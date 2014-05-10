@@ -1,0 +1,78 @@
+package wiretype
+
+// The following are the builtin composite types used by veyron to describe
+// type information over the network.  The combination of these types and the
+// primitives results in the set of bootstrap types, out of which all other
+// types are defined.
+//
+// Each top-level builtin contains optional Name and Tags fields.  The Name
+// field is used to provide user-defined names for each type.  Names are used
+// when decoding interface values into nil interfaces, and thus must be unique
+// within such decoders, but are otherwise unspecified.  Decoders that simply
+// perform generic decoding have no requirement on name uniqueness.  By
+// convention names are assigned their Go "pkgpath.name",
+// e.g. "veyron2/wiretype.NamedPrimitivbeType".
+//
+// The Tags field is used to associate extra meta-information with a type, used
+// to retain implementation-specific details.  E.g. the Go implementation
+// encodes []byte as a string with the tag "[]byte".
+
+// TypeID serves as a reference to a type definition.  The TypeID is only unique
+// within a single Encoder / Decoder stream; different streams may use different
+// TypeIDs to represent the same types.
+type TypeID uint64
+
+// NamedPrimitiveType adds name and tag meta-information to a primitive type.
+type NamedPrimitiveType struct {
+	Type TypeID
+	Name string
+	Tags []string
+}
+
+// SliceType represents a variable-length sequence of Elem values.
+type SliceType struct {
+	Elem TypeID
+	Name string
+	Tags []string
+}
+
+// ArrayType represents a fixed-length sequence of Elem values.
+type ArrayType struct {
+	Elem TypeID
+	Len  uint64
+	Name string
+	Tags []string
+}
+
+// MapType represents an unordered collection of Key,Elem values, where each Key
+// is unique.  Go has a single canonical map, but other languages may use the
+// tag to indicate the representation; e.g. C++ may use tags "rbtree" and
+// "hashmap" to indicate std::map and std::unordered_map respectively.
+type MapType struct {
+	Key  TypeID
+	Elem TypeID
+	Name string
+	Tags []string
+}
+
+// FieldType represents a single possibly-named field in a struct.
+type FieldType struct {
+	Type TypeID
+	Name string
+}
+
+// StructType represents a struct; a sequence of fields.
+type StructType struct {
+	Fields []FieldType
+	Name   string
+	Tags   []string
+}
+
+// WARNING: DEPRECATED
+// TODO(bprosnitz) Remove this.
+// PtrType represents a pointer; a value referencing an underlying Elem value.
+type PtrType struct {
+	Elem TypeID
+	Name string
+	Tags []string
+}

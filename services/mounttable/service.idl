@@ -1,0 +1,64 @@
+// Package mounttable defines a set of mount points and how to traverse them.
+package mounttable
+
+// MountedServer represents a server mounted on a specific name.
+type MountedServer struct {
+        // Server is the OA that's mounted.
+        Server string
+        // TTL is the remaining time (in seconds) before the mount entry expires.
+        TTL uint32
+}
+
+// MountEntry represents a given name mounted in the mounttable.
+type MountEntry struct {
+        // Name is the mounted name.
+	Name    string
+        // Link (if present) specifies the link name (Servers is nil).
+	Link    string
+        // Servers (if present) specifies the mounted names (Link is empty).
+	Servers []MountedServer
+}
+
+// MountedServer and MountEntry are duplicated in the internals of the runtime
+// implementation and any changes made to them here should be reflected there.
+
+type Globable interface {
+	// Glob returns all matching entries at the given server.
+	Glob(pattern string) stream<_, MountEntry> error
+}
+
+// MountTable defines the interface to talk to a mounttable.
+type MountTable interface {
+	// In all methods of MountTable, the receiver is the name bound to.
+
+	// Mount Server (a global name) onto the receiver.
+	// Subsequent mounts add to the servers mounted there.  The multiple
+	// servers are considered equivalent and are meant solely for
+	// availability, i.e., no load balancing is guaranteed.
+	//
+	// TTL is the number of seconds the mount is to last unless refreshed by
+	// another mount of the same server.  A TTL of 0 represents an infinite
+	// duration.  A server with an exipred TTL should never appear in the
+	// results nor affect the operation of any MountTable method, and should
+	// act as if it was never present as far as the interface is concerned.
+	Mount(Server string, TTL uint32) error
+
+	// Unmount removes Server from the mount point.  If Server is empty, remove all
+	// servers mounted there.
+	Unmount(Server string) error
+
+	// Link creates a link in the tree from the receiver to LinkName.
+	Link(LinkName string) error
+
+	// Unlink removes a link at the receiver.
+	Unlink() error
+
+        // TODO(caprita): We can simplify this to just return []string where
+        // each string already has the suffix baked in, and no ttl.
+
+	// ResolveStep takes the next step in resolving a name.  Returns the next
+	// servers to query and the suffix at those servers.
+	ResolveStep() (Servers []MountedServer, Suffix string, Error error)
+
+	Globable
+}

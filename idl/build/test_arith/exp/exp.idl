@@ -1,0 +1,7 @@
+// Package exp is used to test that embedding interfaces works across packages.
+// The arith.Calculator idl interface embeds the Exp interface.
+package exp
+
+type Exp interface {
+	Exp(X float64) (float64, error)
+}

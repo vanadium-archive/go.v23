@@ -1,0 +1,41 @@
+package proximity
+
+// Device represents one neighborhood device.  It contains that device's
+// MAC address, observed names, and the average distance to the device.
+type Device struct {
+	// MAC is remote device's MAC address, in one of the following formats
+	// (as per http://golang.org/pkg/net/#ParseMAC):
+	//   01:23:45:67:89:ab
+	//   01:23:45:67:89:ab:cd:ef
+	//   01-23-45-67-89-ab
+	//   01-23-45-67-89-ab-cd-ef
+	//   0123.4567.89ab
+	//   0123.4567.89ab.cdef
+	MAC string
+	// Names represents all unique observed names of the remote device.
+	Names []string
+	// Distance represents the (estimated) distance to the neighborhood
+	// device.  It can be parsed using distance.Parse method.
+	Distance string
+}
+
+// Proximity maintains a list of devices in our close proximity, using scan
+// readings from nearby devices.  It also continuously advertises a set of
+// provided names, which will be visible at nearby devices and associated
+// with this device.
+type Proximity interface {
+	// RegisterName adds a name that this device will be associated with;
+	// a remote device will see all the unique names currently registered
+	// with this device (see Names field in Device).
+	RegisterName(Name string) error
+
+	// UnregisterName removes a name previously associated with this device.
+	// If the name doesn't exist, this method will return an error.
+	// If the name has been registered multiple times, this method will
+	// remove only one instance of that registration.
+	UnregisterName(Name string) error
+
+	// NearbyDevices returns the most up-to-date list of nearby devices,
+	// sorted in increasing distance order.
+	NearbyDevices() ([]Device, error)
+}

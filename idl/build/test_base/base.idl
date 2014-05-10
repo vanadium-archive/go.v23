@@ -1,0 +1,52 @@
+package test_base
+
+// NestedArgs is defined before Args; that's allowed in regular Go, and also
+// allowed in our idl files.  The compiler will re-order dependent types to ease
+// code generation in other languages.
+type NestedArgs struct {
+	Args Args
+}
+
+// Args will be reordered to show up before NestedArgs in the generated output.
+type Args struct {
+	A int32
+	B int32
+}
+
+// Creating named types based on non-struct underlying types is fine.
+
+type MyInt int32
+type MyArray [2]uint32
+type MySlice []string
+type MyMap map[float32]error
+
+// Creating named types based on other named types is also fine.
+
+type MyInt2 MyInt
+type MyArray2 MyArray
+type MySlice2 MySlice
+type MyMap2 MyMap
+type Args2 Args
+
+// One demonstrates using a simple untyped constant.
+const True = true
+// Five demonstrates using a simple typed constant.
+const Five = int32(5)
+
+// MyInterfaceA is an interface that defines two methods.
+type MyInterfaceA interface {
+	// A takes in two arguments and returns an unnamed argument and an error.
+	A(A Args2, B MyArray2) (MySlice2, error)
+	// B takes in no arguments and returns an error.
+	B() error
+}
+
+// MyInterfaceB is an interface that embeds MyInterfaceA and adds another
+// method.
+type MyInterfaceB interface {
+	MyInterfaceA
+	// C takes in one argument and returns two named arguments and an error.
+	C(C MyArray2) (Val1 MyInt2, Val2 MyMap, err error)
+	// D blah blah
+	D(D MyMap2) stream<int32, MySlice2> error
+}
