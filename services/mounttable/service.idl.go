@@ -39,8 +39,6 @@ type MountEntry struct {
 type Globable_InternalNoTagGetter interface {
 
 	// Glob returns all matching entries at the given server.
-	//
-	// If Recursive is true, list all nodes below the matching entries.
 	Glob(pattern string, opts ..._gen_ipc.ClientCallOpt) (reply GlobableGlobStream, err error)
 }
 type Globable interface {
@@ -55,8 +53,6 @@ type Globable interface {
 type GlobableService interface {
 
 	// Glob returns all matching entries at the given server.
-	//
-	// If Recursive is true, list all nodes below the matching entries.
 	Glob(context _gen_ipc.Context, pattern string, stream GlobableServiceGlobStream) (err error)
 }
 
