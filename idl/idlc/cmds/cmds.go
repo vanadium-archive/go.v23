@@ -188,7 +188,7 @@ var (
 	optGenStatus             bool
 	optGenGoFmt              bool
 	optGenJavaDirTranslation = genJavaDirTranslation{
-		srcSuffix: "v/src",
+		srcSuffix: "go/src",
 		dstSuffix: "java/src",
 	}
 	optGenJavaPkgPrefix string
@@ -231,7 +231,7 @@ for managing Go source code.
 		"Directory translation for generated Java files.  The rule must be specified in the format: "+
 			"srcSuffix->dstSuffix, where srcSuffix is the suffix of the directory just preceding the "+
 			"package path, and dstSuffix is the suffix that srcSuffix is replaced with. For example, "+
-			"default rule: v/src->java/src will result in IDL files: $DIR/v/src/.../*.idl "+
+			"default rule: go/src->java/src will result in IDL files: $DIR/go/src/.../*.idl "+
 			"having their Java generated files output in: $DIR/java/src/...")
 	return idl
 }

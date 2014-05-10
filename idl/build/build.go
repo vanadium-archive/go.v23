@@ -19,7 +19,7 @@ type OpenIDLFilesFunc func(p *BuildPackage) (map[string]io.ReadCloser, error)
 // cmdline tool is the main initial user.
 type BuildPackage struct {
 	// Dir is the absolute directory containing the package files.
-	// E.g. "/home/user/veyron/v/src/veyron/rt/base"
+	// E.g. "/home/user/veyron/go/src/veyron/rt/base"
 	Dir string
 	// Name is the name of the package, specified in the idl files.
 	// E.g. "base"
@@ -121,8 +121,8 @@ func CloseIDLFiles(files map[string]io.ReadCloser) error {
 //
 // This is slightly complicated because of dirs, and the potential for symlinks.
 // E.g. let's say we have two directories, one a symlink to the other:
-//   /home/user/veyron/v/src/veyron/rt/base
-//   /home/user/veyron/v/src/veyron/rt2     symlink to rt
+//   /home/user/veyron/go/src/veyron/rt/base
+//   /home/user/veyron/go/src/veyron/rt2     symlink to rt
 //
 // The problem is that if the user has cwd pointing at one of the two "base"
 // dirs and specifies a relative directory ".." it's ambiguous which absolute

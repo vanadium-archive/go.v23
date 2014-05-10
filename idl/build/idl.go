@@ -244,7 +244,7 @@ type File struct {
 type Package struct {
 	Name          string // e.g. "base"
 	Path          string // e.g. "veyron/rt/base"
-	Dir           string // e.g. "/home/user/veyron/v/src/veyron/rt/base"
+	Dir           string // e.g. "/home/user/veyron/go/src/veyron/rt/base"
 	Files         []*File
 	typeResolver  typeResolver
 	constResolver constResolver
