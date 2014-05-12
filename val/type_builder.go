@@ -3,10 +3,13 @@ package val
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"sync"
 )
 
 var (
+	errNameNonEmpty   = errors.New("val: Any and TypeVal cannot be named")
+	errNameEmpty      = errors.New("val: OneOf, Enum and Struct must be named")
 	errNoLabels       = errors.New("val: no Enum labels")
 	errLabelEmpty     = errors.New("val: empty Enum label")
 	errHasLabels      = errors.New("val: labels only valid for Enum")
@@ -20,247 +23,447 @@ var (
 	errOneOfTypeBad   = errors.New("val: type in OneOf must not be nil, OneOf or Any")
 	errNoTypes        = errors.New("val: no OneOf types")
 	errHasTypes       = errors.New("val: types only valid on OneOf")
+	errBaseNil        = errors.New("val: base type unset for named type")
+	errBaseCycle      = errors.New("val: invalid named type cycle")
+	errNotBuilt       = errors.New("val: TypeBuilder.Build must be called before Pending.Built")
 )
 
-func simpleType(kind Kind, name string) *Type {
-	t, err := typeCons(&Type{kind: kind, name: name})
-	if err != nil {
-		panic(err) // This can never happen, since all simple types are valid.
-	}
-	return t
+// Primitive types, the basis for all other types.  All have empty names.
+var (
+	AnyType        = &Type{kind: Any}
+	BoolType       = &Type{kind: Bool}
+	Int32Type      = &Type{kind: Int32}
+	Int64Type      = &Type{kind: Int64}
+	Uint32Type     = &Type{kind: Uint32}
+	Uint64Type     = &Type{kind: Uint64}
+	Float32Type    = &Type{kind: Float32}
+	Float64Type    = &Type{kind: Float64}
+	Complex64Type  = &Type{kind: Complex64}
+	Complex128Type = &Type{kind: Complex128}
+	StringType     = &Type{kind: String}
+	BytesType      = &Type{kind: Bytes}
+	TypeValType    = &Type{kind: TypeVal}
+)
+
+// TypeOrPending only allows *Type or Pending values; other values cause a
+// compile-time error.  It's used as the argument type for TypeBuilder methods,
+// to allow either fully built *Type values or Pending values as subtypes.
+type TypeOrPending interface {
+	// ptype returns the pending type, which may be only partially built.
+	ptype() *Type
 }
 
-// AnyType returns an Any type with the given name.
-func AnyType(name string) *Type { return simpleType(Any, name) }
-
-// BoolType returns a Bool type with the given name.
-func BoolType(name string) *Type { return simpleType(Bool, name) }
-
-// IntType returns a Int type with the given name.
-func IntType(name string) *Type { return simpleType(Int, name) }
-
-// UintType returns a Uint type with the given name.
-func UintType(name string) *Type { return simpleType(Uint, name) }
-
-// FloatType returns a Float type with the given name.
-func FloatType(name string) *Type { return simpleType(Float, name) }
-
-// ComplexType returns a Complex type with the given name.
-func ComplexType(name string) *Type { return simpleType(Complex, name) }
-
-// StringType returns a String type with the given name.
-func StringType(name string) *Type { return simpleType(String, name) }
-
-// TypeValType returns a Bytes type with the given name.
-func BytesType(name string) *Type { return simpleType(Bytes, name) }
-
-// TypeValType returns a TypeVal type with the given name.
-func TypeValType(name string) *Type { return simpleType(TypeVal, name) }
-
-// TypeBuilder defines the interface for building composite Types.  There are
-// two phases: 1) create a builder and describe the type, and 2) call Build.
-// This two-phase building enables support for recursive types, and also makes
-// it easy to construct a group of dependent types without determining their
-// dependency ordering.
-type TypeBuilder interface {
-	// Build builds the type and returns the hash-consed result.
-	Build() (*Type, error)
-
-	TypeOrBuilder
+// PendingType represents a type that's being built by the TypeBuilder.
+type PendingType interface {
+	TypeOrPending
+	// Built returns the final built and hash-consed type.  Returns a nil type and
+	// a non-nil error if the type couldn't be built, or if Build hasn't been
+	// called on the TypeBuilder yet.
+	Built() (*Type, error)
 }
 
-// TypeOrBuilder only allows *Type or Builder values; other values cause a
-// compile-time error.  It's used as the argument type for builder methods, to
-// allow either fully built *Type values or Builder values as subtypes.
-type TypeOrBuilder interface {
-	// pending returns the pending type, which may be only partially built.
-	pending() *Type
-}
-
-// EnumTypeBuilder is a builder for Enum types.
-type EnumTypeBuilder interface {
-	TypeBuilder
+// PendingEnum represents an Enum type that is being built.
+type PendingEnum interface {
+	PendingType
 	// SetLabels sets the Enum labels.  Every Enum must have at least one label,
 	// and each label must not be empty.
-	SetLabels(labels []string) EnumTypeBuilder
+	SetLabels(labels []string) PendingEnum
 }
 
-// ListTypeBuilder is a builder for List types.
-type ListTypeBuilder interface {
-	TypeBuilder
+// PendingList represents a List type that is being built.
+type PendingList interface {
+	PendingType
 	// SetElem sets the List element type.
-	SetElem(elem TypeOrBuilder) ListTypeBuilder
+	SetElem(elem TypeOrPending) PendingList
 }
 
-// MapTypeBuilder is a builder for Map types.
-type MapTypeBuilder interface {
-	TypeBuilder
+// PendingMap represents a Map type that is being built.
+type PendingMap interface {
+	PendingType
 	// SetKey sets the Map key type.
-	SetKey(key TypeOrBuilder) MapTypeBuilder
+	SetKey(key TypeOrPending) PendingMap
 	// SetElem sets the Map element type.
-	SetElem(elem TypeOrBuilder) MapTypeBuilder
+	SetElem(elem TypeOrPending) PendingMap
 }
 
-// StructTypeBuilder is a builder for Struct types.
-type StructTypeBuilder interface {
-	TypeBuilder
+// PendingStruct represents a Struct type that is being built.
+type PendingStruct interface {
+	PendingType
 	// AppendField appends the Struct field with the given name and t.  The name
 	// must not be empty.  The ordering of fields is preserved; different
 	// orderings create different types.
-	AppendField(name string, t TypeOrBuilder) StructTypeBuilder
+	AppendField(name string, t TypeOrPending) PendingStruct
 }
 
-// OneOfTypeBuilder is a builder for OneOf types.
-type OneOfTypeBuilder interface {
-	TypeBuilder
+// PendingOneOf represents a OneOf type that is being built.
+type PendingOneOf interface {
+	PendingType
 	// AppendType appends the type t to the OneOf.  The ordering of types is
 	// preserved; different orderings create different types.
-	AppendType(t TypeOrBuilder) OneOfTypeBuilder
+	AppendType(t TypeOrPending) PendingOneOf
 }
 
-// BuildEnumType returns a new EnumTypeBuilder.
-func BuildEnumType(name string) EnumTypeBuilder {
-	return enumBuilder{builder{&Type{kind: Enum, name: name}}}
-}
-
-// BuildListType returns a new ListTypeBuilder.
-func BuildListType(name string) ListTypeBuilder {
-	return listBuilder{builder{&Type{kind: List, name: name}}}
-}
-
-// BuildMapType returns a new MapTypeBuilder.
-func BuildMapType(name string) MapTypeBuilder {
-	return mapBuilder{builder{&Type{kind: Map, name: name}}}
-}
-
-// BuildStructType returns a new StructTypeBuilder.
-func BuildStructType(name string) StructTypeBuilder {
-	return structBuilder{builder{&Type{kind: Struct, name: name}}}
-}
-
-// BuildOneOfType returns a new OneOfTypeBuilder.
-func BuildOneOfType(name string) OneOfTypeBuilder {
-	return oneofBuilder{builder{&Type{kind: OneOf, name: name}}}
-}
-
-// builder implements common functionality for all concrete builders.
-type builder struct{ pend *Type }
-
-func (b builder) pending() *Type { return b.pend }
-
-func (b builder) Build() (*Type, error) {
-	return typeCons(b.pend)
+// PendingNamed represents a named type that is being built.  Given a base type
+// you can build a new type with an identical underlying structure, but a
+// different name.
+type PendingNamed interface {
+	PendingType
+	// SetBase sets the base type of the named type.  The resulting built type
+	// will have the same underlying structure as base, but with the given name.
+	SetBase(base TypeOrPending) PendingNamed
 }
 
 type (
-	enumBuilder   struct{ builder }
-	listBuilder   struct{ builder }
-	mapBuilder    struct{ builder }
-	structBuilder struct{ builder }
-	oneofBuilder  struct{ builder }
+	// pending implements common functionality for all pending objects.
+	pending struct {
+		*Type       // Holds pending type pre-Build, and the result post-Build.
+		err   error // Build error for this pending type.
+	}
+
+	// Each pending object holds a *Type that it fills in as the user calls
+	// methods to describe the type.  When Build is called, the type is
+	// hash-consed to the final result.
+	pendingEnum   struct{ *pending }
+	pendingList   struct{ *pending }
+	pendingMap    struct{ *pending }
+	pendingStruct struct{ *pending }
+	pendingOneOf  struct{ *pending }
+	pendingNamed  struct{ *pending }
 )
 
-func (b enumBuilder) SetLabels(labels []string) EnumTypeBuilder {
-	b.pend.labels = labels
-	return b
+func (p pendingEnum) SetLabels(labels []string) PendingEnum {
+	p.labels = labels
+	return p
 }
 
-func (b listBuilder) SetElem(elem TypeOrBuilder) ListTypeBuilder {
-	b.pend.elem = elem.pending()
-	return b
+func (p pendingList) SetElem(elem TypeOrPending) PendingList {
+	p.elem = elem.ptype()
+	return p
 }
 
-func (b mapBuilder) SetKey(key TypeOrBuilder) MapTypeBuilder {
-	b.pend.key = key.pending()
-	return b
+func (p pendingMap) SetElem(elem TypeOrPending) PendingMap {
+	p.elem = elem.ptype()
+	return p
 }
 
-func (b mapBuilder) SetElem(elem TypeOrBuilder) MapTypeBuilder {
-	b.pend.elem = elem.pending()
-	return b
+func (p pendingMap) SetKey(key TypeOrPending) PendingMap {
+	p.key = key.ptype()
+	return p
 }
 
-func (b structBuilder) AppendField(name string, t TypeOrBuilder) StructTypeBuilder {
-	b.pend.fields = append(b.pend.fields, StructField{name, t.pending()})
-	return b
+func (p pendingStruct) AppendField(name string, t TypeOrPending) PendingStruct {
+	p.fields = append(p.fields, StructField{name, t.ptype()})
+	return p
 }
 
-func (b oneofBuilder) AppendType(t TypeOrBuilder) OneOfTypeBuilder {
-	b.pend.types = append(b.pend.types, t.pending())
-	return b
+func (p pendingOneOf) AppendType(t TypeOrPending) PendingOneOf {
+	p.types = append(p.types, t.ptype())
+	return p
 }
 
-func checkedBuild(b TypeBuilder) *Type {
-	t, err := b.Build()
+func (p pendingNamed) SetBase(base TypeOrPending) PendingNamed {
+	// Pending named types are special - they have the internalNamed kind, and put
+	// the base type in elem.  See pending.finalize() for the extra logic.
+	p.elem = base.ptype()
+	return p
+}
+
+// TypeBuilder builds Types.  There are two phases: 1) Create Pending* objects
+// and describe each type, and 2) call Build.  When Build is called, all types
+// are created.  This two-phase building enables support for recursive types,
+// and also makes it easy to construct a group of dependent types without
+// determining their dependency ordering.
+//
+// The zero TypeBuilder represents an empty builder.
+type TypeBuilder struct {
+	ptypes []*pending
+}
+
+func (b *TypeBuilder) add(t *Type) *pending {
+	// Every pending object starts with the errNotBuilt error, which will be
+	// overridden when the type is actually built.
+	p := &pending{Type: t, err: errNotBuilt}
+	b.ptypes = append(b.ptypes, p)
+	return p
+}
+
+// Enum returns PendingEnum, used to describe an Enum type.
+func (b *TypeBuilder) Enum(name string) PendingEnum {
+	return pendingEnum{b.add(&Type{kind: Enum, name: name})}
+}
+
+// List returns PendingList, used to describe a List type.
+func (b *TypeBuilder) List() PendingList {
+	return pendingList{b.add(&Type{kind: List})}
+}
+
+// Map returns PendingMap, used to describe a Map type.
+func (b *TypeBuilder) Map() PendingMap {
+	return pendingMap{b.add(&Type{kind: Map})}
+}
+
+// Struct returns PendingStruct, used to describe a Struct type.
+func (b *TypeBuilder) Struct(name string) PendingStruct {
+	return pendingStruct{b.add(&Type{kind: Struct, name: name})}
+}
+
+// OneOf returns PendingOneOf, used to describe a OneOf type.
+func (b *TypeBuilder) OneOf(name string) PendingOneOf {
+	return pendingOneOf{b.add(&Type{kind: OneOf, name: name})}
+}
+
+// Named returns PendingNamed, used to describe a named type based on another
+// type.
+func (b *TypeBuilder) Named(name string) PendingNamed {
+	return pendingNamed{b.add(&Type{kind: internalNamed, name: name})}
+}
+
+// Build builds all pending types.  Build must be called before Built may be
+// called on each pending type to retrieve the final result.
+func (b *TypeBuilder) Build() {
+	// First finalize all types, indicating no more mutations will occur.
+	for _, p := range b.ptypes {
+		p.err = p.finalize()
+	}
+	// Now hash cons each pending type.
+	for _, p := range b.ptypes {
+		if p.err != nil {
+			continue // skip this type since it already has an error
+		}
+		p.Type, p.err = typeCons(p.Type)
+	}
+	// Make sure that any type with an error has a nil type
+	for _, p := range b.ptypes {
+		if p.err != nil {
+			p.Type = nil
+		}
+	}
+}
+
+func (p *pending) ptype() *Type { return p.Type }
+
+// finalize indicates Build has been called, and the pending type will not be
+// mutated anymore.
+func (p *pending) finalize() error {
+	if p.Type.kind == internalNamed {
+		// Now that the mutations have finished, we can copy the base type into
+		// p.Type, keeping the name of p.Type.
+		name, base := p.Type.name, p.Type.elem
+		// There may be a chain of named types, in which case we'll need to follow the
+		// chain to the first type that's not internalNamed.
+		for {
+			if base == nil {
+				return errBaseNil
+			}
+			if base == p.Type {
+				return errBaseCycle
+			}
+			if base.kind != internalNamed {
+				break
+			}
+			base = base.elem
+		}
+		*p.Type = *base
+		p.Type.name = name
+	}
+	return nil
+}
+
+func (p *pending) Built() (*Type, error) {
+	return p.Type, p.err
+}
+
+func checkedBuild(b TypeBuilder, p PendingType) *Type {
+	b.Build()
+	t, err := p.Built()
 	if err != nil {
 		panic(err)
 	}
 	return t
 }
 
-// EnumType is a helper using EnumTypeBuilder to create a Enum type.  Panics on
-// all Build errors.
+// EnumType is a helper using TypeBuilder to create a single Enum type.  Panics
+// on all errors.
 func EnumType(name string, labels []string) *Type {
-	return checkedBuild(BuildEnumType(name).SetLabels(labels))
+	var b TypeBuilder
+	return checkedBuild(b, b.Enum(name).SetLabels(labels))
 }
 
-// ListType is a helper using ListTypeBuilder to create a List type.  Panics on
-// all Build errors.
-func ListType(name string, elem *Type) *Type {
-	return checkedBuild(BuildListType(name).SetElem(elem))
+// ListType is a helper using TypeBuilder to create a single List type.  Panics
+// on all errors.
+func ListType(elem *Type) *Type {
+	var b TypeBuilder
+	return checkedBuild(b, b.List().SetElem(elem))
 }
 
-// MapType is a helper using MapTypeBuilder to create Map types.  Panics on all
-// Build errors.
-func MapType(name string, key, elem *Type) *Type {
-	return checkedBuild(BuildMapType(name).SetKey(key).SetElem(elem))
+// MapType is a helper using TypeBuilder to create a single Map type.  Panics on
+// all errors.
+func MapType(key, elem *Type) *Type {
+	var b TypeBuilder
+	return checkedBuild(b, b.Map().SetKey(key).SetElem(elem))
 }
 
-// StructType is a helper using StructTypeBuilder to create Struct types.
-// Panics on all Build errors.
+// StructType is a helper using TypeBuilder to create a single Struct type.
+// Panics on all errors.
 func StructType(name string, fields []StructField) *Type {
-	b := BuildStructType(name)
+	var b TypeBuilder
+	s := b.Struct(name)
 	for _, f := range fields {
-		b.AppendField(f.Name, f.Type)
+		s.AppendField(f.Name, f.Type)
 	}
-	return checkedBuild(b)
+	return checkedBuild(b, s)
 }
 
-// OneOfType is a helper using OneOfTypeBuilder to create OneOf types.  Panics
-// on all Build errors.
+// OneOfType is a helper using TypeBuilder to create a single OneOf type.
+// Panics on all errors.
 func OneOfType(name string, types []*Type) *Type {
-	b := BuildOneOfType(name)
+	var b TypeBuilder
+	o := b.OneOf(name)
 	for _, t := range types {
-		b.AppendType(t)
+		o.AppendType(t)
 	}
-	return checkedBuild(b)
+	return checkedBuild(b, o)
+}
+
+// NamedType is a helper using TypeBuilder to create a single named type based
+// on another type.  Panics on all errors.
+func NamedType(name string, base *Type) *Type {
+	var b TypeBuilder
+	return checkedBuild(b, b.Named(name).SetBase(base))
+}
+
+// uniqueType returns a unique string representing t, which is also its
+// human-readable representation.  Invariant: two types A and B have the same
+// unique string iff they are equal, even if they haven't been hash-consed yet.
+//
+// Think of each type as a graph, where nodes represent each type, and edges
+// point from composite type to subtype.  Recursive types form a cycle in this
+// graph.  If two type graphs are the same, the two types are equal.
+//
+// There is a subtlety.  Since we haven't hash-consed the types yet, it's
+// possible that two different graphs also represent equal types.  E.g. consider
+// the type:
+//   type A struct {x []string;y []string}
+//
+// There are two different representations:
+//            A (not consed)     A (hash-consed)
+//          x/ \y              x/ \y
+//          /   \               \ /
+//   []string   []string     []string
+//
+// Both of these representations must return the same unique string.  To
+// accomplish this, we recursively traverse the graph and dump the semantic
+// contents of each type node.  The seen map breaks infinite loops from
+// recursive types.  Since type cycles may only be created via named types, we
+// keep track of seen types and only dump their names.
+func uniqueType(t *Type, seen map[*Type]bool) string {
+	if seen[t] && t.name != "" {
+		return t.name
+	}
+	seen[t] = true
+	s := t.name
+	if s != "" {
+		s += " "
+	}
+	switch t.kind {
+	case Enum:
+		return s + "enum{" + strings.Join(t.labels, ";") + "}"
+	case List:
+		return s + "[]" + uniqueType(t.elem, seen)
+	case Map:
+		return s + "map[" + uniqueType(t.key, seen) + "]" + uniqueType(t.elem, seen)
+	case Struct:
+		s += "struct{"
+		for index, f := range t.fields {
+			if index > 0 {
+				s += ";"
+			}
+			s += f.Name + " " + uniqueType(f.Type, seen)
+		}
+		return s + "}"
+	case OneOf:
+		s += "oneof{"
+		for index, one := range t.types {
+			if index > 0 {
+				s += ";"
+			}
+			s += uniqueType(one, seen)
+		}
+		return s + "}"
+	default:
+		return s + t.kind.String()
+	}
 }
 
 var (
-	// typeReg holds a global set of hash-consed types.
-	typeReg   = typeSet{}
+	// typeReg holds a global set of hash-consed types.  Hash-consing is based on
+	// the string representation of the type.  See comments in uniqueType for an
+	// explanation of subtleties.
+	typeReg   = map[string]*Type{}
 	typeRegMu sync.Mutex
 )
 
 // typeCons returns the hash-consed Type for a given Type t.
 func typeCons(t *Type) (*Type, error) {
+	typeRegMu.Lock()
+	defer typeRegMu.Unlock()
+	return typeConsLocked(t)
+}
+
+func typeConsLocked(t *Type) (*Type, error) {
 	if t == nil {
 		return nil, nil
 	}
-	if err := normalizeType(t); err != nil {
+	if err := validType(t); err != nil {
 		return nil, err
 	}
-	hashcode := hashType(t)
-	typeRegMu.Lock()
-	defer typeRegMu.Unlock()
-	if found := typeReg.lookup(hashcode, t); found != nil {
+	// Look for the type in our registry, based on its unique string.
+	t.unique = uniqueType(t, make(map[*Type]bool))
+	if found := typeReg[t.unique]; found != nil {
 		return found, nil
 	}
-	typeReg.insert(hashcode, t)
+	// Not found in the registry, add it and recursively cons subtypes.  We cons
+	// the outer type first to deal with recursive types; otherwise we'd have an
+	// infinite loop.
+	typeReg[t.unique] = t
+	var err error
+	if t.elem, err = typeConsLocked(t.elem); err != nil {
+		return nil, err
+	}
+	if t.key, err = typeConsLocked(t.key); err != nil {
+		return nil, err
+	}
+	for x := range t.fields {
+		if t.fields[x].Type, err = typeConsLocked(t.fields[x].Type); err != nil {
+			return nil, err
+		}
+	}
+	for x := range t.types {
+		if t.types[x], err = typeConsLocked(t.types[x]); err != nil {
+			return nil, err
+		}
+	}
 	return t, nil
 }
 
-func normalizeType(t *Type) error {
+// validType returns a nil error iff t is a valid Type.
+func validType(t *Type) error {
+	// Check kind
+	switch t.kind {
+	case internalNamed:
+		panic(fmt.Errorf("val: internal kind %d used in validType", t.kind))
+	}
+	// Check name
+	switch t.kind {
+	case Any, TypeVal:
+		if t.name != "" {
+			return errNameNonEmpty
+		}
+	case OneOf, Enum, Struct:
+		if t.name == "" {
+			return errNameEmpty
+		}
+	}
 	// Check elem
 	switch t.kind {
 	case List, Map:
@@ -326,16 +529,15 @@ func normalizeType(t *Type) error {
 		if len(t.types) == 0 {
 			return errNoTypes
 		}
-		dups := typeSet{}
+		seen := make(map[string]bool, len(t.types))
 		for _, u := range t.types {
 			if err := ValidOneOfType(u); err != nil {
 				return err
 			}
-			hashcode := hashType(u)
-			if dups.lookup(hashcode, u) != nil {
-				return fmt.Errorf("val: oneof %q has duplicate type %q", t.name, u)
+			if seen[u.unique] {
+				return fmt.Errorf("val: duplicate OneOf type: %s", u.unique)
 			}
-			dups.insert(hashcode, u)
+			seen[u.unique] = true
 		}
 	default:
 		if len(t.types) > 0 {

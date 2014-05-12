@@ -8,32 +8,24 @@ import (
 	testutil "veyron/lib/testutil"
 )
 
-var (
-	anyT     = AnyType("")
-	boolT    = BoolType("")
-	intT     = IntType("")
-	uintT    = UintType("")
-	floatT   = FloatType("")
-	complexT = ComplexType("")
-	stringT  = StringType("")
-	bytesT   = BytesType("")
-	typevalT = TypeValType("")
-)
-
 var singletons = []struct {
 	k Kind
 	t *Type
 	s string
 }{
-	{Any, anyT, "any"},
-	{Bool, boolT, "bool"},
-	{Int, intT, "int"},
-	{Uint, uintT, "uint"},
-	{Float, floatT, "float"},
-	{Complex, complexT, "complex"},
-	{String, stringT, "string"},
-	{Bytes, bytesT, "bytes"},
-	{TypeVal, typevalT, "typeval"},
+	{Any, AnyType, "any"},
+	{Bool, BoolType, "bool"},
+	{Int32, Int32Type, "int32"},
+	{Int64, Int64Type, "int64"},
+	{Uint32, Uint32Type, "uint32"},
+	{Uint64, Uint64Type, "uint64"},
+	{Float32, Float32Type, "float32"},
+	{Float64, Float64Type, "float64"},
+	{Complex64, Complex64Type, "complex64"},
+	{Complex128, Complex128Type, "complex128"},
+	{String, StringType, "string"},
+	{Bytes, BytesType, "bytes"},
+	{TypeVal, TypeValType, "typeval"},
 }
 
 type l []string
@@ -44,9 +36,9 @@ var enums = []struct {
 	str    string
 	errstr string
 }{
+	{"", l{"A"}, "enum{A}", "must be named"},
 	{"FailNoLabels", l{}, "", "no Enum labels"},
 	{"FailEmptyLabel", l{""}, "", "empty Enum label"},
-	{"", l{"A"}, "enum{A}", ""},
 	{"A", l{"A"}, "A enum{A}", ""},
 	{"AB", l{"A", "B"}, "AB enum{A;B}", ""},
 }
@@ -59,15 +51,15 @@ var structs = []struct {
 	str    string
 	errstr string
 }{
-	{"FailFieldName", f{{"", boolT}}, "", "empty Struct field name"},
-	{"FailDupFields", f{{"A", boolT}, {"A", intT}}, "", "duplicate field name"},
+	{"", f{}, "struct{}", "must be named"},
+	{"FailFieldName", f{{"", BoolType}}, "", "empty Struct field name"},
+	{"FailDupFields", f{{"A", BoolType}, {"A", Int32Type}}, "", "duplicate field name"},
 	{"FailNilFieldType", f{{"A", nil}}, "", "nil Struct field type"},
-	{"", f{}, "struct{}", ""},
 	{"Empty", f{}, "Empty struct{}", ""},
-	{"A", f{{"A", boolT}}, "A struct{A bool}", ""},
-	{"AB", f{{"A", boolT}, {"B", intT}}, "AB struct{A bool;B int}", ""},
-	{"ABC", f{{"A", boolT}, {"B", intT}, {"C", uintT}}, "ABC struct{A bool;B int;C uint}", ""},
-	{"ABCD", f{{"A", boolT}, {"B", intT}, {"C", uintT}, {"D", stringT}}, "ABCD struct{A bool;B int;C uint;D string}", ""},
+	{"A", f{{"A", BoolType}}, "A struct{A bool}", ""},
+	{"AB", f{{"A", BoolType}, {"B", Int32Type}}, "AB struct{A bool;B int32}", ""},
+	{"ABC", f{{"A", BoolType}, {"B", Int32Type}, {"C", Uint64Type}}, "ABC struct{A bool;B int32;C uint64}", ""},
+	{"ABCD", f{{"A", BoolType}, {"B", Int32Type}, {"C", Uint64Type}, {"D", StringType}}, "ABCD struct{A bool;B int32;C uint64;D string}", ""},
 }
 
 type t []*Type
@@ -78,21 +70,21 @@ var oneofs = []struct {
 	str    string
 	errstr string
 }{
+	{"", t{BoolType}, "oneof{bool}", "must be named"},
 	{"FailNoTypes", t{}, "", "no OneOf types"},
-	{"FailAny", t{anyT}, "", "type in OneOf must not be nil, OneOf or Any"},
-	{"FailDup", t{boolT, boolT}, "", "duplicate type"},
-	{"", t{boolT}, "oneof{bool}", ""},
-	{"A", t{boolT}, "A oneof{bool}", ""},
-	{"AB", t{boolT, intT}, "AB oneof{bool;int}", ""},
-	{"ABC", t{boolT, intT, uintT}, "ABC oneof{bool;int;uint}", ""},
-	{"ABCD", t{boolT, intT, uintT, stringT}, "ABCD oneof{bool;int;uint;string}", ""},
+	{"FailAny", t{AnyType}, "", "type in OneOf must not be nil, OneOf or Any"},
+	{"FailDup", t{BoolType, BoolType}, "", "duplicate OneOf type"},
+	{"A", t{BoolType}, "A oneof{bool}", ""},
+	{"AB", t{BoolType, Int32Type}, "AB oneof{bool;int32}", ""},
+	{"ABC", t{BoolType, Int32Type, Uint64Type}, "ABC oneof{bool;int32;uint64}", ""},
+	{"ABCD", t{BoolType, Int32Type, Uint64Type, StringType}, "ABCD oneof{bool;int32;uint64;string}", ""},
 }
 
 func allTypes() (types []*Type) {
 	for _, test := range singletons {
-		types = append(types, test.t, ListType("List"+test.s, test.t))
+		types = append(types, test.t, ListType(test.t))
 		for _, test2 := range singletons {
-			types = append(types, MapType("Map"+test.s+test2.s, test.t, test2.t))
+			types = append(types, MapType(test.t, test2.t))
 		}
 	}
 	for _, test := range enums {
@@ -150,7 +142,7 @@ func TestTypeMismatch(t *testing.T) {
 		}
 		if ty.Kind() != OneOf {
 			expectMismatchedKind(t, func() { ty.OneOfType(0) })
-			expectMismatchedKind(t, func() { ty.OneOfIndex(anyT) })
+			expectMismatchedKind(t, func() { ty.OneOfIndex(AnyType) })
 			expectMismatchedKind(t, func() { ty.NumOneOfType() })
 		}
 	}
@@ -206,15 +198,14 @@ func TestEnumTypes(t *testing.T) {
 
 func TestListTypes(t *testing.T) {
 	for _, test := range singletons {
-		name := "List" + test.s
-		x := ListType(name, test.t)
+		x := ListType(test.t)
 		if got, want := x.Kind(), List; got != want {
 			t.Errorf(`List %s got kind %q, want %q`, test.k, got, want)
 		}
-		if got, want := x.Name(), name; got != want {
+		if got, want := x.Name(), ""; got != want {
 			t.Errorf(`List %s got name %q, want %q`, test.k, got, want)
 		}
-		if got, want := x.String(), name+" []"+test.s; got != want {
+		if got, want := x.String(), "[]"+test.s; got != want {
 			t.Errorf(`List %s got string %q, want %q`, test.k, got, want)
 		}
 		if got, want := x.Elem(), test.t; got != want {
@@ -226,15 +217,14 @@ func TestListTypes(t *testing.T) {
 func TestMapTypes(t *testing.T) {
 	for _, key := range singletons {
 		for _, elem := range singletons {
-			name := "Map" + key.s + elem.s
-			x := MapType(name, key.t, elem.t)
+			x := MapType(key.t, elem.t)
 			if got, want := x.Kind(), Map; got != want {
 				t.Errorf(`Map[%s]%s got kind %q, want %q`, key.k, elem.k, got, want)
 			}
-			if got, want := x.Name(), name; got != want {
+			if got, want := x.Name(), ""; got != want {
 				t.Errorf(`Map[%s]%s got name %q, want %q`, key.k, elem.k, got, want)
 			}
-			if got, want := x.String(), fmt.Sprintf("%s map[%s]%s", name, key.s, elem.s); got != want {
+			if got, want := x.String(), fmt.Sprintf("map[%s]%s", key.s, elem.s); got != want {
 				t.Errorf(`Map[%s]%s got name %q, want %q`, key.k, elem.k, got, want)
 			}
 			if got, want := x.Key(), key.t; got != want {
@@ -281,7 +271,7 @@ func TestStructTypes(t *testing.T) {
 		}
 	}
 	// Make sure hash consing of struct types respects the ordering of the fields.
-	A, B, C := boolT, intT, uintT
+	A, B, C := BoolType, Int32Type, Uint64Type
 	x := StructType("X", []StructField{{"A", A}, {"B", B}, {"C", C}})
 	for iter := 0; iter < 10; iter++ {
 		abc := StructType("X", []StructField{{"A", A}, {"B", B}, {"C", C}})
@@ -331,7 +321,7 @@ func TestOneOfTypes(t *testing.T) {
 		}
 	}
 	// Make sure hash consing of oneof types respects ordering.
-	A, B, C := boolT, intT, uintT
+	A, B, C := BoolType, Int32Type, Uint64Type
 	x := OneOfType("X", []*Type{A, B, C})
 	for iter := 0; iter < 10; iter++ {
 		abc := OneOfType("X", []*Type{A, B, C})
@@ -353,18 +343,20 @@ func TestOneOfTypes(t *testing.T) {
 	// represented by different builder instances building the same struct, which
 	// are added to Z.  We want Z to detect Y1 and Y2 are dups, even though
 	// they're not pointer equal (since they haven't been hash-consed yet).
-	buildY1 := BuildStructType("Y").AppendField("A", intT)
-	buildY2 := BuildStructType("Y").AppendField("A", intT)
-	buildZ := BuildOneOfType("Z").AppendType(buildY1).AppendType(buildY2)
-	z, zerr := buildZ.Build()
-	if got, want := fmt.Sprint(zerr), "duplicate type"; !strings.Contains(got, want) {
+	var builder TypeBuilder
+	pendY1 := builder.Struct("Y").AppendField("A", Int32Type)
+	pendY2 := builder.Struct("Y").AppendField("A", Int32Type)
+	pendZ := builder.OneOf("Z").AppendType(pendY1).AppendType(pendY2)
+	builder.Build()
+	z, zerr := pendZ.Built()
+	if got, want := fmt.Sprint(zerr), "duplicate OneOf type"; !strings.Contains(got, want) {
 		t.Errorf(`build Z got error %q, want substr %q`, got, want)
 	}
 	if z != nil {
 		t.Errorf(`build Z got %v, want nil`, z)
 	}
-	y1, y1err := buildY1.Build()
-	y2, y2err := buildY2.Build()
+	y1, y1err := pendY1.Built()
+	y2, y2err := pendY2.Built()
 	if y1err != nil || y2err != nil {
 		t.Errorf(`build got y1err %q y2err %q, want nil`, y1err, y2err)
 	}
@@ -373,16 +365,129 @@ func TestOneOfTypes(t *testing.T) {
 	}
 }
 
+func TestNamedTypes(t *testing.T) {
+	for _, test := range singletons {
+		switch test.k {
+		case Any, TypeVal:
+			continue // can't name Any or TypeVal
+		}
+		name := "Named" + test.s
+		x := NamedType(name, test.t)
+		if got, want := x.Kind(), test.k; got != want {
+			t.Errorf(`Named %s got kind %q, want %q`, test.k, got, want)
+		}
+		if got, want := x.Name(), name; got != want {
+			t.Errorf(`Named %s got name %q, want %q`, test.k, got, want)
+		}
+		if got, want := x.String(), name+" "+test.s; got != want {
+			t.Errorf(`Named %s got string %q, want %q`, test.k, got, want)
+		}
+	}
+	// Try a chain of named types:
+	// type A B
+	// type B C
+	// type C D
+	// type D struct{X []C}
+	var builder TypeBuilder
+	a, b, c := builder.Named("A"), builder.Named("B"), builder.Named("C")
+	d := builder.Struct("D")
+	a.SetBase(b)
+	b.SetBase(c)
+	c.SetBase(d)
+	d.AppendField("X", builder.List().SetElem(c))
+	builder.Build()
+	bA, errA := a.Built()
+	bB, errB := b.Built()
+	bC, errC := c.Built()
+	bD, errD := d.Built()
+	if errA != nil || errB != nil || errC != nil || errD != nil {
+		t.Errorf(`Named chain got (%q,%q,%q,%q), want nil`, errA, errB, errC, errD)
+	}
+	if got, want := bA.Kind(), Struct; got != want {
+		t.Errorf(`Named chain got kind %q, want %q`, got, want)
+	}
+	if got, want := bB.Kind(), Struct; got != want {
+		t.Errorf(`Named chain got kind %q, want %q`, got, want)
+	}
+	if got, want := bC.Kind(), Struct; got != want {
+		t.Errorf(`Named chain got kind %q, want %q`, got, want)
+	}
+	if got, want := bD.Kind(), Struct; got != want {
+		t.Errorf(`Named chain got kind %q, want %q`, got, want)
+	}
+	if got, want := bA.Name(), "A"; got != want {
+		t.Errorf(`Named chain got name %q, want %q`, got, want)
+	}
+	if got, want := bB.Name(), "B"; got != want {
+		t.Errorf(`Named chain got name %q, want %q`, got, want)
+	}
+	if got, want := bC.Name(), "C"; got != want {
+		t.Errorf(`Named chain got name %q, want %q`, got, want)
+	}
+	if got, want := bD.Name(), "D"; got != want {
+		t.Errorf(`Named chain got name %q, want %q`, got, want)
+	}
+	if got, want := bA.String(), "A struct{X []C struct{X []C}}"; got != want {
+		t.Errorf(`Named chain got name %q, want %q`, got, want)
+	}
+	if got, want := bB.String(), "B struct{X []C struct{X []C}}"; got != want {
+		t.Errorf(`Named chain got name %q, want %q`, got, want)
+	}
+	if got, want := bC.String(), "C struct{X []C}"; got != want {
+		t.Errorf(`Named chain got name %q, want %q`, got, want)
+	}
+	if got, want := bD.String(), "D struct{X []C struct{X []C}}"; got != want {
+		t.Errorf(`Named chain got name %q, want %q`, got, want)
+	}
+	if got, want := bA.NumField(), 1; got != want {
+		t.Errorf(`Named chain got NumField %q, want %q`, got, want)
+	}
+	if got, want := bB.NumField(), 1; got != want {
+		t.Errorf(`Named chain got NumField %q, want %q`, got, want)
+	}
+	if got, want := bC.NumField(), 1; got != want {
+		t.Errorf(`Named chain got NumField %q, want %q`, got, want)
+	}
+	if got, want := bD.NumField(), 1; got != want {
+		t.Errorf(`Named chain got NumField %q, want %q`, got, want)
+	}
+	if got, want := bA.Field(0).Name, "X"; got != want {
+		t.Errorf(`Named chain got Field(0).Name %q, want %q`, got, want)
+	}
+	if got, want := bB.Field(0).Name, "X"; got != want {
+		t.Errorf(`Named chain got Field(0).Name %q, want %q`, got, want)
+	}
+	if got, want := bC.Field(0).Name, "X"; got != want {
+		t.Errorf(`Named chain got Field(0).Name %q, want %q`, got, want)
+	}
+	if got, want := bD.Field(0).Name, "X"; got != want {
+		t.Errorf(`Named chain got Field(0).Name %q, want %q`, got, want)
+	}
+	listC := ListType(bC)
+	if got, want := bA.Field(0).Type, listC; got != want {
+		t.Errorf(`Named chain got Field(0).Type %q, want %q`, got, want)
+	}
+	if got, want := bB.Field(0).Type, listC; got != want {
+		t.Errorf(`Named chain got Field(0).Type %q, want %q`, got, want)
+	}
+	if got, want := bC.Field(0).Type, listC; got != want {
+		t.Errorf(`Named chain got Field(0).Type %q, want %q`, got, want)
+	}
+	if got, want := bD.Field(0).Type, listC; got != want {
+		t.Errorf(`Named chain got Field(0).Type %q, want %q`, got, want)
+	}
+}
+
 func TestHashConsTypes(t *testing.T) {
 	// Create a bunch of distinct types multiple times.
 	var types [3][]*Type
 	for iter := 0; iter < 3; iter++ {
 		for _, a := range singletons {
-			types[iter] = append(types[iter], ListType("List"+a.s, a.t))
+			types[iter] = append(types[iter], ListType(a.t))
 			for _, b := range singletons {
 				lA, lB := "A"+a.s, "B"+b.s
 				types[iter] = append(types[iter], EnumType("Enum"+lA+lB, []string{lA, lB}))
-				types[iter] = append(types[iter], MapType("Map"+a.s+b.s, a.t, b.t))
+				types[iter] = append(types[iter], MapType(a.t, b.t))
 				types[iter] = append(types[iter], StructType("Struct"+lA+lB, []StructField{{lA, a.t}, {lB, b.t}}))
 				if a.t != b.t && a.k != Any && b.k != Any {
 					types[iter] = append(types[iter], OneOfType("OneOf"+lA+lB, []*Type{a.t, b.t}))
@@ -413,17 +518,17 @@ func TestAssignableFrom(t *testing.T) {
 		t, f   *Type
 		expect bool
 	}{
-		{boolT, boolT, true},
-		{anyT, boolT, true},
-		{OneOfType("U", []*Type{boolT}), boolT, true},
-		{OneOfType("U", []*Type{boolT, intT}), intT, true},
+		{BoolType, BoolType, true},
+		{AnyType, BoolType, true},
+		{OneOfType("U", []*Type{BoolType}), BoolType, true},
+		{OneOfType("U", []*Type{BoolType, Int32Type}), Int32Type, true},
 
-		{boolT, intT, false},
-		{boolT, anyT, false},
-		{boolT, OneOfType("U", []*Type{boolT}), false},
-		{boolT, OneOfType("U", []*Type{boolT, intT}), false},
-		{OneOfType("U", []*Type{boolT}), stringT, false},
-		{OneOfType("U", []*Type{boolT, intT}), stringT, false},
+		{BoolType, Int32Type, false},
+		{BoolType, AnyType, false},
+		{BoolType, OneOfType("U", []*Type{BoolType}), false},
+		{BoolType, OneOfType("U", []*Type{BoolType, Int32Type}), false},
+		{OneOfType("U", []*Type{BoolType}), StringType, false},
+		{OneOfType("U", []*Type{BoolType, Int32Type}), StringType, false},
 	}
 	for _, test := range tests {
 		if test.t.AssignableFrom(test.f) != test.expect {
@@ -440,12 +545,14 @@ func TestSelfRecursiveType(t *testing.T) {
 		//   Val      string
 		//   Children []Node
 		// }
-		buildN := BuildStructType("Node")
-		buildC := BuildListType("").SetElem(buildN)
-		buildN.AppendField("Val", stringT)
-		buildN.AppendField("Children", buildC)
-		c, cerr := buildC.Build()
-		n, nerr := buildN.Build()
+		var builder TypeBuilder
+		pendN := builder.Struct("Node")
+		pendC := builder.List().SetElem(pendN)
+		pendN.AppendField("Val", StringType)
+		pendN.AppendField("Children", pendC)
+		builder.Build()
+		c, cerr := pendC.Built()
+		n, nerr := pendN.Built()
 		return c, cerr, n, nerr
 	}
 	c, cerr, n, nerr := buildTree()
@@ -468,7 +575,7 @@ func TestSelfRecursiveType(t *testing.T) {
 	if got, want := n.Field(0).Name, "Val"; got != want {
 		t.Errorf(`node Field(0).Name got %q, want %q`, got, want)
 	}
-	if got, want := n.Field(0).Type, stringT; got != want {
+	if got, want := n.Field(0).Type, StringType; got != want {
 		t.Errorf(`node Field(0).Type got %q, want %q`, got, want)
 	}
 	if got, want := n.Field(1).Name, "Children"; got != want {
@@ -506,19 +613,59 @@ func TestSelfRecursiveType(t *testing.T) {
 }
 
 func TestMutuallyRecursiveType(t *testing.T) {
-	build := func() (*Type, error, *Type, error) {
-		// type A struct{X int;B B}
-		// type B struct{Y int;A A}
-		buildA, buildB := BuildStructType("A"), BuildStructType("B")
-		buildA.AppendField("X", intT).AppendField("B", buildB)
-		buildB.AppendField("Y", intT).AppendField("A", buildA)
-		a, aerr := buildA.Build()
-		b, berr := buildB.Build()
-		return a, aerr, b, berr
+	build := func() (*Type, error, *Type, error, *Type, error, *Type, error) {
+		// type D A
+		// type A struct{X int32;B B;C C}
+		// type B struct{Y int32;A A;C C}
+		// type C struct{Z string}
+		var builder TypeBuilder
+		d := builder.Named("D")
+		a, b, c := builder.Struct("A"), builder.Struct("B"), builder.Struct("C")
+		d.SetBase(a)
+		a.AppendField("X", Int32Type).AppendField("B", b).AppendField("C", c)
+		b.AppendField("Y", Int32Type).AppendField("A", a).AppendField("C", c)
+		c.AppendField("Z", StringType)
+		builder.Build()
+		builtD, derr := d.Built()
+		builtA, aerr := a.Built()
+		builtB, berr := b.Built()
+		builtC, cerr := c.Built()
+		return builtD, derr, builtA, aerr, builtB, berr, builtC, cerr
 	}
-	a, aerr, b, berr := build()
-	if aerr != nil || berr != nil {
-		t.Errorf(`build got cerr %q nerr %q, want nil`, aerr, berr)
+	d, derr, a, aerr, b, berr, c, cerr := build()
+	if derr != nil || aerr != nil || berr != nil || cerr != nil {
+		t.Errorf(`build got (%q,%q,%q,%q), want nil`, derr, aerr, berr, cerr)
+	}
+	// Check D
+	if got, want := d.Kind(), Struct; got != want {
+		t.Errorf(`D Kind got %s, want %s`, got, want)
+	}
+	if got, want := d.Name(), "D"; got != want {
+		t.Errorf(`D Name got %q, want %q`, got, want)
+	}
+	if got, want := d.String(), "D struct{X int32;B B struct{Y int32;A A struct{X int32;B B;C C struct{Z string}};C C};C C}"; got != want {
+		t.Errorf(`D String got %q, want %q`, got, want)
+	}
+	if got, want := d.NumField(), 3; got != want {
+		t.Errorf(`D NumField got %q, want %q`, got, want)
+	}
+	if got, want := d.Field(0).Name, "X"; got != want {
+		t.Errorf(`D Field(0).Name got %q, want %q`, got, want)
+	}
+	if got, want := d.Field(0).Type, Int32Type; got != want {
+		t.Errorf(`D Field(0).Type got %q, want %q`, got, want)
+	}
+	if got, want := d.Field(1).Name, "B"; got != want {
+		t.Errorf(`D Field(1).Name got %q, want %q`, got, want)
+	}
+	if got, want := d.Field(1).Type, b; got != want {
+		t.Errorf(`D Field(1).Type got %q, want %q`, got, want)
+	}
+	if got, want := d.Field(2).Name, "C"; got != want {
+		t.Errorf(`D Field(2).Name got %q, want %q`, got, want)
+	}
+	if got, want := d.Field(2).Type, c; got != want {
+		t.Errorf(`D Field(2).Type got %q, want %q`, got, want)
 	}
 	// Check A
 	if got, want := a.Kind(), Struct; got != want {
@@ -527,16 +674,16 @@ func TestMutuallyRecursiveType(t *testing.T) {
 	if got, want := a.Name(), "A"; got != want {
 		t.Errorf(`A Name got %q, want %q`, got, want)
 	}
-	if got, want := a.String(), "A struct{X int;B B struct{Y int;A A}}"; got != want {
+	if got, want := a.String(), "A struct{X int32;B B struct{Y int32;A A;C C struct{Z string}};C C}"; got != want {
 		t.Errorf(`A String got %q, want %q`, got, want)
 	}
-	if got, want := a.NumField(), 2; got != want {
+	if got, want := a.NumField(), 3; got != want {
 		t.Errorf(`A NumField got %q, want %q`, got, want)
 	}
 	if got, want := a.Field(0).Name, "X"; got != want {
 		t.Errorf(`A Field(0).Name got %q, want %q`, got, want)
 	}
-	if got, want := a.Field(0).Type, intT; got != want {
+	if got, want := a.Field(0).Type, Int32Type; got != want {
 		t.Errorf(`A Field(0).Type got %q, want %q`, got, want)
 	}
 	if got, want := a.Field(1).Name, "B"; got != want {
@@ -545,6 +692,12 @@ func TestMutuallyRecursiveType(t *testing.T) {
 	if got, want := a.Field(1).Type, b; got != want {
 		t.Errorf(`A Field(1).Type got %q, want %q`, got, want)
 	}
+	if got, want := a.Field(2).Name, "C"; got != want {
+		t.Errorf(`A Field(2).Name got %q, want %q`, got, want)
+	}
+	if got, want := a.Field(2).Type, c; got != want {
+		t.Errorf(`A Field(2).Type got %q, want %q`, got, want)
+	}
 	// Check B
 	if got, want := b.Kind(), Struct; got != want {
 		t.Errorf(`B Kind got %s, want %s`, got, want)
@@ -552,16 +705,16 @@ func TestMutuallyRecursiveType(t *testing.T) {
 	if got, want := b.Name(), "B"; got != want {
 		t.Errorf(`B Name got %q, want %q`, got, want)
 	}
-	if got, want := b.String(), "B struct{Y int;A A struct{X int;B B}}"; got != want {
+	if got, want := b.String(), "B struct{Y int32;A A struct{X int32;B B;C C struct{Z string}};C C}"; got != want {
 		t.Errorf(`B String got %q, want %q`, got, want)
 	}
-	if got, want := b.NumField(), 2; got != want {
+	if got, want := b.NumField(), 3; got != want {
 		t.Errorf(`B NumField got %q, want %q`, got, want)
 	}
 	if got, want := b.Field(0).Name, "Y"; got != want {
 		t.Errorf(`B Field(0).Name got %q, want %q`, got, want)
 	}
-	if got, want := b.Field(0).Type, intT; got != want {
+	if got, want := b.Field(0).Type, Int32Type; got != want {
 		t.Errorf(`B Field(0).Type got %q, want %q`, got, want)
 	}
 	if got, want := b.Field(1).Name, "A"; got != want {
@@ -570,17 +723,48 @@ func TestMutuallyRecursiveType(t *testing.T) {
 	if got, want := b.Field(1).Type, a; got != want {
 		t.Errorf(`B Field(1).Type got %q, want %q`, got, want)
 	}
+	if got, want := b.Field(2).Name, "C"; got != want {
+		t.Errorf(`B Field(2).Name got %q, want %q`, got, want)
+	}
+	if got, want := b.Field(2).Type, c; got != want {
+		t.Errorf(`B Field(2).Type got %q, want %q`, got, want)
+	}
+	// Check C
+	if got, want := c.Kind(), Struct; got != want {
+		t.Errorf(`C Kind got %s, want %s`, got, want)
+	}
+	if got, want := c.Name(), "C"; got != want {
+		t.Errorf(`C Name got %q, want %q`, got, want)
+	}
+	if got, want := c.String(), "C struct{Z string}"; got != want {
+		t.Errorf(`C String got %q, want %q`, got, want)
+	}
+	if got, want := c.NumField(), 1; got != want {
+		t.Errorf(`C NumField got %q, want %q`, got, want)
+	}
+	if got, want := c.Field(0).Name, "Z"; got != want {
+		t.Errorf(`C Field(0).Name got %q, want %q`, got, want)
+	}
+	if got, want := c.Field(0).Type, StringType; got != want {
+		t.Errorf(`C Field(0).Type got %q, want %q`, got, want)
+	}
 	// Check hash-consing
 	for iter := 0; iter < 5; iter++ {
-		a2, aerr2, b2, berr2 := build()
-		if aerr2 != nil || berr2 != nil {
-			t.Errorf(`build got aerr %q berr %q, want nil`, aerr, berr)
+		d2, derr, a2, aerr, b2, berr, c2, cerr := build()
+		if derr != nil || aerr != nil || berr != nil || cerr != nil {
+			t.Errorf(`build got (%q,%q,%q,%q), want nil`, derr, aerr, berr, cerr)
+		}
+		if got, want := d2, d; got != want {
+			t.Errorf(`build got %q, want %q`, got, want)
 		}
 		if got, want := a2, a; got != want {
-			t.Errorf(`cons A got %q, want %q`, got, want)
+			t.Errorf(`build got %q, want %q`, got, want)
 		}
 		if got, want := b2, b; got != want {
-			t.Errorf(`cons B got %q, want %q`, got, want)
+			t.Errorf(`build got %q, want %q`, got, want)
+		}
+		if got, want := c2, c; got != want {
+			t.Errorf(`build got %q, want %q`, got, want)
 		}
 	}
 }

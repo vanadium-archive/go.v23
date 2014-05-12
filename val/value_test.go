@@ -8,15 +8,12 @@ import (
 )
 
 var (
-	keyType = StructType("Key", []StructField{{"I", intT}, {"S", stringT}})
+	keyType = StructType("Key", []StructField{{"I", Int64Type}, {"S", StringType}})
 
-	strA, strB, strC = makeString("A"), makeString("B"), makeString("C")
-	int1, int2       = makeInt(1), makeInt(2)
+	strA, strB, strC = StringValue("A"), StringValue("B"), StringValue("C")
+	int1, int2       = Int64Value(1), Int64Value(2)
 	key1, key2, key3 = makeKey(1, "A"), makeKey(2, "B"), makeKey(3, "C")
 )
-
-func makeString(v string) *Value { return Zero(stringT).AssignString(v) }
-func makeInt(v int64) *Value     { return Zero(intT).AssignInt(v) }
 
 func makeKey(a int64, b string) *Value {
 	key := Zero(keyType)
@@ -31,21 +28,25 @@ func TestValue(t *testing.T) {
 		t *Type
 		s string
 	}{
-		{Bool, boolT, "false"},
-		{Int, intT, "0"},
-		{Uint, uintT, "0"},
-		{Float, floatT, "0"},
-		{Complex, complexT, "(0+0i)"},
-		{String, stringT, ""},
-		{Bytes, bytesT, ""},
-		{TypeVal, typevalT, "any"},
+		{Bool, BoolType, "false"},
+		{Int32, Int32Type, "0"},
+		{Int64, Int64Type, "0"},
+		{Uint32, Uint32Type, "0"},
+		{Uint64, Uint64Type, "0"},
+		{Float32, Float32Type, "0"},
+		{Float64, Float64Type, "0"},
+		{Complex64, Complex64Type, "(0+0i)"},
+		{Complex128, Complex128Type, "(0+0i)"},
+		{String, StringType, ""},
+		{Bytes, BytesType, ""},
+		{TypeVal, TypeValType, "any"},
 		{Enum, EnumType("Enum", []string{"A", "B", "C"}), "A"},
-		{List, ListType("ListString", stringT), "[]"},
-		{Map, MapType("MapStringInt", stringT, intT), "{}"},
-		{Map, MapType("MapKeyInt", keyType, intT), "{}"},
-		{Struct, StructType("Struct", []StructField{{"A", intT}, {"B", stringT}, {"C", boolT}}), `{A: 0, B: "", C: false}`},
-		{OneOf, OneOfType("OneOf", []*Type{intT, stringT}), "nil"},
-		{Any, anyT, "nil"},
+		{List, ListType(StringType), "[]"},
+		{Map, MapType(StringType, Int64Type), "{}"},
+		{Map, MapType(keyType, Int64Type), "{}"},
+		{Struct, StructType("Struct", []StructField{{"A", Int64Type}, {"B", StringType}, {"C", BoolType}}), `{A: 0, B: "", C: false}`},
+		{OneOf, OneOfType("OneOf", []*Type{Int64Type, StringType}), "nil"},
+		{Any, AnyType, "nil"},
 	}
 	for _, test := range tests {
 		x := Zero(test.t)
@@ -147,7 +148,8 @@ func assignBool(t *testing.T, x *Value) {
 
 func assignInt(t *testing.T, x *Value) {
 	newval, newstr := int64(123), "123"
-	if x.Kind() == Int {
+	switch x.Kind() {
+	case Int32, Int64:
 		if got, want := x.Int(), int64(0); got != want {
 			t.Errorf(`Int zero value got %v, want %v`, got, want)
 		}
@@ -158,7 +160,7 @@ func assignInt(t *testing.T, x *Value) {
 		if got, want := x.String(), newstr; got != want {
 			t.Errorf(`Int string got %v, want %v`, got, want)
 		}
-	} else {
+	default:
 		expectMismatchedKind(t, func() { x.Int() })
 		expectMismatchedKind(t, func() { x.AssignInt(newval) })
 	}
@@ -166,7 +168,8 @@ func assignInt(t *testing.T, x *Value) {
 
 func assignUint(t *testing.T, x *Value) {
 	newval, newstr := uint64(123), "123"
-	if x.Kind() == Uint {
+	switch x.Kind() {
+	case Uint32, Uint64:
 		if got, want := x.Uint(), uint64(0); got != want {
 			t.Errorf(`Uint zero value got %v, want %v`, got, want)
 		}
@@ -177,7 +180,7 @@ func assignUint(t *testing.T, x *Value) {
 		if got, want := x.String(), newstr; got != want {
 			t.Errorf(`Uint string got %v, want %v`, got, want)
 		}
-	} else {
+	default:
 		expectMismatchedKind(t, func() { x.Uint() })
 		expectMismatchedKind(t, func() { x.AssignUint(newval) })
 	}
@@ -185,7 +188,8 @@ func assignUint(t *testing.T, x *Value) {
 
 func assignFloat(t *testing.T, x *Value) {
 	newval, newstr := float64(1.23), "1.23"
-	if x.Kind() == Float {
+	switch x.Kind() {
+	case Float32, Float64:
 		if got, want := x.Float(), float64(0); got != want {
 			t.Errorf(`Float zero value got %v, want %v`, got, want)
 		}
@@ -196,7 +200,7 @@ func assignFloat(t *testing.T, x *Value) {
 		if got, want := x.String(), newstr; got != want {
 			t.Errorf(`Float string got %v, want %v`, got, want)
 		}
-	} else {
+	default:
 		expectMismatchedKind(t, func() { x.Float() })
 		expectMismatchedKind(t, func() { x.AssignFloat(newval) })
 	}
@@ -204,7 +208,8 @@ func assignFloat(t *testing.T, x *Value) {
 
 func assignComplex(t *testing.T, x *Value) {
 	newval, newstr := complex128(1+2i), "(1+2i)"
-	if x.Kind() == Complex {
+	switch x.Kind() {
+	case Complex64, Complex128:
 		if got, want := x.Complex(), complex128(0); got != want {
 			t.Errorf(`Complex zero value got %v, want %v`, got, want)
 		}
@@ -215,7 +220,7 @@ func assignComplex(t *testing.T, x *Value) {
 		if got, want := x.String(), newstr; got != want {
 			t.Errorf(`Complex string got %v, want %v`, got, want)
 		}
-	} else {
+	default:
 		expectMismatchedKind(t, func() { x.Complex() })
 		expectMismatchedKind(t, func() { x.AssignComplex(newval) })
 	}
@@ -276,7 +281,7 @@ func assignBytes(t *testing.T, x *Value) {
 }
 
 func assignTypeVal(t *testing.T, x *Value) {
-	newval, newstr := boolT, "bool"
+	newval, newstr := BoolType, "bool"
 	if x.Kind() == TypeVal {
 		if got, want := x.TypeVal(), zeroTypeVal; got != want {
 			t.Errorf(`TypeVal zero value got %v, want %v`, got, want)
@@ -416,7 +421,7 @@ func assignMap(t *testing.T, x *Value) {
 		v1, v2 := int1, int2
 		mapstr1 := `{{I: 1, S: "A"}: 1, {I: 2, S: "B"}: 2}`
 		mapstr2 := `{{I: 2, S: "B"}: 2}`
-		if x.Type().Key() == stringT {
+		if x.Type().Key() == StringType {
 			k1, k2, k3 = strA, strB, strC
 			mapstr1, mapstr2 = `{"A": 1, "B": 2}`, `{"B": 2}`
 		}

@@ -21,8 +21,8 @@ type Value struct {
 }
 
 var (
-	// the zero TypeVal returns an unnamed any type
-	zeroTypeVal = AnyType("")
+	// the zero TypeVal returns the any type
+	zeroTypeVal = AnyType
 )
 
 // enumIndex represents an enum value by the index of its label.
@@ -33,13 +33,13 @@ func zeroRep(t *Type) interface{} {
 	switch t.kind {
 	case Bool:
 		return false
-	case Int:
+	case Int32, Int64:
 		return int64(0)
-	case Uint:
+	case Uint32, Uint64:
 		return uint64(0)
-	case Float:
+	case Float32, Float64:
 		return float64(0)
-	case Complex:
+	case Complex64, Complex128:
 		return complex128(0)
 	case String:
 		return ""
@@ -67,13 +67,13 @@ func isZeroRep(k Kind, rep interface{}) bool {
 	switch k {
 	case Bool:
 		return !rep.(bool)
-	case Int:
+	case Int32, Int64:
 		return rep.(int64) == 0
-	case Uint:
+	case Uint32, Uint64:
 		return rep.(uint64) == 0
-	case Float:
+	case Float32, Float64:
 		return rep.(float64) == 0
-	case Complex:
+	case Complex64, Complex128:
 		return rep.(complex128) == 0
 	case String:
 		return len(rep.(string)) == 0
@@ -99,7 +99,7 @@ func isZeroRep(k Kind, rep interface{}) bool {
 // copyRep returns a copy of v.rep.
 func copyRep(v *Value) interface{} {
 	switch v.t.kind {
-	case Bool, Int, Uint, Float, Complex, String, TypeVal, Enum:
+	case Bool, Int32, Int64, Uint32, Uint64, Float32, Float64, Complex64, Complex128, String, TypeVal, Enum:
 		return v.rep
 	case Bytes:
 		return copyBytes(v.rep.([]byte))
@@ -136,7 +136,7 @@ func copySliceOfValues(orig []*Value) []*Value {
 // TODO(toddw): Perhaps we should use the JSON format instead?
 func stringRep(t *Type, rep interface{}, quotes bool) string {
 	switch t.kind {
-	case Bool, Int, Uint, Float, Complex:
+	case Bool, Int32, Int64, Uint32, Uint64, Float32, Float64, Complex64, Complex128:
 		return fmt.Sprint(rep)
 	case String:
 		if quotes {
@@ -175,6 +175,42 @@ func stringRep(t *Type, rep interface{}, quotes bool) string {
 	}
 }
 
+// BoolValue is a convenience to create a Bool value.
+func BoolValue(x bool) *Value { return Zero(BoolType).AssignBool(x) }
+
+// Int32Value is a convenience to create an Int32 value.
+func Int32Value(x int32) *Value { return Zero(Int32Type).AssignInt(int64(x)) }
+
+// Int64Value is a convenience to create an Int64 value.
+func Int64Value(x int64) *Value { return Zero(Int64Type).AssignInt(x) }
+
+// Uint32Value is a convenience to create an Uint32 value.
+func Uint32Value(x uint32) *Value { return Zero(Uint32Type).AssignUint(uint64(x)) }
+
+// Uint64Value is a convenience to create an Uint64 value.
+func Uint64Value(x uint64) *Value { return Zero(Uint64Type).AssignUint(x) }
+
+// Float32Value is a convenience to create a Float32 value.
+func Float32Value(x float32) *Value { return Zero(Float32Type).AssignFloat(float64(x)) }
+
+// Float64Value is a convenience to create a Float64 value.
+func Float64Value(x float64) *Value { return Zero(Float64Type).AssignFloat(x) }
+
+// Complex64Value is a convenience to create a Complex64 value.
+func Complex64Value(x complex64) *Value { return Zero(Complex64Type).AssignComplex(complex128(x)) }
+
+// Complex128Value is a convenience to create a Complex128 value.
+func Complex128Value(x complex128) *Value { return Zero(Complex128Type).AssignComplex(x) }
+
+// StringValue is a convenience to create a String value.
+func StringValue(x string) *Value { return Zero(StringType).AssignString(x) }
+
+// BytesValue is a convenience to create a Bytes value.
+func BytesValue(x []byte) *Value { return Zero(BytesType).CopyBytes(x) }
+
+// TypeValValue is a convenience to create a TypeVal value.
+func TypeValValue(x *Type) *Value { return Zero(TypeValType).AssignTypeVal(x) }
+
 // Zero returns a new Value containing the zero value for the given Type t.
 func Zero(t *Type) *Value {
 	if t == nil {
@@ -202,13 +238,13 @@ func Equal(a, b *Value) bool {
 	switch a.t.kind {
 	case Bool:
 		return a.rep.(bool) == b.rep.(bool)
-	case Int:
+	case Int32, Int64:
 		return a.rep.(int64) == b.rep.(int64)
-	case Uint:
+	case Uint32, Uint64:
 		return a.rep.(uint64) == b.rep.(uint64)
-	case Float:
+	case Float32, Float64:
 		return a.rep.(float64) == b.rep.(float64)
-	case Complex:
+	case Complex64, Complex128:
 		return a.rep.(complex128) == b.rep.(complex128)
 	case String:
 		return a.rep.(string) == b.rep.(string)
@@ -261,27 +297,27 @@ func (v *Value) Bool() bool {
 	return v.rep.(bool)
 }
 
-// Int returns the underlying value of an Int.
+// Int returns the underlying value of an Int{32,64}.
 func (v *Value) Int() int64 {
-	v.t.checkKind("Int", Int)
+	v.t.checkKind("Int", Int32, Int64)
 	return v.rep.(int64)
 }
 
-// Uint returns the underlying value of a Uint.
+// Uint returns the underlying value of a Uint{32,64}.
 func (v *Value) Uint() uint64 {
-	v.t.checkKind("Uint", Uint)
+	v.t.checkKind("Uint", Uint32, Uint64)
 	return v.rep.(uint64)
 }
 
-// Float returns the underlying value of a Float.
+// Float returns the underlying value of a Float{32,64}.
 func (v *Value) Float() float64 {
-	v.t.checkKind("Float", Float)
+	v.t.checkKind("Float", Float32, Float64)
 	return v.rep.(float64)
 }
 
-// Complex returns the underlying value of a Complex.
+// Complex returns the underlying value of a Complex{64,128}.
 func (v *Value) Complex() complex128 {
-	v.t.checkKind("Complex", Complex)
+	v.t.checkKind("Complex", Complex64, Complex128)
 	return v.rep.(complex128)
 }
 
@@ -391,30 +427,30 @@ func (v *Value) AssignBool(x bool) *Value {
 	return v
 }
 
-// AssignInt sets the underlying Int to x.
+// AssignInt sets the underlying Int{32,64} to x.
 func (v *Value) AssignInt(x int64) *Value {
-	v.t.checkKind("AssignInt", Int)
+	v.t.checkKind("AssignInt", Int32, Int64)
 	v.rep = x
 	return v
 }
 
-// AssignUint sets the underlying Uint to x.
+// AssignUint sets the underlying Uint{32,64} to x.
 func (v *Value) AssignUint(x uint64) *Value {
-	v.t.checkKind("AssignUint", Uint)
+	v.t.checkKind("AssignUint", Uint32, Uint64)
 	v.rep = x
 	return v
 }
 
-// AssignFloat sets the underlying Float to x.
+// AssignFloat sets the underlying Float{32,64} to x.
 func (v *Value) AssignFloat(x float64) *Value {
-	v.t.checkKind("AssignFloat", Float)
+	v.t.checkKind("AssignFloat", Float32, Float64)
 	v.rep = x
 	return v
 }
 
-// AssignComplex sets the underlying Complex to x.
+// AssignComplex sets the underlying Complex{32,64} to x.
 func (v *Value) AssignComplex(x complex128) *Value {
-	v.t.checkKind("AssignComplex", Complex)
+	v.t.checkKind("AssignComplex", Complex64, Complex128)
 	v.rep = x
 	return v
 }

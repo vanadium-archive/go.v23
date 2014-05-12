@@ -43,7 +43,7 @@ func (kv kvPair) String() string {
 func zeroRepMap(t *Type) repMap {
 	rep := repMap{}
 	switch t.key.kind {
-	case Bool, Int, Uint, Float, Complex, String, Bytes, Enum:
+	case Bool, Int32, Int64, Uint32, Uint64, Float32, Float64, Complex64, Complex128, String, Bytes, Enum:
 		// TODO(toddw): Structs with exactly 1 simple field may also use fast.
 		rep.fastIndex = make(map[interface{}]kvPair)
 	default:

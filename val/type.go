@@ -2,7 +2,6 @@ package val
 
 import (
 	"fmt"
-	"strings"
 )
 
 // Kind represents the kind of type that a Type represents.
@@ -14,10 +13,14 @@ const (
 	OneOf
 	// Scalar kinds
 	Bool
-	Int
-	Uint
-	Float
-	Complex
+	Int32
+	Int64
+	Uint32
+	Uint64
+	Float32
+	Float64
+	Complex64
+	Complex128
 	String
 	Bytes
 	TypeVal
@@ -26,6 +29,8 @@ const (
 	List
 	Map
 	Struct
+	// Internal kinds; they never appear in a *Type returned to the user.
+	internalNamed
 )
 
 func (k Kind) String() string {
@@ -36,14 +41,22 @@ func (k Kind) String() string {
 		return "oneof"
 	case Bool:
 		return "bool"
-	case Int:
-		return "int"
-	case Uint:
-		return "uint"
-	case Float:
-		return "float"
-	case Complex:
-		return "complex"
+	case Int32:
+		return "int32"
+	case Int64:
+		return "int64"
+	case Uint32:
+		return "uint32"
+	case Uint64:
+		return "uint64"
+	case Float32:
+		return "float32"
+	case Float64:
+		return "float64"
+	case Complex64:
+		return "complex64"
+	case Complex128:
+		return "complex128"
 	case String:
 		return "string"
 	case Bytes:
@@ -78,11 +91,12 @@ func (k Kind) String() string {
 type Type struct {
 	kind   Kind          // used by all kinds
 	name   string        // used by all kinds
+	labels []string      // used by Enum
 	elem   *Type         // used by List, Map
 	key    *Type         // used by Map
-	labels []string      // used by Enum
 	fields []StructField // used by Struct
 	types  []*Type       // used by OneOf
+	unique string        // used by all kinds, filled in by typeCons
 }
 
 // StructField describes a single field in a Struct.
@@ -98,51 +112,7 @@ func (t *Type) Kind() Kind { return t.kind }
 func (t *Type) Name() string { return t.name }
 
 // String returns a human-readable description of type t.
-func (t *Type) String() string {
-	return t.stringHelper(make(map[*Type]bool))
-}
-
-func (t *Type) stringHelper(seen map[*Type]bool) string {
-	// The seen map is to break infinite loops from recursive types.  Since cycles
-	// in recursive types may only be created via named types, we simply detect
-	// the loop and only dump the name of the next named type.
-	if seen[t] && t.name != "" {
-		return t.name
-	}
-	seen[t] = true
-	s := t.name
-	if s != "" {
-		s += " "
-	}
-	switch t.kind {
-	case Enum:
-		return s + "enum{" + strings.Join(t.labels, ";") + "}"
-	case List:
-		return s + "[]" + t.elem.stringHelper(seen)
-	case Map:
-		return s + "map[" + t.key.stringHelper(seen) + "]" + t.elem.stringHelper(seen)
-	case Struct:
-		s += "struct{"
-		for index, f := range t.fields {
-			if index > 0 {
-				s += ";"
-			}
-			s += f.Name + " " + f.Type.stringHelper(seen)
-		}
-		return s + "}"
-	case OneOf:
-		s += "oneof{"
-		for index, one := range t.types {
-			if index > 0 {
-				s += ";"
-			}
-			s += one.stringHelper(seen)
-		}
-		return s + "}"
-	default:
-		return s + t.kind.String()
-	}
-}
+func (t *Type) String() string { return t.unique }
 
 // EnumLabel returns the Enum label at the given index.  It panics if the index
 // is out of range.
@@ -241,8 +211,8 @@ func (t *Type) AssignableFrom(f *Type) bool {
 	return t == f || t.kind == Any || (t.kind == OneOf && t.OneOfIndex(f) != -1)
 }
 
-// pending implements the TypeOrBuilder interface.
-func (t *Type) pending() *Type { return t }
+// ptype implements the TypeOrPending interface.
+func (t *Type) ptype() *Type { return t }
 
 func errKindMismatch(method string, k Kind, allowed ...Kind) error {
 	return fmt.Errorf("val: method %q called on mismatched kind; got: %v, want: %v", method, k, allowed)
