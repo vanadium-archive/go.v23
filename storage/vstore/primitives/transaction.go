@@ -1,6 +1,7 @@
-package vstore
+package primitives
 
 import (
+	"errors"
 	"log"
 	"math/rand"
 
@@ -9,10 +10,14 @@ import (
 	"veyron2/storage"
 )
 
+var (
+	ErrBadTransaction = errors.New("bad transaction")
+)
+
 type transaction struct {
-	id    store.TransactionID
-	opts  []storage.TransactionOpt
-	store *vstore
+	id   store.TransactionID
+	opts []storage.TransactionOpt
+	serv store.Store
 }
 
 var _ storage.Transaction = (*transaction)(nil)
@@ -29,6 +34,18 @@ func NewTransaction(opts ...storage.TransactionOpt) storage.Transaction {
 	return tr
 }
 
+// updateTransaction casts the transaction and sets the store object in it.
+func UpdateTransaction(t storage.Transaction, serv store.Store) (store.TransactionID, error) {
+	if t == nil {
+		return nullTransactionID, nil
+	}
+	tr, ok := t.(*transaction)
+	if !ok || !tr.setServ(serv) {
+		return nullTransactionID, ErrBadTransaction
+	}
+	return tr.id, nil
+}
+
 // transactionOptsToAnyData converts the array to []idl.AnyData.
 func transactionOptsToAnyData(opts []storage.TransactionOpt) []idl.AnyData {
 	vopts := make([]idl.AnyData, len(opts))
@@ -38,35 +55,35 @@ func transactionOptsToAnyData(opts []storage.TransactionOpt) []idl.AnyData {
 	return vopts
 }
 
-// setStore binds the transaction to a store if it hasn't already been bound.
+// setServ binds the transaction to a store if it hasn't already been bound.
 // Returns true iff the binding succeeded, or the transaction is already bound
 // to the specified store.
-func (tr *transaction) setStore(st *vstore) bool {
-	if tr.store == nil {
+func (tr *transaction) setServ(serv store.Store) bool {
+	if tr.serv == nil {
 		vopts := transactionOptsToAnyData(tr.opts)
-		if err := st.serv.CreateTransaction(tr.id, vopts); err != nil {
+		if err := serv.CreateTransaction(tr.id, vopts); err != nil {
 			log.Printf("CreateTransaction error: %s", err)
 			return false
 		}
-		tr.store = st
+		tr.serv = serv
 		return true
 	}
-	return tr.store == st
+	return tr.serv == serv
 }
 
 // Commit commits the transaction.  Returns an error if the operation aborted.
 func (tr *transaction) Commit() error {
-	if tr.store == nil {
+	if tr.serv == nil {
 		return nil
 	}
-	return tr.store.serv.Commit(tr.id)
+	return tr.serv.Commit(tr.id)
 }
 
 // Abort aborts the transaction.  Returns an error if the operation
 // could not be aborted.
 func (tr *transaction) Abort() error {
-	if tr.store == nil {
+	if tr.serv == nil {
 		return nil
 	}
-	return tr.store.serv.Abort(tr.id)
+	return tr.serv.Abort(tr.id)
 }

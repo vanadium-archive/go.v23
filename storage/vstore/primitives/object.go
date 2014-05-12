@@ -1,4 +1,4 @@
-package vstore
+package primitives
 
 import (
 	"errors"
@@ -10,8 +10,8 @@ import (
 )
 
 type object struct {
-	store *vstore
-	serv  store.Object
+	sServ store.Store
+	oServ store.Object
 }
 
 type errorObject struct {
@@ -19,9 +19,8 @@ type errorObject struct {
 }
 
 var (
-	errBadTransaction = errors.New("bad transaction")
-	errBadAttr        = errors.New("bad attribute")
-	errTypeError      = errors.New("type error")
+	ErrBadAttr   = errors.New("bad attribute")
+	ErrTypeError = errors.New("type error")
 
 	_ storage.Object = (*object)(nil)
 
@@ -35,7 +34,7 @@ func fillStat(stat *storage.Stat, serviceStat *store.Stat) error {
 	for i, attr := range serviceStat.Attrs {
 		a, ok := attr.(storage.Attr)
 		if !ok {
-			return errBadAttr
+			return ErrBadAttr
 		}
 		attrs[i] = a
 	}
@@ -67,47 +66,35 @@ func makeEntry(serviceEntry *store.Entry) (storage.Entry, error) {
 // Bind returns a storage.Object for a value at a Veyron name.  The Bind always
 // succeeds.  If the Veyron name is not a value in a Veyron storage. all
 // subsequent operations on the object will fail.
-func (st *vstore) Bind(name string) storage.Object {
+func BindObject(sServ store.Store, mount, name string) storage.Object {
 	if len(name) > 0 && name[0] == '/' {
 		name = name[1:]
 	}
-	serv, err := store.BindObject(st.mount + "/" + name)
+	oServ, err := store.BindObject(mount + "/" + name)
 	if err != nil {
 		return &errorObject{err: err}
 	}
-	return &object{store: st, serv: serv}
-}
-
-// updateTransaction casts the transaction and sets the store object in it.
-func (o *object) updateTransaction(t storage.Transaction) (store.TransactionID, bool) {
-	if t == nil {
-		return nullTransactionID, true
-	}
-	tr, ok := t.(*transaction)
-	if !ok || !tr.setStore(o.store) {
-		return nullTransactionID, false
-	}
-	return tr.id, true
+	return &object{sServ: sServ, oServ: oServ}
 }
 
 // Exists returns true iff the Entry has a value.
 func (o *object) Exists(t storage.Transaction) (bool, error) {
-	id, ok := o.updateTransaction(t)
-	if !ok {
-		return false, errBadTransaction
+	id, err := UpdateTransaction(t, o.sServ)
+	if err != nil {
+		return false, err
 	}
-	return o.serv.Exists(id)
+	return o.oServ.Exists(id)
 }
 
 // Get returns the value for the Object.  The value returned is from the
 // most recent mutation of the entry in the storage.Transaction, or from the
 // storage.Transaction's snapshot if there is no mutation.
 func (o *object) Get(t storage.Transaction) (storage.Entry, error) {
-	id, ok := o.updateTransaction(t)
-	if !ok {
-		return nullEntry, errBadTransaction
+	id, err := UpdateTransaction(t, o.sServ)
+	if err != nil {
+		return nullEntry, err
 	}
-	entry, err := o.serv.Get(id)
+	entry, err := o.oServ.Get(id)
 	if err != nil {
 		return nullEntry, err
 	}
@@ -116,11 +103,11 @@ func (o *object) Get(t storage.Transaction) (storage.Entry, error) {
 
 // Put adds or modifies the Object.
 func (o *object) Put(t storage.Transaction, v interface{}) (storage.Stat, error) {
-	tid, ok := o.updateTransaction(t)
-	if !ok {
-		return nullStat, errBadTransaction
+	id, err := UpdateTransaction(t, o.sServ)
+	if err != nil {
+		return nullStat, err
 	}
-	serviceStat, err := o.serv.Put(tid, v)
+	serviceStat, err := o.oServ.Put(id, v)
 	if err != nil {
 		return nullStat, err
 	}
@@ -129,35 +116,35 @@ func (o *object) Put(t storage.Transaction, v interface{}) (storage.Stat, error)
 
 // Remove removes the Object.
 func (o *object) Remove(t storage.Transaction) error {
-	id, ok := o.updateTransaction(t)
-	if !ok {
-		return errBadTransaction
+	id, err := UpdateTransaction(t, o.sServ)
+	if err != nil {
+		return err
 	}
-	return o.serv.Remove(id)
+	return o.oServ.Remove(id)
 }
 
 // SetAttr changes the attributes of the entry, such as permissions and
 // replication groups.  Attributes are associated with the value, not the
 // path.
 func (o *object) SetAttr(t storage.Transaction, attrs ...storage.Attr) error {
-	id, ok := o.updateTransaction(t)
-	if !ok {
-		return errBadTransaction
+	id, err := UpdateTransaction(t, o.sServ)
+	if err != nil {
+		return err
 	}
 	serviceAttrs := make([]idl.AnyData, len(attrs))
 	for i, x := range attrs {
 		serviceAttrs[i] = idl.AnyData(x)
 	}
-	return o.serv.SetAttr(id, serviceAttrs)
+	return o.oServ.SetAttr(id, serviceAttrs)
 }
 
 // Stat returns entry info.
 func (o *object) Stat(t storage.Transaction) (storage.Stat, error) {
-	id, ok := o.updateTransaction(t)
-	if !ok {
-		return nullStat, errBadTransaction
+	id, err := UpdateTransaction(t, o.sServ)
+	if err != nil {
+		return nullStat, err
 	}
-	serviceStat, err := o.serv.Stat(id)
+	serviceStat, err := o.oServ.Stat(id)
 	if err != nil {
 		return nullStat, err
 	}
@@ -166,11 +153,11 @@ func (o *object) Stat(t storage.Transaction) (storage.Stat, error) {
 
 // Glob returns a sequence of names that match the given pattern.
 func (o *object) GlobT(t storage.Transaction, pattern string) (storage.GlobStream, error) {
-	id, ok := o.updateTransaction(t)
-	if !ok {
-		return nil, errBadTransaction
+	id, err := UpdateTransaction(t, o.sServ)
+	if err != nil {
+		return nil, err
 	}
-	return o.serv.GlobT(id, pattern)
+	return o.oServ.GlobT(id, pattern)
 }
 
 // The errorObject responds with an error to all operations.

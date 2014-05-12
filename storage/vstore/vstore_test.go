@@ -9,6 +9,7 @@ import (
 	"veyron2/rt"
 	"veyron2/security"
 	"veyron2/storage"
+	"veyron2/storage/vstore/primitives"
 	"veyron2/vom"
 )
 
@@ -64,7 +65,7 @@ func TestPutGetRemoveChild(t *testing.T) {
 		// Create a root.
 		o := s.Bind("/")
 		value := newValue()
-		tr1 := NewTransaction()
+		tr1 := primitives.NewTransaction()
 		if _, err := o.Put(tr1, value); err != nil {
 			t.Errorf("Unexpected error: %s", err)
 		}
@@ -72,7 +73,7 @@ func TestPutGetRemoveChild(t *testing.T) {
 			t.Errorf("Unexpected error")
 		}
 
-		tr2 := NewTransaction()
+		tr2 := primitives.NewTransaction()
 		if ok, err := o.Exists(tr2); !ok || err != nil {
 			t.Errorf("Should exist: %s", err)
 		}
@@ -89,7 +90,7 @@ func testPutGetRemove(t *testing.T, s storage.Store, o storage.Object) {
 	value := newValue()
 	{
 		// Check that the object does not exist.
-		tr := NewTransaction()
+		tr := primitives.NewTransaction()
 		if ok, err := o.Exists(tr); ok || err != nil {
 			t.Errorf("Should not exist: %s", err)
 		}
@@ -100,7 +101,7 @@ func testPutGetRemove(t *testing.T, s storage.Store, o storage.Object) {
 
 	{
 		// Add the object.
-		tr1 := NewTransaction()
+		tr1 := primitives.NewTransaction()
 		if _, err := o.Put(tr1, value); err != nil {
 			t.Errorf("Unexpected error: %s", err)
 		}
@@ -112,7 +113,7 @@ func testPutGetRemove(t *testing.T, s storage.Store, o storage.Object) {
 		}
 
 		// Transactions are isolated.
-		tr2 := NewTransaction()
+		tr2 := primitives.NewTransaction()
 		if ok, err := o.Exists(tr2); ok || err != nil {
 			t.Errorf("Should not exist: %s", err)
 		}
@@ -134,7 +135,7 @@ func testPutGetRemove(t *testing.T, s storage.Store, o storage.Object) {
 		}
 
 		// tr3 observes the commit.
-		tr3 := NewTransaction()
+		tr3 := primitives.NewTransaction()
 		if ok, err := o.Exists(tr3); !ok || err != nil {
 			t.Errorf("Should exist: %s", err)
 		}
@@ -145,7 +146,7 @@ func testPutGetRemove(t *testing.T, s storage.Store, o storage.Object) {
 
 	{
 		// Remove the object.
-		tr1 := NewTransaction()
+		tr1 := primitives.NewTransaction()
 		if err := o.Remove(tr1); err != nil {
 			t.Errorf("Unexpected error: %s", err)
 		}
@@ -157,7 +158,7 @@ func testPutGetRemove(t *testing.T, s storage.Store, o storage.Object) {
 		}
 
 		// The removal is isolated.
-		tr2 := NewTransaction()
+		tr2 := primitives.NewTransaction()
 		if ok, err := o.Exists(tr2); !ok || err != nil {
 			t.Errorf("Should exist: %s", err)
 		}
@@ -181,7 +182,7 @@ func testPutGetRemove(t *testing.T, s storage.Store, o storage.Object) {
 
 	{
 		// Check that the object does not exist.
-		tr1 := NewTransaction()
+		tr1 := primitives.NewTransaction()
 		if ok, err := o.Exists(tr1); ok || err != nil {
 			t.Errorf("Should not exist")
 		}
@@ -223,7 +224,7 @@ func TestPutGetRemoveNilTransaction(t *testing.T) {
 	}
 
 	{
-		tr := NewTransaction()
+		tr := primitives.NewTransaction()
 		if ok, err := o.Exists(tr); ok || err != nil {
 			t.Errorf("Should not exist: %s", err)
 		}
@@ -252,7 +253,7 @@ func TestPutGetRemoveNilTransaction(t *testing.T) {
 	}
 
 	{
-		tr := NewTransaction()
+		tr := primitives.NewTransaction()
 		if ok, err := o.Exists(tr); !ok || err != nil {
 			t.Errorf("Should exist: %s", err)
 		}
