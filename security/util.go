@@ -10,8 +10,13 @@ import (
 	"veyron2/vom"
 )
 
-// ValidLabels is the set of all valid Labels for IPC methods.
-var ValidLabels = []Label{ReadLabel, WriteLabel, AdminLabel, DebugLabel, MonitoringLabel}
+var (
+	// ValidLabels is the set of all valid Labels for IPC methods.
+	ValidLabels = []Label{ReadLabel, WriteLabel, AdminLabel, DebugLabel, MonitoringLabel}
+
+	// AllLabels is a LabelSet containing all ValidLabels.
+	AllLabels = LabelSet(ReadLabel | WriteLabel | AdminLabel | DebugLabel | MonitoringLabel)
+)
 
 // String representation of a Label.
 func (l Label) String() string {
