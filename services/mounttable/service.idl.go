@@ -25,9 +25,7 @@ type MountedServer struct {
 type MountEntry struct {
 	// Name is the mounted name.
 	Name string
-	// Link (if present) specifies the link name (Servers is nil).
-	Link string
-	// Servers (if present) specifies the mounted names (Link is empty).
+	// Servers (if present) specifies the mounted names.
 	Servers []MountedServer
 }
 
@@ -211,7 +209,6 @@ func (s *ServerStubGlobable) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Servi
 		_gen_wiretype.SliceType{Elem: 0x42, Name: "", Tags: []string(nil)}, _gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
 				_gen_wiretype.FieldType{Type: 0x3, Name: "Name"},
-				_gen_wiretype.FieldType{Type: 0x3, Name: "Link"},
 				_gen_wiretype.FieldType{Type: 0x43, Name: "Servers"},
 			},
 			"MountEntry", []string(nil)},
@@ -277,12 +274,6 @@ type MountTable_InternalNoTagGetter interface {
 	// servers mounted there.
 	Unmount(Server string, opts ..._gen_ipc.ClientCallOpt) (err error)
 
-	// Link creates a link in the tree from the receiver to LinkName.
-	Link(LinkName string, opts ..._gen_ipc.ClientCallOpt) (err error)
-
-	// Unlink removes a link at the receiver.
-	Unlink(opts ..._gen_ipc.ClientCallOpt) (err error)
-
 	// ResolveStep takes the next step in resolving a name.  Returns the next
 	// servers to query and the suffix at those servers.
 	ResolveStep(opts ..._gen_ipc.ClientCallOpt) (Servers []MountedServer, Suffix string, err error)
@@ -315,12 +306,6 @@ type MountTableService interface {
 	// Unmount removes Server from the mount point.  If Server is empty, remove all
 	// servers mounted there.
 	Unmount(context _gen_ipc.Context, Server string) (err error)
-
-	// Link creates a link in the tree from the receiver to LinkName.
-	Link(context _gen_ipc.Context, LinkName string) (err error)
-
-	// Unlink removes a link at the receiver.
-	Unlink(context _gen_ipc.Context) (err error)
 
 	// ResolveStep takes the next step in resolving a name.  Returns the next
 	// servers to query and the suffix at those servers.
@@ -402,28 +387,6 @@ func (__gen_c *clientStubMountTable) Unmount(Server string, opts ..._gen_ipc.Cli
 	return
 }
 
-func (__gen_c *clientStubMountTable) Link(LinkName string, opts ..._gen_ipc.ClientCallOpt) (err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Link", []interface{}{LinkName}, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
-func (__gen_c *clientStubMountTable) Unlink(opts ..._gen_ipc.ClientCallOpt) (err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Unlink", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
 func (__gen_c *clientStubMountTable) ResolveStep(opts ..._gen_ipc.ClientCallOpt) (Servers []MountedServer, Suffix string, err error) {
 	var call _gen_ipc.ClientCall
 	if call, err = __gen_c.client.StartCall(__gen_c.name, "ResolveStep", nil, opts...); err != nil {
@@ -461,14 +424,6 @@ func (s *ServerStubMountTable) GetMethodTags(method string) []interface{} {
 
 func (s *ServerStubMountTable) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
 	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
-	result.Methods["Link"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{
-			{Name: "LinkName", Type: 3},
-		},
-		OutArgs: []_gen_ipc.MethodArgument{
-			{Name: "", Type: 65},
-		},
-	}
 	result.Methods["Mount"] = _gen_ipc.MethodSignature{
 		InArgs: []_gen_ipc.MethodArgument{
 			{Name: "Server", Type: 3},
@@ -484,12 +439,6 @@ func (s *ServerStubMountTable) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Ser
 			{Name: "Servers", Type: 67},
 			{Name: "Suffix", Type: 3},
 			{Name: "Error", Type: 65},
-		},
-	}
-	result.Methods["Unlink"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{},
-		OutArgs: []_gen_ipc.MethodArgument{
-			{Name: "", Type: 65},
 		},
 	}
 	result.Methods["Unmount"] = _gen_ipc.MethodSignature{
@@ -595,16 +544,6 @@ func (__gen_s *ServerStubMountTable) Unmount(call _gen_ipc.ServerCall, Server st
 	return
 }
 
-func (__gen_s *ServerStubMountTable) Link(call _gen_ipc.ServerCall, LinkName string) (err error) {
-	err = __gen_s.service.Link(call, LinkName)
-	return
-}
-
-func (__gen_s *ServerStubMountTable) Unlink(call _gen_ipc.ServerCall) (err error) {
-	err = __gen_s.service.Unlink(call)
-	return
-}
-
 func (__gen_s *ServerStubMountTable) ResolveStep(call _gen_ipc.ServerCall) (Servers []MountedServer, Suffix string, err error) {
 	Servers, Suffix, err = __gen_s.service.ResolveStep(call)
 	return
@@ -618,10 +557,6 @@ func GetMountTableMethodTags(method string) []interface{} {
 	case "Mount":
 		return []interface{}{}
 	case "Unmount":
-		return []interface{}{}
-	case "Link":
-		return []interface{}{}
-	case "Unlink":
 		return []interface{}{}
 	case "ResolveStep":
 		return []interface{}{}

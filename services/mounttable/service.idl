@@ -13,9 +13,7 @@ type MountedServer struct {
 type MountEntry struct {
         // Name is the mounted name.
 	Name    string
-        // Link (if present) specifies the link name (Servers is nil).
-	Link    string
-        // Servers (if present) specifies the mounted names (Link is empty).
+        // Servers (if present) specifies the mounted names.
 	Servers []MountedServer
 }
 
@@ -46,12 +44,6 @@ type MountTable interface {
 	// Unmount removes Server from the mount point.  If Server is empty, remove all
 	// servers mounted there.
 	Unmount(Server string) error
-
-	// Link creates a link in the tree from the receiver to LinkName.
-	Link(LinkName string) error
-
-	// Unlink removes a link at the receiver.
-	Unlink() error
 
         // TODO(caprita): We can simplify this to just return []string where
         // each string already has the suffix baked in, and no ttl.
