@@ -1,7 +1,6 @@
 package parse
 
 import (
-	"fmt"
 	"math/big"
 	"reflect"
 	"regexp"
@@ -794,7 +793,6 @@ func TestParsing(t *testing.T) {
 	}
 
 	for _, test := range basic {
-		fmt.Println("Testing", test.query)
 		ast, err := Parse(query.Query{test.query})
 		if test.errRegex == "" {
 			if err != nil {

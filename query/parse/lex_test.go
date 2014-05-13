@@ -1,7 +1,6 @@
 package parse
 
 import (
-	"fmt"
 	"math/big"
 	"reflect"
 	"regexp"
@@ -132,7 +131,6 @@ func TestLexing(t *testing.T) {
 		{`trueish`, []token2{{tIDENT, yySymType{strpos: strPos{"trueish", Pos{1, 1}}}}}},
 	}
 	for _, test := range tests {
-		fmt.Printf("Testing %s\n", test.query)
 		l := newLexer(test.query)
 		for i, tok := range test.tokens {
 			var yys yySymType
@@ -191,7 +189,6 @@ func TestError(t *testing.T) {
 		{`"abc` + "\xff\"", "illegal UTF-8 encoding"},
 	}
 	for _, test := range errors {
-		fmt.Printf("Testing %s\n", test.query)
 		l := newLexer(test.query)
 		var yys yySymType
 		l.Lex(&yys)
