@@ -339,30 +339,6 @@ func TestOneOfTypes(t *testing.T) {
 			t.Errorf(`OneOf ABC / AC hash consing broken: %v, %v, %v`, x, ac, ca)
 		}
 	}
-	// A more complicated scenario for duplicate type errors.  Here Y1 and Y2 are
-	// represented by different builder instances building the same struct, which
-	// are added to Z.  We want Z to detect Y1 and Y2 are dups, even though
-	// they're not pointer equal (since they haven't been hash-consed yet).
-	var builder TypeBuilder
-	pendY1 := builder.Struct("Y").AppendField("A", Int32Type)
-	pendY2 := builder.Struct("Y").AppendField("A", Int32Type)
-	pendZ := builder.OneOf("Z").AppendType(pendY1).AppendType(pendY2)
-	builder.Build()
-	z, zerr := pendZ.Built()
-	if got, want := fmt.Sprint(zerr), "duplicate OneOf type"; !strings.Contains(got, want) {
-		t.Errorf(`build Z got error %q, want substr %q`, got, want)
-	}
-	if z != nil {
-		t.Errorf(`build Z got %v, want nil`, z)
-	}
-	y1, y1err := pendY1.Built()
-	y2, y2err := pendY2.Built()
-	if y1err != nil || y2err != nil {
-		t.Errorf(`build got y1err %q y2err %q, want nil`, y1err, y2err)
-	}
-	if y1 != y2 {
-		t.Errorf(`build got Y1 %s != Y2 %s`, y1, y2)
-	}
 }
 
 func TestNamedTypes(t *testing.T) {
@@ -767,4 +743,68 @@ func TestMutuallyRecursiveType(t *testing.T) {
 			t.Errorf(`build got %q, want %q`, got, want)
 		}
 	}
+}
+
+func TestUniqueTypeNames(t *testing.T) {
+	var builder TypeBuilder
+	var pending [2][]PendingType
+	pending[0] = makeAllPending(&builder)
+	pending[1] = makeAllPending(&builder)
+	builder.Build()
+	// The first pending types have no errors, but have nil types since the other
+	// pending types fail to build.
+	for _, p := range pending[0] {
+		ty, err := p.Built()
+		if ty != nil {
+			t.Errorf(`built[0] got type %q, want nil`, ty)
+		}
+		if err != nil {
+			t.Errorf(`built[0] got error %q, want nil`, err)
+		}
+	}
+	// The second built types have non-unique name errors, and also nil types.
+	for _, p := range pending[1] {
+		ty, err := p.Built()
+		if ty != nil {
+			t.Errorf(`built[0] got type %q, want nil`, ty)
+		}
+		if got, want := fmt.Sprint(err), "duplicate type names"; !strings.Contains(got, want) {
+			t.Errorf(`built[0] got error %s, want %s`, got, want)
+		}
+	}
+}
+
+func makeAllPending(builder *TypeBuilder) []PendingType {
+	var ret []PendingType
+	for _, test := range singletons {
+		switch test.k {
+		case Any, TypeVal:
+			continue // can't name Any or TypeVal
+		}
+		ret = append(ret, builder.Named("Named"+test.s).SetBase(test.t))
+	}
+	for _, test := range enums {
+		if test.errstr == "" {
+			ret = append(ret, builder.Enum("Enum"+test.name).SetLabels([]string(test.labels)))
+		}
+	}
+	for _, test := range structs {
+		if test.errstr == "" {
+			p := builder.Struct("Struct" + test.name)
+			for _, f := range test.fields {
+				p.AppendField(f.Name, f.Type)
+			}
+			ret = append(ret, p)
+		}
+	}
+	for _, test := range oneofs {
+		if test.errstr == "" {
+			p := builder.OneOf("OneOf" + test.name)
+			for _, t := range test.types {
+				p.AppendType(t)
+			}
+			ret = append(ret, p)
+		}
+	}
+	return ret
 }

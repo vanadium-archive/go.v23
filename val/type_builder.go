@@ -56,9 +56,10 @@ type TypeOrPending interface {
 // PendingType represents a type that's being built by the TypeBuilder.
 type PendingType interface {
 	TypeOrPending
-	// Built returns the final built and hash-consed type.  Returns a nil type and
-	// a non-nil error if the type couldn't be built, or if Build hasn't been
-	// called on the TypeBuilder yet.
+	// Built returns the final built and hash-consed type.  Build must be called
+	// on the TypeBuilder before Built is called on any pending type.  If any
+	// pending type has a build error, Built returns a nil type for all pending
+	// types, and returns non-nil errors for at least one pending type.
 	Built() (*Type, error)
 }
 
@@ -170,9 +171,24 @@ func (p pendingNamed) SetBase(base TypeOrPending) PendingNamed {
 
 // TypeBuilder builds Types.  There are two phases: 1) Create Pending* objects
 // and describe each type, and 2) call Build.  When Build is called, all types
-// are created.  This two-phase building enables support for recursive types,
-// and also makes it easy to construct a group of dependent types without
-// determining their dependency ordering.
+// are created and may be retrieved by calling Built on the pending type.  This
+// two-phase building enables support for recursive types, and also makes it
+// easy to construct a group of dependent types without determining their
+// dependency ordering.  The separation between Build and Built allows
+// individual errors to be returned for each pending type, and easily associated
+// with additional information for the pending type, e.g. position information
+// in a compiler.
+//
+// Each TypeBuilder instance enforces the rule that type names are unique; each
+// named type must be represented by exactly one Type or PendingType object.
+// E.g. you can't create an enum "Foo" and a struct "Foo" via the same
+// TypeBuilder, nor can you create two structs named "Foo", even if they have
+// the same fields.  This rule simplifies the hash consing logic.
+//
+// There is no enforcement of unique names across TypeBuilder instances; the val
+// package allows different types with the same names.  This allows support for
+// a single named type with multiple versions, all handled within a single
+// address space.
 //
 // The zero TypeBuilder represents an empty builder.
 type TypeBuilder struct {
@@ -225,6 +241,15 @@ func (b *TypeBuilder) Build() {
 	for _, p := range b.ptypes {
 		p.err = p.finalize()
 	}
+	// Now enforce the rule that type names are unique.  This must occur before we
+	// hash cons anything, to catch tricky cases where hash consing is difficult.
+	// See uniqueType for more info.
+	names := make(map[string]*Type)
+	for _, p := range b.ptypes {
+		if err := enforceUniqueNames(p.Type, names); err != nil && p.err == nil {
+			p.err = err
+		}
+	}
 	// Now hash cons each pending type.
 	for _, p := range b.ptypes {
 		if p.err != nil {
@@ -232,10 +257,13 @@ func (b *TypeBuilder) Build() {
 		}
 		p.Type, p.err = typeCons(p.Type)
 	}
-	// Make sure that any type with an error has a nil type
+	// If any pending type has a build error, make sure all built types are nil.
 	for _, p := range b.ptypes {
 		if p.err != nil {
-			p.Type = nil
+			for _, q := range b.ptypes {
+				q.Type = nil
+			}
+			break
 		}
 	}
 }
@@ -330,6 +358,41 @@ func OneOfType(name string, types []*Type) *Type {
 func NamedType(name string, base *Type) *Type {
 	var b TypeBuilder
 	return checkedBuild(b, b.Named(name).SetBase(base))
+}
+
+// enforceUniqueNames ensures that t and its subtypes contain unique type names;
+// every non-empty type name corresponds to exactly one *Type.
+func enforceUniqueNames(t *Type, names map[string]*Type) error {
+	if t == nil || t.name == "" {
+		return nil
+	}
+	if found := names[t.name]; found != nil {
+		if found != t {
+			one := uniqueType(found, make(map[*Type]bool))
+			two := uniqueType(t, make(map[*Type]bool))
+			return fmt.Errorf("val: duplicate type names %q and %q", one, two)
+		}
+		return nil
+	}
+	// First time seeing this type, put it in names and call recursively.
+	names[t.name] = t
+	if err := enforceUniqueNames(t.elem, names); err != nil {
+		return err
+	}
+	if err := enforceUniqueNames(t.key, names); err != nil {
+		return err
+	}
+	for _, x := range t.fields {
+		if err := enforceUniqueNames(x.Type, names); err != nil {
+			return err
+		}
+	}
+	for _, x := range t.types {
+		if err := enforceUniqueNames(x, names); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // uniqueType returns a unique string representing t, which is also its
