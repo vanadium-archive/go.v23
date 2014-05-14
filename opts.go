@@ -153,3 +153,22 @@ func (ProductOpt) ROpt() {}
 type HTTPDebugOpt string
 
 func (HTTPDebugOpt) ROpt() {}
+
+// ServerPublishOpt tells the ipc server which of the endpoints it listens on
+// should be published by Publish.
+type ServerPublishOpt int
+
+const (
+	PublishAll   ServerPublishOpt = 0
+	PublishFirst ServerPublishOpt = 1
+)
+
+func (ServerPublishOpt) IPCServerOpt() {}
+
+// EndpointRewriteOpt specifies how to rewrite the address of the endpoints
+// being listened on.  The rewrite only applies to tcp endpoints.  The value of
+// the option is the rewritten host/ip portion of the address of the endpoint.
+type EndpointRewriteOpt string
+
+func (EndpointRewriteOpt) IPCServerOpt()         {}
+func (EndpointRewriteOpt) IPCStreamListenerOpt() {}
