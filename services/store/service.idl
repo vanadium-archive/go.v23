@@ -7,6 +7,13 @@ import (
   "veyron2/services/mounttable"
 )
 
+const (
+  // The Store has Veyron name "<mount>/.store", where <mount> is the
+  // Veyron name of the mount point.
+  // An Object with path <path> has Veyron name "<mount>/<path>".
+  StoreSuffix = ".store"
+)
+
 // TransactionID is a transaction identifier.  The identifier is chosen by the
 // client.
 //

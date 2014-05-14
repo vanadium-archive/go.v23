@@ -177,6 +177,13 @@ type QueryResult struct {
 	Value _gen_idl.AnyData
 }
 
+const (
+	// The Store has Veyron name "<mount>/.store", where <mount> is the
+	// Veyron name of the mount point.
+	// An Object with path <path> has Veyron name "<mount>/<path>".
+	StoreSuffix = ".store"
+)
+
 // ObjectService is the interface for a value in the store.
 // Object is the interface the client binds and uses.
 // Object_InternalNoTagGetter is the interface without the TagGetter
