@@ -36,7 +36,7 @@ type MountTable interface {
 	//
 	// TTL is the number of seconds the mount is to last unless refreshed by
 	// another mount of the same server.  A TTL of 0 represents an infinite
-	// duration.  A server with an exipred TTL should never appear in the
+	// duration.  A server with an expired TTL should never appear in the
 	// results nor affect the operation of any MountTable method, and should
 	// act as if it was never present as far as the interface is concerned.
 	Mount(Server string, TTL uint32) error
