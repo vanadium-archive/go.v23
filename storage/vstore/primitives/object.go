@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"veyron2/idl"
+	"veyron2/query"
 	"veyron2/services/store"
 	"veyron2/storage"
 )
@@ -151,6 +152,11 @@ func (o *object) Stat(t storage.Transaction) (storage.Stat, error) {
 	return makeStat(&serviceStat)
 }
 
+// Query performs a query on the store.
+func (o *object) Query(t storage.Transaction, q query.Query) storage.Iterator {
+	panic("not implemented.")
+}
+
 // Glob returns a sequence of names that match the given pattern.
 func (o *object) GlobT(t storage.Transaction, pattern string) (storage.GlobStream, error) {
 	id, err := UpdateTransaction(t, o.sServ)
@@ -187,6 +193,10 @@ func (o *errorObject) Stat(t storage.Transaction) (storage.Stat, error) {
 
 func (o *errorObject) GetAllPaths(t storage.Transaction) ([]string, error) {
 	return nil, o.err
+}
+
+func (o *errorObject) Query(t storage.Transaction, q query.Query) storage.Iterator {
+	return nil
 }
 
 func (o *errorObject) Glob(pattern string) (storage.GlobStream, error) {

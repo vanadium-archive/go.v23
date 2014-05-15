@@ -5,7 +5,6 @@ package vstore
 import (
 	"veyron2"
 	"veyron2/ipc"
-	"veyron2/query"
 	"veyron2/services/store"
 	"veyron2/services/watch"
 	"veyron2/storage"
@@ -45,23 +44,8 @@ func (st *VStore) Bind(name string) storage.Object {
 	return primitives.BindObject(st.serv, st.mount, name)
 }
 
-// Glob returns a sequence of names that match the given pattern.
-func (st *VStore) Glob(t storage.Transaction, pattern string) (storage.GlobStream, error) {
-	id, err := primitives.UpdateTransaction(t, st.serv)
-	if err != nil {
-		return nil, err
-	}
-	return st.serv.Glob(id, pattern)
-}
-
 func (st *VStore) Watch(req watch.Request) (watch.WatcherWatchStream, error) {
 	return st.serv.Watch(req, veyron2.CallTimeout(ipc.NoTimeout))
-}
-
-// Search returns an Iterator to a sequence of elements that satisfy the
-// query.
-func (st *VStore) Search(t storage.Transaction, q query.Query) storage.Iterator {
-	panic("not implemented")
 }
 
 // SetConflictResolver specifies a function to perform conflict resolution.

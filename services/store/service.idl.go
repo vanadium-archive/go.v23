@@ -206,6 +206,10 @@ type Object_InternalNoTagGetter interface {
 	// Stat returns entry info.
 	Stat(TID TransactionID, opts ..._gen_ipc.ClientCallOpt) (reply Stat, err error)
 
+	// Query returns the sequence of elements that satisfy the
+	// query.
+	Query(TID TransactionID, Q query.Query, opts ..._gen_ipc.ClientCallOpt) (reply ObjectQueryStream, err error)
+
 	// GlobT finds objects beneath this value that match the given pattern.
 	// This is the same as Glob, but operates within a transaction.
 	GlobT(TID TransactionID, pattern string, opts ..._gen_ipc.ClientCallOpt) (reply ObjectGlobTStream, err error)
@@ -245,11 +249,69 @@ type ObjectService interface {
 	// Stat returns entry info.
 	Stat(context _gen_ipc.Context, TID TransactionID) (reply Stat, err error)
 
+	// Query returns the sequence of elements that satisfy the
+	// query.
+	Query(context _gen_ipc.Context, TID TransactionID, Q query.Query, stream ObjectServiceQueryStream) (err error)
+
 	// GlobT finds objects beneath this value that match the given pattern.
 	// This is the same as Glob, but operates within a transaction.
 	GlobT(context _gen_ipc.Context, TID TransactionID, pattern string, stream ObjectServiceGlobTStream) (err error)
 
 	mounttable.GlobableService
+}
+
+// ObjectQueryStream is the interface for streaming responses of the method
+// Query in the service interface Object.
+type ObjectQueryStream interface {
+
+	// Recv returns the next item in the input stream, blocking until
+	// an item is available.  Returns io.EOF to indicate graceful end of input.
+	Recv() (item QueryResult, err error)
+
+	// Finish closes the stream and returns the positional return values for
+	// call.
+	Finish() (err error)
+
+	// Cancel cancels the RPC, notifying the server to stop processing.
+	Cancel()
+}
+
+// Implementation of the ObjectQueryStream interface that is not exported.
+type implObjectQueryStream struct {
+	clientCall _gen_ipc.ClientCall
+}
+
+func (c *implObjectQueryStream) Recv() (item QueryResult, err error) {
+	err = c.clientCall.Recv(&item)
+	return
+}
+
+func (c *implObjectQueryStream) Finish() (err error) {
+	if ierr := c.clientCall.Finish(&err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (c *implObjectQueryStream) Cancel() {
+	c.clientCall.Cancel()
+}
+
+// ObjectServiceQueryStream is the interface for streaming responses of the method
+// Query in the service interface Object.
+type ObjectServiceQueryStream interface {
+	// Send places the item onto the output stream, blocking if there is no buffer
+	// space available.
+	Send(item QueryResult) error
+}
+
+// Implementation of the ObjectServiceQueryStream interface that is not exported.
+type implObjectServiceQueryStream struct {
+	serverCall _gen_ipc.ServerCall
+}
+
+func (s *implObjectServiceQueryStream) Send(item QueryResult) error {
+	return s.serverCall.Send(item)
 }
 
 // ObjectGlobTStream is the interface for streaming responses of the method
@@ -423,6 +485,15 @@ func (__gen_c *clientStubObject) Stat(TID TransactionID, opts ..._gen_ipc.Client
 	return
 }
 
+func (__gen_c *clientStubObject) Query(TID TransactionID, Q query.Query, opts ..._gen_ipc.ClientCallOpt) (reply ObjectQueryStream, err error) {
+	var call _gen_ipc.ClientCall
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "Query", []interface{}{TID, Q}, opts...); err != nil {
+		return
+	}
+	reply = &implObjectQueryStream{clientCall: call}
+	return
+}
+
 func (__gen_c *clientStubObject) GlobT(TID TransactionID, pattern string, opts ..._gen_ipc.ClientCallOpt) (reply ObjectGlobTStream, err error) {
 	var call _gen_ipc.ClientCall
 	if call, err = __gen_c.client.StartCall(__gen_c.name, "GlobT", []interface{}{TID, pattern}, opts...); err != nil {
@@ -497,6 +568,17 @@ func (s *ServerStubObject) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Service
 			{Name: "", Type: 66},
 		},
 	}
+	result.Methods["Query"] = _gen_ipc.MethodSignature{
+		InArgs: []_gen_ipc.MethodArgument{
+			{Name: "TID", Type: 65},
+			{Name: "Q", Type: 73},
+		},
+		OutArgs: []_gen_ipc.MethodArgument{
+			{Name: "", Type: 66},
+		},
+
+		OutStream: 76,
+	}
 	result.Methods["Remove"] = _gen_ipc.MethodSignature{
 		InArgs: []_gen_ipc.MethodArgument{
 			{Name: "TID", Type: 65},
@@ -538,6 +620,19 @@ func (s *ServerStubObject) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Service
 				_gen_wiretype.FieldType{Type: 0x45, Name: "Value"},
 			},
 			"Entry", []string(nil)},
+		_gen_wiretype.StructType{
+			[]_gen_wiretype.FieldType{
+				_gen_wiretype.FieldType{Type: 0x3, Name: "Stmt"},
+			},
+			"query.Query", []string(nil)},
+		_gen_wiretype.NamedPrimitiveType{Type: 0x25, Name: "NestedResult", Tags: []string(nil)}, _gen_wiretype.MapType{Key: 0x3, Elem: 0x45, Name: "", Tags: []string(nil)}, _gen_wiretype.StructType{
+			[]_gen_wiretype.FieldType{
+				_gen_wiretype.FieldType{Type: 0x4a, Name: "NestedResult"},
+				_gen_wiretype.FieldType{Type: 0x3, Name: "Name"},
+				_gen_wiretype.FieldType{Type: 0x4b, Name: "Fields"},
+				_gen_wiretype.FieldType{Type: 0x45, Name: "Value"},
+			},
+			"QueryResult", []string(nil)},
 	}
 	var ss _gen_ipc.ServiceSignature
 	var firstAdded int
@@ -645,6 +740,12 @@ func (__gen_s *ServerStubObject) Stat(call _gen_ipc.ServerCall, TID TransactionI
 	return
 }
 
+func (__gen_s *ServerStubObject) Query(call _gen_ipc.ServerCall, TID TransactionID, Q query.Query) (err error) {
+	stream := &implObjectServiceQueryStream{serverCall: call}
+	err = __gen_s.service.Query(call, TID, Q, stream)
+	return
+}
+
 func (__gen_s *ServerStubObject) GlobT(call _gen_ipc.ServerCall, TID TransactionID, pattern string) (err error) {
 	stream := &implObjectServiceGlobTStream{serverCall: call}
 	err = __gen_s.service.GlobT(call, TID, pattern, stream)
@@ -668,6 +769,8 @@ func GetObjectMethodTags(method string) []interface{} {
 		return []interface{}{}
 	case "Stat":
 		return []interface{}{}
+	case "Query":
+		return []interface{}{}
 	case "GlobT":
 		return []interface{}{}
 	default:
@@ -682,13 +785,6 @@ func GetObjectMethodTags(method string) []interface{} {
 // to enable embedding without method collisions.  Not to be used directly by
 // clients.
 type Store_InternalNoTagGetter interface {
-
-	// Search returns the sequence of elements that satisfy the
-	// query.
-	Search(TID TransactionID, Q query.Query, opts ..._gen_ipc.ClientCallOpt) (reply StoreSearchStream, err error)
-
-	// Glob returns a stream of pathnames that match the provided pattern.
-	Glob(TID TransactionID, pattern string, opts ..._gen_ipc.ClientCallOpt) (reply StoreGlobStream, err error)
 
 	// CreateTransaction creates the transaction and sets the options for it.
 	CreateTransaction(TID TransactionID, Options []_gen_idl.AnyData, opts ..._gen_ipc.ClientCallOpt) (err error)
@@ -721,13 +817,6 @@ type Store interface {
 // StoreService is the interface the server implements.
 type StoreService interface {
 
-	// Search returns the sequence of elements that satisfy the
-	// query.
-	Search(context _gen_ipc.Context, TID TransactionID, Q query.Query, stream StoreServiceSearchStream) (err error)
-
-	// Glob returns a stream of pathnames that match the provided pattern.
-	Glob(context _gen_ipc.Context, TID TransactionID, pattern string, stream StoreServiceGlobStream) (err error)
-
 	// CreateTransaction creates the transaction and sets the options for it.
 	CreateTransaction(context _gen_ipc.Context, TID TransactionID, Options []_gen_idl.AnyData) (err error)
 
@@ -747,114 +836,6 @@ type StoreService interface {
 	ReadConflicts(context _gen_ipc.Context, stream StoreServiceReadConflictsStream) (err error)
 
 	watch.WatcherService
-}
-
-// StoreSearchStream is the interface for streaming responses of the method
-// Search in the service interface Store.
-type StoreSearchStream interface {
-
-	// Recv returns the next item in the input stream, blocking until
-	// an item is available.  Returns io.EOF to indicate graceful end of input.
-	Recv() (item QueryResult, err error)
-
-	// Finish closes the stream and returns the positional return values for
-	// call.
-	Finish() (err error)
-
-	// Cancel cancels the RPC, notifying the server to stop processing.
-	Cancel()
-}
-
-// Implementation of the StoreSearchStream interface that is not exported.
-type implStoreSearchStream struct {
-	clientCall _gen_ipc.ClientCall
-}
-
-func (c *implStoreSearchStream) Recv() (item QueryResult, err error) {
-	err = c.clientCall.Recv(&item)
-	return
-}
-
-func (c *implStoreSearchStream) Finish() (err error) {
-	if ierr := c.clientCall.Finish(&err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
-func (c *implStoreSearchStream) Cancel() {
-	c.clientCall.Cancel()
-}
-
-// StoreServiceSearchStream is the interface for streaming responses of the method
-// Search in the service interface Store.
-type StoreServiceSearchStream interface {
-	// Send places the item onto the output stream, blocking if there is no buffer
-	// space available.
-	Send(item QueryResult) error
-}
-
-// Implementation of the StoreServiceSearchStream interface that is not exported.
-type implStoreServiceSearchStream struct {
-	serverCall _gen_ipc.ServerCall
-}
-
-func (s *implStoreServiceSearchStream) Send(item QueryResult) error {
-	return s.serverCall.Send(item)
-}
-
-// StoreGlobStream is the interface for streaming responses of the method
-// Glob in the service interface Store.
-type StoreGlobStream interface {
-
-	// Recv returns the next item in the input stream, blocking until
-	// an item is available.  Returns io.EOF to indicate graceful end of input.
-	Recv() (item string, err error)
-
-	// Finish closes the stream and returns the positional return values for
-	// call.
-	Finish() (err error)
-
-	// Cancel cancels the RPC, notifying the server to stop processing.
-	Cancel()
-}
-
-// Implementation of the StoreGlobStream interface that is not exported.
-type implStoreGlobStream struct {
-	clientCall _gen_ipc.ClientCall
-}
-
-func (c *implStoreGlobStream) Recv() (item string, err error) {
-	err = c.clientCall.Recv(&item)
-	return
-}
-
-func (c *implStoreGlobStream) Finish() (err error) {
-	if ierr := c.clientCall.Finish(&err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
-func (c *implStoreGlobStream) Cancel() {
-	c.clientCall.Cancel()
-}
-
-// StoreServiceGlobStream is the interface for streaming responses of the method
-// Glob in the service interface Store.
-type StoreServiceGlobStream interface {
-	// Send places the item onto the output stream, blocking if there is no buffer
-	// space available.
-	Send(item string) error
-}
-
-// Implementation of the StoreServiceGlobStream interface that is not exported.
-type implStoreServiceGlobStream struct {
-	serverCall _gen_ipc.ServerCall
-}
-
-func (s *implStoreServiceGlobStream) Send(item string) error {
-	return s.serverCall.Send(item)
 }
 
 // StoreReadConflictsStream is the interface for streaming responses of the method
@@ -962,24 +943,6 @@ func (c *clientStubStore) GetMethodTags(method string) []interface{} {
 	return GetStoreMethodTags(method)
 }
 
-func (__gen_c *clientStubStore) Search(TID TransactionID, Q query.Query, opts ..._gen_ipc.ClientCallOpt) (reply StoreSearchStream, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Search", []interface{}{TID, Q}, opts...); err != nil {
-		return
-	}
-	reply = &implStoreSearchStream{clientCall: call}
-	return
-}
-
-func (__gen_c *clientStubStore) Glob(TID TransactionID, pattern string, opts ..._gen_ipc.ClientCallOpt) (reply StoreGlobStream, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Glob", []interface{}{TID, pattern}, opts...); err != nil {
-		return
-	}
-	reply = &implStoreGlobStream{clientCall: call}
-	return
-}
-
 func (__gen_c *clientStubStore) CreateTransaction(TID TransactionID, Options []_gen_idl.AnyData, opts ..._gen_ipc.ClientCallOpt) (err error) {
 	var call _gen_ipc.ClientCall
 	if call, err = __gen_c.client.StartCall(__gen_c.name, "CreateTransaction", []interface{}{TID, Options}, opts...); err != nil {
@@ -1053,7 +1016,7 @@ func (s *ServerStubStore) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceS
 			{Name: "TID", Type: 65},
 		},
 		OutArgs: []_gen_ipc.MethodArgument{
-			{Name: "", Type: 67},
+			{Name: "", Type: 68},
 		},
 	}
 	result.Methods["Commit"] = _gen_ipc.MethodSignature{
@@ -1061,83 +1024,48 @@ func (s *ServerStubStore) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceS
 			{Name: "TID", Type: 65},
 		},
 		OutArgs: []_gen_ipc.MethodArgument{
-			{Name: "", Type: 67},
+			{Name: "", Type: 68},
 		},
 	}
 	result.Methods["CreateTransaction"] = _gen_ipc.MethodSignature{
 		InArgs: []_gen_ipc.MethodArgument{
 			{Name: "TID", Type: 65},
-			{Name: "Options", Type: 72},
+			{Name: "Options", Type: 67},
 		},
 		OutArgs: []_gen_ipc.MethodArgument{
-			{Name: "", Type: 67},
+			{Name: "", Type: 68},
 		},
-	}
-	result.Methods["Glob"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{
-			{Name: "TID", Type: 65},
-			{Name: "pattern", Type: 3},
-		},
-		OutArgs: []_gen_ipc.MethodArgument{
-			{Name: "", Type: 67},
-		},
-
-		OutStream: 3,
 	}
 	result.Methods["ReadConflicts"] = _gen_ipc.MethodSignature{
 		InArgs: []_gen_ipc.MethodArgument{},
 		OutArgs: []_gen_ipc.MethodArgument{
-			{Name: "", Type: 67},
+			{Name: "", Type: 68},
 		},
 
-		OutStream: 77,
-	}
-	result.Methods["Search"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{
-			{Name: "TID", Type: 65},
-			{Name: "Q", Type: 66},
-		},
-		OutArgs: []_gen_ipc.MethodArgument{
-			{Name: "", Type: 67},
-		},
-
-		OutStream: 71,
+		OutStream: 73,
 	}
 
 	result.TypeDefs = []_gen_idl.AnyData{
-		_gen_wiretype.NamedPrimitiveType{Type: 0x35, Name: "TransactionID", Tags: []string(nil)}, _gen_wiretype.StructType{
+		_gen_wiretype.NamedPrimitiveType{Type: 0x35, Name: "TransactionID", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "anydata", Tags: []string(nil)}, _gen_wiretype.SliceType{Elem: 0x42, Name: "", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, _gen_wiretype.ArrayType{Elem: 0x45, Len: 0x10, Name: "storage.ID", Tags: []string(nil)}, _gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
-				_gen_wiretype.FieldType{Type: 0x3, Name: "Stmt"},
-			},
-			"query.Query", []string(nil)},
-		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x25, Name: "NestedResult", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "anydata", Tags: []string(nil)}, _gen_wiretype.MapType{Key: 0x3, Elem: 0x45, Name: "", Tags: []string(nil)}, _gen_wiretype.StructType{
-			[]_gen_wiretype.FieldType{
-				_gen_wiretype.FieldType{Type: 0x44, Name: "NestedResult"},
-				_gen_wiretype.FieldType{Type: 0x3, Name: "Name"},
-				_gen_wiretype.FieldType{Type: 0x46, Name: "Fields"},
-				_gen_wiretype.FieldType{Type: 0x45, Name: "Value"},
-			},
-			"QueryResult", []string(nil)},
-		_gen_wiretype.SliceType{Elem: 0x45, Name: "", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, _gen_wiretype.ArrayType{Elem: 0x49, Len: 0x10, Name: "storage.ID", Tags: []string(nil)}, _gen_wiretype.StructType{
-			[]_gen_wiretype.FieldType{
-				_gen_wiretype.FieldType{Type: 0x4a, Name: "ID"},
+				_gen_wiretype.FieldType{Type: 0x46, Name: "ID"},
 				_gen_wiretype.FieldType{Type: 0x25, Name: "MTimeNS"},
-				_gen_wiretype.FieldType{Type: 0x48, Name: "Attrs"},
+				_gen_wiretype.FieldType{Type: 0x43, Name: "Attrs"},
 			},
 			"Stat", []string(nil)},
 		_gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
-				_gen_wiretype.FieldType{Type: 0x4b, Name: "Stat"},
-				_gen_wiretype.FieldType{Type: 0x45, Name: "Value"},
+				_gen_wiretype.FieldType{Type: 0x47, Name: "Stat"},
+				_gen_wiretype.FieldType{Type: 0x42, Name: "Value"},
 			},
 			"Entry", []string(nil)},
 		_gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
 				_gen_wiretype.FieldType{Type: 0x3, Name: "Ty"},
-				_gen_wiretype.FieldType{Type: 0x4a, Name: "ID"},
-				_gen_wiretype.FieldType{Type: 0x4c, Name: "Local"},
-				_gen_wiretype.FieldType{Type: 0x4c, Name: "Remote"},
-				_gen_wiretype.FieldType{Type: 0x4c, Name: "Root"},
+				_gen_wiretype.FieldType{Type: 0x46, Name: "ID"},
+				_gen_wiretype.FieldType{Type: 0x48, Name: "Local"},
+				_gen_wiretype.FieldType{Type: 0x48, Name: "Remote"},
+				_gen_wiretype.FieldType{Type: 0x48, Name: "Root"},
 			},
 			"Conflict", []string(nil)},
 	}
@@ -1217,18 +1145,6 @@ func (s *ServerStubStore) UnresolveStep(call _gen_ipc.ServerCall) (reply []strin
 	return
 }
 
-func (__gen_s *ServerStubStore) Search(call _gen_ipc.ServerCall, TID TransactionID, Q query.Query) (err error) {
-	stream := &implStoreServiceSearchStream{serverCall: call}
-	err = __gen_s.service.Search(call, TID, Q, stream)
-	return
-}
-
-func (__gen_s *ServerStubStore) Glob(call _gen_ipc.ServerCall, TID TransactionID, pattern string) (err error) {
-	stream := &implStoreServiceGlobStream{serverCall: call}
-	err = __gen_s.service.Glob(call, TID, pattern, stream)
-	return
-}
-
 func (__gen_s *ServerStubStore) CreateTransaction(call _gen_ipc.ServerCall, TID TransactionID, Options []_gen_idl.AnyData) (err error) {
 	err = __gen_s.service.CreateTransaction(call, TID, Options)
 	return
@@ -1255,10 +1171,6 @@ func GetStoreMethodTags(method string) []interface{} {
 		return resp
 	}
 	switch method {
-	case "Search":
-		return []interface{}{}
-	case "Glob":
-		return []interface{}{}
 	case "CreateTransaction":
 		return []interface{}{}
 	case "Commit":

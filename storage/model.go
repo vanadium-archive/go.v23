@@ -184,6 +184,10 @@ type Object interface {
 	// Stat returns entry info.
 	Stat(t Transaction) (Stat, error)
 
+	// Query returns an Iterator to a sequence of elements that satisfy the
+	// query.
+	Query(t Transaction, q query.Query) Iterator
+
 	// GlobT returns a set of names that match the glob pattern.
 	// This is the same as Glob, but takes a transaction.
 	GlobT(t Transaction, pattern string) (GlobStream, error)
@@ -224,13 +228,6 @@ type Store interface {
 
 	// Bind returns the Object associated with a path.
 	Bind(path string) Object
-
-	// Glob returns a set of names that match the glob pattern.
-	Glob(t Transaction, pattern string) (GlobStream, error)
-
-	// Search returns an Iterator to a sequence of elements that satisfy the
-	// query.
-	Search(t Transaction, q query.Query) Iterator
 
 	// SetConflictResolver specifies a function to perform conflict resolution.
 	// The <ty> represents the IDL name for the type.

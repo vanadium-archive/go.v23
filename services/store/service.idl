@@ -46,6 +46,10 @@ type Object interface {
 	// Stat returns entry info.
 	Stat(TID TransactionID) (Stat, error)
 
+	// Query returns the sequence of elements that satisfy the
+	// query.
+	Query(TID TransactionID, Q query.Query) stream<_, QueryResult> error
+
 	// GlobT finds objects beneath this value that match the given pattern.
 	// This is the same as Glob, but operates within a transaction.
 	GlobT(TID TransactionID, pattern string) stream<_, string> error
@@ -55,13 +59,6 @@ type Object interface {
 
 // Store is the client interface to the storage system.
 type Store interface {
-	// Search returns the sequence of elements that satisfy the
-	// query.
-	Search(TID TransactionID, Q query.Query) stream<_, QueryResult> error
-
-	// Glob returns a stream of pathnames that match the provided pattern.
-	Glob(TID TransactionID, pattern string) stream<_, string> error
-
 	// CreateTransaction creates the transaction and sets the options for it.
 	CreateTransaction(TID TransactionID, Options []anydata) error
 
