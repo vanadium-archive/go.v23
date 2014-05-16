@@ -1,13 +1,17 @@
 package ipc_test
 
 import (
+	"veyron2"
 	"veyron2/ipc"
+	"veyron2/ipc/stream"
 	"veyron2/naming"
+	"veyron2/product"
 	"veyron2/security"
+	"veyron2/vlog"
 )
 
 type TestRuntime interface {
-	ipc.Runtime
+	veyron2.Runtime
 }
 
 var (
@@ -24,29 +28,60 @@ func (*rtImpl) NewClient(opts ...ipc.ClientOpt) (ipc.Client, error) {
 	return &client{}, nil
 }
 
-func (*rtImpl) Client() ipc.Client {
-	return nil
+func (*rtImpl) Client() ipc.Client { return nil }
+
+func (*rtImpl) Product() product.T { return nil }
+func (*rtImpl) NewIdentity(name string) (security.PrivateID, error) {
+	return nil, nil
 }
+
+func (*rtImpl) Identity() security.PrivateID { return nil }
 
 func (*rtImpl) NewServer(opts ...ipc.ServerOpt) (ipc.Server, error) {
 	return &server{}, nil
 }
 
+func (*rtImpl) NewStreamManager(opts ...stream.ManagerOpt) (stream.Manager, error) {
+	return nil, nil
+}
+
+func (*rtImpl) StreamManager() stream.Manager { return nil }
+
+func (*rtImpl) NewEndpoint(ep string) (naming.Endpoint, error) {
+	return nil, nil
+}
+
+func (*rtImpl) MountTable() naming.MountTable { return nil }
+
+func (*rtImpl) Logger() vlog.Logger { return nil }
+
+func (*rtImpl) NewLogger(name string, opts ...vlog.LoggingOpts) (vlog.Logger, error) {
+	return nil, nil
+}
+
+func (*rtImpl) Stop() {}
+
+func (*rtImpl) ForceStop() {}
+
+func (*rtImpl) WaitForStop(chan<- string) {}
+
+func (*rtImpl) Shutdown() {}
+
 func (*rtImpl) RegisterType(interface{}) {
 }
 
-type stream struct{}
+type istream struct{}
 
-func (*stream) Send(item interface{}) error {
+func (*istream) Send(item interface{}) error {
 	return nil
 }
 
-func (*stream) Recv(itemptr interface{}) error {
+func (*istream) Recv(itemptr interface{}) error {
 	return nil
 }
 
 type call struct {
-	stream
+	istream
 }
 
 func (*call) Cancel() {
