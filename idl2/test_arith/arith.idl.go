@@ -30,6 +30,7 @@ import (
 	"veyron2/idl2/test_base"
 
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
+	_gen_veyron2 "veyron2"
 	_gen_idl2 "veyron2/idl2"
 	_gen_ipc "veyron2/ipc"
 	_gen_naming "veyron2/naming"
@@ -270,7 +271,7 @@ func BindArith(name string, opts ..._gen_ipc.BindOpt) (Arith, error) {
 		client = _gen_rt.R().Client()
 	case 1:
 		switch o := opts[0].(type) {
-		case _gen_ipc.Runtime:
+		case _gen_veyron2.Runtime:
 			client = o.Client()
 		case _gen_ipc.Client:
 			client = o
@@ -549,7 +550,7 @@ func BindCalculator(name string, opts ..._gen_ipc.BindOpt) (Calculator, error) {
 		client = _gen_rt.R().Client()
 	case 1:
 		switch o := opts[0].(type) {
-		case _gen_ipc.Runtime:
+		case _gen_veyron2.Runtime:
 			client = o.Client()
 		case _gen_ipc.Client:
 			client = o

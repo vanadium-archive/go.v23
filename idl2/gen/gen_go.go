@@ -129,6 +129,7 @@ func systemImportsGo(f *compile.File) []string {
 		set[`_gen_rt "veyron2/rt/r"`] = true
 		//set[`_gen_wiretype "veyron2/wiretype"`] = true
 		set[`_gen_ipc "veyron2/ipc"`] = true
+		set[`_gen_veyron2 "veyron2"`] = true
 		set[`_gen_idl2 "veyron2/idl2"`] = true
 		set[`_gen_naming "veyron2/naming"`] = true
 	}
@@ -731,7 +732,7 @@ func Bind{{$iface.Name}}(name string, opts ..._gen_ipc.BindOpt) ({{$iface.Name}}
 		client = _gen_rt.R().Client()
 	case 1:
 		switch o := opts[0].(type) {
-		case _gen_ipc.Runtime:
+		case _gen_veyron2.Runtime:
 			client = o.Client()
 		case _gen_ipc.Client:
 			client = o

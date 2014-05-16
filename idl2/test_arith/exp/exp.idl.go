@@ -8,11 +8,10 @@ package exp
 import (
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
 	_gen_veyron2 "veyron2"
-	_gen_idl "veyron2/idl"
+	_gen_idl2 "veyron2/idl2"
 	_gen_ipc "veyron2/ipc"
 	_gen_naming "veyron2/naming"
 	_gen_rt "veyron2/rt/r"
-	_gen_wiretype "veyron2/wiretype"
 )
 
 // Exp is the interface the client binds and uses.
@@ -24,7 +23,7 @@ type Exp_InternalNoTagGetter interface {
 	Exp(x float64, opts ..._gen_ipc.ClientCallOpt) (reply float64, err error)
 }
 type Exp interface {
-	_gen_idl.TagGetter
+	_gen_idl2.TagGetter
 	// UnresolveStep returns the names for the remote service, rooted at the
 	// service's immediate namespace ancestor.
 	UnresolveStep(opts ..._gen_ipc.ClientCallOpt) ([]string, error)
@@ -53,10 +52,10 @@ func BindExp(name string, opts ..._gen_ipc.BindOpt) (Exp, error) {
 		case _gen_ipc.Client:
 			client = o
 		default:
-			return nil, _gen_idl.ErrUnrecognizedOption
+			return nil, _gen_idl2.ErrUnrecognizedOption
 		}
 	default:
-		return nil, _gen_idl.ErrTooManyOptionsToBind
+		return nil, _gen_idl2.ErrTooManyOptionsToBind
 	}
 	stub := &clientStubExp{client: client, name: name}
 
@@ -114,24 +113,6 @@ type ServerStubExp struct {
 
 func (s *ServerStubExp) GetMethodTags(method string) []interface{} {
 	return GetExpMethodTags(method)
-}
-
-func (s *ServerStubExp) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
-	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
-	result.Methods["Exp"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{
-			{Name: "x", Type: 26},
-		},
-		OutArgs: []_gen_ipc.MethodArgument{
-			{Name: "", Type: 26},
-			{Name: "", Type: 65},
-		},
-	}
-
-	result.TypeDefs = []_gen_idl.AnyData{
-		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}}
-
-	return result, nil
 }
 
 func (s *ServerStubExp) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
