@@ -147,6 +147,7 @@ type nextRune struct {
 // without a special token id; the ascii value represents itself.
 var knownPunct = map[rune][]nextRune{
 	';': nil,
+	':': nil,
 	',': nil,
 	'.': nil,
 	'*': nil,
@@ -439,7 +440,7 @@ func (l *lexer) handleImag(tok token, lval *yySymType) bool {
 
 	rat := new(big.Rat)
 	if _, ok := rat.SetString(tok.text); !ok {
-		l.posErrorf(tok.pos, "Couldn't convert token [%v] to imaginary literal", tok)
+		l.posErrorf(tok.pos, "can't convert token [%v] to imaginary literal", tok)
 	}
 	lval.imagpos.pos = tok.pos
 	lval.imagpos.imag = (*BigImag)(rat)
@@ -471,7 +472,7 @@ func (l *lexer) translateToken(tok token, lval *yySymType) (id int, done bool) {
 		lval.strpos.pos = tok.pos
 		lval.strpos.str, err = strconv.Unquote(tok.text)
 		if err != nil {
-			l.posErrorf(tok.pos, "Couldn't convert token [%v] to string literal", tok)
+			l.posErrorf(tok.pos, "can't convert token [%v] to string literal", tok)
 		}
 		return tSTRLIT, true
 
@@ -482,7 +483,7 @@ func (l *lexer) translateToken(tok token, lval *yySymType) (id int, done bool) {
 		lval.intpos.pos = tok.pos
 		lval.intpos.int = new(big.Int)
 		if _, ok := lval.intpos.int.SetString(tok.text, 0); !ok {
-			l.posErrorf(tok.pos, "Couldn't convert token [%v] to integer literal", tok)
+			l.posErrorf(tok.pos, "can't convert token [%v] to integer literal", tok)
 		}
 		return tINTLIT, true
 
@@ -493,7 +494,7 @@ func (l *lexer) translateToken(tok token, lval *yySymType) (id int, done bool) {
 		lval.ratpos.pos = tok.pos
 		lval.ratpos.rat = new(big.Rat)
 		if _, ok := lval.ratpos.rat.SetString(tok.text); !ok {
-			l.posErrorf(tok.pos, "Couldn't convert token [%v] to float literal", tok)
+			l.posErrorf(tok.pos, "can't convert token [%v] to float literal", tok)
 		}
 		return tRATLIT, true
 
@@ -530,7 +531,7 @@ func (l *lexer) translateToken(tok token, lval *yySymType) (id int, done bool) {
 			}
 			return int(tok.t), true
 		}
-		l.posErrorf(tok.pos, "Unexpected token [%v]", tok)
+		l.posErrorf(tok.pos, "unexpected token [%v]", tok)
 		l.sawEOF = true
 		return yaccEOF, true
 	}

@@ -41,7 +41,7 @@ func TestValue(t *testing.T) {
 		{Bytes, BytesType, ""},
 		{TypeVal, TypeValType, "any"},
 		{Enum, EnumType("Enum", []string{"A", "B", "C"}), "A"},
-		{List, ListType(StringType), "[]"},
+		{List, ListType(StringType), "{}"},
 		{Map, MapType(StringType, Int64Type), "{}"},
 		{Map, MapType(keyType, Int64Type), "{}"},
 		{Struct, StructType("Struct", []StructField{{"A", Int64Type}, {"B", StringType}, {"C", BoolType}}), `{A: 0, B: "", C: false}`},
@@ -343,7 +343,7 @@ func assignList(t *testing.T, x *Value) {
 		if g0, g1, w0, w1 := x.Index(0).String(), x.Index(1).String(), "", ""; g0 != w0 || g1 != w1 {
 			t.Errorf(`List assign values got %v %v, want %v %v`, g0, g1, w0, w1)
 		}
-		if got, want := x.String(), `["", ""]`; got != want {
+		if got, want := x.String(), `{"", ""}`; got != want {
 			t.Errorf(`Bytes string got %v, want %v`, got, want)
 		}
 		x.Index(0).AssignString("A")
@@ -351,7 +351,7 @@ func assignList(t *testing.T, x *Value) {
 		if g0, g1, w0, w1 := x.Index(0).String(), x.Index(1).String(), "A", "B"; g0 != w0 || g1 != w1 {
 			t.Errorf(`List assign values got %v %v, want %v %v`, g0, g1, w0, w1)
 		}
-		if got, want := x.String(), `["A", "B"]`; got != want {
+		if got, want := x.String(), `{"A", "B"}`; got != want {
 			t.Errorf(`Bytes string got %v, want %v`, got, want)
 		}
 		x.AssignLen(1)
@@ -361,7 +361,7 @@ func assignList(t *testing.T, x *Value) {
 		if g0, w0 := x.Index(0).String(), "A"; g0 != w0 {
 			t.Errorf(`List assign values got %v, want %v`, g0, w0)
 		}
-		if got, want := x.String(), `["A"]`; got != want {
+		if got, want := x.String(), `{"A"}`; got != want {
 			t.Errorf(`Bytes string got %v, want %v`, got, want)
 		}
 		x.AssignLen(3)
@@ -371,7 +371,7 @@ func assignList(t *testing.T, x *Value) {
 		if g0, g1, g2, w0, w1, w2 := x.Index(0).String(), x.Index(1).String(), x.Index(2).String(), "A", "", ""; g0 != w0 || g1 != w1 || g2 != w2 {
 			t.Errorf(`List assign values got %v %v %v, want %v %v %v`, g0, g1, g2, w0, w1, w2)
 		}
-		if got, want := x.String(), `["A", "", ""]`; got != want {
+		if got, want := x.String(), `{"A", "", ""}`; got != want {
 			t.Errorf(`Bytes string got %v, want %v`, got, want)
 		}
 	} else {
@@ -491,6 +491,11 @@ func assignStruct(t *testing.T, x *Value) {
 		}
 		if got, want := x.String(), `{A: 1, B: "a", C: false}`; got != want {
 			t.Errorf(`Struct assign index 1 got %v, want %v`, got, want)
+		}
+		y := Copy(x)
+		y.Field(2).AssignBool(false)
+		if !Equal(x, y) {
+			t.Errorf(`Struct !equal %v and %v`, x, y)
 		}
 	} else {
 		expectMismatchedKind(t, func() { x.Field(0) })

@@ -79,7 +79,7 @@ func TestConstInvalid(t *testing.T) {
 	if x.IsValid() {
 		t.Errorf("zero Const IsValid")
 	}
-	if got, want := x.String(), "invalid()"; got != want {
+	if got, want := x.String(), "invalid"; got != want {
 		t.Errorf("ToValue got string %v, want %v", got, want)
 	}
 	{

@@ -12,13 +12,13 @@ type ConstExpr interface {
 	Pos() Pos
 }
 
-// ConstLit represents literals in const expressions.  The supported types for
-// Lit are:
-//   bool     - Represents all boolean constants.
-//   string   - Represents all string constants.
-//   *big.Int - Represents all integer constants.
-//   *big.Rat - Represents all rational constants.
-//   *BigImag - Represents all imaginary constants.
+// ConstLit represents scalar literals in const expressions.  The supported
+// types for Lit are:
+//   bool       - Represents all boolean constants.
+//   string     - Represents all string constants.
+//   *big.Int   - Represents all integer constants.
+//   *big.Rat   - Represents all rational constants.
+//   *BigImag   - Represents all imaginary constants.
 type ConstLit struct {
 	Lit interface{}
 	P   Pos
@@ -26,6 +26,19 @@ type ConstLit struct {
 
 // BigImag represents a literal imaginary number.
 type BigImag big.Rat
+
+// ConstCompositeLit represents composite literals in const expressions.
+type ConstCompositeLit struct {
+	Type   Type
+	KVList []KVLit
+	P      Pos
+}
+
+// KVLit represents a key/value literal in composite literals.
+type KVLit struct {
+	Key   ConstExpr
+	Value ConstExpr
+}
 
 // ConstNamed represents named references to other consts.
 type ConstNamed struct {
@@ -35,7 +48,7 @@ type ConstNamed struct {
 
 // ConstTypeConv represents explicit type conversions.
 type ConstTypeConv struct {
-	Type *TypeNamed
+	Type Type
 	Expr ConstExpr
 	P    Pos
 }
@@ -70,7 +83,7 @@ func cvString(val interface{}) string {
 		}
 		return "false"
 	case string:
-		return `"` + tv + `"`
+		return strconv.Quote(tv)
 	case *big.Int:
 		return tv.String()
 	case *big.Rat:
@@ -89,6 +102,23 @@ func cvString(val interface{}) string {
 func (c *ConstLit) String() string {
 	return cvString(c.Lit)
 }
+func (c *ConstCompositeLit) String() string {
+	var s string
+	if c.Type != nil {
+		s += c.Type.String()
+	}
+	s += "{"
+	for index, kv := range c.KVList {
+		if index > 0 {
+			s += ", "
+		}
+		if kv.Key != nil {
+			s += kv.Key.String() + ": "
+		}
+		s += kv.Value.String()
+	}
+	return s + "}"
+}
 func (c *ConstNamed) String() string {
 	return c.Name
 }
@@ -102,8 +132,9 @@ func (c *ConstBinaryOp) String() string {
 	return "(" + c.Lexpr.String() + c.Op + c.Rexpr.String() + ")"
 }
 
-func (c *ConstLit) Pos() Pos      { return c.P }
-func (c *ConstNamed) Pos() Pos    { return c.P }
-func (c *ConstTypeConv) Pos() Pos { return c.P }
-func (c *ConstUnaryOp) Pos() Pos  { return c.P }
-func (c *ConstBinaryOp) Pos() Pos { return c.P }
+func (c *ConstLit) Pos() Pos          { return c.P }
+func (c *ConstCompositeLit) Pos() Pos { return c.P }
+func (c *ConstNamed) Pos() Pos        { return c.P }
+func (c *ConstTypeConv) Pos() Pos     { return c.P }
+func (c *ConstUnaryOp) Pos() Pos      { return c.P }
+func (c *ConstBinaryOp) Pos() Pos     { return c.P }
