@@ -177,3 +177,23 @@ func TestLoadSaveIdentity(t *testing.T) {
 		t.Fatalf("Got Identity %v, but want %v", loadedID, id)
 	}
 }
+
+func TestLoadSaveACL(t *testing.T) {
+	acl := ACL{
+		"veyron/alice": LabelSet(ReadLabel | WriteLabel),
+		"veyron/bob":   LabelSet(ReadLabel),
+	}
+
+	var buf bytes.Buffer
+	if err := SaveACL(&buf, acl); err != nil {
+		t.Fatalf("Failed to save ACL %q: %v", acl, err)
+	}
+
+	loadedACL, err := LoadACL(&buf)
+	if err != nil {
+		t.Fatalf("Failed to load ACL: %v", err)
+	}
+	if !reflect.DeepEqual(loadedACL, acl) {
+		t.Fatalf("Got ACL %v, but want %v", loadedACL, acl)
+	}
+}

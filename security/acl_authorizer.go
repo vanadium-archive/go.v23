@@ -7,9 +7,7 @@ package security
 // at the local and remote ends are identical.
 
 import (
-	"encoding/json"
 	"errors"
-	"io"
 	"os"
 	"reflect"
 )
@@ -98,17 +96,5 @@ func loadACLFromFile(filePath string) (ACL, error) {
 		return nil, err
 	}
 	defer f.Close()
-	return loadACL(f)
-}
-
-func loadACL(r io.Reader) (ACL, error) {
-	var acl ACL
-	if err := json.NewDecoder(r).Decode(&acl); err != nil {
-		return nil, err
-	}
-	return acl, nil
-}
-
-func saveACL(w io.Writer, acl ACL) error {
-	return json.NewEncoder(w).Encode(acl)
+	return LoadACL(f)
 }

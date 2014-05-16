@@ -32,7 +32,7 @@ func saveACLToTempFile(acl ACL) string {
 		panic(err)
 	}
 	defer f.Close()
-	if err := saveACL(f, acl); err != nil {
+	if err := SaveACL(f, acl); err != nil {
 		defer os.Remove(f.Name())
 		panic(err)
 	}
@@ -45,7 +45,7 @@ func updateACLInFile(fileName string, acl ACL) {
 		panic(err)
 	}
 	defer f.Close()
-	if err := saveACL(f, acl); err != nil {
+	if err := SaveACL(f, acl); err != nil {
 		panic(err)
 	}
 }

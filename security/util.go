@@ -126,3 +126,17 @@ func SaveIdentity(w io.Writer, id PrivateID) error {
 	}
 	return nil
 }
+
+// LoadACL reads an ACL from the provided Reader containing a JSON encoded ACL.
+func LoadACL(r io.Reader) (ACL, error) {
+	var acl ACL
+	if err := json.NewDecoder(r).Decode(&acl); err != nil {
+		return nil, err
+	}
+	return acl, nil
+}
+
+// SaveACL encodes an ACL in JSON format and writes it to the provided Writer.
+func SaveACL(w io.Writer, acl ACL) error {
+	return json.NewEncoder(w).Encode(acl)
+}
