@@ -55,8 +55,8 @@ func startServer(t *testing.T) (storage.Store, func()) {
 	}
 
 	// Register the services.
-	storeDisp := server.NewStoreDispatcher(storeService)
-	objectDisp := server.NewObjectDispatcher(storeService)
+	storeDisp := server.NewStoreDispatcher(storeService, nil)
+	objectDisp := server.NewObjectDispatcher(storeService, nil)
 	// TODO(sadovsky): If we write "[.]storage. instead of ".store" and omit the
 	// Register(objectDisp), we get some crazy error like "vom: type mismatch".
 	// Similarly, originally I did not include the ".*" (objectDisp) dispatcher
