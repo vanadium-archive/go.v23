@@ -25,11 +25,6 @@ type T interface {
 	Addresses() []net.Addr
 }
 
-type Runtime interface {
-	// Product returns the Product that the current process is running on.
-	Product() T
-}
-
 // DetermineProduct will be called by the runtime Init routine to determine
 // the product that this process is running on. The idea is for product
 // specific configuration to be encapsulated by this and to provide a single

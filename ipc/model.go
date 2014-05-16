@@ -200,29 +200,6 @@ type Context interface {
 	Server() Server
 }
 
-// Runtime defines the functions that any implementation of the
-// interfaces must provide.
-type Runtime interface {
-	// NewClient creates a new Client instance.
-	//
-	// It accepts at least the following options:
-	// Client, ClientID and StreamManager
-	//
-	// In particular, if the options include a Client, then NewClient
-	// just returns that.
-	NewClient(opts ...ClientOpt) (Client, error)
-
-	// NewServer creates a new Server instance.
-	//
-	// It accepts at least the following options:
-	// ServerID and StreamManager
-	NewServer(opts ...ServerOpt) (Server, error)
-
-	// Client returns the pre-configured Client that is created when the
-	// Runtime is initialized.
-	Client() Client
-}
-
 // BindOpt is the interface for options provided to Bind<Service> calls in IPC
 // clients.
 type BindOpt interface {

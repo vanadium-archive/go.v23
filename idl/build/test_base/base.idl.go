@@ -5,6 +5,7 @@ package test_base
 
 import (
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
+	_gen_veyron2 "veyron2"
 	_gen_idl "veyron2/idl"
 	_gen_ipc "veyron2/ipc"
 	_gen_naming "veyron2/naming"
@@ -86,7 +87,7 @@ func BindMyInterfaceA(name string, opts ..._gen_ipc.BindOpt) (MyInterfaceA, erro
 		client = _gen_rt.R().Client()
 	case 1:
 		switch o := opts[0].(type) {
-		case _gen_ipc.Runtime:
+		case _gen_veyron2.Runtime:
 			client = o.Client()
 		case _gen_ipc.Client:
 			client = o
@@ -363,7 +364,7 @@ func BindMyInterfaceB(name string, opts ..._gen_ipc.BindOpt) (MyInterfaceB, erro
 		client = _gen_rt.R().Client()
 	case 1:
 		switch o := opts[0].(type) {
-		case _gen_ipc.Runtime:
+		case _gen_veyron2.Runtime:
 			client = o.Client()
 		case _gen_ipc.Client:
 			client = o

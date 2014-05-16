@@ -11,23 +11,112 @@ package veyron2
 import (
 	"veyron2/ipc"
 	"veyron2/ipc/stream"
-	"veyron2/mgmt"
 	"veyron2/naming"
 	"veyron2/product"
 	"veyron2/security"
 	"veyron2/vlog"
 )
 
-// Runtime is the interface that concrete veyron implementations must implement;
-// it is the union of the runtime interfaces for each subcomponent.
+// LocalStop is the message received on WaitForStop when the stop was initiated
+// by the process itself.
+const (
+	LocalStop             = "localstop"
+	UnhandledStopExitCode = 1
+	ForceStopExitCode     = 1
+)
+
+// TODO(caprita): make Stop return chan Tick and expose the ability to convey
+// shutdown progress to application layer.
+// type Tick struct {
+// 	Processed, Goal int32
+// }
+
+// Runtime is the interface that concrete Veyron implementations must
+// implement.
 type Runtime interface {
-	ipc.Runtime
-	naming.Runtime
-	product.Runtime
-	security.Runtime
-	stream.Runtime
-	vlog.Runtime
-	mgmt.Runtime
+	// Product returns the Product that the current process is running on.
+	Product() product.T
+
+	// NewIdentity creates a new PrivateID with the provided name.
+	NewIdentity(name string) (security.PrivateID, error)
+
+	// Identity returns the default identity used by the runtime.
+	Identity() security.PrivateID
+
+	// NewClient creates a new Client instance.
+	//
+	// It accepts at least the following options:
+	// Client, ClientID and StreamManager
+	//
+	// In particular, if the options include a Client, then NewClient
+	// just returns that.
+	NewClient(opts ...ipc.ClientOpt) (ipc.Client, error)
+
+	// NewServer creates a new Server instance.
+	//
+	// It accepts at least the following options:
+	// ServerID and StreamManager
+	NewServer(opts ...ipc.ServerOpt) (ipc.Server, error)
+
+	// Client returns the pre-configured Client that is created when the
+	// Runtime is initialized.
+	Client() ipc.Client
+
+	// NewStreamManager creates a new stream manager.
+	NewStreamManager(opts ...stream.ManagerOpt) (stream.Manager, error)
+
+	// StreamManager returns the pre-configured StreamManager that is created
+	// when the Runtime is initialized.
+	StreamManager() stream.Manager
+
+	// NewEndpoint returns an Endpoint by parsing the supplied endpoint
+	// string as per the format described above. It can be used to test
+	// a string to see if it's in valid endpoint format.
+	//
+	// NewEndpoint will accept srings both in the @ format described
+	// above and in internet host:port format.
+	//
+	// All implementations of NewEndpoint should provide appropriate
+	// defaults for any endpoint subfields not explicitly provided as
+	// follows:
+	// - a missing protocol will default to a protocol appropriate for the
+	//   implementation hosting NewEndpoint
+	// - a missing host:port will default to :0 - i.e. any port on all
+	//   interfaces
+	// - a missing routing id should default to the null routing id
+	// - a missing codec version should default to AnyCodec
+	// - a missing RPC version should default to the highest version
+	//   supported by the runtime implementation hosting NewEndpoint
+	NewEndpoint(ep string) (naming.Endpoint, error)
+
+	// MountTable returns the pre-configured MountTable that is created
+	// when the Runtime is initialized.
+	MountTable() naming.MountTable
+
+	// Logger returns the current logger in use by the Runtime.
+	Logger() vlog.Logger
+
+	// NewLogger creates a new instance of the logging interface that is
+	// separate from the one provided by Runtime.
+	NewLogger(name string, opts ...vlog.LoggingOpts) (vlog.Logger, error)
+
+	// Stop causes all the channels returned by WaitForStop to return the
+	// LocalStop message, to give the application a chance to shut down.
+	// Stop does not block.  If any of the channels are not receiving,
+	// the message is not sent on them.
+	// If WaitForStop had never been called, Stop acts like ForceStop.
+	Stop()
+
+	// ForceStop causes the application to exit immediately with an error
+	// code.
+	ForceStop()
+
+	// WaitForStop takes in a channel on which a stop event will be
+	// conveyed.  The stop event is represented by a string identifying the
+	// source of the event.  For example, when Stop is called locally, the
+	// LocalStop message will be received on the channel.  If the channel is
+	// not being received on, or is full, no message is sent on it.
+	WaitForStop(chan<- string)
 
 	// Shutdown cleanly shuts down any internal state, logging, goroutines
 	// etc spawned and managed by the runtime. It is useful for cases where
@@ -47,7 +136,6 @@ type Runtime interface {
 // Their signatures are:
 // <package>.R(opts ...NewROpt{}) (Runtime, error)
 // <package>.NewR(opts ...NewROpt{}) (Runtime, error)
-
 type ROpt interface {
 	ROpt()
 }
