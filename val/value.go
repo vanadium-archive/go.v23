@@ -2,6 +2,7 @@ package val
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 )
 
@@ -287,9 +288,15 @@ func (v *Value) Kind() Kind { return v.t.kind }
 // Type returns the type of this value.  All values have a non-nil type.
 func (v *Value) Type() *Type { return v.t }
 
-// TODO(toddw): Should we support Convert?  Should it implement all vom
-// compatibility rules?
-//   func (v *Value) Convert(t *Type) *Value
+// Convert converts v to the target type t, and returns the resulting value.
+//
+// TODO(toddw): Define conversion rules and implement this function.
+func (v *Value) Convert(t *Type) (*Value, error) {
+	if v.t == t {
+		return v, nil
+	}
+	return nil, errors.New("val: Value.Convert isn't implemented")
+}
 
 // Bool returns the underlying value of a Bool.
 func (v *Value) Bool() bool {

@@ -30,20 +30,28 @@ var (
 
 // Primitive types, the basis for all other types.  All have empty names.
 var (
-	AnyType        = &Type{kind: Any}
-	BoolType       = &Type{kind: Bool}
-	Int32Type      = &Type{kind: Int32}
-	Int64Type      = &Type{kind: Int64}
-	Uint32Type     = &Type{kind: Uint32}
-	Uint64Type     = &Type{kind: Uint64}
-	Float32Type    = &Type{kind: Float32}
-	Float64Type    = &Type{kind: Float64}
-	Complex64Type  = &Type{kind: Complex64}
-	Complex128Type = &Type{kind: Complex128}
-	StringType     = &Type{kind: String}
-	BytesType      = &Type{kind: Bytes}
-	TypeValType    = &Type{kind: TypeVal}
+	AnyType        = primitiveType(&Type{kind: Any})
+	BoolType       = primitiveType(&Type{kind: Bool})
+	Int32Type      = primitiveType(&Type{kind: Int32})
+	Int64Type      = primitiveType(&Type{kind: Int64})
+	Uint32Type     = primitiveType(&Type{kind: Uint32})
+	Uint64Type     = primitiveType(&Type{kind: Uint64})
+	Float32Type    = primitiveType(&Type{kind: Float32})
+	Float64Type    = primitiveType(&Type{kind: Float64})
+	Complex64Type  = primitiveType(&Type{kind: Complex64})
+	Complex128Type = primitiveType(&Type{kind: Complex128})
+	StringType     = primitiveType(&Type{kind: String})
+	BytesType      = primitiveType(&Type{kind: Bytes})
+	TypeValType    = primitiveType(&Type{kind: TypeVal})
 )
+
+func primitiveType(t *Type) *Type {
+	prim, err := typeCons(t)
+	if err != nil {
+		panic(err)
+	}
+	return prim
+}
 
 // TypeOrPending only allows *Type or Pending values; other values cause a
 // compile-time error.  It's used as the argument type for TypeBuilder methods,

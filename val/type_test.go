@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"strings"
 	"testing"
-
-	testutil "veyron/lib/testutil"
 )
 
 var singletons = []struct {
@@ -103,22 +101,6 @@ func allTypes() (types []*Type) {
 		}
 	}
 	return
-}
-
-func expectPanic(t *testing.T, f func(), wantstr string, format string, args ...interface{}) {
-	got := testutil.CallAndRecover(f)
-	gotstr := fmt.Sprint(got)
-	msg := fmt.Sprintf(format, args...)
-	if wantstr != "" && !strings.Contains(gotstr, wantstr) {
-		t.Errorf(`%s got panic %q, want substr %q`, msg, gotstr, wantstr)
-	}
-	if wantstr == "" && got != nil {
-		t.Errorf(`%s got panic %q, want nil`, msg, gotstr)
-	}
-}
-
-func expectMismatchedKind(t *testing.T, f func()) {
-	expectPanic(t, f, "mismatched kind", "")
 }
 
 func TestTypeMismatch(t *testing.T) {
