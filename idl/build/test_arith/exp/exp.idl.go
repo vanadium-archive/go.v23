@@ -11,7 +11,7 @@ import (
 	_gen_idl "veyron2/idl"
 	_gen_ipc "veyron2/ipc"
 	_gen_naming "veyron2/naming"
-	_gen_rt "veyron2/rt/r"
+	_gen_rt "veyron2/rt"
 	_gen_wiretype "veyron2/wiretype"
 )
 

@@ -126,7 +126,7 @@ func systemImportsGo(f *compile.File) []string {
 	}
 	if len(f.Interfaces) > 0 {
 		// Imports for the generated method: Bind{interface name}.
-		set[`_gen_rt "veyron2/rt/r"`] = true
+		set[`_gen_rt "veyron2/rt"`] = true
 		//set[`_gen_wiretype "veyron2/wiretype"`] = true
 		set[`_gen_ipc "veyron2/ipc"`] = true
 		set[`_gen_veyron2 "veyron2"`] = true

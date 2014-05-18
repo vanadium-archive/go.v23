@@ -11,7 +11,7 @@ import (
 	_gen_idl2 "veyron2/idl2"
 	_gen_ipc "veyron2/ipc"
 	_gen_naming "veyron2/naming"
-	_gen_rt "veyron2/rt/r"
+	_gen_rt "veyron2/rt"
 )
 
 // Exp is the interface the client binds and uses.
