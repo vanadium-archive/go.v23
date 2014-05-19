@@ -6,9 +6,9 @@ import (
 	"regexp"
 	"strings"
 
+	"veyron2/val"
 	"veyron2/vdl"
 	"veyron2/vdl/parse"
-	"veyron2/val"
 )
 
 // Env is the environment for compilation.  It contains all errors that were

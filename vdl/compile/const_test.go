@@ -3,10 +3,10 @@ package compile_test
 import (
 	"testing"
 
+	"veyron2/val"
 	"veyron2/vdl/build"
 	"veyron2/vdl/compile"
 	"veyron2/vdl/vdltest"
-	"veyron2/val"
 )
 
 func TestConst(t *testing.T) {

@@ -10,11 +10,11 @@ import (
 
 	_ "veyron/lib/testutil"
 
-	"veyron2/vdl"
-	"veyron2/vdl/test_base"
 	"veyron2/ipc"
 	"veyron2/naming"
 	"veyron2/rt"
+	"veyron2/vdl"
+	"veyron2/vdl/test_base"
 	//"veyron2/wiretype"
 )
 

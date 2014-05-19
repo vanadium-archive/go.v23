@@ -25,7 +25,7 @@ func init() {
 func checkErrors(w io.Writer, env *compile.Env) {
 	if !env.Errors.IsEmpty() {
 		fmt.Fprintf(w, "ERROR\n%v", env.Errors.ToError())
-		fmt.Fprintln(w, `   (run with "vdlc -v" for verbose logging or "vdlc help" for help)`)
+		fmt.Fprintln(w, `   (run with "vdl -v" for verbose logging or "vdl help" for help)`)
 		os.Exit(2)
 	}
 }
@@ -98,7 +98,7 @@ var cmdListInfo = &cmdline.Command{
 	Long: `
 Listinfo returns information about packages and their transitive dependencies,
 in transitive order.  This is the same order the generate and compile commands
-use for processing.  If "vdlc listinfo A" is run and A depends on B, which
+use for processing.  If "vdl listinfo A" is run and A depends on B, which
 depends on C, the returned order will be C, B, A.  If multiple packages are
 specified the ordering is over all combined dependencies.
 
@@ -212,19 +212,19 @@ var (
 
 // Root returns the root command for the VDL tool.
 func Root() *cmdline.Command {
-	vdlc := &cmdline.Command{
-		Name:  "vdlc",
+	vdlcmd := &cmdline.Command{
+		Name:  "vdl",
 		Short: "Manage veyron VDL source code",
 		Long: `
-The vdlc tool manages veyron VDL source code.  It's similar to the go tool used
+The vdl tool manages veyron VDL source code.  It's similar to the go tool used
 for managing Go source code.
 `,
 		Children: []*cmdline.Command{cmdGen, cmdCompile, cmdListInfo},
 	}
 
 	// Common flags for the tool itself, applicable to all commands.
-	vdlc.Flags.BoolVar(&flagVerbose, "v", false, "Turn on verbose logging.")
-	vdlc.Flags.IntVar(&flagMaxErrors, "max_errors", -1, "Stop processing after this many errors, or -1 for unlimited.")
+	vdlcmd.Flags.BoolVar(&flagVerbose, "v", false, "Turn on verbose logging.")
+	vdlcmd.Flags.IntVar(&flagMaxErrors, "max_errors", -1, "Stop processing after this many errors, or -1 for unlimited.")
 
 	// Options for compile.
 	cmdCompile.Flags.BoolVar(&optCompileStatus, "status", true, "Show package names while we compile")
@@ -265,7 +265,7 @@ for managing Go source code.
    before the package path, and dst is the replacement for src.`)
 	cmdGen.Flags.Var(&optGenJavaOutDir, "java_out_dir",
 		"Same semantics as --go_out_dir but applies to java code generation.")
-	return vdlc
+	return vdlcmd
 }
 
 func runCompile(targets []*build.Package, env *compile.Env) {

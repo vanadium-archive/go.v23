@@ -16,10 +16,10 @@ const (
 )
 
 func TestVDLGenerator(t *testing.T) {
-	// Setup the vdlc command-line.
+	// Setup the vdl command-line.
 	cmd := Root()
 	cmd.Init(nil, os.Stdout, os.Stderr)
-	// Use vdlc to generate Go code from input, into a temporary directory.
+	// Use vdl to generate Go code from input, into a temporary directory.
 	outDir, err := ioutil.TempDir("", "vdltest")
 	if err != nil {
 		t.Fatalf("TempDir() failed: %v", err)

@@ -9,8 +9,8 @@ import (
 	"testing"
 
 	"veyron2/vdl"
-	"veyron2/vdl/vdltest"
 	"veyron2/vdl/parse"
+	"veyron2/vdl/vdltest"
 )
 
 type parseTest struct {

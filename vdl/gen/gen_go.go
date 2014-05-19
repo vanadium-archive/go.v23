@@ -11,9 +11,9 @@ import (
 	"strings"
 	"text/template"
 
+	"veyron2/val"
 	"veyron2/vdl"
 	"veyron2/vdl/compile"
-	"veyron2/val"
 	"veyron2/wiretype"
 )
 

@@ -5,8 +5,8 @@ import (
 	"math/big"
 
 	"veyron/lib/toposort"
-	"veyron2/vdl/parse"
 	"veyron2/val"
+	"veyron2/vdl/parse"
 )
 
 // ConstDef represents a user-defined named const definition in the compiled
