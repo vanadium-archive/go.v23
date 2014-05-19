@@ -1,0 +1,85 @@
+// Package test_base is a simple single-file test of vdl functionality.
+package test_base
+
+// Error ids, that allow stable error checking across different error messages
+// and different address spaces.
+errorid (
+	ErrIDFoo
+	ErrIDBar = "some/path.ErrIdOther"
+)
+
+type Scalars struct {
+	A bool
+	B byte
+	C int32
+	D int64
+	E uint32
+	F uint64
+	G float32
+	H float64
+	I complex64
+	J complex128
+	K string
+	L error
+	M any
+}
+
+type Composites struct {
+	A Scalars
+	B []Scalars
+	C map[string]Scalars
+	D map[Scalars][]map[string]complex128
+}
+
+type CompComp struct {
+	A Composites
+	B []Composites
+	C map[string]Composites
+}
+
+// NestedArgs is defined before Args; that's allowed in regular Go, and also
+// allowed in our vdl files.  The compiler will re-order dependent types to ease
+// code generation in other languages.
+type NestedArgs struct {
+	Args Args
+}
+
+// Args will be reordered to show up before NestedArgs in the generated output.
+type Args struct {
+	A int32
+	B int32
+}
+
+const (
+	Cbool = true
+	Cbyte = byte(1)
+	Cint32 = int32(2)
+	Cint64 = int64(3)
+	Cuint32 = uint32(4)
+	Cuint64 = uint64(5)
+	Cfloat32 = float32(6)
+	Cfloat64 = float64(7)
+	Ccomplex64 = complex64(8+9i)
+	Ccomplex128 = complex128(10+11i)
+	Cstring = "foo"
+  Cany = Cbool
+
+	True = true
+	Foo = "foo"
+	Five = int32(5)
+	SixSquared = Six*Six
+	FiveSquared = Five*Five
+	Six = uint64(6)
+)
+
+type ServiceA interface {
+	MethodA1() error
+	MethodA2(a int32, b string) (s string, err error)
+	MethodA3(a int32) stream<_, Scalars> (s string, err error) {"tag", Six}
+	MethodA4(a int32) stream<int32, string> error
+}
+
+type ServiceB interface {
+	ServiceA
+	MethodB1(a Scalars, b Composites) (c CompComp, err error)
+}
