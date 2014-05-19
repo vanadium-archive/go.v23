@@ -1,7 +1,6 @@
 package compile
 
 import (
-	"errors"
 	"fmt"
 	"path"
 	"regexp"
@@ -120,11 +119,15 @@ func (e *Env) ResolveInterface(name string, file *File) *Interface {
 	return nil
 }
 
-// errorf and the fp{String,Error}{,f} functions are helpers for error
-// reporting; we want all errors to consistently contain the file and position
-// of the error when possible.
+// errorf and the fpString{,f} functions are helpers for error reporting; we
+// want all errors to consistently contain the file and position of the error
+// when possible.
 func (e *Env) errorf(file *File, pos parse.Pos, format string, v ...interface{}) {
-	e.Errors.Errorf(fpStringf(file, pos, format, v...))
+	e.Errors.Error(fpStringf(file, pos, format, v...))
+}
+
+func (e *Env) prefixErrorf(file *File, pos parse.Pos, err error, format string, v ...interface{}) {
+	e.Errors.Error(fpStringf(file, pos, format, v...) + " (" + err.Error() + ")")
 }
 
 func fpString(file *File, pos parse.Pos) string {
@@ -133,14 +136,6 @@ func fpString(file *File, pos parse.Pos) string {
 
 func fpStringf(file *File, pos parse.Pos, format string, v ...interface{}) string {
 	return fmt.Sprintf(fpString(file, pos)+" "+format, v...)
-}
-
-func fpError(file *File, pos parse.Pos, msg string) error {
-	return errors.New(fpString(file, pos) + msg)
-}
-
-func fpErrorf(file *File, pos parse.Pos, format string, v ...interface{}) error {
-	return errors.New(fpStringf(file, pos, format, v...))
 }
 
 // Representation of the components of an idl file.  These data types represent

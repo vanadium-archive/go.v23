@@ -39,7 +39,7 @@ var importTests = []parseTest{
 		"FAILEmptyFile",
 		"",
 		nil,
-		[]string{"File must start with package statement"}},
+		[]string{"file must start with package statement"}},
 
 	// Comment tests.
 	{
@@ -514,7 +514,7 @@ errorid (
 		`package testpkg
 errorid ErrIDFoo = ""`,
 		nil,
-		[]string{"testfile:2:20 Error id must be non-empty if specified"}},
+		[]string{"testfile:2:20 error id must be non-empty if specified"}},
 
 	// Interface tests.
 	{
@@ -608,8 +608,8 @@ type foo interface{
   meth1([]a, []b []c)
 }`,
 		nil,
-		[]string{"Expected one or more variable names",
-			"testfile:3:18 Perhaps you forgot a comma"}},
+		[]string{"expected one or more variable names",
+			"testfile:3:18 perhaps you forgot a comma"}},
 }
 
 func testParse(t *testing.T, test parseTest, opts parse.Opts) {

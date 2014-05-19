@@ -6,9 +6,9 @@ import (
 	"veyron2/val"
 )
 
-// defineInterfaces is the "entry point" to the rest of this file.  It takes the
-// interfaces defined in pfiles and defines them in pkg.
-func defineInterfaces(pkg *Package, pfiles []*parse.File, env *Env) {
+// compileInterfaces is the "entry point" to the rest of this file.  It takes
+// the interfaces defined in pfiles and compiles them into Interfaces in pkg.
+func compileInterfaces(pkg *Package, pfiles []*parse.File, env *Env) {
 	id := ifaceDefiner{pkg, pfiles, env, make(map[string]*ifaceBuilder)}
 	if id.Declare(); !env.Errors.IsEmpty() {
 		return
@@ -20,6 +20,9 @@ func defineInterfaces(pkg *Package, pfiles []*parse.File, env *Env) {
 // 1) Declare ensures local interface references can be resolved.
 // 2) SortAndDefine sorts in dependency order, and evaluates and defines each
 //    const.
+//
+// It holds a builders map from interface name to ifaceBuilder, where the
+// ifaceBuilder is responsible for compiling and defining a single interface.
 type ifaceDefiner struct {
 	pkg      *Package
 	pfiles   []*parse.File

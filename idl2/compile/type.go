@@ -7,7 +7,8 @@ import (
 	"veyron2/val"
 )
 
-// TypeDef represents a user-defined named type definition.
+// TypeDef represents a user-defined named type definition in the compiled
+// results.
 type TypeDef struct {
 	NamePos                  // name, parse position and docs
 	Type           *val.Type // type definition
@@ -22,9 +23,9 @@ func (x *TypeDef) String() string {
 	return fmt.Sprintf("%+v", c)
 }
 
-// defineTypeDefs is the "entry point" to the rest of this file.  It takes the
-// types defined in pfiles and defines them in pkg.
-func defineTypeDefs(pkg *Package, pfiles []*parse.File, env *Env) {
+// compileTypeDefs is the "entry point" to the rest of this file.  It takes the
+// types defined in pfiles and compiles them into TypeDefs in pkg.
+func compileTypeDefs(pkg *Package, pfiles []*parse.File, env *Env) {
 	td := typeDefiner{
 		pkg:      pkg,
 		pfiles:   pfiles,
@@ -47,6 +48,9 @@ func defineTypeDefs(pkg *Package, pfiles []*parse.File, env *Env) {
 // 1) Declare ensures local type references can be resolved.
 // 2) Define describes each type, resolving named references.
 // 3) Build builds all types.
+//
+// It holds a builders map from type name to typeBuilder, where the typeBuilder
+// is responsible for compiling and defining a single type.
 type typeDefiner struct {
 	pkg      *Package
 	pfiles   []*parse.File
@@ -140,12 +144,13 @@ func compileType(ptype parse.Type, file *File, env *Env) *val.Type {
 	case val.PendingType:
 		t, err := top.Built()
 		if err != nil {
-			env.Errors.Error(fpString(file, ptype.Pos()) + err.Error())
+			env.prefixErrorf(file, ptype.Pos(), err, "invalid type")
 			return nil
 		}
 		return t
+	default:
+		panic(fmt.Errorf("idl: val.TypeOrPending isn't Type or Pending"))
 	}
-	panic(fmt.Errorf("idl: val.TypeOrPending isn't Type or Pending"))
 }
 
 // compilePendingType returns the *val.Type corresponding to ptype if it is
@@ -161,30 +166,23 @@ func compilePendingType(ptype parse.Type, file *File, env *Env, tbuilder *val.Ty
 			return b.pending
 		}
 		env.errorf(file, pt.Pos(), "type %s undefined", pt.Name)
-		return nil
 	case *parse.TypeArray:
-		if pt.Len <= 0 {
-			env.errorf(file, pt.Pos(), "bad array length: %d", pt.Len)
-			return nil
-		}
 		env.errorf(file, pt.Pos(), "arrays are not supported and will be removed")
-		return nil
 	case *parse.TypeList:
-		if elem := compilePendingType(pt.Elem, file, env, tbuilder, builders); elem != nil {
+		elem := compilePendingType(pt.Elem, file, env, tbuilder, builders)
+		if elem != nil {
 			return tbuilder.List().SetElem(elem)
 		}
-		return nil
 	case *parse.TypeMap:
-		if key := compilePendingType(pt.Key, file, env, tbuilder, builders); key != nil {
-			if elem := compilePendingType(pt.Elem, file, env, tbuilder, builders); elem != nil {
-				return tbuilder.Map().SetKey(key).SetElem(elem)
-			}
+		key := compilePendingType(pt.Key, file, env, tbuilder, builders)
+		elem := compilePendingType(pt.Elem, file, env, tbuilder, builders)
+		if key != nil && elem != nil {
+			return tbuilder.Map().SetKey(key).SetElem(elem)
 		}
-		return nil
 	default:
 		env.errorf(file, pt.Pos(), "unnamed %s type invalid (type must be defined)", ptype.Kind())
-		return nil
 	}
+	return nil
 }
 
 // Build actually builds each type and updates the package with the typedefs.
@@ -261,64 +259,4 @@ func globalSingleton(name string, t *val.Type) {
 		File:    GlobalFile,
 	}
 	addTypeDef(def, nil)
-}
-
-func typeString(t *val.Type) string {
-	return typeStringHelper(t, make(map[*val.Type]bool))
-}
-
-func typeStringHelper(t *val.Type, seen map[*val.Type]bool) string {
-	if t == nil {
-		return "untyped"
-	}
-	name := t.Name()
-	// The seen map breaks infinite loops for recursive types.  Since cycles in
-	// recursive types may only be created via named types, we simply detect the
-	// loop and dump the next named type.
-	if seen[t] && name != "" {
-		return name
-	}
-	seen[t] = true
-	s := name
-	if s != "" {
-		s += " "
-	}
-	switch t.Kind() {
-	case val.Enum:
-		s += "enum{"
-		for x := 0; x < t.NumEnumLabel(); x++ {
-			if x > 0 {
-				s += ";"
-			}
-			s += t.EnumLabel(x)
-		}
-		return s + "}"
-	case val.List:
-		return s + "[]" + typeStringHelper(t.Elem(), seen)
-	case val.Map:
-		key := typeStringHelper(t.Key(), seen)
-		elem := typeStringHelper(t.Elem(), seen)
-		return s + "map[" + key + "]" + elem
-	case val.Struct:
-		s += "struct{"
-		for x := 0; x < t.NumField(); x++ {
-			if x > 0 {
-				s += ";"
-			}
-			f := t.Field(x)
-			s += f.Name + " " + typeStringHelper(f.Type, seen)
-		}
-		return s + "}"
-	case val.OneOf:
-		s += "oneof{"
-		for x := 0; x < t.NumOneOfType(); x++ {
-			if x > 0 {
-				s += ";"
-			}
-			s += typeStringHelper(t.OneOfType(x), seen)
-		}
-		return s + "}"
-	default:
-		return s + t.Kind().String()
-	}
 }

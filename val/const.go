@@ -111,6 +111,11 @@ func (c Const) IsValid() bool {
 	return c.rep != nil
 }
 
+// Type returns the type of c.  Nil indicates c is an untyped const.
+func (c Const) Type() *Type {
+	return c.repType
+}
+
 // Convert converts c to the target type t, and returns the resulting const.
 // Returns an error if t is nil; you're not allowed to convert into an untyped
 // const.
@@ -122,7 +127,22 @@ func (c Const) Convert(t *Type) (Const, error) {
 }
 
 func (c Const) String() string {
-	return c.typeString() + "(" + cRepString(c.rep) + ")"
+	if !c.IsValid() {
+		return "invalid"
+	}
+	if v, ok := c.rep.(*Value); ok {
+		switch v.Kind() {
+		case List, Map, Struct:
+			// E.g. []int32{1, 2, 3}
+			return v.Type().String() + v.String()
+		}
+	}
+	if c.repType == nil {
+		// E.g. 12345 [untyped integer]
+		return cRepString(c.rep) + " [" + c.typeString() + "]"
+	}
+	// E.g. 12345 [type int32]
+	return cRepString(c.rep) + " [type " + c.typeString() + "]"
 }
 
 func (c Const) typeString() string {
@@ -670,7 +690,7 @@ func coerceConsts(cl, cr Const) (interface{}, interface{}, *Type, error) {
 	if cl.repType != nil && cr.repType != nil {
 		// Both consts are typed - their types must match (no implicit conversion).
 		if cl.repType != cr.repType {
-			return nil, nil, nil, fmt.Errorf("type mismatch %v != %v", cl.typeString(), cr.typeString())
+			return nil, nil, nil, fmt.Errorf("type mismatch %v and %v", cl.typeString(), cr.typeString())
 		}
 		return cl.rep, cr.rep, cl.repType, nil
 	}
@@ -736,7 +756,7 @@ func coerceConsts(cl, cr Const) (interface{}, interface{}, *Type, error) {
 			return vl, vr, nil, nil
 		}
 	}
-	return nil, nil, nil, fmt.Errorf("mismatched lhs: %s, rhs: %s", cl.typeString(), cr.typeString())
+	return nil, nil, nil, fmt.Errorf("mismatched %s and %s", cl.typeString(), cr.typeString())
 }
 
 func compString(op BinaryOp, l, r string) bool {

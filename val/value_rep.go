@@ -225,10 +225,14 @@ func equalRepStruct(a, b repStruct) bool {
 	for index := 0; index < len(a); index++ {
 		// Handle cases where we're using nil to represent zero fields.
 		switch af, bf := a[index], b[index]; {
-		case af == nil && bf != nil && !bf.IsZero():
-			return false
-		case af != nil && bf == nil && !af.IsZero():
-			return false
+		case af == nil && bf != nil:
+			if !bf.IsZero() {
+				return false
+			}
+		case af != nil && bf == nil:
+			if !af.IsZero() {
+				return false
+			}
 		case !Equal(af, bf):
 			return false
 		}

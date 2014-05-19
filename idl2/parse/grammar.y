@@ -70,12 +70,12 @@ func typeListToStrList(yylex yyLexer, typeList []Type) (strList []strPos, ok boo
   for _, t := range typeList {
     var tn *TypeNamed
     if tn, ok = t.(*TypeNamed); !ok {
-      lexPosErrorf(yylex, t.Pos(), "Expected one or more variable names, but received type %q.", t.String())
+      lexPosErrorf(yylex, t.Pos(), "%s invalid (expected one or more variable names)", t.String())
       return
     }
     if strings.ContainsRune(tn.Name, '.') {
       ok = false
-      lexPosErrorf(yylex, t.Pos(), "Expected one or more variable names, but received package-qualified name %q.", tn.Name)
+      lexPosErrorf(yylex, t.Pos(), "%s invalid (expected one or more variable names).", tn.Name)
       return
     }
     strList = append(strList, strPos{tn.Name, tn.P})
@@ -106,13 +106,16 @@ func ensureNonEmptyToken(yylex yyLexer, tok strPos, errMsg string) {
   iface      *Interface
   constexpr  ConstExpr
   constexprs []ConstExpr
+  complit    *ConstCompositeLit
+  kvlit      KVLit
+  kvlits     []KVLit
 }
 
 // Terminal tokens.  We leave single-char tokens as-is using their ascii code as
 // their id, to make the grammar more readable; multi-char tokens get their own
 // id.  The start* tokens are dummy tokens to kick off the parse.
 %token            startImportsOnly startFullFile
-%token <pos>      ';' ',' '.' '(' ')' '[' ']' '{' '}' '<' '>' '='
+%token <pos>      ';' ':' ',' '.' '(' ')' '[' ']' '{' '}' '<' '>' '='
 %token <pos>      '!' '+' '-' '*' '/' '%' '|' '&' '^'
 %token <pos>      tOROR tANDAND tLE tGE tNE tEQEQ tLSH tRSH
 %token <pos>      tPACKAGE tIMPORT tTYPE tMAP tSTRUCT tINTERFACE tSTREAM
@@ -122,12 +125,16 @@ func ensureNonEmptyToken(yylex yyLexer, tok strPos, errMsg string) {
 %token <ratpos>   tRATLIT
 %token <imagpos>  tIMAGLIT
 
+%type <strpos>     nameref
 %type <typeexpr>   type
 %type <typeexprs>  type_list streamargs
 %type <fields>     field_spec_list field_spec named_arg_list inargs outargs
 %type <iface>      iface_item_list iface_item
-%type <constexpr>  expr unary_expr operand
+%type <constexpr>  expr unary_expr operand v_lit
 %type <constexprs> tags tag_list
+%type <complit>    comp_lit
+%type <kvlit>      kv_lit
+%type <kvlits>     kv_lit_list
 
 // There are 5 precedence levels for operators, all left-associative, just like
 // Go.  Lines are listed in order of increasing precedence.
@@ -167,7 +174,7 @@ gen_eof:
 // PACKAGE
 package:
   %prec notPackage
-  { lexPosErrorf(yylex, Pos{}, "File must start with package statement") }
+  { lexPosErrorf(yylex, Pos{}, "file must start with package statement") }
 | tPACKAGE tIDENT ';'
   { lexIDLFile(yylex).PackageDef = NamePos{Name:$2.str, Pos:$2.pos} }
 
@@ -227,10 +234,8 @@ type_spec:
   }
 
 type:
-  tIDENT
+  nameref
   { $$ = &TypeNamed{Name:$1.str, P:$1.pos} }
-| tIDENT '.' tIDENT
-  { $$ = &TypeNamed{Name:$1.str+"."+$3.str, P:$1.pos} }
 | '[' tINTLIT ']' type
   { $$ = &TypeArray{Len:int($2.int.Int64()), Elem:$4, P:$1} }
 | '[' ']' type
@@ -290,7 +295,7 @@ field_spec:
         $$ = append($$, &Field{Type:$2, NamePos:NamePos{Name:n.str, Pos:n.pos}})
       }
     } else {
-      lexPosErrorf(yylex, $2.Pos(), "Perhaps you forgot a comma before type %q?.", $2.String())
+      lexPosErrorf(yylex, $2.Pos(), "perhaps you forgot a comma before %q?.", $2.String())
     }
   }
 
@@ -321,10 +326,8 @@ iface_item_list:
 iface_item:
   tIDENT inargs streamargs outargs tags
   { $$ = &Interface{Methods: []*Method{{InArgs:$2, InStream:$3[0], OutStream:$3[1], OutArgs:$4, Tags:$5, NamePos:NamePos{Name:$1.str, Pos:$1.pos}}}} }
-| tIDENT
+| nameref
   { $$ = &Interface{Embeds: []*NamePos{{Name:$1.str, Pos:$1.pos}}} }
-| tIDENT '.' tIDENT
-  { $$ = &Interface{Embeds: []*NamePos{{Name:$1.str+"."+$3.str, Pos:$1.pos}}} }
 
 inargs:
   '(' ')'
@@ -451,13 +454,10 @@ unary_expr:
   { $$ = &ConstUnaryOp{"-", $2, $1} }
 | '^' unary_expr
   { $$ = &ConstUnaryOp{"^", $2, $1} }
-| tIDENT '(' expr ')'
-  { $$ = &ConstTypeConv{&TypeNamed{Name:$1.str, P:$1.pos}, $3, $1.pos} }
-| tIDENT '.' tIDENT '(' expr ')'
-  { $$ = &ConstTypeConv{&TypeNamed{Name:$1.str+"."+$3.str, P:$1.pos}, $5, $1.pos} }
+| type '(' expr ')'
+  { $$ = &ConstTypeConv{$1, $3, $1.Pos()} }
 // TODO(bprosnitz) Add .real() and .imag() for complex.
 
-// TODO(toddw): Maybe support composite-literals also?
 operand:
   tTRUE
   { $$ = &ConstLit{true, $1} }
@@ -471,12 +471,36 @@ operand:
   { $$ = &ConstLit{$1.rat, $1.pos} }
 | tIMAGLIT
   { $$ = &ConstLit{$1.imag, $1.pos} }
-| tIDENT
+| nameref
   { $$ = &ConstNamed{$1.str, $1.pos} }
-| tIDENT '.' tIDENT
-  { $$ = &ConstNamed{$1.str+"."+$3.str, $1.pos} }
+| type comp_lit
+  { $$ = &ConstCompositeLit{$1, $2.KVList, $1.Pos()} }
 | '(' expr ')'
   { $$ = $2 }
+
+comp_lit:
+  '{' '}'
+  { $$ = &ConstCompositeLit{nil, nil, $1} }
+| '{' kv_lit_list ocomma '}'
+  { $$ = &ConstCompositeLit{nil, $2, $1} }
+
+kv_lit_list:
+  kv_lit
+  { $$ = []KVLit{$1} }
+| kv_lit_list ',' kv_lit
+  { $$ = append($1, $3) }
+
+kv_lit:
+  v_lit
+  { $$ = KVLit{Value:$1} }
+| expr ':' v_lit
+  { $$ = KVLit{Key:$1, Value:$3} }
+
+v_lit:
+  comp_lit
+  { $$ = $1 }
+| expr
+  { $$ = $1 }
 
 // ERROR IDS
 errorid_spec_list:
@@ -491,16 +515,26 @@ errorid_spec:
   }
 | tIDENT '=' tSTRLIT
   {
-    ensureNonEmptyToken(yylex, $3, "Error id must be non-empty if specified")
+    ensureNonEmptyToken(yylex, $3, "error id must be non-empty if specified")
     eds := &lexIDLFile(yylex).ErrorIDs
     *eds = append(*eds, &ErrorID{ID:$3.str, NamePos:NamePos{Name:$1.str, Pos:$1.pos}})
   }
 
-// OPTIONAL TOKENS
+// MISC TOKENS
+
+// nameref describes a named reference to another type, interface or const.
+nameref:
+  tIDENT
+  { $$ = $1 }
+| tIDENT '.' tIDENT
+  { $$ = strPos{$1.str+"."+$3.str, $1.pos} }
+
+// Optional semicolon
 osemi:
   // Empty.
 | ';'
 
+// Optional comma
 ocomma:
   // Empty.
 | ','

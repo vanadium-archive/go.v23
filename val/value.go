@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"strconv"
 )
 
 // Value is the generic representation of any value expressible in veyron.  All
@@ -134,19 +135,18 @@ func copySliceOfValues(orig []*Value) []*Value {
 	return slice
 }
 
-// TODO(toddw): Perhaps we should use the JSON format instead?
 func stringRep(t *Type, rep interface{}, quotes bool) string {
 	switch t.kind {
 	case Bool, Int32, Int64, Uint32, Uint64, Float32, Float64, Complex64, Complex128:
 		return fmt.Sprint(rep)
 	case String:
 		if quotes {
-			return `"` + rep.(string) + `"`
+			return strconv.Quote(rep.(string))
 		}
 		return rep.(string)
 	case Bytes:
 		if quotes {
-			return `"` + string(rep.([]byte)) + `"`
+			return strconv.Quote(string(rep.([]byte)))
 		}
 		return string(rep.([]byte))
 	case TypeVal:
@@ -154,14 +154,14 @@ func stringRep(t *Type, rep interface{}, quotes bool) string {
 	case Enum:
 		return t.labels[int(rep.(enumIndex))]
 	case List:
-		s := "["
+		s := "{"
 		for index, elem := range rep.([]*Value) {
 			if index > 0 {
 				s += ", "
 			}
 			s += stringRep(elem.t, elem.rep, true)
 		}
-		return s + "]"
+		return s + "}"
 	case Map:
 		return rep.(repMap).String()
 	case Struct:
@@ -282,10 +282,10 @@ func (v *Value) IsZero() bool {
 	return isZeroRep(v.t.kind, v.rep)
 }
 
-// Kind returns the kind of type of this value.
+// Kind returns the kind of type of v.
 func (v *Value) Kind() Kind { return v.t.kind }
 
-// Type returns the type of this value.  All values have a non-nil type.
+// Type returns the type of v.  All values have a non-nil type.
 func (v *Value) Type() *Type { return v.t }
 
 // Convert converts v to the target type t, and returns the resulting value.

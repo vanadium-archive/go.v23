@@ -49,6 +49,47 @@ func namedZero(name string, base *val.Type) *val.Value {
 	return val.Zero(val.NamedType(name, base))
 }
 
+func makeIntList(vals ...int64) *val.Value {
+	listv := val.Zero(val.ListType(val.Int64Type)).AssignLen(len(vals))
+	for index, v := range vals {
+		listv.Index(index).AssignInt(v)
+	}
+	return listv
+}
+
+func makeStringIntMap(m map[string]int64) *val.Value {
+	mapv := val.Zero(val.MapType(val.StringType, val.Int64Type))
+	for k, v := range m {
+		mapv.AssignMapIndex(val.StringValue(k), val.Int64Value(v))
+	}
+	return mapv
+}
+
+func makeStruct(name string, x int64, y string, z bool) *val.Value {
+	t := val.StructType(name, []val.StructField{
+		{"X", val.Int64Type}, {"Y", val.StringType}, {"Z", val.BoolType},
+	})
+	structv := val.Zero(t)
+	structv.Field(0).AssignInt(x)
+	structv.Field(1).AssignString(y)
+	structv.Field(2).AssignBool(z)
+	return structv
+}
+
+func makeABStruct() *val.Value {
+	tA := val.StructType("a.A", []val.StructField{
+		{"X", val.Int64Type}, {"Y", val.StringType},
+	})
+	tB := val.StructType("a.B", []val.StructField{{"Z", val.ListType(tA)}})
+	res := val.Zero(tB)
+	listv := res.Field(0).AssignLen(2)
+	listv.Index(0).Field(0).AssignInt(1)
+	listv.Index(0).Field(1).AssignString("a")
+	listv.Index(1).Field(0).AssignInt(2)
+	listv.Index(1).Field(1).AssignString("b")
+	return res
+}
+
 type testPkg struct {
 	Name      string
 	Data      string
@@ -73,15 +114,68 @@ var constTests = []struct {
 	{
 		"UntypedInteger",
 		p{{"a", `const Res = 123`, nil,
-			`final const invalid \(untyped integer\(123\) must be assigned a type\)`}}},
+			`final const invalid \(123 \[untyped integer\] must be assigned a type\)`}}},
 	{
 		"UntypedFloat",
 		p{{"a", `const Res = 1.5`, nil,
-			`final const invalid \(untyped rational\(1\.5\) must be assigned a type\)`}}},
+			`final const invalid \(1\.5 \[untyped rational\] must be assigned a type\)`}}},
 	{
 		"UntypedComplex",
 		p{{"a", `const Res = 3.4+9.8i`, nil,
-			`final const invalid \(untyped complex\(3\.4\+9\.8i\) must be assigned a type\)`}}},
+			`final const invalid \(3\.4\+9\.8i \[untyped complex\] must be assigned a type\)`}}},
+
+	// Test composite literals.
+	{
+		"IntList",
+		p{{"a", `const Res = []int64{0,1,2}`, makeIntList(0, 1, 2), ""}}},
+	{
+		"IntListKeys",
+		p{{"a", `const Res = []int64{1:1, 2:2, 0:0}`, makeIntList(0, 1, 2), ""}}},
+	{
+		"IntListMixedKey",
+		p{{"a", `const Res = []int64{1:1, 2, 0:0}`, makeIntList(0, 1, 2), ""}}},
+	{
+		"IntListDupKey",
+		p{{"a", `const Res = []int64{2:2, 1:1, 0}`, nil, "duplicate index 2 in list literal"}}},
+	{
+		"StringIntMap",
+		p{{"a", `const Res = map[string]int64{"a":1, "b":2, "c":3}`, makeStringIntMap(map[string]int64{"a": 1, "b": 2, "c": 3}), ""}}},
+	{
+		"StringIntMapNoKey",
+		p{{"a", `const Res = map[string]int64{"a":1, "b":2, 3}`, nil, "missing key"}}},
+	{
+		"StringIntMapDupKey",
+		p{{"a", `const Res = map[string]int64{"a":1, "b":2, "a":3}`, nil, "duplicate key"}}},
+	{
+		"StructNoKeys",
+		p{{"a", `type A struct{X int64;Y string;Z bool}; const Res = A{1,"b",true}`, makeStruct("a.A", 1, "b", true), ""}}},
+	{
+		"StructKeys",
+		p{{"a", `type A struct{X int64;Y string;Z bool}; const Res = A{X:1,Y:"b",Z:true}`, makeStruct("a.A", 1, "b", true), ""}}},
+	{
+		"StructKeysShort",
+		p{{"a", `type A struct{X int64;Y string;Z bool}; const Res = A{Y:"b"}`, makeStruct("a.A", 0, "b", false), ""}}},
+	{
+		"StructMixedKeys",
+		p{{"a", `type A struct{X int64;Y string;Z bool}; const Res = A{X:1,"b",Z:true}`, nil, "mixed key:value and value in a.A struct literal"}}},
+	{
+		"StructInvalidFieldName",
+		p{{"a", `type A struct{X int64;Y string;Z bool}; const Res = A{1+1:1}`, nil, `invalid field name`}}},
+	{
+		"StructUnknownFieldName",
+		p{{"a", `type A struct{X int64;Y string;Z bool}; const Res = A{ZZZ:1}`, nil, `unknown field "ZZZ" in a.A struct literal`}}},
+	{
+		"StructDupFieldName",
+		p{{"a", `type A struct{X int64;Y string;Z bool}; const Res = A{X:1,X:2}`, nil, `duplicate field "X" in a.A struct literal`}}},
+	{
+		"StructTooManyFields",
+		p{{"a", `type A struct{X int64;Y string;Z bool}; const Res = A{1,"b",true,4}`, nil, `too many fields in a.A struct literal`}}},
+	{
+		"StructTooFewFields",
+		p{{"a", `type A struct{X int64;Y string;Z bool}; const Res = A{1,"b"}`, nil, `too few fields in a.A struct literal`}}},
+	{
+		"ImplicitSubTypes",
+		p{{"a", `type A struct{X int64;Y string}; type B struct{Z []A}; const Res = B{{{1, "a"}, A{X:2,Y:"b"}}}`, makeABStruct(), ""}}},
 
 	// Test explicit primitive type conversions.
 	{
@@ -135,19 +229,19 @@ var constTests = []struct {
 	{
 		"TypedUserBoolMismatch",
 		p{{"a", `type Bool bool;const Res = Bool(1)`, nil,
-			`type mismatch \(can't convert 1 to a.Bool bool\)`}}},
+			`invalid type conversion \(can't convert 1 to a.Bool bool\)`}}},
 	{
 		"TypedUserStringMismatch",
 		p{{"a", `type Str string;const Res = Str(1)`, nil,
-			`type mismatch \(can't convert 1 to a.Str string\)`}}},
+			`invalid type conversion \(can't convert 1 to a.Str string\)`}}},
 	{
 		"TypedUserInt32Mismatch",
 		p{{"a", `type Int int32;const Res = Int(true)`, nil,
-			`type mismatch \(can't convert true to a.Int int32\)`}}},
+			`invalid type conversion \(can't convert true to a.Int int32\)`}}},
 	{
 		"TypedUserFloat32Mismatch",
 		p{{"a", `type Flt float32;const Res = Flt(true)`, nil,
-			`type mismatch \(can't convert true to a.Flt float32\)`}}},
+			`invalid type conversion \(can't convert true to a.Flt float32\)`}}},
 
 	// Test named consts.
 	{
@@ -230,7 +324,7 @@ var constTests = []struct {
 		p{{"a", `const Res = +"abc"`, nil, `unary \+ invalid \(untyped string not supported\)`}}},
 	{
 		"ErrNeg",
-		p{{"a", `const Res = -false`, nil, `unary \- invalid \(untyped bool not supported\)`}}},
+		p{{"a", `const Res = -false`, nil, `unary \- invalid \(untyped boolean not supported\)`}}},
 	{
 		"ErrComplement",
 		p{{"a", `const Res = ^1.5`, nil, `unary \^ invalid \(converting untyped rational 1.5 to integer loses precision\)`}}},

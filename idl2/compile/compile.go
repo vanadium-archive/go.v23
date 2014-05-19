@@ -47,22 +47,22 @@ func Compile(pkgpath string, pfiles []*parse.File, env *Env) *Package {
 			imports:    make(map[string]*importPath),
 		})
 	}
-	// Define our various structures.  The order of these operations matters;
-	// e.g. we must define types before consts, since consts may use a type
+	// Compile our various structures.  The order of these operations matters;
+	// e.g. we must compile types before consts, since consts may use a type
 	// defined in this package.
-	if defineImports(pkg, pfiles, env); !env.Errors.IsEmpty() {
+	if compileImports(pkg, pfiles, env); !env.Errors.IsEmpty() {
 		return nil
 	}
-	if defineErrorIDs(pkg, pfiles, env); !env.Errors.IsEmpty() {
+	if compileErrorIDs(pkg, pfiles, env); !env.Errors.IsEmpty() {
 		return nil
 	}
-	if defineTypeDefs(pkg, pfiles, env); !env.Errors.IsEmpty() {
+	if compileTypeDefs(pkg, pfiles, env); !env.Errors.IsEmpty() {
 		return nil
 	}
-	if defineConstDefs(pkg, pfiles, env); !env.Errors.IsEmpty() {
+	if compileConstDefs(pkg, pfiles, env); !env.Errors.IsEmpty() {
 		return nil
 	}
-	if defineInterfaces(pkg, pfiles, env); !env.Errors.IsEmpty() {
+	if compileInterfaces(pkg, pfiles, env); !env.Errors.IsEmpty() {
 		return nil
 	}
 	if computeDeps(pkg, env); !env.Errors.IsEmpty() {
@@ -72,7 +72,7 @@ func Compile(pkgpath string, pfiles []*parse.File, env *Env) *Package {
 	return pkg
 }
 
-func defineImports(pkg *Package, pfiles []*parse.File, env *Env) {
+func compileImports(pkg *Package, pfiles []*parse.File, env *Env) {
 	for index := range pfiles {
 		file, pfile := pkg.Files[index], pfiles[index]
 		for _, pimp := range pfile.Imports {
@@ -89,7 +89,7 @@ func defineImports(pkg *Package, pfiles []*parse.File, env *Env) {
 	}
 }
 
-func defineErrorIDs(pkg *Package, pfiles []*parse.File, env *Env) {
+func compileErrorIDs(pkg *Package, pfiles []*parse.File, env *Env) {
 	for index := range pkg.Files {
 		file, pfile := pkg.Files[index], pfiles[index]
 		seen := make(map[string]*ErrorID)
