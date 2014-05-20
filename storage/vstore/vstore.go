@@ -5,6 +5,7 @@ package vstore
 import (
 	"veyron2"
 	"veyron2/ipc"
+	"veyron2/naming"
 	"veyron2/services/store"
 	"veyron2/services/watch"
 	"veyron2/storage"
@@ -20,7 +21,7 @@ var _ storage.Store = (*VStore)(nil)
 
 // New returns a storage.Store for a Veyron store mounted at a Veyron name.
 func New(mount string, opts ...ipc.BindOpt) (storage.Store, error) {
-	serv, err := store.BindStore(mount+"/.store", opts...)
+	serv, err := store.BindStore(naming.JoinAddressName(mount, store.StoreSuffix), opts...)
 	if err != nil {
 		return nil, err
 	}

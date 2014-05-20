@@ -16,6 +16,7 @@ import (
 	"veyron2/naming"
 	"veyron2/rt"
 	"veyron2/security"
+	"veyron2/services/store"
 	"veyron2/storage"
 	"veyron2/storage/vstore"
 )
@@ -62,7 +63,7 @@ func startServer(t *testing.T) (storage.Store, func()) {
 	// Similarly, originally I did not include the ".*" (objectDisp) dispatcher
 	// here and got crazy errors like "ipc: wrong number of output results". It
 	// would be nice to have friendlier error messages.
-	if err := s.Register(mount+"/.store", storeDisp); err != nil {
+	if err := s.Register(naming.JoinAddressName(mount, store.StoreSuffix), storeDisp); err != nil {
 		log.Fatal("s.Register(storage.isp) failed: ", err)
 	}
 	if err := s.Register(mount, objectDisp); err != nil {
