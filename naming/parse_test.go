@@ -32,6 +32,8 @@ func TestSplitName(t *testing.T) {
 		{"/12.3.4.5:444/foo", "12.3.4.5:444", "foo"},
 		{"/12.3.4.5", "12.3.4.5", ""},
 		{"/12.3.4.5/foo", "12.3.4.5", "foo"},
+		{"/12.3.4.5//foo", "12.3.4.5", "//foo"},
+		{"/12.3.4.5/foo//bar", "12.3.4.5", "foo//bar"},
 	}
 	for _, c := range cases {
 		addr, name := SplitAddressName(c.input)
@@ -71,39 +73,15 @@ func TestJoinAddressName(t *testing.T) {
 	}
 }
 
-func TestJoinAddressNameFixed(t *testing.T) {
-	cases := []struct {
-		address, name, joined string
-	}{
-		{"", "", ""},
-		{"", "a", "//a"},
-		{"", "/a", "//a"},
-		{"", "//a", "//a"},
-		{"", "///a", "//a"},
-		{"/", "", ""},
-		{"//", "", ""},
-		{"/a", "", "/a"},
-		{"//a", "", "/a"},
-		{"aaa", "", "/aaa"},
-		{"/aaa", "aa", "/aaa//aa"},
-		{"ab", "/cd", "/ab//cd"},
-		{"/ab", "/cd", "/ab//cd"},
-		{"ab", "//cd", "/ab//cd"},
-	}
-	for _, c := range cases {
-		if got, want := JoinAddressNameFixed(c.address, c.name), c.joined; want != got {
-			t.Errorf("%q %q: unexpected join: %q not %q", c.address, c.name, got, want)
-		}
-	}
-}
-
 func TestJoin(t *testing.T) {
 	cases := []struct {
 		name, suffix, joined string
 	}{
 		{"a", "b", "a/b"},
+		{"a/", "b/", "a/b/"},
 		{"", "b", "b"},
 		{"a", "", "a"},
+		{"a/", "", "a"},
 		{"/a", "b", "/a/b"},
 		{"/a/b", "c", "/a/b/c"},
 		{"/a/b", "c/d", "/a/b/c/d"},
@@ -118,99 +96,233 @@ func TestJoin(t *testing.T) {
 	}
 }
 
-func TestDepth(t *testing.T) {
+func TestSplitJoin(t *testing.T) {
 	cases := []struct {
-		name  string
-		depth int
+		name, address, relative string
 	}{
-		{"", 0},
-		{"foo", 1},
-		{"foo/", 1},
-		{"foo/bar", 2},
-		{"foo//bar", 2},
-		{"/foo/bar", 2},
-		{"//", 0},
-		{"//foo//bar", 2},
-		{"/foo/bar//baz//baf/", 4},
+		{"/a/b", "a", "b"},
+		{"/a//b", "a", "//b"},
+		{"/a:10//b/c", "a:10", "//b/c"},
+		{"/a:10/b//c", "a:10", "b//c"},
 	}
 	for _, c := range cases {
-		if got, want := Depth(c.name), c.depth; want != got {
-			t.Errorf("%q: unexpected depth: %d not %d", c.name, got, want)
+		a, r := SplitAddressName(c.name)
+		if got, want := a, c.address; got != want {
+			t.Errorf("%q: got %q, want %q", c.name, got, want)
+		}
+		if got, want := r, c.relative; got != want {
+			t.Errorf("%q: got %q, want %q", c.name, got, want)
+		}
+		j := JoinAddressName(a, r)
+		if got, want := j, c.name; got != want {
+			t.Errorf("%q: got %q, want %q", c.name, got, want)
 		}
 	}
 }
 
-func TestFixed(t *testing.T) {
-	cases := []struct {
-		name, fixed string
-	}{
+func TestTerminal(t *testing.T) {
+	ep := "/" + FormatEndpoint("tcp", "h:0")
+	for _, c := range []string{
+		"",
+		"/",
+		"//",
+		"//a/b",
+		ep + "",
+		ep + "//",
+		ep + "//a",
+		ep + "//a/b",
+	} {
+		if !Terminal(c) {
+			t.Errorf("Expected %q to be terminal", c)
+		}
+	}
+	for _, c := range []string{
+		"/a/b",
+		"a/b",
+		"a//b",
+		ep + "/a",
+		ep + "/a//b",
+	} {
+		if Terminal(c) {
+			t.Errorf("Expected %q to not be terminal", c)
+		}
+	}
+}
+
+func TestMakeTerminal(t *testing.T) {
+	ep := "/" + FormatEndpoint("tcp", "h:0")
+	type testcases struct {
+		name   string
+		result string
+	}
+	cases := []testcases{
+		// relative names
+		{"", ""},
 		{"a", "//a"},
 		{"a/b", "//a/b"},
-		{"/a/b", "/a//b"},
-		{"/a//b", "/a//b"},
-		{"/a//b/c", "/a//b/c"},
-		{"/a//b//c", "/a//b//c"},
-		{"/a", "/a"},
-		{"//a", "//a"},
+		// rooted names
+		{ep + "", ep + ""},
+		{ep + "/", ep + ""},
+		{ep + "//", ep + "//"},
+		{ep + "/a", ep + "//a"},
+		{ep + "/a/c", ep + "//a/c"},
+		{ep + "/a//c", ep + "//a//c"},
+		{ep + "/a/b//c", ep + "//a/b//c"},
+		// corner cases
+		{"//", "//"},
+		{"///", "//"},
+		{"///" + ep + "/", "/" + ep + "/"},
 	}
 	for _, c := range cases {
-		if got, want := MakeFixed(c.name), c.fixed; want != got {
-			t.Errorf("%q: unexpected fixed: %q not %q", c.name, got, want)
-		} else if !Fixed(got) {
-			t.Errorf("%q: expected to be fixed", got)
+		if got, want := MakeTerminal(c.name), c.result; want != got {
+			t.Errorf("MakeTerminal(%q) : got %q, want %q", c.name, got, want)
+		} else if !Terminal(got) {
+			t.Errorf("%q is not terminal", got)
 		}
 	}
 }
 
-func TestNotFixed(t *testing.T) {
+func TestMakeTerminalAtIndex(t *testing.T) {
+	ep := "/" + FormatEndpoint("tcp", "h:0")
+	_ = ep
+	type testcases struct {
+		name   string
+		index  int
+		result string
+	}
+	cases := []testcases{
+		// examples from the comments:
+
+		{"a/b/c", 1, "a//b/c"},
+		{"a/b/c", -1, "a/b//c"},
+		{"a/b/c/", 3, "a/b/c//"},
+		{"a////b/c/", 3, "a////b/c//"},
+		{"a/b///c", -1, "a/b//c"},
+		{"a/b///c/", -1, "a/b///c//"},
+		{"a/b///c", 1, "a//b///c"},
+		{"", 0, ""},
+		{"//a//b", 0, "//a//b"},
+		{"", -1, ""},
+		{"", 2, ""},
+		{"", 1, ""},
+		{"", -2, ""},
+		{"//", 0, "//"},
+		{"//", -1, "//"},
+		{"//", 2, "//"},
+		{"//", 1, "//"},
+		{"//", -2, "//"},
+		{"a", 0, "//a"},
+		{"a/b", 1, "a//b"},
+		{"a/b", 2, "a/b//"},
+		{"a/b", 3, "a/b//"},
+		{"a/b", -1, "a//b"},
+		{"a/b", -2, "//a/b"},
+		{"a/b", -3, "//a/b"},
+		{"a/b//", -3, "//a/b//"},
+		{"//a/b//", -3, "//a/b//"},
+		{"a/b/c/d", -2, "a/b//c/d"},
+		{"a/b/c/d", 1, "a//b/c/d"},
+		{"a/b/c/d", 2, "a/b//c/d"},
+		{"a/b/c/d", 3, "a/b/c//d"},
+		{"a/b/c/d/", 4, "a/b/c/d//"},
+		{"aa/bb", 1, "aa//bb"},
+		{"aa/bb", 2, "aa/bb//"},
+		{"aa/bb", 3, "aa/bb//"},
+		{"aa/bb", -1, "aa//bb"},
+		{"aa/bb", -2, "//aa/bb"},
+		{"aa/bb", -3, "//aa/bb"},
+		{"aa/bb//", -3, "//aa/bb//"},
+		{"//aa/bb//", -3, "//aa/bb//"},
+		{"aa/bb/cc/dd", -2, "aa/bb//cc/dd"},
+		{"aa/bb/cc/dd", 1, "aa//bb/cc/dd"},
+		{"aa/bb/cc/dd", 2, "aa/bb//cc/dd"},
+		{"aa/bb/cc/dd", 3, "aa/bb/cc//dd"},
+		{"aa/bb/cc/dd/", 4, "aa/bb/cc/dd//"},
+		{ep + "//", 0, ep + "//"},
+		{ep + "//", -1, ep + "//"},
+		{ep + "//", 1, ep + "//"},
+		{ep + "/a", 0, ep + "//a"},
+		{ep + "/a/b", 0, ep + "//a/b"},
+		{ep + "/a/b", 1, ep + "/a//b"},
+		{ep + "/a/b", 2, ep + "/a/b//"},
+		{ep + "/a/b", 100, ep + "/a/b//"},
+		{ep + "/a/b/c", 0, ep + "//a/b/c"},
+		{ep + "/a/b/c", 1, ep + "/a//b/c"},
+		{ep + "/a/b/c", 2, ep + "/a/b//c"},
+		{ep + "/a/b/c", 3, ep + "/a/b/c//"},
+		{ep + "/a/b/c", -1, ep + "/a/b//c"},
+		{ep + "/a/b/c", -2, ep + "/a//b/c"},
+		{ep + "/a/b/c", -3, ep + "//a/b/c"},
+		{ep + "/a/b/c", -4, ep + "//a/b/c"},
+		{ep + "//a//b//c/", -1, ep + "//a//b//c//"},
+		{ep + "//a//b//c//", -1, ep + "//a//b//c//"},
+		{ep + "//a//b//c//", 1, ep + "//a//b//c//"},
+		{ep + "//a//b//c//", 2, ep + "//a//b//c//"},
+	}
+	for _, c := range cases {
+		if got, want := MakeTerminalAtIndex(c.name, c.index), c.result; want != got {
+			t.Errorf("InstertTerminalAtIndex(%q, %d) : got %q want %q", c.name, c.index, got, want)
+		}
+	}
+}
+
+func TestRooted(t *testing.T) {
+	ep := "/" + FormatEndpoint("tcp", "h:0")
+	// should be rooted.
+	cases := []string{
+		"/",
+		"/a",
+		"/a/b",
+		ep + "/",
+	}
+	for _, c := range cases {
+		if !Rooted(c) {
+			t.Errorf("Rooted(%q) return false, not true", c)
+		}
+
+	}
+	cases = []string{
+		"",
+		"//a",
+		"//b",
+		"//" + ep,
+	}
+	for _, c := range cases {
+		if Rooted(c) {
+			t.Errorf("Rooted(%q) return true, not false", c)
+		}
+
+	}
+
+}
+
+func TestResolvable(t *testing.T) {
+	ep := "/" + FormatEndpoint("tcp", "h:0")
 	cases := []struct {
-		name, notFixed string
+		name, notTerminal string
 	}{
+		{"", ""},
+		{"/", "/"},
+		{"//", ""},
 		{"a", "a"},
 		{"a/b", "a/b"},
-		{"/a/b", "/a/b"},
-		{"//a", "a"},
 		{"//a/b", "a/b"},
-		{"/a//b", "/a/b"},
-		{"//a//b", "a//b"},
-		{"a//b", "a//b"},
+		{"///a/b", "a/b"},
+		{"a//b", "a/b"},
+		{"a//b//", "a/b//"},
+		{"//a//b//", "a//b//"},
+		{"//a//b///", "a//b///"},
+		{ep + "//a", ep + "/a"},
+		{ep + "//a/b", ep + "/a/b"},
+		{ep + "//a///b", ep + "/a///b"},
+		{ep + "///a//b", ep + "/a//b"},
+		{ep + "///a//b//", ep + "/a//b//"},
 	}
 	for _, c := range cases {
-		if got, want := MakeNotFixed(c.name), c.notFixed; want != got {
-			t.Errorf("%q: unexpected not fixed: %q not %q", c.name, got, want)
-		} else if Fixed(got) {
-			t.Errorf("%q: expected to be not fixed", got)
-		}
-	}
-}
-
-func TestStripSuffix(t *testing.T) {
-	cases := []struct {
-		name, suffix, stripped string
-	}{
-		{"a/b", "b", "a"},
-		{"/a/b", "b", "/a"},
-		{"/a/b", "/b", "/a"},
-		{"/a/b", "", "/a/b"},
-		{"/a/b//", "", "/a/b"},
-		{"a", "a", ""},
-		{"/a", "a", ""},
-		{"/a//b", "b", "/a"},
-		{"/a//b", "/b", "/a"},
-		{"/a//b", "//b", "/a"},
-		{"/a//b", "///b", "/a//b"},
-		{"/a/b//c", "b//c", "/a"},
-		{"/a/b//c", "b/c", "/a/b//c"},
-		{"/yes/we/can", "we/can", "/yes"},
-		{"/yes/we/can", "e/can", "/yes/we/can"},
-		{"/yes/we/can", "yes/we/can", ""},
-		{"/yes/we/can", "/yes/we/can", ""},
-		{"/yes/we/can", "/yes/we/can", ""},
-		{"/yes/we/can", "/yes/we/ca", "/yes/we/can"},
-	}
-	for _, c := range cases {
-		if want, got := c.stripped, StripSuffix(c.name, c.suffix); want != got {
-			t.Errorf("StripSuffix(%q, %q): want %q, got %q", c.name, c.suffix, want, got)
+		if got, want := MakeResolvable(c.name), c.notTerminal; want != got {
+			t.Errorf("MakeResolvable(%q): unexpected not terminal: %q not %q", c.name, got, want)
+		} else if !(got == "" || got == "/") && Terminal(got) {
+			t.Errorf("MakeResolvable(%q): expected to be resolveable: got %q", c.name, got)
 		}
 	}
 }
