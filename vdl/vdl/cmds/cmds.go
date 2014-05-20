@@ -205,7 +205,7 @@ var (
 	optGenStatus        bool
 	optGenGoFmt         bool
 	optGenGoOutDir      = genOutDir{}
-	optGenJavaOutDir    = genOutDir{src: "v/src", dst: "java/src"}
+	optGenJavaOutDir    = genOutDir{src: "go/src", dst: "java/src"}
 	optGenJavaPkgPrefix string
 	optGenLangs         = genLangs{genLangGo: true}
 )
@@ -244,25 +244,25 @@ for managing Go source code.
 		"Package prefix that will be added to the VDL package prefixes when generating Java files. ")
 	cmdGen.Flags.Var(&optGenGoOutDir, "go_out_dir",
 		`Go output directory.  There are three modes:
-      ""         : Generate output in-place in the source tree
-      "dir"      : Generate output rooted at dir
-      "src->dst" : Generate output rooted at x, with translation from src to dst
-   Assume your source tree is organized as follows:
-   GOPATH=/home/me/code/v
-      /home/me/code/v/src/veyron2/vdl/test_base/base1.vdl
-      /home/me/code/v/src/veyron2/vdl/test_base/base2.vdl
-   Here's example output under the different modes:
-   --go_out_dir=""
-      /home/me/code/v/src/veyron2/vdl/test_base/base1.vdl.go
-      /home/me/code/v/src/veyron2/vdl/test_base/base2.vdl.go
-   --go_out_dir="/tmp/foo"
-      /tmp/foo/veyron2/vdl/test_base/base1.vdl.go
-      /tmp/foo/veyron2/vdl/test_base/base2.vdl.go
-   --go_out_dir="v/src->bar/src"
-      /home/me/code/bar/src/veyron2/vdl/test_base/base1.vdl.go
-      /home/me/code/bar/src/veyron2/vdl/test_base/base2.vdl.go
-   When the src->dst form is used, src must match the suffix of the path just
-   before the package path, and dst is the replacement for src.`)
+			""         : Generate output in-place in the source tree
+			"dir"      : Generate output rooted at dir
+			"src->dst" : Generate output rooted at x, with translation from src to dst
+	 Assume your source tree is organized as follows:
+	 GOPATH=/home/me/code/go
+			/home/me/code/go/src/veyron2/vdl/test_base/base1.vdl
+			/home/me/code/go/src/veyron2/vdl/test_base/base2.vdl
+	 Here's example output under the different modes:
+	 --go_out_dir=""
+			/home/me/code/go/src/veyron2/vdl/test_base/base1.vdl.go
+			/home/me/code/go/src/veyron2/vdl/test_base/base2.vdl.go
+	 --go_out_dir="/tmp/foo"
+			/tmp/foo/veyron2/vdl/test_base/base1.vdl.go
+			/tmp/foo/veyron2/vdl/test_base/base2.vdl.go
+	 --go_out_dir="go/src->bar/src"
+			/home/me/code/bar/src/veyron2/vdl/test_base/base1.vdl.go
+			/home/me/code/bar/src/veyron2/vdl/test_base/base2.vdl.go
+	 When the src->dst form is used, src must match the suffix of the path just
+	 before the package path, and dst is the replacement for src.`)
 	cmdGen.Flags.Var(&optGenJavaOutDir, "java_out_dir",
 		"Same semantics as --go_out_dir but applies to java code generation.")
 	return vdlcmd
@@ -291,7 +291,7 @@ func runGen(targets []*build.Package, env *compile.Env) {
 			case genLangGo:
 				dir, err := xlateOutDir(target, optGenGoOutDir, "")
 				if err != nil {
-					env.Errors.Errorf("--out_dir error: %v", err)
+					env.Errors.Errorf("--go_out_dir error: %v", err)
 					continue
 				}
 				for _, file := range pkg.Files {
@@ -302,21 +302,18 @@ func runGen(targets []*build.Package, env *compile.Env) {
 					}
 				}
 			case genLangJava:
-				panic("oh no")
-				/*
-					build.SetJavaGenPkgPrefix(optGenJavaPkgPrefix)
-					files := build.GenJavaFiles(pkg)
-					dir, err := xlateOutDir(target, optGenJavaOutDir, optGenJavaPkgPrefix)
-					if err != nil {
-						env.Errors.Errorf("Couldn't translate package dir %q for Java generation", pkg.Dir)
-						continue
+				gen.SetJavaGenPkgPrefix(optGenJavaPkgPrefix)
+				files := gen.GenJavaFiles(pkg, env)
+				dir, err := xlateOutDir(target, optGenJavaOutDir, optGenJavaPkgPrefix)
+				if err != nil {
+					env.Errors.Errorf("--java_out_dir error: %v", err)
+					continue
+				}
+				for _, file := range files {
+					if writeFile(file.Data, dir, file.Name, env) {
+						changed = true
 					}
-					for _, file := range files {
-						if writeFile(file.Data, dir, file.Name, env) {
-							changed = true
-						}
-					}
-				*/
+				}
 			default:
 				env.Errors.Errorf("Generating code for language %v isn't supported", gl)
 			}
