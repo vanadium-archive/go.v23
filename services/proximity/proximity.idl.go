@@ -4,6 +4,8 @@
 package proximity
 
 import (
+	"veyron2/security"
+
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
 	_gen_veyron2 "veyron2"
 	_gen_idl "veyron2/idl"
@@ -262,11 +264,11 @@ func (__gen_s *ServerStubProximity) NearbyDevices(call _gen_ipc.ServerCall) (rep
 func GetProximityMethodTags(method string) []interface{} {
 	switch method {
 	case "RegisterName":
-		return []interface{}{}
+		return []interface{}{security.Label(2)}
 	case "UnregisterName":
-		return []interface{}{}
+		return []interface{}{security.Label(2)}
 	case "NearbyDevices":
-		return []interface{}{}
+		return []interface{}{security.Label(1)}
 	default:
 		return nil
 	}

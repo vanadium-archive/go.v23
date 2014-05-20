@@ -1,5 +1,7 @@
 package proximity
 
+import "veyron2/security"
+
 // Device represents one neighborhood device.  It contains that device's
 // MAC address, observed names, and the average distance to the device.
 type Device struct {
@@ -27,15 +29,15 @@ type Proximity interface {
 	// RegisterName adds a name that this device will be associated with;
 	// a remote device will see all the unique names currently registered
 	// with this device (see Names field in Device).
-	RegisterName(Name string) error
+	RegisterName(Name string) error {security.WriteLabel}
 
 	// UnregisterName removes a name previously associated with this device.
 	// If the name doesn't exist, this method will return an error.
 	// If the name has been registered multiple times, this method will
 	// remove only one instance of that registration.
-	UnregisterName(Name string) error
+	UnregisterName(Name string) error {security.WriteLabel}
 
 	// NearbyDevices returns the most up-to-date list of nearby devices,
 	// sorted in increasing distance order.
-	NearbyDevices() ([]Device, error)
+	NearbyDevices() ([]Device, error) {security.ReadLabel}
 }
