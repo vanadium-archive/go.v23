@@ -300,7 +300,7 @@ public class Client { {{range $file := $data.Package.Files}}
 		}{{end}}
 		{{end}}
 	}{{end}}{{end}}
-}{{end}}
+}
 `
 
 // javaUserImports stores Java class imports found in user-specified code (i.e.,
