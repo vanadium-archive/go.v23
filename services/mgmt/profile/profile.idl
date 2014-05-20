@@ -8,6 +8,8 @@
 // retrieval, and 3) the Glob interface, to enable profile discovery.
 package profile
 
+import "veyron2/security"
+
 // Profile abstracts a device's ability to run binaries, and hides
 // specifics such as operating system, hardware architecture, and the
 // set of installed libraries. Profiles describe binaries and devices,
@@ -17,9 +19,9 @@ type Profile interface {
   // e.g. "linux-media". The label can be used to uniquely identify
   // the profile (for the purpose of matching application binaries and
   // nodes).
-  Label() (string, error)
+  Label() (string, error) {security.ReadLabel}
   // Description is a free-text description of the profile, meant for
   // human consumption.
-  Description() (string, error)
+  Description() (string, error) {security.ReadLabel}
 }
 

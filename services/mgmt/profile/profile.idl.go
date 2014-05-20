@@ -12,6 +12,8 @@
 package profile
 
 import (
+	"veyron2/security"
+
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
 	_gen_veyron2 "veyron2"
 	_gen_idl "veyron2/idl"
@@ -209,9 +211,9 @@ func (__gen_s *ServerStubProfile) Description(call _gen_ipc.ServerCall) (reply s
 func GetProfileMethodTags(method string) []interface{} {
 	switch method {
 	case "Label":
-		return []interface{}{}
+		return []interface{}{security.Label(1)}
 	case "Description":
-		return []interface{}{}
+		return []interface{}{security.Label(1)}
 	default:
 		return nil
 	}
