@@ -49,9 +49,9 @@ const (
 // New packages always start with an empty Name and Path.  The Name is filled in
 // when we walkDeps, and the Path is only filled in if we process this package
 // via resolvePkgPath.
-func newPackage(dir string, mode missingMode, errs *vdl.Errors) *Package {
+func newPackage(dir string, mode missingMode, exts map[string]bool, errs *vdl.Errors) *Package {
 	pkg := &Package{Dir: dir, OpenFilesFunc: openFiles}
-	if err := pkg.initBaseFileNames(); err != nil {
+	if err := pkg.initBaseFileNames(exts); err != nil {
 		errs.Errorf("Couldn't init vdl file names in package dir %v, %v", pkg.Dir, err)
 		return nil
 	}
@@ -65,7 +65,7 @@ func newPackage(dir string, mode missingMode, errs *vdl.Errors) *Package {
 }
 
 // initBaseFileNames initializes BaseFileNames from the Dir.
-func (p *Package) initBaseFileNames() error {
+func (p *Package) initBaseFileNames(exts map[string]bool) error {
 	vdl.Vlog.Printf("Looking for vdl files in package dir %v", p.Dir)
 	fd, err := os.Open(p.Dir)
 	if err != nil {
@@ -76,7 +76,7 @@ func (p *Package) initBaseFileNames() error {
 		return err
 	}
 	for _, baseFile := range dirFileNames {
-		if filepath.Ext(baseFile) == ".vdl" {
+		if exts[filepath.Ext(baseFile)] {
 			p.BaseFileNames = append(p.BaseFileNames, baseFile)
 		}
 	}
@@ -180,11 +180,20 @@ func (p *Package) CloseFiles() error {
 // similar to how the regular go tool generates *.a files under the top-level
 // pkg directory.
 type depSorter struct {
+	exts    map[string]bool // file extensions of valid vdl files.
 	srcDirs []string
 	pathMap map[string]*Package
 	dirMap  map[string]*Package
 	sorter  toposort.Sorter
 	errs    *vdl.Errors
+}
+
+func makeExts(exts []string) map[string]bool {
+	ret := make(map[string]bool)
+	for _, e := range exts {
+		ret[e] = true
+	}
+	return ret
 }
 
 func toAbs(dirs []string, errs *vdl.Errors) (ret []string) {
@@ -198,8 +207,9 @@ func toAbs(dirs []string, errs *vdl.Errors) (ret []string) {
 	return
 }
 
-func newDepSorter(errs *vdl.Errors) *depSorter {
+func newDepSorter(exts []string, errs *vdl.Errors) *depSorter {
 	return &depSorter{
+		exts:    makeExts(exts),
 		srcDirs: toAbs(gobuild.Default.SrcDirs(), errs),
 		pathMap: make(map[string]*Package),
 		dirMap:  make(map[string]*Package),
@@ -286,7 +296,7 @@ func (ds *depSorter) resolvePkgDir(pkgDir string, mode missingMode) (*Package, b
 		}
 		return nil, false
 	}
-	newPkg := newPackage(absDir, mode, ds.errs)
+	newPkg := newPackage(absDir, mode, ds.exts, ds.errs)
 	if newPkg == nil {
 		return nil, false
 	}
@@ -392,9 +402,10 @@ func printPackagePath(v interface{}) string {
 
 // TransitivePackages takes a list of cmdline args representing packages, and
 // returns all packages (either explicitly added or a transitive dependency) in
-// transitive order.
-func TransitivePackages(cmdLineArgs []string, errs *vdl.Errors) []*Package {
-	ds := newDepSorter(errs)
+// transitive order.  The given exts specifies the file name extensions for
+// valid vdl files, e.g. ".vdl".
+func TransitivePackages(cmdLineArgs, exts []string, errs *vdl.Errors) []*Package {
+	ds := newDepSorter(exts, errs)
 	for _, cmdLineArg := range cmdLineArgs {
 		ds.AddCmdLineArg(cmdLineArg)
 	}

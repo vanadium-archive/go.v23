@@ -41,8 +41,9 @@ func runHelper(run func(targets []*build.Package, env *compile.Env)) func(cmd *c
 			// If the user doesn't specify any targets, the cwd is implied.
 			args = append(args, ".")
 		}
+		exts := strings.Split(flagExts, ",")
 		env := compile.NewEnv(flagMaxErrors)
-		targets := build.TransitivePackages(args, env.Errors)
+		targets := build.TransitivePackages(args, exts, env.Errors)
 		checkErrors(cmd.Stderr(), env)
 		if len(targets) == 0 {
 			// The user's probably confused if we don't end up with any targets.
@@ -199,6 +200,7 @@ var (
 	// Common flags for the tool itself, applicable to all commands.
 	flagVerbose   bool
 	flagMaxErrors int
+	flagExts      string
 
 	// Options for each command.
 	optCompileStatus    bool
@@ -225,6 +227,7 @@ for managing Go source code.
 	// Common flags for the tool itself, applicable to all commands.
 	vdlcmd.Flags.BoolVar(&flagVerbose, "v", false, "Turn on verbose logging.")
 	vdlcmd.Flags.IntVar(&flagMaxErrors, "max_errors", -1, "Stop processing after this many errors, or -1 for unlimited.")
+	vdlcmd.Flags.StringVar(&flagExts, "exts", ".vdl", "Comma-separated list of valid VDL file name extensions.")
 
 	// Options for compile.
 	cmdCompile.Flags.BoolVar(&optCompileStatus, "status", true, "Show package names while we compile")
