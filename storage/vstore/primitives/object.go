@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"veyron2/idl"
+	"veyron2/naming"
 	"veyron2/query"
 	"veyron2/services/store"
 	"veyron2/storage"
@@ -68,10 +69,8 @@ func makeEntry(serviceEntry *store.Entry) (storage.Entry, error) {
 // succeeds.  If the Veyron name is not a value in a Veyron storage. all
 // subsequent operations on the object will fail.
 func BindObject(sServ store.Store, mount, name string) storage.Object {
-	if len(name) > 0 && name[0] == '/' {
-		name = name[1:]
-	}
-	oServ, err := store.BindObject(mount + "/" + name)
+	oServ, err := store.BindObject(naming.JoinAddressName(mount, name))
+
 	if err != nil {
 		return &errorObject{err: err}
 	}
