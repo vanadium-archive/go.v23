@@ -11,10 +11,33 @@ import (
 	_gen_ipc "veyron2/ipc"
 	_gen_naming "veyron2/naming"
 	_gen_rt "veyron2/rt"
+	_gen_val "veyron2/val"
 	_gen_vdl "veyron2/vdl"
 	_gen_verror "veyron2/verror"
 	_gen_wiretype "veyron2/wiretype"
 )
+
+type Bool bool
+
+type Byte byte
+
+type Int32 int32
+
+type Int64 int64
+
+type Uint32 uint32
+
+type Uint64 uint64
+
+type Float32 float32
+
+type Float64 float64
+
+type Complex64 complex64
+
+type Complex128 complex128
+
+type String string
 
 type Scalars struct {
 	A bool
@@ -30,6 +53,7 @@ type Scalars struct {
 	K string
 	L error
 	M _gen_vdl.Any
+	N *_gen_val.Type
 }
 
 type Composites struct {
@@ -398,7 +422,7 @@ func (s *ServerStubServiceA) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Servi
 			{Name: "err", Type: 65},
 		},
 
-		OutStream: 68,
+		OutStream: 69,
 	}
 	result.Methods["MethodA4"] = _gen_ipc.MethodSignature{
 		InArgs: []_gen_ipc.MethodArgument{
@@ -418,7 +442,7 @@ func (s *ServerStubServiceA) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Servi
 				_gen_wiretype.FieldType{Type: 0x3, Name: "Msg"},
 			},
 			"error", []string(nil)},
-		_gen_wiretype.NamedPrimitiveType{Type: 0x34, Name: "byte", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "anydata", Tags: []string(nil)}, _gen_wiretype.StructType{
+		_gen_wiretype.NamedPrimitiveType{Type: 0x34, Name: "byte", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "anydata", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x7, Name: "TypeID", Tags: []string(nil)}, _gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
 				_gen_wiretype.FieldType{Type: 0x2, Name: "A"},
 				_gen_wiretype.FieldType{Type: 0x42, Name: "B"},
@@ -433,6 +457,7 @@ func (s *ServerStubServiceA) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Servi
 				_gen_wiretype.FieldType{Type: 0x3, Name: "K"},
 				_gen_wiretype.FieldType{Type: 0x41, Name: "L"},
 				_gen_wiretype.FieldType{Type: 0x43, Name: "M"},
+				_gen_wiretype.FieldType{Type: 0x44, Name: "N"},
 			},
 			"veyron2/vdl/test_base.Scalars", []string(nil)},
 	}
@@ -608,11 +633,11 @@ func (s *ServerStubServiceB) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Servi
 	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
 	result.Methods["MethodB1"] = _gen_ipc.MethodSignature{
 		InArgs: []_gen_ipc.MethodArgument{
-			{Name: "a", Type: 68},
-			{Name: "b", Type: 74},
+			{Name: "a", Type: 69},
+			{Name: "b", Type: 75},
 		},
 		OutArgs: []_gen_ipc.MethodArgument{
-			{Name: "c", Type: 77},
+			{Name: "c", Type: 78},
 			{Name: "err", Type: 66},
 		},
 	}
@@ -624,7 +649,7 @@ func (s *ServerStubServiceB) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Servi
 				_gen_wiretype.FieldType{Type: 0x3, Name: "Msg"},
 			},
 			"error", []string(nil)},
-		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "anydata", Tags: []string(nil)}, _gen_wiretype.StructType{
+		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "anydata", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x7, Name: "TypeID", Tags: []string(nil)}, _gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
 				_gen_wiretype.FieldType{Type: 0x2, Name: "A"},
 				_gen_wiretype.FieldType{Type: 0x41, Name: "B"},
@@ -639,21 +664,22 @@ func (s *ServerStubServiceB) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Servi
 				_gen_wiretype.FieldType{Type: 0x3, Name: "K"},
 				_gen_wiretype.FieldType{Type: 0x42, Name: "L"},
 				_gen_wiretype.FieldType{Type: 0x43, Name: "M"},
+				_gen_wiretype.FieldType{Type: 0x44, Name: "N"},
 			},
 			"veyron2/vdl/test_base.Scalars", []string(nil)},
-		_gen_wiretype.SliceType{Elem: 0x44, Name: "", Tags: []string(nil)}, _gen_wiretype.MapType{Key: 0x3, Elem: 0x44, Name: "", Tags: []string(nil)}, _gen_wiretype.MapType{Key: 0x3, Elem: 0x39, Name: "", Tags: []string(nil)}, _gen_wiretype.SliceType{Elem: 0x47, Name: "", Tags: []string(nil)}, _gen_wiretype.MapType{Key: 0x44, Elem: 0x48, Name: "", Tags: []string(nil)}, _gen_wiretype.StructType{
+		_gen_wiretype.SliceType{Elem: 0x45, Name: "", Tags: []string(nil)}, _gen_wiretype.MapType{Key: 0x3, Elem: 0x45, Name: "", Tags: []string(nil)}, _gen_wiretype.MapType{Key: 0x3, Elem: 0x39, Name: "", Tags: []string(nil)}, _gen_wiretype.SliceType{Elem: 0x48, Name: "", Tags: []string(nil)}, _gen_wiretype.MapType{Key: 0x45, Elem: 0x49, Name: "", Tags: []string(nil)}, _gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
-				_gen_wiretype.FieldType{Type: 0x44, Name: "A"},
-				_gen_wiretype.FieldType{Type: 0x45, Name: "B"},
-				_gen_wiretype.FieldType{Type: 0x46, Name: "C"},
-				_gen_wiretype.FieldType{Type: 0x49, Name: "D"},
+				_gen_wiretype.FieldType{Type: 0x45, Name: "A"},
+				_gen_wiretype.FieldType{Type: 0x46, Name: "B"},
+				_gen_wiretype.FieldType{Type: 0x47, Name: "C"},
+				_gen_wiretype.FieldType{Type: 0x4a, Name: "D"},
 			},
 			"veyron2/vdl/test_base.Composites", []string(nil)},
-		_gen_wiretype.SliceType{Elem: 0x4a, Name: "", Tags: []string(nil)}, _gen_wiretype.MapType{Key: 0x3, Elem: 0x4a, Name: "", Tags: []string(nil)}, _gen_wiretype.StructType{
+		_gen_wiretype.SliceType{Elem: 0x4b, Name: "", Tags: []string(nil)}, _gen_wiretype.MapType{Key: 0x3, Elem: 0x4b, Name: "", Tags: []string(nil)}, _gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
-				_gen_wiretype.FieldType{Type: 0x4a, Name: "A"},
-				_gen_wiretype.FieldType{Type: 0x4b, Name: "B"},
-				_gen_wiretype.FieldType{Type: 0x4c, Name: "C"},
+				_gen_wiretype.FieldType{Type: 0x4b, Name: "A"},
+				_gen_wiretype.FieldType{Type: 0x4c, Name: "B"},
+				_gen_wiretype.FieldType{Type: 0x4d, Name: "C"},
 			},
 			"veyron2/vdl/test_base.CompComp", []string(nil)},
 	}

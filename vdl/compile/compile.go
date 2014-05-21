@@ -33,6 +33,10 @@ func Compile(pkgpath string, pfiles []*parse.File, env *Env) *Package {
 		env.Errors.Errorf("compile called with empty pkgpath")
 		return nil
 	}
+	if env.pkgs[pkgpath] != nil {
+		env.Errors.Errorf("%q invalid recompile (already exists in env)", pkgpath)
+		return nil
+	}
 	if len(pfiles) == 0 {
 		env.Errors.Errorf("%q compile called with no files", pkgpath)
 		return nil

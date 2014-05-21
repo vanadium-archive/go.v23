@@ -109,11 +109,6 @@ func userImportsGo(f *compile.File) (ret userImports) {
 	return
 }
 
-// usesGlobalAny returns true iff the global "any" type is used within f.
-func usesGlobalAny(f *compile.File) bool {
-	return f.TypeDeps[val.AnyType]
-}
-
 // systemImportsGo returns a list of required veyron system imports.
 //
 // TODO(toddw): Now that we have the userImports mechanism for de-duping local
@@ -121,9 +116,13 @@ func usesGlobalAny(f *compile.File) bool {
 // That'll make the template code a bit messier though.
 func systemImportsGo(f *compile.File) []string {
 	set := make(map[string]bool)
-	if usesGlobalAny(f) {
+	if f.TypeDeps[val.AnyType] {
 		// Import for vdl.Any
 		set[`_gen_vdl "veyron2/vdl"`] = true
+	}
+	if f.TypeDeps[val.TypeValType] {
+		// Import for val.Type
+		set[`_gen_val "veyron2/val"`] = true
 	}
 	if len(f.Interfaces) > 0 {
 		// Imports for the generated method: Bind{interface name}.
@@ -224,10 +223,14 @@ func typeGo(data goData, t *val.Type) string {
 	if def := data.Env.FindTypeDef(t); def != nil {
 		switch {
 		case t == val.AnyType:
-			// Special-case unnamed anydata.
 			return "_gen_vdl.Any"
+		case t == val.TypeValType:
+			return "*_gen_val.Type"
 		case def.File == compile.GlobalFile:
-			// Global primitives just use their name.
+			// Global primitives just use their name, except the special case bytes.
+			if t.Kind() == val.Bytes {
+				return "[]byte"
+			}
 			return def.Name
 		}
 		return qualifiedName(data, def.Name, def.File)
@@ -241,15 +244,17 @@ func typeGo(data goData, t *val.Type) string {
 		elem := typeGo(data, t.Elem())
 		return "map[" + key + "]" + elem
 	default:
-		panic(fmt.Errorf("vdl: unhandled type %v %v", t.Kind(), t))
+		panic(fmt.Errorf("vdl: typeGo unhandled type %v %v", t.Kind(), t))
 	}
 }
 
 // typeDefGo prints the type definition for a type.
 func typeDefGo(data goData, def *compile.TypeDef) string {
 	s := fmt.Sprintf("%stype %s ", def.Doc, def.Name)
-	switch t := def.Type; t.Kind() {
-	case val.Struct:
+	switch base, t := def.BaseType, def.Type; {
+	case base != nil:
+		s += typeGo(data, base)
+	case t.Kind() == val.Struct:
 		s += "struct {"
 		for x := 0; x < t.NumField(); x++ {
 			f := t.Field(x)
@@ -259,7 +264,7 @@ func typeDefGo(data goData, def *compile.TypeDef) string {
 		s += "\n}"
 	default:
 		// TODO(toddw): Add support for enum and oneof.
-		panic(fmt.Errorf("vdl: unhandled type %v %v", t.Kind(), t))
+		panic(fmt.Errorf("vdl: typeDefGo unhandled type %v %v", t.Kind(), t))
 	}
 	return s + def.DocSuffix
 }

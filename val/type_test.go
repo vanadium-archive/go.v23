@@ -35,8 +35,8 @@ var enums = []struct {
 	errstr string
 }{
 	{"", l{"A"}, "enum{A}", "must be named"},
-	{"FailNoLabels", l{}, "", "no Enum labels"},
-	{"FailEmptyLabel", l{""}, "", "empty Enum label"},
+	{"FailNoLabels", l{}, "", "no enum labels"},
+	{"FailEmptyLabel", l{""}, "", "empty enum label"},
 	{"A", l{"A"}, "A enum{A}", ""},
 	{"AB", l{"A", "B"}, "AB enum{A;B}", ""},
 }
@@ -50,9 +50,9 @@ var structs = []struct {
 	errstr string
 }{
 	{"", f{}, "struct{}", "must be named"},
-	{"FailFieldName", f{{"", BoolType}}, "", "empty Struct field name"},
+	{"FailFieldName", f{{"", BoolType}}, "", "empty struct field name"},
 	{"FailDupFields", f{{"A", BoolType}, {"A", Int32Type}}, "", "duplicate field name"},
-	{"FailNilFieldType", f{{"A", nil}}, "", "nil Struct field type"},
+	{"FailNilFieldType", f{{"A", nil}}, "", "nil struct field type"},
 	{"Empty", f{}, "Empty struct{}", ""},
 	{"A", f{{"A", BoolType}}, "A struct{A bool}", ""},
 	{"AB", f{{"A", BoolType}, {"B", Int32Type}}, "AB struct{A bool;B int32}", ""},
@@ -69,9 +69,9 @@ var oneofs = []struct {
 	errstr string
 }{
 	{"", t{BoolType}, "oneof{bool}", "must be named"},
-	{"FailNoTypes", t{}, "", "no OneOf types"},
-	{"FailAny", t{AnyType}, "", "type in OneOf must not be nil, OneOf or Any"},
-	{"FailDup", t{BoolType, BoolType}, "", "duplicate OneOf type"},
+	{"FailNoTypes", t{}, "", "no oneof types"},
+	{"FailAny", t{AnyType}, "", "type in oneof must not be nil, oneof or any"},
+	{"FailDup", t{BoolType, BoolType}, "", "duplicate oneof type"},
 	{"A", t{BoolType}, "A oneof{bool}", ""},
 	{"AB", t{BoolType, Int32Type}, "AB oneof{bool;int32}", ""},
 	{"ABC", t{BoolType, Int32Type, Uint64Type}, "ABC oneof{bool;int32;uint64}", ""},
@@ -83,6 +83,9 @@ func allTypes() (types []*Type) {
 		types = append(types, test.t, ListType(test.t))
 		for _, test2 := range singletons {
 			types = append(types, MapType(test.t, test2.t))
+		}
+		if test.k != Any && test.k != TypeVal {
+			types = append(types, NamedType("Named"+test.s, test.t))
 		}
 	}
 	for _, test := range enums {
@@ -151,7 +154,7 @@ func TestEnumTypes(t *testing.T) {
 	for _, test := range enums {
 		var x *Type
 		create := func() { x = EnumType(test.name, []string(test.labels)) }
-		expectPanic(t, create, test.errstr, "%s EnumOf", test.name)
+		expectPanic(t, create, test.errstr, "%s EnumType", test.name)
 		if x == nil {
 			continue
 		}
@@ -223,7 +226,7 @@ func TestStructTypes(t *testing.T) {
 	for _, test := range structs {
 		var x *Type
 		create := func() { x = StructType(test.name, []StructField(test.fields)) }
-		expectPanic(t, create, test.errstr, "%s StructOf", test.name)
+		expectPanic(t, create, test.errstr, "%s StructType", test.name)
 		if x == nil {
 			continue
 		}
@@ -277,7 +280,7 @@ func TestOneOfTypes(t *testing.T) {
 	for _, test := range oneofs {
 		var x *Type
 		create := func() { x = OneOfType(test.name, []*Type(test.types)) }
-		expectPanic(t, create, test.errstr, "%s OneOfOf", test.name)
+		expectPanic(t, create, test.errstr, "%s OneOfType", test.name)
 		if x == nil {
 			continue
 		}
@@ -325,12 +328,18 @@ func TestOneOfTypes(t *testing.T) {
 
 func TestNamedTypes(t *testing.T) {
 	for _, test := range singletons {
+		var errstr string
 		switch test.k {
 		case Any, TypeVal:
-			continue // can't name Any or TypeVal
+			errstr = "any and typeval cannot be renamed"
 		}
 		name := "Named" + test.s
-		x := NamedType(name, test.t)
+		var x *Type
+		create := func() { x = NamedType(name, test.t) }
+		expectPanic(t, create, errstr, name)
+		if x == nil {
+			continue
+		}
 		if got, want := x.Kind(), test.k; got != want {
 			t.Errorf(`Named %s got kind %q, want %q`, test.k, got, want)
 		}

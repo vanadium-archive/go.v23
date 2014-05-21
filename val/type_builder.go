@@ -8,24 +8,24 @@ import (
 )
 
 var (
-	errNameNonEmpty   = errors.New("val: Any and TypeVal cannot be named")
-	errNameEmpty      = errors.New("val: OneOf, Enum and Struct must be named")
-	errNoLabels       = errors.New("val: no Enum labels")
-	errLabelEmpty     = errors.New("val: empty Enum label")
-	errHasLabels      = errors.New("val: labels only valid for Enum")
-	errElemNil        = errors.New("val: nil elem type")
-	errElemNonNil     = errors.New("val: elem only valid for List and Map")
-	errKeyNil         = errors.New("val: nil key type")
-	errKeyNonNil      = errors.New("val: key only valid for Map")
-	errFieldTypeNil   = errors.New("val: nil Struct field type")
-	errFieldNameEmpty = errors.New("val: empty Struct field name")
-	errHasFields      = errors.New("val: fields only valid for Struct")
-	errOneOfTypeBad   = errors.New("val: type in OneOf must not be nil, OneOf or Any")
-	errNoTypes        = errors.New("val: no OneOf types")
-	errHasTypes       = errors.New("val: types only valid on OneOf")
-	errBaseNil        = errors.New("val: base type unset for named type")
-	errBaseCycle      = errors.New("val: invalid named type cycle")
-	errNotBuilt       = errors.New("val: TypeBuilder.Build must be called before Pending.Built")
+	errNameNonEmpty   = errors.New("any and typeval cannot be renamed")
+	errNameEmpty      = errors.New("oneof, enum and struct must be named")
+	errNoLabels       = errors.New("no enum labels")
+	errLabelEmpty     = errors.New("empty enum label")
+	errHasLabels      = errors.New("labels only valid for enum")
+	errElemNil        = errors.New("nil elem type")
+	errElemNonNil     = errors.New("elem only valid for list and map")
+	errKeyNil         = errors.New("nil key type")
+	errKeyNonNil      = errors.New("key only valid for map")
+	errFieldTypeNil   = errors.New("nil struct field type")
+	errFieldNameEmpty = errors.New("empty struct field name")
+	errHasFields      = errors.New("fields only valid for struct")
+	errOneOfTypeBad   = errors.New("type in oneof must not be nil, oneof or any")
+	errNoTypes        = errors.New("no oneof types")
+	errHasTypes       = errors.New("types only valid on oneof")
+	errBaseNil        = errors.New("base type unset for named type")
+	errBaseCycle      = errors.New("invalid named type cycle")
+	errNotBuilt       = errors.New("TypeBuilder.Build must be called before Pending.Built")
 )
 
 // Primitive types, the basis for all other types.  All have empty names.
@@ -378,7 +378,7 @@ func enforceUniqueNames(t *Type, names map[string]*Type) error {
 		if found != t {
 			one := uniqueType(found, make(map[*Type]bool))
 			two := uniqueType(t, make(map[*Type]bool))
-			return fmt.Errorf("val: duplicate type names %q and %q", one, two)
+			return fmt.Errorf("duplicate type names %q and %q", one, two)
 		}
 		return nil
 	}
@@ -522,7 +522,7 @@ func validType(t *Type) error {
 	// Check kind
 	switch t.kind {
 	case internalNamed:
-		panic(fmt.Errorf("val: internal kind %d used in validType", t.kind))
+		panic(fmt.Errorf("internal kind %d used in validType", t.kind))
 	}
 	// Check name
 	switch t.kind {
@@ -585,7 +585,7 @@ func validType(t *Type) error {
 				return errFieldNameEmpty
 			}
 			if seen[f.Name] {
-				return fmt.Errorf("val: struct %q has duplicate field name %q", t.name, f.Name)
+				return fmt.Errorf("struct %q has duplicate field name %q", t.name, f.Name)
 			}
 			seen[f.Name] = true
 		}
@@ -606,7 +606,7 @@ func validType(t *Type) error {
 				return err
 			}
 			if seen[u.unique] {
-				return fmt.Errorf("val: duplicate OneOf type: %s", u.unique)
+				return fmt.Errorf("duplicate oneof type: %s", u.unique)
 			}
 			seen[u.unique] = true
 		}

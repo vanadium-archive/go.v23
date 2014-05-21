@@ -10,11 +10,25 @@ import (
 // TypeDef represents a user-defined named type definition in the compiled
 // results.
 type TypeDef struct {
-	NamePos                  // name, parse position and docs
-	Type           *val.Type // type definition
-	FieldDoc       []string  // [only valid for struct] docs for each field
-	FieldDocSuffix []string  // [only valid for struct] suffix docs for each field
-	File           *File     // parent file that this type is defined in
+	NamePos           // name, parse position and docs
+	Type    *val.Type // type of this type definition
+
+	// BaseType is the type that Type is based on.  The BaseType may be named or
+	// unnamed.  The base type is nil if it corresponds to an enum, struct or
+	// oneof literal, simply because val.Type doesn't allow these to be unnamed.
+	// E.g.
+	//                                 BaseType
+	//   type Bool    bool;            bool
+	//   type Bool2   Bool;            Bool
+	//   type List    []int32;         []int32
+	//   type List2   List;            List
+	//   type Struct  struct{A bool};  nil
+	//   type Struct2 Struct;          Struct
+	BaseType *val.Type
+
+	FieldDoc       []string // [only valid for struct] docs for each field
+	FieldDocSuffix []string // [only valid for struct] suffix docs for each field
+	File           *File    // parent file that this type is defined in
 }
 
 func (x *TypeDef) String() string {
@@ -31,7 +45,7 @@ func compileTypeDefs(pkg *Package, pfiles []*parse.File, env *Env) {
 		pfiles:   pfiles,
 		env:      env,
 		tbuilder: &val.TypeBuilder{},
-		builders: make(map[string]typeBuilder),
+		builders: make(map[string]*typeBuilder),
 	}
 	if td.Declare(); !env.Errors.IsEmpty() {
 		return
@@ -56,13 +70,14 @@ type typeDefiner struct {
 	pfiles   []*parse.File
 	env      *Env
 	tbuilder *val.TypeBuilder
-	builders map[string]typeBuilder
+	builders map[string]*typeBuilder
 }
 
 type typeBuilder struct {
 	def     *TypeDef
 	ptype   parse.Type
-	pending val.PendingType
+	pending val.PendingType // pending type that we're building
+	base    val.PendingType // base type that pending is based on, may be nil
 }
 
 // Declare creates builders for each type defined in the package.
@@ -79,13 +94,14 @@ func (td typeDefiner) Declare() {
 	}
 }
 
-func (td typeDefiner) makeTypeBuilder(file *File, pdef *parse.TypeDef) (ret typeBuilder) {
+func (td typeDefiner) makeTypeBuilder(file *File, pdef *parse.TypeDef) *typeBuilder {
+	if err := ValidIdent(pdef.Name); err != nil {
+		td.env.prefixErrorf(file, pdef.Pos, err, "type %s invalid name", pdef.Name)
+		return nil
+	}
+	ret := new(typeBuilder)
 	ret.def = &TypeDef{NamePos: NamePos(pdef.NamePos), File: file}
 	ret.ptype = pdef.Type
-	if err := ValidIdent(pdef.Name); err != nil {
-		td.env.errorf(file, pdef.Pos, "type %s invalid name (%s)", pdef.Name, err)
-		return
-	}
 	// We use the qualified name to actually name the type, to ensure types
 	// defined in separate packages are hash-consed separately.
 	qname := file.Package.QualifiedName(pdef.Name)
@@ -104,7 +120,7 @@ func (td typeDefiner) makeTypeBuilder(file *File, pdef *parse.TypeDef) (ret type
 	default:
 		td.env.errorf(file, pt.Pos(), "type %s invalid (type definition can't be based on %s type)", pdef.Name, pt.Kind())
 	}
-	return
+	return ret
 }
 
 // Define uses the builders to describe each type.  Named types defined in
@@ -112,14 +128,27 @@ func (td typeDefiner) makeTypeBuilder(file *File, pdef *parse.TypeDef) (ret type
 // defined in this package are represented by the builders.
 func (td typeDefiner) Define() {
 	for _, b := range td.builders {
+		def, file := b.def, b.def.File
 		switch pt := b.ptype.(type) {
 		case *parse.TypeNamed, *parse.TypeArray, *parse.TypeList, *parse.TypeMap:
-			if base := compilePendingType(pt, b.def.File, td.env, td.tbuilder, td.builders); base != nil {
+			if base := compilePendingType(pt, file, td.env, td.tbuilder, td.builders); base != nil {
+				switch tbase := base.(type) {
+				case *val.Type:
+					if tbase == TypeError {
+						td.env.errorf(file, def.Pos, "error cannot be renamed")
+						continue // keep going to catch more errors
+					}
+					def.BaseType = tbase
+				case val.PendingType:
+					b.base = tbase
+				default:
+					panic(fmt.Errorf("vdl: typeDefiner.Define unhandled TypeOrPending %T %v", tbase, tbase))
+				}
 				b.pending.(val.PendingNamed).SetBase(base)
 			}
 		case *parse.TypeStruct:
 			for _, pfield := range pt.Fields {
-				if ftype := compilePendingType(pfield.Type, b.def.File, td.env, td.tbuilder, td.builders); ftype != nil {
+				if ftype := compilePendingType(pfield.Type, file, td.env, td.tbuilder, td.builders); ftype != nil {
 					b.pending.(val.PendingStruct).AppendField(pfield.Name, ftype)
 				}
 			}
@@ -149,14 +178,14 @@ func compileType(ptype parse.Type, file *File, env *Env) *val.Type {
 		}
 		return t
 	default:
-		panic(fmt.Errorf("vdl: val.TypeOrPending isn't Type or Pending"))
+		panic(fmt.Errorf("vdl: compileType unhandled TypeOrPending %T %v", top, top))
 	}
 }
 
 // compilePendingType returns the *val.Type corresponding to ptype if it is
 // already defined, or a PendingType from builders if it is currently being
 // built.
-func compilePendingType(ptype parse.Type, file *File, env *Env, tbuilder *val.TypeBuilder, builders map[string]typeBuilder) val.TypeOrPending {
+func compilePendingType(ptype parse.Type, file *File, env *Env, tbuilder *val.TypeBuilder, builders map[string]*typeBuilder) val.TypeOrPending {
 	switch pt := ptype.(type) {
 	case *parse.TypeNamed:
 		if def := env.ResolveType(pt.Name, file); def != nil {
@@ -196,9 +225,17 @@ func (td typeDefiner) Build() {
 		for _, pdef := range pfile.TypeDefs {
 			b := td.builders[pdef.Name]
 			def, file := b.def, b.def.File
+			if b.base != nil {
+				base, err := b.base.Built()
+				if err != nil {
+					td.env.prefixErrorf(file, b.ptype.Pos(), err, "%s base type invalid", def.Name)
+					continue // keep going to catch more errors
+				}
+				def.BaseType = base
+			}
 			t, err := b.pending.Built()
 			if err != nil {
-				td.env.errorf(file, def.Pos, "%s invalid (%s)", def.Name, err)
+				td.env.prefixErrorf(file, def.Pos, err, "%s invalid", def.Name)
 				continue // keep going to catch more errors
 			}
 			def.Type = t
