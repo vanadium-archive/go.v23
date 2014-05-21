@@ -15,7 +15,9 @@ import (
 	"veyron2/rt"
 	"veyron2/vdl"
 	"veyron2/vdl/test_base"
-	//"veyron2/wiretype"
+	"veyron2/wiretype"
+
+	"veyron2/idl"
 )
 
 var generatedError = errors.New("generated error")
@@ -189,148 +191,144 @@ func TestCalculator(t *testing.T) {
 			t.Errorf("GetMethodTags(%q): got %v but expected %v", tagTest.method, tags, tagTest.expected)
 		}
 	}
+	signature, err := serverStub.Signature(nil)
+	expectedSignature := map[string]ipc.MethodSignature{
+		"Add": ipc.MethodSignature{
+			InArgs: []ipc.MethodArgument{
+				{Name: "a", Type: 36},
+				{Name: "b", Type: 36},
+			},
+			OutArgs: []ipc.MethodArgument{
+				{Name: "", Type: 36},
+				{Name: "", Type: 66},
+			},
+		},
+		"DivMod": ipc.MethodSignature{
+			InArgs: []ipc.MethodArgument{
+				{Name: "a", Type: 36},
+				{Name: "b", Type: 36},
+			},
+			OutArgs: []ipc.MethodArgument{
+				{Name: "quot", Type: 36},
+				{Name: "rem", Type: 36},
+				{Name: "err", Type: 66},
+			},
+		},
+		"Sub": ipc.MethodSignature{
+			InArgs: []ipc.MethodArgument{
+				{Name: "args", Type: 67},
+			},
+			OutArgs: []ipc.MethodArgument{
+				{Name: "", Type: 36},
+				{Name: "", Type: 66},
+			},
+		},
+		"Mul": ipc.MethodSignature{
+			InArgs: []ipc.MethodArgument{
+				{Name: "nested", Type: 68},
+			},
+			OutArgs: []ipc.MethodArgument{
+				{Name: "", Type: 36},
+				{Name: "", Type: 66},
+			},
+		},
+		"GenError": ipc.MethodSignature{
+			InArgs: []ipc.MethodArgument{},
+			OutArgs: []ipc.MethodArgument{
+				{Name: "", Type: 66},
+			},
+		},
+		"Count": ipc.MethodSignature{
+			InArgs: []ipc.MethodArgument{
+				{Name: "Start", Type: 36},
+			},
+			OutArgs: []ipc.MethodArgument{
+				{Name: "", Type: 66},
+			},
 
-	/*
-		signature, err := serverStub.Signature(nil)
-		expectedSignature := map[string]ipc.MethodSignature{
-			"Add": ipc.MethodSignature{
-				InArgs: []ipc.MethodArgument{
-					{Name: "A", Type: 36},
-					{Name: "B", Type: 36},
-				},
-				OutArgs: []ipc.MethodArgument{
-					{Name: "", Type: 36},
-					{Name: "", Type: 66},
-				},
+			OutStream: 36,
+		},
+		"StreamingAdd": ipc.MethodSignature{
+			InArgs: []ipc.MethodArgument{},
+			OutArgs: []ipc.MethodArgument{
+				{Name: "total", Type: 36},
+				{Name: "err", Type: 66},
 			},
-			"DivMod": ipc.MethodSignature{
-				InArgs: []ipc.MethodArgument{
-					{Name: "A", Type: 36},
-					{Name: "B", Type: 36},
-				},
-				OutArgs: []ipc.MethodArgument{
-					{Name: "Quot", Type: 36},
-					{Name: "Remain", Type: 36},
-					{Name: "E", Type: 66},
-				},
+			InStream:  36,
+			OutStream: 36,
+		},
+		"QuoteAny": ipc.MethodSignature{
+			InArgs: []ipc.MethodArgument{
+				{Name: "a", Type: 69},
 			},
-			"Sub": ipc.MethodSignature{
-				InArgs: []ipc.MethodArgument{
-					{Name: "args", Type: 67},
-				},
-				OutArgs: []ipc.MethodArgument{
-					{Name: "", Type: 36},
-					{Name: "", Type: 66},
-				},
+			OutArgs: []ipc.MethodArgument{
+				{Name: "", Type: 69},
+				{Name: "", Type: 66},
 			},
-			"Mul": ipc.MethodSignature{
-				InArgs: []ipc.MethodArgument{
-					{Name: "nestedArgs", Type: 69},
-				},
-				OutArgs: []ipc.MethodArgument{
-					{Name: "", Type: 36},
-					{Name: "", Type: 66},
-				},
+		},
+		"Sine": ipc.MethodSignature{
+			InArgs: []ipc.MethodArgument{
+				{Name: "angle", Type: 26},
 			},
-			"GenError": ipc.MethodSignature{
-				InArgs: []ipc.MethodArgument{},
-				OutArgs: []ipc.MethodArgument{
-					{Name: "", Type: 66},
-				},
+			OutArgs: []ipc.MethodArgument{
+				{Name: "", Type: 26},
+				{Name: "", Type: 70},
 			},
-			"Count": ipc.MethodSignature{
-				InArgs: []ipc.MethodArgument{
-					{Name: "Start", Type: 36},
-				},
-				OutArgs: []ipc.MethodArgument{
-					{Name: "", Type: 66},
-				},
+		},
+		"Cosine": ipc.MethodSignature{
+			InArgs: []ipc.MethodArgument{
+				{Name: "angle", Type: 26},
+			},
+			OutArgs: []ipc.MethodArgument{
+				{Name: "", Type: 26},
+				{Name: "", Type: 70},
+			},
+		},
+		"Exp": ipc.MethodSignature{
+			InArgs: []ipc.MethodArgument{
+				{Name: "x", Type: 26},
+			},
+			OutArgs: []ipc.MethodArgument{
+				{Name: "", Type: 26},
+				{Name: "", Type: 71},
+			},
+		},
+		"On": ipc.MethodSignature{
+			InArgs: []ipc.MethodArgument{},
+			OutArgs: []ipc.MethodArgument{
+				{Name: "", Type: 65},
+			},
+		},
+		"Off": ipc.MethodSignature{
+			InArgs: []ipc.MethodArgument{},
+			OutArgs: []ipc.MethodArgument{
+				{Name: "", Type: 65},
+			},
+		},
+	}
+	if !reflect.DeepEqual(signature.Methods, expectedSignature) {
+		t.Errorf("Signature Methods: got %v but expected %v", signature.Methods, expectedSignature)
+	}
 
-				OutStream: 36,
-			},
-			"StreamingAdd": ipc.MethodSignature{
-				InArgs: []ipc.MethodArgument{},
-				OutArgs: []ipc.MethodArgument{
-					{Name: "Total", Type: 36},
-					{Name: "E", Type: 66},
-				},
-				InStream:  36,
-				OutStream: 36,
-			},
-			"QuoteAny": ipc.MethodSignature{
-				InArgs: []ipc.MethodArgument{
-					{Name: "Any", Type: 70},
-				},
-				OutArgs: []ipc.MethodArgument{
-					{Name: "", Type: 70},
-					{Name: "", Type: 66},
-				},
-			},
-			"Sine": ipc.MethodSignature{
-				InArgs: []ipc.MethodArgument{
-					{Name: "Angle", Type: 26},
-				},
-				OutArgs: []ipc.MethodArgument{
-					{Name: "", Type: 26},
-					{Name: "", Type: 71},
-				},
-			},
-			"Cosine": ipc.MethodSignature{
-				InArgs: []ipc.MethodArgument{
-					{Name: "Angle", Type: 26},
-				},
-				OutArgs: []ipc.MethodArgument{
-					{Name: "", Type: 26},
-					{Name: "", Type: 71},
-				},
-			},
-			"Exp": ipc.MethodSignature{
-				InArgs: []ipc.MethodArgument{
-					{Name: "X", Type: 26},
-				},
-				OutArgs: []ipc.MethodArgument{
-					{Name: "", Type: 26},
-					{Name: "", Type: 72},
-				},
-			},
-			"On": ipc.MethodSignature{
-				InArgs: []ipc.MethodArgument{},
-				OutArgs: []ipc.MethodArgument{
-					{Name: "", Type: 65},
-				},
-			},
-			"Off": ipc.MethodSignature{
-				InArgs: []ipc.MethodArgument{},
-				OutArgs: []ipc.MethodArgument{
-					{Name: "", Type: 65},
-				},
-			},
-		}
-		if !reflect.DeepEqual(signature.Methods, expectedSignature) {
-			t.Errorf("Signature Methods: got %v but expected %v", signature.Methods, expectedSignature)
-		}
+	expectedTypeDefs := []idl.AnyData{
+		// Calculator:
+		wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{Type: 3, Name: "Id"}, wiretype.FieldType{Type: 3, Name: "Msg"}}, "error", nil},
+		// Arith:
+		wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{Type: 3, Name: "Id"}, wiretype.FieldType{Type: 3, Name: "Msg"}}, "error", nil},
+		wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{36, "A"},
+			wiretype.FieldType{36, "B"}}, "veyron2/vdl/test_base.Args", nil},
+		wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{66, "Args"}}, "veyron2/vdl/test_base.NestedArgs", nil},
+		wiretype.NamedPrimitiveType{1, "anydata", nil},
+		// Trig:
+		wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{Type: 3, Name: "Id"}, wiretype.FieldType{Type: 3, Name: "Msg"}}, "error", nil},
+		// Exp:
+		wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{Type: 3, Name: "Id"}, wiretype.FieldType{Type: 3, Name: "Msg"}}, "error", nil},
+	}
 
-		expectedTypeDefs := []vdl.Any{
-			// Calculator:
-			wiretype.NamedPrimitiveType{1, "error", nil},
-			// Arith:
-			wiretype.NamedPrimitiveType{1, "error", nil},
-			wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{36, "A"},
-				wiretype.FieldType{36, "B"}}, "base.Args", nil},
-			wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{36, "A"},
-				wiretype.FieldType{36, "B"}}, "Args", nil},
-			wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{67, "Args"}}, "base.NestedArgs", nil},
-			wiretype.NamedPrimitiveType{1, "anydata", nil},
-			// Trig:
-			wiretype.NamedPrimitiveType{1, "error", nil},
-			// Exp:
-			wiretype.NamedPrimitiveType{1, "error", nil},
-		}
+	if !reflect.DeepEqual(signature.TypeDefs, expectedTypeDefs) {
+		t.Errorf("Signature TypeDefs: got %v but expected %v", signature.TypeDefs, expectedTypeDefs)
+	}
 
-		if !reflect.DeepEqual(signature.TypeDefs, expectedTypeDefs) {
-			t.Errorf("Signature TypeDefs: got %v but expected %v", signature.TypeDefs, expectedTypeDefs)
-		}
-	*/
 }
 
 func TestArith(t *testing.T) {
@@ -467,99 +465,95 @@ func TestArith(t *testing.T) {
 		if !reflect.DeepEqual(tags, expectedTags) {
 			t.Errorf("GetMethodTags: got %v but expected %v", tags, expectedTags)
 		}
-		/*
-				signature, err := serverStub.Signature(nil)
-				expectedSignature := map[string]ipc.MethodSignature{
-					"Add": ipc.MethodSignature{
-						InArgs: []ipc.MethodArgument{
-							{Name: "A", Type: 36},
-							{Name: "B", Type: 36},
-						},
-						OutArgs: []ipc.MethodArgument{
-							{Name: "", Type: 36},
-							{Name: "", Type: 65},
-						},
-					},
-					"DivMod": ipc.MethodSignature{
-						InArgs: []ipc.MethodArgument{
-							{Name: "A", Type: 36},
-							{Name: "B", Type: 36},
-						},
-						OutArgs: []ipc.MethodArgument{
-							{Name: "Quot", Type: 36},
-							{Name: "Remain", Type: 36},
-							{Name: "E", Type: 65},
-						},
-					},
-					"Sub": ipc.MethodSignature{
-						InArgs: []ipc.MethodArgument{
-							{Name: "args", Type: 66},
-						},
-						OutArgs: []ipc.MethodArgument{
-							{Name: "", Type: 36},
-							{Name: "", Type: 65},
-						},
-					},
-					"Mul": ipc.MethodSignature{
-						InArgs: []ipc.MethodArgument{
-							{Name: "nestedArgs", Type: 68},
-						},
-						OutArgs: []ipc.MethodArgument{
-							{Name: "", Type: 36},
-							{Name: "", Type: 65},
-						},
-					},
-					"GenError": ipc.MethodSignature{
-						InArgs: []ipc.MethodArgument{},
-						OutArgs: []ipc.MethodArgument{
-							{Name: "", Type: 65},
-						},
-					},
-					"Count": ipc.MethodSignature{
-						InArgs: []ipc.MethodArgument{
-							{Name: "Start", Type: 36},
-						},
-						OutArgs: []ipc.MethodArgument{
-							{Name: "", Type: 65},
-						},
+		signature, err := serverStub.Signature(nil)
+		expectedSignature := map[string]ipc.MethodSignature{
+			"Add": ipc.MethodSignature{
+				InArgs: []ipc.MethodArgument{
+					{Name: "a", Type: 36},
+					{Name: "b", Type: 36},
+				},
+				OutArgs: []ipc.MethodArgument{
+					{Name: "", Type: 36},
+					{Name: "", Type: 65},
+				},
+			},
+			"DivMod": ipc.MethodSignature{
+				InArgs: []ipc.MethodArgument{
+					{Name: "a", Type: 36},
+					{Name: "b", Type: 36},
+				},
+				OutArgs: []ipc.MethodArgument{
+					{Name: "quot", Type: 36},
+					{Name: "rem", Type: 36},
+					{Name: "err", Type: 65},
+				},
+			},
+			"Sub": ipc.MethodSignature{
+				InArgs: []ipc.MethodArgument{
+					{Name: "args", Type: 66},
+				},
+				OutArgs: []ipc.MethodArgument{
+					{Name: "", Type: 36},
+					{Name: "", Type: 65},
+				},
+			},
+			"Mul": ipc.MethodSignature{
+				InArgs: []ipc.MethodArgument{
+					{Name: "nested", Type: 67},
+				},
+				OutArgs: []ipc.MethodArgument{
+					{Name: "", Type: 36},
+					{Name: "", Type: 65},
+				},
+			},
+			"GenError": ipc.MethodSignature{
+				InArgs: []ipc.MethodArgument{},
+				OutArgs: []ipc.MethodArgument{
+					{Name: "", Type: 65},
+				},
+			},
+			"Count": ipc.MethodSignature{
+				InArgs: []ipc.MethodArgument{
+					{Name: "Start", Type: 36},
+				},
+				OutArgs: []ipc.MethodArgument{
+					{Name: "", Type: 65},
+				},
 
-						OutStream: 36,
-					},
-					"StreamingAdd": ipc.MethodSignature{
-						InArgs: []ipc.MethodArgument{},
-						OutArgs: []ipc.MethodArgument{
-							{Name: "Total", Type: 36},
-							{Name: "E", Type: 65},
-						},
-						InStream:  36,
-						OutStream: 36,
-					},
-					"QuoteAny": ipc.MethodSignature{
-						InArgs: []ipc.MethodArgument{
-							{Name: "Any", Type: 69},
-						},
-						OutArgs: []ipc.MethodArgument{
-							{Name: "", Type: 69},
-							{Name: "", Type: 65},
-						},
-					},
-				}
-				if !reflect.DeepEqual(signature.Methods, expectedSignature) {
-					t.Errorf("Signature Methods: got %v but expected %v", signature.Methods, expectedSignature)
-				}
+				OutStream: 36,
+			},
+			"StreamingAdd": ipc.MethodSignature{
+				InArgs: []ipc.MethodArgument{},
+				OutArgs: []ipc.MethodArgument{
+					{Name: "total", Type: 36},
+					{Name: "err", Type: 65},
+				},
+				InStream:  36,
+				OutStream: 36,
+			},
+			"QuoteAny": ipc.MethodSignature{
+				InArgs: []ipc.MethodArgument{
+					{Name: "a", Type: 68},
+				},
+				OutArgs: []ipc.MethodArgument{
+					{Name: "", Type: 68},
+					{Name: "", Type: 65},
+				},
+			},
+		}
+		if !reflect.DeepEqual(signature.Methods, expectedSignature) {
+			t.Errorf("Signature Methods: got %v but expected %v", signature.Methods, expectedSignature)
+		}
 
-				expectedTypeDefs := []vdl.Any{
-					wiretype.NamedPrimitiveType{1, "error", nil},
-					wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{36, "A"}, wiretype.FieldType{36, "B"}}, "base.Args", nil},
-					wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{36, "A"}, wiretype.FieldType{36, "B"}}, "Args", nil},
-					wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{67, "Args"}}, "base.NestedArgs", nil},
-					wiretype.NamedPrimitiveType{1, "anydata", nil},
-				}
+		expectedTypeDefs := []idl.AnyData{
+			wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{Type: 3, Name: "Id"}, wiretype.FieldType{Type: 3, Name: "Msg"}}, "error", nil},
+			wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{36, "A"}, wiretype.FieldType{36, "B"}}, "veyron2/vdl/test_base.Args", nil},
+			wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{66, "Args"}}, "veyron2/vdl/test_base.NestedArgs", nil},
+			wiretype.NamedPrimitiveType{1, "anydata", nil},
+		}
 
-				if !reflect.DeepEqual(signature.TypeDefs, expectedTypeDefs) {
-					t.Errorf("Signature TypeDefs: got %v but expected %v", signature.TypeDefs, expectedTypeDefs)
-				}
-			}
-		*/
+		if !reflect.DeepEqual(signature.TypeDefs, expectedTypeDefs) {
+			t.Errorf("Signature TypeDefs: got %v but expected %v", signature.TypeDefs, expectedTypeDefs)
+		}
 	}
 }

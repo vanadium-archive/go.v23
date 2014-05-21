@@ -11,6 +11,7 @@ import (
 	"path"
 	"unicode"
 
+	"veyron2/idl"
 	"veyron2/ipc"
 )
 
@@ -188,7 +189,10 @@ func (iface *Interface) Signature() *ipc.ServiceSignature {
 		}
 		sig.Methods[method.Name] = ms
 	}
-	sig.TypeDefs = wtc.Defs
+	sig.TypeDefs = []idl.AnyData{}
+	for _, def := range wtc.Defs {
+		sig.TypeDefs = append(sig.TypeDefs, def)
+	}
 	return sig
 }
 

@@ -15,6 +15,7 @@ import (
 	"veyron2/vdl"
 	"veyron2/vdl/compile"
 	"veyron2/wiretype"
+	"veyron2/wiretype/build"
 )
 
 // GoOpts specifies options for generating Go files.
@@ -127,10 +128,11 @@ func systemImportsGo(f *compile.File) []string {
 	if len(f.Interfaces) > 0 {
 		// Imports for the generated method: Bind{interface name}.
 		set[`_gen_rt "veyron2/rt"`] = true
-		//set[`_gen_wiretype "veyron2/wiretype"`] = true
+		set[`_gen_wiretype "veyron2/wiretype"`] = true
 		set[`_gen_ipc "veyron2/ipc"`] = true
 		set[`_gen_veyron2 "veyron2"`] = true
 		set[`_gen_vdl "veyron2/vdl"`] = true
+		set[`_gen_idl "veyron2/idl"`] = true
 		set[`_gen_naming "veyron2/naming"`] = true
 	}
 	// If the user has specified any error IDs, typically we need to import the
@@ -177,7 +179,8 @@ func init() {
 		"hasStreamingInput":        hasStreamingInputGo,
 		"hasStreamingOutput":       hasStreamingOutputGo,
 		"prefixName":               prefixName,
-		"typeDefsCode":             typeDefsCode,
+		"signatureMethods":         signatureMethods,
+		"signatureTypeDefs":        signatureTypeDefs,
 	}
 	goTemplate = template.Must(template.New("genGo").Funcs(funcMap).Parse(genGo))
 }
@@ -537,10 +540,66 @@ func serverStubImplGo(data goData, iface *compile.Interface, method *compile.Met
 	return buf.String()
 }
 
+type methodArgument struct {
+	Name string // Argument name
+	Type wiretype.TypeID
+}
+
+type methodSignature struct {
+	InArgs    []methodArgument // Positional Argument information.
+	OutArgs   []methodArgument
+	InStream  wiretype.TypeID // Type of streaming arguments (or TypeIDInvalid if none). The type IDs here use the definitions in ServiceSigature.TypeDefs.
+	OutStream wiretype.TypeID
+}
+
+type serviceSignature struct {
+	TypeDefs build.TypeDefs // A slice of wiretype structures form the type definition.
+	Methods  map[string]methodSignature
+}
+
+// signature generates the service signature of the interface.
+func signature(iface *compile.Interface) *serviceSignature {
+
+	sig := &serviceSignature{Methods: map[string]methodSignature{}}
+	wtc := wireTypeConverter{}
+	for _, method := range iface.Methods {
+		ms := methodSignature{}
+		for _, inarg := range method.InArgs {
+			ms.InArgs = append(ms.InArgs, methodArgument{
+				Name: inarg.Name,
+				Type: wtc.WireTypeID(inarg.Type),
+			})
+		}
+		for _, outarg := range method.OutArgs {
+			ms.OutArgs = append(ms.OutArgs, methodArgument{
+				Name: outarg.Name,
+				Type: wtc.WireTypeID(outarg.Type),
+			})
+		}
+		if method.InStream != nil {
+			ms.InStream = wtc.WireTypeID(method.InStream)
+		}
+		if method.OutStream != nil {
+			ms.OutStream = wtc.WireTypeID(method.OutStream)
+		}
+		sig.Methods[method.Name] = ms
+	}
+	sig.TypeDefs = wtc.Defs
+	return sig
+}
+
+func signatureMethods(iface *compile.Interface) map[string]methodSignature {
+	return signature(iface).Methods
+}
+
+func signatureTypeDefs(iface *compile.Interface) string {
+	return typeDefsCode(signature(iface).TypeDefs)
+}
+
 // generate the go code for type defs
 func typeDefsCode(td []vdl.Any) string {
 	var buf bytes.Buffer
-	buf.WriteString("[]_gen_vdl.Any{\n")
+	buf.WriteString("[]_gen_idl.AnyData{\n")
 	for _, wt := range td {
 		switch t := wt.(type) {
 		case wiretype.StructType:
@@ -798,6 +857,77 @@ type ServerStub{{$iface.Name}} struct {
 
 func (s *ServerStub{{$iface.Name}}) GetMethodTags(method string) []interface{} {
 	return Get{{$iface.Name}}MethodTags(method)
+}
+
+func (s *ServerStub{{$iface.Name}}) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
+	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
+{{range $mname, $method := signatureMethods $iface}}{{printf "\tresult.Methods[%q] = _gen_ipc.MethodSignature{" $mname}}
+		InArgs:[]_gen_ipc.MethodArgument{
+{{range $arg := $method.InArgs}}{{printf "\t\t\t{Name:%q, Type:%d},\n" ($arg.Name) ($arg.Type)}}{{end}}{{printf "\t\t},"}}
+		OutArgs:[]_gen_ipc.MethodArgument{
+{{range $arg := $method.OutArgs}}{{printf "\t\t\t{Name:%q, Type:%d},\n" ($arg.Name) ($arg.Type)}}{{end}}{{printf "\t\t},"}}
+{{if $method.InStream}}{{printf "\t\t"}}InStream: {{$method.InStream}},{{end}}
+{{if $method.OutStream}}{{printf "\t\t"}}OutStream: {{$method.OutStream}},{{end}}
+	}
+{{end}}
+result.TypeDefs = {{signatureTypeDefs $iface}}
+{{if $iface.Embeds}}	var ss _gen_ipc.ServiceSignature
+var firstAdded int
+{{range $interface := $iface.Embeds}}	ss, _ = s.{{prefixName $interface.NamePos.Name "ServerStub"}}.Signature(call)
+	firstAdded = len(result.TypeDefs)
+	for k, v := range ss.Methods {
+		for i, _ := range v.InArgs {
+			if v.InArgs[i].Type >= _gen_wiretype.TypeIDFirst {
+				v.InArgs[i].Type += _gen_wiretype.TypeID(firstAdded)
+			}
+		}
+		for i, _ := range v.OutArgs {
+			if v.OutArgs[i].Type >= _gen_wiretype.TypeIDFirst {
+				v.OutArgs[i].Type += _gen_wiretype.TypeID(firstAdded)
+			}
+		}
+		if v.InStream >= _gen_wiretype.TypeIDFirst {
+			v.InStream += _gen_wiretype.TypeID(firstAdded)
+		}
+		if v.OutStream >= _gen_wiretype.TypeIDFirst {
+			v.OutStream += _gen_wiretype.TypeID(firstAdded)
+		}
+		result.Methods[k] = v
+	}
+	//TODO(bprosnitz) combine type definitions from embeded interfaces in a way that doesn't cause duplication.
+	for _, d := range ss.TypeDefs {
+		switch wt := d.(type) {
+		case _gen_wiretype.SliceType:
+			if wt.Elem >= _gen_wiretype.TypeIDFirst {
+				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+			}
+			d = wt
+		case _gen_wiretype.ArrayType:
+			if wt.Elem >= _gen_wiretype.TypeIDFirst {
+				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+			}
+			d = wt
+		case _gen_wiretype.MapType:
+			if wt.Key >= _gen_wiretype.TypeIDFirst {
+				wt.Key += _gen_wiretype.TypeID(firstAdded)
+			}
+			if wt.Elem >= _gen_wiretype.TypeIDFirst {
+				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+			}
+			d = wt
+		case _gen_wiretype.StructType:
+			for _, fld := range wt.Fields {
+				if fld.Type >= _gen_wiretype.TypeIDFirst {
+					fld.Type += _gen_wiretype.TypeID(firstAdded)
+				}
+			}
+			d = wt
+		}
+		result.TypeDefs = append(result.TypeDefs, d)
+	}
+{{end}}{{end}}
+
+	return result, nil
 }
 
 func (s *ServerStub{{$iface.Name}}) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {

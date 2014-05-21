@@ -3,15 +3,15 @@ package build
 import (
 	"reflect"
 
-	"veyron2/idl"
+	"veyron2/vdl"
 	"veyron2/wiretype"
 )
 
 // TypeDefs is a slice of type definitions.
-type TypeDefs []idl.AnyData
+type TypeDefs []vdl.Any
 
 // Put looks up the TypeID for the wire type or adds a new one.
-func (td TypeDefs) Put(wt idl.AnyData) (TypeDefs, wiretype.TypeID) {
+func (td TypeDefs) Put(wt vdl.Any) (TypeDefs, wiretype.TypeID) {
 	// Check if it is a bootstrap type.
 	for _, pair := range wiretype.BootstrapTypes {
 		if reflect.DeepEqual(pair.WT, wt) {

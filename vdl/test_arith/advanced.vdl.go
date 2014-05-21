@@ -8,10 +8,12 @@ import (
 
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
 	_gen_veyron2 "veyron2"
+	_gen_idl "veyron2/idl"
 	_gen_ipc "veyron2/ipc"
 	_gen_naming "veyron2/naming"
 	_gen_rt "veyron2/rt"
 	_gen_vdl "veyron2/vdl"
+	_gen_wiretype "veyron2/wiretype"
 )
 
 // Trigonometry is an interface that specifies a couple trigonometric functions.
@@ -127,6 +129,39 @@ type ServerStubTrigonometry struct {
 
 func (s *ServerStubTrigonometry) GetMethodTags(method string) []interface{} {
 	return GetTrigonometryMethodTags(method)
+}
+
+func (s *ServerStubTrigonometry) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
+	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
+	result.Methods["Cosine"] = _gen_ipc.MethodSignature{
+		InArgs: []_gen_ipc.MethodArgument{
+			{Name: "angle", Type: 26},
+		},
+		OutArgs: []_gen_ipc.MethodArgument{
+			{Name: "", Type: 26},
+			{Name: "", Type: 65},
+		},
+	}
+	result.Methods["Sine"] = _gen_ipc.MethodSignature{
+		InArgs: []_gen_ipc.MethodArgument{
+			{Name: "angle", Type: 26},
+		},
+		OutArgs: []_gen_ipc.MethodArgument{
+			{Name: "", Type: 26},
+			{Name: "", Type: 65},
+		},
+	}
+
+	result.TypeDefs = []_gen_idl.AnyData{
+		_gen_wiretype.StructType{
+			[]_gen_wiretype.FieldType{
+				_gen_wiretype.FieldType{Type: 0x3, Name: "Id"},
+				_gen_wiretype.FieldType{Type: 0x3, Name: "Msg"},
+			},
+			"error", []string(nil)},
+	}
+
+	return result, nil
 }
 
 func (s *ServerStubTrigonometry) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
@@ -276,6 +311,120 @@ type ServerStubAdvancedMath struct {
 
 func (s *ServerStubAdvancedMath) GetMethodTags(method string) []interface{} {
 	return GetAdvancedMathMethodTags(method)
+}
+
+func (s *ServerStubAdvancedMath) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
+	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
+
+	result.TypeDefs = []_gen_idl.AnyData{}
+	var ss _gen_ipc.ServiceSignature
+	var firstAdded int
+	ss, _ = s.ServerStubTrigonometry.Signature(call)
+	firstAdded = len(result.TypeDefs)
+	for k, v := range ss.Methods {
+		for i, _ := range v.InArgs {
+			if v.InArgs[i].Type >= _gen_wiretype.TypeIDFirst {
+				v.InArgs[i].Type += _gen_wiretype.TypeID(firstAdded)
+			}
+		}
+		for i, _ := range v.OutArgs {
+			if v.OutArgs[i].Type >= _gen_wiretype.TypeIDFirst {
+				v.OutArgs[i].Type += _gen_wiretype.TypeID(firstAdded)
+			}
+		}
+		if v.InStream >= _gen_wiretype.TypeIDFirst {
+			v.InStream += _gen_wiretype.TypeID(firstAdded)
+		}
+		if v.OutStream >= _gen_wiretype.TypeIDFirst {
+			v.OutStream += _gen_wiretype.TypeID(firstAdded)
+		}
+		result.Methods[k] = v
+	}
+	//TODO(bprosnitz) combine type definitions from embeded interfaces in a way that doesn't cause duplication.
+	for _, d := range ss.TypeDefs {
+		switch wt := d.(type) {
+		case _gen_wiretype.SliceType:
+			if wt.Elem >= _gen_wiretype.TypeIDFirst {
+				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+			}
+			d = wt
+		case _gen_wiretype.ArrayType:
+			if wt.Elem >= _gen_wiretype.TypeIDFirst {
+				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+			}
+			d = wt
+		case _gen_wiretype.MapType:
+			if wt.Key >= _gen_wiretype.TypeIDFirst {
+				wt.Key += _gen_wiretype.TypeID(firstAdded)
+			}
+			if wt.Elem >= _gen_wiretype.TypeIDFirst {
+				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+			}
+			d = wt
+		case _gen_wiretype.StructType:
+			for _, fld := range wt.Fields {
+				if fld.Type >= _gen_wiretype.TypeIDFirst {
+					fld.Type += _gen_wiretype.TypeID(firstAdded)
+				}
+			}
+			d = wt
+		}
+		result.TypeDefs = append(result.TypeDefs, d)
+	}
+	ss, _ = s.ServerStubExp.Signature(call)
+	firstAdded = len(result.TypeDefs)
+	for k, v := range ss.Methods {
+		for i, _ := range v.InArgs {
+			if v.InArgs[i].Type >= _gen_wiretype.TypeIDFirst {
+				v.InArgs[i].Type += _gen_wiretype.TypeID(firstAdded)
+			}
+		}
+		for i, _ := range v.OutArgs {
+			if v.OutArgs[i].Type >= _gen_wiretype.TypeIDFirst {
+				v.OutArgs[i].Type += _gen_wiretype.TypeID(firstAdded)
+			}
+		}
+		if v.InStream >= _gen_wiretype.TypeIDFirst {
+			v.InStream += _gen_wiretype.TypeID(firstAdded)
+		}
+		if v.OutStream >= _gen_wiretype.TypeIDFirst {
+			v.OutStream += _gen_wiretype.TypeID(firstAdded)
+		}
+		result.Methods[k] = v
+	}
+	//TODO(bprosnitz) combine type definitions from embeded interfaces in a way that doesn't cause duplication.
+	for _, d := range ss.TypeDefs {
+		switch wt := d.(type) {
+		case _gen_wiretype.SliceType:
+			if wt.Elem >= _gen_wiretype.TypeIDFirst {
+				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+			}
+			d = wt
+		case _gen_wiretype.ArrayType:
+			if wt.Elem >= _gen_wiretype.TypeIDFirst {
+				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+			}
+			d = wt
+		case _gen_wiretype.MapType:
+			if wt.Key >= _gen_wiretype.TypeIDFirst {
+				wt.Key += _gen_wiretype.TypeID(firstAdded)
+			}
+			if wt.Elem >= _gen_wiretype.TypeIDFirst {
+				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+			}
+			d = wt
+		case _gen_wiretype.StructType:
+			for _, fld := range wt.Fields {
+				if fld.Type >= _gen_wiretype.TypeIDFirst {
+					fld.Type += _gen_wiretype.TypeID(firstAdded)
+				}
+			}
+			d = wt
+		}
+		result.TypeDefs = append(result.TypeDefs, d)
+	}
+
+	return result, nil
 }
 
 func (s *ServerStubAdvancedMath) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {

@@ -8,10 +8,12 @@ package exp
 import (
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
 	_gen_veyron2 "veyron2"
+	_gen_idl "veyron2/idl"
 	_gen_ipc "veyron2/ipc"
 	_gen_naming "veyron2/naming"
 	_gen_rt "veyron2/rt"
 	_gen_vdl "veyron2/vdl"
+	_gen_wiretype "veyron2/wiretype"
 )
 
 // Exp is the interface the client binds and uses.
@@ -113,6 +115,30 @@ type ServerStubExp struct {
 
 func (s *ServerStubExp) GetMethodTags(method string) []interface{} {
 	return GetExpMethodTags(method)
+}
+
+func (s *ServerStubExp) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
+	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
+	result.Methods["Exp"] = _gen_ipc.MethodSignature{
+		InArgs: []_gen_ipc.MethodArgument{
+			{Name: "x", Type: 26},
+		},
+		OutArgs: []_gen_ipc.MethodArgument{
+			{Name: "", Type: 26},
+			{Name: "", Type: 65},
+		},
+	}
+
+	result.TypeDefs = []_gen_idl.AnyData{
+		_gen_wiretype.StructType{
+			[]_gen_wiretype.FieldType{
+				_gen_wiretype.FieldType{Type: 0x3, Name: "Id"},
+				_gen_wiretype.FieldType{Type: 0x3, Name: "Msg"},
+			},
+			"error", []string(nil)},
+	}
+
+	return result, nil
 }
 
 func (s *ServerStubExp) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {

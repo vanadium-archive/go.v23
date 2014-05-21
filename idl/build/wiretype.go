@@ -8,7 +8,7 @@ import (
 	wiretype_build "veyron2/wiretype/build"
 )
 
-// wireTypeConverter converts IDL build types to wiretype IDs and maintains a slice of the type
+// wireTypeConverter converts val types to wiretype IDs and maintains a slice of the type
 // definitions needed to fully describe the type.
 type wireTypeConverter struct {
 	Defs wiretype_build.TypeDefs
