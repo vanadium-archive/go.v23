@@ -37,7 +37,7 @@ func copyKVPair(kv kvPair) kvPair {
 }
 
 func (kv kvPair) String() string {
-	return stringRep(kv.key.t, kv.key.rep, true) + ": " + stringRep(kv.val.t, kv.val.rep, true)
+	return stringRep(kv.key.t, kv.key.rep) + ": " + stringRep(kv.val.t, kv.val.rep)
 }
 
 func zeroRepMap(t *Type) repMap {
@@ -259,9 +259,9 @@ func (rep repStruct) String(t *Type) string {
 		s += fieldt.Name
 		s += ": "
 		if field == nil {
-			s += stringRep(fieldt.Type, zeroRep(fieldt.Type), true)
+			s += stringRep(fieldt.Type, zeroRep(fieldt.Type))
 		} else {
-			s += stringRep(field.t, field.rep, true)
+			s += stringRep(field.t, field.rep)
 		}
 	}
 	return s + "}"

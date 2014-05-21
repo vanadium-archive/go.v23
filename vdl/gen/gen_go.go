@@ -300,7 +300,7 @@ func valueGo(v *val.Value) string {
 		s += strconv.FormatFloat(imag(v.Complex()), 'g', -1, bitlen(v.Kind())) + "i"
 		return s
 	case val.String:
-		return strconv.Quote(v.String())
+		return strconv.Quote(v.RawString())
 	case val.Bytes:
 		return strconv.Quote(string(v.Bytes()))
 	}

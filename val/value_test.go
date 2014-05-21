@@ -28,23 +28,23 @@ func TestValue(t *testing.T) {
 		t *Type
 		s string
 	}{
-		{Bool, BoolType, "false"},
-		{Int32, Int32Type, "0"},
-		{Int64, Int64Type, "0"},
-		{Uint32, Uint32Type, "0"},
-		{Uint64, Uint64Type, "0"},
-		{Float32, Float32Type, "0"},
-		{Float64, Float64Type, "0"},
-		{Complex64, Complex64Type, "(0+0i)"},
-		{Complex128, Complex128Type, "(0+0i)"},
-		{String, StringType, ""},
-		{Bytes, BytesType, ""},
-		{TypeVal, TypeValType, "any"},
-		{Enum, EnumType("Enum", []string{"A", "B", "C"}), "A"},
-		{List, ListType(StringType), "{}"},
-		{Map, MapType(StringType, Int64Type), "{}"},
-		{Map, MapType(keyType, Int64Type), "{}"},
-		{Struct, StructType("Struct", []StructField{{"A", Int64Type}, {"B", StringType}, {"C", BoolType}}), `{A: 0, B: "", C: false}`},
+		{Bool, BoolType, "bool(false)"},
+		{Int32, Int32Type, "int32(0)"},
+		{Int64, Int64Type, "int64(0)"},
+		{Uint32, Uint32Type, "uint32(0)"},
+		{Uint64, Uint64Type, "uint64(0)"},
+		{Float32, Float32Type, "float32(0)"},
+		{Float64, Float64Type, "float64(0)"},
+		{Complex64, Complex64Type, "complex64(0+0i)"},
+		{Complex128, Complex128Type, "complex128(0+0i)"},
+		{String, StringType, `string("")`},
+		{Bytes, BytesType, `bytes("")`},
+		{TypeVal, TypeValType, "typeval(any)"},
+		{Enum, EnumType("Enum", []string{"A", "B", "C"}), "Enum enum{A;B;C}(A)"},
+		{List, ListType(StringType), "[]string{}"},
+		{Map, MapType(StringType, Int64Type), "map[string]int64{}"},
+		{Map, MapType(keyType, Int64Type), "map[Key struct{I int64;S string}]int64{}"},
+		{Struct, StructType("Struct", []StructField{{"A", Int64Type}, {"B", StringType}, {"C", BoolType}}), `Struct struct{A int64;B string;C bool}{A: 0, B: "", C: false}`},
 		{OneOf, OneOfType("OneOf", []*Type{Int64Type, StringType}), "nil"},
 		{Any, AnyType, "nil"},
 	}
@@ -128,7 +128,7 @@ func TestValue(t *testing.T) {
 // of kinds and methods.
 
 func assignBool(t *testing.T, x *Value) {
-	newval, newstr := true, "true"
+	newval, newstr := true, "bool(true)"
 	if x.Kind() == Bool {
 		if got, want := x.Bool(), false; got != want {
 			t.Errorf(`Bool zero value got %v, want %v`, got, want)
@@ -147,7 +147,7 @@ func assignBool(t *testing.T, x *Value) {
 }
 
 func assignInt(t *testing.T, x *Value) {
-	newval, newstr := int64(123), "123"
+	newval, newstr32, newstr64 := int64(123), "int32(123)", "int64(123)"
 	switch x.Kind() {
 	case Int32, Int64:
 		if got, want := x.Int(), int64(0); got != want {
@@ -156,6 +156,13 @@ func assignInt(t *testing.T, x *Value) {
 		x.AssignInt(newval)
 		if got, want := x.Int(), newval; got != want {
 			t.Errorf(`Int assign value got %v, want %v`, got, want)
+		}
+		var newstr string
+		switch x.Kind() {
+		case Int32:
+			newstr = newstr32
+		case Int64:
+			newstr = newstr64
 		}
 		if got, want := x.String(), newstr; got != want {
 			t.Errorf(`Int string got %v, want %v`, got, want)
@@ -167,7 +174,7 @@ func assignInt(t *testing.T, x *Value) {
 }
 
 func assignUint(t *testing.T, x *Value) {
-	newval, newstr := uint64(123), "123"
+	newval, newstr32, newstr64 := uint64(123), "uint32(123)", "uint64(123)"
 	switch x.Kind() {
 	case Uint32, Uint64:
 		if got, want := x.Uint(), uint64(0); got != want {
@@ -176,6 +183,13 @@ func assignUint(t *testing.T, x *Value) {
 		x.AssignUint(newval)
 		if got, want := x.Uint(), newval; got != want {
 			t.Errorf(`Uint assign value got %v, want %v`, got, want)
+		}
+		var newstr string
+		switch x.Kind() {
+		case Uint32:
+			newstr = newstr32
+		case Uint64:
+			newstr = newstr64
 		}
 		if got, want := x.String(), newstr; got != want {
 			t.Errorf(`Uint string got %v, want %v`, got, want)
@@ -187,7 +201,7 @@ func assignUint(t *testing.T, x *Value) {
 }
 
 func assignFloat(t *testing.T, x *Value) {
-	newval, newstr := float64(1.23), "1.23"
+	newval, newstr32, newstr64 := float64(1.23), "float32(1.23)", "float64(1.23)"
 	switch x.Kind() {
 	case Float32, Float64:
 		if got, want := x.Float(), float64(0); got != want {
@@ -196,6 +210,13 @@ func assignFloat(t *testing.T, x *Value) {
 		x.AssignFloat(newval)
 		if got, want := x.Float(), newval; got != want {
 			t.Errorf(`Float assign value got %v, want %v`, got, want)
+		}
+		var newstr string
+		switch x.Kind() {
+		case Float32:
+			newstr = newstr32
+		case Float64:
+			newstr = newstr64
 		}
 		if got, want := x.String(), newstr; got != want {
 			t.Errorf(`Float string got %v, want %v`, got, want)
@@ -207,7 +228,7 @@ func assignFloat(t *testing.T, x *Value) {
 }
 
 func assignComplex(t *testing.T, x *Value) {
-	newval, newstr := complex128(1+2i), "(1+2i)"
+	newval, newstr64, newstr128 := complex128(1+2i), "complex64(1+2i)", "complex128(1+2i)"
 	switch x.Kind() {
 	case Complex64, Complex128:
 		if got, want := x.Complex(), complex128(0); got != want {
@@ -216,6 +237,13 @@ func assignComplex(t *testing.T, x *Value) {
 		x.AssignComplex(newval)
 		if got, want := x.Complex(), newval; got != want {
 			t.Errorf(`Complex assign value got %v, want %v`, got, want)
+		}
+		var newstr string
+		switch x.Kind() {
+		case Complex64:
+			newstr = newstr64
+		case Complex128:
+			newstr = newstr128
 		}
 		if got, want := x.String(), newstr; got != want {
 			t.Errorf(`Complex string got %v, want %v`, got, want)
@@ -228,22 +256,29 @@ func assignComplex(t *testing.T, x *Value) {
 
 func assignString(t *testing.T, x *Value) {
 	newval := "abc"
+	zerostr := `string("")`
+	newvalstr := `string("abc")`
 	if x.Kind() == String {
-		if got, want := x.String(), ""; got != want {
+		if got, want := x.String(), zerostr; got != want {
 			t.Errorf(`String zero value got %v, want %v`, got, want)
 		}
 		x.AssignString(newval)
-		if got, want := x.String(), newval; got != want {
+		if got, want := x.RawString(), newval; got != want {
 			t.Errorf(`String assign value got %v, want %v`, got, want)
 		}
+		if got, want := x.String(), newvalstr; got != want {
+			t.Errorf(`String assign string rep got %v, want %v`, got, want)
+		}
 	} else {
-		// Exception: the String method is allowed on all kinds of types.
+		expectMismatchedKind(t, func() { x.RawString() })
 		expectMismatchedKind(t, func() { x.AssignString(newval) })
 	}
 }
 
 func assignBytes(t *testing.T, x *Value) {
 	newval := []byte("abc")
+	newvalstr := `bytes("abc")`
+	modifiedstr := `bytes("aZc")`
 	if x.Kind() == Bytes {
 		if got, want := x.Bytes(), []byte(""); !bytes.Equal(got, want) {
 			t.Errorf(`Bytes zero value got %v, want %v`, got, want)
@@ -257,7 +292,7 @@ func assignBytes(t *testing.T, x *Value) {
 		if got, want := x.Bytes(), newval; !bytes.Equal(got, want) {
 			t.Errorf(`Bytes assign value got %v, want %v`, got, want)
 		}
-		if got, want := x.String(), "aZc"; got != want {
+		if got, want := x.String(), modifiedstr; got != want {
 			t.Errorf(`Bytes string got %v, want %v`, got, want)
 		}
 		// CopyBytes doesn't allow aliasing.
@@ -270,7 +305,7 @@ func assignBytes(t *testing.T, x *Value) {
 		if got, want := x.Bytes(), []byte("abc"); !bytes.Equal(got, want) {
 			t.Errorf(`Bytes assign value got %v, want %v`, got, want)
 		}
-		if got, want := x.String(), "abc"; got != want {
+		if got, want := x.String(), newvalstr; got != want {
 			t.Errorf(`Bytes string got %v, want %v`, got, want)
 		}
 	} else {
@@ -281,7 +316,7 @@ func assignBytes(t *testing.T, x *Value) {
 }
 
 func assignTypeVal(t *testing.T, x *Value) {
-	newval, newstr := BoolType, "bool"
+	newval, newstr := BoolType, "typeval(bool)"
 	if x.Kind() == TypeVal {
 		if got, want := x.TypeVal(), zeroTypeVal; got != want {
 			t.Errorf(`TypeVal zero value got %v, want %v`, got, want)
@@ -313,14 +348,14 @@ func assignEnum(t *testing.T, x *Value) {
 		if gi, gl, wi, wl := x.EnumIndex(), x.EnumLabel(), 1, "B"; gi != wi || gl != wl {
 			t.Errorf(`Enum assign index value got [%d]%v, want [%d]%v`, gi, gl, wi, wl)
 		}
-		if got, want := x.String(), "B"; got != want {
+		if got, want := x.String(), "Enum enum{A;B;C}(B)"; got != want {
 			t.Errorf(`Bytes string got %v, want %v`, got, want)
 		}
 		x.AssignEnumIndex(2)
 		if gi, gl, wi, wl := x.EnumIndex(), x.EnumLabel(), 2, "C"; gi != wi || gl != wl {
 			t.Errorf(`Enum assign label value got [%d]%v, want [%d]%v`, gi, gl, wi, wl)
 		}
-		if got, want := x.String(), "C"; got != want {
+		if got, want := x.String(), "Enum enum{A;B;C}(C)"; got != want {
 			t.Errorf(`Bytes string got %v, want %v`, got, want)
 		}
 	} else {
@@ -340,38 +375,38 @@ func assignList(t *testing.T, x *Value) {
 		if got, want := x.Len(), 2; got != want {
 			t.Errorf(`List assign len got %v, want %v`, got, want)
 		}
-		if g0, g1, w0, w1 := x.Index(0).String(), x.Index(1).String(), "", ""; g0 != w0 || g1 != w1 {
+		if g0, g1, w0, w1 := x.Index(0).String(), x.Index(1).String(), `string("")`, `string("")`; g0 != w0 || g1 != w1 {
 			t.Errorf(`List assign values got %v %v, want %v %v`, g0, g1, w0, w1)
 		}
-		if got, want := x.String(), `{"", ""}`; got != want {
+		if got, want := x.String(), `[]string{"", ""}`; got != want {
 			t.Errorf(`Bytes string got %v, want %v`, got, want)
 		}
 		x.Index(0).AssignString("A")
 		x.Index(1).AssignString("B")
-		if g0, g1, w0, w1 := x.Index(0).String(), x.Index(1).String(), "A", "B"; g0 != w0 || g1 != w1 {
+		if g0, g1, w0, w1 := x.Index(0).String(), x.Index(1).String(), `string("A")`, `string("B")`; g0 != w0 || g1 != w1 {
 			t.Errorf(`List assign values got %v %v, want %v %v`, g0, g1, w0, w1)
 		}
-		if got, want := x.String(), `{"A", "B"}`; got != want {
+		if got, want := x.String(), `[]string{"A", "B"}`; got != want {
 			t.Errorf(`Bytes string got %v, want %v`, got, want)
 		}
 		x.AssignLen(1)
 		if got, want := x.Len(), 1; got != want {
 			t.Errorf(`List assign len got %v, want %v`, got, want)
 		}
-		if g0, w0 := x.Index(0).String(), "A"; g0 != w0 {
+		if g0, w0 := x.Index(0).String(), `string("A")`; g0 != w0 {
 			t.Errorf(`List assign values got %v, want %v`, g0, w0)
 		}
-		if got, want := x.String(), `{"A"}`; got != want {
+		if got, want := x.String(), `[]string{"A"}`; got != want {
 			t.Errorf(`Bytes string got %v, want %v`, got, want)
 		}
 		x.AssignLen(3)
 		if got, want := x.Len(), 3; got != want {
 			t.Errorf(`List assign len got %v, want %v`, got, want)
 		}
-		if g0, g1, g2, w0, w1, w2 := x.Index(0).String(), x.Index(1).String(), x.Index(2).String(), "A", "", ""; g0 != w0 || g1 != w1 || g2 != w2 {
+		if g0, g1, g2, w0, w1, w2 := x.Index(0).String(), x.Index(1).String(), x.Index(2).String(), `string("A")`, `string("")`, `string("")`; g0 != w0 || g1 != w1 || g2 != w2 {
 			t.Errorf(`List assign values got %v %v %v, want %v %v %v`, g0, g1, g2, w0, w1, w2)
 		}
-		if got, want := x.String(), `{"A", "", ""}`; got != want {
+		if got, want := x.String(), `[]string{"A", "", ""}`; got != want {
 			t.Errorf(`Bytes string got %v, want %v`, got, want)
 		}
 	} else {
@@ -404,12 +439,21 @@ func matchKeys(a, b []*Value) bool {
 // matchMapString returns true iff a and b are equivalent string representations
 // of a map, dealing with entries in different orders.
 func matchMapString(a, b string) bool {
-	n := len(a)
-	if n != len(b) || n < 2 || a[0] != '{' || a[n-1] != '}' || b[0] != '{' || b[n-1] != '}' {
+	atypeval := strings.SplitN(a, "{", 2)
+	btypeval := strings.SplitN(b, "{", 2)
+	if len(atypeval) != 2 || len(btypeval) != 2 || atypeval[0] != btypeval[0] {
 		return false
 	}
-	asplit := strings.Split(a[1:n-1], ", ")
-	bsplit := strings.Split(b[1:n-1], ", ")
+
+	a = atypeval[1]
+	b = btypeval[1]
+
+	n := len(a)
+	if n != len(b) || n < 1 || a[n-1] != '}' || b[n-1] != '}' {
+		return false
+	}
+	asplit := strings.Split(a[:n-1], ", ")
+	bsplit := strings.Split(b[:n-1], ", ")
 	sort.Strings(asplit)
 	sort.Strings(bsplit)
 	return strings.Join(asplit, "") == strings.Join(bsplit, "")
@@ -419,11 +463,11 @@ func assignMap(t *testing.T, x *Value) {
 	if x.Kind() == Map {
 		k1, k2, k3 := key1, key2, key3
 		v1, v2 := int1, int2
-		mapstr1 := `{{I: 1, S: "A"}: 1, {I: 2, S: "B"}: 2}`
-		mapstr2 := `{{I: 2, S: "B"}: 2}`
+		mapstr1 := `map[Key struct{I int64;S string}]int64{{I: 1, S: "A"}: 1, {I: 2, S: "B"}: 2}`
+		mapstr2 := `map[Key struct{I int64;S string}]int64{{I: 2, S: "B"}: 2}`
 		if x.Type().Key() == StringType {
 			k1, k2, k3 = strA, strB, strC
-			mapstr1, mapstr2 = `{"A": 1, "B": 2}`, `{"B": 2}`
+			mapstr1, mapstr2 = `map[string]int64{"A": 1, "B": 2}`, `map[string]int64{"B": 2}`
 		}
 
 		if got, want := x.MapKeys(), []*Value{}; !matchKeys(got, want) {
@@ -482,14 +526,14 @@ func assignStruct(t *testing.T, x *Value) {
 		if x.IsZero() {
 			t.Errorf(`Struct assign index 0 is zero`)
 		}
-		if got, want := x.String(), `{A: 1, B: "", C: false}`; got != want {
+		if got, want := x.String(), `Struct struct{A int64;B string;C bool}{A: 1, B: "", C: false}`; got != want {
 			t.Errorf(`Struct assign index 0 got %v, want %v`, got, want)
 		}
 		x.Field(1).AssignString("a")
 		if x.IsZero() {
 			t.Errorf(`Struct assign index 1 is zero`)
 		}
-		if got, want := x.String(), `{A: 1, B: "a", C: false}`; got != want {
+		if got, want := x.String(), `Struct struct{A int64;B string;C bool}{A: 1, B: "a", C: false}`; got != want {
 			t.Errorf(`Struct assign index 1 got %v, want %v`, got, want)
 		}
 		y := Copy(x)
@@ -511,14 +555,14 @@ func assignOneOfAny(t *testing.T, x *Value) {
 		if got, want := x.Elem(), int1; !Equal(got, want) {
 			t.Errorf(`OneOf/Any assign value got %v, want %v`, got, want)
 		}
-		if got, want := x.String(), "1"; got != want {
+		if got, want := x.String(), "int64(1)"; got != want {
 			t.Errorf(`OneOf/Any assign string got %v, want %v`, got, want)
 		}
 		x.Assign(strA)
 		if got, want := x.Elem(), strA; !Equal(got, want) {
 			t.Errorf(`OneOf/Any assign value got %v, want %v`, got, want)
 		}
-		if got, want := x.String(), "A"; got != want {
+		if got, want := x.String(), `string("A")`; got != want {
 			t.Errorf(`OneOf/Any assign string got %v, want %v`, got, want)
 		}
 	} else {

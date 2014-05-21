@@ -89,7 +89,7 @@ func ConstFromValue(v *Value) Const {
 	case Bool:
 		return Const{v.Bool(), v.Type()}
 	case String:
-		return Const{v.String(), v.Type()}
+		return Const{v.RawString(), v.Type()}
 	case Bytes:
 		return Const{string(v.Bytes()), v.Type()}
 	case Int32, Int64:
@@ -131,18 +131,14 @@ func (c Const) String() string {
 		return "invalid"
 	}
 	if v, ok := c.rep.(*Value); ok {
-		switch v.Kind() {
-		case List, Map, Struct:
-			// E.g. []int32{1, 2, 3}
-			return v.Type().String() + v.String()
-		}
+		return v.String()
 	}
 	if c.repType == nil {
-		// E.g. 12345 [untyped integer]
-		return cRepString(c.rep) + " [" + c.typeString() + "]"
+		// E.g. 12345
+		return cRepString(c.rep)
 	}
-	// E.g. 12345 [type int32]
-	return cRepString(c.rep) + " [type " + c.typeString() + "]"
+	// E.g. int32(12345)
+	return c.typeString() + "(" + cRepString(c.rep) + ")"
 }
 
 func (c Const) typeString() string {

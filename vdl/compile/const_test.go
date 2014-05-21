@@ -114,15 +114,15 @@ var constTests = []struct {
 	{
 		"UntypedInteger",
 		p{{"a", `const Res = 123`, nil,
-			`final const invalid \(123 \[untyped integer\] must be assigned a type\)`}}},
+			`final const invalid \(123 must be assigned a type\)`}}},
 	{
 		"UntypedFloat",
 		p{{"a", `const Res = 1.5`, nil,
-			`final const invalid \(1\.5 \[untyped rational\] must be assigned a type\)`}}},
+			`final const invalid \(1\.5 must be assigned a type\)`}}},
 	{
 		"UntypedComplex",
 		p{{"a", `const Res = 3.4+9.8i`, nil,
-			`final const invalid \(3\.4\+9\.8i \[untyped complex\] must be assigned a type\)`}}},
+			`final const invalid \(3\.4\+9\.8i must be assigned a type\)`}}},
 
 	// Test composite literals.
 	{

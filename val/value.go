@@ -135,20 +135,16 @@ func copySliceOfValues(orig []*Value) []*Value {
 	return slice
 }
 
-func stringRep(t *Type, rep interface{}, quotes bool) string {
+func stringRep(t *Type, rep interface{}) string {
 	switch t.kind {
-	case Bool, Int32, Int64, Uint32, Uint64, Float32, Float64, Complex64, Complex128:
+	case Bool, Int32, Int64, Uint32, Uint64, Float32, Float64:
 		return fmt.Sprint(rep)
+	case Complex64, Complex128:
+		return fmt.Sprintf("%v+%vi", real(rep.(complex128)), imag(rep.(complex128)))
 	case String:
-		if quotes {
-			return strconv.Quote(rep.(string))
-		}
-		return rep.(string)
+		return strconv.Quote(rep.(string))
 	case Bytes:
-		if quotes {
-			return strconv.Quote(string(rep.([]byte)))
-		}
-		return string(rep.([]byte))
+		return strconv.Quote(string(rep.([]byte)))
 	case TypeVal:
 		return rep.(*Type).String()
 	case Enum:
@@ -159,7 +155,7 @@ func stringRep(t *Type, rep interface{}, quotes bool) string {
 			if index > 0 {
 				s += ", "
 			}
-			s += stringRep(elem.t, elem.rep, true)
+			s += stringRep(elem.t, elem.rep)
 		}
 		return s + "}"
 	case Map:
@@ -168,7 +164,7 @@ func stringRep(t *Type, rep interface{}, quotes bool) string {
 		return rep.(repStruct).String(t)
 	case OneOf, Any:
 		if elem := rep.(*Value); elem != nil {
-			return stringRep(elem.t, elem.rep, quotes)
+			return elem.String() // include the type
 		}
 		return "nil"
 	default:
@@ -328,10 +324,25 @@ func (v *Value) Complex() complex128 {
 	return v.rep.(complex128)
 }
 
-// String returns the underlying value of a String, and a human-readable
-// representation for values of other kinds of types.
+// RawString returns the underlying value of a String.
+func (v *Value) RawString() string {
+	v.t.checkKind("RawString", String)
+	return v.rep.(string)
+}
+
+// String returns a human-readable representation of the value.
+// To retrieve the underlying value of a String, use RawString.
 func (v *Value) String() string {
-	return stringRep(v.t, v.rep, false)
+	switch v.t.Kind() {
+	case Struct, Map, List:
+		// { } are used instead of parens for composites,
+		return v.t.String() + stringRep(v.t, v.rep)
+	case OneOf, Any:
+		// Just show the inner type for oneof or any.
+		return stringRep(v.t, v.rep)
+	default:
+		return v.t.String() + "(" + stringRep(v.t, v.rep) + ")"
+	}
 }
 
 // Bytes returns the underlying value of a Bytes.
