@@ -1,6 +1,8 @@
 // Package mounttable defines a set of mount points and how to traverse them.
 package mounttable
 
+import "veyron2/security"
+
 // MountedServer represents a server mounted on a specific name.
 type MountedServer struct {
         // Server is the OA that's mounted.
@@ -22,7 +24,7 @@ type MountEntry struct {
 
 type Globable interface {
 	// Glob returns all matching entries at the given server.
-	Glob(pattern string) stream<_, MountEntry> error
+	Glob(pattern string) stream<_, MountEntry> error {security.ReadLabel}
 }
 
 // MountTable defines the interface to talk to a mounttable.
@@ -39,18 +41,18 @@ type MountTable interface {
 	// duration.  A server with an expired TTL should never appear in the
 	// results nor affect the operation of any MountTable method, and should
 	// act as if it was never present as far as the interface is concerned.
-	Mount(Server string, TTL uint32) error
+	Mount(Server string, TTL uint32) error {security.WriteLabel}
 
 	// Unmount removes Server from the mount point.  If Server is empty, remove all
 	// servers mounted there.
-	Unmount(Server string) error
+	Unmount(Server string) error {security.WriteLabel}
 
         // TODO(caprita): We can simplify this to just return []string where
         // each string already has the suffix baked in, and no ttl.
 
 	// ResolveStep takes the next step in resolving a name.  Returns the next
 	// servers to query and the suffix at those servers.
-	ResolveStep() (Servers []MountedServer, Suffix string, Error error)
+	ResolveStep() (Servers []MountedServer, Suffix string, Error error) {security.ReadLabel}
 
 	Globable
 }

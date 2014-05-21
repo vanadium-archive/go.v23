@@ -5,6 +5,8 @@
 package mounttable
 
 import (
+	"veyron2/security"
+
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
 	_gen_veyron2 "veyron2"
 	_gen_idl "veyron2/idl"
@@ -245,7 +247,7 @@ func (__gen_s *ServerStubGlobable) Glob(call _gen_ipc.ServerCall, pattern string
 func GetGlobableMethodTags(method string) []interface{} {
 	switch method {
 	case "Glob":
-		return []interface{}{}
+		return []interface{}{security.Label(1)}
 	default:
 		return nil
 	}
@@ -556,11 +558,11 @@ func GetMountTableMethodTags(method string) []interface{} {
 	}
 	switch method {
 	case "Mount":
-		return []interface{}{}
+		return []interface{}{security.Label(2)}
 	case "Unmount":
-		return []interface{}{}
+		return []interface{}{security.Label(2)}
 	case "ResolveStep":
-		return []interface{}{}
+		return []interface{}{security.Label(1)}
 	default:
 		return nil
 	}
