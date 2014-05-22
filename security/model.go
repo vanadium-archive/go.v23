@@ -1,3 +1,5 @@
+// Package security provides the API for identity, authentication and authorization
+// in veyron.
 package security
 
 import (
@@ -5,8 +7,8 @@ import (
 	"time"
 )
 
-// PublicID is the interface for the non-secret component of the unique
-// identity of a principal in veyron.
+// PublicID is the interface for the non-secret component of a principal's
+// unique identity.
 type PublicID interface {
 	// Names returns a list of human-readable names associated with the principal.
 	// The returned names act only as a hint, there is no guarantee that they are
@@ -26,11 +28,11 @@ type PublicID interface {
 	// that is held only by the principal represented by this PublicID.
 	PublicKey() *ecdsa.PublicKey
 
-	// Authorize determines whether a principal corresponding to this
-	// object is authorized for the provided context, and if so returns
-	// a new PublicID that only carries the authorizations necessary for
-	// the context. The returned PublicID is always non-nil (in the absence
-	// of errors) and has the same public key as this PublicID.
+	// Authorize determines whether the PublicID has credentials that are valid
+	// under the provided context. If so, Authorize returns a new PublicID that
+	// carries only the valid credentials. The returned PublicID is always
+	// non-nil in the absence of errors and has the same public key as this
+	// PublicID.
 	Authorize(context Context) (PublicID, error)
 
 	// ThirdPartyCaveats returns the set of third-party restrictions on the scope of the
@@ -39,11 +41,11 @@ type PublicID interface {
 	ThirdPartyCaveats() []ServiceCaveat
 }
 
-// PrivateID is the interface for the secret component of the unique identity
-// of a principal in veyron.
+// PrivateID is the interface for the secret component of a principal's unique
+// identity.
 //
-// Each principal in veyron has a unique (private, public) key pair. The private
-// key is known only to the principal and is not expected to be shared.
+// Each principal has a unique (private, public) key pair. The private key
+// is known only to the principal and is not expected to be shared.
 type PrivateID interface {
 	// PublicID returns the non-secret component of principal's identity
 	// (which can be encoded and transmitted across the network perhaps).
@@ -59,9 +61,9 @@ type PrivateID interface {
 	//   provided blessingName string.
 	// - Is valid for the provided duration only if both the constraints on the
 	//   PrivateID and the provided service caveats are met.
-	// Note: Before invoking the Bless method it is important to verify that the
-	// principal identified by the provided PublicID indeed possesses the private key
-	// corresponding to the PublicID. Failure to verify this property may result in
+	//
+	// Bless assumes that the blessee is in posession of the private key correponding
+	// to the blessee.PublicKey. Failure to ensure this property may result in
 	// impersonation attacks.
 	Bless(blessee PublicID, blessingName string, duration time.Duration, caveats []ServiceCaveat) (PublicID, error)
 
@@ -82,8 +84,6 @@ type PrivateID interface {
 // Caveat is the interface for restrictions on the scope of an identity. These
 // restrictions are validated by the remote end when a connection is made using the
 // identity.
-//
-// TODO(ataly, ashankar): Rename this to FirstPartyCaveat?
 type Caveat interface {
 	// Validate tests the restrictions specified in the Caveat under the
 	// provided context, returning nil if they are satisfied or an error if
@@ -127,4 +127,31 @@ type ThirdPartyDischarge interface {
 	// discharge. The returned restrictions are wrapped in ServiceCaveats according to the
 	// services they are bound to.
 	ThirdPartyCaveats() []ServiceCaveat
+}
+
+// CaveatDischargeMap is map from third-party caveat identities to the corresponding
+// discharges.
+type CaveatDischargeMap map[ThirdPartyCaveatID]ThirdPartyDischarge
+
+// Context defines the state available for authorizing a principal.
+type Context interface {
+	// Method returns the method being invoked.
+	Method() string
+	// Name returns the veyron name on which the method is being invoked.
+	Name() string
+	// Suffix returns the veyron name suffix for the request.
+	Suffix() string
+	// Label returns the method's security label.
+	Label() Label
+	// CaveatDischarges returns a map of Discharges indexed by their CaveatIDs.
+	CaveatDischarges() CaveatDischargeMap
+	// LocalID returns the PublicID of the principal at the local end of the request.
+	LocalID() PublicID
+	// RemoteID returns the PublicID of the principal at the remote end of the request.
+	RemoteID() PublicID
+}
+
+// Authorizer is the interface for performing authorization checks.
+type Authorizer interface {
+	Authorize(context Context) error
 }
