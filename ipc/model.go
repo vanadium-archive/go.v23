@@ -1,6 +1,7 @@
 package ipc
 
 import (
+	"net"
 	"time"
 
 	"veyron2/naming"
@@ -198,6 +199,10 @@ type Context interface {
 	Closed() <-chan struct{}
 	// Server returns the Server that this context is associated with.
 	Server() Server
+	// LocalAddr returns the address of the Server associated with this context.
+	LocalAddr() net.Addr
+	// RemoteAddr returns the address of the Client associated with this context.
+	RemoteAddr() net.Addr
 }
 
 // BindOpt is the interface for options provided to Bind<Service> calls in IPC
