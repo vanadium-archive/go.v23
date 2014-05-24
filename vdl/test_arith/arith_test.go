@@ -412,9 +412,13 @@ func TestArith(t *testing.T) {
 
 		go func() {
 			for i := int32(0); i < 100; i++ {
-				addStream.Send(i)
+				if err := addStream.Send(i); err != nil {
+					t.Errorf("Send error %v", err)
+				}
 			}
-			addStream.CloseSend()
+			if err := addStream.CloseSend(); err != nil {
+				t.Errorf("CloseSend error %v", err)
+			}
 		}()
 
 		var expectedSum int32
