@@ -100,6 +100,8 @@ func ensureNonEmptyToken(yylex yyLexer, tok strPos, errMsg string) {
   intpos     intPos
   ratpos     ratPos
   imagpos    imagPos
+  namepos    NamePos
+  nameposes  []NamePos
   typeexpr   Type
   typeexprs  []Type
   fields     []*Field
@@ -118,16 +120,18 @@ func ensureNonEmptyToken(yylex yyLexer, tok strPos, errMsg string) {
 %token <pos>      ';' ':' ',' '.' '(' ')' '[' ']' '{' '}' '<' '>' '='
 %token <pos>      '!' '+' '-' '*' '/' '%' '|' '&' '^'
 %token <pos>      tOROR tANDAND tLE tGE tNE tEQEQ tLSH tRSH
-%token <pos>      tPACKAGE tIMPORT tTYPE tMAP tSTRUCT tINTERFACE tSTREAM
-%token <pos>      tCONST tTRUE tFALSE tERRORID
+%token <pos>      tPACKAGE tIMPORT tTYPE tENUM tSET tMAP tSTRUCT tONEOF
+%token <pos>      tINTERFACE tSTREAM tCONST tTRUE tFALSE tERRORID
 %token <strpos>   tIDENT tSTRLIT
 %token <intpos>   tINTLIT
 %token <ratpos>   tRATLIT
 %token <imagpos>  tIMAGLIT
 
 %type <strpos>     nameref
+%type <namepos>    label_spec
+%type <nameposes>  label_spec_list
 %type <typeexpr>   type
-%type <typeexprs>  type_list streamargs
+%type <typeexprs>  type_comma_list type_semi_list streamargs
 %type <fields>     field_spec_list field_spec named_arg_list inargs outargs
 %type <iface>      iface_item_list iface_item
 %type <constexpr>  expr unary_expr operand v_lit
@@ -240,12 +244,28 @@ type:
   { $$ = &TypeArray{Len:int($2.int.Int64()), Elem:$4, P:$1} }
 | '[' ']' type
   { $$ = &TypeList{Elem:$3, P:$1} }
+| tENUM '{' label_spec_list osemi '}'
+  { $$ = &TypeEnum{Labels:$3, P:$1} }
+| tSET '[' type ']'
+  { $$ = &TypeSet{Key:$3, P:$1} }
 | tMAP '[' type ']' type
   { $$ = &TypeMap{Key:$3, Elem:$5, P:$1} }
 | tSTRUCT '{' field_spec_list osemi '}'
   { $$ = &TypeStruct{Fields:$3, P:$1} }
 | tSTRUCT '{' '}'
   { $$ = &TypeStruct{P:$1} }
+| tONEOF '{' type_semi_list osemi '}'
+  { $$ = &TypeOneOf{Types:$3, P:$1} }
+
+label_spec_list:
+  label_spec
+  { $$ = []NamePos{$1} }
+| label_spec_list ';' label_spec
+  { $$ = append($1, $3) }
+
+label_spec:
+  tIDENT
+  { $$ = NamePos{Name:$1.str, Pos:$1.pos} }
 
 field_spec_list:
   field_spec
@@ -288,7 +308,7 @@ field_spec_list:
 // much more complicated grammar.  As a bonus, with the type_list solution we
 // can give better error messages.
 field_spec:
-  type_list type
+  type_comma_list type
   {
     if names, ok := typeListToStrList(yylex, $1); ok {
       for _, n := range names {
@@ -298,6 +318,18 @@ field_spec:
       lexPosErrorf(yylex, $2.Pos(), "perhaps you forgot a comma before %q?.", $2.String())
     }
   }
+
+type_comma_list:
+  type
+  { $$ = []Type{$1} }
+| type_comma_list ',' type
+  { $$ = append($1, $3) }
+
+type_semi_list:
+  type
+  { $$ = []Type{$1} }
+| type_semi_list ';' type
+  { $$ = append($1, $3) }
 
 // INTERFACE DECLARATIONS
 interface_spec:
@@ -334,7 +366,7 @@ inargs:
   { $$ = nil }
 | '(' named_arg_list ocomma ')'
   { $$ = $2 }
-| '(' type_list ocomma ')'
+| '(' type_comma_list ocomma ')'
   // Just like Go, we allow a list of types without variable names.  See the
   // field_spec rule for a workaround to avoid a reduce/reduce conflict.
   {
@@ -350,12 +382,6 @@ named_arg_list:
   { $$ = $1 }
 | named_arg_list ',' field_spec
   { $$ = append($1, $3...) }
-
-type_list:
-  type
-  { $$ = []Type{$1} }
-| type_list ',' type
-  { $$ = append($1, $3) }
 
 // The outargs accept everything regular inargs accept, and are also allowed to
 // be empty or contain a single non-parenthesized type without an arg name.

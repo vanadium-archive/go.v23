@@ -68,7 +68,7 @@ func makeStringIntMap(m map[string]int64) *val.Value {
 func makeStruct(name string, x int64, y string, z bool) *val.Value {
 	t := val.StructType(name, []val.StructField{
 		{"X", val.Int64Type}, {"Y", val.StringType}, {"Z", val.BoolType},
-	})
+	}...)
 	structv := val.Zero(t)
 	structv.Field(0).AssignInt(x)
 	structv.Field(1).AssignString(y)
@@ -79,8 +79,8 @@ func makeStruct(name string, x int64, y string, z bool) *val.Value {
 func makeABStruct() *val.Value {
 	tA := val.StructType("a.A", []val.StructField{
 		{"X", val.Int64Type}, {"Y", val.StringType},
-	})
-	tB := val.StructType("a.B", []val.StructField{{"Z", val.ListType(tA)}})
+	}...)
+	tB := val.StructType("a.B", val.StructField{"Z", val.ListType(tA)})
 	res := val.Zero(tB)
 	listv := res.Field(0).AssignLen(2)
 	listv.Index(0).Field(0).AssignInt(1)

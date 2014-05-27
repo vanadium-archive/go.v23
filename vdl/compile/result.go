@@ -19,10 +19,11 @@ import (
 //
 // Always create a new Env via NewEnv; the zero Env is invalid.
 type Env struct {
-	Errors    *vdl.Errors
-	pkgs      map[string]*Package
-	typeDefs  map[*val.Type]*TypeDef
-	constDefs map[*val.Value]*ConstDef
+	Errors       *vdl.Errors
+	pkgs         map[string]*Package
+	typeDefs     map[*val.Type]*TypeDef
+	constDefs    map[*val.Value]*ConstDef
+	experimental bool // enable experimental features
 }
 
 // NewEnv creates a new Env, allowing up to maxErrors errors before we stop.
@@ -136,6 +137,19 @@ func fpString(file *File, pos parse.Pos) string {
 
 func fpStringf(file *File, pos parse.Pos, format string, v ...interface{}) string {
 	return fmt.Sprintf(fpString(file, pos)+" "+format, v...)
+}
+
+// EnableExperimental enables experimental features that may crash the compiler
+// and change without notice.  Intended for VDL compiler developers.
+func (e *Env) EnableExperimental() *Env {
+	e.experimental = true
+	return e
+}
+
+func (e *Env) experimentalOnly(file *File, pos parse.Pos, format string, v ...interface{}) {
+	if !e.experimental {
+		e.Errors.Error(fpStringf(file, pos, format, v...) + " (only allowed in experimental mode)")
+	}
 }
 
 // Representation of the components of an vdl file.  These data types represent

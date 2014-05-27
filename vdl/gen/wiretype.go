@@ -7,6 +7,7 @@ import (
 
 	"veyron2/val"
 	"veyron2/vdl"
+	"veyron2/vdl/compile"
 	"veyron2/wiretype"
 	"veyron2/wiretype/build"
 )
@@ -17,14 +18,23 @@ type wireTypeConverter struct {
 	Defs build.TypeDefs
 }
 
-func (wtc *wireTypeConverter) bootstrapTypeID(kind val.Kind) wiretype.TypeID {
-	switch kind {
+func (wtc *wireTypeConverter) bootstrapTypeID(t *val.Type) wiretype.TypeID {
+	if t.Kind() == val.List && t.Elem().Kind() == val.Byte {
+		return wiretype.TypeIDByteSlice
+	}
+	switch t.Kind() {
 	case val.Bool:
 		return wiretype.TypeIDBool
+	case val.Byte:
+		return wiretype.TypeIDUint8
+	case val.Uint16:
+		return wiretype.TypeIDUint16
 	case val.Uint32:
 		return wiretype.TypeIDUint32
 	case val.Uint64:
 		return wiretype.TypeIDUint64
+	case val.Int16:
+		return wiretype.TypeIDInt16
 	case val.Int32:
 		return wiretype.TypeIDInt32
 	case val.Int64:
@@ -37,8 +47,6 @@ func (wtc *wireTypeConverter) bootstrapTypeID(kind val.Kind) wiretype.TypeID {
 		return wiretype.TypeIDComplex64
 	case val.Complex128:
 		return wiretype.TypeIDComplex128
-	case val.Bytes:
-		return wiretype.TypeIDByteSlice
 	case val.String:
 		return wiretype.TypeIDString
 	case val.Any, val.OneOf:
@@ -46,15 +54,41 @@ func (wtc *wireTypeConverter) bootstrapTypeID(kind val.Kind) wiretype.TypeID {
 	case val.TypeVal:
 		return wiretype.TypeIDTypeID
 	default:
-		panic(fmt.Sprintf("unknown primitive kind: %v", kind))
+		panic(fmt.Sprintf("unknown primitive type: %v", t))
 	}
 }
 
 func (wtc *wireTypeConverter) wireType(typ *val.Type) vdl.Any {
+	if typ == compile.ErrorType {
+		// Hack error as an interface for now, since that was the old behavior.
+		return wiretype.NamedPrimitiveType{
+			Type: wtc.bootstrapTypeID(val.AnyType),
+			Name: "error",
+		}
+	}
 	switch typ.Kind() {
+	case val.Enum:
+		// Hack enum as an int for now, this will all go away with vom2.
+		return wiretype.NamedPrimitiveType{
+			Type: wtc.bootstrapTypeID(val.Uint64Type),
+			Name: typ.Name(),
+		}
+	case val.Array:
+		return wiretype.ArrayType{
+			Elem: wtc.WireTypeID(typ.Elem()),
+			Len:  uint64(typ.Len()),
+			Name: typ.Name(),
+		}
 	case val.List:
 		return wiretype.SliceType{
 			Elem: wtc.WireTypeID(typ.Elem()),
+			Name: typ.Name(),
+		}
+	case val.Set:
+		// Hack set as a map for now, this will all go away with vom2.
+		return wiretype.MapType{
+			Key:  wtc.WireTypeID(typ.Key()),
+			Elem: wtc.WireTypeID(val.BoolType),
 			Name: typ.Name(),
 		}
 	case val.Map:
@@ -74,9 +108,15 @@ func (wtc *wireTypeConverter) wireType(typ *val.Type) vdl.Any {
 			Fields: flds,
 			Name:   typ.Name(),
 		}
+	case val.OneOf:
+		// Hack oneof as a named any for now, this will all go away with vom2.
+		return wiretype.NamedPrimitiveType{
+			Type: wtc.bootstrapTypeID(val.AnyType),
+			Name: typ.Name(),
+		}
 	default:
 		wt := wiretype.NamedPrimitiveType{
-			Type: wtc.bootstrapTypeID(typ.Kind()),
+			Type: wtc.bootstrapTypeID(typ),
 			Name: typ.Name(),
 		}
 		if typ.Kind() == val.Any {

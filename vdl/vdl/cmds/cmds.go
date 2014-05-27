@@ -43,6 +43,9 @@ func runHelper(run func(targets []*build.Package, env *compile.Env)) func(cmd *c
 		}
 		exts := strings.Split(flagExts, ",")
 		env := compile.NewEnv(flagMaxErrors)
+		if flagExperimental {
+			env.EnableExperimental()
+		}
 		targets := build.TransitivePackages(args, exts, env.Errors)
 		checkErrors(cmd.Stderr(), env)
 		if len(targets) == 0 {
@@ -198,9 +201,10 @@ func (x *genOutDir) Set(value string) error {
 
 var (
 	// Common flags for the tool itself, applicable to all commands.
-	flagVerbose   bool
-	flagMaxErrors int
-	flagExts      string
+	flagVerbose      bool
+	flagMaxErrors    int
+	flagExts         string
+	flagExperimental bool
 
 	// Options for each command.
 	optCompileStatus    bool
@@ -228,6 +232,7 @@ for managing Go source code.
 	vdlcmd.Flags.BoolVar(&flagVerbose, "v", false, "Turn on verbose logging.")
 	vdlcmd.Flags.IntVar(&flagMaxErrors, "max_errors", -1, "Stop processing after this many errors, or -1 for unlimited.")
 	vdlcmd.Flags.StringVar(&flagExts, "exts", ".vdl", "Comma-separated list of valid VDL file name extensions.")
+	vdlcmd.Flags.BoolVar(&flagExperimental, "experimental", false, "Enable experimental features that may crash the compiler and change without notice.  Intended for VDL compiler developers.")
 
 	// Options for compile.
 	cmdCompile.Flags.BoolVar(&optCompileStatus, "status", true, "Show package names while we compile")

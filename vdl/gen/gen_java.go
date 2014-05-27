@@ -582,7 +582,8 @@ func javaConstVal(v *val.Value) string {
 	// TODO(spetrovic): handle complex numbers.
 	case val.String:
 		return strconv.Quote(v.String())
-	case val.Bytes:
+	}
+	if v.Type().IsBytes() {
 		return strconv.Quote(string(v.Bytes()))
 	}
 	// TODO(spetrovic): Handle Enum, List, Map, Struct, OneOf, Any

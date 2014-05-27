@@ -312,17 +312,17 @@ func TestCalculator(t *testing.T) {
 
 	expectedTypeDefs := []idl.AnyData{
 		// Calculator:
-		wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{Type: 3, Name: "Id"}, wiretype.FieldType{Type: 3, Name: "Msg"}}, "error", nil},
+		wiretype.NamedPrimitiveType{1, "error", nil},
 		// Arith:
-		wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{Type: 3, Name: "Id"}, wiretype.FieldType{Type: 3, Name: "Msg"}}, "error", nil},
+		wiretype.NamedPrimitiveType{1, "error", nil},
 		wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{36, "A"},
 			wiretype.FieldType{36, "B"}}, "veyron2/vdl/test_base.Args", nil},
 		wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{66, "Args"}}, "veyron2/vdl/test_base.NestedArgs", nil},
 		wiretype.NamedPrimitiveType{1, "anydata", nil},
 		// Trig:
-		wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{Type: 3, Name: "Id"}, wiretype.FieldType{Type: 3, Name: "Msg"}}, "error", nil},
+		wiretype.NamedPrimitiveType{1, "error", nil},
 		// Exp:
-		wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{Type: 3, Name: "Id"}, wiretype.FieldType{Type: 3, Name: "Msg"}}, "error", nil},
+		wiretype.NamedPrimitiveType{1, "error", nil},
 	}
 
 	if !reflect.DeepEqual(signature.TypeDefs, expectedTypeDefs) {
@@ -550,7 +550,7 @@ func TestArith(t *testing.T) {
 		}
 
 		expectedTypeDefs := []idl.AnyData{
-			wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{Type: 3, Name: "Id"}, wiretype.FieldType{Type: 3, Name: "Msg"}}, "error", nil},
+			wiretype.NamedPrimitiveType{1, "error", nil},
 			wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{36, "A"}, wiretype.FieldType{36, "B"}}, "veyron2/vdl/test_base.Args", nil},
 			wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{66, "Args"}}, "veyron2/vdl/test_base.NestedArgs", nil},
 			wiretype.NamedPrimitiveType{1, "anydata", nil},

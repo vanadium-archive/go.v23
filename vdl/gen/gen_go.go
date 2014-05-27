@@ -227,22 +227,22 @@ func typeGo(data goData, t *val.Type) string {
 		case t == val.TypeValType:
 			return "*_gen_val.Type"
 		case def.File == compile.GlobalFile:
-			// Global primitives just use their name, except the special case bytes.
-			if t.Kind() == val.Bytes {
-				return "[]byte"
-			}
+			// Global primitives just use their name.
 			return def.Name
 		}
 		return qualifiedName(data, def.Name, def.File)
 	}
 	// Otherwise recurse through the type.
 	switch t.Kind() {
+	case val.Array:
+		return "[" + strconv.Itoa(t.Len()) + "]" + typeGo(data, t.Elem())
 	case val.List:
 		return "[]" + typeGo(data, t.Elem())
+	case val.Set:
+		// TODO(toddw): Should we use map[X]bool instead?
+		return "map[" + typeGo(data, t.Key()) + "]struct{}"
 	case val.Map:
-		key := typeGo(data, t.Key())
-		elem := typeGo(data, t.Elem())
-		return "map[" + key + "]" + elem
+		return "map[" + typeGo(data, t.Key()) + "]" + typeGo(data, t.Elem())
 	default:
 		panic(fmt.Errorf("vdl: typeGo unhandled type %v %v", t.Kind(), t))
 	}
@@ -254,6 +254,25 @@ func typeDefGo(data goData, def *compile.TypeDef) string {
 	switch base, t := def.BaseType, def.Type; {
 	case base != nil:
 		s += typeGo(data, base)
+	case t.Kind() == val.Enum:
+		// We turn the VDL:
+		//   type X enum{A;B}
+		// into Go:
+		//   type X uint
+		//   const (
+		//     A X = iota
+		//     B
+		//   )
+		s += "int" + def.DocSuffix
+		s += "\nconst ("
+		for x := 0; x < t.NumEnumLabel(); x++ {
+			s += "\n" + def.LabelDoc[x] + t.EnumLabel(x)
+			if x == 0 {
+				s += " " + def.Name + " = iota"
+			}
+			s += def.LabelDocSuffix[x]
+		}
+		return s + "\n)"
 	case t.Kind() == val.Struct:
 		s += "struct {"
 		for x := 0; x < t.NumField(); x++ {
@@ -262,8 +281,13 @@ func typeDefGo(data goData, def *compile.TypeDef) string {
 			s += typeGo(data, f.Type) + def.FieldDocSuffix[x]
 		}
 		s += "\n}"
+	case t.Kind() == val.OneOf:
+		// We turn the VDL:
+		//   type X oneof{bool;string}
+		// into Go:
+		//   type X interface{}
+		s += "interface{}"
 	default:
-		// TODO(toddw): Add support for enum and oneof.
 		panic(fmt.Errorf("vdl: typeDefGo unhandled type %v %v", t.Kind(), t))
 	}
 	return s + def.DocSuffix
@@ -283,6 +307,31 @@ func constDefGo(data goData, def *compile.ConstDef) string {
 }
 
 func constGo(data goData, v *val.Value) string {
+	switch v.Type() {
+	case val.BoolType, val.StringType:
+		// Treat the standard bool and string types as untyped constants in Go.
+		// We turn the VDL:
+		//   type NamedBool   bool
+		//   type NamedString string
+		//   const (
+		//     B1 = true
+		//     B2 = bool(true)
+		//     B3 = NamedBool(true)
+		//     S1 = "abc"
+		//     S2 = string("abc")
+		//     S3 = NamedString("abc")
+		//   )
+		// into Go:
+		//   const (
+		//     B1 = true
+		//     B2 = true
+		//     B3 = NamedBool(true)
+		//     S1 = "abc"
+		//     S2 = "abc"
+		//     S3 = NamedString("abc")
+		//   )
+		return valueGo(v)
+	}
 	return typeGo(data, v.Type()) + "(" + valueGo(v) + ")"
 }
 
@@ -294,10 +343,12 @@ func valueGo(v *val.Value) string {
 		} else {
 			return "false"
 		}
-	case val.Int32, val.Int64:
-		return strconv.FormatInt(v.Int(), 10)
-	case val.Uint32, val.Uint64:
+	case val.Byte:
+		return strconv.FormatUint(uint64(v.Byte()), 10)
+	case val.Uint16, val.Uint32, val.Uint64:
 		return strconv.FormatUint(v.Uint(), 10)
+	case val.Int16, val.Int32, val.Int64:
+		return strconv.FormatInt(v.Int(), 10)
 	case val.Float32, val.Float64:
 		return strconv.FormatFloat(v.Float(), 'g', -1, bitlen(v.Kind()))
 	case val.Complex64, val.Complex128:
@@ -306,7 +357,8 @@ func valueGo(v *val.Value) string {
 		return s
 	case val.String:
 		return strconv.Quote(v.RawString())
-	case val.Bytes:
+	}
+	if v.Type().IsBytes() {
 		return strconv.Quote(string(v.Bytes()))
 	}
 	// TODO(toddw): Handle Enum, List, Map, Struct, OneOf, Any

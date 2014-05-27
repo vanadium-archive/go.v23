@@ -3,6 +3,7 @@ package val
 import (
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 	"sync"
 )
@@ -13,40 +14,48 @@ var (
 	errNoLabels       = errors.New("no enum labels")
 	errLabelEmpty     = errors.New("empty enum label")
 	errHasLabels      = errors.New("labels only valid for enum")
+	errLenZero        = errors.New("negative or zero array length")
+	errLenNonZero     = errors.New("length only valid for array")
 	errElemNil        = errors.New("nil elem type")
-	errElemNonNil     = errors.New("elem only valid for list and map")
+	errElemNonNil     = errors.New("elem only valid for array, list and map")
 	errKeyNil         = errors.New("nil key type")
-	errKeyNonNil      = errors.New("key only valid for map")
+	errKeyNonNil      = errors.New("key only valid for set and map")
 	errFieldTypeNil   = errors.New("nil struct field type")
 	errFieldNameEmpty = errors.New("empty struct field name")
 	errHasFields      = errors.New("fields only valid for struct")
 	errOneOfTypeBad   = errors.New("type in oneof must not be nil, oneof or any")
 	errNoTypes        = errors.New("no oneof types")
 	errHasTypes       = errors.New("types only valid on oneof")
-	errBaseNil        = errors.New("base type unset for named type")
+	errBaseNil        = errors.New("nil base type for named type")
 	errBaseCycle      = errors.New("invalid named type cycle")
 	errNotBuilt       = errors.New("TypeBuilder.Build must be called before Pending.Built")
 )
 
 // Primitive types, the basis for all other types.  All have empty names.
 var (
-	AnyType        = primitiveType(&Type{kind: Any})
-	BoolType       = primitiveType(&Type{kind: Bool})
-	Int32Type      = primitiveType(&Type{kind: Int32})
-	Int64Type      = primitiveType(&Type{kind: Int64})
-	Uint32Type     = primitiveType(&Type{kind: Uint32})
-	Uint64Type     = primitiveType(&Type{kind: Uint64})
-	Float32Type    = primitiveType(&Type{kind: Float32})
-	Float64Type    = primitiveType(&Type{kind: Float64})
-	Complex64Type  = primitiveType(&Type{kind: Complex64})
-	Complex128Type = primitiveType(&Type{kind: Complex128})
-	StringType     = primitiveType(&Type{kind: String})
-	BytesType      = primitiveType(&Type{kind: Bytes})
-	TypeValType    = primitiveType(&Type{kind: TypeVal})
+	AnyType        = primitiveType(Any)
+	BoolType       = primitiveType(Bool)
+	ByteType       = primitiveType(Byte)
+	Uint16Type     = primitiveType(Uint16)
+	Uint32Type     = primitiveType(Uint32)
+	Uint64Type     = primitiveType(Uint64)
+	Int16Type      = primitiveType(Int16)
+	Int32Type      = primitiveType(Int32)
+	Int64Type      = primitiveType(Int64)
+	Float32Type    = primitiveType(Float32)
+	Float64Type    = primitiveType(Float64)
+	Complex64Type  = primitiveType(Complex64)
+	Complex128Type = primitiveType(Complex128)
+	StringType     = primitiveType(String)
+	TypeValType    = primitiveType(TypeVal)
+
+	// Keep this type unexported; Type.IsBytes returns true for both []byte and
+	// [N]byte, but this is just []byte.
+	bytesType = ListType(ByteType)
 )
 
-func primitiveType(t *Type) *Type {
-	prim, err := typeCons(t)
+func primitiveType(k Kind) *Type {
+	prim, err := typeCons(&Type{kind: k})
 	if err != nil {
 		panic(err)
 	}
@@ -74,25 +83,41 @@ type PendingType interface {
 // PendingEnum represents an Enum type that is being built.
 type PendingEnum interface {
 	PendingType
-	// SetLabels sets the Enum labels.  Every Enum must have at least one label,
-	// and each label must not be empty.
-	SetLabels(labels []string) PendingEnum
+	// AppendLabel appends an Enum label.  Every Enum must have at least one
+	// label, and each label must not be empty.
+	AppendLabel(label string) PendingEnum
+}
+
+// PendingArray represents an Array type that is being built.
+type PendingArray interface {
+	PendingType
+	// AssignLen assigns the Array length.
+	AssignLen(len int) PendingArray
+	// AssignElem assigns the Array element type.
+	AssignElem(elem TypeOrPending) PendingArray
 }
 
 // PendingList represents a List type that is being built.
 type PendingList interface {
 	PendingType
-	// SetElem sets the List element type.
-	SetElem(elem TypeOrPending) PendingList
+	// AssignElem assigns the List element type.
+	AssignElem(elem TypeOrPending) PendingList
+}
+
+// PendingSet represents a Set type that is being built.
+type PendingSet interface {
+	PendingType
+	// AssignKey assigns the Set key type.
+	AssignKey(key TypeOrPending) PendingSet
 }
 
 // PendingMap represents a Map type that is being built.
 type PendingMap interface {
 	PendingType
-	// SetKey sets the Map key type.
-	SetKey(key TypeOrPending) PendingMap
-	// SetElem sets the Map element type.
-	SetElem(elem TypeOrPending) PendingMap
+	// AssignKey assigns the Map key type.
+	AssignKey(key TypeOrPending) PendingMap
+	// AssignElem assigns the Map element type.
+	AssignElem(elem TypeOrPending) PendingMap
 }
 
 // PendingStruct represents a Struct type that is being built.
@@ -117,9 +142,10 @@ type PendingOneOf interface {
 // different name.
 type PendingNamed interface {
 	PendingType
-	// SetBase sets the base type of the named type.  The resulting built type
-	// will have the same underlying structure as base, but with the given name.
-	SetBase(base TypeOrPending) PendingNamed
+	// AssignBase assigns the base type of the named type.  The resulting built
+	// type will have the same underlying structure as base, but with the given
+	// name.
+	AssignBase(base TypeOrPending) PendingNamed
 }
 
 type (
@@ -133,30 +159,47 @@ type (
 	// methods to describe the type.  When Build is called, the type is
 	// hash-consed to the final result.
 	pendingEnum   struct{ *pending }
+	pendingArray  struct{ *pending }
 	pendingList   struct{ *pending }
+	pendingSet    struct{ *pending }
 	pendingMap    struct{ *pending }
 	pendingStruct struct{ *pending }
 	pendingOneOf  struct{ *pending }
 	pendingNamed  struct{ *pending }
 )
 
-func (p pendingEnum) SetLabels(labels []string) PendingEnum {
-	p.labels = labels
+func (p pendingEnum) AppendLabel(label string) PendingEnum {
+	p.labels = append(p.labels, label)
 	return p
 }
 
-func (p pendingList) SetElem(elem TypeOrPending) PendingList {
+func (p pendingArray) AssignLen(len int) PendingArray {
+	p.len = len
+	return p
+}
+
+func (p pendingArray) AssignElem(elem TypeOrPending) PendingArray {
 	p.elem = elem.ptype()
 	return p
 }
 
-func (p pendingMap) SetElem(elem TypeOrPending) PendingMap {
+func (p pendingList) AssignElem(elem TypeOrPending) PendingList {
 	p.elem = elem.ptype()
 	return p
 }
 
-func (p pendingMap) SetKey(key TypeOrPending) PendingMap {
+func (p pendingSet) AssignKey(key TypeOrPending) PendingSet {
 	p.key = key.ptype()
+	return p
+}
+
+func (p pendingMap) AssignKey(key TypeOrPending) PendingMap {
+	p.key = key.ptype()
+	return p
+}
+
+func (p pendingMap) AssignElem(elem TypeOrPending) PendingMap {
+	p.elem = elem.ptype()
 	return p
 }
 
@@ -170,7 +213,7 @@ func (p pendingOneOf) AppendType(t TypeOrPending) PendingOneOf {
 	return p
 }
 
-func (p pendingNamed) SetBase(base TypeOrPending) PendingNamed {
+func (p pendingNamed) AssignBase(base TypeOrPending) PendingNamed {
 	// Pending named types are special - they have the internalNamed kind, and put
 	// the base type in elem.  See pending.finalize() for the extra logic.
 	p.elem = base.ptype()
@@ -216,9 +259,19 @@ func (b *TypeBuilder) Enum(name string) PendingEnum {
 	return pendingEnum{b.add(&Type{kind: Enum, name: name})}
 }
 
+// Array returns PendingArray, used to describe an Array type.
+func (b *TypeBuilder) Array() PendingArray {
+	return pendingArray{b.add(&Type{kind: Array})}
+}
+
 // List returns PendingList, used to describe a List type.
 func (b *TypeBuilder) List() PendingList {
 	return pendingList{b.add(&Type{kind: List})}
+}
+
+// Set returns PendingSet, used to describe a Set type.
+func (b *TypeBuilder) Set() PendingSet {
+	return pendingSet{b.add(&Type{kind: Set})}
 }
 
 // Map returns PendingMap, used to describe a Map type.
@@ -318,30 +371,48 @@ func checkedBuild(b TypeBuilder, p PendingType) *Type {
 	return t
 }
 
-// EnumType is a helper using TypeBuilder to create a single Enum type.  Panics
-// on all errors.
-func EnumType(name string, labels []string) *Type {
+// EnumType is a helper using TypeBuilder to create a single Enum type.
+// Panics on all errors.
+func EnumType(name string, labels ...string) *Type {
 	var b TypeBuilder
-	return checkedBuild(b, b.Enum(name).SetLabels(labels))
+	e := b.Enum(name)
+	for _, l := range labels {
+		e.AppendLabel(l)
+	}
+	return checkedBuild(b, e)
+}
+
+// ArrayType is a helper using TypeBuilder to create a single Array type.
+// Panics on all errors.
+func ArrayType(len int, elem *Type) *Type {
+	var b TypeBuilder
+	return checkedBuild(b, b.Array().AssignLen(len).AssignElem(elem))
 }
 
 // ListType is a helper using TypeBuilder to create a single List type.  Panics
 // on all errors.
 func ListType(elem *Type) *Type {
 	var b TypeBuilder
-	return checkedBuild(b, b.List().SetElem(elem))
+	return checkedBuild(b, b.List().AssignElem(elem))
 }
 
-// MapType is a helper using TypeBuilder to create a single Map type.  Panics on
+// SetType is a helper using TypeBuilder to create a single Set type.  Panics on
 // all errors.
+func SetType(key *Type) *Type {
+	var b TypeBuilder
+	return checkedBuild(b, b.Set().AssignKey(key))
+}
+
+// MapType is a helper using TypeBuilder to create a single Map type.  Panics
+// on all errors.
 func MapType(key, elem *Type) *Type {
 	var b TypeBuilder
-	return checkedBuild(b, b.Map().SetKey(key).SetElem(elem))
+	return checkedBuild(b, b.Map().AssignKey(key).AssignElem(elem))
 }
 
 // StructType is a helper using TypeBuilder to create a single Struct type.
 // Panics on all errors.
-func StructType(name string, fields []StructField) *Type {
+func StructType(name string, fields ...StructField) *Type {
 	var b TypeBuilder
 	s := b.Struct(name)
 	for _, f := range fields {
@@ -352,7 +423,7 @@ func StructType(name string, fields []StructField) *Type {
 
 // OneOfType is a helper using TypeBuilder to create a single OneOf type.
 // Panics on all errors.
-func OneOfType(name string, types []*Type) *Type {
+func OneOfType(name string, types ...*Type) *Type {
 	var b TypeBuilder
 	o := b.OneOf(name)
 	for _, t := range types {
@@ -365,7 +436,7 @@ func OneOfType(name string, types []*Type) *Type {
 // on another type.  Panics on all errors.
 func NamedType(name string, base *Type) *Type {
 	var b TypeBuilder
-	return checkedBuild(b, b.Named(name).SetBase(base))
+	return checkedBuild(b, b.Named(name).AssignBase(base))
 }
 
 // enforceUniqueNames ensures that t and its subtypes contain unique type names;
@@ -439,8 +510,12 @@ func uniqueType(t *Type, seen map[*Type]bool) string {
 	switch t.kind {
 	case Enum:
 		return s + "enum{" + strings.Join(t.labels, ";") + "}"
+	case Array:
+		return s + "[" + strconv.Itoa(t.len) + "]" + uniqueType(t.elem, seen)
 	case List:
 		return s + "[]" + uniqueType(t.elem, seen)
+	case Set:
+		return s + "set[" + uniqueType(t.key, seen) + "]"
 	case Map:
 		return s + "map[" + uniqueType(t.key, seen) + "]" + uniqueType(t.elem, seen)
 	case Struct:
@@ -485,7 +560,7 @@ func typeConsLocked(t *Type) (*Type, error) {
 	if t == nil {
 		return nil, nil
 	}
-	if err := validType(t); err != nil {
+	if err := validType(t, make(map[*Type]bool)); err != nil {
 		return nil, err
 	}
 	// Look for the type in our registry, based on its unique string.
@@ -518,7 +593,11 @@ func typeConsLocked(t *Type) (*Type, error) {
 }
 
 // validType returns a nil error iff t is a valid Type.
-func validType(t *Type) error {
+func validType(t *Type, seen map[*Type]bool) error {
+	if t == nil || seen[t] {
+		return nil
+	}
+	seen[t] = true
 	// Check kind
 	switch t.kind {
 	case internalNamed:
@@ -535,9 +614,20 @@ func validType(t *Type) error {
 			return errNameEmpty
 		}
 	}
+	// Check len
+	switch t.kind {
+	case Array:
+		if t.len <= 0 {
+			return errLenZero
+		}
+	default:
+		if t.len != 0 {
+			return errLenNonZero
+		}
+	}
 	// Check elem
 	switch t.kind {
-	case List, Map:
+	case Array, List, Map:
 		if t.elem == nil {
 			return errElemNil
 		}
@@ -548,8 +638,8 @@ func validType(t *Type) error {
 	}
 	// Check key
 	switch t.kind {
-	case Map:
-		if err := ValidMapKey(t.key); err != nil {
+	case Set, Map:
+		if err := ValidKey(t.key); err != nil {
 			return err
 		}
 	default:
@@ -615,11 +705,29 @@ func validType(t *Type) error {
 			return errHasTypes
 		}
 	}
+	// Check subtypes recursively; since types may be built in any order, we might
+	// have invalid subtypes.
+	if err := validType(t.elem, seen); err != nil {
+		return err
+	}
+	if err := validType(t.key, seen); err != nil {
+		return err
+	}
+	for _, f := range t.fields {
+		if err := validType(f.Type, seen); err != nil {
+			return err
+		}
+	}
+	for _, o := range t.types {
+		if err := validType(o, seen); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
-// ValidMapKey returns a nil error iff the key may be used as a map key type.
-func ValidMapKey(key *Type) error {
+// ValidKey returns a nil error iff key may be used as a Set or Map key.
+func ValidKey(key *Type) error {
 	if key == nil {
 		return errKeyNil
 	}

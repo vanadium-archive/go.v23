@@ -21,13 +21,17 @@ type Bool bool
 
 type Byte byte
 
-type Int32 int32
-
-type Int64 int64
+type Uint16 uint16
 
 type Uint32 uint32
 
 type Uint64 uint64
+
+type Int16 int16
+
+type Int32 int32
+
+type Int64 int64
 
 type Float32 float32
 
@@ -39,34 +43,67 @@ type Complex128 complex128
 
 type String string
 
-type Scalars struct {
+//Enum       enum{A;B;C}
+type Array [2]bool
+
+type List []uint32
+
+//Set        set[string]
+type Map map[string]float32
+
+type Struct struct {
 	A bool
-	B byte
+	B string
 	C int32
-	D int64
-	E uint32
-	F uint64
-	G float32
-	H float64
-	I complex64
-	J complex128
-	K string
-	L error
-	M _gen_vdl.Any
-	N *_gen_val.Type
+}
+
+type Scalars struct {
+	A0  bool
+	A1  byte
+	A2  uint16
+	A3  uint32
+	A4  uint64
+	A5  int16
+	A6  int32
+	A7  int64
+	A8  float32
+	A9  float64
+	A10 complex64
+	A11 complex128
+	A12 string
+	A13 error
+	A14 _gen_vdl.Any
+	A15 *_gen_val.Type
+	B0  Bool
+	B1  Byte
+	B2  Uint16
+	B3  Uint32
+	B4  Uint64
+	B5  Int16
+	B6  Int32
+	B7  Int64
+	B8  Float32
+	B9  Float64
+	B10 Complex64
+	B11 Complex128
+	B12 String
 }
 
 type Composites struct {
-	A Scalars
-	B []Scalars
-	C map[string]Scalars
-	D map[Scalars][]map[string]complex128
+	A0 Scalars
+	A1 [2]Scalars
+	A2 []Scalars
+	//A3 set[Scalars]
+	A4 map[string]Scalars
+	A5 map[Scalars][]map[string]complex128
 }
 
 type CompComp struct {
-	A Composites
-	B []Composites
-	C map[string]Composites
+	A0 Composites
+	A1 [2]Composites
+	A2 []Composites
+	A3 map[string]Composites
+	A4 map[Scalars][]map[string]Composites
 }
 
 // NestedArgs is defined before Args; that's allowed in regular Go, and also
@@ -83,7 +120,7 @@ type Args struct {
 }
 
 const (
-	Cbool = bool(true)
+	Cbool = true
 
 	Cbyte = byte(1)
 
@@ -103,13 +140,13 @@ const (
 
 	Ccomplex128 = complex128(10 + 11i)
 
-	Cstring = string("foo")
+	Cstring = "foo"
 
-	Cany = bool(true)
+	Cany = true
 
-	True = bool(true)
+	True = true
 
-	Foo = string("foo")
+	Foo = "foo"
 
 	Five = int32(5)
 
@@ -422,7 +459,7 @@ func (s *ServerStubServiceA) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Servi
 			{Name: "err", Type: 65},
 		},
 
-		OutStream: 69,
+		OutStream: 82,
 	}
 	result.Methods["MethodA4"] = _gen_ipc.MethodSignature{
 		InArgs: []_gen_ipc.MethodArgument{
@@ -436,28 +473,37 @@ func (s *ServerStubServiceA) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Servi
 	}
 
 	result.TypeDefs = []_gen_idl.AnyData{
-		_gen_wiretype.StructType{
+		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "anydata", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x7, Name: "TypeID", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x2, Name: "veyron2/vdl/test_base.Bool", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x32, Name: "veyron2/vdl/test_base.Byte", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x33, Name: "veyron2/vdl/test_base.Uint16", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x34, Name: "veyron2/vdl/test_base.Uint32", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x35, Name: "veyron2/vdl/test_base.Uint64", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x23, Name: "veyron2/vdl/test_base.Int16", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x24, Name: "veyron2/vdl/test_base.Int32", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x25, Name: "veyron2/vdl/test_base.Int64", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x19, Name: "veyron2/vdl/test_base.Float32", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x1a, Name: "veyron2/vdl/test_base.Float64", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x38, Name: "veyron2/vdl/test_base.Complex64", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x39, Name: "veyron2/vdl/test_base.Complex128", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x3, Name: "veyron2/vdl/test_base.String", Tags: []string(nil)}, _gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
-				_gen_wiretype.FieldType{Type: 0x3, Name: "Id"},
-				_gen_wiretype.FieldType{Type: 0x3, Name: "Msg"},
-			},
-			"error", []string(nil)},
-		_gen_wiretype.NamedPrimitiveType{Type: 0x34, Name: "byte", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "anydata", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x7, Name: "TypeID", Tags: []string(nil)}, _gen_wiretype.StructType{
-			[]_gen_wiretype.FieldType{
-				_gen_wiretype.FieldType{Type: 0x2, Name: "A"},
-				_gen_wiretype.FieldType{Type: 0x42, Name: "B"},
-				_gen_wiretype.FieldType{Type: 0x24, Name: "C"},
-				_gen_wiretype.FieldType{Type: 0x25, Name: "D"},
-				_gen_wiretype.FieldType{Type: 0x34, Name: "E"},
-				_gen_wiretype.FieldType{Type: 0x35, Name: "F"},
-				_gen_wiretype.FieldType{Type: 0x19, Name: "G"},
-				_gen_wiretype.FieldType{Type: 0x1a, Name: "H"},
-				_gen_wiretype.FieldType{Type: 0x38, Name: "I"},
-				_gen_wiretype.FieldType{Type: 0x39, Name: "J"},
-				_gen_wiretype.FieldType{Type: 0x3, Name: "K"},
-				_gen_wiretype.FieldType{Type: 0x41, Name: "L"},
-				_gen_wiretype.FieldType{Type: 0x43, Name: "M"},
-				_gen_wiretype.FieldType{Type: 0x44, Name: "N"},
+				_gen_wiretype.FieldType{Type: 0x2, Name: "A0"},
+				_gen_wiretype.FieldType{Type: 0x42, Name: "A1"},
+				_gen_wiretype.FieldType{Type: 0x33, Name: "A2"},
+				_gen_wiretype.FieldType{Type: 0x34, Name: "A3"},
+				_gen_wiretype.FieldType{Type: 0x35, Name: "A4"},
+				_gen_wiretype.FieldType{Type: 0x23, Name: "A5"},
+				_gen_wiretype.FieldType{Type: 0x24, Name: "A6"},
+				_gen_wiretype.FieldType{Type: 0x25, Name: "A7"},
+				_gen_wiretype.FieldType{Type: 0x19, Name: "A8"},
+				_gen_wiretype.FieldType{Type: 0x1a, Name: "A9"},
+				_gen_wiretype.FieldType{Type: 0x38, Name: "A10"},
+				_gen_wiretype.FieldType{Type: 0x39, Name: "A11"},
+				_gen_wiretype.FieldType{Type: 0x3, Name: "A12"},
+				_gen_wiretype.FieldType{Type: 0x41, Name: "A13"},
+				_gen_wiretype.FieldType{Type: 0x43, Name: "A14"},
+				_gen_wiretype.FieldType{Type: 0x44, Name: "A15"},
+				_gen_wiretype.FieldType{Type: 0x45, Name: "B0"},
+				_gen_wiretype.FieldType{Type: 0x46, Name: "B1"},
+				_gen_wiretype.FieldType{Type: 0x47, Name: "B2"},
+				_gen_wiretype.FieldType{Type: 0x48, Name: "B3"},
+				_gen_wiretype.FieldType{Type: 0x49, Name: "B4"},
+				_gen_wiretype.FieldType{Type: 0x4a, Name: "B5"},
+				_gen_wiretype.FieldType{Type: 0x4b, Name: "B6"},
+				_gen_wiretype.FieldType{Type: 0x4c, Name: "B7"},
+				_gen_wiretype.FieldType{Type: 0x4d, Name: "B8"},
+				_gen_wiretype.FieldType{Type: 0x4e, Name: "B9"},
+				_gen_wiretype.FieldType{Type: 0x4f, Name: "B10"},
+				_gen_wiretype.FieldType{Type: 0x50, Name: "B11"},
+				_gen_wiretype.FieldType{Type: 0x51, Name: "B12"},
 			},
 			"veyron2/vdl/test_base.Scalars", []string(nil)},
 	}
@@ -512,7 +558,7 @@ func GetServiceAMethodTags(method string) []interface{} {
 	case "MethodA2":
 		return []interface{}{}
 	case "MethodA3":
-		return []interface{}{string("tag"), uint64(6)}
+		return []interface{}{"tag", uint64(6)}
 	case "MethodA4":
 		return []interface{}{}
 	default:
@@ -633,53 +679,65 @@ func (s *ServerStubServiceB) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Servi
 	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
 	result.Methods["MethodB1"] = _gen_ipc.MethodSignature{
 		InArgs: []_gen_ipc.MethodArgument{
-			{Name: "a", Type: 69},
-			{Name: "b", Type: 75},
+			{Name: "a", Type: 82},
+			{Name: "b", Type: 89},
 		},
 		OutArgs: []_gen_ipc.MethodArgument{
-			{Name: "c", Type: 78},
+			{Name: "c", Type: 95},
 			{Name: "err", Type: 66},
 		},
 	}
 
 	result.TypeDefs = []_gen_idl.AnyData{
-		_gen_wiretype.NamedPrimitiveType{Type: 0x34, Name: "byte", Tags: []string(nil)}, _gen_wiretype.StructType{
+		_gen_wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "anydata", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x7, Name: "TypeID", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x2, Name: "veyron2/vdl/test_base.Bool", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x32, Name: "veyron2/vdl/test_base.Byte", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x33, Name: "veyron2/vdl/test_base.Uint16", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x34, Name: "veyron2/vdl/test_base.Uint32", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x35, Name: "veyron2/vdl/test_base.Uint64", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x23, Name: "veyron2/vdl/test_base.Int16", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x24, Name: "veyron2/vdl/test_base.Int32", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x25, Name: "veyron2/vdl/test_base.Int64", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x19, Name: "veyron2/vdl/test_base.Float32", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x1a, Name: "veyron2/vdl/test_base.Float64", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x38, Name: "veyron2/vdl/test_base.Complex64", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x39, Name: "veyron2/vdl/test_base.Complex128", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x3, Name: "veyron2/vdl/test_base.String", Tags: []string(nil)}, _gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
-				_gen_wiretype.FieldType{Type: 0x3, Name: "Id"},
-				_gen_wiretype.FieldType{Type: 0x3, Name: "Msg"},
-			},
-			"error", []string(nil)},
-		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "anydata", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x7, Name: "TypeID", Tags: []string(nil)}, _gen_wiretype.StructType{
-			[]_gen_wiretype.FieldType{
-				_gen_wiretype.FieldType{Type: 0x2, Name: "A"},
-				_gen_wiretype.FieldType{Type: 0x41, Name: "B"},
-				_gen_wiretype.FieldType{Type: 0x24, Name: "C"},
-				_gen_wiretype.FieldType{Type: 0x25, Name: "D"},
-				_gen_wiretype.FieldType{Type: 0x34, Name: "E"},
-				_gen_wiretype.FieldType{Type: 0x35, Name: "F"},
-				_gen_wiretype.FieldType{Type: 0x19, Name: "G"},
-				_gen_wiretype.FieldType{Type: 0x1a, Name: "H"},
-				_gen_wiretype.FieldType{Type: 0x38, Name: "I"},
-				_gen_wiretype.FieldType{Type: 0x39, Name: "J"},
-				_gen_wiretype.FieldType{Type: 0x3, Name: "K"},
-				_gen_wiretype.FieldType{Type: 0x42, Name: "L"},
-				_gen_wiretype.FieldType{Type: 0x43, Name: "M"},
-				_gen_wiretype.FieldType{Type: 0x44, Name: "N"},
+				_gen_wiretype.FieldType{Type: 0x2, Name: "A0"},
+				_gen_wiretype.FieldType{Type: 0x41, Name: "A1"},
+				_gen_wiretype.FieldType{Type: 0x33, Name: "A2"},
+				_gen_wiretype.FieldType{Type: 0x34, Name: "A3"},
+				_gen_wiretype.FieldType{Type: 0x35, Name: "A4"},
+				_gen_wiretype.FieldType{Type: 0x23, Name: "A5"},
+				_gen_wiretype.FieldType{Type: 0x24, Name: "A6"},
+				_gen_wiretype.FieldType{Type: 0x25, Name: "A7"},
+				_gen_wiretype.FieldType{Type: 0x19, Name: "A8"},
+				_gen_wiretype.FieldType{Type: 0x1a, Name: "A9"},
+				_gen_wiretype.FieldType{Type: 0x38, Name: "A10"},
+				_gen_wiretype.FieldType{Type: 0x39, Name: "A11"},
+				_gen_wiretype.FieldType{Type: 0x3, Name: "A12"},
+				_gen_wiretype.FieldType{Type: 0x42, Name: "A13"},
+				_gen_wiretype.FieldType{Type: 0x43, Name: "A14"},
+				_gen_wiretype.FieldType{Type: 0x44, Name: "A15"},
+				_gen_wiretype.FieldType{Type: 0x45, Name: "B0"},
+				_gen_wiretype.FieldType{Type: 0x46, Name: "B1"},
+				_gen_wiretype.FieldType{Type: 0x47, Name: "B2"},
+				_gen_wiretype.FieldType{Type: 0x48, Name: "B3"},
+				_gen_wiretype.FieldType{Type: 0x49, Name: "B4"},
+				_gen_wiretype.FieldType{Type: 0x4a, Name: "B5"},
+				_gen_wiretype.FieldType{Type: 0x4b, Name: "B6"},
+				_gen_wiretype.FieldType{Type: 0x4c, Name: "B7"},
+				_gen_wiretype.FieldType{Type: 0x4d, Name: "B8"},
+				_gen_wiretype.FieldType{Type: 0x4e, Name: "B9"},
+				_gen_wiretype.FieldType{Type: 0x4f, Name: "B10"},
+				_gen_wiretype.FieldType{Type: 0x50, Name: "B11"},
+				_gen_wiretype.FieldType{Type: 0x51, Name: "B12"},
 			},
 			"veyron2/vdl/test_base.Scalars", []string(nil)},
-		_gen_wiretype.SliceType{Elem: 0x45, Name: "", Tags: []string(nil)}, _gen_wiretype.MapType{Key: 0x3, Elem: 0x45, Name: "", Tags: []string(nil)}, _gen_wiretype.MapType{Key: 0x3, Elem: 0x39, Name: "", Tags: []string(nil)}, _gen_wiretype.SliceType{Elem: 0x48, Name: "", Tags: []string(nil)}, _gen_wiretype.MapType{Key: 0x45, Elem: 0x49, Name: "", Tags: []string(nil)}, _gen_wiretype.StructType{
+		_gen_wiretype.ArrayType{Elem: 0x52, Len: 0x2, Name: "", Tags: []string(nil)}, _gen_wiretype.SliceType{Elem: 0x52, Name: "", Tags: []string(nil)}, _gen_wiretype.MapType{Key: 0x3, Elem: 0x52, Name: "", Tags: []string(nil)}, _gen_wiretype.MapType{Key: 0x3, Elem: 0x39, Name: "", Tags: []string(nil)}, _gen_wiretype.SliceType{Elem: 0x56, Name: "", Tags: []string(nil)}, _gen_wiretype.MapType{Key: 0x52, Elem: 0x57, Name: "", Tags: []string(nil)}, _gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
-				_gen_wiretype.FieldType{Type: 0x45, Name: "A"},
-				_gen_wiretype.FieldType{Type: 0x46, Name: "B"},
-				_gen_wiretype.FieldType{Type: 0x47, Name: "C"},
-				_gen_wiretype.FieldType{Type: 0x4a, Name: "D"},
+				_gen_wiretype.FieldType{Type: 0x52, Name: "A0"},
+				_gen_wiretype.FieldType{Type: 0x53, Name: "A1"},
+				_gen_wiretype.FieldType{Type: 0x54, Name: "A2"},
+				_gen_wiretype.FieldType{Type: 0x55, Name: "A4"},
+				_gen_wiretype.FieldType{Type: 0x58, Name: "A5"},
 			},
 			"veyron2/vdl/test_base.Composites", []string(nil)},
-		_gen_wiretype.SliceType{Elem: 0x4b, Name: "", Tags: []string(nil)}, _gen_wiretype.MapType{Key: 0x3, Elem: 0x4b, Name: "", Tags: []string(nil)}, _gen_wiretype.StructType{
+		_gen_wiretype.ArrayType{Elem: 0x59, Len: 0x2, Name: "", Tags: []string(nil)}, _gen_wiretype.SliceType{Elem: 0x59, Name: "", Tags: []string(nil)}, _gen_wiretype.MapType{Key: 0x3, Elem: 0x59, Name: "", Tags: []string(nil)}, _gen_wiretype.SliceType{Elem: 0x5c, Name: "", Tags: []string(nil)}, _gen_wiretype.MapType{Key: 0x52, Elem: 0x5d, Name: "", Tags: []string(nil)}, _gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
-				_gen_wiretype.FieldType{Type: 0x4b, Name: "A"},
-				_gen_wiretype.FieldType{Type: 0x4c, Name: "B"},
-				_gen_wiretype.FieldType{Type: 0x4d, Name: "C"},
+				_gen_wiretype.FieldType{Type: 0x59, Name: "A0"},
+				_gen_wiretype.FieldType{Type: 0x5a, Name: "A1"},
+				_gen_wiretype.FieldType{Type: 0x5b, Name: "A2"},
+				_gen_wiretype.FieldType{Type: 0x5c, Name: "A3"},
+				_gen_wiretype.FieldType{Type: 0x5e, Name: "A4"},
 			},
 			"veyron2/vdl/test_base.CompComp", []string(nil)},
 	}

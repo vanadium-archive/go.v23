@@ -85,17 +85,21 @@ func ComplexConst(re, im *big.Rat) Const { return Const{newComplex(re, im), nil}
 
 // ConstFromValue returns a typed Const based on value v.
 func ConstFromValue(v *Value) Const {
+	if v.Type().IsBytes() {
+		// Represent []byte and [N]byte as a string, so that conversions are easy.
+		return Const{string(v.Bytes()), v.Type()}
+	}
 	switch v.Kind() {
 	case Bool:
 		return Const{v.Bool(), v.Type()}
 	case String:
 		return Const{v.RawString(), v.Type()}
-	case Bytes:
-		return Const{string(v.Bytes()), v.Type()}
-	case Int32, Int64:
-		return Const{new(big.Int).SetInt64(v.Int()), v.Type()}
-	case Uint32, Uint64:
+	case Byte:
+		return Const{new(big.Int).SetUint64(uint64(v.Byte())), v.Type()}
+	case Uint16, Uint32, Uint64:
 		return Const{new(big.Int).SetUint64(v.Uint()), v.Type()}
+	case Int16, Int32, Int64:
+		return Const{new(big.Int).SetInt64(v.Int()), v.Type()}
 	case Float32, Float64:
 		return Const{new(big.Rat).SetFloat64(v.Float()), v.Type()}
 	case Complex64, Complex128:
@@ -224,18 +228,27 @@ func (c Const) ToValue() (*Value, error) {
 			return vx.AssignBool(trep), nil
 		}
 	case string:
-		switch vx.Kind() {
-		case String:
+		switch {
+		case vx.Kind() == String:
 			return vx.AssignString(trep), nil
-		case Bytes:
+		case vx.Type().IsBytes():
+			if vx.Kind() == Array {
+				if vx.Len() != len(trep) {
+					return nil, fmt.Errorf("%s has a different length than %v", c, vx.Type())
+				}
+			} else {
+				vx.AssignLen(len(trep))
+			}
 			return vx.CopyBytes([]byte(trep)), nil
 		}
 	case *big.Int:
 		switch vx.Kind() {
-		case Int32, Int64:
-			return vx.AssignInt(trep.Int64()), nil
-		case Uint32, Uint64:
+		case Byte:
+			return vx.AssignByte(byte(trep.Uint64())), nil
+		case Uint16, Uint32, Uint64:
 			return vx.AssignUint(trep.Uint64()), nil
+		case Int16, Int32, Int64:
+			return vx.AssignInt(trep.Int64()), nil
 		}
 	case *big.Rat:
 		switch vx.Kind() {
@@ -300,6 +313,10 @@ func EvalUnary(op UnaryOp, x Const) (Const, error) {
 		// special-case unsigned integers.  E.g. ^int8(1)=-2, ^uint8(1)=254
 		not := new(big.Int)
 		switch {
+		case x.repType != nil && x.repType.Kind() == Byte:
+			not.SetUint64(uint64(^uint8(ix.Uint64())))
+		case x.repType != nil && x.repType.Kind() == Uint16:
+			not.SetUint64(uint64(^uint16(ix.Uint64())))
 		case x.repType != nil && x.repType.Kind() == Uint32:
 			not.SetUint64(uint64(^uint32(ix.Uint64())))
 		case x.repType != nil && x.repType.Kind() == Uint64:
@@ -512,13 +529,12 @@ func makeConst(rep interface{}, totype *Type) (Const, error) {
 			return Const{trep, totype}, nil
 		}
 	case string:
-		switch totype.Kind() {
-		case String, Bytes:
+		if totype.Kind() == String || totype.IsBytes() {
 			return Const{trep, totype}, nil
 		}
 	case *big.Int:
 		switch totype.Kind() {
-		case Int32, Int64, Uint32, Uint64:
+		case Byte, Uint16, Uint32, Uint64, Int16, Int32, Int64:
 			if err := checkOverflowInt(trep, totype.Kind()); err != nil {
 				return Const{}, err
 			}
@@ -528,11 +544,11 @@ func makeConst(rep interface{}, totype *Type) (Const, error) {
 		}
 	case *big.Rat:
 		switch totype.Kind() {
-		case Int32, Int64, Uint32, Uint64:
+		case Byte, Uint16, Uint32, Uint64, Int16, Int32, Int64:
 			// The only way we reach this conversion from big.Rat to a typed integer
 			// is for explicit type conversions.  We pass a nil Type to bigRatToInt
-			// indicating trep is untyped, to allow all conversions from float to int as
-			// long as trep is actually an integer.
+			// indicating trep is untyped, to allow all conversions from float to int
+			// as long as trep is actually an integer.
 			irep, err := bigRatToInt(trep, nil)
 			if err != nil {
 				return Const{}, err
@@ -553,7 +569,7 @@ func makeConst(rep interface{}, totype *Type) (Const, error) {
 		}
 	case *bigComplex:
 		switch totype.Kind() {
-		case Int32, Int64, Uint32, Uint64, Float32, Float64:
+		case Byte, Uint16, Uint32, Uint64, Int16, Int32, Int64, Float32, Float64:
 			v, err := bigComplexToRat(trep)
 			if err != nil {
 				return Const{}, err
@@ -576,15 +592,15 @@ func makeConst(rep interface{}, totype *Type) (Const, error) {
 	return Const{}, fmt.Errorf("can't convert %s to %v", cRepString(rep), cRepTypeString(rep, totype))
 }
 
-func bitLen(kind Kind) int {
+func bitLenInt(kind Kind) int {
 	switch kind {
-	case Int32:
+	case Byte:
+		return 8
+	case Uint16, Int16:
+		return 16
+	case Uint32, Int32:
 		return 32
-	case Int64:
-		return 64
-	case Uint32:
-		return 32
-	case Uint64:
+	case Uint64, Int64:
 		return 64
 	default:
 		panic(fmt.Errorf("val: bitLen unhandled kind %v", kind))
@@ -594,8 +610,12 @@ func bitLen(kind Kind) int {
 // checkOverflowInt returns an error iff converting b to the typed integer will
 // cause overflow.
 func checkOverflowInt(b *big.Int, kind Kind) error {
-	switch bitlen := bitLen(kind); kind {
-	case Int32, Int64:
+	switch bitlen := bitLenInt(kind); kind {
+	case Byte, Uint16, Uint32, Uint64:
+		if b.Sign() < 0 || b.BitLen() > bitlen {
+			return fmt.Errorf("const %v overflows uint%d", cRepString(b), bitlen)
+		}
+	case Int16, Int32, Int64:
 		// Account for two's complement, where e.g. int8 ranges from -128 to 127
 		if b.Sign() >= 0 {
 			// Positives and 0 - just check bitlen, accounting for the sign bit.
@@ -608,10 +628,6 @@ func checkOverflowInt(b *big.Int, kind Kind) error {
 			if bplus1.BitLen() >= bitlen {
 				return fmt.Errorf("const %v overflows int%d", cRepString(b), bitlen)
 			}
-		}
-	case Uint32, Uint64:
-		if b.Sign() < 0 || b.BitLen() > bitlen {
-			return fmt.Errorf("const %v overflows uint%d", cRepString(b), bitlen)
 		}
 	default:
 		panic(fmt.Errorf("val: checkOverflowInt unhandled kind %v", kind))

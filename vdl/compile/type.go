@@ -26,6 +26,8 @@ type TypeDef struct {
 	//   type Struct2 Struct;          Struct
 	BaseType *val.Type
 
+	LabelDoc       []string // [only valid for enum] docs for each label
+	LabelDocSuffix []string // [only valid for enum] suffix docs for each label
 	FieldDoc       []string // [only valid for struct] docs for each field
 	FieldDocSuffix []string // [only valid for struct] suffix docs for each field
 	File           *File    // parent file that this type is defined in
@@ -45,7 +47,7 @@ func compileTypeDefs(pkg *Package, pfiles []*parse.File, env *Env) {
 		pfiles:   pfiles,
 		env:      env,
 		tbuilder: &val.TypeBuilder{},
-		builders: make(map[string]*typeBuilder),
+		builders: make(map[string]*typeDefBuilder),
 	}
 	if td.Declare(); !env.Errors.IsEmpty() {
 		return
@@ -63,17 +65,17 @@ func compileTypeDefs(pkg *Package, pfiles []*parse.File, env *Env) {
 // 2) Define describes each type, resolving named references.
 // 3) Build builds all types.
 //
-// It holds a builders map from type name to typeBuilder, where the typeBuilder
-// is responsible for compiling and defining a single type.
+// It holds a builders map from type name to typeDefBuilder, where the
+// typeDefBuilder is responsible for compiling and defining a single type.
 type typeDefiner struct {
 	pkg      *Package
 	pfiles   []*parse.File
 	env      *Env
 	tbuilder *val.TypeBuilder
-	builders map[string]*typeBuilder
+	builders map[string]*typeDefBuilder
 }
 
-type typeBuilder struct {
+type typeDefBuilder struct {
 	def     *TypeDef
 	ptype   parse.Type
 	pending val.PendingType // pending type that we're building
@@ -89,25 +91,33 @@ func (td typeDefiner) Declare() {
 				td.env.errorf(file, pdef.Pos, "type %s redefined (previous at %s)", pdef.Name, fpString(b.def.File, b.def.Pos))
 				continue // keep going to catch more errors
 			}
-			td.builders[pdef.Name] = td.makeTypeBuilder(file, pdef)
+			td.builders[pdef.Name] = td.makeTypeDefBuilder(file, pdef)
 		}
 	}
 }
 
-func (td typeDefiner) makeTypeBuilder(file *File, pdef *parse.TypeDef) *typeBuilder {
+func (td typeDefiner) makeTypeDefBuilder(file *File, pdef *parse.TypeDef) *typeDefBuilder {
 	if err := ValidIdent(pdef.Name); err != nil {
 		td.env.prefixErrorf(file, pdef.Pos, err, "type %s invalid name", pdef.Name)
 		return nil
 	}
-	ret := new(typeBuilder)
+	ret := new(typeDefBuilder)
 	ret.def = &TypeDef{NamePos: NamePos(pdef.NamePos), File: file}
 	ret.ptype = pdef.Type
 	// We use the qualified name to actually name the type, to ensure types
 	// defined in separate packages are hash-consed separately.
 	qname := file.Package.QualifiedName(pdef.Name)
 	switch pt := pdef.Type.(type) {
-	case *parse.TypeNamed, *parse.TypeArray, *parse.TypeList, *parse.TypeMap:
+	case *parse.TypeNamed, *parse.TypeArray, *parse.TypeList, *parse.TypeSet, *parse.TypeMap:
 		ret.pending = td.tbuilder.Named(qname)
+	case *parse.TypeEnum:
+		ret.pending = td.tbuilder.Enum(qname)
+		ret.def.LabelDoc = make([]string, len(pt.Labels))
+		ret.def.LabelDocSuffix = make([]string, len(pt.Labels))
+		for index, plabel := range pt.Labels {
+			ret.def.LabelDoc[index] = plabel.Doc
+			ret.def.LabelDocSuffix[index] = plabel.DocSuffix
+		}
 	case *parse.TypeStruct:
 		ret.pending = td.tbuilder.Struct(qname)
 		ret.def.FieldDoc = make([]string, len(pt.Fields))
@@ -116,7 +126,8 @@ func (td typeDefiner) makeTypeBuilder(file *File, pdef *parse.TypeDef) *typeBuil
 			ret.def.FieldDoc[index] = pfield.Doc
 			ret.def.FieldDocSuffix[index] = pfield.DocSuffix
 		}
-		// TODO(toddw): Implement Enum, OneOf
+	case *parse.TypeOneOf:
+		ret.pending = td.tbuilder.OneOf(qname)
 	default:
 		td.env.errorf(file, pt.Pos(), "type %s invalid (type definition can't be based on %s type)", pdef.Name, pt.Kind())
 	}
@@ -130,11 +141,11 @@ func (td typeDefiner) Define() {
 	for _, b := range td.builders {
 		def, file := b.def, b.def.File
 		switch pt := b.ptype.(type) {
-		case *parse.TypeNamed, *parse.TypeArray, *parse.TypeList, *parse.TypeMap:
+		case *parse.TypeNamed, *parse.TypeArray, *parse.TypeList, *parse.TypeSet, *parse.TypeMap:
 			if base := compilePendingType(pt, file, td.env, td.tbuilder, td.builders); base != nil {
 				switch tbase := base.(type) {
 				case *val.Type:
-					if tbase == TypeError {
+					if tbase == ErrorType {
 						td.env.errorf(file, def.Pos, "error cannot be renamed")
 						continue // keep going to catch more errors
 					}
@@ -144,7 +155,12 @@ func (td typeDefiner) Define() {
 				default:
 					panic(fmt.Errorf("vdl: typeDefiner.Define unhandled TypeOrPending %T %v", tbase, tbase))
 				}
-				b.pending.(val.PendingNamed).SetBase(base)
+				b.pending.(val.PendingNamed).AssignBase(base)
+			}
+		case *parse.TypeEnum:
+			td.env.experimentalOnly(file, def.Pos, "enum not supported")
+			for _, plabel := range pt.Labels {
+				b.pending.(val.PendingEnum).AppendLabel(plabel.Name)
 			}
 		case *parse.TypeStruct:
 			for _, pfield := range pt.Fields {
@@ -152,8 +168,15 @@ func (td typeDefiner) Define() {
 					b.pending.(val.PendingStruct).AppendField(pfield.Name, ftype)
 				}
 			}
+		case *parse.TypeOneOf:
+			td.env.experimentalOnly(file, def.Pos, "oneof not supported")
+			for _, ptype := range pt.Types {
+				if otype := compilePendingType(ptype, file, td.env, td.tbuilder, td.builders); otype != nil {
+					b.pending.(val.PendingOneOf).AppendType(otype)
+				}
+			}
 		default:
-			// This type switch must mirror the types in makeTypeBuilder.
+			// This type switch must mirror the types in makeTypeDefBuilder.
 			panic(fmt.Errorf("vdl: unhandled parse.Type %T %#v", pt, pt))
 		}
 	}
@@ -185,7 +208,7 @@ func compileType(ptype parse.Type, file *File, env *Env) *val.Type {
 // compilePendingType returns the *val.Type corresponding to ptype if it is
 // already defined, or a PendingType from builders if it is currently being
 // built.
-func compilePendingType(ptype parse.Type, file *File, env *Env, tbuilder *val.TypeBuilder, builders map[string]*typeBuilder) val.TypeOrPending {
+func compilePendingType(ptype parse.Type, file *File, env *Env, tbuilder *val.TypeBuilder, builders map[string]*typeDefBuilder) val.TypeOrPending {
 	switch pt := ptype.(type) {
 	case *parse.TypeNamed:
 		if def := env.ResolveType(pt.Name, file); def != nil {
@@ -196,17 +219,25 @@ func compilePendingType(ptype parse.Type, file *File, env *Env, tbuilder *val.Ty
 		}
 		env.errorf(file, pt.Pos(), "type %s undefined", pt.Name)
 	case *parse.TypeArray:
-		env.errorf(file, pt.Pos(), "arrays are not supported and will be removed")
+		elem := compilePendingType(pt.Elem, file, env, tbuilder, builders)
+		if elem != nil {
+			return tbuilder.Array().AssignLen(pt.Len).AssignElem(elem)
+		}
 	case *parse.TypeList:
 		elem := compilePendingType(pt.Elem, file, env, tbuilder, builders)
 		if elem != nil {
-			return tbuilder.List().SetElem(elem)
+			return tbuilder.List().AssignElem(elem)
+		}
+	case *parse.TypeSet:
+		key := compilePendingType(pt.Key, file, env, tbuilder, builders)
+		if key != nil {
+			return tbuilder.Set().AssignKey(key)
 		}
 	case *parse.TypeMap:
 		key := compilePendingType(pt.Key, file, env, tbuilder, builders)
 		elem := compilePendingType(pt.Elem, file, env, tbuilder, builders)
 		if key != nil && elem != nil {
-			return tbuilder.Map().SetKey(key).SetElem(elem)
+			return tbuilder.Map().AssignKey(key).AssignElem(elem)
 		}
 	default:
 		env.errorf(file, pt.Pos(), "unnamed %s type invalid (type must be defined)", ptype.Kind())
@@ -261,10 +292,12 @@ var (
 	GlobalFile    = &File{BaseName: "global.vdl"}
 
 	// Built-in types defined by the compiler.
-	// TODO(toddw): Remove byte from the VDL language.
-	TypeByte = val.NamedType("byte", val.Uint32Type)
 	// TODO(toddw): Represent error in a built-in VDL file.
-	TypeError = val.StructType("error", []val.StructField{{"Id", val.StringType}, {"Msg", val.StringType}})
+	ErrorType = val.StructType(
+		"error",
+		val.StructField{"Id", val.StringType},
+		val.StructField{"Msg", val.StringType},
+	)
 )
 
 func init() {
@@ -274,19 +307,20 @@ func init() {
 	// are linked to each other.
 	globalSingleton("any", val.AnyType)
 	globalSingleton("bool", val.BoolType)
-	globalSingleton("int32", val.Int32Type)
-	globalSingleton("int64", val.Int64Type)
+	globalSingleton("byte", val.ByteType)
+	globalSingleton("uint16", val.Uint16Type)
 	globalSingleton("uint32", val.Uint32Type)
 	globalSingleton("uint64", val.Uint64Type)
+	globalSingleton("int16", val.Int16Type)
+	globalSingleton("int32", val.Int32Type)
+	globalSingleton("int64", val.Int64Type)
 	globalSingleton("float32", val.Float32Type)
 	globalSingleton("float64", val.Float64Type)
 	globalSingleton("complex64", val.Complex64Type)
 	globalSingleton("complex128", val.Complex128Type)
 	globalSingleton("string", val.StringType)
-	globalSingleton("bytes", val.BytesType)
 	globalSingleton("typeval", val.TypeValType)
-	globalSingleton("byte", TypeByte)
-	globalSingleton("error", TypeError)
+	globalSingleton("error", ErrorType)
 }
 
 func globalSingleton(name string, t *val.Type) {

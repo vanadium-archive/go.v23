@@ -9,28 +9,33 @@ type Kind uint
 
 const (
 	// Variant kinds
-	Any Kind = iota
-	OneOf
+	Any   Kind = iota // any type
+	OneOf             // one of a set of types
 	// Scalar kinds
-	Bool
-	Int32
-	Int64
-	Uint32
-	Uint64
-	Float32
-	Float64
-	Complex64
-	Complex128
-	String
-	Bytes
-	TypeVal
-	Enum
+	Bool       // boolean
+	Byte       // 8 bit unsigned integer
+	Uint16     // 16 bit unsigned integer
+	Uint32     // 32 bit unsigned integer
+	Uint64     // 64 bit unsigned integer
+	Int16      // 16 bit signed integer
+	Int32      // 32 bit signed integer
+	Int64      // 64 bit signed integer
+	Float32    // 32 bit IEEE 754 floating point
+	Float64    // 64 bit IEEE 754 floating point
+	Complex64  // {real,imag} each 32 bit IEEE 754 floating point
+	Complex128 // {real,imag} each 64 bit IEEE 754 floating point
+	String     // unicode string (encoded as UTF-8 in memory)
+	TypeVal    // type represented as a value
+	Enum       // one of a set of labels
 	// Composite kinds
-	List
-	Map
-	Struct
+	Array  // fixed-length ordered sequence of elements
+	List   // variable-length ordered sequence of elements
+	Set    // unordered collection of distinct keys
+	Map    // unordered association between distinct keys and values
+	Struct // ordered sequence of fields, each with a name and value
+
 	// Internal kinds; they never appear in a *Type returned to the user.
-	internalNamed
+	internalNamed // placeholder for named types while they're being built.
 )
 
 func (k Kind) String() string {
@@ -41,14 +46,20 @@ func (k Kind) String() string {
 		return "oneof"
 	case Bool:
 		return "bool"
-	case Int32:
-		return "int32"
-	case Int64:
-		return "int64"
+	case Byte:
+		return "byte"
+	case Uint16:
+		return "uint16"
 	case Uint32:
 		return "uint32"
 	case Uint64:
 		return "uint64"
+	case Int16:
+		return "int16"
+	case Int32:
+		return "int32"
+	case Int64:
+		return "int64"
 	case Float32:
 		return "float32"
 	case Float64:
@@ -59,14 +70,16 @@ func (k Kind) String() string {
 		return "complex128"
 	case String:
 		return "string"
-	case Bytes:
-		return "bytes"
 	case TypeVal:
 		return "typeval"
 	case Enum:
 		return "enum"
+	case Array:
+		return "array"
 	case List:
 		return "list"
+	case Set:
+		return "set"
 	case Map:
 		return "map"
 	case Struct:
@@ -92,8 +105,9 @@ type Type struct {
 	kind   Kind          // used by all kinds
 	name   string        // used by all kinds
 	labels []string      // used by Enum
-	elem   *Type         // used by List, Map
-	key    *Type         // used by Map
+	len    int           // used by Array
+	elem   *Type         // used by Array, List, Map
+	key    *Type         // used by Set, Map
 	fields []StructField // used by Struct
 	types  []*Type       // used by OneOf
 	unique string        // used by all kinds, filled in by typeCons
@@ -113,6 +127,11 @@ func (t *Type) Name() string { return t.name }
 
 // String returns a human-readable description of type t.
 func (t *Type) String() string { return t.unique }
+
+// IsBytes returns true iff the kind of type is []byte or [N]byte.
+func (t *Type) IsBytes() bool {
+	return (t.kind == List || t.kind == Array) && t.elem.kind == Byte
+}
 
 // EnumLabel returns the Enum label at the given index.  It panics if the index
 // is out of range.
@@ -140,15 +159,21 @@ func (t *Type) NumEnumLabel() int {
 	return len(t.labels)
 }
 
-// Elem returns the element type of a List or Map.
+// Len returns the length of an Array.
+func (t *Type) Len() int {
+	t.checkKind("Len", Array)
+	return t.len
+}
+
+// Elem returns the element type of an Array, List or Map.
 func (t *Type) Elem() *Type {
-	t.checkKind("Elem", List, Map)
+	t.checkKind("Elem", Array, List, Map)
 	return t.elem
 }
 
-// Key returns the key type of a Map.
+// Key returns the key type of a Set or Map.
 func (t *Type) Key() *Type {
-	t.checkKind("Key", Map)
+	t.checkKind("Key", Set, Map)
 	return t.key
 }
 
@@ -214,8 +239,12 @@ func (t *Type) AssignableFrom(f *Type) bool {
 // ptype implements the TypeOrPending interface.
 func (t *Type) ptype() *Type { return t }
 
-func errKindMismatch(method string, k Kind, allowed ...Kind) error {
-	return fmt.Errorf("val: method %q called on mismatched kind; got: %v, want: %v", method, k, allowed)
+func (t *Type) errKind(method string, allowed ...Kind) error {
+	return fmt.Errorf("val: %s mismatched kind; got: %v, want: %v", method, t, allowed)
+}
+
+func (t *Type) errBytes(method string) error {
+	return fmt.Errorf("val: %s mismatched type; got: %v, want: bytes", method, t)
 }
 
 func (t *Type) checkKind(method string, allowed ...Kind) {
@@ -224,5 +253,11 @@ func (t *Type) checkKind(method string, allowed ...Kind) {
 			return
 		}
 	}
-	panic(errKindMismatch(method, t.kind, allowed...))
+	panic(t.errKind(method, allowed...))
+}
+
+func (t *Type) checkIsBytes(method string) {
+	if !t.IsBytes() {
+		panic(t.errBytes(method))
+	}
 }

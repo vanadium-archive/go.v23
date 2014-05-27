@@ -41,12 +41,12 @@ import (
 
 const (
 	// Yes shows that bools may be untyped.
-	Yes = bool(true) // yes trailing doc
+	Yes = true // yes trailing doc
 
 	// No shows explicit boolean typing.
-	No = bool(false)
+	No = false
 
-	Hello = string("hello")
+	Hello = "hello"
 
 	// Int32 shows explicit integer typing.
 	Int32 = int32(123)
@@ -491,13 +491,7 @@ func (s *ServerStubArith) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceS
 	}
 
 	result.TypeDefs = []_gen_idl.AnyData{
-		_gen_wiretype.StructType{
-			[]_gen_wiretype.FieldType{
-				_gen_wiretype.FieldType{Type: 0x3, Name: "Id"},
-				_gen_wiretype.FieldType{Type: 0x3, Name: "Msg"},
-			},
-			"error", []string(nil)},
-		_gen_wiretype.StructType{
+		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, _gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
 				_gen_wiretype.FieldType{Type: 0x24, Name: "A"},
 				_gen_wiretype.FieldType{Type: 0x24, Name: "B"},
@@ -584,7 +578,7 @@ func GetArithMethodTags(method string) []interface{} {
 	case "Mul":
 		return []interface{}{}
 	case "GenError":
-		return []interface{}{string("foo"), string("barz"), string("hello"), int32(129), uint64(36)}
+		return []interface{}{"foo", "barz", "hello", int32(129), uint64(36)}
 	case "Count":
 		return []interface{}{}
 	case "StreamingAdd":
@@ -756,13 +750,7 @@ func (s *ServerStubCalculator) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Ser
 	}
 
 	result.TypeDefs = []_gen_idl.AnyData{
-		_gen_wiretype.StructType{
-			[]_gen_wiretype.FieldType{
-				_gen_wiretype.FieldType{Type: 0x3, Name: "Id"},
-				_gen_wiretype.FieldType{Type: 0x3, Name: "Msg"},
-			},
-			"error", []string(nil)},
-	}
+		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}}
 	var ss _gen_ipc.ServiceSignature
 	var firstAdded int
 	ss, _ = s.ServerStubArith.Signature(call)
@@ -912,7 +900,7 @@ func GetCalculatorMethodTags(method string) []interface{} {
 	case "On":
 		return []interface{}{}
 	case "Off":
-		return []interface{}{string("offtag")}
+		return []interface{}{"offtag"}
 	default:
 		return nil
 	}

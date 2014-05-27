@@ -7,9 +7,37 @@ import (
 // This file contains the non-trivial "rep" types, which are the representation
 // of values of certain types.
 
-// repMap represents map values.  There are two underlying representations
-// depending on the key type.  We decide which one to use based on the type of
-// the map key, and never change representations thereafter.
+// repBytes represents []byte and [N]byte values.  We special-case these kinds
+// of types to easily support the Value.Bytes() and Value.CopyBytes() methods,
+// which makes usage more convenient for the user.  This is also a more
+// efficient representation.
+type repBytes []byte
+
+func copyRepBytes(rep repBytes) repBytes {
+	cp := make(repBytes, len(rep))
+	copy(cp, rep)
+	return cp
+}
+
+func (rep repBytes) IsZero(t *Type) bool {
+	switch t.kind {
+	case List:
+		return len(rep) == 0
+	case Array:
+		// TODO(toddw): Speed up the zero checking loop over each byte.
+		for _, b := range rep {
+			if b != 0 {
+				return false
+			}
+		}
+		return true
+	}
+	panic(t.errBytes("IsZero"))
+}
+
+// repMap represents set and map values.  There are two underlying
+// representations depending on the key type.  We decide which one to use based
+// on the type of the map key, and never change representations thereafter.
 //   fast: Use a real Go map to associate keys with a kvPair
 //   slow: Just a slice of kvPairs.
 //
@@ -37,16 +65,39 @@ func copyKVPair(kv kvPair) kvPair {
 }
 
 func (kv kvPair) String() string {
-	return stringRep(kv.key.t, kv.key.rep) + ": " + stringRep(kv.val.t, kv.val.rep)
+	s := stringRep(kv.key.t, kv.key.rep)
+	if kv.val != nil {
+		s += ": " + stringRep(kv.val.t, kv.val.rep)
+	}
+	return s
 }
 
-func zeroRepMap(t *Type) repMap {
+func useFastIndex(key *Type) bool {
+	// TODO(toddw): Structs with exactly 1 simple field may also use fast.
+	switch key.kind {
+	case Bool, Byte, Uint16, Uint32, Uint64, Int16, Int32, Int64, Float32, Float64, Complex64, Complex128, String, Enum:
+		return true
+	}
+	if key.IsBytes() {
+		return true
+	}
+	return false
+}
+
+// fastKeyRep returns a representation of key that may be used in a regular Go
+// map.  It's only called on keys where useFastIndex returns true.
+func fastKeyRep(key *Value) interface{} {
+	if key.t.IsBytes() {
+		return string(key.Bytes())
+	}
+	return key.rep
+}
+
+func zeroRepMap(key *Type) repMap {
 	rep := repMap{}
-	switch t.key.kind {
-	case Bool, Int32, Int64, Uint32, Uint64, Float32, Float64, Complex64, Complex128, String, Bytes, Enum:
-		// TODO(toddw): Structs with exactly 1 simple field may also use fast.
+	if useFastIndex(key) {
 		rep.fastIndex = make(map[interface{}]kvPair)
-	default:
+	} else {
 		slow := make([]kvPair, 0)
 		rep.slowIndex = &slow
 	}
@@ -76,13 +127,13 @@ func equalRepMap(maptype *Type, a, b repMap) bool {
 	}
 	if a.fastIndex != nil {
 		for _, akv := range a.fastIndex {
-			if !b.equalKV(maptype, akv) {
+			if !b.hasKV(maptype, akv) {
 				return false
 			}
 		}
 	} else {
 		for _, akv := range *a.slowIndex {
-			if !b.equalKV(maptype, akv) {
+			if !b.hasKV(maptype, akv) {
 				return false
 			}
 		}
@@ -90,9 +141,9 @@ func equalRepMap(maptype *Type, a, b repMap) bool {
 	return true
 }
 
-func (rep repMap) equalKV(maptype *Type, kv kvPair) bool {
-	val := rep.Index(maptype, kv.key)
-	if val == nil {
+func (rep repMap) hasKV(maptype *Type, kv kvPair) bool {
+	val, ok := rep.Index(maptype, kv.key)
+	if !ok {
 		return false
 	}
 	return Equal(kv.val, val)
@@ -147,30 +198,22 @@ func (rep repMap) Keys() []*Value {
 	}
 }
 
-func fastKeyRep(key *Value) interface{} {
-	switch key.t.kind {
-	case Bytes:
-		return string(key.rep.([]byte))
-	}
-	return key.rep
-}
-
-func (rep repMap) Index(maptype *Type, key *Value) *Value {
+func (rep repMap) Index(maptype *Type, key *Value) (*Value, bool) {
 	if !maptype.key.AssignableFrom(key.t) {
 		panic(fmt.Errorf("val: map type %v can't be indexed with key type %v", maptype, key.t))
 	}
 	if rep.fastIndex != nil {
 		if kv, ok := rep.fastIndex[fastKeyRep(key)]; ok {
-			return kv.val
+			return kv.val, true
 		}
 	} else {
 		for _, kv := range *rep.slowIndex {
 			if Equal(kv.key, key) {
-				return kv.val
+				return kv.val, true
 			}
 		}
 	}
-	return nil
+	return nil, false
 }
 
 func (rep repMap) Assign(maptype *Type, key, val *Value) {
@@ -182,22 +225,11 @@ func (rep repMap) Assign(maptype *Type, key, val *Value) {
 	}
 	// TODO(toddw): Copy key and val?
 	if rep.fastIndex != nil {
-		if val == nil {
-			delete(rep.fastIndex, fastKeyRep(key))
-		} else {
-			rep.fastIndex[fastKeyRep(key)] = kvPair{key, val}
-		}
+		rep.fastIndex[fastKeyRep(key)] = kvPair{key, val}
 	} else {
 		for ix := 0; ix < len(*rep.slowIndex); ix++ {
 			if Equal((*rep.slowIndex)[ix].key, key) {
-				if val == nil {
-					// Delete entry ix by copying last entry into ix and shrinking by 1.
-					last := len(*rep.slowIndex) - 1
-					(*rep.slowIndex)[ix] = (*rep.slowIndex)[last]
-					(*rep.slowIndex) = (*rep.slowIndex)[:last]
-				} else {
-					(*rep.slowIndex)[ix].val = val
-				}
+				(*rep.slowIndex)[ix].val = val
 				return
 			}
 		}
@@ -206,24 +238,35 @@ func (rep repMap) Assign(maptype *Type, key, val *Value) {
 	}
 }
 
-// repStruct represents the fields of a struct in a slice.  Structs always
-// exist, and consequently the slice is always sized to the number of fields in
-// the slice.  Each field is lazily initialized, as a minor optimization.
-// Regardless of the representation, the semantics are that nil fields are
-// indistinguishable from zero valued fields.
-type repStruct []*Value
-
-func zeroRepStruct(t *Type) repStruct {
-	return make(repStruct, len(t.fields))
+func (rep repMap) Delete(maptype *Type, key *Value) {
+	if !maptype.key.AssignableFrom(key.t) {
+		panic(fmt.Errorf("val: map type %v can't be assigned with key type %v", maptype, key.t))
+	}
+	if rep.fastIndex != nil {
+		delete(rep.fastIndex, fastKeyRep(key))
+	} else {
+		for ix := 0; ix < len(*rep.slowIndex); ix++ {
+			if Equal((*rep.slowIndex)[ix].key, key) {
+				// Delete entry ix by copying last entry into ix and shrinking by 1.
+				last := len(*rep.slowIndex) - 1
+				(*rep.slowIndex)[ix] = (*rep.slowIndex)[last]
+				(*rep.slowIndex) = (*rep.slowIndex)[:last]
+				return
+			}
+		}
+	}
 }
 
-func copyRepStruct(rep repStruct) repStruct {
-	return repStruct(copySliceOfValues([]*Value(rep)))
-}
+// repFixedLen represents the elements of an array, and the fields of a struct.
+// Both are conceptually fixed-length ordered sequences of values, so we
+// represent them as a slice of values initialized to that fixed length.  Each
+// item is lazily initialized.  The semantics are that nil items are
+// indistinguishable from zero valued items.
+type repFixedLen []*Value
 
-func equalRepStruct(a, b repStruct) bool {
+func equalRepFixedLen(a, b repFixedLen) bool {
 	for index := 0; index < len(a); index++ {
-		// Handle cases where we're using nil to represent zero fields.
+		// Handle cases where we're using nil to represent zero items.
 		switch af, bf := a[index], b[index]; {
 		case af == nil && bf != nil:
 			if !bf.IsZero() {
@@ -240,39 +283,42 @@ func equalRepStruct(a, b repStruct) bool {
 	return true
 }
 
-func (rep repStruct) IsZero() bool {
-	for _, field := range rep {
-		if field != nil && !field.IsZero() {
+func (rep repFixedLen) IsZero() bool {
+	for _, item := range rep {
+		if item != nil && !item.IsZero() {
 			return false
 		}
 	}
 	return true
 }
 
-func (rep repStruct) String(t *Type) string {
+func (rep repFixedLen) String(t *Type) string {
 	s := "{"
-	for index, field := range rep {
+	for index, item := range rep {
 		if index > 0 {
 			s += ", "
 		}
-		fieldt := t.fields[index]
-		s += fieldt.Name
-		s += ": "
-		if field == nil {
-			s += stringRep(fieldt.Type, zeroRep(fieldt.Type))
+		itemtype := t.elem
+		if t.Kind() == Struct {
+			itemtype = t.fields[index].Type
+			s += t.fields[index].Name
+			s += ": "
+		}
+		if item == nil {
+			s += stringRep(itemtype, zeroRep(itemtype))
 		} else {
-			s += stringRep(field.t, field.rep)
+			s += stringRep(item.t, item.rep)
 		}
 	}
 	return s + "}"
 }
 
-func (rep repStruct) Field(t *Type, index int) *Value {
+func (rep repFixedLen) Index(t *Type, index int) *Value {
 	if oldf := rep[index]; oldf != nil {
 		return oldf
 	}
-	// Lazy initialization; create the new field upon first access.
-	newf := Zero(t.fields[index].Type)
+	// Lazy initialization; create the new item upon first access.
+	newf := Zero(t)
 	rep[index] = newf
 	return newf
 }

@@ -9,47 +9,78 @@ errorid (
 )
 
 type (
-	Bool bool
-	Byte byte
-	Int32 int32
-	Int64 int64
-	Uint32 uint32
-	Uint64 uint64
-	Float32 float32
-	Float64 float64
-	Complex64 complex64
+	Bool       bool
+	Byte       byte
+	Uint16     uint16
+	Uint32     uint32
+	Uint64     uint64
+	Int16      int16
+	Int32      int32
+	Int64      int64
+	Float32    float32
+	Float64    float64
+	Complex64  complex64
 	Complex128 complex128
-	String string
+	String     string
+	//Enum       enum{A;B;C}
+	Array      [2]bool
+	List       []uint32
+	//Set        set[string]
+	Map        map[string]float32
+	Struct     struct{A bool;B string;C int32}
+	//OneOf      oneof{bool;string;int32}
 )
 
 type Scalars struct {
-	A bool
-	B byte
-	C int32
-	D int64
-	E uint32
-	F uint64
-	G float32
-	H float64
-	I complex64
-	J complex128
-	K string
-	L error
-	M any
-	N typeval
+	A0  bool
+	A1  byte
+	A2  uint16
+	A3  uint32
+	A4  uint64
+	A5  int16
+	A6  int32
+	A7  int64
+	A8  float32
+	A9  float64
+	A10 complex64
+	A11 complex128
+	A12 string
+	A13 error
+	A14 any
+	A15 typeval
+
+	B0  Bool
+	B1  Byte
+	B2  Uint16
+	B3  Uint32
+	B4  Uint64
+	B5  Int16
+	B6  Int32
+	B7  Int64
+	B8  Float32
+	B9  Float64
+	B10 Complex64
+	B11 Complex128
+	B12 String
+	//B13 Enum
+	//B14 OneOf
 }
 
 type Composites struct {
-	A Scalars
-	B []Scalars
-	C map[string]Scalars
-	D map[Scalars][]map[string]complex128
+	A0 Scalars
+	A1 [2]Scalars
+	A2 []Scalars
+	//A3 set[Scalars]
+	A4 map[string]Scalars
+	A5 map[Scalars][]map[string]complex128
 }
 
 type CompComp struct {
-	A Composites
-	B []Composites
-	C map[string]Composites
+	A0 Composites
+	A1 [2]Composites
+	A2 []Composites
+	A3 map[string]Composites
+	A4 map[Scalars][]map[string]Composites
 }
 
 // NestedArgs is defined before Args; that's allowed in regular Go, and also

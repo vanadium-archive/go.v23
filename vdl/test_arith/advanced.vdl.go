@@ -153,13 +153,7 @@ func (s *ServerStubTrigonometry) Signature(call _gen_ipc.ServerCall) (_gen_ipc.S
 	}
 
 	result.TypeDefs = []_gen_idl.AnyData{
-		_gen_wiretype.StructType{
-			[]_gen_wiretype.FieldType{
-				_gen_wiretype.FieldType{Type: 0x3, Name: "Id"},
-				_gen_wiretype.FieldType{Type: 0x3, Name: "Msg"},
-			},
-			"error", []string(nil)},
-	}
+		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}}
 
 	return result, nil
 }

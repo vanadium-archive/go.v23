@@ -125,8 +125,11 @@ var keywords = map[string]int{
 	"package":   tPACKAGE,
 	"import":    tIMPORT,
 	"type":      tTYPE,
+	"enum":      tENUM,
+	"set":       tSET,
 	"map":       tMAP,
 	"struct":    tSTRUCT,
+	"oneof":     tONEOF,
 	"interface": tINTERFACE,
 	"stream":    tSTREAM,
 	"const":     tCONST,
@@ -344,10 +347,20 @@ func (cm *commentMap) getDocSuffix(pos Pos) string {
 
 func attachTypeComments(t Type, cm *commentMap, suffix bool) {
 	switch tu := t.(type) {
+	case *TypeEnum:
+		for _, label := range tu.Labels {
+			if suffix {
+				label.DocSuffix = cm.getDocSuffix(label.Pos)
+			} else {
+				label.Doc = cm.getDoc(label.Pos)
+			}
+		}
 	case *TypeArray:
 		attachTypeComments(tu.Elem, cm, suffix)
 	case *TypeList:
 		attachTypeComments(tu.Elem, cm, suffix)
+	case *TypeSet:
+		attachTypeComments(tu.Key, cm, suffix)
 	case *TypeMap:
 		attachTypeComments(tu.Key, cm, suffix)
 		attachTypeComments(tu.Elem, cm, suffix)
@@ -359,6 +372,10 @@ func attachTypeComments(t Type, cm *commentMap, suffix bool) {
 				field.Doc = cm.getDoc(field.Pos)
 			}
 			attachTypeComments(field.Type, cm, suffix)
+		}
+	case *TypeOneOf:
+		for _, t := range tu.Types {
+			attachTypeComments(t, cm, suffix)
 		}
 	case *TypeNamed:
 		// Terminate the recursion at named types.
