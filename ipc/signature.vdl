@@ -1,0 +1,24 @@
+package ipc
+
+import "veyron2/wiretype"
+
+// ServiceSignature represents the signature of the service. This includes type information needed
+// to resolve the method argument types.
+// TODO(bprosnitz) Rename this and move it to wiretype.
+type ServiceSignature struct {
+    TypeDefs []any // A slice of wiretype structures form the type definition.
+    Methods  map[string]MethodSignature
+}
+
+// MethodSignature represents the structure for passing around method
+// signatures. This is usually sent in a ServiceSignature.
+type MethodSignature struct {
+    InArgs, OutArgs     []MethodArgument // Positional Argument information.
+    InStream, OutStream wiretype.TypeID  // Type of streaming arguments (or TypeIDInvalid if none). The type IDs here use the definitions in ServiceSigature.TypeDefs.
+}
+
+// MethodArgument represents the argument to a method in a method signature.
+type MethodArgument struct {
+    Name string // Argument name
+    Type wiretype.TypeID
+}

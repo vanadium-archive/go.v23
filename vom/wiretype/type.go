@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"strings"
 
-	"veyron2/idl"
+	"veyron2/vdl"
 	"veyron2/vom"
 	"veyron2/wiretype"
 	wiretype_build "veyron2/wiretype/build"
@@ -18,7 +18,7 @@ type Type struct {
 	ID   wiretype.TypeID          // The TypeID of this type, as an index into Defs.
 }
 
-func (t Type) wiretype() idl.AnyData {
+func (t Type) wiretype() vdl.Any {
 	if t.ID >= wiretype.TypeIDFirst {
 		return (*t.Defs)[t.ID-wiretype.TypeIDFirst]
 	}

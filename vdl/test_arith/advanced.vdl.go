@@ -8,7 +8,6 @@ import (
 
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
 	_gen_veyron2 "veyron2"
-	_gen_idl "veyron2/idl"
 	_gen_ipc "veyron2/ipc"
 	_gen_naming "veyron2/naming"
 	_gen_rt "veyron2/rt"
@@ -152,7 +151,7 @@ func (s *ServerStubTrigonometry) Signature(call _gen_ipc.ServerCall) (_gen_ipc.S
 		},
 	}
 
-	result.TypeDefs = []_gen_idl.AnyData{
+	result.TypeDefs = []_gen_vdl.Any{
 		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}}
 
 	return result, nil
@@ -310,7 +309,7 @@ func (s *ServerStubAdvancedMath) GetMethodTags(method string) []interface{} {
 func (s *ServerStubAdvancedMath) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
 	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
 
-	result.TypeDefs = []_gen_idl.AnyData{}
+	result.TypeDefs = []_gen_vdl.Any{}
 	var ss _gen_ipc.ServiceSignature
 	var firstAdded int
 	ss, _ = s.ServerStubTrigonometry.Signature(call)

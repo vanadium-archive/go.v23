@@ -1,0 +1,239 @@
+package store
+
+import (
+  "veyron2/query"
+  "veyron2/storage"
+  "veyron2/services/watch"
+  "veyron2/services/mounttable"
+)
+
+const (
+  // The Store has Veyron name "<mount>/.store", where <mount> is the
+  // Veyron name of the mount point.
+  // An Object with path <path> has Veyron name "<mount>/<path>".
+  StoreSuffix = ".store"
+)
+
+// TransactionID is a transaction identifier.  The identifier is chosen by the
+// client.
+//
+// TransactionIDs do not span store instances.  If you use the same
+// TransactionID with two different store instances, the transactions are
+// separate, and must be committed separately.  Don't do that, it will lead to
+// confusion.  Use fresh TransactionIDs for each store instance.
+//
+// TODO(jyh): Consider using a larger identifier space to reduce chance of
+// collisions.
+type TransactionID uint64
+
+// ObjectService is the interface for a value in the store.
+type Object interface {
+	// TODO(jyh): Decide how to pass per-operation options (like priority and
+	// timeout info).
+
+	// Exists returns true iff the Entry has a value.
+	Exists(TID TransactionID) (bool, error)
+
+	// Get returns the value for the Object.  The value returned is from the
+	// most recent mutation of the entry in the Transaction, or from the
+	// Transaction's snapshot if there is no mutation.
+	Get(TID TransactionID) (Entry, error)
+
+	// Put modifies the value of the Object.
+	Put(TID TransactionID, V any) (Stat, error)
+
+	// Remove removes the Object.
+	Remove(TID TransactionID) error
+
+	// SetAttr changes the attributes of the entry, such as permissions and
+	// replication groups.  Attributes are associated with the value, not the
+	// path.
+	SetAttr(TID TransactionID, Attrs []any) error
+
+	// Stat returns entry info.
+	Stat(TID TransactionID) (Stat, error)
+
+	// Query returns the sequence of elements that satisfy the
+	// query.
+	Query(TID TransactionID, Q query.Query) stream<_, QueryResult> error
+
+	// GlobT finds objects beneath this value that match the given pattern.
+	// This is the same as Glob, but operates within a transaction.
+	GlobT(TID TransactionID, pattern string) stream<_, string> error
+
+	mounttable.Globable
+}
+
+// Store is the client interface to the storage system.
+type Store interface {
+	// CreateTransaction creates the transaction and sets the options for it.
+	CreateTransaction(TID TransactionID, Options []any) error
+
+	// Commit commits the changes in the transaction to the store.  The
+	// operation is atomic, so all mutations are performed, or none.  Returns an
+	// error if the transaction aborted.
+	Commit(TID TransactionID) error
+
+	// Abort discards a transaction.  This is an optimization; transactions
+	// eventually time out and get discarded.  However, live transactions
+	// consume resources, so if you know that you won't be using a transaction
+	// anymore, you should discard it explicitly.
+	Abort(TID TransactionID) error
+
+	// ReadConflicts returns the stream of conflicts to store values.  A
+	// conflict occurs when there is a concurrent modification to a value.
+	ReadConflicts() stream<_, Conflict> error
+	
+	watch.Watcher
+}
+
+// Stat provides information about an entry in the store.
+//
+// TODO(jyh): Specify versioning more precisely.
+type Stat struct {
+	// ID is the unique identifier of the entry.
+	ID storage.ID
+
+	// MTimeNS is the last modification time in Unix nanoseconds (see time.UnixNano).
+	//
+	// TODO(jyh): Use Veyron Time when it gets implemented.
+	MTimeNS int64
+
+	// Attrs are the attributes associated with the entry.
+	Attrs []any
+}
+
+// Conflict represents a conflicting update in the store.
+type Conflict struct {
+	// Ty is the IDL name of the type.
+	Ty string
+
+	// ID is the identifier for the entry.
+	ID storage.ID
+
+	// Local is the local value for the entry.
+	Local Entry
+
+	// Remove is the conflicting update.
+	Remote Entry
+
+	// Root is a common ancestor.
+	Root Entry
+}
+
+// Entry represents a value at some point in time in the store.
+type Entry struct {
+	// Stat is the entry's metadata.
+	Stat Stat
+
+	// Value is the value of the entry.
+	Value any
+}
+
+// NestedResult allows nested query results to be sent out-of-line.
+// See QueryResult for a full explanation.
+type NestedResult int64
+
+// QueryResult is a single level result.  If the query contained nested
+// queries, they will be sent as subsequent QueryResults.  If the
+// QueryResult is for a known type, the value is stored in Value.
+// If the result is for a dynamic type using selection, Fields will
+// be populated appropriately and Value will be nil.
+//
+// Examples
+// 1) Return Team objects: "/teamsapp/teams".Query("*:Team")
+//    QueryResult{
+//      NestedResult: 0,
+//      Name: "hornets",
+//      Fields: nil,
+//      Value: Team{Location: "CA", Mascot:"Buzz"},
+//    },
+//    QueryResult{
+//      NestedResult: 0,
+//      Name: "sharks",
+//      Fields: nil,
+//      Value: Team{Location: "NY", Mascot:"Jaws"},
+//    }
+//
+// 2) Return just the mascot names: "/teamsapp/teams".Query("*:Team{Mascot}")
+//    QueryResult{
+//      NestedResult: 0,
+//      Name: "hornets",
+//      Fields: {"Mascot": "Buzz"},
+//      Value: nil,
+//    },
+//    QueryResult{
+//      NestedResult: 0,
+//      Name: "sharks",
+//      Fields: {"Mascot": "Jaws"},
+//      Value: nil
+//    }
+//
+// 3) Return the players for each team: "/teamsapp/teams".Query("*:Team{., players/*:Player")
+//    QueryResult{
+//      NestedResult: 0,
+//      Name: "hornets",
+//      Fields: {
+//        ".": Team{Location: "CA", Mascot: "Buzz"},
+//        // Any subsequent QueryResult with a NestedResult of 1 should be
+//        // materialized in this field.
+//        "players": NestedResult(1),
+//      },
+//      Value:nil
+//    },
+//    QueryResult{
+//      NestedResult: 1,
+//      Name: "John",
+//      Fields: nil,
+//      Value: Player{Age: 23, Hometown: "New York"},
+//    },
+//    QueryResult{
+//      NestedResult: 1,
+//      Name: "Julie",
+//      Fields: nil,
+//      Value: Player{Age: 24, Hometown: "Charlotte"},
+//    },
+//    QueryResult{
+//      NestedResult: 0,
+//      Name: "sharks",
+//      Fields:
+//        ".": Team{Location: "NY", Mascot: "Jaws"},
+//        "players": NestedResult(2),
+//      },
+//      Value:nil
+//    },
+//    QueryResult{
+//      NestedResult: 2,
+//      Name: "Jamie",
+//      Fields: nil,
+//      Value: Player{Age: 20, Hometown: "Seattle"},
+//    },
+//    QueryResult{
+//      NestedResult: 2,
+//      Name: "Jacob",
+//      Fields: nil,
+//      Value: Player{Age: 25, Hometown: "Miami"},
+//    }
+//
+// Nested results may in turn contain their own nested results.  A
+// NestedResult value is always greater than the parent's NestedResult value.
+// In a stream of results, a decrease in the NestedResult values means
+// that the group is finished.  Here is an example result stream containing
+// only the NestedResult values.  The parentheses show the grouping.
+//  (0 (1 (2, 2), 1 (3), 1 (4, 4, 4)), (0 (1, 1 (5, 5)))
+type QueryResult struct {
+	// NestedResult, if non-zero, specifies which previous result contains
+	// this result.
+	NestedResult NestedResult
+	// Name is the Veyron name of this value.  It is relative to the query
+	// root or, if NestedResult is non-zero, to the parent result.
+	Name string
+	// Fields will be non-nil if this query result is of a dynamic type
+	// specified by the selection operator. The keys will be the names
+	// used in the selection.  If a field represents a subquery, the
+	// value will be a NestedResult and subsequent QueryResults will
+	// have the same valued NestedResult.  See the example above.
+	Fields map[string]any
+	// Value will be non-nil if this query result is of a known type.
+	Value any
+}

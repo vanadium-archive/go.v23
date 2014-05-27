@@ -4,11 +4,11 @@ import (
 	"errors"
 	"time"
 
-	"veyron2/idl"
 	"veyron2/naming"
 	"veyron2/query"
 	"veyron2/services/store"
 	"veyron2/storage"
+	"veyron2/vdl"
 )
 
 type object struct {
@@ -131,9 +131,9 @@ func (o *object) SetAttr(t storage.Transaction, attrs ...storage.Attr) error {
 	if err != nil {
 		return err
 	}
-	serviceAttrs := make([]idl.AnyData, len(attrs))
+	serviceAttrs := make([]vdl.Any, len(attrs))
 	for i, x := range attrs {
-		serviceAttrs[i] = idl.AnyData(x)
+		serviceAttrs[i] = vdl.Any(x)
 	}
 	return o.oServ.SetAttr(id, serviceAttrs)
 }

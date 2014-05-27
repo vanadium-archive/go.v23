@@ -5,9 +5,9 @@ import (
 	"log"
 	"math/rand"
 
-	"veyron2/idl"
 	"veyron2/services/store"
 	"veyron2/storage"
+	"veyron2/vdl"
 )
 
 var (
@@ -46,11 +46,11 @@ func UpdateTransaction(t storage.Transaction, serv store.Store) (store.Transacti
 	return tr.id, nil
 }
 
-// transactionOptsToAnyData converts the array to []idl.AnyData.
-func transactionOptsToAnyData(opts []storage.TransactionOpt) []idl.AnyData {
-	vopts := make([]idl.AnyData, len(opts))
+// transactionOptsToAnyData converts the array to []vdl.Any.
+func transactionOptsToAnyData(opts []storage.TransactionOpt) []vdl.Any {
+	vopts := make([]vdl.Any, len(opts))
 	for i, x := range opts {
-		vopts[i] = idl.AnyData(x)
+		vopts[i] = vdl.Any(x)
 	}
 	return vopts
 }

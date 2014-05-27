@@ -131,7 +131,6 @@ func systemImportsGo(f *compile.File) []string {
 		set[`_gen_ipc "veyron2/ipc"`] = true
 		set[`_gen_veyron2 "veyron2"`] = true
 		set[`_gen_vdl "veyron2/vdl"`] = true
-		set[`_gen_idl "veyron2/idl"`] = true
 		set[`_gen_naming "veyron2/naming"`] = true
 	}
 	// If the user has specified any error IDs, typically we need to import the
@@ -656,7 +655,7 @@ func signatureTypeDefs(iface *compile.Interface) string {
 // generate the go code for type defs
 func typeDefsCode(td []vdl.Any) string {
 	var buf bytes.Buffer
-	buf.WriteString("[]_gen_idl.AnyData{\n")
+	buf.WriteString("[]_gen_vdl.Any{\n")
 	for _, wt := range td {
 		switch t := wt.(type) {
 		case wiretype.StructType:

@@ -31,7 +31,6 @@ import (
 
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
 	_gen_veyron2 "veyron2"
-	_gen_idl "veyron2/idl"
 	_gen_ipc "veyron2/ipc"
 	_gen_naming "veyron2/naming"
 	_gen_rt "veyron2/rt"
@@ -490,7 +489,7 @@ func (s *ServerStubArith) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceS
 		},
 	}
 
-	result.TypeDefs = []_gen_idl.AnyData{
+	result.TypeDefs = []_gen_vdl.Any{
 		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, _gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
 				_gen_wiretype.FieldType{Type: 0x24, Name: "A"},
@@ -749,7 +748,7 @@ func (s *ServerStubCalculator) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Ser
 		},
 	}
 
-	result.TypeDefs = []_gen_idl.AnyData{
+	result.TypeDefs = []_gen_vdl.Any{
 		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}}
 	var ss _gen_ipc.ServiceSignature
 	var firstAdded int

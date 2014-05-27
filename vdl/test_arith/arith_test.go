@@ -16,8 +16,6 @@ import (
 	"veyron2/vdl"
 	"veyron2/vdl/test_base"
 	"veyron2/wiretype"
-
-	"veyron2/idl"
 )
 
 var generatedError = errors.New("generated error")
@@ -310,7 +308,7 @@ func TestCalculator(t *testing.T) {
 		t.Errorf("Signature Methods: got %v but expected %v", signature.Methods, expectedSignature)
 	}
 
-	expectedTypeDefs := []idl.AnyData{
+	expectedTypeDefs := []vdl.Any{
 		// Calculator:
 		wiretype.NamedPrimitiveType{1, "error", nil},
 		// Arith:
@@ -549,7 +547,7 @@ func TestArith(t *testing.T) {
 			t.Errorf("Signature Methods: got %v but expected %v", signature.Methods, expectedSignature)
 		}
 
-		expectedTypeDefs := []idl.AnyData{
+		expectedTypeDefs := []vdl.Any{
 			wiretype.NamedPrimitiveType{1, "error", nil},
 			wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{36, "A"}, wiretype.FieldType{36, "B"}}, "veyron2/vdl/test_base.Args", nil},
 			wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{66, "Args"}}, "veyron2/vdl/test_base.NestedArgs", nil},

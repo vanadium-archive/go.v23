@@ -5,8 +5,8 @@ import (
 	"reflect"
 	"sync"
 
-	"veyron2/idl"
 	"veyron2/security"
+	"veyron2/vdl"
 	"veyron2/verror"
 )
 
@@ -57,7 +57,7 @@ func ReflectInvoker(obj interface{}) Invoker {
 
 // getMethodLabel retrieves the security acl label for the given method.
 func getMethodLabel(obj interface{}, method string) security.Label {
-	if tagger, _ := obj.(idl.TagGetter); tagger != nil {
+	if tagger, _ := obj.(vdl.TagGetter); tagger != nil {
 		for _, tag := range tagger.GetMethodTags(method) {
 			if label, ok := tag.(security.Label); ok && security.IsValidLabel(label) {
 				return label
