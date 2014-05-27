@@ -6,14 +6,12 @@ import (
 	"sync"
 
 	"veyron2/security"
-	"veyron2/vdl"
 	"veyron2/verror"
 )
 
 const defaultLabel = security.AdminLabel
 
 var (
-	errUnknownMethod  = verror.NotFoundf("ipc: unknown method")
 	errWrongNumInArgs = verror.BadArgf("ipc: wrong number of in-args")
 )
 
@@ -55,12 +53,19 @@ func ReflectInvoker(obj interface{}) Invoker {
 	return reflectInvoker{rcvr, methodsCopy}
 }
 
+// serverGetMethodTags is a helper interface to check if GetMethodTags is implemented on an object
+type serverGetMethodTags interface {
+	GetMethodTags(c ServerCall, method string) ([]interface{}, error)
+}
+
 // getMethodLabel retrieves the security acl label for the given method.
 func getMethodLabel(obj interface{}, method string) security.Label {
-	if tagger, _ := obj.(vdl.TagGetter); tagger != nil {
-		for _, tag := range tagger.GetMethodTags(method) {
-			if label, ok := tag.(security.Label); ok && security.IsValidLabel(label) {
-				return label
+	if tagger, _ := obj.(serverGetMethodTags); tagger != nil {
+		if tags, err := tagger.GetMethodTags(nil, method); err == nil {
+			for _, tag := range tags {
+				if label, ok := tag.(security.Label); ok && security.IsValidLabel(label) {
+					return label
+				}
 			}
 		}
 	}
@@ -71,7 +76,7 @@ func getMethodLabel(obj interface{}, method string) security.Label {
 func (ri reflectInvoker) Prepare(method string, _ int) ([]interface{}, security.Label, error) {
 	info, ok := ri.methods[method]
 	if !ok {
-		return nil, defaultLabel, errUnknownMethod
+		return nil, defaultLabel, verror.NotFoundf("ipc: unknown method '%s'", method)
 	}
 	// Return the memoized label and new in-arg objects.
 	var argptrs []interface{}
@@ -81,6 +86,7 @@ func (ri reflectInvoker) Prepare(method string, _ int) ([]interface{}, security.
 			argptrs[ix] = reflect.New(rtInArg).Interface()
 		}
 	}
+
 	return argptrs, info.label, nil
 }
 
@@ -88,7 +94,7 @@ func (ri reflectInvoker) Prepare(method string, _ int) ([]interface{}, security.
 func (ri reflectInvoker) Invoke(method string, call ServerCall, argptrs []interface{}) ([]interface{}, error) {
 	info, ok := ri.methods[method]
 	if !ok {
-		return nil, errUnknownMethod
+		return nil, verror.NotFoundf("ipc: unknown method '%s'", method)
 	}
 	// Create the reflect.Value args for the invocation.  The receiver of the
 	// method is always first, followed by the first method arg which is always

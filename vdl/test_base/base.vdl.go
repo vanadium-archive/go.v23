@@ -161,22 +161,17 @@ const ErrIDFoo = _gen_verror.ID("veyron2/vdl/test_base.ErrIDFoo")
 const ErrIDBar = _gen_verror.ID("some/path.ErrIdOther")
 
 // ServiceA is the interface the client binds and uses.
-// ServiceA_InternalNoTagGetter is the interface without the TagGetter
-// and UnresolveStep methods (both framework-added, rathern than user-defined),
-// to enable embedding without method collisions.  Not to be used directly by
-// clients.
-type ServiceA_InternalNoTagGetter interface {
+// ServiceA_ExcludingUniversal is the interface without internal framework-added methods
+// to enable embedding without method collisions.  Not to be used directly by clients.
+type ServiceA_ExcludingUniversal interface {
 	MethodA1(opts ..._gen_ipc.ClientCallOpt) (err error)
 	MethodA2(a int32, b string, opts ..._gen_ipc.ClientCallOpt) (reply string, err error)
 	MethodA3(a int32, opts ..._gen_ipc.ClientCallOpt) (reply ServiceAMethodA3Stream, err error)
 	MethodA4(a int32, opts ..._gen_ipc.ClientCallOpt) (reply ServiceAMethodA4Stream, err error)
 }
 type ServiceA interface {
-	_gen_vdl.TagGetter
-	// UnresolveStep returns the names for the remote service, rooted at the
-	// service's immediate namespace ancestor.
-	UnresolveStep(opts ..._gen_ipc.ClientCallOpt) ([]string, error)
-	ServiceA_InternalNoTagGetter
+	_gen_ipc.UniversalServiceMethods
+	ServiceA_ExcludingUniversal
 }
 
 // ServiceAService is the interface the server implements.
@@ -365,10 +360,6 @@ type clientStubServiceA struct {
 	name   string
 }
 
-func (c *clientStubServiceA) GetMethodTags(method string) []interface{} {
-	return GetServiceAMethodTags(method)
-}
-
 func (__gen_c *clientStubServiceA) MethodA1(opts ..._gen_ipc.ClientCallOpt) (err error) {
 	var call _gen_ipc.ClientCall
 	if call, err = __gen_c.client.StartCall(__gen_c.name, "MethodA1", nil, opts...); err != nil {
@@ -409,9 +400,31 @@ func (__gen_c *clientStubServiceA) MethodA4(a int32, opts ..._gen_ipc.ClientCall
 	return
 }
 
-func (c *clientStubServiceA) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
+func (__gen_c *clientStubServiceA) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
 	var call _gen_ipc.ClientCall
-	if call, err = c.client.StartCall(c.name, "UnresolveStep", nil, opts...); err != nil {
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubServiceA) Signature(opts ..._gen_ipc.ClientCallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+	var call _gen_ipc.ClientCall
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "Signature", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubServiceA) GetMethodTags(method string, opts ..._gen_ipc.ClientCallOpt) (reply []interface{}, err error) {
+	var call _gen_ipc.ClientCall
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -427,11 +440,25 @@ type ServerStubServiceA struct {
 	service ServiceAService
 }
 
-func (s *ServerStubServiceA) GetMethodTags(method string) []interface{} {
-	return GetServiceAMethodTags(method)
+func (__gen_s *ServerStubServiceA) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
+	// TODO(bprosnitz) GetMethodTags() will be replaces with Signature().
+	// Note: This exhibits some weird behavior like returning a nil error if the method isn't found.
+	// This will change when it is replaced with Signature().
+	switch method {
+	case "MethodA1":
+		return []interface{}{}, nil
+	case "MethodA2":
+		return []interface{}{}, nil
+	case "MethodA3":
+		return []interface{}{"tag", uint64(6)}, nil
+	case "MethodA4":
+		return []interface{}{}, nil
+	default:
+		return nil, nil
+	}
 }
 
-func (s *ServerStubServiceA) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
+func (__gen_s *ServerStubServiceA) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
 	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
 	result.Methods["MethodA1"] = _gen_ipc.MethodSignature{
 		InArgs: []_gen_ipc.MethodArgument{},
@@ -510,8 +537,8 @@ func (s *ServerStubServiceA) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Servi
 	return result, nil
 }
 
-func (s *ServerStubServiceA) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
-	if unresolver, ok := s.service.(_gen_ipc.Unresolver); ok {
+func (__gen_s *ServerStubServiceA) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
+	if unresolver, ok := __gen_s.service.(_gen_ipc.Unresolver); ok {
 		return unresolver.UnresolveStep(call)
 	}
 	if call.Server() == nil {
@@ -550,36 +577,16 @@ func (__gen_s *ServerStubServiceA) MethodA4(call _gen_ipc.ServerCall, a int32) (
 	return
 }
 
-func GetServiceAMethodTags(method string) []interface{} {
-	switch method {
-	case "MethodA1":
-		return []interface{}{}
-	case "MethodA2":
-		return []interface{}{}
-	case "MethodA3":
-		return []interface{}{"tag", uint64(6)}
-	case "MethodA4":
-		return []interface{}{}
-	default:
-		return nil
-	}
-}
-
 // ServiceB is the interface the client binds and uses.
-// ServiceB_InternalNoTagGetter is the interface without the TagGetter
-// and UnresolveStep methods (both framework-added, rathern than user-defined),
-// to enable embedding without method collisions.  Not to be used directly by
-// clients.
-type ServiceB_InternalNoTagGetter interface {
-	ServiceA_InternalNoTagGetter
+// ServiceB_ExcludingUniversal is the interface without internal framework-added methods
+// to enable embedding without method collisions.  Not to be used directly by clients.
+type ServiceB_ExcludingUniversal interface {
+	ServiceA_ExcludingUniversal
 	MethodB1(a Scalars, b Composites, opts ..._gen_ipc.ClientCallOpt) (reply CompComp, err error)
 }
 type ServiceB interface {
-	_gen_vdl.TagGetter
-	// UnresolveStep returns the names for the remote service, rooted at the
-	// service's immediate namespace ancestor.
-	UnresolveStep(opts ..._gen_ipc.ClientCallOpt) ([]string, error)
-	ServiceB_InternalNoTagGetter
+	_gen_ipc.UniversalServiceMethods
+	ServiceB_ExcludingUniversal
 }
 
 // ServiceBService is the interface the server implements.
@@ -611,7 +618,7 @@ func BindServiceB(name string, opts ..._gen_ipc.BindOpt) (ServiceB, error) {
 		return nil, _gen_vdl.ErrTooManyOptionsToBind
 	}
 	stub := &clientStubServiceB{client: client, name: name}
-	stub.ServiceA_InternalNoTagGetter, _ = BindServiceA(name, client)
+	stub.ServiceA_ExcludingUniversal, _ = BindServiceA(name, client)
 
 	return stub, nil
 }
@@ -629,14 +636,10 @@ func NewServerServiceB(server ServiceBService) interface{} {
 
 // clientStubServiceB implements ServiceB.
 type clientStubServiceB struct {
-	ServiceA_InternalNoTagGetter
+	ServiceA_ExcludingUniversal
 
 	client _gen_ipc.Client
 	name   string
-}
-
-func (c *clientStubServiceB) GetMethodTags(method string) []interface{} {
-	return GetServiceBMethodTags(method)
 }
 
 func (__gen_c *clientStubServiceB) MethodB1(a Scalars, b Composites, opts ..._gen_ipc.ClientCallOpt) (reply CompComp, err error) {
@@ -650,9 +653,31 @@ func (__gen_c *clientStubServiceB) MethodB1(a Scalars, b Composites, opts ..._ge
 	return
 }
 
-func (c *clientStubServiceB) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
+func (__gen_c *clientStubServiceB) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
 	var call _gen_ipc.ClientCall
-	if call, err = c.client.StartCall(c.name, "UnresolveStep", nil, opts...); err != nil {
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubServiceB) Signature(opts ..._gen_ipc.ClientCallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+	var call _gen_ipc.ClientCall
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "Signature", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubServiceB) GetMethodTags(method string, opts ..._gen_ipc.ClientCallOpt) (reply []interface{}, err error) {
+	var call _gen_ipc.ClientCall
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -670,11 +695,22 @@ type ServerStubServiceB struct {
 	service ServiceBService
 }
 
-func (s *ServerStubServiceB) GetMethodTags(method string) []interface{} {
-	return GetServiceBMethodTags(method)
+func (__gen_s *ServerStubServiceB) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
+	// TODO(bprosnitz) GetMethodTags() will be replaces with Signature().
+	// Note: This exhibits some weird behavior like returning a nil error if the method isn't found.
+	// This will change when it is replaced with Signature().
+	if resp, err := __gen_s.ServerStubServiceA.GetMethodTags(call, method); resp != nil || err != nil {
+		return resp, err
+	}
+	switch method {
+	case "MethodB1":
+		return []interface{}{}, nil
+	default:
+		return nil, nil
+	}
 }
 
-func (s *ServerStubServiceB) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
+func (__gen_s *ServerStubServiceB) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
 	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
 	result.Methods["MethodB1"] = _gen_ipc.MethodSignature{
 		InArgs: []_gen_ipc.MethodArgument{
@@ -742,7 +778,7 @@ func (s *ServerStubServiceB) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Servi
 	}
 	var ss _gen_ipc.ServiceSignature
 	var firstAdded int
-	ss, _ = s.ServerStubServiceA.Signature(call)
+	ss, _ = __gen_s.ServerStubServiceA.Signature(call)
 	firstAdded = len(result.TypeDefs)
 	for k, v := range ss.Methods {
 		for i, _ := range v.InArgs {
@@ -798,8 +834,8 @@ func (s *ServerStubServiceB) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Servi
 	return result, nil
 }
 
-func (s *ServerStubServiceB) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
-	if unresolver, ok := s.service.(_gen_ipc.Unresolver); ok {
+func (__gen_s *ServerStubServiceB) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
+	if unresolver, ok := __gen_s.service.(_gen_ipc.Unresolver); ok {
 		return unresolver.UnresolveStep(call)
 	}
 	if call.Server() == nil {
@@ -819,16 +855,4 @@ func (s *ServerStubServiceB) UnresolveStep(call _gen_ipc.ServerCall) (reply []st
 func (__gen_s *ServerStubServiceB) MethodB1(call _gen_ipc.ServerCall, a Scalars, b Composites) (reply CompComp, err error) {
 	reply, err = __gen_s.service.MethodB1(call, a, b)
 	return
-}
-
-func GetServiceBMethodTags(method string) []interface{} {
-	if resp := GetServiceAMethodTags(method); resp != nil {
-		return resp
-	}
-	switch method {
-	case "MethodB1":
-		return []interface{}{}
-	default:
-		return nil
-	}
 }

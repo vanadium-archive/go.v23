@@ -31,12 +31,9 @@ type Tick struct {
 
 // AppCycle interfaces with the process running a veyron runtime.
 // AppCycle is the interface the client binds and uses.
-// AppCycle_InternalNoTagGetter is the interface without the TagGetter
-// and UnresolveStep methods (both framework-added, rathern than user-defined),
-// to enable embedding without method collisions.  Not to be used directly by
-// clients.
-type AppCycle_InternalNoTagGetter interface {
-
+// AppCycle_ExcludingUniversal is the interface without internal framework-added methods
+// to enable embedding without method collisions.  Not to be used directly by clients.
+type AppCycle_ExcludingUniversal interface {
 	// Stop initiates shutdown of the server.  It streams back periodic updates
 	// to give the client an idea of how the shutdown is progressing.
 	Stop(opts ..._gen_ipc.ClientCallOpt) (reply AppCycleStopStream, err error)
@@ -46,11 +43,8 @@ type AppCycle_InternalNoTagGetter interface {
 	ForceStop(opts ..._gen_ipc.ClientCallOpt) (err error)
 }
 type AppCycle interface {
-	_gen_vdl.TagGetter
-	// UnresolveStep returns the names for the remote service, rooted at the
-	// service's immediate namespace ancestor.
-	UnresolveStep(opts ..._gen_ipc.ClientCallOpt) ([]string, error)
-	AppCycle_InternalNoTagGetter
+	_gen_ipc.UniversalServiceMethods
+	AppCycle_ExcludingUniversal
 }
 
 // AppCycleService is the interface the server implements.
@@ -162,10 +156,6 @@ type clientStubAppCycle struct {
 	name   string
 }
 
-func (c *clientStubAppCycle) GetMethodTags(method string) []interface{} {
-	return GetAppCycleMethodTags(method)
-}
-
 func (__gen_c *clientStubAppCycle) Stop(opts ..._gen_ipc.ClientCallOpt) (reply AppCycleStopStream, err error) {
 	var call _gen_ipc.ClientCall
 	if call, err = __gen_c.client.StartCall(__gen_c.name, "Stop", nil, opts...); err != nil {
@@ -186,9 +176,31 @@ func (__gen_c *clientStubAppCycle) ForceStop(opts ..._gen_ipc.ClientCallOpt) (er
 	return
 }
 
-func (c *clientStubAppCycle) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
+func (__gen_c *clientStubAppCycle) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
 	var call _gen_ipc.ClientCall
-	if call, err = c.client.StartCall(c.name, "UnresolveStep", nil, opts...); err != nil {
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubAppCycle) Signature(opts ..._gen_ipc.ClientCallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+	var call _gen_ipc.ClientCall
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "Signature", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubAppCycle) GetMethodTags(method string, opts ..._gen_ipc.ClientCallOpt) (reply []interface{}, err error) {
+	var call _gen_ipc.ClientCall
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -204,11 +216,21 @@ type ServerStubAppCycle struct {
 	service AppCycleService
 }
 
-func (s *ServerStubAppCycle) GetMethodTags(method string) []interface{} {
-	return GetAppCycleMethodTags(method)
+func (__gen_s *ServerStubAppCycle) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
+	// TODO(bprosnitz) GetMethodTags() will be replaces with Signature().
+	// Note: This exhibits some weird behavior like returning a nil error if the method isn't found.
+	// This will change when it is replaced with Signature().
+	switch method {
+	case "Stop":
+		return []interface{}{}, nil
+	case "ForceStop":
+		return []interface{}{}, nil
+	default:
+		return nil, nil
+	}
 }
 
-func (s *ServerStubAppCycle) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
+func (__gen_s *ServerStubAppCycle) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
 	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
 	result.Methods["ForceStop"] = _gen_ipc.MethodSignature{
 		InArgs: []_gen_ipc.MethodArgument{},
@@ -237,8 +259,8 @@ func (s *ServerStubAppCycle) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Servi
 	return result, nil
 }
 
-func (s *ServerStubAppCycle) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
-	if unresolver, ok := s.service.(_gen_ipc.Unresolver); ok {
+func (__gen_s *ServerStubAppCycle) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
+	if unresolver, ok := __gen_s.service.(_gen_ipc.Unresolver); ok {
 		return unresolver.UnresolveStep(call)
 	}
 	if call.Server() == nil {
@@ -264,15 +286,4 @@ func (__gen_s *ServerStubAppCycle) Stop(call _gen_ipc.ServerCall) (err error) {
 func (__gen_s *ServerStubAppCycle) ForceStop(call _gen_ipc.ServerCall) (err error) {
 	err = __gen_s.service.ForceStop(call)
 	return
-}
-
-func GetAppCycleMethodTags(method string) []interface{} {
-	switch method {
-	case "Stop":
-		return []interface{}{}
-	case "ForceStop":
-		return []interface{}{}
-	default:
-		return nil
-	}
 }

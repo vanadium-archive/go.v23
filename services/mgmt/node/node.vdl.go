@@ -102,12 +102,9 @@ type Description struct {
 // In other words, invoking any method using an existing application
 // installation instance as a receiver is well-defined.
 // Application is the interface the client binds and uses.
-// Application_InternalNoTagGetter is the interface without the TagGetter
-// and UnresolveStep methods (both framework-added, rathern than user-defined),
-// to enable embedding without method collisions.  Not to be used directly by
-// clients.
-type Application_InternalNoTagGetter interface {
-
+// Application_ExcludingUniversal is the interface without internal framework-added methods
+// to enable embedding without method collisions.  Not to be used directly by clients.
+type Application_ExcludingUniversal interface {
 	// Install installs the latest version of the application and
 	// returns a veyron name that identifies the new
 	// installation. Optionally, veyron name suffix can be used to
@@ -147,11 +144,8 @@ type Application_InternalNoTagGetter interface {
 	Suspend(opts ..._gen_ipc.ClientCallOpt) (err error)
 }
 type Application interface {
-	_gen_vdl.TagGetter
-	// UnresolveStep returns the names for the remote service, rooted at the
-	// service's immediate namespace ancestor.
-	UnresolveStep(opts ..._gen_ipc.ClientCallOpt) ([]string, error)
-	Application_InternalNoTagGetter
+	_gen_ipc.UniversalServiceMethods
+	Application_ExcludingUniversal
 }
 
 // ApplicationService is the interface the server implements.
@@ -237,10 +231,6 @@ func NewServerApplication(server ApplicationService) interface{} {
 type clientStubApplication struct {
 	client _gen_ipc.Client
 	name   string
-}
-
-func (c *clientStubApplication) GetMethodTags(method string) []interface{} {
-	return GetApplicationMethodTags(method)
 }
 
 func (__gen_c *clientStubApplication) Install(opts ..._gen_ipc.ClientCallOpt) (reply string, err error) {
@@ -342,9 +332,31 @@ func (__gen_c *clientStubApplication) Suspend(opts ..._gen_ipc.ClientCallOpt) (e
 	return
 }
 
-func (c *clientStubApplication) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
+func (__gen_c *clientStubApplication) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
 	var call _gen_ipc.ClientCall
-	if call, err = c.client.StartCall(c.name, "UnresolveStep", nil, opts...); err != nil {
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubApplication) Signature(opts ..._gen_ipc.ClientCallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+	var call _gen_ipc.ClientCall
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "Signature", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubApplication) GetMethodTags(method string, opts ..._gen_ipc.ClientCallOpt) (reply []interface{}, err error) {
+	var call _gen_ipc.ClientCall
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -360,11 +372,35 @@ type ServerStubApplication struct {
 	service ApplicationService
 }
 
-func (s *ServerStubApplication) GetMethodTags(method string) []interface{} {
-	return GetApplicationMethodTags(method)
+func (__gen_s *ServerStubApplication) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
+	// TODO(bprosnitz) GetMethodTags() will be replaces with Signature().
+	// Note: This exhibits some weird behavior like returning a nil error if the method isn't found.
+	// This will change when it is replaced with Signature().
+	switch method {
+	case "Install":
+		return []interface{}{}, nil
+	case "Start":
+		return []interface{}{}, nil
+	case "Uninstall":
+		return []interface{}{}, nil
+	case "Update":
+		return []interface{}{}, nil
+	case "Refresh":
+		return []interface{}{}, nil
+	case "Restart":
+		return []interface{}{}, nil
+	case "Resume":
+		return []interface{}{}, nil
+	case "Shutdown":
+		return []interface{}{}, nil
+	case "Suspend":
+		return []interface{}{}, nil
+	default:
+		return nil, nil
+	}
 }
 
-func (s *ServerStubApplication) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
+func (__gen_s *ServerStubApplication) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
 	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
 	result.Methods["Install"] = _gen_ipc.MethodSignature{
 		InArgs: []_gen_ipc.MethodArgument{},
@@ -431,8 +467,8 @@ func (s *ServerStubApplication) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Se
 	return result, nil
 }
 
-func (s *ServerStubApplication) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
-	if unresolver, ok := s.service.(_gen_ipc.Unresolver); ok {
+func (__gen_s *ServerStubApplication) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
+	if unresolver, ok := __gen_s.service.(_gen_ipc.Unresolver); ok {
 		return unresolver.UnresolveStep(call)
 	}
 	if call.Server() == nil {
@@ -494,40 +530,12 @@ func (__gen_s *ServerStubApplication) Suspend(call _gen_ipc.ServerCall) (err err
 	return
 }
 
-func GetApplicationMethodTags(method string) []interface{} {
-	switch method {
-	case "Install":
-		return []interface{}{}
-	case "Start":
-		return []interface{}{}
-	case "Uninstall":
-		return []interface{}{}
-	case "Update":
-		return []interface{}{}
-	case "Refresh":
-		return []interface{}{}
-	case "Restart":
-		return []interface{}{}
-	case "Resume":
-		return []interface{}{}
-	case "Shutdown":
-		return []interface{}{}
-	case "Suspend":
-		return []interface{}{}
-	default:
-		return nil
-	}
-}
-
 // Node can be used to manage a node. The idea is that this interace
 // will be invoked using a veyron name that identifies the node.
 // Node is the interface the client binds and uses.
-// Node_InternalNoTagGetter is the interface without the TagGetter
-// and UnresolveStep methods (both framework-added, rathern than user-defined),
-// to enable embedding without method collisions.  Not to be used directly by
-// clients.
-type Node_InternalNoTagGetter interface {
-
+// Node_ExcludingUniversal is the interface without internal framework-added methods
+// to enable embedding without method collisions.  Not to be used directly by clients.
+type Node_ExcludingUniversal interface {
 	// Application can be used to manage applications. The idea is that
 	// this interace will be invoked using a veyron name that identifies
 	// the application and its installations and instances where
@@ -599,7 +607,7 @@ type Node_InternalNoTagGetter interface {
 	//
 	// In other words, invoking any method using an existing application
 	// installation instance as a receiver is well-defined.
-	Application_InternalNoTagGetter
+	Application_ExcludingUniversal
 	// Describe generates a description of the node.
 	Describe(opts ..._gen_ipc.ClientCallOpt) (reply Description, err error)
 	// IsRunnable checks if the node can execute the given binary.
@@ -613,11 +621,8 @@ type Node_InternalNoTagGetter interface {
 	Reset(Deadline uint64, opts ..._gen_ipc.ClientCallOpt) (err error)
 }
 type Node interface {
-	_gen_vdl.TagGetter
-	// UnresolveStep returns the names for the remote service, rooted at the
-	// service's immediate namespace ancestor.
-	UnresolveStep(opts ..._gen_ipc.ClientCallOpt) ([]string, error)
-	Node_InternalNoTagGetter
+	_gen_ipc.UniversalServiceMethods
+	Node_ExcludingUniversal
 }
 
 // NodeService is the interface the server implements.
@@ -731,7 +736,7 @@ func BindNode(name string, opts ..._gen_ipc.BindOpt) (Node, error) {
 		return nil, _gen_vdl.ErrTooManyOptionsToBind
 	}
 	stub := &clientStubNode{client: client, name: name}
-	stub.Application_InternalNoTagGetter, _ = BindApplication(name, client)
+	stub.Application_ExcludingUniversal, _ = BindApplication(name, client)
 
 	return stub, nil
 }
@@ -749,14 +754,10 @@ func NewServerNode(server NodeService) interface{} {
 
 // clientStubNode implements Node.
 type clientStubNode struct {
-	Application_InternalNoTagGetter
+	Application_ExcludingUniversal
 
 	client _gen_ipc.Client
 	name   string
-}
-
-func (c *clientStubNode) GetMethodTags(method string) []interface{} {
-	return GetNodeMethodTags(method)
 }
 
 func (__gen_c *clientStubNode) Describe(opts ..._gen_ipc.ClientCallOpt) (reply Description, err error) {
@@ -792,9 +793,31 @@ func (__gen_c *clientStubNode) Reset(Deadline uint64, opts ..._gen_ipc.ClientCal
 	return
 }
 
-func (c *clientStubNode) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
+func (__gen_c *clientStubNode) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
 	var call _gen_ipc.ClientCall
-	if call, err = c.client.StartCall(c.name, "UnresolveStep", nil, opts...); err != nil {
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubNode) Signature(opts ..._gen_ipc.ClientCallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+	var call _gen_ipc.ClientCall
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "Signature", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubNode) GetMethodTags(method string, opts ..._gen_ipc.ClientCallOpt) (reply []interface{}, err error) {
+	var call _gen_ipc.ClientCall
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -812,11 +835,26 @@ type ServerStubNode struct {
 	service NodeService
 }
 
-func (s *ServerStubNode) GetMethodTags(method string) []interface{} {
-	return GetNodeMethodTags(method)
+func (__gen_s *ServerStubNode) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
+	// TODO(bprosnitz) GetMethodTags() will be replaces with Signature().
+	// Note: This exhibits some weird behavior like returning a nil error if the method isn't found.
+	// This will change when it is replaced with Signature().
+	if resp, err := __gen_s.ServerStubApplication.GetMethodTags(call, method); resp != nil || err != nil {
+		return resp, err
+	}
+	switch method {
+	case "Describe":
+		return []interface{}{}, nil
+	case "IsRunnable":
+		return []interface{}{}, nil
+	case "Reset":
+		return []interface{}{}, nil
+	default:
+		return nil, nil
+	}
 }
 
-func (s *ServerStubNode) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
+func (__gen_s *ServerStubNode) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
 	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
 	result.Methods["Describe"] = _gen_ipc.MethodSignature{
 		InArgs: []_gen_ipc.MethodArgument{},
@@ -858,7 +896,7 @@ func (s *ServerStubNode) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSi
 	}
 	var ss _gen_ipc.ServiceSignature
 	var firstAdded int
-	ss, _ = s.ServerStubApplication.Signature(call)
+	ss, _ = __gen_s.ServerStubApplication.Signature(call)
 	firstAdded = len(result.TypeDefs)
 	for k, v := range ss.Methods {
 		for i, _ := range v.InArgs {
@@ -914,8 +952,8 @@ func (s *ServerStubNode) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSi
 	return result, nil
 }
 
-func (s *ServerStubNode) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
-	if unresolver, ok := s.service.(_gen_ipc.Unresolver); ok {
+func (__gen_s *ServerStubNode) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
+	if unresolver, ok := __gen_s.service.(_gen_ipc.Unresolver); ok {
 		return unresolver.UnresolveStep(call)
 	}
 	if call.Server() == nil {
@@ -945,20 +983,4 @@ func (__gen_s *ServerStubNode) IsRunnable(call _gen_ipc.ServerCall, Binary build
 func (__gen_s *ServerStubNode) Reset(call _gen_ipc.ServerCall, Deadline uint64) (err error) {
 	err = __gen_s.service.Reset(call, Deadline)
 	return
-}
-
-func GetNodeMethodTags(method string) []interface{} {
-	if resp := GetApplicationMethodTags(method); resp != nil {
-		return resp
-	}
-	switch method {
-	case "Describe":
-		return []interface{}{}
-	case "IsRunnable":
-		return []interface{}{}
-	case "Reset":
-		return []interface{}{}
-	default:
-		return nil
-	}
 }

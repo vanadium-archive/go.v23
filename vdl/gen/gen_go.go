@@ -306,6 +306,7 @@ func constDefGo(data goData, def *compile.ConstDef) string {
 }
 
 func constGo(data goData, v *val.Value) string {
+	// TODO(bprosnitz) Generate the full tag name e.g. security.Read instead of security.Label(1)
 	switch v.Type() {
 	case val.BoolType, val.StringType:
 		// Treat the standard bool and string types as untyped constants in Go.
@@ -710,21 +711,15 @@ import ({{range $imp := $data.UserImports}}
 {{end}}
 {{range $iface := $file.Interfaces}}
 {{$iface.Doc}}// {{$iface.Name}} is the interface the client binds and uses.
-// {{$iface.Name}}_InternalNoTagGetter is the interface without the TagGetter
-// and UnresolveStep methods (both framework-added, rathern than user-defined),
-// to enable embedding without method collisions.  Not to be used directly by
-// clients.
-type {{$iface.Name}}_InternalNoTagGetter interface {
-{{range $embed := $iface.Embeds}}
-	{{$embed.Doc}}{{embedGo $data $embed}}_InternalNoTagGetter{{$embed.DocSuffix}}{{end}}{{range $method := $iface.Methods}}
+// {{$iface.Name}}_ExcludingUniversal is the interface without internal framework-added methods
+// to enable embedding without method collisions.  Not to be used directly by clients.
+type {{$iface.Name}}_ExcludingUniversal interface { {{range $embed := $iface.Embeds}}
+	{{$embed.Doc}}{{embedGo $data $embed}}_ExcludingUniversal{{$embed.DocSuffix}}{{end}}{{range $method := $iface.Methods}}
 	{{$method.Doc}}{{$method.Name}}({{inArgsWithOptsGo "" $data $method}}) {{outArgsGo $data $iface $method}}{{$method.DocSuffix}}{{end}}
 }
 type {{$iface.Name}} interface {
-	_gen_vdl.TagGetter
-	// UnresolveStep returns the names for the remote service, rooted at the
-	// service's immediate namespace ancestor.
-	UnresolveStep(opts ..._gen_ipc.ClientCallOpt) ([]string, error)
-	{{$iface.Name}}_InternalNoTagGetter
+	_gen_ipc.UniversalServiceMethods
+	{{$iface.Name}}_ExcludingUniversal
 }
 
 // {{$iface.Name}}Service is the interface the server implements.
@@ -858,7 +853,7 @@ func Bind{{$iface.Name}}(name string, opts ..._gen_ipc.BindOpt) ({{$iface.Name}}
 		return nil, _gen_vdl.ErrTooManyOptionsToBind
 	}
 	stub := &clientStub{{$iface.Name}}{client: client, name: name}
-{{range $embed := $iface.Embeds}}	stub.{{$embed.Name}}_InternalNoTagGetter, _ = {{prefixName (embedGo $data $embed) "Bind"}}(name, client)
+{{range $embed := $iface.Embeds}}	stub.{{$embed.Name}}_ExcludingUniversal, _ = {{prefixName (embedGo $data $embed) "Bind"}}(name, client)
 {{end}}
 	return stub, nil
 }
@@ -876,24 +871,21 @@ func NewServer{{$iface.Name}}(server {{$iface.Name}}Service) interface{} {
 
 // clientStub{{$iface.Name}} implements {{$iface.Name}}.
 type clientStub{{$iface.Name}} struct {
-{{range $embed := $iface.Embeds}}	{{embedGo $data $embed}}_InternalNoTagGetter
+{{range $embed := $iface.Embeds}}	{{embedGo $data $embed}}_ExcludingUniversal
 {{end}}
 	client _gen_ipc.Client
 	name string
 }
 
-func (c *clientStub{{$iface.Name}}) GetMethodTags(method string) []interface{} {
-	return Get{{$iface.Name}}MethodTags(method)
-}
 {{range $method := $iface.Methods}}
 func (__gen_c *clientStub{{$iface.Name}}) {{$method.Name}}({{inArgsWithOptsGo "" $data $method}}) {{outArgsGo $data $iface $method}} {
 {{clientStubImplGo $data $iface $method}}
 }
 {{end}}
 
-func (c *clientStub{{$iface.Name}}) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
+func (__gen_c *clientStub{{$iface.Name}}) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
 	var call _gen_ipc.ClientCall
-	if call, err = c.client.StartCall(c.name, "UnresolveStep", nil, opts...); err != nil {
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "UnresolveStep", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -901,6 +893,29 @@ func (c *clientStub{{$iface.Name}}) UnresolveStep(opts ..._gen_ipc.ClientCallOpt
 	}
 	return
 }
+
+func (__gen_c *clientStub{{$iface.Name}}) Signature(opts ..._gen_ipc.ClientCallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+	var call _gen_ipc.ClientCall
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "Signature", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStub{{$iface.Name}}) GetMethodTags(method string, opts ..._gen_ipc.ClientCallOpt) (reply []interface{}, err error) {
+	var call _gen_ipc.ClientCall
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
 
 // ServerStub{{$iface.Name}} wraps a server that implements
 // {{$iface.Name}}Service and provides an object that satisfies
@@ -911,11 +926,22 @@ type ServerStub{{$iface.Name}} struct {
 	service {{$iface.Name}}Service
 }
 
-func (s *ServerStub{{$iface.Name}}) GetMethodTags(method string) []interface{} {
-	return Get{{$iface.Name}}MethodTags(method)
+func (__gen_s *ServerStub{{$iface.Name}}) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
+	// TODO(bprosnitz) GetMethodTags() will be replaces with Signature().
+	// Note: This exhibits some weird behavior like returning a nil error if the method isn't found.
+	// This will change when it is replaced with Signature().
+	{{range $embed := $iface.Embeds}}	if resp, err := __gen_s.{{prefixName $embed.NamePos.Name "ServerStub"}}.GetMethodTags(call, method); resp != nil || err != nil {
+			return resp, err
+		}
+	{{end}}{{if $iface.Methods}}	switch method { {{range $method := $iface.Methods}}
+		case "{{$method.Name}}":
+			return {{tagsGo $data $method.Tags}}, nil{{end}}
+		default:
+			return nil, nil
+		}{{else}}	return nil, nil{{end}}
 }
 
-func (s *ServerStub{{$iface.Name}}) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
+func (__gen_s *ServerStub{{$iface.Name}}) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
 	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
 {{range $mname, $method := signatureMethods $iface}}{{printf "\tresult.Methods[%q] = _gen_ipc.MethodSignature{" $mname}}
 		InArgs:[]_gen_ipc.MethodArgument{
@@ -929,7 +955,7 @@ func (s *ServerStub{{$iface.Name}}) Signature(call _gen_ipc.ServerCall) (_gen_ip
 result.TypeDefs = {{signatureTypeDefs $iface}}
 {{if $iface.Embeds}}	var ss _gen_ipc.ServiceSignature
 var firstAdded int
-{{range $interface := $iface.Embeds}}	ss, _ = s.{{prefixName $interface.NamePos.Name "ServerStub"}}.Signature(call)
+{{range $interface := $iface.Embeds}}	ss, _ = __gen_s.{{prefixName $interface.NamePos.Name "ServerStub"}}.Signature(call)
 	firstAdded = len(result.TypeDefs)
 	for k, v := range ss.Methods {
 		for i, _ := range v.InArgs {
@@ -986,8 +1012,8 @@ var firstAdded int
 	return result, nil
 }
 
-func (s *ServerStub{{$iface.Name}}) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
-	if unresolver, ok := s.service.(_gen_ipc.Unresolver); ok {
+func (__gen_s *ServerStub{{$iface.Name}}) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
+	if unresolver, ok := __gen_s.service.(_gen_ipc.Unresolver); ok {
 		return unresolver.UnresolveStep(call)
 	}
 	if call.Server() == nil {
@@ -1009,17 +1035,5 @@ func (__gen_s *ServerStub{{$iface.Name}}) {{$method.Name}}({{inArgsGo "call _gen
 {{serverStubImplGo $data $iface $method}}
 }
 {{end}}
-
-func Get{{$iface.Name}}MethodTags(method string) []interface{} {
-{{range $embed := $iface.Embeds}}	if resp := {{prefixName (embedGo $data $embed) "Get"}}MethodTags(method); resp != nil {
-		return resp
-	}
-{{end}}{{if $iface.Methods}}	switch method { {{range $method := $iface.Methods}}
-	case "{{$method.Name}}":
-		return {{tagsGo $data $method.Tags}}{{end}}
-	default:
-		return nil
-	}{{else}}	return nil{{end}}
-}
 {{end}}{{end}}{{end}}
 `

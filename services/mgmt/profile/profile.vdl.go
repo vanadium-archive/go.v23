@@ -28,12 +28,9 @@ import (
 // set of installed libraries. Profiles describe binaries and devices,
 // and are used to match them.
 // Profile is the interface the client binds and uses.
-// Profile_InternalNoTagGetter is the interface without the TagGetter
-// and UnresolveStep methods (both framework-added, rathern than user-defined),
-// to enable embedding without method collisions.  Not to be used directly by
-// clients.
-type Profile_InternalNoTagGetter interface {
-
+// Profile_ExcludingUniversal is the interface without internal framework-added methods
+// to enable embedding without method collisions.  Not to be used directly by clients.
+type Profile_ExcludingUniversal interface {
 	// Label is the human-readable profile key for the profile,
 	// e.g. "linux-media". The label can be used to uniquely identify
 	// the profile (for the purpose of matching application binaries and
@@ -44,11 +41,8 @@ type Profile_InternalNoTagGetter interface {
 	Description(opts ..._gen_ipc.ClientCallOpt) (reply string, err error)
 }
 type Profile interface {
-	_gen_vdl.TagGetter
-	// UnresolveStep returns the names for the remote service, rooted at the
-	// service's immediate namespace ancestor.
-	UnresolveStep(opts ..._gen_ipc.ClientCallOpt) ([]string, error)
-	Profile_InternalNoTagGetter
+	_gen_ipc.UniversalServiceMethods
+	Profile_ExcludingUniversal
 }
 
 // ProfileService is the interface the server implements.
@@ -107,10 +101,6 @@ type clientStubProfile struct {
 	name   string
 }
 
-func (c *clientStubProfile) GetMethodTags(method string) []interface{} {
-	return GetProfileMethodTags(method)
-}
-
 func (__gen_c *clientStubProfile) Label(opts ..._gen_ipc.ClientCallOpt) (reply string, err error) {
 	var call _gen_ipc.ClientCall
 	if call, err = __gen_c.client.StartCall(__gen_c.name, "Label", nil, opts...); err != nil {
@@ -133,9 +123,31 @@ func (__gen_c *clientStubProfile) Description(opts ..._gen_ipc.ClientCallOpt) (r
 	return
 }
 
-func (c *clientStubProfile) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
+func (__gen_c *clientStubProfile) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
 	var call _gen_ipc.ClientCall
-	if call, err = c.client.StartCall(c.name, "UnresolveStep", nil, opts...); err != nil {
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubProfile) Signature(opts ..._gen_ipc.ClientCallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+	var call _gen_ipc.ClientCall
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "Signature", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubProfile) GetMethodTags(method string, opts ..._gen_ipc.ClientCallOpt) (reply []interface{}, err error) {
+	var call _gen_ipc.ClientCall
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -151,11 +163,21 @@ type ServerStubProfile struct {
 	service ProfileService
 }
 
-func (s *ServerStubProfile) GetMethodTags(method string) []interface{} {
-	return GetProfileMethodTags(method)
+func (__gen_s *ServerStubProfile) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
+	// TODO(bprosnitz) GetMethodTags() will be replaces with Signature().
+	// Note: This exhibits some weird behavior like returning a nil error if the method isn't found.
+	// This will change when it is replaced with Signature().
+	switch method {
+	case "Label":
+		return []interface{}{security.Label(1)}, nil
+	case "Description":
+		return []interface{}{security.Label(1)}, nil
+	default:
+		return nil, nil
+	}
 }
 
-func (s *ServerStubProfile) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
+func (__gen_s *ServerStubProfile) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
 	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
 	result.Methods["Description"] = _gen_ipc.MethodSignature{
 		InArgs: []_gen_ipc.MethodArgument{},
@@ -178,8 +200,8 @@ func (s *ServerStubProfile) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Servic
 	return result, nil
 }
 
-func (s *ServerStubProfile) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
-	if unresolver, ok := s.service.(_gen_ipc.Unresolver); ok {
+func (__gen_s *ServerStubProfile) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
+	if unresolver, ok := __gen_s.service.(_gen_ipc.Unresolver); ok {
 		return unresolver.UnresolveStep(call)
 	}
 	if call.Server() == nil {
@@ -204,15 +226,4 @@ func (__gen_s *ServerStubProfile) Label(call _gen_ipc.ServerCall) (reply string,
 func (__gen_s *ServerStubProfile) Description(call _gen_ipc.ServerCall) (reply string, err error) {
 	reply, err = __gen_s.service.Description(call)
 	return
-}
-
-func GetProfileMethodTags(method string) []interface{} {
-	switch method {
-	case "Label":
-		return []interface{}{security.Label(1)}
-	case "Description":
-		return []interface{}{security.Label(1)}
-	default:
-		return nil
-	}
 }

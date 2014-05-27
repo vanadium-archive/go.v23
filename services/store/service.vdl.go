@@ -186,12 +186,10 @@ const (
 
 // ObjectService is the interface for a value in the store.
 // Object is the interface the client binds and uses.
-// Object_InternalNoTagGetter is the interface without the TagGetter
-// and UnresolveStep methods (both framework-added, rathern than user-defined),
-// to enable embedding without method collisions.  Not to be used directly by
-// clients.
-type Object_InternalNoTagGetter interface {
-	mounttable.Globable_InternalNoTagGetter
+// Object_ExcludingUniversal is the interface without internal framework-added methods
+// to enable embedding without method collisions.  Not to be used directly by clients.
+type Object_ExcludingUniversal interface {
+	mounttable.Globable_ExcludingUniversal
 	// Exists returns true iff the Entry has a value.
 	Exists(TID TransactionID, opts ..._gen_ipc.ClientCallOpt) (reply bool, err error)
 	// Get returns the value for the Object.  The value returned is from the
@@ -216,11 +214,8 @@ type Object_InternalNoTagGetter interface {
 	GlobT(TID TransactionID, pattern string, opts ..._gen_ipc.ClientCallOpt) (reply ObjectGlobTStream, err error)
 }
 type Object interface {
-	_gen_vdl.TagGetter
-	// UnresolveStep returns the names for the remote service, rooted at the
-	// service's immediate namespace ancestor.
-	UnresolveStep(opts ..._gen_ipc.ClientCallOpt) ([]string, error)
-	Object_InternalNoTagGetter
+	_gen_ipc.UniversalServiceMethods
+	Object_ExcludingUniversal
 }
 
 // ObjectService is the interface the server implements.
@@ -381,7 +376,7 @@ func BindObject(name string, opts ..._gen_ipc.BindOpt) (Object, error) {
 		return nil, _gen_vdl.ErrTooManyOptionsToBind
 	}
 	stub := &clientStubObject{client: client, name: name}
-	stub.Globable_InternalNoTagGetter, _ = mounttable.BindGlobable(name, client)
+	stub.Globable_ExcludingUniversal, _ = mounttable.BindGlobable(name, client)
 
 	return stub, nil
 }
@@ -399,14 +394,10 @@ func NewServerObject(server ObjectService) interface{} {
 
 // clientStubObject implements Object.
 type clientStubObject struct {
-	mounttable.Globable_InternalNoTagGetter
+	mounttable.Globable_ExcludingUniversal
 
 	client _gen_ipc.Client
 	name   string
-}
-
-func (c *clientStubObject) GetMethodTags(method string) []interface{} {
-	return GetObjectMethodTags(method)
 }
 
 func (__gen_c *clientStubObject) Exists(TID TransactionID, opts ..._gen_ipc.ClientCallOpt) (reply bool, err error) {
@@ -493,9 +484,31 @@ func (__gen_c *clientStubObject) GlobT(TID TransactionID, pattern string, opts .
 	return
 }
 
-func (c *clientStubObject) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
+func (__gen_c *clientStubObject) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
 	var call _gen_ipc.ClientCall
-	if call, err = c.client.StartCall(c.name, "UnresolveStep", nil, opts...); err != nil {
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubObject) Signature(opts ..._gen_ipc.ClientCallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+	var call _gen_ipc.ClientCall
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "Signature", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubObject) GetMethodTags(method string, opts ..._gen_ipc.ClientCallOpt) (reply []interface{}, err error) {
+	var call _gen_ipc.ClientCall
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -513,11 +526,36 @@ type ServerStubObject struct {
 	service ObjectService
 }
 
-func (s *ServerStubObject) GetMethodTags(method string) []interface{} {
-	return GetObjectMethodTags(method)
+func (__gen_s *ServerStubObject) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
+	// TODO(bprosnitz) GetMethodTags() will be replaces with Signature().
+	// Note: This exhibits some weird behavior like returning a nil error if the method isn't found.
+	// This will change when it is replaced with Signature().
+	if resp, err := __gen_s.ServerStubGlobable.GetMethodTags(call, method); resp != nil || err != nil {
+		return resp, err
+	}
+	switch method {
+	case "Exists":
+		return []interface{}{}, nil
+	case "Get":
+		return []interface{}{}, nil
+	case "Put":
+		return []interface{}{}, nil
+	case "Remove":
+		return []interface{}{}, nil
+	case "SetAttr":
+		return []interface{}{}, nil
+	case "Stat":
+		return []interface{}{}, nil
+	case "Query":
+		return []interface{}{}, nil
+	case "GlobT":
+		return []interface{}{}, nil
+	default:
+		return nil, nil
+	}
 }
 
-func (s *ServerStubObject) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
+func (__gen_s *ServerStubObject) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
 	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
 	result.Methods["Exists"] = _gen_ipc.MethodSignature{
 		InArgs: []_gen_ipc.MethodArgument{
@@ -626,7 +664,7 @@ func (s *ServerStubObject) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Service
 	}
 	var ss _gen_ipc.ServiceSignature
 	var firstAdded int
-	ss, _ = s.ServerStubGlobable.Signature(call)
+	ss, _ = __gen_s.ServerStubGlobable.Signature(call)
 	firstAdded = len(result.TypeDefs)
 	for k, v := range ss.Methods {
 		for i, _ := range v.InArgs {
@@ -682,8 +720,8 @@ func (s *ServerStubObject) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Service
 	return result, nil
 }
 
-func (s *ServerStubObject) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
-	if unresolver, ok := s.service.(_gen_ipc.Unresolver); ok {
+func (__gen_s *ServerStubObject) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
+	if unresolver, ok := __gen_s.service.(_gen_ipc.Unresolver); ok {
 		return unresolver.UnresolveStep(call)
 	}
 	if call.Server() == nil {
@@ -742,43 +780,14 @@ func (__gen_s *ServerStubObject) GlobT(call _gen_ipc.ServerCall, TID Transaction
 	return
 }
 
-func GetObjectMethodTags(method string) []interface{} {
-	if resp := mounttable.GetGlobableMethodTags(method); resp != nil {
-		return resp
-	}
-	switch method {
-	case "Exists":
-		return []interface{}{}
-	case "Get":
-		return []interface{}{}
-	case "Put":
-		return []interface{}{}
-	case "Remove":
-		return []interface{}{}
-	case "SetAttr":
-		return []interface{}{}
-	case "Stat":
-		return []interface{}{}
-	case "Query":
-		return []interface{}{}
-	case "GlobT":
-		return []interface{}{}
-	default:
-		return nil
-	}
-}
-
 // Store is the client interface to the storage system.
 // Store is the interface the client binds and uses.
-// Store_InternalNoTagGetter is the interface without the TagGetter
-// and UnresolveStep methods (both framework-added, rathern than user-defined),
-// to enable embedding without method collisions.  Not to be used directly by
-// clients.
-type Store_InternalNoTagGetter interface {
-
+// Store_ExcludingUniversal is the interface without internal framework-added methods
+// to enable embedding without method collisions.  Not to be used directly by clients.
+type Store_ExcludingUniversal interface {
 	// Watcher allows a client to receive updates for changes to objects
 	// that match a query.  See the package comments for details.
-	watch.Watcher_InternalNoTagGetter
+	watch.Watcher_ExcludingUniversal
 	// CreateTransaction creates the transaction and sets the options for it.
 	CreateTransaction(TID TransactionID, Options []_gen_vdl.Any, opts ..._gen_ipc.ClientCallOpt) (err error)
 	// Commit commits the changes in the transaction to the store.  The
@@ -795,11 +804,8 @@ type Store_InternalNoTagGetter interface {
 	ReadConflicts(opts ..._gen_ipc.ClientCallOpt) (reply StoreReadConflictsStream, err error)
 }
 type Store interface {
-	_gen_vdl.TagGetter
-	// UnresolveStep returns the names for the remote service, rooted at the
-	// service's immediate namespace ancestor.
-	UnresolveStep(opts ..._gen_ipc.ClientCallOpt) ([]string, error)
-	Store_InternalNoTagGetter
+	_gen_ipc.UniversalServiceMethods
+	Store_ExcludingUniversal
 }
 
 // StoreService is the interface the server implements.
@@ -901,7 +907,7 @@ func BindStore(name string, opts ..._gen_ipc.BindOpt) (Store, error) {
 		return nil, _gen_vdl.ErrTooManyOptionsToBind
 	}
 	stub := &clientStubStore{client: client, name: name}
-	stub.Watcher_InternalNoTagGetter, _ = watch.BindWatcher(name, client)
+	stub.Watcher_ExcludingUniversal, _ = watch.BindWatcher(name, client)
 
 	return stub, nil
 }
@@ -919,14 +925,10 @@ func NewServerStore(server StoreService) interface{} {
 
 // clientStubStore implements Store.
 type clientStubStore struct {
-	watch.Watcher_InternalNoTagGetter
+	watch.Watcher_ExcludingUniversal
 
 	client _gen_ipc.Client
 	name   string
-}
-
-func (c *clientStubStore) GetMethodTags(method string) []interface{} {
-	return GetStoreMethodTags(method)
 }
 
 func (__gen_c *clientStubStore) CreateTransaction(TID TransactionID, Options []_gen_vdl.Any, opts ..._gen_ipc.ClientCallOpt) (err error) {
@@ -971,9 +973,31 @@ func (__gen_c *clientStubStore) ReadConflicts(opts ..._gen_ipc.ClientCallOpt) (r
 	return
 }
 
-func (c *clientStubStore) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
+func (__gen_c *clientStubStore) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
 	var call _gen_ipc.ClientCall
-	if call, err = c.client.StartCall(c.name, "UnresolveStep", nil, opts...); err != nil {
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubStore) Signature(opts ..._gen_ipc.ClientCallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+	var call _gen_ipc.ClientCall
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "Signature", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubStore) GetMethodTags(method string, opts ..._gen_ipc.ClientCallOpt) (reply []interface{}, err error) {
+	var call _gen_ipc.ClientCall
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -991,11 +1015,28 @@ type ServerStubStore struct {
 	service StoreService
 }
 
-func (s *ServerStubStore) GetMethodTags(method string) []interface{} {
-	return GetStoreMethodTags(method)
+func (__gen_s *ServerStubStore) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
+	// TODO(bprosnitz) GetMethodTags() will be replaces with Signature().
+	// Note: This exhibits some weird behavior like returning a nil error if the method isn't found.
+	// This will change when it is replaced with Signature().
+	if resp, err := __gen_s.ServerStubWatcher.GetMethodTags(call, method); resp != nil || err != nil {
+		return resp, err
+	}
+	switch method {
+	case "CreateTransaction":
+		return []interface{}{}, nil
+	case "Commit":
+		return []interface{}{}, nil
+	case "Abort":
+		return []interface{}{}, nil
+	case "ReadConflicts":
+		return []interface{}{}, nil
+	default:
+		return nil, nil
+	}
 }
 
-func (s *ServerStubStore) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
+func (__gen_s *ServerStubStore) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
 	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
 	result.Methods["Abort"] = _gen_ipc.MethodSignature{
 		InArgs: []_gen_ipc.MethodArgument{
@@ -1057,7 +1098,7 @@ func (s *ServerStubStore) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceS
 	}
 	var ss _gen_ipc.ServiceSignature
 	var firstAdded int
-	ss, _ = s.ServerStubWatcher.Signature(call)
+	ss, _ = __gen_s.ServerStubWatcher.Signature(call)
 	firstAdded = len(result.TypeDefs)
 	for k, v := range ss.Methods {
 		for i, _ := range v.InArgs {
@@ -1113,8 +1154,8 @@ func (s *ServerStubStore) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceS
 	return result, nil
 }
 
-func (s *ServerStubStore) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
-	if unresolver, ok := s.service.(_gen_ipc.Unresolver); ok {
+func (__gen_s *ServerStubStore) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
+	if unresolver, ok := __gen_s.service.(_gen_ipc.Unresolver); ok {
 		return unresolver.UnresolveStep(call)
 	}
 	if call.Server() == nil {
@@ -1150,22 +1191,4 @@ func (__gen_s *ServerStubStore) ReadConflicts(call _gen_ipc.ServerCall) (err err
 	stream := &implStoreServiceReadConflictsStream{serverCall: call}
 	err = __gen_s.service.ReadConflicts(call, stream)
 	return
-}
-
-func GetStoreMethodTags(method string) []interface{} {
-	if resp := watch.GetWatcherMethodTags(method); resp != nil {
-		return resp
-	}
-	switch method {
-	case "CreateTransaction":
-		return []interface{}{}
-	case "Commit":
-		return []interface{}{}
-	case "Abort":
-		return []interface{}{}
-	case "ReadConflicts":
-		return []interface{}{}
-	default:
-		return nil
-	}
 }

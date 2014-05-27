@@ -65,12 +65,9 @@ const (
 // Things to note:
 //   * There must be at least 1 out-arg, and the last out-arg must be error.
 // Arith is the interface the client binds and uses.
-// Arith_InternalNoTagGetter is the interface without the TagGetter
-// and UnresolveStep methods (both framework-added, rathern than user-defined),
-// to enable embedding without method collisions.  Not to be used directly by
-// clients.
-type Arith_InternalNoTagGetter interface {
-
+// Arith_ExcludingUniversal is the interface without internal framework-added methods
+// to enable embedding without method collisions.  Not to be used directly by clients.
+type Arith_ExcludingUniversal interface {
 	// Add is a typical method with multiple input and output arguments.
 	Add(a int32, b int32, opts ..._gen_ipc.ClientCallOpt) (reply int32, err error)
 	// DivMod shows that runs of args with the same type can use the short form,
@@ -93,11 +90,8 @@ type Arith_InternalNoTagGetter interface {
 	QuoteAny(a _gen_vdl.Any, opts ..._gen_ipc.ClientCallOpt) (reply _gen_vdl.Any, err error)
 }
 type Arith interface {
-	_gen_vdl.TagGetter
-	// UnresolveStep returns the names for the remote service, rooted at the
-	// service's immediate namespace ancestor.
-	UnresolveStep(opts ..._gen_ipc.ClientCallOpt) ([]string, error)
-	Arith_InternalNoTagGetter
+	_gen_ipc.UniversalServiceMethods
+	Arith_ExcludingUniversal
 }
 
 // ArithService is the interface the server implements.
@@ -303,10 +297,6 @@ type clientStubArith struct {
 	name   string
 }
 
-func (c *clientStubArith) GetMethodTags(method string) []interface{} {
-	return GetArithMethodTags(method)
-}
-
 func (__gen_c *clientStubArith) Add(a int32, b int32, opts ..._gen_ipc.ClientCallOpt) (reply int32, err error) {
 	var call _gen_ipc.ClientCall
 	if call, err = __gen_c.client.StartCall(__gen_c.name, "Add", []interface{}{a, b}, opts...); err != nil {
@@ -391,9 +381,31 @@ func (__gen_c *clientStubArith) QuoteAny(a _gen_vdl.Any, opts ..._gen_ipc.Client
 	return
 }
 
-func (c *clientStubArith) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
+func (__gen_c *clientStubArith) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
 	var call _gen_ipc.ClientCall
-	if call, err = c.client.StartCall(c.name, "UnresolveStep", nil, opts...); err != nil {
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubArith) Signature(opts ..._gen_ipc.ClientCallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+	var call _gen_ipc.ClientCall
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "Signature", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubArith) GetMethodTags(method string, opts ..._gen_ipc.ClientCallOpt) (reply []interface{}, err error) {
+	var call _gen_ipc.ClientCall
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -409,11 +421,33 @@ type ServerStubArith struct {
 	service ArithService
 }
 
-func (s *ServerStubArith) GetMethodTags(method string) []interface{} {
-	return GetArithMethodTags(method)
+func (__gen_s *ServerStubArith) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
+	// TODO(bprosnitz) GetMethodTags() will be replaces with Signature().
+	// Note: This exhibits some weird behavior like returning a nil error if the method isn't found.
+	// This will change when it is replaced with Signature().
+	switch method {
+	case "Add":
+		return []interface{}{}, nil
+	case "DivMod":
+		return []interface{}{}, nil
+	case "Sub":
+		return []interface{}{}, nil
+	case "Mul":
+		return []interface{}{}, nil
+	case "GenError":
+		return []interface{}{"foo", "barz", "hello", int32(129), uint64(36)}, nil
+	case "Count":
+		return []interface{}{}, nil
+	case "StreamingAdd":
+		return []interface{}{}, nil
+	case "QuoteAny":
+		return []interface{}{}, nil
+	default:
+		return nil, nil
+	}
 }
 
-func (s *ServerStubArith) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
+func (__gen_s *ServerStubArith) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
 	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
 	result.Methods["Add"] = _gen_ipc.MethodSignature{
 		InArgs: []_gen_ipc.MethodArgument{
@@ -506,8 +540,8 @@ func (s *ServerStubArith) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceS
 	return result, nil
 }
 
-func (s *ServerStubArith) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
-	if unresolver, ok := s.service.(_gen_ipc.Unresolver); ok {
+func (__gen_s *ServerStubArith) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
+	if unresolver, ok := __gen_s.service.(_gen_ipc.Unresolver); ok {
 		return unresolver.UnresolveStep(call)
 	}
 	if call.Server() == nil {
@@ -566,54 +600,25 @@ func (__gen_s *ServerStubArith) QuoteAny(call _gen_ipc.ServerCall, a _gen_vdl.An
 	return
 }
 
-func GetArithMethodTags(method string) []interface{} {
-	switch method {
-	case "Add":
-		return []interface{}{}
-	case "DivMod":
-		return []interface{}{}
-	case "Sub":
-		return []interface{}{}
-	case "Mul":
-		return []interface{}{}
-	case "GenError":
-		return []interface{}{"foo", "barz", "hello", int32(129), uint64(36)}
-	case "Count":
-		return []interface{}{}
-	case "StreamingAdd":
-		return []interface{}{}
-	case "QuoteAny":
-		return []interface{}{}
-	default:
-		return nil
-	}
-}
-
 // Calculator is the interface the client binds and uses.
-// Calculator_InternalNoTagGetter is the interface without the TagGetter
-// and UnresolveStep methods (both framework-added, rathern than user-defined),
-// to enable embedding without method collisions.  Not to be used directly by
-// clients.
-type Calculator_InternalNoTagGetter interface {
-
+// Calculator_ExcludingUniversal is the interface without internal framework-added methods
+// to enable embedding without method collisions.  Not to be used directly by clients.
+type Calculator_ExcludingUniversal interface {
 	// Arith is an example of an interface definition for an arithmetic service.
 	// Things to note:
 	//   * There must be at least 1 out-arg, and the last out-arg must be error.
-	Arith_InternalNoTagGetter
+	Arith_ExcludingUniversal
 	// AdvancedMath is an interface for more advanced math than arith.  It embeds
 	// interfaces defined both in the same file and in an external package; and in
 	// turn it is embedded by arith.Calculator (which is in the same package but
 	// different file) to verify that embedding works in all these scenarios.
-	AdvancedMath_InternalNoTagGetter
+	AdvancedMath_ExcludingUniversal
 	On(opts ..._gen_ipc.ClientCallOpt) (err error)  // On turns the calculator on.
 	Off(opts ..._gen_ipc.ClientCallOpt) (err error) // Off turns the calculator off.
 }
 type Calculator interface {
-	_gen_vdl.TagGetter
-	// UnresolveStep returns the names for the remote service, rooted at the
-	// service's immediate namespace ancestor.
-	UnresolveStep(opts ..._gen_ipc.ClientCallOpt) ([]string, error)
-	Calculator_InternalNoTagGetter
+	_gen_ipc.UniversalServiceMethods
+	Calculator_ExcludingUniversal
 }
 
 // CalculatorService is the interface the server implements.
@@ -655,8 +660,8 @@ func BindCalculator(name string, opts ..._gen_ipc.BindOpt) (Calculator, error) {
 		return nil, _gen_vdl.ErrTooManyOptionsToBind
 	}
 	stub := &clientStubCalculator{client: client, name: name}
-	stub.Arith_InternalNoTagGetter, _ = BindArith(name, client)
-	stub.AdvancedMath_InternalNoTagGetter, _ = BindAdvancedMath(name, client)
+	stub.Arith_ExcludingUniversal, _ = BindArith(name, client)
+	stub.AdvancedMath_ExcludingUniversal, _ = BindAdvancedMath(name, client)
 
 	return stub, nil
 }
@@ -675,15 +680,11 @@ func NewServerCalculator(server CalculatorService) interface{} {
 
 // clientStubCalculator implements Calculator.
 type clientStubCalculator struct {
-	Arith_InternalNoTagGetter
-	AdvancedMath_InternalNoTagGetter
+	Arith_ExcludingUniversal
+	AdvancedMath_ExcludingUniversal
 
 	client _gen_ipc.Client
 	name   string
-}
-
-func (c *clientStubCalculator) GetMethodTags(method string) []interface{} {
-	return GetCalculatorMethodTags(method)
 }
 
 func (__gen_c *clientStubCalculator) On(opts ..._gen_ipc.ClientCallOpt) (err error) {
@@ -708,9 +709,31 @@ func (__gen_c *clientStubCalculator) Off(opts ..._gen_ipc.ClientCallOpt) (err er
 	return
 }
 
-func (c *clientStubCalculator) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
+func (__gen_c *clientStubCalculator) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
 	var call _gen_ipc.ClientCall
-	if call, err = c.client.StartCall(c.name, "UnresolveStep", nil, opts...); err != nil {
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubCalculator) Signature(opts ..._gen_ipc.ClientCallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+	var call _gen_ipc.ClientCall
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "Signature", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubCalculator) GetMethodTags(method string, opts ..._gen_ipc.ClientCallOpt) (reply []interface{}, err error) {
+	var call _gen_ipc.ClientCall
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -729,11 +752,27 @@ type ServerStubCalculator struct {
 	service CalculatorService
 }
 
-func (s *ServerStubCalculator) GetMethodTags(method string) []interface{} {
-	return GetCalculatorMethodTags(method)
+func (__gen_s *ServerStubCalculator) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
+	// TODO(bprosnitz) GetMethodTags() will be replaces with Signature().
+	// Note: This exhibits some weird behavior like returning a nil error if the method isn't found.
+	// This will change when it is replaced with Signature().
+	if resp, err := __gen_s.ServerStubArith.GetMethodTags(call, method); resp != nil || err != nil {
+		return resp, err
+	}
+	if resp, err := __gen_s.ServerStubAdvancedMath.GetMethodTags(call, method); resp != nil || err != nil {
+		return resp, err
+	}
+	switch method {
+	case "On":
+		return []interface{}{}, nil
+	case "Off":
+		return []interface{}{"offtag"}, nil
+	default:
+		return nil, nil
+	}
 }
 
-func (s *ServerStubCalculator) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
+func (__gen_s *ServerStubCalculator) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
 	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
 	result.Methods["Off"] = _gen_ipc.MethodSignature{
 		InArgs: []_gen_ipc.MethodArgument{},
@@ -752,7 +791,7 @@ func (s *ServerStubCalculator) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Ser
 		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}}
 	var ss _gen_ipc.ServiceSignature
 	var firstAdded int
-	ss, _ = s.ServerStubArith.Signature(call)
+	ss, _ = __gen_s.ServerStubArith.Signature(call)
 	firstAdded = len(result.TypeDefs)
 	for k, v := range ss.Methods {
 		for i, _ := range v.InArgs {
@@ -804,7 +843,7 @@ func (s *ServerStubCalculator) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Ser
 		}
 		result.TypeDefs = append(result.TypeDefs, d)
 	}
-	ss, _ = s.ServerStubAdvancedMath.Signature(call)
+	ss, _ = __gen_s.ServerStubAdvancedMath.Signature(call)
 	firstAdded = len(result.TypeDefs)
 	for k, v := range ss.Methods {
 		for i, _ := range v.InArgs {
@@ -860,8 +899,8 @@ func (s *ServerStubCalculator) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Ser
 	return result, nil
 }
 
-func (s *ServerStubCalculator) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
-	if unresolver, ok := s.service.(_gen_ipc.Unresolver); ok {
+func (__gen_s *ServerStubCalculator) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
+	if unresolver, ok := __gen_s.service.(_gen_ipc.Unresolver); ok {
 		return unresolver.UnresolveStep(call)
 	}
 	if call.Server() == nil {
@@ -886,21 +925,4 @@ func (__gen_s *ServerStubCalculator) On(call _gen_ipc.ServerCall) (err error) {
 func (__gen_s *ServerStubCalculator) Off(call _gen_ipc.ServerCall) (err error) {
 	err = __gen_s.service.Off(call)
 	return
-}
-
-func GetCalculatorMethodTags(method string) []interface{} {
-	if resp := GetArithMethodTags(method); resp != nil {
-		return resp
-	}
-	if resp := GetAdvancedMathMethodTags(method); resp != nil {
-		return resp
-	}
-	switch method {
-	case "On":
-		return []interface{}{}
-	case "Off":
-		return []interface{}{"offtag"}
-	default:
-		return nil
-	}
 }

@@ -50,12 +50,9 @@ type Envelope struct {
 // "release" versions that will be symbolic links whose mapping is
 // maintained by a mount table.
 // Repository is the interface the client binds and uses.
-// Repository_InternalNoTagGetter is the interface without the TagGetter
-// and UnresolveStep methods (both framework-added, rathern than user-defined),
-// to enable embedding without method collisions.  Not to be used directly by
-// clients.
-type Repository_InternalNoTagGetter interface {
-
+// Repository_ExcludingUniversal is the interface without internal framework-added methods
+// to enable embedding without method collisions.  Not to be used directly by clients.
+type Repository_ExcludingUniversal interface {
 	// Match checks if any of the given profiles contains an application
 	// envelope for the given application version (specified through the
 	// veyron name suffix) and if so, returns this envelope. If multiple
@@ -64,11 +61,8 @@ type Repository_InternalNoTagGetter interface {
 	Match(Profiles []string, opts ..._gen_ipc.ClientCallOpt) (reply Envelope, err error)
 }
 type Repository interface {
-	_gen_vdl.TagGetter
-	// UnresolveStep returns the names for the remote service, rooted at the
-	// service's immediate namespace ancestor.
-	UnresolveStep(opts ..._gen_ipc.ClientCallOpt) ([]string, error)
-	Repository_InternalNoTagGetter
+	_gen_ipc.UniversalServiceMethods
+	Repository_ExcludingUniversal
 }
 
 // RepositoryService is the interface the server implements.
@@ -125,10 +119,6 @@ type clientStubRepository struct {
 	name   string
 }
 
-func (c *clientStubRepository) GetMethodTags(method string) []interface{} {
-	return GetRepositoryMethodTags(method)
-}
-
 func (__gen_c *clientStubRepository) Match(Profiles []string, opts ..._gen_ipc.ClientCallOpt) (reply Envelope, err error) {
 	var call _gen_ipc.ClientCall
 	if call, err = __gen_c.client.StartCall(__gen_c.name, "Match", []interface{}{Profiles}, opts...); err != nil {
@@ -140,9 +130,31 @@ func (__gen_c *clientStubRepository) Match(Profiles []string, opts ..._gen_ipc.C
 	return
 }
 
-func (c *clientStubRepository) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
+func (__gen_c *clientStubRepository) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
 	var call _gen_ipc.ClientCall
-	if call, err = c.client.StartCall(c.name, "UnresolveStep", nil, opts...); err != nil {
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubRepository) Signature(opts ..._gen_ipc.ClientCallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+	var call _gen_ipc.ClientCall
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "Signature", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubRepository) GetMethodTags(method string, opts ..._gen_ipc.ClientCallOpt) (reply []interface{}, err error) {
+	var call _gen_ipc.ClientCall
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -158,11 +170,19 @@ type ServerStubRepository struct {
 	service RepositoryService
 }
 
-func (s *ServerStubRepository) GetMethodTags(method string) []interface{} {
-	return GetRepositoryMethodTags(method)
+func (__gen_s *ServerStubRepository) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
+	// TODO(bprosnitz) GetMethodTags() will be replaces with Signature().
+	// Note: This exhibits some weird behavior like returning a nil error if the method isn't found.
+	// This will change when it is replaced with Signature().
+	switch method {
+	case "Match":
+		return []interface{}{security.Label(1)}, nil
+	default:
+		return nil, nil
+	}
 }
 
-func (s *ServerStubRepository) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
+func (__gen_s *ServerStubRepository) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
 	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
 	result.Methods["Match"] = _gen_ipc.MethodSignature{
 		InArgs: []_gen_ipc.MethodArgument{
@@ -187,8 +207,8 @@ func (s *ServerStubRepository) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Ser
 	return result, nil
 }
 
-func (s *ServerStubRepository) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
-	if unresolver, ok := s.service.(_gen_ipc.Unresolver); ok {
+func (__gen_s *ServerStubRepository) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
+	if unresolver, ok := __gen_s.service.(_gen_ipc.Unresolver); ok {
 		return unresolver.UnresolveStep(call)
 	}
 	if call.Server() == nil {
@@ -208,13 +228,4 @@ func (s *ServerStubRepository) UnresolveStep(call _gen_ipc.ServerCall) (reply []
 func (__gen_s *ServerStubRepository) Match(call _gen_ipc.ServerCall, Profiles []string) (reply Envelope, err error) {
 	reply, err = __gen_s.service.Match(call, Profiles)
 	return
-}
-
-func GetRepositoryMethodTags(method string) []interface{} {
-	switch method {
-	case "Match":
-		return []interface{}{security.Label(1)}
-	default:
-		return nil
-	}
 }

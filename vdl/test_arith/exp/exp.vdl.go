@@ -16,19 +16,14 @@ import (
 )
 
 // Exp is the interface the client binds and uses.
-// Exp_InternalNoTagGetter is the interface without the TagGetter
-// and UnresolveStep methods (both framework-added, rathern than user-defined),
-// to enable embedding without method collisions.  Not to be used directly by
-// clients.
-type Exp_InternalNoTagGetter interface {
+// Exp_ExcludingUniversal is the interface without internal framework-added methods
+// to enable embedding without method collisions.  Not to be used directly by clients.
+type Exp_ExcludingUniversal interface {
 	Exp(x float64, opts ..._gen_ipc.ClientCallOpt) (reply float64, err error)
 }
 type Exp interface {
-	_gen_vdl.TagGetter
-	// UnresolveStep returns the names for the remote service, rooted at the
-	// service's immediate namespace ancestor.
-	UnresolveStep(opts ..._gen_ipc.ClientCallOpt) ([]string, error)
-	Exp_InternalNoTagGetter
+	_gen_ipc.UniversalServiceMethods
+	Exp_ExcludingUniversal
 }
 
 // ExpService is the interface the server implements.
@@ -79,10 +74,6 @@ type clientStubExp struct {
 	name   string
 }
 
-func (c *clientStubExp) GetMethodTags(method string) []interface{} {
-	return GetExpMethodTags(method)
-}
-
 func (__gen_c *clientStubExp) Exp(x float64, opts ..._gen_ipc.ClientCallOpt) (reply float64, err error) {
 	var call _gen_ipc.ClientCall
 	if call, err = __gen_c.client.StartCall(__gen_c.name, "Exp", []interface{}{x}, opts...); err != nil {
@@ -94,9 +85,31 @@ func (__gen_c *clientStubExp) Exp(x float64, opts ..._gen_ipc.ClientCallOpt) (re
 	return
 }
 
-func (c *clientStubExp) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
+func (__gen_c *clientStubExp) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
 	var call _gen_ipc.ClientCall
-	if call, err = c.client.StartCall(c.name, "UnresolveStep", nil, opts...); err != nil {
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubExp) Signature(opts ..._gen_ipc.ClientCallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+	var call _gen_ipc.ClientCall
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "Signature", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubExp) GetMethodTags(method string, opts ..._gen_ipc.ClientCallOpt) (reply []interface{}, err error) {
+	var call _gen_ipc.ClientCall
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -112,11 +125,19 @@ type ServerStubExp struct {
 	service ExpService
 }
 
-func (s *ServerStubExp) GetMethodTags(method string) []interface{} {
-	return GetExpMethodTags(method)
+func (__gen_s *ServerStubExp) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
+	// TODO(bprosnitz) GetMethodTags() will be replaces with Signature().
+	// Note: This exhibits some weird behavior like returning a nil error if the method isn't found.
+	// This will change when it is replaced with Signature().
+	switch method {
+	case "Exp":
+		return []interface{}{}, nil
+	default:
+		return nil, nil
+	}
 }
 
-func (s *ServerStubExp) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
+func (__gen_s *ServerStubExp) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
 	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
 	result.Methods["Exp"] = _gen_ipc.MethodSignature{
 		InArgs: []_gen_ipc.MethodArgument{
@@ -134,8 +155,8 @@ func (s *ServerStubExp) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSig
 	return result, nil
 }
 
-func (s *ServerStubExp) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
-	if unresolver, ok := s.service.(_gen_ipc.Unresolver); ok {
+func (__gen_s *ServerStubExp) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
+	if unresolver, ok := __gen_s.service.(_gen_ipc.Unresolver); ok {
 		return unresolver.UnresolveStep(call)
 	}
 	if call.Server() == nil {
@@ -155,13 +176,4 @@ func (s *ServerStubExp) UnresolveStep(call _gen_ipc.ServerCall) (reply []string,
 func (__gen_s *ServerStubExp) Exp(call _gen_ipc.ServerCall, x float64) (reply float64, err error) {
 	reply, err = __gen_s.service.Exp(call, x)
 	return
-}
-
-func GetExpMethodTags(method string) []interface{} {
-	switch method {
-	case "Exp":
-		return []interface{}{}
-	default:
-		return nil
-	}
 }

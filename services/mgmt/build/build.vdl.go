@@ -35,22 +35,16 @@ type BinaryDescription struct {
 
 // Build describes an interface for building binaries from source.
 // Build is the interface the client binds and uses.
-// Build_InternalNoTagGetter is the interface without the TagGetter
-// and UnresolveStep methods (both framework-added, rathern than user-defined),
-// to enable embedding without method collisions.  Not to be used directly by
-// clients.
-type Build_InternalNoTagGetter interface {
-
+// Build_ExcludingUniversal is the interface without internal framework-added methods
+// to enable embedding without method collisions.  Not to be used directly by clients.
+type Build_ExcludingUniversal interface {
 	// Describe generates a BinaryDescription for a binary identified by
 	// the given Veyron name.
 	Describe(Name string, opts ..._gen_ipc.ClientCallOpt) (reply BinaryDescription, err error)
 }
 type Build interface {
-	_gen_vdl.TagGetter
-	// UnresolveStep returns the names for the remote service, rooted at the
-	// service's immediate namespace ancestor.
-	UnresolveStep(opts ..._gen_ipc.ClientCallOpt) ([]string, error)
-	Build_InternalNoTagGetter
+	_gen_ipc.UniversalServiceMethods
+	Build_ExcludingUniversal
 }
 
 // BuildService is the interface the server implements.
@@ -104,10 +98,6 @@ type clientStubBuild struct {
 	name   string
 }
 
-func (c *clientStubBuild) GetMethodTags(method string) []interface{} {
-	return GetBuildMethodTags(method)
-}
-
 func (__gen_c *clientStubBuild) Describe(Name string, opts ..._gen_ipc.ClientCallOpt) (reply BinaryDescription, err error) {
 	var call _gen_ipc.ClientCall
 	if call, err = __gen_c.client.StartCall(__gen_c.name, "Describe", []interface{}{Name}, opts...); err != nil {
@@ -119,9 +109,31 @@ func (__gen_c *clientStubBuild) Describe(Name string, opts ..._gen_ipc.ClientCal
 	return
 }
 
-func (c *clientStubBuild) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
+func (__gen_c *clientStubBuild) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
 	var call _gen_ipc.ClientCall
-	if call, err = c.client.StartCall(c.name, "UnresolveStep", nil, opts...); err != nil {
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubBuild) Signature(opts ..._gen_ipc.ClientCallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+	var call _gen_ipc.ClientCall
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "Signature", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubBuild) GetMethodTags(method string, opts ..._gen_ipc.ClientCallOpt) (reply []interface{}, err error) {
+	var call _gen_ipc.ClientCall
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -137,11 +149,19 @@ type ServerStubBuild struct {
 	service BuildService
 }
 
-func (s *ServerStubBuild) GetMethodTags(method string) []interface{} {
-	return GetBuildMethodTags(method)
+func (__gen_s *ServerStubBuild) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
+	// TODO(bprosnitz) GetMethodTags() will be replaces with Signature().
+	// Note: This exhibits some weird behavior like returning a nil error if the method isn't found.
+	// This will change when it is replaced with Signature().
+	switch method {
+	case "Describe":
+		return []interface{}{}, nil
+	default:
+		return nil, nil
+	}
 }
 
-func (s *ServerStubBuild) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
+func (__gen_s *ServerStubBuild) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
 	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
 	result.Methods["Describe"] = _gen_ipc.MethodSignature{
 		InArgs: []_gen_ipc.MethodArgument{
@@ -165,8 +185,8 @@ func (s *ServerStubBuild) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceS
 	return result, nil
 }
 
-func (s *ServerStubBuild) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
-	if unresolver, ok := s.service.(_gen_ipc.Unresolver); ok {
+func (__gen_s *ServerStubBuild) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
+	if unresolver, ok := __gen_s.service.(_gen_ipc.Unresolver); ok {
 		return unresolver.UnresolveStep(call)
 	}
 	if call.Server() == nil {
@@ -186,13 +206,4 @@ func (s *ServerStubBuild) UnresolveStep(call _gen_ipc.ServerCall) (reply []strin
 func (__gen_s *ServerStubBuild) Describe(call _gen_ipc.ServerCall, Name string) (reply BinaryDescription, err error) {
 	reply, err = __gen_s.service.Describe(call, Name)
 	return
-}
-
-func GetBuildMethodTags(method string) []interface{} {
-	switch method {
-	case "Describe":
-		return []interface{}{}
-	default:
-		return nil
-	}
 }

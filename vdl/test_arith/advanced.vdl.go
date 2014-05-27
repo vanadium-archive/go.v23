@@ -17,20 +17,15 @@ import (
 
 // Trigonometry is an interface that specifies a couple trigonometric functions.
 // Trigonometry is the interface the client binds and uses.
-// Trigonometry_InternalNoTagGetter is the interface without the TagGetter
-// and UnresolveStep methods (both framework-added, rathern than user-defined),
-// to enable embedding without method collisions.  Not to be used directly by
-// clients.
-type Trigonometry_InternalNoTagGetter interface {
+// Trigonometry_ExcludingUniversal is the interface without internal framework-added methods
+// to enable embedding without method collisions.  Not to be used directly by clients.
+type Trigonometry_ExcludingUniversal interface {
 	Sine(angle float64, opts ..._gen_ipc.ClientCallOpt) (reply float64, err error)
 	Cosine(angle float64, opts ..._gen_ipc.ClientCallOpt) (reply float64, err error)
 }
 type Trigonometry interface {
-	_gen_vdl.TagGetter
-	// UnresolveStep returns the names for the remote service, rooted at the
-	// service's immediate namespace ancestor.
-	UnresolveStep(opts ..._gen_ipc.ClientCallOpt) ([]string, error)
-	Trigonometry_InternalNoTagGetter
+	_gen_ipc.UniversalServiceMethods
+	Trigonometry_ExcludingUniversal
 }
 
 // TrigonometryService is the interface the server implements.
@@ -82,10 +77,6 @@ type clientStubTrigonometry struct {
 	name   string
 }
 
-func (c *clientStubTrigonometry) GetMethodTags(method string) []interface{} {
-	return GetTrigonometryMethodTags(method)
-}
-
 func (__gen_c *clientStubTrigonometry) Sine(angle float64, opts ..._gen_ipc.ClientCallOpt) (reply float64, err error) {
 	var call _gen_ipc.ClientCall
 	if call, err = __gen_c.client.StartCall(__gen_c.name, "Sine", []interface{}{angle}, opts...); err != nil {
@@ -108,9 +99,31 @@ func (__gen_c *clientStubTrigonometry) Cosine(angle float64, opts ..._gen_ipc.Cl
 	return
 }
 
-func (c *clientStubTrigonometry) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
+func (__gen_c *clientStubTrigonometry) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
 	var call _gen_ipc.ClientCall
-	if call, err = c.client.StartCall(c.name, "UnresolveStep", nil, opts...); err != nil {
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubTrigonometry) Signature(opts ..._gen_ipc.ClientCallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+	var call _gen_ipc.ClientCall
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "Signature", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubTrigonometry) GetMethodTags(method string, opts ..._gen_ipc.ClientCallOpt) (reply []interface{}, err error) {
+	var call _gen_ipc.ClientCall
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -126,11 +139,21 @@ type ServerStubTrigonometry struct {
 	service TrigonometryService
 }
 
-func (s *ServerStubTrigonometry) GetMethodTags(method string) []interface{} {
-	return GetTrigonometryMethodTags(method)
+func (__gen_s *ServerStubTrigonometry) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
+	// TODO(bprosnitz) GetMethodTags() will be replaces with Signature().
+	// Note: This exhibits some weird behavior like returning a nil error if the method isn't found.
+	// This will change when it is replaced with Signature().
+	switch method {
+	case "Sine":
+		return []interface{}{}, nil
+	case "Cosine":
+		return []interface{}{}, nil
+	default:
+		return nil, nil
+	}
 }
 
-func (s *ServerStubTrigonometry) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
+func (__gen_s *ServerStubTrigonometry) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
 	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
 	result.Methods["Cosine"] = _gen_ipc.MethodSignature{
 		InArgs: []_gen_ipc.MethodArgument{
@@ -157,8 +180,8 @@ func (s *ServerStubTrigonometry) Signature(call _gen_ipc.ServerCall) (_gen_ipc.S
 	return result, nil
 }
 
-func (s *ServerStubTrigonometry) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
-	if unresolver, ok := s.service.(_gen_ipc.Unresolver); ok {
+func (__gen_s *ServerStubTrigonometry) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
+	if unresolver, ok := __gen_s.service.(_gen_ipc.Unresolver); ok {
 		return unresolver.UnresolveStep(call)
 	}
 	if call.Server() == nil {
@@ -185,38 +208,21 @@ func (__gen_s *ServerStubTrigonometry) Cosine(call _gen_ipc.ServerCall, angle fl
 	return
 }
 
-func GetTrigonometryMethodTags(method string) []interface{} {
-	switch method {
-	case "Sine":
-		return []interface{}{}
-	case "Cosine":
-		return []interface{}{}
-	default:
-		return nil
-	}
-}
-
 // AdvancedMath is an interface for more advanced math than arith.  It embeds
 // interfaces defined both in the same file and in an external package; and in
 // turn it is embedded by arith.Calculator (which is in the same package but
 // different file) to verify that embedding works in all these scenarios.
 // AdvancedMath is the interface the client binds and uses.
-// AdvancedMath_InternalNoTagGetter is the interface without the TagGetter
-// and UnresolveStep methods (both framework-added, rathern than user-defined),
-// to enable embedding without method collisions.  Not to be used directly by
-// clients.
-type AdvancedMath_InternalNoTagGetter interface {
-
+// AdvancedMath_ExcludingUniversal is the interface without internal framework-added methods
+// to enable embedding without method collisions.  Not to be used directly by clients.
+type AdvancedMath_ExcludingUniversal interface {
 	// Trigonometry is an interface that specifies a couple trigonometric functions.
-	Trigonometry_InternalNoTagGetter
-	exp.Exp_InternalNoTagGetter
+	Trigonometry_ExcludingUniversal
+	exp.Exp_ExcludingUniversal
 }
 type AdvancedMath interface {
-	_gen_vdl.TagGetter
-	// UnresolveStep returns the names for the remote service, rooted at the
-	// service's immediate namespace ancestor.
-	UnresolveStep(opts ..._gen_ipc.ClientCallOpt) ([]string, error)
-	AdvancedMath_InternalNoTagGetter
+	_gen_ipc.UniversalServiceMethods
+	AdvancedMath_ExcludingUniversal
 }
 
 // AdvancedMathService is the interface the server implements.
@@ -250,8 +256,8 @@ func BindAdvancedMath(name string, opts ..._gen_ipc.BindOpt) (AdvancedMath, erro
 		return nil, _gen_vdl.ErrTooManyOptionsToBind
 	}
 	stub := &clientStubAdvancedMath{client: client, name: name}
-	stub.Trigonometry_InternalNoTagGetter, _ = BindTrigonometry(name, client)
-	stub.Exp_InternalNoTagGetter, _ = exp.BindExp(name, client)
+	stub.Trigonometry_ExcludingUniversal, _ = BindTrigonometry(name, client)
+	stub.Exp_ExcludingUniversal, _ = exp.BindExp(name, client)
 
 	return stub, nil
 }
@@ -270,20 +276,38 @@ func NewServerAdvancedMath(server AdvancedMathService) interface{} {
 
 // clientStubAdvancedMath implements AdvancedMath.
 type clientStubAdvancedMath struct {
-	Trigonometry_InternalNoTagGetter
-	exp.Exp_InternalNoTagGetter
+	Trigonometry_ExcludingUniversal
+	exp.Exp_ExcludingUniversal
 
 	client _gen_ipc.Client
 	name   string
 }
 
-func (c *clientStubAdvancedMath) GetMethodTags(method string) []interface{} {
-	return GetAdvancedMathMethodTags(method)
+func (__gen_c *clientStubAdvancedMath) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
+	var call _gen_ipc.ClientCall
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
 }
 
-func (c *clientStubAdvancedMath) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
+func (__gen_c *clientStubAdvancedMath) Signature(opts ..._gen_ipc.ClientCallOpt) (reply _gen_ipc.ServiceSignature, err error) {
 	var call _gen_ipc.ClientCall
-	if call, err = c.client.StartCall(c.name, "UnresolveStep", nil, opts...); err != nil {
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "Signature", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubAdvancedMath) GetMethodTags(method string, opts ..._gen_ipc.ClientCallOpt) (reply []interface{}, err error) {
+	var call _gen_ipc.ClientCall
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -302,17 +326,26 @@ type ServerStubAdvancedMath struct {
 	service AdvancedMathService
 }
 
-func (s *ServerStubAdvancedMath) GetMethodTags(method string) []interface{} {
-	return GetAdvancedMathMethodTags(method)
+func (__gen_s *ServerStubAdvancedMath) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
+	// TODO(bprosnitz) GetMethodTags() will be replaces with Signature().
+	// Note: This exhibits some weird behavior like returning a nil error if the method isn't found.
+	// This will change when it is replaced with Signature().
+	if resp, err := __gen_s.ServerStubTrigonometry.GetMethodTags(call, method); resp != nil || err != nil {
+		return resp, err
+	}
+	if resp, err := __gen_s.ServerStubExp.GetMethodTags(call, method); resp != nil || err != nil {
+		return resp, err
+	}
+	return nil, nil
 }
 
-func (s *ServerStubAdvancedMath) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
+func (__gen_s *ServerStubAdvancedMath) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
 	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
 
 	result.TypeDefs = []_gen_vdl.Any{}
 	var ss _gen_ipc.ServiceSignature
 	var firstAdded int
-	ss, _ = s.ServerStubTrigonometry.Signature(call)
+	ss, _ = __gen_s.ServerStubTrigonometry.Signature(call)
 	firstAdded = len(result.TypeDefs)
 	for k, v := range ss.Methods {
 		for i, _ := range v.InArgs {
@@ -364,7 +397,7 @@ func (s *ServerStubAdvancedMath) Signature(call _gen_ipc.ServerCall) (_gen_ipc.S
 		}
 		result.TypeDefs = append(result.TypeDefs, d)
 	}
-	ss, _ = s.ServerStubExp.Signature(call)
+	ss, _ = __gen_s.ServerStubExp.Signature(call)
 	firstAdded = len(result.TypeDefs)
 	for k, v := range ss.Methods {
 		for i, _ := range v.InArgs {
@@ -420,8 +453,8 @@ func (s *ServerStubAdvancedMath) Signature(call _gen_ipc.ServerCall) (_gen_ipc.S
 	return result, nil
 }
 
-func (s *ServerStubAdvancedMath) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
-	if unresolver, ok := s.service.(_gen_ipc.Unresolver); ok {
+func (__gen_s *ServerStubAdvancedMath) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
+	if unresolver, ok := __gen_s.service.(_gen_ipc.Unresolver); ok {
 		return unresolver.UnresolveStep(call)
 	}
 	if call.Server() == nil {
@@ -436,14 +469,4 @@ func (s *ServerStubAdvancedMath) UnresolveStep(call _gen_ipc.ServerCall) (reply 
 		reply[i] = _gen_naming.Join(p, call.Name())
 	}
 	return
-}
-
-func GetAdvancedMathMethodTags(method string) []interface{} {
-	if resp := GetTrigonometryMethodTags(method); resp != nil {
-		return resp
-	}
-	if resp := exp.GetExpMethodTags(method); resp != nil {
-		return resp
-	}
-	return nil
 }

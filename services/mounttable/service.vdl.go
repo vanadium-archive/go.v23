@@ -33,21 +33,15 @@ type MountEntry struct {
 }
 
 // Globable is the interface the client binds and uses.
-// Globable_InternalNoTagGetter is the interface without the TagGetter
-// and UnresolveStep methods (both framework-added, rathern than user-defined),
-// to enable embedding without method collisions.  Not to be used directly by
-// clients.
-type Globable_InternalNoTagGetter interface {
-
+// Globable_ExcludingUniversal is the interface without internal framework-added methods
+// to enable embedding without method collisions.  Not to be used directly by clients.
+type Globable_ExcludingUniversal interface {
 	// Glob returns all matching entries at the given server.
 	Glob(pattern string, opts ..._gen_ipc.ClientCallOpt) (reply GlobableGlobStream, err error)
 }
 type Globable interface {
-	_gen_vdl.TagGetter
-	// UnresolveStep returns the names for the remote service, rooted at the
-	// service's immediate namespace ancestor.
-	UnresolveStep(opts ..._gen_ipc.ClientCallOpt) ([]string, error)
-	Globable_InternalNoTagGetter
+	_gen_ipc.UniversalServiceMethods
+	Globable_ExcludingUniversal
 }
 
 // GlobableService is the interface the server implements.
@@ -154,10 +148,6 @@ type clientStubGlobable struct {
 	name   string
 }
 
-func (c *clientStubGlobable) GetMethodTags(method string) []interface{} {
-	return GetGlobableMethodTags(method)
-}
-
 func (__gen_c *clientStubGlobable) Glob(pattern string, opts ..._gen_ipc.ClientCallOpt) (reply GlobableGlobStream, err error) {
 	var call _gen_ipc.ClientCall
 	if call, err = __gen_c.client.StartCall(__gen_c.name, "Glob", []interface{}{pattern}, opts...); err != nil {
@@ -167,9 +157,31 @@ func (__gen_c *clientStubGlobable) Glob(pattern string, opts ..._gen_ipc.ClientC
 	return
 }
 
-func (c *clientStubGlobable) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
+func (__gen_c *clientStubGlobable) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
 	var call _gen_ipc.ClientCall
-	if call, err = c.client.StartCall(c.name, "UnresolveStep", nil, opts...); err != nil {
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubGlobable) Signature(opts ..._gen_ipc.ClientCallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+	var call _gen_ipc.ClientCall
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "Signature", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubGlobable) GetMethodTags(method string, opts ..._gen_ipc.ClientCallOpt) (reply []interface{}, err error) {
+	var call _gen_ipc.ClientCall
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -185,11 +197,19 @@ type ServerStubGlobable struct {
 	service GlobableService
 }
 
-func (s *ServerStubGlobable) GetMethodTags(method string) []interface{} {
-	return GetGlobableMethodTags(method)
+func (__gen_s *ServerStubGlobable) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
+	// TODO(bprosnitz) GetMethodTags() will be replaces with Signature().
+	// Note: This exhibits some weird behavior like returning a nil error if the method isn't found.
+	// This will change when it is replaced with Signature().
+	switch method {
+	case "Glob":
+		return []interface{}{security.Label(1)}, nil
+	default:
+		return nil, nil
+	}
 }
 
-func (s *ServerStubGlobable) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
+func (__gen_s *ServerStubGlobable) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
 	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
 	result.Methods["Glob"] = _gen_ipc.MethodSignature{
 		InArgs: []_gen_ipc.MethodArgument{
@@ -220,8 +240,8 @@ func (s *ServerStubGlobable) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Servi
 	return result, nil
 }
 
-func (s *ServerStubGlobable) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
-	if unresolver, ok := s.service.(_gen_ipc.Unresolver); ok {
+func (__gen_s *ServerStubGlobable) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
+	if unresolver, ok := __gen_s.service.(_gen_ipc.Unresolver); ok {
 		return unresolver.UnresolveStep(call)
 	}
 	if call.Server() == nil {
@@ -244,23 +264,12 @@ func (__gen_s *ServerStubGlobable) Glob(call _gen_ipc.ServerCall, pattern string
 	return
 }
 
-func GetGlobableMethodTags(method string) []interface{} {
-	switch method {
-	case "Glob":
-		return []interface{}{security.Label(1)}
-	default:
-		return nil
-	}
-}
-
 // MountTable defines the interface to talk to a mounttable.
 // MountTable is the interface the client binds and uses.
-// MountTable_InternalNoTagGetter is the interface without the TagGetter
-// and UnresolveStep methods (both framework-added, rathern than user-defined),
-// to enable embedding without method collisions.  Not to be used directly by
-// clients.
-type MountTable_InternalNoTagGetter interface {
-	Globable_InternalNoTagGetter
+// MountTable_ExcludingUniversal is the interface without internal framework-added methods
+// to enable embedding without method collisions.  Not to be used directly by clients.
+type MountTable_ExcludingUniversal interface {
+	Globable_ExcludingUniversal
 	// Mount Server (a global name) onto the receiver.
 	// Subsequent mounts add to the servers mounted there.  The multiple
 	// servers are considered equivalent and are meant solely for
@@ -280,11 +289,8 @@ type MountTable_InternalNoTagGetter interface {
 	ResolveStep(opts ..._gen_ipc.ClientCallOpt) (Servers []MountedServer, Suffix string, err error)
 }
 type MountTable interface {
-	_gen_vdl.TagGetter
-	// UnresolveStep returns the names for the remote service, rooted at the
-	// service's immediate namespace ancestor.
-	UnresolveStep(opts ..._gen_ipc.ClientCallOpt) ([]string, error)
-	MountTable_InternalNoTagGetter
+	_gen_ipc.UniversalServiceMethods
+	MountTable_ExcludingUniversal
 }
 
 // MountTableService is the interface the server implements.
@@ -332,7 +338,7 @@ func BindMountTable(name string, opts ..._gen_ipc.BindOpt) (MountTable, error) {
 		return nil, _gen_vdl.ErrTooManyOptionsToBind
 	}
 	stub := &clientStubMountTable{client: client, name: name}
-	stub.Globable_InternalNoTagGetter, _ = BindGlobable(name, client)
+	stub.Globable_ExcludingUniversal, _ = BindGlobable(name, client)
 
 	return stub, nil
 }
@@ -350,14 +356,10 @@ func NewServerMountTable(server MountTableService) interface{} {
 
 // clientStubMountTable implements MountTable.
 type clientStubMountTable struct {
-	Globable_InternalNoTagGetter
+	Globable_ExcludingUniversal
 
 	client _gen_ipc.Client
 	name   string
-}
-
-func (c *clientStubMountTable) GetMethodTags(method string) []interface{} {
-	return GetMountTableMethodTags(method)
 }
 
 func (__gen_c *clientStubMountTable) Mount(Server string, TTL uint32, opts ..._gen_ipc.ClientCallOpt) (err error) {
@@ -393,9 +395,31 @@ func (__gen_c *clientStubMountTable) ResolveStep(opts ..._gen_ipc.ClientCallOpt)
 	return
 }
 
-func (c *clientStubMountTable) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
+func (__gen_c *clientStubMountTable) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
 	var call _gen_ipc.ClientCall
-	if call, err = c.client.StartCall(c.name, "UnresolveStep", nil, opts...); err != nil {
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubMountTable) Signature(opts ..._gen_ipc.ClientCallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+	var call _gen_ipc.ClientCall
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "Signature", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubMountTable) GetMethodTags(method string, opts ..._gen_ipc.ClientCallOpt) (reply []interface{}, err error) {
+	var call _gen_ipc.ClientCall
+	if call, err = __gen_c.client.StartCall(__gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -413,11 +437,26 @@ type ServerStubMountTable struct {
 	service MountTableService
 }
 
-func (s *ServerStubMountTable) GetMethodTags(method string) []interface{} {
-	return GetMountTableMethodTags(method)
+func (__gen_s *ServerStubMountTable) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
+	// TODO(bprosnitz) GetMethodTags() will be replaces with Signature().
+	// Note: This exhibits some weird behavior like returning a nil error if the method isn't found.
+	// This will change when it is replaced with Signature().
+	if resp, err := __gen_s.ServerStubGlobable.GetMethodTags(call, method); resp != nil || err != nil {
+		return resp, err
+	}
+	switch method {
+	case "Mount":
+		return []interface{}{security.Label(2)}, nil
+	case "Unmount":
+		return []interface{}{security.Label(2)}, nil
+	case "ResolveStep":
+		return []interface{}{security.Label(1)}, nil
+	default:
+		return nil, nil
+	}
 }
 
-func (s *ServerStubMountTable) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
+func (__gen_s *ServerStubMountTable) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
 	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
 	result.Methods["Mount"] = _gen_ipc.MethodSignature{
 		InArgs: []_gen_ipc.MethodArgument{
@@ -455,7 +494,7 @@ func (s *ServerStubMountTable) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Ser
 		_gen_wiretype.SliceType{Elem: 0x42, Name: "", Tags: []string(nil)}}
 	var ss _gen_ipc.ServiceSignature
 	var firstAdded int
-	ss, _ = s.ServerStubGlobable.Signature(call)
+	ss, _ = __gen_s.ServerStubGlobable.Signature(call)
 	firstAdded = len(result.TypeDefs)
 	for k, v := range ss.Methods {
 		for i, _ := range v.InArgs {
@@ -511,8 +550,8 @@ func (s *ServerStubMountTable) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Ser
 	return result, nil
 }
 
-func (s *ServerStubMountTable) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
-	if unresolver, ok := s.service.(_gen_ipc.Unresolver); ok {
+func (__gen_s *ServerStubMountTable) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
+	if unresolver, ok := __gen_s.service.(_gen_ipc.Unresolver); ok {
 		return unresolver.UnresolveStep(call)
 	}
 	if call.Server() == nil {
@@ -542,20 +581,4 @@ func (__gen_s *ServerStubMountTable) Unmount(call _gen_ipc.ServerCall, Server st
 func (__gen_s *ServerStubMountTable) ResolveStep(call _gen_ipc.ServerCall) (Servers []MountedServer, Suffix string, err error) {
 	Servers, Suffix, err = __gen_s.service.ResolveStep(call)
 	return
-}
-
-func GetMountTableMethodTags(method string) []interface{} {
-	if resp := GetGlobableMethodTags(method); resp != nil {
-		return resp
-	}
-	switch method {
-	case "Mount":
-		return []interface{}{security.Label(2)}
-	case "Unmount":
-		return []interface{}{security.Label(2)}
-	case "ResolveStep":
-		return []interface{}{security.Label(1)}
-	default:
-		return nil
-	}
 }

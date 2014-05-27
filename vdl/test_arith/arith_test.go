@@ -185,7 +185,11 @@ func TestCalculator(t *testing.T) {
 		{"Off", []interface{}{"offtag"}},
 	}
 	for _, tagTest := range tagTests {
-		if tags := serverStub.GetMethodTags(tagTest.method); !reflect.DeepEqual(tags, tagTest.expected) {
+		tags, err := serverStub.GetMethodTags(nil, tagTest.method)
+		if err != nil {
+			t.Errorf("Error calling GetMethodTags(%q): ", tagTest.method, err)
+		}
+		if !reflect.DeepEqual(tags, tagTest.expected) {
 			t.Errorf("GetMethodTags(%q): got %v but expected %v", tagTest.method, tags, tagTest.expected)
 		}
 	}
@@ -330,6 +334,8 @@ func TestCalculator(t *testing.T) {
 }
 
 func TestArith(t *testing.T) {
+	// TODO(bprosnitz) Split this test up -- it is quite long and hard to debug.
+
 	// We try a few types of dispatchers on the server side, to verify that
 	// anything dispatching to Arith or an interface embedding Arith (like
 	// Calculator) works for a client looking to talk to an Arith service.
@@ -452,21 +458,33 @@ func TestArith(t *testing.T) {
 
 		clientStub := arith.(*clientStubArith)
 
-		tags := clientStub.GetMethodTags("GenError")
+		tags, err := clientStub.GetMethodTags("GenError")
 		expectedTags := []interface{}{"foo", "barz", "hello", int32(129), uint64(36)}
+		if err != nil {
+			t.Error(`Error calling GetMethodTags("GenError"): `, err)
+		}
 		if !reflect.DeepEqual(tags, expectedTags) {
 			t.Errorf("GetMethodTags: got %v but expected %v", tags, expectedTags)
+		}
+
+		if _, err := clientStub.Signature(nil); err != nil {
+			// TODO(bprosnitz) Check that the signature is the expected signature.
+			t.Errorf("Failed to get signature from client: %v", err)
 		}
 
 		// Server-side stubs
 
 		serverStub := NewServerArith(&serverArith{}).(*ServerStubArith)
 
-		tags = serverStub.GetMethodTags("GenError")
+		tags, err = serverStub.GetMethodTags(nil, "GenError")
 		expectedTags = []interface{}{"foo", "barz", "hello", int32(129), uint64(36)}
+		if err != nil {
+			t.Error(`Error calling GetMethodTags("GenError"): `, err)
+		}
 		if !reflect.DeepEqual(tags, expectedTags) {
 			t.Errorf("GetMethodTags: got %v but expected %v", tags, expectedTags)
 		}
+
 		signature, err := serverStub.Signature(nil)
 		expectedSignature := map[string]ipc.MethodSignature{
 			"Add": ipc.MethodSignature{

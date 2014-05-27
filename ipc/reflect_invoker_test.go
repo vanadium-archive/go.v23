@@ -12,6 +12,7 @@ import (
 	vtest "veyron/lib/testutil"
 
 	"veyron2/security"
+	"veyron2/verror"
 )
 
 // constServerCall implements ipc.ServerCall and is easily comparable in tests.
@@ -74,20 +75,20 @@ func (o *tags) Monitoring(c ServerCall, i int) (int, error)              { o.cal
 func (o *tags) Debug(c ServerCall, i int, s string) (int, string, error) { o.call = c; return i, s, nil }
 func (o *tags) Error(c ServerCall) error                                 { o.call = c; return errApp }
 
-func (o *tags) GetMethodTags(method string) []interface{} {
+func (o *tags) GetMethodTags(c ServerCall, method string) ([]interface{}, error) {
 	switch method {
 	case "Admin":
-		return []interface{}{security.AdminLabel}
+		return []interface{}{security.AdminLabel}, nil
 	case "Read":
-		return []interface{}{security.ReadLabel}
+		return []interface{}{security.ReadLabel}, nil
 	case "Write":
-		return []interface{}{security.WriteLabel}
+		return []interface{}{security.WriteLabel}, nil
 	case "Monitoring":
-		return []interface{}{security.MonitoringLabel}
+		return []interface{}{security.MonitoringLabel}, nil
 	case "Debug":
-		return []interface{}{security.DebugLabel}
+		return []interface{}{security.DebugLabel}, nil
 	default:
-		return []interface{}{}
+		return []interface{}{}, nil
 	}
 }
 
@@ -228,9 +229,10 @@ func TestReflectInvokerErrors(t *testing.T) {
 		prepareErr error
 		invokeErr  error
 	}
+	expectedError := verror.NotFoundf("ipc: unknown method 'UnknownMethod'")
 	tests := []testcase{
-		{&notags{}, "UnknownMethod", v{}, errUnknownMethod, errUnknownMethod},
-		{&tags{}, "UnknownMethod", v{}, errUnknownMethod, errUnknownMethod},
+		{&notags{}, "UnknownMethod", v{}, expectedError, expectedError},
+		{&tags{}, "UnknownMethod", v{}, expectedError, expectedError},
 	}
 	name := func(t testcase) string {
 		return fmt.Sprintf("%T.%s()", t.obj, t.method)
@@ -273,7 +275,7 @@ func TestTypeCheckMethods(t *testing.T) {
 			"Monitoring":     nil,
 			"Debug":          nil,
 			"Error":          nil,
-			"GetMethodTags":  ErrInServerCall,
+			"GetMethodTags":  nil,
 			"LastServerCall": ErrNumInArgs,
 		}},
 		{nocompat{}, map[string]error{
