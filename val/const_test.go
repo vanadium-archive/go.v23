@@ -27,7 +27,8 @@ var (
 	uint32TypeA    = NamedType("Uint32A", Uint32Type)
 	float32TypeA   = NamedType("Float32A", Float32Type)
 	complex64TypeA = NamedType("Complex64A", Complex64Type)
-	structTypeA    = StructType("StructA", StructField{"A", Int32Type})
+	structType     = StructType(StructField{"A", Int32Type})
+	structTypeA    = NamedType("StructA", structType)
 
 	bi0              = new(big.Int)
 	bi1, bi2, bi3    = big.NewInt(1), big.NewInt(2), big.NewInt(3)
@@ -136,7 +137,7 @@ func TestConstToValueOK(t *testing.T) {
 		uintValue(Uint32Type, 123), uintValue(uint32TypeA, 123),
 		floatValue(Float32Type, 123), floatValue(float32TypeA, 123),
 		complexValue(Complex64Type, 123), complexValue(complex64TypeA, 123),
-		structValue(structTypeA, 123),
+		structValue(structType, 123), structValue(structTypeA, 123),
 	}
 	for _, test := range tests {
 		c := ConstFromValue(test)
@@ -248,27 +249,29 @@ func TestConstConvertError(t *testing.T) {
 		{BooleanConst(true),
 			ty{StringType, stringTypeA, bytesType, bytesTypeA, bytes3Type, bytes3TypeA,
 				Int32Type, int32TypeA, Uint32Type, uint32TypeA,
-				Float32Type, float32TypeA, Complex64Type, complex64TypeA, structTypeA},
+				Float32Type, float32TypeA, Complex64Type, complex64TypeA,
+				structType, structTypeA},
 			cantConvert},
 		{StringConst("abc"),
 			ty{BoolType, boolTypeA,
 				Int32Type, int32TypeA, Uint32Type, uint32TypeA,
-				Float32Type, float32TypeA, Complex64Type, complex64TypeA, structTypeA},
+				Float32Type, float32TypeA, Complex64Type, complex64TypeA,
+				structType, structTypeA},
 			cantConvert},
 		{IntegerConst(bi1),
 			ty{BoolType, boolTypeA,
 				StringType, stringTypeA, bytesType, bytesTypeA, bytes3Type, bytes3TypeA,
-				structTypeA},
+				structType, structTypeA},
 			cantConvert},
 		{RationalConst(br1),
 			ty{BoolType, boolTypeA,
 				StringType, stringTypeA, bytesType, bytesTypeA, bytes3Type, bytes3TypeA,
-				structTypeA},
+				structType, structTypeA},
 			cantConvert},
 		{ComplexConst(br1, br0),
 			ty{BoolType, boolTypeA,
 				StringType, stringTypeA, bytesType, bytesTypeA, bytes3Type, bytes3TypeA,
-				structTypeA},
+				structType, structTypeA},
 			cantConvert},
 		// Bounds tests
 		{IntegerConst(bi_neg1), ty{Uint32Type, uint32TypeA}, overflows},
@@ -582,23 +585,25 @@ func TestConstBinaryOpError(t *testing.T) {
 				IntegerConst(bi1), intConst(int32TypeA, 1), uintConst(uint32TypeA, 1),
 				RationalConst(br1), floatConst(float32TypeA, 1),
 				ComplexConst(br1, br1), complexConst(complex64TypeA, 1),
-				structConst(structTypeA, 1)},
+				structConst(structType, 1), structConst(structTypeA, 1)},
 			notSupported},
 		{bo{LT, LE, GT, GE},
 			c{BooleanConst(true), boolConst(boolTypeA, false),
 				ComplexConst(br1, br1), complexConst(complex64TypeA, 1),
-				structConst(structTypeA, 1)},
+				structConst(structType, 1), structConst(structTypeA, 1)},
 			notSupported},
-		{bo{Add}, c{structConst(structTypeA, 1)}, notSupported},
+		{bo{Add},
+			c{structConst(structType, 1), structConst(structTypeA, 1)},
+			notSupported},
 		{bo{Sub, Mul, Div},
 			c{StringConst("abc"), stringConst(stringTypeA, "abc"),
 				bytesConst(bytesTypeA, "abc"), bytes3Const(bytes3TypeA, "abc"),
-				structConst(structTypeA, 1)},
+				structConst(structType, 1), structConst(structTypeA, 1)},
 			notSupported},
 		{bo{Mod, BitAnd, BitOr, BitXor, LeftShift, RightShift},
 			c{StringConst("abc"), stringConst(stringTypeA, "abc"),
 				bytesConst(bytesTypeA, "abc"), bytes3Const(bytes3TypeA, "abc"),
-				structConst(structTypeA, 1)},
+				structConst(structType, 1), structConst(structTypeA, 1)},
 			cantConvert},
 		// Bounds checking
 		{bo{Add}, c{uintConst(uint32TypeA, 1<<31)}, overflows},

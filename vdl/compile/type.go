@@ -14,15 +14,13 @@ type TypeDef struct {
 	Type    *val.Type // type of this type definition
 
 	// BaseType is the type that Type is based on.  The BaseType may be named or
-	// unnamed.  The base type is nil if it corresponds to an enum, struct or
-	// oneof literal, simply because val.Type doesn't allow these to be unnamed.
-	// E.g.
+	// unnamed.  E.g.
 	//                                 BaseType
 	//   type Bool    bool;            bool
 	//   type Bool2   Bool;            Bool
 	//   type List    []int32;         []int32
 	//   type List2   List;            List
-	//   type Struct  struct{A bool};  nil
+	//   type Struct  struct{A bool};  struct{A bool}
 	//   type Struct2 Struct;          Struct
 	BaseType *val.Type
 
@@ -78,8 +76,8 @@ type typeDefiner struct {
 type typeDefBuilder struct {
 	def     *TypeDef
 	ptype   parse.Type
-	pending val.PendingType // pending type that we're building
-	base    val.PendingType // base type that pending is based on, may be nil
+	pending val.PendingNamed // named type that's being built
+	base    val.PendingType  // base type that pending is based on
 }
 
 // Declare creates builders for each type defined in the package.
@@ -107,11 +105,9 @@ func (td typeDefiner) makeTypeDefBuilder(file *File, pdef *parse.TypeDef) *typeD
 	// We use the qualified name to actually name the type, to ensure types
 	// defined in separate packages are hash-consed separately.
 	qname := file.Package.QualifiedName(pdef.Name)
+	ret.pending = td.tbuilder.Named(qname)
 	switch pt := pdef.Type.(type) {
-	case *parse.TypeNamed, *parse.TypeArray, *parse.TypeList, *parse.TypeSet, *parse.TypeMap:
-		ret.pending = td.tbuilder.Named(qname)
 	case *parse.TypeEnum:
-		ret.pending = td.tbuilder.Enum(qname)
 		ret.def.LabelDoc = make([]string, len(pt.Labels))
 		ret.def.LabelDocSuffix = make([]string, len(pt.Labels))
 		for index, plabel := range pt.Labels {
@@ -119,17 +115,12 @@ func (td typeDefiner) makeTypeDefBuilder(file *File, pdef *parse.TypeDef) *typeD
 			ret.def.LabelDocSuffix[index] = plabel.DocSuffix
 		}
 	case *parse.TypeStruct:
-		ret.pending = td.tbuilder.Struct(qname)
 		ret.def.FieldDoc = make([]string, len(pt.Fields))
 		ret.def.FieldDocSuffix = make([]string, len(pt.Fields))
 		for index, pfield := range pt.Fields {
 			ret.def.FieldDoc[index] = pfield.Doc
 			ret.def.FieldDocSuffix[index] = pfield.DocSuffix
 		}
-	case *parse.TypeOneOf:
-		ret.pending = td.tbuilder.OneOf(qname)
-	default:
-		td.env.errorf(file, pt.Pos(), "type %s invalid (type definition can't be based on %s type)", pdef.Name, pt.Kind())
 	}
 	return ret
 }
@@ -140,45 +131,22 @@ func (td typeDefiner) makeTypeDefBuilder(file *File, pdef *parse.TypeDef) *typeD
 func (td typeDefiner) Define() {
 	for _, b := range td.builders {
 		def, file := b.def, b.def.File
-		switch pt := b.ptype.(type) {
-		case *parse.TypeNamed, *parse.TypeArray, *parse.TypeList, *parse.TypeSet, *parse.TypeMap:
-			if base := compilePendingType(pt, file, td.env, td.tbuilder, td.builders); base != nil {
-				switch tbase := base.(type) {
-				case *val.Type:
-					if tbase == ErrorType {
-						td.env.errorf(file, def.Pos, "error cannot be renamed")
-						continue // keep going to catch more errors
-					}
-					def.BaseType = tbase
-				case val.PendingType:
-					b.base = tbase
-				default:
-					panic(fmt.Errorf("vdl: typeDefiner.Define unhandled TypeOrPending %T %v", tbase, tbase))
-				}
-				b.pending.(val.PendingNamed).AssignBase(base)
+		base := compileDefinedType(b.ptype, file, td.env, td.tbuilder, td.builders)
+		switch tbase := base.(type) {
+		case nil:
+			continue // keep going to catch  more errors
+		case *val.Type:
+			if tbase == ErrorType {
+				td.env.errorf(file, def.Pos, "error cannot be renamed")
+				continue // keep going to catch more errors
 			}
-		case *parse.TypeEnum:
-			td.env.experimentalOnly(file, def.Pos, "enum not supported")
-			for _, plabel := range pt.Labels {
-				b.pending.(val.PendingEnum).AppendLabel(plabel.Name)
-			}
-		case *parse.TypeStruct:
-			for _, pfield := range pt.Fields {
-				if ftype := compilePendingType(pfield.Type, file, td.env, td.tbuilder, td.builders); ftype != nil {
-					b.pending.(val.PendingStruct).AppendField(pfield.Name, ftype)
-				}
-			}
-		case *parse.TypeOneOf:
-			td.env.experimentalOnly(file, def.Pos, "oneof not supported")
-			for _, ptype := range pt.Types {
-				if otype := compilePendingType(ptype, file, td.env, td.tbuilder, td.builders); otype != nil {
-					b.pending.(val.PendingOneOf).AppendType(otype)
-				}
-			}
+			def.BaseType = tbase
+		case val.PendingType:
+			b.base = tbase
 		default:
-			// This type switch must mirror the types in makeTypeDefBuilder.
-			panic(fmt.Errorf("vdl: unhandled parse.Type %T %#v", pt, pt))
+			panic(fmt.Errorf("vdl: typeDefiner.Define unhandled TypeOrPending %T %v", tbase, tbase))
 		}
+		b.pending.AssignBase(base)
 	}
 }
 
@@ -186,7 +154,7 @@ func (td typeDefiner) Define() {
 // referenced by ptype must already be defined.
 func compileType(ptype parse.Type, file *File, env *Env) *val.Type {
 	var tbuilder val.TypeBuilder
-	typeOrPending := compilePendingType(ptype, file, env, &tbuilder, nil)
+	typeOrPending := compileLiteralType(ptype, file, env, &tbuilder, nil)
 	tbuilder.Build()
 	switch top := typeOrPending.(type) {
 	case nil:
@@ -205,10 +173,46 @@ func compileType(ptype parse.Type, file *File, env *Env) *val.Type {
 	}
 }
 
-// compilePendingType returns the *val.Type corresponding to ptype if it is
-// already defined, or a PendingType from builders if it is currently being
-// built.
-func compilePendingType(ptype parse.Type, file *File, env *Env, tbuilder *val.TypeBuilder, builders map[string]*typeDefBuilder) val.TypeOrPending {
+// compileDefinedType compiles ptype.  It can handle definitions based on enum,
+// struct and oneof, as well as definitions based on any literal type.
+func compileDefinedType(ptype parse.Type, file *File, env *Env, tbuilder *val.TypeBuilder, builders map[string]*typeDefBuilder) val.TypeOrPending {
+	switch pt := ptype.(type) {
+	case *parse.TypeEnum:
+		env.experimentalOnly(file, pt.Pos(), "enum not supported")
+		enum := tbuilder.Enum()
+		for _, plabel := range pt.Labels {
+			enum.AppendLabel(plabel.Name)
+		}
+		return enum
+	case *parse.TypeStruct:
+		st := tbuilder.Struct()
+		for _, pfield := range pt.Fields {
+			ftype := compileLiteralType(pfield.Type, file, env, tbuilder, builders)
+			if ftype == nil {
+				return nil
+			}
+			st.AppendField(pfield.Name, ftype)
+		}
+		return st
+	case *parse.TypeOneOf:
+		env.experimentalOnly(file, pt.Pos(), "oneof not supported")
+		oneof := tbuilder.OneOf()
+		for _, ptype := range pt.Types {
+			otype := compileLiteralType(ptype, file, env, tbuilder, builders)
+			if otype == nil {
+				return nil
+			}
+			oneof.AppendType(otype)
+		}
+		return oneof
+	}
+	return compileLiteralType(ptype, file, env, tbuilder, builders)
+}
+
+// compileLiteralType compiles ptype.  It can handle any literal type.  Note
+// that enum, struct and oneof are required to be defined and named, and aren't
+// allowed as regular literal types.
+func compileLiteralType(ptype parse.Type, file *File, env *Env, tbuilder *val.TypeBuilder, builders map[string]*typeDefBuilder) val.TypeOrPending {
 	switch pt := ptype.(type) {
 	case *parse.TypeNamed:
 		if def := env.ResolveType(pt.Name, file); def != nil {
@@ -219,23 +223,23 @@ func compilePendingType(ptype parse.Type, file *File, env *Env, tbuilder *val.Ty
 		}
 		env.errorf(file, pt.Pos(), "type %s undefined", pt.Name)
 	case *parse.TypeArray:
-		elem := compilePendingType(pt.Elem, file, env, tbuilder, builders)
+		elem := compileLiteralType(pt.Elem, file, env, tbuilder, builders)
 		if elem != nil {
 			return tbuilder.Array().AssignLen(pt.Len).AssignElem(elem)
 		}
 	case *parse.TypeList:
-		elem := compilePendingType(pt.Elem, file, env, tbuilder, builders)
+		elem := compileLiteralType(pt.Elem, file, env, tbuilder, builders)
 		if elem != nil {
 			return tbuilder.List().AssignElem(elem)
 		}
 	case *parse.TypeSet:
-		key := compilePendingType(pt.Key, file, env, tbuilder, builders)
+		key := compileLiteralType(pt.Key, file, env, tbuilder, builders)
 		if key != nil {
 			return tbuilder.Set().AssignKey(key)
 		}
 	case *parse.TypeMap:
-		key := compilePendingType(pt.Key, file, env, tbuilder, builders)
-		elem := compilePendingType(pt.Elem, file, env, tbuilder, builders)
+		key := compileLiteralType(pt.Key, file, env, tbuilder, builders)
+		elem := compileLiteralType(pt.Elem, file, env, tbuilder, builders)
 		if key != nil && elem != nil {
 			return tbuilder.Map().AssignKey(key).AssignElem(elem)
 		}
@@ -293,11 +297,10 @@ var (
 
 	// Built-in types defined by the compiler.
 	// TODO(toddw): Represent error in a built-in VDL file.
-	ErrorType = val.StructType(
-		"error",
+	ErrorType = val.NamedType("error", val.StructType(
 		val.StructField{"Id", val.StringType},
 		val.StructField{"Msg", val.StringType},
-	)
+	))
 )
 
 func init() {

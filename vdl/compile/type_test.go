@@ -57,12 +57,9 @@ func matchTypeRes(t *testing.T, tname string, tpkg typePkg, tdefs []*compile.Typ
 	// Look for a TypeDef called "Res" to compare our expected results.
 	for _, tdef := range tdefs {
 		if tdef.Name == "Res" {
-			base, res, resname := tpkg.ExpectBase, tpkg.ExpectBase, tpkg.Name+".Res"
-			if res.Name() != resname {
-				res = val.NamedType(resname, base)
-			} else {
-				base = nil
-			}
+			base := tpkg.ExpectBase
+			resname := tpkg.Name + ".Res"
+			res := val.NamedType(resname, base)
 			if got, want := tdef.Type, res; got != want {
 				t.Errorf("%s type got %s, want %s", tname, got, want)
 			}
@@ -115,13 +112,13 @@ var typeTests = []typeTest{
 	{"Error", tp{{"a", `type Res error`, nil, "error cannot be renamed"}}},
 
 	// Test composite types.
-	{"Enum", tp{{"a", `type Res enum{A;B;C}`, val.EnumType("a.Res", "A", "B", "C"), exp}}},
+	{"Enum", tp{{"a", `type Res enum{A;B;C}`, val.EnumType("A", "B", "C"), exp}}},
 	{"Array", tp{{"a", `type Res [2]bool`, val.ArrayType(2, val.BoolType), ""}}},
 	{"List", tp{{"a", `type Res []int32`, val.ListType(val.Int32Type), ""}}},
 	{"Set", tp{{"a", `type Res set[int32]`, val.SetType(val.Int32Type), ""}}},
 	{"Map", tp{{"a", `type Res map[int32]string`, val.MapType(val.Int32Type, val.StringType), ""}}},
-	{"Struct", tp{{"a", `type Res struct{A int32;B string}`, val.StructType("a.Res", []val.StructField{{"A", val.Int32Type}, {"B", val.StringType}}...), ""}}},
-	{"OneOf", tp{{"a", `type Res oneof{bool;int32;string}`, val.OneOfType("a.Res", val.BoolType, val.Int32Type, val.StringType), exp}}},
+	{"Struct", tp{{"a", `type Res struct{A int32;B string}`, val.StructType([]val.StructField{{"A", val.Int32Type}, {"B", val.StringType}}...), ""}}},
+	{"OneOf", tp{{"a", `type Res oneof{bool;int32;string}`, val.OneOfType(val.BoolType, val.Int32Type, val.StringType), exp}}},
 
 	// Test named types based on named types.
 	{"NBool", tp{{"a", `type Res X;type X bool`, namedX(val.BoolType), ""}}},
@@ -138,13 +135,13 @@ var typeTests = []typeTest{
 	{"NComplex128", tp{{"a", `type Res X;type X complex128`, namedX(val.Complex128Type), ""}}},
 	{"NString", tp{{"a", `type Res X;type X string`, namedX(val.StringType), ""}}},
 	{"NBytes", tp{{"a", `type Res X;type X []byte`, namedX(bytesType), ""}}},
-	{"NEnum", tp{{"a", `type Res X;type X enum{A;B;C}`, namedX(val.EnumType("a.Res", "A", "B", "C")), exp}}},
+	{"NEnum", tp{{"a", `type Res X;type X enum{A;B;C}`, namedX(val.EnumType("A", "B", "C")), exp}}},
 	{"NArray", tp{{"a", `type Res X;type X [2]bool`, namedX(val.ArrayType(2, val.BoolType)), ""}}},
 	{"NList", tp{{"a", `type Res X;type X []int32`, namedX(val.ListType(val.Int32Type)), ""}}},
 	{"NSet", tp{{"a", `type Res X;type X set[int32]`, namedX(val.SetType(val.Int32Type)), ""}}},
 	{"NMap", tp{{"a", `type Res X;type X map[int32]string`, namedX(val.MapType(val.Int32Type, val.StringType)), ""}}},
-	{"NStruct", tp{{"a", `type Res X;type X struct{A int32;B string}`, namedX(val.StructType("a.Res", []val.StructField{{"A", val.Int32Type}, {"B", val.StringType}}...)), ""}}},
-	{"NOneOf", tp{{"a", `type Res X; type X oneof{bool;int32;string}`, namedX(val.OneOfType("a.Res", val.BoolType, val.Int32Type, val.StringType)), exp}}},
+	{"NStruct", tp{{"a", `type Res X;type X struct{A int32;B string}`, namedX(val.StructType([]val.StructField{{"A", val.Int32Type}, {"B", val.StringType}}...)), ""}}},
+	{"NOneOf", tp{{"a", `type Res X; type X oneof{bool;int32;string}`, namedX(val.OneOfType(val.BoolType, val.Int32Type, val.StringType)), exp}}},
 
 	// Test multi-package types
 	{"MultiPkgSameTypeName", tp{
@@ -165,5 +162,7 @@ var typeTests = []typeTest{
 	{"DupDiff", tp{{"a", `type Res bool; type Res int32`, nil, "type Res redefined"}}},
 	{"InvalidName", tp{{"a", `type _Res bool`, nil, "type _Res invalid name"}}},
 	{"Undefined", tp{{"a", `type Res foo`, nil, "type foo undefined"}}},
+	{"UnnamedEnum", tp{{"a", `type Res []enum{A;B;C}`, nil, "unnamed enum type invalid"}}},
 	{"UnnamedStruct", tp{{"a", `type Res []struct{A int32}`, nil, "unnamed struct type invalid"}}},
+	{"UnnamedOneOf", tp{{"a", `type Res []oneof{bool;int32;string}`, nil, "unnamed oneof type invalid"}}},
 }

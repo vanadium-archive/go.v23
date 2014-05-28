@@ -250,10 +250,8 @@ func typeGo(data goData, t *val.Type) string {
 // typeDefGo prints the type definition for a type.
 func typeDefGo(data goData, def *compile.TypeDef) string {
 	s := fmt.Sprintf("%stype %s ", def.Doc, def.Name)
-	switch base, t := def.BaseType, def.Type; {
-	case base != nil:
-		s += typeGo(data, base)
-	case t.Kind() == val.Enum:
+	switch t := def.Type; t.Kind() {
+	case val.Enum:
 		// We turn the VDL:
 		//   type X enum{A;B}
 		// into Go:
@@ -272,7 +270,7 @@ func typeDefGo(data goData, def *compile.TypeDef) string {
 			s += def.LabelDocSuffix[x]
 		}
 		return s + "\n)"
-	case t.Kind() == val.Struct:
+	case val.Struct:
 		s += "struct {"
 		for x := 0; x < t.NumField(); x++ {
 			f := t.Field(x)
@@ -280,14 +278,14 @@ func typeDefGo(data goData, def *compile.TypeDef) string {
 			s += typeGo(data, f.Type) + def.FieldDocSuffix[x]
 		}
 		s += "\n}"
-	case t.Kind() == val.OneOf:
+	case val.OneOf:
 		// We turn the VDL:
 		//   type X oneof{bool;string}
 		// into Go:
 		//   type X interface{}
 		s += "interface{}"
 	default:
-		panic(fmt.Errorf("vdl: typeDefGo unhandled type %v %v", t.Kind(), t))
+		s += typeGo(data, def.BaseType)
 	}
 	return s + def.DocSuffix
 }

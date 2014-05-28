@@ -10,7 +10,6 @@ import (
 
 var (
 	errNameNonEmpty   = errors.New("any and typeval cannot be renamed")
-	errNameEmpty      = errors.New("oneof, enum and struct must be named")
 	errNoLabels       = errors.New("no enum labels")
 	errLabelEmpty     = errors.New("empty enum label")
 	errHasLabels      = errors.New("labels only valid for enum")
@@ -255,8 +254,8 @@ func (b *TypeBuilder) add(t *Type) *pending {
 }
 
 // Enum returns PendingEnum, used to describe an Enum type.
-func (b *TypeBuilder) Enum(name string) PendingEnum {
-	return pendingEnum{b.add(&Type{kind: Enum, name: name})}
+func (b *TypeBuilder) Enum() PendingEnum {
+	return pendingEnum{b.add(&Type{kind: Enum})}
 }
 
 // Array returns PendingArray, used to describe an Array type.
@@ -280,13 +279,13 @@ func (b *TypeBuilder) Map() PendingMap {
 }
 
 // Struct returns PendingStruct, used to describe a Struct type.
-func (b *TypeBuilder) Struct(name string) PendingStruct {
-	return pendingStruct{b.add(&Type{kind: Struct, name: name})}
+func (b *TypeBuilder) Struct() PendingStruct {
+	return pendingStruct{b.add(&Type{kind: Struct})}
 }
 
 // OneOf returns PendingOneOf, used to describe a OneOf type.
-func (b *TypeBuilder) OneOf(name string) PendingOneOf {
-	return pendingOneOf{b.add(&Type{kind: OneOf, name: name})}
+func (b *TypeBuilder) OneOf() PendingOneOf {
+	return pendingOneOf{b.add(&Type{kind: OneOf})}
 }
 
 // Named returns PendingNamed, used to describe a named type based on another
@@ -373,9 +372,9 @@ func checkedBuild(b TypeBuilder, p PendingType) *Type {
 
 // EnumType is a helper using TypeBuilder to create a single Enum type.
 // Panics on all errors.
-func EnumType(name string, labels ...string) *Type {
+func EnumType(labels ...string) *Type {
 	var b TypeBuilder
-	e := b.Enum(name)
+	e := b.Enum()
 	for _, l := range labels {
 		e.AppendLabel(l)
 	}
@@ -412,9 +411,9 @@ func MapType(key, elem *Type) *Type {
 
 // StructType is a helper using TypeBuilder to create a single Struct type.
 // Panics on all errors.
-func StructType(name string, fields ...StructField) *Type {
+func StructType(fields ...StructField) *Type {
 	var b TypeBuilder
-	s := b.Struct(name)
+	s := b.Struct()
 	for _, f := range fields {
 		s.AppendField(f.Name, f.Type)
 	}
@@ -423,9 +422,9 @@ func StructType(name string, fields ...StructField) *Type {
 
 // OneOfType is a helper using TypeBuilder to create a single OneOf type.
 // Panics on all errors.
-func OneOfType(name string, types ...*Type) *Type {
+func OneOfType(types ...*Type) *Type {
 	var b TypeBuilder
-	o := b.OneOf(name)
+	o := b.OneOf()
 	for _, t := range types {
 		o.AppendType(t)
 	}
@@ -608,10 +607,6 @@ func validType(t *Type, seen map[*Type]bool) error {
 	case Any, TypeVal:
 		if t.name != "" {
 			return errNameNonEmpty
-		}
-	case OneOf, Enum, Struct:
-		if t.name == "" {
-			return errNameEmpty
 		}
 	}
 	// Check len

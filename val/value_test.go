@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	keyType = StructType("Key", []StructField{{"I", Int64Type}, {"S", StringType}}...)
+	keyType = StructType([]StructField{{"I", Int64Type}, {"S", StringType}}...)
 
 	strA, strB, strC = StringValue("A"), StringValue("B"), StringValue("C")
 	int1, int2       = Int64Value(1), Int64Value(2)
@@ -45,15 +45,15 @@ func TestValue(t *testing.T) {
 		{List, ListType(ByteType), `[]byte("")`},
 		{Array, ArrayType(3, ByteType), `[3]byte("\x00\x00\x00")`},
 		{TypeVal, TypeValType, "typeval(any)"},
-		{Enum, EnumType("Enum", "A", "B", "C"), "Enum enum{A;B;C}(A)"},
+		{Enum, EnumType("A", "B", "C"), "enum{A;B;C}(A)"},
 		{Array, ArrayType(2, StringType), `[2]string{"", ""}`},
 		{List, ListType(StringType), "[]string{}"},
 		{Set, SetType(StringType), "set[string]{}"},
-		{Set, SetType(keyType), "set[Key struct{I int64;S string}]{}"},
+		{Set, SetType(keyType), "set[struct{I int64;S string}]{}"},
 		{Map, MapType(StringType, Int64Type), "map[string]int64{}"},
-		{Map, MapType(keyType, Int64Type), "map[Key struct{I int64;S string}]int64{}"},
-		{Struct, StructType("Struct", []StructField{{"A", Int64Type}, {"B", StringType}, {"C", BoolType}}...), `Struct struct{A int64;B string;C bool}{A: 0, B: "", C: false}`},
-		{OneOf, OneOfType("OneOf", Int64Type, StringType), "nil"},
+		{Map, MapType(keyType, Int64Type), "map[struct{I int64;S string}]int64{}"},
+		{Struct, StructType([]StructField{{"A", Int64Type}, {"B", StringType}, {"C", BoolType}}...), `struct{A int64;B string;C bool}{A: 0, B: "", C: false}`},
+		{OneOf, OneOfType(Int64Type, StringType), "nil"},
 		{Any, AnyType, "nil"},
 	}
 	for _, test := range tests {
@@ -308,14 +308,14 @@ func assignEnum(t *testing.T, x *Value) {
 		if gi, gl, wi, wl := x.EnumIndex(), x.EnumLabel(), 1, "B"; gi != wi || gl != wl {
 			t.Errorf(`Enum assign index value got [%d]%v, want [%d]%v`, gi, gl, wi, wl)
 		}
-		if got, want := x.String(), "Enum enum{A;B;C}(B)"; got != want {
+		if got, want := x.String(), "enum{A;B;C}(B)"; got != want {
 			t.Errorf(`Enum string got %v, want %v`, got, want)
 		}
 		x.AssignEnumIndex(2)
 		if gi, gl, wi, wl := x.EnumIndex(), x.EnumLabel(), 2, "C"; gi != wi || gl != wl {
 			t.Errorf(`Enum assign label value got [%d]%v, want [%d]%v`, gi, gl, wi, wl)
 		}
-		if got, want := x.String(), "Enum enum{A;B;C}(C)"; got != want {
+		if got, want := x.String(), "enum{A;B;C}(C)"; got != want {
 			t.Errorf(`Enum string got %v, want %v`, got, want)
 		}
 	} else {
@@ -530,8 +530,8 @@ func matchMapString(a, b string) bool {
 func assignSet(t *testing.T, x *Value) {
 	if x.Kind() == Set {
 		k1, k2, k3 := key1, key2, key3
-		setstr1 := `set[Key struct{I int64;S string}]{{I: 1, S: "A"}, {I: 2, S: "B"}}`
-		setstr2 := `set[Key struct{I int64;S string}]{{I: 2, S: "B"}}`
+		setstr1 := `set[struct{I int64;S string}]{{I: 1, S: "A"}, {I: 2, S: "B"}}`
+		setstr2 := `set[struct{I int64;S string}]{{I: 2, S: "B"}}`
 		if x.Type().Key() == StringType {
 			k1, k2, k3 = strA, strB, strC
 			setstr1, setstr2 = `set[string]{"A", "B"}`, `set[string]{"B"}`
@@ -601,11 +601,12 @@ func assignMap(t *testing.T, x *Value) {
 	if x.Kind() == Map {
 		k1, k2, k3 := key1, key2, key3
 		v1, v2 := int1, int2
-		mapstr1 := `map[Key struct{I int64;S string}]int64{{I: 1, S: "A"}: 1, {I: 2, S: "B"}: 2}`
-		mapstr2 := `map[Key struct{I int64;S string}]int64{{I: 2, S: "B"}: 2}`
+		mapstr1 := `map[struct{I int64;S string}]int64{{I: 1, S: "A"}: 1, {I: 2, S: "B"}: 2}`
+		mapstr2 := `map[struct{I int64;S string}]int64{{I: 2, S: "B"}: 2}`
 		if x.Type().Key() == StringType {
 			k1, k2, k3 = strA, strB, strC
-			mapstr1, mapstr2 = `map[string]int64{"A": 1, "B": 2}`, `map[string]int64{"B": 2}`
+			mapstr1 = `map[string]int64{"A": 1, "B": 2}`
+			mapstr2 = `map[string]int64{"B": 2}`
 		}
 
 		if got, want := x.Keys(), []*Value{}; !matchKeys(got, want) {
@@ -701,14 +702,14 @@ func assignStruct(t *testing.T, x *Value) {
 		if x.IsZero() {
 			t.Errorf(`Struct assign index 0 is zero`)
 		}
-		if got, want := x.String(), `Struct struct{A int64;B string;C bool}{A: 1, B: "", C: false}`; got != want {
+		if got, want := x.String(), `struct{A int64;B string;C bool}{A: 1, B: "", C: false}`; got != want {
 			t.Errorf(`Struct assign index 0 got %v, want %v`, got, want)
 		}
 		x.Field(1).AssignString("a")
 		if x.IsZero() {
 			t.Errorf(`Struct assign index 1 is zero`)
 		}
-		if got, want := x.String(), `Struct struct{A int64;B string;C bool}{A: 1, B: "a", C: false}`; got != want {
+		if got, want := x.String(), `struct{A int64;B string;C bool}{A: 1, B: "a", C: false}`; got != want {
 			t.Errorf(`Struct assign index 1 got %v, want %v`, got, want)
 		}
 		y := Copy(x)

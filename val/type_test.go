@@ -38,9 +38,9 @@ var enums = []struct {
 	str    string
 	errstr string
 }{
-	{"", l{"A"}, "enum{A}", "must be named"},
 	{"FailNoLabels", l{}, "", "no enum labels"},
 	{"FailEmptyLabel", l{""}, "", "empty enum label"},
+	{"", l{"A"}, "enum{A}", ""},
 	{"A", l{"A"}, "A enum{A}", ""},
 	{"AB", l{"A", "B"}, "AB enum{A;B}", ""},
 }
@@ -53,10 +53,10 @@ var structs = []struct {
 	str    string
 	errstr string
 }{
-	{"", f{}, "struct{}", "must be named"},
 	{"FailFieldName", f{{"", BoolType}}, "", "empty struct field name"},
 	{"FailDupFields", f{{"A", BoolType}, {"A", Int32Type}}, "", "duplicate field name"},
 	{"FailNilFieldType", f{{"A", nil}}, "", "nil struct field type"},
+	{"", f{}, "struct{}", ""},
 	{"Empty", f{}, "Empty struct{}", ""},
 	{"A", f{{"A", BoolType}}, "A struct{A bool}", ""},
 	{"AB", f{{"A", BoolType}, {"B", Int32Type}}, "AB struct{A bool;B int32}", ""},
@@ -72,10 +72,10 @@ var oneofs = []struct {
 	str    string
 	errstr string
 }{
-	{"", t{BoolType}, "oneof{bool}", "must be named"},
 	{"FailNoTypes", t{}, "", "no oneof types"},
 	{"FailAny", t{AnyType}, "", "type in oneof must not be nil, oneof or any"},
 	{"FailDup", t{BoolType, BoolType}, "", "duplicate oneof type"},
+	{"", t{BoolType}, "oneof{bool}", ""},
 	{"A", t{BoolType}, "A oneof{bool}", ""},
 	{"AB", t{BoolType, Int32Type}, "AB oneof{bool;int32}", ""},
 	{"ABC", t{BoolType, Int32Type, Uint64Type}, "ABC oneof{bool;int32;uint64}", ""},
@@ -96,17 +96,17 @@ func allTypes() (types []*Type) {
 	}
 	for _, test := range enums {
 		if test.errstr == "" {
-			types = append(types, EnumType(test.name, test.labels...))
+			types = append(types, EnumType(test.labels...))
 		}
 	}
 	for _, test := range structs {
 		if test.errstr == "" {
-			types = append(types, StructType(test.name, test.fields...))
+			types = append(types, StructType(test.fields...))
 		}
 	}
 	for _, test := range oneofs {
 		if test.errstr == "" {
-			types = append(types, OneOfType(test.name, test.types...))
+			types = append(types, OneOfType(test.types...))
 		}
 	}
 	return
@@ -162,7 +162,7 @@ func TestSingletonTypes(t *testing.T) {
 func TestEnumTypes(t *testing.T) {
 	for _, test := range enums {
 		var x *Type
-		create := func() { x = EnumType(test.name, test.labels...) }
+		create := func() { x = NamedType(test.name, EnumType(test.labels...)) }
 		expectPanic(t, create, test.errstr, "%s EnumType", test.name)
 		if x == nil {
 			continue
@@ -289,7 +289,7 @@ func TestMapTypes(t *testing.T) {
 func TestStructTypes(t *testing.T) {
 	for _, test := range structs {
 		var x *Type
-		create := func() { x = StructType(test.name, test.fields...) }
+		create := func() { x = NamedType(test.name, StructType(test.fields...)) }
 		expectPanic(t, create, test.errstr, "%s StructType", test.name)
 		if x == nil {
 			continue
@@ -324,19 +324,19 @@ func TestStructTypes(t *testing.T) {
 	}
 	// Make sure hash consing of struct types respects the ordering of the fields.
 	A, B, C := BoolType, Int32Type, Uint64Type
-	x := StructType("X", []StructField{{"A", A}, {"B", B}, {"C", C}}...)
+	x := StructType([]StructField{{"A", A}, {"B", B}, {"C", C}}...)
 	for iter := 0; iter < 10; iter++ {
-		abc := StructType("X", []StructField{{"A", A}, {"B", B}, {"C", C}}...)
-		acb := StructType("X", []StructField{{"A", A}, {"C", C}, {"B", B}}...)
-		bac := StructType("X", []StructField{{"B", B}, {"A", A}, {"C", C}}...)
-		bca := StructType("X", []StructField{{"B", B}, {"C", C}, {"A", A}}...)
-		cab := StructType("X", []StructField{{"C", C}, {"A", A}, {"B", B}}...)
-		cba := StructType("X", []StructField{{"C", C}, {"B", B}, {"A", A}}...)
+		abc := StructType([]StructField{{"A", A}, {"B", B}, {"C", C}}...)
+		acb := StructType([]StructField{{"A", A}, {"C", C}, {"B", B}}...)
+		bac := StructType([]StructField{{"B", B}, {"A", A}, {"C", C}}...)
+		bca := StructType([]StructField{{"B", B}, {"C", C}, {"A", A}}...)
+		cab := StructType([]StructField{{"C", C}, {"A", A}, {"B", B}}...)
+		cba := StructType([]StructField{{"C", C}, {"B", B}, {"A", A}}...)
 		if x != abc || x == acb || x == bac || x == bca || x == cab || x == cba {
 			t.Errorf(`Struct ABC hash consing broken: %v, %v, %v, %v, %v, %v, %v`, x, abc, acb, bac, bca, cab, cba)
 		}
-		ac := StructType("X", []StructField{{"A", A}, {"C", C}}...)
-		ca := StructType("X", []StructField{{"C", C}, {"A", A}}...)
+		ac := StructType([]StructField{{"A", A}, {"C", C}}...)
+		ca := StructType([]StructField{{"C", C}, {"A", A}}...)
 		if x == ac || x == ca {
 			t.Errorf(`Struct ABC / AC hash consing broken: %v, %v, %v`, x, ac, ca)
 		}
@@ -346,7 +346,7 @@ func TestStructTypes(t *testing.T) {
 func TestOneOfTypes(t *testing.T) {
 	for _, test := range oneofs {
 		var x *Type
-		create := func() { x = OneOfType(test.name, test.types...) }
+		create := func() { x = NamedType(test.name, OneOfType(test.types...)) }
 		expectPanic(t, create, test.errstr, "%s OneOfType", test.name)
 		if x == nil {
 			continue
@@ -377,19 +377,19 @@ func TestOneOfTypes(t *testing.T) {
 	}
 	// Make sure hash consing of oneof types respects ordering.
 	A, B, C := BoolType, Int32Type, Uint64Type
-	x := OneOfType("X", A, B, C)
+	x := OneOfType(A, B, C)
 	for iter := 0; iter < 10; iter++ {
-		abc := OneOfType("X", A, B, C)
-		acb := OneOfType("X", A, C, B)
-		bac := OneOfType("X", B, A, C)
-		bca := OneOfType("X", B, C, A)
-		cab := OneOfType("X", C, A, B)
-		cba := OneOfType("X", C, B, A)
+		abc := OneOfType(A, B, C)
+		acb := OneOfType(A, C, B)
+		bac := OneOfType(B, A, C)
+		bca := OneOfType(B, C, A)
+		cab := OneOfType(C, A, B)
+		cba := OneOfType(C, B, A)
 		if x != abc || x == acb || x == bac || x == bca || x == cab || x == cba {
 			t.Errorf(`OneOf ABC hash consing broken: %v, %v, %v, %v, %v, %v, %v`, x, abc, acb, bac, bca, cab, cba)
 		}
-		ac := OneOfType("X", A, C)
-		ca := OneOfType("X", C, A)
+		ac := OneOfType(A, C)
+		ca := OneOfType(C, A)
 		if x == ac || x == ca {
 			t.Errorf(`OneOf ABC / AC hash consing broken: %v, %v, %v`, x, ac, ca)
 		}
@@ -426,12 +426,11 @@ func TestNamedTypes(t *testing.T) {
 	// type C D
 	// type D struct{X []C}
 	var builder TypeBuilder
-	a, b, c := builder.Named("A"), builder.Named("B"), builder.Named("C")
-	d := builder.Struct("D")
+	a, b, c, d := builder.Named("A"), builder.Named("B"), builder.Named("C"), builder.Named("D")
 	a.AssignBase(b)
 	b.AssignBase(c)
 	c.AssignBase(d)
-	d.AppendField("X", builder.List().AssignElem(c))
+	d.AssignBase(builder.Struct().AppendField("X", builder.List().AssignElem(c)))
 	builder.Build()
 	bA, errA := a.Built()
 	bB, errB := b.Built()
@@ -520,14 +519,24 @@ func TestHashConsTypes(t *testing.T) {
 	var types [3][]*Type
 	for iter := 0; iter < 3; iter++ {
 		for _, a := range singletons {
+			types[iter] = append(types[iter], a.t)
+			if a.t != AnyType && a.t != TypeValType {
+				types[iter] = append(types[iter], NamedType("Named"+a.s, a.t))
+			}
 			types[iter] = append(types[iter], ListType(a.t))
+			types[iter] = append(types[iter], NamedType("List"+a.s, ListType(a.t)))
 			for _, b := range singletons {
 				lA, lB := "A"+a.s, "B"+b.s
-				types[iter] = append(types[iter], EnumType("Enum"+lA+lB, lA, lB))
+				name := lA + lB
+				types[iter] = append(types[iter], EnumType(lA, lB))
 				types[iter] = append(types[iter], MapType(a.t, b.t))
-				types[iter] = append(types[iter], StructType("Struct"+lA+lB, []StructField{{lA, a.t}, {lB, b.t}}...))
+				types[iter] = append(types[iter], StructType([]StructField{{lA, a.t}, {lB, b.t}}...))
+				types[iter] = append(types[iter], NamedType("Enum"+name, EnumType(lA, lB)))
+				types[iter] = append(types[iter], NamedType("Map"+name, MapType(a.t, b.t)))
+				types[iter] = append(types[iter], NamedType("Struct"+name, StructType([]StructField{{lA, a.t}, {lB, b.t}}...)))
 				if a.t != b.t && a.k != Any && b.k != Any {
-					types[iter] = append(types[iter], OneOfType("OneOf"+lA+lB, a.t, b.t))
+					types[iter] = append(types[iter], OneOfType(a.t, b.t))
+					types[iter] = append(types[iter], NamedType("OneOf"+name, OneOfType(a.t, b.t)))
 				}
 			}
 		}
@@ -557,15 +566,15 @@ func TestAssignableFrom(t *testing.T) {
 	}{
 		{BoolType, BoolType, true},
 		{AnyType, BoolType, true},
-		{OneOfType("U", BoolType), BoolType, true},
-		{OneOfType("U", BoolType, Int32Type), Int32Type, true},
+		{OneOfType(BoolType, Int32Type), BoolType, true},
+		{OneOfType(BoolType, Int32Type), Int32Type, true},
 
 		{BoolType, Int32Type, false},
 		{BoolType, AnyType, false},
-		{BoolType, OneOfType("U", BoolType), false},
-		{BoolType, OneOfType("U", BoolType, Int32Type), false},
-		{OneOfType("U", BoolType), StringType, false},
-		{OneOfType("U", BoolType, Int32Type), StringType, false},
+		{BoolType, OneOfType(BoolType), false},
+		{BoolType, OneOfType(BoolType, Int32Type), false},
+		{OneOfType(BoolType), StringType, false},
+		{OneOfType(BoolType, Int32Type), StringType, false},
 	}
 	for _, test := range tests {
 		if test.t.AssignableFrom(test.f) != test.expect {
@@ -581,10 +590,12 @@ func TestSelfRecursiveType(t *testing.T) {
 		//   Children []Node
 		// }
 		var builder TypeBuilder
-		pendN := builder.Struct("Node")
+		pendN := builder.Named("Node")
 		pendC := builder.List().AssignElem(pendN)
-		pendN.AppendField("Val", StringType)
-		pendN.AppendField("Children", pendC)
+		structN := builder.Struct()
+		structN.AppendField("Val", StringType)
+		structN.AppendField("Children", pendC)
+		pendN.AssignBase(structN)
 		builder.Build()
 		c, cerr := pendC.Built()
 		n, nerr := pendN.Built()
@@ -654,12 +665,15 @@ func TestMutuallyRecursiveType(t *testing.T) {
 		// type B struct{Y int32;A A;C C}
 		// type C struct{Z string}
 		var builder TypeBuilder
-		d := builder.Named("D")
-		a, b, c := builder.Struct("A"), builder.Struct("B"), builder.Struct("C")
+		a, b, c, d := builder.Named("A"), builder.Named("B"), builder.Named("C"), builder.Named("D")
+		stA, stB, stC := builder.Struct(), builder.Struct(), builder.Struct()
 		d.AssignBase(a)
-		a.AppendField("X", Int32Type).AppendField("B", b).AppendField("C", c)
-		b.AppendField("Y", Int32Type).AppendField("A", a).AppendField("C", c)
-		c.AppendField("Z", StringType)
+		a.AssignBase(stA)
+		b.AssignBase(stB)
+		c.AssignBase(stC)
+		stA.AppendField("X", Int32Type).AppendField("B", b).AppendField("C", c)
+		stB.AppendField("Y", Int32Type).AppendField("A", a).AppendField("C", c)
+		stC.AppendField("Z", StringType)
 		builder.Build()
 		builtD, derr := d.Built()
 		builtA, aerr := a.Built()
@@ -844,29 +858,29 @@ func makeAllPending(builder *TypeBuilder) []PendingType {
 	}
 	for _, test := range enums {
 		if test.errstr == "" {
-			p := builder.Enum("Enum" + test.name)
+			base := builder.Enum()
 			for _, l := range test.labels {
-				p.AppendLabel(l)
+				base.AppendLabel(l)
 			}
-			ret = append(ret, p)
+			ret = append(ret, builder.Named("Enum"+test.name).AssignBase(base))
 		}
 	}
 	for _, test := range structs {
 		if test.errstr == "" {
-			p := builder.Struct("Struct" + test.name)
+			base := builder.Struct()
 			for _, f := range test.fields {
-				p.AppendField(f.Name, f.Type)
+				base.AppendField(f.Name, f.Type)
 			}
-			ret = append(ret, p)
+			ret = append(ret, builder.Named("Struct"+test.name).AssignBase(base))
 		}
 	}
 	for _, test := range oneofs {
 		if test.errstr == "" {
-			p := builder.OneOf("OneOf" + test.name)
+			base := builder.OneOf()
 			for _, t := range test.types {
-				p.AppendType(t)
+				base.AppendType(t)
 			}
-			ret = append(ret, p)
+			ret = append(ret, builder.Named("OneOf"+test.name).AssignBase(base))
 		}
 	}
 	return ret
