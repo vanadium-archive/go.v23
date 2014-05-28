@@ -3,11 +3,9 @@
 package vstore
 
 import (
-	"veyron2"
 	"veyron2/ipc"
 	"veyron2/naming"
 	"veyron2/services/store"
-	"veyron2/services/watch"
 	"veyron2/storage"
 	"veyron2/storage/vstore/primitives"
 )
@@ -43,10 +41,6 @@ func (st *VStore) Init(mount string, serv store.Store) {
 // subsequent operations on the object will fail.
 func (st *VStore) Bind(name string) storage.Object {
 	return primitives.BindObject(st.serv, st.mount, name)
-}
-
-func (st *VStore) Watch(req watch.Request) (watch.WatcherWatchStream, error) {
-	return st.serv.Watch(req, veyron2.CallTimeout(ipc.NoTimeout))
 }
 
 // SetConflictResolver specifies a function to perform conflict resolution.

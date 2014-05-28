@@ -159,6 +159,8 @@ type Watcher interface {
 
 // Object is the interface for a value in the store.
 type Object interface {
+	Watcher
+
 	// Exists returns true iff the Entry has a value.
 	Exists(t Transaction) (bool, error)
 
@@ -224,8 +226,6 @@ type TransactionOpt interface {
 
 // Store is the client interface to the storage system.
 type Store interface {
-	Watcher
-
 	// Bind returns the Object associated with a path.
 	Bind(path string) Object
 

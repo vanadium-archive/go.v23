@@ -4,9 +4,12 @@ import (
 	"errors"
 	"time"
 
+	"veyron2"
+	"veyron2/ipc"
 	"veyron2/naming"
 	"veyron2/query"
 	"veyron2/services/store"
+	"veyron2/services/watch"
 	"veyron2/storage"
 	"veyron2/vdl"
 )
@@ -165,6 +168,10 @@ func (o *object) GlobT(t storage.Transaction, pattern string) (storage.GlobStrea
 	return o.oServ.GlobT(id, pattern)
 }
 
+func (o *object) Watch(req watch.Request) (watch.WatcherWatchStream, error) {
+	return o.oServ.Watch(req, veyron2.CallTimeout(ipc.NoTimeout))
+}
+
 // The errorObject responds with an error to all operations.
 func (o *errorObject) Exists(t storage.Transaction) (bool, error) {
 	return false, o.err
@@ -203,5 +210,9 @@ func (o *errorObject) Glob(pattern string) (storage.GlobStream, error) {
 }
 
 func (o *errorObject) GlobT(t storage.Transaction, pattern string) (storage.GlobStream, error) {
+	return nil, o.err
+}
+
+func (o *errorObject) Watch(req watch.Request) (watch.WatcherWatchStream, error) {
 	return nil, o.err
 }

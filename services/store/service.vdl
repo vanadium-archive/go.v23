@@ -53,15 +53,20 @@ type Object interface {
 	// Stat returns entry info.
 	Stat(TID TransactionID) (Stat, error)
 
-	// Query returns the sequence of elements that satisfy the
-	// query.
+	// Query returns the sequence of elements that satisfy the query.
 	Query(TID TransactionID, Q query.Query) stream<_, QueryResult> error
 
 	// GlobT finds objects beneath this value that match the given pattern.
 	// This is the same as Glob, but operates within a transaction.
 	GlobT(TID TransactionID, pattern string) stream<_, string> error
 
+    // Globable is an API for finding all objects beneath this pattern that
+    // match a pattern.
 	mounttable.Globable
+
+    // Watcher is an API for watching updates to objects beneath this value
+    // that satisfy a query.
+	watch.Watcher
 }
 
 // Store is the client interface to the storage system.
@@ -83,8 +88,6 @@ type Store interface {
 	// ReadConflicts returns the stream of conflicts to store values.  A
 	// conflict occurs when there is a concurrent modification to a value.
 	ReadConflicts() stream<_, Conflict> error
-	
-	watch.Watcher
 }
 
 // Stat provides information about an entry in the store.

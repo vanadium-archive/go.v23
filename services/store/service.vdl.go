@@ -190,6 +190,9 @@ const (
 // to enable embedding without method collisions.  Not to be used directly by clients.
 type Object_ExcludingUniversal interface {
 	mounttable.Globable_ExcludingUniversal
+	// Watcher allows a client to receive updates for changes to objects
+	// that match a query.  See the package comments for details.
+	watch.Watcher_ExcludingUniversal
 	// Exists returns true iff the Entry has a value.
 	Exists(TID TransactionID, opts ..._gen_ipc.ClientCallOpt) (reply bool, err error)
 	// Get returns the value for the Object.  The value returned is from the
@@ -206,8 +209,7 @@ type Object_ExcludingUniversal interface {
 	SetAttr(TID TransactionID, Attrs []_gen_vdl.Any, opts ..._gen_ipc.ClientCallOpt) (err error)
 	// Stat returns entry info.
 	Stat(TID TransactionID, opts ..._gen_ipc.ClientCallOpt) (reply Stat, err error)
-	// Query returns the sequence of elements that satisfy the
-	// query.
+	// Query returns the sequence of elements that satisfy the query.
 	Query(TID TransactionID, Q query.Query, opts ..._gen_ipc.ClientCallOpt) (reply ObjectQueryStream, err error)
 	// GlobT finds objects beneath this value that match the given pattern.
 	// This is the same as Glob, but operates within a transaction.
@@ -221,6 +223,9 @@ type Object interface {
 // ObjectService is the interface the server implements.
 type ObjectService interface {
 	mounttable.GlobableService
+	// Watcher allows a client to receive updates for changes to objects
+	// that match a query.  See the package comments for details.
+	watch.WatcherService
 	// Exists returns true iff the Entry has a value.
 	Exists(context _gen_ipc.Context, TID TransactionID) (reply bool, err error)
 	// Get returns the value for the Object.  The value returned is from the
@@ -237,8 +242,7 @@ type ObjectService interface {
 	SetAttr(context _gen_ipc.Context, TID TransactionID, Attrs []_gen_vdl.Any) (err error)
 	// Stat returns entry info.
 	Stat(context _gen_ipc.Context, TID TransactionID) (reply Stat, err error)
-	// Query returns the sequence of elements that satisfy the
-	// query.
+	// Query returns the sequence of elements that satisfy the query.
 	Query(context _gen_ipc.Context, TID TransactionID, Q query.Query, stream ObjectServiceQueryStream) (err error)
 	// GlobT finds objects beneath this value that match the given pattern.
 	// This is the same as Glob, but operates within a transaction.
@@ -377,6 +381,7 @@ func BindObject(name string, opts ..._gen_ipc.BindOpt) (Object, error) {
 	}
 	stub := &clientStubObject{client: client, name: name}
 	stub.Globable_ExcludingUniversal, _ = mounttable.BindGlobable(name, client)
+	stub.Watcher_ExcludingUniversal, _ = watch.BindWatcher(name, client)
 
 	return stub, nil
 }
@@ -388,6 +393,7 @@ func BindObject(name string, opts ..._gen_ipc.BindOpt) (Object, error) {
 func NewServerObject(server ObjectService) interface{} {
 	return &ServerStubObject{
 		ServerStubGlobable: *mounttable.NewServerGlobable(server).(*mounttable.ServerStubGlobable),
+		ServerStubWatcher:  *watch.NewServerWatcher(server).(*watch.ServerStubWatcher),
 		service:            server,
 	}
 }
@@ -395,6 +401,7 @@ func NewServerObject(server ObjectService) interface{} {
 // clientStubObject implements Object.
 type clientStubObject struct {
 	mounttable.Globable_ExcludingUniversal
+	watch.Watcher_ExcludingUniversal
 
 	client _gen_ipc.Client
 	name   string
@@ -522,6 +529,7 @@ func (__gen_c *clientStubObject) GetMethodTags(method string, opts ..._gen_ipc.C
 // the requirements of veyron2/ipc.ReflectInvoker.
 type ServerStubObject struct {
 	mounttable.ServerStubGlobable
+	watch.ServerStubWatcher
 
 	service ObjectService
 }
@@ -531,6 +539,9 @@ func (__gen_s *ServerStubObject) GetMethodTags(call _gen_ipc.ServerCall, method 
 	// Note: This exhibits some weird behavior like returning a nil error if the method isn't found.
 	// This will change when it is replaced with Signature().
 	if resp, err := __gen_s.ServerStubGlobable.GetMethodTags(call, method); resp != nil || err != nil {
+		return resp, err
+	}
+	if resp, err := __gen_s.ServerStubWatcher.GetMethodTags(call, method); resp != nil || err != nil {
 		return resp, err
 	}
 	switch method {
@@ -716,6 +727,58 @@ func (__gen_s *ServerStubObject) Signature(call _gen_ipc.ServerCall) (_gen_ipc.S
 		}
 		result.TypeDefs = append(result.TypeDefs, d)
 	}
+	ss, _ = __gen_s.ServerStubWatcher.Signature(call)
+	firstAdded = len(result.TypeDefs)
+	for k, v := range ss.Methods {
+		for i, _ := range v.InArgs {
+			if v.InArgs[i].Type >= _gen_wiretype.TypeIDFirst {
+				v.InArgs[i].Type += _gen_wiretype.TypeID(firstAdded)
+			}
+		}
+		for i, _ := range v.OutArgs {
+			if v.OutArgs[i].Type >= _gen_wiretype.TypeIDFirst {
+				v.OutArgs[i].Type += _gen_wiretype.TypeID(firstAdded)
+			}
+		}
+		if v.InStream >= _gen_wiretype.TypeIDFirst {
+			v.InStream += _gen_wiretype.TypeID(firstAdded)
+		}
+		if v.OutStream >= _gen_wiretype.TypeIDFirst {
+			v.OutStream += _gen_wiretype.TypeID(firstAdded)
+		}
+		result.Methods[k] = v
+	}
+	//TODO(bprosnitz) combine type definitions from embeded interfaces in a way that doesn't cause duplication.
+	for _, d := range ss.TypeDefs {
+		switch wt := d.(type) {
+		case _gen_wiretype.SliceType:
+			if wt.Elem >= _gen_wiretype.TypeIDFirst {
+				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+			}
+			d = wt
+		case _gen_wiretype.ArrayType:
+			if wt.Elem >= _gen_wiretype.TypeIDFirst {
+				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+			}
+			d = wt
+		case _gen_wiretype.MapType:
+			if wt.Key >= _gen_wiretype.TypeIDFirst {
+				wt.Key += _gen_wiretype.TypeID(firstAdded)
+			}
+			if wt.Elem >= _gen_wiretype.TypeIDFirst {
+				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+			}
+			d = wt
+		case _gen_wiretype.StructType:
+			for _, fld := range wt.Fields {
+				if fld.Type >= _gen_wiretype.TypeIDFirst {
+					fld.Type += _gen_wiretype.TypeID(firstAdded)
+				}
+			}
+			d = wt
+		}
+		result.TypeDefs = append(result.TypeDefs, d)
+	}
 
 	return result, nil
 }
@@ -785,9 +848,6 @@ func (__gen_s *ServerStubObject) GlobT(call _gen_ipc.ServerCall, TID Transaction
 // Store_ExcludingUniversal is the interface without internal framework-added methods
 // to enable embedding without method collisions.  Not to be used directly by clients.
 type Store_ExcludingUniversal interface {
-	// Watcher allows a client to receive updates for changes to objects
-	// that match a query.  See the package comments for details.
-	watch.Watcher_ExcludingUniversal
 	// CreateTransaction creates the transaction and sets the options for it.
 	CreateTransaction(TID TransactionID, Options []_gen_vdl.Any, opts ..._gen_ipc.ClientCallOpt) (err error)
 	// Commit commits the changes in the transaction to the store.  The
@@ -811,9 +871,6 @@ type Store interface {
 // StoreService is the interface the server implements.
 type StoreService interface {
 
-	// Watcher allows a client to receive updates for changes to objects
-	// that match a query.  See the package comments for details.
-	watch.WatcherService
 	// CreateTransaction creates the transaction and sets the options for it.
 	CreateTransaction(context _gen_ipc.Context, TID TransactionID, Options []_gen_vdl.Any) (err error)
 	// Commit commits the changes in the transaction to the store.  The
@@ -907,7 +964,6 @@ func BindStore(name string, opts ..._gen_ipc.BindOpt) (Store, error) {
 		return nil, _gen_vdl.ErrTooManyOptionsToBind
 	}
 	stub := &clientStubStore{client: client, name: name}
-	stub.Watcher_ExcludingUniversal, _ = watch.BindWatcher(name, client)
 
 	return stub, nil
 }
@@ -918,15 +974,12 @@ func BindStore(name string, opts ..._gen_ipc.BindOpt) (Store, error) {
 // interface, and returns a new server stub.
 func NewServerStore(server StoreService) interface{} {
 	return &ServerStubStore{
-		ServerStubWatcher: *watch.NewServerWatcher(server).(*watch.ServerStubWatcher),
-		service:           server,
+		service: server,
 	}
 }
 
 // clientStubStore implements Store.
 type clientStubStore struct {
-	watch.Watcher_ExcludingUniversal
-
 	client _gen_ipc.Client
 	name   string
 }
@@ -1010,8 +1063,6 @@ func (__gen_c *clientStubStore) GetMethodTags(method string, opts ..._gen_ipc.Cl
 // StoreService and provides an object that satisfies
 // the requirements of veyron2/ipc.ReflectInvoker.
 type ServerStubStore struct {
-	watch.ServerStubWatcher
-
 	service StoreService
 }
 
@@ -1019,9 +1070,6 @@ func (__gen_s *ServerStubStore) GetMethodTags(call _gen_ipc.ServerCall, method s
 	// TODO(bprosnitz) GetMethodTags() will be replaces with Signature().
 	// Note: This exhibits some weird behavior like returning a nil error if the method isn't found.
 	// This will change when it is replaced with Signature().
-	if resp, err := __gen_s.ServerStubWatcher.GetMethodTags(call, method); resp != nil || err != nil {
-		return resp, err
-	}
 	switch method {
 	case "CreateTransaction":
 		return []interface{}{}, nil
@@ -1095,60 +1143,6 @@ func (__gen_s *ServerStubStore) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Se
 				_gen_wiretype.FieldType{Type: 0x48, Name: "Root"},
 			},
 			"veyron2/services/store.Conflict", []string(nil)},
-	}
-	var ss _gen_ipc.ServiceSignature
-	var firstAdded int
-	ss, _ = __gen_s.ServerStubWatcher.Signature(call)
-	firstAdded = len(result.TypeDefs)
-	for k, v := range ss.Methods {
-		for i, _ := range v.InArgs {
-			if v.InArgs[i].Type >= _gen_wiretype.TypeIDFirst {
-				v.InArgs[i].Type += _gen_wiretype.TypeID(firstAdded)
-			}
-		}
-		for i, _ := range v.OutArgs {
-			if v.OutArgs[i].Type >= _gen_wiretype.TypeIDFirst {
-				v.OutArgs[i].Type += _gen_wiretype.TypeID(firstAdded)
-			}
-		}
-		if v.InStream >= _gen_wiretype.TypeIDFirst {
-			v.InStream += _gen_wiretype.TypeID(firstAdded)
-		}
-		if v.OutStream >= _gen_wiretype.TypeIDFirst {
-			v.OutStream += _gen_wiretype.TypeID(firstAdded)
-		}
-		result.Methods[k] = v
-	}
-	//TODO(bprosnitz) combine type definitions from embeded interfaces in a way that doesn't cause duplication.
-	for _, d := range ss.TypeDefs {
-		switch wt := d.(type) {
-		case _gen_wiretype.SliceType:
-			if wt.Elem >= _gen_wiretype.TypeIDFirst {
-				wt.Elem += _gen_wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case _gen_wiretype.ArrayType:
-			if wt.Elem >= _gen_wiretype.TypeIDFirst {
-				wt.Elem += _gen_wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case _gen_wiretype.MapType:
-			if wt.Key >= _gen_wiretype.TypeIDFirst {
-				wt.Key += _gen_wiretype.TypeID(firstAdded)
-			}
-			if wt.Elem >= _gen_wiretype.TypeIDFirst {
-				wt.Elem += _gen_wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case _gen_wiretype.StructType:
-			for _, fld := range wt.Fields {
-				if fld.Type >= _gen_wiretype.TypeIDFirst {
-					fld.Type += _gen_wiretype.TypeID(firstAdded)
-				}
-			}
-			d = wt
-		}
-		result.TypeDefs = append(result.TypeDefs, d)
 	}
 
 	return result, nil
