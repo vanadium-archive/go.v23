@@ -72,7 +72,7 @@ func matchTypeRes(t *testing.T, tname string, tpkg typePkg, tdefs []*compile.Typ
 	t.Errorf("%s couldn't find Res in package %s", tname, tpkg.Name)
 }
 
-func namedX(base *val.Type) *val.Type   { return val.NamedType("a.X", base) }
+func namedX(base *val.Type) *val.Type   { return val.NamedType("a.x", base) }
 func namedRes(base *val.Type) *val.Type { return val.NamedType("a.Res", base) }
 
 var bytesType = val.ListType(val.ByteType)
@@ -121,35 +121,38 @@ var typeTests = []typeTest{
 	{"OneOf", tp{{"a", `type Res oneof{bool;int32;string}`, val.OneOfType(val.BoolType, val.Int32Type, val.StringType), exp}}},
 
 	// Test named types based on named types.
-	{"NBool", tp{{"a", `type Res X;type X bool`, namedX(val.BoolType), ""}}},
-	{"NByte", tp{{"a", `type Res X;type X byte`, namedX(val.ByteType), ""}}},
-	{"NUint16", tp{{"a", `type Res X;type X uint16`, namedX(val.Uint16Type), ""}}},
-	{"NUint32", tp{{"a", `type Res X;type X uint32`, namedX(val.Uint32Type), ""}}},
-	{"NUint64", tp{{"a", `type Res X;type X uint64`, namedX(val.Uint64Type), ""}}},
-	{"NInt16", tp{{"a", `type Res X;type X int16`, namedX(val.Int16Type), ""}}},
-	{"NInt32", tp{{"a", `type Res X;type X int32`, namedX(val.Int32Type), ""}}},
-	{"NInt64", tp{{"a", `type Res X;type X int64`, namedX(val.Int64Type), ""}}},
-	{"NFloat32", tp{{"a", `type Res X;type X float32`, namedX(val.Float32Type), ""}}},
-	{"NFloat64", tp{{"a", `type Res X;type X float64`, namedX(val.Float64Type), ""}}},
-	{"NComplex64", tp{{"a", `type Res X;type X complex64`, namedX(val.Complex64Type), ""}}},
-	{"NComplex128", tp{{"a", `type Res X;type X complex128`, namedX(val.Complex128Type), ""}}},
-	{"NString", tp{{"a", `type Res X;type X string`, namedX(val.StringType), ""}}},
-	{"NBytes", tp{{"a", `type Res X;type X []byte`, namedX(bytesType), ""}}},
-	{"NEnum", tp{{"a", `type Res X;type X enum{A;B;C}`, namedX(val.EnumType("A", "B", "C")), exp}}},
-	{"NArray", tp{{"a", `type Res X;type X [2]bool`, namedX(val.ArrayType(2, val.BoolType)), ""}}},
-	{"NList", tp{{"a", `type Res X;type X []int32`, namedX(val.ListType(val.Int32Type)), ""}}},
-	{"NSet", tp{{"a", `type Res X;type X set[int32]`, namedX(val.SetType(val.Int32Type)), ""}}},
-	{"NMap", tp{{"a", `type Res X;type X map[int32]string`, namedX(val.MapType(val.Int32Type, val.StringType)), ""}}},
-	{"NStruct", tp{{"a", `type Res X;type X struct{A int32;B string}`, namedX(val.StructType([]val.StructField{{"A", val.Int32Type}, {"B", val.StringType}}...)), ""}}},
-	{"NOneOf", tp{{"a", `type Res X; type X oneof{bool;int32;string}`, namedX(val.OneOfType(val.BoolType, val.Int32Type, val.StringType)), exp}}},
+	{"NBool", tp{{"a", `type Res x;type x bool`, namedX(val.BoolType), ""}}},
+	{"NByte", tp{{"a", `type Res x;type x byte`, namedX(val.ByteType), ""}}},
+	{"NUint16", tp{{"a", `type Res x;type x uint16`, namedX(val.Uint16Type), ""}}},
+	{"NUint32", tp{{"a", `type Res x;type x uint32`, namedX(val.Uint32Type), ""}}},
+	{"NUint64", tp{{"a", `type Res x;type x uint64`, namedX(val.Uint64Type), ""}}},
+	{"NInt16", tp{{"a", `type Res x;type x int16`, namedX(val.Int16Type), ""}}},
+	{"NInt32", tp{{"a", `type Res x;type x int32`, namedX(val.Int32Type), ""}}},
+	{"NInt64", tp{{"a", `type Res x;type x int64`, namedX(val.Int64Type), ""}}},
+	{"NFloat32", tp{{"a", `type Res x;type x float32`, namedX(val.Float32Type), ""}}},
+	{"NFloat64", tp{{"a", `type Res x;type x float64`, namedX(val.Float64Type), ""}}},
+	{"NComplex64", tp{{"a", `type Res x;type x complex64`, namedX(val.Complex64Type), ""}}},
+	{"NComplex128", tp{{"a", `type Res x;type x complex128`, namedX(val.Complex128Type), ""}}},
+	{"NString", tp{{"a", `type Res x;type x string`, namedX(val.StringType), ""}}},
+	{"NBytes", tp{{"a", `type Res x;type x []byte`, namedX(bytesType), ""}}},
+	{"NEnum", tp{{"a", `type Res x;type x enum{A;B;C}`, namedX(val.EnumType("A", "B", "C")), exp}}},
+	{"NArray", tp{{"a", `type Res x;type x [2]bool`, namedX(val.ArrayType(2, val.BoolType)), ""}}},
+	{"NList", tp{{"a", `type Res x;type x []int32`, namedX(val.ListType(val.Int32Type)), ""}}},
+	{"NSet", tp{{"a", `type Res x;type x set[int32]`, namedX(val.SetType(val.Int32Type)), ""}}},
+	{"NMap", tp{{"a", `type Res x;type x map[int32]string`, namedX(val.MapType(val.Int32Type, val.StringType)), ""}}},
+	{"NStruct", tp{{"a", `type Res x;type x struct{A int32;B string}`, namedX(val.StructType([]val.StructField{{"A", val.Int32Type}, {"B", val.StringType}}...)), ""}}},
+	{"NOneOf", tp{{"a", `type Res x; type x oneof{bool;int32;string}`, namedX(val.OneOfType(val.BoolType, val.Int32Type, val.StringType)), exp}}},
 
 	// Test multi-package types
 	{"MultiPkgSameTypeName", tp{
 		{"a", `type Res bool`, val.BoolType, ""},
 		{"b", `type Res bool`, val.BoolType, ""}}},
 	{"MultiPkgDep", tp{
-		{"a", `type Res bool`, val.BoolType, ""},
+		{"a", `type Res x;type x bool`, namedX(val.BoolType), ""},
 		{"b", `import "a";type Res []a.Res`, val.ListType(namedRes(val.BoolType)), ""}}},
+	{"MultiPkgUnexportedType", tp{
+		{"a", `type Res x;type x bool`, namedX(val.BoolType), ""},
+		{"b", `import "a";type Res []a.x`, nil, "type a.x undefined"}}},
 	{"MultiPkgSamePkgName", tp{
 		{"a", `type Res bool`, val.BoolType, ""},
 		{"a", `type Res bool`, nil, "invalid recompile"}}},

@@ -412,7 +412,7 @@ func javaClassPaths(t *val.Type, forceClass bool, env *compile.Env) (ret []strin
 }
 
 func javaNamedClassPaths(def *compile.TypeDef, forceClass bool) []string {
-	if def.File == compile.GlobalFile {
+	if def.File == compile.BuiltInFile {
 		t, class := javaPrimitiveType(def, forceClass)
 		if class {
 			return []string{t}
@@ -488,7 +488,7 @@ func javaType(t *val.Type, forceClass bool, imports javaUserImports, env *compil
 }
 
 func javaNamedType(def *compile.TypeDef, forceClass bool, imports javaUserImports) string {
-	if def.File == compile.GlobalFile {
+	if def.File == compile.BuiltInFile {
 		name, class := javaPrimitiveType(def, forceClass)
 		if class {
 			return javaName(name, imports)

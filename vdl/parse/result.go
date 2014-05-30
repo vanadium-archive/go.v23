@@ -55,6 +55,16 @@ type File struct {
 	Interfaces []*Interface // Interfaces defined in this file
 }
 
+// Config represents a parsed config file.  Config files use a similar syntax as
+// vdl files, with similar concepts.
+type Config struct {
+	BaseName  string      // Base name of the config file, e.g. "foo.config"
+	ConfigDef NamePos     // Name, position and docs of the "config" clause
+	Imports   []*Import   // Imports listed in this file.
+	Config    ConstExpr   // Const expression exported from this config.
+	ConstDefs []*ConstDef // Consts defined in this file.
+}
+
 // Import represents an import definition, which is used to import other
 // packages into an vdl file.  An example of the syntax in the vdl file:
 //   import foo "some/package/path"

@@ -14,7 +14,6 @@ type ConstExpr interface {
 
 // ConstLit represents scalar literals in const expressions.  The supported
 // types for Lit are:
-//   bool       - Represents all boolean constants.
 //   string     - Represents all string constants.
 //   *big.Int   - Represents all integer constants.
 //   *big.Rat   - Represents all rational constants.
@@ -77,11 +76,6 @@ type ConstDef struct {
 // cvString returns a human-readable string representing the const value.
 func cvString(val interface{}) string {
 	switch tv := val.(type) {
-	case bool:
-		if tv {
-			return "true"
-		}
-		return "false"
 	case string:
 		return strconv.Quote(tv)
 	case *big.Int:
@@ -131,6 +125,7 @@ func (c *ConstUnaryOp) String() string {
 func (c *ConstBinaryOp) String() string {
 	return "(" + c.Lexpr.String() + c.Op + c.Rexpr.String() + ")"
 }
+func (c *ConstDef) String() string { return fmt.Sprintf("%+v", *c) }
 
 func (c *ConstLit) Pos() Pos          { return c.P }
 func (c *ConstCompositeLit) Pos() Pos { return c.P }

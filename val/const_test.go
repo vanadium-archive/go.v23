@@ -158,6 +158,10 @@ func TestConstToValueImplicit(t *testing.T) {
 		{StringConst("abc"), StringValue("abc")},
 	}
 	for _, test := range tests {
+		c := ConstFromValue(test.V)
+		if got, want := c, test.C; !constEqual(got, want) {
+			t.Errorf("ConstFromValue(%v) got %v, want %v", test.C, got, want)
+		}
 		v, err := test.C.ToValue()
 		if got, want := v, test.V; !Equal(got, want) {
 			t.Errorf("%v.ToValue got %v, want %v", test.C, got, want)

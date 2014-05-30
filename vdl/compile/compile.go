@@ -30,13 +30,48 @@ import (
 // already have been compiled and populated into env.
 func Compile(pkgpath string, pfiles []*parse.File, env *Env) *Package {
 	if pkgpath == "" {
-		env.Errors.Errorf("compile called with empty pkgpath")
+		env.Errors.Errorf("Compile called with empty pkgpath")
 		return nil
 	}
 	if env.pkgs[pkgpath] != nil {
 		env.Errors.Errorf("%q invalid recompile (already exists in env)", pkgpath)
 		return nil
 	}
+	pkg := compile(pkgpath, pfiles, env)
+	if pkg == nil {
+		return nil
+	}
+	env.pkgs[pkg.Path] = pkg
+	return pkg
+}
+
+// CompileConfig compiles a parse.Config into a value.  Returns the compiled
+// value on success, or returns nil and guarantees !env.Errors.IsEmpty().  All
+// imports that the parsed config depend on must already have been compiled and
+// populated into env.  If implicit is non-nil and the exported config const is
+// an untyped const literal, it is assumed to be of that type.
+func CompileConfig(implicit *val.Type, pconfig *parse.Config, env *Env) *val.Value {
+	if pconfig == nil || env == nil {
+		env.Errors.Errorf("CompileConfig called with nil config or env")
+		return nil
+	}
+	// Since the concepts are so similar between config files and vdl files, we
+	// just compile it as a single-file vdl package, and compile the exported
+	// config const to retrieve the final exported config value.
+	pfile := &parse.File{
+		BaseName:   pconfig.BaseName,
+		PackageDef: pconfig.ConfigDef,
+		Imports:    pconfig.Imports,
+		ConstDefs:  pconfig.ConstDefs,
+	}
+	pkg := compile("", []*parse.File{pfile}, env)
+	if pkg == nil {
+		return nil
+	}
+	return compileConst(implicit, pconfig.Config, pkg.Files[0], env)
+}
+
+func compile(pkgpath string, pfiles []*parse.File, env *Env) *Package {
 	if len(pfiles) == 0 {
 		env.Errors.Errorf("%q compile called with no files", pkgpath)
 		return nil
@@ -72,7 +107,6 @@ func Compile(pkgpath string, pfiles []*parse.File, env *Env) *Package {
 	if computeDeps(pkg, env); !env.Errors.IsEmpty() {
 		return nil
 	}
-	env.pkgs[pkg.Path] = pkg
 	return pkg
 }
 
@@ -160,10 +194,10 @@ func computeDeps(pkg *Package, env *Env) {
 			}
 		}
 		file.TypeDeps = tdeps
-		// Now remove self and global package dependencies.  Every package can use
-		// itself and the global package, so we don't need to record this.
+		// Now remove self and built-in package dependencies.  Every package can use
+		// itself and the built-in package, so we don't need to record this.
 		delete(pdeps, pkg)
-		delete(pdeps, GlobalPackage)
+		delete(pdeps, BuiltInPackage)
 		// Finally populate PackageDeps and sort by package path.
 		file.PackageDeps = make([]*Package, 0, len(pdeps))
 		for pdep, _ := range pdeps {

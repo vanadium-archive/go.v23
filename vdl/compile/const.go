@@ -12,9 +12,10 @@ import (
 // ConstDef represents a user-defined named const definition in the compiled
 // results.
 type ConstDef struct {
-	NamePos            // name, parse position and docs
-	Value   *val.Value // const value
-	File    *File      // parent file that this const is defined in
+	NamePos             // name, parse position and docs
+	Exported bool       // is this const definition exported?
+	Value    *val.Value // const value
+	File     *File      // parent file that this const is defined in
 }
 
 func (x *ConstDef) String() string {
@@ -61,15 +62,16 @@ func (cd constDefiner) Declare() {
 	for ix := range cd.pkg.Files {
 		file, pfile := cd.pkg.Files[ix], cd.pfiles[ix]
 		for _, pdef := range pfile.ConstDefs {
-			if err := ValidIdent(pdef.Name); err != nil {
-				cd.env.errorf(file, pdef.Pos, "const %s invalid name (%s)", pdef.Name, err)
+			export, err := ValidIdent(pdef.Name)
+			if err != nil {
+				cd.env.prefixErrorf(file, pdef.Pos, err, "const %s invalid name", pdef.Name)
 				continue // keep going to catch more errors
 			}
 			if b, dup := cd.builders[pdef.Name]; dup {
 				cd.env.errorf(file, pdef.Pos, "const %s redefined (previous at %s)", pdef.Name, fpString(b.def.File, b.def.Pos))
 				continue // keep going to catch more errors
 			}
-			def := &ConstDef{NamePos: NamePos(pdef.NamePos), File: file}
+			def := &ConstDef{NamePos: NamePos(pdef.NamePos), Exported: export, File: file}
 			cd.builders[pdef.Name] = &constBuilder{def, pdef.Expr}
 		}
 	}
@@ -111,7 +113,7 @@ func (cd constDefiner) SortAndDefine() {
 	for _, ibuilder := range sorted {
 		b := ibuilder.(*constBuilder)
 		def, file := b.def, b.def.File
-		if value := compileConst(b.pexpr, file, cd.env); value != nil {
+		if value := compileConst(nil, b.pexpr, file, cd.env); value != nil {
 			def.Value = value
 			addConstDef(def, cd.env)
 		}
@@ -123,8 +125,8 @@ func addConstDef(def *ConstDef, env *Env) {
 	def.File.ConstDefs = append(def.File.ConstDefs, def)
 	def.File.Package.constDefs[def.Name] = def
 	if env != nil {
-		// env should only be nil during initialization of the global package;
-		// NewEnv ensures new environments have the global types.
+		// env should only be nil during initialization of the built-in package;
+		// NewEnv ensures new environments have the built-in consts.
 		env.constDefs[def.Value] = def
 	}
 }
@@ -174,10 +176,11 @@ func mergeConstBuilderSets(a, b constBuilderSet) constBuilderSet {
 }
 
 // compileConst compiles pexpr into a *val.Value.  All named types and consts
-// referenced by pexpr must already be defined.
-func compileConst(pexpr parse.ConstExpr, file *File, env *Env) *val.Value {
+// referenced by pexpr must already be defined.  If implicit is non-nil, untyped
+// composite literals are assumed to be of that type.
+func compileConst(implicit *val.Type, pexpr parse.ConstExpr, file *File, env *Env) *val.Value {
 	// Evaluate pexpr into val.Const, and turn that into val.Value.
-	vc := evalConstExpr(nil, pexpr, file, env)
+	vc := evalConstExpr(implicit, pexpr, file, env)
 	if !vc.IsValid() {
 		return nil
 	}
@@ -191,16 +194,14 @@ func compileConst(pexpr parse.ConstExpr, file *File, env *Env) *val.Value {
 
 var bigRatZero = new(big.Rat)
 
-// evalConstExpr returns the result of evaluating pexpr into a val.Const.  The
-// given implicit type is used to enable evaluation of untyped composite
-// literals contained within an enclosing composite literal.
+// evalConstExpr returns the result of evaluating pexpr into a val.Const.  If
+// implicit is non-nil, untyped composite literals are assumed to be of that
+// type.
 func evalConstExpr(implicit *val.Type, pexpr parse.ConstExpr, file *File, env *Env) val.Const {
 	switch pe := pexpr.(type) {
 	case *parse.ConstLit:
 		// All literal constants start out untyped.
 		switch tlit := pe.Lit.(type) {
-		case bool:
-			return val.BooleanConst(tlit)
 		case string:
 			return val.StringConst(tlit)
 		case *big.Int:
@@ -215,8 +216,8 @@ func evalConstExpr(implicit *val.Type, pexpr parse.ConstExpr, file *File, env *E
 	case *parse.ConstCompositeLit:
 		t := implicit
 		if pe.Type != nil {
-			// An explicit type specified for the composite literal overrides the
-			// implicit type inferred from the enclosing type.
+			// If an explicit type is specified for the composite literal, it
+			// overrides the implicit type.
 			t = compileType(pe.Type, file, env)
 			if t == nil {
 				break
@@ -296,6 +297,8 @@ func evalCompLit(t *val.Type, lit *parse.ConstCompositeLit, file *File, env *Env
 	switch t.Kind() {
 	case val.List:
 		return evalListLit(t, lit, file, env)
+	case val.Set:
+		return evalSetLit(t, lit, file, env)
 	case val.Map:
 		return evalMapLit(t, lit, file, env)
 	case val.Struct:
@@ -324,12 +327,12 @@ func evalListLit(t *val.Type, lit *parse.ConstCompositeLit, file *File, env *Env
 			}
 			ckey, err := key.Convert(val.Uint64Type)
 			if err != nil {
-				env.prefixErrorf(file, kv.Key.Pos(), err, "invalid list key")
+				env.prefixErrorf(file, kv.Key.Pos(), err, "invalid index in list literal")
 				return nil
 			}
 			vkey, err := ckey.ToValue()
 			if err != nil {
-				env.prefixErrorf(file, kv.Key.Pos(), err, "invalid list key")
+				env.prefixErrorf(file, kv.Key.Pos(), err, "invalid index in list literal")
 				return nil
 			}
 			index = int(vkey.Uint())
@@ -345,7 +348,7 @@ func evalListLit(t *val.Type, lit *parse.ConstCompositeLit, file *File, env *Env
 			listv.AssignLen(index + 1)
 		}
 		// Evaluate the value and perform the assignment.
-		value := evalTypedValue(t.Elem(), kv.Value, file, env)
+		value := evalTypedValue("list value", t.Elem(), kv.Value, file, env)
 		if value == nil {
 			return nil
 		}
@@ -353,6 +356,31 @@ func evalListLit(t *val.Type, lit *parse.ConstCompositeLit, file *File, env *Env
 		index++
 	}
 	return listv
+}
+
+func evalSetLit(t *val.Type, lit *parse.ConstCompositeLit, file *File, env *Env) *val.Value {
+	setv := val.Zero(t)
+	for _, kv := range lit.KVList {
+		if kv.Key != nil {
+			env.errorf(file, kv.Key.Pos(), "invalid index in set literal")
+			return nil
+		}
+		if kv.Value == nil {
+			env.errorf(file, lit.Pos(), "missing key in set literal")
+			return nil
+		}
+		// Evaluate the key and make sure it hasn't been assigned already.
+		key := evalTypedValue("set key", t.Key(), kv.Value, file, env)
+		if key == nil {
+			return nil
+		}
+		if setv.ContainsKey(key) {
+			env.errorf(file, kv.Value.Pos(), "duplicate key %v in set literal", key)
+			return nil
+		}
+		setv.AssignSetKey(key)
+	}
+	return setv
 }
 
 func evalMapLit(t *val.Type, lit *parse.ConstCompositeLit, file *File, env *Env) *val.Value {
@@ -367,16 +395,16 @@ func evalMapLit(t *val.Type, lit *parse.ConstCompositeLit, file *File, env *Env)
 			return nil
 		}
 		// Evaluate the key and make sure it hasn't been assigned already.
-		key := evalTypedValue(t.Key(), kv.Key, file, env)
+		key := evalTypedValue("map key", t.Key(), kv.Key, file, env)
 		if key == nil {
 			return nil
 		}
-		if mapv.MapIndex(key) != nil {
+		if mapv.ContainsKey(key) {
 			env.errorf(file, kv.Key.Pos(), "duplicate key %v in map literal", key)
 			return nil
 		}
 		// Evaluate the value and perform the assignment.
-		value := evalTypedValue(t.Elem(), kv.Value, file, env)
+		value := evalTypedValue("map value", t.Elem(), kv.Value, file, env)
 		if value == nil {
 			return nil
 		}
@@ -428,7 +456,7 @@ func evalStructLit(t *val.Type, lit *parse.ConstCompositeLit, file *File, env *E
 		}
 		assigned[index] = true
 		// Evaluate the value and perform the assignment.
-		value := evalTypedValue(field.Type, kv.Value, file, env)
+		value := evalTypedValue("struct field", field.Type, kv.Value, file, env)
 		if value == nil {
 			return nil
 		}
@@ -444,7 +472,7 @@ func evalStructLit(t *val.Type, lit *parse.ConstCompositeLit, file *File, env *E
 // evalTypedValue evaluates pexpr into a val.Value.  If a non-nil value is
 // returned, it's guaranteed that the type of the returned value is assignable
 // to the given target type.
-func evalTypedValue(target *val.Type, pexpr parse.ConstExpr, file *File, env *Env) *val.Value {
+func evalTypedValue(what string, target *val.Type, pexpr parse.ConstExpr, file *File, env *Env) *val.Value {
 	c := evalConstExpr(target, pexpr, file, env)
 	if !c.IsValid() {
 		return nil
@@ -452,14 +480,14 @@ func evalTypedValue(target *val.Type, pexpr parse.ConstExpr, file *File, env *En
 	if c.Type() != nil {
 		// Typed const - confirm it may be assigned to the target type.
 		if !target.AssignableFrom(c.Type()) {
-			env.errorf(file, pexpr.Pos(), "%v not assignable from %v", target, c)
+			env.errorf(file, pexpr.Pos(), "invalid %v (%v not assignable from %v)", what, target, c)
 			return nil
 		}
 	} else {
 		// Untyped const - make it typed by converting to the target type.
 		convert, err := c.Convert(target)
 		if err != nil {
-			env.prefixErrorf(file, pexpr.Pos(), err, "invalid value")
+			env.prefixErrorf(file, pexpr.Pos(), err, "invalid %v", what)
 			return nil
 		}
 		c = convert
@@ -467,7 +495,13 @@ func evalTypedValue(target *val.Type, pexpr parse.ConstExpr, file *File, env *En
 	// ToValue should always succeed, since the const is now typed.
 	v, err := c.ToValue()
 	if err != nil {
-		env.prefixErrorf(file, pexpr.Pos(), err, "internal error")
+		env.prefixErrorf(file, pexpr.Pos(), err, "internal error: invalid %v")
 	}
 	return v
 }
+
+var (
+	// Built-in consts defined by the compiler.
+	TrueConst  = val.BoolValue(true)
+	FalseConst = val.BoolValue(false)
+)

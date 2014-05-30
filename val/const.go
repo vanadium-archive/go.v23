@@ -91,8 +91,14 @@ func ConstFromValue(v *Value) Const {
 	}
 	switch v.Kind() {
 	case Bool:
+		if v.Type() == BoolType { // Treat the standard bool as untyped bool.
+			return BooleanConst(v.Bool())
+		}
 		return Const{v.Bool(), v.Type()}
 	case String:
+		if v.Type() == StringType { // Treat the standard string as untyped string.
+			return StringConst(v.RawString())
+		}
 		return Const{v.RawString(), v.Type()}
 	case Byte:
 		return Const{new(big.Int).SetUint64(uint64(v.Byte())), v.Type()}

@@ -1,6 +1,7 @@
 package compile_test
 
 import (
+	"strings"
 	"testing"
 
 	"veyron2/val"
@@ -9,40 +10,83 @@ import (
 	"veyron2/vdl/vdltest"
 )
 
-func TestConst(t *testing.T) {
-	for _, test := range constTests {
-		env := compile.NewEnv(-1)
-		for _, tpkg := range test.Pkgs {
-			// Compile the package with a single file, and adding the "package foo"
-			// prefix to the source data automatically.
-			files := map[string]string{
-				tpkg.Name + ".vdl": "package " + tpkg.Name + "\n" + tpkg.Data,
-			}
-			buildPkg := vdltest.FakeBuildPackage(tpkg.Name, tpkg.Name, files)
-			pkg := build.CompilePackage(buildPkg, env)
-			vdltest.ExpectResult(t, env.Errors, test.Name, tpkg.ErrRE)
-			if pkg == nil || tpkg.ErrRE != "" {
-				continue
-			}
-			matchConstRes(t, test.Name, tpkg, pkg.Files[0].ConstDefs)
-		}
+func testConstPackage(t *testing.T, name string, tpkg constPkg, env *compile.Env) *compile.Package {
+	// Compile the package with a single file, and adding the "package foo"
+	// prefix to the source data automatically.
+	files := map[string]string{
+		tpkg.Name + ".vdl": "package " + tpkg.Name + "\n" + tpkg.Data,
 	}
+	buildPkg := vdltest.FakeBuildPackage(tpkg.Name, tpkg.Name, files)
+	pkg := build.CompilePackage(buildPkg, env)
+	vdltest.ExpectResult(t, env.Errors, name, tpkg.ErrRE)
+	if pkg == nil || tpkg.ErrRE != "" {
+		return nil
+	}
+	matchConstRes(t, name, tpkg, pkg.Files[0].ConstDefs)
+	return pkg
 }
 
-func matchConstRes(t *testing.T, tname string, cpkg constPkg, cdefs []*compile.ConstDef) {
-	if cpkg.ExpectRes == nil {
+func matchConstRes(t *testing.T, tname string, tpkg constPkg, cdefs []*compile.ConstDef) {
+	if tpkg.ExpectRes == nil {
 		return
 	}
 	// Look for a ConstDef called "Res" to compare our expected results.
 	for _, cdef := range cdefs {
 		if cdef.Name == "Res" {
-			if got, want := cdef.Value, cpkg.ExpectRes; !val.Equal(got, want) {
+			if got, want := cdef.Value, tpkg.ExpectRes; !val.Equal(got, want) {
 				t.Errorf("%s value got %s(%s), want %s(%s)", tname, got.Type(), got, want.Type(), want)
 			}
 			return
 		}
 	}
-	t.Errorf("%s couldn't find Res in package %s", tname, cpkg.Name)
+	t.Errorf("%s couldn't find Res in package %s", tname, tpkg.Name)
+}
+
+func testConfigFile(t *testing.T, name string, tpkg constPkg, env *compile.Env) {
+	// Take advantage of the fact that vdl files and config files have very
+	// similar syntax.  Just prefix the data with "config Res\n" rather than
+	// "package a\n" and we have a valid config file.
+	fname := tpkg.Name + ".config"
+	data := "config = Res\n" + tpkg.Data
+	config := build.CompileConfig(fname, strings.NewReader(data), nil, env)
+	vdltest.ExpectResult(t, env.Errors, name, tpkg.ErrRE)
+	if config == nil || tpkg.ErrRE != "" {
+		return
+	}
+	if got, want := config, tpkg.ExpectRes; !val.Equal(got, want) {
+		t.Errorf("%s value got %s(%s), want %s(%s)", name, got.Type(), got, want.Type(), want)
+	}
+}
+
+func TestConst(t *testing.T) {
+	for _, test := range constTests {
+		env := compile.NewEnv(-1)
+		for _, tpkg := range test.Pkgs {
+			testConstPackage(t, test.Name, tpkg, env)
+		}
+	}
+}
+
+func TestConfig(t *testing.T) {
+	for _, test := range constTests {
+		env := compile.NewEnv(-1)
+		// Compile all but the last tpkg as regular packages.
+		for _, tpkg := range test.Pkgs[:len(test.Pkgs)-1] {
+			testConstPackage(t, test.Name, tpkg, env)
+		}
+		// Compile the last tpkg as a regular package to see if it defines anything
+		// other than consts.
+		last := test.Pkgs[len(test.Pkgs)-1]
+		pkg := testConstPackage(t, test.Name, last, env)
+		if pkg == nil ||
+			len(pkg.Files[0].ErrorIDs) > 0 ||
+			len(pkg.Files[0].TypeDefs) > 0 ||
+			len(pkg.Files[0].Interfaces) > 0 {
+			continue // has non-const stuff, can't be a valid config file
+		}
+		// Finally compile the config file.
+		testConfigFile(t, test.Name, last, env)
+	}
 }
 
 func namedZero(name string, base *val.Type) *val.Value {
@@ -55,6 +99,14 @@ func makeIntList(vals ...int64) *val.Value {
 		listv.Index(index).AssignInt(v)
 	}
 	return listv
+}
+
+func makeStringSet(keys ...string) *val.Value {
+	setv := val.Zero(val.SetType(val.StringType))
+	for _, k := range keys {
+		setv.AssignSetKey(val.StringValue(k))
+	}
+	return setv
 }
 
 func makeStringIntMap(m map[string]int64) *val.Value {
@@ -123,7 +175,7 @@ var constTests = []struct {
 		cp{{"a", `const Res = 3.4+9.8i`, nil,
 			`final const invalid \(3\.4\+9\.8i must be assigned a type\)`}}},
 
-	// Test composite literals.
+	// Test list literals.
 	{
 		"IntList",
 		cp{{"a", `const Res = []int64{0,1,2}`, makeIntList(0, 1, 2), ""}}},
@@ -137,6 +189,26 @@ var constTests = []struct {
 		"IntListDupKey",
 		cp{{"a", `const Res = []int64{2:2, 1:1, 0}`, nil, "duplicate index 2 in list literal"}}},
 	{
+		"IntListInvalidIndex",
+		cp{{"a", `const Res = []int64{"a":2, 1:1, 2:2}`, nil, "invalid index"}}},
+	{
+		"IntListInvalidValue",
+		cp{{"a", `const Res = []int64{0,1,"c"}`, nil, "invalid list value"}}},
+	// Test set literals.
+	{
+		"StringSet",
+		cp{{"a", `const Res = set[string]{"a","b","c"}`, makeStringSet("a", "b", "c"), ""}}},
+	{
+		"StringSetInvalidIndex",
+		cp{{"a", `const Res = set[string]{"a","b","c":3}`, nil, "invalid index"}}},
+	{
+		"StringSetDupKey",
+		cp{{"a", `const Res = set[string]{"a","b","b"}`, nil, "duplicate key"}}},
+	{
+		"StringSetInvalidKey",
+		cp{{"a", `const Res = set[string]{"a","b",3}`, nil, "invalid set key"}}},
+	// Test map literals.
+	{
 		"StringIntMap",
 		cp{{"a", `const Res = map[string]int64{"a":1, "b":2, "c":3}`, makeStringIntMap(map[string]int64{"a": 1, "b": 2, "c": 3}), ""}}},
 	{
@@ -145,6 +217,13 @@ var constTests = []struct {
 	{
 		"StringIntMapDupKey",
 		cp{{"a", `const Res = map[string]int64{"a":1, "b":2, "a":3}`, nil, "duplicate key"}}},
+	{
+		"StringIntMapInvalidKey",
+		cp{{"a", `const Res = map[string]int64{"a":1, "b":2, 3:3}`, nil, "invalid map key"}}},
+	{
+		"StringIntMapInvalidValue",
+		cp{{"a", `const Res = map[string]int64{"a":1, "b":2, "c":"c"}`, nil, "invalid map value"}}},
+	// Test struct literals.
 	{
 		"StructNoKeys",
 		cp{{"a", `type A struct{X int64;Y string;Z bool}; const Res = A{1,"b",true}`, makeStruct("a.A", 1, "b", true), ""}}},
@@ -172,6 +251,9 @@ var constTests = []struct {
 	{
 		"StructTooFewFields",
 		cp{{"a", `type A struct{X int64;Y string;Z bool}; const Res = A{1,"b"}`, nil, `too few fields in a.A struct literal`}}},
+	{
+		"StructInvalidField",
+		cp{{"a", `type A struct{X int64;Y string;Z bool}; const Res = A{Y:1}`, nil, "invalid struct field"}}},
 	{
 		"ImplicitSubTypes",
 		cp{{"a", `type A struct{X int64;Y string}; type B struct{Z []A}; const Res = B{{{1, "a"}, A{X:2,Y:"b"}}}`, makeABStruct(), ""}}},
@@ -245,34 +327,34 @@ var constTests = []struct {
 	// Test named consts.
 	{
 		"NamedBool",
-		cp{{"a", `const Foo = true;const Res = Foo`, val.BoolValue(true), ""}}},
+		cp{{"a", `const foo = true;const Res = foo`, val.BoolValue(true), ""}}},
 	{
 		"NamedString",
-		cp{{"a", `const Foo = "abc";const Res = Foo`, val.StringValue("abc"), ""}}},
+		cp{{"a", `const foo = "abc";const Res = foo`, val.StringValue("abc"), ""}}},
 	{
 		"NamedInt32",
-		cp{{"a", `const Foo = int32(123);const Res = Foo`, val.Int32Value(123), ""}}},
+		cp{{"a", `const foo = int32(123);const Res = foo`, val.Int32Value(123), ""}}},
 	{
 		"NamedFloat32",
-		cp{{"a", `const Foo = float32(1.5);const Res = Foo`, val.Float32Value(1.5), ""}}},
+		cp{{"a", `const foo = float32(1.5);const Res = foo`, val.Float32Value(1.5), ""}}},
 	{
 		"NamedComplex64",
-		cp{{"a", `const Foo = complex64(3+2i);const Res = Foo`, val.Complex64Value(3 + 2i), ""}}},
+		cp{{"a", `const foo = complex64(3+2i);const Res = foo`, val.Complex64Value(3 + 2i), ""}}},
 	{
 		"NamedUserBool",
-		cp{{"a", `type Bool bool;const Foo = Bool(true);const Res = Foo`,
+		cp{{"a", `type Bool bool;const foo = Bool(true);const Res = foo`,
 			namedZero("a.Bool", val.BoolType).AssignBool(true), ""}}},
 	{
 		"NamedUserString",
-		cp{{"a", `type Str string;const Foo = Str("abc");const Res = Foo`,
+		cp{{"a", `type Str string;const foo = Str("abc");const Res = foo`,
 			namedZero("a.Str", val.StringType).AssignString("abc"), ""}}},
 	{
 		"NamedUserInt32",
-		cp{{"a", `type Int int32;const Foo = Int(123);const Res = Foo`,
+		cp{{"a", `type Int int32;const foo = Int(123);const Res = foo`,
 			namedZero("a.Int", val.Int32Type).AssignInt(123), ""}}},
 	{
 		"NamedUserFloat32",
-		cp{{"a", `type Flt float32;const Foo = Flt(1.5);const Res = Foo`,
+		cp{{"a", `type Flt float32;const foo = Flt(1.5);const Res = foo`,
 			namedZero("a.Flt", val.Float32Type).AssignFloat(1.5), ""}}},
 	{
 		"ConstNamedI",
@@ -305,16 +387,16 @@ var constTests = []struct {
 		cp{{"a", `type Int int32;const Res = Int(^1)`, namedZero("a.Int", val.Int32Type).AssignInt(-2), ""}}},
 	{
 		"NamedNot",
-		cp{{"a", `const Foo = bool(true);const Res = !Foo`, val.BoolValue(false), ""}}},
+		cp{{"a", `const foo = bool(true);const Res = !foo`, val.BoolValue(false), ""}}},
 	{
 		"NamedPos",
-		cp{{"a", `const Foo = int32(123);const Res = +Foo`, val.Int32Value(123), ""}}},
+		cp{{"a", `const foo = int32(123);const Res = +foo`, val.Int32Value(123), ""}}},
 	{
 		"NamedNeg",
-		cp{{"a", `const Foo = int32(123);const Res = -Foo`, val.Int32Value(-123), ""}}},
+		cp{{"a", `const foo = int32(123);const Res = -foo`, val.Int32Value(-123), ""}}},
 	{
 		"NamedComplement",
-		cp{{"a", `const Foo = int32(1);const Res = ^Foo`, val.Int32Value(-2), ""}}},
+		cp{{"a", `const foo = int32(1);const Res = ^foo`, val.Int32Value(-2), ""}}},
 	{
 		"ErrNot",
 		cp{{"a", `const Res = !1`, nil, `unary \! invalid \(untyped integer not supported\)`}}},
@@ -623,8 +705,11 @@ var constTests = []struct {
 		{"a", `const Res = true`, val.BoolValue(true), ""},
 		{"b", `const Res = true`, val.BoolValue(true), ""}}},
 	{"MultiPkgDep", cp{
-		{"a", `const Res = true`, val.BoolValue(true), ""},
+		{"a", `const Res = x;const x = true`, val.BoolValue(true), ""},
 		{"b", `import "a";const Res = a.Res && false`, val.BoolValue(false), ""}}},
+	{"MultiPkgUnexportedConst", cp{
+		{"a", `const Res = x;const x = true`, val.BoolValue(true), ""},
+		{"b", `import "a";const Res = a.x && false`, nil, "const a.x undefined"}}},
 	{"MultiPkgSamePkgName", cp{
 		{"a", `const Res = true`, val.BoolValue(true), ""},
 		{"a", `const Res = true`, nil, "invalid recompile"}}},

@@ -225,8 +225,8 @@ func typeGo(data goData, t *val.Type) string {
 			return "_gen_vdl.Any"
 		case t == val.TypeValType:
 			return "*_gen_val.Type"
-		case def.File == compile.GlobalFile:
-			// Global primitives just use their name.
+		case def.File == compile.BuiltInFile:
+			// Built-in primitives just use their name.
 			return def.Name
 		}
 		return qualifiedName(data, def.Name, def.File)

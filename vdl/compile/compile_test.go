@@ -11,20 +11,19 @@ import (
 	"veyron2/vdl/vdltest"
 )
 
-func TestValidIdent(t *testing.T) {
-	const errInvalidID = "invalid identifier"
+func TestValidExportedIdent(t *testing.T) {
 	tests := []struct {
 		ident  string
 		errstr string
 	}{
-		{"", errInvalidID},
-		{"xFirstLetterLower", errInvalidID},
-		{"0FirstLetterDigit", errInvalidID},
-		{"_FirstLetterPunct", errInvalidID},
-		{" FirstLetterSpace", errInvalidID},
-		{"X.InvalidPunct", errInvalidID},
-		{"X InvalidSpace", errInvalidID},
-		{"X\nNonAlphaNum", errInvalidID},
+		{"", `"" invalid`},
+		{"xFirstLetterLower", `"xFirstLetterLower" must be exported`},
+		{"0FirstLetterDigit", `"0FirstLetterDigit" invalid`},
+		{"_FirstLetterPunct", `"_FirstLetterPunct" invalid`},
+		{" FirstLetterSpace", `" FirstLetterSpace" invalid`},
+		{"X.InvalidPunct", `"X.InvalidPunct" invalid`},
+		{"X InvalidSpace", `"X InvalidSpace" invalid`},
+		{"X\nNonAlphaNum", `"X\nNonAlphaNum" invalid`},
 		{"X", ""},
 		{"XYZ", ""},
 		{"Xyz", ""},
@@ -32,49 +31,52 @@ func TestValidIdent(t *testing.T) {
 		{"Xyz_123", ""},
 	}
 	for _, test := range tests {
-		err := compile.ValidIdent(test.ident)
+		err := compile.ValidExportedIdent(test.ident)
 		errstr := fmt.Sprint(err)
 		if test.errstr != "" && !strings.Contains(errstr, test.errstr) {
-			t.Errorf(`ValidIdent(%s) got error %q, want substr %q`, test.ident, errstr, test.errstr)
+			t.Errorf(`ValidExportedIdent(%s) got error %q, want substr %q`, test.ident, errstr, test.errstr)
 		}
 		if test.errstr == "" && err != nil {
-			t.Errorf(`ValidIdent(%s) got error %q, want nil`, test.ident, errstr)
+			t.Errorf(`ValidExportedIdent(%s) got error %q, want nil`, test.ident, errstr)
 		}
 	}
 }
 
-func TestValidArgName(t *testing.T) {
-	const errInvalidArgName = "invalid arg name"
+func TestValidIdent(t *testing.T) {
 	tests := []struct {
-		name   string
-		errstr string
+		name     string
+		exported bool
+		errstr   string
 	}{
-		{"", errInvalidArgName},
-		{"0FirstLetterDigit", errInvalidArgName},
-		{"_FirstLetterPunct", errInvalidArgName},
-		{" FirstLetterSpace", errInvalidArgName},
-		{"x.InvalidPunct", errInvalidArgName},
-		{"x InvalidSpace", errInvalidArgName},
-		{"x\nNonAlphaNum", errInvalidArgName},
-		{"X", ""},
-		{"XYZ", ""},
-		{"Xyz", ""},
-		{"Xyz123", ""},
-		{"Xyz_123", ""},
-		{"x", ""},
-		{"xYZ", ""},
-		{"xyz", ""},
-		{"xyz123", ""},
-		{"xyz_123", ""},
+		{"", false, `"" invalid`},
+		{"0FirstLetterDigit", false, `"0FirstLetterDigit" invalid`},
+		{"_FirstLetterPunct", false, `"_FirstLetterPunct" invalid`},
+		{" FirstLetterSpace", false, `" FirstLetterSpace" invalid`},
+		{"x.InvalidPunct", false, `"x.InvalidPunct" invalid`},
+		{"x InvalidSpace", false, `"x InvalidSpace" invalid`},
+		{"x\nNonAlphaNum", false, `"x\nNonAlphaNum" invalid`},
+		{"X", true, ""},
+		{"XYZ", true, ""},
+		{"Xyz", true, ""},
+		{"Xyz123", true, ""},
+		{"Xyz_123", true, ""},
+		{"x", false, ""},
+		{"xYZ", false, ""},
+		{"xyz", false, ""},
+		{"xyz123", false, ""},
+		{"xyz_123", false, ""},
 	}
 	for _, test := range tests {
-		err := compile.ValidArgName(test.name)
+		exported, err := compile.ValidIdent(test.name)
 		errstr := fmt.Sprint(err)
 		if test.errstr != "" && !strings.Contains(errstr, test.errstr) {
-			t.Errorf(`ValidArgName(%s) got error %q, want substr %q`, test.name, errstr, test.errstr)
+			t.Errorf(`ValidIdent(%s) got error %q, want substr %q`, test.name, errstr, test.errstr)
 		}
 		if test.errstr == "" && err != nil {
-			t.Errorf(`ValidArgName(%s) got error %q, want nil`, test.name, errstr)
+			t.Errorf(`ValidIdent(%s) got error %q, want nil`, test.name, errstr)
+		}
+		if got, want := exported, test.exported; got != want {
+			t.Errorf(`ValidIdent(%s) got exported %v, want %v`, test.name, got, want)
 		}
 	}
 }

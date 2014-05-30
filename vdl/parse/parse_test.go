@@ -13,13 +13,6 @@ import (
 	"veyron2/vdl/vdltest"
 )
 
-type parseTest struct {
-	name   string
-	src    string
-	expect *parse.File
-	errors []string
-}
-
 func pos(line, col int) parse.Pos {
 	return parse.Pos{line, col}
 }
@@ -32,14 +25,107 @@ func tn(name string, line, col int) *parse.TypeNamed {
 	return &parse.TypeNamed{Name: name, P: pos(line, col)}
 }
 
-// importTests contains tests of stuff up to and including the imports.
-var importTests = []parseTest{
-	// Empty file isn't allowed (need at least a package).
+// Tests of vdl imports and file parsing.
+type vdlTest struct {
+	name   string
+	src    string
+	expect *parse.File
+	errors []string
+}
+
+func testParseVDL(t *testing.T, test vdlTest, opts parse.Opts) {
+	errs := vdl.NewErrors(-1)
+	actual := parse.Parse("testfile", strings.NewReader(test.src), opts, errs)
+	vdltest.ExpectResult(t, errs, test.name, test.errors...)
+	if !reflect.DeepEqual(test.expect, actual) {
+		t.Errorf("%v\nEXPECT %+v\nACTUAL %+v", test.name, test.expect, actual)
+	}
+}
+
+func TestParseVDLImports(t *testing.T) {
+	for _, test := range vdlImportsTests {
+		testParseVDL(t, test, parse.Opts{ImportsOnly: true})
+	}
+	for _, test := range vdlFileTests {
+		// We only run the success tests from vdlFileTests on the imports only
+		// parser, since the failure tests are testing failures in stuff after the
+		// imports, which won't cause failures in the imports only parser.
+		//
+		// The imports-only parser isn't supposed to fill in fields after the
+		// imports, so we clear them from the expected result.  We must copy the
+		// file to ensure the actual vdlTests isn't overwritten since the
+		// full-parser tests needs the full expectations.  The test itself doesn't
+		// need to be copied, since it's already copied in the range-for.
+		if test.expect != nil {
+			copyFile := *test.expect
+			test.expect = &copyFile
+			test.expect.TypeDefs = nil
+			test.expect.ConstDefs = nil
+			test.expect.ErrorIDs = nil
+			test.expect.Interfaces = nil
+			testParseVDL(t, test, parse.Opts{ImportsOnly: true})
+		}
+	}
+}
+
+func TestParseVDLFile(t *testing.T) {
+	for _, test := range append(vdlImportsTests, vdlFileTests...) {
+		testParseVDL(t, test, parse.Opts{ImportsOnly: false})
+	}
+}
+
+// Tests of config imports and file parsing.
+type configTest struct {
+	name   string
+	src    string
+	expect *parse.Config
+	errors []string
+}
+
+func testParseConfig(t *testing.T, test configTest, opts parse.Opts) {
+	errs := vdl.NewErrors(-1)
+	actual := parse.ParseConfig("testfile", strings.NewReader(test.src), opts, errs)
+	vdltest.ExpectResult(t, errs, test.name, test.errors...)
+	if !reflect.DeepEqual(test.expect, actual) {
+		t.Errorf("%v\nEXPECT %+v\nACTUAL %+v", test.name, test.expect, actual)
+	}
+}
+
+func TestParseConfigImports(t *testing.T) {
+	for _, test := range configTests {
+		// We only run the success tests from configTests on the imports only
+		// parser, since the failure tests are testing failures in stuff after the
+		// imports, which won't cause failures in the imports only parser.
+		//
+		// The imports-only parser isn't supposed to fill in fields after the
+		// imports, so we clear them from the expected result.  We must copy the
+		// file to ensure the actual configTests isn't overwritten since the
+		// full-parser tests needs the full expectations.  The test itself doesn't
+		// need to be copied, since it's already copied in the range-for.
+		if test.expect != nil {
+			copyConfig := *test.expect
+			test.expect = &copyConfig
+			test.expect.Config = nil
+			test.expect.ConstDefs = nil
+			testParseConfig(t, test, parse.Opts{ImportsOnly: true})
+		}
+	}
+}
+
+func TestParseConfig(t *testing.T) {
+	for _, test := range configTests {
+		testParseConfig(t, test, parse.Opts{ImportsOnly: false})
+	}
+}
+
+// vdlImportsTests contains tests of stuff up to and including the imports.
+var vdlImportsTests = []vdlTest{
+	// Empty file isn't allowed (need at least a package clause).
 	{
 		"FAILEmptyFile",
 		"",
 		nil,
-		[]string{"file must start with package statement"}},
+		[]string{"vdl file must start with package clause"}},
 
 	// Comment tests.
 	{
@@ -160,8 +246,8 @@ import (
 		[]string{"testfile:3:12 syntax error"}},
 }
 
-// fullTests contains tests of stuff after the imports.
-var fullTests = []parseTest{
+// vdlFileTests contains tests of stuff after the imports.
+var vdlFileTests = []vdlTest{
 	// Data type tests.
 	{
 		"TypeNamed",
@@ -309,8 +395,8 @@ const foo = true
 const bar = false`,
 		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
 			ConstDefs: []*parse.ConstDef{
-				{NamePos: np("foo", 2, 7), Expr: &parse.ConstLit{true, pos(2, 13)}},
-				{NamePos: np("bar", 3, 7), Expr: &parse.ConstLit{false, pos(3, 13)}}}},
+				{NamePos: np("foo", 2, 7), Expr: &parse.ConstNamed{"true", pos(2, 13)}},
+				{NamePos: np("bar", 3, 7), Expr: &parse.ConstNamed{"false", pos(3, 13)}}}},
 		nil},
 	{
 		"StringConst",
@@ -347,6 +433,56 @@ const bar = pkg.box`,
 				{NamePos: np("bar", 3, 7), Expr: &parse.ConstNamed{"pkg.box", pos(3, 13)}}}},
 		nil},
 	{
+		"CompLitConst",
+		`package testpkg
+const foo = {"a","b"}`,
+		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
+			ConstDefs: []*parse.ConstDef{
+				{NamePos: np("foo", 2, 7), Expr: &parse.ConstCompositeLit{
+					KVList: []parse.KVLit{
+						{Value: &parse.ConstLit{"a", pos(2, 14)}},
+						{Value: &parse.ConstLit{"b", pos(2, 18)}}},
+					P: pos(2, 13)}}}},
+		nil},
+	{
+		"CompLitKVConst",
+		`package testpkg
+const foo = {"a":1,"b":2}`,
+		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
+			ConstDefs: []*parse.ConstDef{
+				{NamePos: np("foo", 2, 7), Expr: &parse.ConstCompositeLit{
+					KVList: []parse.KVLit{
+						{&parse.ConstLit{"a", pos(2, 14)}, &parse.ConstLit{big.NewInt(1), pos(2, 18)}},
+						{&parse.ConstLit{"b", pos(2, 20)}, &parse.ConstLit{big.NewInt(2), pos(2, 24)}}},
+					P: pos(2, 13)}}}},
+		nil},
+	{
+		"CompLitTypedConst",
+		`package testpkg
+const foo = bar{"a","b"}`,
+		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
+			ConstDefs: []*parse.ConstDef{
+				{NamePos: np("foo", 2, 7), Expr: &parse.ConstCompositeLit{
+					Type: tn("bar", 2, 13),
+					KVList: []parse.KVLit{
+						{Value: &parse.ConstLit{"a", pos(2, 17)}},
+						{Value: &parse.ConstLit{"b", pos(2, 21)}}},
+					P: pos(2, 16)}}}},
+		nil},
+	{
+		"CompLitKVTypedConst",
+		`package testpkg
+const foo = bar{"a":1,"b":2}`,
+		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
+			ConstDefs: []*parse.ConstDef{
+				{NamePos: np("foo", 2, 7), Expr: &parse.ConstCompositeLit{
+					Type: tn("bar", 2, 13),
+					KVList: []parse.KVLit{
+						{&parse.ConstLit{"a", pos(2, 17)}, &parse.ConstLit{big.NewInt(1), pos(2, 21)}},
+						{&parse.ConstLit{"b", pos(2, 23)}, &parse.ConstLit{big.NewInt(2), pos(2, 27)}}},
+					P: pos(2, 16)}}}},
+		nil},
+	{
 		"UnaryOpConst",
 		`package testpkg
 const foo = !false
@@ -356,7 +492,7 @@ const box = ^3`,
 		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
 			ConstDefs: []*parse.ConstDef{
 				{NamePos: np("foo", 2, 7), Expr: &parse.ConstUnaryOp{"!",
-					&parse.ConstLit{false, pos(2, 14)}, pos(2, 13)}},
+					&parse.ConstNamed{"false", pos(2, 14)}, pos(2, 13)}},
 				{NamePos: np("bar", 3, 7), Expr: &parse.ConstUnaryOp{"+",
 					&parse.ConstLit{big.NewInt(1), pos(3, 14)}, pos(3, 13)}},
 				{NamePos: np("baz", 4, 7), Expr: &parse.ConstUnaryOp{"-",
@@ -372,9 +508,9 @@ const bar = pkg.box(false)`,
 		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
 			ConstDefs: []*parse.ConstDef{
 				{NamePos: np("foo", 2, 7), Expr: &parse.ConstTypeConv{tn("baz", 2, 13),
-					&parse.ConstLit{true, pos(2, 17)}, pos(2, 13)}},
+					&parse.ConstNamed{"true", pos(2, 17)}, pos(2, 13)}},
 				{NamePos: np("bar", 3, 7), Expr: &parse.ConstTypeConv{tn("pkg.box", 3, 13),
-					&parse.ConstLit{false, pos(3, 21)}, pos(3, 13)}}}},
+					&parse.ConstNamed{"false", pos(3, 21)}, pos(3, 13)}}}},
 		nil},
 	{
 		"BinaryOpConst",
@@ -400,11 +536,11 @@ const r = 3 >> 2`,
 		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
 			ConstDefs: []*parse.ConstDef{
 				{NamePos: np("a", 2, 7),
-					Expr: &parse.ConstBinaryOp{"||", &parse.ConstLit{true, pos(2, 11)},
-						&parse.ConstLit{false, pos(2, 19)}, pos(2, 16)}},
+					Expr: &parse.ConstBinaryOp{"||", &parse.ConstNamed{"true", pos(2, 11)},
+						&parse.ConstNamed{"false", pos(2, 19)}, pos(2, 16)}},
 				{NamePos: np("b", 3, 7),
-					Expr: &parse.ConstBinaryOp{"&&", &parse.ConstLit{true, pos(3, 11)},
-						&parse.ConstLit{false, pos(3, 19)}, pos(3, 16)}},
+					Expr: &parse.ConstBinaryOp{"&&", &parse.ConstNamed{"true", pos(3, 11)},
+						&parse.ConstNamed{"false", pos(3, 19)}, pos(3, 16)}},
 				{NamePos: np("c", 4, 7),
 					Expr: &parse.ConstBinaryOp{"<", &parse.ConstLit{big.NewInt(1), pos(4, 11)},
 						&parse.ConstLit{big.NewInt(2), pos(4, 15)}, pos(4, 13)}},
@@ -612,43 +748,265 @@ type foo interface{
 			"testfile:3:18 perhaps you forgot a comma"}},
 }
 
-func testParse(t *testing.T, test parseTest, opts parse.Opts) {
-	errs := vdl.NewErrors(100)
-	actual := parse.Parse("testfile", strings.NewReader(test.src), opts, errs)
-	vdltest.ExpectResult(t, errs, test.name, test.errors...)
-	if !reflect.DeepEqual(test.expect, actual) {
-		t.Errorf("%v\nEXPECT %+v\nACTUAL %+v", test.name, test.expect, actual)
-	}
-}
+// configTests contains tests of config files.
+var configTests = []configTest{
+	// Empty file isn't allowed (need at least a package clause).
+	{
+		"FAILEmptyFile",
+		"",
+		nil,
+		[]string{"config file must start with config clause"}},
 
-func TestImportsOnlyParser(t *testing.T) {
-	for _, test := range importTests {
-		testParse(t, test, parse.Opts{ImportsOnly: true})
-	}
-	for _, test := range fullTests {
-		// We only run the success tests from fullTests on the imports only parser,
-		// since the failure tests are testing failures in stuff after the imports,
-		// which won't cause failures in the imports only parser.
-		//
-		// The imports-only parser isn't supposed to fill in fields after the
-		// imports, so we clear them from the expected result.  We must copy the
-		// file to ensure the actual parseTests isn't overwritten since the
-		// full-parser tests needs the full expectations.  The test itself doesn't
-		// need to be copied, since it's already copied in the range-for.
-		if test.expect != nil {
-			copyFile := *test.expect
-			test.expect = &copyFile
-			test.expect.TypeDefs = nil
-			test.expect.ConstDefs = nil
-			test.expect.ErrorIDs = nil
-			test.expect.Interfaces = nil
-			testParse(t, test, parse.Opts{ImportsOnly: true})
-		}
-	}
-}
+	// Comment tests.
+	{
+		"ConfigDocOneLiner",
+		`// One liner
+// Another line
+config = true`,
+		&parse.Config{BaseName: "testfile", ConfigDef: parse.NamePos{Name: "config", Pos: pos(3, 1), Doc: `// One liner
+// Another line
+`},
+			Config: &parse.ConstNamed{"true", pos(3, 10)}},
+		nil},
+	{
+		"ConfigDocMultiLiner",
+		`/* Multi liner
+Another line
+*/
+config = true`,
+		&parse.Config{BaseName: "testfile", ConfigDef: parse.NamePos{Name: "config", Pos: pos(4, 1), Doc: `/* Multi liner
+Another line
+*/
+`},
+			Config: &parse.ConstNamed{"true", pos(4, 10)}},
+		nil},
+	{
+		"NotConfigDoc",
+		`// Extra newline, not config doc
 
-func TestFullParser(t *testing.T) {
-	for _, test := range append(importTests, fullTests...) {
-		testParse(t, test, parse.Opts{ImportsOnly: false})
-	}
+config = true`,
+		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 3, 1),
+			Config: &parse.ConstNamed{"true", pos(3, 10)}},
+		nil},
+	{
+		"FAILUnterminatedComment",
+		`/* Unterminated
+Another line
+config = true`,
+		nil,
+		[]string{"comment not terminated"}},
+
+	// Config tests.
+	{
+		"Config",
+		"config = true;",
+		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
+			Config: &parse.ConstNamed{"true", pos(1, 10)}},
+		nil},
+	{
+		"ConfigNoSemi",
+		"config = true",
+		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
+			Config: &parse.ConstNamed{"true", pos(1, 10)}},
+		nil},
+	{
+		"ConfigNamedConfig",
+		"config = config",
+		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
+			Config: &parse.ConstNamed{"config", pos(1, 10)}},
+		nil},
+	{
+		"FAILConfigNoEqual",
+		"config true",
+		nil,
+		[]string{"testfile:1:8 syntax error"}},
+
+	// Import tests.
+	{
+		"EmptyImport",
+		`config = foo
+import (
+)`,
+		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
+			Config: &parse.ConstNamed{"foo", pos(1, 10)}},
+		nil},
+	{
+		"OneImport",
+		`config = foo
+import "foo/bar";`,
+		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
+			Imports: []*parse.Import{{Path: "foo/bar", NamePos: np("", 2, 8)}},
+			Config:  &parse.ConstNamed{"foo", pos(1, 10)}},
+		nil},
+	{
+		"OneImportLocalNameNoSemi",
+		`config = foo
+import baz "foo/bar"`,
+		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
+			Imports: []*parse.Import{{Path: "foo/bar", NamePos: np("baz", 2, 8)}},
+			Config:  &parse.ConstNamed{"foo", pos(1, 10)}},
+		nil},
+	{
+		"OneImportParens",
+		`config = foo
+import (
+  "foo/bar";
+)`,
+		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
+			Imports: []*parse.Import{{Path: "foo/bar", NamePos: np("", 3, 3)}},
+			Config:  &parse.ConstNamed{"foo", pos(1, 10)}},
+		nil},
+	{
+		"OneImportParensNoSemi",
+		`config = foo
+import (
+  "foo/bar"
+)`,
+		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
+			Imports: []*parse.Import{{Path: "foo/bar", NamePos: np("", 3, 3)}},
+			Config:  &parse.ConstNamed{"foo", pos(1, 10)}},
+		nil},
+	{
+		"OneImportParensNamed",
+		`config = foo
+import (
+  baz "foo/bar"
+)`,
+		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
+			Imports: []*parse.Import{{Path: "foo/bar", NamePos: np("baz", 3, 3)}},
+			Config:  &parse.ConstNamed{"foo", pos(1, 10)}},
+		nil},
+	{
+		"MixedImports",
+		`config = foo
+import "foo/bar"
+import (
+  "baz";"a/b"
+  "c/d"
+)
+import "z"`,
+		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
+			Imports: []*parse.Import{
+				{Path: "foo/bar", NamePos: np("", 2, 8)},
+				{Path: "baz", NamePos: np("", 4, 3)},
+				{Path: "a/b", NamePos: np("", 4, 9)},
+				{Path: "c/d", NamePos: np("", 5, 3)},
+				{Path: "z", NamePos: np("", 7, 8)}},
+			Config: &parse.ConstNamed{"foo", pos(1, 10)}},
+		nil},
+	{
+		"FAILImportParensNotClosed",
+		`config = foo
+import (
+  "foo/bar"`,
+		nil,
+		[]string{"testfile:3:12 syntax error"}},
+
+	// Inline config tests.
+	{
+		"BoolConst",
+		`config = true`,
+		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
+			Config: &parse.ConstNamed{"true", pos(1, 10)}},
+		nil},
+	{
+		"StringConst",
+		`config = "abc"`,
+		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
+			Config: &parse.ConstLit{"abc", pos(1, 10)}},
+		nil},
+	{
+		"IntegerConst",
+		`config = 123`,
+		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
+			Config: &parse.ConstLit{big.NewInt(123), pos(1, 10)}},
+		nil},
+	{
+		"FloatConst",
+		`config = 1.5`,
+		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
+			Config: &parse.ConstLit{big.NewRat(3, 2), pos(1, 10)}},
+		nil},
+	{
+		"NamedConst",
+		`config = pkg.foo`,
+		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
+			Config: &parse.ConstNamed{"pkg.foo", pos(1, 10)}},
+		nil},
+	{
+		"CompLitConst",
+		`config = {"a","b"}`,
+		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
+			Config: &parse.ConstCompositeLit{
+				KVList: []parse.KVLit{
+					{Value: &parse.ConstLit{"a", pos(1, 11)}},
+					{Value: &parse.ConstLit{"b", pos(1, 15)}}},
+				P: pos(1, 10)}},
+		nil},
+	{
+		"CompLitKVConst",
+		`config = {"a":1,"b":2}`,
+		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
+			Config: &parse.ConstCompositeLit{
+				KVList: []parse.KVLit{
+					{&parse.ConstLit{"a", pos(1, 11)}, &parse.ConstLit{big.NewInt(1), pos(1, 15)}},
+					{&parse.ConstLit{"b", pos(1, 17)}, &parse.ConstLit{big.NewInt(2), pos(1, 21)}}},
+				P: pos(1, 10)}},
+		nil},
+	{
+		"CompLitTypedConst",
+		`config = foo{"a","b"}`,
+		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
+			Config: &parse.ConstCompositeLit{
+				Type: tn("foo", 1, 10),
+				KVList: []parse.KVLit{
+					{Value: &parse.ConstLit{"a", pos(1, 14)}},
+					{Value: &parse.ConstLit{"b", pos(1, 18)}}},
+				P: pos(1, 13)}},
+		nil},
+	{
+		"CompLitKVTypedConst",
+		`config = foo{"a":1,"b":2}`,
+		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
+			Config: &parse.ConstCompositeLit{
+				Type: tn("foo", 1, 10),
+				KVList: []parse.KVLit{
+					{&parse.ConstLit{"a", pos(1, 14)}, &parse.ConstLit{big.NewInt(1), pos(1, 18)}},
+					{&parse.ConstLit{"b", pos(1, 20)}, &parse.ConstLit{big.NewInt(2), pos(1, 24)}}},
+				P: pos(1, 13)}},
+		nil},
+	{
+		"FAILConstNoEquals",
+		`config 123`,
+		nil,
+		[]string{"testfile:1:8 syntax error"}},
+	{
+		"FAILConstNoValue",
+		`config =`,
+		nil,
+		[]string{"testfile:1:9 syntax error"}},
+
+	// Out-of-line config tests.
+	{
+		"BoolOutOfLineConfig",
+		`config = config
+import "foo"
+const config = true`,
+		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
+			Imports: []*parse.Import{{Path: "foo", NamePos: np("", 2, 8)}},
+			Config:  &parse.ConstNamed{"config", pos(1, 10)},
+			ConstDefs: []*parse.ConstDef{
+				{NamePos: np("config", 3, 7), Expr: &parse.ConstNamed{"true", pos(3, 16)}}}},
+		nil},
+	{
+		"BoolOutOfLineBar",
+		`config = bar
+import "foo"
+const bar = true`,
+		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
+			Imports: []*parse.Import{{Path: "foo", NamePos: np("", 2, 8)}},
+			Config:  &parse.ConstNamed{"bar", pos(1, 10)},
+			ConstDefs: []*parse.ConstDef{
+				{NamePos: np("bar", 3, 7), Expr: &parse.ConstNamed{"true", pos(3, 13)}}}},
+		nil},
 }

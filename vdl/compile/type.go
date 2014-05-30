@@ -10,8 +10,9 @@ import (
 // TypeDef represents a user-defined named type definition in the compiled
 // results.
 type TypeDef struct {
-	NamePos           // name, parse position and docs
-	Type    *val.Type // type of this type definition
+	NamePos            // name, parse position and docs
+	Exported bool      // is this type definition exported?
+	Type     *val.Type // type of this type definition
 
 	// BaseType is the type that Type is based on.  The BaseType may be named or
 	// unnamed.  E.g.
@@ -95,12 +96,13 @@ func (td typeDefiner) Declare() {
 }
 
 func (td typeDefiner) makeTypeDefBuilder(file *File, pdef *parse.TypeDef) *typeDefBuilder {
-	if err := ValidIdent(pdef.Name); err != nil {
+	export, err := ValidIdent(pdef.Name)
+	if err != nil {
 		td.env.prefixErrorf(file, pdef.Pos, err, "type %s invalid name", pdef.Name)
 		return nil
 	}
 	ret := new(typeDefBuilder)
-	ret.def = &TypeDef{NamePos: NamePos(pdef.NamePos), File: file}
+	ret.def = &TypeDef{NamePos: NamePos(pdef.NamePos), Exported: export, File: file}
 	ret.ptype = pdef.Type
 	// We use the qualified name to actually name the type, to ensure types
 	// defined in separate packages are hash-consed separately.
@@ -284,17 +286,13 @@ func addTypeDef(def *TypeDef, env *Env) {
 	def.File.TypeDefs = append(def.File.TypeDefs, def)
 	def.File.Package.typeDefs[def.Name] = def
 	if env != nil {
-		// env should only be nil during initialization of the global package;
-		// NewEnv ensures new environments have the global types.
+		// env should only be nil during initialization of the built-in package;
+		// NewEnv ensures new environments have the built-in types.
 		env.typeDefs[def.Type] = def
 	}
 }
 
 var (
-	// The GlobalPackage and GlobalFile are used to hold the built-in types.
-	GlobalPackage = newPackage("", "global")
-	GlobalFile    = &File{BaseName: "global.vdl"}
-
 	// Built-in types defined by the compiler.
 	// TODO(toddw): Represent error in a built-in VDL file.
 	ErrorType = val.NamedType("error", val.StructType(
@@ -302,35 +300,3 @@ var (
 		val.StructField{"Msg", val.StringType},
 	))
 )
-
-func init() {
-	GlobalPackage.Files = []*File{GlobalFile}
-	GlobalFile.Package = GlobalPackage
-	// The built-in types may only be initialized after the Global{Package,File}
-	// are linked to each other.
-	globalSingleton("any", val.AnyType)
-	globalSingleton("bool", val.BoolType)
-	globalSingleton("byte", val.ByteType)
-	globalSingleton("uint16", val.Uint16Type)
-	globalSingleton("uint32", val.Uint32Type)
-	globalSingleton("uint64", val.Uint64Type)
-	globalSingleton("int16", val.Int16Type)
-	globalSingleton("int32", val.Int32Type)
-	globalSingleton("int64", val.Int64Type)
-	globalSingleton("float32", val.Float32Type)
-	globalSingleton("float64", val.Float64Type)
-	globalSingleton("complex64", val.Complex64Type)
-	globalSingleton("complex128", val.Complex128Type)
-	globalSingleton("string", val.StringType)
-	globalSingleton("typeval", val.TypeValType)
-	globalSingleton("error", ErrorType)
-}
-
-func globalSingleton(name string, t *val.Type) {
-	def := &TypeDef{
-		NamePos: NamePos{Name: name},
-		Type:    t,
-		File:    GlobalFile,
-	}
-	addTypeDef(def, nil)
-}

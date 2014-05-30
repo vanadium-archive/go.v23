@@ -25,21 +25,62 @@ type Opts struct {
 	ImportsOnly bool // Only parse imports; skip everything else.
 }
 
-// Parse takes an vdl base file name, the contents of the file src, and the
-// accumulated errors, and parses the vdl into a parse.File, containing the
-// parse tree.  Returns nil if any errors are encountered, with errs containing
-// more information.  Otherwise returns the parsed File.
+// Parse takes a base file name, the contents of the vdl file src, and the
+// accumulated errors, and parses the vdl into a parse.File containing the parse
+// tree.  Returns nil if any errors are encountered, with errs containing more
+// information.  Otherwise returns the parsed File.
 func Parse(baseFileName string, src io.Reader, opts Opts, errs *vdl.Errors) *File {
+	mode := modeFile
+	if opts.ImportsOnly {
+		mode = modeFileImports
+	}
+	return parse(baseFileName, src, mode, errs)
+}
+
+// ParseConfig takes a base file name, the contents of the config file src, and
+// the accumulated errors, and parses the config into a parse.Config containing
+// the parse tree.  Returns nil if any errors are encountered, with errs
+// containing more information.  Otherwise returns the parsed Config.
+func ParseConfig(baseFileName string, src io.Reader, opts Opts, errs *vdl.Errors) *Config {
+	mode := modeConfig
+	if opts.ImportsOnly {
+		mode = modeConfigImports
+	}
+	// Since the syntax is so similar between config files and vdl files, we just
+	// parse it as a vdl file and populate Config afterwards.
+	file := parse(baseFileName, src, mode, errs)
+	if file == nil {
+		return nil
+	}
+	config := &Config{
+		BaseName:  file.BaseName,
+		ConfigDef: file.PackageDef,
+		Imports:   file.Imports,
+		Config:    file.ConstDefs[0].Expr,
+		ConstDefs: file.ConstDefs[1:],
+	}
+	if len(config.ConstDefs) == 0 {
+		config.ConstDefs = nil
+	}
+	if opts.ImportsOnly {
+		// If the config clause has an inline const defined, we clear it out.
+		config.Config = nil
+		config.ConstDefs = nil
+	}
+	return config
+}
+
+func parse(baseFileName string, src io.Reader, mode mode, errs *vdl.Errors) *File {
 	if errs == nil {
 		log.Fatal("Nil errors specified for Parse")
 	}
 	startErrs := errs.NumErrors()
-	lex := newLexer(baseFileName, src, opts, errs)
+	lex := newLexer(baseFileName, src, mode, errs)
 	if errCode := yyParse(lex); errCode != 0 {
 		errs.Errorf("%s yyParse returned error code %v", baseFileName, errCode)
 	}
 	lex.attachComments()
-	if !opts.ImportsOnly {
+	if mode == modeFile || mode == modeConfig {
 		vdl.Vlog.Printf("PARSE RESULTS\n\n%v\n\n", lex.vdlFile)
 	}
 	if startErrs != errs.NumErrors() {
@@ -47,6 +88,15 @@ func Parse(baseFileName string, src io.Reader, opts Opts, errs *vdl.Errors) *Fil
 	}
 	return lex.vdlFile
 }
+
+type mode int
+
+const (
+	modeFileImports mode = iota
+	modeFile
+	modeConfigImports
+	modeConfig
+)
 
 // lexer implements the yyLexer interface for the yacc-generated parser.
 //
@@ -62,7 +112,7 @@ func Parse(baseFileName string, src io.Reader, opts Opts, errs *vdl.Errors) *Fil
 type lexer struct {
 	// Fields for lexing / scanning the input source file.
 	scanner scanner.Scanner
-	opts    Opts
+	mode    mode
 	errs    *vdl.Errors
 	started bool  // Has the dummy start token already been emitted?
 	sawEOF  bool  // Have we already seen the end-of-file?
@@ -73,8 +123,8 @@ type lexer struct {
 	vdlFile  *File
 }
 
-func newLexer(baseFileName string, src io.Reader, opts Opts, errs *vdl.Errors) *lexer {
-	l := &lexer{opts: opts, errs: errs, vdlFile: &File{BaseName: baseFileName}}
+func newLexer(baseFileName string, src io.Reader, mode mode, errs *vdl.Errors) *lexer {
+	l := &lexer{mode: mode, errs: errs, vdlFile: &File{BaseName: baseFileName}}
 	l.comments.init()
 	l.scanner.Init(src)
 	// Don't produce character literal tokens, but do scan comments.
@@ -133,8 +183,6 @@ var keywords = map[string]int{
 	"interface": tINTERFACE,
 	"stream":    tSTREAM,
 	"const":     tCONST,
-	"true":      tTRUE,
-	"false":     tFALSE,
 	"errorid":   tERRORID,
 }
 
@@ -559,10 +607,18 @@ func (l *lexer) Lex(lval *yySymType) int {
 	// Emit a dummy start token indicating what type of parse we're performing.
 	if !l.started {
 		l.started = true
-		if l.opts.ImportsOnly {
-			return startImportsOnly
+		switch l.mode {
+		case modeFileImports:
+			return startFileImports
+		case modeFile:
+			return startFile
+		case modeConfigImports:
+			return startConfigImports
+		case modeConfig:
+			return startConfig
+		default:
+			panic(fmt.Errorf("vdl: unhandled parse mode %d", l.mode))
 		}
-		return startFullFile
 	}
 	// Always return EOF after we've scanned it.  This ensures we emit EOF on the
 	// next Lex call after scanning EOF and adding an auto-semicolon.

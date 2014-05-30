@@ -34,12 +34,12 @@ func NewEnv(maxErrors int) *Env {
 		typeDefs:  make(map[*val.Type]*TypeDef),
 		constDefs: make(map[*val.Value]*ConstDef),
 	}
-	// The env always starts out with the global package.
-	env.pkgs[GlobalPackage.Name] = GlobalPackage
-	for _, def := range GlobalFile.TypeDefs {
+	// The env always starts out with the built-in package.
+	env.pkgs[BuiltInPackage.Name] = BuiltInPackage
+	for _, def := range BuiltInFile.TypeDefs {
 		env.typeDefs[def.Type] = def
 	}
-	for _, def := range GlobalFile.ConstDefs {
+	for _, def := range BuiltInFile.ConstDefs {
 		env.constDefs[def.Value] = def
 	}
 	return env
@@ -74,9 +74,9 @@ func (e *Env) resolvePartial(name string, file *File) (string, []*Package) {
 			}
 		}
 	case 1:
-		// No dots name "A", where A may either refer to a global identifier, or the
-		// local package the file is contained in.
-		return n[0], []*Package{GlobalPackage, file.Package}
+		// No dots name "A", where A may either refer to a built-in identifier, or
+		// the local package the file is contained in.
+		return n[0], []*Package{BuiltInPackage, file.Package}
 	}
 	return "", nil
 }
@@ -87,7 +87,7 @@ func (e *Env) resolvePartial(name string, file *File) (string, []*Package) {
 func (e *Env) ResolveType(name string, file *File) *TypeDef {
 	n, pkgs := e.resolvePartial(name, file)
 	for _, pkg := range pkgs {
-		if x := pkg.ResolveType(n); x != nil {
+		if x := pkg.ResolveType(n); x != nil && (x.Exported || pkg == file.Package) {
 			return x
 		}
 	}
@@ -100,7 +100,7 @@ func (e *Env) ResolveType(name string, file *File) *TypeDef {
 func (e *Env) ResolveConst(name string, file *File) *ConstDef {
 	n, pkgs := e.resolvePartial(name, file)
 	for _, pkg := range pkgs {
-		if x := pkg.ResolveConst(n); x != nil {
+		if x := pkg.ResolveConst(n); x != nil && (x.Exported || pkg == file.Package) {
 			return x
 		}
 	}
@@ -113,7 +113,7 @@ func (e *Env) ResolveConst(name string, file *File) *ConstDef {
 func (e *Env) ResolveInterface(name string, file *File) *Interface {
 	n, pkgs := e.resolvePartial(name, file)
 	for _, pkg := range pkgs {
-		if x := pkg.ResolveInterface(n); x != nil {
+		if x := pkg.ResolveInterface(n); x != nil && (x.Exported || pkg == file.Package) {
 			return x
 		}
 	}
@@ -243,10 +243,11 @@ type ErrorID parse.ErrorID
 
 // Interface represents a set of embedded interfaces and methods.
 type Interface struct {
-	NamePos              // interface name, pos and doc
-	Embeds  []*Interface // list of embedded interfaces
-	Methods []*Method    // list of methods
-	File    *File        // parent file
+	NamePos               // interface name, pos and doc
+	Exported bool         // is this interface exported?
+	Embeds   []*Interface // list of embedded interfaces
+	Methods  []*Method    // list of methods
+	File     *File        // parent file
 }
 
 // Method represents a method in an interface.
@@ -293,24 +294,28 @@ func (x *Interface) String() string {
 // We might consider allowing more characters, but we'll need to ensure they're
 // allowed in all our codegen languages.
 var (
-	regexpIdent   = regexp.MustCompile("^[A-Z][A-Za-z0-9_]*$")
-	regexpArgName = regexp.MustCompile("^[A-Za-z][A-Za-z0-9_]*$")
+	regexpIdent = regexp.MustCompile("^[A-Za-z][A-Za-z0-9_]*$")
 )
 
-// ValidIdent returns a nil error iff the identifier may be used as a type name,
-// method name, struct field name or enum label. Allowed: "^[A-Z][A-Za-z0-9_]*$"
-func ValidIdent(ident string) error {
+// ValidIdent returns (exported, err) where err is non-nil iff the identifer is
+// valid, and exported is true if the identifier is exported.
+// Valid: "^[A-Za-z][A-Za-z0-9_]*$"
+func ValidIdent(ident string) (bool, error) {
 	if re := regexpIdent; !re.MatchString(ident) {
-		return fmt.Errorf("invalid identifier %q, allowed regexp: %q", ident, re)
+		return false, fmt.Errorf("%q invalid, allowed regexp: %q", ident, re)
 	}
-	return nil
+	return ident[0] >= 'A' && ident[0] <= 'Z', nil
 }
 
-// ValidArgName returns a nil error iff the name may be used as an input or
-// output argument name. Allowed: "^[A-Za-z][A-Za-z0-9_]*$"
-func ValidArgName(name string) error {
-	if re := regexpArgName; !re.MatchString(name) {
-		return fmt.Errorf("invalid arg name %q, allowed regexp: %q", name, re)
+// ValidExportedIdent returns a non-nil error iff the identifier is valid and
+// exported.
+func ValidExportedIdent(ident string) error {
+	exported, err := ValidIdent(ident)
+	if err != nil {
+		return err
+	}
+	if !exported {
+		return fmt.Errorf("%q must be exported", ident)
 	}
 	return nil
 }

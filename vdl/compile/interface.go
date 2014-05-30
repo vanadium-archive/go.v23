@@ -44,15 +44,16 @@ func (id ifaceDefiner) Declare() {
 	for ix := range id.pkg.Files {
 		file, pfile := id.pkg.Files[ix], id.pfiles[ix]
 		for _, pdef := range pfile.Interfaces {
-			if err := ValidIdent(pdef.Name); err != nil {
-				id.env.errorf(file, pdef.Pos, "interface %s name (%s)", pdef.Name, err)
+			export, err := ValidIdent(pdef.Name)
+			if err != nil {
+				id.env.prefixErrorf(file, pdef.Pos, err, "interface %s invalid name", pdef.Name)
 				continue // keep going to catch more errors
 			}
 			if b, dup := id.builders[pdef.Name]; dup {
 				id.env.errorf(file, pdef.Pos, "interface %s redefined (previous at %s)", pdef.Name, fpString(b.def.File, b.def.Pos))
 				continue // keep going to catch more errors
 			}
-			def := &Interface{NamePos: NamePos(pdef.NamePos), File: file}
+			def := &Interface{NamePos: NamePos(pdef.NamePos), Exported: export, File: file}
 			id.builders[pdef.Name] = &ifaceBuilder{def, pdef}
 		}
 	}
@@ -144,7 +145,7 @@ func (id ifaceDefiner) defineMethods(b *ifaceBuilder) {
 			continue // keep going to catch more errors
 		}
 		seen[pm.Name] = pm
-		if err := ValidIdent(pm.Name); err != nil {
+		if err := ValidExportedIdent(pm.Name); err != nil {
 			id.env.errorf(file, pm.Pos, "method %s name (%s)", pm.Name, err)
 			continue // keep going to catch more errors
 		}
@@ -177,8 +178,8 @@ func (id ifaceDefiner) defineArgs(io, mname string, pargs []*parse.Field, file *
 			continue // keep going to catch more errors
 		}
 		if parg.Name != "" {
-			if err := ValidArgName(parg.Name); err != nil {
-				id.env.errorf(file, parg.Pos, "method %s invalid arg %s (%s)", mname, parg.Name, err)
+			if _, err := ValidIdent(parg.Name); err != nil {
+				id.env.prefixErrorf(file, parg.Pos, err, "method %s invalid arg %s", mname, parg.Name)
 				continue // keep going to catch more errors
 			}
 		}
@@ -201,7 +202,7 @@ func (id ifaceDefiner) defineStreamType(ptype parse.Type, file *File) *val.Type 
 
 func (id ifaceDefiner) defineTags(ptags []parse.ConstExpr, file *File) (tags []*val.Value) {
 	for _, ptag := range ptags {
-		if tag := compileConst(ptag, file, id.env); tag != nil {
+		if tag := compileConst(nil, ptag, file, id.env); tag != nil {
 			tags = append(tags, tag)
 		}
 	}

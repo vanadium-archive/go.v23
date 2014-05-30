@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"veyron/lib/toposort"
+	"veyron2/val"
 	"veyron2/vdl"
 	"veyron2/vdl/compile"
 	"veyron2/vdl/parse"
@@ -432,12 +433,25 @@ func ParsePackage(pkg *Package, opts parse.Opts, errs *vdl.Errors) (pfiles []*pa
 }
 
 // CompilePackage parses and compiles the given pkg, updates env with the
-// compiled package and returns it.  Errors are reported in env.  All imports
-// that pkg depend on must already have been compiled and populated into env.
+// compiled package and returns it.  Errors are reported in env.
 //
-// See TransitivePackages for an easy way to retrieve packages in their
-// transitive order.
+// All imports that pkg depend on must already have been compiled and populated
+// into env.  See TransitivePackages for an easy way to retrieve packages in
+// their transitive order.
 func CompilePackage(pkg *Package, env *compile.Env) *compile.Package {
 	pfiles := ParsePackage(pkg, parse.Opts{}, env.Errors)
 	return compile.Compile(pkg.Path, pfiles, env)
+}
+
+// CompileConfig parses and compiles the given config src and returns it.
+// Errors are reported in env; baseFileName is only used for error reporting.
+// If implicit is non-nil and the exported config const is an untyped const
+// literal, it is assumed to be of that type.
+//
+// All imports that the config src depend on must already have been compiled and
+// populated into env.  See TransitivePackages for an easy way to retrieve
+// packages in their transitive order.
+func CompileConfig(baseFileName string, src io.Reader, implicit *val.Type, env *compile.Env) *val.Value {
+	pconfig := parse.ParseConfig(baseFileName, src, parse.Opts{}, env.Errors)
+	return compile.CompileConfig(implicit, pconfig, env)
 }
