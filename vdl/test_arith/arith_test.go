@@ -36,23 +36,23 @@ func newClientServer() (ipc.Client, ipc.Server) {
 // serverArith implements the Arith interface.
 type serverArith struct{}
 
-func (*serverArith) Add(_ ipc.Context, A, B int32) (int32, error) {
+func (*serverArith) Add(_ ipc.ServerContext, A, B int32) (int32, error) {
 	return A + B, nil
 }
 
-func (*serverArith) DivMod(_ ipc.Context, A, B int32) (int32, int32, error) {
+func (*serverArith) DivMod(_ ipc.ServerContext, A, B int32) (int32, int32, error) {
 	return A / B, A % B, nil
 }
 
-func (*serverArith) Sub(_ ipc.Context, args test_base.Args) (int32, error) {
+func (*serverArith) Sub(_ ipc.ServerContext, args test_base.Args) (int32, error) {
 	return args.A - args.B, nil
 }
 
-func (*serverArith) Mul(_ ipc.Context, nestedArgs test_base.NestedArgs) (int32, error) {
+func (*serverArith) Mul(_ ipc.ServerContext, nestedArgs test_base.NestedArgs) (int32, error) {
 	return nestedArgs.Args.A * nestedArgs.Args.B, nil
 }
 
-func (*serverArith) Count(_ ipc.Context, Start int32, Stream ArithServiceCountStream) error {
+func (*serverArith) Count(_ ipc.ServerContext, Start int32, Stream ArithServiceCountStream) error {
 	const kNum = 1000
 	for i := int32(0); i < kNum; i++ {
 		if err := Stream.Send(Start + i); err != nil {
@@ -62,7 +62,7 @@ func (*serverArith) Count(_ ipc.Context, Start int32, Stream ArithServiceCountSt
 	return nil
 }
 
-func (*serverArith) StreamingAdd(_ ipc.Context, Stream ArithServiceStreamingAddStream) (int32, error) {
+func (*serverArith) StreamingAdd(_ ipc.ServerContext, Stream ArithServiceStreamingAddStream) (int32, error) {
 	var total int32
 	for {
 		value, err := Stream.Recv()
@@ -79,11 +79,11 @@ func (*serverArith) StreamingAdd(_ ipc.Context, Stream ArithServiceStreamingAddS
 	return total, nil
 }
 
-func (*serverArith) GenError(_ ipc.Context) error {
+func (*serverArith) GenError(_ ipc.ServerContext) error {
 	return generatedError
 }
 
-func (*serverArith) QuoteAny(_ ipc.Context, any vdl.Any) (vdl.Any, error) {
+func (*serverArith) QuoteAny(_ ipc.ServerContext, any vdl.Any) (vdl.Any, error) {
 	return fmt.Sprintf("'%v'", any), nil
 }
 
@@ -91,23 +91,23 @@ type serverCalculator struct {
 	serverArith
 }
 
-func (*serverCalculator) Sine(_ ipc.Context, angle float64) (float64, error) {
+func (*serverCalculator) Sine(_ ipc.ServerContext, angle float64) (float64, error) {
 	return math.Sin(angle), nil
 }
 
-func (*serverCalculator) Cosine(_ ipc.Context, angle float64) (float64, error) {
+func (*serverCalculator) Cosine(_ ipc.ServerContext, angle float64) (float64, error) {
 	return math.Cos(angle), nil
 }
 
-func (*serverCalculator) Exp(_ ipc.Context, x float64) (float64, error) {
+func (*serverCalculator) Exp(_ ipc.ServerContext, x float64) (float64, error) {
 	return math.Exp(x), nil
 }
 
-func (*serverCalculator) On(_ ipc.Context) error {
+func (*serverCalculator) On(_ ipc.ServerContext) error {
 	return nil
 }
 
-func (*serverCalculator) Off(_ ipc.Context) error {
+func (*serverCalculator) Off(_ ipc.ServerContext) error {
 	return nil
 }
 
@@ -121,20 +121,21 @@ func TestCalculator(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	ctx := rt.R().NewContext()
 	name := naming.JoinAddressName(ep.String(), "math/calculator")
 	// Synchronous calls
 	calculator, err := BindCalculator(name, client)
 	if err != nil {
 		t.Fatalf("Bind: got %q but expected no error", err)
 	}
-	sine, err := calculator.Sine(0)
+	sine, err := calculator.Sine(ctx, 0)
 	if err != nil {
 		t.Errorf("Sine: got %q but expected no error", err)
 	}
 	if sine != 0 {
 		t.Errorf("Sine: expected 0 got %f", sine)
 	}
-	cosine, err := calculator.Cosine(0)
+	cosine, err := calculator.Cosine(ctx, 0)
 	if err != nil {
 		t.Errorf("Cosine: got %q but expected no error", err)
 	}
@@ -146,7 +147,7 @@ func TestCalculator(t *testing.T) {
 	if err != nil {
 		t.Errorf("Bind: got %q but expected no error", err)
 	}
-	sum, err := arith.Add(7, 8)
+	sum, err := arith.Add(ctx, 7, 8)
 	if err != nil {
 		t.Errorf("Add: got %q but expected no error", err)
 	}
@@ -154,7 +155,7 @@ func TestCalculator(t *testing.T) {
 		t.Errorf("Add: expected 15 got %d", sum)
 	}
 	arith = calculator
-	sum, err = arith.Add(7, 8)
+	sum, err = arith.Add(ctx, 7, 8)
 	if err != nil {
 		t.Errorf("Add: got %q but expected no error", err)
 	}
@@ -166,7 +167,7 @@ func TestCalculator(t *testing.T) {
 	if err != nil {
 		t.Errorf("Bind: got %q but expected no error", err)
 	}
-	cosine, err = trig.Cosine(0)
+	cosine, err = trig.Cosine(ctx, 0)
 	if err != nil {
 		t.Errorf("Cosine: got %q but expected no error", err)
 	}
@@ -346,6 +347,7 @@ func TestArith(t *testing.T) {
 	}
 
 	client, server := newClientServer()
+	ctx := rt.R().NewContext()
 	ep, err := server.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
 		t.Fatal(err)
@@ -362,35 +364,35 @@ func TestArith(t *testing.T) {
 			t.Errorf("Bind: got %q but expected no error", err)
 		}
 
-		sum, err := arith.Add(7, 8)
+		sum, err := arith.Add(ctx, 7, 8)
 		if err != nil {
 			t.Errorf("Add: got %q but expected no error", err)
 		}
 		if sum != 15 {
 			t.Errorf("Add: expected 15 got %d", sum)
 		}
-		q, r, err := arith.DivMod(7, 3)
+		q, r, err := arith.DivMod(ctx, 7, 3)
 		if err != nil {
 			t.Errorf("DivMod: got %q but expected no error", err)
 		}
 		if q != 2 || r != 1 {
 			t.Errorf("DivMod: expected (2,1) got (%d,%d)", q, r)
 		}
-		diff, err := arith.Sub(test_base.Args{7, 8})
+		diff, err := arith.Sub(ctx, test_base.Args{7, 8})
 		if err != nil {
 			t.Errorf("Sub: got %q but expected no error", err)
 		}
 		if diff != -1 {
 			t.Errorf("Sub: got %d, expected -1", diff)
 		}
-		prod, err := arith.Mul(test_base.NestedArgs{test_base.Args{7, 8}})
+		prod, err := arith.Mul(ctx, test_base.NestedArgs{test_base.Args{7, 8}})
 		if err != nil {
 			t.Errorf("Mul: got %q, but expected no error", err)
 		}
 		if prod != 56 {
 			t.Errorf("Sub: got %d, expected 56", prod)
 		}
-		stream, err := arith.Count(35)
+		stream, err := arith.Count(ctx, 35)
 		if err != nil {
 			t.Fatalf("error while executing Count %v", err)
 		}
@@ -412,7 +414,7 @@ func TestArith(t *testing.T) {
 			t.Errorf("Count failed with %v", err)
 		}
 
-		addStream, err := arith.StreamingAdd()
+		addStream, err := arith.StreamingAdd(ctx)
 
 		go func() {
 			for i := int32(0); i < 100; i++ {
@@ -450,7 +452,7 @@ func TestArith(t *testing.T) {
 			t.Errorf("Got %d but expexted %d", total, expectedSum)
 		}
 
-		if err := arith.GenError(); err == nil {
+		if err := arith.GenError(ctx); err == nil {
 			t.Errorf("GenError: got %v but expected %v", err, generatedError)
 		}
 
@@ -458,7 +460,7 @@ func TestArith(t *testing.T) {
 
 		clientStub := arith.(*clientStubArith)
 
-		tags, err := clientStub.GetMethodTags("GenError")
+		tags, err := clientStub.GetMethodTags(ctx, "GenError")
 		expectedTags := []interface{}{"foo", "barz", "hello", int32(129), uint64(36)}
 		if err != nil {
 			t.Error(`Error calling GetMethodTags("GenError"): `, err)

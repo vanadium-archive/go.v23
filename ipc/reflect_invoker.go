@@ -181,7 +181,7 @@ var (
 
 	ErrMethodNotExported = verror.BadArgf("method not exported")
 	ErrNumInArgs         = verror.BadArgf("require at least 1 in-arg (ipc.ServerCall)")
-	ErrInContext         = verror.Abortedf("first in-arg got ipc.Context, want ipc.ServerCall - you probably forgot to wrap your server with the IDL-generated stub")
+	ErrInContext         = verror.Abortedf("first in-arg got ipc.ServerContext, want ipc.ServerCall - you probably forgot to wrap your server with the IDL-generated stub")
 	ErrInServerCall      = verror.BadArgf("first in-arg must be ipc.ServerCall")
 )
 

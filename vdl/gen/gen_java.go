@@ -453,7 +453,7 @@ func javaIfaceClassPaths(iface *compile.Interface, isService bool, env *compile.
 		if !isService {
 			ret = append(ret, "com/veyron2/ipc/Client")
 		} else {
-			ret = append(ret, "com/veyron2/ipc/Context")
+			ret = append(ret, "com/veyron2/ipc.ServerContext")
 		}
 		for _, iarg := range m.InArgs {
 			ret = append(ret, javaClassPaths(iarg.Type, false, env)...)
@@ -652,7 +652,7 @@ func javaShouldPackOutArgs(method *compile.Method, isService bool, imports javaU
 // javaInArgs returns the in-args string for the provided method.
 func javaInArgs(method *compile.Method, isService, camelCase bool, imports javaUserImports, env *compile.Env) (ret string) {
 	if isService {
-		ret += javaName("com/veyron2/ipc/Context", imports) + " context"
+		ret += javaName("com/veyron2/ipc.ServerContext", imports) + " context"
 	}
 	for _, arg := range method.InArgs {
 		if ret != "" {

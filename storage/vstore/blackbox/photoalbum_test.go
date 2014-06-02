@@ -4,6 +4,7 @@ import (
 	"runtime"
 	"testing"
 
+	"veyron2/rt"
 	"veyron2/storage"
 	"veyron2/storage/vstore/primitives"
 	"veyron2/vom"
@@ -85,7 +86,7 @@ func newPhoto(content, comment string, edits ...Edit) *Photo {
 
 func get(t *testing.T, st storage.Store, tr storage.Transaction, path string) *storage.Entry {
 	_, file, line, _ := runtime.Caller(1)
-	entry, err := st.Bind(path).Get(tr)
+	entry, err := st.Bind(path).Get(rt.R().NewContext(), tr)
 	if err != nil {
 		t.Fatalf("%s(%d): can't get %s: %s", file, line, path, err)
 	}
@@ -104,7 +105,7 @@ func getPhoto(t *testing.T, st storage.Store, tr storage.Transaction, path strin
 }
 
 func put(t *testing.T, st storage.Store, tr storage.Transaction, path string, v interface{}) storage.ID {
-	stat, err := st.Bind(path).Put(tr, v)
+	stat, err := st.Bind(path).Put(rt.R().NewContext(), tr, v)
 	if err != nil {
 		_, file, line, _ := runtime.Caller(1)
 		t.Errorf("%s(%d): can't put %s: %s", file, line, path, err)
@@ -119,7 +120,7 @@ func put(t *testing.T, st storage.Store, tr storage.Transaction, path string, v 
 }
 
 func commit(t *testing.T, tr storage.Transaction) {
-	if err := tr.Commit(); err != nil {
+	if err := tr.Commit(rt.R().NewContext()); err != nil {
 		t.Fatalf("Transaction aborted: %s", err)
 	}
 }
@@ -130,7 +131,7 @@ func TestPhotoAlbum(t *testing.T) {
 
 	// Create directories.
 	{
-		tr := primitives.NewTransaction()
+		tr := primitives.NewTransaction(rt.R().NewContext())
 		put(t, st, tr, "/", newDir())
 		put(t, st, tr, "/Users", newDir())
 		put(t, st, tr, "/Users/jyh", newUser(1234567890))
@@ -148,7 +149,7 @@ func TestPhotoAlbum(t *testing.T) {
 		p4 := newPhoto("/global/contentd/DSC1003.jpg", "Ice cream")
 		p5 := newPhoto("/global/contentd/DSC1004.jpg", "Let's go home")
 
-		tr := primitives.NewTransaction()
+		tr := primitives.NewTransaction(rt.R().NewContext())
 		put(t, st, tr, "/Users/jyh/ByDate/2014_01_01/09:00", p1)
 		put(t, st, tr, "/Users/jyh/ByDate/2014_01_01/09:15", p2)
 		put(t, st, tr, "/Users/jyh/ByDate/2014_01_01/09:16", p3)
@@ -159,7 +160,7 @@ func TestPhotoAlbum(t *testing.T) {
 
 	// Add an Album with some of the photos.
 	{
-		tr := primitives.NewTransaction()
+		tr := primitives.NewTransaction(rt.R().NewContext())
 		put(t, st, tr, "/Users/jyh/Albums/Yosemite", newAlbum("Yosemite selected photos"))
 		p5 := get(t, st, tr, "/Users/jyh/ByDate/2014_01_01/10:05")
 		put(t, st, tr, "/Users/jyh/Albums/Yosemite/Photos/1", p5.Stat.ID)
@@ -170,7 +171,7 @@ func TestPhotoAlbum(t *testing.T) {
 
 	// Verify some of the photos.
 	{
-		tr := primitives.NewTransaction()
+		tr := primitives.NewTransaction(rt.R().NewContext())
 		p1 := getPhoto(t, st, tr, "/Users/jyh/ByDate/2014_01_01/09:00")
 		if p1.Comment != "Half Dome" {
 			t.Errorf("Expected %q, got %q", "Half Dome", p1.Comment)
@@ -178,7 +179,7 @@ func TestPhotoAlbum(t *testing.T) {
 	}
 
 	{
-		tr := primitives.NewTransaction()
+		tr := primitives.NewTransaction(rt.R().NewContext())
 		p3 := getPhoto(t, st, tr, "/Users/jyh/Albums/Yosemite/Photos/2")
 		if p3.Comment != "Crying kids" {
 			t.Errorf("Expected %q, got %q", "Crying kids", p3.Comment)
@@ -187,7 +188,7 @@ func TestPhotoAlbum(t *testing.T) {
 
 	// Update p3.Comment to "Happy".
 	{
-		tr := primitives.NewTransaction()
+		tr := primitives.NewTransaction(rt.R().NewContext())
 		p3 := getPhoto(t, st, tr, "/Users/jyh/ByDate/2014_01_01/09:16")
 		p3.Comment = "Happy"
 		put(t, st, tr, "/Users/jyh/ByDate/2014_01_01/09:16", p3)
@@ -196,7 +197,7 @@ func TestPhotoAlbum(t *testing.T) {
 
 	// Verify that the photo in the album has also changed.
 	{
-		tr := primitives.NewTransaction()
+		tr := primitives.NewTransaction(rt.R().NewContext())
 		p3 := getPhoto(t, st, tr, "/Users/jyh/Albums/Yosemite/Photos/2")
 		if p3.Comment != "Happy" {
 			t.Errorf("Expected %q, got %q", "Happy", p3.Comment)

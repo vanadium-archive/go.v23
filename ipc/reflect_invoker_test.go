@@ -197,7 +197,7 @@ func (nocompat) NoInServerCall2(int, string) error { return nil }
 
 type nostub struct{}
 
-// NoStub takes ipc.Context rather than ipc.ServerCall as the first arg, a
+// NoStub takes ipc.ServerContext rather than ipc.ServerCall as the first arg, a
 // common mistake where the server isn't wrapped with the IDL-generated stub.
 func (nostub) NoStub(Context) error { return nil }
 

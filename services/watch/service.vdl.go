@@ -210,7 +210,7 @@ const (
 // to enable embedding without method collisions.  Not to be used directly by clients.
 type Watcher_ExcludingUniversal interface {
 	// Watch returns a stream of changes.
-	Watch(Req Request, opts ..._gen_ipc.ClientCallOpt) (reply WatcherWatchStream, err error)
+	Watch(ctx _gen_ipc.Context, Req Request, opts ..._gen_ipc.CallOpt) (reply WatcherWatchStream, err error)
 }
 type Watcher interface {
 	_gen_ipc.UniversalServiceMethods
@@ -221,7 +221,7 @@ type Watcher interface {
 type WatcherService interface {
 
 	// Watch returns a stream of changes.
-	Watch(context _gen_ipc.Context, Req Request, stream WatcherServiceWatchStream) (err error)
+	Watch(context _gen_ipc.ServerContext, Req Request, stream WatcherServiceWatchStream) (err error)
 }
 
 // WatcherWatchStream is the interface for streaming responses of the method
@@ -242,7 +242,7 @@ type WatcherWatchStream interface {
 
 // Implementation of the WatcherWatchStream interface that is not exported.
 type implWatcherWatchStream struct {
-	clientCall _gen_ipc.ClientCall
+	clientCall _gen_ipc.Call
 }
 
 func (c *implWatcherWatchStream) Recv() (item ChangeBatch, err error) {
@@ -321,18 +321,18 @@ type clientStubWatcher struct {
 	name   string
 }
 
-func (__gen_c *clientStubWatcher) Watch(Req Request, opts ..._gen_ipc.ClientCallOpt) (reply WatcherWatchStream, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Watch", []interface{}{Req}, opts...); err != nil {
+func (__gen_c *clientStubWatcher) Watch(ctx _gen_ipc.Context, Req Request, opts ..._gen_ipc.CallOpt) (reply WatcherWatchStream, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Watch", []interface{}{Req}, opts...); err != nil {
 		return
 	}
 	reply = &implWatcherWatchStream{clientCall: call}
 	return
 }
 
-func (__gen_c *clientStubWatcher) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+func (__gen_c *clientStubWatcher) UnresolveStep(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -341,9 +341,9 @@ func (__gen_c *clientStubWatcher) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) 
 	return
 }
 
-func (__gen_c *clientStubWatcher) Signature(opts ..._gen_ipc.ClientCallOpt) (reply _gen_ipc.ServiceSignature, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Signature", nil, opts...); err != nil {
+func (__gen_c *clientStubWatcher) Signature(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -352,9 +352,9 @@ func (__gen_c *clientStubWatcher) Signature(opts ..._gen_ipc.ClientCallOpt) (rep
 	return
 }
 
-func (__gen_c *clientStubWatcher) GetMethodTags(method string, opts ..._gen_ipc.ClientCallOpt) (reply []interface{}, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
+func (__gen_c *clientStubWatcher) GetMethodTags(ctx _gen_ipc.Context, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {

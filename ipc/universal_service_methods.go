@@ -6,10 +6,10 @@ type UniversalServiceMethods interface {
 	// TODO(bprosnitz) Remove GetMethodTags and fetch the method tags from
 	// signature instead.
 	// GetMethodTags returns the tags associated with the given method.
-	GetMethodTags(method string, opts ...ClientCallOpt) ([]interface{}, error)
+	GetMethodTags(ctx Context, method string, opts ...CallOpt) ([]interface{}, error)
 	// Signature returns a description of the service.
-	Signature(opts ...ClientCallOpt) (ServiceSignature, error)
+	Signature(ctx Context, opts ...CallOpt) (ServiceSignature, error)
 	// UnresolveStep returns the names for the remote service, rooted at the
 	// service's immediate namespace ancestor.
-	UnresolveStep(opts ...ClientCallOpt) ([]string, error)
+	UnresolveStep(ctx Context, opts ...CallOpt) ([]string, error)
 }

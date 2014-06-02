@@ -110,27 +110,27 @@ type Application_ExcludingUniversal interface {
 	// installation. Optionally, veyron name suffix can be used to
 	// specify the application version to be installed. If no version is
 	// specified, the latest version is installed.
-	Install(opts ..._gen_ipc.ClientCallOpt) (reply string, err error)
+	Install(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply string, err error)
 	// Start starts an instance of application installation(s) and
 	// returns the veyron name(s) that identifies/identify the new
 	// instance(s).
-	Start(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error)
+	Start(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply []string, err error)
 	// Uninstall uninstalls application installation(s).
-	Uninstall(opts ..._gen_ipc.ClientCallOpt) (err error)
+	Uninstall(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (err error)
 	// Update updates application installation(s) version. Optionally,
 	// veyron name suffix can be used to specify the application version
 	// to which the installation(s) should be updated. If no version is
 	// specified, the installation(s) are updated to the latest version.
-	Update(opts ..._gen_ipc.ClientCallOpt) (err error)
+	Update(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (err error)
 	// Refresh refreshes the state of application installation(s)
 	// instance(s).
-	Refresh(opts ..._gen_ipc.ClientCallOpt) (err error)
+	Refresh(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (err error)
 	// Restart restarts execution of application installation(s)
 	// instance(s).
-	Restart(opts ..._gen_ipc.ClientCallOpt) (err error)
+	Restart(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (err error)
 	// Resume resumes execution of application installation(s)
 	// instance(s).
-	Resume(opts ..._gen_ipc.ClientCallOpt) (err error)
+	Resume(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (err error)
 	// Shutdown attempts a clean shutdown of application installation(s)
 	// instance(s). If the deadline is non-zero and the instance(s) in
 	// questions is/are still running after the given deadline, shutdown
@@ -138,10 +138,10 @@ type Application_ExcludingUniversal interface {
 	//
 	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
 	// are implemented.
-	Shutdown(Deadline uint64, opts ..._gen_ipc.ClientCallOpt) (err error)
+	Shutdown(ctx _gen_ipc.Context, Deadline uint64, opts ..._gen_ipc.CallOpt) (err error)
 	// Suspend suspends execution of application installation(s)
 	// instance(s).
-	Suspend(opts ..._gen_ipc.ClientCallOpt) (err error)
+	Suspend(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (err error)
 }
 type Application interface {
 	_gen_ipc.UniversalServiceMethods
@@ -156,27 +156,27 @@ type ApplicationService interface {
 	// installation. Optionally, veyron name suffix can be used to
 	// specify the application version to be installed. If no version is
 	// specified, the latest version is installed.
-	Install(context _gen_ipc.Context) (reply string, err error)
+	Install(context _gen_ipc.ServerContext) (reply string, err error)
 	// Start starts an instance of application installation(s) and
 	// returns the veyron name(s) that identifies/identify the new
 	// instance(s).
-	Start(context _gen_ipc.Context) (reply []string, err error)
+	Start(context _gen_ipc.ServerContext) (reply []string, err error)
 	// Uninstall uninstalls application installation(s).
-	Uninstall(context _gen_ipc.Context) (err error)
+	Uninstall(context _gen_ipc.ServerContext) (err error)
 	// Update updates application installation(s) version. Optionally,
 	// veyron name suffix can be used to specify the application version
 	// to which the installation(s) should be updated. If no version is
 	// specified, the installation(s) are updated to the latest version.
-	Update(context _gen_ipc.Context) (err error)
+	Update(context _gen_ipc.ServerContext) (err error)
 	// Refresh refreshes the state of application installation(s)
 	// instance(s).
-	Refresh(context _gen_ipc.Context) (err error)
+	Refresh(context _gen_ipc.ServerContext) (err error)
 	// Restart restarts execution of application installation(s)
 	// instance(s).
-	Restart(context _gen_ipc.Context) (err error)
+	Restart(context _gen_ipc.ServerContext) (err error)
 	// Resume resumes execution of application installation(s)
 	// instance(s).
-	Resume(context _gen_ipc.Context) (err error)
+	Resume(context _gen_ipc.ServerContext) (err error)
 	// Shutdown attempts a clean shutdown of application installation(s)
 	// instance(s). If the deadline is non-zero and the instance(s) in
 	// questions is/are still running after the given deadline, shutdown
@@ -184,10 +184,10 @@ type ApplicationService interface {
 	//
 	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
 	// are implemented.
-	Shutdown(context _gen_ipc.Context, Deadline uint64) (err error)
+	Shutdown(context _gen_ipc.ServerContext, Deadline uint64) (err error)
 	// Suspend suspends execution of application installation(s)
 	// instance(s).
-	Suspend(context _gen_ipc.Context) (err error)
+	Suspend(context _gen_ipc.ServerContext) (err error)
 }
 
 // BindApplication returns the client stub implementing the Application
@@ -233,9 +233,9 @@ type clientStubApplication struct {
 	name   string
 }
 
-func (__gen_c *clientStubApplication) Install(opts ..._gen_ipc.ClientCallOpt) (reply string, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Install", nil, opts...); err != nil {
+func (__gen_c *clientStubApplication) Install(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply string, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Install", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -244,9 +244,9 @@ func (__gen_c *clientStubApplication) Install(opts ..._gen_ipc.ClientCallOpt) (r
 	return
 }
 
-func (__gen_c *clientStubApplication) Start(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Start", nil, opts...); err != nil {
+func (__gen_c *clientStubApplication) Start(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Start", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -255,9 +255,9 @@ func (__gen_c *clientStubApplication) Start(opts ..._gen_ipc.ClientCallOpt) (rep
 	return
 }
 
-func (__gen_c *clientStubApplication) Uninstall(opts ..._gen_ipc.ClientCallOpt) (err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Uninstall", nil, opts...); err != nil {
+func (__gen_c *clientStubApplication) Uninstall(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Uninstall", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&err); ierr != nil {
@@ -266,9 +266,9 @@ func (__gen_c *clientStubApplication) Uninstall(opts ..._gen_ipc.ClientCallOpt) 
 	return
 }
 
-func (__gen_c *clientStubApplication) Update(opts ..._gen_ipc.ClientCallOpt) (err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Update", nil, opts...); err != nil {
+func (__gen_c *clientStubApplication) Update(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Update", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&err); ierr != nil {
@@ -277,9 +277,9 @@ func (__gen_c *clientStubApplication) Update(opts ..._gen_ipc.ClientCallOpt) (er
 	return
 }
 
-func (__gen_c *clientStubApplication) Refresh(opts ..._gen_ipc.ClientCallOpt) (err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Refresh", nil, opts...); err != nil {
+func (__gen_c *clientStubApplication) Refresh(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Refresh", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&err); ierr != nil {
@@ -288,9 +288,9 @@ func (__gen_c *clientStubApplication) Refresh(opts ..._gen_ipc.ClientCallOpt) (e
 	return
 }
 
-func (__gen_c *clientStubApplication) Restart(opts ..._gen_ipc.ClientCallOpt) (err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Restart", nil, opts...); err != nil {
+func (__gen_c *clientStubApplication) Restart(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Restart", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&err); ierr != nil {
@@ -299,9 +299,9 @@ func (__gen_c *clientStubApplication) Restart(opts ..._gen_ipc.ClientCallOpt) (e
 	return
 }
 
-func (__gen_c *clientStubApplication) Resume(opts ..._gen_ipc.ClientCallOpt) (err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Resume", nil, opts...); err != nil {
+func (__gen_c *clientStubApplication) Resume(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Resume", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&err); ierr != nil {
@@ -310,9 +310,9 @@ func (__gen_c *clientStubApplication) Resume(opts ..._gen_ipc.ClientCallOpt) (er
 	return
 }
 
-func (__gen_c *clientStubApplication) Shutdown(Deadline uint64, opts ..._gen_ipc.ClientCallOpt) (err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Shutdown", []interface{}{Deadline}, opts...); err != nil {
+func (__gen_c *clientStubApplication) Shutdown(ctx _gen_ipc.Context, Deadline uint64, opts ..._gen_ipc.CallOpt) (err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Shutdown", []interface{}{Deadline}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&err); ierr != nil {
@@ -321,9 +321,9 @@ func (__gen_c *clientStubApplication) Shutdown(Deadline uint64, opts ..._gen_ipc
 	return
 }
 
-func (__gen_c *clientStubApplication) Suspend(opts ..._gen_ipc.ClientCallOpt) (err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Suspend", nil, opts...); err != nil {
+func (__gen_c *clientStubApplication) Suspend(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Suspend", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&err); ierr != nil {
@@ -332,9 +332,9 @@ func (__gen_c *clientStubApplication) Suspend(opts ..._gen_ipc.ClientCallOpt) (e
 	return
 }
 
-func (__gen_c *clientStubApplication) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+func (__gen_c *clientStubApplication) UnresolveStep(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -343,9 +343,9 @@ func (__gen_c *clientStubApplication) UnresolveStep(opts ..._gen_ipc.ClientCallO
 	return
 }
 
-func (__gen_c *clientStubApplication) Signature(opts ..._gen_ipc.ClientCallOpt) (reply _gen_ipc.ServiceSignature, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Signature", nil, opts...); err != nil {
+func (__gen_c *clientStubApplication) Signature(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -354,9 +354,9 @@ func (__gen_c *clientStubApplication) Signature(opts ..._gen_ipc.ClientCallOpt) 
 	return
 }
 
-func (__gen_c *clientStubApplication) GetMethodTags(method string, opts ..._gen_ipc.ClientCallOpt) (reply []interface{}, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
+func (__gen_c *clientStubApplication) GetMethodTags(ctx _gen_ipc.Context, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -609,16 +609,16 @@ type Node_ExcludingUniversal interface {
 	// installation instance as a receiver is well-defined.
 	Application_ExcludingUniversal
 	// Describe generates a description of the node.
-	Describe(opts ..._gen_ipc.ClientCallOpt) (reply Description, err error)
+	Describe(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply Description, err error)
 	// IsRunnable checks if the node can execute the given binary.
-	IsRunnable(Binary build.BinaryDescription, opts ..._gen_ipc.ClientCallOpt) (reply bool, err error)
+	IsRunnable(ctx _gen_ipc.Context, Binary build.BinaryDescription, opts ..._gen_ipc.CallOpt) (reply bool, err error)
 	// Reset resets the node. If the deadline is non-zero and the node
 	// in question is still running after the given deadline expired,
 	// reset of the node is enforced.
 	//
 	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
 	// are implemented.
-	Reset(Deadline uint64, opts ..._gen_ipc.ClientCallOpt) (err error)
+	Reset(ctx _gen_ipc.Context, Deadline uint64, opts ..._gen_ipc.CallOpt) (err error)
 }
 type Node interface {
 	_gen_ipc.UniversalServiceMethods
@@ -701,16 +701,16 @@ type NodeService interface {
 	// installation instance as a receiver is well-defined.
 	ApplicationService
 	// Describe generates a description of the node.
-	Describe(context _gen_ipc.Context) (reply Description, err error)
+	Describe(context _gen_ipc.ServerContext) (reply Description, err error)
 	// IsRunnable checks if the node can execute the given binary.
-	IsRunnable(context _gen_ipc.Context, Binary build.BinaryDescription) (reply bool, err error)
+	IsRunnable(context _gen_ipc.ServerContext, Binary build.BinaryDescription) (reply bool, err error)
 	// Reset resets the node. If the deadline is non-zero and the node
 	// in question is still running after the given deadline expired,
 	// reset of the node is enforced.
 	//
 	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
 	// are implemented.
-	Reset(context _gen_ipc.Context, Deadline uint64) (err error)
+	Reset(context _gen_ipc.ServerContext, Deadline uint64) (err error)
 }
 
 // BindNode returns the client stub implementing the Node
@@ -760,9 +760,9 @@ type clientStubNode struct {
 	name   string
 }
 
-func (__gen_c *clientStubNode) Describe(opts ..._gen_ipc.ClientCallOpt) (reply Description, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Describe", nil, opts...); err != nil {
+func (__gen_c *clientStubNode) Describe(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply Description, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Describe", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -771,9 +771,9 @@ func (__gen_c *clientStubNode) Describe(opts ..._gen_ipc.ClientCallOpt) (reply D
 	return
 }
 
-func (__gen_c *clientStubNode) IsRunnable(Binary build.BinaryDescription, opts ..._gen_ipc.ClientCallOpt) (reply bool, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "IsRunnable", []interface{}{Binary}, opts...); err != nil {
+func (__gen_c *clientStubNode) IsRunnable(ctx _gen_ipc.Context, Binary build.BinaryDescription, opts ..._gen_ipc.CallOpt) (reply bool, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "IsRunnable", []interface{}{Binary}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -782,9 +782,9 @@ func (__gen_c *clientStubNode) IsRunnable(Binary build.BinaryDescription, opts .
 	return
 }
 
-func (__gen_c *clientStubNode) Reset(Deadline uint64, opts ..._gen_ipc.ClientCallOpt) (err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Reset", []interface{}{Deadline}, opts...); err != nil {
+func (__gen_c *clientStubNode) Reset(ctx _gen_ipc.Context, Deadline uint64, opts ..._gen_ipc.CallOpt) (err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Reset", []interface{}{Deadline}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&err); ierr != nil {
@@ -793,9 +793,9 @@ func (__gen_c *clientStubNode) Reset(Deadline uint64, opts ..._gen_ipc.ClientCal
 	return
 }
 
-func (__gen_c *clientStubNode) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+func (__gen_c *clientStubNode) UnresolveStep(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -804,9 +804,9 @@ func (__gen_c *clientStubNode) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (re
 	return
 }
 
-func (__gen_c *clientStubNode) Signature(opts ..._gen_ipc.ClientCallOpt) (reply _gen_ipc.ServiceSignature, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Signature", nil, opts...); err != nil {
+func (__gen_c *clientStubNode) Signature(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -815,9 +815,9 @@ func (__gen_c *clientStubNode) Signature(opts ..._gen_ipc.ClientCallOpt) (reply 
 	return
 }
 
-func (__gen_c *clientStubNode) GetMethodTags(method string, opts ..._gen_ipc.ClientCallOpt) (reply []interface{}, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
+func (__gen_c *clientStubNode) GetMethodTags(ctx _gen_ipc.Context, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {

@@ -64,7 +64,7 @@ func Example_client() {
 	client, err := RT.NewClient()
 	defer client.Close()
 	var photo Photo
-	call, err := client.StartCall("/myhome/photos/birthday.jpg", "Get", nil)
+	call, err := client.StartCall(RT.NewContext(), "/myhome/photos/birthday.jpg", "Get", nil)
 	err = call.Finish(&photo)
 	_ = err
 }
@@ -73,7 +73,7 @@ func Example_clientCancel() {
 	client, err := RT.NewClient()
 	defer client.Close()
 	var photo Photo
-	call, err := client.StartCall("/myhome/photos/birthday.jpg", "Get", nil)
+	call, err := client.StartCall(RT.NewContext(), "/myhome/photos/birthday.jpg", "Get", nil)
 	call.Cancel()
 	err = call.Finish(&photo)
 	_ = err
@@ -82,7 +82,7 @@ func Example_clientCancel() {
 func Example_clientStreamRecv() {
 	client, err := RT.NewClient()
 	defer client.Close()
-	call, err := client.StartCall(`/myhome/photos/.*\.jpg`, "Download", nil)
+	call, err := client.StartCall(RT.NewContext(), `/myhome/photos/.*\.jpg`, "Download", nil)
 	err = call.CloseSend()
 	for {
 		var photo Photo
@@ -98,7 +98,7 @@ func Example_clientStreamRecv() {
 func Example_clientStreamSend() {
 	client, err := RT.NewClient()
 	defer client.Close()
-	call, err := client.StartCall(`/myhome/photos/newdir`, "Upload", nil)
+	call, err := client.StartCall(RT.NewContext(), `/myhome/photos/newdir`, "Upload", nil)
 	for _, np := range []string{"n1", "n2", "n3"} {
 		if err := call.Send(&Photo{Name: np}); err != nil {
 			break

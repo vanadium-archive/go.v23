@@ -35,10 +35,10 @@ type Profile_ExcludingUniversal interface {
 	// e.g. "linux-media". The label can be used to uniquely identify
 	// the profile (for the purpose of matching application binaries and
 	// nodes).
-	Label(opts ..._gen_ipc.ClientCallOpt) (reply string, err error)
+	Label(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply string, err error)
 	// Description is a free-text description of the profile, meant for
 	// human consumption.
-	Description(opts ..._gen_ipc.ClientCallOpt) (reply string, err error)
+	Description(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply string, err error)
 }
 type Profile interface {
 	_gen_ipc.UniversalServiceMethods
@@ -52,10 +52,10 @@ type ProfileService interface {
 	// e.g. "linux-media". The label can be used to uniquely identify
 	// the profile (for the purpose of matching application binaries and
 	// nodes).
-	Label(context _gen_ipc.Context) (reply string, err error)
+	Label(context _gen_ipc.ServerContext) (reply string, err error)
 	// Description is a free-text description of the profile, meant for
 	// human consumption.
-	Description(context _gen_ipc.Context) (reply string, err error)
+	Description(context _gen_ipc.ServerContext) (reply string, err error)
 }
 
 // BindProfile returns the client stub implementing the Profile
@@ -101,9 +101,9 @@ type clientStubProfile struct {
 	name   string
 }
 
-func (__gen_c *clientStubProfile) Label(opts ..._gen_ipc.ClientCallOpt) (reply string, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Label", nil, opts...); err != nil {
+func (__gen_c *clientStubProfile) Label(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply string, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Label", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -112,9 +112,9 @@ func (__gen_c *clientStubProfile) Label(opts ..._gen_ipc.ClientCallOpt) (reply s
 	return
 }
 
-func (__gen_c *clientStubProfile) Description(opts ..._gen_ipc.ClientCallOpt) (reply string, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Description", nil, opts...); err != nil {
+func (__gen_c *clientStubProfile) Description(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply string, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Description", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -123,9 +123,9 @@ func (__gen_c *clientStubProfile) Description(opts ..._gen_ipc.ClientCallOpt) (r
 	return
 }
 
-func (__gen_c *clientStubProfile) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+func (__gen_c *clientStubProfile) UnresolveStep(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -134,9 +134,9 @@ func (__gen_c *clientStubProfile) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) 
 	return
 }
 
-func (__gen_c *clientStubProfile) Signature(opts ..._gen_ipc.ClientCallOpt) (reply _gen_ipc.ServiceSignature, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Signature", nil, opts...); err != nil {
+func (__gen_c *clientStubProfile) Signature(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -145,9 +145,9 @@ func (__gen_c *clientStubProfile) Signature(opts ..._gen_ipc.ClientCallOpt) (rep
 	return
 }
 
-func (__gen_c *clientStubProfile) GetMethodTags(method string, opts ..._gen_ipc.ClientCallOpt) (reply []interface{}, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
+func (__gen_c *clientStubProfile) GetMethodTags(ctx _gen_ipc.Context, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {

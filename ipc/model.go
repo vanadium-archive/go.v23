@@ -9,7 +9,7 @@ import (
 )
 
 // Client represents the interface for making RPC calls.  There may be multiple
-// outstanding ClientCalls associated with a single Client, and a Client may be
+// outstanding Calls associated with a single Client, and a Client may be
 // used by multiple goroutines concurrently.
 type Client interface {
 	// Client can be provided to Bind<Service> calls.
@@ -21,16 +21,16 @@ type Client interface {
 	//
 	// StartCall accepts at least the following options:
 	// veyron2.CallTimeout.
-	StartCall(name, method string, args []interface{}, opts ...ClientCallOpt) (ClientCall, error)
+	StartCall(ctx Context, name, method string, args []interface{}, opts ...CallOpt) (Call, error)
 
 	// Close discards all state associated with this Client.  In-flight calls may
 	// be terminated with an error.
 	Close()
 }
 
-// ClientCall defines the interface for each in-flight call on the client.
+// Call defines the interface for each in-flight call on the client.
 // Finish must be called to finish the call; all other methods are optional.
-type ClientCall interface {
+type Call interface {
 	Stream
 
 	// CloseSend indicates to the server that no more items will be sent; server
@@ -45,7 +45,7 @@ type ClientCall interface {
 
 	// Cancel the call.  The server will stop processing, if possible.  Calls to
 	// Finish will return immediately with an error indicating the cancellation.
-	// It is safe to call Cancel concurrently with any other ClientCall method.
+	// It is safe to call Cancel concurrently with any other Call method.
 	Cancel()
 }
 
@@ -177,19 +177,28 @@ type Invoker interface {
 // Unresolver defines the interface to be implemented by service objects
 // that want to define their custom UnresolveStep functionality.
 type Unresolver interface {
-	UnresolveStep(context Context) ([]string, error)
+	UnresolveStep(context ServerContext) ([]string, error)
 }
 
 // ServerCall defines the interface for each in-flight call on the server.
 type ServerCall interface {
 	Stream
-	Context
+	ServerContext
+}
+
+// Context defines a context under which outgoing RPC calls are made.  It
+// carries some setting information, but also creates relationships between RPCs
+// executed under the same context.
+// TODO(mattr): Add Deadline and other settings.
+type Context interface {
 }
 
 // Context defines the in-flight call state on the server, not including methods
 // to stream args and results.
-type Context interface {
+type ServerContext interface {
 	security.Context
+	Context
+
 	// Deadline returns the deadline for this call.
 	Deadline() time.Time
 	// IsClosed returns true iff the call has been cancelled or otherwise closed.
@@ -211,9 +220,9 @@ type BindOpt interface {
 	IPCBindOpt()
 }
 
-// ClientCallOpt is the interface for all ClientCall options.
-type ClientCallOpt interface {
-	IPCClientCallOpt()
+// CallOpt is the interface for all Call options.
+type CallOpt interface {
+	IPCCallOpt()
 }
 
 // ClientOpt is the interface for all Client options.

@@ -194,26 +194,26 @@ type Object_ExcludingUniversal interface {
 	// that match a query.  See the package comments for details.
 	watch.Watcher_ExcludingUniversal
 	// Exists returns true iff the Entry has a value.
-	Exists(TID TransactionID, opts ..._gen_ipc.ClientCallOpt) (reply bool, err error)
+	Exists(ctx _gen_ipc.Context, TID TransactionID, opts ..._gen_ipc.CallOpt) (reply bool, err error)
 	// Get returns the value for the Object.  The value returned is from the
 	// most recent mutation of the entry in the Transaction, or from the
 	// Transaction's snapshot if there is no mutation.
-	Get(TID TransactionID, opts ..._gen_ipc.ClientCallOpt) (reply Entry, err error)
+	Get(ctx _gen_ipc.Context, TID TransactionID, opts ..._gen_ipc.CallOpt) (reply Entry, err error)
 	// Put modifies the value of the Object.
-	Put(TID TransactionID, V _gen_vdl.Any, opts ..._gen_ipc.ClientCallOpt) (reply Stat, err error)
+	Put(ctx _gen_ipc.Context, TID TransactionID, V _gen_vdl.Any, opts ..._gen_ipc.CallOpt) (reply Stat, err error)
 	// Remove removes the Object.
-	Remove(TID TransactionID, opts ..._gen_ipc.ClientCallOpt) (err error)
+	Remove(ctx _gen_ipc.Context, TID TransactionID, opts ..._gen_ipc.CallOpt) (err error)
 	// SetAttr changes the attributes of the entry, such as permissions and
 	// replication groups.  Attributes are associated with the value, not the
 	// path.
-	SetAttr(TID TransactionID, Attrs []_gen_vdl.Any, opts ..._gen_ipc.ClientCallOpt) (err error)
+	SetAttr(ctx _gen_ipc.Context, TID TransactionID, Attrs []_gen_vdl.Any, opts ..._gen_ipc.CallOpt) (err error)
 	// Stat returns entry info.
-	Stat(TID TransactionID, opts ..._gen_ipc.ClientCallOpt) (reply Stat, err error)
+	Stat(ctx _gen_ipc.Context, TID TransactionID, opts ..._gen_ipc.CallOpt) (reply Stat, err error)
 	// Query returns the sequence of elements that satisfy the query.
-	Query(TID TransactionID, Q query.Query, opts ..._gen_ipc.ClientCallOpt) (reply ObjectQueryStream, err error)
+	Query(ctx _gen_ipc.Context, TID TransactionID, Q query.Query, opts ..._gen_ipc.CallOpt) (reply ObjectQueryStream, err error)
 	// GlobT finds objects beneath this value that match the given pattern.
 	// This is the same as Glob, but operates within a transaction.
-	GlobT(TID TransactionID, pattern string, opts ..._gen_ipc.ClientCallOpt) (reply ObjectGlobTStream, err error)
+	GlobT(ctx _gen_ipc.Context, TID TransactionID, pattern string, opts ..._gen_ipc.CallOpt) (reply ObjectGlobTStream, err error)
 }
 type Object interface {
 	_gen_ipc.UniversalServiceMethods
@@ -227,26 +227,26 @@ type ObjectService interface {
 	// that match a query.  See the package comments for details.
 	watch.WatcherService
 	// Exists returns true iff the Entry has a value.
-	Exists(context _gen_ipc.Context, TID TransactionID) (reply bool, err error)
+	Exists(context _gen_ipc.ServerContext, TID TransactionID) (reply bool, err error)
 	// Get returns the value for the Object.  The value returned is from the
 	// most recent mutation of the entry in the Transaction, or from the
 	// Transaction's snapshot if there is no mutation.
-	Get(context _gen_ipc.Context, TID TransactionID) (reply Entry, err error)
+	Get(context _gen_ipc.ServerContext, TID TransactionID) (reply Entry, err error)
 	// Put modifies the value of the Object.
-	Put(context _gen_ipc.Context, TID TransactionID, V _gen_vdl.Any) (reply Stat, err error)
+	Put(context _gen_ipc.ServerContext, TID TransactionID, V _gen_vdl.Any) (reply Stat, err error)
 	// Remove removes the Object.
-	Remove(context _gen_ipc.Context, TID TransactionID) (err error)
+	Remove(context _gen_ipc.ServerContext, TID TransactionID) (err error)
 	// SetAttr changes the attributes of the entry, such as permissions and
 	// replication groups.  Attributes are associated with the value, not the
 	// path.
-	SetAttr(context _gen_ipc.Context, TID TransactionID, Attrs []_gen_vdl.Any) (err error)
+	SetAttr(context _gen_ipc.ServerContext, TID TransactionID, Attrs []_gen_vdl.Any) (err error)
 	// Stat returns entry info.
-	Stat(context _gen_ipc.Context, TID TransactionID) (reply Stat, err error)
+	Stat(context _gen_ipc.ServerContext, TID TransactionID) (reply Stat, err error)
 	// Query returns the sequence of elements that satisfy the query.
-	Query(context _gen_ipc.Context, TID TransactionID, Q query.Query, stream ObjectServiceQueryStream) (err error)
+	Query(context _gen_ipc.ServerContext, TID TransactionID, Q query.Query, stream ObjectServiceQueryStream) (err error)
 	// GlobT finds objects beneath this value that match the given pattern.
 	// This is the same as Glob, but operates within a transaction.
-	GlobT(context _gen_ipc.Context, TID TransactionID, pattern string, stream ObjectServiceGlobTStream) (err error)
+	GlobT(context _gen_ipc.ServerContext, TID TransactionID, pattern string, stream ObjectServiceGlobTStream) (err error)
 }
 
 // ObjectQueryStream is the interface for streaming responses of the method
@@ -267,7 +267,7 @@ type ObjectQueryStream interface {
 
 // Implementation of the ObjectQueryStream interface that is not exported.
 type implObjectQueryStream struct {
-	clientCall _gen_ipc.ClientCall
+	clientCall _gen_ipc.Call
 }
 
 func (c *implObjectQueryStream) Recv() (item QueryResult, err error) {
@@ -321,7 +321,7 @@ type ObjectGlobTStream interface {
 
 // Implementation of the ObjectGlobTStream interface that is not exported.
 type implObjectGlobTStream struct {
-	clientCall _gen_ipc.ClientCall
+	clientCall _gen_ipc.Call
 }
 
 func (c *implObjectGlobTStream) Recv() (item string, err error) {
@@ -407,9 +407,9 @@ type clientStubObject struct {
 	name   string
 }
 
-func (__gen_c *clientStubObject) Exists(TID TransactionID, opts ..._gen_ipc.ClientCallOpt) (reply bool, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Exists", []interface{}{TID}, opts...); err != nil {
+func (__gen_c *clientStubObject) Exists(ctx _gen_ipc.Context, TID TransactionID, opts ..._gen_ipc.CallOpt) (reply bool, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Exists", []interface{}{TID}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -418,9 +418,9 @@ func (__gen_c *clientStubObject) Exists(TID TransactionID, opts ..._gen_ipc.Clie
 	return
 }
 
-func (__gen_c *clientStubObject) Get(TID TransactionID, opts ..._gen_ipc.ClientCallOpt) (reply Entry, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Get", []interface{}{TID}, opts...); err != nil {
+func (__gen_c *clientStubObject) Get(ctx _gen_ipc.Context, TID TransactionID, opts ..._gen_ipc.CallOpt) (reply Entry, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Get", []interface{}{TID}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -429,9 +429,9 @@ func (__gen_c *clientStubObject) Get(TID TransactionID, opts ..._gen_ipc.ClientC
 	return
 }
 
-func (__gen_c *clientStubObject) Put(TID TransactionID, V _gen_vdl.Any, opts ..._gen_ipc.ClientCallOpt) (reply Stat, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Put", []interface{}{TID, V}, opts...); err != nil {
+func (__gen_c *clientStubObject) Put(ctx _gen_ipc.Context, TID TransactionID, V _gen_vdl.Any, opts ..._gen_ipc.CallOpt) (reply Stat, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Put", []interface{}{TID, V}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -440,9 +440,9 @@ func (__gen_c *clientStubObject) Put(TID TransactionID, V _gen_vdl.Any, opts ...
 	return
 }
 
-func (__gen_c *clientStubObject) Remove(TID TransactionID, opts ..._gen_ipc.ClientCallOpt) (err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Remove", []interface{}{TID}, opts...); err != nil {
+func (__gen_c *clientStubObject) Remove(ctx _gen_ipc.Context, TID TransactionID, opts ..._gen_ipc.CallOpt) (err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Remove", []interface{}{TID}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&err); ierr != nil {
@@ -451,9 +451,9 @@ func (__gen_c *clientStubObject) Remove(TID TransactionID, opts ..._gen_ipc.Clie
 	return
 }
 
-func (__gen_c *clientStubObject) SetAttr(TID TransactionID, Attrs []_gen_vdl.Any, opts ..._gen_ipc.ClientCallOpt) (err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "SetAttr", []interface{}{TID, Attrs}, opts...); err != nil {
+func (__gen_c *clientStubObject) SetAttr(ctx _gen_ipc.Context, TID TransactionID, Attrs []_gen_vdl.Any, opts ..._gen_ipc.CallOpt) (err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "SetAttr", []interface{}{TID, Attrs}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&err); ierr != nil {
@@ -462,9 +462,9 @@ func (__gen_c *clientStubObject) SetAttr(TID TransactionID, Attrs []_gen_vdl.Any
 	return
 }
 
-func (__gen_c *clientStubObject) Stat(TID TransactionID, opts ..._gen_ipc.ClientCallOpt) (reply Stat, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Stat", []interface{}{TID}, opts...); err != nil {
+func (__gen_c *clientStubObject) Stat(ctx _gen_ipc.Context, TID TransactionID, opts ..._gen_ipc.CallOpt) (reply Stat, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Stat", []interface{}{TID}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -473,27 +473,27 @@ func (__gen_c *clientStubObject) Stat(TID TransactionID, opts ..._gen_ipc.Client
 	return
 }
 
-func (__gen_c *clientStubObject) Query(TID TransactionID, Q query.Query, opts ..._gen_ipc.ClientCallOpt) (reply ObjectQueryStream, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Query", []interface{}{TID, Q}, opts...); err != nil {
+func (__gen_c *clientStubObject) Query(ctx _gen_ipc.Context, TID TransactionID, Q query.Query, opts ..._gen_ipc.CallOpt) (reply ObjectQueryStream, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Query", []interface{}{TID, Q}, opts...); err != nil {
 		return
 	}
 	reply = &implObjectQueryStream{clientCall: call}
 	return
 }
 
-func (__gen_c *clientStubObject) GlobT(TID TransactionID, pattern string, opts ..._gen_ipc.ClientCallOpt) (reply ObjectGlobTStream, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "GlobT", []interface{}{TID, pattern}, opts...); err != nil {
+func (__gen_c *clientStubObject) GlobT(ctx _gen_ipc.Context, TID TransactionID, pattern string, opts ..._gen_ipc.CallOpt) (reply ObjectGlobTStream, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "GlobT", []interface{}{TID, pattern}, opts...); err != nil {
 		return
 	}
 	reply = &implObjectGlobTStream{clientCall: call}
 	return
 }
 
-func (__gen_c *clientStubObject) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+func (__gen_c *clientStubObject) UnresolveStep(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -502,9 +502,9 @@ func (__gen_c *clientStubObject) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (
 	return
 }
 
-func (__gen_c *clientStubObject) Signature(opts ..._gen_ipc.ClientCallOpt) (reply _gen_ipc.ServiceSignature, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Signature", nil, opts...); err != nil {
+func (__gen_c *clientStubObject) Signature(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -513,9 +513,9 @@ func (__gen_c *clientStubObject) Signature(opts ..._gen_ipc.ClientCallOpt) (repl
 	return
 }
 
-func (__gen_c *clientStubObject) GetMethodTags(method string, opts ..._gen_ipc.ClientCallOpt) (reply []interface{}, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
+func (__gen_c *clientStubObject) GetMethodTags(ctx _gen_ipc.Context, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -849,19 +849,19 @@ func (__gen_s *ServerStubObject) GlobT(call _gen_ipc.ServerCall, TID Transaction
 // to enable embedding without method collisions.  Not to be used directly by clients.
 type Store_ExcludingUniversal interface {
 	// CreateTransaction creates the transaction and sets the options for it.
-	CreateTransaction(TID TransactionID, Options []_gen_vdl.Any, opts ..._gen_ipc.ClientCallOpt) (err error)
+	CreateTransaction(ctx _gen_ipc.Context, TID TransactionID, Options []_gen_vdl.Any, opts ..._gen_ipc.CallOpt) (err error)
 	// Commit commits the changes in the transaction to the store.  The
 	// operation is atomic, so all mutations are performed, or none.  Returns an
 	// error if the transaction aborted.
-	Commit(TID TransactionID, opts ..._gen_ipc.ClientCallOpt) (err error)
+	Commit(ctx _gen_ipc.Context, TID TransactionID, opts ..._gen_ipc.CallOpt) (err error)
 	// Abort discards a transaction.  This is an optimization; transactions
 	// eventually time out and get discarded.  However, live transactions
 	// consume resources, so if you know that you won't be using a transaction
 	// anymore, you should discard it explicitly.
-	Abort(TID TransactionID, opts ..._gen_ipc.ClientCallOpt) (err error)
+	Abort(ctx _gen_ipc.Context, TID TransactionID, opts ..._gen_ipc.CallOpt) (err error)
 	// ReadConflicts returns the stream of conflicts to store values.  A
 	// conflict occurs when there is a concurrent modification to a value.
-	ReadConflicts(opts ..._gen_ipc.ClientCallOpt) (reply StoreReadConflictsStream, err error)
+	ReadConflicts(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply StoreReadConflictsStream, err error)
 }
 type Store interface {
 	_gen_ipc.UniversalServiceMethods
@@ -872,19 +872,19 @@ type Store interface {
 type StoreService interface {
 
 	// CreateTransaction creates the transaction and sets the options for it.
-	CreateTransaction(context _gen_ipc.Context, TID TransactionID, Options []_gen_vdl.Any) (err error)
+	CreateTransaction(context _gen_ipc.ServerContext, TID TransactionID, Options []_gen_vdl.Any) (err error)
 	// Commit commits the changes in the transaction to the store.  The
 	// operation is atomic, so all mutations are performed, or none.  Returns an
 	// error if the transaction aborted.
-	Commit(context _gen_ipc.Context, TID TransactionID) (err error)
+	Commit(context _gen_ipc.ServerContext, TID TransactionID) (err error)
 	// Abort discards a transaction.  This is an optimization; transactions
 	// eventually time out and get discarded.  However, live transactions
 	// consume resources, so if you know that you won't be using a transaction
 	// anymore, you should discard it explicitly.
-	Abort(context _gen_ipc.Context, TID TransactionID) (err error)
+	Abort(context _gen_ipc.ServerContext, TID TransactionID) (err error)
 	// ReadConflicts returns the stream of conflicts to store values.  A
 	// conflict occurs when there is a concurrent modification to a value.
-	ReadConflicts(context _gen_ipc.Context, stream StoreServiceReadConflictsStream) (err error)
+	ReadConflicts(context _gen_ipc.ServerContext, stream StoreServiceReadConflictsStream) (err error)
 }
 
 // StoreReadConflictsStream is the interface for streaming responses of the method
@@ -905,7 +905,7 @@ type StoreReadConflictsStream interface {
 
 // Implementation of the StoreReadConflictsStream interface that is not exported.
 type implStoreReadConflictsStream struct {
-	clientCall _gen_ipc.ClientCall
+	clientCall _gen_ipc.Call
 }
 
 func (c *implStoreReadConflictsStream) Recv() (item Conflict, err error) {
@@ -984,9 +984,9 @@ type clientStubStore struct {
 	name   string
 }
 
-func (__gen_c *clientStubStore) CreateTransaction(TID TransactionID, Options []_gen_vdl.Any, opts ..._gen_ipc.ClientCallOpt) (err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "CreateTransaction", []interface{}{TID, Options}, opts...); err != nil {
+func (__gen_c *clientStubStore) CreateTransaction(ctx _gen_ipc.Context, TID TransactionID, Options []_gen_vdl.Any, opts ..._gen_ipc.CallOpt) (err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "CreateTransaction", []interface{}{TID, Options}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&err); ierr != nil {
@@ -995,9 +995,9 @@ func (__gen_c *clientStubStore) CreateTransaction(TID TransactionID, Options []_
 	return
 }
 
-func (__gen_c *clientStubStore) Commit(TID TransactionID, opts ..._gen_ipc.ClientCallOpt) (err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Commit", []interface{}{TID}, opts...); err != nil {
+func (__gen_c *clientStubStore) Commit(ctx _gen_ipc.Context, TID TransactionID, opts ..._gen_ipc.CallOpt) (err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Commit", []interface{}{TID}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&err); ierr != nil {
@@ -1006,9 +1006,9 @@ func (__gen_c *clientStubStore) Commit(TID TransactionID, opts ..._gen_ipc.Clien
 	return
 }
 
-func (__gen_c *clientStubStore) Abort(TID TransactionID, opts ..._gen_ipc.ClientCallOpt) (err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Abort", []interface{}{TID}, opts...); err != nil {
+func (__gen_c *clientStubStore) Abort(ctx _gen_ipc.Context, TID TransactionID, opts ..._gen_ipc.CallOpt) (err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Abort", []interface{}{TID}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&err); ierr != nil {
@@ -1017,18 +1017,18 @@ func (__gen_c *clientStubStore) Abort(TID TransactionID, opts ..._gen_ipc.Client
 	return
 }
 
-func (__gen_c *clientStubStore) ReadConflicts(opts ..._gen_ipc.ClientCallOpt) (reply StoreReadConflictsStream, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "ReadConflicts", nil, opts...); err != nil {
+func (__gen_c *clientStubStore) ReadConflicts(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply StoreReadConflictsStream, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "ReadConflicts", nil, opts...); err != nil {
 		return
 	}
 	reply = &implStoreReadConflictsStream{clientCall: call}
 	return
 }
 
-func (__gen_c *clientStubStore) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+func (__gen_c *clientStubStore) UnresolveStep(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -1037,9 +1037,9 @@ func (__gen_c *clientStubStore) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (r
 	return
 }
 
-func (__gen_c *clientStubStore) Signature(opts ..._gen_ipc.ClientCallOpt) (reply _gen_ipc.ServiceSignature, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Signature", nil, opts...); err != nil {
+func (__gen_c *clientStubStore) Signature(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -1048,9 +1048,9 @@ func (__gen_c *clientStubStore) Signature(opts ..._gen_ipc.ClientCallOpt) (reply
 	return
 }
 
-func (__gen_c *clientStubStore) GetMethodTags(method string, opts ..._gen_ipc.ClientCallOpt) (reply []interface{}, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
+func (__gen_c *clientStubStore) GetMethodTags(ctx _gen_ipc.Context, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {

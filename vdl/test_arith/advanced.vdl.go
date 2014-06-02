@@ -20,8 +20,8 @@ import (
 // Trigonometry_ExcludingUniversal is the interface without internal framework-added methods
 // to enable embedding without method collisions.  Not to be used directly by clients.
 type Trigonometry_ExcludingUniversal interface {
-	Sine(angle float64, opts ..._gen_ipc.ClientCallOpt) (reply float64, err error)
-	Cosine(angle float64, opts ..._gen_ipc.ClientCallOpt) (reply float64, err error)
+	Sine(ctx _gen_ipc.Context, angle float64, opts ..._gen_ipc.CallOpt) (reply float64, err error)
+	Cosine(ctx _gen_ipc.Context, angle float64, opts ..._gen_ipc.CallOpt) (reply float64, err error)
 }
 type Trigonometry interface {
 	_gen_ipc.UniversalServiceMethods
@@ -30,8 +30,8 @@ type Trigonometry interface {
 
 // TrigonometryService is the interface the server implements.
 type TrigonometryService interface {
-	Sine(context _gen_ipc.Context, angle float64) (reply float64, err error)
-	Cosine(context _gen_ipc.Context, angle float64) (reply float64, err error)
+	Sine(context _gen_ipc.ServerContext, angle float64) (reply float64, err error)
+	Cosine(context _gen_ipc.ServerContext, angle float64) (reply float64, err error)
 }
 
 // BindTrigonometry returns the client stub implementing the Trigonometry
@@ -77,9 +77,9 @@ type clientStubTrigonometry struct {
 	name   string
 }
 
-func (__gen_c *clientStubTrigonometry) Sine(angle float64, opts ..._gen_ipc.ClientCallOpt) (reply float64, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Sine", []interface{}{angle}, opts...); err != nil {
+func (__gen_c *clientStubTrigonometry) Sine(ctx _gen_ipc.Context, angle float64, opts ..._gen_ipc.CallOpt) (reply float64, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Sine", []interface{}{angle}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -88,9 +88,9 @@ func (__gen_c *clientStubTrigonometry) Sine(angle float64, opts ..._gen_ipc.Clie
 	return
 }
 
-func (__gen_c *clientStubTrigonometry) Cosine(angle float64, opts ..._gen_ipc.ClientCallOpt) (reply float64, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Cosine", []interface{}{angle}, opts...); err != nil {
+func (__gen_c *clientStubTrigonometry) Cosine(ctx _gen_ipc.Context, angle float64, opts ..._gen_ipc.CallOpt) (reply float64, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Cosine", []interface{}{angle}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -99,9 +99,9 @@ func (__gen_c *clientStubTrigonometry) Cosine(angle float64, opts ..._gen_ipc.Cl
 	return
 }
 
-func (__gen_c *clientStubTrigonometry) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+func (__gen_c *clientStubTrigonometry) UnresolveStep(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -110,9 +110,9 @@ func (__gen_c *clientStubTrigonometry) UnresolveStep(opts ..._gen_ipc.ClientCall
 	return
 }
 
-func (__gen_c *clientStubTrigonometry) Signature(opts ..._gen_ipc.ClientCallOpt) (reply _gen_ipc.ServiceSignature, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Signature", nil, opts...); err != nil {
+func (__gen_c *clientStubTrigonometry) Signature(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -121,9 +121,9 @@ func (__gen_c *clientStubTrigonometry) Signature(opts ..._gen_ipc.ClientCallOpt)
 	return
 }
 
-func (__gen_c *clientStubTrigonometry) GetMethodTags(method string, opts ..._gen_ipc.ClientCallOpt) (reply []interface{}, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
+func (__gen_c *clientStubTrigonometry) GetMethodTags(ctx _gen_ipc.Context, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -283,9 +283,9 @@ type clientStubAdvancedMath struct {
 	name   string
 }
 
-func (__gen_c *clientStubAdvancedMath) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+func (__gen_c *clientStubAdvancedMath) UnresolveStep(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -294,9 +294,9 @@ func (__gen_c *clientStubAdvancedMath) UnresolveStep(opts ..._gen_ipc.ClientCall
 	return
 }
 
-func (__gen_c *clientStubAdvancedMath) Signature(opts ..._gen_ipc.ClientCallOpt) (reply _gen_ipc.ServiceSignature, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Signature", nil, opts...); err != nil {
+func (__gen_c *clientStubAdvancedMath) Signature(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -305,9 +305,9 @@ func (__gen_c *clientStubAdvancedMath) Signature(opts ..._gen_ipc.ClientCallOpt)
 	return
 }
 
-func (__gen_c *clientStubAdvancedMath) GetMethodTags(method string, opts ..._gen_ipc.ClientCallOpt) (reply []interface{}, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
+func (__gen_c *clientStubAdvancedMath) GetMethodTags(ctx _gen_ipc.Context, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {

@@ -37,7 +37,7 @@ type MountEntry struct {
 // to enable embedding without method collisions.  Not to be used directly by clients.
 type Globable_ExcludingUniversal interface {
 	// Glob returns all matching entries at the given server.
-	Glob(pattern string, opts ..._gen_ipc.ClientCallOpt) (reply GlobableGlobStream, err error)
+	Glob(ctx _gen_ipc.Context, pattern string, opts ..._gen_ipc.CallOpt) (reply GlobableGlobStream, err error)
 }
 type Globable interface {
 	_gen_ipc.UniversalServiceMethods
@@ -48,7 +48,7 @@ type Globable interface {
 type GlobableService interface {
 
 	// Glob returns all matching entries at the given server.
-	Glob(context _gen_ipc.Context, pattern string, stream GlobableServiceGlobStream) (err error)
+	Glob(context _gen_ipc.ServerContext, pattern string, stream GlobableServiceGlobStream) (err error)
 }
 
 // GlobableGlobStream is the interface for streaming responses of the method
@@ -69,7 +69,7 @@ type GlobableGlobStream interface {
 
 // Implementation of the GlobableGlobStream interface that is not exported.
 type implGlobableGlobStream struct {
-	clientCall _gen_ipc.ClientCall
+	clientCall _gen_ipc.Call
 }
 
 func (c *implGlobableGlobStream) Recv() (item MountEntry, err error) {
@@ -148,18 +148,18 @@ type clientStubGlobable struct {
 	name   string
 }
 
-func (__gen_c *clientStubGlobable) Glob(pattern string, opts ..._gen_ipc.ClientCallOpt) (reply GlobableGlobStream, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Glob", []interface{}{pattern}, opts...); err != nil {
+func (__gen_c *clientStubGlobable) Glob(ctx _gen_ipc.Context, pattern string, opts ..._gen_ipc.CallOpt) (reply GlobableGlobStream, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Glob", []interface{}{pattern}, opts...); err != nil {
 		return
 	}
 	reply = &implGlobableGlobStream{clientCall: call}
 	return
 }
 
-func (__gen_c *clientStubGlobable) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+func (__gen_c *clientStubGlobable) UnresolveStep(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -168,9 +168,9 @@ func (__gen_c *clientStubGlobable) UnresolveStep(opts ..._gen_ipc.ClientCallOpt)
 	return
 }
 
-func (__gen_c *clientStubGlobable) Signature(opts ..._gen_ipc.ClientCallOpt) (reply _gen_ipc.ServiceSignature, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Signature", nil, opts...); err != nil {
+func (__gen_c *clientStubGlobable) Signature(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -179,9 +179,9 @@ func (__gen_c *clientStubGlobable) Signature(opts ..._gen_ipc.ClientCallOpt) (re
 	return
 }
 
-func (__gen_c *clientStubGlobable) GetMethodTags(method string, opts ..._gen_ipc.ClientCallOpt) (reply []interface{}, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
+func (__gen_c *clientStubGlobable) GetMethodTags(ctx _gen_ipc.Context, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -280,13 +280,13 @@ type MountTable_ExcludingUniversal interface {
 	// duration.  A server with an expired TTL should never appear in the
 	// results nor affect the operation of any MountTable method, and should
 	// act as if it was never present as far as the interface is concerned.
-	Mount(Server string, TTL uint32, opts ..._gen_ipc.ClientCallOpt) (err error)
+	Mount(ctx _gen_ipc.Context, Server string, TTL uint32, opts ..._gen_ipc.CallOpt) (err error)
 	// Unmount removes Server from the mount point.  If Server is empty, remove all
 	// servers mounted there.
-	Unmount(Server string, opts ..._gen_ipc.ClientCallOpt) (err error)
+	Unmount(ctx _gen_ipc.Context, Server string, opts ..._gen_ipc.CallOpt) (err error)
 	// ResolveStep takes the next step in resolving a name.  Returns the next
 	// servers to query and the suffix at those servers.
-	ResolveStep(opts ..._gen_ipc.ClientCallOpt) (Servers []MountedServer, Suffix string, err error)
+	ResolveStep(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (Servers []MountedServer, Suffix string, err error)
 }
 type MountTable interface {
 	_gen_ipc.UniversalServiceMethods
@@ -306,13 +306,13 @@ type MountTableService interface {
 	// duration.  A server with an expired TTL should never appear in the
 	// results nor affect the operation of any MountTable method, and should
 	// act as if it was never present as far as the interface is concerned.
-	Mount(context _gen_ipc.Context, Server string, TTL uint32) (err error)
+	Mount(context _gen_ipc.ServerContext, Server string, TTL uint32) (err error)
 	// Unmount removes Server from the mount point.  If Server is empty, remove all
 	// servers mounted there.
-	Unmount(context _gen_ipc.Context, Server string) (err error)
+	Unmount(context _gen_ipc.ServerContext, Server string) (err error)
 	// ResolveStep takes the next step in resolving a name.  Returns the next
 	// servers to query and the suffix at those servers.
-	ResolveStep(context _gen_ipc.Context) (Servers []MountedServer, Suffix string, err error)
+	ResolveStep(context _gen_ipc.ServerContext) (Servers []MountedServer, Suffix string, err error)
 }
 
 // BindMountTable returns the client stub implementing the MountTable
@@ -362,9 +362,9 @@ type clientStubMountTable struct {
 	name   string
 }
 
-func (__gen_c *clientStubMountTable) Mount(Server string, TTL uint32, opts ..._gen_ipc.ClientCallOpt) (err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Mount", []interface{}{Server, TTL}, opts...); err != nil {
+func (__gen_c *clientStubMountTable) Mount(ctx _gen_ipc.Context, Server string, TTL uint32, opts ..._gen_ipc.CallOpt) (err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Mount", []interface{}{Server, TTL}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&err); ierr != nil {
@@ -373,9 +373,9 @@ func (__gen_c *clientStubMountTable) Mount(Server string, TTL uint32, opts ..._g
 	return
 }
 
-func (__gen_c *clientStubMountTable) Unmount(Server string, opts ..._gen_ipc.ClientCallOpt) (err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Unmount", []interface{}{Server}, opts...); err != nil {
+func (__gen_c *clientStubMountTable) Unmount(ctx _gen_ipc.Context, Server string, opts ..._gen_ipc.CallOpt) (err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Unmount", []interface{}{Server}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&err); ierr != nil {
@@ -384,9 +384,9 @@ func (__gen_c *clientStubMountTable) Unmount(Server string, opts ..._gen_ipc.Cli
 	return
 }
 
-func (__gen_c *clientStubMountTable) ResolveStep(opts ..._gen_ipc.ClientCallOpt) (Servers []MountedServer, Suffix string, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "ResolveStep", nil, opts...); err != nil {
+func (__gen_c *clientStubMountTable) ResolveStep(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (Servers []MountedServer, Suffix string, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "ResolveStep", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&Servers, &Suffix, &err); ierr != nil {
@@ -395,9 +395,9 @@ func (__gen_c *clientStubMountTable) ResolveStep(opts ..._gen_ipc.ClientCallOpt)
 	return
 }
 
-func (__gen_c *clientStubMountTable) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+func (__gen_c *clientStubMountTable) UnresolveStep(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -406,9 +406,9 @@ func (__gen_c *clientStubMountTable) UnresolveStep(opts ..._gen_ipc.ClientCallOp
 	return
 }
 
-func (__gen_c *clientStubMountTable) Signature(opts ..._gen_ipc.ClientCallOpt) (reply _gen_ipc.ServiceSignature, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Signature", nil, opts...); err != nil {
+func (__gen_c *clientStubMountTable) Signature(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -417,9 +417,9 @@ func (__gen_c *clientStubMountTable) Signature(opts ..._gen_ipc.ClientCallOpt) (
 	return
 }
 
-func (__gen_c *clientStubMountTable) GetMethodTags(method string, opts ..._gen_ipc.ClientCallOpt) (reply []interface{}, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
+func (__gen_c *clientStubMountTable) GetMethodTags(ctx _gen_ipc.Context, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {

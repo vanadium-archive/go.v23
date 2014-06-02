@@ -69,25 +69,25 @@ const (
 // to enable embedding without method collisions.  Not to be used directly by clients.
 type Arith_ExcludingUniversal interface {
 	// Add is a typical method with multiple input and output arguments.
-	Add(a int32, b int32, opts ..._gen_ipc.ClientCallOpt) (reply int32, err error)
+	Add(ctx _gen_ipc.Context, a int32, b int32, opts ..._gen_ipc.CallOpt) (reply int32, err error)
 	// DivMod shows that runs of args with the same type can use the short form,
 	// just like Go.
-	DivMod(a int32, b int32, opts ..._gen_ipc.ClientCallOpt) (quot int32, rem int32, err error)
+	DivMod(ctx _gen_ipc.Context, a int32, b int32, opts ..._gen_ipc.CallOpt) (quot int32, rem int32, err error)
 	// Sub shows that you can use data types defined in other packages.
-	Sub(args test_base.Args, opts ..._gen_ipc.ClientCallOpt) (reply int32, err error)
+	Sub(ctx _gen_ipc.Context, args test_base.Args, opts ..._gen_ipc.CallOpt) (reply int32, err error)
 	// Mul tries another data type defined in another package.
-	Mul(nested test_base.NestedArgs, opts ..._gen_ipc.ClientCallOpt) (reply int32, err error)
+	Mul(ctx _gen_ipc.Context, nested test_base.NestedArgs, opts ..._gen_ipc.CallOpt) (reply int32, err error)
 	// GenError shows that it's fine to have no in args, and no out args other
 	// than "error".  In addition GenError shows the usage of tags.  Tags are a
 	// sequence of constants.  There's no requirement on uniqueness of types or
 	// values, and regular const expressions may also be used.
-	GenError(opts ..._gen_ipc.ClientCallOpt) (err error)
+	GenError(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (err error)
 	// Count shows using only an int32 out-stream type, with no in-stream type.
-	Count(Start int32, opts ..._gen_ipc.ClientCallOpt) (reply ArithCountStream, err error)
+	Count(ctx _gen_ipc.Context, Start int32, opts ..._gen_ipc.CallOpt) (reply ArithCountStream, err error)
 	// StreamingAdd shows a bidirectional stream.
-	StreamingAdd(opts ..._gen_ipc.ClientCallOpt) (reply ArithStreamingAddStream, err error)
+	StreamingAdd(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply ArithStreamingAddStream, err error)
 	// QuoteAny shows the any built-in type, representing a value of any type.
-	QuoteAny(a _gen_vdl.Any, opts ..._gen_ipc.ClientCallOpt) (reply _gen_vdl.Any, err error)
+	QuoteAny(ctx _gen_ipc.Context, a _gen_vdl.Any, opts ..._gen_ipc.CallOpt) (reply _gen_vdl.Any, err error)
 }
 type Arith interface {
 	_gen_ipc.UniversalServiceMethods
@@ -98,25 +98,25 @@ type Arith interface {
 type ArithService interface {
 
 	// Add is a typical method with multiple input and output arguments.
-	Add(context _gen_ipc.Context, a int32, b int32) (reply int32, err error)
+	Add(context _gen_ipc.ServerContext, a int32, b int32) (reply int32, err error)
 	// DivMod shows that runs of args with the same type can use the short form,
 	// just like Go.
-	DivMod(context _gen_ipc.Context, a int32, b int32) (quot int32, rem int32, err error)
+	DivMod(context _gen_ipc.ServerContext, a int32, b int32) (quot int32, rem int32, err error)
 	// Sub shows that you can use data types defined in other packages.
-	Sub(context _gen_ipc.Context, args test_base.Args) (reply int32, err error)
+	Sub(context _gen_ipc.ServerContext, args test_base.Args) (reply int32, err error)
 	// Mul tries another data type defined in another package.
-	Mul(context _gen_ipc.Context, nested test_base.NestedArgs) (reply int32, err error)
+	Mul(context _gen_ipc.ServerContext, nested test_base.NestedArgs) (reply int32, err error)
 	// GenError shows that it's fine to have no in args, and no out args other
 	// than "error".  In addition GenError shows the usage of tags.  Tags are a
 	// sequence of constants.  There's no requirement on uniqueness of types or
 	// values, and regular const expressions may also be used.
-	GenError(context _gen_ipc.Context) (err error)
+	GenError(context _gen_ipc.ServerContext) (err error)
 	// Count shows using only an int32 out-stream type, with no in-stream type.
-	Count(context _gen_ipc.Context, Start int32, stream ArithServiceCountStream) (err error)
+	Count(context _gen_ipc.ServerContext, Start int32, stream ArithServiceCountStream) (err error)
 	// StreamingAdd shows a bidirectional stream.
-	StreamingAdd(context _gen_ipc.Context, stream ArithServiceStreamingAddStream) (reply int32, err error)
+	StreamingAdd(context _gen_ipc.ServerContext, stream ArithServiceStreamingAddStream) (reply int32, err error)
 	// QuoteAny shows the any built-in type, representing a value of any type.
-	QuoteAny(context _gen_ipc.Context, a _gen_vdl.Any) (reply _gen_vdl.Any, err error)
+	QuoteAny(context _gen_ipc.ServerContext, a _gen_vdl.Any) (reply _gen_vdl.Any, err error)
 }
 
 // ArithCountStream is the interface for streaming responses of the method
@@ -137,7 +137,7 @@ type ArithCountStream interface {
 
 // Implementation of the ArithCountStream interface that is not exported.
 type implArithCountStream struct {
-	clientCall _gen_ipc.ClientCall
+	clientCall _gen_ipc.Call
 }
 
 func (c *implArithCountStream) Recv() (item int32, err error) {
@@ -201,7 +201,7 @@ type ArithStreamingAddStream interface {
 
 // Implementation of the ArithStreamingAddStream interface that is not exported.
 type implArithStreamingAddStream struct {
-	clientCall _gen_ipc.ClientCall
+	clientCall _gen_ipc.Call
 }
 
 func (c *implArithStreamingAddStream) Send(item int32) error {
@@ -297,9 +297,9 @@ type clientStubArith struct {
 	name   string
 }
 
-func (__gen_c *clientStubArith) Add(a int32, b int32, opts ..._gen_ipc.ClientCallOpt) (reply int32, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Add", []interface{}{a, b}, opts...); err != nil {
+func (__gen_c *clientStubArith) Add(ctx _gen_ipc.Context, a int32, b int32, opts ..._gen_ipc.CallOpt) (reply int32, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Add", []interface{}{a, b}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -308,9 +308,9 @@ func (__gen_c *clientStubArith) Add(a int32, b int32, opts ..._gen_ipc.ClientCal
 	return
 }
 
-func (__gen_c *clientStubArith) DivMod(a int32, b int32, opts ..._gen_ipc.ClientCallOpt) (quot int32, rem int32, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "DivMod", []interface{}{a, b}, opts...); err != nil {
+func (__gen_c *clientStubArith) DivMod(ctx _gen_ipc.Context, a int32, b int32, opts ..._gen_ipc.CallOpt) (quot int32, rem int32, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "DivMod", []interface{}{a, b}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&quot, &rem, &err); ierr != nil {
@@ -319,9 +319,9 @@ func (__gen_c *clientStubArith) DivMod(a int32, b int32, opts ..._gen_ipc.Client
 	return
 }
 
-func (__gen_c *clientStubArith) Sub(args test_base.Args, opts ..._gen_ipc.ClientCallOpt) (reply int32, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Sub", []interface{}{args}, opts...); err != nil {
+func (__gen_c *clientStubArith) Sub(ctx _gen_ipc.Context, args test_base.Args, opts ..._gen_ipc.CallOpt) (reply int32, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Sub", []interface{}{args}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -330,9 +330,9 @@ func (__gen_c *clientStubArith) Sub(args test_base.Args, opts ..._gen_ipc.Client
 	return
 }
 
-func (__gen_c *clientStubArith) Mul(nested test_base.NestedArgs, opts ..._gen_ipc.ClientCallOpt) (reply int32, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Mul", []interface{}{nested}, opts...); err != nil {
+func (__gen_c *clientStubArith) Mul(ctx _gen_ipc.Context, nested test_base.NestedArgs, opts ..._gen_ipc.CallOpt) (reply int32, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Mul", []interface{}{nested}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -341,9 +341,9 @@ func (__gen_c *clientStubArith) Mul(nested test_base.NestedArgs, opts ..._gen_ip
 	return
 }
 
-func (__gen_c *clientStubArith) GenError(opts ..._gen_ipc.ClientCallOpt) (err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "GenError", nil, opts...); err != nil {
+func (__gen_c *clientStubArith) GenError(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "GenError", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&err); ierr != nil {
@@ -352,27 +352,27 @@ func (__gen_c *clientStubArith) GenError(opts ..._gen_ipc.ClientCallOpt) (err er
 	return
 }
 
-func (__gen_c *clientStubArith) Count(Start int32, opts ..._gen_ipc.ClientCallOpt) (reply ArithCountStream, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Count", []interface{}{Start}, opts...); err != nil {
+func (__gen_c *clientStubArith) Count(ctx _gen_ipc.Context, Start int32, opts ..._gen_ipc.CallOpt) (reply ArithCountStream, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Count", []interface{}{Start}, opts...); err != nil {
 		return
 	}
 	reply = &implArithCountStream{clientCall: call}
 	return
 }
 
-func (__gen_c *clientStubArith) StreamingAdd(opts ..._gen_ipc.ClientCallOpt) (reply ArithStreamingAddStream, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "StreamingAdd", nil, opts...); err != nil {
+func (__gen_c *clientStubArith) StreamingAdd(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply ArithStreamingAddStream, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "StreamingAdd", nil, opts...); err != nil {
 		return
 	}
 	reply = &implArithStreamingAddStream{clientCall: call}
 	return
 }
 
-func (__gen_c *clientStubArith) QuoteAny(a _gen_vdl.Any, opts ..._gen_ipc.ClientCallOpt) (reply _gen_vdl.Any, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "QuoteAny", []interface{}{a}, opts...); err != nil {
+func (__gen_c *clientStubArith) QuoteAny(ctx _gen_ipc.Context, a _gen_vdl.Any, opts ..._gen_ipc.CallOpt) (reply _gen_vdl.Any, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "QuoteAny", []interface{}{a}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -381,9 +381,9 @@ func (__gen_c *clientStubArith) QuoteAny(a _gen_vdl.Any, opts ..._gen_ipc.Client
 	return
 }
 
-func (__gen_c *clientStubArith) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+func (__gen_c *clientStubArith) UnresolveStep(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -392,9 +392,9 @@ func (__gen_c *clientStubArith) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (r
 	return
 }
 
-func (__gen_c *clientStubArith) Signature(opts ..._gen_ipc.ClientCallOpt) (reply _gen_ipc.ServiceSignature, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Signature", nil, opts...); err != nil {
+func (__gen_c *clientStubArith) Signature(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -403,9 +403,9 @@ func (__gen_c *clientStubArith) Signature(opts ..._gen_ipc.ClientCallOpt) (reply
 	return
 }
 
-func (__gen_c *clientStubArith) GetMethodTags(method string, opts ..._gen_ipc.ClientCallOpt) (reply []interface{}, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
+func (__gen_c *clientStubArith) GetMethodTags(ctx _gen_ipc.Context, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -613,8 +613,8 @@ type Calculator_ExcludingUniversal interface {
 	// turn it is embedded by arith.Calculator (which is in the same package but
 	// different file) to verify that embedding works in all these scenarios.
 	AdvancedMath_ExcludingUniversal
-	On(opts ..._gen_ipc.ClientCallOpt) (err error)  // On turns the calculator on.
-	Off(opts ..._gen_ipc.ClientCallOpt) (err error) // Off turns the calculator off.
+	On(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (err error)  // On turns the calculator on.
+	Off(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (err error) // Off turns the calculator off.
 }
 type Calculator interface {
 	_gen_ipc.UniversalServiceMethods
@@ -633,8 +633,8 @@ type CalculatorService interface {
 	// turn it is embedded by arith.Calculator (which is in the same package but
 	// different file) to verify that embedding works in all these scenarios.
 	AdvancedMathService
-	On(context _gen_ipc.Context) (err error)  // On turns the calculator on.
-	Off(context _gen_ipc.Context) (err error) // Off turns the calculator off.
+	On(context _gen_ipc.ServerContext) (err error)  // On turns the calculator on.
+	Off(context _gen_ipc.ServerContext) (err error) // Off turns the calculator off.
 }
 
 // BindCalculator returns the client stub implementing the Calculator
@@ -687,9 +687,9 @@ type clientStubCalculator struct {
 	name   string
 }
 
-func (__gen_c *clientStubCalculator) On(opts ..._gen_ipc.ClientCallOpt) (err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "On", nil, opts...); err != nil {
+func (__gen_c *clientStubCalculator) On(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "On", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&err); ierr != nil {
@@ -698,9 +698,9 @@ func (__gen_c *clientStubCalculator) On(opts ..._gen_ipc.ClientCallOpt) (err err
 	return
 }
 
-func (__gen_c *clientStubCalculator) Off(opts ..._gen_ipc.ClientCallOpt) (err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Off", nil, opts...); err != nil {
+func (__gen_c *clientStubCalculator) Off(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Off", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&err); ierr != nil {
@@ -709,9 +709,9 @@ func (__gen_c *clientStubCalculator) Off(opts ..._gen_ipc.ClientCallOpt) (err er
 	return
 }
 
-func (__gen_c *clientStubCalculator) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+func (__gen_c *clientStubCalculator) UnresolveStep(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -720,9 +720,9 @@ func (__gen_c *clientStubCalculator) UnresolveStep(opts ..._gen_ipc.ClientCallOp
 	return
 }
 
-func (__gen_c *clientStubCalculator) Signature(opts ..._gen_ipc.ClientCallOpt) (reply _gen_ipc.ServiceSignature, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Signature", nil, opts...); err != nil {
+func (__gen_c *clientStubCalculator) Signature(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -731,9 +731,9 @@ func (__gen_c *clientStubCalculator) Signature(opts ..._gen_ipc.ClientCallOpt) (
 	return
 }
 
-func (__gen_c *clientStubCalculator) GetMethodTags(method string, opts ..._gen_ipc.ClientCallOpt) (reply []interface{}, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
+func (__gen_c *clientStubCalculator) GetMethodTags(ctx _gen_ipc.Context, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {

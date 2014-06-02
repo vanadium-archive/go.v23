@@ -29,13 +29,13 @@ import (
 // to enable embedding without method collisions.  Not to be used directly by clients.
 type Content_ExcludingUniversal interface {
 	// Delete deletes the content.
-	Delete(opts ..._gen_ipc.ClientCallOpt) (err error)
+	Delete(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (err error)
 	// Download opens a stream that can used for downloading the
 	// content.
-	Download(opts ..._gen_ipc.ClientCallOpt) (reply ContentDownloadStream, err error)
+	Download(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply ContentDownloadStream, err error)
 	// Upload opens a stream that can be used for uploading the content
 	// and returns the name under which this content can be found.
-	Upload(opts ..._gen_ipc.ClientCallOpt) (reply ContentUploadStream, err error)
+	Upload(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply ContentUploadStream, err error)
 }
 type Content interface {
 	_gen_ipc.UniversalServiceMethods
@@ -46,13 +46,13 @@ type Content interface {
 type ContentService interface {
 
 	// Delete deletes the content.
-	Delete(context _gen_ipc.Context) (err error)
+	Delete(context _gen_ipc.ServerContext) (err error)
 	// Download opens a stream that can used for downloading the
 	// content.
-	Download(context _gen_ipc.Context, stream ContentServiceDownloadStream) (err error)
+	Download(context _gen_ipc.ServerContext, stream ContentServiceDownloadStream) (err error)
 	// Upload opens a stream that can be used for uploading the content
 	// and returns the name under which this content can be found.
-	Upload(context _gen_ipc.Context, stream ContentServiceUploadStream) (reply string, err error)
+	Upload(context _gen_ipc.ServerContext, stream ContentServiceUploadStream) (reply string, err error)
 }
 
 // ContentDownloadStream is the interface for streaming responses of the method
@@ -73,7 +73,7 @@ type ContentDownloadStream interface {
 
 // Implementation of the ContentDownloadStream interface that is not exported.
 type implContentDownloadStream struct {
-	clientCall _gen_ipc.ClientCall
+	clientCall _gen_ipc.Call
 }
 
 func (c *implContentDownloadStream) Recv() (item []byte, err error) {
@@ -133,7 +133,7 @@ type ContentUploadStream interface {
 
 // Implementation of the ContentUploadStream interface that is not exported.
 type implContentUploadStream struct {
-	clientCall _gen_ipc.ClientCall
+	clientCall _gen_ipc.Call
 }
 
 func (c *implContentUploadStream) Send(item []byte) error {
@@ -217,9 +217,9 @@ type clientStubContent struct {
 	name   string
 }
 
-func (__gen_c *clientStubContent) Delete(opts ..._gen_ipc.ClientCallOpt) (err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Delete", nil, opts...); err != nil {
+func (__gen_c *clientStubContent) Delete(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Delete", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&err); ierr != nil {
@@ -228,27 +228,27 @@ func (__gen_c *clientStubContent) Delete(opts ..._gen_ipc.ClientCallOpt) (err er
 	return
 }
 
-func (__gen_c *clientStubContent) Download(opts ..._gen_ipc.ClientCallOpt) (reply ContentDownloadStream, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Download", nil, opts...); err != nil {
+func (__gen_c *clientStubContent) Download(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply ContentDownloadStream, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Download", nil, opts...); err != nil {
 		return
 	}
 	reply = &implContentDownloadStream{clientCall: call}
 	return
 }
 
-func (__gen_c *clientStubContent) Upload(opts ..._gen_ipc.ClientCallOpt) (reply ContentUploadStream, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Upload", nil, opts...); err != nil {
+func (__gen_c *clientStubContent) Upload(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply ContentUploadStream, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Upload", nil, opts...); err != nil {
 		return
 	}
 	reply = &implContentUploadStream{clientCall: call}
 	return
 }
 
-func (__gen_c *clientStubContent) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+func (__gen_c *clientStubContent) UnresolveStep(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -257,9 +257,9 @@ func (__gen_c *clientStubContent) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) 
 	return
 }
 
-func (__gen_c *clientStubContent) Signature(opts ..._gen_ipc.ClientCallOpt) (reply _gen_ipc.ServiceSignature, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Signature", nil, opts...); err != nil {
+func (__gen_c *clientStubContent) Signature(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -268,9 +268,9 @@ func (__gen_c *clientStubContent) Signature(opts ..._gen_ipc.ClientCallOpt) (rep
 	return
 }
 
-func (__gen_c *clientStubContent) GetMethodTags(method string, opts ..._gen_ipc.ClientCallOpt) (reply []interface{}, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
+func (__gen_c *clientStubContent) GetMethodTags(ctx _gen_ipc.Context, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {

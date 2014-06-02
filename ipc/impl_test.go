@@ -70,6 +70,14 @@ func (*rtImpl) Shutdown() {}
 func (*rtImpl) RegisterType(interface{}) {
 }
 
+func (*rtImpl) NewContext() ipc.Context {
+	return nil
+}
+
+func (*rtImpl) TODOContext() ipc.Context {
+	return nil
+}
+
 type istream struct{}
 
 func (*istream) Send(item interface{}) error {
@@ -100,7 +108,7 @@ type client struct{}
 // IPCBindOpt makes client implement BindOpt.
 func (c *client) IPCBindOpt() {}
 
-func (*client) StartCall(name, method string, args []interface{}, opts ...ipc.ClientCallOpt) (ipc.ClientCall, error) {
+func (*client) StartCall(ctx ipc.Context, name, method string, args []interface{}, opts ...ipc.CallOpt) (ipc.Call, error) {
 	return &call{}, nil
 }
 

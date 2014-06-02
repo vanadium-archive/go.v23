@@ -4,6 +4,7 @@ import (
 	"runtime"
 	"testing"
 
+	"veyron2/rt"
 	"veyron2/storage"
 	"veyron2/storage/vstore/primitives"
 	"veyron2/vom"
@@ -125,7 +126,7 @@ func TestManyToManyWithRole(t *testing.T) {
 
 	// Create a player John who plays for the Rockets team.
 	{
-		tr := primitives.NewTransaction()
+		tr := primitives.NewTransaction(rt.R().NewContext())
 		put(t, st, tr, "/", newDir())
 		put(t, st, tr, "/People", newDir())
 		put(t, st, tr, "/Players", newDir())
@@ -152,7 +153,7 @@ func TestManyToManyWithRole(t *testing.T) {
 
 	// Verify the state.
 	{
-		tr := primitives.NewTransaction()
+		tr := primitives.NewTransaction(rt.R().NewContext())
 		pID, p := getPerson(t, st, tr, "/People/John")
 		if p.FullName != "John" {
 			t.Errorf("Expected %q, got %q", "John", p.FullName)
@@ -233,7 +234,7 @@ func TestManyToManyDirect(t *testing.T) {
 
 	// Create a player John who plays for the Rockets team.
 	{
-		tr := primitives.NewTransaction()
+		tr := primitives.NewTransaction(rt.R().NewContext())
 		put(t, st, tr, "/", newDir())
 		put(t, st, tr, "/People", newDir())
 		put(t, st, tr, "/Players", newDir())
@@ -257,7 +258,7 @@ func TestManyToManyDirect(t *testing.T) {
 
 	// Verify the state.
 	{
-		tr := primitives.NewTransaction()
+		tr := primitives.NewTransaction(rt.R().NewContext())
 		pID, p := getPerson(t, st, tr, "/People/John")
 		plID, pl := getDirectPlayer(t, st, tr, "/Players/John")
 		teamID, team := getDirectTeam(t, st, tr, "/Teams/Rockets")

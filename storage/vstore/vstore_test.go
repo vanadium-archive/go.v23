@@ -58,6 +58,7 @@ func TestPutGetRemoveRoot(t *testing.T) {
 }
 
 func TestPutGetRemoveChild(t *testing.T) {
+	ctx := rt.R().NewContext()
 	s, c := newServer(t) // calls rt.Init()
 	defer c()
 
@@ -65,19 +66,19 @@ func TestPutGetRemoveChild(t *testing.T) {
 		// Create a root.
 		o := s.Bind("/")
 		value := newValue()
-		tr1 := primitives.NewTransaction()
-		if _, err := o.Put(tr1, value); err != nil {
+		tr1 := primitives.NewTransaction(ctx)
+		if _, err := o.Put(ctx, tr1, value); err != nil {
 			t.Errorf("Unexpected error: %s", err)
 		}
-		if err := tr1.Commit(); err != nil {
+		if err := tr1.Commit(ctx); err != nil {
 			t.Errorf("Unexpected error")
 		}
 
-		tr2 := primitives.NewTransaction()
-		if ok, err := o.Exists(tr2); !ok || err != nil {
+		tr2 := primitives.NewTransaction(ctx)
+		if ok, err := o.Exists(ctx, tr2); !ok || err != nil {
 			t.Errorf("Should exist: %s", err)
 		}
-		if _, err := o.Get(tr2); err != nil {
+		if _, err := o.Get(ctx, tr2); err != nil {
 			t.Errorf("Object should exist: %s", err)
 		}
 	}
@@ -88,111 +89,113 @@ func TestPutGetRemoveChild(t *testing.T) {
 
 func testPutGetRemove(t *testing.T, s storage.Store, o storage.Object) {
 	value := newValue()
+	ctx := rt.R().NewContext()
 	{
 		// Check that the object does not exist.
-		tr := primitives.NewTransaction()
-		if ok, err := o.Exists(tr); ok || err != nil {
+		tr := primitives.NewTransaction(ctx)
+		if ok, err := o.Exists(ctx, tr); ok || err != nil {
 			t.Errorf("Should not exist: %s", err)
 		}
-		if v, err := o.Get(tr); !v.Stat.ID.IsValid() && err == nil {
+		if v, err := o.Get(ctx, tr); !v.Stat.ID.IsValid() && err == nil {
 			t.Errorf("Should not exist: %v, %s", v, err)
 		}
 	}
 
 	{
 		// Add the object.
-		tr1 := primitives.NewTransaction()
-		if _, err := o.Put(tr1, value); err != nil {
+		tr1 := primitives.NewTransaction(ctx)
+		if _, err := o.Put(ctx, tr1, value); err != nil {
 			t.Errorf("Unexpected error: %s", err)
 		}
-		if ok, err := o.Exists(tr1); !ok || err != nil {
+		if ok, err := o.Exists(ctx, tr1); !ok || err != nil {
 			t.Errorf("Should exist: %s", err)
 		}
-		if _, err := o.Get(tr1); err != nil {
+		if _, err := o.Get(ctx, tr1); err != nil {
 			t.Errorf("Object should exist: %s", err)
 		}
 
 		// Transactions are isolated.
-		tr2 := primitives.NewTransaction()
-		if ok, err := o.Exists(tr2); ok || err != nil {
+		tr2 := primitives.NewTransaction(ctx)
+		if ok, err := o.Exists(ctx, tr2); ok || err != nil {
 			t.Errorf("Should not exist: %s", err)
 		}
-		if v, err := o.Get(tr2); v.Stat.ID.IsValid() && err == nil {
+		if v, err := o.Get(ctx, tr2); v.Stat.ID.IsValid() && err == nil {
 			t.Errorf("Should not exist: %v, %s", v, err)
 		}
 
 		// Apply tr1.
-		if err := tr1.Commit(); err != nil {
+		if err := tr1.Commit(ctx); err != nil {
 			t.Errorf("Unexpected error")
 		}
 
 		// tr2 is still isolated.
-		if ok, err := o.Exists(tr2); ok || err != nil {
+		if ok, err := o.Exists(ctx, tr2); ok || err != nil {
 			t.Errorf("Should not exist: %s", err)
 		}
-		if v, err := o.Get(tr2); v.Stat.ID.IsValid() && err == nil {
+		if v, err := o.Get(ctx, tr2); v.Stat.ID.IsValid() && err == nil {
 			t.Errorf("Should not exist: %v, %s", v, err)
 		}
 
 		// tr3 observes the commit.
-		tr3 := primitives.NewTransaction()
-		if ok, err := o.Exists(tr3); !ok || err != nil {
+		tr3 := primitives.NewTransaction(ctx)
+		if ok, err := o.Exists(ctx, tr3); !ok || err != nil {
 			t.Errorf("Should exist: %s", err)
 		}
-		if _, err := o.Get(tr3); err != nil {
+		if _, err := o.Get(ctx, tr3); err != nil {
 			t.Errorf("Object should exist: %s", err)
 		}
 	}
 
 	{
 		// Remove the object.
-		tr1 := primitives.NewTransaction()
-		if err := o.Remove(tr1); err != nil {
+		tr1 := primitives.NewTransaction(ctx)
+		if err := o.Remove(ctx, tr1); err != nil {
 			t.Errorf("Unexpected error: %s", err)
 		}
-		if ok, err := o.Exists(tr1); ok || err != nil {
+		if ok, err := o.Exists(ctx, tr1); ok || err != nil {
 			t.Errorf("Should not exist: %s", err)
 		}
-		if v, err := o.Get(tr1); v.Stat.ID.IsValid() || err == nil {
+		if v, err := o.Get(ctx, tr1); v.Stat.ID.IsValid() || err == nil {
 			t.Errorf("Object should exist: %v", v)
 		}
 
 		// The removal is isolated.
-		tr2 := primitives.NewTransaction()
-		if ok, err := o.Exists(tr2); !ok || err != nil {
+		tr2 := primitives.NewTransaction(ctx)
+		if ok, err := o.Exists(ctx, tr2); !ok || err != nil {
 			t.Errorf("Should exist: %s", err)
 		}
-		if _, err := o.Get(tr2); err != nil {
+		if _, err := o.Get(ctx, tr2); err != nil {
 			t.Errorf("Object should exist: %s", err)
 		}
 
 		// Apply tr1.
-		if err := tr1.Commit(); err != nil {
+		if err := tr1.Commit(ctx); err != nil {
 			t.Errorf("Unexpected error: %s", err)
 		}
 
 		// The removal is isolated.
-		if ok, err := o.Exists(tr2); !ok || err != nil {
+		if ok, err := o.Exists(ctx, tr2); !ok || err != nil {
 			t.Errorf("Should exist: %s", err)
 		}
-		if _, err := o.Get(tr2); err != nil {
+		if _, err := o.Get(ctx, tr2); err != nil {
 			t.Errorf("Object should exist: %s", err)
 		}
 	}
 
 	{
 		// Check that the object does not exist.
-		tr1 := primitives.NewTransaction()
-		if ok, err := o.Exists(tr1); ok || err != nil {
+		tr1 := primitives.NewTransaction(ctx)
+		if ok, err := o.Exists(ctx, tr1); ok || err != nil {
 			t.Errorf("Should not exist")
 		}
-		if v, err := o.Get(tr1); v.Stat.ID.IsValid() && err == nil {
+		if v, err := o.Get(ctx, tr1); v.Stat.ID.IsValid() && err == nil {
 			t.Errorf("Should not exist: %v, %s", v, err)
 		}
 	}
 }
 
 func TestPutGetRemoveNilTransaction(t *testing.T) {
+	ctx := rt.R().NewContext()
 	s, c := newServer(t) // calls rt.Init()
 	defer c()
 
@@ -200,13 +203,13 @@ func TestPutGetRemoveNilTransaction(t *testing.T) {
 		// Create a root.
 		o := s.Bind("/")
 		value := newValue()
-		if _, err := o.Put(nil, value); err != nil {
+		if _, err := o.Put(ctx, nil, value); err != nil {
 			t.Errorf("Unexpected error: %s", err)
 		}
-		if ok, err := o.Exists(nil); !ok || err != nil {
+		if ok, err := o.Exists(ctx, nil); !ok || err != nil {
 			t.Errorf("Should exist: %s", err)
 		}
-		if _, err := o.Get(nil); err != nil {
+		if _, err := o.Get(ctx, nil); err != nil {
 			t.Errorf("Object should exist: %s", err)
 		}
 	}
@@ -215,68 +218,68 @@ func TestPutGetRemoveNilTransaction(t *testing.T) {
 	value := newValue()
 	{
 		// Check that the object does not exist.
-		if ok, err := o.Exists(nil); ok || err != nil {
+		if ok, err := o.Exists(ctx, nil); ok || err != nil {
 			t.Errorf("Should not exist: %s", err)
 		}
-		if v, err := o.Get(nil); v.Stat.ID.IsValid() && err == nil {
+		if v, err := o.Get(ctx, nil); v.Stat.ID.IsValid() && err == nil {
 			t.Errorf("Should not exist: %v, %s", v, err)
 		}
 	}
 
 	{
-		tr := primitives.NewTransaction()
-		if ok, err := o.Exists(tr); ok || err != nil {
+		tr := primitives.NewTransaction(ctx)
+		if ok, err := o.Exists(ctx, tr); ok || err != nil {
 			t.Errorf("Should not exist: %s", err)
 		}
 
 		// Add the object.
-		if _, err := o.Put(nil, value); err != nil {
+		if _, err := o.Put(ctx, nil, value); err != nil {
 			t.Errorf("Unexpected error: %s", err)
 		}
-		if ok, err := o.Exists(nil); !ok || err != nil {
+		if ok, err := o.Exists(ctx, nil); !ok || err != nil {
 			t.Errorf("Should exist: %s", err)
 		}
-		if _, err := o.Get(nil); err != nil {
+		if _, err := o.Get(ctx, nil); err != nil {
 			t.Errorf("Object should exist: %s", err)
 		}
 
 		// Transactions are isolated.
-		if ok, err := o.Exists(tr); ok || err != nil {
+		if ok, err := o.Exists(ctx, tr); ok || err != nil {
 			t.Errorf("Should not exist: %s", err)
 		}
-		if v, err := o.Get(tr); v.Stat.ID.IsValid() && err == nil {
+		if v, err := o.Get(ctx, tr); v.Stat.ID.IsValid() && err == nil {
 			t.Errorf("Should not exist: %v, %s", v, err)
 		}
-		if err := tr.Abort(); err != nil {
+		if err := tr.Abort(ctx); err != nil {
 			t.Errorf("Unexpected error: %s", err)
 		}
 	}
 
 	{
-		tr := primitives.NewTransaction()
-		if ok, err := o.Exists(tr); !ok || err != nil {
+		tr := primitives.NewTransaction(ctx)
+		if ok, err := o.Exists(ctx, tr); !ok || err != nil {
 			t.Errorf("Should exist: %s", err)
 		}
 
 		// Remove the object.
-		if err := o.Remove(nil); err != nil {
+		if err := o.Remove(ctx, nil); err != nil {
 			t.Errorf("Unexpected error: %s", err)
 		}
-		if ok, err := o.Exists(nil); ok || err != nil {
+		if ok, err := o.Exists(ctx, nil); ok || err != nil {
 			t.Errorf("Should not exist: %s", err)
 		}
-		if v, err := o.Get(nil); v.Stat.ID.IsValid() || err == nil {
+		if v, err := o.Get(ctx, nil); v.Stat.ID.IsValid() || err == nil {
 			t.Errorf("Object should exist: %v", v)
 		}
 
 		// The removal is isolated.
-		if ok, err := o.Exists(tr); !ok || err != nil {
+		if ok, err := o.Exists(ctx, tr); !ok || err != nil {
 			t.Errorf("Should exist: %s", err)
 		}
-		if _, err := o.Get(tr); err != nil {
+		if _, err := o.Get(ctx, tr); err != nil {
 			t.Errorf("Object should exist: %s", err)
 		}
-		if err := tr.Abort(); err != nil {
+		if err := tr.Abort(ctx); err != nil {
 			t.Errorf("Unexpected error: %s", err)
 		}
 	}

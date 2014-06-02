@@ -81,23 +81,23 @@ func BindObject(sServ store.Store, mount, name string) storage.Object {
 }
 
 // Exists returns true iff the Entry has a value.
-func (o *object) Exists(t storage.Transaction) (bool, error) {
-	id, err := UpdateTransaction(t, o.sServ)
+func (o *object) Exists(ctx ipc.Context, t storage.Transaction) (bool, error) {
+	id, err := UpdateTransaction(ctx, t, o.sServ)
 	if err != nil {
 		return false, err
 	}
-	return o.oServ.Exists(id)
+	return o.oServ.Exists(ctx, id)
 }
 
 // Get returns the value for the Object.  The value returned is from the
 // most recent mutation of the entry in the storage.Transaction, or from the
 // storage.Transaction's snapshot if there is no mutation.
-func (o *object) Get(t storage.Transaction) (storage.Entry, error) {
-	id, err := UpdateTransaction(t, o.sServ)
+func (o *object) Get(ctx ipc.Context, t storage.Transaction) (storage.Entry, error) {
+	id, err := UpdateTransaction(ctx, t, o.sServ)
 	if err != nil {
 		return nullEntry, err
 	}
-	entry, err := o.oServ.Get(id)
+	entry, err := o.oServ.Get(ctx, id)
 	if err != nil {
 		return nullEntry, err
 	}
@@ -105,12 +105,12 @@ func (o *object) Get(t storage.Transaction) (storage.Entry, error) {
 }
 
 // Put adds or modifies the Object.
-func (o *object) Put(t storage.Transaction, v interface{}) (storage.Stat, error) {
-	id, err := UpdateTransaction(t, o.sServ)
+func (o *object) Put(ctx ipc.Context, t storage.Transaction, v interface{}) (storage.Stat, error) {
+	id, err := UpdateTransaction(ctx, t, o.sServ)
 	if err != nil {
 		return nullStat, err
 	}
-	serviceStat, err := o.oServ.Put(id, v)
+	serviceStat, err := o.oServ.Put(ctx, id, v)
 	if err != nil {
 		return nullStat, err
 	}
@@ -118,19 +118,19 @@ func (o *object) Put(t storage.Transaction, v interface{}) (storage.Stat, error)
 }
 
 // Remove removes the Object.
-func (o *object) Remove(t storage.Transaction) error {
-	id, err := UpdateTransaction(t, o.sServ)
+func (o *object) Remove(ctx ipc.Context, t storage.Transaction) error {
+	id, err := UpdateTransaction(ctx, t, o.sServ)
 	if err != nil {
 		return err
 	}
-	return o.oServ.Remove(id)
+	return o.oServ.Remove(ctx, id)
 }
 
 // SetAttr changes the attributes of the entry, such as permissions and
 // replication groups.  Attributes are associated with the value, not the
 // path.
-func (o *object) SetAttr(t storage.Transaction, attrs ...storage.Attr) error {
-	id, err := UpdateTransaction(t, o.sServ)
+func (o *object) SetAttr(ctx ipc.Context, t storage.Transaction, attrs ...storage.Attr) error {
+	id, err := UpdateTransaction(ctx, t, o.sServ)
 	if err != nil {
 		return err
 	}
@@ -138,16 +138,16 @@ func (o *object) SetAttr(t storage.Transaction, attrs ...storage.Attr) error {
 	for i, x := range attrs {
 		serviceAttrs[i] = vdl.Any(x)
 	}
-	return o.oServ.SetAttr(id, serviceAttrs)
+	return o.oServ.SetAttr(ctx, id, serviceAttrs)
 }
 
 // Stat returns entry info.
-func (o *object) Stat(t storage.Transaction) (storage.Stat, error) {
-	id, err := UpdateTransaction(t, o.sServ)
+func (o *object) Stat(ctx ipc.Context, t storage.Transaction) (storage.Stat, error) {
+	id, err := UpdateTransaction(ctx, t, o.sServ)
 	if err != nil {
 		return nullStat, err
 	}
-	serviceStat, err := o.oServ.Stat(id)
+	serviceStat, err := o.oServ.Stat(ctx, id)
 	if err != nil {
 		return nullStat, err
 	}
@@ -155,64 +155,60 @@ func (o *object) Stat(t storage.Transaction) (storage.Stat, error) {
 }
 
 // Query performs a query on the store.
-func (o *object) Query(t storage.Transaction, q query.Query) storage.Iterator {
+func (o *object) Query(ctx ipc.Context, t storage.Transaction, q query.Query) storage.Iterator {
 	panic("not implemented.")
 }
 
 // Glob returns a sequence of names that match the given pattern.
-func (o *object) GlobT(t storage.Transaction, pattern string) (storage.GlobStream, error) {
-	id, err := UpdateTransaction(t, o.sServ)
+func (o *object) GlobT(ctx ipc.Context, t storage.Transaction, pattern string) (storage.GlobStream, error) {
+	id, err := UpdateTransaction(ctx, t, o.sServ)
 	if err != nil {
 		return nil, err
 	}
-	return o.oServ.GlobT(id, pattern)
+	return o.oServ.GlobT(ctx, id, pattern)
 }
 
-func (o *object) Watch(req watch.Request) (watch.WatcherWatchStream, error) {
-	return o.oServ.Watch(req, veyron2.CallTimeout(ipc.NoTimeout))
+func (o *object) Watch(ctx ipc.Context, req watch.Request) (watch.WatcherWatchStream, error) {
+	return o.oServ.Watch(ctx, req, veyron2.CallTimeout(ipc.NoTimeout))
 }
 
 // The errorObject responds with an error to all operations.
-func (o *errorObject) Exists(t storage.Transaction) (bool, error) {
+func (o *errorObject) Exists(ctx ipc.Context, t storage.Transaction) (bool, error) {
 	return false, o.err
 }
 
-func (o *errorObject) Get(t storage.Transaction) (storage.Entry, error) {
+func (o *errorObject) Get(ctx ipc.Context, t storage.Transaction) (storage.Entry, error) {
 	return nullEntry, o.err
 }
 
-func (o *errorObject) Put(t storage.Transaction, v interface{}) (storage.Stat, error) {
+func (o *errorObject) Put(ctx ipc.Context, t storage.Transaction, v interface{}) (storage.Stat, error) {
 	return nullStat, o.err
 }
 
-func (o *errorObject) Remove(t storage.Transaction) error {
+func (o *errorObject) Remove(ctx ipc.Context, t storage.Transaction) error {
 	return o.err
 }
 
-func (o *errorObject) SetAttr(t storage.Transaction, attrs ...storage.Attr) error {
+func (o *errorObject) SetAttr(ctx ipc.Context, t storage.Transaction, attrs ...storage.Attr) error {
 	return o.err
 }
 
-func (o *errorObject) Stat(t storage.Transaction) (storage.Stat, error) {
+func (o *errorObject) Stat(ctx ipc.Context, t storage.Transaction) (storage.Stat, error) {
 	return nullStat, o.err
 }
 
-func (o *errorObject) GetAllPaths(t storage.Transaction) ([]string, error) {
+func (o *errorObject) GetAllPaths(ctx ipc.Context, t storage.Transaction) ([]string, error) {
 	return nil, o.err
 }
 
-func (o *errorObject) Query(t storage.Transaction, q query.Query) storage.Iterator {
+func (o *errorObject) Query(ctx ipc.Context, t storage.Transaction, q query.Query) storage.Iterator {
 	return nil
 }
 
-func (o *errorObject) Glob(pattern string) (storage.GlobStream, error) {
+func (o *errorObject) GlobT(ctx ipc.Context, t storage.Transaction, pattern string) (storage.GlobStream, error) {
 	return nil, o.err
 }
 
-func (o *errorObject) GlobT(t storage.Transaction, pattern string) (storage.GlobStream, error) {
-	return nil, o.err
-}
-
-func (o *errorObject) Watch(req watch.Request) (watch.WatcherWatchStream, error) {
+func (o *errorObject) Watch(ctx ipc.Context, req watch.Request) (watch.WatcherWatchStream, error) {
 	return nil, o.err
 }

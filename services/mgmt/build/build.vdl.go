@@ -40,7 +40,7 @@ type BinaryDescription struct {
 type Build_ExcludingUniversal interface {
 	// Describe generates a BinaryDescription for a binary identified by
 	// the given Veyron name.
-	Describe(Name string, opts ..._gen_ipc.ClientCallOpt) (reply BinaryDescription, err error)
+	Describe(ctx _gen_ipc.Context, Name string, opts ..._gen_ipc.CallOpt) (reply BinaryDescription, err error)
 }
 type Build interface {
 	_gen_ipc.UniversalServiceMethods
@@ -52,7 +52,7 @@ type BuildService interface {
 
 	// Describe generates a BinaryDescription for a binary identified by
 	// the given Veyron name.
-	Describe(context _gen_ipc.Context, Name string) (reply BinaryDescription, err error)
+	Describe(context _gen_ipc.ServerContext, Name string) (reply BinaryDescription, err error)
 }
 
 // BindBuild returns the client stub implementing the Build
@@ -98,9 +98,9 @@ type clientStubBuild struct {
 	name   string
 }
 
-func (__gen_c *clientStubBuild) Describe(Name string, opts ..._gen_ipc.ClientCallOpt) (reply BinaryDescription, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Describe", []interface{}{Name}, opts...); err != nil {
+func (__gen_c *clientStubBuild) Describe(ctx _gen_ipc.Context, Name string, opts ..._gen_ipc.CallOpt) (reply BinaryDescription, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Describe", []interface{}{Name}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -109,9 +109,9 @@ func (__gen_c *clientStubBuild) Describe(Name string, opts ..._gen_ipc.ClientCal
 	return
 }
 
-func (__gen_c *clientStubBuild) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+func (__gen_c *clientStubBuild) UnresolveStep(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -120,9 +120,9 @@ func (__gen_c *clientStubBuild) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (r
 	return
 }
 
-func (__gen_c *clientStubBuild) Signature(opts ..._gen_ipc.ClientCallOpt) (reply _gen_ipc.ServiceSignature, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Signature", nil, opts...); err != nil {
+func (__gen_c *clientStubBuild) Signature(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -131,9 +131,9 @@ func (__gen_c *clientStubBuild) Signature(opts ..._gen_ipc.ClientCallOpt) (reply
 	return
 }
 
-func (__gen_c *clientStubBuild) GetMethodTags(method string, opts ..._gen_ipc.ClientCallOpt) (reply []interface{}, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
+func (__gen_c *clientStubBuild) GetMethodTags(ctx _gen_ipc.Context, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {

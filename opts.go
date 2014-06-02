@@ -80,7 +80,7 @@ func LocalID(id security.PrivateID) LocalIDOpt { return LocalIDOpt{id} }
 // a call.
 type RemoteID security.PrincipalPattern
 
-func (RemoteID) IPCClientCallOpt() {}
+func (RemoteID) IPCCallOpt() {}
 
 // VCSecurityLevel represents the level of confidentiality of data transmitted
 // and received over a VC.
@@ -103,8 +103,8 @@ const (
 // CallTimeout specifies the timeout for Call.
 type CallTimeout time.Duration
 
-func (CallTimeout) IPCClientCallOpt() {}
-func (CallTimeout) IPCClientOpt()     {}
+func (CallTimeout) IPCCallOpt()   {}
+func (CallTimeout) IPCClientOpt() {}
 
 // StreamManager specifies an explicit stream.Manager.
 func StreamManager(sm stream.Manager) StreamManagerOpt {

@@ -5,6 +5,7 @@ import (
 	"log"
 	"math/rand"
 
+	"veyron2/ipc"
 	"veyron2/services/store"
 	"veyron2/storage"
 	"veyron2/vdl"
@@ -26,7 +27,7 @@ var _ storage.Transaction = (*transaction)(nil)
 // span multiple stores; it can be used only with one instance of a store.Store.
 // The storage.instance is determined by the first Object operation to use the
 // Transaction.
-func NewTransaction(opts ...storage.TransactionOpt) storage.Transaction {
+func NewTransaction(ctx ipc.Context, opts ...storage.TransactionOpt) storage.Transaction {
 	tr := &transaction{
 		id:   store.TransactionID(rand.Int63()),
 		opts: opts,
@@ -35,12 +36,12 @@ func NewTransaction(opts ...storage.TransactionOpt) storage.Transaction {
 }
 
 // updateTransaction casts the transaction and sets the store object in it.
-func UpdateTransaction(t storage.Transaction, serv store.Store) (store.TransactionID, error) {
+func UpdateTransaction(ctx ipc.Context, t storage.Transaction, serv store.Store) (store.TransactionID, error) {
 	if t == nil {
 		return nullTransactionID, nil
 	}
 	tr, ok := t.(*transaction)
-	if !ok || !tr.setServ(serv) {
+	if !ok || !tr.setServ(ctx, serv) {
 		return nullTransactionID, ErrBadTransaction
 	}
 	return tr.id, nil
@@ -58,10 +59,10 @@ func transactionOptsToAnyData(opts []storage.TransactionOpt) []vdl.Any {
 // setServ binds the transaction to a store if it hasn't already been bound.
 // Returns true iff the binding succeeded, or the transaction is already bound
 // to the specified store.
-func (tr *transaction) setServ(serv store.Store) bool {
+func (tr *transaction) setServ(ctx ipc.Context, serv store.Store) bool {
 	if tr.serv == nil {
 		vopts := transactionOptsToAnyData(tr.opts)
-		if err := serv.CreateTransaction(tr.id, vopts); err != nil {
+		if err := serv.CreateTransaction(ctx, tr.id, vopts); err != nil {
 			log.Printf("CreateTransaction error: %s", err)
 			return false
 		}
@@ -72,18 +73,18 @@ func (tr *transaction) setServ(serv store.Store) bool {
 }
 
 // Commit commits the transaction.  Returns an error if the operation aborted.
-func (tr *transaction) Commit() error {
+func (tr *transaction) Commit(ctx ipc.Context) error {
 	if tr.serv == nil {
 		return nil
 	}
-	return tr.serv.Commit(tr.id)
+	return tr.serv.Commit(ctx, tr.id)
 }
 
 // Abort aborts the transaction.  Returns an error if the operation
 // could not be aborted.
-func (tr *transaction) Abort() error {
+func (tr *transaction) Abort(ctx ipc.Context) error {
 	if tr.serv == nil {
 		return nil
 	}
-	return tr.serv.Abort(tr.id)
+	return tr.serv.Abort(ctx, tr.id)
 }

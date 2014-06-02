@@ -404,7 +404,7 @@ func inArgsWithOptsGo(firstArg string, data goData, method *compile.Method) stri
 	if len(result) > 0 {
 		result += ", "
 	}
-	return result + "opts ..._gen_ipc.ClientCallOpt"
+	return result + "opts ..._gen_ipc.CallOpt"
 }
 
 // Returns the in-args of an interface's server method.
@@ -472,7 +472,7 @@ func nonStreamingOutArgs(data goData, method *compile.Method) string {
 }
 
 // The pointers of the return values of an vdl method.  This will be passed
-// into ipc.ClientCall.Finish.
+// into ipc.Call.Finish.
 func finishInArgsGo(data goData, method *compile.Method) string {
 	switch len := len(method.OutArgs); {
 	case len > 2:
@@ -519,7 +519,7 @@ func streamArgTypeGo(streamType string, iface *compile.Interface, method *compil
 // Returns the client stub implementation for an interface method.
 func clientStubImplGo(data goData, iface *compile.Interface, method *compile.Method) string {
 	var buf bytes.Buffer
-	buf.WriteString("\tvar call _gen_ipc.ClientCall\n")
+	buf.WriteString("\tvar call _gen_ipc.Call\n")
 	var args string
 
 	if len(method.InArgs) == 0 {
@@ -535,7 +535,7 @@ func clientStubImplGo(data goData, iface *compile.Interface, method *compile.Met
 		args += "}"
 	}
 
-	fmt.Fprintf(&buf, "\tif call, err = __gen_c.client.StartCall(__gen_c.name, %q, %s, opts...); err != nil {\n return \n }\n", method.Name, args)
+	fmt.Fprintf(&buf, "\tif call, err = __gen_c.client.StartCall(ctx, __gen_c.name, %q, %s, opts...); err != nil {\n return \n }\n", method.Name, args)
 
 	if !isStreamingMethodGo(method) {
 		fmt.Fprintf(&buf,
@@ -713,7 +713,7 @@ import ({{range $imp := $data.UserImports}}
 // to enable embedding without method collisions.  Not to be used directly by clients.
 type {{$iface.Name}}_ExcludingUniversal interface { {{range $embed := $iface.Embeds}}
 	{{$embed.Doc}}{{embedGo $data $embed}}_ExcludingUniversal{{$embed.DocSuffix}}{{end}}{{range $method := $iface.Methods}}
-	{{$method.Doc}}{{$method.Name}}({{inArgsWithOptsGo "" $data $method}}) {{outArgsGo $data $iface $method}}{{$method.DocSuffix}}{{end}}
+	{{$method.Doc}}{{$method.Name}}({{inArgsWithOptsGo "ctx _gen_ipc.Context" $data $method}}) {{outArgsGo $data $iface $method}}{{$method.DocSuffix}}{{end}}
 }
 type {{$iface.Name}} interface {
 	_gen_ipc.UniversalServiceMethods
@@ -724,7 +724,7 @@ type {{$iface.Name}} interface {
 type {{$iface.Name}}Service interface {
 {{range $embed := $iface.Embeds}}
 	{{$embed.Doc}}{{embedGo $data $embed}}Service{{$embed.DocSuffix}}{{end}}{{range $method := $iface.Methods}}
-	{{$method.Doc}}{{$method.Name}}({{inArgsServiceGo "context _gen_ipc.Context" $data $iface $method}}) {{finishOutArgsGo $data $method}}{{$method.DocSuffix}}{{end}}
+	{{$method.Doc}}{{$method.Name}}({{inArgsServiceGo "context _gen_ipc.ServerContext" $data $iface $method}}) {{finishOutArgsGo $data $method}}{{$method.DocSuffix}}{{end}}
 }
 {{range $method := $iface.Methods}}{{if isStreamingMethodGo $method}}
 {{$clientStreamIfaceType := streamArgInterfaceTypeGo "" $iface $method}}
@@ -763,7 +763,7 @@ type {{$clientStreamIfaceType}} interface {
 
 // Implementation of the {{$clientStreamIfaceType}} interface that is not exported.
 type {{$clientStreamType}} struct {
-	clientCall _gen_ipc.ClientCall
+	clientCall _gen_ipc.Call
 }
 {{if hasStreamingInput $method}}
 func (c *{{$clientStreamType}}) Send(item {{typeGo $data $method.InStream}}) error {
@@ -876,14 +876,14 @@ type clientStub{{$iface.Name}} struct {
 }
 
 {{range $method := $iface.Methods}}
-func (__gen_c *clientStub{{$iface.Name}}) {{$method.Name}}({{inArgsWithOptsGo "" $data $method}}) {{outArgsGo $data $iface $method}} {
+func (__gen_c *clientStub{{$iface.Name}}) {{$method.Name}}({{inArgsWithOptsGo "ctx _gen_ipc.Context" $data $method}}) {{outArgsGo $data $iface $method}} {
 {{clientStubImplGo $data $iface $method}}
 }
 {{end}}
 
-func (__gen_c *clientStub{{$iface.Name}}) UnresolveStep(opts ..._gen_ipc.ClientCallOpt) (reply []string, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+func (__gen_c *clientStub{{$iface.Name}}) UnresolveStep(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -892,9 +892,9 @@ func (__gen_c *clientStub{{$iface.Name}}) UnresolveStep(opts ..._gen_ipc.ClientC
 	return
 }
 
-func (__gen_c *clientStub{{$iface.Name}}) Signature(opts ..._gen_ipc.ClientCallOpt) (reply _gen_ipc.ServiceSignature, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "Signature", nil, opts...); err != nil {
+func (__gen_c *clientStub{{$iface.Name}}) Signature(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -903,9 +903,9 @@ func (__gen_c *clientStub{{$iface.Name}}) Signature(opts ..._gen_ipc.ClientCallO
 	return
 }
 
-func (__gen_c *clientStub{{$iface.Name}}) GetMethodTags(method string, opts ..._gen_ipc.ClientCallOpt) (reply []interface{}, err error) {
-	var call _gen_ipc.ClientCall
-	if call, err = __gen_c.client.StartCall(__gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
+func (__gen_c *clientStub{{$iface.Name}}) GetMethodTags(ctx _gen_ipc.Context, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
