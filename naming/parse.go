@@ -50,16 +50,16 @@ func JoinAddressName(address, name string) string {
 // Terminal returns true if its argument is considered to be a terminal name.
 // Terminal names have three forms:
 // 1. A rooted name with a relative component starting with //.
-// 2. A rooted name with an empty relative component.
-// 3. A relative name starting with //.
+// 2. A relative name starting with //.
+// 3. A rooted name with an empty relative name.
 // A name containing // in other location is not considered terminal.
 func Terminal(name string) bool {
 	_, n := SplitAddressName(name)
 	return len(n) == 0 || strings.HasPrefix(n, "//")
 }
 
-// MakeTerminal returns a version of that's guaranteed to return true
-// when passed as an argument to the Terminal function above.
+// MakeTerminal returns a version of its parameter that's guaranteed to
+// return true when passed as an argument to the Terminal function above.
 func MakeTerminal(name string) string {
 	return MakeTerminalAtIndex(name, 0)
 }
@@ -220,18 +220,23 @@ func squashSlashRun(s string) string {
 }
 
 // Join takes a veyron name and appends the given suffix to it.
-// Any trailing /'s in name are removed and Join will not create a terminal
-// name from a resolvable name and suffix.
+// It takes care to ensure that it does not create a '//' pair where
+// one didn't exist before. Runs of two or more '/'s are truncated
+// to '//' when they trail in name or lead in suffix. A similarly positioned
+// single '/' will be removed.
 func Join(name, suffix string) string {
+	nameSlashSlash := strings.HasSuffix(name, "//")
+	suffixSlashSlash := strings.HasPrefix(suffix, "//")
 	name = strings.TrimRight(name, "/")
-	if len(suffix) == 0 {
-		return name
+	suffix = strings.TrimLeft(suffix, "/")
+	if !nameSlashSlash && !suffixSlashSlash {
+		if len(suffix) == 0 {
+			return name
+		}
+		if len(name) == 0 {
+			return suffix
+		}
+		return name + "/" + suffix
 	}
-	if len(name) == 0 {
-		return suffix
-	}
-	if strings.HasPrefix(suffix, "/") {
-		return name + suffix
-	}
-	return name + "/" + suffix
+	return name + "//" + suffix
 }

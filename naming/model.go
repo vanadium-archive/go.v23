@@ -99,6 +99,13 @@ type MountTable interface {
 	// Glob returns all names matching pattern.  If recursive is true, it also
 	// returns all names below the matching ones.
 	Glob(pattern string) (chan MountEntry, error)
+
+	// SetRoots sets the roots that the local MountTable is
+	// relative to. All relative names passed to the methods above
+	// will be interpreted as relative to these roots. The roots
+	// will be tried in the order that they are specified in the parameter
+	// list for SetRoots.
+	SetRoots(roots []string) error
 }
 
 type Runtime interface {

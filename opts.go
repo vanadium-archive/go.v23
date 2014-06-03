@@ -154,6 +154,14 @@ type HTTPDebugOpt string
 
 func (HTTPDebugOpt) ROpt() {}
 
+// TODO(cnicolaou): this will be replaced by a cleaner API.
+// Create a server that will be used to serve a MountTable. This server
+// cannot be used for any other purpose.
+type ServesMountTableOpt bool
+
+func (ServesMountTableOpt) IPCServerOpt() {}
+
+// TODO(cnicolaou): this will be replaced by a cleaner API.
 // ServerPublishOpt tells the ipc server which of the endpoints it listens on
 // should be published by Publish.
 type ServerPublishOpt int
@@ -165,6 +173,7 @@ const (
 
 func (ServerPublishOpt) IPCServerOpt() {}
 
+// TODO(cnicolaou): this wiil be replaced by a cleaner API.
 // EndpointRewriteOpt specifies how to rewrite the address of the endpoints
 // being listened on.  The rewrite only applies to tcp endpoints.  The value of
 // the option is the rewritten host/ip portion of the address of the endpoint.

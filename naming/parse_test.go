@@ -77,17 +77,23 @@ func TestJoin(t *testing.T) {
 	cases := []struct {
 		name, suffix, joined string
 	}{
-		{"a", "b", "a/b"},
-		{"a/", "b/", "a/b/"},
-		{"", "b", "b"},
+		{"", "", ""},
 		{"a", "", "a"},
 		{"a/", "", "a"},
+		{"", "a", "a"},
+		{"", "/a", "a"},
+		{"a", "b", "a/b"},
+		{"a/", "b/", "a/b/"},
+		{"a/", "/b", "a/b"},
 		{"/a", "b", "/a/b"},
 		{"/a/b", "c", "/a/b/c"},
 		{"/a/b", "c/d", "/a/b/c/d"},
 		{"/a/b", "/c/d", "/a/b/c/d"},
 		{"/a/b", "//c/d", "/a/b//c/d"},
+		{"/a//", "c", "/a//c"},
 		{"", "//a/b", "//a/b"},
+		{"/ep//", "", "/ep//"},
+		{"/ep//", "a", "/ep//a"},
 	}
 	for _, c := range cases {
 		if got, want := Join(c.name, c.suffix), c.joined; want != got {
