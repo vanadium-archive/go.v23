@@ -24,7 +24,7 @@ type E interface {
 
 // ErrorID returns the ID of the given err, or Unknown if the err has no ID.
 func ErrorID(err error) ID {
-	if e, _ := err.(E); e != nil {
+	if e, ok := err.(E); ok {
 		return e.ErrorID()
 	}
 	return Unknown
