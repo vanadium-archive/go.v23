@@ -28,6 +28,7 @@ func (constServerCall) Label() security.Label                         { return d
 func (constServerCall) CaveatDischarges() security.CaveatDischargeMap { return nil }
 func (constServerCall) LocalID() security.PublicID                    { return security.FakePublicID("test") }
 func (constServerCall) RemoteID() security.PublicID                   { return security.FakePublicID("test") }
+func (constServerCall) Blessing() security.PublicID                   { return nil }
 func (constServerCall) LocalAddr() net.Addr                           { return nil }
 func (constServerCall) RemoteAddr() net.Addr                          { return nil }
 func (constServerCall) Deadline() time.Time                           { return time.Time{} }

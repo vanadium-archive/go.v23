@@ -199,6 +199,10 @@ type ServerContext interface {
 	security.Context
 	Context
 
+	// Blessing is a credential provided by the client bound to the private key
+	// of the server's identity. It can be nil, in which case the client did
+	// not provide any additional credentials.
+	Blessing() security.PublicID
 	// Deadline returns the deadline for this call.
 	Deadline() time.Time
 	// IsClosed returns true iff the call has been cancelled or otherwise closed.
@@ -233,4 +237,15 @@ type ClientOpt interface {
 // ServerOpt is the interface for all Server options.
 type ServerOpt interface {
 	IPCServerOpt()
+}
+
+// Granter is a ClientCallOpt that is used to provide additional credentials
+// (typically in the form of a blessed identity) to a server.
+type Granter interface {
+	// Grant grants a blessing to the provided server.
+	Grant(server security.PublicID) (blessing security.PublicID, err error)
+
+	// Granter implements the CallOpt interface so that
+	// Granters can be provided as options to an RPC invocation.
+	CallOpt
 }
