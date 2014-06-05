@@ -108,7 +108,7 @@ const (
 	Ccomplex64 = complex64(8+9i)
 	Ccomplex128 = complex128(10+11i)
 	Cstring = "foo"
-  Cany = Cbool
+	Cany = Cbool
 
 	True = true
 	Foo = "foo"
