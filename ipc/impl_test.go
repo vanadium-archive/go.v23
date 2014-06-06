@@ -2,6 +2,7 @@ package ipc_test
 
 import (
 	"veyron2"
+	"veyron2/context"
 	"veyron2/ipc"
 	"veyron2/ipc/stream"
 	"veyron2/naming"
@@ -70,11 +71,11 @@ func (*rtImpl) Shutdown() {}
 func (*rtImpl) RegisterType(interface{}) {
 }
 
-func (*rtImpl) NewContext() ipc.Context {
+func (*rtImpl) NewContext() context.T {
 	return nil
 }
 
-func (*rtImpl) TODOContext() ipc.Context {
+func (*rtImpl) TODOContext() context.T {
 	return nil
 }
 
@@ -108,7 +109,7 @@ type client struct{}
 // IPCBindOpt makes client implement BindOpt.
 func (c *client) IPCBindOpt() {}
 
-func (*client) StartCall(ctx ipc.Context, name, method string, args []interface{}, opts ...ipc.CallOpt) (ipc.Call, error) {
+func (*client) StartCall(ctx context.T, name, method string, args []interface{}, opts ...ipc.CallOpt) (ipc.Call, error) {
 	return &call{}, nil
 }
 
@@ -137,20 +138,20 @@ func (*server) Stop() error {
 	return nil
 }
 
-type context struct{}
+type serverContext struct{}
 
-func (*context) Send(item interface{}) error {
+func (*serverContext) Send(item interface{}) error {
 	return nil
 }
 
-func (*context) Recv(itemptr interface{}) error {
+func (*serverContext) Recv(itemptr interface{}) error {
 	return nil
 }
 
-func (*context) Cancelled() bool {
+func (*serverContext) Cancelled() bool {
 	return false
 }
 
-func (*context) RemoteID() security.PublicID {
+func (*serverContext) RemoteID() security.PublicID {
 	return security.FakePublicID("remote")
 }

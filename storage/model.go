@@ -144,7 +144,7 @@ package storage
 import (
 	"time"
 
-	"veyron2/ipc"
+	"veyron2/context"
 	"veyron2/query"
 	"veyron2/services/watch"
 )
@@ -155,7 +155,7 @@ import (
 // into a shared location, such as veyron2/watch.
 type Watcher interface {
 	// Watch returns a stream of changes.
-	Watch(ctx ipc.Context, req watch.Request) (watch.WatcherWatchStream, error)
+	Watch(ctx context.T, req watch.Request) (watch.WatcherWatchStream, error)
 }
 
 // Object is the interface for a value in the store.
@@ -163,37 +163,37 @@ type Object interface {
 	Watcher
 
 	// Exists returns true iff the Entry has a value.
-	Exists(ctx ipc.Context, t Transaction) (bool, error)
+	Exists(ctx context.T, t Transaction) (bool, error)
 
 	// Get returns the value for the Object.  The value returned is from the
 	// most recent mutation of the entry in the Transaction, or from the
 	// Transaction's snapshot if there is no mutation.
-	Get(ctx ipc.Context, t Transaction) (Entry, error)
+	Get(ctx context.T, t Transaction) (Entry, error)
 
 	// Put adds or modifies the Object.  If there is no current value, the
 	// object is created with default attributes.  It is legal to update a
 	// subfield of a value.  Returns the updated *Stat of the store value.  If
 	// putting a subfield, the *Stat is for the enclosing store value.
-	Put(ctx ipc.Context, t Transaction, v interface{}) (Stat, error)
+	Put(ctx context.T, t Transaction, v interface{}) (Stat, error)
 
 	// Remove removes the Object.
-	Remove(ctx ipc.Context, t Transaction) error
+	Remove(ctx context.T, t Transaction) error
 
 	// SetAttr changes the attributes of the entry, such as permissions and
 	// replication groups.  Attributes are associated with the value, not the
 	// path.
-	SetAttr(ctx ipc.Context, t Transaction, attrs ...Attr) error
+	SetAttr(ctx context.T, t Transaction, attrs ...Attr) error
 
 	// Stat returns entry info.
-	Stat(ctx ipc.Context, t Transaction) (Stat, error)
+	Stat(ctx context.T, t Transaction) (Stat, error)
 
 	// Query returns an Iterator to a sequence of elements that satisfy the
 	// query.
-	Query(ctx ipc.Context, t Transaction, q query.Query) Iterator
+	Query(ctx context.T, t Transaction, q query.Query) Iterator
 
 	// GlobT returns a set of names that match the glob pattern.
 	// This is the same as Glob, but takes a transaction.
-	GlobT(ctx ipc.Context, t Transaction, pattern string) (GlobStream, error)
+	GlobT(ctx context.T, t Transaction, pattern string) (GlobStream, error)
 }
 
 // Transaction is an atomic state mutation.
@@ -212,12 +212,12 @@ type Transaction interface {
 	//
 	// The Transaction should be discarded once Commit is called.  It can no
 	// longer be used.
-	Commit(ctx ipc.Context) error
+	Commit(ctx context.T) error
 
 	// Abort discards a transaction.  This is an optimization; transactions
 	// eventually time out and get discarded.  However, live transactions
 	// consume resources, so it is good practice to clean up.
-	Abort(ctx ipc.Context) error
+	Abort(ctx context.T) error
 }
 
 // TransactionOpt represents the options for creating transactions.

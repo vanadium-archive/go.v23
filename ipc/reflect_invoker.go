@@ -174,7 +174,7 @@ func makeMethods(rt reflect.Type) map[string]methodInfo {
 
 var (
 	rtServerCall = reflect.TypeOf((*ServerCall)(nil)).Elem()
-	rtContext    = reflect.TypeOf((*Context)(nil)).Elem()
+	rtContext    = reflect.TypeOf((*ServerContext)(nil)).Elem()
 
 	// ReflectInvoker will panic iff the error is Aborted, otherwise it will
 	// silently ignore the error.

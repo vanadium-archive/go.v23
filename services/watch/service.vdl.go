@@ -115,6 +115,7 @@ import (
 
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
 	_gen_veyron2 "veyron2"
+	_gen_context "veyron2/context"
 	_gen_ipc "veyron2/ipc"
 	_gen_naming "veyron2/naming"
 	_gen_rt "veyron2/rt"
@@ -210,7 +211,7 @@ const (
 // to enable embedding without method collisions.  Not to be used directly by clients.
 type Watcher_ExcludingUniversal interface {
 	// Watch returns a stream of changes.
-	Watch(ctx _gen_ipc.Context, Req Request, opts ..._gen_ipc.CallOpt) (reply WatcherWatchStream, err error)
+	Watch(ctx _gen_context.T, Req Request, opts ..._gen_ipc.CallOpt) (reply WatcherWatchStream, err error)
 }
 type Watcher interface {
 	_gen_ipc.UniversalServiceMethods
@@ -321,7 +322,7 @@ type clientStubWatcher struct {
 	name   string
 }
 
-func (__gen_c *clientStubWatcher) Watch(ctx _gen_ipc.Context, Req Request, opts ..._gen_ipc.CallOpt) (reply WatcherWatchStream, err error) {
+func (__gen_c *clientStubWatcher) Watch(ctx _gen_context.T, Req Request, opts ..._gen_ipc.CallOpt) (reply WatcherWatchStream, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Watch", []interface{}{Req}, opts...); err != nil {
 		return
@@ -330,7 +331,7 @@ func (__gen_c *clientStubWatcher) Watch(ctx _gen_ipc.Context, Req Request, opts 
 	return
 }
 
-func (__gen_c *clientStubWatcher) UnresolveStep(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
+func (__gen_c *clientStubWatcher) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
 		return
@@ -341,7 +342,7 @@ func (__gen_c *clientStubWatcher) UnresolveStep(ctx _gen_ipc.Context, opts ..._g
 	return
 }
 
-func (__gen_c *clientStubWatcher) Signature(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+func (__gen_c *clientStubWatcher) Signature(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
 		return
@@ -352,7 +353,7 @@ func (__gen_c *clientStubWatcher) Signature(ctx _gen_ipc.Context, opts ..._gen_i
 	return
 }
 
-func (__gen_c *clientStubWatcher) GetMethodTags(ctx _gen_ipc.Context, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
+func (__gen_c *clientStubWatcher) GetMethodTags(ctx _gen_context.T, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return

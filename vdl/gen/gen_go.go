@@ -129,6 +129,7 @@ func systemImportsGo(f *compile.File) []string {
 		set[`_gen_rt "veyron2/rt"`] = true
 		set[`_gen_wiretype "veyron2/wiretype"`] = true
 		set[`_gen_ipc "veyron2/ipc"`] = true
+		set[`_gen_context "veyron2/context"`] = true
 		set[`_gen_veyron2 "veyron2"`] = true
 		set[`_gen_vdl "veyron2/vdl"`] = true
 		set[`_gen_naming "veyron2/naming"`] = true
@@ -713,7 +714,7 @@ import ({{range $imp := $data.UserImports}}
 // to enable embedding without method collisions.  Not to be used directly by clients.
 type {{$iface.Name}}_ExcludingUniversal interface { {{range $embed := $iface.Embeds}}
 	{{$embed.Doc}}{{embedGo $data $embed}}_ExcludingUniversal{{$embed.DocSuffix}}{{end}}{{range $method := $iface.Methods}}
-	{{$method.Doc}}{{$method.Name}}({{inArgsWithOptsGo "ctx _gen_ipc.Context" $data $method}}) {{outArgsGo $data $iface $method}}{{$method.DocSuffix}}{{end}}
+	{{$method.Doc}}{{$method.Name}}({{inArgsWithOptsGo "ctx _gen_context.T" $data $method}}) {{outArgsGo $data $iface $method}}{{$method.DocSuffix}}{{end}}
 }
 type {{$iface.Name}} interface {
 	_gen_ipc.UniversalServiceMethods
@@ -876,12 +877,12 @@ type clientStub{{$iface.Name}} struct {
 }
 
 {{range $method := $iface.Methods}}
-func (__gen_c *clientStub{{$iface.Name}}) {{$method.Name}}({{inArgsWithOptsGo "ctx _gen_ipc.Context" $data $method}}) {{outArgsGo $data $iface $method}} {
+func (__gen_c *clientStub{{$iface.Name}}) {{$method.Name}}({{inArgsWithOptsGo "ctx _gen_context.T" $data $method}}) {{outArgsGo $data $iface $method}} {
 {{clientStubImplGo $data $iface $method}}
 }
 {{end}}
 
-func (__gen_c *clientStub{{$iface.Name}}) UnresolveStep(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
+func (__gen_c *clientStub{{$iface.Name}}) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
 		return
@@ -892,7 +893,7 @@ func (__gen_c *clientStub{{$iface.Name}}) UnresolveStep(ctx _gen_ipc.Context, op
 	return
 }
 
-func (__gen_c *clientStub{{$iface.Name}}) Signature(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+func (__gen_c *clientStub{{$iface.Name}}) Signature(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
 		return
@@ -903,7 +904,7 @@ func (__gen_c *clientStub{{$iface.Name}}) Signature(ctx _gen_ipc.Context, opts .
 	return
 }
 
-func (__gen_c *clientStub{{$iface.Name}}) GetMethodTags(ctx _gen_ipc.Context, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
+func (__gen_c *clientStub{{$iface.Name}}) GetMethodTags(ctx _gen_context.T, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return

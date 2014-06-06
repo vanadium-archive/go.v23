@@ -9,6 +9,7 @@ import (
 
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
 	_gen_veyron2 "veyron2"
+	_gen_context "veyron2/context"
 	_gen_ipc "veyron2/ipc"
 	_gen_naming "veyron2/naming"
 	_gen_rt "veyron2/rt"
@@ -37,7 +38,7 @@ type MountEntry struct {
 // to enable embedding without method collisions.  Not to be used directly by clients.
 type Globable_ExcludingUniversal interface {
 	// Glob returns all matching entries at the given server.
-	Glob(ctx _gen_ipc.Context, pattern string, opts ..._gen_ipc.CallOpt) (reply GlobableGlobStream, err error)
+	Glob(ctx _gen_context.T, pattern string, opts ..._gen_ipc.CallOpt) (reply GlobableGlobStream, err error)
 }
 type Globable interface {
 	_gen_ipc.UniversalServiceMethods
@@ -148,7 +149,7 @@ type clientStubGlobable struct {
 	name   string
 }
 
-func (__gen_c *clientStubGlobable) Glob(ctx _gen_ipc.Context, pattern string, opts ..._gen_ipc.CallOpt) (reply GlobableGlobStream, err error) {
+func (__gen_c *clientStubGlobable) Glob(ctx _gen_context.T, pattern string, opts ..._gen_ipc.CallOpt) (reply GlobableGlobStream, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Glob", []interface{}{pattern}, opts...); err != nil {
 		return
@@ -157,7 +158,7 @@ func (__gen_c *clientStubGlobable) Glob(ctx _gen_ipc.Context, pattern string, op
 	return
 }
 
-func (__gen_c *clientStubGlobable) UnresolveStep(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
+func (__gen_c *clientStubGlobable) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
 		return
@@ -168,7 +169,7 @@ func (__gen_c *clientStubGlobable) UnresolveStep(ctx _gen_ipc.Context, opts ..._
 	return
 }
 
-func (__gen_c *clientStubGlobable) Signature(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+func (__gen_c *clientStubGlobable) Signature(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
 		return
@@ -179,7 +180,7 @@ func (__gen_c *clientStubGlobable) Signature(ctx _gen_ipc.Context, opts ..._gen_
 	return
 }
 
-func (__gen_c *clientStubGlobable) GetMethodTags(ctx _gen_ipc.Context, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
+func (__gen_c *clientStubGlobable) GetMethodTags(ctx _gen_context.T, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
@@ -280,13 +281,13 @@ type MountTable_ExcludingUniversal interface {
 	// duration.  A server with an expired TTL should never appear in the
 	// results nor affect the operation of any MountTable method, and should
 	// act as if it was never present as far as the interface is concerned.
-	Mount(ctx _gen_ipc.Context, Server string, TTL uint32, opts ..._gen_ipc.CallOpt) (err error)
+	Mount(ctx _gen_context.T, Server string, TTL uint32, opts ..._gen_ipc.CallOpt) (err error)
 	// Unmount removes Server from the mount point.  If Server is empty, remove all
 	// servers mounted there.
-	Unmount(ctx _gen_ipc.Context, Server string, opts ..._gen_ipc.CallOpt) (err error)
+	Unmount(ctx _gen_context.T, Server string, opts ..._gen_ipc.CallOpt) (err error)
 	// ResolveStep takes the next step in resolving a name.  Returns the next
 	// servers to query and the suffix at those servers.
-	ResolveStep(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (Servers []MountedServer, Suffix string, err error)
+	ResolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (Servers []MountedServer, Suffix string, err error)
 }
 type MountTable interface {
 	_gen_ipc.UniversalServiceMethods
@@ -362,7 +363,7 @@ type clientStubMountTable struct {
 	name   string
 }
 
-func (__gen_c *clientStubMountTable) Mount(ctx _gen_ipc.Context, Server string, TTL uint32, opts ..._gen_ipc.CallOpt) (err error) {
+func (__gen_c *clientStubMountTable) Mount(ctx _gen_context.T, Server string, TTL uint32, opts ..._gen_ipc.CallOpt) (err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Mount", []interface{}{Server, TTL}, opts...); err != nil {
 		return
@@ -373,7 +374,7 @@ func (__gen_c *clientStubMountTable) Mount(ctx _gen_ipc.Context, Server string, 
 	return
 }
 
-func (__gen_c *clientStubMountTable) Unmount(ctx _gen_ipc.Context, Server string, opts ..._gen_ipc.CallOpt) (err error) {
+func (__gen_c *clientStubMountTable) Unmount(ctx _gen_context.T, Server string, opts ..._gen_ipc.CallOpt) (err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Unmount", []interface{}{Server}, opts...); err != nil {
 		return
@@ -384,7 +385,7 @@ func (__gen_c *clientStubMountTable) Unmount(ctx _gen_ipc.Context, Server string
 	return
 }
 
-func (__gen_c *clientStubMountTable) ResolveStep(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (Servers []MountedServer, Suffix string, err error) {
+func (__gen_c *clientStubMountTable) ResolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (Servers []MountedServer, Suffix string, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "ResolveStep", nil, opts...); err != nil {
 		return
@@ -395,7 +396,7 @@ func (__gen_c *clientStubMountTable) ResolveStep(ctx _gen_ipc.Context, opts ..._
 	return
 }
 
-func (__gen_c *clientStubMountTable) UnresolveStep(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
+func (__gen_c *clientStubMountTable) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
 		return
@@ -406,7 +407,7 @@ func (__gen_c *clientStubMountTable) UnresolveStep(ctx _gen_ipc.Context, opts ..
 	return
 }
 
-func (__gen_c *clientStubMountTable) Signature(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+func (__gen_c *clientStubMountTable) Signature(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
 		return
@@ -417,7 +418,7 @@ func (__gen_c *clientStubMountTable) Signature(ctx _gen_ipc.Context, opts ..._ge
 	return
 }
 
-func (__gen_c *clientStubMountTable) GetMethodTags(ctx _gen_ipc.Context, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
+func (__gen_c *clientStubMountTable) GetMethodTags(ctx _gen_context.T, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return

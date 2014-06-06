@@ -7,6 +7,7 @@ package appcycle
 import (
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
 	_gen_veyron2 "veyron2"
+	_gen_context "veyron2/context"
 	_gen_ipc "veyron2/ipc"
 	_gen_naming "veyron2/naming"
 	_gen_rt "veyron2/rt"
@@ -36,11 +37,11 @@ type Tick struct {
 type AppCycle_ExcludingUniversal interface {
 	// Stop initiates shutdown of the server.  It streams back periodic updates
 	// to give the client an idea of how the shutdown is progressing.
-	Stop(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply AppCycleStopStream, err error)
+	Stop(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply AppCycleStopStream, err error)
 	// ForceStop tells the server to shut down right away.  It can be issued while
 	// a Stop is outstanding if for example the client does not want to wait any
 	// longer.
-	ForceStop(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (err error)
+	ForceStop(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error)
 }
 type AppCycle interface {
 	_gen_ipc.UniversalServiceMethods
@@ -156,7 +157,7 @@ type clientStubAppCycle struct {
 	name   string
 }
 
-func (__gen_c *clientStubAppCycle) Stop(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply AppCycleStopStream, err error) {
+func (__gen_c *clientStubAppCycle) Stop(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply AppCycleStopStream, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Stop", nil, opts...); err != nil {
 		return
@@ -165,7 +166,7 @@ func (__gen_c *clientStubAppCycle) Stop(ctx _gen_ipc.Context, opts ..._gen_ipc.C
 	return
 }
 
-func (__gen_c *clientStubAppCycle) ForceStop(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (err error) {
+func (__gen_c *clientStubAppCycle) ForceStop(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "ForceStop", nil, opts...); err != nil {
 		return
@@ -176,7 +177,7 @@ func (__gen_c *clientStubAppCycle) ForceStop(ctx _gen_ipc.Context, opts ..._gen_
 	return
 }
 
-func (__gen_c *clientStubAppCycle) UnresolveStep(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
+func (__gen_c *clientStubAppCycle) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
 		return
@@ -187,7 +188,7 @@ func (__gen_c *clientStubAppCycle) UnresolveStep(ctx _gen_ipc.Context, opts ..._
 	return
 }
 
-func (__gen_c *clientStubAppCycle) Signature(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+func (__gen_c *clientStubAppCycle) Signature(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
 		return
@@ -198,7 +199,7 @@ func (__gen_c *clientStubAppCycle) Signature(ctx _gen_ipc.Context, opts ..._gen_
 	return
 }
 
-func (__gen_c *clientStubAppCycle) GetMethodTags(ctx _gen_ipc.Context, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
+func (__gen_c *clientStubAppCycle) GetMethodTags(ctx _gen_context.T, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return

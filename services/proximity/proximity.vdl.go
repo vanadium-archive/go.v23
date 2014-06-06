@@ -8,6 +8,7 @@ import (
 
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
 	_gen_veyron2 "veyron2"
+	_gen_context "veyron2/context"
 	_gen_ipc "veyron2/ipc"
 	_gen_naming "veyron2/naming"
 	_gen_rt "veyron2/rt"
@@ -45,15 +46,15 @@ type Proximity_ExcludingUniversal interface {
 	// RegisterName adds a name that this device will be associated with;
 	// a remote device will see all the unique names currently registered
 	// with this device (see Names field in Device).
-	RegisterName(ctx _gen_ipc.Context, Name string, opts ..._gen_ipc.CallOpt) (err error)
+	RegisterName(ctx _gen_context.T, Name string, opts ..._gen_ipc.CallOpt) (err error)
 	// UnregisterName removes a name previously associated with this device.
 	// If the name doesn't exist, this method will return an error.
 	// If the name has been registered multiple times, this method will
 	// remove only one instance of that registration.
-	UnregisterName(ctx _gen_ipc.Context, Name string, opts ..._gen_ipc.CallOpt) (err error)
+	UnregisterName(ctx _gen_context.T, Name string, opts ..._gen_ipc.CallOpt) (err error)
 	// NearbyDevices returns the most up-to-date list of nearby devices,
 	// sorted in increasing distance order.
-	NearbyDevices(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply []Device, err error)
+	NearbyDevices(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []Device, err error)
 }
 type Proximity interface {
 	_gen_ipc.UniversalServiceMethods
@@ -120,7 +121,7 @@ type clientStubProximity struct {
 	name   string
 }
 
-func (__gen_c *clientStubProximity) RegisterName(ctx _gen_ipc.Context, Name string, opts ..._gen_ipc.CallOpt) (err error) {
+func (__gen_c *clientStubProximity) RegisterName(ctx _gen_context.T, Name string, opts ..._gen_ipc.CallOpt) (err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "RegisterName", []interface{}{Name}, opts...); err != nil {
 		return
@@ -131,7 +132,7 @@ func (__gen_c *clientStubProximity) RegisterName(ctx _gen_ipc.Context, Name stri
 	return
 }
 
-func (__gen_c *clientStubProximity) UnregisterName(ctx _gen_ipc.Context, Name string, opts ..._gen_ipc.CallOpt) (err error) {
+func (__gen_c *clientStubProximity) UnregisterName(ctx _gen_context.T, Name string, opts ..._gen_ipc.CallOpt) (err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "UnregisterName", []interface{}{Name}, opts...); err != nil {
 		return
@@ -142,7 +143,7 @@ func (__gen_c *clientStubProximity) UnregisterName(ctx _gen_ipc.Context, Name st
 	return
 }
 
-func (__gen_c *clientStubProximity) NearbyDevices(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply []Device, err error) {
+func (__gen_c *clientStubProximity) NearbyDevices(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []Device, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "NearbyDevices", nil, opts...); err != nil {
 		return
@@ -153,7 +154,7 @@ func (__gen_c *clientStubProximity) NearbyDevices(ctx _gen_ipc.Context, opts ...
 	return
 }
 
-func (__gen_c *clientStubProximity) UnresolveStep(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
+func (__gen_c *clientStubProximity) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
 		return
@@ -164,7 +165,7 @@ func (__gen_c *clientStubProximity) UnresolveStep(ctx _gen_ipc.Context, opts ...
 	return
 }
 
-func (__gen_c *clientStubProximity) Signature(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+func (__gen_c *clientStubProximity) Signature(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
 		return
@@ -175,7 +176,7 @@ func (__gen_c *clientStubProximity) Signature(ctx _gen_ipc.Context, opts ..._gen
 	return
 }
 
-func (__gen_c *clientStubProximity) GetMethodTags(ctx _gen_ipc.Context, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
+func (__gen_c *clientStubProximity) GetMethodTags(ctx _gen_context.T, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return

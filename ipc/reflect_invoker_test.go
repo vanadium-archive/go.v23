@@ -200,7 +200,7 @@ type nostub struct{}
 
 // NoStub takes ipc.ServerContext rather than ipc.ServerCall as the first arg, a
 // common mistake where the server isn't wrapped with the IDL-generated stub.
-func (nostub) NoStub(Context) error { return nil }
+func (nostub) NoStub(ServerContext) error { return nil }
 
 func TestReflectInvokerPanic(t *testing.T) {
 	type testcase struct {

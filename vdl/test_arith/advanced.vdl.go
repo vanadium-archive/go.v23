@@ -8,6 +8,7 @@ import (
 
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
 	_gen_veyron2 "veyron2"
+	_gen_context "veyron2/context"
 	_gen_ipc "veyron2/ipc"
 	_gen_naming "veyron2/naming"
 	_gen_rt "veyron2/rt"
@@ -20,8 +21,8 @@ import (
 // Trigonometry_ExcludingUniversal is the interface without internal framework-added methods
 // to enable embedding without method collisions.  Not to be used directly by clients.
 type Trigonometry_ExcludingUniversal interface {
-	Sine(ctx _gen_ipc.Context, angle float64, opts ..._gen_ipc.CallOpt) (reply float64, err error)
-	Cosine(ctx _gen_ipc.Context, angle float64, opts ..._gen_ipc.CallOpt) (reply float64, err error)
+	Sine(ctx _gen_context.T, angle float64, opts ..._gen_ipc.CallOpt) (reply float64, err error)
+	Cosine(ctx _gen_context.T, angle float64, opts ..._gen_ipc.CallOpt) (reply float64, err error)
 }
 type Trigonometry interface {
 	_gen_ipc.UniversalServiceMethods
@@ -77,7 +78,7 @@ type clientStubTrigonometry struct {
 	name   string
 }
 
-func (__gen_c *clientStubTrigonometry) Sine(ctx _gen_ipc.Context, angle float64, opts ..._gen_ipc.CallOpt) (reply float64, err error) {
+func (__gen_c *clientStubTrigonometry) Sine(ctx _gen_context.T, angle float64, opts ..._gen_ipc.CallOpt) (reply float64, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Sine", []interface{}{angle}, opts...); err != nil {
 		return
@@ -88,7 +89,7 @@ func (__gen_c *clientStubTrigonometry) Sine(ctx _gen_ipc.Context, angle float64,
 	return
 }
 
-func (__gen_c *clientStubTrigonometry) Cosine(ctx _gen_ipc.Context, angle float64, opts ..._gen_ipc.CallOpt) (reply float64, err error) {
+func (__gen_c *clientStubTrigonometry) Cosine(ctx _gen_context.T, angle float64, opts ..._gen_ipc.CallOpt) (reply float64, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Cosine", []interface{}{angle}, opts...); err != nil {
 		return
@@ -99,7 +100,7 @@ func (__gen_c *clientStubTrigonometry) Cosine(ctx _gen_ipc.Context, angle float6
 	return
 }
 
-func (__gen_c *clientStubTrigonometry) UnresolveStep(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
+func (__gen_c *clientStubTrigonometry) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
 		return
@@ -110,7 +111,7 @@ func (__gen_c *clientStubTrigonometry) UnresolveStep(ctx _gen_ipc.Context, opts 
 	return
 }
 
-func (__gen_c *clientStubTrigonometry) Signature(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+func (__gen_c *clientStubTrigonometry) Signature(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
 		return
@@ -121,7 +122,7 @@ func (__gen_c *clientStubTrigonometry) Signature(ctx _gen_ipc.Context, opts ..._
 	return
 }
 
-func (__gen_c *clientStubTrigonometry) GetMethodTags(ctx _gen_ipc.Context, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
+func (__gen_c *clientStubTrigonometry) GetMethodTags(ctx _gen_context.T, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
@@ -283,7 +284,7 @@ type clientStubAdvancedMath struct {
 	name   string
 }
 
-func (__gen_c *clientStubAdvancedMath) UnresolveStep(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
+func (__gen_c *clientStubAdvancedMath) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
 		return
@@ -294,7 +295,7 @@ func (__gen_c *clientStubAdvancedMath) UnresolveStep(ctx _gen_ipc.Context, opts 
 	return
 }
 
-func (__gen_c *clientStubAdvancedMath) Signature(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+func (__gen_c *clientStubAdvancedMath) Signature(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
 		return
@@ -305,7 +306,7 @@ func (__gen_c *clientStubAdvancedMath) Signature(ctx _gen_ipc.Context, opts ..._
 	return
 }
 
-func (__gen_c *clientStubAdvancedMath) GetMethodTags(ctx _gen_ipc.Context, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
+func (__gen_c *clientStubAdvancedMath) GetMethodTags(ctx _gen_context.T, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return

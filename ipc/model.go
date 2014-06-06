@@ -4,6 +4,7 @@ import (
 	"net"
 	"time"
 
+	"veyron2/context"
 	"veyron2/naming"
 	"veyron2/security"
 )
@@ -21,7 +22,7 @@ type Client interface {
 	//
 	// StartCall accepts at least the following options:
 	// veyron2.CallTimeout.
-	StartCall(ctx Context, name, method string, args []interface{}, opts ...CallOpt) (Call, error)
+	StartCall(ctx context.T, name, method string, args []interface{}, opts ...CallOpt) (Call, error)
 
 	// Close discards all state associated with this Client.  In-flight calls may
 	// be terminated with an error.
@@ -186,18 +187,11 @@ type ServerCall interface {
 	ServerContext
 }
 
-// Context defines a context under which outgoing RPC calls are made.  It
-// carries some setting information, but also creates relationships between RPCs
-// executed under the same context.
-// TODO(mattr): Add Deadline and other settings.
-type Context interface {
-}
-
 // Context defines the in-flight call state on the server, not including methods
 // to stream args and results.
 type ServerContext interface {
 	security.Context
-	Context
+	context.T
 
 	// Blessing is a credential provided by the client bound to the private key
 	// of the server's identity. It can be nil, in which case the client did

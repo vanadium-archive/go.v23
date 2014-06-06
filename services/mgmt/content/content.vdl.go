@@ -16,6 +16,7 @@ import (
 
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
 	_gen_veyron2 "veyron2"
+	_gen_context "veyron2/context"
 	_gen_ipc "veyron2/ipc"
 	_gen_naming "veyron2/naming"
 	_gen_rt "veyron2/rt"
@@ -29,13 +30,13 @@ import (
 // to enable embedding without method collisions.  Not to be used directly by clients.
 type Content_ExcludingUniversal interface {
 	// Delete deletes the content.
-	Delete(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (err error)
+	Delete(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error)
 	// Download opens a stream that can used for downloading the
 	// content.
-	Download(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply ContentDownloadStream, err error)
+	Download(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply ContentDownloadStream, err error)
 	// Upload opens a stream that can be used for uploading the content
 	// and returns the name under which this content can be found.
-	Upload(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply ContentUploadStream, err error)
+	Upload(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply ContentUploadStream, err error)
 }
 type Content interface {
 	_gen_ipc.UniversalServiceMethods
@@ -217,7 +218,7 @@ type clientStubContent struct {
 	name   string
 }
 
-func (__gen_c *clientStubContent) Delete(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (err error) {
+func (__gen_c *clientStubContent) Delete(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Delete", nil, opts...); err != nil {
 		return
@@ -228,7 +229,7 @@ func (__gen_c *clientStubContent) Delete(ctx _gen_ipc.Context, opts ..._gen_ipc.
 	return
 }
 
-func (__gen_c *clientStubContent) Download(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply ContentDownloadStream, err error) {
+func (__gen_c *clientStubContent) Download(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply ContentDownloadStream, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Download", nil, opts...); err != nil {
 		return
@@ -237,7 +238,7 @@ func (__gen_c *clientStubContent) Download(ctx _gen_ipc.Context, opts ..._gen_ip
 	return
 }
 
-func (__gen_c *clientStubContent) Upload(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply ContentUploadStream, err error) {
+func (__gen_c *clientStubContent) Upload(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply ContentUploadStream, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Upload", nil, opts...); err != nil {
 		return
@@ -246,7 +247,7 @@ func (__gen_c *clientStubContent) Upload(ctx _gen_ipc.Context, opts ..._gen_ipc.
 	return
 }
 
-func (__gen_c *clientStubContent) UnresolveStep(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
+func (__gen_c *clientStubContent) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
 		return
@@ -257,7 +258,7 @@ func (__gen_c *clientStubContent) UnresolveStep(ctx _gen_ipc.Context, opts ..._g
 	return
 }
 
-func (__gen_c *clientStubContent) Signature(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+func (__gen_c *clientStubContent) Signature(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
 		return
@@ -268,7 +269,7 @@ func (__gen_c *clientStubContent) Signature(ctx _gen_ipc.Context, opts ..._gen_i
 	return
 }
 
-func (__gen_c *clientStubContent) GetMethodTags(ctx _gen_ipc.Context, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
+func (__gen_c *clientStubContent) GetMethodTags(ctx _gen_context.T, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return

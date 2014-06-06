@@ -16,6 +16,7 @@ import (
 
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
 	_gen_veyron2 "veyron2"
+	_gen_context "veyron2/context"
 	_gen_ipc "veyron2/ipc"
 	_gen_naming "veyron2/naming"
 	_gen_rt "veyron2/rt"
@@ -58,7 +59,7 @@ type Repository_ExcludingUniversal interface {
 	// veyron name suffix) and if so, returns this envelope. If multiple
 	// profile matches are possible, the method returns the first
 	// matching profile, respecting the order of the input argument.
-	Match(ctx _gen_ipc.Context, Profiles []string, opts ..._gen_ipc.CallOpt) (reply Envelope, err error)
+	Match(ctx _gen_context.T, Profiles []string, opts ..._gen_ipc.CallOpt) (reply Envelope, err error)
 }
 type Repository interface {
 	_gen_ipc.UniversalServiceMethods
@@ -119,7 +120,7 @@ type clientStubRepository struct {
 	name   string
 }
 
-func (__gen_c *clientStubRepository) Match(ctx _gen_ipc.Context, Profiles []string, opts ..._gen_ipc.CallOpt) (reply Envelope, err error) {
+func (__gen_c *clientStubRepository) Match(ctx _gen_context.T, Profiles []string, opts ..._gen_ipc.CallOpt) (reply Envelope, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Match", []interface{}{Profiles}, opts...); err != nil {
 		return
@@ -130,7 +131,7 @@ func (__gen_c *clientStubRepository) Match(ctx _gen_ipc.Context, Profiles []stri
 	return
 }
 
-func (__gen_c *clientStubRepository) UnresolveStep(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
+func (__gen_c *clientStubRepository) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
 		return
@@ -141,7 +142,7 @@ func (__gen_c *clientStubRepository) UnresolveStep(ctx _gen_ipc.Context, opts ..
 	return
 }
 
-func (__gen_c *clientStubRepository) Signature(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+func (__gen_c *clientStubRepository) Signature(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
 		return
@@ -152,7 +153,7 @@ func (__gen_c *clientStubRepository) Signature(ctx _gen_ipc.Context, opts ..._ge
 	return
 }
 
-func (__gen_c *clientStubRepository) GetMethodTags(ctx _gen_ipc.Context, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
+func (__gen_c *clientStubRepository) GetMethodTags(ctx _gen_context.T, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return

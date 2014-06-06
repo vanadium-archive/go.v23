@@ -8,6 +8,7 @@ package exp
 import (
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
 	_gen_veyron2 "veyron2"
+	_gen_context "veyron2/context"
 	_gen_ipc "veyron2/ipc"
 	_gen_naming "veyron2/naming"
 	_gen_rt "veyron2/rt"
@@ -19,7 +20,7 @@ import (
 // Exp_ExcludingUniversal is the interface without internal framework-added methods
 // to enable embedding without method collisions.  Not to be used directly by clients.
 type Exp_ExcludingUniversal interface {
-	Exp(ctx _gen_ipc.Context, x float64, opts ..._gen_ipc.CallOpt) (reply float64, err error)
+	Exp(ctx _gen_context.T, x float64, opts ..._gen_ipc.CallOpt) (reply float64, err error)
 }
 type Exp interface {
 	_gen_ipc.UniversalServiceMethods
@@ -74,7 +75,7 @@ type clientStubExp struct {
 	name   string
 }
 
-func (__gen_c *clientStubExp) Exp(ctx _gen_ipc.Context, x float64, opts ..._gen_ipc.CallOpt) (reply float64, err error) {
+func (__gen_c *clientStubExp) Exp(ctx _gen_context.T, x float64, opts ..._gen_ipc.CallOpt) (reply float64, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Exp", []interface{}{x}, opts...); err != nil {
 		return
@@ -85,7 +86,7 @@ func (__gen_c *clientStubExp) Exp(ctx _gen_ipc.Context, x float64, opts ..._gen_
 	return
 }
 
-func (__gen_c *clientStubExp) UnresolveStep(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
+func (__gen_c *clientStubExp) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
 		return
@@ -96,7 +97,7 @@ func (__gen_c *clientStubExp) UnresolveStep(ctx _gen_ipc.Context, opts ..._gen_i
 	return
 }
 
-func (__gen_c *clientStubExp) Signature(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+func (__gen_c *clientStubExp) Signature(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
 		return
@@ -107,7 +108,7 @@ func (__gen_c *clientStubExp) Signature(ctx _gen_ipc.Context, opts ..._gen_ipc.C
 	return
 }
 
-func (__gen_c *clientStubExp) GetMethodTags(ctx _gen_ipc.Context, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
+func (__gen_c *clientStubExp) GetMethodTags(ctx _gen_context.T, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return

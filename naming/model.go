@@ -4,6 +4,7 @@ import (
 	"net"
 	"time"
 
+	"veyron2/context"
 	"veyron2/verror"
 )
 
@@ -73,18 +74,18 @@ type MountTable interface {
 	// Mount the server OA under the veyron name, expiring after the ttl.
 	// ttl of zero implies an implementation-specific high value
 	// (essentially, forever).
-	Mount(name, server string, ttl time.Duration) error
+	Mount(ctx context.T, name, server string, ttl time.Duration) error
 
 	// Unmount the server OA from the veyron name, or if server is empty, unmount
 	// all server OAs from the veyron name.
-	Unmount(name, server string) error
+	Unmount(ctx context.T, name, server string) error
 
 	// Resolve the veyron name into its mounted servers.
-	Resolve(name string) (names []string, err error)
+	Resolve(ctx context.T, name string) (names []string, err error)
 
 	// ResolveToMountTable resolves the veyron name into the mounttables
 	// directly responsible for the name.
-	ResolveToMountTable(name string) (names []string, err error)
+	ResolveToMountTable(ctx context.T, name string) (names []string, err error)
 
 	// TODO(caprita): consider adding a version of Unresolve to the
 	// IDL-generated stub (in addition to UnresolveStep).
@@ -94,11 +95,11 @@ type MountTable interface {
 	// given name will return the name of a mount table, which is then
 	// followed up the namespace ancestry to obtain a name rooted at a
 	// 'global' (i.e., widely accessible) mount table.
-	Unresolve(name string) (names []string, err error)
+	Unresolve(ctx context.T, name string) (names []string, err error)
 
 	// Glob returns all names matching pattern.  If recursive is true, it also
 	// returns all names below the matching ones.
-	Glob(pattern string) (chan MountEntry, error)
+	Glob(ctx context.T, pattern string) (chan MountEntry, error)
 
 	// SetRoots sets the roots that the local MountTable is
 	// relative to. All relative names passed to the methods above

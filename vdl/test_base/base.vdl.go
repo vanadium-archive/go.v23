@@ -7,6 +7,7 @@ package test_base
 import (
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
 	_gen_veyron2 "veyron2"
+	_gen_context "veyron2/context"
 	_gen_ipc "veyron2/ipc"
 	_gen_naming "veyron2/naming"
 	_gen_rt "veyron2/rt"
@@ -164,10 +165,10 @@ const ErrIDBar = _gen_verror.ID("some/path.ErrIdOther")
 // ServiceA_ExcludingUniversal is the interface without internal framework-added methods
 // to enable embedding without method collisions.  Not to be used directly by clients.
 type ServiceA_ExcludingUniversal interface {
-	MethodA1(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (err error)
-	MethodA2(ctx _gen_ipc.Context, a int32, b string, opts ..._gen_ipc.CallOpt) (reply string, err error)
-	MethodA3(ctx _gen_ipc.Context, a int32, opts ..._gen_ipc.CallOpt) (reply ServiceAMethodA3Stream, err error)
-	MethodA4(ctx _gen_ipc.Context, a int32, opts ..._gen_ipc.CallOpt) (reply ServiceAMethodA4Stream, err error)
+	MethodA1(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error)
+	MethodA2(ctx _gen_context.T, a int32, b string, opts ..._gen_ipc.CallOpt) (reply string, err error)
+	MethodA3(ctx _gen_context.T, a int32, opts ..._gen_ipc.CallOpt) (reply ServiceAMethodA3Stream, err error)
+	MethodA4(ctx _gen_context.T, a int32, opts ..._gen_ipc.CallOpt) (reply ServiceAMethodA4Stream, err error)
 }
 type ServiceA interface {
 	_gen_ipc.UniversalServiceMethods
@@ -360,7 +361,7 @@ type clientStubServiceA struct {
 	name   string
 }
 
-func (__gen_c *clientStubServiceA) MethodA1(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (err error) {
+func (__gen_c *clientStubServiceA) MethodA1(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "MethodA1", nil, opts...); err != nil {
 		return
@@ -371,7 +372,7 @@ func (__gen_c *clientStubServiceA) MethodA1(ctx _gen_ipc.Context, opts ..._gen_i
 	return
 }
 
-func (__gen_c *clientStubServiceA) MethodA2(ctx _gen_ipc.Context, a int32, b string, opts ..._gen_ipc.CallOpt) (reply string, err error) {
+func (__gen_c *clientStubServiceA) MethodA2(ctx _gen_context.T, a int32, b string, opts ..._gen_ipc.CallOpt) (reply string, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "MethodA2", []interface{}{a, b}, opts...); err != nil {
 		return
@@ -382,7 +383,7 @@ func (__gen_c *clientStubServiceA) MethodA2(ctx _gen_ipc.Context, a int32, b str
 	return
 }
 
-func (__gen_c *clientStubServiceA) MethodA3(ctx _gen_ipc.Context, a int32, opts ..._gen_ipc.CallOpt) (reply ServiceAMethodA3Stream, err error) {
+func (__gen_c *clientStubServiceA) MethodA3(ctx _gen_context.T, a int32, opts ..._gen_ipc.CallOpt) (reply ServiceAMethodA3Stream, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "MethodA3", []interface{}{a}, opts...); err != nil {
 		return
@@ -391,7 +392,7 @@ func (__gen_c *clientStubServiceA) MethodA3(ctx _gen_ipc.Context, a int32, opts 
 	return
 }
 
-func (__gen_c *clientStubServiceA) MethodA4(ctx _gen_ipc.Context, a int32, opts ..._gen_ipc.CallOpt) (reply ServiceAMethodA4Stream, err error) {
+func (__gen_c *clientStubServiceA) MethodA4(ctx _gen_context.T, a int32, opts ..._gen_ipc.CallOpt) (reply ServiceAMethodA4Stream, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "MethodA4", []interface{}{a}, opts...); err != nil {
 		return
@@ -400,7 +401,7 @@ func (__gen_c *clientStubServiceA) MethodA4(ctx _gen_ipc.Context, a int32, opts 
 	return
 }
 
-func (__gen_c *clientStubServiceA) UnresolveStep(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
+func (__gen_c *clientStubServiceA) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
 		return
@@ -411,7 +412,7 @@ func (__gen_c *clientStubServiceA) UnresolveStep(ctx _gen_ipc.Context, opts ..._
 	return
 }
 
-func (__gen_c *clientStubServiceA) Signature(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+func (__gen_c *clientStubServiceA) Signature(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
 		return
@@ -422,7 +423,7 @@ func (__gen_c *clientStubServiceA) Signature(ctx _gen_ipc.Context, opts ..._gen_
 	return
 }
 
-func (__gen_c *clientStubServiceA) GetMethodTags(ctx _gen_ipc.Context, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
+func (__gen_c *clientStubServiceA) GetMethodTags(ctx _gen_context.T, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
@@ -582,7 +583,7 @@ func (__gen_s *ServerStubServiceA) MethodA4(call _gen_ipc.ServerCall, a int32) (
 // to enable embedding without method collisions.  Not to be used directly by clients.
 type ServiceB_ExcludingUniversal interface {
 	ServiceA_ExcludingUniversal
-	MethodB1(ctx _gen_ipc.Context, a Scalars, b Composites, opts ..._gen_ipc.CallOpt) (reply CompComp, err error)
+	MethodB1(ctx _gen_context.T, a Scalars, b Composites, opts ..._gen_ipc.CallOpt) (reply CompComp, err error)
 }
 type ServiceB interface {
 	_gen_ipc.UniversalServiceMethods
@@ -642,7 +643,7 @@ type clientStubServiceB struct {
 	name   string
 }
 
-func (__gen_c *clientStubServiceB) MethodB1(ctx _gen_ipc.Context, a Scalars, b Composites, opts ..._gen_ipc.CallOpt) (reply CompComp, err error) {
+func (__gen_c *clientStubServiceB) MethodB1(ctx _gen_context.T, a Scalars, b Composites, opts ..._gen_ipc.CallOpt) (reply CompComp, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "MethodB1", []interface{}{a, b}, opts...); err != nil {
 		return
@@ -653,7 +654,7 @@ func (__gen_c *clientStubServiceB) MethodB1(ctx _gen_ipc.Context, a Scalars, b C
 	return
 }
 
-func (__gen_c *clientStubServiceB) UnresolveStep(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
+func (__gen_c *clientStubServiceB) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
 		return
@@ -664,7 +665,7 @@ func (__gen_c *clientStubServiceB) UnresolveStep(ctx _gen_ipc.Context, opts ..._
 	return
 }
 
-func (__gen_c *clientStubServiceB) Signature(ctx _gen_ipc.Context, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+func (__gen_c *clientStubServiceB) Signature(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
 		return
@@ -675,7 +676,7 @@ func (__gen_c *clientStubServiceB) Signature(ctx _gen_ipc.Context, opts ..._gen_
 	return
 }
 
-func (__gen_c *clientStubServiceB) GetMethodTags(ctx _gen_ipc.Context, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
+func (__gen_c *clientStubServiceB) GetMethodTags(ctx _gen_context.T, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
