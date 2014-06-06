@@ -13,8 +13,8 @@ type Request struct {
 	Suffix string
 	// Method to invoke on the service.
 	Method string
-	// NumPosArgs is the number of positional arguments, which immediately follow
-	// on the request stream.
+	// NumPosArgs is the number of positional arguments, which follow this message
+	// (and any blessings) on the request stream.
 	NumPosArgs uint64
 	// EndStreamArgs is true iff no more streaming arguments will be sent.  No
 	// more data will be sent on the request stream.
@@ -24,6 +24,12 @@ type Request struct {
 	//
 	// TODO(toddw): Change to time.Time when a built-in idl time package is added.
 	Timeout int64
+	// HasBlessing is true iff a blessing credential, bound to the identity of
+	// the server (provided by the client) appears immediately after this request
+	// message.
+	// TODO(toddw,ashankar): Ideally, this would be the blessing itself, but
+	// vom currently does not allow for data-type interfaces.
+	HasBlessing bool
 }
 
 // Response describes the response header sent by the server to the client.  A
