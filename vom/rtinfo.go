@@ -369,6 +369,9 @@ func fillRTInfoHelperLocked(rt Type, rti *rtInfo) error {
 			// Byte slices have their own type id.
 			rti.kind = typeKindByteSlice
 			rti.id = wiretype.TypeIDByteSlice
+			if rti.elem, err = lookupRTInfoLocked(rt.Elem()); err != nil {
+				return err
+			}
 			return nil
 		}
 		rti.kind = typeKindSlice

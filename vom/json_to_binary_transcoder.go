@@ -1,12 +1,28 @@
 package vom
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"reflect"
 	"strconv"
 	"strings"
 )
+
+// JSONToObject converts a JSON string to a go object of the specified type.
+func JSONToObject(str string, typ Type) (result interface{}, err error) {
+	var buf bytes.Buffer
+	tr := NewJSONToBinaryTranscoder(&buf, strings.NewReader(str))
+	if err := tr.Transcode(typ); err != nil {
+		return nil, fmt.Errorf("error transcoding json to object: %v (JSON was %q)", err, str)
+	}
+	var target interface{}
+	dec := NewDecoder(bytes.NewReader(buf.Bytes()))
+	if err := dec.Decode(&target); err != nil {
+		return nil, fmt.Errorf("error decoding transcoded json: %v", err)
+	}
+	return target, nil
+}
 
 // JSONToBinaryTranscoder reads from JSON input stream and writes the transcoded objects to a VOM
 // binary stream.
@@ -59,6 +75,18 @@ func (t *JSONToBinaryTranscoder) Transcode(typ Type) error {
 	return nil
 }
 
+func stringToJSONByteString(str string) string {
+	s := "["
+	for i, b := range []byte(str) {
+		if i > 0 {
+			s += ","
+		}
+		s += fmt.Sprintf("%v", b)
+	}
+	s += "]"
+	return s
+}
+
 func (t *JSONToBinaryTranscoder) transcodeValue(typ Type, tzr *jsonTokenizer) error {
 	tok, err := tzr.Peek(0)
 	if err != nil {
@@ -102,7 +130,11 @@ func (t *JSONToBinaryTranscoder) transcodeValue(typ Type, tzr *jsonTokenizer) er
 			tzr.ConsumePeeked()
 			return nil
 		}
-		if tok.typ != jsonStartArr {
+		if tok.typ == jsonStringVal && typ.Elem().Kind() == reflect.Uint8 {
+			// if we have a string, then encode it as a string and we will read from that
+			tzr.ConsumePeeked()
+			tzr = newJSONTokenizer(strings.NewReader(stringToJSONByteString(tok.val)))
+		} else if tok.typ != jsonStartArr {
 			return fmt.Errorf("poorly formatted array or slice. Doesn't start with '[' (Token seen: %v)", tok)
 		}
 		return t.transcodeArray(typ, tzr)

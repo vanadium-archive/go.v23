@@ -202,7 +202,12 @@ func (t Type) PkgPath() string {
 }
 
 func (t Type) String() string {
-	return fmt.Sprintf("Type{%d}", t.ID)
+	if t.ID < wiretype.TypeIDFirst {
+		return fmt.Sprintf("Type{%d, %q}", t.ID, t.Name())
+	} else {
+
+		return fmt.Sprintf("Type{%d, %#t}", t.ID, t.wiretype())
+	}
 }
 
 // Implements vom.ReflectTypeConverter
@@ -234,7 +239,7 @@ func (t Type) ToReflectType() (reflect.Type, error) {
 		return reflect.TypeOf(""), nil
 	case reflect.Interface:
 		switch t.Name() {
-		case "interface":
+		case "interface", "anydata", "AnyData":
 			return reflect.TypeOf([]interface{}{}), nil
 		case "error":
 			return reflect.TypeOf([]error{}), nil

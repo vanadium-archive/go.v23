@@ -997,12 +997,13 @@ var firstAdded int
 			}
 			d = wt
 		case _gen_wiretype.StructType:
-			for _, fld := range wt.Fields {
+			for i, fld := range wt.Fields {
 				if fld.Type >= _gen_wiretype.TypeIDFirst {
-					fld.Type += _gen_wiretype.TypeID(firstAdded)
+					wt.Fields[i].Type += _gen_wiretype.TypeID(firstAdded)
 				}
 			}
 			d = wt
+		// NOTE: other types are missing, but we are upgrading anyways.
 		}
 		result.TypeDefs = append(result.TypeDefs, d)
 	}

@@ -112,7 +112,7 @@ type StructWithInterfaces struct {
 var (
 	rtibool      = &rtInfo{name: "bool", kind: typeKindBool, id: wiretype.TypeIDBool}
 	rtistring    = &rtInfo{name: "string", kind: typeKindString, id: wiretype.TypeIDString}
-	rtibyteslice = &rtInfo{name: "[]byte", kind: typeKindByteSlice, id: wiretype.TypeIDByteSlice}
+	rtibyteslice = &rtInfo{name: "[]byte", kind: typeKindByteSlice, id: wiretype.TypeIDByteSlice, elem: rtiuint8}
 
 	rtiuint    = &rtInfo{name: "uint", kind: typeKindUint, id: wiretype.TypeIDUint}
 	rtiuint8   = &rtInfo{name: "byte", kind: typeKindByte, id: wiretype.TypeIDUint8, suffix: "8"}
@@ -187,7 +187,7 @@ var rtInfoTests = []struct {
 		&rtInfo{isNamed: true, name: "veyron2/vom.String", snames: s{"String", "vom.String", "veyron2/vom.String"}, kind: typeKindString, id: wiretype.TypeIDString},
 		""},
 	{ByteSlice(""),
-		&rtInfo{isNamed: true, name: "veyron2/vom.ByteSlice", snames: s{"ByteSlice", "vom.ByteSlice", "veyron2/vom.ByteSlice"}, kind: typeKindByteSlice, id: wiretype.TypeIDByteSlice},
+		&rtInfo{isNamed: true, name: "veyron2/vom.ByteSlice", snames: s{"ByteSlice", "vom.ByteSlice", "veyron2/vom.ByteSlice"}, kind: typeKindByteSlice, id: wiretype.TypeIDByteSlice, elem: rtiuint8},
 		""},
 
 	{Uint(0),

@@ -320,7 +320,7 @@ func TestCalculator(t *testing.T) {
 		wiretype.NamedPrimitiveType{1, "error", nil},
 		wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{36, "A"},
 			wiretype.FieldType{36, "B"}}, "veyron2/vdl/test_base.Args", nil},
-		wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{66, "Args"}}, "veyron2/vdl/test_base.NestedArgs", nil},
+		wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{67, "Args"}}, "veyron2/vdl/test_base.NestedArgs", nil},
 		wiretype.NamedPrimitiveType{1, "anydata", nil},
 		// Trig:
 		wiretype.NamedPrimitiveType{1, "error", nil},
