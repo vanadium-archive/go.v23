@@ -45,6 +45,7 @@ type MountTable interface {
 
 	// Unmount removes Server from the mount point.  If Server is empty, remove all
 	// servers mounted there.
+	// Returns a non-nil error iff Server remains mounted at the mount point.
 	Unmount(Server string) error {security.WriteLabel}
 
         // TODO(caprita): We can simplify this to just return []string where
