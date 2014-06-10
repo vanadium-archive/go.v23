@@ -47,7 +47,7 @@ type Runtime interface {
 	// NewClient creates a new Client instance.
 	//
 	// It accepts at least the following options:
-	// Client, ClientID and StreamManager
+	// LocalID and StreamManager
 	//
 	// In particular, if the options include a Client, then NewClient
 	// just returns that.
@@ -55,8 +55,7 @@ type Runtime interface {
 
 	// NewServer creates a new Server instance.
 	//
-	// It accepts at least the following options:
-	// ServerID and StreamManager
+	// It accepts at least the following option: StreamManager.
 	NewServer(opts ...ipc.ServerOpt) (ipc.Server, error)
 
 	// Client returns the pre-configured Client that is created when the

@@ -43,7 +43,7 @@ func startServer(t *testing.T) (storage.Store, func()) {
 	t.Logf("Mount: %s", mount)
 
 	// Create a new server instance.
-	s, err := r.NewServer(veyron2.LocalID(serverID))
+	s, err := r.NewServer()
 	if err != nil {
 		log.Fatal("r.NewServer() failed: ", err)
 	}

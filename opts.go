@@ -61,17 +61,15 @@ import (
 //   demo.MyFuncA(1, 2, 3, FooOption(5), GoodOption("good"))
 //   demo.MyFuncB(FooOption(9), BarOption("bar"))
 
-// LocalIDOpt represents the identity of the local process.
+// LocalIDOpt represents the identity to be used by the local end of an IPC.
 //
 // It wraps the security.PrivateID interface so that functions representing
 // option annotations can be added.
 type LocalIDOpt struct{ security.PrivateID }
 
-func (LocalIDOpt) IPCClientOpt()         {}
-func (LocalIDOpt) IPCServerOpt()         {}
-func (LocalIDOpt) IPCStreamVCOpt()       {}
-func (LocalIDOpt) IPCStreamListenerOpt() {}
-func (LocalIDOpt) ROpt()                 {}
+func (LocalIDOpt) IPCClientOpt()   {}
+func (LocalIDOpt) IPCStreamVCOpt() {}
+func (LocalIDOpt) ROpt()           {}
 
 // LocalID specifies the identity of the local process.
 func LocalID(id security.PrivateID) LocalIDOpt { return LocalIDOpt{id} }

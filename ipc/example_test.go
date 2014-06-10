@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	"veyron2"
 	"veyron2/ipc"
 	"veyron2/security"
 )
@@ -51,7 +50,7 @@ func (*Photo) Upload(call ipc.ServerCall) error {
 
 func Example_server() {
 	jpegServer := &photoServer{}
-	sm, err := RT.NewServer(veyron2.LocalID(security.FakePrivateID("server")))
+	sm, err := RT.NewServer()
 	err = sm.Register("photos", jpegServer)
 	_, err = sm.Listen("tcp", "127.0.0.1:0")
 	err = sm.Publish("/myhome")

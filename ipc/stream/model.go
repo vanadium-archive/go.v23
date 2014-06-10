@@ -102,7 +102,7 @@ type Manager interface {
 	// Typical options accepted:
 	// TODO(ashankar): Update comment as these option types will change
 	// once we finalize the "public" and "private" ids in veyron2.
-	// veyron2.ClientID - Identity of the caller
+	// veyron2.LocalID - Identity of the caller
 	// veyron2.ServerID - Expected identity of the server
 	// veyron2.TLSConfig
 	//
