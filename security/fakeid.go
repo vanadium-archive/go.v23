@@ -57,7 +57,7 @@ func (id fakeID) Derive(pub PublicID) (PrivateID, error) {
 	return fakePub, nil
 }
 
-func (id fakeID) MintDischarge(caveat ThirdPartyCaveat, duration time.Duration, caveats []ServiceCaveat) (ThirdPartyDischarge, error) {
+func (id fakeID) MintDischarge(caveat ThirdPartyCaveat, ctx Context, duration time.Duration, caveats []ServiceCaveat) (ThirdPartyDischarge, error) {
 	return nil, fmt.Errorf("discharge cannot be constructed for ThirdPartyCaveat of type %T from PrivateID of type %T", caveat, id)
 }
 

@@ -73,12 +73,14 @@ type PrivateID interface {
 	// PublicID for this operation to succeed.
 	Derive(publicID PublicID) (PrivateID, error)
 
-	// MintDischarge returns a discharge for the provided third-party
-	// caveat. The discharge is valid for duration if caveats are met.
+	// MintDischarge returns a discharge for the provided third-party caveat if
+	// the caveat's restrictions on minting discharges are satisfied.
+	// Otherwise, it returns nil and an error.
+	// The discharge is valid for duration if caveats are met.
 	//
 	// TODO(ataly, ashankar): Should we get rid of the duration argument
 	// and simply have a list of discharge caveats?
-	MintDischarge(caveat ThirdPartyCaveat, duration time.Duration, caveats []ServiceCaveat) (ThirdPartyDischarge, error)
+	MintDischarge(caveat ThirdPartyCaveat, context Context, duration time.Duration, caveats []ServiceCaveat) (ThirdPartyDischarge, error)
 }
 
 // Caveat is the interface for restrictions on the scope of an identity. These
