@@ -26,11 +26,13 @@ const (
 	ForceStopExitCode     = 1
 )
 
-// TODO(caprita): make Stop return chan Tick and expose the ability to convey
-// shutdown progress to application layer.
-// type Tick struct {
-// 	Processed, Goal int32
-// }
+// Task is streamed to channels registered using TrackTask to provide a sense of
+// the progress of the application's shutdown sequence.  For a description of
+// the fields, see the Task struct in the veyron2/services/mgmt/appcycle
+// package, which it mirrors.
+type Task struct {
+	Progress, Goal int
+}
 
 // Runtime is the interface that concrete Veyron implementations must
 // implement.
@@ -129,7 +131,25 @@ type Runtime interface {
 	// source of the event.  For example, when Stop is called locally, the
 	// LocalStop message will be received on the channel.  If the channel is
 	// not being received on, or is full, no message is sent on it.
+	//
+	// The channel is assumed to remain open while messages could be sent on
+	// it.
 	WaitForStop(chan<- string)
+
+	// AdvanceGoal extends the goal value in the shutdown task tracker.
+	// Non-positive delta is ignored.
+	AdvanceGoal(delta int)
+	// AdvanceProgress advances the progress value in the shutdown task
+	// tracker.  Non-positive delta is ignored.
+	AdvanceProgress(delta int)
+	// TrackTask registers a channel to receive task updates (a Task will be
+	// sent on the channel if either the goal or progress values of the
+	// task have changed).  If the channel is not being received on, or is
+	// full, no Task is sent on it.
+	//
+	// The channel is assumed to remain open while Tasks could be sent on
+	// it.
+	TrackTask(chan<- Task)
 
 	// Shutdown cleanly shuts down any internal state, logging, goroutines
 	// etc spawned and managed by the runtime. It is useful for cases where

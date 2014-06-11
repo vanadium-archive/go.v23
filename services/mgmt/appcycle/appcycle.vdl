@@ -3,7 +3,7 @@ package appcycle
 
 // TODO(caprita): Implement AppCycle server in runtime.
 
-// Tick is streamed by Stop to provide the client with a sense of the progress
+// Task is streamed by Stop to provide the client with a sense of the progress
 // of the shutdown.
 // The meaning of Progress and Goal are up to the developer (the server provides
 // the framework with values for these).  The recommended meanings are:
@@ -13,17 +13,18 @@ package appcycle
 //   complete.  This should not change during a stream, but could change if
 //   e.g. new shutdown tasks are triggered that were not forseen at the outset
 //   of the shutdown.
-type Tick struct {
-  Progress, Goal int32
+type Task struct {
+	Progress, Goal int32
 }
 
 // AppCycle interfaces with the process running a veyron runtime.
 type AppCycle interface{
-  // Stop initiates shutdown of the server.  It streams back periodic updates
-  // to give the client an idea of how the shutdown is progressing.
-  Stop() stream<_, Tick> error
-  // ForceStop tells the server to shut down right away.  It can be issued while
-  // a Stop is outstanding if for example the client does not want to wait any
-  // longer.
-  ForceStop() error
+	// Stop initiates shutdown of the server.  It streams back periodic
+	// updates to give the client an idea of how the shutdown is
+	// progressing.
+	Stop() stream<_, Task> error
+	// ForceStop tells the server to shut down right away.  It can be issued
+	// while a Stop is outstanding if for example the client does not want
+	// to wait any longer.
+	ForceStop() error
 }

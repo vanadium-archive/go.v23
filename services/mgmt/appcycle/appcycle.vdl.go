@@ -15,7 +15,7 @@ import (
 	_gen_wiretype "veyron2/wiretype"
 )
 
-// Tick is streamed by Stop to provide the client with a sense of the progress
+// Task is streamed by Stop to provide the client with a sense of the progress
 // of the shutdown.
 // The meaning of Progress and Goal are up to the developer (the server provides
 // the framework with values for these).  The recommended meanings are:
@@ -25,7 +25,7 @@ import (
 //   complete.  This should not change during a stream, but could change if
 //   e.g. new shutdown tasks are triggered that were not forseen at the outset
 //   of the shutdown.
-type Tick struct {
+type Task struct {
 	Progress int32
 	Goal     int32
 }
@@ -35,12 +35,13 @@ type Tick struct {
 // AppCycle_ExcludingUniversal is the interface without internal framework-added methods
 // to enable embedding without method collisions.  Not to be used directly by clients.
 type AppCycle_ExcludingUniversal interface {
-	// Stop initiates shutdown of the server.  It streams back periodic updates
-	// to give the client an idea of how the shutdown is progressing.
+	// Stop initiates shutdown of the server.  It streams back periodic
+	// updates to give the client an idea of how the shutdown is
+	// progressing.
 	Stop(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply AppCycleStopStream, err error)
-	// ForceStop tells the server to shut down right away.  It can be issued while
-	// a Stop is outstanding if for example the client does not want to wait any
-	// longer.
+	// ForceStop tells the server to shut down right away.  It can be issued
+	// while a Stop is outstanding if for example the client does not want
+	// to wait any longer.
 	ForceStop(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error)
 }
 type AppCycle interface {
@@ -51,12 +52,13 @@ type AppCycle interface {
 // AppCycleService is the interface the server implements.
 type AppCycleService interface {
 
-	// Stop initiates shutdown of the server.  It streams back periodic updates
-	// to give the client an idea of how the shutdown is progressing.
+	// Stop initiates shutdown of the server.  It streams back periodic
+	// updates to give the client an idea of how the shutdown is
+	// progressing.
 	Stop(context _gen_ipc.ServerContext, stream AppCycleServiceStopStream) (err error)
-	// ForceStop tells the server to shut down right away.  It can be issued while
-	// a Stop is outstanding if for example the client does not want to wait any
-	// longer.
+	// ForceStop tells the server to shut down right away.  It can be issued
+	// while a Stop is outstanding if for example the client does not want
+	// to wait any longer.
 	ForceStop(context _gen_ipc.ServerContext) (err error)
 }
 
@@ -66,7 +68,7 @@ type AppCycleStopStream interface {
 
 	// Recv returns the next item in the input stream, blocking until
 	// an item is available.  Returns io.EOF to indicate graceful end of input.
-	Recv() (item Tick, err error)
+	Recv() (item Task, err error)
 
 	// Finish closes the stream and returns the positional return values for
 	// call.
@@ -81,7 +83,7 @@ type implAppCycleStopStream struct {
 	clientCall _gen_ipc.Call
 }
 
-func (c *implAppCycleStopStream) Recv() (item Tick, err error) {
+func (c *implAppCycleStopStream) Recv() (item Task, err error) {
 	err = c.clientCall.Recv(&item)
 	return
 }
@@ -102,7 +104,7 @@ func (c *implAppCycleStopStream) Cancel() {
 type AppCycleServiceStopStream interface {
 	// Send places the item onto the output stream, blocking if there is no buffer
 	// space available.
-	Send(item Tick) error
+	Send(item Task) error
 }
 
 // Implementation of the AppCycleServiceStopStream interface that is not exported.
@@ -110,7 +112,7 @@ type implAppCycleServiceStopStream struct {
 	serverCall _gen_ipc.ServerCall
 }
 
-func (s *implAppCycleServiceStopStream) Send(item Tick) error {
+func (s *implAppCycleServiceStopStream) Send(item Task) error {
 	return s.serverCall.Send(item)
 }
 
@@ -254,7 +256,7 @@ func (__gen_s *ServerStubAppCycle) Signature(call _gen_ipc.ServerCall) (_gen_ipc
 				_gen_wiretype.FieldType{Type: 0x24, Name: "Progress"},
 				_gen_wiretype.FieldType{Type: 0x24, Name: "Goal"},
 			},
-			"veyron2/services/mgmt/appcycle.Tick", []string(nil)},
+			"veyron2/services/mgmt/appcycle.Task", []string(nil)},
 	}
 
 	return result, nil

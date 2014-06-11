@@ -66,6 +66,10 @@ func (*rtImpl) ForceStop() {}
 
 func (*rtImpl) WaitForStop(chan<- string) {}
 
+func (rtImpl) AdvanceGoal(int)               {}
+func (rtImpl) AdvanceProgress(int)           {}
+func (rtImpl) TrackTask(chan<- veyron2.Task) {}
+
 func (*rtImpl) Shutdown() {}
 
 func (*rtImpl) RegisterType(interface{}) {
