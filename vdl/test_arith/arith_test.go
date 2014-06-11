@@ -469,7 +469,7 @@ func TestArith(t *testing.T) {
 			t.Errorf("GetMethodTags: got %v but expected %v", tags, expectedTags)
 		}
 
-		if _, err := clientStub.Signature(nil); err != nil {
+		if _, err := clientStub.Signature(ctx); err != nil {
 			// TODO(bprosnitz) Check that the signature is the expected signature.
 			t.Errorf("Failed to get signature from client: %v", err)
 		}
