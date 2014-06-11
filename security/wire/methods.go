@@ -135,6 +135,12 @@ func (c *Caveat) Validate(ctx security.Context) error {
 
 // -- Helper methods on the wire format for the chain implementation of Identity --
 
+// Set sets the wire representation of a signature from the provided object.
+func (s *Signature) Set(signature security.Signature) {
+	s.R = signature.R.Bytes()
+	s.S = signature.S.Bytes()
+}
+
 // contentHash returns a SHA256 hash of the contents of the certificate along with the
 // provided signature.
 func (c *Certificate) contentHash(issuerSignature Signature) []byte {

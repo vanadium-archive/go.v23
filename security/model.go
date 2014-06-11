@@ -4,6 +4,7 @@ package security
 
 import (
 	"crypto/ecdsa"
+	"math/big"
 	"time"
 )
 
@@ -51,8 +52,9 @@ type PrivateID interface {
 	// (which can be encoded and transmitted across the network perhaps).
 	PublicID() PublicID
 
-	// PrivateKey returns the secret key that identifies the principal.
-	PrivateKey() *ecdsa.PrivateKey
+	// Sign signs an arbitrary length message (often the hash of a larger message)
+	// using the private key associated with this identity.
+	Sign(message []byte) (Signature, error)
 
 	// Bless creates a constrained PublicID from the provided one.
 	// The returned PublicID:
@@ -81,6 +83,11 @@ type PrivateID interface {
 	// TODO(ataly, ashankar): Should we get rid of the duration argument
 	// and simply have a list of discharge caveats?
 	MintDischarge(caveat ThirdPartyCaveat, context Context, duration time.Duration, caveats []ServiceCaveat) (ThirdPartyDischarge, error)
+}
+
+// Signature represents a digital signature created by a PrivateID.
+type Signature struct {
+	R, S *big.Int
 }
 
 // Caveat is the interface for restrictions on the scope of an identity. These
