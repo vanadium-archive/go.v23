@@ -64,9 +64,13 @@ type Object interface {
     // match a pattern.
 	mounttable.Globable
 
-    // Watcher is an API for watching updates to objects beneath this value
-    // that satisfy a query.
-	watch.Watcher
+    // GlobWatcher is an API for watching updates to objects beneath this value
+    // that match a pattern.
+	watch.GlobWatcher
+
+    // QueryWatcher is an API for watching updates to objects beneath this
+    // value that satisfy a query.
+	watch.QueryWatcher
 }
 
 // Store is the client interface to the storage system.

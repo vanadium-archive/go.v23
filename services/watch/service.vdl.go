@@ -123,46 +123,61 @@ import (
 	_gen_wiretype "veyron2/wiretype"
 )
 
-// Request specifies which entities should be watched and, optionally,
+// GlobRequest specifies which entities should be watched and, optionally,
 // how to resume from a previous Watch call.
-type Request struct {
+type GlobRequest struct {
+	// Pattern specifies the subset of the children of the root entity
+	// for which the client wants updates.
+	Pattern string
+	// ResumeMarker specifies how to resume from a previous Watch call.
+	// See the ResumeMarker type for detailed comments.
+	ResumeMarker ResumeMarker
+}
+
+// QueryRequest specifies which entities should be watched and, optionally,
+// how to resume from a previous Watch call.
+type QueryRequest struct {
 	// Query specifies the subset of the children of the root entity
 	// for which the client wants updates.
 	Query query.Query
-	// ResumeMarker specifies how much of the existing underlying state
-	// is delivered to the client when the watch request is received by
-	// the system. The client can set this marker in one of the
-	// following ways to get different semantics:
-	//
-	// (A) Parameter is left empty.
-	//     Semantics: Fetch initial state.
-	//     The client wants the entities' initial states to be delivered.
-	//     See the description in "Initial State".
-	//
-	// (B) Parameter is set to the string "now" (UTF-8 encoding).
-	//     Semantics: Fetch new changes only.
-	//     The client just wants to get the changes received by the
-	//     system after the watch point. The system may deliver changes
-	//     from before the watch point as well.
-	//
-	// (C) Parameter is set to a value received in an earlier
-	//     Change.ResumeMarker field while watching the same entity with
-	//     the same query.
-	//     Semantics: Resume from a specific point.
-	//     The client wants to receive the changes from a specific point
-	//     - this value must correspond to a value received in the
-	//     Change.ResumeMarker field. The system may deliver changes
-	//     from before the ResumeMarker as well.  If the system cannot
-	//     resume the stream from this point (e.g., if it is too far
-	//     behind in the stream), it can return the
-	//     ErrUnknownResumeMarker error.
-	//     ResumeMarkers are received in lexicographical order.
-	//
-	// An implementation MUST support the empty string "" marker
-	// (initial state fetching) and the "now" marker. It need not
-	// support resuming from a specific point.
-	ResumeMarker []byte
+	// ResumeMarker specifies how to resume from a previous Watch call.
+	// See the ResumeMarker type for detailed comments.
+	ResumeMarker ResumeMarker
 }
+
+// ResumeMarker specifies how much of the existing underlying state
+// is delivered to the client when the watch request is received by
+// the system. The client can set this marker in one of the
+// following ways to get different semantics:
+//
+// (A) Parameter is left empty.
+//     Semantics: Fetch initial state.
+//     The client wants the entities' initial states to be delivered.
+//     See the description in "Initial State".
+//
+// (B) Parameter is set to the string "now" (UTF-8 encoding).
+//     Semantics: Fetch new changes only.
+//     The client just wants to get the changes received by the
+//     system after the watch point. The system may deliver changes
+//     from before the watch point as well.
+//
+// (C) Parameter is set to a value received in an earlier
+//     Change.ResumeMarker field while watching the same entity with
+//     the same query.
+//     Semantics: Resume from a specific point.
+//     The client wants to receive the changes from a specific point
+//     - this value must correspond to a value received in the
+//     Change.ResumeMarker field. The system may deliver changes
+//     from before the ResumeMarker as well.  If the system cannot
+//     resume the stream from this point (e.g., if it is too far
+//     behind in the stream), it can return the
+//     ErrUnknownResumeMarker error.
+//     ResumeMarkers are received in lexicographical order.
+//
+// An implementation MUST support the empty string "" marker
+// (initial state fetching) and the "now" marker. It need not
+// support resuming from a specific point.
+type ResumeMarker []byte
 
 // ChangeBatch is a batch of Change messages.
 type ChangeBatch struct {
@@ -184,7 +199,7 @@ type Change struct {
 	// timestamp/version vector. This marker can be provided in the
 	// Request message to allow the caller to resume the stream watching
 	// at a specific point without fetching the initial state.
-	ResumeMarker []byte
+	ResumeMarker ResumeMarker
 	// If true, this Change is followed by more Changes that are in the
 	// same group as this Change.
 	Continued bool
@@ -204,30 +219,30 @@ const (
 	InitialStateSkipped = int32(2)
 )
 
-// Watcher allows a client to receive updates for changes to objects
-// that match a query.  See the package comments for details.
-// Watcher is the interface the client binds and uses.
-// Watcher_ExcludingUniversal is the interface without internal framework-added methods
+// GlobWatcher allows a client to receive updates for changes to objects
+// that match a pattern.  See the package comments for details.
+// GlobWatcher is the interface the client binds and uses.
+// GlobWatcher_ExcludingUniversal is the interface without internal framework-added methods
 // to enable embedding without method collisions.  Not to be used directly by clients.
-type Watcher_ExcludingUniversal interface {
-	// Watch returns a stream of changes.
-	Watch(ctx _gen_context.T, Req Request, opts ..._gen_ipc.CallOpt) (reply WatcherWatchStream, err error)
+type GlobWatcher_ExcludingUniversal interface {
+	// WatchGlob returns a stream of changes that match a pattern.
+	WatchGlob(ctx _gen_context.T, Req GlobRequest, opts ..._gen_ipc.CallOpt) (reply GlobWatcherWatchGlobStream, err error)
 }
-type Watcher interface {
+type GlobWatcher interface {
 	_gen_ipc.UniversalServiceMethods
-	Watcher_ExcludingUniversal
+	GlobWatcher_ExcludingUniversal
 }
 
-// WatcherService is the interface the server implements.
-type WatcherService interface {
+// GlobWatcherService is the interface the server implements.
+type GlobWatcherService interface {
 
-	// Watch returns a stream of changes.
-	Watch(context _gen_ipc.ServerContext, Req Request, stream WatcherServiceWatchStream) (err error)
+	// WatchGlob returns a stream of changes that match a pattern.
+	WatchGlob(context _gen_ipc.ServerContext, Req GlobRequest, stream GlobWatcherServiceWatchGlobStream) (err error)
 }
 
-// WatcherWatchStream is the interface for streaming responses of the method
-// Watch in the service interface Watcher.
-type WatcherWatchStream interface {
+// GlobWatcherWatchGlobStream is the interface for streaming responses of the method
+// WatchGlob in the service interface GlobWatcher.
+type GlobWatcherWatchGlobStream interface {
 
 	// Recv returns the next item in the input stream, blocking until
 	// an item is available.  Returns io.EOF to indicate graceful end of input.
@@ -241,50 +256,50 @@ type WatcherWatchStream interface {
 	Cancel()
 }
 
-// Implementation of the WatcherWatchStream interface that is not exported.
-type implWatcherWatchStream struct {
+// Implementation of the GlobWatcherWatchGlobStream interface that is not exported.
+type implGlobWatcherWatchGlobStream struct {
 	clientCall _gen_ipc.Call
 }
 
-func (c *implWatcherWatchStream) Recv() (item ChangeBatch, err error) {
+func (c *implGlobWatcherWatchGlobStream) Recv() (item ChangeBatch, err error) {
 	err = c.clientCall.Recv(&item)
 	return
 }
 
-func (c *implWatcherWatchStream) Finish() (err error) {
+func (c *implGlobWatcherWatchGlobStream) Finish() (err error) {
 	if ierr := c.clientCall.Finish(&err); ierr != nil {
 		err = ierr
 	}
 	return
 }
 
-func (c *implWatcherWatchStream) Cancel() {
+func (c *implGlobWatcherWatchGlobStream) Cancel() {
 	c.clientCall.Cancel()
 }
 
-// WatcherServiceWatchStream is the interface for streaming responses of the method
-// Watch in the service interface Watcher.
-type WatcherServiceWatchStream interface {
+// GlobWatcherServiceWatchGlobStream is the interface for streaming responses of the method
+// WatchGlob in the service interface GlobWatcher.
+type GlobWatcherServiceWatchGlobStream interface {
 	// Send places the item onto the output stream, blocking if there is no buffer
 	// space available.
 	Send(item ChangeBatch) error
 }
 
-// Implementation of the WatcherServiceWatchStream interface that is not exported.
-type implWatcherServiceWatchStream struct {
+// Implementation of the GlobWatcherServiceWatchGlobStream interface that is not exported.
+type implGlobWatcherServiceWatchGlobStream struct {
 	serverCall _gen_ipc.ServerCall
 }
 
-func (s *implWatcherServiceWatchStream) Send(item ChangeBatch) error {
+func (s *implGlobWatcherServiceWatchGlobStream) Send(item ChangeBatch) error {
 	return s.serverCall.Send(item)
 }
 
-// BindWatcher returns the client stub implementing the Watcher
+// BindGlobWatcher returns the client stub implementing the GlobWatcher
 // interface.
 //
 // If no _gen_ipc.Client is specified, the default _gen_ipc.Client in the
 // global Runtime is used.
-func BindWatcher(name string, opts ..._gen_ipc.BindOpt) (Watcher, error) {
+func BindGlobWatcher(name string, opts ..._gen_ipc.BindOpt) (GlobWatcher, error) {
 	var client _gen_ipc.Client
 	switch len(opts) {
 	case 0:
@@ -301,37 +316,37 @@ func BindWatcher(name string, opts ..._gen_ipc.BindOpt) (Watcher, error) {
 	default:
 		return nil, _gen_vdl.ErrTooManyOptionsToBind
 	}
-	stub := &clientStubWatcher{client: client, name: name}
+	stub := &clientStubGlobWatcher{client: client, name: name}
 
 	return stub, nil
 }
 
-// NewServerWatcher creates a new server stub.
+// NewServerGlobWatcher creates a new server stub.
 //
-// It takes a regular server implementing the WatcherService
+// It takes a regular server implementing the GlobWatcherService
 // interface, and returns a new server stub.
-func NewServerWatcher(server WatcherService) interface{} {
-	return &ServerStubWatcher{
+func NewServerGlobWatcher(server GlobWatcherService) interface{} {
+	return &ServerStubGlobWatcher{
 		service: server,
 	}
 }
 
-// clientStubWatcher implements Watcher.
-type clientStubWatcher struct {
+// clientStubGlobWatcher implements GlobWatcher.
+type clientStubGlobWatcher struct {
 	client _gen_ipc.Client
 	name   string
 }
 
-func (__gen_c *clientStubWatcher) Watch(ctx _gen_context.T, Req Request, opts ..._gen_ipc.CallOpt) (reply WatcherWatchStream, err error) {
+func (__gen_c *clientStubGlobWatcher) WatchGlob(ctx _gen_context.T, Req GlobRequest, opts ..._gen_ipc.CallOpt) (reply GlobWatcherWatchGlobStream, err error) {
 	var call _gen_ipc.Call
-	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Watch", []interface{}{Req}, opts...); err != nil {
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "WatchGlob", []interface{}{Req}, opts...); err != nil {
 		return
 	}
-	reply = &implWatcherWatchStream{clientCall: call}
+	reply = &implGlobWatcherWatchGlobStream{clientCall: call}
 	return
 }
 
-func (__gen_c *clientStubWatcher) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
+func (__gen_c *clientStubGlobWatcher) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
 		return
@@ -342,7 +357,7 @@ func (__gen_c *clientStubWatcher) UnresolveStep(ctx _gen_context.T, opts ..._gen
 	return
 }
 
-func (__gen_c *clientStubWatcher) Signature(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+func (__gen_c *clientStubGlobWatcher) Signature(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
 		return
@@ -353,7 +368,7 @@ func (__gen_c *clientStubWatcher) Signature(ctx _gen_context.T, opts ..._gen_ipc
 	return
 }
 
-func (__gen_c *clientStubWatcher) GetMethodTags(ctx _gen_context.T, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
+func (__gen_c *clientStubGlobWatcher) GetMethodTags(ctx _gen_context.T, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
@@ -364,28 +379,270 @@ func (__gen_c *clientStubWatcher) GetMethodTags(ctx _gen_context.T, method strin
 	return
 }
 
-// ServerStubWatcher wraps a server that implements
-// WatcherService and provides an object that satisfies
+// ServerStubGlobWatcher wraps a server that implements
+// GlobWatcherService and provides an object that satisfies
 // the requirements of veyron2/ipc.ReflectInvoker.
-type ServerStubWatcher struct {
-	service WatcherService
+type ServerStubGlobWatcher struct {
+	service GlobWatcherService
 }
 
-func (__gen_s *ServerStubWatcher) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
+func (__gen_s *ServerStubGlobWatcher) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
 	// TODO(bprosnitz) GetMethodTags() will be replaces with Signature().
 	// Note: This exhibits some weird behavior like returning a nil error if the method isn't found.
 	// This will change when it is replaced with Signature().
 	switch method {
-	case "Watch":
+	case "WatchGlob":
 		return []interface{}{}, nil
 	default:
 		return nil, nil
 	}
 }
 
-func (__gen_s *ServerStubWatcher) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
+func (__gen_s *ServerStubGlobWatcher) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
 	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
-	result.Methods["Watch"] = _gen_ipc.MethodSignature{
+	result.Methods["WatchGlob"] = _gen_ipc.MethodSignature{
+		InArgs: []_gen_ipc.MethodArgument{
+			{Name: "Req", Type: 67},
+		},
+		OutArgs: []_gen_ipc.MethodArgument{
+			{Name: "", Type: 68},
+		},
+
+		OutStream: 72,
+	}
+
+	result.TypeDefs = []_gen_vdl.Any{
+		_gen_wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, _gen_wiretype.SliceType{Elem: 0x41, Name: "veyron2/services/watch.ResumeMarker", Tags: []string(nil)}, _gen_wiretype.StructType{
+			[]_gen_wiretype.FieldType{
+				_gen_wiretype.FieldType{Type: 0x3, Name: "Pattern"},
+				_gen_wiretype.FieldType{Type: 0x42, Name: "ResumeMarker"},
+			},
+			"veyron2/services/watch.GlobRequest", []string(nil)},
+		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "anydata", Tags: []string(nil)}, _gen_wiretype.StructType{
+			[]_gen_wiretype.FieldType{
+				_gen_wiretype.FieldType{Type: 0x3, Name: "Name"},
+				_gen_wiretype.FieldType{Type: 0x24, Name: "State"},
+				_gen_wiretype.FieldType{Type: 0x45, Name: "Value"},
+				_gen_wiretype.FieldType{Type: 0x42, Name: "ResumeMarker"},
+				_gen_wiretype.FieldType{Type: 0x2, Name: "Continued"},
+			},
+			"veyron2/services/watch.Change", []string(nil)},
+		_gen_wiretype.SliceType{Elem: 0x46, Name: "", Tags: []string(nil)}, _gen_wiretype.StructType{
+			[]_gen_wiretype.FieldType{
+				_gen_wiretype.FieldType{Type: 0x47, Name: "Changes"},
+			},
+			"veyron2/services/watch.ChangeBatch", []string(nil)},
+	}
+
+	return result, nil
+}
+
+func (__gen_s *ServerStubGlobWatcher) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
+	if unresolver, ok := __gen_s.service.(_gen_ipc.Unresolver); ok {
+		return unresolver.UnresolveStep(call)
+	}
+	if call.Server() == nil {
+		return
+	}
+	var published []string
+	if published, err = call.Server().Published(); err != nil || published == nil {
+		return
+	}
+	reply = make([]string, len(published))
+	for i, p := range published {
+		reply[i] = _gen_naming.Join(p, call.Name())
+	}
+	return
+}
+
+func (__gen_s *ServerStubGlobWatcher) WatchGlob(call _gen_ipc.ServerCall, Req GlobRequest) (err error) {
+	stream := &implGlobWatcherServiceWatchGlobStream{serverCall: call}
+	err = __gen_s.service.WatchGlob(call, Req, stream)
+	return
+}
+
+// QueryWatcher allows a client to receive updates for changes to objects
+// that match a query.  See the package comments for details.
+// QueryWatcher is the interface the client binds and uses.
+// QueryWatcher_ExcludingUniversal is the interface without internal framework-added methods
+// to enable embedding without method collisions.  Not to be used directly by clients.
+type QueryWatcher_ExcludingUniversal interface {
+	// WatchGlob returns a stream of changes that satisy a query.
+	WatchQuery(ctx _gen_context.T, Req QueryRequest, opts ..._gen_ipc.CallOpt) (reply QueryWatcherWatchQueryStream, err error)
+}
+type QueryWatcher interface {
+	_gen_ipc.UniversalServiceMethods
+	QueryWatcher_ExcludingUniversal
+}
+
+// QueryWatcherService is the interface the server implements.
+type QueryWatcherService interface {
+
+	// WatchGlob returns a stream of changes that satisy a query.
+	WatchQuery(context _gen_ipc.ServerContext, Req QueryRequest, stream QueryWatcherServiceWatchQueryStream) (err error)
+}
+
+// QueryWatcherWatchQueryStream is the interface for streaming responses of the method
+// WatchQuery in the service interface QueryWatcher.
+type QueryWatcherWatchQueryStream interface {
+
+	// Recv returns the next item in the input stream, blocking until
+	// an item is available.  Returns io.EOF to indicate graceful end of input.
+	Recv() (item ChangeBatch, err error)
+
+	// Finish closes the stream and returns the positional return values for
+	// call.
+	Finish() (err error)
+
+	// Cancel cancels the RPC, notifying the server to stop processing.
+	Cancel()
+}
+
+// Implementation of the QueryWatcherWatchQueryStream interface that is not exported.
+type implQueryWatcherWatchQueryStream struct {
+	clientCall _gen_ipc.Call
+}
+
+func (c *implQueryWatcherWatchQueryStream) Recv() (item ChangeBatch, err error) {
+	err = c.clientCall.Recv(&item)
+	return
+}
+
+func (c *implQueryWatcherWatchQueryStream) Finish() (err error) {
+	if ierr := c.clientCall.Finish(&err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (c *implQueryWatcherWatchQueryStream) Cancel() {
+	c.clientCall.Cancel()
+}
+
+// QueryWatcherServiceWatchQueryStream is the interface for streaming responses of the method
+// WatchQuery in the service interface QueryWatcher.
+type QueryWatcherServiceWatchQueryStream interface {
+	// Send places the item onto the output stream, blocking if there is no buffer
+	// space available.
+	Send(item ChangeBatch) error
+}
+
+// Implementation of the QueryWatcherServiceWatchQueryStream interface that is not exported.
+type implQueryWatcherServiceWatchQueryStream struct {
+	serverCall _gen_ipc.ServerCall
+}
+
+func (s *implQueryWatcherServiceWatchQueryStream) Send(item ChangeBatch) error {
+	return s.serverCall.Send(item)
+}
+
+// BindQueryWatcher returns the client stub implementing the QueryWatcher
+// interface.
+//
+// If no _gen_ipc.Client is specified, the default _gen_ipc.Client in the
+// global Runtime is used.
+func BindQueryWatcher(name string, opts ..._gen_ipc.BindOpt) (QueryWatcher, error) {
+	var client _gen_ipc.Client
+	switch len(opts) {
+	case 0:
+		client = _gen_rt.R().Client()
+	case 1:
+		switch o := opts[0].(type) {
+		case _gen_veyron2.Runtime:
+			client = o.Client()
+		case _gen_ipc.Client:
+			client = o
+		default:
+			return nil, _gen_vdl.ErrUnrecognizedOption
+		}
+	default:
+		return nil, _gen_vdl.ErrTooManyOptionsToBind
+	}
+	stub := &clientStubQueryWatcher{client: client, name: name}
+
+	return stub, nil
+}
+
+// NewServerQueryWatcher creates a new server stub.
+//
+// It takes a regular server implementing the QueryWatcherService
+// interface, and returns a new server stub.
+func NewServerQueryWatcher(server QueryWatcherService) interface{} {
+	return &ServerStubQueryWatcher{
+		service: server,
+	}
+}
+
+// clientStubQueryWatcher implements QueryWatcher.
+type clientStubQueryWatcher struct {
+	client _gen_ipc.Client
+	name   string
+}
+
+func (__gen_c *clientStubQueryWatcher) WatchQuery(ctx _gen_context.T, Req QueryRequest, opts ..._gen_ipc.CallOpt) (reply QueryWatcherWatchQueryStream, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "WatchQuery", []interface{}{Req}, opts...); err != nil {
+		return
+	}
+	reply = &implQueryWatcherWatchQueryStream{clientCall: call}
+	return
+}
+
+func (__gen_c *clientStubQueryWatcher) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubQueryWatcher) Signature(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubQueryWatcher) GetMethodTags(ctx _gen_context.T, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+// ServerStubQueryWatcher wraps a server that implements
+// QueryWatcherService and provides an object that satisfies
+// the requirements of veyron2/ipc.ReflectInvoker.
+type ServerStubQueryWatcher struct {
+	service QueryWatcherService
+}
+
+func (__gen_s *ServerStubQueryWatcher) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
+	// TODO(bprosnitz) GetMethodTags() will be replaces with Signature().
+	// Note: This exhibits some weird behavior like returning a nil error if the method isn't found.
+	// This will change when it is replaced with Signature().
+	switch method {
+	case "WatchQuery":
+		return []interface{}{}, nil
+	default:
+		return nil, nil
+	}
+}
+
+func (__gen_s *ServerStubQueryWatcher) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
+	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
+	result.Methods["WatchQuery"] = _gen_ipc.MethodSignature{
 		InArgs: []_gen_ipc.MethodArgument{
 			{Name: "Req", Type: 68},
 		},
@@ -402,12 +659,12 @@ func (__gen_s *ServerStubWatcher) Signature(call _gen_ipc.ServerCall) (_gen_ipc.
 				_gen_wiretype.FieldType{Type: 0x3, Name: "Stmt"},
 			},
 			"veyron2/query.Query", []string(nil)},
-		_gen_wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, _gen_wiretype.SliceType{Elem: 0x42, Name: "", Tags: []string(nil)}, _gen_wiretype.StructType{
+		_gen_wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, _gen_wiretype.SliceType{Elem: 0x42, Name: "veyron2/services/watch.ResumeMarker", Tags: []string(nil)}, _gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
 				_gen_wiretype.FieldType{Type: 0x41, Name: "Query"},
 				_gen_wiretype.FieldType{Type: 0x43, Name: "ResumeMarker"},
 			},
-			"veyron2/services/watch.Request", []string(nil)},
+			"veyron2/services/watch.QueryRequest", []string(nil)},
 		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "anydata", Tags: []string(nil)}, _gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
 				_gen_wiretype.FieldType{Type: 0x3, Name: "Name"},
@@ -427,7 +684,7 @@ func (__gen_s *ServerStubWatcher) Signature(call _gen_ipc.ServerCall) (_gen_ipc.
 	return result, nil
 }
 
-func (__gen_s *ServerStubWatcher) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
+func (__gen_s *ServerStubQueryWatcher) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
 	if unresolver, ok := __gen_s.service.(_gen_ipc.Unresolver); ok {
 		return unresolver.UnresolveStep(call)
 	}
@@ -445,8 +702,8 @@ func (__gen_s *ServerStubWatcher) UnresolveStep(call _gen_ipc.ServerCall) (reply
 	return
 }
 
-func (__gen_s *ServerStubWatcher) Watch(call _gen_ipc.ServerCall, Req Request) (err error) {
-	stream := &implWatcherServiceWatchStream{serverCall: call}
-	err = __gen_s.service.Watch(call, Req, stream)
+func (__gen_s *ServerStubQueryWatcher) WatchQuery(call _gen_ipc.ServerCall, Req QueryRequest) (err error) {
+	stream := &implQueryWatcherServiceWatchQueryStream{serverCall: call}
+	err = __gen_s.service.WatchQuery(call, Req, stream)
 	return
 }

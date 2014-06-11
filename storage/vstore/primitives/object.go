@@ -169,8 +169,12 @@ func (o *object) GlobT(ctx context.T, t storage.Transaction, pattern string) (st
 	return o.oServ.GlobT(ctx, id, pattern)
 }
 
-func (o *object) Watch(ctx context.T, req watch.Request) (watch.WatcherWatchStream, error) {
-	return o.oServ.Watch(ctx, req, veyron2.CallTimeout(ipc.NoTimeout))
+func (o *object) WatchGlob(ctx context.T, req watch.GlobRequest) (watch.GlobWatcherWatchGlobStream, error) {
+	return o.oServ.WatchGlob(ctx, req, veyron2.CallTimeout(ipc.NoTimeout))
+}
+
+func (o *object) WatchQuery(ctx context.T, req watch.QueryRequest) (watch.QueryWatcherWatchQueryStream, error) {
+	return o.oServ.WatchQuery(ctx, req, veyron2.CallTimeout(ipc.NoTimeout))
 }
 
 // The errorObject responds with an error to all operations.
@@ -210,6 +214,10 @@ func (o *errorObject) GlobT(ctx context.T, t storage.Transaction, pattern string
 	return nil, o.err
 }
 
-func (o *errorObject) Watch(ctx context.T, req watch.Request) (watch.WatcherWatchStream, error) {
+func (o *errorObject) WatchGlob(ctx context.T, req watch.GlobRequest) (watch.GlobWatcherWatchGlobStream, error) {
+	return nil, o.err
+}
+
+func (o *errorObject) WatchQuery(ctx context.T, req watch.QueryRequest) (watch.QueryWatcherWatchQueryStream, error) {
 	return nil, o.err
 }
