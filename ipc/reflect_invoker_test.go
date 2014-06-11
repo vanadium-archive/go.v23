@@ -3,7 +3,6 @@ package ipc
 import (
 	"errors"
 	"fmt"
-	"net"
 	"reflect"
 	"regexp"
 	"testing"
@@ -11,6 +10,7 @@ import (
 
 	vtest "veyron/lib/testutil"
 
+	"veyron2/naming"
 	"veyron2/security"
 	"veyron2/verror"
 )
@@ -29,8 +29,8 @@ func (constServerCall) CaveatDischarges() security.CaveatDischargeMap { return n
 func (constServerCall) LocalID() security.PublicID                    { return security.FakePublicID("test") }
 func (constServerCall) RemoteID() security.PublicID                   { return security.FakePublicID("test") }
 func (constServerCall) Blessing() security.PublicID                   { return nil }
-func (constServerCall) LocalAddr() net.Addr                           { return nil }
-func (constServerCall) RemoteAddr() net.Addr                          { return nil }
+func (constServerCall) LocalEndpoint() naming.Endpoint                { return nil }
+func (constServerCall) RemoteEndpoint() naming.Endpoint               { return nil }
 func (constServerCall) Deadline() time.Time                           { return time.Time{} }
 func (constServerCall) IsClosed() bool                                { return false }
 func (constServerCall) Closed() <-chan struct{}                       { return nil }

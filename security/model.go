@@ -6,6 +6,7 @@ import (
 	"crypto/ecdsa"
 	"math/big"
 	"time"
+	"veyron2/naming"
 )
 
 // PublicID is the interface for the non-secret component of a principal's
@@ -158,6 +159,10 @@ type Context interface {
 	LocalID() PublicID
 	// RemoteID returns the PublicID of the principal at the remote end of the request.
 	RemoteID() PublicID
+	// LocalEndpoint() returns the Endpoint of the principal at the local end of the request
+	LocalEndpoint() naming.Endpoint
+	// RemoteAddr() returns the Endpoint of the principal at the remote end of the request
+	RemoteEndpoint() naming.Endpoint
 }
 
 // Authorizer is the interface for performing authorization checks.

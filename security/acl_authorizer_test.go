@@ -6,6 +6,7 @@ import (
 	"runtime"
 	"testing"
 	"time"
+	"veyron2/naming"
 )
 
 type authMap map[PublicID]LabelSet
@@ -25,6 +26,8 @@ func (c *context) Label() Label                         { return c.label }
 func (c *context) CaveatDischarges() CaveatDischargeMap { return c.discharges }
 func (c *context) LocalID() PublicID                    { return c.localID }
 func (c *context) RemoteID() PublicID                   { return c.remoteID }
+func (c *context) LocalEndpoint() naming.Endpoint       { return nil }
+func (c *context) RemoteEndpoint() naming.Endpoint      { return nil }
 
 func saveACLToTempFile(acl ACL) string {
 	f, err := ioutil.TempFile("", "saved_acl")

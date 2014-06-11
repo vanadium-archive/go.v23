@@ -17,6 +17,12 @@ type Flow interface {
 	// Flow objects implement the net.Conn interface.
 	net.Conn
 
+	// Returns the local veyron Endpoint
+	LocalEndpoint() naming.Endpoint
+
+	// Returns the remote veyron Endpoint
+	RemoteEndpoint() naming.Endpoint
+
 	// Cancel, like Close, closes the Flow but unlike Close discards any queued writes.
 	Cancel()
 

@@ -71,6 +71,8 @@ func (*flow) Closed() <-chan struct{}            { return nil }
 func (*flow) Cancel()                            {}
 func (*flow) LocalAddr() net.Addr                { return &endpoint{} }
 func (*flow) RemoteAddr() net.Addr               { return &endpoint{} }
+func (*flow) LocalEndpoint() naming.Endpoint     { return &endpoint{} }
+func (*flow) RemoteEndpoint() naming.Endpoint    { return &endpoint{} }
 func (*flow) SetDeadline(t time.Time) error      { return nil }
 func (*flow) SetReadDeadline(t time.Time) error  { return nil }
 func (*flow) SetWriteDeadline(t time.Time) error { return nil }
