@@ -31,6 +31,7 @@
 //       return err
 //     }
 //     // Add newLabel to the LabelSet.
+//     // TODO(kash): Update when we switch labels to strings instead of ints.
 //     acl.Principals[newPattern] = acl.Principals[newPattern] | newLabel
 //     // Use the same etag with the modified acl to ensure that no other client
 //     // has modified the acl since GetACL returned.
@@ -128,7 +129,6 @@ import (
 //         "user1/*": ["Write"],
 //       }
 //       Groups {
-//         // XXX: Should we have a way of saying all labels (e.g. "*")
 //         Group{"google.com/eng-interns"}: ["Read", "Write", "Admin"],
 //       }
 //     }
@@ -136,6 +136,11 @@ import (
 // NotIn subtracts privileges.  In this example, it says that "user1/*" has
 // only  "Read" access.  All of engineering has read access except for
 // engineering interns.
+//
+// Principals can have multiple names.  As long as the principal has a name
+// that matches In and not NotIn, it is authorized. The reasoning is that the
+// principal can always hide a name if it wants to, so requiring all names to
+// satisfy the policy does not make sense.
 type ACL struct {
 	// In represents the set of principals and groups that can access the object
 	// only if they are not also present in NotIn.
@@ -145,9 +150,7 @@ type ACL struct {
 	NotIn Entries
 }
 
-// Principals are represented by a pattern to allow
-// for a concise representation for blessings.  A Group is defined by the
-// Group API.
+// Entries describes a set of principals and groups (of principals).
 type Entries struct {
 	// Principals specifies the type of access being granted or revoked to any
 	// Identity that matches the PrincipalPattern.  If multiple patterns match
