@@ -19,7 +19,7 @@ var _ storage.Store = (*VStore)(nil)
 
 // New returns a storage.Store for a Veyron store mounted at a Veyron name.
 func New(mount string, opts ...ipc.BindOpt) (storage.Store, error) {
-	serv, err := store.BindStore(naming.JoinAddressName(mount, store.StoreSuffix), opts...)
+	serv, err := store.BindStore(naming.Join(mount, store.StoreSuffix), opts...)
 	if err != nil {
 		return nil, err
 	}
