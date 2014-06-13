@@ -71,7 +71,7 @@ func startServer(t *testing.T) (storage.Store, func()) {
 		log.Fatal("s.Listen() failed: ", err)
 	}
 
-	name := naming.JoinAddressName(ep.String(), mount)
+	name := naming.JoinAddressName(ep.String(), "//"+mount)
 	st, err := vstore.New(name)
 	if err != nil {
 		log.Fatal("vstorage.New() failed: ", err)

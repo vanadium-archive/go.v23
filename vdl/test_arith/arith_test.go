@@ -122,7 +122,7 @@ func TestCalculator(t *testing.T) {
 	}
 
 	ctx := rt.R().NewContext()
-	name := naming.JoinAddressName(ep.String(), "math/calculator")
+	name := naming.JoinAddressName(ep.String(), "//math/calculator")
 	// Synchronous calls
 	calculator, err := BindCalculator(name, client)
 	if err != nil {
@@ -352,7 +352,7 @@ func TestArith(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	name := naming.JoinAddressName(ep.String(), "")
+	name := naming.JoinAddressName(ep.String(), "//")
 	for i, disp := range dispatchers {
 		dispSuffix := fmt.Sprintf("arith%d", i)
 		if err := server.Register(dispSuffix, disp); err != nil {
