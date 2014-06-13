@@ -69,8 +69,10 @@ type MountEntry struct {
 	Error error
 }
 
-// MountTable provides translation from veyron names to server object addresses.
-type MountTable interface {
+// Namespace provides translation from veyron names to server object addresses.
+// It represents the interface to a client side library for the MountTable
+// service
+type Namespace interface {
 	// Mount the server OA under the veyron name, expiring after the ttl.
 	// ttl of zero implies an implementation-specific high value
 	// (essentially, forever).
@@ -101,36 +103,10 @@ type MountTable interface {
 	// returns all names below the matching ones.
 	Glob(ctx context.T, pattern string) (chan MountEntry, error)
 
-	// SetRoots sets the roots that the local MountTable is
+	// SetRoots sets the roots that the local Namespace is
 	// relative to. All relative names passed to the methods above
 	// will be interpreted as relative to these roots. The roots
 	// will be tried in the order that they are specified in the parameter
 	// list for SetRoots.
 	SetRoots(roots []string) error
-}
-
-type Runtime interface {
-	// NewEndpoint returns an Endpoint by parsing the supplied endpoint
-	// string as per the format described above. It can be used to test
-	// a string to see if it's in valid endpoint format.
-	//
-	// NewEndpoint will accept srings both in the @ format described
-	// above and in internet host:port format.
-	//
-	// All implementations of NewEndpoint should provide appropriate
-	// defaults for any endpoint subfields not explicitly provided as
-	// follows:
-	// - a missing protocol will default to a protocol appropriate for the
-	//   implementation hosting NewEndpoint
-	// - a missing host:port will default to :0 - i.e. any port on all
-	//   interfaces
-	// - a missing routing id should default to the null routing id
-	// - a missing codec version should default to AnyCodec
-	// - a missing RPC version should default to the highest version
-	//   supported by the runtime implementation hosting NewEndpoint
-	NewEndpoint(ep string) (Endpoint, error)
-
-	// MountTable returns the pre-configured MountTable that is created
-	// when the Runtime is initialized.
-	MountTable() MountTable
 }

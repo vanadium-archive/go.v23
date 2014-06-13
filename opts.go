@@ -116,23 +116,23 @@ type StreamManagerOpt struct{ stream.Manager }
 func (StreamManagerOpt) IPCClientOpt() {}
 func (StreamManagerOpt) IPCServerOpt() {}
 
-// MountTable specifies an explicit naming.MountTable.
-func MountTable(mt naming.MountTable) MountTableOpt {
-	return MountTableOpt{mt}
+// Namespace specifies an explicit naming.Namespace.
+func Namespace(mt naming.Namespace) NamespaceOpt {
+	return NamespaceOpt{mt}
 }
 
-// MountTableOpt wraps the naming.MountTable interface so that we can add
+// NamespaceOpt wraps the naming.Namespace interface so that we can add
 // functions representing the option annotations.
-type MountTableOpt struct{ naming.MountTable }
+type NamespaceOpt struct{ naming.Namespace }
 
-func (MountTableOpt) IPCClientOpt() {}
-func (MountTableOpt) IPCServerOpt() {}
+func (NamespaceOpt) IPCClientOpt() {}
+func (NamespaceOpt) IPCServerOpt() {}
 
-// MountTableRoots wraps an array of strings so that we specify the root
-// of the mounttable when initializing the runtime.
-type MountTableRoots []string
+// NamespaceRoots wraps an array of strings so that we specify the root
+// of the Namespace when initializing the runtime.
+type NamespaceRoots []string
 
-func (MountTableRoots) ROpt() {}
+func (NamespaceRoots) ROpt() {}
 
 // RuntimeOpt wraps the Runtime interface so that we can add
 // functions representing the option annotations.

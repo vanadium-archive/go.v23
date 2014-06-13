@@ -130,12 +130,3 @@ type Manager interface {
 type ManagerOpt interface {
 	IPCStreamManagerOpt()
 }
-
-// Runtime defines the factory and accessor methods that any runtime must provide.
-type Runtime interface {
-	NewStreamManager(opts ...ManagerOpt) (Manager, error)
-
-	// StreamManager returns the pre-configured StreamManager that is created
-	// when the Runtime is initialized.
-	StreamManager() Manager
-}
