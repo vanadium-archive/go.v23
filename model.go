@@ -104,9 +104,9 @@ type Runtime interface {
 	//   supported by the runtime implementation hosting NewEndpoint
 	NewEndpoint(ep string) (naming.Endpoint, error)
 
-	// MountTable returns the pre-configured MountTable that is created
+	// Namespace returns the pre-configured Namespace that is created
 	// when the Runtime is initialized.
-	MountTable() naming.MountTable
+	Namespace() naming.Namespace
 
 	// Logger returns the current logger in use by the Runtime.
 	Logger() vlog.Logger
