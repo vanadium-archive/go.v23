@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log"
 	"math/rand"
+	"time"
 
 	"veyron2/context"
 	"veyron2/services/store"
@@ -13,6 +14,7 @@ import (
 
 var (
 	ErrBadTransaction = errors.New("bad transaction")
+	rng               = rand.New(rand.NewSource(time.Now().UTC().UnixNano()))
 )
 
 type transaction struct {
@@ -29,7 +31,7 @@ var _ storage.Transaction = (*transaction)(nil)
 // Transaction.
 func NewTransaction(ctx context.T, opts ...storage.TransactionOpt) storage.Transaction {
 	tr := &transaction{
-		id:   store.TransactionID(rand.Int63()),
+		id:   store.TransactionID(rng.Int63()),
 		opts: opts,
 	}
 	return tr
