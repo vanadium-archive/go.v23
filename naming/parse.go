@@ -154,9 +154,6 @@ func MakeTerminalAtIndex(name string, index int) string {
 // A rooted name is one that starts with a single / followed by
 // a non /. / on its own is considered rooted.
 func Rooted(name string) bool {
-	if name == "/" {
-		return true
-	}
 	if !strings.HasPrefix(name, "/") {
 		return false
 	}

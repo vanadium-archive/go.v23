@@ -13,6 +13,8 @@ func TestSplitName(t *testing.T) {
 		{"//", "", "//"},
 		{"//abc@@/foo", "", "//abc@@/foo"},
 		{"a", "", "a"},
+		{"/a", "a", ""},
+		{"/a/", "a", ""},
 		{"a/b", "", "a/b"},
 		{"/a/b", "a", "b"},
 		{"abc@@/foo", "", "abc@@/foo"},
@@ -131,6 +133,7 @@ func TestTerminal(t *testing.T) {
 	for _, c := range []string{
 		"",
 		"/",
+		"/a",
 		"//",
 		"//a/b",
 		ep + "",
@@ -143,6 +146,7 @@ func TestTerminal(t *testing.T) {
 		}
 	}
 	for _, c := range []string{
+		"a",
 		"/a/b",
 		"a/b",
 		"a//b",
@@ -170,14 +174,21 @@ func TestMakeTerminal(t *testing.T) {
 		{ep + "", ep + ""},
 		{ep + "/", ep + ""},
 		{ep + "//", ep + "//"},
+		{ep + "///", ep + "//"},
 		{ep + "/a", ep + "//a"},
+		{ep + "//a", ep + "//a"},
+		{ep + "///a", ep + "//a"},
+		{ep + "/a/", ep + "//a/"},
 		{ep + "/a/c", ep + "//a/c"},
 		{ep + "/a//c", ep + "//a//c"},
 		{ep + "/a/b//c", ep + "//a/b//c"},
 		// corner cases
+		{"/", ""},
 		{"//", "//"},
 		{"///", "//"},
+		{"////", "//"},
 		{"///" + ep + "/", "/" + ep + "/"},
+		{"////" + ep + "/", "/" + ep + "/"},
 	}
 	for _, c := range cases {
 		if got, want := MakeTerminal(c.name), c.result; want != got {
