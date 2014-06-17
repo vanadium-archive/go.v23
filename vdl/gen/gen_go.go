@@ -175,8 +175,6 @@ func init() {
 		"streamArgTypeGo":          streamArgTypeGo,
 		"clientStubImplGo":         clientStubImplGo,
 		"serverStubImplGo":         serverStubImplGo,
-		"hasStreamingInput":        hasStreamingInputGo,
-		"hasStreamingOutput":       hasStreamingOutputGo,
 		"prefixName":               prefixName,
 		"signatureMethods":         signatureMethods,
 		"signatureTypeDefs":        signatureTypeDefs,
@@ -195,15 +193,7 @@ func genpkg(file *compile.File, pkg string) string {
 
 // Returns true iff the method has a streaming reply return value or a streaming arg input.
 func isStreamingMethodGo(method *compile.Method) bool {
-	return hasStreamingInputGo(method) || hasStreamingOutputGo(method)
-}
-
-func hasStreamingInputGo(method *compile.Method) bool {
-	return method.InStream != nil
-}
-
-func hasStreamingOutputGo(method *compile.Method) bool {
-	return method.OutStream != nil
+	return method.InStream != nil || method.OutStream != nil
 }
 
 func qualifiedName(data goData, name string, file *compile.File) string {
@@ -736,7 +726,7 @@ type {{$iface.Name}}Service interface {
 // {{$clientStreamIfaceType}} is the interface for streaming responses of the method
 // {{$method.Name}} in the service interface {{$iface.Name}}.
 type {{$clientStreamIfaceType}} interface {
-	{{if hasStreamingInput $method}}
+	{{if $method.InStream}}
 	// Send places the item onto the output stream, blocking if there is no buffer
 	// space available.
 	Send(item {{typeGo $data $method.InStream}}) error
@@ -748,7 +738,7 @@ type {{$clientStreamIfaceType}} interface {
 	CloseSend() error
 	{{end}}
 
-	{{if hasStreamingOutput $method}}
+	{{if $method.OutStream}}
 	// Recv returns the next item in the input stream, blocking until
 	// an item is available.  Returns io.EOF to indicate graceful end of input.
 	Recv() (item {{typeGo $data $method.OutStream}}, err error)
@@ -766,7 +756,7 @@ type {{$clientStreamIfaceType}} interface {
 type {{$clientStreamType}} struct {
 	clientCall _gen_ipc.Call
 }
-{{if hasStreamingInput $method}}
+{{if $method.InStream}}
 func (c *{{$clientStreamType}}) Send(item {{typeGo $data $method.InStream}}) error {
 	return c.clientCall.Send(item)
 }
@@ -776,7 +766,7 @@ func (c *{{$clientStreamType}}) CloseSend() error {
 }
 {{end}}
 
-{{if hasStreamingOutput $method}}
+{{if $method.OutStream}}
 func (c *{{$clientStreamType}}) Recv() (item {{typeGo $data $method.OutStream}}, err error) {
 	err = c.clientCall.Recv(&item)
 	return
@@ -796,13 +786,13 @@ func (c *{{$clientStreamType}}) Cancel() {
 
 // {{$serverStreamIfaceType}} is the interface for streaming responses of the method
 // {{$method.Name}} in the service interface {{$iface.Name}}.
-type {{$serverStreamIfaceType}} interface { {{if hasStreamingOutput $method}}
+type {{$serverStreamIfaceType}} interface { {{if $method.OutStream}}
 	// Send places the item onto the output stream, blocking if there is no buffer
 	// space available.
 	Send(item {{typeGo $data $method.OutStream}}) error
 	{{end}}
 
-	{{if hasStreamingInput $method}}
+	{{if $method.InStream}}
 	// Recv fills itemptr with the next item in the input stream, blocking until
 	// an item is available.  Returns io.EOF to indicate graceful end of input.
 	Recv() (item {{typeGo $data $method.InStream}}, err error)
@@ -813,13 +803,13 @@ type {{$serverStreamIfaceType}} interface { {{if hasStreamingOutput $method}}
 type {{$serverStreamType}} struct {
 	serverCall _gen_ipc.ServerCall
 }
-{{if hasStreamingOutput $method}}
+{{if $method.OutStream}}
 func (s *{{$serverStreamType}}) Send(item {{typeGo $data $method.OutStream}}) error {
 	return s.serverCall.Send(item)
 }
 {{end}}
 
-{{if hasStreamingInput $method}}
+{{if $method.InStream}}
 func (s *{{$serverStreamType}}) Recv() (item {{typeGo $data $method.InStream}}, err error) {
 	err = s.serverCall.Recv(&item)
 	return

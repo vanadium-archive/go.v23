@@ -1030,15 +1030,6 @@ func javaClassToVarName(className string) string {
 	return strings.Replace(path.Dir(className), "/", "_", -1) + "_" + toCamelCase(path.Base(className))
 }
 
-// toCamelCase converts ThisString to thisString.
-func toCamelCase(s string) string {
-	if s == "" {
-		return ""
-	}
-	r, n := utf8.DecodeRuneInString(s)
-	return string(unicode.ToLower(r)) + s[n:]
-}
-
 // toConstCase converts ThisString to THIS_STRING.
 func toConstCase(s string) string {
 	// Extract all characters.

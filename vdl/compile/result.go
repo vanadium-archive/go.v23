@@ -291,6 +291,16 @@ func (x *Interface) String() string {
 	return fmt.Sprintf("%+v", c)
 }
 
+func (x *Interface) AllMethods() []*Method {
+	result := make([]*Method, len(x.Methods))
+	copy(result, x.Methods)
+	for _, embed := range x.Embeds {
+		result = append(result, embed.AllMethods()...)
+	}
+	return result
+
+}
+
 // We might consider allowing more characters, but we'll need to ensure they're
 // allowed in all our codegen languages.
 var (

@@ -118,6 +118,7 @@ func (id ifaceDefiner) define(b *ifaceBuilder) {
 }
 
 func (id ifaceDefiner) defineEmbeds(b *ifaceBuilder) {
+	// TODO(toddw): Check for duplicate methods.
 	def, file := b.def, b.def.File
 	seen := make(map[string]*parse.NamePos)
 	for _, pe := range b.pdef.Embeds {

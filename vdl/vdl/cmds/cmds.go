@@ -118,6 +118,7 @@ other languages like C++.
 const (
 	genLangGo genLang = iota
 	genLangJava
+	genLangJavascript
 	numGenLang
 )
 
@@ -129,7 +130,8 @@ func (l genLang) String() string {
 		return "go"
 	case genLangJava:
 		return "java"
-		// Add other languages...
+	case genLangJavascript:
+		return "js"
 	}
 	panic(fmt.Errorf("Unhandled language %d", l))
 }
@@ -140,7 +142,8 @@ func genLangFromString(str string) genLang {
 		return genLangGo
 	case "java":
 		return genLangJava
-		// Add other languages...
+	case "js":
+		return genLangJavascript
 	}
 	panic(fmt.Errorf("Unknown language %s", str))
 }
@@ -207,13 +210,14 @@ var (
 	flagExperimental bool
 
 	// Options for each command.
-	optCompileStatus    bool
-	optGenStatus        bool
-	optGenGoFmt         bool
-	optGenGoOutDir      = genOutDir{}
-	optGenJavaOutDir    = genOutDir{src: "go/src", dst: "java/src"}
-	optGenJavaPkgPrefix string
-	optGenLangs         = genLangs{genLangGo: true}
+	optCompileStatus       bool
+	optGenStatus           bool
+	optGenGoFmt            bool
+	optGenGoOutDir         = genOutDir{}
+	optGenJavaOutDir       = genOutDir{src: "go/src", dst: "java/src"}
+	optGenJavascriptOutDir = genOutDir{src: "go/src", dst: "javascript/src"}
+	optGenJavaPkgPrefix    string
+	optGenLangs            = genLangs{genLangGo: true}
 )
 
 // Root returns the root command for the VDL tool.
@@ -273,6 +277,8 @@ for managing Go source code.
 	 before the package path, and dst is the replacement for src.`)
 	cmdGen.Flags.Var(&optGenJavaOutDir, "java_out_dir",
 		"Same semantics as --go_out_dir but applies to java code generation.")
+	cmdGen.Flags.Var(&optGenJavascriptOutDir, "js_out_dir",
+		"Same semantics as --go_out_dir but applies to js code generation.")
 	return vdlcmd
 }
 
@@ -321,6 +327,16 @@ func runGen(targets []*build.Package, env *compile.Env) {
 					if writeFile(file.Data, dir, file.Name, env) {
 						changed = true
 					}
+				}
+			case genLangJavascript:
+				dir, err := xlateOutDir(target, optGenJavascriptOutDir, "")
+				if err != nil {
+					env.Errors.Errorf("--js_out_dir error: %v", err)
+					continue
+				}
+				data := gen.GenJavascriptFiles(pkg)
+				if writeFile(data, dir, pkg.Name+".js", env) {
+					changed = true
 				}
 			default:
 				env.Errors.Errorf("Generating code for language %v isn't supported", gl)
