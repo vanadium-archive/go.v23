@@ -20,7 +20,7 @@ import (
 
 // Description enumerates the profiles that a Node supports.
 type Description struct {
-	// Profiles is a set of names of supported profiles.  Each name can
+	// Profiles is a set of names of supported profiles.	Each name can
 	// either be a veyron name that resolves to a Profile, or can be the
 	// profile's label, e.g.:
 	//   "profiles/google/cluster/diskfull"
@@ -31,10 +31,10 @@ type Description struct {
 	Profiles map[string]struct{}
 }
 
-// Application can be used to manage applications. The idea is that
-// this interace will be invoked using a veyron name that identifies
-// the application and its installations and instances where
-// applicable.
+// Application can be used to manage applications on a device. The
+// idea is that this interace will be invoked using a veyron name that
+// identifies the application and its installations and instances
+// where applicable.
 //
 // In particular, the interface methods can be divided into three
 // groups based on their intended receiver:
@@ -51,7 +51,7 @@ type Description struct {
 // -- Refresh()
 // -- Restart()
 // -- Resume()
-// -- Shutdown()
+// -- Stop()
 // -- Suspend()
 //
 // For groups 2) and 3), the suffix that specifies the receiver can
@@ -80,7 +80,7 @@ type Description struct {
 //
 // Further, the following methods complement one another:
 // -- Install() and Uninstall()
-// -- Start() and Shutdown()
+// -- Start() and Stop()
 // -- Suspend() and Resume()
 //
 // Finally, an application installation instance can be in one of
@@ -95,8 +95,8 @@ type Description struct {
 // apply(Restart(), "suspended") = "running"
 // apply(Resume(), "suspended") = "running"
 // apply(Resume(), "running") = "running"
-// apply(Shutdown(), "running") = "does not exist"
-// apply(Shutdown(), "suspended") = "does not exist"
+// apply(Stop(), "running") = "does not exist"
+// apply(Stop(), "suspended") = "does not exist"
 // apply(Suspend(), "running") = "suspended"
 // apply(Suspend(), "suspended") = "suspended"
 //
@@ -112,17 +112,6 @@ type Application_ExcludingUniversal interface {
 	// specify the application version to be installed. If no version is
 	// specified, the latest version is installed.
 	Install(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply string, err error)
-	// Start starts an instance of application installation(s) and
-	// returns the veyron name(s) that identifies/identify the new
-	// instance(s).
-	Start(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error)
-	// Uninstall uninstalls application installation(s).
-	Uninstall(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error)
-	// Update updates application installation(s) version. Optionally,
-	// veyron name suffix can be used to specify the application version
-	// to which the installation(s) should be updated. If no version is
-	// specified, the installation(s) are updated to the latest version.
-	Update(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error)
 	// Refresh refreshes the state of application installation(s)
 	// instance(s).
 	Refresh(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error)
@@ -132,17 +121,31 @@ type Application_ExcludingUniversal interface {
 	// Resume resumes execution of application installation(s)
 	// instance(s).
 	Resume(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error)
-	// Shutdown attempts a clean shutdown of application installation(s)
+	// Revert reverts application installation(s) to the most recent
+	// previous installation.
+	Revert(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error)
+	// Start starts an instance of application installation(s) and
+	// returns the veyron name(s) that identifies/identify the new
+	// instance(s).
+	Start(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error)
+	// Stop attempts a clean shutdown of application installation(s)
 	// instance(s). If the deadline is non-zero and the instance(s) in
-	// questions is/are still running after the given deadline, shutdown
-	// of the instance(s) is enforced.
+	// questions are still running after the given deadline, shutdown of
+	// the instance(s) is enforced.
 	//
 	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
 	// are implemented.
-	Shutdown(ctx _gen_context.T, Deadline uint64, opts ..._gen_ipc.CallOpt) (err error)
+	Stop(ctx _gen_context.T, Deadline uint64, opts ..._gen_ipc.CallOpt) (err error)
 	// Suspend suspends execution of application installation(s)
 	// instance(s).
 	Suspend(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error)
+	// Uninstall uninstalls application installation(s).
+	Uninstall(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error)
+	// Update updates application installation(s) version. Optionally,
+	// veyron name suffix can be used to specify the application version
+	// to which the installation(s) should be updated. If no version is
+	// specified, the installation(s) are updated to the latest version.
+	Update(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error)
 }
 type Application interface {
 	_gen_ipc.UniversalServiceMethods
@@ -158,17 +161,6 @@ type ApplicationService interface {
 	// specify the application version to be installed. If no version is
 	// specified, the latest version is installed.
 	Install(context _gen_ipc.ServerContext) (reply string, err error)
-	// Start starts an instance of application installation(s) and
-	// returns the veyron name(s) that identifies/identify the new
-	// instance(s).
-	Start(context _gen_ipc.ServerContext) (reply []string, err error)
-	// Uninstall uninstalls application installation(s).
-	Uninstall(context _gen_ipc.ServerContext) (err error)
-	// Update updates application installation(s) version. Optionally,
-	// veyron name suffix can be used to specify the application version
-	// to which the installation(s) should be updated. If no version is
-	// specified, the installation(s) are updated to the latest version.
-	Update(context _gen_ipc.ServerContext) (err error)
 	// Refresh refreshes the state of application installation(s)
 	// instance(s).
 	Refresh(context _gen_ipc.ServerContext) (err error)
@@ -178,17 +170,31 @@ type ApplicationService interface {
 	// Resume resumes execution of application installation(s)
 	// instance(s).
 	Resume(context _gen_ipc.ServerContext) (err error)
-	// Shutdown attempts a clean shutdown of application installation(s)
+	// Revert reverts application installation(s) to the most recent
+	// previous installation.
+	Revert(context _gen_ipc.ServerContext) (err error)
+	// Start starts an instance of application installation(s) and
+	// returns the veyron name(s) that identifies/identify the new
+	// instance(s).
+	Start(context _gen_ipc.ServerContext) (reply []string, err error)
+	// Stop attempts a clean shutdown of application installation(s)
 	// instance(s). If the deadline is non-zero and the instance(s) in
-	// questions is/are still running after the given deadline, shutdown
-	// of the instance(s) is enforced.
+	// questions are still running after the given deadline, shutdown of
+	// the instance(s) is enforced.
 	//
 	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
 	// are implemented.
-	Shutdown(context _gen_ipc.ServerContext, Deadline uint64) (err error)
+	Stop(context _gen_ipc.ServerContext, Deadline uint64) (err error)
 	// Suspend suspends execution of application installation(s)
 	// instance(s).
 	Suspend(context _gen_ipc.ServerContext) (err error)
+	// Uninstall uninstalls application installation(s).
+	Uninstall(context _gen_ipc.ServerContext) (err error)
+	// Update updates application installation(s) version. Optionally,
+	// veyron name suffix can be used to specify the application version
+	// to which the installation(s) should be updated. If no version is
+	// specified, the installation(s) are updated to the latest version.
+	Update(context _gen_ipc.ServerContext) (err error)
 }
 
 // BindApplication returns the client stub implementing the Application
@@ -245,39 +251,6 @@ func (__gen_c *clientStubApplication) Install(ctx _gen_context.T, opts ..._gen_i
 	return
 }
 
-func (__gen_c *clientStubApplication) Start(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Start", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
-func (__gen_c *clientStubApplication) Uninstall(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Uninstall", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
-func (__gen_c *clientStubApplication) Update(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Update", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
 func (__gen_c *clientStubApplication) Refresh(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Refresh", nil, opts...); err != nil {
@@ -311,9 +284,31 @@ func (__gen_c *clientStubApplication) Resume(ctx _gen_context.T, opts ..._gen_ip
 	return
 }
 
-func (__gen_c *clientStubApplication) Shutdown(ctx _gen_context.T, Deadline uint64, opts ..._gen_ipc.CallOpt) (err error) {
+func (__gen_c *clientStubApplication) Revert(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error) {
 	var call _gen_ipc.Call
-	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Shutdown", []interface{}{Deadline}, opts...); err != nil {
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Revert", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubApplication) Start(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Start", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubApplication) Stop(ctx _gen_context.T, Deadline uint64, opts ..._gen_ipc.CallOpt) (err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Stop", []interface{}{Deadline}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&err); ierr != nil {
@@ -325,6 +320,28 @@ func (__gen_c *clientStubApplication) Shutdown(ctx _gen_context.T, Deadline uint
 func (__gen_c *clientStubApplication) Suspend(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Suspend", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubApplication) Uninstall(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Uninstall", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubApplication) Update(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Update", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&err); ierr != nil {
@@ -380,21 +397,23 @@ func (__gen_s *ServerStubApplication) GetMethodTags(call _gen_ipc.ServerCall, me
 	switch method {
 	case "Install":
 		return []interface{}{}, nil
-	case "Start":
-		return []interface{}{}, nil
-	case "Uninstall":
-		return []interface{}{}, nil
-	case "Update":
-		return []interface{}{}, nil
 	case "Refresh":
 		return []interface{}{}, nil
 	case "Restart":
 		return []interface{}{}, nil
 	case "Resume":
 		return []interface{}{}, nil
-	case "Shutdown":
+	case "Revert":
+		return []interface{}{}, nil
+	case "Start":
+		return []interface{}{}, nil
+	case "Stop":
 		return []interface{}{}, nil
 	case "Suspend":
+		return []interface{}{}, nil
+	case "Uninstall":
+		return []interface{}{}, nil
+	case "Update":
 		return []interface{}{}, nil
 	default:
 		return nil, nil
@@ -428,10 +447,8 @@ func (__gen_s *ServerStubApplication) Signature(call _gen_ipc.ServerCall) (_gen_
 			{Name: "", Type: 65},
 		},
 	}
-	result.Methods["Shutdown"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{
-			{Name: "Deadline", Type: 53},
-		},
+	result.Methods["Revert"] = _gen_ipc.MethodSignature{
+		InArgs: []_gen_ipc.MethodArgument{},
 		OutArgs: []_gen_ipc.MethodArgument{
 			{Name: "", Type: 65},
 		},
@@ -440,6 +457,14 @@ func (__gen_s *ServerStubApplication) Signature(call _gen_ipc.ServerCall) (_gen_
 		InArgs: []_gen_ipc.MethodArgument{},
 		OutArgs: []_gen_ipc.MethodArgument{
 			{Name: "", Type: 61},
+			{Name: "", Type: 65},
+		},
+	}
+	result.Methods["Stop"] = _gen_ipc.MethodSignature{
+		InArgs: []_gen_ipc.MethodArgument{
+			{Name: "Deadline", Type: 53},
+		},
+		OutArgs: []_gen_ipc.MethodArgument{
 			{Name: "", Type: 65},
 		},
 	}
@@ -491,21 +516,6 @@ func (__gen_s *ServerStubApplication) Install(call _gen_ipc.ServerCall) (reply s
 	return
 }
 
-func (__gen_s *ServerStubApplication) Start(call _gen_ipc.ServerCall) (reply []string, err error) {
-	reply, err = __gen_s.service.Start(call)
-	return
-}
-
-func (__gen_s *ServerStubApplication) Uninstall(call _gen_ipc.ServerCall) (err error) {
-	err = __gen_s.service.Uninstall(call)
-	return
-}
-
-func (__gen_s *ServerStubApplication) Update(call _gen_ipc.ServerCall) (err error) {
-	err = __gen_s.service.Update(call)
-	return
-}
-
 func (__gen_s *ServerStubApplication) Refresh(call _gen_ipc.ServerCall) (err error) {
 	err = __gen_s.service.Refresh(call)
 	return
@@ -521,13 +531,33 @@ func (__gen_s *ServerStubApplication) Resume(call _gen_ipc.ServerCall) (err erro
 	return
 }
 
-func (__gen_s *ServerStubApplication) Shutdown(call _gen_ipc.ServerCall, Deadline uint64) (err error) {
-	err = __gen_s.service.Shutdown(call, Deadline)
+func (__gen_s *ServerStubApplication) Revert(call _gen_ipc.ServerCall) (err error) {
+	err = __gen_s.service.Revert(call)
+	return
+}
+
+func (__gen_s *ServerStubApplication) Start(call _gen_ipc.ServerCall) (reply []string, err error) {
+	reply, err = __gen_s.service.Start(call)
+	return
+}
+
+func (__gen_s *ServerStubApplication) Stop(call _gen_ipc.ServerCall, Deadline uint64) (err error) {
+	err = __gen_s.service.Stop(call, Deadline)
 	return
 }
 
 func (__gen_s *ServerStubApplication) Suspend(call _gen_ipc.ServerCall) (err error) {
 	err = __gen_s.service.Suspend(call)
+	return
+}
+
+func (__gen_s *ServerStubApplication) Uninstall(call _gen_ipc.ServerCall) (err error) {
+	err = __gen_s.service.Uninstall(call)
+	return
+}
+
+func (__gen_s *ServerStubApplication) Update(call _gen_ipc.ServerCall) (err error) {
+	err = __gen_s.service.Update(call)
 	return
 }
 
@@ -537,10 +567,10 @@ func (__gen_s *ServerStubApplication) Suspend(call _gen_ipc.ServerCall) (err err
 // Node_ExcludingUniversal is the interface without internal framework-added methods
 // to enable embedding without method collisions.  Not to be used directly by clients.
 type Node_ExcludingUniversal interface {
-	// Application can be used to manage applications. The idea is that
-	// this interace will be invoked using a veyron name that identifies
-	// the application and its installations and instances where
-	// applicable.
+	// Application can be used to manage applications on a device. The
+	// idea is that this interace will be invoked using a veyron name that
+	// identifies the application and its installations and instances
+	// where applicable.
 	//
 	// In particular, the interface methods can be divided into three
 	// groups based on their intended receiver:
@@ -557,7 +587,7 @@ type Node_ExcludingUniversal interface {
 	// -- Refresh()
 	// -- Restart()
 	// -- Resume()
-	// -- Shutdown()
+	// -- Stop()
 	// -- Suspend()
 	//
 	// For groups 2) and 3), the suffix that specifies the receiver can
@@ -586,7 +616,7 @@ type Node_ExcludingUniversal interface {
 	//
 	// Further, the following methods complement one another:
 	// -- Install() and Uninstall()
-	// -- Start() and Shutdown()
+	// -- Start() and Stop()
 	// -- Suspend() and Resume()
 	//
 	// Finally, an application installation instance can be in one of
@@ -601,8 +631,8 @@ type Node_ExcludingUniversal interface {
 	// apply(Restart(), "suspended") = "running"
 	// apply(Resume(), "suspended") = "running"
 	// apply(Resume(), "running") = "running"
-	// apply(Shutdown(), "running") = "does not exist"
-	// apply(Shutdown(), "suspended") = "does not exist"
+	// apply(Stop(), "running") = "does not exist"
+	// apply(Stop(), "suspended") = "does not exist"
 	// apply(Suspend(), "running") = "suspended"
 	// apply(Suspend(), "suspended") = "suspended"
 	//
@@ -629,10 +659,10 @@ type Node interface {
 // NodeService is the interface the server implements.
 type NodeService interface {
 
-	// Application can be used to manage applications. The idea is that
-	// this interace will be invoked using a veyron name that identifies
-	// the application and its installations and instances where
-	// applicable.
+	// Application can be used to manage applications on a device. The
+	// idea is that this interace will be invoked using a veyron name that
+	// identifies the application and its installations and instances
+	// where applicable.
 	//
 	// In particular, the interface methods can be divided into three
 	// groups based on their intended receiver:
@@ -649,7 +679,7 @@ type NodeService interface {
 	// -- Refresh()
 	// -- Restart()
 	// -- Resume()
-	// -- Shutdown()
+	// -- Stop()
 	// -- Suspend()
 	//
 	// For groups 2) and 3), the suffix that specifies the receiver can
@@ -678,7 +708,7 @@ type NodeService interface {
 	//
 	// Further, the following methods complement one another:
 	// -- Install() and Uninstall()
-	// -- Start() and Shutdown()
+	// -- Start() and Stop()
 	// -- Suspend() and Resume()
 	//
 	// Finally, an application installation instance can be in one of
@@ -693,8 +723,8 @@ type NodeService interface {
 	// apply(Restart(), "suspended") = "running"
 	// apply(Resume(), "suspended") = "running"
 	// apply(Resume(), "running") = "running"
-	// apply(Shutdown(), "running") = "does not exist"
-	// apply(Shutdown(), "suspended") = "does not exist"
+	// apply(Stop(), "running") = "does not exist"
+	// apply(Stop(), "suspended") = "does not exist"
 	// apply(Suspend(), "running") = "suspended"
 	// apply(Suspend(), "suspended") = "suspended"
 	//
