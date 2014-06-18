@@ -467,7 +467,7 @@ func (__gen_s *ServerStubGlobWatcher) WatchGlob(call _gen_ipc.ServerCall, Req Gl
 // QueryWatcher_ExcludingUniversal is the interface without internal framework-added methods
 // to enable embedding without method collisions.  Not to be used directly by clients.
 type QueryWatcher_ExcludingUniversal interface {
-	// WatchGlob returns a stream of changes that satisy a query.
+	// WatchQuery returns a stream of changes that satisy a query.
 	WatchQuery(ctx _gen_context.T, Req QueryRequest, opts ..._gen_ipc.CallOpt) (reply QueryWatcherWatchQueryStream, err error)
 }
 type QueryWatcher interface {
@@ -478,7 +478,7 @@ type QueryWatcher interface {
 // QueryWatcherService is the interface the server implements.
 type QueryWatcherService interface {
 
-	// WatchGlob returns a stream of changes that satisy a query.
+	// WatchQuery returns a stream of changes that satisy a query.
 	WatchQuery(context _gen_ipc.ServerContext, Req QueryRequest, stream QueryWatcherServiceWatchQueryStream) (err error)
 }
 

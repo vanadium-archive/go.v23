@@ -133,7 +133,7 @@ type GlobRequest struct {
 // QueryWatcher allows a client to receive updates for changes to objects
 // that match a query.  See the package comments for details.
 type QueryWatcher interface {
-  // WatchGlob returns a stream of changes that satisy a query.
+  // WatchQuery returns a stream of changes that satisy a query.
   WatchQuery(Req QueryRequest) stream<_, ChangeBatch> error
 }
 
