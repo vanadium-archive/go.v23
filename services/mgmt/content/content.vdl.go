@@ -25,6 +25,9 @@ import (
 )
 
 // Repository can be used to store and retrieve binaries.
+//
+// TODO(jsimsa): Rename to Content and move this into the repository
+// package.
 // Repository is the interface the client binds and uses.
 // Repository_ExcludingUniversal is the interface without internal framework-added methods
 // to enable embedding without method collisions.  Not to be used directly by clients.
