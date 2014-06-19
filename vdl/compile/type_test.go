@@ -159,6 +159,9 @@ var typeTests = []typeTest{
 	{"MultiPkgUnimportedPkg", tp{
 		{"a", `type Res bool`, val.BoolType, ""},
 		{"b", `type Res []a.Res`, nil, "type a.Res undefined"}}},
+	{"RedefinitionOfImportedName", tp{
+		{"a", `type Res bool`, val.BoolType, ""},
+		{"b", `import "a"; type a string; type Res a`, nil, "type a name conflict"}}},
 
 	// Test errors.
 	{"DupSame", tp{{"a", `type Res bool; type Res bool`, nil, "type Res redefined"}}},

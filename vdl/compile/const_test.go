@@ -194,6 +194,27 @@ var constTests = []struct {
 	{
 		"IntListInvalidValue",
 		cp{{"a", `const Res = []int64{0,1,"c"}`, nil, "invalid list value"}}},
+	{
+		"IndexingNamedList",
+		cp{{"a", `const A = []int64{3,4,2}; const Res=A[1]`, val.Int64Value(4), ""}}},
+	{
+		"IndexingUnnamedList",
+		cp{{"a", `const Res = []int64{3,4,2}[1]`, nil, "cannot apply index operator to unnamed constant"}}},
+	{
+		"TypedListIndexing",
+		cp{{"a", `const A = []int64{3,4,2};  const Res = A[int16(1)]`, val.Int64Value(4), ""}}},
+	{
+		"NegativeListIndexing",
+		cp{{"a", `const A = []int64{3,4,2}; const Res = A[-1]`, nil, "error converting index [(]const -1 overflows uint64[)]"}}},
+	{
+		"OutOfBoundsListIndexing",
+		cp{{"a", `const A = []int64{3,4,2}; const Res = A[10]`, nil, "index out of bounds"}}},
+	{
+		"InvalidIndexType",
+		cp{{"a", `const A = []int64{3,4,2}; const Res = A["ok"]`, nil, "error converting"}}},
+	{
+		"InvalidIndexBaseType",
+		cp{{"a", `type A struct{}; const B = A{}; const Res = B["ok"]`, nil, "illegal use of index operator with unsupported type"}}},
 	// Test set literals.
 	{
 		"StringSet",
@@ -223,6 +244,22 @@ var constTests = []struct {
 	{
 		"StringIntMapInvalidValue",
 		cp{{"a", `const Res = map[string]int64{"a":1, "b":2, "c":"c"}`, nil, "invalid map value"}}},
+	{
+		"MapIndexing",
+		cp{{"a", `const A = map[int64]int64{1:4}; const Res=A[1]`, val.Int64Value(4), ""}}},
+	{
+		"MapUnnamedIndexing",
+		cp{{"a", `const Res = map[int64]int64{1:4}[1]`, nil, "cannot apply index operator to unnamed constant"}}},
+	{
+		"MapTypedIndexing",
+		cp{{"a", `const A = map[int64]int64{1:4}; const Res = A[int64(1)]`, val.Int64Value(4), ""}}},
+	{
+		"MapIncorrectlyTypedIndexing",
+		cp{{"a", `const A = map[int64]int64{1:4};const Res = A[int16(1)]`, nil, "invalid map index [(]int64 not assignable from int16[(]1[)][)]"}}},
+	{
+		"MapIndexingMissingValue",
+		cp{{"a", `const A = map[int64]int64{1:4}; const Res = A[0]`, nil, "map key not in map"}}},
+
 	// Test struct literals.
 	{
 		"StructNoKeys",
@@ -257,6 +294,22 @@ var constTests = []struct {
 	{
 		"ImplicitSubTypes",
 		cp{{"a", `type A struct{X int64;Y string}; type B struct{Z []A}; const Res = B{{{1, "a"}, A{X:2,Y:"b"}}}`, makeABStruct(), ""}}},
+	{
+		"StructSelector",
+		cp{{"a", `type A struct{X int64;Y string}; const a = A{2,"b"}; const Res = a.Y`, val.StringValue("b"), ""}}},
+	{
+		"StructMultipleSelector",
+		cp{{"a", `type A struct{X int64;Y B}; type B struct{Z bool}; const a = A{2,B{true}}; const Res = a.Y.Z`, val.BoolValue(true), ""}}},
+
+	{
+		"InvalidStructSelectorName",
+		cp{{"a", `type A struct{X int64;Y string}; const a = A{2,"b"}; const Res = a.Z`, nil, "invalid field name"}}},
+	{
+		"StructSelectorOnNonStructType",
+		cp{{"a", `type A []int32; const a = A{2}; const Res = a.Z`, nil, "invalid selector on const of kind: list"}}},
+	{
+		"SelectorOnUnnamedStruct",
+		cp{{"a", `type A struct{X int64;Y string}; const Res = A{2,"b"}.Y`, nil, "cannot apply selector operator to unnamed constant"}}},
 
 	// Test explicit primitive type conversions.
 	{
@@ -716,4 +769,15 @@ var constTests = []struct {
 	{"MultiPkgUnimportedPkg", cp{
 		{"a", `const Res = true`, val.BoolValue(true), ""},
 		{"b", `const Res = a.Res && false`, nil, "const a.Res undefined"}}},
+	{"RedefinitionOfImportedName", cp{
+		{"a", `const Res = true`, val.BoolValue(true), ""},
+		{"b", `import "a"; const a = "test"; const Res = a`, nil, "const a name conflict"}}},
+
+	// Test conflicting const and interface / type definitions:
+	{"ConflictingTypeAndConstDefinition",
+		cp{{"a", `type A int64; const A = true; const Res = true`, nil, "const A name conflict"}}},
+	{"ConflictingConstAndInterfaceDefinition",
+		cp{{"a", `type A interface{}; const A = true; const Res = true`, nil, "interface A name conflict"}}},
+	{"ConflictingTypeAndInterfaceDefinition",
+		cp{{"a", `type A interface{}; type A int64; const Res = true`, nil, "interface A name conflict"}}},
 }

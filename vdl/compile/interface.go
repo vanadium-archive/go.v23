@@ -53,6 +53,10 @@ func (id ifaceDefiner) Declare() {
 				id.env.errorf(file, pdef.Pos, "interface %s redefined (previous at %s)", pdef.Name, fpString(b.def.File, b.def.Pos))
 				continue // keep going to catch more errors
 			}
+			if err := file.ValidateNotDefined(pdef.Name); err != nil {
+				id.env.prefixErrorf(file, pdef.Pos, err, "interface %s name conflict", pdef.Name)
+				continue
+			}
 			def := &Interface{NamePos: NamePos(pdef.NamePos), Exported: export, File: file}
 			id.builders[pdef.Name] = &ifaceBuilder{def, pdef}
 		}
@@ -128,7 +132,7 @@ func (id ifaceDefiner) defineEmbeds(b *ifaceBuilder) {
 		}
 		seen[pe.Name] = pe
 		// Resolve the embedded interface.
-		embed := id.env.ResolveInterface(pe.Name, file)
+		embed, _ := id.env.ResolveInterface(pe.Name, file)
 		if embed == nil {
 			id.env.errorf(file, pe.Pos, "interface %s undefined", pe.Name)
 			continue // keep going to catch more errors

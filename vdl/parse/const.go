@@ -45,6 +45,13 @@ type ConstNamed struct {
 	P    Pos
 }
 
+// ConstIndexed represents an index operation on a composite type.
+type ConstIndexed struct {
+	Expr      *ConstNamed
+	IndexExpr ConstExpr
+	P         Pos
+}
+
 // ConstTypeConv represents explicit type conversions.
 type ConstTypeConv struct {
 	Type Type
@@ -116,6 +123,9 @@ func (c *ConstCompositeLit) String() string {
 func (c *ConstNamed) String() string {
 	return c.Name
 }
+func (c *ConstIndexed) String() string {
+	return c.Expr.String() + "[" + c.IndexExpr.String() + "]"
+}
 func (c *ConstTypeConv) String() string {
 	return c.Type.String() + "(" + c.Expr.String() + ")"
 }
@@ -130,6 +140,7 @@ func (c *ConstDef) String() string { return fmt.Sprintf("%+v", *c) }
 func (c *ConstLit) Pos() Pos          { return c.P }
 func (c *ConstCompositeLit) Pos() Pos { return c.P }
 func (c *ConstNamed) Pos() Pos        { return c.P }
+func (c *ConstIndexed) Pos() Pos      { return c.P }
 func (c *ConstTypeConv) Pos() Pos     { return c.P }
 func (c *ConstUnaryOp) Pos() Pos      { return c.P }
 func (c *ConstBinaryOp) Pos() Pos     { return c.P }

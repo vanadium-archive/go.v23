@@ -112,7 +112,6 @@ func ensureNonEmptyToken(yylex yyLexer, tok strPos, errMsg string) {
 %token <imagpos>  tIMAGLIT
 
 %type <strpos>     nameref
-%type <strpos>     nameref
 %type <namepos>    label_spec
 %type <nameposes>  label_spec_list
 %type <typeexpr>   type otype
@@ -512,6 +511,12 @@ operand:
   { $$ = &ConstNamed{$1.str, $1.pos} }
 | comp_lit
   { $$ = $1 }
+| comp_lit '.' tIDENT
+  { lexPosErrorf(yylex, $2, "cannot apply selector operator to unnamed constant")}
+| comp_lit '[' expr ']'
+  { lexPosErrorf(yylex, $2, "cannot apply index operator to unnamed constant")}
+| nameref '[' expr ']'
+  { $$ = &ConstIndexed{&ConstNamed{$1.str, $1.pos}, $3, $1.pos} }
 | '(' expr ')'
   { $$ = $2 }
 
@@ -557,7 +562,7 @@ errorid_spec:
 nameref:
   tIDENT
   { $$ = $1 }
-| tIDENT '.' tIDENT
+| nameref '.' tIDENT
   { $$ = strPos{$1.str+"."+$3.str, $1.pos} }
 
 otype:

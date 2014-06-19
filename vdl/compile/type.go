@@ -90,6 +90,10 @@ func (td typeDefiner) Declare() {
 				td.env.errorf(file, pdef.Pos, "type %s redefined (previous at %s)", pdef.Name, fpString(b.def.File, b.def.Pos))
 				continue // keep going to catch more errors
 			}
+			if err := file.ValidateNotDefined(pdef.Name); err != nil {
+				td.env.prefixErrorf(file, pdef.Pos, err, "type %s name conflict", pdef.Name)
+				continue
+			}
 			td.builders[pdef.Name] = td.makeTypeDefBuilder(file, pdef)
 		}
 	}
@@ -217,7 +221,7 @@ func compileDefinedType(ptype parse.Type, file *File, env *Env, tbuilder *val.Ty
 func compileLiteralType(ptype parse.Type, file *File, env *Env, tbuilder *val.TypeBuilder, builders map[string]*typeDefBuilder) val.TypeOrPending {
 	switch pt := ptype.(type) {
 	case *parse.TypeNamed:
-		if def := env.ResolveType(pt.Name, file); def != nil {
+		if def, _ := env.ResolveType(pt.Name, file); def != nil {
 			return def.Type
 		}
 		if b, ok := builders[pt.Name]; ok {

@@ -60,64 +60,125 @@ func (e *Env) ResolvePackage(path string) *Package {
 	return e.pkgs[path]
 }
 
-// resolvePartial resolves the name to a partially-resolved name, and a list of
-// packages it might be defined in.  The caller should complete resolution by
-// trying the partial name on each package, in the order listed.
-func (e *Env) resolvePartial(name string, file *File) (string, []*Package) {
-	switch n := strings.SplitN(name, ".", 2); len(n) {
-	case 2:
-		// Fully qualified name "A.B", where A refers to the package and B is the
-		// local name within the package.
-		if path := file.LookupImportPath(n[0]); path != "" {
+// Resolves a name against the current package and imported package namespace.
+func (e *Env) resolve(name string, file *File) (val interface{}, matched string) {
+	nameParts := strings.Split(name, ".")
+	if len(nameParts) < 1 {
+		return nil, ""
+	}
+
+	builtin := BuiltInPackage.resolve(nameParts[0], false)
+	if builtin != nil {
+		return builtin, nameParts[0]
+	}
+
+	local := file.Package.resolve(nameParts[0], true)
+	if local != nil {
+		return local, nameParts[0]
+	}
+
+	if len(nameParts) >= 2 {
+		path := file.LookupImportPath(nameParts[0])
+		if path != "" {
 			if pkg := e.ResolvePackage(path); pkg != nil {
-				return n[1], []*Package{pkg}
+				return pkg.resolve(nameParts[1], false), nameParts[0] + "." + nameParts[1]
 			}
 		}
-	case 1:
-		// No dots name "A", where A may either refer to a built-in identifier, or
-		// the local package the file is contained in.
-		return n[0], []*Package{BuiltInPackage, file.Package}
 	}
-	return "", nil
+
+	return nil, ""
 }
 
-// ResolveType resolves a type name to its definition.  Name resolution uses the
-// context of the file it appears in; e.g. the name "a.foo" requires the file
-// imports in order to resolve.
-func (e *Env) ResolveType(name string, file *File) *TypeDef {
-	n, pkgs := e.resolvePartial(name, file)
-	for _, pkg := range pkgs {
-		if x := pkg.ResolveType(n); x != nil && (x.Exported || pkg == file.Package) {
-			return x
-		}
+// ResolveType resolves a name to a type definition.
+// Returns the type def and a string representing the amount of the name that was consumed.
+func (e *Env) ResolveType(name string, file *File) (td *TypeDef, matched string) {
+	v, matched := e.resolve(name, file)
+	td, _ = v.(*TypeDef)
+	if td == nil {
+		return nil, ""
 	}
-	return nil
+	return td, matched
 }
 
-// ResolveConst resolves a const name to its definition.  Name resolution uses
-// the context of the file it appears in; e.g. the name "a.foo" requires the
-// file imports in order to resolve.
-func (e *Env) ResolveConst(name string, file *File) *ConstDef {
-	n, pkgs := e.resolvePartial(name, file)
-	for _, pkg := range pkgs {
-		if x := pkg.ResolveConst(n); x != nil && (x.Exported || pkg == file.Package) {
-			return x
-		}
+// ResolveConst resolves a name to a const definition.
+// Returns the const def and a string representing the amount of the name that was consumed.
+func (e *Env) ResolveConst(name string, file *File) (cd *ConstDef, matched string) {
+	v, matched := e.resolve(name, file)
+	cd, _ = v.(*ConstDef)
+	if cd == nil {
+		return nil, ""
 	}
-	return nil
+	return cd, matched
 }
 
-// ResolveInterface resolves an interface name to its definition.  Name
-// resolution uses the context of the file it appears in; e.g. the name "a.foo"
-// requires the file imports in order to resolve.
-func (e *Env) ResolveInterface(name string, file *File) *Interface {
-	n, pkgs := e.resolvePartial(name, file)
-	for _, pkg := range pkgs {
-		if x := pkg.ResolveInterface(n); x != nil && (x.Exported || pkg == file.Package) {
-			return x
-		}
+// ResolveInterface resolves a name to an interface definition.
+// Returns the interface def and a string representing the amount of the name that was consumed.
+func (e *Env) ResolveInterface(name string, file *File) (i *Interface, matched string) {
+	v, matched := e.resolve(name, file)
+	i, _ = v.(*Interface)
+	if i == nil {
+		return nil, ""
 	}
-	return nil
+	return i, matched
+}
+
+// evalSelectorOnConst evaluates a selector on a const to a constant.
+// This returns an empty const if a selector is applied on a non-struct value.
+func (e *Env) evalSelectorOnConst(def *ConstDef, selector string) (val.Const, error) {
+	v := def.Value
+	for _, fieldName := range strings.Split(selector, ".") {
+		if v.Kind() != val.Struct {
+			return val.Const{}, fmt.Errorf("invalid selector on const of kind: %v", v.Type().Kind())
+		}
+		_, i := v.Type().FieldByName(fieldName)
+		if i < 0 {
+			return val.Const{}, fmt.Errorf("invalid field name on struct %s: %s", v, fieldName)
+		}
+		v = v.Field(i)
+	}
+	return val.ConstFromValue(v), nil
+}
+
+// evalSelectorOnType evaluates a selector on a type to a constant.
+// This returns an empty const if a selector is applied on a non-enum type.
+func (e *Env) evalSelectorOnType(def *TypeDef, selector string) (val.Const, error) {
+	if def.Type.Kind() != val.Enum {
+		return val.Const{}, fmt.Errorf("invalid selector on type of kind: %v", def.Type.Kind())
+	}
+	if def.Type.EnumIndex(selector) < 0 {
+		return val.Const{}, fmt.Errorf("invalid label on enum %s: %s", def.Type.Name(), selector)
+	}
+	enumVal := val.Zero(def.Type)
+	enumVal.AssignEnumLabel(selector)
+	return val.ConstFromValue(enumVal), nil
+}
+
+// EvalConst resolves and evaluates a name to a const.
+func (e *Env) EvalConst(name string, file *File) (val.Const, error) {
+	cd, matched := e.ResolveConst(name, file)
+	if matched == name {
+		return val.ConstFromValue(cd.Value), nil
+	}
+	if cd != nil {
+		remainder := name[len(matched)+1:]
+		c, err := e.evalSelectorOnConst(cd, remainder)
+		if err != nil {
+			return val.Const{}, err
+		}
+		return c, nil
+	}
+
+	td, matched := e.ResolveType(name, file)
+	if td != nil && matched != "" {
+		remainder := name[len(matched):]
+		c, err := e.evalSelectorOnType(td, remainder)
+		if err != nil {
+			return val.Const{}, err
+		}
+		return c, nil
+	}
+
+	return val.Const{}, fmt.Errorf("const %s undefined", name)
 }
 
 // errorf and the fpString{,f} functions are helpers for error reporting; we
@@ -190,6 +251,25 @@ func (p *Package) ResolveConst(name string) *ConstDef { return p.constDefs[name]
 // ResolveInterface resolves the interface name to its definition.
 func (p *Package) ResolveInterface(name string) *Interface { return p.ifaceDefs[name] }
 
+// resolve resolves a name against a the package.
+// Checks for duplicate definitions should be performed before this is called.
+func (p *Package) resolve(name string, isLocal bool) interface{} {
+	c := p.ResolveConst(name)
+	i := p.ResolveInterface(name)
+	t := p.ResolveType(name)
+
+	if c != nil && (c.Exported || isLocal) {
+		return c
+	}
+	if i != nil && (i.Exported || isLocal) {
+		return i
+	}
+	if t != nil && (t.Exported || isLocal) {
+		return t
+	}
+	return nil
+}
+
 // File represents a compiled vdl file.
 type File struct {
 	BaseName   string       // Base name of the vdl file, e.g. "foo.vdl"
@@ -236,6 +316,23 @@ func (f *File) LookupImportPath(local string) string {
 		return imp.path
 	}
 	return ""
+}
+
+// ValidateNotDefined returns an error if the name is already defined.
+func (f *File) ValidateNotDefined(name string) error {
+	if i, ok := f.imports[name]; ok {
+		return fmt.Errorf("previous import at %s", i.pos)
+	}
+	if t := f.Package.ResolveType(name); t != nil {
+		return fmt.Errorf("previous type at %s", t.NamePos.Pos)
+	}
+	if c := f.Package.ResolveConst(name); c != nil {
+		return fmt.Errorf("previous const at %s", c.NamePos.Pos)
+	}
+	if i := f.Package.ResolveInterface(name); i != nil {
+		return fmt.Errorf("previous interface at %s", i.NamePos.Pos)
+	}
+	return nil
 }
 
 // ErrorID represents an error id.

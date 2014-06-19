@@ -71,6 +71,10 @@ func (cd constDefiner) Declare() {
 				cd.env.errorf(file, pdef.Pos, "const %s redefined (previous at %s)", pdef.Name, fpString(b.def.File, b.def.Pos))
 				continue // keep going to catch more errors
 			}
+			if err := file.ValidateNotDefined(pdef.Name); err != nil {
+				cd.env.prefixErrorf(file, pdef.Pos, err, "const %s name conflict", pdef.Name)
+				continue
+			}
 			def := &ConstDef{NamePos: NamePos(pdef.NamePos), Exported: export, File: file}
 			cd.builders[pdef.Name] = &constBuilder{def, pdef.Expr}
 		}
@@ -150,6 +154,9 @@ func (cd constDefiner) getLocalDeps(pexpr parse.ConstExpr) constBuilderSet {
 			return constBuilderSet{b: true}
 		}
 		return nil
+	case *parse.ConstIndexed:
+		e, i := cd.getLocalDeps(pe.Expr), cd.getLocalDeps(pe.IndexExpr)
+		return mergeConstBuilderSets(e, i)
 	case *parse.ConstTypeConv:
 		return cd.getLocalDeps(pe.Expr)
 	case *parse.ConstUnaryOp:
@@ -229,12 +236,38 @@ func evalConstExpr(implicit *val.Type, pexpr parse.ConstExpr, file *File, env *E
 		}
 		return val.ConstFromValue(v)
 	case *parse.ConstNamed:
-		def := env.ResolveConst(pe.Name, file)
-		if def == nil {
-			env.errorf(file, pe.Pos(), "const %s undefined", pe.Name)
+		c, err := env.EvalConst(pe.Name, file)
+		if err != nil {
+			env.prefixErrorf(file, pe.Pos(), err, "const %s invalid", pe.Name)
 			break
 		}
-		return val.ConstFromValue(def.Value)
+		return c
+	case *parse.ConstIndexed:
+		expr := evalConstExpr(nil, pe.Expr, file, env)
+		if !expr.IsValid() {
+			break
+		}
+		value, err := expr.ToValue()
+		if err != nil {
+			env.prefixErrorf(file, pe.Pos(), err, "error converting expression to value")
+			break
+		}
+
+		// TODO(bprosnitz) Should indexing on set also be supported?
+		switch value.Kind() {
+		case val.Array, val.List:
+			v := evalListIndex(value, pe.IndexExpr, file, env)
+			if v != nil {
+				return val.ConstFromValue(v)
+			}
+		case val.Map:
+			v := evalMapIndex(value, pe.IndexExpr, file, env)
+			if v != nil {
+				return val.ConstFromValue(v)
+			}
+		default:
+			env.errorf(file, pe.Pos(), "illegal use of index operator with unsupported type")
+		}
 	case *parse.ConstTypeConv:
 		t := compileType(pe.Type, file, env)
 		x := evalConstExpr(nil, pe.Expr, file, env)
@@ -284,6 +317,49 @@ func evalConstExpr(implicit *val.Type, pexpr parse.ConstExpr, file *File, env *E
 		panic(fmt.Errorf("vdl: unhandled parse.ConstExpr %T %#v", pexpr, pexpr))
 	}
 	return val.Const{}
+}
+
+// Evaluate an indexed list or array to a constant.
+// Inputs are representative of expr[index].
+func evalListIndex(exprVal *val.Value, indexExpr parse.ConstExpr, file *File, env *Env) *val.Value {
+	index := evalConstExpr(nil, indexExpr, file, env)
+	if !index.IsValid() {
+		return nil
+	}
+	convertedIndex, err := index.Convert(val.Uint64Type)
+	if err != nil {
+		env.prefixErrorf(file, indexExpr.Pos(), err, "error converting index")
+		return nil
+	}
+	indexVal, err := convertedIndex.ToValue()
+	if err != nil {
+		env.prefixErrorf(file, indexExpr.Pos(), err, "error converting index to value")
+		return nil
+	}
+
+	if indexVal.Uint() >= uint64(exprVal.Len()) {
+		env.errorf(file, indexExpr.Pos(), "index out of bounds of array")
+		return nil
+	}
+	return exprVal.Index(int(indexVal.Uint()))
+}
+
+// Evaluate an indexed map to a constant.
+// Inputs are representative of expr[index].
+func evalMapIndex(exprVal *val.Value, indexExpr parse.ConstExpr, file *File, env *Env) *val.Value {
+	indexVal := evalTypedValue("map index", exprVal.Type().Key(), indexExpr, file, env)
+	if indexVal == nil {
+		return nil
+	}
+
+	mapItemVal := exprVal.MapIndex(indexVal)
+	if mapItemVal == nil {
+		// Unlike normal go code, it is probably undesirable to return nil here.
+		// It is very likely this is an error.
+		env.errorf(file, indexExpr.Pos(), "map key not in map")
+		return nil
+	}
+	return mapItemVal
 }
 
 // evalCompLit evaluates a composite literal, returning it as a val.Value.  The
