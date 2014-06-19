@@ -191,9 +191,12 @@ const (
 // to enable embedding without method collisions.  Not to be used directly by clients.
 type Object_ExcludingUniversal interface {
 	mounttable.Globable_ExcludingUniversal
-	// Watcher allows a client to receive updates for changes to objects
+	// GlobWatcher allows a client to receive updates for changes to objects
+	// that match a pattern.  See the package comments for details.
+	watch.GlobWatcher_ExcludingUniversal
+	// QueryWatcher allows a client to receive updates for changes to objects
 	// that match a query.  See the package comments for details.
-	watch.Watcher_ExcludingUniversal
+	watch.QueryWatcher_ExcludingUniversal
 	// Exists returns true iff the Entry has a value.
 	Exists(ctx _gen_context.T, TID TransactionID, opts ..._gen_ipc.CallOpt) (reply bool, err error)
 	// Get returns the value for the Object.  The value returned is from the
@@ -224,9 +227,12 @@ type Object interface {
 // ObjectService is the interface the server implements.
 type ObjectService interface {
 	mounttable.GlobableService
-	// Watcher allows a client to receive updates for changes to objects
+	// GlobWatcher allows a client to receive updates for changes to objects
+	// that match a pattern.  See the package comments for details.
+	watch.GlobWatcherService
+	// QueryWatcher allows a client to receive updates for changes to objects
 	// that match a query.  See the package comments for details.
-	watch.WatcherService
+	watch.QueryWatcherService
 	// Exists returns true iff the Entry has a value.
 	Exists(context _gen_ipc.ServerContext, TID TransactionID) (reply bool, err error)
 	// Get returns the value for the Object.  The value returned is from the
@@ -382,7 +388,8 @@ func BindObject(name string, opts ..._gen_ipc.BindOpt) (Object, error) {
 	}
 	stub := &clientStubObject{client: client, name: name}
 	stub.Globable_ExcludingUniversal, _ = mounttable.BindGlobable(name, client)
-	stub.Watcher_ExcludingUniversal, _ = watch.BindWatcher(name, client)
+	stub.GlobWatcher_ExcludingUniversal, _ = watch.BindGlobWatcher(name, client)
+	stub.QueryWatcher_ExcludingUniversal, _ = watch.BindQueryWatcher(name, client)
 
 	return stub, nil
 }
@@ -393,16 +400,18 @@ func BindObject(name string, opts ..._gen_ipc.BindOpt) (Object, error) {
 // interface, and returns a new server stub.
 func NewServerObject(server ObjectService) interface{} {
 	return &ServerStubObject{
-		ServerStubGlobable: *mounttable.NewServerGlobable(server).(*mounttable.ServerStubGlobable),
-		ServerStubWatcher:  *watch.NewServerWatcher(server).(*watch.ServerStubWatcher),
-		service:            server,
+		ServerStubGlobable:     *mounttable.NewServerGlobable(server).(*mounttable.ServerStubGlobable),
+		ServerStubGlobWatcher:  *watch.NewServerGlobWatcher(server).(*watch.ServerStubGlobWatcher),
+		ServerStubQueryWatcher: *watch.NewServerQueryWatcher(server).(*watch.ServerStubQueryWatcher),
+		service:                server,
 	}
 }
 
 // clientStubObject implements Object.
 type clientStubObject struct {
 	mounttable.Globable_ExcludingUniversal
-	watch.Watcher_ExcludingUniversal
+	watch.GlobWatcher_ExcludingUniversal
+	watch.QueryWatcher_ExcludingUniversal
 
 	client _gen_ipc.Client
 	name   string
@@ -530,7 +539,8 @@ func (__gen_c *clientStubObject) GetMethodTags(ctx _gen_context.T, method string
 // the requirements of veyron2/ipc.ReflectInvoker.
 type ServerStubObject struct {
 	mounttable.ServerStubGlobable
-	watch.ServerStubWatcher
+	watch.ServerStubGlobWatcher
+	watch.ServerStubQueryWatcher
 
 	service ObjectService
 }
@@ -542,7 +552,10 @@ func (__gen_s *ServerStubObject) GetMethodTags(call _gen_ipc.ServerCall, method 
 	if resp, err := __gen_s.ServerStubGlobable.GetMethodTags(call, method); resp != nil || err != nil {
 		return resp, err
 	}
-	if resp, err := __gen_s.ServerStubWatcher.GetMethodTags(call, method); resp != nil || err != nil {
+	if resp, err := __gen_s.ServerStubGlobWatcher.GetMethodTags(call, method); resp != nil || err != nil {
+		return resp, err
+	}
+	if resp, err := __gen_s.ServerStubQueryWatcher.GetMethodTags(call, method); resp != nil || err != nil {
 		return resp, err
 	}
 	switch method {
@@ -729,7 +742,60 @@ func (__gen_s *ServerStubObject) Signature(call _gen_ipc.ServerCall) (_gen_ipc.S
 		}
 		result.TypeDefs = append(result.TypeDefs, d)
 	}
-	ss, _ = __gen_s.ServerStubWatcher.Signature(call)
+	ss, _ = __gen_s.ServerStubGlobWatcher.Signature(call)
+	firstAdded = len(result.TypeDefs)
+	for k, v := range ss.Methods {
+		for i, _ := range v.InArgs {
+			if v.InArgs[i].Type >= _gen_wiretype.TypeIDFirst {
+				v.InArgs[i].Type += _gen_wiretype.TypeID(firstAdded)
+			}
+		}
+		for i, _ := range v.OutArgs {
+			if v.OutArgs[i].Type >= _gen_wiretype.TypeIDFirst {
+				v.OutArgs[i].Type += _gen_wiretype.TypeID(firstAdded)
+			}
+		}
+		if v.InStream >= _gen_wiretype.TypeIDFirst {
+			v.InStream += _gen_wiretype.TypeID(firstAdded)
+		}
+		if v.OutStream >= _gen_wiretype.TypeIDFirst {
+			v.OutStream += _gen_wiretype.TypeID(firstAdded)
+		}
+		result.Methods[k] = v
+	}
+	//TODO(bprosnitz) combine type definitions from embeded interfaces in a way that doesn't cause duplication.
+	for _, d := range ss.TypeDefs {
+		switch wt := d.(type) {
+		case _gen_wiretype.SliceType:
+			if wt.Elem >= _gen_wiretype.TypeIDFirst {
+				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+			}
+			d = wt
+		case _gen_wiretype.ArrayType:
+			if wt.Elem >= _gen_wiretype.TypeIDFirst {
+				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+			}
+			d = wt
+		case _gen_wiretype.MapType:
+			if wt.Key >= _gen_wiretype.TypeIDFirst {
+				wt.Key += _gen_wiretype.TypeID(firstAdded)
+			}
+			if wt.Elem >= _gen_wiretype.TypeIDFirst {
+				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+			}
+			d = wt
+		case _gen_wiretype.StructType:
+			for i, fld := range wt.Fields {
+				if fld.Type >= _gen_wiretype.TypeIDFirst {
+					wt.Fields[i].Type += _gen_wiretype.TypeID(firstAdded)
+				}
+			}
+			d = wt
+			// NOTE: other types are missing, but we are upgrading anyways.
+		}
+		result.TypeDefs = append(result.TypeDefs, d)
+	}
+	ss, _ = __gen_s.ServerStubQueryWatcher.Signature(call)
 	firstAdded = len(result.TypeDefs)
 	for k, v := range ss.Methods {
 		for i, _ := range v.InArgs {

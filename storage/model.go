@@ -149,18 +149,28 @@ import (
 	"veyron2/services/watch"
 )
 
-// Watcher allows a client to receive updates for changes to objects
-// that match a query.  See the package comments for details.
-// TODO(tilaks): if we build a suite of client-side libraries, move Watcher
+// GlobWatcher allows a client to receive updates for changes to objects
+// that match a pattern.  See the package comments for details.
+// TODO(tilaks): if we build a suite of client-side libraries, move GlobWatcher
 // into a shared location, such as veyron2/watch.
-type Watcher interface {
-	// Watch returns a stream of changes.
-	Watch(ctx context.T, req watch.Request) (watch.WatcherWatchStream, error)
+type GlobWatcher interface {
+	// WatchGlob returns a stream of changes.
+	WatchGlob(ctx context.T, req watch.GlobRequest) (watch.GlobWatcherWatchGlobStream, error)
+}
+
+// QueryWatcher allows a client to receive updates for changes to objects
+// that match a query.  See the package comments for details.
+// TODO(tilaks): if we build a suite of client-side libraries, move QueryWatcher
+// into a shared location, such as veyron2/watch.
+type QueryWatcher interface {
+	// WatchQuery returns a stream of changes.
+	WatchQuery(ctx context.T, req watch.QueryRequest) (watch.QueryWatcherWatchQueryStream, error)
 }
 
 // Object is the interface for a value in the store.
 type Object interface {
-	Watcher
+	GlobWatcher
+	QueryWatcher
 
 	// Exists returns true iff the Entry has a value.
 	Exists(ctx context.T, t Transaction) (bool, error)
