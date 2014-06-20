@@ -156,7 +156,7 @@ func (o *object) Stat(ctx context.T, t storage.Transaction) (storage.Stat, error
 }
 
 // Query performs a query on the store.
-func (o *object) Query(ctx context.T, t storage.Transaction, q query.Query) storage.Iterator {
+func (o *object) Query(ctx context.T, t storage.Transaction, q query.Query) storage.QueryStream {
 	panic("not implemented.")
 }
 
@@ -206,8 +206,8 @@ func (o *errorObject) GetAllPaths(ctx context.T, t storage.Transaction) ([]strin
 	return nil, o.err
 }
 
-func (o *errorObject) Query(ctx context.T, t storage.Transaction, q query.Query) storage.Iterator {
-	return nil
+func (o *errorObject) Query(ctx context.T, t storage.Transaction, q query.Query) storage.QueryStream {
+	return &errorQueryStream{o.err}
 }
 
 func (o *errorObject) GlobT(ctx context.T, t storage.Transaction, pattern string) (storage.GlobStream, error) {
@@ -221,3 +221,22 @@ func (o *errorObject) WatchGlob(ctx context.T, req watch.GlobRequest) (watch.Glo
 func (o *errorObject) WatchQuery(ctx context.T, req watch.QueryRequest) (watch.QueryWatcherWatchQueryStream, error) {
 	return nil, o.err
 }
+
+// errorQueryStream implements service.QueryStream.
+type errorQueryStream struct {
+	err error
+}
+
+func (e *errorQueryStream) Advance() bool {
+	return false
+}
+
+func (e *errorQueryStream) Value() storage.QueryResult {
+	panic("No values")
+}
+
+func (e *errorQueryStream) Err() error {
+	return e.err
+}
+
+func (e *errorQueryStream) Cancel() {}

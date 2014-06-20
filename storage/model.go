@@ -197,9 +197,9 @@ type Object interface {
 	// Stat returns entry info.
 	Stat(ctx context.T, t Transaction) (Stat, error)
 
-	// Query returns an Iterator to a sequence of elements that satisfy the
+	// Query returns a QueryStream to a sequence of elements that satisfy the
 	// query.
-	Query(ctx context.T, t Transaction, q query.Query) Iterator
+	Query(ctx context.T, t Transaction, q query.Query) QueryStream
 
 	// GlobT returns a set of names that match the glob pattern.
 	// This is the same as Glob, but takes a transaction.
@@ -257,17 +257,48 @@ type Entry struct {
 	Value interface{}
 }
 
-// Iterator is an iterator that refers to a sequence of entries.
-type Iterator interface {
-	// IsValid returns true iff the Iterator refers to a valid entry,
-	// so Name and Value return valid results.
-	IsValid() bool
+// QueryStream provides a stream of query results.
+type QueryStream interface {
+	// Advance stages an element so the client can retrieve it with Value.
+	// Advance returns true iff there is an element to retrieve.  The client
+	// must call Advance before calling Value.  The client must call Cancel if
+	// it does not iterate through all elements (i.e. until Advance returns
+	// false).  Advance may block if an element is not immediately available.
+	Advance() bool
 
-	// Value returns the value of the current entry.
+	// Value returns the element that was staged by Advance. Value may panic if
+	// Advance returned false or was not called at all.  Value does not block.
+	Value() QueryResult
+
+	// Err returns a non-nil error iff the stream encountered
+	// any errors.  Err does not block.
+	Err() error
+
+	// Cancel notifies the stream provider that it can stop producing elements.
+	// The client must call Cancel if it does not iterate through all elements
+	// (i.e. until Advance returns false).  Cancel is idempotent and can be
+	// called concurrently with a goroutine that is iterating via Advance/Value.
+	// Cancel causes Advance to subsequently return  false.  Cancel does not
+	// block.
+	Cancel()
+}
+
+// QueryResult is a single result of a query.  Because a query might
+// produce a dynamically typed value via the selection operator, a
+// QueryResult contains either a Value or a map of Fields.
+type QueryResult interface {
+	// Name returns the name of the object relative to the query root.
+	Name() string
+
+	// Value will return a non-nil value if this query result is of a known
+	// type.
 	Value() interface{}
 
-	// Next moves to the next entry.
-	Next()
+	// Fields will return a non-nil map if this query result is of a dynamic
+	// type specified by the selection operator. The keys will be the names used
+	// in the selection.  If a field represents a subquery, the value will be
+	// a QueryStream.
+	Fields() map[string]interface{}
 }
 
 // GlobStream is the interface for streaming responses from the Glob method.
