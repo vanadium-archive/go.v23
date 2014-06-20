@@ -1,46 +1,14 @@
-// Package application defines the interface for serving application
-// metadata.
-//
-// OVERVIEW: Applications are expected to be organized using veyron's
-// hierarchical namespace. The nodes of the hierarchy are expected to
-// implement: 1) the MountTable interface, to enable application
-// discovery and hierarchy organization and 2) the Application
-// interface, to enable application (metadata) management.
+// Package application defines the type for describing an application.
 package application
-
-import "veyron2/security"
 
 // Envelope is a collection of metadata that describes an application.
 type Envelope struct {
-  // Arguments is an array of command-line arguments to be used when
-  // executing the binary.
-  Args   []string
-  // Binary is a veyron name that identifies the application binary.
-  Binary      string
-  // Environment is a map that stores the environment variable values
-  // to be used when executing the binary.
-  Env []string
-}
-
-// Repository provides access to application envelopes. An
-// application envelope is identified by an application name and an
-// application version, which are specified through the veyron name,
-// and a profile name, which is specified using a method argument.
-//
-// Example:
-// /apps/search/v1.Match([]string{"base", "media"})
-//   returns an application envelope that can be used for downloading
-//   and executing the "search" application, version "v1", runnable
-//   on either the "base" or "media" profile.
-//
-// Further, we envision that there will be special "latest" and
-// "release" versions that will be symbolic links whose mapping is
-// maintained by a mount table.
-type Repository interface {
-  // Match checks if any of the given profiles contains an application
-  // envelope for the given application version (specified through the
-  // veyron name suffix) and if so, returns this envelope. If multiple
-  // profile matches are possible, the method returns the first
-  // matching profile, respecting the order of the input argument.
-  Match(Profiles []string) (Envelope, error) {security.ReadLabel}
+	// Arguments is an array of command-line arguments to be used when
+	// executing the binary.
+	Args   []string
+	// Binary is a veyron name that identifies the application binary.
+	Binary string
+	// Environment is a map that stores the environment variable values
+	// to be used when executing the binary.
+	Env    []string
 }
