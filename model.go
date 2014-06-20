@@ -18,10 +18,13 @@ import (
 	"veyron2/vlog"
 )
 
-// LocalStop is the message received on WaitForStop when the stop was initiated
-// by the process itself.
 const (
-	LocalStop             = "localstop"
+	// LocalStop is the message received on WaitForStop when the stop was
+	// initiated by the process itself.
+	LocalStop = "localstop"
+	// RemoteStop is the message received on WaitForStop when the stop was
+	// initiated via an RPC call (AppCycle.Stop).
+	RemoteStop            = "remotestop"
 	UnhandledStopExitCode = 1
 	ForceStopExitCode     = 1
 )
@@ -133,7 +136,8 @@ type Runtime interface {
 	// not being received on, or is full, no message is sent on it.
 	//
 	// The channel is assumed to remain open while messages could be sent on
-	// it.
+	// it.  The channel will be automatically closed during the call to
+	// Shutdown.
 	WaitForStop(chan<- string)
 
 	// AdvanceGoal extends the goal value in the shutdown task tracker.
@@ -150,6 +154,9 @@ type Runtime interface {
 	// The channel is assumed to remain open while Tasks could be sent on
 	// it.
 	TrackTask(chan<- Task)
+
+	// TODO(caprita): I think we should rename this to Cleanup to avoid
+	// confusion with Stop.
 
 	// Shutdown cleanly shuts down any internal state, logging, goroutines
 	// etc spawned and managed by the runtime. It is useful for cases where
