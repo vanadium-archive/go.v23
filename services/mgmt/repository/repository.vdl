@@ -1,0 +1,55 @@
+// Package repository can be used for storing and serving various
+// veyron management objects.
+package repository
+
+import (
+	"veyron2/security"
+	"veyron2/services/mgmt/application"
+)
+
+// Application provides access to application envelopes. An
+// application envelope is identified by an application name and an
+// application version, which are specified through the veyron name,
+// and a profile name, which is specified using a method argument.
+//
+// Example:
+// /apps/search/v1.Match([]string{"base", "media"})
+//   returns an application envelope that can be used for downloading
+//   and executing the "search" application, version "v1", runnable
+//   on either the "base" or "media" profile.
+type Application interface {
+	// Match checks if any of the given profiles contains an application
+	// envelope for the given application version (specified through the
+	// veyron name suffix) and if so, returns this envelope. If multiple
+	// profile matches are possible, the method returns the first
+	// matching profile, respecting the order of the input argument.
+	Match(Profiles []string) (application.Envelope, error) {security.ReadLabel}
+}
+
+// Content can be used to store and retrieve binary content such as
+// veyron application binaries.
+type Content interface {
+	// Delete deletes the binary identified by the veyron suffix.
+	Delete() error {security.WriteLabel}
+	// Download opens a stream that can used for downloading the
+	// content identified by the veyron suffix.
+	Download() stream<_, []byte> error {security.ReadLabel}
+	// Upload opens a stream that can be used for uploading the content
+	// and returns the name under which this content can be found.
+	Upload() stream<[]byte> (string, error) {security.WriteLabel}
+}
+
+// Profile abstracts a device's ability to run binaries, and hides
+// specifics such as the operating system, hardware architecture, and
+// the set of installed libraries. Profiles describe binaries and
+// devices, and are used to match them.
+type Profile interface {
+	// Label is the human-readable profile key for the profile,
+	// e.g. "linux-media". The label can be used to uniquely identify
+	// the profile (for the purpose of matching application binaries and
+	// nodes).
+	Label() (string, error) {security.ReadLabel}
+	// Description is a free-text description of the profile, meant for
+	// human consumption.
+	Description() (string, error) {security.ReadLabel}
+}
