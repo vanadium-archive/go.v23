@@ -25,8 +25,8 @@ const (
 	Complex64  // {real,imag} each 32 bit IEEE 754 floating point
 	Complex128 // {real,imag} each 64 bit IEEE 754 floating point
 	String     // unicode string (encoded as UTF-8 in memory)
-	TypeVal    // type represented as a value
 	Enum       // one of a set of labels
+	TypeVal    // type represented as a value
 	// Composite kinds
 	Array  // fixed-length ordered sequence of elements
 	List   // variable-length ordered sequence of elements
@@ -70,10 +70,10 @@ func (k Kind) String() string {
 		return "complex128"
 	case String:
 		return "string"
-	case TypeVal:
-		return "typeval"
 	case Enum:
 		return "enum"
+	case TypeVal:
+		return "typeval"
 	case Array:
 		return "array"
 	case List:
@@ -248,9 +248,11 @@ func (t *Type) errBytes(method string) error {
 }
 
 func (t *Type) checkKind(method string, allowed ...Kind) {
-	for _, k := range allowed {
-		if k == t.kind {
-			return
+	if t != nil {
+		for _, k := range allowed {
+			if k == t.kind {
+				return
+			}
 		}
 	}
 	panic(t.errKind(method, allowed...))

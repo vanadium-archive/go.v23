@@ -13,6 +13,10 @@ import (
 // efficient representation.
 type repBytes []byte
 
+// allZeroBytes is a buffer containing all 0 bytes.  It's used for fast filling
+// of 0 bytes after resizing.
+var allZeroBytes = make([]byte, 1024)
+
 func copyRepBytes(rep repBytes) repBytes {
 	cp := make(repBytes, len(rep))
 	copy(cp, rep)

@@ -47,10 +47,6 @@ var (
 	Complex128Type = primitiveType(Complex128)
 	StringType     = primitiveType(String)
 	TypeValType    = primitiveType(TypeVal)
-
-	// Keep this type unexported; Type.IsBytes returns true for both []byte and
-	// [N]byte, but this is just []byte.
-	bytesType = ListType(ByteType)
 )
 
 func primitiveType(k Kind) *Type {
@@ -126,6 +122,8 @@ type PendingStruct interface {
 	// must not be empty.  The ordering of fields is preserved; different
 	// orderings create different types.
 	AppendField(name string, t TypeOrPending) PendingStruct
+	// NumField returns the number of fields appended so far.
+	NumField() int
 }
 
 // PendingOneOf represents a OneOf type that is being built.
@@ -134,6 +132,8 @@ type PendingOneOf interface {
 	// AppendType appends the type t to the OneOf.  The ordering of types is
 	// preserved; different orderings create different types.
 	AppendType(t TypeOrPending) PendingOneOf
+	// NumOneOfType returns the number of types appended so far.
+	NumOneOfType() int
 }
 
 // PendingNamed represents a named type that is being built.  Given a base type
@@ -207,9 +207,17 @@ func (p pendingStruct) AppendField(name string, t TypeOrPending) PendingStruct {
 	return p
 }
 
+func (p pendingStruct) NumField() int {
+	return len(p.fields)
+}
+
 func (p pendingOneOf) AppendType(t TypeOrPending) PendingOneOf {
 	p.types = append(p.types, t.ptype())
 	return p
+}
+
+func (p pendingOneOf) NumOneOfType() int {
+	return len(p.types)
 }
 
 func (p pendingNamed) AssignBase(base TypeOrPending) PendingNamed {
@@ -296,7 +304,7 @@ func (b *TypeBuilder) Named(name string) PendingNamed {
 
 // Build builds all pending types.  Build must be called before Built may be
 // called on each pending type to retrieve the final result.
-func (b *TypeBuilder) Build() {
+func (b *TypeBuilder) Build() bool {
 	// First finalize all types, indicating no more mutations will occur.
 	for _, p := range b.ptypes {
 		p.err = p.finalize()
@@ -323,9 +331,10 @@ func (b *TypeBuilder) Build() {
 			for _, q := range b.ptypes {
 				q.Type = nil
 			}
-			break
+			return false
 		}
 	}
+	return true
 }
 
 func (p *pending) ptype() *Type { return p.Type }
@@ -550,48 +559,40 @@ var (
 
 // typeCons returns the hash-consed Type for a given Type t.
 func typeCons(t *Type) (*Type, error) {
-	typeRegMu.Lock()
-	defer typeRegMu.Unlock()
-	return typeConsLocked(t)
-}
-
-func typeConsLocked(t *Type) (*Type, error) {
-	if t == nil {
-		return nil, nil
-	}
 	if err := validType(t, make(map[*Type]bool)); err != nil {
 		return nil, err
+	}
+	typeRegMu.Lock()
+	cons := typeConsLocked(t)
+	typeRegMu.Unlock()
+	return cons, nil
+}
+
+func typeConsLocked(t *Type) *Type {
+	if t == nil {
+		return nil
 	}
 	// Look for the type in our registry, based on its unique string.
 	t.unique = uniqueType(t, make(map[*Type]bool))
 	if found := typeReg[t.unique]; found != nil {
-		return found, nil
+		return found
 	}
 	// Not found in the registry, add it and recursively cons subtypes.  We cons
 	// the outer type first to deal with recursive types; otherwise we'd have an
 	// infinite loop.
 	typeReg[t.unique] = t
-	var err error
-	if t.elem, err = typeConsLocked(t.elem); err != nil {
-		return nil, err
-	}
-	if t.key, err = typeConsLocked(t.key); err != nil {
-		return nil, err
-	}
+	t.elem = typeConsLocked(t.elem)
+	t.key = typeConsLocked(t.key)
 	for x := range t.fields {
-		if t.fields[x].Type, err = typeConsLocked(t.fields[x].Type); err != nil {
-			return nil, err
-		}
+		t.fields[x].Type = typeConsLocked(t.fields[x].Type)
 	}
 	for x := range t.types {
-		if t.types[x], err = typeConsLocked(t.types[x]); err != nil {
-			return nil, err
-		}
+		t.types[x] = typeConsLocked(t.types[x])
 	}
-	return t, nil
+	return t
 }
 
-// validType returns a nil error iff t is a valid Type.
+// validType returns a nil error iff t and all subtypes are valid.
 func validType(t *Type, seen map[*Type]bool) error {
 	if t == nil || seen[t] {
 		return nil
@@ -700,21 +701,20 @@ func validType(t *Type, seen map[*Type]bool) error {
 			return errHasTypes
 		}
 	}
-	// Check subtypes recursively; since types may be built in any order, we might
-	// have invalid subtypes.
+	// Check subtypes recursively.
 	if err := validType(t.elem, seen); err != nil {
 		return err
 	}
 	if err := validType(t.key, seen); err != nil {
 		return err
 	}
-	for _, f := range t.fields {
-		if err := validType(f.Type, seen); err != nil {
+	for _, x := range t.fields {
+		if err := validType(x.Type, seen); err != nil {
 			return err
 		}
 	}
-	for _, o := range t.types {
-		if err := validType(o, seen); err != nil {
+	for _, x := range t.types {
+		if err := validType(x, seen); err != nil {
 			return err
 		}
 	}

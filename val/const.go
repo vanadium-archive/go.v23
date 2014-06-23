@@ -242,10 +242,8 @@ func (c Const) ToValue() (*Value, error) {
 				if vx.Len() != len(trep) {
 					return nil, fmt.Errorf("%s has a different length than %v", c, vx.Type())
 				}
-			} else {
-				vx.AssignLen(len(trep))
 			}
-			return vx.CopyBytes([]byte(trep)), nil
+			return vx.AssignBytes([]byte(trep)), nil
 		}
 	case *big.Int:
 		switch vx.Kind() {
@@ -589,11 +587,11 @@ func makeConst(rep interface{}, totype *Type) (Const, error) {
 			return Const{v, totype}, nil
 		}
 	case *Value:
-		v, err := trep.Convert(totype)
-		if err != nil {
+		conv := Zero(totype)
+		if err := Convert(conv, trep); err != nil {
 			return Const{}, err
 		}
-		return Const{v, totype}, nil
+		return Const{conv, totype}, nil
 	}
 	return Const{}, fmt.Errorf("can't convert %s to %v", cRepString(rep), cRepTypeString(rep, totype))
 }

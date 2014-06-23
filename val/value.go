@@ -2,10 +2,21 @@ package val
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"strconv"
 )
+
+// TODO(toddw): Consider changing the representation to separate read-only and
+// assignable values.  The motivation would be to avoid heap allocations;
+// e.g. the representation of slices would be []Value rather than []*Value.
+// This might give us better performance.  But this might not be good - we can
+// only assign inner values if we have an assigner for the outer value.
+//   func Zero(t *Type) Value
+//   type Assigner struct { v *Value }
+//   func (a Assigner) Assign(x Assigner)
+//   func (a Assigner) AssignBool(x bool)
+//   func (a Assigner) AssignByte(x byte)
+//   ... etc ...
 
 // Value is the generic representation of any value expressible in veyron.  All
 // values are typed.
@@ -14,7 +25,8 @@ import (
 // documentation for each method.  Calling a method inappropriate to the kind of
 // value causes a run-time panic.
 //
-// Cyclic values are not supported.
+// Cyclic values are not supported.  The zero Value is invalid; use Zero or one
+// of the *Value helper functions to create a valid Value.
 type Value struct {
 	// Each value is represented by a non-nil Type, along with a different
 	// representation depending on the kind of Type.
@@ -47,10 +59,10 @@ func zeroRep(t *Type) interface{} {
 		return complex128(0)
 	case String:
 		return ""
-	case TypeVal:
-		return zeroTypeVal
 	case Enum:
 		return enumIndex(0)
+	case TypeVal:
+		return zeroTypeVal
 	case List:
 		return make([]*Value, 0)
 	case Set, Map:
@@ -81,10 +93,10 @@ func isZeroRep(t *Type, rep interface{}) bool {
 		return trep == 0
 	case string:
 		return trep == ""
-	case *Type:
-		return trep == zeroTypeVal
 	case enumIndex:
 		return trep == 0
+	case *Type:
+		return trep == zeroTypeVal
 	case []*Value:
 		return len(trep) == 0
 	case repBytes:
@@ -214,7 +226,7 @@ func Complex128Value(x complex128) *Value { return Zero(Complex128Type).AssignCo
 func StringValue(x string) *Value { return Zero(StringType).AssignString(x) }
 
 // BytesValue is a convenience to create a []byte value.  The bytes are copied.
-func BytesValue(x []byte) *Value { return Zero(bytesType).AssignLen(len(x)).CopyBytes(x) }
+func BytesValue(x []byte) *Value { return Zero(ListType(ByteType)).AssignBytes(x) }
 
 // TypeValValue is a convenience to create a TypeVal value.
 func TypeValValue(x *Type) *Value { return Zero(TypeValType).AssignTypeVal(x) }
@@ -293,21 +305,17 @@ func (v *Value) IsZero() bool {
 	return isZeroRep(v.t, v.rep)
 }
 
+// IsValid returns true iff v is valid.  Nil and new(Value) are invalid; most
+// other methods panic if called on an invalid Value.
+func (v *Value) IsValid() bool {
+	return v != nil && v.t != nil
+}
+
 // Kind returns the kind of type of v.
 func (v *Value) Kind() Kind { return v.t.kind }
 
-// Type returns the type of v.  All values have a non-nil type.
+// Type returns the type of v.  All valid values have a non-nil type.
 func (v *Value) Type() *Type { return v.t }
-
-// Convert converts v to the target type t, and returns the resulting value.
-//
-// TODO(toddw): Define conversion rules and implement this function.
-func (v *Value) Convert(t *Type) (*Value, error) {
-	if v.t == t {
-		return v, nil
-	}
-	return nil, errors.New("val: Value.Convert isn't implemented")
-}
 
 // Bool returns the underlying value of a Bool.
 func (v *Value) Bool() bool {
@@ -360,15 +368,16 @@ func (v *Value) RawString() string {
 // String returns a human-readable representation of the value.
 // To retrieve the underlying value of a String, use RawString.
 func (v *Value) String() string {
+	if !v.IsValid() {
+		// This occurs if the user calls new(Value).String().
+		return "INVALID"
+	}
 	switch v.t.Kind() {
 	case Array, List, Set, Map, Struct:
 		// { } are used instead of ( ) for composites, except for []byte and [N]byte
 		if !v.t.IsBytes() {
 			return v.t.String() + stringRep(v.t, v.rep)
 		}
-	case OneOf, Any:
-		// Just show the inner type for oneof or any.
-		return stringRep(v.t, v.rep)
 	}
 	return v.t.String() + "(" + stringRep(v.t, v.rep) + ")"
 }
@@ -378,6 +387,18 @@ func (v *Value) String() string {
 func (v *Value) Bytes() []byte {
 	v.t.checkIsBytes("Bytes")
 	return v.rep.(repBytes)
+}
+
+// EnumIndex returns the index of the underlying Enum.
+func (v *Value) EnumIndex() int {
+	v.t.checkKind("EnumIndex", Enum)
+	return int(v.rep.(enumIndex))
+}
+
+// EnumLabel returns the label of the underlying Enum.
+func (v *Value) EnumLabel() string {
+	v.t.checkKind("EnumLabel", Enum)
+	return v.t.labels[int(v.rep.(enumIndex))]
 }
 
 // TypeVal returns the underlying value of a TypeVal.
@@ -445,18 +466,6 @@ func (v *Value) MapIndex(key *Value) *Value {
 	return val
 }
 
-// EnumIndex returns the index of the underlying Enum.
-func (v *Value) EnumIndex() int {
-	v.t.checkKind("EnumIndex", Enum)
-	return int(v.rep.(enumIndex))
-}
-
-// EnumLabel returns the label of the underlying Enum.
-func (v *Value) EnumLabel() string {
-	v.t.checkKind("EnumLabel", Enum)
-	return v.t.labels[int(v.rep.(enumIndex))]
-}
-
 // Field returns the Struct field at the given index.  It panics if the index is
 // out of range.
 func (v *Value) Field(index int) *Value {
@@ -473,8 +482,6 @@ func (v *Value) Elem() *Value {
 
 // Assign the value v to x.  If x is nil, v is set to its zero value.  It panics
 // if the type of v is not assignable from the type of x.
-//
-// TODO(toddw): Restrict OneOf and Any to only allowing structs?
 func (v *Value) Assign(x *Value) *Value {
 	if x == nil {
 		v.rep = zeroRep(v.t)
@@ -550,23 +557,40 @@ func (v *Value) AssignString(x string) *Value {
 	return v
 }
 
-// CopyBytes assigns the underlying []byte or [N]byte to a copy of x.  Copy
-// semantics are the same as the built-in copy function; we copy min(v.Len(),
-// len(x)) bytes from x to v.
-func (v *Value) CopyBytes(x []byte) *Value {
-	v.t.checkIsBytes("CopyBytes")
-	copy(v.rep.(repBytes), x)
+// AssignBytes assigns the underlying []byte or [N]byte to a copy of x.  If the
+// underlying value is []byte, the resulting v has len == len(x).  If the
+// underlying value is [N]byte, we require len(x) == N, otherwise panics.
+func (v *Value) AssignBytes(x []byte) *Value {
+	v.t.checkIsBytes("AssignBytes")
+	switch v.t.kind {
+	case Array:
+		rep := v.rep.(repBytes)
+		if v.t.len != len(x) {
+			panic(fmt.Errorf("val: AssignBytes on type [%d]byte with len %d", v.t.len, len(x)))
+		}
+		copy(rep, x)
+	case List:
+		oldrep, newlen := v.rep.(repBytes), len(x)
+		var newrep repBytes
+		if newlen <= cap(oldrep) {
+			newrep = oldrep[:newlen]
+		} else {
+			newrep = make(repBytes, newlen)
+		}
+		copy(newrep, x)
+		v.rep = newrep
+	default:
+		panic(v.t.errBytes("AssignBytes"))
+	}
 	return v
 }
 
-// AssignTypeVal assigns the underlying TypeVal to x.  If x == nil we assign the
-// zero TypeVal.
-func (v *Value) AssignTypeVal(x *Type) *Value {
-	v.t.checkKind("AssignTypeVal", TypeVal)
-	if x == nil {
-		x = zeroTypeVal
-	}
-	v.rep = x
+// CopyBytes copies bytes from x to v for the underlying []byte or [N]byte.  The
+// semantics are the same as the built-in copy function; min(v.Len(), len(x))
+// bytes are copied from x to v.
+func (v *Value) CopyBytes(x []byte) *Value {
+	v.t.checkIsBytes("CopyBytes")
+	copy(v.rep.(repBytes), x)
 	return v
 }
 
@@ -593,23 +617,32 @@ func (v *Value) AssignEnumLabel(label string) *Value {
 	return v
 }
 
+// AssignTypeVal assigns the underlying TypeVal to x.  If x == nil we assign the
+// zero TypeVal.
+func (v *Value) AssignTypeVal(x *Type) *Value {
+	v.t.checkKind("AssignTypeVal", TypeVal)
+	if x == nil {
+		x = zeroTypeVal
+	}
+	v.rep = x
+	return v
+}
+
 // AssignLen assigns the length of the underlying List to n.  Unlike Go slices,
 // Lists do not have a separate notion of capacity.
 func (v *Value) AssignLen(n int) *Value {
 	v.t.checkKind("AssignLen", List)
 	if oldrep, ok := v.rep.(repBytes); ok {
-		// TODO(toddw): Speed up the loops below that zero each byte.
 		var newrep repBytes
 		if n <= cap(oldrep) {
 			newrep = oldrep[:n]
-			for ix := len(oldrep); ix < n; ix++ {
-				newrep[ix] = 0
+			// Fill newrep[oldlen:n] with zero bytes.
+			for zx := len(oldrep); zx < n; {
+				zx += copy(newrep[zx:], allZeroBytes)
 			}
 		} else {
 			newrep = make(repBytes, n)
-			for ix := copy(newrep, oldrep); ix < n; ix++ {
-				newrep[ix] = 0
-			}
+			copy(newrep, oldrep)
 		}
 		v.rep = newrep
 		return v
