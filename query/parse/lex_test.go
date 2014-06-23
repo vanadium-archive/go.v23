@@ -121,7 +121,6 @@ func TestLexing(t *testing.T) {
 		{`<`, []token2{{'<', yySymType{pos: Pos{1, 1}}}}},
 		{`<=`, []token2{{tLE, yySymType{pos: Pos{1, 1}}}}},
 		{`.`, []token2{{'.', yySymType{pos: Pos{1, 1}}}}},
-		{`..`, []token2{{tDOTDOT, yySymType{pos: Pos{1, 1}}}}},
 
 		// Keywords:
 		{`true`, []token2{{tTRUE, yySymType{pos: Pos{1, 1}}}}},

@@ -42,5 +42,5 @@ func TestParsePath(t *testing.T) {
 	expectPath(t, ParsePath("/"), PathName{})
 	expectPath(t, ParsePath("a"), PathName{"a"})
 	expectPath(t, ParsePath("a/b"), PathName{"a", "b"})
-	expectPath(t, ParsePath("a/b/./c/d/../e"), PathName{"a", "b", "c", "e"})
+	expectPath(t, ParsePath("a/b/./c/d/../e"), PathName{"a", "b", "c", "d", "..", "e"})
 }

@@ -204,7 +204,6 @@ var multiRunes = map[rune]multiRune{
 	'|': {'|', tOROR},
 	'&': {'&', tANDAND},
 	'!': {'=', tNE},
-	'.': {'.', tDOTDOT},
 }
 
 // scan extracts a single token from l.input and stores it in l.lval.

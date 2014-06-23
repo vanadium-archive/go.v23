@@ -16,9 +16,8 @@ state 0
 
 	.  shift 7
 	*  shift 8
-	/  shift 10
-	tDOTDOT  shift 9
-	tTYPE  shift 11
+	/  shift 9
+	tTYPE  shift 10
 	tIDENT  shift 6
 	tSTRLIT  shift 5
 	.  error
@@ -44,81 +43,73 @@ state 2
 	pipeline:  pipeline.| tIDENT 
 	pipeline:  pipeline.| tIDENT ( ) 
 
-	|  shift 12
-	.  reduce 1 (src line 163)
+	|  shift 11
+	.  reduce 1 (src line 168)
 
 
 state 3
 	pipeline:  wildcard_name.    (2)
 
-	.  reduce 2 (src line 167)
+	.  reduce 2 (src line 172)
 
 
 state 4
 	pipeline:  type_filter.    (4)
 
-	.  reduce 4 (src line 172)
+	.  reduce 4 (src line 177)
 
 
 state 5
 	wildcard_name:  tSTRLIT.    (10)
 
-	.  reduce 10 (src line 188)
+	.  reduce 10 (src line 193)
 
 
 state 6
 	wildcard_name:  tIDENT./ * 
-	wildcard_name:  tIDENT./ tDOTDOT 
 	wildcard_name:  tIDENT./ . 
-	wildcard_name:  tIDENT.    (14)
+	wildcard_name:  tIDENT.    (13)
 	wildcard_name:  tIDENT./ tIDENT 
 	wildcard_name:  tIDENT./ . / 
-	wildcard_name:  tIDENT./ tDOTDOT / 
 	wildcard_name:  tIDENT./ * / 
 	wildcard_name:  tIDENT./ 
 
-	/  shift 13
-	.  reduce 14 (src line 197)
+	/  shift 12
+	.  reduce 13 (src line 200)
 
 
 state 7
-	wildcard_name:  ..    (15)
+	wildcard_name:  ..    (14)
 	wildcard_name:  ../ 
 
-	/  shift 14
-	.  reduce 15 (src line 199)
+	/  shift 13
+	.  reduce 14 (src line 202)
 
 
 state 8
-	wildcard_name:  *.    (16)
+	wildcard_name:  *.    (15)
 	wildcard_name:  *./ 
 
-	/  shift 15
-	.  reduce 16 (src line 201)
+	/  shift 14
+	.  reduce 15 (src line 204)
 
 
 state 9
-	wildcard_name:  tDOTDOT.    (22)
+	wildcard_name:  /.    (22)
 
-	.  reduce 22 (src line 228)
+	.  reduce 22 (src line 236)
 
 
 state 10
-	wildcard_name:  /.    (25)
-
-	.  reduce 25 (src line 243)
-
-
-state 11
 	type_filter:  tTYPE.tIDENT 
 	type_filter:  tTYPE.tSTRLIT 
 
-	tIDENT  shift 16
-	tSTRLIT  shift 17
+	tIDENT  shift 15
+	tSTRLIT  shift 16
 	.  error
 
 
-state 12
+state 11
 	pipeline:  pipeline |.type_filter 
 	pipeline:  pipeline |.? predicate 
 	pipeline:  pipeline |.{ alias_list } 
@@ -126,181 +117,169 @@ state 12
 	pipeline:  pipeline |.tIDENT 
 	pipeline:  pipeline |.tIDENT ( ) 
 
-	{  shift 20
-	?  shift 19
-	tTYPE  shift 11
-	tIDENT  shift 21
+	{  shift 19
+	?  shift 18
+	tTYPE  shift 10
+	tIDENT  shift 20
 	.  error
 
-	type_filter  goto 18
+	type_filter  goto 17
 
-state 13
+state 12
 	wildcard_name:  tIDENT /.* 
-	wildcard_name:  tIDENT /.tDOTDOT 
 	wildcard_name:  tIDENT /.. 
 	wildcard_name:  tIDENT /.tIDENT 
 	wildcard_name:  tIDENT /.. / 
-	wildcard_name:  tIDENT /.tDOTDOT / 
 	wildcard_name:  tIDENT /.* / 
-	wildcard_name:  tIDENT /.    (21)
+	wildcard_name:  tIDENT /.    (19)
 
-	.  shift 24
-	*  shift 22
-	tDOTDOT  shift 23
-	tIDENT  shift 25
-	.  reduce 21 (src line 223)
+	.  shift 22
+	*  shift 21
+	tIDENT  shift 23
+	.  reduce 19 (src line 221)
+
+
+state 13
+	wildcard_name:  . /.    (20)
+
+	.  reduce 20 (src line 226)
 
 
 state 14
-	wildcard_name:  . /.    (23)
+	wildcard_name:  * /.    (21)
 
-	.  reduce 23 (src line 233)
+	.  reduce 21 (src line 231)
 
 
 state 15
-	wildcard_name:  * /.    (24)
+	type_filter:  tTYPE tIDENT.    (23)
 
-	.  reduce 24 (src line 238)
+	.  reduce 23 (src line 242)
 
 
 state 16
-	type_filter:  tTYPE tIDENT.    (26)
+	type_filter:  tTYPE tSTRLIT.    (24)
 
-	.  reduce 26 (src line 249)
+	.  reduce 24 (src line 245)
 
 
 state 17
-	type_filter:  tTYPE tSTRLIT.    (27)
+	pipeline:  pipeline | type_filter.    (3)
 
-	.  reduce 27 (src line 252)
+	.  reduce 3 (src line 175)
 
 
 state 18
-	pipeline:  pipeline | type_filter.    (3)
-
-	.  reduce 3 (src line 170)
-
-
-state 19
 	pipeline:  pipeline | ?.predicate 
 
-	!  shift 31
-	(  shift 29
-	/  shift 37
-	-  shift 38
-	+  shift 39
-	tTRUE  shift 27
-	tFALSE  shift 28
-	tIDENT  shift 32
-	tSTRLIT  shift 33
-	tINTLIT  shift 35
-	tRATLIT  shift 34
+	!  shift 29
+	(  shift 27
+	/  shift 35
+	-  shift 36
+	+  shift 37
+	tTRUE  shift 25
+	tFALSE  shift 26
+	tIDENT  shift 30
+	tSTRLIT  shift 31
+	tINTLIT  shift 33
+	tRATLIT  shift 32
 	.  error
 
-	predicate  goto 26
-	expr  goto 30
-	vname  goto 36
+	predicate  goto 24
+	expr  goto 28
+	vname  goto 34
 
-state 20
+state 19
 	pipeline:  pipeline | {.alias_list } 
 
 	.  shift 7
 	*  shift 8
-	/  shift 10
-	tDOTDOT  shift 9
-	tTYPE  shift 11
+	/  shift 9
+	tTYPE  shift 10
 	tIDENT  shift 6
 	tSTRLIT  shift 5
 	.  error
 
-	pipeline  goto 42
+	pipeline  goto 40
 	wildcard_name  goto 3
 	type_filter  goto 4
-	alias  goto 41
-	alias_list  goto 40
+	alias  goto 39
+	alias_list  goto 38
 
-state 21
+state 20
 	pipeline:  pipeline | tIDENT.( expr_list ) 
 	pipeline:  pipeline | tIDENT.    (8)
 	pipeline:  pipeline | tIDENT.( ) 
 
-	(  shift 43
-	.  reduce 8 (src line 182)
+	(  shift 41
+	.  reduce 8 (src line 187)
 
 
-state 22
+state 21
 	wildcard_name:  tIDENT / *.    (11)
 	wildcard_name:  tIDENT / *./ 
 
-	/  shift 44
-	.  reduce 11 (src line 191)
+	/  shift 42
+	.  reduce 11 (src line 196)
+
+
+state 22
+	wildcard_name:  tIDENT / ..    (12)
+	wildcard_name:  tIDENT / ../ 
+
+	/  shift 43
+	.  reduce 12 (src line 198)
 
 
 state 23
-	wildcard_name:  tIDENT / tDOTDOT.    (12)
-	wildcard_name:  tIDENT / tDOTDOT./ 
+	wildcard_name:  tIDENT / tIDENT.    (16)
 
-	/  shift 45
-	.  reduce 12 (src line 193)
+	.  reduce 16 (src line 206)
 
 
 state 24
-	wildcard_name:  tIDENT / ..    (13)
-	wildcard_name:  tIDENT / ../ 
-
-	/  shift 46
-	.  reduce 13 (src line 195)
-
-
-state 25
-	wildcard_name:  tIDENT / tIDENT.    (17)
-
-	.  reduce 17 (src line 203)
-
-
-state 26
 	pipeline:  pipeline | ? predicate.    (5)
 	predicate:  predicate.tANDAND predicate 
 	predicate:  predicate.tOROR predicate 
 
-	tOROR  shift 48
-	tANDAND  shift 47
-	.  reduce 5 (src line 176)
+	tOROR  shift 45
+	tANDAND  shift 44
+	.  reduce 5 (src line 181)
+
+
+state 25
+	predicate:  tTRUE.    (25)
+
+	.  reduce 25 (src line 248)
+
+
+state 26
+	predicate:  tFALSE.    (26)
+
+	.  reduce 26 (src line 251)
 
 
 state 27
-	predicate:  tTRUE.    (28)
-
-	.  reduce 28 (src line 255)
-
-
-state 28
-	predicate:  tFALSE.    (29)
-
-	.  reduce 29 (src line 258)
-
-
-state 29
 	predicate:  (.predicate ) 
 
-	!  shift 31
-	(  shift 29
-	/  shift 37
-	-  shift 38
-	+  shift 39
-	tTRUE  shift 27
-	tFALSE  shift 28
-	tIDENT  shift 32
-	tSTRLIT  shift 33
-	tINTLIT  shift 35
-	tRATLIT  shift 34
+	!  shift 29
+	(  shift 27
+	/  shift 35
+	-  shift 36
+	+  shift 37
+	tTRUE  shift 25
+	tFALSE  shift 26
+	tIDENT  shift 30
+	tSTRLIT  shift 31
+	tINTLIT  shift 33
+	tRATLIT  shift 32
 	.  error
 
-	predicate  goto 49
-	expr  goto 30
-	vname  goto 36
+	predicate  goto 46
+	expr  goto 28
+	vname  goto 34
 
-state 30
+state 28
 	predicate:  expr.= expr 
 	predicate:  expr.tEQEQ expr 
 	predicate:  expr.tNE expr 
@@ -309,642 +288,635 @@ state 30
 	predicate:  expr.> expr 
 	predicate:  expr.tGE expr 
 
-	=  shift 50
-	<  shift 53
-	>  shift 55
-	tLE  shift 54
-	tGE  shift 56
-	tNE  shift 52
-	tEQEQ  shift 51
+	=  shift 47
+	<  shift 50
+	>  shift 52
+	tLE  shift 51
+	tGE  shift 53
+	tNE  shift 49
+	tEQEQ  shift 48
 	.  error
+
+
+state 29
+	predicate:  !.predicate 
+
+	!  shift 29
+	(  shift 27
+	/  shift 35
+	-  shift 36
+	+  shift 37
+	tTRUE  shift 25
+	tFALSE  shift 26
+	tIDENT  shift 30
+	tSTRLIT  shift 31
+	tINTLIT  shift 33
+	tRATLIT  shift 32
+	.  error
+
+	predicate  goto 54
+	expr  goto 28
+	vname  goto 34
+
+state 30
+	predicate:  tIDENT.( expr_list ) 
+	expr:  tIDENT.( expr_list ) 
+	vname:  tIDENT.    (49)
+
+	(  shift 55
+	.  reduce 49 (src line 304)
 
 
 state 31
-	predicate:  !.predicate 
+	expr:  tSTRLIT.    (39)
 
-	!  shift 31
-	(  shift 29
-	/  shift 37
-	-  shift 38
-	+  shift 39
-	tTRUE  shift 27
-	tFALSE  shift 28
-	tIDENT  shift 32
-	tSTRLIT  shift 33
-	tINTLIT  shift 35
-	tRATLIT  shift 34
-	.  error
+	.  reduce 39 (src line 278)
 
-	predicate  goto 57
-	expr  goto 30
-	vname  goto 36
 
 state 32
-	predicate:  tIDENT.( expr_list ) 
-	expr:  tIDENT.( expr_list ) 
-	vname:  tIDENT.    (52)
+	expr:  tRATLIT.    (40)
 
-	(  shift 58
-	.  reduce 52 (src line 311)
+	.  reduce 40 (src line 281)
 
 
 state 33
-	expr:  tSTRLIT.    (42)
+	expr:  tINTLIT.    (41)
 
-	.  reduce 42 (src line 285)
+	.  reduce 41 (src line 283)
 
 
 state 34
-	expr:  tRATLIT.    (43)
+	expr:  vname.    (42)
+	vname:  vname./ tIDENT 
 
-	.  reduce 43 (src line 288)
+	/  shift 56
+	.  reduce 42 (src line 285)
 
 
 state 35
-	expr:  tINTLIT.    (44)
+	expr:  /.tSTRLIT 
 
-	.  reduce 44 (src line 290)
+	tSTRLIT  shift 57
+	.  error
 
 
 state 36
-	expr:  vname.    (45)
-	vname:  vname./ tIDENT 
-
-	/  shift 59
-	.  reduce 45 (src line 292)
-
-
-state 37
-	expr:  /.tSTRLIT 
-
-	tSTRLIT  shift 60
-	.  error
-
-
-state 38
 	expr:  -.expr 
 
-	/  shift 37
-	-  shift 38
-	+  shift 39
-	tIDENT  shift 62
-	tSTRLIT  shift 33
-	tINTLIT  shift 35
-	tRATLIT  shift 34
+	/  shift 35
+	-  shift 36
+	+  shift 37
+	tIDENT  shift 59
+	tSTRLIT  shift 31
+	tINTLIT  shift 33
+	tRATLIT  shift 32
 	.  error
 
-	expr  goto 61
-	vname  goto 36
+	expr  goto 58
+	vname  goto 34
 
-state 39
+state 37
 	expr:  +.expr 
 
-	/  shift 37
-	-  shift 38
-	+  shift 39
-	tIDENT  shift 62
-	tSTRLIT  shift 33
-	tINTLIT  shift 35
-	tRATLIT  shift 34
+	/  shift 35
+	-  shift 36
+	+  shift 37
+	tIDENT  shift 59
+	tSTRLIT  shift 31
+	tINTLIT  shift 33
+	tRATLIT  shift 32
 	.  error
 
-	expr  goto 63
-	vname  goto 36
+	expr  goto 60
+	vname  goto 34
 
-state 40
+state 38
 	pipeline:  pipeline | { alias_list.} 
 	alias_list:  alias_list., alias 
 
-	}  shift 64
-	,  shift 65
+	}  shift 61
+	,  shift 62
 	.  error
 
 
-state 41
-	alias_list:  alias.    (54)
+state 39
+	alias_list:  alias.    (51)
 
-	.  reduce 54 (src line 316)
+	.  reduce 51 (src line 309)
 
 
-state 42
+state 40
 	pipeline:  pipeline.| type_filter 
 	pipeline:  pipeline.| ? predicate 
 	pipeline:  pipeline.| { alias_list } 
 	pipeline:  pipeline.| tIDENT ( expr_list ) 
 	pipeline:  pipeline.| tIDENT 
 	pipeline:  pipeline.| tIDENT ( ) 
-	alias:  pipeline.    (56)
+	alias:  pipeline.    (53)
 	alias:  pipeline.tAS tIDENT 
 	alias:  pipeline.tAS tSTRLIT 
 	alias:  pipeline.tAS tIDENT tHIDDEN 
 	alias:  pipeline.tAS tSTRLIT tHIDDEN 
 
-	|  shift 12
-	tAS  shift 66
-	.  reduce 56 (src line 322)
+	|  shift 11
+	tAS  shift 63
+	.  reduce 53 (src line 315)
 
 
-state 43
+state 41
 	pipeline:  pipeline | tIDENT (.expr_list ) 
 	pipeline:  pipeline | tIDENT (.) 
 
-	)  shift 68
-	/  shift 37
-	-  shift 38
-	+  shift 39
-	tIDENT  shift 62
-	tSTRLIT  shift 33
-	tINTLIT  shift 35
-	tRATLIT  shift 34
+	)  shift 65
+	/  shift 35
+	-  shift 36
+	+  shift 37
+	tIDENT  shift 59
+	tSTRLIT  shift 31
+	tINTLIT  shift 33
+	tRATLIT  shift 32
 	.  error
 
-	expr  goto 69
-	expr_list  goto 67
-	vname  goto 36
+	expr  goto 66
+	expr_list  goto 64
+	vname  goto 34
+
+state 42
+	wildcard_name:  tIDENT / * /.    (18)
+
+	.  reduce 18 (src line 216)
+
+
+state 43
+	wildcard_name:  tIDENT / . /.    (17)
+
+	.  reduce 17 (src line 211)
+
 
 state 44
-	wildcard_name:  tIDENT / * /.    (20)
-
-	.  reduce 20 (src line 218)
-
-
-state 45
-	wildcard_name:  tIDENT / tDOTDOT /.    (19)
-
-	.  reduce 19 (src line 213)
-
-
-state 46
-	wildcard_name:  tIDENT / . /.    (18)
-
-	.  reduce 18 (src line 208)
-
-
-state 47
 	predicate:  predicate tANDAND.predicate 
 
-	!  shift 31
-	(  shift 29
-	/  shift 37
-	-  shift 38
-	+  shift 39
-	tTRUE  shift 27
-	tFALSE  shift 28
-	tIDENT  shift 32
-	tSTRLIT  shift 33
-	tINTLIT  shift 35
-	tRATLIT  shift 34
+	!  shift 29
+	(  shift 27
+	/  shift 35
+	-  shift 36
+	+  shift 37
+	tTRUE  shift 25
+	tFALSE  shift 26
+	tIDENT  shift 30
+	tSTRLIT  shift 31
+	tINTLIT  shift 33
+	tRATLIT  shift 32
 	.  error
 
-	predicate  goto 70
-	expr  goto 30
-	vname  goto 36
+	predicate  goto 67
+	expr  goto 28
+	vname  goto 34
 
-state 48
+state 45
 	predicate:  predicate tOROR.predicate 
 
-	!  shift 31
-	(  shift 29
-	/  shift 37
-	-  shift 38
-	+  shift 39
-	tTRUE  shift 27
-	tFALSE  shift 28
-	tIDENT  shift 32
-	tSTRLIT  shift 33
-	tINTLIT  shift 35
-	tRATLIT  shift 34
+	!  shift 29
+	(  shift 27
+	/  shift 35
+	-  shift 36
+	+  shift 37
+	tTRUE  shift 25
+	tFALSE  shift 26
+	tIDENT  shift 30
+	tSTRLIT  shift 31
+	tINTLIT  shift 33
+	tRATLIT  shift 32
 	.  error
 
-	predicate  goto 71
-	expr  goto 30
-	vname  goto 36
+	predicate  goto 68
+	expr  goto 28
+	vname  goto 34
 
-state 49
+state 46
 	predicate:  ( predicate.) 
 	predicate:  predicate.tANDAND predicate 
 	predicate:  predicate.tOROR predicate 
 
-	)  shift 72
-	tOROR  shift 48
-	tANDAND  shift 47
+	)  shift 69
+	tOROR  shift 45
+	tANDAND  shift 44
 	.  error
 
 
-state 50
+state 47
 	predicate:  expr =.expr 
 
-	/  shift 37
-	-  shift 38
-	+  shift 39
-	tIDENT  shift 62
-	tSTRLIT  shift 33
-	tINTLIT  shift 35
-	tRATLIT  shift 34
+	/  shift 35
+	-  shift 36
+	+  shift 37
+	tIDENT  shift 59
+	tSTRLIT  shift 31
+	tINTLIT  shift 33
+	tRATLIT  shift 32
+	.  error
+
+	expr  goto 70
+	vname  goto 34
+
+state 48
+	predicate:  expr tEQEQ.expr 
+
+	/  shift 35
+	-  shift 36
+	+  shift 37
+	tIDENT  shift 59
+	tSTRLIT  shift 31
+	tINTLIT  shift 33
+	tRATLIT  shift 32
+	.  error
+
+	expr  goto 71
+	vname  goto 34
+
+state 49
+	predicate:  expr tNE.expr 
+
+	/  shift 35
+	-  shift 36
+	+  shift 37
+	tIDENT  shift 59
+	tSTRLIT  shift 31
+	tINTLIT  shift 33
+	tRATLIT  shift 32
+	.  error
+
+	expr  goto 72
+	vname  goto 34
+
+state 50
+	predicate:  expr <.expr 
+
+	/  shift 35
+	-  shift 36
+	+  shift 37
+	tIDENT  shift 59
+	tSTRLIT  shift 31
+	tINTLIT  shift 33
+	tRATLIT  shift 32
 	.  error
 
 	expr  goto 73
-	vname  goto 36
+	vname  goto 34
 
 state 51
-	predicate:  expr tEQEQ.expr 
+	predicate:  expr tLE.expr 
 
-	/  shift 37
-	-  shift 38
-	+  shift 39
-	tIDENT  shift 62
-	tSTRLIT  shift 33
-	tINTLIT  shift 35
-	tRATLIT  shift 34
+	/  shift 35
+	-  shift 36
+	+  shift 37
+	tIDENT  shift 59
+	tSTRLIT  shift 31
+	tINTLIT  shift 33
+	tRATLIT  shift 32
 	.  error
 
 	expr  goto 74
-	vname  goto 36
+	vname  goto 34
 
 state 52
-	predicate:  expr tNE.expr 
+	predicate:  expr >.expr 
 
-	/  shift 37
-	-  shift 38
-	+  shift 39
-	tIDENT  shift 62
-	tSTRLIT  shift 33
-	tINTLIT  shift 35
-	tRATLIT  shift 34
+	/  shift 35
+	-  shift 36
+	+  shift 37
+	tIDENT  shift 59
+	tSTRLIT  shift 31
+	tINTLIT  shift 33
+	tRATLIT  shift 32
 	.  error
 
 	expr  goto 75
-	vname  goto 36
+	vname  goto 34
 
 state 53
-	predicate:  expr <.expr 
+	predicate:  expr tGE.expr 
 
-	/  shift 37
-	-  shift 38
-	+  shift 39
-	tIDENT  shift 62
-	tSTRLIT  shift 33
-	tINTLIT  shift 35
-	tRATLIT  shift 34
+	/  shift 35
+	-  shift 36
+	+  shift 37
+	tIDENT  shift 59
+	tSTRLIT  shift 31
+	tINTLIT  shift 33
+	tRATLIT  shift 32
 	.  error
 
 	expr  goto 76
-	vname  goto 36
+	vname  goto 34
 
 state 54
-	predicate:  expr tLE.expr 
-
-	/  shift 37
-	-  shift 38
-	+  shift 39
-	tIDENT  shift 62
-	tSTRLIT  shift 33
-	tINTLIT  shift 35
-	tRATLIT  shift 34
-	.  error
-
-	expr  goto 77
-	vname  goto 36
-
-state 55
-	predicate:  expr >.expr 
-
-	/  shift 37
-	-  shift 38
-	+  shift 39
-	tIDENT  shift 62
-	tSTRLIT  shift 33
-	tINTLIT  shift 35
-	tRATLIT  shift 34
-	.  error
-
-	expr  goto 78
-	vname  goto 36
-
-state 56
-	predicate:  expr tGE.expr 
-
-	/  shift 37
-	-  shift 38
-	+  shift 39
-	tIDENT  shift 62
-	tSTRLIT  shift 33
-	tINTLIT  shift 35
-	tRATLIT  shift 34
-	.  error
-
-	expr  goto 79
-	vname  goto 36
-
-state 57
 	predicate:  predicate.tANDAND predicate 
 	predicate:  predicate.tOROR predicate 
-	predicate:  ! predicate.    (40)
+	predicate:  ! predicate.    (37)
 
-	.  reduce 40 (src line 280)
+	.  reduce 37 (src line 273)
 
 
-state 58
+state 55
 	predicate:  tIDENT (.expr_list ) 
 	expr:  tIDENT (.expr_list ) 
 
-	/  shift 37
-	-  shift 38
-	+  shift 39
-	tIDENT  shift 62
-	tSTRLIT  shift 33
-	tINTLIT  shift 35
-	tRATLIT  shift 34
+	/  shift 35
+	-  shift 36
+	+  shift 37
+	tIDENT  shift 59
+	tSTRLIT  shift 31
+	tINTLIT  shift 33
+	tRATLIT  shift 32
 	.  error
 
-	expr  goto 69
-	expr_list  goto 80
-	vname  goto 36
+	expr  goto 66
+	expr_list  goto 77
+	vname  goto 34
 
-state 59
+state 56
 	vname:  vname /.tIDENT 
 
-	tIDENT  shift 81
+	tIDENT  shift 78
 	.  error
+
+
+state 57
+	expr:  / tSTRLIT.    (43)
+
+	.  reduce 43 (src line 287)
+
+
+state 58
+	expr:  - expr.    (45)
+
+	.  reduce 45 (src line 291)
+
+
+state 59
+	expr:  tIDENT.( expr_list ) 
+	vname:  tIDENT.    (49)
+
+	(  shift 79
+	.  reduce 49 (src line 304)
 
 
 state 60
-	expr:  / tSTRLIT.    (46)
+	expr:  + expr.    (46)
 
-	.  reduce 46 (src line 294)
+	.  reduce 46 (src line 293)
 
 
 state 61
-	expr:  - expr.    (48)
+	pipeline:  pipeline | { alias_list }.    (6)
 
-	.  reduce 48 (src line 298)
+	.  reduce 6 (src line 183)
 
 
 state 62
-	expr:  tIDENT.( expr_list ) 
-	vname:  tIDENT.    (52)
-
-	(  shift 82
-	.  reduce 52 (src line 311)
-
-
-state 63
-	expr:  + expr.    (49)
-
-	.  reduce 49 (src line 300)
-
-
-state 64
-	pipeline:  pipeline | { alias_list }.    (6)
-
-	.  reduce 6 (src line 178)
-
-
-state 65
 	alias_list:  alias_list ,.alias 
 
 	.  shift 7
 	*  shift 8
-	/  shift 10
-	tDOTDOT  shift 9
-	tTYPE  shift 11
+	/  shift 9
+	tTYPE  shift 10
 	tIDENT  shift 6
 	tSTRLIT  shift 5
 	.  error
 
-	pipeline  goto 42
+	pipeline  goto 40
 	wildcard_name  goto 3
 	type_filter  goto 4
-	alias  goto 83
+	alias  goto 80
 
-state 66
+state 63
 	alias:  pipeline tAS.tIDENT 
 	alias:  pipeline tAS.tSTRLIT 
 	alias:  pipeline tAS.tIDENT tHIDDEN 
 	alias:  pipeline tAS.tSTRLIT tHIDDEN 
 
-	tIDENT  shift 84
-	tSTRLIT  shift 85
+	tIDENT  shift 81
+	tSTRLIT  shift 82
 	.  error
 
 
-state 67
+state 64
 	pipeline:  pipeline | tIDENT ( expr_list.) 
 	expr_list:  expr_list., expr 
 
-	)  shift 86
-	,  shift 87
+	)  shift 83
+	,  shift 84
 	.  error
 
 
-state 68
+state 65
 	pipeline:  pipeline | tIDENT ( ).    (9)
 
-	.  reduce 9 (src line 184)
+	.  reduce 9 (src line 189)
 
 
-state 69
-	expr_list:  expr.    (50)
-
-	.  reduce 50 (src line 303)
-
-
-state 70
-	predicate:  predicate.tANDAND predicate 
-	predicate:  predicate tANDAND predicate.    (38)
-	predicate:  predicate.tOROR predicate 
-
-	.  reduce 38 (src line 276)
-
-
-state 71
-	predicate:  predicate.tANDAND predicate 
-	predicate:  predicate.tOROR predicate 
-	predicate:  predicate tOROR predicate.    (39)
-
-	tANDAND  shift 47
-	.  reduce 39 (src line 278)
-
-
-state 72
-	predicate:  ( predicate ).    (30)
-
-	.  reduce 30 (src line 260)
-
-
-state 73
-	predicate:  expr = expr.    (31)
-
-	.  reduce 31 (src line 262)
-
-
-state 74
-	predicate:  expr tEQEQ expr.    (32)
-
-	.  reduce 32 (src line 264)
-
-
-state 75
-	predicate:  expr tNE expr.    (33)
-
-	.  reduce 33 (src line 266)
-
-
-state 76
-	predicate:  expr < expr.    (34)
-
-	.  reduce 34 (src line 268)
-
-
-state 77
-	predicate:  expr tLE expr.    (35)
-
-	.  reduce 35 (src line 270)
-
-
-state 78
-	predicate:  expr > expr.    (36)
-
-	.  reduce 36 (src line 272)
-
-
-state 79
-	predicate:  expr tGE expr.    (37)
-
-	.  reduce 37 (src line 274)
-
-
-state 80
-	predicate:  tIDENT ( expr_list.) 
-	expr:  tIDENT ( expr_list.) 
-	expr_list:  expr_list., expr 
-
-	)  shift 88
-	,  shift 87
-	.  error
-
-
-state 81
-	vname:  vname / tIDENT.    (53)
-
-	.  reduce 53 (src line 313)
-
-
-state 82
-	expr:  tIDENT (.expr_list ) 
-
-	/  shift 37
-	-  shift 38
-	+  shift 39
-	tIDENT  shift 62
-	tSTRLIT  shift 33
-	tINTLIT  shift 35
-	tRATLIT  shift 34
-	.  error
-
-	expr  goto 69
-	expr_list  goto 89
-	vname  goto 36
-
-state 83
-	alias_list:  alias_list , alias.    (55)
-
-	.  reduce 55 (src line 319)
-
-
-state 84
-	alias:  pipeline tAS tIDENT.    (57)
-	alias:  pipeline tAS tIDENT.tHIDDEN 
-
-	tHIDDEN  shift 90
-	.  reduce 57 (src line 325)
-
-
-state 85
-	alias:  pipeline tAS tSTRLIT.    (58)
-	alias:  pipeline tAS tSTRLIT.tHIDDEN 
-
-	tHIDDEN  shift 91
-	.  reduce 58 (src line 327)
-
-
-state 86
-	pipeline:  pipeline | tIDENT ( expr_list ).    (7)
-
-	.  reduce 7 (src line 180)
-
-
-state 87
-	expr_list:  expr_list ,.expr 
-
-	/  shift 37
-	-  shift 38
-	+  shift 39
-	tIDENT  shift 62
-	tSTRLIT  shift 33
-	tINTLIT  shift 35
-	tRATLIT  shift 34
-	.  error
-
-	expr  goto 92
-	vname  goto 36
-
-state 88
-	predicate:  tIDENT ( expr_list ).    (41)
-	expr:  tIDENT ( expr_list ).    (47)
-
-	=  reduce 47 (src line 296)
-	<  reduce 47 (src line 296)
-	>  reduce 47 (src line 296)
-	tLE  reduce 47 (src line 296)
-	tGE  reduce 47 (src line 296)
-	tNE  reduce 47 (src line 296)
-	tEQEQ  reduce 47 (src line 296)
-	.  reduce 41 (src line 282)
-
-
-state 89
-	expr:  tIDENT ( expr_list.) 
-	expr_list:  expr_list., expr 
-
-	)  shift 93
-	,  shift 87
-	.  error
-
-
-state 90
-	alias:  pipeline tAS tIDENT tHIDDEN.    (59)
-
-	.  reduce 59 (src line 329)
-
-
-state 91
-	alias:  pipeline tAS tSTRLIT tHIDDEN.    (60)
-
-	.  reduce 60 (src line 331)
-
-
-state 92
-	expr_list:  expr_list , expr.    (51)
-
-	.  reduce 51 (src line 306)
-
-
-state 93
-	expr:  tIDENT ( expr_list ).    (47)
+state 66
+	expr_list:  expr.    (47)
 
 	.  reduce 47 (src line 296)
 
 
-38 terminals, 11 nonterminals
-61 grammar rules, 94/2000 states
+state 67
+	predicate:  predicate.tANDAND predicate 
+	predicate:  predicate tANDAND predicate.    (35)
+	predicate:  predicate.tOROR predicate 
+
+	.  reduce 35 (src line 269)
+
+
+state 68
+	predicate:  predicate.tANDAND predicate 
+	predicate:  predicate.tOROR predicate 
+	predicate:  predicate tOROR predicate.    (36)
+
+	tANDAND  shift 44
+	.  reduce 36 (src line 271)
+
+
+state 69
+	predicate:  ( predicate ).    (27)
+
+	.  reduce 27 (src line 253)
+
+
+state 70
+	predicate:  expr = expr.    (28)
+
+	.  reduce 28 (src line 255)
+
+
+state 71
+	predicate:  expr tEQEQ expr.    (29)
+
+	.  reduce 29 (src line 257)
+
+
+state 72
+	predicate:  expr tNE expr.    (30)
+
+	.  reduce 30 (src line 259)
+
+
+state 73
+	predicate:  expr < expr.    (31)
+
+	.  reduce 31 (src line 261)
+
+
+state 74
+	predicate:  expr tLE expr.    (32)
+
+	.  reduce 32 (src line 263)
+
+
+state 75
+	predicate:  expr > expr.    (33)
+
+	.  reduce 33 (src line 265)
+
+
+state 76
+	predicate:  expr tGE expr.    (34)
+
+	.  reduce 34 (src line 267)
+
+
+state 77
+	predicate:  tIDENT ( expr_list.) 
+	expr:  tIDENT ( expr_list.) 
+	expr_list:  expr_list., expr 
+
+	)  shift 85
+	,  shift 84
+	.  error
+
+
+state 78
+	vname:  vname / tIDENT.    (50)
+
+	.  reduce 50 (src line 306)
+
+
+state 79
+	expr:  tIDENT (.expr_list ) 
+
+	/  shift 35
+	-  shift 36
+	+  shift 37
+	tIDENT  shift 59
+	tSTRLIT  shift 31
+	tINTLIT  shift 33
+	tRATLIT  shift 32
+	.  error
+
+	expr  goto 66
+	expr_list  goto 86
+	vname  goto 34
+
+state 80
+	alias_list:  alias_list , alias.    (52)
+
+	.  reduce 52 (src line 312)
+
+
+state 81
+	alias:  pipeline tAS tIDENT.    (54)
+	alias:  pipeline tAS tIDENT.tHIDDEN 
+
+	tHIDDEN  shift 87
+	.  reduce 54 (src line 318)
+
+
+state 82
+	alias:  pipeline tAS tSTRLIT.    (55)
+	alias:  pipeline tAS tSTRLIT.tHIDDEN 
+
+	tHIDDEN  shift 88
+	.  reduce 55 (src line 320)
+
+
+state 83
+	pipeline:  pipeline | tIDENT ( expr_list ).    (7)
+
+	.  reduce 7 (src line 185)
+
+
+state 84
+	expr_list:  expr_list ,.expr 
+
+	/  shift 35
+	-  shift 36
+	+  shift 37
+	tIDENT  shift 59
+	tSTRLIT  shift 31
+	tINTLIT  shift 33
+	tRATLIT  shift 32
+	.  error
+
+	expr  goto 89
+	vname  goto 34
+
+state 85
+	predicate:  tIDENT ( expr_list ).    (38)
+	expr:  tIDENT ( expr_list ).    (44)
+
+	=  reduce 44 (src line 289)
+	<  reduce 44 (src line 289)
+	>  reduce 44 (src line 289)
+	tLE  reduce 44 (src line 289)
+	tGE  reduce 44 (src line 289)
+	tNE  reduce 44 (src line 289)
+	tEQEQ  reduce 44 (src line 289)
+	.  reduce 38 (src line 275)
+
+
+state 86
+	expr:  tIDENT ( expr_list.) 
+	expr_list:  expr_list., expr 
+
+	)  shift 90
+	,  shift 84
+	.  error
+
+
+state 87
+	alias:  pipeline tAS tIDENT tHIDDEN.    (56)
+
+	.  reduce 56 (src line 322)
+
+
+state 88
+	alias:  pipeline tAS tSTRLIT tHIDDEN.    (57)
+
+	.  reduce 57 (src line 324)
+
+
+state 89
+	expr_list:  expr_list , expr.    (48)
+
+	.  reduce 48 (src line 299)
+
+
+state 90
+	expr:  tIDENT ( expr_list ).    (44)
+
+	.  reduce 44 (src line 289)
+
+
+37 terminals, 11 nonterminals
+58 grammar rules, 91/2000 states
 0 shift/reduce, 0 reduce/reduce conflicts reported
 60 working sets used
 memory: parser 59/30000
-91 extra closures
-218 shift entries, 8 exceptions
+88 extra closures
+213 shift entries, 8 exceptions
 32 goto entries
 26 entries saved by goto default
-Optimizer space used: output 120/30000
-120 table entries, 5 zero
-maximum spread: 38, maximum offset: 87
+Optimizer space used: output 116/30000
+116 table entries, 4 zero
+maximum spread: 37, maximum offset: 84

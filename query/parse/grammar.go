@@ -10,8 +10,9 @@ import __yyfmt__ "fmt"
 import (
 	"fmt"
 	"math/big"
-	"path"
 	"strings"
+
+	"veyron2/naming"
 )
 
 type strPos struct {
@@ -61,13 +62,6 @@ func newWildcardName(name strPos, yylex yyLexer) *WildcardName {
 		switch c {
 		case "", ".":
 			// Do nothing.
-		case "..":
-			if len(clean) > 0 {
-				clean = clean[:len(clean)-1]
-			} else {
-				lexAbort(yylex, "Not possible to use '..' to traverse above the root of the query")
-				return &WildcardName{}
-			}
 		case "*":
 			if i != len(parts)-1 {
 				lexAbort(yylex, fmt.Sprintf("'%s' is supported only as the last component", c))
@@ -80,12 +74,23 @@ func newWildcardName(name strPos, yylex yyLexer) *WildcardName {
 		}
 	}
 	if len(clean) > 0 && clean[len(clean)-1] == "*" {
-		return &WildcardName{path.Join(clean[:len(clean)-1]...), Star, name.pos}
+		return &WildcardName{joinPath(clean[:len(clean)-1]), Star, name.pos}
 	}
-	return &WildcardName{path.Join(clean...), Self, name.pos}
+	return &WildcardName{joinPath(clean), Self, name.pos}
 }
 
-//line grammar.y:100
+// joinPath uses naming.Join to combine an array of path parts into one.
+// We don't use path.Join because that version strips out ".." which does
+// not have a special meaning in Veyron.
+func joinPath(parts []string) string {
+	path := ""
+	for _, p := range parts {
+		path = naming.Join(path, p)
+	}
+	return path
+}
+
+//line grammar.y:105
 type yySymType struct {
 	yys          int
 	pos          Pos
@@ -107,16 +112,15 @@ const tLE = 57348
 const tGE = 57349
 const tNE = 57350
 const tEQEQ = 57351
-const tDOTDOT = 57352
-const tTRUE = 57353
-const tFALSE = 57354
-const tTYPE = 57355
-const tAS = 57356
-const tHIDDEN = 57357
-const tIDENT = 57358
-const tSTRLIT = 57359
-const tINTLIT = 57360
-const tRATLIT = 57361
+const tTRUE = 57352
+const tFALSE = 57353
+const tTYPE = 57354
+const tAS = 57355
+const tHIDDEN = 57356
+const tIDENT = 57357
+const tSTRLIT = 57358
+const tINTLIT = 57359
+const tRATLIT = 57360
 
 var yyToknames = []string{
 	" .",
@@ -143,7 +147,6 @@ var yyToknames = []string{
 	"tGE",
 	"tNE",
 	"tEQEQ",
-	"tDOTDOT",
 	"tTRUE",
 	"tFALSE",
 	"tTYPE",
@@ -165,103 +168,101 @@ var yyExca = []int{
 	-1, 1,
 	1, -1,
 	-2, 0,
-	-1, 88,
-	11, 47,
-	12, 47,
-	13, 47,
-	24, 47,
-	25, 47,
-	26, 47,
-	27, 47,
-	-2, 41,
+	-1, 85,
+	11, 44,
+	12, 44,
+	13, 44,
+	24, 44,
+	25, 44,
+	26, 44,
+	27, 44,
+	-2, 38,
 }
 
-const yyNprod = 61
+const yyNprod = 58
 const yyPrivate = 57344
 
 var yyTokenNames []string
 var yyStates []string
 
-const yyLast = 120
+const yyLast = 116
 
 var yyAct = []int{
 
-	30, 67, 41, 31, 29, 60, 64, 84, 85, 68,
-	37, 16, 17, 26, 37, 38, 39, 24, 93, 38,
-	39, 88, 86, 81, 27, 28, 91, 22, 47, 32,
-	33, 35, 34, 62, 33, 35, 34, 90, 65, 61,
-	63, 23, 12, 49, 69, 57, 87, 25, 59, 87,
-	87, 73, 74, 75, 76, 77, 78, 79, 37, 69,
-	80, 70, 71, 38, 39, 7, 48, 47, 83, 12,
-	46, 45, 44, 20, 72, 8, 10, 62, 33, 35,
-	34, 15, 66, 69, 89, 19, 48, 47, 92, 9,
-	14, 13, 11, 4, 82, 6, 5, 58, 43, 11,
-	42, 2, 21, 50, 53, 55, 18, 1, 40, 36,
-	3, 0, 0, 0, 0, 0, 54, 56, 52, 51,
+	28, 64, 39, 29, 27, 81, 82, 15, 16, 65,
+	35, 57, 90, 24, 35, 36, 37, 85, 83, 36,
+	37, 78, 88, 25, 26, 87, 45, 44, 30, 31,
+	33, 32, 59, 31, 33, 32, 44, 58, 60, 84,
+	61, 46, 66, 54, 84, 84, 11, 56, 70, 71,
+	72, 73, 74, 75, 76, 35, 66, 77, 67, 68,
+	36, 37, 22, 43, 42, 80, 14, 7, 13, 12,
+	19, 62, 21, 59, 31, 33, 32, 8, 9, 79,
+	66, 86, 18, 55, 1, 89, 47, 50, 52, 41,
+	38, 23, 11, 10, 69, 10, 6, 5, 20, 51,
+	53, 49, 48, 4, 63, 34, 45, 44, 40, 2,
+	3, 0, 0, 0, 0, 17,
 }
 var yyPact = []int{
 
-	61, -1000, 23, -1000, -1000, -1000, 76, 75, 66, -1000,
-	-1000, -23, 68, 13, -1000, -1000, -1000, -1000, -1000, -5,
-	61, 89, 57, 56, 55, -1000, 44, -1000, -1000, -5,
-	92, -5, 88, -1000, -1000, -1000, 33, -30, 43, 43,
-	0, -1000, 50, -1, -1000, -1000, -1000, -5, -5, 64,
-	43, 43, 43, 43, 43, 43, 43, -1000, 43, -11,
-	-1000, -1000, 85, -1000, -1000, 61, -27, 12, -1000, -1000,
-	-1000, 5, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000,
-	11, -1000, 43, -1000, 4, -7, -1000, 43, -1000, 8,
-	-1000, -1000, -1000, -1000,
+	63, -1000, 27, -1000, -1000, -1000, 54, 53, 51, -1000,
+	-26, 65, 58, -1000, -1000, -1000, -1000, -1000, -5, 63,
+	80, 49, 48, -1000, 4, -1000, -1000, -5, 75, -5,
+	74, -1000, -1000, -1000, 32, -23, 40, 40, 34, -1000,
+	73, -1, -1000, -1000, -5, -5, 84, 40, 40, 40,
+	40, 40, 40, 40, -1000, 40, -12, -1000, -1000, 70,
+	-1000, -1000, 63, -28, 8, -1000, -1000, -1000, 13, -1000,
+	-1000, -1000, -1000, -1000, -1000, -1000, -1000, 7, -1000, 40,
+	-1000, -7, -10, -1000, 40, -1000, 2, -1000, -1000, -1000,
+	-1000,
 }
 var yyPgo = []int{
 
-	0, 100, 110, 93, 13, 0, 1, 109, 2, 108,
-	107,
+	0, 108, 110, 103, 13, 0, 1, 105, 2, 90,
+	84,
 }
 var yyR1 = []int{
 
 	0, 10, 1, 1, 1, 1, 1, 1, 1, 1,
 	2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-	2, 2, 2, 2, 2, 2, 3, 3, 4, 4,
-	4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
-	4, 4, 5, 5, 5, 5, 5, 5, 5, 5,
-	6, 6, 7, 7, 9, 9, 8, 8, 8, 8,
-	8,
+	2, 2, 2, 3, 3, 4, 4, 4, 4, 4,
+	4, 4, 4, 4, 4, 4, 4, 4, 4, 5,
+	5, 5, 5, 5, 5, 5, 5, 6, 6, 7,
+	7, 9, 9, 8, 8, 8, 8, 8,
 }
 var yyR2 = []int{
 
 	0, 1, 1, 3, 1, 4, 5, 6, 3, 5,
-	1, 3, 3, 3, 1, 1, 1, 3, 4, 4,
-	4, 2, 1, 2, 2, 1, 2, 2, 1, 1,
-	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-	2, 4, 1, 1, 1, 1, 2, 4, 2, 2,
-	1, 3, 1, 3, 1, 3, 1, 3, 3, 4,
-	4,
+	1, 3, 3, 1, 1, 1, 3, 4, 4, 2,
+	2, 2, 1, 2, 2, 1, 1, 3, 3, 3,
+	3, 3, 3, 3, 3, 3, 3, 2, 4, 1,
+	1, 1, 1, 2, 4, 2, 2, 1, 3, 1,
+	3, 1, 3, 1, 3, 3, 4, 4,
 }
 var yyChk = []int{
 
-	-1000, -10, -1, -2, -3, 35, 34, 4, 14, 28,
-	15, 31, 19, 15, 15, 15, 34, 35, -3, 17,
-	5, 34, 14, 28, 4, 34, -4, 29, 30, 9,
-	-5, 8, 34, 35, 37, 36, -7, 15, 20, 21,
-	-9, -8, -1, 9, 15, 15, 15, 23, 22, -4,
-	11, 27, 26, 12, 24, 13, 25, -4, 9, 15,
-	35, -5, 34, -5, 6, 38, 32, -6, 10, -5,
-	-4, -4, 10, -5, -5, -5, -5, -5, -5, -5,
-	-6, 34, 9, -8, 34, 35, 10, 38, 10, -6,
-	33, 33, -5, 10,
+	-1000, -10, -1, -2, -3, 34, 33, 4, 14, 15,
+	30, 19, 15, 15, 15, 33, 34, -3, 17, 5,
+	33, 14, 4, 33, -4, 28, 29, 9, -5, 8,
+	33, 34, 36, 35, -7, 15, 20, 21, -9, -8,
+	-1, 9, 15, 15, 23, 22, -4, 11, 27, 26,
+	12, 24, 13, 25, -4, 9, 15, 34, -5, 33,
+	-5, 6, 37, 31, -6, 10, -5, -4, -4, 10,
+	-5, -5, -5, -5, -5, -5, -5, -6, 33, 9,
+	-8, 33, 34, 10, 37, 10, -6, 32, 32, -5,
+	10,
 }
 var yyDef = []int{
 
-	0, -2, 1, 2, 4, 10, 14, 15, 16, 22,
-	25, 0, 0, 21, 23, 24, 26, 27, 3, 0,
-	0, 8, 11, 12, 13, 17, 5, 28, 29, 0,
-	0, 0, 52, 42, 43, 44, 45, 0, 0, 0,
-	0, 54, 56, 0, 20, 19, 18, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 40, 0, 0,
-	46, 48, 52, 49, 6, 0, 0, 0, 9, 50,
-	38, 39, 30, 31, 32, 33, 34, 35, 36, 37,
-	0, 53, 0, 55, 57, 58, 7, 0, -2, 0,
-	59, 60, 51, 47,
+	0, -2, 1, 2, 4, 10, 13, 14, 15, 22,
+	0, 0, 19, 20, 21, 23, 24, 3, 0, 0,
+	8, 11, 12, 16, 5, 25, 26, 0, 0, 0,
+	49, 39, 40, 41, 42, 0, 0, 0, 0, 51,
+	53, 0, 18, 17, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 37, 0, 0, 43, 45, 49,
+	46, 6, 0, 0, 0, 9, 47, 35, 36, 27,
+	28, 29, 30, 31, 32, 33, 34, 0, 50, 0,
+	52, 54, 55, 7, 0, -2, 0, 56, 57, 48,
+	44,
 }
 var yyTok1 = []int{
 
@@ -269,7 +270,7 @@ var yyTok1 = []int{
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 8, 3, 3, 7, 3, 18, 3,
-	9, 10, 14, 21, 38, 20, 4, 15, 3, 3,
+	9, 10, 14, 21, 37, 20, 4, 15, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 16, 3,
 	12, 11, 13, 17, 3, 3, 3, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
@@ -282,7 +283,7 @@ var yyTok1 = []int{
 var yyTok2 = []int{
 
 	2, 3, 22, 23, 24, 25, 26, 27, 28, 29,
-	30, 31, 32, 33, 34, 35, 36, 37,
+	30, 31, 32, 33, 34, 35, 36,
 }
 var yyTok3 = []int{
 	0,
@@ -514,308 +515,291 @@ yydefault:
 	switch yynt {
 
 	case 1:
-		//line grammar.y:165
+		//line grammar.y:170
 		{
 			lexASTResult(yylex, yyS[yypt-0].pipeline)
 		}
 	case 2:
-		//line grammar.y:169
+		//line grammar.y:174
 		{
 			yyVAL.pipeline = &PipelineName{yyS[yypt-0].wildcardname, yyS[yypt-0].wildcardname.Pos}
 		}
 	case 3:
-		//line grammar.y:171
+		//line grammar.y:176
 		{
 			yyVAL.pipeline = &PipelineType{yyS[yypt-2].pipeline, yyS[yypt-0].strpos.str, yyS[yypt-1].pos}
 		}
 	case 4:
-		//line grammar.y:173
+		//line grammar.y:178
 		{
 			lexAbort(yylex, "'type' cannot start a pipeline")
 		}
 	case 5:
-		//line grammar.y:177
+		//line grammar.y:182
 		{
 			yyVAL.pipeline = &PipelineFilter{yyS[yypt-3].pipeline, yyS[yypt-0].pred, yyS[yypt-2].pos}
 		}
 	case 6:
-		//line grammar.y:179
+		//line grammar.y:184
 		{
 			yyVAL.pipeline = &PipelineSelection{yyS[yypt-4].pipeline, yyS[yypt-1].aliaslist, yyS[yypt-3].pos}
 		}
 	case 7:
-		//line grammar.y:181
+		//line grammar.y:186
 		{
 			yyVAL.pipeline = &PipelineFunc{yyS[yypt-5].pipeline, yyS[yypt-3].strpos.str, yyS[yypt-1].exprlist, yyS[yypt-4].pos}
 		}
 	case 8:
-		//line grammar.y:183
+		//line grammar.y:188
 		{
 			yyVAL.pipeline = &PipelineFunc{yyS[yypt-2].pipeline, yyS[yypt-0].strpos.str, nil, yyS[yypt-1].pos}
 		}
 	case 9:
-		//line grammar.y:185
+		//line grammar.y:190
 		{
 			yyVAL.pipeline = &PipelineFunc{yyS[yypt-4].pipeline, yyS[yypt-2].strpos.str, nil, yyS[yypt-3].pos}
 		}
 	case 10:
-		//line grammar.y:190
+		//line grammar.y:195
 		{
 			yyVAL.wildcardname = newWildcardName(yyS[yypt-0].strpos, yylex)
 		}
 	case 11:
-		//line grammar.y:192
+		//line grammar.y:197
 		{
 			yyVAL.wildcardname = &WildcardName{yyS[yypt-2].strpos.str, Star, yyS[yypt-2].strpos.pos}
 		}
 	case 12:
-		//line grammar.y:194
-		{
-			yyVAL.wildcardname = &WildcardName{"", Self, yyS[yypt-2].strpos.pos}
-		}
-	case 13:
-		//line grammar.y:196
+		//line grammar.y:199
 		{
 			yyVAL.wildcardname = &WildcardName{yyS[yypt-2].strpos.str, Self, yyS[yypt-2].strpos.pos}
 		}
-	case 14:
-		//line grammar.y:198
+	case 13:
+		//line grammar.y:201
 		{
 			yyVAL.wildcardname = &WildcardName{yyS[yypt-0].strpos.str, Self, yyS[yypt-0].strpos.pos}
 		}
-	case 15:
-		//line grammar.y:200
+	case 14:
+		//line grammar.y:203
 		{
 			yyVAL.wildcardname = &WildcardName{"", Self, yyS[yypt-0].pos}
 		}
-	case 16:
-		//line grammar.y:202
+	case 15:
+		//line grammar.y:205
 		{
 			yyVAL.wildcardname = &WildcardName{"", Star, yyS[yypt-0].pos}
 		}
+	case 16:
+		//line grammar.y:207
+		{
+			lexAbort(yylex, "Found '/'.  Multi-component names must be passed as string literals")
+			yyVAL.wildcardname = &WildcardName{} // Avoid nil pointer dereference in pipeline.
+		}
 	case 17:
-		//line grammar.y:204
+		//line grammar.y:212
 		{
 			lexAbort(yylex, "Found '/'.  Multi-component names must be passed as string literals")
 			yyVAL.wildcardname = &WildcardName{} // Avoid nil pointer dereference in pipeline.
 		}
 	case 18:
-		//line grammar.y:209
-		{
-			lexAbort(yylex, "Found '/'.  Multi-component names must be passed as string literals")
-			yyVAL.wildcardname = &WildcardName{} // Avoid nil pointer dereference in pipeline.
-		}
-	case 19:
-		//line grammar.y:214
-		{
-			lexAbort(yylex, "Found '/'.  Multi-component names must be passed as string literals")
-			yyVAL.wildcardname = &WildcardName{} // Avoid nil pointer dereference in pipeline.
-		}
-	case 20:
-		//line grammar.y:219
+		//line grammar.y:217
 		{
 			lexAbort(yylex, "'*' is supported only as the last component of a name")
 			yyVAL.wildcardname = &WildcardName{} // Avoid nil pointer dereference in pipeline.
 		}
-	case 21:
-		//line grammar.y:224
+	case 19:
+		//line grammar.y:222
 		{
 			lexAbort(yylex, "Found spurious trailing '/'")
 			yyVAL.wildcardname = &WildcardName{} // Avoid nil pointer dereference in pipeline.
 		}
-	case 22:
-		//line grammar.y:229
-		{
-			lexAbort(yylex, "Not possible to use '..' to traverse above the root of the query")
-			yyVAL.wildcardname = &WildcardName{} // Avoid nil pointer dereference in pipeline.
-		}
-	case 23:
-		//line grammar.y:234
+	case 20:
+		//line grammar.y:227
 		{
 			lexAbort(yylex, "Found '/'.  Multi-component names must be passed as string literals")
 			yyVAL.wildcardname = &WildcardName{} // Avoid nil pointer dereference in pipeline.
 		}
-	case 24:
-		//line grammar.y:239
+	case 21:
+		//line grammar.y:232
 		{
 			lexAbort(yylex, "'...' is supported only as the last component of a name")
 			yyVAL.wildcardname = &WildcardName{} // Avoid nil pointer dereference in pipeline.
 		}
-	case 25:
-		//line grammar.y:244
+	case 22:
+		//line grammar.y:237
 		{
 			lexAbort(yylex, "Names must be relative.  Found leading '/'")
 			yyVAL.wildcardname = &WildcardName{} // Avoid nil pointer dereference in pipeline.
 		}
-	case 26:
-		//line grammar.y:251
+	case 23:
+		//line grammar.y:244
 		{
 			yyVAL.strpos = yyS[yypt-0].strpos
 		}
-	case 27:
-		//line grammar.y:253
+	case 24:
+		//line grammar.y:246
 		{
 			yyVAL.strpos = yyS[yypt-0].strpos
 		}
-	case 28:
-		//line grammar.y:257
+	case 25:
+		//line grammar.y:250
 		{
 			yyVAL.pred = &PredicateBool{true, yyS[yypt-0].pos}
 		}
-	case 29:
-		//line grammar.y:259
+	case 26:
+		//line grammar.y:252
 		{
 			yyVAL.pred = &PredicateBool{false, yyS[yypt-0].pos}
 		}
-	case 30:
-		//line grammar.y:261
+	case 27:
+		//line grammar.y:254
 		{
 			yyVAL.pred = yyS[yypt-1].pred
 		}
-	case 31:
-		//line grammar.y:263
+	case 28:
+		//line grammar.y:256
 		{
 			yyVAL.pred = &PredicateCompare{yyS[yypt-2].expr, yyS[yypt-0].expr, CompEQ, yyS[yypt-1].pos}
 		}
-	case 32:
-		//line grammar.y:265
+	case 29:
+		//line grammar.y:258
 		{
 			yyVAL.pred = &PredicateCompare{yyS[yypt-2].expr, yyS[yypt-0].expr, CompEQ, yyS[yypt-1].pos}
 		}
-	case 33:
-		//line grammar.y:267
+	case 30:
+		//line grammar.y:260
 		{
 			yyVAL.pred = &PredicateCompare{yyS[yypt-2].expr, yyS[yypt-0].expr, CompNE, yyS[yypt-1].pos}
 		}
-	case 34:
-		//line grammar.y:269
+	case 31:
+		//line grammar.y:262
 		{
 			yyVAL.pred = &PredicateCompare{yyS[yypt-2].expr, yyS[yypt-0].expr, CompLT, yyS[yypt-1].pos}
 		}
-	case 35:
-		//line grammar.y:271
+	case 32:
+		//line grammar.y:264
 		{
 			yyVAL.pred = &PredicateCompare{yyS[yypt-2].expr, yyS[yypt-0].expr, CompLE, yyS[yypt-1].pos}
 		}
-	case 36:
-		//line grammar.y:273
+	case 33:
+		//line grammar.y:266
 		{
 			yyVAL.pred = &PredicateCompare{yyS[yypt-2].expr, yyS[yypt-0].expr, CompGT, yyS[yypt-1].pos}
 		}
-	case 37:
-		//line grammar.y:275
+	case 34:
+		//line grammar.y:268
 		{
 			yyVAL.pred = &PredicateCompare{yyS[yypt-2].expr, yyS[yypt-0].expr, CompGE, yyS[yypt-1].pos}
 		}
-	case 38:
-		//line grammar.y:277
+	case 35:
+		//line grammar.y:270
 		{
 			yyVAL.pred = &PredicateAnd{yyS[yypt-2].pred, yyS[yypt-0].pred, yyS[yypt-1].pos}
 		}
-	case 39:
-		//line grammar.y:279
+	case 36:
+		//line grammar.y:272
 		{
 			yyVAL.pred = &PredicateOr{yyS[yypt-2].pred, yyS[yypt-0].pred, yyS[yypt-1].pos}
 		}
-	case 40:
-		//line grammar.y:281
+	case 37:
+		//line grammar.y:274
 		{
 			yyVAL.pred = &PredicateNot{yyS[yypt-0].pred, yyS[yypt-1].pos}
 		}
-	case 41:
-		//line grammar.y:283
+	case 38:
+		//line grammar.y:276
 		{
 			yyVAL.pred = &PredicateFunc{yyS[yypt-3].strpos.str, yyS[yypt-1].exprlist, yyS[yypt-3].strpos.pos}
 		}
-	case 42:
-		//line grammar.y:287
+	case 39:
+		//line grammar.y:280
 		{
 			yyVAL.expr = &ExprString{yyS[yypt-0].strpos.str, yyS[yypt-0].strpos.pos}
 		}
-	case 43:
-		//line grammar.y:289
+	case 40:
+		//line grammar.y:282
 		{
 			yyVAL.expr = &ExprRat{yyS[yypt-0].ratpos.rat, yyS[yypt-0].ratpos.pos}
 		}
-	case 44:
-		//line grammar.y:291
+	case 41:
+		//line grammar.y:284
 		{
 			yyVAL.expr = &ExprInt{yyS[yypt-0].intpos.int, yyS[yypt-0].intpos.pos}
 		}
-	case 45:
-		//line grammar.y:293
+	case 42:
+		//line grammar.y:286
 		{
 			yyVAL.expr = &ExprName{yyS[yypt-0].strpos.str, yyS[yypt-0].strpos.pos}
 		}
-	case 46:
-		//line grammar.y:295
+	case 43:
+		//line grammar.y:288
 		{
 			yyVAL.expr = &ExprName{yyS[yypt-0].strpos.str, yyS[yypt-1].pos}
 		}
-	case 47:
-		//line grammar.y:297
+	case 44:
+		//line grammar.y:290
 		{
 			yyVAL.expr = &ExprFunc{yyS[yypt-3].strpos.str, yyS[yypt-1].exprlist, yyS[yypt-3].strpos.pos}
 		}
-	case 48:
-		//line grammar.y:299
+	case 45:
+		//line grammar.y:292
 		{
 			yyVAL.expr = &ExprUnary{yyS[yypt-0].expr, OpNeg, yyS[yypt-1].pos}
 		}
-	case 49:
-		//line grammar.y:301
+	case 46:
+		//line grammar.y:294
 		{
 			yyVAL.expr = &ExprUnary{yyS[yypt-0].expr, OpPos, yyS[yypt-1].pos}
 		}
-	case 50:
-		//line grammar.y:305
+	case 47:
+		//line grammar.y:298
 		{
 			yyVAL.exprlist = []Expr{yyS[yypt-0].expr}
 		}
-	case 51:
-		//line grammar.y:307
+	case 48:
+		//line grammar.y:300
 		{
 			yyVAL.exprlist = append(yyS[yypt-2].exprlist, yyS[yypt-0].expr)
 		}
-	case 52:
+	case 49:
 		yyVAL.strpos = yyS[yypt-0].strpos
-	case 53:
-		//line grammar.y:314
+	case 50:
+		//line grammar.y:307
 		{
-			yyVAL.strpos = strPos{path.Join(yyS[yypt-2].strpos.str, yyS[yypt-0].strpos.str), yyS[yypt-2].strpos.pos}
+			yyVAL.strpos = strPos{naming.Join(yyS[yypt-2].strpos.str, yyS[yypt-0].strpos.str), yyS[yypt-2].strpos.pos}
 		}
-	case 54:
-		//line grammar.y:318
+	case 51:
+		//line grammar.y:311
 		{
 			yyVAL.aliaslist = []Alias{yyS[yypt-0].alias}
 		}
-	case 55:
-		//line grammar.y:320
+	case 52:
+		//line grammar.y:313
 		{
 			yyVAL.aliaslist = append(yyS[yypt-2].aliaslist, yyS[yypt-0].alias)
 		}
-	case 56:
-		//line grammar.y:324
+	case 53:
+		//line grammar.y:317
 		{
 			yyVAL.alias = Alias{yyS[yypt-0].pipeline, "", false}
 		}
-	case 57:
-		//line grammar.y:326
+	case 54:
+		//line grammar.y:319
 		{
 			yyVAL.alias = Alias{yyS[yypt-2].pipeline, yyS[yypt-0].strpos.str, false}
 		}
-	case 58:
-		//line grammar.y:328
+	case 55:
+		//line grammar.y:321
 		{
 			yyVAL.alias = Alias{yyS[yypt-2].pipeline, yyS[yypt-0].strpos.str, false}
 		}
-	case 59:
-		//line grammar.y:330
+	case 56:
+		//line grammar.y:323
 		{
 			yyVAL.alias = Alias{yyS[yypt-3].pipeline, yyS[yypt-1].strpos.str, true}
 		}
-	case 60:
-		//line grammar.y:332
+	case 57:
+		//line grammar.y:325
 		{
 			yyVAL.alias = Alias{yyS[yypt-3].pipeline, yyS[yypt-1].strpos.str, true}
 		}

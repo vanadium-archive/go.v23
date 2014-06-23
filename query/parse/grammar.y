@@ -17,8 +17,9 @@ package parse
 import (
   "fmt"
   "math/big"
-  "path"
   "strings"
+
+  "veyron2/naming"
 )
 
 type strPos struct {
@@ -68,13 +69,6 @@ func newWildcardName(name strPos, yylex yyLexer) *WildcardName {
     switch c {
     case "", ".":
       // Do nothing.
-    case "..":
-      if len(clean) > 0 {
-        clean = clean[:len(clean)-1]
-      } else {
-        lexAbort(yylex, "Not possible to use '..' to traverse above the root of the query")
-        return &WildcardName{}
-      }
     case "*":
       if i != len(parts) - 1 {
         lexAbort(yylex, fmt.Sprintf("'%s' is supported only as the last component", c))
@@ -87,9 +81,20 @@ func newWildcardName(name strPos, yylex yyLexer) *WildcardName {
     }
   }
   if len(clean) > 0 && clean[len(clean)-1] == "*" {
-    return &WildcardName{path.Join(clean[:len(clean)-1]...), Star, name.pos}
+    return &WildcardName{joinPath(clean[:len(clean)-1]), Star, name.pos}
   }
-  return &WildcardName{path.Join(clean...), Self, name.pos}
+  return &WildcardName{joinPath(clean), Self, name.pos}
+}
+
+// joinPath uses naming.Join to combine an array of path parts into one.
+// We don't use path.Join because that version strips out ".." which does
+// not have a special meaning in Veyron.
+func joinPath(parts []string) string {
+  path := ""
+  for _, p := range parts {
+    path = naming.Join(path, p)
+  }
+  return path
 }
 
 %}
@@ -130,11 +135,11 @@ func newWildcardName(name strPos, yylex yyLexer) *WildcardName {
 //   vname:
 //     tIDENT  // The default rule is { $$ = $1 }
 //   | vname '/' tIDENT
-//     { $$ = strPos{path.Join($1.str, $3.str), $1.pos} }
+//     { $$ = strPos{naming.Join($1.str, $3.str), $1.pos} }
 
 %token <pos> '.' '{' '}' '$' '!' '(' ')' '=' '<' '>' '*' '/' ':' '?' '&' '|'
 %token <pos> '-' '+'
-%token <pos> tOROR tANDAND tLE tGE tNE tEQEQ tDOTDOT
+%token <pos> tOROR tANDAND tLE tGE tNE tEQEQ
 %token <pos> tTRUE tFALSE tTYPE tAS tHIDDEN
 %token <strpos> tIDENT tSTRLIT
 %token <intpos> tINTLIT
@@ -190,8 +195,6 @@ wildcard_name:
   { $$ = newWildcardName($1, yylex) }
 | tIDENT '/' '*'
   { $$ = &WildcardName{$1.str, Star, $1.pos} }
-| tIDENT '/' tDOTDOT
-  { $$ = &WildcardName{"", Self, $1.pos} }
 | tIDENT '/' '.'
   { $$ = &WildcardName{$1.str, Self, $1.pos} }
 | tIDENT
@@ -210,11 +213,6 @@ wildcard_name:
     lexAbort(yylex, "Found '/'.  Multi-component names must be passed as string literals")
     $$ = &WildcardName{}  // Avoid nil pointer dereference in pipeline.
   }
-| tIDENT '/' tDOTDOT '/'
-  {
-    lexAbort(yylex, "Found '/'.  Multi-component names must be passed as string literals")
-    $$ = &WildcardName{}  // Avoid nil pointer dereference in pipeline.
-  }
 | tIDENT '/' '*' '/'
   {
     lexAbort(yylex, "'*' is supported only as the last component of a name")
@@ -223,11 +221,6 @@ wildcard_name:
 | tIDENT '/'
   {
     lexAbort(yylex, "Found spurious trailing '/'")
-    $$ = &WildcardName{}  // Avoid nil pointer dereference in pipeline.
-  }
-| tDOTDOT
-  {
-    lexAbort(yylex, "Not possible to use '..' to traverse above the root of the query")
     $$ = &WildcardName{}  // Avoid nil pointer dereference in pipeline.
   }
 | '.' '/'
@@ -311,7 +304,7 @@ expr_list:
 vname:
   tIDENT
 | vname '/' tIDENT
-  { $$ = strPos{path.Join($1.str, $3.str), $1.pos} }
+  { $$ = strPos{naming.Join($1.str, $3.str), $1.pos} }
 
 alias_list:
   alias

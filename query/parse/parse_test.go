@@ -116,11 +116,11 @@ func TestParsing(t *testing.T) {
 			},
 			"",
 		},
-		// Double dots remove the previous component of the name.
+		// Double dots are not special.
 		{
 			"`foo/../bar`",
 			&PipelineName{
-				&WildcardName{"bar", Self, Pos{1, 1}},
+				&WildcardName{"foo/../bar", Self, Pos{1, 1}},
 				Pos{1, 1},
 			},
 			"",
@@ -128,7 +128,7 @@ func TestParsing(t *testing.T) {
 		{
 			"`foo/..`",
 			&PipelineName{
-				&WildcardName{"", Self, Pos{1, 1}},
+				&WildcardName{"foo/..", Self, Pos{1, 1}},
 				Pos{1, 1},
 			},
 			"",
@@ -136,7 +136,7 @@ func TestParsing(t *testing.T) {
 		{
 			"`foo/../*`",
 			&PipelineName{
-				&WildcardName{"", Star, Pos{1, 1}},
+				&WildcardName{"foo/..", Star, Pos{1, 1}},
 				Pos{1, 1},
 			},
 			"",
@@ -144,16 +144,7 @@ func TestParsing(t *testing.T) {
 		{
 			"`foo/bar/..`",
 			&PipelineName{
-				&WildcardName{"foo", Self, Pos{1, 1}},
-				Pos{1, 1},
-			},
-			"",
-		},
-		// One case where double dots are supported outside of a string literal.
-		{
-			"foo/..",
-			&PipelineName{
-				&WildcardName{"", Self, Pos{1, 1}},
+				&WildcardName{"foo/bar/..", Self, Pos{1, 1}},
 				Pos{1, 1},
 			},
 			"",
@@ -166,10 +157,8 @@ func TestParsing(t *testing.T) {
 		{"./foo", nil, "Multi-component names must be passed as string literals"},
 		{"foo/./bar", nil, "Multi-component names must be passed as string literals"},
 
-		{"..", nil, "Not possible to use '..' to traverse above the root"},
-		{"foo/../../bar", nil, "Multi-component names must be passed as string literals"},
-		{"`foo/../../bar`", nil, "Not possible to use '..' to traverse above the root"},
-		{"`foo/bar/../../..`", nil, "Not possible to use '..' to traverse above the root"},
+		{"..", nil, "syntax error at token '.'"},
+		{"foo/..", nil, "syntax error at token '.'"},
 
 		{"*/foo", nil, "'*' is supported only as the last component"},
 		{"foo/*/bar", nil, "'*' is supported only as the last component"},

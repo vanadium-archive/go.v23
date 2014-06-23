@@ -21,10 +21,6 @@ func ParsePath(p string) PathName {
 		switch c {
 		case "", ".":
 			// do nothing
-		case "..":
-			if len(pll) > 0 {
-				pll = pll[:len(pll)-1]
-			}
 		default:
 			pll = append(pll, c)
 		}
