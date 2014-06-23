@@ -26,9 +26,13 @@ func GenJavascriptFiles(pkg *compile.Package) []byte {
 
 var javascriptTemplate *template.Template
 
+func jsNumOutArgs(method *compile.Method) int {
+	return len(method.OutArgs) - 1
+}
 func init() {
 	funcMap := template.FuncMap{
-		"toCamelCase": toCamelCase,
+		"toCamelCase":  toCamelCase,
+		"jsNumOutArgs": jsNumOutArgs,
 	}
 	javascriptTemplate = template.Must(template.New("genJS").Funcs(funcMap).Parse(genJS))
 }
@@ -44,7 +48,7 @@ var services = {
 {{range $file := $pkg.Files}}{{range $iface := $file.Interfaces}}  {{$iface.Name}}: {
 {{range $method := $iface.AllMethods}}    {{toCamelCase $method.Name}}: {
           numInArgs: {{len $method.InArgs}},
-          numOutArgs: {{len $method.OutArgs}},
+          numOutArgs: {{jsNumOutArgs $method}},
           inputStreaming: {{if $method.InStream}}true{{else}}false{{end}},
           outputStreaming: {{if $method.OutStream}}true{{else}}false{{end}}
     },
