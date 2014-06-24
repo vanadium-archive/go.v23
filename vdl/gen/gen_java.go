@@ -267,9 +267,9 @@ public class Client { {{range $file := $data.Package.Files}}
 	}
 	public static {{$ifaceClassName}} bind{{$ifaceClassName}}({{$stringClassName}} name, {{$optsClassName}} opts) throws {{$veyronExceptionClassName}} {
 		{{$clientClassName}} client = null;
-		if (opts.get({{$optDefsClassName}}.CLIENT) != null) {
+		if (opts != null && opts.get({{$optDefsClassName}}.CLIENT) != null) {
 			client = opts.get({{$optDefsClassName}}.CLIENT, {{$clientClassName}}.class);
-		} else if (opts.get({{$optDefsClassName}}.RUNTIME) != null) {
+		} else if (opts != null && opts.get({{$optDefsClassName}}.RUNTIME) != null) {
 			client = opts.get({{$optDefsClassName}}.RUNTIME, {{$runtimeClassName}}.class).getClient();
 		} else {
 			client = {{javaName "com/veyron2/RuntimeFactory" $data.Imports}}.getRuntime().getClient();
