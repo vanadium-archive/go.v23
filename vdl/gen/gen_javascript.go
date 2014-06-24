@@ -43,18 +43,26 @@ func init() {
 //
 // We try to generate code that has somewhat reasonable formatting.
 const genJS = `{{with $pkg := .}}// This file was auto-generatead by the veyron vdl tool.
-var services = {
-  package: "{{$pkg.Path}}",
-{{range $file := $pkg.Files}}{{range $iface := $file.Interfaces}}  {{$iface.Name}}: {
-{{range $method := $iface.AllMethods}}    {{toCamelCase $method.Name}}: {
-          numInArgs: {{len $method.InArgs}},
-          numOutArgs: {{jsNumOutArgs $method}},
-          inputStreaming: {{if $method.InStream}}true{{else}}false{{end}},
-          outputStreaming: {{if $method.OutStream}}true{{else}}false{{end}}
+(function (name, context, definition) {
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = definition();
+  } else {
+    context.vdls = context.vdls || {};
+    context[name] = definition();
+  }
+})('{{$pkg.Path}}', this, function() {
+  var services = {
+    package: '{{$pkg.Path}}',
+  {{range $file := $pkg.Files}}{{range $iface := $file.Interfaces}}  {{$iface.Name}}: {
+  {{range $method := $iface.AllMethods}}    {{toCamelCase $method.Name}}: {
+	    numInArgs: {{len $method.InArgs}},
+	    numOutArgs: {{jsNumOutArgs $method}},
+	    inputStreaming: {{if $method.InStream}}true{{else}}false{{end}},
+	    outputStreaming: {{if $method.OutStream}}true{{else}}false{{end}}
+      },
+  {{end}}
     },
-{{end}}
-  },
-{{end}}{{end}}
-};{{end}}
-module.exports = services;
-`
+  {{end}}{{end}}
+  };
+  return services;
+});{{end}}`
