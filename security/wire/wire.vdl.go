@@ -85,9 +85,4 @@ const (
 
 	// ChainSeparator is used to join blessing names to form a blessing chain name.
 	ChainSeparator = "/"
-
-	// UntrustedIDProviderPrefix is the prefix added to identity names
-	// when the identity provider is unknown (i.e., neither trusted nor
-	// mistrusted).
-	UntrustedIDProviderPrefix = "untrusted/"
 )
