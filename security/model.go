@@ -9,7 +9,42 @@ import (
 	"veyron2/naming"
 )
 
-// PublicID is the interface for the non-secret component of a principal's
+// PublicIDStore is an interface for managing PublicIDs. All PublicIDs added
+// to the store are required to be blessing the same public key and must be tagged
+// with a PrincipalPattern. By default, in IPC, a client uses a PublicID from the
+// store to authenticate to servers identified by the pattern tagged on
+// the PublicID.
+type PublicIDStore interface {
+	// Adds a PublicID to the store and tags it with the provided peerPattern.
+	// The method fails if the provided PublicID has a different public key from
+	// the (common) public key of existing PublicIDs in the store. PublicIDs with
+	// multiple Names are broken up into PublicIDs with at most one Name and then
+	// added separately to the store.
+	Add(PublicID PublicID, peerPattern PrincipalPattern) error
+
+	// ForPeer returns a PublicID by combining all PublicIDs from the store that are
+	// tagged with patterns matching the provided peer. The combined PublicID has the
+	// same public key as the individual PublicIDs and carries the union of the
+	// set of names of the individual PublicIDs. An error is returned if there are no
+	// matching PublicIDs.
+	ForPeer(peer PublicID) (PublicID, error)
+
+	// DefaultPublicID returns a PublicID from the store based on the default
+	// PrincipalPattern. The returned PublicID has the same public key as the common
+	// public key of all PublicIDs in the store, and carries the union of the set of
+	// names of all PublicIDs that match the default pattern. An error is returned if
+	// there are no matching PublicIDs. (Note that it is the PublicIDs that are matched
+	// with the default pattern rather than the peer pattern tags on them.)
+	DefaultPublicID() (PublicID, error)
+
+	// SetDefaultPrincipalPattern changes the default PrincipalPattern used by subsequent
+	// calls to DefaultPublicID to the provided pattern. In the absence of any
+	// SetDefaultPrincipalPattern calls, the default PrincipalPattern must be set to
+	// "*" which matches all PublicIDs.
+	SetDefaultPrincipalPattern(pattern PrincipalPattern)
+}
+
+// PublicID is the interface for a non-secret component of a principal's
 // unique identity.
 type PublicID interface {
 	// Names returns a list of human-readable names associated with the principal.
@@ -51,6 +86,7 @@ type PublicID interface {
 type PrivateID interface {
 	// PublicID returns the non-secret component of principal's identity
 	// (which can be encoded and transmitted across the network perhaps).
+	// TODO(ataly): Replace this method with one that returns the PublicIDStore.
 	PublicID() PublicID
 
 	// Sign signs an arbitrary length message (often the hash of a larger message)
@@ -74,6 +110,8 @@ type PrivateID interface {
 	// as a existing PrivateID but with the provided public component (PublicID).
 	// The provided PublicID must have the same public key as the existing
 	// PublicID for this operation to succeed.
+	// TODO(ataly, ashankar): Replace this method with one that derives from a PublicIDStore.
+	//
 	Derive(publicID PublicID) (PrivateID, error)
 
 	// MintDischarge returns a discharge for the provided third-party caveat if
