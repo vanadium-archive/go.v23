@@ -8,6 +8,7 @@ import (
 	"veyron2"
 	"veyron2/rt"
 	"veyron2/security"
+	"veyron2/services/watch"
 	"veyron2/storage"
 	"veyron2/storage/vstore/primitives"
 	"veyron2/vom"
@@ -282,5 +283,88 @@ func TestPutGetRemoveNilTransaction(t *testing.T) {
 		if err := tr.Abort(ctx); err != nil {
 			t.Errorf("Unexpected error: %s", err)
 		}
+	}
+}
+
+func TestWatchGlob(t *testing.T) {
+	ctx := rt.R().NewContext()
+	s, c := newServer(t) // calls rt.Init()
+	defer c()
+
+	root := s.Bind("/")
+
+	// Create the root.
+	rootValue := "root-val"
+	stat, err := root.Put(ctx, nil, rootValue)
+	if err != nil {
+		t.Fatalf("Unexpected error: %s", err)
+	}
+
+	// Watch all objects under the root.
+	req := watch.GlobRequest{Pattern: "..."}
+	stream, err := root.WatchGlob(ctx, req)
+	if err != nil {
+		t.Fatalf("Unexpected error: %s", err)
+	}
+	defer stream.Cancel()
+
+	// Expect a change adding /.
+	cb, err := stream.Recv()
+	if err != nil {
+		t.Fatalf("Unexpected error: %s", err)
+	}
+	changes := cb.Changes
+	if len(changes) != 1 {
+		t.Fatalf("Expected 1 change, but got %d", len(changes))
+	}
+	change := changes[0]
+	if change.Name != "" {
+		t.Fatalf("Expected change on \"\", but was on \"%s\"", change.Name)
+	}
+	entry, ok := change.Value.(*storage.Entry)
+	if !ok {
+		t.Fatalf("Expected value to be an entry, but was %#v", change.Value)
+	}
+	if entry.Value != rootValue {
+		t.Fatalf("Expected value to be %v, but was %v.", rootValue, entry.Value)
+	}
+	if entry.Stat.ID != stat.ID {
+		t.Fatalf("Expected stat to be %v, but was %v.", stat, entry.Stat)
+	}
+
+	// Create /a.
+	a := s.Bind("/a")
+	aValue := "a-val"
+	stat, err = a.Put(ctx, nil, aValue)
+	if err != nil {
+		t.Fatalf("Unexpected error: %s", err)
+	}
+
+	// Expect changes updating / and adding /a.
+	cb, err = stream.Recv()
+	if err != nil {
+		t.Fatalf("Unexpected error: %s", err)
+	}
+	changes = cb.Changes
+	if len(changes) != 2 {
+		t.Fatalf("Expected 2 changes, but got %d", len(changes))
+	}
+	change = changes[0]
+	if change.Name != "" {
+		t.Fatalf("Expected change on \"\", but was on \"%s\"", change.Name)
+	}
+	change = changes[1]
+	if change.Name != "a" {
+		t.Fatalf("Expected change on \"a\", but was on \"%s\"", change.Name)
+	}
+	entry, ok = change.Value.(*storage.Entry)
+	if !ok {
+		t.Fatalf("Expected value to be an entry, but was %#v", change.Value)
+	}
+	if entry.Value != aValue {
+		t.Fatalf("Expected value to be %v, but was %v.", aValue, entry.Value)
+	}
+	if entry.Stat.ID != stat.ID {
+		t.Fatalf("Expected stat to be %v, but was %v.", stat, entry.Stat)
 	}
 }

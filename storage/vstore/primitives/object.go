@@ -33,6 +33,7 @@ var (
 	nullEntry         storage.Entry
 	nullStat          storage.Stat
 	nullTransactionID store.TransactionID
+	nullChangeBatch   watch.ChangeBatch
 )
 
 func fillStat(stat *storage.Stat, serviceStat *store.Stat) error {
@@ -169,12 +170,71 @@ func (o *object) GlobT(ctx context.T, t storage.Transaction, pattern string) (st
 	return o.oServ.GlobT(ctx, id, pattern)
 }
 
-func (o *object) WatchGlob(ctx context.T, req watch.GlobRequest) (watch.GlobWatcherWatchGlobStream, error) {
-	return o.oServ.WatchGlob(ctx, req, veyron2.CallTimeout(ipc.NoTimeout))
+// ChangeBatchStream is an interface for streaming responses of type ChangeBatch.
+type ChangeBatchStream interface {
+	// Recv returns the next item in the input stream, blocking until
+	// an item is available.  Returns io.EOF to indicate graceful end of input.
+	Recv() (watch.ChangeBatch, error)
+
+	// Finish closes the stream and returns the positional return values for
+	// call.
+	Finish() error
+
+	// Cancel cancels the RPC, notifying the server to stop processing.
+	Cancel()
 }
 
+// entryTransformStream implements GlobWatcherWatchGlobStream and
+// QueryWatcherWatchQueryStream. It wraps a ChangeBatchStream, transforming the
+// value in each change from *store.Entry to *storage.Entry.
+type entryTransformStream struct {
+	delegate ChangeBatchStream
+}
+
+func (s *entryTransformStream) Recv() (watch.ChangeBatch, error) {
+	cb, err := s.delegate.Recv()
+	if err != nil {
+		return nullChangeBatch, err
+	}
+	// Transform the ChangeBatch in-place.
+	changes := cb.Changes
+	for i := range changes {
+		if changes[i].Value != nil {
+			serviceEntry := changes[i].Value.(*store.Entry)
+			entry, err := makeEntry(serviceEntry)
+			if err != nil {
+				return nullChangeBatch, err
+			}
+			changes[i].Value = &entry
+		}
+	}
+	return cb, nil
+}
+
+func (s *entryTransformStream) Finish() error {
+	return s.delegate.Finish()
+}
+
+func (s *entryTransformStream) Cancel() {
+	s.delegate.Cancel()
+}
+
+// WatchGlob returns a stream of changes that match a pattern.
+func (o *object) WatchGlob(ctx context.T, req watch.GlobRequest) (watch.GlobWatcherWatchGlobStream, error) {
+	stream, err := o.oServ.WatchGlob(ctx, req, veyron2.CallTimeout(ipc.NoTimeout))
+	if err != nil {
+		return nil, err
+	}
+	return &entryTransformStream{stream}, nil
+}
+
+// WatchQuery returns a stream of changes that satisy a query.
 func (o *object) WatchQuery(ctx context.T, req watch.QueryRequest) (watch.QueryWatcherWatchQueryStream, error) {
-	return o.oServ.WatchQuery(ctx, req, veyron2.CallTimeout(ipc.NoTimeout))
+	stream, err := o.oServ.WatchQuery(ctx, req, veyron2.CallTimeout(ipc.NoTimeout))
+	if err != nil {
+		return nil, err
+	}
+	return &entryTransformStream{stream}, nil
 }
 
 // The errorObject responds with an error to all operations.
