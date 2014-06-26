@@ -83,10 +83,6 @@ type Runtime interface {
 	// NewStreamManager creates a new stream manager.
 	NewStreamManager(opts ...stream.ManagerOpt) (stream.Manager, error)
 
-	// StreamManager returns the pre-configured StreamManager that is created
-	// when the Runtime is initialized.
-	StreamManager() stream.Manager
-
 	// NewEndpoint returns an Endpoint by parsing the supplied endpoint
 	// string as per the format described above. It can be used to test
 	// a string to see if it's in valid endpoint format.
