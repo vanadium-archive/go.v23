@@ -48,7 +48,7 @@ const genJS = `{{with $pkg := .}}// This file was auto-generatead by the veyron 
     module.exports = definition();
   } else {
     context.vdls = context.vdls || {};
-    context[name] = definition();
+    context.vdls[name] = definition();
   }
 })('{{$pkg.Path}}', this, function() {
   var services = {
