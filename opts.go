@@ -114,7 +114,6 @@ func StreamManager(sm stream.Manager) StreamManagerOpt {
 type StreamManagerOpt struct{ stream.Manager }
 
 func (StreamManagerOpt) IPCClientOpt() {}
-func (StreamManagerOpt) IPCServerOpt() {}
 
 // Namespace specifies an explicit naming.Namespace.
 func Namespace(mt naming.Namespace) NamespaceOpt {
