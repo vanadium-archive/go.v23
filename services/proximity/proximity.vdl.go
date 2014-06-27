@@ -18,6 +18,7 @@ import (
 
 // Device represents one neighborhood device.  It contains that device's
 // MAC address, observed names, and the average distance to the device.
+// TODO(bprosnitz) This is bluetooth specific. We need a more generate service as well.
 type Device struct {
 	// MAC is remote device's MAC address, in one of the following formats
 	// (as per http://golang.org/pkg/net/#ParseMAC):
@@ -32,6 +33,7 @@ type Device struct {
 	Names []string
 	// Distance represents the (estimated) distance to the neighborhood
 	// device.  It can be parsed using distance.Parse method.
+	// TODO(bprosnitz) Change from string.
 	Distance string
 }
 
