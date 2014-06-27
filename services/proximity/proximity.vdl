@@ -4,6 +4,7 @@ import "veyron2/security"
 
 // Device represents one neighborhood device.  It contains that device's
 // MAC address, observed names, and the average distance to the device.
+// TODO(bprosnitz) This is bluetooth specific. We need a more generate service as well.
 type Device struct {
 	// MAC is remote device's MAC address, in one of the following formats
 	// (as per http://golang.org/pkg/net/#ParseMAC):
@@ -18,6 +19,7 @@ type Device struct {
 	Names []string
 	// Distance represents the (estimated) distance to the neighborhood
 	// device.  It can be parsed using distance.Parse method.
+	// TODO(bprosnitz) Change from string.
 	Distance string
 }
 
@@ -25,7 +27,7 @@ type Device struct {
 // readings from nearby devices.  It also continuously advertises a set of
 // provided names, which will be visible at nearby devices and associated
 // with this device.
-type Proximity interface {
+type ProximityAnnouncer interface {
 	// RegisterName adds a name that this device will be associated with;
 	// a remote device will see all the unique names currently registered
 	// with this device (see Names field in Device).
@@ -36,8 +38,16 @@ type Proximity interface {
 	// If the name has been registered multiple times, this method will
 	// remove only one instance of that registration.
 	UnregisterName(Name string) error {security.WriteLabel}
+}
 
+
+type ProximityScanner interface {
 	// NearbyDevices returns the most up-to-date list of nearby devices,
 	// sorted in increasing distance order.
 	NearbyDevices() ([]Device, error) {security.ReadLabel}
+}
+
+type Proximity interface {
+	ProximityAnnouncer
+	ProximityScanner
 }
