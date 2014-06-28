@@ -317,14 +317,7 @@ func TestWatchGlob(t *testing.T) {
 	if len(changes) != 1 {
 		t.Fatalf("Expected 1 change, but got %d", len(changes))
 	}
-	change := changes[0]
-	if change.Name != "" {
-		t.Fatalf("Expected change on \"\", but was on \"%s\"", change.Name)
-	}
-	entry, ok := change.Value.(*storage.Entry)
-	if !ok {
-		t.Fatalf("Expected value to be an entry, but was %#v", change.Value)
-	}
+	entry := findEntry(t, changes, "")
 	if entry.Value != rootValue {
 		t.Fatalf("Expected value to be %v, but was %v.", rootValue, entry.Value)
 	}
@@ -349,22 +342,26 @@ func TestWatchGlob(t *testing.T) {
 	if len(changes) != 2 {
 		t.Fatalf("Expected 2 changes, but got %d", len(changes))
 	}
-	change = changes[0]
-	if change.Name != "" {
-		t.Fatalf("Expected change on \"\", but was on \"%s\"", change.Name)
-	}
-	change = changes[1]
-	if change.Name != "a" {
-		t.Fatalf("Expected change on \"a\", but was on \"%s\"", change.Name)
-	}
-	entry, ok = change.Value.(*storage.Entry)
-	if !ok {
-		t.Fatalf("Expected value to be an entry, but was %#v", change.Value)
-	}
+	findEntry(t, changes, "")
+	entry = findEntry(t, changes, "a")
 	if entry.Value != aValue {
 		t.Fatalf("Expected value to be %v, but was %v.", aValue, entry.Value)
 	}
 	if entry.Stat.ID != stat.ID {
 		t.Fatalf("Expected stat to be %v, but was %v.", stat, entry.Stat)
 	}
+}
+
+func findEntry(t *testing.T, changes []watch.Change, name string) *storage.Entry {
+	for _, change := range changes {
+		if change.Name == name {
+			entry, ok := change.Value.(*storage.Entry)
+			if !ok {
+				t.Fatalf("Expected value to be an entry, but was %#v", change.Value)
+			}
+			return entry
+		}
+	}
+	t.Fatalf("Expected a change for name: %v", name)
+	panic("Should not reach here")
 }
