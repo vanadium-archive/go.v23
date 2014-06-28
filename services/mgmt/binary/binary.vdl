@@ -1,0 +1,14 @@
+// Package binary supports storing and serving veyron application
+// binaries.
+package binary
+
+const MissingChecksum = ""
+const MissingSize = int64(-1)
+
+// Info holds information describing a binary part.
+type PartInfo struct {
+	// Checksum holds the hex-encoded MD5 checksum of the binary part.
+	Checksum string
+	// Size holds the binary part size in bytes.
+	Size int64
+}

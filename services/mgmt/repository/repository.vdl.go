@@ -10,6 +10,8 @@ import (
 
 	"veyron2/services/mgmt/application"
 
+	"veyron2/services/mgmt/binary"
+
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
 	_gen_veyron2 "veyron2"
 	_gen_context "veyron2/context"
@@ -211,42 +213,107 @@ func (__gen_s *ServerStubApplication) Match(call _gen_ipc.ServerCall, Profiles [
 	return
 }
 
-// Content can be used to store and retrieve binary content such as
-// veyron application binaries.
-// Content is the interface the client binds and uses.
-// Content_ExcludingUniversal is the interface without internal framework-added methods
+// Binary can be used to store and retrieve veyron application
+// binaries.
+//
+// To create a binary, clients first invoke the Create() method that
+// specifies the number of parts the binary consists of. Clients then
+// uploads the individual parts through the Upload() method, which
+// identifies the part being uploaded. To resume an upload after a
+// failure, clients invoke the UploadStatus() method, which returns a
+// slice that identifies which parts are missing.
+//
+// To download a binary, clients first invoke Stat(), which returns
+// information describing the binary, including the number of parts
+// the binary consists of. Clients then download the individual parts
+// through the Download() method, which identifies the part being
+// downloaded. Alternatively, clients can download the binary through
+// HTTP using a transient URL available through the DownloadURL()
+// method.
+//
+// To delete the binary, clients invoke the Delete() method.
+// Binary is the interface the client binds and uses.
+// Binary_ExcludingUniversal is the interface without internal framework-added methods
 // to enable embedding without method collisions.  Not to be used directly by clients.
-type Content_ExcludingUniversal interface {
-	// Delete deletes the binary identified by the veyron suffix.
+type Binary_ExcludingUniversal interface {
+	// Create expresses the intent to create a binary identified by the
+	// veyron name suffix consisting of the given number of parts. If
+	// the suffix identifies a binary that has already been created, the
+	// method returns an error.
+	Create(ctx _gen_context.T, nparts int32, opts ..._gen_ipc.CallOpt) (err error)
+	// Delete deletes the binary identified by the veyron name
+	// suffix. If the binary that has not been created, the method
+	// returns an error.
 	Delete(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error)
-	// Download opens a stream that can used for downloading the
-	// content identified by the veyron suffix.
-	Download(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply ContentDownloadStream, err error)
-	// Upload opens a stream that can be used for uploading the content
-	// and returns the name under which this content can be found.
-	Upload(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply ContentUploadStream, err error)
+	// Download opens a stream that can used for downloading the given
+	// part of the binary identified by the veyron name suffix. If the
+	// binary part has not been uploaded, the method returns an
+	// error. If the Delete() method is invoked when the Download()
+	// method is in progress, the outcome the Download() method is
+	// undefined.
+	Download(ctx _gen_context.T, part int32, opts ..._gen_ipc.CallOpt) (reply BinaryDownloadStream, err error)
+	// DownloadURL returns a transient URL from which the binary
+	// identified by the veyron name suffix can be downloaded using the
+	// HTTP protocol. If not all parts of the binary have been uploaded,
+	// the method returns an error.
+	DownloadURL(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (URL string, TTL int64, err error)
+	// Stat returns information describing the parts of the binary
+	// identified by the veyron name suffix. If the binary has not been
+	// created, the method returns an error.
+	Stat(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []binary.PartInfo, err error)
+	// Upload opens a stream that can be used for uploading the given
+	// part of the binary identified by the veyron name suffix. If the
+	// binary has not been created, the method returns an error. If the
+	// binary part has been uploaded, the method returns an error. If
+	// the same binary part is being uploaded by another caller, the
+	// method returns an error.
+	Upload(ctx _gen_context.T, part int32, opts ..._gen_ipc.CallOpt) (reply BinaryUploadStream, err error)
 }
-type Content interface {
+type Binary interface {
 	_gen_ipc.UniversalServiceMethods
-	Content_ExcludingUniversal
+	Binary_ExcludingUniversal
 }
 
-// ContentService is the interface the server implements.
-type ContentService interface {
+// BinaryService is the interface the server implements.
+type BinaryService interface {
 
-	// Delete deletes the binary identified by the veyron suffix.
+	// Create expresses the intent to create a binary identified by the
+	// veyron name suffix consisting of the given number of parts. If
+	// the suffix identifies a binary that has already been created, the
+	// method returns an error.
+	Create(context _gen_ipc.ServerContext, nparts int32) (err error)
+	// Delete deletes the binary identified by the veyron name
+	// suffix. If the binary that has not been created, the method
+	// returns an error.
 	Delete(context _gen_ipc.ServerContext) (err error)
-	// Download opens a stream that can used for downloading the
-	// content identified by the veyron suffix.
-	Download(context _gen_ipc.ServerContext, stream ContentServiceDownloadStream) (err error)
-	// Upload opens a stream that can be used for uploading the content
-	// and returns the name under which this content can be found.
-	Upload(context _gen_ipc.ServerContext, stream ContentServiceUploadStream) (reply string, err error)
+	// Download opens a stream that can used for downloading the given
+	// part of the binary identified by the veyron name suffix. If the
+	// binary part has not been uploaded, the method returns an
+	// error. If the Delete() method is invoked when the Download()
+	// method is in progress, the outcome the Download() method is
+	// undefined.
+	Download(context _gen_ipc.ServerContext, part int32, stream BinaryServiceDownloadStream) (err error)
+	// DownloadURL returns a transient URL from which the binary
+	// identified by the veyron name suffix can be downloaded using the
+	// HTTP protocol. If not all parts of the binary have been uploaded,
+	// the method returns an error.
+	DownloadURL(context _gen_ipc.ServerContext) (URL string, TTL int64, err error)
+	// Stat returns information describing the parts of the binary
+	// identified by the veyron name suffix. If the binary has not been
+	// created, the method returns an error.
+	Stat(context _gen_ipc.ServerContext) (reply []binary.PartInfo, err error)
+	// Upload opens a stream that can be used for uploading the given
+	// part of the binary identified by the veyron name suffix. If the
+	// binary has not been created, the method returns an error. If the
+	// binary part has been uploaded, the method returns an error. If
+	// the same binary part is being uploaded by another caller, the
+	// method returns an error.
+	Upload(context _gen_ipc.ServerContext, part int32, stream BinaryServiceUploadStream) (err error)
 }
 
-// ContentDownloadStream is the interface for streaming responses of the method
-// Download in the service interface Content.
-type ContentDownloadStream interface {
+// BinaryDownloadStream is the interface for streaming responses of the method
+// Download in the service interface Binary.
+type BinaryDownloadStream interface {
 
 	// Recv returns the next item in the input stream, blocking until
 	// an item is available.  Returns io.EOF to indicate graceful end of input.
@@ -260,47 +327,47 @@ type ContentDownloadStream interface {
 	Cancel()
 }
 
-// Implementation of the ContentDownloadStream interface that is not exported.
-type implContentDownloadStream struct {
+// Implementation of the BinaryDownloadStream interface that is not exported.
+type implBinaryDownloadStream struct {
 	clientCall _gen_ipc.Call
 }
 
-func (c *implContentDownloadStream) Recv() (item []byte, err error) {
+func (c *implBinaryDownloadStream) Recv() (item []byte, err error) {
 	err = c.clientCall.Recv(&item)
 	return
 }
 
-func (c *implContentDownloadStream) Finish() (err error) {
+func (c *implBinaryDownloadStream) Finish() (err error) {
 	if ierr := c.clientCall.Finish(&err); ierr != nil {
 		err = ierr
 	}
 	return
 }
 
-func (c *implContentDownloadStream) Cancel() {
+func (c *implBinaryDownloadStream) Cancel() {
 	c.clientCall.Cancel()
 }
 
-// ContentServiceDownloadStream is the interface for streaming responses of the method
-// Download in the service interface Content.
-type ContentServiceDownloadStream interface {
+// BinaryServiceDownloadStream is the interface for streaming responses of the method
+// Download in the service interface Binary.
+type BinaryServiceDownloadStream interface {
 	// Send places the item onto the output stream, blocking if there is no buffer
 	// space available.
 	Send(item []byte) error
 }
 
-// Implementation of the ContentServiceDownloadStream interface that is not exported.
-type implContentServiceDownloadStream struct {
+// Implementation of the BinaryServiceDownloadStream interface that is not exported.
+type implBinaryServiceDownloadStream struct {
 	serverCall _gen_ipc.ServerCall
 }
 
-func (s *implContentServiceDownloadStream) Send(item []byte) error {
+func (s *implBinaryServiceDownloadStream) Send(item []byte) error {
 	return s.serverCall.Send(item)
 }
 
-// ContentUploadStream is the interface for streaming responses of the method
-// Upload in the service interface Content.
-type ContentUploadStream interface {
+// BinaryUploadStream is the interface for streaming responses of the method
+// Upload in the service interface Binary.
+type BinaryUploadStream interface {
 
 	// Send places the item onto the output stream, blocking if there is no buffer
 	// space available.
@@ -314,61 +381,61 @@ type ContentUploadStream interface {
 
 	// Finish closes the stream and returns the positional return values for
 	// call.
-	Finish() (reply string, err error)
+	Finish() (err error)
 
 	// Cancel cancels the RPC, notifying the server to stop processing.
 	Cancel()
 }
 
-// Implementation of the ContentUploadStream interface that is not exported.
-type implContentUploadStream struct {
+// Implementation of the BinaryUploadStream interface that is not exported.
+type implBinaryUploadStream struct {
 	clientCall _gen_ipc.Call
 }
 
-func (c *implContentUploadStream) Send(item []byte) error {
+func (c *implBinaryUploadStream) Send(item []byte) error {
 	return c.clientCall.Send(item)
 }
 
-func (c *implContentUploadStream) CloseSend() error {
+func (c *implBinaryUploadStream) CloseSend() error {
 	return c.clientCall.CloseSend()
 }
 
-func (c *implContentUploadStream) Finish() (reply string, err error) {
-	if ierr := c.clientCall.Finish(&reply, &err); ierr != nil {
+func (c *implBinaryUploadStream) Finish() (err error) {
+	if ierr := c.clientCall.Finish(&err); ierr != nil {
 		err = ierr
 	}
 	return
 }
 
-func (c *implContentUploadStream) Cancel() {
+func (c *implBinaryUploadStream) Cancel() {
 	c.clientCall.Cancel()
 }
 
-// ContentServiceUploadStream is the interface for streaming responses of the method
-// Upload in the service interface Content.
-type ContentServiceUploadStream interface {
+// BinaryServiceUploadStream is the interface for streaming responses of the method
+// Upload in the service interface Binary.
+type BinaryServiceUploadStream interface {
 
 	// Recv fills itemptr with the next item in the input stream, blocking until
 	// an item is available.  Returns io.EOF to indicate graceful end of input.
 	Recv() (item []byte, err error)
 }
 
-// Implementation of the ContentServiceUploadStream interface that is not exported.
-type implContentServiceUploadStream struct {
+// Implementation of the BinaryServiceUploadStream interface that is not exported.
+type implBinaryServiceUploadStream struct {
 	serverCall _gen_ipc.ServerCall
 }
 
-func (s *implContentServiceUploadStream) Recv() (item []byte, err error) {
+func (s *implBinaryServiceUploadStream) Recv() (item []byte, err error) {
 	err = s.serverCall.Recv(&item)
 	return
 }
 
-// BindContent returns the client stub implementing the Content
+// BindBinary returns the client stub implementing the Binary
 // interface.
 //
 // If no _gen_ipc.Client is specified, the default _gen_ipc.Client in the
 // global Runtime is used.
-func BindContent(name string, opts ..._gen_ipc.BindOpt) (Content, error) {
+func BindBinary(name string, opts ..._gen_ipc.BindOpt) (Binary, error) {
 	var client _gen_ipc.Client
 	switch len(opts) {
 	case 0:
@@ -385,28 +452,39 @@ func BindContent(name string, opts ..._gen_ipc.BindOpt) (Content, error) {
 	default:
 		return nil, _gen_vdl.ErrTooManyOptionsToBind
 	}
-	stub := &clientStubContent{client: client, name: name}
+	stub := &clientStubBinary{client: client, name: name}
 
 	return stub, nil
 }
 
-// NewServerContent creates a new server stub.
+// NewServerBinary creates a new server stub.
 //
-// It takes a regular server implementing the ContentService
+// It takes a regular server implementing the BinaryService
 // interface, and returns a new server stub.
-func NewServerContent(server ContentService) interface{} {
-	return &ServerStubContent{
+func NewServerBinary(server BinaryService) interface{} {
+	return &ServerStubBinary{
 		service: server,
 	}
 }
 
-// clientStubContent implements Content.
-type clientStubContent struct {
+// clientStubBinary implements Binary.
+type clientStubBinary struct {
 	client _gen_ipc.Client
 	name   string
 }
 
-func (__gen_c *clientStubContent) Delete(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error) {
+func (__gen_c *clientStubBinary) Create(ctx _gen_context.T, nparts int32, opts ..._gen_ipc.CallOpt) (err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Create", []interface{}{nparts}, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubBinary) Delete(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Delete", nil, opts...); err != nil {
 		return
@@ -417,25 +495,47 @@ func (__gen_c *clientStubContent) Delete(ctx _gen_context.T, opts ..._gen_ipc.Ca
 	return
 }
 
-func (__gen_c *clientStubContent) Download(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply ContentDownloadStream, err error) {
+func (__gen_c *clientStubBinary) Download(ctx _gen_context.T, part int32, opts ..._gen_ipc.CallOpt) (reply BinaryDownloadStream, err error) {
 	var call _gen_ipc.Call
-	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Download", nil, opts...); err != nil {
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Download", []interface{}{part}, opts...); err != nil {
 		return
 	}
-	reply = &implContentDownloadStream{clientCall: call}
+	reply = &implBinaryDownloadStream{clientCall: call}
 	return
 }
 
-func (__gen_c *clientStubContent) Upload(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply ContentUploadStream, err error) {
+func (__gen_c *clientStubBinary) DownloadURL(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (URL string, TTL int64, err error) {
 	var call _gen_ipc.Call
-	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Upload", nil, opts...); err != nil {
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "DownloadURL", nil, opts...); err != nil {
 		return
 	}
-	reply = &implContentUploadStream{clientCall: call}
+	if ierr := call.Finish(&URL, &TTL, &err); ierr != nil {
+		err = ierr
+	}
 	return
 }
 
-func (__gen_c *clientStubContent) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
+func (__gen_c *clientStubBinary) Stat(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []binary.PartInfo, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Stat", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubBinary) Upload(ctx _gen_context.T, part int32, opts ..._gen_ipc.CallOpt) (reply BinaryUploadStream, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Upload", []interface{}{part}, opts...); err != nil {
+		return
+	}
+	reply = &implBinaryUploadStream{clientCall: call}
+	return
+}
+
+func (__gen_c *clientStubBinary) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
 		return
@@ -446,7 +546,7 @@ func (__gen_c *clientStubContent) UnresolveStep(ctx _gen_context.T, opts ..._gen
 	return
 }
 
-func (__gen_c *clientStubContent) Signature(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+func (__gen_c *clientStubBinary) Signature(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
 		return
@@ -457,7 +557,7 @@ func (__gen_c *clientStubContent) Signature(ctx _gen_context.T, opts ..._gen_ipc
 	return
 }
 
-func (__gen_c *clientStubContent) GetMethodTags(ctx _gen_context.T, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
+func (__gen_c *clientStubBinary) GetMethodTags(ctx _gen_context.T, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
@@ -468,21 +568,27 @@ func (__gen_c *clientStubContent) GetMethodTags(ctx _gen_context.T, method strin
 	return
 }
 
-// ServerStubContent wraps a server that implements
-// ContentService and provides an object that satisfies
+// ServerStubBinary wraps a server that implements
+// BinaryService and provides an object that satisfies
 // the requirements of veyron2/ipc.ReflectInvoker.
-type ServerStubContent struct {
-	service ContentService
+type ServerStubBinary struct {
+	service BinaryService
 }
 
-func (__gen_s *ServerStubContent) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
+func (__gen_s *ServerStubBinary) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
 	// TODO(bprosnitz) GetMethodTags() will be replaces with Signature().
 	// Note: This exhibits some weird behavior like returning a nil error if the method isn't found.
 	// This will change when it is replaced with Signature().
 	switch method {
+	case "Create":
+		return []interface{}{security.Label(2)}, nil
 	case "Delete":
 		return []interface{}{security.Label(2)}, nil
 	case "Download":
+		return []interface{}{security.Label(1)}, nil
+	case "DownloadURL":
+		return []interface{}{security.Label(1)}, nil
+	case "Stat":
 		return []interface{}{security.Label(1)}, nil
 	case "Upload":
 		return []interface{}{security.Label(2)}, nil
@@ -491,8 +597,16 @@ func (__gen_s *ServerStubContent) GetMethodTags(call _gen_ipc.ServerCall, method
 	}
 }
 
-func (__gen_s *ServerStubContent) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
+func (__gen_s *ServerStubBinary) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
 	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
+	result.Methods["Create"] = _gen_ipc.MethodSignature{
+		InArgs: []_gen_ipc.MethodArgument{
+			{Name: "nparts", Type: 36},
+		},
+		OutArgs: []_gen_ipc.MethodArgument{
+			{Name: "", Type: 65},
+		},
+	}
 	result.Methods["Delete"] = _gen_ipc.MethodSignature{
 		InArgs: []_gen_ipc.MethodArgument{},
 		OutArgs: []_gen_ipc.MethodArgument{
@@ -500,29 +614,53 @@ func (__gen_s *ServerStubContent) Signature(call _gen_ipc.ServerCall) (_gen_ipc.
 		},
 	}
 	result.Methods["Download"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{},
+		InArgs: []_gen_ipc.MethodArgument{
+			{Name: "part", Type: 36},
+		},
 		OutArgs: []_gen_ipc.MethodArgument{
 			{Name: "", Type: 65},
 		},
 
 		OutStream: 67,
 	}
-	result.Methods["Upload"] = _gen_ipc.MethodSignature{
+	result.Methods["DownloadURL"] = _gen_ipc.MethodSignature{
 		InArgs: []_gen_ipc.MethodArgument{},
 		OutArgs: []_gen_ipc.MethodArgument{
-			{Name: "", Type: 3},
+			{Name: "URL", Type: 3},
+			{Name: "TTL", Type: 37},
+			{Name: "err", Type: 65},
+		},
+	}
+	result.Methods["Stat"] = _gen_ipc.MethodSignature{
+		InArgs: []_gen_ipc.MethodArgument{},
+		OutArgs: []_gen_ipc.MethodArgument{
+			{Name: "", Type: 69},
+			{Name: "", Type: 65},
+		},
+	}
+	result.Methods["Upload"] = _gen_ipc.MethodSignature{
+		InArgs: []_gen_ipc.MethodArgument{
+			{Name: "part", Type: 36},
+		},
+		OutArgs: []_gen_ipc.MethodArgument{
 			{Name: "", Type: 65},
 		},
 		InStream: 67,
 	}
 
 	result.TypeDefs = []_gen_vdl.Any{
-		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, _gen_wiretype.SliceType{Elem: 0x42, Name: "", Tags: []string(nil)}}
+		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, _gen_wiretype.SliceType{Elem: 0x42, Name: "", Tags: []string(nil)}, _gen_wiretype.StructType{
+			[]_gen_wiretype.FieldType{
+				_gen_wiretype.FieldType{Type: 0x3, Name: "Checksum"},
+				_gen_wiretype.FieldType{Type: 0x25, Name: "Size"},
+			},
+			"veyron2/services/mgmt/binary.PartInfo", []string(nil)},
+		_gen_wiretype.SliceType{Elem: 0x44, Name: "", Tags: []string(nil)}}
 
 	return result, nil
 }
 
-func (__gen_s *ServerStubContent) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
+func (__gen_s *ServerStubBinary) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
 	if unresolver, ok := __gen_s.service.(_gen_ipc.Unresolver); ok {
 		return unresolver.UnresolveStep(call)
 	}
@@ -540,20 +678,35 @@ func (__gen_s *ServerStubContent) UnresolveStep(call _gen_ipc.ServerCall) (reply
 	return
 }
 
-func (__gen_s *ServerStubContent) Delete(call _gen_ipc.ServerCall) (err error) {
+func (__gen_s *ServerStubBinary) Create(call _gen_ipc.ServerCall, nparts int32) (err error) {
+	err = __gen_s.service.Create(call, nparts)
+	return
+}
+
+func (__gen_s *ServerStubBinary) Delete(call _gen_ipc.ServerCall) (err error) {
 	err = __gen_s.service.Delete(call)
 	return
 }
 
-func (__gen_s *ServerStubContent) Download(call _gen_ipc.ServerCall) (err error) {
-	stream := &implContentServiceDownloadStream{serverCall: call}
-	err = __gen_s.service.Download(call, stream)
+func (__gen_s *ServerStubBinary) Download(call _gen_ipc.ServerCall, part int32) (err error) {
+	stream := &implBinaryServiceDownloadStream{serverCall: call}
+	err = __gen_s.service.Download(call, part, stream)
 	return
 }
 
-func (__gen_s *ServerStubContent) Upload(call _gen_ipc.ServerCall) (reply string, err error) {
-	stream := &implContentServiceUploadStream{serverCall: call}
-	reply, err = __gen_s.service.Upload(call, stream)
+func (__gen_s *ServerStubBinary) DownloadURL(call _gen_ipc.ServerCall) (URL string, TTL int64, err error) {
+	URL, TTL, err = __gen_s.service.DownloadURL(call)
+	return
+}
+
+func (__gen_s *ServerStubBinary) Stat(call _gen_ipc.ServerCall) (reply []binary.PartInfo, err error) {
+	reply, err = __gen_s.service.Stat(call)
+	return
+}
+
+func (__gen_s *ServerStubBinary) Upload(call _gen_ipc.ServerCall, part int32) (err error) {
+	stream := &implBinaryServiceUploadStream{serverCall: call}
+	err = __gen_s.service.Upload(call, part, stream)
 	return
 }
 
