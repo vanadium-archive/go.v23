@@ -48,15 +48,15 @@ const (
 
 	Hello = "hello"
 
-	// Int32 shows explicit integer typing.
-	Int32 = int32(123)
+	// Int32Const shows explicit integer typing.
+	Int32Const = int32(123)
 
-	// Int64 shows explicit integer conversion from another type, and referencing
+	// Int64Const shows explicit integer conversion from another type, and referencing
 	// a constant from another package.
-	Int64 = int64(128)
+	Int64Const = int64(128)
 
-	// Float shows arithmetic expressions may be used.
-	Float = float64(2)
+	// FloatConst shows arithmetic expressions may be used.
+	FloatConst = float64(2)
 
 	// Mask shows bitwise operations.
 	Mask = uint64(256)

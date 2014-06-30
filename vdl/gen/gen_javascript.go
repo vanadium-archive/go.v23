@@ -11,6 +11,7 @@ import (
 	"text/template"
 
 	"veyron2/vdl/compile"
+	"veyron2/vdl/util"
 )
 
 // GenJavascriptFile takes a populated compile.Package and produces a byte slice
@@ -31,7 +32,7 @@ func jsNumOutArgs(method *compile.Method) int {
 }
 func init() {
 	funcMap := template.FuncMap{
-		"toCamelCase":  toCamelCase,
+		"toCamelCase":  util.ToCamelCase,
 		"jsNumOutArgs": jsNumOutArgs,
 	}
 	javascriptTemplate = template.Must(template.New("genJS").Funcs(funcMap).Parse(genJS))

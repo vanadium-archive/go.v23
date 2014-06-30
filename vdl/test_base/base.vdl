@@ -9,26 +9,26 @@ errorid (
 )
 
 type (
-	Bool       bool
-	Byte       byte
-	Uint16     uint16
-	Uint32     uint32
-	Uint64     uint64
-	Int16      int16
-	Int32      int32
-	Int64      int64
-	Float32    float32
-	Float64    float64
-	Complex64  complex64
-	Complex128 complex128
-	String     string
-	//Enum       enum{A;B;C}
-	Array      [2]bool
-	List       []uint32
-	//Set        set[string]
-	Map        map[string]float32
-	Struct     struct{A bool;B string;C int32}
-	//OneOf      oneof{bool;string;int32}
+	NamedBool       bool
+	NamedByte       byte
+	NamedUint16     uint16
+	NamedUint32     uint32
+	NamedUint64     uint64
+	NamedInt16      int16
+	NamedInt32      int32
+	NamedInt64      int64
+	NamedFloat32    float32
+	NamedFloat64    float64
+	NamedComplex64  complex64
+	NamedComplex128 complex128
+	NamedString     string
+	//NamedEnum       enum{A;B;C}
+	NamedArray      [2]bool
+	NamedList       []uint32
+	//NamedSet        set[string]
+	NamedMap        map[string]float32
+	NamedStruct     struct{A bool;B string;C int32}
+	//NamedOneOf      oneof{bool;string;int32}
 )
 
 type Scalars struct {
@@ -49,21 +49,21 @@ type Scalars struct {
 	A14 any
 	A15 typeval
 
-	B0  Bool
-	B1  Byte
-	B2  Uint16
-	B3  Uint32
-	B4  Uint64
-	B5  Int16
-	B6  Int32
-	B7  Int64
-	B8  Float32
-	B9  Float64
-	B10 Complex64
-	B11 Complex128
-	B12 String
-	//B13 Enum
-	//B14 OneOf
+	B0  NamedBool
+	B1  NamedByte
+	B2  NamedUint16
+	B3  NamedUint32
+	B4  NamedUint64
+	B5  NamedInt16
+	B6  NamedInt32
+	B7  NamedInt64
+	B8  NamedFloat32
+	B9  NamedFloat64
+	B10 NamedComplex64
+	B11 NamedComplex128
+	B12 NamedString
+	//B13 NamedEnum
+	//B14 NamedOneOf
 }
 
 type Composites struct {
