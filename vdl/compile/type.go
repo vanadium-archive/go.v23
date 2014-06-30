@@ -193,10 +193,6 @@ func compileDefinedType(ptype parse.Type, file *File, env *Env, tbuilder *val.Ty
 	case *parse.TypeStruct:
 		st := tbuilder.Struct()
 		for _, pfield := range pt.Fields {
-			if reservedWord(pfield.Name) {
-				env.errorf(file, pt.Pos(), "invalid field name %q is a reserved word", pfield.Name)
-				return nil
-			}
 			ftype := compileLiteralType(pfield.Type, file, env, tbuilder, builders)
 			if ftype == nil {
 				return nil
