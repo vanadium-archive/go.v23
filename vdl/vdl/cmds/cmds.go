@@ -217,6 +217,7 @@ var (
 	optGenJavaOutDir       = genOutDir{src: "go/src", dst: "java/src"}
 	optGenJavascriptOutDir = genOutDir{src: "go/src", dst: "javascript/src"}
 	optGenJavaPkgPrefix    string
+	optGenJavaPkgOutDir    string
 	optGenLangs            = genLangs{genLangGo: true}
 )
 
@@ -254,6 +255,8 @@ for managing Go source code.
 	cmdGen.Flags.BoolVar(&optGenStatus, "status", true, "Show package names while we compile")
 	cmdGen.Flags.StringVar(&optGenJavaPkgPrefix, "java_pkg_prefix", "com",
 		"Package prefix that will be added to the VDL package prefixes when generating Java files. ")
+	cmdGen.Flags.StringVar(&optGenJavaPkgOutDir, "java_pkg_out_dir", "vdlgen",
+		"Directory under each package that generated files will be placed. (Empty string for no directory)")
 	cmdGen.Flags.Var(&optGenGoOutDir, "go_out_dir",
 		`Go output directory.  There are three modes:
 			""         : Generate output in-place in the source tree
@@ -317,11 +320,15 @@ func runGen(targets []*build.Package, env *compile.Env) {
 				}
 			case genLangJava:
 				gen.SetJavaGenPkgPrefix(optGenJavaPkgPrefix)
+				gen.SetJavaGenPkgOutDir(optGenJavaPkgOutDir)
 				files := gen.GenJavaFiles(pkg, env)
 				dir, err := xlateOutDir(target, optGenJavaOutDir, optGenJavaPkgPrefix)
 				if err != nil {
 					env.Errors.Errorf("--java_out_dir error: %v", err)
 					continue
+				}
+				if optGenJavaPkgOutDir != "" {
+					dir = filepath.Join(dir, optGenJavaPkgOutDir)
 				}
 				for _, file := range files {
 					if writeFile(file.Data, dir, file.Name, env) {

@@ -347,35 +347,35 @@ var constTests = []struct {
 	// Test explicit user type conversions.
 	{
 		"TypedUserBool",
-		cp{{"a", `type Bool bool;const Res = Bool(true)`, namedZero("a.Bool", val.BoolType).AssignBool(true), ""}}},
+		cp{{"a", `type TypedBool bool;const Res = TypedBool(true)`, namedZero("a.TypedBool", val.BoolType).AssignBool(true), ""}}},
 	{
 		"TypedUserString",
-		cp{{"a", `type Str string;const Res = Str("abc")`, namedZero("a.Str", val.StringType).AssignString("abc"), ""}}},
+		cp{{"a", `type TypedStr string;const Res = TypedStr("abc")`, namedZero("a.TypedStr", val.StringType).AssignString("abc"), ""}}},
 	{
 		"TypedUserInt32",
-		cp{{"a", `type Int int32;const Res = Int(123)`, namedZero("a.Int", val.Int32Type).AssignInt(123), ""}}},
+		cp{{"a", `type TypedInt int32;const Res = TypedInt(123)`, namedZero("a.TypedInt", val.Int32Type).AssignInt(123), ""}}},
 	{
 		"TypedUserFloat32",
-		cp{{"a", `type Flt float32;const Res = Flt(1.5)`, namedZero("a.Flt", val.Float32Type).AssignFloat(1.5), ""}}},
+		cp{{"a", `type TypedFlt float32;const Res = TypedFlt(1.5)`, namedZero("a.TypedFlt", val.Float32Type).AssignFloat(1.5), ""}}},
 	{
 		"TypedUserComplex64",
-		cp{{"a", `type Cpx complex64;const Res = Cpx(1.5+2i)`, namedZero("a.Cpx", val.Complex64Type).AssignComplex(1.5 + 2i), ""}}},
+		cp{{"a", `type TypedCpx complex64;const Res = TypedCpx(1.5+2i)`, namedZero("a.TypedCpx", val.Complex64Type).AssignComplex(1.5 + 2i), ""}}},
 	{
 		"TypedUserBoolMismatch",
-		cp{{"a", `type Bool bool;const Res = Bool(1)`, nil,
-			`invalid type conversion \(can't convert 1 to a.Bool bool\)`}}},
+		cp{{"a", `type TypedBool bool;const Res = TypedBool(1)`, nil,
+			`invalid type conversion \(can't convert 1 to a.TypedBool bool\)`}}},
 	{
 		"TypedUserStringMismatch",
-		cp{{"a", `type Str string;const Res = Str(1)`, nil,
-			`invalid type conversion \(can't convert 1 to a.Str string\)`}}},
+		cp{{"a", `type TypedStr string;const Res = TypedStr(1)`, nil,
+			`invalid type conversion \(can't convert 1 to a.TypedStr string\)`}}},
 	{
 		"TypedUserInt32Mismatch",
-		cp{{"a", `type Int int32;const Res = Int(true)`, nil,
-			`invalid type conversion \(can't convert true to a.Int int32\)`}}},
+		cp{{"a", `type TypedInt int32;const Res = TypedInt(true)`, nil,
+			`invalid type conversion \(can't convert true to a.TypedInt int32\)`}}},
 	{
 		"TypedUserFloat32Mismatch",
-		cp{{"a", `type Flt float32;const Res = Flt(true)`, nil,
-			`invalid type conversion \(can't convert true to a.Flt float32\)`}}},
+		cp{{"a", `type TypedFlt float32;const Res = TypedFlt(true)`, nil,
+			`invalid type conversion \(can't convert true to a.TypedFlt float32\)`}}},
 
 	// Test named consts.
 	{
@@ -395,20 +395,20 @@ var constTests = []struct {
 		cp{{"a", `const foo = complex64(3+2i);const Res = foo`, val.Complex64Value(3 + 2i), ""}}},
 	{
 		"NamedUserBool",
-		cp{{"a", `type Bool bool;const foo = Bool(true);const Res = foo`,
-			namedZero("a.Bool", val.BoolType).AssignBool(true), ""}}},
+		cp{{"a", `type TypedBool bool;const foo = TypedBool(true);const Res = foo`,
+			namedZero("a.TypedBool", val.BoolType).AssignBool(true), ""}}},
 	{
 		"NamedUserString",
-		cp{{"a", `type Str string;const foo = Str("abc");const Res = foo`,
-			namedZero("a.Str", val.StringType).AssignString("abc"), ""}}},
+		cp{{"a", `type TypedStr string;const foo = TypedStr("abc");const Res = foo`,
+			namedZero("a.TypedStr", val.StringType).AssignString("abc"), ""}}},
 	{
 		"NamedUserInt32",
-		cp{{"a", `type Int int32;const foo = Int(123);const Res = foo`,
-			namedZero("a.Int", val.Int32Type).AssignInt(123), ""}}},
+		cp{{"a", `type TypedInt int32;const foo = TypedInt(123);const Res = foo`,
+			namedZero("a.TypedInt", val.Int32Type).AssignInt(123), ""}}},
 	{
 		"NamedUserFloat32",
-		cp{{"a", `type Flt float32;const foo = Flt(1.5);const Res = foo`,
-			namedZero("a.Flt", val.Float32Type).AssignFloat(1.5), ""}}},
+		cp{{"a", `type TypedFlt float32;const foo = TypedFlt(1.5);const Res = foo`,
+			namedZero("a.TypedFlt", val.Float32Type).AssignFloat(1.5), ""}}},
 	{
 		"ConstNamedI",
 		cp{{"a", `const I = true;const Res = I`, val.BoolValue(true), ""}}},
@@ -428,16 +428,16 @@ var constTests = []struct {
 		cp{{"a", `const Res = int32(^1)`, val.Int32Value(-2), ""}}},
 	{
 		"TypedNot",
-		cp{{"a", `type Bool bool;const Res = !Bool(true)`, namedZero("a.Bool", val.BoolType), ""}}},
+		cp{{"a", `type TypedBool bool;const Res = !TypedBool(true)`, namedZero("a.TypedBool", val.BoolType), ""}}},
 	{
 		"TypedPos",
-		cp{{"a", `type Int int32;const Res = Int(+123)`, namedZero("a.Int", val.Int32Type).AssignInt(123), ""}}},
+		cp{{"a", `type TypedInt int32;const Res = TypedInt(+123)`, namedZero("a.TypedInt", val.Int32Type).AssignInt(123), ""}}},
 	{
 		"TypedNeg",
-		cp{{"a", `type Int int32;const Res = Int(-123)`, namedZero("a.Int", val.Int32Type).AssignInt(-123), ""}}},
+		cp{{"a", `type TypedInt int32;const Res = TypedInt(-123)`, namedZero("a.TypedInt", val.Int32Type).AssignInt(-123), ""}}},
 	{
 		"TypedComplement",
-		cp{{"a", `type Int int32;const Res = Int(^1)`, namedZero("a.Int", val.Int32Type).AssignInt(-2), ""}}},
+		cp{{"a", `type TypedInt int32;const Res = TypedInt(^1)`, namedZero("a.TypedInt", val.Int32Type).AssignInt(-2), ""}}},
 	{
 		"NamedNot",
 		cp{{"a", `const foo = bool(true);const Res = !foo`, val.BoolValue(false), ""}}},

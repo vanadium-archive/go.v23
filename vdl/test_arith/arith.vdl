@@ -35,13 +35,13 @@ const (
 	// No shows explicit boolean typing.
 	No       = bool(false)
 	Hello    = "hello"
-	// Int32 shows explicit integer typing.
-	Int32    = int32(123)
-	// Int64 shows explicit integer conversion from another type, and referencing
+	// Int32Const shows explicit integer typing.
+	Int32Const    = int32(123)
+	// Int64Const shows explicit integer conversion from another type, and referencing
 	// a constant from another package.
-	Int64    = int64(Int32 + base.Five)
-	// Float shows arithmetic expressions may be used.
-	Float    = float64(3.0 / 2 + 0.5)
+	Int64Const    = int64(Int32Const + base.Five)
+	// FloatConst shows arithmetic expressions may be used.
+	FloatConst    = float64(3.0 / 2 + 0.5)
 	// Mask shows bitwise operations.
 	Mask     = uint64(0x1 << 8)
 )
@@ -67,7 +67,7 @@ type Arith interface {
 	// than "error".  In addition GenError shows the usage of tags.  Tags are a
 	// sequence of constants.  There's no requirement on uniqueness of types or
 	// values, and regular const expressions may also be used.
-	GenError() error {"foo", "bar" + "z", Hello, int32(Int64 + 1), base.SixSquared}
+	GenError() error {"foo", "bar" + "z", Hello, int32(Int64Const + 1), base.SixSquared}
 
 	// Count shows using only an int32 out-stream type, with no in-stream type.
 	Count(Start int32) stream<_, int32> error
