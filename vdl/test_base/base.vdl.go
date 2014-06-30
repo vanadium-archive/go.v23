@@ -17,41 +17,41 @@ import (
 	_gen_wiretype "veyron2/wiretype"
 )
 
-type NamedBool bool
+type Bool bool
 
-type NamedByte byte
+type Byte byte
 
-type NamedUint16 uint16
+type Uint16 uint16
 
-type NamedUint32 uint32
+type Uint32 uint32
 
-type NamedUint64 uint64
+type Uint64 uint64
 
-type NamedInt16 int16
+type Int16 int16
 
-type NamedInt32 int32
+type Int32 int32
 
-type NamedInt64 int64
+type Int64 int64
 
-type NamedFloat32 float32
+type Float32 float32
 
-type NamedFloat64 float64
+type Float64 float64
 
-type NamedComplex64 complex64
+type Complex64 complex64
 
-type NamedComplex128 complex128
+type Complex128 complex128
 
-type NamedString string
+type String string
 
-//NamedEnum       enum{A;B;C}
-type NamedArray [2]bool
+//Enum       enum{A;B;C}
+type Array [2]bool
 
-type NamedList []uint32
+type List []uint32
 
-//NamedSet        set[string]
-type NamedMap map[string]float32
+//Set        set[string]
+type Map map[string]float32
 
-type NamedStruct struct {
+type Struct struct {
 	A bool
 	B string
 	C int32
@@ -74,19 +74,19 @@ type Scalars struct {
 	A13 error
 	A14 _gen_vdl.Any
 	A15 *_gen_val.Type
-	B0  NamedBool
-	B1  NamedByte
-	B2  NamedUint16
-	B3  NamedUint32
-	B4  NamedUint64
-	B5  NamedInt16
-	B6  NamedInt32
-	B7  NamedInt64
-	B8  NamedFloat32
-	B9  NamedFloat64
-	B10 NamedComplex64
-	B11 NamedComplex128
-	B12 NamedString
+	B0  Bool
+	B1  Byte
+	B2  Uint16
+	B3  Uint32
+	B4  Uint64
+	B5  Int16
+	B6  Int32
+	B7  Int64
+	B8  Float32
+	B9  Float64
+	B10 Complex64
+	B11 Complex128
+	B12 String
 }
 
 type Composites struct {
@@ -500,7 +500,7 @@ func (__gen_s *ServerStubServiceA) Signature(call _gen_ipc.ServerCall) (_gen_ipc
 	}
 
 	result.TypeDefs = []_gen_vdl.Any{
-		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "anydata", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x7, Name: "TypeID", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x2, Name: "veyron2/vdl/test_base.NamedBool", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x32, Name: "veyron2/vdl/test_base.NamedByte", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x33, Name: "veyron2/vdl/test_base.NamedUint16", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x34, Name: "veyron2/vdl/test_base.NamedUint32", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x35, Name: "veyron2/vdl/test_base.NamedUint64", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x23, Name: "veyron2/vdl/test_base.NamedInt16", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x24, Name: "veyron2/vdl/test_base.NamedInt32", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x25, Name: "veyron2/vdl/test_base.NamedInt64", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x19, Name: "veyron2/vdl/test_base.NamedFloat32", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x1a, Name: "veyron2/vdl/test_base.NamedFloat64", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x38, Name: "veyron2/vdl/test_base.NamedComplex64", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x39, Name: "veyron2/vdl/test_base.NamedComplex128", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x3, Name: "veyron2/vdl/test_base.NamedString", Tags: []string(nil)}, _gen_wiretype.StructType{
+		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "anydata", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x7, Name: "TypeID", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x2, Name: "veyron2/vdl/test_base.Bool", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x32, Name: "veyron2/vdl/test_base.Byte", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x33, Name: "veyron2/vdl/test_base.Uint16", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x34, Name: "veyron2/vdl/test_base.Uint32", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x35, Name: "veyron2/vdl/test_base.Uint64", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x23, Name: "veyron2/vdl/test_base.Int16", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x24, Name: "veyron2/vdl/test_base.Int32", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x25, Name: "veyron2/vdl/test_base.Int64", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x19, Name: "veyron2/vdl/test_base.Float32", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x1a, Name: "veyron2/vdl/test_base.Float64", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x38, Name: "veyron2/vdl/test_base.Complex64", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x39, Name: "veyron2/vdl/test_base.Complex128", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x3, Name: "veyron2/vdl/test_base.String", Tags: []string(nil)}, _gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
 				_gen_wiretype.FieldType{Type: 0x2, Name: "A0"},
 				_gen_wiretype.FieldType{Type: 0x42, Name: "A1"},
@@ -725,7 +725,7 @@ func (__gen_s *ServerStubServiceB) Signature(call _gen_ipc.ServerCall) (_gen_ipc
 	}
 
 	result.TypeDefs = []_gen_vdl.Any{
-		_gen_wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "anydata", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x7, Name: "TypeID", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x2, Name: "veyron2/vdl/test_base.NamedBool", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x32, Name: "veyron2/vdl/test_base.NamedByte", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x33, Name: "veyron2/vdl/test_base.NamedUint16", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x34, Name: "veyron2/vdl/test_base.NamedUint32", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x35, Name: "veyron2/vdl/test_base.NamedUint64", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x23, Name: "veyron2/vdl/test_base.NamedInt16", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x24, Name: "veyron2/vdl/test_base.NamedInt32", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x25, Name: "veyron2/vdl/test_base.NamedInt64", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x19, Name: "veyron2/vdl/test_base.NamedFloat32", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x1a, Name: "veyron2/vdl/test_base.NamedFloat64", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x38, Name: "veyron2/vdl/test_base.NamedComplex64", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x39, Name: "veyron2/vdl/test_base.NamedComplex128", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x3, Name: "veyron2/vdl/test_base.NamedString", Tags: []string(nil)}, _gen_wiretype.StructType{
+		_gen_wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "anydata", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x7, Name: "TypeID", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x2, Name: "veyron2/vdl/test_base.Bool", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x32, Name: "veyron2/vdl/test_base.Byte", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x33, Name: "veyron2/vdl/test_base.Uint16", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x34, Name: "veyron2/vdl/test_base.Uint32", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x35, Name: "veyron2/vdl/test_base.Uint64", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x23, Name: "veyron2/vdl/test_base.Int16", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x24, Name: "veyron2/vdl/test_base.Int32", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x25, Name: "veyron2/vdl/test_base.Int64", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x19, Name: "veyron2/vdl/test_base.Float32", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x1a, Name: "veyron2/vdl/test_base.Float64", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x38, Name: "veyron2/vdl/test_base.Complex64", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x39, Name: "veyron2/vdl/test_base.Complex128", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x3, Name: "veyron2/vdl/test_base.String", Tags: []string(nil)}, _gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
 				_gen_wiretype.FieldType{Type: 0x2, Name: "A0"},
 				_gen_wiretype.FieldType{Type: 0x41, Name: "A1"},

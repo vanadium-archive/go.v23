@@ -1,12 +1,12 @@
-package util
+package gen
 
 import (
 	"unicode"
 	"unicode/utf8"
 )
 
-// ToCamelCase converts ThisString to thisString.
-func ToCamelCase(s string) string {
+// toCamelCase converts ThisString to thisString.
+func toCamelCase(s string) string {
 	if s == "" {
 		return ""
 	}
