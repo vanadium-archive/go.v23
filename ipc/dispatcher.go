@@ -5,13 +5,11 @@ import (
 	"veyron2/verror"
 )
 
-var errSoloHasSuffix = verror.NotFoundf("ipc: SoloDispatcher lookup on non-empty suffix")
-
 // SoloDispatcher returns a dispatcher for a single object obj, using
 // ReflectInvoker to invoke methods.  Lookup only succeeds on the empty suffix.
 // The provided auth is returned for successful lookups.
 func SoloDispatcher(obj interface{}, auth security.Authorizer) Dispatcher {
-	return soloDispatcher{ReflectInvoker(obj), auth}
+	return &soloDispatcher{ReflectInvoker(obj), auth}
 }
 
 type soloDispatcher struct {
@@ -21,7 +19,7 @@ type soloDispatcher struct {
 
 func (d soloDispatcher) Lookup(suffix string) (Invoker, security.Authorizer, error) {
 	if suffix != "" {
-		return nil, nil, errSoloHasSuffix
+		return nil, nil, verror.NotFoundf("ipc: SoloDispatcher lookup on non-empty suffix: " + suffix)
 	}
 	return d.invoker, d.auth, nil
 }

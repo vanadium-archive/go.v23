@@ -1,4 +1,4 @@
-package vstore
+package vstore_test
 
 import (
 	"testing"
@@ -10,6 +10,7 @@ import (
 	"veyron2/security"
 	"veyron2/services/watch"
 	"veyron2/storage"
+	"veyron2/storage/vstore"
 	"veyron2/storage/vstore/primitives"
 	"veyron2/vom"
 )
@@ -39,7 +40,7 @@ func newServer(t *testing.T) (storage.Store, func()) {
 		t.Fatalf("rt.NewServer() failed: %v", err)
 	}
 	name, cl := store.NewStore(t, server, r.Identity().PublicID())
-	st, err := New(name)
+	st, err := vstore.New(name)
 	if err != nil {
 		t.Fatalf("vstore.New() failed: %v", err)
 	}

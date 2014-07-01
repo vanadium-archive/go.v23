@@ -1,4 +1,4 @@
-package ipc
+package ipc_test
 
 import (
 	"errors"
@@ -10,6 +10,7 @@ import (
 
 	vtest "veyron/lib/testutil"
 
+	"veyron2/ipc"
 	"veyron2/naming"
 	"veyron2/security"
 	"veyron2/verror"
@@ -20,7 +21,7 @@ type constServerCall int
 
 func (constServerCall) Send(item interface{}) error                   { return nil }
 func (constServerCall) Recv(itemptr interface{}) error                { return nil }
-func (constServerCall) Server() Server                                { return nil }
+func (constServerCall) Server() ipc.Server                            { return nil }
 func (constServerCall) Method() string                                { return "" }
 func (constServerCall) Name() string                                  { return "" }
 func (constServerCall) Suffix() string                                { return "" }
@@ -44,39 +45,44 @@ const (
 	call6
 )
 
+const defaultLabel = security.AdminLabel
+
 // All objects used for success testing are based on testObj, which captures the
 // state from each invocation, so that we may test it against our expectations.
 type testObj struct {
-	call ServerCall
+	call ipc.ServerCall
 }
 
-func (o testObj) LastServerCall() ServerCall { return o.call }
+func (o testObj) LastServerCall() ipc.ServerCall { return o.call }
 
 type testObjIface interface {
-	LastServerCall() ServerCall
+	LastServerCall() ipc.ServerCall
 }
 
 var errApp = errors.New("app error")
 
 type notags struct{ testObj }
 
-func (o *notags) Method1(c ServerCall) error               { o.call = c; return nil }
-func (o *notags) Method2(c ServerCall) (int, error)        { o.call = c; return 0, nil }
-func (o *notags) Method3(c ServerCall, _ int) error        { o.call = c; return nil }
-func (o *notags) Method4(c ServerCall, i int) (int, error) { o.call = c; return i, nil }
-func (o *notags) Method5(c ServerCall) int                 { o.call = c; return 1 }
-func (o *notags) Error(c ServerCall) error                 { o.call = c; return errApp }
+func (o *notags) Method1(c ipc.ServerCall) error               { o.call = c; return nil }
+func (o *notags) Method2(c ipc.ServerCall) (int, error)        { o.call = c; return 0, nil }
+func (o *notags) Method3(c ipc.ServerCall, _ int) error        { o.call = c; return nil }
+func (o *notags) Method4(c ipc.ServerCall, i int) (int, error) { o.call = c; return i, nil }
+func (o *notags) Method5(c ipc.ServerCall) int                 { o.call = c; return 1 }
+func (o *notags) Error(c ipc.ServerCall) error                 { o.call = c; return errApp }
 
 type tags struct{ testObj }
 
-func (o *tags) Admin(c ServerCall) error                                 { o.call = c; return nil }
-func (o *tags) Read(c ServerCall) (int, error)                           { o.call = c; return 0, nil }
-func (o *tags) Write(c ServerCall, _ int) error                          { o.call = c; return nil }
-func (o *tags) Monitoring(c ServerCall, i int) (int, error)              { o.call = c; return i, nil }
-func (o *tags) Debug(c ServerCall, i int, s string) (int, string, error) { o.call = c; return i, s, nil }
-func (o *tags) Error(c ServerCall) error                                 { o.call = c; return errApp }
+func (o *tags) Admin(c ipc.ServerCall) error                    { o.call = c; return nil }
+func (o *tags) Read(c ipc.ServerCall) (int, error)              { o.call = c; return 0, nil }
+func (o *tags) Write(c ipc.ServerCall, _ int) error             { o.call = c; return nil }
+func (o *tags) Monitoring(c ipc.ServerCall, i int) (int, error) { o.call = c; return i, nil }
+func (o *tags) Debug(c ipc.ServerCall, i int, s string) (int, string, error) {
+	o.call = c
+	return i, s, nil
+}
+func (o *tags) Error(c ipc.ServerCall) error { o.call = c; return errApp }
 
-func (o *tags) GetMethodTags(c ServerCall, method string) ([]interface{}, error) {
+func (o *tags) GetMethodTags(c ipc.ServerCall, method string) ([]interface{}, error) {
 	switch method {
 	case "Admin":
 		return []interface{}{security.AdminLabel}, nil
@@ -98,7 +104,7 @@ func TestReflectInvoker(t *testing.T) {
 	type testcase struct {
 		obj    testObjIface
 		method string
-		call   ServerCall
+		call   ipc.ServerCall
 		// Expected results:
 		label   security.Label
 		args    v
@@ -123,7 +129,7 @@ func TestReflectInvoker(t *testing.T) {
 		return fmt.Sprintf("%T.%s()", t.obj, t.method)
 	}
 	for _, test := range tests {
-		invoker := ReflectInvoker(test.obj)
+		invoker := ipc.ReflectInvoker(test.obj)
 		// Call Invoker.Prepare and check results.
 		argptrs, label, err := invoker.Prepare(test.method, len(test.args))
 		if err != nil {
@@ -191,7 +197,7 @@ func toPtrs(vals []interface{}) []interface{} {
 
 type nocompat struct{}
 
-func (nocompat) notExported(ServerCall) error      { return nil }
+func (nocompat) notExported(ipc.ServerCall) error  { return nil }
 func (nocompat) NumInArgs() error                  { return nil }
 func (nocompat) NoInServerCall1(int) error         { return nil }
 func (nocompat) NoInServerCall2(int, string) error { return nil }
@@ -200,7 +206,7 @@ type nostub struct{}
 
 // NoStub takes ipc.ServerContext rather than ipc.ServerCall as the first arg, a
 // common mistake where the server isn't wrapped with the IDL-generated stub.
-func (nostub) NoStub(ServerContext) error { return nil }
+func (nostub) NoStub(ipc.ServerContext) error { return nil }
 
 func TestReflectInvokerPanic(t *testing.T) {
 	type testcase struct {
@@ -214,7 +220,7 @@ func TestReflectInvokerPanic(t *testing.T) {
 		{nostub{}, "forgot to wrap your server with the IDL-generated stub"},
 	}
 	for _, test := range tests {
-		got := vtest.CallAndRecover(func() { ReflectInvoker(test.obj) })
+		got := vtest.CallAndRecover(func() { ipc.ReflectInvoker(test.obj) })
 		if !regexp.MustCompile(test.regexp).MatchString(fmt.Sprint(got)) {
 			t.Errorf(`ReflectInvoker(%T) got panic "%v", want regexp "%v"`, test.obj, got, test.regexp)
 		}
@@ -239,7 +245,7 @@ func TestReflectInvokerErrors(t *testing.T) {
 		return fmt.Sprintf("%T.%s()", t.obj, t.method)
 	}
 	for _, test := range tests {
-		invoker := ReflectInvoker(test.obj)
+		invoker := ipc.ReflectInvoker(test.obj)
 		// Call Invoker.Prepare and check error.
 		_, _, err := invoker.Prepare(test.method, len(test.args))
 		if err != test.prepareErr {
@@ -267,7 +273,7 @@ func TestTypeCheckMethods(t *testing.T) {
 			"Method4":        nil,
 			"Method5":        nil,
 			"Error":          nil,
-			"LastServerCall": ErrNumInArgs,
+			"LastServerCall": ipc.ErrNumInArgs,
 		}},
 		{&tags{}, map[string]error{
 			"Admin":          nil,
@@ -277,17 +283,17 @@ func TestTypeCheckMethods(t *testing.T) {
 			"Debug":          nil,
 			"Error":          nil,
 			"GetMethodTags":  nil,
-			"LastServerCall": ErrNumInArgs,
+			"LastServerCall": ipc.ErrNumInArgs,
 		}},
 		{nocompat{}, map[string]error{
-			"notExported":     ErrMethodNotExported,
-			"NumInArgs":       ErrNumInArgs,
-			"NoInServerCall1": ErrInServerCall,
-			"NoInServerCall2": ErrInServerCall,
+			"notExported":     ipc.ErrMethodNotExported,
+			"NumInArgs":       ipc.ErrNumInArgs,
+			"NoInServerCall1": ipc.ErrInServerCall,
+			"NoInServerCall2": ipc.ErrInServerCall,
 		}},
 	}
 	for _, test := range tests {
-		actual := TypeCheckMethods(test.obj)
+		actual := ipc.TypeCheckMethods(test.obj)
 		if !reflect.DeepEqual(actual, test.expect) {
 			t.Errorf("TypeCheckMethods(%T) got %v, want %v", test.obj, actual, test.expect)
 		}

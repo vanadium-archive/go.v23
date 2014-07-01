@@ -108,5 +108,9 @@ type Namespace interface {
 	// will be interpreted as relative to these roots. The roots
 	// will be tried in the order that they are specified in the parameter
 	// list for SetRoots.
-	SetRoots(roots []string) error
+	SetRoots(roots ...string) error
+
+	// Roots returns the currently configured roots. An empty slice is
+	// returned if no roots are configured.
+	Roots() []string
 }

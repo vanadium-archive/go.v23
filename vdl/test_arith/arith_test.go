@@ -8,8 +8,6 @@ import (
 	"reflect"
 	"testing"
 
-	_ "veyron/lib/testutil"
-
 	"veyron2/ipc"
 	"veyron2/naming"
 	"veyron2/rt"
@@ -20,17 +18,22 @@ import (
 
 var generatedError = errors.New("generated error")
 
-func newClientServer() (ipc.Client, ipc.Server) {
+func newClient() ipc.Client {
 	r := rt.Init()
 	c, err := r.NewClient()
 	if err != nil {
 		panic(err)
 	}
+	return c
+}
+
+func newServer() ipc.Server {
+	r := rt.Init()
 	s, err := r.NewServer()
 	if err != nil {
 		panic(err)
 	}
-	return c, s
+	return s
 }
 
 // serverArith implements the Arith interface.
@@ -112,19 +115,19 @@ func (*serverCalculator) Off(_ ipc.ServerContext) error {
 }
 
 func TestCalculator(t *testing.T) {
-	client, server := newClientServer()
-	if err := server.Register("math/calculator", ipc.SoloDispatcher(NewServerCalculator(&serverCalculator{}), nil)); err != nil {
+	client := newClient()
+	server := newServer()
+	if err := server.Serve("", ipc.SoloDispatcher(NewServerCalculator(&serverCalculator{}), nil)); err != nil {
 		t.Fatal(err)
 	}
 	ep, err := server.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
 		t.Fatal(err)
 	}
-
+	root := naming.JoinAddressName(ep.String(), "")
 	ctx := rt.R().NewContext()
-	name := naming.JoinAddressName(ep.String(), "//math/calculator")
 	// Synchronous calls
-	calculator, err := BindCalculator(name, client)
+	calculator, err := BindCalculator(root, client)
 	if err != nil {
 		t.Fatalf("Bind: got %q but expected no error", err)
 	}
@@ -143,7 +146,7 @@ func TestCalculator(t *testing.T) {
 		t.Errorf("Cosine: expected 1 got %f", cosine)
 	}
 
-	arith, err := BindArith(name, client)
+	arith, err := BindArith(root, client)
 	if err != nil {
 		t.Errorf("Bind: got %q but expected no error", err)
 	}
@@ -163,7 +166,7 @@ func TestCalculator(t *testing.T) {
 		t.Errorf("Add: expected 15 got %d", sum)
 	}
 
-	trig, err := BindTrigonometry(name, client)
+	trig, err := BindTrigonometry(root, client)
 	if err != nil {
 		t.Errorf("Bind: got %q but expected no error", err)
 	}
@@ -346,20 +349,22 @@ func TestArith(t *testing.T) {
 		ipc.SoloDispatcher(NewServerCalculator(&serverCalculator{}), nil),
 	}
 
-	client, server := newClientServer()
+	client := newClient()
 	ctx := rt.R().NewContext()
-	ep, err := server.Listen("tcp", "127.0.0.1:0")
-	if err != nil {
-		t.Fatal(err)
-	}
-	name := naming.JoinAddressName(ep.String(), "//")
+
 	for i, disp := range dispatchers {
-		dispSuffix := fmt.Sprintf("arith%d", i)
-		if err := server.Register(dispSuffix, disp); err != nil {
-			t.Fatalf("%q: %v", dispSuffix, err)
+		server := newServer()
+		defer server.Stop()
+		ep, err := server.Listen("tcp", "127.0.0.1:0")
+		if err != nil {
+			t.Fatal(err)
+		}
+		root := naming.JoinAddressName(ep.String(), "")
+		if err := server.Serve("", disp); err != nil {
+			t.Fatalf("%d: %v", i, err)
 		}
 		// Synchronous calls
-		arith, err := BindArith(naming.Join(name, dispSuffix), client)
+		arith, err := BindArith(root, client)
 		if err != nil {
 			t.Errorf("Bind: got %q but expected no error", err)
 		}

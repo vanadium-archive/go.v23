@@ -62,22 +62,6 @@ type Stream interface {
 
 // Server defines the interface for managing a collection of services.
 type Server interface {
-	// Register associates a Dispatcher with a name prefix.  Dispatchers are used
-	// in order of the longest prefix matching the name specified in the incoming
-	// request.  Multiple dispatchers may be associated with the same prefix
-	// (which may be the empty string), in which case they will be invoked in the
-	// same order as the invocations of Register.  Path components (the substring
-	// between /'s) are not partially matched.
-	//
-	//   Register("media/video", videoSvc)
-	//   Register("media", mediaSvc)
-	// and
-	//   Register("media", mediaSvc)
-	//   Register("media/video", videoSvc)
-	// will both result in videoSvc being invoked for names of the form
-	// "media/video/*"
-	Register(prefix string, disp Dispatcher) error
-
 	// Listen creates a listening network endpoint for the Server.  The
 	// meaning of the arguments are similar to what Go's net.Listen accepts.
 	// For the special protocol "veyron", the address can also be:
@@ -89,23 +73,21 @@ type Server interface {
 	// with the mount table when Publish (below) is called.
 	Listen(protocol, address string) (naming.Endpoint, error)
 
-	// Publish enables the services registered thus far to service RPCs.  It
-	// will register them with the mount table and maintain that
-	// registration so long as Stop has not been called.  The name
-	// determines where in the mount table's name tree the new services will
-	// appear.  The name is applied as a prefix to the prefixes specified in
-	// Register.
-	//
-	// To serve names of the form "mymedia/media/*" make the calls:
-	//   Register("media", mediaSvc)
-	//   Publish("mymedia")
-	//
-	// Publish may be called multiple times to publish the same server under
-	// multiple names.
-	//
-	// TODO(toddw): If Listen hasn't been called yet, it will be called using a
-	// default protocol/address?
-	Publish(name string) error
+	// Serve performs two related functions:
+	// 1. it publishes the services available at the network addresses
+	// created using Listen to the mount table as <name>, thereafter
+	// resolving <name> via the mount table will return these network addresses.
+	// 2. it associates a dispatcher to handle RPC invocations received
+	// on those addresses.
+	// Serve may be called multiple times with different names to publish the
+	// same address using different names. The dispatcher may not be changed
+	// once it has been set to a non-nil value, subsequent calls to Serve
+	// should pass in either the original value of the dispatcher or nil.
+	// It is considered an error to call Listen after Serve, as is calling
+	// Serve before Listen.
+	// If name is an empty string, no attempt will made to publish that
+	// name to a mount table.
+	Serve(name string, disp Dispatcher) error
 
 	// Published returns the rooted names that this server's services have
 	// been published as.

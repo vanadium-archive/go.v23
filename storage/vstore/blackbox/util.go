@@ -61,7 +61,7 @@ func startServer(t *testing.T) (storage.Store, func()) {
 	// Similarly, originally I did not include the ".*" (objectDisp) dispatcher
 	// here and got crazy errors like "ipc: wrong number of output results". It
 	// would be nice to have friendlier error messages.
-	if err := s.Register(mount, storeDisp); err != nil {
+	if err := s.Serve(mount, storeDisp); err != nil {
 		log.Fatal("s.Register(storeDisp) failed: ", err)
 	}
 
@@ -71,7 +71,9 @@ func startServer(t *testing.T) (storage.Store, func()) {
 		log.Fatal("s.Listen() failed: ", err)
 	}
 
-	name := naming.JoinAddressName(ep.String(), "//"+mount)
+	// We're running without a MountTable so we use the endpoint as the
+	// name.
+	name := naming.JoinAddressName(ep.String(), "")
 	st, err := vstore.New(name)
 	if err != nil {
 		log.Fatal("vstorage.New() failed: ", err)
