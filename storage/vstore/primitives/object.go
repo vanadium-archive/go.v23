@@ -158,7 +158,15 @@ func (o *object) Stat(ctx context.T, t storage.Transaction) (storage.Stat, error
 
 // Query performs a query on the store.
 func (o *object) Query(ctx context.T, t storage.Transaction, q query.Query) storage.QueryStream {
-	panic("not implemented.")
+	id, err := UpdateTransaction(ctx, t, o.sServ)
+	if err != nil {
+		return &errorQueryStream{err}
+	}
+	stream, err := o.oServ.Query(ctx, id, q)
+	if err != nil {
+		return &errorQueryStream{err}
+	}
+	return newQueryStream(stream)
 }
 
 // Glob returns a sequence of names that match the given pattern.
