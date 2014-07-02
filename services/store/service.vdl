@@ -8,9 +8,9 @@ import (
 )
 
 const (
-  // The Store has Veyron name "<mount>/.store", where <mount> is the
-  // Veyron name of the mount point.
-  // An Object with path <path> has Veyron name "<mount>/<path>".
+  // The Store has Object name "<mount>/.store", where <mount> is the
+  // Object name of the mount point.
+  // An Object with path <path> has Object name "<mount>/<path>".
   StoreSuffix = ".store"
 )
 
@@ -232,7 +232,7 @@ type QueryResult struct {
 	// NestedResult, if non-zero, specifies which previous result contains
 	// this result.
 	NestedResult NestedResult
-	// Name is the Veyron name of this value.  It is relative to the query
+	// Name is the Object name of this value.  It is relative to the query
 	// root or, if NestedResult is non-zero, to the parent result.
 	Name string
 	// Fields will be non-nil if this query result is of a dynamic type

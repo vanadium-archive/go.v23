@@ -17,8 +17,8 @@ var (
 )
 
 // Endpoint represents unique identifiers for entities communicating over a
-// network.  End users don't use endpoints - they deal solely with veyron names,
-// with the MountTable providing translation of veyron names to endpoints.
+// network.  End users don't use endpoints - they deal solely with object names,
+// with the MountTable providing translation of object names to endpoints.
 type Endpoint interface {
 	// Network returns "veyron" so that Endpoint can implement net.Addr.
 	Network() string
@@ -53,7 +53,7 @@ type Endpoint interface {
 	Addr() net.Addr
 }
 
-// MountedServer represents a server mounted under a veyron name.
+// MountedServer represents a server mounted under an object name.
 type MountedServer struct {
 	Server string        // Server is an object address (OA): endpoint + suffix
 	TTL    time.Duration // Time-To-Live, after which the mount expires.
@@ -69,30 +69,30 @@ type MountEntry struct {
 	Error error
 }
 
-// Namespace provides translation from veyron names to server object addresses.
+// Namespace provides translation from object names to server object addresses.
 // It represents the interface to a client side library for the MountTable
 // service
 type Namespace interface {
-	// Mount the server OA under the veyron name, expiring after the ttl.
+	// Mount the server OA under the object name, expiring after the ttl.
 	// ttl of zero implies an implementation-specific high value
 	// (essentially, forever).
 	Mount(ctx context.T, name, server string, ttl time.Duration) error
 
-	// Unmount the server OA from the veyron name, or if server is empty, unmount
-	// all server OAs from the veyron name.
+	// Unmount the server OA from the object name, or if server is empty, unmount
+	// all server OAs from the object name.
 	Unmount(ctx context.T, name, server string) error
 
-	// Resolve the veyron name into its mounted servers.
+	// Resolve the object name into its mounted servers.
 	Resolve(ctx context.T, name string) (names []string, err error)
 
-	// ResolveToMountTable resolves the veyron name into the mounttables
+	// ResolveToMountTable resolves the object name into the mounttables
 	// directly responsible for the name.
 	ResolveToMountTable(ctx context.T, name string) (names []string, err error)
 
 	// TODO(caprita): consider adding a version of Unresolve to the
 	// IDL-generated stub (in addition to UnresolveStep).
 
-	// Unresolve returns the veyron name that resolves to the given name.
+	// Unresolve returns the object name that resolves to the given name.
 	// It can be the given name itself, though typically the service at the
 	// given name will return the name of a mount table, which is then
 	// followed up the namespace ancestry to obtain a name rooted at a

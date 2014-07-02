@@ -29,7 +29,7 @@
 //       }
 //       type Image struct {
 //           Comment string
-//           Content string // Veyron name
+//           Content string // Object name
 //       }
 //       type Dir struct {
 //           Entries map[string]Name
@@ -115,10 +115,10 @@
 //
 //       type ReplicationGroupAttr struct {
 //           Attr()
-//           Name string // A Veyron name for the replication group.
+//           Name string // An Object name for the replication group.
 //       }
 //
-//   The Name is a Veyron name like "/replication_groups/jyh/mydevices".  The
+//   The Name is an Object name like "/replication_groups/jyh/mydevices".  The
 //   nameserver can be used to determine the reachable group members.
 //
 // - When stores that share a replication group can communicate, they can

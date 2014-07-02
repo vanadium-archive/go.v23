@@ -66,7 +66,7 @@ type Server interface {
 	// meaning of the arguments are similar to what Go's net.Listen accepts.
 	// For the special protocol "veyron", the address can also be:
 	// - a formatted Veyron endpoint
-	// - a Veyron name which resolves to an endpoint
+	// - an Object name which resolves to an endpoint
 	//
 	// Listen may be called multiple times to listen on multiple endpoints.
 	// The returned endpoint represents an address that will be published

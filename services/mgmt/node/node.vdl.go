@@ -21,7 +21,7 @@ import (
 // Description enumerates the profiles that a Node supports.
 type Description struct {
 	// Profiles is a set of names of supported profiles.	Each name can
-	// either be a veyron name that resolves to a Profile, or can be the
+	// either be an object name that resolves to a Profile, or can be the
 	// profile's label, e.g.:
 	//   "profiles/google/cluster/diskfull"
 	//   "linux-media"
@@ -32,7 +32,7 @@ type Description struct {
 }
 
 // Application can be used to manage applications on a device. The
-// idea is that this interace will be invoked using a veyron name that
+// idea is that this interace will be invoked using an object name that
 // identifies the application and its installations and instances
 // where applicable.
 //
@@ -107,8 +107,8 @@ type Description struct {
 // to enable embedding without method collisions.  Not to be used directly by clients.
 type Application_ExcludingUniversal interface {
 	// Install installs the latest version of the application and
-	// returns a veyron name that identifies the new
-	// installation. Optionally, veyron name suffix can be used to
+	// returns an object name that identifies the new
+	// installation. Optionally, object name suffix can be used to
 	// specify the application version to be installed. If no version is
 	// specified, the latest version is installed.
 	Install(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply string, err error)
@@ -125,7 +125,7 @@ type Application_ExcludingUniversal interface {
 	// previous installation.
 	Revert(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error)
 	// Start starts an instance of application installation(s) and
-	// returns the veyron name(s) that identifies/identify the new
+	// returns the object name(s) that identifies/identify the new
 	// instance(s).
 	Start(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error)
 	// Stop attempts a clean shutdown of application installation(s)
@@ -142,7 +142,7 @@ type Application_ExcludingUniversal interface {
 	// Uninstall uninstalls application installation(s).
 	Uninstall(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error)
 	// Update updates application installation(s) version. Optionally,
-	// veyron name suffix can be used to specify the application version
+	// object name suffix can be used to specify the application version
 	// to which the installation(s) should be updated. If no version is
 	// specified, the installation(s) are updated to the latest version.
 	Update(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error)
@@ -156,8 +156,8 @@ type Application interface {
 type ApplicationService interface {
 
 	// Install installs the latest version of the application and
-	// returns a veyron name that identifies the new
-	// installation. Optionally, veyron name suffix can be used to
+	// returns an object name that identifies the new
+	// installation. Optionally, object name suffix can be used to
 	// specify the application version to be installed. If no version is
 	// specified, the latest version is installed.
 	Install(context _gen_ipc.ServerContext) (reply string, err error)
@@ -174,7 +174,7 @@ type ApplicationService interface {
 	// previous installation.
 	Revert(context _gen_ipc.ServerContext) (err error)
 	// Start starts an instance of application installation(s) and
-	// returns the veyron name(s) that identifies/identify the new
+	// returns the object name(s) that identifies/identify the new
 	// instance(s).
 	Start(context _gen_ipc.ServerContext) (reply []string, err error)
 	// Stop attempts a clean shutdown of application installation(s)
@@ -191,7 +191,7 @@ type ApplicationService interface {
 	// Uninstall uninstalls application installation(s).
 	Uninstall(context _gen_ipc.ServerContext) (err error)
 	// Update updates application installation(s) version. Optionally,
-	// veyron name suffix can be used to specify the application version
+	// object name suffix can be used to specify the application version
 	// to which the installation(s) should be updated. If no version is
 	// specified, the installation(s) are updated to the latest version.
 	Update(context _gen_ipc.ServerContext) (err error)
@@ -562,13 +562,13 @@ func (__gen_s *ServerStubApplication) Update(call _gen_ipc.ServerCall) (err erro
 }
 
 // Node can be used to manage a node. The idea is that this interace
-// will be invoked using a veyron name that identifies the node.
+// will be invoked using an object name that identifies the node.
 // Node is the interface the client binds and uses.
 // Node_ExcludingUniversal is the interface without internal framework-added methods
 // to enable embedding without method collisions.  Not to be used directly by clients.
 type Node_ExcludingUniversal interface {
 	// Application can be used to manage applications on a device. The
-	// idea is that this interace will be invoked using a veyron name that
+	// idea is that this interace will be invoked using an object name that
 	// identifies the application and its installations and instances
 	// where applicable.
 	//
@@ -660,7 +660,7 @@ type Node interface {
 type NodeService interface {
 
 	// Application can be used to manage applications on a device. The
-	// idea is that this interace will be invoked using a veyron name that
+	// idea is that this interace will be invoked using an object name that
 	// identifies the application and its installations and instances
 	// where applicable.
 	//

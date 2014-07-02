@@ -178,7 +178,7 @@ type Entries struct {
 // Group represents a group of principals in the TBD Group API.  This is
 // just a placeholder for now.
 type Group struct {
-  // Name is the Veyron name of the group.  This name must
+  // Name is the Object name of the group.  This name must
   // implement the TBD Group API.
   Name string
 }

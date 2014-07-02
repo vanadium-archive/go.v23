@@ -7,7 +7,7 @@ import (
 )
 
 // Application can be used to manage applications on a device. The
-// idea is that this interace will be invoked using a veyron name that
+// idea is that this interace will be invoked using an object name that
 // identifies the application and its installations and instances
 // where applicable.
 //
@@ -79,8 +79,8 @@ import (
 // installation instance as a receiver is well-defined.
 type Application interface {
 	// Install installs the latest version of the application and
-	// returns a veyron name that identifies the new
-	// installation. Optionally, veyron name suffix can be used to
+	// returns an object name that identifies the new
+	// installation. Optionally, object name suffix can be used to
 	// specify the application version to be installed. If no version is
 	// specified, the latest version is installed.
 	Install() (string, error)
@@ -97,7 +97,7 @@ type Application interface {
 	// previous installation.
 	Revert() error
 	// Start starts an instance of application installation(s) and
-	// returns the veyron name(s) that identifies/identify the new
+	// returns the object name(s) that identifies/identify the new
 	// instance(s).
 	Start() ([]string, error)
 	// Stop attempts a clean shutdown of application installation(s)
@@ -114,7 +114,7 @@ type Application interface {
 	// Uninstall uninstalls application installation(s).
 	Uninstall() error
 	// Update updates application installation(s) version. Optionally,
-	// veyron name suffix can be used to specify the application version
+	// object name suffix can be used to specify the application version
 	// to which the installation(s) should be updated. If no version is
 	// specified, the installation(s) are updated to the latest version.
 	Update() error
@@ -123,7 +123,7 @@ type Application interface {
 // Description enumerates the profiles that a Node supports.
 type Description struct {
 	// Profiles is a set of names of supported profiles.	Each name can
-	// either be a veyron name that resolves to a Profile, or can be the
+	// either be an object name that resolves to a Profile, or can be the
 	// profile's label, e.g.:
 	//   "profiles/google/cluster/diskfull"
 	//   "linux-media"
@@ -134,7 +134,7 @@ type Description struct {
 }
 
 // Node can be used to manage a node. The idea is that this interace
-// will be invoked using a veyron name that identifies the node.
+// will be invoked using an object name that identifies the node.
 type Node interface {
 	// Each method of the Application interface invoked at the node
 	// level applies to all applications installed on the node (and

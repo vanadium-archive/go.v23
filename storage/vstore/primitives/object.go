@@ -70,8 +70,8 @@ func makeEntry(serviceEntry *store.Entry) (storage.Entry, error) {
 	return entry, nil
 }
 
-// Bind returns a storage.Object for a value at a Veyron name.  The Bind always
-// succeeds.  If the Veyron name is not a value in a Veyron storage. all
+// Bind returns a storage.Object for a value at an Object name.  The Bind always
+// succeeds.  If the Object name is not a value in a Veyron storage. all
 // subsequent operations on the object will fail.
 func BindObject(sServ store.Store, mount, name string) storage.Object {
 	oServ, err := store.BindObject(naming.Join(mount, name))

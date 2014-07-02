@@ -6,7 +6,7 @@ type Envelope struct {
 	// Arguments is an array of command-line arguments to be used when
 	// executing the binary.
 	Args   []string
-	// Binary is a veyron name that identifies the application binary.
+	// Binary is an object name that identifies the application binary.
 	Binary string
 	// Environment is a map that stores the environment variable values
 	// to be used when executing the binary.

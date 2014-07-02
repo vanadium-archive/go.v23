@@ -24,7 +24,7 @@ import (
 
 // Application provides access to application envelopes. An
 // application envelope is identified by an application name and an
-// application version, which are specified through the veyron name,
+// application version, which are specified through the object name,
 // and a profile name, which is specified using a method argument.
 //
 // Example:
@@ -38,7 +38,7 @@ import (
 type Application_ExcludingUniversal interface {
 	// Match checks if any of the given profiles contains an application
 	// envelope for the given application version (specified through the
-	// veyron name suffix) and if so, returns this envelope. If multiple
+	// object name suffix) and if so, returns this envelope. If multiple
 	// profile matches are possible, the method returns the first
 	// matching profile, respecting the order of the input argument.
 	Match(ctx _gen_context.T, Profiles []string, opts ..._gen_ipc.CallOpt) (reply application.Envelope, err error)
@@ -53,7 +53,7 @@ type ApplicationService interface {
 
 	// Match checks if any of the given profiles contains an application
 	// envelope for the given application version (specified through the
-	// veyron name suffix) and if so, returns this envelope. If multiple
+	// object name suffix) and if so, returns this envelope. If multiple
 	// profile matches are possible, the method returns the first
 	// matching profile, respecting the order of the input argument.
 	Match(context _gen_ipc.ServerContext, Profiles []string) (reply application.Envelope, err error)
@@ -237,32 +237,32 @@ func (__gen_s *ServerStubApplication) Match(call _gen_ipc.ServerCall, Profiles [
 // to enable embedding without method collisions.  Not to be used directly by clients.
 type Binary_ExcludingUniversal interface {
 	// Create expresses the intent to create a binary identified by the
-	// veyron name suffix consisting of the given number of parts. If
+	// object name suffix consisting of the given number of parts. If
 	// the suffix identifies a binary that has already been created, the
 	// method returns an error.
 	Create(ctx _gen_context.T, nparts int32, opts ..._gen_ipc.CallOpt) (err error)
-	// Delete deletes the binary identified by the veyron name
+	// Delete deletes the binary identified by the object name
 	// suffix. If the binary that has not been created, the method
 	// returns an error.
 	Delete(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error)
 	// Download opens a stream that can used for downloading the given
-	// part of the binary identified by the veyron name suffix. If the
+	// part of the binary identified by the object name suffix. If the
 	// binary part has not been uploaded, the method returns an
 	// error. If the Delete() method is invoked when the Download()
 	// method is in progress, the outcome the Download() method is
 	// undefined.
 	Download(ctx _gen_context.T, part int32, opts ..._gen_ipc.CallOpt) (reply BinaryDownloadStream, err error)
 	// DownloadURL returns a transient URL from which the binary
-	// identified by the veyron name suffix can be downloaded using the
+	// identified by the object name suffix can be downloaded using the
 	// HTTP protocol. If not all parts of the binary have been uploaded,
 	// the method returns an error.
 	DownloadURL(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (URL string, TTL int64, err error)
 	// Stat returns information describing the parts of the binary
-	// identified by the veyron name suffix. If the binary has not been
+	// identified by the object name suffix. If the binary has not been
 	// created, the method returns an error.
 	Stat(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []binary.PartInfo, err error)
 	// Upload opens a stream that can be used for uploading the given
-	// part of the binary identified by the veyron name suffix. If the
+	// part of the binary identified by the object name suffix. If the
 	// binary has not been created, the method returns an error. If the
 	// binary part has been uploaded, the method returns an error. If
 	// the same binary part is being uploaded by another caller, the
@@ -278,32 +278,32 @@ type Binary interface {
 type BinaryService interface {
 
 	// Create expresses the intent to create a binary identified by the
-	// veyron name suffix consisting of the given number of parts. If
+	// object name suffix consisting of the given number of parts. If
 	// the suffix identifies a binary that has already been created, the
 	// method returns an error.
 	Create(context _gen_ipc.ServerContext, nparts int32) (err error)
-	// Delete deletes the binary identified by the veyron name
+	// Delete deletes the binary identified by the object name
 	// suffix. If the binary that has not been created, the method
 	// returns an error.
 	Delete(context _gen_ipc.ServerContext) (err error)
 	// Download opens a stream that can used for downloading the given
-	// part of the binary identified by the veyron name suffix. If the
+	// part of the binary identified by the object name suffix. If the
 	// binary part has not been uploaded, the method returns an
 	// error. If the Delete() method is invoked when the Download()
 	// method is in progress, the outcome the Download() method is
 	// undefined.
 	Download(context _gen_ipc.ServerContext, part int32, stream BinaryServiceDownloadStream) (err error)
 	// DownloadURL returns a transient URL from which the binary
-	// identified by the veyron name suffix can be downloaded using the
+	// identified by the object name suffix can be downloaded using the
 	// HTTP protocol. If not all parts of the binary have been uploaded,
 	// the method returns an error.
 	DownloadURL(context _gen_ipc.ServerContext) (URL string, TTL int64, err error)
 	// Stat returns information describing the parts of the binary
-	// identified by the veyron name suffix. If the binary has not been
+	// identified by the object name suffix. If the binary has not been
 	// created, the method returns an error.
 	Stat(context _gen_ipc.ServerContext) (reply []binary.PartInfo, err error)
 	// Upload opens a stream that can be used for uploading the given
-	// part of the binary identified by the veyron name suffix. If the
+	// part of the binary identified by the object name suffix. If the
 	// binary has not been created, the method returns an error. If the
 	// binary part has been uploaded, the method returns an error. If
 	// the same binary part is being uploaded by another caller, the

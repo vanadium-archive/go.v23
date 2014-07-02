@@ -19,11 +19,11 @@ import (
 // profiles. The mechanism for determing profiles is specifically not
 // specified and left to the implementation of the Build interface.
 type BinaryDescription struct {
-	// Name is the Veyron name of the application binary that can be
+	// Name is the Object name of the application binary that can be
 	// used to fetch the actual binary from a content server.
 	Name string
 	// Profiles is a set of names of compatible profiles.  Each name can either
-	// be a Veyron name that resolves to a Profile, or can be the profile's
+	// be an Object name that resolves to a Profile, or can be the profile's
 	// label, e.g.:
 	//   "profiles/google/cluster/diskfull"
 	//   "linux-media"
@@ -40,7 +40,7 @@ type BinaryDescription struct {
 // to enable embedding without method collisions.  Not to be used directly by clients.
 type Build_ExcludingUniversal interface {
 	// Describe generates a BinaryDescription for a binary identified by
-	// the given Veyron name.
+	// the given Object name.
 	Describe(ctx _gen_context.T, Name string, opts ..._gen_ipc.CallOpt) (reply BinaryDescription, err error)
 }
 type Build interface {
@@ -52,7 +52,7 @@ type Build interface {
 type BuildService interface {
 
 	// Describe generates a BinaryDescription for a binary identified by
-	// the given Veyron name.
+	// the given Object name.
 	Describe(context _gen_ipc.ServerContext, Name string) (reply BinaryDescription, err error)
 }
 

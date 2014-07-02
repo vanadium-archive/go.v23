@@ -16,7 +16,7 @@
 //
 // Root Entity
 //
-// The Veyron name that receives the Watch RPC is called the root
+// The Object name that receives the Watch RPC is called the root
 // entity.  The root entity is the parent of all entities that the
 // client cares about.  Therefore, the query is confined to children
 // of the root entity, and the names in the Change messages are all
@@ -186,7 +186,7 @@ type ChangeBatch struct {
 
 // Change is the new value for a watched entity.
 type Change struct {
-	// Name is the Veyron name of the entity that changed.  This name is relative
+	// Name is the Object name of the entity that changed.  This name is relative
 	// to the root entity (i.e. the name of the Watcher service).
 	Name string
 	// State must be one of Exists, DoesNotExist, or InitialStateSkipped.

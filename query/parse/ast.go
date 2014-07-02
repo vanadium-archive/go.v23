@@ -107,7 +107,7 @@ func (q *PipelineFunc) String() string {
 	return fmt.Sprintf("Func{Src:%s FuncName:%s Args:%s Pos:%s}", q.Src, q.FuncName, q.Args, q.Pos)
 }
 
-// Expansion expands a Veyron name to include its children.
+// Expansion expands an Object name to include its children.
 type Expansion int
 
 const (
@@ -135,7 +135,7 @@ func (e Expansion) String() string {
 // WildcardName is the first part of a query and specifies where in the
 // namespace to begin the search.
 type WildcardName struct {
-	// VName is a Veyron name.  Any query results must have this name as
+	// VName is an Object name.  Any query results must have this name as
 	// a prefix.
 	VName string
 	// Exp possibly expands the query to the children of VName.
@@ -313,9 +313,9 @@ func (e *ExprInt) String() string {
 	return fmt.Sprintf("{Int:%s Pos:%s}", e.Int, e.Pos)
 }
 
-// ExprName is an Expr for a Veyron name literal.
+// ExprName is an Expr for an Object name literal.
 type ExprName struct {
-	// Name is the Veyron name used in the query.
+	// Name is the Object name used in the query.
 	Name string
 	// Pos specifies where in the query string this component started.
 	Pos Pos

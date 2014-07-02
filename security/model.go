@@ -161,7 +161,7 @@ type ThirdPartyCaveat interface {
 	// ID returns a cryptographically unique identity for the caveat.
 	ID() ThirdPartyCaveatID
 
-	// Location returns a global Veyron name for the discharging third-party.
+	// Location returns a global Object name for the discharging third-party.
 	Location() string
 }
 
@@ -185,9 +185,9 @@ type CaveatDischargeMap map[ThirdPartyCaveatID]ThirdPartyDischarge
 type Context interface {
 	// Method returns the method being invoked.
 	Method() string
-	// Name returns the veyron name on which the method is being invoked.
+	// Name returns the object name on which the method is being invoked.
 	Name() string
-	// Suffix returns the veyron name suffix for the request.
+	// Suffix returns the object name suffix for the request.
 	Suffix() string
 	// Label returns the method's security label.
 	Label() Label

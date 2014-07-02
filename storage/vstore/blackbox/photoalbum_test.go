@@ -48,12 +48,12 @@ type User struct {
 	SSN int
 }
 
-// Photo represents an image.  It contains the Veyron name for the data,
+// Photo represents an image.  It contains the Object name for the data,
 // stored elsewhere on some content server.
 type Photo struct {
 	Dir
 	Comment string
-	Content string // Veyron name
+	Content string // Object name
 	Edits   []Edit
 }
 

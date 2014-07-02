@@ -17,7 +17,7 @@ type VStore struct {
 
 var _ storage.Store = (*VStore)(nil)
 
-// New returns a storage.Store for a Veyron store mounted at a Veyron name.
+// New returns a storage.Store for a Veyron store mounted at an Object name.
 func New(mount string, opts ...ipc.BindOpt) (storage.Store, error) {
 	serv, err := store.BindStore(naming.Join(mount, store.StoreSuffix), opts...)
 	if err != nil {
@@ -30,14 +30,14 @@ func New(mount string, opts ...ipc.BindOpt) (storage.Store, error) {
 }
 
 // Init initializes a storage.Store for the specified store mounted at the
-// specified Veyron name.
+// specified Object name.
 func (st *VStore) Init(mount string, serv store.Store) {
 	st.mount = mount
 	st.serv = serv
 }
 
-// Bind returns a storage.Object for a value at a Veyron name.  The Bind always
-// succeeds.  If the Veyron name is not a value in a Veyron storage. all
+// Bind returns a storage.Object for a value at an Object name.  The Bind always
+// succeeds.  If the Object name is not a value in a Veyron storage. all
 // subsequent operations on the object will fail.
 func (st *VStore) Bind(name string) storage.Object {
 	return primitives.BindObject(st.serv, st.mount, name)

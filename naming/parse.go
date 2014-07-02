@@ -8,7 +8,7 @@ import (
 // {Split,Join}EndpointName. For Join, it's not clear that host:port is
 // really an Endpoint. Something to consider.
 
-// SplitAddressName takes a veyron name and returns the server address and
+// SplitAddressName takes an object name and returns the server address and
 // the name relative to the server. Terminal names (i.e. those starting
 // with "//"s) are maintained.
 // The name parameter may be a rooted name or a relative name; an empty string
@@ -216,7 +216,7 @@ func squashSlashRun(s string) string {
 	return string(r)
 }
 
-// Join takes a veyron name and appends the given suffix to it.
+// Join takes an object name and appends the given suffix to it.
 // It takes care to ensure that it does not create a '//' pair where
 // one didn't exist before. Runs of two or more '/'s are truncated
 // to '//' when they trail in name or lead in suffix. A similarly positioned

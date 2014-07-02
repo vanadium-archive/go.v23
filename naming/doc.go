@@ -2,7 +2,7 @@
 // the format of names, the APIs for resolving and managing names as
 // well as all associated types.
 //
-// Veyron names are 'resolved' using a MountTable to obtain a
+// Object names are 'resolved' using a MountTable to obtain a
 // MountedServer that RPC method invocations can be directed
 // at. MountTables may be mounted on each other to typically create a
 // hierarchy. The name resolution process can thus involve multiple
@@ -10,7 +10,7 @@
 // typical use, it is nonetheless possible to create a cyclic graph of
 // MountTables which will lead to name resolution errors at runtime.
 //
-// Veyron names are strings with / used to separate the components of
+// Object names are strings with / used to separate the components of
 // a name.  Names may be started with / and the address of a
 // MountTable or server, in which case they are considerd 'rooted',
 // otherwise they are 'relative' to the MountTable used to resolve

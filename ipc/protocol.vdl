@@ -1,7 +1,7 @@
 package ipc
 
 // The communications between a client and server is based on RPCs.  Assume a
-// server published on veyron name "a/b/c" implements the following method:
+// server published on object name "a/b/c" implements the following method:
 //
 //   type myServer struct{}
 //   func (myServer) Method(_ ServerCall, a0 int, a1 string) (r0 uint, err error) {
