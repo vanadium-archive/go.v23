@@ -133,7 +133,7 @@ type Runtime interface {
 	//
 	// The channel is assumed to remain open while messages could be sent on
 	// it.  The channel will be automatically closed during the call to
-	// Shutdown.
+	// Cleanup.
 	WaitForStop(chan<- string)
 
 	// AdvanceGoal extends the goal value in the shutdown task tracker.
@@ -151,17 +151,15 @@ type Runtime interface {
 	// it.
 	TrackTask(chan<- Task)
 
-	// TODO(caprita): I think we should rename this to Cleanup to avoid
-	// confusion with Stop.
-
-	// Shutdown cleanly shuts down any internal state, logging, goroutines
+	// Cleanup cleanly shuts down any internal state, logging, goroutines
 	// etc spawned and managed by the runtime. It is useful for cases where
 	// an application or library wants to be sure that it cleans up after
 	// itself, and should typically be the last thing the program does.
-	// Shutdown does not wait for any inflight requests to complete on
+	// Cleanup does not wait for any inflight requests to complete on
 	// existing servers and clients in the runtime -- these need to be shut
-	// down cleanly in advance if desired.
-	Shutdown()
+	// down cleanly in advance if desired.  It does, however, drain the
+	// network connections.
+	Cleanup()
 }
 
 // The runtime must provide two package level functions, R and NewR.
