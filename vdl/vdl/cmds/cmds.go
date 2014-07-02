@@ -324,7 +324,8 @@ func runGen(targets []*build.Package, env *compile.Env) {
 					continue
 				}
 				for _, file := range files {
-					if writeFile(file.Data, dir, file.Name, env) {
+					fileDir := filepath.Join(dir, file.Dir)
+					if writeFile(file.Data, fileDir, file.Name, env) {
 						changed = true
 					}
 				}

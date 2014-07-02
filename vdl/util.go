@@ -1,12 +1,12 @@
-package gen
+package vdl
 
 import (
 	"unicode"
 	"unicode/utf8"
 )
 
-// toCamelCase converts ThisString to thisString.
-func toCamelCase(s string) string {
+// ToCamelCase converts ThisString to thisString.
+func ToCamelCase(s string) string {
 	if s == "" {
 		return ""
 	}

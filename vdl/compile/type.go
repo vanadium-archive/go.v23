@@ -117,6 +117,11 @@ func (td typeDefiner) makeTypeDefBuilder(file *File, pdef *parse.TypeDef) *typeD
 		ret.def.LabelDoc = make([]string, len(pt.Labels))
 		ret.def.LabelDocSuffix = make([]string, len(pt.Labels))
 		for index, plabel := range pt.Labels {
+			_, err := ValidIdent(plabel.Name)
+			if err != nil {
+				td.env.prefixErrorf(file, plabel.Pos, err, "invalid enum label name %s", plabel.Name)
+				return nil
+			}
 			ret.def.LabelDoc[index] = plabel.Doc
 			ret.def.LabelDocSuffix[index] = plabel.DocSuffix
 		}
@@ -124,6 +129,11 @@ func (td typeDefiner) makeTypeDefBuilder(file *File, pdef *parse.TypeDef) *typeD
 		ret.def.FieldDoc = make([]string, len(pt.Fields))
 		ret.def.FieldDocSuffix = make([]string, len(pt.Fields))
 		for index, pfield := range pt.Fields {
+			_, err := ValidIdent(pfield.Name)
+			if err != nil {
+				td.env.prefixErrorf(file, pfield.Pos, err, "invalid struct field name %s", pfield.Name)
+				return nil
+			}
 			ret.def.FieldDoc[index] = pfield.Doc
 			ret.def.FieldDocSuffix[index] = pfield.DocSuffix
 		}

@@ -411,6 +411,9 @@ func ValidIdent(ident string) (bool, error) {
 	if re := regexpIdent; !re.MatchString(ident) {
 		return false, fmt.Errorf("%q invalid, allowed regexp: %q", ident, re)
 	}
+	if reservedWord(ident) {
+		return false, fmt.Errorf("%q invalid identifier (keyword in a generated language)", ident)
+	}
 	return ident[0] >= 'A' && ident[0] <= 'Z', nil
 }
 

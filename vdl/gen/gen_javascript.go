@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"text/template"
 
+	"veyron2/vdl"
 	"veyron2/vdl/compile"
 )
 
@@ -31,7 +32,7 @@ func jsNumOutArgs(method *compile.Method) int {
 }
 func init() {
 	funcMap := template.FuncMap{
-		"toCamelCase":  toCamelCase,
+		"toCamelCase":  vdl.ToCamelCase,
 		"jsNumOutArgs": jsNumOutArgs,
 	}
 	javascriptTemplate = template.Must(template.New("genJS").Funcs(funcMap).Parse(genJS))
