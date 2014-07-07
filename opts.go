@@ -104,6 +104,12 @@ type CallTimeout time.Duration
 func (CallTimeout) IPCCallOpt()   {}
 func (CallTimeout) IPCClientOpt() {}
 
+// DischargeOpt wraps the security.ThirdPartyDischarge interface so that we can
+// add functions representing the option annotations.
+type DischargeOpt struct{ security.ThirdPartyDischarge }
+
+func (DischargeOpt) IPCCallOpt() {}
+
 // StreamManager specifies an explicit stream.Manager.
 func StreamManager(sm stream.Manager) StreamManagerOpt {
 	return StreamManagerOpt{sm}

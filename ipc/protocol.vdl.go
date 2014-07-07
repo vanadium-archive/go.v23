@@ -30,6 +30,11 @@ type Request struct {
 	// TODO(toddw,ashankar): Ideally, this would be the blessing itself, but
 	// vom currently does not allow for data-type interfaces.
 	HasBlessing bool
+	// NumDischarges specifies the number of third party caveat discharges that
+	// are sent after the blessing to fulfill its caveats.
+	// TODO(toddw,ashankar,andreser): Ideally, this would be the a slice of
+	// discharges, but vom currently does not allow for data-type interfaces.
+	NumDischarges uint64
 }
 
 // Response describes the response header sent by the server to the client.  A
