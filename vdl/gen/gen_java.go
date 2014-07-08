@@ -226,7 +226,7 @@ package {{javaPath (javaGenPkgPath $iface.File.Package.Path)}};
 {{range $imp := javaImports $data.Imports $iface.File.Package.Path}}
 import {{$imp}};{{end}}
 
-{{javaDoc $iface.Doc}}{{if $data.IsService}}@VeyronService(stubWrapper={{$iface.Name}}ServiceWrapper.class)
+{{javaDoc $iface.Doc}}{{if $data.IsService}}@VeyronService(serviceWrapper={{$iface.Name}}ServiceWrapper.class)
 {{end}}public interface {{$iface.Name}}{{if $data.IsService}}Service{{end}}{{if gt (len $iface.Embeds) 0}} extends {{end}}{{range $idx, $eIface := $iface.Embeds}}{{if gt $idx 0}}, {{end}}{{javaIfaceName $eIface $data.IsService $data.Imports}}{{end}} { {{range $method := $iface.Methods}}{{if gt (len (javaNonErrorOutArgs $method)) 1}}
 	// {{$method.Name}}Out packages output arguments for method {{$method.Name}}.
 	public static class {{$method.Name}}Out { {{range $arg := javaNonErrorOutArgs $method}}
@@ -318,7 +318,7 @@ import {{$imp}};{{end}}
 
 /* Client stub for interface: {{$iface.Name}}. */{{$ifaceClassName := javaIfaceName $iface (not $isService) $data.Imports}}{{$ifaceShortClassName := javaShortIfaceName $iface (not $isService)}}
 public final class {{$ifaceShortClassName}}Stub implements {{$ifaceClassName}} {
-	private static final {{$stringClassName}} vdlIfacePathOpt = "{{javaPath (javaGenPkgPath $pkgPath)}}.{{$ifaceShortClassName}}";
+	private static final {{$stringClassName}} vdlIfacePathOpt = "{{javaPath (javaGenPkgPath $iface.File.Package.Path)}}.{{$ifaceShortClassName}}";
 	private final {{$clientClassName}} client;
 	private final {{$stringClassName}} name;{{range $eIface := $iface.Embeds}}{{$eIfaceClassName := javaIfaceName $eIface (not $isService) $data.Imports}}{{$eIfaceShortClassName := javaShortIfaceName $eIface (not $isService)}}
 	private final {{$eIfaceClassName}} {{javaClassToVarName $eIfaceShortClassName}};{{end}}
@@ -388,14 +388,14 @@ public final class {{$ifaceShortClassName}}Stub implements {{$ifaceClassName}} {
 		{{if ne $outArgType "void"}}return {{end}}this.{{javaClassToVarName $eIfaceShortClassName}}.{{toCamelCase $method.Name}}(context{{range $arg := $method.InArgs}}, {{$arg.Name}}{{end}}, {{$optionVarName}});
 	}{{end}}{{end}}
 }
-{{define "resultFetch"}}{{$data := .}}{{$forceClass := true}}{{$isService := true}}{{$typeTokenClassName := javaName "com/google/common/reflect/TypeToken" $data.Imports}}{{$objectClassName := javaName "java/lang/Object" $data.Imports}}// Prepare output argument and finish the call.{{$outArgs := javaNonErrorOutArgs $data.Method}}{{$outArgType := javaNonStreamingOutArgType $data.Method $data.Interface (not $isService) $data.ForceClass $data.Imports $data.Env}}
+{{define "resultFetch"}}{{$data := .}}{{$forceClass := true}}{{$isService := true}}{{$typeTokenClassName := javaName "com/google/common/reflect/TypeToken" $data.Imports}}{{$objectClassName := javaName "java/lang/Object" $data.Imports}}// Prepare output argument and finish the call.{{$outArgs := javaNonErrorOutArgs $data.Method}}{{$finalOutArgType := javaNonStreamingOutArgType $data.Method $data.Interface (not $isService) $data.ForceClass $data.Imports $data.Env}}{{$objOutArgType := javaNonStreamingOutArgType $data.Method $data.Interface (not $isService) $forceClass $data.Imports $data.Env}}
 {{$data.Indent}}final {{$typeTokenClassName}}<?>[] resultTypes = new {{$typeTokenClassName}}<?>[]{ {{range $idx, $arg := $outArgs}}{{if gt $idx 0}}, {{end}}new {{$typeTokenClassName}}<{{javaType $arg.Type $forceClass $data.Imports $data.Env}}>() {}{{end}} };{{if eq (len $outArgs) 0}}
-{{$data.Indent}}call.finish(resultTypes);{{if ne $outArgType "void"}}
+{{$data.Indent}}call.finish(resultTypes);{{if eq $finalOutArgType "java.lang.Void"}}
 {{$data.Indent}}return null;{{end}}{{else}}{{if eq (len $outArgs) 1}}
-{{$data.Indent}}return ({{$outArgType}})call.finish(resultTypes)[0];{{else}}
+{{$data.Indent}}return ({{$objOutArgType}})call.finish(resultTypes)[0];{{else}}
 {{$data.Indent}}final {{$objectClassName}}[] results = call.finish(resultTypes);
 {{$data.Indent}}// Pack the results.
-{{$data.Indent}}final {{$outArgType}} ret = new {{$outArgType}}();
+{{$data.Indent}}final {{$finalOutArgType}} ret = new {{$finalOutArgType}}();
 {{$data.Indent}}int resultIdx = 0;{{range $arg := $outArgs}}
 {{$data.Indent}}ret.{{toCamelCase $arg.Name}} = ({{javaType $arg.Type $forceClass $data.Imports $data.Env}})results[resultIdx++];{{end}}
 {{$data.Indent}}return ret;{{end}}{{end}}
