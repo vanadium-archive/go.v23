@@ -69,6 +69,7 @@ func Makef(id ID, format string, v ...interface{}) E {
 func Abortedf(fmt string, v ...interface{}) E       { return Makef(Aborted, fmt, v...) }
 func BadArgf(fmt string, v ...interface{}) E        { return Makef(BadArg, fmt, v...) }
 func BadProtocolf(fmt string, v ...interface{}) E   { return Makef(BadProtocol, fmt, v...) }
+func Existsf(fmt string, v ...interface{}) E        { return Makef(Exists, fmt, v...) }
 func Internalf(fmt string, v ...interface{}) E      { return Makef(Internal, fmt, v...) }
 func NotAuthorizedf(fmt string, v ...interface{}) E { return Makef(NotAuthorized, fmt, v...) }
 func NotFoundf(fmt string, v ...interface{}) E      { return Makef(NotFound, fmt, v...) }

@@ -180,6 +180,7 @@ func (__gen_s *ServerStubApplication) Signature(call _gen_ipc.ServerCall) (_gen_
 	result.TypeDefs = []_gen_vdl.Any{
 		_gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
+				_gen_wiretype.FieldType{Type: 0x3, Name: "Title"},
 				_gen_wiretype.FieldType{Type: 0x3d, Name: "Args"},
 				_gen_wiretype.FieldType{Type: 0x3, Name: "Binary"},
 				_gen_wiretype.FieldType{Type: 0x3d, Name: "Env"},

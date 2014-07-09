@@ -6,6 +6,12 @@ package application
 
 // Envelope is a collection of metadata that describes an application.
 type Envelope struct {
+	// Title is the publisher-assigned application title.  Application
+	// installations with the same title are considered as belonging to the
+	// same application by the application management system.
+	//
+	// A change in the title signals a new application.
+	Title string
 	// Arguments is an array of command-line arguments to be used when
 	// executing the binary.
 	Args []string
@@ -15,3 +21,8 @@ type Envelope struct {
 	// to be used when executing the binary.
 	Env []string
 }
+
+const (
+	// Node manager application envelopes must present this title.
+	NodeManagerTitle = "node manager"
+)

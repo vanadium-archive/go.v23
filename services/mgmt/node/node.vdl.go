@@ -60,23 +60,40 @@ type Description struct {
 // scope of the suffix.
 //
 // Examples:
+// # Install Google Maps on the node.
+// device/apps.Install("/google.com/appstore/maps") --> "google maps/0"
 //
-// device/apps/maps.Start() starts an instance of all maps application
-// installations.
+// # Start an instance of the previously installed maps application installation.
+// device/apps/google maps/0.Start() --> { "0" }
 //
-// device/apps/maps/installation.Start() starts an instance of the
-// maps application installation identified by the given suffix.
+// # Start a second instance of the previously installed maps application installation.
+// device/apps/google maps/0.Start() --> { "1" }
 //
-// device/apps/maps.Refresh() refreshes the state of all instances of
-// all maps application installations.
+// # Stop the first instance previously started.
+// device/apps/google maps/0/0.Stop()
 //
-// device/apps/maps/installation.Refresh() refreshes the state of all
-// instances of the maps application installation identified by the
-// given suffix.
+// # Install a second Google Maps installation.
+// device/apps.Install("/google.com/appstore/maps") --> "google maps/1"
 //
-// device/apps/maps/installation/instance.Refresh() refreshes the
-// state of the maps application installation instance identified by
+// # Start an instance for all maps application installations.
+// device/apps/google maps.Start() --> {"0/2", "1/0"}
+//
+// # Refresh the state of all instances of all maps application installations.
+// device/apps/google maps.Refresh()
+//
+// # Refresh the state of all instances of the maps application installation
+// identified by the given suffix.
+// device/apps/google maps/0.Refresh()
+//
+// # Refresh the state of the maps application installation instance identified by
 // the given suffix.
+// device/apps/google maps/0/2.Refresh()
+//
+// # Update the second maps installation to the latest version available.
+// device/apps/google maps/1.Update()
+//
+// # Update the first maps installation to a specific version.
+// device/apps/google maps/0.UpdateTo("/google.com/appstore/beta/maps")
 //
 // Further, the following methods complement one another:
 // -- Install() and Uninstall()
@@ -106,12 +123,20 @@ type Description struct {
 // Application_ExcludingUniversal is the interface without internal framework-added methods
 // to enable embedding without method collisions.  Not to be used directly by clients.
 type Application_ExcludingUniversal interface {
-	// Install installs the latest version of the application and
-	// returns an object name that identifies the new
-	// installation. Optionally, object name suffix can be used to
-	// specify the application version to be installed. If no version is
-	// specified, the latest version is installed.
-	Install(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply string, err error)
+	// Install installs the application identified by the argument and
+	// returns an object name suffix that identifies the new installation.
+	//
+	// The argument should be an object name. The service it identifies must
+	// implement repository.Application, and is expected to return either
+	// the requested version (if the object name encodes a specific
+	// version), or otherwise the latest available version, as appropriate.
+	//
+	// The returned suffix, when appended to the name used to reach the
+	// receiver for Install, can be used to control the installation object.
+	// The suffix will contain the title of the application as a prefix,
+	// which can then be used to control all the installations of the given
+	// application.
+	Install(ctx _gen_context.T, Name string, opts ..._gen_ipc.CallOpt) (reply string, err error)
 	// Refresh refreshes the state of application installation(s)
 	// instance(s).
 	Refresh(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error)
@@ -141,11 +166,16 @@ type Application_ExcludingUniversal interface {
 	Suspend(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error)
 	// Uninstall uninstalls application installation(s).
 	Uninstall(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error)
-	// Update updates application installation(s) version. Optionally,
-	// object name suffix can be used to specify the application version
-	// to which the installation(s) should be updated. If no version is
-	// specified, the installation(s) are updated to the latest version.
+	// Update updates the application installation(s) from the object name
+	// provided during Install.  If the new application envelope contains a
+	// different application title, the update does not occur, and an error
+	// is returned.
 	Update(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error)
+	// UpdateTo updates the application installation(s) to the application
+	// specified by the object name argument.  If the new application
+	// envelope contains a different application title, the update does not
+	// occur, and an error is returned.
+	UpdateTo(ctx _gen_context.T, Name string, opts ..._gen_ipc.CallOpt) (err error)
 }
 type Application interface {
 	_gen_ipc.UniversalServiceMethods
@@ -155,12 +185,20 @@ type Application interface {
 // ApplicationService is the interface the server implements.
 type ApplicationService interface {
 
-	// Install installs the latest version of the application and
-	// returns an object name that identifies the new
-	// installation. Optionally, object name suffix can be used to
-	// specify the application version to be installed. If no version is
-	// specified, the latest version is installed.
-	Install(context _gen_ipc.ServerContext) (reply string, err error)
+	// Install installs the application identified by the argument and
+	// returns an object name suffix that identifies the new installation.
+	//
+	// The argument should be an object name. The service it identifies must
+	// implement repository.Application, and is expected to return either
+	// the requested version (if the object name encodes a specific
+	// version), or otherwise the latest available version, as appropriate.
+	//
+	// The returned suffix, when appended to the name used to reach the
+	// receiver for Install, can be used to control the installation object.
+	// The suffix will contain the title of the application as a prefix,
+	// which can then be used to control all the installations of the given
+	// application.
+	Install(context _gen_ipc.ServerContext, Name string) (reply string, err error)
 	// Refresh refreshes the state of application installation(s)
 	// instance(s).
 	Refresh(context _gen_ipc.ServerContext) (err error)
@@ -190,11 +228,16 @@ type ApplicationService interface {
 	Suspend(context _gen_ipc.ServerContext) (err error)
 	// Uninstall uninstalls application installation(s).
 	Uninstall(context _gen_ipc.ServerContext) (err error)
-	// Update updates application installation(s) version. Optionally,
-	// object name suffix can be used to specify the application version
-	// to which the installation(s) should be updated. If no version is
-	// specified, the installation(s) are updated to the latest version.
+	// Update updates the application installation(s) from the object name
+	// provided during Install.  If the new application envelope contains a
+	// different application title, the update does not occur, and an error
+	// is returned.
 	Update(context _gen_ipc.ServerContext) (err error)
+	// UpdateTo updates the application installation(s) to the application
+	// specified by the object name argument.  If the new application
+	// envelope contains a different application title, the update does not
+	// occur, and an error is returned.
+	UpdateTo(context _gen_ipc.ServerContext, Name string) (err error)
 }
 
 // BindApplication returns the client stub implementing the Application
@@ -240,9 +283,9 @@ type clientStubApplication struct {
 	name   string
 }
 
-func (__gen_c *clientStubApplication) Install(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply string, err error) {
+func (__gen_c *clientStubApplication) Install(ctx _gen_context.T, Name string, opts ..._gen_ipc.CallOpt) (reply string, err error) {
 	var call _gen_ipc.Call
-	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Install", nil, opts...); err != nil {
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Install", []interface{}{Name}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -350,6 +393,17 @@ func (__gen_c *clientStubApplication) Update(ctx _gen_context.T, opts ..._gen_ip
 	return
 }
 
+func (__gen_c *clientStubApplication) UpdateTo(ctx _gen_context.T, Name string, opts ..._gen_ipc.CallOpt) (err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "UpdateTo", []interface{}{Name}, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
 func (__gen_c *clientStubApplication) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
@@ -415,6 +469,8 @@ func (__gen_s *ServerStubApplication) GetMethodTags(call _gen_ipc.ServerCall, me
 		return []interface{}{}, nil
 	case "Update":
 		return []interface{}{}, nil
+	case "UpdateTo":
+		return []interface{}{}, nil
 	default:
 		return nil, nil
 	}
@@ -423,7 +479,9 @@ func (__gen_s *ServerStubApplication) GetMethodTags(call _gen_ipc.ServerCall, me
 func (__gen_s *ServerStubApplication) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
 	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
 	result.Methods["Install"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{},
+		InArgs: []_gen_ipc.MethodArgument{
+			{Name: "Name", Type: 3},
+		},
 		OutArgs: []_gen_ipc.MethodArgument{
 			{Name: "", Type: 3},
 			{Name: "", Type: 65},
@@ -486,6 +544,14 @@ func (__gen_s *ServerStubApplication) Signature(call _gen_ipc.ServerCall) (_gen_
 			{Name: "", Type: 65},
 		},
 	}
+	result.Methods["UpdateTo"] = _gen_ipc.MethodSignature{
+		InArgs: []_gen_ipc.MethodArgument{
+			{Name: "Name", Type: 3},
+		},
+		OutArgs: []_gen_ipc.MethodArgument{
+			{Name: "", Type: 65},
+		},
+	}
 
 	result.TypeDefs = []_gen_vdl.Any{
 		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}}
@@ -511,8 +577,8 @@ func (__gen_s *ServerStubApplication) UnresolveStep(call _gen_ipc.ServerCall) (r
 	return
 }
 
-func (__gen_s *ServerStubApplication) Install(call _gen_ipc.ServerCall) (reply string, err error) {
-	reply, err = __gen_s.service.Install(call)
+func (__gen_s *ServerStubApplication) Install(call _gen_ipc.ServerCall, Name string) (reply string, err error) {
+	reply, err = __gen_s.service.Install(call, Name)
 	return
 }
 
@@ -561,6 +627,11 @@ func (__gen_s *ServerStubApplication) Update(call _gen_ipc.ServerCall) (err erro
 	return
 }
 
+func (__gen_s *ServerStubApplication) UpdateTo(call _gen_ipc.ServerCall, Name string) (err error) {
+	err = __gen_s.service.UpdateTo(call, Name)
+	return
+}
+
 // Node can be used to manage a node. The idea is that this interace
 // will be invoked using an object name that identifies the node.
 // Node is the interface the client binds and uses.
@@ -596,23 +667,40 @@ type Node_ExcludingUniversal interface {
 	// scope of the suffix.
 	//
 	// Examples:
+	// # Install Google Maps on the node.
+	// device/apps.Install("/google.com/appstore/maps") --> "google maps/0"
 	//
-	// device/apps/maps.Start() starts an instance of all maps application
-	// installations.
+	// # Start an instance of the previously installed maps application installation.
+	// device/apps/google maps/0.Start() --> { "0" }
 	//
-	// device/apps/maps/installation.Start() starts an instance of the
-	// maps application installation identified by the given suffix.
+	// # Start a second instance of the previously installed maps application installation.
+	// device/apps/google maps/0.Start() --> { "1" }
 	//
-	// device/apps/maps.Refresh() refreshes the state of all instances of
-	// all maps application installations.
+	// # Stop the first instance previously started.
+	// device/apps/google maps/0/0.Stop()
 	//
-	// device/apps/maps/installation.Refresh() refreshes the state of all
-	// instances of the maps application installation identified by the
-	// given suffix.
+	// # Install a second Google Maps installation.
+	// device/apps.Install("/google.com/appstore/maps") --> "google maps/1"
 	//
-	// device/apps/maps/installation/instance.Refresh() refreshes the
-	// state of the maps application installation instance identified by
+	// # Start an instance for all maps application installations.
+	// device/apps/google maps.Start() --> {"0/2", "1/0"}
+	//
+	// # Refresh the state of all instances of all maps application installations.
+	// device/apps/google maps.Refresh()
+	//
+	// # Refresh the state of all instances of the maps application installation
+	// identified by the given suffix.
+	// device/apps/google maps/0.Refresh()
+	//
+	// # Refresh the state of the maps application installation instance identified by
 	// the given suffix.
+	// device/apps/google maps/0/2.Refresh()
+	//
+	// # Update the second maps installation to the latest version available.
+	// device/apps/google maps/1.Update()
+	//
+	// # Update the first maps installation to a specific version.
+	// device/apps/google maps/0.UpdateTo("/google.com/appstore/beta/maps")
 	//
 	// Further, the following methods complement one another:
 	// -- Install() and Uninstall()
@@ -688,23 +776,40 @@ type NodeService interface {
 	// scope of the suffix.
 	//
 	// Examples:
+	// # Install Google Maps on the node.
+	// device/apps.Install("/google.com/appstore/maps") --> "google maps/0"
 	//
-	// device/apps/maps.Start() starts an instance of all maps application
-	// installations.
+	// # Start an instance of the previously installed maps application installation.
+	// device/apps/google maps/0.Start() --> { "0" }
 	//
-	// device/apps/maps/installation.Start() starts an instance of the
-	// maps application installation identified by the given suffix.
+	// # Start a second instance of the previously installed maps application installation.
+	// device/apps/google maps/0.Start() --> { "1" }
 	//
-	// device/apps/maps.Refresh() refreshes the state of all instances of
-	// all maps application installations.
+	// # Stop the first instance previously started.
+	// device/apps/google maps/0/0.Stop()
 	//
-	// device/apps/maps/installation.Refresh() refreshes the state of all
-	// instances of the maps application installation identified by the
-	// given suffix.
+	// # Install a second Google Maps installation.
+	// device/apps.Install("/google.com/appstore/maps") --> "google maps/1"
 	//
-	// device/apps/maps/installation/instance.Refresh() refreshes the
-	// state of the maps application installation instance identified by
+	// # Start an instance for all maps application installations.
+	// device/apps/google maps.Start() --> {"0/2", "1/0"}
+	//
+	// # Refresh the state of all instances of all maps application installations.
+	// device/apps/google maps.Refresh()
+	//
+	// # Refresh the state of all instances of the maps application installation
+	// identified by the given suffix.
+	// device/apps/google maps/0.Refresh()
+	//
+	// # Refresh the state of the maps application installation instance identified by
 	// the given suffix.
+	// device/apps/google maps/0/2.Refresh()
+	//
+	// # Update the second maps installation to the latest version available.
+	// device/apps/google maps/1.Update()
+	//
+	// # Update the first maps installation to a specific version.
+	// device/apps/google maps/0.UpdateTo("/google.com/appstore/beta/maps")
 	//
 	// Further, the following methods complement one another:
 	// -- Install() and Uninstall()
