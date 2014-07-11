@@ -3,7 +3,7 @@
 package node
 
 import (
-	"veyron2/services/mgmt/build"
+	"veyron2/services/mgmt/binary"
 )
 
 // Application can be used to manage applications on a device. The
@@ -173,7 +173,7 @@ type Node interface {
 	// Describe generates a description of the node.
 	Describe() (Description, error)
 	// IsRunnable checks if the node can execute the given binary.
-	IsRunnable(Binary build.BinaryDescription) (bool, error)
+	IsRunnable(Description binary.Description) (bool, error)
 	// Reset resets the node. If the deadline is non-zero and the node
 	// in question is still running after the given deadline expired,
 	// reset of the node is enforced.

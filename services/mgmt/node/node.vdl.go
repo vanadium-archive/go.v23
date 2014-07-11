@@ -6,7 +6,7 @@
 package node
 
 import (
-	"veyron2/services/mgmt/build"
+	"veyron2/services/mgmt/binary"
 
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
 	_gen_veyron2 "veyron2"
@@ -730,7 +730,7 @@ type Node_ExcludingUniversal interface {
 	// Describe generates a description of the node.
 	Describe(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply Description, err error)
 	// IsRunnable checks if the node can execute the given binary.
-	IsRunnable(ctx _gen_context.T, Binary build.BinaryDescription, opts ..._gen_ipc.CallOpt) (reply bool, err error)
+	IsRunnable(ctx _gen_context.T, Description binary.Description, opts ..._gen_ipc.CallOpt) (reply bool, err error)
 	// Reset resets the node. If the deadline is non-zero and the node
 	// in question is still running after the given deadline expired,
 	// reset of the node is enforced.
@@ -839,7 +839,7 @@ type NodeService interface {
 	// Describe generates a description of the node.
 	Describe(context _gen_ipc.ServerContext) (reply Description, err error)
 	// IsRunnable checks if the node can execute the given binary.
-	IsRunnable(context _gen_ipc.ServerContext, Binary build.BinaryDescription) (reply bool, err error)
+	IsRunnable(context _gen_ipc.ServerContext, Description binary.Description) (reply bool, err error)
 	// Reset resets the node. If the deadline is non-zero and the node
 	// in question is still running after the given deadline expired,
 	// reset of the node is enforced.
@@ -907,9 +907,9 @@ func (__gen_c *clientStubNode) Describe(ctx _gen_context.T, opts ..._gen_ipc.Cal
 	return
 }
 
-func (__gen_c *clientStubNode) IsRunnable(ctx _gen_context.T, Binary build.BinaryDescription, opts ..._gen_ipc.CallOpt) (reply bool, err error) {
+func (__gen_c *clientStubNode) IsRunnable(ctx _gen_context.T, Description binary.Description, opts ..._gen_ipc.CallOpt) (reply bool, err error) {
 	var call _gen_ipc.Call
-	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "IsRunnable", []interface{}{Binary}, opts...); err != nil {
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "IsRunnable", []interface{}{Description}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -1001,7 +1001,7 @@ func (__gen_s *ServerStubNode) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Ser
 	}
 	result.Methods["IsRunnable"] = _gen_ipc.MethodSignature{
 		InArgs: []_gen_ipc.MethodArgument{
-			{Name: "Binary", Type: 68},
+			{Name: "Description", Type: 68},
 		},
 		OutArgs: []_gen_ipc.MethodArgument{
 			{Name: "", Type: 2},
@@ -1028,7 +1028,7 @@ func (__gen_s *ServerStubNode) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Ser
 				_gen_wiretype.FieldType{Type: 0x3, Name: "Name"},
 				_gen_wiretype.FieldType{Type: 0x41, Name: "Profiles"},
 			},
-			"veyron2/services/mgmt/build.BinaryDescription", []string(nil)},
+			"veyron2/services/mgmt/binary.Description", []string(nil)},
 	}
 	var ss _gen_ipc.ServiceSignature
 	var firstAdded int
@@ -1112,8 +1112,8 @@ func (__gen_s *ServerStubNode) Describe(call _gen_ipc.ServerCall) (reply Descrip
 	return
 }
 
-func (__gen_s *ServerStubNode) IsRunnable(call _gen_ipc.ServerCall, Binary build.BinaryDescription) (reply bool, err error) {
-	reply, err = __gen_s.service.IsRunnable(call, Binary)
+func (__gen_s *ServerStubNode) IsRunnable(call _gen_ipc.ServerCall, Description binary.Description) (reply bool, err error) {
+	reply, err = __gen_s.service.IsRunnable(call, Description)
 	return
 }
 

@@ -5,6 +5,8 @@
 package build
 
 import (
+	"veyron2/services/mgmt/binary"
+
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
 	_gen_veyron2 "veyron2"
 	_gen_context "veyron2/context"
@@ -15,23 +17,9 @@ import (
 	_gen_wiretype "veyron2/wiretype"
 )
 
-// Binaries are named and have been determined to run on some set of
-// profiles. The mechanism for determing profiles is specifically not
-// specified and left to the implementation of the Build interface.
-type BinaryDescription struct {
-	// Name is the Object name of the application binary that can be
-	// used to fetch the actual binary from a content server.
-	Name string
-	// Profiles is a set of names of compatible profiles.  Each name can either
-	// be an Object name that resolves to a Profile, or can be the profile's
-	// label, e.g.:
-	//   "profiles/google/cluster/diskfull"
-	//   "linux-media"
-	//
-	// Application developers can specify compatible profiles by hand, but we also
-	// want to be able to automatically derive the matching profiles from
-	// examining the binary itself (e.g. that's what Build.Describe() does).
-	Profiles map[string]bool
+type File struct {
+	Name     string
+	Contents []byte
 }
 
 // Build describes an interface for building binaries from source.
@@ -39,9 +27,12 @@ type BinaryDescription struct {
 // Build_ExcludingUniversal is the interface without internal framework-added methods
 // to enable embedding without method collisions.  Not to be used directly by clients.
 type Build_ExcludingUniversal interface {
-	// Describe generates a BinaryDescription for a binary identified by
+	// Build streams sources to the build server, which then attempts to
+	// build the sources and returns the output.
+	Build(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply BuildBuildStream, err error)
+	// Describe generates a description for a binary identified by
 	// the given Object name.
-	Describe(ctx _gen_context.T, Name string, opts ..._gen_ipc.CallOpt) (reply BinaryDescription, err error)
+	Describe(ctx _gen_context.T, Name string, opts ..._gen_ipc.CallOpt) (reply binary.Description, err error)
 }
 type Build interface {
 	_gen_ipc.UniversalServiceMethods
@@ -51,9 +42,77 @@ type Build interface {
 // BuildService is the interface the server implements.
 type BuildService interface {
 
-	// Describe generates a BinaryDescription for a binary identified by
+	// Build streams sources to the build server, which then attempts to
+	// build the sources and returns the output.
+	Build(context _gen_ipc.ServerContext, stream BuildServiceBuildStream) (reply []byte, err error)
+	// Describe generates a description for a binary identified by
 	// the given Object name.
-	Describe(context _gen_ipc.ServerContext, Name string) (reply BinaryDescription, err error)
+	Describe(context _gen_ipc.ServerContext, Name string) (reply binary.Description, err error)
+}
+
+// BuildBuildStream is the interface for streaming responses of the method
+// Build in the service interface Build.
+type BuildBuildStream interface {
+
+	// Send places the item onto the output stream, blocking if there is no buffer
+	// space available.
+	Send(item File) error
+
+	// CloseSend indicates to the server that no more items will be sent; server
+	// Recv calls will receive io.EOF after all sent items.  Subsequent calls to
+	// Send on the client will fail.  This is an optional call - it's used by
+	// streaming clients that need the server to receive the io.EOF terminator.
+	CloseSend() error
+
+	// Finish closes the stream and returns the positional return values for
+	// call.
+	Finish() (reply []byte, err error)
+
+	// Cancel cancels the RPC, notifying the server to stop processing.
+	Cancel()
+}
+
+// Implementation of the BuildBuildStream interface that is not exported.
+type implBuildBuildStream struct {
+	clientCall _gen_ipc.Call
+}
+
+func (c *implBuildBuildStream) Send(item File) error {
+	return c.clientCall.Send(item)
+}
+
+func (c *implBuildBuildStream) CloseSend() error {
+	return c.clientCall.CloseSend()
+}
+
+func (c *implBuildBuildStream) Finish() (reply []byte, err error) {
+	if ierr := c.clientCall.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (c *implBuildBuildStream) Cancel() {
+	c.clientCall.Cancel()
+}
+
+// BuildServiceBuildStream is the interface for streaming responses of the method
+// Build in the service interface Build.
+type BuildServiceBuildStream interface {
+
+	// Recv fills itemptr with the next item in the input stream, blocking until
+	// an item is available.  Returns io.EOF to indicate graceful end of input.
+	Recv() (item File, err error)
+}
+
+// Implementation of the BuildServiceBuildStream interface that is not exported.
+type implBuildServiceBuildStream struct {
+	serverCall _gen_ipc.ServerCall
+}
+
+func (s *implBuildServiceBuildStream) Recv() (item File, err error) {
+	err = s.serverCall.Recv(&item)
+	return
 }
 
 // BindBuild returns the client stub implementing the Build
@@ -99,7 +158,16 @@ type clientStubBuild struct {
 	name   string
 }
 
-func (__gen_c *clientStubBuild) Describe(ctx _gen_context.T, Name string, opts ..._gen_ipc.CallOpt) (reply BinaryDescription, err error) {
+func (__gen_c *clientStubBuild) Build(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply BuildBuildStream, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Build", nil, opts...); err != nil {
+		return
+	}
+	reply = &implBuildBuildStream{clientCall: call}
+	return
+}
+
+func (__gen_c *clientStubBuild) Describe(ctx _gen_context.T, Name string, opts ..._gen_ipc.CallOpt) (reply binary.Description, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Describe", []interface{}{Name}, opts...); err != nil {
 		return
@@ -155,6 +223,8 @@ func (__gen_s *ServerStubBuild) GetMethodTags(call _gen_ipc.ServerCall, method s
 	// Note: This exhibits some weird behavior like returning a nil error if the method isn't found.
 	// This will change when it is replaced with Signature().
 	switch method {
+	case "Build":
+		return []interface{}{}, nil
 	case "Describe":
 		return []interface{}{}, nil
 	default:
@@ -164,24 +234,38 @@ func (__gen_s *ServerStubBuild) GetMethodTags(call _gen_ipc.ServerCall, method s
 
 func (__gen_s *ServerStubBuild) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
 	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
+	result.Methods["Build"] = _gen_ipc.MethodSignature{
+		InArgs: []_gen_ipc.MethodArgument{},
+		OutArgs: []_gen_ipc.MethodArgument{
+			{Name: "", Type: 66},
+			{Name: "", Type: 67},
+		},
+		InStream: 68,
+	}
 	result.Methods["Describe"] = _gen_ipc.MethodSignature{
 		InArgs: []_gen_ipc.MethodArgument{
 			{Name: "Name", Type: 3},
 		},
 		OutArgs: []_gen_ipc.MethodArgument{
-			{Name: "", Type: 66},
+			{Name: "", Type: 70},
 			{Name: "", Type: 67},
 		},
 	}
 
 	result.TypeDefs = []_gen_vdl.Any{
+		_gen_wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, _gen_wiretype.SliceType{Elem: 0x41, Name: "", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, _gen_wiretype.StructType{
+			[]_gen_wiretype.FieldType{
+				_gen_wiretype.FieldType{Type: 0x3, Name: "Name"},
+				_gen_wiretype.FieldType{Type: 0x42, Name: "Contents"},
+			},
+			"veyron2/services/mgmt/build.File", []string(nil)},
 		_gen_wiretype.MapType{Key: 0x3, Elem: 0x2, Name: "", Tags: []string(nil)}, _gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
 				_gen_wiretype.FieldType{Type: 0x3, Name: "Name"},
-				_gen_wiretype.FieldType{Type: 0x41, Name: "Profiles"},
+				_gen_wiretype.FieldType{Type: 0x45, Name: "Profiles"},
 			},
-			"veyron2/services/mgmt/build.BinaryDescription", []string(nil)},
-		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}}
+			"veyron2/services/mgmt/binary.Description", []string(nil)},
+	}
 
 	return result, nil
 }
@@ -204,7 +288,13 @@ func (__gen_s *ServerStubBuild) UnresolveStep(call _gen_ipc.ServerCall) (reply [
 	return
 }
 
-func (__gen_s *ServerStubBuild) Describe(call _gen_ipc.ServerCall, Name string) (reply BinaryDescription, err error) {
+func (__gen_s *ServerStubBuild) Build(call _gen_ipc.ServerCall) (reply []byte, err error) {
+	stream := &implBuildServiceBuildStream{serverCall: call}
+	reply, err = __gen_s.service.Build(call, stream)
+	return
+}
+
+func (__gen_s *ServerStubBuild) Describe(call _gen_ipc.ServerCall, Name string) (reply binary.Description, err error) {
 	reply, err = __gen_s.service.Describe(call, Name)
 	return
 }
