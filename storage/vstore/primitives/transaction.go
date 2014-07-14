@@ -9,7 +9,7 @@ import (
 	"veyron2/context"
 	"veyron2/services/store"
 	"veyron2/storage"
-	"veyron2/vdl"
+	"veyron2/vdl/vdlutil"
 )
 
 var (
@@ -49,11 +49,11 @@ func UpdateTransaction(ctx context.T, t storage.Transaction, serv store.Store) (
 	return tr.id, nil
 }
 
-// transactionOptsToAnyData converts the array to []vdl.Any.
-func transactionOptsToAnyData(opts []storage.TransactionOpt) []vdl.Any {
-	vopts := make([]vdl.Any, len(opts))
+// transactionOptsToAnyData converts the array to []vdlutil.Any.
+func transactionOptsToAnyData(opts []storage.TransactionOpt) []vdlutil.Any {
+	vopts := make([]vdlutil.Any, len(opts))
 	for i, x := range opts {
-		vopts[i] = vdl.Any(x)
+		vopts[i] = vdlutil.Any(x)
 	}
 	return vopts
 }

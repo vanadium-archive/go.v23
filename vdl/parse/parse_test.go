@@ -8,9 +8,9 @@ import (
 	"strings"
 	"testing"
 
-	"veyron2/vdl"
 	"veyron2/vdl/parse"
 	"veyron2/vdl/vdltest"
+	"veyron2/vdl/vdlutil"
 )
 
 func pos(line, col int) parse.Pos {
@@ -34,7 +34,7 @@ type vdlTest struct {
 }
 
 func testParseVDL(t *testing.T, test vdlTest, opts parse.Opts) {
-	errs := vdl.NewErrors(-1)
+	errs := vdlutil.NewErrors(-1)
 	actual := parse.Parse("testfile", strings.NewReader(test.src), opts, errs)
 	vdltest.ExpectResult(t, errs, test.name, test.errors...)
 	if !reflect.DeepEqual(test.expect, actual) {
@@ -83,7 +83,7 @@ type configTest struct {
 }
 
 func testParseConfig(t *testing.T, test configTest, opts parse.Opts) {
-	errs := vdl.NewErrors(-1)
+	errs := vdlutil.NewErrors(-1)
 	actual := parse.ParseConfig("testfile", strings.NewReader(test.src), opts, errs)
 	vdltest.ExpectResult(t, errs, test.name, test.errors...)
 	if !reflect.DeepEqual(test.expect, actual) {

@@ -2,7 +2,7 @@ package compile
 
 import (
 	"veyron/lib/toposort"
-	"veyron2/val"
+	"veyron2/vdl"
 	"veyron2/vdl/parse"
 )
 
@@ -194,7 +194,7 @@ func (id ifaceDefiner) defineArgs(io, mname string, pargs []*parse.Field, file *
 	return
 }
 
-func (id ifaceDefiner) defineStreamType(ptype parse.Type, file *File) *val.Type {
+func (id ifaceDefiner) defineStreamType(ptype parse.Type, file *File) *vdl.Type {
 	if ptype == nil {
 		return nil
 	}
@@ -205,7 +205,7 @@ func (id ifaceDefiner) defineStreamType(ptype parse.Type, file *File) *val.Type 
 	return compileType(ptype, file, id.env)
 }
 
-func (id ifaceDefiner) defineTags(ptags []parse.ConstExpr, file *File) (tags []*val.Value) {
+func (id ifaceDefiner) defineTags(ptags []parse.ConstExpr, file *File) (tags []*vdl.Value) {
 	for _, ptag := range ptags {
 		if tag := compileConst(nil, ptag, file, id.env); tag != nil {
 			tags = append(tags, tag)

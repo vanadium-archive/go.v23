@@ -12,7 +12,7 @@ import (
 	"veyron2/services/store"
 	"veyron2/services/watch"
 	"veyron2/storage"
-	"veyron2/vdl"
+	"veyron2/vdl/vdlutil"
 )
 
 type object struct {
@@ -136,9 +136,9 @@ func (o *object) SetAttr(ctx context.T, t storage.Transaction, attrs ...storage.
 	if err != nil {
 		return err
 	}
-	serviceAttrs := make([]vdl.Any, len(attrs))
+	serviceAttrs := make([]vdlutil.Any, len(attrs))
 	for i, x := range attrs {
-		serviceAttrs[i] = vdl.Any(x)
+		serviceAttrs[i] = vdlutil.Any(x)
 	}
 	return o.oServ.SetAttr(ctx, id, serviceAttrs)
 }

@@ -12,10 +12,10 @@ import (
 
 	"veyron/lib/cmdline"
 
-	"veyron2/vdl"
 	"veyron2/vdl/build"
 	"veyron2/vdl/compile"
 	"veyron2/vdl/gen"
+	"veyron2/vdl/vdlutil"
 )
 
 func init() {
@@ -35,7 +35,7 @@ func checkErrors(w io.Writer, env *compile.Env) {
 func runHelper(run func(targets []*build.Package, env *compile.Env)) func(cmd *cmdline.Command, args []string) error {
 	return func(cmd *cmdline.Command, args []string) error {
 		if flagVerbose {
-			vdl.SetVerbose()
+			vdlutil.SetVerbose()
 		}
 		if len(args) == 0 {
 			// If the user doesn't specify any targets, the cwd is implied.

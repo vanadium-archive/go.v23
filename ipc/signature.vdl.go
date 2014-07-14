@@ -7,14 +7,14 @@ import (
 	"veyron2/wiretype"
 
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
-	_gen_vdl "veyron2/vdl"
+	_gen_vdlutil "veyron2/vdl/vdlutil"
 )
 
 // ServiceSignature represents the signature of the service. This includes type information needed
 // to resolve the method argument types.
 // TODO(bprosnitz) Rename this and move it to wiretype.
 type ServiceSignature struct {
-	TypeDefs []_gen_vdl.Any // A slice of wiretype structures form the type definition.
+	TypeDefs []_gen_vdlutil.Any // A slice of wiretype structures form the type definition.
 	Methods  map[string]MethodSignature
 }
 

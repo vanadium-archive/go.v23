@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"veyron2/vdl"
+	"veyron2/vdl/vdlutil"
 	"veyron2/vom"
 	"veyron2/wiretype"
 	wiretype_build "veyron2/wiretype/build"
@@ -16,7 +16,7 @@ type TypeConverter struct {
 	Defs wiretype_build.TypeDefs
 }
 
-func (tc *TypeConverter) getWireType(vt vom.Type) vdl.Any {
+func (tc *TypeConverter) getWireType(vt vom.Type) vdlutil.Any {
 	name := vt.Name()
 	if vt.PkgPath() != "" {
 		name = vt.PkgPath() + "." + vt.Name()

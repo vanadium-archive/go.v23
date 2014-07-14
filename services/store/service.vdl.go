@@ -18,7 +18,7 @@ import (
 	_gen_ipc "veyron2/ipc"
 	_gen_naming "veyron2/naming"
 	_gen_rt "veyron2/rt"
-	_gen_vdl "veyron2/vdl"
+	_gen_vdlutil "veyron2/vdl/vdlutil"
 	_gen_wiretype "veyron2/wiretype"
 )
 
@@ -45,7 +45,7 @@ type Stat struct {
 	// TODO(jyh): Use Veyron Time when it gets implemented.
 	MTimeNS int64
 	// Attrs are the attributes associated with the entry.
-	Attrs []_gen_vdl.Any
+	Attrs []_gen_vdlutil.Any
 }
 
 // Conflict represents a conflicting update in the store.
@@ -67,7 +67,7 @@ type Entry struct {
 	// Stat is the entry's metadata.
 	Stat Stat
 	// Value is the value of the entry.
-	Value _gen_vdl.Any
+	Value _gen_vdlutil.Any
 }
 
 // NestedResult allows nested query results to be sent out-of-line.
@@ -173,9 +173,9 @@ type QueryResult struct {
 	// used in the selection.  If a field represents a subquery, the
 	// value will be a NestedResult and subsequent QueryResults will
 	// have the same valued NestedResult.  See the example above.
-	Fields map[string]_gen_vdl.Any
+	Fields map[string]_gen_vdlutil.Any
 	// Value will be non-nil if this query result is of a known type.
-	Value _gen_vdl.Any
+	Value _gen_vdlutil.Any
 }
 
 const (
@@ -204,13 +204,13 @@ type Object_ExcludingUniversal interface {
 	// Transaction's snapshot if there is no mutation.
 	Get(ctx _gen_context.T, TID TransactionID, opts ..._gen_ipc.CallOpt) (reply Entry, err error)
 	// Put modifies the value of the Object.
-	Put(ctx _gen_context.T, TID TransactionID, V _gen_vdl.Any, opts ..._gen_ipc.CallOpt) (reply Stat, err error)
+	Put(ctx _gen_context.T, TID TransactionID, V _gen_vdlutil.Any, opts ..._gen_ipc.CallOpt) (reply Stat, err error)
 	// Remove removes the Object.
 	Remove(ctx _gen_context.T, TID TransactionID, opts ..._gen_ipc.CallOpt) (err error)
 	// SetAttr changes the attributes of the entry, such as permissions and
 	// replication groups.  Attributes are associated with the value, not the
 	// path.
-	SetAttr(ctx _gen_context.T, TID TransactionID, Attrs []_gen_vdl.Any, opts ..._gen_ipc.CallOpt) (err error)
+	SetAttr(ctx _gen_context.T, TID TransactionID, Attrs []_gen_vdlutil.Any, opts ..._gen_ipc.CallOpt) (err error)
 	// Stat returns entry info.
 	Stat(ctx _gen_context.T, TID TransactionID, opts ..._gen_ipc.CallOpt) (reply Stat, err error)
 	// Query returns the sequence of elements that satisfy the query.
@@ -240,13 +240,13 @@ type ObjectService interface {
 	// Transaction's snapshot if there is no mutation.
 	Get(context _gen_ipc.ServerContext, TID TransactionID) (reply Entry, err error)
 	// Put modifies the value of the Object.
-	Put(context _gen_ipc.ServerContext, TID TransactionID, V _gen_vdl.Any) (reply Stat, err error)
+	Put(context _gen_ipc.ServerContext, TID TransactionID, V _gen_vdlutil.Any) (reply Stat, err error)
 	// Remove removes the Object.
 	Remove(context _gen_ipc.ServerContext, TID TransactionID) (err error)
 	// SetAttr changes the attributes of the entry, such as permissions and
 	// replication groups.  Attributes are associated with the value, not the
 	// path.
-	SetAttr(context _gen_ipc.ServerContext, TID TransactionID, Attrs []_gen_vdl.Any) (err error)
+	SetAttr(context _gen_ipc.ServerContext, TID TransactionID, Attrs []_gen_vdlutil.Any) (err error)
 	// Stat returns entry info.
 	Stat(context _gen_ipc.ServerContext, TID TransactionID) (reply Stat, err error)
 	// Query returns the sequence of elements that satisfy the query.
@@ -381,10 +381,10 @@ func BindObject(name string, opts ..._gen_ipc.BindOpt) (Object, error) {
 		case _gen_ipc.Client:
 			client = o
 		default:
-			return nil, _gen_vdl.ErrUnrecognizedOption
+			return nil, _gen_vdlutil.ErrUnrecognizedOption
 		}
 	default:
-		return nil, _gen_vdl.ErrTooManyOptionsToBind
+		return nil, _gen_vdlutil.ErrTooManyOptionsToBind
 	}
 	stub := &clientStubObject{client: client, name: name}
 	stub.Globable_ExcludingUniversal, _ = mounttable.BindGlobable(name, client)
@@ -439,7 +439,7 @@ func (__gen_c *clientStubObject) Get(ctx _gen_context.T, TID TransactionID, opts
 	return
 }
 
-func (__gen_c *clientStubObject) Put(ctx _gen_context.T, TID TransactionID, V _gen_vdl.Any, opts ..._gen_ipc.CallOpt) (reply Stat, err error) {
+func (__gen_c *clientStubObject) Put(ctx _gen_context.T, TID TransactionID, V _gen_vdlutil.Any, opts ..._gen_ipc.CallOpt) (reply Stat, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Put", []interface{}{TID, V}, opts...); err != nil {
 		return
@@ -461,7 +461,7 @@ func (__gen_c *clientStubObject) Remove(ctx _gen_context.T, TID TransactionID, o
 	return
 }
 
-func (__gen_c *clientStubObject) SetAttr(ctx _gen_context.T, TID TransactionID, Attrs []_gen_vdl.Any, opts ..._gen_ipc.CallOpt) (err error) {
+func (__gen_c *clientStubObject) SetAttr(ctx _gen_context.T, TID TransactionID, Attrs []_gen_vdlutil.Any, opts ..._gen_ipc.CallOpt) (err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "SetAttr", []interface{}{TID, Attrs}, opts...); err != nil {
 		return
@@ -659,7 +659,7 @@ func (__gen_s *ServerStubObject) Signature(call _gen_ipc.ServerCall) (_gen_ipc.S
 		},
 	}
 
-	result.TypeDefs = []_gen_vdl.Any{
+	result.TypeDefs = []_gen_vdlutil.Any{
 		_gen_wiretype.NamedPrimitiveType{Type: 0x35, Name: "veyron2/services/store.TransactionID", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, _gen_wiretype.ArrayType{Elem: 0x43, Len: 0x10, Name: "veyron2/storage.ID", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "anydata", Tags: []string(nil)}, _gen_wiretype.SliceType{Elem: 0x45, Name: "", Tags: []string(nil)}, _gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
 				_gen_wiretype.FieldType{Type: 0x44, Name: "ID"},
@@ -880,7 +880,7 @@ func (__gen_s *ServerStubObject) Get(call _gen_ipc.ServerCall, TID TransactionID
 	return
 }
 
-func (__gen_s *ServerStubObject) Put(call _gen_ipc.ServerCall, TID TransactionID, V _gen_vdl.Any) (reply Stat, err error) {
+func (__gen_s *ServerStubObject) Put(call _gen_ipc.ServerCall, TID TransactionID, V _gen_vdlutil.Any) (reply Stat, err error) {
 	reply, err = __gen_s.service.Put(call, TID, V)
 	return
 }
@@ -890,7 +890,7 @@ func (__gen_s *ServerStubObject) Remove(call _gen_ipc.ServerCall, TID Transactio
 	return
 }
 
-func (__gen_s *ServerStubObject) SetAttr(call _gen_ipc.ServerCall, TID TransactionID, Attrs []_gen_vdl.Any) (err error) {
+func (__gen_s *ServerStubObject) SetAttr(call _gen_ipc.ServerCall, TID TransactionID, Attrs []_gen_vdlutil.Any) (err error) {
 	err = __gen_s.service.SetAttr(call, TID, Attrs)
 	return
 }
@@ -918,7 +918,7 @@ func (__gen_s *ServerStubObject) GlobT(call _gen_ipc.ServerCall, TID Transaction
 // to enable embedding without method collisions.  Not to be used directly by clients.
 type Store_ExcludingUniversal interface {
 	// CreateTransaction creates the transaction and sets the options for it.
-	CreateTransaction(ctx _gen_context.T, TID TransactionID, Options []_gen_vdl.Any, opts ..._gen_ipc.CallOpt) (err error)
+	CreateTransaction(ctx _gen_context.T, TID TransactionID, Options []_gen_vdlutil.Any, opts ..._gen_ipc.CallOpt) (err error)
 	// Commit commits the changes in the transaction to the store.  The
 	// operation is atomic, so all mutations are performed, or none.  Returns an
 	// error if the transaction aborted.
@@ -941,7 +941,7 @@ type Store interface {
 type StoreService interface {
 
 	// CreateTransaction creates the transaction and sets the options for it.
-	CreateTransaction(context _gen_ipc.ServerContext, TID TransactionID, Options []_gen_vdl.Any) (err error)
+	CreateTransaction(context _gen_ipc.ServerContext, TID TransactionID, Options []_gen_vdlutil.Any) (err error)
 	// Commit commits the changes in the transaction to the store.  The
 	// operation is atomic, so all mutations are performed, or none.  Returns an
 	// error if the transaction aborted.
@@ -1027,10 +1027,10 @@ func BindStore(name string, opts ..._gen_ipc.BindOpt) (Store, error) {
 		case _gen_ipc.Client:
 			client = o
 		default:
-			return nil, _gen_vdl.ErrUnrecognizedOption
+			return nil, _gen_vdlutil.ErrUnrecognizedOption
 		}
 	default:
-		return nil, _gen_vdl.ErrTooManyOptionsToBind
+		return nil, _gen_vdlutil.ErrTooManyOptionsToBind
 	}
 	stub := &clientStubStore{client: client, name: name}
 
@@ -1053,7 +1053,7 @@ type clientStubStore struct {
 	name   string
 }
 
-func (__gen_c *clientStubStore) CreateTransaction(ctx _gen_context.T, TID TransactionID, Options []_gen_vdl.Any, opts ..._gen_ipc.CallOpt) (err error) {
+func (__gen_c *clientStubStore) CreateTransaction(ctx _gen_context.T, TID TransactionID, Options []_gen_vdlutil.Any, opts ..._gen_ipc.CallOpt) (err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "CreateTransaction", []interface{}{TID, Options}, opts...); err != nil {
 		return
@@ -1189,7 +1189,7 @@ func (__gen_s *ServerStubStore) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Se
 		OutStream: 73,
 	}
 
-	result.TypeDefs = []_gen_vdl.Any{
+	result.TypeDefs = []_gen_vdlutil.Any{
 		_gen_wiretype.NamedPrimitiveType{Type: 0x35, Name: "veyron2/services/store.TransactionID", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "anydata", Tags: []string(nil)}, _gen_wiretype.SliceType{Elem: 0x42, Name: "", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, _gen_wiretype.ArrayType{Elem: 0x45, Len: 0x10, Name: "veyron2/storage.ID", Tags: []string(nil)}, _gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
 				_gen_wiretype.FieldType{Type: 0x46, Name: "ID"},
@@ -1235,7 +1235,7 @@ func (__gen_s *ServerStubStore) UnresolveStep(call _gen_ipc.ServerCall) (reply [
 	return
 }
 
-func (__gen_s *ServerStubStore) CreateTransaction(call _gen_ipc.ServerCall, TID TransactionID, Options []_gen_vdl.Any) (err error) {
+func (__gen_s *ServerStubStore) CreateTransaction(call _gen_ipc.ServerCall, TID TransactionID, Options []_gen_vdlutil.Any) (err error) {
 	err = __gen_s.service.CreateTransaction(call, TID, Options)
 	return
 }

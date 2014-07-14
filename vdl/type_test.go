@@ -1,4 +1,4 @@
-package val
+package vdl
 
 import (
 	"fmt"
@@ -162,7 +162,12 @@ func TestSingletonTypes(t *testing.T) {
 func TestEnumTypes(t *testing.T) {
 	for _, test := range enums {
 		var x *Type
-		create := func() { x = NamedType(test.name, EnumType(test.labels...)) }
+		create := func() {
+			x = EnumType(test.labels...)
+			if test.name != "" {
+				x = NamedType(test.name, x)
+			}
+		}
 		expectPanic(t, create, test.errstr, "%s EnumType", test.name)
 		if x == nil {
 			continue
@@ -289,7 +294,12 @@ func TestMapTypes(t *testing.T) {
 func TestStructTypes(t *testing.T) {
 	for _, test := range structs {
 		var x *Type
-		create := func() { x = NamedType(test.name, StructType(test.fields...)) }
+		create := func() {
+			x = StructType(test.fields...)
+			if test.name != "" {
+				x = NamedType(test.name, x)
+			}
+		}
 		expectPanic(t, create, test.errstr, "%s StructType", test.name)
 		if x == nil {
 			continue
@@ -346,7 +356,12 @@ func TestStructTypes(t *testing.T) {
 func TestOneOfTypes(t *testing.T) {
 	for _, test := range oneofs {
 		var x *Type
-		create := func() { x = NamedType(test.name, OneOfType(test.types...)) }
+		create := func() {
+			x = OneOfType(test.types...)
+			if test.name != "" {
+				x = NamedType(test.name, x)
+			}
+		}
 		expectPanic(t, create, test.errstr, "%s OneOfType", test.name)
 		if x == nil {
 			continue

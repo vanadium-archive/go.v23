@@ -11,8 +11,8 @@ import (
 	"veyron2/ipc"
 	"veyron2/naming"
 	"veyron2/rt"
-	"veyron2/vdl"
 	"veyron2/vdl/test_base"
+	"veyron2/vdl/vdlutil"
 	"veyron2/wiretype"
 )
 
@@ -86,7 +86,7 @@ func (*serverArith) GenError(_ ipc.ServerContext) error {
 	return generatedError
 }
 
-func (*serverArith) QuoteAny(_ ipc.ServerContext, any vdl.Any) (vdl.Any, error) {
+func (*serverArith) QuoteAny(_ ipc.ServerContext, any vdlutil.Any) (vdlutil.Any, error) {
 	return fmt.Sprintf("'%v'", any), nil
 }
 
@@ -316,7 +316,7 @@ func TestCalculator(t *testing.T) {
 		t.Errorf("Signature Methods: got %v but expected %v", signature.Methods, expectedSignature)
 	}
 
-	expectedTypeDefs := []vdl.Any{
+	expectedTypeDefs := []vdlutil.Any{
 		// Calculator:
 		wiretype.NamedPrimitiveType{1, "error", nil},
 		// Arith:
@@ -572,7 +572,7 @@ func TestArith(t *testing.T) {
 			t.Errorf("Signature Methods: got %v but expected %v", signature.Methods, expectedSignature)
 		}
 
-		expectedTypeDefs := []vdl.Any{
+		expectedTypeDefs := []vdlutil.Any{
 			wiretype.NamedPrimitiveType{1, "error", nil},
 			wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{36, "A"}, wiretype.FieldType{36, "B"}}, "veyron2/vdl/test_base.Args", nil},
 			wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{66, "Args"}}, "veyron2/vdl/test_base.NestedArgs", nil},

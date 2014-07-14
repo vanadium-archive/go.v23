@@ -1,4 +1,4 @@
-package vdl
+package vdlutil
 
 import (
 	"unicode"

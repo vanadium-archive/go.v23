@@ -1,4 +1,4 @@
-package vdl
+package vdlutil
 
 import (
 	"encoding/gob"
@@ -7,7 +7,7 @@ import (
 )
 
 // Any is a special type used by the veyron vdl compiler.  The built-in "any"
-// vdl type gets translated into vdl.Any when generating Go code.  We define a
+// vdl type gets translated into vdlutil.Any when generating Go code.  We define a
 // special type rather than just using "interface{}" to make it easy to add
 // special-case logic when necessary.
 type Any interface{}

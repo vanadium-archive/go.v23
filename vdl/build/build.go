@@ -11,10 +11,10 @@ import (
 	"strings"
 
 	"veyron/lib/toposort"
-	"veyron2/val"
 	"veyron2/vdl"
 	"veyron2/vdl/compile"
 	"veyron2/vdl/parse"
+	"veyron2/vdl/vdlutil"
 )
 
 // Package represents the build information for an vdl package.
@@ -50,7 +50,7 @@ const (
 // New packages always start with an empty Name and Path.  The Name is filled in
 // when we walkDeps, and the Path is only filled in if we process this package
 // via resolvePkgPath.
-func newPackage(dir string, mode missingMode, exts map[string]bool, errs *vdl.Errors) *Package {
+func newPackage(dir string, mode missingMode, exts map[string]bool, errs *vdlutil.Errors) *Package {
 	pkg := &Package{Dir: dir, OpenFilesFunc: openFiles}
 	if err := pkg.initBaseFileNames(exts); err != nil {
 		errs.Errorf("Couldn't init vdl file names in package dir %v, %v", pkg.Dir, err)
@@ -67,7 +67,7 @@ func newPackage(dir string, mode missingMode, exts map[string]bool, errs *vdl.Er
 
 // initBaseFileNames initializes BaseFileNames from the Dir.
 func (p *Package) initBaseFileNames(exts map[string]bool) error {
-	vdl.Vlog.Printf("Looking for vdl files in package dir %v", p.Dir)
+	vdlutil.Vlog.Printf("Looking for vdl files in package dir %v", p.Dir)
 	fd, err := os.Open(p.Dir)
 	if err != nil {
 		return err
@@ -177,7 +177,7 @@ func (p *Package) CloseFiles() error {
 // packages multiple times.
 //
 // TODO(toddw): If we care about performance we could serialize the compiled
-// vdl.Package information and write it out as compiler-generated artifacts,
+// vdlutil.Package information and write it out as compiler-generated artifacts,
 // similar to how the regular go tool generates *.a files under the top-level
 // pkg directory.
 type depSorter struct {
@@ -186,7 +186,7 @@ type depSorter struct {
 	pathMap map[string]*Package
 	dirMap  map[string]*Package
 	sorter  toposort.Sorter
-	errs    *vdl.Errors
+	errs    *vdlutil.Errors
 }
 
 func makeExts(exts []string) map[string]bool {
@@ -197,7 +197,7 @@ func makeExts(exts []string) map[string]bool {
 	return ret
 }
 
-func toAbs(dirs []string, errs *vdl.Errors) (ret []string) {
+func toAbs(dirs []string, errs *vdlutil.Errors) (ret []string) {
 	for _, d := range dirs {
 		if abs, err := filepath.Abs(d); err != nil {
 			errs.Errorf("Couldn't make dir %q absolute: %v", d, err)
@@ -208,7 +208,7 @@ func toAbs(dirs []string, errs *vdl.Errors) (ret []string) {
 	return
 }
 
-func newDepSorter(exts []string, errs *vdl.Errors) *depSorter {
+func newDepSorter(exts []string, errs *vdlutil.Errors) *depSorter {
 	return &depSorter{
 		exts:    makeExts(exts),
 		srcDirs: toAbs(gobuild.Default.SrcDirs(), errs),
@@ -319,7 +319,7 @@ func (ds *depSorter) resolvePkgPath(pkgPath string) (*Package, bool) {
 	for _, srcDir := range ds.srcDirs {
 		candidateDir := filepath.Join(srcDir, pkgPath)
 		if pkg, isNew := ds.resolvePkgDir(candidateDir, missingIsOk); pkg != nil {
-			vdl.Vlog.Printf("Resolved pkg path %v to abs dir %v", pkgPath, pkg.Dir)
+			vdlutil.Vlog.Printf("Resolved pkg path %v to abs dir %v", pkgPath, pkg.Dir)
 			// Update the pkg path since it might not have been known before.
 			//
 			// TODO(toddw): Should we handle hardlinks / symlinks?
@@ -405,7 +405,7 @@ func printPackagePath(v interface{}) string {
 // returns all packages (either explicitly added or a transitive dependency) in
 // transitive order.  The given exts specifies the file name extensions for
 // valid vdl files, e.g. ".vdl".
-func TransitivePackages(cmdLineArgs, exts []string, errs *vdl.Errors) []*Package {
+func TransitivePackages(cmdLineArgs, exts []string, errs *vdlutil.Errors) []*Package {
 	ds := newDepSorter(exts, errs)
 	for _, cmdLineArg := range cmdLineArgs {
 		ds.AddCmdLineArg(cmdLineArg)
@@ -416,8 +416,8 @@ func TransitivePackages(cmdLineArgs, exts []string, errs *vdl.Errors) []*Package
 
 // ParsePackage parses the given pkg with the given parse opts, and returns a
 // slice of parsed files.  Errors are reported in errs.
-func ParsePackage(pkg *Package, opts parse.Opts, errs *vdl.Errors) (pfiles []*parse.File) {
-	vdl.Vlog.Printf("Parsing package %s %q, dir %s", pkg.Name, pkg.Path, pkg.Dir)
+func ParsePackage(pkg *Package, opts parse.Opts, errs *vdlutil.Errors) (pfiles []*parse.File) {
+	vdlutil.Vlog.Printf("Parsing package %s %q, dir %s", pkg.Name, pkg.Path, pkg.Dir)
 	files, err := pkg.OpenFiles()
 	if err != nil {
 		errs.Errorf("Couldn't open vdl files %v, %v", pkg.BaseFileNames, err)
@@ -451,7 +451,7 @@ func CompilePackage(pkg *Package, env *compile.Env) *compile.Package {
 // All imports that the config src depend on must already have been compiled and
 // populated into env.  See TransitivePackages for an easy way to retrieve
 // packages in their transitive order.
-func CompileConfig(baseFileName string, src io.Reader, implicit *val.Type, env *compile.Env) *val.Value {
+func CompileConfig(baseFileName string, src io.Reader, implicit *vdl.Type, env *compile.Env) *vdl.Value {
 	pconfig := parse.ParseConfig(baseFileName, src, parse.Opts{}, env.Errors)
 	return compile.CompileConfig(implicit, pconfig, env)
 }

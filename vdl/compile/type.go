@@ -3,7 +3,7 @@ package compile
 import (
 	"fmt"
 
-	"veyron2/val"
+	"veyron2/vdl"
 	"veyron2/vdl/parse"
 )
 
@@ -12,7 +12,7 @@ import (
 type TypeDef struct {
 	NamePos            // name, parse position and docs
 	Exported bool      // is this type definition exported?
-	Type     *val.Type // type of this type definition
+	Type     *vdl.Type // type of this type definition
 
 	// BaseType is the type that Type is based on.  The BaseType may be named or
 	// unnamed.  E.g.
@@ -23,7 +23,7 @@ type TypeDef struct {
 	//   type List2   List;            List
 	//   type Struct  struct{A bool};  struct{A bool}
 	//   type Struct2 Struct;          Struct
-	BaseType *val.Type
+	BaseType *vdl.Type
 
 	LabelDoc       []string // [only valid for enum] docs for each label
 	LabelDocSuffix []string // [only valid for enum] suffix docs for each label
@@ -45,7 +45,7 @@ func compileTypeDefs(pkg *Package, pfiles []*parse.File, env *Env) {
 		pkg:      pkg,
 		pfiles:   pfiles,
 		env:      env,
-		tbuilder: &val.TypeBuilder{},
+		tbuilder: &vdl.TypeBuilder{},
 		builders: make(map[string]*typeDefBuilder),
 	}
 	if td.Declare(); !env.Errors.IsEmpty() {
@@ -62,7 +62,7 @@ func compileTypeDefs(pkg *Package, pfiles []*parse.File, env *Env) {
 // typeDefiner defines types in a package.  This is split into three phases:
 // 1) Declare ensures local type references can be resolved.
 // 2) Define describes each type, resolving named references.
-// 3) Build builds all types.
+// 3) Build builds all vdl.
 //
 // It holds a builders map from type name to typeDefBuilder, where the
 // typeDefBuilder is responsible for compiling and defining a single type.
@@ -70,15 +70,15 @@ type typeDefiner struct {
 	pkg      *Package
 	pfiles   []*parse.File
 	env      *Env
-	tbuilder *val.TypeBuilder
+	tbuilder *vdl.TypeBuilder
 	builders map[string]*typeDefBuilder
 }
 
 type typeDefBuilder struct {
 	def     *TypeDef
 	ptype   parse.Type
-	pending val.PendingNamed // named type that's being built
-	base    val.PendingType  // base type that pending is based on
+	pending vdl.PendingNamed // named type that's being built
+	base    vdl.PendingType  // base type that pending is based on
 }
 
 // Declare creates builders for each type defined in the package.
@@ -151,13 +151,13 @@ func (td typeDefiner) Define() {
 		switch tbase := base.(type) {
 		case nil:
 			continue // keep going to catch  more errors
-		case *val.Type:
+		case *vdl.Type:
 			if tbase == ErrorType {
 				td.env.errorf(file, def.Pos, "error cannot be renamed")
 				continue // keep going to catch more errors
 			}
 			def.BaseType = tbase
-		case val.PendingType:
+		case vdl.PendingType:
 			b.base = tbase
 		default:
 			panic(fmt.Errorf("vdl: typeDefiner.Define unhandled TypeOrPending %T %v", tbase, tbase))
@@ -166,18 +166,18 @@ func (td typeDefiner) Define() {
 	}
 }
 
-// compileType returns the *val.Type corresponding to ptype.  All named types
+// compileType returns the *vdl.Type corresponding to ptype.  All named types
 // referenced by ptype must already be defined.
-func compileType(ptype parse.Type, file *File, env *Env) *val.Type {
-	var tbuilder val.TypeBuilder
+func compileType(ptype parse.Type, file *File, env *Env) *vdl.Type {
+	var tbuilder vdl.TypeBuilder
 	typeOrPending := compileLiteralType(ptype, file, env, &tbuilder, nil)
 	tbuilder.Build()
 	switch top := typeOrPending.(type) {
 	case nil:
 		return nil
-	case *val.Type:
+	case *vdl.Type:
 		return top
-	case val.PendingType:
+	case vdl.PendingType:
 		t, err := top.Built()
 		if err != nil {
 			env.prefixErrorf(file, ptype.Pos(), err, "invalid type")
@@ -191,7 +191,7 @@ func compileType(ptype parse.Type, file *File, env *Env) *val.Type {
 
 // compileDefinedType compiles ptype.  It can handle definitions based on enum,
 // struct and oneof, as well as definitions based on any literal type.
-func compileDefinedType(ptype parse.Type, file *File, env *Env, tbuilder *val.TypeBuilder, builders map[string]*typeDefBuilder) val.TypeOrPending {
+func compileDefinedType(ptype parse.Type, file *File, env *Env, tbuilder *vdl.TypeBuilder, builders map[string]*typeDefBuilder) vdl.TypeOrPending {
 	switch pt := ptype.(type) {
 	case *parse.TypeEnum:
 		env.experimentalOnly(file, pt.Pos(), "enum not supported")
@@ -227,8 +227,8 @@ func compileDefinedType(ptype parse.Type, file *File, env *Env, tbuilder *val.Ty
 
 // compileLiteralType compiles ptype.  It can handle any literal type.  Note
 // that enum, struct and oneof are required to be defined and named, and aren't
-// allowed as regular literal types.
-func compileLiteralType(ptype parse.Type, file *File, env *Env, tbuilder *val.TypeBuilder, builders map[string]*typeDefBuilder) val.TypeOrPending {
+// allowed as regular literal vdl.
+func compileLiteralType(ptype parse.Type, file *File, env *Env, tbuilder *vdl.TypeBuilder, builders map[string]*typeDefBuilder) vdl.TypeOrPending {
 	switch pt := ptype.(type) {
 	case *parse.TypeNamed:
 		if def, _ := env.ResolveType(pt.Name, file); def != nil {
@@ -266,8 +266,8 @@ func compileLiteralType(ptype parse.Type, file *File, env *Env, tbuilder *val.Ty
 }
 
 // Build actually builds each type and updates the package with the typedefs.
-// The order we call each pending type doesn't matter; the veyron2/val package
-// deals with arbitrary orders, and supports recursive types.  However we want
+// The order we call each pending type doesn't matter; the veyron2/vdl package
+// deals with arbitrary orders, and supports recursive vdl.  However we want
 // the order to be deterministic, otherwise the output will constantly change.
 // So we use the same order as the parsed file.
 func (td typeDefiner) Build() {
@@ -301,7 +301,7 @@ func addTypeDef(def *TypeDef, env *Env) {
 	def.File.Package.typeDefs[def.Name] = def
 	if env != nil {
 		// env should only be nil during initialization of the built-in package;
-		// NewEnv ensures new environments have the built-in types.
+		// NewEnv ensures new environments have the built-in vdl.
 		env.typeDefs[def.Type] = def
 	}
 }
@@ -309,8 +309,8 @@ func addTypeDef(def *TypeDef, env *Env) {
 var (
 	// Built-in types defined by the compiler.
 	// TODO(toddw): Represent error in a built-in VDL file.
-	ErrorType = val.NamedType("error", val.StructType(
-		val.StructField{"Id", val.StringType},
-		val.StructField{"Msg", val.StringType},
+	ErrorType = vdl.NamedType("error", vdl.StructType(
+		vdl.StructField{"Id", vdl.StringType},
+		vdl.StructField{"Msg", vdl.StringType},
 	))
 )

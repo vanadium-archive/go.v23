@@ -1,11 +1,13 @@
-package val
+package vdl
+
+// TODO(toddw): Merge with vdl/{opconst,valconv}/testutil_test.go
 
 import (
 	"fmt"
 	"strings"
 	"testing"
 
-	testutil "veyron/lib/testutil"
+	"veyron/lib/testutil"
 )
 
 func expectErr(t *testing.T, err error, wantstr string, format string, args ...interface{}) bool {
@@ -202,7 +204,7 @@ type (
 
 func recurseSelfType() *Type {
 	var builder TypeBuilder
-	n := builder.Named("veyron2/val.nRecurseSelf")
+	n := builder.Named("veyron2/vdl.nRecurseSelf")
 	n.AssignBase(builder.Struct().AppendField("X", builder.List().AssignElem(n)))
 	builder.Build()
 	t, err := n.Built()
@@ -214,8 +216,8 @@ func recurseSelfType() *Type {
 
 func recurseABTypes() [2]*Type {
 	var builder TypeBuilder
-	a := builder.Named("veyron2/val.nRecurseA")
-	b := builder.Named("veyron2/val.nRecurseB")
+	a := builder.Named("veyron2/vdl.nRecurseA")
+	b := builder.Named("veyron2/vdl.nRecurseB")
 	a.AssignBase(builder.Struct().AppendField("B", builder.List().AssignElem(b)))
 	b.AssignBase(builder.Struct().AppendField("A", builder.List().AssignElem(a)))
 	builder.Build()
@@ -338,21 +340,21 @@ var (
 	structXYZEmptyTypeN = NamedType("nStructXYZEmpty", StructType(StructField{"X", emptyTypeN}, StructField{"Y", emptyTypeN}, StructField{"Z", emptyTypeN}))
 )
 
-func anyValue(x *Value) *Value                  { return Zero(AnyType).Assign(x) }
-func boolValue(t *Type, x bool) *Value          { return Zero(t).AssignBool(x) }
-func byteValue(t *Type, x byte) *Value          { return Zero(t).AssignByte(x) }
-func uintValue(t *Type, x uint64) *Value        { return Zero(t).AssignUint(x) }
-func intValue(t *Type, x int64) *Value          { return Zero(t).AssignInt(x) }
-func floatValue(t *Type, x float64) *Value      { return Zero(t).AssignFloat(x) }
-func complexValue(t *Type, x complex128) *Value { return Zero(t).AssignComplex(x) }
-func stringValue(t *Type, x string) *Value      { return Zero(t).AssignString(x) }
-func bytesValue(t *Type, x string) *Value       { return Zero(t).AssignBytes([]byte(x)) }
-func bytes3Value(t *Type, x string) *Value      { return Zero(t).CopyBytes([]byte(x)) }
+func anyValue(x *Value) *Value                  { return ZeroValue(AnyType).Assign(x) }
+func boolValue(t *Type, x bool) *Value          { return ZeroValue(t).AssignBool(x) }
+func byteValue(t *Type, x byte) *Value          { return ZeroValue(t).AssignByte(x) }
+func uintValue(t *Type, x uint64) *Value        { return ZeroValue(t).AssignUint(x) }
+func intValue(t *Type, x int64) *Value          { return ZeroValue(t).AssignInt(x) }
+func floatValue(t *Type, x float64) *Value      { return ZeroValue(t).AssignFloat(x) }
+func complexValue(t *Type, x complex128) *Value { return ZeroValue(t).AssignComplex(x) }
+func stringValue(t *Type, x string) *Value      { return ZeroValue(t).AssignString(x) }
+func bytesValue(t *Type, x string) *Value       { return ZeroValue(t).AssignBytes([]byte(x)) }
+func bytes3Value(t *Type, x string) *Value      { return ZeroValue(t).CopyBytes([]byte(x)) }
 
 func setStringValue(t *Type, x ...string) *Value {
-	res := Zero(t)
+	res := ZeroValue(t)
 	for _, vx := range x {
-		key := Zero(t.Key()).AssignString(vx)
+		key := ZeroValue(t.Key()).AssignString(vx)
 		res.AssignSetKey(key)
 	}
 	return res
@@ -364,27 +366,27 @@ type sb struct {
 }
 
 func mapStringBoolValue(t *Type, x ...sb) *Value {
-	res := Zero(t)
+	res := ZeroValue(t)
 	for _, sb := range x {
-		key := Zero(t.Key()).AssignString(sb.s)
-		val := Zero(t.Elem()).AssignBool(sb.b)
+		key := ZeroValue(t.Key()).AssignString(sb.s)
+		val := ZeroValue(t.Elem()).AssignBool(sb.b)
 		res.AssignMapIndex(key, val)
 	}
 	return res
 }
 
 func mapStringEmptyValue(t *Type, x ...string) *Value {
-	res := Zero(t)
+	res := ZeroValue(t)
 	for _, vx := range x {
-		key := Zero(t.Key()).AssignString(vx)
-		val := Zero(t.Elem())
+		key := ZeroValue(t.Key()).AssignString(vx)
+		val := ZeroValue(t.Elem())
 		res.AssignMapIndex(key, val)
 	}
 	return res
 }
 
 func structBoolValue(t *Type, x ...sb) *Value {
-	res := Zero(t)
+	res := ZeroValue(t)
 	for _, sb := range x {
 		_, index := t.FieldByName(sb.s)
 		res.Field(index).AssignBool(sb.b)
@@ -411,7 +413,7 @@ func assignNum(v *Value, num float64) *Value {
 }
 
 func seqNumValue(t *Type, x ...float64) *Value {
-	res := Zero(t)
+	res := ZeroValue(t)
 	if t.Kind() == List {
 		res.AssignLen(len(x))
 	}
@@ -422,9 +424,9 @@ func seqNumValue(t *Type, x ...float64) *Value {
 }
 
 func setNumValue(t *Type, x ...float64) *Value {
-	res := Zero(t)
+	res := ZeroValue(t)
 	for _, n := range x {
-		res.AssignSetKey(assignNum(Zero(t.Key()), n))
+		res.AssignSetKey(assignNum(ZeroValue(t.Key()), n))
 	}
 	return res
 }
@@ -435,10 +437,10 @@ type nb struct {
 }
 
 func mapNumBoolValue(t *Type, x ...nb) *Value {
-	res := Zero(t)
+	res := ZeroValue(t)
 	for _, nb := range x {
-		key := assignNum(Zero(t.Key()), nb.n)
-		val := Zero(t.Elem()).AssignBool(nb.b)
+		key := assignNum(ZeroValue(t.Key()), nb.n)
+		val := ZeroValue(t.Elem()).AssignBool(nb.b)
 		res.AssignMapIndex(key, val)
 	}
 	return res
@@ -450,17 +452,17 @@ type sn struct {
 }
 
 func mapStringNumValue(t *Type, x ...sn) *Value {
-	res := Zero(t)
+	res := ZeroValue(t)
 	for _, sn := range x {
-		key := Zero(t.Key()).AssignString(sn.s)
-		val := assignNum(Zero(t.Elem()), sn.n)
+		key := ZeroValue(t.Key()).AssignString(sn.s)
+		val := assignNum(ZeroValue(t.Elem()), sn.n)
 		res.AssignMapIndex(key, val)
 	}
 	return res
 }
 
 func structNumValue(t *Type, x ...sn) *Value {
-	res := Zero(t)
+	res := ZeroValue(t)
 	for _, sn := range x {
 		_, index := t.FieldByName(sn.s)
 		assignNum(res.Field(index), sn.n)

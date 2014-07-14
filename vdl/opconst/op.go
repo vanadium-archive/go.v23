@@ -1,4 +1,4 @@
-package val
+package opconst
 
 // UnaryOp represents a unary operation to be performed on a Const.
 type UnaryOp uint

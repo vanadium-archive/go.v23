@@ -6,9 +6,10 @@ import (
 	"regexp"
 	"strings"
 
-	"veyron2/val"
 	"veyron2/vdl"
+	"veyron2/vdl/opconst"
 	"veyron2/vdl/parse"
+	"veyron2/vdl/vdlutil"
 )
 
 // Env is the environment for compilation.  It contains all errors that were
@@ -19,20 +20,20 @@ import (
 //
 // Always create a new Env via NewEnv; the zero Env is invalid.
 type Env struct {
-	Errors       *vdl.Errors
+	Errors       *vdlutil.Errors
 	pkgs         map[string]*Package
-	typeDefs     map[*val.Type]*TypeDef
-	constDefs    map[*val.Value]*ConstDef
+	typeDefs     map[*vdl.Type]*TypeDef
+	constDefs    map[*vdl.Value]*ConstDef
 	experimental bool // enable experimental features
 }
 
 // NewEnv creates a new Env, allowing up to maxErrors errors before we stop.
 func NewEnv(maxErrors int) *Env {
 	env := &Env{
-		Errors:    vdl.NewErrors(maxErrors),
+		Errors:    vdlutil.NewErrors(maxErrors),
 		pkgs:      make(map[string]*Package),
-		typeDefs:  make(map[*val.Type]*TypeDef),
-		constDefs: make(map[*val.Value]*ConstDef),
+		typeDefs:  make(map[*vdl.Type]*TypeDef),
+		constDefs: make(map[*vdl.Value]*ConstDef),
 	}
 	// The env always starts out with the built-in package.
 	env.pkgs[BuiltInPackage.Name] = BuiltInPackage
@@ -48,12 +49,12 @@ func NewEnv(maxErrors int) *Env {
 // FindTypeDef returns the type definition corresponding to t, or nil if t isn't
 // a defined type.  All built-in and user-defined named types are considered
 // defined; e.g. unnamed lists don't have a corresponding type def.
-func (e *Env) FindTypeDef(t *val.Type) *TypeDef { return e.typeDefs[t] }
+func (e *Env) FindTypeDef(t *vdl.Type) *TypeDef { return e.typeDefs[t] }
 
 // FindConstDef returns the const definition corresponding to v, or nil if v
 // isn't a defined const.  All user-defined named consts are considered defined;
 // e.g. method tags don't have a corresponding const def.
-func (e *Env) FindConstDef(v *val.Value) *ConstDef { return e.constDefs[v] }
+func (e *Env) FindConstDef(v *vdl.Value) *ConstDef { return e.constDefs[v] }
 
 // ResolvePackage resolves a package path to its previous compiled results.
 func (e *Env) ResolvePackage(path string) *Package {
@@ -124,46 +125,46 @@ func (e *Env) ResolveInterface(name string, file *File) (i *Interface, matched s
 
 // evalSelectorOnConst evaluates a selector on a const to a constant.
 // This returns an empty const if a selector is applied on a non-struct value.
-func (e *Env) evalSelectorOnConst(def *ConstDef, selector string) (val.Const, error) {
+func (e *Env) evalSelectorOnConst(def *ConstDef, selector string) (opconst.Const, error) {
 	v := def.Value
 	for _, fieldName := range strings.Split(selector, ".") {
-		if v.Kind() != val.Struct {
-			return val.Const{}, fmt.Errorf("invalid selector on const of kind: %v", v.Type().Kind())
+		if v.Kind() != vdl.Struct {
+			return opconst.Const{}, fmt.Errorf("invalid selector on const of kind: %v", v.Type().Kind())
 		}
 		_, i := v.Type().FieldByName(fieldName)
 		if i < 0 {
-			return val.Const{}, fmt.Errorf("invalid field name on struct %s: %s", v, fieldName)
+			return opconst.Const{}, fmt.Errorf("invalid field name on struct %s: %s", v, fieldName)
 		}
 		v = v.Field(i)
 	}
-	return val.ConstFromValue(v), nil
+	return opconst.FromValue(v), nil
 }
 
 // evalSelectorOnType evaluates a selector on a type to a constant.
 // This returns an empty const if a selector is applied on a non-enum type.
-func (e *Env) evalSelectorOnType(def *TypeDef, selector string) (val.Const, error) {
-	if def.Type.Kind() != val.Enum {
-		return val.Const{}, fmt.Errorf("invalid selector on type of kind: %v", def.Type.Kind())
+func (e *Env) evalSelectorOnType(def *TypeDef, selector string) (opconst.Const, error) {
+	if def.Type.Kind() != vdl.Enum {
+		return opconst.Const{}, fmt.Errorf("invalid selector on type of kind: %v", def.Type.Kind())
 	}
 	if def.Type.EnumIndex(selector) < 0 {
-		return val.Const{}, fmt.Errorf("invalid label on enum %s: %s", def.Type.Name(), selector)
+		return opconst.Const{}, fmt.Errorf("invalid label on enum %s: %s", def.Type.Name(), selector)
 	}
-	enumVal := val.Zero(def.Type)
+	enumVal := vdl.ZeroValue(def.Type)
 	enumVal.AssignEnumLabel(selector)
-	return val.ConstFromValue(enumVal), nil
+	return opconst.FromValue(enumVal), nil
 }
 
 // EvalConst resolves and evaluates a name to a const.
-func (e *Env) EvalConst(name string, file *File) (val.Const, error) {
+func (e *Env) EvalConst(name string, file *File) (opconst.Const, error) {
 	cd, matched := e.ResolveConst(name, file)
 	if matched == name {
-		return val.ConstFromValue(cd.Value), nil
+		return opconst.FromValue(cd.Value), nil
 	}
 	if cd != nil {
 		remainder := name[len(matched)+1:]
 		c, err := e.evalSelectorOnConst(cd, remainder)
 		if err != nil {
-			return val.Const{}, err
+			return opconst.Const{}, err
 		}
 		return c, nil
 	}
@@ -173,12 +174,12 @@ func (e *Env) EvalConst(name string, file *File) (val.Const, error) {
 		remainder := name[len(matched):]
 		c, err := e.evalSelectorOnType(td, remainder)
 		if err != nil {
-			return val.Const{}, err
+			return opconst.Const{}, err
 		}
 		return c, nil
 	}
 
-	return val.Const{}, fmt.Errorf("const %s undefined", name)
+	return opconst.Const{}, fmt.Errorf("const %s undefined", name)
 }
 
 // errorf and the fpString{,f} functions are helpers for error reporting; we
@@ -280,7 +281,7 @@ type File struct {
 	Interfaces []*Interface // Interfaces defined in this file
 	Package    *Package     // Parent package
 
-	TypeDeps    map[*val.Type]bool // Types the file depends on
+	TypeDeps    map[*vdl.Type]bool // Types the file depends on
 	PackageDeps []*Package         // Packages the file depends on, sorted by path
 
 	// Imports maps the user-supplied imports from local package name to package
@@ -352,15 +353,15 @@ type Method struct {
 	NamePos                // method name, pos and doc
 	InArgs    []*Arg       // list of positional in-args
 	OutArgs   []*Arg       // list of positional out-args
-	InStream  *val.Type    // in-stream type, may be nil
-	OutStream *val.Type    // out-stream type, may be nil
-	Tags      []*val.Value // list of method tags
+	InStream  *vdl.Type    // in-stream type, may be nil
+	OutStream *vdl.Type    // out-stream type, may be nil
+	Tags      []*vdl.Value // list of method tags
 }
 
 // Arg represents method arguments.
 type Arg struct {
 	NamePos           // arg name, pos and doc
-	Type    *val.Type // arg type, never nil
+	Type    *vdl.Type // arg type, never nil
 }
 
 // NamePos represents a name, its associated position and documentation.

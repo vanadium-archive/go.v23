@@ -13,9 +13,9 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"veyron2/val"
 	"veyron2/vdl"
 	"veyron2/vdl/compile"
+	"veyron2/vdl/vdlutil"
 )
 
 // javaGenImplDir is the directory in which implementation details for the generated interfaces should be put.
@@ -635,7 +635,7 @@ func javaPackageDefinedPaths(pkg *compile.Package) []string {
 			paths = append(paths, path.Join(pkgPath, i.Name+"Factory"))
 		}
 		for _, t := range f.TypeDefs {
-			if t.Type.Kind() == val.Struct {
+			if t.Type.Kind() == vdl.Struct {
 				paths = append(paths, path.Join(pkgPath, t.Name))
 			}
 		}
@@ -673,7 +673,7 @@ func genJavaUserImports(classPaths []string, pkgPath string) (ret javaUserImport
 
 // javaClassPaths returns pathnames of all Java classes originating in the
 // provided type.
-func javaClassPaths(t *val.Type, env *compile.Env) (ret []string) {
+func javaClassPaths(t *vdl.Type, env *compile.Env) (ret []string) {
 	if t == nil {
 		typeStr, _ := javaPrimitiveType(nil, true)
 		return []string{typeStr}
@@ -682,15 +682,15 @@ func javaClassPaths(t *val.Type, env *compile.Env) (ret []string) {
 		return javaNamedClassPaths(def, env)
 	}
 	switch t.Kind() {
-	case val.Array:
+	case vdl.Array:
 		ret = javaClassPaths(t.Elem(), env)
-	case val.List:
+	case vdl.List:
 		ret = append(ret, "java/util/ArrayList")
 		ret = append(ret, javaClassPaths(t.Elem(), env)...)
-	case val.Set:
+	case vdl.Set:
 		ret = append(ret, "java/util/HashSet")
 		ret = append(ret, javaClassPaths(t.Key(), env)...)
-	case val.Map:
+	case vdl.Map:
 		ret = append(ret, "java/util/HashMap")
 		ret = append(ret, javaClassPaths(t.Key(), env)...)
 		ret = append(ret, javaClassPaths(t.Elem(), env)...)
@@ -771,7 +771,7 @@ func javaStreamClassPaths(method *compile.Method, iface *compile.Interface, isSe
 // javaType returns the Java type string given the provided VDL type.  It
 // consults the provided imports map to see if the full pathnames or only
 // base names can be used (e.g., "java.util.HashMap" or "HashMap").
-func javaType(t *val.Type, forceClass bool, imports javaUserImports, env *compile.Env) string {
+func javaType(t *vdl.Type, forceClass bool, imports javaUserImports, env *compile.Env) string {
 	if t == nil {
 		name, class := javaPrimitiveType(nil, forceClass)
 		if class {
@@ -783,13 +783,13 @@ func javaType(t *val.Type, forceClass bool, imports javaUserImports, env *compil
 		return javaNamedType(def, forceClass, imports, env)
 	}
 	switch t.Kind() {
-	case val.Array:
+	case vdl.Array:
 		return fmt.Sprintf("%s[]", javaType(t.Elem(), false, imports, env))
-	case val.List:
+	case vdl.List:
 		return fmt.Sprintf("%s<%s>", javaName("java/util/ArrayList", imports), javaType(t.Elem(), true, imports, env))
-	case val.Set:
+	case vdl.Set:
 		return fmt.Sprintf("%s<%s>", javaName("java/util/HashSet", imports), javaType(t.Key(), true, imports, env))
-	case val.Map:
+	case vdl.Map:
 		return fmt.Sprintf("%s<%s, %s>", javaName("java/util/HashMap", imports), javaType(t.Key(), true, imports, env), javaType(t.Elem(), true, imports, env))
 	default:
 		log.Fatalf("vdl: javaType unhandled type %v %v", t.Kind(), t)
@@ -812,7 +812,7 @@ func javaNamedType(def *compile.TypeDef, forceClass bool, imports javaUserImport
 // definition, forcing the use of a java class (e.g., java.lang.Integer) if so
 // desired.  This method also returns a boolean value indicating whether the
 // returned type is a class.
-func javaPrimitiveType(typ *val.Type, forceClass bool) (string, bool) {
+func javaPrimitiveType(typ *vdl.Type, forceClass bool) (string, bool) {
 	if typ == nil {
 		if forceClass {
 			return "java/lang/Void", true
@@ -824,54 +824,54 @@ func javaPrimitiveType(typ *val.Type, forceClass bool) (string, bool) {
 		return "com/veyron2/ipc/VeyronException", true
 	}
 	switch typ.Kind() {
-	case val.Bool:
+	case vdl.Bool:
 		if forceClass {
 			return "java/lang/Boolean", true
 		} else {
 			return "boolean", false
 		}
-	case val.Byte:
+	case vdl.Byte:
 		if forceClass {
 			return "java/lang/Byte", true
 		} else {
 			return "byte", false
 		}
-	case val.Uint16, val.Int16:
+	case vdl.Uint16, vdl.Int16:
 		if forceClass {
 			return "java/lang/Short", true
 		} else {
 			return "short", false
 		}
-	case val.Uint32, val.Int32:
+	case vdl.Uint32, vdl.Int32:
 		if forceClass {
 			return "java/lang/Integer", true
 		} else {
 			return "int", false
 		}
-	case val.Uint64, val.Int64:
+	case vdl.Uint64, vdl.Int64:
 		if forceClass {
 			return "java/lang/Long", true
 		} else {
 			return "long", false
 		}
-	case val.Float32:
+	case vdl.Float32:
 		if forceClass {
 			return "java/lang/Float", true
 		} else {
 			return "float", false
 		}
-	case val.Float64:
+	case vdl.Float64:
 		if forceClass {
 			return "java/lang/Double", true
 		} else {
 			return "double", false
 		}
-	case val.Complex64, val.Complex128:
+	case vdl.Complex64, vdl.Complex128:
 		return "org/apache/commons/math3/complex/Complex", true
-	case val.String:
+	case vdl.String:
 		return "java/lang/String", true
 	// TODO(spetrovic): handle typeval correctly.
-	case val.Any, val.TypeVal:
+	case vdl.Any, vdl.TypeVal:
 		return "java/lang/Object", true
 	default:
 		return "", false
@@ -905,7 +905,7 @@ func javaStreamType(method *compile.Method, iface *compile.Interface, isService 
 }
 
 // javaConstVal returns the value string for the provided constant value.
-func javaConstVal(v *val.Value, imports javaUserImports, env *compile.Env) (ret string) {
+func javaConstVal(v *vdl.Value, imports javaUserImports, env *compile.Env) (ret string) {
 	ret = javaVal(v, imports, env)
 	if def := env.FindTypeDef(v.Type()); def != nil && def.File != compile.BuiltInFile { // User-defined type.
 		ret = "new " + javaType(v.Type(), false, imports, env) + "(" + ret + ")"
@@ -914,45 +914,45 @@ func javaConstVal(v *val.Value, imports javaUserImports, env *compile.Env) (ret 
 }
 
 // javaVal returns the value string for the provided Value.
-func javaVal(v *val.Value, imports javaUserImports, env *compile.Env) string {
+func javaVal(v *vdl.Value, imports javaUserImports, env *compile.Env) string {
 	const longSuffix = "L"
 	const floatSuffix = "f"
 
 	switch v.Kind() {
-	case val.Bool:
+	case vdl.Bool:
 		if v.Bool() {
 			return "true"
 		} else {
 			return "false"
 		}
-	case val.Byte:
+	case vdl.Byte:
 		return "(byte)" + strconv.FormatUint(uint64(v.Byte()), 10)
-	case val.Uint16, val.Uint32, val.Uint64:
+	case vdl.Uint16, vdl.Uint32, vdl.Uint64:
 		c := strconv.FormatUint(v.Uint(), 10)
-		if v.Kind() == val.Uint64 {
+		if v.Kind() == vdl.Uint64 {
 			return c + longSuffix
 		}
 		return c
-	case val.Int16, val.Int32, val.Int64:
+	case vdl.Int16, vdl.Int32, vdl.Int64:
 		c := strconv.FormatInt(v.Int(), 10)
-		if v.Kind() == val.Int64 {
+		if v.Kind() == vdl.Int64 {
 			return c + longSuffix
 		}
 		return c
-	case val.Float32, val.Float64:
+	case vdl.Float32, vdl.Float64:
 		c := strconv.FormatFloat(v.Float(), 'g', -1, bitlen(v.Kind()))
 		if strings.Index(c, ".") == -1 {
 			c += ".0"
 		}
-		if v.Kind() == val.Float32 {
+		if v.Kind() == vdl.Float32 {
 			return c + floatSuffix
 		}
 		return c
-	case val.Complex64, val.Complex128:
+	case vdl.Complex64, vdl.Complex128:
 		r := strconv.FormatFloat(real(v.Complex()), 'g', -1, bitlen(v.Kind()))
 		i := strconv.FormatFloat(imag(v.Complex()), 'g', -1, bitlen(v.Kind()))
 		return fmt.Sprintf("new %s(%s, %s)", javaType(v.Type(), true, imports, env), r, i)
-	case val.String:
+	case vdl.String:
 		return strconv.Quote(v.RawString())
 	}
 	if v.Type().IsBytes() {
@@ -1024,7 +1024,7 @@ func javaInArgs(method *compile.Method, iface *compile.Interface, isService, use
 		}
 		argName := arg.Name
 		if camelCase {
-			argName = vdl.ToCamelCase(argName)
+			argName = vdlutil.ToCamelCase(argName)
 		}
 		ret += javaType(arg.Type, false, imports, env) + " " + argName
 	}
@@ -1098,7 +1098,7 @@ func javaHasConsts(file *compile.File) bool {
 
 type typeDefField struct {
 	Name      string
-	Type      *val.Type
+	Type      *vdl.Type
 	Doc       string
 	DocSuffix string
 }
@@ -1106,7 +1106,7 @@ type typeDefField struct {
 // javaTypeDefFields returns the types of all the fields in the provided typedef.
 // For non-struct types, we return a field name "Value" of that same type.
 func javaTypeDefFields(tdef *compile.TypeDef) (ret []typeDefField) {
-	if tdef.Type.Kind() == val.Struct {
+	if tdef.Type.Kind() == vdl.Struct {
 		for idx := 0; idx < tdef.Type.NumField(); idx++ {
 			f := tdef.Type.Field(idx)
 			ret = append(ret, typeDefField{
@@ -1186,9 +1186,9 @@ func javaIfacePathName(iface *compile.Interface, isService bool) string {
 func javaClassToVarName(className string) string {
 	dir := path.Dir(className)
 	if dir == "." {
-		return vdl.ToCamelCase(className)
+		return vdlutil.ToCamelCase(className)
 	}
-	return strings.Replace(path.Dir(className), "/", "_", -1) + "_" + vdl.ToCamelCase(path.Base(className))
+	return strings.Replace(path.Dir(className), "/", "_", -1) + "_" + vdlutil.ToCamelCase(path.Base(className))
 }
 
 // javaCastToObject generates a string for the provided argument that represents
@@ -1203,7 +1203,7 @@ func javaCastToObject(arg *compile.Arg, imports javaUserImports, env *compile.En
 }
 
 // javaTypeIsClass returns true iff the provided type is represented by a Java class.
-func javaTypeIsClass(t *val.Type, env *compile.Env) bool {
+func javaTypeIsClass(t *vdl.Type, env *compile.Env) bool {
 	if t == nil { // void type
 		return false
 	}
@@ -1278,7 +1278,7 @@ func init() {
 		"javaClassToVarName":         javaClassToVarName,
 		"javaCastToObject":           javaCastToObject,
 		"javaTypeIsClass":            javaTypeIsClass,
-		"toCamelCase":                vdl.ToCamelCase,
+		"toCamelCase":                vdlutil.ToCamelCase,
 		"toConstCase":                toConstCase,
 	}
 	javaPkgTmpl = template.Must(template.New("javaPkg").Funcs(funcMap).Parse(javaPkgTmplStr))

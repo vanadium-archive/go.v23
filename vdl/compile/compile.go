@@ -20,7 +20,7 @@ package compile
 import (
 	"sort"
 
-	"veyron2/val"
+	"veyron2/vdl"
 	"veyron2/vdl/parse"
 )
 
@@ -50,7 +50,7 @@ func Compile(pkgpath string, pfiles []*parse.File, env *Env) *Package {
 // imports that the parsed config depend on must already have been compiled and
 // populated into env.  If implicit is non-nil and the exported config const is
 // an untyped const literal, it is assumed to be of that type.
-func CompileConfig(implicit *val.Type, pconfig *parse.Config, env *Env) *val.Value {
+func CompileConfig(implicit *vdl.Type, pconfig *parse.Config, env *Env) *vdl.Value {
 	if pconfig == nil || env == nil {
 		env.Errors.Errorf("CompileConfig called with nil config or env")
 		return nil
@@ -159,13 +159,13 @@ func computeDeps(pkg *Package, env *Env) {
 	// interfaces that are actually used.  We ignore const dependencies, since
 	// we've already evaluated the const expressions.
 	for _, file := range pkg.Files {
-		tdeps := make(map[*val.Type]bool)
+		tdeps := make(map[*vdl.Type]bool)
 		pdeps := make(map[*Package]bool)
-		// TypeDef.Type is always defined in our package; start with subtypes.
+		// TypeDef.Type is always defined in our package; start with subvdl.
 		for _, def := range file.TypeDefs {
 			addSubTypeDeps(def.Type, pkg, env, tdeps, pdeps)
 		}
-		// Consts contribute the packages of their value types.
+		// Consts contribute the packages of their value vdl.
 		for _, def := range file.ConstDefs {
 			addTypeDeps(def.Value.Type(), pkg, env, tdeps, pdeps)
 		}
@@ -208,7 +208,7 @@ func computeDeps(pkg *Package, env *Env) {
 }
 
 // Add immediate package deps for t and subtypes of t.
-func addTypeDeps(t *val.Type, pkg *Package, env *Env, tdeps map[*val.Type]bool, pdeps map[*Package]bool) {
+func addTypeDeps(t *vdl.Type, pkg *Package, env *Env, tdeps map[*vdl.Type]bool, pdeps map[*Package]bool) {
 	if def := env.typeDefs[t]; def != nil {
 		// We don't track transitive dependencies, only immediate dependencies.
 		tdeps[t] = true
@@ -221,18 +221,18 @@ func addTypeDeps(t *val.Type, pkg *Package, env *Env, tdeps map[*val.Type]bool, 
 }
 
 // Add immediate package deps for subtypes of t.
-func addSubTypeDeps(t *val.Type, pkg *Package, env *Env, tdeps map[*val.Type]bool, pdeps map[*Package]bool) {
+func addSubTypeDeps(t *vdl.Type, pkg *Package, env *Env, tdeps map[*vdl.Type]bool, pdeps map[*Package]bool) {
 	switch t.Kind() {
-	case val.List:
+	case vdl.List:
 		addTypeDeps(t.Elem(), pkg, env, tdeps, pdeps)
-	case val.Map:
+	case vdl.Map:
 		addTypeDeps(t.Key(), pkg, env, tdeps, pdeps)
 		addTypeDeps(t.Elem(), pkg, env, tdeps, pdeps)
-	case val.Struct:
+	case vdl.Struct:
 		for ix := 0; ix < t.NumField(); ix++ {
 			addTypeDeps(t.Field(ix).Type, pkg, env, tdeps, pdeps)
 		}
-	case val.OneOf:
+	case vdl.OneOf:
 		for ix := 0; ix < t.NumOneOfType(); ix++ {
 			addTypeDeps(t.OneOfType(ix), pkg, env, tdeps, pdeps)
 		}

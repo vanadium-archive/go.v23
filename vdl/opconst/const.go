@@ -1,4 +1,5 @@
-package val
+// Package opconst provides the representation and operations for vdl constants.
+package opconst
 
 import (
 	"errors"
@@ -6,6 +7,9 @@ import (
 	"math"
 	"math/big"
 	"strconv"
+
+	"veyron2/vdl"
+	"veyron2/vdl/valconv"
 )
 
 var (
@@ -65,50 +69,50 @@ type Const struct {
 	// repType holds the type of rep.  If repType is nil the constant is untyped,
 	// otherwise the constant is typed, and rep must match the kind of repType.
 	// If rep is a *Value, repType is always non-nil.
-	repType *Type
+	repType *vdl.Type
 }
 
-// BooleanConst returns an untyped boolean Const.
-func BooleanConst(x bool) Const { return Const{x, nil} }
+// Boolean returns an untyped boolean Const.
+func Boolean(x bool) Const { return Const{x, nil} }
 
-// StringConst returns an untyped string Const.
-func StringConst(x string) Const { return Const{x, nil} }
+// String returns an untyped string Const.
+func String(x string) Const { return Const{x, nil} }
 
-// IntegerConst returns an untyped integer Const.
-func IntegerConst(x *big.Int) Const { return Const{x, nil} }
+// Integer returns an untyped integer Const.
+func Integer(x *big.Int) Const { return Const{x, nil} }
 
-// RationalConst returns an untyped rational Const.
-func RationalConst(x *big.Rat) Const { return Const{x, nil} }
+// Rational returns an untyped rational Const.
+func Rational(x *big.Rat) Const { return Const{x, nil} }
 
-// ComplexConst returns an untyped complex Const.
-func ComplexConst(re, im *big.Rat) Const { return Const{newComplex(re, im), nil} }
+// Complex returns an untyped complex Const.
+func Complex(re, im *big.Rat) Const { return Const{newComplex(re, im), nil} }
 
-// ConstFromValue returns a typed Const based on value v.
-func ConstFromValue(v *Value) Const {
+// FromValue returns a typed Const based on value v.
+func FromValue(v *vdl.Value) Const {
 	if v.Type().IsBytes() {
 		// Represent []byte and [N]byte as a string, so that conversions are easy.
 		return Const{string(v.Bytes()), v.Type()}
 	}
 	switch v.Kind() {
-	case Bool:
-		if v.Type() == BoolType { // Treat the standard bool as untyped bool.
-			return BooleanConst(v.Bool())
+	case vdl.Bool:
+		if v.Type() == vdl.BoolType { // Treat unnamed bool as untyped bool.
+			return Boolean(v.Bool())
 		}
 		return Const{v.Bool(), v.Type()}
-	case String:
-		if v.Type() == StringType { // Treat the standard string as untyped string.
-			return StringConst(v.RawString())
+	case vdl.String:
+		if v.Type() == vdl.StringType { // Treat unnamed string as untyped string.
+			return String(v.RawString())
 		}
 		return Const{v.RawString(), v.Type()}
-	case Byte:
+	case vdl.Byte:
 		return Const{new(big.Int).SetUint64(uint64(v.Byte())), v.Type()}
-	case Uint16, Uint32, Uint64:
+	case vdl.Uint16, vdl.Uint32, vdl.Uint64:
 		return Const{new(big.Int).SetUint64(v.Uint()), v.Type()}
-	case Int16, Int32, Int64:
+	case vdl.Int16, vdl.Int32, vdl.Int64:
 		return Const{new(big.Int).SetInt64(v.Int()), v.Type()}
-	case Float32, Float64:
+	case vdl.Float32, vdl.Float64:
 		return Const{new(big.Rat).SetFloat64(v.Float()), v.Type()}
-	case Complex64, Complex128:
+	case vdl.Complex64, vdl.Complex128:
 		return Const{new(bigComplex).SetComplex128(v.Complex()), v.Type()}
 	default:
 		return Const{v, v.Type()}
@@ -122,14 +126,14 @@ func (c Const) IsValid() bool {
 }
 
 // Type returns the type of c.  Nil indicates c is an untyped const.
-func (c Const) Type() *Type {
+func (c Const) Type() *vdl.Type {
 	return c.repType
 }
 
 // Convert converts c to the target type t, and returns the resulting const.
 // Returns an error if t is nil; you're not allowed to convert into an untyped
 // const.
-func (c Const) Convert(t *Type) (Const, error) {
+func (c Const) Convert(t *vdl.Type) (Const, error) {
 	if t == nil {
 		return Const{}, errConvertNil
 	}
@@ -140,7 +144,7 @@ func (c Const) String() string {
 	if !c.IsValid() {
 		return "invalid"
 	}
-	if v, ok := c.rep.(*Value); ok {
+	if v, ok := c.rep.(*vdl.Value); ok {
 		return v.String()
 	}
 	if c.repType == nil {
@@ -177,7 +181,7 @@ func cRepString(rep interface{}) string {
 		return strconv.FormatFloat(frep, 'g', -1, 64)
 	case *bigComplex:
 		return fmt.Sprintf("%v+%vi", cRepString(&trep.re), cRepString(&trep.im))
-	case *Value:
+	case *vdl.Value:
 		return trep.String()
 	default:
 		panic(fmt.Errorf("val: unhandled const type %T value %v", rep, rep))
@@ -186,7 +190,7 @@ func cRepString(rep interface{}) string {
 
 // cRepTypeString returns a human-readable string representing the type of
 // the const value.
-func cRepTypeString(rep interface{}, t *Type) string {
+func cRepTypeString(rep interface{}, t *vdl.Type) string {
 	if t != nil {
 		return t.String()
 	}
@@ -209,7 +213,7 @@ func cRepTypeString(rep interface{}, t *Type) string {
 }
 
 // ToValue converts Const c to a Value.
-func (c Const) ToValue() (*Value, error) {
+func (c Const) ToValue() (*vdl.Value, error) {
 	if c.rep == nil {
 		return nil, errInvalidConst
 	}
@@ -218,27 +222,27 @@ func (c Const) ToValue() (*Value, error) {
 	if c.repType == nil {
 		switch c.rep.(type) {
 		case bool:
-			c.repType = BoolType
+			c.repType = vdl.BoolType
 		case string:
-			c.repType = StringType
+			c.repType = vdl.StringType
 		default:
 			return nil, fmt.Errorf("%s must be assigned a type", c)
 		}
 	}
 	// Create a value of the appropriate type.
-	vx := Zero(c.repType)
+	vx := vdl.ZeroValue(c.repType)
 	switch trep := c.rep.(type) {
 	case bool:
 		switch vx.Kind() {
-		case Bool:
+		case vdl.Bool:
 			return vx.AssignBool(trep), nil
 		}
 	case string:
 		switch {
-		case vx.Kind() == String:
+		case vx.Kind() == vdl.String:
 			return vx.AssignString(trep), nil
 		case vx.Type().IsBytes():
-			if vx.Kind() == Array {
+			if vx.Kind() == vdl.Array {
 				if vx.Len() != len(trep) {
 					return nil, fmt.Errorf("%s has a different length than %v", c, vx.Type())
 				}
@@ -247,27 +251,27 @@ func (c Const) ToValue() (*Value, error) {
 		}
 	case *big.Int:
 		switch vx.Kind() {
-		case Byte:
+		case vdl.Byte:
 			return vx.AssignByte(byte(trep.Uint64())), nil
-		case Uint16, Uint32, Uint64:
+		case vdl.Uint16, vdl.Uint32, vdl.Uint64:
 			return vx.AssignUint(trep.Uint64()), nil
-		case Int16, Int32, Int64:
+		case vdl.Int16, vdl.Int32, vdl.Int64:
 			return vx.AssignInt(trep.Int64()), nil
 		}
 	case *big.Rat:
 		switch vx.Kind() {
-		case Float32, Float64:
+		case vdl.Float32, vdl.Float64:
 			f64, _ := trep.Float64()
 			return vx.AssignFloat(f64), nil
 		}
 	case *bigComplex:
 		switch vx.Kind() {
-		case Complex64, Complex128:
+		case vdl.Complex64, vdl.Complex128:
 			re64, _ := trep.re.Float64()
 			im64, _ := trep.im.Float64()
 			return vx.AssignComplex(complex(re64, im64)), nil
 		}
-	case *Value:
+	case *vdl.Value:
 		return trep, nil
 	}
 	// Type mismatches shouldn't occur, since makeConst always ensures the rep and
@@ -275,7 +279,7 @@ func (c Const) ToValue() (*Value, error) {
 	panic(fmt.Errorf("val: mismatched const rep type for %v", c))
 }
 
-func errNotSupported(rep interface{}, t *Type) error {
+func errNotSupported(rep interface{}, t *vdl.Type) error {
 	return fmt.Errorf("%s not supported", cRepTypeString(rep, t))
 }
 
@@ -284,7 +288,7 @@ func EvalUnary(op UnaryOp, x Const) (Const, error) {
 	if x.rep == nil {
 		return Const{}, errInvalidConst
 	}
-	if _, ok := x.rep.(*Value); ok {
+	if _, ok := x.rep.(*vdl.Value); ok {
 		// There are no valid unary ops on *Value consts.
 		return Const{}, errNotSupported(x.rep, x.repType)
 	}
@@ -317,13 +321,13 @@ func EvalUnary(op UnaryOp, x Const) (Const, error) {
 		// special-case unsigned integers.  E.g. ^int8(1)=-2, ^uint8(1)=254
 		not := new(big.Int)
 		switch {
-		case x.repType != nil && x.repType.Kind() == Byte:
+		case x.repType != nil && x.repType.Kind() == vdl.Byte:
 			not.SetUint64(uint64(^uint8(ix.Uint64())))
-		case x.repType != nil && x.repType.Kind() == Uint16:
+		case x.repType != nil && x.repType.Kind() == vdl.Uint16:
 			not.SetUint64(uint64(^uint16(ix.Uint64())))
-		case x.repType != nil && x.repType.Kind() == Uint32:
+		case x.repType != nil && x.repType.Kind() == vdl.Uint32:
 			not.SetUint64(uint64(^uint32(ix.Uint64())))
-		case x.repType != nil && x.repType.Kind() == Uint64:
+		case x.repType != nil && x.repType.Kind() == vdl.Uint64:
 			not.SetUint64(^ix.Uint64())
 		default:
 			not.Not(ix)
@@ -375,7 +379,7 @@ func EvalBinary(op BinaryOp, x, y Const) (Const, error) {
 	return makeConst(res, resType)
 }
 
-func opLogic(op BinaryOp, x, y interface{}, resType *Type) (interface{}, error) {
+func opLogic(op BinaryOp, x, y interface{}, resType *vdl.Type) (interface{}, error) {
 	switch tx := x.(type) {
 	case bool:
 		switch op {
@@ -388,7 +392,7 @@ func opLogic(op BinaryOp, x, y interface{}, resType *Type) (interface{}, error) 
 	return nil, errNotSupported(x, resType)
 }
 
-func opComp(op BinaryOp, x, y interface{}, resType *Type) (interface{}, error) {
+func opComp(op BinaryOp, x, y interface{}, resType *vdl.Type) (interface{}, error) {
 	switch tx := x.(type) {
 	case bool:
 		switch op {
@@ -410,18 +414,18 @@ func opComp(op BinaryOp, x, y interface{}, resType *Type) (interface{}, error) {
 		case NE:
 			return !tx.Equal(y.(*bigComplex)), nil
 		}
-	case *Value:
+	case *vdl.Value:
 		switch op {
 		case EQ:
-			return Equal(tx, y.(*Value)), nil
+			return vdl.EqualValue(tx, y.(*vdl.Value)), nil
 		case NE:
-			return !Equal(tx, y.(*Value)), nil
+			return !vdl.EqualValue(tx, y.(*vdl.Value)), nil
 		}
 	}
 	return nil, errNotSupported(x, resType)
 }
 
-func opArith(op BinaryOp, x, y interface{}, resType *Type) (interface{}, error) {
+func opArith(op BinaryOp, x, y interface{}, resType *vdl.Type) (interface{}, error) {
 	switch tx := x.(type) {
 	case string:
 		if op == Add {
@@ -437,7 +441,7 @@ func opArith(op BinaryOp, x, y interface{}, resType *Type) (interface{}, error) 
 	return nil, errNotSupported(x, resType)
 }
 
-func opIntArith(op BinaryOp, x, y interface{}, resType *Type) (interface{}, error) {
+func opIntArith(op BinaryOp, x, y interface{}, resType *vdl.Type) (interface{}, error) {
 	ix, err := constToInt(Const{x, resType})
 	if err != nil {
 		return nil, err
@@ -472,7 +476,7 @@ func evalShift(op BinaryOp, x, y Const) (Const, error) {
 
 // bigRatToInt converts rational to integer values as long as there isn't any
 // loss in precision, checking resType to make sure the conversion is allowed.
-func bigRatToInt(rat *big.Rat, resType *Type) (*big.Int, error) {
+func bigRatToInt(rat *big.Rat, resType *vdl.Type) (*big.Int, error) {
 	// As a special-case we allow untyped rat consts to be converted to integers,
 	// as long as they can do so without loss of precision.  This is safe since
 	// untyped rat consts have "unbounded" precision.  Typed float consts may have
@@ -517,38 +521,38 @@ func constToInt(x Const) (*big.Int, error) {
 // makeConst creates a Const with value rep and type totype, performing overflow
 // and conversion checks on numeric values.  If totype is nil the resulting
 // const is untyped.
-func makeConst(rep interface{}, totype *Type) (Const, error) {
+func makeConst(rep interface{}, totype *vdl.Type) (Const, error) {
 	if rep == nil {
 		return Const{}, errInvalidConst
 	}
 	if totype == nil {
-		if v, ok := rep.(*Value); ok {
+		if v, ok := rep.(*vdl.Value); ok {
 			return Const{}, fmt.Errorf("can't make typed value %s untyped", v.Type())
 		}
 		return Const{rep, nil}, nil
 	}
 	switch trep := rep.(type) {
 	case bool:
-		if totype.Kind() == Bool {
+		if totype.Kind() == vdl.Bool {
 			return Const{trep, totype}, nil
 		}
 	case string:
-		if totype.Kind() == String || totype.IsBytes() {
+		if totype.Kind() == vdl.String || totype.IsBytes() {
 			return Const{trep, totype}, nil
 		}
 	case *big.Int:
 		switch totype.Kind() {
-		case Byte, Uint16, Uint32, Uint64, Int16, Int32, Int64:
+		case vdl.Byte, vdl.Uint16, vdl.Uint32, vdl.Uint64, vdl.Int16, vdl.Int32, vdl.Int64:
 			if err := checkOverflowInt(trep, totype.Kind()); err != nil {
 				return Const{}, err
 			}
 			return Const{trep, totype}, nil
-		case Float32, Float64, Complex64, Complex128:
+		case vdl.Float32, vdl.Float64, vdl.Complex64, vdl.Complex128:
 			return makeConst(new(big.Rat).SetInt(trep), totype)
 		}
 	case *big.Rat:
 		switch totype.Kind() {
-		case Byte, Uint16, Uint32, Uint64, Int16, Int32, Int64:
+		case vdl.Byte, vdl.Uint16, vdl.Uint32, vdl.Uint64, vdl.Int16, vdl.Int32, vdl.Int64:
 			// The only way we reach this conversion from big.Rat to a typed integer
 			// is for explicit type conversions.  We pass a nil Type to bigRatToInt
 			// indicating trep is untyped, to allow all conversions from float to int
@@ -558,13 +562,13 @@ func makeConst(rep interface{}, totype *Type) (Const, error) {
 				return Const{}, err
 			}
 			return makeConst(irep, totype)
-		case Float32, Float64:
+		case vdl.Float32, vdl.Float64:
 			frep, err := convertTypedRat(trep, totype.Kind())
 			if err != nil {
 				return Const{}, err
 			}
 			return Const{frep, totype}, nil
-		case Complex64, Complex128:
+		case vdl.Complex64, vdl.Complex128:
 			frep, err := convertTypedRat(trep, totype.Kind())
 			if err != nil {
 				return Const{}, err
@@ -573,22 +577,22 @@ func makeConst(rep interface{}, totype *Type) (Const, error) {
 		}
 	case *bigComplex:
 		switch totype.Kind() {
-		case Byte, Uint16, Uint32, Uint64, Int16, Int32, Int64, Float32, Float64:
+		case vdl.Byte, vdl.Uint16, vdl.Uint32, vdl.Uint64, vdl.Int16, vdl.Int32, vdl.Int64, vdl.Float32, vdl.Float64:
 			v, err := bigComplexToRat(trep)
 			if err != nil {
 				return Const{}, err
 			}
 			return makeConst(v, totype)
-		case Complex64, Complex128:
+		case vdl.Complex64, vdl.Complex128:
 			v, err := convertTypedComplex(trep, totype.Kind())
 			if err != nil {
 				return Const{}, err
 			}
 			return Const{v, totype}, nil
 		}
-	case *Value:
-		conv := Zero(totype)
-		if err := Convert(conv, trep); err != nil {
+	case *vdl.Value:
+		conv := vdl.ZeroValue(totype)
+		if err := valconv.Convert(conv, trep); err != nil {
 			return Const{}, err
 		}
 		return Const{conv, totype}, nil
@@ -596,15 +600,15 @@ func makeConst(rep interface{}, totype *Type) (Const, error) {
 	return Const{}, fmt.Errorf("can't convert %s to %v", cRepString(rep), cRepTypeString(rep, totype))
 }
 
-func bitLenInt(kind Kind) int {
+func bitLenInt(kind vdl.Kind) int {
 	switch kind {
-	case Byte:
+	case vdl.Byte:
 		return 8
-	case Uint16, Int16:
+	case vdl.Uint16, vdl.Int16:
 		return 16
-	case Uint32, Int32:
+	case vdl.Uint32, vdl.Int32:
 		return 32
-	case Uint64, Int64:
+	case vdl.Uint64, vdl.Int64:
 		return 64
 	default:
 		panic(fmt.Errorf("val: bitLen unhandled kind %v", kind))
@@ -613,13 +617,13 @@ func bitLenInt(kind Kind) int {
 
 // checkOverflowInt returns an error iff converting b to the typed integer will
 // cause overflow.
-func checkOverflowInt(b *big.Int, kind Kind) error {
+func checkOverflowInt(b *big.Int, kind vdl.Kind) error {
 	switch bitlen := bitLenInt(kind); kind {
-	case Byte, Uint16, Uint32, Uint64:
+	case vdl.Byte, vdl.Uint16, vdl.Uint32, vdl.Uint64:
 		if b.Sign() < 0 || b.BitLen() > bitlen {
 			return fmt.Errorf("const %v overflows uint%d", cRepString(b), bitlen)
 		}
-	case Int16, Int32, Int64:
+	case vdl.Int16, vdl.Int32, vdl.Int64:
 		// Account for two's complement, where e.g. int8 ranges from -128 to 127
 		if b.Sign() >= 0 {
 			// Positives and 0 - just check bitlen, accounting for the sign bit.
@@ -641,7 +645,7 @@ func checkOverflowInt(b *big.Int, kind Kind) error {
 
 // checkOverflowRat returns an error iff converting b to the typed rat will
 // cause overflow or underflow.
-func checkOverflowRat(b *big.Rat, kind Kind) error {
+func checkOverflowRat(b *big.Rat, kind vdl.Kind) error {
 	// Exact zero is special cased in ieee754.
 	if b.Cmp(bigRatZero) == 0 {
 		return nil
@@ -649,14 +653,14 @@ func checkOverflowRat(b *big.Rat, kind Kind) error {
 	// TODO(toddw): perhaps allow slightly smaller and larger values, to account
 	// for ieee754 round-to-even rules.
 	switch abs := new(big.Rat).Abs(b); kind {
-	case Float32, Complex64:
+	case vdl.Float32, vdl.Complex64:
 		if abs.Cmp(bigRatAbsMin32) < 0 {
 			return fmt.Errorf("const %v underflows float32", cRepString(b))
 		}
 		if abs.Cmp(bigRatAbsMax32) > 0 {
 			return fmt.Errorf("const %v overflows float32", cRepString(b))
 		}
-	case Float64, Complex128:
+	case vdl.Float64, vdl.Complex128:
 		if abs.Cmp(bigRatAbsMin64) < 0 {
 			return fmt.Errorf("const %v underflows float64", cRepString(b))
 		}
@@ -670,14 +674,14 @@ func checkOverflowRat(b *big.Rat, kind Kind) error {
 }
 
 // convertTypedRat converts b to the typed rat, rounding as necessary.
-func convertTypedRat(b *big.Rat, kind Kind) (*big.Rat, error) {
+func convertTypedRat(b *big.Rat, kind vdl.Kind) (*big.Rat, error) {
 	if err := checkOverflowRat(b, kind); err != nil {
 		return nil, err
 	}
 	switch f64, _ := b.Float64(); kind {
-	case Float32, Complex64:
+	case vdl.Float32, vdl.Complex64:
 		return new(big.Rat).SetFloat64(float64(float32(f64))), nil
-	case Float64, Complex128:
+	case vdl.Float64, vdl.Complex128:
 		return new(big.Rat).SetFloat64(f64), nil
 	default:
 		panic(fmt.Errorf("val: convertTypedRat unhandled kind %v", kind))
@@ -685,7 +689,7 @@ func convertTypedRat(b *big.Rat, kind Kind) (*big.Rat, error) {
 }
 
 // convertTypedComplex converts b to the typed complex, rounding as necessary.
-func convertTypedComplex(b *bigComplex, kind Kind) (*bigComplex, error) {
+func convertTypedComplex(b *bigComplex, kind vdl.Kind) (*bigComplex, error) {
 	re, err := convertTypedRat(&b.re, kind)
 	if err != nil {
 		return nil, err
@@ -698,10 +702,10 @@ func convertTypedComplex(b *bigComplex, kind Kind) (*bigComplex, error) {
 }
 
 // coerceConsts performs implicit conversion of cl and cr based on their
-// respective types.  Returns the converted values vl and vr which are
+// respective vdl.  Returns the converted values vl and vr which are
 // guaranteed to be of the same type represented by the returned Type, which may
 // be nil if both consts are untyped.
-func coerceConsts(cl, cr Const) (interface{}, interface{}, *Type, error) {
+func coerceConsts(cl, cr Const) (interface{}, interface{}, *vdl.Type, error) {
 	var err error
 	if cl.repType != nil && cr.repType != nil {
 		// Both consts are typed - their types must match (no implicit conversion).

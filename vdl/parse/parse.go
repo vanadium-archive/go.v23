@@ -3,7 +3,7 @@
 package parse
 
 // This is the only file in this package that uses the yacc-generated parser
-// with entrypoint yyParse.  The result of the parse is the simple vdl.File
+// with entrypoint yyParse.  The result of the parse is the simple vdlutil.File
 // representation, which is used by the compilation and code-generation stages.
 //
 // TODO(toddw): The yacc-generated parser returns pretty lousy error messages;
@@ -17,7 +17,7 @@ import (
 	"strings"
 	"text/scanner"
 
-	"veyron2/vdl"
+	"veyron2/vdl/vdlutil"
 )
 
 // Opts specifies vdl parsing options.
@@ -29,7 +29,7 @@ type Opts struct {
 // accumulated errors, and parses the vdl into a parse.File containing the parse
 // tree.  Returns nil if any errors are encountered, with errs containing more
 // information.  Otherwise returns the parsed File.
-func Parse(baseFileName string, src io.Reader, opts Opts, errs *vdl.Errors) *File {
+func Parse(baseFileName string, src io.Reader, opts Opts, errs *vdlutil.Errors) *File {
 	mode := modeFile
 	if opts.ImportsOnly {
 		mode = modeFileImports
@@ -41,7 +41,7 @@ func Parse(baseFileName string, src io.Reader, opts Opts, errs *vdl.Errors) *Fil
 // the accumulated errors, and parses the config into a parse.Config containing
 // the parse tree.  Returns nil if any errors are encountered, with errs
 // containing more information.  Otherwise returns the parsed Config.
-func ParseConfig(baseFileName string, src io.Reader, opts Opts, errs *vdl.Errors) *Config {
+func ParseConfig(baseFileName string, src io.Reader, opts Opts, errs *vdlutil.Errors) *Config {
 	mode := modeConfig
 	if opts.ImportsOnly {
 		mode = modeConfigImports
@@ -70,7 +70,7 @@ func ParseConfig(baseFileName string, src io.Reader, opts Opts, errs *vdl.Errors
 	return config
 }
 
-func parse(baseFileName string, src io.Reader, mode mode, errs *vdl.Errors) *File {
+func parse(baseFileName string, src io.Reader, mode mode, errs *vdlutil.Errors) *File {
 	if errs == nil {
 		log.Fatal("Nil errors specified for Parse")
 	}
@@ -81,7 +81,7 @@ func parse(baseFileName string, src io.Reader, mode mode, errs *vdl.Errors) *Fil
 	}
 	lex.attachComments()
 	if mode == modeFile || mode == modeConfig {
-		vdl.Vlog.Printf("PARSE RESULTS\n\n%v\n\n", lex.vdlFile)
+		vdlutil.Vlog.Printf("PARSE RESULTS\n\n%v\n\n", lex.vdlFile)
 	}
 	if startErrs != errs.NumErrors() {
 		return nil
@@ -113,7 +113,7 @@ type lexer struct {
 	// Fields for lexing / scanning the input source file.
 	scanner scanner.Scanner
 	mode    mode
-	errs    *vdl.Errors
+	errs    *vdlutil.Errors
 	started bool  // Has the dummy start token already been emitted?
 	sawEOF  bool  // Have we already seen the end-of-file?
 	prevTok token // Previous token, used for auto-semicolons and errors.
@@ -123,7 +123,7 @@ type lexer struct {
 	vdlFile  *File
 }
 
-func newLexer(baseFileName string, src io.Reader, mode mode, errs *vdl.Errors) *lexer {
+func newLexer(baseFileName string, src io.Reader, mode mode, errs *vdlutil.Errors) *lexer {
 	l := &lexer{mode: mode, errs: errs, vdlFile: &File{BaseName: baseFileName}}
 	l.comments.init()
 	l.scanner.Init(src)
@@ -151,7 +151,7 @@ func (t token) String() string {
 // lexer as their first step.  The type conversion is always safe since we're
 // the ones who called yyParse, and thus know the concrete type is always lexer.
 
-// lexVDLFile retrieves the vdl.File parse result from the yyLexer interface.
+// lexVDLFile retrieves the vdlutil.File parse result from the yyLexer interface.
 // This is called in the yacc rules to fill in the parse result.
 func lexVDLFile(yylex yyLexer) *File {
 	return yylex.(*lexer).vdlFile

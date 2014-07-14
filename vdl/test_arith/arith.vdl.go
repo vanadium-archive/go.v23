@@ -35,7 +35,7 @@ import (
 	_gen_ipc "veyron2/ipc"
 	_gen_naming "veyron2/naming"
 	_gen_rt "veyron2/rt"
-	_gen_vdl "veyron2/vdl"
+	_gen_vdlutil "veyron2/vdl/vdlutil"
 	_gen_wiretype "veyron2/wiretype"
 )
 
@@ -88,7 +88,7 @@ type Arith_ExcludingUniversal interface {
 	// StreamingAdd shows a bidirectional stream.
 	StreamingAdd(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply ArithStreamingAddStream, err error)
 	// QuoteAny shows the any built-in type, representing a value of any type.
-	QuoteAny(ctx _gen_context.T, a _gen_vdl.Any, opts ..._gen_ipc.CallOpt) (reply _gen_vdl.Any, err error)
+	QuoteAny(ctx _gen_context.T, a _gen_vdlutil.Any, opts ..._gen_ipc.CallOpt) (reply _gen_vdlutil.Any, err error)
 }
 type Arith interface {
 	_gen_ipc.UniversalServiceMethods
@@ -117,7 +117,7 @@ type ArithService interface {
 	// StreamingAdd shows a bidirectional stream.
 	StreamingAdd(context _gen_ipc.ServerContext, stream ArithServiceStreamingAddStream) (reply int32, err error)
 	// QuoteAny shows the any built-in type, representing a value of any type.
-	QuoteAny(context _gen_ipc.ServerContext, a _gen_vdl.Any) (reply _gen_vdl.Any, err error)
+	QuoteAny(context _gen_ipc.ServerContext, a _gen_vdlutil.Any) (reply _gen_vdlutil.Any, err error)
 }
 
 // ArithCountStream is the interface for streaming responses of the method
@@ -272,10 +272,10 @@ func BindArith(name string, opts ..._gen_ipc.BindOpt) (Arith, error) {
 		case _gen_ipc.Client:
 			client = o
 		default:
-			return nil, _gen_vdl.ErrUnrecognizedOption
+			return nil, _gen_vdlutil.ErrUnrecognizedOption
 		}
 	default:
-		return nil, _gen_vdl.ErrTooManyOptionsToBind
+		return nil, _gen_vdlutil.ErrTooManyOptionsToBind
 	}
 	stub := &clientStubArith{client: client, name: name}
 
@@ -371,7 +371,7 @@ func (__gen_c *clientStubArith) StreamingAdd(ctx _gen_context.T, opts ..._gen_ip
 	return
 }
 
-func (__gen_c *clientStubArith) QuoteAny(ctx _gen_context.T, a _gen_vdl.Any, opts ..._gen_ipc.CallOpt) (reply _gen_vdl.Any, err error) {
+func (__gen_c *clientStubArith) QuoteAny(ctx _gen_context.T, a _gen_vdlutil.Any, opts ..._gen_ipc.CallOpt) (reply _gen_vdlutil.Any, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "QuoteAny", []interface{}{a}, opts...); err != nil {
 		return
@@ -524,7 +524,7 @@ func (__gen_s *ServerStubArith) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Se
 		},
 	}
 
-	result.TypeDefs = []_gen_vdl.Any{
+	result.TypeDefs = []_gen_vdlutil.Any{
 		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, _gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
 				_gen_wiretype.FieldType{Type: 0x24, Name: "A"},
@@ -596,7 +596,7 @@ func (__gen_s *ServerStubArith) StreamingAdd(call _gen_ipc.ServerCall) (reply in
 	return
 }
 
-func (__gen_s *ServerStubArith) QuoteAny(call _gen_ipc.ServerCall, a _gen_vdl.Any) (reply _gen_vdl.Any, err error) {
+func (__gen_s *ServerStubArith) QuoteAny(call _gen_ipc.ServerCall, a _gen_vdlutil.Any) (reply _gen_vdlutil.Any, err error) {
 	reply, err = __gen_s.service.QuoteAny(call, a)
 	return
 }
@@ -655,10 +655,10 @@ func BindCalculator(name string, opts ..._gen_ipc.BindOpt) (Calculator, error) {
 		case _gen_ipc.Client:
 			client = o
 		default:
-			return nil, _gen_vdl.ErrUnrecognizedOption
+			return nil, _gen_vdlutil.ErrUnrecognizedOption
 		}
 	default:
-		return nil, _gen_vdl.ErrTooManyOptionsToBind
+		return nil, _gen_vdlutil.ErrTooManyOptionsToBind
 	}
 	stub := &clientStubCalculator{client: client, name: name}
 	stub.Arith_ExcludingUniversal, _ = BindArith(name, client)
@@ -788,7 +788,7 @@ func (__gen_s *ServerStubCalculator) Signature(call _gen_ipc.ServerCall) (_gen_i
 		},
 	}
 
-	result.TypeDefs = []_gen_vdl.Any{
+	result.TypeDefs = []_gen_vdlutil.Any{
 		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}}
 	var ss _gen_ipc.ServiceSignature
 	var firstAdded int

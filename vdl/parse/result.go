@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"path"
 
-	"veyron2/vdl"
+	"veyron2/vdl/vdlutil"
 )
 
 // Pos captures positional information during parsing.
@@ -27,7 +27,7 @@ func (p Pos) String() string {
 
 // InferPackageName returns the package name from a group of files.  Every file
 // must specify the same package name, otherwise an error is reported in errs.
-func InferPackageName(files []*File, errs *vdl.Errors) (pkgName string) {
+func InferPackageName(files []*File, errs *vdlutil.Errors) (pkgName string) {
 	var firstFile string
 	for _, f := range files {
 		switch {

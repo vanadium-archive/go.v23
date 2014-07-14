@@ -1,7 +1,7 @@
 package compile
 
 import (
-	"veyron2/val"
+	"veyron2/vdl"
 )
 
 var (
@@ -15,28 +15,28 @@ func init() {
 	BuiltInPackage.Files = []*File{BuiltInFile}
 	BuiltInFile.Package = BuiltInPackage
 	// Built-in types
-	builtInType("any", val.AnyType)
-	builtInType("bool", val.BoolType)
-	builtInType("byte", val.ByteType)
-	builtInType("uint16", val.Uint16Type)
-	builtInType("uint32", val.Uint32Type)
-	builtInType("uint64", val.Uint64Type)
-	builtInType("int16", val.Int16Type)
-	builtInType("int32", val.Int32Type)
-	builtInType("int64", val.Int64Type)
-	builtInType("float32", val.Float32Type)
-	builtInType("float64", val.Float64Type)
-	builtInType("complex64", val.Complex64Type)
-	builtInType("complex128", val.Complex128Type)
-	builtInType("string", val.StringType)
-	builtInType("typeval", val.TypeValType)
+	builtInType("any", vdl.AnyType)
+	builtInType("bool", vdl.BoolType)
+	builtInType("byte", vdl.ByteType)
+	builtInType("uint16", vdl.Uint16Type)
+	builtInType("uint32", vdl.Uint32Type)
+	builtInType("uint64", vdl.Uint64Type)
+	builtInType("int16", vdl.Int16Type)
+	builtInType("int32", vdl.Int32Type)
+	builtInType("int64", vdl.Int64Type)
+	builtInType("float32", vdl.Float32Type)
+	builtInType("float64", vdl.Float64Type)
+	builtInType("complex64", vdl.Complex64Type)
+	builtInType("complex128", vdl.Complex128Type)
+	builtInType("string", vdl.StringType)
+	builtInType("typeval", vdl.TypeValType)
 	builtInType("error", ErrorType)
 	// Built-in consts
 	builtInConst("true", TrueConst)
 	builtInConst("false", FalseConst)
 }
 
-func builtInType(name string, t *val.Type) {
+func builtInType(name string, t *vdl.Type) {
 	def := &TypeDef{
 		NamePos:  NamePos{Name: name},
 		Exported: true,
@@ -46,7 +46,7 @@ func builtInType(name string, t *val.Type) {
 	addTypeDef(def, nil)
 }
 
-func builtInConst(name string, v *val.Value) {
+func builtInConst(name string, v *vdl.Value) {
 	def := &ConstDef{
 		NamePos:  NamePos{Name: name},
 		Exported: true,

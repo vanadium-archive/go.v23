@@ -1,4 +1,4 @@
-package val
+package valconv
 
 // TODO(toddw): test values of enum, oneof and recursive types.
 
@@ -7,24 +7,26 @@ import (
 	"math"
 	"reflect"
 	"testing"
+
+	"veyron2/vdl"
 )
 
-type nValue *Value
+type nValue *vdl.Value
 
 // Each group of values in vvNAME and rvNAME are all mutually convertible.
 var (
-	vvBoolTrue = []*Value{
-		boolValue(BoolType, true), boolValue(boolTypeN, true),
+	vvBoolTrue = []*vdl.Value{
+		boolValue(vdl.BoolType, true), boolValue(boolTypeN, true),
 	}
-	vvStrABC = []*Value{
-		stringValue(StringType, "ABC"), stringValue(stringTypeN, "ABC"),
+	vvStrABC = []*vdl.Value{
+		stringValue(vdl.StringType, "ABC"), stringValue(stringTypeN, "ABC"),
 		bytesValue(bytesType, "ABC"), bytesValue(bytesTypeN, "ABC"),
 		bytes3Value(bytes3Type, "ABC"), bytes3Value(bytes3TypeN, "ABC"),
 	}
-	vvTypeValBool = []*Value{
-		TypeValValue(BoolType),
+	vvTypeValBool = []*vdl.Value{
+		vdl.TypeValValue(vdl.BoolType),
 	}
-	vvSeq123 = []*Value{
+	vvSeq123 = []*vdl.Value{
 		seqNumValue(array3Uint64Type, 1, 2, 3),
 		seqNumValue(array3Uint64TypeN, 1, 2, 3),
 		seqNumValue(array3Int64Type, 1, 2, 3),
@@ -42,7 +44,7 @@ var (
 		seqNumValue(listComplex64Type, 1, 2, 3),
 		seqNumValue(listComplex64TypeN, 1, 2, 3),
 	}
-	vvSet123 = []*Value{
+	vvSet123 = []*vdl.Value{
 		setNumValue(setUint64Type, 1, 2, 3),
 		setNumValue(setUint64TypeN, 1, 2, 3),
 		setNumValue(setInt64Type, 1, 2, 3),
@@ -52,7 +54,7 @@ var (
 		setNumValue(setComplex64Type, 1, 2, 3),
 		setNumValue(setComplex64TypeN, 1, 2, 3),
 	}
-	vvMap123True = []*Value{
+	vvMap123True = []*vdl.Value{
 		mapNumBoolValue(mapUint64BoolType, nb{1, true}, nb{2, true}, nb{3, true}),
 		mapNumBoolValue(mapUint64BoolTypeN, nb{1, true}, nb{2, true}, nb{3, true}),
 		mapNumBoolValue(mapInt64BoolType, nb{1, true}, nb{2, true}, nb{3, true}),
@@ -63,7 +65,7 @@ var (
 		mapNumBoolValue(mapComplex64BoolTypeN, nb{1, true}, nb{2, true}, nb{3, true}),
 	}
 	vvSetMap123       = append(vvSet123, vvMap123True...)
-	vvMap123FalseTrue = []*Value{
+	vvMap123FalseTrue = []*vdl.Value{
 		mapNumBoolValue(mapUint64BoolType, nb{1, false}, nb{2, true}, nb{3, false}),
 		mapNumBoolValue(mapUint64BoolTypeN, nb{1, false}, nb{2, true}, nb{3, false}),
 		mapNumBoolValue(mapInt64BoolType, nb{1, false}, nb{2, true}, nb{3, false}),
@@ -73,35 +75,35 @@ var (
 		mapNumBoolValue(mapComplex64BoolType, nb{1, false}, nb{2, true}, nb{3, false}),
 		mapNumBoolValue(mapComplex64BoolTypeN, nb{1, false}, nb{2, true}, nb{3, false}),
 	}
-	vvSetXYZ = []*Value{
+	vvSetXYZ = []*vdl.Value{
 		setStringValue(setStringType, "X", "Y", "Z"),
 		setStringValue(setStringTypeN, "X", "Y", "Z"),
 	}
-	vvMapXYZTrue = []*Value{
+	vvMapXYZTrue = []*vdl.Value{
 		mapStringBoolValue(mapStringBoolType, sb{"X", true}, sb{"Y", true}, sb{"Z", true}),
 		mapStringBoolValue(mapStringBoolTypeN, sb{"X", true}, sb{"Y", true}, sb{"Z", true}),
 	}
-	vvStructXYZTrue = []*Value{
+	vvStructXYZTrue = []*vdl.Value{
 		structBoolValue(structXYZBoolType, sb{"X", true}, sb{"Y", true}, sb{"Z", true}),
 		structBoolValue(structXYZBoolTypeN, sb{"X", true}, sb{"Y", true}, sb{"Z", true}),
 	}
 	vvSetMapStructXYZ       = append(append(vvSetXYZ, vvMapXYZTrue...), vvStructXYZTrue...)
-	vvMapStructXYZFalseTrue = []*Value{
+	vvMapStructXYZFalseTrue = []*vdl.Value{
 		mapStringBoolValue(mapStringBoolType, sb{"X", false}, sb{"Y", true}, sb{"Z", false}),
 		mapStringBoolValue(mapStringBoolTypeN, sb{"X", false}, sb{"Y", true}, sb{"Z", false}),
 		structBoolValue(structXYZBoolType, sb{"X", false}, sb{"Y", true}, sb{"Z", false}),
 		structBoolValue(structXYZBoolTypeN, sb{"X", false}, sb{"Y", true}, sb{"Z", false}),
 	}
-	vvMapStructXYZEmpty = []*Value{
+	vvMapStructXYZEmpty = []*vdl.Value{
 		mapStringEmptyValue(mapStringEmptyType, "X", "Y", "Z"),
 		mapStringEmptyValue(mapStringEmptyTypeN, "X", "Y", "Z"),
-		Zero(structXYZEmptyType), Zero(structXYZEmptyTypeN),
+		vdl.ZeroValue(structXYZEmptyType), vdl.ZeroValue(structXYZEmptyTypeN),
 	}
-	vvStructWXFalseTrue = []*Value{
+	vvStructWXFalseTrue = []*vdl.Value{
 		structBoolValue(structWXBoolType, sb{"W", false}, sb{"X", true}),
 		structBoolValue(structWXBoolTypeN, sb{"W", false}, sb{"X", true}),
 	}
-	vvMapVWX123 = []*Value{
+	vvMapVWX123 = []*vdl.Value{
 		mapStringNumValue(mapStringUint64Type, sn{"V", 1}, sn{"W", 2}, sn{"X", 3}),
 		mapStringNumValue(mapStringUint64TypeN, sn{"V", 1}, sn{"W", 2}, sn{"X", 3}),
 		mapStringNumValue(mapStringInt64Type, sn{"V", 1}, sn{"W", 2}, sn{"X", 3}),
@@ -111,7 +113,7 @@ var (
 		mapStringNumValue(mapStringComplex64Type, sn{"V", 1}, sn{"W", 2}, sn{"X", 3}),
 		mapStringNumValue(mapStringComplex64TypeN, sn{"V", 1}, sn{"W", 2}, sn{"X", 3}),
 	}
-	vvStructVWX123 = []*Value{
+	vvStructVWX123 = []*vdl.Value{
 		structNumValue(structVWXUint64Type, sn{"V", 1}, sn{"W", 2}, sn{"X", 3}),
 		structNumValue(structVWXUint64TypeN, sn{"V", 1}, sn{"W", 2}, sn{"X", 3}),
 		structNumValue(structVWXInt64Type, sn{"V", 1}, sn{"W", 2}, sn{"X", 3}),
@@ -122,7 +124,7 @@ var (
 		structNumValue(structVWXComplex64TypeN, sn{"V", 1}, sn{"W", 2}, sn{"X", 3}),
 	}
 	vvMapStructVWX123 = append(vvMapVWX123, vvStructVWX123...)
-	vvStructUV01      = []*Value{
+	vvStructUV01      = []*vdl.Value{
 		structNumValue(structUVUint64Type, sn{"U", 0}, sn{"V", 1}),
 		structNumValue(structUVUint64TypeN, sn{"U", 0}, sn{"V", 1}),
 		structNumValue(structUVInt64Type, sn{"U", 0}, sn{"V", 1}),
@@ -132,7 +134,7 @@ var (
 		structNumValue(structUVComplex64Type, sn{"U", 0}, sn{"V", 1}),
 		structNumValue(structUVComplex64TypeN, sn{"U", 0}, sn{"V", 1}),
 	}
-	vvEmptyStruct = []*Value{Zero(emptyType), Zero(emptyTypeN)}
+	vvEmptyStruct = []*vdl.Value{vdl.ZeroValue(emptyType), vdl.ZeroValue(emptyTypeN)}
 
 	rvBoolTrue = []interface{}{
 		bool(true), nBool(true),
@@ -142,7 +144,7 @@ var (
 		nString("ABC"), nSliceUint8("ABC"), nArray3Uint8{'A', 'B', 'C'},
 	}
 	rvTypeValBool = []interface{}{
-		BoolType, nType(BoolType),
+		vdl.BoolType, nType(vdl.BoolType),
 	}
 	rvSeq123 = []interface{}{
 		[3]uint64{1, 2, 3}, []uint64{1, 2, 3}, nArray3Uint64{1, 2, 3}, nSliceUint64{1, 2, 3},
@@ -257,18 +259,22 @@ var (
 	ttStructVWXNum    = ttTypes(vvStructVWX123)
 	ttMapStructVWXNum = ttTypes(vvMapStructVWX123)
 	ttStructUVNum     = ttTypes(vvStructUV01)
-	ttUints           = []*Type{
-		ByteType, nByteType,
-		Uint16Type, uint16TypeN, Uint32Type, uint32TypeN, Uint64Type, uint64TypeN,
+	ttUints           = []*vdl.Type{
+		vdl.ByteType, nByteType,
+		vdl.Uint16Type, uint16TypeN,
+		vdl.Uint32Type, uint32TypeN,
+		vdl.Uint64Type, uint64TypeN,
 	}
-	ttInts = []*Type{
-		Int16Type, int16TypeN, Int32Type, int32TypeN, Int64Type, int64TypeN,
+	ttInts = []*vdl.Type{
+		vdl.Int16Type, int16TypeN,
+		vdl.Int32Type, int32TypeN,
+		vdl.Int64Type, int64TypeN,
 	}
-	ttFloat32s    = []*Type{Float32Type, float32TypeN}
-	ttFloat64s    = []*Type{Float64Type, float64TypeN}
+	ttFloat32s    = []*vdl.Type{vdl.Float32Type, float32TypeN}
+	ttFloat64s    = []*vdl.Type{vdl.Float64Type, float64TypeN}
 	ttFloats      = ttUnion(ttFloat32s, ttFloat64s)
-	ttComplex64s  = []*Type{Complex64Type, complex64TypeN}
-	ttComplex128s = []*Type{Complex128Type, complex128TypeN}
+	ttComplex64s  = []*vdl.Type{vdl.Complex64Type, complex64TypeN}
+	ttComplex128s = []*vdl.Type{vdl.Complex128Type, complex128TypeN}
 	ttComplexes   = ttUnion(ttComplex64s, ttComplex128s)
 	ttIntegers    = ttUnion(ttUints, ttInts)
 	ttNumbers     = ttUnion(ttIntegers, ttFloats, ttComplexes)
@@ -323,21 +329,21 @@ var (
 )
 
 // Helpers to manipulate slices of *Type
-func ttSetToSlice(set map[*Type]bool) (result []*Type) {
+func ttSetToSlice(set map[*vdl.Type]bool) (result []*vdl.Type) {
 	for tt, _ := range set {
 		result = append(result, tt)
 	}
 	return
 }
-func ttTypes(values []*Value) []*Type {
-	uniq := make(map[*Type]bool)
+func ttTypes(values []*vdl.Value) []*vdl.Type {
+	uniq := make(map[*vdl.Type]bool)
 	for _, v := range values {
 		uniq[v.Type()] = true
 	}
 	return ttSetToSlice(uniq)
 }
-func ttUnion(types ...[]*Type) []*Type {
-	uniq := make(map[*Type]bool)
+func ttUnion(types ...[]*vdl.Type) []*vdl.Type {
+	uniq := make(map[*vdl.Type]bool)
 	for _, ttSlice := range types {
 		for _, tt := range ttSlice {
 			uniq[tt] = true
@@ -347,8 +353,8 @@ func ttUnion(types ...[]*Type) []*Type {
 }
 
 // ttOtherThan returns all types from types that aren't represented in other.
-func ttOtherThan(types []*Type, other ...[]*Type) (result []*Type) {
-	otherMap := make(map[*Type]bool)
+func ttOtherThan(types []*vdl.Type, other ...[]*vdl.Type) (result []*vdl.Type) {
+	otherMap := make(map[*vdl.Type]bool)
 	for _, oo := range other {
 		for _, o := range oo {
 			otherMap[o] = true
@@ -403,8 +409,8 @@ func rtOtherThan(types []reflect.Type, other ...[]reflect.Type) (result []reflec
 }
 
 // vvOnlyFrom returns all values from values that are represented in from.
-func vvOnlyFrom(values []*Value, from []*Type) (result []*Value) {
-	fromMap := make(map[*Type]bool)
+func vvOnlyFrom(values []*vdl.Value, from []*vdl.Type) (result []*vdl.Value) {
+	fromMap := make(map[*vdl.Type]bool)
 	for _, f := range from {
 		fromMap[f] = true
 	}
@@ -431,39 +437,39 @@ func rvOnlyFrom(values []interface{}, from []reflect.Type) (result []interface{}
 }
 
 // vvFromUint returns all *Values that can represent u without loss of precision.
-func vvFromUint(u uint64) (result []*Value) {
+func vvFromUint(u uint64) (result []*vdl.Value) {
 	b, i, f, c := byte(u), int64(u), float64(u), complex(float64(u), 0)
 	switch {
 	case u <= math.MaxInt8:
 		fallthrough
 	case u <= math.MaxUint8:
-		result = append(result, byteValue(ByteType, b), byteValue(nByteType, b))
+		result = append(result, byteValue(vdl.ByteType, b), byteValue(nByteType, b))
 		fallthrough
 	case u <= math.MaxInt16:
-		result = append(result, intValue(Int16Type, i), intValue(int16TypeN, i))
+		result = append(result, intValue(vdl.Int16Type, i), intValue(int16TypeN, i))
 		fallthrough
 	case u <= math.MaxUint16:
-		result = append(result, uintValue(Uint16Type, u), uintValue(uint16TypeN, u))
+		result = append(result, uintValue(vdl.Uint16Type, u), uintValue(uint16TypeN, u))
 		fallthrough
 	case u <= 1<<24:
-		result = append(result, floatValue(Float32Type, f), floatValue(float32TypeN, f))
-		result = append(result, complexValue(Complex64Type, c), complexValue(complex64TypeN, c))
+		result = append(result, floatValue(vdl.Float32Type, f), floatValue(float32TypeN, f))
+		result = append(result, complexValue(vdl.Complex64Type, c), complexValue(complex64TypeN, c))
 		fallthrough
 	case u <= math.MaxInt32:
-		result = append(result, intValue(Int32Type, i), intValue(int32TypeN, i))
+		result = append(result, intValue(vdl.Int32Type, i), intValue(int32TypeN, i))
 		fallthrough
 	case u <= math.MaxUint32:
-		result = append(result, uintValue(Uint32Type, u), uintValue(uint32TypeN, u))
+		result = append(result, uintValue(vdl.Uint32Type, u), uintValue(uint32TypeN, u))
 		fallthrough
 	case u <= 1<<53:
-		result = append(result, floatValue(Float64Type, f), floatValue(float64TypeN, f))
-		result = append(result, complexValue(Complex128Type, c), complexValue(complex128TypeN, c))
+		result = append(result, floatValue(vdl.Float64Type, f), floatValue(float64TypeN, f))
+		result = append(result, complexValue(vdl.Complex128Type, c), complexValue(complex128TypeN, c))
 		fallthrough
 	case u <= math.MaxInt64:
-		result = append(result, intValue(Int64Type, i), intValue(int64TypeN, i))
+		result = append(result, intValue(vdl.Int64Type, i), intValue(int64TypeN, i))
 		fallthrough
 	default:
-		result = append(result, uintValue(Uint64Type, u), uintValue(uint64TypeN, u))
+		result = append(result, uintValue(vdl.Uint64Type, u), uintValue(uint64TypeN, u))
 	}
 	return result
 }
@@ -508,43 +514,43 @@ func rvFromUint(u uint64) (result []interface{}) {
 }
 
 // vvFromInt returns all *Values that can represent i without loss of precision.
-func vvFromInt(i int64) (result []*Value) {
+func vvFromInt(i int64) (result []*vdl.Value) {
 	b, u, f, c := byte(i), uint64(i), float64(i), complex(float64(i), 0)
 	switch {
 	case math.MinInt8 <= i && i <= math.MaxInt8:
 		fallthrough
 	case math.MinInt16 <= i && i <= math.MaxInt16:
-		result = append(result, intValue(Int16Type, i), intValue(int16TypeN, i))
+		result = append(result, intValue(vdl.Int16Type, i), intValue(int16TypeN, i))
 		fallthrough
 	case -1<<24 <= i && i <= 1<<24:
-		result = append(result, floatValue(Float32Type, f), floatValue(float32TypeN, f))
-		result = append(result, complexValue(Complex64Type, c), complexValue(complex64TypeN, c))
+		result = append(result, floatValue(vdl.Float32Type, f), floatValue(float32TypeN, f))
+		result = append(result, complexValue(vdl.Complex64Type, c), complexValue(complex64TypeN, c))
 		fallthrough
 	case math.MinInt32 <= i && i <= math.MaxInt32:
-		result = append(result, intValue(Int32Type, i), intValue(int32TypeN, i))
+		result = append(result, intValue(vdl.Int32Type, i), intValue(int32TypeN, i))
 		fallthrough
 	case -1<<53 <= i && i <= 1<<53:
-		result = append(result, floatValue(Float64Type, f), floatValue(float64TypeN, f))
-		result = append(result, complexValue(Complex128Type, c), complexValue(complex128TypeN, c))
+		result = append(result, floatValue(vdl.Float64Type, f), floatValue(float64TypeN, f))
+		result = append(result, complexValue(vdl.Complex128Type, c), complexValue(complex128TypeN, c))
 		fallthrough
 	default:
-		result = append(result, intValue(Int64Type, i), intValue(int64TypeN, i))
+		result = append(result, intValue(vdl.Int64Type, i), intValue(int64TypeN, i))
 	}
 	if i < 0 {
 		return
 	}
 	switch {
 	case i <= math.MaxUint8:
-		result = append(result, byteValue(ByteType, b), byteValue(nByteType, b))
+		result = append(result, byteValue(vdl.ByteType, b), byteValue(nByteType, b))
 		fallthrough
 	case i <= math.MaxUint16:
-		result = append(result, uintValue(Uint16Type, u), uintValue(uint16TypeN, u))
+		result = append(result, uintValue(vdl.Uint16Type, u), uintValue(uint16TypeN, u))
 		fallthrough
 	case i <= math.MaxUint32:
-		result = append(result, uintValue(Uint32Type, u), uintValue(uint32TypeN, u))
+		result = append(result, uintValue(vdl.Uint32Type, u), uintValue(uint32TypeN, u))
 		fallthrough
 	default:
-		result = append(result, uintValue(Uint64Type, u), uintValue(uint64TypeN, u))
+		result = append(result, uintValue(vdl.Uint64Type, u), uintValue(uint64TypeN, u))
 	}
 	return
 }
@@ -592,20 +598,20 @@ func rvFromInt(i int64) (result []interface{}) {
 	return
 }
 
-func vvFloat(f float64) []*Value {
+func vvFloat(f float64) []*vdl.Value {
 	c := complex(f, 0)
-	return []*Value{
-		floatValue(Float32Type, f), floatValue(float32TypeN, f),
-		floatValue(Float64Type, f), floatValue(float64TypeN, f),
-		complexValue(Complex64Type, c), complexValue(complex64TypeN, c),
-		complexValue(Complex128Type, c), complexValue(complex128TypeN, c),
+	return []*vdl.Value{
+		floatValue(vdl.Float32Type, f), floatValue(float32TypeN, f),
+		floatValue(vdl.Float64Type, f), floatValue(float64TypeN, f),
+		complexValue(vdl.Complex64Type, c), complexValue(complex64TypeN, c),
+		complexValue(vdl.Complex128Type, c), complexValue(complex128TypeN, c),
 	}
 }
 
-func vvComplex(c complex128) []*Value {
-	return []*Value{
-		complexValue(Complex64Type, c), complexValue(complex64TypeN, c),
-		complexValue(Complex128Type, c), complexValue(complex128TypeN, c),
+func vvComplex(c complex128) []*vdl.Value {
+	return []*vdl.Value{
+		complexValue(vdl.Complex64Type, c), complexValue(complex64TypeN, c),
+		complexValue(vdl.Complex128Type, c), complexValue(complex128TypeN, c),
 	}
 }
 
@@ -631,7 +637,7 @@ func rvComplex(c128 complex128) []interface{} {
 // interfaces that are all equivalent and convertible to each other.
 func TestConverter(t *testing.T) {
 	tests := []struct {
-		vv []*Value
+		vv []*vdl.Value
 		rv []interface{}
 	}{
 		{vvBoolTrue, rvBoolTrue},
@@ -671,9 +677,9 @@ func TestConverter(t *testing.T) {
 // Test successful conversions that drop and ignore fields in the dst struct.
 func TestConverterStructDropIgnore(t *testing.T) {
 	tests := []struct {
-		vvWant []*Value
+		vvWant []*vdl.Value
 		rvWant []interface{}
-		vvSrc  []*Value
+		vvSrc  []*vdl.Value
 		rvSrc  []interface{}
 	}{
 		{vvStructWXFalseTrue, rvStructWXFalseTrue, vvSetMapStructXYZ, rvSetMapStructXYZ},
@@ -685,7 +691,7 @@ func TestConverterStructDropIgnore(t *testing.T) {
 }
 
 type vvrv struct {
-	vv []*Value
+	vv []*vdl.Value
 	rv []interface{}
 }
 
@@ -696,7 +702,7 @@ func testConverterWantSrc(t *testing.T, vvrvWant, vvrvSrc vvrv) {
 	for _, vvSrc := range vvrvSrc.vv {
 		for _, vvWant := range vvrvWant.vv {
 			// Test filling *Value from *Value
-			vvDst := Zero(vvWant.Type())
+			vvDst := vdl.ZeroValue(vvWant.Type())
 			testConvert(t, vvDst, vvSrc, vvWant, 0)
 			testConvert(t, vvDst, vvSrc, vvWant, 0)
 		}
@@ -707,31 +713,31 @@ func testConverterWantSrc(t *testing.T, vvrvWant, vvrvSrc vvrv) {
 			testConvert(t, dst, vvSrc, want, 1)
 		}
 		// Test filling *Value(Any) from *Value
-		vvDst := Zero(AnyType)
+		vvDst := vdl.ZeroValue(vdl.AnyType)
 		testConvert(t, vvDst, vvSrc, anyValue(vvSrc), 0)
 		testConvert(t, vvDst, vvSrc, anyValue(vvSrc), 0)
 		// Test filling **Value(nil) from *Value
-		var vvNil *Value
+		var vvNil *vdl.Value
 		testConvert(t, &vvNil, vvSrc, vvSrc, 1)
 		testConvert(t, &vvNil, vvSrc, vvSrc, 1)
 		// Test filling interface{} from *Value
 		var dst interface{}
 		testConvert(t, &dst, vvSrc, vvSrc, 1)
 		testConvert(t, &dst, vvSrc, vvSrc, 1)
-		if vvSrc.Kind() == Struct {
+		if vvSrc.Kind() == vdl.Struct {
 			// Every struct may be converted to the empty struct
-			testConvert(t, Zero(emptyType), vvSrc, Zero(emptyType), 0)
-			testConvert(t, Zero(emptyTypeN), vvSrc, Zero(emptyTypeN), 0)
+			testConvert(t, vdl.ZeroValue(emptyType), vvSrc, vdl.ZeroValue(emptyType), 0)
+			testConvert(t, vdl.ZeroValue(emptyTypeN), vvSrc, vdl.ZeroValue(emptyTypeN), 0)
 			var empty struct{}
 			var emptyN nEmpty
 			testConvert(t, &empty, vvSrc, struct{}{}, 1)
 			testConvert(t, &emptyN, vvSrc, nEmpty{}, 1)
 			// The empty struct may be converted to the zero value of any struct
-			vvZeroSrc := Zero(vvSrc.Type())
-			testConvert(t, Zero(vvSrc.Type()), Zero(emptyType), vvZeroSrc, 0)
-			testConvert(t, Zero(vvSrc.Type()), Zero(emptyTypeN), vvZeroSrc, 0)
-			testConvert(t, Zero(vvSrc.Type()), struct{}{}, vvZeroSrc, 0)
-			testConvert(t, Zero(vvSrc.Type()), nEmpty{}, vvZeroSrc, 0)
+			vvZeroSrc := vdl.ZeroValue(vvSrc.Type())
+			testConvert(t, vdl.ZeroValue(vvSrc.Type()), vdl.ZeroValue(emptyType), vvZeroSrc, 0)
+			testConvert(t, vdl.ZeroValue(vvSrc.Type()), vdl.ZeroValue(emptyTypeN), vvZeroSrc, 0)
+			testConvert(t, vdl.ZeroValue(vvSrc.Type()), struct{}{}, vvZeroSrc, 0)
+			testConvert(t, vdl.ZeroValue(vvSrc.Type()), nEmpty{}, vvZeroSrc, 0)
 		}
 	}
 
@@ -739,7 +745,7 @@ func testConverterWantSrc(t *testing.T, vvrvWant, vvrvSrc vvrv) {
 	for _, src := range vvrvSrc.rv {
 		for _, vvWant := range vvrvWant.vv {
 			// Test filling *Value from reflect.Value
-			vvDst := Zero(vvWant.Type())
+			vvDst := vdl.ZeroValue(vvWant.Type())
 			testConvert(t, vvDst, src, vvWant, 0)
 			testConvert(t, vvDst, src, vvWant, 0)
 		}
@@ -749,17 +755,17 @@ func testConverterWantSrc(t *testing.T, vvrvWant, vvrvSrc vvrv) {
 			testConvert(t, dst, src, want, 1)
 			testConvert(t, dst, src, want, 1)
 		}
-		vvWant, err := ValueOf(src)
-		if err != nil {
-			t.Errorf("ValueOf(%T) error: %v", src, err)
+		var vvWant *vdl.Value
+		if err := Convert(&vvWant, src); err != nil {
+			t.Errorf("Convert(*Value, %T) error: %v", src, err)
 			continue
 		}
 		// Test filling *Value(Any) from reflect.Value
-		vvDst := Zero(AnyType)
+		vvDst := vdl.ZeroValue(vdl.AnyType)
 		testConvert(t, vvDst, src, anyValue(vvWant), 0)
 		testConvert(t, vvDst, src, anyValue(vvWant), 0)
 		// Test filling **Value(nil) from *Value
-		var vvNil *Value
+		var vvNil *vdl.Value
 		testConvert(t, &vvNil, src, vvWant, 1)
 		testConvert(t, &vvNil, src, vvWant, 1)
 		// Test filling interface{} from *Value
@@ -769,16 +775,16 @@ func testConverterWantSrc(t *testing.T, vvrvWant, vvrvSrc vvrv) {
 		rtSrc := reflect.TypeOf(src)
 		if rtSrc.Kind() == reflect.Struct {
 			// Every struct may be converted to the empty struct
-			testConvert(t, Zero(emptyType), src, Zero(emptyType), 0)
-			testConvert(t, Zero(emptyTypeN), src, Zero(emptyTypeN), 0)
+			testConvert(t, vdl.ZeroValue(emptyType), src, vdl.ZeroValue(emptyType), 0)
+			testConvert(t, vdl.ZeroValue(emptyTypeN), src, vdl.ZeroValue(emptyTypeN), 0)
 			var empty struct{}
 			var emptyN nEmpty
 			testConvert(t, &empty, src, struct{}{}, 1)
 			testConvert(t, &emptyN, src, nEmpty{}, 1)
 			// The empty struct may be converted to the zero value of any struct
 			rvZeroSrc := reflect.Zero(rtSrc).Interface()
-			testConvert(t, reflect.New(rtSrc).Interface(), Zero(emptyType), rvZeroSrc, 1)
-			testConvert(t, reflect.New(rtSrc).Interface(), Zero(emptyTypeN), rvZeroSrc, 1)
+			testConvert(t, reflect.New(rtSrc).Interface(), vdl.ZeroValue(emptyType), rvZeroSrc, 1)
+			testConvert(t, reflect.New(rtSrc).Interface(), vdl.ZeroValue(emptyTypeN), rvZeroSrc, 1)
 			testConvert(t, reflect.New(rtSrc).Interface(), struct{}{}, rvZeroSrc, 1)
 			testConvert(t, reflect.New(rtSrc).Interface(), nEmpty{}, rvZeroSrc, 1)
 		}
@@ -791,10 +797,10 @@ func testConvert(t *testing.T, dst, src, want interface{}, deref int) {
 	for dstptrs := 0; dstptrs < ptrDepth; dstptrs++ {
 		rvSrc := reflect.ValueOf(src)
 		for srcptrs := 0; srcptrs < ptrDepth; srcptrs++ {
-			tname := fmt.Sprintf("Converter(%v).From(%v)", rvDst.Type(), rvSrc.Type())
-			c, err := Converter(rvDst.Interface())
+			tname := fmt.Sprintf("ReflectTarget(%v).From(%v)", rvDst.Type(), rvSrc.Type())
+			target, err := ReflectTarget(rvDst)
 			expectErr(t, err, "", tname)
-			err = c.From(rvSrc.Interface())
+			err = FromReflect(target, rvSrc)
 			expectErr(t, err, "", tname)
 			expectConvert(t, tname, dst, want, deref)
 			// Next iteration adds a pointer to src.
@@ -819,10 +825,10 @@ func expectConvert(t *testing.T, tname string, got, want interface{}, deref int)
 		rvGot = rvGot.Elem()
 	}
 	got = rvGot.Interface()
-	vvGot, ok1 := got.(*Value)
-	vvWant, ok2 := want.(*Value)
+	vvGot, ok1 := got.(*vdl.Value)
+	vvWant, ok2 := want.(*vdl.Value)
 	if ok1 && ok2 {
-		if !Equal(vvGot, vvWant) {
+		if !vdl.EqualValue(vvGot, vvWant) {
 			t.Errorf("%s got %v, want %v", tname, vvGot, vvWant)
 		}
 		return
@@ -835,9 +841,9 @@ func expectConvert(t *testing.T, tname string, got, want interface{}, deref int)
 // Test failed conversions.
 func TestConverterError(t *testing.T) {
 	tests := []struct {
-		ttDst []*Type
+		ttDst []*vdl.Type
 		rtDst []reflect.Type
-		vvSrc []*Value
+		vvSrc []*vdl.Value
 		rvSrc []interface{}
 	}{
 		{ttOtherThan(ttAllTypes, ttBools), rtOtherThan(rtAllTypes, rtBools),
@@ -929,41 +935,41 @@ func TestConverterError(t *testing.T) {
 	}
 	for _, test := range tests {
 		for _, ttDst := range test.ttDst {
-			tname := fmt.Sprintf("value Converter(%v)", ttDst)
-			vvDst := Zero(ttDst)
-			c, err := Converter(vvDst)
+			tname := fmt.Sprintf("ValueTarget(%v)", ttDst)
+			vvDst := vdl.ZeroValue(ttDst)
+			target, err := ValueTarget(vvDst)
 			if !expectErr(t, err, "", tname) {
 				continue
 			}
 			for _, vvSrc := range test.vvSrc {
-				if err := c.From(vvSrc); err == nil {
-					t.Errorf("%s.From(%v) got %v, want error", tname, vvSrc.Type(), vvDst)
+				if err := FromValue(target, vvSrc); err == nil {
+					t.Errorf("%s FromValue(%v) got %v, want error", tname, vvSrc.Type(), vvDst)
 				}
 			}
 			for _, src := range test.rvSrc {
-				rtSrc := reflect.TypeOf(src)
-				if err := c.From(src); err == nil {
-					t.Errorf("%s.From(%v) got %v, want error", tname, rtSrc, vvDst)
+				rvSrc := reflect.ValueOf(src)
+				if err := FromReflect(target, rvSrc); err == nil {
+					t.Errorf("%s FromReflect(%v) got %v, want error", tname, rvSrc.Type(), vvDst)
 				}
 			}
 		}
 		for _, rtDst := range test.rtDst {
-			tname := fmt.Sprintf("reflect Converter(%v)", rtDst)
+			tname := fmt.Sprintf("ReflectTarget(%v)", rtDst)
 			rvDst := reflect.New(rtDst)
-			c, err := Converter(rvDst.Interface())
+			target, err := ReflectTarget(rvDst)
 			if !expectErr(t, err, "", tname) {
 				continue
 			}
 			got := rvDst.Elem().Interface()
 			for _, vvSrc := range test.vvSrc {
-				if err := c.From(vvSrc); err == nil {
-					t.Errorf("%s.From(%v) got %v, want error", tname, vvSrc.Type(), got)
+				if err := FromValue(target, vvSrc); err == nil {
+					t.Errorf("%s FromValue(%v) got %v, want error", tname, vvSrc.Type(), got)
 				}
 			}
 			for _, src := range test.rvSrc {
-				rtSrc := reflect.TypeOf(src)
-				if err := c.From(src); err == nil {
-					t.Errorf("%s.From(%v) got %v, want error", tname, rtSrc, got)
+				rvSrc := reflect.ValueOf(src)
+				if err := FromReflect(target, rvSrc); err == nil {
+					t.Errorf("%s FromReflect(%v) got %v, want error", tname, rvSrc.Type(), got)
 				}
 			}
 		}

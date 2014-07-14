@@ -8,12 +8,12 @@ import (
 	"strings"
 	"testing"
 
-	"veyron2/vdl"
 	"veyron2/vdl/build"
+	"veyron2/vdl/vdlutil"
 )
 
 // ExpectPass makes sure errs has no errors.
-func ExpectPass(t *testing.T, errs *vdl.Errors, testName string) {
+func ExpectPass(t *testing.T, errs *vdlutil.Errors, testName string) {
 	if !errs.IsEmpty() {
 		t.Errorf("%v expected no errors but saw: %v", testName, errs.ToError())
 		errs.Reset()
@@ -21,7 +21,7 @@ func ExpectPass(t *testing.T, errs *vdl.Errors, testName string) {
 }
 
 // ExpectFail makes sure errs has an error that matches all the re regexps.
-func ExpectFail(t *testing.T, errs *vdl.Errors, testName string, re ...string) {
+func ExpectFail(t *testing.T, errs *vdlutil.Errors, testName string, re ...string) {
 	if errs.IsEmpty() {
 		t.Errorf("%v expected errors but didn't see any", testName)
 		return
@@ -43,7 +43,7 @@ func ExpectFail(t *testing.T, errs *vdl.Errors, testName string, re ...string) {
 // ExpectResult ensures errs has an error that matches all the re regexps, or
 // that errs has no errors if no regexps were provided, or only one was provided
 // with the empty string.
-func ExpectResult(t *testing.T, errs *vdl.Errors, testName string, re ...string) {
+func ExpectResult(t *testing.T, errs *vdlutil.Errors, testName string, re ...string) {
 	if len(re) == 0 || len(re) == 1 && re[0] == "" {
 		ExpectPass(t, errs, testName)
 	} else {

@@ -1,7 +1,7 @@
 package compile
 
 import (
-	"veyron2/vdl"
+	"veyron2/vdl/vdlutil"
 )
 
 // reservedWord checks if identifiers are reserved after they are converted to the native form for the language.
@@ -13,7 +13,7 @@ func reservedWord(ident string) bool {
 }
 
 func reservedWordJava(ident string) bool {
-	_, isReserved := javaReservedWords[vdl.ToCamelCase(ident)]
+	_, isReserved := javaReservedWords[vdlutil.ToCamelCase(ident)]
 	return isReserved
 }
 
@@ -104,7 +104,7 @@ var goReservedWords = map[string]bool{
 }
 
 func reservedWordJavascript(ident string) bool {
-	_, isReserved := javascriptReservedWords[vdl.ToCamelCase(ident)]
+	_, isReserved := javascriptReservedWords[vdlutil.ToCamelCase(ident)]
 	return isReserved
 }
 
@@ -115,14 +115,14 @@ var javascriptReservedWords = map[string]bool{
 	"continue": true,
 	"debugger": true,
 	"default":  true,
-	//"delete":     true, // TODO(bprosnitz) Look into adding this back. This conflicts with Delete() on Content in repository.vdl.
+	//"delete":     true, // TODO(bprosnitz) Look into adding this back. This conflicts with Delete() on Content in repository.vdlutil.
 	"do":       true,
 	"else":     true,
 	"finally":  true,
 	"for":      true,
 	"function": true,
 	"if":       true,
-	//"in":         true, // TODO(bprosnitz) Look into addint this back. It conflicts with In in access/service.vdl.
+	//"in":         true, // TODO(bprosnitz) Look into addint this back. It conflicts with In in access/service.vdlutil.
 	"instanceof": true,
 	"new":        true,
 	"return":     true,

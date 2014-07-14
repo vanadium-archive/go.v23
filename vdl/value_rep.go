@@ -1,4 +1,4 @@
-package val
+package vdl
 
 import (
 	"fmt"
@@ -65,7 +65,7 @@ type kvPair struct {
 }
 
 func copyKVPair(kv kvPair) kvPair {
-	return kvPair{Copy(kv.key), Copy(kv.val)}
+	return kvPair{CopyValue(kv.key), CopyValue(kv.val)}
 }
 
 func (kv kvPair) String() string {
@@ -150,7 +150,7 @@ func (rep repMap) hasKV(maptype *Type, kv kvPair) bool {
 	if !ok {
 		return false
 	}
-	return Equal(kv.val, val)
+	return EqualValue(kv.val, val)
 }
 
 func (rep repMap) Len() int {
@@ -212,7 +212,7 @@ func (rep repMap) Index(maptype *Type, key *Value) (*Value, bool) {
 		}
 	} else {
 		for _, kv := range *rep.slowIndex {
-			if Equal(kv.key, key) {
+			if EqualValue(kv.key, key) {
 				return kv.val, true
 			}
 		}
@@ -232,7 +232,7 @@ func (rep repMap) Assign(maptype *Type, key, val *Value) {
 		rep.fastIndex[fastKeyRep(key)] = kvPair{key, val}
 	} else {
 		for ix := 0; ix < len(*rep.slowIndex); ix++ {
-			if Equal((*rep.slowIndex)[ix].key, key) {
+			if EqualValue((*rep.slowIndex)[ix].key, key) {
 				(*rep.slowIndex)[ix].val = val
 				return
 			}
@@ -250,7 +250,7 @@ func (rep repMap) Delete(maptype *Type, key *Value) {
 		delete(rep.fastIndex, fastKeyRep(key))
 	} else {
 		for ix := 0; ix < len(*rep.slowIndex); ix++ {
-			if Equal((*rep.slowIndex)[ix].key, key) {
+			if EqualValue((*rep.slowIndex)[ix].key, key) {
 				// Delete entry ix by copying last entry into ix and shrinking by 1.
 				last := len(*rep.slowIndex) - 1
 				(*rep.slowIndex)[ix] = (*rep.slowIndex)[last]
@@ -280,7 +280,7 @@ func equalRepFixedLen(a, b repFixedLen) bool {
 			if !af.IsZero() {
 				return false
 			}
-		case !Equal(af, bf):
+		case !EqualValue(af, bf):
 			return false
 		}
 	}
@@ -322,7 +322,7 @@ func (rep repFixedLen) Index(t *Type, index int) *Value {
 		return oldf
 	}
 	// Lazy initialization; create the new item upon first access.
-	newf := Zero(t)
+	newf := ZeroValue(t)
 	rep[index] = newf
 	return newf
 }

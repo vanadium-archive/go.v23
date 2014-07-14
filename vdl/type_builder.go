@@ -1,4 +1,4 @@
-package val
+package vdl
 
 import (
 	"errors"
@@ -304,6 +304,8 @@ func (b *TypeBuilder) Named(name string) PendingNamed {
 
 // Build builds all pending types.  Build must be called before Built may be
 // called on each pending type to retrieve the final result.
+//
+// TODO(toddw): Change Build() to return an error rather than a boolean.
 func (b *TypeBuilder) Build() bool {
 	// First finalize all types, indicating no more mutations will occur.
 	for _, p := range b.ptypes {
@@ -346,8 +348,12 @@ func (p *pending) finalize() error {
 		// Now that the mutations have finished, we can copy the base type into
 		// p.Type, keeping the name of p.Type.
 		name, base := p.Type.name, p.Type.elem
-		// There may be a chain of named types, in which case we'll need to follow the
-		// chain to the first type that's not internalNamed.
+		if name == "" {
+			baseDesc := uniqueType(base, make(map[*Type]bool))
+			return fmt.Errorf("PendingNamed used to build unnamed type based on %v", baseDesc)
+		}
+		// There may be a chain of named types, in which case we'll need to follow
+		// the chain to the first type that's not internalNamed.
 		for {
 			if base == nil {
 				return errBaseNil

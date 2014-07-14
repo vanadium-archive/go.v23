@@ -1,4 +1,4 @@
-package val
+package opconst
 
 import (
 	"math/big"

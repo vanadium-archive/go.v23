@@ -1,4 +1,4 @@
-package val
+package vdl
 
 import (
 	"bytes"
@@ -131,7 +131,7 @@ func copyRep(v *Value) interface{} {
 		return repFixedLen(copySliceOfValues(trep))
 	case *Value:
 		if trep != nil {
-			return Copy(trep)
+			return CopyValue(trep)
 		}
 		return (*Value)(nil)
 	default:
@@ -142,7 +142,7 @@ func copyRep(v *Value) interface{} {
 func copySliceOfValues(orig []*Value) []*Value {
 	slice := make([]*Value, len(orig))
 	for ix := 0; ix < len(orig); ix++ {
-		slice[ix] = Copy(orig[ix])
+		slice[ix] = CopyValue(orig[ix])
 	}
 	return slice
 }
@@ -187,68 +187,68 @@ func stringRep(t *Type, rep interface{}) string {
 }
 
 // BoolValue is a convenience to create a Bool value.
-func BoolValue(x bool) *Value { return Zero(BoolType).AssignBool(x) }
+func BoolValue(x bool) *Value { return ZeroValue(BoolType).AssignBool(x) }
 
 // ByteValue is a convenience to create an Byte value.
-func ByteValue(x byte) *Value { return Zero(ByteType).AssignByte(x) }
+func ByteValue(x byte) *Value { return ZeroValue(ByteType).AssignByte(x) }
 
 // Uint16Value is a convenience to create an Uint16 value.
-func Uint16Value(x uint16) *Value { return Zero(Uint16Type).AssignUint(uint64(x)) }
+func Uint16Value(x uint16) *Value { return ZeroValue(Uint16Type).AssignUint(uint64(x)) }
 
 // Uint32Value is a convenience to create an Uint32 value.
-func Uint32Value(x uint32) *Value { return Zero(Uint32Type).AssignUint(uint64(x)) }
+func Uint32Value(x uint32) *Value { return ZeroValue(Uint32Type).AssignUint(uint64(x)) }
 
 // Uint64Value is a convenience to create an Uint64 value.
-func Uint64Value(x uint64) *Value { return Zero(Uint64Type).AssignUint(x) }
+func Uint64Value(x uint64) *Value { return ZeroValue(Uint64Type).AssignUint(x) }
 
 // Int16Value is a convenience to create an Int16 value.
-func Int16Value(x int16) *Value { return Zero(Int16Type).AssignInt(int64(x)) }
+func Int16Value(x int16) *Value { return ZeroValue(Int16Type).AssignInt(int64(x)) }
 
 // Int32Value is a convenience to create an Int32 value.
-func Int32Value(x int32) *Value { return Zero(Int32Type).AssignInt(int64(x)) }
+func Int32Value(x int32) *Value { return ZeroValue(Int32Type).AssignInt(int64(x)) }
 
 // Int64Value is a convenience to create an Int64 value.
-func Int64Value(x int64) *Value { return Zero(Int64Type).AssignInt(x) }
+func Int64Value(x int64) *Value { return ZeroValue(Int64Type).AssignInt(x) }
 
 // Float32Value is a convenience to create a Float32 value.
-func Float32Value(x float32) *Value { return Zero(Float32Type).AssignFloat(float64(x)) }
+func Float32Value(x float32) *Value { return ZeroValue(Float32Type).AssignFloat(float64(x)) }
 
 // Float64Value is a convenience to create a Float64 value.
-func Float64Value(x float64) *Value { return Zero(Float64Type).AssignFloat(x) }
+func Float64Value(x float64) *Value { return ZeroValue(Float64Type).AssignFloat(x) }
 
 // Complex64Value is a convenience to create a Complex64 value.
-func Complex64Value(x complex64) *Value { return Zero(Complex64Type).AssignComplex(complex128(x)) }
+func Complex64Value(x complex64) *Value { return ZeroValue(Complex64Type).AssignComplex(complex128(x)) }
 
 // Complex128Value is a convenience to create a Complex128 value.
-func Complex128Value(x complex128) *Value { return Zero(Complex128Type).AssignComplex(x) }
+func Complex128Value(x complex128) *Value { return ZeroValue(Complex128Type).AssignComplex(x) }
 
 // StringValue is a convenience to create a String value.
-func StringValue(x string) *Value { return Zero(StringType).AssignString(x) }
+func StringValue(x string) *Value { return ZeroValue(StringType).AssignString(x) }
 
 // BytesValue is a convenience to create a []byte value.  The bytes are copied.
-func BytesValue(x []byte) *Value { return Zero(ListType(ByteType)).AssignBytes(x) }
+func BytesValue(x []byte) *Value { return ZeroValue(ListType(ByteType)).AssignBytes(x) }
 
 // TypeValValue is a convenience to create a TypeVal value.
-func TypeValValue(x *Type) *Value { return Zero(TypeValType).AssignTypeVal(x) }
+func TypeValValue(x *Type) *Value { return ZeroValue(TypeValType).AssignTypeVal(x) }
 
-// Zero returns a new Value containing the zero value for the given Type t.
-func Zero(t *Type) *Value {
+// ZeroValue returns a new Value containing the zero value for the given Type t.
+func ZeroValue(t *Type) *Value {
 	if t == nil {
 		return nil
 	}
 	return &Value{t, zeroRep(t)}
 }
 
-// Copy returns a copy of the Value v.
-func Copy(v *Value) *Value {
+// CopyValue returns a copy of the Value v.
+func CopyValue(v *Value) *Value {
 	if v == nil {
 		return nil
 	}
 	return &Value{v.t, copyRep(v)}
 }
 
-// Equal returns true iff a and b have the same type, and equal values.
-func Equal(a, b *Value) bool {
+// EqualValue returns true iff a and b have the same type, and equal values.
+func EqualValue(a, b *Value) bool {
 	if a == nil || b == nil {
 		return a == nil && b == nil
 	}
@@ -282,7 +282,7 @@ func Equal(a, b *Value) bool {
 			return false
 		}
 		for index := range arep {
-			if !Equal(arep[index], brep[index]) {
+			if !EqualValue(arep[index], brep[index]) {
 				return false
 			}
 		}
@@ -294,7 +294,7 @@ func Equal(a, b *Value) bool {
 	case repFixedLen:
 		return equalRepFixedLen(arep, b.rep.(repFixedLen))
 	case *Value:
-		return Equal(arep, b.rep.(*Value))
+		return EqualValue(arep, b.rep.(*Value))
 	default:
 		panic(fmt.Errorf("val: Equal unhandled %v %T %v", a.t.kind, arep, arep))
 	}
@@ -494,7 +494,7 @@ func (v *Value) Assign(x *Value) *Value {
 		if x.t.kind == OneOf || x.t.kind == Any {
 			x = x.rep.(*Value) // get the concrete element value
 		}
-		v.rep = Copy(x)
+		v.rep = CopyValue(x)
 		return v
 	}
 	v.rep = copyRep(x)
@@ -652,12 +652,12 @@ func (v *Value) AssignLen(n int) *Value {
 	if n <= cap(oldrep) {
 		newrep = oldrep[:n]
 		for ix := len(oldrep); ix < n; ix++ {
-			newrep[ix] = Zero(v.t.elem)
+			newrep[ix] = ZeroValue(v.t.elem)
 		}
 	} else {
 		newrep = make([]*Value, n)
 		for ix := copy(newrep, oldrep); ix < n; ix++ {
-			newrep[ix] = Zero(v.t.elem)
+			newrep[ix] = ZeroValue(v.t.elem)
 		}
 	}
 	v.rep = newrep

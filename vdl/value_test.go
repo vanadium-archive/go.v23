@@ -1,4 +1,4 @@
-package val
+package vdl
 
 import (
 	"bytes"
@@ -17,7 +17,7 @@ var (
 )
 
 func makeKey(a int64, b string) *Value {
-	key := Zero(keyType)
+	key := ZeroValue(keyType)
 	key.Field(0).AssignInt(a)
 	key.Field(1).AssignString(b)
 	return key
@@ -69,31 +69,31 @@ func TestValue(t *testing.T) {
 		{Any, AnyType, "any(nil)"},
 	}
 	for _, test := range tests {
-		x := Zero(test.t)
+		x := ZeroValue(test.t)
 		if !x.IsValid() {
-			t.Errorf(`!Zero(%s).IsValid`, test.k)
+			t.Errorf(`!ZeroValue(%s).IsValid`, test.k)
 		}
 		if !x.IsZero() {
-			t.Errorf(`Zero(%s) isn't zero`, test.k)
+			t.Errorf(`ZeroValue(%s) isn't zero`, test.k)
 		}
 		if got, want := x.Kind(), test.k; got != want {
-			t.Errorf(`Zero(%s) got kind %v, want %v`, test.k, got, want)
+			t.Errorf(`ZeroValue(%s) got kind %v, want %v`, test.k, got, want)
 		}
 		if got, want := x.Type(), test.t; got != want {
-			t.Errorf(`Zero(%s) got type %v, want %v`, test.k, got, want)
+			t.Errorf(`ZeroValue(%s) got type %v, want %v`, test.k, got, want)
 		}
 		if got, want := x.String(), test.s; got != want {
-			t.Errorf(`Zero(%s) got string %q, want %q`, test.k, got, want)
+			t.Errorf(`ZeroValue(%s) got string %q, want %q`, test.k, got, want)
 		}
-		y := Copy(x)
+		y := CopyValue(x)
 		if !y.IsValid() {
-			t.Errorf(`!Copy(Zero(%s)).IsValid`, test.k)
+			t.Errorf(`!CopyValue(ZeroValue(%s)).IsValid`, test.k)
 		}
 		if !y.IsZero() {
-			t.Errorf(`Zero(%s) of copy isn't zero, y: %v`, test.k, y)
+			t.Errorf(`ZeroValue(%s) of copy isn't zero, y: %v`, test.k, y)
 		}
-		if !Equal(x, y) {
-			t.Errorf(`Zero(%s) !Equal after copy, x: %v, y: %v`, test.k, x, y)
+		if !EqualValue(x, y) {
+			t.Errorf(`ZeroValue(%s) !Equal after copy, x: %v, y: %v`, test.k, x, y)
 		}
 
 		// Invariant here: x == y == 0
@@ -115,43 +115,43 @@ func TestValue(t *testing.T) {
 		assignOneOfAny(t, x)
 
 		// Invariant here: x != 0 && y == 0
-		if Equal(x, y) {
-			t.Errorf(`Zero(%s) Equal after assign, x: %v, y: %v`, test.k, x, y)
+		if EqualValue(x, y) {
+			t.Errorf(`ZeroValue(%s) Equal after assign, x: %v, y: %v`, test.k, x, y)
 		}
-		z := Copy(x) // x == z && x != 0 && y == 0
-		if !Equal(x, z) {
-			t.Errorf(`Zero(%s) !Equal after copy, x: %v, z: %v`, test.k, x, z)
+		z := CopyValue(x) // x == z && x != 0 && y == 0
+		if !EqualValue(x, z) {
+			t.Errorf(`ZeroValue(%s) !Equal after copy, x: %v, z: %v`, test.k, x, z)
 		}
-		if Equal(y, z) {
-			t.Errorf(`Zero(%s) Equal after copy, y: %v, z: %v`, test.k, y, z)
+		if EqualValue(y, z) {
+			t.Errorf(`ZeroValue(%s) Equal after copy, y: %v, z: %v`, test.k, y, z)
 		}
 
 		z.Assign(nil) // x != 0 && y == z == 0
 		if !z.IsValid() {
-			t.Errorf(`Zero(%s) z after Assign(nil) isn't valid`, test.k)
+			t.Errorf(`ZeroValue(%s) z after Assign(nil) isn't valid`, test.k)
 		}
 		if !z.IsZero() {
-			t.Errorf(`Zero(%s) z after Assign(nil) isn't zero`, test.k)
+			t.Errorf(`ZeroValue(%s) z after Assign(nil) isn't zero`, test.k)
 		}
-		if Equal(x, z) {
-			t.Errorf(`Zero(%s) Equal after Assign(nil), x: %v, z: %v`, test.k, x, z)
+		if EqualValue(x, z) {
+			t.Errorf(`ZeroValue(%s) Equal after Assign(nil), x: %v, z: %v`, test.k, x, z)
 		}
-		if !Equal(y, z) {
-			t.Errorf(`Zero(%s) !Equal after Assign(nil), y: %v, z: %v`, test.k, y, z)
+		if !EqualValue(y, z) {
+			t.Errorf(`ZeroValue(%s) !Equal after Assign(nil), y: %v, z: %v`, test.k, y, z)
 		}
 
 		y.Assign(x) // x == y && x != 0 && z == 0
 		if !y.IsValid() {
-			t.Errorf(`Zero(%s) y after Assign(x) isn't valid`, test.k)
+			t.Errorf(`ZeroValue(%s) y after Assign(x) isn't valid`, test.k)
 		}
 		if y.IsZero() {
-			t.Errorf(`Zero(%s) y after Assign(x) is zero, y: %v`, test.k, y)
+			t.Errorf(`ZeroValue(%s) y after Assign(x) is zero, y: %v`, test.k, y)
 		}
-		if !Equal(x, y) {
-			t.Errorf(`Zero(%s) Equal after Assign(x), x: %v, y: %v`, test.k, x, y)
+		if !EqualValue(x, y) {
+			t.Errorf(`ZeroValue(%s) Equal after Assign(x), x: %v, y: %v`, test.k, x, y)
 		}
-		if Equal(y, z) {
-			t.Errorf(`Zero(%s) Equal after Assign(x), y: %v, z: %v`, test.k, y, z)
+		if EqualValue(y, z) {
+			t.Errorf(`ZeroValue(%s) Equal after Assign(x), y: %v, z: %v`, test.k, y, z)
 		}
 	}
 }
@@ -524,7 +524,7 @@ func assignBytes(t *testing.T, x *Value) {
 	if got, want := index.Byte(), byte('Z'); got != want {
 		t.Errorf(`Bytes index Byte got %v, want %v`, got, want)
 	}
-	if got, want := index, ByteValue('Z'); !Equal(got, want) {
+	if got, want := index, ByteValue('Z'); !EqualValue(got, want) {
 		t.Errorf(`Bytes index value got %v, want %v`, got, want)
 	}
 	index.AssignByte('Y')
@@ -534,7 +534,7 @@ func assignBytes(t *testing.T, x *Value) {
 	if got, want := index.Byte(), byte('Y'); got != want {
 		t.Errorf(`Bytes index Byte got %v, want %v`, got, want)
 	}
-	if got, want := index, ByteValue('Y'); !Equal(got, want) {
+	if got, want := index, ByteValue('Y'); !EqualValue(got, want) {
 		t.Errorf(`Bytes index value got %v, want %v`, got, want)
 	}
 	// Make sure the original bytes were mutated.
@@ -694,10 +694,10 @@ func assignMap(t *testing.T, x *Value) {
 		if got, want := x.Keys(), []*Value{k1, k2}; !matchKeys(got, want) {
 			t.Errorf(`Map Keys got %v, want %v`, got, want)
 		}
-		if got, want := x.MapIndex(k1), v1; !Equal(got, want) {
+		if got, want := x.MapIndex(k1), v1; !EqualValue(got, want) {
 			t.Errorf(`Map MapIndex k1 got %v, want %v`, got, want)
 		}
-		if got, want := x.MapIndex(k2), v2; !Equal(got, want) {
+		if got, want := x.MapIndex(k2), v2; !EqualValue(got, want) {
 			t.Errorf(`Map MapIndex k2 got %v, want %v`, got, want)
 		}
 		if got := x.MapIndex(k3); got != nil {
@@ -722,7 +722,7 @@ func assignMap(t *testing.T, x *Value) {
 		if got := x.MapIndex(k1); got != nil {
 			t.Errorf(`Map MapIndex k1 got %v, want nil`, got)
 		}
-		if got, want := x.MapIndex(k2), v2; !Equal(got, want) {
+		if got, want := x.MapIndex(k2), v2; !EqualValue(got, want) {
 			t.Errorf(`Map MapIndex k2 got %v, want %v`, got, want)
 		}
 		if got := x.MapIndex(k3); got != nil {
@@ -771,9 +771,9 @@ func assignStruct(t *testing.T, x *Value) {
 		if got, want := x.String(), `struct{A int64;B string;C bool}{A: 1, B: "a", C: false}`; got != want {
 			t.Errorf(`Struct assign index 1 got %v, want %v`, got, want)
 		}
-		y := Copy(x)
+		y := CopyValue(x)
 		y.Field(2).AssignBool(false)
-		if !Equal(x, y) {
+		if !EqualValue(x, y) {
 			t.Errorf(`Struct !equal %v and %v`, x, y)
 		}
 	} else {
@@ -791,14 +791,14 @@ func assignOneOfAny(t *testing.T, x *Value) {
 			t.Errorf(`OneOf/Any zero value got %v, want nil`, got)
 		}
 		x.Assign(int1)
-		if got, want := x.Elem(), int1; !Equal(got, want) {
+		if got, want := x.Elem(), int1; !EqualValue(got, want) {
 			t.Errorf(`OneOf/Any assign value got %v, want %v`, got, want)
 		}
 		if got, want := x.String(), fmt.Sprintf("%s(int64(1))", typestr); got != want {
 			t.Errorf(`OneOf/Any assign string got %v, want %v`, got, want)
 		}
 		x.Assign(strA)
-		if got, want := x.Elem(), strA; !Equal(got, want) {
+		if got, want := x.Elem(), strA; !EqualValue(got, want) {
 			t.Errorf(`OneOf/Any assign value got %v, want %v`, got, want)
 		}
 		if got, want := x.String(), fmt.Sprintf(`%s(string("A"))`, typestr); got != want {

@@ -8,7 +8,7 @@ import (
 
 	"veyron2/services/store"
 	"veyron2/storage"
-	"veyron2/vdl"
+	"veyron2/vdl/vdlutil"
 )
 
 type mockObjectQueryStream struct {
@@ -100,7 +100,7 @@ func TestFlatQueryStream(t *testing.T) {
 			NestedResult: 0,
 			Name:         "result2",
 			Value:        nil,
-			Fields: map[string]vdl.Any{
+			Fields: map[string]vdlutil.Any{
 				"field1": 1,
 				"field2": "value2",
 			},
@@ -165,7 +165,7 @@ func TestSimpleNestedQueryStream(t *testing.T) {
 			NestedResult: 0,
 			Name:         "result2",
 			Value:        nil,
-			Fields: map[string]vdl.Any{
+			Fields: map[string]vdlutil.Any{
 				"nested1": store.NestedResult(1),
 				"field1":  6,
 			},
@@ -270,7 +270,7 @@ func TestEmptyNestedQueryStream(t *testing.T) {
 			NestedResult: 0,
 			Name:         "result2",
 			Value:        nil,
-			Fields: map[string]vdl.Any{
+			Fields: map[string]vdlutil.Any{
 				"nested1": store.NestedResult(1),
 			},
 		},
@@ -313,7 +313,7 @@ func TestMultipleNestedQueryStreams(t *testing.T) {
 			NestedResult: 0,
 			Name:         "result2",
 			Value:        nil,
-			Fields: map[string]vdl.Any{
+			Fields: map[string]vdlutil.Any{
 				"nested1": store.NestedResult(1),
 				"nested2": store.NestedResult(2),
 			},

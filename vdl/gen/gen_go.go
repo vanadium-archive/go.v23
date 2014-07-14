@@ -11,9 +11,9 @@ import (
 	"strings"
 	"text/template"
 
-	"veyron2/val"
 	"veyron2/vdl"
 	"veyron2/vdl/compile"
+	"veyron2/vdl/vdlutil"
 	"veyron2/wiretype"
 	"veyron2/wiretype/build"
 )
@@ -62,7 +62,7 @@ func GoFile(file *compile.File, env *compile.Env, opts GoOpts) []byte {
 
 type userImport struct {
 	Local string // Local name of the import; empty if no local name.
-	Path  string // Path of the import; e.g. "veyron2/vdl"
+	Path  string // Path of the import; e.g. "veyron2/vdl/vdlutil"
 	Pkg   string // Set to non-empty Local, otherwise the basename of Path.
 }
 
@@ -116,13 +116,13 @@ func userImportsGo(f *compile.File) (ret userImports) {
 // That'll make the template code a bit messier though.
 func systemImportsGo(f *compile.File) []string {
 	set := make(map[string]bool)
-	if f.TypeDeps[val.AnyType] {
-		// Import for vdl.Any
-		set[`_gen_vdl "veyron2/vdl"`] = true
+	if f.TypeDeps[vdl.AnyType] {
+		// Import for vdlutil.Any
+		set[`_gen_vdlutil "veyron2/vdl/vdlutil"`] = true
 	}
-	if f.TypeDeps[val.TypeValType] {
-		// Import for val.Type
-		set[`_gen_val "veyron2/val"`] = true
+	if f.TypeDeps[vdl.TypeValType] {
+		// Import for vdl.Type
+		set[`_gen_vdl "veyron2/vdl"`] = true
 	}
 	if len(f.Interfaces) > 0 {
 		// Imports for the generated method: Bind{interface name}.
@@ -131,7 +131,7 @@ func systemImportsGo(f *compile.File) []string {
 		set[`_gen_ipc "veyron2/ipc"`] = true
 		set[`_gen_context "veyron2/context"`] = true
 		set[`_gen_veyron2 "veyron2"`] = true
-		set[`_gen_vdl "veyron2/vdl"`] = true
+		set[`_gen_vdlutil "veyron2/vdl/vdlutil"`] = true
 		set[`_gen_naming "veyron2/naming"`] = true
 	}
 	// If the user has specified any error IDs, typically we need to import the
@@ -206,16 +206,16 @@ func qualifiedName(data goData, name string, file *compile.File) string {
 	return data.UserImports.lookupImport(file.Package.Path) + "." + name
 }
 
-// typeGo translates val.Type into a Go type.
-func typeGo(data goData, t *val.Type) string {
+// typeGo translates vdl.Type into a Go type.
+func typeGo(data goData, t *vdl.Type) string {
 	// Terminate recursion at defined types, which include both user-defined types
-	// (enum, struct, oneof) and built-in types.
+	// (enum, struct, oneof) and built-in vdl.
 	if def := data.Env.FindTypeDef(t); def != nil {
 		switch {
-		case t == val.AnyType:
-			return "_gen_vdl.Any"
-		case t == val.TypeValType:
-			return "*_gen_val.Type"
+		case t == vdl.AnyType:
+			return "_gen_vdlutil.Any"
+		case t == vdl.TypeValType:
+			return "*_gen_vdl.Type"
 		case def.File == compile.BuiltInFile:
 			// Built-in primitives just use their name.
 			return def.Name
@@ -224,14 +224,14 @@ func typeGo(data goData, t *val.Type) string {
 	}
 	// Otherwise recurse through the type.
 	switch t.Kind() {
-	case val.Array:
+	case vdl.Array:
 		return "[" + strconv.Itoa(t.Len()) + "]" + typeGo(data, t.Elem())
-	case val.List:
+	case vdl.List:
 		return "[]" + typeGo(data, t.Elem())
-	case val.Set:
+	case vdl.Set:
 		// TODO(toddw): Should we use map[X]bool instead?
 		return "map[" + typeGo(data, t.Key()) + "]struct{}"
-	case val.Map:
+	case vdl.Map:
 		return "map[" + typeGo(data, t.Key()) + "]" + typeGo(data, t.Elem())
 	default:
 		panic(fmt.Errorf("vdl: typeGo unhandled type %v %v", t.Kind(), t))
@@ -242,7 +242,7 @@ func typeGo(data goData, t *val.Type) string {
 func typeDefGo(data goData, def *compile.TypeDef) string {
 	s := fmt.Sprintf("%stype %s ", def.Doc, def.Name)
 	switch t := def.Type; t.Kind() {
-	case val.Enum:
+	case vdl.Enum:
 		// We turn the VDL:
 		//   type X enum{A;B}
 		// into Go:
@@ -261,7 +261,7 @@ func typeDefGo(data goData, def *compile.TypeDef) string {
 			s += def.LabelDocSuffix[x]
 		}
 		return s + "\n)"
-	case val.Struct:
+	case vdl.Struct:
 		s += "struct {"
 		for x := 0; x < t.NumField(); x++ {
 			f := t.Field(x)
@@ -269,7 +269,7 @@ func typeDefGo(data goData, def *compile.TypeDef) string {
 			s += typeGo(data, f.Type) + def.FieldDocSuffix[x]
 		}
 		s += "\n}"
-	case val.OneOf:
+	case vdl.OneOf:
 		// We turn the VDL:
 		//   type X oneof{bool;string}
 		// into Go:
@@ -294,10 +294,10 @@ func constDefGo(data goData, def *compile.ConstDef) string {
 	return fmt.Sprintf("%s%s = %s%s", def.Doc, def.Name, constGo(data, def.Value), def.DocSuffix)
 }
 
-func constGo(data goData, v *val.Value) string {
+func constGo(data goData, v *vdl.Value) string {
 	// TODO(bprosnitz) Generate the full tag name e.g. security.Read instead of security.Label(1)
 	switch v.Type() {
-	case val.BoolType, val.StringType:
+	case vdl.BoolType, vdl.StringType:
 		// Treat the standard bool and string types as untyped constants in Go.
 		// We turn the VDL:
 		//   type NamedBool   bool
@@ -324,27 +324,27 @@ func constGo(data goData, v *val.Value) string {
 	return typeGo(data, v.Type()) + "(" + valueGo(v) + ")"
 }
 
-func valueGo(v *val.Value) string {
+func valueGo(v *vdl.Value) string {
 	switch v.Kind() {
-	case val.Bool:
+	case vdl.Bool:
 		if v.Bool() {
 			return "true"
 		} else {
 			return "false"
 		}
-	case val.Byte:
+	case vdl.Byte:
 		return strconv.FormatUint(uint64(v.Byte()), 10)
-	case val.Uint16, val.Uint32, val.Uint64:
+	case vdl.Uint16, vdl.Uint32, vdl.Uint64:
 		return strconv.FormatUint(v.Uint(), 10)
-	case val.Int16, val.Int32, val.Int64:
+	case vdl.Int16, vdl.Int32, vdl.Int64:
 		return strconv.FormatInt(v.Int(), 10)
-	case val.Float32, val.Float64:
+	case vdl.Float32, vdl.Float64:
 		return strconv.FormatFloat(v.Float(), 'g', -1, bitlen(v.Kind()))
-	case val.Complex64, val.Complex128:
+	case vdl.Complex64, vdl.Complex128:
 		s := strconv.FormatFloat(real(v.Complex()), 'g', -1, bitlen(v.Kind())) + "+"
 		s += strconv.FormatFloat(imag(v.Complex()), 'g', -1, bitlen(v.Kind())) + "i"
 		return s
-	case val.String:
+	case vdl.String:
 		return strconv.Quote(v.RawString())
 	}
 	if v.Type().IsBytes() {
@@ -354,17 +354,17 @@ func valueGo(v *val.Value) string {
 	panic(fmt.Errorf("vdl: valueGo unhandled type %v %v", v.Kind(), v.Type()))
 }
 
-func bitlen(kind val.Kind) int {
+func bitlen(kind vdl.Kind) int {
 	switch kind {
-	case val.Float32, val.Complex64:
+	case vdl.Float32, vdl.Complex64:
 		return 32
-	case val.Float64, val.Complex128:
+	case vdl.Float64, vdl.Complex128:
 		return 64
 	}
 	panic(fmt.Errorf("vdl: bitLen unhandled kind %v", kind))
 }
 
-func tagsGo(data goData, tags []*val.Value) string {
+func tagsGo(data goData, tags []*vdl.Value) string {
 	str := "[]interface{}{"
 	for ix, tag := range tags {
 		if ix > 0 {
@@ -437,7 +437,7 @@ func finishOutArgsGo(data goData, method *compile.Method) string {
 	return nonStreamingOutArgs(data, method)
 }
 
-// Returns the non streaming parts of the return types.  This will the return
+// Returns the non streaming parts of the return vdl.  This will the return
 // types for the server interface and the Finish method on the client stream.
 func nonStreamingOutArgs(data goData, method *compile.Method) string {
 	switch len := len(method.OutArgs); {
@@ -643,9 +643,9 @@ func signatureTypeDefs(iface *compile.Interface) string {
 }
 
 // generate the go code for type defs
-func typeDefsCode(td []vdl.Any) string {
+func typeDefsCode(td []vdlutil.Any) string {
 	var buf bytes.Buffer
-	buf.WriteString("[]_gen_vdl.Any{\n")
+	buf.WriteString("[]_gen_vdlutil.Any{\n")
 	for _, wt := range td {
 		switch t := wt.(type) {
 		case wiretype.StructType:
@@ -836,10 +836,10 @@ func Bind{{$iface.Name}}(name string, opts ..._gen_ipc.BindOpt) ({{$iface.Name}}
 		case _gen_ipc.Client:
 			client = o
 		default:
-			return nil, _gen_vdl.ErrUnrecognizedOption
+			return nil, _gen_vdlutil.ErrUnrecognizedOption
 		}
 	default:
-		return nil, _gen_vdl.ErrTooManyOptionsToBind
+		return nil, _gen_vdlutil.ErrTooManyOptionsToBind
 	}
 	stub := &clientStub{{$iface.Name}}{client: client, name: name}
 {{range $embed := $iface.Embeds}}	stub.{{$embed.Name}}_ExcludingUniversal, _ = {{prefixName (embedGo $data $embed) "Bind"}}(name, client)

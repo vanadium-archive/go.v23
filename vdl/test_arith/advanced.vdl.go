@@ -12,7 +12,7 @@ import (
 	_gen_ipc "veyron2/ipc"
 	_gen_naming "veyron2/naming"
 	_gen_rt "veyron2/rt"
-	_gen_vdl "veyron2/vdl"
+	_gen_vdlutil "veyron2/vdl/vdlutil"
 	_gen_wiretype "veyron2/wiretype"
 )
 
@@ -52,10 +52,10 @@ func BindTrigonometry(name string, opts ..._gen_ipc.BindOpt) (Trigonometry, erro
 		case _gen_ipc.Client:
 			client = o
 		default:
-			return nil, _gen_vdl.ErrUnrecognizedOption
+			return nil, _gen_vdlutil.ErrUnrecognizedOption
 		}
 	default:
-		return nil, _gen_vdl.ErrTooManyOptionsToBind
+		return nil, _gen_vdlutil.ErrTooManyOptionsToBind
 	}
 	stub := &clientStubTrigonometry{client: client, name: name}
 
@@ -175,7 +175,7 @@ func (__gen_s *ServerStubTrigonometry) Signature(call _gen_ipc.ServerCall) (_gen
 		},
 	}
 
-	result.TypeDefs = []_gen_vdl.Any{
+	result.TypeDefs = []_gen_vdlutil.Any{
 		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}}
 
 	return result, nil
@@ -251,10 +251,10 @@ func BindAdvancedMath(name string, opts ..._gen_ipc.BindOpt) (AdvancedMath, erro
 		case _gen_ipc.Client:
 			client = o
 		default:
-			return nil, _gen_vdl.ErrUnrecognizedOption
+			return nil, _gen_vdlutil.ErrUnrecognizedOption
 		}
 	default:
-		return nil, _gen_vdl.ErrTooManyOptionsToBind
+		return nil, _gen_vdlutil.ErrTooManyOptionsToBind
 	}
 	stub := &clientStubAdvancedMath{client: client, name: name}
 	stub.Trigonometry_ExcludingUniversal, _ = BindTrigonometry(name, client)
@@ -343,7 +343,7 @@ func (__gen_s *ServerStubAdvancedMath) GetMethodTags(call _gen_ipc.ServerCall, m
 func (__gen_s *ServerStubAdvancedMath) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
 	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
 
-	result.TypeDefs = []_gen_vdl.Any{}
+	result.TypeDefs = []_gen_vdlutil.Any{}
 	var ss _gen_ipc.ServiceSignature
 	var firstAdded int
 	ss, _ = __gen_s.ServerStubTrigonometry.Signature(call)

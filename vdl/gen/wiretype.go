@@ -5,9 +5,9 @@ package gen
 import (
 	"fmt"
 
-	"veyron2/val"
 	"veyron2/vdl"
 	"veyron2/vdl/compile"
+	"veyron2/vdl/vdlutil"
 	"veyron2/wiretype"
 	"veyron2/wiretype/build"
 )
@@ -18,86 +18,86 @@ type wireTypeConverter struct {
 	Defs build.TypeDefs
 }
 
-func (wtc *wireTypeConverter) bootstrapTypeID(t *val.Type) wiretype.TypeID {
-	if t.Kind() == val.List && t.Elem().Kind() == val.Byte {
+func (wtc *wireTypeConverter) bootstrapTypeID(t *vdl.Type) wiretype.TypeID {
+	if t.Kind() == vdl.List && t.Elem().Kind() == vdl.Byte {
 		return wiretype.TypeIDByteSlice
 	}
 	switch t.Kind() {
-	case val.Bool:
+	case vdl.Bool:
 		return wiretype.TypeIDBool
-	case val.Byte:
+	case vdl.Byte:
 		return wiretype.TypeIDUint8
-	case val.Uint16:
+	case vdl.Uint16:
 		return wiretype.TypeIDUint16
-	case val.Uint32:
+	case vdl.Uint32:
 		return wiretype.TypeIDUint32
-	case val.Uint64:
+	case vdl.Uint64:
 		return wiretype.TypeIDUint64
-	case val.Int16:
+	case vdl.Int16:
 		return wiretype.TypeIDInt16
-	case val.Int32:
+	case vdl.Int32:
 		return wiretype.TypeIDInt32
-	case val.Int64:
+	case vdl.Int64:
 		return wiretype.TypeIDInt64
-	case val.Float32:
+	case vdl.Float32:
 		return wiretype.TypeIDFloat32
-	case val.Float64:
+	case vdl.Float64:
 		return wiretype.TypeIDFloat64
-	case val.Complex64:
+	case vdl.Complex64:
 		return wiretype.TypeIDComplex64
-	case val.Complex128:
+	case vdl.Complex128:
 		return wiretype.TypeIDComplex128
-	case val.String:
+	case vdl.String:
 		return wiretype.TypeIDString
-	case val.Any, val.OneOf:
+	case vdl.Any, vdl.OneOf:
 		return wiretype.TypeIDInterface
-	case val.TypeVal:
+	case vdl.TypeVal:
 		return wiretype.TypeIDTypeID
 	default:
 		panic(fmt.Sprintf("unknown primitive type: %v", t))
 	}
 }
 
-func (wtc *wireTypeConverter) wireType(typ *val.Type) vdl.Any {
+func (wtc *wireTypeConverter) wireType(typ *vdl.Type) vdlutil.Any {
 	if typ == compile.ErrorType {
 		// Hack error as an interface for now, since that was the old behavior.
 		return wiretype.NamedPrimitiveType{
-			Type: wtc.bootstrapTypeID(val.AnyType),
+			Type: wtc.bootstrapTypeID(vdl.AnyType),
 			Name: "error",
 		}
 	}
 	switch typ.Kind() {
-	case val.Enum:
+	case vdl.Enum:
 		// Hack enum as an int for now, this will all go away with vom2.
 		return wiretype.NamedPrimitiveType{
-			Type: wtc.bootstrapTypeID(val.Uint64Type),
+			Type: wtc.bootstrapTypeID(vdl.Uint64Type),
 			Name: typ.Name(),
 		}
-	case val.Array:
+	case vdl.Array:
 		return wiretype.ArrayType{
 			Elem: wtc.WireTypeID(typ.Elem()),
 			Len:  uint64(typ.Len()),
 			Name: typ.Name(),
 		}
-	case val.List:
+	case vdl.List:
 		return wiretype.SliceType{
 			Elem: wtc.WireTypeID(typ.Elem()),
 			Name: typ.Name(),
 		}
-	case val.Set:
+	case vdl.Set:
 		// Hack set as a map for now, this will all go away with vom2.
 		return wiretype.MapType{
 			Key:  wtc.WireTypeID(typ.Key()),
-			Elem: wtc.WireTypeID(val.BoolType),
+			Elem: wtc.WireTypeID(vdl.BoolType),
 			Name: typ.Name(),
 		}
-	case val.Map:
+	case vdl.Map:
 		return wiretype.MapType{
 			Key:  wtc.WireTypeID(typ.Key()),
 			Elem: wtc.WireTypeID(typ.Elem()),
 			Name: typ.Name(),
 		}
-	case val.Struct:
+	case vdl.Struct:
 		flds := make([]wiretype.FieldType, typ.NumField())
 		for i := 0; i < typ.NumField(); i++ {
 			fld := typ.Field(i)
@@ -108,10 +108,10 @@ func (wtc *wireTypeConverter) wireType(typ *val.Type) vdl.Any {
 			Fields: flds,
 			Name:   typ.Name(),
 		}
-	case val.OneOf:
+	case vdl.OneOf:
 		// Hack oneof as a named any for now, this will all go away with vom2.
 		return wiretype.NamedPrimitiveType{
-			Type: wtc.bootstrapTypeID(val.AnyType),
+			Type: wtc.bootstrapTypeID(vdl.AnyType),
 			Name: typ.Name(),
 		}
 	default:
@@ -119,7 +119,7 @@ func (wtc *wireTypeConverter) wireType(typ *val.Type) vdl.Any {
 			Type: wtc.bootstrapTypeID(typ),
 			Name: typ.Name(),
 		}
-		if typ.Kind() == val.Any {
+		if typ.Kind() == vdl.Any {
 			wt.Name = "anydata"
 		}
 		if wt.Name == "" {
@@ -131,7 +131,7 @@ func (wtc *wireTypeConverter) wireType(typ *val.Type) vdl.Any {
 
 // WireTypeID gets the TypeID of the given VDL build type and stores the needed type definitions
 // in the wireTypeConverter.
-func (wtc *wireTypeConverter) WireTypeID(typ *val.Type) wiretype.TypeID {
+func (wtc *wireTypeConverter) WireTypeID(typ *vdl.Type) wiretype.TypeID {
 	wt := wtc.wireType(typ)
 	var tid wiretype.TypeID
 	wtc.Defs, tid = wtc.Defs.Put(wt)

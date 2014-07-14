@@ -12,7 +12,7 @@ import (
 	_gen_ipc "veyron2/ipc"
 	_gen_naming "veyron2/naming"
 	_gen_rt "veyron2/rt"
-	_gen_vdl "veyron2/vdl"
+	_gen_vdlutil "veyron2/vdl/vdlutil"
 	_gen_wiretype "veyron2/wiretype"
 )
 
@@ -91,10 +91,10 @@ func BindProximityAnnouncer(name string, opts ..._gen_ipc.BindOpt) (ProximityAnn
 		case _gen_ipc.Client:
 			client = o
 		default:
-			return nil, _gen_vdl.ErrUnrecognizedOption
+			return nil, _gen_vdlutil.ErrUnrecognizedOption
 		}
 	default:
-		return nil, _gen_vdl.ErrTooManyOptionsToBind
+		return nil, _gen_vdlutil.ErrTooManyOptionsToBind
 	}
 	stub := &clientStubProximityAnnouncer{client: client, name: name}
 
@@ -212,7 +212,7 @@ func (__gen_s *ServerStubProximityAnnouncer) Signature(call _gen_ipc.ServerCall)
 		},
 	}
 
-	result.TypeDefs = []_gen_vdl.Any{
+	result.TypeDefs = []_gen_vdlutil.Any{
 		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}}
 
 	return result, nil
@@ -284,10 +284,10 @@ func BindProximityScanner(name string, opts ..._gen_ipc.BindOpt) (ProximityScann
 		case _gen_ipc.Client:
 			client = o
 		default:
-			return nil, _gen_vdl.ErrUnrecognizedOption
+			return nil, _gen_vdlutil.ErrUnrecognizedOption
 		}
 	default:
-		return nil, _gen_vdl.ErrTooManyOptionsToBind
+		return nil, _gen_vdlutil.ErrTooManyOptionsToBind
 	}
 	stub := &clientStubProximityScanner{client: client, name: name}
 
@@ -383,7 +383,7 @@ func (__gen_s *ServerStubProximityScanner) Signature(call _gen_ipc.ServerCall) (
 		},
 	}
 
-	result.TypeDefs = []_gen_vdl.Any{
+	result.TypeDefs = []_gen_vdlutil.Any{
 		_gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
 				_gen_wiretype.FieldType{Type: 0x3, Name: "MAC"},
@@ -463,10 +463,10 @@ func BindProximity(name string, opts ..._gen_ipc.BindOpt) (Proximity, error) {
 		case _gen_ipc.Client:
 			client = o
 		default:
-			return nil, _gen_vdl.ErrUnrecognizedOption
+			return nil, _gen_vdlutil.ErrUnrecognizedOption
 		}
 	default:
-		return nil, _gen_vdl.ErrTooManyOptionsToBind
+		return nil, _gen_vdlutil.ErrTooManyOptionsToBind
 	}
 	stub := &clientStubProximity{client: client, name: name}
 	stub.ProximityAnnouncer_ExcludingUniversal, _ = BindProximityAnnouncer(name, client)
@@ -555,7 +555,7 @@ func (__gen_s *ServerStubProximity) GetMethodTags(call _gen_ipc.ServerCall, meth
 func (__gen_s *ServerStubProximity) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
 	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
 
-	result.TypeDefs = []_gen_vdl.Any{}
+	result.TypeDefs = []_gen_vdlutil.Any{}
 	var ss _gen_ipc.ServiceSignature
 	var firstAdded int
 	ss, _ = __gen_s.ServerStubProximityAnnouncer.Signature(call)
