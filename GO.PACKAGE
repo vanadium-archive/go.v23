@@ -1,0 +1,8 @@
+{
+	"dependencies": {
+		"outgoing": [
+			{"allow": "veyron2/..."},
+			{"deny": "..."}
+		]
+	}
+}
