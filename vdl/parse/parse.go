@@ -3,8 +3,8 @@
 package parse
 
 // This is the only file in this package that uses the yacc-generated parser
-// with entrypoint yyParse.  The result of the parse is the simple vdlutil.File
-// representation, which is used by the compilation and code-generation stages.
+// with entrypoint yyParse.  The result of the parse is the simple parse.File
+// representation, which is used by the compilation stage.
 //
 // TODO(toddw): The yacc-generated parser returns pretty lousy error messages;
 // basically "syntax error" is the only string returned.  Improve them.
@@ -151,8 +151,8 @@ func (t token) String() string {
 // lexer as their first step.  The type conversion is always safe since we're
 // the ones who called yyParse, and thus know the concrete type is always lexer.
 
-// lexVDLFile retrieves the vdlutil.File parse result from the yyLexer interface.
-// This is called in the yacc rules to fill in the parse result.
+// lexVDLFile retrieves the File parse result from the yyLexer interface.  This
+// is called in the yacc rules to fill in the parse result.
 func lexVDLFile(yylex yyLexer) *File {
 	return yylex.(*lexer).vdlFile
 }

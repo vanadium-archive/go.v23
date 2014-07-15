@@ -177,7 +177,7 @@ func (p *Package) CloseFiles() error {
 // packages multiple times.
 //
 // TODO(toddw): If we care about performance we could serialize the compiled
-// vdlutil.Package information and write it out as compiler-generated artifacts,
+// compile.Package information and write it out as compiler-generated artifacts,
 // similar to how the regular go tool generates *.a files under the top-level
 // pkg directory.
 type depSorter struct {

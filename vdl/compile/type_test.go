@@ -120,7 +120,7 @@ var typeTests = []typeTest{
 	{"Struct", tp{{"a", `type Res struct{A int32;B string}`, vdl.StructType([]vdl.StructField{{"A", vdl.Int32Type}, {"B", vdl.StringType}}...), ""}}},
 	{"OneOf", tp{{"a", `type Res oneof{bool;int32;string}`, vdl.OneOfType(vdl.BoolType, vdl.Int32Type, vdl.StringType), exp}}},
 
-	// Test named types based on named vdl.
+	// Test named types based on named types.
 	{"NBool", tp{{"a", `type Res x;type x bool`, namedX(vdl.BoolType), ""}}},
 	{"NByte", tp{{"a", `type Res x;type x byte`, namedX(vdl.ByteType), ""}}},
 	{"NUint16", tp{{"a", `type Res x;type x uint16`, namedX(vdl.Uint16Type), ""}}},

@@ -233,13 +233,9 @@ var (
 	errTypeFromReflectNil   = errors.New("invalid val.TypeOf(nil)")
 	errTypeFromReflectValue = errors.New("invalid val.TypeOf(reflect.Value{})")
 
-	rtByte               = reflect.TypeOf(byte(0))
-	rtBool               = reflect.TypeOf(bool(false))
-	rtString             = reflect.TypeOf(string(""))
 	rtType               = reflect.TypeOf(Type{})
 	rtValue              = reflect.TypeOf(Value{})
 	rtPtrToType          = reflect.TypeOf((*Type)(nil))
-	rtPtrToValue         = reflect.TypeOf((*Value)(nil))
 	rtReflectValue       = reflect.TypeOf(reflect.Value{})
 	rtUnnamedEmptyStruct = reflect.TypeOf(struct{}{})
 
@@ -249,56 +245,20 @@ var (
 		reflect.Uint16:     Uint16Type,
 		reflect.Uint32:     Uint32Type,
 		reflect.Uint64:     Uint64Type,
-		reflect.Uint:       uintType(bitlenR(reflect.Uint)),
-		reflect.Uintptr:    uintType(bitlenR(reflect.Uintptr)),
+		reflect.Uint:       uintType(8 * unsafe.Sizeof(uint(0))),
+		reflect.Uintptr:    uintType(8 * unsafe.Sizeof(uintptr(0))),
 		reflect.Int8:       Int16Type,
 		reflect.Int16:      Int16Type,
 		reflect.Int32:      Int32Type,
 		reflect.Int64:      Int64Type,
-		reflect.Int:        intType(bitlenR(reflect.Int)),
+		reflect.Int:        intType(8 * unsafe.Sizeof(int(0))),
 		reflect.Float32:    Float32Type,
 		reflect.Float64:    Float64Type,
 		reflect.Complex64:  Complex64Type,
 		reflect.Complex128: Complex128Type,
 		reflect.String:     StringType,
 	}
-
-	bitlenReflect = [...]uintptr{
-		reflect.Uint8:      8,
-		reflect.Uint16:     16,
-		reflect.Uint32:     32,
-		reflect.Uint64:     64,
-		reflect.Uint:       8 * unsafe.Sizeof(uint(0)),
-		reflect.Uintptr:    8 * unsafe.Sizeof(uintptr(0)),
-		reflect.Int8:       8,
-		reflect.Int16:      16,
-		reflect.Int32:      32,
-		reflect.Int64:      64,
-		reflect.Int:        8 * unsafe.Sizeof(int(0)),
-		reflect.Float32:    32,
-		reflect.Float64:    64,
-		reflect.Complex64:  32, // bitlen of each float
-		reflect.Complex128: 64, // bitlen of each float
-	}
-
-	bitlenValue = [...]uintptr{
-		Byte:       8,
-		Uint16:     16,
-		Uint32:     32,
-		Uint64:     64,
-		Int16:      16,
-		Int32:      32,
-		Int64:      64,
-		Float32:    32,
-		Float64:    64,
-		Complex64:  32, // bitlen of each float
-		Complex128: 64, // bitlen of each float
-	}
 )
-
-// bitlen{R,V} enforce static type safety on kind.
-func bitlenR(kind reflect.Kind) uintptr { return bitlenReflect[kind] }
-func bitlenV(kind Kind) uintptr         { return bitlenValue[kind] }
 
 func uintType(bitlen uintptr) *Type {
 	switch bitlen {
@@ -316,23 +276,4 @@ func intType(bitlen uintptr) *Type {
 	default:
 		return Int64Type
 	}
-}
-
-// isRTBytes returns true iff rt is an array or slice of bytes.
-func isRTBytes(rt reflect.Type) bool {
-	return (rt.Kind() == reflect.Array || rt.Kind() == reflect.Slice) && rt.Elem().Kind() == reflect.Uint8
-}
-
-// rtBytes extracts []byte from rv.  Assumes isRTBytes(rv.Type()) == true.
-func rtBytes(rv reflect.Value) []byte {
-	// Fastpath if the underlying type is []byte
-	if rv.Kind() == reflect.Slice && rv.Type().Elem() == rtByte {
-		return rv.Bytes()
-	}
-	// Slowpath copying bytes one by one.
-	ret := make([]byte, rv.Len())
-	for ix := 0; ix < rv.Len(); ix++ {
-		ret[ix] = rv.Index(ix).Convert(rtByte).Interface().(byte)
-	}
-	return ret
 }

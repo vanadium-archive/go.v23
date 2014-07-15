@@ -161,11 +161,11 @@ func computeDeps(pkg *Package, env *Env) {
 	for _, file := range pkg.Files {
 		tdeps := make(map[*vdl.Type]bool)
 		pdeps := make(map[*Package]bool)
-		// TypeDef.Type is always defined in our package; start with subvdl.
+		// TypeDef.Type is always defined in our package; start with sub types.
 		for _, def := range file.TypeDefs {
 			addSubTypeDeps(def.Type, pkg, env, tdeps, pdeps)
 		}
-		// Consts contribute the packages of their value vdl.
+		// Consts contribute the packages of their value types.
 		for _, def := range file.ConstDefs {
 			addTypeDeps(def.Value.Type(), pkg, env, tdeps, pdeps)
 		}

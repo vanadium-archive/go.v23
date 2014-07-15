@@ -62,7 +62,7 @@ func compileTypeDefs(pkg *Package, pfiles []*parse.File, env *Env) {
 // typeDefiner defines types in a package.  This is split into three phases:
 // 1) Declare ensures local type references can be resolved.
 // 2) Define describes each type, resolving named references.
-// 3) Build builds all vdl.
+// 3) Build builds all types.
 //
 // It holds a builders map from type name to typeDefBuilder, where the
 // typeDefBuilder is responsible for compiling and defining a single type.
@@ -227,7 +227,7 @@ func compileDefinedType(ptype parse.Type, file *File, env *Env, tbuilder *vdl.Ty
 
 // compileLiteralType compiles ptype.  It can handle any literal type.  Note
 // that enum, struct and oneof are required to be defined and named, and aren't
-// allowed as regular literal vdl.
+// allowed as regular literal types.
 func compileLiteralType(ptype parse.Type, file *File, env *Env, tbuilder *vdl.TypeBuilder, builders map[string]*typeDefBuilder) vdl.TypeOrPending {
 	switch pt := ptype.(type) {
 	case *parse.TypeNamed:
@@ -267,7 +267,7 @@ func compileLiteralType(ptype parse.Type, file *File, env *Env, tbuilder *vdl.Ty
 
 // Build actually builds each type and updates the package with the typedefs.
 // The order we call each pending type doesn't matter; the veyron2/vdl package
-// deals with arbitrary orders, and supports recursive vdl.  However we want
+// deals with arbitrary orders, and supports recursive types.  However we want
 // the order to be deterministic, otherwise the output will constantly change.
 // So we use the same order as the parsed file.
 func (td typeDefiner) Build() {
@@ -301,7 +301,7 @@ func addTypeDef(def *TypeDef, env *Env) {
 	def.File.Package.typeDefs[def.Name] = def
 	if env != nil {
 		// env should only be nil during initialization of the built-in package;
-		// NewEnv ensures new environments have the built-in vdl.
+		// NewEnv ensures new environments have the built-in types.
 		env.typeDefs[def.Type] = def
 	}
 }

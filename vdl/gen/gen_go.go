@@ -62,7 +62,7 @@ func GoFile(file *compile.File, env *compile.Env, opts GoOpts) []byte {
 
 type userImport struct {
 	Local string // Local name of the import; empty if no local name.
-	Path  string // Path of the import; e.g. "veyron2/vdl/vdlutil"
+	Path  string // Path of the import; e.g. "veyron2/vdl"
 	Pkg   string // Set to non-empty Local, otherwise the basename of Path.
 }
 
@@ -209,7 +209,7 @@ func qualifiedName(data goData, name string, file *compile.File) string {
 // typeGo translates vdl.Type into a Go type.
 func typeGo(data goData, t *vdl.Type) string {
 	// Terminate recursion at defined types, which include both user-defined types
-	// (enum, struct, oneof) and built-in vdl.
+	// (enum, struct, oneof) and built-in types.
 	if def := data.Env.FindTypeDef(t); def != nil {
 		switch {
 		case t == vdl.AnyType:
@@ -437,7 +437,7 @@ func finishOutArgsGo(data goData, method *compile.Method) string {
 	return nonStreamingOutArgs(data, method)
 }
 
-// Returns the non streaming parts of the return vdl.  This will the return
+// Returns the non streaming parts of the return types.  This will the return
 // types for the server interface and the Finish method on the client stream.
 func nonStreamingOutArgs(data goData, method *compile.Method) string {
 	switch len := len(method.OutArgs); {

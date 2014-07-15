@@ -702,7 +702,7 @@ func convertTypedComplex(b *bigComplex, kind vdl.Kind) (*bigComplex, error) {
 }
 
 // coerceConsts performs implicit conversion of cl and cr based on their
-// respective vdl.  Returns the converted values vl and vr which are
+// respective types.  Returns the converted values vl and vr which are
 // guaranteed to be of the same type represented by the returned Type, which may
 // be nil if both consts are untyped.
 func coerceConsts(cl, cr Const) (interface{}, interface{}, *vdl.Type, error) {
