@@ -195,11 +195,20 @@ import {{$imp}};{{end}}
 
 	@Override
 	public boolean equals({{$objectClassName}} obj) {
-		if (!(obj instanceof {{$className}})) return false;
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (this.getClass() != obj.getClass()) return false;
 		final {{$className}} other = ({{$className}})obj;{{range $field := $classFields}}{{if javaTypeIsClass $field.Type $data.Env}}
 		if (!(this.{{toCamelCase $field.Name}}.equals(other.{{toCamelCase $field.Name}}))) return false;{{else}}
 		if (this.{{toCamelCase $field.Name}} != other.{{toCamelCase $field.Name}}) return false;{{end}}{{end}}
 		return true;
+	}
+	@Override
+	public int hashCode() {
+		int result = 1;
+		final int prime = 31;{{range $field := $classFields}}
+		result = prime * result + {{javaFieldHashCode $field $data.Imports $data.Env}};{{end}}
+		return result;
 	}
 }
 `
@@ -465,7 +474,7 @@ public class {{$iface.Name}}ServiceWrapper {
 			final {{$objectClassName}}[] tags = this.{{javaClassToVarName $eIfaceShortClassName}}.getMethodTags(call, method);
 			if (tags != null) return tags;
 		}{{end}}{{range $method := $iface.Methods}}
-		if (method == "{{$method.Name}}") {
+		if ("{{toCamelCase $method.Name}}".equals(method)) {
 			return new {{$objectClassName}}[]{ {{range $idx, $tag := $method.Tags}}{{if gt $idx 0}}, {{end}}{{javaConstVal $tag $data.Imports $data.Env}}{{end}} };
 		}{{end}}
 		return null;
@@ -962,6 +971,30 @@ func javaVal(v *vdl.Value, imports javaUserImports, env *compile.Env) string {
 	panic(fmt.Errorf("vdl: javaVal unhandled type %v %v", v.Kind(), v.Type()))
 }
 
+// javaFieldHashCode returns the code for the hashCode() computation for the given field.
+func javaFieldHashCode(field typeDefField, imports javaUserImports, env *compile.Env) string {
+	f := vdlutil.ToCamelCase(field.Name)
+	if def := env.FindTypeDef(field.Type); def != nil && def.File == compile.BuiltInFile {
+		switch field.Type.Kind() {
+		case vdl.Bool:
+			return fmt.Sprintf("%s.valueOf(%s).hashCode()", javaName("java/lang/Boolean", imports), f)
+		case vdl.Byte, vdl.Uint16, vdl.Int16:
+			return "(int)" + f
+		case vdl.Uint32, vdl.Int32:
+			return f
+		case vdl.Uint64, vdl.Int64:
+			return fmt.Sprintf("%s.valueOf(%s).hashCode()", javaName("java/lang/Long", imports), f)
+		case vdl.Float32:
+			return fmt.Sprintf("%s.valueOf(%s).hashCode()", javaName("java/lang/Float", imports), f)
+		case vdl.Float64:
+			return fmt.Sprintf("%s.valueOf(%s).hashCode()", javaName("java/lang/Double", imports), f)
+		case vdl.Array:
+			return fmt.Sprintf("%s.hashCode(%s)", javaName("java/util/Arrays", imports), f)
+		}
+	}
+	return fmt.Sprintf("(%s == null ? 0 : %s.hashCode())", f, f)
+}
+
 // javaImports prunes the provided imports list, removing the unnecessary
 // imports, and returns the pruned list in the Java format.
 func javaImports(imports javaUserImports, pkgPath string) (ret []string) {
@@ -1261,9 +1294,10 @@ func init() {
 		"javaPath":                   javaPath,
 		"javaImports":                javaImports,
 		"javaType":                   javaType,
-		"javaConstVal":               javaConstVal,
 		"javaInArgs":                 javaInArgs,
 		"javaOutArgType":             javaOutArgType,
+		"javaConstVal":               javaConstVal,
+		"javaFieldHashCode":          javaFieldHashCode,
 		"javaClientResultFetchArgs":  javaClientResultFetchArgs,
 		"javaNonErrorOutArgs":        javaNonErrorOutArgs,
 		"javaIsStreamingMethod":      javaIsStreamingMethod,
