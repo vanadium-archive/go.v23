@@ -1,11 +1,15 @@
 package vstore_test
 
 import (
+	"reflect"
+	"runtime"
 	"testing"
 
 	store "veyron/services/store/testutil"
 
 	"veyron2"
+	"veyron2/context"
+	"veyron2/query"
 	"veyron2/rt"
 	"veyron2/security"
 	"veyron2/services/watch"
@@ -60,9 +64,9 @@ func TestPutGetRemoveRoot(t *testing.T) {
 }
 
 func TestPutGetRemoveChild(t *testing.T) {
-	ctx := rt.R().NewContext()
 	s, c := newServer(t) // calls rt.Init()
 	defer c()
+	ctx := rt.R().NewContext()
 
 	{
 		// Create a root.
@@ -197,9 +201,9 @@ func testPutGetRemove(t *testing.T, s storage.Store, o storage.Object) {
 }
 
 func TestPutGetRemoveNilTransaction(t *testing.T) {
-	ctx := rt.R().NewContext()
 	s, c := newServer(t) // calls rt.Init()
 	defer c()
+	ctx := rt.R().NewContext()
 
 	{
 		// Create a root.
@@ -288,9 +292,9 @@ func TestPutGetRemoveNilTransaction(t *testing.T) {
 }
 
 func TestWatchGlob(t *testing.T) {
-	ctx := rt.R().NewContext()
 	s, c := newServer(t) // calls rt.Init()
 	defer c()
+	ctx := rt.R().NewContext()
 
 	root := s.Bind("/")
 
@@ -365,4 +369,126 @@ func findEntry(t *testing.T, changes []watch.Change, name string) *storage.Entry
 	}
 	t.Fatalf("Expected a change for name: %v", name)
 	panic("Should not reach here")
+}
+
+type player struct {
+	Name string
+	Age  int
+}
+
+func put(t *testing.T, s storage.Store, ctx context.T, name string, value interface{}) {
+	_, file, line, _ := runtime.Caller(1)
+
+	o := s.Bind(name)
+	if _, err := o.Put(ctx, nil, value); err != nil {
+		t.Fatalf("%s:%d unexpected error: %s", file, line, err)
+	}
+}
+
+func expectResultNames(t *testing.T, query string, stream storage.QueryStream, expectedNames []string) {
+	_, file, line, _ := runtime.Caller(1)
+
+	var resultNames []string
+	for stream.Advance() {
+		result := stream.Value()
+		resultNames = append(resultNames, result.Name())
+	}
+	if !reflect.DeepEqual(resultNames, expectedNames) {
+		t.Errorf("%s:%d query: %s;\nGOT  %v\nWANT %v", file, line, query, resultNames, expectedNames)
+	}
+}
+
+func TestQuery(t *testing.T) {
+	s, c := newServer(t) // calls rt.Init()
+	defer c()
+	ctx := rt.R().NewContext()
+
+	put(t, s, ctx, "/", newValue())
+
+	put(t, s, ctx, "/players", newValue())
+	put(t, s, ctx, "/players/alfred", player{"alfred", 17})
+	put(t, s, ctx, "/players/alice", player{"alice", 16})
+	put(t, s, ctx, "/players/betty", player{"betty", 23})
+	put(t, s, ctx, "/players/bob", player{"bob", 21})
+
+	type testCase struct {
+		query       string
+		resultNames []string
+	}
+
+	tests := []testCase{
+		{
+			"players/* | type player | sort()",
+			[]string{"players/alfred", "players/alice", "players/betty", "players/bob"},
+		},
+		{
+			"players/* | type player | ? Age > 20 | sort(Age)",
+			[]string{"players/bob", "players/betty"},
+		},
+	}
+
+	o := s.Bind("/")
+	for _, test := range tests {
+		stream := o.Query(ctx, nil, query.Query{test.query})
+		expectResultNames(t, test.query, stream, test.resultNames)
+	}
+}
+
+func putTx(t *testing.T, s storage.Store, ctx context.T, tx storage.Transaction,
+	name string, value interface{}) {
+	_, file, line, _ := runtime.Caller(1)
+
+	o := s.Bind(name)
+	if _, err := o.Put(ctx, tx, value); err != nil {
+		t.Fatalf("%s:%d unexpected error: %s", file, line, err)
+	}
+}
+
+func TestQueryInTransaction(t *testing.T) {
+	s, c := newServer(t) // calls rt.Init()
+	defer c()
+	ctx := rt.R().NewContext()
+
+	tr1 := primitives.NewTransaction(ctx)
+	putTx(t, s, ctx, tr1, "/", newValue())
+	putTx(t, s, ctx, tr1, "/players", newValue())
+	putTx(t, s, ctx, tr1, "/players/alfred", player{"alfred", 17})
+	putTx(t, s, ctx, tr1, "/players/alice", player{"alice", 16})
+	if err := tr1.Commit(ctx); err != nil {
+		t.Fatalf("Unexpected error: %s", err)
+	}
+
+	o := s.Bind("/")
+
+	tr2 := primitives.NewTransaction(ctx)
+
+	const allPlayers = "players/* | type player | sort()"
+	stream := o.Query(ctx, tr2, query.Query{allPlayers})
+	expectResultNames(t, allPlayers, stream, []string{"players/alfred", "players/alice"})
+
+	// Query should see mutations that are part of the transaction.
+	putTx(t, s, ctx, tr2, "/players/betty", player{"betty", 23})
+	putTx(t, s, ctx, tr2, "/players/bob", player{"bob", 21})
+	stream = o.Query(ctx, tr2, query.Query{allPlayers})
+	expectResultNames(t, allPlayers, stream,
+		[]string{"players/alfred", "players/alice", "players/betty", "players/bob"})
+
+	// Query should not see mutations that are part of an uncommitted transaction.
+	tr3 := primitives.NewTransaction(ctx)
+	stream = o.Query(ctx, tr3, query.Query{allPlayers})
+	expectResultNames(t, allPlayers, stream, []string{"players/alfred", "players/alice"})
+
+	if err := tr2.Commit(ctx); err != nil {
+		t.Fatalf("Unexpected error: %s", err)
+	}
+
+	// tr3 should still not see the mutations from tr2.
+	stream = o.Query(ctx, tr3, query.Query{allPlayers})
+	expectResultNames(t, allPlayers, stream, []string{"players/alfred", "players/alice"})
+
+	// A new transaction should see the mutations from tr2.
+	tr4 := primitives.NewTransaction(ctx)
+	stream = o.Query(ctx, tr4, query.Query{allPlayers})
+	expectResultNames(t, allPlayers, stream,
+		[]string{"players/alfred", "players/alice", "players/betty", "players/bob"})
 }

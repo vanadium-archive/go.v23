@@ -257,7 +257,18 @@ type Entry struct {
 	Value interface{}
 }
 
-// QueryStream provides a stream of query results.
+// QueryStream provides a stream of query results.  Typical usage:
+//   for stream.Advance() {
+//     result := stream.Value()
+//     // Process result.
+//     if enough_results {
+//       stream.Cancel()
+//       break
+//     }
+//   }
+//   if stream.Err() != nil {
+//     return stream.Err()
+//   }
 type QueryStream interface {
 	// Advance stages an element so the client can retrieve it with Value.
 	// Advance returns true iff there is an element to retrieve.  The client
