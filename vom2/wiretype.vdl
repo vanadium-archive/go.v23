@@ -1,0 +1,111 @@
+package vom2
+
+/* TODO(toddw): Use this as the WireType, instead of any.
+type WireType oneof{
+	WireNamed
+	WireEnum
+	WireArray
+	WireList
+	WireSet
+	WireMap
+	WireStruct
+	WireOneOf
+}
+*/
+
+// WireNamed represents a named type definition.
+type WireNamed struct {
+	Name string
+	Base TypeID
+}
+
+// WireEnum represents an enum type definition.
+type WireEnum struct {
+	Name   string
+	Labels []string
+}
+
+// WireArray represents an array type definition.
+type WireArray struct {
+	Name string
+	Elem TypeID
+	Len  uint64
+}
+
+// WireList represents a list type definition.
+type WireList struct {
+	Name string
+	Elem TypeID
+}
+
+// WireSet represents a set type definition.
+type WireSet struct {
+	Name string
+	Key  TypeID
+}
+
+// WireMap represents a map type definition.
+type WireMap struct {
+	Name string
+	Key  TypeID
+	Elem TypeID
+}
+
+// WireStruct represents a struct type definition.
+type WireStruct struct {
+	Name   string
+	Fields []WireField
+}
+
+// WireField represents a field in a struct.
+type WireField struct {
+	Name string
+	Type TypeID
+}
+
+// WireOneOf represents a oneof type definition.
+type WireOneOf struct {
+	Name  string
+	Types []TypeID
+}
+
+// TypeID uniquely identifies a type definition within a vom stream.
+type TypeID uint64
+
+// Built-in TypeIDs
+const (
+  // Primitives
+	WireAnyID        = TypeID(1)
+	WireTypeID       = TypeID(2)
+	WireBoolID       = TypeID(3)
+	WireStringID     = TypeID(4)
+	WireByteID       = TypeID(5)
+	WireUint16ID     = TypeID(6)
+	WireUint32ID     = TypeID(7)
+	WireUint64ID     = TypeID(8)
+	WireInt16ID      = TypeID(9)
+	WireInt32ID      = TypeID(10)
+	WireInt64ID      = TypeID(11)
+	WireFloat32ID    = TypeID(12)
+	WireFloat64ID    = TypeID(13)
+	WireComplex64ID  = TypeID(14)
+	WireComplex128ID = TypeID(15)
+	// Composites only used in type definitions
+	WireNamedID      = TypeID(16)
+	WireEnumID       = TypeID(17)
+	WireArrayID      = TypeID(18)
+	WireListID       = TypeID(19)
+	WireSetID        = TypeID(20)
+	WireMapID        = TypeID(21)
+	WireStructID     = TypeID(22)
+	WireFieldID      = TypeID(23)
+	WireFieldListID  = TypeID(24)
+	WireOneOfID      = TypeID(25)
+	// Other commonly used composites
+	WireByteListID   = TypeID(26)
+	WireStringListID = TypeID(27)
+	WireTypeListID =   TypeID(28)
+	// The first user-defined TypeID is 65.  Note that -64 is encoded as 1 byte,
+	// while -65 is encoded as 2 bytes.
+	WireTypeFirstUserID = TypeID(65)
+)
