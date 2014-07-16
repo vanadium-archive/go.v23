@@ -2,6 +2,9 @@
 // Source: build.vdl
 
 // Package build supports building and describing Veyron binaries.
+//
+// TODO(jsimsa): Switch Architecture, Format, and OperatingSystem type
+// to enum when supported.
 package build
 
 import (
@@ -17,10 +20,42 @@ import (
 	_gen_wiretype "veyron2/wiretype"
 )
 
+type Architecture byte
+
+type Format byte
+
+type OperatingSystem byte
+
 type File struct {
 	Name     string
 	Contents []byte
 }
+
+const (
+	UnsupportedArchitecture = Architecture(0)
+
+	AMD64 = Architecture(1)
+
+	ARM = Architecture(2)
+
+	X86 = Architecture(3)
+
+	UnsupportedFormat = Format(0)
+
+	ELF = Format(1)
+
+	MACH = Format(2)
+
+	PE = Format(3)
+
+	UnsupportedOperatingSystem = OperatingSystem(0)
+
+	Darwin = OperatingSystem(1)
+
+	Linux = OperatingSystem(2)
+
+	Windows = OperatingSystem(3)
+)
 
 // Build describes an interface for building binaries from source.
 // Build is the interface the client binds and uses.
@@ -28,7 +63,7 @@ type File struct {
 // to enable embedding without method collisions.  Not to be used directly by clients.
 type Build_ExcludingUniversal interface {
 	// Build streams sources to the build server, which then attempts to
-	// build the sources and returns the output.
+	// build the sources and streams back the compiled binaries.
 	Build(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply BuildBuildStream, err error)
 	// Describe generates a description for a binary identified by
 	// the given Object name.
@@ -43,7 +78,7 @@ type Build interface {
 type BuildService interface {
 
 	// Build streams sources to the build server, which then attempts to
-	// build the sources and returns the output.
+	// build the sources and streams back the compiled binaries.
 	Build(context _gen_ipc.ServerContext, stream BuildServiceBuildStream) (reply []byte, err error)
 	// Describe generates a description for a binary identified by
 	// the given Object name.
@@ -63,6 +98,10 @@ type BuildBuildStream interface {
 	// Send on the client will fail.  This is an optional call - it's used by
 	// streaming clients that need the server to receive the io.EOF terminator.
 	CloseSend() error
+
+	// Recv returns the next item in the input stream, blocking until
+	// an item is available.  Returns io.EOF to indicate graceful end of input.
+	Recv() (item File, err error)
 
 	// Finish closes the stream and returns the positional return values for
 	// call.
@@ -85,6 +124,11 @@ func (c *implBuildBuildStream) CloseSend() error {
 	return c.clientCall.CloseSend()
 }
 
+func (c *implBuildBuildStream) Recv() (item File, err error) {
+	err = c.clientCall.Recv(&item)
+	return
+}
+
 func (c *implBuildBuildStream) Finish() (reply []byte, err error) {
 	if ierr := c.clientCall.Finish(&reply, &err); ierr != nil {
 		err = ierr
@@ -99,6 +143,9 @@ func (c *implBuildBuildStream) Cancel() {
 // BuildServiceBuildStream is the interface for streaming responses of the method
 // Build in the service interface Build.
 type BuildServiceBuildStream interface {
+	// Send places the item onto the output stream, blocking if there is no buffer
+	// space available.
+	Send(item File) error
 
 	// Recv fills itemptr with the next item in the input stream, blocking until
 	// an item is available.  Returns io.EOF to indicate graceful end of input.
@@ -108,6 +155,10 @@ type BuildServiceBuildStream interface {
 // Implementation of the BuildServiceBuildStream interface that is not exported.
 type implBuildServiceBuildStream struct {
 	serverCall _gen_ipc.ServerCall
+}
+
+func (s *implBuildServiceBuildStream) Send(item File) error {
+	return s.serverCall.Send(item)
 }
 
 func (s *implBuildServiceBuildStream) Recv() (item File, err error) {
@@ -240,7 +291,8 @@ func (__gen_s *ServerStubBuild) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Se
 			{Name: "", Type: 66},
 			{Name: "", Type: 67},
 		},
-		InStream: 68,
+		InStream:  68,
+		OutStream: 68,
 	}
 	result.Methods["Describe"] = _gen_ipc.MethodSignature{
 		InArgs: []_gen_ipc.MethodArgument{

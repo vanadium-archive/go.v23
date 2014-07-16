@@ -1,8 +1,38 @@
 // Package build supports building and describing Veyron binaries.
+//
+// TODO(jsimsa): Switch Architecture, Format, and OperatingSystem type
+// to enum when supported.
 package build
 
 import (
 	"veyron2/services/mgmt/binary"
+)
+
+type Architecture byte
+
+const (
+	UnsupportedArchitecture = Architecture(0)
+	AMD64 = Architecture(1)
+	ARM = Architecture(2)
+	X86 = Architecture(3)
+)
+
+type Format byte
+
+const (
+	UnsupportedFormat = Format(0)
+	ELF = Format(1)
+	MACH = Format(2)
+	PE = Format(3)
+)
+
+type OperatingSystem byte
+
+const (
+	UnsupportedOperatingSystem = OperatingSystem(0)
+	Darwin = OperatingSystem(1)
+	Linux = OperatingSystem(2)
+	Windows = OperatingSystem(3)
 )
 
 type File struct {
@@ -13,8 +43,8 @@ type File struct {
 // Build describes an interface for building binaries from source.
 type Build interface {
 	// Build streams sources to the build server, which then attempts to
-	// build the sources and returns the output.
-	Build() stream<File> ([]byte, error)
+	// build the sources and streams back the compiled binaries.
+	Build() stream<File,File> ([]byte, error)
 	// Describe generates a description for a binary identified by
 	// the given Object name.
 	Describe(Name string) (binary.Description, error)
