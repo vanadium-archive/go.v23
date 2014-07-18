@@ -57,14 +57,26 @@ type GlobableService interface {
 type GlobableGlobStream interface {
 
 	// Recv returns the next item in the input stream, blocking until
-	// an item is available.  Returns io.EOF to indicate graceful end of input.
+	// an item is available.  Returns io.EOF to indicate graceful end of
+	// input.
 	Recv() (item MountEntry, err error)
 
-	// Finish closes the stream and returns the positional return values for
+	// Finish blocks until the server is done and returns the positional
+	// return values for call.
+	//
+	// If Cancel has been called, Finish will return immediately; the output of
+	// Finish could either be an error signalling cancelation, or the correct
+	// positional return values from the server depending on the timing of the
 	// call.
+	//
+	// Calling Finish is mandatory for releasing stream resources, unless Cancel
+	// has been called or any of the other methods return a non-EOF error.
+	// Finish should be called at most once.
 	Finish() (err error)
 
-	// Cancel cancels the RPC, notifying the server to stop processing.
+	// Cancel cancels the RPC, notifying the server to stop processing.  It
+	// is safe to call Cancel concurrently with any of the other stream methods.
+	// Calling Cancel after Finish has returned is a no-op.
 	Cancel()
 }
 
@@ -93,7 +105,7 @@ func (c *implGlobableGlobStream) Cancel() {
 // Glob in the service interface Globable.
 type GlobableServiceGlobStream interface {
 	// Send places the item onto the output stream, blocking if there is no buffer
-	// space available.
+	// space available.  If the client has canceled, an error is returned.
 	Send(item MountEntry) error
 }
 
