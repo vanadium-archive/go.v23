@@ -61,18 +61,42 @@ import (
 //   demo.MyFuncA(1, 2, 3, FooOption(5), GoodOption("good"))
 //   demo.MyFuncB(FooOption(9), BarOption("bar"))
 
-// LocalIDOpt represents the identity to be used by the local end of an IPC.
+// RuntimeIDOpt represents the identity to be used by the runtime.
 //
 // It wraps the security.PrivateID interface so that functions representing
 // option annotations can be added.
-type LocalIDOpt struct{ security.PrivateID }
+type RuntimeIDOpt struct{ security.PrivateID }
 
-func (LocalIDOpt) IPCClientOpt()   {}
-func (LocalIDOpt) IPCStreamVCOpt() {}
-func (LocalIDOpt) ROpt()           {}
+func (RuntimeIDOpt) ROpt() {}
 
-// LocalID specifies the identity of the local process.
-func LocalID(id security.PrivateID) LocalIDOpt { return LocalIDOpt{id} }
+// RuntimeID returns an option specifiying the PrivateID to be used by the
+// local process.
+func RuntimeID(id security.PrivateID) RuntimeIDOpt { return RuntimeIDOpt{id} }
+
+// RuntimePublicIDStoreOpt represents the PublicIDStore to be used the local
+// process.
+type RuntimePublicIDStoreOpt struct{ security.PublicIDStore }
+
+func (RuntimePublicIDStoreOpt) ROpt() {}
+
+// RuntimePublicIDStore returns an option specifying the PublicIDStore to be used
+// by the local process.
+func RuntimePublicIDStore(s security.PublicIDStore) RuntimePublicIDStoreOpt {
+	return RuntimePublicIDStoreOpt{s}
+}
+
+// LocalIDOpt represents the PublicID to be used by the local end of an IPC.
+//
+// It wraps the security.PrivateID interface so that functions representing
+// option annotations can be added.
+type LocalIDOpt struct{ security.PublicID }
+
+func (LocalIDOpt) IPCClientOpt() {}
+func (LocalIDOpt) IPCServerOpt() {}
+
+// LocalID returns an option specifying the PublicID to be used by the local end
+// of an IPC.
+func LocalID(id security.PublicID) LocalIDOpt { return LocalIDOpt{id} }
 
 // RemoteID specifies a pattern identifying the set of valid remote identities for
 // a call.

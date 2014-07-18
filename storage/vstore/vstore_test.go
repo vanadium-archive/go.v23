@@ -36,7 +36,7 @@ type Dir struct {
 }
 
 func newServer(t *testing.T) (storage.Store, func()) {
-	id := veyron2.LocalID(ipcID)
+	id := veyron2.RuntimeID(ipcID)
 	r := rt.Init(id)
 
 	server, err := r.NewServer()

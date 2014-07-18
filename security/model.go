@@ -20,7 +20,7 @@ type PublicIDStore interface {
 	// the (common) public key of existing PublicIDs in the store. PublicIDs with
 	// multiple Names are broken up into PublicIDs with at most one Name and then
 	// added separately to the store.
-	Add(PublicID PublicID, peerPattern PrincipalPattern) error
+	Add(id PublicID, peerPattern PrincipalPattern) error
 
 	// ForPeer returns a PublicID by combining all PublicIDs from the store that are
 	// tagged with patterns matching the provided peer. The combined PublicID has the

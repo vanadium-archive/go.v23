@@ -43,10 +43,14 @@ type Runtime interface {
 	// Product returns the Product that the current process is running on.
 	Product() product.T
 
-	// NewIdentity creates a new PrivateID with the provided name.
+	// NewIdentity creates a new PrivateID with the provided name and a newly
+	// minted private key.
 	NewIdentity(name string) (security.PrivateID, error)
 
-	// Identity returns the default identity used by the runtime.
+	// PublicIDStore returns the store of PublicIDs held by the Runtime.
+	PublicIDStore() security.PublicIDStore
+
+	// Identity returns the PrivateID used by the runtime.
 	Identity() security.PrivateID
 
 	// NewClient creates a new Client instance.

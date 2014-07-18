@@ -20,12 +20,12 @@ import (
 	"veyron2/storage/vstore"
 )
 
-var serverID = security.FakePrivateID("store")
+var storeID = security.FakePrivateID("store")
 
 // startServer opens a server, then creates and returns a client.  Also returns
 // a function to close everything at the end of the test.
 func startServer(t *testing.T) (storage.Store, func()) {
-	r := rt.Init(veyron2.LocalID(serverID))
+	r := rt.Init(veyron2.RuntimeID(storeID))
 
 	var buf [16]byte
 	if _, err := rand.Read(buf[:]); err != nil {
@@ -49,7 +49,7 @@ func startServer(t *testing.T) (storage.Store, func()) {
 	}
 
 	// Create a new StoreService.
-	storeService, err := server.New(server.ServerConfig{Admin: serverID.PublicID(), DBName: dbName})
+	storeService, err := server.New(server.ServerConfig{Admin: storeID.PublicID(), DBName: dbName})
 	if err != nil {
 		log.Fatal("server.New() failed: ", err)
 	}
