@@ -57,6 +57,10 @@ const (
 	Windows = OperatingSystem(3)
 )
 
+// TODO(bprosnitz) Remove this line once signatures are updated to use typevals.
+// It corrects a bug where _gen_wiretype is unused in VDL pacakges where only bootstrap types are used on interfaces.
+const _ = _gen_wiretype.TypeIDInvalid
+
 // Build describes an interface for building binaries from source.
 // Build is the interface the client binds and uses.
 // Build_ExcludingUniversal is the interface without internal framework-added methods

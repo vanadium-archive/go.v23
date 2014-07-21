@@ -157,6 +157,10 @@ const (
 	FiveSquared = int32(25)
 )
 
+// TODO(bprosnitz) Remove this line once signatures are updated to use typevals.
+// It corrects a bug where _gen_wiretype is unused in VDL pacakges where only bootstrap types are used on interfaces.
+const _ = _gen_wiretype.TypeIDInvalid
+
 const ErrIDFoo = _gen_verror.ID("veyron2/vdl/test_base.ErrIDFoo")
 
 const ErrIDBar = _gen_verror.ID("some/path.ErrIdOther")

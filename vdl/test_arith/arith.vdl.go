@@ -62,6 +62,10 @@ const (
 	Mask = uint64(256)
 )
 
+// TODO(bprosnitz) Remove this line once signatures are updated to use typevals.
+// It corrects a bug where _gen_wiretype is unused in VDL pacakges where only bootstrap types are used on interfaces.
+const _ = _gen_wiretype.TypeIDInvalid
+
 // Arith is an example of an interface definition for an arithmetic service.
 // Things to note:
 //   * There must be at least 1 out-arg, and the last out-arg must be error.
