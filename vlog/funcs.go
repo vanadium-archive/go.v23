@@ -1,7 +1,7 @@
 package vlog
 
 import (
-	"github.com/cnicolaou/llog"
+	"github.com/cosmosnicolaou/llog"
 )
 
 // Info logs to the INFO log.

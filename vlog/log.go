@@ -3,7 +3,7 @@ package vlog
 import (
 	"runtime"
 
-	"github.com/cnicolaou/llog"
+	"github.com/cosmosnicolaou/llog"
 )
 
 const (
