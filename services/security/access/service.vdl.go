@@ -170,6 +170,10 @@ type Group struct {
 	Name string
 }
 
+// TODO(bprosnitz) Remove this line once signatures are updated to use typevals.
+// It corrects a bug where _gen_wiretype is unused in VDL pacakges where only bootstrap types are used on interfaces.
+const _ = _gen_wiretype.TypeIDInvalid
+
 // The etag passed to SetACL is invalid.  Likely, another client set
 // the ACL already and invalidated the etag.  Use GetACL to fetch a
 // fresh etag.

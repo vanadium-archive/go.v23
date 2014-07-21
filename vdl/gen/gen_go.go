@@ -695,6 +695,11 @@ import ({{range $imp := $data.UserImports}}
 {{if $file.ConstDefs}}const ({{range $cdef := $file.ConstDefs}}
 	{{constDefGo $data $cdef}}
 {{end}}){{end}}
+{{if $file.Interfaces}}
+// TODO(bprosnitz) Remove this line once signatures are updated to use typevals.
+// It corrects a bug where _gen_wiretype is unused in VDL pacakges where only bootstrap types are used on interfaces.
+const _ = _gen_wiretype.TypeIDInvalid
+{{end}}
 {{range $eid := $file.ErrorIDs}}
 {{$eid.Doc}}const {{$eid.Name}} = {{genpkg $file "verror"}}ID("{{$eid.ID}}"){{$eid.DocSuffix}}
 {{end}}
