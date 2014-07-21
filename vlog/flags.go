@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/cnicolaou/llog"
+	"github.com/cosmosnicolaou/llog"
 )
 
 var (

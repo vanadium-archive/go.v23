@@ -3,7 +3,7 @@ package vlog
 import (
 	// TODO(cnicolaou): remove this dependency in the future. For now this
 	// saves us some code.
-	"github.com/cnicolaou/llog"
+	"github.com/cosmosnicolaou/llog"
 )
 
 type InfoLog interface {
