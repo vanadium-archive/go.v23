@@ -69,6 +69,7 @@ func newPackage(dir string, mode missingMode, exts map[string]bool, errs *vdluti
 func (p *Package) initBaseFileNames(exts map[string]bool) error {
 	vdlutil.Vlog.Printf("Looking for vdl files in package dir %v", p.Dir)
 	fd, err := os.Open(p.Dir)
+	defer fd.Close()
 	if err != nil {
 		return err
 	}
@@ -257,6 +258,7 @@ func (ds *depSorter) addAllDirs(prefix string) {
 	}
 	// Now try looking for all dirs under the prefix.
 	fd, err := os.Open(prefix)
+	defer fd.Close()
 	if err != nil {
 		return // Silently skip this src dir.
 	}
