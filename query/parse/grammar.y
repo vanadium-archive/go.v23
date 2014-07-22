@@ -313,13 +313,11 @@ alias_list:
   {  $$ = append($1, $3) }
 
 alias:
-  pipeline
-  { $$ = Alias{$1, "", false} }
-| pipeline tAS tIDENT
-  { $$ = Alias{$1, $3.str, false}}
-| pipeline tAS tSTRLIT
-  { $$ = Alias{$1, $3.str, false}}
-| pipeline tAS tIDENT tHIDDEN
-  { $$ = Alias{$1, $3.str, true}}
-| pipeline tAS tSTRLIT tHIDDEN
-  { $$ = Alias{$1, $3.str, true}}
+  tIDENT ':' pipeline
+  { $$ = Alias{$3, $1.str, false}}
+| tSTRLIT ':' pipeline
+  { $$ = Alias{$3, $1.str, false}}
+| tIDENT tHIDDEN ':' pipeline
+  { $$ = Alias{$4, $1.str, true}}
+| tSTRLIT tHIDDEN ':' pipeline
+  { $$ = Alias{$4, $1.str, true}}

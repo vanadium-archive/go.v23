@@ -636,32 +636,32 @@ func TestParsing(t *testing.T) {
 		///////////////////////////////////////////////////////////////////////////
 		// Selection
 		{
-			"* | type Team | {Name, Location}",
+			"* | type Team | {Name: Name, Location: Location}",
 			&PipelineSelection{
 				&PipelineType{&PipelineName{&WildcardName{"", Star, Pos{1, 1}}, Pos{1, 1}}, "Team", Pos{1, 3}},
 				[]Alias{
-					Alias{&PipelineName{&WildcardName{"Name", Self, Pos{1, 18}}, Pos{1, 18}}, "", false},
-					Alias{&PipelineName{&WildcardName{"Location", Self, Pos{1, 24}}, Pos{1, 24}}, "", false},
+					Alias{&PipelineName{&WildcardName{"Name", Self, Pos{1, 24}}, Pos{1, 24}}, "Name", false},
+					Alias{&PipelineName{&WildcardName{"Location", Self, Pos{1, 40}}, Pos{1, 40}}, "Location", false},
 				},
 				Pos{1, 15},
 			},
 			"",
 		},
 		{
-			"* | type Team | {Name, * | type Player | {Age}}",
+			"* | type Team | {Name: Name, player_age: * | type Player | {Age: Age}}",
 			&PipelineSelection{
 				&PipelineType{&PipelineName{&WildcardName{"", Star, Pos{1, 1}}, Pos{1, 1}}, "Team", Pos{1, 3}},
 				[]Alias{
-					Alias{&PipelineName{&WildcardName{"Name", Self, Pos{1, 18}}, Pos{1, 18}}, "", false},
+					Alias{&PipelineName{&WildcardName{"Name", Self, Pos{1, 24}}, Pos{1, 24}}, "Name", false},
 					Alias{
 						&PipelineSelection{
-							&PipelineType{&PipelineName{&WildcardName{"", Star, Pos{1, 24}}, Pos{1, 24}}, "Player", Pos{1, 26}},
+							&PipelineType{&PipelineName{&WildcardName{"", Star, Pos{1, 42}}, Pos{1, 42}}, "Player", Pos{1, 44}},
 							[]Alias{
-								Alias{&PipelineName{&WildcardName{"Age", Self, Pos{1, 43}}, Pos{1, 43}}, "", false},
+								Alias{&PipelineName{&WildcardName{"Age", Self, Pos{1, 66}}, Pos{1, 66}}, "Age", false},
 							},
-							Pos{1, 40},
+							Pos{1, 58},
 						},
-						"",
+						"player_age",
 						false,
 					},
 				},
@@ -737,23 +737,23 @@ func TestParsing(t *testing.T) {
 			"",
 		},
 		{
-			". | { teams/* | type Team | {NumPlayers} | avg as 'avg age'," +
-				"    teams/* | type Team | {NumPlayers} | sum as total_players hidden}",
+			". | { 'avg age': teams/* | type Team | {NumPlayers: NumPlayers} | avg," +
+				"    total_players hidden: teams/* | type Team | {NumPlayers: NumPlayers} | sum }",
 			&PipelineSelection{
 				&PipelineName{&WildcardName{"", Self, Pos{1, 1}}, Pos{1, 1}},
 				[]Alias{
 					Alias{
 						&PipelineFunc{
 							&PipelineSelection{
-								&PipelineType{&PipelineName{&WildcardName{"teams", Star, Pos{1, 7}}, Pos{1, 7}}, "Team", Pos{1, 15}},
+								&PipelineType{&PipelineName{&WildcardName{"teams", Star, Pos{1, 18}}, Pos{1, 18}}, "Team", Pos{1, 26}},
 								[]Alias{
-									Alias{&PipelineName{&WildcardName{"NumPlayers", Self, Pos{1, 30}}, Pos{1, 30}}, "", false},
+									Alias{&PipelineName{&WildcardName{"NumPlayers", Self, Pos{1, 53}}, Pos{1, 53}}, "NumPlayers", false},
 								},
-								Pos{1, 27},
+								Pos{1, 38},
 							},
 							"avg",
 							nil,
-							Pos{1, 42},
+							Pos{1, 65},
 						},
 						"avg age",
 						false,
@@ -761,15 +761,15 @@ func TestParsing(t *testing.T) {
 					Alias{
 						&PipelineFunc{
 							&PipelineSelection{
-								&PipelineType{&PipelineName{&WildcardName{"teams", Star, Pos{1, 65}}, Pos{1, 65}}, "Team", Pos{1, 73}},
+								&PipelineType{&PipelineName{&WildcardName{"teams", Star, Pos{1, 97}}, Pos{1, 97}}, "Team", Pos{1, 105}},
 								[]Alias{
-									Alias{&PipelineName{&WildcardName{"NumPlayers", Self, Pos{1, 88}}, Pos{1, 88}}, "", false},
+									Alias{&PipelineName{&WildcardName{"NumPlayers", Self, Pos{1, 132}}, Pos{1, 132}}, "NumPlayers", false},
 								},
-								Pos{1, 85},
+								Pos{1, 117},
 							},
 							"sum",
 							nil,
-							Pos{1, 100},
+							Pos{1, 144},
 						},
 						"total_players",
 						true,
@@ -780,23 +780,23 @@ func TestParsing(t *testing.T) {
 			"",
 		},
 		{
-			". | { teams/* | type Team | {NumPlayers} | avg as 'avg age' hidden," +
-				"    teams/* | type Team | {NumPlayers} | sum as total_players}",
+			". | { 'avg age' hidden: teams/* | type Team | {NumPlayers: NumPlayers} | avg," +
+				"    total_players: teams/* | type Team | {NumPlayers: NumPlayers} | sum }",
 			&PipelineSelection{
 				&PipelineName{&WildcardName{"", Self, Pos{1, 1}}, Pos{1, 1}},
 				[]Alias{
 					Alias{
 						&PipelineFunc{
 							&PipelineSelection{
-								&PipelineType{&PipelineName{&WildcardName{"teams", Star, Pos{1, 7}}, Pos{1, 7}}, "Team", Pos{1, 15}},
+								&PipelineType{&PipelineName{&WildcardName{"teams", Star, Pos{1, 25}}, Pos{1, 25}}, "Team", Pos{1, 33}},
 								[]Alias{
-									Alias{&PipelineName{&WildcardName{"NumPlayers", Self, Pos{1, 30}}, Pos{1, 30}}, "", false},
+									Alias{&PipelineName{&WildcardName{"NumPlayers", Self, Pos{1, 60}}, Pos{1, 60}}, "NumPlayers", false},
 								},
-								Pos{1, 27},
+								Pos{1, 45},
 							},
 							"avg",
 							nil,
-							Pos{1, 42},
+							Pos{1, 72},
 						},
 						"avg age",
 						true,
@@ -804,15 +804,15 @@ func TestParsing(t *testing.T) {
 					Alias{
 						&PipelineFunc{
 							&PipelineSelection{
-								&PipelineType{&PipelineName{&WildcardName{"teams", Star, Pos{1, 72}}, Pos{1, 72}}, "Team", Pos{1, 80}},
+								&PipelineType{&PipelineName{&WildcardName{"teams", Star, Pos{1, 97}}, Pos{1, 97}}, "Team", Pos{1, 105}},
 								[]Alias{
-									Alias{&PipelineName{&WildcardName{"NumPlayers", Self, Pos{1, 95}}, Pos{1, 95}}, "", false},
+									Alias{&PipelineName{&WildcardName{"NumPlayers", Self, Pos{1, 132}}, Pos{1, 132}}, "NumPlayers", false},
 								},
-								Pos{1, 92},
+								Pos{1, 117},
 							},
 							"sum",
 							nil,
-							Pos{1, 107},
+							Pos{1, 144},
 						},
 						"total_players",
 						false,
@@ -823,23 +823,23 @@ func TestParsing(t *testing.T) {
 			"",
 		},
 		{
-			". | { teams/* | type Team | {NumPlayers} | avg as 'avg/age' hidden," +
-				"    teams/* | type Team | {NumPlayers} | sum as 'total/players'}",
+			". | { 'avg/age' hidden: teams/* | type Team | {NumPlayers: NumPlayers} | avg," +
+				"    'total/players': teams/* | type Team | {NumPlayers: NumPlayers} | sum}",
 			&PipelineSelection{
 				&PipelineName{&WildcardName{"", Self, Pos{1, 1}}, Pos{1, 1}},
 				[]Alias{
 					Alias{
 						&PipelineFunc{
 							&PipelineSelection{
-								&PipelineType{&PipelineName{&WildcardName{"teams", Star, Pos{1, 7}}, Pos{1, 7}}, "Team", Pos{1, 15}},
+								&PipelineType{&PipelineName{&WildcardName{"teams", Star, Pos{1, 25}}, Pos{1, 25}}, "Team", Pos{1, 33}},
 								[]Alias{
-									Alias{&PipelineName{&WildcardName{"NumPlayers", Self, Pos{1, 30}}, Pos{1, 30}}, "", false},
+									Alias{&PipelineName{&WildcardName{"NumPlayers", Self, Pos{1, 60}}, Pos{1, 60}}, "NumPlayers", false},
 								},
-								Pos{1, 27},
+								Pos{1, 45},
 							},
 							"avg",
 							nil,
-							Pos{1, 42},
+							Pos{1, 72},
 						},
 						"avg/age",
 						true,
@@ -847,15 +847,15 @@ func TestParsing(t *testing.T) {
 					Alias{
 						&PipelineFunc{
 							&PipelineSelection{
-								&PipelineType{&PipelineName{&WildcardName{"teams", Star, Pos{1, 72}}, Pos{1, 72}}, "Team", Pos{1, 80}},
+								&PipelineType{&PipelineName{&WildcardName{"teams", Star, Pos{1, 99}}, Pos{1, 99}}, "Team", Pos{1, 107}},
 								[]Alias{
-									Alias{&PipelineName{&WildcardName{"NumPlayers", Self, Pos{1, 95}}, Pos{1, 95}}, "", false},
+									Alias{&PipelineName{&WildcardName{"NumPlayers", Self, Pos{1, 134}}, Pos{1, 134}}, "NumPlayers", false},
 								},
-								Pos{1, 92},
+								Pos{1, 119},
 							},
 							"sum",
 							nil,
-							Pos{1, 107},
+							Pos{1, 146},
 						},
 						"total/players",
 						false,
@@ -865,7 +865,7 @@ func TestParsing(t *testing.T) {
 			},
 			"",
 		},
-		{"teams/* | type team | {Name as foo/bar}", nil, "1:35: syntax error at token '/'"},
+		{"teams/* | type team | {foo/bar: Name}", nil, "1:27: syntax error at token '/'"},
 	}
 
 	for _, test := range basic {
