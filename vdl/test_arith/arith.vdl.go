@@ -62,10 +62,6 @@ const (
 	Mask = uint64(256)
 )
 
-// TODO(bprosnitz) Remove this line once signatures are updated to use typevals.
-// It corrects a bug where _gen_wiretype is unused in VDL pacakges where only bootstrap types are used on interfaces.
-const _ = _gen_wiretype.TypeIDInvalid
-
 // Arith is an example of an interface definition for an arithmetic service.
 // Things to note:
 //   * There must be at least 1 out-arg, and the last out-arg must be error.
@@ -129,26 +125,14 @@ type ArithService interface {
 type ArithCountStream interface {
 
 	// Recv returns the next item in the input stream, blocking until
-	// an item is available.  Returns io.EOF to indicate graceful end of
-	// input.
+	// an item is available.  Returns io.EOF to indicate graceful end of input.
 	Recv() (item int32, err error)
 
-	// Finish blocks until the server is done and returns the positional
-	// return values for call.
-	//
-	// If Cancel has been called, Finish will return immediately; the output of
-	// Finish could either be an error signalling cancelation, or the correct
-	// positional return values from the server depending on the timing of the
+	// Finish closes the stream and returns the positional return values for
 	// call.
-	//
-	// Calling Finish is mandatory for releasing stream resources, unless Cancel
-	// has been called or any of the other methods return a non-EOF error.
-	// Finish should be called at most once.
 	Finish() (err error)
 
-	// Cancel cancels the RPC, notifying the server to stop processing.  It
-	// is safe to call Cancel concurrently with any of the other stream methods.
-	// Calling Cancel after Finish has returned is a no-op.
+	// Cancel cancels the RPC, notifying the server to stop processing.
 	Cancel()
 }
 
@@ -177,7 +161,7 @@ func (c *implArithCountStream) Cancel() {
 // Count in the service interface Arith.
 type ArithServiceCountStream interface {
 	// Send places the item onto the output stream, blocking if there is no buffer
-	// space available.  If the client has canceled, an error is returned.
+	// space available.
 	Send(item int32) error
 }
 
@@ -194,43 +178,25 @@ func (s *implArithServiceCountStream) Send(item int32) error {
 // StreamingAdd in the service interface Arith.
 type ArithStreamingAddStream interface {
 
-	// Send places the item onto the output stream, blocking if there is no
-	// buffer space available.  Calls to Send after having called CloseSend
-	// or Cancel will fail.  Any blocked Send calls will be unblocked upon
-	// calling Cancel.
+	// Send places the item onto the output stream, blocking if there is no buffer
+	// space available.
 	Send(item int32) error
 
-	// CloseSend indicates to the server that no more items will be sent;
-	// server Recv calls will receive io.EOF after all sent items.  This is
-	// an optional call - it's used by streaming clients that need the
-	// server to receive the io.EOF terminator before the client calls
-	// Finish (for example, if the client needs to continue receiving items
-	// from the server after having finished sending).
-	// Calls to CloseSend after having called Cancel will fail.
-	// Like Send, CloseSend blocks when there's no buffer space available.
+	// CloseSend indicates to the server that no more items will be sent; server
+	// Recv calls will receive io.EOF after all sent items.  Subsequent calls to
+	// Send on the client will fail.  This is an optional call - it's used by
+	// streaming clients that need the server to receive the io.EOF terminator.
 	CloseSend() error
 
 	// Recv returns the next item in the input stream, blocking until
-	// an item is available.  Returns io.EOF to indicate graceful end of
-	// input.
+	// an item is available.  Returns io.EOF to indicate graceful end of input.
 	Recv() (item int32, err error)
 
-	// Finish performs the equivalent of CloseSend, then blocks until the server
-	// is done, and returns the positional return values for call.
-	//
-	// If Cancel has been called, Finish will return immediately; the output of
-	// Finish could either be an error signalling cancelation, or the correct
-	// positional return values from the server depending on the timing of the
+	// Finish closes the stream and returns the positional return values for
 	// call.
-	//
-	// Calling Finish is mandatory for releasing stream resources, unless Cancel
-	// has been called or any of the other methods return a non-EOF error.
-	// Finish should be called at most once.
 	Finish() (reply int32, err error)
 
-	// Cancel cancels the RPC, notifying the server to stop processing.  It
-	// is safe to call Cancel concurrently with any of the other stream methods.
-	// Calling Cancel after Finish has returned is a no-op.
+	// Cancel cancels the RPC, notifying the server to stop processing.
 	Cancel()
 }
 
@@ -267,7 +233,7 @@ func (c *implArithStreamingAddStream) Cancel() {
 // StreamingAdd in the service interface Arith.
 type ArithServiceStreamingAddStream interface {
 	// Send places the item onto the output stream, blocking if there is no buffer
-	// space available.  If the client has canceled, an error is returned.
+	// space available.
 	Send(item int32) error
 
 	// Recv fills itemptr with the next item in the input stream, blocking until

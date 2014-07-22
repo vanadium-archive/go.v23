@@ -31,10 +31,6 @@ type Description struct {
 	Profiles map[string]struct{}
 }
 
-// TODO(bprosnitz) Remove this line once signatures are updated to use typevals.
-// It corrects a bug where _gen_wiretype is unused in VDL pacakges where only bootstrap types are used on interfaces.
-const _ = _gen_wiretype.TypeIDInvalid
-
 // Application can be used to manage applications on a device. The
 // idea is that this interace will be invoked using an object name that
 // identifies the application and its installations and instances

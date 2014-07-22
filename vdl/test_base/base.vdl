@@ -25,7 +25,7 @@ type (
 	//NamedEnum       enum{A;B;C}
 	NamedArray      [2]bool
 	NamedList       []uint32
-	//NamedSet        set[string]
+	NamedSet        set[string]
 	NamedMap        map[string]float32
 	NamedStruct     struct{A bool;B string;C int32}
 	//NamedOneOf      oneof{bool;string;int32}
