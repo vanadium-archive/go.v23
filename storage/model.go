@@ -314,9 +314,21 @@ type QueryResult interface {
 
 // GlobStream is the interface for streaming responses from the Glob method.
 type GlobStream interface {
-	// Recv returns the next item in the input stream, blocking until
-	// an item is available.  Returns io.EOF to indicate graceful end of input.
-	Recv() (item string, err error)
+	// Advance stages an element so the client can retrieve it
+	// with Value.  Advance returns true iff there is an
+	// element to retrieve.  The client must call Advance before
+	// calling Value.  The client must call Cancel if it does
+	// not iterate through all elements (i.e. until Advance
+	// returns false).  Advance may block if an element is not
+	// immediately available.
+	Advance() bool
+	// Value returns the element that was staged by Advance.
+	// Value may panic if Advance returned false or was not
+	// called at all.  Value does not block.
+	Value() string
+	// Err returns a non-nil error iff the stream encountered
+	// any errors.  Err does not block.
+	Err() error
 
 	// Finish closes the stream and returns the positional return values for
 	// call.

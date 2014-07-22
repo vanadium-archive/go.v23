@@ -180,9 +180,21 @@ func (o *object) GlobT(ctx context.T, t storage.Transaction, pattern string) (st
 
 // ChangeBatchStream is an interface for streaming responses of type ChangeBatch.
 type ChangeBatchStream interface {
-	// Recv returns the next item in the input stream, blocking until
-	// an item is available.  Returns io.EOF to indicate graceful end of input.
-	Recv() (watch.ChangeBatch, error)
+	// Advance stages an element so the client can retrieve it
+	// with Value.  Advance returns true iff there is an
+	// element to retrieve.  The client must call Advance before
+	// calling Value.  The client must call Cancel if it does
+	// not iterate through all elements (i.e. until Advance
+	// returns false).  Advance may block if an element is not
+	// immediately available.
+	Advance() bool
+	// Value returns the element that was staged by Advance.
+	// Value may panic if Advance returned false or was not
+	// called at all.  Value does not block.
+	Value() watch.ChangeBatch
+	// Err returns a non-nil error iff the stream encountered
+	// any errors.  Err does not block.
+	Err() error
 
 	// Finish closes the stream and returns the positional return values for
 	// call.
@@ -197,26 +209,42 @@ type ChangeBatchStream interface {
 // value in each change from *store.Entry to *storage.Entry.
 type entryTransformStream struct {
 	delegate ChangeBatchStream
+	value    watch.ChangeBatch
+	err      error
 }
 
-func (s *entryTransformStream) Recv() (watch.ChangeBatch, error) {
-	cb, err := s.delegate.Recv()
-	if err != nil {
-		return nullChangeBatch, err
+func (s *entryTransformStream) Advance() bool {
+	if !s.delegate.Advance() {
+		s.value = nullChangeBatch
+		s.err = s.Err()
+		return false
 	}
+	s.value = s.delegate.Value()
 	// Transform the ChangeBatch in-place.
-	changes := cb.Changes
+	changes := s.value.Changes
 	for i := range changes {
 		if changes[i].Value != nil {
 			serviceEntry := changes[i].Value.(*store.Entry)
 			entry, err := makeEntry(serviceEntry)
 			if err != nil {
-				return nullChangeBatch, err
+				s.value = nullChangeBatch
+				s.err = err
+				return false
 			}
 			changes[i].Value = &entry
 		}
 	}
-	return cb, nil
+	return true
+
+}
+
+func (s *entryTransformStream) Value() watch.ChangeBatch {
+	return s.value
+
+}
+
+func (s *entryTransformStream) Err() error {
+	return s.err
 }
 
 func (s *entryTransformStream) Finish() error {
@@ -233,7 +261,7 @@ func (o *object) WatchGlob(ctx context.T, req watch.GlobRequest) (watch.GlobWatc
 	if err != nil {
 		return nil, err
 	}
-	return &entryTransformStream{stream}, nil
+	return &entryTransformStream{delegate: stream}, nil
 }
 
 // WatchQuery returns a stream of changes that satisy a query.
@@ -242,7 +270,7 @@ func (o *object) WatchQuery(ctx context.T, req watch.QueryRequest) (watch.QueryW
 	if err != nil {
 		return nil, err
 	}
-	return &entryTransformStream{stream}, nil
+	return &entryTransformStream{delegate: stream}, nil
 }
 
 // The errorObject responds with an error to all operations.

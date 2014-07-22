@@ -6,6 +6,7 @@ package appcycle
 
 import (
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
+	_gen_io "io"
 	_gen_veyron2 "veyron2"
 	_gen_context "veyron2/context"
 	_gen_ipc "veyron2/ipc"
@@ -29,6 +30,10 @@ type Task struct {
 	Progress int32
 	Goal     int32
 }
+
+// TODO(bprosnitz) Remove this line once signatures are updated to use typevals.
+// It corrects a bug where _gen_wiretype is unused in VDL pacakges where only bootstrap types are used on interfaces.
+const _ = _gen_wiretype.TypeIDInvalid
 
 // AppCycle interfaces with the process running a veyron runtime.
 // AppCycle is the interface the client binds and uses.
@@ -66,26 +71,65 @@ type AppCycleService interface {
 // Stop in the service interface AppCycle.
 type AppCycleStopStream interface {
 
-	// Recv returns the next item in the input stream, blocking until
-	// an item is available.  Returns io.EOF to indicate graceful end of input.
-	Recv() (item Task, err error)
+	// Advance stages an element so the client can retrieve it
+	// with Value.  Advance returns true iff there is an
+	// element to retrieve.  The client must call Advance before
+	// calling Value.  The client must call Cancel if it does
+	// not iterate through all elements (i.e. until Advance
+	// returns false).  Advance may block if an element is not
+	// immediately available.
+	Advance() bool
 
-	// Finish closes the stream and returns the positional return values for
+	// Value returns the element that was staged by Advance.
+	// Value may panic if Advance returned false or was not
+	// called at all.  Value does not block.
+	Value() Task
+
+	// Err returns a non-nil error iff the stream encountered
+	// any errors.  Err does not block.
+	Err() error
+
+	// Finish blocks until the server is done and returns the positional
+	// return values for call.
+	//
+	// If Cancel has been called, Finish will return immediately; the output of
+	// Finish could either be an error signalling cancelation, or the correct
+	// positional return values from the server depending on the timing of the
 	// call.
+	//
+	// Calling Finish is mandatory for releasing stream resources, unless Cancel
+	// has been called or any of the other methods return a non-EOF error.
+	// Finish should be called at most once.
 	Finish() (err error)
 
-	// Cancel cancels the RPC, notifying the server to stop processing.
+	// Cancel cancels the RPC, notifying the server to stop processing.  It
+	// is safe to call Cancel concurrently with any of the other stream methods.
+	// Calling Cancel after Finish has returned is a no-op.
 	Cancel()
 }
 
 // Implementation of the AppCycleStopStream interface that is not exported.
 type implAppCycleStopStream struct {
 	clientCall _gen_ipc.Call
+	val        Task
+	err        error
 }
 
-func (c *implAppCycleStopStream) Recv() (item Task, err error) {
-	err = c.clientCall.Recv(&item)
-	return
+func (c *implAppCycleStopStream) Advance() bool {
+	c.val = Task{}
+	c.err = c.clientCall.Recv(&c.val)
+	return c.err == nil
+}
+
+func (c *implAppCycleStopStream) Value() Task {
+	return c.val
+}
+
+func (c *implAppCycleStopStream) Err() error {
+	if c.err == _gen_io.EOF {
+		return nil
+	}
+	return c.err
 }
 
 func (c *implAppCycleStopStream) Finish() (err error) {
@@ -103,7 +147,7 @@ func (c *implAppCycleStopStream) Cancel() {
 // Stop in the service interface AppCycle.
 type AppCycleServiceStopStream interface {
 	// Send places the item onto the output stream, blocking if there is no buffer
-	// space available.
+	// space available.  If the client has canceled, an error is returned.
 	Send(item Task) error
 }
 

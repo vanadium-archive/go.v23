@@ -133,6 +133,25 @@ func systemImportsGo(f *compile.File) []string {
 		set[`_gen_veyron2 "veyron2"`] = true
 		set[`_gen_vdlutil "veyron2/vdl/vdlutil"`] = true
 		set[`_gen_naming "veyron2/naming"`] = true
+
+		hasStreaming := false
+
+		for _, i := range f.Interfaces {
+			for _, m := range i.AllMethods() {
+				if isStreamingMethodGo(m) {
+					hasStreaming = true
+					break
+
+				}
+			}
+			if hasStreaming {
+				break
+			}
+		}
+
+		if hasStreaming {
+			set[`_gen_io "io"`] = true
+		}
 	}
 	// If the user has specified any error IDs, typically we need to import the
 	// "veyron2/verror" package.  However we allow vdl code-generation in the
@@ -178,6 +197,7 @@ func init() {
 		"prefixName":               prefixName,
 		"signatureMethods":         signatureMethods,
 		"signatureTypeDefs":        signatureTypeDefs,
+		"reInitStreamValue":        reInitStreamValue,
 	}
 	goTemplate = template.Must(template.New("genGo").Funcs(funcMap).Parse(genGo))
 }
@@ -668,6 +688,16 @@ func typeDefsCode(td []vdlutil.Any) string {
 	return buf.String()
 }
 
+func reInitStreamValue(data goData, t *vdl.Type, name string) string {
+	switch t.Kind() {
+	case vdl.Struct:
+		return name + " = " + typeGo(data, t) + "{}\n"
+	case vdl.Any:
+		return name + " = nil\n"
+	}
+	return ""
+}
+
 // The template that we execute against a goData instance to generate our
 // code.  Most of this is fairly straightforward substitution and ranges; more
 // complicated logic is delegated to the helper functions above.
@@ -750,10 +780,23 @@ type {{$clientStreamIfaceType}} interface {
 	{{end}}
 
 	{{if $method.OutStream}}
-	// Recv returns the next item in the input stream, blocking until
-	// an item is available.  Returns io.EOF to indicate graceful end of
-	// input.
-	Recv() (item {{typeGo $data $method.OutStream}}, err error)
+	// Advance stages an element so the client can retrieve it
+	// with Value.  Advance returns true iff there is an
+	// element to retrieve.  The client must call Advance before
+	// calling Value.  The client must call Cancel if it does
+	// not iterate through all elements (i.e. until Advance
+	// returns false).  Advance may block if an element is not
+	// immediately available.
+        Advance() bool
+
+	// Value returns the element that was staged by Advance.
+	// Value may panic if Advance returned false or was not
+  	// called at all.  Value does not block.
+  	Value() {{typeGo $data $method.OutStream}}
+
+	// Err returns a non-nil error iff the stream encountered
+  	// any errors.  Err does not block.
+  	Err() error
 	{{end}}
 
 	{{if $method.InStream}}
@@ -777,11 +820,13 @@ type {{$clientStreamIfaceType}} interface {
 	// Calling Cancel after Finish has returned is a no-op.
 	Cancel()
 }
-
 // Implementation of the {{$clientStreamIfaceType}} interface that is not exported.
 type {{$clientStreamType}} struct {
-	clientCall _gen_ipc.Call
+	clientCall _gen_ipc.Call{{if $method.OutStream}}
+	val {{typeGo $data $method.OutStream}}
+	err error{{end}}
 }
+
 {{if $method.InStream}}
 func (c *{{$clientStreamType}}) Send(item {{typeGo $data $method.InStream}}) error {
 	return c.clientCall.Send(item)
@@ -793,9 +838,20 @@ func (c *{{$clientStreamType}}) CloseSend() error {
 {{end}}
 
 {{if $method.OutStream}}
-func (c *{{$clientStreamType}}) Recv() (item {{typeGo $data $method.OutStream}}, err error) {
-	err = c.clientCall.Recv(&item)
-	return
+func (c *{{$clientStreamType}}) Advance() bool {
+	{{reInitStreamValue $data $method.OutStream "c.val"}}c.err = c.clientCall.Recv(&c.val)
+	return c.err == nil
+}
+
+func (c *{{$clientStreamType}}) Value() {{typeGo $data $method.OutStream}} {
+	return c.val
+}
+
+func (c *{{$clientStreamType}}) Err() error {
+	if c.err == _gen_io.EOF {
+		return nil
+	}
+	return c.err
 }
 {{end}}
 
@@ -819,15 +875,37 @@ type {{$serverStreamIfaceType}} interface { {{if $method.OutStream}}
 	{{end}}
 
 	{{if $method.InStream}}
-	// Recv fills itemptr with the next item in the input stream, blocking until
-	// an item is available.  Returns io.EOF to indicate graceful end of input.
-	Recv() (item {{typeGo $data $method.InStream}}, err error)
+	// Advance stages an element so the client can retrieve it
+        // with Value.  Advance returns true iff there is an
+        // element to retrieve.  The client must call Advance before
+        // calling Value.  The client must call Cancel if it does
+        // not iterate through all elements (i.e. until Advance
+        // returns false).  Advance may block if an element is not
+        // immediately available.
+        Advance() bool
+  
+	// Value returns the element that was staged by Advance.
+	// Value may panic if Advance returned false or was not
+  	// called at all.  Value does not block.
+  	//
+  	// In general, Value is undefined if the underlying collection
+  	// of elements changes while iteration is in progress.  If
+  	// <DataProvider> supports concurrent modification, it should
+  	// document its behavior.
+  	Value() {{typeGo $data $method.InStream}}
+  	
+	// Err returns a non-nil error iff the stream encountered
+  	// any errors.  Err does not block.
+  	Err() error
 	{{end}}
 }
 
 // Implementation of the {{$serverStreamIfaceType}} interface that is not exported.
 type {{$serverStreamType}} struct {
-	serverCall _gen_ipc.ServerCall
+	serverCall _gen_ipc.ServerCall{{if $method.InStream}}
+	val {{typeGo $data $method.InStream}}
+	err error
+	{{end}}
 }
 {{if $method.OutStream}}
 func (s *{{$serverStreamType}}) Send(item {{typeGo $data $method.OutStream}}) error {
@@ -836,9 +914,20 @@ func (s *{{$serverStreamType}}) Send(item {{typeGo $data $method.OutStream}}) er
 {{end}}
 
 {{if $method.InStream}}
-func (s *{{$serverStreamType}}) Recv() (item {{typeGo $data $method.InStream}}, err error) {
-	err = s.serverCall.Recv(&item)
-	return
+func (s *{{$serverStreamType}}) Advance() bool {
+	{{reInitStreamValue $data $method.InStream "s.val"}}s.err = s.serverCall.Recv(&s.val)
+	return s.err == nil
+}
+
+func (s *{{$serverStreamType}}) Value() {{typeGo $data $method.InStream}} {
+	return s.val
+}
+
+func (s *{{$serverStreamType}}) Err() error {
+	if s.err == _gen_io.EOF {
+		return nil
+	}
+	return s.err
 }
 {{end}}
 

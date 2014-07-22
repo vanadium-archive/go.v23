@@ -3,7 +3,6 @@ package arith
 import (
 	"errors"
 	"fmt"
-	"io"
 	"math"
 	"reflect"
 	"testing"
@@ -67,19 +66,12 @@ func (*serverArith) Count(_ ipc.ServerContext, Start int32, Stream ArithServiceC
 
 func (*serverArith) StreamingAdd(_ ipc.ServerContext, Stream ArithServiceStreamingAddStream) (int32, error) {
 	var total int32
-	for {
-		value, err := Stream.Recv()
-		if err == io.EOF {
-			break
-		}
-
-		if err != nil {
-			return total, err
-		}
+	for Stream.Advance() {
+		value := Stream.Value()
 		total += value
 		Stream.Send(total)
 	}
-	return total, nil
+	return total, Stream.Err()
 }
 
 func (*serverArith) GenError(_ ipc.ServerContext) error {
@@ -403,16 +395,16 @@ func TestArith(t *testing.T) {
 		}
 
 		for i := int32(0); i < 1000; i++ {
-			val, err := stream.Recv()
-			if err != nil {
-				t.Errorf("Error getting value %v", err)
+			if !stream.Advance() {
+				t.Errorf("Error getting value %v", stream.Err())
 			}
+			val := stream.Value()
 			if val != 35+i {
 				t.Errorf("Expected value %d, got %d", 35+i, val)
 			}
 		}
-		if _, err := stream.Recv(); err != io.EOF {
-			t.Errorf("Reply stream should have been closed %v", err)
+		if stream.Advance() || stream.Err() != nil {
+			t.Errorf("Reply stream should have been closed %v", stream.Err())
 		}
 
 		if err := stream.Finish(); err != nil {
@@ -435,16 +427,17 @@ func TestArith(t *testing.T) {
 		var expectedSum int32
 		for i := int32(0); i < 100; i++ {
 			expectedSum += i
-			value, err := addStream.Recv()
-			if err != nil {
-				t.Errorf("Error getting value %v", err)
-			} else if value != expectedSum {
+			if !addStream.Advance() {
+				t.Errorf("Error getting value %v", stream.Err())
+			}
+			value := addStream.Value()
+			if value != expectedSum {
 				t.Errorf("Got %d but expected %d", value, expectedSum)
 			}
 		}
 
-		if _, err := addStream.Recv(); err != io.EOF {
-			t.Errorf("Reply stream should have been closed %v", err)
+		if addStream.Advance() || addStream.Err() != nil {
+			t.Errorf("Reply stream should have been closed %v", stream.Err())
 		}
 
 		total, err := addStream.Finish()

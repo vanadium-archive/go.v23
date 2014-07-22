@@ -2,7 +2,6 @@ package primitives
 
 import (
 	"errors"
-	"io"
 	"sort"
 	"sync"
 
@@ -68,20 +67,18 @@ func (r *serverStream) Advance() bool {
 	}
 	r.mu.Unlock()
 	// Don't hold the lock while waiting for the next result.
-	curr, err := r.stream.Recv()
+	hasValue := r.stream.Advance()
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	// The client might have called Cancel() while we were blocked on Recv().
 	if r.err != nil {
 		return false
 	}
-	if err == io.EOF {
+	if !hasValue {
+		r.err = r.stream.Err()
 		return false
 	}
-	if err != nil {
-		r.err = err
-		return false
-	}
+	curr := r.stream.Value()
 	r.curr = &curr
 	r.next = nil
 	return true

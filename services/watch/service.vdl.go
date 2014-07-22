@@ -114,6 +114,7 @@ import (
 	"veyron2/query"
 
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
+	_gen_io "io"
 	_gen_veyron2 "veyron2"
 	_gen_context "veyron2/context"
 	_gen_ipc "veyron2/ipc"
@@ -219,6 +220,10 @@ const (
 	InitialStateSkipped = int32(2)
 )
 
+// TODO(bprosnitz) Remove this line once signatures are updated to use typevals.
+// It corrects a bug where _gen_wiretype is unused in VDL pacakges where only bootstrap types are used on interfaces.
+const _ = _gen_wiretype.TypeIDInvalid
+
 // GlobWatcher allows a client to receive updates for changes to objects
 // that match a pattern.  See the package comments for details.
 // GlobWatcher is the interface the client binds and uses.
@@ -244,26 +249,65 @@ type GlobWatcherService interface {
 // WatchGlob in the service interface GlobWatcher.
 type GlobWatcherWatchGlobStream interface {
 
-	// Recv returns the next item in the input stream, blocking until
-	// an item is available.  Returns io.EOF to indicate graceful end of input.
-	Recv() (item ChangeBatch, err error)
+	// Advance stages an element so the client can retrieve it
+	// with Value.  Advance returns true iff there is an
+	// element to retrieve.  The client must call Advance before
+	// calling Value.  The client must call Cancel if it does
+	// not iterate through all elements (i.e. until Advance
+	// returns false).  Advance may block if an element is not
+	// immediately available.
+	Advance() bool
 
-	// Finish closes the stream and returns the positional return values for
+	// Value returns the element that was staged by Advance.
+	// Value may panic if Advance returned false or was not
+	// called at all.  Value does not block.
+	Value() ChangeBatch
+
+	// Err returns a non-nil error iff the stream encountered
+	// any errors.  Err does not block.
+	Err() error
+
+	// Finish blocks until the server is done and returns the positional
+	// return values for call.
+	//
+	// If Cancel has been called, Finish will return immediately; the output of
+	// Finish could either be an error signalling cancelation, or the correct
+	// positional return values from the server depending on the timing of the
 	// call.
+	//
+	// Calling Finish is mandatory for releasing stream resources, unless Cancel
+	// has been called or any of the other methods return a non-EOF error.
+	// Finish should be called at most once.
 	Finish() (err error)
 
-	// Cancel cancels the RPC, notifying the server to stop processing.
+	// Cancel cancels the RPC, notifying the server to stop processing.  It
+	// is safe to call Cancel concurrently with any of the other stream methods.
+	// Calling Cancel after Finish has returned is a no-op.
 	Cancel()
 }
 
 // Implementation of the GlobWatcherWatchGlobStream interface that is not exported.
 type implGlobWatcherWatchGlobStream struct {
 	clientCall _gen_ipc.Call
+	val        ChangeBatch
+	err        error
 }
 
-func (c *implGlobWatcherWatchGlobStream) Recv() (item ChangeBatch, err error) {
-	err = c.clientCall.Recv(&item)
-	return
+func (c *implGlobWatcherWatchGlobStream) Advance() bool {
+	c.val = ChangeBatch{}
+	c.err = c.clientCall.Recv(&c.val)
+	return c.err == nil
+}
+
+func (c *implGlobWatcherWatchGlobStream) Value() ChangeBatch {
+	return c.val
+}
+
+func (c *implGlobWatcherWatchGlobStream) Err() error {
+	if c.err == _gen_io.EOF {
+		return nil
+	}
+	return c.err
 }
 
 func (c *implGlobWatcherWatchGlobStream) Finish() (err error) {
@@ -281,7 +325,7 @@ func (c *implGlobWatcherWatchGlobStream) Cancel() {
 // WatchGlob in the service interface GlobWatcher.
 type GlobWatcherServiceWatchGlobStream interface {
 	// Send places the item onto the output stream, blocking if there is no buffer
-	// space available.
+	// space available.  If the client has canceled, an error is returned.
 	Send(item ChangeBatch) error
 }
 
@@ -486,26 +530,65 @@ type QueryWatcherService interface {
 // WatchQuery in the service interface QueryWatcher.
 type QueryWatcherWatchQueryStream interface {
 
-	// Recv returns the next item in the input stream, blocking until
-	// an item is available.  Returns io.EOF to indicate graceful end of input.
-	Recv() (item ChangeBatch, err error)
+	// Advance stages an element so the client can retrieve it
+	// with Value.  Advance returns true iff there is an
+	// element to retrieve.  The client must call Advance before
+	// calling Value.  The client must call Cancel if it does
+	// not iterate through all elements (i.e. until Advance
+	// returns false).  Advance may block if an element is not
+	// immediately available.
+	Advance() bool
 
-	// Finish closes the stream and returns the positional return values for
+	// Value returns the element that was staged by Advance.
+	// Value may panic if Advance returned false or was not
+	// called at all.  Value does not block.
+	Value() ChangeBatch
+
+	// Err returns a non-nil error iff the stream encountered
+	// any errors.  Err does not block.
+	Err() error
+
+	// Finish blocks until the server is done and returns the positional
+	// return values for call.
+	//
+	// If Cancel has been called, Finish will return immediately; the output of
+	// Finish could either be an error signalling cancelation, or the correct
+	// positional return values from the server depending on the timing of the
 	// call.
+	//
+	// Calling Finish is mandatory for releasing stream resources, unless Cancel
+	// has been called or any of the other methods return a non-EOF error.
+	// Finish should be called at most once.
 	Finish() (err error)
 
-	// Cancel cancels the RPC, notifying the server to stop processing.
+	// Cancel cancels the RPC, notifying the server to stop processing.  It
+	// is safe to call Cancel concurrently with any of the other stream methods.
+	// Calling Cancel after Finish has returned is a no-op.
 	Cancel()
 }
 
 // Implementation of the QueryWatcherWatchQueryStream interface that is not exported.
 type implQueryWatcherWatchQueryStream struct {
 	clientCall _gen_ipc.Call
+	val        ChangeBatch
+	err        error
 }
 
-func (c *implQueryWatcherWatchQueryStream) Recv() (item ChangeBatch, err error) {
-	err = c.clientCall.Recv(&item)
-	return
+func (c *implQueryWatcherWatchQueryStream) Advance() bool {
+	c.val = ChangeBatch{}
+	c.err = c.clientCall.Recv(&c.val)
+	return c.err == nil
+}
+
+func (c *implQueryWatcherWatchQueryStream) Value() ChangeBatch {
+	return c.val
+}
+
+func (c *implQueryWatcherWatchQueryStream) Err() error {
+	if c.err == _gen_io.EOF {
+		return nil
+	}
+	return c.err
 }
 
 func (c *implQueryWatcherWatchQueryStream) Finish() (err error) {
@@ -523,7 +606,7 @@ func (c *implQueryWatcherWatchQueryStream) Cancel() {
 // WatchQuery in the service interface QueryWatcher.
 type QueryWatcherServiceWatchQueryStream interface {
 	// Send places the item onto the output stream, blocking if there is no buffer
-	// space available.
+	// space available.  If the client has canceled, an error is returned.
 	Send(item ChangeBatch) error
 }
 

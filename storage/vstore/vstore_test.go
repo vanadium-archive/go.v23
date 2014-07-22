@@ -314,10 +314,10 @@ func TestWatchGlob(t *testing.T) {
 	defer stream.Cancel()
 
 	// Expect a change adding /.
-	cb, err := stream.Recv()
-	if err != nil {
-		t.Fatalf("Unexpected error: %s", err)
+	if !stream.Advance() {
+		t.Fatalf("Unexpected error: %s", stream.Err())
 	}
+	cb := stream.Value()
 	changes := cb.Changes
 	if len(changes) != 1 {
 		t.Fatalf("Expected 1 change, but got %d", len(changes))
@@ -339,10 +339,10 @@ func TestWatchGlob(t *testing.T) {
 	}
 
 	// Expect changes updating / and adding /a.
-	cb, err = stream.Recv()
-	if err != nil {
-		t.Fatalf("Unexpected error: %s", err)
+	if !stream.Advance() {
+		t.Fatalf("Unexpected error: %s", stream.Err())
 	}
+	cb = stream.Value()
 	changes = cb.Changes
 	if len(changes) != 2 {
 		t.Fatalf("Expected 2 changes, but got %d", len(changes))

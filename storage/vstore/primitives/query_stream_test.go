@@ -1,7 +1,6 @@
 package primitives
 
 import (
-	"io"
 	"reflect"
 	"runtime"
 	"testing"
@@ -13,22 +12,32 @@ import (
 
 type mockObjectQueryStream struct {
 	results []interface{}
+	curr    int
+	err     error
 }
 
-func (m *mockObjectQueryStream) Recv() (store.QueryResult, error) {
-	if len(m.results) == 0 {
-		return store.QueryResult{}, io.EOF
+func (m *mockObjectQueryStream) Advance() bool {
+	if m.curr >= len(m.results)-1 || m.err != nil {
+		return false
 	}
-	res := m.results[0]
-	m.results = m.results[1:]
-	switch r := res.(type) {
+	m.curr++
+	switch r := m.results[m.curr].(type) {
 	case error:
-		return store.QueryResult{}, r
+		m.err = r
+		return false
 	case store.QueryResult:
-		return r, nil
+		return true
 	default:
-		panic("unknown type")
+		return false
 	}
+}
+
+func (m *mockObjectQueryStream) Value() store.QueryResult {
+	return m.results[m.curr].(store.QueryResult)
+}
+
+func (m *mockObjectQueryStream) Err() error {
+	return m.err
 }
 
 func (m *mockObjectQueryStream) Cancel() {
@@ -37,6 +46,10 @@ func (m *mockObjectQueryStream) Cancel() {
 
 func (m *mockObjectQueryStream) Finish() error {
 	return nil
+}
+
+func newMockObjectQueryStream(results []interface{}) *mockObjectQueryStream {
+	return &mockObjectQueryStream{results: results, curr: -1}
 }
 
 func advance(t *testing.T, stream storage.QueryStream) {
@@ -113,7 +126,7 @@ func TestFlatQueryStream(t *testing.T) {
 		},
 	}
 
-	stream := newQueryStream(&mockObjectQueryStream{results: mockResults})
+	stream := newQueryStream(newMockObjectQueryStream(mockResults))
 	advance(t, stream)
 	assertNameAndValue(t, stream.Value(), "result1", 10)
 	advance(t, stream)
@@ -126,18 +139,18 @@ func TestFlatQueryStream(t *testing.T) {
 	assertDone(t, stream)
 
 	// Cancel right away.
-	stream = newQueryStream(&mockObjectQueryStream{results: mockResults})
+	stream = newQueryStream(newMockObjectQueryStream(mockResults))
 	stream.Cancel()
 	assertDone(t, stream)
 
 	// Cancel after one iteration.
-	stream = newQueryStream(&mockObjectQueryStream{results: mockResults})
+	stream = newQueryStream(newMockObjectQueryStream(mockResults))
 	advance(t, stream)
 	stream.Cancel()
 	assertDone(t, stream)
 
 	// Cancel after all done.
-	stream = newQueryStream(&mockObjectQueryStream{results: mockResults})
+	stream = newQueryStream(newMockObjectQueryStream(mockResults))
 	advance(t, stream)
 	advance(t, stream)
 	advance(t, stream)
@@ -184,7 +197,7 @@ func TestSimpleNestedQueryStream(t *testing.T) {
 		},
 	}
 
-	stream := newQueryStream(&mockObjectQueryStream{results: mockResults})
+	stream := newQueryStream(newMockObjectQueryStream(mockResults))
 	advance(t, stream)
 	assertNameAndValue(t, stream.Value(), "result1", 10)
 
@@ -207,20 +220,20 @@ func TestSimpleNestedQueryStream(t *testing.T) {
 	assertDone(t, stream)
 
 	// Cancel before encountering the child stream.
-	stream = newQueryStream(&mockObjectQueryStream{results: mockResults})
+	stream = newQueryStream(newMockObjectQueryStream(mockResults))
 	advance(t, stream)
 	stream.Cancel()
 	assertDone(t, stream)
 
 	// Cancel after encountering the child stream.
-	stream = newQueryStream(&mockObjectQueryStream{results: mockResults})
+	stream = newQueryStream(newMockObjectQueryStream(mockResults))
 	advance(t, stream)
 	advance(t, stream)
 	stream.Cancel()
 	assertDone(t, stream)
 
 	// Cancel the child stream right away.
-	stream = newQueryStream(&mockObjectQueryStream{results: mockResults})
+	stream = newQueryStream(newMockObjectQueryStream(mockResults))
 	advance(t, stream)
 	advance(t, stream)
 	childStream := stream.Value().Fields()["nested1"].(storage.QueryStream)
@@ -230,7 +243,7 @@ func TestSimpleNestedQueryStream(t *testing.T) {
 	assertDone(t, stream)
 
 	// Advancing the parent stream should invalidate the child stream.
-	stream = newQueryStream(&mockObjectQueryStream{results: mockResults})
+	stream = newQueryStream(newMockObjectQueryStream(mockResults))
 	advance(t, stream)
 	advance(t, stream)
 	childStream = stream.Value().Fields()["nested1"].(storage.QueryStream)
@@ -239,7 +252,7 @@ func TestSimpleNestedQueryStream(t *testing.T) {
 	assertDone(t, stream)
 
 	// Canceling the parent stream should invalidate both streams.
-	stream = newQueryStream(&mockObjectQueryStream{results: mockResults})
+	stream = newQueryStream(newMockObjectQueryStream(mockResults))
 	advance(t, stream)
 	advance(t, stream)
 	childStream = stream.Value().Fields()["nested1"].(storage.QueryStream)
@@ -248,7 +261,7 @@ func TestSimpleNestedQueryStream(t *testing.T) {
 	assertDone(t, stream)
 
 	// Async cancel of the child stream to uncover race conditions.
-	stream = newQueryStream(&mockObjectQueryStream{results: mockResults})
+	stream = newQueryStream(newMockObjectQueryStream(mockResults))
 	advance(t, stream)
 	advance(t, stream)
 	childStream = stream.Value().Fields()["nested1"].(storage.QueryStream)
@@ -282,7 +295,7 @@ func TestEmptyNestedQueryStream(t *testing.T) {
 		},
 	}
 
-	stream := newQueryStream(&mockObjectQueryStream{results: mockResults})
+	stream := newQueryStream(newMockObjectQueryStream(mockResults))
 	advance(t, stream)
 	assertNameAndValue(t, stream.Value(), "result1", 10)
 
@@ -349,7 +362,7 @@ func TestMultipleNestedQueryStreams(t *testing.T) {
 			Fields:       nil,
 		},
 	}
-	stream := newQueryStream(&mockObjectQueryStream{results: mockResults})
+	stream := newQueryStream(newMockObjectQueryStream(mockResults))
 	advance(t, stream)
 	assertNameAndValue(t, stream.Value(), "result1", 10)
 	advance(t, stream)
@@ -372,7 +385,7 @@ func TestMultipleNestedQueryStreams(t *testing.T) {
 	assertDone(t, stream)
 
 	// It should be ok to access "nested2" stream before "nested1".
-	stream = newQueryStream(&mockObjectQueryStream{results: mockResults})
+	stream = newQueryStream(newMockObjectQueryStream(mockResults))
 	advance(t, stream)
 	assertNameAndValue(t, stream.Value(), "result1", 10)
 	advance(t, stream)
@@ -395,7 +408,7 @@ func TestMultipleNestedQueryStreams(t *testing.T) {
 	assertDone(t, stream)
 
 	// Canceling the parent stream should invalidate the nested streams.
-	stream = newQueryStream(&mockObjectQueryStream{results: mockResults})
+	stream = newQueryStream(newMockObjectQueryStream(mockResults))
 	advance(t, stream)
 	assertNameAndValue(t, stream.Value(), "result1", 10)
 	advance(t, stream)
@@ -409,7 +422,7 @@ func TestMultipleNestedQueryStreams(t *testing.T) {
 	assertDone(t, nested2Stream)
 
 	// Canceling one nested stream should not affect the other.
-	stream = newQueryStream(&mockObjectQueryStream{results: mockResults})
+	stream = newQueryStream(newMockObjectQueryStream(mockResults))
 	advance(t, stream)
 	assertNameAndValue(t, stream.Value(), "result1", 10)
 	advance(t, stream)
