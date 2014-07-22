@@ -18,6 +18,13 @@ type LabelSet Label
 // in the ACL such that <pid>.Match(principals) and labels.HasLabel(label).
 type ACL map[PrincipalPattern]LabelSet
 
+// Signature represents an ECDSA signature.
+type Signature struct {
+	// R, S specify the pair of integers that make up an ECDSA signature.
+	R []byte
+	S []byte
+}
+
 const (
 	// AllPrincipals is a pattern that all principals match.
 	AllPrincipals = "*"

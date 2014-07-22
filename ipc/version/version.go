@@ -11,6 +11,9 @@ const (
 
 	// IPCVersion1 is the initially defined version of the IPC Protocol.
 	IPCVersion1
+	
+	// IPCVersion2 uses VOM for encoding signatures.
+	IPCVersion2
 )
 
 // IPCVersionRange allows you to optionally specify a range of versions to
