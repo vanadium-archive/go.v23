@@ -1126,15 +1126,14 @@ public class {{$iface.Name}}ServiceWrapper {
 	 * Returns all tags associated with the provided method or null if the method isn't implemented
 	 * by this service.
 	 */
-	public {{$objectClassName}}[] getMethodTags({{$serverCallClassName}} call, String method) { {{range $eIface := $iface.Embeds}}{{$eIfaceShortClassName := javaShortIfaceName $eIface (not $isService)}}
-		{
-			final {{$objectClassName}}[] tags = this.{{javaClassToVarName $eIfaceShortClassName}}.getMethodTags(call, method);
-			if (tags != null) return tags;
-		}{{end}}{{range $method := $iface.Methods}}
+	public {{$objectClassName}}[] getMethodTags({{$serverCallClassName}} call, String method) throws {{$veyronExceptionClassName}} { {{range $eIface := $iface.Embeds}}{{$eIfaceShortClassName := javaShortIfaceName $eIface (not $isService)}}
+		try {
+			return this.{{javaClassToVarName $eIfaceShortClassName}}.getMethodTags(call, method);
+		} catch ({{$veyronExceptionClassName}} e) {}  // method not found.{{end}}{{range $method := $iface.Methods}}
 		if ("{{toCamelCase $method.Name}}".equals(method)) {
 			return new {{$objectClassName}}[]{ {{range $idx, $tag := $method.Tags}}{{if gt $idx 0}}, {{end}}{{javaConstVal $tag $data.Imports $data.Env}}{{end}} };
 		}{{end}}
-		return null;
+		throw new {{$veyronExceptionClassName}}("method: " + method + " not found");
 	}
 	// Methods from interface {{$iface.Name}}.{{range $method := $iface.Methods}}{{$outArgType := javaNonStreamingOutArgType $method $iface $isService (not $forceClass) $data.Imports $data.Env}}
 	public {{$outArgType}} {{toCamelCase $method.Name}}({{$serverCallClassName}} call{{range $arg := $method.InArgs}}, {{javaType $arg.Type (not $forceClass) $data.Imports $data.Env}} {{$arg.Name}}{{end}}) throws {{$veyronExceptionClassName}} { {{if javaIsStreamingMethod $method}}{{$classCastExceptionClassName := javaName "java/lang/ClassCastException" $data.Imports}}{{$typeTokenClassName := javaName "com/google/common/reflect/TypeToken" $data.Imports}}{{$streamClassName := javaName "com/veyron2/vdl/Stream" $data.Imports}}{{$streamSend := javaType $method.OutStream $forceClass $data.Imports $data.Env}}{{$streamRecv := javaType $method.InStream $forceClass $data.Imports $data.Env}}
