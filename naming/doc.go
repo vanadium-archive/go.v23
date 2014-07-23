@@ -12,7 +12,7 @@
 //
 // Object names are strings with / used to separate the components of
 // a name.  Names may be started with / and the address of a
-// MountTable or server, in which case they are considerd 'rooted',
+// MountTable or server, in which case they are considered 'rooted',
 // otherwise they are 'relative' to the MountTable used to resolve
 // them. Rooted names, unlike relative ones, have the same meaning
 // regardless of the context in which they are accessed.

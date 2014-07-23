@@ -73,13 +73,13 @@ type MountEntry struct {
 // It represents the interface to a client side library for the MountTable
 // service
 type Namespace interface {
-	// Mount the server OA under the object name, expiring after the ttl.
-	// ttl of zero implies an implementation-specific high value
+	// Mount the server object address under the object name, expiring after
+	// the ttl. ttl of zero implies an implementation-specific high value
 	// (essentially, forever).
 	Mount(ctx context.T, name, server string, ttl time.Duration) error
 
-	// Unmount the server OA from the object name, or if server is empty, unmount
-	// all server OAs from the object name.
+	// Unmount the server object address from the object name, or if server
+	// is empty, unmount all server OAs from the object name.
 	Unmount(ctx context.T, name, server string) error
 
 	// Resolve the object name into its mounted servers.
