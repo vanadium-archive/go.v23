@@ -12,15 +12,17 @@ import (
 
 var (
 	// ValidLabels is the set of all valid Labels for IPC methods.
-	ValidLabels = []Label{ReadLabel, WriteLabel, AdminLabel, DebugLabel, MonitoringLabel}
+	ValidLabels = []Label{ResolveLabel, ReadLabel, WriteLabel, AdminLabel, DebugLabel, MonitoringLabel}
 
 	// AllLabels is a LabelSet containing all ValidLabels.
-	AllLabels = LabelSet(ReadLabel | WriteLabel | AdminLabel | DebugLabel | MonitoringLabel)
+	AllLabels = LabelSet(ResolveLabel | ReadLabel | WriteLabel | AdminLabel | DebugLabel | MonitoringLabel)
 )
 
 // String representation of a Label.
 func (l Label) String() string {
 	switch l {
+	case ResolveLabel:
+		return "X"
 	case ReadLabel:
 		return "R"
 	case WriteLabel:
@@ -62,6 +64,8 @@ func (ls LabelSet) MarshalJSON() ([]byte, error) {
 func (ls *LabelSet) fromString(s string) error {
 	for i := 0; i < len(s); i++ {
 		switch s[i] {
+		case 'X', 'x':
+			*ls |= LabelSet(ResolveLabel)
 		case 'R', 'r':
 			*ls |= LabelSet(ReadLabel)
 		case 'W', 'w':

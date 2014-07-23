@@ -22,20 +22,23 @@ const (
 	// AllPrincipals is a pattern that all principals match.
 	AllPrincipals = "*"
 
+	// ResolveLabel allows resolve operations.
+	ResolveLabel = Label(1 << 0)
+
 	// ReadLabel allows read operations.
-	ReadLabel = Label(1 << 0)
+	ReadLabel = Label(1 << 1)
 
 	// WriteLabel allows write operations.
-	WriteLabel = Label(1 << 1)
+	WriteLabel = Label(1 << 2)
 
 	// AdminLabel allows administrative operations.
-	AdminLabel = Label(1 << 2)
+	AdminLabel = Label(1 << 3)
 
 	// DebugLabel allows debug operations.
-	DebugLabel = Label(1 << 3)
+	DebugLabel = Label(1 << 4)
 
 	// MonitoringLabel allows monitoring operations.
-	MonitoringLabel = Label(1 << 4)
+	MonitoringLabel = Label(1 << 5)
 
 	// SHA1Hash denotes the SHA1 cryptographic hash function as defined
 	// in RFC3174.

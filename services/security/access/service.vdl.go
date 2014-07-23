@@ -348,9 +348,9 @@ func (__gen_s *ServerStubObject) GetMethodTags(call _gen_ipc.ServerCall, method 
 	// This will change when it is replaced with Signature().
 	switch method {
 	case "SetACL":
-		return []interface{}{security.Label(4)}, nil
+		return []interface{}{security.Label(8)}, nil
 	case "GetACL":
-		return []interface{}{security.Label(4)}, nil
+		return []interface{}{security.Label(8)}, nil
 	default:
 		return nil, nil
 	}

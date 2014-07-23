@@ -161,7 +161,7 @@ func (__gen_s *ServerStubApplication) GetMethodTags(call _gen_ipc.ServerCall, me
 	// This will change when it is replaced with Signature().
 	switch method {
 	case "Match":
-		return []interface{}{security.Label(1)}, nil
+		return []interface{}{security.Label(2)}, nil
 	default:
 		return nil, nil
 	}
@@ -732,17 +732,17 @@ func (__gen_s *ServerStubBinary) GetMethodTags(call _gen_ipc.ServerCall, method 
 	// This will change when it is replaced with Signature().
 	switch method {
 	case "Create":
-		return []interface{}{security.Label(2)}, nil
+		return []interface{}{security.Label(4)}, nil
 	case "Delete":
-		return []interface{}{security.Label(2)}, nil
+		return []interface{}{security.Label(4)}, nil
 	case "Download":
-		return []interface{}{security.Label(1)}, nil
-	case "DownloadURL":
-		return []interface{}{security.Label(1)}, nil
-	case "Stat":
-		return []interface{}{security.Label(1)}, nil
-	case "Upload":
 		return []interface{}{security.Label(2)}, nil
+	case "DownloadURL":
+		return []interface{}{security.Label(2)}, nil
+	case "Stat":
+		return []interface{}{security.Label(2)}, nil
+	case "Upload":
+		return []interface{}{security.Label(4)}, nil
 	default:
 		return nil, nil
 	}
@@ -1005,9 +1005,9 @@ func (__gen_s *ServerStubProfile) GetMethodTags(call _gen_ipc.ServerCall, method
 	// This will change when it is replaced with Signature().
 	switch method {
 	case "Label":
-		return []interface{}{security.Label(1)}, nil
+		return []interface{}{security.Label(2)}, nil
 	case "Description":
-		return []interface{}{security.Label(1)}, nil
+		return []interface{}{security.Label(2)}, nil
 	default:
 		return nil, nil
 	}

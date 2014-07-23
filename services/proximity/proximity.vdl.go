@@ -186,9 +186,9 @@ func (__gen_s *ServerStubProximityAnnouncer) GetMethodTags(call _gen_ipc.ServerC
 	// This will change when it is replaced with Signature().
 	switch method {
 	case "RegisterName":
-		return []interface{}{security.Label(2)}, nil
+		return []interface{}{security.Label(4)}, nil
 	case "UnregisterName":
-		return []interface{}{security.Label(2)}, nil
+		return []interface{}{security.Label(4)}, nil
 	default:
 		return nil, nil
 	}
@@ -366,7 +366,7 @@ func (__gen_s *ServerStubProximityScanner) GetMethodTags(call _gen_ipc.ServerCal
 	// This will change when it is replaced with Signature().
 	switch method {
 	case "NearbyDevices":
-		return []interface{}{security.Label(1)}, nil
+		return []interface{}{security.Label(2)}, nil
 	default:
 		return nil, nil
 	}

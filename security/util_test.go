@@ -23,7 +23,7 @@ func (s lSet) has(l Label) bool {
 
 func TestHasLabel(t *testing.T) {
 	// writeAdminLabel is a new label created for testing purposes.
-	writeAdminLabel := Label(6)
+	writeAdminLabel := Label(12)
 	// labels is the set of labels on which HasLabel is tested.
 	labels := append(ValidLabels, writeAdminLabel)
 	testData := []struct {
@@ -31,6 +31,7 @@ func TestHasLabel(t *testing.T) {
 		want     []Label
 	}{
 		{emptyLabelSet, nil},
+		{LabelSet(ResolveLabel), []Label{ResolveLabel}},
 		{LabelSet(ReadLabel), []Label{ReadLabel}},
 		{LabelSet(writeAdminLabel), []Label{WriteLabel, AdminLabel, writeAdminLabel}},
 		{LabelSet(ReadLabel | WriteLabel), []Label{ReadLabel, WriteLabel, writeAdminLabel}},
@@ -38,6 +39,7 @@ func TestHasLabel(t *testing.T) {
 		{LabelSet(AdminLabel | DebugLabel | MonitoringLabel), []Label{AdminLabel, DebugLabel, MonitoringLabel, writeAdminLabel}},
 		{LabelSet(ReadLabel | WriteLabel | AdminLabel | DebugLabel), []Label{ReadLabel, WriteLabel, AdminLabel, DebugLabel, writeAdminLabel}},
 		{LabelSet(ReadLabel | WriteLabel | AdminLabel | DebugLabel | MonitoringLabel), []Label{ReadLabel, WriteLabel, AdminLabel, DebugLabel, MonitoringLabel, writeAdminLabel}},
+		{LabelSet(ResolveLabel | ReadLabel | WriteLabel | AdminLabel | DebugLabel | MonitoringLabel), []Label{ResolveLabel, ReadLabel, WriteLabel, AdminLabel, DebugLabel, MonitoringLabel, writeAdminLabel}},
 	}
 	for _, d := range testData {
 		for _, l := range labels {
@@ -51,11 +53,14 @@ func TestHasLabel(t *testing.T) {
 func TestLabelSetRoundTripJSON(t *testing.T) {
 	testData := []LabelSet{
 		emptyLabelSet,
+		LabelSet(ResolveLabel),
 		LabelSet(ReadLabel),
+		LabelSet(ResolveLabel | ReadLabel),
 		LabelSet(ReadLabel | WriteLabel),
 		LabelSet(AdminLabel | DebugLabel | MonitoringLabel),
 		LabelSet(WriteLabel | AdminLabel | DebugLabel | MonitoringLabel),
 		LabelSet(ReadLabel | WriteLabel | AdminLabel | DebugLabel | MonitoringLabel),
+		LabelSet(ResolveLabel | ReadLabel | WriteLabel | AdminLabel | DebugLabel | MonitoringLabel),
 	}
 	for _, ls := range testData {
 		marshalled, err := json.Marshal(ls)
@@ -83,6 +88,10 @@ func TestLabelSetUnmarshalJSON(t *testing.T) {
 			labelSet:   emptyLabelSet,
 		},
 		{
+			marshalled: `"X"`,
+			labelSet:   LabelSet(ResolveLabel),
+		},
+		{
 			marshalled: `"R"`,
 			labelSet:   LabelSet(ReadLabel),
 		},
@@ -105,10 +114,6 @@ func TestLabelSetUnmarshalJSON(t *testing.T) {
 		{
 			marshalled: `"AWDMR"`,
 			labelSet:   LabelSet(ReadLabel | WriteLabel | AdminLabel | DebugLabel | MonitoringLabel),
-		},
-		{
-			marshalled: `"X"`,
-			err:        fmt.Sprintf("invalid label: %q", 'X'),
 		},
 		{
 			marshalled: `"AWYMR"`,

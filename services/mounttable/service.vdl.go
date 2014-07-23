@@ -273,7 +273,7 @@ func (__gen_s *ServerStubGlobbable) GetMethodTags(call _gen_ipc.ServerCall, meth
 	// This will change when it is replaced with Signature().
 	switch method {
 	case "Glob":
-		return []interface{}{security.Label(1)}, nil
+		return []interface{}{security.Label(2)}, nil
 	default:
 		return nil, nil
 	}
@@ -516,11 +516,11 @@ func (__gen_s *ServerStubMountTable) GetMethodTags(call _gen_ipc.ServerCall, met
 	}
 	switch method {
 	case "Mount":
-		return []interface{}{security.Label(2)}, nil
+		return []interface{}{security.Label(4)}, nil
 	case "Unmount":
-		return []interface{}{security.Label(2)}, nil
+		return []interface{}{security.Label(4)}, nil
 	case "ResolveStep":
-		return []interface{}{security.Label(1)}, nil
+		return []interface{}{security.Label(2)}, nil
 	default:
 		return nil, nil
 	}
