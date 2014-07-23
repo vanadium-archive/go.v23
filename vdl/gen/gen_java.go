@@ -1133,6 +1133,9 @@ public class {{$iface.Name}}ServiceWrapper {
 		if ("{{toCamelCase $method.Name}}".equals(method)) {
 			return new {{$objectClassName}}[]{ {{range $idx, $tag := $method.Tags}}{{if gt $idx 0}}, {{end}}{{javaConstVal $tag $data.Imports $data.Env}}{{end}} };
 		}{{end}}
+        if ("getMethodTags".equals(method)) {
+            return new {{$objectClassName}}[]{};
+        }
 		throw new {{$veyronExceptionClassName}}("method: " + method + " not found");
 	}
 	// Methods from interface {{$iface.Name}}.{{range $method := $iface.Methods}}{{$outArgType := javaNonStreamingOutArgType $method $iface $isService (not $forceClass) $data.Imports $data.Env}}
