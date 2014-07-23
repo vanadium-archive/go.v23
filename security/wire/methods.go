@@ -135,15 +135,9 @@ func (c *Caveat) Validate(ctx security.Context) error {
 
 // -- Helper methods on the wire format for the chain implementation of Identity --
 
-// Set sets the wire representation of a signature from the provided object.
-func (s *Signature) Set(signature security.Signature) {
-	s.R = signature.R.Bytes()
-	s.S = signature.S.Bytes()
-}
-
 // contentHash returns a SHA256 hash of the contents of the certificate along with the
 // provided signature.
-func (c *Certificate) contentHash(issuerSignature Signature) []byte {
+func (c *Certificate) contentHash(issuerSignature security.Signature) []byte {
 	h := sha256.New()
 	tmp := make([]byte, binary.MaxVarintLen64)
 	WriteBytes(h, tmp, issuerSignature.R)
@@ -180,7 +174,7 @@ func (c *Certificate) Sign(issuer *ChainPrivateID) error {
 	return nil
 }
 
-func (c *Certificate) verify(issuerSignature Signature, key *ecdsa.PublicKey) bool {
+func (c *Certificate) verify(issuerSignature security.Signature, key *ecdsa.PublicKey) bool {
 	var r, s big.Int
 	return ecdsa.Verify(key, c.contentHash(issuerSignature), r.SetBytes(c.Signature.R), s.SetBytes(c.Signature.S))
 }
@@ -223,7 +217,7 @@ func (id *ChainPublicID) VerifyIntegrity() error {
 	if err != nil {
 		return ErrNoIntegrity
 	}
-	issuerSignature := Signature{}
+	issuerSignature := security.Signature{}
 	for _, c := range id.Certificates {
 		if err := ValidateBlessingName(c.Name); err != nil {
 			return err

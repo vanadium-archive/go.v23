@@ -34,3 +34,9 @@ const (
 	// MonitoringLabel allows monitoring operations.
 	MonitoringLabel = Label(1 << 4)
 )
+
+// Signature represents an ECDSA signature.
+type Signature struct {
+	// R, S specify the pair of integers that make up an ECDSA signature.
+	R, S []byte
+}

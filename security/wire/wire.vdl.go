@@ -26,13 +26,6 @@ type PublicKey struct {
 	XY []byte
 }
 
-// Signature represents an ECDSA signature.
-type Signature struct {
-	// R, S specify the pair of integers that make up an ECDSA signature.
-	R []byte
-	S []byte
-}
-
 // Caveat represents a veyron2/security.ServiceCaveat.
 type Caveat struct {
 	// Service is a pattern identifying the services that the caveat encoded in Bytes
@@ -55,7 +48,7 @@ type Certificate struct {
 	// Caveats under which the certificate is valid.
 	Caveats []Caveat
 	// Signature of the contents of the certificate.
-	Signature Signature
+	Signature security.Signature
 }
 
 // ChainPublicID represents the chain implementation of PublicIDs from veyron/runtimes/google/security.

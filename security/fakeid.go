@@ -46,9 +46,11 @@ func (id fakeID) Authorize(context Context) (PublicID, error) { return id, nil }
 func (fakeID) ThirdPartyCaveats() []ServiceCaveat             { return nil }
 func (id fakeID) PublicID() PublicID                          { return id }
 func (fakeID) Sign(message []byte) (signature Signature, err error) {
-	signature.R, signature.S, err = ecdsa.Sign(rand.Reader, &fakeKey, message)
+	r, s, err := ecdsa.Sign(rand.Reader, &fakeKey, message)
+	signature.R, signature.S = r.Bytes(), s.Bytes()
 	return
 }
+
 func (id fakeID) Bless(blessee PublicID, blessingName string, duration time.Duration, caveats []ServiceCaveat) (PublicID, error) {
 	return fakeID(string(id) + chainSeparator + blessingName), nil
 }
