@@ -1,9 +1,5 @@
 package storage
 
-import (
-	"veyron2/security"
-)
-
 // This file exists because these types are shared between the client library
 // (veyron2/storage) and the network API (veyron2/services/store).  We expect
 // most clients to use the library, and we don't want them to have to do
@@ -23,27 +19,6 @@ type ID [16]byte
 // and version, then the entries represent the same thing, at the same point in
 // time (as agreed upon by the two stores).
 type Version uint64
-
-// ACL has a security.ACL and a name.
-type ACL struct {
-	Name     string
-	Contents security.ACL
-}
-
-// TagOp is an operation to perform with an ACL.
-type TagOp byte
-
-// Tag has an TagOp and an ACL.
-type Tag struct {
-	Op TagOp
-
-	// ACL is a reference (ID) to the stored ACL struct.
-	ACL ID
-}
-
-// TagList is a labeled list of tags.  Each value in the store can be labeled with
-// a TagList to specify permissions.
-type TagList []Tag
 
 // DEntry is a directory entry.
 type DEntry struct {
@@ -77,16 +52,6 @@ type Entry struct {
 }
 
 const (
-	// RemoveACL means to remove the ACL from any inherited ACLs.
-	RemoveACL = TagOp(0)
-
-	// AddACL means to add the ACL for a single value; it is not inherited.
-	AddACL = TagOp(1)
-
-	// AddInheritedACL means to add the ACL for the value and all of its
-	// descendents.
-	AddInheritedACL = TagOp(2)
-
 	// NoVersion means the entry is not present in the store.
 	NoVersion = Version(0)
 )
