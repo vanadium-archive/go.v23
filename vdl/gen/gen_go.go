@@ -130,7 +130,6 @@ func systemImportsGo(f *compile.File) []string {
 		set[`_gen_wiretype "veyron2/wiretype"`] = true
 		set[`_gen_ipc "veyron2/ipc"`] = true
 		set[`_gen_context "veyron2/context"`] = true
-		set[`_gen_veyron2 "veyron2"`] = true
 		set[`_gen_vdlutil "veyron2/vdl/vdlutil"`] = true
 		set[`_gen_naming "veyron2/naming"`] = true
 
