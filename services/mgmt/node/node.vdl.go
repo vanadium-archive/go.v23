@@ -256,8 +256,6 @@ func BindApplication(name string, opts ..._gen_ipc.BindOpt) (Application, error)
 		client = _gen_rt.R().Client()
 	case 1:
 		switch o := opts[0].(type) {
-		case _gen_veyron2.Runtime:
-			client = o.Client()
 		case _gen_ipc.Client:
 			client = o
 		default:
@@ -865,8 +863,6 @@ func BindNode(name string, opts ..._gen_ipc.BindOpt) (Node, error) {
 		client = _gen_rt.R().Client()
 	case 1:
 		switch o := opts[0].(type) {
-		case _gen_veyron2.Runtime:
-			client = o.Client()
 		case _gen_ipc.Client:
 			client = o
 		default:
