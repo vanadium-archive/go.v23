@@ -17,8 +17,7 @@
 //   the cloud" to improve availability, reliability, etc.
 //
 // - Each store entry has at least one pathname that refers to it, a globally
-//   unique ID for the entry, and a value.  Entries can be accessed by ID by
-//   using the pathname "/uid/<ID>".
+//   unique ID for the entry, and a value.
 //
 // - Values are structured, specified in the IDL.  Here is an example:
 //
@@ -95,8 +94,7 @@
 //      t.Commit()
 //
 //   The references form an arbitrary directed graph, posssibly cyclic.  Entries
-//   are removed immediately when there are no more references to it.  The
-//   "/uid/<ID>" names do not count as references.
+//   are removed immediately when there are no more references to it.
 //
 // - Operations are transactional.  A transaction contains a consistent snapshot
 //   of the current state, and a set of mutations to be applied to the store
