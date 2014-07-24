@@ -163,12 +163,6 @@ type NamespaceRoots []string
 
 func (NamespaceRoots) ROpt() {}
 
-// RuntimeOpt wraps the Runtime interface so that we can add
-// functions representing the option annotations.
-type RuntimeOpt struct{ Runtime }
-
-func (RuntimeOpt) IPCBindOpt() {}
-
 // ProductOpt wraps the product.T interface so that we can add
 // functions representing the option annotations
 type ProductOpt struct{ product.T }
