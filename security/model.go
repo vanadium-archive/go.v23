@@ -77,20 +77,28 @@ type PublicID interface {
 	ThirdPartyCaveats() []ServiceCaveat
 }
 
+// Signer is the interface for signing arbitrary length messages using ECDSA private keys.
+type Signer interface {
+	// Sign signs an arbitrary length message (often the hash of a larger message)
+	// using the private key associated with this Signer.
+	Sign(message []byte) (Signature, error)
+
+	// PublicKey returns ECDSA public key corresponding to the Signer's private key.
+	PublicKey() *ecdsa.PublicKey
+}
+
 // PrivateID is the interface for the secret component of a principal's unique
 // identity.
 //
 // Each principal has a unique (private, public) key pair. The private key
 // is known only to the principal and is not expected to be shared.
 type PrivateID interface {
+	Signer
+
 	// PublicID returns the non-secret component of principal's identity
 	// (which can be encoded and transmitted across the network perhaps).
 	// TODO(ataly): Replace this method with one that returns the PublicIDStore.
 	PublicID() PublicID
-
-	// Sign signs an arbitrary length message (often the hash of a larger message)
-	// using the private key associated with this identity.
-	Sign(message []byte) (Signature, error)
 
 	// Bless creates a constrained PublicID from the provided one.
 	// The returned PublicID:

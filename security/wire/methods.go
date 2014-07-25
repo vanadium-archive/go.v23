@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"crypto/ecdsa"
 	"crypto/elliptic"
-	"crypto/rand"
 	"crypto/sha256"
 	"encoding/binary"
 	"errors"
@@ -153,25 +152,16 @@ func (c *Certificate) contentHash(issuerSignature security.Signature) []byte {
 	return h.Sum(nil)
 }
 
-// Sign uses the provided ChainPrivateID to sign the contents of the Certificate.
-func (c *Certificate) Sign(issuer *ChainPrivateID) error {
-	pubID := issuer.PublicID
+// Sign uses the given Signer to sign the signature of the last certificate in
+// the provided PublicID, storing the new signature in the current certificate.
+func (c *Certificate) Sign(signer security.Signer, pubID *ChainPublicID) error {
 	numCerts := len(pubID.Certificates)
 	if numCerts == 0 {
-		return errors.New("cannot sign with a ChainPrivateID with no certificates")
+		return errors.New("cannot sign a ChainPublicID with no certificates")
 	}
-	pubKey, err := pubID.Certificates[numCerts-1].PublicKey.Decode()
-	if err != nil {
-		return err
-	}
-	privKey := &ecdsa.PrivateKey{PublicKey: *pubKey, D: new(big.Int).SetBytes(issuer.Secret)}
-	r, s, err := ecdsa.Sign(rand.Reader, privKey, c.contentHash(pubID.Certificates[numCerts-1].Signature))
-	if err != nil {
-		return err
-	}
-	c.Signature.R = r.Bytes()
-	c.Signature.S = s.Bytes()
-	return nil
+	var err error
+	c.Signature, err = signer.Sign(c.contentHash(pubID.Certificates[numCerts-1].Signature))
+	return err
 }
 
 func (c *Certificate) verify(issuerSignature security.Signature, key *ecdsa.PublicKey) bool {
