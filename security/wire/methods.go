@@ -229,7 +229,7 @@ func (id *ChainPublicID) VerifyIntegrity() error {
 func ValidateBlessingName(name string) error {
 	// TODO(ataly, ashankar): Define the list of reserved characters (such as  "*", "#",
 	// "/", "\", etc.) and ensure that the check below ensures absence of all of them.
-	if name == "" || strings.ContainsAny(name, ChainSeparator) || strings.Contains(name, "@@") {
+	if name == "" || strings.ContainsAny(name, ChainSeparator) {
 		return errInvalidBlessingName(name)
 	}
 	return nil
