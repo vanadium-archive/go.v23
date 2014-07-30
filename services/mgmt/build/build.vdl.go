@@ -68,7 +68,7 @@ const _ = _gen_wiretype.TypeIDInvalid
 type Build_ExcludingUniversal interface {
 	// Build streams sources to the build server, which then attempts to
 	// build the sources and streams back the compiled binaries.
-	Build(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply BuildBuildStream, err error)
+	Build(ctx _gen_context.T, Arch Architecture, OS OperatingSystem, opts ..._gen_ipc.CallOpt) (reply BuildBuildStream, err error)
 	// Describe generates a description for a binary identified by
 	// the given Object name.
 	Describe(ctx _gen_context.T, Name string, opts ..._gen_ipc.CallOpt) (reply binary.Description, err error)
@@ -83,7 +83,7 @@ type BuildService interface {
 
 	// Build streams sources to the build server, which then attempts to
 	// build the sources and streams back the compiled binaries.
-	Build(context _gen_ipc.ServerContext, stream BuildServiceBuildStream) (reply []byte, err error)
+	Build(context _gen_ipc.ServerContext, Arch Architecture, OS OperatingSystem, stream BuildServiceBuildStream) (reply []byte, err error)
 	// Describe generates a description for a binary identified by
 	// the given Object name.
 	Describe(context _gen_ipc.ServerContext, Name string) (reply binary.Description, err error)
@@ -289,9 +289,9 @@ type clientStubBuild struct {
 	name   string
 }
 
-func (__gen_c *clientStubBuild) Build(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply BuildBuildStream, err error) {
+func (__gen_c *clientStubBuild) Build(ctx _gen_context.T, Arch Architecture, OS OperatingSystem, opts ..._gen_ipc.CallOpt) (reply BuildBuildStream, err error) {
 	var call _gen_ipc.Call
-	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Build", nil, opts...); err != nil {
+	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Build", []interface{}{Arch, OS}, opts...); err != nil {
 		return
 	}
 	reply = &implBuildBuildStream{clientCall: call}
@@ -366,35 +366,38 @@ func (__gen_s *ServerStubBuild) GetMethodTags(call _gen_ipc.ServerCall, method s
 func (__gen_s *ServerStubBuild) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
 	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
 	result.Methods["Build"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{},
-		OutArgs: []_gen_ipc.MethodArgument{
-			{Name: "", Type: 66},
-			{Name: "", Type: 67},
+		InArgs: []_gen_ipc.MethodArgument{
+			{Name: "Arch", Type: 65},
+			{Name: "OS", Type: 66},
 		},
-		InStream:  68,
-		OutStream: 68,
+		OutArgs: []_gen_ipc.MethodArgument{
+			{Name: "", Type: 68},
+			{Name: "", Type: 69},
+		},
+		InStream:  70,
+		OutStream: 70,
 	}
 	result.Methods["Describe"] = _gen_ipc.MethodSignature{
 		InArgs: []_gen_ipc.MethodArgument{
 			{Name: "Name", Type: 3},
 		},
 		OutArgs: []_gen_ipc.MethodArgument{
-			{Name: "", Type: 70},
-			{Name: "", Type: 67},
+			{Name: "", Type: 72},
+			{Name: "", Type: 69},
 		},
 	}
 
 	result.TypeDefs = []_gen_vdlutil.Any{
-		_gen_wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, _gen_wiretype.SliceType{Elem: 0x41, Name: "", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, _gen_wiretype.StructType{
+		_gen_wiretype.NamedPrimitiveType{Type: 0x32, Name: "veyron2/services/mgmt/build.Architecture", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x32, Name: "veyron2/services/mgmt/build.OperatingSystem", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, _gen_wiretype.SliceType{Elem: 0x43, Name: "", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, _gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
 				_gen_wiretype.FieldType{Type: 0x3, Name: "Name"},
-				_gen_wiretype.FieldType{Type: 0x42, Name: "Contents"},
+				_gen_wiretype.FieldType{Type: 0x44, Name: "Contents"},
 			},
 			"veyron2/services/mgmt/build.File", []string(nil)},
 		_gen_wiretype.MapType{Key: 0x3, Elem: 0x2, Name: "", Tags: []string(nil)}, _gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
 				_gen_wiretype.FieldType{Type: 0x3, Name: "Name"},
-				_gen_wiretype.FieldType{Type: 0x45, Name: "Profiles"},
+				_gen_wiretype.FieldType{Type: 0x47, Name: "Profiles"},
 			},
 			"veyron2/services/mgmt/binary.Description", []string(nil)},
 	}
@@ -420,9 +423,9 @@ func (__gen_s *ServerStubBuild) UnresolveStep(call _gen_ipc.ServerCall) (reply [
 	return
 }
 
-func (__gen_s *ServerStubBuild) Build(call _gen_ipc.ServerCall) (reply []byte, err error) {
+func (__gen_s *ServerStubBuild) Build(call _gen_ipc.ServerCall, Arch Architecture, OS OperatingSystem) (reply []byte, err error) {
 	stream := &implBuildServiceBuildStream{serverCall: call}
-	reply, err = __gen_s.service.Build(call, stream)
+	reply, err = __gen_s.service.Build(call, Arch, OS, stream)
 	return
 }
 
