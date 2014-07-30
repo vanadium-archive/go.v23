@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"crypto/ecdsa"
 	"crypto/elliptic"
+	"crypto/sha1"
 	"crypto/sha256"
+	"crypto/sha512"
 	"encoding/binary"
 	"errors"
 	"fmt"
@@ -139,6 +141,9 @@ func (c *Caveat) Validate(ctx security.Context) error {
 func (c *Certificate) contentHash(issuerSignature security.Signature) []byte {
 	h := sha256.New()
 	tmp := make([]byte, binary.MaxVarintLen64)
+	if issuerSignature.Hash != security.NoHash {
+		WriteBytes(h, tmp, []byte(issuerSignature.Hash))
+	}
 	WriteBytes(h, tmp, issuerSignature.R)
 	WriteBytes(h, tmp, issuerSignature.S)
 	WriteString(h, tmp, c.Name)
@@ -150,6 +155,28 @@ func (c *Certificate) contentHash(issuerSignature security.Signature) []byte {
 		WriteBytes(h, tmp, cav.Bytes)
 	}
 	return h.Sum(nil)
+}
+
+// cryptoHash hashes the provided data using the specified hash function, returning nil
+// if the hash couldn't be applied.
+func cryptoHash(hash security.Hash, data []byte) []byte {
+	switch hash {
+	case security.NoHash:
+		return data
+	case security.SHA1Hash:
+		h := sha1.Sum(data)
+		return h[:]
+	case security.SHA256Hash:
+		h := sha256.Sum256(data)
+		return h[:]
+	case security.SHA384Hash:
+		h := sha512.Sum384(data)
+		return h[:]
+	case security.SHA512Hash:
+		h := sha512.Sum512(data)
+		return h[:]
+	}
+	return nil
 }
 
 // Sign uses the given Signer to sign the signature of the last certificate in
@@ -165,8 +192,12 @@ func (c *Certificate) Sign(signer security.Signer, pubID *ChainPublicID) error {
 }
 
 func (c *Certificate) verify(issuerSignature security.Signature, key *ecdsa.PublicKey) bool {
+	msg := c.contentHash(issuerSignature)
+	if msg = cryptoHash(issuerSignature.Hash, msg); msg == nil {
+		return false
+	}
 	var r, s big.Int
-	return ecdsa.Verify(key, c.contentHash(issuerSignature), r.SetBytes(c.Signature.R), s.SetBytes(c.Signature.S))
+	return ecdsa.Verify(key, msg, r.SetBytes(c.Signature.R), s.SetBytes(c.Signature.S))
 }
 
 // ValidateCaveats verifies if all caveats present on the certificate validate with

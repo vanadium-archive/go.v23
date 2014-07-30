@@ -18,8 +18,14 @@ type LabelSet Label
 // in the ACL such that <pid>.Match(principals) and labels.HasLabel(label).
 type ACL map[PrincipalPattern]LabelSet
 
+// Hash identifies a cryptographic hash function.
+type Hash string
+
 // Signature represents an ECDSA signature.
 type Signature struct {
+	// Hash specifies a cryptographic hash function that was used when this
+	// signature was computed.
+	Hash Hash
 	// R, S specify the pair of integers that make up an ECDSA signature.
 	R []byte
 	S []byte
@@ -43,4 +49,23 @@ const (
 
 	// MonitoringLabel allows monitoring operations.
 	MonitoringLabel = Label(16)
+
+	// SHA1Hash denotes the SHA1 cryptographic hash function as defined
+	// in RFC3174.
+	SHA1Hash = Hash("SHA1")
+
+	// SHA256Hash denotes the SHA256 cryptographic hash function as defined
+	// in FIPS 180-4.
+	SHA256Hash = Hash("SHA256")
+
+	// SHA384Hash denotes the SHA384 cryptographic hash function as defined
+	// in FIPS 180-2.
+	SHA384Hash = Hash("SHA384")
+
+	// SHA512Hash denotes the SHA512 cryptographic hash function as defined
+	// in FIPS 180-2.
+	SHA512Hash = Hash("SHA512")
+
+	// NoHash denotes the identity hash function.
+	NoHash = Hash("")
 )
