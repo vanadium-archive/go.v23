@@ -1,6 +1,7 @@
 package primitives
 
 import (
+	"fmt"
 	"reflect"
 	"runtime"
 	"testing"
@@ -11,9 +12,10 @@ import (
 )
 
 type mockObjectQueryStream struct {
-	results []interface{}
-	curr    int
-	err     error
+	results   []interface{}
+	curr      int
+	err       error
+	finishErr error
 }
 
 func (m *mockObjectQueryStream) Advance() bool {
@@ -45,7 +47,7 @@ func (m *mockObjectQueryStream) Cancel() {
 }
 
 func (m *mockObjectQueryStream) Finish() error {
-	return nil
+	return m.finishErr
 }
 
 func newMockObjectQueryStream(results []interface{}) *mockObjectQueryStream {
@@ -442,4 +444,58 @@ func TestMultipleNestedQueryStreams(t *testing.T) {
 	advance(t, stream)
 	assertNameAndValue(t, stream.Value(), "result3", 30)
 	assertDone(t, stream)
+}
+
+func TestErrorMidStream(t *testing.T) {
+	mockResults := []interface{}{
+		store.QueryResult{
+			NestedResult: 0,
+			Name:         "result1",
+			Value:        10,
+			Fields:       nil,
+		},
+		fmt.Errorf("error in processing"),
+		store.QueryResult{
+			NestedResult: 0,
+			Name:         "result3",
+			Value:        30,
+			Fields:       nil,
+		},
+	}
+
+	stream := newQueryStream(newMockObjectQueryStream(mockResults))
+	advance(t, stream)
+	assertNameAndValue(t, stream.Value(), "result1", 10)
+	assertDone(t, stream)
+	if stream.Err() == nil {
+		t.Errorf("expected to find an error")
+	}
+}
+
+func TestFinishError(t *testing.T) {
+	mockResults := []interface{}{
+		store.QueryResult{
+			NestedResult: 0,
+			Name:         "result1",
+			Value:        10,
+			Fields:       nil,
+		},
+		store.QueryResult{
+			NestedResult: 0,
+			Name:         "result2",
+			Value:        20,
+			Fields:       nil,
+		},
+	}
+	mockStream := newMockObjectQueryStream(mockResults)
+	mockStream.finishErr = fmt.Errorf("error while parsing query")
+	stream := newQueryStream(mockStream)
+	advance(t, stream)
+	assertNameAndValue(t, stream.Value(), "result1", 10)
+	advance(t, stream)
+	assertNameAndValue(t, stream.Value(), "result2", 20)
+	assertDone(t, stream)
+	if stream.Err() == nil {
+		t.Errorf("expected to find an error")
+	}
 }

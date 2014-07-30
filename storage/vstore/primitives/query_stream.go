@@ -75,7 +75,11 @@ func (r *serverStream) Advance() bool {
 		return false
 	}
 	if !hasValue {
-		r.err = r.stream.Err()
+		if r.stream.Err() != nil {
+			r.err = r.stream.Err()
+		} else {
+			r.err = r.stream.Finish()
+		}
 		return false
 	}
 	curr := r.stream.Value()
