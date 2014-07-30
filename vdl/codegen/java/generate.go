@@ -1,0 +1,85 @@
+package java
+
+import (
+	"path"
+
+	"veyron2/vdl"
+	"veyron2/vdl/compile"
+)
+
+// javaGenImplDir is the directory in which implementation details for the generated interfaces should be put.
+const javaGenImplDir = "gen_impl"
+
+// javaGenPkgPrefix is the path prefix to be added to generated VDL package paths.
+var javaGenPkgPrefix string
+
+// SetJavaGenPkgPrefix sets the prefix that will be added to generated VDL package paths.
+func SetJavaGenPkgPrefix(prefix string) {
+	javaGenPkgPrefix = prefix
+}
+
+// javaGenPkgPath returns the Java package path given the Go package path.
+func javaGenPkgPath(goPkgPath string) string {
+	return path.Join(javaGenPkgPrefix, goPkgPath)
+}
+
+// JavaFileInfo stores the name and contents of the generated Java file.
+type JavaFileInfo struct {
+	Dir  string
+	Name string
+	Data []byte
+}
+
+// Generate generates Java files for all VDL files in the provided package,
+// returning the list of generated Java files as a slice.  Since Java requires
+// that each public class/interface gets defined in a separate file, this method
+// will return one generated file per struct.  (Interfaces actually generate
+// two files because we create separate interfaces for clients and services.)
+// In addition, since Java doesn't support global variables (i.e., variables
+// defined outside of a class), all constants are moved into a special "Consts"
+// class and stored in a separate file.  All client bindings are stored in a
+// separate Client.java file. Finally, package documentation (if any) is stored
+// in a "package-info.java" file.
+//
+// The current generator doesn't yet support the full set of VDL features.  In
+// particular, we don't yet support error ids and types Complex64 and Complex128.
+//
+// TODO(spetrovic): Run Java formatters on the generated files.
+func Generate(pkg *compile.Package, env *compile.Env) (ret []JavaFileInfo) {
+	// One file for package documentation (if any).
+	if g := genJavaPackageFile(pkg, env); g != nil {
+		ret = append(ret, *g)
+	}
+	// Single file for all constants' definitions.
+	if g := genJavaConstFile(pkg, env); g != nil {
+		ret = append(ret, *g)
+	}
+	for _, file := range pkg.Files {
+		// Separate file for all typedefs.
+		for _, tdef := range file.TypeDefs {
+			switch tdef.Type.Kind() {
+			case vdl.List:
+				ret = append(ret, genJavaListFile(tdef, env))
+			case vdl.Array:
+				ret = append(ret, genJavaArrayFile(tdef, env))
+			case vdl.Set:
+				ret = append(ret, genJavaSetFile(tdef, env))
+			case vdl.Map:
+				ret = append(ret, genJavaMapFile(tdef, env))
+			case vdl.Struct:
+				ret = append(ret, genJavaStructFile(tdef, env))
+			default:
+				ret = append(ret, genJavaPrimitiveFile(tdef, env))
+			}
+		}
+		// Separate file for all interface definitions.
+		for _, iface := range file.Interfaces {
+			ret = append(ret, genJavaClientFactoryFile(iface, env))
+			ret = append(ret, genJavaClientInterfaceFile(iface, env)) // client interface
+			ret = append(ret, genJavaClientStubFile(iface, env))
+			ret = append(ret, genJavaServiceInterfaceFile(iface, env)) // service interface
+			ret = append(ret, genJavaServiceWrapperFile(iface, env))
+		}
+	}
+	return
+}

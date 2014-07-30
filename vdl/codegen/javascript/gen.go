@@ -3,7 +3,7 @@
 // object that contains the parsed VDL structures that will be used by the Javascript code
 // to valid servers.
 
-package gen
+package javascript
 
 import (
 	"bytes"
@@ -14,9 +14,9 @@ import (
 	"veyron2/vdl/vdlutil"
 )
 
-// GenJavascriptFile takes a populated compile.Package and produces a byte slice
+// Generate takes a populated compile.Package and produces a byte slice
 // containing the generated Javascript code.
-func GenJavascriptFiles(pkg *compile.Package) []byte {
+func Generate(pkg *compile.Package) []byte {
 	var buf bytes.Buffer
 	if err := javascriptTemplate.Execute(&buf, pkg); err != nil {
 		// We shouldn't see an error; it means our template is buggy.

@@ -396,7 +396,6 @@ func (x *Interface) AllMethods() []*Method {
 		result = append(result, embed.AllMethods()...)
 	}
 	return result
-
 }
 
 // We might consider allowing more characters, but we'll need to ensure they're

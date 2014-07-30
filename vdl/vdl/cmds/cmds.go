@@ -13,8 +13,10 @@ import (
 	"veyron/lib/cmdline"
 
 	"veyron2/vdl/build"
+	"veyron2/vdl/codegen/golang"
+	"veyron2/vdl/codegen/java"
+	"veyron2/vdl/codegen/javascript"
 	"veyron2/vdl/compile"
-	"veyron2/vdl/gen"
 	"veyron2/vdl/vdlutil"
 )
 
@@ -309,15 +311,15 @@ func runGen(targets []*build.Package, env *compile.Env) {
 					continue
 				}
 				for _, file := range pkg.Files {
-					opts := gen.GoOpts{Fmt: optGenGoFmt}
-					data := gen.GoFile(file, env, opts)
+					opts := golang.Opts{Fmt: optGenGoFmt}
+					data := golang.Generate(file, env, opts)
 					if writeFile(data, dir, file.BaseName+".go", env) {
 						changed = true
 					}
 				}
 			case genLangJava:
-				gen.SetJavaGenPkgPrefix(optGenJavaPkgPrefix)
-				files := gen.GenJavaFiles(pkg, env)
+				java.SetJavaGenPkgPrefix(optGenJavaPkgPrefix)
+				files := java.Generate(pkg, env)
 				dir, err := xlateOutDir(target, optGenJavaOutDir, optGenJavaPkgPrefix)
 				if err != nil {
 					env.Errors.Errorf("--java_out_dir error: %v", err)
@@ -335,7 +337,7 @@ func runGen(targets []*build.Package, env *compile.Env) {
 					env.Errors.Errorf("--js_out_dir error: %v", err)
 					continue
 				}
-				data := gen.GenJavascriptFiles(pkg)
+				data := javascript.Generate(pkg)
 				if writeFile(data, dir, pkg.Name+".js", env) {
 					changed = true
 				}

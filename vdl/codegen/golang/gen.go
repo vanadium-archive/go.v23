@@ -1,5 +1,5 @@
 // Package gen provides functions to generate code from compiled VDL packages.
-package gen
+package golang
 
 import (
 	"bytes"
@@ -18,8 +18,8 @@ import (
 	"veyron2/wiretype/build"
 )
 
-// GoOpts specifies options for generating Go files.
-type GoOpts struct {
+// Opts specifies options for generating Go files.
+type Opts struct {
 	// Fmt specifies whether to run gofmt on the generated source.
 	Fmt bool
 }
@@ -31,9 +31,9 @@ type goData struct {
 	SystemImports []string
 }
 
-// GoFile takes a populated compile.File and returns a byte slice containing the
+// Generate takes a populated compile.File and returns a byte slice containing the
 // generated Go source code.
-func GoFile(file *compile.File, env *compile.Env, opts GoOpts) []byte {
+func Generate(file *compile.File, env *compile.Env, opts Opts) []byte {
 	data := goData{
 		File:          file,
 		Env:           env,
@@ -882,7 +882,7 @@ type {{$serverStreamIfaceType}} interface { {{if $method.OutStream}}
         // returns false).  Advance may block if an element is not
         // immediately available.
         Advance() bool
-  
+
 	// Value returns the element that was staged by Advance.
 	// Value may panic if Advance returned false or was not
   	// called at all.  Value does not block.
@@ -892,7 +892,7 @@ type {{$serverStreamIfaceType}} interface { {{if $method.OutStream}}
   	// <DataProvider> supports concurrent modification, it should
   	// document its behavior.
   	Value() {{typeGo $data $method.InStream}}
-  	
+
 	// Err returns a non-nil error iff the stream encountered
   	// any errors.  Err does not block.
   	Err() error

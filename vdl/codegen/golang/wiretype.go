@@ -1,4 +1,4 @@
-package gen
+package golang
 
 // TODO(bprosnitz) Remove this after vom2 is implemented and we switch to the new signatures.
 
