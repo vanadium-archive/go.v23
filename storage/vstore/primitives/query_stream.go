@@ -70,7 +70,7 @@ func (r *serverStream) Advance() bool {
 	hasValue := r.stream.Advance()
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	// The client might have called Cancel() while we were blocked on Recv().
+	// The client might have called Cancel() while we were blocked on Advance().
 	if r.err != nil {
 		return false
 	}
@@ -105,9 +105,6 @@ func (r *serverStream) Rewind() {
 func (r *serverStream) Value() *store.QueryResult {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	if r.err != nil {
-		panic("can't call value when there is an error")
-	}
 	if r.curr == nil {
 		panic("need to call advance first")
 	}
