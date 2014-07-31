@@ -22,7 +22,7 @@ type MountEntry struct {
 // MountedServer and MountEntry are duplicated in the internals of the runtime
 // implementation and any changes made to them here should be reflected there.
 
-type Globable interface {
+type Globbable interface {
 	// Glob returns all matching entries at the given server.
 	Glob(pattern string) stream<_, MountEntry> error {security.ReadLabel}
 }
@@ -55,5 +55,5 @@ type MountTable interface {
 	// servers to query and the suffix at those servers.
 	ResolveStep() (Servers []MountedServer, Suffix string, Error error) {security.ReadLabel}
 
-	Globable
+	Globbable
 }

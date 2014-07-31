@@ -535,7 +535,7 @@ func (__gen_s *ServerStubTransaction) Abort(call _gen_ipc.ServerCall) (err error
 type Object_ExcludingUniversal interface {
 	TransactionRoot_ExcludingUniversal
 	Transaction_ExcludingUniversal
-	mounttable.Globable_ExcludingUniversal
+	mounttable.Globbable_ExcludingUniversal
 	// GlobWatcher allows a client to receive updates for changes to objects
 	// that match a pattern.  See the package comments for details.
 	watch.GlobWatcher_ExcludingUniversal
@@ -570,7 +570,7 @@ type Object interface {
 type ObjectService interface {
 	TransactionRootService
 	TransactionService
-	mounttable.GlobableService
+	mounttable.GlobbableService
 	// GlobWatcher allows a client to receive updates for changes to objects
 	// that match a pattern.  See the package comments for details.
 	watch.GlobWatcherService
@@ -713,7 +713,7 @@ func BindObject(name string, opts ..._gen_ipc.BindOpt) (Object, error) {
 	stub := &clientStubObject{client: client, name: name}
 	stub.TransactionRoot_ExcludingUniversal, _ = BindTransactionRoot(name, client)
 	stub.Transaction_ExcludingUniversal, _ = BindTransaction(name, client)
-	stub.Globable_ExcludingUniversal, _ = mounttable.BindGlobable(name, client)
+	stub.Globbable_ExcludingUniversal, _ = mounttable.BindGlobbable(name, client)
 	stub.GlobWatcher_ExcludingUniversal, _ = watch.BindGlobWatcher(name, client)
 	stub.QueryWatcher_ExcludingUniversal, _ = watch.BindQueryWatcher(name, client)
 
@@ -728,7 +728,7 @@ func NewServerObject(server ObjectService) interface{} {
 	return &ServerStubObject{
 		ServerStubTransactionRoot: *NewServerTransactionRoot(server).(*ServerStubTransactionRoot),
 		ServerStubTransaction:     *NewServerTransaction(server).(*ServerStubTransaction),
-		ServerStubGlobable:        *mounttable.NewServerGlobable(server).(*mounttable.ServerStubGlobable),
+		ServerStubGlobbable:       *mounttable.NewServerGlobbable(server).(*mounttable.ServerStubGlobbable),
 		ServerStubGlobWatcher:     *watch.NewServerGlobWatcher(server).(*watch.ServerStubGlobWatcher),
 		ServerStubQueryWatcher:    *watch.NewServerQueryWatcher(server).(*watch.ServerStubQueryWatcher),
 		service:                   server,
@@ -739,7 +739,7 @@ func NewServerObject(server ObjectService) interface{} {
 type clientStubObject struct {
 	TransactionRoot_ExcludingUniversal
 	Transaction_ExcludingUniversal
-	mounttable.Globable_ExcludingUniversal
+	mounttable.Globbable_ExcludingUniversal
 	watch.GlobWatcher_ExcludingUniversal
 	watch.QueryWatcher_ExcludingUniversal
 
@@ -861,7 +861,7 @@ func (__gen_c *clientStubObject) GetMethodTags(ctx _gen_context.T, method string
 type ServerStubObject struct {
 	ServerStubTransactionRoot
 	ServerStubTransaction
-	mounttable.ServerStubGlobable
+	mounttable.ServerStubGlobbable
 	watch.ServerStubGlobWatcher
 	watch.ServerStubQueryWatcher
 
@@ -878,7 +878,7 @@ func (__gen_s *ServerStubObject) GetMethodTags(call _gen_ipc.ServerCall, method 
 	if resp, err := __gen_s.ServerStubTransaction.GetMethodTags(call, method); resp != nil || err != nil {
 		return resp, err
 	}
-	if resp, err := __gen_s.ServerStubGlobable.GetMethodTags(call, method); resp != nil || err != nil {
+	if resp, err := __gen_s.ServerStubGlobbable.GetMethodTags(call, method); resp != nil || err != nil {
 		return resp, err
 	}
 	if resp, err := __gen_s.ServerStubGlobWatcher.GetMethodTags(call, method); resp != nil || err != nil {
@@ -1100,7 +1100,7 @@ func (__gen_s *ServerStubObject) Signature(call _gen_ipc.ServerCall) (_gen_ipc.S
 		}
 		result.TypeDefs = append(result.TypeDefs, d)
 	}
-	ss, _ = __gen_s.ServerStubGlobable.Signature(call)
+	ss, _ = __gen_s.ServerStubGlobbable.Signature(call)
 	firstAdded = len(result.TypeDefs)
 	for k, v := range ss.Methods {
 		for i, _ := range v.InArgs {

@@ -12,13 +12,13 @@ import (
 )
 
 // newGlobStream constructs a storage.GlobStream from the given
-// mounttable.GlobableGlobStream.
-func newGlobStream(stream mounttable.GlobableGlobStream) storage.GlobStream {
+// mounttable.GlobbableGlobStream.
+func newGlobStream(stream mounttable.GlobbableGlobStream) storage.GlobStream {
 	return &globStream{stream: stream}
 }
 
 type globStream struct {
-	stream mounttable.GlobableGlobStream
+	stream mounttable.GlobbableGlobStream
 
 	// mu protects all fields below.
 	mu sync.Mutex

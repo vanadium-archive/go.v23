@@ -49,9 +49,9 @@ type Object interface {
 	TransactionRoot
 	Transaction
 
-	// Globable is an API for finding all objects beneath this pattern that
+	// Globbable is an API for finding all objects beneath this pattern that
 	// match a pattern.
-	mounttable.Globable
+	mounttable.Globbable
 
 	// GlobWatcher is an API for watching updates to objects beneath this value
 	// that match a pattern.
