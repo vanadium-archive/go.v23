@@ -8,7 +8,8 @@ import (
 	"os"
 	"testing"
 
-	// TODO(cnicolaou): should probably remove this dependency on an external implementation.
+	// TODO(cnicolaou): should probably remove this dependency on an external
+	// implementation.
 	"veyron/services/store/server"
 
 	"veyron2"
@@ -56,11 +57,6 @@ func startServer(t *testing.T) (storage.Store, func()) {
 
 	// Register the services.
 	storeDisp := server.NewStoreDispatcher(storeService, nil)
-	// TODO(sadovsky): If we write "[.]storage. instead of ".store" and omit the
-	// Register(objectDisp), we get some crazy error like "vom: type mismatch".
-	// Similarly, originally I did not include the ".*" (objectDisp) dispatcher
-	// here and got crazy errors like "ipc: wrong number of output results". It
-	// would be nice to have friendlier error messages.
 	if err := s.Serve(mount, storeDisp); err != nil {
 		log.Fatal("s.Register(storeDisp) failed: ", err)
 	}
@@ -71,8 +67,7 @@ func startServer(t *testing.T) (storage.Store, func()) {
 		log.Fatal("s.Listen() failed: ", err)
 	}
 
-	// We're running without a MountTable so we use the endpoint as the
-	// name.
+	// We're running without a MountTable so we use the endpoint as the name.
 	name := naming.JoinAddressName(ep.String(), "")
 	st, err := vstore.New(name)
 	if err != nil {

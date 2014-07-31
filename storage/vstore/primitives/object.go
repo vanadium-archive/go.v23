@@ -16,8 +16,7 @@ import (
 )
 
 type object struct {
-	sServ store.Store
-	oServ store.Object
+	serv store.Object
 }
 
 type errorObject struct {
@@ -25,15 +24,16 @@ type errorObject struct {
 }
 
 var (
-	ErrBadAttr   = errors.New("bad attribute")
-	ErrTypeError = errors.New("type error")
+	ErrBadAttr = errors.New("bad attribute")
 
-	_ storage.Object = (*object)(nil)
+	_ storage.Object      = (*object)(nil)
+	_ storage.Object      = (*errorObject)(nil)
+	_ storage.QueryStream = (*errorQueryStream)(nil)
+	_ storage.GlobStream  = (*errorGlobStream)(nil)
 
-	nullEntry         storage.Entry
-	nullStat          storage.Stat
-	nullTransactionID store.TransactionID
-	nullChangeBatch   watch.ChangeBatch
+	nullEntry       storage.Entry
+	nullStat        storage.Stat
+	nullChangeBatch watch.ChangeBatch
 )
 
 func fillStat(stat *storage.Stat, serviceStat *store.Stat) error {
@@ -70,36 +70,29 @@ func makeEntry(serviceEntry *store.Entry) (storage.Entry, error) {
 	return entry, nil
 }
 
-// Bind returns a storage.Object for a value at an Object name.  The Bind always
-// succeeds.  If the Object name is not a value in a Veyron storage. all
-// subsequent operations on the object will fail.
-func BindObject(sServ store.Store, mount, name string) storage.Object {
-	oServ, err := store.BindObject(naming.Join(mount, name))
-
+// BindObject returns a storage.Object for a value at an Object name. This
+// method always succeeds. If the Object name is not a value in a Veyron store,
+// all subsequent operations on the Object will fail.
+// TODO(sadovsky): Maybe just take a single name argument, so that the client
+// need not know the store mount name?
+func BindObject(mount, name string) storage.Object {
+	serv, err := store.BindObject(naming.Join(mount, name))
 	if err != nil {
 		return &errorObject{err: err}
 	}
-	return &object{sServ: sServ, oServ: oServ}
+	return &object{serv: serv}
 }
 
 // Exists returns true iff the Entry has a value.
-func (o *object) Exists(ctx context.T, t storage.Transaction) (bool, error) {
-	id, err := UpdateTransaction(ctx, t, o.sServ)
-	if err != nil {
-		return false, err
-	}
-	return o.oServ.Exists(ctx, id)
+func (o *object) Exists(ctx context.T) (bool, error) {
+	return o.serv.Exists(ctx)
 }
 
 // Get returns the value for the Object.  The value returned is from the
 // most recent mutation of the entry in the storage.Transaction, or from the
 // storage.Transaction's snapshot if there is no mutation.
-func (o *object) Get(ctx context.T, t storage.Transaction) (storage.Entry, error) {
-	id, err := UpdateTransaction(ctx, t, o.sServ)
-	if err != nil {
-		return nullEntry, err
-	}
-	entry, err := o.oServ.Get(ctx, id)
+func (o *object) Get(ctx context.T) (storage.Entry, error) {
+	entry, err := o.serv.Get(ctx)
 	if err != nil {
 		return nullEntry, err
 	}
@@ -107,12 +100,8 @@ func (o *object) Get(ctx context.T, t storage.Transaction) (storage.Entry, error
 }
 
 // Put adds or modifies the Object.
-func (o *object) Put(ctx context.T, t storage.Transaction, v interface{}) (storage.Stat, error) {
-	id, err := UpdateTransaction(ctx, t, o.sServ)
-	if err != nil {
-		return nullStat, err
-	}
-	serviceStat, err := o.oServ.Put(ctx, id, v)
+func (o *object) Put(ctx context.T, v interface{}) (storage.Stat, error) {
+	serviceStat, err := o.serv.Put(ctx, v)
 	if err != nil {
 		return nullStat, err
 	}
@@ -120,87 +109,71 @@ func (o *object) Put(ctx context.T, t storage.Transaction, v interface{}) (stora
 }
 
 // Remove removes the Object.
-func (o *object) Remove(ctx context.T, t storage.Transaction) error {
-	id, err := UpdateTransaction(ctx, t, o.sServ)
-	if err != nil {
-		return err
-	}
-	return o.oServ.Remove(ctx, id)
+func (o *object) Remove(ctx context.T) error {
+	return o.serv.Remove(ctx)
 }
 
 // SetAttr changes the attributes of the entry, such as permissions and
 // replication groups.  Attributes are associated with the value, not the
 // path.
-func (o *object) SetAttr(ctx context.T, t storage.Transaction, attrs ...storage.Attr) error {
-	id, err := UpdateTransaction(ctx, t, o.sServ)
-	if err != nil {
-		return err
-	}
+func (o *object) SetAttr(ctx context.T, attrs ...storage.Attr) error {
 	serviceAttrs := make([]vdlutil.Any, len(attrs))
 	for i, x := range attrs {
 		serviceAttrs[i] = vdlutil.Any(x)
 	}
-	return o.oServ.SetAttr(ctx, id, serviceAttrs)
+	return o.serv.SetAttr(ctx, serviceAttrs)
 }
 
 // Stat returns entry info.
-func (o *object) Stat(ctx context.T, t storage.Transaction) (storage.Stat, error) {
-	id, err := UpdateTransaction(ctx, t, o.sServ)
-	if err != nil {
-		return nullStat, err
-	}
-	serviceStat, err := o.oServ.Stat(ctx, id)
+func (o *object) Stat(ctx context.T) (storage.Stat, error) {
+	serviceStat, err := o.serv.Stat(ctx)
 	if err != nil {
 		return nullStat, err
 	}
 	return makeStat(&serviceStat)
 }
 
-// Query performs a query on the store.
-func (o *object) Query(ctx context.T, t storage.Transaction, q query.Query) storage.QueryStream {
-	id, err := UpdateTransaction(ctx, t, o.sServ)
-	if err != nil {
-		return &errorQueryStream{err}
-	}
-	stream, err := o.oServ.Query(ctx, id, q)
+// Query returns entries matching the given query.
+func (o *object) Query(ctx context.T, q query.Query) storage.QueryStream {
+	stream, err := o.serv.Query(ctx, q)
 	if err != nil {
 		return &errorQueryStream{err}
 	}
 	return newQueryStream(stream)
 }
 
-// Glob returns a sequence of names that match the given pattern.
-func (o *object) GlobT(ctx context.T, t storage.Transaction, pattern string) (storage.GlobStream, error) {
-	id, err := UpdateTransaction(ctx, t, o.sServ)
+// Glob returns names matching the given pattern.
+func (o *object) Glob(ctx context.T, pattern string) storage.GlobStream {
+	stream, err := o.serv.Glob(ctx, pattern)
 	if err != nil {
-		return nil, err
+		return &errorGlobStream{err}
 	}
-	return o.oServ.GlobT(ctx, id, pattern)
+	return newGlobStream(stream)
 }
 
-// ChangeBatchStream is an interface for streaming responses of type ChangeBatch.
+// ChangeBatchStream is an interface for streaming responses of type
+// ChangeBatch.
 type ChangeBatchStream interface {
-	// Advance stages an element so the client can retrieve it
-	// with Value.  Advance returns true iff there is an
-	// element to retrieve.  The client must call Advance before
-	// calling Value.  The client must call Cancel if it does
-	// not iterate through all elements (i.e. until Advance
-	// returns false).  Advance may block if an element is not
-	// immediately available.
+	// Advance stages an element so the client can retrieve it with Value.
+	// Advance returns true iff there is an element to retrieve.  The client must
+	// call Advance before calling Value.  The client must call Cancel if it does
+	// not iterate through all elements (i.e. until Advance returns false).
+	// Advance may block if an element is not immediately available.
 	Advance() bool
-	// Value returns the element that was staged by Advance.
-	// Value may panic if Advance returned false or was not
-	// called at all.  Value does not block.
+
+	// Value returns the element that was staged by Advance.  Value may panic if
+	// Advance returned false or was not called at all.  Value does not block.
 	Value() watch.ChangeBatch
-	// Err returns a non-nil error iff the stream encountered
-	// any errors.  Err does not block.
+
+	// Err returns a non-nil error iff the stream encountered any errors.  Err
+	// does not block.
 	Err() error
 
 	// Finish closes the stream and returns the positional return values for
 	// call.
 	Finish() error
 
-	// Cancel cancels the RPC, notifying the server to stop processing.
+	// Cancel notifies the stream provider that it can stop producing elements.
 	Cancel()
 }
 
@@ -235,12 +208,10 @@ func (s *entryTransformStream) Advance() bool {
 		}
 	}
 	return true
-
 }
 
 func (s *entryTransformStream) Value() watch.ChangeBatch {
 	return s.value
-
 }
 
 func (s *entryTransformStream) Err() error {
@@ -257,7 +228,7 @@ func (s *entryTransformStream) Cancel() {
 
 // WatchGlob returns a stream of changes that match a pattern.
 func (o *object) WatchGlob(ctx context.T, req watch.GlobRequest) (watch.GlobWatcherWatchGlobStream, error) {
-	stream, err := o.oServ.WatchGlob(ctx, req, veyron2.CallTimeout(ipc.NoTimeout))
+	stream, err := o.serv.WatchGlob(ctx, req, veyron2.CallTimeout(ipc.NoTimeout))
 	if err != nil {
 		return nil, err
 	}
@@ -266,48 +237,56 @@ func (o *object) WatchGlob(ctx context.T, req watch.GlobRequest) (watch.GlobWatc
 
 // WatchQuery returns a stream of changes that satisy a query.
 func (o *object) WatchQuery(ctx context.T, req watch.QueryRequest) (watch.QueryWatcherWatchQueryStream, error) {
-	stream, err := o.oServ.WatchQuery(ctx, req, veyron2.CallTimeout(ipc.NoTimeout))
+	stream, err := o.serv.WatchQuery(ctx, req, veyron2.CallTimeout(ipc.NoTimeout))
 	if err != nil {
 		return nil, err
 	}
 	return &entryTransformStream{delegate: stream}, nil
 }
 
-// The errorObject responds with an error to all operations.
-func (o *errorObject) Exists(ctx context.T, t storage.Transaction) (bool, error) {
+// errorObject responds with an error to all operations.
+func (o *errorObject) Exists(ctx context.T) (bool, error) {
 	return false, o.err
 }
 
-func (o *errorObject) Get(ctx context.T, t storage.Transaction) (storage.Entry, error) {
+func (o *errorObject) Get(ctx context.T) (storage.Entry, error) {
 	return nullEntry, o.err
 }
 
-func (o *errorObject) Put(ctx context.T, t storage.Transaction, v interface{}) (storage.Stat, error) {
+func (o *errorObject) Put(ctx context.T, v interface{}) (storage.Stat, error) {
 	return nullStat, o.err
 }
 
-func (o *errorObject) Remove(ctx context.T, t storage.Transaction) error {
+func (o *errorObject) Remove(ctx context.T) error {
 	return o.err
 }
 
-func (o *errorObject) SetAttr(ctx context.T, t storage.Transaction, attrs ...storage.Attr) error {
+func (o *errorObject) SetAttr(ctx context.T, attrs ...storage.Attr) error {
 	return o.err
 }
 
-func (o *errorObject) Stat(ctx context.T, t storage.Transaction) (storage.Stat, error) {
+func (o *errorObject) Stat(ctx context.T) (storage.Stat, error) {
 	return nullStat, o.err
 }
 
-func (o *errorObject) GetAllPaths(ctx context.T, t storage.Transaction) ([]string, error) {
+func (o *errorObject) GetAllPaths(ctx context.T) ([]string, error) {
 	return nil, o.err
 }
 
-func (o *errorObject) Query(ctx context.T, t storage.Transaction, q query.Query) storage.QueryStream {
+func (o *errorObject) Query(ctx context.T, q query.Query) storage.QueryStream {
 	return &errorQueryStream{o.err}
 }
 
-func (o *errorObject) GlobT(ctx context.T, t storage.Transaction, pattern string) (storage.GlobStream, error) {
-	return nil, o.err
+func (o *errorObject) Glob(ctx context.T, pattern string) storage.GlobStream {
+	return &errorGlobStream{o.err}
+}
+
+func (o *errorObject) Commit(ctx context.T) error {
+	return o.err
+}
+
+func (o *errorObject) Abort(ctx context.T) error {
+	return o.err
 }
 
 func (o *errorObject) WatchGlob(ctx context.T, req watch.GlobRequest) (watch.GlobWatcherWatchGlobStream, error) {
@@ -318,7 +297,7 @@ func (o *errorObject) WatchQuery(ctx context.T, req watch.QueryRequest) (watch.Q
 	return nil, o.err
 }
 
-// errorQueryStream implements service.QueryStream.
+// errorQueryStream implements storage.QueryStream.
 type errorQueryStream struct {
 	err error
 }
@@ -328,7 +307,7 @@ func (e *errorQueryStream) Advance() bool {
 }
 
 func (e *errorQueryStream) Value() storage.QueryResult {
-	panic("No values")
+	panic("No value.")
 }
 
 func (e *errorQueryStream) Err() error {
@@ -336,3 +315,22 @@ func (e *errorQueryStream) Err() error {
 }
 
 func (e *errorQueryStream) Cancel() {}
+
+// errorGlobStream implements storage.GlobStream.
+type errorGlobStream struct {
+	err error
+}
+
+func (e *errorGlobStream) Advance() bool {
+	return false
+}
+
+func (e *errorGlobStream) Value() string {
+	panic("No value.")
+}
+
+func (e *errorGlobStream) Err() error {
+	return e.err
+}
+
+func (e *errorGlobStream) Cancel() {}

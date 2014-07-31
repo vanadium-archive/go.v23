@@ -3,19 +3,20 @@ package vstore_test
 import (
 	"reflect"
 	"runtime"
+	"sort"
 	"testing"
 
 	store "veyron/services/store/testutil"
 
 	"veyron2"
 	"veyron2/context"
+	"veyron2/naming"
 	"veyron2/query"
 	"veyron2/rt"
 	"veyron2/security"
 	"veyron2/services/watch"
 	"veyron2/storage"
 	"veyron2/storage/vstore"
-	"veyron2/storage/vstore/primitives"
 	"veyron2/vom"
 )
 
@@ -59,8 +60,7 @@ func TestPutGetRemoveRoot(t *testing.T) {
 	s, c := newServer(t) // calls rt.Init()
 	defer c()
 
-	o := s.Bind("/")
-	testPutGetRemove(t, s, o)
+	testPutGetRemove(t, s, "/")
 }
 
 func TestPutGetRemoveChild(t *testing.T) {
@@ -70,131 +70,143 @@ func TestPutGetRemoveChild(t *testing.T) {
 
 	{
 		// Create a root.
-		o := s.Bind("/")
+		name := "/"
 		value := newValue()
-		tr1 := primitives.NewTransaction(ctx)
-		if _, err := o.Put(ctx, tr1, value); err != nil {
+
+		tname1 := createTransaction(t, s, ctx, name)
+		tobj1 := s.BindObject(tname1)
+		if _, err := tobj1.Put(ctx, value); err != nil {
 			t.Errorf("Unexpected error: %s", err)
 		}
-		if err := tr1.Commit(ctx); err != nil {
-			t.Errorf("Unexpected error")
+		if err := s.BindTransaction(tname1).Commit(ctx); err != nil {
+			t.Errorf("Unexpected error: %s", err)
 		}
 
-		tr2 := primitives.NewTransaction(ctx)
-		if ok, err := o.Exists(ctx, tr2); !ok || err != nil {
+		tname2 := createTransaction(t, s, ctx, name)
+		tobj2 := s.BindObject(tname2)
+		if ok, err := tobj2.Exists(ctx); !ok || err != nil {
 			t.Errorf("Should exist: %s", err)
 		}
-		if _, err := o.Get(ctx, tr2); err != nil {
+		if _, err := tobj2.Get(ctx); err != nil {
 			t.Errorf("Object should exist: %s", err)
+		}
+		if err := s.BindTransaction(tname2).Abort(ctx); err != nil {
+			t.Errorf("Unexpected error: %s", err)
 		}
 	}
 
-	o := s.Bind("/Entries/a")
-	testPutGetRemove(t, s, o)
+	testPutGetRemove(t, s, "/Entries/a")
 }
 
-func testPutGetRemove(t *testing.T, s storage.Store, o storage.Object) {
+func testPutGetRemove(t *testing.T, s storage.Store, name string) {
 	value := newValue()
 	ctx := rt.R().NewContext()
 	{
 		// Check that the object does not exist.
-		tr := primitives.NewTransaction(ctx)
-		if ok, err := o.Exists(ctx, tr); ok || err != nil {
+		tname := createTransaction(t, s, ctx, name)
+		tobj := s.BindObject(tname)
+		if ok, err := tobj.Exists(ctx); ok || err != nil {
 			t.Errorf("Should not exist: %s", err)
 		}
-		if v, err := o.Get(ctx, tr); !v.Stat.ID.IsValid() && err == nil {
+		if v, err := tobj.Get(ctx); !v.Stat.ID.IsValid() && err == nil {
 			t.Errorf("Should not exist: %v, %s", v, err)
 		}
 	}
 
 	{
 		// Add the object.
-		tr1 := primitives.NewTransaction(ctx)
-		if _, err := o.Put(ctx, tr1, value); err != nil {
+		tname1 := createTransaction(t, s, ctx, name)
+		tobj1 := s.BindObject(tname1)
+		if _, err := tobj1.Put(ctx, value); err != nil {
 			t.Errorf("Unexpected error: %s", err)
 		}
-		if ok, err := o.Exists(ctx, tr1); !ok || err != nil {
+		if ok, err := tobj1.Exists(ctx); !ok || err != nil {
 			t.Errorf("Should exist: %s", err)
 		}
-		if _, err := o.Get(ctx, tr1); err != nil {
+		if _, err := tobj1.Get(ctx); err != nil {
 			t.Errorf("Object should exist: %s", err)
 		}
 
 		// Transactions are isolated.
-		tr2 := primitives.NewTransaction(ctx)
-		if ok, err := o.Exists(ctx, tr2); ok || err != nil {
+		tname2 := createTransaction(t, s, ctx, name)
+		tobj2 := s.BindObject(tname2)
+		if ok, err := tobj2.Exists(ctx); ok || err != nil {
 			t.Errorf("Should not exist: %s", err)
 		}
-		if v, err := o.Get(ctx, tr2); v.Stat.ID.IsValid() && err == nil {
+		if v, err := tobj2.Get(ctx); v.Stat.ID.IsValid() && err == nil {
 			t.Errorf("Should not exist: %v, %s", v, err)
 		}
 
-		// Apply tr1.
-		if err := tr1.Commit(ctx); err != nil {
+		// Apply tobj1.
+		if err := s.BindTransaction(tname1).Commit(ctx); err != nil {
 			t.Errorf("Unexpected error")
 		}
 
-		// tr2 is still isolated.
-		if ok, err := o.Exists(ctx, tr2); ok || err != nil {
+		// tobj2 is still isolated.
+		if ok, err := tobj2.Exists(ctx); ok || err != nil {
 			t.Errorf("Should not exist: %s", err)
 		}
-		if v, err := o.Get(ctx, tr2); v.Stat.ID.IsValid() && err == nil {
+		if v, err := tobj2.Get(ctx); v.Stat.ID.IsValid() && err == nil {
 			t.Errorf("Should not exist: %v, %s", v, err)
 		}
 
-		// tr3 observes the commit.
-		tr3 := primitives.NewTransaction(ctx)
-		if ok, err := o.Exists(ctx, tr3); !ok || err != nil {
+		// tobj3 observes the commit.
+		tname3 := createTransaction(t, s, ctx, name)
+		tobj3 := s.BindObject(tname3)
+		if ok, err := tobj3.Exists(ctx); !ok || err != nil {
 			t.Errorf("Should exist: %s", err)
 		}
-		if _, err := o.Get(ctx, tr3); err != nil {
+		if _, err := tobj3.Get(ctx); err != nil {
 			t.Errorf("Object should exist: %s", err)
 		}
 	}
 
 	{
 		// Remove the object.
-		tr1 := primitives.NewTransaction(ctx)
-		if err := o.Remove(ctx, tr1); err != nil {
+		tname1 := createTransaction(t, s, ctx, name)
+		tobj1 := s.BindObject(tname1)
+		if err := tobj1.Remove(ctx); err != nil {
 			t.Errorf("Unexpected error: %s", err)
 		}
-		if ok, err := o.Exists(ctx, tr1); ok || err != nil {
+		if ok, err := tobj1.Exists(ctx); ok || err != nil {
 			t.Errorf("Should not exist: %s", err)
 		}
-		if v, err := o.Get(ctx, tr1); v.Stat.ID.IsValid() || err == nil {
+		if v, err := tobj1.Get(ctx); v.Stat.ID.IsValid() || err == nil {
 			t.Errorf("Object should exist: %v", v)
 		}
 
 		// The removal is isolated.
-		tr2 := primitives.NewTransaction(ctx)
-		if ok, err := o.Exists(ctx, tr2); !ok || err != nil {
+		tname2 := createTransaction(t, s, ctx, name)
+		tobj2 := s.BindObject(tname2)
+		if ok, err := tobj2.Exists(ctx); !ok || err != nil {
 			t.Errorf("Should exist: %s", err)
 		}
-		if _, err := o.Get(ctx, tr2); err != nil {
+		if _, err := tobj2.Get(ctx); err != nil {
 			t.Errorf("Object should exist: %s", err)
 		}
 
-		// Apply tr1.
-		if err := tr1.Commit(ctx); err != nil {
+		// Apply tobj1.
+		if err := s.BindTransaction(tname1).Commit(ctx); err != nil {
 			t.Errorf("Unexpected error: %s", err)
 		}
 
 		// The removal is isolated.
-		if ok, err := o.Exists(ctx, tr2); !ok || err != nil {
+		if ok, err := tobj2.Exists(ctx); !ok || err != nil {
 			t.Errorf("Should exist: %s", err)
 		}
-		if _, err := o.Get(ctx, tr2); err != nil {
+		if _, err := tobj2.Get(ctx); err != nil {
 			t.Errorf("Object should exist: %s", err)
 		}
 	}
 
 	{
 		// Check that the object does not exist.
-		tr1 := primitives.NewTransaction(ctx)
-		if ok, err := o.Exists(ctx, tr1); ok || err != nil {
+		tname1 := createTransaction(t, s, ctx, name)
+		tobj1 := s.BindObject(tname1)
+		if ok, err := tobj1.Exists(ctx); ok || err != nil {
 			t.Errorf("Should not exist")
 		}
-		if v, err := o.Get(ctx, tr1); v.Stat.ID.IsValid() && err == nil {
+		if v, err := tobj1.Get(ctx); v.Stat.ID.IsValid() && err == nil {
 			t.Errorf("Should not exist: %v, %s", v, err)
 		}
 	}
@@ -207,85 +219,88 @@ func TestPutGetRemoveNilTransaction(t *testing.T) {
 
 	{
 		// Create a root.
-		o := s.Bind("/")
+		o := s.BindObject("/")
 		value := newValue()
-		if _, err := o.Put(ctx, nil, value); err != nil {
+		if _, err := o.Put(ctx, value); err != nil {
 			t.Errorf("Unexpected error: %s", err)
 		}
-		if ok, err := o.Exists(ctx, nil); !ok || err != nil {
+		if ok, err := o.Exists(ctx); !ok || err != nil {
 			t.Errorf("Should exist: %s", err)
 		}
-		if _, err := o.Get(ctx, nil); err != nil {
+		if _, err := o.Get(ctx); err != nil {
 			t.Errorf("Object should exist: %s", err)
 		}
 	}
 
-	o := s.Bind("/Entries/b")
+	name := "/Entries/b"
 	value := newValue()
+	o := s.BindObject(name)
 	{
 		// Check that the object does not exist.
-		if ok, err := o.Exists(ctx, nil); ok || err != nil {
+		if ok, err := o.Exists(ctx); ok || err != nil {
 			t.Errorf("Should not exist: %s", err)
 		}
-		if v, err := o.Get(ctx, nil); v.Stat.ID.IsValid() && err == nil {
+		if v, err := o.Get(ctx); v.Stat.ID.IsValid() && err == nil {
 			t.Errorf("Should not exist: %v, %s", v, err)
 		}
 	}
 
 	{
-		tr := primitives.NewTransaction(ctx)
-		if ok, err := o.Exists(ctx, tr); ok || err != nil {
+		tname := createTransaction(t, s, ctx, name)
+		tobj := s.BindObject(tname)
+		if ok, err := tobj.Exists(ctx); ok || err != nil {
 			t.Errorf("Should not exist: %s", err)
 		}
 
 		// Add the object.
-		if _, err := o.Put(ctx, nil, value); err != nil {
+		if _, err := o.Put(ctx, value); err != nil {
 			t.Errorf("Unexpected error: %s", err)
 		}
-		if ok, err := o.Exists(ctx, nil); !ok || err != nil {
+		if ok, err := o.Exists(ctx); !ok || err != nil {
 			t.Errorf("Should exist: %s", err)
 		}
-		if _, err := o.Get(ctx, nil); err != nil {
+		if _, err := o.Get(ctx); err != nil {
 			t.Errorf("Object should exist: %s", err)
 		}
 
 		// Transactions are isolated.
-		if ok, err := o.Exists(ctx, tr); ok || err != nil {
+		if ok, err := tobj.Exists(ctx); ok || err != nil {
 			t.Errorf("Should not exist: %s", err)
 		}
-		if v, err := o.Get(ctx, tr); v.Stat.ID.IsValid() && err == nil {
+		if v, err := tobj.Get(ctx); v.Stat.ID.IsValid() && err == nil {
 			t.Errorf("Should not exist: %v, %s", v, err)
 		}
-		if err := tr.Abort(ctx); err != nil {
+		if err := s.BindTransaction(tname).Abort(ctx); err != nil {
 			t.Errorf("Unexpected error: %s", err)
 		}
 	}
 
 	{
-		tr := primitives.NewTransaction(ctx)
-		if ok, err := o.Exists(ctx, tr); !ok || err != nil {
+		tname := createTransaction(t, s, ctx, name)
+		tobj := s.BindObject(tname)
+		if ok, err := tobj.Exists(ctx); !ok || err != nil {
 			t.Errorf("Should exist: %s", err)
 		}
 
 		// Remove the object.
-		if err := o.Remove(ctx, nil); err != nil {
+		if err := o.Remove(ctx); err != nil {
 			t.Errorf("Unexpected error: %s", err)
 		}
-		if ok, err := o.Exists(ctx, nil); ok || err != nil {
+		if ok, err := o.Exists(ctx); ok || err != nil {
 			t.Errorf("Should not exist: %s", err)
 		}
-		if v, err := o.Get(ctx, nil); v.Stat.ID.IsValid() || err == nil {
+		if v, err := o.Get(ctx); v.Stat.ID.IsValid() || err == nil {
 			t.Errorf("Object should exist: %v", v)
 		}
 
 		// The removal is isolated.
-		if ok, err := o.Exists(ctx, tr); !ok || err != nil {
+		if ok, err := tobj.Exists(ctx); !ok || err != nil {
 			t.Errorf("Should exist: %s", err)
 		}
-		if _, err := o.Get(ctx, tr); err != nil {
+		if _, err := tobj.Get(ctx); err != nil {
 			t.Errorf("Object should exist: %s", err)
 		}
-		if err := tr.Abort(ctx); err != nil {
+		if err := s.BindTransaction(tname).Abort(ctx); err != nil {
 			t.Errorf("Unexpected error: %s", err)
 		}
 	}
@@ -296,11 +311,11 @@ func TestWatchGlob(t *testing.T) {
 	defer c()
 	ctx := rt.R().NewContext()
 
-	root := s.Bind("/")
+	root := s.BindObject("/")
 
 	// Create the root.
 	rootValue := "root-val"
-	stat, err := root.Put(ctx, nil, rootValue)
+	stat, err := root.Put(ctx, rootValue)
 	if err != nil {
 		t.Fatalf("Unexpected error: %s", err)
 	}
@@ -331,9 +346,9 @@ func TestWatchGlob(t *testing.T) {
 	}
 
 	// Create /a.
-	a := s.Bind("/a")
+	a := s.BindObject("/a")
 	aValue := "a-val"
-	stat, err = a.Put(ctx, nil, aValue)
+	stat, err = a.Put(ctx, aValue)
 	if err != nil {
 		t.Fatalf("Unexpected error: %s", err)
 	}
@@ -376,25 +391,53 @@ type player struct {
 	Age  int
 }
 
-func put(t *testing.T, s storage.Store, ctx context.T, name string, value interface{}) {
-	_, file, line, _ := runtime.Caller(1)
+// TODO(sadovsky): Similar helper functions exist in photoalbum_test.go,
+// examples/todos/test/store_util.go, and elsewhere. We should unify them and
+// put them in a common location.
 
-	o := s.Bind(name)
-	if _, err := o.Put(ctx, nil, value); err != nil {
-		t.Fatalf("%s:%d unexpected error: %s", file, line, err)
+func createTransaction(t *testing.T, st storage.Store, ctx context.T, name string) string {
+	_, file, line, _ := runtime.Caller(1)
+	tid, err := st.BindTransactionRoot(name).CreateTransaction(ctx)
+	if err != nil {
+		t.Fatalf("%s(%d): can't create transaction %s: %s", file, line, name, err)
+	}
+	return naming.Join(name, tid)
+}
+
+func put(t *testing.T, st storage.Store, ctx context.T, name string, v interface{}) storage.ID {
+	_, file, line, _ := runtime.Caller(1)
+	if ctx == nil {
+		ctx = rt.R().NewContext()
+	}
+	stat, err := st.BindObject(name).Put(ctx, v)
+	if err != nil || !stat.ID.IsValid() {
+		t.Fatalf("%s(%d): can't put %s: %s", file, line, name, err)
+	}
+	return stat.ID
+}
+
+func commit(t *testing.T, st storage.Store, ctx context.T, name string) {
+	_, file, line, _ := runtime.Caller(1)
+	if ctx == nil {
+		ctx = rt.R().NewContext()
+	}
+	if err := st.BindTransaction(name).Commit(ctx); err != nil {
+		t.Fatalf("%s(%d): commit failed: %s", file, line, err)
 	}
 }
 
 func expectResultNames(t *testing.T, query string, stream storage.QueryStream, expectedNames []string) {
 	_, file, line, _ := runtime.Caller(1)
-
 	var resultNames []string
 	for stream.Advance() {
 		result := stream.Value()
 		resultNames = append(resultNames, result.Name())
 	}
+	if err := stream.Err(); err != nil {
+		t.Errorf("%s:%d stream error: %v", err)
+	}
 	if !reflect.DeepEqual(resultNames, expectedNames) {
-		t.Errorf("%s:%d query: %s;\nGOT  %v\nWANT %v", file, line, query, resultNames, expectedNames)
+		t.Errorf("%s:%d query: %s\nGOT  %v\nWANT %v", file, line, query, resultNames, expectedNames)
 	}
 }
 
@@ -403,13 +446,12 @@ func TestQuery(t *testing.T) {
 	defer c()
 	ctx := rt.R().NewContext()
 
-	put(t, s, ctx, "/", newValue())
-
-	put(t, s, ctx, "/players", newValue())
-	put(t, s, ctx, "/players/alfred", player{"alfred", 17})
-	put(t, s, ctx, "/players/alice", player{"alice", 16})
-	put(t, s, ctx, "/players/betty", player{"betty", 23})
-	put(t, s, ctx, "/players/bob", player{"bob", 21})
+	put(t, s, ctx, "", newValue())
+	put(t, s, ctx, "players", newValue())
+	put(t, s, ctx, "players/alfred", player{"alfred", 17})
+	put(t, s, ctx, "players/alice", player{"alice", 16})
+	put(t, s, ctx, "players/betty", player{"betty", 23})
+	put(t, s, ctx, "players/bob", player{"bob", 21})
 
 	type testCase struct {
 		query       string
@@ -427,20 +469,10 @@ func TestQuery(t *testing.T) {
 		},
 	}
 
-	o := s.Bind("/")
+	o := s.BindObject("/")
 	for _, test := range tests {
-		stream := o.Query(ctx, nil, query.Query{test.query})
+		stream := o.Query(ctx, query.Query{test.query})
 		expectResultNames(t, test.query, stream, test.resultNames)
-	}
-}
-
-func putTx(t *testing.T, s storage.Store, ctx context.T, tx storage.Transaction,
-	name string, value interface{}) {
-	_, file, line, _ := runtime.Caller(1)
-
-	o := s.Bind(name)
-	if _, err := o.Put(ctx, tx, value); err != nil {
-		t.Fatalf("%s:%d unexpected error: %s", file, line, err)
 	}
 }
 
@@ -449,46 +481,124 @@ func TestQueryInTransaction(t *testing.T) {
 	defer c()
 	ctx := rt.R().NewContext()
 
-	tr1 := primitives.NewTransaction(ctx)
-	putTx(t, s, ctx, tr1, "/", newValue())
-	putTx(t, s, ctx, tr1, "/players", newValue())
-	putTx(t, s, ctx, tr1, "/players/alfred", player{"alfred", 17})
-	putTx(t, s, ctx, tr1, "/players/alice", player{"alice", 16})
-	if err := tr1.Commit(ctx); err != nil {
-		t.Fatalf("Unexpected error: %s", err)
-	}
+	tname1 := createTransaction(t, s, ctx, "")
+	put(t, s, ctx, tname1, newValue())
+	put(t, s, ctx, naming.Join(tname1, "players"), newValue())
+	put(t, s, ctx, naming.Join(tname1, "players/alfred"), player{"alfred", 17})
+	put(t, s, ctx, naming.Join(tname1, "players/alice"), player{"alice", 16})
+	commit(t, s, ctx, tname1)
 
-	o := s.Bind("/")
-
-	tr2 := primitives.NewTransaction(ctx)
+	tname2 := createTransaction(t, s, ctx, "")
+	tobj2 := s.BindObject(tname2)
 
 	const allPlayers = "players/* | type player | sort()"
-	stream := o.Query(ctx, tr2, query.Query{allPlayers})
+	stream := tobj2.Query(ctx, query.Query{allPlayers})
 	expectResultNames(t, allPlayers, stream, []string{"players/alfred", "players/alice"})
 
 	// Query should see mutations that are part of the transaction.
-	putTx(t, s, ctx, tr2, "/players/betty", player{"betty", 23})
-	putTx(t, s, ctx, tr2, "/players/bob", player{"bob", 21})
-	stream = o.Query(ctx, tr2, query.Query{allPlayers})
+	put(t, s, ctx, naming.Join(tname2, "players/betty"), player{"betty", 23})
+	put(t, s, ctx, naming.Join(tname2, "players/bob"), player{"bob", 21})
+	stream = tobj2.Query(ctx, query.Query{allPlayers})
 	expectResultNames(t, allPlayers, stream,
 		[]string{"players/alfred", "players/alice", "players/betty", "players/bob"})
 
 	// Query should not see mutations that are part of an uncommitted transaction.
-	tr3 := primitives.NewTransaction(ctx)
-	stream = o.Query(ctx, tr3, query.Query{allPlayers})
+	tname3 := createTransaction(t, s, ctx, "")
+	tobj3 := s.BindObject(tname3)
+	stream = tobj3.Query(ctx, query.Query{allPlayers})
 	expectResultNames(t, allPlayers, stream, []string{"players/alfred", "players/alice"})
 
-	if err := tr2.Commit(ctx); err != nil {
-		t.Fatalf("Unexpected error: %s", err)
-	}
+	commit(t, s, ctx, tname2)
 
-	// tr3 should still not see the mutations from tr2.
-	stream = o.Query(ctx, tr3, query.Query{allPlayers})
+	// tobj3 should still not see the mutations from tobj2.
+	stream = tobj3.Query(ctx, query.Query{allPlayers})
 	expectResultNames(t, allPlayers, stream, []string{"players/alfred", "players/alice"})
 
-	// A new transaction should see the mutations from tr2.
-	tr4 := primitives.NewTransaction(ctx)
-	stream = o.Query(ctx, tr4, query.Query{allPlayers})
+	// A new transaction should see the mutations from tobj2.
+	tname4 := createTransaction(t, s, ctx, "")
+	stream = s.BindObject(tname4).Query(ctx, query.Query{allPlayers})
 	expectResultNames(t, allPlayers, stream,
+		[]string{"players/alfred", "players/alice", "players/betty", "players/bob"})
+}
+
+func expectValues(t *testing.T, pattern string, stream storage.GlobStream, expectedValues []string) {
+	_, file, line, _ := runtime.Caller(1)
+	var values []string
+	for stream.Advance() {
+		values = append(values, stream.Value())
+	}
+	if err := stream.Err(); err != nil {
+		t.Errorf("%s:%d stream error: %v", err)
+	}
+	// TODO(sadovsky): For now, we do not test that items have the same
+	// order. Should Glob return results in deterministic (e.g. alphabetical)
+	// order?
+	sort.Strings(values)
+	sort.Strings(expectedValues)
+	if !reflect.DeepEqual(values, expectedValues) {
+		t.Errorf("%s:%d pattern: %s\nGOT  %v\nWANT %v", file, line, pattern, values, expectedValues)
+	}
+}
+
+func TestGlob(t *testing.T) {
+	s, c := newServer(t) // calls rt.Init()
+	defer c()
+	ctx := rt.R().NewContext()
+
+	const pattern = "players/*"
+
+	put(t, s, ctx, "", newValue())
+	put(t, s, ctx, "players", newValue())
+	put(t, s, ctx, "players/alice", player{"alice", 16})
+	put(t, s, ctx, "players/bob", player{"bob", 21})
+
+	o := s.BindObject("/")
+	stream := o.Glob(ctx, pattern)
+	expectValues(t, pattern, stream, []string{"players/alice", "players/bob"})
+}
+
+func TestGlobInTransaction(t *testing.T) {
+	s, c := newServer(t) // calls rt.Init()
+	defer c()
+	ctx := rt.R().NewContext()
+
+	const pattern = "players/*"
+
+	tname1 := createTransaction(t, s, ctx, "")
+	put(t, s, ctx, tname1, newValue())
+	put(t, s, ctx, naming.Join(tname1, "players"), newValue())
+	put(t, s, ctx, naming.Join(tname1, "players/alfred"), player{"alfred", 17})
+	put(t, s, ctx, naming.Join(tname1, "players/alice"), player{"alice", 16})
+	commit(t, s, ctx, tname1)
+
+	tname2 := createTransaction(t, s, ctx, "")
+	tobj2 := s.BindObject(tname2)
+
+	stream := tobj2.Glob(ctx, pattern)
+	expectValues(t, pattern, stream, []string{"players/alfred", "players/alice"})
+
+	// Glob should see mutations that are part of the transaction.
+	put(t, s, ctx, naming.Join(tname2, "players/betty"), player{"betty", 23})
+	put(t, s, ctx, naming.Join(tname2, "players/bob"), player{"bob", 21})
+	stream = tobj2.Glob(ctx, pattern)
+	expectValues(t, pattern, stream,
+		[]string{"players/alfred", "players/alice", "players/betty", "players/bob"})
+
+	// Glob should not see mutations that are part of an uncommitted transaction.
+	tname3 := createTransaction(t, s, ctx, "")
+	tobj3 := s.BindObject(tname3)
+	stream = tobj3.Glob(ctx, pattern)
+	expectValues(t, pattern, stream, []string{"players/alfred", "players/alice"})
+
+	commit(t, s, ctx, tname2)
+
+	// tobj3 should still not see the mutations from tobj2.
+	stream = tobj3.Glob(ctx, pattern)
+	expectValues(t, pattern, stream, []string{"players/alfred", "players/alice"})
+
+	// A new transaction should see the mutations from tobj2.
+	tname4 := createTransaction(t, s, ctx, "")
+	stream = s.BindObject(tname4).Glob(ctx, pattern)
+	expectValues(t, pattern, stream,
 		[]string{"players/alfred", "players/alice", "players/betty", "players/bob"})
 }

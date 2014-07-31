@@ -5,17 +5,17 @@ import "veyron2/security"
 
 // MountedServer represents a server mounted on a specific name.
 type MountedServer struct {
-        // Server is the OA that's mounted.
-        Server string
-        // TTL is the remaining time (in seconds) before the mount entry expires.
-        TTL uint32
+	// Server is the OA that's mounted.
+	Server string
+	// TTL is the remaining time (in seconds) before the mount entry expires.
+	TTL uint32
 }
 
 // MountEntry represents a given name mounted in the mounttable.
 type MountEntry struct {
-        // Name is the mounted name.
+	// Name is the mounted name.
 	Name    string
-        // Servers (if present) specifies the mounted names.
+	// Servers (if present) specifies the mounted names.
 	Servers []MountedServer
 }
 
@@ -43,13 +43,13 @@ type MountTable interface {
 	// act as if it was never present as far as the interface is concerned.
 	Mount(Server string, TTL uint32) error {security.WriteLabel}
 
-	// Unmount removes Server from the mount point.  If Server is empty, remove all
-	// servers mounted there.
+	// Unmount removes Server from the mount point.  If Server is empty, remove
+	// all servers mounted there.
 	// Returns a non-nil error iff Server remains mounted at the mount point.
 	Unmount(Server string) error {security.WriteLabel}
 
-        // TODO(caprita): We can simplify this to just return []string where
-        // each string already has the suffix baked in, and no ttl.
+	// TODO(caprita): We can simplify this to just return []string where
+	// each string already has the suffix baked in, and no ttl.
 
 	// ResolveStep takes the next step in resolving a name.  Returns the next
 	// servers to query and the suffix at those servers.

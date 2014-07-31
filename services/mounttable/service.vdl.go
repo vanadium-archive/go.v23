@@ -323,8 +323,8 @@ type MountTable_ExcludingUniversal interface {
 	// results nor affect the operation of any MountTable method, and should
 	// act as if it was never present as far as the interface is concerned.
 	Mount(ctx _gen_context.T, Server string, TTL uint32, opts ..._gen_ipc.CallOpt) (err error)
-	// Unmount removes Server from the mount point.  If Server is empty, remove all
-	// servers mounted there.
+	// Unmount removes Server from the mount point.  If Server is empty, remove
+	// all servers mounted there.
 	// Returns a non-nil error iff Server remains mounted at the mount point.
 	Unmount(ctx _gen_context.T, Server string, opts ..._gen_ipc.CallOpt) (err error)
 	// ResolveStep takes the next step in resolving a name.  Returns the next
@@ -350,8 +350,8 @@ type MountTableService interface {
 	// results nor affect the operation of any MountTable method, and should
 	// act as if it was never present as far as the interface is concerned.
 	Mount(context _gen_ipc.ServerContext, Server string, TTL uint32) (err error)
-	// Unmount removes Server from the mount point.  If Server is empty, remove all
-	// servers mounted there.
+	// Unmount removes Server from the mount point.  If Server is empty, remove
+	// all servers mounted there.
 	// Returns a non-nil error iff Server remains mounted at the mount point.
 	Unmount(context _gen_ipc.ServerContext, Server string) (err error)
 	// ResolveStep takes the next step in resolving a name.  Returns the next

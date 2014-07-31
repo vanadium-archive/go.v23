@@ -37,22 +37,22 @@ type serverStream struct {
 
 	// mu protects all fields below.
 	mu sync.Mutex
-	// curr is the result that should be returned by value().
+	// curr is the result that should be returned by Value().
 	curr *store.QueryResult
-	// next is the result that should be moved to curr by a call to
-	// Advance.  Rewind moves curr to next.  If next is nil, Advance
-	// should pull a result from stream.
+	// next is the result that should be moved to curr by a call to Advance.
+	// Rewind moves curr to next.  If next is nil, Advance should pull a result
+	// from stream.
 	next *store.QueryResult
-	// err is the first error encountered from stream.  It may also be
-	// populated by a call to Cancel.
+	// err is the first error encountered from stream.  It may also be populated
+	// by a call to Cancel.
 	err error
 }
 
 // Advance stages an element so the client can retrieve it with Value.
-// Advance returns true iff there is an element to retrieve.  The client
-// must call Advance before calling Value.  The client must call Cancel if
-// it does not iterate through all elements (i.e. until Advance returns
-// false).  Advance may block if an element is not immediately available.
+// Advance returns true iff there is an element to retrieve.  The client must
+// call Advance before calling Value.  The client must call Cancel if it does
+// not iterate through all elements (i.e. until Advance returns false).
+// Advance may block if an element is not immediately available.
 func (r *serverStream) Advance() bool {
 	r.mu.Lock()
 	if r.err != nil {
@@ -88,8 +88,8 @@ func (r *serverStream) Advance() bool {
 	return true
 }
 
-// Rewind moves the stream back one position.  After calling Rewind, the
-// client must call Advance before calling Value or Rewind.
+// Rewind moves the stream back one position.  After calling Rewind, the client
+// must call Advance before calling Value or Rewind.
 func (r *serverStream) Rewind() {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -100,8 +100,8 @@ func (r *serverStream) Rewind() {
 	r.curr = nil
 }
 
-// Value returns the element that was staged by Advance. Value may panic if
-// Advance returned false or was not called at all.  Value does not block.
+// Value returns the element that was staged by Advance.  Value may panic if
+// Advance returned false or was not called at all.  Value does not block.
 func (r *serverStream) Value() *store.QueryResult {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -111,8 +111,8 @@ func (r *serverStream) Value() *store.QueryResult {
 	return r.curr
 }
 
-// Err returns a non-nil error iff the stream encountered
-// any errors.  Err does not block.
+// Err returns a non-nil error iff the stream encountered any errors.  Err
+// does not block.
 func (r *serverStream) Err() error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -121,10 +121,9 @@ func (r *serverStream) Err() error {
 
 // Cancel notifies the stream provider that it can stop producing elements.
 // The client must call Cancel if it does not iterate through all elements
-// (i.e. until Advance returns false).  Cancel is idempotent and can be
-// called concurrently with a goroutine that is iterating via Advance/Value.
-// Cancel causes Advance to subsequently return false.  Cancel does not
-// block.
+// (i.e. until Advance returns false).  Cancel is idempotent and can be called
+// concurrently with a goroutine that is iterating via Advance/Value.  Cancel
+// causes Advance to subsequently return false.  Cancel does not block.
 func (r *serverStream) Cancel() {
 	r.mu.Lock()
 	defer r.mu.Unlock()

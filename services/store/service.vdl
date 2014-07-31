@@ -14,81 +14,82 @@ const (
   StoreSuffix = ".store"
 )
 
-// TransactionID is a transaction identifier.  The identifier is chosen by the
-// client.
-//
-// TransactionIDs do not span store instances.  If you use the same
-// TransactionID with two different store instances, the transactions are
-// separate, and must be committed separately.  Don't do that, it will lead to
-// confusion.  Use fresh TransactionIDs for each store instance.
-//
-// TODO(jyh): Consider using a larger identifier space to reduce chance of
-// collisions.
-type TransactionID uint64
-
 // ObjectService is the interface for a value in the store.
 type Object interface {
 	// TODO(jyh): Decide how to pass per-operation options (like priority and
 	// timeout info).
 
 	// Exists returns true iff the Entry has a value.
-	Exists(TID TransactionID) (bool, error)
+	Exists() (bool, error)
 
 	// Get returns the value for the Object.  The value returned is from the
 	// most recent mutation of the entry in the Transaction, or from the
 	// Transaction's snapshot if there is no mutation.
-	Get(TID TransactionID) (Entry, error)
+	Get() (Entry, error)
 
 	// Put modifies the value of the Object.
-	Put(TID TransactionID, V any) (Stat, error)
+	Put(V any) (Stat, error)
 
 	// Remove removes the Object.
-	Remove(TID TransactionID) error
+	Remove() error
 
 	// SetAttr changes the attributes of the entry, such as permissions and
 	// replication groups.  Attributes are associated with the value, not the
 	// path.
-	SetAttr(TID TransactionID, Attrs []any) error
+	SetAttr(Attrs []any) error
 
 	// Stat returns entry info.
-	Stat(TID TransactionID) (Stat, error)
+	Stat() (Stat, error)
 
 	// Query returns the sequence of elements that satisfy the query.
-	Query(TID TransactionID, Q query.Query) stream<_, QueryResult> error
+	Query(Q query.Query) stream<_, QueryResult> error
 
-	// GlobT finds objects beneath this value that match the given pattern.
-	// This is the same as Glob, but operates within a transaction.
-	GlobT(TID TransactionID, pattern string) stream<_, string> error
+	// TODO(sadovsky): For now, we make Object implement the TransactionRoot and
+	// Transaction interfaces, so that the generated ServerStubObject has their
+	// methods. This is needed because on the server side we pass ServerStubObject
+	// to ReflectInvoker. In theory we could implement a "MultiReflectInvoker"
+	// that wraps multiple stubs and decides which stub to talk to based on the
+	// method being called, but we'd still need to handle calls to ipc-generated
+	// methods like Signature. Ideally the ipc framework would make it easy to
+	// combine server stubs so that one object (one name) could implement multiple
+	// idl interfaces.
+	TransactionRoot
+	Transaction
 
-    // Globable is an API for finding all objects beneath this pattern that
-    // match a pattern.
+	// Globable is an API for finding all objects beneath this pattern that
+	// match a pattern.
 	mounttable.Globable
 
-    // GlobWatcher is an API for watching updates to objects beneath this value
-    // that match a pattern.
+	// GlobWatcher is an API for watching updates to objects beneath this value
+	// that match a pattern.
 	watch.GlobWatcher
 
-    // QueryWatcher is an API for watching updates to objects beneath this
-    // value that satisfy a query.
+	// QueryWatcher is an API for watching updates to objects beneath this
+	// value that satisfy a query.
 	watch.QueryWatcher
 }
 
-// Store is the client interface to the storage system.
-type Store interface {
-	// CreateTransaction creates the transaction and sets the options for it.
-	CreateTransaction(TID TransactionID, Options []any) error
+type TransactionRoot interface {
+	// CreateTransaction creates a transaction with the given options.  It returns
+	// the name of the transaction relative to this TransactionRoot's name.
+	CreateTransaction(Options []any) (string, error)
+}
 
+type Transaction interface {
 	// Commit commits the changes in the transaction to the store.  The
 	// operation is atomic, so all mutations are performed, or none.  Returns an
 	// error if the transaction aborted.
-	Commit(TID TransactionID) error
+	Commit() error
 
 	// Abort discards a transaction.  This is an optimization; transactions
 	// eventually time out and get discarded.  However, live transactions
 	// consume resources, so if you know that you won't be using a transaction
 	// anymore, you should discard it explicitly.
-	Abort(TID TransactionID) error
+	Abort() error
+}
 
+// Store is the client interface to the storage system.
+type Store interface {
 	// ReadConflicts returns the stream of conflicts to store values.  A
 	// conflict occurs when there is a concurrent modification to a value.
 	ReadConflicts() stream<_, Conflict> error

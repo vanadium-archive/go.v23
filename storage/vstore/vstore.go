@@ -23,7 +23,6 @@ func New(mount string, opts ...ipc.BindOpt) (storage.Store, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	st := &VStore{}
 	st.Init(mount, serv)
 	return st, nil
@@ -36,11 +35,26 @@ func (st *VStore) Init(mount string, serv store.Store) {
 	st.serv = serv
 }
 
-// Bind returns a storage.Object for a value at an Object name.  The Bind always
-// succeeds.  If the Object name is not a value in a Veyron storage. all
-// subsequent operations on the object will fail.
-func (st *VStore) Bind(name string) storage.Object {
-	return primitives.BindObject(st.serv, st.mount, name)
+// BindObject returns a storage.Object for a value at an Object name. This
+// method always succeeds. If the Object name is not a value in a Veyron store,
+// all subsequent operations on the Object will fail.
+func (st *VStore) BindObject(name string) storage.Object {
+	return primitives.BindObject(st.mount, name)
+}
+
+// BindTransaction returns a storage.Transaction for a value at a Transaction
+// name. This method always succeeds. If the Transaction name is not a value in
+// a Veyron store, all subsequent operations on the Transaction will fail.
+func (st *VStore) BindTransaction(name string) storage.Transaction {
+	return primitives.BindTransaction(st.mount, name)
+}
+
+// BindTransactionRoot returns a storage.TransactionRoot for a value at a
+// TransactionRoot name. This method always succeeds. If the TransactionRoot
+// name is not a value in a Veyron store, all subsequent operations on the
+// TransactionRoot will fail.
+func (st *VStore) BindTransactionRoot(name string) storage.TransactionRoot {
+	return primitives.BindTransactionRoot(st.mount, name)
 }
 
 // SetConflictResolver specifies a function to perform conflict resolution.

@@ -4,9 +4,8 @@ import (
 	"runtime"
 	"testing"
 
-	"veyron2/rt"
+	"veyron2/naming"
 	"veyron2/storage"
-	"veyron2/storage/vstore/primitives"
 	"veyron2/vom"
 )
 
@@ -75,46 +74,46 @@ func newRole(pos string, playerID, teamID storage.ID) *Role {
 	return &Role{Position: pos, Player: playerID, Team: teamID}
 }
 
-func getPerson(t *testing.T, st storage.Store, tr storage.Transaction, path string) (storage.ID, *Person) {
+func getPerson(t *testing.T, st storage.Store, name string) (storage.ID, *Person) {
 	_, file, line, _ := runtime.Caller(1)
-	e := get(t, st, tr, path)
+	e := get(t, st, name)
 	v := e.Value
 	p, ok := v.(*Person)
 	if !ok {
-		t.Fatalf("%s(%d): %s: not a Person: %v", file, line, path, v)
+		t.Fatalf("%s(%d): %s: not a Person: %v", file, line, name, v)
 	}
 	return e.Stat.ID, p
 }
 
-func getPlayer(t *testing.T, st storage.Store, tr storage.Transaction, path string) (storage.ID, *Player) {
+func getPlayer(t *testing.T, st storage.Store, name string) (storage.ID, *Player) {
 	_, file, line, _ := runtime.Caller(1)
-	e := get(t, st, tr, path)
+	e := get(t, st, name)
 	v := e.Value
 	p, ok := v.(*Player)
 	if !ok {
-		t.Fatalf("%s(%d): %s: not a Player: %v", file, line, path, v)
+		t.Fatalf("%s(%d): %s: not a Player: %v", file, line, name, v)
 	}
 	return e.Stat.ID, p
 }
 
-func getTeam(t *testing.T, st storage.Store, tr storage.Transaction, path string) (storage.ID, *Team) {
+func getTeam(t *testing.T, st storage.Store, name string) (storage.ID, *Team) {
 	_, file, line, _ := runtime.Caller(1)
-	e := get(t, st, tr, path)
+	e := get(t, st, name)
 	v := e.Value
 	p, ok := v.(*Team)
 	if !ok {
-		t.Fatalf("%s(%d): %s: not a Team: %v", file, line, path, v)
+		t.Fatalf("%s(%d): %s: not a Team: %v", file, line, name, v)
 	}
 	return e.Stat.ID, p
 }
 
-func getRole(t *testing.T, st storage.Store, tr storage.Transaction, path string) (storage.ID, *Role) {
+func getRole(t *testing.T, st storage.Store, name string) (storage.ID, *Role) {
 	_, file, line, _ := runtime.Caller(1)
-	e := get(t, st, tr, path)
+	e := get(t, st, name)
 	v := e.Value
 	p, ok := v.(*Role)
 	if !ok {
-		t.Fatalf("%s(%d): %s: not a Role: %v", file, line, path, v)
+		t.Fatalf("%s(%d): %s: not a Role: %v", file, line, name, v)
 	}
 	return e.Stat.ID, p
 }
@@ -126,18 +125,18 @@ func TestManyToManyWithRole(t *testing.T) {
 
 	// Create a player John who plays for the Rockets team.
 	{
-		tr := primitives.NewTransaction(rt.R().NewContext())
-		put(t, st, tr, "/", newDir())
-		put(t, st, tr, "/People", newDir())
-		put(t, st, tr, "/Players", newDir())
-		put(t, st, tr, "/Teams", newDir())
+		tname := createTransaction(t, st, "")
+		put(t, st, naming.Join(tname, ""), newDir())
+		put(t, st, naming.Join(tname, "People"), newDir())
+		put(t, st, naming.Join(tname, "Players"), newDir())
+		put(t, st, naming.Join(tname, "Teams"), newDir())
 
 		person := newPerson("John", 1234567809)
-		personID := put(t, st, tr, "/People/John", person)
+		personID := put(t, st, naming.Join(tname, "People/John"), person)
 		player := newPlayer(personID)
-		playerID := put(t, st, tr, "/Players/John", player)
+		playerID := put(t, st, naming.Join(tname, "Players/John"), player)
 		team := newTeam()
-		teamID := put(t, st, tr, "/Teams/Rockets", team)
+		teamID := put(t, st, naming.Join(tname, "Teams/Rockets"), team)
 
 		// XXX(jyh): we have to update the team/player to add the cyclic
 		// links.  Consider whether individual operations in a transaction
@@ -145,32 +144,32 @@ func TestManyToManyWithRole(t *testing.T) {
 		//
 		// Note: the @ means to append the role to the Roles array.
 		role := newRole("center", playerID, teamID)
-		roleID := put(t, st, tr, "/Players/John/Roles/@", role)
-		put(t, st, tr, "/Teams/Rockets/Roles/@", roleID)
+		roleID := put(t, st, naming.Join(tname, "Players/John/Roles/@"), role)
+		put(t, st, naming.Join(tname, "Teams/Rockets/Roles/@"), roleID)
 
-		commit(t, tr)
+		commit(t, st, tname)
 	}
 
 	// Verify the state.
 	{
-		tr := primitives.NewTransaction(rt.R().NewContext())
-		pID, p := getPerson(t, st, tr, "/People/John")
+		tname := createTransaction(t, st, "")
+		pID, p := getPerson(t, st, naming.Join(tname, "People/John"))
 		if p.FullName != "John" {
 			t.Errorf("Expected %q, got %q", "John", p.FullName)
 		}
 
-		plID, pl := getPlayer(t, st, tr, "/Players/John")
+		plID, pl := getPlayer(t, st, naming.Join(tname, "Players/John"))
 		if pl.Person != pID {
 			t.Errorf("Expected %s, got %s", pID, pl.Person)
 		}
 
-		teamID, team := getTeam(t, st, tr, "/Teams/Rockets")
+		teamID, team := getTeam(t, st, naming.Join(tname, "Teams/Rockets"))
 		if len(team.Roles) != 1 || len(pl.Roles) != 1 || team.Roles[0] != pl.Roles[0] {
 			t.Errorf("Expected one role: %v, %v", team, pl)
 		}
 
-		role1ID, role1 := getRole(t, st, tr, "/Players/John/Roles/0")
-		role2ID, _ := getRole(t, st, tr, "/Teams/Rockets/Roles/0")
+		role1ID, role1 := getRole(t, st, naming.Join(tname, "Players/John/Roles/0"))
+		role2ID, _ := getRole(t, st, naming.Join(tname, "Teams/Rockets/Roles/0"))
 		if role1ID != role2ID {
 			t.Errorf("Expected %s, got %s", role1ID, role2ID)
 		}
@@ -206,24 +205,24 @@ func newDirectTeam() *DirectTeam {
 	return &DirectTeam{}
 }
 
-func getDirectPlayer(t *testing.T, st storage.Store, tr storage.Transaction, path string) (storage.ID, *DirectPlayer) {
+func getDirectPlayer(t *testing.T, st storage.Store, name string) (storage.ID, *DirectPlayer) {
 	_, file, line, _ := runtime.Caller(1)
-	e := get(t, st, tr, path)
+	e := get(t, st, name)
 	v := e.Value
 	p, ok := v.(*DirectPlayer)
 	if !ok {
-		t.Fatalf("%s(%d): %s: not a DirectPlayer: %v", file, line, path, v)
+		t.Fatalf("%s(%d): %s: not a DirectPlayer: %v", file, line, name, v)
 	}
 	return e.Stat.ID, p
 }
 
-func getDirectTeam(t *testing.T, st storage.Store, tr storage.Transaction, path string) (storage.ID, *DirectTeam) {
+func getDirectTeam(t *testing.T, st storage.Store, name string) (storage.ID, *DirectTeam) {
 	_, file, line, _ := runtime.Caller(1)
-	e := get(t, st, tr, path)
+	e := get(t, st, name)
 	v := e.Value
 	p, ok := v.(*DirectTeam)
 	if !ok {
-		t.Fatalf("%s(%d): %s: not a DirectTeam: %v", file, line, path, v)
+		t.Fatalf("%s(%d): %s: not a DirectTeam: %v", file, line, name, v)
 	}
 	return e.Stat.ID, p
 }
@@ -234,34 +233,34 @@ func TestManyToManyDirect(t *testing.T) {
 
 	// Create a player John who plays for the Rockets team.
 	{
-		tr := primitives.NewTransaction(rt.R().NewContext())
-		put(t, st, tr, "/", newDir())
-		put(t, st, tr, "/People", newDir())
-		put(t, st, tr, "/Players", newDir())
-		put(t, st, tr, "/Teams", newDir())
+		tname := createTransaction(t, st, "")
+		put(t, st, naming.Join(tname, ""), newDir())
+		put(t, st, naming.Join(tname, "People"), newDir())
+		put(t, st, naming.Join(tname, "Players"), newDir())
+		put(t, st, naming.Join(tname, "Teams"), newDir())
 
 		person := newPerson("John", 1234567809)
-		personID := put(t, st, tr, "/People/John", person)
+		personID := put(t, st, naming.Join(tname, "People/John"), person)
 		player := newDirectPlayer(personID)
-		playerID := put(t, st, tr, "/Players/John", player)
+		playerID := put(t, st, naming.Join(tname, "Players/John"), player)
 		team := newDirectTeam()
-		teamID := put(t, st, tr, "/Teams/Rockets", team)
+		teamID := put(t, st, naming.Join(tname, "Teams/Rockets"), team)
 
 		// XXX(jyh): we have to update the team/player to add the cyclic
 		// links.  Consider whether individual operations in a transaction
 		// should be exempt from the dangling-reference check.
-		put(t, st, tr, "/Players/John/Teams/@", teamID)
-		put(t, st, tr, "/Teams/Rockets/Players/@", playerID)
+		put(t, st, naming.Join(tname, "Players/John/Teams/@"), teamID)
+		put(t, st, naming.Join(tname, "Teams/Rockets/Players/@"), playerID)
 
-		commit(t, tr)
+		commit(t, st, tname)
 	}
 
 	// Verify the state.
 	{
-		tr := primitives.NewTransaction(rt.R().NewContext())
-		pID, p := getPerson(t, st, tr, "/People/John")
-		plID, pl := getDirectPlayer(t, st, tr, "/Players/John")
-		teamID, team := getDirectTeam(t, st, tr, "/Teams/Rockets")
+		tname := createTransaction(t, st, "")
+		pID, p := getPerson(t, st, naming.Join(tname, "People/John"))
+		plID, pl := getDirectPlayer(t, st, naming.Join(tname, "Players/John"))
+		teamID, team := getDirectTeam(t, st, naming.Join(tname, "Teams/Rockets"))
 
 		if p.FullName != "John" {
 			t.Errorf("Expected %q, got %q", "John", p.FullName)
