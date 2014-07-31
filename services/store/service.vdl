@@ -7,13 +7,6 @@ import (
   "veyron2/services/mounttable"
 )
 
-const (
-  // The Store has Object name "<mount>/.store", where <mount> is the
-  // Object name of the mount point.
-  // An Object with path <path> has Object name "<mount>/<path>".
-  StoreSuffix = ".store"
-)
-
 // ObjectService is the interface for a value in the store.
 type Object interface {
 	// TODO(jyh): Decide how to pass per-operation options (like priority and
@@ -88,13 +81,6 @@ type Transaction interface {
 	Abort() error
 }
 
-// Store is the client interface to the storage system.
-type Store interface {
-	// ReadConflicts returns the stream of conflicts to store values.  A
-	// conflict occurs when there is a concurrent modification to a value.
-	ReadConflicts() stream<_, Conflict> error
-}
-
 // Stat provides information about an entry in the store.
 //
 // TODO(jyh): Specify versioning more precisely.
@@ -109,24 +95,6 @@ type Stat struct {
 
 	// Attrs are the attributes associated with the entry.
 	Attrs []any
-}
-
-// Conflict represents a conflicting update in the store.
-type Conflict struct {
-	// Ty is the IDL name of the type.
-	Ty string
-
-	// ID is the identifier for the entry.
-	ID storage.ID
-
-	// Local is the local value for the entry.
-	Local Entry
-
-	// Remove is the conflicting update.
-	Remote Entry
-
-	// Root is a common ancestor.
-	Root Entry
 }
 
 // Entry represents a value at some point in time in the store.

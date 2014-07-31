@@ -4,35 +4,20 @@ package vstore
 
 import (
 	"veyron2/ipc"
-	"veyron2/naming"
-	"veyron2/services/store"
 	"veyron2/storage"
 	"veyron2/storage/vstore/primitives"
 )
 
 type VStore struct {
 	mount string
-	serv  store.Store
 }
 
 var _ storage.Store = (*VStore)(nil)
 
 // New returns a storage.Store for a Veyron store mounted at an Object name.
 func New(mount string, opts ...ipc.BindOpt) (storage.Store, error) {
-	serv, err := store.BindStore(naming.Join(mount, store.StoreSuffix), opts...)
-	if err != nil {
-		return nil, err
-	}
-	st := &VStore{}
-	st.Init(mount, serv)
+	st := &VStore{mount}
 	return st, nil
-}
-
-// Init initializes a storage.Store for the specified store mounted at the
-// specified Object name.
-func (st *VStore) Init(mount string, serv store.Store) {
-	st.mount = mount
-	st.serv = serv
 }
 
 // BindObject returns a storage.Object for a value at an Object name. This
