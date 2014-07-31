@@ -237,6 +237,7 @@ type implBuildServiceBuildStreamIterator struct {
 }
 
 func (s *implBuildServiceBuildStreamIterator) Advance() bool {
+	s.val = File{}
 	s.err = s.serverCall.Recv(&s.val)
 	return s.err == nil
 }

@@ -935,7 +935,7 @@ type {{$serverStreamReadType}} struct {
 }
 
 func (s *{{$serverStreamReadType}}) Advance() bool {
-	s.err = s.serverCall.Recv(&s.val)
+	{{reInitStreamValue $data $method.InStream "s.val"}}s.err = s.serverCall.Recv(&s.val)
 	return s.err == nil
 }
 
