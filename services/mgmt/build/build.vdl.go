@@ -20,41 +20,45 @@ import (
 	_gen_wiretype "veyron2/wiretype"
 )
 
-type Architecture byte
+// Architecture specifies the hardware architecture of a host.
+type Architecture string
 
-type Format byte
+// Format specifies the file format of a host.
+type Format string
 
-type OperatingSystem byte
+// OperatingSystem specifies the operating system of a host.
+type OperatingSystem string
 
+// File records the name and contents of a file.
 type File struct {
 	Name     string
 	Contents []byte
 }
 
 const (
-	UnsupportedArchitecture = Architecture(0)
+	X86 = Architecture("386")
 
-	AMD64 = Architecture(1)
+	AMD64 = Architecture("amd64")
 
-	ARM = Architecture(2)
+	ARM = Architecture("arm")
 
-	X86 = Architecture(3)
+	UnsupportedArchitecture = Architecture("unsupported")
 
-	UnsupportedFormat = Format(0)
+	ELF = Format("ELF")
 
-	ELF = Format(1)
+	MACH = Format("MACH")
 
-	MACH = Format(2)
+	PE = Format("PE")
 
-	PE = Format(3)
+	UnsupportedFormat = Format("unsupported")
 
-	UnsupportedOperatingSystem = OperatingSystem(0)
+	Darwin = OperatingSystem("darwin")
 
-	Darwin = OperatingSystem(1)
+	Linux = OperatingSystem("linux")
 
-	Linux = OperatingSystem(2)
+	Windows = OperatingSystem("windows")
 
-	Windows = OperatingSystem(3)
+	UnsupportedOS = OperatingSystem("unsupported")
 )
 
 // TODO(bprosnitz) Remove this line once signatures are updated to use typevals.
@@ -388,7 +392,7 @@ func (__gen_s *ServerStubBuild) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Se
 	}
 
 	result.TypeDefs = []_gen_vdlutil.Any{
-		_gen_wiretype.NamedPrimitiveType{Type: 0x32, Name: "veyron2/services/mgmt/build.Architecture", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x32, Name: "veyron2/services/mgmt/build.OperatingSystem", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, _gen_wiretype.SliceType{Elem: 0x43, Name: "", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, _gen_wiretype.StructType{
+		_gen_wiretype.NamedPrimitiveType{Type: 0x3, Name: "veyron2/services/mgmt/build.Architecture", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x3, Name: "veyron2/services/mgmt/build.OperatingSystem", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, _gen_wiretype.SliceType{Elem: 0x43, Name: "", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, _gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
 				_gen_wiretype.FieldType{Type: 0x3, Name: "Name"},
 				_gen_wiretype.FieldType{Type: 0x44, Name: "Contents"},
