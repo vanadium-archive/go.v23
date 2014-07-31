@@ -552,7 +552,7 @@ type Object_ExcludingUniversal interface {
 	// Stat returns entry info.
 	Stat(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply Stat, err error)
 	// Query returns the sequence of elements that satisfy the query.
-	Query(ctx _gen_context.T, Q query.Query, opts ..._gen_ipc.CallOpt) (reply ObjectQueryStream, err error)
+	Query(ctx _gen_context.T, Q query.Query, opts ..._gen_ipc.CallOpt) (reply ObjectQueryCall, err error)
 }
 type Object interface {
 	_gen_ipc.UniversalServiceMethods
@@ -590,27 +590,29 @@ type ObjectService interface {
 	Query(context _gen_ipc.ServerContext, Q query.Query, stream ObjectServiceQueryStream) (err error)
 }
 
-// ObjectQueryStream is the interface for streaming responses of the method
+// ObjectQueryCall is the interface for call object of the method
 // Query in the service interface Object.
-type ObjectQueryStream interface {
+type ObjectQueryCall interface {
+	// RecvStream returns the recv portion of the stream
+	RecvStream() interface {
+		// Advance stages an element so the client can retrieve it
+		// with Value.  Advance returns true iff there is an
+		// element to retrieve.  The client must call Advance before
+		// calling Value.  The client must call Cancel if it does
+		// not iterate through all elements (i.e. until Advance
+		// returns false).  Advance may block if an element is not
+		// immediately available.
+		Advance() bool
 
-	// Advance stages an element so the client can retrieve it
-	// with Value.  Advance returns true iff there is an
-	// element to retrieve.  The client must call Advance before
-	// calling Value.  The client must call Cancel if it does
-	// not iterate through all elements (i.e. until Advance
-	// returns false).  Advance may block if an element is not
-	// immediately available.
-	Advance() bool
+		// Value returns the element that was staged by Advance.
+		// Value may panic if Advance returned false or was not
+		// called at all.  Value does not block.
+		Value() QueryResult
 
-	// Value returns the element that was staged by Advance.
-	// Value may panic if Advance returned false or was not
-	// called at all.  Value does not block.
-	Value() QueryResult
-
-	// Err returns a non-nil error iff the stream encountered
-	// any errors.  Err does not block.
-	Err() error
+		// Err returns a non-nil error iff the stream encountered
+		// any errors.  Err does not block.
+		Err() error
+	}
 
 	// Finish blocks until the server is done and returns the positional
 	// return values for call.
@@ -621,7 +623,7 @@ type ObjectQueryStream interface {
 	// call.
 	//
 	// Calling Finish is mandatory for releasing stream resources, unless Cancel
-	// has been called or any of the other methods return a non-EOF error.
+	// has been called or any of the other methods return an error.
 	// Finish should be called at most once.
 	Finish() (err error)
 
@@ -631,56 +633,84 @@ type ObjectQueryStream interface {
 	Cancel()
 }
 
-// Implementation of the ObjectQueryStream interface that is not exported.
-type implObjectQueryStream struct {
+type implObjectQueryStreamIterator struct {
 	clientCall _gen_ipc.Call
 	val        QueryResult
 	err        error
 }
 
-func (c *implObjectQueryStream) Advance() bool {
+func (c *implObjectQueryStreamIterator) Advance() bool {
 	c.val = QueryResult{}
 	c.err = c.clientCall.Recv(&c.val)
 	return c.err == nil
 }
 
-func (c *implObjectQueryStream) Value() QueryResult {
+func (c *implObjectQueryStreamIterator) Value() QueryResult {
 	return c.val
 }
 
-func (c *implObjectQueryStream) Err() error {
+func (c *implObjectQueryStreamIterator) Err() error {
 	if c.err == _gen_io.EOF {
 		return nil
 	}
 	return c.err
 }
 
-func (c *implObjectQueryStream) Finish() (err error) {
+// Implementation of the ObjectQueryCall interface that is not exported.
+type implObjectQueryCall struct {
+	clientCall _gen_ipc.Call
+	readStream implObjectQueryStreamIterator
+}
+
+func (c *implObjectQueryCall) RecvStream() interface {
+	Advance() bool
+	Value() QueryResult
+	Err() error
+} {
+	return &c.readStream
+}
+
+func (c *implObjectQueryCall) Finish() (err error) {
 	if ierr := c.clientCall.Finish(&err); ierr != nil {
 		err = ierr
 	}
 	return
 }
 
-func (c *implObjectQueryStream) Cancel() {
+func (c *implObjectQueryCall) Cancel() {
 	c.clientCall.Cancel()
+}
+
+type implObjectServiceQueryStreamSender struct {
+	serverCall _gen_ipc.ServerCall
+}
+
+func (s *implObjectServiceQueryStreamSender) Send(item QueryResult) error {
+	return s.serverCall.Send(item)
 }
 
 // ObjectServiceQueryStream is the interface for streaming responses of the method
 // Query in the service interface Object.
 type ObjectServiceQueryStream interface {
-	// Send places the item onto the output stream, blocking if there is no buffer
-	// space available.  If the client has canceled, an error is returned.
-	Send(item QueryResult) error
+	// SendStream returns the send portion of the stream.
+	SendStream() interface {
+		// Send places the item onto the output stream, blocking if there is no buffer
+		// space available.  If the client has canceled, an error is returned.
+		Send(item QueryResult) error
+	}
 }
 
 // Implementation of the ObjectServiceQueryStream interface that is not exported.
 type implObjectServiceQueryStream struct {
-	serverCall _gen_ipc.ServerCall
+	writer implObjectServiceQueryStreamSender
 }
 
-func (s *implObjectServiceQueryStream) Send(item QueryResult) error {
-	return s.serverCall.Send(item)
+func (s *implObjectServiceQueryStream) SendStream() interface {
+	// Send places the item onto the output stream, blocking if there is no buffer
+	// space available.  If the client has canceled, an error is returned.
+	Send(item QueryResult) error
+} {
+	return &s.writer
 }
 
 // BindObject returns the client stub implementing the Object
@@ -806,12 +836,12 @@ func (__gen_c *clientStubObject) Stat(ctx _gen_context.T, opts ..._gen_ipc.CallO
 	return
 }
 
-func (__gen_c *clientStubObject) Query(ctx _gen_context.T, Q query.Query, opts ..._gen_ipc.CallOpt) (reply ObjectQueryStream, err error) {
+func (__gen_c *clientStubObject) Query(ctx _gen_context.T, Q query.Query, opts ..._gen_ipc.CallOpt) (reply ObjectQueryCall, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Query", []interface{}{Q}, opts...); err != nil {
 		return
 	}
-	reply = &implObjectQueryStream{clientCall: call}
+	reply = &implObjectQueryCall{clientCall: call, readStream: implObjectQueryStreamIterator{clientCall: call}}
 	return
 }
 
@@ -1305,7 +1335,7 @@ func (__gen_s *ServerStubObject) Stat(call _gen_ipc.ServerCall) (reply Stat, err
 }
 
 func (__gen_s *ServerStubObject) Query(call _gen_ipc.ServerCall, Q query.Query) (err error) {
-	stream := &implObjectServiceQueryStream{serverCall: call}
+	stream := &implObjectServiceQueryStream{writer: implObjectServiceQueryStreamSender{serverCall: call}}
 	err = __gen_s.service.Query(call, Q, stream)
 	return
 }

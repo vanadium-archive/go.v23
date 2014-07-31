@@ -42,6 +42,14 @@ func (m *mockObjectQueryStream) Err() error {
 	return m.err
 }
 
+func (m *mockObjectQueryStream) RecvStream() interface {
+	Advance() bool
+	Value() store.QueryResult
+	Err() error
+} {
+	return m
+}
+
 func (m *mockObjectQueryStream) Cancel() {
 	m.results = nil
 }

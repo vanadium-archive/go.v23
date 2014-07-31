@@ -230,7 +230,7 @@ const _ = _gen_wiretype.TypeIDInvalid
 // to enable embedding without method collisions.  Not to be used directly by clients.
 type GlobWatcher_ExcludingUniversal interface {
 	// WatchGlob returns a stream of changes that match a pattern.
-	WatchGlob(ctx _gen_context.T, Req GlobRequest, opts ..._gen_ipc.CallOpt) (reply GlobWatcherWatchGlobStream, err error)
+	WatchGlob(ctx _gen_context.T, Req GlobRequest, opts ..._gen_ipc.CallOpt) (reply GlobWatcherWatchGlobCall, err error)
 }
 type GlobWatcher interface {
 	_gen_ipc.UniversalServiceMethods
@@ -244,27 +244,29 @@ type GlobWatcherService interface {
 	WatchGlob(context _gen_ipc.ServerContext, Req GlobRequest, stream GlobWatcherServiceWatchGlobStream) (err error)
 }
 
-// GlobWatcherWatchGlobStream is the interface for streaming responses of the method
+// GlobWatcherWatchGlobCall is the interface for call object of the method
 // WatchGlob in the service interface GlobWatcher.
-type GlobWatcherWatchGlobStream interface {
+type GlobWatcherWatchGlobCall interface {
+	// RecvStream returns the recv portion of the stream
+	RecvStream() interface {
+		// Advance stages an element so the client can retrieve it
+		// with Value.  Advance returns true iff there is an
+		// element to retrieve.  The client must call Advance before
+		// calling Value.  The client must call Cancel if it does
+		// not iterate through all elements (i.e. until Advance
+		// returns false).  Advance may block if an element is not
+		// immediately available.
+		Advance() bool
 
-	// Advance stages an element so the client can retrieve it
-	// with Value.  Advance returns true iff there is an
-	// element to retrieve.  The client must call Advance before
-	// calling Value.  The client must call Cancel if it does
-	// not iterate through all elements (i.e. until Advance
-	// returns false).  Advance may block if an element is not
-	// immediately available.
-	Advance() bool
+		// Value returns the element that was staged by Advance.
+		// Value may panic if Advance returned false or was not
+		// called at all.  Value does not block.
+		Value() ChangeBatch
 
-	// Value returns the element that was staged by Advance.
-	// Value may panic if Advance returned false or was not
-	// called at all.  Value does not block.
-	Value() ChangeBatch
-
-	// Err returns a non-nil error iff the stream encountered
-	// any errors.  Err does not block.
-	Err() error
+		// Err returns a non-nil error iff the stream encountered
+		// any errors.  Err does not block.
+		Err() error
+	}
 
 	// Finish blocks until the server is done and returns the positional
 	// return values for call.
@@ -275,7 +277,7 @@ type GlobWatcherWatchGlobStream interface {
 	// call.
 	//
 	// Calling Finish is mandatory for releasing stream resources, unless Cancel
-	// has been called or any of the other methods return a non-EOF error.
+	// has been called or any of the other methods return an error.
 	// Finish should be called at most once.
 	Finish() (err error)
 
@@ -285,56 +287,84 @@ type GlobWatcherWatchGlobStream interface {
 	Cancel()
 }
 
-// Implementation of the GlobWatcherWatchGlobStream interface that is not exported.
-type implGlobWatcherWatchGlobStream struct {
+type implGlobWatcherWatchGlobStreamIterator struct {
 	clientCall _gen_ipc.Call
 	val        ChangeBatch
 	err        error
 }
 
-func (c *implGlobWatcherWatchGlobStream) Advance() bool {
+func (c *implGlobWatcherWatchGlobStreamIterator) Advance() bool {
 	c.val = ChangeBatch{}
 	c.err = c.clientCall.Recv(&c.val)
 	return c.err == nil
 }
 
-func (c *implGlobWatcherWatchGlobStream) Value() ChangeBatch {
+func (c *implGlobWatcherWatchGlobStreamIterator) Value() ChangeBatch {
 	return c.val
 }
 
-func (c *implGlobWatcherWatchGlobStream) Err() error {
+func (c *implGlobWatcherWatchGlobStreamIterator) Err() error {
 	if c.err == _gen_io.EOF {
 		return nil
 	}
 	return c.err
 }
 
-func (c *implGlobWatcherWatchGlobStream) Finish() (err error) {
+// Implementation of the GlobWatcherWatchGlobCall interface that is not exported.
+type implGlobWatcherWatchGlobCall struct {
+	clientCall _gen_ipc.Call
+	readStream implGlobWatcherWatchGlobStreamIterator
+}
+
+func (c *implGlobWatcherWatchGlobCall) RecvStream() interface {
+	Advance() bool
+	Value() ChangeBatch
+	Err() error
+} {
+	return &c.readStream
+}
+
+func (c *implGlobWatcherWatchGlobCall) Finish() (err error) {
 	if ierr := c.clientCall.Finish(&err); ierr != nil {
 		err = ierr
 	}
 	return
 }
 
-func (c *implGlobWatcherWatchGlobStream) Cancel() {
+func (c *implGlobWatcherWatchGlobCall) Cancel() {
 	c.clientCall.Cancel()
+}
+
+type implGlobWatcherServiceWatchGlobStreamSender struct {
+	serverCall _gen_ipc.ServerCall
+}
+
+func (s *implGlobWatcherServiceWatchGlobStreamSender) Send(item ChangeBatch) error {
+	return s.serverCall.Send(item)
 }
 
 // GlobWatcherServiceWatchGlobStream is the interface for streaming responses of the method
 // WatchGlob in the service interface GlobWatcher.
 type GlobWatcherServiceWatchGlobStream interface {
-	// Send places the item onto the output stream, blocking if there is no buffer
-	// space available.  If the client has canceled, an error is returned.
-	Send(item ChangeBatch) error
+	// SendStream returns the send portion of the stream.
+	SendStream() interface {
+		// Send places the item onto the output stream, blocking if there is no buffer
+		// space available.  If the client has canceled, an error is returned.
+		Send(item ChangeBatch) error
+	}
 }
 
 // Implementation of the GlobWatcherServiceWatchGlobStream interface that is not exported.
 type implGlobWatcherServiceWatchGlobStream struct {
-	serverCall _gen_ipc.ServerCall
+	writer implGlobWatcherServiceWatchGlobStreamSender
 }
 
-func (s *implGlobWatcherServiceWatchGlobStream) Send(item ChangeBatch) error {
-	return s.serverCall.Send(item)
+func (s *implGlobWatcherServiceWatchGlobStream) SendStream() interface {
+	// Send places the item onto the output stream, blocking if there is no buffer
+	// space available.  If the client has canceled, an error is returned.
+	Send(item ChangeBatch) error
+} {
+	return &s.writer
 }
 
 // BindGlobWatcher returns the client stub implementing the GlobWatcher
@@ -378,12 +408,12 @@ type clientStubGlobWatcher struct {
 	name   string
 }
 
-func (__gen_c *clientStubGlobWatcher) WatchGlob(ctx _gen_context.T, Req GlobRequest, opts ..._gen_ipc.CallOpt) (reply GlobWatcherWatchGlobStream, err error) {
+func (__gen_c *clientStubGlobWatcher) WatchGlob(ctx _gen_context.T, Req GlobRequest, opts ..._gen_ipc.CallOpt) (reply GlobWatcherWatchGlobCall, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "WatchGlob", []interface{}{Req}, opts...); err != nil {
 		return
 	}
-	reply = &implGlobWatcherWatchGlobStream{clientCall: call}
+	reply = &implGlobWatcherWatchGlobCall{clientCall: call, readStream: implGlobWatcherWatchGlobStreamIterator{clientCall: call}}
 	return
 }
 
@@ -497,7 +527,7 @@ func (__gen_s *ServerStubGlobWatcher) UnresolveStep(call _gen_ipc.ServerCall) (r
 }
 
 func (__gen_s *ServerStubGlobWatcher) WatchGlob(call _gen_ipc.ServerCall, Req GlobRequest) (err error) {
-	stream := &implGlobWatcherServiceWatchGlobStream{serverCall: call}
+	stream := &implGlobWatcherServiceWatchGlobStream{writer: implGlobWatcherServiceWatchGlobStreamSender{serverCall: call}}
 	err = __gen_s.service.WatchGlob(call, Req, stream)
 	return
 }
@@ -509,7 +539,7 @@ func (__gen_s *ServerStubGlobWatcher) WatchGlob(call _gen_ipc.ServerCall, Req Gl
 // to enable embedding without method collisions.  Not to be used directly by clients.
 type QueryWatcher_ExcludingUniversal interface {
 	// WatchQuery returns a stream of changes that satisy a query.
-	WatchQuery(ctx _gen_context.T, Req QueryRequest, opts ..._gen_ipc.CallOpt) (reply QueryWatcherWatchQueryStream, err error)
+	WatchQuery(ctx _gen_context.T, Req QueryRequest, opts ..._gen_ipc.CallOpt) (reply QueryWatcherWatchQueryCall, err error)
 }
 type QueryWatcher interface {
 	_gen_ipc.UniversalServiceMethods
@@ -523,27 +553,29 @@ type QueryWatcherService interface {
 	WatchQuery(context _gen_ipc.ServerContext, Req QueryRequest, stream QueryWatcherServiceWatchQueryStream) (err error)
 }
 
-// QueryWatcherWatchQueryStream is the interface for streaming responses of the method
+// QueryWatcherWatchQueryCall is the interface for call object of the method
 // WatchQuery in the service interface QueryWatcher.
-type QueryWatcherWatchQueryStream interface {
+type QueryWatcherWatchQueryCall interface {
+	// RecvStream returns the recv portion of the stream
+	RecvStream() interface {
+		// Advance stages an element so the client can retrieve it
+		// with Value.  Advance returns true iff there is an
+		// element to retrieve.  The client must call Advance before
+		// calling Value.  The client must call Cancel if it does
+		// not iterate through all elements (i.e. until Advance
+		// returns false).  Advance may block if an element is not
+		// immediately available.
+		Advance() bool
 
-	// Advance stages an element so the client can retrieve it
-	// with Value.  Advance returns true iff there is an
-	// element to retrieve.  The client must call Advance before
-	// calling Value.  The client must call Cancel if it does
-	// not iterate through all elements (i.e. until Advance
-	// returns false).  Advance may block if an element is not
-	// immediately available.
-	Advance() bool
+		// Value returns the element that was staged by Advance.
+		// Value may panic if Advance returned false or was not
+		// called at all.  Value does not block.
+		Value() ChangeBatch
 
-	// Value returns the element that was staged by Advance.
-	// Value may panic if Advance returned false or was not
-	// called at all.  Value does not block.
-	Value() ChangeBatch
-
-	// Err returns a non-nil error iff the stream encountered
-	// any errors.  Err does not block.
-	Err() error
+		// Err returns a non-nil error iff the stream encountered
+		// any errors.  Err does not block.
+		Err() error
+	}
 
 	// Finish blocks until the server is done and returns the positional
 	// return values for call.
@@ -554,7 +586,7 @@ type QueryWatcherWatchQueryStream interface {
 	// call.
 	//
 	// Calling Finish is mandatory for releasing stream resources, unless Cancel
-	// has been called or any of the other methods return a non-EOF error.
+	// has been called or any of the other methods return an error.
 	// Finish should be called at most once.
 	Finish() (err error)
 
@@ -564,56 +596,84 @@ type QueryWatcherWatchQueryStream interface {
 	Cancel()
 }
 
-// Implementation of the QueryWatcherWatchQueryStream interface that is not exported.
-type implQueryWatcherWatchQueryStream struct {
+type implQueryWatcherWatchQueryStreamIterator struct {
 	clientCall _gen_ipc.Call
 	val        ChangeBatch
 	err        error
 }
 
-func (c *implQueryWatcherWatchQueryStream) Advance() bool {
+func (c *implQueryWatcherWatchQueryStreamIterator) Advance() bool {
 	c.val = ChangeBatch{}
 	c.err = c.clientCall.Recv(&c.val)
 	return c.err == nil
 }
 
-func (c *implQueryWatcherWatchQueryStream) Value() ChangeBatch {
+func (c *implQueryWatcherWatchQueryStreamIterator) Value() ChangeBatch {
 	return c.val
 }
 
-func (c *implQueryWatcherWatchQueryStream) Err() error {
+func (c *implQueryWatcherWatchQueryStreamIterator) Err() error {
 	if c.err == _gen_io.EOF {
 		return nil
 	}
 	return c.err
 }
 
-func (c *implQueryWatcherWatchQueryStream) Finish() (err error) {
+// Implementation of the QueryWatcherWatchQueryCall interface that is not exported.
+type implQueryWatcherWatchQueryCall struct {
+	clientCall _gen_ipc.Call
+	readStream implQueryWatcherWatchQueryStreamIterator
+}
+
+func (c *implQueryWatcherWatchQueryCall) RecvStream() interface {
+	Advance() bool
+	Value() ChangeBatch
+	Err() error
+} {
+	return &c.readStream
+}
+
+func (c *implQueryWatcherWatchQueryCall) Finish() (err error) {
 	if ierr := c.clientCall.Finish(&err); ierr != nil {
 		err = ierr
 	}
 	return
 }
 
-func (c *implQueryWatcherWatchQueryStream) Cancel() {
+func (c *implQueryWatcherWatchQueryCall) Cancel() {
 	c.clientCall.Cancel()
+}
+
+type implQueryWatcherServiceWatchQueryStreamSender struct {
+	serverCall _gen_ipc.ServerCall
+}
+
+func (s *implQueryWatcherServiceWatchQueryStreamSender) Send(item ChangeBatch) error {
+	return s.serverCall.Send(item)
 }
 
 // QueryWatcherServiceWatchQueryStream is the interface for streaming responses of the method
 // WatchQuery in the service interface QueryWatcher.
 type QueryWatcherServiceWatchQueryStream interface {
-	// Send places the item onto the output stream, blocking if there is no buffer
-	// space available.  If the client has canceled, an error is returned.
-	Send(item ChangeBatch) error
+	// SendStream returns the send portion of the stream.
+	SendStream() interface {
+		// Send places the item onto the output stream, blocking if there is no buffer
+		// space available.  If the client has canceled, an error is returned.
+		Send(item ChangeBatch) error
+	}
 }
 
 // Implementation of the QueryWatcherServiceWatchQueryStream interface that is not exported.
 type implQueryWatcherServiceWatchQueryStream struct {
-	serverCall _gen_ipc.ServerCall
+	writer implQueryWatcherServiceWatchQueryStreamSender
 }
 
-func (s *implQueryWatcherServiceWatchQueryStream) Send(item ChangeBatch) error {
-	return s.serverCall.Send(item)
+func (s *implQueryWatcherServiceWatchQueryStream) SendStream() interface {
+	// Send places the item onto the output stream, blocking if there is no buffer
+	// space available.  If the client has canceled, an error is returned.
+	Send(item ChangeBatch) error
+} {
+	return &s.writer
 }
 
 // BindQueryWatcher returns the client stub implementing the QueryWatcher
@@ -657,12 +717,12 @@ type clientStubQueryWatcher struct {
 	name   string
 }
 
-func (__gen_c *clientStubQueryWatcher) WatchQuery(ctx _gen_context.T, Req QueryRequest, opts ..._gen_ipc.CallOpt) (reply QueryWatcherWatchQueryStream, err error) {
+func (__gen_c *clientStubQueryWatcher) WatchQuery(ctx _gen_context.T, Req QueryRequest, opts ..._gen_ipc.CallOpt) (reply QueryWatcherWatchQueryCall, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "WatchQuery", []interface{}{Req}, opts...); err != nil {
 		return
 	}
-	reply = &implQueryWatcherWatchQueryStream{clientCall: call}
+	reply = &implQueryWatcherWatchQueryCall{clientCall: call, readStream: implQueryWatcherWatchQueryStreamIterator{clientCall: call}}
 	return
 }
 
@@ -781,7 +841,7 @@ func (__gen_s *ServerStubQueryWatcher) UnresolveStep(call _gen_ipc.ServerCall) (
 }
 
 func (__gen_s *ServerStubQueryWatcher) WatchQuery(call _gen_ipc.ServerCall, Req QueryRequest) (err error) {
-	stream := &implQueryWatcherServiceWatchQueryStream{serverCall: call}
+	stream := &implQueryWatcherServiceWatchQueryStream{writer: implQueryWatcherServiceWatchQueryStreamSender{serverCall: call}}
 	err = __gen_s.service.WatchQuery(call, Req, stream)
 	return
 }

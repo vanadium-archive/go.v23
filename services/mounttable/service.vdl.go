@@ -42,7 +42,7 @@ const _ = _gen_wiretype.TypeIDInvalid
 // to enable embedding without method collisions.  Not to be used directly by clients.
 type Globbable_ExcludingUniversal interface {
 	// Glob returns all matching entries at the given server.
-	Glob(ctx _gen_context.T, pattern string, opts ..._gen_ipc.CallOpt) (reply GlobbableGlobStream, err error)
+	Glob(ctx _gen_context.T, pattern string, opts ..._gen_ipc.CallOpt) (reply GlobbableGlobCall, err error)
 }
 type Globbable interface {
 	_gen_ipc.UniversalServiceMethods
@@ -56,27 +56,29 @@ type GlobbableService interface {
 	Glob(context _gen_ipc.ServerContext, pattern string, stream GlobbableServiceGlobStream) (err error)
 }
 
-// GlobbableGlobStream is the interface for streaming responses of the method
+// GlobbableGlobCall is the interface for call object of the method
 // Glob in the service interface Globbable.
-type GlobbableGlobStream interface {
+type GlobbableGlobCall interface {
+	// RecvStream returns the recv portion of the stream
+	RecvStream() interface {
+		// Advance stages an element so the client can retrieve it
+		// with Value.  Advance returns true iff there is an
+		// element to retrieve.  The client must call Advance before
+		// calling Value.  The client must call Cancel if it does
+		// not iterate through all elements (i.e. until Advance
+		// returns false).  Advance may block if an element is not
+		// immediately available.
+		Advance() bool
 
-	// Advance stages an element so the client can retrieve it
-	// with Value.  Advance returns true iff there is an
-	// element to retrieve.  The client must call Advance before
-	// calling Value.  The client must call Cancel if it does
-	// not iterate through all elements (i.e. until Advance
-	// returns false).  Advance may block if an element is not
-	// immediately available.
-	Advance() bool
+		// Value returns the element that was staged by Advance.
+		// Value may panic if Advance returned false or was not
+		// called at all.  Value does not block.
+		Value() MountEntry
 
-	// Value returns the element that was staged by Advance.
-	// Value may panic if Advance returned false or was not
-	// called at all.  Value does not block.
-	Value() MountEntry
-
-	// Err returns a non-nil error iff the stream encountered
-	// any errors.  Err does not block.
-	Err() error
+		// Err returns a non-nil error iff the stream encountered
+		// any errors.  Err does not block.
+		Err() error
+	}
 
 	// Finish blocks until the server is done and returns the positional
 	// return values for call.
@@ -87,7 +89,7 @@ type GlobbableGlobStream interface {
 	// call.
 	//
 	// Calling Finish is mandatory for releasing stream resources, unless Cancel
-	// has been called or any of the other methods return a non-EOF error.
+	// has been called or any of the other methods return an error.
 	// Finish should be called at most once.
 	Finish() (err error)
 
@@ -97,56 +99,84 @@ type GlobbableGlobStream interface {
 	Cancel()
 }
 
-// Implementation of the GlobbableGlobStream interface that is not exported.
-type implGlobbableGlobStream struct {
+type implGlobbableGlobStreamIterator struct {
 	clientCall _gen_ipc.Call
 	val        MountEntry
 	err        error
 }
 
-func (c *implGlobbableGlobStream) Advance() bool {
+func (c *implGlobbableGlobStreamIterator) Advance() bool {
 	c.val = MountEntry{}
 	c.err = c.clientCall.Recv(&c.val)
 	return c.err == nil
 }
 
-func (c *implGlobbableGlobStream) Value() MountEntry {
+func (c *implGlobbableGlobStreamIterator) Value() MountEntry {
 	return c.val
 }
 
-func (c *implGlobbableGlobStream) Err() error {
+func (c *implGlobbableGlobStreamIterator) Err() error {
 	if c.err == _gen_io.EOF {
 		return nil
 	}
 	return c.err
 }
 
-func (c *implGlobbableGlobStream) Finish() (err error) {
+// Implementation of the GlobbableGlobCall interface that is not exported.
+type implGlobbableGlobCall struct {
+	clientCall _gen_ipc.Call
+	readStream implGlobbableGlobStreamIterator
+}
+
+func (c *implGlobbableGlobCall) RecvStream() interface {
+	Advance() bool
+	Value() MountEntry
+	Err() error
+} {
+	return &c.readStream
+}
+
+func (c *implGlobbableGlobCall) Finish() (err error) {
 	if ierr := c.clientCall.Finish(&err); ierr != nil {
 		err = ierr
 	}
 	return
 }
 
-func (c *implGlobbableGlobStream) Cancel() {
+func (c *implGlobbableGlobCall) Cancel() {
 	c.clientCall.Cancel()
+}
+
+type implGlobbableServiceGlobStreamSender struct {
+	serverCall _gen_ipc.ServerCall
+}
+
+func (s *implGlobbableServiceGlobStreamSender) Send(item MountEntry) error {
+	return s.serverCall.Send(item)
 }
 
 // GlobbableServiceGlobStream is the interface for streaming responses of the method
 // Glob in the service interface Globbable.
 type GlobbableServiceGlobStream interface {
-	// Send places the item onto the output stream, blocking if there is no buffer
-	// space available.  If the client has canceled, an error is returned.
-	Send(item MountEntry) error
+	// SendStream returns the send portion of the stream.
+	SendStream() interface {
+		// Send places the item onto the output stream, blocking if there is no buffer
+		// space available.  If the client has canceled, an error is returned.
+		Send(item MountEntry) error
+	}
 }
 
 // Implementation of the GlobbableServiceGlobStream interface that is not exported.
 type implGlobbableServiceGlobStream struct {
-	serverCall _gen_ipc.ServerCall
+	writer implGlobbableServiceGlobStreamSender
 }
 
-func (s *implGlobbableServiceGlobStream) Send(item MountEntry) error {
-	return s.serverCall.Send(item)
+func (s *implGlobbableServiceGlobStream) SendStream() interface {
+	// Send places the item onto the output stream, blocking if there is no buffer
+	// space available.  If the client has canceled, an error is returned.
+	Send(item MountEntry) error
+} {
+	return &s.writer
 }
 
 // BindGlobbable returns the client stub implementing the Globbable
@@ -190,12 +220,12 @@ type clientStubGlobbable struct {
 	name   string
 }
 
-func (__gen_c *clientStubGlobbable) Glob(ctx _gen_context.T, pattern string, opts ..._gen_ipc.CallOpt) (reply GlobbableGlobStream, err error) {
+func (__gen_c *clientStubGlobbable) Glob(ctx _gen_context.T, pattern string, opts ..._gen_ipc.CallOpt) (reply GlobbableGlobCall, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Glob", []interface{}{pattern}, opts...); err != nil {
 		return
 	}
-	reply = &implGlobbableGlobStream{clientCall: call}
+	reply = &implGlobbableGlobCall{clientCall: call, readStream: implGlobbableGlobStreamIterator{clientCall: call}}
 	return
 }
 
@@ -301,7 +331,7 @@ func (__gen_s *ServerStubGlobbable) UnresolveStep(call _gen_ipc.ServerCall) (rep
 }
 
 func (__gen_s *ServerStubGlobbable) Glob(call _gen_ipc.ServerCall, pattern string) (err error) {
-	stream := &implGlobbableServiceGlobStream{serverCall: call}
+	stream := &implGlobbableServiceGlobStream{writer: implGlobbableServiceGlobStreamSender{serverCall: call}}
 	err = __gen_s.service.Glob(call, pattern, stream)
 	return
 }

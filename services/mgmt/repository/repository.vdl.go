@@ -254,7 +254,7 @@ type Binary_ExcludingUniversal interface {
 	// error. If the Delete() method is invoked when the Download()
 	// method is in progress, the outcome the Download() method is
 	// undefined.
-	Download(ctx _gen_context.T, part int32, opts ..._gen_ipc.CallOpt) (reply BinaryDownloadStream, err error)
+	Download(ctx _gen_context.T, part int32, opts ..._gen_ipc.CallOpt) (reply BinaryDownloadCall, err error)
 	// DownloadURL returns a transient URL from which the binary
 	// identified by the object name suffix can be downloaded using the
 	// HTTP protocol. If not all parts of the binary have been uploaded,
@@ -270,7 +270,7 @@ type Binary_ExcludingUniversal interface {
 	// binary part has been uploaded, the method returns an error. If
 	// the same binary part is being uploaded by another caller, the
 	// method returns an error.
-	Upload(ctx _gen_context.T, part int32, opts ..._gen_ipc.CallOpt) (reply BinaryUploadStream, err error)
+	Upload(ctx _gen_context.T, part int32, opts ..._gen_ipc.CallOpt) (reply BinaryUploadCall, err error)
 }
 type Binary interface {
 	_gen_ipc.UniversalServiceMethods
@@ -314,27 +314,29 @@ type BinaryService interface {
 	Upload(context _gen_ipc.ServerContext, part int32, stream BinaryServiceUploadStream) (err error)
 }
 
-// BinaryDownloadStream is the interface for streaming responses of the method
+// BinaryDownloadCall is the interface for call object of the method
 // Download in the service interface Binary.
-type BinaryDownloadStream interface {
+type BinaryDownloadCall interface {
+	// RecvStream returns the recv portion of the stream
+	RecvStream() interface {
+		// Advance stages an element so the client can retrieve it
+		// with Value.  Advance returns true iff there is an
+		// element to retrieve.  The client must call Advance before
+		// calling Value.  The client must call Cancel if it does
+		// not iterate through all elements (i.e. until Advance
+		// returns false).  Advance may block if an element is not
+		// immediately available.
+		Advance() bool
 
-	// Advance stages an element so the client can retrieve it
-	// with Value.  Advance returns true iff there is an
-	// element to retrieve.  The client must call Advance before
-	// calling Value.  The client must call Cancel if it does
-	// not iterate through all elements (i.e. until Advance
-	// returns false).  Advance may block if an element is not
-	// immediately available.
-	Advance() bool
+		// Value returns the element that was staged by Advance.
+		// Value may panic if Advance returned false or was not
+		// called at all.  Value does not block.
+		Value() []byte
 
-	// Value returns the element that was staged by Advance.
-	// Value may panic if Advance returned false or was not
-	// called at all.  Value does not block.
-	Value() []byte
-
-	// Err returns a non-nil error iff the stream encountered
-	// any errors.  Err does not block.
-	Err() error
+		// Err returns a non-nil error iff the stream encountered
+		// any errors.  Err does not block.
+		Err() error
+	}
 
 	// Finish blocks until the server is done and returns the positional
 	// return values for call.
@@ -345,7 +347,7 @@ type BinaryDownloadStream interface {
 	// call.
 	//
 	// Calling Finish is mandatory for releasing stream resources, unless Cancel
-	// has been called or any of the other methods return a non-EOF error.
+	// has been called or any of the other methods return an error.
 	// Finish should be called at most once.
 	Finish() (err error)
 
@@ -355,87 +357,117 @@ type BinaryDownloadStream interface {
 	Cancel()
 }
 
-// Implementation of the BinaryDownloadStream interface that is not exported.
-type implBinaryDownloadStream struct {
+type implBinaryDownloadStreamIterator struct {
 	clientCall _gen_ipc.Call
 	val        []byte
 	err        error
 }
 
-func (c *implBinaryDownloadStream) Advance() bool {
+func (c *implBinaryDownloadStreamIterator) Advance() bool {
 	c.err = c.clientCall.Recv(&c.val)
 	return c.err == nil
 }
 
-func (c *implBinaryDownloadStream) Value() []byte {
+func (c *implBinaryDownloadStreamIterator) Value() []byte {
 	return c.val
 }
 
-func (c *implBinaryDownloadStream) Err() error {
+func (c *implBinaryDownloadStreamIterator) Err() error {
 	if c.err == _gen_io.EOF {
 		return nil
 	}
 	return c.err
 }
 
-func (c *implBinaryDownloadStream) Finish() (err error) {
+// Implementation of the BinaryDownloadCall interface that is not exported.
+type implBinaryDownloadCall struct {
+	clientCall _gen_ipc.Call
+	readStream implBinaryDownloadStreamIterator
+}
+
+func (c *implBinaryDownloadCall) RecvStream() interface {
+	Advance() bool
+	Value() []byte
+	Err() error
+} {
+	return &c.readStream
+}
+
+func (c *implBinaryDownloadCall) Finish() (err error) {
 	if ierr := c.clientCall.Finish(&err); ierr != nil {
 		err = ierr
 	}
 	return
 }
 
-func (c *implBinaryDownloadStream) Cancel() {
+func (c *implBinaryDownloadCall) Cancel() {
 	c.clientCall.Cancel()
+}
+
+type implBinaryServiceDownloadStreamSender struct {
+	serverCall _gen_ipc.ServerCall
+}
+
+func (s *implBinaryServiceDownloadStreamSender) Send(item []byte) error {
+	return s.serverCall.Send(item)
 }
 
 // BinaryServiceDownloadStream is the interface for streaming responses of the method
 // Download in the service interface Binary.
 type BinaryServiceDownloadStream interface {
-	// Send places the item onto the output stream, blocking if there is no buffer
-	// space available.  If the client has canceled, an error is returned.
-	Send(item []byte) error
+	// SendStream returns the send portion of the stream.
+	SendStream() interface {
+		// Send places the item onto the output stream, blocking if there is no buffer
+		// space available.  If the client has canceled, an error is returned.
+		Send(item []byte) error
+	}
 }
 
 // Implementation of the BinaryServiceDownloadStream interface that is not exported.
 type implBinaryServiceDownloadStream struct {
-	serverCall _gen_ipc.ServerCall
+	writer implBinaryServiceDownloadStreamSender
 }
 
-func (s *implBinaryServiceDownloadStream) Send(item []byte) error {
-	return s.serverCall.Send(item)
-}
-
-// BinaryUploadStream is the interface for streaming responses of the method
-// Upload in the service interface Binary.
-type BinaryUploadStream interface {
-
-	// Send places the item onto the output stream, blocking if there is no
-	// buffer space available.  Calls to Send after having called CloseSend
-	// or Cancel will fail.  Any blocked Send calls will be unblocked upon
-	// calling Cancel.
+func (s *implBinaryServiceDownloadStream) SendStream() interface {
+	// Send places the item onto the output stream, blocking if there is no buffer
+	// space available.  If the client has canceled, an error is returned.
 	Send(item []byte) error
+} {
+	return &s.writer
+}
 
-	// CloseSend indicates to the server that no more items will be sent;
-	// server Recv calls will receive io.EOF after all sent items.  This is
-	// an optional call - it's used by streaming clients that need the
-	// server to receive the io.EOF terminator before the client calls
-	// Finish (for example, if the client needs to continue receiving items
-	// from the server after having finished sending).
-	// Calls to CloseSend after having called Cancel will fail.
-	// Like Send, CloseSend blocks when there's no buffer space available.
-	CloseSend() error
+// BinaryUploadCall is the interface for call object of the method
+// Upload in the service interface Binary.
+type BinaryUploadCall interface {
 
-	// Finish performs the equivalent of CloseSend, then blocks until the server
+	// SendStream returns the send portion of the stream
+	SendStream() interface {
+		// Send places the item onto the output stream, blocking if there is no
+		// buffer space available.  Calls to Send after having called Close
+		// or Cancel will fail.  Any blocked Send calls will be unblocked upon
+		// calling Cancel.
+		Send(item []byte) error
+
+		// Close indicates to the server that no more items will be sent;
+		// server Recv calls will receive io.EOF after all sent items.  This is
+		// an optional call - it's used by streaming clients that need the
+		// server to receive the io.EOF terminator before the client calls
+		// Finish (for example, if the client needs to continue receiving items
+		// from the server after having finished sending).
+		// Calls to Close after having called Cancel will fail.
+		// Like Send, Close blocks when there's no buffer space available.
+		Close() error
+	}
+
+	// Finish performs the equivalent of SendStream().Close, then blocks until the server
 	// is done, and returns the positional return values for call.
-	//
 	// If Cancel has been called, Finish will return immediately; the output of
 	// Finish could either be an error signalling cancelation, or the correct
 	// positional return values from the server depending on the timing of the
 	// call.
 	//
 	// Calling Finish is mandatory for releasing stream resources, unless Cancel
-	// has been called or any of the other methods return a non-EOF error.
+	// has been called or any of the other methods return an error.
 	// Finish should be called at most once.
 	Finish() (err error)
 
@@ -445,34 +477,95 @@ type BinaryUploadStream interface {
 	Cancel()
 }
 
-// Implementation of the BinaryUploadStream interface that is not exported.
-type implBinaryUploadStream struct {
+type implBinaryUploadStreamSender struct {
 	clientCall _gen_ipc.Call
 }
 
-func (c *implBinaryUploadStream) Send(item []byte) error {
+func (c *implBinaryUploadStreamSender) Send(item []byte) error {
 	return c.clientCall.Send(item)
 }
 
-func (c *implBinaryUploadStream) CloseSend() error {
+func (c *implBinaryUploadStreamSender) Close() error {
 	return c.clientCall.CloseSend()
 }
 
-func (c *implBinaryUploadStream) Finish() (err error) {
+// Implementation of the BinaryUploadCall interface that is not exported.
+type implBinaryUploadCall struct {
+	clientCall  _gen_ipc.Call
+	writeStream implBinaryUploadStreamSender
+}
+
+func (c *implBinaryUploadCall) SendStream() interface {
+	Send(item []byte) error
+	Close() error
+} {
+	return &c.writeStream
+}
+
+func (c *implBinaryUploadCall) Finish() (err error) {
 	if ierr := c.clientCall.Finish(&err); ierr != nil {
 		err = ierr
 	}
 	return
 }
 
-func (c *implBinaryUploadStream) Cancel() {
+func (c *implBinaryUploadCall) Cancel() {
 	c.clientCall.Cancel()
+}
+
+type implBinaryServiceUploadStreamIterator struct {
+	serverCall _gen_ipc.ServerCall
+	val        []byte
+	err        error
+}
+
+func (s *implBinaryServiceUploadStreamIterator) Advance() bool {
+	s.err = s.serverCall.Recv(&s.val)
+	return s.err == nil
+}
+
+func (s *implBinaryServiceUploadStreamIterator) Value() []byte {
+	return s.val
+}
+
+func (s *implBinaryServiceUploadStreamIterator) Err() error {
+	if s.err == _gen_io.EOF {
+		return nil
+	}
+	return s.err
 }
 
 // BinaryServiceUploadStream is the interface for streaming responses of the method
 // Upload in the service interface Binary.
 type BinaryServiceUploadStream interface {
+	// RecvStream returns the recv portion of the stream
+	RecvStream() interface {
+		// Advance stages an element so the client can retrieve it
+		// with Value.  Advance returns true iff there is an
+		// element to retrieve.  The client must call Advance before
+		// calling Value.  The client must call Cancel if it does
+		// not iterate through all elements (i.e. until Advance
+		// returns false).  Advance may block if an element is not
+		// immediately available.
+		Advance() bool
 
+		// Value returns the element that was staged by Advance.
+		// Value may panic if Advance returned false or was not
+		// called at all.  Value does not block.
+		Value() []byte
+
+		// Err returns a non-nil error iff the stream encountered
+		// any errors.  Err does not block.
+		Err() error
+	}
+}
+
+// Implementation of the BinaryServiceUploadStream interface that is not exported.
+type implBinaryServiceUploadStream struct {
+	reader implBinaryServiceUploadStreamIterator
+}
+
+func (s *implBinaryServiceUploadStream) RecvStream() interface {
 	// Advance stages an element so the client can retrieve it
 	// with Value.  Advance returns true iff there is an
 	// element to retrieve.  The client must call Advance before
@@ -485,39 +578,13 @@ type BinaryServiceUploadStream interface {
 	// Value returns the element that was staged by Advance.
 	// Value may panic if Advance returned false or was not
 	// called at all.  Value does not block.
-	//
-	// In general, Value is undefined if the underlying collection
-	// of elements changes while iteration is in progress.  If
-	// <DataProvider> supports concurrent modification, it should
-	// document its behavior.
 	Value() []byte
 
 	// Err returns a non-nil error iff the stream encountered
 	// any errors.  Err does not block.
 	Err() error
-}
-
-// Implementation of the BinaryServiceUploadStream interface that is not exported.
-type implBinaryServiceUploadStream struct {
-	serverCall _gen_ipc.ServerCall
-	val        []byte
-	err        error
-}
-
-func (s *implBinaryServiceUploadStream) Advance() bool {
-	s.err = s.serverCall.Recv(&s.val)
-	return s.err == nil
-}
-
-func (s *implBinaryServiceUploadStream) Value() []byte {
-	return s.val
-}
-
-func (s *implBinaryServiceUploadStream) Err() error {
-	if s.err == _gen_io.EOF {
-		return nil
-	}
-	return s.err
+} {
+	return &s.reader
 }
 
 // BindBinary returns the client stub implementing the Binary
@@ -583,12 +650,12 @@ func (__gen_c *clientStubBinary) Delete(ctx _gen_context.T, opts ..._gen_ipc.Cal
 	return
 }
 
-func (__gen_c *clientStubBinary) Download(ctx _gen_context.T, part int32, opts ..._gen_ipc.CallOpt) (reply BinaryDownloadStream, err error) {
+func (__gen_c *clientStubBinary) Download(ctx _gen_context.T, part int32, opts ..._gen_ipc.CallOpt) (reply BinaryDownloadCall, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Download", []interface{}{part}, opts...); err != nil {
 		return
 	}
-	reply = &implBinaryDownloadStream{clientCall: call}
+	reply = &implBinaryDownloadCall{clientCall: call, readStream: implBinaryDownloadStreamIterator{clientCall: call}}
 	return
 }
 
@@ -614,12 +681,12 @@ func (__gen_c *clientStubBinary) Stat(ctx _gen_context.T, opts ..._gen_ipc.CallO
 	return
 }
 
-func (__gen_c *clientStubBinary) Upload(ctx _gen_context.T, part int32, opts ..._gen_ipc.CallOpt) (reply BinaryUploadStream, err error) {
+func (__gen_c *clientStubBinary) Upload(ctx _gen_context.T, part int32, opts ..._gen_ipc.CallOpt) (reply BinaryUploadCall, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Upload", []interface{}{part}, opts...); err != nil {
 		return
 	}
-	reply = &implBinaryUploadStream{clientCall: call}
+	reply = &implBinaryUploadCall{clientCall: call, writeStream: implBinaryUploadStreamSender{clientCall: call}}
 	return
 }
 
@@ -777,7 +844,7 @@ func (__gen_s *ServerStubBinary) Delete(call _gen_ipc.ServerCall) (err error) {
 }
 
 func (__gen_s *ServerStubBinary) Download(call _gen_ipc.ServerCall, part int32) (err error) {
-	stream := &implBinaryServiceDownloadStream{serverCall: call}
+	stream := &implBinaryServiceDownloadStream{writer: implBinaryServiceDownloadStreamSender{serverCall: call}}
 	err = __gen_s.service.Download(call, part, stream)
 	return
 }
@@ -793,7 +860,7 @@ func (__gen_s *ServerStubBinary) Stat(call _gen_ipc.ServerCall) (reply []binary.
 }
 
 func (__gen_s *ServerStubBinary) Upload(call _gen_ipc.ServerCall, part int32) (err error) {
-	stream := &implBinaryServiceUploadStream{serverCall: call}
+	stream := &implBinaryServiceUploadStream{reader: implBinaryServiceUploadStreamIterator{serverCall: call}}
 	err = __gen_s.service.Upload(call, part, stream)
 	return
 }

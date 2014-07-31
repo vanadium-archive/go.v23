@@ -13,13 +13,12 @@ import (
 
 // newGlobStream constructs a storage.GlobStream from the given
 // mounttable.GlobbableGlobStream.
-func newGlobStream(stream mounttable.GlobbableGlobStream) storage.GlobStream {
-	return &globStream{stream: stream}
+func newGlobStream(call mounttable.GlobbableGlobCall) storage.GlobCall {
+	return &globStream{call: call}
 }
 
 type globStream struct {
-	stream mounttable.GlobbableGlobStream
-
+	call mounttable.GlobbableGlobCall
 	// mu protects all fields below.
 	mu sync.Mutex
 	// curr is the result that should be returned by Value().
@@ -36,7 +35,8 @@ type globStream struct {
 // Advance may block if an element is not immediately available.
 func (s *globStream) Advance() bool {
 	// Don't hold the lock while waiting for the next result.
-	hasValue := s.stream.Advance()
+	rStream := s.call.RecvStream()
+	hasValue := rStream.Advance()
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	// The client might have called Cancel() while we were blocked on Advance().
@@ -44,16 +44,20 @@ func (s *globStream) Advance() bool {
 		return false
 	}
 	if !hasValue {
-		if s.stream.Err() != nil {
-			s.err = s.stream.Err()
+		if rStream.Err() != nil {
+			s.err = rStream.Err()
 		} else {
-			s.err = s.stream.Finish()
+			s.err = s.call.Finish()
 		}
 		return false
 	}
-	curr := s.stream.Value()
+	curr := rStream.Value()
 	s.curr = &curr
 	return true
+}
+
+func (s *globStream) RecvStream() storage.GlobStream {
+	return s
 }
 
 // Value returns the element that was staged by Advance.  Value may panic if
@@ -84,5 +88,5 @@ func (s *globStream) Cancel() {
 	s.mu.Lock()
 	s.err = errors.New("cancelled by client")
 	s.mu.Unlock()
-	s.stream.Cancel()
+	s.call.Cancel()
 }

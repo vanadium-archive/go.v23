@@ -328,11 +328,12 @@ func TestWatchGlob(t *testing.T) {
 	}
 	defer stream.Cancel()
 
+	rStream := stream.RecvStream()
 	// Expect a change adding /.
-	if !stream.Advance() {
-		t.Fatalf("Unexpected error: %s", stream.Err())
+	if !rStream.Advance() {
+		t.Fatalf("Unexpected error: %s", rStream.Err())
 	}
-	cb := stream.Value()
+	cb := rStream.Value()
 	changes := cb.Changes
 	if len(changes) != 1 {
 		t.Fatalf("Expected 1 change, but got %d", len(changes))
@@ -354,10 +355,10 @@ func TestWatchGlob(t *testing.T) {
 	}
 
 	// Expect changes updating / and adding /a.
-	if !stream.Advance() {
-		t.Fatalf("Unexpected error: %s", stream.Err())
+	if !rStream.Advance() {
+		t.Fatalf("Unexpected error: %s", rStream.Err())
 	}
-	cb = stream.Value()
+	cb = rStream.Value()
 	changes = cb.Changes
 	if len(changes) != 2 {
 		t.Fatalf("Expected 2 changes, but got %d", len(changes))
@@ -521,9 +522,10 @@ func TestQueryInTransaction(t *testing.T) {
 		[]string{"players/alfred", "players/alice", "players/betty", "players/bob"})
 }
 
-func expectValues(t *testing.T, pattern string, stream storage.GlobStream, expectedValues []string) {
+func expectValues(t *testing.T, pattern string, call storage.GlobCall, expectedValues []string) {
 	_, file, line, _ := runtime.Caller(1)
 	var values []string
+	stream := call.RecvStream()
 	for stream.Advance() {
 		values = append(values, stream.Value())
 	}

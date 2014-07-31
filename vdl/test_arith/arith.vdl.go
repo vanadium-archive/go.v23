@@ -88,9 +88,9 @@ type Arith_ExcludingUniversal interface {
 	// values, and regular const expressions may also be used.
 	GenError(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error)
 	// Count shows using only an int32 out-stream type, with no in-stream type.
-	Count(ctx _gen_context.T, Start int32, opts ..._gen_ipc.CallOpt) (reply ArithCountStream, err error)
+	Count(ctx _gen_context.T, Start int32, opts ..._gen_ipc.CallOpt) (reply ArithCountCall, err error)
 	// StreamingAdd shows a bidirectional stream.
-	StreamingAdd(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply ArithStreamingAddStream, err error)
+	StreamingAdd(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply ArithStreamingAddCall, err error)
 	// QuoteAny shows the any built-in type, representing a value of any type.
 	QuoteAny(ctx _gen_context.T, a _gen_vdlutil.Any, opts ..._gen_ipc.CallOpt) (reply _gen_vdlutil.Any, err error)
 }
@@ -124,27 +124,29 @@ type ArithService interface {
 	QuoteAny(context _gen_ipc.ServerContext, a _gen_vdlutil.Any) (reply _gen_vdlutil.Any, err error)
 }
 
-// ArithCountStream is the interface for streaming responses of the method
+// ArithCountCall is the interface for call object of the method
 // Count in the service interface Arith.
-type ArithCountStream interface {
+type ArithCountCall interface {
+	// RecvStream returns the recv portion of the stream
+	RecvStream() interface {
+		// Advance stages an element so the client can retrieve it
+		// with Value.  Advance returns true iff there is an
+		// element to retrieve.  The client must call Advance before
+		// calling Value.  The client must call Cancel if it does
+		// not iterate through all elements (i.e. until Advance
+		// returns false).  Advance may block if an element is not
+		// immediately available.
+		Advance() bool
 
-	// Advance stages an element so the client can retrieve it
-	// with Value.  Advance returns true iff there is an
-	// element to retrieve.  The client must call Advance before
-	// calling Value.  The client must call Cancel if it does
-	// not iterate through all elements (i.e. until Advance
-	// returns false).  Advance may block if an element is not
-	// immediately available.
-	Advance() bool
+		// Value returns the element that was staged by Advance.
+		// Value may panic if Advance returned false or was not
+		// called at all.  Value does not block.
+		Value() int32
 
-	// Value returns the element that was staged by Advance.
-	// Value may panic if Advance returned false or was not
-	// called at all.  Value does not block.
-	Value() int32
-
-	// Err returns a non-nil error iff the stream encountered
-	// any errors.  Err does not block.
-	Err() error
+		// Err returns a non-nil error iff the stream encountered
+		// any errors.  Err does not block.
+		Err() error
+	}
 
 	// Finish blocks until the server is done and returns the positional
 	// return values for call.
@@ -155,7 +157,7 @@ type ArithCountStream interface {
 	// call.
 	//
 	// Calling Finish is mandatory for releasing stream resources, unless Cancel
-	// has been called or any of the other methods return a non-EOF error.
+	// has been called or any of the other methods return an error.
 	// Finish should be called at most once.
 	Finish() (err error)
 
@@ -165,105 +167,137 @@ type ArithCountStream interface {
 	Cancel()
 }
 
-// Implementation of the ArithCountStream interface that is not exported.
-type implArithCountStream struct {
+type implArithCountStreamIterator struct {
 	clientCall _gen_ipc.Call
 	val        int32
 	err        error
 }
 
-func (c *implArithCountStream) Advance() bool {
+func (c *implArithCountStreamIterator) Advance() bool {
 	c.err = c.clientCall.Recv(&c.val)
 	return c.err == nil
 }
 
-func (c *implArithCountStream) Value() int32 {
+func (c *implArithCountStreamIterator) Value() int32 {
 	return c.val
 }
 
-func (c *implArithCountStream) Err() error {
+func (c *implArithCountStreamIterator) Err() error {
 	if c.err == _gen_io.EOF {
 		return nil
 	}
 	return c.err
 }
 
-func (c *implArithCountStream) Finish() (err error) {
+// Implementation of the ArithCountCall interface that is not exported.
+type implArithCountCall struct {
+	clientCall _gen_ipc.Call
+	readStream implArithCountStreamIterator
+}
+
+func (c *implArithCountCall) RecvStream() interface {
+	Advance() bool
+	Value() int32
+	Err() error
+} {
+	return &c.readStream
+}
+
+func (c *implArithCountCall) Finish() (err error) {
 	if ierr := c.clientCall.Finish(&err); ierr != nil {
 		err = ierr
 	}
 	return
 }
 
-func (c *implArithCountStream) Cancel() {
+func (c *implArithCountCall) Cancel() {
 	c.clientCall.Cancel()
+}
+
+type implArithServiceCountStreamSender struct {
+	serverCall _gen_ipc.ServerCall
+}
+
+func (s *implArithServiceCountStreamSender) Send(item int32) error {
+	return s.serverCall.Send(item)
 }
 
 // ArithServiceCountStream is the interface for streaming responses of the method
 // Count in the service interface Arith.
 type ArithServiceCountStream interface {
-	// Send places the item onto the output stream, blocking if there is no buffer
-	// space available.  If the client has canceled, an error is returned.
-	Send(item int32) error
+	// SendStream returns the send portion of the stream.
+	SendStream() interface {
+		// Send places the item onto the output stream, blocking if there is no buffer
+		// space available.  If the client has canceled, an error is returned.
+		Send(item int32) error
+	}
 }
 
 // Implementation of the ArithServiceCountStream interface that is not exported.
 type implArithServiceCountStream struct {
-	serverCall _gen_ipc.ServerCall
+	writer implArithServiceCountStreamSender
 }
 
-func (s *implArithServiceCountStream) Send(item int32) error {
-	return s.serverCall.Send(item)
-}
-
-// ArithStreamingAddStream is the interface for streaming responses of the method
-// StreamingAdd in the service interface Arith.
-type ArithStreamingAddStream interface {
-
-	// Send places the item onto the output stream, blocking if there is no
-	// buffer space available.  Calls to Send after having called CloseSend
-	// or Cancel will fail.  Any blocked Send calls will be unblocked upon
-	// calling Cancel.
+func (s *implArithServiceCountStream) SendStream() interface {
+	// Send places the item onto the output stream, blocking if there is no buffer
+	// space available.  If the client has canceled, an error is returned.
 	Send(item int32) error
+} {
+	return &s.writer
+}
 
-	// CloseSend indicates to the server that no more items will be sent;
-	// server Recv calls will receive io.EOF after all sent items.  This is
-	// an optional call - it's used by streaming clients that need the
-	// server to receive the io.EOF terminator before the client calls
-	// Finish (for example, if the client needs to continue receiving items
-	// from the server after having finished sending).
-	// Calls to CloseSend after having called Cancel will fail.
-	// Like Send, CloseSend blocks when there's no buffer space available.
-	CloseSend() error
+// ArithStreamingAddCall is the interface for call object of the method
+// StreamingAdd in the service interface Arith.
+type ArithStreamingAddCall interface {
+	// RecvStream returns the recv portion of the stream
+	RecvStream() interface {
+		// Advance stages an element so the client can retrieve it
+		// with Value.  Advance returns true iff there is an
+		// element to retrieve.  The client must call Advance before
+		// calling Value.  The client must call Cancel if it does
+		// not iterate through all elements (i.e. until Advance
+		// returns false).  Advance may block if an element is not
+		// immediately available.
+		Advance() bool
 
-	// Advance stages an element so the client can retrieve it
-	// with Value.  Advance returns true iff there is an
-	// element to retrieve.  The client must call Advance before
-	// calling Value.  The client must call Cancel if it does
-	// not iterate through all elements (i.e. until Advance
-	// returns false).  Advance may block if an element is not
-	// immediately available.
-	Advance() bool
+		// Value returns the element that was staged by Advance.
+		// Value may panic if Advance returned false or was not
+		// called at all.  Value does not block.
+		Value() int32
 
-	// Value returns the element that was staged by Advance.
-	// Value may panic if Advance returned false or was not
-	// called at all.  Value does not block.
-	Value() int32
+		// Err returns a non-nil error iff the stream encountered
+		// any errors.  Err does not block.
+		Err() error
+	}
 
-	// Err returns a non-nil error iff the stream encountered
-	// any errors.  Err does not block.
-	Err() error
+	// SendStream returns the send portion of the stream
+	SendStream() interface {
+		// Send places the item onto the output stream, blocking if there is no
+		// buffer space available.  Calls to Send after having called Close
+		// or Cancel will fail.  Any blocked Send calls will be unblocked upon
+		// calling Cancel.
+		Send(item int32) error
 
-	// Finish performs the equivalent of CloseSend, then blocks until the server
+		// Close indicates to the server that no more items will be sent;
+		// server Recv calls will receive io.EOF after all sent items.  This is
+		// an optional call - it's used by streaming clients that need the
+		// server to receive the io.EOF terminator before the client calls
+		// Finish (for example, if the client needs to continue receiving items
+		// from the server after having finished sending).
+		// Calls to Close after having called Cancel will fail.
+		// Like Send, Close blocks when there's no buffer space available.
+		Close() error
+	}
+
+	// Finish performs the equivalent of SendStream().Close, then blocks until the server
 	// is done, and returns the positional return values for call.
-	//
 	// If Cancel has been called, Finish will return immediately; the output of
 	// Finish could either be an error signalling cancelation, or the correct
 	// positional return values from the server depending on the timing of the
 	// call.
 	//
 	// Calling Finish is mandatory for releasing stream resources, unless Cancel
-	// has been called or any of the other methods return a non-EOF error.
+	// has been called or any of the other methods return an error.
 	// Finish should be called at most once.
 	Finish() (reply int32, err error)
 
@@ -273,55 +307,149 @@ type ArithStreamingAddStream interface {
 	Cancel()
 }
 
-// Implementation of the ArithStreamingAddStream interface that is not exported.
-type implArithStreamingAddStream struct {
+type implArithStreamingAddStreamSender struct {
+	clientCall _gen_ipc.Call
+}
+
+func (c *implArithStreamingAddStreamSender) Send(item int32) error {
+	return c.clientCall.Send(item)
+}
+
+func (c *implArithStreamingAddStreamSender) Close() error {
+	return c.clientCall.CloseSend()
+}
+
+type implArithStreamingAddStreamIterator struct {
 	clientCall _gen_ipc.Call
 	val        int32
 	err        error
 }
 
-func (c *implArithStreamingAddStream) Send(item int32) error {
-	return c.clientCall.Send(item)
-}
-
-func (c *implArithStreamingAddStream) CloseSend() error {
-	return c.clientCall.CloseSend()
-}
-
-func (c *implArithStreamingAddStream) Advance() bool {
+func (c *implArithStreamingAddStreamIterator) Advance() bool {
 	c.err = c.clientCall.Recv(&c.val)
 	return c.err == nil
 }
 
-func (c *implArithStreamingAddStream) Value() int32 {
+func (c *implArithStreamingAddStreamIterator) Value() int32 {
 	return c.val
 }
 
-func (c *implArithStreamingAddStream) Err() error {
+func (c *implArithStreamingAddStreamIterator) Err() error {
 	if c.err == _gen_io.EOF {
 		return nil
 	}
 	return c.err
 }
 
-func (c *implArithStreamingAddStream) Finish() (reply int32, err error) {
+// Implementation of the ArithStreamingAddCall interface that is not exported.
+type implArithStreamingAddCall struct {
+	clientCall  _gen_ipc.Call
+	writeStream implArithStreamingAddStreamSender
+	readStream  implArithStreamingAddStreamIterator
+}
+
+func (c *implArithStreamingAddCall) SendStream() interface {
+	Send(item int32) error
+	Close() error
+} {
+	return &c.writeStream
+}
+
+func (c *implArithStreamingAddCall) RecvStream() interface {
+	Advance() bool
+	Value() int32
+	Err() error
+} {
+	return &c.readStream
+}
+
+func (c *implArithStreamingAddCall) Finish() (reply int32, err error) {
 	if ierr := c.clientCall.Finish(&reply, &err); ierr != nil {
 		err = ierr
 	}
 	return
 }
 
-func (c *implArithStreamingAddStream) Cancel() {
+func (c *implArithStreamingAddCall) Cancel() {
 	c.clientCall.Cancel()
+}
+
+type implArithServiceStreamingAddStreamSender struct {
+	serverCall _gen_ipc.ServerCall
+}
+
+func (s *implArithServiceStreamingAddStreamSender) Send(item int32) error {
+	return s.serverCall.Send(item)
+}
+
+type implArithServiceStreamingAddStreamIterator struct {
+	serverCall _gen_ipc.ServerCall
+	val        int32
+	err        error
+}
+
+func (s *implArithServiceStreamingAddStreamIterator) Advance() bool {
+	s.err = s.serverCall.Recv(&s.val)
+	return s.err == nil
+}
+
+func (s *implArithServiceStreamingAddStreamIterator) Value() int32 {
+	return s.val
+}
+
+func (s *implArithServiceStreamingAddStreamIterator) Err() error {
+	if s.err == _gen_io.EOF {
+		return nil
+	}
+	return s.err
 }
 
 // ArithServiceStreamingAddStream is the interface for streaming responses of the method
 // StreamingAdd in the service interface Arith.
 type ArithServiceStreamingAddStream interface {
+	// SendStream returns the send portion of the stream.
+	SendStream() interface {
+		// Send places the item onto the output stream, blocking if there is no buffer
+		// space available.  If the client has canceled, an error is returned.
+		Send(item int32) error
+	}
+	// RecvStream returns the recv portion of the stream
+	RecvStream() interface {
+		// Advance stages an element so the client can retrieve it
+		// with Value.  Advance returns true iff there is an
+		// element to retrieve.  The client must call Advance before
+		// calling Value.  The client must call Cancel if it does
+		// not iterate through all elements (i.e. until Advance
+		// returns false).  Advance may block if an element is not
+		// immediately available.
+		Advance() bool
+
+		// Value returns the element that was staged by Advance.
+		// Value may panic if Advance returned false or was not
+		// called at all.  Value does not block.
+		Value() int32
+
+		// Err returns a non-nil error iff the stream encountered
+		// any errors.  Err does not block.
+		Err() error
+	}
+}
+
+// Implementation of the ArithServiceStreamingAddStream interface that is not exported.
+type implArithServiceStreamingAddStream struct {
+	writer implArithServiceStreamingAddStreamSender
+	reader implArithServiceStreamingAddStreamIterator
+}
+
+func (s *implArithServiceStreamingAddStream) SendStream() interface {
 	// Send places the item onto the output stream, blocking if there is no buffer
 	// space available.  If the client has canceled, an error is returned.
 	Send(item int32) error
+} {
+	return &s.writer
+}
 
+func (s *implArithServiceStreamingAddStream) RecvStream() interface {
 	// Advance stages an element so the client can retrieve it
 	// with Value.  Advance returns true iff there is an
 	// element to retrieve.  The client must call Advance before
@@ -334,43 +462,13 @@ type ArithServiceStreamingAddStream interface {
 	// Value returns the element that was staged by Advance.
 	// Value may panic if Advance returned false or was not
 	// called at all.  Value does not block.
-	//
-	// In general, Value is undefined if the underlying collection
-	// of elements changes while iteration is in progress.  If
-	// <DataProvider> supports concurrent modification, it should
-	// document its behavior.
 	Value() int32
 
 	// Err returns a non-nil error iff the stream encountered
 	// any errors.  Err does not block.
 	Err() error
-}
-
-// Implementation of the ArithServiceStreamingAddStream interface that is not exported.
-type implArithServiceStreamingAddStream struct {
-	serverCall _gen_ipc.ServerCall
-	val        int32
-	err        error
-}
-
-func (s *implArithServiceStreamingAddStream) Send(item int32) error {
-	return s.serverCall.Send(item)
-}
-
-func (s *implArithServiceStreamingAddStream) Advance() bool {
-	s.err = s.serverCall.Recv(&s.val)
-	return s.err == nil
-}
-
-func (s *implArithServiceStreamingAddStream) Value() int32 {
-	return s.val
-}
-
-func (s *implArithServiceStreamingAddStream) Err() error {
-	if s.err == _gen_io.EOF {
-		return nil
-	}
-	return s.err
+} {
+	return &s.reader
 }
 
 // BindArith returns the client stub implementing the Arith
@@ -469,21 +567,21 @@ func (__gen_c *clientStubArith) GenError(ctx _gen_context.T, opts ..._gen_ipc.Ca
 	return
 }
 
-func (__gen_c *clientStubArith) Count(ctx _gen_context.T, Start int32, opts ..._gen_ipc.CallOpt) (reply ArithCountStream, err error) {
+func (__gen_c *clientStubArith) Count(ctx _gen_context.T, Start int32, opts ..._gen_ipc.CallOpt) (reply ArithCountCall, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Count", []interface{}{Start}, opts...); err != nil {
 		return
 	}
-	reply = &implArithCountStream{clientCall: call}
+	reply = &implArithCountCall{clientCall: call, readStream: implArithCountStreamIterator{clientCall: call}}
 	return
 }
 
-func (__gen_c *clientStubArith) StreamingAdd(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply ArithStreamingAddStream, err error) {
+func (__gen_c *clientStubArith) StreamingAdd(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply ArithStreamingAddCall, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "StreamingAdd", nil, opts...); err != nil {
 		return
 	}
-	reply = &implArithStreamingAddStream{clientCall: call}
+	reply = &implArithStreamingAddCall{clientCall: call, writeStream: implArithStreamingAddStreamSender{clientCall: call}, readStream: implArithStreamingAddStreamIterator{clientCall: call}}
 	return
 }
 
@@ -701,13 +799,13 @@ func (__gen_s *ServerStubArith) GenError(call _gen_ipc.ServerCall) (err error) {
 }
 
 func (__gen_s *ServerStubArith) Count(call _gen_ipc.ServerCall, Start int32) (err error) {
-	stream := &implArithServiceCountStream{serverCall: call}
+	stream := &implArithServiceCountStream{writer: implArithServiceCountStreamSender{serverCall: call}}
 	err = __gen_s.service.Count(call, Start, stream)
 	return
 }
 
 func (__gen_s *ServerStubArith) StreamingAdd(call _gen_ipc.ServerCall) (reply int32, err error) {
-	stream := &implArithServiceStreamingAddStream{serverCall: call}
+	stream := &implArithServiceStreamingAddStream{reader: implArithServiceStreamingAddStreamIterator{serverCall: call}, writer: implArithServiceStreamingAddStreamSender{serverCall: call}}
 	reply, err = __gen_s.service.StreamingAdd(call, stream)
 	return
 }

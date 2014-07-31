@@ -72,7 +72,7 @@ const _ = _gen_wiretype.TypeIDInvalid
 type Build_ExcludingUniversal interface {
 	// Build streams sources to the build server, which then attempts to
 	// build the sources and streams back the compiled binaries.
-	Build(ctx _gen_context.T, Arch Architecture, OS OperatingSystem, opts ..._gen_ipc.CallOpt) (reply BuildBuildStream, err error)
+	Build(ctx _gen_context.T, Arch Architecture, OS OperatingSystem, opts ..._gen_ipc.CallOpt) (reply BuildBuildCall, err error)
 	// Describe generates a description for a binary identified by
 	// the given Object name.
 	Describe(ctx _gen_context.T, Name string, opts ..._gen_ipc.CallOpt) (reply binary.Description, err error)
@@ -93,54 +93,58 @@ type BuildService interface {
 	Describe(context _gen_ipc.ServerContext, Name string) (reply binary.Description, err error)
 }
 
-// BuildBuildStream is the interface for streaming responses of the method
+// BuildBuildCall is the interface for call object of the method
 // Build in the service interface Build.
-type BuildBuildStream interface {
+type BuildBuildCall interface {
+	// RecvStream returns the recv portion of the stream
+	RecvStream() interface {
+		// Advance stages an element so the client can retrieve it
+		// with Value.  Advance returns true iff there is an
+		// element to retrieve.  The client must call Advance before
+		// calling Value.  The client must call Cancel if it does
+		// not iterate through all elements (i.e. until Advance
+		// returns false).  Advance may block if an element is not
+		// immediately available.
+		Advance() bool
 
-	// Send places the item onto the output stream, blocking if there is no
-	// buffer space available.  Calls to Send after having called CloseSend
-	// or Cancel will fail.  Any blocked Send calls will be unblocked upon
-	// calling Cancel.
-	Send(item File) error
+		// Value returns the element that was staged by Advance.
+		// Value may panic if Advance returned false or was not
+		// called at all.  Value does not block.
+		Value() File
 
-	// CloseSend indicates to the server that no more items will be sent;
-	// server Recv calls will receive io.EOF after all sent items.  This is
-	// an optional call - it's used by streaming clients that need the
-	// server to receive the io.EOF terminator before the client calls
-	// Finish (for example, if the client needs to continue receiving items
-	// from the server after having finished sending).
-	// Calls to CloseSend after having called Cancel will fail.
-	// Like Send, CloseSend blocks when there's no buffer space available.
-	CloseSend() error
+		// Err returns a non-nil error iff the stream encountered
+		// any errors.  Err does not block.
+		Err() error
+	}
 
-	// Advance stages an element so the client can retrieve it
-	// with Value.  Advance returns true iff there is an
-	// element to retrieve.  The client must call Advance before
-	// calling Value.  The client must call Cancel if it does
-	// not iterate through all elements (i.e. until Advance
-	// returns false).  Advance may block if an element is not
-	// immediately available.
-	Advance() bool
+	// SendStream returns the send portion of the stream
+	SendStream() interface {
+		// Send places the item onto the output stream, blocking if there is no
+		// buffer space available.  Calls to Send after having called Close
+		// or Cancel will fail.  Any blocked Send calls will be unblocked upon
+		// calling Cancel.
+		Send(item File) error
 
-	// Value returns the element that was staged by Advance.
-	// Value may panic if Advance returned false or was not
-	// called at all.  Value does not block.
-	Value() File
+		// Close indicates to the server that no more items will be sent;
+		// server Recv calls will receive io.EOF after all sent items.  This is
+		// an optional call - it's used by streaming clients that need the
+		// server to receive the io.EOF terminator before the client calls
+		// Finish (for example, if the client needs to continue receiving items
+		// from the server after having finished sending).
+		// Calls to Close after having called Cancel will fail.
+		// Like Send, Close blocks when there's no buffer space available.
+		Close() error
+	}
 
-	// Err returns a non-nil error iff the stream encountered
-	// any errors.  Err does not block.
-	Err() error
-
-	// Finish performs the equivalent of CloseSend, then blocks until the server
+	// Finish performs the equivalent of SendStream().Close, then blocks until the server
 	// is done, and returns the positional return values for call.
-	//
 	// If Cancel has been called, Finish will return immediately; the output of
 	// Finish could either be an error signalling cancelation, or the correct
 	// positional return values from the server depending on the timing of the
 	// call.
 	//
 	// Calling Finish is mandatory for releasing stream resources, unless Cancel
-	// has been called or any of the other methods return a non-EOF error.
+	// has been called or any of the other methods return an error.
 	// Finish should be called at most once.
 	Finish() (reply []byte, err error)
 
@@ -150,56 +154,150 @@ type BuildBuildStream interface {
 	Cancel()
 }
 
-// Implementation of the BuildBuildStream interface that is not exported.
-type implBuildBuildStream struct {
+type implBuildBuildStreamSender struct {
+	clientCall _gen_ipc.Call
+}
+
+func (c *implBuildBuildStreamSender) Send(item File) error {
+	return c.clientCall.Send(item)
+}
+
+func (c *implBuildBuildStreamSender) Close() error {
+	return c.clientCall.CloseSend()
+}
+
+type implBuildBuildStreamIterator struct {
 	clientCall _gen_ipc.Call
 	val        File
 	err        error
 }
 
-func (c *implBuildBuildStream) Send(item File) error {
-	return c.clientCall.Send(item)
-}
-
-func (c *implBuildBuildStream) CloseSend() error {
-	return c.clientCall.CloseSend()
-}
-
-func (c *implBuildBuildStream) Advance() bool {
+func (c *implBuildBuildStreamIterator) Advance() bool {
 	c.val = File{}
 	c.err = c.clientCall.Recv(&c.val)
 	return c.err == nil
 }
 
-func (c *implBuildBuildStream) Value() File {
+func (c *implBuildBuildStreamIterator) Value() File {
 	return c.val
 }
 
-func (c *implBuildBuildStream) Err() error {
+func (c *implBuildBuildStreamIterator) Err() error {
 	if c.err == _gen_io.EOF {
 		return nil
 	}
 	return c.err
 }
 
-func (c *implBuildBuildStream) Finish() (reply []byte, err error) {
+// Implementation of the BuildBuildCall interface that is not exported.
+type implBuildBuildCall struct {
+	clientCall  _gen_ipc.Call
+	writeStream implBuildBuildStreamSender
+	readStream  implBuildBuildStreamIterator
+}
+
+func (c *implBuildBuildCall) SendStream() interface {
+	Send(item File) error
+	Close() error
+} {
+	return &c.writeStream
+}
+
+func (c *implBuildBuildCall) RecvStream() interface {
+	Advance() bool
+	Value() File
+	Err() error
+} {
+	return &c.readStream
+}
+
+func (c *implBuildBuildCall) Finish() (reply []byte, err error) {
 	if ierr := c.clientCall.Finish(&reply, &err); ierr != nil {
 		err = ierr
 	}
 	return
 }
 
-func (c *implBuildBuildStream) Cancel() {
+func (c *implBuildBuildCall) Cancel() {
 	c.clientCall.Cancel()
+}
+
+type implBuildServiceBuildStreamSender struct {
+	serverCall _gen_ipc.ServerCall
+}
+
+func (s *implBuildServiceBuildStreamSender) Send(item File) error {
+	return s.serverCall.Send(item)
+}
+
+type implBuildServiceBuildStreamIterator struct {
+	serverCall _gen_ipc.ServerCall
+	val        File
+	err        error
+}
+
+func (s *implBuildServiceBuildStreamIterator) Advance() bool {
+	s.err = s.serverCall.Recv(&s.val)
+	return s.err == nil
+}
+
+func (s *implBuildServiceBuildStreamIterator) Value() File {
+	return s.val
+}
+
+func (s *implBuildServiceBuildStreamIterator) Err() error {
+	if s.err == _gen_io.EOF {
+		return nil
+	}
+	return s.err
 }
 
 // BuildServiceBuildStream is the interface for streaming responses of the method
 // Build in the service interface Build.
 type BuildServiceBuildStream interface {
+	// SendStream returns the send portion of the stream.
+	SendStream() interface {
+		// Send places the item onto the output stream, blocking if there is no buffer
+		// space available.  If the client has canceled, an error is returned.
+		Send(item File) error
+	}
+	// RecvStream returns the recv portion of the stream
+	RecvStream() interface {
+		// Advance stages an element so the client can retrieve it
+		// with Value.  Advance returns true iff there is an
+		// element to retrieve.  The client must call Advance before
+		// calling Value.  The client must call Cancel if it does
+		// not iterate through all elements (i.e. until Advance
+		// returns false).  Advance may block if an element is not
+		// immediately available.
+		Advance() bool
+
+		// Value returns the element that was staged by Advance.
+		// Value may panic if Advance returned false or was not
+		// called at all.  Value does not block.
+		Value() File
+
+		// Err returns a non-nil error iff the stream encountered
+		// any errors.  Err does not block.
+		Err() error
+	}
+}
+
+// Implementation of the BuildServiceBuildStream interface that is not exported.
+type implBuildServiceBuildStream struct {
+	writer implBuildServiceBuildStreamSender
+	reader implBuildServiceBuildStreamIterator
+}
+
+func (s *implBuildServiceBuildStream) SendStream() interface {
 	// Send places the item onto the output stream, blocking if there is no buffer
 	// space available.  If the client has canceled, an error is returned.
 	Send(item File) error
+} {
+	return &s.writer
+}
 
+func (s *implBuildServiceBuildStream) RecvStream() interface {
 	// Advance stages an element so the client can retrieve it
 	// with Value.  Advance returns true iff there is an
 	// element to retrieve.  The client must call Advance before
@@ -212,44 +310,13 @@ type BuildServiceBuildStream interface {
 	// Value returns the element that was staged by Advance.
 	// Value may panic if Advance returned false or was not
 	// called at all.  Value does not block.
-	//
-	// In general, Value is undefined if the underlying collection
-	// of elements changes while iteration is in progress.  If
-	// <DataProvider> supports concurrent modification, it should
-	// document its behavior.
 	Value() File
 
 	// Err returns a non-nil error iff the stream encountered
 	// any errors.  Err does not block.
 	Err() error
-}
-
-// Implementation of the BuildServiceBuildStream interface that is not exported.
-type implBuildServiceBuildStream struct {
-	serverCall _gen_ipc.ServerCall
-	val        File
-	err        error
-}
-
-func (s *implBuildServiceBuildStream) Send(item File) error {
-	return s.serverCall.Send(item)
-}
-
-func (s *implBuildServiceBuildStream) Advance() bool {
-	s.val = File{}
-	s.err = s.serverCall.Recv(&s.val)
-	return s.err == nil
-}
-
-func (s *implBuildServiceBuildStream) Value() File {
-	return s.val
-}
-
-func (s *implBuildServiceBuildStream) Err() error {
-	if s.err == _gen_io.EOF {
-		return nil
-	}
-	return s.err
+} {
+	return &s.reader
 }
 
 // BindBuild returns the client stub implementing the Build
@@ -293,12 +360,12 @@ type clientStubBuild struct {
 	name   string
 }
 
-func (__gen_c *clientStubBuild) Build(ctx _gen_context.T, Arch Architecture, OS OperatingSystem, opts ..._gen_ipc.CallOpt) (reply BuildBuildStream, err error) {
+func (__gen_c *clientStubBuild) Build(ctx _gen_context.T, Arch Architecture, OS OperatingSystem, opts ..._gen_ipc.CallOpt) (reply BuildBuildCall, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Build", []interface{}{Arch, OS}, opts...); err != nil {
 		return
 	}
-	reply = &implBuildBuildStream{clientCall: call}
+	reply = &implBuildBuildCall{clientCall: call, writeStream: implBuildBuildStreamSender{clientCall: call}, readStream: implBuildBuildStreamIterator{clientCall: call}}
 	return
 }
 
@@ -428,7 +495,7 @@ func (__gen_s *ServerStubBuild) UnresolveStep(call _gen_ipc.ServerCall) (reply [
 }
 
 func (__gen_s *ServerStubBuild) Build(call _gen_ipc.ServerCall, Arch Architecture, OS OperatingSystem) (reply []byte, err error) {
-	stream := &implBuildServiceBuildStream{serverCall: call}
+	stream := &implBuildServiceBuildStream{reader: implBuildServiceBuildStreamIterator{serverCall: call}, writer: implBuildServiceBuildStreamSender{serverCall: call}}
 	reply, err = __gen_s.service.Build(call, Arch, OS, stream)
 	return
 }

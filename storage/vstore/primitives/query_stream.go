@@ -12,7 +12,7 @@ import (
 
 // newQueryStream constructs a storage.QueryStream from the given
 // store.ObjectQueryStream.
-func newQueryStream(stream store.ObjectQueryStream) storage.QueryStream {
+func newQueryStream(stream store.ObjectQueryCall) storage.QueryStream {
 	return &queryStream{stream: &serverStream{stream: stream}}
 }
 
@@ -33,7 +33,7 @@ type internalQueryStream interface {
 // too many to detect that there are no more results to read.
 type serverStream struct {
 	// stream contains the interleaved query results as sent by the server.
-	stream store.ObjectQueryStream
+	stream store.ObjectQueryCall
 
 	// mu protects all fields below.
 	mu sync.Mutex
@@ -67,7 +67,7 @@ func (r *serverStream) Advance() bool {
 	}
 	r.mu.Unlock()
 	// Don't hold the lock while waiting for the next result.
-	hasValue := r.stream.Advance()
+	hasValue := r.stream.RecvStream().Advance()
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	// The client might have called Cancel() while we were blocked on Advance().
@@ -75,14 +75,14 @@ func (r *serverStream) Advance() bool {
 		return false
 	}
 	if !hasValue {
-		if r.stream.Err() != nil {
-			r.err = r.stream.Err()
+		if r.stream.RecvStream().Err() != nil {
+			r.err = r.stream.RecvStream().Err()
 		} else {
 			r.err = r.stream.Finish()
 		}
 		return false
 	}
-	curr := r.stream.Value()
+	curr := r.stream.RecvStream().Value()
 	r.curr = &curr
 	r.next = nil
 	return true

@@ -42,7 +42,7 @@ type AppCycle_ExcludingUniversal interface {
 	// Stop initiates shutdown of the server.  It streams back periodic
 	// updates to give the client an idea of how the shutdown is
 	// progressing.
-	Stop(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply AppCycleStopStream, err error)
+	Stop(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply AppCycleStopCall, err error)
 	// ForceStop tells the server to shut down right away.  It can be issued
 	// while a Stop is outstanding if for example the client does not want
 	// to wait any longer.
@@ -66,27 +66,29 @@ type AppCycleService interface {
 	ForceStop(context _gen_ipc.ServerContext) (err error)
 }
 
-// AppCycleStopStream is the interface for streaming responses of the method
+// AppCycleStopCall is the interface for call object of the method
 // Stop in the service interface AppCycle.
-type AppCycleStopStream interface {
+type AppCycleStopCall interface {
+	// RecvStream returns the recv portion of the stream
+	RecvStream() interface {
+		// Advance stages an element so the client can retrieve it
+		// with Value.  Advance returns true iff there is an
+		// element to retrieve.  The client must call Advance before
+		// calling Value.  The client must call Cancel if it does
+		// not iterate through all elements (i.e. until Advance
+		// returns false).  Advance may block if an element is not
+		// immediately available.
+		Advance() bool
 
-	// Advance stages an element so the client can retrieve it
-	// with Value.  Advance returns true iff there is an
-	// element to retrieve.  The client must call Advance before
-	// calling Value.  The client must call Cancel if it does
-	// not iterate through all elements (i.e. until Advance
-	// returns false).  Advance may block if an element is not
-	// immediately available.
-	Advance() bool
+		// Value returns the element that was staged by Advance.
+		// Value may panic if Advance returned false or was not
+		// called at all.  Value does not block.
+		Value() Task
 
-	// Value returns the element that was staged by Advance.
-	// Value may panic if Advance returned false or was not
-	// called at all.  Value does not block.
-	Value() Task
-
-	// Err returns a non-nil error iff the stream encountered
-	// any errors.  Err does not block.
-	Err() error
+		// Err returns a non-nil error iff the stream encountered
+		// any errors.  Err does not block.
+		Err() error
+	}
 
 	// Finish blocks until the server is done and returns the positional
 	// return values for call.
@@ -97,7 +99,7 @@ type AppCycleStopStream interface {
 	// call.
 	//
 	// Calling Finish is mandatory for releasing stream resources, unless Cancel
-	// has been called or any of the other methods return a non-EOF error.
+	// has been called or any of the other methods return an error.
 	// Finish should be called at most once.
 	Finish() (err error)
 
@@ -107,56 +109,84 @@ type AppCycleStopStream interface {
 	Cancel()
 }
 
-// Implementation of the AppCycleStopStream interface that is not exported.
-type implAppCycleStopStream struct {
+type implAppCycleStopStreamIterator struct {
 	clientCall _gen_ipc.Call
 	val        Task
 	err        error
 }
 
-func (c *implAppCycleStopStream) Advance() bool {
+func (c *implAppCycleStopStreamIterator) Advance() bool {
 	c.val = Task{}
 	c.err = c.clientCall.Recv(&c.val)
 	return c.err == nil
 }
 
-func (c *implAppCycleStopStream) Value() Task {
+func (c *implAppCycleStopStreamIterator) Value() Task {
 	return c.val
 }
 
-func (c *implAppCycleStopStream) Err() error {
+func (c *implAppCycleStopStreamIterator) Err() error {
 	if c.err == _gen_io.EOF {
 		return nil
 	}
 	return c.err
 }
 
-func (c *implAppCycleStopStream) Finish() (err error) {
+// Implementation of the AppCycleStopCall interface that is not exported.
+type implAppCycleStopCall struct {
+	clientCall _gen_ipc.Call
+	readStream implAppCycleStopStreamIterator
+}
+
+func (c *implAppCycleStopCall) RecvStream() interface {
+	Advance() bool
+	Value() Task
+	Err() error
+} {
+	return &c.readStream
+}
+
+func (c *implAppCycleStopCall) Finish() (err error) {
 	if ierr := c.clientCall.Finish(&err); ierr != nil {
 		err = ierr
 	}
 	return
 }
 
-func (c *implAppCycleStopStream) Cancel() {
+func (c *implAppCycleStopCall) Cancel() {
 	c.clientCall.Cancel()
+}
+
+type implAppCycleServiceStopStreamSender struct {
+	serverCall _gen_ipc.ServerCall
+}
+
+func (s *implAppCycleServiceStopStreamSender) Send(item Task) error {
+	return s.serverCall.Send(item)
 }
 
 // AppCycleServiceStopStream is the interface for streaming responses of the method
 // Stop in the service interface AppCycle.
 type AppCycleServiceStopStream interface {
-	// Send places the item onto the output stream, blocking if there is no buffer
-	// space available.  If the client has canceled, an error is returned.
-	Send(item Task) error
+	// SendStream returns the send portion of the stream.
+	SendStream() interface {
+		// Send places the item onto the output stream, blocking if there is no buffer
+		// space available.  If the client has canceled, an error is returned.
+		Send(item Task) error
+	}
 }
 
 // Implementation of the AppCycleServiceStopStream interface that is not exported.
 type implAppCycleServiceStopStream struct {
-	serverCall _gen_ipc.ServerCall
+	writer implAppCycleServiceStopStreamSender
 }
 
-func (s *implAppCycleServiceStopStream) Send(item Task) error {
-	return s.serverCall.Send(item)
+func (s *implAppCycleServiceStopStream) SendStream() interface {
+	// Send places the item onto the output stream, blocking if there is no buffer
+	// space available.  If the client has canceled, an error is returned.
+	Send(item Task) error
+} {
+	return &s.writer
 }
 
 // BindAppCycle returns the client stub implementing the AppCycle
@@ -200,12 +230,12 @@ type clientStubAppCycle struct {
 	name   string
 }
 
-func (__gen_c *clientStubAppCycle) Stop(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply AppCycleStopStream, err error) {
+func (__gen_c *clientStubAppCycle) Stop(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply AppCycleStopCall, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Stop", nil, opts...); err != nil {
 		return
 	}
-	reply = &implAppCycleStopStream{clientCall: call}
+	reply = &implAppCycleStopCall{clientCall: call, readStream: implAppCycleStopStreamIterator{clientCall: call}}
 	return
 }
 
@@ -322,7 +352,7 @@ func (__gen_s *ServerStubAppCycle) UnresolveStep(call _gen_ipc.ServerCall) (repl
 }
 
 func (__gen_s *ServerStubAppCycle) Stop(call _gen_ipc.ServerCall) (err error) {
-	stream := &implAppCycleServiceStopStream{serverCall: call}
+	stream := &implAppCycleServiceStopStream{writer: implAppCycleServiceStopStreamSender{serverCall: call}}
 	err = __gen_s.service.Stop(call, stream)
 	return
 }

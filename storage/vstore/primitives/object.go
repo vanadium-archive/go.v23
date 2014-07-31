@@ -143,7 +143,7 @@ func (o *object) Query(ctx context.T, q query.Query) storage.QueryStream {
 }
 
 // Glob returns names matching the given pattern.
-func (o *object) Glob(ctx context.T, pattern string) storage.GlobStream {
+func (o *object) Glob(ctx context.T, pattern string) storage.GlobCall {
 	stream, err := o.serv.Glob(ctx, pattern)
 	if err != nil {
 		return &errorGlobStream{err}
@@ -168,7 +168,9 @@ type ChangeBatchStream interface {
 	// Err returns a non-nil error iff the stream encountered any errors.  Err
 	// does not block.
 	Err() error
+}
 
+type ChangeCall interface {
 	// Finish closes the stream and returns the positional return values for
 	// call.
 	Finish() error
@@ -177,8 +179,8 @@ type ChangeBatchStream interface {
 	Cancel()
 }
 
-// entryTransformStream implements GlobWatcherWatchGlobStream and
-// QueryWatcherWatchQueryStream. It wraps a ChangeBatchStream, transforming the
+// entryTransformCall implements GlobWatcherWatchGlobCall and
+// QueryWatcherWatchQueryCall. It wraps a ChangeBatchStream, transforming the
 // value in each change from *store.Entry to *storage.Entry.
 type entryTransformStream struct {
 	delegate ChangeBatchStream
@@ -218,30 +220,46 @@ func (s *entryTransformStream) Err() error {
 	return s.err
 }
 
-func (s *entryTransformStream) Finish() error {
-	return s.delegate.Finish()
+// entryTransformCall implements GlobWatcherWatchGlobCall
+// It wraps an entryTransformStream, transforming the
+// value in each change from *store.Entry to *storage.Entry.
+type entryTransformCall struct {
+	delegateStream ChangeBatchStream
+	delegateCall   ChangeCall
 }
 
-func (s *entryTransformStream) Cancel() {
-	s.delegate.Cancel()
+func (s *entryTransformCall) RecvStream() interface {
+	Advance() bool
+	Value() watch.ChangeBatch
+	Err() error
+} {
+	return s.delegateStream
+}
+
+func (s *entryTransformCall) Finish() error {
+	return s.delegateCall.Finish()
+}
+
+func (s *entryTransformCall) Cancel() {
+	s.delegateCall.Cancel()
 }
 
 // WatchGlob returns a stream of changes that match a pattern.
-func (o *object) WatchGlob(ctx context.T, req watch.GlobRequest) (watch.GlobWatcherWatchGlobStream, error) {
-	stream, err := o.serv.WatchGlob(ctx, req, veyron2.CallTimeout(ipc.NoTimeout))
+func (o *object) WatchGlob(ctx context.T, req watch.GlobRequest) (watch.GlobWatcherWatchGlobCall, error) {
+	rpc, err := o.serv.WatchGlob(ctx, req, veyron2.CallTimeout(ipc.NoTimeout))
 	if err != nil {
 		return nil, err
 	}
-	return &entryTransformStream{delegate: stream}, nil
+	return &entryTransformCall{delegateCall: rpc, delegateStream: &entryTransformStream{delegate: rpc.RecvStream()}}, nil
 }
 
 // WatchQuery returns a stream of changes that satisy a query.
-func (o *object) WatchQuery(ctx context.T, req watch.QueryRequest) (watch.QueryWatcherWatchQueryStream, error) {
-	stream, err := o.serv.WatchQuery(ctx, req, veyron2.CallTimeout(ipc.NoTimeout))
+func (o *object) WatchQuery(ctx context.T, req watch.QueryRequest) (watch.QueryWatcherWatchQueryCall, error) {
+	rpc, err := o.serv.WatchQuery(ctx, req, veyron2.CallTimeout(ipc.NoTimeout))
 	if err != nil {
 		return nil, err
 	}
-	return &entryTransformStream{delegate: stream}, nil
+	return &entryTransformCall{delegateCall: rpc, delegateStream: &entryTransformStream{delegate: rpc.RecvStream()}}, nil
 }
 
 // errorObject responds with an error to all operations.
@@ -277,7 +295,7 @@ func (o *errorObject) Query(ctx context.T, q query.Query) storage.QueryStream {
 	return &errorQueryStream{o.err}
 }
 
-func (o *errorObject) Glob(ctx context.T, pattern string) storage.GlobStream {
+func (o *errorObject) Glob(ctx context.T, pattern string) storage.GlobCall {
 	return &errorGlobStream{o.err}
 }
 
@@ -289,11 +307,11 @@ func (o *errorObject) Abort(ctx context.T) error {
 	return o.err
 }
 
-func (o *errorObject) WatchGlob(ctx context.T, req watch.GlobRequest) (watch.GlobWatcherWatchGlobStream, error) {
+func (o *errorObject) WatchGlob(ctx context.T, req watch.GlobRequest) (watch.GlobWatcherWatchGlobCall, error) {
 	return nil, o.err
 }
 
-func (o *errorObject) WatchQuery(ctx context.T, req watch.QueryRequest) (watch.QueryWatcherWatchQueryStream, error) {
+func (o *errorObject) WatchQuery(ctx context.T, req watch.QueryRequest) (watch.QueryWatcherWatchQueryCall, error) {
 	return nil, o.err
 }
 
@@ -316,9 +334,13 @@ func (e *errorQueryStream) Err() error {
 
 func (e *errorQueryStream) Cancel() {}
 
-// errorGlobStream implements storage.GlobStream.
+// errorGlobStream implements storage.GlobCall.
 type errorGlobStream struct {
 	err error
+}
+
+func (e *errorGlobStream) RecvStream() storage.GlobStream {
+	return e
 }
 
 func (e *errorGlobStream) Advance() bool {

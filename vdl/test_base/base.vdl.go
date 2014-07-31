@@ -172,8 +172,8 @@ const ErrIDBar = _gen_verror.ID("some/path.ErrIdOther")
 type ServiceA_ExcludingUniversal interface {
 	MethodA1(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error)
 	MethodA2(ctx _gen_context.T, a int32, b string, opts ..._gen_ipc.CallOpt) (reply string, err error)
-	MethodA3(ctx _gen_context.T, a int32, opts ..._gen_ipc.CallOpt) (reply ServiceAMethodA3Stream, err error)
-	MethodA4(ctx _gen_context.T, a int32, opts ..._gen_ipc.CallOpt) (reply ServiceAMethodA4Stream, err error)
+	MethodA3(ctx _gen_context.T, a int32, opts ..._gen_ipc.CallOpt) (reply ServiceAMethodA3Call, err error)
+	MethodA4(ctx _gen_context.T, a int32, opts ..._gen_ipc.CallOpt) (reply ServiceAMethodA4Call, err error)
 }
 type ServiceA interface {
 	_gen_ipc.UniversalServiceMethods
@@ -188,27 +188,29 @@ type ServiceAService interface {
 	MethodA4(context _gen_ipc.ServerContext, a int32, stream ServiceAServiceMethodA4Stream) (err error)
 }
 
-// ServiceAMethodA3Stream is the interface for streaming responses of the method
+// ServiceAMethodA3Call is the interface for call object of the method
 // MethodA3 in the service interface ServiceA.
-type ServiceAMethodA3Stream interface {
+type ServiceAMethodA3Call interface {
+	// RecvStream returns the recv portion of the stream
+	RecvStream() interface {
+		// Advance stages an element so the client can retrieve it
+		// with Value.  Advance returns true iff there is an
+		// element to retrieve.  The client must call Advance before
+		// calling Value.  The client must call Cancel if it does
+		// not iterate through all elements (i.e. until Advance
+		// returns false).  Advance may block if an element is not
+		// immediately available.
+		Advance() bool
 
-	// Advance stages an element so the client can retrieve it
-	// with Value.  Advance returns true iff there is an
-	// element to retrieve.  The client must call Advance before
-	// calling Value.  The client must call Cancel if it does
-	// not iterate through all elements (i.e. until Advance
-	// returns false).  Advance may block if an element is not
-	// immediately available.
-	Advance() bool
+		// Value returns the element that was staged by Advance.
+		// Value may panic if Advance returned false or was not
+		// called at all.  Value does not block.
+		Value() Scalars
 
-	// Value returns the element that was staged by Advance.
-	// Value may panic if Advance returned false or was not
-	// called at all.  Value does not block.
-	Value() Scalars
-
-	// Err returns a non-nil error iff the stream encountered
-	// any errors.  Err does not block.
-	Err() error
+		// Err returns a non-nil error iff the stream encountered
+		// any errors.  Err does not block.
+		Err() error
+	}
 
 	// Finish blocks until the server is done and returns the positional
 	// return values for call.
@@ -219,7 +221,7 @@ type ServiceAMethodA3Stream interface {
 	// call.
 	//
 	// Calling Finish is mandatory for releasing stream resources, unless Cancel
-	// has been called or any of the other methods return a non-EOF error.
+	// has been called or any of the other methods return an error.
 	// Finish should be called at most once.
 	Finish() (reply string, err error)
 
@@ -229,106 +231,138 @@ type ServiceAMethodA3Stream interface {
 	Cancel()
 }
 
-// Implementation of the ServiceAMethodA3Stream interface that is not exported.
-type implServiceAMethodA3Stream struct {
+type implServiceAMethodA3StreamIterator struct {
 	clientCall _gen_ipc.Call
 	val        Scalars
 	err        error
 }
 
-func (c *implServiceAMethodA3Stream) Advance() bool {
+func (c *implServiceAMethodA3StreamIterator) Advance() bool {
 	c.val = Scalars{}
 	c.err = c.clientCall.Recv(&c.val)
 	return c.err == nil
 }
 
-func (c *implServiceAMethodA3Stream) Value() Scalars {
+func (c *implServiceAMethodA3StreamIterator) Value() Scalars {
 	return c.val
 }
 
-func (c *implServiceAMethodA3Stream) Err() error {
+func (c *implServiceAMethodA3StreamIterator) Err() error {
 	if c.err == _gen_io.EOF {
 		return nil
 	}
 	return c.err
 }
 
-func (c *implServiceAMethodA3Stream) Finish() (reply string, err error) {
+// Implementation of the ServiceAMethodA3Call interface that is not exported.
+type implServiceAMethodA3Call struct {
+	clientCall _gen_ipc.Call
+	readStream implServiceAMethodA3StreamIterator
+}
+
+func (c *implServiceAMethodA3Call) RecvStream() interface {
+	Advance() bool
+	Value() Scalars
+	Err() error
+} {
+	return &c.readStream
+}
+
+func (c *implServiceAMethodA3Call) Finish() (reply string, err error) {
 	if ierr := c.clientCall.Finish(&reply, &err); ierr != nil {
 		err = ierr
 	}
 	return
 }
 
-func (c *implServiceAMethodA3Stream) Cancel() {
+func (c *implServiceAMethodA3Call) Cancel() {
 	c.clientCall.Cancel()
+}
+
+type implServiceAServiceMethodA3StreamSender struct {
+	serverCall _gen_ipc.ServerCall
+}
+
+func (s *implServiceAServiceMethodA3StreamSender) Send(item Scalars) error {
+	return s.serverCall.Send(item)
 }
 
 // ServiceAServiceMethodA3Stream is the interface for streaming responses of the method
 // MethodA3 in the service interface ServiceA.
 type ServiceAServiceMethodA3Stream interface {
-	// Send places the item onto the output stream, blocking if there is no buffer
-	// space available.  If the client has canceled, an error is returned.
-	Send(item Scalars) error
+	// SendStream returns the send portion of the stream.
+	SendStream() interface {
+		// Send places the item onto the output stream, blocking if there is no buffer
+		// space available.  If the client has canceled, an error is returned.
+		Send(item Scalars) error
+	}
 }
 
 // Implementation of the ServiceAServiceMethodA3Stream interface that is not exported.
 type implServiceAServiceMethodA3Stream struct {
-	serverCall _gen_ipc.ServerCall
+	writer implServiceAServiceMethodA3StreamSender
 }
 
-func (s *implServiceAServiceMethodA3Stream) Send(item Scalars) error {
-	return s.serverCall.Send(item)
+func (s *implServiceAServiceMethodA3Stream) SendStream() interface {
+	// Send places the item onto the output stream, blocking if there is no buffer
+	// space available.  If the client has canceled, an error is returned.
+	Send(item Scalars) error
+} {
+	return &s.writer
 }
 
-// ServiceAMethodA4Stream is the interface for streaming responses of the method
+// ServiceAMethodA4Call is the interface for call object of the method
 // MethodA4 in the service interface ServiceA.
-type ServiceAMethodA4Stream interface {
+type ServiceAMethodA4Call interface {
+	// RecvStream returns the recv portion of the stream
+	RecvStream() interface {
+		// Advance stages an element so the client can retrieve it
+		// with Value.  Advance returns true iff there is an
+		// element to retrieve.  The client must call Advance before
+		// calling Value.  The client must call Cancel if it does
+		// not iterate through all elements (i.e. until Advance
+		// returns false).  Advance may block if an element is not
+		// immediately available.
+		Advance() bool
 
-	// Send places the item onto the output stream, blocking if there is no
-	// buffer space available.  Calls to Send after having called CloseSend
-	// or Cancel will fail.  Any blocked Send calls will be unblocked upon
-	// calling Cancel.
-	Send(item int32) error
+		// Value returns the element that was staged by Advance.
+		// Value may panic if Advance returned false or was not
+		// called at all.  Value does not block.
+		Value() string
 
-	// CloseSend indicates to the server that no more items will be sent;
-	// server Recv calls will receive io.EOF after all sent items.  This is
-	// an optional call - it's used by streaming clients that need the
-	// server to receive the io.EOF terminator before the client calls
-	// Finish (for example, if the client needs to continue receiving items
-	// from the server after having finished sending).
-	// Calls to CloseSend after having called Cancel will fail.
-	// Like Send, CloseSend blocks when there's no buffer space available.
-	CloseSend() error
+		// Err returns a non-nil error iff the stream encountered
+		// any errors.  Err does not block.
+		Err() error
+	}
 
-	// Advance stages an element so the client can retrieve it
-	// with Value.  Advance returns true iff there is an
-	// element to retrieve.  The client must call Advance before
-	// calling Value.  The client must call Cancel if it does
-	// not iterate through all elements (i.e. until Advance
-	// returns false).  Advance may block if an element is not
-	// immediately available.
-	Advance() bool
+	// SendStream returns the send portion of the stream
+	SendStream() interface {
+		// Send places the item onto the output stream, blocking if there is no
+		// buffer space available.  Calls to Send after having called Close
+		// or Cancel will fail.  Any blocked Send calls will be unblocked upon
+		// calling Cancel.
+		Send(item int32) error
 
-	// Value returns the element that was staged by Advance.
-	// Value may panic if Advance returned false or was not
-	// called at all.  Value does not block.
-	Value() string
+		// Close indicates to the server that no more items will be sent;
+		// server Recv calls will receive io.EOF after all sent items.  This is
+		// an optional call - it's used by streaming clients that need the
+		// server to receive the io.EOF terminator before the client calls
+		// Finish (for example, if the client needs to continue receiving items
+		// from the server after having finished sending).
+		// Calls to Close after having called Cancel will fail.
+		// Like Send, Close blocks when there's no buffer space available.
+		Close() error
+	}
 
-	// Err returns a non-nil error iff the stream encountered
-	// any errors.  Err does not block.
-	Err() error
-
-	// Finish performs the equivalent of CloseSend, then blocks until the server
+	// Finish performs the equivalent of SendStream().Close, then blocks until the server
 	// is done, and returns the positional return values for call.
-	//
 	// If Cancel has been called, Finish will return immediately; the output of
 	// Finish could either be an error signalling cancelation, or the correct
 	// positional return values from the server depending on the timing of the
 	// call.
 	//
 	// Calling Finish is mandatory for releasing stream resources, unless Cancel
-	// has been called or any of the other methods return a non-EOF error.
+	// has been called or any of the other methods return an error.
 	// Finish should be called at most once.
 	Finish() (err error)
 
@@ -338,55 +372,149 @@ type ServiceAMethodA4Stream interface {
 	Cancel()
 }
 
-// Implementation of the ServiceAMethodA4Stream interface that is not exported.
-type implServiceAMethodA4Stream struct {
+type implServiceAMethodA4StreamSender struct {
+	clientCall _gen_ipc.Call
+}
+
+func (c *implServiceAMethodA4StreamSender) Send(item int32) error {
+	return c.clientCall.Send(item)
+}
+
+func (c *implServiceAMethodA4StreamSender) Close() error {
+	return c.clientCall.CloseSend()
+}
+
+type implServiceAMethodA4StreamIterator struct {
 	clientCall _gen_ipc.Call
 	val        string
 	err        error
 }
 
-func (c *implServiceAMethodA4Stream) Send(item int32) error {
-	return c.clientCall.Send(item)
-}
-
-func (c *implServiceAMethodA4Stream) CloseSend() error {
-	return c.clientCall.CloseSend()
-}
-
-func (c *implServiceAMethodA4Stream) Advance() bool {
+func (c *implServiceAMethodA4StreamIterator) Advance() bool {
 	c.err = c.clientCall.Recv(&c.val)
 	return c.err == nil
 }
 
-func (c *implServiceAMethodA4Stream) Value() string {
+func (c *implServiceAMethodA4StreamIterator) Value() string {
 	return c.val
 }
 
-func (c *implServiceAMethodA4Stream) Err() error {
+func (c *implServiceAMethodA4StreamIterator) Err() error {
 	if c.err == _gen_io.EOF {
 		return nil
 	}
 	return c.err
 }
 
-func (c *implServiceAMethodA4Stream) Finish() (err error) {
+// Implementation of the ServiceAMethodA4Call interface that is not exported.
+type implServiceAMethodA4Call struct {
+	clientCall  _gen_ipc.Call
+	writeStream implServiceAMethodA4StreamSender
+	readStream  implServiceAMethodA4StreamIterator
+}
+
+func (c *implServiceAMethodA4Call) SendStream() interface {
+	Send(item int32) error
+	Close() error
+} {
+	return &c.writeStream
+}
+
+func (c *implServiceAMethodA4Call) RecvStream() interface {
+	Advance() bool
+	Value() string
+	Err() error
+} {
+	return &c.readStream
+}
+
+func (c *implServiceAMethodA4Call) Finish() (err error) {
 	if ierr := c.clientCall.Finish(&err); ierr != nil {
 		err = ierr
 	}
 	return
 }
 
-func (c *implServiceAMethodA4Stream) Cancel() {
+func (c *implServiceAMethodA4Call) Cancel() {
 	c.clientCall.Cancel()
+}
+
+type implServiceAServiceMethodA4StreamSender struct {
+	serverCall _gen_ipc.ServerCall
+}
+
+func (s *implServiceAServiceMethodA4StreamSender) Send(item string) error {
+	return s.serverCall.Send(item)
+}
+
+type implServiceAServiceMethodA4StreamIterator struct {
+	serverCall _gen_ipc.ServerCall
+	val        int32
+	err        error
+}
+
+func (s *implServiceAServiceMethodA4StreamIterator) Advance() bool {
+	s.err = s.serverCall.Recv(&s.val)
+	return s.err == nil
+}
+
+func (s *implServiceAServiceMethodA4StreamIterator) Value() int32 {
+	return s.val
+}
+
+func (s *implServiceAServiceMethodA4StreamIterator) Err() error {
+	if s.err == _gen_io.EOF {
+		return nil
+	}
+	return s.err
 }
 
 // ServiceAServiceMethodA4Stream is the interface for streaming responses of the method
 // MethodA4 in the service interface ServiceA.
 type ServiceAServiceMethodA4Stream interface {
+	// SendStream returns the send portion of the stream.
+	SendStream() interface {
+		// Send places the item onto the output stream, blocking if there is no buffer
+		// space available.  If the client has canceled, an error is returned.
+		Send(item string) error
+	}
+	// RecvStream returns the recv portion of the stream
+	RecvStream() interface {
+		// Advance stages an element so the client can retrieve it
+		// with Value.  Advance returns true iff there is an
+		// element to retrieve.  The client must call Advance before
+		// calling Value.  The client must call Cancel if it does
+		// not iterate through all elements (i.e. until Advance
+		// returns false).  Advance may block if an element is not
+		// immediately available.
+		Advance() bool
+
+		// Value returns the element that was staged by Advance.
+		// Value may panic if Advance returned false or was not
+		// called at all.  Value does not block.
+		Value() int32
+
+		// Err returns a non-nil error iff the stream encountered
+		// any errors.  Err does not block.
+		Err() error
+	}
+}
+
+// Implementation of the ServiceAServiceMethodA4Stream interface that is not exported.
+type implServiceAServiceMethodA4Stream struct {
+	writer implServiceAServiceMethodA4StreamSender
+	reader implServiceAServiceMethodA4StreamIterator
+}
+
+func (s *implServiceAServiceMethodA4Stream) SendStream() interface {
 	// Send places the item onto the output stream, blocking if there is no buffer
 	// space available.  If the client has canceled, an error is returned.
 	Send(item string) error
+} {
+	return &s.writer
+}
 
+func (s *implServiceAServiceMethodA4Stream) RecvStream() interface {
 	// Advance stages an element so the client can retrieve it
 	// with Value.  Advance returns true iff there is an
 	// element to retrieve.  The client must call Advance before
@@ -399,43 +527,13 @@ type ServiceAServiceMethodA4Stream interface {
 	// Value returns the element that was staged by Advance.
 	// Value may panic if Advance returned false or was not
 	// called at all.  Value does not block.
-	//
-	// In general, Value is undefined if the underlying collection
-	// of elements changes while iteration is in progress.  If
-	// <DataProvider> supports concurrent modification, it should
-	// document its behavior.
 	Value() int32
 
 	// Err returns a non-nil error iff the stream encountered
 	// any errors.  Err does not block.
 	Err() error
-}
-
-// Implementation of the ServiceAServiceMethodA4Stream interface that is not exported.
-type implServiceAServiceMethodA4Stream struct {
-	serverCall _gen_ipc.ServerCall
-	val        int32
-	err        error
-}
-
-func (s *implServiceAServiceMethodA4Stream) Send(item string) error {
-	return s.serverCall.Send(item)
-}
-
-func (s *implServiceAServiceMethodA4Stream) Advance() bool {
-	s.err = s.serverCall.Recv(&s.val)
-	return s.err == nil
-}
-
-func (s *implServiceAServiceMethodA4Stream) Value() int32 {
-	return s.val
-}
-
-func (s *implServiceAServiceMethodA4Stream) Err() error {
-	if s.err == _gen_io.EOF {
-		return nil
-	}
-	return s.err
+} {
+	return &s.reader
 }
 
 // BindServiceA returns the client stub implementing the ServiceA
@@ -501,21 +599,21 @@ func (__gen_c *clientStubServiceA) MethodA2(ctx _gen_context.T, a int32, b strin
 	return
 }
 
-func (__gen_c *clientStubServiceA) MethodA3(ctx _gen_context.T, a int32, opts ..._gen_ipc.CallOpt) (reply ServiceAMethodA3Stream, err error) {
+func (__gen_c *clientStubServiceA) MethodA3(ctx _gen_context.T, a int32, opts ..._gen_ipc.CallOpt) (reply ServiceAMethodA3Call, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "MethodA3", []interface{}{a}, opts...); err != nil {
 		return
 	}
-	reply = &implServiceAMethodA3Stream{clientCall: call}
+	reply = &implServiceAMethodA3Call{clientCall: call, readStream: implServiceAMethodA3StreamIterator{clientCall: call}}
 	return
 }
 
-func (__gen_c *clientStubServiceA) MethodA4(ctx _gen_context.T, a int32, opts ..._gen_ipc.CallOpt) (reply ServiceAMethodA4Stream, err error) {
+func (__gen_c *clientStubServiceA) MethodA4(ctx _gen_context.T, a int32, opts ..._gen_ipc.CallOpt) (reply ServiceAMethodA4Call, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "MethodA4", []interface{}{a}, opts...); err != nil {
 		return
 	}
-	reply = &implServiceAMethodA4Stream{clientCall: call}
+	reply = &implServiceAMethodA4Call{clientCall: call, writeStream: implServiceAMethodA4StreamSender{clientCall: call}, readStream: implServiceAMethodA4StreamIterator{clientCall: call}}
 	return
 }
 
@@ -685,13 +783,13 @@ func (__gen_s *ServerStubServiceA) MethodA2(call _gen_ipc.ServerCall, a int32, b
 }
 
 func (__gen_s *ServerStubServiceA) MethodA3(call _gen_ipc.ServerCall, a int32) (reply string, err error) {
-	stream := &implServiceAServiceMethodA3Stream{serverCall: call}
+	stream := &implServiceAServiceMethodA3Stream{writer: implServiceAServiceMethodA3StreamSender{serverCall: call}}
 	reply, err = __gen_s.service.MethodA3(call, a, stream)
 	return
 }
 
 func (__gen_s *ServerStubServiceA) MethodA4(call _gen_ipc.ServerCall, a int32) (err error) {
-	stream := &implServiceAServiceMethodA4Stream{serverCall: call}
+	stream := &implServiceAServiceMethodA4Stream{reader: implServiceAServiceMethodA4StreamIterator{serverCall: call}, writer: implServiceAServiceMethodA4StreamSender{serverCall: call}}
 	err = __gen_s.service.MethodA4(call, a, stream)
 	return
 }

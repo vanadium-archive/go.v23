@@ -424,7 +424,7 @@ func inArgsServiceGo(firstArg string, data goData, iface *compile.Interface, met
 		if len(result) > 0 {
 			result += ", "
 		}
-		result += "stream " + streamArgInterfaceTypeGo("Service", iface, method)
+		result += "stream " + streamArgInterfaceTypeGo("Service", "Stream", iface, method)
 	}
 	return result
 }
@@ -446,7 +446,7 @@ func inArgsGo(firstArg string, data goData, method *compile.Method) string {
 // name the last error arg "err error" to simplify stub generation.
 func outArgsGo(data goData, iface *compile.Interface, method *compile.Method) string {
 	if isStreamingMethodGo(method) {
-		interfaceType := streamArgInterfaceTypeGo("", iface, method)
+		interfaceType := streamArgInterfaceTypeGo("", "Call", iface, method)
 		return "(reply " + interfaceType + ", err error)"
 	}
 	return nonStreamingOutArgs(data, method)
@@ -508,18 +508,18 @@ func finishInArgsGo(data goData, method *compile.Method) string {
 // Returns the type name representing the Go interface of the stream arg of an
 // interface method.  There is a different type for the server and client portion of
 // the stream since the stream defined might not be bidirectional.
-func streamArgInterfaceTypeGo(streamType string, iface *compile.Interface, method *compile.Method) string {
+func streamArgInterfaceTypeGo(streamType string, suffix string, iface *compile.Interface, method *compile.Method) string {
 	if method.OutStream == nil && method.InStream == nil {
 		return ""
 	}
-	return fmt.Sprintf("%s%s%sStream", iface.Name, streamType, method.Name)
+	return fmt.Sprintf("%s%s%s%s", iface.Name, streamType, method.Name, suffix)
 }
 
 // Returns the concrete type name (not interface) representing the stream arg
 // of an interface methods. There is a different type for the server and client
 // portion of the stream since the stream defined might not be bidirectional.
-func streamArgTypeGo(streamType string, iface *compile.Interface, method *compile.Method) string {
-	n := streamArgInterfaceTypeGo(streamType, iface, method)
+func streamArgTypeGo(streamType string, suffix string, iface *compile.Interface, method *compile.Method) string {
+	n := streamArgInterfaceTypeGo(streamType, suffix, iface, method)
 	if len(n) == 0 {
 		return ""
 	}
@@ -553,7 +553,16 @@ func clientStubImplGo(data goData, iface *compile.Interface, method *compile.Met
 	err = ierr
 }`, finishInArgsGo(data, method))
 	} else {
-		fmt.Fprintf(&buf, "reply = &%s{ clientCall: call}", streamArgTypeGo("", iface, method))
+		fmt.Fprintf(&buf, "reply = &%s{ clientCall: call", streamArgTypeGo("", "Call", iface, method))
+		if method.InStream != nil {
+			fmt.Fprintf(&buf, ", writeStream: %s{clientCall: call}", streamArgTypeGo("", "StreamSender", iface, method))
+		}
+
+		if method.OutStream != nil {
+			fmt.Fprintf(&buf, ", readStream: %s{clientCall: call}", streamArgTypeGo("", "StreamIterator", iface, method))
+		}
+
+		fmt.Fprintf(&buf, "}")
 	}
 
 	buf.WriteString("\nreturn")
@@ -573,7 +582,19 @@ func serverStubImplGo(data goData, iface *compile.Interface, method *compile.Met
 	}
 
 	if isStreamingMethodGo(method) {
-		fmt.Fprintf(&buf, "\tstream := &%s{ serverCall: call }\n", streamArgTypeGo("Service", iface, method))
+		fmt.Fprintf(&buf, "\tstream := &%s{ ", streamArgTypeGo("Service", "Stream", iface, method))
+		if method.InStream != nil {
+			fmt.Fprintf(&buf, " reader:%s{ serverCall: call}", streamArgTypeGo("Service", "StreamIterator", iface, method))
+		}
+
+		if method.OutStream != nil {
+			if method.InStream != nil {
+				fmt.Fprintf(&buf, ", ")
+			}
+			fmt.Fprintf(&buf, " writer:%s{ serverCall: call}", streamArgTypeGo("Service", "StreamSender", iface, method))
+		}
+
+		fmt.Fprintf(&buf, "}\n")
 		if len(args) > 0 {
 			args += ", "
 		}
@@ -752,65 +773,71 @@ type {{$iface.Name}}Service interface {
 	{{$method.Doc}}{{$method.Name}}({{inArgsServiceGo "context _gen_ipc.ServerContext" $data $iface $method}}) {{finishOutArgsGo $data $method}}{{$method.DocSuffix}}{{end}}
 }
 {{range $method := $iface.Methods}}{{if isStreamingMethodGo $method}}
-{{$clientStreamIfaceType := streamArgInterfaceTypeGo "" $iface $method}}
-{{$clientStreamType := streamArgTypeGo "" $iface $method}}
-{{$serverStreamIfaceType := streamArgInterfaceTypeGo "Service" $iface $method}}
-{{$serverStreamType := streamArgTypeGo "Service" $iface $method}}
+{{$clientStreamIfaceType := streamArgInterfaceTypeGo "" "Call" $iface $method}}
+{{$clientStreamWriteType := streamArgTypeGo "" "StreamSender" $iface $method}}
+{{$clientStreamReadType := streamArgTypeGo "" "StreamIterator" $iface $method}}
+{{$clientStreamType := streamArgTypeGo "" "Call" $iface $method}}
+{{$serverStreamIfaceType := streamArgInterfaceTypeGo "Service" "Stream" $iface $method}}
+{{$serverStreamWriteType := streamArgTypeGo "Service" "StreamSender" $iface $method}}
+{{$serverStreamReadType := streamArgTypeGo "Service" "StreamIterator" $iface $method}}
+{{$serverStreamType := streamArgTypeGo "Service" "Stream" $iface $method}}
 
-// {{$clientStreamIfaceType}} is the interface for streaming responses of the method
+// {{$clientStreamIfaceType}} is the interface for call object of the method
 // {{$method.Name}} in the service interface {{$iface.Name}}.
 type {{$clientStreamIfaceType}} interface {
-	{{if $method.InStream}}
-	// Send places the item onto the output stream, blocking if there is no
-	// buffer space available.  Calls to Send after having called CloseSend
-	// or Cancel will fail.  Any blocked Send calls will be unblocked upon
-	// calling Cancel.
-	Send(item {{typeGo $data $method.InStream}}) error
+	{{if $method.OutStream}} // RecvStream returns the recv portion of the stream
+	RecvStream() interface {
+		// Advance stages an element so the client can retrieve it
+		// with Value.  Advance returns true iff there is an
+		// element to retrieve.  The client must call Advance before
+		// calling Value.  The client must call Cancel if it does
+		// not iterate through all elements (i.e. until Advance
+		// returns false).  Advance may block if an element is not
+		// immediately available.
+		Advance() bool
 
-	// CloseSend indicates to the server that no more items will be sent;
-	// server Recv calls will receive io.EOF after all sent items.  This is
-	// an optional call - it's used by streaming clients that need the
-	// server to receive the io.EOF terminator before the client calls
-	// Finish (for example, if the client needs to continue receiving items
-	// from the server after having finished sending).
-	// Calls to CloseSend after having called Cancel will fail.
-	// Like Send, CloseSend blocks when there's no buffer space available.
-	CloseSend() error
-	{{end}}
+		// Value returns the element that was staged by Advance.
+		// Value may panic if Advance returned false or was not
+		// called at all.  Value does not block.
+		Value() {{typeGo $data $method.OutStream}}
 
-	{{if $method.OutStream}}
-	// Advance stages an element so the client can retrieve it
-	// with Value.  Advance returns true iff there is an
-	// element to retrieve.  The client must call Advance before
-	// calling Value.  The client must call Cancel if it does
-	// not iterate through all elements (i.e. until Advance
-	// returns false).  Advance may block if an element is not
-	// immediately available.
-        Advance() bool
+		// Err returns a non-nil error iff the stream encountered
+		// any errors.  Err does not block.
+		Err() error
+	}
 
-	// Value returns the element that was staged by Advance.
-	// Value may panic if Advance returned false or was not
-  	// called at all.  Value does not block.
-  	Value() {{typeGo $data $method.OutStream}}
+	{{end}}{{if $method.InStream}}
+	// SendStream returns the send portion of the stream
+	SendStream() interface {
+		// Send places the item onto the output stream, blocking if there is no
+		// buffer space available.  Calls to Send after having called Close
+		// or Cancel will fail.  Any blocked Send calls will be unblocked upon
+		// calling Cancel.
+		Send(item {{typeGo $data $method.InStream}}) error
 
-	// Err returns a non-nil error iff the stream encountered
-  	// any errors.  Err does not block.
-  	Err() error
-	{{end}}
+		// Close indicates to the server that no more items will be sent;
+		// server Recv calls will receive io.EOF after all sent items.  This is
+		// an optional call - it's used by streaming clients that need the
+		// server to receive the io.EOF terminator before the client calls
+		// Finish (for example, if the client needs to continue receiving items
+		// from the server after having finished sending).
+		// Calls to Close after having called Cancel will fail.
+		// Like Send, Close blocks when there's no buffer space available.
+		Close() error
+	}
 
-	{{if $method.InStream}}
-	// Finish performs the equivalent of CloseSend, then blocks until the server
- 	// is done, and returns the positional return values for call.{{else}}
+	// Finish performs the equivalent of SendStream().Close, then blocks until the server
+	// is done, and returns the positional return values for call.{{else}}
 	// Finish blocks until the server is done and returns the positional
-	// return values for call.{{end}}
-	//
+	// return values for call.
+	// {{end}}
 	// If Cancel has been called, Finish will return immediately; the output of
 	// Finish could either be an error signalling cancelation, or the correct
 	// positional return values from the server depending on the timing of the
- 	// call.
+	// call.
 	//
 	// Calling Finish is mandatory for releasing stream resources, unless Cancel
-	// has been called or any of the other methods return a non-EOF error.
+	// has been called or any of the other methods return an error.
 	// Finish should be called at most once.
 	Finish() {{finishOutArgsGo $data $method}}
 
@@ -819,38 +846,64 @@ type {{$clientStreamIfaceType}} interface {
 	// Calling Cancel after Finish has returned is a no-op.
 	Cancel()
 }
-// Implementation of the {{$clientStreamIfaceType}} interface that is not exported.
-type {{$clientStreamType}} struct {
-	clientCall _gen_ipc.Call{{if $method.OutStream}}
-	val {{typeGo $data $method.OutStream}}
-	err error{{end}}
+{{if $method.InStream}}
+
+type {{$clientStreamWriteType}} struct {
+	clientCall _gen_ipc.Call
 }
 
-{{if $method.InStream}}
-func (c *{{$clientStreamType}}) Send(item {{typeGo $data $method.InStream}}) error {
+func (c *{{$clientStreamWriteType}}) Send(item {{typeGo $data $method.InStream}}) error {
 	return c.clientCall.Send(item)
 }
 
-func (c *{{$clientStreamType}}) CloseSend() error {
+func (c *{{$clientStreamWriteType}}) Close() error {
 	return c.clientCall.CloseSend()
 }
-{{end}}
+{{end}}{{if $method.OutStream}}
 
-{{if $method.OutStream}}
-func (c *{{$clientStreamType}}) Advance() bool {
+type {{$clientStreamReadType}} struct {
+	clientCall _gen_ipc.Call
+	val {{typeGo $data $method.OutStream}}
+	err error
+}
+func (c *{{$clientStreamReadType}}) Advance() bool {
 	{{reInitStreamValue $data $method.OutStream "c.val"}}c.err = c.clientCall.Recv(&c.val)
 	return c.err == nil
 }
 
-func (c *{{$clientStreamType}}) Value() {{typeGo $data $method.OutStream}} {
+func (c *{{$clientStreamReadType}}) Value() {{typeGo $data $method.OutStream}} {
 	return c.val
 }
 
-func (c *{{$clientStreamType}}) Err() error {
+func (c *{{$clientStreamReadType}}) Err() error {
 	if c.err == _gen_io.EOF {
 		return nil
 	}
 	return c.err
+}
+{{end}}
+
+// Implementation of the {{$clientStreamIfaceType}} interface that is not exported.
+type {{$clientStreamType}} struct {
+	clientCall _gen_ipc.Call{{if $method.InStream}}
+	writeStream {{$clientStreamWriteType}}{{end}}{{if $method.OutStream}}
+	readStream {{$clientStreamReadType}}{{end}}
+}
+
+{{if $method.InStream}}func (c *{{$clientStreamType}}) SendStream() interface {
+		Send(item {{typeGo $data $method.InStream}}) error
+		Close() error
+	} {
+	return &c.writeStream
+}
+{{end}}
+
+{{if $method.OutStream}}func (c *{{$clientStreamType}}) RecvStream() interface {
+		Advance() bool
+		Value() {{typeGo $data $method.OutStream}}
+		Err() error
+	} {
+	return &c.readStream
 }
 {{end}}
 
@@ -865,68 +918,106 @@ func (c *{{$clientStreamType}}) Cancel() {
   c.clientCall.Cancel()
 }
 
-// {{$serverStreamIfaceType}} is the interface for streaming responses of the method
-// {{$method.Name}} in the service interface {{$iface.Name}}.
-type {{$serverStreamIfaceType}} interface { {{if $method.OutStream}}
-	// Send places the item onto the output stream, blocking if there is no buffer
-	// space available.  If the client has canceled, an error is returned.
-	Send(item {{typeGo $data $method.OutStream}}) error
-	{{end}}
-
-	{{if $method.InStream}}
-	// Advance stages an element so the client can retrieve it
-        // with Value.  Advance returns true iff there is an
-        // element to retrieve.  The client must call Advance before
-        // calling Value.  The client must call Cancel if it does
-        // not iterate through all elements (i.e. until Advance
-        // returns false).  Advance may block if an element is not
-        // immediately available.
-        Advance() bool
-
-	// Value returns the element that was staged by Advance.
-	// Value may panic if Advance returned false or was not
-  	// called at all.  Value does not block.
-  	//
-  	// In general, Value is undefined if the underlying collection
-  	// of elements changes while iteration is in progress.  If
-  	// <DataProvider> supports concurrent modification, it should
-  	// document its behavior.
-  	Value() {{typeGo $data $method.InStream}}
-
-	// Err returns a non-nil error iff the stream encountered
-  	// any errors.  Err does not block.
-  	Err() error
-	{{end}}
-}
-
-// Implementation of the {{$serverStreamIfaceType}} interface that is not exported.
-type {{$serverStreamType}} struct {
-	serverCall _gen_ipc.ServerCall{{if $method.InStream}}
-	val {{typeGo $data $method.InStream}}
-	err error
-	{{end}}
-}
 {{if $method.OutStream}}
-func (s *{{$serverStreamType}}) Send(item {{typeGo $data $method.OutStream}}) error {
+
+type {{$serverStreamWriteType}} struct {
+	serverCall _gen_ipc.ServerCall
+}
+
+func (s *{{$serverStreamWriteType}}) Send(item {{typeGo $data $method.OutStream}}) error {
 	return s.serverCall.Send(item)
 }
-{{end}}
+{{end}}{{if $method.InStream}}
+type {{$serverStreamReadType}} struct {
+	serverCall _gen_ipc.ServerCall
+	val {{typeGo $data $method.InStream}}
+	err error
+}
 
-{{if $method.InStream}}
-func (s *{{$serverStreamType}}) Advance() bool {
-	{{reInitStreamValue $data $method.InStream "s.val"}}s.err = s.serverCall.Recv(&s.val)
+func (s *{{$serverStreamReadType}}) Advance() bool {
+	s.err = s.serverCall.Recv(&s.val)
 	return s.err == nil
 }
 
-func (s *{{$serverStreamType}}) Value() {{typeGo $data $method.InStream}} {
+func (s *{{$serverStreamReadType}}) Value() {{typeGo $data $method.InStream}} {
 	return s.val
 }
 
-func (s *{{$serverStreamType}}) Err() error {
+func (s *{{$serverStreamReadType}}) Err() error {
 	if s.err == _gen_io.EOF {
 		return nil
 	}
 	return s.err
+}
+{{end}}
+
+// {{$serverStreamIfaceType}} is the interface for streaming responses of the method
+// {{$method.Name}} in the service interface {{$iface.Name}}.
+type {{$serverStreamIfaceType}} interface { {{if $method.OutStream}}
+	// SendStream returns the send portion of the stream.
+	SendStream() interface {
+		// Send places the item onto the output stream, blocking if there is no buffer
+		// space available.  If the client has canceled, an error is returned.
+		Send(item {{typeGo $data $method.OutStream}}) error
+	}{{end}}{{if $method.InStream}}
+	// RecvStream returns the recv portion of the stream
+	RecvStream() interface {
+		// Advance stages an element so the client can retrieve it
+		// with Value.  Advance returns true iff there is an
+		// element to retrieve.  The client must call Advance before
+		// calling Value.  The client must call Cancel if it does
+		// not iterate through all elements (i.e. until Advance
+		// returns false).  Advance may block if an element is not
+		// immediately available.
+		Advance() bool
+
+		// Value returns the element that was staged by Advance.
+		// Value may panic if Advance returned false or was not
+		// called at all.  Value does not block.
+		Value() {{typeGo $data $method.InStream}}
+
+		// Err returns a non-nil error iff the stream encountered
+		// any errors.  Err does not block.
+		Err() error
+	}{{end}}
+}
+
+// Implementation of the {{$serverStreamIfaceType}} interface that is not exported.
+type {{$serverStreamType}} struct { {{if $method.OutStream}}
+	writer {{$serverStreamWriteType}}{{end}}{{if $method.InStream}}
+	reader {{$serverStreamReadType}}{{end}}
+}
+{{if $method.OutStream}}
+func (s *{{$serverStreamType}}) SendStream() interface {
+		// Send places the item onto the output stream, blocking if there is no buffer
+		// space available.  If the client has canceled, an error is returned.
+		Send(item {{typeGo $data $method.OutStream}}) error
+	} {
+	return &s.writer
+}
+{{end}}
+
+{{if $method.InStream}}
+func (s  *{{$serverStreamType}}) RecvStream() interface {
+		// Advance stages an element so the client can retrieve it
+		// with Value.  Advance returns true iff there is an
+		// element to retrieve.  The client must call Advance before
+		// calling Value.  The client must call Cancel if it does
+		// not iterate through all elements (i.e. until Advance
+		// returns false).  Advance may block if an element is not
+		// immediately available.
+		Advance() bool
+
+		// Value returns the element that was staged by Advance.
+		// Value may panic if Advance returned false or was not
+		// called at all.  Value does not block.
+		Value() {{typeGo $data $method.InStream}}
+
+		// Err returns a non-nil error iff the stream encountered
+		// any errors.  Err does not block.
+		Err() error
+	} {
+	return &s.reader
 }
 {{end}}
 

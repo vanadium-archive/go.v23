@@ -56,8 +56,9 @@ func (*serverArith) Mul(_ ipc.ServerContext, nestedArgs test_base.NestedArgs) (i
 
 func (*serverArith) Count(_ ipc.ServerContext, Start int32, Stream ArithServiceCountStream) error {
 	const kNum = 1000
+	sender := Stream.SendStream()
 	for i := int32(0); i < kNum; i++ {
-		if err := Stream.Send(Start + i); err != nil {
+		if err := sender.Send(Start + i); err != nil {
 			return err
 		}
 	}
@@ -66,12 +67,14 @@ func (*serverArith) Count(_ ipc.ServerContext, Start int32, Stream ArithServiceC
 
 func (*serverArith) StreamingAdd(_ ipc.ServerContext, Stream ArithServiceStreamingAddStream) (int32, error) {
 	var total int32
-	for Stream.Advance() {
-		value := Stream.Value()
+	rStream := Stream.RecvStream()
+	sender := Stream.SendStream()
+	for rStream.Advance() {
+		value := rStream.Value()
 		total += value
-		Stream.Send(total)
+		sender.Send(total)
 	}
-	return total, Stream.Err()
+	return total, rStream.Err()
 }
 
 func (*serverArith) GenError(_ ipc.ServerContext) error {
@@ -394,17 +397,18 @@ func TestArith(t *testing.T) {
 			t.Fatalf("error while executing Count %v", err)
 		}
 
+		countIterator := stream.RecvStream()
 		for i := int32(0); i < 1000; i++ {
-			if !stream.Advance() {
-				t.Errorf("Error getting value %v", stream.Err())
+			if !countIterator.Advance() {
+				t.Errorf("Error getting value %v", countIterator.Err())
 			}
-			val := stream.Value()
+			val := countIterator.Value()
 			if val != 35+i {
 				t.Errorf("Expected value %d, got %d", 35+i, val)
 			}
 		}
-		if stream.Advance() || stream.Err() != nil {
-			t.Errorf("Reply stream should have been closed %v", stream.Err())
+		if countIterator.Advance() || countIterator.Err() != nil {
+			t.Errorf("Reply stream should have been closed %v", countIterator.Err())
 		}
 
 		if err := stream.Finish(); err != nil {
@@ -414,30 +418,32 @@ func TestArith(t *testing.T) {
 		addStream, err := arith.StreamingAdd(ctx)
 
 		go func() {
+			sender := addStream.SendStream()
 			for i := int32(0); i < 100; i++ {
-				if err := addStream.Send(i); err != nil {
+				if err := sender.Send(i); err != nil {
 					t.Errorf("Send error %v", err)
 				}
 			}
-			if err := addStream.CloseSend(); err != nil {
-				t.Errorf("CloseSend error %v", err)
+			if err := sender.Close(); err != nil {
+				t.Errorf("Close error %v", err)
 			}
 		}()
 
 		var expectedSum int32
+		rStream := addStream.RecvStream()
 		for i := int32(0); i < 100; i++ {
 			expectedSum += i
-			if !addStream.Advance() {
-				t.Errorf("Error getting value %v", stream.Err())
+			if !rStream.Advance() {
+				t.Errorf("Error getting value %v", rStream.Err())
 			}
-			value := addStream.Value()
+			value := rStream.Value()
 			if value != expectedSum {
 				t.Errorf("Got %d but expected %d", value, expectedSum)
 			}
 		}
 
-		if addStream.Advance() || addStream.Err() != nil {
-			t.Errorf("Reply stream should have been closed %v", stream.Err())
+		if rStream.Advance() || rStream.Err() != nil {
+			t.Errorf("Reply stream should have been closed %v", rStream.Err())
 		}
 
 		total, err := addStream.Finish()

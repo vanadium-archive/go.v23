@@ -153,7 +153,7 @@ import (
 // into a shared location, such as veyron2/watch.
 type GlobWatcher interface {
 	// WatchGlob returns a stream of changes.
-	WatchGlob(ctx context.T, req watch.GlobRequest) (watch.GlobWatcherWatchGlobStream, error)
+	WatchGlob(ctx context.T, req watch.GlobRequest) (watch.GlobWatcherWatchGlobCall, error)
 }
 
 // QueryWatcher allows a client to receive updates for changes to objects
@@ -162,7 +162,7 @@ type GlobWatcher interface {
 // into a shared location, such as veyron2/watch.
 type QueryWatcher interface {
 	// WatchQuery returns a stream of changes.
-	WatchQuery(ctx context.T, req watch.QueryRequest) (watch.QueryWatcherWatchQueryStream, error)
+	WatchQuery(ctx context.T, req watch.QueryRequest) (watch.QueryWatcherWatchQueryCall, error)
 }
 
 // TransactionOpt represents the options for creating a transaction.
@@ -204,7 +204,7 @@ type Object interface {
 	Query(ctx context.T, q query.Query) QueryStream
 
 	// Glob returns names matching the given pattern.
-	Glob(ctx context.T, pattern string) GlobStream
+	Glob(ctx context.T, pattern string) GlobCall
 }
 
 // TransactionRoot is used to create transactions.
@@ -332,6 +332,15 @@ type GlobStream interface {
 	// Value returns the element that was staged by Advance.  Value may panic if
 	// Advance returned false or was not called at all.  Value does not block.
 	Value() string
+
+	// Err returns a non-nil error iff the stream encountered
+	// any errors.  Err does not block.
+	Err() error
+}
+
+// GlobRPC is the interface for the RPC handle for the streaming responses for Glob
+type GlobCall interface {
+	RecvStream() GlobStream
 
 	// Err returns a non-nil error iff the stream encountered any errors.  Err
 	// does not block.
