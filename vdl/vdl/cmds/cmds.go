@@ -216,7 +216,7 @@ var (
 	optGenStatus           bool
 	optGenGoFmt            bool
 	optGenGoOutDir         = genOutDir{}
-	optGenJavaOutDir       = genOutDir{src: "go/src", dst: "java/src"}
+	optGenJavaOutDir       = genOutDir{src: "go/src", dst: "java/src/main/java"}
 	optGenJavascriptOutDir = genOutDir{src: "go/src", dst: "javascript/src"}
 	optGenJavaPkgPrefix    string
 	optGenLangs            = genLangs{genLangGo: true}

@@ -58,7 +58,7 @@ The generate flags are:
       /home/me/code/bar/src/veyron2/vdl/test_base/base2.vdl.go
    When the src->dst form is used, src must match the suffix of the path just
    before the package path, and dst is the replacement for src.
-   -java_out_dir=v/src->java/src: Same semantics as --go_out_dir but applies to java code generation.
+   -java_out_dir=v/src->java/src/main/java: Same semantics as --go_out_dir but applies to java code generation.
    -java_pkg_prefix=com: Package prefix that will be added to the VDL package prefixes when generating Java files.
    -lang=[go]: Comma-separated list of languages to generate, currently supporting "go", "java"
    -status=true: Show package names while we compile

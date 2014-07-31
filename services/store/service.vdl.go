@@ -152,13 +152,6 @@ type QueryResult struct {
 	Value _gen_vdlutil.Any
 }
 
-const (
-	// The Store has Object name "<mount>/.store", where <mount> is the
-	// Object name of the mount point.
-	// An Object with path <path> has Object name "<mount>/<path>".
-	StoreSuffix = ".store"
-)
-
 // TODO(bprosnitz) Remove this line once signatures are updated to use typevals.
 // It corrects a bug where _gen_wiretype is unused in VDL pacakges where only bootstrap types are used on interfaces.
 const _ = _gen_wiretype.TypeIDInvalid
