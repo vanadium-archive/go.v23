@@ -8,33 +8,37 @@ import (
 	"veyron2/services/mgmt/binary"
 )
 
-type Architecture byte
+// Architecture specifies the hardware architecture of a host.
+type Architecture string
 
 const (
-	UnsupportedArchitecture = Architecture(0)
-	AMD64 = Architecture(1)
-	ARM = Architecture(2)
-	X86 = Architecture(3)
+	X86 = Architecture("386")
+	AMD64 = Architecture("amd64")
+	ARM = Architecture("arm")
+	UnsupportedArchitecture = Architecture("unsupported")
 )
 
-type Format byte
+// Format specifies the file format of a host.
+type Format string
 
 const (
-	UnsupportedFormat = Format(0)
-	ELF = Format(1)
-	MACH = Format(2)
-	PE = Format(3)
+	ELF = Format("ELF")
+	MACH = Format("MACH")
+	PE = Format("PE")
+	UnsupportedFormat = Format("unsupported")
 )
 
-type OperatingSystem byte
+// OperatingSystem specifies the operating system of a host.
+type OperatingSystem string
 
 const (
-	UnsupportedOperatingSystem = OperatingSystem(0)
-	Darwin = OperatingSystem(1)
-	Linux = OperatingSystem(2)
-	Windows = OperatingSystem(3)
+	Darwin = OperatingSystem("darwin")
+	Linux = OperatingSystem("linux")
+	Windows = OperatingSystem("windows")
+	UnsupportedOS = OperatingSystem("unsupported")
 )
 
+// File records the name and contents of a file.
 type File struct {
 	Name     string
 	Contents []byte
