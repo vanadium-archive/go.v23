@@ -2,31 +2,35 @@ package java
 
 import (
 	"bytes"
-	"log"
 	"unicode"
 	"unicode/utf8"
 )
 
-// toConstCase converts ThisString to THIS_STRING.
+// toConstCase converts ThisString to THIS_STRING. For adding '_', we follow the
+// following algorithm.  For any sequence of three characters, c[n-1], c[n],
+// c[n+1], we add an underscore before c[n] if:
+//     1) c[n-1] is a digit and c[n] is a letter, or
+//     2) c[n-1] is a letter and c[n] is a digit, or
+//     3) c[n-1] is lowercase, and c[n] is uppercase, or
+//     4) c[n-1] is uppercase, c[n] is uppercase, and c[n+1] is lowercase.
 func toConstCase(s string) string {
-	// Extract all characters.
-	chars := []rune{}
-	idx := 0
-	for idx < len(s) {
-		r, size := utf8.DecodeRuneInString(s[idx:])
-		if r == utf8.RuneError {
-			log.Fatalf("Invalid UTF8 string: %s", s)
-		}
-		chars = append(chars, r)
-		idx += size
-	}
-	// Case.
 	var buf bytes.Buffer
-	for i, r := range chars {
-		if i > 0 && unicode.IsUpper(r) && i < len(chars)-1 && !unicode.IsUpper(chars[i+1]) {
+	var size int
+	var prev, cur, next rune
+	next, size = utf8.DecodeRuneInString(s)
+	for next != utf8.RuneError {
+		s = s[size:]
+		prev, cur = cur, next
+		next, size = utf8.DecodeRuneInString(s)
+		// We avoid checking boundary conditions because, for a rune r that is zero or utf8.RuneError:
+		// unicode.Is{Letter,Digit,Lower,Upper}(r) == false
+		if unicode.IsDigit(prev) && unicode.IsLetter(cur) || // Rule (1)
+			unicode.IsLetter(prev) && unicode.IsDigit(cur) || // Rule (2)
+			unicode.IsLower(prev) && unicode.IsUpper(cur) || // Rule (3)
+			unicode.IsUpper(prev) && unicode.IsUpper(cur) && unicode.IsLower(next) { // Rule (4)
 			buf.WriteRune('_')
 		}
-		buf.WriteRune(unicode.ToUpper(r))
+		buf.WriteRune(unicode.ToUpper(cur))
 	}
 	return buf.String()
 }
