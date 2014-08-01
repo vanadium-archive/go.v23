@@ -2,12 +2,10 @@ package security
 
 import (
 	"bytes"
-	"crypto/ecdsa"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
-	"math/big"
 
 	"veyron2/vom"
 )
@@ -141,10 +139,4 @@ func LoadACL(r io.Reader) (ACL, error) {
 // SaveACL encodes an ACL in JSON format and writes it to the provided Writer.
 func SaveACL(w io.Writer, acl ACL) error {
 	return json.NewEncoder(w).Encode(acl)
-}
-
-// Verify returns true if sig is a valid signature for a message.
-func (sig Signature) Verify(key *ecdsa.PublicKey, message []byte) bool {
-	var r, s big.Int
-	return ecdsa.Verify(key, message, r.SetBytes(sig.R), s.SetBytes(sig.S))
 }
