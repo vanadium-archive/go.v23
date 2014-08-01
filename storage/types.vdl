@@ -46,6 +46,31 @@ type DEntry struct {
 	ID   ID
 }
 
+// Stat provides information about an entry in the store.
+//
+// TODO(jyh): Specify versioning more precisely.
+type Stat struct {
+	// ID is the unique identifier of the entry.
+	ID ID
+
+	// MTimeNS is the last modification time in Unix nanoseconds (see time.UnixNano).
+	//
+	// TODO(jyh): Use Veyron Time when it gets implemented.
+	MTimeNS int64
+
+	// Attrs are the attributes associated with the entry.
+	Attrs []any
+}
+
+// Entry represents a value at some point in time in the store.
+type Entry struct {
+	// Stat is the entry's metadata.
+	Stat Stat
+
+	// Value is the value of the entry.
+	Value any
+}
+
 const (
 	// RemoveACL means to remove the ACL from any inherited ACLs.
 	RemoveACL = TagOp(0)

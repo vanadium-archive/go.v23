@@ -2,7 +2,6 @@ package primitives
 
 import (
 	"errors"
-	"time"
 
 	"veyron2"
 	"veyron2/context"
@@ -12,7 +11,6 @@ import (
 	"veyron2/services/store"
 	"veyron2/services/watch"
 	"veyron2/storage"
-	"veyron2/vdl/vdlutil"
 )
 
 type object struct {
@@ -36,40 +34,6 @@ var (
 	nullChangeBatch watch.ChangeBatch
 )
 
-func fillStat(stat *storage.Stat, serviceStat *store.Stat) error {
-	attrs := make([]storage.Attr, len(serviceStat.Attrs))
-	for i, attr := range serviceStat.Attrs {
-		a, ok := attr.(storage.Attr)
-		if !ok {
-			return ErrBadAttr
-		}
-		attrs[i] = a
-	}
-	stat.ID = serviceStat.ID
-	stat.MTime = time.Unix(0, serviceStat.MTimeNS)
-	stat.Attrs = attrs
-	return nil
-}
-
-func makeStat(serviceStat *store.Stat) (storage.Stat, error) {
-	if serviceStat == nil {
-		return nullStat, nil
-	}
-	var stat storage.Stat
-	if err := fillStat(&stat, serviceStat); err != nil {
-		return nullStat, err
-	}
-	return stat, nil
-}
-
-func makeEntry(serviceEntry *store.Entry) (storage.Entry, error) {
-	entry := storage.Entry{Value: serviceEntry.Value}
-	if err := fillStat(&entry.Stat, &serviceEntry.Stat); err != nil {
-		return nullEntry, err
-	}
-	return entry, nil
-}
-
 // BindObject returns a storage.Object for a value at an Object name. This
 // method always succeeds. If the Object name is not a value in a Veyron store,
 // all subsequent operations on the Object will fail.
@@ -92,20 +56,12 @@ func (o *object) Exists(ctx context.T) (bool, error) {
 // most recent mutation of the entry in the storage.Transaction, or from the
 // storage.Transaction's snapshot if there is no mutation.
 func (o *object) Get(ctx context.T) (storage.Entry, error) {
-	entry, err := o.serv.Get(ctx)
-	if err != nil {
-		return nullEntry, err
-	}
-	return makeEntry(&entry)
+	return o.serv.Get(ctx)
 }
 
 // Put adds or modifies the Object.
 func (o *object) Put(ctx context.T, v interface{}) (storage.Stat, error) {
-	serviceStat, err := o.serv.Put(ctx, v)
-	if err != nil {
-		return nullStat, err
-	}
-	return makeStat(&serviceStat)
+	return o.serv.Put(ctx, v)
 }
 
 // Remove removes the Object.
@@ -113,24 +69,9 @@ func (o *object) Remove(ctx context.T) error {
 	return o.serv.Remove(ctx)
 }
 
-// SetAttr changes the attributes of the entry, such as permissions and
-// replication groups.  Attributes are associated with the value, not the
-// path.
-func (o *object) SetAttr(ctx context.T, attrs ...storage.Attr) error {
-	serviceAttrs := make([]vdlutil.Any, len(attrs))
-	for i, x := range attrs {
-		serviceAttrs[i] = vdlutil.Any(x)
-	}
-	return o.serv.SetAttr(ctx, serviceAttrs)
-}
-
 // Stat returns entry info.
 func (o *object) Stat(ctx context.T) (storage.Stat, error) {
-	serviceStat, err := o.serv.Stat(ctx)
-	if err != nil {
-		return nullStat, err
-	}
-	return makeStat(&serviceStat)
+	return o.serv.Stat(ctx)
 }
 
 // Query returns entries matching the given query.
@@ -151,115 +92,14 @@ func (o *object) Glob(ctx context.T, pattern string) storage.GlobCall {
 	return newGlobStream(stream)
 }
 
-// ChangeBatchStream is an interface for streaming responses of type
-// ChangeBatch.
-type ChangeBatchStream interface {
-	// Advance stages an element so the client can retrieve it with Value.
-	// Advance returns true iff there is an element to retrieve.  The client must
-	// call Advance before calling Value.  The client must call Cancel if it does
-	// not iterate through all elements (i.e. until Advance returns false).
-	// Advance may block if an element is not immediately available.
-	Advance() bool
-
-	// Value returns the element that was staged by Advance.  Value may panic if
-	// Advance returned false or was not called at all.  Value does not block.
-	Value() watch.ChangeBatch
-
-	// Err returns a non-nil error iff the stream encountered any errors.  Err
-	// does not block.
-	Err() error
-}
-
-type ChangeCall interface {
-	// Finish closes the stream and returns the positional return values for
-	// call.
-	Finish() error
-
-	// Cancel notifies the stream provider that it can stop producing elements.
-	Cancel()
-}
-
-// entryTransformCall implements GlobWatcherWatchGlobCall and
-// QueryWatcherWatchQueryCall. It wraps a ChangeBatchStream, transforming the
-// value in each change from *store.Entry to *storage.Entry.
-type entryTransformStream struct {
-	delegate ChangeBatchStream
-	value    watch.ChangeBatch
-	err      error
-}
-
-func (s *entryTransformStream) Advance() bool {
-	if !s.delegate.Advance() {
-		s.value = nullChangeBatch
-		s.err = s.Err()
-		return false
-	}
-	s.value = s.delegate.Value()
-	// Transform the ChangeBatch in-place.
-	changes := s.value.Changes
-	for i := range changes {
-		if changes[i].Value != nil {
-			serviceEntry := changes[i].Value.(*store.Entry)
-			entry, err := makeEntry(serviceEntry)
-			if err != nil {
-				s.value = nullChangeBatch
-				s.err = err
-				return false
-			}
-			changes[i].Value = &entry
-		}
-	}
-	return true
-}
-
-func (s *entryTransformStream) Value() watch.ChangeBatch {
-	return s.value
-}
-
-func (s *entryTransformStream) Err() error {
-	return s.err
-}
-
-// entryTransformCall implements GlobWatcherWatchGlobCall
-// It wraps an entryTransformStream, transforming the
-// value in each change from *store.Entry to *storage.Entry.
-type entryTransformCall struct {
-	delegateStream ChangeBatchStream
-	delegateCall   ChangeCall
-}
-
-func (s *entryTransformCall) RecvStream() interface {
-	Advance() bool
-	Value() watch.ChangeBatch
-	Err() error
-} {
-	return s.delegateStream
-}
-
-func (s *entryTransformCall) Finish() error {
-	return s.delegateCall.Finish()
-}
-
-func (s *entryTransformCall) Cancel() {
-	s.delegateCall.Cancel()
-}
-
 // WatchGlob returns a stream of changes that match a pattern.
 func (o *object) WatchGlob(ctx context.T, req watch.GlobRequest) (watch.GlobWatcherWatchGlobCall, error) {
-	rpc, err := o.serv.WatchGlob(ctx, req, veyron2.CallTimeout(ipc.NoTimeout))
-	if err != nil {
-		return nil, err
-	}
-	return &entryTransformCall{delegateCall: rpc, delegateStream: &entryTransformStream{delegate: rpc.RecvStream()}}, nil
+	return o.serv.WatchGlob(ctx, req, veyron2.CallTimeout(ipc.NoTimeout))
 }
 
 // WatchQuery returns a stream of changes that satisy a query.
 func (o *object) WatchQuery(ctx context.T, req watch.QueryRequest) (watch.QueryWatcherWatchQueryCall, error) {
-	rpc, err := o.serv.WatchQuery(ctx, req, veyron2.CallTimeout(ipc.NoTimeout))
-	if err != nil {
-		return nil, err
-	}
-	return &entryTransformCall{delegateCall: rpc, delegateStream: &entryTransformStream{delegate: rpc.RecvStream()}}, nil
+	return o.serv.WatchQuery(ctx, req, veyron2.CallTimeout(ipc.NoTimeout))
 }
 
 // errorObject responds with an error to all operations.
@@ -276,10 +116,6 @@ func (o *errorObject) Put(ctx context.T, v interface{}) (storage.Stat, error) {
 }
 
 func (o *errorObject) Remove(ctx context.T) error {
-	return o.err
-}
-
-func (o *errorObject) SetAttr(ctx context.T, attrs ...storage.Attr) error {
 	return o.err
 }
 

@@ -140,8 +140,6 @@
 package storage
 
 import (
-	"time"
-
 	"veyron2/context"
 	"veyron2/query"
 	"veyron2/services/watch"
@@ -191,11 +189,6 @@ type Object interface {
 
 	// Remove removes the Object.
 	Remove(ctx context.T) error
-
-	// SetAttr changes the attributes of the entry, such as permissions and
-	// replication groups.  Attributes are associated with the value, not the
-	// path.
-	SetAttr(ctx context.T, attrs ...Attr) error
 
 	// Stat returns entry info.
 	Stat(ctx context.T) (Stat, error)
@@ -249,21 +242,8 @@ type Store interface {
 	// BindTransaction returns the Transaction associated with a path.
 	BindTransaction(path string) Transaction
 
-	// SetConflictResolver specifies a function to perform conflict resolution.
-	// The <ty> represents the IDL name for the type.
-	SetConflictResolver(ty string, r ConflictResolver)
-
 	// Close closes the Store.
 	Close() error
-}
-
-// Entry contains the metadata and data for an entry in the store.
-type Entry struct {
-	// Stat is the entry's metadata.
-	Stat Stat
-
-	// Value is the value of the entry.
-	Value interface{}
 }
 
 // QueryStream provides a stream of query results.  Typical usage:
@@ -353,42 +333,3 @@ type GlobCall interface {
 	// causes Advance to subsequently return false.  Cancel does not block.
 	Cancel()
 }
-
-// Stat provides information about an entry in the store.
-//
-// TODO(jyh): Specify versioning more precisely.
-type Stat struct {
-	// ID is the unique identifier of the entry.
-	ID ID
-
-	// MTime is the last modification time.
-	MTime time.Time
-
-	// Attrs are the attributes associated with the entry.
-	Attrs []Attr
-}
-
-// Attr represents attributes associated with an entry.
-//
-// TODO: define attributes for,
-//    1. security properties
-//    2. versions
-type Attr interface {
-	Attr()
-}
-
-// ReplicationGroupAttr specifies a replication group.  The Name is thre Veyron
-// name of the replication group.
-type ReplicationGroupAttr struct {
-	Attr
-
-	Name string
-}
-
-// ConflictResolver is a function that performs a conflict resolution.  <remote>
-// is a remote value, <local> is the local value, and <root> is a common
-// ancestor (or nil if the common ancestory can't be determined).
-//
-// A ConflictResolver function is expected to handle values of a single type
-// (see the SetConflictResolver method above).
-type ConflictResolver func(local, remote, root Entry) interface{}
