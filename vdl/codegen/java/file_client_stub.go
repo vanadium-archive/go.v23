@@ -55,7 +55,7 @@ public final class {{ .ServiceName }}Stub implements {{ .FullServiceName }} {
         {{/* Start the veyron call */}}
         // Start the call.
         final java.lang.Object[] inArgs = new java.lang.Object[]{ {{ $method.NoCommaArgNames }} };
-        final com.veyron2.ipc.Client.Call call = this.client.startCall(context, this.veyronName, "Glob", inArgs, veyronOpts);
+        final com.veyron2.ipc.Client.Call call = this.client.startCall(context, this.veyronName, "{{ $method.Name }}", inArgs, veyronOpts);
 
         // Finish the call.
         {{/* Now handle returning from the function. */}}
