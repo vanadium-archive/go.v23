@@ -4,6 +4,11 @@ import (
 	"veyron2/security"
 )
 
+// This file exists because these types are shared between the client library
+// (veyron2/storage) and the network API (veyron2/services/store).  We expect
+// most clients to use the library, and we don't want them to have to do
+// two imports.
+
 // ID is the type of keys for the key/value store.  The key is a numeric
 // identifier that is globally unique, meaning that if two stores contain an
 // entry with the same ID, then the entries represent the same thing.  To
