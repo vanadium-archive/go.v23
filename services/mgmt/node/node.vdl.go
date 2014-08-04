@@ -157,13 +157,13 @@ type Application_ExcludingUniversal interface {
 	// instance(s).
 	Start(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error)
 	// Stop attempts a clean shutdown of application installation(s)
-	// instance(s). If the deadline is non-zero and the instance(s) in
-	// questions are still running after the given deadline, shutdown of
-	// the instance(s) is enforced.
+	// instance(s). If the deadline (in seconds) is non-zero and the
+	// instance(s) in questions are still running after the given deadline,
+	// shutdown of the instance(s) is enforced.
 	//
 	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
 	// are implemented.
-	Stop(ctx _gen_context.T, Deadline uint64, opts ..._gen_ipc.CallOpt) (err error)
+	Stop(ctx _gen_context.T, Deadline uint32, opts ..._gen_ipc.CallOpt) (err error)
 	// Suspend suspends execution of application installation(s)
 	// instance(s).
 	Suspend(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error)
@@ -219,13 +219,13 @@ type ApplicationService interface {
 	// instance(s).
 	Start(context _gen_ipc.ServerContext) (reply []string, err error)
 	// Stop attempts a clean shutdown of application installation(s)
-	// instance(s). If the deadline is non-zero and the instance(s) in
-	// questions are still running after the given deadline, shutdown of
-	// the instance(s) is enforced.
+	// instance(s). If the deadline (in seconds) is non-zero and the
+	// instance(s) in questions are still running after the given deadline,
+	// shutdown of the instance(s) is enforced.
 	//
 	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
 	// are implemented.
-	Stop(context _gen_ipc.ServerContext, Deadline uint64) (err error)
+	Stop(context _gen_ipc.ServerContext, Deadline uint32) (err error)
 	// Suspend suspends execution of application installation(s)
 	// instance(s).
 	Suspend(context _gen_ipc.ServerContext) (err error)
@@ -350,7 +350,7 @@ func (__gen_c *clientStubApplication) Start(ctx _gen_context.T, opts ..._gen_ipc
 	return
 }
 
-func (__gen_c *clientStubApplication) Stop(ctx _gen_context.T, Deadline uint64, opts ..._gen_ipc.CallOpt) (err error) {
+func (__gen_c *clientStubApplication) Stop(ctx _gen_context.T, Deadline uint32, opts ..._gen_ipc.CallOpt) (err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Stop", []interface{}{Deadline}, opts...); err != nil {
 		return
@@ -521,7 +521,7 @@ func (__gen_s *ServerStubApplication) Signature(call _gen_ipc.ServerCall) (_gen_
 	}
 	result.Methods["Stop"] = _gen_ipc.MethodSignature{
 		InArgs: []_gen_ipc.MethodArgument{
-			{Name: "Deadline", Type: 53},
+			{Name: "Deadline", Type: 52},
 		},
 		OutArgs: []_gen_ipc.MethodArgument{
 			{Name: "", Type: 65},
@@ -608,7 +608,7 @@ func (__gen_s *ServerStubApplication) Start(call _gen_ipc.ServerCall) (reply []s
 	return
 }
 
-func (__gen_s *ServerStubApplication) Stop(call _gen_ipc.ServerCall, Deadline uint64) (err error) {
+func (__gen_s *ServerStubApplication) Stop(call _gen_ipc.ServerCall, Deadline uint32) (err error) {
 	err = __gen_s.service.Stop(call, Deadline)
 	return
 }
