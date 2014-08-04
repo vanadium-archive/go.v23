@@ -22,28 +22,6 @@ import (
 	_gen_wiretype "veyron2/wiretype"
 )
 
-// Stat provides information about an entry in the store.
-//
-// TODO(jyh): Specify versioning more precisely.
-type Stat struct {
-	// ID is the unique identifier of the entry.
-	ID storage.ID
-	// MTimeNS is the last modification time in Unix nanoseconds (see time.UnixNano).
-	//
-	// TODO(jyh): Use Veyron Time when it gets implemented.
-	MTimeNS int64
-	// Attrs are the attributes associated with the entry.
-	Attrs []_gen_vdlutil.Any
-}
-
-// Entry represents a value at some point in time in the store.
-type Entry struct {
-	// Stat is the entry's metadata.
-	Stat Stat
-	// Value is the value of the entry.
-	Value _gen_vdlutil.Any
-}
-
 // NestedResult allows nested query results to be sent out-of-line.
 // See QueryResult for a full explanation.
 type NestedResult int64
@@ -540,17 +518,13 @@ type Object_ExcludingUniversal interface {
 	// Get returns the value for the Object.  The value returned is from the
 	// most recent mutation of the entry in the Transaction, or from the
 	// Transaction's snapshot if there is no mutation.
-	Get(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply Entry, err error)
+	Get(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply storage.Entry, err error)
 	// Put modifies the value of the Object.
-	Put(ctx _gen_context.T, V _gen_vdlutil.Any, opts ..._gen_ipc.CallOpt) (reply Stat, err error)
+	Put(ctx _gen_context.T, V _gen_vdlutil.Any, opts ..._gen_ipc.CallOpt) (reply storage.Stat, err error)
 	// Remove removes the Object.
 	Remove(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error)
-	// SetAttr changes the attributes of the entry, such as permissions and
-	// replication groups.  Attributes are associated with the value, not the
-	// path.
-	SetAttr(ctx _gen_context.T, Attrs []_gen_vdlutil.Any, opts ..._gen_ipc.CallOpt) (err error)
 	// Stat returns entry info.
-	Stat(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply Stat, err error)
+	Stat(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply storage.Stat, err error)
 	// Query returns the sequence of elements that satisfy the query.
 	Query(ctx _gen_context.T, Q query.Query, opts ..._gen_ipc.CallOpt) (reply ObjectQueryCall, err error)
 }
@@ -575,17 +549,13 @@ type ObjectService interface {
 	// Get returns the value for the Object.  The value returned is from the
 	// most recent mutation of the entry in the Transaction, or from the
 	// Transaction's snapshot if there is no mutation.
-	Get(context _gen_ipc.ServerContext) (reply Entry, err error)
+	Get(context _gen_ipc.ServerContext) (reply storage.Entry, err error)
 	// Put modifies the value of the Object.
-	Put(context _gen_ipc.ServerContext, V _gen_vdlutil.Any) (reply Stat, err error)
+	Put(context _gen_ipc.ServerContext, V _gen_vdlutil.Any) (reply storage.Stat, err error)
 	// Remove removes the Object.
 	Remove(context _gen_ipc.ServerContext) (err error)
-	// SetAttr changes the attributes of the entry, such as permissions and
-	// replication groups.  Attributes are associated with the value, not the
-	// path.
-	SetAttr(context _gen_ipc.ServerContext, Attrs []_gen_vdlutil.Any) (err error)
 	// Stat returns entry info.
-	Stat(context _gen_ipc.ServerContext) (reply Stat, err error)
+	Stat(context _gen_ipc.ServerContext) (reply storage.Stat, err error)
 	// Query returns the sequence of elements that satisfy the query.
 	Query(context _gen_ipc.ServerContext, Q query.Query, stream ObjectServiceQueryStream) (err error)
 }
@@ -779,7 +749,7 @@ func (__gen_c *clientStubObject) Exists(ctx _gen_context.T, opts ..._gen_ipc.Cal
 	return
 }
 
-func (__gen_c *clientStubObject) Get(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply Entry, err error) {
+func (__gen_c *clientStubObject) Get(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply storage.Entry, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Get", nil, opts...); err != nil {
 		return
@@ -790,7 +760,7 @@ func (__gen_c *clientStubObject) Get(ctx _gen_context.T, opts ..._gen_ipc.CallOp
 	return
 }
 
-func (__gen_c *clientStubObject) Put(ctx _gen_context.T, V _gen_vdlutil.Any, opts ..._gen_ipc.CallOpt) (reply Stat, err error) {
+func (__gen_c *clientStubObject) Put(ctx _gen_context.T, V _gen_vdlutil.Any, opts ..._gen_ipc.CallOpt) (reply storage.Stat, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Put", []interface{}{V}, opts...); err != nil {
 		return
@@ -812,18 +782,7 @@ func (__gen_c *clientStubObject) Remove(ctx _gen_context.T, opts ..._gen_ipc.Cal
 	return
 }
 
-func (__gen_c *clientStubObject) SetAttr(ctx _gen_context.T, Attrs []_gen_vdlutil.Any, opts ..._gen_ipc.CallOpt) (err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "SetAttr", []interface{}{Attrs}, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
-func (__gen_c *clientStubObject) Stat(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply Stat, err error) {
+func (__gen_c *clientStubObject) Stat(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply storage.Stat, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Stat", nil, opts...); err != nil {
 		return
@@ -917,8 +876,6 @@ func (__gen_s *ServerStubObject) GetMethodTags(call _gen_ipc.ServerCall, method 
 		return []interface{}{}, nil
 	case "Remove":
 		return []interface{}{}, nil
-	case "SetAttr":
-		return []interface{}{}, nil
 	case "Stat":
 		return []interface{}{}, nil
 	case "Query":
@@ -969,14 +926,6 @@ func (__gen_s *ServerStubObject) Signature(call _gen_ipc.ServerCall) (_gen_ipc.S
 			{Name: "", Type: 65},
 		},
 	}
-	result.Methods["SetAttr"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{
-			{Name: "Attrs", Type: 69},
-		},
-		OutArgs: []_gen_ipc.MethodArgument{
-			{Name: "", Type: 65},
-		},
-	}
 	result.Methods["Stat"] = _gen_ipc.MethodSignature{
 		InArgs: []_gen_ipc.MethodArgument{},
 		OutArgs: []_gen_ipc.MethodArgument{
@@ -992,13 +941,13 @@ func (__gen_s *ServerStubObject) Signature(call _gen_ipc.ServerCall) (_gen_ipc.S
 				_gen_wiretype.FieldType{Type: 0x25, Name: "MTimeNS"},
 				_gen_wiretype.FieldType{Type: 0x45, Name: "Attrs"},
 			},
-			"veyron2/services/store.Stat", []string(nil)},
+			"veyron2/storage.Stat", []string(nil)},
 		_gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
 				_gen_wiretype.FieldType{Type: 0x46, Name: "Stat"},
 				_gen_wiretype.FieldType{Type: 0x44, Name: "Value"},
 			},
-			"veyron2/services/store.Entry", []string(nil)},
+			"veyron2/storage.Entry", []string(nil)},
 		_gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
 				_gen_wiretype.FieldType{Type: 0x3, Name: "Stmt"},
@@ -1307,12 +1256,12 @@ func (__gen_s *ServerStubObject) Exists(call _gen_ipc.ServerCall) (reply bool, e
 	return
 }
 
-func (__gen_s *ServerStubObject) Get(call _gen_ipc.ServerCall) (reply Entry, err error) {
+func (__gen_s *ServerStubObject) Get(call _gen_ipc.ServerCall) (reply storage.Entry, err error) {
 	reply, err = __gen_s.service.Get(call)
 	return
 }
 
-func (__gen_s *ServerStubObject) Put(call _gen_ipc.ServerCall, V _gen_vdlutil.Any) (reply Stat, err error) {
+func (__gen_s *ServerStubObject) Put(call _gen_ipc.ServerCall, V _gen_vdlutil.Any) (reply storage.Stat, err error) {
 	reply, err = __gen_s.service.Put(call, V)
 	return
 }
@@ -1322,12 +1271,7 @@ func (__gen_s *ServerStubObject) Remove(call _gen_ipc.ServerCall) (err error) {
 	return
 }
 
-func (__gen_s *ServerStubObject) SetAttr(call _gen_ipc.ServerCall, Attrs []_gen_vdlutil.Any) (err error) {
-	err = __gen_s.service.SetAttr(call, Attrs)
-	return
-}
-
-func (__gen_s *ServerStubObject) Stat(call _gen_ipc.ServerCall) (reply Stat, err error) {
+func (__gen_s *ServerStubObject) Stat(call _gen_ipc.ServerCall) (reply storage.Stat, err error) {
 	reply, err = __gen_s.service.Stat(call)
 	return
 }

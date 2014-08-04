@@ -18,21 +18,16 @@ type Object interface {
 	// Get returns the value for the Object.  The value returned is from the
 	// most recent mutation of the entry in the Transaction, or from the
 	// Transaction's snapshot if there is no mutation.
-	Get() (Entry, error)
+	Get() (storage.Entry, error)
 
 	// Put modifies the value of the Object.
-	Put(V any) (Stat, error)
+	Put(V any) (storage.Stat, error)
 
 	// Remove removes the Object.
 	Remove() error
 
-	// SetAttr changes the attributes of the entry, such as permissions and
-	// replication groups.  Attributes are associated with the value, not the
-	// path.
-	SetAttr(Attrs []any) error
-
 	// Stat returns entry info.
-	Stat() (Stat, error)
+	Stat() (storage.Stat, error)
 
 	// Query returns the sequence of elements that satisfy the query.
 	Query(Q query.Query) stream<_, QueryResult> error
@@ -79,31 +74,6 @@ type Transaction interface {
 	// consume resources, so if you know that you won't be using a transaction
 	// anymore, you should discard it explicitly.
 	Abort() error
-}
-
-// Stat provides information about an entry in the store.
-//
-// TODO(jyh): Specify versioning more precisely.
-type Stat struct {
-	// ID is the unique identifier of the entry.
-	ID storage.ID
-
-	// MTimeNS is the last modification time in Unix nanoseconds (see time.UnixNano).
-	//
-	// TODO(jyh): Use Veyron Time when it gets implemented.
-	MTimeNS int64
-
-	// Attrs are the attributes associated with the entry.
-	Attrs []any
-}
-
-// Entry represents a value at some point in time in the store.
-type Entry struct {
-	// Stat is the entry's metadata.
-	Stat Stat
-
-	// Value is the value of the entry.
-	Value any
 }
 
 // NestedResult allows nested query results to be sent out-of-line.

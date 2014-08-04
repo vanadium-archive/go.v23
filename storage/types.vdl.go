@@ -5,6 +5,9 @@ package storage
 
 import (
 	"veyron2/security"
+
+	// The non-user imports are prefixed with "_gen_" to prevent collisions.
+	_gen_vdlutil "veyron2/vdl/vdlutil"
 )
 
 // ID is the type of keys for the key/value store.  The key is a numeric
@@ -46,6 +49,28 @@ type TagList []Tag
 type DEntry struct {
 	Name string
 	ID   ID
+}
+
+// Stat provides information about an entry in the store.
+//
+// TODO(jyh): Specify versioning more precisely.
+type Stat struct {
+	// ID is the unique identifier of the entry.
+	ID ID
+	// MTimeNS is the last modification time in Unix nanoseconds (see time.UnixNano).
+	//
+	// TODO(jyh): Use Veyron Time when it gets implemented.
+	MTimeNS int64
+	// Attrs are the attributes associated with the entry.
+	Attrs []_gen_vdlutil.Any
+}
+
+// Entry represents a value at some point in time in the store.
+type Entry struct {
+	// Stat is the entry's metadata.
+	Stat Stat
+	// Value is the value of the entry.
+	Value _gen_vdlutil.Any
 }
 
 const (

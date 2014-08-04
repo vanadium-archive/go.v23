@@ -42,12 +42,6 @@ func (st *VStore) BindTransactionRoot(name string) storage.TransactionRoot {
 	return primitives.BindTransactionRoot(st.mount, name)
 }
 
-// SetConflictResolver specifies a function to perform conflict resolution.
-// The <ty> represents the IDL name for the type.
-func (st *VStore) SetConflictResolver(ty string, r storage.ConflictResolver) {
-	panic("not implemented")
-}
-
 // Close closes the Store.
 func (st *VStore) Close() error {
 	return nil
