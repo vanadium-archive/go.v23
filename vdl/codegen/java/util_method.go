@@ -1,6 +1,10 @@
 package java
 
 import (
+	"bytes"
+	"fmt"
+	"sort"
+
 	"veyron2/vdl/compile"
 )
 
@@ -54,6 +58,35 @@ func dedupedEmbeddedMethodAndOrigins(iface *compile.Interface) []methodAndOrigin
 	for _, mao := range embeddedMao {
 		ret = append(ret, mao)
 	}
+	sort.Sort(bySignature(ret))
 
 	return ret
+}
+
+// bySignature implements sort.Interface
+type bySignature []methodAndOrigin
+
+func (b bySignature) Len() int {
+	return len(b)
+}
+
+func (b bySignature) Less(i, j int) bool {
+	return b.signature(i) < b.signature(j)
+}
+
+func (b bySignature) signature(i int) string {
+	var buf bytes.Buffer
+	buf.WriteString(fmt.Sprintf("%s|%s|%s",
+		b[i].Origin.File.Package.Path,
+		b[i].Origin.Name,
+		b[i].Method.Name,
+	))
+	for _, arg := range b[i].Method.InArgs {
+		buf.WriteString(fmt.Sprintf("|%s", arg.Type.Name()))
+	}
+	return buf.String()
+}
+
+func (b bySignature) Swap(i, j int) {
+	b[i], b[j] = b[j], b[i]
 }
