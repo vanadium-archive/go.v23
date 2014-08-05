@@ -65,37 +65,37 @@ const (
 // It corrects a bug where _gen_wiretype is unused in VDL pacakges where only bootstrap types are used on interfaces.
 const _ = _gen_wiretype.TypeIDInvalid
 
-// Build describes an interface for building binaries from source.
-// Build is the interface the client binds and uses.
-// Build_ExcludingUniversal is the interface without internal framework-added methods
+// Builder describes an interface for building binaries from source.
+// Builder is the interface the client binds and uses.
+// Builder_ExcludingUniversal is the interface without internal framework-added methods
 // to enable embedding without method collisions.  Not to be used directly by clients.
-type Build_ExcludingUniversal interface {
+type Builder_ExcludingUniversal interface {
 	// Build streams sources to the build server, which then attempts to
 	// build the sources and streams back the compiled binaries.
-	Build(ctx _gen_context.T, Arch Architecture, OS OperatingSystem, opts ..._gen_ipc.CallOpt) (reply BuildBuildCall, err error)
+	Build(ctx _gen_context.T, Arch Architecture, OS OperatingSystem, opts ..._gen_ipc.CallOpt) (reply BuilderBuildCall, err error)
 	// Describe generates a description for a binary identified by
 	// the given Object name.
 	Describe(ctx _gen_context.T, Name string, opts ..._gen_ipc.CallOpt) (reply binary.Description, err error)
 }
-type Build interface {
+type Builder interface {
 	_gen_ipc.UniversalServiceMethods
-	Build_ExcludingUniversal
+	Builder_ExcludingUniversal
 }
 
-// BuildService is the interface the server implements.
-type BuildService interface {
+// BuilderService is the interface the server implements.
+type BuilderService interface {
 
 	// Build streams sources to the build server, which then attempts to
 	// build the sources and streams back the compiled binaries.
-	Build(context _gen_ipc.ServerContext, Arch Architecture, OS OperatingSystem, stream BuildServiceBuildStream) (reply []byte, err error)
+	Build(context _gen_ipc.ServerContext, Arch Architecture, OS OperatingSystem, stream BuilderServiceBuildStream) (reply []byte, err error)
 	// Describe generates a description for a binary identified by
 	// the given Object name.
 	Describe(context _gen_ipc.ServerContext, Name string) (reply binary.Description, err error)
 }
 
-// BuildBuildCall is the interface for call object of the method
-// Build in the service interface Build.
-type BuildBuildCall interface {
+// BuilderBuildCall is the interface for call object of the method
+// Build in the service interface Builder.
+type BuilderBuildCall interface {
 	// RecvStream returns the recv portion of the stream
 	RecvStream() interface {
 		// Advance stages an element so the client can retrieve it
@@ -152,56 +152,56 @@ type BuildBuildCall interface {
 	Cancel()
 }
 
-type implBuildBuildStreamSender struct {
+type implBuilderBuildStreamSender struct {
 	clientCall _gen_ipc.Call
 }
 
-func (c *implBuildBuildStreamSender) Send(item File) error {
+func (c *implBuilderBuildStreamSender) Send(item File) error {
 	return c.clientCall.Send(item)
 }
 
-func (c *implBuildBuildStreamSender) Close() error {
+func (c *implBuilderBuildStreamSender) Close() error {
 	return c.clientCall.CloseSend()
 }
 
-type implBuildBuildStreamIterator struct {
+type implBuilderBuildStreamIterator struct {
 	clientCall _gen_ipc.Call
 	val        File
 	err        error
 }
 
-func (c *implBuildBuildStreamIterator) Advance() bool {
+func (c *implBuilderBuildStreamIterator) Advance() bool {
 	c.val = File{}
 	c.err = c.clientCall.Recv(&c.val)
 	return c.err == nil
 }
 
-func (c *implBuildBuildStreamIterator) Value() File {
+func (c *implBuilderBuildStreamIterator) Value() File {
 	return c.val
 }
 
-func (c *implBuildBuildStreamIterator) Err() error {
+func (c *implBuilderBuildStreamIterator) Err() error {
 	if c.err == _gen_io.EOF {
 		return nil
 	}
 	return c.err
 }
 
-// Implementation of the BuildBuildCall interface that is not exported.
-type implBuildBuildCall struct {
+// Implementation of the BuilderBuildCall interface that is not exported.
+type implBuilderBuildCall struct {
 	clientCall  _gen_ipc.Call
-	writeStream implBuildBuildStreamSender
-	readStream  implBuildBuildStreamIterator
+	writeStream implBuilderBuildStreamSender
+	readStream  implBuilderBuildStreamIterator
 }
 
-func (c *implBuildBuildCall) SendStream() interface {
+func (c *implBuilderBuildCall) SendStream() interface {
 	Send(item File) error
 	Close() error
 } {
 	return &c.writeStream
 }
 
-func (c *implBuildBuildCall) RecvStream() interface {
+func (c *implBuilderBuildCall) RecvStream() interface {
 	Advance() bool
 	Value() File
 	Err() error
@@ -209,51 +209,51 @@ func (c *implBuildBuildCall) RecvStream() interface {
 	return &c.readStream
 }
 
-func (c *implBuildBuildCall) Finish() (reply []byte, err error) {
+func (c *implBuilderBuildCall) Finish() (reply []byte, err error) {
 	if ierr := c.clientCall.Finish(&reply, &err); ierr != nil {
 		err = ierr
 	}
 	return
 }
 
-func (c *implBuildBuildCall) Cancel() {
+func (c *implBuilderBuildCall) Cancel() {
 	c.clientCall.Cancel()
 }
 
-type implBuildServiceBuildStreamSender struct {
+type implBuilderServiceBuildStreamSender struct {
 	serverCall _gen_ipc.ServerCall
 }
 
-func (s *implBuildServiceBuildStreamSender) Send(item File) error {
+func (s *implBuilderServiceBuildStreamSender) Send(item File) error {
 	return s.serverCall.Send(item)
 }
 
-type implBuildServiceBuildStreamIterator struct {
+type implBuilderServiceBuildStreamIterator struct {
 	serverCall _gen_ipc.ServerCall
 	val        File
 	err        error
 }
 
-func (s *implBuildServiceBuildStreamIterator) Advance() bool {
+func (s *implBuilderServiceBuildStreamIterator) Advance() bool {
 	s.val = File{}
 	s.err = s.serverCall.Recv(&s.val)
 	return s.err == nil
 }
 
-func (s *implBuildServiceBuildStreamIterator) Value() File {
+func (s *implBuilderServiceBuildStreamIterator) Value() File {
 	return s.val
 }
 
-func (s *implBuildServiceBuildStreamIterator) Err() error {
+func (s *implBuilderServiceBuildStreamIterator) Err() error {
 	if s.err == _gen_io.EOF {
 		return nil
 	}
 	return s.err
 }
 
-// BuildServiceBuildStream is the interface for streaming responses of the method
-// Build in the service interface Build.
-type BuildServiceBuildStream interface {
+// BuilderServiceBuildStream is the interface for streaming responses of the method
+// Build in the service interface Builder.
+type BuilderServiceBuildStream interface {
 	// SendStream returns the send portion of the stream.
 	SendStream() interface {
 		// Send places the item onto the output stream, blocking if there is no buffer
@@ -280,13 +280,13 @@ type BuildServiceBuildStream interface {
 	}
 }
 
-// Implementation of the BuildServiceBuildStream interface that is not exported.
-type implBuildServiceBuildStream struct {
-	writer implBuildServiceBuildStreamSender
-	reader implBuildServiceBuildStreamIterator
+// Implementation of the BuilderServiceBuildStream interface that is not exported.
+type implBuilderServiceBuildStream struct {
+	writer implBuilderServiceBuildStreamSender
+	reader implBuilderServiceBuildStreamIterator
 }
 
-func (s *implBuildServiceBuildStream) SendStream() interface {
+func (s *implBuilderServiceBuildStream) SendStream() interface {
 	// Send places the item onto the output stream, blocking if there is no buffer
 	// space available.  If the client has canceled, an error is returned.
 	Send(item File) error
@@ -294,7 +294,7 @@ func (s *implBuildServiceBuildStream) SendStream() interface {
 	return &s.writer
 }
 
-func (s *implBuildServiceBuildStream) RecvStream() interface {
+func (s *implBuilderServiceBuildStream) RecvStream() interface {
 	// Advance stages an element so the client can retrieve it
 	// with Value.  Advance returns true iff there is an
 	// element to retrieve.  The client must call Advance before
@@ -316,12 +316,12 @@ func (s *implBuildServiceBuildStream) RecvStream() interface {
 	return &s.reader
 }
 
-// BindBuild returns the client stub implementing the Build
+// BindBuilder returns the client stub implementing the Builder
 // interface.
 //
 // If no _gen_ipc.Client is specified, the default _gen_ipc.Client in the
 // global Runtime is used.
-func BindBuild(name string, opts ..._gen_ipc.BindOpt) (Build, error) {
+func BindBuilder(name string, opts ..._gen_ipc.BindOpt) (Builder, error) {
 	var client _gen_ipc.Client
 	switch len(opts) {
 	case 0:
@@ -336,37 +336,37 @@ func BindBuild(name string, opts ..._gen_ipc.BindOpt) (Build, error) {
 	default:
 		return nil, _gen_vdlutil.ErrTooManyOptionsToBind
 	}
-	stub := &clientStubBuild{client: client, name: name}
+	stub := &clientStubBuilder{client: client, name: name}
 
 	return stub, nil
 }
 
-// NewServerBuild creates a new server stub.
+// NewServerBuilder creates a new server stub.
 //
-// It takes a regular server implementing the BuildService
+// It takes a regular server implementing the BuilderService
 // interface, and returns a new server stub.
-func NewServerBuild(server BuildService) interface{} {
-	return &ServerStubBuild{
+func NewServerBuilder(server BuilderService) interface{} {
+	return &ServerStubBuilder{
 		service: server,
 	}
 }
 
-// clientStubBuild implements Build.
-type clientStubBuild struct {
+// clientStubBuilder implements Builder.
+type clientStubBuilder struct {
 	client _gen_ipc.Client
 	name   string
 }
 
-func (__gen_c *clientStubBuild) Build(ctx _gen_context.T, Arch Architecture, OS OperatingSystem, opts ..._gen_ipc.CallOpt) (reply BuildBuildCall, err error) {
+func (__gen_c *clientStubBuilder) Build(ctx _gen_context.T, Arch Architecture, OS OperatingSystem, opts ..._gen_ipc.CallOpt) (reply BuilderBuildCall, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Build", []interface{}{Arch, OS}, opts...); err != nil {
 		return
 	}
-	reply = &implBuildBuildCall{clientCall: call, writeStream: implBuildBuildStreamSender{clientCall: call}, readStream: implBuildBuildStreamIterator{clientCall: call}}
+	reply = &implBuilderBuildCall{clientCall: call, writeStream: implBuilderBuildStreamSender{clientCall: call}, readStream: implBuilderBuildStreamIterator{clientCall: call}}
 	return
 }
 
-func (__gen_c *clientStubBuild) Describe(ctx _gen_context.T, Name string, opts ..._gen_ipc.CallOpt) (reply binary.Description, err error) {
+func (__gen_c *clientStubBuilder) Describe(ctx _gen_context.T, Name string, opts ..._gen_ipc.CallOpt) (reply binary.Description, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Describe", []interface{}{Name}, opts...); err != nil {
 		return
@@ -377,7 +377,7 @@ func (__gen_c *clientStubBuild) Describe(ctx _gen_context.T, Name string, opts .
 	return
 }
 
-func (__gen_c *clientStubBuild) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
+func (__gen_c *clientStubBuilder) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
 		return
@@ -388,7 +388,7 @@ func (__gen_c *clientStubBuild) UnresolveStep(ctx _gen_context.T, opts ..._gen_i
 	return
 }
 
-func (__gen_c *clientStubBuild) Signature(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+func (__gen_c *clientStubBuilder) Signature(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
 		return
@@ -399,7 +399,7 @@ func (__gen_c *clientStubBuild) Signature(ctx _gen_context.T, opts ..._gen_ipc.C
 	return
 }
 
-func (__gen_c *clientStubBuild) GetMethodTags(ctx _gen_context.T, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
+func (__gen_c *clientStubBuilder) GetMethodTags(ctx _gen_context.T, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
@@ -410,14 +410,14 @@ func (__gen_c *clientStubBuild) GetMethodTags(ctx _gen_context.T, method string,
 	return
 }
 
-// ServerStubBuild wraps a server that implements
-// BuildService and provides an object that satisfies
+// ServerStubBuilder wraps a server that implements
+// BuilderService and provides an object that satisfies
 // the requirements of veyron2/ipc.ReflectInvoker.
-type ServerStubBuild struct {
-	service BuildService
+type ServerStubBuilder struct {
+	service BuilderService
 }
 
-func (__gen_s *ServerStubBuild) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
+func (__gen_s *ServerStubBuilder) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
 	// TODO(bprosnitz) GetMethodTags() will be replaces with Signature().
 	// Note: This exhibits some weird behavior like returning a nil error if the method isn't found.
 	// This will change when it is replaced with Signature().
@@ -431,7 +431,7 @@ func (__gen_s *ServerStubBuild) GetMethodTags(call _gen_ipc.ServerCall, method s
 	}
 }
 
-func (__gen_s *ServerStubBuild) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
+func (__gen_s *ServerStubBuilder) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
 	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
 	result.Methods["Build"] = _gen_ipc.MethodSignature{
 		InArgs: []_gen_ipc.MethodArgument{
@@ -473,7 +473,7 @@ func (__gen_s *ServerStubBuild) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Se
 	return result, nil
 }
 
-func (__gen_s *ServerStubBuild) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
+func (__gen_s *ServerStubBuilder) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
 	if unresolver, ok := __gen_s.service.(_gen_ipc.Unresolver); ok {
 		return unresolver.UnresolveStep(call)
 	}
@@ -491,13 +491,13 @@ func (__gen_s *ServerStubBuild) UnresolveStep(call _gen_ipc.ServerCall) (reply [
 	return
 }
 
-func (__gen_s *ServerStubBuild) Build(call _gen_ipc.ServerCall, Arch Architecture, OS OperatingSystem) (reply []byte, err error) {
-	stream := &implBuildServiceBuildStream{reader: implBuildServiceBuildStreamIterator{serverCall: call}, writer: implBuildServiceBuildStreamSender{serverCall: call}}
+func (__gen_s *ServerStubBuilder) Build(call _gen_ipc.ServerCall, Arch Architecture, OS OperatingSystem) (reply []byte, err error) {
+	stream := &implBuilderServiceBuildStream{reader: implBuilderServiceBuildStreamIterator{serverCall: call}, writer: implBuilderServiceBuildStreamSender{serverCall: call}}
 	reply, err = __gen_s.service.Build(call, Arch, OS, stream)
 	return
 }
 
-func (__gen_s *ServerStubBuild) Describe(call _gen_ipc.ServerCall, Name string) (reply binary.Description, err error) {
+func (__gen_s *ServerStubBuilder) Describe(call _gen_ipc.ServerCall, Name string) (reply binary.Description, err error) {
 	reply, err = __gen_s.service.Describe(call, Name)
 	return
 }

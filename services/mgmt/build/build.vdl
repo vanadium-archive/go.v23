@@ -44,8 +44,8 @@ type File struct {
 	Contents []byte
 }
 
-// Build describes an interface for building binaries from source.
-type Build interface {
+// Builder describes an interface for building binaries from source.
+type Builder interface {
 	// Build streams sources to the build server, which then attempts to
 	// build the sources and streams back the compiled binaries.
 	Build(Arch Architecture, OS OperatingSystem) stream<File,File> ([]byte, error)
