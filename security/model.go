@@ -173,6 +173,7 @@ type ThirdPartyDischarge interface {
 	// This identity must match the identity of the corresponding caveat.
 	CaveatID() ThirdPartyCaveatID
 
+	// TODO(ashankar,ataly): Shouldn't this be "Caveats" and not ThirdPartyCaveats?
 	// ThirdPartyCaveats returns the set of third-party restrictions on the scope of the
 	// discharge. The returned restrictions are wrapped in ServiceCaveats according to the
 	// services they are bound to.
