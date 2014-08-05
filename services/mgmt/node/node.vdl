@@ -126,13 +126,13 @@ type Application interface {
 	// instance(s).
 	Start() ([]string, error)
 	// Stop attempts a clean shutdown of application installation(s)
-	// instance(s). If the deadline is non-zero and the instance(s) in
-	// questions are still running after the given deadline, shutdown of
-	// the instance(s) is enforced.
+	// instance(s). If the deadline (in seconds) is non-zero and the
+	// instance(s) in questions are still running after the given deadline,
+	// shutdown of the instance(s) is enforced.
 	//
 	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
 	// are implemented.
-	Stop(Deadline uint64) error
+	Stop(Deadline uint32) error
 	// Suspend suspends execution of application installation(s)
 	// instance(s).
 	Suspend() error
