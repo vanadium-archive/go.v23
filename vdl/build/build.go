@@ -8,6 +8,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"veyron/lib/toposort"
@@ -417,7 +418,7 @@ func TransitivePackages(cmdLineArgs, exts []string, errs *vdlutil.Errors) []*Pac
 }
 
 // ParsePackage parses the given pkg with the given parse opts, and returns a
-// slice of parsed files.  Errors are reported in errs.
+// slice of parsed files, sorted by name.  Errors are reported in errs.
 func ParsePackage(pkg *Package, opts parse.Opts, errs *vdlutil.Errors) (pfiles []*parse.File) {
 	vdlutil.Vlog.Printf("Parsing package %s %q, dir %s", pkg.Name, pkg.Path, pkg.Dir)
 	files, err := pkg.OpenFiles()
@@ -430,9 +431,17 @@ func ParsePackage(pkg *Package, opts parse.Opts, errs *vdlutil.Errors) (pfiles [
 			pfiles = append(pfiles, pf)
 		}
 	}
+	sort.Sort(byBaseName(pfiles))
 	pkg.CloseFiles()
 	return
 }
+
+// byBaseName implements sort.Interface
+type byBaseName []*parse.File
+
+func (b byBaseName) Len() int           { return len(b) }
+func (b byBaseName) Less(i, j int) bool { return b[i].BaseName < b[j].BaseName }
+func (b byBaseName) Swap(i, j int)      { b[i], b[j] = b[j], b[i] }
 
 // CompilePackage parses and compiles the given pkg, updates env with the
 // compiled package and returns it.  Errors are reported in env.
