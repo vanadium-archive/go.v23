@@ -15,7 +15,7 @@ type repBytes []byte
 
 // allZeroBytes is a buffer containing all 0 bytes.  It's used for fast filling
 // of 0 bytes after resizing.
-var allZeroBytes = make([]byte, 1024)
+var allZeroBytes = make(repBytes, 1024)
 
 func copyRepBytes(rep repBytes) repBytes {
 	cp := make(repBytes, len(rep))
@@ -261,68 +261,83 @@ func (rep repMap) Delete(maptype *Type, key *Value) {
 	}
 }
 
-// repFixedLen represents the elements of an array, and the fields of a struct.
-// Both are conceptually fixed-length ordered sequences of values, so we
-// represent them as a slice of values initialized to that fixed length.  Each
-// item is lazily initialized.  The semantics are that nil items are
-// indistinguishable from zero valued items.
-type repFixedLen []*Value
+// repSequence represents the elements of a list and array, and the fields of a
+// struct.  Each value is lazily initialized; the semantics dictate that nil is
+// indistinguishable from zero values.
+//
+// Arrays and structs are initialized to their fixed-length, while lists are
+// initialized to nil.
+type repSequence []*Value
 
-func equalRepFixedLen(a, b repFixedLen) bool {
-	for index := 0; index < len(a); index++ {
-		// Handle cases where we're using nil to represent zero items.
-		switch af, bf := a[index], b[index]; {
-		case af == nil && bf != nil:
-			if !bf.IsZero() {
+func copyRepSequence(rep repSequence) repSequence {
+	if rep == nil {
+		return nil
+	}
+	cp := make(repSequence, len(rep))
+	for index, val := range rep {
+		cp[index] = CopyValue(val)
+	}
+	return cp
+}
+
+func equalRepSequence(a, b repSequence) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for index, aval := range a {
+		// Handle cases where we're using nil to represent zero values.
+		switch bval := b[index]; {
+		case aval == nil && bval != nil:
+			if !bval.IsZero() {
 				return false
 			}
-		case af != nil && bf == nil:
-			if !af.IsZero() {
+		case aval != nil && bval == nil:
+			if !aval.IsZero() {
 				return false
 			}
-		case !EqualValue(af, bf):
+		case !EqualValue(aval, bval):
 			return false
 		}
 	}
 	return true
 }
 
-func (rep repFixedLen) IsZero() bool {
-	for _, item := range rep {
-		if item != nil && !item.IsZero() {
+func (rep repSequence) AllValuesZero() bool {
+	for _, val := range rep {
+		if val != nil && !val.IsZero() {
 			return false
 		}
 	}
 	return true
 }
 
-func (rep repFixedLen) String(t *Type) string {
+func (rep repSequence) String(t *Type) string {
 	s := "{"
-	for index, item := range rep {
+	for index, val := range rep {
 		if index > 0 {
 			s += ", "
 		}
-		itemtype := t.elem
+		valtype := t.elem
 		if t.Kind() == Struct {
-			itemtype = t.fields[index].Type
+			valtype = t.fields[index].Type
 			s += t.fields[index].Name
 			s += ": "
 		}
-		if item == nil {
-			s += stringRep(itemtype, zeroRep(itemtype))
+		if val == nil {
+			s += stringRep(valtype, zeroRep(valtype))
 		} else {
-			s += stringRep(item.t, item.rep)
+			s += stringRep(val.t, val.rep)
 		}
 	}
 	return s + "}"
 }
 
-func (rep repFixedLen) Index(t *Type, index int) *Value {
-	if oldf := rep[index]; oldf != nil {
-		return oldf
+func (rep repSequence) Index(t *Type, index int) *Value {
+	if oldval := rep[index]; oldval != nil {
+		return oldval
 	}
-	// Lazy initialization; create the new item upon first access.
-	newf := ZeroValue(t)
-	rep[index] = newf
-	return newf
+	// Lazy initialization; create the new value upon first access.
+	newval := ZeroValue(t)
+	rep[index] = newval
+	return newval
 }

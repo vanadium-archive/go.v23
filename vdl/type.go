@@ -9,8 +9,9 @@ type Kind uint
 
 const (
 	// Variant kinds
-	Any   Kind = iota // any type
-	OneOf             // one of a set of types
+	Any     Kind = iota // any type
+	OneOf               // one of a set of types
+	Nilable             // value may be nil, indicating it doesn't exist
 	// Scalar kinds
 	Bool       // boolean
 	Byte       // 8 bit unsigned integer
@@ -44,6 +45,8 @@ func (k Kind) String() string {
 		return "any"
 	case OneOf:
 		return "oneof"
+	case Nilable:
+		return "nilable"
 	case Bool:
 		return "bool"
 	case Byte:
@@ -106,7 +109,7 @@ type Type struct {
 	name   string        // used by all kinds
 	labels []string      // used by Enum
 	len    int           // used by Array
-	elem   *Type         // used by Array, List, Map
+	elem   *Type         // used by Nilable, Array, List, Map
 	key    *Type         // used by Set, Map
 	fields []StructField // used by Struct
 	types  []*Type       // used by OneOf
@@ -126,7 +129,12 @@ func (t *Type) Kind() Kind { return t.kind }
 func (t *Type) Name() string { return t.name }
 
 // String returns a human-readable description of type t.
-func (t *Type) String() string { return t.unique }
+func (t *Type) String() string {
+	if t.unique != "" {
+		return t.unique
+	}
+	return uniqueTypeStr(t, make(map[*Type]bool))
+}
 
 // IsBytes returns true iff the kind of type is []byte or [N]byte.
 func (t *Type) IsBytes() bool {
@@ -165,9 +173,9 @@ func (t *Type) Len() int {
 	return t.len
 }
 
-// Elem returns the element type of an Array, List or Map.
+// Elem returns the element type of an Nilable, Array, List or Map.
 func (t *Type) Elem() *Type {
-	t.checkKind("Elem", Array, List, Map)
+	t.checkKind("Elem", Nilable, Array, List, Map)
 	return t.elem
 }
 
@@ -229,9 +237,9 @@ func (t *Type) NumOneOfType() int {
 
 // AssignableFrom returns true iff a value of type t may be assigned from a
 // value of type f.  The following cases are allowed:
-// + The types t and f are identical, or
-// + The type t is Any, or
-// + The type t is OneOf, and f is one of the allowed types in t.
+// + Types t and f are identical, or
+// + Type t is Any, or
+// + Type t is OneOf, and f is one of the types in t.
 func (t *Type) AssignableFrom(f *Type) bool {
 	return t == f || t.kind == Any || (t.kind == OneOf && t.OneOfIndex(f) != -1)
 }

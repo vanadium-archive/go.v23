@@ -93,6 +93,9 @@ func allTypes() (types []*Type) {
 		if test.k != Any && test.k != TypeVal {
 			types = append(types, NamedType("Named"+test.s, test.t))
 		}
+		if test.k != Any {
+			types = append(types, NilableType(test.t))
+		}
 	}
 	for _, test := range enums {
 		if test.errstr == "" {
@@ -115,26 +118,27 @@ func allTypes() (types []*Type) {
 func TestTypeMismatch(t *testing.T) {
 	// Make sure we panic if a method is called for a mismatched kind.
 	for _, ty := range allTypes() {
-		if ty.Kind() != Enum {
+		k := ty.Kind()
+		if k != Enum {
 			expectMismatchedKind(t, func() { ty.EnumLabel(0) })
 			expectMismatchedKind(t, func() { ty.EnumIndex("") })
 			expectMismatchedKind(t, func() { ty.NumEnumLabel() })
 		}
-		if ty.Kind() != Array {
+		if k != Array {
 			expectMismatchedKind(t, func() { ty.Len() })
 		}
-		if ty.Kind() != Array && ty.Kind() != List && ty.Kind() != Map {
+		if k != Nilable && k != Array && k != List && k != Map {
 			expectMismatchedKind(t, func() { ty.Elem() })
 		}
-		if ty.Kind() != Set && ty.Kind() != Map {
+		if k != Set && k != Map {
 			expectMismatchedKind(t, func() { ty.Key() })
 		}
-		if ty.Kind() != Struct {
+		if k != Struct {
 			expectMismatchedKind(t, func() { ty.Field(0) })
 			expectMismatchedKind(t, func() { ty.FieldByName("") })
 			expectMismatchedKind(t, func() { ty.NumField() })
 		}
-		if ty.Kind() != OneOf {
+		if k != OneOf {
 			expectMismatchedKind(t, func() { ty.OneOfType(0) })
 			expectMismatchedKind(t, func() { ty.OneOfIndex(AnyType) })
 			expectMismatchedKind(t, func() { ty.NumOneOfType() })
@@ -142,20 +146,46 @@ func TestTypeMismatch(t *testing.T) {
 	}
 }
 
+func testSingleton(t *testing.T, k Kind, ty *Type, s string) {
+	if got, want := ty.Kind(), k; got != want {
+		t.Errorf(`%s got kind %q, want %q`, k, got, want)
+	}
+	if got, want := ty.Name(), ""; got != want {
+		t.Errorf(`%s got name %q, want %q`, k, got, want)
+	}
+	if got, want := k.String(), s; got != want {
+		t.Errorf(`%s got kind %q, want %q`, k, got, want)
+	}
+	if got, want := ty.String(), s; got != want {
+		t.Errorf(`%s got string %q, want %q`, k, got, want)
+	}
+}
+
 func TestSingletonTypes(t *testing.T) {
 	for _, test := range singletons {
-		if got, want := test.t.Kind(), test.k; got != want {
-			t.Errorf(`%s got kind %q, want %q`, test.k, got, want)
+		testSingleton(t, test.k, test.t, test.s)
+	}
+}
+
+func TestNilableTypes(t *testing.T) {
+	for _, test := range singletons {
+		if test.k == Any {
+			continue
 		}
-		if got, want := test.t.Name(), ""; got != want {
-			t.Errorf(`%s got name %q, want %q`, test.k, got, want)
+		nilable := NilableType(test.t)
+		if got, want := nilable.Kind(), Nilable; got != want {
+			t.Errorf(`%s got kind %q, want %q`, nilable, got, want)
 		}
-		if got, want := test.k.String(), test.s; got != want {
-			t.Errorf(`%s got kind %q, want %q`, test.k, got, want)
+		if got, want := nilable.Name(), ""; got != want {
+			t.Errorf(`%s got name %q, want %q`, nilable, got, want)
 		}
-		if got, want := test.t.String(), test.s; got != want {
-			t.Errorf(`%s got string %q, want %q`, test.k, got, want)
+		if got, want := Nilable.String(), "nilable"; got != want {
+			t.Errorf(`%s got kind %q, want %q`, nilable, got, want)
 		}
+		if got, want := nilable.String(), "?"+test.s; got != want {
+			t.Errorf(`%s got string %q, want %q`, nilable, got, want)
+		}
+		testSingleton(t, test.k, nilable.Elem(), test.s)
 	}
 }
 
@@ -538,6 +568,10 @@ func TestHashConsTypes(t *testing.T) {
 			if a.t != AnyType && a.t != TypeValType {
 				types[iter] = append(types[iter], NamedType("Named"+a.s, a.t))
 			}
+			if a.t != AnyType {
+				types[iter] = append(types[iter], NilableType(a.t))
+				types[iter] = append(types[iter], NamedType("Nilable"+a.s, NilableType(a.t)))
+			}
 			types[iter] = append(types[iter], ListType(a.t))
 			types[iter] = append(types[iter], NamedType("List"+a.s, ListType(a.t)))
 			for _, b := range singletons {
@@ -580,16 +614,25 @@ func TestAssignableFrom(t *testing.T) {
 		expect bool
 	}{
 		{BoolType, BoolType, true},
+		{NilableType(BoolType), NilableType(BoolType), true},
 		{AnyType, BoolType, true},
-		{OneOfType(BoolType, Int32Type), BoolType, true},
-		{OneOfType(BoolType, Int32Type), Int32Type, true},
+		{AnyType, NilableType(BoolType), true},
+		{AnyType, OneOfType(BoolType, Int32Type), true},
+		{OneOfType(BoolType, NilableType(Int32Type)), BoolType, true},
+		{OneOfType(BoolType, NilableType(Int32Type)), NilableType(Int32Type), true},
 
 		{BoolType, Int32Type, false},
 		{BoolType, AnyType, false},
+		{BoolType, NilableType(BoolType), false},
 		{BoolType, OneOfType(BoolType), false},
 		{BoolType, OneOfType(BoolType, Int32Type), false},
+		{OneOfType(BoolType), NilableType(BoolType), false},
 		{OneOfType(BoolType), StringType, false},
 		{OneOfType(BoolType, Int32Type), StringType, false},
+		{NilableType(BoolType), BoolType, false},
+		{NilableType(BoolType), StringType, false},
+		{NilableType(OneOfType(BoolType)), NilableType(BoolType), false},
+		{OneOfType(NilableType(BoolType)), BoolType, false},
 	}
 	for _, test := range tests {
 		if test.t.AssignableFrom(test.f) != test.expect {
@@ -865,11 +908,9 @@ func TestUniqueTypeNames(t *testing.T) {
 func makeAllPending(builder *TypeBuilder) []PendingType {
 	var ret []PendingType
 	for _, test := range singletons {
-		switch test.k {
-		case Any, TypeVal:
-			continue // can't name Any or TypeVal
+		if test.k != Any && test.k != TypeVal {
+			ret = append(ret, builder.Named("Named"+test.s).AssignBase(test.t))
 		}
-		ret = append(ret, builder.Named("Named"+test.s).AssignBase(test.t))
 	}
 	for _, test := range enums {
 		if test.errstr == "" {

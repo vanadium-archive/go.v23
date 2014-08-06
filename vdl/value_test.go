@@ -65,7 +65,7 @@ func TestValue(t *testing.T) {
 		{Map, MapType(StringType, Int64Type), "map[string]int64{}"},
 		{Map, MapType(keyType, Int64Type), "map[struct{I int64;S string}]int64{}"},
 		{Struct, StructType([]StructField{{"A", Int64Type}, {"B", StringType}, {"C", BoolType}}...), `struct{A int64;B string;C bool}{A: 0, B: "", C: false}`},
-		{OneOf, OneOfType(Int64Type, StringType), "oneof{int64;string}(nil)"},
+		{OneOf, OneOfType(Int64Type, StringType), "oneof{int64;string}(int64(0))"},
 		{Any, AnyType, "any(nil)"},
 	}
 	for _, test := range tests {
@@ -75,6 +75,9 @@ func TestValue(t *testing.T) {
 		}
 		if !x.IsZero() {
 			t.Errorf(`ZeroValue(%s) isn't zero`, test.k)
+		}
+		if test.k == Any && !x.IsNil() {
+			t.Errorf(`ZeroValue(Any) isn't nil`)
 		}
 		if got, want := x.Kind(), test.k; got != want {
 			t.Errorf(`ZeroValue(%s) got kind %v, want %v`, test.k, got, want)
@@ -91,6 +94,9 @@ func TestValue(t *testing.T) {
 		}
 		if !y.IsZero() {
 			t.Errorf(`ZeroValue(%s) of copy isn't zero, y: %v`, test.k, y)
+		}
+		if test.k == Any && !y.IsNil() {
+			t.Errorf(`ZeroValue(Any) of copy isn't nil`)
 		}
 		if !EqualValue(x, y) {
 			t.Errorf(`ZeroValue(%s) !Equal after copy, x: %v, y: %v`, test.k, x, y)
@@ -112,7 +118,8 @@ func TestValue(t *testing.T) {
 		assignSet(t, x)
 		assignMap(t, x)
 		assignStruct(t, x)
-		assignOneOfAny(t, x)
+		assignOneOf(t, x)
+		assignAny(t, x)
 
 		// Invariant here: x != 0 && y == 0
 		if EqualValue(x, y) {
@@ -128,30 +135,80 @@ func TestValue(t *testing.T) {
 
 		z.Assign(nil) // x != 0 && y == z == 0
 		if !z.IsValid() {
-			t.Errorf(`ZeroValue(%s) z after Assign(nil) isn't valid`, test.k)
+			t.Errorf(`%s z after Assign(nil) isn't valid`, test.k)
 		}
 		if !z.IsZero() {
-			t.Errorf(`ZeroValue(%s) z after Assign(nil) isn't zero`, test.k)
+			t.Errorf(`%s z after Assign(nil) isn't zero`, test.k)
+		}
+		if test.k == Any && !z.IsNil() {
+			t.Errorf(`Any z after Assign(nil) isn't nil`)
 		}
 		if EqualValue(x, z) {
-			t.Errorf(`ZeroValue(%s) Equal after Assign(nil), x: %v, z: %v`, test.k, x, z)
+			t.Errorf(`%s Equal after Assign(nil), x: %v, z: %v`, test.k, x, z)
 		}
 		if !EqualValue(y, z) {
-			t.Errorf(`ZeroValue(%s) !Equal after Assign(nil), y: %v, z: %v`, test.k, y, z)
+			t.Errorf(`%s !Equal after Assign(nil), y: %v, z: %v`, test.k, y, z)
 		}
 
 		y.Assign(x) // x == y && x != 0 && z == 0
 		if !y.IsValid() {
-			t.Errorf(`ZeroValue(%s) y after Assign(x) isn't valid`, test.k)
+			t.Errorf(`%s y after Assign(x) isn't valid`, test.k)
 		}
 		if y.IsZero() {
-			t.Errorf(`ZeroValue(%s) y after Assign(x) is zero, y: %v`, test.k, y)
+			t.Errorf(`%s y after Assign(x) is zero, y: %v`, test.k, y)
+		}
+		if y.IsNil() {
+			t.Errorf(`%s y after Assign(x) is nil, y: %v`, test.k, y)
 		}
 		if !EqualValue(x, y) {
-			t.Errorf(`ZeroValue(%s) Equal after Assign(x), x: %v, y: %v`, test.k, x, y)
+			t.Errorf(`%s Equal after Assign(x), x: %v, y: %v`, test.k, x, y)
 		}
 		if EqualValue(y, z) {
-			t.Errorf(`ZeroValue(%s) Equal after Assign(x), y: %v, z: %v`, test.k, y, z)
+			t.Errorf(`%s Equal after Assign(x), y: %v, z: %v`, test.k, y, z)
+		}
+
+		// Test nilable types
+		if test.k == Any {
+			continue
+		}
+		ntype := NilableType(test.t)
+
+		// nx == nil
+		nx := ZeroValue(ntype)
+		if !nx.IsValid() {
+			t.Errorf(`!ZeroValue(?%s).IsValid`, test.k)
+		}
+		if !nx.IsZero() {
+			t.Errorf(`ZeroValue(?%s) isn't zero`, test.k)
+		}
+		if !nx.IsNil() {
+			t.Errorf(`ZeroValue(?%s) isn't nil`, test.k)
+		}
+		if got, want := nx.Kind(), Nilable; got != want {
+			t.Errorf(`ZeroValue(?%s) got kind %v, want %v`, test.k, got, want)
+		}
+		if got, want := nx.Type(), ntype; got != want {
+			t.Errorf(`ZeroValue(?%s) got type %v, want %v`, test.k, got, want)
+		}
+		if got, want := nx.String(), ntype.String()+"(nil)"; got != want {
+			t.Errorf(`ZeroValue(?%s) got string %q, want %q`, test.k, got, want)
+		}
+		// ny != nil
+		ny := NonNilZeroValue(ntype)
+		if !ny.IsValid() {
+			t.Errorf(`!NonNilZeroValue(?%s).IsValid`, test.k)
+		}
+		if ny.IsZero() {
+			t.Errorf(`NonNilZeroValue(?%s) is zero`, test.k)
+		}
+		if ny.IsNil() {
+			t.Errorf(`NonNilZeroValue(?%s) is nil`, test.k)
+		}
+		if got, want := ny.Kind(), Nilable; got != want {
+			t.Errorf(`NonNilZeroValue(?%s) got kind %v, want %v`, test.k, got, want)
+		}
+		if got, want := ny.Type(), ntype; got != want {
+			t.Errorf(`NonNilZeroValue(?%s) got type %v, want %v`, test.k, got, want)
 		}
 	}
 }
@@ -781,30 +838,50 @@ func assignStruct(t *testing.T, x *Value) {
 	}
 }
 
-func assignOneOfAny(t *testing.T, x *Value) {
-	if x.Kind() == OneOf || x.Kind() == Any {
-		typestr := "any"
-		if x.Kind() == OneOf {
-			typestr = "oneof{int64;string}"
-		}
-		if got := x.Elem(); got != nil {
-			t.Errorf(`OneOf/Any zero value got %v, want nil`, got)
+func assignOneOf(t *testing.T, x *Value) {
+	if x.Kind() == OneOf {
+		if got, want := x.Elem(), Int64Value(0); !EqualValue(got, want) {
+			t.Errorf(`OneOf zero value got %v, want %v`, got, want)
 		}
 		x.Assign(int1)
 		if got, want := x.Elem(), int1; !EqualValue(got, want) {
-			t.Errorf(`OneOf/Any assign value got %v, want %v`, got, want)
+			t.Errorf(`OneOf assign value got %v, want %v`, got, want)
 		}
-		if got, want := x.String(), fmt.Sprintf("%s(int64(1))", typestr); got != want {
-			t.Errorf(`OneOf/Any assign string got %v, want %v`, got, want)
+		if got, want := x.String(), "oneof{int64;string}(int64(1))"; got != want {
+			t.Errorf(`OneOf assign string got %v, want %v`, got, want)
 		}
 		x.Assign(strA)
 		if got, want := x.Elem(), strA; !EqualValue(got, want) {
-			t.Errorf(`OneOf/Any assign value got %v, want %v`, got, want)
+			t.Errorf(`OneOf assign value got %v, want %v`, got, want)
 		}
-		if got, want := x.String(), fmt.Sprintf(`%s(string("A"))`, typestr); got != want {
-			t.Errorf(`OneOf/Any assign string got %v, want %v`, got, want)
+		if got, want := x.String(), `oneof{int64;string}(string("A"))`; got != want {
+			t.Errorf(`OneOf assign string got %v, want %v`, got, want)
 		}
-	} else {
+	} else if x.Kind() != Any && x.Kind() != Nilable {
+		expectMismatchedKind(t, func() { x.Elem() })
+	}
+}
+
+func assignAny(t *testing.T, x *Value) {
+	if x.Kind() == Any {
+		if got := x.Elem(); got != nil {
+			t.Errorf(`Any zero value got %v, want nil`, got)
+		}
+		x.Assign(int1)
+		if got, want := x.Elem(), int1; !EqualValue(got, want) {
+			t.Errorf(`Any assign value got %v, want %v`, got, want)
+		}
+		if got, want := x.String(), "any(int64(1))"; got != want {
+			t.Errorf(`Any assign string got %v, want %v`, got, want)
+		}
+		x.Assign(strA)
+		if got, want := x.Elem(), strA; !EqualValue(got, want) {
+			t.Errorf(`Any assign value got %v, want %v`, got, want)
+		}
+		if got, want := x.String(), `any(string("A"))`; got != want {
+			t.Errorf(`Any assign string got %v, want %v`, got, want)
+		}
+	} else if x.Kind() != OneOf && x.Kind() != Nilable {
 		expectMismatchedKind(t, func() { x.Elem() })
 	}
 }

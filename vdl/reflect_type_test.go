@@ -337,13 +337,23 @@ func allTests() []rtTest {
 	copy(tests[n:], rtNonKeyTests)
 	// Add all types we can generate via reflect; no arrays and structs.
 	for _, test := range rtKeyTests {
-		tests = append(tests, rtTest{reflect.PtrTo(test.rt), test.t})
+		switch test.t.Kind() {
+		case Any, TypeVal, Nilable:
+			tests = append(tests, rtTest{reflect.PtrTo(test.rt), test.t})
+		default:
+			tests = append(tests, rtTest{reflect.PtrTo(test.rt), NilableType(test.t)})
+		}
 		tests = append(tests, rtTest{reflect.SliceOf(test.rt), ListType(test.t)})
 		tests = append(tests, rtTest{reflect.MapOf(test.rt, test.rt), MapType(test.t, test.t)})
 	}
 	// Now generate types from everything we have so far, for more complicated subtypes.
 	for _, test := range tests {
-		tests = append(tests, rtTest{reflect.PtrTo(test.rt), test.t})
+		switch test.t.Kind() {
+		case Any, TypeVal, Nilable:
+			tests = append(tests, rtTest{reflect.PtrTo(test.rt), test.t})
+		default:
+			tests = append(tests, rtTest{reflect.PtrTo(test.rt), NilableType(test.t)})
+		}
 		tests = append(tests, rtTest{reflect.SliceOf(test.rt), ListType(test.t)})
 		for _, key := range rtKeyTests {
 			// Only generate maps with valid keys.
@@ -379,11 +389,11 @@ type rtErrorTest struct {
 
 var rtErrorTests = []rtErrorTest{
 	{reflect.Type(nil), `invalid val.TypeOf(nil)`},
-	{reflect.TypeOf(make(chan int)), `type "chan int" not supported`},
+	{reflect.TypeOf(make(chan int64)), `type "chan int64" not supported`},
 	{reflect.TypeOf(func() {}), `type "func()" not supported`},
 	{reflect.TypeOf(unsafe.Pointer(uintptr(0))), `type "unsafe.Pointer" not supported`},
-	{reflect.TypeOf(map[*int]int{}), `type "map[*int]int" has pointer keys`},
-	{reflect.TypeOf(struct{ a int }{}), `type "struct { a int }" only has unexported fields`},
+	{reflect.TypeOf(map[*int64]string{}), `invalid nilable key "?int64"`},
+	{reflect.TypeOf(struct{ a int64 }{}), `type "struct { a int64 }" only has unexported fields`},
 }
 
 func allErrorTests() []rtErrorTest {

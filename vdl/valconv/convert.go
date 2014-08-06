@@ -34,14 +34,15 @@ var (
 
 // compatible returns true if types a and b are compatible with each other.
 // Type compatibility is a lower threshold than value convertibility; values of
-// incompatible types are never convertible, but values of compatible types may
-// be inconvertible.  E.g. float32 and byte are compatible, and float32(1.0) is
-// convertible with byte(1), but float32(-1.0) is not convertible with any byte
-// value.
+// incompatible types are never convertible, while values of compatible types
+// might not be convertible.  E.g. float32 and byte are compatible, and
+// float32(1.0) is convertible with byte(1), but float32(-1.0) is not
+// convertible with any byte value.
 //
 // Compatibility is commutative.  The basic rules:
+//   o Nilability is ignored for all rules (e.g. ?int is compatible with int).
 //   o Bool is only compatible with bool.
-//   o TypeVal is only compatible with TypeVdl.
+//   o TypeVal is only compatible with TypeVal.
 //   o Numbers are mutually compatible.
 //   o String, enum, []byte and [N]byte are mutually compatible.
 //   o Array and list are compatible if their elems are compatible.
@@ -66,6 +67,12 @@ var (
 // checking.  This seems fine in practice since type compatibility is weaker
 // than value convertibility, and since recursive types are not common.
 func compatible(a, b *vdl.Type) bool {
+	if a.Kind() == vdl.Nilable {
+		a = a.Elem()
+	}
+	if b.Kind() == vdl.Nilable {
+		b = b.Elem()
+	}
 	key := compatKey(a, b)
 	if compat, ok := compatCache.lookup(key); ok {
 		return compat
@@ -114,6 +121,12 @@ func (reg compatRegistry) update(key [2]*vdl.Type, compat bool) {
 
 // compat is a recursive helper that implements compatible.
 func compat(a, b *vdl.Type, seenA, seenB map[*vdl.Type]bool) bool {
+	if a.Kind() == vdl.Nilable {
+		a = a.Elem()
+	}
+	if b.Kind() == vdl.Nilable {
+		b = b.Elem()
+	}
 	if a == b || seenA[a] || seenB[b] {
 		return true
 	}
@@ -343,14 +356,15 @@ func extractValue(rv reflect.Value) *vdl.Value {
 // the final value to assign to, and fill represents the value to actually fill
 // in.
 func startConvert(c convTarget, tt *vdl.Type) (fin, fill convTarget, _ error) {
-	if tt.Kind() == vdl.Any || tt.Kind() == vdl.OneOf {
-		return convTarget{}, convTarget{}, fmt.Errorf("variant type %q used as conversion src", tt)
+	switch tt.Kind() {
+	case vdl.Any, vdl.OneOf, vdl.Nilable:
+		return convTarget{}, convTarget{}, fmt.Errorf("variant or nilable type %q used as conversion src", tt)
 	}
 	if !compatible(c.tt, tt) {
 		return convTarget{}, convTarget{}, fmt.Errorf("types %q and %q aren't compatible", c.tt, tt)
 	}
 	if c.vv == nil {
-		// Walk pointers down to their base value, creating new values as necessary.
+		// Flatten pointers, creating new values as necessary.
 		for c.rv.Kind() == reflect.Ptr {
 			if c.rv.Type().Elem() == rtValue {
 				// c.rv has underlying type *vdl.Value, fill from it directly.
@@ -370,6 +384,9 @@ func startConvert(c convTarget, tt *vdl.Type) (fin, fill convTarget, _ error) {
 			}
 			c.rv = c.rv.Elem()
 		}
+		if c.tt.Kind() == vdl.Nilable {
+			c.tt = c.tt.Elem() // flatten c.tt to match c.rv
+		}
 		switch c.rv.Kind() {
 		case reflect.Interface:
 			// Create a concrete *vdl.Value to convert to, which will be assigned to
@@ -384,6 +401,13 @@ func startConvert(c convTarget, tt *vdl.Type) (fin, fill convTarget, _ error) {
 			c.rv.Set(reflect.Zero(c.rv.Type())) // start with zero collections
 		}
 	} else {
+		// Flatten nilable, creating non-nil values as necessary.
+		if c.vv.Kind() == vdl.Nilable {
+			if c.vv.IsNil() {
+				c.vv.Assign(vdl.NonNilZeroValue(c.tt))
+			}
+			c.tt, c.vv = c.tt.Elem(), c.vv.Elem()
+		}
 		switch c.vv.Kind() {
 		case vdl.Any, vdl.OneOf:
 			if !c.tt.AssignableFrom(tt) {
@@ -512,8 +536,18 @@ func (c convTarget) FromTypeVal(src *vdl.Type) error {
 
 // FromNil implements the Target interface method.
 func (c convTarget) FromNil(tt *vdl.Type) error {
-	// TODO(toddw): Is this right?
-	return FromValue(c, vdl.ZeroValue(tt))
+	// Only perform type-checking; assume the target starts at its zero value.
+	//
+	// TODO(toddw): Consider setting the target to nil, so that non-zero targets
+	// are set correctly.  If we do this we'll also need to reset all struct
+	// fields before conversion.
+	switch tt.Kind() {
+	case vdl.Any, vdl.Nilable:
+		if compatible(c.tt, tt) {
+			return nil
+		}
+	}
+	return fmt.Errorf("invalid conversion from nil %v to %v", tt, c.tt)
 }
 
 func (c convTarget) fromBool(src bool) error {

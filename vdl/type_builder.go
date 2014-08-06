@@ -15,6 +15,7 @@ var (
 	errHasLabels      = errors.New("labels only valid for enum")
 	errLenZero        = errors.New("negative or zero array length")
 	errLenNonZero     = errors.New("length only valid for array")
+	errNilableElemBad = errors.New("nilable elem type must not be nilable or any")
 	errElemNil        = errors.New("nil elem type")
 	errElemNonNil     = errors.New("elem only valid for array, list and map")
 	errKeyNil         = errors.New("nil key type")
@@ -73,6 +74,14 @@ type PendingType interface {
 	// pending type has a build error, Built returns a nil type for all pending
 	// types, and returns non-nil errors for at least one pending type.
 	Built() (*Type, error)
+}
+
+// PendingNilable represents an Nilable type that is being built.  Given a base
+// type that is non-nilable, you can build a new type that is nilable.
+type PendingNilable interface {
+	PendingType
+	// AssignBase assigns the Nilable base type.
+	AssignBase(base TypeOrPending) PendingNilable
 }
 
 // PendingEnum represents an Enum type that is being built.
@@ -157,15 +166,21 @@ type (
 	// Each pending object holds a *Type that it fills in as the user calls
 	// methods to describe the type.  When Build is called, the type is
 	// hash-consed to the final result.
-	pendingEnum   struct{ *pending }
-	pendingArray  struct{ *pending }
-	pendingList   struct{ *pending }
-	pendingSet    struct{ *pending }
-	pendingMap    struct{ *pending }
-	pendingStruct struct{ *pending }
-	pendingOneOf  struct{ *pending }
-	pendingNamed  struct{ *pending }
+	pendingNilable struct{ *pending }
+	pendingEnum    struct{ *pending }
+	pendingArray   struct{ *pending }
+	pendingList    struct{ *pending }
+	pendingSet     struct{ *pending }
+	pendingMap     struct{ *pending }
+	pendingStruct  struct{ *pending }
+	pendingOneOf   struct{ *pending }
+	pendingNamed   struct{ *pending }
 )
+
+func (p pendingNilable) AssignBase(base TypeOrPending) PendingNilable {
+	p.elem = base.ptype()
+	return p
+}
 
 func (p pendingEnum) AppendLabel(label string) PendingEnum {
 	p.labels = append(p.labels, label)
@@ -261,6 +276,11 @@ func (b *TypeBuilder) add(t *Type) *pending {
 	return p
 }
 
+// Nilable returns PendingNilable, used to describe an Nilable type.
+func (b *TypeBuilder) Nilable() PendingNilable {
+	return pendingNilable{b.add(&Type{kind: Nilable})}
+}
+
 // Enum returns PendingEnum, used to describe an Enum type.
 func (b *TypeBuilder) Enum() PendingEnum {
 	return pendingEnum{b.add(&Type{kind: Enum})}
@@ -313,7 +333,7 @@ func (b *TypeBuilder) Build() bool {
 	}
 	// Now enforce the rule that type names are unique.  This must occur before we
 	// hash cons anything, to catch tricky cases where hash consing is difficult.
-	// See uniqueType for more info.
+	// See uniqueTypeStr for more info.
 	names := make(map[string]*Type)
 	for _, p := range b.ptypes {
 		if err := enforceUniqueNames(p.Type, names); err != nil && p.err == nil {
@@ -349,8 +369,7 @@ func (p *pending) finalize() error {
 		// p.Type, keeping the name of p.Type.
 		name, base := p.Type.name, p.Type.elem
 		if name == "" {
-			baseDesc := uniqueType(base, make(map[*Type]bool))
-			return fmt.Errorf("PendingNamed used to build unnamed type based on %v", baseDesc)
+			return fmt.Errorf("PendingNamed used to build unnamed type based on %v", base)
 		}
 		// There may be a chain of named types, in which case we'll need to follow
 		// the chain to the first type that's not internalNamed.
@@ -368,6 +387,7 @@ func (p *pending) finalize() error {
 		}
 		*p.Type = *base
 		p.Type.name = name
+		p.Type.unique = ""
 	}
 	return nil
 }
@@ -383,6 +403,13 @@ func checkedBuild(b TypeBuilder, p PendingType) *Type {
 		panic(err)
 	}
 	return t
+}
+
+// NilableType is a helper using TypeBuilder to create a single Nilable type.
+// Panics on all errors.
+func NilableType(base *Type) *Type {
+	var b TypeBuilder
+	return checkedBuild(b, b.Nilable().AssignBase(base))
 }
 
 // EnumType is a helper using TypeBuilder to create a single Enum type.
@@ -461,9 +488,7 @@ func enforceUniqueNames(t *Type, names map[string]*Type) error {
 	}
 	if found := names[t.name]; found != nil {
 		if found != t {
-			one := uniqueType(found, make(map[*Type]bool))
-			two := uniqueType(t, make(map[*Type]bool))
-			return fmt.Errorf("duplicate type names %q and %q", one, two)
+			return fmt.Errorf("duplicate type names %q and %q", found, t)
 		}
 		return nil
 	}
@@ -488,7 +513,7 @@ func enforceUniqueNames(t *Type, names map[string]*Type) error {
 	return nil
 }
 
-// uniqueType returns a unique string representing t, which is also its
+// uniqueTypeStr returns a unique string representing t, which is also its
 // human-readable representation.  Invariant: two types A and B have the same
 // unique string iff they are equal, even if they haven't been hash-consed yet.
 //
@@ -512,7 +537,7 @@ func enforceUniqueNames(t *Type, names map[string]*Type) error {
 // contents of each type node.  The seen map breaks infinite loops from
 // recursive types.  Since type cycles may only be created via named types, we
 // keep track of seen types and only dump their names.
-func uniqueType(t *Type, seen map[*Type]bool) string {
+func uniqueTypeStr(t *Type, seen map[*Type]bool) string {
 	if seen[t] && t.name != "" {
 		return t.name
 	}
@@ -522,23 +547,25 @@ func uniqueType(t *Type, seen map[*Type]bool) string {
 		s += " "
 	}
 	switch t.kind {
+	case Nilable:
+		return s + "?" + uniqueTypeStr(t.elem, seen)
 	case Enum:
 		return s + "enum{" + strings.Join(t.labels, ";") + "}"
 	case Array:
-		return s + "[" + strconv.Itoa(t.len) + "]" + uniqueType(t.elem, seen)
+		return s + "[" + strconv.Itoa(t.len) + "]" + uniqueTypeStr(t.elem, seen)
 	case List:
-		return s + "[]" + uniqueType(t.elem, seen)
+		return s + "[]" + uniqueTypeStr(t.elem, seen)
 	case Set:
-		return s + "set[" + uniqueType(t.key, seen) + "]"
+		return s + "set[" + uniqueTypeStr(t.key, seen) + "]"
 	case Map:
-		return s + "map[" + uniqueType(t.key, seen) + "]" + uniqueType(t.elem, seen)
+		return s + "map[" + uniqueTypeStr(t.key, seen) + "]" + uniqueTypeStr(t.elem, seen)
 	case Struct:
 		s += "struct{"
 		for index, f := range t.fields {
 			if index > 0 {
 				s += ";"
 			}
-			s += f.Name + " " + uniqueType(f.Type, seen)
+			s += f.Name + " " + uniqueTypeStr(f.Type, seen)
 		}
 		return s + "}"
 	case OneOf:
@@ -547,7 +574,7 @@ func uniqueType(t *Type, seen map[*Type]bool) string {
 			if index > 0 {
 				s += ";"
 			}
-			s += uniqueType(one, seen)
+			s += uniqueTypeStr(one, seen)
 		}
 		return s + "}"
 	default:
@@ -579,7 +606,9 @@ func typeConsLocked(t *Type) *Type {
 		return nil
 	}
 	// Look for the type in our registry, based on its unique string.
-	t.unique = uniqueType(t, make(map[*Type]bool))
+	if t.unique == "" {
+		t.unique = uniqueTypeStr(t, make(map[*Type]bool))
+	}
 	if found := typeReg[t.unique]; found != nil {
 		return found
 	}
@@ -589,11 +618,11 @@ func typeConsLocked(t *Type) *Type {
 	typeReg[t.unique] = t
 	t.elem = typeConsLocked(t.elem)
 	t.key = typeConsLocked(t.key)
-	for x := range t.fields {
-		t.fields[x].Type = typeConsLocked(t.fields[x].Type)
+	for index := range t.fields {
+		t.fields[index].Type = typeConsLocked(t.fields[index].Type)
 	}
-	for x := range t.types {
-		t.types[x] = typeConsLocked(t.types[x])
+	for index := range t.types {
+		t.types[index] = typeConsLocked(t.types[index])
 	}
 	return t
 }
@@ -633,6 +662,16 @@ func validType(t *Type, seen map[*Type]bool) error {
 		if t.elem == nil {
 			return errElemNil
 		}
+	case Nilable:
+		if t.elem == nil {
+			return errElemNil
+		}
+		switch t.elem.kind {
+		case Nilable, Any:
+			// Disallow ?? since the concept doesn't seem useful.
+			// Disallow ?any to avoid confusion, since any already has a nil value.
+			return errNilableElemBad
+		}
 	default:
 		if t.elem != nil {
 			return errElemNonNil
@@ -668,7 +707,7 @@ func validType(t *Type, seen map[*Type]bool) error {
 	// Check fields
 	switch t.kind {
 	case Struct:
-		seen := make(map[string]bool, len(t.fields))
+		seenFields := make(map[string]bool, len(t.fields))
 		for _, f := range t.fields {
 			if f.Type == nil {
 				return errFieldTypeNil
@@ -676,10 +715,10 @@ func validType(t *Type, seen map[*Type]bool) error {
 			if f.Name == "" {
 				return errFieldNameEmpty
 			}
-			if seen[f.Name] {
+			if seenFields[f.Name] {
 				return fmt.Errorf("struct %q has duplicate field name %q", t.name, f.Name)
 			}
-			seen[f.Name] = true
+			seenFields[f.Name] = true
 		}
 	default:
 		if len(t.fields) > 0 {
@@ -692,15 +731,21 @@ func validType(t *Type, seen map[*Type]bool) error {
 		if len(t.types) == 0 {
 			return errNoTypes
 		}
-		seen := make(map[string]bool, len(t.types))
-		for _, u := range t.types {
-			if err := ValidOneOfType(u); err != nil {
+		seenTypes := make(map[string]bool, len(t.types))
+		for _, one := range t.types {
+			if err := ValidOneOfType(one); err != nil {
 				return err
 			}
-			if seen[u.unique] {
-				return fmt.Errorf("duplicate oneof type: %s", u.unique)
+			// Each type may only occur once in the set, in either its nilable or
+			// non-nilable form.
+			if one.kind == Nilable {
+				one = one.elem
 			}
-			seen[u.unique] = true
+			unique := uniqueTypeStr(one, make(map[*Type]bool))
+			if seenTypes[unique] {
+				return fmt.Errorf("duplicate oneof type: %s", unique)
+			}
+			seenTypes[unique] = true
 		}
 	default:
 		if len(t.types) > 0 {
@@ -732,6 +777,9 @@ func ValidKey(key *Type) error {
 	if key == nil {
 		return errKeyNil
 	}
+	if key.kind == Nilable {
+		return fmt.Errorf("invalid nilable key %q", key)
+	}
 	// TODO(toddw): Disallow lists, maps, etc?  Also consider that JSON /
 	// javascript only supports string keys, and doesn't have good support for
 	// object keys.
@@ -743,6 +791,5 @@ func ValidOneOfType(t *Type) error {
 	if t == nil || t.kind == OneOf || t.kind == Any {
 		return errOneOfTypeBad
 	}
-	// TODO(toddw): Disallow primitives?
 	return nil
 }

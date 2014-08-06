@@ -2,21 +2,15 @@ package vdl
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"strconv"
 )
 
-// TODO(toddw): Consider changing the representation to separate read-only and
-// assignable values.  The motivation would be to avoid heap allocations;
-// e.g. the representation of slices would be []Value rather than []*Value.
-// This might give us better performance.  But this might not be good - we can
-// only assign inner values if we have an assigner for the outer value.
-//   func Zero(t *Type) Value
-//   type Assigner struct { v *Value }
-//   func (a Assigner) Assign(x Assigner)
-//   func (a Assigner) AssignBool(x bool)
-//   func (a Assigner) AssignByte(x byte)
-//   ... etc ...
+var (
+	errNilType       = errors.New("nil type")
+	errNonNilZeroAny = errors.New("any has an unknown non-nil zero value")
+)
 
 // Value is the generic representation of any value expressible in veyron.  All
 // values are typed.
@@ -63,17 +57,18 @@ func zeroRep(t *Type) interface{} {
 		return enumIndex(0)
 	case TypeVal:
 		return zeroTypeVal
+	case Array:
+		return make(repSequence, t.len)
 	case List:
-		return make([]*Value, 0)
+		return repSequence(nil)
 	case Set, Map:
 		return zeroRepMap(t.key)
-	case Array:
-		return make(repFixedLen, t.len)
 	case Struct:
-		return make(repFixedLen, len(t.fields))
-	case OneOf, Any:
-		// The nil value represents non-existence.
-		return (*Value)(nil)
+		return make(repSequence, len(t.fields))
+	case Any, Nilable:
+		return (*Value)(nil) // nil represents nonexistence
+	case OneOf:
+		return ZeroValue(t.types[0])
 	default:
 		panic(fmt.Errorf("val: unhandled kind: %v", t.kind))
 	}
@@ -97,54 +92,47 @@ func isZeroRep(t *Type, rep interface{}) bool {
 		return trep == 0
 	case *Type:
 		return trep == zeroTypeVal
-	case []*Value:
-		return len(trep) == 0
 	case repBytes:
 		return trep.IsZero(t)
 	case *byte:
 		return *trep == 0
 	case repMap:
 		return trep.Len() == 0
-	case repFixedLen:
-		return trep.IsZero()
+	case repSequence:
+		switch t.Kind() {
+		case List:
+			return len(trep) == 0
+		case Array, Struct:
+			return trep.AllValuesZero()
+		}
 	case *Value:
-		return trep == nil
-	default:
-		panic(fmt.Errorf("val: isZeroRep unhandled %v %T %v", t, rep, rep))
+		switch t.Kind() {
+		case Any, Nilable:
+			return trep == nil
+		case OneOf:
+			return trep.t == t.types[0] && trep.IsZero()
+		}
 	}
+	panic(fmt.Errorf("val: isZeroRep unhandled %v %T %v", t, rep, rep))
 }
 
-// copyRep returns a copy of v.rep.
-func copyRep(v *Value) interface{} {
-	switch trep := v.rep.(type) {
-	case bool, uint64, int64, float64, complex128, string, *Type, enumIndex:
+func copyRep(t *Type, rep interface{}) interface{} {
+	switch trep := rep.(type) {
+	case bool, uint64, int64, float64, complex128, string, enumIndex, *Type:
 		return trep
-	case []*Value:
-		return copySliceOfValues(trep)
 	case repBytes:
 		return copyRepBytes(trep)
 	case *byte:
 		return uint64(*trep) // convert to standard uint64 representation
 	case repMap:
 		return copyRepMap(trep)
-	case repFixedLen:
-		return repFixedLen(copySliceOfValues(trep))
+	case repSequence:
+		return copyRepSequence(trep)
 	case *Value:
-		if trep != nil {
-			return CopyValue(trep)
-		}
-		return (*Value)(nil)
+		return CopyValue(trep)
 	default:
-		panic(fmt.Errorf("val: copyRep unhandled %v %T %v", v.t.kind, v.rep, v.rep))
+		panic(fmt.Errorf("val: copyRep unhandled %v %T %v", t.kind, rep, rep))
 	}
-}
-
-func copySliceOfValues(orig []*Value) []*Value {
-	slice := make([]*Value, len(orig))
-	for ix := 0; ix < len(orig); ix++ {
-		slice[ix] = CopyValue(orig[ix])
-	}
-	return slice
 }
 
 func stringRep(t *Type, rep interface{}) string {
@@ -155,32 +143,26 @@ func stringRep(t *Type, rep interface{}) string {
 		return fmt.Sprintf("%v+%vi", real(trep), imag(trep))
 	case string:
 		return strconv.Quote(trep)
-	case *Type:
-		return trep.String()
 	case enumIndex:
 		return t.labels[int(trep)]
-	case []*Value:
-		s := "{"
-		for index, elem := range trep {
-			if index > 0 {
-				s += ", "
-			}
-			s += stringRep(elem.t, elem.rep)
-		}
-		return s + "}"
+	case *Type:
+		return trep.String()
 	case repBytes:
 		return strconv.Quote(string(trep))
 	case *byte:
 		return fmt.Sprint(*trep)
 	case repMap:
 		return trep.String()
-	case repFixedLen:
+	case repSequence:
 		return trep.String(t)
 	case *Value:
-		if trep != nil {
-			return trep.String() // include the type
+		switch {
+		case trep == nil:
+			return "nil"
+		case t.kind == Nilable:
+			return stringRep(t.elem, trep.rep) // don't include the type
 		}
-		return "nil"
+		return trep.String() // include the type
 	default:
 		panic(fmt.Errorf("val: stringRep unhandled %v %T %v", t.kind, rep, rep))
 	}
@@ -231,12 +213,45 @@ func BytesValue(x []byte) *Value { return ZeroValue(ListType(ByteType)).AssignBy
 // TypeValValue is a convenience to create a TypeVal value.
 func TypeValValue(x *Type) *Value { return ZeroValue(TypeValType).AssignTypeVal(x) }
 
-// ZeroValue returns a new Value containing the zero value for the given Type t.
+// ZeroValue returns a new Value of type t representing the zero value for t:
+//   o Bool:    false
+//   o Numbers: 0
+//   o String:  ""
+//   o Enum:    label at index 0
+//   o TypeVal: AnyType
+//   o List:    empty collection
+//   o Set:     empty collection
+//   o Map:     empty collection
+//   o Array:   zero values for all elems
+//   o Struct:  zero values for all fields
+//   o OneOf:   zero value of the type at index 0
+//   o Any:     nil value, representing nonexistence
+//   o Nilable: nil value, representing nonexistence
+//
+// Panics if t == nil.
 func ZeroValue(t *Type) *Value {
 	if t == nil {
-		return nil
+		panic(errNilType)
 	}
 	return &Value{t, zeroRep(t)}
+}
+
+// NonNilZeroValue returns a new Value of type t representing the non-nil zero
+// value for t.  It is is the same as ZeroValue, except if t is Nilable, in
+// which case it returns a Value representing the zero value of the elem type.
+//
+// Panics if t == nil or t is Any.
+func NonNilZeroValue(t *Type) *Value {
+	if t == nil {
+		panic(errNilType)
+	}
+	switch t.kind {
+	case Any:
+		panic(errNonNilZeroAny)
+	case Nilable:
+		return &Value{t, ZeroValue(t.elem)}
+	}
+	return ZeroValue(t)
 }
 
 // CopyValue returns a copy of the Value v.
@@ -244,7 +259,7 @@ func CopyValue(v *Value) *Value {
 	if v == nil {
 		return nil
 	}
-	return &Value{v.t, copyRep(v)}
+	return &Value{v.t, copyRep(v.t, v.rep)}
 }
 
 // EqualValue returns true iff a and b have the same type, and equal values.
@@ -272,27 +287,16 @@ func EqualValue(a, b *Value) bool {
 		return arep == b.rep.(complex128)
 	case string:
 		return arep == b.rep.(string)
-	case *Type:
-		return arep == b.rep.(*Type)
 	case enumIndex:
 		return arep == b.rep.(enumIndex)
-	case []*Value:
-		brep := b.rep.([]*Value)
-		if len(arep) != len(brep) {
-			return false
-		}
-		for index := range arep {
-			if !EqualValue(arep[index], brep[index]) {
-				return false
-			}
-		}
-		return true
+	case *Type:
+		return arep == b.rep.(*Type)
 	case repBytes:
 		return bytes.Equal(arep, b.rep.(repBytes))
 	case repMap:
 		return equalRepMap(a.t, arep, b.rep.(repMap))
-	case repFixedLen:
-		return equalRepFixedLen(arep, b.rep.(repFixedLen))
+	case repSequence:
+		return equalRepSequence(arep, b.rep.(repSequence))
 	case *Value:
 		return EqualValue(arep, b.rep.(*Value))
 	default:
@@ -303,6 +307,12 @@ func EqualValue(a, b *Value) bool {
 // IsZero returns true iff v is the zero value for its type.
 func (v *Value) IsZero() bool {
 	return isZeroRep(v.t, v.rep)
+}
+
+// IsNil returns true iff v is Nilable or Any and has the nil value.
+func (v *Value) IsNil() bool {
+	vrep, ok := v.rep.(*Value)
+	return ok && vrep == nil
 }
 
 // IsValid returns true iff v is valid.  Nil and new(Value) are invalid; most
@@ -410,12 +420,10 @@ func (v *Value) TypeVal() *Type {
 // Len returns the length of the underlying Array, List, Set or Map.
 func (v *Value) Len() int {
 	switch trep := v.rep.(type) {
-	case []*Value:
-		return len(trep)
 	case repMap:
 		return trep.Len()
-	case repFixedLen:
-		if v.t.kind == Array { // don't allow Struct
+	case repSequence:
+		if v.t.kind != Struct { // Len not allowed on Struct
 			return len(trep)
 		}
 	case repBytes:
@@ -424,14 +432,12 @@ func (v *Value) Len() int {
 	panic(v.t.errKind("Len", Array, List, Set, Map))
 }
 
-// Index returns the i'th element of the underlying Array or List.  It panics if
+// Index returns the i'th element of the underlying Array or List.  Panics if
 // the index is out of range.
 func (v *Value) Index(index int) *Value {
 	switch trep := v.rep.(type) {
-	case []*Value:
-		return trep[index]
-	case repFixedLen:
-		if v.t.kind == Array { // don't allow Struct
+	case repSequence:
+		if v.t.kind != Struct { // Index not allowed on Struct
 			return trep.Index(v.t.elem, index)
 		}
 	case repBytes:
@@ -458,46 +464,46 @@ func (v *Value) ContainsKey(key *Value) bool {
 }
 
 // MapIndex returns the value associated with the key in the underlying Map, or
-// nil if the key is not found in the map.  It panics if the key isn't
-// assignable to the map's key type.
+// nil if the key is not found in the map.  Panics if the key isn't assignable
+// to the map's key type.
 func (v *Value) MapIndex(key *Value) *Value {
 	v.t.checkKind("MapIndex", Map)
 	val, _ := v.rep.(repMap).Index(v.t, key)
 	return val
 }
 
-// Field returns the Struct field at the given index.  It panics if the index is
+// Field returns the Struct field at the given index.  Panics if the index is
 // out of range.
 func (v *Value) Field(index int) *Value {
 	v.t.checkKind("Field", Struct)
-	return v.rep.(repFixedLen).Index(v.t.fields[index].Type, index)
+	return v.rep.(repSequence).Index(v.t.fields[index].Type, index)
 }
 
-// Elem returns the element value contained in a Value of kind OneOf or Any.  It
-// returns nil if the OneOf or Any is the zero value.
+// Elem returns the element value contained in the underlying Any, OneOf or
+// Nilable.  Returns nil if v.IsNil() == true.
 func (v *Value) Elem() *Value {
-	v.t.checkKind("Elem", OneOf, Any)
+	v.t.checkKind("Elem", Any, OneOf, Nilable)
 	return v.rep.(*Value)
 }
 
-// Assign the value v to x.  If x is nil, v is set to its zero value.  It panics
-// if the type of v is not assignable from the type of x.
+// Assign the value v to x.  If x is nil, v is set to its zero value.  Panics if
+// the type of v is not assignable from the type of x.
 func (v *Value) Assign(x *Value) *Value {
-	if x == nil {
+	// The logic here mirrors our definition of Type.AssignableFrom.
+	switch {
+	case x == nil:
+		// Assign(nil) sets the zero value.
 		v.rep = zeroRep(v.t)
-		return v
-	}
-	if !v.t.AssignableFrom(x.t) {
-		panic(fmt.Errorf("val: value of type %q isn't assignable from value of type %q", v.t, x.t))
-	}
-	if v.t.kind == OneOf || v.t.kind == Any {
-		if x.t.kind == OneOf || x.t.kind == Any {
-			x = x.rep.(*Value) // get the concrete element value
-		}
+	case v.t == x.t:
+		// Types are identical (including Any or OneOf), v holds a copy of the
+		// underlying rep.
+		v.rep = copyRep(x.t, x.rep)
+	case v.t.kind == Any || (v.t.kind == OneOf && v.t.OneOfIndex(x.t) != -1):
+		// Assigning into Any or OneOf, v holds a copy of the value.
 		v.rep = CopyValue(x)
-		return v
+	default:
+		panic(fmt.Errorf("vdl: value of type %q not assignable from %q", v.t, x.t))
 	}
-	v.rep = copyRep(x)
 	return v
 }
 
@@ -595,7 +601,7 @@ func (v *Value) CopyBytes(x []byte) *Value {
 }
 
 // AssignEnumIndex assigns the underlying Enum to the label corresponding to
-// index.  It panics if the index is out of range.
+// index.  Panics if the index is out of range.
 func (v *Value) AssignEnumIndex(index int) *Value {
 	v.t.checkKind("AssignEnumIndex", Enum)
 	if index < 0 || index >= len(v.t.labels) {
@@ -605,7 +611,7 @@ func (v *Value) AssignEnumIndex(index int) *Value {
 	return v
 }
 
-// AssignEnumLabel assigns the underlying Enum to the label.  It panics if the
+// AssignEnumLabel assigns the underlying Enum to the label.  Panics if the
 // label doesn't exist in the Enum.
 func (v *Value) AssignEnumLabel(label string) *Value {
 	v.t.checkKind("AssignEnumLabel", Enum)
@@ -647,24 +653,22 @@ func (v *Value) AssignLen(n int) *Value {
 		v.rep = newrep
 		return v
 	}
-	oldrep := v.rep.([]*Value)
-	var newrep []*Value
+	oldrep := v.rep.(repSequence)
+	var newrep repSequence
 	if n <= cap(oldrep) {
 		newrep = oldrep[:n]
 		for ix := len(oldrep); ix < n; ix++ {
-			newrep[ix] = ZeroValue(v.t.elem)
+			newrep[ix] = nil
 		}
 	} else {
-		newrep = make([]*Value, n)
-		for ix := copy(newrep, oldrep); ix < n; ix++ {
-			newrep[ix] = ZeroValue(v.t.elem)
-		}
+		newrep = make(repSequence, n)
+		copy(newrep, oldrep)
 	}
 	v.rep = newrep
 	return v
 }
 
-// AssignSetKey assigns key to the underlying Set.  It panics if the key isn't
+// AssignSetKey assigns key to the underlying Set.  Panics if the key isn't
 // assignable to the set's key type.
 func (v *Value) AssignSetKey(key *Value) *Value {
 	v.t.checkKind("AssignSetKey", Set)
@@ -680,8 +684,8 @@ func (v *Value) DeleteSetKey(key *Value) *Value {
 }
 
 // AssignMapIndex assigns the value associated with key to val in the underlying
-// Map.  If val is nil, AssignMapIndex deletes the key from the Map.  It panics
-// if the key isn't assignable to the map's key type, and ditto for val.
+// Map.  If val is nil, AssignMapIndex deletes the key from the Map.  Panics if
+// the key isn't assignable to the map's key type, and ditto for val.
 func (v *Value) AssignMapIndex(key, val *Value) *Value {
 	v.t.checkKind("AssignMapIndex", Map)
 	if val == nil {

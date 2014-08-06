@@ -65,6 +65,41 @@ func TypeOf(v interface{}) (*Type, error) {
 	return TypeFromReflect(reflect.TypeOf(v))
 }
 
+// Normalize the rt type.  The VDL type system represents the concept of
+// pointers as Nilable (?), and doesn't allow multiple nilables (??int) or
+// Nilable Any (?any).  In addition all interfaces are represented with the
+// single Any type.  By normalizing the rt type we simplify the type creation
+// logic, and also reduce redundancy in the rtCache.
+func normalizeType(rt reflect.Type) reflect.Type {
+	// Flatten multiple pointers down to a single pointer.
+	for rt.Kind() == reflect.Ptr && rt.Elem().Kind() == reflect.Ptr {
+		rt = rt.Elem()
+	}
+	// Collapse all interfaces to interface{}.
+	if rt.Kind() == reflect.Interface || (rt.Kind() == reflect.Ptr && rt.Elem().Kind() == reflect.Interface) {
+		return rtInterface
+	}
+	return rt
+}
+
+// Lookup the rt type and return the corresponding *Type.  Returns a non-nil
+// *Type if rt exists in the cache, or has a well-known conversion.
+func lookupType(rt reflect.Type) *Type {
+	if t := rtCache.lookup(rt); t != nil {
+		return t
+	}
+	for rt.Kind() == reflect.Ptr {
+		rt = rt.Elem()
+	}
+	switch rt {
+	case rtInterface, rtValue:
+		return AnyType
+	case rtType:
+		return TypeValType
+	}
+	return nil
+}
+
 // TypeFromReflect returns the type corresponding to rt.  Not all reflect types
 // have a valid type; reflect.Chan, reflect.Func and reflect.UnsafePointer are
 // unsupported, as are maps with pointer keys, as well as structs with only
@@ -73,10 +108,8 @@ func TypeFromReflect(rt reflect.Type) (*Type, error) {
 	if rt == nil {
 		return nil, errTypeFromReflectNil
 	}
-	for rt.Kind() == reflect.Ptr {
-		rt = rt.Elem() // flatten pointers down to the base type
-	}
-	if t := rtCache.lookup(rt); t != nil {
+	rt = normalizeType(rt)
+	if t := lookupType(rt); t != nil {
 		return t, nil
 	}
 	// The strategy is to recursively populate the builder with the type and
@@ -101,13 +134,12 @@ func TypeFromReflect(rt reflect.Type) (*Type, error) {
 	return getBuiltType(result), nil
 }
 
-// typeFromReflect returns the Type or PendingType corresponding to rt, possibly
-// returning the result from rtCache or pending.
+// typeFromReflect returns the Type or PendingType corresponding to rt.  It
+// either returns the type directly from the cache or pending map, or makes the
+// type based on rt.
 func typeFromReflect(rt reflect.Type, builder *TypeBuilder, pending map[reflect.Type]TypeOrPending) (TypeOrPending, error) {
-	for rt.Kind() == reflect.Ptr {
-		rt = rt.Elem() // flatten pointers down to the base type
-	}
-	if t := rtCache.lookup(rt); t != nil {
+	rt = normalizeType(rt)
+	if t := lookupType(rt); t != nil {
 		return t, nil
 	}
 	if p, ok := pending[rt]; ok {
@@ -118,60 +150,75 @@ func typeFromReflect(rt reflect.Type, builder *TypeBuilder, pending map[reflect.
 	return makeTypeFromReflect(rt, builder, pending)
 }
 
-// makeTypeFromReflect makes the Type or PendingType corresponding to rt.
-// PRE-CONDITION: rt doesn't exist in rtCache or pending.
+// validateType returns a non-nil error if rt is not a valid vdl type.
+func validateType(rt reflect.Type) error {
+	// First flatten all pointers.
+	for rt.Kind() == reflect.Ptr {
+		rt = rt.Elem()
+	}
+	// Now check error conditions.
+	if rt == rtReflectValue {
+		return errTypeFromReflectValue
+	}
+	switch rt.Kind() {
+	case reflect.Chan, reflect.Func, reflect.UnsafePointer:
+		return fmt.Errorf("reflect type %q not supported", rt)
+	}
+	return nil
+}
+
+// makeTypeFromReflect makes the Type or PendingType corresponding to rt.  Calls
+// typeFromReflect to recursively generate subtypes.
+//
+// PRE-CONDITION:  rt doesn't exist in rtCache or pending.
 // POST-CONDITION: rt exists in pending.
 func makeTypeFromReflect(rt reflect.Type, builder *TypeBuilder, pending map[reflect.Type]TypeOrPending) (TypeOrPending, error) {
-	kind := rt.Kind()
-	// Handle error cases.
-	switch {
-	case rt == rtReflectValue:
-		return nil, errTypeFromReflectValue
-	case kind == reflect.Chan || kind == reflect.Func || kind == reflect.UnsafePointer:
-		return nil, fmt.Errorf("reflect type %q not supported", rt)
+	if err := validateType(rt); err != nil {
+		return nil, err
 	}
 	switch {
-	case rt == rtValue || kind == reflect.Interface:
-		// Any is special-cased since it can't be named.
-		pending[rt] = AnyType
-		return AnyType, nil
-	case rt == rtType:
-		// TypeVal is special-cased since it can't be named.
-		pending[rt] = TypeValType
-		return TypeValType, nil
-	case rt.PkgPath() == "":
-		// Unnamed types are made directly from their base type.  It's fine to
-		// update pending after making the base type, since there's no way to create
-		// a recursive type based solely on unnamed types.
-		base, err := makeBaseFromReflect(rt, builder, pending)
+	case rt.Kind() == reflect.Ptr:
+		// Pointers are turned into Nilable.
+		nilable := builder.Nilable()
+		pending[rt] = nilable
+		base, err := typeFromReflect(rt.Elem(), builder, pending)
 		if err != nil {
 			return nil, err
 		}
-		pending[rt] = base
-		return base, nil
+		nilable.AssignBase(base)
+		return nilable, nil
+	case rt.PkgPath() == "":
+		// Unnamed types are made directly.  There's no way to create a recursive
+		// type based solely on unnamed types, so it's ok to to update pending
+		// *after* making the unnamed type.
+		unnamed, err := makeUnnamedFromReflect(rt, builder, pending)
+		if err != nil {
+			return nil, err
+		}
+		pending[rt] = unnamed
+		return unnamed, nil
 	default:
 		// Named types are trickier, since they may be recursive.  First create the
 		// named type and add it to pending.
 		named := builder.Named(rt.PkgPath() + "." + rt.Name())
 		pending[rt] = named
-		// Now make the base type.  Recursive types will find the existing entry in
-		// pending, and avoid the infinite loop.
-		base, err := makeBaseFromReflect(rt, builder, pending)
+		// Now make the unnamed underlying type.  Recursive types will find the
+		// existing entry in pending, and avoid the infinite loop.
+		unnamed, err := makeUnnamedFromReflect(rt, builder, pending)
 		if err != nil {
 			return nil, err
 		}
 		// Finally assign the base type and we're done.
-		named.AssignBase(base)
+		named.AssignBase(unnamed)
 		return named, nil
 	}
 }
 
-// makeBaseFromReflect makes the base (underlying unnamed) Type or PendingType
+// makeUnnamedFromReflect makes the underlying unnamed Type or PendingType
 // corresponding to rt.
-func makeBaseFromReflect(rt reflect.Type, builder *TypeBuilder, pending map[reflect.Type]TypeOrPending) (TypeOrPending, error) {
-	kind := rt.Kind()
+func makeUnnamedFromReflect(rt reflect.Type, builder *TypeBuilder, pending map[reflect.Type]TypeOrPending) (TypeOrPending, error) {
 	// Handle composite types
-	switch kind {
+	switch rt.Kind() {
 	case reflect.Array:
 		elem, err := typeFromReflect(rt.Elem(), builder, pending)
 		if err != nil {
@@ -185,12 +232,6 @@ func makeBaseFromReflect(rt reflect.Type, builder *TypeBuilder, pending map[refl
 		}
 		return builder.List().AssignElem(elem), nil
 	case reflect.Map:
-		if rt.Key().Kind() == reflect.Ptr && !rt.Key().ConvertibleTo(rtPtrToType) {
-			// We don't allow maps with pointer keys; we can't just flatten the
-			// pointers since we may end up with duplicates.  We make an exception for
-			// *Type, since we know it's hash-consed.
-			return nil, fmt.Errorf("type %q has pointer keys", rt)
-		}
 		key, err := typeFromReflect(rt.Key(), builder, pending)
 		if err != nil {
 			return nil, err
@@ -223,19 +264,19 @@ func makeBaseFromReflect(rt reflect.Type, builder *TypeBuilder, pending map[refl
 		return st, nil
 	}
 	// Handle scalar types
-	if t := rtScalarTypes[kind]; t != nil {
+	if t := rtScalarTypes[rt.Kind()]; t != nil {
 		return t, nil
 	}
-	panic(fmt.Errorf("val: makeBaseFromReflect unhandled %v %v", rt.Kind(), rt))
+	panic(fmt.Errorf("val: makeUnnamedFromReflect unhandled %v %v", rt.Kind(), rt))
 }
 
 var (
 	errTypeFromReflectNil   = errors.New("invalid val.TypeOf(nil)")
 	errTypeFromReflectValue = errors.New("invalid val.TypeOf(reflect.Value{})")
 
+	rtInterface          = reflect.TypeOf((*interface{})(nil)).Elem()
 	rtType               = reflect.TypeOf(Type{})
 	rtValue              = reflect.TypeOf(Value{})
-	rtPtrToType          = reflect.TypeOf((*Type)(nil))
 	rtReflectValue       = reflect.TypeOf(reflect.Value{})
 	rtUnnamedEmptyStruct = reflect.TypeOf(struct{}{})
 

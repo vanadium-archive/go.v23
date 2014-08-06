@@ -699,6 +699,7 @@ func testConverterWantSrc(t *testing.T, vvrvWant, vvrvSrc vvrv) {
 	// We run each testConvert helper twice; the first call tests filling in a
 	// zero dst, and the second call tests filling in a non-zero dst.
 
+	// Tests of filling from *Value
 	for _, vvSrc := range vvrvSrc.vv {
 		for _, vvWant := range vvrvWant.vv {
 			// Test filling *Value from *Value
@@ -712,14 +713,21 @@ func testConverterWantSrc(t *testing.T, vvrvWant, vvrvSrc vvrv) {
 			testConvert(t, dst, vvSrc, want, 1)
 			testConvert(t, dst, vvSrc, want, 1)
 		}
-		// Test filling *Value(Any) from *Value
+		// Test filling Any from *Value
 		vvDst := vdl.ZeroValue(vdl.AnyType)
 		testConvert(t, vvDst, vvSrc, anyValue(vvSrc), 0)
 		testConvert(t, vvDst, vvSrc, anyValue(vvSrc), 0)
+		// Test filling Nilable from *Value
+		ttNil := vdl.NilableType(vvSrc.Type())
+		vvNil := vdl.ZeroValue(ttNil)
+		vvNilWant := vdl.NonNilZeroValue(ttNil)
+		vvNilWant.Elem().Assign(vvSrc)
+		testConvert(t, vvNil, vvSrc, vvNilWant, 0)
+		testConvert(t, vvNil, vvSrc, vvNilWant, 0)
 		// Test filling **Value(nil) from *Value
-		var vvNil *vdl.Value
-		testConvert(t, &vvNil, vvSrc, vvSrc, 1)
-		testConvert(t, &vvNil, vvSrc, vvSrc, 1)
+		var vvValue *vdl.Value
+		testConvert(t, &vvValue, vvSrc, vvSrc, 1)
+		testConvert(t, &vvValue, vvSrc, vvSrc, 1)
 		// Test filling interface{} from *Value
 		var dst interface{}
 		testConvert(t, &dst, vvSrc, vvSrc, 1)
@@ -760,15 +768,15 @@ func testConverterWantSrc(t *testing.T, vvrvWant, vvrvSrc vvrv) {
 			t.Errorf("Convert(*Value, %T) error: %v", src, err)
 			continue
 		}
-		// Test filling *Value(Any) from reflect.Value
+		// Test filling Any from reflect.Value
 		vvDst := vdl.ZeroValue(vdl.AnyType)
 		testConvert(t, vvDst, src, anyValue(vvWant), 0)
 		testConvert(t, vvDst, src, anyValue(vvWant), 0)
-		// Test filling **Value(nil) from *Value
-		var vvNil *vdl.Value
-		testConvert(t, &vvNil, src, vvWant, 1)
-		testConvert(t, &vvNil, src, vvWant, 1)
-		// Test filling interface{} from *Value
+		// Test filling **Value(nil) from reflect.Value
+		var vvValue *vdl.Value
+		testConvert(t, &vvValue, src, vvWant, 1)
+		testConvert(t, &vvValue, src, vvWant, 1)
+		// Test filling interface{} from reflect.Value
 		var dst interface{}
 		testConvert(t, &dst, src, vvWant, 1)
 		testConvert(t, &dst, src, vvWant, 1)

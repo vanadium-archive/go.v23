@@ -43,8 +43,8 @@ type Target interface {
 	FromEnumLabel(src string, tt *vdl.Type) error
 	// FromTypeVal converts from the src type to the target.
 	FromTypeVal(src *vdl.Type) error
-	// FromNil converts from a nil value of type tt.
-	// TODO(toddw): Change this to deal with optional values.
+	// FromNil converts from a nil (nonexistent) value of type tt, where tt must
+	// be of kind Nilable or Any.
 	FromNil(tt *vdl.Type) error
 
 	// StartList prepares conversion from a list or array of type tt, with the
@@ -151,17 +151,19 @@ func FromReflect(target Target, rv reflect.Value) error {
 		}
 		rt, rv = rt.Elem(), rv.Elem()
 	}
+	if tt.Kind() == vdl.Nilable {
+		tt = tt.Elem() // flatten tt to match rt and rv
+	}
 	// Recursive walk through the reflect value to fill in target.
 	if isRTBytes(rt) {
 		return target.FromBytes(rtBytes(rv), tt)
 	}
 	switch rt.Kind() {
 	case reflect.Interface:
-		if !rv.IsNil() {
-			return FromReflect(target, rv.Elem())
+		if rv.IsNil() {
+			return target.FromNil(tt)
 		}
-		// TODO(toddw): How about nil interfaces?
-		return nil
+		return FromReflect(target, rv.Elem())
 	case reflect.Bool:
 		return target.FromBool(rv.Bool(), tt)
 	case reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uint, reflect.Uintptr:
@@ -276,12 +278,11 @@ func FromValue(target Target, vv *vdl.Value) error {
 		return target.FromBytes(vv.Bytes(), tt)
 	}
 	switch vv.Kind() {
-	case vdl.Any, vdl.OneOf:
-		if elem := vv.Elem(); elem != nil {
-			return FromValue(target, elem)
+	case vdl.Any, vdl.OneOf, vdl.Nilable:
+		if vv.IsNil() {
+			return target.FromNil(tt)
 		}
-		// TODO(toddw): how about nil any or oneof?
-		return nil
+		return FromValue(target, vv.Elem())
 	case vdl.Bool:
 		return target.FromBool(vv.Bool(), tt)
 	case vdl.Byte:
