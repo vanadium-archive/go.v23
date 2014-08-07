@@ -12,7 +12,7 @@
 ***** PLEASE READ THIS! DO NOT DELETE THIS BLOCK! *****
 
 state 0
-	$accept: .start $end
+	$accept: .start $end 
 
 	startFileImports  shift 2
 	startFile  shift 3
@@ -23,14 +23,14 @@ state 0
 	start  goto 1
 
 state 1
-	$accept:  start.$end
+	$accept:  start.$end 
 
 	$end  accept
 	.  error
 
 
 state 2
-	start:  startFileImports.package imports gen_eof
+	start:  startFileImports.package imports gen_eof 
 	package: .    (9)
 
 	tPACKAGE  shift 7
@@ -39,7 +39,7 @@ state 2
 	package  goto 6
 
 state 3
-	start:  startFile.package imports defs
+	start:  startFile.package imports defs 
 	package: .    (9)
 
 	tPACKAGE  shift 7
@@ -48,7 +48,7 @@ state 3
 	package  goto 8
 
 state 4
-	start:  startConfigImports.config imports gen_eof
+	start:  startConfigImports.config imports gen_eof 
 	config: .    (11)
 
 	tIDENT  shift 10
@@ -57,7 +57,7 @@ state 4
 	config  goto 9
 
 state 5
-	start:  startConfig.config imports const_defs
+	start:  startConfig.config imports const_defs 
 	config: .    (11)
 
 	tIDENT  shift 10
@@ -66,7 +66,7 @@ state 5
 	config  goto 11
 
 state 6
-	start:  startFileImports package.imports gen_eof
+	start:  startFileImports package.imports gen_eof 
 	imports: .    (13)
 
 	.  reduce 13 (src line 189)
@@ -74,14 +74,14 @@ state 6
 	imports  goto 12
 
 state 7
-	package:  tPACKAGE.tIDENT ;
+	package:  tPACKAGE.tIDENT ; 
 
 	tIDENT  shift 13
 	.  error
 
 
 state 8
-	start:  startFile package.imports defs
+	start:  startFile package.imports defs 
 	imports: .    (13)
 
 	.  reduce 13 (src line 189)
@@ -89,7 +89,7 @@ state 8
 	imports  goto 14
 
 state 9
-	start:  startConfigImports config.imports gen_eof
+	start:  startConfigImports config.imports gen_eof 
 	imports: .    (13)
 
 	.  reduce 13 (src line 189)
@@ -97,14 +97,14 @@ state 9
 	imports  goto 15
 
 state 10
-	config:  tIDENT.= expr ;
+	config:  tIDENT.= expr ; 
 
 	=  shift 16
 	.  error
 
 
 state 11
-	start:  startConfig config.imports const_defs
+	start:  startConfig config.imports const_defs 
 	imports: .    (13)
 
 	.  reduce 13 (src line 189)
@@ -112,8 +112,8 @@ state 11
 	imports  goto 17
 
 state 12
-	start:  startFileImports package imports.gen_eof
-	imports:  imports.import ;
+	start:  startFileImports package imports.gen_eof 
+	imports:  imports.import ; 
 	gen_eof: .    (5)
 
 	tIMPORT  shift 23
@@ -126,15 +126,15 @@ state 12
 	import  goto 19
 
 state 13
-	package:  tPACKAGE tIDENT.;
+	package:  tPACKAGE tIDENT.; 
 
 	;  shift 24
 	.  error
 
 
 state 14
-	start:  startFile package imports.defs
-	imports:  imports.import ;
+	start:  startFile package imports.defs 
+	imports:  imports.import ; 
 	defs: .    (22)
 
 	tIMPORT  shift 23
@@ -144,8 +144,8 @@ state 14
 	import  goto 19
 
 state 15
-	start:  startConfigImports config imports.gen_eof
-	imports:  imports.import ;
+	start:  startConfigImports config imports.gen_eof 
+	imports:  imports.import ; 
 	gen_eof: .    (5)
 
 	tIMPORT  shift 23
@@ -158,8 +158,8 @@ state 15
 	import  goto 19
 
 state 16
-	config:  tIDENT =.expr ;
-	otype: .    (133)
+	config:  tIDENT =.expr ; 
+	otype: .    (134)
 
 	(  shift 41
 	[  shift 42
@@ -167,35 +167,36 @@ state 16
 	+  shift 31
 	-  shift 32
 	^  shift 33
+	?  shift 48
 	tENUM  shift 43
 	tSET  shift 44
 	tMAP  shift 45
 	tSTRUCT  shift 46
 	tONEOF  shift 47
-	tIDENT  shift 48
+	tIDENT  shift 49
 	tSTRLIT  shift 35
 	tINTLIT  shift 36
 	tRATLIT  shift 37
 	tIMAGLIT  shift 38
-	.  reduce 133 (src line 568)
+	.  reduce 134 (src line 570)
 
 	nameref  goto 39
 	type  goto 34
-	otype  goto 49
+	otype  goto 50
 	expr  goto 27
 	unary_expr  goto 28
 	operand  goto 29
 	comp_lit  goto 40
 
 state 17
-	start:  startConfig config imports.const_defs
-	imports:  imports.import ;
+	start:  startConfig config imports.const_defs 
+	imports:  imports.import ; 
 	const_defs: .    (26)
 
 	tIMPORT  shift 23
 	.  reduce 26 (src line 221)
 
-	const_defs  goto 50
+	const_defs  goto 51
 	import  goto 19
 
 state 18
@@ -205,9 +206,9 @@ state 18
 
 
 state 19
-	imports:  imports import.;
+	imports:  imports import.; 
 
-	;  shift 51
+	;  shift 52
 	.  error
 
 
@@ -230,16 +231,16 @@ state 22
 
 
 state 23
-	import:  tIMPORT.( )
-	import:  tIMPORT.( import_spec_list osemi )
-	import:  tIMPORT.import_spec
+	import:  tIMPORT.( ) 
+	import:  tIMPORT.( import_spec_list osemi ) 
+	import:  tIMPORT.import_spec 
 
-	(  shift 52
-	tIDENT  shift 55
-	tSTRLIT  shift 54
+	(  shift 53
+	tIDENT  shift 56
+	tSTRLIT  shift 55
 	.  error
 
-	import_spec  goto 53
+	import_spec  goto 54
 
 state 24
 	package:  tPACKAGE tIDENT ;.    (10)
@@ -249,18 +250,18 @@ state 24
 
 state 25
 	start:  startFile package imports defs.    (2)
-	defs:  defs.type_def ;
-	defs:  defs.const_def ;
-	defs:  defs.error_def ;
+	defs:  defs.type_def ; 
+	defs:  defs.const_def ; 
+	defs:  defs.error_def ; 
 
-	tTYPE  shift 59
-	tCONST  shift 60
-	tERRORID  shift 61
+	tTYPE  shift 60
+	tCONST  shift 61
+	tERRORID  shift 62
 	.  reduce 2 (src line 145)
 
-	type_def  goto 56
-	const_def  goto 57
-	error_def  goto 58
+	type_def  goto 57
+	const_def  goto 58
+	error_def  goto 59
 
 state 26
 	start:  startConfigImports config imports gen_eof.    (3)
@@ -269,63 +270,63 @@ state 26
 
 
 state 27
-	config:  tIDENT = expr.;
-	expr:  expr.tOROR expr
-	expr:  expr.tANDAND expr
-	expr:  expr.< expr
-	expr:  expr.> expr
-	expr:  expr.tLE expr
-	expr:  expr.tGE expr
-	expr:  expr.tNE expr
-	expr:  expr.tEQEQ expr
-	expr:  expr.+ expr
-	expr:  expr.- expr
-	expr:  expr.* expr
-	expr:  expr./ expr
-	expr:  expr.% expr
-	expr:  expr.| expr
-	expr:  expr.& expr
-	expr:  expr.^ expr
-	expr:  expr.tLSH expr
-	expr:  expr.tRSH expr
+	config:  tIDENT = expr.; 
+	expr:  expr.tOROR expr 
+	expr:  expr.tANDAND expr 
+	expr:  expr.< expr 
+	expr:  expr.> expr 
+	expr:  expr.tLE expr 
+	expr:  expr.tGE expr 
+	expr:  expr.tNE expr 
+	expr:  expr.tEQEQ expr 
+	expr:  expr.+ expr 
+	expr:  expr.- expr 
+	expr:  expr.* expr 
+	expr:  expr./ expr 
+	expr:  expr.% expr 
+	expr:  expr.| expr 
+	expr:  expr.& expr 
+	expr:  expr.^ expr 
+	expr:  expr.tLSH expr 
+	expr:  expr.tRSH expr 
 
-	;  shift 62
-	<  shift 65
-	>  shift 66
-	+  shift 71
-	-  shift 72
-	*  shift 73
-	/  shift 74
-	%  shift 75
-	|  shift 76
-	&  shift 77
-	^  shift 78
-	tOROR  shift 63
-	tANDAND  shift 64
-	tLE  shift 67
-	tGE  shift 68
-	tNE  shift 69
-	tEQEQ  shift 70
-	tLSH  shift 79
-	tRSH  shift 80
+	;  shift 63
+	<  shift 66
+	>  shift 67
+	+  shift 72
+	-  shift 73
+	*  shift 74
+	/  shift 75
+	%  shift 76
+	|  shift 77
+	&  shift 78
+	^  shift 79
+	tOROR  shift 64
+	tANDAND  shift 65
+	tLE  shift 68
+	tGE  shift 69
+	tNE  shift 70
+	tEQEQ  shift 71
+	tLSH  shift 80
+	tRSH  shift 81
 	.  error
 
 
 state 28
-	expr:  unary_expr.    (86)
+	expr:  unary_expr.    (87)
 
-	.  reduce 86 (src line 446)
+	.  reduce 87 (src line 448)
 
 
 state 29
-	unary_expr:  operand.    (105)
+	unary_expr:  operand.    (106)
 
-	.  reduce 105 (src line 486)
+	.  reduce 106 (src line 488)
 
 
 state 30
-	unary_expr:  !.unary_expr
-	otype: .    (133)
+	unary_expr:  !.unary_expr 
+	otype: .    (134)
 
 	(  shift 41
 	[  shift 42
@@ -333,57 +334,29 @@ state 30
 	+  shift 31
 	-  shift 32
 	^  shift 33
+	?  shift 48
 	tENUM  shift 43
 	tSET  shift 44
 	tMAP  shift 45
 	tSTRUCT  shift 46
 	tONEOF  shift 47
-	tIDENT  shift 48
+	tIDENT  shift 49
 	tSTRLIT  shift 35
 	tINTLIT  shift 36
 	tRATLIT  shift 37
 	tIMAGLIT  shift 38
-	.  reduce 133 (src line 568)
+	.  reduce 134 (src line 570)
 
 	nameref  goto 39
 	type  goto 34
-	otype  goto 49
-	unary_expr  goto 81
-	operand  goto 29
-	comp_lit  goto 40
-
-state 31
-	unary_expr:  +.unary_expr
-	otype: .    (133)
-
-	(  shift 41
-	[  shift 42
-	!  shift 30
-	+  shift 31
-	-  shift 32
-	^  shift 33
-	tENUM  shift 43
-	tSET  shift 44
-	tMAP  shift 45
-	tSTRUCT  shift 46
-	tONEOF  shift 47
-	tIDENT  shift 48
-	tSTRLIT  shift 35
-	tINTLIT  shift 36
-	tRATLIT  shift 37
-	tIMAGLIT  shift 38
-	.  reduce 133 (src line 568)
-
-	nameref  goto 39
-	type  goto 34
-	otype  goto 49
+	otype  goto 50
 	unary_expr  goto 82
 	operand  goto 29
 	comp_lit  goto 40
 
-state 32
-	unary_expr:  -.unary_expr
-	otype: .    (133)
+state 31
+	unary_expr:  +.unary_expr 
+	otype: .    (134)
 
 	(  shift 41
 	[  shift 42
@@ -391,28 +364,29 @@ state 32
 	+  shift 31
 	-  shift 32
 	^  shift 33
+	?  shift 48
 	tENUM  shift 43
 	tSET  shift 44
 	tMAP  shift 45
 	tSTRUCT  shift 46
 	tONEOF  shift 47
-	tIDENT  shift 48
+	tIDENT  shift 49
 	tSTRLIT  shift 35
 	tINTLIT  shift 36
 	tRATLIT  shift 37
 	tIMAGLIT  shift 38
-	.  reduce 133 (src line 568)
+	.  reduce 134 (src line 570)
 
 	nameref  goto 39
 	type  goto 34
-	otype  goto 49
+	otype  goto 50
 	unary_expr  goto 83
 	operand  goto 29
 	comp_lit  goto 40
 
-state 33
-	unary_expr:  ^.unary_expr
-	otype: .    (133)
+state 32
+	unary_expr:  -.unary_expr 
+	otype: .    (134)
 
 	(  shift 41
 	[  shift 42
@@ -420,83 +394,29 @@ state 33
 	+  shift 31
 	-  shift 32
 	^  shift 33
+	?  shift 48
 	tENUM  shift 43
 	tSET  shift 44
 	tMAP  shift 45
 	tSTRUCT  shift 46
 	tONEOF  shift 47
-	tIDENT  shift 48
+	tIDENT  shift 49
 	tSTRLIT  shift 35
 	tINTLIT  shift 36
 	tRATLIT  shift 37
 	tIMAGLIT  shift 38
-	.  reduce 133 (src line 568)
+	.  reduce 134 (src line 570)
 
 	nameref  goto 39
 	type  goto 34
-	otype  goto 49
+	otype  goto 50
 	unary_expr  goto 84
 	operand  goto 29
 	comp_lit  goto 40
 
-state 34
-	unary_expr:  type.( expr )
-	otype:  type.    (134)
-
-	(  shift 85
-	.  reduce 134 (src line 571)
-
-
-state 35
-	operand:  tSTRLIT.    (111)
-
-	.  reduce 111 (src line 501)
-
-
-state 36
-	operand:  tINTLIT.    (112)
-
-	.  reduce 112 (src line 504)
-
-
-state 37
-	operand:  tRATLIT.    (113)
-
-	.  reduce 113 (src line 506)
-
-
-state 38
-	operand:  tIMAGLIT.    (114)
-
-	.  reduce 114 (src line 508)
-
-
-state 39
-	type:  nameref.    (41)
-	operand:  nameref.    (115)
-	operand:  nameref.[ expr ]
-	nameref:  nameref.. tIDENT
-
-	.  shift 87
-	(  reduce 41 (src line 253)
-	[  shift 86
-	{  reduce 41 (src line 253)
-	.  reduce 115 (src line 510)
-
-
-state 40
-	operand:  comp_lit.    (116)
-	operand:  comp_lit.. tIDENT
-	operand:  comp_lit.[ expr ]
-
-	.  shift 88
-	[  shift 89
-	.  reduce 116 (src line 512)
-
-
-state 41
-	operand:  (.expr )
-	otype: .    (133)
+state 33
+	unary_expr:  ^.unary_expr 
+	otype: .    (134)
 
 	(  shift 41
 	[  shift 42
@@ -504,226 +424,298 @@ state 41
 	+  shift 31
 	-  shift 32
 	^  shift 33
+	?  shift 48
 	tENUM  shift 43
 	tSET  shift 44
 	tMAP  shift 45
 	tSTRUCT  shift 46
 	tONEOF  shift 47
-	tIDENT  shift 48
+	tIDENT  shift 49
 	tSTRLIT  shift 35
 	tINTLIT  shift 36
 	tRATLIT  shift 37
 	tIMAGLIT  shift 38
-	.  reduce 133 (src line 568)
+	.  reduce 134 (src line 570)
 
 	nameref  goto 39
 	type  goto 34
-	otype  goto 49
-	expr  goto 90
+	otype  goto 50
+	unary_expr  goto 85
+	operand  goto 29
+	comp_lit  goto 40
+
+state 34
+	unary_expr:  type.( expr ) 
+	otype:  type.    (135)
+
+	(  shift 86
+	.  reduce 135 (src line 573)
+
+
+state 35
+	operand:  tSTRLIT.    (112)
+
+	.  reduce 112 (src line 503)
+
+
+state 36
+	operand:  tINTLIT.    (113)
+
+	.  reduce 113 (src line 506)
+
+
+state 37
+	operand:  tRATLIT.    (114)
+
+	.  reduce 114 (src line 508)
+
+
+state 38
+	operand:  tIMAGLIT.    (115)
+
+	.  reduce 115 (src line 510)
+
+
+state 39
+	type:  nameref.    (41)
+	operand:  nameref.    (116)
+	operand:  nameref.[ expr ] 
+	nameref:  nameref.. tIDENT 
+
+	.  shift 88
+	(  reduce 41 (src line 253)
+	[  shift 87
+	{  reduce 41 (src line 253)
+	.  reduce 116 (src line 512)
+
+
+state 40
+	operand:  comp_lit.    (117)
+	operand:  comp_lit.. tIDENT 
+	operand:  comp_lit.[ expr ] 
+
+	.  shift 89
+	[  shift 90
+	.  reduce 117 (src line 514)
+
+
+state 41
+	operand:  (.expr ) 
+	otype: .    (134)
+
+	(  shift 41
+	[  shift 42
+	!  shift 30
+	+  shift 31
+	-  shift 32
+	^  shift 33
+	?  shift 48
+	tENUM  shift 43
+	tSET  shift 44
+	tMAP  shift 45
+	tSTRUCT  shift 46
+	tONEOF  shift 47
+	tIDENT  shift 49
+	tSTRLIT  shift 35
+	tINTLIT  shift 36
+	tRATLIT  shift 37
+	tIMAGLIT  shift 38
+	.  reduce 134 (src line 570)
+
+	nameref  goto 39
+	type  goto 34
+	otype  goto 50
+	expr  goto 91
 	unary_expr  goto 28
 	operand  goto 29
 	comp_lit  goto 40
 
 state 42
-	type:  [.tINTLIT ] type
-	type:  [.] type
+	type:  [.tINTLIT ] type 
+	type:  [.] type 
 
-	]  shift 92
-	tINTLIT  shift 91
+	]  shift 93
+	tINTLIT  shift 92
 	.  error
 
 
 state 43
-	type:  tENUM.{ label_spec_list osemi }
+	type:  tENUM.{ label_spec_list osemi } 
 
-	{  shift 93
+	{  shift 94
 	.  error
 
 
 state 44
-	type:  tSET.[ type ]
-
-	[  shift 94
-	.  error
-
-
-state 45
-	type:  tMAP.[ type ] type
+	type:  tSET.[ type ] 
 
 	[  shift 95
 	.  error
 
 
-state 46
-	type:  tSTRUCT.{ field_spec_list osemi }
-	type:  tSTRUCT.{ }
+state 45
+	type:  tMAP.[ type ] type 
 
-	{  shift 96
+	[  shift 96
 	.  error
 
 
-state 47
-	type:  tONEOF.{ type_semi_list osemi }
+state 46
+	type:  tSTRUCT.{ field_spec_list osemi } 
+	type:  tSTRUCT.{ } 
 
 	{  shift 97
 	.  error
 
 
-state 48
-	nameref:  tIDENT.    (131)
-
-	.  reduce 131 (src line 562)
-
-
-state 49
-	comp_lit:  otype.{ }
-	comp_lit:  otype.{ kv_lit_list ocomma }
+state 47
+	type:  tONEOF.{ type_semi_list osemi } 
 
 	{  shift 98
 	.  error
 
 
+state 48
+	type:  ?.type 
+
+	[  shift 42
+	?  shift 48
+	tENUM  shift 43
+	tSET  shift 44
+	tMAP  shift 45
+	tSTRUCT  shift 46
+	tONEOF  shift 47
+	tIDENT  shift 49
+	.  error
+
+	nameref  goto 100
+	type  goto 99
+
+state 49
+	nameref:  tIDENT.    (132)
+
+	.  reduce 132 (src line 564)
+
+
 state 50
-	start:  startConfig config imports const_defs.    (4)
-	const_defs:  const_defs.const_def ;
+	comp_lit:  otype.{ } 
+	comp_lit:  otype.{ kv_lit_list ocomma } 
 
-	tCONST  shift 60
-	.  reduce 4 (src line 147)
+	{  shift 101
+	.  error
 
-	const_def  goto 99
 
 state 51
+	start:  startConfig config imports const_defs.    (4)
+	const_defs:  const_defs.const_def ; 
+
+	tCONST  shift 61
+	.  reduce 4 (src line 147)
+
+	const_def  goto 102
+
+state 52
 	imports:  imports import ;.    (14)
 
 	.  reduce 14 (src line 191)
 
 
-state 52
-	import:  tIMPORT (.)
-	import:  tIMPORT (.import_spec_list osemi )
+state 53
+	import:  tIMPORT (.) 
+	import:  tIMPORT (.import_spec_list osemi ) 
 
-	)  shift 100
-	tIDENT  shift 55
-	tSTRLIT  shift 54
+	)  shift 103
+	tIDENT  shift 56
+	tSTRLIT  shift 55
 	.  error
 
-	import_spec_list  goto 101
-	import_spec  goto 102
+	import_spec_list  goto 104
+	import_spec  goto 105
 
-state 53
+state 54
 	import:  tIMPORT import_spec.    (17)
 
 	.  reduce 17 (src line 196)
 
 
-state 54
+state 55
 	import_spec:  tSTRLIT.    (20)
 
 	.  reduce 20 (src line 202)
 
 
-state 55
-	import_spec:  tIDENT.tSTRLIT
-
-	tSTRLIT  shift 103
-	.  error
-
-
 state 56
-	defs:  defs type_def.;
+	import_spec:  tIDENT.tSTRLIT 
 
-	;  shift 104
+	tSTRLIT  shift 106
 	.  error
 
 
 state 57
-	defs:  defs const_def.;
+	defs:  defs type_def.; 
 
-	;  shift 105
+	;  shift 107
 	.  error
 
 
 state 58
-	defs:  defs error_def.;
+	defs:  defs const_def.; 
 
-	;  shift 106
+	;  shift 108
 	.  error
 
 
 state 59
-	type_def:  tTYPE.( )
-	type_def:  tTYPE.( type_spec_list osemi )
-	type_def:  tTYPE.type_spec
-	type_def:  tTYPE.interface_spec
+	defs:  defs error_def.; 
 
-	(  shift 107
-	tIDENT  shift 110
+	;  shift 109
 	.  error
 
-	type_spec  goto 108
-	interface_spec  goto 109
 
 state 60
-	const_def:  tCONST.( )
-	const_def:  tCONST.( const_spec_list osemi )
-	const_def:  tCONST.const_spec
+	type_def:  tTYPE.( ) 
+	type_def:  tTYPE.( type_spec_list osemi ) 
+	type_def:  tTYPE.type_spec 
+	type_def:  tTYPE.interface_spec 
 
-	(  shift 111
+	(  shift 110
 	tIDENT  shift 113
 	.  error
 
-	const_spec  goto 112
+	type_spec  goto 111
+	interface_spec  goto 112
 
 state 61
-	error_def:  tERRORID.( )
-	error_def:  tERRORID.( errorid_spec_list osemi )
-	error_def:  tERRORID.errorid_spec
+	const_def:  tCONST.( ) 
+	const_def:  tCONST.( const_spec_list osemi ) 
+	const_def:  tCONST.const_spec 
 
 	(  shift 114
 	tIDENT  shift 116
 	.  error
 
-	errorid_spec  goto 115
+	const_spec  goto 115
 
 state 62
+	error_def:  tERRORID.( ) 
+	error_def:  tERRORID.( errorid_spec_list osemi ) 
+	error_def:  tERRORID.errorid_spec 
+
+	(  shift 117
+	tIDENT  shift 119
+	.  error
+
+	errorid_spec  goto 118
+
+state 63
 	config:  tIDENT = expr ;.    (12)
 
 	.  reduce 12 (src line 175)
 
 
-state 63
-	expr:  expr tOROR.expr
-	otype: .    (133)
-
-	(  shift 41
-	[  shift 42
-	!  shift 30
-	+  shift 31
-	-  shift 32
-	^  shift 33
-	tENUM  shift 43
-	tSET  shift 44
-	tMAP  shift 45
-	tSTRUCT  shift 46
-	tONEOF  shift 47
-	tIDENT  shift 48
-	tSTRLIT  shift 35
-	tINTLIT  shift 36
-	tRATLIT  shift 37
-	tIMAGLIT  shift 38
-	.  reduce 133 (src line 568)
-
-	nameref  goto 39
-	type  goto 34
-	otype  goto 49
-	expr  goto 117
-	unary_expr  goto 28
-	operand  goto 29
-	comp_lit  goto 40
-
 state 64
-	expr:  expr tANDAND.expr
-	otype: .    (133)
+	expr:  expr tOROR.expr 
+	otype: .    (134)
 
 	(  shift 41
 	[  shift 42
@@ -731,89 +723,30 @@ state 64
 	+  shift 31
 	-  shift 32
 	^  shift 33
+	?  shift 48
 	tENUM  shift 43
 	tSET  shift 44
 	tMAP  shift 45
 	tSTRUCT  shift 46
 	tONEOF  shift 47
-	tIDENT  shift 48
+	tIDENT  shift 49
 	tSTRLIT  shift 35
 	tINTLIT  shift 36
 	tRATLIT  shift 37
 	tIMAGLIT  shift 38
-	.  reduce 133 (src line 568)
+	.  reduce 134 (src line 570)
 
 	nameref  goto 39
 	type  goto 34
-	otype  goto 49
-	expr  goto 118
-	unary_expr  goto 28
-	operand  goto 29
-	comp_lit  goto 40
-
-state 65
-	expr:  expr <.expr
-	otype: .    (133)
-
-	(  shift 41
-	[  shift 42
-	!  shift 30
-	+  shift 31
-	-  shift 32
-	^  shift 33
-	tENUM  shift 43
-	tSET  shift 44
-	tMAP  shift 45
-	tSTRUCT  shift 46
-	tONEOF  shift 47
-	tIDENT  shift 48
-	tSTRLIT  shift 35
-	tINTLIT  shift 36
-	tRATLIT  shift 37
-	tIMAGLIT  shift 38
-	.  reduce 133 (src line 568)
-
-	nameref  goto 39
-	type  goto 34
-	otype  goto 49
-	expr  goto 119
-	unary_expr  goto 28
-	operand  goto 29
-	comp_lit  goto 40
-
-state 66
-	expr:  expr >.expr
-	otype: .    (133)
-
-	(  shift 41
-	[  shift 42
-	!  shift 30
-	+  shift 31
-	-  shift 32
-	^  shift 33
-	tENUM  shift 43
-	tSET  shift 44
-	tMAP  shift 45
-	tSTRUCT  shift 46
-	tONEOF  shift 47
-	tIDENT  shift 48
-	tSTRLIT  shift 35
-	tINTLIT  shift 36
-	tRATLIT  shift 37
-	tIMAGLIT  shift 38
-	.  reduce 133 (src line 568)
-
-	nameref  goto 39
-	type  goto 34
-	otype  goto 49
+	otype  goto 50
 	expr  goto 120
 	unary_expr  goto 28
 	operand  goto 29
 	comp_lit  goto 40
 
-state 67
-	expr:  expr tLE.expr
-	otype: .    (133)
+state 65
+	expr:  expr tANDAND.expr 
+	otype: .    (134)
 
 	(  shift 41
 	[  shift 42
@@ -821,29 +754,30 @@ state 67
 	+  shift 31
 	-  shift 32
 	^  shift 33
+	?  shift 48
 	tENUM  shift 43
 	tSET  shift 44
 	tMAP  shift 45
 	tSTRUCT  shift 46
 	tONEOF  shift 47
-	tIDENT  shift 48
+	tIDENT  shift 49
 	tSTRLIT  shift 35
 	tINTLIT  shift 36
 	tRATLIT  shift 37
 	tIMAGLIT  shift 38
-	.  reduce 133 (src line 568)
+	.  reduce 134 (src line 570)
 
 	nameref  goto 39
 	type  goto 34
-	otype  goto 49
+	otype  goto 50
 	expr  goto 121
 	unary_expr  goto 28
 	operand  goto 29
 	comp_lit  goto 40
 
-state 68
-	expr:  expr tGE.expr
-	otype: .    (133)
+state 66
+	expr:  expr <.expr 
+	otype: .    (134)
 
 	(  shift 41
 	[  shift 42
@@ -851,29 +785,30 @@ state 68
 	+  shift 31
 	-  shift 32
 	^  shift 33
+	?  shift 48
 	tENUM  shift 43
 	tSET  shift 44
 	tMAP  shift 45
 	tSTRUCT  shift 46
 	tONEOF  shift 47
-	tIDENT  shift 48
+	tIDENT  shift 49
 	tSTRLIT  shift 35
 	tINTLIT  shift 36
 	tRATLIT  shift 37
 	tIMAGLIT  shift 38
-	.  reduce 133 (src line 568)
+	.  reduce 134 (src line 570)
 
 	nameref  goto 39
 	type  goto 34
-	otype  goto 49
+	otype  goto 50
 	expr  goto 122
 	unary_expr  goto 28
 	operand  goto 29
 	comp_lit  goto 40
 
-state 69
-	expr:  expr tNE.expr
-	otype: .    (133)
+state 67
+	expr:  expr >.expr 
+	otype: .    (134)
 
 	(  shift 41
 	[  shift 42
@@ -881,29 +816,30 @@ state 69
 	+  shift 31
 	-  shift 32
 	^  shift 33
+	?  shift 48
 	tENUM  shift 43
 	tSET  shift 44
 	tMAP  shift 45
 	tSTRUCT  shift 46
 	tONEOF  shift 47
-	tIDENT  shift 48
+	tIDENT  shift 49
 	tSTRLIT  shift 35
 	tINTLIT  shift 36
 	tRATLIT  shift 37
 	tIMAGLIT  shift 38
-	.  reduce 133 (src line 568)
+	.  reduce 134 (src line 570)
 
 	nameref  goto 39
 	type  goto 34
-	otype  goto 49
+	otype  goto 50
 	expr  goto 123
 	unary_expr  goto 28
 	operand  goto 29
 	comp_lit  goto 40
 
-state 70
-	expr:  expr tEQEQ.expr
-	otype: .    (133)
+state 68
+	expr:  expr tLE.expr 
+	otype: .    (134)
 
 	(  shift 41
 	[  shift 42
@@ -911,29 +847,30 @@ state 70
 	+  shift 31
 	-  shift 32
 	^  shift 33
+	?  shift 48
 	tENUM  shift 43
 	tSET  shift 44
 	tMAP  shift 45
 	tSTRUCT  shift 46
 	tONEOF  shift 47
-	tIDENT  shift 48
+	tIDENT  shift 49
 	tSTRLIT  shift 35
 	tINTLIT  shift 36
 	tRATLIT  shift 37
 	tIMAGLIT  shift 38
-	.  reduce 133 (src line 568)
+	.  reduce 134 (src line 570)
 
 	nameref  goto 39
 	type  goto 34
-	otype  goto 49
+	otype  goto 50
 	expr  goto 124
 	unary_expr  goto 28
 	operand  goto 29
 	comp_lit  goto 40
 
-state 71
-	expr:  expr +.expr
-	otype: .    (133)
+state 69
+	expr:  expr tGE.expr 
+	otype: .    (134)
 
 	(  shift 41
 	[  shift 42
@@ -941,29 +878,30 @@ state 71
 	+  shift 31
 	-  shift 32
 	^  shift 33
+	?  shift 48
 	tENUM  shift 43
 	tSET  shift 44
 	tMAP  shift 45
 	tSTRUCT  shift 46
 	tONEOF  shift 47
-	tIDENT  shift 48
+	tIDENT  shift 49
 	tSTRLIT  shift 35
 	tINTLIT  shift 36
 	tRATLIT  shift 37
 	tIMAGLIT  shift 38
-	.  reduce 133 (src line 568)
+	.  reduce 134 (src line 570)
 
 	nameref  goto 39
 	type  goto 34
-	otype  goto 49
+	otype  goto 50
 	expr  goto 125
 	unary_expr  goto 28
 	operand  goto 29
 	comp_lit  goto 40
 
-state 72
-	expr:  expr -.expr
-	otype: .    (133)
+state 70
+	expr:  expr tNE.expr 
+	otype: .    (134)
 
 	(  shift 41
 	[  shift 42
@@ -971,29 +909,30 @@ state 72
 	+  shift 31
 	-  shift 32
 	^  shift 33
+	?  shift 48
 	tENUM  shift 43
 	tSET  shift 44
 	tMAP  shift 45
 	tSTRUCT  shift 46
 	tONEOF  shift 47
-	tIDENT  shift 48
+	tIDENT  shift 49
 	tSTRLIT  shift 35
 	tINTLIT  shift 36
 	tRATLIT  shift 37
 	tIMAGLIT  shift 38
-	.  reduce 133 (src line 568)
+	.  reduce 134 (src line 570)
 
 	nameref  goto 39
 	type  goto 34
-	otype  goto 49
+	otype  goto 50
 	expr  goto 126
 	unary_expr  goto 28
 	operand  goto 29
 	comp_lit  goto 40
 
-state 73
-	expr:  expr *.expr
-	otype: .    (133)
+state 71
+	expr:  expr tEQEQ.expr 
+	otype: .    (134)
 
 	(  shift 41
 	[  shift 42
@@ -1001,29 +940,30 @@ state 73
 	+  shift 31
 	-  shift 32
 	^  shift 33
+	?  shift 48
 	tENUM  shift 43
 	tSET  shift 44
 	tMAP  shift 45
 	tSTRUCT  shift 46
 	tONEOF  shift 47
-	tIDENT  shift 48
+	tIDENT  shift 49
 	tSTRLIT  shift 35
 	tINTLIT  shift 36
 	tRATLIT  shift 37
 	tIMAGLIT  shift 38
-	.  reduce 133 (src line 568)
+	.  reduce 134 (src line 570)
 
 	nameref  goto 39
 	type  goto 34
-	otype  goto 49
+	otype  goto 50
 	expr  goto 127
 	unary_expr  goto 28
 	operand  goto 29
 	comp_lit  goto 40
 
-state 74
-	expr:  expr /.expr
-	otype: .    (133)
+state 72
+	expr:  expr +.expr 
+	otype: .    (134)
 
 	(  shift 41
 	[  shift 42
@@ -1031,29 +971,30 @@ state 74
 	+  shift 31
 	-  shift 32
 	^  shift 33
+	?  shift 48
 	tENUM  shift 43
 	tSET  shift 44
 	tMAP  shift 45
 	tSTRUCT  shift 46
 	tONEOF  shift 47
-	tIDENT  shift 48
+	tIDENT  shift 49
 	tSTRLIT  shift 35
 	tINTLIT  shift 36
 	tRATLIT  shift 37
 	tIMAGLIT  shift 38
-	.  reduce 133 (src line 568)
+	.  reduce 134 (src line 570)
 
 	nameref  goto 39
 	type  goto 34
-	otype  goto 49
+	otype  goto 50
 	expr  goto 128
 	unary_expr  goto 28
 	operand  goto 29
 	comp_lit  goto 40
 
-state 75
-	expr:  expr %.expr
-	otype: .    (133)
+state 73
+	expr:  expr -.expr 
+	otype: .    (134)
 
 	(  shift 41
 	[  shift 42
@@ -1061,29 +1002,30 @@ state 75
 	+  shift 31
 	-  shift 32
 	^  shift 33
+	?  shift 48
 	tENUM  shift 43
 	tSET  shift 44
 	tMAP  shift 45
 	tSTRUCT  shift 46
 	tONEOF  shift 47
-	tIDENT  shift 48
+	tIDENT  shift 49
 	tSTRLIT  shift 35
 	tINTLIT  shift 36
 	tRATLIT  shift 37
 	tIMAGLIT  shift 38
-	.  reduce 133 (src line 568)
+	.  reduce 134 (src line 570)
 
 	nameref  goto 39
 	type  goto 34
-	otype  goto 49
+	otype  goto 50
 	expr  goto 129
 	unary_expr  goto 28
 	operand  goto 29
 	comp_lit  goto 40
 
-state 76
-	expr:  expr |.expr
-	otype: .    (133)
+state 74
+	expr:  expr *.expr 
+	otype: .    (134)
 
 	(  shift 41
 	[  shift 42
@@ -1091,29 +1033,30 @@ state 76
 	+  shift 31
 	-  shift 32
 	^  shift 33
+	?  shift 48
 	tENUM  shift 43
 	tSET  shift 44
 	tMAP  shift 45
 	tSTRUCT  shift 46
 	tONEOF  shift 47
-	tIDENT  shift 48
+	tIDENT  shift 49
 	tSTRLIT  shift 35
 	tINTLIT  shift 36
 	tRATLIT  shift 37
 	tIMAGLIT  shift 38
-	.  reduce 133 (src line 568)
+	.  reduce 134 (src line 570)
 
 	nameref  goto 39
 	type  goto 34
-	otype  goto 49
+	otype  goto 50
 	expr  goto 130
 	unary_expr  goto 28
 	operand  goto 29
 	comp_lit  goto 40
 
-state 77
-	expr:  expr &.expr
-	otype: .    (133)
+state 75
+	expr:  expr /.expr 
+	otype: .    (134)
 
 	(  shift 41
 	[  shift 42
@@ -1121,29 +1064,30 @@ state 77
 	+  shift 31
 	-  shift 32
 	^  shift 33
+	?  shift 48
 	tENUM  shift 43
 	tSET  shift 44
 	tMAP  shift 45
 	tSTRUCT  shift 46
 	tONEOF  shift 47
-	tIDENT  shift 48
+	tIDENT  shift 49
 	tSTRLIT  shift 35
 	tINTLIT  shift 36
 	tRATLIT  shift 37
 	tIMAGLIT  shift 38
-	.  reduce 133 (src line 568)
+	.  reduce 134 (src line 570)
 
 	nameref  goto 39
 	type  goto 34
-	otype  goto 49
+	otype  goto 50
 	expr  goto 131
 	unary_expr  goto 28
 	operand  goto 29
 	comp_lit  goto 40
 
-state 78
-	expr:  expr ^.expr
-	otype: .    (133)
+state 76
+	expr:  expr %.expr 
+	otype: .    (134)
 
 	(  shift 41
 	[  shift 42
@@ -1151,29 +1095,30 @@ state 78
 	+  shift 31
 	-  shift 32
 	^  shift 33
+	?  shift 48
 	tENUM  shift 43
 	tSET  shift 44
 	tMAP  shift 45
 	tSTRUCT  shift 46
 	tONEOF  shift 47
-	tIDENT  shift 48
+	tIDENT  shift 49
 	tSTRLIT  shift 35
 	tINTLIT  shift 36
 	tRATLIT  shift 37
 	tIMAGLIT  shift 38
-	.  reduce 133 (src line 568)
+	.  reduce 134 (src line 570)
 
 	nameref  goto 39
 	type  goto 34
-	otype  goto 49
+	otype  goto 50
 	expr  goto 132
 	unary_expr  goto 28
 	operand  goto 29
 	comp_lit  goto 40
 
-state 79
-	expr:  expr tLSH.expr
-	otype: .    (133)
+state 77
+	expr:  expr |.expr 
+	otype: .    (134)
 
 	(  shift 41
 	[  shift 42
@@ -1181,29 +1126,30 @@ state 79
 	+  shift 31
 	-  shift 32
 	^  shift 33
+	?  shift 48
 	tENUM  shift 43
 	tSET  shift 44
 	tMAP  shift 45
 	tSTRUCT  shift 46
 	tONEOF  shift 47
-	tIDENT  shift 48
+	tIDENT  shift 49
 	tSTRLIT  shift 35
 	tINTLIT  shift 36
 	tRATLIT  shift 37
 	tIMAGLIT  shift 38
-	.  reduce 133 (src line 568)
+	.  reduce 134 (src line 570)
 
 	nameref  goto 39
 	type  goto 34
-	otype  goto 49
+	otype  goto 50
 	expr  goto 133
 	unary_expr  goto 28
 	operand  goto 29
 	comp_lit  goto 40
 
-state 80
-	expr:  expr tRSH.expr
-	otype: .    (133)
+state 78
+	expr:  expr &.expr 
+	otype: .    (134)
 
 	(  shift 41
 	[  shift 42
@@ -1211,53 +1157,30 @@ state 80
 	+  shift 31
 	-  shift 32
 	^  shift 33
+	?  shift 48
 	tENUM  shift 43
 	tSET  shift 44
 	tMAP  shift 45
 	tSTRUCT  shift 46
 	tONEOF  shift 47
-	tIDENT  shift 48
+	tIDENT  shift 49
 	tSTRLIT  shift 35
 	tINTLIT  shift 36
 	tRATLIT  shift 37
 	tIMAGLIT  shift 38
-	.  reduce 133 (src line 568)
+	.  reduce 134 (src line 570)
 
 	nameref  goto 39
 	type  goto 34
-	otype  goto 49
+	otype  goto 50
 	expr  goto 134
 	unary_expr  goto 28
 	operand  goto 29
 	comp_lit  goto 40
 
-state 81
-	unary_expr:  ! unary_expr.    (106)
-
-	.  reduce 106 (src line 489)
-
-
-state 82
-	unary_expr:  + unary_expr.    (107)
-
-	.  reduce 107 (src line 491)
-
-
-state 83
-	unary_expr:  - unary_expr.    (108)
-
-	.  reduce 108 (src line 493)
-
-
-state 84
-	unary_expr:  ^ unary_expr.    (109)
-
-	.  reduce 109 (src line 495)
-
-
-state 85
-	unary_expr:  type (.expr )
-	otype: .    (133)
+state 79
+	expr:  expr ^.expr 
+	otype: .    (134)
 
 	(  shift 41
 	[  shift 42
@@ -1265,29 +1188,30 @@ state 85
 	+  shift 31
 	-  shift 32
 	^  shift 33
+	?  shift 48
 	tENUM  shift 43
 	tSET  shift 44
 	tMAP  shift 45
 	tSTRUCT  shift 46
 	tONEOF  shift 47
-	tIDENT  shift 48
+	tIDENT  shift 49
 	tSTRLIT  shift 35
 	tINTLIT  shift 36
 	tRATLIT  shift 37
 	tIMAGLIT  shift 38
-	.  reduce 133 (src line 568)
+	.  reduce 134 (src line 570)
 
 	nameref  goto 39
 	type  goto 34
-	otype  goto 49
+	otype  goto 50
 	expr  goto 135
 	unary_expr  goto 28
 	operand  goto 29
 	comp_lit  goto 40
 
-state 86
-	operand:  nameref [.expr ]
-	otype: .    (133)
+state 80
+	expr:  expr tLSH.expr 
+	otype: .    (134)
 
 	(  shift 41
 	[  shift 42
@@ -1295,43 +1219,30 @@ state 86
 	+  shift 31
 	-  shift 32
 	^  shift 33
+	?  shift 48
 	tENUM  shift 43
 	tSET  shift 44
 	tMAP  shift 45
 	tSTRUCT  shift 46
 	tONEOF  shift 47
-	tIDENT  shift 48
+	tIDENT  shift 49
 	tSTRLIT  shift 35
 	tINTLIT  shift 36
 	tRATLIT  shift 37
 	tIMAGLIT  shift 38
-	.  reduce 133 (src line 568)
+	.  reduce 134 (src line 570)
 
 	nameref  goto 39
 	type  goto 34
-	otype  goto 49
+	otype  goto 50
 	expr  goto 136
 	unary_expr  goto 28
 	operand  goto 29
 	comp_lit  goto 40
 
-state 87
-	nameref:  nameref ..tIDENT
-
-	tIDENT  shift 137
-	.  error
-
-
-state 88
-	operand:  comp_lit ..tIDENT
-
-	tIDENT  shift 138
-	.  error
-
-
-state 89
-	operand:  comp_lit [.expr ]
-	otype: .    (133)
+state 81
+	expr:  expr tRSH.expr 
+	otype: .    (134)
 
 	(  shift 41
 	[  shift 42
@@ -1339,1330 +1250,1478 @@ state 89
 	+  shift 31
 	-  shift 32
 	^  shift 33
+	?  shift 48
 	tENUM  shift 43
 	tSET  shift 44
 	tMAP  shift 45
 	tSTRUCT  shift 46
 	tONEOF  shift 47
-	tIDENT  shift 48
+	tIDENT  shift 49
 	tSTRLIT  shift 35
 	tINTLIT  shift 36
 	tRATLIT  shift 37
 	tIMAGLIT  shift 38
-	.  reduce 133 (src line 568)
+	.  reduce 134 (src line 570)
 
 	nameref  goto 39
 	type  goto 34
-	otype  goto 49
+	otype  goto 50
+	expr  goto 137
+	unary_expr  goto 28
+	operand  goto 29
+	comp_lit  goto 40
+
+state 82
+	unary_expr:  ! unary_expr.    (107)
+
+	.  reduce 107 (src line 491)
+
+
+state 83
+	unary_expr:  + unary_expr.    (108)
+
+	.  reduce 108 (src line 493)
+
+
+state 84
+	unary_expr:  - unary_expr.    (109)
+
+	.  reduce 109 (src line 495)
+
+
+state 85
+	unary_expr:  ^ unary_expr.    (110)
+
+	.  reduce 110 (src line 497)
+
+
+state 86
+	unary_expr:  type (.expr ) 
+	otype: .    (134)
+
+	(  shift 41
+	[  shift 42
+	!  shift 30
+	+  shift 31
+	-  shift 32
+	^  shift 33
+	?  shift 48
+	tENUM  shift 43
+	tSET  shift 44
+	tMAP  shift 45
+	tSTRUCT  shift 46
+	tONEOF  shift 47
+	tIDENT  shift 49
+	tSTRLIT  shift 35
+	tINTLIT  shift 36
+	tRATLIT  shift 37
+	tIMAGLIT  shift 38
+	.  reduce 134 (src line 570)
+
+	nameref  goto 39
+	type  goto 34
+	otype  goto 50
+	expr  goto 138
+	unary_expr  goto 28
+	operand  goto 29
+	comp_lit  goto 40
+
+state 87
+	operand:  nameref [.expr ] 
+	otype: .    (134)
+
+	(  shift 41
+	[  shift 42
+	!  shift 30
+	+  shift 31
+	-  shift 32
+	^  shift 33
+	?  shift 48
+	tENUM  shift 43
+	tSET  shift 44
+	tMAP  shift 45
+	tSTRUCT  shift 46
+	tONEOF  shift 47
+	tIDENT  shift 49
+	tSTRLIT  shift 35
+	tINTLIT  shift 36
+	tRATLIT  shift 37
+	tIMAGLIT  shift 38
+	.  reduce 134 (src line 570)
+
+	nameref  goto 39
+	type  goto 34
+	otype  goto 50
 	expr  goto 139
 	unary_expr  goto 28
 	operand  goto 29
 	comp_lit  goto 40
 
+state 88
+	nameref:  nameref ..tIDENT 
+
+	tIDENT  shift 140
+	.  error
+
+
+state 89
+	operand:  comp_lit ..tIDENT 
+
+	tIDENT  shift 141
+	.  error
+
+
 state 90
-	expr:  expr.tOROR expr
-	expr:  expr.tANDAND expr
-	expr:  expr.< expr
-	expr:  expr.> expr
-	expr:  expr.tLE expr
-	expr:  expr.tGE expr
-	expr:  expr.tNE expr
-	expr:  expr.tEQEQ expr
-	expr:  expr.+ expr
-	expr:  expr.- expr
-	expr:  expr.* expr
-	expr:  expr./ expr
-	expr:  expr.% expr
-	expr:  expr.| expr
-	expr:  expr.& expr
-	expr:  expr.^ expr
-	expr:  expr.tLSH expr
-	expr:  expr.tRSH expr
-	operand:  ( expr.)
-
-	)  shift 140
-	<  shift 65
-	>  shift 66
-	+  shift 71
-	-  shift 72
-	*  shift 73
-	/  shift 74
-	%  shift 75
-	|  shift 76
-	&  shift 77
-	^  shift 78
-	tOROR  shift 63
-	tANDAND  shift 64
-	tLE  shift 67
-	tGE  shift 68
-	tNE  shift 69
-	tEQEQ  shift 70
-	tLSH  shift 79
-	tRSH  shift 80
-	.  error
-
-
-state 91
-	type:  [ tINTLIT.] type
-
-	]  shift 141
-	.  error
-
-
-state 92
-	type:  [ ].type
-
-	[  shift 42
-	tENUM  shift 43
-	tSET  shift 44
-	tMAP  shift 45
-	tSTRUCT  shift 46
-	tONEOF  shift 47
-	tIDENT  shift 48
-	.  error
-
-	nameref  goto 143
-	type  goto 142
-
-state 93
-	type:  tENUM {.label_spec_list osemi }
-
-	tIDENT  shift 146
-	.  error
-
-	label_spec  goto 145
-	label_spec_list  goto 144
-
-state 94
-	type:  tSET [.type ]
-
-	[  shift 42
-	tENUM  shift 43
-	tSET  shift 44
-	tMAP  shift 45
-	tSTRUCT  shift 46
-	tONEOF  shift 47
-	tIDENT  shift 48
-	.  error
-
-	nameref  goto 143
-	type  goto 147
-
-state 95
-	type:  tMAP [.type ] type
-
-	[  shift 42
-	tENUM  shift 43
-	tSET  shift 44
-	tMAP  shift 45
-	tSTRUCT  shift 46
-	tONEOF  shift 47
-	tIDENT  shift 48
-	.  error
-
-	nameref  goto 143
-	type  goto 148
-
-state 96
-	type:  tSTRUCT {.field_spec_list osemi }
-	type:  tSTRUCT {.}
-
-	[  shift 42
-	}  shift 150
-	tENUM  shift 43
-	tSET  shift 44
-	tMAP  shift 45
-	tSTRUCT  shift 46
-	tONEOF  shift 47
-	tIDENT  shift 48
-	.  error
-
-	nameref  goto 143
-	type  goto 153
-	type_comma_list  goto 152
-	field_spec_list  goto 149
-	field_spec  goto 151
-
-state 97
-	type:  tONEOF {.type_semi_list osemi }
-
-	[  shift 42
-	tENUM  shift 43
-	tSET  shift 44
-	tMAP  shift 45
-	tSTRUCT  shift 46
-	tONEOF  shift 47
-	tIDENT  shift 48
-	.  error
-
-	nameref  goto 143
-	type  goto 155
-	type_semi_list  goto 154
-
-state 98
-	comp_lit:  otype {.}
-	comp_lit:  otype {.kv_lit_list ocomma }
-	otype: .    (133)
+	operand:  comp_lit [.expr ] 
+	otype: .    (134)
 
 	(  shift 41
 	[  shift 42
-	}  shift 156
 	!  shift 30
 	+  shift 31
 	-  shift 32
 	^  shift 33
+	?  shift 48
 	tENUM  shift 43
 	tSET  shift 44
 	tMAP  shift 45
 	tSTRUCT  shift 46
 	tONEOF  shift 47
-	tIDENT  shift 48
+	tIDENT  shift 49
 	tSTRLIT  shift 35
 	tINTLIT  shift 36
 	tRATLIT  shift 37
 	tIMAGLIT  shift 38
-	.  reduce 133 (src line 568)
+	.  reduce 134 (src line 570)
 
 	nameref  goto 39
 	type  goto 34
-	otype  goto 49
-	expr  goto 159
+	otype  goto 50
+	expr  goto 142
 	unary_expr  goto 28
 	operand  goto 29
 	comp_lit  goto 40
-	kv_lit  goto 158
-	kv_lit_list  goto 157
 
-state 99
-	const_defs:  const_defs const_def.;
+state 91
+	expr:  expr.tOROR expr 
+	expr:  expr.tANDAND expr 
+	expr:  expr.< expr 
+	expr:  expr.> expr 
+	expr:  expr.tLE expr 
+	expr:  expr.tGE expr 
+	expr:  expr.tNE expr 
+	expr:  expr.tEQEQ expr 
+	expr:  expr.+ expr 
+	expr:  expr.- expr 
+	expr:  expr.* expr 
+	expr:  expr./ expr 
+	expr:  expr.% expr 
+	expr:  expr.| expr 
+	expr:  expr.& expr 
+	expr:  expr.^ expr 
+	expr:  expr.tLSH expr 
+	expr:  expr.tRSH expr 
+	operand:  ( expr.) 
 
-	;  shift 160
+	)  shift 143
+	<  shift 66
+	>  shift 67
+	+  shift 72
+	-  shift 73
+	*  shift 74
+	/  shift 75
+	%  shift 76
+	|  shift 77
+	&  shift 78
+	^  shift 79
+	tOROR  shift 64
+	tANDAND  shift 65
+	tLE  shift 68
+	tGE  shift 69
+	tNE  shift 70
+	tEQEQ  shift 71
+	tLSH  shift 80
+	tRSH  shift 81
 	.  error
 
 
+state 92
+	type:  [ tINTLIT.] type 
+
+	]  shift 144
+	.  error
+
+
+state 93
+	type:  [ ].type 
+
+	[  shift 42
+	?  shift 48
+	tENUM  shift 43
+	tSET  shift 44
+	tMAP  shift 45
+	tSTRUCT  shift 46
+	tONEOF  shift 47
+	tIDENT  shift 49
+	.  error
+
+	nameref  goto 100
+	type  goto 145
+
+state 94
+	type:  tENUM {.label_spec_list osemi } 
+
+	tIDENT  shift 148
+	.  error
+
+	label_spec  goto 147
+	label_spec_list  goto 146
+
+state 95
+	type:  tSET [.type ] 
+
+	[  shift 42
+	?  shift 48
+	tENUM  shift 43
+	tSET  shift 44
+	tMAP  shift 45
+	tSTRUCT  shift 46
+	tONEOF  shift 47
+	tIDENT  shift 49
+	.  error
+
+	nameref  goto 100
+	type  goto 149
+
+state 96
+	type:  tMAP [.type ] type 
+
+	[  shift 42
+	?  shift 48
+	tENUM  shift 43
+	tSET  shift 44
+	tMAP  shift 45
+	tSTRUCT  shift 46
+	tONEOF  shift 47
+	tIDENT  shift 49
+	.  error
+
+	nameref  goto 100
+	type  goto 150
+
+state 97
+	type:  tSTRUCT {.field_spec_list osemi } 
+	type:  tSTRUCT {.} 
+
+	[  shift 42
+	}  shift 152
+	?  shift 48
+	tENUM  shift 43
+	tSET  shift 44
+	tMAP  shift 45
+	tSTRUCT  shift 46
+	tONEOF  shift 47
+	tIDENT  shift 49
+	.  error
+
+	nameref  goto 100
+	type  goto 155
+	type_comma_list  goto 154
+	field_spec_list  goto 151
+	field_spec  goto 153
+
+state 98
+	type:  tONEOF {.type_semi_list osemi } 
+
+	[  shift 42
+	?  shift 48
+	tENUM  shift 43
+	tSET  shift 44
+	tMAP  shift 45
+	tSTRUCT  shift 46
+	tONEOF  shift 47
+	tIDENT  shift 49
+	.  error
+
+	nameref  goto 100
+	type  goto 157
+	type_semi_list  goto 156
+
+state 99
+	type:  ? type.    (50)
+
+	.  reduce 50 (src line 272)
+
+
 state 100
+	type:  nameref.    (41)
+	nameref:  nameref.. tIDENT 
+
+	.  shift 88
+	.  reduce 41 (src line 253)
+
+
+state 101
+	comp_lit:  otype {.} 
+	comp_lit:  otype {.kv_lit_list ocomma } 
+	otype: .    (134)
+
+	(  shift 41
+	[  shift 42
+	}  shift 158
+	!  shift 30
+	+  shift 31
+	-  shift 32
+	^  shift 33
+	?  shift 48
+	tENUM  shift 43
+	tSET  shift 44
+	tMAP  shift 45
+	tSTRUCT  shift 46
+	tONEOF  shift 47
+	tIDENT  shift 49
+	tSTRLIT  shift 35
+	tINTLIT  shift 36
+	tRATLIT  shift 37
+	tIMAGLIT  shift 38
+	.  reduce 134 (src line 570)
+
+	nameref  goto 39
+	type  goto 34
+	otype  goto 50
+	expr  goto 161
+	unary_expr  goto 28
+	operand  goto 29
+	comp_lit  goto 40
+	kv_lit  goto 160
+	kv_lit_list  goto 159
+
+state 102
+	const_defs:  const_defs const_def.; 
+
+	;  shift 162
+	.  error
+
+
+state 103
 	import:  tIMPORT ( ).    (15)
 
 	.  reduce 15 (src line 193)
 
 
-state 101
-	import:  tIMPORT ( import_spec_list.osemi )
-	import_spec_list:  import_spec_list.; import_spec
-	osemi: .    (135)
+state 104
+	import:  tIMPORT ( import_spec_list.osemi ) 
+	import_spec_list:  import_spec_list.; import_spec 
+	osemi: .    (136)
 
-	;  shift 162
-	.  reduce 135 (src line 574)
+	;  shift 164
+	.  reduce 136 (src line 576)
 
-	osemi  goto 161
+	osemi  goto 163
 
-state 102
+state 105
 	import_spec_list:  import_spec.    (18)
 
 	.  reduce 18 (src line 198)
 
 
-state 103
+state 106
 	import_spec:  tIDENT tSTRLIT.    (21)
 
 	.  reduce 21 (src line 208)
 
 
-state 104
+state 107
 	defs:  defs type_def ;.    (23)
 
 	.  reduce 23 (src line 217)
 
 
-state 105
+state 108
 	defs:  defs const_def ;.    (24)
 
 	.  reduce 24 (src line 218)
 
 
-state 106
+state 109
 	defs:  defs error_def ;.    (25)
 
 	.  reduce 25 (src line 219)
 
 
-state 107
-	type_def:  tTYPE (.)
-	type_def:  tTYPE (.type_spec_list osemi )
+state 110
+	type_def:  tTYPE (.) 
+	type_def:  tTYPE (.type_spec_list osemi ) 
 
-	)  shift 163
-	tIDENT  shift 166
+	)  shift 165
+	tIDENT  shift 168
 	.  error
 
-	type_spec_list  goto 164
-	type_spec  goto 165
+	type_spec_list  goto 166
+	type_spec  goto 167
 
-state 108
+state 111
 	type_def:  tTYPE type_spec.    (30)
 
 	.  reduce 30 (src line 228)
 
 
-state 109
+state 112
 	type_def:  tTYPE interface_spec.    (31)
 
 	.  reduce 31 (src line 229)
 
 
-state 110
-	type_spec:  tIDENT.type
-	interface_spec:  tIDENT.tINTERFACE { }
-	interface_spec:  tIDENT.tINTERFACE { iface_item_list osemi }
+state 113
+	type_spec:  tIDENT.type 
+	interface_spec:  tIDENT.tINTERFACE { } 
+	interface_spec:  tIDENT.tINTERFACE { iface_item_list osemi } 
 
 	[  shift 42
+	?  shift 48
 	tENUM  shift 43
 	tSET  shift 44
 	tMAP  shift 45
 	tSTRUCT  shift 46
 	tONEOF  shift 47
-	tINTERFACE  shift 168
-	tIDENT  shift 48
+	tINTERFACE  shift 170
+	tIDENT  shift 49
 	.  error
 
-	nameref  goto 143
-	type  goto 167
+	nameref  goto 100
+	type  goto 169
 
-state 111
-	const_def:  tCONST (.)
-	const_def:  tCONST (.const_spec_list osemi )
+state 114
+	const_def:  tCONST (.) 
+	const_def:  tCONST (.const_spec_list osemi ) 
 
-	)  shift 169
-	tIDENT  shift 113
+	)  shift 171
+	tIDENT  shift 116
 	.  error
 
-	const_spec_list  goto 170
-	const_spec  goto 171
+	const_spec_list  goto 172
+	const_spec  goto 173
 
-state 112
+state 115
 	const_def:  tCONST const_spec.    (34)
 
 	.  reduce 34 (src line 234)
 
 
-state 113
-	const_spec:  tIDENT.= expr
+state 116
+	const_spec:  tIDENT.= expr 
 
-	=  shift 172
+	=  shift 174
 	.  error
 
 
-state 114
-	error_def:  tERRORID (.)
-	error_def:  tERRORID (.errorid_spec_list osemi )
+state 117
+	error_def:  tERRORID (.) 
+	error_def:  tERRORID (.errorid_spec_list osemi ) 
 
-	)  shift 173
-	tIDENT  shift 116
+	)  shift 175
+	tIDENT  shift 119
 	.  error
 
-	errorid_spec_list  goto 174
-	errorid_spec  goto 175
+	errorid_spec_list  goto 176
+	errorid_spec  goto 177
 
-state 115
+state 118
 	error_def:  tERRORID errorid_spec.    (37)
 
 	.  reduce 37 (src line 239)
 
 
-state 116
-	errorid_spec:  tIDENT.    (129)
-	errorid_spec:  tIDENT.= tSTRLIT
-
-	=  shift 176
-	.  reduce 129 (src line 546)
-
-
-state 117
-	expr:  expr.tOROR expr
-	expr:  expr tOROR expr.    (87)
-	expr:  expr.tANDAND expr
-	expr:  expr.< expr
-	expr:  expr.> expr
-	expr:  expr.tLE expr
-	expr:  expr.tGE expr
-	expr:  expr.tNE expr
-	expr:  expr.tEQEQ expr
-	expr:  expr.+ expr
-	expr:  expr.- expr
-	expr:  expr.* expr
-	expr:  expr./ expr
-	expr:  expr.% expr
-	expr:  expr.| expr
-	expr:  expr.& expr
-	expr:  expr.^ expr
-	expr:  expr.tLSH expr
-	expr:  expr.tRSH expr
-
-	<  shift 65
-	>  shift 66
-	+  shift 71
-	-  shift 72
-	*  shift 73
-	/  shift 74
-	%  shift 75
-	|  shift 76
-	&  shift 77
-	^  shift 78
-	tANDAND  shift 64
-	tLE  shift 67
-	tGE  shift 68
-	tNE  shift 69
-	tEQEQ  shift 70
-	tLSH  shift 79
-	tRSH  shift 80
-	.  reduce 87 (src line 449)
-
-
-state 118
-	expr:  expr.tOROR expr
-	expr:  expr.tANDAND expr
-	expr:  expr tANDAND expr.    (88)
-	expr:  expr.< expr
-	expr:  expr.> expr
-	expr:  expr.tLE expr
-	expr:  expr.tGE expr
-	expr:  expr.tNE expr
-	expr:  expr.tEQEQ expr
-	expr:  expr.+ expr
-	expr:  expr.- expr
-	expr:  expr.* expr
-	expr:  expr./ expr
-	expr:  expr.% expr
-	expr:  expr.| expr
-	expr:  expr.& expr
-	expr:  expr.^ expr
-	expr:  expr.tLSH expr
-	expr:  expr.tRSH expr
-
-	<  shift 65
-	>  shift 66
-	+  shift 71
-	-  shift 72
-	*  shift 73
-	/  shift 74
-	%  shift 75
-	|  shift 76
-	&  shift 77
-	^  shift 78
-	tLE  shift 67
-	tGE  shift 68
-	tNE  shift 69
-	tEQEQ  shift 70
-	tLSH  shift 79
-	tRSH  shift 80
-	.  reduce 88 (src line 451)
-
-
 state 119
-	expr:  expr.tOROR expr
-	expr:  expr.tANDAND expr
-	expr:  expr.< expr
-	expr:  expr < expr.    (89)
-	expr:  expr.> expr
-	expr:  expr.tLE expr
-	expr:  expr.tGE expr
-	expr:  expr.tNE expr
-	expr:  expr.tEQEQ expr
-	expr:  expr.+ expr
-	expr:  expr.- expr
-	expr:  expr.* expr
-	expr:  expr./ expr
-	expr:  expr.% expr
-	expr:  expr.| expr
-	expr:  expr.& expr
-	expr:  expr.^ expr
-	expr:  expr.tLSH expr
-	expr:  expr.tRSH expr
+	errorid_spec:  tIDENT.    (130)
+	errorid_spec:  tIDENT.= tSTRLIT 
 
-	+  shift 71
-	-  shift 72
-	*  shift 73
-	/  shift 74
-	%  shift 75
-	|  shift 76
-	&  shift 77
-	^  shift 78
-	tLSH  shift 79
-	tRSH  shift 80
-	.  reduce 89 (src line 453)
+	=  shift 178
+	.  reduce 130 (src line 548)
 
 
 state 120
-	expr:  expr.tOROR expr
-	expr:  expr.tANDAND expr
-	expr:  expr.< expr
-	expr:  expr.> expr
-	expr:  expr > expr.    (90)
-	expr:  expr.tLE expr
-	expr:  expr.tGE expr
-	expr:  expr.tNE expr
-	expr:  expr.tEQEQ expr
-	expr:  expr.+ expr
-	expr:  expr.- expr
-	expr:  expr.* expr
-	expr:  expr./ expr
-	expr:  expr.% expr
-	expr:  expr.| expr
-	expr:  expr.& expr
-	expr:  expr.^ expr
-	expr:  expr.tLSH expr
-	expr:  expr.tRSH expr
+	expr:  expr.tOROR expr 
+	expr:  expr tOROR expr.    (88)
+	expr:  expr.tANDAND expr 
+	expr:  expr.< expr 
+	expr:  expr.> expr 
+	expr:  expr.tLE expr 
+	expr:  expr.tGE expr 
+	expr:  expr.tNE expr 
+	expr:  expr.tEQEQ expr 
+	expr:  expr.+ expr 
+	expr:  expr.- expr 
+	expr:  expr.* expr 
+	expr:  expr./ expr 
+	expr:  expr.% expr 
+	expr:  expr.| expr 
+	expr:  expr.& expr 
+	expr:  expr.^ expr 
+	expr:  expr.tLSH expr 
+	expr:  expr.tRSH expr 
 
-	+  shift 71
-	-  shift 72
-	*  shift 73
-	/  shift 74
-	%  shift 75
-	|  shift 76
-	&  shift 77
-	^  shift 78
-	tLSH  shift 79
-	tRSH  shift 80
-	.  reduce 90 (src line 455)
+	<  shift 66
+	>  shift 67
+	+  shift 72
+	-  shift 73
+	*  shift 74
+	/  shift 75
+	%  shift 76
+	|  shift 77
+	&  shift 78
+	^  shift 79
+	tANDAND  shift 65
+	tLE  shift 68
+	tGE  shift 69
+	tNE  shift 70
+	tEQEQ  shift 71
+	tLSH  shift 80
+	tRSH  shift 81
+	.  reduce 88 (src line 451)
 
 
 state 121
-	expr:  expr.tOROR expr
-	expr:  expr.tANDAND expr
-	expr:  expr.< expr
-	expr:  expr.> expr
-	expr:  expr.tLE expr
-	expr:  expr tLE expr.    (91)
-	expr:  expr.tGE expr
-	expr:  expr.tNE expr
-	expr:  expr.tEQEQ expr
-	expr:  expr.+ expr
-	expr:  expr.- expr
-	expr:  expr.* expr
-	expr:  expr./ expr
-	expr:  expr.% expr
-	expr:  expr.| expr
-	expr:  expr.& expr
-	expr:  expr.^ expr
-	expr:  expr.tLSH expr
-	expr:  expr.tRSH expr
+	expr:  expr.tOROR expr 
+	expr:  expr.tANDAND expr 
+	expr:  expr tANDAND expr.    (89)
+	expr:  expr.< expr 
+	expr:  expr.> expr 
+	expr:  expr.tLE expr 
+	expr:  expr.tGE expr 
+	expr:  expr.tNE expr 
+	expr:  expr.tEQEQ expr 
+	expr:  expr.+ expr 
+	expr:  expr.- expr 
+	expr:  expr.* expr 
+	expr:  expr./ expr 
+	expr:  expr.% expr 
+	expr:  expr.| expr 
+	expr:  expr.& expr 
+	expr:  expr.^ expr 
+	expr:  expr.tLSH expr 
+	expr:  expr.tRSH expr 
 
-	+  shift 71
-	-  shift 72
-	*  shift 73
-	/  shift 74
-	%  shift 75
-	|  shift 76
-	&  shift 77
-	^  shift 78
-	tLSH  shift 79
-	tRSH  shift 80
-	.  reduce 91 (src line 457)
+	<  shift 66
+	>  shift 67
+	+  shift 72
+	-  shift 73
+	*  shift 74
+	/  shift 75
+	%  shift 76
+	|  shift 77
+	&  shift 78
+	^  shift 79
+	tLE  shift 68
+	tGE  shift 69
+	tNE  shift 70
+	tEQEQ  shift 71
+	tLSH  shift 80
+	tRSH  shift 81
+	.  reduce 89 (src line 453)
 
 
 state 122
-	expr:  expr.tOROR expr
-	expr:  expr.tANDAND expr
-	expr:  expr.< expr
-	expr:  expr.> expr
-	expr:  expr.tLE expr
-	expr:  expr.tGE expr
-	expr:  expr tGE expr.    (92)
-	expr:  expr.tNE expr
-	expr:  expr.tEQEQ expr
-	expr:  expr.+ expr
-	expr:  expr.- expr
-	expr:  expr.* expr
-	expr:  expr./ expr
-	expr:  expr.% expr
-	expr:  expr.| expr
-	expr:  expr.& expr
-	expr:  expr.^ expr
-	expr:  expr.tLSH expr
-	expr:  expr.tRSH expr
+	expr:  expr.tOROR expr 
+	expr:  expr.tANDAND expr 
+	expr:  expr.< expr 
+	expr:  expr < expr.    (90)
+	expr:  expr.> expr 
+	expr:  expr.tLE expr 
+	expr:  expr.tGE expr 
+	expr:  expr.tNE expr 
+	expr:  expr.tEQEQ expr 
+	expr:  expr.+ expr 
+	expr:  expr.- expr 
+	expr:  expr.* expr 
+	expr:  expr./ expr 
+	expr:  expr.% expr 
+	expr:  expr.| expr 
+	expr:  expr.& expr 
+	expr:  expr.^ expr 
+	expr:  expr.tLSH expr 
+	expr:  expr.tRSH expr 
 
-	+  shift 71
-	-  shift 72
-	*  shift 73
-	/  shift 74
-	%  shift 75
-	|  shift 76
-	&  shift 77
-	^  shift 78
-	tLSH  shift 79
-	tRSH  shift 80
-	.  reduce 92 (src line 459)
+	+  shift 72
+	-  shift 73
+	*  shift 74
+	/  shift 75
+	%  shift 76
+	|  shift 77
+	&  shift 78
+	^  shift 79
+	tLSH  shift 80
+	tRSH  shift 81
+	.  reduce 90 (src line 455)
 
 
 state 123
-	expr:  expr.tOROR expr
-	expr:  expr.tANDAND expr
-	expr:  expr.< expr
-	expr:  expr.> expr
-	expr:  expr.tLE expr
-	expr:  expr.tGE expr
-	expr:  expr.tNE expr
-	expr:  expr tNE expr.    (93)
-	expr:  expr.tEQEQ expr
-	expr:  expr.+ expr
-	expr:  expr.- expr
-	expr:  expr.* expr
-	expr:  expr./ expr
-	expr:  expr.% expr
-	expr:  expr.| expr
-	expr:  expr.& expr
-	expr:  expr.^ expr
-	expr:  expr.tLSH expr
-	expr:  expr.tRSH expr
+	expr:  expr.tOROR expr 
+	expr:  expr.tANDAND expr 
+	expr:  expr.< expr 
+	expr:  expr.> expr 
+	expr:  expr > expr.    (91)
+	expr:  expr.tLE expr 
+	expr:  expr.tGE expr 
+	expr:  expr.tNE expr 
+	expr:  expr.tEQEQ expr 
+	expr:  expr.+ expr 
+	expr:  expr.- expr 
+	expr:  expr.* expr 
+	expr:  expr./ expr 
+	expr:  expr.% expr 
+	expr:  expr.| expr 
+	expr:  expr.& expr 
+	expr:  expr.^ expr 
+	expr:  expr.tLSH expr 
+	expr:  expr.tRSH expr 
 
-	+  shift 71
-	-  shift 72
-	*  shift 73
-	/  shift 74
-	%  shift 75
-	|  shift 76
-	&  shift 77
-	^  shift 78
-	tLSH  shift 79
-	tRSH  shift 80
-	.  reduce 93 (src line 461)
+	+  shift 72
+	-  shift 73
+	*  shift 74
+	/  shift 75
+	%  shift 76
+	|  shift 77
+	&  shift 78
+	^  shift 79
+	tLSH  shift 80
+	tRSH  shift 81
+	.  reduce 91 (src line 457)
 
 
 state 124
-	expr:  expr.tOROR expr
-	expr:  expr.tANDAND expr
-	expr:  expr.< expr
-	expr:  expr.> expr
-	expr:  expr.tLE expr
-	expr:  expr.tGE expr
-	expr:  expr.tNE expr
-	expr:  expr.tEQEQ expr
-	expr:  expr tEQEQ expr.    (94)
-	expr:  expr.+ expr
-	expr:  expr.- expr
-	expr:  expr.* expr
-	expr:  expr./ expr
-	expr:  expr.% expr
-	expr:  expr.| expr
-	expr:  expr.& expr
-	expr:  expr.^ expr
-	expr:  expr.tLSH expr
-	expr:  expr.tRSH expr
+	expr:  expr.tOROR expr 
+	expr:  expr.tANDAND expr 
+	expr:  expr.< expr 
+	expr:  expr.> expr 
+	expr:  expr.tLE expr 
+	expr:  expr tLE expr.    (92)
+	expr:  expr.tGE expr 
+	expr:  expr.tNE expr 
+	expr:  expr.tEQEQ expr 
+	expr:  expr.+ expr 
+	expr:  expr.- expr 
+	expr:  expr.* expr 
+	expr:  expr./ expr 
+	expr:  expr.% expr 
+	expr:  expr.| expr 
+	expr:  expr.& expr 
+	expr:  expr.^ expr 
+	expr:  expr.tLSH expr 
+	expr:  expr.tRSH expr 
 
-	+  shift 71
-	-  shift 72
-	*  shift 73
-	/  shift 74
-	%  shift 75
-	|  shift 76
-	&  shift 77
-	^  shift 78
-	tLSH  shift 79
-	tRSH  shift 80
-	.  reduce 94 (src line 463)
+	+  shift 72
+	-  shift 73
+	*  shift 74
+	/  shift 75
+	%  shift 76
+	|  shift 77
+	&  shift 78
+	^  shift 79
+	tLSH  shift 80
+	tRSH  shift 81
+	.  reduce 92 (src line 459)
 
 
 state 125
-	expr:  expr.tOROR expr
-	expr:  expr.tANDAND expr
-	expr:  expr.< expr
-	expr:  expr.> expr
-	expr:  expr.tLE expr
-	expr:  expr.tGE expr
-	expr:  expr.tNE expr
-	expr:  expr.tEQEQ expr
-	expr:  expr.+ expr
-	expr:  expr + expr.    (95)
-	expr:  expr.- expr
-	expr:  expr.* expr
-	expr:  expr./ expr
-	expr:  expr.% expr
-	expr:  expr.| expr
-	expr:  expr.& expr
-	expr:  expr.^ expr
-	expr:  expr.tLSH expr
-	expr:  expr.tRSH expr
+	expr:  expr.tOROR expr 
+	expr:  expr.tANDAND expr 
+	expr:  expr.< expr 
+	expr:  expr.> expr 
+	expr:  expr.tLE expr 
+	expr:  expr.tGE expr 
+	expr:  expr tGE expr.    (93)
+	expr:  expr.tNE expr 
+	expr:  expr.tEQEQ expr 
+	expr:  expr.+ expr 
+	expr:  expr.- expr 
+	expr:  expr.* expr 
+	expr:  expr./ expr 
+	expr:  expr.% expr 
+	expr:  expr.| expr 
+	expr:  expr.& expr 
+	expr:  expr.^ expr 
+	expr:  expr.tLSH expr 
+	expr:  expr.tRSH expr 
 
-	*  shift 73
-	/  shift 74
-	%  shift 75
-	&  shift 77
-	tLSH  shift 79
-	tRSH  shift 80
-	.  reduce 95 (src line 465)
+	+  shift 72
+	-  shift 73
+	*  shift 74
+	/  shift 75
+	%  shift 76
+	|  shift 77
+	&  shift 78
+	^  shift 79
+	tLSH  shift 80
+	tRSH  shift 81
+	.  reduce 93 (src line 461)
 
 
 state 126
-	expr:  expr.tOROR expr
-	expr:  expr.tANDAND expr
-	expr:  expr.< expr
-	expr:  expr.> expr
-	expr:  expr.tLE expr
-	expr:  expr.tGE expr
-	expr:  expr.tNE expr
-	expr:  expr.tEQEQ expr
-	expr:  expr.+ expr
-	expr:  expr.- expr
-	expr:  expr - expr.    (96)
-	expr:  expr.* expr
-	expr:  expr./ expr
-	expr:  expr.% expr
-	expr:  expr.| expr
-	expr:  expr.& expr
-	expr:  expr.^ expr
-	expr:  expr.tLSH expr
-	expr:  expr.tRSH expr
+	expr:  expr.tOROR expr 
+	expr:  expr.tANDAND expr 
+	expr:  expr.< expr 
+	expr:  expr.> expr 
+	expr:  expr.tLE expr 
+	expr:  expr.tGE expr 
+	expr:  expr.tNE expr 
+	expr:  expr tNE expr.    (94)
+	expr:  expr.tEQEQ expr 
+	expr:  expr.+ expr 
+	expr:  expr.- expr 
+	expr:  expr.* expr 
+	expr:  expr./ expr 
+	expr:  expr.% expr 
+	expr:  expr.| expr 
+	expr:  expr.& expr 
+	expr:  expr.^ expr 
+	expr:  expr.tLSH expr 
+	expr:  expr.tRSH expr 
 
-	*  shift 73
-	/  shift 74
-	%  shift 75
-	&  shift 77
-	tLSH  shift 79
-	tRSH  shift 80
-	.  reduce 96 (src line 467)
+	+  shift 72
+	-  shift 73
+	*  shift 74
+	/  shift 75
+	%  shift 76
+	|  shift 77
+	&  shift 78
+	^  shift 79
+	tLSH  shift 80
+	tRSH  shift 81
+	.  reduce 94 (src line 463)
 
 
 state 127
-	expr:  expr.tOROR expr
-	expr:  expr.tANDAND expr
-	expr:  expr.< expr
-	expr:  expr.> expr
-	expr:  expr.tLE expr
-	expr:  expr.tGE expr
-	expr:  expr.tNE expr
-	expr:  expr.tEQEQ expr
-	expr:  expr.+ expr
-	expr:  expr.- expr
-	expr:  expr.* expr
-	expr:  expr * expr.    (97)
-	expr:  expr./ expr
-	expr:  expr.% expr
-	expr:  expr.| expr
-	expr:  expr.& expr
-	expr:  expr.^ expr
-	expr:  expr.tLSH expr
-	expr:  expr.tRSH expr
+	expr:  expr.tOROR expr 
+	expr:  expr.tANDAND expr 
+	expr:  expr.< expr 
+	expr:  expr.> expr 
+	expr:  expr.tLE expr 
+	expr:  expr.tGE expr 
+	expr:  expr.tNE expr 
+	expr:  expr.tEQEQ expr 
+	expr:  expr tEQEQ expr.    (95)
+	expr:  expr.+ expr 
+	expr:  expr.- expr 
+	expr:  expr.* expr 
+	expr:  expr./ expr 
+	expr:  expr.% expr 
+	expr:  expr.| expr 
+	expr:  expr.& expr 
+	expr:  expr.^ expr 
+	expr:  expr.tLSH expr 
+	expr:  expr.tRSH expr 
 
-	.  reduce 97 (src line 469)
+	+  shift 72
+	-  shift 73
+	*  shift 74
+	/  shift 75
+	%  shift 76
+	|  shift 77
+	&  shift 78
+	^  shift 79
+	tLSH  shift 80
+	tRSH  shift 81
+	.  reduce 95 (src line 465)
 
 
 state 128
-	expr:  expr.tOROR expr
-	expr:  expr.tANDAND expr
-	expr:  expr.< expr
-	expr:  expr.> expr
-	expr:  expr.tLE expr
-	expr:  expr.tGE expr
-	expr:  expr.tNE expr
-	expr:  expr.tEQEQ expr
-	expr:  expr.+ expr
-	expr:  expr.- expr
-	expr:  expr.* expr
-	expr:  expr./ expr
-	expr:  expr / expr.    (98)
-	expr:  expr.% expr
-	expr:  expr.| expr
-	expr:  expr.& expr
-	expr:  expr.^ expr
-	expr:  expr.tLSH expr
-	expr:  expr.tRSH expr
+	expr:  expr.tOROR expr 
+	expr:  expr.tANDAND expr 
+	expr:  expr.< expr 
+	expr:  expr.> expr 
+	expr:  expr.tLE expr 
+	expr:  expr.tGE expr 
+	expr:  expr.tNE expr 
+	expr:  expr.tEQEQ expr 
+	expr:  expr.+ expr 
+	expr:  expr + expr.    (96)
+	expr:  expr.- expr 
+	expr:  expr.* expr 
+	expr:  expr./ expr 
+	expr:  expr.% expr 
+	expr:  expr.| expr 
+	expr:  expr.& expr 
+	expr:  expr.^ expr 
+	expr:  expr.tLSH expr 
+	expr:  expr.tRSH expr 
+
+	*  shift 74
+	/  shift 75
+	%  shift 76
+	&  shift 78
+	tLSH  shift 80
+	tRSH  shift 81
+	.  reduce 96 (src line 467)
+
+
+state 129
+	expr:  expr.tOROR expr 
+	expr:  expr.tANDAND expr 
+	expr:  expr.< expr 
+	expr:  expr.> expr 
+	expr:  expr.tLE expr 
+	expr:  expr.tGE expr 
+	expr:  expr.tNE expr 
+	expr:  expr.tEQEQ expr 
+	expr:  expr.+ expr 
+	expr:  expr.- expr 
+	expr:  expr - expr.    (97)
+	expr:  expr.* expr 
+	expr:  expr./ expr 
+	expr:  expr.% expr 
+	expr:  expr.| expr 
+	expr:  expr.& expr 
+	expr:  expr.^ expr 
+	expr:  expr.tLSH expr 
+	expr:  expr.tRSH expr 
+
+	*  shift 74
+	/  shift 75
+	%  shift 76
+	&  shift 78
+	tLSH  shift 80
+	tRSH  shift 81
+	.  reduce 97 (src line 469)
+
+
+state 130
+	expr:  expr.tOROR expr 
+	expr:  expr.tANDAND expr 
+	expr:  expr.< expr 
+	expr:  expr.> expr 
+	expr:  expr.tLE expr 
+	expr:  expr.tGE expr 
+	expr:  expr.tNE expr 
+	expr:  expr.tEQEQ expr 
+	expr:  expr.+ expr 
+	expr:  expr.- expr 
+	expr:  expr.* expr 
+	expr:  expr * expr.    (98)
+	expr:  expr./ expr 
+	expr:  expr.% expr 
+	expr:  expr.| expr 
+	expr:  expr.& expr 
+	expr:  expr.^ expr 
+	expr:  expr.tLSH expr 
+	expr:  expr.tRSH expr 
 
 	.  reduce 98 (src line 471)
 
 
-state 129
-	expr:  expr.tOROR expr
-	expr:  expr.tANDAND expr
-	expr:  expr.< expr
-	expr:  expr.> expr
-	expr:  expr.tLE expr
-	expr:  expr.tGE expr
-	expr:  expr.tNE expr
-	expr:  expr.tEQEQ expr
-	expr:  expr.+ expr
-	expr:  expr.- expr
-	expr:  expr.* expr
-	expr:  expr./ expr
-	expr:  expr.% expr
-	expr:  expr % expr.    (99)
-	expr:  expr.| expr
-	expr:  expr.& expr
-	expr:  expr.^ expr
-	expr:  expr.tLSH expr
-	expr:  expr.tRSH expr
+state 131
+	expr:  expr.tOROR expr 
+	expr:  expr.tANDAND expr 
+	expr:  expr.< expr 
+	expr:  expr.> expr 
+	expr:  expr.tLE expr 
+	expr:  expr.tGE expr 
+	expr:  expr.tNE expr 
+	expr:  expr.tEQEQ expr 
+	expr:  expr.+ expr 
+	expr:  expr.- expr 
+	expr:  expr.* expr 
+	expr:  expr./ expr 
+	expr:  expr / expr.    (99)
+	expr:  expr.% expr 
+	expr:  expr.| expr 
+	expr:  expr.& expr 
+	expr:  expr.^ expr 
+	expr:  expr.tLSH expr 
+	expr:  expr.tRSH expr 
 
 	.  reduce 99 (src line 473)
 
 
-state 130
-	expr:  expr.tOROR expr
-	expr:  expr.tANDAND expr
-	expr:  expr.< expr
-	expr:  expr.> expr
-	expr:  expr.tLE expr
-	expr:  expr.tGE expr
-	expr:  expr.tNE expr
-	expr:  expr.tEQEQ expr
-	expr:  expr.+ expr
-	expr:  expr.- expr
-	expr:  expr.* expr
-	expr:  expr./ expr
-	expr:  expr.% expr
-	expr:  expr.| expr
-	expr:  expr | expr.    (100)
-	expr:  expr.& expr
-	expr:  expr.^ expr
-	expr:  expr.tLSH expr
-	expr:  expr.tRSH expr
+state 132
+	expr:  expr.tOROR expr 
+	expr:  expr.tANDAND expr 
+	expr:  expr.< expr 
+	expr:  expr.> expr 
+	expr:  expr.tLE expr 
+	expr:  expr.tGE expr 
+	expr:  expr.tNE expr 
+	expr:  expr.tEQEQ expr 
+	expr:  expr.+ expr 
+	expr:  expr.- expr 
+	expr:  expr.* expr 
+	expr:  expr./ expr 
+	expr:  expr.% expr 
+	expr:  expr % expr.    (100)
+	expr:  expr.| expr 
+	expr:  expr.& expr 
+	expr:  expr.^ expr 
+	expr:  expr.tLSH expr 
+	expr:  expr.tRSH expr 
 
-	*  shift 73
-	/  shift 74
-	%  shift 75
-	&  shift 77
-	tLSH  shift 79
-	tRSH  shift 80
 	.  reduce 100 (src line 475)
 
 
-state 131
-	expr:  expr.tOROR expr
-	expr:  expr.tANDAND expr
-	expr:  expr.< expr
-	expr:  expr.> expr
-	expr:  expr.tLE expr
-	expr:  expr.tGE expr
-	expr:  expr.tNE expr
-	expr:  expr.tEQEQ expr
-	expr:  expr.+ expr
-	expr:  expr.- expr
-	expr:  expr.* expr
-	expr:  expr./ expr
-	expr:  expr.% expr
-	expr:  expr.| expr
-	expr:  expr.& expr
-	expr:  expr & expr.    (101)
-	expr:  expr.^ expr
-	expr:  expr.tLSH expr
-	expr:  expr.tRSH expr
+state 133
+	expr:  expr.tOROR expr 
+	expr:  expr.tANDAND expr 
+	expr:  expr.< expr 
+	expr:  expr.> expr 
+	expr:  expr.tLE expr 
+	expr:  expr.tGE expr 
+	expr:  expr.tNE expr 
+	expr:  expr.tEQEQ expr 
+	expr:  expr.+ expr 
+	expr:  expr.- expr 
+	expr:  expr.* expr 
+	expr:  expr./ expr 
+	expr:  expr.% expr 
+	expr:  expr.| expr 
+	expr:  expr | expr.    (101)
+	expr:  expr.& expr 
+	expr:  expr.^ expr 
+	expr:  expr.tLSH expr 
+	expr:  expr.tRSH expr 
 
+	*  shift 74
+	/  shift 75
+	%  shift 76
+	&  shift 78
+	tLSH  shift 80
+	tRSH  shift 81
 	.  reduce 101 (src line 477)
 
 
-state 132
-	expr:  expr.tOROR expr
-	expr:  expr.tANDAND expr
-	expr:  expr.< expr
-	expr:  expr.> expr
-	expr:  expr.tLE expr
-	expr:  expr.tGE expr
-	expr:  expr.tNE expr
-	expr:  expr.tEQEQ expr
-	expr:  expr.+ expr
-	expr:  expr.- expr
-	expr:  expr.* expr
-	expr:  expr./ expr
-	expr:  expr.% expr
-	expr:  expr.| expr
-	expr:  expr.& expr
-	expr:  expr.^ expr
-	expr:  expr ^ expr.    (102)
-	expr:  expr.tLSH expr
-	expr:  expr.tRSH expr
+state 134
+	expr:  expr.tOROR expr 
+	expr:  expr.tANDAND expr 
+	expr:  expr.< expr 
+	expr:  expr.> expr 
+	expr:  expr.tLE expr 
+	expr:  expr.tGE expr 
+	expr:  expr.tNE expr 
+	expr:  expr.tEQEQ expr 
+	expr:  expr.+ expr 
+	expr:  expr.- expr 
+	expr:  expr.* expr 
+	expr:  expr./ expr 
+	expr:  expr.% expr 
+	expr:  expr.| expr 
+	expr:  expr.& expr 
+	expr:  expr & expr.    (102)
+	expr:  expr.^ expr 
+	expr:  expr.tLSH expr 
+	expr:  expr.tRSH expr 
 
-	*  shift 73
-	/  shift 74
-	%  shift 75
-	&  shift 77
-	tLSH  shift 79
-	tRSH  shift 80
 	.  reduce 102 (src line 479)
 
 
-state 133
-	expr:  expr.tOROR expr
-	expr:  expr.tANDAND expr
-	expr:  expr.< expr
-	expr:  expr.> expr
-	expr:  expr.tLE expr
-	expr:  expr.tGE expr
-	expr:  expr.tNE expr
-	expr:  expr.tEQEQ expr
-	expr:  expr.+ expr
-	expr:  expr.- expr
-	expr:  expr.* expr
-	expr:  expr./ expr
-	expr:  expr.% expr
-	expr:  expr.| expr
-	expr:  expr.& expr
-	expr:  expr.^ expr
-	expr:  expr.tLSH expr
-	expr:  expr tLSH expr.    (103)
-	expr:  expr.tRSH expr
+state 135
+	expr:  expr.tOROR expr 
+	expr:  expr.tANDAND expr 
+	expr:  expr.< expr 
+	expr:  expr.> expr 
+	expr:  expr.tLE expr 
+	expr:  expr.tGE expr 
+	expr:  expr.tNE expr 
+	expr:  expr.tEQEQ expr 
+	expr:  expr.+ expr 
+	expr:  expr.- expr 
+	expr:  expr.* expr 
+	expr:  expr./ expr 
+	expr:  expr.% expr 
+	expr:  expr.| expr 
+	expr:  expr.& expr 
+	expr:  expr.^ expr 
+	expr:  expr ^ expr.    (103)
+	expr:  expr.tLSH expr 
+	expr:  expr.tRSH expr 
 
+	*  shift 74
+	/  shift 75
+	%  shift 76
+	&  shift 78
+	tLSH  shift 80
+	tRSH  shift 81
 	.  reduce 103 (src line 481)
 
 
-state 134
-	expr:  expr.tOROR expr
-	expr:  expr.tANDAND expr
-	expr:  expr.< expr
-	expr:  expr.> expr
-	expr:  expr.tLE expr
-	expr:  expr.tGE expr
-	expr:  expr.tNE expr
-	expr:  expr.tEQEQ expr
-	expr:  expr.+ expr
-	expr:  expr.- expr
-	expr:  expr.* expr
-	expr:  expr./ expr
-	expr:  expr.% expr
-	expr:  expr.| expr
-	expr:  expr.& expr
-	expr:  expr.^ expr
-	expr:  expr.tLSH expr
-	expr:  expr.tRSH expr
-	expr:  expr tRSH expr.    (104)
+state 136
+	expr:  expr.tOROR expr 
+	expr:  expr.tANDAND expr 
+	expr:  expr.< expr 
+	expr:  expr.> expr 
+	expr:  expr.tLE expr 
+	expr:  expr.tGE expr 
+	expr:  expr.tNE expr 
+	expr:  expr.tEQEQ expr 
+	expr:  expr.+ expr 
+	expr:  expr.- expr 
+	expr:  expr.* expr 
+	expr:  expr./ expr 
+	expr:  expr.% expr 
+	expr:  expr.| expr 
+	expr:  expr.& expr 
+	expr:  expr.^ expr 
+	expr:  expr.tLSH expr 
+	expr:  expr tLSH expr.    (104)
+	expr:  expr.tRSH expr 
 
 	.  reduce 104 (src line 483)
 
 
-state 135
-	expr:  expr.tOROR expr
-	expr:  expr.tANDAND expr
-	expr:  expr.< expr
-	expr:  expr.> expr
-	expr:  expr.tLE expr
-	expr:  expr.tGE expr
-	expr:  expr.tNE expr
-	expr:  expr.tEQEQ expr
-	expr:  expr.+ expr
-	expr:  expr.- expr
-	expr:  expr.* expr
-	expr:  expr./ expr
-	expr:  expr.% expr
-	expr:  expr.| expr
-	expr:  expr.& expr
-	expr:  expr.^ expr
-	expr:  expr.tLSH expr
-	expr:  expr.tRSH expr
-	unary_expr:  type ( expr.)
-
-	)  shift 177
-	<  shift 65
-	>  shift 66
-	+  shift 71
-	-  shift 72
-	*  shift 73
-	/  shift 74
-	%  shift 75
-	|  shift 76
-	&  shift 77
-	^  shift 78
-	tOROR  shift 63
-	tANDAND  shift 64
-	tLE  shift 67
-	tGE  shift 68
-	tNE  shift 69
-	tEQEQ  shift 70
-	tLSH  shift 79
-	tRSH  shift 80
-	.  error
-
-
-state 136
-	expr:  expr.tOROR expr
-	expr:  expr.tANDAND expr
-	expr:  expr.< expr
-	expr:  expr.> expr
-	expr:  expr.tLE expr
-	expr:  expr.tGE expr
-	expr:  expr.tNE expr
-	expr:  expr.tEQEQ expr
-	expr:  expr.+ expr
-	expr:  expr.- expr
-	expr:  expr.* expr
-	expr:  expr./ expr
-	expr:  expr.% expr
-	expr:  expr.| expr
-	expr:  expr.& expr
-	expr:  expr.^ expr
-	expr:  expr.tLSH expr
-	expr:  expr.tRSH expr
-	operand:  nameref [ expr.]
-
-	]  shift 178
-	<  shift 65
-	>  shift 66
-	+  shift 71
-	-  shift 72
-	*  shift 73
-	/  shift 74
-	%  shift 75
-	|  shift 76
-	&  shift 77
-	^  shift 78
-	tOROR  shift 63
-	tANDAND  shift 64
-	tLE  shift 67
-	tGE  shift 68
-	tNE  shift 69
-	tEQEQ  shift 70
-	tLSH  shift 79
-	tRSH  shift 80
-	.  error
-
-
 state 137
-	nameref:  nameref . tIDENT.    (132)
+	expr:  expr.tOROR expr 
+	expr:  expr.tANDAND expr 
+	expr:  expr.< expr 
+	expr:  expr.> expr 
+	expr:  expr.tLE expr 
+	expr:  expr.tGE expr 
+	expr:  expr.tNE expr 
+	expr:  expr.tEQEQ expr 
+	expr:  expr.+ expr 
+	expr:  expr.- expr 
+	expr:  expr.* expr 
+	expr:  expr./ expr 
+	expr:  expr.% expr 
+	expr:  expr.| expr 
+	expr:  expr.& expr 
+	expr:  expr.^ expr 
+	expr:  expr.tLSH expr 
+	expr:  expr.tRSH expr 
+	expr:  expr tRSH expr.    (105)
 
-	.  reduce 132 (src line 565)
+	.  reduce 105 (src line 485)
 
 
 state 138
-	operand:  comp_lit . tIDENT.    (117)
+	expr:  expr.tOROR expr 
+	expr:  expr.tANDAND expr 
+	expr:  expr.< expr 
+	expr:  expr.> expr 
+	expr:  expr.tLE expr 
+	expr:  expr.tGE expr 
+	expr:  expr.tNE expr 
+	expr:  expr.tEQEQ expr 
+	expr:  expr.+ expr 
+	expr:  expr.- expr 
+	expr:  expr.* expr 
+	expr:  expr./ expr 
+	expr:  expr.% expr 
+	expr:  expr.| expr 
+	expr:  expr.& expr 
+	expr:  expr.^ expr 
+	expr:  expr.tLSH expr 
+	expr:  expr.tRSH expr 
+	unary_expr:  type ( expr.) 
 
-	.  reduce 117 (src line 514)
+	)  shift 179
+	<  shift 66
+	>  shift 67
+	+  shift 72
+	-  shift 73
+	*  shift 74
+	/  shift 75
+	%  shift 76
+	|  shift 77
+	&  shift 78
+	^  shift 79
+	tOROR  shift 64
+	tANDAND  shift 65
+	tLE  shift 68
+	tGE  shift 69
+	tNE  shift 70
+	tEQEQ  shift 71
+	tLSH  shift 80
+	tRSH  shift 81
+	.  error
 
 
 state 139
-	expr:  expr.tOROR expr
-	expr:  expr.tANDAND expr
-	expr:  expr.< expr
-	expr:  expr.> expr
-	expr:  expr.tLE expr
-	expr:  expr.tGE expr
-	expr:  expr.tNE expr
-	expr:  expr.tEQEQ expr
-	expr:  expr.+ expr
-	expr:  expr.- expr
-	expr:  expr.* expr
-	expr:  expr./ expr
-	expr:  expr.% expr
-	expr:  expr.| expr
-	expr:  expr.& expr
-	expr:  expr.^ expr
-	expr:  expr.tLSH expr
-	expr:  expr.tRSH expr
-	operand:  comp_lit [ expr.]
+	expr:  expr.tOROR expr 
+	expr:  expr.tANDAND expr 
+	expr:  expr.< expr 
+	expr:  expr.> expr 
+	expr:  expr.tLE expr 
+	expr:  expr.tGE expr 
+	expr:  expr.tNE expr 
+	expr:  expr.tEQEQ expr 
+	expr:  expr.+ expr 
+	expr:  expr.- expr 
+	expr:  expr.* expr 
+	expr:  expr./ expr 
+	expr:  expr.% expr 
+	expr:  expr.| expr 
+	expr:  expr.& expr 
+	expr:  expr.^ expr 
+	expr:  expr.tLSH expr 
+	expr:  expr.tRSH expr 
+	operand:  nameref [ expr.] 
 
-	]  shift 179
-	<  shift 65
-	>  shift 66
-	+  shift 71
-	-  shift 72
-	*  shift 73
-	/  shift 74
-	%  shift 75
-	|  shift 76
-	&  shift 77
-	^  shift 78
-	tOROR  shift 63
-	tANDAND  shift 64
-	tLE  shift 67
-	tGE  shift 68
-	tNE  shift 69
-	tEQEQ  shift 70
-	tLSH  shift 79
-	tRSH  shift 80
+	]  shift 180
+	<  shift 66
+	>  shift 67
+	+  shift 72
+	-  shift 73
+	*  shift 74
+	/  shift 75
+	%  shift 76
+	|  shift 77
+	&  shift 78
+	^  shift 79
+	tOROR  shift 64
+	tANDAND  shift 65
+	tLE  shift 68
+	tGE  shift 69
+	tNE  shift 70
+	tEQEQ  shift 71
+	tLSH  shift 80
+	tRSH  shift 81
 	.  error
 
 
 state 140
-	operand:  ( expr ).    (120)
+	nameref:  nameref . tIDENT.    (133)
 
-	.  reduce 120 (src line 520)
+	.  reduce 133 (src line 567)
 
 
 state 141
-	type:  [ tINTLIT ].type
+	operand:  comp_lit . tIDENT.    (118)
+
+	.  reduce 118 (src line 516)
+
+
+state 142
+	expr:  expr.tOROR expr 
+	expr:  expr.tANDAND expr 
+	expr:  expr.< expr 
+	expr:  expr.> expr 
+	expr:  expr.tLE expr 
+	expr:  expr.tGE expr 
+	expr:  expr.tNE expr 
+	expr:  expr.tEQEQ expr 
+	expr:  expr.+ expr 
+	expr:  expr.- expr 
+	expr:  expr.* expr 
+	expr:  expr./ expr 
+	expr:  expr.% expr 
+	expr:  expr.| expr 
+	expr:  expr.& expr 
+	expr:  expr.^ expr 
+	expr:  expr.tLSH expr 
+	expr:  expr.tRSH expr 
+	operand:  comp_lit [ expr.] 
+
+	]  shift 181
+	<  shift 66
+	>  shift 67
+	+  shift 72
+	-  shift 73
+	*  shift 74
+	/  shift 75
+	%  shift 76
+	|  shift 77
+	&  shift 78
+	^  shift 79
+	tOROR  shift 64
+	tANDAND  shift 65
+	tLE  shift 68
+	tGE  shift 69
+	tNE  shift 70
+	tEQEQ  shift 71
+	tLSH  shift 80
+	tRSH  shift 81
+	.  error
+
+
+state 143
+	operand:  ( expr ).    (121)
+
+	.  reduce 121 (src line 522)
+
+
+state 144
+	type:  [ tINTLIT ].type 
 
 	[  shift 42
+	?  shift 48
 	tENUM  shift 43
 	tSET  shift 44
 	tMAP  shift 45
 	tSTRUCT  shift 46
 	tONEOF  shift 47
-	tIDENT  shift 48
+	tIDENT  shift 49
 	.  error
 
-	nameref  goto 143
-	type  goto 180
+	nameref  goto 100
+	type  goto 182
 
-state 142
+state 145
 	type:  [ ] type.    (43)
 
 	.  reduce 43 (src line 258)
 
 
-state 143
-	type:  nameref.    (41)
-	nameref:  nameref.. tIDENT
-
-	.  shift 87
-	.  reduce 41 (src line 253)
-
-
-state 144
-	type:  tENUM { label_spec_list.osemi }
-	label_spec_list:  label_spec_list.; label_spec
-	osemi: .    (135)
-
-	;  shift 182
-	.  reduce 135 (src line 574)
-
-	osemi  goto 181
-
-state 145
-	label_spec_list:  label_spec.    (50)
-
-	.  reduce 50 (src line 273)
-
-
 state 146
-	label_spec:  tIDENT.    (52)
+	type:  tENUM { label_spec_list.osemi } 
+	label_spec_list:  label_spec_list.; label_spec 
+	osemi: .    (136)
 
-	.  reduce 52 (src line 279)
+	;  shift 184
+	.  reduce 136 (src line 576)
 
+	osemi  goto 183
 
 state 147
-	type:  tSET [ type.]
+	label_spec_list:  label_spec.    (51)
 
-	]  shift 183
-	.  error
+	.  reduce 51 (src line 275)
 
 
 state 148
-	type:  tMAP [ type.] type
+	label_spec:  tIDENT.    (53)
 
-	]  shift 184
-	.  error
+	.  reduce 53 (src line 281)
 
 
 state 149
-	type:  tSTRUCT { field_spec_list.osemi }
-	field_spec_list:  field_spec_list.; field_spec
-	osemi: .    (135)
+	type:  tSET [ type.] 
 
-	;  shift 186
-	.  reduce 135 (src line 574)
+	]  shift 185
+	.  error
 
-	osemi  goto 185
 
 state 150
+	type:  tMAP [ type.] type 
+
+	]  shift 186
+	.  error
+
+
+state 151
+	type:  tSTRUCT { field_spec_list.osemi } 
+	field_spec_list:  field_spec_list.; field_spec 
+	osemi: .    (136)
+
+	;  shift 188
+	.  reduce 136 (src line 576)
+
+	osemi  goto 187
+
+state 152
 	type:  tSTRUCT { }.    (48)
 
 	.  reduce 48 (src line 268)
 
 
-state 151
-	field_spec_list:  field_spec.    (53)
+state 153
+	field_spec_list:  field_spec.    (54)
 
-	.  reduce 53 (src line 283)
+	.  reduce 54 (src line 285)
 
 
-state 152
-	field_spec:  type_comma_list.type
-	type_comma_list:  type_comma_list., type
+state 154
+	field_spec:  type_comma_list.type 
+	type_comma_list:  type_comma_list., type 
 
-	,  shift 188
+	,  shift 190
 	[  shift 42
+	?  shift 48
 	tENUM  shift 43
 	tSET  shift 44
 	tMAP  shift 45
 	tSTRUCT  shift 46
 	tONEOF  shift 47
-	tIDENT  shift 48
+	tIDENT  shift 49
 	.  error
 
-	nameref  goto 143
-	type  goto 187
-
-state 153
-	type_comma_list:  type.    (56)
-
-	.  reduce 56 (src line 335)
-
-
-state 154
-	type:  tONEOF { type_semi_list.osemi }
-	type_semi_list:  type_semi_list.; type
-	osemi: .    (135)
-
-	;  shift 190
-	.  reduce 135 (src line 574)
-
-	osemi  goto 189
+	nameref  goto 100
+	type  goto 189
 
 state 155
-	type_semi_list:  type.    (58)
+	type_comma_list:  type.    (57)
 
-	.  reduce 58 (src line 341)
+	.  reduce 57 (src line 337)
 
 
 state 156
-	comp_lit:  otype { }.    (121)
+	type:  tONEOF { type_semi_list.osemi } 
+	type_semi_list:  type_semi_list.; type 
+	osemi: .    (136)
 
-	.  reduce 121 (src line 523)
+	;  shift 192
+	.  reduce 136 (src line 576)
 
+	osemi  goto 191
 
 state 157
-	comp_lit:  otype { kv_lit_list.ocomma }
-	kv_lit_list:  kv_lit_list., kv_lit
-	ocomma: .    (137)
+	type_semi_list:  type.    (59)
 
-	,  shift 192
-	.  reduce 137 (src line 578)
+	.  reduce 59 (src line 343)
 
-	ocomma  goto 191
 
 state 158
-	kv_lit_list:  kv_lit.    (123)
+	comp_lit:  otype { }.    (122)
 
-	.  reduce 123 (src line 529)
+	.  reduce 122 (src line 525)
 
 
 state 159
-	expr:  expr.tOROR expr
-	expr:  expr.tANDAND expr
-	expr:  expr.< expr
-	expr:  expr.> expr
-	expr:  expr.tLE expr
-	expr:  expr.tGE expr
-	expr:  expr.tNE expr
-	expr:  expr.tEQEQ expr
-	expr:  expr.+ expr
-	expr:  expr.- expr
-	expr:  expr.* expr
-	expr:  expr./ expr
-	expr:  expr.% expr
-	expr:  expr.| expr
-	expr:  expr.& expr
-	expr:  expr.^ expr
-	expr:  expr.tLSH expr
-	expr:  expr.tRSH expr
-	kv_lit:  expr.    (125)
-	kv_lit:  expr.: expr
+	comp_lit:  otype { kv_lit_list.ocomma } 
+	kv_lit_list:  kv_lit_list., kv_lit 
+	ocomma: .    (138)
 
-	:  shift 193
-	<  shift 65
-	>  shift 66
-	+  shift 71
-	-  shift 72
-	*  shift 73
-	/  shift 74
-	%  shift 75
-	|  shift 76
-	&  shift 77
-	^  shift 78
-	tOROR  shift 63
-	tANDAND  shift 64
-	tLE  shift 67
-	tGE  shift 68
-	tNE  shift 69
-	tEQEQ  shift 70
-	tLSH  shift 79
-	tRSH  shift 80
-	.  reduce 125 (src line 535)
+	,  shift 194
+	.  reduce 138 (src line 580)
 
+	ocomma  goto 193
 
 state 160
+	kv_lit_list:  kv_lit.    (124)
+
+	.  reduce 124 (src line 531)
+
+
+state 161
+	expr:  expr.tOROR expr 
+	expr:  expr.tANDAND expr 
+	expr:  expr.< expr 
+	expr:  expr.> expr 
+	expr:  expr.tLE expr 
+	expr:  expr.tGE expr 
+	expr:  expr.tNE expr 
+	expr:  expr.tEQEQ expr 
+	expr:  expr.+ expr 
+	expr:  expr.- expr 
+	expr:  expr.* expr 
+	expr:  expr./ expr 
+	expr:  expr.% expr 
+	expr:  expr.| expr 
+	expr:  expr.& expr 
+	expr:  expr.^ expr 
+	expr:  expr.tLSH expr 
+	expr:  expr.tRSH expr 
+	kv_lit:  expr.    (126)
+	kv_lit:  expr.: expr 
+
+	:  shift 195
+	<  shift 66
+	>  shift 67
+	+  shift 72
+	-  shift 73
+	*  shift 74
+	/  shift 75
+	%  shift 76
+	|  shift 77
+	&  shift 78
+	^  shift 79
+	tOROR  shift 64
+	tANDAND  shift 65
+	tLE  shift 68
+	tGE  shift 69
+	tNE  shift 70
+	tEQEQ  shift 71
+	tLSH  shift 80
+	tRSH  shift 81
+	.  reduce 126 (src line 537)
+
+
+state 162
 	const_defs:  const_defs const_def ;.    (27)
 
 	.  reduce 27 (src line 223)
 
 
-state 161
-	import:  tIMPORT ( import_spec_list osemi.)
+state 163
+	import:  tIMPORT ( import_spec_list osemi.) 
 
-	)  shift 194
+	)  shift 196
 	.  error
 
 
-state 162
-	import_spec_list:  import_spec_list ;.import_spec
-	osemi:  ;.    (136)
+state 164
+	import_spec_list:  import_spec_list ;.import_spec 
+	osemi:  ;.    (137)
 
-	tIDENT  shift 55
-	tSTRLIT  shift 54
-	.  reduce 136 (src line 576)
+	tIDENT  shift 56
+	tSTRLIT  shift 55
+	.  reduce 137 (src line 578)
 
-	import_spec  goto 195
+	import_spec  goto 197
 
-state 163
+state 165
 	type_def:  tTYPE ( ).    (28)
 
 	.  reduce 28 (src line 225)
 
 
-state 164
-	type_def:  tTYPE ( type_spec_list.osemi )
-	type_spec_list:  type_spec_list.; type_spec
-	osemi: .    (135)
+state 166
+	type_def:  tTYPE ( type_spec_list.osemi ) 
+	type_spec_list:  type_spec_list.; type_spec 
+	osemi: .    (136)
 
-	;  shift 197
-	.  reduce 135 (src line 574)
+	;  shift 199
+	.  reduce 136 (src line 576)
 
-	osemi  goto 196
+	osemi  goto 198
 
-state 165
+state 167
 	type_spec_list:  type_spec.    (38)
 
 	.  reduce 38 (src line 242)
 
 
-state 166
-	type_spec:  tIDENT.type
+state 168
+	type_spec:  tIDENT.type 
 
 	[  shift 42
+	?  shift 48
 	tENUM  shift 43
 	tSET  shift 44
 	tMAP  shift 45
 	tSTRUCT  shift 46
 	tONEOF  shift 47
-	tIDENT  shift 48
+	tIDENT  shift 49
 	.  error
 
-	nameref  goto 143
-	type  goto 167
+	nameref  goto 100
+	type  goto 169
 
-state 167
+state 169
 	type_spec:  tIDENT type.    (40)
 
 	.  reduce 40 (src line 246)
 
 
-state 168
-	interface_spec:  tIDENT tINTERFACE.{ }
-	interface_spec:  tIDENT tINTERFACE.{ iface_item_list osemi }
+state 170
+	interface_spec:  tIDENT tINTERFACE.{ } 
+	interface_spec:  tIDENT tINTERFACE.{ iface_item_list osemi } 
 
-	{  shift 198
+	{  shift 200
 	.  error
 
 
-state 169
+state 171
 	const_def:  tCONST ( ).    (32)
 
 	.  reduce 32 (src line 231)
 
 
-state 170
-	const_def:  tCONST ( const_spec_list.osemi )
-	const_spec_list:  const_spec_list.; const_spec
-	osemi: .    (135)
-
-	;  shift 200
-	.  reduce 135 (src line 574)
-
-	osemi  goto 199
-
-state 171
-	const_spec_list:  const_spec.    (83)
-
-	.  reduce 83 (src line 435)
-
-
 state 172
-	const_spec:  tIDENT =.expr
-	otype: .    (133)
+	const_def:  tCONST ( const_spec_list.osemi ) 
+	const_spec_list:  const_spec_list.; const_spec 
+	osemi: .    (136)
+
+	;  shift 202
+	.  reduce 136 (src line 576)
+
+	osemi  goto 201
+
+state 173
+	const_spec_list:  const_spec.    (84)
+
+	.  reduce 84 (src line 437)
+
+
+state 174
+	const_spec:  tIDENT =.expr 
+	otype: .    (134)
 
 	(  shift 41
 	[  shift 42
@@ -2670,228 +2729,234 @@ state 172
 	+  shift 31
 	-  shift 32
 	^  shift 33
+	?  shift 48
 	tENUM  shift 43
 	tSET  shift 44
 	tMAP  shift 45
 	tSTRUCT  shift 46
 	tONEOF  shift 47
-	tIDENT  shift 48
+	tIDENT  shift 49
 	tSTRLIT  shift 35
 	tINTLIT  shift 36
 	tRATLIT  shift 37
 	tIMAGLIT  shift 38
-	.  reduce 133 (src line 568)
+	.  reduce 134 (src line 570)
 
 	nameref  goto 39
 	type  goto 34
-	otype  goto 49
-	expr  goto 201
+	otype  goto 50
+	expr  goto 203
 	unary_expr  goto 28
 	operand  goto 29
 	comp_lit  goto 40
 
-state 173
+state 175
 	error_def:  tERRORID ( ).    (35)
 
 	.  reduce 35 (src line 236)
 
 
-state 174
-	error_def:  tERRORID ( errorid_spec_list.osemi )
-	errorid_spec_list:  errorid_spec_list.; errorid_spec
-	osemi: .    (135)
-
-	;  shift 203
-	.  reduce 135 (src line 574)
-
-	osemi  goto 202
-
-state 175
-	errorid_spec_list:  errorid_spec.    (127)
-
-	.  reduce 127 (src line 542)
-
-
 state 176
-	errorid_spec:  tIDENT =.tSTRLIT
+	error_def:  tERRORID ( errorid_spec_list.osemi ) 
+	errorid_spec_list:  errorid_spec_list.; errorid_spec 
+	osemi: .    (136)
 
-	tSTRLIT  shift 204
-	.  error
+	;  shift 205
+	.  reduce 136 (src line 576)
 
+	osemi  goto 204
 
 state 177
-	unary_expr:  type ( expr ).    (110)
+	errorid_spec_list:  errorid_spec.    (128)
 
-	.  reduce 110 (src line 497)
+	.  reduce 128 (src line 544)
 
 
 state 178
-	operand:  nameref [ expr ].    (119)
+	errorid_spec:  tIDENT =.tSTRLIT 
+
+	tSTRLIT  shift 206
+	.  error
+
+
+state 179
+	unary_expr:  type ( expr ).    (111)
+
+	.  reduce 111 (src line 499)
+
+
+state 180
+	operand:  nameref [ expr ].    (120)
+
+	.  reduce 120 (src line 520)
+
+
+state 181
+	operand:  comp_lit [ expr ].    (119)
 
 	.  reduce 119 (src line 518)
 
 
-state 179
-	operand:  comp_lit [ expr ].    (118)
-
-	.  reduce 118 (src line 516)
-
-
-state 180
+state 182
 	type:  [ tINTLIT ] type.    (42)
 
 	.  reduce 42 (src line 256)
 
 
-state 181
-	type:  tENUM { label_spec_list osemi.}
+state 183
+	type:  tENUM { label_spec_list osemi.} 
 
-	}  shift 205
+	}  shift 207
 	.  error
 
 
-state 182
-	label_spec_list:  label_spec_list ;.label_spec
-	osemi:  ;.    (136)
+state 184
+	label_spec_list:  label_spec_list ;.label_spec 
+	osemi:  ;.    (137)
 
-	tIDENT  shift 146
-	.  reduce 136 (src line 576)
+	tIDENT  shift 148
+	.  reduce 137 (src line 578)
 
-	label_spec  goto 206
+	label_spec  goto 208
 
-state 183
+state 185
 	type:  tSET [ type ].    (45)
 
 	.  reduce 45 (src line 262)
 
 
-state 184
-	type:  tMAP [ type ].type
-
-	[  shift 42
-	tENUM  shift 43
-	tSET  shift 44
-	tMAP  shift 45
-	tSTRUCT  shift 46
-	tONEOF  shift 47
-	tIDENT  shift 48
-	.  error
-
-	nameref  goto 143
-	type  goto 207
-
-state 185
-	type:  tSTRUCT { field_spec_list osemi.}
-
-	}  shift 208
-	.  error
-
-
 state 186
-	field_spec_list:  field_spec_list ;.field_spec
-	osemi:  ;.    (136)
+	type:  tMAP [ type ].type 
 
 	[  shift 42
+	?  shift 48
 	tENUM  shift 43
 	tSET  shift 44
 	tMAP  shift 45
 	tSTRUCT  shift 46
 	tONEOF  shift 47
-	tIDENT  shift 48
-	.  reduce 136 (src line 576)
+	tIDENT  shift 49
+	.  error
 
-	nameref  goto 143
-	type  goto 153
-	type_comma_list  goto 152
-	field_spec  goto 209
+	nameref  goto 100
+	type  goto 209
 
 state 187
-	field_spec:  type_comma_list type.    (55)
+	type:  tSTRUCT { field_spec_list osemi.} 
 
-	.  reduce 55 (src line 323)
+	}  shift 210
+	.  error
 
 
 state 188
-	type_comma_list:  type_comma_list ,.type
+	field_spec_list:  field_spec_list ;.field_spec 
+	osemi:  ;.    (137)
 
 	[  shift 42
+	?  shift 48
 	tENUM  shift 43
 	tSET  shift 44
 	tMAP  shift 45
 	tSTRUCT  shift 46
 	tONEOF  shift 47
-	tIDENT  shift 48
-	.  error
+	tIDENT  shift 49
+	.  reduce 137 (src line 578)
 
-	nameref  goto 143
-	type  goto 210
+	nameref  goto 100
+	type  goto 155
+	type_comma_list  goto 154
+	field_spec  goto 211
 
 state 189
-	type:  tONEOF { type_semi_list osemi.}
+	field_spec:  type_comma_list type.    (56)
 
-	}  shift 211
-	.  error
+	.  reduce 56 (src line 325)
 
 
 state 190
-	type_semi_list:  type_semi_list ;.type
-	osemi:  ;.    (136)
+	type_comma_list:  type_comma_list ,.type 
 
 	[  shift 42
+	?  shift 48
 	tENUM  shift 43
 	tSET  shift 44
 	tMAP  shift 45
 	tSTRUCT  shift 46
 	tONEOF  shift 47
-	tIDENT  shift 48
-	.  reduce 136 (src line 576)
+	tIDENT  shift 49
+	.  error
 
-	nameref  goto 143
+	nameref  goto 100
 	type  goto 212
 
 state 191
-	comp_lit:  otype { kv_lit_list ocomma.}
+	type:  tONEOF { type_semi_list osemi.} 
 
 	}  shift 213
 	.  error
 
 
 state 192
-	kv_lit_list:  kv_lit_list ,.kv_lit
-	ocomma:  ,.    (138)
-	otype: .    (133)
+	type_semi_list:  type_semi_list ;.type 
+	osemi:  ;.    (137)
 
-	(  shift 41
 	[  shift 42
-	}  reduce 138 (src line 580)
-	!  shift 30
-	+  shift 31
-	-  shift 32
-	^  shift 33
+	?  shift 48
 	tENUM  shift 43
 	tSET  shift 44
 	tMAP  shift 45
 	tSTRUCT  shift 46
 	tONEOF  shift 47
-	tIDENT  shift 48
-	tSTRLIT  shift 35
-	tINTLIT  shift 36
-	tRATLIT  shift 37
-	tIMAGLIT  shift 38
-	.  reduce 133 (src line 568)
+	tIDENT  shift 49
+	.  reduce 137 (src line 578)
 
-	nameref  goto 39
-	type  goto 34
-	otype  goto 49
-	expr  goto 159
-	unary_expr  goto 28
-	operand  goto 29
-	comp_lit  goto 40
-	kv_lit  goto 214
+	nameref  goto 100
+	type  goto 214
 
 state 193
-	kv_lit:  expr :.expr
-	otype: .    (133)
+	comp_lit:  otype { kv_lit_list ocomma.} 
+
+	}  shift 215
+	.  error
+
+
+state 194
+	kv_lit_list:  kv_lit_list ,.kv_lit 
+	ocomma:  ,.    (139)
+	otype: .    (134)
+
+	(  shift 41
+	[  shift 42
+	}  reduce 139 (src line 582)
+	!  shift 30
+	+  shift 31
+	-  shift 32
+	^  shift 33
+	?  shift 48
+	tENUM  shift 43
+	tSET  shift 44
+	tMAP  shift 45
+	tSTRUCT  shift 46
+	tONEOF  shift 47
+	tIDENT  shift 49
+	tSTRLIT  shift 35
+	tINTLIT  shift 36
+	tRATLIT  shift 37
+	tIMAGLIT  shift 38
+	.  reduce 134 (src line 570)
+
+	nameref  goto 39
+	type  goto 34
+	otype  goto 50
+	expr  goto 161
+	unary_expr  goto 28
+	operand  goto 29
+	comp_lit  goto 40
+	kv_lit  goto 216
+
+state 195
+	kv_lit:  expr :.expr 
+	otype: .    (134)
 
 	(  shift 41
 	[  shift 42
@@ -2899,799 +2964,809 @@ state 193
 	+  shift 31
 	-  shift 32
 	^  shift 33
+	?  shift 48
 	tENUM  shift 43
 	tSET  shift 44
 	tMAP  shift 45
 	tSTRUCT  shift 46
 	tONEOF  shift 47
-	tIDENT  shift 48
+	tIDENT  shift 49
 	tSTRLIT  shift 35
 	tINTLIT  shift 36
 	tRATLIT  shift 37
 	tIMAGLIT  shift 38
-	.  reduce 133 (src line 568)
+	.  reduce 134 (src line 570)
 
 	nameref  goto 39
 	type  goto 34
-	otype  goto 49
-	expr  goto 215
+	otype  goto 50
+	expr  goto 217
 	unary_expr  goto 28
 	operand  goto 29
 	comp_lit  goto 40
 
-state 194
+state 196
 	import:  tIMPORT ( import_spec_list osemi ).    (16)
 
 	.  reduce 16 (src line 195)
 
 
-state 195
+state 197
 	import_spec_list:  import_spec_list ; import_spec.    (19)
 
 	.  reduce 19 (src line 200)
 
 
-state 196
-	type_def:  tTYPE ( type_spec_list osemi.)
-
-	)  shift 216
-	.  error
-
-
-state 197
-	type_spec_list:  type_spec_list ;.type_spec
-	osemi:  ;.    (136)
-
-	tIDENT  shift 166
-	.  reduce 136 (src line 576)
-
-	type_spec  goto 217
-
 state 198
-	interface_spec:  tIDENT tINTERFACE {.}
-	interface_spec:  tIDENT tINTERFACE {.iface_item_list osemi }
+	type_def:  tTYPE ( type_spec_list osemi.) 
 
-	}  shift 218
-	tIDENT  shift 221
+	)  shift 218
 	.  error
 
-	nameref  goto 222
-	iface_item_list  goto 219
-	iface_item  goto 220
 
 state 199
-	const_def:  tCONST ( const_spec_list osemi.)
+	type_spec_list:  type_spec_list ;.type_spec 
+	osemi:  ;.    (137)
 
-	)  shift 223
-	.  error
+	tIDENT  shift 168
+	.  reduce 137 (src line 578)
 
+	type_spec  goto 219
 
 state 200
-	const_spec_list:  const_spec_list ;.const_spec
-	osemi:  ;.    (136)
+	interface_spec:  tIDENT tINTERFACE {.} 
+	interface_spec:  tIDENT tINTERFACE {.iface_item_list osemi } 
 
-	tIDENT  shift 113
-	.  reduce 136 (src line 576)
+	}  shift 220
+	tIDENT  shift 223
+	.  error
 
-	const_spec  goto 224
+	nameref  goto 224
+	iface_item_list  goto 221
+	iface_item  goto 222
 
 state 201
-	const_spec:  tIDENT = expr.    (85)
-	expr:  expr.tOROR expr
-	expr:  expr.tANDAND expr
-	expr:  expr.< expr
-	expr:  expr.> expr
-	expr:  expr.tLE expr
-	expr:  expr.tGE expr
-	expr:  expr.tNE expr
-	expr:  expr.tEQEQ expr
-	expr:  expr.+ expr
-	expr:  expr.- expr
-	expr:  expr.* expr
-	expr:  expr./ expr
-	expr:  expr.% expr
-	expr:  expr.| expr
-	expr:  expr.& expr
-	expr:  expr.^ expr
-	expr:  expr.tLSH expr
-	expr:  expr.tRSH expr
-
-	<  shift 65
-	>  shift 66
-	+  shift 71
-	-  shift 72
-	*  shift 73
-	/  shift 74
-	%  shift 75
-	|  shift 76
-	&  shift 77
-	^  shift 78
-	tOROR  shift 63
-	tANDAND  shift 64
-	tLE  shift 67
-	tGE  shift 68
-	tNE  shift 69
-	tEQEQ  shift 70
-	tLSH  shift 79
-	tRSH  shift 80
-	.  reduce 85 (src line 439)
-
-
-state 202
-	error_def:  tERRORID ( errorid_spec_list osemi.)
+	const_def:  tCONST ( const_spec_list osemi.) 
 
 	)  shift 225
 	.  error
 
 
-state 203
-	errorid_spec_list:  errorid_spec_list ;.errorid_spec
-	osemi:  ;.    (136)
+state 202
+	const_spec_list:  const_spec_list ;.const_spec 
+	osemi:  ;.    (137)
 
 	tIDENT  shift 116
-	.  reduce 136 (src line 576)
+	.  reduce 137 (src line 578)
 
-	errorid_spec  goto 226
+	const_spec  goto 226
+
+state 203
+	const_spec:  tIDENT = expr.    (86)
+	expr:  expr.tOROR expr 
+	expr:  expr.tANDAND expr 
+	expr:  expr.< expr 
+	expr:  expr.> expr 
+	expr:  expr.tLE expr 
+	expr:  expr.tGE expr 
+	expr:  expr.tNE expr 
+	expr:  expr.tEQEQ expr 
+	expr:  expr.+ expr 
+	expr:  expr.- expr 
+	expr:  expr.* expr 
+	expr:  expr./ expr 
+	expr:  expr.% expr 
+	expr:  expr.| expr 
+	expr:  expr.& expr 
+	expr:  expr.^ expr 
+	expr:  expr.tLSH expr 
+	expr:  expr.tRSH expr 
+
+	<  shift 66
+	>  shift 67
+	+  shift 72
+	-  shift 73
+	*  shift 74
+	/  shift 75
+	%  shift 76
+	|  shift 77
+	&  shift 78
+	^  shift 79
+	tOROR  shift 64
+	tANDAND  shift 65
+	tLE  shift 68
+	tGE  shift 69
+	tNE  shift 70
+	tEQEQ  shift 71
+	tLSH  shift 80
+	tRSH  shift 81
+	.  reduce 86 (src line 441)
+
 
 state 204
-	errorid_spec:  tIDENT = tSTRLIT.    (130)
+	error_def:  tERRORID ( errorid_spec_list osemi.) 
 
-	.  reduce 130 (src line 552)
+	)  shift 227
+	.  error
 
 
 state 205
+	errorid_spec_list:  errorid_spec_list ;.errorid_spec 
+	osemi:  ;.    (137)
+
+	tIDENT  shift 119
+	.  reduce 137 (src line 578)
+
+	errorid_spec  goto 228
+
+state 206
+	errorid_spec:  tIDENT = tSTRLIT.    (131)
+
+	.  reduce 131 (src line 554)
+
+
+state 207
 	type:  tENUM { label_spec_list osemi }.    (44)
 
 	.  reduce 44 (src line 260)
 
 
-state 206
-	label_spec_list:  label_spec_list ; label_spec.    (51)
+state 208
+	label_spec_list:  label_spec_list ; label_spec.    (52)
 
-	.  reduce 51 (src line 276)
+	.  reduce 52 (src line 278)
 
 
-state 207
+state 209
 	type:  tMAP [ type ] type.    (46)
 
 	.  reduce 46 (src line 264)
 
 
-state 208
+state 210
 	type:  tSTRUCT { field_spec_list osemi }.    (47)
 
 	.  reduce 47 (src line 266)
 
 
-state 209
-	field_spec_list:  field_spec_list ; field_spec.    (54)
-
-	.  reduce 54 (src line 286)
-
-
-state 210
-	type_comma_list:  type_comma_list , type.    (57)
-
-	.  reduce 57 (src line 338)
-
-
 state 211
+	field_spec_list:  field_spec_list ; field_spec.    (55)
+
+	.  reduce 55 (src line 288)
+
+
+state 212
+	type_comma_list:  type_comma_list , type.    (58)
+
+	.  reduce 58 (src line 340)
+
+
+state 213
 	type:  tONEOF { type_semi_list osemi }.    (49)
 
 	.  reduce 49 (src line 270)
 
 
-state 212
-	type_semi_list:  type_semi_list ; type.    (59)
-
-	.  reduce 59 (src line 344)
-
-
-state 213
-	comp_lit:  otype { kv_lit_list ocomma }.    (122)
-
-	.  reduce 122 (src line 526)
-
-
 state 214
-	kv_lit_list:  kv_lit_list , kv_lit.    (124)
+	type_semi_list:  type_semi_list ; type.    (60)
 
-	.  reduce 124 (src line 532)
+	.  reduce 60 (src line 346)
 
 
 state 215
-	expr:  expr.tOROR expr
-	expr:  expr.tANDAND expr
-	expr:  expr.< expr
-	expr:  expr.> expr
-	expr:  expr.tLE expr
-	expr:  expr.tGE expr
-	expr:  expr.tNE expr
-	expr:  expr.tEQEQ expr
-	expr:  expr.+ expr
-	expr:  expr.- expr
-	expr:  expr.* expr
-	expr:  expr./ expr
-	expr:  expr.% expr
-	expr:  expr.| expr
-	expr:  expr.& expr
-	expr:  expr.^ expr
-	expr:  expr.tLSH expr
-	expr:  expr.tRSH expr
-	kv_lit:  expr : expr.    (126)
+	comp_lit:  otype { kv_lit_list ocomma }.    (123)
 
-	<  shift 65
-	>  shift 66
-	+  shift 71
-	-  shift 72
-	*  shift 73
-	/  shift 74
-	%  shift 75
-	|  shift 76
-	&  shift 77
-	^  shift 78
-	tOROR  shift 63
-	tANDAND  shift 64
-	tLE  shift 67
-	tGE  shift 68
-	tNE  shift 69
-	tEQEQ  shift 70
-	tLSH  shift 79
-	tRSH  shift 80
-	.  reduce 126 (src line 538)
+	.  reduce 123 (src line 528)
 
 
 state 216
+	kv_lit_list:  kv_lit_list , kv_lit.    (125)
+
+	.  reduce 125 (src line 534)
+
+
+state 217
+	expr:  expr.tOROR expr 
+	expr:  expr.tANDAND expr 
+	expr:  expr.< expr 
+	expr:  expr.> expr 
+	expr:  expr.tLE expr 
+	expr:  expr.tGE expr 
+	expr:  expr.tNE expr 
+	expr:  expr.tEQEQ expr 
+	expr:  expr.+ expr 
+	expr:  expr.- expr 
+	expr:  expr.* expr 
+	expr:  expr./ expr 
+	expr:  expr.% expr 
+	expr:  expr.| expr 
+	expr:  expr.& expr 
+	expr:  expr.^ expr 
+	expr:  expr.tLSH expr 
+	expr:  expr.tRSH expr 
+	kv_lit:  expr : expr.    (127)
+
+	<  shift 66
+	>  shift 67
+	+  shift 72
+	-  shift 73
+	*  shift 74
+	/  shift 75
+	%  shift 76
+	|  shift 77
+	&  shift 78
+	^  shift 79
+	tOROR  shift 64
+	tANDAND  shift 65
+	tLE  shift 68
+	tGE  shift 69
+	tNE  shift 70
+	tEQEQ  shift 71
+	tLSH  shift 80
+	tRSH  shift 81
+	.  reduce 127 (src line 540)
+
+
+state 218
 	type_def:  tTYPE ( type_spec_list osemi ).    (29)
 
 	.  reduce 29 (src line 227)
 
 
-state 217
+state 219
 	type_spec_list:  type_spec_list ; type_spec.    (39)
 
 	.  reduce 39 (src line 244)
 
 
-state 218
-	interface_spec:  tIDENT tINTERFACE { }.    (60)
-
-	.  reduce 60 (src line 349)
-
-
-state 219
-	interface_spec:  tIDENT tINTERFACE { iface_item_list.osemi }
-	iface_item_list:  iface_item_list.; iface_item
-	osemi: .    (135)
-
-	;  shift 228
-	.  reduce 135 (src line 574)
-
-	osemi  goto 227
-
 state 220
-	iface_item_list:  iface_item.    (62)
+	interface_spec:  tIDENT tINTERFACE { }.    (61)
 
-	.  reduce 62 (src line 362)
+	.  reduce 61 (src line 351)
 
 
 state 221
-	iface_item:  tIDENT.inargs streamargs outargs tags
-	nameref:  tIDENT.    (131)
+	interface_spec:  tIDENT tINTERFACE { iface_item_list.osemi } 
+	iface_item_list:  iface_item_list.; iface_item 
+	osemi: .    (136)
 
-	(  shift 230
-	.  reduce 131 (src line 562)
+	;  shift 230
+	.  reduce 136 (src line 576)
 
-	inargs  goto 229
+	osemi  goto 229
 
 state 222
-	iface_item:  nameref.    (65)
-	nameref:  nameref.. tIDENT
+	iface_item_list:  iface_item.    (63)
 
-	.  shift 87
-	.  reduce 65 (src line 375)
+	.  reduce 63 (src line 364)
 
 
 state 223
+	iface_item:  tIDENT.inargs streamargs outargs tags 
+	nameref:  tIDENT.    (132)
+
+	(  shift 232
+	.  reduce 132 (src line 564)
+
+	inargs  goto 231
+
+state 224
+	iface_item:  nameref.    (66)
+	nameref:  nameref.. tIDENT 
+
+	.  shift 88
+	.  reduce 66 (src line 377)
+
+
+state 225
 	const_def:  tCONST ( const_spec_list osemi ).    (33)
 
 	.  reduce 33 (src line 233)
 
 
-state 224
-	const_spec_list:  const_spec_list ; const_spec.    (84)
+state 226
+	const_spec_list:  const_spec_list ; const_spec.    (85)
 
-	.  reduce 84 (src line 437)
+	.  reduce 85 (src line 439)
 
 
-state 225
+state 227
 	error_def:  tERRORID ( errorid_spec_list osemi ).    (36)
 
 	.  reduce 36 (src line 238)
 
 
-state 226
-	errorid_spec_list:  errorid_spec_list ; errorid_spec.    (128)
-
-	.  reduce 128 (src line 544)
-
-
-state 227
-	interface_spec:  tIDENT tINTERFACE { iface_item_list osemi.}
-
-	}  shift 231
-	.  error
-
-
 state 228
-	iface_item_list:  iface_item_list ;.iface_item
-	osemi:  ;.    (136)
+	errorid_spec_list:  errorid_spec_list ; errorid_spec.    (129)
 
-	tIDENT  shift 221
-	.  reduce 136 (src line 576)
+	.  reduce 129 (src line 546)
 
-	nameref  goto 222
-	iface_item  goto 232
 
 state 229
-	iface_item:  tIDENT inargs.streamargs outargs tags
-	streamargs: .    (74)
+	interface_spec:  tIDENT tINTERFACE { iface_item_list osemi.} 
 
-	tSTREAM  shift 234
-	.  reduce 74 (src line 410)
+	}  shift 233
+	.  error
 
-	streamargs  goto 233
 
 state 230
-	inargs:  (.)
-	inargs:  (.named_arg_list ocomma )
-	inargs:  (.type_comma_list ocomma )
+	iface_item_list:  iface_item_list ;.iface_item 
+	osemi:  ;.    (137)
 
-	)  shift 235
-	[  shift 42
-	tENUM  shift 43
-	tSET  shift 44
-	tMAP  shift 45
-	tSTRUCT  shift 46
-	tONEOF  shift 47
-	tIDENT  shift 48
-	.  error
+	tIDENT  shift 223
+	.  reduce 137 (src line 578)
 
-	nameref  goto 143
-	type  goto 153
-	type_comma_list  goto 237
-	field_spec  goto 238
-	named_arg_list  goto 236
+	nameref  goto 224
+	iface_item  goto 234
 
 state 231
-	interface_spec:  tIDENT tINTERFACE { iface_item_list osemi }.    (61)
+	iface_item:  tIDENT inargs.streamargs outargs tags 
+	streamargs: .    (75)
 
-	.  reduce 61 (src line 355)
+	tSTREAM  shift 236
+	.  reduce 75 (src line 412)
 
+	streamargs  goto 235
 
 state 232
-	iface_item_list:  iface_item_list ; iface_item.    (63)
+	inargs:  (.) 
+	inargs:  (.named_arg_list ocomma ) 
+	inargs:  (.type_comma_list ocomma ) 
 
-	.  reduce 63 (src line 365)
-
-
-state 233
-	iface_item:  tIDENT inargs streamargs.outargs tags
-	outargs: .    (71)
-
-	(  shift 230
+	)  shift 237
 	[  shift 42
+	?  shift 48
 	tENUM  shift 43
 	tSET  shift 44
 	tMAP  shift 45
 	tSTRUCT  shift 46
 	tONEOF  shift 47
-	tIDENT  shift 48
-	.  reduce 71 (src line 402)
+	tIDENT  shift 49
+	.  error
 
-	nameref  goto 143
-	type  goto 240
-	inargs  goto 241
-	outargs  goto 239
+	nameref  goto 100
+	type  goto 155
+	type_comma_list  goto 239
+	field_spec  goto 240
+	named_arg_list  goto 238
+
+state 233
+	interface_spec:  tIDENT tINTERFACE { iface_item_list osemi }.    (62)
+
+	.  reduce 62 (src line 357)
+
 
 state 234
-	streamargs:  tSTREAM.< >
-	streamargs:  tSTREAM.< type >
-	streamargs:  tSTREAM.< type , type >
+	iface_item_list:  iface_item_list ; iface_item.    (64)
 
-	<  shift 242
-	.  error
+	.  reduce 64 (src line 367)
 
 
 state 235
-	inargs:  ( ).    (66)
+	iface_item:  tIDENT inargs streamargs.outargs tags 
+	outargs: .    (72)
 
-	.  reduce 66 (src line 378)
-
-
-state 236
-	inargs:  ( named_arg_list.ocomma )
-	named_arg_list:  named_arg_list., field_spec
-	ocomma: .    (137)
-
-	,  shift 244
-	.  reduce 137 (src line 578)
-
-	ocomma  goto 243
-
-state 237
-	field_spec:  type_comma_list.type
-	type_comma_list:  type_comma_list., type
-	inargs:  ( type_comma_list.ocomma )
-	ocomma: .    (137)
-
-	,  shift 245
+	(  shift 232
 	[  shift 42
+	?  shift 48
 	tENUM  shift 43
 	tSET  shift 44
 	tMAP  shift 45
 	tSTRUCT  shift 46
 	tONEOF  shift 47
-	tIDENT  shift 48
-	.  reduce 137 (src line 578)
+	tIDENT  shift 49
+	.  reduce 72 (src line 404)
 
-	nameref  goto 143
-	type  goto 187
-	ocomma  goto 246
+	nameref  goto 100
+	type  goto 242
+	inargs  goto 243
+	outargs  goto 241
+
+state 236
+	streamargs:  tSTREAM.< > 
+	streamargs:  tSTREAM.< type > 
+	streamargs:  tSTREAM.< type , type > 
+
+	<  shift 244
+	.  error
+
+
+state 237
+	inargs:  ( ).    (67)
+
+	.  reduce 67 (src line 380)
+
 
 state 238
-	named_arg_list:  field_spec.    (69)
+	inargs:  ( named_arg_list.ocomma ) 
+	named_arg_list:  named_arg_list., field_spec 
+	ocomma: .    (138)
 
-	.  reduce 69 (src line 394)
+	,  shift 246
+	.  reduce 138 (src line 580)
 
+	ocomma  goto 245
 
 state 239
-	iface_item:  tIDENT inargs streamargs outargs.tags
-	tags: .    (78)
+	field_spec:  type_comma_list.type 
+	type_comma_list:  type_comma_list., type 
+	inargs:  ( type_comma_list.ocomma ) 
+	ocomma: .    (138)
 
-	{  shift 248
-	.  reduce 78 (src line 420)
+	,  shift 247
+	[  shift 42
+	?  shift 48
+	tENUM  shift 43
+	tSET  shift 44
+	tMAP  shift 45
+	tSTRUCT  shift 46
+	tONEOF  shift 47
+	tIDENT  shift 49
+	.  reduce 138 (src line 580)
 
-	tags  goto 247
+	nameref  goto 100
+	type  goto 189
+	ocomma  goto 248
 
 state 240
-	outargs:  type.    (72)
+	named_arg_list:  field_spec.    (70)
 
-	.  reduce 72 (src line 405)
+	.  reduce 70 (src line 396)
 
 
 state 241
-	outargs:  inargs.    (73)
+	iface_item:  tIDENT inargs streamargs outargs.tags 
+	tags: .    (79)
+
+	{  shift 250
+	.  reduce 79 (src line 422)
+
+	tags  goto 249
+
+state 242
+	outargs:  type.    (73)
 
 	.  reduce 73 (src line 407)
 
 
-state 242
-	streamargs:  tSTREAM <.>
-	streamargs:  tSTREAM <.type >
-	streamargs:  tSTREAM <.type , type >
-
-	[  shift 42
-	>  shift 249
-	tENUM  shift 43
-	tSET  shift 44
-	tMAP  shift 45
-	tSTRUCT  shift 46
-	tONEOF  shift 47
-	tIDENT  shift 48
-	.  error
-
-	nameref  goto 143
-	type  goto 250
-
 state 243
-	inargs:  ( named_arg_list ocomma.)
+	outargs:  inargs.    (74)
 
-	)  shift 251
-	.  error
+	.  reduce 74 (src line 409)
 
 
 state 244
-	named_arg_list:  named_arg_list ,.field_spec
-	ocomma:  ,.    (138)
+	streamargs:  tSTREAM <.> 
+	streamargs:  tSTREAM <.type > 
+	streamargs:  tSTREAM <.type , type > 
 
 	[  shift 42
+	>  shift 251
+	?  shift 48
 	tENUM  shift 43
 	tSET  shift 44
 	tMAP  shift 45
 	tSTRUCT  shift 46
 	tONEOF  shift 47
-	tIDENT  shift 48
-	.  reduce 138 (src line 580)
+	tIDENT  shift 49
+	.  error
 
-	nameref  goto 143
-	type  goto 153
-	type_comma_list  goto 152
-	field_spec  goto 252
+	nameref  goto 100
+	type  goto 252
 
 state 245
-	type_comma_list:  type_comma_list ,.type
-	ocomma:  ,.    (138)
-
-	[  shift 42
-	tENUM  shift 43
-	tSET  shift 44
-	tMAP  shift 45
-	tSTRUCT  shift 46
-	tONEOF  shift 47
-	tIDENT  shift 48
-	.  reduce 138 (src line 580)
-
-	nameref  goto 143
-	type  goto 210
-
-state 246
-	inargs:  ( type_comma_list ocomma.)
+	inargs:  ( named_arg_list ocomma.) 
 
 	)  shift 253
 	.  error
 
 
-state 247
-	iface_item:  tIDENT inargs streamargs outargs tags.    (64)
+state 246
+	named_arg_list:  named_arg_list ,.field_spec 
+	ocomma:  ,.    (139)
 
-	.  reduce 64 (src line 372)
-
-
-state 248
-	tags:  {.}
-	tags:  {.tag_list ocomma }
-	otype: .    (133)
-
-	(  shift 41
 	[  shift 42
-	}  shift 254
-	!  shift 30
-	+  shift 31
-	-  shift 32
-	^  shift 33
+	?  shift 48
 	tENUM  shift 43
 	tSET  shift 44
 	tMAP  shift 45
 	tSTRUCT  shift 46
 	tONEOF  shift 47
-	tIDENT  shift 48
+	tIDENT  shift 49
+	.  reduce 139 (src line 582)
+
+	nameref  goto 100
+	type  goto 155
+	type_comma_list  goto 154
+	field_spec  goto 254
+
+state 247
+	type_comma_list:  type_comma_list ,.type 
+	ocomma:  ,.    (139)
+
+	[  shift 42
+	?  shift 48
+	tENUM  shift 43
+	tSET  shift 44
+	tMAP  shift 45
+	tSTRUCT  shift 46
+	tONEOF  shift 47
+	tIDENT  shift 49
+	.  reduce 139 (src line 582)
+
+	nameref  goto 100
+	type  goto 212
+
+state 248
+	inargs:  ( type_comma_list ocomma.) 
+
+	)  shift 255
+	.  error
+
+
+state 249
+	iface_item:  tIDENT inargs streamargs outargs tags.    (65)
+
+	.  reduce 65 (src line 374)
+
+
+state 250
+	tags:  {.} 
+	tags:  {.tag_list ocomma } 
+	otype: .    (134)
+
+	(  shift 41
+	[  shift 42
+	}  shift 256
+	!  shift 30
+	+  shift 31
+	-  shift 32
+	^  shift 33
+	?  shift 48
+	tENUM  shift 43
+	tSET  shift 44
+	tMAP  shift 45
+	tSTRUCT  shift 46
+	tONEOF  shift 47
+	tIDENT  shift 49
 	tSTRLIT  shift 35
 	tINTLIT  shift 36
 	tRATLIT  shift 37
 	tIMAGLIT  shift 38
-	.  reduce 133 (src line 568)
+	.  reduce 134 (src line 570)
 
 	nameref  goto 39
 	type  goto 34
-	otype  goto 49
-	expr  goto 256
+	otype  goto 50
+	expr  goto 258
 	unary_expr  goto 28
 	operand  goto 29
-	tag_list  goto 255
+	tag_list  goto 257
 	comp_lit  goto 40
 
-state 249
-	streamargs:  tSTREAM < >.    (75)
-
-	.  reduce 75 (src line 413)
-
-
-state 250
-	streamargs:  tSTREAM < type.>
-	streamargs:  tSTREAM < type., type >
-
-	,  shift 258
-	>  shift 257
-	.  error
-
-
 state 251
-	inargs:  ( named_arg_list ocomma ).    (67)
+	streamargs:  tSTREAM < >.    (76)
 
-	.  reduce 67 (src line 381)
+	.  reduce 76 (src line 415)
 
 
 state 252
-	named_arg_list:  named_arg_list , field_spec.    (70)
+	streamargs:  tSTREAM < type.> 
+	streamargs:  tSTREAM < type., type > 
 
-	.  reduce 70 (src line 397)
+	,  shift 260
+	>  shift 259
+	.  error
 
 
 state 253
-	inargs:  ( type_comma_list ocomma ).    (68)
+	inargs:  ( named_arg_list ocomma ).    (68)
 
 	.  reduce 68 (src line 383)
 
 
 state 254
-	tags:  { }.    (79)
+	named_arg_list:  named_arg_list , field_spec.    (71)
 
-	.  reduce 79 (src line 423)
+	.  reduce 71 (src line 399)
 
 
 state 255
-	tags:  { tag_list.ocomma }
-	tag_list:  tag_list., expr
-	ocomma: .    (137)
+	inargs:  ( type_comma_list ocomma ).    (69)
 
-	,  shift 260
-	.  reduce 137 (src line 578)
+	.  reduce 69 (src line 385)
 
-	ocomma  goto 259
 
 state 256
-	tag_list:  expr.    (81)
-	expr:  expr.tOROR expr
-	expr:  expr.tANDAND expr
-	expr:  expr.< expr
-	expr:  expr.> expr
-	expr:  expr.tLE expr
-	expr:  expr.tGE expr
-	expr:  expr.tNE expr
-	expr:  expr.tEQEQ expr
-	expr:  expr.+ expr
-	expr:  expr.- expr
-	expr:  expr.* expr
-	expr:  expr./ expr
-	expr:  expr.% expr
-	expr:  expr.| expr
-	expr:  expr.& expr
-	expr:  expr.^ expr
-	expr:  expr.tLSH expr
-	expr:  expr.tRSH expr
-
-	<  shift 65
-	>  shift 66
-	+  shift 71
-	-  shift 72
-	*  shift 73
-	/  shift 74
-	%  shift 75
-	|  shift 76
-	&  shift 77
-	^  shift 78
-	tOROR  shift 63
-	tANDAND  shift 64
-	tLE  shift 67
-	tGE  shift 68
-	tNE  shift 69
-	tEQEQ  shift 70
-	tLSH  shift 79
-	tRSH  shift 80
-	.  reduce 81 (src line 428)
-
-
-state 257
-	streamargs:  tSTREAM < type >.    (76)
-
-	.  reduce 76 (src line 415)
-
-
-state 258
-	streamargs:  tSTREAM < type ,.type >
-
-	[  shift 42
-	tENUM  shift 43
-	tSET  shift 44
-	tMAP  shift 45
-	tSTRUCT  shift 46
-	tONEOF  shift 47
-	tIDENT  shift 48
-	.  error
-
-	nameref  goto 143
-	type  goto 261
-
-state 259
-	tags:  { tag_list ocomma.}
-
-	}  shift 262
-	.  error
-
-
-state 260
-	tag_list:  tag_list ,.expr
-	ocomma:  ,.    (138)
-	otype: .    (133)
-
-	(  shift 41
-	[  shift 42
-	}  reduce 138 (src line 580)
-	!  shift 30
-	+  shift 31
-	-  shift 32
-	^  shift 33
-	tENUM  shift 43
-	tSET  shift 44
-	tMAP  shift 45
-	tSTRUCT  shift 46
-	tONEOF  shift 47
-	tIDENT  shift 48
-	tSTRLIT  shift 35
-	tINTLIT  shift 36
-	tRATLIT  shift 37
-	tIMAGLIT  shift 38
-	.  reduce 133 (src line 568)
-
-	nameref  goto 39
-	type  goto 34
-	otype  goto 49
-	expr  goto 263
-	unary_expr  goto 28
-	operand  goto 29
-	comp_lit  goto 40
-
-state 261
-	streamargs:  tSTREAM < type , type.>
-
-	>  shift 264
-	.  error
-
-
-state 262
-	tags:  { tag_list ocomma }.    (80)
+	tags:  { }.    (80)
 
 	.  reduce 80 (src line 425)
 
 
-state 263
-	tag_list:  tag_list , expr.    (82)
-	expr:  expr.tOROR expr
-	expr:  expr.tANDAND expr
-	expr:  expr.< expr
-	expr:  expr.> expr
-	expr:  expr.tLE expr
-	expr:  expr.tGE expr
-	expr:  expr.tNE expr
-	expr:  expr.tEQEQ expr
-	expr:  expr.+ expr
-	expr:  expr.- expr
-	expr:  expr.* expr
-	expr:  expr./ expr
-	expr:  expr.% expr
-	expr:  expr.| expr
-	expr:  expr.& expr
-	expr:  expr.^ expr
-	expr:  expr.tLSH expr
-	expr:  expr.tRSH expr
+state 257
+	tags:  { tag_list.ocomma } 
+	tag_list:  tag_list., expr 
+	ocomma: .    (138)
 
-	<  shift 65
-	>  shift 66
-	+  shift 71
-	-  shift 72
-	*  shift 73
-	/  shift 74
-	%  shift 75
-	|  shift 76
-	&  shift 77
-	^  shift 78
-	tOROR  shift 63
-	tANDAND  shift 64
-	tLE  shift 67
-	tGE  shift 68
-	tNE  shift 69
-	tEQEQ  shift 70
-	tLSH  shift 79
-	tRSH  shift 80
-	.  reduce 82 (src line 431)
+	,  shift 262
+	.  reduce 138 (src line 580)
+
+	ocomma  goto 261
+
+state 258
+	tag_list:  expr.    (82)
+	expr:  expr.tOROR expr 
+	expr:  expr.tANDAND expr 
+	expr:  expr.< expr 
+	expr:  expr.> expr 
+	expr:  expr.tLE expr 
+	expr:  expr.tGE expr 
+	expr:  expr.tNE expr 
+	expr:  expr.tEQEQ expr 
+	expr:  expr.+ expr 
+	expr:  expr.- expr 
+	expr:  expr.* expr 
+	expr:  expr./ expr 
+	expr:  expr.% expr 
+	expr:  expr.| expr 
+	expr:  expr.& expr 
+	expr:  expr.^ expr 
+	expr:  expr.tLSH expr 
+	expr:  expr.tRSH expr 
+
+	<  shift 66
+	>  shift 67
+	+  shift 72
+	-  shift 73
+	*  shift 74
+	/  shift 75
+	%  shift 76
+	|  shift 77
+	&  shift 78
+	^  shift 79
+	tOROR  shift 64
+	tANDAND  shift 65
+	tLE  shift 68
+	tGE  shift 69
+	tNE  shift 70
+	tEQEQ  shift 71
+	tLSH  shift 80
+	tRSH  shift 81
+	.  reduce 82 (src line 430)
 
 
-state 264
-	streamargs:  tSTREAM < type , type >.    (77)
+state 259
+	streamargs:  tSTREAM < type >.    (77)
 
 	.  reduce 77 (src line 417)
 
 
-56 terminals, 46 nonterminals
-139 grammar rules, 265/2000 states
+state 260
+	streamargs:  tSTREAM < type ,.type > 
+
+	[  shift 42
+	?  shift 48
+	tENUM  shift 43
+	tSET  shift 44
+	tMAP  shift 45
+	tSTRUCT  shift 46
+	tONEOF  shift 47
+	tIDENT  shift 49
+	.  error
+
+	nameref  goto 100
+	type  goto 263
+
+state 261
+	tags:  { tag_list ocomma.} 
+
+	}  shift 264
+	.  error
+
+
+state 262
+	tag_list:  tag_list ,.expr 
+	ocomma:  ,.    (139)
+	otype: .    (134)
+
+	(  shift 41
+	[  shift 42
+	}  reduce 139 (src line 582)
+	!  shift 30
+	+  shift 31
+	-  shift 32
+	^  shift 33
+	?  shift 48
+	tENUM  shift 43
+	tSET  shift 44
+	tMAP  shift 45
+	tSTRUCT  shift 46
+	tONEOF  shift 47
+	tIDENT  shift 49
+	tSTRLIT  shift 35
+	tINTLIT  shift 36
+	tRATLIT  shift 37
+	tIMAGLIT  shift 38
+	.  reduce 134 (src line 570)
+
+	nameref  goto 39
+	type  goto 34
+	otype  goto 50
+	expr  goto 265
+	unary_expr  goto 28
+	operand  goto 29
+	comp_lit  goto 40
+
+state 263
+	streamargs:  tSTREAM < type , type.> 
+
+	>  shift 266
+	.  error
+
+
+state 264
+	tags:  { tag_list ocomma }.    (81)
+
+	.  reduce 81 (src line 427)
+
+
+state 265
+	tag_list:  tag_list , expr.    (83)
+	expr:  expr.tOROR expr 
+	expr:  expr.tANDAND expr 
+	expr:  expr.< expr 
+	expr:  expr.> expr 
+	expr:  expr.tLE expr 
+	expr:  expr.tGE expr 
+	expr:  expr.tNE expr 
+	expr:  expr.tEQEQ expr 
+	expr:  expr.+ expr 
+	expr:  expr.- expr 
+	expr:  expr.* expr 
+	expr:  expr./ expr 
+	expr:  expr.% expr 
+	expr:  expr.| expr 
+	expr:  expr.& expr 
+	expr:  expr.^ expr 
+	expr:  expr.tLSH expr 
+	expr:  expr.tRSH expr 
+
+	<  shift 66
+	>  shift 67
+	+  shift 72
+	-  shift 73
+	*  shift 74
+	/  shift 75
+	%  shift 76
+	|  shift 77
+	&  shift 78
+	^  shift 79
+	tOROR  shift 64
+	tANDAND  shift 65
+	tLE  shift 68
+	tGE  shift 69
+	tNE  shift 70
+	tEQEQ  shift 71
+	tLSH  shift 80
+	tRSH  shift 81
+	.  reduce 83 (src line 433)
+
+
+state 266
+	streamargs:  tSTREAM < type , type >.    (78)
+
+	.  reduce 78 (src line 419)
+
+
+57 terminals, 46 nonterminals
+140 grammar rules, 267/2000 states
 0 shift/reduce, 0 reduce/reduce conflicts reported
 95 working sets used
 memory: parser 411/30000
-112 extra closures
-1093 shift entries, 5 exceptions
-151 goto entries
+114 extra closures
+1154 shift entries, 5 exceptions
+153 goto entries
 194 entries saved by goto default
-Optimizer space used: output 612/30000
-612 table entries, 63 zero
-maximum spread: 54, maximum offset: 260
+Optimizer space used: output 632/30000
+632 table entries, 70 zero
+maximum spread: 55, maximum offset: 262

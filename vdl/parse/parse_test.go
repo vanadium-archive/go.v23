@@ -266,6 +266,30 @@ type foo bar.baz`,
 				{NamePos: np("foo", 2, 6), Type: tn("bar.baz", 2, 10)}}},
 		nil},
 	{
+		"TypeEnum",
+		`package testpkg
+type foo enum{A;B;C}`,
+		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
+			TypeDefs: []*parse.TypeDef{
+				{NamePos: np("foo", 2, 6), Type: &parse.TypeEnum{
+					Labels: []parse.NamePos{np("A", 2, 15), np("B", 2, 17), np("C", 2, 19)},
+					P:      pos(2, 10)}}}},
+		nil},
+	{
+		"TypeEnumNewlines",
+		`package testpkg
+type foo enum {
+  A
+  B
+  C
+}`,
+		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
+			TypeDefs: []*parse.TypeDef{
+				{NamePos: np("foo", 2, 6), Type: &parse.TypeEnum{
+					Labels: []parse.NamePos{np("A", 3, 3), np("B", 4, 3), np("C", 5, 3)},
+					P:      pos(2, 10)}}}},
+		nil},
+	{
 		"TypeArray",
 		`package testpkg
 type foo [2]bar`,
@@ -282,6 +306,15 @@ type foo []bar`,
 			TypeDefs: []*parse.TypeDef{
 				{NamePos: np("foo", 2, 6), Type: &parse.TypeList{
 					Elem: tn("bar", 2, 12), P: pos(2, 10)}}}},
+		nil},
+	{
+		"TypeSet",
+		`package testpkg
+type foo set[bar]`,
+		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
+			TypeDefs: []*parse.TypeDef{
+				{NamePos: np("foo", 2, 6), Type: &parse.TypeSet{
+					Key: tn("bar", 2, 14), P: pos(2, 10)}}}},
 		nil},
 	{
 		"TypeMap",
@@ -365,6 +398,60 @@ type foo struct{
 						{NamePos: np("d", 3, 9), Type: tn("e", 3, 11)},
 						{NamePos: np("f", 4, 3), Type: tn("h", 4, 7)},
 						{NamePos: np("g", 4, 5), Type: tn("h", 4, 7)}},
+					P: pos(2, 10)}}}},
+		nil},
+	{
+		"TypeOneOf",
+		`package testpkg
+type foo oneof{A;B;C}`,
+		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
+			TypeDefs: []*parse.TypeDef{
+				{NamePos: np("foo", 2, 6), Type: &parse.TypeOneOf{
+					Types: []parse.Type{tn("A", 2, 16), tn("B", 2, 18), tn("C", 2, 20)},
+					P:     pos(2, 10)}}}},
+		nil},
+	{
+		"TypeOneOfNewlines",
+		`package testpkg
+type foo oneof{
+  A
+  B
+  C
+}`,
+		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
+			TypeDefs: []*parse.TypeDef{
+				{NamePos: np("foo", 2, 6), Type: &parse.TypeOneOf{
+					Types: []parse.Type{tn("A", 3, 3), tn("B", 4, 3), tn("C", 5, 3)},
+					P:     pos(2, 10)}}}},
+		nil},
+	{
+		"TypeNilable",
+		`package testpkg
+type foo oneof{A;?B;?C}`,
+		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
+			TypeDefs: []*parse.TypeDef{
+				{NamePos: np("foo", 2, 6), Type: &parse.TypeOneOf{
+					Types: []parse.Type{
+						tn("A", 2, 16),
+						&parse.TypeNilable{Base: tn("B", 2, 19), P: pos(2, 18)},
+						&parse.TypeNilable{Base: tn("C", 2, 22), P: pos(2, 21)}},
+					P: pos(2, 10)}}}},
+		nil},
+	{
+		"TypeNilableNewlines",
+		`package testpkg
+type foo oneof{
+  A
+  ?B
+  ?C
+}`,
+		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
+			TypeDefs: []*parse.TypeDef{
+				{NamePos: np("foo", 2, 6), Type: &parse.TypeOneOf{
+					Types: []parse.Type{
+						tn("A", 3, 3),
+						&parse.TypeNilable{Base: tn("B", 4, 4), P: pos(4, 3)},
+						&parse.TypeNilable{Base: tn("C", 5, 4), P: pos(5, 3)}},
 					P: pos(2, 10)}}}},
 		nil},
 	{

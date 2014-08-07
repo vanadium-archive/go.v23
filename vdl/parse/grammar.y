@@ -102,7 +102,7 @@ func ensureNonEmptyToken(yylex yyLexer, tok strPos, errMsg string) {
 // id.  The start* tokens are dummy tokens to kick off the parse.
 %token            startFileImports startFile startConfigImports startConfig
 %token <pos>      ';' ':' ',' '.' '(' ')' '[' ']' '{' '}' '<' '>' '='
-%token <pos>      '!' '+' '-' '*' '/' '%' '|' '&' '^'
+%token <pos>      '!' '+' '-' '*' '/' '%' '|' '&' '^' '?'
 %token <pos>      tOROR tANDAND tLE tGE tNE tEQEQ tLSH tRSH
 %token <pos>      tPACKAGE tIMPORT tTYPE tENUM tSET tMAP tSTRUCT tONEOF
 %token <pos>      tINTERFACE tSTREAM tCONST tERRORID
@@ -269,6 +269,8 @@ type:
   { $$ = &TypeStruct{P:$1} }
 | tONEOF '{' type_semi_list osemi '}'
   { $$ = &TypeOneOf{Types:$3, P:$1} }
+| '?' type
+  { $$ = &TypeNilable{Base:$2, P:$1} }
 
 label_spec_list:
   label_spec

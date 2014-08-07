@@ -222,7 +222,24 @@ func compileDefinedType(ptype parse.Type, file *File, env *Env, tbuilder *vdl.Ty
 		}
 		return oneof
 	}
-	return compileLiteralType(ptype, file, env, tbuilder, builders)
+	lit := compileLiteralType(ptype, file, env, tbuilder, builders)
+	if _, ok := lit.(vdl.PendingNilable); ok {
+		// Don't allow Nilable at the top-level of a type definition.  The purpose
+		// of this rule is twofold:
+		// 1) Reduce confusion; the Nilable modifier cannot be hidden in a type
+		//    definition, it must be explicitly mentioned on each use.
+		// 2) The Nilable concept is typically translated to pointers in generated
+		//    languages, and many languages don't support named pointer types.
+		//
+		//   type A string            // ok
+		//   type B []?string         // ok
+		//   type C struct{X ?string} // ok
+		//   type C ?string           // bad
+		//   type D ?struct{X string} // bad
+		env.errorf(file, ptype.Pos(), "can't define type based on top-level nilable")
+		return nil
+	}
+	return lit
 }
 
 // compileLiteralType compiles ptype.  It can handle any literal type.  Note
@@ -258,6 +275,11 @@ func compileLiteralType(ptype parse.Type, file *File, env *Env, tbuilder *vdl.Ty
 		elem := compileLiteralType(pt.Elem, file, env, tbuilder, builders)
 		if key != nil && elem != nil {
 			return tbuilder.Map().AssignKey(key).AssignElem(elem)
+		}
+	case *parse.TypeNilable:
+		base := compileLiteralType(pt.Base, file, env, tbuilder, builders)
+		if base != nil {
+			return tbuilder.Nilable().AssignBase(base)
 		}
 	default:
 		env.errorf(file, pt.Pos(), "unnamed %s type invalid (type must be defined)", ptype.Kind())
