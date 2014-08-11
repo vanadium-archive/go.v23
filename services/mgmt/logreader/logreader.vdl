@@ -1,0 +1,34 @@
+// Package logreader contains the interface for reading log files remotely.
+package logreader
+
+// LogLine is a log entry from a log file.
+type LogEntry struct {
+	// The offset (in bytes) where this entry starts.
+	Position int64
+	// The content of the log entry.
+	Line   string
+}
+
+// LogFile can be used to access log files remotely.
+type LogFile interface {
+	// Size returns the number of bytes in the receiving object.
+	Size() (int64, error)
+	// ReadLog receives up to NumEntries log entries starting at the
+	// StartPos offset (in bytes) in the receiving object. Each stream chunk
+	// contains one log entry.
+	//
+	// If Follow is true, ReadLog will block and wait for more entries to
+	// arrive when it reaches the end of the file.
+	//
+	// ReadLog returns the position where it stopped reading, i.e. the
+	// position where the next entry starts. This value can be used as
+	// StartPos for successive calls to ReadLog.
+	//
+	// The returned error will be io.EOF if and only if ReadLog reached the
+	// end of the file and no log entries were returned.
+	ReadLog(StartPos int64, NumEntries int32, Follow bool) stream<_, LogEntry> (int64, error)
+}
+
+// A special NumEntries value that indicates that all entries should be
+// returned by ReadLog.
+const AllEntries = int64(-1)
