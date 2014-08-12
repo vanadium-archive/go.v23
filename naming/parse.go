@@ -216,24 +216,45 @@ func squashSlashRun(s string) string {
 	return string(r)
 }
 
-// Join takes an object name and appends the given suffix to it.
-// It takes care to ensure that it does not create a '//' pair where
-// one didn't exist before. Runs of two or more '/'s are truncated
-// to '//' when they trail in name or lead in suffix. A similarly positioned
-// single '/' will be removed.
-func Join(name, suffix string) string {
-	nameSlashSlash := strings.HasSuffix(name, "//")
-	suffixSlashSlash := strings.HasPrefix(suffix, "//")
-	name = strings.TrimRight(name, "/")
-	suffix = strings.TrimLeft(suffix, "/")
-	if !nameSlashSlash && !suffixSlashSlash {
-		if len(suffix) == 0 {
-			return name
-		}
-		if len(name) == 0 {
-			return suffix
-		}
-		return name + "/" + suffix
+// Join takes a variable number of name fragments and concatenates them
+// together using '/'. It takes care to ensure that it does not create a '//'
+// pair where one didn't exist before. Runs of two or more '/'s are truncated
+// to '//' when they are in the middle of the joined string.
+func Join(elems ...string) string {
+	if len(elems) == 0 {
+		return ""
 	}
-	return name + "//" + suffix
+	var n int
+	for _, e := range elems {
+		n += len(e)
+	}
+	n += len(elems) - 1
+	b := make([]byte, n)
+	var bp int
+	var delimiter string
+	for i, e := range elems {
+		if i > 0 {
+			if strings.HasPrefix(e, "//") {
+				delimiter = "//"
+			}
+			e = strings.TrimLeft(e, "/")
+		}
+		if len(e) > 0 {
+			bp += copy(b[bp:], delimiter)
+			delimiter = "/"
+		}
+		if i < len(elems)-1 {
+			if strings.HasSuffix(e, "//") {
+				delimiter = "//"
+			}
+			e = strings.TrimRight(e, "/")
+		}
+		bp += copy(b[bp:], e)
+	}
+	if delimiter == "//" {
+		bp += copy(b[bp:], delimiter)
+	}
+	// We made b too big because we didn't know how many '/' would be stripped.
+	// As a result, we have to reslice to just the portion we used.
+	return string(b[:bp])
 }

@@ -77,29 +77,61 @@ func TestJoinAddressName(t *testing.T) {
 
 func TestJoin(t *testing.T) {
 	cases := []struct {
-		name, suffix, joined string
+		elems  []string
+		joined string
 	}{
-		{"", "", ""},
-		{"a", "", "a"},
-		{"a/", "", "a"},
-		{"", "a", "a"},
-		{"", "/a", "a"},
-		{"a", "b", "a/b"},
-		{"a/", "b/", "a/b/"},
-		{"a/", "/b", "a/b"},
-		{"/a", "b", "/a/b"},
-		{"/a/b", "c", "/a/b/c"},
-		{"/a/b", "c/d", "/a/b/c/d"},
-		{"/a/b", "/c/d", "/a/b/c/d"},
-		{"/a/b", "//c/d", "/a/b//c/d"},
-		{"/a//", "c", "/a//c"},
-		{"", "//a/b", "//a/b"},
-		{"/ep//", "", "/ep//"},
-		{"/ep//", "a", "/ep//a"},
+		{[]string{}, ""},
+		{[]string{""}, ""},
+		{[]string{"", ""}, ""},
+		{[]string{"a"}, "a"},
+		{[]string{"a", ""}, "a"},
+		{[]string{"a/"}, "a/"},
+		{[]string{"a/", ""}, "a"},
+		{[]string{"a", "/"}, "a"},
+		{[]string{"", "a"}, "a"},
+		{[]string{"", "/a"}, "a"},
+		{[]string{"a", "b"}, "a/b"},
+		{[]string{"a/", "b/"}, "a/b/"},
+		{[]string{"a/", "/b"}, "a/b"},
+		{[]string{"/a", "b"}, "/a/b"},
+		{[]string{"a", "/", "b"}, "a/b"},
+		{[]string{"a", "/", "/b"}, "a/b"},
+		{[]string{"a/", "/", "/b"}, "a/b"},
+		{[]string{"/a/b", "c"}, "/a/b/c"},
+		{[]string{"/a", "b", "c"}, "/a/b/c"},
+		{[]string{"/a/", "/b/", "/c/"}, "/a/b/c/"},
+		{[]string{"a", "b", "c"}, "a/b/c"},
+		{[]string{"a", "", "c"}, "a/c"},
+		{[]string{"a", "", "", "c"}, "a/c"},
+		{[]string{"/a/b", "c/d"}, "/a/b/c/d"},
+		{[]string{"/a/b", "/c/d"}, "/a/b/c/d"},
+		{[]string{"/a/b", "//c/d"}, "/a/b//c/d"},
+		{[]string{"/a//", "c"}, "/a//c"},
+		{[]string{"/a", "//"}, "/a//"},
+		{[]string{"", "//a/b"}, "//a/b"},
+		{[]string{"a", "b//"}, "a/b//"},
+		{[]string{"a", "//", "b"}, "a//b"},
+		{[]string{"a", "//", "/b"}, "a//b"},
+		{[]string{"a", "//", "//b"}, "a//b"},
+		{[]string{"a/", "//", "b"}, "a//b"},
+		{[]string{"a//", "//", "b"}, "a//b"},
+		{[]string{"a//", "//", "//b"}, "a//b"},
+		{[]string{"a", "/", "/", "b"}, "a/b"},
+		{[]string{"a/", "/", "/", "/b"}, "a/b"},
+		{[]string{"a", "//", "//", "b"}, "a//b"},
+		{[]string{"a//", "//", "//", "//b"}, "a//b"},
+		{[]string{"a//", "//b//", "//c//"}, "a//b//c//"},
+		{[]string{"a//", "", "//c//"}, "a//c//"},
+		{[]string{"a///", "////b"}, "a//b"},
+		{[]string{"////a", "b"}, "////a/b"},
+		{[]string{"a", "b////"}, "a/b////"},
+		{[]string{"/ep//", ""}, "/ep//"},
+		{[]string{"/ep//", "a"}, "/ep//a"},
+		{[]string{"/ep//", "//a"}, "/ep//a"},
 	}
 	for _, c := range cases {
-		if got, want := Join(c.name, c.suffix), c.joined; want != got {
-			t.Errorf("%q %q: unexpected join: %q not %q", c.name, c.suffix, got, want)
+		if got, want := Join(c.elems...), c.joined; want != got {
+			t.Errorf("%q: unexpected join: %q not %q", c.elems, got, want)
 		}
 	}
 }
