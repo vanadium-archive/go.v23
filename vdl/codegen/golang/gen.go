@@ -1,4 +1,4 @@
-// Package gen provides functions to generate code from compiled VDL packages.
+// Package golang implements Go code generation from compiled VDL packages.
 package golang
 
 import (
@@ -133,22 +133,7 @@ func systemImportsGo(f *compile.File) []string {
 		set[`_gen_vdlutil "veyron2/vdl/vdlutil"`] = true
 		set[`_gen_naming "veyron2/naming"`] = true
 
-		hasStreaming := false
-
-		for _, i := range f.Interfaces {
-			for _, m := range i.AllMethods() {
-				if isStreamingMethodGo(m) {
-					hasStreaming = true
-					break
-
-				}
-			}
-			if hasStreaming {
-				break
-			}
-		}
-
-		if hasStreaming {
+		if fileHasStreamingMethods(f) {
 			set[`_gen_io "io"`] = true
 		}
 	}
@@ -166,6 +151,19 @@ func systemImportsGo(f *compile.File) []string {
 	}
 	ret.Sort()
 	return ret
+}
+
+// fileHasStreamingMethods returns true iff f contains an interface with a
+// streaming method, disregarding embedded interfaces.
+func fileHasStreamingMethods(f *compile.File) bool {
+	for _, i := range f.Interfaces {
+		for _, m := range i.Methods {
+			if isStreamingMethodGo(m) {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 var goTemplate *template.Template
