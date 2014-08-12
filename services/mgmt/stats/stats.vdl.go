@@ -11,7 +11,6 @@ import (
 	"veyron2/services/watch"
 
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
-	_gen_io "io"
 	_gen_context "veyron2/context"
 	_gen_ipc "veyron2/ipc"
 	_gen_naming "veyron2/naming"
