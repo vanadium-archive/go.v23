@@ -74,23 +74,12 @@ func newWildcardName(name strPos, yylex yyLexer) *WildcardName {
 		}
 	}
 	if len(clean) > 0 && clean[len(clean)-1] == "*" {
-		return &WildcardName{joinPath(clean[:len(clean)-1]), Star, name.pos}
+		return &WildcardName{naming.Join(clean[:len(clean)-1]...), Star, name.pos}
 	}
-	return &WildcardName{joinPath(clean), Self, name.pos}
+	return &WildcardName{naming.Join(clean...), Self, name.pos}
 }
 
-// joinPath uses naming.Join to combine an array of path parts into one.
-// We don't use path.Join because that version strips out ".." which does
-// not have a special meaning in Veyron.
-func joinPath(parts []string) string {
-	path := ""
-	for _, p := range parts {
-		path = naming.Join(path, p)
-	}
-	return path
-}
-
-//line grammar.y:105
+//line grammar.y:94
 type yySymType struct {
 	yys          int
 	pos          Pos
@@ -515,286 +504,286 @@ yydefault:
 	switch yynt {
 
 	case 1:
-		//line grammar.y:170
+		//line grammar.y:159
 		{
 			lexASTResult(yylex, yyS[yypt-0].pipeline)
 		}
 	case 2:
-		//line grammar.y:174
+		//line grammar.y:163
 		{
 			yyVAL.pipeline = &PipelineName{yyS[yypt-0].wildcardname, yyS[yypt-0].wildcardname.Pos}
 		}
 	case 3:
-		//line grammar.y:176
+		//line grammar.y:165
 		{
 			yyVAL.pipeline = &PipelineType{yyS[yypt-2].pipeline, yyS[yypt-0].strpos.str, yyS[yypt-1].pos}
 		}
 	case 4:
-		//line grammar.y:178
+		//line grammar.y:167
 		{
 			lexAbort(yylex, "'type' cannot start a pipeline")
 		}
 	case 5:
-		//line grammar.y:182
+		//line grammar.y:171
 		{
 			yyVAL.pipeline = &PipelineFilter{yyS[yypt-3].pipeline, yyS[yypt-0].pred, yyS[yypt-2].pos}
 		}
 	case 6:
-		//line grammar.y:184
+		//line grammar.y:173
 		{
 			yyVAL.pipeline = &PipelineSelection{yyS[yypt-4].pipeline, yyS[yypt-1].aliaslist, yyS[yypt-3].pos}
 		}
 	case 7:
-		//line grammar.y:186
+		//line grammar.y:175
 		{
 			yyVAL.pipeline = &PipelineFunc{yyS[yypt-5].pipeline, yyS[yypt-3].strpos.str, yyS[yypt-1].exprlist, yyS[yypt-4].pos}
 		}
 	case 8:
-		//line grammar.y:188
+		//line grammar.y:177
 		{
 			yyVAL.pipeline = &PipelineFunc{yyS[yypt-2].pipeline, yyS[yypt-0].strpos.str, nil, yyS[yypt-1].pos}
 		}
 	case 9:
-		//line grammar.y:190
+		//line grammar.y:179
 		{
 			yyVAL.pipeline = &PipelineFunc{yyS[yypt-4].pipeline, yyS[yypt-2].strpos.str, nil, yyS[yypt-3].pos}
 		}
 	case 10:
-		//line grammar.y:195
+		//line grammar.y:184
 		{
 			yyVAL.wildcardname = newWildcardName(yyS[yypt-0].strpos, yylex)
 		}
 	case 11:
-		//line grammar.y:197
+		//line grammar.y:186
 		{
 			yyVAL.wildcardname = &WildcardName{yyS[yypt-2].strpos.str, Star, yyS[yypt-2].strpos.pos}
 		}
 	case 12:
-		//line grammar.y:199
+		//line grammar.y:188
 		{
 			yyVAL.wildcardname = &WildcardName{yyS[yypt-2].strpos.str, Self, yyS[yypt-2].strpos.pos}
 		}
 	case 13:
-		//line grammar.y:201
+		//line grammar.y:190
 		{
 			yyVAL.wildcardname = &WildcardName{yyS[yypt-0].strpos.str, Self, yyS[yypt-0].strpos.pos}
 		}
 	case 14:
-		//line grammar.y:203
+		//line grammar.y:192
 		{
 			yyVAL.wildcardname = &WildcardName{"", Self, yyS[yypt-0].pos}
 		}
 	case 15:
-		//line grammar.y:205
+		//line grammar.y:194
 		{
 			yyVAL.wildcardname = &WildcardName{"", Star, yyS[yypt-0].pos}
 		}
 	case 16:
-		//line grammar.y:207
+		//line grammar.y:196
 		{
 			lexAbort(yylex, "Found '/'.  Multi-component names must be passed as string literals")
 			yyVAL.wildcardname = &WildcardName{} // Avoid nil pointer dereference in pipeline.
 		}
 	case 17:
-		//line grammar.y:212
+		//line grammar.y:201
 		{
 			lexAbort(yylex, "Found '/'.  Multi-component names must be passed as string literals")
 			yyVAL.wildcardname = &WildcardName{} // Avoid nil pointer dereference in pipeline.
 		}
 	case 18:
-		//line grammar.y:217
+		//line grammar.y:206
 		{
 			lexAbort(yylex, "'*' is supported only as the last component of a name")
 			yyVAL.wildcardname = &WildcardName{} // Avoid nil pointer dereference in pipeline.
 		}
 	case 19:
-		//line grammar.y:222
+		//line grammar.y:211
 		{
 			lexAbort(yylex, "Found spurious trailing '/'")
 			yyVAL.wildcardname = &WildcardName{} // Avoid nil pointer dereference in pipeline.
 		}
 	case 20:
-		//line grammar.y:227
+		//line grammar.y:216
 		{
 			lexAbort(yylex, "Found '/'.  Multi-component names must be passed as string literals")
 			yyVAL.wildcardname = &WildcardName{} // Avoid nil pointer dereference in pipeline.
 		}
 	case 21:
-		//line grammar.y:232
+		//line grammar.y:221
 		{
 			lexAbort(yylex, "'...' is supported only as the last component of a name")
 			yyVAL.wildcardname = &WildcardName{} // Avoid nil pointer dereference in pipeline.
 		}
 	case 22:
-		//line grammar.y:237
+		//line grammar.y:226
 		{
 			lexAbort(yylex, "Names must be relative.  Found leading '/'")
 			yyVAL.wildcardname = &WildcardName{} // Avoid nil pointer dereference in pipeline.
 		}
 	case 23:
-		//line grammar.y:244
+		//line grammar.y:233
 		{
 			yyVAL.strpos = yyS[yypt-0].strpos
 		}
 	case 24:
-		//line grammar.y:246
+		//line grammar.y:235
 		{
 			yyVAL.strpos = yyS[yypt-0].strpos
 		}
 	case 25:
-		//line grammar.y:250
+		//line grammar.y:239
 		{
 			yyVAL.pred = &PredicateBool{true, yyS[yypt-0].pos}
 		}
 	case 26:
-		//line grammar.y:252
+		//line grammar.y:241
 		{
 			yyVAL.pred = &PredicateBool{false, yyS[yypt-0].pos}
 		}
 	case 27:
-		//line grammar.y:254
+		//line grammar.y:243
 		{
 			yyVAL.pred = yyS[yypt-1].pred
 		}
 	case 28:
-		//line grammar.y:256
+		//line grammar.y:245
 		{
 			yyVAL.pred = &PredicateCompare{yyS[yypt-2].expr, yyS[yypt-0].expr, CompEQ, yyS[yypt-1].pos}
 		}
 	case 29:
-		//line grammar.y:258
+		//line grammar.y:247
 		{
 			yyVAL.pred = &PredicateCompare{yyS[yypt-2].expr, yyS[yypt-0].expr, CompEQ, yyS[yypt-1].pos}
 		}
 	case 30:
-		//line grammar.y:260
+		//line grammar.y:249
 		{
 			yyVAL.pred = &PredicateCompare{yyS[yypt-2].expr, yyS[yypt-0].expr, CompNE, yyS[yypt-1].pos}
 		}
 	case 31:
-		//line grammar.y:262
+		//line grammar.y:251
 		{
 			yyVAL.pred = &PredicateCompare{yyS[yypt-2].expr, yyS[yypt-0].expr, CompLT, yyS[yypt-1].pos}
 		}
 	case 32:
-		//line grammar.y:264
+		//line grammar.y:253
 		{
 			yyVAL.pred = &PredicateCompare{yyS[yypt-2].expr, yyS[yypt-0].expr, CompLE, yyS[yypt-1].pos}
 		}
 	case 33:
-		//line grammar.y:266
+		//line grammar.y:255
 		{
 			yyVAL.pred = &PredicateCompare{yyS[yypt-2].expr, yyS[yypt-0].expr, CompGT, yyS[yypt-1].pos}
 		}
 	case 34:
-		//line grammar.y:268
+		//line grammar.y:257
 		{
 			yyVAL.pred = &PredicateCompare{yyS[yypt-2].expr, yyS[yypt-0].expr, CompGE, yyS[yypt-1].pos}
 		}
 	case 35:
-		//line grammar.y:270
+		//line grammar.y:259
 		{
 			yyVAL.pred = &PredicateAnd{yyS[yypt-2].pred, yyS[yypt-0].pred, yyS[yypt-1].pos}
 		}
 	case 36:
-		//line grammar.y:272
+		//line grammar.y:261
 		{
 			yyVAL.pred = &PredicateOr{yyS[yypt-2].pred, yyS[yypt-0].pred, yyS[yypt-1].pos}
 		}
 	case 37:
-		//line grammar.y:274
+		//line grammar.y:263
 		{
 			yyVAL.pred = &PredicateNot{yyS[yypt-0].pred, yyS[yypt-1].pos}
 		}
 	case 38:
-		//line grammar.y:276
+		//line grammar.y:265
 		{
 			yyVAL.pred = &PredicateFunc{yyS[yypt-3].strpos.str, yyS[yypt-1].exprlist, yyS[yypt-3].strpos.pos}
 		}
 	case 39:
-		//line grammar.y:280
+		//line grammar.y:269
 		{
 			yyVAL.expr = &ExprString{yyS[yypt-0].strpos.str, yyS[yypt-0].strpos.pos}
 		}
 	case 40:
-		//line grammar.y:282
+		//line grammar.y:271
 		{
 			yyVAL.expr = &ExprRat{yyS[yypt-0].ratpos.rat, yyS[yypt-0].ratpos.pos}
 		}
 	case 41:
-		//line grammar.y:284
+		//line grammar.y:273
 		{
 			yyVAL.expr = &ExprInt{yyS[yypt-0].intpos.int, yyS[yypt-0].intpos.pos}
 		}
 	case 42:
-		//line grammar.y:286
+		//line grammar.y:275
 		{
 			yyVAL.expr = &ExprName{yyS[yypt-0].strpos.str, yyS[yypt-0].strpos.pos}
 		}
 	case 43:
-		//line grammar.y:288
+		//line grammar.y:277
 		{
 			yyVAL.expr = &ExprName{yyS[yypt-0].strpos.str, yyS[yypt-1].pos}
 		}
 	case 44:
-		//line grammar.y:290
+		//line grammar.y:279
 		{
 			yyVAL.expr = &ExprFunc{yyS[yypt-3].strpos.str, yyS[yypt-1].exprlist, yyS[yypt-3].strpos.pos}
 		}
 	case 45:
-		//line grammar.y:292
+		//line grammar.y:281
 		{
 			yyVAL.expr = &ExprUnary{yyS[yypt-0].expr, OpNeg, yyS[yypt-1].pos}
 		}
 	case 46:
-		//line grammar.y:294
+		//line grammar.y:283
 		{
 			yyVAL.expr = &ExprUnary{yyS[yypt-0].expr, OpPos, yyS[yypt-1].pos}
 		}
 	case 47:
-		//line grammar.y:298
+		//line grammar.y:287
 		{
 			yyVAL.exprlist = []Expr{yyS[yypt-0].expr}
 		}
 	case 48:
-		//line grammar.y:300
+		//line grammar.y:289
 		{
 			yyVAL.exprlist = append(yyS[yypt-2].exprlist, yyS[yypt-0].expr)
 		}
 	case 49:
 		yyVAL.strpos = yyS[yypt-0].strpos
 	case 50:
-		//line grammar.y:307
+		//line grammar.y:296
 		{
 			yyVAL.strpos = strPos{naming.Join(yyS[yypt-2].strpos.str, yyS[yypt-0].strpos.str), yyS[yypt-2].strpos.pos}
 		}
 	case 51:
-		//line grammar.y:311
+		//line grammar.y:300
 		{
 			yyVAL.aliaslist = []Alias{yyS[yypt-0].alias}
 		}
 	case 52:
-		//line grammar.y:313
+		//line grammar.y:302
 		{
 			yyVAL.aliaslist = append(yyS[yypt-2].aliaslist, yyS[yypt-0].alias)
 		}
 	case 53:
-		//line grammar.y:317
+		//line grammar.y:306
 		{
 			yyVAL.alias = Alias{yyS[yypt-0].pipeline, yyS[yypt-2].strpos.str, false}
 		}
 	case 54:
-		//line grammar.y:319
+		//line grammar.y:308
 		{
 			yyVAL.alias = Alias{yyS[yypt-0].pipeline, yyS[yypt-2].strpos.str, false}
 		}
 	case 55:
-		//line grammar.y:321
+		//line grammar.y:310
 		{
 			yyVAL.alias = Alias{yyS[yypt-0].pipeline, yyS[yypt-3].strpos.str, true}
 		}
 	case 56:
-		//line grammar.y:323
+		//line grammar.y:312
 		{
 			yyVAL.alias = Alias{yyS[yypt-0].pipeline, yyS[yypt-3].strpos.str, true}
 		}
