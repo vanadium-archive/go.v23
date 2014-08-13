@@ -14,6 +14,10 @@ const (
 
 	// IPCVersion2 uses VOM for encoding signatures.
 	IPCVersion2
+
+	// IPCVersion3 uses channel-binding for authentication.
+	// Versions prior to this have broken authentication.
+	IPCVersion3
 )
 
 // IPCVersionRange allows you to optionally specify a range of versions to
