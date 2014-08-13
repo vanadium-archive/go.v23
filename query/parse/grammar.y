@@ -81,20 +81,9 @@ func newWildcardName(name strPos, yylex yyLexer) *WildcardName {
     }
   }
   if len(clean) > 0 && clean[len(clean)-1] == "*" {
-    return &WildcardName{joinPath(clean[:len(clean)-1]), Star, name.pos}
+    return &WildcardName{naming.Join(clean[:len(clean)-1]...), Star, name.pos}
   }
-  return &WildcardName{joinPath(clean), Self, name.pos}
-}
-
-// joinPath uses naming.Join to combine an array of path parts into one.
-// We don't use path.Join because that version strips out ".." which does
-// not have a special meaning in Veyron.
-func joinPath(parts []string) string {
-  path := ""
-  for _, p := range parts {
-    path = naming.Join(path, p)
-  }
-  return path
+  return &WildcardName{naming.Join(clean...), Self, name.pos}
 }
 
 %}
