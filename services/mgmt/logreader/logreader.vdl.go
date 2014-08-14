@@ -12,6 +12,7 @@ import (
 	_gen_naming "veyron2/naming"
 	_gen_rt "veyron2/rt"
 	_gen_vdlutil "veyron2/vdl/vdlutil"
+	_gen_verror "veyron2/verror"
 	_gen_wiretype "veyron2/wiretype"
 )
 
@@ -26,12 +27,15 @@ type LogEntry struct {
 const (
 	// A special NumEntries value that indicates that all entries should be
 	// returned by ReadLog.
-	AllEntries = int64(-1)
+	AllEntries = int32(-1)
 )
 
 // TODO(bprosnitz) Remove this line once signatures are updated to use typevals.
 // It corrects a bug where _gen_wiretype is unused in VDL pacakges where only bootstrap types are used on interfaces.
 const _ = _gen_wiretype.TypeIDInvalid
+
+// This error indicates that the end of the file was reached.
+const EOF = _gen_verror.ID("veyron2/services/mgmt/logreader.EOF")
 
 // LogFile can be used to access log files remotely.
 // LogFile is the interface the client binds and uses.
@@ -51,7 +55,7 @@ type LogFile_ExcludingUniversal interface {
 	// position where the next entry starts. This value can be used as
 	// StartPos for successive calls to ReadLog.
 	//
-	// The returned error will be io.EOF if and only if ReadLog reached the
+	// The returned error will be EOF if and only if ReadLog reached the
 	// end of the file and no log entries were returned.
 	ReadLog(ctx _gen_context.T, StartPos int64, NumEntries int32, Follow bool, opts ..._gen_ipc.CallOpt) (reply LogFileReadLogCall, err error)
 }
@@ -76,7 +80,7 @@ type LogFileService interface {
 	// position where the next entry starts. This value can be used as
 	// StartPos for successive calls to ReadLog.
 	//
-	// The returned error will be io.EOF if and only if ReadLog reached the
+	// The returned error will be EOF if and only if ReadLog reached the
 	// end of the file and no log entries were returned.
 	ReadLog(context _gen_ipc.ServerContext, StartPos int64, NumEntries int32, Follow bool, stream LogFileServiceReadLogStream) (reply int64, err error)
 }

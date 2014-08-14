@@ -6,7 +6,7 @@ type LogEntry struct {
 	// The offset (in bytes) where this entry starts.
 	Position int64
 	// The content of the log entry.
-	Line   string
+	Line string
 }
 
 // LogFile can be used to access log files remotely.
@@ -24,11 +24,14 @@ type LogFile interface {
 	// position where the next entry starts. This value can be used as
 	// StartPos for successive calls to ReadLog.
 	//
-	// The returned error will be io.EOF if and only if ReadLog reached the
+	// The returned error will be EOF if and only if ReadLog reached the
 	// end of the file and no log entries were returned.
 	ReadLog(StartPos int64, NumEntries int32, Follow bool) stream<_, LogEntry> (int64, error)
 }
 
 // A special NumEntries value that indicates that all entries should be
 // returned by ReadLog.
-const AllEntries = int64(-1)
+const AllEntries = int32(-1)
+
+// This error indicates that the end of the file was reached.
+errorid EOF
