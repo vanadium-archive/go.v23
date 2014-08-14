@@ -5,7 +5,6 @@ import (
 
 	"veyron2/ipc/stream"
 	"veyron2/naming"
-	"veyron2/product"
 	"veyron2/security"
 )
 
@@ -163,11 +162,17 @@ type NamespaceRoots []string
 
 func (NamespaceRoots) ROpt() {}
 
-// ProductOpt wraps the product.T interface so that we can add
+// ProfileOpt wraps the Profile interface so that we can add
 // functions representing the option annotations
-type ProductOpt struct{ product.T }
+type ProfileOpt struct{ Profile }
 
-func (ProductOpt) ROpt() {}
+func (ProfileOpt) ROpt() {}
+
+// RuntimeOpt wraps the name of the runtime so that we can add
+// functions representing the option annotations
+type RuntimeOpt struct{ Name string }
+
+func (RuntimeOpt) ROpt() {}
 
 // HTTPDebugOpt specifies the address on which an HTTP server will be run for
 // debugging the process.

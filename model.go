@@ -1,19 +1,23 @@
 /*
 Package veyron2 defines the Runtime interface of the public Veyron API and its subdirectories define the entire Veyron public API.
 
-These public APIs will be stable over an extended period and changes to
-them will be carefully managed to ensure backward compatibility. The same
-policy as used for go (http://golang.org/doc/go1compat) will be used for these
-APIs.
+Once we reach a '1.0' version these public APIs will be stable over
+an extended period and changes to them will be carefully managed to ensure backward compatibility. The same solicy as used for go (http://golang.org/doc/go1compat) will be used for them.
+
+The current release is 0.1 and although we will do our best to maintain
+backwards compatibility we can't guarantee that until we reach the 1.0 milestone.
+
 */
 package veyron2
 
 import (
+	"fmt"
+
+	"veyron2/config"
 	"veyron2/context"
 	"veyron2/ipc"
 	"veyron2/ipc/stream"
 	"veyron2/naming"
-	"veyron2/product"
 	"veyron2/security"
 	"veyron2/vlog"
 )
@@ -37,11 +41,133 @@ type Task struct {
 	Progress, Goal int
 }
 
+// Platform describes the hardware and software environment that this
+// process is running on. It is modeled on the Unix uname call.
+type Platform struct {
+	// Vendor is the manufacturer of the system. It must be possible
+	// to crypographically verify the authenticity of the Vendor
+	// using the value of Vendor. The test must fail if the underlying
+	// hardware does not provide appropriate support for this.
+	// TODO(ashankar, ataly): provide an API for verifying vendor authenticity.
+	Vendor string
+
+	// Identity is a cryptographically secure Identity for this device. It is
+	// unique across all devices from all vendors. It is stable for the
+	// lifetime of this device.
+	// TODO(ashankar, ataly, cnicolaou): how should we handle this?
+	Identity security.PublicID
+
+	// Model is the model description, including version information.
+	Model string
+
+	// System is the name of the operating system.
+	// E.g. 'Linux', 'Darwin'
+	System string
+
+	// Release is the specific release of System if known, the empty
+	// string otherwise.
+	// E.g. 3.12.24-1-ARCH on a Raspberry pi running Arch Linux
+	Release string
+
+	// Version is the version of System if known, the empty string otherwise.
+	// E.g. #1 PREEMPT Thu Jul 10 23:57:15 MDT 2014 on a Raspberry Pi B
+	// running Arch Linux
+	Version string
+
+	// Machine is the hardware identifier
+	// E.g. armv6l on a Raspberry Pi B
+	Machine string
+
+	// Node is the name of the name of the node that the
+	// the platform is running on. This is not necessarily unique.
+	Node string
+}
+
+func (p *Platform) String() string {
+	return fmt.Sprintf("%s/%s node %s running %s (%s %s) on machine %s", p.Vendor, p.Model, p.Node, p.System, p.Release, p.Version, p.Machine)
+}
+
+// A Profile represents the combination of hardware, operating system,
+// compiler and libraries available to the application. The Profile
+// interface is the runtime representation of the Profiles used in the
+// Veyron Management and Build System to manage and build applications.
+// The Profile interface is thus intended to abstract out the hardware,
+// operating system and library specific implementation so that they
+// can be integrated with the rest of the Veyron runtime. The implementations
+// of the Profile interface are intended to capture all of the dependencies
+// implied by that Profile. For example, if a Profile requires a particular
+// hardware specific library (say Bluetooth support), then the implementation
+// of the Profile should include that dependency; the package implementing
+// the Profile may should expose the additional APIs needed to use the
+// functionality.
+//
+// The Profile interface provides a description of the Profile and the
+// platform it is running on, an initialization hook into the rest of
+// the Veyron runtime and a means of sharing configuration information with
+// the rest of the application as follows:
+//
+// - the Name methods returns the name of the Profile used to build the binary
+// - the Platform method returns a description of the platform the binary is
+//   running on.
+// - the Init method is called by the Runtime after it has fully
+//   initialized itself. Henceforth, the Profile implementation can safely
+//   use the supplied Runtime. This a convenient hook for initialization.
+// - configuration information can be provided to the rest of the
+//   application via the config.Publisher passed to the Init method.
+//   This allows a common set of configuration information to be made
+//   available to all applications without burdening them with understanding
+//   the implementations of how to obtain that information (e.g. dhcp,
+//   network configuration differs).
+//
+// TODO(cnicolaou): define the common set of setting streams.
+//
+// Profiles range from the generic to the very specific (e.g. "linux" or
+// "my-sprinkler-controller-v2". Applications should, in general, use
+// as generic a Profile as possbile.
+// Profiles are selecting in one of two principal ways:
+// - inserting a dependency on the appropriate package in a main package
+//   e.g. import _ "veyron/profiles/linux"
+// - expliciting registering a Profile (veyron2/rt.RegisterProfile) before
+//   initializing the Runtime (i.e. creating an instance of the
+//   Runtime interface below via the veryon2/rt package).
+//   e.g. rt.RegisterProfile(myprofile, "") ; rt.Init()
+//
+// This scheme allows applications to use a pre-supplied Profile as well
+// as for developers to create their own Profiles (to represent their
+// hardware and software system). The Veyron Build System, once fully
+// developed will likely insert generated that uses one of the above schemes
+// to configure Profiles.
+//
+// See the veyron/profiles package for a complete description of the
+// precanned Profiles and how to use them; see veyron2/rt for the registration
+// function used to register new Profiles.
+type Profile interface {
+	// Name returns the name of the Profile used to build this binary.
+	Name() string
+
+	// Runtime returns the name of the Runtime that this Profile requires,
+	// or "" to work with any runtime.
+	Runtime() string
+
+	// Description returns the Description of the Platform.
+	Platform() *Platform
+
+	// Init is called by the Runtime once it has been initialized and
+	// command line flags have been parsed.
+	Init(rt Runtime, p *config.Publisher)
+
+	String() string
+}
+
 // Runtime is the interface that concrete Veyron implementations must
 // implement.
 type Runtime interface {
-	// Product returns the Product that the current process is running on.
-	Product() product.T
+	// Profile returns the current processes' Profile.
+	Profile() Profile
+
+	// Publisher returns a configuration Publisher that
+	// can be used to access configuration information.
+	Publisher() *config.Publisher
 
 	// NewIdentity creates a new PrivateID with the provided name and a newly
 	// minted private key.
@@ -165,6 +291,9 @@ type Runtime interface {
 	// network connections.
 	Cleanup()
 }
+
+// The name for the google runtime implementation
+const GoogleRuntimeName = "google"
 
 // The runtime must provide two package level functions, R and NewR.
 // R returns the initialized global instance of the Runtime. NewR will

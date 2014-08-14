@@ -1,9 +1,10 @@
 package rt_test
 
 import (
-	"net"
+	"testing"
 
 	"veyron2"
+	"veyron2/config"
 	"veyron2/rt"
 	"veyron2/security"
 )
@@ -15,23 +16,42 @@ func ExampleInit() {
 	log.Infof("hello world")
 }
 
-type myproduct struct{}
+type myprofile struct{}
 
-func (p *myproduct) Description() (vendor, model, name string) {
-	return "me", "mine", "home"
+func (mp *myprofile) Name() string {
+	return "test"
 }
 
-func (p *myproduct) ID() security.PublicID {
-	return nil
+func (mp *myprofile) Runtime() string {
+	return ""
 }
 
-func (p *myproduct) Addresses() []net.Addr {
-	return []net.Addr{}
+func (mp *myprofile) Platform() *veyron2.Platform {
+	id := security.FakePublicID("anyoldid")
+	return &veyron2.Platform{"google", id, "v1", "any", "rel1", ".2", "who knows", "this host"}
 }
 
-func ExampleInitWithOptions() {
-	r := rt.Init(veyron2.ProductOpt{&myproduct{}})
+func (mp *myprofile) String() string {
+	return "myprofile on " + mp.Platform().String()
+}
+
+func (mp *myprofile) Init(veyron2.Runtime, *config.Publisher) {}
+
+func ExampleInitWithProfile() {
+	r := rt.Init(veyron2.ProfileOpt{&myprofile{}})
 	// Go ahead and use the runtime.
 	log := r.Logger()
-	log.Infof("hello world for my product")
+	log.Infof("hello world from my product: %s", r.Profile())
+}
+
+// TODO(cnicolaou): add tests to:
+//  - catch mismatched profile and runtimes - e.g. profile asks for "foo"
+// runtime, but only bar is available.
+//  - tests to catch multiple calls to init with different options
+
+func TestErrorOnNew(t *testing.T) {
+	_, err := rt.New(veyron2.RuntimeOpt{"foo"})
+	if err == nil {
+		t.Errorf("expected an error!")
+	}
 }
