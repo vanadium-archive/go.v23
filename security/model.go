@@ -40,7 +40,7 @@ type PublicIDStore interface {
 	// calls to DefaultPublicID to the provided pattern. In the absence of any
 	// SetDefaultPrincipalPattern calls, the default PrincipalPattern must be set to
 	// "*" which matches all PublicIDs.
-	SetDefaultPrincipalPattern(pattern PrincipalPattern)
+	SetDefaultPrincipalPattern(pattern PrincipalPattern) error
 }
 
 // PublicID is the interface for a non-secret component of a principal's

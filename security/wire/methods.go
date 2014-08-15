@@ -15,12 +15,22 @@ import (
 	"veyron2/vom"
 )
 
-// ErrNoIntegrity is the error returned when bytes of an object seem to have been tampered with.
-var ErrNoIntegrity = errors.New("signature does not match bytes, possible tampering")
+var (
+	// ErrNoIntegrity is the error returned when bytes of an object seem to have been tampered with.
+	ErrNoIntegrity = errors.New("signature does not match bytes, possible tampering")
+
+	// TODO(ataly, ashankar): Make sure we add all reserved characters to this list.
+	invalidBlessingStrs = []string{security.AllPrincipals, ChainSeparator}
+)
 
 // errInvalidBlessingName returns an error specifying that the provided blessing name is invalid.
 func errInvalidBlessingName(blessingName string) error {
 	return fmt.Errorf("invalid blessing name:%q", blessingName)
+}
+
+// errInvalidPattern returns an error specifying that the provided PrincipalPattern is invalid.
+func errInvalidPattern(pattern security.PrincipalPattern) error {
+	return fmt.Errorf("invalid blessing pattern:%q", pattern)
 }
 
 // WriteString writes the length and contents of the provided string to the provided Writer.
@@ -228,10 +238,27 @@ func (id *ChainPublicID) VerifyIntegrity() error {
 
 // ValidateBlessingName verifies if the provided name is fit to be the name of a blessing.
 func ValidateBlessingName(name string) error {
-	// TODO(ataly, ashankar): Define the list of reserved characters (such as  "*", "#",
-	// "/", "\", etc.) and ensure that the check below ensures absence of all of them.
-	if name == "" || strings.ContainsAny(name, ChainSeparator) {
+	if name == "" {
 		return errInvalidBlessingName(name)
+	}
+	for _, s := range invalidBlessingStrs {
+		if strings.Contains(name, s) {
+			return errInvalidBlessingName(name)
+		}
+	}
+	return nil
+}
+
+// ValidatePrincipalPattern verifies if the provided security.PrincipalPattern is valid.
+func ValidatePrincipalPattern(pattern security.PrincipalPattern) error {
+	patternParts := strings.Split(string(pattern), ChainSeparator)
+	for i, p := range patternParts {
+		if (p == security.AllPrincipals) && (i == len(patternParts)-1) {
+			break
+		}
+		if ValidateBlessingName(p) != nil {
+			return errInvalidPattern(pattern)
+		}
 	}
 	return nil
 }
