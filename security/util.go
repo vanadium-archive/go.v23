@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"strings"
 
 	"veyron2/vom"
 )
@@ -17,6 +18,8 @@ var (
 	// AllLabels is a LabelSet containing all ValidLabels.
 	AllLabels = LabelSet(ResolveLabel | ReadLabel | WriteLabel | AdminLabel | DebugLabel | MonitoringLabel)
 )
+
+var nullACL ACL
 
 // String representation of a Label.
 func (l Label) String() string {
@@ -131,11 +134,135 @@ func SaveIdentity(w io.Writer, id PrivateID) error {
 	return nil
 }
 
+// NewWhitelistACL creates an ACL that grants access to the given principals.
+func NewWhitelistACL(principals map[PrincipalPattern]LabelSet) ACL {
+	acl := ACL{}
+	acl.In.Principals = principals
+	return acl
+}
+
+// (pattern P).isDelegateOf(name N) checks if some name that exactly matches P
+// is equal to or blessed by N.
+//
+// If P is of the form p_0/.../p_k; P.isDelegateOf(N) is true iff N is of the
+// form n_0/.../n_m such that m <= k and for all i from 0 to m, p_i = n_i.
+//
+// If P is of the form p_0/.../p_k/*; P.isDelegateOf(N) is true iff N is of the
+// form n_0/.../n_m such that for all i from 0 to min(m, k), p_i = n_i.
+func (p PrincipalPattern) isDelegateOf(n string) bool {
+	if p == AllPrincipals {
+		return true
+	}
+
+	pattern := string(p)
+	patternParts := strings.Split(pattern, ChainSeparator)
+	patternLen := len(patternParts)
+	nameParts := strings.Split(n, ChainSeparator)
+	nameLen := len(nameParts)
+
+	if patternParts[patternLen-1] != AllPrincipals && nameLen > patternLen {
+		return false
+	}
+
+	min := nameLen
+	if patternParts[patternLen-1] == AllPrincipals && nameLen > patternLen-1 {
+		min = patternLen - 1
+	}
+
+	for i := 0; i < min; i++ {
+		if patternParts[i] != nameParts[i] {
+			return false
+		}
+	}
+	return true
+}
+
+// (pattern P).isBlesserOf(name N) checks if some name that exactly matches P is
+// equal to or a blesser of N.
+//
+// If P is of the form p_0/.../p_k; P.isBlesserOf(N) is true iff N is of the
+// form n_0/.../n_m such that m >= k and for all i from 0 to k, p_i = n_i.
+//
+// If P is of the form p_0/.../p_k/*; P.isBlesserOf(N) is true iff N is of the
+// form n_0/.../n_m such that m >= k and for all i from 0 to k, p_i = n_i.
+func (p PrincipalPattern) isBlesserOf(n string) bool {
+	if p == AllPrincipals {
+		return true
+	}
+
+	pattern := string(p)
+	patternParts := strings.Split(pattern, ChainSeparator)
+	patternLen := len(patternParts)
+	nameParts := strings.Split(n, ChainSeparator)
+	nameLen := len(nameParts)
+
+	min := patternLen
+	if patternParts[patternLen-1] == AllPrincipals {
+		min = patternLen - 1
+	}
+	if nameLen < min {
+		return false
+	}
+
+	for i := 0; i < min; i++ {
+		if patternParts[i] != nameParts[i] {
+			return false
+		}
+	}
+	return true
+
+}
+
+// Matches checks if some name of the provided principal is equal to or a
+// blesser of some name that exactly matches the provided pattern.
+// In other words, the principal has a name matching the pattern, or can obtain
+// a name matching the pattern by manipulating its PublicID using PrivateID
+// operations (e.g., <PrivateID>.Bless(<PublicID>, ..., ...)).
+func Matches(pid PublicID, pattern PrincipalPattern) bool {
+	if pattern == AllPrincipals {
+		return true
+	}
+	for _, name := range pid.Names() {
+		if pattern.isDelegateOf(name) {
+			return true
+		}
+	}
+	return false
+}
+
+// Matches tests whether the principal has the desired access.
+func (acl ACL) Matches(pid PublicID, label Label) bool {
+	for _, name := range pid.Names() {
+		// TODO(m3b,tilaks): consult group ACLs.
+		in := false
+		for pattern, labels := range acl.In.Principals {
+			if labels.HasLabel(label) && pattern.isDelegateOf(name) {
+				in = true
+				break
+			}
+		}
+		if !in {
+			continue
+		}
+		notIn := false
+		for pattern, labels := range acl.NotIn.Principals {
+			if labels.HasLabel(label) && pattern.isBlesserOf(name) {
+				notIn = true
+				break
+			}
+		}
+		if in && !notIn {
+			return true
+		}
+	}
+	return false
+}
+
 // LoadACL reads an ACL from the provided Reader containing a JSON encoded ACL.
 func LoadACL(r io.Reader) (ACL, error) {
 	var acl ACL
 	if err := json.NewDecoder(r).Decode(&acl); err != nil {
-		return nil, err
+		return nullACL, err
 	}
 	return acl, nil
 }

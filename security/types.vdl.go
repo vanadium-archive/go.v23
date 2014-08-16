@@ -4,6 +4,9 @@
 package security
 
 // PrincipalPattern is a pattern identifying a set of principal names.
+// A PrincipalPattern can be:
+// - a fixed name pattern of the form p1/.../pk
+// - a glob pattern of the form p1/.../pk/*
 type PrincipalPattern string
 
 // Label is an access control right, like Read, Write, Admin, etc.
@@ -12,11 +15,72 @@ type Label uint32
 // LabelSet is a set of access control labels, represented as a bitmask.
 type LabelSet Label
 
-// ACL pairs principal sets with label sets. This should be treated as an
-// unordered set, not as a dictionary.  A client with PublicID <pid> is
-// allowed access using <label> if there exists a pair (principals, labels)
-// in the ACL such that <pid>.Match(principals) and labels.HasLabel(label).
-type ACL map[PrincipalPattern]LabelSet
+// ACL (Access Control List) tracks which principals have access to an object
+// and which principals specifically do not have access to an object.
+// For example:
+//   ACL {
+//     In {
+//       Principals {
+//         "user1/*": ["Read", "Write"],
+//         "user2/*": ["Read"],
+//       }
+//     }
+//     NotIn {
+//       Principals {
+//         "user1/*": ["Write"],
+//       }
+//     }
+//   }
+// NotIn subtracts privileges.  In this example, it says that "user1/*" has
+// only "Read" access.  All of engineering has read access except for
+// engineering interns.
+//
+// Principals can have multiple names.  As long as the principal has a name
+// that matches In and not NotIn, it is authorized. The reasoning is that the
+// principal can always hide a name if it wants to, so requiring all names to
+// satisfy the policy does not make sense.
+//
+// Formally,
+//
+// Delegate(pattern P, name N) checks if some name that exactly matches P is
+// equal to or blessed by N.
+// If P is of the form p_0/.../p_k; Delegate(P, N) is true iff N is of the form
+// n_0/.../n_m such that m <= k and for all i from 0 to m, p_i = n_i.
+// If P is of the form p_0/.../p_k/*; Delegate(P, N) is true iff N is of the
+// form n_0/.../n_m such that for all i from 0 to min(m, k), p_i = n_i.
+//
+// Blesser(pattern P, name N) checks if some name that exactly matches P is
+// equal to or a blesser of N.
+// If P is of the form p_0/.../p_k; Blesser(P, N) is true iff N is of the form
+// n_0/.../n_m such that m >= k and for all i from 0 to k, p_i = n_i.
+// If P is of the form p_0/.../p_k/*; Blesser(P, N) is true iff N is of the form
+// n_0/.../n_m such that m >= k and for all i from 0 to k, p_i = n_i.
+//
+// In(label L) = { pattern P | L ∈ ACL.In.Principals[P] }
+// NotIn(label L) = { pattern P | L ∈ ACL.NotIn.Principals[P] }
+//
+// Matches(label L) = { id I | ∃ name N ∈ I.Names() |
+//   ∃ P ∈ In(L) | Delegate(P, N)
+//   ∧
+//   ∀ P ∈ NotIn(L) ~Blesser(P, N)
+// }
+type ACL struct {
+	// In represents the set of principals that can access the object only if
+	// they are not also present in NotIn.
+	In Entries
+	// NotIn represents the set of principals that do not have access to the
+	// object.  It effectively subtracts permissions from In.
+	NotIn Entries
+}
+
+// Entries describes a set of principals.
+type Entries struct {
+	// Principals specifies the type of access being granted or revoked to any
+	// Identity that matches the PrincipalPattern.  If multiple patterns match
+	// an Identity, the server will iterate through them to find one that
+	// contains the desired label.
+	Principals map[PrincipalPattern]LabelSet
+}
 
 // Hash identifies a cryptographic hash function.
 type Hash string
@@ -34,6 +98,9 @@ type Signature struct {
 const (
 	// AllPrincipals is a pattern that all principals match.
 	AllPrincipals = "*"
+
+	// ChainSeparator joins blessing names to form a blessing chain name.
+	ChainSeparator = "/"
 
 	// ResolveLabel allows resolve operations.
 	ResolveLabel = Label(1)

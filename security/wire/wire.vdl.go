@@ -75,7 +75,4 @@ type ChainPrivateID struct {
 const (
 	// KeyCurveP256 describes the NIST P256 curve.
 	KeyCurveP256 = KeyCurve(0)
-
-	// ChainSeparator is used to join blessing names to form a blessing chain name.
-	ChainSeparator = "/"
 )

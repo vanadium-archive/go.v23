@@ -11,20 +11,17 @@ import (
 	"encoding/base64"
 	"fmt"
 	"log"
-	"strings"
 	"time"
 
 	"veyron2/vom"
 )
-
-const chainSeparator = "/"
 
 func fakeName(name string) string {
 	const prefix = "fake"
 	if len(name) == 0 {
 		return prefix
 	}
-	return prefix + chainSeparator + name
+	return prefix + ChainSeparator + name
 }
 
 // fakeID implements both PublicID and PrivateID.
@@ -40,7 +37,6 @@ func fakeName(name string) string {
 type fakeID string
 
 func (id fakeID) Names() []string                             { return []string{string(id)} }
-func (id fakeID) Match(s PrincipalPattern) bool               { return matchPrincipalPattern(string(id), s) }
 func (fakeID) PublicKey() *ecdsa.PublicKey                    { return &fakeKey.PublicKey }
 func (id fakeID) Authorize(context Context) (PublicID, error) { return id, nil }
 func (fakeID) ThirdPartyCaveats() []ServiceCaveat             { return nil }
@@ -52,7 +48,7 @@ func (fakeID) Sign(message []byte) (signature Signature, err error) {
 }
 
 func (id fakeID) Bless(blessee PublicID, blessingName string, duration time.Duration, caveats []ServiceCaveat) (PublicID, error) {
-	return fakeID(string(id) + chainSeparator + blessingName), nil
+	return fakeID(string(id) + ChainSeparator + blessingName), nil
 }
 func (id fakeID) Derive(pub PublicID) (PrivateID, error) {
 	fakePub, ok := pub.(fakeID)
@@ -74,41 +70,6 @@ func FakePublicID(name string) PublicID { return fakeID(fakeName(name)) }
 // that uses a fixed private key which is not kept secret and the provided
 // name.
 func FakePrivateID(name string) PrivateID { return fakeID(fakeName(name)) }
-
-// matchesPattern checks if the provided name conforms to the provided pattern.
-// This function assumes pattern to be of the one of the following forms:
-// - Pattern is a chained name of the form p_0/.../p_k; in this case the check
-//   succeeds iff the provided name is of the form n_0/.../n_m such that m <= k
-//   and for all i from 0 to m, p_i = n_i.
-// - Pattern is a chained name of the form p_0/.../p_k/*; in this case the check
-//   succeeds iff the provided name is of the form n_0/.../n_m such that for all i
-//   from 0 to min(m, k), p_i = n_i.
-func matchesPattern(name, pattern string) bool {
-	patternParts := strings.Split(pattern, chainSeparator)
-	patternLen := len(patternParts)
-	nameParts := strings.Split(name, chainSeparator)
-	nameLen := len(nameParts)
-
-	if patternParts[patternLen-1] != AllPrincipals && nameLen > patternLen {
-		return false
-	}
-
-	min := nameLen
-	if patternParts[patternLen-1] == AllPrincipals && nameLen > patternLen-1 {
-		min = patternLen - 1
-	}
-
-	for i := 0; i < min; i++ {
-		if patternParts[i] != nameParts[i] {
-			return false
-		}
-	}
-	return true
-}
-
-func matchPrincipalPattern(name string, pattern PrincipalPattern) bool {
-	return pattern == AllPrincipals || matchesPattern(name, string(pattern))
-}
 
 func generateAndPrintFakeKey() {
 	priv, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)

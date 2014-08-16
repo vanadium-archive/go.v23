@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
+	"time"
 )
 
 const emptyLabelSet LabelSet = 0
@@ -19,6 +20,14 @@ func (s lSet) has(l Label) bool {
 		}
 	}
 	return false
+}
+
+func bless(blessee PublicID, blesser PrivateID, name string) PublicID {
+	blessed, err := blesser.Bless(blessee, name, 5*time.Minute, nil)
+	if err != nil {
+		panic(err)
+	}
+	return blessed
 }
 
 func TestHasLabel(t *testing.T) {
@@ -166,6 +175,111 @@ func TestLabelSetUnmarshalJSON(t *testing.T) {
 	}
 }
 
+func TestACLMatches(t *testing.T) {
+	annPrivateID := FakePrivateID("ann")
+	bobPrivateID := FakePrivateID("bob")
+	chePrivateID := FakePrivateID("che")
+	danPrivateID := FakePrivateID("dan")
+	evaPrivateID := FakePrivateID("eva")
+	ann := annPrivateID.PublicID()
+	bob := bobPrivateID.PublicID()
+	che := chePrivateID.PublicID()
+	dan := danPrivateID.PublicID()
+	eva := evaPrivateID.PublicID()
+	annFriend := bless(bob, annPrivateID, "friend")
+
+	aclstring1 := `{
+		"In": { "Principals": {
+			"fake/ann": "RW",
+			"fake/bob": "RW",
+			"fake/che": "R"
+		}},
+		"NotIn": { "Principals": {
+			"fake/bob": "W",
+			"fake/dan": "R"
+		}}
+	}`
+	aclstring2 := `{
+		"In": { "Principals": {
+			"*": "RW"
+		}},
+		"NotIn": { "Principals": {
+			"fake/ann/friend": "W"
+		}}
+	}`
+	aclstring3 := `{
+		"In": { "Principals": {
+			"*": "RW"
+		}},
+		"NotIn": { "Principals": {
+			"fake/ann/*": "W"
+		}}
+	}`
+	aclstring4 := `{
+		"In": { "Principals": {
+			"fake/ann/*": "RW"
+		}},
+		"NotIn": { "Principals": {
+			"fake/ann/friend": "W"
+		}}
+	}`
+	aclToTests := map[string][]struct {
+		Principal PublicID
+		Label     Label
+		Match     bool
+	}{
+		aclstring1: {
+			{ann, ReadLabel, true},
+			{ann, WriteLabel, true},
+			{annFriend, ReadLabel, false},
+			{annFriend, WriteLabel, false},
+			{bob, ReadLabel, true},
+			{bob, WriteLabel, false},
+			{che, ReadLabel, true},
+			{che, WriteLabel, false},
+			{dan, ReadLabel, false},
+			{dan, WriteLabel, false},
+			{eva, ReadLabel, false},
+			{eva, WriteLabel, false},
+		},
+		aclstring2: {
+			{ann, ReadLabel, true},
+			{ann, WriteLabel, true},
+			{annFriend, ReadLabel, true},
+			{annFriend, WriteLabel, false},
+			{bob, ReadLabel, true},
+			{bob, WriteLabel, true},
+		},
+		aclstring3: {
+			{ann, ReadLabel, true},
+			{ann, WriteLabel, false},
+			{annFriend, ReadLabel, true},
+			{annFriend, WriteLabel, false},
+			{bob, ReadLabel, true},
+			{bob, WriteLabel, true},
+		},
+		aclstring4: {
+			{ann, ReadLabel, true},
+			{ann, WriteLabel, true},
+			{annFriend, ReadLabel, true},
+			{annFriend, WriteLabel, false},
+			{bob, ReadLabel, false},
+			{bob, WriteLabel, false},
+		},
+	}
+	for aclstring, tests := range aclToTests {
+		acl, err := LoadACL(bytes.NewBufferString(aclstring))
+		if err != nil {
+			t.Fatalf("Cannot parse ACL %s: %v", aclstring, err)
+		}
+		for _, test := range tests {
+			if acl.Matches(test.Principal, test.Label) != test.Match {
+				t.Errorf("acl.Matches(%v, %v) was not %v", test.Principal, test.Label, test.Match)
+			}
+		}
+	}
+}
+
 func TestLoadSaveIdentity(t *testing.T) {
 	id := FakePrivateID("test")
 
@@ -184,9 +298,14 @@ func TestLoadSaveIdentity(t *testing.T) {
 }
 
 func TestLoadSaveACL(t *testing.T) {
-	acl := ACL{
+	acl := ACL{}
+	acl.In.Principals = map[PrincipalPattern]LabelSet{
+		"veyron/*":     LabelSet(ReadLabel),
 		"veyron/alice": LabelSet(ReadLabel | WriteLabel),
-		"veyron/bob":   LabelSet(ReadLabel),
+		"veyron/bob":   LabelSet(AdminLabel),
+	}
+	acl.NotIn.Principals = map[PrincipalPattern]LabelSet{
+		"veyron/che": LabelSet(ReadLabel),
 	}
 
 	var buf bytes.Buffer

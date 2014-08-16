@@ -110,65 +110,6 @@ import (
 	_gen_wiretype "veyron2/wiretype"
 )
 
-// ACL (Access Control List) tracks which principals and groups have access to
-// an object and which principals and groups specifically do not have access
-// to an object.  For example:
-//   ACL {
-//     In {
-//       Principals {
-//         "user1/*": ["Read", "Write"],
-//         "user2/*": ["Read"],
-//       }
-//       Groups {
-//         Group{"google.com/engineering"}: ["Read"],
-//       }
-//     }
-//     NotIn {
-//       Principals {
-//         "user1/*": ["Write"],
-//       }
-//       Groups {
-//         Group{"google.com/eng-interns"}: ["Read", "Write", "Admin"],
-//       }
-//     }
-//   }
-// NotIn subtracts privileges.  In this example, it says that "user1/*" has
-// only  "Read" access.  All of engineering has read access except for
-// engineering interns.
-//
-// Principals can have multiple names.  As long as the principal has a name
-// that matches In and not NotIn, it is authorized. The reasoning is that the
-// principal can always hide a name if it wants to, so requiring all names to
-// satisfy the policy does not make sense.
-type ACL struct {
-	// In represents the set of principals and groups that can access the object
-	// only if they are not also present in NotIn.
-	In Entries
-	// NotIn represents the set of principals and groups that do not have access
-	// to the object.  It effectively subtracts permissions from In.
-	NotIn Entries
-}
-
-// Entries describes a set of principals and groups (of principals).
-type Entries struct {
-	// Principals specifies the type of access being granted or revoked to any
-	// Identity that matches the PrincipalPattern.  If multiple patterns match
-	// an Identity, the server will iterate through them to find one that
-	// contains the desired label.
-	Principals map[security.PrincipalPattern]security.LabelSet
-	// Groups specifies the type of access being granted or revoked to all
-	// members of the group.
-	Groups map[Group]security.LabelSet
-}
-
-// Group represents a group of principals in the TBD Group API.  This is
-// just a placeholder for now.
-type Group struct {
-	// Name is the Object name of the group.  This name must
-	// implement the TBD Group API.
-	Name string
-}
-
 // TODO(bprosnitz) Remove this line once signatures are updated to use typevals.
 // It corrects a bug where _gen_wiretype is unused in VDL pacakges where only bootstrap types are used on interfaces.
 const _ = _gen_wiretype.TypeIDInvalid
@@ -201,12 +142,12 @@ type Object_ExcludingUniversal interface {
 	// endpoint.  To modify the mount point's ACL, use ResolveToMountTable
 	// to get an endpoint and call SetACL on that.  This means that clients
 	// must know when a name refers to a mount point to change its ACL.
-	SetACL(ctx _gen_context.T, acl ACL, etag string, opts ..._gen_ipc.CallOpt) (err error)
+	SetACL(ctx _gen_context.T, acl security.ACL, etag string, opts ..._gen_ipc.CallOpt) (err error)
 	// GetACL returns the complete, current ACL for an object.  The returned etag
 	// can be passed to a subsequent call to SetACL for optimistic concurrency
 	// control. A successful call to SetACL will invalidate etag, and the client
 	// must call GetACL again to get the current etag.
-	GetACL(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (acl ACL, etag string, err error)
+	GetACL(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (acl security.ACL, etag string, err error)
 }
 type Object interface {
 	_gen_ipc.UniversalServiceMethods
@@ -231,12 +172,12 @@ type ObjectService interface {
 	// endpoint.  To modify the mount point's ACL, use ResolveToMountTable
 	// to get an endpoint and call SetACL on that.  This means that clients
 	// must know when a name refers to a mount point to change its ACL.
-	SetACL(context _gen_ipc.ServerContext, acl ACL, etag string) (err error)
+	SetACL(context _gen_ipc.ServerContext, acl security.ACL, etag string) (err error)
 	// GetACL returns the complete, current ACL for an object.  The returned etag
 	// can be passed to a subsequent call to SetACL for optimistic concurrency
 	// control. A successful call to SetACL will invalidate etag, and the client
 	// must call GetACL again to get the current etag.
-	GetACL(context _gen_ipc.ServerContext) (acl ACL, etag string, err error)
+	GetACL(context _gen_ipc.ServerContext) (acl security.ACL, etag string, err error)
 }
 
 // BindObject returns the client stub implementing the Object
@@ -280,7 +221,7 @@ type clientStubObject struct {
 	name   string
 }
 
-func (__gen_c *clientStubObject) SetACL(ctx _gen_context.T, acl ACL, etag string, opts ..._gen_ipc.CallOpt) (err error) {
+func (__gen_c *clientStubObject) SetACL(ctx _gen_context.T, acl security.ACL, etag string, opts ..._gen_ipc.CallOpt) (err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "SetACL", []interface{}{acl, etag}, opts...); err != nil {
 		return
@@ -291,7 +232,7 @@ func (__gen_c *clientStubObject) SetACL(ctx _gen_context.T, acl ACL, etag string
 	return
 }
 
-func (__gen_c *clientStubObject) GetACL(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (acl ACL, etag string, err error) {
+func (__gen_c *clientStubObject) GetACL(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (acl security.ACL, etag string, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "GetACL", nil, opts...); err != nil {
 		return
@@ -361,39 +302,33 @@ func (__gen_s *ServerStubObject) Signature(call _gen_ipc.ServerCall) (_gen_ipc.S
 	result.Methods["GetACL"] = _gen_ipc.MethodSignature{
 		InArgs: []_gen_ipc.MethodArgument{},
 		OutArgs: []_gen_ipc.MethodArgument{
-			{Name: "acl", Type: 71},
+			{Name: "acl", Type: 69},
 			{Name: "etag", Type: 3},
-			{Name: "err", Type: 72},
+			{Name: "err", Type: 70},
 		},
 	}
 	result.Methods["SetACL"] = _gen_ipc.MethodSignature{
 		InArgs: []_gen_ipc.MethodArgument{
-			{Name: "acl", Type: 71},
+			{Name: "acl", Type: 69},
 			{Name: "etag", Type: 3},
 		},
 		OutArgs: []_gen_ipc.MethodArgument{
-			{Name: "", Type: 72},
+			{Name: "", Type: 70},
 		},
 	}
 
 	result.TypeDefs = []_gen_vdlutil.Any{
 		_gen_wiretype.NamedPrimitiveType{Type: 0x3, Name: "veyron2/security.PrincipalPattern", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x34, Name: "veyron2/security.LabelSet", Tags: []string(nil)}, _gen_wiretype.MapType{Key: 0x41, Elem: 0x42, Name: "", Tags: []string(nil)}, _gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
-				_gen_wiretype.FieldType{Type: 0x3, Name: "Name"},
-			},
-			"veyron2/services/security/access.Group", []string(nil)},
-		_gen_wiretype.MapType{Key: 0x44, Elem: 0x42, Name: "", Tags: []string(nil)}, _gen_wiretype.StructType{
-			[]_gen_wiretype.FieldType{
 				_gen_wiretype.FieldType{Type: 0x43, Name: "Principals"},
-				_gen_wiretype.FieldType{Type: 0x45, Name: "Groups"},
 			},
-			"veyron2/services/security/access.Entries", []string(nil)},
+			"veyron2/security.Entries", []string(nil)},
 		_gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
-				_gen_wiretype.FieldType{Type: 0x46, Name: "In"},
-				_gen_wiretype.FieldType{Type: 0x46, Name: "NotIn"},
+				_gen_wiretype.FieldType{Type: 0x44, Name: "In"},
+				_gen_wiretype.FieldType{Type: 0x44, Name: "NotIn"},
 			},
-			"veyron2/services/security/access.ACL", []string(nil)},
+			"veyron2/security.ACL", []string(nil)},
 		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}}
 
 	return result, nil
@@ -417,12 +352,12 @@ func (__gen_s *ServerStubObject) UnresolveStep(call _gen_ipc.ServerCall) (reply 
 	return
 }
 
-func (__gen_s *ServerStubObject) SetACL(call _gen_ipc.ServerCall, acl ACL, etag string) (err error) {
+func (__gen_s *ServerStubObject) SetACL(call _gen_ipc.ServerCall, acl security.ACL, etag string) (err error) {
 	err = __gen_s.service.SetACL(call, acl, etag)
 	return
 }
 
-func (__gen_s *ServerStubObject) GetACL(call _gen_ipc.ServerCall) (acl ACL, etag string, err error) {
+func (__gen_s *ServerStubObject) GetACL(call _gen_ipc.ServerCall) (acl security.ACL, etag string, err error) {
 	acl, etag, err = __gen_s.service.GetACL(call)
 	return
 }

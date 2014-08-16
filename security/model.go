@@ -51,15 +51,6 @@ type PublicID interface {
 	// globally unique.
 	Names() []string
 
-	// Match verifies if the principal has a name matching the provided PrincipalPattern
-	// or can obtain a name matching the PrincipalPattern by manipulating its PublicID
-	// using PrivateID operations (e.g., <PrivateID>.Bless(<PublicID>, ..., ...)). The
-	// provided pattern may be of one of the following forms:
-	// - pattern "*" matching all principals regardless of the names they have.
-	// - a specific name <name> matching all principals who have a name that can be extended to <name>.
-	// - pattern <name>/* matching all principals who have a name that is an extension of the name <name>.
-	Match(pattern PrincipalPattern) bool
-
 	// PublicKey returns the public key corresponding to the private key
 	// that is held only by the principal represented by this PublicID.
 	PublicKey() *ecdsa.PublicKey
