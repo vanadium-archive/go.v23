@@ -258,3 +258,44 @@ func Join(elems ...string) string {
 	// As a result, we have to reslice to just the portion we used.
 	return string(b[:bp])
 }
+
+// TrimSuffix removes the suffix (and any connecting '/') from
+// the name.  Examples are:
+//  a/b/c - b/c = a
+//  a//b - b = a//
+//  a//b - /b = a//b (not a suffix)
+//  /a - a = a (not a suffix)
+//  /a//b - //b = /a
+//  /a// - // = /a
+func TrimSuffix(name, suffix string) string {
+	// Easy cases first.
+	if name == suffix {
+		return ""
+	}
+	if len(suffix) >= len(name) {
+		return name
+	}
+	// Double slash is easy, can only be a strict suffix match.
+	if strings.HasPrefix(suffix, "//") {
+		return strings.TrimSuffix(name, suffix)
+	}
+	// A suffix starting with a slash cannot be a partial match.
+	if strings.HasPrefix(suffix, "/") {
+		return name
+	}
+	// At this point suffix is guaranteed not to start with a '/' and
+	// suffix is shorter than name.
+	if strings.HasSuffix(name, suffix) {
+		prefix := strings.TrimSuffix(name, suffix)
+		if strings.HasSuffix(prefix, "//") {
+			return prefix
+		}
+		if strings.HasSuffix(prefix, "/") {
+			if len(prefix) == 1 {
+				return name
+			}
+			return strings.TrimSuffix(prefix, "/")
+		}
+	}
+	return name
+}

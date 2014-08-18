@@ -89,6 +89,10 @@ type Namespace interface {
 	// directly responsible for the name.
 	ResolveToMountTable(ctx context.T, name string) (names []string, err error)
 
+	// FlushCacheEntry flushes resolution information cached for the name.  If
+	// anything was flushed it returns true.
+	FlushCacheEntry(name string) bool
+
 	// TODO(caprita): consider adding a version of Unresolve to the
 	// IDL-generated stub (in addition to UnresolveStep).
 

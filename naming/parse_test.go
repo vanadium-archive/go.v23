@@ -160,6 +160,34 @@ func TestSplitJoin(t *testing.T) {
 	}
 }
 
+func TestTrimSuffix(t *testing.T) {
+	cases := []struct {
+		name, suffix, prefix string
+	}{
+		{"", "", ""},
+		{"a", "", "a"},
+		{"a", "a", ""},
+		{"/a", "a", "/a"},
+		{"a/b", "b", "a"},
+		{"a/b", "/b", "a/b"},
+		{"a/b/", "b/", "a"},
+		{"/a/b", "b", "/a"},
+		{"/a/b/c", "c", "/a/b"},
+		{"/a/b/c/d", "c/d", "/a/b"},
+		{"/a/b//c/d", "c/d", "/a/b//"},
+		{"/a/b//c/d", "/c/d", "/a/b//c/d"},
+		{"/a/b//c/d", "//c/d", "/a/b"},
+		{"//a/b", "//a/b", ""},
+		{"/a/b", "/a/b", ""},
+		{"//a", "a", "//"},
+	}
+	for _, c := range cases {
+		if p := TrimSuffix(c.name, c.suffix); p != c.prefix {
+			t.Errorf("TrimSuffix(%q, %q): got %q, want %q", c.name, c.suffix, p, c.prefix)
+		}
+	}
+}
+
 func TestTerminal(t *testing.T) {
 	ep := "/" + FormatEndpoint("tcp", "h:0")
 	for _, c := range []string{
