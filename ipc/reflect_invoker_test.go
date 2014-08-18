@@ -10,39 +10,64 @@ import (
 
 	vtest "veyron/lib/testutil"
 
+	"veyron2/context"
 	"veyron2/ipc"
 	"veyron2/naming"
 	"veyron2/security"
 	"veyron2/verror"
 )
 
-// constServerCall implements ipc.ServerCall and is easily comparable in tests.
-type constServerCall int
+// FakeServerCall implements ipc.ServerContext.
+type FakeServerCall struct {
+	id security.PublicID
+}
 
-func (constServerCall) Send(item interface{}) error                   { return nil }
-func (constServerCall) Recv(itemptr interface{}) error                { return nil }
-func (constServerCall) Server() ipc.Server                            { return nil }
-func (constServerCall) Method() string                                { return "" }
-func (constServerCall) Name() string                                  { return "" }
-func (constServerCall) Suffix() string                                { return "" }
-func (constServerCall) Label() security.Label                         { return defaultLabel }
-func (constServerCall) CaveatDischarges() security.CaveatDischargeMap { return nil }
-func (constServerCall) LocalID() security.PublicID                    { return security.FakePublicID("test") }
-func (constServerCall) RemoteID() security.PublicID                   { return security.FakePublicID("test") }
-func (constServerCall) Blessing() security.PublicID                   { return nil }
-func (constServerCall) LocalEndpoint() naming.Endpoint                { return nil }
-func (constServerCall) RemoteEndpoint() naming.Endpoint               { return nil }
-func (constServerCall) Deadline() time.Time                           { return time.Time{} }
-func (constServerCall) IsClosed() bool                                { return false }
-func (constServerCall) Closed() <-chan struct{}                       { return nil }
+func NewFakeServerCall(id security.PublicID) *FakeServerCall {
+	return &FakeServerCall{
+		id: id,
+	}
+}
 
-const (
-	call1 = constServerCall(iota + 1)
-	call2
-	call3
-	call4
-	call5
-	call6
+func (*FakeServerCall) Deadline() (deadline time.Time, ok bool) {
+	var t time.Time
+	return t, false
+}
+func (*FakeServerCall) Done() <-chan struct{}                                  { return nil }
+func (*FakeServerCall) Err() error                                             { return nil }
+func (*FakeServerCall) Value(key interface{}) interface{}                      { return nil }
+func (*FakeServerCall) WithCancel() (ctx context.T, cancel context.CancelFunc) { return nil, nil }
+func (*FakeServerCall) WithDeadline(deadline time.Time) (context.T, context.CancelFunc) {
+	return nil, nil
+}
+func (*FakeServerCall) WithTimeout(timeout time.Duration) (context.T, context.CancelFunc) {
+	return nil, nil
+}
+func (*FakeServerCall) WithValue(key interface{}, val interface{}) context.T { return nil }
+func (*FakeServerCall) Server() ipc.Server                                   { return nil }
+func (*FakeServerCall) Method() string                                       { return "" }
+func (*FakeServerCall) Name() string                                         { return "" }
+func (*FakeServerCall) Suffix() string                                       { return "" }
+func (*FakeServerCall) Label() (l security.Label)                            { return }
+func (*FakeServerCall) CaveatDischarges() security.CaveatDischargeMap        { return nil }
+func (ctx *FakeServerCall) LocalID() security.PublicID                       { return ctx.id }
+func (ctx *FakeServerCall) RemoteID() security.PublicID                      { return ctx.id }
+func (*FakeServerCall) Blessing() security.PublicID                          { return nil }
+func (*FakeServerCall) LocalEndpoint() naming.Endpoint                       { return nil }
+func (*FakeServerCall) RemoteEndpoint() naming.Endpoint                      { return nil }
+func (*FakeServerCall) Closed() <-chan struct{}                              { return nil }
+func (*FakeServerCall) IsClosed() bool                                       { return false }
+func (*FakeServerCall) Send(item interface{}) error                          { return nil }
+func (*FakeServerCall) Recv(itemptr interface{}) error                       { return nil }
+
+var testPublicID = security.FakePublicID("test")
+
+var (
+	call1 = NewFakeServerCall(testPublicID)
+	call2 = NewFakeServerCall(testPublicID)
+	call3 = NewFakeServerCall(testPublicID)
+	call4 = NewFakeServerCall(testPublicID)
+	call5 = NewFakeServerCall(testPublicID)
+	call6 = NewFakeServerCall(testPublicID)
 )
 
 const defaultLabel = security.AdminLabel

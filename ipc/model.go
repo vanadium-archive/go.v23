@@ -1,8 +1,6 @@
 package ipc
 
 import (
-	"time"
-
 	"veyron2/context"
 	"veyron2/naming"
 	"veyron2/security"
@@ -178,13 +176,6 @@ type ServerContext interface {
 	// of the server's identity. It can be nil, in which case the client did
 	// not provide any additional credentials.
 	Blessing() security.PublicID
-	// Deadline returns the deadline for this call.
-	Deadline() time.Time
-	// IsClosed returns true iff the call has been cancelled or otherwise closed.
-	IsClosed() bool
-	// Closed returns a channel that remains open until the call has been
-	// cancelled or otherwise closed.
-	Closed() <-chan struct{}
 	// Server returns the Server that this context is associated with.
 	Server() Server
 }

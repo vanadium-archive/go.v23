@@ -3,9 +3,7 @@ package primitives
 import (
 	"errors"
 
-	"veyron2"
 	"veyron2/context"
-	"veyron2/ipc"
 	"veyron2/naming"
 	"veyron2/query"
 	"veyron2/services/store"
@@ -94,12 +92,12 @@ func (o *object) Glob(ctx context.T, pattern string) storage.GlobCall {
 
 // WatchGlob returns a stream of changes that match a pattern.
 func (o *object) WatchGlob(ctx context.T, req watch.GlobRequest) (watch.GlobWatcherWatchGlobCall, error) {
-	return o.serv.WatchGlob(ctx, req, veyron2.CallTimeout(ipc.NoTimeout))
+	return o.serv.WatchGlob(ctx, req)
 }
 
 // WatchQuery returns a stream of changes that satisy a query.
 func (o *object) WatchQuery(ctx context.T, req watch.QueryRequest) (watch.QueryWatcherWatchQueryCall, error) {
-	return o.serv.WatchQuery(ctx, req, veyron2.CallTimeout(ipc.NoTimeout))
+	return o.serv.WatchQuery(ctx, req)
 }
 
 // errorObject responds with an error to all operations.

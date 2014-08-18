@@ -1,8 +1,6 @@
 package veyron2
 
 import (
-	"time"
-
 	"veyron2/ipc/stream"
 	"veyron2/naming"
 	"veyron2/security"
@@ -120,12 +118,6 @@ const (
 	// Data is transmitted over the VC in plain text and there is no authentication.
 	VCSecurityNone VCSecurityLevel = 1
 )
-
-// CallTimeout specifies the timeout for Call.
-type CallTimeout time.Duration
-
-func (CallTimeout) IPCCallOpt()   {}
-func (CallTimeout) IPCClientOpt() {}
 
 // DischargeOpt wraps the security.ThirdPartyDischarge interface so that we can
 // add functions representing the option annotations.
