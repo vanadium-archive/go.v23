@@ -12,8 +12,6 @@ import "veyron2/security"
 const (
 	// KeyCurveP256 describes the NIST P256 curve.
 	KeyCurveP256 = KeyCurve(0)
-	// ChainSeparator is used to join blessing names to form a blessing chain name.
-	ChainSeparator = "/"
 )
 
 // KeyCurve defines a namespace for elliptic curves.

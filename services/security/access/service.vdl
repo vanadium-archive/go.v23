@@ -115,72 +115,13 @@ type Object interface {
   // endpoint.  To modify the mount point's ACL, use ResolveToMountTable
   // to get an endpoint and call SetACL on that.  This means that clients
   // must know when a name refers to a mount point to change its ACL.
-  SetACL(acl ACL, etag string) error {security.AdminLabel}
+  SetACL(acl security.ACL, etag string) error {security.AdminLabel}
 
   // GetACL returns the complete, current ACL for an object.  The returned etag
   // can be passed to a subsequent call to SetACL for optimistic concurrency
   // control. A successful call to SetACL will invalidate etag, and the client
   // must call GetACL again to get the current etag.
-  GetACL() (acl ACL, etag string, err error) {security.AdminLabel}
-}
-
-// ACL (Access Control List) tracks which principals and groups have access to
-// an object and which principals and groups specifically do not have access
-// to an object.  For example:
-//   ACL {
-//     In {
-//       Principals {
-//         "user1/*": ["Read", "Write"],
-//         "user2/*": ["Read"],
-//       }
-//       Groups {
-//         Group{"google.com/engineering"}: ["Read"],
-//       }
-//     }
-//     NotIn {
-//       Principals {
-//         "user1/*": ["Write"],
-//       }
-//       Groups {
-//         Group{"google.com/eng-interns"}: ["Read", "Write", "Admin"],
-//       }
-//     }
-//   }
-// NotIn subtracts privileges.  In this example, it says that "user1/*" has
-// only  "Read" access.  All of engineering has read access except for
-// engineering interns.
-//
-// Principals can have multiple names.  As long as the principal has a name
-// that matches In and not NotIn, it is authorized. The reasoning is that the
-// principal can always hide a name if it wants to, so requiring all names to
-// satisfy the policy does not make sense.
-type ACL struct {
-  // In represents the set of principals and groups that can access the object
-  // only if they are not also present in NotIn.
-  In Entries
-  // NotIn represents the set of principals and groups that do not have access
-  // to the object.  It effectively subtracts permissions from In.
-  NotIn Entries
-}
-
-// Entries describes a set of principals and groups (of principals).
-type Entries struct {
-  // Principals specifies the type of access being granted or revoked to any
-  // Identity that matches the PrincipalPattern.  If multiple patterns match
-  // an Identity, the server will iterate through them to find one that
-  // contains the desired label.
-  Principals map[security.PrincipalPattern]security.LabelSet
-  // Groups specifies the type of access being granted or revoked to all
-  // members of the group.
-  Groups map[Group]security.LabelSet
-}
-
-// Group represents a group of principals in the TBD Group API.  This is
-// just a placeholder for now.
-type Group struct {
-  // Name is the Object name of the group.  This name must
-  // implement the TBD Group API.
-  Name string
+  GetACL() (acl security.ACL, etag string, err error) {security.AdminLabel}
 }
 
 errorid (

@@ -20,7 +20,7 @@ var (
 	ErrNoIntegrity = errors.New("signature does not match bytes, possible tampering")
 
 	// TODO(ataly, ashankar): Make sure we add all reserved characters to this list.
-	invalidBlessingStrs = []string{security.AllPrincipals, ChainSeparator}
+	invalidBlessingStrs = []string{security.AllPrincipals, security.ChainSeparator}
 )
 
 // errInvalidBlessingName returns an error specifying that the provided blessing name is invalid.
@@ -131,7 +131,8 @@ func DecodeThirdPartyCaveats(caveats []Caveat) (thirdPartyCaveats []security.Ser
 func (c *Caveat) Validate(ctx security.Context) error {
 	// TODO(ataly): Is checking that the localID matches the caveat's Service pattern
 	// the right choice here?
-	if c.Service != security.AllPrincipals && (ctx.LocalID() == nil || !ctx.LocalID().Match(c.Service)) {
+	if c.Service != security.AllPrincipals &&
+		(ctx.LocalID() == nil || !security.Matches(ctx.LocalID(), c.Service)) {
 		return nil
 	}
 	cav, err := c.Decode()
@@ -197,7 +198,7 @@ func (id *ChainPublicID) Name() string {
 	var buf bytes.Buffer
 	for i, c := range id.Certificates {
 		if i > 0 {
-			buf.WriteString(ChainSeparator)
+			buf.WriteString(security.ChainSeparator)
 		}
 		buf.WriteString(c.Name)
 	}
@@ -251,7 +252,7 @@ func ValidateBlessingName(name string) error {
 
 // ValidatePrincipalPattern verifies if the provided security.PrincipalPattern is valid.
 func ValidatePrincipalPattern(pattern security.PrincipalPattern) error {
-	patternParts := strings.Split(string(pattern), ChainSeparator)
+	patternParts := strings.Split(string(pattern), security.ChainSeparator)
 	for i, p := range patternParts {
 		if (p == security.AllPrincipals) && (i == len(patternParts)-1) {
 			break
