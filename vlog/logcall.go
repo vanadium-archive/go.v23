@@ -42,17 +42,16 @@ import (
 //
 // The log injector tool will automatically insert a LogCall invocation
 // into all implementations of the public API it runs, unless a Valid
-// Log Construct is found.  A Valid Log Construct is defined as of the
-// following at the beginning of the function body (i.e. should not be
-// preceded by any non-whitespace or non-comment tokens):
+// Log Construct is found.  A Valid Log Construct is defined as one of
+// the following at the beginning of the function body (i.e. should not
+// be preceded by any non-whitespace or non-comment tokens):
 //     1. defer vlog.LogCall(optional arguments)(optional pointers to return values)
 //     2. defer vlog.LogCallf(argsFormat, optional arguments)(returnValuesFormat, optional pointers to return values)
 //     3. // nologcall
 //
-// The comment "// nologcall" is used to silence the static analysis
-// and not warn about the lack of a LogCall or LogCallf statement within
-// a function.  It also prevents the log injector to inject a LogCall
-// invocation in a function.  It is used as follows:
+// The comment "// nologcall" serves as a hint to log injection and
+// checking tools to exclude the function from their consideration.
+// It is used as follows:
 //
 //     func FunctionWithoutLogging(args ...interface{}) {
 //         // nologcall
@@ -102,6 +101,9 @@ func derefSlice(slice []interface{}) []interface{} {
 
 var invocationCounter uint64 = 0
 
+// newInvocationIdentifier generates a unique identifier for a method invocation
+// to make it easier to match up log lines for the entry and exit of a function
+// when looking at a log transcript.
 func newInvocationIdentifier() string {
 	const (
 		charSet    = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz"
