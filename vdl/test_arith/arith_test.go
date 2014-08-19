@@ -112,7 +112,7 @@ func (*serverCalculator) Off(_ ipc.ServerContext) error {
 func TestCalculator(t *testing.T) {
 	client := newClient()
 	server := newServer()
-	if err := server.Serve("", ipc.SoloDispatcher(NewServerCalculator(&serverCalculator{}), nil)); err != nil {
+	if err := server.Serve("", ipc.LeafDispatcher(NewServerCalculator(&serverCalculator{}), nil)); err != nil {
 		t.Fatal(err)
 	}
 	ep, err := server.Listen("tcp", "127.0.0.1:0")
@@ -339,9 +339,9 @@ func TestArith(t *testing.T) {
 	// anything dispatching to Arith or an interface embedding Arith (like
 	// Calculator) works for a client looking to talk to an Arith service.
 	dispatchers := []ipc.Dispatcher{
-		ipc.SoloDispatcher(NewServerArith(&serverArith{}), nil),
-		ipc.SoloDispatcher(NewServerArith(&serverCalculator{}), nil),
-		ipc.SoloDispatcher(NewServerCalculator(&serverCalculator{}), nil),
+		ipc.LeafDispatcher(NewServerArith(&serverArith{}), nil),
+		ipc.LeafDispatcher(NewServerArith(&serverCalculator{}), nil),
+		ipc.LeafDispatcher(NewServerCalculator(&serverCalculator{}), nil),
 	}
 
 	client := newClient()
