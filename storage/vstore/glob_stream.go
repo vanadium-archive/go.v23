@@ -1,4 +1,4 @@
-package primitives
+package vstore
 
 // TODO(sadovsky): Write detailed unit tests. For now, globStream is tested
 // indirectly via vstore_test.go.

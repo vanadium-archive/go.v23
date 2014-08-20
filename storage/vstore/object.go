@@ -1,4 +1,4 @@
-package primitives
+package vstore
 
 import (
 	"errors"
@@ -10,14 +10,6 @@ import (
 	"veyron2/services/watch"
 	"veyron2/storage"
 )
-
-type object struct {
-	serv store.Object
-}
-
-type errorObject struct {
-	err error
-}
 
 var (
 	ErrBadAttr = errors.New("bad attribute")
@@ -32,47 +24,52 @@ var (
 	nullChangeBatch watch.ChangeBatch
 )
 
-// BindObject returns a storage.Object for a value at an Object name. This
-// method always succeeds. If the Object name is not a value in a Veyron store,
-// all subsequent operations on the Object will fail.
-// TODO(sadovsky): Maybe just take a single name argument, so that the client
-// need not know the store mount name?
-func BindObject(mount, name string) storage.Object {
-	serv, err := store.BindObject(naming.Join(mount, name))
-	if err != nil {
-		return &errorObject{err: err}
-	}
-	return &object{serv: serv}
+// object implements the store.Object interface.  It is just a thin
+// wrapper for store.Object except for the Glob and Query methods.
+type object struct {
+	serv store.Object
+	name string
 }
 
-// Exists returns true iff the Entry has a value.
+func newObject(name string) storage.Object {
+	serv, err := store.BindObject(name)
+	if err != nil {
+		return newErrorObject(err)
+	}
+	return &object{serv, name}
+}
+
+// Bind implements the storage.Object method.
+func (o *object) Bind(relativeName string) storage.Object {
+	return newObject(naming.Join(o.name, relativeName))
+}
+
+// Exists implements the storage.Object method.
 func (o *object) Exists(ctx context.T) (bool, error) {
 	return o.serv.Exists(ctx)
 }
 
-// Get returns the value for the Object.  The value returned is from the
-// most recent mutation of the entry in the storage.Transaction, or from the
-// storage.Transaction's snapshot if there is no mutation.
+// Get implements the storage.Object method.
 func (o *object) Get(ctx context.T) (storage.Entry, error) {
 	return o.serv.Get(ctx)
 }
 
-// Put adds or modifies the Object.
+// Put implements the storage.Object method.
 func (o *object) Put(ctx context.T, v interface{}) (storage.Stat, error) {
 	return o.serv.Put(ctx, v)
 }
 
-// Remove removes the Object.
+// Remove implements the storage.Object method.
 func (o *object) Remove(ctx context.T) error {
 	return o.serv.Remove(ctx)
 }
 
-// Stat returns entry info.
+// Stat implements the storage.Object method.
 func (o *object) Stat(ctx context.T) (storage.Stat, error) {
 	return o.serv.Stat(ctx)
 }
 
-// Query returns entries matching the given query.
+// Query implements the storage.Object method.
 func (o *object) Query(ctx context.T, q query.Query) storage.QueryStream {
 	stream, err := o.serv.Query(ctx, q)
 	if err != nil {
@@ -81,7 +78,7 @@ func (o *object) Query(ctx context.T, q query.Query) storage.QueryStream {
 	return newQueryStream(stream)
 }
 
-// Glob returns names matching the given pattern.
+// Glob implements the storage.Object method.
 func (o *object) Glob(ctx context.T, pattern string) storage.GlobCall {
 	stream, err := o.serv.Glob(ctx, pattern)
 	if err != nil {
@@ -90,17 +87,29 @@ func (o *object) Glob(ctx context.T, pattern string) storage.GlobCall {
 	return newGlobStream(stream)
 }
 
-// WatchGlob returns a stream of changes that match a pattern.
+// WatchGlob implements the storage.Object method.
 func (o *object) WatchGlob(ctx context.T, req watch.GlobRequest) (watch.GlobWatcherWatchGlobCall, error) {
 	return o.serv.WatchGlob(ctx, req)
 }
 
-// WatchQuery returns a stream of changes that satisy a query.
+// WatchQuery implements the storage.Object method.
 func (o *object) WatchQuery(ctx context.T, req watch.QueryRequest) (watch.QueryWatcherWatchQueryCall, error) {
 	return o.serv.WatchQuery(ctx, req)
 }
 
 // errorObject responds with an error to all operations.
+type errorObject struct {
+	err error
+}
+
+func newErrorObject(err error) storage.Object {
+	return &errorObject{err}
+}
+
+func (o *errorObject) Bind(relativeName string) storage.Object {
+	return o
+}
+
 func (o *errorObject) Exists(ctx context.T) (bool, error) {
 	return false, o.err
 }
@@ -121,24 +130,12 @@ func (o *errorObject) Stat(ctx context.T) (storage.Stat, error) {
 	return nullStat, o.err
 }
 
-func (o *errorObject) GetAllPaths(ctx context.T) ([]string, error) {
-	return nil, o.err
-}
-
 func (o *errorObject) Query(ctx context.T, q query.Query) storage.QueryStream {
 	return &errorQueryStream{o.err}
 }
 
 func (o *errorObject) Glob(ctx context.T, pattern string) storage.GlobCall {
 	return &errorGlobStream{o.err}
-}
-
-func (o *errorObject) Commit(ctx context.T) error {
-	return o.err
-}
-
-func (o *errorObject) Abort(ctx context.T) error {
-	return o.err
 }
 
 func (o *errorObject) WatchGlob(ctx context.T, req watch.GlobRequest) (watch.GlobWatcherWatchGlobCall, error) {
@@ -168,7 +165,7 @@ func (e *errorQueryStream) Err() error {
 
 func (e *errorQueryStream) Cancel() {}
 
-// errorGlobStream implements storage.GlobCall.
+// errorGlobStream implements storage.GlobCall and storage.GlobStream.
 type errorGlobStream struct {
 	err error
 }

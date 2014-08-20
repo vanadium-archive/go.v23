@@ -17,15 +17,13 @@ import (
 	"veyron2/naming"
 	"veyron2/rt"
 	"veyron2/security"
-	"veyron2/storage"
-	"veyron2/storage/vstore"
 )
 
 var storeID = security.FakePrivateID("store")
 
-// startServer opens a server, then creates and returns a client.  Also returns
+// startServer starts a Store server.  It returns the name of that server and
 // a function to close everything at the end of the test.
-func startServer(t *testing.T) (storage.Store, func()) {
+func startServer(t *testing.T) (string, func()) {
 	r := rt.Init(veyron2.RuntimeID(storeID))
 
 	var buf [16]byte
@@ -69,16 +67,12 @@ func startServer(t *testing.T) (storage.Store, func()) {
 
 	// We're running without a MountTable so we use the endpoint as the name.
 	name := naming.JoinAddressName(ep.String(), "")
-	st, err := vstore.New(name)
-	if err != nil {
-		log.Fatal("vstorage.New() failed: ", err)
-	}
 
-	cl := func() { closeServer(t, s, dbName, st) }
-	return st, cl
+	cl := func() { closeServer(s, dbName) }
+	return name, cl
 }
 
-func closeServer(t *testing.T, s ipc.Server, dbName string, st storage.Store) {
+func closeServer(s ipc.Server, dbName string) {
 	s.Stop()
 	os.Remove(dbName)
 }

@@ -1,4 +1,4 @@
-package primitives
+package vstore
 
 import (
 	"errors"

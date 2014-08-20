@@ -4,9 +4,9 @@ import (
 	"runtime"
 	"testing"
 
-	"veyron2/naming"
 	"veyron2/rt"
 	"veyron2/storage"
+	"veyron2/storage/vstore"
 	"veyron2/vom"
 )
 
@@ -84,27 +84,18 @@ func newPhoto(content, comment string, edits ...Edit) *Photo {
 	return &Photo{Content: content, Comment: comment}
 }
 
-func createTransaction(t *testing.T, st storage.Store, name string) string {
+func get(t *testing.T, tx storage.Transaction, name string) *storage.Entry {
 	_, file, line, _ := runtime.Caller(1)
-	tid, err := st.BindTransactionRoot(name).CreateTransaction(rt.R().NewContext())
-	if err != nil {
-		t.Fatalf("%s(%d): can't create transaction %s: %s", file, line, name, err)
-	}
-	return naming.Join(name, tid)
-}
-
-func get(t *testing.T, st storage.Store, name string) *storage.Entry {
-	_, file, line, _ := runtime.Caller(1)
-	entry, err := st.BindObject(name).Get(rt.R().NewContext())
+	entry, err := tx.Bind(name).Get(rt.R().NewContext())
 	if err != nil {
 		t.Fatalf("%s(%d): can't get %s: %s", file, line, name, err)
 	}
 	return &entry
 }
 
-func getPhoto(t *testing.T, st storage.Store, name string) *Photo {
+func getPhoto(t *testing.T, tx storage.Transaction, name string) *Photo {
 	_, file, line, _ := runtime.Caller(1)
-	e := get(t, st, name)
+	e := get(t, tx, name)
 	v := e.Value
 	p, ok := v.(*Photo)
 	if !ok {
@@ -113,9 +104,9 @@ func getPhoto(t *testing.T, st storage.Store, name string) *Photo {
 	return p
 }
 
-func put(t *testing.T, st storage.Store, name string, v interface{}) storage.ID {
+func put(t *testing.T, tx storage.Transaction, name string, v interface{}) storage.ID {
 	_, file, line, _ := runtime.Caller(1)
-	stat, err := st.BindObject(name).Put(rt.R().NewContext(), v)
+	stat, err := tx.Bind(name).Put(rt.R().NewContext(), v)
 	if err != nil {
 		t.Errorf("%s(%d): can't put %s: %s", file, line, name, err)
 	}
@@ -128,27 +119,24 @@ func put(t *testing.T, st storage.Store, name string, v interface{}) storage.ID 
 	return storage.ID{}
 }
 
-func commit(t *testing.T, st storage.Store, name string) {
-	_, file, line, _ := runtime.Caller(1)
-	if err := st.BindTransaction(name).Commit(rt.R().NewContext()); err != nil {
-		t.Fatalf("%s(%d): commit failed: %s", file, line, err)
-	}
-}
-
 func TestPhotoAlbum(t *testing.T) {
-	st, c := startServer(t) // calls rt.Init()
+	storeRoot, c := startServer(t) // Calls rt.Init().
 	defer c()
+	ctx := rt.R().NewContext()
+	st := vstore.New()
 
 	// Create directories.
 	{
-		tname := createTransaction(t, st, "")
-		put(t, st, tname, newDir())
-		put(t, st, naming.Join(tname, "Users"), newDir())
-		put(t, st, naming.Join(tname, "Users/jyh"), newUser(1234567890))
-		put(t, st, naming.Join(tname, "Users/jyh/ByDate"), newDir())
-		put(t, st, naming.Join(tname, "Users/jyh/ByDate/2014_01_01"), newDir())
-		put(t, st, naming.Join(tname, "Users/jyh/Albums"), newDir())
-		commit(t, st, tname)
+		tx := st.NewTransaction(ctx, storeRoot)
+		put(t, tx, "", newDir())
+		put(t, tx, "Users", newDir())
+		put(t, tx, "Users/jyh", newUser(1234567890))
+		put(t, tx, "Users/jyh/ByDate", newDir())
+		put(t, tx, "Users/jyh/ByDate/2014_01_01", newDir())
+		put(t, tx, "Users/jyh/Albums", newDir())
+		if err := tx.Commit(ctx); err != nil {
+			t.Fatalf("Unexpected error: %s", err)
+		}
 	}
 
 	// Add some photos by date.
@@ -159,36 +147,42 @@ func TestPhotoAlbum(t *testing.T) {
 		p4 := newPhoto("/global/contentd/DSC1003.jpg", "Ice cream")
 		p5 := newPhoto("/global/contentd/DSC1004.jpg", "Let's go home")
 
-		tname := createTransaction(t, st, "")
-		put(t, st, naming.Join(tname, "Users/jyh/ByDate/2014_01_01/09:00"), p1)
-		put(t, st, naming.Join(tname, "Users/jyh/ByDate/2014_01_01/09:15"), p2)
-		put(t, st, naming.Join(tname, "Users/jyh/ByDate/2014_01_01/09:16"), p3)
-		put(t, st, naming.Join(tname, "Users/jyh/ByDate/2014_01_01/10:00"), p4)
-		put(t, st, naming.Join(tname, "Users/jyh/ByDate/2014_01_01/10:05"), p5)
-		commit(t, st, tname)
+		tx := st.NewTransaction(ctx, storeRoot)
+		put(t, tx, "Users/jyh/ByDate/2014_01_01/09:00", p1)
+		put(t, tx, "Users/jyh/ByDate/2014_01_01/09:15", p2)
+		put(t, tx, "Users/jyh/ByDate/2014_01_01/09:16", p3)
+		put(t, tx, "Users/jyh/ByDate/2014_01_01/10:00", p4)
+		put(t, tx, "Users/jyh/ByDate/2014_01_01/10:05", p5)
+		if err := tx.Commit(ctx); err != nil {
+			t.Fatalf("Unexpected error: %s", err)
+		}
 	}
 
 	// Add an Album with some of the photos.
 	{
-		tname := createTransaction(t, st, "")
-		put(t, st, naming.Join(tname, "Users/jyh/Albums/Yosemite"), newAlbum("Yosemite selected photos"))
-		p5 := get(t, st, naming.Join(tname, "Users/jyh/ByDate/2014_01_01/10:05"))
-		put(t, st, naming.Join(tname, "Users/jyh/Albums/Yosemite/Photos/1"), p5.Stat.ID)
-		p3 := get(t, st, naming.Join(tname, "Users/jyh/ByDate/2014_01_01/09:16"))
-		put(t, st, naming.Join(tname, "Users/jyh/Albums/Yosemite/Photos/2"), p3.Stat.ID)
-		commit(t, st, tname)
+		tx := st.NewTransaction(ctx, storeRoot)
+		put(t, tx, "Users/jyh/Albums/Yosemite", newAlbum("Yosemite selected photos"))
+		p5 := get(t, tx, "Users/jyh/ByDate/2014_01_01/10:05")
+		put(t, tx, "Users/jyh/Albums/Yosemite/Photos/1", p5.Stat.ID)
+		p3 := get(t, tx, "Users/jyh/ByDate/2014_01_01/09:16")
+		put(t, tx, "Users/jyh/Albums/Yosemite/Photos/2", p3.Stat.ID)
+		if err := tx.Commit(ctx); err != nil {
+			t.Fatalf("Unexpected error: %s", err)
+		}
 	}
 
 	// Verify some of the photos.
 	{
-		p1 := getPhoto(t, st, "Users/jyh/ByDate/2014_01_01/09:00")
+		tx := st.NewTransaction(ctx, storeRoot)
+		p1 := getPhoto(t, tx, "Users/jyh/ByDate/2014_01_01/09:00")
 		if p1.Comment != "Half Dome" {
 			t.Errorf("Expected %q, got %q", "Half Dome", p1.Comment)
 		}
 	}
 
 	{
-		p3 := getPhoto(t, st, "Users/jyh/Albums/Yosemite/Photos/2")
+		tx := st.NewTransaction(ctx, storeRoot)
+		p3 := getPhoto(t, tx, "Users/jyh/Albums/Yosemite/Photos/2")
 		if p3.Comment != "Crying kids" {
 			t.Errorf("Expected %q, got %q", "Crying kids", p3.Comment)
 		}
@@ -196,16 +190,19 @@ func TestPhotoAlbum(t *testing.T) {
 
 	// Update p3.Comment to "Happy".
 	{
-		tname := createTransaction(t, st, "")
-		p3 := getPhoto(t, st, naming.Join(tname, "Users/jyh/ByDate/2014_01_01/09:16"))
+		tx := st.NewTransaction(ctx, storeRoot)
+		p3 := getPhoto(t, tx, "Users/jyh/ByDate/2014_01_01/09:16")
 		p3.Comment = "Happy"
-		put(t, st, naming.Join(tname, "Users/jyh/ByDate/2014_01_01/09:16"), p3)
-		commit(t, st, tname)
+		put(t, tx, "Users/jyh/ByDate/2014_01_01/09:16", p3)
+		if err := tx.Commit(ctx); err != nil {
+			t.Fatalf("Unexpected error: %s", err)
+		}
 	}
 
 	// Verify that the photo in the album has also changed.
 	{
-		p3 := getPhoto(t, st, "Users/jyh/Albums/Yosemite/Photos/2")
+		tx := st.NewTransaction(ctx, storeRoot)
+		p3 := getPhoto(t, tx, "Users/jyh/Albums/Yosemite/Photos/2")
 		if p3.Comment != "Happy" {
 			t.Errorf("Expected %q, got %q", "Happy", p3.Comment)
 		}

@@ -3,46 +3,41 @@
 package vstore
 
 import (
-	"veyron2/ipc"
+	"veyron2/context"
+	"veyron2/naming"
+	"veyron2/services/store"
 	"veyron2/storage"
-	"veyron2/storage/vstore/primitives"
 )
 
-type VStore struct {
-	mount string
+type vStore struct{}
+
+var _ storage.Store = (*vStore)(nil)
+
+// New returns a storage.Store.
+func New() storage.Store {
+	return &vStore{}
 }
 
-var _ storage.Store = (*VStore)(nil)
-
-// New returns a storage.Store for a Veyron store mounted at an Object name.
-func New(mount string, opts ...ipc.BindOpt) (storage.Store, error) {
-	st := &VStore{mount}
-	return st, nil
+func (v *vStore) Bind(name string) storage.Object {
+	return newObject(name)
 }
 
-// BindObject returns a storage.Object for a value at an Object name. This
-// method always succeeds. If the Object name is not a value in a Veyron store,
-// all subsequent operations on the Object will fail.
-func (st *VStore) BindObject(name string) storage.Object {
-	return primitives.BindObject(st.mount, name)
-}
-
-// BindTransaction returns a storage.Transaction for a value at a Transaction
-// name. This method always succeeds. If the Transaction name is not a value in
-// a Veyron store, all subsequent operations on the Transaction will fail.
-func (st *VStore) BindTransaction(name string) storage.Transaction {
-	return primitives.BindTransaction(st.mount, name)
-}
-
-// BindTransactionRoot returns a storage.TransactionRoot for a value at a
-// TransactionRoot name. This method always succeeds. If the TransactionRoot
-// name is not a value in a Veyron store, all subsequent operations on the
-// TransactionRoot will fail.
-func (st *VStore) BindTransactionRoot(name string) storage.TransactionRoot {
-	return primitives.BindTransactionRoot(st.mount, name)
-}
-
-// Close closes the Store.
-func (st *VStore) Close() error {
-	return nil
+func (v *vStore) NewTransaction(ctx context.T, name string,
+	opts ...storage.TransactionOpt) storage.Transaction {
+	root, err := store.BindTransactionRoot(name)
+	if err != nil {
+		return newErrorTransaction(err)
+	}
+	tid, err := root.CreateTransaction(ctx, nil)
+	if err != nil {
+		return newErrorTransaction(err)
+	}
+	tname := naming.Join(name, tid)
+	tx, err := store.BindTransaction(tname)
+	if err != nil {
+		// We would want to abort tx if there was an error, but there's no way
+		// to send the abort if we can't bind.
+		return newErrorTransaction(err)
+	}
+	return &transaction{tname, tx}
 }
