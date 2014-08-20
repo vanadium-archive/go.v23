@@ -1,12 +1,10 @@
 package security
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"reflect"
 	"testing"
-	"time"
 )
 
 const emptyLabelSet LabelSet = 0
@@ -20,14 +18,6 @@ func (s lSet) has(l Label) bool {
 		}
 	}
 	return false
-}
-
-func bless(blessee PublicID, blesser PrivateID, name string) PublicID {
-	blessed, err := blesser.Bless(blessee, name, 5*time.Minute, nil)
-	if err != nil {
-		panic(err)
-	}
-	return blessed
 }
 
 func TestHasLabel(t *testing.T) {
@@ -172,155 +162,5 @@ func TestLabelSetUnmarshalJSON(t *testing.T) {
 		if got, want := labelSet, d.labelSet; got != want {
 			t.Errorf("json.Unmarshal([]byte(%q)): got: %d, want: %d", d.marshalled, got, want)
 		}
-	}
-}
-
-func TestACLMatches(t *testing.T) {
-	annPrivateID := FakePrivateID("ann")
-	bobPrivateID := FakePrivateID("bob")
-	chePrivateID := FakePrivateID("che")
-	danPrivateID := FakePrivateID("dan")
-	evaPrivateID := FakePrivateID("eva")
-	ann := annPrivateID.PublicID()
-	bob := bobPrivateID.PublicID()
-	che := chePrivateID.PublicID()
-	dan := danPrivateID.PublicID()
-	eva := evaPrivateID.PublicID()
-	// tests if a nameless publicID can access *
-	nameless := FakePublicID("")
-	annFriend := bless(bob, annPrivateID, "friend")
-
-	aclstring1 := `{
-		"In": { "Principals": {
-			"fake/ann": "RW",
-			"fake/bob": "RW",
-			"fake/che": "R"
-		}},
-		"NotIn": { "Principals": {
-			"fake/bob": "W",
-			"fake/dan": "R"
-		}}
-	}`
-	aclstring2 := `{
-		"In": { "Principals": {
-			"*": "RW"
-		}},
-		"NotIn": { "Principals": {
-			"fake/ann/friend": "W"
-		}}
-	}`
-	aclstring3 := `{
-		"In": { "Principals": {
-			"*": "RW"
-		}},
-		"NotIn": { "Principals": {
-			"fake/ann/*": "W"
-		}}
-	}`
-	aclstring4 := `{
-		"In": { "Principals": {
-			"fake/ann/*": "RW"
-		}},
-		"NotIn": { "Principals": {
-			"fake/ann/friend": "W"
-		}}
-	}`
-	aclToTests := map[string][]struct {
-		Principal PublicID
-		Label     Label
-		Match     bool
-	}{
-		aclstring1: {
-			{ann, ReadLabel, true},
-			{ann, WriteLabel, true},
-			{annFriend, ReadLabel, false},
-			{annFriend, WriteLabel, false},
-			{bob, ReadLabel, true},
-			{bob, WriteLabel, false},
-			{che, ReadLabel, true},
-			{che, WriteLabel, false},
-			{dan, ReadLabel, false},
-			{dan, WriteLabel, false},
-			{eva, ReadLabel, false},
-			{eva, WriteLabel, false},
-		},
-		aclstring2: {
-			{ann, ReadLabel, true},
-			{ann, WriteLabel, true},
-			{annFriend, ReadLabel, true},
-			{annFriend, WriteLabel, false},
-			{bob, ReadLabel, true},
-			{bob, WriteLabel, true},
-		},
-		aclstring3: {
-			{nameless, ReadLabel, true},
-			{ann, ReadLabel, true},
-			{ann, WriteLabel, false},
-			{annFriend, ReadLabel, true},
-			{annFriend, WriteLabel, false},
-			{bob, ReadLabel, true},
-			{bob, WriteLabel, true},
-		},
-		aclstring4: {
-			{ann, ReadLabel, true},
-			{ann, WriteLabel, true},
-			{annFriend, ReadLabel, true},
-			{annFriend, WriteLabel, false},
-			{bob, ReadLabel, false},
-			{bob, WriteLabel, false},
-		},
-	}
-	for aclstring, tests := range aclToTests {
-		acl, err := LoadACL(bytes.NewBufferString(aclstring))
-		if err != nil {
-			t.Fatalf("Cannot parse ACL %s: %v", aclstring, err)
-		}
-		for _, test := range tests {
-			if acl.Matches(test.Principal, test.Label) != test.Match {
-				t.Errorf("acl.Matches(%v, %v) was not %v", test.Principal, test.Label, test.Match)
-			}
-		}
-	}
-}
-
-func TestLoadSaveIdentity(t *testing.T) {
-	id := FakePrivateID("test")
-
-	var buf bytes.Buffer
-	if err := SaveIdentity(&buf, id); err != nil {
-		t.Fatalf("Failed to save PrivateID %q: %v", id, err)
-	}
-
-	loadedID, err := LoadIdentity(&buf)
-	if err != nil {
-		t.Fatalf("Failed to load PrivateID: %v", err)
-	}
-	if !reflect.DeepEqual(loadedID, id) {
-		t.Fatalf("Got Identity %v, but want %v", loadedID, id)
-	}
-}
-
-func TestLoadSaveACL(t *testing.T) {
-	acl := ACL{}
-	acl.In.Principals = map[PrincipalPattern]LabelSet{
-		"veyron/*":     LabelSet(ReadLabel),
-		"veyron/alice": LabelSet(ReadLabel | WriteLabel),
-		"veyron/bob":   LabelSet(AdminLabel),
-	}
-	acl.NotIn.Principals = map[PrincipalPattern]LabelSet{
-		"veyron/che": LabelSet(ReadLabel),
-	}
-
-	var buf bytes.Buffer
-	if err := SaveACL(&buf, acl); err != nil {
-		t.Fatalf("Failed to save ACL %q: %v", acl, err)
-	}
-
-	loadedACL, err := LoadACL(&buf)
-	if err != nil {
-		t.Fatalf("Failed to load ACL: %v", err)
-	}
-	if !reflect.DeepEqual(loadedACL, acl) {
-		t.Fatalf("Got ACL %v, but want %v", loadedACL, acl)
 	}
 }

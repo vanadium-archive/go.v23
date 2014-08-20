@@ -132,7 +132,7 @@ func (c *Caveat) Validate(ctx security.Context) error {
 	// TODO(ataly): Is checking that the localID matches the caveat's Service pattern
 	// the right choice here?
 	if c.Service != security.AllPrincipals &&
-		(ctx.LocalID() == nil || !security.Matches(ctx.LocalID(), c.Service)) {
+		(ctx.LocalID() == nil || !c.Service.MatchedBy(ctx.LocalID())) {
 		return nil
 	}
 	cav, err := c.Decode()
