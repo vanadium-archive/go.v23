@@ -118,56 +118,53 @@ other languages like C++.
 }
 
 const (
-	genLangGo genLang = iota
-	genLangJava
-	genLangJavascript
-	numGenLang
+	genLangGo         genLang = "go"
+	genLangJava               = "java"
+	genLangJavascript         = "js"
 )
 
-type genLang int
+var genLangAll = genLangs{genLangGo, genLangJava, genLangJavascript}
 
-func (l genLang) String() string {
-	switch l {
-	case genLangGo:
-		return "go"
-	case genLangJava:
-		return "java"
-	case genLangJavascript:
-		return "js"
+type genLang string
+
+func (l genLang) String() string { return string(l) }
+
+func genLangFromString(str string) (genLang, error) {
+	for _, l := range genLangAll {
+		if l == genLang(str) {
+			return l, nil
+		}
 	}
-	panic(fmt.Errorf("Unhandled language %d", l))
+	return "", fmt.Errorf("unknown language %s", str)
 }
 
-func genLangFromString(str string) genLang {
-	switch str {
-	case "go":
-		return genLangGo
-	case "java":
-		return genLangJava
-	case "js":
-		return genLangJavascript
-	}
-	panic(fmt.Errorf("Unknown language %s", str))
-}
-
-type genLangs map[genLang]bool
+type genLangs []genLang
 
 func (gls genLangs) String() string {
-	ret := "["
-	for gl, _ := range gls {
-		if ret != "[" {
-			ret += ", "
+	var ret string
+	for i, gl := range gls {
+		if i > 0 {
+			ret += ","
 		}
 		ret += gl.String()
 	}
-	ret += "]"
 	return ret
 }
 
-func (gls genLangs) Set(value string) error {
-	// We allow this flag to be repeated on the cmdline.
+func (gls *genLangs) Set(value string) error {
+	// If the flag is repeated on the cmdline it is overridden.  Duplicates within
+	// the comma separated list are ignored, and retain their original ordering.
+	*gls = genLangs{}
+	seen := make(map[genLang]bool)
 	for _, str := range strings.Split(value, ",") {
-		gls[genLangFromString(str)] = true
+		gl, err := genLangFromString(str)
+		if err != nil {
+			return err
+		}
+		if !seen[gl] {
+			seen[gl] = true
+			*gls = append(*gls, gl)
+		}
 	}
 	return nil
 }
@@ -219,7 +216,7 @@ var (
 	optGenJavaOutDir       = genOutDir{src: "go/src", dst: "java/src/main/java"}
 	optGenJavascriptOutDir = genOutDir{src: "go/src", dst: "javascript/src"}
 	optGenJavaPkgPrefix    string
-	optGenLangs            = genLangs{genLangGo: true}
+	optGenLangs            = genLangs{genLangGo, genLangJava} // TODO: javascript
 )
 
 // Root returns the root command for the VDL tool.
@@ -244,14 +241,7 @@ for managing Go source code.
 	cmdCompile.Flags.BoolVar(&optCompileStatus, "status", true, "Show package names while we compile")
 
 	// Options for generate.
-	var allLangs string
-	for lx := 0; lx < int(numGenLang); lx++ {
-		if lx > 0 {
-			allLangs += ", "
-		}
-		allLangs += `"` + genLang(lx).String() + `"`
-	}
-	cmdGen.Flags.Var(&optGenLangs, "lang", "Comma-separated list of languages to generate, currently supporting "+allLangs)
+	cmdGen.Flags.Var(&optGenLangs, "lang", "Comma-separated list of languages to generate, currently supporting "+genLangAll.String())
 	cmdGen.Flags.BoolVar(&optGenGoFmt, "go_fmt", true, "Format generated Go code")
 	cmdGen.Flags.BoolVar(&optGenStatus, "status", true, "Show package names while we compile")
 	cmdGen.Flags.StringVar(&optGenJavaPkgPrefix, "java_pkg_prefix", "com",
@@ -302,7 +292,7 @@ func runGen(targets []*build.Package, env *compile.Env) {
 		// TODO(toddw): Skip code generation if the semantic contents of the
 		// generated file haven't changed.
 		changed := false
-		for gl, _ := range optGenLangs {
+		for _, gl := range optGenLangs {
 			switch gl {
 			case genLangGo:
 				dir, err := xlateOutDir(target, optGenGoOutDir, "")
