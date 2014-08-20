@@ -3,6 +3,11 @@
 
 package security
 
+import (
+	// The non-user imports are prefixed with "_gen_" to prevent collisions.
+	_gen_vdlutil "veyron2/vdl/vdlutil"
+)
+
 // PrincipalPattern is a pattern identifying a set of principal names.
 // A PrincipalPattern can be:
 // - a fixed name pattern of the form p1/.../pk
@@ -93,6 +98,25 @@ type Signature struct {
 	// R, S specify the pair of integers that make up an ECDSA signature.
 	R []byte
 	S []byte
+}
+
+// DischargeImpetus encapsulates the motivation for a discharge being sought.
+//
+// These values are reported by the holder of a PublicID with ThirdPartyCaveats when
+// requesting a ThirdPartyDischarge. The third-party issuing discharges thus cannot safely
+// assume that all values are provided, or that they are provided honestly.
+//
+// Implementations of services that issue discharges are encouraged to add caveats to the
+// discharge that bind the discharge to the impetus, thereby rendering the discharge unsuable
+// for any other purpose.
+type DischargeImpetus struct {
+	// Identity (security.PublicID) of the server on which the method is to be invoked.
+	// TODO(ashankar): Replace vdlutil.Any here with the appropriate VDL representation of identities.
+	Server _gen_vdlutil.Any
+	// Name of the method being invoked which led to the request for a discharge.
+	Method string
+	// Arguments to the method invocation which led to the request for a discharge.
+	Arguments []_gen_vdlutil.Any
 }
 
 const (

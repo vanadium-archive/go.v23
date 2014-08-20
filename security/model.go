@@ -154,8 +154,20 @@ type ThirdPartyCaveat interface {
 	// ID returns a cryptographically unique identity for the caveat.
 	ID() ThirdPartyCaveatID
 
+	// TODO(andreser, ashankar): require the discarger to have a specific
+	// identity so that the private information below is not exposed to
+	// anybody who can accept an ipc call.
+	// TODO(andreser, ashankar): provide a mechanism for validating blessings
+	// before adding them to the blessingstore so that blessers cannot track
+	// all activity of a blessee without the knowledge and consent of a
+	// blessee.
+
 	// Location returns a global Object name for the discharging third-party.
 	Location() string
+
+	// Requirements specifies what information is required by the discharger in
+	// order to issue a discharge for this caveat.
+	Requirements() ThirdPartyRequirements
 }
 
 // ThirdPartyDischarge is the interface for discharges for third-party restrictions on PublicIDs.
@@ -169,6 +181,24 @@ type ThirdPartyDischarge interface {
 	// discharge. The returned restrictions are wrapped in ServiceCaveats according to the
 	// services they are bound to.
 	ThirdPartyCaveats() []ServiceCaveat
+}
+
+// ThirdPartyRequirements specifies the information required by the
+// third-party that will issue ThirdPartyDischarges.
+//
+// Based on these requirements, a DischargeMotivation should be provided
+// when requesting a ThirdPartyDischarge.
+//
+// Holders of a PublicID can inspect these requirements on all the ThirdPartyCaveats
+// on the PublicID and can decide against using the PublicID, since these requirements
+// provide information to the third-party that the holder may not be willing to share.
+type ThirdPartyRequirements struct {
+	// The identity of the destination server of an ipc call.
+	ReportServer bool
+	// The name of the method being invoked.
+	ReportMethod bool
+	// Arguments to the method being invoked.
+	ReportArguments bool
 }
 
 // CaveatDischargeMap is map from third-party caveat identities to the corresponding
