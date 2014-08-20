@@ -18,6 +18,13 @@ type Request struct {
 	NumPosArgs uint64
 	// EndStreamArgs is true iff no more streaming arguments will be sent.  No
 	// more data will be sent on the request stream.
+	//
+	// NOTE(bprosnitz): We can support multiple stream values per request (+response) header
+	// efficiently by adding a NumExtraStreamArgs (+NumExtraStreamResults to response) field
+	// that is the uint64 (number of stream args to send) - 1. The request is then zero when
+	// exactly one streaming arg is sent. Since the request and response headers are small,
+	// this is only likely necessary for frequently streaming small values.
+	// See implementation in CL: 3913
 	EndStreamArgs bool
 	// Timeout is the duration after which the request should be cancelled.  This
 	// is a hint to the server, to avoid wasted work.
