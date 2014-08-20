@@ -69,6 +69,17 @@ type MountEntry struct {
 	Error error
 }
 
+// CacheCtl is a cache control for the resolution cache.
+type CacheCtl interface {
+	CacheCtl()
+}
+
+// DisbleCache disables the resolution cache when set to true and enables if false.
+// As a side effect one can flush the cache by disabling and then reenabling it.
+type DisableCache bool
+
+func (DisableCache) CacheCtl() {}
+
 // Namespace provides translation from object names to server object addresses.
 // It represents the interface to a client side library for the MountTable
 // service
@@ -92,6 +103,9 @@ type Namespace interface {
 	// FlushCacheEntry flushes resolution information cached for the name.  If
 	// anything was flushed it returns true.
 	FlushCacheEntry(name string) bool
+
+	// CacheCtl sets controls and returns the current control values.
+	CacheCtl(ctls ...CacheCtl) []CacheCtl
 
 	// TODO(caprita): consider adding a version of Unresolve to the
 	// IDL-generated stub (in addition to UnresolveStep).
