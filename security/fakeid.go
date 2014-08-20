@@ -19,7 +19,7 @@ import (
 func fakeName(name string) string {
 	const prefix = "fake"
 	if len(name) == 0 {
-		return prefix
+		return ""
 	}
 	return prefix + ChainSeparator + name
 }
@@ -36,7 +36,13 @@ func fakeName(name string) string {
 //     private key, which is present in this very source file.
 type fakeID string
 
-func (id fakeID) Names() []string                             { return []string{string(id)} }
+func (id fakeID) Names() []string {
+	if len(id) == 0 {
+		return []string{}
+	}
+	return []string{string(id)}
+}
+
 func (fakeID) PublicKey() *ecdsa.PublicKey                    { return &fakeKey.PublicKey }
 func (id fakeID) Authorize(context Context) (PublicID, error) { return id, nil }
 func (fakeID) ThirdPartyCaveats() []ServiceCaveat             { return nil }

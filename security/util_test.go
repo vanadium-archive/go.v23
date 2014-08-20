@@ -186,6 +186,8 @@ func TestACLMatches(t *testing.T) {
 	che := chePrivateID.PublicID()
 	dan := danPrivateID.PublicID()
 	eva := evaPrivateID.PublicID()
+	// tests if a nameless publicID can access *
+	nameless := FakePublicID("")
 	annFriend := bless(bob, annPrivateID, "friend")
 
 	aclstring1 := `{
@@ -251,6 +253,7 @@ func TestACLMatches(t *testing.T) {
 			{bob, WriteLabel, true},
 		},
 		aclstring3: {
+			{nameless, ReadLabel, true},
 			{ann, ReadLabel, true},
 			{ann, WriteLabel, false},
 			{annFriend, ReadLabel, true},
