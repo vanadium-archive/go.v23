@@ -232,7 +232,13 @@ func Matches(pid PublicID, pattern PrincipalPattern) bool {
 
 // Matches tests whether the principal has the desired access.
 func (acl ACL) Matches(pid PublicID, label Label) bool {
-	for _, name := range pid.Names() {
+	// Created list of size one when pidNames is empty to allow access into the loop.
+	// Otherwise, nameless pids will not be able to access an AllPrincipals ACL.
+	pidNames := pid.Names()
+	if len(pidNames) == 0 {
+		pidNames = make([]string, 1)
+	}
+	for _, name := range pidNames {
 		// TODO(m3b,tilaks): consult group ACLs.
 		in := false
 		for pattern, labels := range acl.In.Principals {
