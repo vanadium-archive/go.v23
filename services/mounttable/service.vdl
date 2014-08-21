@@ -1,30 +1,14 @@
 // Package mounttable defines a set of mount points and how to traverse them.
 package mounttable
 
-import "veyron2/security"
-
-// MountedServer represents a server mounted on a specific name.
-type MountedServer struct {
-	// Server is the OA that's mounted.
-	Server string
-	// TTL is the remaining time (in seconds) before the mount entry expires.
-	TTL uint32
-}
-
-// MountEntry represents a given name mounted in the mounttable.
-type MountEntry struct {
-	// Name is the mounted name.
-	Name    string
-	// Servers (if present) specifies the mounted names.
-	Servers []MountedServer
-}
-
-// MountedServer and MountEntry are duplicated in the internals of the runtime
-// implementation and any changes made to them here should be reflected there.
+import (
+	"veyron2/security"
+	"veyron2/services/mounttable/types"
+)
 
 type Globbable interface {
 	// Glob returns all matching entries at the given server.
-	Glob(pattern string) stream<_, MountEntry> error {security.ReadLabel}
+	Glob(pattern string) stream<_, types.MountEntry> error {security.ReadLabel}
 }
 
 // MountTable defines the interface to talk to a mounttable.
@@ -53,7 +37,7 @@ type MountTable interface {
 
 	// ResolveStep takes the next step in resolving a name.  Returns the next
 	// servers to query and the suffix at those servers.
-	ResolveStep() (Servers []MountedServer, Suffix string, Error error) {security.ReadLabel}
+	ResolveStep() (Servers []types.MountedServer, Suffix string, Error error) {security.ReadLabel}
 
 	Globbable
 }

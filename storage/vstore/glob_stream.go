@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"veyron2/services/mounttable"
+	"veyron2/services/mounttable/types"
 	"veyron2/storage"
 )
 
@@ -22,7 +23,7 @@ type globStream struct {
 	// mu protects all fields below.
 	mu sync.Mutex
 	// curr is the result that should be returned by Value().
-	curr *mounttable.MountEntry
+	curr *types.MountEntry
 	// err is the first error encountered from stream.  It may also be populated
 	// by a call to Cancel.
 	err error

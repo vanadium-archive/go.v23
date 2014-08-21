@@ -7,6 +7,8 @@ package mounttable
 import (
 	"veyron2/security"
 
+	"veyron2/services/mounttable/types"
+
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
 	_gen_io "io"
 	_gen_context "veyron2/context"
@@ -16,22 +18,6 @@ import (
 	_gen_vdlutil "veyron2/vdl/vdlutil"
 	_gen_wiretype "veyron2/wiretype"
 )
-
-// MountedServer represents a server mounted on a specific name.
-type MountedServer struct {
-	// Server is the OA that's mounted.
-	Server string
-	// TTL is the remaining time (in seconds) before the mount entry expires.
-	TTL uint32
-}
-
-// MountEntry represents a given name mounted in the mounttable.
-type MountEntry struct {
-	// Name is the mounted name.
-	Name string
-	// Servers (if present) specifies the mounted names.
-	Servers []MountedServer
-}
 
 // TODO(bprosnitz) Remove this line once signatures are updated to use typevals.
 // It corrects a bug where _gen_wiretype is unused in VDL pacakges where only bootstrap types are used on interfaces.
@@ -71,7 +57,7 @@ type GlobbableGlobCall interface {
 		// Value returns the element that was staged by Advance.
 		// Value may panic if Advance returned false or was not
 		// called at all.  Value does not block.
-		Value() MountEntry
+		Value() types.MountEntry
 
 		// Err returns a non-nil error iff the stream encountered
 		// any errors.  Err does not block.
@@ -99,17 +85,17 @@ type GlobbableGlobCall interface {
 
 type implGlobbableGlobStreamIterator struct {
 	clientCall _gen_ipc.Call
-	val        MountEntry
+	val        types.MountEntry
 	err        error
 }
 
 func (c *implGlobbableGlobStreamIterator) Advance() bool {
-	c.val = MountEntry{}
+	c.val = types.MountEntry{}
 	c.err = c.clientCall.Recv(&c.val)
 	return c.err == nil
 }
 
-func (c *implGlobbableGlobStreamIterator) Value() MountEntry {
+func (c *implGlobbableGlobStreamIterator) Value() types.MountEntry {
 	return c.val
 }
 
@@ -128,7 +114,7 @@ type implGlobbableGlobCall struct {
 
 func (c *implGlobbableGlobCall) RecvStream() interface {
 	Advance() bool
-	Value() MountEntry
+	Value() types.MountEntry
 	Err() error
 } {
 	return &c.readStream
@@ -149,7 +135,7 @@ type implGlobbableServiceGlobStreamSender struct {
 	serverCall _gen_ipc.ServerCall
 }
 
-func (s *implGlobbableServiceGlobStreamSender) Send(item MountEntry) error {
+func (s *implGlobbableServiceGlobStreamSender) Send(item types.MountEntry) error {
 	return s.serverCall.Send(item)
 }
 
@@ -160,7 +146,7 @@ type GlobbableServiceGlobStream interface {
 	SendStream() interface {
 		// Send places the item onto the output stream, blocking if there is no buffer
 		// space available.  If the client has canceled, an error is returned.
-		Send(item MountEntry) error
+		Send(item types.MountEntry) error
 	}
 }
 
@@ -172,7 +158,7 @@ type implGlobbableServiceGlobStream struct {
 func (s *implGlobbableServiceGlobStream) SendStream() interface {
 	// Send places the item onto the output stream, blocking if there is no buffer
 	// space available.  If the client has canceled, an error is returned.
-	Send(item MountEntry) error
+	Send(item types.MountEntry) error
 } {
 	return &s.writer
 }
@@ -298,13 +284,13 @@ func (__gen_s *ServerStubGlobbable) Signature(call _gen_ipc.ServerCall) (_gen_ip
 				_gen_wiretype.FieldType{Type: 0x3, Name: "Server"},
 				_gen_wiretype.FieldType{Type: 0x34, Name: "TTL"},
 			},
-			"veyron2/services/mounttable.MountedServer", []string(nil)},
+			"veyron2/services/mounttable/types.MountedServer", []string(nil)},
 		_gen_wiretype.SliceType{Elem: 0x42, Name: "", Tags: []string(nil)}, _gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
 				_gen_wiretype.FieldType{Type: 0x3, Name: "Name"},
 				_gen_wiretype.FieldType{Type: 0x43, Name: "Servers"},
 			},
-			"veyron2/services/mounttable.MountEntry", []string(nil)},
+			"veyron2/services/mounttable/types.MountEntry", []string(nil)},
 	}
 
 	return result, nil
@@ -357,7 +343,7 @@ type MountTable_ExcludingUniversal interface {
 	Unmount(ctx _gen_context.T, Server string, opts ..._gen_ipc.CallOpt) (err error)
 	// ResolveStep takes the next step in resolving a name.  Returns the next
 	// servers to query and the suffix at those servers.
-	ResolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (Servers []MountedServer, Suffix string, err error)
+	ResolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (Servers []types.MountedServer, Suffix string, err error)
 }
 type MountTable interface {
 	_gen_ipc.UniversalServiceMethods
@@ -384,7 +370,7 @@ type MountTableService interface {
 	Unmount(context _gen_ipc.ServerContext, Server string) (err error)
 	// ResolveStep takes the next step in resolving a name.  Returns the next
 	// servers to query and the suffix at those servers.
-	ResolveStep(context _gen_ipc.ServerContext) (Servers []MountedServer, Suffix string, err error)
+	ResolveStep(context _gen_ipc.ServerContext) (Servers []types.MountedServer, Suffix string, err error)
 }
 
 // BindMountTable returns the client stub implementing the MountTable
@@ -454,7 +440,7 @@ func (__gen_c *clientStubMountTable) Unmount(ctx _gen_context.T, Server string, 
 	return
 }
 
-func (__gen_c *clientStubMountTable) ResolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (Servers []MountedServer, Suffix string, err error) {
+func (__gen_c *clientStubMountTable) ResolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (Servers []types.MountedServer, Suffix string, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "ResolveStep", nil, opts...); err != nil {
 		return
@@ -560,7 +546,7 @@ func (__gen_s *ServerStubMountTable) Signature(call _gen_ipc.ServerCall) (_gen_i
 				_gen_wiretype.FieldType{Type: 0x3, Name: "Server"},
 				_gen_wiretype.FieldType{Type: 0x34, Name: "TTL"},
 			},
-			"veyron2/services/mounttable.MountedServer", []string(nil)},
+			"veyron2/services/mounttable/types.MountedServer", []string(nil)},
 		_gen_wiretype.SliceType{Elem: 0x42, Name: "", Tags: []string(nil)}}
 	var ss _gen_ipc.ServiceSignature
 	var firstAdded int
@@ -649,7 +635,7 @@ func (__gen_s *ServerStubMountTable) Unmount(call _gen_ipc.ServerCall, Server st
 	return
 }
 
-func (__gen_s *ServerStubMountTable) ResolveStep(call _gen_ipc.ServerCall) (Servers []MountedServer, Suffix string, err error) {
+func (__gen_s *ServerStubMountTable) ResolveStep(call _gen_ipc.ServerCall) (Servers []types.MountedServer, Suffix string, err error) {
 	Servers, Suffix, err = __gen_s.service.ResolveStep(call)
 	return
 }
