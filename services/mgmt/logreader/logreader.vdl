@@ -1,13 +1,7 @@
 // Package logreader contains the interface for reading log files remotely.
 package logreader
 
-// LogLine is a log entry from a log file.
-type LogEntry struct {
-	// The offset (in bytes) where this entry starts.
-	Position int64
-	// The content of the log entry.
-	Line string
-}
+import "veyron2/services/mgmt/logreader/types"
 
 // LogFile can be used to access log files remotely.
 type LogFile interface {
@@ -26,12 +20,5 @@ type LogFile interface {
 	//
 	// The returned error will be EOF if and only if ReadLog reached the
 	// end of the file and no log entries were returned.
-	ReadLog(StartPos int64, NumEntries int32, Follow bool) stream<_, LogEntry> (int64, error)
+	ReadLog(StartPos int64, NumEntries int32, Follow bool) stream<_, types.LogEntry> (int64, error)
 }
-
-// A special NumEntries value that indicates that all entries should be
-// returned by ReadLog.
-const AllEntries = int32(-1)
-
-// This error indicates that the end of the file was reached.
-errorid EOF

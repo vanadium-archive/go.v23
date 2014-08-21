@@ -5,6 +5,8 @@
 package logreader
 
 import (
+	"veyron2/services/mgmt/logreader/types"
+
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
 	_gen_io "io"
 	_gen_context "veyron2/context"
@@ -12,30 +14,12 @@ import (
 	_gen_naming "veyron2/naming"
 	_gen_rt "veyron2/rt"
 	_gen_vdlutil "veyron2/vdl/vdlutil"
-	_gen_verror "veyron2/verror"
 	_gen_wiretype "veyron2/wiretype"
-)
-
-// LogLine is a log entry from a log file.
-type LogEntry struct {
-	// The offset (in bytes) where this entry starts.
-	Position int64
-	// The content of the log entry.
-	Line string
-}
-
-const (
-	// A special NumEntries value that indicates that all entries should be
-	// returned by ReadLog.
-	AllEntries = int32(-1)
 )
 
 // TODO(bprosnitz) Remove this line once signatures are updated to use typevals.
 // It corrects a bug where _gen_wiretype is unused in VDL pacakges where only bootstrap types are used on interfaces.
 const _ = _gen_wiretype.TypeIDInvalid
-
-// This error indicates that the end of the file was reached.
-const EOF = _gen_verror.ID("veyron2/services/mgmt/logreader.EOF")
 
 // LogFile can be used to access log files remotely.
 // LogFile is the interface the client binds and uses.
@@ -100,7 +84,7 @@ type LogFileReadLogCall interface {
 		// Value returns the element that was staged by Advance.
 		// Value may panic if Advance returned false or was not
 		// called at all.  Value does not block.
-		Value() LogEntry
+		Value() types.LogEntry
 
 		// Err returns a non-nil error iff the stream encountered
 		// any errors.  Err does not block.
@@ -128,17 +112,17 @@ type LogFileReadLogCall interface {
 
 type implLogFileReadLogStreamIterator struct {
 	clientCall _gen_ipc.Call
-	val        LogEntry
+	val        types.LogEntry
 	err        error
 }
 
 func (c *implLogFileReadLogStreamIterator) Advance() bool {
-	c.val = LogEntry{}
+	c.val = types.LogEntry{}
 	c.err = c.clientCall.Recv(&c.val)
 	return c.err == nil
 }
 
-func (c *implLogFileReadLogStreamIterator) Value() LogEntry {
+func (c *implLogFileReadLogStreamIterator) Value() types.LogEntry {
 	return c.val
 }
 
@@ -157,7 +141,7 @@ type implLogFileReadLogCall struct {
 
 func (c *implLogFileReadLogCall) RecvStream() interface {
 	Advance() bool
-	Value() LogEntry
+	Value() types.LogEntry
 	Err() error
 } {
 	return &c.readStream
@@ -178,7 +162,7 @@ type implLogFileServiceReadLogStreamSender struct {
 	serverCall _gen_ipc.ServerCall
 }
 
-func (s *implLogFileServiceReadLogStreamSender) Send(item LogEntry) error {
+func (s *implLogFileServiceReadLogStreamSender) Send(item types.LogEntry) error {
 	return s.serverCall.Send(item)
 }
 
@@ -189,7 +173,7 @@ type LogFileServiceReadLogStream interface {
 	SendStream() interface {
 		// Send places the item onto the output stream, blocking if there is no buffer
 		// space available.  If the client has canceled, an error is returned.
-		Send(item LogEntry) error
+		Send(item types.LogEntry) error
 	}
 }
 
@@ -201,7 +185,7 @@ type implLogFileServiceReadLogStream struct {
 func (s *implLogFileServiceReadLogStream) SendStream() interface {
 	// Send places the item onto the output stream, blocking if there is no buffer
 	// space available.  If the client has canceled, an error is returned.
-	Send(item LogEntry) error
+	Send(item types.LogEntry) error
 } {
 	return &s.writer
 }
@@ -350,7 +334,7 @@ func (__gen_s *ServerStubLogFile) Signature(call _gen_ipc.ServerCall) (_gen_ipc.
 				_gen_wiretype.FieldType{Type: 0x25, Name: "Position"},
 				_gen_wiretype.FieldType{Type: 0x3, Name: "Line"},
 			},
-			"veyron2/services/mgmt/logreader.LogEntry", []string(nil)},
+			"veyron2/services/mgmt/logreader/types.LogEntry", []string(nil)},
 	}
 
 	return result, nil
