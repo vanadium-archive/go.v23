@@ -1,0 +1,21 @@
+// Package types defines the types used by the mounttable interface.
+package types
+
+// MountedServer represents a server mounted on a specific name.
+type MountedServer struct {
+	// Server is the OA that's mounted.
+	Server string
+	// TTL is the remaining time (in seconds) before the mount entry expires.
+	TTL uint32
+}
+
+// MountEntry represents a given name mounted in the mounttable.
+type MountEntry struct {
+	// Name is the mounted name.
+	Name    string
+	// Servers (if present) specifies the mounted names.
+	Servers []MountedServer
+}
+
+// MountedServer and MountEntry are duplicated in the internals of the runtime
+// implementation and any changes made to them here should be reflected there.
