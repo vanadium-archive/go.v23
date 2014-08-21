@@ -8,6 +8,7 @@ import (
 	"veyron2/query"
 	"veyron2/services/store"
 	"veyron2/services/watch"
+	"veyron2/services/watch/types"
 	"veyron2/storage"
 )
 
@@ -21,7 +22,7 @@ var (
 
 	nullEntry       storage.Entry
 	nullStat        storage.Stat
-	nullChangeBatch watch.ChangeBatch
+	nullChangeBatch types.ChangeBatch
 )
 
 // object implements the store.Object interface.  It is just a thin
@@ -88,12 +89,12 @@ func (o *object) Glob(ctx context.T, pattern string) storage.GlobCall {
 }
 
 // WatchGlob implements the storage.Object method.
-func (o *object) WatchGlob(ctx context.T, req watch.GlobRequest) (watch.GlobWatcherWatchGlobCall, error) {
+func (o *object) WatchGlob(ctx context.T, req types.GlobRequest) (watch.GlobWatcherWatchGlobCall, error) {
 	return o.serv.WatchGlob(ctx, req)
 }
 
 // WatchQuery implements the storage.Object method.
-func (o *object) WatchQuery(ctx context.T, req watch.QueryRequest) (watch.QueryWatcherWatchQueryCall, error) {
+func (o *object) WatchQuery(ctx context.T, req types.QueryRequest) (watch.QueryWatcherWatchQueryCall, error) {
 	return o.serv.WatchQuery(ctx, req)
 }
 
@@ -138,11 +139,11 @@ func (o *errorObject) Glob(ctx context.T, pattern string) storage.GlobCall {
 	return &errorGlobStream{o.err}
 }
 
-func (o *errorObject) WatchGlob(ctx context.T, req watch.GlobRequest) (watch.GlobWatcherWatchGlobCall, error) {
+func (o *errorObject) WatchGlob(ctx context.T, req types.GlobRequest) (watch.GlobWatcherWatchGlobCall, error) {
 	return nil, o.err
 }
 
-func (o *errorObject) WatchQuery(ctx context.T, req watch.QueryRequest) (watch.QueryWatcherWatchQueryCall, error) {
+func (o *errorObject) WatchQuery(ctx context.T, req types.QueryRequest) (watch.QueryWatcherWatchQueryCall, error) {
 	return nil, o.err
 }
 

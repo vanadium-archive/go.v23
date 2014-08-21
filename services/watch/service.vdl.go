@@ -111,7 +111,7 @@
 package watch
 
 import (
-	"veyron2/query"
+	"veyron2/services/watch/types"
 
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
 	_gen_io "io"
@@ -121,102 +121,6 @@ import (
 	_gen_rt "veyron2/rt"
 	_gen_vdlutil "veyron2/vdl/vdlutil"
 	_gen_wiretype "veyron2/wiretype"
-)
-
-// GlobRequest specifies which entities should be watched and, optionally,
-// how to resume from a previous Watch call.
-type GlobRequest struct {
-	// Pattern specifies the subset of the children of the root entity
-	// for which the client wants updates.
-	Pattern string
-	// ResumeMarker specifies how to resume from a previous Watch call.
-	// See the ResumeMarker type for detailed comments.
-	ResumeMarker ResumeMarker
-}
-
-// QueryRequest specifies which entities should be watched and, optionally,
-// how to resume from a previous Watch call.
-type QueryRequest struct {
-	// Query specifies the subset of the children of the root entity
-	// for which the client wants updates.
-	Query query.Query
-	// ResumeMarker specifies how to resume from a previous Watch call.
-	// See the ResumeMarker type for detailed comments.
-	ResumeMarker ResumeMarker
-}
-
-// ResumeMarker specifies how much of the existing underlying state
-// is delivered to the client when the watch request is received by
-// the system. The client can set this marker in one of the
-// following ways to get different semantics:
-//
-// (A) Parameter is left empty.
-//     Semantics: Fetch initial state.
-//     The client wants the entities' initial states to be delivered.
-//     See the description in "Initial State".
-//
-// (B) Parameter is set to the string "now" (UTF-8 encoding).
-//     Semantics: Fetch new changes only.
-//     The client just wants to get the changes received by the
-//     system after the watch point. The system may deliver changes
-//     from before the watch point as well.
-//
-// (C) Parameter is set to a value received in an earlier
-//     Change.ResumeMarker field while watching the same entity with
-//     the same query.
-//     Semantics: Resume from a specific point.
-//     The client wants to receive the changes from a specific point
-//     - this value must correspond to a value received in the
-//     Change.ResumeMarker field. The system may deliver changes
-//     from before the ResumeMarker as well.  If the system cannot
-//     resume the stream from this point (e.g., if it is too far
-//     behind in the stream), it can return the
-//     ErrUnknownResumeMarker error.
-//     ResumeMarkers are received in lexicographical order.
-//
-// An implementation MUST support the empty string "" marker
-// (initial state fetching) and the "now" marker. It need not
-// support resuming from a specific point.
-type ResumeMarker []byte
-
-// ChangeBatch is a batch of Change messages.
-type ChangeBatch struct {
-	Changes []Change
-}
-
-// Change is the new value for a watched entity.
-type Change struct {
-	// Name is the Object name of the entity that changed.  This name is relative
-	// to the root entity (i.e. the name of the Watcher service).
-	Name string
-	// State must be one of Exists, DoesNotExist, or InitialStateSkipped.
-	State int32
-	// Value contains the service-specific data for the entity.
-	Value _gen_vdlutil.Any
-	// If present, provides a compact representation of all the messages
-	// that have been received by the caller for the given Watch call.
-	// For example, it could be a sequence number or a multi-part
-	// timestamp/version vector. This marker can be provided in the
-	// Request message to allow the caller to resume the stream watching
-	// at a specific point without fetching the initial state.
-	ResumeMarker ResumeMarker
-	// If true, this Change is followed by more Changes that are in the
-	// same group as this Change.
-	Continued bool
-}
-
-const (
-	// The entity exists and its full value is included in Value.
-	Exists = int32(0)
-
-	// The entity does not exist.
-	DoesNotExist = int32(1)
-
-	// The root entity and its children may or may not exist. Used only
-	// for initial state delivery when the client is not interested in
-	// fetching the initial state. See the "Initial State" section
-	// above.
-	InitialStateSkipped = int32(2)
 )
 
 // TODO(bprosnitz) Remove this line once signatures are updated to use typevals.
@@ -230,7 +134,7 @@ const _ = _gen_wiretype.TypeIDInvalid
 // to enable embedding without method collisions.  Not to be used directly by clients.
 type GlobWatcher_ExcludingUniversal interface {
 	// WatchGlob returns a stream of changes that match a pattern.
-	WatchGlob(ctx _gen_context.T, Req GlobRequest, opts ..._gen_ipc.CallOpt) (reply GlobWatcherWatchGlobCall, err error)
+	WatchGlob(ctx _gen_context.T, Req types.GlobRequest, opts ..._gen_ipc.CallOpt) (reply GlobWatcherWatchGlobCall, err error)
 }
 type GlobWatcher interface {
 	_gen_ipc.UniversalServiceMethods
@@ -241,7 +145,7 @@ type GlobWatcher interface {
 type GlobWatcherService interface {
 
 	// WatchGlob returns a stream of changes that match a pattern.
-	WatchGlob(context _gen_ipc.ServerContext, Req GlobRequest, stream GlobWatcherServiceWatchGlobStream) (err error)
+	WatchGlob(context _gen_ipc.ServerContext, Req types.GlobRequest, stream GlobWatcherServiceWatchGlobStream) (err error)
 }
 
 // GlobWatcherWatchGlobCall is the interface for call object of the method
@@ -259,7 +163,7 @@ type GlobWatcherWatchGlobCall interface {
 		// Value returns the element that was staged by Advance.
 		// Value may panic if Advance returned false or was not
 		// called at all.  Value does not block.
-		Value() ChangeBatch
+		Value() types.ChangeBatch
 
 		// Err returns a non-nil error iff the stream encountered
 		// any errors.  Err does not block.
@@ -287,17 +191,17 @@ type GlobWatcherWatchGlobCall interface {
 
 type implGlobWatcherWatchGlobStreamIterator struct {
 	clientCall _gen_ipc.Call
-	val        ChangeBatch
+	val        types.ChangeBatch
 	err        error
 }
 
 func (c *implGlobWatcherWatchGlobStreamIterator) Advance() bool {
-	c.val = ChangeBatch{}
+	c.val = types.ChangeBatch{}
 	c.err = c.clientCall.Recv(&c.val)
 	return c.err == nil
 }
 
-func (c *implGlobWatcherWatchGlobStreamIterator) Value() ChangeBatch {
+func (c *implGlobWatcherWatchGlobStreamIterator) Value() types.ChangeBatch {
 	return c.val
 }
 
@@ -316,7 +220,7 @@ type implGlobWatcherWatchGlobCall struct {
 
 func (c *implGlobWatcherWatchGlobCall) RecvStream() interface {
 	Advance() bool
-	Value() ChangeBatch
+	Value() types.ChangeBatch
 	Err() error
 } {
 	return &c.readStream
@@ -337,7 +241,7 @@ type implGlobWatcherServiceWatchGlobStreamSender struct {
 	serverCall _gen_ipc.ServerCall
 }
 
-func (s *implGlobWatcherServiceWatchGlobStreamSender) Send(item ChangeBatch) error {
+func (s *implGlobWatcherServiceWatchGlobStreamSender) Send(item types.ChangeBatch) error {
 	return s.serverCall.Send(item)
 }
 
@@ -348,7 +252,7 @@ type GlobWatcherServiceWatchGlobStream interface {
 	SendStream() interface {
 		// Send places the item onto the output stream, blocking if there is no buffer
 		// space available.  If the client has canceled, an error is returned.
-		Send(item ChangeBatch) error
+		Send(item types.ChangeBatch) error
 	}
 }
 
@@ -360,7 +264,7 @@ type implGlobWatcherServiceWatchGlobStream struct {
 func (s *implGlobWatcherServiceWatchGlobStream) SendStream() interface {
 	// Send places the item onto the output stream, blocking if there is no buffer
 	// space available.  If the client has canceled, an error is returned.
-	Send(item ChangeBatch) error
+	Send(item types.ChangeBatch) error
 } {
 	return &s.writer
 }
@@ -406,7 +310,7 @@ type clientStubGlobWatcher struct {
 	name   string
 }
 
-func (__gen_c *clientStubGlobWatcher) WatchGlob(ctx _gen_context.T, Req GlobRequest, opts ..._gen_ipc.CallOpt) (reply GlobWatcherWatchGlobCall, err error) {
+func (__gen_c *clientStubGlobWatcher) WatchGlob(ctx _gen_context.T, Req types.GlobRequest, opts ..._gen_ipc.CallOpt) (reply GlobWatcherWatchGlobCall, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "WatchGlob", []interface{}{Req}, opts...); err != nil {
 		return
@@ -481,12 +385,12 @@ func (__gen_s *ServerStubGlobWatcher) Signature(call _gen_ipc.ServerCall) (_gen_
 	}
 
 	result.TypeDefs = []_gen_vdlutil.Any{
-		_gen_wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, _gen_wiretype.SliceType{Elem: 0x41, Name: "veyron2/services/watch.ResumeMarker", Tags: []string(nil)}, _gen_wiretype.StructType{
+		_gen_wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, _gen_wiretype.SliceType{Elem: 0x41, Name: "veyron2/services/watch/types.ResumeMarker", Tags: []string(nil)}, _gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
 				_gen_wiretype.FieldType{Type: 0x3, Name: "Pattern"},
 				_gen_wiretype.FieldType{Type: 0x42, Name: "ResumeMarker"},
 			},
-			"veyron2/services/watch.GlobRequest", []string(nil)},
+			"veyron2/services/watch/types.GlobRequest", []string(nil)},
 		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "anydata", Tags: []string(nil)}, _gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
 				_gen_wiretype.FieldType{Type: 0x3, Name: "Name"},
@@ -495,12 +399,12 @@ func (__gen_s *ServerStubGlobWatcher) Signature(call _gen_ipc.ServerCall) (_gen_
 				_gen_wiretype.FieldType{Type: 0x42, Name: "ResumeMarker"},
 				_gen_wiretype.FieldType{Type: 0x2, Name: "Continued"},
 			},
-			"veyron2/services/watch.Change", []string(nil)},
+			"veyron2/services/watch/types.Change", []string(nil)},
 		_gen_wiretype.SliceType{Elem: 0x46, Name: "", Tags: []string(nil)}, _gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
 				_gen_wiretype.FieldType{Type: 0x47, Name: "Changes"},
 			},
-			"veyron2/services/watch.ChangeBatch", []string(nil)},
+			"veyron2/services/watch/types.ChangeBatch", []string(nil)},
 	}
 
 	return result, nil
@@ -524,7 +428,7 @@ func (__gen_s *ServerStubGlobWatcher) UnresolveStep(call _gen_ipc.ServerCall) (r
 	return
 }
 
-func (__gen_s *ServerStubGlobWatcher) WatchGlob(call _gen_ipc.ServerCall, Req GlobRequest) (err error) {
+func (__gen_s *ServerStubGlobWatcher) WatchGlob(call _gen_ipc.ServerCall, Req types.GlobRequest) (err error) {
 	stream := &implGlobWatcherServiceWatchGlobStream{writer: implGlobWatcherServiceWatchGlobStreamSender{serverCall: call}}
 	err = __gen_s.service.WatchGlob(call, Req, stream)
 	return
@@ -537,7 +441,7 @@ func (__gen_s *ServerStubGlobWatcher) WatchGlob(call _gen_ipc.ServerCall, Req Gl
 // to enable embedding without method collisions.  Not to be used directly by clients.
 type QueryWatcher_ExcludingUniversal interface {
 	// WatchQuery returns a stream of changes that satisy a query.
-	WatchQuery(ctx _gen_context.T, Req QueryRequest, opts ..._gen_ipc.CallOpt) (reply QueryWatcherWatchQueryCall, err error)
+	WatchQuery(ctx _gen_context.T, Req types.QueryRequest, opts ..._gen_ipc.CallOpt) (reply QueryWatcherWatchQueryCall, err error)
 }
 type QueryWatcher interface {
 	_gen_ipc.UniversalServiceMethods
@@ -548,7 +452,7 @@ type QueryWatcher interface {
 type QueryWatcherService interface {
 
 	// WatchQuery returns a stream of changes that satisy a query.
-	WatchQuery(context _gen_ipc.ServerContext, Req QueryRequest, stream QueryWatcherServiceWatchQueryStream) (err error)
+	WatchQuery(context _gen_ipc.ServerContext, Req types.QueryRequest, stream QueryWatcherServiceWatchQueryStream) (err error)
 }
 
 // QueryWatcherWatchQueryCall is the interface for call object of the method
@@ -566,7 +470,7 @@ type QueryWatcherWatchQueryCall interface {
 		// Value returns the element that was staged by Advance.
 		// Value may panic if Advance returned false or was not
 		// called at all.  Value does not block.
-		Value() ChangeBatch
+		Value() types.ChangeBatch
 
 		// Err returns a non-nil error iff the stream encountered
 		// any errors.  Err does not block.
@@ -594,17 +498,17 @@ type QueryWatcherWatchQueryCall interface {
 
 type implQueryWatcherWatchQueryStreamIterator struct {
 	clientCall _gen_ipc.Call
-	val        ChangeBatch
+	val        types.ChangeBatch
 	err        error
 }
 
 func (c *implQueryWatcherWatchQueryStreamIterator) Advance() bool {
-	c.val = ChangeBatch{}
+	c.val = types.ChangeBatch{}
 	c.err = c.clientCall.Recv(&c.val)
 	return c.err == nil
 }
 
-func (c *implQueryWatcherWatchQueryStreamIterator) Value() ChangeBatch {
+func (c *implQueryWatcherWatchQueryStreamIterator) Value() types.ChangeBatch {
 	return c.val
 }
 
@@ -623,7 +527,7 @@ type implQueryWatcherWatchQueryCall struct {
 
 func (c *implQueryWatcherWatchQueryCall) RecvStream() interface {
 	Advance() bool
-	Value() ChangeBatch
+	Value() types.ChangeBatch
 	Err() error
 } {
 	return &c.readStream
@@ -644,7 +548,7 @@ type implQueryWatcherServiceWatchQueryStreamSender struct {
 	serverCall _gen_ipc.ServerCall
 }
 
-func (s *implQueryWatcherServiceWatchQueryStreamSender) Send(item ChangeBatch) error {
+func (s *implQueryWatcherServiceWatchQueryStreamSender) Send(item types.ChangeBatch) error {
 	return s.serverCall.Send(item)
 }
 
@@ -655,7 +559,7 @@ type QueryWatcherServiceWatchQueryStream interface {
 	SendStream() interface {
 		// Send places the item onto the output stream, blocking if there is no buffer
 		// space available.  If the client has canceled, an error is returned.
-		Send(item ChangeBatch) error
+		Send(item types.ChangeBatch) error
 	}
 }
 
@@ -667,7 +571,7 @@ type implQueryWatcherServiceWatchQueryStream struct {
 func (s *implQueryWatcherServiceWatchQueryStream) SendStream() interface {
 	// Send places the item onto the output stream, blocking if there is no buffer
 	// space available.  If the client has canceled, an error is returned.
-	Send(item ChangeBatch) error
+	Send(item types.ChangeBatch) error
 } {
 	return &s.writer
 }
@@ -713,7 +617,7 @@ type clientStubQueryWatcher struct {
 	name   string
 }
 
-func (__gen_c *clientStubQueryWatcher) WatchQuery(ctx _gen_context.T, Req QueryRequest, opts ..._gen_ipc.CallOpt) (reply QueryWatcherWatchQueryCall, err error) {
+func (__gen_c *clientStubQueryWatcher) WatchQuery(ctx _gen_context.T, Req types.QueryRequest, opts ..._gen_ipc.CallOpt) (reply QueryWatcherWatchQueryCall, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "WatchQuery", []interface{}{Req}, opts...); err != nil {
 		return
@@ -793,12 +697,12 @@ func (__gen_s *ServerStubQueryWatcher) Signature(call _gen_ipc.ServerCall) (_gen
 				_gen_wiretype.FieldType{Type: 0x3, Name: "Stmt"},
 			},
 			"veyron2/query.Query", []string(nil)},
-		_gen_wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, _gen_wiretype.SliceType{Elem: 0x42, Name: "veyron2/services/watch.ResumeMarker", Tags: []string(nil)}, _gen_wiretype.StructType{
+		_gen_wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, _gen_wiretype.SliceType{Elem: 0x42, Name: "veyron2/services/watch/types.ResumeMarker", Tags: []string(nil)}, _gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
 				_gen_wiretype.FieldType{Type: 0x41, Name: "Query"},
 				_gen_wiretype.FieldType{Type: 0x43, Name: "ResumeMarker"},
 			},
-			"veyron2/services/watch.QueryRequest", []string(nil)},
+			"veyron2/services/watch/types.QueryRequest", []string(nil)},
 		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "anydata", Tags: []string(nil)}, _gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
 				_gen_wiretype.FieldType{Type: 0x3, Name: "Name"},
@@ -807,12 +711,12 @@ func (__gen_s *ServerStubQueryWatcher) Signature(call _gen_ipc.ServerCall) (_gen
 				_gen_wiretype.FieldType{Type: 0x43, Name: "ResumeMarker"},
 				_gen_wiretype.FieldType{Type: 0x2, Name: "Continued"},
 			},
-			"veyron2/services/watch.Change", []string(nil)},
+			"veyron2/services/watch/types.Change", []string(nil)},
 		_gen_wiretype.SliceType{Elem: 0x47, Name: "", Tags: []string(nil)}, _gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
 				_gen_wiretype.FieldType{Type: 0x48, Name: "Changes"},
 			},
-			"veyron2/services/watch.ChangeBatch", []string(nil)},
+			"veyron2/services/watch/types.ChangeBatch", []string(nil)},
 	}
 
 	return result, nil
@@ -836,7 +740,7 @@ func (__gen_s *ServerStubQueryWatcher) UnresolveStep(call _gen_ipc.ServerCall) (
 	return
 }
 
-func (__gen_s *ServerStubQueryWatcher) WatchQuery(call _gen_ipc.ServerCall, Req QueryRequest) (err error) {
+func (__gen_s *ServerStubQueryWatcher) WatchQuery(call _gen_ipc.ServerCall, Req types.QueryRequest) (err error) {
 	stream := &implQueryWatcherServiceWatchQueryStream{writer: implQueryWatcherServiceWatchQueryStreamSender{serverCall: call}}
 	err = __gen_s.service.WatchQuery(call, Req, stream)
 	return

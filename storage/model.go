@@ -97,6 +97,7 @@ import (
 	"veyron2/context"
 	"veyron2/query"
 	"veyron2/services/watch"
+	"veyron2/services/watch/types"
 )
 
 // Store is the client interface to the storage system.
@@ -150,7 +151,7 @@ type Transaction interface {
 // into a shared location, such as veyron2/watch.
 type GlobWatcher interface {
 	// WatchGlob returns a stream of changes.
-	WatchGlob(ctx context.T, req watch.GlobRequest) (watch.GlobWatcherWatchGlobCall, error)
+	WatchGlob(ctx context.T, req types.GlobRequest) (watch.GlobWatcherWatchGlobCall, error)
 }
 
 // QueryWatcher allows a client to receive updates for changes to objects
@@ -159,7 +160,7 @@ type GlobWatcher interface {
 // into a shared location, such as veyron2/watch.
 type QueryWatcher interface {
 	// WatchQuery returns a stream of changes.
-	WatchQuery(ctx context.T, req watch.QueryRequest) (watch.QueryWatcherWatchQueryCall, error)
+	WatchQuery(ctx context.T, req types.QueryRequest) (watch.QueryWatcherWatchQueryCall, error)
 }
 
 // Object is the interface for a value in the store.

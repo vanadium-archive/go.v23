@@ -14,7 +14,7 @@ import (
 	"veyron2/query"
 	"veyron2/rt"
 	"veyron2/security"
-	"veyron2/services/watch"
+	"veyron2/services/watch/types"
 	"veyron2/storage"
 	"veyron2/storage/vstore"
 	"veyron2/vom"
@@ -340,7 +340,7 @@ func TestWatchGlob(t *testing.T) {
 	}
 
 	// Watch all objects under the root.
-	req := watch.GlobRequest{Pattern: "..."}
+	req := types.GlobRequest{Pattern: "..."}
 	stream, err := root.WatchGlob(ctx, req)
 	if err != nil {
 		t.Fatalf("Unexpected error: %s", err)
@@ -392,7 +392,7 @@ func TestWatchGlob(t *testing.T) {
 	}
 }
 
-func findEntry(t *testing.T, changes []watch.Change, name string) *storage.Entry {
+func findEntry(t *testing.T, changes []types.Change, name string) *storage.Entry {
 	for _, change := range changes {
 		if change.Name == name {
 			entry, ok := change.Value.(*storage.Entry)
