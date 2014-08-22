@@ -327,7 +327,7 @@ func runGen(targets []*build.Package, env *compile.Env) {
 					env.Errors.Errorf("--js_out_dir error: %v", err)
 					continue
 				}
-				data := javascript.Generate(pkg)
+				data := javascript.Generate(pkg, env)
 				if writeFile(data, dir, pkg.Name+".js", env) {
 					changed = true
 				}
