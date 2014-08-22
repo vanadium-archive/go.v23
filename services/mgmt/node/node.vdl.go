@@ -9,10 +9,10 @@ import (
 	"veyron2/services/mgmt/binary"
 
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
+	_gen_veyron2 "veyron2"
 	_gen_context "veyron2/context"
 	_gen_ipc "veyron2/ipc"
 	_gen_naming "veyron2/naming"
-	_gen_rt "veyron2/rt"
 	_gen_vdlutil "veyron2/vdl/vdlutil"
 	_gen_wiretype "veyron2/wiretype"
 )
@@ -252,18 +252,17 @@ func BindApplication(name string, opts ..._gen_ipc.BindOpt) (Application, error)
 	var client _gen_ipc.Client
 	switch len(opts) {
 	case 0:
-		client = _gen_rt.R().Client()
+		// Do nothing.
 	case 1:
-		switch o := opts[0].(type) {
-		case _gen_ipc.Client:
-			client = o
-		default:
+		if clientOpt, ok := opts[0].(_gen_ipc.Client); opts[0] == nil || ok {
+			client = clientOpt
+		} else {
 			return nil, _gen_vdlutil.ErrUnrecognizedOption
 		}
 	default:
 		return nil, _gen_vdlutil.ErrTooManyOptionsToBind
 	}
-	stub := &clientStubApplication{client: client, name: name}
+	stub := &clientStubApplication{defaultClient: client, name: name}
 
 	return stub, nil
 }
@@ -280,13 +279,20 @@ func NewServerApplication(server ApplicationService) interface{} {
 
 // clientStubApplication implements Application.
 type clientStubApplication struct {
-	client _gen_ipc.Client
-	name   string
+	defaultClient _gen_ipc.Client
+	name          string
+}
+
+func (__gen_c *clientStubApplication) client(ctx _gen_context.T) _gen_ipc.Client {
+	if __gen_c.defaultClient != nil {
+		return __gen_c.defaultClient
+	}
+	return _gen_veyron2.RuntimeFromContext(ctx).Client()
 }
 
 func (__gen_c *clientStubApplication) Install(ctx _gen_context.T, Name string, opts ..._gen_ipc.CallOpt) (reply string, err error) {
 	var call _gen_ipc.Call
-	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Install", []interface{}{Name}, opts...); err != nil {
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Install", []interface{}{Name}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -297,7 +303,7 @@ func (__gen_c *clientStubApplication) Install(ctx _gen_context.T, Name string, o
 
 func (__gen_c *clientStubApplication) Refresh(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error) {
 	var call _gen_ipc.Call
-	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Refresh", nil, opts...); err != nil {
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Refresh", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&err); ierr != nil {
@@ -308,7 +314,7 @@ func (__gen_c *clientStubApplication) Refresh(ctx _gen_context.T, opts ..._gen_i
 
 func (__gen_c *clientStubApplication) Restart(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error) {
 	var call _gen_ipc.Call
-	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Restart", nil, opts...); err != nil {
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Restart", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&err); ierr != nil {
@@ -319,7 +325,7 @@ func (__gen_c *clientStubApplication) Restart(ctx _gen_context.T, opts ..._gen_i
 
 func (__gen_c *clientStubApplication) Resume(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error) {
 	var call _gen_ipc.Call
-	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Resume", nil, opts...); err != nil {
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Resume", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&err); ierr != nil {
@@ -330,7 +336,7 @@ func (__gen_c *clientStubApplication) Resume(ctx _gen_context.T, opts ..._gen_ip
 
 func (__gen_c *clientStubApplication) Revert(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error) {
 	var call _gen_ipc.Call
-	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Revert", nil, opts...); err != nil {
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Revert", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&err); ierr != nil {
@@ -341,7 +347,7 @@ func (__gen_c *clientStubApplication) Revert(ctx _gen_context.T, opts ..._gen_ip
 
 func (__gen_c *clientStubApplication) Start(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
 	var call _gen_ipc.Call
-	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Start", nil, opts...); err != nil {
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Start", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -352,7 +358,7 @@ func (__gen_c *clientStubApplication) Start(ctx _gen_context.T, opts ..._gen_ipc
 
 func (__gen_c *clientStubApplication) Stop(ctx _gen_context.T, Deadline uint32, opts ..._gen_ipc.CallOpt) (err error) {
 	var call _gen_ipc.Call
-	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Stop", []interface{}{Deadline}, opts...); err != nil {
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Stop", []interface{}{Deadline}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&err); ierr != nil {
@@ -363,7 +369,7 @@ func (__gen_c *clientStubApplication) Stop(ctx _gen_context.T, Deadline uint32, 
 
 func (__gen_c *clientStubApplication) Suspend(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error) {
 	var call _gen_ipc.Call
-	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Suspend", nil, opts...); err != nil {
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Suspend", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&err); ierr != nil {
@@ -374,7 +380,7 @@ func (__gen_c *clientStubApplication) Suspend(ctx _gen_context.T, opts ..._gen_i
 
 func (__gen_c *clientStubApplication) Uninstall(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error) {
 	var call _gen_ipc.Call
-	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Uninstall", nil, opts...); err != nil {
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Uninstall", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&err); ierr != nil {
@@ -385,7 +391,7 @@ func (__gen_c *clientStubApplication) Uninstall(ctx _gen_context.T, opts ..._gen
 
 func (__gen_c *clientStubApplication) Update(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error) {
 	var call _gen_ipc.Call
-	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Update", nil, opts...); err != nil {
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Update", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&err); ierr != nil {
@@ -396,7 +402,7 @@ func (__gen_c *clientStubApplication) Update(ctx _gen_context.T, opts ..._gen_ip
 
 func (__gen_c *clientStubApplication) UpdateTo(ctx _gen_context.T, Name string, opts ..._gen_ipc.CallOpt) (err error) {
 	var call _gen_ipc.Call
-	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "UpdateTo", []interface{}{Name}, opts...); err != nil {
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "UpdateTo", []interface{}{Name}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&err); ierr != nil {
@@ -407,7 +413,7 @@ func (__gen_c *clientStubApplication) UpdateTo(ctx _gen_context.T, Name string, 
 
 func (__gen_c *clientStubApplication) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
 	var call _gen_ipc.Call
-	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -418,7 +424,7 @@ func (__gen_c *clientStubApplication) UnresolveStep(ctx _gen_context.T, opts ...
 
 func (__gen_c *clientStubApplication) Signature(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
 	var call _gen_ipc.Call
-	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -429,7 +435,7 @@ func (__gen_c *clientStubApplication) Signature(ctx _gen_context.T, opts ..._gen
 
 func (__gen_c *clientStubApplication) GetMethodTags(ctx _gen_context.T, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
 	var call _gen_ipc.Call
-	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -859,18 +865,17 @@ func BindNode(name string, opts ..._gen_ipc.BindOpt) (Node, error) {
 	var client _gen_ipc.Client
 	switch len(opts) {
 	case 0:
-		client = _gen_rt.R().Client()
+		// Do nothing.
 	case 1:
-		switch o := opts[0].(type) {
-		case _gen_ipc.Client:
-			client = o
-		default:
+		if clientOpt, ok := opts[0].(_gen_ipc.Client); opts[0] == nil || ok {
+			client = clientOpt
+		} else {
 			return nil, _gen_vdlutil.ErrUnrecognizedOption
 		}
 	default:
 		return nil, _gen_vdlutil.ErrTooManyOptionsToBind
 	}
-	stub := &clientStubNode{client: client, name: name}
+	stub := &clientStubNode{defaultClient: client, name: name}
 	stub.Application_ExcludingUniversal, _ = BindApplication(name, client)
 
 	return stub, nil
@@ -891,13 +896,20 @@ func NewServerNode(server NodeService) interface{} {
 type clientStubNode struct {
 	Application_ExcludingUniversal
 
-	client _gen_ipc.Client
-	name   string
+	defaultClient _gen_ipc.Client
+	name          string
+}
+
+func (__gen_c *clientStubNode) client(ctx _gen_context.T) _gen_ipc.Client {
+	if __gen_c.defaultClient != nil {
+		return __gen_c.defaultClient
+	}
+	return _gen_veyron2.RuntimeFromContext(ctx).Client()
 }
 
 func (__gen_c *clientStubNode) Describe(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply Description, err error) {
 	var call _gen_ipc.Call
-	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Describe", nil, opts...); err != nil {
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Describe", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -908,7 +920,7 @@ func (__gen_c *clientStubNode) Describe(ctx _gen_context.T, opts ..._gen_ipc.Cal
 
 func (__gen_c *clientStubNode) IsRunnable(ctx _gen_context.T, Description binary.Description, opts ..._gen_ipc.CallOpt) (reply bool, err error) {
 	var call _gen_ipc.Call
-	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "IsRunnable", []interface{}{Description}, opts...); err != nil {
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "IsRunnable", []interface{}{Description}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -919,7 +931,7 @@ func (__gen_c *clientStubNode) IsRunnable(ctx _gen_context.T, Description binary
 
 func (__gen_c *clientStubNode) Reset(ctx _gen_context.T, Deadline uint64, opts ..._gen_ipc.CallOpt) (err error) {
 	var call _gen_ipc.Call
-	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Reset", []interface{}{Deadline}, opts...); err != nil {
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Reset", []interface{}{Deadline}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&err); ierr != nil {
@@ -930,7 +942,7 @@ func (__gen_c *clientStubNode) Reset(ctx _gen_context.T, Deadline uint64, opts .
 
 func (__gen_c *clientStubNode) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
 	var call _gen_ipc.Call
-	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -941,7 +953,7 @@ func (__gen_c *clientStubNode) UnresolveStep(ctx _gen_context.T, opts ..._gen_ip
 
 func (__gen_c *clientStubNode) Signature(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
 	var call _gen_ipc.Call
-	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -952,7 +964,7 @@ func (__gen_c *clientStubNode) Signature(ctx _gen_context.T, opts ..._gen_ipc.Ca
 
 func (__gen_c *clientStubNode) GetMethodTags(ctx _gen_context.T, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
 	var call _gen_ipc.Call
-	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {

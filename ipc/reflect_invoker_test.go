@@ -35,6 +35,7 @@ func (*FakeServerCall) Deadline() (deadline time.Time, ok bool) {
 func (*FakeServerCall) Done() <-chan struct{}                                  { return nil }
 func (*FakeServerCall) Err() error                                             { return nil }
 func (*FakeServerCall) Value(key interface{}) interface{}                      { return nil }
+func (*FakeServerCall) Runtime() interface{}                                   { return nil }
 func (*FakeServerCall) WithCancel() (ctx context.T, cancel context.CancelFunc) { return nil, nil }
 func (*FakeServerCall) WithDeadline(deadline time.Time) (context.T, context.CancelFunc) {
 	return nil, nil

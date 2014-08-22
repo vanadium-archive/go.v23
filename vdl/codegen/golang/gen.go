@@ -126,7 +126,7 @@ func systemImportsGo(f *compile.File) []string {
 	}
 	if len(f.Interfaces) > 0 {
 		// Imports for the generated method: Bind{interface name}.
-		set[`_gen_rt "veyron2/rt"`] = true
+		set[`_gen_veyron2 "veyron2"`] = true
 		set[`_gen_wiretype "veyron2/wiretype"`] = true
 		set[`_gen_ipc "veyron2/ipc"`] = true
 		set[`_gen_context "veyron2/context"`] = true
@@ -543,7 +543,7 @@ func clientStubImplGo(data goData, iface *compile.Interface, method *compile.Met
 		args += "}"
 	}
 
-	fmt.Fprintf(&buf, "\tif call, err = __gen_c.client.StartCall(ctx, __gen_c.name, %q, %s, opts...); err != nil {\n return \n }\n", method.Name, args)
+	fmt.Fprintf(&buf, "\tif call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, %q, %s, opts...); err != nil {\n return \n }\n", method.Name, args)
 
 	if !isStreamingMethodGo(method) {
 		fmt.Fprintf(&buf,
@@ -1027,18 +1027,17 @@ func Bind{{$iface.Name}}(name string, opts ..._gen_ipc.BindOpt) ({{$iface.Name}}
 	var client _gen_ipc.Client
 	switch len(opts) {
 	case 0:
-		client = _gen_rt.R().Client()
+		// Do nothing.
 	case 1:
-		switch o := opts[0].(type) {
-		case _gen_ipc.Client:
-			client = o
-		default:
+		if clientOpt, ok := opts[0].(_gen_ipc.Client); opts[0] == nil || ok {
+			client = clientOpt
+		} else {
 			return nil, _gen_vdlutil.ErrUnrecognizedOption
 		}
 	default:
 		return nil, _gen_vdlutil.ErrTooManyOptionsToBind
 	}
-	stub := &clientStub{{$iface.Name}}{client: client, name: name}
+	stub := &clientStub{{$iface.Name}}{defaultClient: client, name: name}
 {{range $embed := $iface.Embeds}}	stub.{{$embed.Name}}_ExcludingUniversal, _ = {{prefixName (embedGo $data $embed) "Bind"}}(name, client)
 {{end}}
 	return stub, nil
@@ -1059,8 +1058,15 @@ func NewServer{{$iface.Name}}(server {{$iface.Name}}Service) interface{} {
 type clientStub{{$iface.Name}} struct {
 {{range $embed := $iface.Embeds}}	{{embedGo $data $embed}}_ExcludingUniversal
 {{end}}
-	client _gen_ipc.Client
+	defaultClient _gen_ipc.Client
 	name string
+}
+
+func (__gen_c *clientStub{{$iface.Name}}) client(ctx _gen_context.T) _gen_ipc.Client {
+	if __gen_c.defaultClient != nil {
+		return __gen_c.defaultClient
+	}
+	return _gen_veyron2.RuntimeFromContext(ctx).Client()
 }
 
 {{range $method := $iface.Methods}}
@@ -1071,7 +1077,7 @@ func (__gen_c *clientStub{{$iface.Name}}) {{$method.Name}}({{inArgsWithOptsGo "c
 
 func (__gen_c *clientStub{{$iface.Name}}) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
 	var call _gen_ipc.Call
-	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -1082,7 +1088,7 @@ func (__gen_c *clientStub{{$iface.Name}}) UnresolveStep(ctx _gen_context.T, opts
 
 func (__gen_c *clientStub{{$iface.Name}}) Signature(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
 	var call _gen_ipc.Call
-	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -1093,7 +1099,7 @@ func (__gen_c *clientStub{{$iface.Name}}) Signature(ctx _gen_context.T, opts ...
 
 func (__gen_c *clientStub{{$iface.Name}}) GetMethodTags(ctx _gen_context.T, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
 	var call _gen_ipc.Call
-	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
