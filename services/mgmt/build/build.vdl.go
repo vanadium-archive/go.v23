@@ -35,31 +35,29 @@ type File struct {
 	Contents []byte
 }
 
-const (
-	X86 = Architecture("386")
+const X86 = Architecture("386")
 
-	AMD64 = Architecture("amd64")
+const AMD64 = Architecture("amd64")
 
-	ARM = Architecture("arm")
+const ARM = Architecture("arm")
 
-	UnsupportedArchitecture = Architecture("unsupported")
+const UnsupportedArchitecture = Architecture("unsupported")
 
-	ELF = Format("ELF")
+const ELF = Format("ELF")
 
-	MACH = Format("MACH")
+const MACH = Format("MACH")
 
-	PE = Format("PE")
+const PE = Format("PE")
 
-	UnsupportedFormat = Format("unsupported")
+const UnsupportedFormat = Format("unsupported")
 
-	Darwin = OperatingSystem("darwin")
+const Darwin = OperatingSystem("darwin")
 
-	Linux = OperatingSystem("linux")
+const Linux = OperatingSystem("linux")
 
-	Windows = OperatingSystem("windows")
+const Windows = OperatingSystem("windows")
 
-	UnsupportedOS = OperatingSystem("unsupported")
-)
+const UnsupportedOS = OperatingSystem("unsupported")
 
 // TODO(bprosnitz) Remove this line once signatures are updated to use typevals.
 // It corrects a bug where _gen_wiretype is unused in VDL pacakges where only bootstrap types are used on interfaces.

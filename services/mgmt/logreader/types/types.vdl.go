@@ -17,11 +17,9 @@ type LogEntry struct {
 	Line string
 }
 
-const (
-	// A special NumEntries value that indicates that all entries should be
-	// returned by ReadLog.
-	AllEntries = int32(-1)
-)
+// A special NumEntries value that indicates that all entries should be
+// returned by ReadLog.
+const AllEntries = int32(-1)
 
 // This error indicates that the end of the file was reached.
 const EOF = _gen_verror.ID("veyron2/services/mgmt/logreader/types.EOF")

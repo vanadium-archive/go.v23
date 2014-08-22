@@ -60,10 +60,8 @@ type Response struct {
 	NumPosResults uint64
 }
 
-const (
-	// NoTimeout specifies that no timeout is desired.
-	// NoTimeout is set to the maximum value for int64 (i.e. 2^63-1),
-	// as opposed to 0 (which may be intended as as instant timeout),
-	// or negative integers (which may indicate a bug).
-	NoTimeout = int64(9223372036854775807)
-)
+// NoTimeout specifies that no timeout is desired.
+// NoTimeout is set to the maximum value for int64 (i.e. 2^63-1),
+// as opposed to 0 (which may be intended as as instant timeout),
+// or negative integers (which may indicate a bug).
+const NoTimeout = int64(9223372036854775807)

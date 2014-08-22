@@ -61,6 +61,7 @@ func testConfigFile(t *testing.T, name string, tpkg constPkg, env *compile.Env) 
 func TestConst(t *testing.T) {
 	for _, test := range constTests {
 		env := compile.NewEnv(-1)
+		env.EnableExperimental()
 		for _, tpkg := range test.Pkgs {
 			testConstPackage(t, test.Name, tpkg, env)
 		}
@@ -70,6 +71,7 @@ func TestConst(t *testing.T) {
 func TestConfig(t *testing.T) {
 	for _, test := range constTests {
 		env := compile.NewEnv(-1)
+		env.EnableExperimental()
 		// Compile all but the last tpkg as regular packages.
 		for _, tpkg := range test.Pkgs[:len(test.Pkgs)-1] {
 			testConstPackage(t, test.Name, tpkg, env)
@@ -142,6 +144,11 @@ func makeABStruct() *vdl.Value {
 	return res
 }
 
+func makeEnumXYZ(name, label string) *vdl.Value {
+	t := vdl.NamedType(name, vdl.EnumType("X", "Y", "Z"))
+	return vdl.ZeroValue(t).AssignEnumLabel(label)
+}
+
 type constPkg struct {
 	Name      string
 	Data      string
@@ -187,7 +194,7 @@ var constTests = []struct {
 		cp{{"a", `const Res = []int64{1:1, 2, 0:0}`, makeIntList(0, 1, 2), ""}}},
 	{
 		"IntListDupKey",
-		cp{{"a", `const Res = []int64{2:2, 1:1, 0}`, nil, "duplicate index 2 in list literal"}}},
+		cp{{"a", `const Res = []int64{2:2, 1:1, 0}`, nil, "duplicate index 2"}}},
 	{
 		"IntListInvalidIndex",
 		cp{{"a", `const Res = []int64{"a":2, 1:1, 2:2}`, nil, "invalid index"}}},
@@ -215,6 +222,7 @@ var constTests = []struct {
 	{
 		"InvalidIndexBaseType",
 		cp{{"a", `type A struct{}; const B = A{}; const Res = B["ok"]`, nil, "illegal use of index operator with unsupported type"}}},
+
 	// Test set literals.
 	{
 		"StringSet",
@@ -228,6 +236,7 @@ var constTests = []struct {
 	{
 		"StringSetInvalidKey",
 		cp{{"a", `const Res = set[string]{"a","b",3}`, nil, "invalid set key"}}},
+
 	// Test map literals.
 	{
 		"StringIntMap",
@@ -272,22 +281,22 @@ var constTests = []struct {
 		cp{{"a", `type A struct{X int64;Y string;Z bool}; const Res = A{Y:"b"}`, makeStruct("a.A", 0, "b", false), ""}}},
 	{
 		"StructMixedKeys",
-		cp{{"a", `type A struct{X int64;Y string;Z bool}; const Res = A{X:1,"b",Z:true}`, nil, "mixed key:value and value in a.A struct literal"}}},
+		cp{{"a", `type A struct{X int64;Y string;Z bool}; const Res = A{X:1,"b",Z:true}`, nil, "mixed key:value and value"}}},
 	{
 		"StructInvalidFieldName",
 		cp{{"a", `type A struct{X int64;Y string;Z bool}; const Res = A{1+1:1}`, nil, `invalid field name`}}},
 	{
 		"StructUnknownFieldName",
-		cp{{"a", `type A struct{X int64;Y string;Z bool}; const Res = A{ZZZ:1}`, nil, `unknown field "ZZZ" in a.A struct literal`}}},
+		cp{{"a", `type A struct{X int64;Y string;Z bool}; const Res = A{ZZZ:1}`, nil, `unknown field "ZZZ"`}}},
 	{
 		"StructDupFieldName",
-		cp{{"a", `type A struct{X int64;Y string;Z bool}; const Res = A{X:1,X:2}`, nil, `duplicate field "X" in a.A struct literal`}}},
+		cp{{"a", `type A struct{X int64;Y string;Z bool}; const Res = A{X:1,X:2}`, nil, `duplicate field "X"`}}},
 	{
 		"StructTooManyFields",
-		cp{{"a", `type A struct{X int64;Y string;Z bool}; const Res = A{1,"b",true,4}`, nil, `too many fields in a.A struct literal`}}},
+		cp{{"a", `type A struct{X int64;Y string;Z bool}; const Res = A{1,"b",true,4}`, nil, `too many fields`}}},
 	{
 		"StructTooFewFields",
-		cp{{"a", `type A struct{X int64;Y string;Z bool}; const Res = A{1,"b"}`, nil, `too few fields in a.A struct literal`}}},
+		cp{{"a", `type A struct{X int64;Y string;Z bool}; const Res = A{1,"b"}`, nil, `too few fields`}}},
 	{
 		"StructInvalidField",
 		cp{{"a", `type A struct{X int64;Y string;Z bool}; const Res = A{Y:1}`, nil, "invalid struct field"}}},
@@ -310,6 +319,14 @@ var constTests = []struct {
 	{
 		"SelectorOnUnnamedStruct",
 		cp{{"a", `type A struct{X int64;Y string}; const Res = A{2,"b"}.Y`, nil, "cannot apply selector operator to unnamed constant"}}},
+
+	// Test enums.
+	{
+		"Enum",
+		cp{{"a", `type A enum{X;Y;Z}; const Res = A.X`, makeEnumXYZ("a.A", "X"), ""}}},
+	{
+		"EnumNoLabel",
+		cp{{"a", `type A enum{X;Y;Z}; const Res = A`, nil, "A is a type"}}},
 
 	// Test explicit primitive type conversions.
 	{
@@ -762,13 +779,13 @@ var constTests = []struct {
 		{"b", `import "a";const Res = a.Res && false`, vdl.BoolValue(false), ""}}},
 	{"MultiPkgUnexportedConst", cp{
 		{"a", `const Res = x;const x = true`, vdl.BoolValue(true), ""},
-		{"b", `import "a";const Res = a.x && false`, nil, "const a.x undefined"}}},
+		{"b", `import "a";const Res = a.x && false`, nil, "a.x undefined"}}},
 	{"MultiPkgSamePkgName", cp{
 		{"a", `const Res = true`, vdl.BoolValue(true), ""},
 		{"a", `const Res = true`, nil, "invalid recompile"}}},
 	{"MultiPkgUnimportedPkg", cp{
 		{"a", `const Res = true`, vdl.BoolValue(true), ""},
-		{"b", `const Res = a.Res && false`, nil, "const a.Res undefined"}}},
+		{"b", `const Res = a.Res && false`, nil, "a.Res undefined"}}},
 	{"RedefinitionOfImportedName", cp{
 		{"a", `const Res = true`, vdl.BoolValue(true), ""},
 		{"b", `import "a"; const a = "test"; const Res = a`, nil, "const a name conflict"}}},

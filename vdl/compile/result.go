@@ -156,11 +156,10 @@ func (e *Env) evalSelectorOnType(def *TypeDef, selector string) (opconst.Const, 
 
 // EvalConst resolves and evaluates a name to a const.
 func (e *Env) EvalConst(name string, file *File) (opconst.Const, error) {
-	cd, matched := e.ResolveConst(name, file)
-	if matched == name {
-		return opconst.FromValue(cd.Value), nil
-	}
-	if cd != nil {
+	if cd, matched := e.ResolveConst(name, file); cd != nil {
+		if matched == name {
+			return opconst.FromValue(cd.Value), nil
+		}
 		remainder := name[len(matched)+1:]
 		c, err := e.evalSelectorOnConst(cd, remainder)
 		if err != nil {
@@ -169,9 +168,11 @@ func (e *Env) EvalConst(name string, file *File) (opconst.Const, error) {
 		return c, nil
 	}
 
-	td, matched := e.ResolveType(name, file)
-	if td != nil && matched != "" {
-		remainder := name[len(matched):]
+	if td, matched := e.ResolveType(name, file); td != nil {
+		if matched == name {
+			return opconst.Const{}, fmt.Errorf("%s is a type", name)
+		}
+		remainder := name[len(matched)+1:]
 		c, err := e.evalSelectorOnType(td, remainder)
 		if err != nil {
 			return opconst.Const{}, err
@@ -179,7 +180,7 @@ func (e *Env) EvalConst(name string, file *File) (opconst.Const, error) {
 		return c, nil
 	}
 
-	return opconst.Const{}, fmt.Errorf("const %s undefined", name)
+	return opconst.Const{}, fmt.Errorf("%s undefined", name)
 }
 
 // errorf and the fpString{,f} functions are helpers for error reporting; we

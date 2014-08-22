@@ -62,67 +62,65 @@ type WireOneOf struct {
 // TypeID uniquely identifies a type definition within a vom stream.
 type TypeID uint64
 
-const (
-	// Primitives
-	WireAnyID = TypeID(1)
+// Primitives
+const WireAnyID = TypeID(1)
 
-	WireTypeID = TypeID(2)
+const WireTypeID = TypeID(2)
 
-	WireBoolID = TypeID(3)
+const WireBoolID = TypeID(3)
 
-	WireStringID = TypeID(4)
+const WireStringID = TypeID(4)
 
-	WireByteID = TypeID(5)
+const WireByteID = TypeID(5)
 
-	WireUint16ID = TypeID(6)
+const WireUint16ID = TypeID(6)
 
-	WireUint32ID = TypeID(7)
+const WireUint32ID = TypeID(7)
 
-	WireUint64ID = TypeID(8)
+const WireUint64ID = TypeID(8)
 
-	WireInt16ID = TypeID(9)
+const WireInt16ID = TypeID(9)
 
-	WireInt32ID = TypeID(10)
+const WireInt32ID = TypeID(10)
 
-	WireInt64ID = TypeID(11)
+const WireInt64ID = TypeID(11)
 
-	WireFloat32ID = TypeID(12)
+const WireFloat32ID = TypeID(12)
 
-	WireFloat64ID = TypeID(13)
+const WireFloat64ID = TypeID(13)
 
-	WireComplex64ID = TypeID(14)
+const WireComplex64ID = TypeID(14)
 
-	WireComplex128ID = TypeID(15)
+const WireComplex128ID = TypeID(15)
 
-	// Composites only used in type definitions
-	WireNamedID = TypeID(16)
+// Composites only used in type definitions
+const WireNamedID = TypeID(16)
 
-	WireEnumID = TypeID(17)
+const WireEnumID = TypeID(17)
 
-	WireArrayID = TypeID(18)
+const WireArrayID = TypeID(18)
 
-	WireListID = TypeID(19)
+const WireListID = TypeID(19)
 
-	WireSetID = TypeID(20)
+const WireSetID = TypeID(20)
 
-	WireMapID = TypeID(21)
+const WireMapID = TypeID(21)
 
-	WireStructID = TypeID(22)
+const WireStructID = TypeID(22)
 
-	WireFieldID = TypeID(23)
+const WireFieldID = TypeID(23)
 
-	WireFieldListID = TypeID(24)
+const WireFieldListID = TypeID(24)
 
-	WireOneOfID = TypeID(25)
+const WireOneOfID = TypeID(25)
 
-	// Other commonly used composites
-	WireByteListID = TypeID(26)
+// Other commonly used composites
+const WireByteListID = TypeID(26)
 
-	WireStringListID = TypeID(27)
+const WireStringListID = TypeID(27)
 
-	WireTypeListID = TypeID(28)
+const WireTypeListID = TypeID(28)
 
-	// The first user-defined TypeID is 65.  Note that -64 is encoded as 1 byte,
-	// while -65 is encoded as 2 bytes.
-	WireTypeFirstUserID = TypeID(65)
-)
+// The first user-defined TypeID is 65.  Note that -64 is encoded as 1 byte,
+// while -65 is encoded as 2 bytes.
+const WireTypeFirstUserID = TypeID(65)

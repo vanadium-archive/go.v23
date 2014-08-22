@@ -70,7 +70,7 @@ type Composites struct {
 	A0 Scalars
 	A1 [2]Scalars
 	A2 []Scalars
-	//A3 set[Scalars]
+	A3 set[Scalars]
 	A4 map[string]Scalars
 	A5 map[Scalars][]map[string]complex128
 }
@@ -108,7 +108,6 @@ const (
 	Ccomplex64 = complex64(8+9i)
 	Ccomplex128 = complex128(10+11i)
 	Cstring = "foo"
-	Cany = Cbool
 
 	True = true
 	Foo = "foo"

@@ -22,7 +22,5 @@ type Envelope struct {
 	Env []string
 }
 
-const (
-	// Node manager application envelopes must present this title.
-	NodeManagerTitle = "node manager"
-)
+// Node manager application envelopes must present this title.
+const NodeManagerTitle = "node manager"

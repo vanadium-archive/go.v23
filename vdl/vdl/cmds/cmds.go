@@ -248,25 +248,25 @@ for managing Go source code.
 		"Package prefix that will be added to the VDL package prefixes when generating Java files. ")
 	cmdGen.Flags.Var(&optGenGoOutDir, "go_out_dir",
 		`Go output directory.  There are three modes:
-			""         : Generate output in-place in the source tree
-			"dir"      : Generate output rooted at dir
-			"src->dst" : Generate output rooted at x, with translation from src to dst
-	 Assume your source tree is organized as follows:
-	 GOPATH=/home/me/code/go
-			/home/me/code/go/src/veyron2/vdl/test_base/base1.vdl
-			/home/me/code/go/src/veyron2/vdl/test_base/base2.vdl
-	 Here's example output under the different modes:
-	 --go_out_dir=""
-			/home/me/code/go/src/veyron2/vdl/test_base/base1.vdl.go
-			/home/me/code/go/src/veyron2/vdl/test_base/base2.vdl.go
-	 --go_out_dir="/tmp/foo"
-			/tmp/foo/veyron2/vdl/test_base/base1.vdl.go
-			/tmp/foo/veyron2/vdl/test_base/base2.vdl.go
-	 --go_out_dir="go/src->bar/src"
-			/home/me/code/bar/src/veyron2/vdl/test_base/base1.vdl.go
-			/home/me/code/bar/src/veyron2/vdl/test_base/base2.vdl.go
-	 When the src->dst form is used, src must match the suffix of the path just
-	 before the package path, and dst is the replacement for src.`)
+         ""         : Generate output in-place in the source tree
+         "dir"      : Generate output rooted at dir
+         "src->dst" : Generate output rooted at x, translating from src to dst
+      Assume your source tree is organized as follows:
+      GOPATH=/home/me/code/go
+         /home/me/code/go/src/veyron2/vdl/test_base/base1.vdl
+         /home/me/code/go/src/veyron2/vdl/test_base/base2.vdl
+      Here's example output under the different modes:
+      --go_out_dir=""
+         /home/me/code/go/src/veyron2/vdl/test_base/base1.vdl.go
+         /home/me/code/go/src/veyron2/vdl/test_base/base2.vdl.go
+      --go_out_dir="/tmp/foo"
+         /tmp/foo/veyron2/vdl/test_base/base1.vdl.go
+         /tmp/foo/veyron2/vdl/test_base/base2.vdl.go
+      --go_out_dir="go/src->bar/src"
+         /home/me/code/bar/src/veyron2/vdl/test_base/base1.vdl.go
+         /home/me/code/bar/src/veyron2/vdl/test_base/base2.vdl.go
+      When the src->dst form is used, src must match the suffix of the path
+      just before the package path, and dst is the replacement for src.`)
 	cmdGen.Flags.Var(&optGenJavaOutDir, "java_out_dir",
 		"Same semantics as --go_out_dir but applies to java code generation.")
 	cmdGen.Flags.Var(&optGenJavascriptOutDir, "js_out_dir",

@@ -39,28 +39,26 @@ import (
 	_gen_wiretype "veyron2/wiretype"
 )
 
-const (
-	// Yes shows that bools may be untyped.
-	Yes = true // yes trailing doc
+// Yes shows that bools may be untyped.
+const Yes = true // yes trailing doc
 
-	// No shows explicit boolean typing.
-	No = false
+// No shows explicit boolean typing.
+const No = false
 
-	Hello = "hello"
+const Hello = "hello"
 
-	// Int32Const shows explicit integer typing.
-	Int32Const = int32(123)
+// Int32Const shows explicit integer typing.
+const Int32Const = int32(123)
 
-	// Int64Const shows explicit integer conversion from another type, and referencing
-	// a constant from another package.
-	Int64Const = int64(128)
+// Int64Const shows explicit integer conversion from another type, and referencing
+// a constant from another package.
+const Int64Const = int64(128)
 
-	// FloatConst shows arithmetic expressions may be used.
-	FloatConst = float64(2)
+// FloatConst shows arithmetic expressions may be used.
+const FloatConst = float64(2)
 
-	// Mask shows bitwise operations.
-	Mask = uint64(256)
-)
+// Mask shows bitwise operations.
+const Mask = uint64(256)
 
 // TODO(bprosnitz) Remove this line once signatures are updated to use typevals.
 // It corrects a bug where _gen_wiretype is unused in VDL pacakges where only bootstrap types are used on interfaces.

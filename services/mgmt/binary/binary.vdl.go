@@ -35,8 +35,6 @@ type PartInfo struct {
 	Size int64
 }
 
-const (
-	MissingChecksum = ""
+const MissingChecksum = ""
 
-	MissingSize = int64(-1)
-)
+const MissingSize = int64(-1)

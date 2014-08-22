@@ -213,91 +213,6 @@ func isStreamingMethodGo(method *compile.Method) bool {
 	return method.InStream != nil || method.OutStream != nil
 }
 
-func qualifiedName(data goData, name string, file *compile.File) string {
-	if file.Package == data.File.Package {
-		// The name is from the same package - just use it.
-		return name
-	}
-	// The name is defined in a different package - print the import package to
-	// use for this file, along with the name.
-	return data.UserImports.lookupImport(file.Package.Path) + "." + name
-}
-
-// typeGo translates vdl.Type into a Go type.
-func typeGo(data goData, t *vdl.Type) string {
-	// Terminate recursion at defined types, which include both user-defined types
-	// (enum, struct, oneof) and built-in types.
-	if def := data.Env.FindTypeDef(t); def != nil {
-		switch {
-		case t == vdl.AnyType:
-			return "_gen_vdlutil.Any"
-		case t == vdl.TypeValType:
-			return "*_gen_vdl.Type"
-		case def.File == compile.BuiltInFile:
-			// Built-in primitives just use their name.
-			return def.Name
-		}
-		return qualifiedName(data, def.Name, def.File)
-	}
-	// Otherwise recurse through the type.
-	switch t.Kind() {
-	case vdl.Array:
-		return "[" + strconv.Itoa(t.Len()) + "]" + typeGo(data, t.Elem())
-	case vdl.List:
-		return "[]" + typeGo(data, t.Elem())
-	case vdl.Set:
-		// TODO(toddw): Should we use map[X]bool instead?
-		return "map[" + typeGo(data, t.Key()) + "]struct{}"
-	case vdl.Map:
-		return "map[" + typeGo(data, t.Key()) + "]" + typeGo(data, t.Elem())
-	default:
-		panic(fmt.Errorf("vdl: typeGo unhandled type %v %v", t.Kind(), t))
-	}
-}
-
-// typeDefGo prints the type definition for a type.
-func typeDefGo(data goData, def *compile.TypeDef) string {
-	s := fmt.Sprintf("%stype %s ", def.Doc, def.Name)
-	switch t := def.Type; t.Kind() {
-	case vdl.Enum:
-		// We turn the VDL:
-		//   type X enum{A;B}
-		// into Go:
-		//   type X uint
-		//   const (
-		//     A X = iota
-		//     B
-		//   )
-		s += "int" + def.DocSuffix
-		s += "\nconst ("
-		for x := 0; x < t.NumEnumLabel(); x++ {
-			s += "\n" + def.LabelDoc[x] + t.EnumLabel(x)
-			if x == 0 {
-				s += " " + def.Name + " = iota"
-			}
-			s += def.LabelDocSuffix[x]
-		}
-		return s + "\n)"
-	case vdl.Struct:
-		s += "struct {"
-		for x := 0; x < t.NumField(); x++ {
-			f := t.Field(x)
-			s += "\n" + def.FieldDoc[x] + f.Name + " "
-			s += typeGo(data, f.Type) + def.FieldDocSuffix[x]
-		}
-		s += "\n}"
-	case vdl.OneOf:
-		// We turn the VDL:
-		//   type X oneof{bool;string}
-		// into Go:
-		//   type X interface{}
-		s += "interface{}"
-	default:
-		s += typeGo(data, def.BaseType)
-	}
-	return s + def.DocSuffix
-}
-
 // prefixName takes a name (potentially qualified with package name, as in
 // "pkg.name") and prepends the given prefix to the last component of the name,
 // as in "pkg.prefixname".
@@ -305,95 +220,6 @@ func prefixName(name, prefix string) string {
 	path := strings.Split(name, ".")
 	path[len(path)-1] = prefix + path[len(path)-1]
 	return strings.Join(path, ".")
-}
-
-func constDefGo(data goData, def *compile.ConstDef) string {
-	return fmt.Sprintf("%s%s = %s%s", def.Doc, def.Name, constGo(data, def.Value), def.DocSuffix)
-}
-
-func constGo(data goData, v *vdl.Value) string {
-	// TODO(bprosnitz) Generate the full tag name e.g. security.Read instead of security.Label(1)
-	switch v.Type() {
-	case vdl.BoolType, vdl.StringType:
-		// Treat the standard bool and string types as untyped constants in Go.
-		// We turn the VDL:
-		//   type NamedBool   bool
-		//   type NamedString string
-		//   const (
-		//     B1 = true
-		//     B2 = bool(true)
-		//     B3 = NamedBool(true)
-		//     S1 = "abc"
-		//     S2 = string("abc")
-		//     S3 = NamedString("abc")
-		//   )
-		// into Go:
-		//   const (
-		//     B1 = true
-		//     B2 = true
-		//     B3 = NamedBool(true)
-		//     S1 = "abc"
-		//     S2 = "abc"
-		//     S3 = NamedString("abc")
-		//   )
-		return valueGo(v)
-	}
-	return typeGo(data, v.Type()) + "(" + valueGo(v) + ")"
-}
-
-func valueGo(v *vdl.Value) string {
-	switch v.Kind() {
-	case vdl.Bool:
-		if v.Bool() {
-			return "true"
-		} else {
-			return "false"
-		}
-	case vdl.Byte:
-		return strconv.FormatUint(uint64(v.Byte()), 10)
-	case vdl.Uint16, vdl.Uint32, vdl.Uint64:
-		return strconv.FormatUint(v.Uint(), 10)
-	case vdl.Int16, vdl.Int32, vdl.Int64:
-		return strconv.FormatInt(v.Int(), 10)
-	case vdl.Float32, vdl.Float64:
-		return strconv.FormatFloat(v.Float(), 'g', -1, bitlen(v.Kind()))
-	case vdl.Complex64, vdl.Complex128:
-		s := strconv.FormatFloat(real(v.Complex()), 'g', -1, bitlen(v.Kind())) + "+"
-		s += strconv.FormatFloat(imag(v.Complex()), 'g', -1, bitlen(v.Kind())) + "i"
-		return s
-	case vdl.String:
-		return strconv.Quote(v.RawString())
-	}
-	if v.Type().IsBytes() {
-		return strconv.Quote(string(v.Bytes()))
-	}
-	// TODO(toddw): Handle Enum, List, Map, Struct, OneOf, Any
-	panic(fmt.Errorf("vdl: valueGo unhandled type %v %v", v.Kind(), v.Type()))
-}
-
-func bitlen(kind vdl.Kind) int {
-	switch kind {
-	case vdl.Float32, vdl.Complex64:
-		return 32
-	case vdl.Float64, vdl.Complex128:
-		return 64
-	}
-	panic(fmt.Errorf("vdl: bitLen unhandled kind %v", kind))
-}
-
-func tagsGo(data goData, tags []*vdl.Value) string {
-	str := "[]interface{}{"
-	for ix, tag := range tags {
-		if ix > 0 {
-			str += ", "
-		}
-		str += constGo(data, tag)
-	}
-	return str + "}"
-}
-
-func embedGo(data goData, embed *compile.Interface) string {
-	return qualifiedName(data, embed.Name, embed.File)
 }
 
 // Returns a field variable, useful for defining in/out args.
@@ -740,9 +566,9 @@ import ({{range $imp := $data.UserImports}}
 {{if $file.TypeDefs}}{{range $tdef := $file.TypeDefs}}
 {{typeDefGo $data $tdef}}
 {{end}}{{end}}
-{{if $file.ConstDefs}}const ({{range $cdef := $file.ConstDefs}}
+{{range $cdef := $file.ConstDefs}}
 	{{constDefGo $data $cdef}}
-{{end}}){{end}}
+{{end}}
 {{if $file.Interfaces}}
 // TODO(bprosnitz) Remove this line once signatures are updated to use typevals.
 // It corrects a bug where _gen_wiretype is unused in VDL pacakges where only bootstrap types are used on interfaces.

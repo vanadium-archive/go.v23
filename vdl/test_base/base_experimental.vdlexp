@@ -1,0 +1,29 @@
+package test_base
+
+// This file contains experimental features, that are not yet supported for all
+// generated languages.  Run the following command to generate Go:
+//
+//   vdl -experimental -exts=.vdl,.vdlexp generate -lang=go veyron2/vdl/...
+
+type (
+	NamedEnum       enum{A;B;C}
+	NamedOneOf      oneof{bool;string;int32}
+)
+
+type ScalarsExp struct {
+	B13 NamedEnum
+	B14 NamedOneOf
+}
+
+const (
+	Cenum  = NamedEnum.A
+	Carray = [3]int32{1, 2, 3}
+	Clist  = []int32{1, 2, 3}
+	// TODO(toddw): test multiple items after ordering is fixed.
+	//Cset   = set[int32]{1, 2, 3}
+	Cset   = set[int32]{1}
+	// TODO(toddw): test multiple items after ordering is fixed.
+	//cmap   = map[int32]string{1: "A", 2: "B", 3: "C"}
+	cmap   = map[int32]string{1: "A"}
+	Cargs = Args{1, 2}
+)

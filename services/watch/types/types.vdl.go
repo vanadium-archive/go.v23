@@ -93,16 +93,14 @@ type Change struct {
 	Continued bool
 }
 
-const (
-	// The entity exists and its full value is included in Value.
-	Exists = int32(0)
+// The entity exists and its full value is included in Value.
+const Exists = int32(0)
 
-	// The entity does not exist.
-	DoesNotExist = int32(1)
+// The entity does not exist.
+const DoesNotExist = int32(1)
 
-	// The root entity and its children may or may not exist. Used only
-	// for initial state delivery when the client is not interested in
-	// fetching the initial state. See the "Initial State" section
-	// above.
-	InitialStateSkipped = int32(2)
-)
+// The root entity and its children may or may not exist. Used only
+// for initial state delivery when the client is not interested in
+// fetching the initial state. See the "Initial State" section
+// above.
+const InitialStateSkipped = int32(2)

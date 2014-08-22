@@ -72,7 +72,5 @@ type ChainPrivateID struct {
 	Secret []byte
 }
 
-const (
-	// KeyCurveP256 describes the NIST P256 curve.
-	KeyCurveP256 = KeyCurve(0)
-)
+// KeyCurveP256 describes the NIST P256 curve.
+const KeyCurveP256 = KeyCurve(0)

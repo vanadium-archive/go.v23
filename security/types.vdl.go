@@ -119,47 +119,45 @@ type DischargeImpetus struct {
 	Arguments []_gen_vdlutil.Any
 }
 
-const (
-	// AllPrincipals is a pattern that all principals match.
-	AllPrincipals = "*"
+// AllPrincipals is a pattern that all principals match.
+const AllPrincipals = "*"
 
-	// ChainSeparator joins blessing names to form a blessing chain name.
-	ChainSeparator = "/"
+// ChainSeparator joins blessing names to form a blessing chain name.
+const ChainSeparator = "/"
 
-	// ResolveLabel allows resolve operations.
-	ResolveLabel = Label(1)
+// ResolveLabel allows resolve operations.
+const ResolveLabel = Label(1)
 
-	// ReadLabel allows read operations.
-	ReadLabel = Label(2)
+// ReadLabel allows read operations.
+const ReadLabel = Label(2)
 
-	// WriteLabel allows write operations.
-	WriteLabel = Label(4)
+// WriteLabel allows write operations.
+const WriteLabel = Label(4)
 
-	// AdminLabel allows administrative operations.
-	AdminLabel = Label(8)
+// AdminLabel allows administrative operations.
+const AdminLabel = Label(8)
 
-	// DebugLabel allows debug operations.
-	DebugLabel = Label(16)
+// DebugLabel allows debug operations.
+const DebugLabel = Label(16)
 
-	// MonitoringLabel allows monitoring operations.
-	MonitoringLabel = Label(32)
+// MonitoringLabel allows monitoring operations.
+const MonitoringLabel = Label(32)
 
-	// SHA1Hash denotes the SHA1 cryptographic hash function as defined
-	// in RFC3174.
-	SHA1Hash = Hash("SHA1")
+// SHA1Hash denotes the SHA1 cryptographic hash function as defined
+// in RFC3174.
+const SHA1Hash = Hash("SHA1")
 
-	// SHA256Hash denotes the SHA256 cryptographic hash function as defined
-	// in FIPS 180-4.
-	SHA256Hash = Hash("SHA256")
+// SHA256Hash denotes the SHA256 cryptographic hash function as defined
+// in FIPS 180-4.
+const SHA256Hash = Hash("SHA256")
 
-	// SHA384Hash denotes the SHA384 cryptographic hash function as defined
-	// in FIPS 180-2.
-	SHA384Hash = Hash("SHA384")
+// SHA384Hash denotes the SHA384 cryptographic hash function as defined
+// in FIPS 180-2.
+const SHA384Hash = Hash("SHA384")
 
-	// SHA512Hash denotes the SHA512 cryptographic hash function as defined
-	// in FIPS 180-2.
-	SHA512Hash = Hash("SHA512")
+// SHA512Hash denotes the SHA512 cryptographic hash function as defined
+// in FIPS 180-2.
+const SHA512Hash = Hash("SHA512")
 
-	// NoHash denotes the identity hash function.
-	NoHash = Hash("")
-)
+// NoHash denotes the identity hash function.
+const NoHash = Hash("")

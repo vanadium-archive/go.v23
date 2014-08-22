@@ -1,9 +1,10 @@
+// Package javascript implements Javascript code generation from compiled VDL packages.
+package javascript
+
 // Generates the javascript source code for vdl files.  The generated output in javascript
 // differs from most other languages, since we don't generate stubs. Instead generate an
 // object that contains the parsed VDL structures that will be used by the Javascript code
 // to valid servers.
-
-package javascript
 
 import (
 	"bytes"

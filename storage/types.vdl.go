@@ -51,7 +51,5 @@ type Entry struct {
 	Value _gen_vdlutil.Any
 }
 
-const (
-	// NoVersion means the entry is not present in the store.
-	NoVersion = Version(0)
-)
+// NoVersion means the entry is not present in the store.
+const NoVersion = Version(0)

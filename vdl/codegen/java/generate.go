@@ -1,3 +1,4 @@
+// Package java implements Java code generation from compiled VDL packages.
 package java
 
 import (
