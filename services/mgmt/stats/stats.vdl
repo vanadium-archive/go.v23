@@ -25,6 +25,3 @@ type Stats interface {
 	// a NoValue error.
 	Value() (any, error)
 }
-
-// This error indicates that the object does not have a value.
-errorid NoValue

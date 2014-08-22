@@ -1,0 +1,5 @@
+// Package types defines the types used by the stats interface.
+package types
+
+// This error indicates that the object does not have a value.
+errorid NoValue

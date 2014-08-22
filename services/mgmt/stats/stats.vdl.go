@@ -16,16 +16,12 @@ import (
 	_gen_naming "veyron2/naming"
 	_gen_rt "veyron2/rt"
 	_gen_vdlutil "veyron2/vdl/vdlutil"
-	_gen_verror "veyron2/verror"
 	_gen_wiretype "veyron2/wiretype"
 )
 
 // TODO(bprosnitz) Remove this line once signatures are updated to use typevals.
 // It corrects a bug where _gen_wiretype is unused in VDL pacakges where only bootstrap types are used on interfaces.
 const _ = _gen_wiretype.TypeIDInvalid
-
-// This error indicates that the object does not have a value.
-const NoValue = _gen_verror.ID("veyron2/services/mgmt/stats.NoValue")
 
 // The Stats interface is used to access stats for troubleshooting and
 // monitoring purposes. The stats objects are discoverable via the Globbable
