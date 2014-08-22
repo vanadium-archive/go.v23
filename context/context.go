@@ -32,6 +32,11 @@ type T interface {
 	// either Canceled or DeadlineExceeded.
 	Err() error
 
+	// Runtime returns the runtime that generated this context.
+	// The return value will always be a non-nil veyron2.Runtime.
+	// Consider using the type-safe wrapper veyron2.RuntimeFromContext instead.
+	Runtime() interface{}
+
 	// Value is used to carry data across API boundaries.  You should use this
 	// only for data that is relevant across multiple API boundaries and not
 	// just to pass extra parameters to functions and methods.

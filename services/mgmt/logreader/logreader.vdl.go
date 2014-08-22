@@ -9,10 +9,10 @@ import (
 
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
 	_gen_io "io"
+	_gen_veyron2 "veyron2"
 	_gen_context "veyron2/context"
 	_gen_ipc "veyron2/ipc"
 	_gen_naming "veyron2/naming"
-	_gen_rt "veyron2/rt"
 	_gen_vdlutil "veyron2/vdl/vdlutil"
 	_gen_wiretype "veyron2/wiretype"
 )
@@ -199,18 +199,17 @@ func BindLogFile(name string, opts ..._gen_ipc.BindOpt) (LogFile, error) {
 	var client _gen_ipc.Client
 	switch len(opts) {
 	case 0:
-		client = _gen_rt.R().Client()
+		// Do nothing.
 	case 1:
-		switch o := opts[0].(type) {
-		case _gen_ipc.Client:
-			client = o
-		default:
+		if clientOpt, ok := opts[0].(_gen_ipc.Client); opts[0] == nil || ok {
+			client = clientOpt
+		} else {
 			return nil, _gen_vdlutil.ErrUnrecognizedOption
 		}
 	default:
 		return nil, _gen_vdlutil.ErrTooManyOptionsToBind
 	}
-	stub := &clientStubLogFile{client: client, name: name}
+	stub := &clientStubLogFile{defaultClient: client, name: name}
 
 	return stub, nil
 }
@@ -227,13 +226,20 @@ func NewServerLogFile(server LogFileService) interface{} {
 
 // clientStubLogFile implements LogFile.
 type clientStubLogFile struct {
-	client _gen_ipc.Client
-	name   string
+	defaultClient _gen_ipc.Client
+	name          string
+}
+
+func (__gen_c *clientStubLogFile) client(ctx _gen_context.T) _gen_ipc.Client {
+	if __gen_c.defaultClient != nil {
+		return __gen_c.defaultClient
+	}
+	return _gen_veyron2.RuntimeFromContext(ctx).Client()
 }
 
 func (__gen_c *clientStubLogFile) Size(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply int64, err error) {
 	var call _gen_ipc.Call
-	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Size", nil, opts...); err != nil {
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Size", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -244,7 +250,7 @@ func (__gen_c *clientStubLogFile) Size(ctx _gen_context.T, opts ..._gen_ipc.Call
 
 func (__gen_c *clientStubLogFile) ReadLog(ctx _gen_context.T, StartPos int64, NumEntries int32, Follow bool, opts ..._gen_ipc.CallOpt) (reply LogFileReadLogCall, err error) {
 	var call _gen_ipc.Call
-	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "ReadLog", []interface{}{StartPos, NumEntries, Follow}, opts...); err != nil {
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "ReadLog", []interface{}{StartPos, NumEntries, Follow}, opts...); err != nil {
 		return
 	}
 	reply = &implLogFileReadLogCall{clientCall: call, readStream: implLogFileReadLogStreamIterator{clientCall: call}}
@@ -253,7 +259,7 @@ func (__gen_c *clientStubLogFile) ReadLog(ctx _gen_context.T, StartPos int64, Nu
 
 func (__gen_c *clientStubLogFile) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
 	var call _gen_ipc.Call
-	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -264,7 +270,7 @@ func (__gen_c *clientStubLogFile) UnresolveStep(ctx _gen_context.T, opts ..._gen
 
 func (__gen_c *clientStubLogFile) Signature(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
 	var call _gen_ipc.Call
-	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -275,7 +281,7 @@ func (__gen_c *clientStubLogFile) Signature(ctx _gen_context.T, opts ..._gen_ipc
 
 func (__gen_c *clientStubLogFile) GetMethodTags(ctx _gen_context.T, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
 	var call _gen_ipc.Call
-	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {

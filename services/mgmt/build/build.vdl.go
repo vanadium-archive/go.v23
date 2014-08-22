@@ -12,10 +12,10 @@ import (
 
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
 	_gen_io "io"
+	_gen_veyron2 "veyron2"
 	_gen_context "veyron2/context"
 	_gen_ipc "veyron2/ipc"
 	_gen_naming "veyron2/naming"
-	_gen_rt "veyron2/rt"
 	_gen_vdlutil "veyron2/vdl/vdlutil"
 	_gen_wiretype "veyron2/wiretype"
 )
@@ -325,18 +325,17 @@ func BindBuilder(name string, opts ..._gen_ipc.BindOpt) (Builder, error) {
 	var client _gen_ipc.Client
 	switch len(opts) {
 	case 0:
-		client = _gen_rt.R().Client()
+		// Do nothing.
 	case 1:
-		switch o := opts[0].(type) {
-		case _gen_ipc.Client:
-			client = o
-		default:
+		if clientOpt, ok := opts[0].(_gen_ipc.Client); opts[0] == nil || ok {
+			client = clientOpt
+		} else {
 			return nil, _gen_vdlutil.ErrUnrecognizedOption
 		}
 	default:
 		return nil, _gen_vdlutil.ErrTooManyOptionsToBind
 	}
-	stub := &clientStubBuilder{client: client, name: name}
+	stub := &clientStubBuilder{defaultClient: client, name: name}
 
 	return stub, nil
 }
@@ -353,13 +352,20 @@ func NewServerBuilder(server BuilderService) interface{} {
 
 // clientStubBuilder implements Builder.
 type clientStubBuilder struct {
-	client _gen_ipc.Client
-	name   string
+	defaultClient _gen_ipc.Client
+	name          string
+}
+
+func (__gen_c *clientStubBuilder) client(ctx _gen_context.T) _gen_ipc.Client {
+	if __gen_c.defaultClient != nil {
+		return __gen_c.defaultClient
+	}
+	return _gen_veyron2.RuntimeFromContext(ctx).Client()
 }
 
 func (__gen_c *clientStubBuilder) Build(ctx _gen_context.T, Arch Architecture, OS OperatingSystem, opts ..._gen_ipc.CallOpt) (reply BuilderBuildCall, err error) {
 	var call _gen_ipc.Call
-	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Build", []interface{}{Arch, OS}, opts...); err != nil {
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Build", []interface{}{Arch, OS}, opts...); err != nil {
 		return
 	}
 	reply = &implBuilderBuildCall{clientCall: call, writeStream: implBuilderBuildStreamSender{clientCall: call}, readStream: implBuilderBuildStreamIterator{clientCall: call}}
@@ -368,7 +374,7 @@ func (__gen_c *clientStubBuilder) Build(ctx _gen_context.T, Arch Architecture, O
 
 func (__gen_c *clientStubBuilder) Describe(ctx _gen_context.T, Name string, opts ..._gen_ipc.CallOpt) (reply binary.Description, err error) {
 	var call _gen_ipc.Call
-	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Describe", []interface{}{Name}, opts...); err != nil {
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Describe", []interface{}{Name}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -379,7 +385,7 @@ func (__gen_c *clientStubBuilder) Describe(ctx _gen_context.T, Name string, opts
 
 func (__gen_c *clientStubBuilder) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
 	var call _gen_ipc.Call
-	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -390,7 +396,7 @@ func (__gen_c *clientStubBuilder) UnresolveStep(ctx _gen_context.T, opts ..._gen
 
 func (__gen_c *clientStubBuilder) Signature(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
 	var call _gen_ipc.Call
-	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {
@@ -401,7 +407,7 @@ func (__gen_c *clientStubBuilder) Signature(ctx _gen_context.T, opts ..._gen_ipc
 
 func (__gen_c *clientStubBuilder) GetMethodTags(ctx _gen_context.T, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
 	var call _gen_ipc.Call
-	if call, err = __gen_c.client.StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&reply, &err); ierr != nil {

@@ -292,6 +292,12 @@ type Runtime interface {
 	Cleanup()
 }
 
+// RuntimeFromContext returns the runtime used to generate a given context.
+// The result will always be a non-nil Runtime instance.
+func RuntimeFromContext(ctx context.T) Runtime {
+	return ctx.Runtime().(Runtime)
+}
+
 // The name for the google runtime implementation
 const GoogleRuntimeName = "google"
 
