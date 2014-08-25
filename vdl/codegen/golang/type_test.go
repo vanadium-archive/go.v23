@@ -97,7 +97,7 @@ func (x TestEnum) String() string {
 }
 
 // vdlEnumLabels identifies TestEnum as an enum.
-func (TestEnum) vdlEnumLabels(A, B, C struct{}) {}`},
+func (TestEnum) vdlEnumLabels(struct{ A, B, C bool }) {}`},
 		{tStruct, `type TestStruct struct {
 	A string
 	B int64

@@ -110,7 +110,7 @@ func typeDefGo(data goData, def *compile.TypeDef) string {
 			"\n\treturn \"\""+
 			"\n}"+
 			"\n\n// vdlEnumLabels identifies %[1]s as an enum."+
-			"\nfunc (%[1]s) vdlEnumLabels(%[2]s struct{}) {}",
+			"\nfunc (%[1]s) vdlEnumLabels(struct{ %[2]s bool }) {}",
 			def.Name, commaEnumLabels("", t))
 		return s
 	case vdl.Struct:

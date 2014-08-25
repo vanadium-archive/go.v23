@@ -135,6 +135,9 @@ var rtKeyTests = []rtTest{
 	{reflect.TypeOf(nStructComplex64{}), rtNStruct("Complex64", Complex64Type)},
 	{reflect.TypeOf(nStructComplex128{}), rtNStruct("Complex128", Complex128Type)},
 	{reflect.TypeOf(nStructString{}), rtNStruct("String", StringType)},
+	// Special-case types
+	{reflect.TypeOf(nEnum(0)), rtN("Enum", EnumType("A", "B", "C"))},
+	{reflect.TypeOf(nOneOf{}), rtN("OneOf", OneOfType(BoolType, StringType, Int32Type))},
 }
 
 // rtNonKeyTests contains types that may not be used as map keys.
@@ -394,7 +397,89 @@ var rtErrorTests = []rtErrorTest{
 	{reflect.TypeOf(unsafe.Pointer(uintptr(0))), `type "unsafe.Pointer" not supported`},
 	{reflect.TypeOf(map[*int64]string{}), `invalid nilable key "?int64"`},
 	{reflect.TypeOf(struct{ a int64 }{}), `type "struct { a int64 }" only has unexported fields`},
+	{reflect.TypeOf(nBadEnum1(0)), badEnum},
+	{reflect.TypeOf(nBadEnum2(0)), badEnum},
+	{reflect.TypeOf(nBadEnum3(0)), badEnum},
+	{reflect.TypeOf(nBadEnum4(0)), badEnumAssign},
+	{reflect.TypeOf(nBadEnum5(0)), badEnumAssign},
+	{reflect.TypeOf(nBadEnum6(0)), badEnumAssign},
+	{reflect.TypeOf(nBadEnum7(0)), badEnumAssign},
+	{reflect.TypeOf(nBadOneOf1{}), badOneOf},
+	{reflect.TypeOf(nBadOneOf2{}), badOneOf},
+	{reflect.TypeOf(nBadOneOf3{}), badOneOfAssign},
+	{reflect.TypeOf(nBadOneOf4{}), badOneOfAssign},
+	{reflect.TypeOf(nBadOneOf5{}), badOneOfAssign},
+	{reflect.TypeOf(nBadOneOf6{}), badOneOfAssign},
 }
+
+const (
+	badEnum        = `must have method vdlEnumLabels with no out-args and one struct in-arg`
+	badEnumAssign  = `must have pointer method Assign(string) bool`
+	badOneOf       = `must have method vdlOneOfTypes with no out-args and at least one in-arg`
+	badOneOfAssign = `must have pointer method Assign(interface{}) bool`
+)
+
+type (
+	nBadEnum1 int
+	nBadEnum2 int
+	nBadEnum3 int
+	nBadEnum4 int
+	nBadEnum5 int
+	nBadEnum6 int
+	nBadEnum7 int
+
+	nBadOneOf1 struct{ oneof interface{} }
+	nBadOneOf2 struct{ oneof interface{} }
+	nBadOneOf3 struct{ oneof interface{} }
+	nBadOneOf4 struct{ oneof interface{} }
+	nBadOneOf5 struct{ oneof interface{} }
+	nBadOneOf6 struct{ oneof interface{} }
+)
+
+// No labels
+func (nBadEnum1) vdlEnumLabels() {}
+
+// In-arg isn't a struct
+func (nBadEnum2) vdlEnumLabels(int) {}
+
+// Can't have out-arg
+func (nBadEnum3) vdlEnumLabels(struct{ A bool }) error { return nil }
+
+// No Assign method
+func (nBadEnum4) vdlEnumLabels(struct{ A bool }) {}
+
+// Assign method isn't Assign(string) bool
+func (nBadEnum5) vdlEnumLabels(struct{ A bool }) {}
+func (nBadEnum5) Assign()                        {}
+
+// Assign method isn't Assign(string) bool
+func (nBadEnum6) vdlEnumLabels(struct{ A bool }) {}
+func (nBadEnum6) Assign(bool) bool               { return false }
+
+// Assign method receiver isn't a pointer
+func (nBadEnum7) vdlEnumLabels(struct{ A bool }) {}
+func (nBadEnum7) Assign(string) bool             { return false }
+
+// No types
+func (nBadOneOf1) vdlOneOfTypes() {}
+
+// Can't have out-arg
+func (nBadOneOf2) vdlOneOfTypes() error { return nil }
+
+// No Assign method
+func (nBadOneOf3) vdlOneOfTypes(bool) {}
+
+// Assign method isn't Assign(interface{}) bool
+func (nBadOneOf4) vdlOneOfTypes(bool) {}
+func (nBadOneOf4) Assign()            {}
+
+// Assign method isn't Assign(interface{}) bool
+func (nBadOneOf5) vdlOneOfTypes(bool) {}
+func (nBadOneOf5) Assign(bool) bool   { return false }
+
+// Assign method receiver isn't pointer
+func (nBadOneOf6) vdlOneOfTypes(bool)      {}
+func (nBadOneOf6) Assign(interface{}) bool { return false }
 
 func allErrorTests() []rtErrorTest {
 	// Start with base error tests

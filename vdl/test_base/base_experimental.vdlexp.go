@@ -53,7 +53,7 @@ func (x NamedEnum) String() string {
 }
 
 // vdlEnumLabels identifies NamedEnum as an enum.
-func (NamedEnum) vdlEnumLabels(A, B, C struct{}) {}
+func (NamedEnum) vdlEnumLabels(struct{ A, B, C bool }) {}
 
 type NamedOneOf struct{ oneof interface{} }
 

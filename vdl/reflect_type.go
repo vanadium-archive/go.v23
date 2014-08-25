@@ -217,6 +217,55 @@ func makeTypeFromReflect(rt reflect.Type, builder *TypeBuilder, pending map[refl
 // makeUnnamedFromReflect makes the underlying unnamed Type or PendingType
 // corresponding to rt.
 func makeUnnamedFromReflect(rt reflect.Type, builder *TypeBuilder, pending map[reflect.Type]TypeOrPending) (TypeOrPending, error) {
+	// Enums are expected to have special methods like this:
+	//   func (Foo) vdlEnumLabels(struct{ A, B, C bool})
+	//   func (*Foo) Assign(string) bool
+	if method, ok := rt.MethodByName("vdlEnumLabels"); ok {
+		enum := builder.Enum()
+		mtype := method.Type
+		// Note that mtype.In(0) is the method receiver.
+		if mtype.NumOut() != 0 || mtype.NumIn() != 2 || mtype.In(1).Kind() != reflect.Struct {
+			return nil, fmt.Errorf("enum type %q must have method vdlEnumLabels with no out-args and one struct in-arg", rt)
+		}
+		stype := mtype.In(1)
+		for fx := 0; fx < stype.NumField(); fx++ {
+			enum.AppendLabel(stype.Field(fx).Name)
+		}
+		_, nonptr := rt.MethodByName("Assign")
+		if a, ok := reflect.PtrTo(rt).MethodByName("Assign"); !ok || nonptr ||
+			a.Type.NumIn() != 2 || a.Type.In(1) != rtString ||
+			a.Type.NumOut() != 1 || a.Type.Out(0) != rtBool {
+			return nil, fmt.Errorf("enum type %q must have pointer method Assign(string) bool", rt)
+		}
+		return enum, nil
+	}
+	// OneOfs are expected to have special methods like this:
+	//   func (Foo) vdlOneOfTypes(_ A, _ B, _ C)
+	//   func (*Foo) Assign(interface{}) bool
+	if method, ok := rt.MethodByName("vdlOneOfTypes"); ok {
+		oneof := builder.OneOf()
+		mtype := method.Type
+		// Note that mtype.In(0) is the method receiver.
+		if mtype.NumOut() != 0 || mtype.NumIn() < 2 {
+			return nil, fmt.Errorf("oneof type %q must have method vdlOneOfTypes with no out-args and at least one in-arg", rt)
+		}
+		for ix := 1; ix < mtype.NumIn(); ix++ {
+			in, err := typeFromReflect(mtype.In(ix), builder, pending)
+			if err != nil {
+				return nil, err
+			}
+			oneof.AppendType(in)
+		}
+		_, nonptr := rt.MethodByName("Assign")
+		if a, ok := reflect.PtrTo(rt).MethodByName("Assign"); !ok || nonptr ||
+			a.Type.NumIn() != 2 ||
+			a.Type.In(1).Kind() != reflect.Interface ||
+			a.Type.In(1).NumMethod() != 0 ||
+			a.Type.NumOut() != 1 || a.Type.Out(0) != rtBool {
+			return nil, fmt.Errorf("oneof type %q must have pointer method Assign(interface{}) bool", rt)
+		}
+		return oneof, nil
+	}
 	// Handle composite types
 	switch rt.Kind() {
 	case reflect.Array:
@@ -275,6 +324,8 @@ var (
 	errTypeFromReflectValue = errors.New("invalid val.TypeOf(reflect.Value{})")
 
 	rtInterface          = reflect.TypeOf((*interface{})(nil)).Elem()
+	rtBool               = reflect.TypeOf(false)
+	rtString             = reflect.TypeOf("")
 	rtType               = reflect.TypeOf(Type{})
 	rtValue              = reflect.TypeOf(Value{})
 	rtReflectValue       = reflect.TypeOf(reflect.Value{})
