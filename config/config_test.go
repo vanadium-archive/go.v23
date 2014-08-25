@@ -357,7 +357,7 @@ func TestIPHostPortFlag(t *testing.T) {
 	}
 
 	for _, s := range []string{
-		":", ":59999999", "foobar", "foobar:"} {
+		":", ":59999999", "__nohost__", "__nohost__:"} {
 		f := &config.IPHostPortFlag{}
 		if err := f.Set(s); err == nil {
 			t.Errorf("expected an error for %q", s)
