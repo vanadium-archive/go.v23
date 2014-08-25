@@ -202,14 +202,6 @@ type Runtime interface {
 	// to ongoing RPCs.
 	NewContext() context.T
 
-	// TODOContext is a factory function to generate a new client context.
-	// This should be used when some context should be supplied but you aren't yet
-	// ready to fill in the correct value.  The idea is that no TODO context
-	// should remain in the codebase long-term.
-	// TODO(mattr): Remove this method entirely once the whole tree has Context
-	// piped through it.
-	TODOContext() context.T
-
 	// NewStreamManager creates a new stream manager.
 	NewStreamManager(opts ...stream.ManagerOpt) (stream.Manager, error)
 
