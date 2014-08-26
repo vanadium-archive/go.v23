@@ -16,12 +16,6 @@ import (
 // unlikely.
 type ID [16]byte
 
-// DEntry is a directory entry.
-type DEntry struct {
-	Name string
-	ID   ID
-}
-
 // Stat provides information about an entry in the store.
 //
 // TODO(jyh): Specify versioning more precisely.
