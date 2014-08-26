@@ -219,6 +219,7 @@ func makeTypeFromReflect(rt reflect.Type, builder *TypeBuilder, pending map[refl
 func makeUnnamedFromReflect(rt reflect.Type, builder *TypeBuilder, pending map[reflect.Type]TypeOrPending) (TypeOrPending, error) {
 	// Enums are expected to have special methods like this:
 	//   func (Foo) vdlEnumLabels(struct{ A, B, C bool})
+	//   func (Foo) String() string
 	//   func (*Foo) Assign(string) bool
 	if method, ok := rt.MethodByName("vdlEnumLabels"); ok {
 		enum := builder.Enum()
@@ -230,6 +231,10 @@ func makeUnnamedFromReflect(rt reflect.Type, builder *TypeBuilder, pending map[r
 		stype := mtype.In(1)
 		for fx := 0; fx < stype.NumField(); fx++ {
 			enum.AppendLabel(stype.Field(fx).Name)
+		}
+		if s, ok := rt.MethodByName("String"); !ok || s.Type.NumIn() != 1 ||
+			s.Type.NumOut() != 1 || s.Type.Out(0) != rtString {
+			return nil, fmt.Errorf("enum type %q must have method String() string", rt)
 		}
 		_, nonptr := rt.MethodByName("Assign")
 		if a, ok := reflect.PtrTo(rt).MethodByName("Assign"); !ok || nonptr ||

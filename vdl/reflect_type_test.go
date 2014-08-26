@@ -400,86 +400,108 @@ var rtErrorTests = []rtErrorTest{
 	{reflect.TypeOf(nBadEnum1(0)), badEnum},
 	{reflect.TypeOf(nBadEnum2(0)), badEnum},
 	{reflect.TypeOf(nBadEnum3(0)), badEnum},
-	{reflect.TypeOf(nBadEnum4(0)), badEnumAssign},
-	{reflect.TypeOf(nBadEnum5(0)), badEnumAssign},
-	{reflect.TypeOf(nBadEnum6(0)), badEnumAssign},
-	{reflect.TypeOf(nBadEnum7(0)), badEnumAssign},
+	{reflect.TypeOf(nBadEnumString1(0)), badEnumString},
+	{reflect.TypeOf(nBadEnumString2(0)), badEnumString},
+	{reflect.TypeOf(nBadEnumString3(0)), badEnumString},
+	{reflect.TypeOf(nBadEnumAssign1(0)), badEnumAssign},
+	{reflect.TypeOf(nBadEnumAssign2(0)), badEnumAssign},
+	{reflect.TypeOf(nBadEnumAssign3(0)), badEnumAssign},
+	{reflect.TypeOf(nBadEnumAssign4(0)), badEnumAssign},
 	{reflect.TypeOf(nBadOneOf1{}), badOneOf},
 	{reflect.TypeOf(nBadOneOf2{}), badOneOf},
-	{reflect.TypeOf(nBadOneOf3{}), badOneOfAssign},
-	{reflect.TypeOf(nBadOneOf4{}), badOneOfAssign},
-	{reflect.TypeOf(nBadOneOf5{}), badOneOfAssign},
-	{reflect.TypeOf(nBadOneOf6{}), badOneOfAssign},
+	{reflect.TypeOf(nBadOneOfAssign1{}), badOneOfAssign},
+	{reflect.TypeOf(nBadOneOfAssign2{}), badOneOfAssign},
+	{reflect.TypeOf(nBadOneOfAssign3{}), badOneOfAssign},
+	{reflect.TypeOf(nBadOneOfAssign4{}), badOneOfAssign},
 }
 
 const (
 	badEnum        = `must have method vdlEnumLabels with no out-args and one struct in-arg`
+	badEnumString  = `must have method String() string`
 	badEnumAssign  = `must have pointer method Assign(string) bool`
 	badOneOf       = `must have method vdlOneOfTypes with no out-args and at least one in-arg`
 	badOneOfAssign = `must have pointer method Assign(interface{}) bool`
 )
 
 type (
-	nBadEnum1 int
-	nBadEnum2 int
-	nBadEnum3 int
-	nBadEnum4 int
-	nBadEnum5 int
-	nBadEnum6 int
-	nBadEnum7 int
+	nBadEnum1       int
+	nBadEnum2       int
+	nBadEnum3       int
+	nBadEnumString1 int
+	nBadEnumString2 int
+	nBadEnumString3 int
+	nBadEnumAssign1 int
+	nBadEnumAssign2 int
+	nBadEnumAssign3 int
+	nBadEnumAssign4 int
 
-	nBadOneOf1 struct{ oneof interface{} }
-	nBadOneOf2 struct{ oneof interface{} }
-	nBadOneOf3 struct{ oneof interface{} }
-	nBadOneOf4 struct{ oneof interface{} }
-	nBadOneOf5 struct{ oneof interface{} }
-	nBadOneOf6 struct{ oneof interface{} }
+	nBadOneOf1       struct{ oneof interface{} }
+	nBadOneOf2       struct{ oneof interface{} }
+	nBadOneOfAssign1 struct{ oneof interface{} }
+	nBadOneOfAssign2 struct{ oneof interface{} }
+	nBadOneOfAssign3 struct{ oneof interface{} }
+	nBadOneOfAssign4 struct{ oneof interface{} }
 )
 
 // No labels
-func (nBadEnum1) vdlEnumLabels() {}
+func (nBadEnum1) vdlEnumLabels() { panic("X") }
 
 // In-arg isn't a struct
-func (nBadEnum2) vdlEnumLabels(int) {}
+func (nBadEnum2) vdlEnumLabels(int) { panic("X") }
 
 // Can't have out-arg
-func (nBadEnum3) vdlEnumLabels(struct{ A bool }) error { return nil }
+func (nBadEnum3) vdlEnumLabels(struct{ A bool }) error { panic("X") }
+
+// No String method
+func (nBadEnumString1) vdlEnumLabels(struct{ A bool }) { panic("X") }
+
+// String method isn't String() string
+func (nBadEnumString2) vdlEnumLabels(struct{ A bool }) { panic("X") }
+func (nBadEnumString2) String()                        { panic("X") }
+
+// String method isn't String() string
+func (nBadEnumString3) vdlEnumLabels(struct{ A bool }) { panic("X") }
+func (nBadEnumString3) String() bool                   { panic("X") }
 
 // No Assign method
-func (nBadEnum4) vdlEnumLabels(struct{ A bool }) {}
+func (nBadEnumAssign1) vdlEnumLabels(struct{ A bool }) { panic("X") }
+func (nBadEnumAssign1) String() string                 { panic("X") }
 
 // Assign method isn't Assign(string) bool
-func (nBadEnum5) vdlEnumLabels(struct{ A bool }) {}
-func (nBadEnum5) Assign()                        {}
+func (nBadEnumAssign2) vdlEnumLabels(struct{ A bool }) { panic("X") }
+func (nBadEnumAssign2) String() string                 { panic("X") }
+func (nBadEnumAssign2) Assign()                        { panic("X") }
 
 // Assign method isn't Assign(string) bool
-func (nBadEnum6) vdlEnumLabels(struct{ A bool }) {}
-func (nBadEnum6) Assign(bool) bool               { return false }
+func (nBadEnumAssign3) vdlEnumLabels(struct{ A bool }) { panic("X") }
+func (nBadEnumAssign3) String() string                 { panic("X") }
+func (nBadEnumAssign3) Assign(bool) bool               { panic("X") }
 
 // Assign method receiver isn't a pointer
-func (nBadEnum7) vdlEnumLabels(struct{ A bool }) {}
-func (nBadEnum7) Assign(string) bool             { return false }
+func (nBadEnumAssign4) vdlEnumLabels(struct{ A bool }) { panic("X") }
+func (nBadEnumAssign4) String() string                 { panic("X") }
+func (nBadEnumAssign4) Assign(string) bool             { panic("X") }
 
 // No types
-func (nBadOneOf1) vdlOneOfTypes() {}
+func (nBadOneOf1) vdlOneOfTypes() { panic("X") }
 
 // Can't have out-arg
-func (nBadOneOf2) vdlOneOfTypes() error { return nil }
+func (nBadOneOf2) vdlOneOfTypes() error { panic("X") }
 
 // No Assign method
-func (nBadOneOf3) vdlOneOfTypes(bool) {}
+func (nBadOneOfAssign1) vdlOneOfTypes(bool) { panic("X") }
 
 // Assign method isn't Assign(interface{}) bool
-func (nBadOneOf4) vdlOneOfTypes(bool) {}
-func (nBadOneOf4) Assign()            {}
+func (nBadOneOfAssign2) vdlOneOfTypes(bool) { panic("X") }
+func (nBadOneOfAssign2) Assign()            { panic("X") }
 
 // Assign method isn't Assign(interface{}) bool
-func (nBadOneOf5) vdlOneOfTypes(bool) {}
-func (nBadOneOf5) Assign(bool) bool   { return false }
+func (nBadOneOfAssign3) vdlOneOfTypes(bool) { panic("X") }
+func (nBadOneOfAssign3) Assign(bool) bool   { panic("X") }
 
 // Assign method receiver isn't pointer
-func (nBadOneOf6) vdlOneOfTypes(bool)      {}
-func (nBadOneOf6) Assign(interface{}) bool { return false }
+func (nBadOneOfAssign4) vdlOneOfTypes(bool)      { panic("X") }
+func (nBadOneOfAssign4) Assign(interface{}) bool { panic("X") }
 
 func allErrorTests() []rtErrorTest {
 	// Start with base error tests

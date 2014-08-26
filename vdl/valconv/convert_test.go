@@ -22,6 +22,7 @@ var (
 		stringValue(vdl.StringType, "ABC"), stringValue(stringTypeN, "ABC"),
 		bytesValue(bytesType, "ABC"), bytesValue(bytesTypeN, "ABC"),
 		bytes3Value(bytes3Type, "ABC"), bytes3Value(bytes3TypeN, "ABC"),
+		vdl.ZeroValue(enumTypeN).AssignEnumLabel("ABC"),
 	}
 	vvTypeValBool = []*vdl.Value{
 		vdl.TypeValValue(vdl.BoolType),
@@ -142,6 +143,7 @@ var (
 	rvStrABC = []interface{}{
 		string("ABC"), []byte("ABC"), [3]byte{'A', 'B', 'C'},
 		nString("ABC"), nSliceUint8("ABC"), nArray3Uint8{'A', 'B', 'C'},
+		nEnumABC,
 	}
 	rvTypeValBool = []interface{}{
 		vdl.BoolType, nType(vdl.BoolType),

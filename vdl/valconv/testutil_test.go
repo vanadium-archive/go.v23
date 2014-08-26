@@ -236,6 +236,53 @@ func recurseABTypes() [2]*vdl.Type {
 func recurseAType() *vdl.Type { return recurseABTypes()[0] }
 func recurseBType() *vdl.Type { return recurseABTypes()[1] }
 
+// Special case enum isn't regularly expressible in Go.
+type nEnum int
+
+const (
+	nEnumA nEnum = iota
+	nEnumB
+	nEnumC
+	nEnumABC
+)
+
+func (x *nEnum) Assign(label string) bool {
+	switch label {
+	case "A":
+		*x = nEnumA
+		return true
+	case "B":
+		*x = nEnumB
+		return true
+	case "C":
+		*x = nEnumC
+		return true
+	case "ABC":
+		*x = nEnumABC
+		return true
+	}
+	*x = -1
+	return false
+}
+
+func (x nEnum) String() string {
+	switch x {
+	case nEnumA:
+		return "A"
+	case nEnumB:
+		return "B"
+	case nEnumC:
+		return "C"
+	case nEnumABC:
+		return "ABC"
+	}
+	return ""
+}
+
+func (nEnum) vdlEnumLabels(struct{ A, B, C, ABC bool }) {}
+
+var enumTypeN = vdl.NamedType("nEnum", vdl.EnumType("A", "B", "C", "ABC"))
+
 // Define a bunch of *Type types used in tests.
 var (
 	// Named scalar types

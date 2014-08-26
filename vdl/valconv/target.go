@@ -155,7 +155,14 @@ func FromReflect(target Target, rv reflect.Value) error {
 		tt = tt.Elem() // flatten tt to match rt and rv
 	}
 	// Recursive walk through the reflect value to fill in target.
-	if isRTBytes(rt) {
+	switch {
+	case tt.Kind() == vdl.Enum:
+		// Handle special-case enum first, getting the string enum label by calling
+		// the String method.  Note that vdl.TypeFromReflect has already validated
+		// the String method, so we can just call it without error checking.
+		out := rv.MethodByName("String").Call(nil)
+		return target.FromEnumLabel(out[0].String(), tt)
+	case isRTBytes(rt):
 		return target.FromBytes(rtBytes(rv), tt)
 	}
 	switch rt.Kind() {

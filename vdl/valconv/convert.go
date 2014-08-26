@@ -783,16 +783,27 @@ func (c convTarget) fromComplex(src complex128) error {
 
 func (c convTarget) fromBytes(src []byte) error {
 	if c.vv == nil {
-		switch kind := c.rv.Kind(); kind {
-		case reflect.String:
+		switch {
+		case c.tt.Kind() == vdl.Enum:
+			// Handle special-case enum first, by calling the Assign method.  Note
+			// that vdl.TypeFromReflect has already validated the Assign method, so we
+			// can just call it without error checking.
+			if c.rv.CanAddr() {
+				in := []reflect.Value{reflect.ValueOf(string(src))}
+				out := c.rv.Addr().MethodByName("Assign").Call(in)
+				if out[0].Bool() {
+					return nil
+				}
+			}
+		case c.rv.Kind() == reflect.String:
 			c.rv.SetString(string(src)) // TODO(toddw): check utf8
 			return nil
-		case reflect.Array:
+		case c.rv.Kind() == reflect.Array:
 			if c.rv.Type().Elem() == rtByte && c.rv.Len() == len(src) {
 				reflect.Copy(c.rv, reflect.ValueOf(src))
 				return nil
 			}
-		case reflect.Slice:
+		case c.rv.Kind() == reflect.Slice:
 			if c.rv.Type().Elem() == rtByte {
 				cp := make([]byte, len(src))
 				copy(cp, src)
@@ -800,7 +811,6 @@ func (c convTarget) fromBytes(src []byte) error {
 				return nil
 			}
 		}
-		// TODO(toddw): Handle enum if it's represented as an index?
 	} else {
 		switch kind := c.vv.Kind(); kind {
 		case vdl.String:
