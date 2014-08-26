@@ -305,17 +305,17 @@ var constTests = []struct {
 		cp{{"a", `type A struct{X int64;Y string}; type B struct{Z []A}; const Res = B{{{1, "a"}, A{X:2,Y:"b"}}}`, makeABStruct(), ""}}},
 	{
 		"StructSelector",
-		cp{{"a", `type A struct{X int64;Y string}; const a = A{2,"b"}; const Res = a.Y`, vdl.StringValue("b"), ""}}},
+		cp{{"a", `type A struct{X int64;Y string}; const x = A{2,"b"}; const Res = x.Y`, vdl.StringValue("b"), ""}}},
 	{
 		"StructMultipleSelector",
-		cp{{"a", `type A struct{X int64;Y B}; type B struct{Z bool}; const a = A{2,B{true}}; const Res = a.Y.Z`, vdl.BoolValue(true), ""}}},
+		cp{{"a", `type A struct{X int64;Y B}; type B struct{Z bool}; const x = A{2,B{true}}; const Res = x.Y.Z`, vdl.BoolValue(true), ""}}},
 
 	{
 		"InvalidStructSelectorName",
-		cp{{"a", `type A struct{X int64;Y string}; const a = A{2,"b"}; const Res = a.Z`, nil, "invalid field name"}}},
+		cp{{"a", `type A struct{X int64;Y string}; const x = A{2,"b"}; const Res = x.Z`, nil, "invalid field name"}}},
 	{
 		"StructSelectorOnNonStructType",
-		cp{{"a", `type A []int32; const a = A{2}; const Res = a.Z`, nil, "invalid selector on const of kind: list"}}},
+		cp{{"a", `type A []int32; const x = A{2}; const Res = x.Z`, nil, "invalid selector on const of kind: list"}}},
 	{
 		"SelectorOnUnnamedStruct",
 		cp{{"a", `type A struct{X int64;Y string}; const Res = A{2,"b"}.Y`, nil, "cannot apply selector operator to unnamed constant"}}},
@@ -789,12 +789,4 @@ var constTests = []struct {
 	{"RedefinitionOfImportedName", cp{
 		{"a", `const Res = true`, vdl.BoolValue(true), ""},
 		{"b", `import "a"; const a = "test"; const Res = a`, nil, "const a name conflict"}}},
-
-	// Test conflicting const and interface / type definitions:
-	{"ConflictingTypeAndConstDefinition",
-		cp{{"a", `type A int64; const A = true; const Res = true`, nil, "const A name conflict"}}},
-	{"ConflictingConstAndInterfaceDefinition",
-		cp{{"a", `type A interface{}; const A = true; const Res = true`, nil, "interface A name conflict"}}},
-	{"ConflictingTypeAndInterfaceDefinition",
-		cp{{"a", `type A interface{}; type A int64; const Res = true`, nil, "interface A name conflict"}}},
 }

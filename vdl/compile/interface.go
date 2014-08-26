@@ -49,11 +49,8 @@ func (id ifaceDefiner) Declare() {
 				id.env.prefixErrorf(file, pdef.Pos, err, "interface %s invalid name", pdef.Name)
 				continue // keep going to catch more errors
 			}
-			if b, dup := id.builders[pdef.Name]; dup {
-				id.env.errorf(file, pdef.Pos, "interface %s redefined (previous at %s)", pdef.Name, fpString(b.def.File, b.def.Pos))
-				continue // keep going to catch more errors
-			}
-			if err := file.ValidateNotDefined(pdef.Name); err != nil {
+			detail := identDetail("interface", file, pdef.Pos)
+			if err := file.DeclareIdent(pdef.Name, detail); err != nil {
 				id.env.prefixErrorf(file, pdef.Pos, err, "interface %s name conflict", pdef.Name)
 				continue
 			}

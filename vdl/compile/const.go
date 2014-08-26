@@ -68,11 +68,8 @@ func (cd constDefiner) Declare() {
 				cd.env.prefixErrorf(file, pdef.Pos, err, "const %s invalid name", pdef.Name)
 				continue // keep going to catch more errors
 			}
-			if b, dup := cd.builders[pdef.Name]; dup {
-				cd.env.errorf(file, pdef.Pos, "const %s redefined (previous at %s)", pdef.Name, fpString(b.def.File, b.def.Pos))
-				continue // keep going to catch more errors
-			}
-			if err := file.ValidateNotDefined(pdef.Name); err != nil {
+			detail := identDetail("const", file, pdef.Pos)
+			if err := file.DeclareIdent(pdef.Name, detail); err != nil {
 				cd.env.prefixErrorf(file, pdef.Pos, err, "const %s name conflict", pdef.Name)
 				continue
 			}

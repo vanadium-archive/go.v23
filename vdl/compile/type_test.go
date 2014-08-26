@@ -166,8 +166,6 @@ var typeTests = []typeTest{
 		{"b", `import "a"; type a string; type Res a`, nil, "type a name conflict"}}},
 
 	// Test errors.
-	{"DupSame", tp{{"a", `type Res bool; type Res bool`, nil, "type Res redefined"}}},
-	{"DupDiff", tp{{"a", `type Res bool; type Res int32`, nil, "type Res redefined"}}},
 	{"InvalidName", tp{{"a", `type _Res bool`, nil, "type _Res invalid name"}}},
 	{"Undefined", tp{{"a", `type Res foo`, nil, "type foo undefined"}}},
 	{"UnnamedEnum", tp{{"a", `type Res []enum{A;B;C}`, nil, "unnamed enum type invalid"}}},

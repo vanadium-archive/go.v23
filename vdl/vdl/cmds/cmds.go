@@ -287,7 +287,11 @@ func runGen(targets []*build.Package, env *compile.Env) {
 	for _, target := range targets {
 		pkg := build.CompilePackage(target, env)
 		if pkg == nil {
-			continue
+			// Stop at the first package that fails to compile.
+			if env.Errors.IsEmpty() {
+				env.Errors.Errorf("%s: internal error (compiled into nil package)", target.Path)
+			}
+			return
 		}
 		// TODO(toddw): Skip code generation if the semantic contents of the
 		// generated file haven't changed.

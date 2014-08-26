@@ -86,11 +86,8 @@ func (td typeDefiner) Declare() {
 	for ix := range td.pkg.Files {
 		file, pfile := td.pkg.Files[ix], td.pfiles[ix]
 		for _, pdef := range pfile.TypeDefs {
-			if b, dup := td.builders[pdef.Name]; dup {
-				td.env.errorf(file, pdef.Pos, "type %s redefined (previous at %s)", pdef.Name, fpString(b.def.File, b.def.Pos))
-				continue // keep going to catch more errors
-			}
-			if err := file.ValidateNotDefined(pdef.Name); err != nil {
+			detail := identDetail("type", file, pdef.Pos)
+			if err := file.DeclareIdent(pdef.Name, detail); err != nil {
 				td.env.prefixErrorf(file, pdef.Pos, err, "type %s name conflict", pdef.Name)
 				continue
 			}

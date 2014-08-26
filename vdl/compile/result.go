@@ -228,15 +228,20 @@ type Package struct {
 	typeDefs  map[string]*TypeDef
 	constDefs map[string]*ConstDef
 	ifaceDefs map[string]*Interface
+
+	// lowercaseIdents maps from lowercased identifier to a detail string; it's
+	// used to detect and report identifier conflicts.
+	lowercaseIdents map[string]string
 }
 
 func newPackage(name, path string) *Package {
 	return &Package{
-		Name:      name,
-		Path:      path,
-		typeDefs:  make(map[string]*TypeDef),
-		constDefs: make(map[string]*ConstDef),
-		ifaceDefs: make(map[string]*Interface),
+		Name:            name,
+		Path:            path,
+		typeDefs:        make(map[string]*TypeDef),
+		constDefs:       make(map[string]*ConstDef),
+		ifaceDefs:       make(map[string]*Interface),
+		lowercaseIdents: make(map[string]string),
 	}
 }
 
@@ -320,20 +325,35 @@ func (f *File) LookupImportPath(local string) string {
 	return ""
 }
 
-// ValidateNotDefined returns an error if the name is already defined.
-func (f *File) ValidateNotDefined(name string) error {
-	if i, ok := f.imports[name]; ok {
+// identDetail formats a detail string for calls to DeclareIdent.
+func identDetail(kind string, file *File, pos parse.Pos) string {
+	return fmt.Sprintf("%s at %s:%s", kind, file.BaseName, pos)
+}
+
+// DeclareIdent declares ident with the given detail string.  Returns an error
+// if ident conflicts with an existing identifier in this file or package, where
+// the error includes the the previous declaration detail.
+func (f *File) DeclareIdent(ident, detail string) error {
+	// Identifiers must be distinct from the the import names used in this file,
+	// but can differ by only their capitalization.  E.g.
+	//   import "foo"
+	//   type foo string // BAD, type "foo" collides with import "foo"
+	//   type Foo string //  OK, type "Foo" distinct from import "foo"
+	//   type FoO string //  OK, type "FoO" distinct from import "foo"
+	if i, ok := f.imports[ident]; ok {
 		return fmt.Errorf("previous import at %s", i.pos)
 	}
-	if t := f.Package.ResolveType(name); t != nil {
-		return fmt.Errorf("previous type at %s", t.NamePos.Pos)
+	// Identifiers must be distinct from all other identifiers within this
+	// package, and cannot differ by only their capitalization.  E.g.
+	//   type foo string
+	//   const foo = "a" // BAD, const "foo" collides with type "foo"
+	//   const Foo = "A" // BAD, const "Foo" collides with type "foo"
+	//   const FoO = "A" // BAD, const "FoO" collides with type "foo"
+	lower := strings.ToLower(ident)
+	if prevDetail := f.Package.lowercaseIdents[lower]; prevDetail != "" {
+		return fmt.Errorf("previous %s", prevDetail)
 	}
-	if c := f.Package.ResolveConst(name); c != nil {
-		return fmt.Errorf("previous const at %s", c.NamePos.Pos)
-	}
-	if i := f.Package.ResolveInterface(name); i != nil {
-		return fmt.Errorf("previous interface at %s", i.NamePos.Pos)
-	}
+	f.Package.lowercaseIdents[lower] = detail
 	return nil
 }
 
