@@ -349,14 +349,12 @@ func TestWatchGlob(t *testing.T) {
 
 	rStream := stream.RecvStream()
 	// Expect a change adding /.
+	changes := []types.Change{}
 	if !rStream.Advance() {
-		t.Fatalf("Unexpected error: %s", rStream.Err())
+		t.Error("Advance() failed: %v", rStream.Err())
 	}
-	cb := rStream.Value()
-	changes := cb.Changes
-	if len(changes) != 1 {
-		t.Fatalf("Expected 1 change, but got %d", len(changes))
-	}
+	change := rStream.Value()
+	changes = append(changes, change)
 	entry := findEntry(t, changes, "")
 	if entry.Value != rootValue {
 		t.Fatalf("Expected value to be %v, but was %v.", rootValue, entry.Value)
@@ -374,14 +372,17 @@ func TestWatchGlob(t *testing.T) {
 	}
 
 	// Expect changes updating / and adding /a.
+	changes = []types.Change{}
 	if !rStream.Advance() {
-		t.Fatalf("Unexpected error: %s", rStream.Err())
+		t.Error("Advance() failed: %v", rStream.Err())
 	}
-	cb = rStream.Value()
-	changes = cb.Changes
-	if len(changes) != 2 {
-		t.Fatalf("Expected 2 changes, but got %d", len(changes))
+	change = rStream.Value()
+	changes = append(changes, change)
+	if !rStream.Advance() {
+		t.Error("Advance() failed: %v", rStream.Err())
 	}
+	change = rStream.Value()
+	changes = append(changes, change)
 	findEntry(t, changes, "")
 	entry = findEntry(t, changes, "a")
 	if entry.Value != aValue {

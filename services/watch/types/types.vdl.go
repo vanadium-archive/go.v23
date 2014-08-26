@@ -67,11 +67,6 @@ type QueryRequest struct {
 // support resuming from a specific point.
 type ResumeMarker []byte
 
-// ChangeBatch is a batch of Change messages.
-type ChangeBatch struct {
-	Changes []Change
-}
-
 // Change is the new value for a watched entity.
 type Change struct {
 	// Name is the Object name of the entity that changed.  This name is relative

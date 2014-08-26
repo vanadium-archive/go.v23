@@ -20,9 +20,8 @@ var (
 	_ storage.QueryStream = (*errorQueryStream)(nil)
 	_ storage.GlobStream  = (*errorGlobStream)(nil)
 
-	nullEntry       storage.Entry
-	nullStat        storage.Stat
-	nullChangeBatch types.ChangeBatch
+	nullEntry storage.Entry
+	nullStat  storage.Stat
 )
 
 // object implements the store.Object interface.  It is just a thin
