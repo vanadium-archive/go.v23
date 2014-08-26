@@ -1,6 +1,7 @@
 package vlog
 
 import (
+	"os"
 	"runtime"
 
 	"github.com/cosmosnicolaou/llog"
@@ -14,6 +15,7 @@ type logger struct {
 	log             *llog.Log
 	autoFlush       bool
 	maxStackBufSize int
+	logDir          string
 }
 
 func (l *logger) maybeFlush() {
@@ -52,7 +54,8 @@ func (l *logger) ConfigureLogger(opts ...LoggingOpts) error {
 		case Level:
 			l.log.SetV(llog.Level(v))
 		case LogDir:
-			l.log.SetLogDir(string(v))
+			l.logDir = string(v)
+			l.log.SetLogDir(l.logDir)
 		case LogToStderr:
 			l.log.SetLogToStderr(bool(v))
 		case MaxStackBufSize:
@@ -72,6 +75,14 @@ func (l *logger) ConfigureLogger(opts ...LoggingOpts) error {
 		}
 	}
 	return nil
+}
+
+// LogDir returns the directory where the log files are written.
+func (l *logger) LogDir() string {
+	if len(l.logDir) != 0 {
+		return l.logDir
+	}
+	return os.TempDir()
 }
 
 // Stats returns stats on how many lines/bytes haven been written to
