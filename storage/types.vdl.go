@@ -16,13 +16,6 @@ import (
 // unlikely.
 type ID [16]byte
 
-// Version identifies the value in the store for a key at some point in time.
-// The version is a numeric identifier that is globally unique within the space
-// of a single ID, meaning that if two stores contain an entry with the same ID
-// and version, then the entries represent the same thing, at the same point in
-// time (as agreed upon by the two stores).
-type Version uint64
-
 // DEntry is a directory entry.
 type DEntry struct {
 	Name string
@@ -50,6 +43,3 @@ type Entry struct {
 	// Value is the value of the entry.
 	Value _gen_vdlutil.Any
 }
-
-// NoVersion means the entry is not present in the store.
-const NoVersion = Version(0)
