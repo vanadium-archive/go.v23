@@ -1,10 +1,19 @@
 package security
 
-// PrincipalPattern is a pattern identifying a set of principal names.
-// A PrincipalPattern can be:
-// - a fixed name pattern of the form p1/.../pk
-// - a glob pattern of the form p1/.../pk/*
-type PrincipalPattern string
+// BlessingPattern is a pattern that is matched by specific blessings.
+//
+// A pattern can be either a blessing (slash-separated human-readable string)
+// or a blessing ending in a glob ("/*"). A blessing matches a pattern if it
+// can be extended to produce the same string as the pattern.  For example, the
+// pattern "a/b/c" is matched by the blessings "a", "a/b" and "a/b/c" but not
+// "x", not "a/x", not "a/b/x" and not "a/b/c/x".
+//
+// Additionally, when the pattern ends with a glob ("/*"), it is matched by
+// all blessings that represent delegates of the pattern string excluding the
+// glob. For example, the pattern "a/b/c/*" is matched by all the patterns
+// that match "a/b/c" ("a", "a/b", "a/b/c") and all delegates of "a/b/c" (like
+// "a/b/c/d", "a/b/c/d/e" etc.).
+type BlessingPattern string
 
 // Label is an access control right, like Read, Write, Admin, etc.
 type Label uint32
@@ -73,10 +82,10 @@ type ACL struct {
 // Entries describes a set of principals.
 type Entries struct {
   // Principals specifies the type of access being granted or revoked to any
-  // Identity that matches the PrincipalPattern.  If multiple patterns match
+  // Identity that matches the BlessingPattern.  If multiple patterns match
   // an Identity, the server will iterate through them to find one that
   // contains the desired label.
-  Principals map[PrincipalPattern]LabelSet
+  Principals map[BlessingPattern]LabelSet
 }
 
 // Hash identifies a cryptographic hash function.
@@ -84,7 +93,8 @@ type Hash string
 
 const (
 	// AllPrincipals is a pattern that all principals match.
-	AllPrincipals = "*"
+  // TODO(ashankar): Change to "..." to match the glob style and update comment for the BlessingPattern type.
+	AllPrincipals = BlessingPattern("*")
 
     // ChainSeparator joins blessing names to form a blessing chain name.
     ChainSeparator = "/"

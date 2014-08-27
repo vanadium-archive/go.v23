@@ -20,7 +20,7 @@ var (
 	ErrNoIntegrity = errors.New("signature does not match bytes, possible tampering")
 
 	// TODO(ataly, ashankar): Make sure we add all reserved characters to this list.
-	invalidBlessingStrs = []string{security.AllPrincipals, security.ChainSeparator}
+	invalidBlessingStrs = []string{string(security.AllPrincipals), security.ChainSeparator}
 )
 
 // errInvalidBlessingName returns an error specifying that the provided blessing name is invalid.
@@ -28,8 +28,8 @@ func errInvalidBlessingName(blessingName string) error {
 	return fmt.Errorf("invalid blessing name:%q", blessingName)
 }
 
-// errInvalidPattern returns an error specifying that the provided PrincipalPattern is invalid.
-func errInvalidPattern(pattern security.PrincipalPattern) error {
+// errInvalidPattern returns an error specifying that the provided BlessingPattern is invalid.
+func errInvalidPattern(pattern security.BlessingPattern) error {
 	return fmt.Errorf("invalid blessing pattern:%q", pattern)
 }
 
@@ -132,7 +132,7 @@ func (c *Caveat) Validate(ctx security.Context) error {
 	// TODO(ataly): Is checking that the localID matches the caveat's Service pattern
 	// the right choice here?
 	if c.Service != security.AllPrincipals &&
-		(ctx.LocalID() == nil || !c.Service.MatchedBy(ctx.LocalID())) {
+		(ctx.LocalID() == nil || !c.Service.MatchedBy(ctx.LocalID().Names()...)) {
 		return nil
 	}
 	cav, err := c.Decode()
@@ -250,11 +250,11 @@ func ValidateBlessingName(name string) error {
 	return nil
 }
 
-// ValidatePrincipalPattern verifies if the provided security.PrincipalPattern is valid.
-func ValidatePrincipalPattern(pattern security.PrincipalPattern) error {
+// ValidateBlessingPattern verifies if the provided security.BlessingPattern is valid.
+func ValidateBlessingPattern(pattern security.BlessingPattern) error {
 	patternParts := strings.Split(string(pattern), security.ChainSeparator)
 	for i, p := range patternParts {
-		if (p == security.AllPrincipals) && (i == len(patternParts)-1) {
+		if (p == string(security.AllPrincipals)) && (i == len(patternParts)-1) {
 			break
 		}
 		if ValidateBlessingName(p) != nil {

@@ -97,7 +97,7 @@ func LocalID(id security.PublicID) LocalIDOpt { return LocalIDOpt{id} }
 
 // RemoteID specifies a pattern identifying the set of valid remote identities for
 // a call.
-type RemoteID security.PrincipalPattern
+type RemoteID security.BlessingPattern
 
 func (RemoteID) IPCCallOpt() {}
 

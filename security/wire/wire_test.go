@@ -23,19 +23,19 @@ func TestValidateBlessingName(t *testing.T) {
 	}
 }
 
-func TestValidatePrincipalPattern(t *testing.T) {
+func TestValidateBlessingPattern(t *testing.T) {
 	var (
-		valid   = []security.PrincipalPattern{"*", "alice", "alice@google", "veyron/alice@google", "veyron/alice@google/bob", "alice/*", "alice/bob/*"}
-		invalid = []security.PrincipalPattern{"", "alice*", "*alice", "alice*bob", "/alice", "alice/", "/alice", "*alice/bob", "alice*/bob", "alice/*/bob"}
+		valid   = []security.BlessingPattern{"*", "alice", "alice@google", "veyron/alice@google", "veyron/alice@google/bob", "alice/*", "alice/bob/*"}
+		invalid = []security.BlessingPattern{"", "alice*", "*alice", "alice*bob", "/alice", "alice/", "/alice", "*alice/bob", "alice*/bob", "alice/*/bob"}
 	)
 	for _, p := range valid {
-		if err := ValidatePrincipalPattern(p); err != nil {
-			t.Errorf("ValidatePrincipalPattern(%q) failed unexpectedly", p)
+		if err := ValidateBlessingPattern(p); err != nil {
+			t.Errorf("ValidateBlessingPattern(%q) failed unexpectedly", p)
 		}
 	}
 	for _, p := range invalid {
-		if err := ValidatePrincipalPattern(p); err == nil {
-			t.Errorf("ValidatePrincipalPattern(%q) passed unexpectedly", p)
+		if err := ValidateBlessingPattern(p); err == nil {
+			t.Errorf("ValidateBlessingPattern(%q) passed unexpectedly", p)
 		}
 	}
 }

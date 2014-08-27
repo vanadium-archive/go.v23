@@ -30,7 +30,7 @@ type PublicKey struct {
 type Caveat struct {
 	// Service is a pattern identifying the services that the caveat encoded in Bytes
 	// is bound to.
-	Service security.PrincipalPattern
+	Service security.BlessingPattern
 	// Bytes is a serialized representation of the embedded caveat.
 	Bytes []byte
 }

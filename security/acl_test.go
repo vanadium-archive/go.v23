@@ -1,109 +1,107 @@
 package security
 
 import (
-	"bytes"
 	"encoding/json"
 	"testing"
 )
 
 func TestCanAccess(t *testing.T) {
-	ann := "fake/ann"
-	bob := "fake/bob"
-	che := "fake/che"
-	dan := "fake/dan"
-	eva := "fake/eva"
-	annFriend := "fake/ann/friend"
-	// tests if a nameless publicID can access *
-	nameless := ""
+	const (
+		acl1 = `{
+		"In": { "Principals": {
+			"ann": "RW",
+			"bob": "RW",
+			"che": "R"
+		}},
+		"NotIn": { "Principals": {
+			"bob": "W",
+			"dan": "R"
+		}}
+	}`
+		acl2 = `{
+		"In": { "Principals": {
+			"*": "RW"
+		}},
+		"NotIn": { "Principals": {
+			"ann/friend": "W"
+		}}
+	}`
+		acl3 = `{
+		"In": { "Principals": {
+			"*": "RW"
+		}},
+		"NotIn": { "Principals": {
+			"ann": "W"
+		}}
+	}`
+		acl4 = `{
+		"In": { "Principals": {
+			"ann/*": "RW"
+		}},
+		"NotIn": { "Principals": {
+			"ann/friend": "W"
+		}}
+	}`
+		acl5 = `{
+		"In": { "Principals": {
+			"*": "RW"
+		}}
+	}`
+	)
 
-	aclstring1 := `{
-		"In": { "Principals": {
-			"fake/ann": "RW",
-			"fake/bob": "RW",
-			"fake/che": "R"
-		}},
-		"NotIn": { "Principals": {
-			"fake/bob": "W",
-			"fake/dan": "R"
-		}}
-	}`
-	aclstring2 := `{
-		"In": { "Principals": {
-			"*": "RW"
-		}},
-		"NotIn": { "Principals": {
-			"fake/ann/friend": "W"
-		}}
-	}`
-	aclstring3 := `{
-		"In": { "Principals": {
-			"*": "RW"
-		}},
-		"NotIn": { "Principals": {
-			"fake/ann/*": "W"
-		}}
-	}`
-	aclstring4 := `{
-		"In": { "Principals": {
-			"fake/ann/*": "RW"
-		}},
-		"NotIn": { "Principals": {
-			"fake/ann/friend": "W"
-		}}
-	}`
-	aclToTests := map[string][]struct {
-		Name  string
-		Label Label
-		Match bool
+	tests := map[string][]struct {
+		Name, Access string
 	}{
-		aclstring1: {
-			{ann, ReadLabel, true},
-			{ann, WriteLabel, true},
-			{annFriend, ReadLabel, false},
-			{annFriend, WriteLabel, false},
-			{bob, ReadLabel, true},
-			{bob, WriteLabel, false},
-			{che, ReadLabel, true},
-			{che, WriteLabel, false},
-			{dan, ReadLabel, false},
-			{dan, WriteLabel, false},
-			{eva, ReadLabel, false},
-			{eva, WriteLabel, false},
+		acl1: {
+			{"ann", "RW"},
+			{"ann/friend", ""},
+			{"bob", "R"},
+			{"che", "R"},
+			{"dan", ""},
 		},
-		aclstring2: {
-			{ann, ReadLabel, true},
-			{ann, WriteLabel, true},
-			{annFriend, ReadLabel, true},
-			{annFriend, WriteLabel, false},
-			{bob, ReadLabel, true},
-			{bob, WriteLabel, true},
+		acl2: {
+			{"", "RW"},
+			{"ann", "RW"},
+			{"ann/friend", "R"},
+			{"ann/friend/spouse", "R"},
+			{"bob", "RW"},
 		},
-		aclstring3: {
-			{nameless, ReadLabel, true},
-			{ann, ReadLabel, true},
-			{ann, WriteLabel, false},
-			{annFriend, ReadLabel, true},
-			{annFriend, WriteLabel, false},
-			{bob, ReadLabel, true},
-			{bob, WriteLabel, true},
+		acl3: {
+			{"", "RW"},
+			{"ann", "R"},
+			{"ann/friend", "R"},
+			{"bob", "RW"},
 		},
-		aclstring4: {
-			{ann, ReadLabel, true},
-			{ann, WriteLabel, true},
-			{annFriend, ReadLabel, true},
-			{annFriend, WriteLabel, false},
-			{bob, ReadLabel, false},
-			{bob, WriteLabel, false},
+		acl4: {
+			{"ann", "RW"},
+			{"ann/friend", "R"},
+			{"ann/enemy", "RW"},
+			{"ann/friend/spouse", "R"},
+			{"bob", ""},
+		},
+		acl5: {
+			{"", "RW"},
+			{"ann", "RW"},
+			{"bob", "RW"},
 		},
 	}
-	for aclstring, tests := range aclToTests {
+
+	for aclstring, entries := range tests {
 		var acl ACL
-		if err := json.NewDecoder(bytes.NewBufferString(aclstring)).Decode(&acl); err != nil {
-			t.Fatalf("Cannot parse ACL %s: %v", aclstring, err)
+		if err := json.Unmarshal([]byte(aclstring), &acl); err != nil {
+			t.Errorf("json.Unmarshal(%q,%T) failed: %v", aclstring, acl, err)
+			continue
 		}
-		for _, test := range tests {
-			if acl.CanAccess(test.Name, test.Label) != test.Match {
-				t.Errorf("acl.CanAccess(%v, %v) was not %v", test.Name, test.Label, test.Match)
+		for _, e := range entries {
+			var access LabelSet
+			if err := json.Unmarshal([]byte("\""+e.Access+"\""), &access); err != nil {
+				t.Errorf("json.Unmarshal(%q, %T) failed: %v", e.Access, access, err)
+				continue
+			}
+			for _, label := range ValidLabels {
+				if got, want := acl.CanAccess(e.Name, label), access.HasLabel(label); got != want {
+					t.Errorf("Got %v, want %v for CanAccess(%q, %v) on ACL %v", got, want, e.Name, label, acl)
+				}
 			}
 		}
 	}

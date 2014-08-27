@@ -1,11 +1,14 @@
 package security
 
-// CanAccess tests whether the provided name has the desired access.
-func (acl ACL) CanAccess(name string, label Label) bool {
-	// TODO(m3b,tilaks): consult group ACLs.
+import "strings"
+
+// CanAccess returns true iff the ACL provides blessing with access to operations with label.
+func (acl ACL) CanAccess(blessing string, label Label) bool {
+	// Step 1: blessing should match a pattern in acl.In
 	in := false
+	// TODO(m3b,tilaks): consult group ACLs.
 	for pattern, labels := range acl.In.Principals {
-		if labels.HasLabel(label) && pattern.isDelegateOf(name) {
+		if labels.HasLabel(label) && pattern.MatchedBy(blessing) {
 			in = true
 			break
 		}
@@ -13,12 +16,15 @@ func (acl ACL) CanAccess(name string, label Label) bool {
 	if !in {
 		return false
 	}
-	notIn := false
-	for pattern, labels := range acl.NotIn.Principals {
-		if labels.HasLabel(label) && pattern.isBlesserOf(name) {
-			notIn = true
-			break
+	// Step 2: Check the NotIn list.
+	// NotIn denies access to the delegates of all blessings explicitly
+	// specified in it.
+	const glob = ChainSeparator + string(AllPrincipals)
+	pattern := BlessingPattern(blessing)
+	for notin, labels := range acl.NotIn.Principals {
+		if labels.HasLabel(label) && pattern.MatchedBy(strings.TrimSuffix(string(notin), glob)) {
+			return false
 		}
 	}
-	return in && !notIn
+	return true
 }

@@ -1,46 +1,71 @@
 package security
 
-import (
-	"testing"
-	"time"
-)
-
-func bless(blessee PublicID, blesser PrivateID, name string) PublicID {
-	blessed, err := blesser.Bless(blessee, name, 5*time.Minute, nil)
-	if err != nil {
-		panic(err)
-	}
-	return blessed
-}
+import "testing"
 
 func TestMatchedBy(t *testing.T) {
-	annPrivateID := FakePrivateID("ann")
-	bobPrivateID := FakePrivateID("bob")
-	ann := annPrivateID.PublicID()
-	bob := bobPrivateID.PublicID()
-	annFriend := bless(bob, annPrivateID, "friend")
-	// tests if a nameless publicID can access *
-	nameless := FakePublicID("")
-
-	tests := map[PrincipalPattern][]PublicID{
-		"*":               {ann, bob, annFriend, nameless},
-		"fake/*":          {ann, bob, annFriend},
-		"fake/ann":        {ann},
-		"fake/bob":        {bob},
-		"fake/ann/friend": {ann, annFriend},
-		"fake/ann/*":      {ann, annFriend},
+	type v []string
+	tests := []struct {
+		Pattern      BlessingPattern
+		Matches      v
+		DoesNotMatch v
+	}{
+		{
+			Pattern:      "",
+			DoesNotMatch: v{"ann", "bob", "ann/friend", ""},
+		},
+		{
+			Pattern: "*",
+			Matches: v{"", "ann", "bob", "ann/friend"},
+		},
+		{
+			Pattern:      "",
+			DoesNotMatch: v{"", "ann", "bob", "ann/friend"},
+		},
+		{
+			Pattern:      "ann/*",
+			Matches:      v{"ann", "ann/friend", "ann/enemy"},
+			DoesNotMatch: v{"", "bob", "bob/ann"},
+		},
+		{
+			Pattern:      "ann/friend",
+			Matches:      v{"ann", "ann/friend"},
+			DoesNotMatch: v{"", "bob", "bob/friend", "bob/ann", "ann/friend/spouce"},
+		},
 	}
-	for p, test := range tests {
-		pidToMatch := map[PublicID]bool{
-			ann: false, bob: false, annFriend: false, nameless: false,
+	for _, test := range tests {
+		// All combinations of test.Matches should match.
+		for i := 0; i < len(test.Matches); i++ {
+			for j := i + 1; j < len(test.Matches); j++ {
+				args := []string(test.Matches[i:j])
+				if !test.Pattern.MatchedBy(args...) {
+					t.Errorf("%q.MatchedBy(%v) returned false", test.Pattern, args)
+				}
+			}
 		}
-		for _, pid := range test {
-			pidToMatch[pid] = true
-		}
-		for pid, match := range pidToMatch {
-			if p.MatchedBy(pid) != match {
-				t.Errorf("%q.MatchedBy(%v) was not %v", p, pid, match)
+		// All combinations of test.DoesNotMatch should not match.
+		for i := 0; i < len(test.DoesNotMatch); i++ {
+			for j := i + 1; j < len(test.DoesNotMatch); j++ {
+				args := []string(test.DoesNotMatch[i:j])
+				if test.Pattern.MatchedBy(args...) {
+					t.Errorf("%q.MatchedBy(%v) returned true", test.Pattern, args)
+				}
 			}
 		}
 	}
+}
+
+func TestMatchedByCornerCases(t *testing.T) {
+	if !AllPrincipals.MatchedBy() {
+		t.Errorf("%q.MatchedBy() failed", AllPrincipals)
+	}
+	if !AllPrincipals.MatchedBy("") {
+		t.Errorf("%q.MatchedBy(%q) failed", AllPrincipals, "")
+	}
+	if BlessingPattern("ann").MatchedBy() {
+		t.Errorf("%q.MatchedBy() returned true", "ann")
+	}
+	if BlessingPattern("ann").MatchedBy("") {
+		t.Errorf("%q.MatchedBy(%q) returned true", "ann", "")
+	}
+
 }
