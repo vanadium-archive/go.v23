@@ -14,7 +14,7 @@ func TestMatchedBy(t *testing.T) {
 			DoesNotMatch: v{"ann", "bob", "ann/friend", ""},
 		},
 		{
-			Pattern: "*",
+			Pattern: "...",
 			Matches: v{"", "ann", "bob", "ann/friend"},
 		},
 		{
@@ -22,7 +22,7 @@ func TestMatchedBy(t *testing.T) {
 			DoesNotMatch: v{"", "ann", "bob", "ann/friend"},
 		},
 		{
-			Pattern:      "ann/*",
+			Pattern:      "ann/...",
 			Matches:      v{"ann", "ann/friend", "ann/enemy"},
 			DoesNotMatch: v{"", "bob", "bob/ann"},
 		},

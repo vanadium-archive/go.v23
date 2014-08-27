@@ -1,4 +1,4 @@
-// Package access defines the service and types for dynamic access control
+// Package access defines the service for dynamic access control
 // in Veyron.  Examples: "allow app to read this photo", "prevent user
 // from modifying this file".
 //
@@ -10,8 +10,8 @@
 // Overview
 //
 // Every Veyron object supports GetACL and SetACL methods.  An ACL (Access
-// Control List) contains principals, groups, and the labels that these
-// principals and groups can access for that object.
+// Control List) contains blessings, groups, and the labels that principals
+// with these blessings and group memberships can access for that object.
 //
 // An object can have multiple names, so GetACL and SetACL can be invoked on
 // any of these names, but the object itself has a single ACL.
@@ -29,7 +29,7 @@
 //     }
 //     // Add newLabel to the LabelSet.
 //     // TODO(kash): Update when we switch labels to strings instead of ints.
-//     acl.Principals[newPattern] = acl.Principals[newPattern] | newLabel
+//     acl.In[newPattern] = acl.In[newPattern] | newLabel
 //     // Use the same etag with the modified acl to ensure that no other client
 //     // has modified the acl since GetACL returned.
 //     if err := n.SetACL(acl, etag); err != nil {

@@ -8,8 +8,8 @@ import (
 
 func TestValidateBlessingName(t *testing.T) {
 	var (
-		valid   = []string{"alice", "alice@google", "alice@google@gmail"}
-		invalid = []string{"", "alice*", "*alice", "alice*bob", "/alice", "alice/", "/alice", "alice/bob"}
+		valid   = []string{"alice", "alice@google", "alice@google@gmail", "alice.jones"}
+		invalid = []string{"", "alice...", "...alice", "alice...bob", "/alice", "alice/", "/alice", "alice/bob"}
 	)
 	for _, n := range valid {
 		if err := ValidateBlessingName(n); err != nil {
@@ -25,8 +25,8 @@ func TestValidateBlessingName(t *testing.T) {
 
 func TestValidateBlessingPattern(t *testing.T) {
 	var (
-		valid   = []security.BlessingPattern{"*", "alice", "alice@google", "veyron/alice@google", "veyron/alice@google/bob", "alice/*", "alice/bob/*"}
-		invalid = []security.BlessingPattern{"", "alice*", "*alice", "alice*bob", "/alice", "alice/", "/alice", "*alice/bob", "alice*/bob", "alice/*/bob"}
+		valid   = []security.BlessingPattern{"...", "alice", "alice.jones", "alice@google", "veyron/alice@google", "veyron/alice@google/bob", "alice/...", "alice/bob/..."}
+		invalid = []security.BlessingPattern{"", "alice...", "...alice", "alice...bob", "/alice", "alice/", "/alice", "...alice/bob", "alice.../bob", "alice/.../bob"}
 	)
 	for _, p := range valid {
 		if err := ValidateBlessingPattern(p); err != nil {

@@ -6,8 +6,8 @@ import "strings"
 func (acl ACL) CanAccess(blessing string, label Label) bool {
 	// Step 1: blessing should match a pattern in acl.In
 	in := false
-	// TODO(m3b,tilaks): consult group ACLs.
-	for pattern, labels := range acl.In.Principals {
+	// TODO(ataly,ashankar,hpucha): consult group ACLs.
+	for pattern, labels := range acl.In {
 		if labels.HasLabel(label) && pattern.MatchedBy(blessing) {
 			in = true
 			break
@@ -21,8 +21,8 @@ func (acl ACL) CanAccess(blessing string, label Label) bool {
 	// specified in it.
 	const glob = ChainSeparator + string(AllPrincipals)
 	pattern := BlessingPattern(blessing)
-	for notin, labels := range acl.NotIn.Principals {
-		if labels.HasLabel(label) && pattern.MatchedBy(strings.TrimSuffix(string(notin), glob)) {
+	for notin, labels := range acl.NotIn {
+		if labels.HasLabel(label) && pattern.MatchedBy(strings.TrimSuffix(notin, glob)) {
 			return false
 		}
 	}
