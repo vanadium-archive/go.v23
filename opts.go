@@ -1,6 +1,7 @@
 package veyron2
 
 import (
+	"net"
 	"veyron2/ipc/stream"
 	"veyron2/naming"
 	"veyron2/security"
@@ -179,23 +180,9 @@ type ServesMountTableOpt bool
 
 func (ServesMountTableOpt) IPCServerOpt() {}
 
-// TODO(cnicolaou): this will be replaced by a cleaner API.
-// ServerPublishOpt tells the ipc server which of the endpoints it listens on
-// should be published by Publish.
-type ServerPublishOpt int
+// PreferredAddressOpt is a function that can be used to select
+// the preferred address to use for publishing to the mount table when
+// the default policy is inappropriate.
+type PreferredAddressOpt func(network string) (net.Addr, error)
 
-const (
-	PublishAll   ServerPublishOpt = 0
-	PublishFirst ServerPublishOpt = 1
-)
-
-func (ServerPublishOpt) IPCServerOpt() {}
-
-// TODO(cnicolaou): this wiil be replaced by a cleaner API.
-// EndpointRewriteOpt specifies how to rewrite the address of the endpoints
-// being listened on.  The rewrite only applies to tcp endpoints.  The value of
-// the option is the rewritten host/ip portion of the address of the endpoint.
-type EndpointRewriteOpt string
-
-func (EndpointRewriteOpt) IPCServerOpt()         {}
-func (EndpointRewriteOpt) IPCStreamListenerOpt() {}
+func (PreferredAddressOpt) IPCServerOpt() {}

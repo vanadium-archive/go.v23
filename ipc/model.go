@@ -61,7 +61,8 @@ type Stream interface {
 // Server defines the interface for managing a collection of services.
 type Server interface {
 	// Listen creates a listening network endpoint for the Server.  The
-	// meaning of the arguments are similar to what Go's net.Listen accepts.
+	// meaning of the arguments are similar to those which Go's net.Listen
+	// accepts.
 	// For the special protocol "veyron", the address can also be:
 	// - a formatted Veyron endpoint
 	// - an Object name which resolves to an endpoint
