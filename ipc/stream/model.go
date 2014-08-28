@@ -124,6 +124,9 @@ type Manager interface {
 	// frees up internal data structures.
 	// The Manager is not usable after Shutdown has been called.
 	Shutdown()
+
+	// RoutingID returns the Routing ID associated with the VC.
+	RoutingID() naming.RoutingID
 }
 
 // ManagerOpt is the interface for all Manager related options provided to Runtime.NewStreamManager.
