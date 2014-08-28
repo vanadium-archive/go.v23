@@ -61,11 +61,6 @@ type QueryRequest struct {
 // support resuming from a specific point.
 type ResumeMarker []byte
 
-// ChangeBatch is a batch of Change messages.
-type ChangeBatch struct {
-  Changes []Change
-}
-
 const (
   // The entity exists and its full value is included in Value.
   Exists = int32(0)

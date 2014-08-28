@@ -48,13 +48,6 @@
 // continued bit, i.e., they will just process each Change message as
 // it is received.
 //
-// Batching
-//
-// Multiple Change messages may be grouped into a single ChangeBatch message to
-// reduce message transfer overhead. A single ChangeBatch may contain many
-// atomic groups or a single atomic group may be split across many
-// ChangeBatches.
-//
 // Initial State
 //
 // The first atomic group delivered by a watch call is special. It is
@@ -163,7 +156,7 @@ type GlobWatcherWatchGlobCall interface {
 		// Value returns the element that was staged by Advance.
 		// Value may panic if Advance returned false or was not
 		// called at all.  Value does not block.
-		Value() types.ChangeBatch
+		Value() types.Change
 
 		// Err returns a non-nil error iff the stream encountered
 		// any errors.  Err does not block.
@@ -191,17 +184,17 @@ type GlobWatcherWatchGlobCall interface {
 
 type implGlobWatcherWatchGlobStreamIterator struct {
 	clientCall _gen_ipc.Call
-	val        types.ChangeBatch
+	val        types.Change
 	err        error
 }
 
 func (c *implGlobWatcherWatchGlobStreamIterator) Advance() bool {
-	c.val = types.ChangeBatch{}
+	c.val = types.Change{}
 	c.err = c.clientCall.Recv(&c.val)
 	return c.err == nil
 }
 
-func (c *implGlobWatcherWatchGlobStreamIterator) Value() types.ChangeBatch {
+func (c *implGlobWatcherWatchGlobStreamIterator) Value() types.Change {
 	return c.val
 }
 
@@ -220,7 +213,7 @@ type implGlobWatcherWatchGlobCall struct {
 
 func (c *implGlobWatcherWatchGlobCall) RecvStream() interface {
 	Advance() bool
-	Value() types.ChangeBatch
+	Value() types.Change
 	Err() error
 } {
 	return &c.readStream
@@ -241,7 +234,7 @@ type implGlobWatcherServiceWatchGlobStreamSender struct {
 	serverCall _gen_ipc.ServerCall
 }
 
-func (s *implGlobWatcherServiceWatchGlobStreamSender) Send(item types.ChangeBatch) error {
+func (s *implGlobWatcherServiceWatchGlobStreamSender) Send(item types.Change) error {
 	return s.serverCall.Send(item)
 }
 
@@ -252,7 +245,7 @@ type GlobWatcherServiceWatchGlobStream interface {
 	SendStream() interface {
 		// Send places the item onto the output stream, blocking if there is no buffer
 		// space available.  If the client has canceled, an error is returned.
-		Send(item types.ChangeBatch) error
+		Send(item types.Change) error
 	}
 }
 
@@ -264,7 +257,7 @@ type implGlobWatcherServiceWatchGlobStream struct {
 func (s *implGlobWatcherServiceWatchGlobStream) SendStream() interface {
 	// Send places the item onto the output stream, blocking if there is no buffer
 	// space available.  If the client has canceled, an error is returned.
-	Send(item types.ChangeBatch) error
+	Send(item types.Change) error
 } {
 	return &s.writer
 }
@@ -387,7 +380,7 @@ func (__gen_s *ServerStubGlobWatcher) Signature(call _gen_ipc.ServerCall) (_gen_
 			{Name: "", Type: 68},
 		},
 
-		OutStream: 72,
+		OutStream: 70,
 	}
 
 	result.TypeDefs = []_gen_vdlutil.Any{
@@ -406,11 +399,6 @@ func (__gen_s *ServerStubGlobWatcher) Signature(call _gen_ipc.ServerCall) (_gen_
 				_gen_wiretype.FieldType{Type: 0x2, Name: "Continued"},
 			},
 			"veyron2/services/watch/types.Change", []string(nil)},
-		_gen_wiretype.SliceType{Elem: 0x46, Name: "", Tags: []string(nil)}, _gen_wiretype.StructType{
-			[]_gen_wiretype.FieldType{
-				_gen_wiretype.FieldType{Type: 0x47, Name: "Changes"},
-			},
-			"veyron2/services/watch/types.ChangeBatch", []string(nil)},
 	}
 
 	return result, nil
@@ -476,7 +464,7 @@ type QueryWatcherWatchQueryCall interface {
 		// Value returns the element that was staged by Advance.
 		// Value may panic if Advance returned false or was not
 		// called at all.  Value does not block.
-		Value() types.ChangeBatch
+		Value() types.Change
 
 		// Err returns a non-nil error iff the stream encountered
 		// any errors.  Err does not block.
@@ -504,17 +492,17 @@ type QueryWatcherWatchQueryCall interface {
 
 type implQueryWatcherWatchQueryStreamIterator struct {
 	clientCall _gen_ipc.Call
-	val        types.ChangeBatch
+	val        types.Change
 	err        error
 }
 
 func (c *implQueryWatcherWatchQueryStreamIterator) Advance() bool {
-	c.val = types.ChangeBatch{}
+	c.val = types.Change{}
 	c.err = c.clientCall.Recv(&c.val)
 	return c.err == nil
 }
 
-func (c *implQueryWatcherWatchQueryStreamIterator) Value() types.ChangeBatch {
+func (c *implQueryWatcherWatchQueryStreamIterator) Value() types.Change {
 	return c.val
 }
 
@@ -533,7 +521,7 @@ type implQueryWatcherWatchQueryCall struct {
 
 func (c *implQueryWatcherWatchQueryCall) RecvStream() interface {
 	Advance() bool
-	Value() types.ChangeBatch
+	Value() types.Change
 	Err() error
 } {
 	return &c.readStream
@@ -554,7 +542,7 @@ type implQueryWatcherServiceWatchQueryStreamSender struct {
 	serverCall _gen_ipc.ServerCall
 }
 
-func (s *implQueryWatcherServiceWatchQueryStreamSender) Send(item types.ChangeBatch) error {
+func (s *implQueryWatcherServiceWatchQueryStreamSender) Send(item types.Change) error {
 	return s.serverCall.Send(item)
 }
 
@@ -565,7 +553,7 @@ type QueryWatcherServiceWatchQueryStream interface {
 	SendStream() interface {
 		// Send places the item onto the output stream, blocking if there is no buffer
 		// space available.  If the client has canceled, an error is returned.
-		Send(item types.ChangeBatch) error
+		Send(item types.Change) error
 	}
 }
 
@@ -577,7 +565,7 @@ type implQueryWatcherServiceWatchQueryStream struct {
 func (s *implQueryWatcherServiceWatchQueryStream) SendStream() interface {
 	// Send places the item onto the output stream, blocking if there is no buffer
 	// space available.  If the client has canceled, an error is returned.
-	Send(item types.ChangeBatch) error
+	Send(item types.Change) error
 } {
 	return &s.writer
 }
@@ -700,7 +688,7 @@ func (__gen_s *ServerStubQueryWatcher) Signature(call _gen_ipc.ServerCall) (_gen
 			{Name: "", Type: 69},
 		},
 
-		OutStream: 73,
+		OutStream: 71,
 	}
 
 	result.TypeDefs = []_gen_vdlutil.Any{
@@ -724,11 +712,6 @@ func (__gen_s *ServerStubQueryWatcher) Signature(call _gen_ipc.ServerCall) (_gen
 				_gen_wiretype.FieldType{Type: 0x2, Name: "Continued"},
 			},
 			"veyron2/services/watch/types.Change", []string(nil)},
-		_gen_wiretype.SliceType{Elem: 0x47, Name: "", Tags: []string(nil)}, _gen_wiretype.StructType{
-			[]_gen_wiretype.FieldType{
-				_gen_wiretype.FieldType{Type: 0x48, Name: "Changes"},
-			},
-			"veyron2/services/watch/types.ChangeBatch", []string(nil)},
 	}
 
 	return result, nil

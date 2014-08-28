@@ -45,13 +45,6 @@
 // continued bit, i.e., they will just process each Change message as
 // it is received.
 //
-// Batching
-//
-// Multiple Change messages may be grouped into a single ChangeBatch message to
-// reduce message transfer overhead. A single ChangeBatch may contain many
-// atomic groups or a single atomic group may be split across many
-// ChangeBatches.
-//
 // Initial State
 //
 // The first atomic group delivered by a watch call is special. It is
@@ -113,12 +106,12 @@ import "veyron2/services/watch/types"
 // that match a pattern.  See the package comments for details.
 type GlobWatcher interface {
   // WatchGlob returns a stream of changes that match a pattern.
-  WatchGlob(Req types.GlobRequest) stream<_, types.ChangeBatch> error
+  WatchGlob(Req types.GlobRequest) stream<_, types.Change> error
 }
 
 // QueryWatcher allows a client to receive updates for changes to objects
 // that match a query.  See the package comments for details.
 type QueryWatcher interface {
   // WatchQuery returns a stream of changes that satisy a query.
-  WatchQuery(Req types.QueryRequest) stream<_, types.ChangeBatch> error
+  WatchQuery(Req types.QueryRequest) stream<_, types.Change> error
 }
