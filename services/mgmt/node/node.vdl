@@ -98,10 +98,11 @@ type Application interface {
 	// Install installs the application identified by the argument and
 	// returns an object name suffix that identifies the new installation.
 	//
-	// The argument should be an object name. The service it identifies must
-	// implement repository.Application, and is expected to return either
-	// the requested version (if the object name encodes a specific
-	// version), or otherwise the latest available version, as appropriate.
+	// The argument should be an object name for an application envelope.
+	// The service it identifies must implement repository.Application, and
+	// is expected to return either the requested version (if the object name
+	// encodes a specific version), or otherwise the latest available version,
+	// as appropriate.
 	//
 	// The returned suffix, when appended to the name used to reach the
 	// receiver for Install, can be used to control the installation object.
@@ -163,13 +164,17 @@ type Description struct {
 	Profiles set[string]
 }
 
-// Node can be used to manage a node. The idea is that this interace
+// Node can be used to manage a node. The idea is that this interface
 // will be invoked using an object name that identifies the node.
 type Node interface {
 	// Each method of the Application interface invoked at the node
 	// level applies to all applications installed on the node (and
 	// their installations and instances where applicable).
 	Application
+	// Claim is used to claim ownership of a Node running on a device
+	// by blessing its identity. By default, after this call all node
+	// methods will be access protected to the identity of the claimer.
+	Claim() error
 	// Describe generates a description of the node.
 	Describe() (Description, error)
 	// IsRunnable checks if the node can execute the given binary.

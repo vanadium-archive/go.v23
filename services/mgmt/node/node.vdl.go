@@ -129,10 +129,11 @@ type Application_ExcludingUniversal interface {
 	// Install installs the application identified by the argument and
 	// returns an object name suffix that identifies the new installation.
 	//
-	// The argument should be an object name. The service it identifies must
-	// implement repository.Application, and is expected to return either
-	// the requested version (if the object name encodes a specific
-	// version), or otherwise the latest available version, as appropriate.
+	// The argument should be an object name for an application envelope.
+	// The service it identifies must implement repository.Application, and
+	// is expected to return either the requested version (if the object name
+	// encodes a specific version), or otherwise the latest available version,
+	// as appropriate.
 	//
 	// The returned suffix, when appended to the name used to reach the
 	// receiver for Install, can be used to control the installation object.
@@ -191,10 +192,11 @@ type ApplicationService interface {
 	// Install installs the application identified by the argument and
 	// returns an object name suffix that identifies the new installation.
 	//
-	// The argument should be an object name. The service it identifies must
-	// implement repository.Application, and is expected to return either
-	// the requested version (if the object name encodes a specific
-	// version), or otherwise the latest available version, as appropriate.
+	// The argument should be an object name for an application envelope.
+	// The service it identifies must implement repository.Application, and
+	// is expected to return either the requested version (if the object name
+	// encodes a specific version), or otherwise the latest available version,
+	// as appropriate.
 	//
 	// The returned suffix, when appended to the name used to reach the
 	// receiver for Install, can be used to control the installation object.
@@ -639,7 +641,7 @@ func (__gen_s *ServerStubApplication) UpdateTo(call _gen_ipc.ServerCall, Name st
 	return
 }
 
-// Node can be used to manage a node. The idea is that this interace
+// Node can be used to manage a node. The idea is that this interface
 // will be invoked using an object name that identifies the node.
 // Node is the interface the client binds and uses.
 // Node_ExcludingUniversal is the interface without internal framework-added methods
@@ -734,6 +736,10 @@ type Node_ExcludingUniversal interface {
 	// In other words, invoking any method using an existing application
 	// installation instance as a receiver is well-defined.
 	Application_ExcludingUniversal
+	// Claim is used to claim ownership of a Node running on a device
+	// by blessing its identity. By default, after this call all node
+	// methods will be access protected to the identity of the claimer.
+	Claim(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error)
 	// Describe generates a description of the node.
 	Describe(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply Description, err error)
 	// IsRunnable checks if the node can execute the given binary.
@@ -843,6 +849,10 @@ type NodeService interface {
 	// In other words, invoking any method using an existing application
 	// installation instance as a receiver is well-defined.
 	ApplicationService
+	// Claim is used to claim ownership of a Node running on a device
+	// by blessing its identity. By default, after this call all node
+	// methods will be access protected to the identity of the claimer.
+	Claim(context _gen_ipc.ServerContext) (err error)
 	// Describe generates a description of the node.
 	Describe(context _gen_ipc.ServerContext) (reply Description, err error)
 	// IsRunnable checks if the node can execute the given binary.
@@ -905,6 +915,17 @@ func (__gen_c *clientStubNode) client(ctx _gen_context.T) _gen_ipc.Client {
 		return __gen_c.defaultClient
 	}
 	return _gen_veyron2.RuntimeFromContext(ctx).Client()
+}
+
+func (__gen_c *clientStubNode) Claim(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Claim", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&err); ierr != nil {
+		err = ierr
+	}
+	return
 }
 
 func (__gen_c *clientStubNode) Describe(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply Description, err error) {
@@ -990,6 +1011,8 @@ func (__gen_s *ServerStubNode) GetMethodTags(call _gen_ipc.ServerCall, method st
 		return resp, err
 	}
 	switch method {
+	case "Claim":
+		return []interface{}{}, nil
 	case "Describe":
 		return []interface{}{}, nil
 	case "IsRunnable":
@@ -1003,11 +1026,17 @@ func (__gen_s *ServerStubNode) GetMethodTags(call _gen_ipc.ServerCall, method st
 
 func (__gen_s *ServerStubNode) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
 	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
+	result.Methods["Claim"] = _gen_ipc.MethodSignature{
+		InArgs: []_gen_ipc.MethodArgument{},
+		OutArgs: []_gen_ipc.MethodArgument{
+			{Name: "", Type: 65},
+		},
+	}
 	result.Methods["Describe"] = _gen_ipc.MethodSignature{
 		InArgs: []_gen_ipc.MethodArgument{},
 		OutArgs: []_gen_ipc.MethodArgument{
-			{Name: "", Type: 66},
 			{Name: "", Type: 67},
+			{Name: "", Type: 65},
 		},
 	}
 	result.Methods["IsRunnable"] = _gen_ipc.MethodSignature{
@@ -1016,7 +1045,7 @@ func (__gen_s *ServerStubNode) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Ser
 		},
 		OutArgs: []_gen_ipc.MethodArgument{
 			{Name: "", Type: 2},
-			{Name: "", Type: 67},
+			{Name: "", Type: 65},
 		},
 	}
 	result.Methods["Reset"] = _gen_ipc.MethodSignature{
@@ -1024,20 +1053,20 @@ func (__gen_s *ServerStubNode) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Ser
 			{Name: "Deadline", Type: 53},
 		},
 		OutArgs: []_gen_ipc.MethodArgument{
-			{Name: "", Type: 67},
+			{Name: "", Type: 65},
 		},
 	}
 
 	result.TypeDefs = []_gen_vdlutil.Any{
-		_gen_wiretype.MapType{Key: 0x3, Elem: 0x2, Name: "", Tags: []string(nil)}, _gen_wiretype.StructType{
+		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, _gen_wiretype.MapType{Key: 0x3, Elem: 0x2, Name: "", Tags: []string(nil)}, _gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
-				_gen_wiretype.FieldType{Type: 0x41, Name: "Profiles"},
+				_gen_wiretype.FieldType{Type: 0x42, Name: "Profiles"},
 			},
 			"veyron2/services/mgmt/node.Description", []string(nil)},
-		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, _gen_wiretype.StructType{
+		_gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
 				_gen_wiretype.FieldType{Type: 0x3, Name: "Name"},
-				_gen_wiretype.FieldType{Type: 0x41, Name: "Profiles"},
+				_gen_wiretype.FieldType{Type: 0x42, Name: "Profiles"},
 			},
 			"veyron2/services/mgmt/binary.Description", []string(nil)},
 	}
@@ -1115,6 +1144,11 @@ func (__gen_s *ServerStubNode) UnresolveStep(call _gen_ipc.ServerCall) (reply []
 	for i, p := range published {
 		reply[i] = _gen_naming.Join(p, call.Name())
 	}
+	return
+}
+
+func (__gen_s *ServerStubNode) Claim(call _gen_ipc.ServerCall) (err error) {
+	err = __gen_s.service.Claim(call)
 	return
 }
 
