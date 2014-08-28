@@ -11,14 +11,14 @@ import (
 // BlessingPattern is a pattern that is matched by specific blessings.
 //
 // A pattern can be either a blessing (slash-separated human-readable string)
-// or a blessing ending in a glob ("/*"). A blessing matches a pattern if it
+// or a blessing ending in a glob ("/..."). A blessing matches a pattern if it
 // can be extended to produce the same string as the pattern.  For example, the
 // pattern "a/b/c" is matched by the blessings "a", "a/b" and "a/b/c" but not
 // "x", not "a/x", not "a/b/x" and not "a/b/c/x".
 //
-// Additionally, when the pattern ends with a glob ("/*"), it is matched by
+// Additionally, when the pattern ends with a glob ("/..."), it is matched by
 // all blessings that represent delegates of the pattern string excluding the
-// glob. For example, the pattern "a/b/c/*" is matched by all the patterns
+// glob. For example, the pattern "a/b/c/..." is matched by all the patterns
 // that match "a/b/c" ("a", "a/b", "a/b/c") and all delegates of "a/b/c" (like
 // "a/b/c/d", "a/b/c/d/e" etc.).
 type BlessingPattern string
@@ -29,71 +29,46 @@ type Label uint32
 // LabelSet is a set of access control labels, represented as a bitmask.
 type LabelSet Label
 
-// ACL (Access Control List) tracks which principals have access to an object
-// and which principals specifically do not have access to an object.
-// For example:
-//   ACL {
-//     In {
-//       Principals {
-//         "user1/*": ["Read", "Write"],
-//         "user2/*": ["Read"],
-//       }
-//     }
-//     NotIn {
-//       Principals {
-//         "user1/*": ["Write"],
-//       }
-//     }
-//   }
-// NotIn subtracts privileges.  In this example, it says that "user1/*" has
-// only "Read" access.  All of engineering has read access except for
-// engineering interns.
+// ACL (Access Control List) tracks the set of blessings that grant
+// access to an object and the type of access the blessing grants.
 //
-// Principals can have multiple names.  As long as the principal has a name
-// that matches In and not NotIn, it is authorized. The reasoning is that the
-// principal can always hide a name if it wants to, so requiring all names to
-// satisfy the policy does not make sense.
-//
-// Formally,
-//
-// Delegate(pattern P, name N) checks if some name that exactly matches P is
-// equal to or blessed by N.
-// If P is of the form p_0/.../p_k; Delegate(P, N) is true iff N is of the form
-// n_0/.../n_m such that m <= k and for all i from 0 to m, p_i = n_i.
-// If P is of the form p_0/.../p_k/*; Delegate(P, N) is true iff N is of the
-// form n_0/.../n_m such that for all i from 0 to min(m, k), p_i = n_i.
-//
-// Blesser(pattern P, name N) checks if some name that exactly matches P is
-// equal to or a blesser of N.
-// If P is of the form p_0/.../p_k; Blesser(P, N) is true iff N is of the form
-// n_0/.../n_m such that m >= k and for all i from 0 to k, p_i = n_i.
-// If P is of the form p_0/.../p_k/*; Blesser(P, N) is true iff N is of the form
-// n_0/.../n_m such that m >= k and for all i from 0 to k, p_i = n_i.
-//
-// In(label L) = { pattern P | L ∈ ACL.In.Principals[P] }
-// NotIn(label L) = { pattern P | L ∈ ACL.NotIn.Principals[P] }
-//
-// Matches(label L) = { id I | ∃ name N ∈ I.Names() |
-//   ∃ P ∈ In(L) | Delegate(P, N)
-//   ∧
-//   ∀ P ∈ NotIn(L) ~Blesser(P, N)
-// }
+// When a principal presents multiple blessings, it should be authorized
+// if any one of those blessings matches the ACL. Since the principal
+// chooses the subset of its blessings to share (and can thus withold
+// any particular one), requiring all presented blessings to match the
+// ACL does not provide any security benefits.
 type ACL struct {
-	// In represents the set of principals that can access the object only if
-	// they are not also present in NotIn.
-	In Entries
-	// NotIn represents the set of principals that do not have access to the
-	// object.  It effectively subtracts permissions from In.
-	NotIn Entries
-}
-
-// Entries describes a set of principals.
-type Entries struct {
-	// Principals specifies the type of access being granted or revoked to any
-	// Identity that matches the BlessingPattern.  If multiple patterns match
-	// an Identity, the server will iterate through them to find one that
-	// contains the desired label.
-	Principals map[BlessingPattern]LabelSet
+	// In denotes the set of blessings (represented as BlessingPatterns)
+	// that grant access to an object, unless blacklisted by an entry in
+	// NotIn.
+	//
+	// For example:
+	//
+	//  In: {"foo/bar": "R"}
+	//
+	// grants "Read" access to a principal that holds the blessing "foo/bar"
+	// or a delegator of "foo/bar" ("foo"), but
+	// not delegates of "foo/bar" (like "foo/bar/a" or "foo/bar/b").
+	//
+	// While:
+	//
+	//  In: {"foo/bar/...": "R"}
+	//
+	// grants "Read" access to "foo/bar", all its delegates (like "foo/bar/baz")
+	// and its delegators ("foo").
+	In map[BlessingPattern]LabelSet
+	// NotIn denotes the set of blessings (and their delegates) that
+	// are explicitly blacklisted from specific kinds of access.
+	//
+	// The NotIn list is meant to be used as an override. For example:
+	//
+	//  In: {"foo/...": "RW"}, NotIn: {"foo/bar": "W"}
+	//
+	// will grant "Read" and "Write" access to "foo" and all its delegates
+	// ("foo/friend", "foo/family" etc.) EXCEPT to "foo/bar" and its
+	// delegates (e.g. "foo/bar/baz"), who only get "Read" access since
+	// "Write" access has been explicitly blacklisted for them.
+	NotIn map[string]LabelSet
 }
 
 // Hash identifies a cryptographic hash function.
@@ -101,12 +76,9 @@ type Hash string
 
 // Signature represents an ECDSA signature.
 type Signature struct {
-	// Hash specifies a cryptographic hash function that was used when this
-	// signature was computed.
-	Hash Hash
-	// R, S specify the pair of integers that make up an ECDSA signature.
-	R []byte
-	S []byte
+	Hash Hash   // Cryptographic hash function applied to the message before computing the signature.
+	R    []byte // Pair of integers that make up an ECDSA signature.
+	S    []byte
 }
 
 // DischargeImpetus encapsulates the motivation for a discharge being sought.
@@ -128,46 +100,28 @@ type DischargeImpetus struct {
 	Arguments []_gen_vdlutil.Any
 }
 
-// AllPrincipals is a pattern that all principals match.
-// TODO(ashankar): Change to "..." to match the glob style and update comment for the BlessingPattern type.
-const AllPrincipals = BlessingPattern("*")
+const AllPrincipals = BlessingPattern("...") // Glob pattern that matches all blessings.
 
-// ChainSeparator joins blessing names to form a blessing chain name.
-const ChainSeparator = "/"
+const ChainSeparator = "/" // ChainSeparator joins blessing names to form a blessing chain name.
 
-// ResolveLabel allows resolve operations.
-const ResolveLabel = Label(1)
+const ResolveLabel = Label(1) // ResolveLabel applies to operations involving navigating the namespace.
 
-// ReadLabel allows read operations.
-const ReadLabel = Label(2)
+const ReadLabel = Label(2) // ReadLabel applies to operations where state of the object is not changed.
 
-// WriteLabel allows write operations.
-const WriteLabel = Label(4)
+const WriteLabel = Label(4) // WriteLabel applies to operations where the contents of an object are changed.
 
-// AdminLabel allows administrative operations.
-const AdminLabel = Label(8)
+const AdminLabel = Label(8) // AdminLabel applies to operations where metadata about the object (such as access control) is changed.
 
-// DebugLabel allows debug operations.
-const DebugLabel = Label(16)
+const DebugLabel = Label(16) // DebugLabel applies to operations that returns metadata about the object.
 
-// MonitoringLabel allows monitoring operations.
-const MonitoringLabel = Label(32)
+const MonitoringLabel = Label(32) // MonitoringLabel is like DebugLabel.
 
-// SHA1Hash denotes the SHA1 cryptographic hash function as defined
-// in RFC3174.
-const SHA1Hash = Hash("SHA1")
+const SHA1Hash = Hash("SHA1") // SHA1 cryptographic hash function defined in RFC3174.
 
-// SHA256Hash denotes the SHA256 cryptographic hash function as defined
-// in FIPS 180-4.
-const SHA256Hash = Hash("SHA256")
+const SHA256Hash = Hash("SHA256") // SHA256 cryptographic hash function defined  in FIPS 180-4.
 
-// SHA384Hash denotes the SHA384 cryptographic hash function as defined
-// in FIPS 180-2.
-const SHA384Hash = Hash("SHA384")
+const SHA384Hash = Hash("SHA384") // SHA384 cryptographic hash function defined in FIPS 180-2.
 
-// SHA512Hash denotes the SHA512 cryptographic hash function as defined
-// in FIPS 180-2.
-const SHA512Hash = Hash("SHA512")
+const SHA512Hash = Hash("SHA512") // SHA512 cryptographic hash function defined in FIPS 180-2.
 
-// NoHash denotes the identity hash function.
-const NoHash = Hash("")
+const NoHash = Hash("") // Identity hash function.

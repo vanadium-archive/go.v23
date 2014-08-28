@@ -8,44 +8,44 @@ import (
 func TestCanAccess(t *testing.T) {
 	const (
 		acl1 = `{
-		"In": { "Principals": {
+		"In": {
 			"ann": "RW",
 			"bob": "RW",
 			"che": "R"
-		}},
-		"NotIn": { "Principals": {
+		},
+		"NotIn": {
 			"bob": "W",
 			"dan": "R"
-		}}
+		}
 	}`
 		acl2 = `{
-		"In": { "Principals": {
-			"*": "RW"
-		}},
-		"NotIn": { "Principals": {
+		"In": {
+			"...": "RW"
+		},
+		"NotIn": {
 			"ann/friend": "W"
-		}}
+		}
 	}`
 		acl3 = `{
-		"In": { "Principals": {
-			"*": "RW"
-		}},
-		"NotIn": { "Principals": {
+		"In": {
+			"...": "RW"
+		},
+		"NotIn": {
 			"ann": "W"
-		}}
+		}
 	}`
 		acl4 = `{
-		"In": { "Principals": {
-			"ann/*": "RW"
-		}},
-		"NotIn": { "Principals": {
+		"In": {
+			"ann/...": "RW"
+		},
+		"NotIn": {
 			"ann/friend": "W"
-		}}
+		}
 	}`
 		acl5 = `{
-		"In": { "Principals": {
-			"*": "RW"
-		}}
+		"In": {
+			"...": "RW"
+		}
 	}`
 	)
 
