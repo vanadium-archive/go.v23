@@ -1,6 +1,6 @@
 package valconv
 
-// TODO(toddw): test values of enum, oneof and recursive types.
+// TODO(toddw): test values of recursive types.
 
 import (
 	"fmt"
@@ -692,6 +692,76 @@ func TestConverterStructDropIgnore(t *testing.T) {
 	}
 }
 
+// Test successful conversions to and from oneof values.
+func TestConverterOneOf(t *testing.T) {
+	// values for oneof component types
+	vvTrue := vdl.BoolValue(true)
+	vv123 := vdl.Int64Value(123)
+	vvAbc := vdl.StringValue("Abc")
+	vvStruct123 := vdl.ZeroValue(structInt64TypeN)
+	vvStruct123.Field(0).Assign(vv123)
+	rvTrue := bool(true)
+	rv123 := int64(123)
+	rvAbc := string("Abc")
+	rvStruct123 := nStructInt64{123}
+	// values for oneof{bool;string;struct}
+	vvTrueBSS := vdl.ZeroValue(oneOfBSSTypeN).Assign(vvTrue)
+	vvAbcBSS := vdl.ZeroValue(oneOfBSSTypeN).Assign(vvAbc)
+	vvStruct123BSS := vdl.ZeroValue(oneOfBSSTypeN).Assign(vvStruct123)
+	rvTrueBSS := mustmakeOneOfBSS(rvTrue)
+	rvAbcBSS := mustmakeOneOfBSS(rvAbc)
+	rvStruct123BSS := mustmakeOneOfBSS(rvStruct123)
+	// values for oneof{int64;string;struct}
+	vv123ISS := vdl.ZeroValue(oneOfISSTypeN).Assign(vv123)
+	vvAbcISS := vdl.ZeroValue(oneOfISSTypeN).Assign(vvAbc)
+	vvStruct123ISS := vdl.ZeroValue(oneOfISSTypeN).Assign(vvStruct123)
+	rv123ISS := mustmakeOneOfISS(rv123)
+	rvAbcISS := mustmakeOneOfISS(rvAbc)
+	rvStruct123ISS := mustmakeOneOfISS(rvStruct123)
+
+	tests := []struct {
+		vvWant *vdl.Value
+		rvWant interface{}
+		vvSrc  *vdl.Value
+		rvSrc  interface{}
+	}{
+		// Convert source oneof to component.
+		{vvTrue, rvTrue, vvTrueBSS, rvTrueBSS},
+		{vv123, rv123, vv123ISS, rv123ISS},
+		{vvAbc, rvAbc, vvAbcBSS, rvAbcBSS},
+		{vvAbc, rvAbc, vvAbcISS, rvAbcISS},
+		{vvStruct123, rvStruct123, vvStruct123BSS, rvStruct123BSS},
+		{vvStruct123, rvStruct123, vvStruct123ISS, rvStruct123ISS},
+
+		// Convert source component to target oneof.
+		{vvTrueBSS, rvTrueBSS, vvTrue, rvTrue},
+		{vv123ISS, rv123ISS, vv123, rv123},
+		{vvAbcBSS, rvAbcBSS, vvAbc, rvAbc},
+		{vvAbcISS, rvAbcISS, vvAbc, rvAbc},
+		{vvStruct123BSS, rvStruct123BSS, vvStruct123, rvStruct123},
+		{vvStruct123ISS, rvStruct123ISS, vvStruct123, rvStruct123},
+
+		// Convert source and target same oneof.
+		{vvTrueBSS, rvTrueBSS, vvTrueBSS, rvTrueBSS},
+		{vv123ISS, rv123ISS, vv123ISS, rv123ISS},
+		{vvAbcBSS, rvAbcBSS, vvAbcBSS, rvAbcBSS},
+		{vvAbcISS, rvAbcISS, vvAbcISS, rvAbcISS},
+		{vvStruct123BSS, rvStruct123BSS, vvStruct123BSS, rvStruct123BSS},
+		{vvStruct123ISS, rvStruct123ISS, vvStruct123ISS, rvStruct123ISS},
+
+		// Convert source and target different oneof.
+		{vvAbcBSS, rvAbcBSS, vvAbcISS, rvAbcISS},
+		{vvAbcISS, rvAbcISS, vvAbcBSS, rvAbcBSS},
+		{vvStruct123BSS, rvStruct123BSS, vvStruct123ISS, rvStruct123ISS},
+		{vvStruct123ISS, rvStruct123ISS, vvStruct123BSS, rvStruct123BSS},
+	}
+	for _, test := range tests {
+		testConverterWantSrc(t,
+			vvrv{[]*vdl.Value{test.vvWant}, []interface{}{test.rvWant}},
+			vvrv{[]*vdl.Value{test.vvSrc}, []interface{}{test.rvSrc}})
+	}
+}
+
 type vvrv struct {
 	vv []*vdl.Value
 	rv []interface{}
@@ -783,7 +853,12 @@ func testConverterWantSrc(t *testing.T, vvrvWant, vvrvSrc vvrv) {
 		testConvert(t, &dst, src, vvWant, 1)
 		testConvert(t, &dst, src, vvWant, 1)
 		rtSrc := reflect.TypeOf(src)
-		if rtSrc.Kind() == reflect.Struct {
+		ttSrc, err := vdl.TypeOf(src)
+		if err != nil {
+			t.Error(err)
+			continue
+		}
+		if rtSrc.Kind() == reflect.Struct && ttSrc.Kind() != vdl.OneOf {
 			// Every struct may be converted to the empty struct
 			testConvert(t, vdl.ZeroValue(emptyType), src, vdl.ZeroValue(emptyType), 0)
 			testConvert(t, vdl.ZeroValue(emptyTypeN), src, vdl.ZeroValue(emptyTypeN), 0)

@@ -463,20 +463,32 @@ func (e *binaryEncoder) StartStruct(tt *vdl.Type) (valconv.StructTarget, error) 
 	return e, nil
 }
 
-func (e *binaryEncoder) FinishList(x valconv.ListTarget) error {
+func (e *binaryEncoder) StartOneOf(tt *vdl.Type) (valconv.Target, error) {
+	if err := e.prepareType(tt, vdl.OneOf); err != nil {
+		return nil, err
+	}
+	e.pushType(tt)
+	return e, nil
+}
+
+func (e *binaryEncoder) FinishList(valconv.ListTarget) error {
 	return e.popType()
 }
 
-func (e *binaryEncoder) FinishSet(x valconv.SetTarget) error {
+func (e *binaryEncoder) FinishSet(valconv.SetTarget) error {
 	return e.popType()
 }
 
-func (e *binaryEncoder) FinishMap(x valconv.MapTarget) error {
+func (e *binaryEncoder) FinishMap(valconv.MapTarget) error {
 	return e.popType()
 }
 
-func (e *binaryEncoder) FinishStruct(x valconv.StructTarget) error {
+func (e *binaryEncoder) FinishStruct(valconv.StructTarget) error {
 	binaryEncodeUint(e.bufV, 0)
+	return e.popType()
+}
+
+func (e *binaryEncoder) FinishOneOf(valconv.Target) error {
 	return e.popType()
 }
 

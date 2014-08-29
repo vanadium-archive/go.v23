@@ -283,6 +283,76 @@ func (nEnum) vdlEnumLabels(struct{ A, B, C, ABC bool }) {}
 
 var enumTypeN = vdl.NamedType("nEnum", vdl.EnumType("A", "B", "C", "ABC"))
 
+// oneof{bool;string;StructInt64}
+type nOneOfBSS struct{ oneof interface{} }
+
+func makeOneOfBSS(oneof interface{}) (x nOneOfBSS, ok bool) {
+	ok = x.Assign(oneof)
+	return
+}
+
+func mustmakeOneOfBSS(oneof interface{}) nOneOfBSS {
+	x, ok := makeOneOfBSS(oneof)
+	if !ok {
+		panic(fmt.Errorf("can't make nOneOfBSS from %[1]T %[1]v", oneof))
+	}
+	return x
+}
+
+func (x *nOneOfBSS) Assign(oneof interface{}) bool {
+	switch oneof.(type) {
+	case bool, string, nStructInt64:
+		x.oneof = oneof
+		return true
+	}
+	x.oneof = nil
+	return false
+}
+
+func (x nOneOfBSS) OneOf() interface{} {
+	return x.oneof
+}
+
+func (nOneOfBSS) vdlOneOfTypes(_ bool, _ string, _ nStructInt64) {}
+
+// oneof{int64;string;StructInt64}
+type nOneOfISS struct{ oneof interface{} }
+
+func makeOneOfISS(oneof interface{}) (x nOneOfISS, ok bool) {
+	ok = x.Assign(oneof)
+	return
+}
+
+func mustmakeOneOfISS(oneof interface{}) nOneOfISS {
+	x, ok := makeOneOfISS(oneof)
+	if !ok {
+		panic(fmt.Errorf("can't make nOneOfISS from %[1]T %[1]v", oneof))
+	}
+	return x
+}
+
+func (x *nOneOfISS) Assign(oneof interface{}) bool {
+	switch oneof.(type) {
+	case int64, string, nStructInt64:
+		x.oneof = oneof
+		return true
+	}
+	x.oneof = nil
+	return false
+}
+
+func (x nOneOfISS) OneOf() interface{} {
+	return x.oneof
+}
+
+func (nOneOfISS) vdlOneOfTypes(_ int64, _ string, _ nStructInt64) {}
+
+var (
+	structInt64TypeN = vdl.NamedType("veyron2/vdl/valconv.nStructInt64", vdl.StructType(vdl.StructField{"X", vdl.Int64Type}))
+	oneOfBSSTypeN    = vdl.NamedType("veyron2/vdl/valconv.nOneOfBSS", vdl.OneOfType(vdl.BoolType, vdl.StringType, structInt64TypeN))
+	oneOfISSTypeN    = vdl.NamedType("veyron2/vdl/valconv.nOneOfISS", vdl.OneOfType(vdl.Int64Type, vdl.StringType, structInt64TypeN))
+)
+
 // Define a bunch of *Type types used in tests.
 var (
 	// Named scalar types

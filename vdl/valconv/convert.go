@@ -9,7 +9,6 @@ package valconv
 import (
 	"fmt"
 	"reflect"
-	"sync"
 
 	"veyron2/vdl"
 	"veyron2/verror"
@@ -31,248 +30,6 @@ var (
 	rtPtrToType  = reflect.PtrTo(rtType)
 	rtPtrToValue = reflect.PtrTo(rtValue)
 )
-
-// compatible returns true if types a and b are compatible with each other.
-// Type compatibility is a lower threshold than value convertibility; values of
-// incompatible types are never convertible, while values of compatible types
-// might not be convertible.  E.g. float32 and byte are compatible, and
-// float32(1.0) is convertible with byte(1), but float32(-1.0) is not
-// convertible with any byte value.
-//
-// Compatibility is commutative.  The basic rules:
-//   o Nilability is ignored for all rules (e.g. ?int is compatible with int).
-//   o Bool is only compatible with bool.
-//   o TypeVal is only compatible with TypeVal.
-//   o Numbers are mutually compatible.
-//   o String, enum, []byte and [N]byte are mutually compatible.
-//   o Array and list are compatible if their elems are compatible.
-//   o Set, map and struct are compatible if keys K* are compatible,
-//     and fields F* are compatible:
-//     - set[Ka] is compatible with set[Kb] and map[Kb]bool
-//       (all bools must be true)
-//     - map[string]Fa is compatible with struct{_ Fb, _ Fc, ...}
-//     - transitively combining the first two rules:
-//       set[string] is compatible with map[string]bool and struct{_ bool, ...}
-//       (all bools must be true)
-//     - Two structs are compatible if all fields with the same name are
-//       compatible, and at least one field as the same name or one of the
-//       structs is empty.
-//   o OneOf X is compatible with type Y if any type in X is compatible with Y.
-//   o Any is compatible with anything.
-//
-// Recursive types are checked for compatibility up to the first occurrence of a
-// cycle in either type.  This leaves open the possibility of "obvious" false
-// positives where types are compatible but values are not; this is a tradeoff
-// favoring a simpler implementation and better performance over exhaustive
-// checking.  This seems fine in practice since type compatibility is weaker
-// than value convertibility, and since recursive types are not common.
-func compatible(a, b *vdl.Type) bool {
-	if a.Kind() == vdl.Nilable {
-		a = a.Elem()
-	}
-	if b.Kind() == vdl.Nilable {
-		b = b.Elem()
-	}
-	key := compatKey(a, b)
-	if compat, ok := compatCache.lookup(key); ok {
-		return compat
-	}
-	// Concurrent updates may cause compatCache to be updated multiple times.
-	// This race is benign; we always end up with the same result.
-	compat := compat(a, b, make(map[*vdl.Type]bool), make(map[*vdl.Type]bool))
-	compatCache.update(key, compat)
-	return compat
-}
-
-// compatRegistry is a cache of positive and negative compat results.  It is
-// used to improve the performance of compatibility checks.  The only instance
-// is the compatCache global cache.
-type compatRegistry struct {
-	sync.Mutex
-	compat map[[2]*vdl.Type]bool
-}
-
-// TODO(toddw): Change this to a fixed-size LRU cache, otherwise it can grow
-// without bounds and exhaust our memory.
-var compatCache = compatRegistry{compat: make(map[[2]*vdl.Type]bool)}
-
-// The compat cache key is just the two types, which are already hash-consed.
-// We make a minor attempt to normalize the order.
-func compatKey(a, b *vdl.Type) [2]*vdl.Type {
-	if a.Kind() > b.Kind() ||
-		(a.Kind() == vdl.Struct && b.Kind() == vdl.Struct && a.NumField() > b.NumField()) {
-		a, b = b, a
-	}
-	return [2]*vdl.Type{a, b}
-}
-
-func (reg compatRegistry) lookup(key [2]*vdl.Type) (bool, bool) {
-	reg.Lock()
-	compat, ok := reg.compat[key]
-	reg.Unlock()
-	return compat, ok
-}
-
-func (reg compatRegistry) update(key [2]*vdl.Type, compat bool) {
-	reg.Lock()
-	reg.compat[key] = compat
-	reg.Unlock()
-}
-
-// compat is a recursive helper that implements compatible.
-func compat(a, b *vdl.Type, seenA, seenB map[*vdl.Type]bool) bool {
-	if a.Kind() == vdl.Nilable {
-		a = a.Elem()
-	}
-	if b.Kind() == vdl.Nilable {
-		b = b.Elem()
-	}
-	if a == b || seenA[a] || seenB[b] {
-		return true
-	}
-	seenA[a], seenB[b] = true, true
-	// Handle variant cases Any and OneOf
-	switch {
-	case a.Kind() == vdl.Any || b.Kind() == vdl.Any:
-		return true
-	case a.Kind() == vdl.OneOf:
-		return compatOneOf(a, b, seenA, seenB)
-	case b.Kind() == vdl.OneOf:
-		return compatOneOf(b, a, seenB, seenA)
-	}
-	// Handle simple scalar vdl.
-	if ax, bx := ttIsNumber(a), ttIsNumber(b); ax || bx {
-		return ax && bx
-	}
-	if ax, bx := a.Kind() == vdl.Bool, b.Kind() == vdl.Bool; ax || bx {
-		return ax && bx
-	}
-	if ax, bx := a.Kind() == vdl.TypeVal, b.Kind() == vdl.TypeVal; ax || bx {
-		return ax && bx
-	}
-	// We must check if either a or b is []byte and handle it here first, to
-	// ensure it doesn't fall through to the standard array/list handling.  This
-	// ensures that []byte isn't compatible with []uint16 and other lists or
-	// arrays of numbers.
-	if ax, bx := ttIsStringEnumBytes(a), ttIsStringEnumBytes(b); ax || bx {
-		return ax && bx
-	}
-	// Handle composite vdl.
-	switch a.Kind() {
-	case vdl.Array, vdl.List:
-		switch b.Kind() {
-		case vdl.Array, vdl.List:
-			return compat(a.Elem(), b.Elem(), seenA, seenB)
-		}
-		return false
-	case vdl.Set:
-		switch b.Kind() {
-		case vdl.Set:
-			return compat(a.Key(), b.Key(), seenA, seenB)
-		case vdl.Map:
-			return compatMapKeyElem(b, a.Key(), vdl.BoolType, seenB, seenA)
-		case vdl.Struct:
-			return compatStructKeyElem(b, a.Key(), vdl.BoolType, seenB, seenA)
-		}
-		return false
-	case vdl.Map:
-		switch b.Kind() {
-		case vdl.Set:
-			return compatMapKeyElem(a, b.Key(), vdl.BoolType, seenA, seenB)
-		case vdl.Map:
-			return compatMapKeyElem(a, b.Key(), b.Elem(), seenA, seenB)
-		case vdl.Struct:
-			return compatStructKeyElem(b, a.Key(), a.Elem(), seenB, seenA)
-		}
-		return false
-	case vdl.Struct:
-		switch b.Kind() {
-		case vdl.Set:
-			return compatStructKeyElem(a, b.Key(), vdl.BoolType, seenA, seenB)
-		case vdl.Map:
-			return compatStructKeyElem(a, b.Key(), b.Elem(), seenA, seenB)
-		case vdl.Struct:
-			return compatStructStruct(a, b, seenA, seenB)
-		}
-		return false
-	default:
-		panic(fmt.Errorf("val: compat unhandled types %q %q", a, b))
-	}
-}
-
-func ttIsNumber(tt *vdl.Type) bool {
-	switch tt.Kind() {
-	case vdl.Byte, vdl.Uint16, vdl.Uint32, vdl.Uint64, vdl.Int16, vdl.Int32, vdl.Int64, vdl.Float32, vdl.Float64, vdl.Complex64, vdl.Complex128:
-		return true
-	}
-	return false
-}
-
-func ttIsStringEnumBytes(tt *vdl.Type) bool {
-	return tt.Kind() == vdl.String || tt.Kind() == vdl.Enum || tt.IsBytes()
-}
-
-func ttIsEmptyStruct(tt *vdl.Type) bool {
-	return tt.Kind() == vdl.Struct && tt.NumField() == 0
-}
-
-// REQUIRED: a is OneOf
-func compatOneOf(a, b *vdl.Type, seenA, seenB map[*vdl.Type]bool) bool {
-	// OneOf is a disjunction - only one of the types needs to be compatible.
-	for ax := 0; ax < a.NumOneOfType(); ax++ {
-		if compat(a.OneOfType(ax), b, seenA, seenB) {
-			return true
-		}
-	}
-	return false
-}
-
-// REQUIRED: a is Map
-func compatMapKeyElem(a, bKey, bElem *vdl.Type, seenA, seenB map[*vdl.Type]bool) bool {
-	return compat(a.Key(), bKey, seenA, seenB) && compat(a.Elem(), bElem, seenA, seenB)
-}
-
-// REQUIRED: a is Struct
-func compatStructKeyElem(a, bKey, bElem *vdl.Type, seenA, seenB map[*vdl.Type]bool) bool {
-	// Struct is a conjunction, all fields must be compatible.
-	if ttIsEmptyStruct(a) {
-		return false // empty struct isn't compatible with set or map
-	}
-	if !compat(vdl.StringType, bKey, seenA, seenB) {
-		return false
-	}
-	for ax := 0; ax < a.NumField(); ax++ {
-		if !compat(a.Field(ax).Type, bElem, seenA, seenB) {
-			return false
-		}
-	}
-	return true
-}
-
-// REQUIRED: a and b are Struct
-func compatStructStruct(a, b *vdl.Type, seenA, seenB map[*vdl.Type]bool) bool {
-	// Struct is a conjunction, all fields with the same name must be compatible.
-	if ttIsEmptyStruct(a) || ttIsEmptyStruct(b) {
-		return true // empty struct is compatible all other structs
-	}
-	if a.NumField() > b.NumField() {
-		a, b, seenA, seenB = b, a, seenB, seenA
-	}
-	fieldMatch := false
-	for ax := 0; ax < a.NumField(); ax++ {
-		afield := a.Field(ax)
-		bfield, bindex := b.FieldByName(afield.Name)
-		if bindex < 0 {
-			continue
-		}
-		if !compat(afield.Type, bfield.Type, seenA, seenB) {
-			return false
-		}
-		fieldMatch = true
-	}
-	// At least one field must have matched.
-	return fieldMatch
-}
 
 // convTarget represents the state and logic for value conversion.
 //
@@ -353,16 +110,27 @@ func extractValue(rv reflect.Value) *vdl.Value {
 
 // startConvert prepares to fill in c, converting from type tt.  Returns fin and
 // fill which are used by finishConvert to finish the conversion; fin represents
-// the final value to assign to, and fill represents the value to actually fill
-// in.
-func startConvert(c convTarget, tt *vdl.Type) (fin, fill convTarget, _ error) {
+// the final target to assign to, and fill represents the target to actually
+// fill in.
+func startConvert(c convTarget, tt *vdl.Type) (fin, fill convTarget, err error) {
 	switch tt.Kind() {
-	case vdl.Any, vdl.OneOf, vdl.Nilable:
-		return convTarget{}, convTarget{}, fmt.Errorf("variant or nilable type %q used as conversion src", tt)
+	case vdl.Any, vdl.Nilable:
+		return convTarget{}, convTarget{}, fmt.Errorf("any or nilable type %q can't be used as conversion src", tt)
 	}
 	if !compatible(c.tt, tt) {
 		return convTarget{}, convTarget{}, fmt.Errorf("types %q and %q aren't compatible", c.tt, tt)
 	}
+	fin = createFinTarget(c, tt)
+	fill, err = createFillTarget(fin, tt)
+	if err != nil {
+		return convTarget{}, convTarget{}, err
+	}
+	return fin, fill, nil
+}
+
+// createFinTarget returns the fin target for the conversion, flattening
+// pointers and creating new non-nil values as necessary.
+func createFinTarget(c convTarget, tt *vdl.Type) convTarget {
 	if c.vv == nil {
 		// Flatten pointers, creating new values as necessary.
 		for c.rv.Kind() == reflect.Ptr {
@@ -373,32 +141,19 @@ func startConvert(c convTarget, tt *vdl.Type) (fin, fill convTarget, _ error) {
 					vv = vdl.ZeroValue(tt)
 					c.rv.Set(reflect.ValueOf(vv).Convert(c.rv.Type()))
 				}
-				return c, valueConv(vv), nil
+				return valueConv(vv)
 			}
 			if c.rv.IsNil() {
 				c.rv.Set(reflect.New(c.rv.Type().Elem()))
 			}
 			if c.rv.Type().Elem() == rtType {
 				// Stop at *vdl.Type to allow TypeVal values to be assigned.
-				return c, c, nil
+				return c
 			}
 			c.rv = c.rv.Elem()
 		}
 		if c.tt.Kind() == vdl.Nilable {
 			c.tt = c.tt.Elem() // flatten c.tt to match c.rv
-		}
-		switch c.rv.Kind() {
-		case reflect.Interface:
-			// Create a concrete *vdl.Value to convert to, which will be assigned to
-			// the interface in finishConvert.
-			//
-			// TODO(toddw): Add type registration and create real Go objects?
-			if !rtPtrToValue.AssignableTo(c.rv.Type()) {
-				return convTarget{}, convTarget{}, fmt.Errorf("%v not assignable from *vdl.Value", c.rv.Type())
-			}
-			return c, valueConv(vdl.ZeroValue(tt)), nil
-		case reflect.Array, reflect.Slice, reflect.Map:
-			c.rv.Set(reflect.Zero(c.rv.Type())) // start with zero collections
 		}
 	} else {
 		// Flatten nilable, creating non-nil values as necessary.
@@ -408,26 +163,67 @@ func startConvert(c convTarget, tt *vdl.Type) (fin, fill convTarget, _ error) {
 			}
 			c.tt, c.vv = c.tt.Elem(), c.vv.Elem()
 		}
-		switch c.vv.Kind() {
-		case vdl.Any, vdl.OneOf:
-			if !c.tt.AssignableFrom(tt) {
-				return convTarget{}, convTarget{}, fmt.Errorf("%v not assignable from %v", c.tt, tt)
+	}
+	return c
+}
+
+// createFillTarget returns the fill target for the conversion, creating new
+// values of the appropriate type if necessary.  If fin has type Any or OneOf,
+// the returned fill target will be have type based on tt, and finishConvert
+// will assign fin from the fill target to finish the conversion.  Otherwise fin
+// is used directly as the fill target and finishConvert is a no-op.
+func createFillTarget(fin convTarget, tt *vdl.Type) (convTarget, error) {
+	if fin.vv == nil {
+		if fin.tt.Kind() == vdl.OneOf {
+			// Conversion target is OneOf.  Return a ReflectTarget matching tt.
+			if rt := vdl.MatchOneOfReflectType(fin.rv.Type(), tt); rt != nil {
+				return reflectConv(reflect.New(rt).Elem(), tt)
 			}
-			return c, valueConv(vdl.ZeroValue(tt)), nil
+			return convTarget{}, fmt.Errorf("%v not assignable from %v", fin.tt, tt)
+		}
+		switch fin.rv.Kind() {
+		case reflect.Interface:
+			// Create a concrete *vdl.Value to convert to, which will be assigned to
+			// the interface in finishConvert.
+			//
+			// TODO(toddw): Add type registration and create real Go objects?
+			if !rtPtrToValue.AssignableTo(fin.rv.Type()) {
+				return convTarget{}, fmt.Errorf("%v not assignable from *vdl.Value", fin.rv.Type())
+			}
+			return valueConv(vdl.ZeroValue(tt)), nil
+		case reflect.Array, reflect.Slice, reflect.Map:
+			fin.rv.Set(reflect.Zero(fin.rv.Type())) // start with zero collections
+		}
+	} else {
+		switch fin.vv.Kind() {
+		case vdl.Any, vdl.OneOf:
+			if !fin.tt.AssignableFrom(tt) {
+				return convTarget{}, fmt.Errorf("%v not assignable from %v", fin.tt, tt)
+			}
+			return valueConv(vdl.ZeroValue(tt)), nil
 		case vdl.Array, vdl.List, vdl.Set, vdl.Map:
-			c.vv.Assign(nil) // start with zero collections
+			fin.vv.Assign(nil) // start with zero collections
 		}
 	}
-	return c, c, nil
+	return fin, nil
 }
 
 // finishConvert finishes converting a value, taking the fin and fill returned
 // by startConvert.  This is necessary since interface/any/oneof values are
 // assigned by value, and can't be filled in by reference.
 func finishConvert(fin, fill convTarget) error {
+	// The logic here mirrors the logic in createFillTarget.
 	if fin.vv == nil {
-		switch fin.rv.Kind() {
-		case reflect.Interface:
+		switch {
+		case fin.tt.Kind() == vdl.OneOf:
+			// Note that vdl.TypeFromReflect has already validated the Assign method,
+			// so we can call without error checking.
+			in := []reflect.Value{fill.rv}
+			out := fin.rv.Addr().MethodByName("Assign").Call(in)
+			if !out[0].Bool() {
+				return fmt.Errorf("%v not assignable from %v", fin.tt, fill.tt)
+			}
+		case fin.rv.Kind() == reflect.Interface:
 			fin.rv.Set(reflect.ValueOf(fill.vv))
 		}
 	} else {
@@ -787,7 +583,7 @@ func (c convTarget) fromBytes(src []byte) error {
 		case c.tt.Kind() == vdl.Enum:
 			// Handle special-case enum first, by calling the Assign method.  Note
 			// that vdl.TypeFromReflect has already validated the Assign method, so we
-			// can just call it without error checking.
+			// can call without error checking.
 			if c.rv.CanAddr() {
 				in := []reflect.Value{reflect.ValueOf(string(src))}
 				out := c.rv.Addr().MethodByName("Assign").Call(in)
@@ -849,6 +645,35 @@ func (c convTarget) fromTypeVal(src *vdl.Type) error {
 		}
 	}
 	return fmt.Errorf("invalid conversion from typeval to %v", c.tt)
+}
+
+// StartOneOf implements the Target interface method.
+func (c convTarget) StartOneOf(tt *vdl.Type) (Target, error) {
+	// Converting from a source OneOf to a target Any is special; the Any value
+	// needs to end up with the source OneOf type, so we run the regular
+	// startConvert logic.  For all other target types this is the identity
+	// function, which ends up filling directly from the OneOf elem value.
+	if c.tt.Kind() == vdl.Any {
+		fin, fill, err := startConvert(c, tt)
+		return oneofTarget{fill, fin}, err
+	}
+	return c, nil
+}
+
+// FinishOneOf implements the Target interface method.
+func (c convTarget) FinishOneOf(x Target) error {
+	if oneof, ok := x.(oneofTarget); ok {
+		return finishConvert(oneof.fin, oneof.convTarget)
+	}
+	return nil
+}
+
+type oneofTarget struct {
+	// This is similar to compConvTarget, but we hold fill as an embedded field,
+	// so that the From* methods are exported.  Basically oneofTarget behaves just
+	// like convTarget, but holds an additional fin field used in FinishOneOf.
+	convTarget // fin field represented here
+	fin        convTarget
 }
 
 // StartList implements the Target interface method.

@@ -279,7 +279,7 @@ type nOneOf struct{ oneof interface{} }
 
 func (x *nOneOf) Assign(oneof interface{}) bool {
 	switch oneof.(type) {
-	case bool, string, int32:
+	case bool, string, int64:
 		x.oneof = oneof
 		return true
 	}
@@ -287,7 +287,7 @@ func (x *nOneOf) Assign(oneof interface{}) bool {
 	return false
 }
 
-func (nOneOf) vdlOneOfTypes(_ bool, _ string, _ int32) {}
+func (nOneOf) vdlOneOfTypes(_ bool, _ string, _ int64) {}
 
 // Define a bunch of *Type types used in tests.
 var (

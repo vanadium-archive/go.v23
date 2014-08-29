@@ -324,6 +324,24 @@ func makeUnnamedFromReflect(rt reflect.Type, builder *TypeBuilder, pending map[r
 	panic(fmt.Errorf("val: makeUnnamedFromReflect unhandled %v %v", rt.Kind(), rt))
 }
 
+// MatchOneOfReflectType returns the reflect.Type from oneof that matches
+// target.  Returns nil iff no match was found.
+func MatchOneOfReflectType(oneof reflect.Type, target *Type) reflect.Type {
+	// Look for an exact vdl.Type match within the oneof types.
+	// TODO(toddw): Add backoff second-pass matching based on type name.
+	if method, ok := oneof.MethodByName("vdlOneOfTypes"); ok {
+		mtype := method.Type
+		for ix := 1; ix < mtype.NumIn(); ix++ {
+			rt := mtype.In(ix)
+			if tt, err := TypeFromReflect(rt); err == nil && tt == target {
+				return rt
+			}
+		}
+	}
+	// TODO(toddw): cache the results for better performance.
+	return nil
+}
+
 var (
 	errTypeFromReflectNil   = errors.New("invalid val.TypeOf(nil)")
 	errTypeFromReflectValue = errors.New("invalid val.TypeOf(reflect.Value{})")

@@ -70,6 +70,12 @@ type Target interface {
 	StartStruct(tt *vdl.Type) (StructTarget, error)
 	// FinishStruct finishes a prior StartStruct call.
 	FinishStruct(x StructTarget) error
+
+	// StartOneOf prepares conversion from a oneof of type tt.  FinishOneOf must
+	// be called to finish the oneof.
+	StartOneOf(tt *vdl.Type) (Target, error)
+	// FinishOneOf finishes a prior StartOneOf call.
+	FinishOneOf(x Target) error
 }
 
 // ListTarget represents conversion from a list or array.
@@ -155,16 +161,30 @@ func FromReflect(target Target, rv reflect.Value) error {
 		tt = tt.Elem() // flatten tt to match rt and rv
 	}
 	// Recursive walk through the reflect value to fill in target.
-	switch {
-	case tt.Kind() == vdl.Enum:
-		// Handle special-case enum first, getting the string enum label by calling
-		// the String method.  Note that vdl.TypeFromReflect has already validated
-		// the String method, so we can just call it without error checking.
+	//
+	// First handle special-cases enum and oneof.  Note that vdl.TypeFromReflect
+	// has already validated the String and OneOf methods, so we can call without
+	// error checking.
+	switch tt.Kind() {
+	case vdl.Enum:
 		out := rv.MethodByName("String").Call(nil)
 		return target.FromEnumLabel(out[0].String(), tt)
-	case isRTBytes(rt):
+	case vdl.OneOf:
+		oneof, err := target.StartOneOf(tt)
+		if err != nil {
+			return err
+		}
+		elem := rv.MethodByName("OneOf").Call(nil)[0]
+		if err := FromReflect(oneof, elem); err != nil {
+			return err
+		}
+		return target.FinishOneOf(oneof)
+	}
+	// Now handle special-case bytes.
+	if isRTBytes(rt) {
 		return target.FromBytes(rtBytes(rv), tt)
 	}
+	// Handle standard kinds.
 	switch rt.Kind() {
 	case reflect.Interface:
 		if rv.IsNil() {
@@ -285,11 +305,20 @@ func FromValue(target Target, vv *vdl.Value) error {
 		return target.FromBytes(vv.Bytes(), tt)
 	}
 	switch vv.Kind() {
-	case vdl.Any, vdl.OneOf, vdl.Nilable:
+	case vdl.Any, vdl.Nilable:
 		if vv.IsNil() {
 			return target.FromNil(tt)
 		}
 		return FromValue(target, vv.Elem())
+	case vdl.OneOf:
+		oneof, err := target.StartOneOf(tt)
+		if err != nil {
+			return err
+		}
+		if err := FromValue(oneof, vv.Elem()); err != nil {
+			return err
+		}
+		return target.FinishOneOf(oneof)
 	case vdl.Bool:
 		return target.FromBool(vv.Bool(), tt)
 	case vdl.Byte:

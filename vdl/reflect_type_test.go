@@ -137,7 +137,7 @@ var rtKeyTests = []rtTest{
 	{reflect.TypeOf(nStructString{}), rtNStruct("String", StringType)},
 	// Special-case types
 	{reflect.TypeOf(nEnum(0)), rtN("Enum", EnumType("A", "B", "C"))},
-	{reflect.TypeOf(nOneOf{}), rtN("OneOf", OneOfType(BoolType, StringType, Int32Type))},
+	{reflect.TypeOf(nOneOf{}), rtN("OneOf", OneOfType(BoolType, StringType, Int64Type))},
 }
 
 // rtNonKeyTests contains types that may not be used as map keys.
@@ -532,4 +532,29 @@ func TestTypeFromReflectError(t *testing.T) {
 			t.Errorf("TypeFromReflect(%v) got type %v, want nil", test.rt, got)
 		}
 	}
+}
+
+func TestMatchOneOfReflectType(t *testing.T) {
+	tests := []struct {
+		OneOf  reflect.Type
+		Target *Type
+		Want   reflect.Type
+	}{
+		// nOneOf is oneof{bool;string;int64}
+		{reflect.TypeOf(nOneOf{}), BoolType, reflect.TypeOf(false)},
+		{reflect.TypeOf(nOneOf{}), StringType, reflect.TypeOf("")},
+		{reflect.TypeOf(nOneOf{}), Int64Type, reflect.TypeOf(int64(0))},
+		// Only exact type matches at the moment.
+		{reflect.TypeOf(nOneOf{}), emptyType, nil},
+		{reflect.TypeOf(nOneOf{}), Int32Type, nil},
+		{reflect.TypeOf(nOneOf{}), boolTypeN, nil},
+		{reflect.TypeOf(nOneOf{}), stringTypeN, nil},
+		{reflect.TypeOf(nOneOf{}), int64TypeN, nil},
+	}
+	for _, test := range tests {
+		if got := MatchOneOfReflectType(test.OneOf, test.Target); got != test.Want {
+			t.Errorf("MatchOneOfReflectType(%v, %v) got %v, want %v", test.OneOf, test.Target, got, test.Want)
+		}
+	}
+
 }
