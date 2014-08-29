@@ -140,11 +140,15 @@ func ensureNonEmptyToken(yylex yyLexer, tok strPos, errMsg string) {
 ////////////////////////////////////////////////////////////////////////
 // Rules section.
 
+// Note that vdl files and config files use an identical grammar, other than the
+// initial package or config clause respectively.  Error checking for config
+// files that include error, type or interface definitions occurs afterwards, to
+// improve error reporting.
 start:
   startFileImports   package imports gen_eof
 | startFile          package imports defs
 | startConfigImports config imports gen_eof
-| startConfig        config imports const_defs
+| startConfig        config imports defs
 
 // Dummy rule to terminate the parse after the imports, regardless of whether
 // there are any defs.  Defs always start with either the tTYPE, tCONST or
@@ -217,10 +221,6 @@ defs:
 | defs type_def ';'
 | defs const_def ';'
 | defs error_def ';'
-
-const_defs:
-  // Empty.
-| const_defs const_def ';'
 
 type_def:
   tTYPE '(' ')'
