@@ -4,8 +4,6 @@ package vstore
 
 import (
 	"veyron2/context"
-	"veyron2/naming"
-	"veyron2/services/store"
 	"veyron2/storage"
 )
 
@@ -24,20 +22,21 @@ func (v *vStore) Bind(name string) storage.Object {
 
 func (v *vStore) NewTransaction(ctx context.T, name string,
 	opts ...storage.TransactionOpt) storage.Transaction {
-	root, err := store.BindTransactionRoot(name)
-	if err != nil {
-		return newErrorTransaction(err)
-	}
-	tid, err := root.CreateTransaction(ctx, nil)
-	if err != nil {
-		return newErrorTransaction(err)
-	}
-	tname := naming.Join(name, tid)
-	tx, err := store.BindTransaction(tname)
-	if err != nil {
-		// We would want to abort tx if there was an error, but there's no way
-		// to send the abort if we can't bind.
-		return newErrorTransaction(err)
-	}
-	return &transaction{tname, tx}
+	// root, err := store.BindTransactionRoot(name)
+	// if err != nil {
+	// 	return newErrorTransaction(err)
+	// }
+	// tid, err := root.CreateTransaction(ctx, nil)
+	// if err != nil {
+	// 	return newErrorTransaction(err)
+	// }
+	// tname := naming.Join(name, tid)
+	// tx, err := store.BindTransaction(tname)
+	// if err != nil {
+	// 	// We would want to abort tx if there was an error, but there's no way
+	// 	// to send the abort if we can't bind.
+	// 	return newErrorTransaction(err)
+	// }
+	// return &transaction{tname, tx}
+	return &transaction{}
 }

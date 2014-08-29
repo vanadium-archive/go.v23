@@ -13,10 +13,21 @@ package storage
 // unlikely.
 type ID [16]byte
 
+// Kind makes it possible to tell the difference between Dirs and Objects.
+type Kind int16
+
+const (
+  DirKind = Kind(0)
+  ObjectKind = Kind(1)
+)
+
 // Stat provides information about an entry in the store.
 //
 // TODO(jyh): Specify versioning more precisely.
 type Stat struct {
+	// Kind makes it possible to distinguish between Dirs and Objects.
+	Kind Kind
+
 	// ID is the unique identifier of the entry.
 	ID ID
 

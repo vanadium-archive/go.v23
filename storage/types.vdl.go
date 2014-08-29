@@ -16,10 +16,15 @@ import (
 // unlikely.
 type ID [16]byte
 
+// Kind makes it possible to tell the difference between Dirs and Objects.
+type Kind int16
+
 // Stat provides information about an entry in the store.
 //
 // TODO(jyh): Specify versioning more precisely.
 type Stat struct {
+	// Kind makes it possible to distinguish between Dirs and Objects.
+	Kind Kind
 	// ID is the unique identifier of the entry.
 	ID ID
 	// MTimeNS is the last modification time in Unix nanoseconds (see time.UnixNano).
@@ -37,3 +42,7 @@ type Entry struct {
 	// Value is the value of the entry.
 	Value _gen_vdlutil.Any
 }
+
+const DirKind = Kind(0)
+
+const ObjectKind = Kind(1)

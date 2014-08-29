@@ -7,10 +7,59 @@ import (
   "veyron2/services/mounttable"
 )
 
+// Statable provides the Stat method.
+type Statable interface {
+	// Stat returns information about the receiver.
+	Stat() (storage.Stat, error)
+}
+
+// Transactable provides the NewTransaction method.
+type Transactable interface {
+	// NewTransaction creates a transaction with the given options.  It returns
+	// the name of the transaction relative to the receiver's name.  The client must
+	// rebind to this new name to work with the receiver and its descendants as part
+	// of the transaction.
+	NewTransaction(Options []any) (string, error)
+}
+
+// Dir is a directory containing Objects and other Dirs.
+type Dir interface {
+	Transactable
+
+	// Exists returns true iff this Dir is present in the Store.
+	Exists() (bool, error)
+
+	// Make creates this directory and any ancestor directories that do not
+	// exist (i.e. equivalent to Unix's 'mkdir -p').  Make is idempotent.
+	Make() error
+
+	// Remove removes this directory and all of its children, recursively.
+	Remove() error
+
+	Statable
+
+	// Query returns the sequence of elements that satisfy the query.
+	Query(Q query.Query) stream<_, QueryResult> error
+
+	// Globbable is an API for finding all objects beneath this pattern that
+	// match a pattern.
+	mounttable.Globbable
+
+	// GlobWatcher is an API for watching updates to objects beneath this value
+	// that match a pattern.
+	watch.GlobWatcher
+
+	// QueryWatcher is an API for watching updates to objects beneath this
+	// value that satisfy a query.
+	watch.QueryWatcher
+}
+
 // ObjectService is the interface for a value in the store.
 type Object interface {
 	// TODO(jyh): Decide how to pass per-operation options (like priority and
 	// timeout info).
+
+	Transactable
 
 	// Exists returns true iff the Entry has a value.
 	Exists() (bool, error)
@@ -26,23 +75,10 @@ type Object interface {
 	// Remove removes the Object.
 	Remove() error
 
-	// Stat returns entry info.
-	Stat() (storage.Stat, error)
+	Statable
 
 	// Query returns the sequence of elements that satisfy the query.
 	Query(Q query.Query) stream<_, QueryResult> error
-
-	// TODO(sadovsky): For now, we make Object implement the TransactionRoot and
-	// Transaction interfaces, so that the generated ServerStubObject has their
-	// methods. This is needed because on the server side we pass ServerStubObject
-	// to ReflectInvoker. In theory we could implement a "MultiReflectInvoker"
-	// that wraps multiple stubs and decides which stub to talk to based on the
-	// method being called, but we'd still need to handle calls to ipc-generated
-	// methods like Signature. Ideally the ipc framework would make it easy to
-	// combine server stubs so that one object (one name) could implement multiple
-	// idl interfaces.
-	TransactionRoot
-	Transaction
 
 	// Globbable is an API for finding all objects beneath this pattern that
 	// match a pattern.
@@ -55,12 +91,6 @@ type Object interface {
 	// QueryWatcher is an API for watching updates to objects beneath this
 	// value that satisfy a query.
 	watch.QueryWatcher
-}
-
-type TransactionRoot interface {
-	// CreateTransaction creates a transaction with the given options.  It returns
-	// the name of the transaction relative to this TransactionRoot's name.
-	CreateTransaction(Options []any) (string, error)
 }
 
 type Transaction interface {
