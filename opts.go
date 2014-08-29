@@ -183,6 +183,6 @@ func (ServesMountTableOpt) IPCServerOpt() {}
 // PreferredAddressOpt is a function that can be used to select
 // the preferred address to use for publishing to the mount table when
 // the default policy is inappropriate.
-type PreferredAddressOpt func(network string) (net.Addr, error)
+type PreferredAddressOpt func(network string, addrs []net.Addr) (net.Addr, error)
 
 func (PreferredAddressOpt) IPCServerOpt() {}
