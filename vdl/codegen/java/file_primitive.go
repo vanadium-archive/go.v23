@@ -31,6 +31,11 @@ public final class {{.Name}} implements android.os.Parcelable, java.io.Serializa
         if (obj == null) return false;
         if (this.getClass() != obj.getClass()) return false;
         final {{.ObjectType}} other = ({{.ObjectType}})obj;
+        {{ if .IsArray }}
+        if (!java.util.Arrays.equals(this.value, other.value)) {
+            return false;
+        }
+        {{ else }}
         {{ if .IsClass }}
         if (this.value == null) {
             return other.value == null;
@@ -38,7 +43,8 @@ public final class {{.Name}} implements android.os.Parcelable, java.io.Serializa
         return this.value.equals(other.value);
         {{ else }}
         return this.value == other.value;
-        {{ end }}
+        {{ end }} {{/* if is class */}}
+        {{ end }} {{/* if is array */}}
     }
     @Override
     public int hashCode() {
@@ -76,6 +82,7 @@ func genJavaPrimitiveFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo 
 		Doc                 string
 		HashcodeComputation string
 		IsClass             bool
+		IsArray             bool
 		Name                string
 		ObjectType          string
 		PackagePath         string
@@ -86,6 +93,7 @@ func genJavaPrimitiveFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo 
 		Doc:                 javaDocInComment(tdef.Doc),
 		HashcodeComputation: javaHashCode("value", tdef.BaseType, env),
 		IsClass:             isClass(tdef.BaseType, env),
+		IsArray:             isJavaNativeArray(tdef.BaseType, env),
 		Name:                tdef.Name,
 		ObjectType:          javaType(tdef.Type, true, env),
 		PackagePath:         javaPath(javaGenPkgPath(tdef.File.Package.Path)),

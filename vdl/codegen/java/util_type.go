@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"path"
+	"strings"
 
 	"veyron2/vdl"
 	"veyron2/vdl/compile"
@@ -101,6 +102,11 @@ func javaType(t *vdl.Type, forceClass bool, env *compile.Env) string {
 	case vdl.Array:
 		return fmt.Sprintf("%s[]", javaType(t.Elem(), false, env))
 	case vdl.List:
+		// NOTE(spetrovic): We represent byte lists as Java byte arrays, as it's doubtful anybody
+		// would want to use them as Java lists.
+		if javaType(t.Elem(), false, env) == "byte" {
+			return fmt.Sprintf("byte[]")
+		}
 		return fmt.Sprintf("%s<%s>", "java.util.List", javaType(t.Elem(), true, env))
 	case vdl.Set:
 		return fmt.Sprintf("%s<%s>", "java.util.Set", javaType(t.Key(), true, env))
@@ -147,6 +153,12 @@ func isClass(t *vdl.Type, env *compile.Env) bool {
 		}
 	}
 	return true
+}
+
+// isJavaNativeArray returns true iff the provided type is represented by a Java array.
+func isJavaNativeArray(t *vdl.Type, env *compile.Env) bool {
+	typeStr := javaType(t, false, env)
+	return strings.HasSuffix(typeStr, "[]")
 }
 
 func bitlen(kind vdl.Kind) int {

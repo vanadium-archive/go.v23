@@ -49,6 +49,11 @@ public final class {{.Name}} implements android.os.Parcelable, java.io.Serializa
         final {{.Name}} other = ({{.Name}})obj;
 
         {{ range $field := .Fields }}
+        {{ if .IsArray }}
+        if (!java.util.Arrays.equals(this.{{$field.LowercaseName}}, other.{{$field.LowercaseName}})) {
+            return false;
+        }
+        {{ else }}
         {{ if .IsClass }}
         if (this.{{$field.LowercaseName}} == null) {
             if (other.{{$field.LowercaseName}} != null) {
@@ -62,6 +67,7 @@ public final class {{.Name}} implements android.os.Parcelable, java.io.Serializa
             return false;
         }
         {{ end }} {{/* if is class */}}
+        {{ end }} {{/* if is array */}}
         {{ end }} {{/* range over fields */}}
         return true;
     }
@@ -105,6 +111,7 @@ public final class {{.Name}} implements android.os.Parcelable, java.io.Serializa
 type structDefinitionField struct {
 	HashcodeComputation string
 	IsClass             bool
+	IsArray             bool
 	LowercaseName       string
 	Name                string
 	Type                string
@@ -133,6 +140,7 @@ func genJavaStructFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo {
 		fields[i] = structDefinitionField{
 			HashcodeComputation: javaHashCode(vdlutil.ToCamelCase(fld.Name), fld.Type, env),
 			IsClass:             isClass(fld.Type, env),
+			IsArray:             isJavaNativeArray(fld.Type, env),
 			LowercaseName:       vdlutil.ToCamelCase(fld.Name),
 			Name:                fld.Name,
 			Type:                javaType(fld.Type, false, env),
