@@ -16,7 +16,9 @@ package {{.PackagePath}};
 /**
  * type {{.Name}} {{.VdlTypeString}} {{.Doc}}
  **/
-public final class {{.Name}} {
+public final class {{.Name}} implements android.os.Parcelable, java.io.Serializable {
+    static final long serialVersionUID = 0L;
+
     {{/* Field declarations */}}
     {{ range $field := .Fields }}
       private {{$field.Type}} {{$field.LowercaseName}};
@@ -72,6 +74,32 @@ public final class {{.Name}} {
         {{ end }}
         return result;
     }
+    @Override
+    public int describeContents() {
+    	return 0;
+    }
+    @Override
+    public void writeToParcel(android.os.Parcel out, int flags) {
+    	{{ range $field := .Fields }}
+    		com.veyron2.vdl.ParcelUtil.writeValue(out, {{$field.LowercaseName}});
+    	{{ end }}
+    }
+	public static final android.os.Parcelable.Creator<{{.Name}}> CREATOR
+		= new android.os.Parcelable.Creator<{{.Name}}>() {
+		@Override
+		public {{.Name}} createFromParcel(android.os.Parcel in) {
+			return new {{.Name}}(in);
+		}
+		@Override
+		public {{.Name}}[] newArray(int size) {
+			return new {{.Name}}[size];
+		}
+	};
+	private {{.Name}}(android.os.Parcel in) {
+		{{ range $field := .Fields }}
+			this.{{$field.LowercaseName}} = ({{$field.Type}}) com.veyron2.vdl.ParcelUtil.readValue(in, getClass().getClassLoader(), this.{{$field.LowercaseName}});
+		{{ end }}
+	}
 }`
 
 type structDefinitionField struct {

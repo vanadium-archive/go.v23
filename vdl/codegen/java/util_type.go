@@ -80,8 +80,10 @@ func javaBuiltInType(typ *vdl.Type, forceClass bool) (string, bool) {
 	case vdl.String:
 		return "java.lang.String", true
 	// TODO(spetrovic): handle typeval correctly.
-	case vdl.Any, vdl.TypeVal:
+	case vdl.TypeVal:
 		return "java.lang.Object", true
+	case vdl.Any:
+		return "com.veyron2.vdl.Any", true
 	default:
 		return "", false
 	}
@@ -99,11 +101,11 @@ func javaType(t *vdl.Type, forceClass bool, env *compile.Env) string {
 	case vdl.Array:
 		return fmt.Sprintf("%s[]", javaType(t.Elem(), false, env))
 	case vdl.List:
-		return fmt.Sprintf("%s<%s>", "java.util.ArrayList", javaType(t.Elem(), true, env))
+		return fmt.Sprintf("%s<%s>", "java.util.List", javaType(t.Elem(), true, env))
 	case vdl.Set:
-		return fmt.Sprintf("%s<%s>", "java.util.HashSet", javaType(t.Key(), true, env))
+		return fmt.Sprintf("%s<%s>", "java.util.Set", javaType(t.Key(), true, env))
 	case vdl.Map:
-		return fmt.Sprintf("%s<%s, %s>", "java.util.HashMap", javaType(t.Key(), true, env), javaType(t.Elem(), true, env))
+		return fmt.Sprintf("%s<%s, %s>", "java.util.Map", javaType(t.Key(), true, env), javaType(t.Elem(), true, env))
 	default:
 		log.Fatalf("vdl: javaType unhandled type %v %v", t.Kind(), t)
 		return ""

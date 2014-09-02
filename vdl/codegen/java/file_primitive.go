@@ -15,7 +15,7 @@ package {{.PackagePath}};
 /**
  * type {{.Name}} {{.VdlTypeString}} {{.Doc}}
  **/
-public final class {{.Name}} {
+public final class {{.Name}} implements android.os.Parcelable, java.io.Serializable {
     private {{.BaseType}} value;
 
     public {{.Name}}({{.BaseType}} value) {
@@ -44,6 +44,28 @@ public final class {{.Name}} {
     public int hashCode() {
         return {{.HashcodeComputation}};
     }
+    @Override
+    public int describeContents() {
+    	return 0;
+    }
+    @Override
+    public void writeToParcel(android.os.Parcel out, int flags) {
+   		com.veyron2.vdl.ParcelUtil.writeValue(out, value);
+    }
+	public static final android.os.Parcelable.Creator<{{.Name}}> CREATOR
+		= new android.os.Parcelable.Creator<{{.Name}}>() {
+		@Override
+		public {{.Name}} createFromParcel(android.os.Parcel in) {
+			return new {{.Name}}(in);
+		}
+		@Override
+		public {{.Name}}[] newArray(int size) {
+			return new {{.Name}}[size];
+		}
+	};
+	private {{.Name}}(android.os.Parcel in) {
+		value = ({{.BaseType}}) com.veyron2.vdl.ParcelUtil.readValue(in, getClass().getClassLoader(), value);
+	}
 }
 `
 

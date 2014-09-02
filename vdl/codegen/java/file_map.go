@@ -15,7 +15,9 @@ package {{.Package}};
 /**
  * type {{.Type}} {{.VdlTypeString}} {{.Doc}}
  **/
-public final class {{.Type}} implements java.util.Map<{{.KeyType}}, {{.ElemType}}> {
+public final class {{.Type}} implements java.util.Map<{{.KeyType}}, {{.ElemType}}>, android.os.Parcelable, java.io.Serializable {
+    static final long serialVersionUID = 0L;
+
     private java.util.Map<{{.KeyType}}, {{.ElemType}}> impl;
 
     public {{.Type}}(java.util.Map<{{.KeyType}}, {{.ElemType}}> impl) {
@@ -43,7 +45,6 @@ public final class {{.Type}} implements java.util.Map<{{.KeyType}}, {{.ElemType}
             return false;
         return true;
     }
-
     @Override
     public int hashCode() {
         return (impl == null) ? 0 : impl.hashCode();
@@ -53,60 +54,71 @@ public final class {{.Type}} implements java.util.Map<{{.KeyType}}, {{.ElemType}
     public void clear() {
         impl.clear();
     }
-
     @Override
     public boolean containsKey(java.lang.Object key) {
         return impl.containsKey(key);
     }
-
     @Override
     public boolean containsValue(java.lang.Object value) {
         return impl.containsValue(value);
     }
-
     @Override
     public java.util.Set<java.util.Map.Entry<{{.KeyType}}, {{.ElemType}}>> entrySet() {
         return impl.entrySet();
     }
-
     @Override
     public {{.ElemType}} get(java.lang.Object key) {
         return impl.get(key);
     }
-
     @Override
     public boolean isEmpty() {
         return impl.isEmpty();
     }
-
     @Override
     public java.util.Set<{{.KeyType}}> keySet() {
         return impl.keySet();
     }
-
     @Override
     public {{.ElemType}} put({{.KeyType}} key, {{.ElemType}} value) {
         return impl.put(key, value);
     }
-
     @Override
     public void putAll(java.util.Map<? extends {{.KeyType}}, ? extends {{.ElemType}}> map) {
         impl.putAll(map);
     }
-
     @Override
     public {{.ElemType}} remove(java.lang.Object key) {
         return impl.remove(key);
     }
-
     @Override
     public int size() {
         return impl.size();
     }
-
     @Override
     public java.util.Collection<{{.ElemType}}> values() {
         return impl.values();
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+    @Override
+    public void writeToParcel(android.os.Parcel out, int flags) {
+        com.veyron2.vdl.ParcelUtil.writeValue(out, impl);
+    }
+    public static final android.os.Parcelable.Creator<{{.Type}}> CREATOR = new android.os.Parcelable.Creator<{{.Type}}>() {
+        @Override
+        public {{.Type}} createFromParcel(android.os.Parcel in) {
+            return new {{.Type}}(in);
+        }
+        @Override
+        public {{.Type}}[] newArray(int size) {
+            return new {{.Type}}[size];
+        }
+    };
+    private {{.Type}}(android.os.Parcel in) {
+        impl = (java.util.Map<{{.KeyType}}, {{.ElemType}}>) com.veyron2.vdl.ParcelUtil.readValue(in, getClass().getClassLoader(), impl);
     }
 }
 `

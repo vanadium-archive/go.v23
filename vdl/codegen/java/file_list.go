@@ -14,7 +14,9 @@ package {{.Package}};
 /**
  * type {{.Type}} {{.VdlTypeString}} {{.Doc}}
  **/
-public final class {{.Type}} implements java.util.List<{{.ElemType}}> {
+public final class {{.Type}} implements java.util.List<{{.ElemType}}>, android.os.Parcelable, java.io.Serializable {
+    static final long serialVersionUID = 0L;
+
     private java.util.List<{{.ElemType}}> impl;
 
     public {{.Type}}(java.util.List<{{.ElemType}}> impl) {
@@ -130,6 +132,27 @@ public final class {{.Type}} implements java.util.List<{{.ElemType}}> {
     @Override
     public <T> T[] toArray(T[] array) {
         return impl.toArray(array);
+    }
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+    @Override
+    public void writeToParcel(android.os.Parcel out, int flags) {
+        com.veyron2.vdl.ParcelUtil.writeValue(out, impl);
+    }
+    public static final android.os.Parcelable.Creator<{{.Type}}> CREATOR = new android.os.Parcelable.Creator<{{.Type}}>() {
+        @Override
+        public {{.Type}} createFromParcel(android.os.Parcel in) {
+            return new {{.Type}}(in);
+        }
+        @Override
+        public {{.Type}}[] newArray(int size) {
+            return new {{.Type}}[size];
+        }
+    };
+    private {{.Type}}(android.os.Parcel in) {
+        impl = (java.util.List<{{.ElemType}}>) com.veyron2.vdl.ParcelUtil.readValue(in, getClass().getClassLoader(), impl);
     }
 }
 `
