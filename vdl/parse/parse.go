@@ -52,6 +52,10 @@ func ParseConfig(baseFileName string, src io.Reader, opts Opts, errs *vdlutil.Er
 	if file == nil {
 		return nil
 	}
+	if len(file.ErrorIDs) > 0 || len(file.TypeDefs) > 0 || len(file.Interfaces) > 0 {
+		errs.Errorf("%s config files may not contain error, type or interface definitions", baseFileName)
+		return nil
+	}
 	config := &Config{
 		BaseName:  file.BaseName,
 		ConfigDef: file.PackageDef,
@@ -63,7 +67,7 @@ func ParseConfig(baseFileName string, src io.Reader, opts Opts, errs *vdlutil.Er
 		config.ConstDefs = nil
 	}
 	if opts.ImportsOnly {
-		// If the config clause has an inline const defined, we clear it out.
+		// Clear out the const expression from the config clause.
 		config.Config = nil
 		config.ConstDefs = nil
 	}

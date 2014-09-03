@@ -40,7 +40,10 @@ func valueGo(data goData, v *vdl.Value) string {
 	}
 	switch k {
 	case vdl.Any:
-		panic("TODO: Any constants aren't supported yet!")
+		if v.IsNil() {
+			return "nil"
+		}
+		return valueGo(data, v.Elem())
 	case vdl.OneOf:
 		panic("TODO: OneOf constants aren't supported yet!")
 	case vdl.Nilable:
@@ -69,37 +72,28 @@ func valueGo(data goData, v *vdl.Value) string {
 	case vdl.Array, vdl.List:
 		s := typeGo(data, t) + "{"
 		for ix := 0; ix < v.Len(); ix++ {
-			if ix > 0 {
-				s += ", "
-			}
-			s += valueGo(data, v.Index(ix))
+			s += "\n" + valueGo(data, v.Index(ix)) + ","
 		}
-		return s + "}"
+		return s + "\n}"
 	case vdl.Set, vdl.Map:
 		// TODO(toddw): Sort keys to get a deterministic ordering.
 		s := typeGo(data, t) + "{"
-		for ix, key := range v.Keys() {
-			if ix > 0 {
-				s += ", "
-			}
-			s += valueGo(data, key)
+		for _, key := range v.Keys() {
+			s += "\n" + valueGo(data, key)
 			if k == vdl.Set {
-				s += ": struct{}{}"
+				s += ": struct{}{},"
 			} else {
 				elem := v.MapIndex(key)
-				s += ": " + valueGo(data, elem)
+				s += ": " + valueGo(data, elem) + ","
 			}
 		}
-		return s + "}"
+		return s + "\n}"
 	case vdl.Struct:
 		s := typeGo(data, t) + "{"
 		for ix := 0; ix < t.NumField(); ix++ {
-			if ix > 0 {
-				s += ", "
-			}
-			s += t.Field(ix).Name + ": " + valueGo(data, v.Field(ix))
+			s += "\n" + t.Field(ix).Name + ": " + valueGo(data, v.Field(ix)) + ","
 		}
-		return s + "}"
+		return s + "\n}"
 	default:
 		panic(fmt.Errorf("vdl: valueGo unhandled kind %v", k))
 	}

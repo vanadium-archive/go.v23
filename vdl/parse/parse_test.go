@@ -25,6 +25,14 @@ func tn(name string, line, col int) *parse.TypeNamed {
 	return &parse.TypeNamed{Name: name, P: pos(line, col)}
 }
 
+func cn(name string, line, col int) *parse.ConstNamed {
+	return &parse.ConstNamed{Name: name, P: pos(line, col)}
+}
+
+func cl(lit interface{}, line, col int) *parse.ConstLit {
+	return &parse.ConstLit{Lit: lit, P: pos(line, col)}
+}
+
 // Tests of vdl imports and file parsing.
 type vdlTest struct {
 	name   string
@@ -482,16 +490,16 @@ const foo = true
 const bar = false`,
 		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
 			ConstDefs: []*parse.ConstDef{
-				{NamePos: np("foo", 2, 7), Expr: &parse.ConstNamed{"true", pos(2, 13)}},
-				{NamePos: np("bar", 3, 7), Expr: &parse.ConstNamed{"false", pos(3, 13)}}}},
+				{NamePos: np("foo", 2, 7), Expr: cn("true", 2, 13)},
+				{NamePos: np("bar", 3, 7), Expr: cn("false", 3, 13)}}},
 		nil},
 	{
 		"StringConst",
 		"package testpkg\nconst foo = \"abc\"\nconst bar = `def`",
 		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
 			ConstDefs: []*parse.ConstDef{
-				{NamePos: np("foo", 2, 7), Expr: &parse.ConstLit{"abc", pos(2, 13)}},
-				{NamePos: np("bar", 3, 7), Expr: &parse.ConstLit{"def", pos(3, 13)}}}},
+				{NamePos: np("foo", 2, 7), Expr: cl("abc", 2, 13)},
+				{NamePos: np("bar", 3, 7), Expr: cl("def", 3, 13)}}},
 		nil},
 	{
 		"IntegerConst",
@@ -499,7 +507,7 @@ const bar = false`,
 const foo = 123`,
 		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
 			ConstDefs: []*parse.ConstDef{
-				{NamePos: np("foo", 2, 7), Expr: &parse.ConstLit{big.NewInt(123), pos(2, 13)}}}},
+				{NamePos: np("foo", 2, 7), Expr: cl(big.NewInt(123), 2, 13)}}},
 		nil},
 	{
 		"FloatConst",
@@ -507,7 +515,7 @@ const foo = 123`,
 const foo = 1.5`,
 		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
 			ConstDefs: []*parse.ConstDef{
-				{NamePos: np("foo", 2, 7), Expr: &parse.ConstLit{big.NewRat(3, 2), pos(2, 13)}}}},
+				{NamePos: np("foo", 2, 7), Expr: cl(big.NewRat(3, 2), 2, 13)}}},
 		nil},
 	{
 		"NamedConst",
@@ -516,8 +524,8 @@ const foo = baz
 const bar = pkg.box`,
 		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
 			ConstDefs: []*parse.ConstDef{
-				{NamePos: np("foo", 2, 7), Expr: &parse.ConstNamed{"baz", pos(2, 13)}},
-				{NamePos: np("bar", 3, 7), Expr: &parse.ConstNamed{"pkg.box", pos(3, 13)}}}},
+				{NamePos: np("foo", 2, 7), Expr: cn("baz", 2, 13)},
+				{NamePos: np("bar", 3, 7), Expr: cn("pkg.box", 3, 13)}}},
 		nil},
 	{
 		"CompLitConst",
@@ -527,8 +535,8 @@ const foo = {"a","b"}`,
 			ConstDefs: []*parse.ConstDef{
 				{NamePos: np("foo", 2, 7), Expr: &parse.ConstCompositeLit{
 					KVList: []parse.KVLit{
-						{Value: &parse.ConstLit{"a", pos(2, 14)}},
-						{Value: &parse.ConstLit{"b", pos(2, 18)}}},
+						{Value: cl("a", 2, 14)},
+						{Value: cl("b", 2, 18)}},
 					P: pos(2, 13)}}}},
 		nil},
 	{
@@ -539,8 +547,8 @@ const foo = {"a":1,"b":2}`,
 			ConstDefs: []*parse.ConstDef{
 				{NamePos: np("foo", 2, 7), Expr: &parse.ConstCompositeLit{
 					KVList: []parse.KVLit{
-						{&parse.ConstLit{"a", pos(2, 14)}, &parse.ConstLit{big.NewInt(1), pos(2, 18)}},
-						{&parse.ConstLit{"b", pos(2, 20)}, &parse.ConstLit{big.NewInt(2), pos(2, 24)}}},
+						{cl("a", 2, 14), cl(big.NewInt(1), 2, 18)},
+						{cl("b", 2, 20), cl(big.NewInt(2), 2, 24)}},
 					P: pos(2, 13)}}}},
 		nil},
 	{
@@ -552,8 +560,8 @@ const foo = bar{"a","b"}`,
 				{NamePos: np("foo", 2, 7), Expr: &parse.ConstCompositeLit{
 					Type: tn("bar", 2, 13),
 					KVList: []parse.KVLit{
-						{Value: &parse.ConstLit{"a", pos(2, 17)}},
-						{Value: &parse.ConstLit{"b", pos(2, 21)}}},
+						{Value: cl("a", 2, 17)},
+						{Value: cl("b", 2, 21)}},
 					P: pos(2, 16)}}}},
 		nil},
 	{
@@ -565,8 +573,8 @@ const foo = bar{"a":1,"b":2}`,
 				{NamePos: np("foo", 2, 7), Expr: &parse.ConstCompositeLit{
 					Type: tn("bar", 2, 13),
 					KVList: []parse.KVLit{
-						{&parse.ConstLit{"a", pos(2, 17)}, &parse.ConstLit{big.NewInt(1), pos(2, 21)}},
-						{&parse.ConstLit{"b", pos(2, 23)}, &parse.ConstLit{big.NewInt(2), pos(2, 27)}}},
+						{cl("a", 2, 17), cl(big.NewInt(1), 2, 21)},
+						{cl("b", 2, 23), cl(big.NewInt(2), 2, 27)}},
 					P: pos(2, 16)}}}},
 		nil},
 	{
@@ -579,13 +587,13 @@ const box = ^3`,
 		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
 			ConstDefs: []*parse.ConstDef{
 				{NamePos: np("foo", 2, 7), Expr: &parse.ConstUnaryOp{"!",
-					&parse.ConstNamed{"false", pos(2, 14)}, pos(2, 13)}},
+					cn("false", 2, 14), pos(2, 13)}},
 				{NamePos: np("bar", 3, 7), Expr: &parse.ConstUnaryOp{"+",
-					&parse.ConstLit{big.NewInt(1), pos(3, 14)}, pos(3, 13)}},
+					cl(big.NewInt(1), 3, 14), pos(3, 13)}},
 				{NamePos: np("baz", 4, 7), Expr: &parse.ConstUnaryOp{"-",
-					&parse.ConstLit{big.NewInt(2), pos(4, 14)}, pos(4, 13)}},
+					cl(big.NewInt(2), 4, 14), pos(4, 13)}},
 				{NamePos: np("box", 5, 7), Expr: &parse.ConstUnaryOp{"^",
-					&parse.ConstLit{big.NewInt(3), pos(5, 14)}, pos(5, 13)}}}},
+					cl(big.NewInt(3), 5, 14), pos(5, 13)}}}},
 		nil},
 	{
 		"TypeConvConst",
@@ -595,9 +603,9 @@ const bar = pkg.box(false)`,
 		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
 			ConstDefs: []*parse.ConstDef{
 				{NamePos: np("foo", 2, 7), Expr: &parse.ConstTypeConv{tn("baz", 2, 13),
-					&parse.ConstNamed{"true", pos(2, 17)}, pos(2, 13)}},
+					cn("true", 2, 17), pos(2, 13)}},
 				{NamePos: np("bar", 3, 7), Expr: &parse.ConstTypeConv{tn("pkg.box", 3, 13),
-					&parse.ConstNamed{"false", pos(3, 21)}, pos(3, 13)}}}},
+					cn("false", 3, 21), pos(3, 13)}}}},
 		nil},
 	{
 		"BinaryOpConst",
@@ -623,59 +631,59 @@ const r = 3 >> 2`,
 		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
 			ConstDefs: []*parse.ConstDef{
 				{NamePos: np("a", 2, 7),
-					Expr: &parse.ConstBinaryOp{"||", &parse.ConstNamed{"true", pos(2, 11)},
-						&parse.ConstNamed{"false", pos(2, 19)}, pos(2, 16)}},
+					Expr: &parse.ConstBinaryOp{
+						"||", cn("true", 2, 11), cn("false", 2, 19), pos(2, 16)}},
 				{NamePos: np("b", 3, 7),
-					Expr: &parse.ConstBinaryOp{"&&", &parse.ConstNamed{"true", pos(3, 11)},
-						&parse.ConstNamed{"false", pos(3, 19)}, pos(3, 16)}},
+					Expr: &parse.ConstBinaryOp{
+						"&&", cn("true", 3, 11), cn("false", 3, 19), pos(3, 16)}},
 				{NamePos: np("c", 4, 7),
-					Expr: &parse.ConstBinaryOp{"<", &parse.ConstLit{big.NewInt(1), pos(4, 11)},
-						&parse.ConstLit{big.NewInt(2), pos(4, 15)}, pos(4, 13)}},
+					Expr: &parse.ConstBinaryOp{"<", cl(big.NewInt(1), 4, 11),
+						cl(big.NewInt(2), 4, 15), pos(4, 13)}},
 				{NamePos: np("d", 5, 7),
-					Expr: &parse.ConstBinaryOp{">", &parse.ConstLit{big.NewInt(3), pos(5, 11)},
-						&parse.ConstLit{big.NewInt(4), pos(5, 15)}, pos(5, 13)}},
+					Expr: &parse.ConstBinaryOp{">", cl(big.NewInt(3), 5, 11),
+						cl(big.NewInt(4), 5, 15), pos(5, 13)}},
 				{NamePos: np("e", 6, 7),
-					Expr: &parse.ConstBinaryOp{"<=", &parse.ConstLit{big.NewInt(5), pos(6, 11)},
-						&parse.ConstLit{big.NewInt(6), pos(6, 16)}, pos(6, 13)}},
+					Expr: &parse.ConstBinaryOp{"<=", cl(big.NewInt(5), 6, 11),
+						cl(big.NewInt(6), 6, 16), pos(6, 13)}},
 				{NamePos: np("f", 7, 7),
-					Expr: &parse.ConstBinaryOp{">=", &parse.ConstLit{big.NewInt(7), pos(7, 11)},
-						&parse.ConstLit{big.NewInt(8), pos(7, 16)}, pos(7, 13)}},
+					Expr: &parse.ConstBinaryOp{">=", cl(big.NewInt(7), 7, 11),
+						cl(big.NewInt(8), 7, 16), pos(7, 13)}},
 				{NamePos: np("g", 8, 7),
-					Expr: &parse.ConstBinaryOp{"!=", &parse.ConstLit{big.NewInt(9), pos(8, 11)},
-						&parse.ConstLit{big.NewInt(8), pos(8, 16)}, pos(8, 13)}},
+					Expr: &parse.ConstBinaryOp{"!=", cl(big.NewInt(9), 8, 11),
+						cl(big.NewInt(8), 8, 16), pos(8, 13)}},
 				{NamePos: np("h", 9, 7),
-					Expr: &parse.ConstBinaryOp{"==", &parse.ConstLit{big.NewInt(7), pos(9, 11)},
-						&parse.ConstLit{big.NewInt(6), pos(9, 16)}, pos(9, 13)}},
+					Expr: &parse.ConstBinaryOp{"==", cl(big.NewInt(7), 9, 11),
+						cl(big.NewInt(6), 9, 16), pos(9, 13)}},
 				{NamePos: np("i", 10, 7),
-					Expr: &parse.ConstBinaryOp{"+", &parse.ConstLit{big.NewInt(5), pos(10, 11)},
-						&parse.ConstLit{big.NewInt(4), pos(10, 15)}, pos(10, 13)}},
+					Expr: &parse.ConstBinaryOp{"+", cl(big.NewInt(5), 10, 11),
+						cl(big.NewInt(4), 10, 15), pos(10, 13)}},
 				{NamePos: np("j", 11, 7),
-					Expr: &parse.ConstBinaryOp{"-", &parse.ConstLit{big.NewInt(3), pos(11, 11)},
-						&parse.ConstLit{big.NewInt(2), pos(11, 15)}, pos(11, 13)}},
+					Expr: &parse.ConstBinaryOp{"-", cl(big.NewInt(3), 11, 11),
+						cl(big.NewInt(2), 11, 15), pos(11, 13)}},
 				{NamePos: np("k", 12, 7),
-					Expr: &parse.ConstBinaryOp{"*", &parse.ConstLit{big.NewInt(1), pos(12, 11)},
-						&parse.ConstLit{big.NewInt(2), pos(12, 15)}, pos(12, 13)}},
+					Expr: &parse.ConstBinaryOp{"*", cl(big.NewInt(1), 12, 11),
+						cl(big.NewInt(2), 12, 15), pos(12, 13)}},
 				{NamePos: np("l", 13, 7),
-					Expr: &parse.ConstBinaryOp{"/", &parse.ConstLit{big.NewInt(3), pos(13, 11)},
-						&parse.ConstLit{big.NewInt(4), pos(13, 15)}, pos(13, 13)}},
+					Expr: &parse.ConstBinaryOp{"/", cl(big.NewInt(3), 13, 11),
+						cl(big.NewInt(4), 13, 15), pos(13, 13)}},
 				{NamePos: np("m", 14, 7),
-					Expr: &parse.ConstBinaryOp{"%", &parse.ConstLit{big.NewInt(5), pos(14, 11)},
-						&parse.ConstLit{big.NewInt(6), pos(14, 15)}, pos(14, 13)}},
+					Expr: &parse.ConstBinaryOp{"%", cl(big.NewInt(5), 14, 11),
+						cl(big.NewInt(6), 14, 15), pos(14, 13)}},
 				{NamePos: np("n", 15, 7),
-					Expr: &parse.ConstBinaryOp{"|", &parse.ConstLit{big.NewInt(7), pos(15, 11)},
-						&parse.ConstLit{big.NewInt(8), pos(15, 15)}, pos(15, 13)}},
+					Expr: &parse.ConstBinaryOp{"|", cl(big.NewInt(7), 15, 11),
+						cl(big.NewInt(8), 15, 15), pos(15, 13)}},
 				{NamePos: np("o", 16, 7),
-					Expr: &parse.ConstBinaryOp{"&", &parse.ConstLit{big.NewInt(9), pos(16, 11)},
-						&parse.ConstLit{big.NewInt(8), pos(16, 15)}, pos(16, 13)}},
+					Expr: &parse.ConstBinaryOp{"&", cl(big.NewInt(9), 16, 11),
+						cl(big.NewInt(8), 16, 15), pos(16, 13)}},
 				{NamePos: np("p", 17, 7),
-					Expr: &parse.ConstBinaryOp{"^", &parse.ConstLit{big.NewInt(7), pos(17, 11)},
-						&parse.ConstLit{big.NewInt(6), pos(17, 15)}, pos(17, 13)}},
+					Expr: &parse.ConstBinaryOp{"^", cl(big.NewInt(7), 17, 11),
+						cl(big.NewInt(6), 17, 15), pos(17, 13)}},
 				{NamePos: np("q", 18, 7),
-					Expr: &parse.ConstBinaryOp{"<<", &parse.ConstLit{big.NewInt(5), pos(18, 11)},
-						&parse.ConstLit{big.NewInt(4), pos(18, 16)}, pos(18, 13)}},
+					Expr: &parse.ConstBinaryOp{"<<", cl(big.NewInt(5), 18, 11),
+						cl(big.NewInt(4), 18, 16), pos(18, 13)}},
 				{NamePos: np("r", 19, 7),
-					Expr: &parse.ConstBinaryOp{">>", &parse.ConstLit{big.NewInt(3), pos(19, 11)},
-						&parse.ConstLit{big.NewInt(2), pos(19, 16)}, pos(19, 13)}}}},
+					Expr: &parse.ConstBinaryOp{">>", cl(big.NewInt(3), 19, 11),
+						cl(big.NewInt(2), 19, 16), pos(19, 13)}}}},
 		nil},
 	{
 		"FAILConstOnlyName",
@@ -853,7 +861,7 @@ config = true`,
 		&parse.Config{BaseName: "testfile", ConfigDef: parse.NamePos{Name: "config", Pos: pos(3, 1), Doc: `// One liner
 // Another line
 `},
-			Config: &parse.ConstNamed{"true", pos(3, 10)}},
+			Config: cn("true", 3, 10)},
 		nil},
 	{
 		"ConfigDocMultiLiner",
@@ -865,7 +873,7 @@ config = true`,
 Another line
 */
 `},
-			Config: &parse.ConstNamed{"true", pos(4, 10)}},
+			Config: cn("true", 4, 10)},
 		nil},
 	{
 		"NotConfigDoc",
@@ -873,7 +881,7 @@ Another line
 
 config = true`,
 		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 3, 1),
-			Config: &parse.ConstNamed{"true", pos(3, 10)}},
+			Config: cn("true", 3, 10)},
 		nil},
 	{
 		"FAILUnterminatedComment",
@@ -888,19 +896,19 @@ config = true`,
 		"Config",
 		"config = true;",
 		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
-			Config: &parse.ConstNamed{"true", pos(1, 10)}},
+			Config: cn("true", 1, 10)},
 		nil},
 	{
 		"ConfigNoSemi",
 		"config = true",
 		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
-			Config: &parse.ConstNamed{"true", pos(1, 10)}},
+			Config: cn("true", 1, 10)},
 		nil},
 	{
 		"ConfigNamedConfig",
 		"config = config",
 		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
-			Config: &parse.ConstNamed{"config", pos(1, 10)}},
+			Config: cn("config", 1, 10)},
 		nil},
 	{
 		"FAILConfigNoEqual",
@@ -915,7 +923,7 @@ config = true`,
 import (
 )`,
 		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
-			Config: &parse.ConstNamed{"foo", pos(1, 10)}},
+			Config: cn("foo", 1, 10)},
 		nil},
 	{
 		"OneImport",
@@ -923,7 +931,7 @@ import (
 import "foo/bar";`,
 		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
 			Imports: []*parse.Import{{Path: "foo/bar", NamePos: np("", 2, 8)}},
-			Config:  &parse.ConstNamed{"foo", pos(1, 10)}},
+			Config:  cn("foo", 1, 10)},
 		nil},
 	{
 		"OneImportLocalNameNoSemi",
@@ -931,7 +939,7 @@ import "foo/bar";`,
 import baz "foo/bar"`,
 		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
 			Imports: []*parse.Import{{Path: "foo/bar", NamePos: np("baz", 2, 8)}},
-			Config:  &parse.ConstNamed{"foo", pos(1, 10)}},
+			Config:  cn("foo", 1, 10)},
 		nil},
 	{
 		"OneImportParens",
@@ -941,7 +949,7 @@ import (
 )`,
 		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
 			Imports: []*parse.Import{{Path: "foo/bar", NamePos: np("", 3, 3)}},
-			Config:  &parse.ConstNamed{"foo", pos(1, 10)}},
+			Config:  cn("foo", 1, 10)},
 		nil},
 	{
 		"OneImportParensNoSemi",
@@ -951,7 +959,7 @@ import (
 )`,
 		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
 			Imports: []*parse.Import{{Path: "foo/bar", NamePos: np("", 3, 3)}},
-			Config:  &parse.ConstNamed{"foo", pos(1, 10)}},
+			Config:  cn("foo", 1, 10)},
 		nil},
 	{
 		"OneImportParensNamed",
@@ -961,7 +969,7 @@ import (
 )`,
 		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
 			Imports: []*parse.Import{{Path: "foo/bar", NamePos: np("baz", 3, 3)}},
-			Config:  &parse.ConstNamed{"foo", pos(1, 10)}},
+			Config:  cn("foo", 1, 10)},
 		nil},
 	{
 		"MixedImports",
@@ -979,7 +987,7 @@ import "z"`,
 				{Path: "a/b", NamePos: np("", 4, 9)},
 				{Path: "c/d", NamePos: np("", 5, 3)},
 				{Path: "z", NamePos: np("", 7, 8)}},
-			Config: &parse.ConstNamed{"foo", pos(1, 10)}},
+			Config: cn("foo", 1, 10)},
 		nil},
 	{
 		"FAILImportParensNotClosed",
@@ -994,31 +1002,31 @@ import (
 		"BoolConst",
 		`config = true`,
 		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
-			Config: &parse.ConstNamed{"true", pos(1, 10)}},
+			Config: cn("true", 1, 10)},
 		nil},
 	{
 		"StringConst",
 		`config = "abc"`,
 		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
-			Config: &parse.ConstLit{"abc", pos(1, 10)}},
+			Config: cl("abc", 1, 10)},
 		nil},
 	{
 		"IntegerConst",
 		`config = 123`,
 		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
-			Config: &parse.ConstLit{big.NewInt(123), pos(1, 10)}},
+			Config: cl(big.NewInt(123), 1, 10)},
 		nil},
 	{
 		"FloatConst",
 		`config = 1.5`,
 		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
-			Config: &parse.ConstLit{big.NewRat(3, 2), pos(1, 10)}},
+			Config: cl(big.NewRat(3, 2), 1, 10)},
 		nil},
 	{
 		"NamedConst",
 		`config = pkg.foo`,
 		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
-			Config: &parse.ConstNamed{"pkg.foo", pos(1, 10)}},
+			Config: cn("pkg.foo", 1, 10)},
 		nil},
 	{
 		"CompLitConst",
@@ -1026,8 +1034,8 @@ import (
 		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
 			Config: &parse.ConstCompositeLit{
 				KVList: []parse.KVLit{
-					{Value: &parse.ConstLit{"a", pos(1, 11)}},
-					{Value: &parse.ConstLit{"b", pos(1, 15)}}},
+					{Value: cl("a", 1, 11)},
+					{Value: cl("b", 1, 15)}},
 				P: pos(1, 10)}},
 		nil},
 	{
@@ -1036,8 +1044,8 @@ import (
 		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
 			Config: &parse.ConstCompositeLit{
 				KVList: []parse.KVLit{
-					{&parse.ConstLit{"a", pos(1, 11)}, &parse.ConstLit{big.NewInt(1), pos(1, 15)}},
-					{&parse.ConstLit{"b", pos(1, 17)}, &parse.ConstLit{big.NewInt(2), pos(1, 21)}}},
+					{cl("a", 1, 11), cl(big.NewInt(1), 1, 15)},
+					{cl("b", 1, 17), cl(big.NewInt(2), 1, 21)}},
 				P: pos(1, 10)}},
 		nil},
 	{
@@ -1047,8 +1055,8 @@ import (
 			Config: &parse.ConstCompositeLit{
 				Type: tn("foo", 1, 10),
 				KVList: []parse.KVLit{
-					{Value: &parse.ConstLit{"a", pos(1, 14)}},
-					{Value: &parse.ConstLit{"b", pos(1, 18)}}},
+					{Value: cl("a", 1, 14)},
+					{Value: cl("b", 1, 18)}},
 				P: pos(1, 13)}},
 		nil},
 	{
@@ -1058,8 +1066,8 @@ import (
 			Config: &parse.ConstCompositeLit{
 				Type: tn("foo", 1, 10),
 				KVList: []parse.KVLit{
-					{&parse.ConstLit{"a", pos(1, 14)}, &parse.ConstLit{big.NewInt(1), pos(1, 18)}},
-					{&parse.ConstLit{"b", pos(1, 20)}, &parse.ConstLit{big.NewInt(2), pos(1, 24)}}},
+					{cl("a", 1, 14), cl(big.NewInt(1), 1, 18)},
+					{cl("b", 1, 20), cl(big.NewInt(2), 1, 24)}},
 				P: pos(1, 13)}},
 		nil},
 	{
@@ -1081,9 +1089,9 @@ import "foo"
 const config = true`,
 		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
 			Imports: []*parse.Import{{Path: "foo", NamePos: np("", 2, 8)}},
-			Config:  &parse.ConstNamed{"config", pos(1, 10)},
+			Config:  cn("config", 1, 10),
 			ConstDefs: []*parse.ConstDef{
-				{NamePos: np("config", 3, 7), Expr: &parse.ConstNamed{"true", pos(3, 16)}}}},
+				{NamePos: np("config", 3, 7), Expr: cn("true", 3, 16)}}},
 		nil},
 	{
 		"BoolOutOfLineBar",
@@ -1092,8 +1100,28 @@ import "foo"
 const bar = true`,
 		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
 			Imports: []*parse.Import{{Path: "foo", NamePos: np("", 2, 8)}},
-			Config:  &parse.ConstNamed{"bar", pos(1, 10)},
+			Config:  cn("bar", 1, 10),
 			ConstDefs: []*parse.ConstDef{
-				{NamePos: np("bar", 3, 7), Expr: &parse.ConstNamed{"true", pos(3, 13)}}}},
+				{NamePos: np("bar", 3, 7), Expr: cn("true", 3, 13)}}},
 		nil},
+
+	// Errors, types and interfaces return error
+	{
+		"FAILErrorID",
+		`config = true
+errorid foo`,
+		nil,
+		[]string{"config files may not contain error, type or interface definitions"}},
+	{
+		"FAILType",
+		`config = true
+type foo bool`,
+		nil,
+		[]string{"config files may not contain error, type or interface definitions"}},
+	{
+		"FAILInterface",
+		`config = true
+type foo interface{}`,
+		nil,
+		[]string{"config files may not contain error, type or interface definitions"}},
 }

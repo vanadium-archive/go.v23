@@ -247,7 +247,12 @@ func newPackage(name, path string) *Package {
 
 // QualifiedName returns the fully-qualified name of an identifier, by
 // prepending the identifier with the package path.
-func (p *Package) QualifiedName(id string) string { return p.Path + "." + id }
+func (p *Package) QualifiedName(id string) string {
+	if p.Path == "" {
+		return id
+	}
+	return p.Path + "." + id
+}
 
 // ResolveType resolves the type name to its definition.
 func (p *Package) ResolveType(name string) *TypeDef { return p.typeDefs[name] }

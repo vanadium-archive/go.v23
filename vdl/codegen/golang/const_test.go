@@ -30,11 +30,26 @@ func TestConst(t *testing.T) {
 		{"Complex64", vdl.Complex64Value(1 + 2i), `const X = complex64(1+2i)`},
 		{"Complex128", vdl.Complex128Value(3 + 4i), `const X = complex128(3+4i)`},
 		{"Enum", vdl.ZeroValue(tEnum).AssignEnumLabel("B"), `const X = TestEnumB`},
-		{"Array", vArray, `var X = [3]string{"A", "B", "C"}`},
-		{"List", vList, `var X = []string{"A", "B", "C"}`},
-		{"Set", vSet, `var X = map[string]struct{}{"A": struct{}{}}`},
-		{"Map", vMap, `var X = map[string]int64{"A": 1}`},
-		{"Struct", vStruct, `var X = TestStruct{A: "foo", B: 123}`},
+		{"Array", vArray, `var X = [3]string{
+"A",
+"B",
+"C",
+}`},
+		{"List", vList, `var X = []string{
+"A",
+"B",
+"C",
+}`},
+		{"Set", vSet, `var X = map[string]struct{}{
+"A": struct{}{},
+}`},
+		{"Map", vMap, `var X = map[string]int64{
+"A": 1,
+}`},
+		{"Struct", vStruct, `var X = TestStruct{
+A: "foo",
+B: 123,
+}`},
 		// TODO(toddw): Add tests for any, oneof, nilable, typeval
 	}
 	data := goData{Env: compile.NewEnv(-1)}
