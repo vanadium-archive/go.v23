@@ -213,7 +213,7 @@ var (
 	optGenStatus           bool
 	optGenGoFmt            bool
 	optGenGoOutDir         = genOutDir{}
-	optGenJavaOutDir       = genOutDir{src: "go/src", dst: "java/src/main/java"}
+	optGenJavaOutDir       = genOutDir{src: "veyron/go/src", dst: "veyron.new/java/src/main/java"}
 	optGenJavascriptOutDir = genOutDir{src: "go/src", dst: "javascript/src"}
 	optGenJavaPkgPrefix    string
 	optGenLangs            = genLangs{genLangGo, genLangJava} // TODO: javascript
