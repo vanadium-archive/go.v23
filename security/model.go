@@ -39,7 +39,7 @@ type PublicIDStore interface {
 	// SetDefaultBlessingPattern changes the default BlessingPattern used by subsequent
 	// calls to DefaultPublicID to the provided pattern. In the absence of any
 	// SetDefaultBlessingPattern calls, the default BlessingPattern must be set to
-	// "*" which matches all PublicIDs.
+	// "..." which matches all PublicIDs.
 	SetDefaultBlessingPattern(pattern BlessingPattern) error
 }
 
