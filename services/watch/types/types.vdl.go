@@ -5,8 +5,6 @@
 package types
 
 import (
-	"veyron2/query"
-
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
 	_gen_vdlutil "veyron2/vdl/vdlutil"
 )
@@ -17,17 +15,6 @@ type GlobRequest struct {
 	// Pattern specifies the subset of the children of the root entity
 	// for which the client wants updates.
 	Pattern string
-	// ResumeMarker specifies how to resume from a previous Watch call.
-	// See the ResumeMarker type for detailed comments.
-	ResumeMarker ResumeMarker
-}
-
-// QueryRequest specifies which entities should be watched and, optionally,
-// how to resume from a previous Watch call.
-type QueryRequest struct {
-	// Query specifies the subset of the children of the root entity
-	// for which the client wants updates.
-	Query query.Query
 	// ResumeMarker specifies how to resume from a previous Watch call.
 	// See the ResumeMarker type for detailed comments.
 	ResumeMarker ResumeMarker
