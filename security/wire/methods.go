@@ -55,19 +55,20 @@ func ellipticCurve(t KeyCurve) (elliptic.Curve, error) {
 }
 
 // Decode unmarshals the contents of the PublicKey object and returns
-// and crypto.ecdsa.PublicKey object.
-func (p *PublicKey) Decode() (*ecdsa.PublicKey, error) {
+// a security.PublicKey object.
+func (p *PublicKey) Decode() (security.PublicKey, error) {
 	curve, err := ellipticCurve(p.Curve)
 	if err != nil {
 		return nil, err
 	}
 	x, y := elliptic.Unmarshal(curve, p.XY)
-	return &ecdsa.PublicKey{Curve: curve, X: x, Y: y}, nil
+	return security.NewECDSAPublicKey(&ecdsa.PublicKey{Curve: curve, X: x, Y: y}), nil
 }
 
-// Encode takes a crypto.ecdsa.PublicKey object, marshals its contents
+// Encode takes a security.PublicKey object, marshals its contents
 // and populates the PublicKey object with them.
-func (p *PublicKey) Encode(key *ecdsa.PublicKey) error {
+func (p *PublicKey) Encode(pk security.PublicKey) error {
+	key := pk.DO_NOT_USE()
 	if key.Curve != elliptic.P256() {
 		return fmt.Errorf("unrecognized elliptic curve %T", p.Curve)
 	}
@@ -177,7 +178,7 @@ func (c *Certificate) Sign(signer security.Signer, pubID *ChainPublicID) error {
 	return err
 }
 
-func (c *Certificate) verify(issuerSignature security.Signature, key *ecdsa.PublicKey) bool {
+func (c *Certificate) verify(issuerSignature security.Signature, key security.PublicKey) bool {
 	return c.Signature.Verify(key, c.contentHash(issuerSignature))
 }
 

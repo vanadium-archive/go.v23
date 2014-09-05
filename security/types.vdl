@@ -89,7 +89,7 @@ const (
   NoHash = Hash("")           // Identity hash function.
 )
 
-// Signature represents an ECDSA signature.
+// Signature represents a digital signature.
 type Signature struct {
 	Hash Hash    // Cryptographic hash function applied to the message before computing the signature.
 	R, S []byte  // Pair of integers that make up an ECDSA signature.

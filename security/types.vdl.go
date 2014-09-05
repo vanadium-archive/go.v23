@@ -74,7 +74,7 @@ type ACL struct {
 // Hash identifies a cryptographic hash function.
 type Hash string
 
-// Signature represents an ECDSA signature.
+// Signature represents a digital signature.
 type Signature struct {
 	Hash Hash   // Cryptographic hash function applied to the message before computing the signature.
 	R    []byte // Pair of integers that make up an ECDSA signature.

@@ -39,8 +39,8 @@ func (sn *signer) Sign(message []byte) (Signature, error) {
 	}, nil
 }
 
-func (sn *signer) PublicKey() *ecdsa.PublicKey {
-	return &sn.key.PublicKey
+func (sn *signer) PublicKey() PublicKey {
+	return &ecdsaPublicKey{&sn.key.PublicKey}
 }
 
 func TestVerify(t *testing.T) {

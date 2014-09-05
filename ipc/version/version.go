@@ -9,9 +9,6 @@ const (
 	// implementation will have to guess the correct values.
 	UnknownIPCVersion IPCVersion = iota
 
-	// IPCVersion1 is the initially defined version of the IPC Protocol.
-	IPCVersion1
-
 	// IPCVersion2 uses VOM for encoding signatures.
 	IPCVersion2
 

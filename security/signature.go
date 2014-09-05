@@ -9,12 +9,17 @@ import (
 )
 
 // Verify returns true iff sig is a valid signature for a message.
-func (sig Signature) Verify(key *ecdsa.PublicKey, message []byte) bool {
+func (sig Signature) Verify(key PublicKey, message []byte) bool {
 	if message = cryptoHash(sig.Hash, message); message == nil {
 		return false
 	}
-	var r, s big.Int
-	return ecdsa.Verify(key, message, r.SetBytes(sig.R), s.SetBytes(sig.S))
+	switch v := key.(type) {
+	case *ecdsaPublicKey:
+		var r, s big.Int
+		return ecdsa.Verify(v.key, message, r.SetBytes(sig.R), s.SetBytes(sig.S))
+	default:
+		return false
+	}
 }
 
 // cryptoHash hashes the provided data using the given cryptographic hash

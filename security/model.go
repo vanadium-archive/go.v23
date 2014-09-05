@@ -3,7 +3,6 @@
 package security
 
 import (
-	"crypto/ecdsa"
 	"time"
 	"veyron2/naming"
 )
@@ -53,7 +52,7 @@ type PublicID interface {
 
 	// PublicKey returns the public key corresponding to the private key
 	// that is held only by the principal represented by this PublicID.
-	PublicKey() *ecdsa.PublicKey
+	PublicKey() PublicKey
 
 	// Authorize determines whether the PublicID has credentials that are valid
 	// under the provided context. If so, Authorize returns a new PublicID that
@@ -68,14 +67,14 @@ type PublicID interface {
 	ThirdPartyCaveats() []ServiceCaveat
 }
 
-// Signer is the interface for signing arbitrary length messages using ECDSA private keys.
+// Signer is the interface for signing arbitrary length messages using private keys.
 type Signer interface {
 	// Sign signs an arbitrary length message (often the hash of a larger message)
 	// using the private key associated with this Signer.
 	Sign(message []byte) (Signature, error)
 
-	// PublicKey returns ECDSA public key corresponding to the Signer's private key.
-	PublicKey() *ecdsa.PublicKey
+	// PublicKey returns the public key corresponding to the Signer's private key.
+	PublicKey() PublicKey
 }
 
 // PrivateID is the interface for the secret component of a principal's unique

@@ -2,6 +2,7 @@ package security
 
 // THIS FILE SHOULD BE DELETED SOON. IT IS A PLACEHOLDER FOR REAL
 // IMPLEMENTATIONS OF THE IDENTITY INTERFACES THAT ARE STILL DEVELOPING.
+// TODO(ashankar): Remove this before the 0.1 release
 
 import (
 	"bytes"
@@ -43,7 +44,7 @@ func (id fakeID) Names() []string {
 	return []string{string(id)}
 }
 
-func (fakeID) PublicKey() *ecdsa.PublicKey                    { return &fakeKey.PublicKey }
+func (fakeID) PublicKey() PublicKey                           { return NewECDSAPublicKey(&fakeKey.PublicKey) }
 func (id fakeID) Authorize(context Context) (PublicID, error) { return id, nil }
 func (fakeID) ThirdPartyCaveats() []ServiceCaveat             { return nil }
 func (id fakeID) PublicID() PublicID                          { return id }
