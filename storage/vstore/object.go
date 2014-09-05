@@ -24,7 +24,7 @@ var (
 	nullStat  storage.Stat
 )
 
-// object implements the store.Object interface.  It is just a thin
+// object implements the storage.Object interface.  It is just a thin
 // wrapper for store.Object except for the Glob and Query methods.
 type object struct {
 	serv store.Object
@@ -39,8 +39,19 @@ func newObject(name string) storage.Object {
 	return &object{serv, name}
 }
 
+// NewTransaction implements the storage.Object method.
+func (o *object) NewTransaction(ctx context.T, opts ...storage.TransactionOpt) (
+	storage.Object, storage.Transaction) {
+	tid, err := o.serv.NewTransaction(ctx, nil)
+	if err != nil {
+		return newErrorObject(err), newErrorTransaction(err)
+	}
+	tname := naming.Join(o.name, tid)
+	return newObject(tname), newTransaction(tname)
+}
+
 // Bind implements the storage.Object method.
-func (o *object) Bind(relativeName string) storage.Object {
+func (o *object) BindObject(relativeName string) storage.Object {
 	return newObject(naming.Join(o.name, relativeName))
 }
 
@@ -106,7 +117,12 @@ func newErrorObject(err error) storage.Object {
 	return &errorObject{err}
 }
 
-func (o *errorObject) Bind(relativeName string) storage.Object {
+func (o *errorObject) NewTransaction(ctx context.T, opts ...storage.TransactionOpt) (
+	storage.Object, storage.Transaction) {
+	return o, newErrorTransaction(o.err)
+}
+
+func (o *errorObject) BindObject(relativeName string) storage.Object {
 	return o
 }
 

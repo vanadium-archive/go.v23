@@ -3,40 +3,14 @@
 package vstore
 
 import (
-	"veyron2/context"
 	"veyron2/storage"
 )
 
-type vStore struct{}
-
-var _ storage.Store = (*vStore)(nil)
-
-// New returns a storage.Store.
-func New() storage.Store {
-	return &vStore{}
-}
-
-func (v *vStore) Bind(name string) storage.Object {
-	return newObject(name)
-}
-
-func (v *vStore) NewTransaction(ctx context.T, name string,
-	opts ...storage.TransactionOpt) storage.Transaction {
-	// root, err := store.BindTransactionRoot(name)
-	// if err != nil {
-	// 	return newErrorTransaction(err)
-	// }
-	// tid, err := root.CreateTransaction(ctx, nil)
-	// if err != nil {
-	// 	return newErrorTransaction(err)
-	// }
-	// tname := naming.Join(name, tid)
-	// tx, err := store.BindTransaction(tname)
-	// if err != nil {
-	// 	// We would want to abort tx if there was an error, but there's no way
-	// 	// to send the abort if we can't bind.
-	// 	return newErrorTransaction(err)
-	// }
-	// return &transaction{tname, tx}
-	return &transaction{}
+// BindDir binds to a Dir in the Store.  The given name must either
+// be of Dir type or not exist (i.e. it can't be an Object).  BindDir
+// is intended to be called early in the lifetime of the application
+// and the resulting Dir can be passed around.  Tests can pass around
+// mock Dirs and the application code should remain unchanged.
+func BindDir(name string) storage.Dir {
+	return newDir(name)
 }

@@ -2,7 +2,6 @@ package vstore
 
 import (
 	"veyron2/context"
-	"veyron2/naming"
 	"veyron2/services/store"
 	"veyron2/storage"
 )
@@ -21,9 +20,14 @@ type transaction struct {
 	serv store.Transaction
 }
 
-// Bind implements the storage.Transaction method.
-func (t *transaction) Bind(relativeName string) storage.Object {
-	return newObject(naming.Join(t.tname, relativeName))
+func newTransaction(tname string) storage.Transaction {
+	tx, err := store.BindTransaction(tname)
+	if err != nil {
+		// We would want to abort tx if there was an error, but there's no way
+		// to send the abort if we can't bind.
+		return newErrorTransaction(err)
+	}
+	return &transaction{tname, tx}
 }
 
 // Commit implements the storage.Transaction method.
@@ -44,11 +48,6 @@ type errorTransaction struct {
 
 func newErrorTransaction(err error) storage.Transaction {
 	return &errorTransaction{err}
-}
-
-// Bind implements the storage.Transaction method.
-func (t *errorTransaction) Bind(relativeName string) storage.Object {
-	return newErrorObject(t.err)
 }
 
 // Commit implements the storage.Transaction method.

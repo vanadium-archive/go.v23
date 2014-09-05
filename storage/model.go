@@ -1,7 +1,7 @@
 // Package storage specifies a hierarchical structured data store with support
 // for syncing and replication.  This is similar to a filesystem with files and
 // directories, but the "files" are not blobs, they are structured data with a
-// schema specified in the IDL.
+// schema specified in the VDL.
 //
 // See http://goto/veyron:local-store for a more complete description.
 // Currently, that's a discussion doc, rather than a design doc.  Here is a
@@ -16,73 +16,63 @@
 //   instances are peers.  However, one or more of the peers can be hosted "in
 //   the cloud" to improve availability, reliability, etc.
 //
-// - Each store entry has at least one pathname that refers to it, a globally
-//   unique ID for the entry, and a value.
+// - The data in the store consists of Dirs and Objects.  The Dirs form a
+//   strict tree with Objects or empty Dirs as the leaves.
 //
-// - Values are structured, specified in the IDL.  Here is an example:
+// - Objects are structured, specified in the VDL.  Here is an example:
 //
-//       // photo.idl
+//       // photo.vdl
 //       type Album struct {
 //           Title string
-//           Images map[string]Name
 //       }
 //       type Image struct {
 //           Comment string
 //           Content string // Object name
 //       }
-//       type Dir struct {
-//           Entries map[string]Name
-//       }
 //
-//   The Name type is used for references.  Internally, the values are
-//   represented with IDs.
+// - Use vstore.BindDir(name) to get an initial handle to the store.  The name
+//   could be the root of the store or nested within.  The returned Dir
+//   allows for recursive binding to descendants.
 //
-// - Use store.Bind(path) to get an Object in the store.  An Object is just a
-//   reference, it does not mean that there is a value associated with the
-//   Object.  Use Put(v) to store a value.
+// - Use Dir.BindObject(relativeName) to get an Object in the store.  An Object
+//   is just a reference, it does not mean that there is a value associated
+//   with the Object.  Use Object.Put(v) to store a value.
 //
-// - Use store.NewTransaction(path) to create a transaction.
-//   Transactions acquire a snapshot of the state the first time they are used,
-//   and may not span multiple store instances.  All Objects that participate
-//   in the transaction must have names that are relative to path.
+// - Use Dir.NewTransaction() or Object.NewTransaction() to create a transaction.
+//   Transactions acquire a snapshot of the state when they are created.
+//   The scope of the transaction is limited to the subtree of the store where
+//   the transaction was created.  The transaction scope also includes the parent
+//   Object or Dir since some operations (e.g. Remove) modify the parent.
 //
-// - Use Object.Put(value) to add a value to the store at the specified path.
+// - Use Object.Put(value) to add a value to the store at the specified name.
 //   For example, here is how we can create a root directory containing a photo
 //   album with two images.  Error handling is omitted for brevity.
 //
-//       tx := st.NewTransaction(storeName)
-//       d, err := tx.Bind("").Put(&Dir{})
-//       y, err := tx.Bind("/Entries/Yosemite").Put(
-//         &Album{Title: "Yosemite 2013", Images: make(map[string]Name)})
-//       img, err := tx.Bind("/Entries/Yosemite/Images/A").Put(
-//         &Image{Comment: "Waterfall", Content: "global/media/xxx.jpg"})
-//       img, err = tx.Bind("/Entries/Yosemite/Images/B").Put(
-//         &Image{Comment: "Jason", Content: "global/media/yyy.jpg"})
+//       rootDir := vstore.BindDir("<store root name>")
+//       entries, tx := rootDir.BindDir("Entries").NewTransaction(ctx)
+//       err := entries.BindDir("Yosemite/Images").Make(ctx)
+//       meta := entries.BindObject("Yosemite/METADATA")
+//       _, err := meta.Put(ctx, &Album{Title: "Yosemite 2013"})
+//       images := entries.BindDir("Yosemite/Images")
+//       imageA := images.BindObject("A")
+//       _, err := imageA.Put(&Image{Comment: "Waterfall", Content: "global/media/xxx.jpg"})
+//       imageB := images.BindObject("B")
+//       _, err := imageB.Put(&Image{Comment: "Jason", Content: "global/media/yyy.jpg"})
 //       err := tx.Commit()
 //
-// - The fields of an entry are accessible using the path separator "/" in
+// - The fields of an object are accessible using the name separator "/" in
 //   pathnames.  Given this example, the pathnames resolve as follows:
 //
-//       /Entries/Yosemite = Album{Title: "Yosemite 2013", Images: map[string]Name{"A": 37, "B": 21}}
-//       /Entries/Yosemite/Title = "Yosemite 2013"
+//       /Entries/Yosemite = Dir
+//       /Entries/Yosemite/METADATA = Album{Title: "Yosemite 2013"}
+//       /Entries/Yosemite/METADATA/Title = "Yosemite 2013"
+//       /Entries/Yosemite/Images = Dir
 //       /Entries/Yosemite/Images/A = Image{Comment: "Waterfall", Content: "global/media/xxx.jpg"}
 //       /Entries/Yosemite/Images/B = Image{Comment: "Jason", Content: "global/media/yyy.jpg"}
 //       /Entries/Yosemite/Images/A/Comment = "Waterfall"
 //       /Entries/Yosemite/Images/A/Content = "global/media/xxx.jpg"
 //       /Entries/Yosemite/Images/B/Comment = "Jason"
 //       /Entries/Yosemite/Images/B/Content = "global/media/yyy.jpg"
-//
-// - Hard links are supported.  To add a hard link, use a Bind() and Put() to add a
-//   value with each of its paths.
-//
-//       // Set an existing image as the Wallpaper.
-//       tx := st.NewTransaction(storeName)
-//       img1, err := tx.Bind("/Entries/Yosemite/Images/A").Get()
-//       stat, err := tx.Bind("/Entries/Wallpaper").Put(img1.Stat.ID)
-//       err := tx.Commit()
-//
-//   The references form an arbitrary directed graph, posssibly cyclic.  Entries
-//   are removed immediately when there are no more references to them.
 //
 // - Operations are transactional.  A transaction contains a consistent snapshot
 //   of the current state, and a set of mutations to be applied to the store
@@ -100,16 +90,77 @@ import (
 	"veyron2/services/watch/types"
 )
 
-// Store is the client interface to the storage system.
-type Store interface {
-	// Bind returns the Object associated with a name for use outside of any
-	// transaction.
-	Bind(name string) Object
+// Statable provides methods that are common to both Dir and Object.
+type Statable interface {
+	// Stat returns information about the receiver.  A primary use case is to
+	// distinguish between a Dir and an Object.
+	Stat(ctx context.T) (Stat, error)
 
-	// NewTransaction creates a transaction that is rooted at a given name
-	// in the store.  All objects to be used within the transaction must
-	// be addressed with a name relative to the given name.
-	NewTransaction(ctx context.T, name string, opts ...TransactionOpt) Transaction
+	// Exists returns true iff the receiver actually exists.
+	Exists(ctx context.T) (bool, error)
+
+	// Query returns entries matching the given query.
+	Query(ctx context.T, q query.Query) QueryStream
+
+	// Glob returns names matching the given pattern.
+	Glob(ctx context.T, pattern string) GlobCall
+}
+
+// Dir is a directory containing Objects and other Dirs.
+type Dir interface {
+	// NewTransaction creates a transaction that is rooted at this directory.
+	// The caller must use the returned Dir for operations that should be
+	// part of the transaction.  A common pattern is:
+	//   rootDir := BindDir(naming.Join("<path to store>", "myapp"))
+	//   d, tx := rootDir.BindDir("photos/recent").NewTransaction(ctx)
+	NewTransaction(ctx context.T, opts ...TransactionOpt) (Dir, Transaction)
+
+	// BindDir returns a Dir whose name is relative to this dir.
+	BindDir(relativeName string) Dir
+
+	// BindObject returns an Object whose name is relative to this dir.
+	BindObject(relativeName string) Object
+
+	// Make creates this directory and any ancestor directories that do not
+	// exist (i.e. equivalent to Unix's 'mkdir -p').  Make is idempotent.
+	Make(ctx context.T) error
+
+	// Remove removes this directory and all of its children, recursively.
+	Remove(ctx context.T) error
+
+	Statable
+	GlobWatcher
+	QueryWatcher
+}
+
+// Object is the interface for a value in the store.
+type Object interface {
+	// NewTransaction creates a transaction that allows atomic operations
+	// on this object and its fields.
+	NewTransaction(ctx context.T, opts ...TransactionOpt) (Object, Transaction)
+
+	// Bind returns an object whose name is relative to this object's name.
+	// This makes it possible to mutate an individual field of an object
+	// without getting and putting the whole object.
+	BindObject(relativeName string) Object
+
+	// Get returns the value for the Object.  The value returned is from the
+	// most recent mutation of the entry in the Transaction, or from the
+	// Transaction's snapshot if there is no mutation.
+	Get(ctx context.T) (Entry, error)
+
+	// Put adds or modifies the Object.  If there is no current value, the
+	// object is created with default attributes.  It is legal to update a
+	// subfield of a value.  Returns the updated *Stat of the store value.  If
+	// putting a subfield, the *Stat is for the enclosing store value.
+	Put(ctx context.T, v interface{}) (Stat, error)
+
+	// Remove removes the Object.
+	Remove(ctx context.T) error
+
+	Statable
+	GlobWatcher
+	QueryWatcher
 }
 
 // TransactionOpt represents the options for creating transactions.
@@ -121,17 +172,14 @@ type TransactionOpt interface {
 // Transaction is an atomic state mutation.
 //
 // Each Transaction contains a snapshot of the committed state of the store and
-// a set of mutations (created by Put and Remove operations).  The snapshot is
+// a set of mutations (created by Make, Put, and Remove operations).  The snapshot is
 // taken when the Transaction is created, so it contains the state of the store
 // as it was at some (hopefully recent) point in time.  This is used to support
 // read-modify-write operations where reads refer to a consistent snapshot of
 // the state.
 type Transaction interface {
-	// Bind returns an object whose name is relative to the transaction's name.
-	Bind(relativeName string) Object
-
-	// Commit commits the changes (the Put and Remove operations) in the
-	// transaction to the store.  The operation is atomic, so all Put/Remove
+	// Commit commits the changes (the Make, Put, and Remove operations) in the
+	// transaction to the store.  The operation is atomic, so all Make/Put/Remove
 	// operations are performed, or none.  Returns an error if the transaction
 	// aborted.
 	//
@@ -161,41 +209,6 @@ type GlobWatcher interface {
 type QueryWatcher interface {
 	// WatchQuery returns a stream of changes.
 	WatchQuery(ctx context.T, req types.QueryRequest) (watch.QueryWatcherWatchQueryCall, error)
-}
-
-// Object is the interface for a value in the store.
-type Object interface {
-	GlobWatcher
-	QueryWatcher
-
-	// Bind returns an object whose name is relative to this object's name.
-	Bind(relativeName string) Object
-
-	// Exists returns true iff the Entry has a value.
-	Exists(ctx context.T) (bool, error)
-
-	// Get returns the value for the Object.  The value returned is from the
-	// most recent mutation of the entry in the Transaction, or from the
-	// Transaction's snapshot if there is no mutation.
-	Get(ctx context.T) (Entry, error)
-
-	// Put adds or modifies the Object.  If there is no current value, the
-	// object is created with default attributes.  It is legal to update a
-	// subfield of a value.  Returns the updated *Stat of the store value.  If
-	// putting a subfield, the *Stat is for the enclosing store value.
-	Put(ctx context.T, v interface{}) (Stat, error)
-
-	// Remove removes the Object.
-	Remove(ctx context.T) error
-
-	// Stat returns entry info.
-	Stat(ctx context.T) (Stat, error)
-
-	// Query returns entries matching the given query.
-	Query(ctx context.T, q query.Query) QueryStream
-
-	// Glob returns names matching the given pattern.
-	Glob(ctx context.T, pattern string) GlobCall
 }
 
 // QueryStream provides a stream of query results.  Typical usage:
