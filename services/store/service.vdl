@@ -2,6 +2,7 @@ package store
 
 import (
   "veyron2/query"
+  "veyron2/security"
   "veyron2/storage"
   "veyron2/services/watch"
   "veyron2/services/mounttable"
@@ -55,6 +56,89 @@ type DirSpecific interface {
 	// Make creates this directory and any ancestor directories that do not
 	// exist (i.e. equivalent to Unix's 'mkdir -p').  Make is idempotent.
 	Make() error
+
+	// SyncGroup is an API for managing SyncGroups attached to a directory.
+	SyncGroup
+
+	// GetSyncGroupNames returns the global names of all SyncGroups attached
+	// to this directory.
+	GetSyncGroupNames() ([]string, error)
+}
+
+// SyncGroupConfig contains config info for a SyncGroup.
+type SyncGroupConfig struct {
+	// Human readable description.
+	Description string
+	// Options. Can communicate preferences like
+	// TTL on the SyncGroup information cached from
+	// the SyncGroup server.
+	Options map[string]any
+	// ACL for the SyncGroup.
+	ACL security.ACL
+}
+
+// SyncGroup is the interface to a SyncGroup in the store.
+type SyncGroup interface {
+	// CreateSyncGroup creates a new SyncGroup with the given config at the
+	// SyncGroup server and the corresponding local state in the Store.
+	// Requires: Receiver must exist in the Store; client must have
+	// Admin access on the receiver; Store must have Write permission
+	// at the SyncGroup server; SyncGroup name must not exist at the
+	// SyncGroup server; receiver must not have any ancestor SyncGroups.
+	CreateSyncGroup(name string, config SyncGroupConfig) error
+
+	// JoinSyncGroup joins a SyncGroup with the specified global Veyron name,
+	// and creates local state in the Store.
+	// Requires: If receiver does not exist in the Store, client must be allowed to
+	// create a new object at the parent; in this case, a new object is created
+	// with the receiver name, and a nil ACL;
+	// In case of peer SyncGroups, if the root object of the SyncGroup already
+	// exists in the Store, receiver must be that root
+	// object. Store must have Read and Write permission on the SyncGroup at
+	// the SyncGroup server.
+	JoinSyncGroup(name string) error
+
+	// LeaveSyncGroup leaves the SyncGroup. Upon leaving, all objects in the sub-tree will
+	// be given new object IDs if there are no remaining peer SyncGroups.
+	// Data will continue to be accessible under the names
+	// used before leaving the SyncGroup.
+	// Requires: client must have Admin access at the receiver.
+	LeaveSyncGroup(name string) error
+
+	// DestroySyncGroup destroys the SyncGroup. Destroy causes the local Store to leave the
+	// SyncGroup, and destroys the SyncGroup at the SyncGroup server.
+	// Requires: Store must have Admin permission on the SyncGroup;
+	// client must have Admin access at the receiver.
+	DestroySyncGroup(name string) error
+
+	// EjectFromSyncGroup ejects a member from the SyncGroup.
+	// Requires: Store must have Admin permission on the SyncGroup;
+	// client must have Admin access at the receiver.
+	EjectFromSyncGroup(name, member string) error
+
+	// GetSyncGroupConfig gets the config info of the SyncGroup. eTag allows for atomic
+	// read-modify-write of the config by providing optimistic concurrency control.
+	// Requires: Store must have Read permission on the SyncGroup;
+	// client must have Admin access at the receiver.
+	GetSyncGroupConfig(name string) (config SyncGroupConfig, eTag string, err error)
+
+	// SetSyncGroupConfig sets the config info of the SyncGroup. eTag value may be either empty,
+	// or the value from a recent Get. If not empty, Set will only succeed if eTag at
+	// the server matches that specified in Set.
+	// Requires: Store must have Admin permission on the SyncGroup;
+	// client must have Admin access at the receiver.
+	SetSyncGroupConfig(name string, config SyncGroupConfig, eTag string) error
+
+	// GetMembersOfSyncGroup gets the Veyron names of the Stores that joined
+	// this SyncGroup.
+	// Requires: Store must have Read permission on the SyncGroup;
+	// client must have Admin access at the receiver.
+	GetMembersOfSyncGroup(name string) ([]string, error)
+
+	// TODO(hpucha): Add client-side conflict resolution support and sync policies.
+	//StartConflictResolution(name string) stream<ResolutionInfo, ConflictInfo> error
+	//Suspend/ResumeSync. Get/SetSyncPolicy such as "sync only via wifi",
+	//"sync aggressively", "sync once per day".
 }
 
 // Dir is a directory containing Objects and other Dirs.

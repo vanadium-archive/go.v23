@@ -6,6 +6,8 @@ package store
 import (
 	"veyron2/query"
 
+	"veyron2/security"
+
 	"veyron2/services/mounttable"
 
 	"veyron2/services/watch"
@@ -21,6 +23,18 @@ import (
 	_gen_vdlutil "veyron2/vdl/vdlutil"
 	_gen_wiretype "veyron2/wiretype"
 )
+
+// SyncGroupConfig contains config info for a SyncGroup.
+type SyncGroupConfig struct {
+	// Human readable description.
+	Description string
+	// Options. Can communicate preferences like
+	// TTL on the SyncGroup information cached from
+	// the SyncGroup server.
+	Options map[string]_gen_vdlutil.Any
+	// ACL for the SyncGroup.
+	ACL security.ACL
+}
 
 // NestedResult allows nested query results to be sent out-of-line.
 // See QueryResult for a full explanation.
@@ -1175,13 +1189,482 @@ func (__gen_s *ServerStubDirOrObject) Query(call _gen_ipc.ServerCall, Q query.Qu
 	return
 }
 
+// SyncGroup is the interface to a SyncGroup in the store.
+// SyncGroup is the interface the client binds and uses.
+// SyncGroup_ExcludingUniversal is the interface without internal framework-added methods
+// to enable embedding without method collisions.  Not to be used directly by clients.
+type SyncGroup_ExcludingUniversal interface {
+	// CreateSyncGroup creates a new SyncGroup with the given config at the
+	// SyncGroup server and the corresponding local state in the Store.
+	// Requires: Receiver must exist in the Store; client must have
+	// Admin access on the receiver; Store must have Write permission
+	// at the SyncGroup server; SyncGroup name must not exist at the
+	// SyncGroup server; receiver must not have any ancestor SyncGroups.
+	CreateSyncGroup(ctx _gen_context.T, name string, config SyncGroupConfig, opts ..._gen_ipc.CallOpt) (err error)
+	// JoinSyncGroup joins a SyncGroup with the specified global Veyron name,
+	// and creates local state in the Store.
+	// Requires: If receiver does not exist in the Store, client must be allowed to
+	// create a new object at the parent; in this case, a new object is created
+	// with the receiver name, and a nil ACL;
+	// In case of peer SyncGroups, if the root object of the SyncGroup already
+	// exists in the Store, receiver must be that root
+	// object. Store must have Read and Write permission on the SyncGroup at
+	// the SyncGroup server.
+	JoinSyncGroup(ctx _gen_context.T, name string, opts ..._gen_ipc.CallOpt) (err error)
+	// LeaveSyncGroup leaves the SyncGroup. Upon leaving, all objects in the sub-tree will
+	// be given new object IDs if there are no remaining peer SyncGroups.
+	// Data will continue to be accessible under the names
+	// used before leaving the SyncGroup.
+	// Requires: client must have Admin access at the receiver.
+	LeaveSyncGroup(ctx _gen_context.T, name string, opts ..._gen_ipc.CallOpt) (err error)
+	// DestroySyncGroup destroys the SyncGroup. Destroy causes the local Store to leave the
+	// SyncGroup, and destroys the SyncGroup at the SyncGroup server.
+	// Requires: Store must have Admin permission on the SyncGroup;
+	// client must have Admin access at the receiver.
+	DestroySyncGroup(ctx _gen_context.T, name string, opts ..._gen_ipc.CallOpt) (err error)
+	// EjectFromSyncGroup ejects a member from the SyncGroup.
+	// Requires: Store must have Admin permission on the SyncGroup;
+	// client must have Admin access at the receiver.
+	EjectFromSyncGroup(ctx _gen_context.T, name string, member string, opts ..._gen_ipc.CallOpt) (err error)
+	// GetSyncGroupConfig gets the config info of the SyncGroup. eTag allows for atomic
+	// read-modify-write of the config by providing optimistic concurrency control.
+	// Requires: Store must have Read permission on the SyncGroup;
+	// client must have Admin access at the receiver.
+	GetSyncGroupConfig(ctx _gen_context.T, name string, opts ..._gen_ipc.CallOpt) (config SyncGroupConfig, eTag string, err error)
+	// SetSyncGroupConfig sets the config info of the SyncGroup. eTag value may be either empty,
+	// or the value from a recent Get. If not empty, Set will only succeed if eTag at
+	// the server matches that specified in Set.
+	// Requires: Store must have Admin permission on the SyncGroup;
+	// client must have Admin access at the receiver.
+	SetSyncGroupConfig(ctx _gen_context.T, name string, config SyncGroupConfig, eTag string, opts ..._gen_ipc.CallOpt) (err error)
+	// GetMembersOfSyncGroup gets the Veyron names of the Stores that joined
+	// this SyncGroup.
+	// Requires: Store must have Read permission on the SyncGroup;
+	// client must have Admin access at the receiver.
+	GetMembersOfSyncGroup(ctx _gen_context.T, name string, opts ..._gen_ipc.CallOpt) (reply []string, err error)
+}
+type SyncGroup interface {
+	_gen_ipc.UniversalServiceMethods
+	SyncGroup_ExcludingUniversal
+}
+
+// SyncGroupService is the interface the server implements.
+type SyncGroupService interface {
+
+	// CreateSyncGroup creates a new SyncGroup with the given config at the
+	// SyncGroup server and the corresponding local state in the Store.
+	// Requires: Receiver must exist in the Store; client must have
+	// Admin access on the receiver; Store must have Write permission
+	// at the SyncGroup server; SyncGroup name must not exist at the
+	// SyncGroup server; receiver must not have any ancestor SyncGroups.
+	CreateSyncGroup(context _gen_ipc.ServerContext, name string, config SyncGroupConfig) (err error)
+	// JoinSyncGroup joins a SyncGroup with the specified global Veyron name,
+	// and creates local state in the Store.
+	// Requires: If receiver does not exist in the Store, client must be allowed to
+	// create a new object at the parent; in this case, a new object is created
+	// with the receiver name, and a nil ACL;
+	// In case of peer SyncGroups, if the root object of the SyncGroup already
+	// exists in the Store, receiver must be that root
+	// object. Store must have Read and Write permission on the SyncGroup at
+	// the SyncGroup server.
+	JoinSyncGroup(context _gen_ipc.ServerContext, name string) (err error)
+	// LeaveSyncGroup leaves the SyncGroup. Upon leaving, all objects in the sub-tree will
+	// be given new object IDs if there are no remaining peer SyncGroups.
+	// Data will continue to be accessible under the names
+	// used before leaving the SyncGroup.
+	// Requires: client must have Admin access at the receiver.
+	LeaveSyncGroup(context _gen_ipc.ServerContext, name string) (err error)
+	// DestroySyncGroup destroys the SyncGroup. Destroy causes the local Store to leave the
+	// SyncGroup, and destroys the SyncGroup at the SyncGroup server.
+	// Requires: Store must have Admin permission on the SyncGroup;
+	// client must have Admin access at the receiver.
+	DestroySyncGroup(context _gen_ipc.ServerContext, name string) (err error)
+	// EjectFromSyncGroup ejects a member from the SyncGroup.
+	// Requires: Store must have Admin permission on the SyncGroup;
+	// client must have Admin access at the receiver.
+	EjectFromSyncGroup(context _gen_ipc.ServerContext, name string, member string) (err error)
+	// GetSyncGroupConfig gets the config info of the SyncGroup. eTag allows for atomic
+	// read-modify-write of the config by providing optimistic concurrency control.
+	// Requires: Store must have Read permission on the SyncGroup;
+	// client must have Admin access at the receiver.
+	GetSyncGroupConfig(context _gen_ipc.ServerContext, name string) (config SyncGroupConfig, eTag string, err error)
+	// SetSyncGroupConfig sets the config info of the SyncGroup. eTag value may be either empty,
+	// or the value from a recent Get. If not empty, Set will only succeed if eTag at
+	// the server matches that specified in Set.
+	// Requires: Store must have Admin permission on the SyncGroup;
+	// client must have Admin access at the receiver.
+	SetSyncGroupConfig(context _gen_ipc.ServerContext, name string, config SyncGroupConfig, eTag string) (err error)
+	// GetMembersOfSyncGroup gets the Veyron names of the Stores that joined
+	// this SyncGroup.
+	// Requires: Store must have Read permission on the SyncGroup;
+	// client must have Admin access at the receiver.
+	GetMembersOfSyncGroup(context _gen_ipc.ServerContext, name string) (reply []string, err error)
+}
+
+// BindSyncGroup returns the client stub implementing the SyncGroup
+// interface.
+//
+// If no _gen_ipc.Client is specified, the default _gen_ipc.Client in the
+// global Runtime is used.
+func BindSyncGroup(name string, opts ..._gen_ipc.BindOpt) (SyncGroup, error) {
+	var client _gen_ipc.Client
+	switch len(opts) {
+	case 0:
+		// Do nothing.
+	case 1:
+		if clientOpt, ok := opts[0].(_gen_ipc.Client); opts[0] == nil || ok {
+			client = clientOpt
+		} else {
+			return nil, _gen_vdlutil.ErrUnrecognizedOption
+		}
+	default:
+		return nil, _gen_vdlutil.ErrTooManyOptionsToBind
+	}
+	stub := &clientStubSyncGroup{defaultClient: client, name: name}
+
+	return stub, nil
+}
+
+// NewServerSyncGroup creates a new server stub.
+//
+// It takes a regular server implementing the SyncGroupService
+// interface, and returns a new server stub.
+func NewServerSyncGroup(server SyncGroupService) interface{} {
+	return &ServerStubSyncGroup{
+		service: server,
+	}
+}
+
+// clientStubSyncGroup implements SyncGroup.
+type clientStubSyncGroup struct {
+	defaultClient _gen_ipc.Client
+	name          string
+}
+
+func (__gen_c *clientStubSyncGroup) client(ctx _gen_context.T) _gen_ipc.Client {
+	if __gen_c.defaultClient != nil {
+		return __gen_c.defaultClient
+	}
+	return _gen_veyron2.RuntimeFromContext(ctx).Client()
+}
+
+func (__gen_c *clientStubSyncGroup) CreateSyncGroup(ctx _gen_context.T, name string, config SyncGroupConfig, opts ..._gen_ipc.CallOpt) (err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "CreateSyncGroup", []interface{}{name, config}, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubSyncGroup) JoinSyncGroup(ctx _gen_context.T, name string, opts ..._gen_ipc.CallOpt) (err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "JoinSyncGroup", []interface{}{name}, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubSyncGroup) LeaveSyncGroup(ctx _gen_context.T, name string, opts ..._gen_ipc.CallOpt) (err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "LeaveSyncGroup", []interface{}{name}, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubSyncGroup) DestroySyncGroup(ctx _gen_context.T, name string, opts ..._gen_ipc.CallOpt) (err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "DestroySyncGroup", []interface{}{name}, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubSyncGroup) EjectFromSyncGroup(ctx _gen_context.T, name string, member string, opts ..._gen_ipc.CallOpt) (err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "EjectFromSyncGroup", []interface{}{name, member}, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubSyncGroup) GetSyncGroupConfig(ctx _gen_context.T, name string, opts ..._gen_ipc.CallOpt) (config SyncGroupConfig, eTag string, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "GetSyncGroupConfig", []interface{}{name}, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&config, &eTag, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubSyncGroup) SetSyncGroupConfig(ctx _gen_context.T, name string, config SyncGroupConfig, eTag string, opts ..._gen_ipc.CallOpt) (err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "SetSyncGroupConfig", []interface{}{name, config, eTag}, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubSyncGroup) GetMembersOfSyncGroup(ctx _gen_context.T, name string, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "GetMembersOfSyncGroup", []interface{}{name}, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubSyncGroup) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubSyncGroup) Signature(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubSyncGroup) GetMethodTags(ctx _gen_context.T, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+// ServerStubSyncGroup wraps a server that implements
+// SyncGroupService and provides an object that satisfies
+// the requirements of veyron2/ipc.ReflectInvoker.
+type ServerStubSyncGroup struct {
+	service SyncGroupService
+}
+
+func (__gen_s *ServerStubSyncGroup) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
+	// TODO(bprosnitz) GetMethodTags() will be replaces with Signature().
+	// Note: This exhibits some weird behavior like returning a nil error if the method isn't found.
+	// This will change when it is replaced with Signature().
+	switch method {
+	case "CreateSyncGroup":
+		return []interface{}{}, nil
+	case "JoinSyncGroup":
+		return []interface{}{}, nil
+	case "LeaveSyncGroup":
+		return []interface{}{}, nil
+	case "DestroySyncGroup":
+		return []interface{}{}, nil
+	case "EjectFromSyncGroup":
+		return []interface{}{}, nil
+	case "GetSyncGroupConfig":
+		return []interface{}{}, nil
+	case "SetSyncGroupConfig":
+		return []interface{}{}, nil
+	case "GetMembersOfSyncGroup":
+		return []interface{}{}, nil
+	default:
+		return nil, nil
+	}
+}
+
+func (__gen_s *ServerStubSyncGroup) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
+	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
+	result.Methods["CreateSyncGroup"] = _gen_ipc.MethodSignature{
+		InArgs: []_gen_ipc.MethodArgument{
+			{Name: "name", Type: 3},
+			{Name: "config", Type: 72},
+		},
+		OutArgs: []_gen_ipc.MethodArgument{
+			{Name: "", Type: 73},
+		},
+	}
+	result.Methods["DestroySyncGroup"] = _gen_ipc.MethodSignature{
+		InArgs: []_gen_ipc.MethodArgument{
+			{Name: "name", Type: 3},
+		},
+		OutArgs: []_gen_ipc.MethodArgument{
+			{Name: "", Type: 73},
+		},
+	}
+	result.Methods["EjectFromSyncGroup"] = _gen_ipc.MethodSignature{
+		InArgs: []_gen_ipc.MethodArgument{
+			{Name: "name", Type: 3},
+			{Name: "member", Type: 3},
+		},
+		OutArgs: []_gen_ipc.MethodArgument{
+			{Name: "", Type: 73},
+		},
+	}
+	result.Methods["GetMembersOfSyncGroup"] = _gen_ipc.MethodSignature{
+		InArgs: []_gen_ipc.MethodArgument{
+			{Name: "name", Type: 3},
+		},
+		OutArgs: []_gen_ipc.MethodArgument{
+			{Name: "", Type: 61},
+			{Name: "", Type: 73},
+		},
+	}
+	result.Methods["GetSyncGroupConfig"] = _gen_ipc.MethodSignature{
+		InArgs: []_gen_ipc.MethodArgument{
+			{Name: "name", Type: 3},
+		},
+		OutArgs: []_gen_ipc.MethodArgument{
+			{Name: "config", Type: 72},
+			{Name: "eTag", Type: 3},
+			{Name: "err", Type: 73},
+		},
+	}
+	result.Methods["JoinSyncGroup"] = _gen_ipc.MethodSignature{
+		InArgs: []_gen_ipc.MethodArgument{
+			{Name: "name", Type: 3},
+		},
+		OutArgs: []_gen_ipc.MethodArgument{
+			{Name: "", Type: 73},
+		},
+	}
+	result.Methods["LeaveSyncGroup"] = _gen_ipc.MethodSignature{
+		InArgs: []_gen_ipc.MethodArgument{
+			{Name: "name", Type: 3},
+		},
+		OutArgs: []_gen_ipc.MethodArgument{
+			{Name: "", Type: 73},
+		},
+	}
+	result.Methods["SetSyncGroupConfig"] = _gen_ipc.MethodSignature{
+		InArgs: []_gen_ipc.MethodArgument{
+			{Name: "name", Type: 3},
+			{Name: "config", Type: 72},
+			{Name: "eTag", Type: 3},
+		},
+		OutArgs: []_gen_ipc.MethodArgument{
+			{Name: "", Type: 73},
+		},
+	}
+
+	result.TypeDefs = []_gen_vdlutil.Any{
+		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "anydata", Tags: []string(nil)}, _gen_wiretype.MapType{Key: 0x3, Elem: 0x41, Name: "", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x3, Name: "veyron2/security.BlessingPattern", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x34, Name: "veyron2/security.LabelSet", Tags: []string(nil)}, _gen_wiretype.MapType{Key: 0x43, Elem: 0x44, Name: "", Tags: []string(nil)}, _gen_wiretype.MapType{Key: 0x3, Elem: 0x44, Name: "", Tags: []string(nil)}, _gen_wiretype.StructType{
+			[]_gen_wiretype.FieldType{
+				_gen_wiretype.FieldType{Type: 0x45, Name: "In"},
+				_gen_wiretype.FieldType{Type: 0x46, Name: "NotIn"},
+			},
+			"veyron2/security.ACL", []string(nil)},
+		_gen_wiretype.StructType{
+			[]_gen_wiretype.FieldType{
+				_gen_wiretype.FieldType{Type: 0x3, Name: "Description"},
+				_gen_wiretype.FieldType{Type: 0x42, Name: "Options"},
+				_gen_wiretype.FieldType{Type: 0x47, Name: "ACL"},
+			},
+			"veyron2/services/store.SyncGroupConfig", []string(nil)},
+		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}}
+
+	return result, nil
+}
+
+func (__gen_s *ServerStubSyncGroup) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
+	if unresolver, ok := __gen_s.service.(_gen_ipc.Unresolver); ok {
+		return unresolver.UnresolveStep(call)
+	}
+	if call.Server() == nil {
+		return
+	}
+	var published []string
+	if published, err = call.Server().Published(); err != nil || published == nil {
+		return
+	}
+	reply = make([]string, len(published))
+	for i, p := range published {
+		reply[i] = _gen_naming.Join(p, call.Name())
+	}
+	return
+}
+
+func (__gen_s *ServerStubSyncGroup) CreateSyncGroup(call _gen_ipc.ServerCall, name string, config SyncGroupConfig) (err error) {
+	err = __gen_s.service.CreateSyncGroup(call, name, config)
+	return
+}
+
+func (__gen_s *ServerStubSyncGroup) JoinSyncGroup(call _gen_ipc.ServerCall, name string) (err error) {
+	err = __gen_s.service.JoinSyncGroup(call, name)
+	return
+}
+
+func (__gen_s *ServerStubSyncGroup) LeaveSyncGroup(call _gen_ipc.ServerCall, name string) (err error) {
+	err = __gen_s.service.LeaveSyncGroup(call, name)
+	return
+}
+
+func (__gen_s *ServerStubSyncGroup) DestroySyncGroup(call _gen_ipc.ServerCall, name string) (err error) {
+	err = __gen_s.service.DestroySyncGroup(call, name)
+	return
+}
+
+func (__gen_s *ServerStubSyncGroup) EjectFromSyncGroup(call _gen_ipc.ServerCall, name string, member string) (err error) {
+	err = __gen_s.service.EjectFromSyncGroup(call, name, member)
+	return
+}
+
+func (__gen_s *ServerStubSyncGroup) GetSyncGroupConfig(call _gen_ipc.ServerCall, name string) (config SyncGroupConfig, eTag string, err error) {
+	config, eTag, err = __gen_s.service.GetSyncGroupConfig(call, name)
+	return
+}
+
+func (__gen_s *ServerStubSyncGroup) SetSyncGroupConfig(call _gen_ipc.ServerCall, name string, config SyncGroupConfig, eTag string) (err error) {
+	err = __gen_s.service.SetSyncGroupConfig(call, name, config, eTag)
+	return
+}
+
+func (__gen_s *ServerStubSyncGroup) GetMembersOfSyncGroup(call _gen_ipc.ServerCall, name string) (reply []string, err error) {
+	reply, err = __gen_s.service.GetMembersOfSyncGroup(call, name)
+	return
+}
+
 // DirSpecific is the interface the client binds and uses.
 // DirSpecific_ExcludingUniversal is the interface without internal framework-added methods
 // to enable embedding without method collisions.  Not to be used directly by clients.
 type DirSpecific_ExcludingUniversal interface {
+	// SyncGroup is the interface to a SyncGroup in the store.
+	SyncGroup_ExcludingUniversal
 	// Make creates this directory and any ancestor directories that do not
 	// exist (i.e. equivalent to Unix's 'mkdir -p').  Make is idempotent.
 	Make(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error)
+	// GetSyncGroupNames returns the global names of all SyncGroups attached
+	// to this directory.
+	GetSyncGroupNames(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error)
 }
 type DirSpecific interface {
 	_gen_ipc.UniversalServiceMethods
@@ -1191,9 +1674,14 @@ type DirSpecific interface {
 // DirSpecificService is the interface the server implements.
 type DirSpecificService interface {
 
+	// SyncGroup is the interface to a SyncGroup in the store.
+	SyncGroupService
 	// Make creates this directory and any ancestor directories that do not
 	// exist (i.e. equivalent to Unix's 'mkdir -p').  Make is idempotent.
 	Make(context _gen_ipc.ServerContext) (err error)
+	// GetSyncGroupNames returns the global names of all SyncGroups attached
+	// to this directory.
+	GetSyncGroupNames(context _gen_ipc.ServerContext) (reply []string, err error)
 }
 
 // BindDirSpecific returns the client stub implementing the DirSpecific
@@ -1216,6 +1704,7 @@ func BindDirSpecific(name string, opts ..._gen_ipc.BindOpt) (DirSpecific, error)
 		return nil, _gen_vdlutil.ErrTooManyOptionsToBind
 	}
 	stub := &clientStubDirSpecific{defaultClient: client, name: name}
+	stub.SyncGroup_ExcludingUniversal, _ = BindSyncGroup(name, client)
 
 	return stub, nil
 }
@@ -1226,12 +1715,15 @@ func BindDirSpecific(name string, opts ..._gen_ipc.BindOpt) (DirSpecific, error)
 // interface, and returns a new server stub.
 func NewServerDirSpecific(server DirSpecificService) interface{} {
 	return &ServerStubDirSpecific{
-		service: server,
+		ServerStubSyncGroup: *NewServerSyncGroup(server).(*ServerStubSyncGroup),
+		service:             server,
 	}
 }
 
 // clientStubDirSpecific implements DirSpecific.
 type clientStubDirSpecific struct {
+	SyncGroup_ExcludingUniversal
+
 	defaultClient _gen_ipc.Client
 	name          string
 }
@@ -1249,6 +1741,17 @@ func (__gen_c *clientStubDirSpecific) Make(ctx _gen_context.T, opts ..._gen_ipc.
 		return
 	}
 	if ierr := call.Finish(&err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubDirSpecific) GetSyncGroupNames(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "GetSyncGroupNames", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
 		err = ierr
 	}
 	return
@@ -1291,6 +1794,8 @@ func (__gen_c *clientStubDirSpecific) GetMethodTags(ctx _gen_context.T, method s
 // DirSpecificService and provides an object that satisfies
 // the requirements of veyron2/ipc.ReflectInvoker.
 type ServerStubDirSpecific struct {
+	ServerStubSyncGroup
+
 	service DirSpecificService
 }
 
@@ -1298,8 +1803,13 @@ func (__gen_s *ServerStubDirSpecific) GetMethodTags(call _gen_ipc.ServerCall, me
 	// TODO(bprosnitz) GetMethodTags() will be replaces with Signature().
 	// Note: This exhibits some weird behavior like returning a nil error if the method isn't found.
 	// This will change when it is replaced with Signature().
+	if resp, err := __gen_s.ServerStubSyncGroup.GetMethodTags(call, method); resp != nil || err != nil {
+		return resp, err
+	}
 	switch method {
 	case "Make":
+		return []interface{}{}, nil
+	case "GetSyncGroupNames":
 		return []interface{}{}, nil
 	default:
 		return nil, nil
@@ -1308,6 +1818,13 @@ func (__gen_s *ServerStubDirSpecific) GetMethodTags(call _gen_ipc.ServerCall, me
 
 func (__gen_s *ServerStubDirSpecific) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
 	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
+	result.Methods["GetSyncGroupNames"] = _gen_ipc.MethodSignature{
+		InArgs: []_gen_ipc.MethodArgument{},
+		OutArgs: []_gen_ipc.MethodArgument{
+			{Name: "", Type: 61},
+			{Name: "", Type: 65},
+		},
+	}
 	result.Methods["Make"] = _gen_ipc.MethodSignature{
 		InArgs: []_gen_ipc.MethodArgument{},
 		OutArgs: []_gen_ipc.MethodArgument{
@@ -1317,6 +1834,61 @@ func (__gen_s *ServerStubDirSpecific) Signature(call _gen_ipc.ServerCall) (_gen_
 
 	result.TypeDefs = []_gen_vdlutil.Any{
 		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}}
+	var ss _gen_ipc.ServiceSignature
+	var firstAdded int
+	ss, _ = __gen_s.ServerStubSyncGroup.Signature(call)
+	firstAdded = len(result.TypeDefs)
+	for k, v := range ss.Methods {
+		for i, _ := range v.InArgs {
+			if v.InArgs[i].Type >= _gen_wiretype.TypeIDFirst {
+				v.InArgs[i].Type += _gen_wiretype.TypeID(firstAdded)
+			}
+		}
+		for i, _ := range v.OutArgs {
+			if v.OutArgs[i].Type >= _gen_wiretype.TypeIDFirst {
+				v.OutArgs[i].Type += _gen_wiretype.TypeID(firstAdded)
+			}
+		}
+		if v.InStream >= _gen_wiretype.TypeIDFirst {
+			v.InStream += _gen_wiretype.TypeID(firstAdded)
+		}
+		if v.OutStream >= _gen_wiretype.TypeIDFirst {
+			v.OutStream += _gen_wiretype.TypeID(firstAdded)
+		}
+		result.Methods[k] = v
+	}
+	//TODO(bprosnitz) combine type definitions from embeded interfaces in a way that doesn't cause duplication.
+	for _, d := range ss.TypeDefs {
+		switch wt := d.(type) {
+		case _gen_wiretype.SliceType:
+			if wt.Elem >= _gen_wiretype.TypeIDFirst {
+				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+			}
+			d = wt
+		case _gen_wiretype.ArrayType:
+			if wt.Elem >= _gen_wiretype.TypeIDFirst {
+				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+			}
+			d = wt
+		case _gen_wiretype.MapType:
+			if wt.Key >= _gen_wiretype.TypeIDFirst {
+				wt.Key += _gen_wiretype.TypeID(firstAdded)
+			}
+			if wt.Elem >= _gen_wiretype.TypeIDFirst {
+				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+			}
+			d = wt
+		case _gen_wiretype.StructType:
+			for i, fld := range wt.Fields {
+				if fld.Type >= _gen_wiretype.TypeIDFirst {
+					wt.Fields[i].Type += _gen_wiretype.TypeID(firstAdded)
+				}
+			}
+			d = wt
+			// NOTE: other types are missing, but we are upgrading anyways.
+		}
+		result.TypeDefs = append(result.TypeDefs, d)
+	}
 
 	return result, nil
 }
@@ -1341,6 +1913,11 @@ func (__gen_s *ServerStubDirSpecific) UnresolveStep(call _gen_ipc.ServerCall) (r
 
 func (__gen_s *ServerStubDirSpecific) Make(call _gen_ipc.ServerCall) (err error) {
 	err = __gen_s.service.Make(call)
+	return
+}
+
+func (__gen_s *ServerStubDirSpecific) GetSyncGroupNames(call _gen_ipc.ServerCall) (reply []string, err error) {
+	reply, err = __gen_s.service.GetSyncGroupNames(call)
 	return
 }
 
