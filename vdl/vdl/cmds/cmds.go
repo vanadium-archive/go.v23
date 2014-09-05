@@ -235,15 +235,15 @@ var (
 	optGenJavaOutDir = genOutDir{
 		xlate: []xlateSrcDst{
 			{"veyron/go/src", "veyron.new/java/src/main/java"},
+			{"roadmap/go/src", "veyron.new/java/src/main/java"},
 			{"third_party/go/src", "SKIP"},
-			{"workspace/go/src", "SKIP"}, // for jenkins
 		},
 	}
 	optGenJavascriptOutDir = genOutDir{
 		xlate: []xlateSrcDst{
-			{"go/src", "javascript/src"},
+			{"veyron/go/src", "veyron.js/src"},
+			{"roadmap/go/src", "veyron.js/java"},
 			{"third_party/go/src", "SKIP"},
-			{"workspace/go/src", "SKIP"}, // for jenkins
 		},
 	}
 	optGenJavaPkgPrefix string
