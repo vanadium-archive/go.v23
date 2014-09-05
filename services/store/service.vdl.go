@@ -141,6 +141,8 @@ const _ = _gen_wiretype.TypeIDInvalid
 type Statable_ExcludingUniversal interface {
 	// Stat returns information about the receiver.
 	Stat(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply storage.Stat, err error)
+	// Exists returns true iff the receiver is present in the Store.
+	Exists(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply bool, err error)
 }
 type Statable interface {
 	_gen_ipc.UniversalServiceMethods
@@ -152,6 +154,8 @@ type StatableService interface {
 
 	// Stat returns information about the receiver.
 	Stat(context _gen_ipc.ServerContext) (reply storage.Stat, err error)
+	// Exists returns true iff the receiver is present in the Store.
+	Exists(context _gen_ipc.ServerContext) (reply bool, err error)
 }
 
 // BindStatable returns the client stub implementing the Statable
@@ -212,6 +216,17 @@ func (__gen_c *clientStubStatable) Stat(ctx _gen_context.T, opts ..._gen_ipc.Cal
 	return
 }
 
+func (__gen_c *clientStubStatable) Exists(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply bool, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Exists", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
 func (__gen_c *clientStubStatable) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
@@ -259,6 +274,8 @@ func (__gen_s *ServerStubStatable) GetMethodTags(call _gen_ipc.ServerCall, metho
 	switch method {
 	case "Stat":
 		return []interface{}{}, nil
+	case "Exists":
+		return []interface{}{}, nil
 	default:
 		return nil, nil
 	}
@@ -266,6 +283,13 @@ func (__gen_s *ServerStubStatable) GetMethodTags(call _gen_ipc.ServerCall, metho
 
 func (__gen_s *ServerStubStatable) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
 	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
+	result.Methods["Exists"] = _gen_ipc.MethodSignature{
+		InArgs: []_gen_ipc.MethodArgument{},
+		OutArgs: []_gen_ipc.MethodArgument{
+			{Name: "", Type: 2},
+			{Name: "", Type: 71},
+		},
+	}
 	result.Methods["Stat"] = _gen_ipc.MethodSignature{
 		InArgs: []_gen_ipc.MethodArgument{},
 		OutArgs: []_gen_ipc.MethodArgument{
@@ -311,15 +335,20 @@ func (__gen_s *ServerStubStatable) Stat(call _gen_ipc.ServerCall) (reply storage
 	return
 }
 
+func (__gen_s *ServerStubStatable) Exists(call _gen_ipc.ServerCall) (reply bool, err error) {
+	reply, err = __gen_s.service.Exists(call)
+	return
+}
+
 // Transactable provides the NewTransaction method.
 // Transactable is the interface the client binds and uses.
 // Transactable_ExcludingUniversal is the interface without internal framework-added methods
 // to enable embedding without method collisions.  Not to be used directly by clients.
 type Transactable_ExcludingUniversal interface {
 	// NewTransaction creates a transaction with the given options.  It returns
-	// the name of the transaction relative to the receiver's name.  The client must
-	// rebind to this new name to work with the receiver and its descendants as part
-	// of the transaction.
+	// the name of the transaction relative to the receiver's name.  The client
+	// must rebind to this new name to work with the receiver and its descendants
+	// as part of the transaction.
 	NewTransaction(ctx _gen_context.T, Options []_gen_vdlutil.Any, opts ..._gen_ipc.CallOpt) (reply string, err error)
 }
 type Transactable interface {
@@ -331,9 +360,9 @@ type Transactable interface {
 type TransactableService interface {
 
 	// NewTransaction creates a transaction with the given options.  It returns
-	// the name of the transaction relative to the receiver's name.  The client must
-	// rebind to this new name to work with the receiver and its descendants as part
-	// of the transaction.
+	// the name of the transaction relative to the receiver's name.  The client
+	// must rebind to this new name to work with the receiver and its descendants
+	// as part of the transaction.
 	NewTransaction(context _gen_ipc.ServerContext, Options []_gen_vdlutil.Any) (reply string, err error)
 }
 
@@ -488,15 +517,14 @@ func (__gen_s *ServerStubTransactable) NewTransaction(call _gen_ipc.ServerCall, 
 	return
 }
 
-// Dir is a directory containing Objects and other Dirs.
-// Dir is the interface the client binds and uses.
-// Dir_ExcludingUniversal is the interface without internal framework-added methods
+// DirOrObject is the interface the client binds and uses.
+// DirOrObject_ExcludingUniversal is the interface without internal framework-added methods
 // to enable embedding without method collisions.  Not to be used directly by clients.
-type Dir_ExcludingUniversal interface {
-	// Transactable provides the NewTransaction method.
-	Transactable_ExcludingUniversal
+type DirOrObject_ExcludingUniversal interface {
 	// Statable provides the Stat method.
 	Statable_ExcludingUniversal
+	// Transactable provides the NewTransaction method.
+	Transactable_ExcludingUniversal
 	mounttable.Globbable_ExcludingUniversal
 	// GlobWatcher allows a client to receive updates for changes to objects
 	// that match a pattern.  See the package comments for details.
@@ -504,28 +532,23 @@ type Dir_ExcludingUniversal interface {
 	// QueryWatcher allows a client to receive updates for changes to objects
 	// that match a query.  See the package comments for details.
 	watch.QueryWatcher_ExcludingUniversal
-	// Exists returns true iff this Dir is present in the Store.
-	Exists(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply bool, err error)
-	// Make creates this directory and any ancestor directories that do not
-	// exist (i.e. equivalent to Unix's 'mkdir -p').  Make is idempotent.
-	Make(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error)
-	// Remove removes this directory and all of its children, recursively.
+	// Remove removes this Dir (and all its children, recursively) or Object.
 	Remove(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error)
 	// Query returns the sequence of elements that satisfy the query.
-	Query(ctx _gen_context.T, Q query.Query, opts ..._gen_ipc.CallOpt) (reply DirQueryCall, err error)
+	Query(ctx _gen_context.T, Q query.Query, opts ..._gen_ipc.CallOpt) (reply DirOrObjectQueryCall, err error)
 }
-type Dir interface {
+type DirOrObject interface {
 	_gen_ipc.UniversalServiceMethods
-	Dir_ExcludingUniversal
+	DirOrObject_ExcludingUniversal
 }
 
-// DirService is the interface the server implements.
-type DirService interface {
+// DirOrObjectService is the interface the server implements.
+type DirOrObjectService interface {
 
-	// Transactable provides the NewTransaction method.
-	TransactableService
 	// Statable provides the Stat method.
 	StatableService
+	// Transactable provides the NewTransaction method.
+	TransactableService
 	mounttable.GlobbableService
 	// GlobWatcher allows a client to receive updates for changes to objects
 	// that match a pattern.  See the package comments for details.
@@ -533,20 +556,15 @@ type DirService interface {
 	// QueryWatcher allows a client to receive updates for changes to objects
 	// that match a query.  See the package comments for details.
 	watch.QueryWatcherService
-	// Exists returns true iff this Dir is present in the Store.
-	Exists(context _gen_ipc.ServerContext) (reply bool, err error)
-	// Make creates this directory and any ancestor directories that do not
-	// exist (i.e. equivalent to Unix's 'mkdir -p').  Make is idempotent.
-	Make(context _gen_ipc.ServerContext) (err error)
-	// Remove removes this directory and all of its children, recursively.
+	// Remove removes this Dir (and all its children, recursively) or Object.
 	Remove(context _gen_ipc.ServerContext) (err error)
 	// Query returns the sequence of elements that satisfy the query.
-	Query(context _gen_ipc.ServerContext, Q query.Query, stream DirServiceQueryStream) (err error)
+	Query(context _gen_ipc.ServerContext, Q query.Query, stream DirOrObjectServiceQueryStream) (err error)
 }
 
-// DirQueryCall is the interface for call object of the method
-// Query in the service interface Dir.
-type DirQueryCall interface {
+// DirOrObjectQueryCall is the interface for call object of the method
+// Query in the service interface DirOrObject.
+type DirOrObjectQueryCall interface {
 	// RecvStream returns the recv portion of the stream
 	RecvStream() interface {
 		// Advance stages an element so the client can retrieve it
@@ -585,36 +603,36 @@ type DirQueryCall interface {
 	Cancel()
 }
 
-type implDirQueryStreamIterator struct {
+type implDirOrObjectQueryStreamIterator struct {
 	clientCall _gen_ipc.Call
 	val        QueryResult
 	err        error
 }
 
-func (c *implDirQueryStreamIterator) Advance() bool {
+func (c *implDirOrObjectQueryStreamIterator) Advance() bool {
 	c.val = QueryResult{}
 	c.err = c.clientCall.Recv(&c.val)
 	return c.err == nil
 }
 
-func (c *implDirQueryStreamIterator) Value() QueryResult {
+func (c *implDirOrObjectQueryStreamIterator) Value() QueryResult {
 	return c.val
 }
 
-func (c *implDirQueryStreamIterator) Err() error {
+func (c *implDirOrObjectQueryStreamIterator) Err() error {
 	if c.err == _gen_io.EOF {
 		return nil
 	}
 	return c.err
 }
 
-// Implementation of the DirQueryCall interface that is not exported.
-type implDirQueryCall struct {
+// Implementation of the DirOrObjectQueryCall interface that is not exported.
+type implDirOrObjectQueryCall struct {
 	clientCall _gen_ipc.Call
-	readStream implDirQueryStreamIterator
+	readStream implDirOrObjectQueryStreamIterator
 }
 
-func (c *implDirQueryCall) RecvStream() interface {
+func (c *implDirOrObjectQueryCall) RecvStream() interface {
 	Advance() bool
 	Value() QueryResult
 	Err() error
@@ -622,28 +640,28 @@ func (c *implDirQueryCall) RecvStream() interface {
 	return &c.readStream
 }
 
-func (c *implDirQueryCall) Finish() (err error) {
+func (c *implDirOrObjectQueryCall) Finish() (err error) {
 	if ierr := c.clientCall.Finish(&err); ierr != nil {
 		err = ierr
 	}
 	return
 }
 
-func (c *implDirQueryCall) Cancel() {
+func (c *implDirOrObjectQueryCall) Cancel() {
 	c.clientCall.Cancel()
 }
 
-type implDirServiceQueryStreamSender struct {
+type implDirOrObjectServiceQueryStreamSender struct {
 	serverCall _gen_ipc.ServerCall
 }
 
-func (s *implDirServiceQueryStreamSender) Send(item QueryResult) error {
+func (s *implDirOrObjectServiceQueryStreamSender) Send(item QueryResult) error {
 	return s.serverCall.Send(item)
 }
 
-// DirServiceQueryStream is the interface for streaming responses of the method
-// Query in the service interface Dir.
-type DirServiceQueryStream interface {
+// DirOrObjectServiceQueryStream is the interface for streaming responses of the method
+// Query in the service interface DirOrObject.
+type DirOrObjectServiceQueryStream interface {
 	// SendStream returns the send portion of the stream.
 	SendStream() interface {
 		// Send places the item onto the output stream, blocking if there is no buffer
@@ -652,12 +670,12 @@ type DirServiceQueryStream interface {
 	}
 }
 
-// Implementation of the DirServiceQueryStream interface that is not exported.
-type implDirServiceQueryStream struct {
-	writer implDirServiceQueryStreamSender
+// Implementation of the DirOrObjectServiceQueryStream interface that is not exported.
+type implDirOrObjectServiceQueryStream struct {
+	writer implDirOrObjectServiceQueryStreamSender
 }
 
-func (s *implDirServiceQueryStream) SendStream() interface {
+func (s *implDirOrObjectServiceQueryStream) SendStream() interface {
 	// Send places the item onto the output stream, blocking if there is no buffer
 	// space available.  If the client has canceled, an error is returned.
 	Send(item QueryResult) error
@@ -665,12 +683,12 @@ func (s *implDirServiceQueryStream) SendStream() interface {
 	return &s.writer
 }
 
-// BindDir returns the client stub implementing the Dir
+// BindDirOrObject returns the client stub implementing the DirOrObject
 // interface.
 //
 // If no _gen_ipc.Client is specified, the default _gen_ipc.Client in the
 // global Runtime is used.
-func BindDir(name string, opts ..._gen_ipc.BindOpt) (Dir, error) {
+func BindDirOrObject(name string, opts ..._gen_ipc.BindOpt) (DirOrObject, error) {
 	var client _gen_ipc.Client
 	switch len(opts) {
 	case 0:
@@ -684,9 +702,9 @@ func BindDir(name string, opts ..._gen_ipc.BindOpt) (Dir, error) {
 	default:
 		return nil, _gen_vdlutil.ErrTooManyOptionsToBind
 	}
-	stub := &clientStubDir{defaultClient: client, name: name}
-	stub.Transactable_ExcludingUniversal, _ = BindTransactable(name, client)
+	stub := &clientStubDirOrObject{defaultClient: client, name: name}
 	stub.Statable_ExcludingUniversal, _ = BindStatable(name, client)
+	stub.Transactable_ExcludingUniversal, _ = BindTransactable(name, client)
 	stub.Globbable_ExcludingUniversal, _ = mounttable.BindGlobbable(name, client)
 	stub.GlobWatcher_ExcludingUniversal, _ = watch.BindGlobWatcher(name, client)
 	stub.QueryWatcher_ExcludingUniversal, _ = watch.BindQueryWatcher(name, client)
@@ -694,14 +712,14 @@ func BindDir(name string, opts ..._gen_ipc.BindOpt) (Dir, error) {
 	return stub, nil
 }
 
-// NewServerDir creates a new server stub.
+// NewServerDirOrObject creates a new server stub.
 //
-// It takes a regular server implementing the DirService
+// It takes a regular server implementing the DirOrObjectService
 // interface, and returns a new server stub.
-func NewServerDir(server DirService) interface{} {
-	return &ServerStubDir{
-		ServerStubTransactable: *NewServerTransactable(server).(*ServerStubTransactable),
+func NewServerDirOrObject(server DirOrObjectService) interface{} {
+	return &ServerStubDirOrObject{
 		ServerStubStatable:     *NewServerStatable(server).(*ServerStubStatable),
+		ServerStubTransactable: *NewServerTransactable(server).(*ServerStubTransactable),
 		ServerStubGlobbable:    *mounttable.NewServerGlobbable(server).(*mounttable.ServerStubGlobbable),
 		ServerStubGlobWatcher:  *watch.NewServerGlobWatcher(server).(*watch.ServerStubGlobWatcher),
 		ServerStubQueryWatcher: *watch.NewServerQueryWatcher(server).(*watch.ServerStubQueryWatcher),
@@ -709,10 +727,10 @@ func NewServerDir(server DirService) interface{} {
 	}
 }
 
-// clientStubDir implements Dir.
-type clientStubDir struct {
-	Transactable_ExcludingUniversal
+// clientStubDirOrObject implements DirOrObject.
+type clientStubDirOrObject struct {
 	Statable_ExcludingUniversal
+	Transactable_ExcludingUniversal
 	mounttable.Globbable_ExcludingUniversal
 	watch.GlobWatcher_ExcludingUniversal
 	watch.QueryWatcher_ExcludingUniversal
@@ -721,36 +739,14 @@ type clientStubDir struct {
 	name          string
 }
 
-func (__gen_c *clientStubDir) client(ctx _gen_context.T) _gen_ipc.Client {
+func (__gen_c *clientStubDirOrObject) client(ctx _gen_context.T) _gen_ipc.Client {
 	if __gen_c.defaultClient != nil {
 		return __gen_c.defaultClient
 	}
 	return _gen_veyron2.RuntimeFromContext(ctx).Client()
 }
 
-func (__gen_c *clientStubDir) Exists(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply bool, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Exists", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
-func (__gen_c *clientStubDir) Make(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Make", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
-func (__gen_c *clientStubDir) Remove(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error) {
+func (__gen_c *clientStubDirOrObject) Remove(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Remove", nil, opts...); err != nil {
 		return
@@ -761,16 +757,16 @@ func (__gen_c *clientStubDir) Remove(ctx _gen_context.T, opts ..._gen_ipc.CallOp
 	return
 }
 
-func (__gen_c *clientStubDir) Query(ctx _gen_context.T, Q query.Query, opts ..._gen_ipc.CallOpt) (reply DirQueryCall, err error) {
+func (__gen_c *clientStubDirOrObject) Query(ctx _gen_context.T, Q query.Query, opts ..._gen_ipc.CallOpt) (reply DirOrObjectQueryCall, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Query", []interface{}{Q}, opts...); err != nil {
 		return
 	}
-	reply = &implDirQueryCall{clientCall: call, readStream: implDirQueryStreamIterator{clientCall: call}}
+	reply = &implDirOrObjectQueryCall{clientCall: call, readStream: implDirOrObjectQueryStreamIterator{clientCall: call}}
 	return
 }
 
-func (__gen_c *clientStubDir) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
+func (__gen_c *clientStubDirOrObject) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
 		return
@@ -781,7 +777,7 @@ func (__gen_c *clientStubDir) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc
 	return
 }
 
-func (__gen_c *clientStubDir) Signature(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+func (__gen_c *clientStubDirOrObject) Signature(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
 		return
@@ -792,7 +788,7 @@ func (__gen_c *clientStubDir) Signature(ctx _gen_context.T, opts ..._gen_ipc.Cal
 	return
 }
 
-func (__gen_c *clientStubDir) GetMethodTags(ctx _gen_context.T, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
+func (__gen_c *clientStubDirOrObject) GetMethodTags(ctx _gen_context.T, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
@@ -803,27 +799,27 @@ func (__gen_c *clientStubDir) GetMethodTags(ctx _gen_context.T, method string, o
 	return
 }
 
-// ServerStubDir wraps a server that implements
-// DirService and provides an object that satisfies
+// ServerStubDirOrObject wraps a server that implements
+// DirOrObjectService and provides an object that satisfies
 // the requirements of veyron2/ipc.ReflectInvoker.
-type ServerStubDir struct {
-	ServerStubTransactable
+type ServerStubDirOrObject struct {
 	ServerStubStatable
+	ServerStubTransactable
 	mounttable.ServerStubGlobbable
 	watch.ServerStubGlobWatcher
 	watch.ServerStubQueryWatcher
 
-	service DirService
+	service DirOrObjectService
 }
 
-func (__gen_s *ServerStubDir) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
+func (__gen_s *ServerStubDirOrObject) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
 	// TODO(bprosnitz) GetMethodTags() will be replaces with Signature().
 	// Note: This exhibits some weird behavior like returning a nil error if the method isn't found.
 	// This will change when it is replaced with Signature().
-	if resp, err := __gen_s.ServerStubTransactable.GetMethodTags(call, method); resp != nil || err != nil {
+	if resp, err := __gen_s.ServerStubStatable.GetMethodTags(call, method); resp != nil || err != nil {
 		return resp, err
 	}
-	if resp, err := __gen_s.ServerStubStatable.GetMethodTags(call, method); resp != nil || err != nil {
+	if resp, err := __gen_s.ServerStubTransactable.GetMethodTags(call, method); resp != nil || err != nil {
 		return resp, err
 	}
 	if resp, err := __gen_s.ServerStubGlobbable.GetMethodTags(call, method); resp != nil || err != nil {
@@ -836,10 +832,6 @@ func (__gen_s *ServerStubDir) GetMethodTags(call _gen_ipc.ServerCall, method str
 		return resp, err
 	}
 	switch method {
-	case "Exists":
-		return []interface{}{}, nil
-	case "Make":
-		return []interface{}{}, nil
 	case "Remove":
 		return []interface{}{}, nil
 	case "Query":
@@ -849,21 +841,8 @@ func (__gen_s *ServerStubDir) GetMethodTags(call _gen_ipc.ServerCall, method str
 	}
 }
 
-func (__gen_s *ServerStubDir) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
+func (__gen_s *ServerStubDirOrObject) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
 	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
-	result.Methods["Exists"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{},
-		OutArgs: []_gen_ipc.MethodArgument{
-			{Name: "", Type: 2},
-			{Name: "", Type: 65},
-		},
-	}
-	result.Methods["Make"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{},
-		OutArgs: []_gen_ipc.MethodArgument{
-			{Name: "", Type: 65},
-		},
-	}
 	result.Methods["Query"] = _gen_ipc.MethodSignature{
 		InArgs: []_gen_ipc.MethodArgument{
 			{Name: "Q", Type: 66},
@@ -898,7 +877,7 @@ func (__gen_s *ServerStubDir) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Serv
 	}
 	var ss _gen_ipc.ServiceSignature
 	var firstAdded int
-	ss, _ = __gen_s.ServerStubTransactable.Signature(call)
+	ss, _ = __gen_s.ServerStubStatable.Signature(call)
 	firstAdded = len(result.TypeDefs)
 	for k, v := range ss.Methods {
 		for i, _ := range v.InArgs {
@@ -951,7 +930,7 @@ func (__gen_s *ServerStubDir) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Serv
 		}
 		result.TypeDefs = append(result.TypeDefs, d)
 	}
-	ss, _ = __gen_s.ServerStubStatable.Signature(call)
+	ss, _ = __gen_s.ServerStubTransactable.Signature(call)
 	firstAdded = len(result.TypeDefs)
 	for k, v := range ss.Methods {
 		for i, _ := range v.InArgs {
@@ -1111,6 +1090,449 @@ func (__gen_s *ServerStubDir) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Serv
 		result.TypeDefs = append(result.TypeDefs, d)
 	}
 	ss, _ = __gen_s.ServerStubQueryWatcher.Signature(call)
+	firstAdded = len(result.TypeDefs)
+	for k, v := range ss.Methods {
+		for i, _ := range v.InArgs {
+			if v.InArgs[i].Type >= _gen_wiretype.TypeIDFirst {
+				v.InArgs[i].Type += _gen_wiretype.TypeID(firstAdded)
+			}
+		}
+		for i, _ := range v.OutArgs {
+			if v.OutArgs[i].Type >= _gen_wiretype.TypeIDFirst {
+				v.OutArgs[i].Type += _gen_wiretype.TypeID(firstAdded)
+			}
+		}
+		if v.InStream >= _gen_wiretype.TypeIDFirst {
+			v.InStream += _gen_wiretype.TypeID(firstAdded)
+		}
+		if v.OutStream >= _gen_wiretype.TypeIDFirst {
+			v.OutStream += _gen_wiretype.TypeID(firstAdded)
+		}
+		result.Methods[k] = v
+	}
+	//TODO(bprosnitz) combine type definitions from embeded interfaces in a way that doesn't cause duplication.
+	for _, d := range ss.TypeDefs {
+		switch wt := d.(type) {
+		case _gen_wiretype.SliceType:
+			if wt.Elem >= _gen_wiretype.TypeIDFirst {
+				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+			}
+			d = wt
+		case _gen_wiretype.ArrayType:
+			if wt.Elem >= _gen_wiretype.TypeIDFirst {
+				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+			}
+			d = wt
+		case _gen_wiretype.MapType:
+			if wt.Key >= _gen_wiretype.TypeIDFirst {
+				wt.Key += _gen_wiretype.TypeID(firstAdded)
+			}
+			if wt.Elem >= _gen_wiretype.TypeIDFirst {
+				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+			}
+			d = wt
+		case _gen_wiretype.StructType:
+			for i, fld := range wt.Fields {
+				if fld.Type >= _gen_wiretype.TypeIDFirst {
+					wt.Fields[i].Type += _gen_wiretype.TypeID(firstAdded)
+				}
+			}
+			d = wt
+			// NOTE: other types are missing, but we are upgrading anyways.
+		}
+		result.TypeDefs = append(result.TypeDefs, d)
+	}
+
+	return result, nil
+}
+
+func (__gen_s *ServerStubDirOrObject) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
+	if unresolver, ok := __gen_s.service.(_gen_ipc.Unresolver); ok {
+		return unresolver.UnresolveStep(call)
+	}
+	if call.Server() == nil {
+		return
+	}
+	var published []string
+	if published, err = call.Server().Published(); err != nil || published == nil {
+		return
+	}
+	reply = make([]string, len(published))
+	for i, p := range published {
+		reply[i] = _gen_naming.Join(p, call.Name())
+	}
+	return
+}
+
+func (__gen_s *ServerStubDirOrObject) Remove(call _gen_ipc.ServerCall) (err error) {
+	err = __gen_s.service.Remove(call)
+	return
+}
+
+func (__gen_s *ServerStubDirOrObject) Query(call _gen_ipc.ServerCall, Q query.Query) (err error) {
+	stream := &implDirOrObjectServiceQueryStream{writer: implDirOrObjectServiceQueryStreamSender{serverCall: call}}
+	err = __gen_s.service.Query(call, Q, stream)
+	return
+}
+
+// DirSpecific is the interface the client binds and uses.
+// DirSpecific_ExcludingUniversal is the interface without internal framework-added methods
+// to enable embedding without method collisions.  Not to be used directly by clients.
+type DirSpecific_ExcludingUniversal interface {
+	// Make creates this directory and any ancestor directories that do not
+	// exist (i.e. equivalent to Unix's 'mkdir -p').  Make is idempotent.
+	Make(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error)
+}
+type DirSpecific interface {
+	_gen_ipc.UniversalServiceMethods
+	DirSpecific_ExcludingUniversal
+}
+
+// DirSpecificService is the interface the server implements.
+type DirSpecificService interface {
+
+	// Make creates this directory and any ancestor directories that do not
+	// exist (i.e. equivalent to Unix's 'mkdir -p').  Make is idempotent.
+	Make(context _gen_ipc.ServerContext) (err error)
+}
+
+// BindDirSpecific returns the client stub implementing the DirSpecific
+// interface.
+//
+// If no _gen_ipc.Client is specified, the default _gen_ipc.Client in the
+// global Runtime is used.
+func BindDirSpecific(name string, opts ..._gen_ipc.BindOpt) (DirSpecific, error) {
+	var client _gen_ipc.Client
+	switch len(opts) {
+	case 0:
+		// Do nothing.
+	case 1:
+		if clientOpt, ok := opts[0].(_gen_ipc.Client); opts[0] == nil || ok {
+			client = clientOpt
+		} else {
+			return nil, _gen_vdlutil.ErrUnrecognizedOption
+		}
+	default:
+		return nil, _gen_vdlutil.ErrTooManyOptionsToBind
+	}
+	stub := &clientStubDirSpecific{defaultClient: client, name: name}
+
+	return stub, nil
+}
+
+// NewServerDirSpecific creates a new server stub.
+//
+// It takes a regular server implementing the DirSpecificService
+// interface, and returns a new server stub.
+func NewServerDirSpecific(server DirSpecificService) interface{} {
+	return &ServerStubDirSpecific{
+		service: server,
+	}
+}
+
+// clientStubDirSpecific implements DirSpecific.
+type clientStubDirSpecific struct {
+	defaultClient _gen_ipc.Client
+	name          string
+}
+
+func (__gen_c *clientStubDirSpecific) client(ctx _gen_context.T) _gen_ipc.Client {
+	if __gen_c.defaultClient != nil {
+		return __gen_c.defaultClient
+	}
+	return _gen_veyron2.RuntimeFromContext(ctx).Client()
+}
+
+func (__gen_c *clientStubDirSpecific) Make(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Make", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubDirSpecific) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubDirSpecific) Signature(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubDirSpecific) GetMethodTags(ctx _gen_context.T, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+// ServerStubDirSpecific wraps a server that implements
+// DirSpecificService and provides an object that satisfies
+// the requirements of veyron2/ipc.ReflectInvoker.
+type ServerStubDirSpecific struct {
+	service DirSpecificService
+}
+
+func (__gen_s *ServerStubDirSpecific) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
+	// TODO(bprosnitz) GetMethodTags() will be replaces with Signature().
+	// Note: This exhibits some weird behavior like returning a nil error if the method isn't found.
+	// This will change when it is replaced with Signature().
+	switch method {
+	case "Make":
+		return []interface{}{}, nil
+	default:
+		return nil, nil
+	}
+}
+
+func (__gen_s *ServerStubDirSpecific) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
+	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
+	result.Methods["Make"] = _gen_ipc.MethodSignature{
+		InArgs: []_gen_ipc.MethodArgument{},
+		OutArgs: []_gen_ipc.MethodArgument{
+			{Name: "", Type: 65},
+		},
+	}
+
+	result.TypeDefs = []_gen_vdlutil.Any{
+		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}}
+
+	return result, nil
+}
+
+func (__gen_s *ServerStubDirSpecific) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
+	if unresolver, ok := __gen_s.service.(_gen_ipc.Unresolver); ok {
+		return unresolver.UnresolveStep(call)
+	}
+	if call.Server() == nil {
+		return
+	}
+	var published []string
+	if published, err = call.Server().Published(); err != nil || published == nil {
+		return
+	}
+	reply = make([]string, len(published))
+	for i, p := range published {
+		reply[i] = _gen_naming.Join(p, call.Name())
+	}
+	return
+}
+
+func (__gen_s *ServerStubDirSpecific) Make(call _gen_ipc.ServerCall) (err error) {
+	err = __gen_s.service.Make(call)
+	return
+}
+
+// Dir is a directory containing Objects and other Dirs.
+// Dir is the interface the client binds and uses.
+// Dir_ExcludingUniversal is the interface without internal framework-added methods
+// to enable embedding without method collisions.  Not to be used directly by clients.
+type Dir_ExcludingUniversal interface {
+	DirSpecific_ExcludingUniversal
+	DirOrObject_ExcludingUniversal
+}
+type Dir interface {
+	_gen_ipc.UniversalServiceMethods
+	Dir_ExcludingUniversal
+}
+
+// DirService is the interface the server implements.
+type DirService interface {
+	DirSpecificService
+	DirOrObjectService
+}
+
+// BindDir returns the client stub implementing the Dir
+// interface.
+//
+// If no _gen_ipc.Client is specified, the default _gen_ipc.Client in the
+// global Runtime is used.
+func BindDir(name string, opts ..._gen_ipc.BindOpt) (Dir, error) {
+	var client _gen_ipc.Client
+	switch len(opts) {
+	case 0:
+		// Do nothing.
+	case 1:
+		if clientOpt, ok := opts[0].(_gen_ipc.Client); opts[0] == nil || ok {
+			client = clientOpt
+		} else {
+			return nil, _gen_vdlutil.ErrUnrecognizedOption
+		}
+	default:
+		return nil, _gen_vdlutil.ErrTooManyOptionsToBind
+	}
+	stub := &clientStubDir{defaultClient: client, name: name}
+	stub.DirSpecific_ExcludingUniversal, _ = BindDirSpecific(name, client)
+	stub.DirOrObject_ExcludingUniversal, _ = BindDirOrObject(name, client)
+
+	return stub, nil
+}
+
+// NewServerDir creates a new server stub.
+//
+// It takes a regular server implementing the DirService
+// interface, and returns a new server stub.
+func NewServerDir(server DirService) interface{} {
+	return &ServerStubDir{
+		ServerStubDirSpecific: *NewServerDirSpecific(server).(*ServerStubDirSpecific),
+		ServerStubDirOrObject: *NewServerDirOrObject(server).(*ServerStubDirOrObject),
+		service:               server,
+	}
+}
+
+// clientStubDir implements Dir.
+type clientStubDir struct {
+	DirSpecific_ExcludingUniversal
+	DirOrObject_ExcludingUniversal
+
+	defaultClient _gen_ipc.Client
+	name          string
+}
+
+func (__gen_c *clientStubDir) client(ctx _gen_context.T) _gen_ipc.Client {
+	if __gen_c.defaultClient != nil {
+		return __gen_c.defaultClient
+	}
+	return _gen_veyron2.RuntimeFromContext(ctx).Client()
+}
+
+func (__gen_c *clientStubDir) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubDir) Signature(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubDir) GetMethodTags(ctx _gen_context.T, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+// ServerStubDir wraps a server that implements
+// DirService and provides an object that satisfies
+// the requirements of veyron2/ipc.ReflectInvoker.
+type ServerStubDir struct {
+	ServerStubDirSpecific
+	ServerStubDirOrObject
+
+	service DirService
+}
+
+func (__gen_s *ServerStubDir) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
+	// TODO(bprosnitz) GetMethodTags() will be replaces with Signature().
+	// Note: This exhibits some weird behavior like returning a nil error if the method isn't found.
+	// This will change when it is replaced with Signature().
+	if resp, err := __gen_s.ServerStubDirSpecific.GetMethodTags(call, method); resp != nil || err != nil {
+		return resp, err
+	}
+	if resp, err := __gen_s.ServerStubDirOrObject.GetMethodTags(call, method); resp != nil || err != nil {
+		return resp, err
+	}
+	return nil, nil
+}
+
+func (__gen_s *ServerStubDir) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
+	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
+
+	result.TypeDefs = []_gen_vdlutil.Any{}
+	var ss _gen_ipc.ServiceSignature
+	var firstAdded int
+	ss, _ = __gen_s.ServerStubDirSpecific.Signature(call)
+	firstAdded = len(result.TypeDefs)
+	for k, v := range ss.Methods {
+		for i, _ := range v.InArgs {
+			if v.InArgs[i].Type >= _gen_wiretype.TypeIDFirst {
+				v.InArgs[i].Type += _gen_wiretype.TypeID(firstAdded)
+			}
+		}
+		for i, _ := range v.OutArgs {
+			if v.OutArgs[i].Type >= _gen_wiretype.TypeIDFirst {
+				v.OutArgs[i].Type += _gen_wiretype.TypeID(firstAdded)
+			}
+		}
+		if v.InStream >= _gen_wiretype.TypeIDFirst {
+			v.InStream += _gen_wiretype.TypeID(firstAdded)
+		}
+		if v.OutStream >= _gen_wiretype.TypeIDFirst {
+			v.OutStream += _gen_wiretype.TypeID(firstAdded)
+		}
+		result.Methods[k] = v
+	}
+	//TODO(bprosnitz) combine type definitions from embeded interfaces in a way that doesn't cause duplication.
+	for _, d := range ss.TypeDefs {
+		switch wt := d.(type) {
+		case _gen_wiretype.SliceType:
+			if wt.Elem >= _gen_wiretype.TypeIDFirst {
+				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+			}
+			d = wt
+		case _gen_wiretype.ArrayType:
+			if wt.Elem >= _gen_wiretype.TypeIDFirst {
+				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+			}
+			d = wt
+		case _gen_wiretype.MapType:
+			if wt.Key >= _gen_wiretype.TypeIDFirst {
+				wt.Key += _gen_wiretype.TypeID(firstAdded)
+			}
+			if wt.Elem >= _gen_wiretype.TypeIDFirst {
+				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+			}
+			d = wt
+		case _gen_wiretype.StructType:
+			for i, fld := range wt.Fields {
+				if fld.Type >= _gen_wiretype.TypeIDFirst {
+					wt.Fields[i].Type += _gen_wiretype.TypeID(firstAdded)
+				}
+			}
+			d = wt
+			// NOTE: other types are missing, but we are upgrading anyways.
+		}
+		result.TypeDefs = append(result.TypeDefs, d)
+	}
+	ss, _ = __gen_s.ServerStubDirOrObject.Signature(call)
 	firstAdded = len(result.TypeDefs)
 	for k, v := range ss.Methods {
 		for i, _ := range v.InArgs {
@@ -1185,24 +1607,220 @@ func (__gen_s *ServerStubDir) UnresolveStep(call _gen_ipc.ServerCall) (reply []s
 	return
 }
 
-func (__gen_s *ServerStubDir) Exists(call _gen_ipc.ServerCall) (reply bool, err error) {
-	reply, err = __gen_s.service.Exists(call)
+// ObjectSpecific is the interface the client binds and uses.
+// ObjectSpecific_ExcludingUniversal is the interface without internal framework-added methods
+// to enable embedding without method collisions.  Not to be used directly by clients.
+type ObjectSpecific_ExcludingUniversal interface {
+	// Get returns the value for the Object.  The value returned is from the
+	// most recent mutation of the entry in the Transaction, or from the
+	// Transaction's snapshot if there is no mutation.
+	Get(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply storage.Entry, err error)
+	// Put modifies the value of the Object.
+	Put(ctx _gen_context.T, V _gen_vdlutil.Any, opts ..._gen_ipc.CallOpt) (reply storage.Stat, err error)
+}
+type ObjectSpecific interface {
+	_gen_ipc.UniversalServiceMethods
+	ObjectSpecific_ExcludingUniversal
+}
+
+// ObjectSpecificService is the interface the server implements.
+type ObjectSpecificService interface {
+
+	// Get returns the value for the Object.  The value returned is from the
+	// most recent mutation of the entry in the Transaction, or from the
+	// Transaction's snapshot if there is no mutation.
+	Get(context _gen_ipc.ServerContext) (reply storage.Entry, err error)
+	// Put modifies the value of the Object.
+	Put(context _gen_ipc.ServerContext, V _gen_vdlutil.Any) (reply storage.Stat, err error)
+}
+
+// BindObjectSpecific returns the client stub implementing the ObjectSpecific
+// interface.
+//
+// If no _gen_ipc.Client is specified, the default _gen_ipc.Client in the
+// global Runtime is used.
+func BindObjectSpecific(name string, opts ..._gen_ipc.BindOpt) (ObjectSpecific, error) {
+	var client _gen_ipc.Client
+	switch len(opts) {
+	case 0:
+		// Do nothing.
+	case 1:
+		if clientOpt, ok := opts[0].(_gen_ipc.Client); opts[0] == nil || ok {
+			client = clientOpt
+		} else {
+			return nil, _gen_vdlutil.ErrUnrecognizedOption
+		}
+	default:
+		return nil, _gen_vdlutil.ErrTooManyOptionsToBind
+	}
+	stub := &clientStubObjectSpecific{defaultClient: client, name: name}
+
+	return stub, nil
+}
+
+// NewServerObjectSpecific creates a new server stub.
+//
+// It takes a regular server implementing the ObjectSpecificService
+// interface, and returns a new server stub.
+func NewServerObjectSpecific(server ObjectSpecificService) interface{} {
+	return &ServerStubObjectSpecific{
+		service: server,
+	}
+}
+
+// clientStubObjectSpecific implements ObjectSpecific.
+type clientStubObjectSpecific struct {
+	defaultClient _gen_ipc.Client
+	name          string
+}
+
+func (__gen_c *clientStubObjectSpecific) client(ctx _gen_context.T) _gen_ipc.Client {
+	if __gen_c.defaultClient != nil {
+		return __gen_c.defaultClient
+	}
+	return _gen_veyron2.RuntimeFromContext(ctx).Client()
+}
+
+func (__gen_c *clientStubObjectSpecific) Get(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply storage.Entry, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Get", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
 	return
 }
 
-func (__gen_s *ServerStubDir) Make(call _gen_ipc.ServerCall) (err error) {
-	err = __gen_s.service.Make(call)
+func (__gen_c *clientStubObjectSpecific) Put(ctx _gen_context.T, V _gen_vdlutil.Any, opts ..._gen_ipc.CallOpt) (reply storage.Stat, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Put", []interface{}{V}, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
 	return
 }
 
-func (__gen_s *ServerStubDir) Remove(call _gen_ipc.ServerCall) (err error) {
-	err = __gen_s.service.Remove(call)
+func (__gen_c *clientStubObjectSpecific) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
 	return
 }
 
-func (__gen_s *ServerStubDir) Query(call _gen_ipc.ServerCall, Q query.Query) (err error) {
-	stream := &implDirServiceQueryStream{writer: implDirServiceQueryStreamSender{serverCall: call}}
-	err = __gen_s.service.Query(call, Q, stream)
+func (__gen_c *clientStubObjectSpecific) Signature(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubObjectSpecific) GetMethodTags(ctx _gen_context.T, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+// ServerStubObjectSpecific wraps a server that implements
+// ObjectSpecificService and provides an object that satisfies
+// the requirements of veyron2/ipc.ReflectInvoker.
+type ServerStubObjectSpecific struct {
+	service ObjectSpecificService
+}
+
+func (__gen_s *ServerStubObjectSpecific) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
+	// TODO(bprosnitz) GetMethodTags() will be replaces with Signature().
+	// Note: This exhibits some weird behavior like returning a nil error if the method isn't found.
+	// This will change when it is replaced with Signature().
+	switch method {
+	case "Get":
+		return []interface{}{}, nil
+	case "Put":
+		return []interface{}{}, nil
+	default:
+		return nil, nil
+	}
+}
+
+func (__gen_s *ServerStubObjectSpecific) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
+	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
+	result.Methods["Get"] = _gen_ipc.MethodSignature{
+		InArgs: []_gen_ipc.MethodArgument{},
+		OutArgs: []_gen_ipc.MethodArgument{
+			{Name: "", Type: 71},
+			{Name: "", Type: 72},
+		},
+	}
+	result.Methods["Put"] = _gen_ipc.MethodSignature{
+		InArgs: []_gen_ipc.MethodArgument{
+			{Name: "V", Type: 68},
+		},
+		OutArgs: []_gen_ipc.MethodArgument{
+			{Name: "", Type: 70},
+			{Name: "", Type: 72},
+		},
+	}
+
+	result.TypeDefs = []_gen_vdlutil.Any{
+		_gen_wiretype.NamedPrimitiveType{Type: 0x23, Name: "veyron2/storage.Kind", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, _gen_wiretype.ArrayType{Elem: 0x42, Len: 0x10, Name: "veyron2/storage.ID", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "anydata", Tags: []string(nil)}, _gen_wiretype.SliceType{Elem: 0x44, Name: "", Tags: []string(nil)}, _gen_wiretype.StructType{
+			[]_gen_wiretype.FieldType{
+				_gen_wiretype.FieldType{Type: 0x41, Name: "Kind"},
+				_gen_wiretype.FieldType{Type: 0x43, Name: "ID"},
+				_gen_wiretype.FieldType{Type: 0x25, Name: "MTimeNS"},
+				_gen_wiretype.FieldType{Type: 0x45, Name: "Attrs"},
+			},
+			"veyron2/storage.Stat", []string(nil)},
+		_gen_wiretype.StructType{
+			[]_gen_wiretype.FieldType{
+				_gen_wiretype.FieldType{Type: 0x46, Name: "Stat"},
+				_gen_wiretype.FieldType{Type: 0x44, Name: "Value"},
+			},
+			"veyron2/storage.Entry", []string(nil)},
+		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}}
+
+	return result, nil
+}
+
+func (__gen_s *ServerStubObjectSpecific) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
+	if unresolver, ok := __gen_s.service.(_gen_ipc.Unresolver); ok {
+		return unresolver.UnresolveStep(call)
+	}
+	if call.Server() == nil {
+		return
+	}
+	var published []string
+	if published, err = call.Server().Published(); err != nil || published == nil {
+		return
+	}
+	reply = make([]string, len(published))
+	for i, p := range published {
+		reply[i] = _gen_naming.Join(p, call.Name())
+	}
+	return
+}
+
+func (__gen_s *ServerStubObjectSpecific) Get(call _gen_ipc.ServerCall) (reply storage.Entry, err error) {
+	reply, err = __gen_s.service.Get(call)
+	return
+}
+
+func (__gen_s *ServerStubObjectSpecific) Put(call _gen_ipc.ServerCall, V _gen_vdlutil.Any) (reply storage.Stat, err error) {
+	reply, err = __gen_s.service.Put(call, V)
 	return
 }
 
@@ -1211,29 +1829,8 @@ func (__gen_s *ServerStubDir) Query(call _gen_ipc.ServerCall, Q query.Query) (er
 // Object_ExcludingUniversal is the interface without internal framework-added methods
 // to enable embedding without method collisions.  Not to be used directly by clients.
 type Object_ExcludingUniversal interface {
-	// Transactable provides the NewTransaction method.
-	Transactable_ExcludingUniversal
-	// Statable provides the Stat method.
-	Statable_ExcludingUniversal
-	mounttable.Globbable_ExcludingUniversal
-	// GlobWatcher allows a client to receive updates for changes to objects
-	// that match a pattern.  See the package comments for details.
-	watch.GlobWatcher_ExcludingUniversal
-	// QueryWatcher allows a client to receive updates for changes to objects
-	// that match a query.  See the package comments for details.
-	watch.QueryWatcher_ExcludingUniversal
-	// Exists returns true iff the Entry has a value.
-	Exists(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply bool, err error)
-	// Get returns the value for the Object.  The value returned is from the
-	// most recent mutation of the entry in the Transaction, or from the
-	// Transaction's snapshot if there is no mutation.
-	Get(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply storage.Entry, err error)
-	// Put modifies the value of the Object.
-	Put(ctx _gen_context.T, V _gen_vdlutil.Any, opts ..._gen_ipc.CallOpt) (reply storage.Stat, err error)
-	// Remove removes the Object.
-	Remove(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error)
-	// Query returns the sequence of elements that satisfy the query.
-	Query(ctx _gen_context.T, Q query.Query, opts ..._gen_ipc.CallOpt) (reply ObjectQueryCall, err error)
+	ObjectSpecific_ExcludingUniversal
+	DirOrObject_ExcludingUniversal
 }
 type Object interface {
 	_gen_ipc.UniversalServiceMethods
@@ -1242,151 +1839,8 @@ type Object interface {
 
 // ObjectService is the interface the server implements.
 type ObjectService interface {
-
-	// Transactable provides the NewTransaction method.
-	TransactableService
-	// Statable provides the Stat method.
-	StatableService
-	mounttable.GlobbableService
-	// GlobWatcher allows a client to receive updates for changes to objects
-	// that match a pattern.  See the package comments for details.
-	watch.GlobWatcherService
-	// QueryWatcher allows a client to receive updates for changes to objects
-	// that match a query.  See the package comments for details.
-	watch.QueryWatcherService
-	// Exists returns true iff the Entry has a value.
-	Exists(context _gen_ipc.ServerContext) (reply bool, err error)
-	// Get returns the value for the Object.  The value returned is from the
-	// most recent mutation of the entry in the Transaction, or from the
-	// Transaction's snapshot if there is no mutation.
-	Get(context _gen_ipc.ServerContext) (reply storage.Entry, err error)
-	// Put modifies the value of the Object.
-	Put(context _gen_ipc.ServerContext, V _gen_vdlutil.Any) (reply storage.Stat, err error)
-	// Remove removes the Object.
-	Remove(context _gen_ipc.ServerContext) (err error)
-	// Query returns the sequence of elements that satisfy the query.
-	Query(context _gen_ipc.ServerContext, Q query.Query, stream ObjectServiceQueryStream) (err error)
-}
-
-// ObjectQueryCall is the interface for call object of the method
-// Query in the service interface Object.
-type ObjectQueryCall interface {
-	// RecvStream returns the recv portion of the stream
-	RecvStream() interface {
-		// Advance stages an element so the client can retrieve it
-		// with Value.  Advance returns true iff there is an
-		// element to retrieve.  The client must call Advance before
-		// calling Value. Advance may block if an element is not
-		// immediately available.
-		Advance() bool
-
-		// Value returns the element that was staged by Advance.
-		// Value may panic if Advance returned false or was not
-		// called at all.  Value does not block.
-		Value() QueryResult
-
-		// Err returns a non-nil error iff the stream encountered
-		// any errors.  Err does not block.
-		Err() error
-	}
-
-	// Finish blocks until the server is done and returns the positional
-	// return values for call.
-	//
-	// If Cancel has been called, Finish will return immediately; the output of
-	// Finish could either be an error signalling cancelation, or the correct
-	// positional return values from the server depending on the timing of the
-	// call.
-	//
-	// Calling Finish is mandatory for releasing stream resources, unless Cancel
-	// has been called or any of the other methods return an error.
-	// Finish should be called at most once.
-	Finish() (err error)
-
-	// Cancel cancels the RPC, notifying the server to stop processing.  It
-	// is safe to call Cancel concurrently with any of the other stream methods.
-	// Calling Cancel after Finish has returned is a no-op.
-	Cancel()
-}
-
-type implObjectQueryStreamIterator struct {
-	clientCall _gen_ipc.Call
-	val        QueryResult
-	err        error
-}
-
-func (c *implObjectQueryStreamIterator) Advance() bool {
-	c.val = QueryResult{}
-	c.err = c.clientCall.Recv(&c.val)
-	return c.err == nil
-}
-
-func (c *implObjectQueryStreamIterator) Value() QueryResult {
-	return c.val
-}
-
-func (c *implObjectQueryStreamIterator) Err() error {
-	if c.err == _gen_io.EOF {
-		return nil
-	}
-	return c.err
-}
-
-// Implementation of the ObjectQueryCall interface that is not exported.
-type implObjectQueryCall struct {
-	clientCall _gen_ipc.Call
-	readStream implObjectQueryStreamIterator
-}
-
-func (c *implObjectQueryCall) RecvStream() interface {
-	Advance() bool
-	Value() QueryResult
-	Err() error
-} {
-	return &c.readStream
-}
-
-func (c *implObjectQueryCall) Finish() (err error) {
-	if ierr := c.clientCall.Finish(&err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
-func (c *implObjectQueryCall) Cancel() {
-	c.clientCall.Cancel()
-}
-
-type implObjectServiceQueryStreamSender struct {
-	serverCall _gen_ipc.ServerCall
-}
-
-func (s *implObjectServiceQueryStreamSender) Send(item QueryResult) error {
-	return s.serverCall.Send(item)
-}
-
-// ObjectServiceQueryStream is the interface for streaming responses of the method
-// Query in the service interface Object.
-type ObjectServiceQueryStream interface {
-	// SendStream returns the send portion of the stream.
-	SendStream() interface {
-		// Send places the item onto the output stream, blocking if there is no buffer
-		// space available.  If the client has canceled, an error is returned.
-		Send(item QueryResult) error
-	}
-}
-
-// Implementation of the ObjectServiceQueryStream interface that is not exported.
-type implObjectServiceQueryStream struct {
-	writer implObjectServiceQueryStreamSender
-}
-
-func (s *implObjectServiceQueryStream) SendStream() interface {
-	// Send places the item onto the output stream, blocking if there is no buffer
-	// space available.  If the client has canceled, an error is returned.
-	Send(item QueryResult) error
-} {
-	return &s.writer
+	ObjectSpecificService
+	DirOrObjectService
 }
 
 // BindObject returns the client stub implementing the Object
@@ -1409,11 +1863,8 @@ func BindObject(name string, opts ..._gen_ipc.BindOpt) (Object, error) {
 		return nil, _gen_vdlutil.ErrTooManyOptionsToBind
 	}
 	stub := &clientStubObject{defaultClient: client, name: name}
-	stub.Transactable_ExcludingUniversal, _ = BindTransactable(name, client)
-	stub.Statable_ExcludingUniversal, _ = BindStatable(name, client)
-	stub.Globbable_ExcludingUniversal, _ = mounttable.BindGlobbable(name, client)
-	stub.GlobWatcher_ExcludingUniversal, _ = watch.BindGlobWatcher(name, client)
-	stub.QueryWatcher_ExcludingUniversal, _ = watch.BindQueryWatcher(name, client)
+	stub.ObjectSpecific_ExcludingUniversal, _ = BindObjectSpecific(name, client)
+	stub.DirOrObject_ExcludingUniversal, _ = BindDirOrObject(name, client)
 
 	return stub, nil
 }
@@ -1424,22 +1875,16 @@ func BindObject(name string, opts ..._gen_ipc.BindOpt) (Object, error) {
 // interface, and returns a new server stub.
 func NewServerObject(server ObjectService) interface{} {
 	return &ServerStubObject{
-		ServerStubTransactable: *NewServerTransactable(server).(*ServerStubTransactable),
-		ServerStubStatable:     *NewServerStatable(server).(*ServerStubStatable),
-		ServerStubGlobbable:    *mounttable.NewServerGlobbable(server).(*mounttable.ServerStubGlobbable),
-		ServerStubGlobWatcher:  *watch.NewServerGlobWatcher(server).(*watch.ServerStubGlobWatcher),
-		ServerStubQueryWatcher: *watch.NewServerQueryWatcher(server).(*watch.ServerStubQueryWatcher),
-		service:                server,
+		ServerStubObjectSpecific: *NewServerObjectSpecific(server).(*ServerStubObjectSpecific),
+		ServerStubDirOrObject:    *NewServerDirOrObject(server).(*ServerStubDirOrObject),
+		service:                  server,
 	}
 }
 
 // clientStubObject implements Object.
 type clientStubObject struct {
-	Transactable_ExcludingUniversal
-	Statable_ExcludingUniversal
-	mounttable.Globbable_ExcludingUniversal
-	watch.GlobWatcher_ExcludingUniversal
-	watch.QueryWatcher_ExcludingUniversal
+	ObjectSpecific_ExcludingUniversal
+	DirOrObject_ExcludingUniversal
 
 	defaultClient _gen_ipc.Client
 	name          string
@@ -1450,59 +1895,6 @@ func (__gen_c *clientStubObject) client(ctx _gen_context.T) _gen_ipc.Client {
 		return __gen_c.defaultClient
 	}
 	return _gen_veyron2.RuntimeFromContext(ctx).Client()
-}
-
-func (__gen_c *clientStubObject) Exists(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply bool, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Exists", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
-func (__gen_c *clientStubObject) Get(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply storage.Entry, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Get", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
-func (__gen_c *clientStubObject) Put(ctx _gen_context.T, V _gen_vdlutil.Any, opts ..._gen_ipc.CallOpt) (reply storage.Stat, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Put", []interface{}{V}, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
-func (__gen_c *clientStubObject) Remove(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Remove", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
-func (__gen_c *clientStubObject) Query(ctx _gen_context.T, Q query.Query, opts ..._gen_ipc.CallOpt) (reply ObjectQueryCall, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Query", []interface{}{Q}, opts...); err != nil {
-		return
-	}
-	reply = &implObjectQueryCall{clientCall: call, readStream: implObjectQueryStreamIterator{clientCall: call}}
-	return
 }
 
 func (__gen_c *clientStubObject) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
@@ -1542,11 +1934,8 @@ func (__gen_c *clientStubObject) GetMethodTags(ctx _gen_context.T, method string
 // ObjectService and provides an object that satisfies
 // the requirements of veyron2/ipc.ReflectInvoker.
 type ServerStubObject struct {
-	ServerStubTransactable
-	ServerStubStatable
-	mounttable.ServerStubGlobbable
-	watch.ServerStubGlobWatcher
-	watch.ServerStubQueryWatcher
+	ServerStubObjectSpecific
+	ServerStubDirOrObject
 
 	service ObjectService
 }
@@ -1555,111 +1944,22 @@ func (__gen_s *ServerStubObject) GetMethodTags(call _gen_ipc.ServerCall, method 
 	// TODO(bprosnitz) GetMethodTags() will be replaces with Signature().
 	// Note: This exhibits some weird behavior like returning a nil error if the method isn't found.
 	// This will change when it is replaced with Signature().
-	if resp, err := __gen_s.ServerStubTransactable.GetMethodTags(call, method); resp != nil || err != nil {
+	if resp, err := __gen_s.ServerStubObjectSpecific.GetMethodTags(call, method); resp != nil || err != nil {
 		return resp, err
 	}
-	if resp, err := __gen_s.ServerStubStatable.GetMethodTags(call, method); resp != nil || err != nil {
+	if resp, err := __gen_s.ServerStubDirOrObject.GetMethodTags(call, method); resp != nil || err != nil {
 		return resp, err
 	}
-	if resp, err := __gen_s.ServerStubGlobbable.GetMethodTags(call, method); resp != nil || err != nil {
-		return resp, err
-	}
-	if resp, err := __gen_s.ServerStubGlobWatcher.GetMethodTags(call, method); resp != nil || err != nil {
-		return resp, err
-	}
-	if resp, err := __gen_s.ServerStubQueryWatcher.GetMethodTags(call, method); resp != nil || err != nil {
-		return resp, err
-	}
-	switch method {
-	case "Exists":
-		return []interface{}{}, nil
-	case "Get":
-		return []interface{}{}, nil
-	case "Put":
-		return []interface{}{}, nil
-	case "Remove":
-		return []interface{}{}, nil
-	case "Query":
-		return []interface{}{}, nil
-	default:
-		return nil, nil
-	}
+	return nil, nil
 }
 
 func (__gen_s *ServerStubObject) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
 	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
-	result.Methods["Exists"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{},
-		OutArgs: []_gen_ipc.MethodArgument{
-			{Name: "", Type: 2},
-			{Name: "", Type: 65},
-		},
-	}
-	result.Methods["Get"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{},
-		OutArgs: []_gen_ipc.MethodArgument{
-			{Name: "", Type: 72},
-			{Name: "", Type: 65},
-		},
-	}
-	result.Methods["Put"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{
-			{Name: "V", Type: 69},
-		},
-		OutArgs: []_gen_ipc.MethodArgument{
-			{Name: "", Type: 71},
-			{Name: "", Type: 65},
-		},
-	}
-	result.Methods["Query"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{
-			{Name: "Q", Type: 73},
-		},
-		OutArgs: []_gen_ipc.MethodArgument{
-			{Name: "", Type: 65},
-		},
 
-		OutStream: 76,
-	}
-	result.Methods["Remove"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{},
-		OutArgs: []_gen_ipc.MethodArgument{
-			{Name: "", Type: 65},
-		},
-	}
-
-	result.TypeDefs = []_gen_vdlutil.Any{
-		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x23, Name: "veyron2/storage.Kind", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, _gen_wiretype.ArrayType{Elem: 0x43, Len: 0x10, Name: "veyron2/storage.ID", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "anydata", Tags: []string(nil)}, _gen_wiretype.SliceType{Elem: 0x45, Name: "", Tags: []string(nil)}, _gen_wiretype.StructType{
-			[]_gen_wiretype.FieldType{
-				_gen_wiretype.FieldType{Type: 0x42, Name: "Kind"},
-				_gen_wiretype.FieldType{Type: 0x44, Name: "ID"},
-				_gen_wiretype.FieldType{Type: 0x25, Name: "MTimeNS"},
-				_gen_wiretype.FieldType{Type: 0x46, Name: "Attrs"},
-			},
-			"veyron2/storage.Stat", []string(nil)},
-		_gen_wiretype.StructType{
-			[]_gen_wiretype.FieldType{
-				_gen_wiretype.FieldType{Type: 0x47, Name: "Stat"},
-				_gen_wiretype.FieldType{Type: 0x45, Name: "Value"},
-			},
-			"veyron2/storage.Entry", []string(nil)},
-		_gen_wiretype.StructType{
-			[]_gen_wiretype.FieldType{
-				_gen_wiretype.FieldType{Type: 0x3, Name: "Stmt"},
-			},
-			"veyron2/query.Query", []string(nil)},
-		_gen_wiretype.NamedPrimitiveType{Type: 0x25, Name: "veyron2/services/store.NestedResult", Tags: []string(nil)}, _gen_wiretype.MapType{Key: 0x3, Elem: 0x45, Name: "", Tags: []string(nil)}, _gen_wiretype.StructType{
-			[]_gen_wiretype.FieldType{
-				_gen_wiretype.FieldType{Type: 0x4a, Name: "NestedResult"},
-				_gen_wiretype.FieldType{Type: 0x3, Name: "Name"},
-				_gen_wiretype.FieldType{Type: 0x4b, Name: "Fields"},
-				_gen_wiretype.FieldType{Type: 0x45, Name: "Value"},
-			},
-			"veyron2/services/store.QueryResult", []string(nil)},
-	}
+	result.TypeDefs = []_gen_vdlutil.Any{}
 	var ss _gen_ipc.ServiceSignature
 	var firstAdded int
-	ss, _ = __gen_s.ServerStubTransactable.Signature(call)
+	ss, _ = __gen_s.ServerStubObjectSpecific.Signature(call)
 	firstAdded = len(result.TypeDefs)
 	for k, v := range ss.Methods {
 		for i, _ := range v.InArgs {
@@ -1712,166 +2012,7 @@ func (__gen_s *ServerStubObject) Signature(call _gen_ipc.ServerCall) (_gen_ipc.S
 		}
 		result.TypeDefs = append(result.TypeDefs, d)
 	}
-	ss, _ = __gen_s.ServerStubStatable.Signature(call)
-	firstAdded = len(result.TypeDefs)
-	for k, v := range ss.Methods {
-		for i, _ := range v.InArgs {
-			if v.InArgs[i].Type >= _gen_wiretype.TypeIDFirst {
-				v.InArgs[i].Type += _gen_wiretype.TypeID(firstAdded)
-			}
-		}
-		for i, _ := range v.OutArgs {
-			if v.OutArgs[i].Type >= _gen_wiretype.TypeIDFirst {
-				v.OutArgs[i].Type += _gen_wiretype.TypeID(firstAdded)
-			}
-		}
-		if v.InStream >= _gen_wiretype.TypeIDFirst {
-			v.InStream += _gen_wiretype.TypeID(firstAdded)
-		}
-		if v.OutStream >= _gen_wiretype.TypeIDFirst {
-			v.OutStream += _gen_wiretype.TypeID(firstAdded)
-		}
-		result.Methods[k] = v
-	}
-	//TODO(bprosnitz) combine type definitions from embeded interfaces in a way that doesn't cause duplication.
-	for _, d := range ss.TypeDefs {
-		switch wt := d.(type) {
-		case _gen_wiretype.SliceType:
-			if wt.Elem >= _gen_wiretype.TypeIDFirst {
-				wt.Elem += _gen_wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case _gen_wiretype.ArrayType:
-			if wt.Elem >= _gen_wiretype.TypeIDFirst {
-				wt.Elem += _gen_wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case _gen_wiretype.MapType:
-			if wt.Key >= _gen_wiretype.TypeIDFirst {
-				wt.Key += _gen_wiretype.TypeID(firstAdded)
-			}
-			if wt.Elem >= _gen_wiretype.TypeIDFirst {
-				wt.Elem += _gen_wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case _gen_wiretype.StructType:
-			for i, fld := range wt.Fields {
-				if fld.Type >= _gen_wiretype.TypeIDFirst {
-					wt.Fields[i].Type += _gen_wiretype.TypeID(firstAdded)
-				}
-			}
-			d = wt
-			// NOTE: other types are missing, but we are upgrading anyways.
-		}
-		result.TypeDefs = append(result.TypeDefs, d)
-	}
-	ss, _ = __gen_s.ServerStubGlobbable.Signature(call)
-	firstAdded = len(result.TypeDefs)
-	for k, v := range ss.Methods {
-		for i, _ := range v.InArgs {
-			if v.InArgs[i].Type >= _gen_wiretype.TypeIDFirst {
-				v.InArgs[i].Type += _gen_wiretype.TypeID(firstAdded)
-			}
-		}
-		for i, _ := range v.OutArgs {
-			if v.OutArgs[i].Type >= _gen_wiretype.TypeIDFirst {
-				v.OutArgs[i].Type += _gen_wiretype.TypeID(firstAdded)
-			}
-		}
-		if v.InStream >= _gen_wiretype.TypeIDFirst {
-			v.InStream += _gen_wiretype.TypeID(firstAdded)
-		}
-		if v.OutStream >= _gen_wiretype.TypeIDFirst {
-			v.OutStream += _gen_wiretype.TypeID(firstAdded)
-		}
-		result.Methods[k] = v
-	}
-	//TODO(bprosnitz) combine type definitions from embeded interfaces in a way that doesn't cause duplication.
-	for _, d := range ss.TypeDefs {
-		switch wt := d.(type) {
-		case _gen_wiretype.SliceType:
-			if wt.Elem >= _gen_wiretype.TypeIDFirst {
-				wt.Elem += _gen_wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case _gen_wiretype.ArrayType:
-			if wt.Elem >= _gen_wiretype.TypeIDFirst {
-				wt.Elem += _gen_wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case _gen_wiretype.MapType:
-			if wt.Key >= _gen_wiretype.TypeIDFirst {
-				wt.Key += _gen_wiretype.TypeID(firstAdded)
-			}
-			if wt.Elem >= _gen_wiretype.TypeIDFirst {
-				wt.Elem += _gen_wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case _gen_wiretype.StructType:
-			for i, fld := range wt.Fields {
-				if fld.Type >= _gen_wiretype.TypeIDFirst {
-					wt.Fields[i].Type += _gen_wiretype.TypeID(firstAdded)
-				}
-			}
-			d = wt
-			// NOTE: other types are missing, but we are upgrading anyways.
-		}
-		result.TypeDefs = append(result.TypeDefs, d)
-	}
-	ss, _ = __gen_s.ServerStubGlobWatcher.Signature(call)
-	firstAdded = len(result.TypeDefs)
-	for k, v := range ss.Methods {
-		for i, _ := range v.InArgs {
-			if v.InArgs[i].Type >= _gen_wiretype.TypeIDFirst {
-				v.InArgs[i].Type += _gen_wiretype.TypeID(firstAdded)
-			}
-		}
-		for i, _ := range v.OutArgs {
-			if v.OutArgs[i].Type >= _gen_wiretype.TypeIDFirst {
-				v.OutArgs[i].Type += _gen_wiretype.TypeID(firstAdded)
-			}
-		}
-		if v.InStream >= _gen_wiretype.TypeIDFirst {
-			v.InStream += _gen_wiretype.TypeID(firstAdded)
-		}
-		if v.OutStream >= _gen_wiretype.TypeIDFirst {
-			v.OutStream += _gen_wiretype.TypeID(firstAdded)
-		}
-		result.Methods[k] = v
-	}
-	//TODO(bprosnitz) combine type definitions from embeded interfaces in a way that doesn't cause duplication.
-	for _, d := range ss.TypeDefs {
-		switch wt := d.(type) {
-		case _gen_wiretype.SliceType:
-			if wt.Elem >= _gen_wiretype.TypeIDFirst {
-				wt.Elem += _gen_wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case _gen_wiretype.ArrayType:
-			if wt.Elem >= _gen_wiretype.TypeIDFirst {
-				wt.Elem += _gen_wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case _gen_wiretype.MapType:
-			if wt.Key >= _gen_wiretype.TypeIDFirst {
-				wt.Key += _gen_wiretype.TypeID(firstAdded)
-			}
-			if wt.Elem >= _gen_wiretype.TypeIDFirst {
-				wt.Elem += _gen_wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case _gen_wiretype.StructType:
-			for i, fld := range wt.Fields {
-				if fld.Type >= _gen_wiretype.TypeIDFirst {
-					wt.Fields[i].Type += _gen_wiretype.TypeID(firstAdded)
-				}
-			}
-			d = wt
-			// NOTE: other types are missing, but we are upgrading anyways.
-		}
-		result.TypeDefs = append(result.TypeDefs, d)
-	}
-	ss, _ = __gen_s.ServerStubQueryWatcher.Signature(call)
+	ss, _ = __gen_s.ServerStubDirOrObject.Signature(call)
 	firstAdded = len(result.TypeDefs)
 	for k, v := range ss.Methods {
 		for i, _ := range v.InArgs {
@@ -1943,32 +2084,6 @@ func (__gen_s *ServerStubObject) UnresolveStep(call _gen_ipc.ServerCall) (reply 
 	for i, p := range published {
 		reply[i] = _gen_naming.Join(p, call.Name())
 	}
-	return
-}
-
-func (__gen_s *ServerStubObject) Exists(call _gen_ipc.ServerCall) (reply bool, err error) {
-	reply, err = __gen_s.service.Exists(call)
-	return
-}
-
-func (__gen_s *ServerStubObject) Get(call _gen_ipc.ServerCall) (reply storage.Entry, err error) {
-	reply, err = __gen_s.service.Get(call)
-	return
-}
-
-func (__gen_s *ServerStubObject) Put(call _gen_ipc.ServerCall, V _gen_vdlutil.Any) (reply storage.Stat, err error) {
-	reply, err = __gen_s.service.Put(call, V)
-	return
-}
-
-func (__gen_s *ServerStubObject) Remove(call _gen_ipc.ServerCall) (err error) {
-	err = __gen_s.service.Remove(call)
-	return
-}
-
-func (__gen_s *ServerStubObject) Query(call _gen_ipc.ServerCall, Q query.Query) (err error) {
-	stream := &implObjectServiceQueryStream{writer: implObjectServiceQueryStreamSender{serverCall: call}}
-	err = __gen_s.service.Query(call, Q, stream)
 	return
 }
 

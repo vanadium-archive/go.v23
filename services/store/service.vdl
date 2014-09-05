@@ -7,39 +7,36 @@ import (
   "veyron2/services/mounttable"
 )
 
+// TODO(jyh): Decide how to pass per-operation options (like priority and
+// timeout info).
+
 // Statable provides the Stat method.
 type Statable interface {
 	// Stat returns information about the receiver.
 	Stat() (storage.Stat, error)
+
+	// Exists returns true iff the receiver is present in the Store.
+	Exists() (bool, error)
 }
 
 // Transactable provides the NewTransaction method.
 type Transactable interface {
 	// NewTransaction creates a transaction with the given options.  It returns
-	// the name of the transaction relative to the receiver's name.  The client must
-	// rebind to this new name to work with the receiver and its descendants as part
-	// of the transaction.
+	// the name of the transaction relative to the receiver's name.  The client
+	// must rebind to this new name to work with the receiver and its descendants
+	// as part of the transaction.
 	NewTransaction(Options []any) (string, error)
 }
 
-// Dir is a directory containing Objects and other Dirs.
-type Dir interface {
-	Transactable
-
-	// Exists returns true iff this Dir is present in the Store.
-	Exists() (bool, error)
-
-	// Make creates this directory and any ancestor directories that do not
-	// exist (i.e. equivalent to Unix's 'mkdir -p').  Make is idempotent.
-	Make() error
-
-	// Remove removes this directory and all of its children, recursively.
+type DirOrObject interface {
+	// Remove removes this Dir (and all its children, recursively) or Object.
 	Remove() error
-
-	Statable
 
 	// Query returns the sequence of elements that satisfy the query.
 	Query(Q query.Query) stream<_, QueryResult> error
+
+	Statable
+	Transactable
 
 	// Globbable is an API for finding all objects beneath this pattern that
 	// match a pattern.
@@ -54,16 +51,19 @@ type Dir interface {
 	watch.QueryWatcher
 }
 
-// ObjectService is the interface for a value in the store.
-type Object interface {
-	// TODO(jyh): Decide how to pass per-operation options (like priority and
-	// timeout info).
+type DirSpecific interface {
+	// Make creates this directory and any ancestor directories that do not
+	// exist (i.e. equivalent to Unix's 'mkdir -p').  Make is idempotent.
+	Make() error
+}
 
-	Transactable
+// Dir is a directory containing Objects and other Dirs.
+type Dir interface {
+	DirSpecific
+	DirOrObject
+}
 
-	// Exists returns true iff the Entry has a value.
-	Exists() (bool, error)
-
+type ObjectSpecific interface {
 	// Get returns the value for the Object.  The value returned is from the
 	// most recent mutation of the entry in the Transaction, or from the
 	// Transaction's snapshot if there is no mutation.
@@ -71,26 +71,12 @@ type Object interface {
 
 	// Put modifies the value of the Object.
 	Put(V any) (storage.Stat, error)
+}
 
-	// Remove removes the Object.
-	Remove() error
-
-	Statable
-
-	// Query returns the sequence of elements that satisfy the query.
-	Query(Q query.Query) stream<_, QueryResult> error
-
-	// Globbable is an API for finding all objects beneath this pattern that
-	// match a pattern.
-	mounttable.Globbable
-
-	// GlobWatcher is an API for watching updates to objects beneath this value
-	// that match a pattern.
-	watch.GlobWatcher
-
-	// QueryWatcher is an API for watching updates to objects beneath this
-	// value that satisfy a query.
-	watch.QueryWatcher
+// ObjectService is the interface for a value in the store.
+type Object interface {
+	ObjectSpecific
+	DirOrObject
 }
 
 type Transaction interface {

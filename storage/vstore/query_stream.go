@@ -11,8 +11,8 @@ import (
 )
 
 // newQueryStream constructs a storage.QueryStream from the given
-// store.ObjectQueryStream.
-func newQueryStream(stream store.ObjectQueryCall) storage.QueryStream {
+// store.DirOrObjectQueryCall.
+func newQueryStream(stream store.DirOrObjectQueryCall) storage.QueryStream {
 	return &queryStream{stream: &serverStream{stream: stream}}
 }
 
@@ -25,15 +25,16 @@ type internalQueryStream interface {
 	isInternalQueryStream()
 }
 
-// serverStream is a wrapper around store.ObjectQueryStream.  One serverStream
-// is shared by all of the nested streams that make up a set of query results.
+// serverStream is a wrapper around store.DirOrObjectQueryCall.  One
+// serverStream is shared by all of the nested streams that make up a set of
+// query results.
 //
 // serverStream supports rewinding the stream by one result.  This is
 // necessary because each nested storage.QueryStream has to read one result
 // too many to detect that there are no more results to read.
 type serverStream struct {
 	// stream contains the interleaved query results as sent by the server.
-	stream store.ObjectQueryCall
+	stream store.DirOrObjectQueryCall
 
 	// mu protects all fields below.
 	mu sync.Mutex
