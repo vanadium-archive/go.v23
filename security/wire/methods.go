@@ -93,6 +93,7 @@ func (c *Certificate) contentHash(issuerSignature security.Signature) []byte {
 	WriteBytes(h, tmp, c.PublicKey.XY)
 	binary.Write(h, binary.BigEndian, uint32(len(c.Caveats)))
 	for _, cav := range c.Caveats {
+		WriteString(h, tmp, string(cav.Service))
 		WriteBytes(h, tmp, cav.Bytes)
 	}
 	return h.Sum(nil)
