@@ -4,5 +4,5 @@ import "veyron2/vom"
 
 func init() {
 	vom.Register(Signature{})
-	vom.Register(ServiceCaveat{})
+	vom.Register(Caveat{})
 }

@@ -12,7 +12,6 @@ import (
 	"strings"
 
 	"veyron2/security"
-	"veyron2/vom"
 )
 
 var (
@@ -77,72 +76,6 @@ func (p *PublicKey) Encode(pk security.PublicKey) error {
 	return nil
 }
 
-// encode serializes a security.Caveat object and sets the resulting bytes on the Caveat object.
-func (c *Caveat) encode(caveat security.Caveat) error {
-	var b bytes.Buffer
-	if err := vom.NewEncoder(&b).Encode(caveat); err != nil {
-		return err
-	}
-	c.Bytes = b.Bytes()
-	return nil
-}
-
-// EncodeCaveats encodes the provided set of security.ServiceCaveat objects into Caveat objects.
-func EncodeCaveats(serviceCaveats []security.ServiceCaveat) ([]Caveat, error) {
-	caveats := make([]Caveat, len(serviceCaveats))
-	for i, c := range serviceCaveats {
-		caveats[i].Service = c.Service
-		if err := caveats[i].encode(c.Caveat); err != nil {
-			return nil, err
-		}
-	}
-	return caveats, nil
-}
-
-// Decode deserializes the contents of the Caveat object to obtain a security.Caveat object.
-func (c *Caveat) Decode() (security.Caveat, error) {
-	var caveat security.Caveat
-	if err := vom.NewDecoder(bytes.NewReader(c.Bytes)).Decode(&caveat); err != nil {
-		return nil, err
-	}
-	return caveat, nil
-}
-
-// DecodeThirdPartyCaveats decodes the provided Caveat objects into security.ThirdPartyCaveat
-// objects. The resulting objects are wrapped in security.ServiceCaveat objects according
-// to the services they are bound to.
-func DecodeThirdPartyCaveats(caveats []Caveat) (thirdPartyCaveats []security.ServiceCaveat) {
-	for _, wireCav := range caveats {
-		cav, err := wireCav.Decode()
-		if err != nil {
-			continue
-		}
-		tpCav, ok := cav.(security.ThirdPartyCaveat)
-		if !ok {
-			continue
-		}
-		thirdPartyCaveats = append(thirdPartyCaveats, security.ServiceCaveat{Service: wireCav.Service, Caveat: tpCav})
-	}
-	return
-}
-
-// Validate verifies the restriction embedded inside the security.Caveat if the label
-// is an empty string (indicating a universal caveat) or if the label matches the Name
-// of the LocalID present in the provided context.
-func (c *Caveat) Validate(ctx security.Context) error {
-	// TODO(ataly): Is checking that the localID matches the caveat's Service pattern
-	// the right choice here?
-	if c.Service != security.AllPrincipals &&
-		(ctx.LocalID() == nil || !c.Service.MatchedBy(ctx.LocalID().Names()...)) {
-		return nil
-	}
-	cav, err := c.Decode()
-	if err != nil {
-		return err
-	}
-	return cav.Validate(ctx)
-}
-
 // -- Helper methods on the wire format for the chain implementation of Identity --
 
 // contentHash returns a SHA256 hash of the contents of the certificate along with the
@@ -160,7 +93,6 @@ func (c *Certificate) contentHash(issuerSignature security.Signature) []byte {
 	WriteBytes(h, tmp, c.PublicKey.XY)
 	binary.Write(h, binary.BigEndian, uint32(len(c.Caveats)))
 	for _, cav := range c.Caveats {
-		WriteString(h, tmp, string(cav.Service))
 		WriteBytes(h, tmp, cav.Bytes)
 	}
 	return h.Sum(nil)
@@ -180,17 +112,6 @@ func (c *Certificate) Sign(signer security.Signer, pubID *ChainPublicID) error {
 
 func (c *Certificate) verify(issuerSignature security.Signature, key security.PublicKey) bool {
 	return c.Signature.Verify(key, c.contentHash(issuerSignature))
-}
-
-// ValidateCaveats verifies if all caveats present on the certificate validate with
-// respect to the provided context.
-func (c *Certificate) ValidateCaveats(ctx security.Context) error {
-	for _, cav := range c.Caveats {
-		if err := cav.Validate(ctx); err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 // Name returns the chained name obtained by joining all names along the ChainPublicID's

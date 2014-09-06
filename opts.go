@@ -120,9 +120,9 @@ const (
 	VCSecurityNone VCSecurityLevel = 1
 )
 
-// DischargeOpt wraps the security.ThirdPartyDischarge interface so that we can
+// DischargeOpt wraps the security.Discharge interface so that we can
 // add functions representing the option annotations.
-type DischargeOpt struct{ security.ThirdPartyDischarge }
+type DischargeOpt struct{ security.Discharge }
 
 func (DischargeOpt) IPCCallOpt() {}
 

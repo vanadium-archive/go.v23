@@ -49,7 +49,7 @@ func (*FakeServerCall) Method() string                                       { r
 func (*FakeServerCall) Name() string                                         { return "" }
 func (*FakeServerCall) Suffix() string                                       { return "" }
 func (*FakeServerCall) Label() (l security.Label)                            { return }
-func (*FakeServerCall) CaveatDischarges() security.CaveatDischargeMap        { return nil }
+func (*FakeServerCall) Discharges() map[string]security.Discharge            { return nil }
 func (ctx *FakeServerCall) LocalID() security.PublicID                       { return ctx.id }
 func (ctx *FakeServerCall) RemoteID() security.PublicID                      { return ctx.id }
 func (*FakeServerCall) Blessing() security.PublicID                          { return nil }

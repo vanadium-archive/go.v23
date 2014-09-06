@@ -61,10 +61,8 @@ type PublicID interface {
 	// PublicID.
 	Authorize(context Context) (PublicID, error)
 
-	// ThirdPartyCaveats returns the set of third-party restrictions on the scope of the
-	// identity. The returned restrictions are wrapped in ServiceCaveats according to the
-	// services they are bound to.
-	ThirdPartyCaveats() []ServiceCaveat
+	// ThirdPartyCaveats returns the set of third-party restrictions for this PublicID.
+	ThirdPartyCaveats() []ThirdPartyCaveat
 }
 
 // Signer is the interface for signing arbitrary length messages using private keys.
@@ -101,7 +99,7 @@ type PrivateID interface {
 	// Bless assumes that the blessee is in posession of the private key correponding
 	// to the blessee.PublicKey. Failure to ensure this property may result in
 	// impersonation attacks.
-	Bless(blessee PublicID, blessingName string, duration time.Duration, caveats []ServiceCaveat) (PublicID, error)
+	Bless(blessee PublicID, blessingName string, duration time.Duration, caveats []Caveat) (PublicID, error)
 
 	// Derive returns a new PrivateID that has the same secret component
 	// as a existing PrivateID but with the provided public component (PublicID).
@@ -118,79 +116,60 @@ type PrivateID interface {
 	//
 	// TODO(ataly, ashankar): Should we get rid of the duration argument
 	// and simply have a list of discharge caveats?
-	MintDischarge(caveat ThirdPartyCaveat, context Context, duration time.Duration, caveats []ServiceCaveat) (ThirdPartyDischarge, error)
+	MintDischarge(caveat ThirdPartyCaveat, context Context, duration time.Duration, caveats []Caveat) (Discharge, error)
 }
 
-// Caveat is the interface for restrictions on the scope of an identity. These
-// restrictions are validated by the remote end when a connection is made using the
-// identity.
-type Caveat interface {
-	// Validate tests the restrictions specified in the Caveat under the
-	// provided context, returning nil if they are satisfied or an error if
-	// not.
+// CaveatValidator is the interface for validating the restrictions specified
+// in a caveat.
+type CaveatValidator interface {
+	// Validate returns nil iff the restriction encapsulated in the
+	// corresponding caveat has been satisfied by the provided context.
 	Validate(context Context) error
 }
 
-// ServiceCaveat binds a caveat to a specific set of services.
-type ServiceCaveat struct {
-	// Service is a pattern identifying the services this caveat is bound to.
-	Service BlessingPattern
-
-	// Caveat represents the underlying restriction embedded in this ServiceCaveat.
-	Caveat
-}
-
-// ThirdPartyCaveatID is the string identifier for ThirdPartyCaveats and Discharges.
-type ThirdPartyCaveatID string
-
-// ThirdPartyCaveat is the interface for third-party restrictions on the scope
-// of an identity. A request made using an identity carrying such a third-party
-// restriction must be accompanied with a "discharge" for the restriction obtained
-// from the third-party.
+// ThirdPartyCaveat is a restriction on the applicability of a blessing that is
+// considered satisfied only when accompanied with a specific "discharge" from
+// the third-party specified in the caveat.
 type ThirdPartyCaveat interface {
-	Caveat
+	// ThidPartyCaveat implements CaveatValidator, where Validate
+	// succeeds iff a discharge for the caveat is available in the Context.
+	CaveatValidator
 
-	// ID returns a cryptographically unique identity for the caveat.
-	ID() ThirdPartyCaveatID
+	// ID returns a cryptographically unique identifier for the third-party
+	// caveat.
+	ID() string
 
-	// TODO(andreser, ashankar): require the discarger to have a specific
-	// identity so that the private information below is not exposed to
-	// anybody who can accept an ipc call.
-	// TODO(andreser, ashankar): provide a mechanism for validating blessings
-	// before adding them to the blessingstore so that blessers cannot track
-	// all activity of a blessee without the knowledge and consent of a
-	// blessee.
-
-	// Location returns a global Object name for the discharging third-party.
+	// Location returns the Veyron object name of the discharging third-party.
 	Location() string
 
-	// Requirements specifies what information is required by the discharger in
-	// order to issue a discharge for this caveat.
+	// Requirements lists the information that the third-party requires
+	// in order to issue a discharge.
 	Requirements() ThirdPartyRequirements
+
+	// TODO(andreser, ashankar): require the discharger to have a specific
+	// identity so that the private information below is not exposed to
+	// anybody who can accept an ipc call.
 }
 
-// ThirdPartyDischarge is the interface for discharges for third-party restrictions on PublicIDs.
-type ThirdPartyDischarge interface {
-	// CaveatID returns a cryptographically unique identity for the discharge.
-	// This identity must match the identity of the corresponding caveat.
-	CaveatID() ThirdPartyCaveatID
+// Discharge represents a "proof" required for satisfying a ThirdPartyCaveat.
+//
+// A discharge may have caveats of its own (including ThirdPartyCaveats) that
+// restrict the context in which the discharge is usable.
+type Discharge interface {
+	// ID returns the identifier for the ThirdPartyCaveat this discharge is
+	// associated with.
+	ID() string
 
-	// TODO(ashankar,ataly): Shouldn't this be "Caveats" and not ThirdPartyCaveats?
-	// ThirdPartyCaveats returns the set of third-party restrictions on the scope of the
-	// discharge. The returned restrictions are wrapped in ServiceCaveats according to the
-	// services they are bound to.
-	ThirdPartyCaveats() []ServiceCaveat
+	// ThirdPartyCaveats returns the set of third-party restrictions on the
+	// scope of the discharge.
+	ThirdPartyCaveats() []ThirdPartyCaveat
 }
 
 // ThirdPartyRequirements specifies the information required by the
-// third-party that will issue ThirdPartyDischarges.
+// third-party that will issue discharges.
 //
-// Based on these requirements, a DischargeMotivation should be provided
-// when requesting a ThirdPartyDischarge.
-//
-// Holders of a PublicID can inspect these requirements on all the ThirdPartyCaveats
-// on the PublicID and can decide against using the PublicID, since these requirements
-// provide information to the third-party that the holder may not be willing to share.
+// These requirements are typically used to construct a DischargeImpetus,
+// which will be sent to the third-party.
 type ThirdPartyRequirements struct {
 	// The identity of the destination server of an ipc call.
 	ReportServer bool
@@ -200,22 +179,18 @@ type ThirdPartyRequirements struct {
 	ReportArguments bool
 }
 
-// CaveatDischargeMap is map from third-party caveat identities to the corresponding
-// discharges.
-type CaveatDischargeMap map[ThirdPartyCaveatID]ThirdPartyDischarge
-
 // Context defines the state available for authorizing a principal.
 type Context interface {
 	// Method returns the method being invoked.
 	Method() string
-	// Name returns the object name on which the method is being invoked.
+	// Name returns the Veyron object name on which the method is being invoked.
 	Name() string
-	// Suffix returns the object name suffix for the request.
+	// Suffix returns the Veyron object name suffix for the request.
 	Suffix() string
 	// Label returns the method's security label.
 	Label() Label
-	// CaveatDischarges returns a map of Discharges indexed by their CaveatIDs.
-	CaveatDischarges() CaveatDischargeMap
+	// CaveatDischarges returns a map of Discharges indexed by their IDs.
+	Discharges() map[string]Discharge
 	// LocalID returns the PublicID of the principal at the local end of the request.
 	LocalID() PublicID
 	// RemoteID returns the PublicID of the principal at the remote end of the request.

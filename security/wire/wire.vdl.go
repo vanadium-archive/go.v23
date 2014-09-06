@@ -28,7 +28,8 @@ type PublicKey struct {
 	XY []byte
 }
 
-// Caveat represents a veyron2/security.ServiceCaveat.
+// TODO(ataly, ashankar): Get rid of this Caveat type and use security.Caveat instead.
+// Caveat represents a veyron2/security.Caveat.
 type Caveat struct {
 	// Service is a pattern identifying the services that the caveat encoded in Bytes
 	// is bound to.

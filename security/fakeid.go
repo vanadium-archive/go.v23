@@ -46,7 +46,7 @@ func (id fakeID) Names() []string {
 
 func (fakeID) PublicKey() PublicKey                           { return NewECDSAPublicKey(&fakeKey.PublicKey) }
 func (id fakeID) Authorize(context Context) (PublicID, error) { return id, nil }
-func (fakeID) ThirdPartyCaveats() []ServiceCaveat             { return nil }
+func (fakeID) ThirdPartyCaveats() []ThirdPartyCaveat          { return nil }
 func (id fakeID) PublicID() PublicID                          { return id }
 func (fakeID) Sign(message []byte) (signature Signature, err error) {
 	r, s, err := ecdsa.Sign(rand.Reader, &fakeKey, message)
@@ -54,7 +54,7 @@ func (fakeID) Sign(message []byte) (signature Signature, err error) {
 	return
 }
 
-func (id fakeID) Bless(blessee PublicID, blessingName string, duration time.Duration, caveats []ServiceCaveat) (PublicID, error) {
+func (id fakeID) Bless(blessee PublicID, blessingName string, duration time.Duration, caveats []Caveat) (PublicID, error) {
 	return fakeID(string(id) + ChainSeparator + blessingName), nil
 }
 func (id fakeID) Derive(pub PublicID) (PrivateID, error) {
@@ -65,7 +65,7 @@ func (id fakeID) Derive(pub PublicID) (PrivateID, error) {
 	return fakePub, nil
 }
 
-func (id fakeID) MintDischarge(caveat ThirdPartyCaveat, ctx Context, duration time.Duration, caveats []ServiceCaveat) (ThirdPartyDischarge, error) {
+func (id fakeID) MintDischarge(caveat ThirdPartyCaveat, ctx Context, duration time.Duration, caveats []Caveat) (Discharge, error) {
 	return nil, fmt.Errorf("discharge cannot be constructed for ThirdPartyCaveat of type %T from PrivateID of type %T", caveat, id)
 }
 
