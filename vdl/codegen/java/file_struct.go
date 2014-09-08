@@ -21,6 +21,7 @@ public final class {{.Name}} implements android.os.Parcelable, java.io.Serializa
 
     {{/* Field declarations */}}
     {{ range $field := .Fields }}
+      @com.google.gson.annotations.SerializedName("{{$field.Name}}")
       private {{$field.Type}} {{$field.LowercaseName}};
     {{ end }}
 
