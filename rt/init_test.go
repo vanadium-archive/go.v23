@@ -1,6 +1,7 @@
 package rt_test
 
 import (
+	"net"
 	"testing"
 
 	"veyron2"
@@ -24,6 +25,12 @@ func (mp *myprofile) Name() string {
 
 func (mp *myprofile) Runtime() string {
 	return ""
+}
+
+func (mp *myprofile) AddressChooser() veyron2.AddressChooser {
+	return func(network string, addrs []net.Addr) (net.Addr, error) {
+		return &net.IPAddr{IP: net.ParseIP("127.0.0.1")}, nil
+	}
 }
 
 func (mp *myprofile) Platform() *veyron2.Platform {
