@@ -696,7 +696,7 @@ func (__gen_s *ServerStubQueryWatcher) Signature(call _gen_ipc.ServerCall) (_gen
 			[]_gen_wiretype.FieldType{
 				_gen_wiretype.FieldType{Type: 0x3, Name: "Stmt"},
 			},
-			"veyron2/query.Query", []string(nil)},
+			"veyron.io/store/veyron2/query.Query", []string(nil)},
 		_gen_wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, _gen_wiretype.SliceType{Elem: 0x42, Name: "veyron2/services/watch/types.ResumeMarker", Tags: []string(nil)}, _gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
 				_gen_wiretype.FieldType{Type: 0x41, Name: "Query"},

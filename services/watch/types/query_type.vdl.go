@@ -5,7 +5,7 @@
 package types
 
 import (
-	"veyron2/query"
+	"veyron.io/store/veyron2/query"
 )
 
 // QueryRequest specifies which entities should be watched and, optionally,

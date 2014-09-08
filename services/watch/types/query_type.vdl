@@ -1,7 +1,7 @@
 // Package types defines the types used by the watch interface.
 package types
 
-import "veyron2/query"
+import "veyron.io/store/veyron2/query"
 
 // QueryRequest specifies which entities should be watched and, optionally,
 // how to resume from a previous Watch call.
