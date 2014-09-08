@@ -140,6 +140,28 @@ func (p *Publisher) ForkStream(name string, ch chan<- Setting) (*Stream, error) 
 	return &Stream{Name: name, Description: f.desc, Latest: r}, nil
 }
 
+// TODO(cnicolaou): document and add tests for this.
+func (p *Publisher) CloseFork(name string, ch chan<- Setting) error {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if p.shutdown {
+		return fmt.Errorf("stream %q has been shut down", name)
+	}
+	f := p.streams[name]
+	if f == nil {
+		return fmt.Errorf("stream %q doesn't exist", name)
+	}
+	f.Lock()
+	defer f.Unlock()
+	for i, v := range f.outs {
+		if v == ch {
+			f.outs = append(f.outs[0:i], f.outs[i+1:]...)
+			break
+		}
+	}
+	return nil
+}
+
 // Shutdown initiates the process of stopping the operation of the Publisher.
 // All of the channels passed to CreateStream must be closed by their owner
 // to ensure that all goroutines are garbage collected.
@@ -185,7 +207,6 @@ func (f *fork) flow(stop chan struct{}) {
 				// We may well block here.
 				o <- val
 			}
-
 		}
 	}
 }

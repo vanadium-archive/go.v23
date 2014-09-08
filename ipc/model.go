@@ -1,6 +1,9 @@
 package ipc
 
 import (
+	"net"
+
+	"veyron2/config"
 	"veyron2/context"
 	"veyron2/naming"
 	"veyron2/security"
@@ -58,6 +61,53 @@ type Stream interface {
 	Recv(itemptr interface{}) error
 }
 
+// NewProtocolSetting creates the Setting to be sent to RoamingListen on startup
+// to specify the protocol that it should use for listening on.
+func NewProtocolSetting(s string) config.Setting {
+	return config.NewString(ProtocolSetting, ProtocolSettingDesc, s)
+}
+
+// NewListenSpecSetting creates the Setting to be sent to RoamingListen on startup
+// to specify the address that it should listen on.
+func NewListenSpecSetting(s config.IPHostPortFlag) config.Setting {
+	return config.NewIPHostPort(ListenSpecSetting, ListenSpecSettingDesc, s)
+}
+
+// NewInitialAddrsSetting creates the Setting to be sent to RoamingListen on startup
+// to specify the initial set of host addresses that it must choose from for
+// use when creating Endpoints that are published to the mount table.
+func NewInitialAddrsSetting(a []net.Addr) config.Setting {
+	return config.NewAddrSlice(InitialAddrsSetting, InitialAddrsSettingDesc, a)
+}
+
+// NewAddAddrsSetting creates the Setting to be sent to RoamingListen to inform
+// it of new addresses that have become available since the last change. It will
+// use this information to update any Endpoints it has published to the mount
+// table.
+func NewAddAddrsSetting(a []net.Addr) config.Setting {
+	return config.NewAddrSlice(NewAddrsSetting, NewAddrsSettingDesc, a)
+}
+
+// NewRmAddrsSetting creates the Setting to be sent to RoamingListen to inform
+// it of new addresses that are no longer available. It will use this information
+// to update any Endpoints it has published to the mount table.
+func NewRmAddrsSetting(a []net.Addr) config.Setting {
+	return config.NewAddrSlice(RmAddrsSetting, RmAddrsSettingDesc, a)
+}
+
+const (
+	ProtocolSetting         = "Protocol"
+	ProtocolSettingDesc     = "Protocol for server to listen with"
+	ListenSpecSetting       = "ListenSpec"
+	ListenSpecSettingDesc   = "host:port spec for server to listen on"
+	InitialAddrsSetting     = "Addrs"
+	InitialAddrsSettingDesc = "Initial addresses to publish on"
+	NewAddrsSetting         = "NewAddrs"
+	NewAddrsSettingDesc     = "New Addresses discovered since last change"
+	RmAddrsSetting          = "RmAddrs"
+	RmAddrsSettingDesc      = "Addresses that have been removed since last change"
+)
+
 // Server defines the interface for managing a collection of services.
 type Server interface {
 	// Listen creates a listening network endpoint for the Server.  The
@@ -71,6 +121,31 @@ type Server interface {
 	// The returned endpoint represents an address that will be published
 	// with the mount table when Publish (below) is called.
 	Listen(protocol, address string) (naming.Endpoint, error)
+
+	// RoamingListen configures the Server to dynamically change the addresses
+	// it is listening on and the addresses that is publishes to the mount table
+	// as its network configuration changes due to roaming. It does so by reading
+	// config.Setting values from a config.Publisher stream called 'roaming'.
+	// By default it will use the Publisher associated with the runtime
+	// used to create the server. This may be overridden by creating
+	// a server with a veyron2.RoamingPublisherOpt to specify an alternate
+	// config.Publisher and stream name on that publisher.
+	// The set of expected Settings is defined by the New<setting>Functions above.
+	// This dynamic behaviour is disabled if the ListenSpecSetting read
+	// from the channel specifies a loopback address to listen on.
+	//
+	// TODO(cnicolaou): at this point Listen could be retired except for its
+	// use to create a proxy connection. I propose changing Listen to 'Proxy'
+	// rather than keeping the general listen behaviour above. This would
+	// require all servers to import and use the dhcp profile and for the
+	// 'generic' profile (most often used in testing) to implement a
+	// config.Publisher with a fixed loopback address configured, which
+	// may complicate some tests. I propose to evaluate this in a followup
+	// CL.
+	//
+	// See the New<setting>Setting functions for the set of config.Setting
+	// values that it expects to be sent over the supplied Publisher.
+	RoamingListen() (naming.Endpoint, error)
 
 	// Serve performs two related functions:
 	// 1. it publishes the services available at the network addresses

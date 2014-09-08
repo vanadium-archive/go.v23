@@ -62,7 +62,7 @@ func NewAddr(name, description string, value net.Addr) Setting {
 	return &impl{name, description, value}
 }
 
-func NewIP(name, description string, value net.IP) Setting {
+func NewAddrSlice(name, description string, value []net.Addr) Setting {
 	return &impl{name, description, value}
 }
 
@@ -103,9 +103,10 @@ func (t TCPProtocolFlag) String() string {
 // address (v4 or v6). If a hostname is used and it resolves to multiple IP
 // addresses then all of those addresses are stored in IPHostPort.
 type IPHostPortFlag struct {
-	Host string
-	IP   []net.IP
-	Port string
+	Address string
+	Host    string
+	IP      []*net.IPAddr
+	Port    string
 }
 
 // Implements flag.Value.Get
@@ -115,6 +116,7 @@ func (ip IPHostPortFlag) Get() interface{} {
 
 // Implements flag.Value.Set
 func (ip *IPHostPortFlag) Set(s string) error {
+	ip.Address = s
 	host, port, err := net.SplitHostPort(s)
 	if err != nil {
 		// no port number in s.
@@ -135,10 +137,12 @@ func (ip *IPHostPortFlag) Set(s string) error {
 			if err != nil {
 				return fmt.Errorf("%s is neither an IP address nor a host name:%s", host, err)
 			}
-			ip.IP = addrs
+			for _, a := range addrs {
+				ip.IP = append(ip.IP, &net.IPAddr{IP: a})
+			}
 			ip.Host = host
 		} else {
-			ip.IP = []net.IP{addr}
+			ip.IP = []*net.IPAddr{{IP: addr}}
 		}
 		return nil
 	}

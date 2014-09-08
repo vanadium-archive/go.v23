@@ -12,6 +12,7 @@ package veyron2
 
 import (
 	"fmt"
+	"net"
 
 	"veyron2/config"
 	"veyron2/context"
@@ -119,18 +120,15 @@ func (p *Platform) String() string {
 //   the implementations of how to obtain that information (e.g. dhcp,
 //   network configuration differs).
 //
-// TODO(cnicolaou): define the common set of setting streams.
-//
 // Profiles range from the generic to the very specific (e.g. "linux" or
 // "my-sprinkler-controller-v2". Applications should, in general, use
 // as generic a Profile as possbile.
-// Profiles are selecting in one of two principal ways:
-// - inserting a dependency on the appropriate package in a main package
-//   e.g. import _ "veyron/profiles/linux"
-// - expliciting registering a Profile (veyron2/rt.RegisterProfile) before
-//   initializing the Runtime (i.e. creating an instance of the
-//   Runtime interface below via the veryon2/rt package).
-//   e.g. rt.RegisterProfile(myprofile, "") ; rt.Init()
+// Profiles are registered using veyron2/rt.RegisterProfile and subsequent
+// registrations override prior ones. Profile implementations will generally
+// call RegisterProfile in their init functions and hence importing a
+// profile will be sufficient to register it. Applications are also free
+// to explicitly register profile directly by calling RegisterProfile themselves
+// prior to calling rt.Init.
 //
 // This scheme allows applications to use a pre-supplied Profile as well
 // as for developers to create their own Profiles (to represent their
@@ -146,18 +144,31 @@ type Profile interface {
 	Name() string
 
 	// Runtime returns the name of the Runtime that this Profile requires,
-	// or "" to work with any runtime.
+	// or "" to indicate that it will work with any runtime.
 	Runtime() string
 
 	// Description returns the Description of the Platform.
 	Platform() *Platform
 
+	// AddressChooser returns a function that can be used to
+	// choose the preferred address to publish with the mount table
+	// when one is not otherwise specified.
+	// The runtime implementation must pass this option to any new
+	// IPC servers it is asked to create.
+	AddressChooser() AddressChooser
+
 	// Init is called by the Runtime once it has been initialized and
-	// command line flags have been parsed.
+	// command line flags have been parsed. Init will be called once and
+	// only once by the Runtime.
+	// TODO(cnicolaou): Init should return an error
 	Init(rt Runtime, p *config.Publisher)
 
+	// TODO(cnicolaou): provide a Cleanup method for the profile.
 	String() string
 }
+
+// AddressChooser returns the address it prefers out of the set passed to it.
+type AddressChooser func(network string, addrs []net.Addr) (net.Addr, error)
 
 // Runtime is the interface that concrete Veyron implementations must
 // implement.

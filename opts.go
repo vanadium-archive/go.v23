@@ -1,7 +1,7 @@
 package veyron2
 
 import (
-	"net"
+	"veyron2/config"
 	"veyron2/ipc/stream"
 	"veyron2/naming"
 	"veyron2/security"
@@ -173,16 +173,24 @@ type HTTPDebugOpt string
 
 func (HTTPDebugOpt) ROpt() {}
 
-// TODO(cnicolaou): this will be replaced by a cleaner API.
 // Create a server that will be used to serve a MountTable. This server
 // cannot be used for any other purpose.
 type ServesMountTableOpt bool
 
 func (ServesMountTableOpt) IPCServerOpt() {}
 
-// PreferredAddressOpt is a function that can be used to select
+// AddressChooserOpt is a function that can be used to select
 // the preferred address to use for publishing to the mount table when
 // the default policy is inappropriate.
-type PreferredAddressOpt func(network string, addrs []net.Addr) (net.Addr, error)
+type AddressChooserOpt struct{ AddressChooser }
 
-func (PreferredAddressOpt) IPCServerOpt() {}
+func (AddressChooserOpt) IPCServerOpt() {}
+
+// RoamingPublisherOpt wraps a publisher name and associated stream to be used
+// for receiving dynamically changing network settings over.
+type RoamingPublisherOpt struct {
+	Publisher  *config.Publisher
+	StreamName string
+}
+
+func (RoamingPublisherOpt) IPCServerOpt() {}

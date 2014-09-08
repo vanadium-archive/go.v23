@@ -313,8 +313,8 @@ func TestTCPFlag(t *testing.T) {
 }
 
 func TestIPHostPortFlag(t *testing.T) {
-	lh := []net.IP{net.ParseIP("127.0.0.1")}
-	ip6 := []net.IP{net.ParseIP("FE80:0000:0000:0000:0202:B3FF:FE1E:8329")}
+	lh := []*net.IPAddr{{IP: net.ParseIP("127.0.0.1")}}
+	ip6 := []*net.IPAddr{{IP: net.ParseIP("FE80:0000:0000:0000:0202:B3FF:FE1E:8329")}}
 	cases := []struct {
 		input string
 		want  config.IPHostPortFlag
@@ -330,6 +330,7 @@ func TestIPHostPortFlag(t *testing.T) {
 	}
 	for _, c := range cases {
 		got, want := &config.IPHostPortFlag{}, &c.want
+		c.want.Address = c.input
 		if err := got.Set(c.input); err != nil || !reflect.DeepEqual(got, want) {
 			if err != nil {
 				t.Errorf("%q: unexpected error %s", c.input, err)
