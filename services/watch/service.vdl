@@ -108,10 +108,3 @@ type GlobWatcher interface {
   // WatchGlob returns a stream of changes that match a pattern.
   WatchGlob(Req types.GlobRequest) stream<_, types.Change> error
 }
-
-// QueryWatcher allows a client to receive updates for changes to objects
-// that match a query.  See the package comments for details.
-type QueryWatcher interface {
-  // WatchQuery returns a stream of changes that satisy a query.
-  WatchQuery(Req types.QueryRequest) stream<_, types.Change> error
-}
