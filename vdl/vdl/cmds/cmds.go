@@ -85,8 +85,8 @@ generate code.  This is useful to sanity-check that your VDL files are valid.
 	ArgsLong: pkgDesc,
 }
 
-var cmdGen = &cmdline.Command{
-	Run:   runHelper(runGen),
+var cmdGenerate = &cmdline.Command{
+	Run:   runHelper(runGenerate),
 	Name:  "generate",
 	Short: "Compile packages and dependencies, and generate code",
 	Long: `
@@ -97,16 +97,29 @@ in the specified languages.
 	ArgsLong: pkgDesc,
 }
 
-var cmdListInfo = &cmdline.Command{
-	Run:   runHelper(runListInfo),
-	Name:  "listinfo",
+var cmdAudit = &cmdline.Command{
+	Run:   runHelper(runAudit),
+	Name:  "audit",
+	Short: "Check if any packages are stale and need generation",
+	Long: `
+Audit runs the same logic as generate, but doesn't write out generated files.
+Returns a 0 exit code if all packages are up-to-date, otherwise returns a
+non-0 exit code indicating some packages need generation.
+`,
+	ArgsName: "<packages>",
+	ArgsLong: pkgDesc,
+}
+
+var cmdList = &cmdline.Command{
+	Run:   runHelper(runList),
+	Name:  "list",
 	Short: "List package and dependency info in transitive order",
 	Long: `
-Listinfo returns information about packages and their transitive dependencies,
-in transitive order.  This is the same order the generate and compile commands
-use for processing.  If "vdl listinfo A" is run and A depends on B, which
-depends on C, the returned order will be C, B, A.  If multiple packages are
-specified the ordering is over all combined dependencies.
+List returns information about packages and their transitive dependencies, in
+transitive order.  This is the same order the generate and compile commands use
+for processing.  If "vdl list A" is run and A depends on B, which depends on C,
+the returned order will be C, B, A.  If multiple packages are specified the
+ordering is over all combined dependencies.
 
 Reminder: cyclic dependencies between packages are not allowed.  Cyclic
 dependencies between VDL files within the same package are also not allowed.
@@ -259,7 +272,7 @@ func Root() *cmdline.Command {
 The vdl tool manages veyron VDL source code.  It's similar to the go tool used
 for managing Go source code.
 `,
-		Children: []*cmdline.Command{cmdGen, cmdCompile, cmdListInfo},
+		Children: []*cmdline.Command{cmdGenerate, cmdCompile, cmdAudit, cmdList},
 	}
 
 	// Common flags for the tool itself, applicable to all commands.
@@ -272,12 +285,12 @@ for managing Go source code.
 	cmdCompile.Flags.BoolVar(&optCompileStatus, "status", true, "Show package names while we compile")
 
 	// Options for generate.
-	cmdGen.Flags.Var(&optGenLangs, "lang", "Comma-separated list of languages to generate, currently supporting "+genLangAll.String())
-	cmdGen.Flags.BoolVar(&optGenGoFmt, "go_fmt", true, "Format generated Go code")
-	cmdGen.Flags.BoolVar(&optGenStatus, "status", true, "Show package names while we compile")
-	cmdGen.Flags.StringVar(&optGenJavaPkgPrefix, "java_pkg_prefix", "com",
+	cmdGenerate.Flags.Var(&optGenLangs, "lang", "Comma-separated list of languages to generate, currently supporting "+genLangAll.String())
+	cmdGenerate.Flags.BoolVar(&optGenGoFmt, "go_fmt", true, "Format generated Go code")
+	cmdGenerate.Flags.BoolVar(&optGenStatus, "status", true, "Show package names as they are updated")
+	cmdGenerate.Flags.StringVar(&optGenJavaPkgPrefix, "java_pkg_prefix", "com",
 		"Package prefix that will be added to the VDL package prefixes when generating Java files. ")
-	cmdGen.Flags.Var(&optGenGoOutDir, "go_out_dir",
+	cmdGenerate.Flags.Var(&optGenGoOutDir, "go_out_dir",
 		`Go output directory.  There are three modes:
          ""                     : Generate output in-place in the source tree
          "dir"                  : Generate output rooted at dir
@@ -300,10 +313,12 @@ for managing Go source code.
       just before the package path, and dst is the replacement for src.
       Use commas to separate multiple rules; the first rule matching src is
       used.  The special dst SKIP indicates all matching packages are skipped.`)
-	cmdGen.Flags.Var(&optGenJavaOutDir, "java_out_dir",
+	cmdGenerate.Flags.Var(&optGenJavaOutDir, "java_out_dir",
 		"Same semantics as --go_out_dir but applies to java code generation.")
-	cmdGen.Flags.Var(&optGenJavascriptOutDir, "js_out_dir",
+	cmdGenerate.Flags.Var(&optGenJavascriptOutDir, "js_out_dir",
 		"Same semantics as --go_out_dir but applies to js code generation.")
+	// Options for audit are identical to generate.
+	cmdAudit.Flags = cmdGenerate.Flags
 	return vdlcmd
 }
 
@@ -316,7 +331,23 @@ func runCompile(targets []*build.Package, env *compile.Env) {
 	}
 }
 
-func runGen(targets []*build.Package, env *compile.Env) {
+func runGenerate(targets []*build.Package, env *compile.Env) {
+	gen(false, targets, env)
+}
+
+func runAudit(targets []*build.Package, env *compile.Env) {
+	if gen(true, targets, env) && env.Errors.IsEmpty() {
+		// Some packages are stale, and there were no errors; return an arbitrary
+		// non-0 exit code.  Errors are handled in runHelper, as usual.
+		os.Exit(10)
+	}
+}
+
+// gen generates the given targets with env.  If audit is true, only checks
+// whether any packages are stale; otherwise files will actually be written out.
+// Returns true if any packages are stale.
+func gen(audit bool, targets []*build.Package, env *compile.Env) bool {
+	anychanged := false
 	for _, target := range targets {
 		pkg := build.CompilePackage(target, env)
 		if pkg == nil {
@@ -324,11 +355,11 @@ func runGen(targets []*build.Package, env *compile.Env) {
 			if env.Errors.IsEmpty() {
 				env.Errors.Errorf("%s: internal error (compiled into nil package)", target.Path)
 			}
-			return
+			return true
 		}
 		// TODO(toddw): Skip code generation if the semantic contents of the
 		// generated file haven't changed.
-		changed := false
+		pkgchanged := false
 		for _, gl := range optGenLangs {
 			switch gl {
 			case genLangGo:
@@ -342,8 +373,8 @@ func runGen(targets []*build.Package, env *compile.Env) {
 				for _, file := range pkg.Files {
 					opts := golang.Opts{Fmt: optGenGoFmt}
 					data := golang.Generate(file, env, opts)
-					if writeFile(data, dir, file.BaseName+".go", env) {
-						changed = true
+					if writeFile(audit, data, dir, file.BaseName+".go", env) {
+						pkgchanged = true
 					}
 				}
 			case genLangJava:
@@ -358,8 +389,8 @@ func runGen(targets []*build.Package, env *compile.Env) {
 				}
 				for _, file := range files {
 					fileDir := filepath.Join(dir, file.Dir)
-					if writeFile(file.Data, fileDir, file.Name, env) {
-						changed = true
+					if writeFile(audit, file.Data, fileDir, file.Name, env) {
+						pkgchanged = true
 					}
 				}
 			case genLangJavascript:
@@ -371,38 +402,43 @@ func runGen(targets []*build.Package, env *compile.Env) {
 					continue
 				}
 				data := javascript.Generate(pkg, env)
-				if writeFile(data, dir, pkg.Name+".js", env) {
-					changed = true
+				if writeFile(audit, data, dir, pkg.Name+".js", env) {
+					pkgchanged = true
 				}
 			default:
 				env.Errors.Errorf("Generating code for language %v isn't supported", gl)
 			}
 		}
-		if changed && optGenStatus {
-			fmt.Println(pkg.Path)
+		if pkgchanged {
+			anychanged = true
+			if optGenStatus {
+				fmt.Println(pkg.Path)
+			}
 		}
 	}
+	return anychanged
 }
 
 // writeFile writes data into the standard location for file, using the given
-// suffix.  Errors are reported via env.  Returns true iff a new file was
-// written; returns false if the file already exists with the given data.
-func writeFile(data []byte, dirName, baseName string, env *compile.Env) bool {
-	// Create containing directory, if it doesn't already exist.
-	if err := os.MkdirAll(dirName, os.FileMode(0777)); err != nil {
-		env.Errors.Errorf("Couldn't create directory %s: %v", dirName, err)
-		return false
-	}
+// suffix.  Errors are reported via env.  Returns true iff the file doesn't
+// already exist with the given data.
+func writeFile(audit bool, data []byte, dirName, baseName string, env *compile.Env) bool {
 	dstName := filepath.Join(dirName, baseName)
 	// Don't change anything if old and new are the same.
 	if oldData, err := ioutil.ReadFile(dstName); err == nil && bytes.Equal(oldData, data) {
 		return false
 	}
-	if err := ioutil.WriteFile(dstName, data, os.FileMode(0666)); err != nil {
-		env.Errors.Errorf("Couldn't write file %s: %v", dstName, err)
-		return false
+	if !audit {
+		// Create containing directory, if it doesn't already exist.
+		if err := os.MkdirAll(dirName, os.FileMode(0777)); err != nil {
+			env.Errors.Errorf("Couldn't create directory %s: %v", dirName, err)
+			return true
+		}
+		if err := ioutil.WriteFile(dstName, data, os.FileMode(0666)); err != nil {
+			env.Errors.Errorf("Couldn't write file %s: %v", dstName, err)
+			return true
+		}
 	}
-
 	return true
 }
 
@@ -435,7 +471,7 @@ func xlateOutDir(pkg *build.Package, outdir genOutDir, pkgPrefix string) (string
 	return "", fmt.Errorf("package prefix %q doesn't match translation rules %q", dir, outdir)
 }
 
-func runListInfo(targets []*build.Package, env *compile.Env) {
+func runList(targets []*build.Package, env *compile.Env) {
 	for tx, target := range targets {
 		num := fmt.Sprintf("%d", tx)
 		fmt.Println(num, strings.Repeat("=", 80-len(num)))
