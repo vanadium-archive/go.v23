@@ -15,8 +15,4 @@ func NewCaveat(validator CaveatValidator) (Caveat, error) {
 	return Caveat{buf.Bytes()}, nil
 }
 
-func (c Caveat) Bytes() []byte {
-	return c.ValidatorVOM
-}
-
 // TODO(ataly, ashankar): Define UnconstrainedDelegationCaveat.

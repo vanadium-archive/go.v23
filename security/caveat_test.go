@@ -20,7 +20,7 @@ func TestNewCaveat(t *testing.T) {
 	}
 
 	var decodedValidator interface{}
-	if err := vom.NewDecoder(bytes.NewReader(caveat.Bytes())).Decode(&decodedValidator); err != nil {
+	if err := vom.NewDecoder(bytes.NewReader(caveat.ValidatorVOM)).Decode(&decodedValidator); err != nil {
 		t.Fatalf("Could not decode caveat Bytes: %s", err)
 	}
 	if validator != decodedValidator {
