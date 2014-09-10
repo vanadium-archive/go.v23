@@ -2,8 +2,6 @@
 package java
 
 import (
-	"path"
-
 	"veyron2/vdl"
 	"veyron2/vdl/compile"
 )
@@ -11,17 +9,22 @@ import (
 // javaGenImplDir is the directory in which implementation details for the generated interfaces should be put.
 const javaGenImplDir = "gen_impl"
 
-// javaGenPkgPrefix is the path prefix to be added to generated VDL package paths.
-var javaGenPkgPrefix string
+// pkgPathXlator is the function used to translate a VDL package path
+// into a Java package path.  If nil, no translation takes place.
+var pkgPathXlator func(path string) string
 
-// SetJavaGenPkgPrefix sets the prefix that will be added to generated VDL package paths.
-func SetJavaGenPkgPrefix(prefix string) {
-	javaGenPkgPrefix = prefix
+// SetPkgPathXlator sets the function used to translate a VDL package
+// path into a Java package path.
+func SetPkgPathXlator(xlator func(path string) string) {
+	pkgPathXlator = xlator
 }
 
-// javaGenPkgPath returns the Java package path given the Go package path.
-func javaGenPkgPath(goPkgPath string) string {
-	return path.Join(javaGenPkgPrefix, goPkgPath)
+// javaGenPkgPath returns the Java package path given the VDL package path.
+func javaGenPkgPath(vdlPkgPath string) string {
+	if pkgPathXlator == nil {
+		return vdlPkgPath
+	}
+	return pkgPathXlator(vdlPkgPath)
 }
 
 // JavaFileInfo stores the name and contents of the generated Java file.

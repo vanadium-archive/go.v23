@@ -27,7 +27,7 @@ func allEmbeddedIfaces(iface *compile.Interface) (ret []*compile.Interface) {
 // interfaceFullyQualifiedName outputs the fully qualified name of an interface
 // e.g. "com.a.B"
 func interfaceFullyQualifiedName(iface *compile.Interface) string {
-	return path.Join(javaGenPkgPrefix, iface.File.Package.Path, iface.Name)
+	return path.Join(javaGenPkgPath(iface.File.Package.Path), iface.Name)
 }
 
 // javaExtendsStr creates an extends clause for an interface

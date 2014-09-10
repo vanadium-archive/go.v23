@@ -184,11 +184,11 @@ func (gls *genLangs) Set(value string) error {
 
 // genOutDir has three modes:
 //   1) If dir is non-empty, we use it as the out dir.
-//   2) If xlate is non-empty, we translate using the xlate rules.
+//   2) If xlate.rules is non-empty, we translate using the xlate rules.
 //   3) If everything is empty, we generate in-place.
 type genOutDir struct {
 	dir   string
-	xlate []xlateSrcDst
+	xlate xlateRules
 }
 
 // xlateSrcDst specifies a translation rule, where src must match the suffix of
@@ -199,37 +199,43 @@ type xlateSrcDst struct {
 	src, dst string
 }
 
-func (x *genOutDir) String() string {
-	switch {
-	case x.dir != "":
-		return x.dir
-	case len(x.xlate) > 0:
-		s := ""
-		for i, srcdst := range x.xlate {
-			if i > 0 {
-				s += ","
-			}
-			s += srcdst.src + "->" + srcdst.dst
+// xlateRules specifies a collection of translation rules.
+type xlateRules []xlateSrcDst
+
+func (x *xlateRules) String() (ret string) {
+	for _, srcdst := range *x {
+		if len(ret) > 0 {
+			ret += ","
 		}
-		return s
+		ret += srcdst.src + "->" + srcdst.dst
 	}
-	return ""
+	return
+}
+
+func (x *xlateRules) Set(value string) error {
+	for _, rule := range strings.Split(value, ",") {
+		srcdst := strings.Split(rule, "->")
+		if len(srcdst) != 2 {
+			return fmt.Errorf("invalid out dir xlate rule %q (not src->dst format)", rule)
+		}
+		*x = append(*x, xlateSrcDst{srcdst[0], srcdst[1]})
+	}
+	return nil
+}
+
+func (x *genOutDir) String() string {
+	if x.dir != "" {
+		return x.dir
+	}
+	return x.xlate.String()
 }
 
 func (x *genOutDir) Set(value string) error {
 	if strings.Contains(value, "->") {
-		for _, rule := range strings.Split(value, ",") {
-			srcdst := strings.Split(rule, "->")
-			if len(srcdst) != 2 {
-				return fmt.Errorf("invalid out dir xlate rule %q (not src->dst format)", rule)
-			}
-			x.xlate = append(x.xlate, xlateSrcDst{srcdst[0], srcdst[1]})
-		}
 		x.dir = ""
-		return nil
+		return x.xlate.Set(value)
 	}
 	x.dir = value
-	x.xlate = nil
 	return nil
 }
 
@@ -246,21 +252,24 @@ var (
 	optGenGoFmt      bool
 	optGenGoOutDir   = genOutDir{}
 	optGenJavaOutDir = genOutDir{
-		xlate: []xlateSrcDst{
+		xlate: xlateRules{
 			{"veyron/go/src", "veyron.new/java/src/main/java"},
 			{"roadmap/go/src", "veyron.new/java/src/main/java"},
 			{"third_party/go/src", "SKIP"},
 		},
 	}
 	optGenJavascriptOutDir = genOutDir{
-		xlate: []xlateSrcDst{
+		xlate: xlateRules{
 			{"veyron/go/src", "veyron.js/src"},
 			{"roadmap/go/src", "veyron.js/java"},
 			{"third_party/go/src", "SKIP"},
 		},
 	}
-	optGenJavaPkgPrefix string
-	optGenLangs         = genLangs{genLangGo, genLangJava} // TODO: javascript
+	optGenJavaPkgOut = xlateRules{
+		{"veyron.io", "io/veyron"},
+		{"veyron", "com/veyron"},
+	}
+	optGenLangs = genLangs{genLangGo, genLangJava} // TODO: javascript
 )
 
 // Root returns the root command for the VDL tool.
@@ -288,8 +297,6 @@ for managing Go source code.
 	cmdGenerate.Flags.Var(&optGenLangs, "lang", "Comma-separated list of languages to generate, currently supporting "+genLangAll.String())
 	cmdGenerate.Flags.BoolVar(&optGenGoFmt, "go_fmt", true, "Format generated Go code")
 	cmdGenerate.Flags.BoolVar(&optGenStatus, "status", true, "Show package names as they are updated")
-	cmdGenerate.Flags.StringVar(&optGenJavaPkgPrefix, "java_pkg_prefix", "com",
-		"Package prefix that will be added to the VDL package prefixes when generating Java files. ")
 	cmdGenerate.Flags.Var(&optGenGoOutDir, "go_out_dir",
 		`Go output directory.  There are three modes:
          ""                     : Generate output in-place in the source tree
@@ -315,6 +322,13 @@ for managing Go source code.
       used.  The special dst SKIP indicates all matching packages are skipped.`)
 	cmdGenerate.Flags.Var(&optGenJavaOutDir, "java_out_dir",
 		"Same semantics as --go_out_dir but applies to java code generation.")
+	cmdGenerate.Flags.Var(&optGenJavaPkgOut, "java_out_pkg",
+		`Java package translation rules.  Must be of the form:
+           "src->dst[,s2->d2...]"
+        If a VDL package has a prefix src, the prefix will be replaced with dst.
+        Commas are used to separate multiple rules.  The first rule matching the
+        package is used and if no rule matches the package the package remains
+        intact.`)
 	cmdGenerate.Flags.Var(&optGenJavascriptOutDir, "js_out_dir",
 		"Same semantics as --go_out_dir but applies to js code generation.")
 	// Options for audit are identical to generate.
@@ -363,7 +377,7 @@ func gen(audit bool, targets []*build.Package, env *compile.Env) bool {
 		for _, gl := range optGenLangs {
 			switch gl {
 			case genLangGo:
-				dir, err := xlateOutDir(target, optGenGoOutDir, "")
+				dir, err := xlateOutDir(target, optGenGoOutDir, pkg.Path)
 				if err != nil {
 					if err != errSkip {
 						env.Errors.Errorf("--go_out_dir error: %v", err)
@@ -378,9 +392,12 @@ func gen(audit bool, targets []*build.Package, env *compile.Env) bool {
 					}
 				}
 			case genLangJava:
-				java.SetJavaGenPkgPrefix(optGenJavaPkgPrefix)
+				java.SetPkgPathXlator(func(pkgPath string) string {
+					return xlatePkgPath(pkgPath, optGenJavaPkgOut)
+				})
 				files := java.Generate(pkg, env)
-				dir, err := xlateOutDir(target, optGenJavaOutDir, optGenJavaPkgPrefix)
+				pkgPath := xlatePkgPath(pkg.Path, optGenJavaPkgOut)
+				dir, err := xlateOutDir(target, optGenJavaOutDir, pkgPath)
 				if err != nil {
 					if err != errSkip {
 						env.Errors.Errorf("--java_out_dir error: %v", err)
@@ -394,7 +411,7 @@ func gen(audit bool, targets []*build.Package, env *compile.Env) bool {
 					}
 				}
 			case genLangJavascript:
-				dir, err := xlateOutDir(target, optGenJavascriptOutDir, "")
+				dir, err := xlateOutDir(target, optGenJavascriptOutDir, pkg.Path)
 				if err != nil {
 					if err != errSkip {
 						env.Errors.Errorf("--js_out_dir error: %v", err)
@@ -444,19 +461,21 @@ func writeFile(audit bool, data []byte, dirName, baseName string, env *compile.E
 
 var errSkip = fmt.Errorf("SKIP")
 
-func xlateOutDir(pkg *build.Package, outdir genOutDir, pkgPrefix string) (string, error) {
-	switch {
-	case outdir.dir != "":
-		return filepath.Join(outdir.dir, pkg.Path), nil
-	case len(outdir.xlate) == 0:
-		return pkg.Dir, nil
-	}
-	// Try translation rules in order.
+func xlateOutDir(pkg *build.Package, outdir genOutDir, outPkgPath string) (string, error) {
+	// Strip package path from the directory.
 	dir := pkg.Dir
 	if !strings.HasSuffix(dir, pkg.Path) {
 		return "", fmt.Errorf("package dir %q doesn't end with package path %q", dir, pkg.Path)
 	}
 	dir = filepath.Clean(dir[:len(dir)-len(pkg.Path)])
+
+	switch {
+	case outdir.dir != "":
+		return filepath.Join(outdir.dir, outPkgPath), nil
+	case len(outdir.xlate) == 0:
+		return filepath.Join(dir, outPkgPath), nil
+	}
+	// Try translation rules in order.
 	for _, xlate := range outdir.xlate {
 		d := dir
 		if !strings.HasSuffix(d, xlate.src) {
@@ -466,9 +485,18 @@ func xlateOutDir(pkg *build.Package, outdir genOutDir, pkgPrefix string) (string
 			return "", errSkip
 		}
 		d = filepath.Clean(d[:len(d)-len(xlate.src)])
-		return filepath.Join(d, xlate.dst, pkgPrefix, pkg.Path), nil
+		return filepath.Join(d, xlate.dst, outPkgPath), nil
 	}
 	return "", fmt.Errorf("package prefix %q doesn't match translation rules %q", dir, outdir)
+}
+
+func xlatePkgPath(pkgPath string, xRules xlateRules) string {
+	for _, xlate := range xRules {
+		if strings.HasPrefix(pkgPath, xlate.src) {
+			return xlate.dst + pkgPath[len(xlate.src):]
+		}
+	}
+	return pkgPath
 }
 
 func runList(targets []*build.Package, env *compile.Env) {
