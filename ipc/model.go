@@ -61,52 +61,40 @@ type Stream interface {
 	Recv(itemptr interface{}) error
 }
 
-// NewProtocolSetting creates the Setting to be sent to RoamingListen on startup
-// to specify the protocol that it should use for listening on.
-func NewProtocolSetting(s string) config.Setting {
-	return config.NewString(ProtocolSetting, ProtocolSettingDesc, s)
-}
-
-// NewListenSpecSetting creates the Setting to be sent to RoamingListen on startup
-// to specify the address that it should listen on.
-func NewListenSpecSetting(s config.IPHostPortFlag) config.Setting {
-	return config.NewIPHostPort(ListenSpecSetting, ListenSpecSettingDesc, s)
-}
-
-// NewInitialAddrsSetting creates the Setting to be sent to RoamingListen on startup
-// to specify the initial set of host addresses that it must choose from for
-// use when creating Endpoints that are published to the mount table.
-func NewInitialAddrsSetting(a []net.Addr) config.Setting {
-	return config.NewAddrSlice(InitialAddrsSetting, InitialAddrsSettingDesc, a)
-}
-
-// NewAddAddrsSetting creates the Setting to be sent to RoamingListen to inform
-// it of new addresses that have become available since the last change. It will
-// use this information to update any Endpoints it has published to the mount
-// table.
+// NewAddAddrsSetting creates the Setting to be sent to Listen to inform
+// it of new addresses that have become available since the last change.
 func NewAddAddrsSetting(a []net.Addr) config.Setting {
-	return config.NewAddrSlice(NewAddrsSetting, NewAddrsSettingDesc, a)
+	return config.NewAny(NewAddrsSetting, NewAddrsSettingDesc, a)
 }
 
-// NewRmAddrsSetting creates the Setting to be sent to RoamingListen to inform
-// it of new addresses that are no longer available. It will use this information
-// to update any Endpoints it has published to the mount table.
+// NewRmAddrsSetting creates the Setting to be sent to Listen to inform
+// it of addresses that are no longer available.
 func NewRmAddrsSetting(a []net.Addr) config.Setting {
-	return config.NewAddrSlice(RmAddrsSetting, RmAddrsSettingDesc, a)
+	return config.NewAny(RmAddrsSetting, RmAddrsSettingDesc, a)
 }
 
 const (
-	ProtocolSetting         = "Protocol"
-	ProtocolSettingDesc     = "Protocol for server to listen with"
-	ListenSpecSetting       = "ListenSpec"
-	ListenSpecSettingDesc   = "host:port spec for server to listen on"
-	InitialAddrsSetting     = "Addrs"
-	InitialAddrsSettingDesc = "Initial addresses to publish on"
-	NewAddrsSetting         = "NewAddrs"
-	NewAddrsSettingDesc     = "New Addresses discovered since last change"
-	RmAddrsSetting          = "RmAddrs"
-	RmAddrsSettingDesc      = "Addresses that have been removed since last change"
+	NewAddrsSetting     = "NewAddrs"
+	NewAddrsSettingDesc = "New Addresses discovered since last change"
+	RmAddrsSetting      = "RmAddrs"
+	RmAddrsSettingDesc  = "Addresses that have been removed since last change"
 )
+
+// ListenSpec specifies the information required to create a listening
+// network endpoint for a server and, optionally, the name of a proxy
+// to use in conjunction with that listener.
+type ListenSpec struct {
+	// The network protocol to use
+	Protocol string
+	// A protocol specific address.
+	// TCP:
+	// For TCP, the address must be in <ip>:<port> format. The <ip> may be
+	// omitted, but the <port> can not (choose a port of 0 to have the system
+	// allocate one).
+	Address string
+	// The name of a proxy to be used to proxy connections to this listener.
+	Proxy string
+}
 
 // Server defines the interface for managing a collection of services.
 type Server interface {
@@ -122,30 +110,25 @@ type Server interface {
 	// with the mount table when Publish (below) is called.
 	Listen(protocol, address string) (naming.Endpoint, error)
 
-	// RoamingListen configures the Server to dynamically change the addresses
-	// it is listening on and the addresses that is publishes to the mount table
-	// as its network configuration changes due to roaming. It does so by reading
-	// config.Setting values from a config.Publisher stream called 'roaming'.
-	// By default it will use the Publisher associated with the runtime
-	// used to create the server. This may be overridden by creating
-	// a server with a veyron2.RoamingPublisherOpt to specify an alternate
-	// config.Publisher and stream name on that publisher.
-	// The set of expected Settings is defined by the New<setting>Functions above.
-	// This dynamic behaviour is disabled if the ListenSpecSetting read
-	// from the channel specifies a loopback address to listen on.
+	// TODO(cnicolaou): rename ListenX to Listen in a subsequent CL.
 	//
-	// TODO(cnicolaou): at this point Listen could be retired except for its
-	// use to create a proxy connection. I propose changing Listen to 'Proxy'
-	// rather than keeping the general listen behaviour above. This would
-	// require all servers to import and use the dhcp profile and for the
-	// 'generic' profile (most often used in testing) to implement a
-	// config.Publisher with a fixed loopback address configured, which
-	// may complicate some tests. I propose to evaluate this in a followup
-	// CL.
+	// ListenX creates a listening network endpoint for the Server
+	// as specified by its ListenSpec parameter. If the ListenSpec does not
+	// specify a loopback address then the Server will dynamically adapt to
+	// changes in its network address. It will do so by reading config.Setting
+	// values from a config.Publisher stream called 'roaming'. By default
+	// it will use the Publisher associated with the runtime used to create
+	// the server. This may be overridden by creating a server with a
+	// veyron2.RoamingPublisherOpt to specify an alternate config.Publisher
+	// and stream name on that publisher.
+	// The set of expected Settings is defined by the
+	// New<setting>Functions above.
 	//
-	// See the New<setting>Setting functions for the set of config.Setting
-	// values that it expects to be sent over the supplied Publisher.
-	RoamingListen() (naming.Endpoint, error)
+	// The returned endpoint reflects the initial endpoint published to the
+	// mount table even though this may change if dynamic address changes
+	// occur.
+	// Listen may be called multiple times.
+	ListenX(spec *ListenSpec) (naming.Endpoint, error)
 
 	// Serve performs two related functions:
 	// 1. it publishes the services available at the network addresses

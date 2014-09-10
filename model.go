@@ -152,9 +152,8 @@ type Profile interface {
 
 	// AddressChooser returns a function that can be used to
 	// choose the preferred address to publish with the mount table
-	// when one is not otherwise specified.
-	// The runtime implementation must pass this option to any new
-	// IPC servers it is asked to create.
+	// when one is not otherwise specified. The runtime implementation
+	// must pass this option to all IPC servers it creates
 	AddressChooser() AddressChooser
 
 	// Init is called by the Runtime once it has been initialized and
