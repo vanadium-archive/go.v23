@@ -15,7 +15,7 @@ package {{.PackagePath}};
 /**
  * type {{.Name}} {{.VdlTypeString}} {{.Doc}}
  **/
-public final class {{.Name}} implements android.os.Parcelable, java.io.Serializable {
+public final class {{.Name}} implements android.os.Parcelable, java.io.Serializable, com.google.gson.TypeAdapterFactory {
     private {{.BaseType}} value;
 
     public {{.Name}}({{.BaseType}} value) {
@@ -72,6 +72,26 @@ public final class {{.Name}} implements android.os.Parcelable, java.io.Serializa
 	private {{.Name}}(android.os.Parcel in) {
 		value = ({{.BaseType}}) com.veyron2.vdl.ParcelUtil.readValue(in, getClass().getClassLoader(), value);
 	}
+
+	public {{.Name}}() {}
+
+	@Override
+	public <T> com.google.gson.TypeAdapter<T> create(com.google.gson.Gson gson, com.google.gson.reflect.TypeToken<T> type) {
+		if (!type.equals(new com.google.gson.reflect.TypeToken<{{.Name}}>(){})) {
+			return null;
+		}
+		final com.google.gson.TypeAdapter<{{.BaseClassType}}> delegate = gson.getAdapter(new com.google.gson.reflect.TypeToken<{{.BaseClassType}}>() {});
+		return new com.google.gson.TypeAdapter<T>() {
+			@Override
+			public void write(com.google.gson.stream.JsonWriter out, T value) throws java.io.IOException {
+				delegate.write(out, (({{.Name}}) value).getValue());
+			}
+			@Override
+			public T read(com.google.gson.stream.JsonReader in) throws java.io.IOException {
+				return (T) new {{.Name}}(delegate.read(in));
+			}
+		};
+	}
 }
 `
 
@@ -79,6 +99,7 @@ public final class {{.Name}} implements android.os.Parcelable, java.io.Serializa
 func genJavaPrimitiveFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo {
 	data := struct {
 		BaseType            string
+		BaseClassType       string
 		Doc                 string
 		HashcodeComputation string
 		IsClass             bool
@@ -90,6 +111,7 @@ func genJavaPrimitiveFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo 
 		VdlTypeString       string
 	}{
 		BaseType:            javaType(tdef.BaseType, false, env),
+		BaseClassType:       javaType(tdef.BaseType, true, env),
 		Doc:                 javaDocInComment(tdef.Doc),
 		HashcodeComputation: javaHashCode("value", tdef.BaseType, env),
 		IsClass:             isClass(tdef.BaseType, env),
