@@ -15,7 +15,7 @@ package {{ .PackagePath }};
 
 /* Client stub for interface: {{ .ServiceName }}. */
 public final class {{ .ServiceName }}Stub implements {{ .FullServiceName }} {
-    private static final java.lang.String vdlIfacePathOpt = "{{ .FullServiceName }}";
+    private static final java.lang.String vdlIfacePathOpt = "{{ .VDLIfacePathName }}";
     private final com.veyron2.ipc.Client client;
     private final java.lang.String veyronName;
 
@@ -231,21 +231,23 @@ func genJavaClientStubFile(iface *compile.Interface, env *compile.Env) JavaFileI
 	}
 
 	data := struct {
-		EmbedMethods    []clientStubEmbedMethod
-		Embeds          []clientStubEmbed
-		FullServiceName string
-		Methods         []clientStubMethod
-		PackagePath     string
-		ServiceName     string
-		Source          string
+		EmbedMethods     []clientStubEmbedMethod
+		Embeds           []clientStubEmbed
+		FullServiceName  string
+		VDLIfacePathName string
+		Methods          []clientStubMethod
+		PackagePath      string
+		ServiceName      string
+		Source           string
 	}{
-		EmbedMethods:    embedMethods,
-		Embeds:          embeds,
-		FullServiceName: javaPath(interfaceFullyQualifiedName(iface)),
-		Methods:         methods,
-		PackagePath:     javaPath(path.Join(javaGenPkgPath(iface.File.Package.Path), javaGenImplDir)),
-		ServiceName:     iface.Name,
-		Source:          iface.File.BaseName,
+		EmbedMethods:     embedMethods,
+		Embeds:           embeds,
+		FullServiceName:  javaPath(interfaceFullyQualifiedName(iface)),
+		VDLIfacePathName: path.Join(iface.File.Package.Path, iface.Name),
+		Methods:          methods,
+		PackagePath:      javaPath(path.Join(javaGenPkgPath(iface.File.Package.Path), javaGenImplDir)),
+		ServiceName:      iface.Name,
+		Source:           iface.File.BaseName,
 	}
 	var buf bytes.Buffer
 	err := parseTmpl("client stub", clientStubTmpl).Execute(&buf, data)
