@@ -69,7 +69,13 @@ type PublicID interface {
 type Signer interface {
 	// Sign signs an arbitrary length message (often the hash of a larger message)
 	// using the private key associated with this Signer.
-	Sign(message []byte) (Signature, error)
+	//
+	// The provided purpose is appended to message before signing and is made
+	// available (in cleartext) with the Signature. Thus, a non-nil purpose
+	// can be used to avoid "type attacks", wherein an honest entity is
+	// cheated on interpreting a field in a message as one with a type
+	// other than the intended one.
+	Sign(purpose, message []byte) (Signature, error)
 
 	// PublicKey returns the public key corresponding to the Signer's private key.
 	PublicKey() PublicKey
@@ -81,8 +87,6 @@ type Signer interface {
 // Each principal has a unique (private, public) key pair. The private key
 // is known only to the principal and is not expected to be shared.
 type PrivateID interface {
-	Signer
-
 	// PublicID returns the non-secret component of principal's identity
 	// (which can be encoded and transmitted across the network perhaps).
 	// TODO(ataly): Replace this method with one that returns the PublicIDStore.
@@ -117,6 +121,13 @@ type PrivateID interface {
 	// TODO(ataly, ashankar): Should we get rid of the duration argument
 	// and simply have a list of discharge caveats?
 	MintDischarge(caveat ThirdPartyCaveat, context Context, duration time.Duration, caveats []Caveat) (Discharge, error)
+
+	// Sign signs an arbitrary length message (often the hash of a larger message)
+	// using the private key associated with this PrivateID.
+	Sign(message []byte) (Signature, error)
+
+	// PublicKey returns the public key corresponding to the principal.
+	PublicKey() PublicKey
 }
 
 // CaveatValidator is the interface for validating the restrictions specified

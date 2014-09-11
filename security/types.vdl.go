@@ -82,14 +82,20 @@ type ACL struct {
 	NotIn map[string]LabelSet
 }
 
-// Hash identifies a cryptographic hash function.
+// Hash identifies a cryptographic hash function approved for use in signature algorithms.
 type Hash string
 
 // Signature represents a digital signature.
 type Signature struct {
-	Hash Hash   // Cryptographic hash function applied to the message before computing the signature.
-	R    []byte // Pair of integers that make up an ECDSA signature.
-	S    []byte
+	// Purpose of the signature. Can be used to prevent type attacks.
+	// (See Section 4.2 of http://www-users.cs.york.ac.uk/~jac/PublishedPapers/reviewV1_1997.pdf for example).
+	// The actual signature (R, S values for ECDSA keys) is produced by signing: Hash(Hash(message)+Purpose).
+	Purpose []byte
+	// Cryptographic hash function applied to the message before computing the signature.
+	Hash Hash
+	// Pair of integers that make up an ECDSA signature.
+	R []byte
+	S []byte
 }
 
 // DischargeImpetus encapsulates the motivation for a discharge being sought.
@@ -135,4 +141,4 @@ const SHA384Hash = Hash("SHA384") // SHA384 cryptographic hash function defined 
 
 const SHA512Hash = Hash("SHA512") // SHA512 cryptographic hash function defined in FIPS 180-2.
 
-const NoHash = Hash("") // Identity hash function.
+const NoHash = Hash("") // Identity hash function. TODO(ashankar,ataly): REMOVE THIS BEFORE RELEASE. This is NOT a cryptographic hash function.

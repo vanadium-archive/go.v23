@@ -6,12 +6,13 @@ import (
 	"crypto/sha1"
 	"crypto/sha256"
 	"crypto/sha512"
+	"fmt"
 	"math/big"
 )
 
 // Verify returns true iff sig is a valid signature for a message.
-func (sig Signature) Verify(key PublicKey, message []byte) bool {
-	if message = cryptoHash(sig.Hash, message); message == nil {
+func (sig *Signature) Verify(key PublicKey, message []byte) bool {
+	if message = messageToSign(sig.Hash, sig.Purpose, message); message == nil {
 		return false
 	}
 	switch v := key.(type) {
@@ -37,31 +38,48 @@ func NewInMemoryECDSASigner(key *ecdsa.PrivateKey) Signer {
 	} else {
 		hash = SHA512Hash
 	}
-	return &clearSigner{key, NewECDSAPublicKey(&key.PublicKey), hash}
+	return &ecdsaSigner{key, NewECDSAPublicKey(&key.PublicKey), hash}
 }
 
-type clearSigner struct {
+type ecdsaSigner struct {
 	key    *ecdsa.PrivateKey
 	pubkey PublicKey
 	hash   Hash
 }
 
-func (c *clearSigner) Sign(message []byte) (sig Signature, err error) {
-	r, s, err := ecdsa.Sign(rand.Reader, c.key, cryptoHash(c.hash, message))
-	if err != nil {
-		return
+func (c *ecdsaSigner) Sign(purpose, message []byte) (Signature, error) {
+	if message = messageToSign(c.hash, purpose, message); message == nil {
+		return Signature{}, fmt.Errorf("unable to create bytes to sign from message with hashing function %q", c.hash)
 	}
-	sig.R, sig.S, sig.Hash = r.Bytes(), s.Bytes(), c.hash
-	return
+	r, s, err := ecdsa.Sign(rand.Reader, c.key, message)
+	if err != nil {
+		return Signature{}, err
+	}
+	return Signature{
+		Purpose: purpose,
+		Hash:    c.hash,
+		R:       r.Bytes(),
+		S:       s.Bytes(),
+	}, nil
 }
 
-func (c *clearSigner) PublicKey() PublicKey {
+func (c *ecdsaSigner) PublicKey() PublicKey {
 	return c.pubkey
+}
+
+func messageToSign(hash Hash, purpose, message []byte) []byte {
+	if message = cryptoHash(hash, message); message == nil {
+		return nil
+	}
+	return cryptoHash(hash, append(message, purpose...))
 }
 
 // cryptoHash hashes the provided data using the given cryptographic hash
 // function, returning nil iff the hash couldn't be applied.
 func cryptoHash(hash Hash, data []byte) []byte {
+	if data == nil {
+		return nil
+	}
 	switch hash {
 	case NoHash:
 		return data

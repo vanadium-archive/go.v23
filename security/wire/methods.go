@@ -101,7 +101,7 @@ func (c *Certificate) contentHash(issuerSignature security.Signature) []byte {
 
 // Sign uses the given Signer to sign the signature of the last certificate in
 // the provided PublicID, storing the new signature in the current certificate.
-func (c *Certificate) Sign(signer security.Signer, pubID *ChainPublicID) error {
+func (c *Certificate) Sign(signer security.PrivateID, pubID *ChainPublicID) error {
 	numCerts := len(pubID.Certificates)
 	if numCerts == 0 {
 		return errors.New("cannot sign a ChainPublicID with no certificates")
