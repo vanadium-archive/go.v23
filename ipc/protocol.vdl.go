@@ -3,6 +3,10 @@
 
 package ipc
 
+import (
+	"veyron2/vtrace"
+)
+
 // Request describes the request header sent by the client to the server.  A
 // non-zero request header is sent at the beginning of the RPC call, followed by
 // the positional args.  Thereafter a zero request header is sent before each
@@ -42,6 +46,7 @@ type Request struct {
 	// TODO(toddw,ashankar,andreser): Ideally, this would be the a slice of
 	// discharges, but vom currently does not allow for data-type interfaces.
 	NumDischarges uint64
+	TraceRequest  vtrace.Request
 }
 
 // Response describes the response header sent by the server to the client.  A
@@ -58,6 +63,7 @@ type Response struct {
 	// on the response stream.  After these results, no further data will be sent
 	// on the response stream.
 	NumPosResults uint64
+	TraceResponse vtrace.Response
 }
 
 // NoTimeout specifies that no timeout is desired.

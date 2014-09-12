@@ -21,6 +21,7 @@ import (
 	"veyron2/naming"
 	"veyron2/security"
 	"veyron2/vlog"
+	"veyron2/vtrace"
 )
 
 const (
@@ -211,6 +212,13 @@ type Runtime interface {
 	// This should be used when you are doing a new operation that isn't related
 	// to ongoing RPCs.
 	NewContext() context.T
+
+	// WithNewSpan derives a context with a new Span that can be used to
+	// trace and annotate operations across process boundaries.
+	WithNewSpan(ctx context.T, name string) (context.T, vtrace.Span)
+
+	// SpanFromContext finds the currently active span.
+	SpanFromContext(ctx context.T) vtrace.Span
 
 	// NewStreamManager creates a new stream manager.
 	NewStreamManager(opts ...stream.ManagerOpt) (stream.Manager, error)

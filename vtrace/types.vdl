@@ -1,0 +1,65 @@
+package vtrace
+
+import (
+	"veyron2/uniqueid"
+)
+
+type TraceRecord struct {
+	ID    uniqueid.ID
+	Spans []SpanRecord
+}
+
+// An Annotation represents data that is relevant at a specific moment.
+// They can be attached to spans to add useful debugging information.
+type Annotation struct {
+	// When the annotation was added in nanoseconds since the epoch.
+	// TODO(mattr): This should be a time type.
+	When int64
+
+	// The annotation message.
+	// TODO(mattr): Allow richer annotations.
+	Message string
+}
+
+// A SpanRecord is the wire format for a Span.
+type SpanRecord struct {
+	ID     uniqueid.ID // The ID of the Span.
+	Parent uniqueid.ID // The ID of this Span's parent.
+	Name   string      // The Name of this span.
+
+	// A series of annotations.
+	// TODO(mattr): Allow richer annotations.
+	Annotations []Annotation
+}
+
+// TraceMethod specifies the mechanism by which this trace's data should
+// be collected (if it is to be collected at all).
+// TODO(mattr): This should be an enum or perhaps flags.
+type TraceMethod int32
+
+const (
+	// None means that the trace should not be collected.
+	None = TraceMethod(0)
+	// InMemory means that the trace data should be collected
+	// in memory and shipped back with the RPC Response.
+	InMemory = TraceMethod(1)
+	// TODO(mattr): Add log based collection.
+)
+
+// Request is the object that carries trace informtion between processes.
+type Request struct {
+	SpanID  uniqueid.ID // The ID of the span that originated the RPC call.
+	TraceID uniqueid.ID // The ID of the trace this call is a part of.
+	Method  TraceMethod // The method of collection for the trace.
+}
+
+type Response struct {
+	// Method is method of collection for the trace.
+	// Note that a client will start collecting trace data if the server
+	// responds with a non-None trace method, even if it was not previously collecting.
+	Method TraceMethod
+
+	// Trace is collected trace data.  This may be empty.
+	// TODO(mattr): This should be optional if we support that feature.
+	Trace TraceRecord
+}

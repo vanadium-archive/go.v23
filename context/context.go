@@ -1,13 +1,60 @@
-// Package context defines context.T an interface to carry data that crosses
-// API boundaries.  The context carries deadlines and cancellation
-// as well as other arbitraray values.
+// Package context defines context.T an interface to carry data that
+// crosses API boundaries.  The context carries deadlines and
+// cancellation as well as other arbitraray values.
 //
-// Server method implmentations receive a context as their first argument, you
-// should generally pass this context (or a derivitive) on to dependant
-// opertations.  You should allocate new context.T objects only for operations
-// that are semantically unrelated to any ongoing calls.
+// Server method implmentations receive a context as their first
+// argument, you should generally pass this context (or a derivitive)
+// on to dependant opertations.  You should allocate new context.T
+// objects only for operations that are semantically unrelated to any
+// ongoing calls.
 //
-// The context.T type is safe to use from multiple goroutines simultaneously.
+// New contexts are created via the runtime with
+// veryon2.Runtime.NewContext().  New contexts represent a fresh
+// operation that's unrelated to any other ongoing work.  Further
+// contexts can be derived from the original context to refine the
+// environment.  For example if part of your operation requires a
+// finer deadline you can create a new context to handle that part:
+//
+//    ctx := runtime.NewContext()
+//    // We'll use cacheCtx to lookup data in memcache
+//    // if it takes more than a second to get data from
+//    // memcache we should just skip the cache and perform
+//    // the slow operation.
+//    cacheCtx, cancel := ctx.WithTimeout(time.Second)
+//    if err := FetchDataFromMemcache(cacheCtx, key); err == DeadlineExceeded {
+//      RecomputeData(ctx, key)
+//    }
+//
+// Contexts form a tree where derived contexts are children of the
+// contexts from which they were derived.  Children inherit all the
+// properties of their parent except for the property being replaced
+// (the deadline in the example above).
+//
+// Contexts are extensible.  The Value/WithValue methods allow you to attach
+// new information to the context and extend it's capabilities.
+// In the same way we derive new contexts via the 'With' family of functions
+// you can create methods to attach new data:
+//
+//    package auth
+//
+//    import "veyron2/context"
+//
+//    type Auth struct{...}
+//
+//    type authKey struct{}
+//
+//    function WithAuth(parent context.T, data *Auth) context.T {
+//        return parent.WithValue(authKey{}, data)
+//    }
+//
+//    function FromContext(ctx context.T) *Auth {
+//        data, _ := ctx.Value(authKey{}).(*Auth)
+//        return data
+//    }
+//
+// Note that a value of any type can be used as a key, but you should
+// use an unexported value of an unexported type to ensure that no
+// collisions can occur.
 package context
 
 import (
@@ -16,7 +63,7 @@ import (
 )
 
 // A T object carries deadlines, cancellation and data across API
-// boundaries.  It is safe to use from multiple goroutines.
+// boundaries.  It is safe to use a T from multiple goroutines simultaneously.
 type T interface {
 	// Deadline returns the time at which this context will be automatically
 	// canceled.
