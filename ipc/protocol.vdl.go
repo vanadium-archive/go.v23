@@ -46,7 +46,9 @@ type Request struct {
 	// TODO(toddw,ashankar,andreser): Ideally, this would be the a slice of
 	// discharges, but vom currently does not allow for data-type interfaces.
 	NumDischarges uint64
-	TraceRequest  vtrace.Request
+	// TraceRequest maintains the vtrace context between clients and servers
+	// and specifies additional parameters that control how tracing behaves.
+	TraceRequest vtrace.Request
 }
 
 // Response describes the response header sent by the server to the client.  A
@@ -63,6 +65,8 @@ type Response struct {
 	// on the response stream.  After these results, no further data will be sent
 	// on the response stream.
 	NumPosResults uint64
+	// TraceResponse maintains the vtrace context between clients and servers.
+	// In some cases trace data will be included in this response as well.
 	TraceResponse vtrace.Response
 }
 
