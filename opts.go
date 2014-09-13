@@ -1,6 +1,8 @@
 package veyron2
 
 import (
+	"time"
+
 	"veyron2/config"
 	"veyron2/ipc/stream"
 	"veyron2/naming"
@@ -125,6 +127,12 @@ const (
 type DischargeOpt struct{ security.Discharge }
 
 func (DischargeOpt) IPCCallOpt() {}
+
+// RetryTimeoutOpt is the duration during which we will retry starting
+// an RPC call.  Zero means don't retry.
+type RetryTimeoutOpt time.Duration
+
+func (RetryTimeoutOpt) IPCCallOpt() {}
 
 // StreamManager specifies an explicit stream.Manager.
 func StreamManager(sm stream.Manager) StreamManagerOpt {
