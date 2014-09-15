@@ -112,21 +112,29 @@ type Signature struct {
   R, S []byte
 }
 
+// ThirdPartyRequirements specifies the information required by the third-party
+// that will issue discharges for third-party caveats.
+//
+// These requirements are typically used to construct a DischargeImpetus, which
+// will be sent to the third-party.
+type ThirdPartyRequirements struct {
+  ReportServer bool     // The blessings presented by the server of an IPC call.
+  ReportMethod bool     // The name of the method being invoked.
+  ReportArguments bool  // Arguments to the method being invoked.
+}
+
 // DischargeImpetus encapsulates the motivation for a discharge being sought.
 //
-// These values are reported by the holder of a PublicID with ThirdPartyCaveats when
-// requesting a Discharge. The third-party issuing discharges thus cannot safely
-// assume that all values are provided, or that they are provided honestly.
+// These values are reported by a principal that is requesting a Discharge for
+// a third-party caveat on one of its blessings. The third-party issues
+// discharges cannot safely assume that all these values are provided, or that
+// they are provided honestly.
 //
-// Implementations of services that issue discharges are encouraged to add caveats to the
-// discharge that bind the discharge to the impetus, thereby rendering the discharge unsuable
-// for any other purpose.
+// Implementations of services that issue discharges are encouraged to add
+// caveats to the discharge that bind the discharge to the impetus, thereby
+// rendering the discharge unsuable for any other purpose.
 type DischargeImpetus struct {
-  // Identity (security.PublicID) of the server on which the method is to be invoked.
-  // TODO(ashankar): Replace vdlutil.Any here with the appropriate VDL representation of identities.
-  Server any
-  // Name of the method being invoked which led to the request for a discharge.
-  Method string
-  // Arguments to the method invocation which led to the request for a discharge.
-  Arguments []any
+  Server []BlessingPattern  // The client intends to use the discharge to communicate with a server that has a blessing matching one of the patterns in this set.
+  Method string             // Name of the method being invoked by the client.
+  Arguments []any           // Arguments to the method invocation.
 }

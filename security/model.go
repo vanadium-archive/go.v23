@@ -176,20 +176,6 @@ type Discharge interface {
 	ThirdPartyCaveats() []ThirdPartyCaveat
 }
 
-// ThirdPartyRequirements specifies the information required by the
-// third-party that will issue discharges.
-//
-// These requirements are typically used to construct a DischargeImpetus,
-// which will be sent to the third-party.
-type ThirdPartyRequirements struct {
-	// The identity of the destination server of an ipc call.
-	ReportServer bool
-	// The name of the method being invoked.
-	ReportMethod bool
-	// Arguments to the method being invoked.
-	ReportArguments bool
-}
-
 // Context defines the state available for authorizing a principal.
 type Context interface {
 	// Method returns the method being invoked.
