@@ -3,6 +3,8 @@ package vlog_test
 import (
 	"flag"
 	"fmt"
+	"os"
+	"path/filepath"
 	"testing"
 
 	_ "veyron/lib/testutil"
@@ -20,11 +22,12 @@ func init() {
 }
 
 func child(args []string) {
-	flag.Set("log_dir", "/tmp/foo")
+	tmp := filepath.Join(os.TempDir(), "foo")
+	flag.Set("log_dir", tmp)
 	flag.Set("vmodule", "foo=2")
 	flags := vlog.Log.ExplicitlySetFlags()
-	if v, ok := flags["log_dir"]; !ok || v != "/tmp/foo" {
-		panic(fmt.Sprintf("log_dir was supposed to be /tmp/foo"))
+	if v, ok := flags["log_dir"]; !ok || v != tmp {
+		panic(fmt.Sprintf("log_dir was supposed to be %v", tmp))
 	}
 	if v, ok := flags["vmodule"]; !ok || v != "foo=2" {
 		panic(fmt.Sprintf("vmodule was supposed to be foo=2"))
