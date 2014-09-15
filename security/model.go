@@ -7,6 +7,82 @@ import (
 	"veyron2/naming"
 )
 
+// BlessingStore is the interface for storing blessings bound to a
+// principal and managing the subset of blessings to be presented to
+// particular peers.
+type BlessingStore interface {
+	// Add adds a set of blessings to the store.
+	//
+	// These blessings are intended to be shared with peers whose
+	// blessings match the provided pattern.
+	//
+	// It is an error to call Add with "blessings" whose public key does
+	// not match the PublicKey of the principal for which this store hosts
+	// blessings.
+	Add(blessings PublicID, forPeers BlessingPattern) error
+
+	// ForPeer returns the set of blessings that have been previously
+	// Add-ed to the store with an intent of being shared with peers
+	// that have at least one of the provided blessings.
+	//
+	// If no peerBlessings are provided then blessings marked for all peers
+	// (i.e., Add-ed with the AllPrincipals pattern) is returned.
+	//
+	// Returns nil if there are no matching blessings in the store.
+	ForPeer(peerBlessings ...string) PublicID
+
+	// SetDefault sets up the Blessings made available on a subsequent call
+	// to Default.
+	//
+	// It is an error to call SetDefault with Blesssings whose public key
+	// does not match the PublicKey of the principal for which this store
+	// hosts blessings.
+	SetDefault(blessings PublicID) error
+
+	// Default returns the blessings to be shared with peers for which
+	// no other information is available in order to select blessings
+	// from the store.
+	//
+	// For example, Default can be used by servers to identify themselves
+	// to clients before the client has identified itself.
+	//
+	// Default returns the blessings provided to the last call to
+	// SetDefault, or if no such call was made it is equivalent to ForPeer
+	// with no arguments.
+	//
+	// Returns nil if there is no usable blessing.
+	Default() PublicID
+
+	// PublicKey returns the public key of the Principal for which
+	// this store hosts blessings.
+	PublicKey() PublicKey
+
+	// TODO(ataly,ashankar): Might add methods so that discharges
+	// can be persisted. e.g,
+	// // AddDischarge adds a Discharge to the store iff there is a
+	// // blessing that requires it.
+	// AddDischarge(d Discharge) error
+	// // Discharges returns all the Discharges that have been
+	// // added to the store and are required by "blessings".
+	// Discharges(blessings PublicID) []Discharge
+}
+
+// BlessingRoots hosts the set of authoritative public keys for roots
+// of blessings.
+type BlessingRoots interface {
+	// Add marks 'root' as an authoritative key for blessings that
+	// match 'pattern'.
+	//
+	// Multiple keys can be added for the same pattern, in which
+	// case all those keys are considered authoritative for
+	// blessings that match the pattern.
+	Add(root PublicKey, pattern BlessingPattern) error
+
+	// Recognized returns nil iff the provided key is recognized
+	// as an authority on a pattern that is matched by blessing.
+	Recognized(key PublicKey, blessing string) error
+}
+
 // PublicIDStore is an interface for managing PublicIDs. All PublicIDs added
 // to the store are required to be blessing the same public key and must be tagged
 // with a BlessingPattern. By default, in IPC, a client uses a PublicID from the
