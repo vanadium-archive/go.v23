@@ -125,28 +125,30 @@ type DischargeImpetus struct {
 	Arguments []_gen_vdlutil.Any // Arguments to the method invocation.
 }
 
-const AllPrincipals = BlessingPattern("...") // Glob pattern that matches all blessings.
+const (
+	AllPrincipals = BlessingPattern("...") // Glob pattern that matches all blessings.
 
-const ChainSeparator = "/" // ChainSeparator joins blessing names to form a blessing chain name.
+	ChainSeparator = "/" // ChainSeparator joins blessing names to form a blessing chain name.
 
-const ResolveLabel = Label(1) // ResolveLabel applies to operations involving navigating the namespace.
+	ResolveLabel = Label(1) // ResolveLabel applies to operations involving navigating the namespace.
 
-const ReadLabel = Label(2) // ReadLabel applies to operations where state of the object is not changed.
+	ReadLabel = Label(2) // ReadLabel applies to operations where state of the object is not changed.
 
-const WriteLabel = Label(4) // WriteLabel applies to operations where the contents of an object are changed.
+	WriteLabel = Label(4) // WriteLabel applies to operations where the contents of an object are changed.
 
-const AdminLabel = Label(8) // AdminLabel applies to operations where metadata about the object (such as access control) is changed.
+	AdminLabel = Label(8) // AdminLabel applies to operations where metadata about the object (such as access control) is changed.
 
-const DebugLabel = Label(16) // DebugLabel applies to operations that returns metadata about the object.
+	DebugLabel = Label(16) // DebugLabel applies to operations that returns metadata about the object.
 
-const MonitoringLabel = Label(32) // MonitoringLabel is like DebugLabel.
+	MonitoringLabel = Label(32) // MonitoringLabel is like DebugLabel.
 
-const SHA1Hash = Hash("SHA1") // SHA1 cryptographic hash function defined in RFC3174.
+	SHA1Hash = Hash("SHA1") // SHA1 cryptographic hash function defined in RFC3174.
 
-const SHA256Hash = Hash("SHA256") // SHA256 cryptographic hash function defined  in FIPS 180-4.
+	SHA256Hash = Hash("SHA256") // SHA256 cryptographic hash function defined  in FIPS 180-4.
 
-const SHA384Hash = Hash("SHA384") // SHA384 cryptographic hash function defined in FIPS 180-2.
+	SHA384Hash = Hash("SHA384") // SHA384 cryptographic hash function defined in FIPS 180-2.
 
-const SHA512Hash = Hash("SHA512") // SHA512 cryptographic hash function defined in FIPS 180-2.
+	SHA512Hash = Hash("SHA512") // SHA512 cryptographic hash function defined in FIPS 180-2.
 
-const NoHash = Hash("") // Identity hash function. TODO(ashankar,ataly): REMOVE THIS BEFORE RELEASE. This is NOT a cryptographic hash function.
+	NoHash = Hash("") // Identity hash function. TODO(ashankar,ataly): REMOVE THIS BEFORE RELEASE. This is NOT a cryptographic hash function.
+)
