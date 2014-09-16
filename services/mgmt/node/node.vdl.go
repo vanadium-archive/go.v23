@@ -8,6 +8,8 @@ package node
 import (
 	"veyron2/services/mgmt/binary"
 
+	"veyron2/services/security/access"
+
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
 	_gen_veyron2 "veyron2"
 	_gen_context "veyron2/context"
@@ -647,6 +649,8 @@ func (__gen_s *ServerStubApplication) UpdateTo(call _gen_ipc.ServerCall, Name st
 // Node_ExcludingUniversal is the interface without internal framework-added methods
 // to enable embedding without method collisions.  Not to be used directly by clients.
 type Node_ExcludingUniversal interface {
+	// Object provides access control for Veyron objects.
+	access.Object_ExcludingUniversal
 	// Application can be used to manage applications on a device. The
 	// idea is that this interace will be invoked using an object name that
 	// identifies the application and its installations and instances
@@ -760,6 +764,8 @@ type Node interface {
 // NodeService is the interface the server implements.
 type NodeService interface {
 
+	// Object provides access control for Veyron objects.
+	access.ObjectService
 	// Application can be used to manage applications on a device. The
 	// idea is that this interace will be invoked using an object name that
 	// identifies the application and its installations and instances
@@ -886,6 +892,7 @@ func BindNode(name string, opts ..._gen_ipc.BindOpt) (Node, error) {
 		return nil, _gen_vdlutil.ErrTooManyOptionsToBind
 	}
 	stub := &clientStubNode{defaultClient: client, name: name}
+	stub.Object_ExcludingUniversal, _ = access.BindObject(name, client)
 	stub.Application_ExcludingUniversal, _ = BindApplication(name, client)
 
 	return stub, nil
@@ -897,6 +904,7 @@ func BindNode(name string, opts ..._gen_ipc.BindOpt) (Node, error) {
 // interface, and returns a new server stub.
 func NewServerNode(server NodeService) interface{} {
 	return &ServerStubNode{
+		ServerStubObject:      *access.NewServerObject(server).(*access.ServerStubObject),
 		ServerStubApplication: *NewServerApplication(server).(*ServerStubApplication),
 		service:               server,
 	}
@@ -904,6 +912,7 @@ func NewServerNode(server NodeService) interface{} {
 
 // clientStubNode implements Node.
 type clientStubNode struct {
+	access.Object_ExcludingUniversal
 	Application_ExcludingUniversal
 
 	defaultClient _gen_ipc.Client
@@ -998,6 +1007,7 @@ func (__gen_c *clientStubNode) GetMethodTags(ctx _gen_context.T, method string, 
 // NodeService and provides an object that satisfies
 // the requirements of veyron2/ipc.ReflectInvoker.
 type ServerStubNode struct {
+	access.ServerStubObject
 	ServerStubApplication
 
 	service NodeService
@@ -1007,6 +1017,9 @@ func (__gen_s *ServerStubNode) GetMethodTags(call _gen_ipc.ServerCall, method st
 	// TODO(bprosnitz) GetMethodTags() will be replaces with Signature().
 	// Note: This exhibits some weird behavior like returning a nil error if the method isn't found.
 	// This will change when it is replaced with Signature().
+	if resp, err := __gen_s.ServerStubObject.GetMethodTags(call, method); resp != nil || err != nil {
+		return resp, err
+	}
 	if resp, err := __gen_s.ServerStubApplication.GetMethodTags(call, method); resp != nil || err != nil {
 		return resp, err
 	}
@@ -1072,6 +1085,59 @@ func (__gen_s *ServerStubNode) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Ser
 	}
 	var ss _gen_ipc.ServiceSignature
 	var firstAdded int
+	ss, _ = __gen_s.ServerStubObject.Signature(call)
+	firstAdded = len(result.TypeDefs)
+	for k, v := range ss.Methods {
+		for i, _ := range v.InArgs {
+			if v.InArgs[i].Type >= _gen_wiretype.TypeIDFirst {
+				v.InArgs[i].Type += _gen_wiretype.TypeID(firstAdded)
+			}
+		}
+		for i, _ := range v.OutArgs {
+			if v.OutArgs[i].Type >= _gen_wiretype.TypeIDFirst {
+				v.OutArgs[i].Type += _gen_wiretype.TypeID(firstAdded)
+			}
+		}
+		if v.InStream >= _gen_wiretype.TypeIDFirst {
+			v.InStream += _gen_wiretype.TypeID(firstAdded)
+		}
+		if v.OutStream >= _gen_wiretype.TypeIDFirst {
+			v.OutStream += _gen_wiretype.TypeID(firstAdded)
+		}
+		result.Methods[k] = v
+	}
+	//TODO(bprosnitz) combine type definitions from embeded interfaces in a way that doesn't cause duplication.
+	for _, d := range ss.TypeDefs {
+		switch wt := d.(type) {
+		case _gen_wiretype.SliceType:
+			if wt.Elem >= _gen_wiretype.TypeIDFirst {
+				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+			}
+			d = wt
+		case _gen_wiretype.ArrayType:
+			if wt.Elem >= _gen_wiretype.TypeIDFirst {
+				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+			}
+			d = wt
+		case _gen_wiretype.MapType:
+			if wt.Key >= _gen_wiretype.TypeIDFirst {
+				wt.Key += _gen_wiretype.TypeID(firstAdded)
+			}
+			if wt.Elem >= _gen_wiretype.TypeIDFirst {
+				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+			}
+			d = wt
+		case _gen_wiretype.StructType:
+			for i, fld := range wt.Fields {
+				if fld.Type >= _gen_wiretype.TypeIDFirst {
+					wt.Fields[i].Type += _gen_wiretype.TypeID(firstAdded)
+				}
+			}
+			d = wt
+			// NOTE: other types are missing, but we are upgrading anyways.
+		}
+		result.TypeDefs = append(result.TypeDefs, d)
+	}
 	ss, _ = __gen_s.ServerStubApplication.Signature(call)
 	firstAdded = len(result.TypeDefs)
 	for k, v := range ss.Methods {

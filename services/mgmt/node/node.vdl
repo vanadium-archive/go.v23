@@ -4,6 +4,7 @@ package node
 
 import (
 	"veyron2/services/mgmt/binary"
+	"veyron2/services/security/access"
 )
 
 // Application can be used to manage applications on a device. The
@@ -167,6 +168,10 @@ type Description struct {
 // Node can be used to manage a node. The idea is that this interface
 // will be invoked using an object name that identifies the node.
 type Node interface {
+	// Object provides GetACL/SetACL methods to read/modify ACLs for the
+	// node methods. After a device has been claimed only the claimer will
+	// be able to modify the ACLs for the node.
+	access.Object
 	// Each method of the Application interface invoked at the node
 	// level applies to all applications installed on the node (and
 	// their installations and instances where applicable).
