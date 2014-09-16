@@ -10,8 +10,8 @@ type unixTimeExpiryCaveat int64
 
 // methodCaveat represents a caveat that validates iff the method being invoked
 // is included in this list. An empty list implies that no method can be
-// invoked (i.e., the holder of a blessing with this caveat cannot act as a
-// client).
+// invoked (i.e., the holder of a blessing with this caveat could be a server
+// but cannot act as a client).
 type methodCaveat []string
 
 // peerBlessingsCaveat represents a caveat that validates iff the peer being
