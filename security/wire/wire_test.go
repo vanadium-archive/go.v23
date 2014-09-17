@@ -1,10 +1,6 @@
 package wire
 
-import (
-	"testing"
-
-	"veyron2/security"
-)
+import "testing"
 
 func TestValidateBlessingName(t *testing.T) {
 	var (
@@ -19,23 +15,6 @@ func TestValidateBlessingName(t *testing.T) {
 	for _, n := range invalid {
 		if err := ValidateBlessingName(n); err == nil {
 			t.Errorf("ValidateBlessingName(%q) passed unexpectedly", n)
-		}
-	}
-}
-
-func TestValidateBlessingPattern(t *testing.T) {
-	var (
-		valid   = []security.BlessingPattern{"...", "alice", "alice.jones", "alice@google", "veyron/alice@google", "veyron/alice@google/bob", "alice/...", "alice/bob/..."}
-		invalid = []security.BlessingPattern{"", "alice...", "...alice", "alice...bob", "/alice", "alice/", "/alice", "...alice/bob", "alice.../bob", "alice/.../bob"}
-	)
-	for _, p := range valid {
-		if err := ValidateBlessingPattern(p); err != nil {
-			t.Errorf("ValidateBlessingPattern(%q) failed unexpectedly", p)
-		}
-	}
-	for _, p := range invalid {
-		if err := ValidateBlessingPattern(p); err == nil {
-			t.Errorf("ValidateBlessingPattern(%q) passed unexpectedly", p)
 		}
 	}
 }

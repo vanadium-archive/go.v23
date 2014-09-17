@@ -21,6 +21,9 @@ import (
 // glob. For example, the pattern "a/b/c/..." is matched by all the patterns
 // that match "a/b/c" ("a", "a/b", "a/b/c") and all delegates of "a/b/c" (like
 // "a/b/c/d", "a/b/c/d/e" etc.).
+//
+// A pattern string not having one of the above described structures is considered
+// invalid.
 type BlessingPattern string
 
 // Label is an access control right, like Read, Write, Admin, etc.

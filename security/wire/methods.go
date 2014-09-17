@@ -172,17 +172,3 @@ func ValidateBlessingName(name string) error {
 	}
 	return nil
 }
-
-// ValidateBlessingPattern verifies if the provided security.BlessingPattern is valid.
-func ValidateBlessingPattern(pattern security.BlessingPattern) error {
-	patternParts := strings.Split(string(pattern), security.ChainSeparator)
-	for i, p := range patternParts {
-		if (p == string(security.AllPrincipals)) && (i == len(patternParts)-1) {
-			break
-		}
-		if ValidateBlessingName(p) != nil {
-			return errInvalidPattern(pattern)
-		}
-	}
-	return nil
-}

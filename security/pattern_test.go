@@ -22,6 +22,14 @@ func TestMatchedBy(t *testing.T) {
 			DoesNotMatch: v{"", "ann", "bob", "ann/friend"},
 		},
 		{
+			Pattern:      "ann...",
+			DoesNotMatch: v{"", "ann", "bob", "ann/friend"},
+		},
+		{
+			Pattern:      "ann/.../...",
+			DoesNotMatch: v{"", "ann", "bob", "ann/friend", "ann/friend/spouse"},
+		},
+		{
 			Pattern:      "ann/...",
 			Matches:      v{"ann", "ann/friend", "ann/enemy"},
 			DoesNotMatch: v{"", "bob", "bob/ann"},
@@ -29,7 +37,7 @@ func TestMatchedBy(t *testing.T) {
 		{
 			Pattern:      "ann/friend",
 			Matches:      v{"ann", "ann/friend"},
-			DoesNotMatch: v{"", "bob", "bob/friend", "bob/ann", "ann/friend/spouce"},
+			DoesNotMatch: v{"", "bob", "bob/friend", "bob/ann", "ann/friend/spouse"},
 		},
 	}
 	for _, test := range tests {
@@ -68,4 +76,21 @@ func TestMatchedByCornerCases(t *testing.T) {
 		t.Errorf("%q.MatchedBy(%q) returned true", "ann", "")
 	}
 
+}
+
+func TestIsValid(t *testing.T) {
+	var (
+		valid   = []BlessingPattern{"...", "alice", "alice.jones", "alice@google", "veyron/alice@google", "veyron/alice@google/bob", "alice/...", "alice/bob/..."}
+		invalid = []BlessingPattern{"", "alice...", "...alice", "alice...bob", "/alice", "alice/", "/alice", "...alice/bob", "alice.../bob", "alice/.../bob"}
+	)
+	for _, p := range valid {
+		if !p.IsValid() {
+			t.Errorf("%q.IsValid() returned false", p)
+		}
+	}
+	for _, p := range invalid {
+		if p.IsValid() {
+			t.Errorf("%q.IsValid() returned true", p)
+		}
+	}
 }

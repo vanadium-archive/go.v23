@@ -7,7 +7,7 @@ import (
 // MatchedBy returns true iff one of the presented blessings matches
 // p as per the rules described in documentation for the BlessingPattern type.
 func (p BlessingPattern) MatchedBy(blessings ...string) bool {
-	if len(p) == 0 {
+	if len(p) == 0 || !p.IsValid() {
 		return false
 	}
 	if p == AllPrincipals {
@@ -25,6 +25,26 @@ func (p BlessingPattern) MatchedBy(blessings ...string) bool {
 		}
 	}
 	return false
+}
+
+// IsValid returns true iff the BlessingPattern is well formed,
+// i.e., does not contain any character sequences that will cause
+// the BlessingPattern to never match any valid blessings.
+func (p BlessingPattern) IsValid() bool {
+	parts := strings.Split(string(p), ChainSeparator)
+	for i, e := range parts {
+		if e == "" {
+			return false
+		}
+		isGlob := e == string(AllPrincipals)
+		if isGlob && (i < len(parts)-1) {
+			return false
+		}
+		if !isGlob && validateExtension(e) != nil {
+			return false
+		}
+	}
+	return true
 }
 
 func (BlessingPattern) matchedByBlessing(patternchain []string, glob bool, b string) bool {
