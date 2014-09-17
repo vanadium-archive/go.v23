@@ -68,18 +68,23 @@ func (c *ecdsaSigner) PublicKey() PublicKey {
 }
 
 func messageToSign(hash Hash, purpose, message []byte) []byte {
-	if message = cryptoHash(hash, message); message == nil {
+	if message = hash.sum(message); message == nil {
 		return nil
 	}
-	return cryptoHash(hash, append(message, purpose...))
+	// TODO(ashankar): Remove this when switching to the new security API that actually sets the Purpose field.
+	// Kept for backward compatibility till the switch is made.
+	if purpose == nil {
+		return hash.sum(message)
+	}
+	if purpose = hash.sum(purpose); purpose == nil {
+		return nil
+	}
+	return hash.sum(append(message, purpose...))
 }
 
-// cryptoHash hashes the provided data using the given cryptographic hash
-// function, returning nil iff the hash couldn't be applied.
-func cryptoHash(hash Hash, data []byte) []byte {
-	if data == nil {
-		return nil
-	}
+// sum returns the hash of data using hash as the cryptographic hash function.
+// Returns nil if data is nil or hash is not recognized.
+func (hash Hash) sum(data []byte) []byte {
 	switch hash {
 	case NoHash:
 		return data

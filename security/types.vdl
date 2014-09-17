@@ -104,7 +104,7 @@ const (
 type Signature struct {
   // Purpose of the signature. Can be used to prevent type attacks.
   // (See Section 4.2 of http://www-users.cs.york.ac.uk/~jac/PublishedPapers/reviewV1_1997.pdf for example).
-  // The actual signature (R, S values for ECDSA keys) is produced by signing: Hash(Hash(message)+Purpose).
+  // The actual signature (R, S values for ECDSA keys) is produced by signing: Hash(Hash(message), Hash(Purpose)).
   Purpose []byte
   // Cryptographic hash function applied to the message before computing the signature.
   Hash Hash
