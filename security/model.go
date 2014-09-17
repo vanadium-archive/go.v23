@@ -7,6 +7,101 @@ import (
 	"veyron2/naming"
 )
 
+// PublicIDStore is an interface for managing PublicIDs. All PublicIDs added
+// to the store are required to be blessing the same public key and must be tagged
+// with a BlessingPattern. By default, in IPC, a client uses a PublicID from the
+// store to authenticate to servers identified by the pattern tagged on
+// the PublicID.
+type PublicIDStore interface {
+	// Adds a PublicID to the store and tags it with the provided peerPattern.
+	// The method fails if the provided PublicID has a different public key from
+	// the (common) public key of existing PublicIDs in the store. PublicIDs with
+	// multiple Names are broken up into PublicIDs with at most one Name and then
+	// added separately to the store.
+	Add(id PublicID, peerPattern BlessingPattern) error
+
+	// ForPeer returns a PublicID by combining all PublicIDs from the store that are
+	// tagged with patterns matching the provided peer. The combined PublicID has the
+	// same public key as the individual PublicIDs and carries the union of the
+	// set of names of the individual PublicIDs. An error is returned if there are no
+	// matching PublicIDs.
+	ForPeer(peer PublicID) (PublicID, error)
+
+	// DefaultPublicID returns a PublicID from the store based on the default
+	// BlessingPattern. The returned PublicID has the same public key as the common
+	// public key of all PublicIDs in the store, and carries the union of the set of
+	// names of all PublicIDs that match the default pattern. An error is returned if
+	// there are no matching PublicIDs. (Note that it is the PublicIDs that are matched
+	// with the default pattern rather than the peer pattern tags on them.)
+	DefaultPublicID() (PublicID, error)
+
+	// SetDefaultBlessingPattern changes the default BlessingPattern used by subsequent
+	// calls to DefaultPublicID to the provided pattern. In the absence of any
+	// SetDefaultBlessingPattern calls, the default BlessingPattern must be set to
+	// "..." which matches all PublicIDs.
+	SetDefaultBlessingPattern(pattern BlessingPattern) error
+}
+
+// PublicID is the interface for a non-secret component of a principal's
+// unique identity.
+type PublicID interface {
+	// Names returns a list of human-readable names associated with the principal.
+	// The returned names act only as a hint, there is no guarantee that they are
+	// globally unique.
+	Names() []string
+
+	// PublicKey returns the public key corresponding to the private key
+	// that is held only by the principal represented by this PublicID.
+	PublicKey() PublicKey
+
+	// Authorize determines whether the PublicID has credentials that are valid
+	// under the provided context. If so, Authorize returns a new PublicID that
+	// carries only the valid credentials. The returned PublicID is always
+	// non-nil in the absence of errors and has the same public key as this
+	// PublicID.
+	Authorize(context Context) (PublicID, error)
+
+	// ThirdPartyCaveats returns the set of third-party restrictions for this PublicID.
+	ThirdPartyCaveats() []ThirdPartyCaveat
+}
+
+// Principal represents an entity capable of making or receiving RPCs.
+// Principals have a unique (public, private) key pair, have blessings bound
+// to them and can bless other principals.
+//
+// TODO(ashankar, ataly): REMOVE THIS TODO :)
+// IF YOU ARE READING THIS FILE AND YOU SEE THE TYPES PrivateID and
+// PublicID, THEN IGNORE THIS Blessings TYPE. Blessings is part of a
+// newer security API (see https://veyron-review.googlesource.com/#/c/4102)
+// AND WILL EVENTUALLY REPLACE PublicID.
+type Principal interface {
+	// Bless binds extensions of blessings held by this principal to
+	// another principal (represented by its public key).
+	//
+	// For example, a principal with the blessings "google/alice"
+	// and "veyron/alice" can bind the blessings "google/alice/friend"
+	// and "veyron/alice/friend" to another principal using:
+	//   Bless(<other principal>, <google/alice, veyron/alice>, "friend", ...)
+	//
+	// To discourage unconstrained delegation of authority, the interface
+	// requires at least one caveat to be provided. If unconstrained delegation
+	// is desired, the UnconstrainedDelegation function can be used to produce
+	// this argument.
+	//
+	// with.PublicKey must be the same as the principal's public key.
+	Bless(key PublicKey, with Blessings, extension string, caveat Caveat, additionalCaveats ...Caveat) (Blessings, error)
+
+	// BlessSelf creates a blessing with the provided name for this principal.
+	BlessSelf(name string, caveats ...Caveat) (Blessings, error)
+
+	// Sign uses the private key of the principal to sign message.
+	Sign(message []byte) (Signature, error)
+
+	// PublicKey returns the public key counterpart of the private key held
+	// by the Principal.
+	PublicKey() PublicKey
+}
+
 // BlessingStore is the interface for storing blessings bound to a
 // principal and managing the subset of blessings to be presented to
 // particular peers.
@@ -83,74 +178,52 @@ type BlessingRoots interface {
 	Recognized(key PublicKey, blessing string) error
 }
 
-// PublicIDStore is an interface for managing PublicIDs. All PublicIDs added
-// to the store are required to be blessing the same public key and must be tagged
-// with a BlessingPattern. By default, in IPC, a client uses a PublicID from the
-// store to authenticate to servers identified by the pattern tagged on
-// the PublicID.
-type PublicIDStore interface {
-	// Adds a PublicID to the store and tags it with the provided peerPattern.
-	// The method fails if the provided PublicID has a different public key from
-	// the (common) public key of existing PublicIDs in the store. PublicIDs with
-	// multiple Names are broken up into PublicIDs with at most one Name and then
-	// added separately to the store.
-	Add(id PublicID, peerPattern BlessingPattern) error
+// Blessings encapsulates all the cryptographic operations required to
+// prove that a set of blessings (human-readable strings) have been bound
+// to a principal in a specific context.
+//
+// Blessings objects are meant to be presented to other principals to authenticate
+// and authorize actions.
+//
+// TODO(ashankar, ataly): REMOVE THIS TODO :)
+// IF YOU ARE READING THIS FILE AND YOU SEE THE TYPES PrivateID and
+// PublicID, THEN IGNORE THIS Blessings TYPE. Blessings is part of a
+// newer security API (see https://veyron-review.googlesource.com/#/c/4102)
+// AND WILL EVENTUALLY REPLACE PublicID.
+type Blessings interface {
+	// ForContext returns a validated set of (human-readable string) blessings
+	// presented by the principal. These returned blessings (strings) are guaranteed to:
+	//
+	// (1) Satisfy all the caveats given context
+	// (2) Rooted in context.LocalPrincipal.Roots.
+	//
+	// Caveats are considered satisfied in the given context if the CaveatValidator
+	// implementation can be found in the address space of the caller and
+	// Validate returns nil.
+	ForContext(context Context) []string
 
-	// ForPeer returns a PublicID by combining all PublicIDs from the store that are
-	// tagged with patterns matching the provided peer. The combined PublicID has the
-	// same public key as the individual PublicIDs and carries the union of the
-	// set of names of the individual PublicIDs. An error is returned if there are no
-	// matching PublicIDs.
-	ForPeer(peer PublicID) (PublicID, error)
-
-	// DefaultPublicID returns a PublicID from the store based on the default
-	// BlessingPattern. The returned PublicID has the same public key as the common
-	// public key of all PublicIDs in the store, and carries the union of the set of
-	// names of all PublicIDs that match the default pattern. An error is returned if
-	// there are no matching PublicIDs. (Note that it is the PublicIDs that are matched
-	// with the default pattern rather than the peer pattern tags on them.)
-	DefaultPublicID() (PublicID, error)
-
-	// SetDefaultBlessingPattern changes the default BlessingPattern used by subsequent
-	// calls to DefaultPublicID to the provided pattern. In the absence of any
-	// SetDefaultBlessingPattern calls, the default BlessingPattern must be set to
-	// "..." which matches all PublicIDs.
-	SetDefaultBlessingPattern(pattern BlessingPattern) error
-}
-
-// PublicID is the interface for a non-secret component of a principal's
-// unique identity.
-type PublicID interface {
-	// Names returns a list of human-readable names associated with the principal.
-	// The returned names act only as a hint, there is no guarantee that they are
-	// globally unique.
-	Names() []string
-
-	// PublicKey returns the public key corresponding to the private key
-	// that is held only by the principal represented by this PublicID.
+	// PublicKey returns the public key of the principal to which
+	// blessings obtained from this object are bound.
 	PublicKey() PublicKey
 
-	// Authorize determines whether the PublicID has credentials that are valid
-	// under the provided context. If so, Authorize returns a new PublicID that
-	// carries only the valid credentials. The returned PublicID is always
-	// non-nil in the absence of errors and has the same public key as this
-	// PublicID.
-	Authorize(context Context) (PublicID, error)
-
-	// ThirdPartyCaveats returns the set of third-party restrictions for this PublicID.
+	// ThirdPartyCaveats returns the set of third-party restrictions on the
+	// scope of the blessings.
 	ThirdPartyCaveats() []ThirdPartyCaveat
+
+	// unexported methods that prevent implementations of this interface
+	// outside this package.
+	certificateChains() [][]Certificate
+	publicKeyDER() []byte
 }
 
 // Signer is the interface for signing arbitrary length messages using private keys.
 type Signer interface {
-	// Sign signs an arbitrary length message (often the hash of a larger message)
-	// using the private key associated with this Signer.
+	// Sign signs an arbitrary length message using the private key associated
+	// with this Signer.
 	//
-	// The provided purpose is appended to message before signing and is made
-	// available (in cleartext) with the Signature. Thus, a non-nil purpose
-	// can be used to avoid "type attacks", wherein an honest entity is
-	// cheated on interpreting a field in a message as one with a type
-	// other than the intended one.
+	// The provided purpose is used to avoid "type attacks", wherein an honest
+	// entity is cheated into interpreting a field in a message as one with a
+	// type other than the intended one.
 	Sign(purpose, message []byte) (Signature, error)
 
 	// PublicKey returns the public key corresponding to the Signer's private key.

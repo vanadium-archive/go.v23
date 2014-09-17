@@ -3,7 +3,17 @@
 package security
 
 import (
+	"bytes"
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
+	"fmt"
+	"reflect"
+	"strings"
+	"testing"
+
 	"veyron2/naming"
+	"veyron2/vom"
 )
 
 type context struct {
@@ -21,3 +31,85 @@ func (c *context) LocalID() PublicID                { return c.localID }
 func (c *context) RemoteID() PublicID               { return c.remoteID }
 func (c *context) LocalEndpoint() naming.Endpoint   { return nil }
 func (c *context) RemoteEndpoint() naming.Endpoint  { return nil }
+
+func newCaveat(c Caveat, err error) Caveat {
+	if err != nil {
+		panic(err)
+	}
+	return c
+}
+
+// Caveat that validates iff Context.Suffix matches the string.
+//
+// Since at the time of this writing, it was not clear that we want to make caveats on
+// suffixes generally available, this type is implemented in this test file.
+// If there is a general need for such a caveat, it should be defined similar to
+// other caveats (like methodCaveat) in caveat.vdl and removed from this test file.
+type suffixCaveat string
+
+func (c suffixCaveat) Validate(ctx Context) error {
+	if string(c) != ctx.Suffix() {
+		return fmt.Errorf("suffixCaveat not met")
+	}
+	return nil
+}
+
+func newSuffixCaveat(suffix string) Caveat { return newCaveat(NewCaveat(suffixCaveat(suffix))) }
+
+func newPrincipal(t *testing.T) Principal {
+	key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	if err != nil {
+		t.Fatalf("Failed to create private key for principal: %v", err)
+	}
+	p, err := CreatePrincipal(NewInMemoryECDSASigner(key))
+	if err != nil {
+		t.Fatalf("CreatePrincipal failed: %v", err)
+	}
+	return p
+}
+
+func blessSelf(t *testing.T, p Principal, name string, caveats ...Caveat) Blessings {
+	b, err := p.BlessSelf(name, caveats...)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return b
+}
+
+func checkBlessings(b Blessings, c Context, want ...string) error {
+	// Validate the integrity of the bits.
+	buf := new(bytes.Buffer)
+	if err := vom.NewEncoder(buf).Encode(b); err != nil {
+		return err
+	}
+	var decoded Blessings
+	if err := vom.NewDecoder(buf).Decode(&decoded); err != nil {
+		return err
+	}
+	if !reflect.DeepEqual(decoded, b) {
+		return fmt.Errorf("reflect.DeepEqual(%v, %v) failed after validBlessing", decoded, b)
+	}
+	// And now check them under the right context
+	got := b.ForContext(c)
+	if !reflect.DeepEqual(got, want) {
+		return fmt.Errorf("Got blessings %v, want %v", got, want)
+	}
+	return nil
+}
+
+func matchesError(got error, want string) error {
+	if (got == nil) && len(want) == 0 {
+		return nil
+	}
+	if got == nil {
+		return fmt.Errorf("Got nil error, wanted to match %q", want)
+	}
+	if !strings.Contains(got.Error(), want) {
+		return fmt.Errorf("Got error %q, wanted to match %q", got, want)
+	}
+	return nil
+}
+
+func init() {
+	vom.Register(suffixCaveat(""))
+}

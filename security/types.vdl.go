@@ -8,17 +8,6 @@ import (
 	_gen_vdlutil "veyron2/vdl/vdlutil"
 )
 
-// Caveat is a condition on the applicability of a blessing (or
-// a Discharge).
-//
-// These conditions are provided to PrivateID.Bless and are verified
-// in PublicID.Authorize.
-type Caveat struct {
-	// ValidatorVOM holds the VOM-encoded bytes of the CaveatValidator
-	// that validates this caveat.
-	ValidatorVOM []byte
-}
-
 // BlessingPattern is a pattern that is matched by specific blessings.
 //
 // A pattern can be either a blessing (slash-separated human-readable string)
@@ -125,6 +114,31 @@ type DischargeImpetus struct {
 	Arguments []_gen_vdlutil.Any // Arguments to the method invocation.
 }
 
+// Certificate represents the cryptographic proof of the binding of
+// extensions of a blessing held by one principal to another (represented by
+// a public key) under specific caveats.
+//
+// For example, if a principal P1 has a blessing "alice", then it can
+// extend it with a Certificate to generate the blessing "alice/friend" for
+// another principal P2.
+type Certificate struct {
+	Extension string    // Human-readable string extension bound to PublicKey.
+	PublicKey []byte    // DER-encoded PKIX public key.
+	Caveats   []Caveat  // Caveats on the binding of Name to PublicKey.
+	Signature Signature // Signature by the blessing principal that binds the extension to the public key.
+}
+
+// Caveat is a condition on the validity of a blessing/discharge.
+//
+// These conditions are provided when asking a principal to create
+// a blessing and are verified when extracting blessings (Blessings.ForName
+// in the Go API).
+type Caveat struct {
+	// ValidatorVOM holds the VOM-encoded bytes of the CaveatValidator
+	// that validates this caveat.
+	ValidatorVOM []byte
+}
+
 const AllPrincipals = BlessingPattern("...") // Glob pattern that matches all blessings.
 
 const ChainSeparator = "/" // ChainSeparator joins blessing names to form a blessing chain name.
@@ -150,3 +164,7 @@ const SHA384Hash = Hash("SHA384") // SHA384 cryptographic hash function defined 
 const SHA512Hash = Hash("SHA512") // SHA512 cryptographic hash function defined in FIPS 180-2.
 
 const NoHash = Hash("") // Identity hash function. TODO(ashankar,ataly): REMOVE THIS BEFORE RELEASE. This is NOT a cryptographic hash function.
+
+const SignatureForMessageSigning = "S" // Signature.Purpose used by a Principal to sign arbitrary messages.
+
+const SignatureForBlessingCertificates = "B" // Signature.Purpose used by a Principal when signing Certificates for creating blessings.

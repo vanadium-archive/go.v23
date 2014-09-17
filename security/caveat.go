@@ -91,4 +91,7 @@ func (v *Expiry) Validate(context Context) error {
 	return nil
 }
 
-// TODO(ataly, ashankar): Define UnconstrainedDelegationCaveat.
+// UnconstrainedDelegation returns a Caveat implementation that never fails to
+// validate. This is useful only for providing unconstrained blessings to
+// another principal.
+func UnconstrainedDelegation() Caveat { return Caveat{} }

@@ -8,5 +8,7 @@ func init() {
 	vom.Register(unixTimeExpiryCaveat(0))
 	vom.Register(methodCaveat{})
 	vom.Register(peerBlessingsCaveat{})
+	vom.Register(blessingsImpl{})
+	vom.Register(Certificate{})
 	vom.Register(Expiry{})
 }
