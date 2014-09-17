@@ -16,7 +16,7 @@
 // An object can have multiple names, so GetACL and SetACL can be invoked on
 // any of these names, but the object itself has a single ACL.
 //
-// SetACL completely replaces the ACL.  To perform an atomic read-modify-write
+// SetACL completely replaces the ACL. To perform an atomic read-modify-write
 // of the ACL, use the etag parameter.
 //   n, err := access.BindObject(name)
 //   if err != nil {
