@@ -19,7 +19,7 @@ type leafDispatcher struct {
 
 func (d leafDispatcher) Lookup(suffix, method string) (Invoker, security.Authorizer, error) {
 	if suffix != "" {
-		return nil, nil, verror.NotFoundf("ipc: LeafDispatcher lookup on non-empty suffix: " + suffix)
+		return nil, nil, verror.NoExistf("ipc: LeafDispatcher lookup on non-empty suffix: " + suffix)
 	}
 	return d.invoker, d.auth, nil
 }

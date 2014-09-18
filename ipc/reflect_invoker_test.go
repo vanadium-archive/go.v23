@@ -262,7 +262,7 @@ func TestReflectInvokerErrors(t *testing.T) {
 		prepareErr error
 		invokeErr  error
 	}
-	expectedError := verror.NotFoundf("ipc: unknown method 'UnknownMethod'")
+	expectedError := verror.NoExistf("ipc: unknown method 'UnknownMethod'")
 	tests := []testcase{
 		{&notags{}, "UnknownMethod", v{}, expectedError, expectedError},
 		{&tags{}, "UnknownMethod", v{}, expectedError, expectedError},

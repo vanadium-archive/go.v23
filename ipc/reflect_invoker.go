@@ -76,7 +76,7 @@ func getMethodLabel(obj interface{}, method string) security.Label {
 func (ri reflectInvoker) Prepare(method string, _ int) ([]interface{}, security.Label, error) {
 	info, ok := ri.methods[method]
 	if !ok {
-		return nil, defaultLabel, verror.NotFoundf("ipc: unknown method '%s'", method)
+		return nil, defaultLabel, verror.NoExistf("ipc: unknown method '%s'", method)
 	}
 	// Return the memoized label and new in-arg objects.
 	var argptrs []interface{}
@@ -94,7 +94,7 @@ func (ri reflectInvoker) Prepare(method string, _ int) ([]interface{}, security.
 func (ri reflectInvoker) Invoke(method string, call ServerCall, argptrs []interface{}) ([]interface{}, error) {
 	info, ok := ri.methods[method]
 	if !ok {
-		return nil, verror.NotFoundf("ipc: unknown method '%s'", method)
+		return nil, verror.NoExistf("ipc: unknown method '%s'", method)
 	}
 	// Create the reflect.Value args for the invocation.  The receiver of the
 	// method is always first, followed by the first method arg which is always
