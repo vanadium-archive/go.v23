@@ -202,3 +202,9 @@ type RoamingPublisherOpt struct {
 }
 
 func (RoamingPublisherOpt) IPCServerOpt() {}
+
+// DebugAuthorizerOpt specifies the authorizer that controls access to framework
+// provided debug objects on this server.
+type DebugAuthorizerOpt struct{ security.Authorizer }
+
+func (DebugAuthorizerOpt) IPCServerOpt() {}
