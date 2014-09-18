@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"unicode/utf8"
 
-	"veyron2/wiretype"
+	"veyron.io/veyron/veyron2/wiretype"
 )
 
 // encoderJSON handles encoding type and value messages in json format.

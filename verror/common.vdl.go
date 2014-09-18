@@ -3,16 +3,16 @@
 
 package verror
 
-const Aborted = ID("veyron2/verror.Aborted") // Operation aborted, e.g. connection closed.
+const Aborted = ID("veyron.io/veyron/veyron2/verror.Aborted") // Operation aborted, e.g. connection closed.
 
-const BadArg = ID("veyron2/verror.BadArg") // Requester specified an invalid argument.
+const BadArg = ID("veyron.io/veyron/veyron2/verror.BadArg") // Requester specified an invalid argument.
 
-const BadProtocol = ID("veyron2/verror.BadProtocol") // Protocol mismatch, including type or argument errors.
+const BadProtocol = ID("veyron.io/veyron/veyron2/verror.BadProtocol") // Protocol mismatch, including type or argument errors.
 
-const Exists = ID("veyron2/verror.Exists") // Requested entity already exists.
+const Exists = ID("veyron.io/veyron/veyron2/verror.Exists") // Requested entity already exists.
 
-const Internal = ID("veyron2/verror.Internal") // Internal invariants broken; something is very wrong.
+const Internal = ID("veyron.io/veyron/veyron2/verror.Internal") // Internal invariants broken; something is very wrong.
 
-const NotAuthorized = ID("veyron2/verror.NotAuthorized") // Requester isn't authorized to access the entity.
+const NotAuthorized = ID("veyron.io/veyron/veyron2/verror.NotAuthorized") // Requester isn't authorized to access the entity.
 
-const NotFound = ID("veyron2/verror.NotFound") // Requested entity (e.g. object, method) not found.
+const NotFound = ID("veyron.io/veyron/veyron2/verror.NotFound") // Requested entity (e.g. object, method) not found.

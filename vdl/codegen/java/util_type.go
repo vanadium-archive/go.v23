@@ -6,8 +6,8 @@ import (
 	"path"
 	"strings"
 
-	"veyron2/vdl"
-	"veyron2/vdl/compile"
+	"veyron.io/veyron/veyron2/vdl"
+	"veyron.io/veyron/veyron2/vdl/compile"
 )
 
 func javaFullyQualifiedNamedType(def *compile.TypeDef, forceClass bool, env *compile.Env) string {

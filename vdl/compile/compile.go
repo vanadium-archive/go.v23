@@ -20,8 +20,8 @@ package compile
 import (
 	"sort"
 
-	"veyron2/vdl"
-	"veyron2/vdl/parse"
+	"veyron.io/veyron/veyron2/vdl"
+	"veyron.io/veyron/veyron2/vdl/parse"
 )
 
 // Compile compiles a list of parse.Files into a Package.  Updates env with the

@@ -3,8 +3,8 @@
 package node
 
 import (
-	"veyron2/services/mgmt/binary"
-	"veyron2/services/security/access"
+	"veyron.io/veyron/veyron2/services/mgmt/binary"
+	"veyron.io/veyron/veyron2/services/security/access"
 )
 
 // Application can be used to manage applications on a device. The

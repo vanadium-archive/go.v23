@@ -4,8 +4,8 @@ import (
 	"reflect"
 	"testing"
 
-	"veyron/runtimes/google/lib/reflectutil"
-	"veyron2/wiretype"
+	"veyron.io/veyron/veyron/runtimes/google/lib/reflectutil"
+	"veyron.io/veyron/veyron2/wiretype"
 )
 
 func compareRTInfo(a, b *rtInfo) bool {
@@ -143,12 +143,12 @@ var (
 	rtiboolptr2 = &rtInfo{name: "**bool", kind: typeKindPtr, elem: rtiboolptr, numStars: 2}
 	rtiboolptr3 = &rtInfo{name: "***bool", kind: typeKindPtr, elem: rtiboolptr2, numStars: 3}
 
-	rtivomcoder    = &rtInfo{isNamed: true, name: "veyron2/vom.VomCoder", snames: s{"VomCoder", "vom.VomCoder", "veyron2/vom.VomCoder"}, kind: typeKindCustom, customBinary: &customCoder{rti: rtibool}, customJSON: &customCoder{rti: rtibool}, numMethods: 1}
-	rtivomcoderptr = &rtInfo{isNamed: true, name: "veyron2/vom.VomCoderPtr", snames: s{"VomCoderPtr", "vom.VomCoderPtr", "veyron2/vom.VomCoderPtr"}, kind: typeKindCustom, customBinary: &customCoder{rti: rtiboolptr}, customJSON: &customCoder{rti: rtiboolptr}, numStarsBinary: 1, numStarsJSON: 1, numMethods: 1}
-	rtigobcoder    = &rtInfo{isNamed: true, name: "veyron2/vom.GobCoder", snames: s{"GobCoder", "vom.GobCoder", "veyron2/vom.GobCoder"}, kind: typeKindInt, id: wiretype.TypeIDInt, customBinary: &customCoder{rti: rtibyteslice}, numMethods: 1}
+	rtivomcoder    = &rtInfo{isNamed: true, name: "veyron.io/veyron/veyron2/vom.VomCoder", snames: s{"VomCoder", "vom.VomCoder", "veyron.io/veyron/veyron2/vom.VomCoder"}, kind: typeKindCustom, customBinary: &customCoder{rti: rtibool}, customJSON: &customCoder{rti: rtibool}, numMethods: 1}
+	rtivomcoderptr = &rtInfo{isNamed: true, name: "veyron.io/veyron/veyron2/vom.VomCoderPtr", snames: s{"VomCoderPtr", "vom.VomCoderPtr", "veyron.io/veyron/veyron2/vom.VomCoderPtr"}, kind: typeKindCustom, customBinary: &customCoder{rti: rtiboolptr}, customJSON: &customCoder{rti: rtiboolptr}, numStarsBinary: 1, numStarsJSON: 1, numMethods: 1}
+	rtigobcoder    = &rtInfo{isNamed: true, name: "veyron.io/veyron/veyron2/vom.GobCoder", snames: s{"GobCoder", "vom.GobCoder", "veyron.io/veyron/veyron2/vom.GobCoder"}, kind: typeKindInt, id: wiretype.TypeIDInt, customBinary: &customCoder{rti: rtibyteslice}, numMethods: 1}
 
 	rtiiface    = &rtInfo{name: "interface", kind: typeKindInterface, id: wiretype.TypeIDInterface}
-	rti2methods = &rtInfo{isNamed: true, name: "veyron2/vom.TwoMethods", snames: s{"TwoMethods", "vom.TwoMethods", "veyron2/vom.TwoMethods"}, kind: typeKindInterface, id: wiretype.TypeIDInterface, numMethods: 2}
+	rti2methods = &rtInfo{isNamed: true, name: "veyron.io/veyron/veyron2/vom.TwoMethods", snames: s{"TwoMethods", "vom.TwoMethods", "veyron.io/veyron/veyron2/vom.TwoMethods"}, kind: typeKindInterface, id: wiretype.TypeIDInterface, numMethods: 2}
 )
 
 type s []string
@@ -181,55 +181,55 @@ var rtInfoTests = []struct {
 
 	// Named primitives
 	{Bool(false),
-		&rtInfo{isNamed: true, name: "veyron2/vom.Bool", snames: s{"Bool", "vom.Bool", "veyron2/vom.Bool"}, kind: typeKindBool, id: wiretype.TypeIDBool},
+		&rtInfo{isNamed: true, name: "veyron.io/veyron/veyron2/vom.Bool", snames: s{"Bool", "vom.Bool", "veyron.io/veyron/veyron2/vom.Bool"}, kind: typeKindBool, id: wiretype.TypeIDBool},
 		""},
 	{String(""),
-		&rtInfo{isNamed: true, name: "veyron2/vom.String", snames: s{"String", "vom.String", "veyron2/vom.String"}, kind: typeKindString, id: wiretype.TypeIDString},
+		&rtInfo{isNamed: true, name: "veyron.io/veyron/veyron2/vom.String", snames: s{"String", "vom.String", "veyron.io/veyron/veyron2/vom.String"}, kind: typeKindString, id: wiretype.TypeIDString},
 		""},
 	{ByteSlice(""),
-		&rtInfo{isNamed: true, name: "veyron2/vom.ByteSlice", snames: s{"ByteSlice", "vom.ByteSlice", "veyron2/vom.ByteSlice"}, kind: typeKindByteSlice, id: wiretype.TypeIDByteSlice, elem: rtiuint8},
+		&rtInfo{isNamed: true, name: "veyron.io/veyron/veyron2/vom.ByteSlice", snames: s{"ByteSlice", "vom.ByteSlice", "veyron.io/veyron/veyron2/vom.ByteSlice"}, kind: typeKindByteSlice, id: wiretype.TypeIDByteSlice, elem: rtiuint8},
 		""},
 
 	{Uint(0),
-		&rtInfo{isNamed: true, name: "veyron2/vom.Uint", snames: s{"Uint", "vom.Uint", "veyron2/vom.Uint"}, kind: typeKindUint, id: wiretype.TypeIDUint},
+		&rtInfo{isNamed: true, name: "veyron.io/veyron/veyron2/vom.Uint", snames: s{"Uint", "vom.Uint", "veyron.io/veyron/veyron2/vom.Uint"}, kind: typeKindUint, id: wiretype.TypeIDUint},
 		""},
 	{Uint8(0),
-		&rtInfo{isNamed: true, name: "veyron2/vom.Uint8", snames: s{"Uint8", "vom.Uint8", "veyron2/vom.Uint8"}, kind: typeKindByte, id: wiretype.TypeIDUint8, suffix: "8"},
+		&rtInfo{isNamed: true, name: "veyron.io/veyron/veyron2/vom.Uint8", snames: s{"Uint8", "vom.Uint8", "veyron.io/veyron/veyron2/vom.Uint8"}, kind: typeKindByte, id: wiretype.TypeIDUint8, suffix: "8"},
 		""},
 	{Uint16(0),
-		&rtInfo{isNamed: true, name: "veyron2/vom.Uint16", snames: s{"Uint16", "vom.Uint16", "veyron2/vom.Uint16"}, kind: typeKindUint, id: wiretype.TypeIDUint16, suffix: "16"},
+		&rtInfo{isNamed: true, name: "veyron.io/veyron/veyron2/vom.Uint16", snames: s{"Uint16", "vom.Uint16", "veyron.io/veyron/veyron2/vom.Uint16"}, kind: typeKindUint, id: wiretype.TypeIDUint16, suffix: "16"},
 		""},
 	{Uint32(0),
-		&rtInfo{isNamed: true, name: "veyron2/vom.Uint32", snames: s{"Uint32", "vom.Uint32", "veyron2/vom.Uint32"}, kind: typeKindUint, id: wiretype.TypeIDUint32, suffix: "32"},
+		&rtInfo{isNamed: true, name: "veyron.io/veyron/veyron2/vom.Uint32", snames: s{"Uint32", "vom.Uint32", "veyron.io/veyron/veyron2/vom.Uint32"}, kind: typeKindUint, id: wiretype.TypeIDUint32, suffix: "32"},
 		""},
 	{Uint64(0),
-		&rtInfo{isNamed: true, name: "veyron2/vom.Uint64", snames: s{"Uint64", "vom.Uint64", "veyron2/vom.Uint64"}, kind: typeKindUint, id: wiretype.TypeIDUint64, suffix: "64"},
+		&rtInfo{isNamed: true, name: "veyron.io/veyron/veyron2/vom.Uint64", snames: s{"Uint64", "vom.Uint64", "veyron.io/veyron/veyron2/vom.Uint64"}, kind: typeKindUint, id: wiretype.TypeIDUint64, suffix: "64"},
 		""},
 	{Uintptr(0),
-		&rtInfo{isNamed: true, name: "veyron2/vom.Uintptr", snames: s{"Uintptr", "vom.Uintptr", "veyron2/vom.Uintptr"}, kind: typeKindUint, id: wiretype.TypeIDUintptr, suffix: "ptr"},
+		&rtInfo{isNamed: true, name: "veyron.io/veyron/veyron2/vom.Uintptr", snames: s{"Uintptr", "vom.Uintptr", "veyron.io/veyron/veyron2/vom.Uintptr"}, kind: typeKindUint, id: wiretype.TypeIDUintptr, suffix: "ptr"},
 		""},
 
 	{Int(0),
-		&rtInfo{isNamed: true, name: "veyron2/vom.Int", snames: s{"Int", "vom.Int", "veyron2/vom.Int"}, kind: typeKindInt, id: wiretype.TypeIDInt},
+		&rtInfo{isNamed: true, name: "veyron.io/veyron/veyron2/vom.Int", snames: s{"Int", "vom.Int", "veyron.io/veyron/veyron2/vom.Int"}, kind: typeKindInt, id: wiretype.TypeIDInt},
 		""},
 	{Int8(0),
-		&rtInfo{isNamed: true, name: "veyron2/vom.Int8", snames: s{"Int8", "vom.Int8", "veyron2/vom.Int8"}, kind: typeKindInt, id: wiretype.TypeIDInt8, suffix: "8"},
+		&rtInfo{isNamed: true, name: "veyron.io/veyron/veyron2/vom.Int8", snames: s{"Int8", "vom.Int8", "veyron.io/veyron/veyron2/vom.Int8"}, kind: typeKindInt, id: wiretype.TypeIDInt8, suffix: "8"},
 		""},
 	{Int16(0),
-		&rtInfo{isNamed: true, name: "veyron2/vom.Int16", snames: s{"Int16", "vom.Int16", "veyron2/vom.Int16"}, kind: typeKindInt, id: wiretype.TypeIDInt16, suffix: "16"},
+		&rtInfo{isNamed: true, name: "veyron.io/veyron/veyron2/vom.Int16", snames: s{"Int16", "vom.Int16", "veyron.io/veyron/veyron2/vom.Int16"}, kind: typeKindInt, id: wiretype.TypeIDInt16, suffix: "16"},
 		""},
 	{Int32(0),
-		&rtInfo{isNamed: true, name: "veyron2/vom.Int32", snames: s{"Int32", "vom.Int32", "veyron2/vom.Int32"}, kind: typeKindInt, id: wiretype.TypeIDInt32, suffix: "32"},
+		&rtInfo{isNamed: true, name: "veyron.io/veyron/veyron2/vom.Int32", snames: s{"Int32", "vom.Int32", "veyron.io/veyron/veyron2/vom.Int32"}, kind: typeKindInt, id: wiretype.TypeIDInt32, suffix: "32"},
 		""},
 	{Int64(0),
-		&rtInfo{isNamed: true, name: "veyron2/vom.Int64", snames: s{"Int64", "vom.Int64", "veyron2/vom.Int64"}, kind: typeKindInt, id: wiretype.TypeIDInt64, suffix: "64"},
+		&rtInfo{isNamed: true, name: "veyron.io/veyron/veyron2/vom.Int64", snames: s{"Int64", "vom.Int64", "veyron.io/veyron/veyron2/vom.Int64"}, kind: typeKindInt, id: wiretype.TypeIDInt64, suffix: "64"},
 		""},
 
 	{Float32(0),
-		&rtInfo{isNamed: true, name: "veyron2/vom.Float32", snames: s{"Float32", "vom.Float32", "veyron2/vom.Float32"}, kind: typeKindFloat, id: wiretype.TypeIDFloat32, suffix: "32"},
+		&rtInfo{isNamed: true, name: "veyron.io/veyron/veyron2/vom.Float32", snames: s{"Float32", "vom.Float32", "veyron.io/veyron/veyron2/vom.Float32"}, kind: typeKindFloat, id: wiretype.TypeIDFloat32, suffix: "32"},
 		""},
 	{Float64(0),
-		&rtInfo{isNamed: true, name: "veyron2/vom.Float64", snames: s{"Float64", "vom.Float64", "veyron2/vom.Float64"}, kind: typeKindFloat, id: wiretype.TypeIDFloat64, suffix: "64"},
+		&rtInfo{isNamed: true, name: "veyron.io/veyron/veyron2/vom.Float64", snames: s{"Float64", "vom.Float64", "veyron.io/veyron/veyron2/vom.Float64"}, kind: typeKindFloat, id: wiretype.TypeIDFloat64, suffix: "64"},
 		""},
 
 	// Unnnamed composites
@@ -251,19 +251,19 @@ var rtInfoTests = []struct {
 
 	// Named composites
 	{BoolSlice{},
-		&rtInfo{isNamed: true, name: "veyron2/vom.BoolSlice", snames: s{"BoolSlice", "vom.BoolSlice", "veyron2/vom.BoolSlice"}, kind: typeKindSlice, elem: rtibool},
+		&rtInfo{isNamed: true, name: "veyron.io/veyron/veyron2/vom.BoolSlice", snames: s{"BoolSlice", "vom.BoolSlice", "veyron.io/veyron/veyron2/vom.BoolSlice"}, kind: typeKindSlice, elem: rtibool},
 		""},
 	{BoolArray2{},
-		&rtInfo{isNamed: true, name: "veyron2/vom.BoolArray2", snames: s{"BoolArray2", "vom.BoolArray2", "veyron2/vom.BoolArray2"}, kind: typeKindArray, elem: rtibool, len: 2},
+		&rtInfo{isNamed: true, name: "veyron.io/veyron/veyron2/vom.BoolArray2", snames: s{"BoolArray2", "vom.BoolArray2", "veyron.io/veyron/veyron2/vom.BoolArray2"}, kind: typeKindArray, elem: rtibool, len: 2},
 		""},
 	{UintStringMap{},
-		&rtInfo{isNamed: true, name: "veyron2/vom.UintStringMap", snames: s{"UintStringMap", "vom.UintStringMap", "veyron2/vom.UintStringMap"}, kind: typeKindMap, key: rtiuint, elem: rtistring},
+		&rtInfo{isNamed: true, name: "veyron.io/veyron/veyron2/vom.UintStringMap", snames: s{"UintStringMap", "vom.UintStringMap", "veyron.io/veyron/veyron2/vom.UintStringMap"}, kind: typeKindMap, key: rtiuint, elem: rtistring},
 		""},
 	{StructA{},
-		&rtInfo{isNamed: true, name: "veyron2/vom.StructA", snames: s{"StructA", "vom.StructA", "veyron2/vom.StructA"}, kind: typeKindStruct, fields: []*rtInfoField{rtifieldauint}},
+		&rtInfo{isNamed: true, name: "veyron.io/veyron/veyron2/vom.StructA", snames: s{"StructA", "vom.StructA", "veyron.io/veyron/veyron2/vom.StructA"}, kind: typeKindStruct, fields: []*rtInfoField{rtifieldauint}},
 		""},
 	{BoolPtr(nil),
-		&rtInfo{isNamed: true, name: "veyron2/vom.BoolPtr", snames: s{"BoolPtr", "vom.BoolPtr", "veyron2/vom.BoolPtr"}, kind: typeKindPtr, elem: rtibool, numStars: 1},
+		&rtInfo{isNamed: true, name: "veyron.io/veyron/veyron2/vom.BoolPtr", snames: s{"BoolPtr", "vom.BoolPtr", "veyron.io/veyron/veyron2/vom.BoolPtr"}, kind: typeKindPtr, elem: rtibool, numStars: 1},
 		""},
 
 	// Complex
@@ -280,7 +280,7 @@ var rtInfoTests = []struct {
 		""},
 	{Complex64(0),
 		&rtInfo{
-			isNamed: true, name: "veyron2/vom.Complex64", snames: s{"Complex64", "vom.Complex64", "veyron2/vom.Complex64"}, tags: s{"complex64"}, kind: typeKindCustom,
+			isNamed: true, name: "veyron.io/veyron/veyron2/vom.Complex64", snames: s{"Complex64", "vom.Complex64", "veyron.io/veyron/veyron2/vom.Complex64"}, tags: s{"complex64"}, kind: typeKindCustom,
 			customBinary: &customCoder{
 				rti: &rtInfo{isNamed: true, name: "complex64", tags: s{"complex64"}, kind: typeKindStruct, fields: complex64Fields},
 			},
@@ -302,7 +302,7 @@ var rtInfoTests = []struct {
 		""},
 	{Complex128(0),
 		&rtInfo{
-			isNamed: true, name: "veyron2/vom.Complex128", snames: s{"Complex128", "vom.Complex128", "veyron2/vom.Complex128"}, tags: s{"complex128"}, kind: typeKindCustom,
+			isNamed: true, name: "veyron.io/veyron/veyron2/vom.Complex128", snames: s{"Complex128", "vom.Complex128", "veyron.io/veyron/veyron2/vom.Complex128"}, tags: s{"complex128"}, kind: typeKindCustom,
 			customBinary: &customCoder{
 				rti: &rtInfo{isNamed: true, name: "complex128", tags: s{"complex128"}, kind: typeKindStruct, fields: complex128Fields},
 			},
@@ -343,8 +343,8 @@ var rtInfoTests = []struct {
 	{StructWithInterfaces{},
 		&rtInfo{
 			isNamed: true,
-			name:    "veyron2/vom.StructWithInterfaces",
-			snames:  s{"StructWithInterfaces", "vom.StructWithInterfaces", "veyron2/vom.StructWithInterfaces"},
+			name:    "veyron.io/veyron/veyron2/vom.StructWithInterfaces",
+			snames:  s{"StructWithInterfaces", "vom.StructWithInterfaces", "veyron.io/veyron/veyron2/vom.StructWithInterfaces"},
 			kind:    typeKindStruct,
 			fields: []*rtInfoField{
 				{name: "A", index: 0, info: rtiiface},

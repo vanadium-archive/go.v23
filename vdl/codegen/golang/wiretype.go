@@ -5,11 +5,11 @@ package golang
 import (
 	"fmt"
 
-	"veyron2/vdl"
-	"veyron2/vdl/compile"
-	"veyron2/vdl/vdlutil"
-	"veyron2/wiretype"
-	"veyron2/wiretype/build"
+	"veyron.io/veyron/veyron2/vdl"
+	"veyron.io/veyron/veyron2/vdl/compile"
+	"veyron.io/veyron/veyron2/vdl/vdlutil"
+	"veyron.io/veyron/veyron2/wiretype"
+	"veyron.io/veyron/veyron2/wiretype/build"
 )
 
 // wireTypeConverter converts VDL build types to wiretype IDs and maintains a slice of the type

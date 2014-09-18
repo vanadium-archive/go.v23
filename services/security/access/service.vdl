@@ -95,7 +95,7 @@
 package access
 
 import (
-  "veyron2/security"
+  "veyron.io/veyron/veyron2/security"
 )
 
 // Object provides access control for Veyron objects.

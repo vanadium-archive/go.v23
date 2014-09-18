@@ -13,7 +13,7 @@
 package wire
 
 import (
-	"veyron2/security"
+	"veyron.io/veyron/veyron2/security"
 )
 
 // KeyCurve defines a namespace for elliptic curves.

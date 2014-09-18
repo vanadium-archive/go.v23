@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"sync"
 
-	"veyron2/wiretype"
+	"veyron.io/veyron/veyron2/wiretype"
 )
 
 // rtInfo holds type information derived from Type, used during encoding

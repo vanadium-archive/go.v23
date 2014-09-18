@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"sync"
 
-	google_rt "veyron/runtimes/google/rt"
+	google_rt "veyron.io/veyron/veyron/runtimes/google/rt"
 
-	"veyron2"
+	"veyron.io/veyron/veyron2"
 )
 
 type Factory func(opts ...veyron2.ROpt) (veyron2.Runtime, error)

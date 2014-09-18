@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"veyron2/vom"
+	"veyron.io/veyron/veyron2/vom"
 )
 
 func TestCaveats(t *testing.T) {

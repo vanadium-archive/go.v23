@@ -3,10 +3,10 @@ package ipc
 import (
 	"net"
 
-	"veyron2/config"
-	"veyron2/context"
-	"veyron2/naming"
-	"veyron2/security"
+	"veyron.io/veyron/veyron2/config"
+	"veyron.io/veyron/veyron2/context"
+	"veyron.io/veyron/veyron2/naming"
+	"veyron.io/veyron/veyron2/security"
 )
 
 // Client represents the interface for making RPC calls.  There may be multiple

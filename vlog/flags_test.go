@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	_ "veyron/lib/testutil"
-	"veyron/lib/testutil/blackbox"
+	_ "veyron.io/veyron/veyron/lib/testutil"
+	"veyron.io/veyron/veyron/lib/testutil/blackbox"
 
-	"veyron2/vlog"
+	"veyron.io/veyron/veyron2/vlog"
 )
 
 func TestHelperProcess(t *testing.T) {

@@ -8,7 +8,7 @@ import (
 	"reflect"
 	"testing"
 
-	"veyron2/vdl"
+	"veyron.io/veyron/veyron2/vdl"
 )
 
 type nValue *vdl.Value

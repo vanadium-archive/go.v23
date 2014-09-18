@@ -139,7 +139,7 @@ var BootstrapTypes = []struct {
 
 	{NamedPrimitiveType{
 		Type: TypeIDUint64,
-		Name: "veyron2/wiretype.TypeID",
+		Name: "veyron.io/veyron/veyron2/wiretype.TypeID",
 	}, TypeIDTypeID},
 
 	{StructType{
@@ -157,7 +157,7 @@ var BootstrapTypes = []struct {
 				Type: TypeIDStringSlice,
 			},
 		},
-		Name: "veyron2/wiretype.NamedPrimitiveType",
+		Name: "veyron.io/veyron/veyron2/wiretype.NamedPrimitiveType",
 	}, TypeIDNamedPrimitiveType},
 
 	{StructType{
@@ -175,7 +175,7 @@ var BootstrapTypes = []struct {
 				Type: TypeIDStringSlice,
 			},
 		},
-		Name: "veyron2/wiretype.SliceType",
+		Name: "veyron.io/veyron/veyron2/wiretype.SliceType",
 	}, TypeIDSliceType},
 
 	{StructType{
@@ -197,7 +197,7 @@ var BootstrapTypes = []struct {
 				Type: TypeIDStringSlice,
 			},
 		},
-		Name: "veyron2/wiretype.ArrayType",
+		Name: "veyron.io/veyron/veyron2/wiretype.ArrayType",
 	}, TypeIDArrayType},
 
 	{StructType{
@@ -219,7 +219,7 @@ var BootstrapTypes = []struct {
 				Type: TypeIDStringSlice,
 			},
 		},
-		Name: "veyron2/wiretype.MapType",
+		Name: "veyron.io/veyron/veyron2/wiretype.MapType",
 	}, TypeIDMapType},
 
 	{StructType{
@@ -233,7 +233,7 @@ var BootstrapTypes = []struct {
 				Type: TypeIDString,
 			},
 		},
-		Name: "veyron2/wiretype.FieldType",
+		Name: "veyron.io/veyron/veyron2/wiretype.FieldType",
 	}, TypeIDFieldType},
 
 	{SliceType{
@@ -256,7 +256,7 @@ var BootstrapTypes = []struct {
 				Type: TypeIDStringSlice,
 			},
 		},
-		Name: "veyron2/wiretype.StructType",
+		Name: "veyron.io/veyron/veyron2/wiretype.StructType",
 	}, TypeIDStructType},
 
 	{StructType{
@@ -274,7 +274,7 @@ var BootstrapTypes = []struct {
 				Type: TypeIDStringSlice,
 			},
 		},
-		Name: "veyron2/wiretype.PtrType",
+		Name: "veyron.io/veyron/veyron2/wiretype.PtrType",
 	}, TypeIDPtrType},
 
 	{createPrimitiveBootstrapType(TypeIDFloat32), TypeIDFloat32},

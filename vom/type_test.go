@@ -147,8 +147,8 @@ func TestStructOfSometimesReturnsReflectType(t *testing.T) {
 	}
 
 	goal := TypeOf(S{})
-	other := StructOf([]StructField{StructField{Type: TypeOf(4), PkgPath: "veyron2/vom", Name: "x"},
-		StructField{Type: TypeOf(""), PkgPath: "veyron2/vom", Name: "y"}})
+	other := StructOf([]StructField{StructField{Type: TypeOf(4), PkgPath: "veyron.io/veyron/veyron2/vom", Name: "x"},
+		StructField{Type: TypeOf(""), PkgPath: "veyron.io/veyron/veyron2/vom", Name: "y"}})
 
 	if vrt, ok := other.(*vReflectType); !ok {
 		t.Fatalf("expected struct to be of type vReflectType")

@@ -14,7 +14,7 @@ import (
 	"log"
 	"time"
 
-	"veyron2/vom"
+	"veyron.io/veyron/veyron2/vom"
 )
 
 func fakeName(name string) string {

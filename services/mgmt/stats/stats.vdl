@@ -3,8 +3,8 @@
 package stats
 
 import (
-	"veyron2/services/mounttable"
-	"veyron2/services/watch"
+	"veyron.io/veyron/veyron2/services/mounttable"
+	"veyron.io/veyron/veyron2/services/watch"
 )
 
 // The Stats interface is used to access stats for troubleshooting and

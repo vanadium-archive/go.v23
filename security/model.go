@@ -4,7 +4,7 @@ package security
 
 import (
 	"time"
-	"veyron2/naming"
+	"veyron.io/veyron/veyron2/naming"
 )
 
 // PublicIDStore is an interface for managing PublicIDs. All PublicIDs added

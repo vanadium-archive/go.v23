@@ -12,8 +12,8 @@ import (
 	"strings"
 	"testing"
 
-	"veyron2/naming"
-	"veyron2/vom"
+	"veyron.io/veyron/veyron2/naming"
+	"veyron.io/veyron/veyron2/vom"
 )
 
 type context struct {

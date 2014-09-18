@@ -5,7 +5,7 @@ import (
 	"io"
 	"reflect"
 
-	"veyron2/wiretype"
+	"veyron.io/veyron/veyron2/wiretype"
 )
 
 // DecodeVOMBinary is a helper to decode VOM binary. This assumes that the user is decoding into

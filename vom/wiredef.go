@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"veyron2/wiretype"
+	"veyron.io/veyron/veyron2/wiretype"
 )
 
 // wireDef holds the "compiled" representation of WireType type definitions read

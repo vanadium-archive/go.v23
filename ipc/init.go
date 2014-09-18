@@ -1,8 +1,8 @@
 package ipc
 
 import (
-	"veyron2/verror"
-	"veyron2/vom"
+	"veyron.io/veyron/veyron2/verror"
+	"veyron.io/veyron/veyron2/vom"
 )
 
 func init() {

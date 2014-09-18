@@ -12,7 +12,7 @@ import (
 
 const (
 	testDir    = "../../test_base"
-	outPkgPath = "veyron2/vdl/test_base"
+	outPkgPath = "veyron.io/veyron/veyron2/vdl/test_base"
 )
 
 func TestVDLGenerator(t *testing.T) {

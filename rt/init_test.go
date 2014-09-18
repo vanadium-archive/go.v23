@@ -4,10 +4,10 @@ import (
 	"net"
 	"testing"
 
-	"veyron2"
-	"veyron2/config"
-	"veyron2/rt"
-	"veyron2/security"
+	"veyron.io/veyron/veyron2"
+	"veyron.io/veyron/veyron2/config"
+	"veyron.io/veyron/veyron2/rt"
+	"veyron.io/veyron/veyron2/security"
 )
 
 func ExampleInit() {

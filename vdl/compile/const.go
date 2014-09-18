@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"math/big"
 
-	"veyron/lib/toposort"
-	"veyron2/vdl"
-	"veyron2/vdl/opconst"
-	"veyron2/vdl/parse"
+	"veyron.io/veyron/veyron/lib/toposort"
+	"veyron.io/veyron/veyron2/vdl"
+	"veyron.io/veyron/veyron2/vdl/opconst"
+	"veyron.io/veyron/veyron2/vdl/parse"
 )
 
 // ConstDef represents a user-defined named const definition in the compiled

@@ -8,13 +8,13 @@ import (
 	"testing"
 	"time"
 
-	vtest "veyron/lib/testutil"
+	vtest "veyron.io/veyron/veyron/lib/testutil"
 
-	"veyron2/context"
-	"veyron2/ipc"
-	"veyron2/naming"
-	"veyron2/security"
-	"veyron2/verror"
+	"veyron.io/veyron/veyron2/context"
+	"veyron.io/veyron/veyron2/ipc"
+	"veyron.io/veyron/veyron2/naming"
+	"veyron.io/veyron/veyron2/security"
+	"veyron.io/veyron/veyron2/verror"
 )
 
 // FakeServerCall implements ipc.ServerContext.

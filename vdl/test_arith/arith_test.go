@@ -7,12 +7,12 @@ import (
 	"reflect"
 	"testing"
 
-	"veyron2/ipc"
-	"veyron2/naming"
-	"veyron2/rt"
-	"veyron2/vdl/test_base"
-	"veyron2/vdl/vdlutil"
-	"veyron2/wiretype"
+	"veyron.io/veyron/veyron2/ipc"
+	"veyron.io/veyron/veyron2/naming"
+	"veyron.io/veyron/veyron2/rt"
+	"veyron.io/veyron/veyron2/vdl/test_base"
+	"veyron.io/veyron/veyron2/vdl/vdlutil"
+	"veyron.io/veyron/veyron2/wiretype"
 )
 
 var generatedError = errors.New("generated error")
@@ -317,8 +317,8 @@ func TestCalculator(t *testing.T) {
 		// Arith:
 		wiretype.NamedPrimitiveType{1, "error", nil},
 		wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{36, "A"},
-			wiretype.FieldType{36, "B"}}, "veyron2/vdl/test_base.Args", nil},
-		wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{67, "Args"}}, "veyron2/vdl/test_base.NestedArgs", nil},
+			wiretype.FieldType{36, "B"}}, "veyron.io/veyron/veyron2/vdl/test_base.Args", nil},
+		wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{67, "Args"}}, "veyron.io/veyron/veyron2/vdl/test_base.NestedArgs", nil},
 		wiretype.NamedPrimitiveType{1, "anydata", nil},
 		// Trig:
 		wiretype.NamedPrimitiveType{1, "error", nil},
@@ -573,8 +573,8 @@ func TestArith(t *testing.T) {
 
 		expectedTypeDefs := []vdlutil.Any{
 			wiretype.NamedPrimitiveType{1, "error", nil},
-			wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{36, "A"}, wiretype.FieldType{36, "B"}}, "veyron2/vdl/test_base.Args", nil},
-			wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{66, "Args"}}, "veyron2/vdl/test_base.NestedArgs", nil},
+			wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{36, "A"}, wiretype.FieldType{36, "B"}}, "veyron.io/veyron/veyron2/vdl/test_base.Args", nil},
+			wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{66, "Args"}}, "veyron.io/veyron/veyron2/vdl/test_base.NestedArgs", nil},
 			wiretype.NamedPrimitiveType{1, "anydata", nil},
 		}
 

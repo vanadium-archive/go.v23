@@ -10,14 +10,14 @@ import (
 	"path/filepath"
 	"strings"
 
-	"veyron/lib/cmdline"
+	"veyron.io/veyron/veyron/lib/cmdline"
 
-	"veyron2/vdl/build"
-	"veyron2/vdl/codegen/golang"
-	"veyron2/vdl/codegen/java"
-	"veyron2/vdl/codegen/javascript"
-	"veyron2/vdl/compile"
-	"veyron2/vdl/vdlutil"
+	"veyron.io/veyron/veyron2/vdl/build"
+	"veyron.io/veyron/veyron2/vdl/codegen/golang"
+	"veyron.io/veyron/veyron2/vdl/codegen/java"
+	"veyron.io/veyron/veyron2/vdl/codegen/javascript"
+	"veyron.io/veyron/veyron2/vdl/compile"
+	"veyron.io/veyron/veyron2/vdl/vdlutil"
 )
 
 func init() {
@@ -63,7 +63,7 @@ func runHelper(run func(targets []*build.Package, env *compile.Env)) func(cmd *c
 const pkgDesc = `
 <packages> are a list of packages to process, specified as arguments for each
 command.  The format is similar to the go tool.  In its simplest form each
-package is an import path; e.g. "veyron/lib/vdl".  A package that is an absolute
+package is an import path; e.g. "veyron.io/veyron/veyron/lib/vdl".  A package that is an absolute
 path or that contains a "." is interpreted as a file system path and denotes the
 package in that directory.  A package that ends with "..." does a wildcard match
 against all directories with that prefix.  The special import path "all" expands
@@ -253,21 +253,21 @@ var (
 	optGenGoOutDir   = genOutDir{}
 	optGenJavaOutDir = genOutDir{
 		xlate: xlateRules{
-			{"veyron/go/src", "veyron.new/java/src/main/java"},
-			{"roadmap/go/src", "veyron.new/java/src/main/java"},
+			{"veyron.io/veyron/veyron/go/src", "veyron.io/veyron/veyron.new/java/src/main/java"},
+			{"roadmap/go/src", "veyron.io/veyron/veyron.new/java/src/main/java"},
 			{"third_party/go/src", "SKIP"},
 		},
 	}
 	optGenJavascriptOutDir = genOutDir{
 		xlate: xlateRules{
-			{"veyron/go/src", "veyron.js/src"},
-			{"roadmap/go/src", "veyron.js/java"},
+			{"veyron.io/veyron/veyron/go/src", "veyron.io/veyron/veyron.js/src"},
+			{"roadmap/go/src", "veyron.io/veyron/veyron.js/java"},
 			{"third_party/go/src", "SKIP"},
 		},
 	}
 	optGenJavaPkgOut = xlateRules{
 		{"veyron.io", "io/veyron"},
-		{"veyron", "com/veyron"},
+		{"veyron.io/veyron/veyron", "com/veyron"},
 	}
 	optGenLangs = genLangs{genLangGo, genLangJava} // TODO: javascript
 )

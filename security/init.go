@@ -1,6 +1,6 @@
 package security
 
-import "veyron2/vom"
+import "veyron.io/veyron/veyron2/vom"
 
 func init() {
 	vom.Register(Signature{})

@@ -5,8 +5,8 @@ import (
 	"reflect"
 	"sync"
 
-	"veyron2/security"
-	"veyron2/verror"
+	"veyron.io/veyron/veyron2/security"
+	"veyron.io/veyron/veyron2/verror"
 )
 
 const defaultLabel = security.AdminLabel

@@ -1,7 +1,7 @@
 package compile
 
 import (
-	"veyron2/vdl"
+	"veyron.io/veyron/veyron2/vdl"
 )
 
 var (

@@ -7,12 +7,12 @@ package appcycle
 import (
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
 	_gen_io "io"
-	_gen_veyron2 "veyron2"
-	_gen_context "veyron2/context"
-	_gen_ipc "veyron2/ipc"
-	_gen_naming "veyron2/naming"
-	_gen_vdlutil "veyron2/vdl/vdlutil"
-	_gen_wiretype "veyron2/wiretype"
+	_gen_veyron2 "veyron.io/veyron/veyron2"
+	_gen_context "veyron.io/veyron/veyron2/context"
+	_gen_ipc "veyron.io/veyron/veyron2/ipc"
+	_gen_naming "veyron.io/veyron/veyron2/naming"
+	_gen_vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
+	_gen_wiretype "veyron.io/veyron/veyron2/wiretype"
 )
 
 // Task is streamed by Stop to provide the client with a sense of the progress
@@ -331,7 +331,7 @@ func (__gen_s *ServerStubAppCycle) Signature(call _gen_ipc.ServerCall) (_gen_ipc
 				_gen_wiretype.FieldType{Type: 0x24, Name: "Progress"},
 				_gen_wiretype.FieldType{Type: 0x24, Name: "Goal"},
 			},
-			"veyron2/services/mgmt/appcycle.Task", []string(nil)},
+			"veyron.io/veyron/veyron2/services/mgmt/appcycle.Task", []string(nil)},
 	}
 
 	return result, nil

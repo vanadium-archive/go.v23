@@ -1,7 +1,7 @@
 package compile
 
 import (
-	"veyron2/vdl/vdlutil"
+	"veyron.io/veyron/veyron2/vdl/vdlutil"
 )
 
 // reservedWord checks if identifiers are reserved after they are converted to the native form for the language.

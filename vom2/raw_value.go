@@ -1,7 +1,7 @@
 package vom2
 
 import (
-	"veyron2/vdl"
+	"veyron.io/veyron/veyron2/vdl"
 )
 
 // TODO(toddw): Flesh out the RawValue strategy.

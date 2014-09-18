@@ -6,17 +6,17 @@
 package node
 
 import (
-	"veyron2/services/mgmt/binary"
+	"veyron.io/veyron/veyron2/services/mgmt/binary"
 
-	"veyron2/services/security/access"
+	"veyron.io/veyron/veyron2/services/security/access"
 
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
-	_gen_veyron2 "veyron2"
-	_gen_context "veyron2/context"
-	_gen_ipc "veyron2/ipc"
-	_gen_naming "veyron2/naming"
-	_gen_vdlutil "veyron2/vdl/vdlutil"
-	_gen_wiretype "veyron2/wiretype"
+	_gen_veyron2 "veyron.io/veyron/veyron2"
+	_gen_context "veyron.io/veyron/veyron2/context"
+	_gen_ipc "veyron.io/veyron/veyron2/ipc"
+	_gen_naming "veyron.io/veyron/veyron2/naming"
+	_gen_vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
+	_gen_wiretype "veyron.io/veyron/veyron2/wiretype"
 )
 
 // Description enumerates the profiles that a Node supports.
@@ -1075,13 +1075,13 @@ func (__gen_s *ServerStubNode) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Ser
 			[]_gen_wiretype.FieldType{
 				_gen_wiretype.FieldType{Type: 0x42, Name: "Profiles"},
 			},
-			"veyron2/services/mgmt/node.Description", []string(nil)},
+			"veyron.io/veyron/veyron2/services/mgmt/node.Description", []string(nil)},
 		_gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
 				_gen_wiretype.FieldType{Type: 0x3, Name: "Name"},
 				_gen_wiretype.FieldType{Type: 0x42, Name: "Profiles"},
 			},
-			"veyron2/services/mgmt/binary.Description", []string(nil)},
+			"veyron.io/veyron/veyron2/services/mgmt/binary.Description", []string(nil)},
 	}
 	var ss _gen_ipc.ServiceSignature
 	var firstAdded int

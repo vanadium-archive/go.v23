@@ -3,7 +3,7 @@ package naming
 import (
 	"strconv"
 
-	"veyron2/ipc/version"
+	"veyron.io/veyron/veyron2/ipc/version"
 )
 
 // EndpointOpt must be implemented by all optional parameters to FormatEndpoint

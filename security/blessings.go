@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"veyron2/vom"
+	"veyron.io/veyron/veyron2/vom"
 )
 
 type blessingsImpl struct {

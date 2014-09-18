@@ -4,7 +4,7 @@
 package vtrace
 
 import (
-	"veyron2/uniqueid"
+	"veyron.io/veyron/veyron2/uniqueid"
 )
 
 type TraceRecord struct {

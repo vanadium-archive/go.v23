@@ -30,7 +30,7 @@ Usage:
 
 <packages> are a list of packages to process, specified as arguments for each
 command.  The format is similar to the go tool.  In its simplest form each
-package is an import path; e.g. "veyron/lib/vdl".  A package that is an absolute
+package is an import path; e.g. "veyron.io/veyron/veyron/lib/vdl".  A package that is an absolute
 path or that contains a "." is interpreted as a file system path and denotes the
 package in that directory.  A package that ends with "..." does a wildcard match
 against all directories with that prefix.  The special import path "all" expands
@@ -79,7 +79,7 @@ Usage:
 
 <packages> are a list of packages to process, specified as arguments for each
 command.  The format is similar to the go tool.  In its simplest form each
-package is an import path; e.g. "veyron/lib/vdl".  A package that is an absolute
+package is an import path; e.g. "veyron.io/veyron/veyron/lib/vdl".  A package that is an absolute
 path or that contains a "." is interpreted as a file system path and denotes the
 package in that directory.  A package that ends with "..." does a wildcard match
 against all directories with that prefix.  The special import path "all" expands
@@ -102,7 +102,7 @@ Usage:
 
 <packages> are a list of packages to process, specified as arguments for each
 command.  The format is similar to the go tool.  In its simplest form each
-package is an import path; e.g. "veyron/lib/vdl".  A package that is an absolute
+package is an import path; e.g. "veyron.io/veyron/veyron/lib/vdl".  A package that is an absolute
 path or that contains a "." is interpreted as a file system path and denotes the
 package in that directory.  A package that ends with "..." does a wildcard match
 against all directories with that prefix.  The special import path "all" expands
@@ -159,7 +159,7 @@ Usage:
 
 <packages> are a list of packages to process, specified as arguments for each
 command.  The format is similar to the go tool.  In its simplest form each
-package is an import path; e.g. "veyron/lib/vdl".  A package that is an absolute
+package is an import path; e.g. "veyron.io/veyron/veyron/lib/vdl".  A package that is an absolute
 path or that contains a "." is interpreted as a file system path and denotes the
 package in that directory.  A package that ends with "..." does a wildcard match
 against all directories with that prefix.  The special import path "all" expands
@@ -185,7 +185,7 @@ The help flags are:
 */
 package main
 
-import "veyron2/vdl/vdl/cmds"
+import "veyron.io/veyron/veyron2/vdl/vdl/cmds"
 
 func main() {
 	cmds.Root().Main()

@@ -1,6 +1,6 @@
 package ipc
 
-import "veyron2/wiretype"
+import "veyron.io/veyron/veyron2/wiretype"
 
 // ServiceSignature represents the signature of the service. This includes type information needed
 // to resolve the method argument types.

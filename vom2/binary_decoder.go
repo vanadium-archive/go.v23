@@ -1,9 +1,9 @@
 package vom2
 
 import (
-	"veyron2/vdl"
-	"veyron2/vdl/valconv"
-	"veyron2/verror"
+	"veyron.io/veyron/veyron2/vdl"
+	"veyron.io/veyron/veyron2/vdl/valconv"
+	"veyron.io/veyron/veyron2/verror"
 )
 
 var (

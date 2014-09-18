@@ -9,7 +9,7 @@
 // of type crypto.ecdsa.PublicKey.
 package wire
 
-import "veyron2/security"
+import "veyron.io/veyron/veyron2/security"
 
 const (
 	// KeyCurveP256 describes the NIST P256 curve.

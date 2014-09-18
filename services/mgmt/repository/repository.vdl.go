@@ -6,20 +6,20 @@
 package repository
 
 import (
-	"veyron2/security"
+	"veyron.io/veyron/veyron2/security"
 
-	"veyron2/services/mgmt/application"
+	"veyron.io/veyron/veyron2/services/mgmt/application"
 
-	"veyron2/services/mgmt/binary"
+	"veyron.io/veyron/veyron2/services/mgmt/binary"
 
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
 	_gen_io "io"
-	_gen_veyron2 "veyron2"
-	_gen_context "veyron2/context"
-	_gen_ipc "veyron2/ipc"
-	_gen_naming "veyron2/naming"
-	_gen_vdlutil "veyron2/vdl/vdlutil"
-	_gen_wiretype "veyron2/wiretype"
+	_gen_veyron2 "veyron.io/veyron/veyron2"
+	_gen_context "veyron.io/veyron/veyron2/context"
+	_gen_ipc "veyron.io/veyron/veyron2/ipc"
+	_gen_naming "veyron.io/veyron/veyron2/naming"
+	_gen_vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
+	_gen_wiretype "veyron.io/veyron/veyron2/wiretype"
 )
 
 // TODO(bprosnitz) Remove this line once signatures are updated to use typevals.
@@ -193,7 +193,7 @@ func (__gen_s *ServerStubApplication) Signature(call _gen_ipc.ServerCall) (_gen_
 				_gen_wiretype.FieldType{Type: 0x3, Name: "Binary"},
 				_gen_wiretype.FieldType{Type: 0x3d, Name: "Env"},
 			},
-			"veyron2/services/mgmt/application.Envelope", []string(nil)},
+			"veyron.io/veyron/veyron2/services/mgmt/application.Envelope", []string(nil)},
 		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}}
 
 	return result, nil
@@ -817,7 +817,7 @@ func (__gen_s *ServerStubBinary) Signature(call _gen_ipc.ServerCall) (_gen_ipc.S
 				_gen_wiretype.FieldType{Type: 0x3, Name: "Checksum"},
 				_gen_wiretype.FieldType{Type: 0x25, Name: "Size"},
 			},
-			"veyron2/services/mgmt/binary.PartInfo", []string(nil)},
+			"veyron.io/veyron/veyron2/services/mgmt/binary.PartInfo", []string(nil)},
 		_gen_wiretype.SliceType{Elem: 0x44, Name: "", Tags: []string(nil)}}
 
 	return result, nil

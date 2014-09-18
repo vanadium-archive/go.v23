@@ -3,8 +3,8 @@ package vom2
 // TODO(toddw): Add tests.
 
 import (
-	"veyron2/vdl"
-	"veyron2/verror"
+	"veyron.io/veyron/veyron2/vdl"
+	"veyron.io/veyron/veyron2/verror"
 )
 
 // TODO: Replace this with vdl oneof!

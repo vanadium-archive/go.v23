@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"path"
 
-	"veyron2/vdl/vdlutil"
+	"veyron.io/veyron/veyron2/vdl/vdlutil"
 )
 
 // Pos captures positional information during parsing.

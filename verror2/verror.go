@@ -2,8 +2,8 @@
 // address spaces.
 package verror2
 
-import "veyron2/i18n"
-import "veyron2/verror" // While converting from verror to verror2
+import "veyron.io/veyron/veyron2/i18n"
+import "veyron.io/veyron/veyron2/verror" // While converting from verror to verror2
 
 // An Action represents the action expected to be performed by a typical client
 // receiving an error that perhaps it does not understand.
@@ -23,8 +23,8 @@ const (
 // ID is a unique identifier for errors tied to an Action.  This allows stable
 // error checking across different error messages and different address spaces.
 // By convention the format for the identifier is "PKGPATH.NAME" - e.g.
-// ErrIDFoo defined in the "veyron2/verror" package has id
-// "veyron2/verror.ErrIDFoo".
+// ErrIDFoo defined in the "veyron.io/veyron/veyron2/verror" package has id
+// "veyron.io/veyron/veyron2/verror.ErrIDFoo".
 type ID struct {
 	MsgID  i18n.MsgID
 	Action Action
@@ -113,15 +113,15 @@ func (e standard) Error() string {
 
 // Some standard error codes.
 var (
-	Success       = ID{"veyron2/verror.Success", Failed}       // Success; the ErrorID of the nil error.
-	Unknown       = ID{"veyron2/verror.Unknown", Failed}       // The unknown error.
-	Aborted       = ID{"veyron2/verror.Aborted", Failed}       // Operation aborted, e.g. connection closed.
-	BadArg        = ID{"veyron2/verror.BadArg", Failed}        // Requester specified an invalid argument.
-	BadProtocol   = ID{"veyron2/verror.BadProtocol", Failed}   // Protocol mismatch, including type or argument errors.
-	Exists        = ID{"veyron2/verror.Exists", Failed}        // Requested entity already exists.
-	Internal      = ID{"veyron2/verror.Internal", Failed}      // Internal invariants broken; something is very wrong.
-	NotAuthorized = ID{"veyron2/verror.NotAuthorized", Failed} // Requester isn't authorized to access the entity.
-	NotFound      = ID{"veyron2/verror.NotFound", Failed}      // Requested entity (e.g. object, method) not found.
+	Success       = ID{"veyron.io/veyron/veyron2/verror.Success", Failed}       // Success; the ErrorID of the nil error.
+	Unknown       = ID{"veyron.io/veyron/veyron2/verror.Unknown", Failed}       // The unknown error.
+	Aborted       = ID{"veyron.io/veyron/veyron2/verror.Aborted", Failed}       // Operation aborted, e.g. connection closed.
+	BadArg        = ID{"veyron.io/veyron/veyron2/verror.BadArg", Failed}        // Requester specified an invalid argument.
+	BadProtocol   = ID{"veyron.io/veyron/veyron2/verror.BadProtocol", Failed}   // Protocol mismatch, including type or argument errors.
+	Exists        = ID{"veyron.io/veyron/veyron2/verror.Exists", Failed}        // Requested entity already exists.
+	Internal      = ID{"veyron.io/veyron/veyron2/verror.Internal", Failed}      // Internal invariants broken; something is very wrong.
+	NotAuthorized = ID{"veyron.io/veyron/veyron2/verror.NotAuthorized", Failed} // Requester isn't authorized to access the entity.
+	NotFound      = ID{"veyron.io/veyron/veyron2/verror.NotFound", Failed}      // Requested entity (e.g. object, method) not found.
 )
 
 // Install English messages for the error codes above.

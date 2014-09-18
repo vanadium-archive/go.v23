@@ -1,8 +1,8 @@
 package ipc
 
 import (
-	"veyron2/security"
-	"veyron2/verror"
+	"veyron.io/veyron/veyron2/security"
+	"veyron.io/veyron/veyron2/verror"
 )
 
 // LeafDispatcher returns a dispatcher for a single object obj, using

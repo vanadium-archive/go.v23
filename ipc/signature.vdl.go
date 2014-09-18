@@ -4,10 +4,10 @@
 package ipc
 
 import (
-	"veyron2/wiretype"
+	"veyron.io/veyron/veyron2/wiretype"
 
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
-	_gen_vdlutil "veyron2/vdl/vdlutil"
+	_gen_vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
 )
 
 // ServiceSignature represents the signature of the service. This includes type information needed

@@ -98,16 +98,16 @@
 package access
 
 import (
-	"veyron2/security"
+	"veyron.io/veyron/veyron2/security"
 
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
-	_gen_veyron2 "veyron2"
-	_gen_context "veyron2/context"
-	_gen_ipc "veyron2/ipc"
-	_gen_naming "veyron2/naming"
-	_gen_vdlutil "veyron2/vdl/vdlutil"
-	_gen_verror "veyron2/verror"
-	_gen_wiretype "veyron2/wiretype"
+	_gen_veyron2 "veyron.io/veyron/veyron2"
+	_gen_context "veyron.io/veyron/veyron2/context"
+	_gen_ipc "veyron.io/veyron/veyron2/ipc"
+	_gen_naming "veyron.io/veyron/veyron2/naming"
+	_gen_vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
+	_gen_verror "veyron.io/veyron/veyron2/verror"
+	_gen_wiretype "veyron.io/veyron/veyron2/wiretype"
 )
 
 // TODO(bprosnitz) Remove this line once signatures are updated to use typevals.
@@ -117,10 +117,10 @@ const _ = _gen_wiretype.TypeIDInvalid
 // The etag passed to SetACL is invalid.  Likely, another client set
 // the ACL already and invalidated the etag.  Use GetACL to fetch a
 // fresh etag.
-const ErrBadEtag = _gen_verror.ID("veyron2/services/security/access.ErrBadEtag")
+const ErrBadEtag = _gen_verror.ID("veyron.io/veyron/veyron2/services/security/access.ErrBadEtag")
 
 // The ACL is too big.  Use groups to represent large sets of principals.
-const ErrTooBig = _gen_verror.ID("veyron2/services/security/access.ErrTooBig")
+const ErrTooBig = _gen_verror.ID("veyron.io/veyron/veyron2/services/security/access.ErrTooBig")
 
 // Object provides access control for Veyron objects.
 // Object is the interface the client binds and uses.
@@ -324,12 +324,12 @@ func (__gen_s *ServerStubObject) Signature(call _gen_ipc.ServerCall) (_gen_ipc.S
 	}
 
 	result.TypeDefs = []_gen_vdlutil.Any{
-		_gen_wiretype.NamedPrimitiveType{Type: 0x3, Name: "veyron2/security.BlessingPattern", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x34, Name: "veyron2/security.LabelSet", Tags: []string(nil)}, _gen_wiretype.MapType{Key: 0x41, Elem: 0x42, Name: "", Tags: []string(nil)}, _gen_wiretype.MapType{Key: 0x3, Elem: 0x42, Name: "", Tags: []string(nil)}, _gen_wiretype.StructType{
+		_gen_wiretype.NamedPrimitiveType{Type: 0x3, Name: "veyron.io/veyron/veyron2/security.BlessingPattern", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x34, Name: "veyron.io/veyron/veyron2/security.LabelSet", Tags: []string(nil)}, _gen_wiretype.MapType{Key: 0x41, Elem: 0x42, Name: "", Tags: []string(nil)}, _gen_wiretype.MapType{Key: 0x3, Elem: 0x42, Name: "", Tags: []string(nil)}, _gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
 				_gen_wiretype.FieldType{Type: 0x43, Name: "In"},
 				_gen_wiretype.FieldType{Type: 0x44, Name: "NotIn"},
 			},
-			"veyron2/security.ACL", []string(nil)},
+			"veyron.io/veyron/veyron2/security.ACL", []string(nil)},
 		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}}
 
 	return result, nil

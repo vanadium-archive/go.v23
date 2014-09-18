@@ -2,8 +2,8 @@
 package java
 
 import (
-	"veyron2/vdl"
-	"veyron2/vdl/compile"
+	"veyron.io/veyron/veyron2/vdl"
+	"veyron.io/veyron/veyron2/vdl/compile"
 )
 
 // javaGenImplDir is the directory in which implementation details for the generated interfaces should be put.

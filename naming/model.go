@@ -4,8 +4,8 @@ import (
 	"net"
 	"time"
 
-	"veyron2/context"
-	"veyron2/verror"
+	"veyron.io/veyron/veyron2/context"
+	"veyron.io/veyron/veyron2/verror"
 )
 
 var (

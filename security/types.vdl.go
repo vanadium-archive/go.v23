@@ -5,7 +5,7 @@ package security
 
 import (
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
-	_gen_vdlutil "veyron2/vdl/vdlutil"
+	_gen_vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
 )
 
 // BlessingPattern is a pattern that is matched by specific blessings.

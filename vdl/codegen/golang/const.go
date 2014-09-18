@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
-	"veyron2/vdl"
-	"veyron2/vdl/compile"
+	"veyron.io/veyron/veyron2/vdl"
+	"veyron.io/veyron/veyron2/vdl/compile"
 )
 
 func constDefGo(data goData, def *compile.ConstDef) string {

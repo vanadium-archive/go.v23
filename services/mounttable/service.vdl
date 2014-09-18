@@ -2,8 +2,8 @@
 package mounttable
 
 import (
-	"veyron2/security"
-	"veyron2/services/mounttable/types"
+	"veyron.io/veyron/veyron2/security"
+	"veyron.io/veyron/veyron2/services/mounttable/types"
 )
 
 type Globbable interface {

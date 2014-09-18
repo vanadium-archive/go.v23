@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"veyron2/vom"
+	"veyron.io/veyron/veyron2/vom"
 )
 
 // NewCaveat returns a Caveat that requires validation by validator.

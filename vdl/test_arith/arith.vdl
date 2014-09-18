@@ -25,7 +25,7 @@ package arith
 
 // Test the import mechanism.
 import (
-	base "veyron2/vdl/test_base"
+	base "veyron.io/veyron/veyron2/vdl/test_base"
 )
 
 // Constants.

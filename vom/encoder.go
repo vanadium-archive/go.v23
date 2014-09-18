@@ -72,7 +72,7 @@ func (e *Encoder) Encode(v interface{}) error {
 
 // EncodeValue transmits the value represented by rv, with the guarantee that
 // all necessary type definitions have been transmitted first.  Type definitions
-// include the type name, e.g. "veyron/lib/vom.StructType".  The type name is
+// include the type name, e.g. "veyron.io/veyron/veyron/lib/vom.StructType".  The type name is
 // used when decoding into pointers to nil interfaces, and is otherwise unused.
 // The type name is determined by the registered types, and if not registered,
 // the default name for the type; types need not be registered before encoding

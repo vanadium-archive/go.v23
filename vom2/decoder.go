@@ -4,8 +4,8 @@ import (
 	"io"
 	"reflect"
 
-	"veyron2/vdl/valconv"
-	"veyron2/verror"
+	"veyron.io/veyron/veyron2/vdl/valconv"
+	"veyron.io/veyron/veyron2/verror"
 )
 
 var (

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	"veyron2/vdl"
+	"veyron.io/veyron/veyron2/vdl"
 )
 
 // compatible returns true if types a and b are compatible with each other.

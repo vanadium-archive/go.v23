@@ -3,8 +3,8 @@ package compile
 import (
 	"fmt"
 
-	"veyron2/vdl"
-	"veyron2/vdl/parse"
+	"veyron.io/veyron/veyron2/vdl"
+	"veyron.io/veyron/veyron2/vdl/parse"
 )
 
 // TypeDef represents a user-defined named type definition in the compiled

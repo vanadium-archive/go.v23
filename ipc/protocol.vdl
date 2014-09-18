@@ -1,6 +1,6 @@
 package ipc
 
-import "veyron2/vtrace"
+import "veyron.io/veyron/veyron2/vtrace"
 
 // The communications between a client and server is based on RPCs.  Assume a
 // server published on object name "a/b/c" implements the following method:

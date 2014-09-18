@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"unsafe"
 
-	"veyron2/vdl"
+	"veyron.io/veyron/veyron2/vdl"
 )
 
 var (

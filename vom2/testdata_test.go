@@ -66,7 +66,7 @@ var coderTests = []struct {
 		// ff81 17           typedef 65[ff81] msglen[17]
 		// 10                (WireNamed)
 		//   01 11 766579726f6e322f766f6d322e426f6f6c
-		//                     (WireNamed.Name) "veyron2/vom2.Bool"
+		//                     (WireNamed.Name) "veyron.io/veyron/veyron2/vom2.Bool"
 		//   02 03             (WireNamed.Base) bool[03]
 		//   00              (WireNamed end)
 		//
@@ -82,7 +82,7 @@ var coderTests = []struct {
 		// ff81 19           typedef 65[ff81] msglen[19]
 		// 10                (WireNamed)
 		//   01 13 766579726f6e322f766f6d322e537472696e67
-		//                     (WireNamed.Name) "veyron2/vom2.String"
+		//                     (WireNamed.Name) "veyron.io/veyron/veyron2/vom2.String"
 		//   02 04             (WireNamed.Base) string[04]
 		//   00              (WireNamed end)
 		//
@@ -116,7 +116,7 @@ var coderTests = []struct {
 		// ff81 21           typedef 65[ff81] msglen[21]
 		// 12                (WireArray)
 		//   01 19 766579726f6e322f766f6d322e41727261793255696e743136
-		//                     (WireArray.Name) "veyron2/vom2.Array2Uint16"
+		//                     (WireArray.Name) "veyron.io/veyron/veyron2/vom2.Array2Uint16"
 		//   02 06             (WireArray.Elem) uint16[06]
 		//   03 02             (WireArray.Len)  2[02]
 		//   00              (WireArray end)
@@ -149,7 +149,7 @@ var coderTests = []struct {
 		// ff81 1d           typedef 65[ff81] msglen[1d]
 		// 13                (WireList)
 		//   01 17 766579726f6e322f766f6d322e4c69737455696e743136
-		//                     (WireList.Name) "veyron2/vom2.ListUint16"
+		//                     (WireList.Name) "veyron.io/veyron/veyron2/vom2.ListUint16"
 		//   02 06             (WireList.Elem) uint16[06]
 		//   00              (WireList end)
 		//
@@ -181,7 +181,7 @@ var coderTests = []struct {
 		// ff81 1c           typedef 65[ff81] msglen[1c]
 		// 14                (WireSet)
 		//   01 16 766579726f6e322f766f6d322e53657455696e743136
-		//                     (WireSet.Name) "veyron2/vom2.SetUint16"
+		//                     (WireSet.Name) "veyron.io/veyron/veyron2/vom2.SetUint16"
 		//   02 06             (WireSet.Key)  uint16[06]
 		//   00              (WireSet end)
 		//
@@ -217,7 +217,7 @@ var coderTests = []struct {
 		// ff81 24           typedef 65[ff81] msglen[24]
 		// 15                (WireMap)
 		//   01 1c 766579726f6e322f766f6d322e4d617055696e743136537472696e67
-		//                     (WireMap.Name) "veyron2/vom2.MapUint16String"
+		//                     (WireMap.Name) "veyron.io/veyron/veyron2/vom2.MapUint16String"
 		//   02 06             (WireMap.Key)  uint16[06]
 		//   03 04             (WireMap.Elem) string[04]
 		//   00              (WireMap end)

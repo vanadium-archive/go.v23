@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"log"
 
-	"veyron2/vdl/compile"
+	"veyron.io/veyron/veyron2/vdl/compile"
 )
 
 const primitiveTmpl = `

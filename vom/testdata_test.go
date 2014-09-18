@@ -5,7 +5,7 @@ import (
 	"math"
 	"strconv"
 
-	"veyron2/wiretype"
+	"veyron.io/veyron/veyron2/wiretype"
 )
 
 // Data used to test VOM types and values
@@ -453,7 +453,7 @@ var coderTests = []struct {
 		// 10                (NamedPrimitiveType)
 		//   01 31             (NamedPrimitiveType.Type) uint
 		//   01 10 766579726f6e322f766f6d2e55696e74
-		//                     (NamedPrimitiveType.Name) "veyron2/vom.Uint"
+		//                     (NamedPrimitiveType.Name) "veyron.io/veyron/veyron2/vom.Uint"
 		// 00                (NamedPrimitiveType end)
 		//
 		// ff82 01 01        type 65[ff82] len[01] value 1[01]
@@ -461,7 +461,7 @@ var coderTests = []struct {
 		v{Uint(1)},
 		"ff81161001310110766579726f6e322f766f6d2e55696e7400" +
 			"ff820101",
-		`["type","veyron2/vom.Uint uint"]
+		`["type","veyron.io/veyron/veyron2/vom.Uint uint"]
 			["Uint",1]
 			`,
 		j{`1`},
@@ -494,7 +494,7 @@ var coderTests = []struct {
 		// 10                (NamedPrimitiveType)
 		//   01 31             (NamedPrimitiveType.Type) uint
 		//   01 10 766579726f6e322f766f6d2e55696e74
-		//                     (NamedPrimitiveType.Name) "veyron2/vom.Uint"
+		//                     (NamedPrimitiveType.Name) "veyron.io/veyron/veyron2/vom.Uint"
 		// 00                (NamedPrimitiveType end)
 		//
 		// ff82 03 020102    type 65[ff82] len[03] values 1,2[02 0102]
@@ -503,7 +503,7 @@ var coderTests = []struct {
 		"ff810412014200" +
 			"ff83161001310110766579726f6e322f766f6d2e55696e7400" +
 			"ff8203020102",
-		`["type","veyron2/vom.Uint uint"]
+		`["type","veyron.io/veyron/veyron2/vom.Uint uint"]
 			["[]Uint",[1,2]]
 			`,
 		j{`[1, 2]`},
@@ -513,7 +513,7 @@ var coderTests = []struct {
 		// 12                (SliceType)
 		//   01 31             (SliceType.Elem) uint
 		//   01 11 766579726f6e322f766f6d2e536c696365
-		//                     (SliceType.Name) "veyron2/vom.Slice"
+		//                     (SliceType.Name) "veyron.io/veyron/veyron2/vom.Slice"
 		// 00                (SliceType end)
 		//
 		// ff82 03 020102    type 65[ff82] len[03] values 1,2[02 0102]
@@ -521,7 +521,7 @@ var coderTests = []struct {
 		v{Slice{1, 2}},
 		"ff81171201310111766579726f6e322f766f6d2e536c69636500" +
 			"ff8203020102",
-		`["type","veyron2/vom.Slice []uint"]
+		`["type","veyron.io/veyron/veyron2/vom.Slice []uint"]
 			["Slice",[1,2]]
 			`,
 		j{`[1, 2]`},
@@ -531,14 +531,14 @@ var coderTests = []struct {
 		// 12                (SliceType)
 		//   01 42             (SliceType.Elem) typeid 66
 		//   01 16 766579726f6e322f766f6d2e4f75746572536c696365
-		//                     (SliceType.Name) "veyron2/vom.OuterSlice"
+		//                     (SliceType.Name) "veyron.io/veyron/veyron2/vom.OuterSlice"
 		// 00                (SliceType end)
 		//
 		// ff83 17           typedef 66[ff83] len[17]
 		// 12                (SliceType)
 		//   01 31             (SliceType.Elem) uint
 		//   01 11 766579726f6e322f766f6d2e536c696365
-		//                     (SliceType.Name) "veyron2/vom.Slice"
+		//                     (SliceType.Name) "veyron.io/veyron/veyron2/vom.Slice"
 		// 00                (SliceType end)
 		//
 		// ff82 04 01 020102 type 65[ff82] len[04] values 1,2[01 02 0102]
@@ -547,8 +547,8 @@ var coderTests = []struct {
 		"ff811c1201420116766579726f6e322f766f6d2e4f75746572536c69636500" +
 			"ff83171201310111766579726f6e322f766f6d2e536c69636500" +
 			"ff820401020102",
-		`["type","veyron2/vom.Slice []uint"]
-			["type","veyron2/vom.OuterSlice []Slice"]
+		`["type","veyron.io/veyron/veyron2/vom.Slice []uint"]
+			["type","veyron.io/veyron/veyron2/vom.OuterSlice []Slice"]
 			["OuterSlice",[[1,2]]]
 			`,
 		j{`[[1, 2]]`},
@@ -606,7 +606,7 @@ var coderTests = []struct {
 		// 10                (NamedPrimitiveType)
 		//   01 31             (NamedPrimitiveType.Type) uint
 		//   01 10 766579726f6e322f766f6d2e55696e74
-		//                     (NamedPrimitiveType.Name) "veyron2/vom.Uint"
+		//                     (NamedPrimitiveType.Name) "veyron.io/veyron/veyron2/vom.Uint"
 		// 00                (NamedPrimitiveType end)
 		//
 		// ff82 02 0102      type 65[ff82] len[02] values 1,2[0102]
@@ -615,7 +615,7 @@ var coderTests = []struct {
 		"ff8106140142010200" +
 			"ff83161001310110766579726f6e322f766f6d2e55696e7400" +
 			"ff82020102",
-		`["type","veyron2/vom.Uint uint"]
+		`["type","veyron.io/veyron/veyron2/vom.Uint uint"]
 			["[2]Uint",[1,2]]
 			`,
 		j{`[1, 2]`},
@@ -626,7 +626,7 @@ var coderTests = []struct {
 		//   01 31             (ArrayType.Elem) uint
 		//   01 02             (ArrayType.Len) 2
 		//   01 11 766579726f6e322f766f6d2e4172726179
-		//                     (ArrayType.Name) "veyron2/vom.Array"
+		//                     (ArrayType.Name) "veyron.io/veyron/veyron2/vom.Array"
 		// 00                (ArrayType end)
 		//
 		// ff82 02 0102    type 65[ff82] len[02] values 1,2[0102]
@@ -634,7 +634,7 @@ var coderTests = []struct {
 		v{Array{1, 2}},
 		"ff811914013101020111766579726f6e322f766f6d2e417272617900" +
 			"ff82020102",
-		`["type","veyron2/vom.Array [2]uint"]
+		`["type","veyron.io/veyron/veyron2/vom.Array [2]uint"]
 			["Array",[1,2]]
 			`,
 		j{`[1, 2]`},
@@ -645,14 +645,14 @@ var coderTests = []struct {
 		//   01 42             (ArrayType.Elem) typeid 66
 		//   01 01             (ArrayType.Len) 1
 		//   01 16 766579726f6e322f766f6d2e4f757465724172726179
-		//                     (ArrayType.Name) "veyron2/vom.OuterArray"
+		//                     (ArrayType.Name) "veyron.io/veyron/veyron2/vom.OuterArray"
 		// 00                (ArrayType end)
 		//
 		// ff83 17           typedef 66[ff83] len[17]
 		// 12                (SliceType)
 		//   01 31             (SliceType.Elem) uint
 		//   01 11 766579726f6e322f766f6d2e536c696365
-		//                     (SliceType.Name) "veyron2/vom.Slice"
+		//                     (SliceType.Name) "veyron.io/veyron/veyron2/vom.Slice"
 		// 00                (SliceType end)
 		//
 		// ff82 03 020102    type 65[ff82] len[03] values 1,2[02 0102]
@@ -661,8 +661,8 @@ var coderTests = []struct {
 		"ff811e14014201010116766579726f6e322f766f6d2e4f75746572417272617900" +
 			"ff83171201310111766579726f6e322f766f6d2e536c69636500" +
 			"ff8203020102",
-		`["type","veyron2/vom.Slice []uint"]
-			["type","veyron2/vom.OuterArray [1]Slice"]
+		`["type","veyron.io/veyron/veyron2/vom.Slice []uint"]
+			["type","veyron.io/veyron/veyron2/vom.OuterArray [1]Slice"]
 			["OuterArray",[[1,2]]]
 			`,
 		j{`[[1, 2]]`},
@@ -698,7 +698,7 @@ var coderTests = []struct {
 		// 10                (NamedPrimitiveType)
 		//   01 31             (NamedPrimitiveType.Type) uint
 		//   01 10 766579726f6e322f766f6d2e55696e74
-		//                     (NamedPrimitiveType.Name) "veyron2/vom.Uint"
+		//                     (NamedPrimitiveType.Name) "veyron.io/veyron/veyron2/vom.Uint"
 		// 00                (NamedPrimitiveType end)
 		//
 		// ff82 0b 02        type 65[ff82] len[0b] len[02]
@@ -709,7 +709,7 @@ var coderTests = []struct {
 		"ff8106160142010300" +
 			"ff83161001310110766579726f6e322f766f6d2e55696e7400" +
 			"ff820b02[0103616263,0203646566]",
-		`["type","veyron2/vom.Uint uint"]
+		`["type","veyron.io/veyron/veyron2/vom.Uint uint"]
 			["map[Uint]string",{"1":"abc","2":"def"}]
 			`,
 		j{`{"1": "abc", "2": "def"}`},
@@ -720,7 +720,7 @@ var coderTests = []struct {
 		//   01 31             (MapType.Key) uint
 		//   01 03             (MapType.Elem) string
 		//   01 0f 766579726f6e322f766f6d2e4d6170
-		//                     (MapType.Name) "veyron2/vom.Map"
+		//                     (MapType.Name) "veyron.io/veyron/veyron2/vom.Map"
 		// 00                (MapType end)
 		//
 		// ff82 0b 02        type 65[ff82] len[0b] len[02]
@@ -730,7 +730,7 @@ var coderTests = []struct {
 		v{Map{1: "abc", 2: "def"}},
 		"ff81171601310103010f766579726f6e322f766f6d2e4d617000" +
 			"ff820b02[0103616263,0203646566]",
-		`["type","veyron2/vom.Map map[uint]string"]
+		`["type","veyron.io/veyron/veyron2/vom.Map map[uint]string"]
 			["Map",{"1":"abc","2":"def"}]
 			`,
 		j{`{"1": "abc", "2": "def"}`},
@@ -756,14 +756,14 @@ var coderTests = []struct {
 		//   01 31             (MapType.Key) uint
 		//   01 42             (MapType.Elem) typeid 66
 		//   01 14 766579726f6e322f766f6d2e4f757465724d6170
-		//                     (MapType.Name) "veyron2/vom.OuterMap"
+		//                     (MapType.Name) "veyron.io/veyron/veyron2/vom.OuterMap"
 		// 00                (MapType end)
 		//
 		// ff83 17           typedef 66[ff83] len[17]
 		// 12                (SliceType)
 		//   01 31             (SliceType.Elem) uint
 		//   01 11 766579726f6e322f766f6d2e536c696365
-		//                     (SliceType.Name) "veyron2/vom.Slice"
+		//                     (SliceType.Name) "veyron.io/veyron/veyron2/vom.Slice"
 		// 00                (SliceType end)
 		//
 		// ff82 09 02        type 65[ff82] len[09] len[02]
@@ -775,8 +775,8 @@ var coderTests = []struct {
 			"0114766579726f6e322f766f6d2e4f757465724d617000" +
 			"ff83171201310111766579726f6e322f766f6d2e536c69636500" +
 			"ff820902[03020405,06020708]",
-		`["type","veyron2/vom.Slice []uint"]
-			["type","veyron2/vom.OuterMap map[uint]Slice"]
+		`["type","veyron.io/veyron/veyron2/vom.Slice []uint"]
+			["type","veyron.io/veyron/veyron2/vom.OuterMap map[uint]Slice"]
 			["OuterMap",{"3":[4,5],"6":[7,8]}]
 			`,
 		j{`{"3": [4, 5], "6": [7, 8]}`},
@@ -854,7 +854,7 @@ var coderTests = []struct {
 		// 10                (NamedPrimitiveType)
 		//   01 31             (NamedPrimitiveType.Type) uint
 		//   01 10 766579726f6e322f766f6d2e55696e74
-		//                     (NamedPrimitiveType.Name) "veyron2/vom.Uint"
+		//                     (NamedPrimitiveType.Name) "veyron.io/veyron/veyron2/vom.Uint"
 		// 00                (NamedPrimitiveType end)
 		//
 		// ff82 03           type 65[ff82] len[03]
@@ -865,7 +865,7 @@ var coderTests = []struct {
 		"ff810a18010101420101410000" +
 			"ff83161001310110766579726f6e322f766f6d2e55696e7400" +
 			"ff8203010100",
-		`["type","veyron2/vom.Uint uint"]
+		`["type","veyron.io/veyron/veyron2/vom.Uint uint"]
 			["struct{A Uint}",{"A":1}]
 			`,
 		j{`{"a": 1}`},
@@ -878,7 +878,7 @@ var coderTests = []struct {
 		//     01 01 41          (FieldType.Name 0) "A"
 		//     00                (FieldType end  0)
 		//   01 12 766579726f6e322f766f6d2e537472756374
-		//                     (StructType.Name) "veyron2/vom.Struct"
+		//                     (StructType.Name) "veyron.io/veyron/veyron2/vom.Struct"
 		// 00                (StructType end)
 		//
 		// ff82 03           type 65[ff82] len[03]
@@ -889,7 +889,7 @@ var coderTests = []struct {
 		"ff811e180101013101014100" +
 			"0112766579726f6e322f766f6d2e53747275637400" +
 			"ff8203010100",
-		`["type","veyron2/vom.Struct struct{A uint}"]
+		`["type","veyron.io/veyron/veyron2/vom.Struct struct{A uint}"]
 			["Struct",{"A":1}]
 			`,
 		j{`{"a": 1}`},
@@ -902,7 +902,7 @@ var coderTests = []struct {
 		//     01 01 41          (FieldType.Name 0) "A"
 		//     00                (FieldType end  0)
 		//   01 12 766579726f6e322f766f6d2e537472756374
-		//                     (StructType.Name) "veyron2/vom.Struct"
+		//                     (StructType.Name) "veyron.io/veyron/veyron2/vom.Struct"
 		// 00                (StructType end)
 		//
 		// ff82 01           type 65[ff82] len[05]
@@ -912,7 +912,7 @@ var coderTests = []struct {
 		"ff811e180101013101014100" +
 			"0112766579726f6e322f766f6d2e53747275637400" +
 			"ff820100",
-		`["type","veyron2/vom.Struct struct{A uint}"]
+		`["type","veyron.io/veyron/veyron2/vom.Struct struct{A uint}"]
 			["Struct",{}]
 			`,
 		j{`{}`},
@@ -925,14 +925,14 @@ var coderTests = []struct {
 		//     01 01 53          (FieldType.Name 0) "S"
 		//     00                (FieldType end  0)
 		//   01 17 766579726f6e322f766f6d2e4f75746572537472756374
-		//                     (StructType.Name) "veyron2/vom.OuterStruct"
+		//                     (StructType.Name) "veyron.io/veyron/veyron2/vom.OuterStruct"
 		// 00                (StructType end)
 		//
 		// ff83 17           typedef 66[ff83] len[17]
 		// 12                (SliceType)
 		//   01 31             (SliceType.Elem) uint
 		//   01 11 766579726f6e322f766f6d2e536c696365
-		//                     (SliceType.Name) "veyron2/vom.Slice"
+		//                     (SliceType.Name) "veyron.io/veyron/veyron2/vom.Slice"
 		// 00                (SliceType end)
 		//
 		// ff82 05           type 65[ff82] len[05]
@@ -944,8 +944,8 @@ var coderTests = []struct {
 			"0117766579726f6e322f766f6d2e4f7574657253747275637400" +
 			"ff83171201310111766579726f6e322f766f6d2e536c69636500" +
 			"ff82050102050600",
-		`["type","veyron2/vom.Slice []uint"]
-			["type","veyron2/vom.OuterStruct struct{S Slice}"]
+		`["type","veyron.io/veyron/veyron2/vom.Slice []uint"]
+			["type","veyron.io/veyron/veyron2/vom.OuterStruct struct{S Slice}"]
 			["OuterStruct",{"S":[5,6]}]
 			`,
 		j{`{"s":[5,6]}`},
@@ -958,7 +958,7 @@ var coderTests = []struct {
 		//     01 01 41          (FieldType.Name 0) "A"
 		//     00                (FieldType end  0)
 		//   01 15 766579726f6e322f766f6d2e507472537472756374
-		//                     (StructType.Name) "veyron2/vom.PtrStruct"
+		//                     (StructType.Name) "veyron.io/veyron/veyron2/vom.PtrStruct"
 		// 00                (StructType end)
 		//
 		// ff83 04           typedef 66[ff83] len[04]
@@ -976,7 +976,7 @@ var coderTests = []struct {
 			"0115766579726f6e322f766f6d2e50747253747275637400" +
 			"ff83041a013100" +
 			"ff820401010100",
-		`["type","veyron2/vom.PtrStruct struct{A *uint}"]
+		`["type","veyron.io/veyron/veyron2/vom.PtrStruct struct{A *uint}"]
 			["PtrStruct",{"A":[1,1]}]
 			`,
 		nil,
@@ -989,7 +989,7 @@ var coderTests = []struct {
 		//     01 01 41          (FieldType.Name 0) "A"
 		//     00                (FieldType end  0)
 		//   01 15 766579726f6e322f766f6d2e507472537472756374
-		//                     (StructType.Name) "veyron2/vom.PtrStruct"
+		//                     (StructType.Name) "veyron.io/veyron/veyron2/vom.PtrStruct"
 		// 00                (StructType end)
 		//
 		// ff83 04           typedef 66[ff83] len[04]
@@ -1007,7 +1007,7 @@ var coderTests = []struct {
 			"0115766579726f6e322f766f6d2e50747253747275637400" +
 			"ff83041a013100" +
 			"ff820401010000",
-		`["type","veyron2/vom.PtrStruct struct{A *uint}"]
+		`["type","veyron.io/veyron/veyron2/vom.PtrStruct struct{A *uint}"]
 			["PtrStruct",{"A":[1,0]}]
 			`,
 		nil,
@@ -1021,7 +1021,7 @@ var coderTests = []struct {
 		//     01 01 41          (FieldType.Name 0) "A"
 		//     00                (FieldType end  0)
 		//   01 15 766579726f6e322f766f6d2e507472537472756374
-		//                     (StructType.Name) "veyron2/vom.PtrStruct"
+		//                     (StructType.Name) "veyron.io/veyron/veyron2/vom.PtrStruct"
 		// 00                (StructType end)
 		//
 		// ff83 04           typedef 66[ff83] len[04]
@@ -1037,7 +1037,7 @@ var coderTests = []struct {
 			"0115766579726f6e322f766f6d2e50747253747275637400" +
 			"ff83041a013100" +
 			"ff820100",
-		`["type","veyron2/vom.PtrStruct struct{A *uint}"]
+		`["type","veyron.io/veyron/veyron2/vom.PtrStruct struct{A *uint}"]
 			["PtrStruct",{}]
 			`,
 		nil,
@@ -1056,7 +1056,7 @@ var coderTests = []struct {
 		//     01 01 42          (FieldType.Name 0) "B"
 		//     00                (FieldType end  0)
 		//   01 19 766579726f6e322f766f6d2e5061727469616c537472756374
-		//                     (StructType.Name) "veyron2/vom.PartialStruct"
+		//                     (StructType.Name) "veyron.io/veyron/veyron2/vom.PartialStruct"
 		// 00                (StructType end)
 		//
 		// ff82 03           type 65[ff82] len[03]
@@ -1067,7 +1067,7 @@ var coderTests = []struct {
 		"ff812b180102013101014100013101014200" +
 			"0119766579726f6e322f766f6d2e5061727469616c53747275637400" +
 			"ff8203020500",
-		`["type","veyron2/vom.PartialStruct struct{A uint;B uint}"]
+		`["type","veyron.io/veyron/veyron2/vom.PartialStruct struct{A uint;B uint}"]
 			["PartialStruct",{"B":5}]
 			`,
 		j{`{"b": 5}`},
@@ -1084,7 +1084,7 @@ var coderTests = []struct {
 		//     01 01 52          (FieldType.Name 0) "R"
 		//     00                (FieldType end  0)
 		//   01 13 766579726f6e322f766f6d2e52656375727365
-		//                     (StructType.Name) "veyron2/vom.Recurse"
+		//                     (StructType.Name) "veyron.io/veyron/veyron2/vom.Recurse"
 		// 00                (StructType end)
 		//
 		// ff83 04           typedef 66[ff83] len[04]
@@ -1104,7 +1104,7 @@ var coderTests = []struct {
 			"0113766579726f6e322f766f6d2e5265637572736500" +
 			"ff83041a014100" +
 			"ff82080101010101020000",
-		`["type","veyron2/vom.Recurse struct{U uint;R *Recurse}"]
+		`["type","veyron.io/veyron/veyron2/vom.Recurse struct{U uint;R *Recurse}"]
 			["Recurse",{"U":1,"R":[1,{"U":2}]}]
 			`,
 		nil},
@@ -1124,7 +1124,7 @@ var coderTests = []struct {
 		//     01 01 52          (FieldType.Name 0) "R"
 		//     00                (FieldType end  0)
 		//   01 13 766579726f6e322f766f6d2e52656375727365
-		//                     (StructType.Name) "veyron2/vom.Recurse"
+		//                     (StructType.Name) "veyron.io/veyron/veyron2/vom.Recurse"
 		// 00                (StructType end)
 		//
 		// ff82 06           type 65[ff82] len[06]
@@ -1139,7 +1139,7 @@ var coderTests = []struct {
 			"ff8325180102013101015500014101015200" +
 			"0113766579726f6e322f766f6d2e5265637572736500" +
 			"ff8206010105010200",
-		`["type","veyron2/vom.Recurse struct{U uint;R *Recurse}"]
+		`["type","veyron.io/veyron/veyron2/vom.Recurse struct{U uint;R *Recurse}"]
 			["*Recurse",[1,{"U":5,"R":[1]}]]
 			`,
 		nil},
@@ -1154,7 +1154,7 @@ var coderTests = []struct {
 		//     01 01 42          (FieldType.Name 0) "B"
 		//     00                (FieldType end  0)
 		//   01 14 766579726f6e322f766f6d2e5265637572736541
-		//                     (StructType.Name) "veyron2/vom.RecurseA"
+		//                     (StructType.Name) "veyron.io/veyron/veyron2/vom.RecurseA"
 		// 00                (StructType end)
 		//
 		// ff83 04           typedef 66[ff83] len[04]
@@ -1172,7 +1172,7 @@ var coderTests = []struct {
 		//     01 01 41          (FieldType.Name 0) "A"
 		//     00                (FieldType end  0)
 		//   01 14 766579726f6e322f766f6d2e5265637572736542
-		//                     (StructType.Name) "veyron2/vom.RecurseB"
+		//                     (StructType.Name) "veyron.io/veyron/veyron2/vom.RecurseB"
 		// 00                (StructType end)
 		//
 		// ff87 04           typedef 68[ff87] len[04]
@@ -1195,8 +1195,8 @@ var coderTests = []struct {
 			"0114766579726f6e322f766f6d2e526563757273654200" +
 			"ff87041a014100" +
 			"ff82080101010101020000",
-		`["type","veyron2/vom.RecurseB struct{Ub uint;A *veyron2/vom.RecurseA}"]
-			["type","veyron2/vom.RecurseA struct{Ua uint;B *RecurseB}"]
+		`["type","veyron.io/veyron/veyron2/vom.RecurseB struct{Ub uint;A *veyron2/vom.RecurseA}"]
+			["type","veyron.io/veyron/veyron2/vom.RecurseA struct{Ua uint;B *RecurseB}"]
 			["RecurseA",{"Ua":1,"B":[1,{"Ub":2}]}]
 			`,
 		nil},
@@ -1216,7 +1216,7 @@ var coderTests = []struct {
 		//     01 01 42          (FieldType.Name 0) "B"
 		//     00                (FieldType end  0)
 		//   01 14 766579726f6e322f766f6d2e5265637572736541
-		//                     (StructType.Name) "veyron2/vom.RecurseA"
+		//                     (StructType.Name) "veyron.io/veyron/veyron2/vom.RecurseA"
 		// 00                (StructType end)
 		//
 		// ff85 04           typedef 67[ff85] len[04]
@@ -1234,7 +1234,7 @@ var coderTests = []struct {
 		//     01 01 41          (FieldType.Name 0) "A"
 		//     00                (FieldType end  0)
 		//   01 14 766579726f6e322f766f6d2e5265637572736542
-		//                     (StructType.Name) "veyron2/vom.RecurseB"
+		//                     (StructType.Name) "veyron.io/veyron/veyron2/vom.RecurseB"
 		// 00                (StructType end)
 		//
 		// ff82 0b           type 65[ff82] len[0b]
@@ -1255,8 +1255,8 @@ var coderTests = []struct {
 			"ff872718010201310102556200014101014100" +
 			"0114766579726f6e322f766f6d2e526563757273654200" +
 			"ff820b0101050103010601020000",
-		`["type","veyron2/vom.RecurseB struct{Ub uint;A *veyron2/vom.RecurseA}"]
-			["type","veyron2/vom.RecurseA struct{Ua uint;B *RecurseB}"]
+		`["type","veyron.io/veyron/veyron2/vom.RecurseB struct{Ub uint;A *veyron2/vom.RecurseA}"]
+			["type","veyron.io/veyron/veyron2/vom.RecurseA struct{Ua uint;B *RecurseB}"]
 			["*RecurseA",[1,{"Ua":5,"B":[2,{"Ub":6,"A":[1]}]}]]
 			`,
 		nil},
@@ -1267,7 +1267,7 @@ var coderTests = []struct {
 		// 10                (NamedPrimitiveType)
 		//   01 03             (NamedPrimitiveType.Type) string
 		//   01 15 766579726f6e322f766f6d2e55736572436f646572
-		//                     (NamedPrimitiveType.Name) "veyron2/vom.UserCoder"
+		//                     (NamedPrimitiveType.Name) "veyron.io/veyron/veyron2/vom.UserCoder"
 		// 00                (NamedPrimitiveType end)
 		//
 		// ff82 02 01 39     type 65[ff82] len[02] value "9"[0139]
@@ -1276,7 +1276,7 @@ var coderTests = []struct {
 		"ff811b100103" +
 			"0115766579726f6e322f766f6d2e55736572436f64657200" +
 			"ff82020139",
-		`["type","veyron2/vom.UserCoder string"]
+		`["type","veyron.io/veyron/veyron2/vom.UserCoder string"]
 			["UserCoder","9"]
 			`,
 		nil},
@@ -1290,7 +1290,7 @@ var coderTests = []struct {
 		// 10                (NamedPrimitiveType)
 		//   01 03             (NamedPrimitiveType.Type) string
 		//   01 15 766579726f6e322f766f6d2e55736572436f646572
-		//                     (NamedPrimitiveType.Name) "veyron2/vom.UserCoder"
+		//                     (NamedPrimitiveType.Name) "veyron.io/veyron/veyron2/vom.UserCoder"
 		// 00                (NamedPrimitiveType end)
 		//
 		// ff82 03 01 01 39  type 65[ff82] len[03] refdef 1[01] value "9"[0139]
@@ -1300,7 +1300,7 @@ var coderTests = []struct {
 			"ff831b100103" +
 			"0115766579726f6e322f766f6d2e55736572436f64657200" +
 			"ff8203010139",
-		`["type","veyron2/vom.UserCoder string"]
+		`["type","veyron.io/veyron/veyron2/vom.UserCoder string"]
 			["*UserCoder",[1,"9"]]
 			`,
 		nil},
@@ -1314,7 +1314,7 @@ var coderTests = []struct {
 		// 10                (NamedPrimitiveType)
 		//   01 03             (NamedPrimitiveType.Type) string
 		//   01 15 766579726f6e322f766f6d2e55736572436f646572
-		//                     (NamedPrimitiveType.Name) "veyron2/vom.UserCoder"
+		//                     (NamedPrimitiveType.Name) "veyron.io/veyron/veyron2/vom.UserCoder"
 		// 00                (NamedPrimitiveType end)
 		//
 		// ff82 01 00        type 65[ff82] len[01] nil[00]
@@ -1324,7 +1324,7 @@ var coderTests = []struct {
 			"ff831b100103" +
 			"0115766579726f6e322f766f6d2e55736572436f64657200" +
 			"ff820100",
-		`["type","veyron2/vom.UserCoder string"]
+		`["type","veyron.io/veyron/veyron2/vom.UserCoder string"]
 			["*UserCoder",null]
 			`,
 		nil},
@@ -1338,7 +1338,7 @@ var coderTests = []struct {
 		// 10                (NamedPrimitiveType)
 		//   01 03             (NamedPrimitiveType.Type) string
 		//   01 1e 766579726f6e322f766f6d2e55736572436f646572507472456e636f6465
-		//                     (NamedPrimitiveType.Name) "veyron2/vom.UserCoderPtrEncode"
+		//                     (NamedPrimitiveType.Name) "veyron.io/veyron/veyron2/vom.UserCoderPtrEncode"
 		// 00                (NamedPrimitiveType end)
 		//
 		// ff82 03 01 01 39  type 65[ff82] len[03] refdef 1[01] value "9"[0139]
@@ -1348,7 +1348,7 @@ var coderTests = []struct {
 			"ff8324100103" +
 			"011e766579726f6e322f766f6d2e55736572436f646572507472456e636f646500" +
 			"ff8203010139",
-		`["type","veyron2/vom.UserCoderPtrEncode string"]
+		`["type","veyron.io/veyron/veyron2/vom.UserCoderPtrEncode string"]
 			["*UserCoderPtrEncode",[1,"9"]]
 			`,
 		nil},
@@ -1362,7 +1362,7 @@ var coderTests = []struct {
 		// 10                (NamedPrimitiveType)
 		//   01 03             (NamedPrimitiveType.Type) string
 		//   01 1e 766579726f6e322f766f6d2e55736572436f646572507472456e636f6465
-		//                     (NamedPrimitiveType.Name) "veyron2/vom.UserCoderPtrEncode"
+		//                     (NamedPrimitiveType.Name) "veyron.io/veyron/veyron2/vom.UserCoderPtrEncode"
 		// 00                (NamedPrimitiveType end)
 		//
 		// ff82 01 00        type 65[ff82] len[01] nil[00]
@@ -1372,7 +1372,7 @@ var coderTests = []struct {
 			"ff8324100103" +
 			"011e766579726f6e322f766f6d2e55736572436f646572507472456e636f646500" +
 			"ff820100",
-		`["type","veyron2/vom.UserCoderPtrEncode string"]
+		`["type","veyron.io/veyron/veyron2/vom.UserCoderPtrEncode string"]
 			["*UserCoderPtrEncode",null]
 			`,
 		nil},
@@ -1381,7 +1381,7 @@ var coderTests = []struct {
 		// 1a                (PtrType)
 		//   01 03             (Ptr.Type) string
 		//   01 1c 766579726f6e322f766f6d2e55736572436f64657250747254797065
-		//                     (PtrType.Name) "veyron2/vom.UserCoderPtrType"
+		//                     (PtrType.Name) "veyron.io/veyron/veyron2/vom.UserCoderPtrType"
 		// 00                (PtrType end)
 		//
 		// ff82 03 01 01 39  type 65[ff82] len[03] refdef 1[01] value "9"[0139]
@@ -1390,7 +1390,7 @@ var coderTests = []struct {
 		"ff81221a0103" +
 			"011c766579726f6e322f766f6d2e55736572436f6465725074725479706500" +
 			"ff8203010139",
-		`["type","veyron2/vom.UserCoderPtrType *string"]
+		`["type","veyron.io/veyron/veyron2/vom.UserCoderPtrType *string"]
 			["UserCoderPtrType",[1,"9"]]
 			`,
 		nil},
@@ -1404,7 +1404,7 @@ var coderTests = []struct {
 		// 1a                (PtrType)
 		//   01 03             (Ptr.Type) string
 		//   01 1c 766579726f6e322f766f6d2e55736572436f64657250747254797065
-		//                     (PtrType.Name) "veyron2/vom.UserCoderPtrType"
+		//                     (PtrType.Name) "veyron.io/veyron/veyron2/vom.UserCoderPtrType"
 		// 00                (PtrType end)
 		//
 		// ff82 04           type 65[ff82] len[04]
@@ -1415,7 +1415,7 @@ var coderTests = []struct {
 			"ff83221a0103" +
 			"011c766579726f6e322f766f6d2e55736572436f6465725074725479706500" +
 			"ff820401030139",
-		`["type","veyron2/vom.UserCoderPtrType *string"]
+		`["type","veyron.io/veyron/veyron2/vom.UserCoderPtrType *string"]
 			["*UserCoderPtrType",[1,[2,"9"]]]
 			`,
 		nil},
@@ -1429,7 +1429,7 @@ var coderTests = []struct {
 		// 1a                (PtrType)
 		//   01 03             (Ptr.Type) string
 		//   01 1c 766579726f6e322f766f6d2e55736572436f64657250747254797065
-		//                     (PtrType.Name) "veyron2/vom.UserCoderPtrType"
+		//                     (PtrType.Name) "veyron.io/veyron/veyron2/vom.UserCoderPtrType"
 		// 00                (PtrType end)
 		//
 		// ff82 01 00        type 65[ff82] len[01] nil[00]
@@ -1439,7 +1439,7 @@ var coderTests = []struct {
 			"ff83221a0103" +
 			"011c766579726f6e322f766f6d2e55736572436f6465725074725479706500" +
 			"ff820100",
-		`["type","veyron2/vom.UserCoderPtrType *string"]
+		`["type","veyron.io/veyron/veyron2/vom.UserCoderPtrType *string"]
 			["*UserCoderPtrType",null]
 			`,
 		nil},
@@ -1455,7 +1455,7 @@ var coderTests = []struct {
 		// 10                (NamedPrimitiveType)
 		//   01 04             (NamedPrimitiveType.Type) []byte
 		//   01 1c 766579726f6e322f766f6d2e55736572436f646572476f624a534f4e
-		//                     (NamedPrimitiveType.Name) "veyron2/vom.UserCoderGobJSON"
+		//                     (NamedPrimitiveType.Name) "veyron.io/veyron/veyron2/vom.UserCoderGobJSON"
 		// 00                (NamedPrimitiveType end)
 		//
 		// ff82 03 01 01 39  type 65[ff82] len[03] refdef 1[01] value "9"[0139]
@@ -1465,7 +1465,7 @@ var coderTests = []struct {
 			"ff8322100104" +
 			"011c766579726f6e322f766f6d2e55736572436f646572476f624a534f4e00" +
 			"ff8203010139",
-		`["type","veyron2/vom.UserCoderGobJSON string"]
+		`["type","veyron.io/veyron/veyron2/vom.UserCoderGobJSON string"]
 			["*UserCoderGobJSON",[1,"9"]]
 			`,
 		nil},
@@ -1514,7 +1514,7 @@ var coderTests = []struct {
 		//     01 01 49          (FieldType.Name 1) "I"
 		//     00                (FieldType end  1)
 		//   01 15 766579726f6e322f766f6d2e436f6d706c65783634
-		//                     (StructType.Name) "veyron2/vom.Complex64"
+		//                     (StructType.Name) "veyron.io/veyron/veyron2/vom.Complex64"
 		//   01 01 09 636f6d706c65783634
 		//                     (StructType.Tags) []{"complex64"}
 		// 00                (StructType end)
@@ -1529,7 +1529,7 @@ var coderTests = []struct {
 			"0115766579726f6e322f766f6d2e436f6d706c65783634" +
 			"010109636f6d706c6578363400" +
 			"ff820701fef03f014000",
-		`["type","veyron2/vom.Complex64 struct{R float32;I float32}",["complex64"]]
+		`["type","veyron.io/veyron/veyron2/vom.Complex64 struct{R float32;I float32}",["complex64"]]
 	["Complex64",{"R":1,"I":2}]
 	`,
 		nil},
@@ -1576,7 +1576,7 @@ var coderTests = []struct {
 		//     01 01 49          (FieldType.Name 1) "I"
 		//     00                (FieldType end  1)
 		//   01 16 766579726f6e322f766f6d2e436f6d706c6578313238
-		//                     (StructType.Name) "veyron2/vom.Complex128"
+		//                     (StructType.Name) "veyron.io/veyron/veyron2/vom.Complex128"
 		//   01 01 0a 636f6d706c6578313238
 		//                     (StructType.Tags) []{"complex128"}
 		// 00                (StructType end)
@@ -1591,7 +1591,7 @@ var coderTests = []struct {
 			"0116766579726f6e322f766f6d2e436f6d706c6578313238" +
 			"01010a636f6d706c657831323800" +
 			"ff820701fef03f014000",
-		`["type","veyron2/vom.Complex128 struct{R float64;I float64}",["complex128"]]
+		`["type","veyron.io/veyron/veyron2/vom.Complex128 struct{R float64;I float64}",["complex128"]]
 		["Complex128",{"R":1,"I":2}]
 		`,
 		nil},
@@ -1648,7 +1648,7 @@ var coderTests = []struct {
 		//     01 01 41          (FieldType.Name 0) "A"
 		//     00                (FieldType end  0)
 		//   01 12 766579726f6e322f766f6d2e537472756374
-		//                     (StructType.Name) "veyron2/vom.Struct"
+		//                     (StructType.Name) "veyron.io/veyron/veyron2/vom.Struct"
 		// 00                (StructType end)
 		//
 		// ff82 06           type 65[ff82] len[06]
@@ -1661,7 +1661,7 @@ var coderTests = []struct {
 			"ff831e180101013101014100" +
 			"0112766579726f6e322f766f6d2e53747275637400" +
 			"ff820601ff84010100",
-		`["type","veyron2/vom.Struct struct{A uint}"]
+		`["type","veyron.io/veyron/veyron2/vom.Struct struct{A uint}"]
 		["*interface",[1,["Struct",{"A":1}]]]
 		`,
 		nil,
@@ -1682,7 +1682,7 @@ var coderTests = []struct {
 		//     01 01 42          (FieldType.Name 0) "B"
 		//     00                (FieldType end  0)
 		//   01 14 766579726f6e322f766f6d2e5265637572736541
-		//                     (StructType.Name) "veyron2/vom.RecurseA"
+		//                     (StructType.Name) "veyron.io/veyron/veyron2/vom.RecurseA"
 		// 00                (StructType end)
 		//
 		// ff85 04           typedef 67[ff85] len[04]
@@ -1700,7 +1700,7 @@ var coderTests = []struct {
 		//     01 01 41          (FieldType.Name 0) "A"
 		//     00                (FieldType end  0)
 		//   01 14 766579726f6e322f766f6d2e5265637572736542
-		//                     (StructType.Name) "veyron2/vom.RecurseB"
+		//                     (StructType.Name) "veyron.io/veyron/veyron2/vom.RecurseB"
 		// 00                (StructType end)
 		//
 		// ff89 04           typedef 69[ff89] len[04]
@@ -1725,8 +1725,8 @@ var coderTests = []struct {
 			"0114766579726f6e322f766f6d2e526563757273654200" +
 			"ff89041a014200" +
 			"ff820b01ff840101010301020000",
-		`["type","veyron2/vom.RecurseB struct{Ub uint;A *veyron2/vom.RecurseA}"]
-		["type","veyron2/vom.RecurseA struct{Ua uint;B *RecurseB}"]
+		`["type","veyron.io/veyron/veyron2/vom.RecurseB struct{Ub uint;A *veyron2/vom.RecurseA}"]
+		["type","veyron.io/veyron/veyron2/vom.RecurseA struct{Ua uint;B *RecurseB}"]
 		["*interface",[1,["RecurseA",{"Ua":1,"B":[2,{"Ub":2}]}]]]
 		`, nil},
 	{
@@ -1737,7 +1737,7 @@ var coderTests = []struct {
 		//     01 01 49          (FieldType.Name 0) "I"
 		//     00                (FieldType end  0)
 		//   01 1b 766579726f6e322f766f6d2e4e6573746564496e74657266616365
-		//                     (StructType.Name) "veyron2/vom.NestedInterface"
+		//                     (StructType.Name) "veyron.io/veyron/veyron2/vom.NestedInterface"
 		// 00                (StructType end)
 		//
 		// ff83 1e           typedef 66[ff83] len[1e]
@@ -1747,7 +1747,7 @@ var coderTests = []struct {
 		//     01 01 41          (FieldType.Name 0) "A"
 		//     00                (FieldType end  0)
 		//   01 12 766579726f6e322f766f6d2e537472756374
-		//                     (StructType.Name) "veyron2/vom.Struct"
+		//                     (StructType.Name) "veyron.io/veyron/veyron2/vom.Struct"
 		// 00                (StructType end)
 		//
 		// ff82 07           type 65[ff82] len[07]
@@ -1762,8 +1762,8 @@ var coderTests = []struct {
 			"ff831e180101013101014100" +
 			"0112766579726f6e322f766f6d2e53747275637400" +
 			"ff820701ff8401010000",
-		`["type","veyron2/vom.NestedInterface struct{I interface}"]
-		["type","veyron2/vom.Struct struct{A uint}"]
+		`["type","veyron.io/veyron/veyron2/vom.NestedInterface struct{I interface}"]
+		["type","veyron.io/veyron/veyron2/vom.Struct struct{A uint}"]
 		["NestedInterface",{"I":["Struct",{"A":1}]}]
 		`,
 		j{`{"i":{"a":1}}`},
@@ -1781,7 +1781,7 @@ var coderTests = []struct {
 		//     01 01 49          (FieldType.Name 0) "I"
 		//     00                (FieldType end  0)
 		//   01 1b 766579726f6e322f766f6d2e4e6573746564496e74657266616365
-		//                     (StructType.Name) "veyron2/vom.NestedInterface"
+		//                     (StructType.Name) "veyron.io/veyron/veyron2/vom.NestedInterface"
 		// 00                (StructType end)
 		//
 		// ff85 1e           typedef 67[ff85] len[1e]
@@ -1791,7 +1791,7 @@ var coderTests = []struct {
 		//     01 01 41          (FieldType.Name 0) "A"
 		//     00                (FieldType end  0)
 		//   01 12 766579726f6e322f766f6d2e537472756374
-		//                     (StructType.Name) "veyron2/vom.Struct"
+		//                     (StructType.Name) "veyron.io/veyron/veyron2/vom.Struct"
 		// 00                (StructType end)
 		//
 		// ff82 0a           type 65[ff82] len[0a]
@@ -1808,8 +1808,8 @@ var coderTests = []struct {
 			"ff851e180101013101014100" +
 			"0112766579726f6e322f766f6d2e53747275637400" +
 			"ff820a01ff8401ff8601010000",
-		`["type","veyron2/vom.NestedInterface struct{I interface}"]
-		["type","veyron2/vom.Struct struct{A uint}"]
+		`["type","veyron.io/veyron/veyron2/vom.NestedInterface struct{I interface}"]
+		["type","veyron.io/veyron/veyron2/vom.Struct struct{A uint}"]
 		["*interface",[1,["NestedInterface",{"I":["Struct",{"A":1}]}]]]
 		`,
 		nil,
@@ -1822,7 +1822,7 @@ var coderTests = []struct {
 		//     01 01 49          (FieldType.Name 0) "I"
 		//     00                (FieldType end  0)
 		//   01 1b 766579726f6e322f766f6d2e4e6573746564496e74657266616365
-		//                     (StructType.Name) "veyron2/vom.NestedInterface"
+		//                     (StructType.Name) "veyron.io/veyron/veyron2/vom.NestedInterface"
 		// 00                (StructType end)
 		//
 		// ff83 1e           typedef 66[ff83] len[1e]
@@ -1832,7 +1832,7 @@ var coderTests = []struct {
 		//     01 01 41          (FieldType.Name 0) "A"
 		//     00                (FieldType end  0)
 		//   01 12 766579726f6e322f766f6d2e537472756374
-		//                     (StructType.Name) "veyron2/vom.Struct"
+		//                     (StructType.Name) "veyron.io/veyron/veyron2/vom.Struct"
 		// 00                (StructType end)
 		//
 		// ff82 0b           type 65[ff82] len[0b]
@@ -1849,8 +1849,8 @@ var coderTests = []struct {
 			"ff831e180101013101014100" +
 			"0112766579726f6e322f766f6d2e53747275637400" +
 			"ff820b01ff8201ff840101000000",
-		`["type","veyron2/vom.NestedInterface struct{I interface}"]
-		["type","veyron2/vom.Struct struct{A uint}"]
+		`["type","veyron.io/veyron/veyron2/vom.NestedInterface struct{I interface}"]
+		["type","veyron.io/veyron/veyron2/vom.Struct struct{A uint}"]
 		["NestedInterface",{"I":["NestedInterface",{"I":["Struct",{"A":1}]}]}]
 		`,
 		j{`{"i":{"i":{"a":1}}}`},
@@ -1863,7 +1863,7 @@ var coderTests = []struct {
 		//     01 01 49          (FieldType.Name 0) "I"
 		//     00                (FieldType end  0)
 		//   01 1b 766579726f6e322f766f6d2e4e6573746564496e74657266616365
-		//                     (StructType.Name) "veyron2/vom.NestedInterface"
+		//                     (StructType.Name) "veyron.io/veyron/veyron2/vom.NestedInterface"
 		// 00                (StructType end)
 		//
 		// ff83 1e           typedef 66[ff83] len[1e]
@@ -1873,7 +1873,7 @@ var coderTests = []struct {
 		//     01 01 41          (FieldType.Name 0) "A"
 		//     00                (FieldType end  0)
 		//   01 12 766579726f6e322f766f6d2e537472756374
-		//                     (StructType.Name) "veyron2/vom.Struct"
+		//                     (StructType.Name) "veyron.io/veyron/veyron2/vom.Struct"
 		// 00                (StructType end)
 		//
 		// ff82 0b           type 65[ff82] len[0b]
@@ -1899,8 +1899,8 @@ var coderTests = []struct {
 			"0112766579726f6e322f766f6d2e53747275637400" +
 			"ff820b01ff8201ff840101000000" +
 			"ff820b01ff8201ff840101000000",
-		`["type","veyron2/vom.NestedInterface struct{I interface}"]
-		["type","veyron2/vom.Struct struct{A uint}"]
+		`["type","veyron.io/veyron/veyron2/vom.NestedInterface struct{I interface}"]
+		["type","veyron.io/veyron/veyron2/vom.Struct struct{A uint}"]
 		["NestedInterface",{"I":["NestedInterface",{"I":["Struct",{"A":1}]}]}]
 		["NestedInterface",{"I":["NestedInterface",{"I":["Struct",{"A":1}]}]}]
 		`,
@@ -1916,14 +1916,14 @@ var coderTests = []struct {
 		// 10                (NamedPrimitiveType)
 		//   01 01             (NamedPrimitiveType.Type) interface
 		//   01 11 766579726f6e322f766f6d2e466f6f6572
-		//                     (NamedPrimitiveType.Name) "veyron2/vom.Fooer"
+		//                     (NamedPrimitiveType.Name) "veyron.io/veyron/veyron2/vom.Fooer"
 		// 00                (NamedPrimitiveType end)
 		//
 		// ff83 1d           typedef 67[ff85] len[1d]
 		// 10                (NamedPrimitiveType)
 		//   01 21             (NamedPrimitiveType.Type) int
 		//   01 17 766579726f6e322f766f6d2e436f6e6372657465466f6f00
-		//                     (NamedPrimitiveType.Name) "veyron2/vom.ConcreteFoo"
+		//                     (NamedPrimitiveType.Name) "veyron.io/veyron/veyron2/vom.ConcreteFoo"
 		// 00                (NamedPrimitiveType end)
 		//
 		// ff82 04           type 65[ff82] len[04]
@@ -1935,8 +1935,8 @@ var coderTests = []struct {
 			"ff83171001010111766579726f6e322f766f6d2e466f6f657200" +
 			"ff851d1001210117766579726f6e322f766f6d2e436f6e6372657465466f6f00" +
 			"ff820401ff8606",
-		`["type","veyron2/vom.Fooer interface"]
-		["type","veyron2/vom.ConcreteFoo int"]
+		`["type","veyron.io/veyron/veyron2/vom.Fooer interface"]
+		["type","veyron.io/veyron/veyron2/vom.ConcreteFoo int"]
 		["*Fooer",[1,["ConcreteFoo",3]]]
 		`,
 		nil,
@@ -1948,7 +1948,7 @@ var coderTests = []struct {
 		// 10                (NamedPrimitiveType)
 		//   01 04             (NamedPrimitiveType.Type) []byte
 		//   01 15 766579726f6e322f766f6d2e42797465536c696365
-		//                     (NamedPrimitiveType.Name) "veyron2/vom.ByteSlice"
+		//                     (NamedPrimitiveType.Name) "veyron.io/veyron/veyron2/vom.ByteSlice"
 		// 00                (NamedPrimitiveType end)
 		//
 		// ff82 04 03616263  type 65[ff82] len[04] value "abc"[03616263]
@@ -1956,7 +1956,7 @@ var coderTests = []struct {
 		v{ByteSlice("abc")},
 		"ff811b1001040115766579726f6e322f766f6d2e42797465536c69636500" +
 			"ff820403616263",
-		`["type","veyron2/vom.ByteSlice []byte"]
+		`["type","veyron.io/veyron/veyron2/vom.ByteSlice []byte"]
 		["ByteSlice","YWJj"]
 		`,
 		j{`[97,98,99]`},
@@ -1966,14 +1966,14 @@ var coderTests = []struct {
 		// 12                (SliceType)
 		//   01 42             (SliceType.Elem) typeid 66
 		//   01 1a 766579726f6e322f766f6d2e4e616d656442797465536c696365
-		//                     (SliceType.Name) "veyron2/vom.NamedByteSlice"
+		//                     (SliceType.Name) "veyron.io/veyron/veyron2/vom.NamedByteSlice"
 		// 00                (SliceType end)
 		//
 		// ff83 16           typedef 66[ff82] len[16]
 		// 10                (NamedPrimitiveType)
 		//   01 32             (NamedPrimitiveType.Type) uint8
 		//   01 10 766579726f6e322f766f6d2e42797465
-		//                     (NamedPrimitiveType.Name) "veyron2/vom.Byte"
+		//                     (NamedPrimitiveType.Name) "veyron.io/veyron/veyron2/vom.Byte"
 		// 00                (NamedPrimitiveType end)
 		//
 		// ff82 04 03616263  type 65[ff82] len[04] value "abc"[03616263]
@@ -1982,8 +1982,8 @@ var coderTests = []struct {
 		"ff8120120142011a766579726f6e322f766f6d2e4e616d656442797465536c69636500" +
 			"ff83161001320110766579726f6e322f766f6d2e4279746500" +
 			"ff820403616263",
-		`["type","veyron2/vom.Byte byte"]
-		["type","veyron2/vom.NamedByteSlice []Byte"]
+		`["type","veyron.io/veyron/veyron2/vom.Byte byte"]
+		["type","veyron.io/veyron/veyron2/vom.NamedByteSlice []Byte"]
 		["NamedByteSlice","YWJj"]
 		`,
 		j{`[97,98,99]`},
@@ -1994,7 +1994,7 @@ var coderTests = []struct {
 		//   01 32             (ArrayType.Type) uint8
 		//   01 03             (ArrayType.Len) 3
 		//   01 15 766579726f6e322f766f6d2e427974654172726179
-		//                     (ArrayType.Name) "veyron2/vom.ByteArray"
+		//                     (ArrayType.Name) "veyron.io/veyron/veyron2/vom.ByteArray"
 		// 00                (ArrayType end)
 		//
 		// ff82 03 616263    type 65[ff82] len[03] value "abc"[616263]
@@ -2002,7 +2002,7 @@ var coderTests = []struct {
 		v{ByteArray{'a', 'b', 'c'}},
 		"ff811d14013201030115766579726f6e322f766f6d2e42797465417272617900" +
 			"ff8203616263",
-		`["type","veyron2/vom.ByteArray [3]byte"]
+		`["type","veyron.io/veyron/veyron2/vom.ByteArray [3]byte"]
 		["ByteArray","YWJj"]
 		`,
 		j{`[97,98,99]`},
@@ -2013,14 +2013,14 @@ var coderTests = []struct {
 		//   01 42             (ArrayType.Type) typeid 66
 		//   01 03             (ArrayType.Len) 3
 		//   01 1a 766579726f6e322f766f6d2e4e616d6564427974654172726179
-		//                     (ArrayType.Name) "veyron2/vom.NamedByteArray"
+		//                     (ArrayType.Name) "veyron.io/veyron/veyron2/vom.NamedByteArray"
 		// 00                (ArrayType end)
 		//
 		// ff83 16           typedef 66[ff82] len[16]
 		// 10                (NamedPrimitiveType)
 		//   01 32             (NamedPrimitiveType.Type) uint8
 		//   01 10 766579726f6e322f766f6d2e42797465
-		//                     (NamedPrimitiveType.Name) "veyron2/vom.Byte"
+		//                     (NamedPrimitiveType.Name) "veyron.io/veyron/veyron2/vom.Byte"
 		// 00                (NamedPrimitiveType end)
 		//
 		// ff82 03 616263    type 65[ff82] len[03] value "abc"[616263]
@@ -2030,8 +2030,8 @@ var coderTests = []struct {
 			"011a766579726f6e322f766f6d2e4e616d656442797465417272617900" +
 			"ff83161001320110766579726f6e322f766f6d2e4279746500" +
 			"ff8203616263",
-		`["type","veyron2/vom.Byte byte"]
-		["type","veyron2/vom.NamedByteArray [3]Byte"]
+		`["type","veyron.io/veyron/veyron2/vom.Byte byte"]
+		["type","veyron.io/veyron/veyron2/vom.NamedByteArray [3]Byte"]
 		["NamedByteArray","YWJj"]
 		`,
 		j{`[97,98,99]`},
@@ -2045,7 +2045,7 @@ var coderTests = []struct {
 		//   01 42             (MapType.Key) typeid 66
 		//   01 03             (MapType.Elem) string
 		//   01 1d 766579726f6e322f766f6d2e4d756c7469537472696e674b65794d6170
-		//                     (MapType.Name) "veyron2/vom.MultiStringKeyMap"
+		//                     (MapType.Name) "veyron.io/veyron/veyron2/vom.MultiStringKeyMap"
 		// 00                (MapType end)
 		//
 		// ff83 06           typedef 66[ff83] len[06]
@@ -2061,7 +2061,7 @@ var coderTests = []struct {
 		"MultiStringKeyMap",
 		v{MultiStringKeyMap{[2]string{"abc", "def"}: "ghi"}},
 		"ff81251601420103011d766579726f6e322f766f6d2e4d756c7469537472696e674b65794d617000ff8306140103010200ff820d01036162630364656603676869",
-		`["type","veyron2/vom.MultiStringKeyMap map[[2]string]string"]
+		`["type","veyron.io/veyron/veyron2/vom.MultiStringKeyMap map[[2]string]string"]
 		["MultiStringKeyMap",{"[\"abc\",\"def\"]":"ghi"}]
 		`,
 		j{`{"[\"abc\",\"def\"]":"ghi"}`},
@@ -2072,7 +2072,7 @@ var coderTests = []struct {
 		//   01 42             (MapType.Key) typeid 66
 		//   01 03             (MapType.Elem) string
 		//   01 1d 766579726f6e322f766f6d2e4d756c7469537472696e674b65794d6170
-		//                     (MapType.Name) "veyron2/vom.MultiStringKeyMap"
+		//                     (MapType.Name) "veyron.io/veyron/veyron2/vom.MultiStringKeyMap"
 		// 00                (MapType end)
 		//
 		// ff83 06           typedef 66[ff83] len[06]
@@ -2088,7 +2088,7 @@ var coderTests = []struct {
 		"MultiStringKeyMap",
 		v{MultiStringKeyMap{[2]string{`a"b"c`, `d"e"f`}: `g"h"i`}},
 		"ff81251601420103011d766579726f6e322f766f6d2e4d756c7469537472696e674b65794d617000ff8306140103010200ff821301056122622263056422652266056722682269",
-		`["type","veyron2/vom.MultiStringKeyMap map[[2]string]string"]
+		`["type","veyron.io/veyron/veyron2/vom.MultiStringKeyMap map[[2]string]string"]
 		["MultiStringKeyMap",{"[\"a\\\"b\\\"c\",\"d\\\"e\\\"f\"]":"g\"h\"i"}]
 		`,
 		j{`{"[\"a\\\"b\\\"c\",\"d\\\"e\\\"f\"]":"g\"h\"i"}`},
@@ -2099,7 +2099,7 @@ var coderTests = []struct {
 		//   01 42             (MapType.Key) typeid 66
 		//   01 03             (MapType.Elem) string
 		//   01 1d 766579726f6e322f766f6d2e4d756c7469537472696e674b65794d6170
-		//                     (MapType.Name) "veyron2/vom.MultiStringKeyMap"
+		//                     (MapType.Name) "veyron.io/veyron/veyron2/vom.MultiStringKeyMap"
 		// 00                (MapType end)
 		//
 		// ff83 06           typedef 66[ff83] len[06]
@@ -2115,7 +2115,7 @@ var coderTests = []struct {
 		"MultiStringKeyMap",
 		v{MultiStringKeyMap{[2]string{"A\b\f\n\r\t", "\b\f\n\r\tB"}: "\b\f\n\r\t"}},
 		"ff81251601420103011d766579726f6e322f766f6d2e4d756c7469537472696e674b65794d617000ff8306140103010200ff8215010641080c0a0d0906080c0a0d094205080c0a0d09",
-		`["type","veyron2/vom.MultiStringKeyMap map[[2]string]string"]
+		`["type","veyron.io/veyron/veyron2/vom.MultiStringKeyMap map[[2]string]string"]
 		["MultiStringKeyMap",{"[\"A\\b\\f\\n\\r\\t\",\"\\b\\f\\n\\r\\tB\"]":"\b\f\n\r\t"}]
 		`,
 		j{`{"[\"A\\b\\f\\n\\r\\t\",\"\\b\\f\\n\\r\\tB\"]":"\b\f\n\r\t"}`},

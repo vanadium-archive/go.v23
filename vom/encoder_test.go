@@ -41,11 +41,11 @@ func cleanVOMJSON(t *testing.T, m string) string {
 }
 
 func TestCleanVOMJSON(t *testing.T) {
-	vomJSON := `["type","veyron2/vom.Slice []uint"]
-["type","veyron2/vom.OuterMap map[uint]Slice"]
+	vomJSON := `["type","veyron.io/veyron/veyron2/vom.Slice []uint"]
+["type","veyron.io/veyron/veyron2/vom.OuterMap map[uint]Slice"]
 ["OuterMap",{"3":[4,5],"6":[7,8]}]`
-	expectedOutput := `[["type","veyron2/vom.Slice []uint"],
-["type","veyron2/vom.OuterMap map[uint]Slice"],
+	expectedOutput := `[["type","veyron.io/veyron/veyron2/vom.Slice []uint"],
+["type","veyron.io/veyron/veyron2/vom.OuterMap map[uint]Slice"],
 ["OuterMap",{"3":[4,5],"6":[7,8]}]]`
 	if cleanVOMJSON(t, vomJSON) != expectedOutput {
 		t.Errorf("clean JSON '%s' did not match expected output '%s'", cleanVOMJSON(t, vomJSON), expectedOutput)

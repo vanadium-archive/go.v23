@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	"veyron2/wiretype"
+	"veyron.io/veyron/veyron2/wiretype"
 )
 
 // binaryTypeEncode performs binary vom encoding of VOM types.

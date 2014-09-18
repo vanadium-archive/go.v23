@@ -3,8 +3,8 @@ package verror2
 import (
 	"errors"
 	"testing"
-	"veyron2/i18n"
-	"veyron2/verror"
+	"veyron.io/veyron/veyron2/i18n"
+	"veyron.io/veyron/veyron2/verror"
 )
 
 var (
@@ -148,8 +148,8 @@ func TestBasic(t *testing.T) {
 		{nEN1, NotFound, "nEN1: not found: 1 2"},
 		{nFR0, NotFound, "nFR0: pas trouvé: 0"},
 		{nFR1, NotFound, "nFR1: pas trouvé: 1 2"},
-		{nDE0, NotFound, "veyron2/verror.NotFound: nDE0 0"},
-		{nDE1, NotFound, "veyron2/verror.NotFound: nDE1 1 2"},
+		{nDE0, NotFound, "veyron.io/veyron/veyron2/verror.NotFound: nDE0 0"},
+		{nDE1, NotFound, "veyron.io/veyron/veyron2/verror.NotFound: nDE1 1 2"},
 
 		{vEN, Exists, "verror Exists"},
 		{vFR, Exists, "verror Exists"},
@@ -157,7 +157,7 @@ func TestBasic(t *testing.T) {
 
 		{gEN, Unknown, "Error: unknown error: Go error"},
 		{gFR, Unknown, "Error: erreur inconnu: Go error"},
-		{gDE, Unknown, "veyron2/verror.Unknown: Error Go error"},
+		{gDE, Unknown, "veyron.io/veyron/veyron2/verror.Unknown: Error Go error"},
 	}
 
 	for _, test := range tests {

@@ -3,10 +3,10 @@ package veyron2
 import (
 	"time"
 
-	"veyron2/config"
-	"veyron2/ipc/stream"
-	"veyron2/naming"
-	"veyron2/security"
+	"veyron.io/veyron/veyron2/config"
+	"veyron.io/veyron/veyron2/ipc/stream"
+	"veyron.io/veyron/veyron2/naming"
+	"veyron.io/veyron/veyron2/security"
 )
 
 // Below are the common options required of all veyron implementations.  Let's

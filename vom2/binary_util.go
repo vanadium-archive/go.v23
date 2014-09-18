@@ -3,8 +3,8 @@ package vom2
 import (
 	"math"
 
-	"veyron2/vdl"
-	"veyron2/verror"
+	"veyron.io/veyron/veyron2/vdl"
+	"veyron.io/veyron/veyron2/verror"
 )
 
 // Binary encoding and decoding routines.  The binary format is identical to the

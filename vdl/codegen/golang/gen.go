@@ -11,11 +11,11 @@ import (
 	"strings"
 	"text/template"
 
-	"veyron2/vdl"
-	"veyron2/vdl/compile"
-	"veyron2/vdl/vdlutil"
-	"veyron2/wiretype"
-	"veyron2/wiretype/build"
+	"veyron.io/veyron/veyron2/vdl"
+	"veyron.io/veyron/veyron2/vdl/compile"
+	"veyron.io/veyron/veyron2/vdl/vdlutil"
+	"veyron.io/veyron/veyron2/wiretype"
+	"veyron.io/veyron/veyron2/wiretype/build"
 )
 
 // Opts specifies options for generating Go files.
@@ -62,7 +62,7 @@ func Generate(file *compile.File, env *compile.Env, opts Opts) []byte {
 
 type userImport struct {
 	Local string // Local name of the import; empty if no local name.
-	Path  string // Path of the import; e.g. "veyron2/vdl"
+	Path  string // Path of the import; e.g. "veyron.io/veyron/veyron2/vdl"
 	Pkg   string // Set to non-empty Local, otherwise the basename of Path.
 }
 
@@ -118,31 +118,31 @@ func systemImportsGo(f *compile.File) []string {
 	set := make(map[string]bool)
 	if f.TypeDeps[vdl.AnyType] {
 		// Import for vdlutil.Any
-		set[`_gen_vdlutil "veyron2/vdl/vdlutil"`] = true
+		set[`_gen_vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"`] = true
 	}
 	if f.TypeDeps[vdl.TypeValType] {
 		// Import for vdl.Type
-		set[`_gen_vdl "veyron2/vdl"`] = true
+		set[`_gen_vdl "veyron.io/veyron/veyron2/vdl"`] = true
 	}
 	if len(f.Interfaces) > 0 {
 		// Imports for the generated method: Bind{interface name}.
-		set[`_gen_veyron2 "veyron2"`] = true
-		set[`_gen_wiretype "veyron2/wiretype"`] = true
-		set[`_gen_ipc "veyron2/ipc"`] = true
-		set[`_gen_context "veyron2/context"`] = true
-		set[`_gen_vdlutil "veyron2/vdl/vdlutil"`] = true
-		set[`_gen_naming "veyron2/naming"`] = true
+		set[`_gen_veyron2 "veyron.io/veyron/veyron2"`] = true
+		set[`_gen_wiretype "veyron.io/veyron/veyron2/wiretype"`] = true
+		set[`_gen_ipc "veyron.io/veyron/veyron2/ipc"`] = true
+		set[`_gen_context "veyron.io/veyron/veyron2/context"`] = true
+		set[`_gen_vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"`] = true
+		set[`_gen_naming "veyron.io/veyron/veyron2/naming"`] = true
 
 		if fileHasStreamingMethods(f) {
 			set[`_gen_io "io"`] = true
 		}
 	}
 	// If the user has specified any error IDs, typically we need to import the
-	// "veyron2/verror" package.  However we allow vdl code-generation in the
-	// "veyron2/verror" package itself, to specify common error IDs.  Special-case
+	// "veyron.io/veyron/veyron2/verror" package.  However we allow vdl code-generation in the
+	// "veyron.io/veyron/veyron2/verror" package itself, to specify common error IDs.  Special-case
 	// this scenario to avoid self-cyclic package dependencies.
-	if len(f.ErrorIDs) > 0 && f.Package.Path != "veyron2/verror" {
-		set[`_gen_verror "veyron2/verror"`] = true
+	if len(f.ErrorIDs) > 0 && f.Package.Path != "veyron.io/veyron/veyron2/verror" {
+		set[`_gen_verror "veyron.io/veyron/veyron2/verror"`] = true
 	}
 	// Convert the set of imports into a sorted list.
 	var ret sort.StringSlice
@@ -202,7 +202,7 @@ func init() {
 func genpkg(file *compile.File, pkg string) string {
 	// Special-case code generation for the veyron2/verror package, to avoid
 	// adding the "_gen_verror." package qualifier.
-	if file.Package.Path == "veyron2/verror" && pkg == "verror" {
+	if file.Package.Path == "veyron.io/veyron/veyron2/verror" && pkg == "verror" {
 		return ""
 	}
 	return "_gen_" + pkg + "."

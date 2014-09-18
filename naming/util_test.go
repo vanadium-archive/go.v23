@@ -3,7 +3,7 @@ package naming
 import (
 	"testing"
 
-	"veyron2/ipc/version"
+	"veyron.io/veyron/veyron2/ipc/version"
 )
 
 func TestFormat(t *testing.T) {

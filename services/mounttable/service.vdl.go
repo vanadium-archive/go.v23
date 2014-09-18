@@ -5,18 +5,18 @@
 package mounttable
 
 import (
-	"veyron2/security"
+	"veyron.io/veyron/veyron2/security"
 
-	"veyron2/services/mounttable/types"
+	"veyron.io/veyron/veyron2/services/mounttable/types"
 
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
 	_gen_io "io"
-	_gen_veyron2 "veyron2"
-	_gen_context "veyron2/context"
-	_gen_ipc "veyron2/ipc"
-	_gen_naming "veyron2/naming"
-	_gen_vdlutil "veyron2/vdl/vdlutil"
-	_gen_wiretype "veyron2/wiretype"
+	_gen_veyron2 "veyron.io/veyron/veyron2"
+	_gen_context "veyron.io/veyron/veyron2/context"
+	_gen_ipc "veyron.io/veyron/veyron2/ipc"
+	_gen_naming "veyron.io/veyron/veyron2/naming"
+	_gen_vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
+	_gen_wiretype "veyron.io/veyron/veyron2/wiretype"
 )
 
 // TODO(bprosnitz) Remove this line once signatures are updated to use typevals.
@@ -290,13 +290,13 @@ func (__gen_s *ServerStubGlobbable) Signature(call _gen_ipc.ServerCall) (_gen_ip
 				_gen_wiretype.FieldType{Type: 0x3, Name: "Server"},
 				_gen_wiretype.FieldType{Type: 0x34, Name: "TTL"},
 			},
-			"veyron2/services/mounttable/types.MountedServer", []string(nil)},
+			"veyron.io/veyron/veyron2/services/mounttable/types.MountedServer", []string(nil)},
 		_gen_wiretype.SliceType{Elem: 0x42, Name: "", Tags: []string(nil)}, _gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
 				_gen_wiretype.FieldType{Type: 0x3, Name: "Name"},
 				_gen_wiretype.FieldType{Type: 0x43, Name: "Servers"},
 			},
-			"veyron2/services/mounttable/types.MountEntry", []string(nil)},
+			"veyron.io/veyron/veyron2/services/mounttable/types.MountEntry", []string(nil)},
 	}
 
 	return result, nil
@@ -558,7 +558,7 @@ func (__gen_s *ServerStubMountTable) Signature(call _gen_ipc.ServerCall) (_gen_i
 				_gen_wiretype.FieldType{Type: 0x3, Name: "Server"},
 				_gen_wiretype.FieldType{Type: 0x34, Name: "TTL"},
 			},
-			"veyron2/services/mounttable/types.MountedServer", []string(nil)},
+			"veyron.io/veyron/veyron2/services/mounttable/types.MountedServer", []string(nil)},
 		_gen_wiretype.SliceType{Elem: 0x42, Name: "", Tags: []string(nil)}}
 	var ss _gen_ipc.ServiceSignature
 	var firstAdded int

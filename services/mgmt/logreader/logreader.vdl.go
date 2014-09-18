@@ -5,16 +5,16 @@
 package logreader
 
 import (
-	"veyron2/services/mgmt/logreader/types"
+	"veyron.io/veyron/veyron2/services/mgmt/logreader/types"
 
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
 	_gen_io "io"
-	_gen_veyron2 "veyron2"
-	_gen_context "veyron2/context"
-	_gen_ipc "veyron2/ipc"
-	_gen_naming "veyron2/naming"
-	_gen_vdlutil "veyron2/vdl/vdlutil"
-	_gen_wiretype "veyron2/wiretype"
+	_gen_veyron2 "veyron.io/veyron/veyron2"
+	_gen_context "veyron.io/veyron/veyron2/context"
+	_gen_ipc "veyron.io/veyron/veyron2/ipc"
+	_gen_naming "veyron.io/veyron/veyron2/naming"
+	_gen_vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
+	_gen_wiretype "veyron.io/veyron/veyron2/wiretype"
 )
 
 // TODO(bprosnitz) Remove this line once signatures are updated to use typevals.
@@ -340,7 +340,7 @@ func (__gen_s *ServerStubLogFile) Signature(call _gen_ipc.ServerCall) (_gen_ipc.
 				_gen_wiretype.FieldType{Type: 0x25, Name: "Position"},
 				_gen_wiretype.FieldType{Type: 0x3, Name: "Line"},
 			},
-			"veyron2/services/mgmt/logreader/types.LogEntry", []string(nil)},
+			"veyron.io/veyron/veyron2/services/mgmt/logreader/types.LogEntry", []string(nil)},
 	}
 
 	return result, nil

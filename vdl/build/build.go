@@ -11,11 +11,11 @@ import (
 	"sort"
 	"strings"
 
-	"veyron/lib/toposort"
-	"veyron2/vdl"
-	"veyron2/vdl/compile"
-	"veyron2/vdl/parse"
-	"veyron2/vdl/vdlutil"
+	"veyron.io/veyron/veyron/lib/toposort"
+	"veyron.io/veyron/veyron2/vdl"
+	"veyron.io/veyron/veyron2/vdl/compile"
+	"veyron.io/veyron/veyron2/vdl/parse"
+	"veyron.io/veyron/veyron2/vdl/vdlutil"
 )
 
 // Package represents the build information for an vdl package.
@@ -26,9 +26,10 @@ type Package struct {
 	// Name is the name of the package, specified in the vdl files.
 	// E.g. "base"
 	Name string
-	// Path is the package path, e.g. "veyron/vdl/lib".  It may be empty if the
-	// path isn't known - e.g. if we're building a directory.
-	// E.g. "veyron/rt/base"
+	// Path is the package path,
+	// e.g. "veyron.io/veyron/veyron/vdl/lib".  It may be empty if
+	// the path isn't known - e.g. if we're building a directory.
+	// E.g. "veyron.io/veyron/veyron/rt/base"
 	Path string
 	// BaseFileNames is an unordered list of base vdl file names for this
 	// package.  Join these with Dir to get absolute file names.

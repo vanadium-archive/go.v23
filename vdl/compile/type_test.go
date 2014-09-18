@@ -3,10 +3,10 @@ package compile_test
 import (
 	"testing"
 
-	"veyron2/vdl"
-	"veyron2/vdl/build"
-	"veyron2/vdl/compile"
-	"veyron2/vdl/vdltest"
+	"veyron.io/veyron/veyron2/vdl"
+	"veyron.io/veyron/veyron2/vdl/build"
+	"veyron.io/veyron/veyron2/vdl/compile"
+	"veyron.io/veyron/veyron2/vdl/vdltest"
 )
 
 const exp = "experimental"

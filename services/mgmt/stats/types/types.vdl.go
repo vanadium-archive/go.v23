@@ -6,8 +6,8 @@ package types
 
 import (
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
-	_gen_verror "veyron2/verror"
+	_gen_verror "veyron.io/veyron/veyron2/verror"
 )
 
 // This error indicates that the object does not have a value.
-const NoValue = _gen_verror.ID("veyron2/services/mgmt/stats/types.NoValue")
+const NoValue = _gen_verror.ID("veyron.io/veyron/veyron2/services/mgmt/stats/types.NoValue")

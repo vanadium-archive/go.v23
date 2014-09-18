@@ -4,7 +4,7 @@
 package ipc
 
 import (
-	"veyron2/vtrace"
+	"veyron.io/veyron/veyron2/vtrace"
 )
 
 // Request describes the request header sent by the client to the server.  A

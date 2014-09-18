@@ -302,19 +302,19 @@ func testIntType() *Type {
 }
 
 func rtN(suffix string, base *Type) *Type {
-	return NamedType("veyron2/vdl.n"+suffix, base)
+	return NamedType("veyron.io/veyron/veyron2/vdl.n"+suffix, base)
 }
 
 func rtNArray(suffix string, base *Type) *Type {
-	return NamedType("veyron2/vdl.nArray3"+suffix, ArrayType(3, base))
+	return NamedType("veyron.io/veyron/veyron2/vdl.nArray3"+suffix, ArrayType(3, base))
 }
 
 func rtNStruct(suffix string, base *Type) *Type {
-	return NamedType("veyron2/vdl.nStruct"+suffix, StructType(StructField{"X", base}))
+	return NamedType("veyron.io/veyron/veyron2/vdl.nStruct"+suffix, StructType(StructField{"X", base}))
 }
 
 func rtNSlice(suffix string, base *Type) *Type {
-	return NamedType("veyron2/vdl.nSlice"+suffix, ListType(base))
+	return NamedType("veyron.io/veyron/veyron2/vdl.nSlice"+suffix, ListType(base))
 }
 
 func rtSet(base *Type) *Type {
@@ -322,7 +322,7 @@ func rtSet(base *Type) *Type {
 }
 
 func rtNSet(suffix string, base *Type) *Type {
-	return NamedType("veyron2/vdl.nSet"+suffix, rtSet(base))
+	return NamedType("veyron.io/veyron/veyron2/vdl.nSet"+suffix, rtSet(base))
 }
 
 func rtMap(base *Type) *Type {
@@ -330,7 +330,7 @@ func rtMap(base *Type) *Type {
 }
 
 func rtNMap(suffix string, base *Type) *Type {
-	return NamedType("veyron2/vdl.nMap"+suffix, rtMap(base))
+	return NamedType("veyron.io/veyron/veyron2/vdl.nMap"+suffix, rtMap(base))
 }
 
 func allTests() []rtTest {

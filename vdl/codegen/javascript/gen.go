@@ -12,9 +12,9 @@ import (
 	"strconv"
 	"text/template"
 
-	"veyron2/vdl"
-	"veyron2/vdl/compile"
-	"veyron2/vdl/vdlutil"
+	"veyron.io/veyron/veyron2/vdl"
+	"veyron.io/veyron/veyron2/vdl/compile"
+	"veyron.io/veyron/veyron2/vdl/vdlutil"
 )
 
 type jsData struct {

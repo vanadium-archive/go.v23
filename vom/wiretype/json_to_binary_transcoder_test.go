@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"veyron2/vom"
+	"veyron.io/veyron/veyron2/vom"
 )
 
 // stringError makes it easy to convert from json to an error type

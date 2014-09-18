@@ -7,10 +7,11 @@ import (
 	"regexp"
 )
 
-// ID is a unique identifier for errors, allowing stable error checking across
-// different error messages and different address spaces.  By convention the
-// format is "PKGPATH.NAME" - e.g. ErrIDFoo defined in the "veyron2/verror"
-// package has id "veyron2/verror.ErrIDFoo".
+// ID is a unique identifier for errors, allowing stable error
+// checking across different error messages and different address
+// spaces.  By convention the format is "PKGPATH.NAME" - e.g. ErrIDFoo
+// defined in the "veyron.io/veyron/veyron2/verror" package has id
+// "veyron.io/veyron/veyron2/verror.ErrIDFoo".
 type ID string
 
 const Unknown = ID("")

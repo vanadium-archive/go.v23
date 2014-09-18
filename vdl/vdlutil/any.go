@@ -3,7 +3,7 @@ package vdlutil
 import (
 	"encoding/gob"
 
-	"veyron2/vom"
+	"veyron.io/veyron/veyron2/vom"
 )
 
 // Any is a special type used by the veyron vdl compiler.  The built-in "any"

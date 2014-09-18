@@ -70,8 +70,8 @@
 package vtrace
 
 import (
-	"veyron2/context"
-	"veyron2/uniqueid"
+	"veyron.io/veyron/veyron2/context"
+	"veyron.io/veyron/veyron2/uniqueid"
 )
 
 // Trace represents an entire computation which is composed of a number

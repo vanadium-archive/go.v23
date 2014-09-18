@@ -27,16 +27,16 @@
 package arith
 
 import (
-	"veyron2/vdl/test_base"
+	"veyron.io/veyron/veyron2/vdl/test_base"
 
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
 	_gen_io "io"
-	_gen_veyron2 "veyron2"
-	_gen_context "veyron2/context"
-	_gen_ipc "veyron2/ipc"
-	_gen_naming "veyron2/naming"
-	_gen_vdlutil "veyron2/vdl/vdlutil"
-	_gen_wiretype "veyron2/wiretype"
+	_gen_veyron2 "veyron.io/veyron/veyron2"
+	_gen_context "veyron.io/veyron/veyron2/context"
+	_gen_ipc "veyron.io/veyron/veyron2/ipc"
+	_gen_naming "veyron.io/veyron/veyron2/naming"
+	_gen_vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
+	_gen_wiretype "veyron.io/veyron/veyron2/wiretype"
 )
 
 // Yes shows that bools may be untyped.
@@ -742,12 +742,12 @@ func (__gen_s *ServerStubArith) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Se
 				_gen_wiretype.FieldType{Type: 0x24, Name: "A"},
 				_gen_wiretype.FieldType{Type: 0x24, Name: "B"},
 			},
-			"veyron2/vdl/test_base.Args", []string(nil)},
+			"veyron.io/veyron/veyron2/vdl/test_base.Args", []string(nil)},
 		_gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
 				_gen_wiretype.FieldType{Type: 0x42, Name: "Args"},
 			},
-			"veyron2/vdl/test_base.NestedArgs", []string(nil)},
+			"veyron.io/veyron/veyron2/vdl/test_base.NestedArgs", []string(nil)},
 		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "anydata", Tags: []string(nil)}}
 
 	return result, nil

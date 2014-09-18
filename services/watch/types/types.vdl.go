@@ -6,7 +6,7 @@ package types
 
 import (
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
-	_gen_vdlutil "veyron2/vdl/vdlutil"
+	_gen_vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
 )
 
 // GlobRequest specifies which entities should be watched and, optionally,

@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strconv"
 
-	"veyron2/vdl"
-	"veyron2/vdl/compile"
-	"veyron2/vdl/vdlutil"
+	"veyron.io/veyron/veyron2/vdl"
+	"veyron.io/veyron/veyron2/vdl/compile"
+	"veyron.io/veyron/veyron2/vdl/vdlutil"
 )
 
 // testingMode is set to true to simplify tests.
