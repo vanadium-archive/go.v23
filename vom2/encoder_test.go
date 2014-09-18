@@ -6,7 +6,8 @@ import (
 	"testing"
 )
 
-func TestBinaryEncoder(t *testing.T) {
+// TODO(toddw): Re-enable this test based on the new vomtest generated data.
+func DISABLEDTestBinaryEncoder(t *testing.T) {
 	for _, test := range coderTests {
 		var buf bytes.Buffer
 		encoder, err := NewBinaryEncoder(&buf)

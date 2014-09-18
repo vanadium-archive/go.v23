@@ -320,16 +320,16 @@ var rtInfoTests = []struct {
 	// Custom VomEncode / VomDecode methods.
 	{VomCoder(0), rtivomcoder, ""},
 	{(*VomCoder)(nil),
-		&rtInfo{name: "*veyron2/vom.VomCoder", kind: typeKindPtr, elem: rtivomcoder, numStars: 1, numMethods: 2},
+		&rtInfo{name: "*veyron.io/veyron/veyron2/vom.VomCoder", kind: typeKindPtr, elem: rtivomcoder, numStars: 1, numMethods: 2},
 		""},
 	{VomCoderPtr(0), rtivomcoderptr, ""},
 	{(*VomCoderPtr)(nil),
-		&rtInfo{name: "*veyron2/vom.VomCoderPtr", kind: typeKindPtr, elem: rtivomcoderptr, numStars: 1, numStarsBinary: 1, numStarsJSON: 1, numMethods: 2},
+		&rtInfo{name: "*veyron.io/veyron/veyron2/vom.VomCoderPtr", kind: typeKindPtr, elem: rtivomcoderptr, numStars: 1, numStarsBinary: 1, numStarsJSON: 1, numMethods: 2},
 		""},
 	{(**VomCoderPtr)(nil),
 		&rtInfo{
-			name: "**veyron2/vom.VomCoderPtr", kind: typeKindPtr, numStars: 2, numStarsBinary: 1, numStarsJSON: 1,
-			elem: &rtInfo{name: "*veyron2/vom.VomCoderPtr", kind: typeKindPtr, numStars: 1, numStarsBinary: 1, numStarsJSON: 1, numMethods: 2, elem: rtivomcoderptr}},
+			name: "**veyron.io/veyron/veyron2/vom.VomCoderPtr", kind: typeKindPtr, numStars: 2, numStarsBinary: 1, numStarsJSON: 1,
+			elem: &rtInfo{name: "*veyron.io/veyron/veyron2/vom.VomCoderPtr", kind: typeKindPtr, numStars: 1, numStarsBinary: 1, numStarsJSON: 1, numMethods: 2, elem: rtivomcoderptr}},
 		""},
 	{GobCoder(0), rtigobcoder, ""},
 
@@ -338,7 +338,7 @@ var rtInfoTests = []struct {
 		&rtInfo{name: "*interface", kind: typeKindPtr, numStars: 1, elem: rtiiface},
 		""},
 	{(*TwoMethods)(nil),
-		&rtInfo{name: "*veyron2/vom.TwoMethods", kind: typeKindPtr, numStars: 1, elem: rti2methods},
+		&rtInfo{name: "*veyron.io/veyron/veyron2/vom.TwoMethods", kind: typeKindPtr, numStars: 1, elem: rti2methods},
 		""},
 	{StructWithInterfaces{},
 		&rtInfo{
@@ -357,7 +357,7 @@ var rtInfoTests = []struct {
 		B TwoMethods
 	}{},
 		&rtInfo{
-			name: "struct{A interface;B veyron2/vom.TwoMethods}",
+			name: "struct{A interface;B veyron.io/veyron/veyron2/vom.TwoMethods}",
 			kind: typeKindStruct,
 			fields: []*rtInfoField{
 				{name: "A", index: 0, info: rtiiface},
