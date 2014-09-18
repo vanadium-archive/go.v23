@@ -63,7 +63,7 @@ The generate flags are:
       just before the package path, and dst is the replacement for src.
       Use commas to separate multiple rules; the first rule matching src is
       used.  The special dst SKIP indicates all matching packages are skipped.
-   -java_out_dir=veyron/go/src->veyron.new/java/src/main/java,roadmap/go/src->veyron.new/java/src/main/java,third_party/go/src->SKIP: Same semantics as --go_out_dir but applies to java code generation.
+   -java_out_dir=veyron/go/src->veyron/java/src/main/java,roadmap/go/src->veyron/java/src/main/java,third_party/go/src->SKIP: Same semantics as --go_out_dir but applies to java code generation.
    -java_pkg_prefix=com: Package prefix that will be added to the VDL package prefixes when generating Java files.
    -js_out_dir=veyron/go/src->veyron.js/src,roadmap/go/src->veyron.js/java,third_party/go/src->SKIP: Same semantics as --go_out_dir but applies to js code generation.
    -lang=go,java: Comma-separated list of languages to generate, currently supporting go,java,js
@@ -135,7 +135,7 @@ The audit flags are:
       just before the package path, and dst is the replacement for src.
       Use commas to separate multiple rules; the first rule matching src is
       used.  The special dst SKIP indicates all matching packages are skipped.
-   -java_out_dir=veyron/go/src->veyron.new/java/src/main/java,roadmap/go/src->veyron.new/java/src/main/java,third_party/go/src->SKIP: Same semantics as --go_out_dir but applies to java code generation.
+   -java_out_dir=veyron/go/src->veyron/java/src/main/java,roadmap/go/src->veyron/java/src/main/java,third_party/go/src->SKIP: Same semantics as --go_out_dir but applies to java code generation.
    -java_pkg_prefix=com: Package prefix that will be added to the VDL package prefixes when generating Java files.
    -js_out_dir=veyron/go/src->veyron.js/src,roadmap/go/src->veyron.js/java,third_party/go/src->SKIP: Same semantics as --go_out_dir but applies to js code generation.
    -lang=go,java: Comma-separated list of languages to generate, currently supporting go,java,js

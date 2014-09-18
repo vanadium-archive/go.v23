@@ -253,21 +253,20 @@ var (
 	optGenGoOutDir   = genOutDir{}
 	optGenJavaOutDir = genOutDir{
 		xlate: xlateRules{
-			{"veyron.io/veyron/veyron/go/src", "veyron.io/veyron/veyron.new/java/src/main/java"},
-			{"roadmap/go/src", "veyron.io/veyron/veyron.new/java/src/main/java"},
+			{"veyron/go/src", "veyron/java/src/main/java"},
+			{"roadmap/go/src", "veyron/java/src/main/java"},
 			{"third_party/go/src", "SKIP"},
 		},
 	}
 	optGenJavascriptOutDir = genOutDir{
 		xlate: xlateRules{
-			{"veyron.io/veyron/veyron/go/src", "veyron.io/veyron/veyron.js/src"},
-			{"roadmap/go/src", "veyron.io/veyron/veyron.js/java"},
+			{"veyron/go/src", "veyron.js/src"},
+			{"roadmap/go/src", "veyron.js/src"},
 			{"third_party/go/src", "SKIP"},
 		},
 	}
 	optGenJavaPkgOut = xlateRules{
 		{"veyron.io", "io/veyron"},
-		{"veyron.io/veyron/veyron", "com/veyron"},
 	}
 	optGenLangs = genLangs{genLangGo, genLangJava} // TODO: javascript
 )
