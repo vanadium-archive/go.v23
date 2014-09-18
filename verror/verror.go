@@ -67,14 +67,15 @@ func Makef(id ID, format string, v ...interface{}) E {
 
 // Helper functions to easily make errors with a particular ID.
 
-func Abortedf(fmt string, v ...interface{}) E       { return Makef(Aborted, fmt, v...) }
-func BadArgf(fmt string, v ...interface{}) E        { return Makef(BadArg, fmt, v...) }
-func BadProtocolf(fmt string, v ...interface{}) E   { return Makef(BadProtocol, fmt, v...) }
-func Existsf(fmt string, v ...interface{}) E        { return Makef(Exists, fmt, v...) }
-func Internalf(fmt string, v ...interface{}) E      { return Makef(Internal, fmt, v...) }
-func NotAuthorizedf(fmt string, v ...interface{}) E { return Makef(NotAuthorized, fmt, v...) }
-func NotFoundf(fmt string, v ...interface{}) E      { return Makef(NotFound, fmt, v...) }
-func Unknownf(fmt string, v ...interface{}) E       { return Makef(Unknown, fmt, v...) }
+func Abortedf(fmt string, v ...interface{}) E           { return Makef(Aborted, fmt, v...) }
+func BadArgf(fmt string, v ...interface{}) E            { return Makef(BadArg, fmt, v...) }
+func BadProtocolf(fmt string, v ...interface{}) E       { return Makef(BadProtocol, fmt, v...) }
+func Existsf(fmt string, v ...interface{}) E            { return Makef(Exists, fmt, v...) }
+func Internalf(fmt string, v ...interface{}) E          { return Makef(Internal, fmt, v...) }
+func NoAccessf(fmt string, v ...interface{}) E          { return Makef(NoAccess, fmt, v...) }
+func NoExistf(fmt string, v ...interface{}) E           { return Makef(NoExist, fmt, v...) }
+func NoExistOrNoAccessf(fmt string, v ...interface{}) E { return Makef(NoExistOrNoAccess, fmt, v...) }
+func Unknownf(fmt string, v ...interface{}) E           { return Makef(Unknown, fmt, v...) }
 
 // Converts a regular err into an E error.  Returns the err unchanged if it's
 // already an E error or nil, otherwise returns a new E error with Unknown id.

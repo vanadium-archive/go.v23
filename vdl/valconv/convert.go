@@ -18,7 +18,7 @@ var (
 	errTargetInvalid    = verror.BadArgf("invalid target")
 	errTargetUnsettable = verror.BadArgf("unsettable target")
 	errArrayIndex       = verror.BadArgf("array index out of range")
-	errFieldNotFound    = verror.NotFoundf("struct field not found")
+	errFieldNotFound    = verror.NoExistf("struct field not found")
 )
 
 var (

@@ -9,11 +9,11 @@ import (
 )
 
 var (
-	ErrNameExists              = verror.Make(verror.Exists, "Name already exists")
-	ErrNoSuchName              = verror.Make(verror.NotFound, "Name doesn't exist")
-	ErrNoSuchNameRoot          = verror.Make(verror.NotFound, "Name doesn't exist: root of namespace")
-	ErrResolutionDepthExceeded = verror.Make(verror.Aborted, "Resolution depth exceeded")
-	ErrNoMountTable            = verror.Make(verror.Internal, "No mount table available")
+	ErrNameExists              = verror.Existsf("Name already exists")
+	ErrNoSuchName              = verror.NoExistf("Name doesn't exist")
+	ErrNoSuchNameRoot          = verror.NoExistf("Name doesn't exist: root of namespace")
+	ErrResolutionDepthExceeded = verror.Abortedf("Resolution depth exceeded")
+	ErrNoMountTable            = verror.Internalf("No mount table available")
 )
 
 // Endpoint represents unique identifiers for entities communicating over a

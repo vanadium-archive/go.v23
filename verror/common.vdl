@@ -3,11 +3,12 @@ package verror
 // Common error IDs used throughout veyron.  Wherever possible try to use these
 // common IDs to classify your errors.
 errorid (
-	Aborted       // Operation aborted, e.g. connection closed.
-	BadArg        // Requester specified an invalid argument.
-	BadProtocol   // Protocol mismatch, including type or argument errors.
-	Exists        // Requested entity already exists.
-	Internal      // Internal invariants broken; something is very wrong.
-	NotAuthorized // Requester isn't authorized to access the entity.
-	NotFound      // Requested entity (e.g. object, method) not found.
+	Aborted           // Operation aborted, e.g. connection closed.
+	BadArg            // Requester specified an invalid argument.
+	BadProtocol       // Protocol mismatch, including type or argument errors.
+	Exists            // Requested entity already exists.
+	Internal          // Internal invariants broken; something is very wrong.
+	NoAccess          // Requested entity exists, but requester may not access it.
+	NoExist           // Requested entity doesn't exist.
+	NoExistOrNoAccess // Requested entity doesn't exist, or requester may not access it.
 )

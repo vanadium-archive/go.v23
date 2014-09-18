@@ -13,6 +13,8 @@ const Exists = ID("veyron.io/veyron/veyron2/verror.Exists") // Requested entity 
 
 const Internal = ID("veyron.io/veyron/veyron2/verror.Internal") // Internal invariants broken; something is very wrong.
 
-const NotAuthorized = ID("veyron.io/veyron/veyron2/verror.NotAuthorized") // Requester isn't authorized to access the entity.
+const NoAccess = ID("veyron.io/veyron/veyron2/verror.NoAccess") // Requested entity exists, but requester may not access it.
 
-const NotFound = ID("veyron.io/veyron/veyron2/verror.NotFound") // Requested entity (e.g. object, method) not found.
+const NoExist = ID("veyron.io/veyron/veyron2/verror.NoExist") // Requested entity doesn't exist.
+
+const NoExistOrNoAccess = ID("veyron.io/veyron/veyron2/verror.NoExistOrNoAccess") // Requested entity doesn't exist, or requester may not access it.

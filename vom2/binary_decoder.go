@@ -261,7 +261,7 @@ func (d *binaryDecoder) decodeValue(t *vdl.Type, target valconv.Target) error {
 				return err
 			}
 			switch err := setTarget.FinishKey(key); {
-			case verror.Is(err, verror.NotFound):
+			case verror.Is(err, verror.NoExist):
 				continue
 			case err != nil:
 				return err
@@ -286,7 +286,7 @@ func (d *binaryDecoder) decodeValue(t *vdl.Type, target valconv.Target) error {
 				return err
 			}
 			switch field, err := mapTarget.FinishKeyStartField(key); {
-			case verror.Is(err, verror.NotFound):
+			case verror.Is(err, verror.NoExist):
 				if err := d.ignoreValue(t.Elem()); err != nil {
 					return err
 				}
@@ -320,7 +320,7 @@ func (d *binaryDecoder) decodeValue(t *vdl.Type, target valconv.Target) error {
 			}
 			tfield := t.Field(int(index - 1))
 			switch key, field, err := structTarget.StartField(tfield.Name); {
-			case verror.Is(err, verror.NotFound):
+			case verror.Is(err, verror.NoExist):
 				if err := d.ignoreValue(tfield.Type); err != nil {
 					return err
 				}

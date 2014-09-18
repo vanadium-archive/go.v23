@@ -236,7 +236,7 @@ func FromReflect(target Target, rv reflect.Value) error {
 					return err
 				}
 				switch err := setTarget.FinishKey(key); {
-				case verror.Is(err, verror.NotFound):
+				case verror.Is(err, verror.NoExist):
 					continue
 				case err != nil:
 					return err
@@ -258,7 +258,7 @@ func FromReflect(target Target, rv reflect.Value) error {
 			}
 			field, err := mapTarget.FinishKeyStartField(key)
 			switch {
-			case verror.Is(err, verror.NotFound):
+			case verror.Is(err, verror.NoExist):
 				continue
 			case err != nil:
 				return err
@@ -279,7 +279,7 @@ func FromReflect(target Target, rv reflect.Value) error {
 		for fx := 0; fx < rt.NumField(); fx++ {
 			key, field, err := structTarget.StartField(rt.Field(fx).Name)
 			switch {
-			case verror.Is(err, verror.NotFound):
+			case verror.Is(err, verror.NoExist):
 				continue
 			case err != nil:
 				return err
@@ -369,7 +369,7 @@ func FromValue(target Target, vv *vdl.Value) error {
 				return err
 			}
 			switch err := setTarget.FinishKey(key); {
-			case verror.Is(err, verror.NotFound):
+			case verror.Is(err, verror.NoExist):
 				continue
 			case err != nil:
 				return err
@@ -391,7 +391,7 @@ func FromValue(target Target, vv *vdl.Value) error {
 			}
 			field, err := mapTarget.FinishKeyStartField(key)
 			switch {
-			case verror.Is(err, verror.NotFound):
+			case verror.Is(err, verror.NoExist):
 				continue
 			case err != nil:
 				return err
@@ -412,7 +412,7 @@ func FromValue(target Target, vv *vdl.Value) error {
 		for fx := 0; fx < tt.NumField(); fx++ {
 			key, field, err := structTarget.StartField(tt.Field(fx).Name)
 			switch {
-			case verror.Is(err, verror.NotFound):
+			case verror.Is(err, verror.NoExist):
 				continue
 			case err != nil:
 				return err
