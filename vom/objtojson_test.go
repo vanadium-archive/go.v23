@@ -71,7 +71,7 @@ func TestObjToJSON(t *testing.T) {
 		}{2, true}: 5}, "{\"{\\\"x\\\": 2, \\\"y\\\": true}\": 5}"},
 		testCase{map[**string]string{&aStringPtr: "B"}, "{\"str\": \"B\"}"},
 		testCase{map[error]string{verror.NoExistf("errorText"): "errorText"},
-			`{"{\"iD\": \"veyron.io/veyron/veyron2/verror.NotFound\", \"msg\": \"errorText\"}": "errorText"}`},
+			`{"{\"iD\": \"veyron.io/veyron/veyron2/verror.NoExist\", \"msg\": \"errorText\"}": "errorText"}`},
 		testCase{map[interface{}]interface{}{4: 1.7, "A": true}, "{\"4\": 1.7, \"\\\"A\\\"\": true}"},
 		testCase{&anInt, "4"},
 		testCase{&aStringPtr, "\"str\""},
