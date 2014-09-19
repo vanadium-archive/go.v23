@@ -12,7 +12,6 @@ package veyron2
 
 import (
 	"fmt"
-	"net"
 
 	"veyron.io/veyron/veyron2/config"
 	"veyron.io/veyron/veyron2/context"
@@ -151,12 +150,6 @@ type Profile interface {
 	// Description returns the Description of the Platform.
 	Platform() *Platform
 
-	// AddressChooser returns a function that can be used to
-	// choose the preferred address to publish with the mount table
-	// when one is not otherwise specified. The runtime implementation
-	// must pass this option to all IPC servers it creates
-	AddressChooser() AddressChooser
-
 	// Init is called by the Runtime once it has been initialized and
 	// command line flags have been parsed. Init will be called once and
 	// only once by the Runtime.
@@ -166,9 +159,6 @@ type Profile interface {
 	// TODO(cnicolaou): provide a Cleanup method for the profile.
 	String() string
 }
-
-// AddressChooser returns the address it prefers out of the set passed to it.
-type AddressChooser func(network string, addrs []net.Addr) (net.Addr, error)
 
 // Runtime is the interface that concrete Veyron implementations must
 // implement.

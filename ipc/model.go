@@ -94,7 +94,22 @@ type ListenSpec struct {
 	Address string
 	// The name of a proxy to be used to proxy connections to this listener.
 	Proxy string
+
+	// A publisher, which if non-nil, can be used to receive updated
+	// network Settings via the stream named StreamName.
+	StreamPublisher *config.Publisher
+	// The name of the Stream to Fork on the StreamPublisher.
+	StreamName string
+
+	// AddressChooser returns a function that can be used to
+	// choose the preferred address to publish with the mount table
+	// when one is not otherwise specified.
+	AddressChooser AddressChooser
 }
+
+// AddressChooser returns the address it prefers out of the set passed to it
+// for the specified network.
+type AddressChooser func(network string, addrs []net.Addr) (net.Addr, error)
 
 // Server defines the interface for managing a collection of services.
 type Server interface {

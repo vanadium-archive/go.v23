@@ -3,7 +3,6 @@ package veyron2
 import (
 	"time"
 
-	"veyron.io/veyron/veyron2/config"
 	"veyron.io/veyron/veyron2/ipc/stream"
 	"veyron.io/veyron/veyron2/naming"
 	"veyron.io/veyron/veyron2/security"
@@ -186,22 +185,6 @@ func (HTTPDebugOpt) ROpt() {}
 type ServesMountTableOpt bool
 
 func (ServesMountTableOpt) IPCServerOpt() {}
-
-// AddressChooserOpt is a function that can be used to select
-// the preferred address to use for publishing to the mount table when
-// the default policy is inappropriate.
-type AddressChooserOpt struct{ AddressChooser }
-
-func (AddressChooserOpt) IPCServerOpt() {}
-
-// RoamingPublisherOpt wraps a publisher name and associated stream to be used
-// for receiving dynamically changing network settings over.
-type RoamingPublisherOpt struct {
-	Publisher  *config.Publisher
-	StreamName string
-}
-
-func (RoamingPublisherOpt) IPCServerOpt() {}
 
 // DebugAuthorizerOpt specifies the authorizer that controls access to framework
 // provided debug objects on this server.
