@@ -49,11 +49,7 @@ func (p *principal) Bless(key PublicKey, with Blessings, extension string, cavea
 	chains := with.certificateChains()
 	newchains := make([][]Certificate, len(chains))
 	for idx, chain := range chains {
-		msg, err := cert.contentHash(chain[len(chain)-1].Signature)
-		if err != nil {
-			return nil, err
-		}
-		if cert.Signature, err = p.signer.Sign(blessPurpose, msg); err != nil {
+		if err := cert.sign(p.signer, chain[len(chain)-1].Signature); err != nil {
 			return nil, err
 		}
 		newchains[idx] = append(chains[idx], *cert)
@@ -69,11 +65,7 @@ func (p *principal) BlessSelf(name string, caveats ...Caveat) (Blessings, error)
 	if err != nil {
 		return nil, err
 	}
-	msg, err := cert.contentHash(Signature{})
-	if err != nil {
-		return nil, err
-	}
-	if cert.Signature, err = p.signer.Sign(blessPurpose, msg); err != nil {
+	if err := cert.sign(p.signer, Signature{}); err != nil {
 		return nil, err
 	}
 	return &blessingsImpl{

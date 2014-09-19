@@ -2,6 +2,7 @@ package security
 
 import (
 	"bytes"
+	"crypto/elliptic"
 	"reflect"
 	"testing"
 )
@@ -28,6 +29,7 @@ func TestCertificateContentHash(t *testing.T) {
 			reflect.TypeOf([]byte{}):   []reflect.Value{v([]byte{1}), v([]byte{2})},
 			reflect.TypeOf([]Caveat{}): []reflect.Value{v([]Caveat{newCaveat(MethodCaveat("Method"))}), v([]Caveat{newCaveat(PeerBlessingsCaveat("peer"))})},
 		}
+		hashfn = SHA256Hash // hash function used to compute the content hash in tests.
 	)
 	defer func() {
 		// Paranoia: Most of the tests are gated by loops on the size of "certificates" and "signatures",
@@ -84,11 +86,7 @@ func TestCertificateContentHash(t *testing.T) {
 	// TEST: No two certificates should have the same contenthash, even when the parent signature is the same.
 	hashes := make([][]byte, len(certificates))
 	for i, cert := range certificates {
-		var err error
-		hashes[i], err = cert.contentHash(Signature{})
-		if err != nil {
-			t.Fatalf("Failed to create content hash for Certificate{%+v}: %v", cert, err)
-		}
+		hashes[i] = cert.contentHash(hashfn, Signature{})
 	}
 	for i := 0; i < len(hashes); i++ {
 		for j := i + 1; j < len(hashes); j++ {
@@ -102,12 +100,8 @@ func TestCertificateContentHash(t *testing.T) {
 	// TEST: The content hash should change with parent signatures
 	hashes = make([][]byte, len(signatures))
 	for i, sig := range signatures {
-		var err error
 		var cert Certificate
-		hashes[i], err = cert.contentHash(sig)
-		if err != nil {
-			t.Fatalf("Failed to create content hash for Certificate with parent signature{%v}: %v", sig, err)
-		}
+		hashes[i] = cert.contentHash(hashfn, sig)
 	}
 	for i := 0; i < len(hashes); i++ {
 		for j := i + 1; j < len(hashes); j++ {
@@ -121,12 +115,8 @@ func TestCertificateContentHash(t *testing.T) {
 	// TEST: The Signature field within a certificate itself should not affect the hash.
 	hashes = make([][]byte, len(signatures))
 	for i, sig := range signatures {
-		var err error
 		cert := Certificate{Signature: sig}
-		hashes[i], err = cert.contentHash(Signature{})
-		if err != nil {
-			t.Errorf("Failed to create content hash for Certificate{%+v}: %v", cert, err)
-		}
+		hashes[i] = cert.contentHash(hashfn, Signature{})
 	}
 	for i := 1; i < len(hashes); i++ {
 		numtested++
@@ -134,6 +124,36 @@ func TestCertificateContentHash(t *testing.T) {
 			cert1 := Certificate{Signature: signatures[i]}
 			cert2 := Certificate{Signature: signatures[i-1]}
 			t.Errorf("Certificate{%v} and {%v} which only differ in their Signature field seem to have different content hashes", cert1, cert2)
+		}
+	}
+}
+
+func TestCertificateSignUsesContentHashWithStrengthComparableToSigningKey(t *testing.T) {
+	tests := []struct {
+		curve  elliptic.Curve
+		hash   Hash
+		nBytes int
+	}{
+		{elliptic.P224(), SHA256Hash, 32},
+		{elliptic.P256(), SHA256Hash, 32},
+		{elliptic.P384(), SHA384Hash, 48},
+		{elliptic.P521(), SHA512Hash, 64},
+	}
+	for idx, test := range tests {
+		var cert Certificate
+		wanthash := cert.contentHash(test.hash, Signature{})
+		if got, want := len(wanthash), test.nBytes; got != want {
+			t.Errorf("Got content hash of %d bytes, want %d for hash function %q", got, want, test.hash)
+			continue
+		}
+		signer := newECDSASigner(t, test.curve)
+		if err := cert.sign(signer, Signature{}); err != nil {
+			t.Errorf("cert.sign for test #%d (hash:%q) failed: %v", idx, test.hash, err)
+			continue
+		}
+		if !cert.Signature.Verify(signer.PublicKey(), wanthash) {
+			t.Errorf("Incorrect hash function used by sign. Test #%d, expected hash:%q", idx, test.hash)
+			continue
 		}
 	}
 }

@@ -12,7 +12,7 @@ import (
 
 // Verify returns true iff sig is a valid signature for a message.
 func (sig *Signature) Verify(key PublicKey, message []byte) bool {
-	if message = messageToSign(sig.Hash, sig.Purpose, message); message == nil {
+	if message = messageDigest(sig.Hash, sig.Purpose, message); message == nil {
 		return false
 	}
 	switch v := key.(type) {
@@ -28,28 +28,18 @@ func (sig *Signature) Verify(key PublicKey, message []byte) bool {
 // key to sign messages.  This private key is kept in the clear in the memory
 // of the running process.
 func NewInMemoryECDSASigner(key *ecdsa.PrivateKey) Signer {
-	var hash Hash
-	if nbits := key.Curve.Params().BitSize; nbits <= 160 {
-		hash = SHA1Hash
-	} else if nbits <= 256 {
-		hash = SHA256Hash
-	} else if nbits <= 384 {
-		hash = SHA384Hash
-	} else {
-		hash = SHA512Hash
-	}
-	return &ecdsaSigner{key, NewECDSAPublicKey(&key.PublicKey), hash}
+	return &ecdsaSigner{key, NewECDSAPublicKey(&key.PublicKey)}
 }
 
 type ecdsaSigner struct {
 	key    *ecdsa.PrivateKey
 	pubkey PublicKey
-	hash   Hash
 }
 
 func (c *ecdsaSigner) Sign(purpose, message []byte) (Signature, error) {
-	if message = messageToSign(c.hash, purpose, message); message == nil {
-		return Signature{}, fmt.Errorf("unable to create bytes to sign from message with hashing function %q", c.hash)
+	hash := c.pubkey.hash()
+	if message = messageDigest(hash, purpose, message); message == nil {
+		return Signature{}, fmt.Errorf("unable to create bytes to sign from message with hashing function %q", hash)
 	}
 	r, s, err := ecdsa.Sign(rand.Reader, c.key, message)
 	if err != nil {
@@ -57,7 +47,7 @@ func (c *ecdsaSigner) Sign(purpose, message []byte) (Signature, error) {
 	}
 	return Signature{
 		Purpose: purpose,
-		Hash:    c.hash,
+		Hash:    hash,
 		R:       r.Bytes(),
 		S:       s.Bytes(),
 	}, nil
@@ -67,7 +57,7 @@ func (c *ecdsaSigner) PublicKey() PublicKey {
 	return c.pubkey
 }
 
-func messageToSign(hash Hash, purpose, message []byte) []byte {
+func messageDigest(hash Hash, purpose, message []byte) []byte {
 	if message = hash.sum(message); message == nil {
 		return nil
 	}

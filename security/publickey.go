@@ -18,6 +18,12 @@ type PublicKey interface {
 	encoding.BinaryMarshaler
 	fmt.Stringer
 
+	// hash returns a cryptographic hash function whose security strength is
+	// appropriate for creating message digests to sign with this public key.
+	// For example, an ECDSA public key with a 512-bit curve would require a
+	// 512-bit hash function, whilst a key with a 256-bit curve would be
+	// happy with a 256-bit hash function.
+	hash() Hash
 	implementationsOnlyInThisPackage()
 
 	// TODO(ashankar): Transitional method that should be removed once the "wire"
@@ -35,6 +41,17 @@ func (pk *ecdsaPublicKey) MarshalBinary() ([]byte, error)    { return x509.Marsh
 func (pk *ecdsaPublicKey) String() string                    { return publicKeyString(pk) }
 func (pk *ecdsaPublicKey) DO_NOT_USE() *ecdsa.PublicKey      { return pk.key }
 func (pk *ecdsaPublicKey) implementationsOnlyInThisPackage() {}
+func (pk *ecdsaPublicKey) hash() Hash {
+	if nbits := pk.key.Curve.Params().BitSize; nbits <= 160 {
+		return SHA1Hash
+	} else if nbits <= 256 {
+		return SHA256Hash
+	} else if nbits <= 384 {
+		return SHA384Hash
+	} else {
+		return SHA512Hash
+	}
+}
 
 func publicKeyString(pk PublicKey) string {
 	bytes, err := pk.MarshalBinary()

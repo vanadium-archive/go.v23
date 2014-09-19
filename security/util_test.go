@@ -56,12 +56,16 @@ func (c suffixCaveat) Validate(ctx Context) error {
 
 func newSuffixCaveat(suffix string) Caveat { return newCaveat(NewCaveat(suffixCaveat(suffix))) }
 
-func newPrincipal(t *testing.T) Principal {
-	key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+func newECDSASigner(t *testing.T, curve elliptic.Curve) Signer {
+	key, err := ecdsa.GenerateKey(curve, rand.Reader)
 	if err != nil {
-		t.Fatalf("Failed to create private key for principal: %v", err)
+		t.Fatalf("Failed to generate ECDSA key: %v", err)
 	}
-	p, err := CreatePrincipal(NewInMemoryECDSASigner(key))
+	return NewInMemoryECDSASigner(key)
+}
+
+func newPrincipal(t *testing.T) Principal {
+	p, err := CreatePrincipal(newECDSASigner(t, elliptic.P256()))
 	if err != nil {
 		t.Fatalf("CreatePrincipal failed: %v", err)
 	}

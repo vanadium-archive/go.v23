@@ -2,7 +2,6 @@ package security
 
 import (
 	"bytes"
-	"crypto/sha256"
 	"fmt"
 	"strings"
 )
@@ -21,18 +20,10 @@ func newUnsignedCertificate(extension string, key PublicKey, caveats ...Caveat) 
 	return cert, nil
 }
 
-// TODO(ashankar): Use a hash function that does not reduce security of the signature.
-// in other words, use a hash function that is appropriate given the number of bits
-// on the key.
-func (c *Certificate) contentHash(parent Signature) ([]byte, error) {
-	h := sha256.New()
-	var err error
+func (c *Certificate) contentHash(hash Hash, parent Signature) []byte {
+	var fields []byte
 	w := func(data []byte) {
-		if err != nil {
-			return
-		}
-		tmp := sha256.Sum256(data)
-		_, err = h.Write(tmp[:])
+		fields = append(fields, hash.sum(data)...)
 	}
 	// Fields of the Certificate type.
 	w([]byte(c.Extension))
@@ -46,10 +37,7 @@ func (c *Certificate) contentHash(parent Signature) ([]byte, error) {
 	w([]byte("ECDSA")) // Type of signature
 	w(parent.R)
 	w(parent.S)
-	if err != nil {
-		return nil, err
-	}
-	return h.Sum(nil), nil
+	return hash.sum(fields)
 }
 
 func (c *Certificate) validate(parentSignature Signature, parentKey PublicKey) error {
@@ -59,14 +47,16 @@ func (c *Certificate) validate(parentSignature Signature, parentKey PublicKey) e
 	if err := validateExtension(c.Extension); err != nil {
 		return fmt.Errorf("invalid blessing extension in certificate(for %q): %v", c.Extension, err)
 	}
-	hash, err := c.contentHash(parentSignature)
-	if err != nil {
-		return fmt.Errorf("unable to compute content hash of certificate(for %q): %v", c.Extension, err)
-	}
-	if !c.Signature.Verify(parentKey, hash) {
+	if !c.Signature.Verify(parentKey, c.contentHash(c.Signature.Hash, parentSignature)) {
 		return fmt.Errorf("invalid Signature in certificate(for %q), signing key: %v", c.Extension, parentKey)
 	}
 	return nil
+}
+
+func (c *Certificate) sign(signer Signer, parentSignature Signature) error {
+	var err error
+	c.Signature, err = signer.Sign(blessPurpose, c.contentHash(signer.PublicKey().hash(), parentSignature))
+	return err
 }
 
 func validateExtension(extension string) error {
