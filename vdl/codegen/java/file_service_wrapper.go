@@ -35,7 +35,7 @@ public final class {{ .ServiceName }}ServiceWrapper {
      * Returns all tags associated with the provided method or null if the method isn't implemented
      * by this service.
      */
-    public java.lang.Object[] getMethodTags(final com.veyron2.ipc.ServerCall call, final java.lang.String method) throws com.veyron2.ipc.VeyronException {
+    public java.lang.Object[] getMethodTags(final io.veyron.veyron.veyron2.ipc.ServerCall call, final java.lang.String method) throws io.veyron.veyron.veyron2.ipc.VeyronException {
         {{ range $methodName, $tags := .MethodTags }}
         if ("{{ $methodName }}".equals(method)) {
             return new java.lang.Object[] {
@@ -46,22 +46,22 @@ public final class {{ .ServiceName }}ServiceWrapper {
         {{ range $embed := .Embeds }}
         try {
             return this.{{ $embed.LocalWrapperVarName }}.getMethodTags(call, method);
-        } catch (com.veyron2.ipc.VeyronException e) {}  // method not found.
+        } catch (io.veyron.veyron.veyron2.ipc.VeyronException e) {}  // method not found.
         {{ end }}
-        throw new com.veyron2.ipc.VeyronException("method: " + method + " not found");
+        throw new io.veyron.veyron.veyron2.ipc.VeyronException("method: " + method + " not found");
     }
 
      {{/* Iterate over methods defined directly in the body of this service */}}
     {{ range $method := .Methods }}
-    public {{ $method.RetType }} {{ $method.Name }}(final com.veyron2.ipc.ServerCall call{{ $method.DeclarationArgs }}) throws com.veyron2.ipc.VeyronException {
+    public {{ $method.RetType }} {{ $method.Name }}(final io.veyron.veyron.veyron2.ipc.ServerCall call{{ $method.DeclarationArgs }}) throws io.veyron.veyron.veyron2.ipc.VeyronException {
         {{ if $method.IsStreaming }}
-        final com.veyron2.vdl.Stream<{{ $method.SendType }}, {{ $method.RecvType }}> stream = new com.veyron2.vdl.Stream<{{ $method.SendType }}, {{ $method.RecvType }}>() {
+        final io.veyron.veyron.veyron2.vdl.Stream<{{ $method.SendType }}, {{ $method.RecvType }}> stream = new io.veyron.veyron.veyron2.vdl.Stream<{{ $method.SendType }}, {{ $method.RecvType }}>() {
             @Override
-            public void send({{ $method.SendType }} item) throws com.veyron2.ipc.VeyronException {
+            public void send({{ $method.SendType }} item) throws io.veyron.veyron.veyron2.ipc.VeyronException {
                 call.send(item);
             }
             @Override
-            public {{ $method.RecvType }} recv() throws java.io.EOFException, com.veyron2.ipc.VeyronException {
+            public {{ $method.RecvType }} recv() throws java.io.EOFException, io.veyron.veyron.veyron2.ipc.VeyronException {
                 final com.google.common.reflect.TypeToken<?> type = new com.google.common.reflect.TypeToken< {{ $method.RecvType }} >() {
                     private static final long serialVersionUID = 1L;
                 };
@@ -69,7 +69,7 @@ public final class {{ .ServiceName }}ServiceWrapper {
                 try {
                     return ({{ $method.RecvType }})result;
                 } catch (java.lang.ClassCastException e) {
-                    throw new com.veyron2.ipc.VeyronException("Unexpected result type: " + result.getClass().getCanonicalName());
+                    throw new io.veyron.veyron.veyron2.ipc.VeyronException("Unexpected result type: " + result.getClass().getCanonicalName());
                 }
             }
         };
@@ -80,7 +80,7 @@ public final class {{ .ServiceName }}ServiceWrapper {
 
 {{/* Iterate over methods from embeded services and generate code to delegate the work */}}
 {{ range $eMethod := .EmbedMethods }}
-    public {{ $eMethod.RetType }} {{ $eMethod.Name }}(final com.veyron2.ipc.ServerCall call{{ $eMethod.DeclarationArgs }}) throws com.veyron2.ipc.VeyronException {
+    public {{ $eMethod.RetType }} {{ $eMethod.Name }}(final io.veyron.veyron.veyron2.ipc.ServerCall call{{ $eMethod.DeclarationArgs }}) throws io.veyron.veyron.veyron2.ipc.VeyronException {
         {{/* e.g. return this.stubArith.cosine(call, [args], options) */}}
         {{ if $eMethod.Returns }}return{{ end }}  this.{{ $eMethod.LocalWrapperVarName }}.{{ $eMethod.Name }}(call{{ $eMethod.CallingArgs }});
     }

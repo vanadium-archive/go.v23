@@ -105,7 +105,7 @@ public final class {{.Type}} implements java.util.Map<{{.KeyType}}, {{.ElemType}
     }
     @Override
     public void writeToParcel(android.os.Parcel out, int flags) {
-        com.veyron2.vdl.ParcelUtil.writeValue(out, impl);
+        io.veyron.veyron.veyron2.vdl.ParcelUtil.writeValue(out, impl);
     }
     public static final android.os.Parcelable.Creator<{{.Type}}> CREATOR = new android.os.Parcelable.Creator<{{.Type}}>() {
         @Override
@@ -118,7 +118,7 @@ public final class {{.Type}} implements java.util.Map<{{.KeyType}}, {{.ElemType}
         }
     };
     private {{.Type}}(android.os.Parcel in) {
-        impl = (java.util.Map<{{.KeyType}}, {{.ElemType}}>) com.veyron2.vdl.ParcelUtil.readValue(in, getClass().getClassLoader(), impl);
+        impl = (java.util.Map<{{.KeyType}}, {{.ElemType}}>) io.veyron.veyron.veyron2.vdl.ParcelUtil.readValue(in, getClass().getClassLoader(), impl);
     }
 }
 `

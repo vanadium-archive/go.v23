@@ -88,7 +88,7 @@ public final class {{.Name}} implements android.os.Parcelable, java.io.Serializa
     @Override
     public void writeToParcel(android.os.Parcel out, int flags) {
     	{{ range $field := .Fields }}
-    		com.veyron2.vdl.ParcelUtil.writeValue(out, {{$field.LowercaseName}});
+    		io.veyron.veyron.veyron2.vdl.ParcelUtil.writeValue(out, {{$field.LowercaseName}});
     	{{ end }}
     }
 	public static final android.os.Parcelable.Creator<{{.Name}}> CREATOR
@@ -104,7 +104,7 @@ public final class {{.Name}} implements android.os.Parcelable, java.io.Serializa
 	};
 	private {{.Name}}(android.os.Parcel in) {
 		{{ range $field := .Fields }}
-			this.{{$field.LowercaseName}} = ({{$field.Type}}) com.veyron2.vdl.ParcelUtil.readValue(in, getClass().getClassLoader(), this.{{$field.LowercaseName}});
+			this.{{$field.LowercaseName}} = ({{$field.Type}}) io.veyron.veyron.veyron2.vdl.ParcelUtil.readValue(in, getClass().getClassLoader(), this.{{$field.LowercaseName}});
 		{{ end }}
 	}
 }`

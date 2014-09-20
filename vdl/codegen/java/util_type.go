@@ -31,7 +31,7 @@ func javaBuiltInType(typ *vdl.Type, forceClass bool) (string, bool) {
 		}
 	}
 	if typ.Name() == "error" {
-		return "com.veyron2.ipc.VeyronException", true
+		return "io.veyron.veyron.veyron2.ipc.VeyronException", true
 	}
 	switch typ.Kind() {
 	case vdl.Bool:
@@ -84,7 +84,7 @@ func javaBuiltInType(typ *vdl.Type, forceClass bool) (string, bool) {
 	case vdl.TypeVal:
 		return "java.lang.Object", true
 	case vdl.Any:
-		return "com.veyron2.vdl.Any", true
+		return "io.veyron.veyron.veyron2.vdl.Any", true
 	default:
 		return "", false
 	}

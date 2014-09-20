@@ -28,8 +28,8 @@ public interface {{ .ServiceName }} {{ .Extends }} {
 
     {{/* Generate the method signature. */}}
     {{ $method.Doc }}
-    public {{ $method.RetType }} {{ $method.Name }}(final com.veyron2.ipc.Context context{{ $method.Args }}) throws com.veyron2.ipc.VeyronException;
-    public {{ $method.RetType }} {{ $method.Name }}(final com.veyron2.ipc.Context context{{ $method.Args }}, final com.veyron2.Options veyronOpts) throws com.veyron2.ipc.VeyronException;
+    public {{ $method.RetType }} {{ $method.Name }}(final io.veyron.veyron.veyron2.ipc.Context context{{ $method.Args }}) throws io.veyron.veyron.veyron2.ipc.VeyronException;
+    public {{ $method.RetType }} {{ $method.Name }}(final io.veyron.veyron.veyron2.ipc.Context context{{ $method.Args }}, final io.veyron.veyron.veyron2.Options veyronOpts) throws io.veyron.veyron.veyron2.ipc.VeyronException;
 {{ end }}
 }
 `
@@ -65,7 +65,7 @@ func clientInterfaceNonStreamingOutArg(iface *compile.Interface, method *compile
 
 func clientInterfaceOutArg(iface *compile.Interface, method *compile.Method, isService bool, env *compile.Env) string {
 	if isStreamingMethod(method) && !isService {
-		return fmt.Sprintf("com.veyron2.vdl.ClientStream<%s,%s, %s>", javaType(method.InStream, true, env), javaType(method.OutStream, true, env), clientInterfaceNonStreamingOutArg(iface, method, true, env))
+		return fmt.Sprintf("io.veyron.veyron.veyron2.vdl.ClientStream<%s,%s, %s>", javaType(method.InStream, true, env), javaType(method.OutStream, true, env), clientInterfaceNonStreamingOutArg(iface, method, true, env))
 	}
 	return clientInterfaceNonStreamingOutArg(iface, method, false, env)
 }

@@ -109,7 +109,7 @@ public final class {{.Type}} implements java.util.Set<{{.KeyType}}>, android.os.
     }
     @Override
     public void writeToParcel(android.os.Parcel out, int flags) {
-        com.veyron2.vdl.ParcelUtil.writeValue(out, impl);
+        io.veyron.veyron.veyron2.vdl.ParcelUtil.writeValue(out, impl);
     }
     public static final android.os.Parcelable.Creator<{{.Type}}> CREATOR = new android.os.Parcelable.Creator<{{.Type}}>() {
         @Override
@@ -122,7 +122,7 @@ public final class {{.Type}} implements java.util.Set<{{.KeyType}}>, android.os.
         }
     };
     private {{.Type}}(android.os.Parcel in) {
-        impl = (java.util.Set<{{.KeyType}}>) com.veyron2.vdl.ParcelUtil.readValue(in, getClass().getClassLoader(), impl);
+        impl = (java.util.Set<{{.KeyType}}>) io.veyron.veyron.veyron2.vdl.ParcelUtil.readValue(in, getClass().getClassLoader(), impl);
     }
 }
 `

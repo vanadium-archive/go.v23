@@ -19,7 +19,7 @@ public final class {{.Type}} implements java.util.List<{{.ElemType}}>, android.o
     static final long serialVersionUID = 0L;
 
     private final static int length = {{.Length}};
-    private com.veyron2.vdl.FixedLengthList<{{.ElemType}}> impl;
+    private io.veyron.veyron.veyron2.vdl.FixedLengthList<{{.ElemType}}> impl;
 
     public {{.Type}}({{.ElemType}}[] impl) {
         setValue(impl);
@@ -34,7 +34,7 @@ public final class {{.Type}} implements java.util.List<{{.ElemType}}>, android.o
             throw new IllegalArgumentException("Invalid length " + length + " expected "
                     + arr.length);
         }
-        this.impl = new com.veyron2.vdl.FixedLengthList<{{.ElemType}}>(arr);
+        this.impl = new io.veyron.veyron.veyron2.vdl.FixedLengthList<{{.ElemType}}>(arr);
     }
 
     @Override
@@ -154,7 +154,7 @@ public final class {{.Type}} implements java.util.List<{{.ElemType}}>, android.o
     }
     @Override
     public void writeToParcel(android.os.Parcel out, int flags) {
-        com.veyron2.vdl.ParcelUtil.writeValue(out, impl);
+        io.veyron.veyron.veyron2.vdl.ParcelUtil.writeValue(out, impl);
     }
     public static final android.os.Parcelable.Creator<{{.Type}}> CREATOR = new android.os.Parcelable.Creator<{{.Type}}>() {
         @Override
@@ -167,7 +167,7 @@ public final class {{.Type}} implements java.util.List<{{.ElemType}}>, android.o
         }
     };
     private {{.Type}}(android.os.Parcel in) {
-        impl = (com.veyron2.vdl.FixedLengthList<{{.ElemType}}>) com.veyron2.vdl.ParcelUtil.readValue(in, getClass().getClassLoader(), impl);
+        impl = (io.veyron.veyron.veyron2.vdl.FixedLengthList<{{.ElemType}}>) io.veyron.veyron.veyron2.vdl.ParcelUtil.readValue(in, getClass().getClassLoader(), impl);
     }
 }
 `

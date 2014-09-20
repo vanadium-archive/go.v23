@@ -253,8 +253,8 @@ var (
 	optGenGoOutDir   = genOutDir{}
 	optGenJavaOutDir = genOutDir{
 		xlate: xlateRules{
-			{"veyron/go/src", "veyron/java/src/main/java"},
-			{"roadmap/go/src", "veyron/java/src/main/java"},
+			{"veyron/go/src", "veyron/java/src/vdl/java"},
+			{"roadmap/go/src", "veyron/java/src/vdl/java"},
 			{"third_party/go/src", "SKIP"},
 		},
 	}

@@ -16,7 +16,7 @@ package {{ .PackagePath }};
 /* Client stub for interface: {{ .ServiceName }}. */
 public final class {{ .ServiceName }}Stub implements {{ .FullServiceName }} {
     private static final java.lang.String vdlIfacePathOpt = "{{ .VDLIfacePathName }}";
-    private final com.veyron2.ipc.Client client;
+    private final io.veyron.veyron.veyron2.ipc.Client client;
     private final java.lang.String veyronName;
 
     {{/* Define fields to hold each of the embedded object stubs*/}}
@@ -25,7 +25,7 @@ public final class {{ .ServiceName }}Stub implements {{ .FullServiceName }} {
     private final {{ $embed.StubClassName }} {{ $embed.LocalStubVarName }};
     {{ end }}
 
-    public {{ .ServiceName }}Stub(final com.veyron2.ipc.Client client, final java.lang.String veyronName) {
+    public {{ .ServiceName }}Stub(final io.veyron.veyron.veyron2.ipc.Client client, final java.lang.String veyronName) {
         this.client = client;
         this.veyronName = veyronName;
         {{/* Initialize the embeded stubs */}}
@@ -38,24 +38,24 @@ public final class {{ .ServiceName }}Stub implements {{ .FullServiceName }} {
 {{/* Iterate over methods defined directly in the body of this service */}}
 {{ range $method := .Methods }}
     {{/* The optionless overload simply calls the overload with options */}}
-    public {{ $method.RetType }} {{ $method.Name }}(final com.veyron2.ipc.Context context{{ $method.DeclarationArgs }}) throws com.veyron2.ipc.VeyronException {
+    public {{ $method.RetType }} {{ $method.Name }}(final io.veyron.veyron.veyron2.ipc.Context context{{ $method.DeclarationArgs }}) throws io.veyron.veyron.veyron2.ipc.VeyronException {
         {{if $method.Returns }}return{{ end }} {{ $method.Name }}(context{{ $method.CallingArgs }}, null);
     }
     {{/* The main client stub method body */}}
-    public {{ $method.RetType }} {{ $method.Name }}(final com.veyron2.ipc.Context context{{ $method.DeclarationArgs }}, com.veyron2.Options veyronOpts) throws com.veyron2.ipc.VeyronException {
+    public {{ $method.RetType }} {{ $method.Name }}(final io.veyron.veyron.veyron2.ipc.Context context{{ $method.DeclarationArgs }}, io.veyron.veyron.veyron2.Options veyronOpts) throws io.veyron.veyron.veyron2.ipc.VeyronException {
         {{/* Ensure the options object is initialized and populated */}}
         // Add VDL path option.
         // NOTE(spetrovic): this option is temporary and will be removed soon after we switch
         // Java to encoding/decoding from vom.Value objects.
-        if (veyronOpts == null) veyronOpts = new com.veyron2.Options();
-        if (!veyronOpts.has(com.veyron2.OptionDefs.VDL_INTERFACE_PATH)) {
-            veyronOpts.set(com.veyron2.OptionDefs.VDL_INTERFACE_PATH, {{ .ServiceName }}Stub.vdlIfacePathOpt);
+        if (veyronOpts == null) veyronOpts = new io.veyron.veyron.veyron2.Options();
+        if (!veyronOpts.has(io.veyron.veyron.veyron2.OptionDefs.VDL_INTERFACE_PATH)) {
+            veyronOpts.set(io.veyron.veyron.veyron2.OptionDefs.VDL_INTERFACE_PATH, {{ .ServiceName }}Stub.vdlIfacePathOpt);
         }
 
         {{/* Start the veyron call */}}
         // Start the call.
         final java.lang.Object[] inArgs = new java.lang.Object[]{ {{ $method.NoCommaArgNames }} };
-        final com.veyron2.ipc.Client.Call call = this.client.startCall(context, this.veyronName, "{{ $method.Name }}", inArgs, veyronOpts);
+        final io.veyron.veyron.veyron2.ipc.Client.Call call = this.client.startCall(context, this.veyronName, "{{ $method.Name }}", inArgs, veyronOpts);
 
         // Finish the call.
         {{/* Now handle returning from the function. */}}
@@ -86,13 +86,13 @@ public final class {{ .ServiceName }}Stub implements {{ .FullServiceName }} {
         {{ end }} {{/* end if $method.IsVoid */}}
 
         {{else }} {{/* else $method.NotStreaming */}}
-        return new com.veyron2.vdl.ClientStream<{{ $method.SendType }}, {{ $method.RecvType }}, {{ $method.DeclaredObjectRetType }}>() {
+        return new io.veyron.veyron.veyron2.vdl.ClientStream<{{ $method.SendType }}, {{ $method.RecvType }}, {{ $method.DeclaredObjectRetType }}>() {
             @Override
-            public void send(final {{ $method.SendType }} item) throws com.veyron2.ipc.VeyronException {
+            public void send(final {{ $method.SendType }} item) throws io.veyron.veyron.veyron2.ipc.VeyronException {
                 call.send(item);
             }
             @Override
-            public {{ $method.RecvType }} recv() throws java.io.EOFException, com.veyron2.ipc.VeyronException {
+            public {{ $method.RecvType }} recv() throws java.io.EOFException, io.veyron.veyron.veyron2.ipc.VeyronException {
                 final com.google.common.reflect.TypeToken<?> type = new com.google.common.reflect.TypeToken<{{ $method.RecvType }}>() {
                     private static final long serialVersionUID = 1L;
                 };
@@ -100,11 +100,11 @@ public final class {{ .ServiceName }}Stub implements {{ .FullServiceName }} {
                 try {
                     return ({{ $method.RecvType }})result;
                 } catch (java.lang.ClassCastException e) {
-                    throw new com.veyron2.ipc.VeyronException("Unexpected result type: " + result.getClass().getCanonicalName());
+                    throw new io.veyron.veyron.veyron2.ipc.VeyronException("Unexpected result type: " + result.getClass().getCanonicalName());
                 }
             }
             @Override
-            public {{ $method.DeclaredObjectRetType }} finish() throws com.veyron2.ipc.VeyronException {
+            public {{ $method.DeclaredObjectRetType }} finish() throws io.veyron.veyron.veyron2.ipc.VeyronException {
                 {{ if $method.IsVoid }}
                 final com.google.common.reflect.TypeToken<?>[] resultTypes = new com.google.common.reflect.TypeToken<?>[]{};
                 call.finish(resultTypes);
@@ -126,12 +126,12 @@ public final class {{ .ServiceName }}Stub implements {{ .FullServiceName }} {
 {{/* Iterate over methods from embeded services and generate code to delegate the work */}}
 {{ range $eMethod := .EmbedMethods }}
     @Override
-    public {{ $eMethod.RetType }} {{ $eMethod.Name }}(final com.veyron2.ipc.Context context{{ $eMethod.DeclarationArgs }}) throws com.veyron2.ipc.VeyronException {
+    public {{ $eMethod.RetType }} {{ $eMethod.Name }}(final io.veyron.veyron.veyron2.ipc.Context context{{ $eMethod.DeclarationArgs }}) throws io.veyron.veyron.veyron2.ipc.VeyronException {
         {{/* e.g. return this.stubArith.cosine(context, [args]) */}}
         {{ if $eMethod.Returns }}return{{ end }} this.{{ $eMethod.LocalStubVarName }}.{{ $eMethod.Name }}(context{{ $eMethod.CallingArgs }});
     }
     @Override
-    public {{ $eMethod.RetType }} {{ $eMethod.Name }}(final com.veyron2.ipc.Context context{{ $eMethod.DeclarationArgs }}, com.veyron2.Options veyronOpts) throws com.veyron2.ipc.VeyronException {
+    public {{ $eMethod.RetType }} {{ $eMethod.Name }}(final io.veyron.veyron.veyron2.ipc.Context context{{ $eMethod.DeclarationArgs }}, io.veyron.veyron.veyron2.Options veyronOpts) throws io.veyron.veyron.veyron2.ipc.VeyronException {
         {{/* e.g. return this.stubArith.cosine(context, [args], options) */}}
         {{ if $eMethod.Returns }}return{{ end }}  this.{{ $eMethod.LocalStubVarName }}.{{ $eMethod.Name }}(context{{ $eMethod.CallingArgs }}, veyronOpts);
     }

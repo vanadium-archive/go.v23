@@ -139,7 +139,7 @@ public final class {{.Type}} implements java.util.List<{{.ElemType}}>, android.o
     }
     @Override
     public void writeToParcel(android.os.Parcel out, int flags) {
-        com.veyron2.vdl.ParcelUtil.writeValue(out, impl);
+        io.veyron.veyron.veyron2.vdl.ParcelUtil.writeValue(out, impl);
     }
     public static final android.os.Parcelable.Creator<{{.Type}}> CREATOR = new android.os.Parcelable.Creator<{{.Type}}>() {
         @Override
@@ -152,7 +152,7 @@ public final class {{.Type}} implements java.util.List<{{.ElemType}}>, android.o
         }
     };
     private {{.Type}}(android.os.Parcel in) {
-        impl = (java.util.List<{{.ElemType}}>) com.veyron2.vdl.ParcelUtil.readValue(in, getClass().getClassLoader(), impl);
+        impl = (java.util.List<{{.ElemType}}>) io.veyron.veyron.veyron2.vdl.ParcelUtil.readValue(in, getClass().getClassLoader(), impl);
     }
 }
 `

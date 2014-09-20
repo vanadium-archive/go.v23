@@ -56,7 +56,7 @@ public final class {{.Name}} implements android.os.Parcelable, java.io.Serializa
     }
     @Override
     public void writeToParcel(android.os.Parcel out, int flags) {
-   		com.veyron2.vdl.ParcelUtil.writeValue(out, value);
+   		io.veyron.veyron.veyron2.vdl.ParcelUtil.writeValue(out, value);
     }
 	public static final android.os.Parcelable.Creator<{{.Name}}> CREATOR
 		= new android.os.Parcelable.Creator<{{.Name}}>() {
@@ -70,7 +70,7 @@ public final class {{.Name}} implements android.os.Parcelable, java.io.Serializa
 		}
 	};
 	private {{.Name}}(android.os.Parcel in) {
-		value = ({{.BaseType}}) com.veyron2.vdl.ParcelUtil.readValue(in, getClass().getClassLoader(), value);
+		value = ({{.BaseType}}) io.veyron.veyron.veyron2.vdl.ParcelUtil.readValue(in, getClass().getClassLoader(), value);
 	}
 
 	public {{.Name}}() {}
