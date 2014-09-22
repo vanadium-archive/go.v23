@@ -29,7 +29,7 @@ func (c *Certificate) contentHash(hash Hash, parent Signature) []byte {
 	w([]byte(c.Extension))
 	w(c.PublicKey)
 	for _, cav := range c.Caveats {
-		w(cav.ValidatorVOM)
+		fields = append(fields, cav.digest(hash)...)
 	}
 	// Bind to the parent Certificate by including parent certificate's signature.
 	w([]byte(parent.Hash))

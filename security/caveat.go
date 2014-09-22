@@ -38,6 +38,9 @@ func PeerBlessingsCaveat(pattern BlessingPattern, additionalPatterns ...Blessing
 	return NewCaveat(peerBlessingsCaveat(append(additionalPatterns, pattern)))
 }
 
+// digest returns a hash of the contents of c.
+func (c *Caveat) digest(hash Hash) []byte { return hash.sum(c.ValidatorVOM) }
+
 func (c unixTimeExpiryCaveat) Validate(ctx Context) error {
 	now := time.Now()
 	expiry := time.Unix(int64(c), 0)
