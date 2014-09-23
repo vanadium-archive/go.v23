@@ -8,6 +8,9 @@ import (
 	"github.com/cosmosnicolaou/llog"
 )
 
+// logCallLogLevel is the log level beyond which calls are logged.
+const logCallLogLevel = 3
+
 // LogCall logs that its caller has been called given the arguments
 // passed to it.  It returns a function that is supposed to be called
 // when the caller returns, logging the caller’s return along with the
@@ -59,6 +62,9 @@ import (
 //     }
 //
 func LogCall(v ...interface{}) func(...interface{}) {
+	if !V(logCallLogLevel) {
+		return func(...interface{}) {}
+	}
 	invocationId := newInvocationIdentifier()
 	if len(v) > 0 {
 		Log.log.Printf(llog.InfoLog, "call[%s]: args:%v", invocationId, v)
@@ -84,6 +90,9 @@ func LogCall(v ...interface{}) func(...interface{}) {
 //     }
 //
 func LogCallf(format string, v ...interface{}) func(string, ...interface{}) {
+	if !V(logCallLogLevel) {
+		return func(string, ...interface{}) {}
+	}
 	invocationId := newInvocationIdentifier()
 	Log.log.Printf(llog.InfoLog, "call[%s]: %s", invocationId, fmt.Sprintf(format, v...))
 	return func(format string, v ...interface{}) {
