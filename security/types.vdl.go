@@ -134,8 +134,11 @@ type Certificate struct {
 // Caveat is a condition on the validity of a blessing/discharge.
 //
 // These conditions are provided when asking a principal to create
-// a blessing and are verified when extracting blessings (Blessings.ForName
-// in the Go API).
+// a blessing/discharge and are verified when extracting blessings
+// (Blessings.ForName in the Go API).
+//
+// Given a Hash, the message digest of a caveat is:
+// Hash(ValidatorVOM).
 type Caveat struct {
 	// ValidatorVOM holds the VOM-encoded bytes of the CaveatValidator
 	// that validates this caveat.
@@ -171,3 +174,5 @@ const NoHash = Hash("") // Identity hash function. TODO(ashankar,ataly): REMOVE 
 const SignatureForMessageSigning = "S" // Signature.Purpose used by a Principal to sign arbitrary messages.
 
 const SignatureForBlessingCertificates = "B" // Signature.Purpose used by a Principal when signing Certificates for creating blessings.
+
+const SignatureForDischarge = "D" // Signature.Purpose used by a Principal when signing discharges for public-key based third-party caveats.

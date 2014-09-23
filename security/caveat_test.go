@@ -10,13 +10,8 @@ import (
 
 func TestCaveats(t *testing.T) {
 	var (
-		ctx = &context{method: "Foo", name: "myobj", localID: FakePublicID("alice/phone/friend")}
-		C   = func(caveat Caveat, err error) Caveat {
-			if err != nil {
-				t.Fatal(err)
-			}
-			return caveat
-		}
+		ctx   = &context{method: "Foo", localID: FakePublicID("alice/phone/friend")}
+		C     = newCaveat
 		tests = []struct {
 			cav Caveat
 			ok  bool
@@ -52,5 +47,60 @@ func TestCaveats(t *testing.T) {
 		if err := validator.Validate(ctx); (err == nil) != test.ok {
 			t.Errorf("(%T=%v).Validate(...) returned '%v', expected validation? %v", validator, validator, err, test.ok)
 		}
+	}
+}
+
+func TestPublicKeyThirdPartyCaveat(t *testing.T) {
+	var (
+		valid        = newCaveat(ExpiryCaveat(time.Now().Add(24 * time.Hour)))
+		expired      = newCaveat(ExpiryCaveat(time.Now().Add(-24 * time.Hour)))
+		discharger   = newPrincipal(t)
+		randomserver = newPrincipal(t)
+		ctx          = func(method string, discharges ...Discharge) Context {
+			ctx := &context{method: method, discharges: make(map[string]Discharge)}
+			for _, d := range discharges {
+				ctx.discharges[d.ID()] = d
+			}
+			return ctx
+		}
+	)
+
+	tpc, err := NewPublicKeyCaveat(discharger.PublicKey(), "location", ThirdPartyRequirements{}, valid)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Caveat should fail validation without a discharge
+	if err := matchesError(tpc.Validate(ctx("Method1")), "missing discharge"); err != nil {
+		t.Fatal(err)
+	}
+	// Should validate when the discharge is present (and caveats on the discharge are met).
+	d, err := discharger.MintDischarge(tpc, &context{}, newCaveat(MethodCaveat("Method1")))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := tpc.Validate(ctx("Method1", d)); err != nil {
+		t.Fatal(err)
+	}
+	// Should fail validation when caveats on the discharge are not met.
+	if err := matchesError(tpc.Validate(ctx("Method2", d)), "discharge failed to validate"); err != nil {
+		t.Fatal(err)
+	}
+	// A discharge minted by another principal should not be respected.
+	if d, err = randomserver.MintDischarge(tpc, &context{}, UnconstrainedUse()); d != nil {
+		if err := matchesError(tpc.Validate(ctx("Method1", d)), "signature verification on discharge"); err != nil {
+			t.Fatal(err)
+		}
+	}
+	// And discharges should not be minted if the caveat encoded within the ThirdPartyCaveat fails validation.
+	tpc, err = NewPublicKeyCaveat(discharger.PublicKey(), "location", ThirdPartyRequirements{}, expired)
+	if err != nil {
+		t.Fatal(err)
+	}
+	d, err = discharger.MintDischarge(tpc, &context{}, UnconstrainedUse())
+	if merr := matchesError(err, "caveat validation on security.unixTimeExpiryCaveat failed"); merr != nil {
+		t.Fatal(err)
+	}
+	if d != nil {
+		t.Fatalf("MintDischarge should not have returned a discharge")
 	}
 }

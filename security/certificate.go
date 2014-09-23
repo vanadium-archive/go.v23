@@ -20,7 +20,7 @@ func newUnsignedCertificate(extension string, key PublicKey, caveats ...Caveat) 
 	return cert, nil
 }
 
-func (c *Certificate) contentHash(hash Hash, parent Signature) []byte {
+func (c *Certificate) digest(hash Hash, parent Signature) []byte {
 	var fields []byte
 	w := func(data []byte) {
 		fields = append(fields, hash.sum(data)...)
@@ -47,7 +47,7 @@ func (c *Certificate) validate(parentSignature Signature, parentKey PublicKey) e
 	if err := validateExtension(c.Extension); err != nil {
 		return fmt.Errorf("invalid blessing extension in certificate(for %q): %v", c.Extension, err)
 	}
-	if !c.Signature.Verify(parentKey, c.contentHash(c.Signature.Hash, parentSignature)) {
+	if !c.Signature.Verify(parentKey, c.digest(c.Signature.Hash, parentSignature)) {
 		return fmt.Errorf("invalid Signature in certificate(for %q), signing key: %v", c.Extension, parentKey)
 	}
 	return nil
@@ -55,7 +55,7 @@ func (c *Certificate) validate(parentSignature Signature, parentKey PublicKey) e
 
 func (c *Certificate) sign(signer Signer, parentSignature Signature) error {
 	var err error
-	c.Signature, err = signer.Sign(blessPurpose, c.contentHash(signer.PublicKey().hash(), parentSignature))
+	c.Signature, err = signer.Sign(blessPurpose, c.digest(signer.PublicKey().hash(), parentSignature))
 	return err
 }
 

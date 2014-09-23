@@ -83,9 +83,9 @@ type Principal interface {
 	// and "veyron/alice/friend" to another principal using:
 	//   Bless(<other principal>, <google/alice, veyron/alice>, "friend", ...)
 	//
-	// To discourage unconstrained delegation of authority, the interface
+	// To discourage   delegation of authority, the interface
 	// requires at least one caveat to be provided. If unconstrained delegation
-	// is desired, the UnconstrainedDelegation function can be used to produce
+	// is desired, the UnconstrainedUse function can be used to produce
 	// this argument.
 	//
 	// with.PublicKey must be the same as the principal's public key.
@@ -96,6 +96,13 @@ type Principal interface {
 
 	// Sign uses the private key of the principal to sign message.
 	Sign(message []byte) (Signature, error)
+
+	// MintDischarge generates a discharge for 'tp' after validating any
+	// restrictions specified in it under context.
+	//
+	// The returned discharge will be usable only if the provided caveats
+	// are met when using the discharge.
+	MintDischarge(tp ThirdPartyCaveat, context Context, caveat Caveat, additionalCaveats ...Caveat) (Discharge, error)
 
 	// PublicKey returns the public key counterpart of the private key held
 	// by the Principal.

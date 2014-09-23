@@ -54,7 +54,7 @@ func TestBless(t *testing.T) {
 	}
 
 	// p2 should not be able to bless p3 as "alice/friend"
-	blessing, err := p2.Bless(p3.PublicKey(), alice, "friend", UnconstrainedDelegation())
+	blessing, err := p2.Bless(p3.PublicKey(), alice, "friend", UnconstrainedUse())
 	if blessing != nil {
 		t.Errorf("p2 was able to extend a blessing bound to p1 to produce: %v", blessing)
 	}
@@ -96,7 +96,7 @@ func TestBlessings(t *testing.T) {
 		if err := checkBlessings(self, &context{}, test); err != nil {
 			t.Errorf("BlessSelf(%q): %v)", test, err)
 		}
-		other, err := p.Bless(p2, alice, test, UnconstrainedDelegation())
+		other, err := p.Bless(p2, alice, test, UnconstrainedUse())
 		if err != nil {
 			t.Errorf("Bless(%q) failed: %v", test, err)
 			continue
@@ -113,7 +113,7 @@ func TestBlessings(t *testing.T) {
 		} else if self != nil {
 			t.Errorf("BlessSelf(%q) returned %q", test, self)
 		}
-		other, err := p.Bless(p2, alice, test, UnconstrainedDelegation())
+		other, err := p.Bless(p2, alice, test, UnconstrainedUse())
 		if merr := matchesError(err, "invalid blessing extension"); merr != nil {
 			t.Errorf("Bless(%q): %v", test, merr)
 		} else if other != nil {
@@ -153,7 +153,7 @@ func TestPrincipalSignaturePurpose(t *testing.T) {
 	if sig := selfBlessing.(*blessingsImpl).chains[0][0].Signature; !bytes.Equal(sig.Purpose, blessPurpose) {
 		t.Errorf("BlessSelf used signature with purpose %q, want %q", sig.Purpose, blessPurpose)
 	}
-	otherBlessing, err := p.Bless(newPrincipal(t).PublicKey(), selfBlessing, "bar", UnconstrainedDelegation())
+	otherBlessing, err := p.Bless(newPrincipal(t).PublicKey(), selfBlessing, "bar", UnconstrainedUse())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -242,16 +242,16 @@ func TestCertificateCompositionAttack(t *testing.T) {
 	// p3 has the blessings "alice/friend" and "bob/family" (from p1 and p2 respectively).
 	// It then blesses p4 as "alice/friend/spouse" with no caveat and as "bob/family/spouse"
 	// with a caveat.
-	alicefriend, err := p1.Bless(p3.PublicKey(), alice, "friend", UnconstrainedDelegation())
+	alicefriend, err := p1.Bless(p3.PublicKey(), alice, "friend", UnconstrainedUse())
 	if err != nil {
 		t.Fatal(err)
 	}
-	bobfamily, err := p2.Bless(p3.PublicKey(), bob, "family", UnconstrainedDelegation())
+	bobfamily, err := p2.Bless(p3.PublicKey(), bob, "family", UnconstrainedUse())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	alicefriendspouse, err := p3.Bless(p4.PublicKey(), alicefriend, "spouse", UnconstrainedDelegation())
+	alicefriendspouse, err := p3.Bless(p4.PublicKey(), alicefriend, "spouse", UnconstrainedUse())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -291,7 +291,7 @@ func TestCertificateTamperingAttack(t *testing.T) {
 		alice = blessSelf(t, p1, "alice")
 	)
 
-	alicefriend, err := p1.Bless(p2.PublicKey(), alice, "friend", UnconstrainedDelegation())
+	alicefriend, err := p1.Bless(p2.PublicKey(), alice, "friend", UnconstrainedUse())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -323,8 +323,4 @@ func TestCertificateChainsTamperingAttack(t *testing.T) {
 	if err := matchesError(checkBlessings(alice, &context{}, "alice", "bob"), "two certificate chains that bind to different public keys"); err != nil {
 		t.Error(err)
 	}
-}
-
-func TestThirdPartyCaveats(t *testing.T) {
-	// TODO(ashankar,ataly): Implement this once we've figured out what aspects of third-party caveats go into veyron2/security
 }

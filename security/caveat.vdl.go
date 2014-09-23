@@ -18,3 +18,45 @@ type methodCaveat []string
 // communicated with presents a blessing that matches one of the patterns
 // included in this list.
 type peerBlessingsCaveat []BlessingPattern
+
+// publicKeyThirdPartyCaveat represents a third-party caveat that requires
+// discharges to be issued by a principal identified by a public key.
+//
+// The ID of the caveat is base64-encoded:
+// hash(hash(Nonce), hash(DischargerKey), hash(Caveats[0]), hash(Caveats[1]), ...)
+// where hash is a cryptographic hash function with a security strength
+// equivalent to that of the DischargerKey. For example, if DischargerKey
+// represents an ECDSA public key with the P384 curve, then hash should be
+// SHA384.
+type publicKeyThirdPartyCaveat struct {
+	// Nonce specifies a cryptographically random nonce associated with an
+	// instance of the caveat. This prevents discharge replays, where
+	// discharges for ThirdPartyCaveats embedded in the certificates for
+	// one blessing can be used for another blessing.
+	//
+	// Whether discharge re-use is a desired or un-desired property is
+	// still under debate. Till the debate is settled, we err on the side
+	// of discouraging re-use.
+	Nonce [16]byte
+	// Caveats specifies the caveats that have to be validated
+	// before minting a discharge for a publicKeyCaveat.
+	Caveats []Caveat
+	// DER-encoded PKIX public key of the principal that can issue discharges.
+	DischargerKey []byte
+	// Object name where the third-party that can issue discharges can be found.
+	DischargerLocation string
+	// Information required by the third-party in order to issue a discharge.
+	DischargerRequirements ThirdPartyRequirements
+}
+
+// publicKeyDischarge represents the discharge issued for publicKeyThirdPartyCaveats.
+//
+// The message digest of this structure is computed as follows:
+// hash(hash(ThirdPartyCaveatID), hash(Caveats[0]), hash(Caveats[1]), ...),
+// where hash is a cryptographic hash function with a security strength equivalent to the
+// strength of the public key of the principal issuing the discharge.
+type publicKeyDischarge struct {
+	ThirdPartyCaveatID string    // ID of the third party caveat for which this discharge was issued.
+	Caveats            []Caveat  // Caveats on the use of this discharge.
+	Signature          Signature // Signature of the content hash of this discharge by the discharger.
+}

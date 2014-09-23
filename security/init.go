@@ -11,4 +11,6 @@ func init() {
 	vom.Register(blessingsImpl{})
 	vom.Register(Certificate{})
 	vom.Register(Expiry{})
+	vom.Register(publicKeyThirdPartyCaveat{})
+	vom.Register(publicKeyDischarge{})
 }
