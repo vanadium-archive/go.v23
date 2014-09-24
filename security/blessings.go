@@ -62,17 +62,18 @@ func (b *blessingsImpl) String() string {
 }
 
 // TODO(toddw,ashankar): See comment for VomDecode
-func (b *blessingsImpl) VomEncode() ([][]Certificate, error) {
-	return b.chains, nil
+func (b *blessingsImpl) VomEncode() (WireBlessings, error) {
+	return WireBlessings{b.chains}, nil
 }
 
 // TODO(toddw,ashankar): When vom2 and config file support for VDL is
 // in place, then get rid of VomEncode and VomDecode from here and instead
 // in the config file for types.vdl specify a factory function that will
-// convert between the "wire" type ([][]Certificate) and the "in-memory"
+// convert between the "wire" type and the "in-memory"
 // type (Blessings=blessingsImpl) via factory functions that will do the
 // integrity checks.
-func (b *blessingsImpl) VomDecode(certchains [][]Certificate) error {
+func (b *blessingsImpl) VomDecode(wire WireBlessings) error {
+	certchains := wire.CertificateChains
 	if len(certchains) == 0 || len(certchains[0]) == 0 {
 		return errEmptyChain
 	}
@@ -156,6 +157,15 @@ func blessingForCertificateChain(ctx Context, chain []Certificate) string {
 		}
 	}
 	return blessing
+}
+
+// NewBlessings creates a Blessings object from the provided wire representation.
+func NewBlessings(wire WireBlessings) (Blessings, error) {
+	var b blessingsImpl
+	if err := b.VomDecode(wire); err != nil {
+		return nil, err
+	}
+	return &b, nil
 }
 
 // UnionOfBlessings returns a Blessings object that carries the union of the

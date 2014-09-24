@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
+
+	"veyron.io/veyron/veyron2/vom"
 )
 
 func TestBlessSelf(t *testing.T) {
@@ -432,5 +434,123 @@ func TestCertificateChainsTamperingAttack(t *testing.T) {
 	alice.(*blessingsImpl).chains = append(alice.(*blessingsImpl).chains, bob.(*blessingsImpl).chains...)
 	if err := matchesError(checkBlessings(alice, &context{local: tp}, "alice", "bob"), "two certificate chains that bind to different public keys"); err != nil {
 		t.Error(err)
+	}
+}
+
+func TestBlessingsOnWire(t *testing.T) {
+	b, err := newPrincipal(t).BlessSelf("self")
+	if err != nil {
+		t.Fatal(err)
+	}
+	buf := new(bytes.Buffer)
+	if err := vom.NewEncoder(buf).Encode(b); err != nil {
+		t.Fatal(err)
+	}
+	// Even though the Blessings object was encoded "directly", should be
+	// able to decode into the concrete type of the wire representation.
+	var wire WireBlessings
+	if err := vom.NewDecoder(buf).Decode(&wire); err != nil {
+		t.Fatal(err)
+	}
+	got, err := NewBlessings(wire)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(b, got) {
+		t.Fatalf("Got %#v, want %#v", got, b)
+	}
+	// Putzing around with the wire representation should break the factory function.
+	otherkey, err := newPrincipal(t).PublicKey().MarshalBinary()
+	if err != nil {
+		t.Fatal(err)
+	}
+	wire.CertificateChains[0][len(wire.CertificateChains[0])-1].PublicKey = otherkey
+	got, err = NewBlessings(wire)
+	if merr := matchesError(err, "invalid Signature in certificate"); merr != nil || got != nil {
+		t.Errorf("Got (%v, %v): %v", got, err, merr)
+	}
+}
+
+func TestBlessingsOnWireWithMissingCertificates(t *testing.T) {
+	var (
+		B = func(b Blessings, err error) Blessings {
+			if err != nil {
+				t.Fatal(err)
+			}
+			return b
+		}
+
+		// Create "leaf", a blessing involving three certificates that bind the name
+		// root/middleman/leaf to the leaf principal.
+		rootP      = newPrincipal(t)
+		middlemanP = newPrincipal(t)
+		leafP      = newPrincipal(t)
+		root       = B(rootP.BlessSelf("root"))
+		middleman  = B(rootP.Bless(middlemanP.PublicKey(), root, "middleman", UnconstrainedUse()))
+		leaf       = B(middlemanP.Bless(leafP.PublicKey(), middleman, "leaf", UnconstrainedUse()))
+
+		buf  = new(bytes.Buffer)
+		wire WireBlessings
+	)
+	if err := vom.NewEncoder(buf).Encode(leaf); err != nil {
+		t.Fatal(err)
+	}
+	if err := vom.NewDecoder(buf).Decode(&wire); err != nil {
+		t.Fatal(err)
+	}
+	// Phew! We should have a certificate chain of size 3.
+	chain := wire.CertificateChains[0]
+	if len(chain) != 3 {
+		t.Fatalf("Got a chain of %d certificates, want 3", len(chain))
+	}
+
+	C1, C2, C3 := chain[0], chain[1], chain[2]
+	var CX Certificate
+	// The following combinations should fail because a certificate is missing
+	type C []Certificate
+	tests := []struct {
+		Chain []Certificate
+		Err   string
+	}{
+		{C{}, "empty certificate chain"}, // Empty chain
+		{C{C1, C3}, "invalid Signature"}, // Missing link in the chain
+		{C{C2, C3}, "invalid Signature"},
+		{C{CX, C2, C3}, "syntax error"},
+		{C{C1, CX, C3}, "signature"},
+		{C{C1, C2, CX}, "signature"},
+		{C{C1, C2, C3}, ""}, // Valid chain
+	}
+	for idx, test := range tests {
+		wire.CertificateChains[0] = test.Chain
+		_, err := NewBlessings(wire)
+		if merr := matchesError(err, test.Err); merr != nil {
+			t.Errorf("(%d) %v [%v]", idx, merr, test.Chain)
+		}
+	}
+
+	// Mulitple chains, certifying different keys should fail
+	wire.CertificateChains = [][]Certificate{
+		C{C1},
+		C{C1, C2},
+		C{C1, C2, C3},
+	}
+	_, err := NewBlessings(wire)
+	if merr := matchesError(err, "bind to different public keys"); merr != nil {
+		t.Error(err)
+	}
+
+	// Multiple chains certifying the same key are okay
+	wire.CertificateChains = [][]Certificate{chain, chain, chain}
+	if _, err := NewBlessings(wire); err != nil {
+		t.Error(err)
+	}
+	// But leaving any empty chains is not okay
+	for idx := 0; idx < len(wire.CertificateChains); idx++ {
+		wire.CertificateChains[idx] = []Certificate{}
+		_, err := NewBlessings(wire)
+		if merr := matchesError(err, "empty certificate chain"); merr != nil {
+			t.Errorf("%d: %v", idx, merr)
+		}
+		wire.CertificateChains[idx] = chain
 	}
 }
