@@ -43,9 +43,14 @@ func (l Label) String() string {
 	return ""
 }
 
-// HasLabel tests whether a LabelSet contains a Label.
-func (ls LabelSet) HasLabel(l Label) bool {
-	return (ls & LabelSet(l)) != 0
+// HasLabel returns true iff the LabelSet contains at least one of the provided labels.
+func (ls LabelSet) HasLabel(label Label, additionalLabels ...Label) bool {
+	for _, l := range append([]Label{label}, additionalLabels...) {
+		if l != Label(0) && (ls&LabelSet(l)) == LabelSet(l) {
+			return true
+		}
+	}
+	return false
 }
 
 // String representation of a LabelSet.
