@@ -2,18 +2,19 @@ package security
 
 import "strings"
 
-// CanAccess returns true iff the ACL provides blessing with access to operations with label.
-func (acl ACL) CanAccess(blessing string, label Label) bool {
+// CanAccess returns true iff the ACL grants blessing access to any operation
+// with one of the given labels.
+func (acl ACL) CanAccess(blessing string, label Label, additionalLabels ...Label) bool {
+	permittedLabels := LabelSet(0)
 	// Step 1: blessing should match a pattern in acl.In
-	in := false
 	// TODO(ataly,ashankar,hpucha): consult group ACLs.
-	for pattern, labels := range acl.In {
-		if labels.HasLabel(label) && pattern.MatchedBy(blessing) {
-			in = true
-			break
+	for pattern, ls := range acl.In {
+		if pattern.MatchedBy(blessing) {
+			permittedLabels |= ls
 		}
 	}
-	if !in {
+	// Short-circuit.
+	if !permittedLabels.HasLabel(label, additionalLabels...) {
 		return false
 	}
 	// Step 2: Check the NotIn list.
@@ -21,9 +22,13 @@ func (acl ACL) CanAccess(blessing string, label Label) bool {
 	// specified in it.
 	const glob = ChainSeparator + string(AllPrincipals)
 	pattern := BlessingPattern(blessing)
-	for notin, labels := range acl.NotIn {
-		if labels.HasLabel(label) && pattern.MatchedBy(strings.TrimSuffix(notin, glob)) {
-			return false
+	for notin, ls := range acl.NotIn {
+		if pattern.MatchedBy(strings.TrimSuffix(notin, glob)) {
+			permittedLabels &= ^ls
+			// Short-circuit.
+			if !permittedLabels.HasLabel(label, additionalLabels...) {
+				return false
+			}
 		}
 	}
 	return true

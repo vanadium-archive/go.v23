@@ -86,6 +86,8 @@ func TestCanAccess(t *testing.T) {
 		},
 	}
 
+	combinations := combinations(ValidLabels)
+
 	for aclstring, entries := range tests {
 		var acl ACL
 		if err := json.Unmarshal([]byte(aclstring), &acl); err != nil {
@@ -98,9 +100,11 @@ func TestCanAccess(t *testing.T) {
 				t.Errorf("json.Unmarshal(%q, %T) failed: %v", e.Access, access, err)
 				continue
 			}
-			for _, label := range ValidLabels {
-				if got, want := acl.CanAccess(e.Name, label), access.HasLabel(label); got != want {
-					t.Errorf("Got %v, want %v for CanAccess(%q, %v) on ACL %v", got, want, e.Name, label, acl)
+			for _, combination := range combinations {
+				got := acl.CanAccess(e.Name, combination[0], combination[1:]...)
+				want := access.HasLabel(combination[0], combination[1:]...)
+				if got != want {
+					t.Errorf("Got %v, want %v for CanAccess(%q, %v) on ACL %v", got, want, e.Name, combination, acl)
 				}
 			}
 		}

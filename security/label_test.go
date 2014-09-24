@@ -11,20 +11,38 @@ const emptyLabelSet LabelSet = 0
 
 type lSet []Label
 
-func (s lSet) has(l Label) bool {
+func (s lSet) has(labels []Label) bool {
 	for _, x := range s {
-		if x == l {
-			return true
+		for _, label := range labels {
+			if x == label {
+				return true
+			}
 		}
 	}
 	return false
 }
 
+func combinations(labels []Label) [][]Label {
+	l := uint(len(labels))
+	n := uint(0x1 << l)
+	combinations := make([][]Label, n-1)
+	for b := uint(1); b < n; b++ {
+		combination := make([]Label, 0)
+		for i := uint(0); i < l; i++ {
+			if (b>>i)&1 == 1 {
+				combination = append(combination, labels[l-1-i])
+			}
+		}
+		combinations[b-1] = combination
+	}
+	return combinations
+}
+
 func TestHasLabel(t *testing.T) {
 	// writeAdminLabel is a new label created for testing purposes.
 	writeAdminLabel := Label(12)
-	// labels is the set of labels on which HasLabel is tested.
-	labels := append(ValidLabels, writeAdminLabel)
+	// combinations contains all sets of labels on which HasLabel is tested.
+	combinations := combinations(append(ValidLabels, writeAdminLabel))
 	testData := []struct {
 		labelSet LabelSet
 		want     []Label
@@ -32,18 +50,20 @@ func TestHasLabel(t *testing.T) {
 		{emptyLabelSet, nil},
 		{LabelSet(ResolveLabel), []Label{ResolveLabel}},
 		{LabelSet(ReadLabel), []Label{ReadLabel}},
+		{LabelSet(ReadLabel | WriteLabel), []Label{ReadLabel, WriteLabel}},
 		{LabelSet(writeAdminLabel), []Label{WriteLabel, AdminLabel, writeAdminLabel}},
-		{LabelSet(ReadLabel | WriteLabel), []Label{ReadLabel, WriteLabel, writeAdminLabel}},
 		{LabelSet(DebugLabel | MonitoringLabel), []Label{DebugLabel, MonitoringLabel}},
-		{LabelSet(AdminLabel | DebugLabel | MonitoringLabel), []Label{AdminLabel, DebugLabel, MonitoringLabel, writeAdminLabel}},
+		{LabelSet(AdminLabel | DebugLabel | MonitoringLabel), []Label{AdminLabel, DebugLabel, MonitoringLabel}},
 		{LabelSet(ReadLabel | WriteLabel | AdminLabel | DebugLabel), []Label{ReadLabel, WriteLabel, AdminLabel, DebugLabel, writeAdminLabel}},
 		{LabelSet(ReadLabel | WriteLabel | AdminLabel | DebugLabel | MonitoringLabel), []Label{ReadLabel, WriteLabel, AdminLabel, DebugLabel, MonitoringLabel, writeAdminLabel}},
 		{LabelSet(ResolveLabel | ReadLabel | WriteLabel | AdminLabel | DebugLabel | MonitoringLabel), []Label{ResolveLabel, ReadLabel, WriteLabel, AdminLabel, DebugLabel, MonitoringLabel, writeAdminLabel}},
 	}
 	for _, d := range testData {
-		for _, l := range labels {
-			if got, want := d.labelSet.HasLabel(l), lSet(d.want).has(l); got != want {
-				t.Errorf("0x%x.HasLabel(0x%x): got: %t, want: %t", uint(d.labelSet), uint(l), got, want)
+		for _, combination := range combinations {
+			got := d.labelSet.HasLabel(combination[0], combination[1:]...)
+			want := lSet(d.want).has(combination)
+			if got != want {
+				t.Errorf("0x%x.HasLabel(%v): got: %t, want: %t", uint(d.labelSet), combination, got, want)
 			}
 		}
 	}
