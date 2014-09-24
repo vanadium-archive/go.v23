@@ -78,7 +78,7 @@ func genJavaServiceInterfaceFile(iface *compile.Interface, env *compile.Env) Jav
 		ServiceWrapperPath string
 		Source             string
 	}{
-		Extends:            javaExtendsStr(iface.Embeds, "Service"),
+		Extends:            javaServiceExtendsStr(iface.Embeds),
 		Methods:            methods,
 		PackagePath:        javaPath(javaGenPkgPath(iface.File.Package.Path)),
 		ServiceDoc:         javaDoc(iface.Doc),

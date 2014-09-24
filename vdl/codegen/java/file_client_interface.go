@@ -103,7 +103,7 @@ func genJavaClientInterfaceFile(iface *compile.Interface, env *compile.Env) Java
 		ServiceName string
 		Source      string
 	}{
-		Extends:     javaExtendsStr(iface.Embeds, ""),
+		Extends:     javaClientExtendsStr(iface.Embeds),
 		Methods:     methods,
 		PackagePath: javaPath(javaGenPkgPath(iface.File.Package.Path)),
 		ServiceDoc:  javaDoc(iface.Doc),

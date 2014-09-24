@@ -34,14 +34,43 @@ public final class {{ .ServiceName }}Stub implements {{ .FullServiceName }} {
          {{ end }}
     }
 
+    // Methods from interface UniversalServiceMethods.
+    @Override
+    public io.veyron.veyron.veyron2.ipc.ServiceSignature getSignature(io.veyron.veyron.veyron2.ipc.Context context) throws io.veyron.veyron.veyron2.ipc.VeyronException {
+        return getSignature(context, null);
+    }
+    @Override
+    public io.veyron.veyron.veyron2.ipc.ServiceSignature getSignature(io.veyron.veyron.veyron2.ipc.Context context, io.veyron.veyron.veyron2.Options veyronOpts) throws io.veyron.veyron.veyron2.ipc.VeyronException {
+        // Add VDL path option.
+        // NOTE(spetrovic): this option is temporary and will be removed soon after we switch
+        // Java to encoding/decoding from vom.Value objects.
+        if (veyronOpts == null) veyronOpts = new io.veyron.veyron.veyron2.Options();
+        if (!veyronOpts.has(io.veyron.veyron.veyron2.OptionDefs.VDL_INTERFACE_PATH)) {
+            veyronOpts.set(io.veyron.veyron.veyron2.OptionDefs.VDL_INTERFACE_PATH, {{ .ServiceName }}Stub.vdlIfacePathOpt);
+        }
+        // Start the call.
+        final io.veyron.veyron.veyron2.ipc.Client.Call call = this.client.startCall(context, this.veyronName, "signature", new java.lang.Object[0], veyronOpts);
+
+        // Finish the call.
+        final com.google.common.reflect.TypeToken<?>[] resultTypes = new com.google.common.reflect.TypeToken<?>[]{
+            new com.google.common.reflect.TypeToken<io.veyron.veyron.veyron2.ipc.ServiceSignature>() {
+                private static final long serialVersionUID = 1L;
+            },
+        };
+        final java.lang.Object[] results = call.finish(resultTypes);
+        return (io.veyron.veyron.veyron2.ipc.ServiceSignature)results[0];
+    }
+
     // Methods from interface {{ .ServiceName }}.
 {{/* Iterate over methods defined directly in the body of this service */}}
 {{ range $method := .Methods }}
     {{/* The optionless overload simply calls the overload with options */}}
+    @Override
     public {{ $method.RetType }} {{ $method.Name }}(final io.veyron.veyron.veyron2.ipc.Context context{{ $method.DeclarationArgs }}) throws io.veyron.veyron.veyron2.ipc.VeyronException {
         {{if $method.Returns }}return{{ end }} {{ $method.Name }}(context{{ $method.CallingArgs }}, null);
     }
     {{/* The main client stub method body */}}
+    @Override
     public {{ $method.RetType }} {{ $method.Name }}(final io.veyron.veyron.veyron2.ipc.Context context{{ $method.DeclarationArgs }}, io.veyron.veyron.veyron2.Options veyronOpts) throws io.veyron.veyron.veyron2.ipc.VeyronException {
         {{/* Ensure the options object is initialized and populated */}}
         // Add VDL path option.

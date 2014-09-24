@@ -32,10 +32,17 @@ public final class {{ .ServiceName }}ServiceWrapper {
     }
 
     /**
+     * Returns a description of this service.
+     */
+     public io.veyron.veyron.veyron2.ipc.ServiceSignature signature(io.veyron.veyron.veyron2.ipc.ServerCall call) throws io.veyron.veyron.veyron2.ipc.VeyronException {
+         throw new io.veyron.veyron.veyron2.ipc.VeyronException("Signature method not yet supported for Java servers");
+     }
+
+    /**
      * Returns all tags associated with the provided method or null if the method isn't implemented
      * by this service.
      */
-    public java.lang.Object[] getMethodTags(final io.veyron.veyron.veyron2.ipc.ServerCall call, final java.lang.String method) throws io.veyron.veyron.veyron2.ipc.VeyronException {
+    public java.lang.Object[] getMethodTags(final io.veyron.veyron.veyron2.ipc.ServerCall call, final java.lang.String method) {
         {{ range $methodName, $tags := .MethodTags }}
         if ("{{ $methodName }}".equals(method)) {
             return new java.lang.Object[] {
@@ -44,11 +51,14 @@ public final class {{ .ServiceName }}ServiceWrapper {
         }
         {{ end }}
         {{ range $embed := .Embeds }}
-        try {
-            return this.{{ $embed.LocalWrapperVarName }}.getMethodTags(call, method);
-        } catch (io.veyron.veyron.veyron2.ipc.VeyronException e) {}  // method not found.
+        {
+            final java.lang.Object[] tags = this.{{ $embed.LocalWrapperVarName }}.getMethodTags(call, method);
+            if (tags != null) {
+                return tags;
+            }
+        }
         {{ end }}
-        throw new io.veyron.veyron.veyron2.ipc.VeyronException("method: " + method + " not found");
+        return null;  // method not found
     }
 
      {{/* Iterate over methods defined directly in the body of this service */}}
@@ -150,6 +160,7 @@ func genJavaServiceWrapperFile(iface *compile.Interface, env *compile.Env) JavaF
 	}
 	methodTags := make(map[string][]string)
 	// Add generated methods to the tag map:
+	methodTags["signature"] = []string{}
 	methodTags["getMethodTags"] = []string{}
 	// Copy method tags off of the interface.
 	for _, method := range iface.Methods {

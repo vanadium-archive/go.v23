@@ -30,13 +30,25 @@ func interfaceFullyQualifiedName(iface *compile.Interface) string {
 	return path.Join(javaGenPkgPath(iface.File.Package.Path), iface.Name)
 }
 
-// javaExtendsStr creates an extends clause for an interface
+// javaClientExtendsStr creates an extends clause for a client interface
 // e.g. "extends com.a.B, com.d.E"
-func javaExtendsStr(embeds []*compile.Interface, suffix string) string {
+func javaClientExtendsStr(embeds []*compile.Interface) string {
+	var buf bytes.Buffer
+	buf.WriteString("extends ")
+	for _, embed := range embeds {
+		buf.WriteString(javaPath(interfaceFullyQualifiedName(embed)))
+		buf.WriteString(", ")
+	}
+	buf.WriteString("io.veyron.veyron.veyron2.ipc.UniversalServiceMethods")
+	return buf.String()
+}
+
+// javaServiceExtendsStr creates an extends clause for a service interface
+// e.g. "extends com.a.B, com.d.E"
+func javaServiceExtendsStr(embeds []*compile.Interface) string {
 	if len(embeds) == 0 {
 		return ""
 	}
-
 	var buf bytes.Buffer
 	buf.WriteString("extends ")
 	for i, embed := range embeds {
@@ -44,7 +56,7 @@ func javaExtendsStr(embeds []*compile.Interface, suffix string) string {
 			buf.WriteString(", ")
 		}
 		buf.WriteString(javaPath(interfaceFullyQualifiedName(embed)))
-		buf.WriteString(suffix)
+		buf.WriteString("Service")
 	}
 	return buf.String()
 }
