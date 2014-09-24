@@ -176,6 +176,11 @@ type Server interface {
 	Stop() error
 }
 
+// When this keyword is present at the beginning of an object name suffix, the
+// server may intercept the request and handle it internally to serve debugging
+// information.
+const DebugKeyword = "__debug"
+
 // Dispatcher defines the interface that a server must implement to handle
 // method invocations on named objects.
 type Dispatcher interface {
