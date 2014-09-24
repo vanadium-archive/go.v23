@@ -8,7 +8,11 @@ import (
 )
 
 func TestBlessSelf(t *testing.T) {
-	p := newPrincipal(t)
+	var (
+		tp = newPrincipal(t) // principal where blessings are tested
+		p  = newPrincipal(t)
+	)
+
 	alice, err := p.BlessSelf("alice", newCaveat(MethodCaveat("Method")))
 	if err != nil {
 		t.Fatal(err)
@@ -16,21 +20,31 @@ func TestBlessSelf(t *testing.T) {
 	if !reflect.DeepEqual(alice.PublicKey(), p.PublicKey()) {
 		t.Errorf("Public key mismatch. Principal: %v, Blessing: %v", p.PublicKey(), alice.PublicKey())
 	}
-	if err := checkBlessings(alice, &context{method: "Method"}, "alice"); err != nil {
+	if err := checkBlessings(alice, &context{local: tp, method: "Foo"}); err != nil {
 		t.Error(err)
 	}
-	if err := checkBlessings(alice, &context{method: "Foo"}); err != nil {
+	if err := checkBlessings(alice, &context{local: tp, method: "Method"}); err != nil {
+		t.Error(err)
+	}
+	addToRoots(t, tp, alice)
+	if err := checkBlessings(alice, &context{local: tp, method: "Foo"}); err != nil {
+		t.Error(err)
+	}
+	if err := checkBlessings(alice, &context{local: tp, method: "Method"}, "alice"); err != nil {
 		t.Error(err)
 	}
 }
 
 func TestBless(t *testing.T) {
 	var (
+		tp = newPrincipal(t) // principal where blessings are tested
+
 		p1    = newPrincipal(t)
 		p2    = newPrincipal(t)
 		p3    = newPrincipal(t)
 		alice = blessSelf(t, p1, "alice")
 	)
+	addToRoots(t, tp, alice)
 	// p1 blessing p2 as "alice/friend" for "Suffix.Method"
 	friend, err := p1.Bless(p2.PublicKey(), alice, "friend", newCaveat(MethodCaveat("Method")), newSuffixCaveat("Suffix"))
 	if err != nil {
@@ -39,17 +53,17 @@ func TestBless(t *testing.T) {
 	if !reflect.DeepEqual(friend.PublicKey(), p2.PublicKey()) {
 		t.Errorf("Public key mismatch. Principal: %v, Blessing: %v", p2.PublicKey(), friend.PublicKey())
 	}
-	if err := checkBlessings(friend, &context{method: "Method"}); err != nil {
+	if err := checkBlessings(friend, &context{local: tp, method: "Method"}); err != nil {
 		t.Error(err)
 	}
-	if err := checkBlessings(friend, &context{suffix: "Suffix"}); err != nil {
+	if err := checkBlessings(friend, &context{local: tp, suffix: "Suffix"}); err != nil {
 		t.Error(err)
 	}
-	if err := checkBlessings(friend, &context{method: "Method", suffix: "Suffix"}, "alice/friend"); err != nil {
+	if err := checkBlessings(friend, &context{local: tp, method: "Method", suffix: "Suffix"}, "alice/friend"); err != nil {
 		t.Error(err)
 	}
 	// p1.Bless should not mess with the certificate chains of "alice" itself.
-	if err := checkBlessings(alice, &context{}, "alice"); err != nil {
+	if err := checkBlessings(alice, &context{local: tp}, "alice"); err != nil {
 		t.Error(err)
 	}
 
@@ -64,11 +78,15 @@ func TestBless(t *testing.T) {
 }
 
 func TestBlessings(t *testing.T) {
+	type s []string
+
 	var (
+		tp = newPrincipal(t) // principal where blessings are tested
+
 		p     = newPrincipal(t)
 		p2    = newPrincipal(t).PublicKey()
 		alice = blessSelf(t, p, "alice")
-		valid = []string{
+		valid = s{
 			"a",
 			"john.doe",
 			"bruce@wayne.com",
@@ -76,7 +94,7 @@ func TestBlessings(t *testing.T) {
 			"trusted/friends",
 			"friends/colleagues/work",
 		}
-		invalid = []string{
+		invalid = s{
 			"",
 			"...",
 			"/",
@@ -86,14 +104,15 @@ func TestBlessings(t *testing.T) {
 			"trusted//friends",
 		}
 	)
-
+	addToRoots(t, tp, alice)
 	for _, test := range valid {
 		self, err := p.BlessSelf(test)
 		if err != nil {
 			t.Errorf("BlessSelf(%q) failed: %v", test, err)
 			continue
 		}
-		if err := checkBlessings(self, &context{}, test); err != nil {
+		addToRoots(t, tp, self)
+		if err := checkBlessings(self, &context{local: tp}, test); err != nil {
 			t.Errorf("BlessSelf(%q): %v)", test, err)
 		}
 		other, err := p.Bless(p2, alice, test, UnconstrainedUse())
@@ -101,7 +120,7 @@ func TestBlessings(t *testing.T) {
 			t.Errorf("Bless(%q) failed: %v", test, err)
 			continue
 		}
-		if err := checkBlessings(other, &context{}, fmt.Sprintf("alice%v%v", ChainSeparator, test)); err != nil {
+		if err := checkBlessings(other, &context{local: tp}, fmt.Sprintf("alice%v%v", ChainSeparator, test)); err != nil {
 			t.Errorf("Bless(%q): %v", test, err)
 		}
 	}
@@ -118,6 +137,64 @@ func TestBlessings(t *testing.T) {
 			t.Errorf("Bless(%q): %v", test, merr)
 		} else if other != nil {
 			t.Errorf("Bless(%q) returned %q", test, other)
+		}
+	}
+}
+
+func TestAddToRoots(t *testing.T) {
+	type s []string
+	var (
+		p1          = newPrincipal(t)
+		aliceFriend = blessSelf(t, p1, "alice/friend")
+
+		p2      = newPrincipal(t)
+		charlie = blessSelf(t, p2, "charlie")
+
+		p3 = newPrincipal(t).PublicKey()
+	)
+	aliceFriendSpouse, err := p1.Bless(p3, aliceFriend, "spouse", UnconstrainedUse())
+	if err != nil {
+		t.Fatal(err)
+	}
+	charlieFamilyDaughter, err := p2.Bless(p3, charlie, "family/daughter", UnconstrainedUse())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tests := []struct {
+		add           Blessings
+		root          PublicKey
+		recognized    []string
+		notRecognized []string
+	}{
+		{
+			add:           aliceFriendSpouse,
+			root:          p1.PublicKey(),
+			recognized:    s{"alice", "alice/friend", "alice/friend/device", "alice/friend/device/app", "alice/friend/spouse", "alice/friend/spouse/friend"},
+			notRecognized: s{"alice/device", "bob", "bob/friend", "bob/friend/spouse"},
+		},
+		{
+			add:           charlieFamilyDaughter,
+			root:          p2.PublicKey(),
+			recognized:    s{"charlie", "charlie/friend", "charlie/friend/device", "charlie/family", "charlie/family/daughter", "charlie/family/friend", "charlie/family/friend/device"},
+			notRecognized: s{"alice", "bob", "alice/family", "alice/family/daughter"},
+		},
+	}
+	for _, test := range tests {
+		tp := newPrincipal(t) // principal where roots are tested.
+		if err := tp.AddToRoots(test.add); err != nil {
+			t.Error(err)
+			continue
+		}
+		for _, b := range test.recognized {
+			if tp.Roots().Recognized(test.root, b) != nil {
+				t.Errorf("added roots for: %v but did not recognize blessing: %v", test.add, b)
+			}
+		}
+		for _, b := range test.notRecognized {
+			if tp.Roots().Recognized(test.root, b) == nil {
+				t.Errorf("added roots for: %v but recognized blessing: %v", test.add, b)
+			}
 		}
 	}
 }
@@ -166,6 +243,13 @@ func TestPrincipalSignaturePurpose(t *testing.T) {
 }
 
 func TestUnionOfBlessings(t *testing.T) {
+	principalTrustingRootsOf := func(roots ...Blessings) Principal {
+		p := newPrincipal(t)
+		for _, r := range roots {
+			addToRoots(t, p, r)
+		}
+		return p
+	}
 	// A bunch of principals bless p
 	var (
 		p1    = newPrincipal(t)
@@ -173,6 +257,7 @@ func TestUnionOfBlessings(t *testing.T) {
 		alice = blessSelf(t, p1, "alice")
 		bob   = blessSelf(t, p2, "bob")
 		p     = newPrincipal(t)
+		carol = blessSelf(t, p, "carol")
 	)
 	alicefriend, err := p1.Bless(p.PublicKey(), alice, "friend", newCaveat(MethodCaveat("Method")))
 	if err != nil {
@@ -183,20 +268,33 @@ func TestUnionOfBlessings(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	friend, err := UnionOfBlessings(alicefriend, bobfriend, blessSelf(t, p, "carol"))
+	friend, err := UnionOfBlessings(alicefriend, bobfriend, carol)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := checkBlessings(friend, &context{}, "carol"); err != nil {
+
+	if err := checkBlessings(friend, &context{local: principalTrustingRootsOf()}); err != nil {
 		t.Error(err)
 	}
-	if err := checkBlessings(friend, &context{method: "Method"}, "alice/friend", "carol"); err != nil {
+	if err := checkBlessings(friend, &context{local: principalTrustingRootsOf(alice, bob)}); err != nil {
 		t.Error(err)
 	}
-	if err := checkBlessings(friend, &context{suffix: "Suffix"}, "bob/friend", "carol"); err != nil {
+	if err := checkBlessings(friend, &context{local: principalTrustingRootsOf(carol)}, "carol"); err != nil {
 		t.Error(err)
 	}
-	if err := checkBlessings(friend, &context{method: "Method", suffix: "Suffix"}, "alice/friend", "bob/friend", "carol"); err != nil {
+	if err := checkBlessings(friend, &context{local: principalTrustingRootsOf(alice), method: "Method"}, "alice/friend"); err != nil {
+		t.Error(err)
+	}
+	if err := checkBlessings(friend, &context{local: principalTrustingRootsOf(alice, carol), method: "Method"}, "alice/friend", "carol"); err != nil {
+		t.Error(err)
+	}
+	if err := checkBlessings(friend, &context{local: principalTrustingRootsOf(bob), suffix: "Suffix"}, "bob/friend"); err != nil {
+		t.Error(err)
+	}
+	if err := checkBlessings(friend, &context{local: principalTrustingRootsOf(bob, carol), suffix: "Suffix"}, "bob/friend", "carol"); err != nil {
+		t.Error(err)
+	}
+	if err := checkBlessings(friend, &context{local: principalTrustingRootsOf(alice, bob, carol), method: "Method", suffix: "Suffix"}, "alice/friend", "bob/friend", "carol"); err != nil {
 		t.Error(err)
 	}
 
@@ -206,19 +304,19 @@ func TestUnionOfBlessings(t *testing.T) {
 		t.Fatal(err)
 	}
 	server := FakePublicID("peer")
-	if err := checkBlessings(spouse, &context{}); err != nil {
+	if err := checkBlessings(spouse, &context{local: principalTrustingRootsOf()}); err != nil {
 		t.Error(err)
 	}
-	if err := checkBlessings(spouse, &context{localID: server}, "carol/spouse"); err != nil {
+	if err := checkBlessings(spouse, &context{local: principalTrustingRootsOf(carol), localID: server}, "carol/spouse"); err != nil {
 		t.Error(err)
 	}
-	if err := checkBlessings(spouse, &context{method: "Method", localID: server}, "alice/friend/spouse", "carol/spouse"); err != nil {
+	if err := checkBlessings(spouse, &context{local: principalTrustingRootsOf(alice, carol), method: "Method", localID: server}, "alice/friend/spouse", "carol/spouse"); err != nil {
 		t.Error(err)
 	}
-	if err := checkBlessings(spouse, &context{suffix: "Suffix", localID: server}, "bob/friend/spouse", "carol/spouse"); err != nil {
+	if err := checkBlessings(spouse, &context{local: principalTrustingRootsOf(bob, carol), suffix: "Suffix", localID: server}, "bob/friend/spouse", "carol/spouse"); err != nil {
 		t.Error(err)
 	}
-	if err := checkBlessings(spouse, &context{suffix: "Suffix", method: "Method", localID: server}, "alice/friend/spouse", "bob/friend/spouse", "carol/spouse"); err != nil {
+	if err := checkBlessings(spouse, &context{local: principalTrustingRootsOf(alice, bob, carol), suffix: "Suffix", method: "Method", localID: server}, "alice/friend/spouse", "bob/friend/spouse", "carol/spouse"); err != nil {
 		t.Error(err)
 	}
 
@@ -231,14 +329,18 @@ func TestUnionOfBlessings(t *testing.T) {
 
 func TestCertificateCompositionAttack(t *testing.T) {
 	var (
+		tp = newPrincipal(t) // principal for testing blessings.
+
 		p1    = newPrincipal(t)
 		alice = blessSelf(t, p1, "alice")
 		p2    = newPrincipal(t)
 		bob   = blessSelf(t, p2, "bob")
 		p3    = newPrincipal(t)
 		p4    = newPrincipal(t)
-		ctx   = &context{method: "Foo"}
+		ctx   = &context{method: "Foo", local: tp}
 	)
+	addToRoots(t, tp, alice)
+	addToRoots(t, tp, bob)
 	// p3 has the blessings "alice/friend" and "bob/family" (from p1 and p2 respectively).
 	// It then blesses p4 as "alice/friend/spouse" with no caveat and as "bob/family/spouse"
 	// with a caveat.
@@ -284,18 +386,21 @@ func TestCertificateCompositionAttack(t *testing.T) {
 
 func TestCertificateTamperingAttack(t *testing.T) {
 	var (
+		tp = newPrincipal(t) // principal for testing blessings.
+
 		p1 = newPrincipal(t)
 		p2 = newPrincipal(t)
 		p3 = newPrincipal(t)
 
 		alice = blessSelf(t, p1, "alice")
 	)
+	addToRoots(t, tp, alice)
 
 	alicefriend, err := p1.Bless(p2.PublicKey(), alice, "friend", UnconstrainedUse())
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := checkBlessings(alicefriend, &context{}, "alice/friend"); err != nil {
+	if err := checkBlessings(alicefriend, &context{local: tp}, "alice/friend"); err != nil {
 		t.Fatal(err)
 	}
 	// p3 attempts to "steal" the blessing by constructing his own certificate.
@@ -303,24 +408,29 @@ func TestCertificateTamperingAttack(t *testing.T) {
 	if cert.PublicKey, err = p3.PublicKey().MarshalBinary(); err != nil {
 		t.Fatal(err)
 	}
-	if err := matchesError(checkBlessings(alicefriend, &context{}, "alice/friend"), "invalid Signature in certificate(for \"friend\")"); err != nil {
+	if err := matchesError(checkBlessings(alicefriend, &context{local: tp}, "alice/friend"), "invalid Signature in certificate(for \"friend\")"); err != nil {
 		t.Error(err)
 	}
 }
 
 func TestCertificateChainsTamperingAttack(t *testing.T) {
 	var (
+		tp = newPrincipal(t) // principal for testing blessings.
+
 		p1    = newPrincipal(t)
 		p2    = newPrincipal(t)
 		alice = blessSelf(t, p1, "alice")
 		bob   = blessSelf(t, p2, "bob")
 	)
-	if err := checkBlessings(alice, &context{}, "alice"); err != nil {
+	addToRoots(t, tp, alice)
+	addToRoots(t, tp, bob)
+
+	if err := checkBlessings(alice, &context{local: tp}, "alice"); err != nil {
 		t.Fatal(err)
 	}
 	// Act as if alice tried to package bob's chain with her existing chains and ship it over the network.
 	alice.(*blessingsImpl).chains = append(alice.(*blessingsImpl).chains, bob.(*blessingsImpl).chains...)
-	if err := matchesError(checkBlessings(alice, &context{}, "alice", "bob"), "two certificate chains that bind to different public keys"); err != nil {
+	if err := matchesError(checkBlessings(alice, &context{local: tp}, "alice", "bob"), "two certificate chains that bind to different public keys"); err != nil {
 		t.Error(err)
 	}
 }

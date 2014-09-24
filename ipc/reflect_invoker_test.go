@@ -52,6 +52,8 @@ func (*FakeServerCall) Label() (l security.Label)                            { r
 func (*FakeServerCall) Discharges() map[string]security.Discharge            { return nil }
 func (ctx *FakeServerCall) LocalID() security.PublicID                       { return ctx.id }
 func (ctx *FakeServerCall) RemoteID() security.PublicID                      { return ctx.id }
+func (*FakeServerCall) LocalPrincipal() security.Principal                   { return nil }
+func (*FakeServerCall) RemoteBlessings() security.Blessings                  { return nil }
 func (*FakeServerCall) Blessing() security.PublicID                          { return nil }
 func (*FakeServerCall) LocalEndpoint() naming.Endpoint                       { return nil }
 func (*FakeServerCall) RemoteEndpoint() naming.Endpoint                      { return nil }

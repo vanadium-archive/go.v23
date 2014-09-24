@@ -83,7 +83,7 @@ type Principal interface {
 	// and "veyron/alice/friend" to another principal using:
 	//   Bless(<other principal>, <google/alice, veyron/alice>, "friend", ...)
 	//
-	// To discourage   delegation of authority, the interface
+	// To discourage unconstrained delegation of authority, the interface
 	// requires at least one caveat to be provided. If unconstrained delegation
 	// is desired, the UnconstrainedUse function can be used to produce
 	// this argument.
@@ -107,6 +107,27 @@ type Principal interface {
 	// PublicKey returns the public key counterpart of the private key held
 	// by the Principal.
 	PublicKey() PublicKey
+
+	// BlessingsStore provides access to the BlessingStore containing blessings
+	// that have been granted to this principal.
+	BlessingStore() BlessingStore
+
+	// Roots returns the set of recognized authorities (identified by their
+	// public keys) on blessings that match specific patterns
+	Roots() BlessingRoots
+
+	// AddToRoots marks the root principals of all blessing chains
+	// represented by 'blessings' as an authority on blessing chains
+	// beginning at that root.
+	//
+	// For example, if blessings represents the blessing chains
+	// ["alice/friend/spouse", "charlie/family/daughter"] then
+	// AddToRoots(blessing) will mark the root public key of the chain
+	// "alice/friend/bob" as the as authority on all blessings that
+	// match the pattern "alice/...", and root public key of the chain
+	// "charlie/family/daughter" as an authority on all blessings that
+	// match the pattern "charlie/...".
+	AddToRoots(blessing Blessings) error
 }
 
 // BlessingStore is the interface for storing blessings bound to a
@@ -121,7 +142,7 @@ type BlessingStore interface {
 	// It is an error to call Add with "blessings" whose public key does
 	// not match the PublicKey of the principal for which this store hosts
 	// blessings.
-	Add(blessings PublicID, forPeers BlessingPattern) error
+	Add(blessings Blessings, forPeers BlessingPattern) error
 
 	// ForPeer returns the set of blessings that have been previously
 	// Add-ed to the store with an intent of being shared with peers
@@ -131,7 +152,7 @@ type BlessingStore interface {
 	// (i.e., Add-ed with the AllPrincipals pattern) is returned.
 	//
 	// Returns nil if there are no matching blessings in the store.
-	ForPeer(peerBlessings ...string) PublicID
+	ForPeer(peerBlessings ...string) Blessings
 
 	// SetDefault sets up the Blessings made available on a subsequent call
 	// to Default.
@@ -139,7 +160,7 @@ type BlessingStore interface {
 	// It is an error to call SetDefault with Blesssings whose public key
 	// does not match the PublicKey of the principal for which this store
 	// hosts blessings.
-	SetDefault(blessings PublicID) error
+	SetDefault(blessings Blessings) error
 
 	// Default returns the blessings to be shared with peers for which
 	// no other information is available in order to select blessings
@@ -153,7 +174,7 @@ type BlessingStore interface {
 	// with no arguments.
 	//
 	// Returns nil if there is no usable blessing.
-	Default() PublicID
+	Default() Blessings
 
 	// PublicKey returns the public key of the Principal for which
 	// this store hosts blessings.
@@ -166,7 +187,7 @@ type BlessingStore interface {
 	// AddDischarge(d Discharge) error
 	// // Discharges returns all the Discharges that have been
 	// // added to the store and are required by "blessings".
-	// Discharges(blessings PublicID) []Discharge
+	// Discharges(blessings Blessings) []Discharge
 }
 
 // BlessingRoots hosts the set of authoritative public keys for roots
@@ -180,9 +201,9 @@ type BlessingRoots interface {
 	// blessings that match the pattern.
 	Add(root PublicKey, pattern BlessingPattern) error
 
-	// Recognized returns nil iff the provided key is recognized
+	// Recognized returns nil iff the provided root is recognized
 	// as an authority on a pattern that is matched by blessing.
-	Recognized(key PublicKey, blessing string) error
+	Recognized(root PublicKey, blessing string) error
 }
 
 // Blessings encapsulates all the cryptographic operations required to
@@ -336,22 +357,36 @@ type Discharge interface {
 type Context interface {
 	// Method returns the method being invoked.
 	Method() string
-	// Name returns the Veyron object name on which the method is being invoked.
+	// Name returns the object name on which the method is being invoked.
 	Name() string
-	// Suffix returns the Veyron object name suffix for the request.
+	// Suffix returns the object name suffix for the request.
+	// TODO(ashankar,caprita): Remove? Name() should be sufficient?
 	Suffix() string
 	// Label returns the method's security label.
 	Label() Label
-	// CaveatDischarges returns a map of Discharges indexed by their IDs.
+	// Discharges maps a ThirdPartyCaveat identifier to the corresponding
+	// discharges.
+	// TODO(ataly, ashankar): Discharges should return map[string][]Discharge,
+	// i.e, it should map a ThirdPartyCaveat identifier to a set of Discharges.
 	Discharges() map[string]Discharge
+	// LocalPrincipal returns the principal at the local end of communication.
+	LocalPrincipal() Principal
+	// RemoteID provides access to the blessings of the remote end of
+	// communication.
+	RemoteBlessings() Blessings
+	// LocalEndpoint() returns the Endpoint of the principal at the local
+	// end of communication.
+	LocalEndpoint() naming.Endpoint
+	// RemoteEndpoint() returns the Endpoint of the principal at the remote end
+	// of communication.
+	RemoteEndpoint() naming.Endpoint
+
+	// TODO(ataly, ashankar): Get rid of the methods below once LocalPrincipal
+	// and RemoteBlessings are enabled.
 	// LocalID returns the PublicID of the principal at the local end of the request.
 	LocalID() PublicID
 	// RemoteID returns the PublicID of the principal at the remote end of the request.
 	RemoteID() PublicID
-	// LocalEndpoint() returns the Endpoint of the principal at the local end of the request
-	LocalEndpoint() naming.Endpoint
-	// RemoteAddr() returns the Endpoint of the principal at the remote end of the request
-	RemoteEndpoint() naming.Endpoint
 }
 
 // Authorizer is the interface for performing authorization checks.

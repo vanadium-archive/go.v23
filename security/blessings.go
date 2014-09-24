@@ -6,8 +6,11 @@ import (
 	"fmt"
 	"strings"
 
+	"veyron.io/veyron/veyron2/vlog"
 	"veyron.io/veyron/veyron2/vom"
 )
+
+var errEmptyChain = errors.New("empty certificate chain found")
 
 type blessingsImpl struct {
 	chains    [][]Certificate
@@ -70,8 +73,8 @@ func (b *blessingsImpl) VomEncode() ([][]Certificate, error) {
 // type (Blessings=blessingsImpl) via factory functions that will do the
 // integrity checks.
 func (b *blessingsImpl) VomDecode(certchains [][]Certificate) error {
-	if len(certchains) == 0 {
-		return errors.New("empty certificate chain")
+	if len(certchains) == 0 || len(certchains[0]) == 0 {
+		return errEmptyChain
 	}
 	// Public keys should match for all chains.
 	marshaledkey := certchains[0][len(certchains[0])-1].PublicKey
@@ -81,6 +84,9 @@ func (b *blessingsImpl) VomDecode(certchains [][]Certificate) error {
 	}
 	for i := 1; i < len(certchains); i++ {
 		chain := certchains[i]
+		if len(chain) == 0 {
+			return errEmptyChain
+		}
 		cert := chain[len(chain)-1]
 		if !bytes.Equal(marshaledkey, cert.PublicKey) {
 			return errors.New("invalid blessings: two certificate chains that bind to different public keys")
@@ -113,10 +119,30 @@ func validateCertificateChain(chain []Certificate) (PublicKey, error) {
 }
 
 func blessingForCertificateChain(ctx Context, chain []Certificate) string {
-	// TODO(ashankar,ataly): Incorporate trust in the root certificate
-	if chain[0].Extension == "" {
+	blessing := chain[0].Extension
+	for i := 1; i < len(chain); i++ {
+		blessing += ChainSeparator
+		blessing += chain[i].Extension
+	}
+
+	// Verify that the root of the chain is reconized as an authority
+	// on blessing.
+	root, err := UnmarshalPublicKey(chain[0].PublicKey)
+	if err != nil {
+		vlog.VI(2).Infof("could not extract blessing as PublicKey from root certificate with Extension: %v could not be unmarshaled: %v", chain[0].Extension, err)
 		return ""
 	}
+	local := ctx.LocalPrincipal()
+	if local == nil {
+		vlog.VI(2).Infof("could not extract blessing as provided Context: %v has LocalPrincipal nil", ctx)
+		return ""
+	}
+	if err := local.Roots().Recognized(root, blessing); err != nil {
+		vlog.VI(4).Infof("could not extract blessing as certificate chain's root: %v is not trusted for blessing: %v", root, blessing)
+		return ""
+	}
+
+	// Validate all caveats embedded in the chain.
 	for _, cert := range chain {
 		for _, cav := range cert.Caveats {
 			var validator CaveatValidator
@@ -129,13 +155,7 @@ func blessingForCertificateChain(ctx Context, chain []Certificate) string {
 			}
 		}
 	}
-	// All caveats have been validated, construct the blessing name.
-	ret := chain[0].Extension
-	for i := 1; i < len(chain); i++ {
-		ret += ChainSeparator
-		ret += chain[i].Extension
-	}
-	return ret
+	return blessing
 }
 
 // UnionOfBlessings returns a Blessings object that carries the union of the

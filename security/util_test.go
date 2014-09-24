@@ -16,10 +16,47 @@ import (
 	"veyron.io/veyron/veyron2/vom"
 )
 
+type store struct {
+	key PublicKey
+}
+
+func (*store) Add(blessings Blessings, forPeers BlessingPattern) error { return nil }
+func (*store) ForPeer(peerBlesssings ...string) Blessings              { return nil }
+func (*store) SetDefault(blessings Blessings) error                    { return nil }
+func (*store) Default() Blessings                                      { return nil }
+func (s *store) PublicKey() PublicKey                                  { return s.key }
+
+type markedRoot struct {
+	root    PublicKey
+	pattern BlessingPattern
+}
+
+type roots struct {
+	data []markedRoot
+}
+
+func (r *roots) Add(root PublicKey, pattern BlessingPattern) error {
+	if !pattern.IsValid() {
+		return fmt.Errorf("pattern %q is invalid", pattern)
+	}
+	r.data = append(r.data, markedRoot{root, pattern})
+	return nil
+}
+
+func (r *roots) Recognized(root PublicKey, blessing string) error {
+	for _, mr := range r.data {
+		if reflect.DeepEqual(root, mr.root) && mr.pattern.MatchedBy(blessing) {
+			return nil
+		}
+	}
+	return fmt.Errorf("root %v not recognized for blessing %q", root, blessing)
+}
+
 type context struct {
 	method, name, suffix string
 	label                Label
 	localID, remoteID    PublicID
+	local                Principal
 	discharges           map[string]Discharge
 }
 
@@ -30,6 +67,8 @@ func (c *context) Label() Label                     { return c.label }
 func (c *context) Discharges() map[string]Discharge { return c.discharges }
 func (c *context) LocalID() PublicID                { return c.localID }
 func (c *context) RemoteID() PublicID               { return c.remoteID }
+func (c *context) LocalPrincipal() Principal        { return c.local }
+func (c *context) RemoteBlessings() Blessings       { return nil }
 func (c *context) LocalEndpoint() naming.Endpoint   { return nil }
 func (c *context) RemoteEndpoint() naming.Endpoint  { return nil }
 
@@ -66,7 +105,8 @@ func newECDSASigner(t *testing.T, curve elliptic.Curve) Signer {
 }
 
 func newPrincipal(t *testing.T) Principal {
-	p, err := CreatePrincipal(newECDSASigner(t, elliptic.P256()))
+	signer := newECDSASigner(t, elliptic.P256())
+	p, err := CreatePrincipal(signer, &store{signer.PublicKey()}, &roots{})
 	if err != nil {
 		t.Fatalf("CreatePrincipal failed: %v", err)
 	}
@@ -79,6 +119,12 @@ func blessSelf(t *testing.T, p Principal, name string, caveats ...Caveat) Blessi
 		t.Fatal(err)
 	}
 	return b
+}
+
+func addToRoots(t *testing.T, p Principal, b Blessings) {
+	if err := p.AddToRoots(b); err != nil {
+		t.Fatal(err)
+	}
 }
 
 func checkBlessings(b Blessings, c Context, want ...string) error {

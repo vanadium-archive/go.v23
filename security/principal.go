@@ -4,19 +4,38 @@ import (
 	"bytes"
 	"fmt"
 	"reflect"
+	"time"
 
 	"veyron.io/veyron/veyron2/vom"
 )
 
-// CreatePrincipal returns a Principal with the provided blessings and uses
-// signer to Sign further operations. It requires that the provided roots are
-// recognized and that blessings.PublicKey be exactly the same as signer.PublicKey.
+// CreatePrincipal returns a Principal that uses 'signer' for all
+// private key operations, 'store' for storing blessings bound
+// to the Principal and 'roots' for the set of authoritative public
+// keys on blessings recognized by this Principal.
 //
-// TODO(ataly): Add "BlessingStore" and "BlessingRoots" as arguments after adding
-// methods to the Principal interface that have been specified in the new API
-// but not added yet.
-func CreatePrincipal(signer Signer) (Principal, error) {
-	return &principal{signer: signer}, nil
+// It returns an error if 'store' or 'roots' is nil, or store.PublicKey
+// does not match signer.PublicKey.
+func CreatePrincipal(signer Signer, store BlessingStore, roots BlessingRoots) (Principal, error) {
+	if store == nil || roots == nil {
+		return nil, fmt.Errorf("store: %v, roots: %v cannot be nil", store, roots)
+	}
+	if got, want := store.PublicKey(), signer.PublicKey(); !reflect.DeepEqual(got, want) {
+		return nil, fmt.Errorf("store's public key: %v does not match signer's public key: %v", got, want)
+	}
+	return &principal{signer: signer, store: store, roots: roots}, nil
+}
+
+// TODO(ataly, ashankar): GET RID OF THIS METHOD
+// This method is a hack for getting MintDischarge to work on PrivateIDs.
+// It should go away as soon as we replace PrivateIDs with Principals.
+func MintDischargeForPrivateID(signer Signer, cav ThirdPartyCaveat, ctx Context, duration time.Duration, dischargeCaveats []Caveat) (Discharge, error) {
+	p := &principal{signer: signer}
+	expiry, err := ExpiryCaveat(time.Now().Add(duration))
+	if err != nil {
+		return nil, err
+	}
+	return p.MintDischarge(cav, ctx, expiry, dischargeCaveats...)
 }
 
 var (
@@ -36,6 +55,8 @@ var (
 
 type principal struct {
 	signer Signer
+	roots  BlessingRoots
+	store  BlessingStore
 }
 
 func (p *principal) Bless(key PublicKey, with Blessings, extension string, caveat Caveat, additionalCaveats ...Caveat) (Blessings, error) {
@@ -111,4 +132,28 @@ func (p *principal) MintDischarge(tp ThirdPartyCaveat, ctx Context, caveat Cavea
 
 func (p *principal) PublicKey() PublicKey {
 	return p.signer.PublicKey()
+}
+
+func (p *principal) BlessingStore() BlessingStore {
+	return p.store
+}
+
+func (p *principal) Roots() BlessingRoots {
+	return p.roots
+}
+
+func (p *principal) AddToRoots(blessings Blessings) error {
+	chains := blessings.certificateChains()
+	glob := ChainSeparator + AllPrincipals
+	for _, chain := range chains {
+		root, err := UnmarshalPublicKey(chain[0].PublicKey)
+		if err != nil {
+			return fmt.Errorf("failed to unmarshal public key in root certificate with Extension: %q: %v", chain[0].Extension, err)
+		}
+		pattern := BlessingPattern(chain[0].Extension) + glob
+		if err := p.roots.Add(root, pattern); err != nil {
+			return fmt.Errorf("failed to Add root: %v for pattern: %v to this principal's roots: %v", root, pattern)
+		}
+	}
+	return nil
 }
