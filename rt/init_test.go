@@ -35,7 +35,9 @@ func (mp *myprofile) String() string {
 	return "myprofile on " + mp.Platform().String()
 }
 
-func (mp *myprofile) Init(veyron2.Runtime, *config.Publisher) {}
+func (mp *myprofile) Init(veyron2.Runtime, *config.Publisher) error {
+	return nil
+}
 
 func ExampleInitWithProfile() {
 	r := rt.Init(veyron2.ProfileOpt{&myprofile{}})

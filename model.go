@@ -153,8 +153,7 @@ type Profile interface {
 	// Init is called by the Runtime once it has been initialized and
 	// command line flags have been parsed. Init will be called once and
 	// only once by the Runtime.
-	// TODO(cnicolaou): Init should return an error
-	Init(rt Runtime, p *config.Publisher)
+	Init(rt Runtime, p *config.Publisher) error
 
 	// TODO(cnicolaou): provide a Cleanup method for the profile.
 	String() string
