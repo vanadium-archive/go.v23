@@ -68,6 +68,7 @@ func (c *context) Discharges() map[string]Discharge { return c.discharges }
 func (c *context) LocalID() PublicID                { return c.localID }
 func (c *context) RemoteID() PublicID               { return c.remoteID }
 func (c *context) LocalPrincipal() Principal        { return c.local }
+func (c *context) LocalBlessings() Blessings        { return nil }
 func (c *context) RemoteBlessings() Blessings       { return nil }
 func (c *context) LocalEndpoint() naming.Endpoint   { return nil }
 func (c *context) RemoteEndpoint() naming.Endpoint  { return nil }

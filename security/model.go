@@ -1,5 +1,124 @@
-// Package security provides the API for identity, authentication and authorization
-// in veyron.
+// Package security provides the API for identity, authentication and
+// authorization.
+//
+// A principal is an entity capable of making or receiving RPCs and has
+// a unique (public, private) key pair.
+//
+// Principals have a set of "blessings" in the form of human-readable strings
+// that represent delegations from other principals. Blessings are
+// cryptographically bound to the principal's public key. Slashes in this
+// string are used to represent a chain of delegations. For example, a
+// principal with the blessing "johndoe" can delegate to his phone by blessing
+// the phone as "johndoe/phone", which in-turn can delegate to the headset by
+// blessing it as "johndoe/phone/headset". This headset principal may have
+// other blessings bound to it as well. For example, one from the manufaturer
+// ("manufacturer/model"), one from the developer of the software
+// ("developer/software/headset") etc.
+//
+// The "root" principal of a delegation chain (i.e., a blessing) is identified
+// by their public key. For example, let's say a principal P1 presents
+// a blessing "a/b/c" to another principal P2. P2 will consider this blessing
+// valid iff the public key of the principal that generated the blessing "a"
+// (root of the delegation chain) is recognized as an authority on the blessing
+// "a/b/c" by P2. This allows authorizations for actions to be based
+// on the blessings held by the principal attempting the action.  Cryptographic
+// proof of the validity of blessings is done through chains of certificates
+// encapsulated in the Blessings interface defined in this package. The set of
+// authoritative "root" blessers recognized by a principal is encapsulated in
+// the BlessingRoots interface.
+//
+// Caveats and Discharges
+//
+// Blessings are typically granted under specific restrictions.  For example,
+// a principal with the blessing "johndoe" can bless another principal with
+// "johndoe/friend" allowing the other principal to use the blessing with the
+// caveat that it is valid only for the next 5 minutes and cannot be used to
+// communicate with the banking service.
+//
+// When a principal presents a blessing to another principal in order to
+// authorize an action, the authorizing principal verifies that all caveats
+// have been satisfied. Caveats (lifetime of the blessing, set of methods that
+// can be invoked etc.) are typically verified based on the context of the
+// action (time of request, method being invoked etc.). However, validation of
+// some caveats can be offloaded to a party other than the requesting or
+// authorizing principal. Thus, blessings can be made with "third-party
+// caveats" whose validation requires a "proof" of the restriction being
+// satisfied to be issued by the third party. The representation of a "proof"
+// is referred to as a "discharge" (borrowing the term from proof theory,
+// https://proofwiki.org/wiki/Definition:Discharged_Assumption).
+// NewPublicKeyThirdPartyCaveat provides a means to offload validation of a
+// restriction to a third party.
+//
+// Navigating the interfaces
+//
+// Godoc renders all interfaces in this package in alphabetical order.
+// However, we recommend the following order in order to introduce
+// yourself to the API:
+//
+//   * Principal
+//   * Blessings
+//   * BlessingStore
+//   * BlessingRoots
+//   * NewCaveat
+//   * ThirdPartyCaveat
+//   * NewPublicKeyThirdPartyCaveat
+//
+// Examples
+//
+// A principal can decide to call itself anything it wants:
+//  // (in process A)
+//  var p1 Principal
+//  alice, _ := p1.BlessSelf("alice")
+//
+// This "alice" blessing can be presented to to another principal (typically a
+// remote process), but that other principal will not recognize this
+// "self-proclaimed" authority:
+//  // (in process B)
+//  var p2 Principal
+//  ctx :=  GetRPCContext()  // Context under which p1 is communicating with p2, ctx.LocalPrincipal == p2
+//  alice := ctx.RemoteBlessings()
+//  fmt.Println(len(alice.ForContext(ctx))) // Will print 0
+//
+// However, p2 can decide to trust p1 as an authority on the blessings of
+// the form "alice/..." and will then be able to recognize "alice" and
+// her delegates:
+//  // (in process B)
+//  p2.AddToRoots(alice)
+//  fmt.Printf("%v", alice.ForContext(ctx))  // Will print ["alice"]
+//
+// Furthermore, p2 can seek a blessing from "alice":
+//  // (in process A)
+//  ctx := GetRPCContext()  // Context under which p2 is seeking a blessing from alice, ctx.LocalPrincipal = p1
+//  key2 := ctx.RemoteBlessings().PublicKey()
+//  onlyFor10Minutes := ExpiryCaveat(time.Now().Add(10*time.Minute))
+//  aliceFriend, _ := p1.Bless(key2, alice, "friend", onlyFor10Minutes)
+//  SendBlessingToProcessB(aliceFriend)
+//
+// p2 can then add this blessing to its store such that this blessing will be
+// presented to p1 anytime p2 communicates with it in the future:
+//  // (in process B)
+//  p2.BlessingStore().Add(aliceFriend, "alice")
+//
+// p2 could also mark this blessing so that it is used when communicating with
+// any delegates of "alice":
+//  // (in process B)
+//  p2.BlessingStore().Add(aliceFriend, "alice/...")
+//
+// p2 can also choose to present multiple blessings to some servers:
+//  // (in process B)
+//  charlieFriend := ReceiveBlessingFromSomeWhere()
+//  p2.BlessingStore().Add(aliceFriend, "alice/mom")
+//  p2.BlessingStore().Add(charlieFriend, "alice/mom")
+//
+// Thus, when communicating with a "server" that presents the blessing "alice/mom",
+// p2 will declare that he is both "alice's friend" and "charlie's friend" and
+// the server may authorize actions based on this fact.
+//
+// p2 may also choose that it wants to present these two blessings when acting
+// as a "server", (i.e., when it does not know who the peer is):
+//  // (in process B)
+//  default, _ := UnionOfBlessings(aliceFriend, charlieFriend)
+//  p2.BlessingStore().SetDefault(default)
 package security
 
 import (
@@ -7,73 +126,9 @@ import (
 	"veyron.io/veyron/veyron2/naming"
 )
 
-// PublicIDStore is an interface for managing PublicIDs. All PublicIDs added
-// to the store are required to be blessing the same public key and must be tagged
-// with a BlessingPattern. By default, in IPC, a client uses a PublicID from the
-// store to authenticate to servers identified by the pattern tagged on
-// the PublicID.
-type PublicIDStore interface {
-	// Adds a PublicID to the store and tags it with the provided peerPattern.
-	// The method fails if the provided PublicID has a different public key from
-	// the (common) public key of existing PublicIDs in the store. PublicIDs with
-	// multiple Names are broken up into PublicIDs with at most one Name and then
-	// added separately to the store.
-	Add(id PublicID, peerPattern BlessingPattern) error
-
-	// ForPeer returns a PublicID by combining all PublicIDs from the store that are
-	// tagged with patterns matching the provided peer. The combined PublicID has the
-	// same public key as the individual PublicIDs and carries the union of the
-	// set of names of the individual PublicIDs. An error is returned if there are no
-	// matching PublicIDs.
-	ForPeer(peer PublicID) (PublicID, error)
-
-	// DefaultPublicID returns a PublicID from the store based on the default
-	// BlessingPattern. The returned PublicID has the same public key as the common
-	// public key of all PublicIDs in the store, and carries the union of the set of
-	// names of all PublicIDs that match the default pattern. An error is returned if
-	// there are no matching PublicIDs. (Note that it is the PublicIDs that are matched
-	// with the default pattern rather than the peer pattern tags on them.)
-	DefaultPublicID() (PublicID, error)
-
-	// SetDefaultBlessingPattern changes the default BlessingPattern used by subsequent
-	// calls to DefaultPublicID to the provided pattern. In the absence of any
-	// SetDefaultBlessingPattern calls, the default BlessingPattern must be set to
-	// "..." which matches all PublicIDs.
-	SetDefaultBlessingPattern(pattern BlessingPattern) error
-}
-
-// PublicID is the interface for a non-secret component of a principal's
-// unique identity.
-type PublicID interface {
-	// Names returns a list of human-readable names associated with the principal.
-	// The returned names act only as a hint, there is no guarantee that they are
-	// globally unique.
-	Names() []string
-
-	// PublicKey returns the public key corresponding to the private key
-	// that is held only by the principal represented by this PublicID.
-	PublicKey() PublicKey
-
-	// Authorize determines whether the PublicID has credentials that are valid
-	// under the provided context. If so, Authorize returns a new PublicID that
-	// carries only the valid credentials. The returned PublicID is always
-	// non-nil in the absence of errors and has the same public key as this
-	// PublicID.
-	Authorize(context Context) (PublicID, error)
-
-	// ThirdPartyCaveats returns the set of third-party restrictions for this PublicID.
-	ThirdPartyCaveats() []ThirdPartyCaveat
-}
-
 // Principal represents an entity capable of making or receiving RPCs.
 // Principals have a unique (public, private) key pair, have blessings bound
 // to them and can bless other principals.
-//
-// TODO(ashankar, ataly): REMOVE THIS TODO :)
-// IF YOU ARE READING THIS FILE AND YOU SEE THE TYPES PrivateID and
-// PublicID, THEN IGNORE THIS Blessings TYPE. Blessings is part of a
-// newer security API (see https://veyron-review.googlesource.com/#/c/4102)
-// AND WILL EVENTUALLY REPLACE PublicID.
 type Principal interface {
 	// Bless binds extensions of blessings held by this principal to
 	// another principal (represented by its public key).
@@ -212,12 +267,6 @@ type BlessingRoots interface {
 //
 // Blessings objects are meant to be presented to other principals to authenticate
 // and authorize actions.
-//
-// TODO(ashankar, ataly): REMOVE THIS TODO :)
-// IF YOU ARE READING THIS FILE AND YOU SEE THE TYPES PrivateID and
-// PublicID, THEN IGNORE THIS Blessings TYPE. Blessings is part of a
-// newer security API (see https://veyron-review.googlesource.com/#/c/4102)
-// AND WILL EVENTUALLY REPLACE PublicID.
 type Blessings interface {
 	// ForContext returns a validated set of (human-readable string) blessings
 	// presented by the principal. These returned blessings (strings) are guaranteed to:
@@ -255,55 +304,6 @@ type Signer interface {
 	Sign(purpose, message []byte) (Signature, error)
 
 	// PublicKey returns the public key corresponding to the Signer's private key.
-	PublicKey() PublicKey
-}
-
-// PrivateID is the interface for the secret component of a principal's unique
-// identity.
-//
-// Each principal has a unique (private, public) key pair. The private key
-// is known only to the principal and is not expected to be shared.
-type PrivateID interface {
-	// PublicID returns the non-secret component of principal's identity
-	// (which can be encoded and transmitted across the network perhaps).
-	// TODO(ataly): Replace this method with one that returns the PublicIDStore.
-	PublicID() PublicID
-
-	// Bless creates a constrained PublicID from the provided one.
-	// The returned PublicID:
-	// - Has the same PublicKey as the provided one.
-	// - Has a new name which is an extension of PrivateID's name with the
-	//   provided blessingName string.
-	// - Is valid for the provided duration only if both the constraints on the
-	//   PrivateID and the provided service caveats are met.
-	//
-	// Bless assumes that the blessee is in posession of the private key correponding
-	// to the blessee.PublicKey. Failure to ensure this property may result in
-	// impersonation attacks.
-	Bless(blessee PublicID, blessingName string, duration time.Duration, caveats []Caveat) (PublicID, error)
-
-	// Derive returns a new PrivateID that has the same secret component
-	// as a existing PrivateID but with the provided public component (PublicID).
-	// The provided PublicID must have the same public key as the existing
-	// PublicID for this operation to succeed.
-	// TODO(ataly, ashankar): Replace this method with one that derives from a PublicIDStore.
-	//
-	Derive(publicID PublicID) (PrivateID, error)
-
-	// MintDischarge returns a discharge for the provided third-party caveat if
-	// the caveat's restrictions on minting discharges are satisfied.
-	// Otherwise, it returns nil and an error.
-	// The discharge is valid for duration if caveats are met.
-	//
-	// TODO(ataly, ashankar): Should we get rid of the duration argument
-	// and simply have a list of discharge caveats?
-	MintDischarge(caveat ThirdPartyCaveat, context Context, duration time.Duration, caveats []Caveat) (Discharge, error)
-
-	// Sign signs an arbitrary length message (often the hash of a larger message)
-	// using the private key associated with this PrivateID.
-	Sign(message []byte) (Signature, error)
-
-	// PublicKey returns the public key corresponding to the principal.
 	PublicKey() PublicKey
 }
 
@@ -369,10 +369,11 @@ type Context interface {
 	// TODO(ataly, ashankar): Discharges should return map[string][]Discharge,
 	// i.e, it should map a ThirdPartyCaveat identifier to a set of Discharges.
 	Discharges() map[string]Discharge
-	// LocalPrincipal returns the principal at the local end of communication.
+	// LocalPrincipal returns the principal used to authenticate to the remote end.
 	LocalPrincipal() Principal
-	// RemoteID provides access to the blessings of the remote end of
-	// communication.
+	// LocalBlessings returns the blessings sent to the remote end for authentication.
+	LocalBlessings() Blessings
+	// RemoteBlessings returns the blessings received from the remote end during authentication.
 	RemoteBlessings() Blessings
 	// LocalEndpoint() returns the Endpoint of the principal at the local
 	// end of communication.
@@ -381,15 +382,37 @@ type Context interface {
 	// of communication.
 	RemoteEndpoint() naming.Endpoint
 
-	// TODO(ataly, ashankar): Get rid of the methods below once LocalPrincipal
-	// and RemoteBlessings are enabled.
-	// LocalID returns the PublicID of the principal at the local end of the request.
-	LocalID() PublicID
-	// RemoteID returns the PublicID of the principal at the remote end of the request.
-	RemoteID() PublicID
+	LocalID() PublicID  // DEPRECATED TODO(ashankar,ataly): Remove
+	RemoteID() PublicID // DEPRECATED TODO(ashankar,ataly): Remove
 }
 
 // Authorizer is the interface for performing authorization checks.
 type Authorizer interface {
 	Authorize(context Context) error
+}
+
+// DEPRECATED: TODO(ashankar,ataly): Remove this once the transition is complete.
+type PublicIDStore interface {
+	Add(id PublicID, peerPattern BlessingPattern) error
+	ForPeer(peer PublicID) (PublicID, error)
+	DefaultPublicID() (PublicID, error)
+	SetDefaultBlessingPattern(pattern BlessingPattern) error
+}
+
+// DEPRECATED: TODO(ashankar,ataly): Remove this once the transition is complete.
+type PublicID interface {
+	Names() []string
+	PublicKey() PublicKey
+	Authorize(context Context) (PublicID, error)
+	ThirdPartyCaveats() []ThirdPartyCaveat
+}
+
+// DEPRECATED: TODO(ashankar,ataly): Remove this once transition is complete.
+type PrivateID interface {
+	PublicID() PublicID
+	Bless(blessee PublicID, blessingName string, duration time.Duration, caveats []Caveat) (PublicID, error)
+	Derive(publicID PublicID) (PrivateID, error)
+	MintDischarge(caveat ThirdPartyCaveat, context Context, duration time.Duration, caveats []Caveat) (Discharge, error)
+	Sign(message []byte) (Signature, error)
+	PublicKey() PublicKey
 }

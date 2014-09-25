@@ -53,6 +53,7 @@ func (*FakeServerCall) Discharges() map[string]security.Discharge            { r
 func (ctx *FakeServerCall) LocalID() security.PublicID                       { return ctx.id }
 func (ctx *FakeServerCall) RemoteID() security.PublicID                      { return ctx.id }
 func (*FakeServerCall) LocalPrincipal() security.Principal                   { return nil }
+func (*FakeServerCall) LocalBlessings() security.Blessings                   { return nil }
 func (*FakeServerCall) RemoteBlessings() security.Blessings                  { return nil }
 func (*FakeServerCall) Blessing() security.PublicID                          { return nil }
 func (*FakeServerCall) LocalEndpoint() naming.Endpoint                       { return nil }

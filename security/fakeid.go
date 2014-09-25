@@ -1,8 +1,6 @@
 package security
 
-// THIS FILE SHOULD BE DELETED SOON. IT IS A PLACEHOLDER FOR REAL
-// IMPLEMENTATIONS OF THE IDENTITY INTERFACES THAT ARE STILL DEVELOPING.
-// TODO(ashankar): Remove this before the 0.1 release
+// DEPRECATED: TODO(ashankar,ataly): Remove this before the 0.1 release.
 
 import (
 	"bytes"

@@ -145,14 +145,15 @@ type Caveat struct {
 	ValidatorVOM []byte
 }
 
-// WireBlessings encapsulates a set of blessings and the corresponding
-// cryptographic proof that binds the blessings to a principal (identified by
-// a public key).
+// WireBlessings encapsulates wire format of a set of blessings and the
+// corresponding cryptographic proof that binds them to a principal
+// (identified by a public key).
 //
 // This structure is the "wire" format for sending an receiving blessings
 // in RPCs or marshaling to persistent storage. Typically, languages will
 // provide a factory function that converts this wire representation to
-// a more usable object to inspect and manipulate these blessings.
+// a more usable object to inspect and manipulate these blessings. For
+// example, the NewBlessings factory function in Go.
 type WireBlessings struct {
 	// CertificateChains is an array of chains of certificates that bind
 	// a blessing to the public key in the last certificate of the chain.

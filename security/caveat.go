@@ -89,11 +89,8 @@ func (c peerBlessingsCaveat) Validate(ctx Context) error {
 	return fmt.Errorf("%T=%v fails validation for peer with blessings %v", c, c, peerblessings)
 }
 
-// TODO(ashankar): This is kept around only for backward compatibility with the
-// "old" security API. Remove this when switching to the new API (i.e., when there
-// are no concerns about persisted blessings with this caveat).
+// DEPRECATED: TODO(ashankar,ataly): Remove when switching from PublicID/PrivateID to Blessings/Principal.
 type Expiry struct {
-	// TODO(ataly,ashankar): Get rid of IssueTime from this caveat.
 	IssueTime  time.Time
 	ExpiryTime time.Time
 }
