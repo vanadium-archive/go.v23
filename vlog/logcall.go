@@ -9,7 +9,7 @@ import (
 )
 
 // logCallLogLevel is the log level beyond which calls are logged.
-const logCallLogLevel = 3
+const logCallLogLevel = 1
 
 // LogCall logs that its caller has been called given the arguments
 // passed to it.  It returns a function that is supposed to be called
