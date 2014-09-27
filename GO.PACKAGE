@@ -1,8 +1,12 @@
 {
 	"dependencies": {
 		"outgoing": [
-			{"allow": "veyron2/..."},
+			{"allow": "veyron.io/veyron/veyron2/..."},
+			{"allow": "veyron.io/veyron/veyron/lib/...", "comment": "temporarily allowing dependency on lib"},
 			{"deny": "..."}
+		],
+		"incoming": [
+			{"allow": "..."}
 		]
 	}
 }

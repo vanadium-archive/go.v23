@@ -1,8 +1,8 @@
 {
 	"dependencies": {
 		"outgoing": [
-			{"allow": "veyron/runtimes/..."},
-			{"allow": "veyron2/..."},
+			{"allow": "veyron.io/veyron/veyron/runtimes/..."},
+			{"allow": "veyron.io/veyron/veyron2/..."},
 			{"deny": "..."}
 		]
 	}
