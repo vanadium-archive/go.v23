@@ -52,6 +52,11 @@ func (e *Errors) Errorf(format string, v ...interface{}) bool {
 	return e.Error(fmt.Sprintf(format, v...))
 }
 
+// String returns the buffered errors as a single human-readable string.
+func (e *Errors) String() string {
+	return e.buf.String()
+}
+
 // ToError returns the buffered errors as a single error, or nil if there
 // weren't any errors.
 func (e *Errors) ToError() error {
