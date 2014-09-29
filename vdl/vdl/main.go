@@ -30,11 +30,12 @@ Usage:
 
 <packages> are a list of packages to process, specified as arguments for each
 command.  The format is similar to the go tool.  In its simplest form each
-package is an import path; e.g. "veyron.io/veyron/veyron/lib/vdl".  A package that is an absolute
-path or that contains a "." is interpreted as a file system path and denotes the
-package in that directory.  A package that ends with "..." does a wildcard match
-against all directories with that prefix.  The special import path "all" expands
-to all package directories found in all the GOPATH trees.
+package is an import path; e.g. "veyron.io/veyron/veyron/lib/vdl".  A package
+that is an absolute path or that contains a "." is interpreted as a file system
+path and denotes the package in that directory.  A package that ends with "..."
+does a wildcard match against all directories with that prefix.  The special
+import path "all" expands to all package directories found in all the GOPATH
+trees.
 
 For more information use "go help packages" to see the standard go package
 documentation.
@@ -62,10 +63,15 @@ The generate flags are:
       When the src->dst form is used, src must match the suffix of the path
       just before the package path, and dst is the replacement for src.
       Use commas to separate multiple rules; the first rule matching src is
-      used.  The special dst SKIP indicates all matching packages are skipped.
-   -java_out_dir=veyron/go/src->veyron/java/src/main/java,roadmap/go/src->veyron/java/src/main/java,third_party/go/src->SKIP: Same semantics as --go_out_dir but applies to java code generation.
-   -java_pkg_prefix=com: Package prefix that will be added to the VDL package prefixes when generating Java files.
-   -js_out_dir=veyron/go/src->veyron.js/src,roadmap/go/src->veyron.js/java,third_party/go/src->SKIP: Same semantics as --go_out_dir but applies to js code generation.
+      used.  The special dst SKIP indicates matching packages are skipped.
+   -java_out_dir=veyron/go/src->veyron/java/src/vdl/java,roadmap/go/src->veyron/java/src/vdl/java,third_party/go/src->SKIP: Same semantics as --go_out_dir but applies to java code generation.
+   -java_out_pkg=veyron.io/veyron/veyron2/vom2/testdata->SKIP,veyron.io->io/veyron: Java output package translation rules.  Must be of the form:
+         "src->dst[,s2->d2...]"
+      If a VDL package has a prefix src, the prefix will be replaced with dst.
+      Use commas to separate multiple rules; the first rule matching src is
+      used, and if there are no matching rules, the package remains unchanged.
+      The special dst SKIP indicates matching packages are skipped.
+   -js_out_dir=veyron/go/src->veyron.js/src,roadmap/go/src->veyron.js/src,third_party/go/src->SKIP: Same semantics as --go_out_dir but applies to js code generation.
    -lang=go,java: Comma-separated list of languages to generate, currently supporting go,java,js
    -status=true: Show package names as they are updated
 
@@ -79,11 +85,12 @@ Usage:
 
 <packages> are a list of packages to process, specified as arguments for each
 command.  The format is similar to the go tool.  In its simplest form each
-package is an import path; e.g. "veyron.io/veyron/veyron/lib/vdl".  A package that is an absolute
-path or that contains a "." is interpreted as a file system path and denotes the
-package in that directory.  A package that ends with "..." does a wildcard match
-against all directories with that prefix.  The special import path "all" expands
-to all package directories found in all the GOPATH trees.
+package is an import path; e.g. "veyron.io/veyron/veyron/lib/vdl".  A package
+that is an absolute path or that contains a "." is interpreted as a file system
+path and denotes the package in that directory.  A package that ends with "..."
+does a wildcard match against all directories with that prefix.  The special
+import path "all" expands to all package directories found in all the GOPATH
+trees.
 
 For more information use "go help packages" to see the standard go package
 documentation.
@@ -102,11 +109,12 @@ Usage:
 
 <packages> are a list of packages to process, specified as arguments for each
 command.  The format is similar to the go tool.  In its simplest form each
-package is an import path; e.g. "veyron.io/veyron/veyron/lib/vdl".  A package that is an absolute
-path or that contains a "." is interpreted as a file system path and denotes the
-package in that directory.  A package that ends with "..." does a wildcard match
-against all directories with that prefix.  The special import path "all" expands
-to all package directories found in all the GOPATH trees.
+package is an import path; e.g. "veyron.io/veyron/veyron/lib/vdl".  A package
+that is an absolute path or that contains a "." is interpreted as a file system
+path and denotes the package in that directory.  A package that ends with "..."
+does a wildcard match against all directories with that prefix.  The special
+import path "all" expands to all package directories found in all the GOPATH
+trees.
 
 For more information use "go help packages" to see the standard go package
 documentation.
@@ -134,10 +142,15 @@ The audit flags are:
       When the src->dst form is used, src must match the suffix of the path
       just before the package path, and dst is the replacement for src.
       Use commas to separate multiple rules; the first rule matching src is
-      used.  The special dst SKIP indicates all matching packages are skipped.
-   -java_out_dir=veyron/go/src->veyron/java/src/main/java,roadmap/go/src->veyron/java/src/main/java,third_party/go/src->SKIP: Same semantics as --go_out_dir but applies to java code generation.
-   -java_pkg_prefix=com: Package prefix that will be added to the VDL package prefixes when generating Java files.
-   -js_out_dir=veyron/go/src->veyron.js/src,roadmap/go/src->veyron.js/java,third_party/go/src->SKIP: Same semantics as --go_out_dir but applies to js code generation.
+      used.  The special dst SKIP indicates matching packages are skipped.
+   -java_out_dir=veyron/go/src->veyron/java/src/vdl/java,roadmap/go/src->veyron/java/src/vdl/java,third_party/go/src->SKIP: Same semantics as --go_out_dir but applies to java code generation.
+   -java_out_pkg=veyron.io/veyron/veyron2/vom2/testdata->SKIP,veyron.io->io/veyron: Java output package translation rules.  Must be of the form:
+         "src->dst[,s2->d2...]"
+      If a VDL package has a prefix src, the prefix will be replaced with dst.
+      Use commas to separate multiple rules; the first rule matching src is
+      used, and if there are no matching rules, the package remains unchanged.
+      The special dst SKIP indicates matching packages are skipped.
+   -js_out_dir=veyron/go/src->veyron.js/src,roadmap/go/src->veyron.js/src,third_party/go/src->SKIP: Same semantics as --go_out_dir but applies to js code generation.
    -lang=go,java: Comma-separated list of languages to generate, currently supporting go,java,js
    -status=true: Show package names as they are updated
 
@@ -159,11 +172,12 @@ Usage:
 
 <packages> are a list of packages to process, specified as arguments for each
 command.  The format is similar to the go tool.  In its simplest form each
-package is an import path; e.g. "veyron.io/veyron/veyron/lib/vdl".  A package that is an absolute
-path or that contains a "." is interpreted as a file system path and denotes the
-package in that directory.  A package that ends with "..." does a wildcard match
-against all directories with that prefix.  The special import path "all" expands
-to all package directories found in all the GOPATH trees.
+package is an import path; e.g. "veyron.io/veyron/veyron/lib/vdl".  A package
+that is an absolute path or that contains a "." is interpreted as a file system
+path and denotes the package in that directory.  A package that ends with "..."
+does a wildcard match against all directories with that prefix.  The special
+import path "all" expands to all package directories found in all the GOPATH
+trees.
 
 For more information use "go help packages" to see the standard go package
 documentation.
