@@ -6,7 +6,6 @@ import (
 	"veyron.io/veyron/veyron2"
 	"veyron.io/veyron/veyron2/config"
 	"veyron.io/veyron/veyron2/rt"
-	"veyron.io/veyron/veyron2/security"
 )
 
 func ExampleInit() {
@@ -27,8 +26,7 @@ func (mp *myprofile) Runtime() string {
 }
 
 func (mp *myprofile) Platform() *veyron2.Platform {
-	id := security.FakePublicID("anyoldid")
-	return &veyron2.Platform{"google", id, "v1", "any", "rel1", ".2", "who knows", "this host"}
+	return &veyron2.Platform{"google", nil, "v1", "any", "rel1", ".2", "who knows", "this host"}
 }
 
 func (mp *myprofile) String() string {

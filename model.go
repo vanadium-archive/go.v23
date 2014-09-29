@@ -52,11 +52,13 @@ type Platform struct {
 	// TODO(ashankar, ataly): provide an API for verifying vendor authenticity.
 	Vendor string
 
-	// Identity is a cryptographically secure Identity for this device. It is
-	// unique across all devices from all vendors. It is stable for the
-	// lifetime of this device.
-	// TODO(ashankar, ataly, cnicolaou): how should we handle this?
-	Identity security.PublicID
+	// AIKCertificate attests that the platform contains a TPM that is trusted
+	// and has valid EK (Endorsement Key) and platform credentials. The
+	// AIKCertificate is bound to an AIK public key (attestation identity key)
+	// that is secure on the TPM and can be used for signing operations.
+	// TODO(gauthamt): provide an implementation of how a device gets this
+	// certificate and how a remote process uses it to verify device identity.
+	AIKCertificate *security.Certificate
 
 	// Model is the model description, including version information.
 	Model string
