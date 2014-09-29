@@ -34,6 +34,13 @@ type Description struct {
 	Profiles map[string]struct{}
 }
 
+// Association is a tuple containing an association between a Veyron
+// identity and a system account name.
+type Association struct {
+	IdentityName string
+	AccountName  string
+}
+
 // TODO(bprosnitz) Remove this line once signatures are updated to use typevals.
 // It corrects a bug where _gen_wiretype is unused in VDL pacakges where only bootstrap types are used on interfaces.
 const _ = _gen_wiretype.TypeIDInvalid
@@ -822,6 +829,14 @@ type Node_ExcludingUniversal interface {
 	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
 	// are implemented.
 	Reset(ctx _gen_context.T, Deadline uint64, opts ..._gen_ipc.CallOpt) (err error)
+	// AssociateAccount associates a local  system account name with the provided
+	// Veyron identities. It replaces the existing association if one already exists for that
+	// identity. Setting an AccountName to "" removes the association for each
+	// listed identity.
+	AssociateAccount(ctx _gen_context.T, identityNames []string, accountName string, opts ..._gen_ipc.CallOpt) (err error)
+	// ListAssociations returns all of the associations between Veyron identities
+	// and system names.
+	ListAssociations(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []Association, err error)
 }
 type Node interface {
 	_gen_ipc.UniversalServiceMethods
@@ -937,6 +952,14 @@ type NodeService interface {
 	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
 	// are implemented.
 	Reset(context _gen_ipc.ServerContext, Deadline uint64) (err error)
+	// AssociateAccount associates a local  system account name with the provided
+	// Veyron identities. It replaces the existing association if one already exists for that
+	// identity. Setting an AccountName to "" removes the association for each
+	// listed identity.
+	AssociateAccount(context _gen_ipc.ServerContext, identityNames []string, accountName string) (err error)
+	// ListAssociations returns all of the associations between Veyron identities
+	// and system names.
+	ListAssociations(context _gen_ipc.ServerContext) (reply []Association, err error)
 }
 
 // BindNode returns the client stub implementing the Node
@@ -1037,6 +1060,28 @@ func (__gen_c *clientStubNode) Reset(ctx _gen_context.T, Deadline uint64, opts .
 	return
 }
 
+func (__gen_c *clientStubNode) AssociateAccount(ctx _gen_context.T, identityNames []string, accountName string, opts ..._gen_ipc.CallOpt) (err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "AssociateAccount", []interface{}{identityNames, accountName}, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (__gen_c *clientStubNode) ListAssociations(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []Association, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "ListAssociations", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
 func (__gen_c *clientStubNode) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
@@ -1099,6 +1144,10 @@ func (__gen_s *ServerStubNode) GetMethodTags(call _gen_ipc.ServerCall, method st
 		return []interface{}{}, nil
 	case "Reset":
 		return []interface{}{}, nil
+	case "AssociateAccount":
+		return []interface{}{}, nil
+	case "ListAssociations":
+		return []interface{}{}, nil
 	default:
 		return nil, nil
 	}
@@ -1106,6 +1155,15 @@ func (__gen_s *ServerStubNode) GetMethodTags(call _gen_ipc.ServerCall, method st
 
 func (__gen_s *ServerStubNode) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
 	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
+	result.Methods["AssociateAccount"] = _gen_ipc.MethodSignature{
+		InArgs: []_gen_ipc.MethodArgument{
+			{Name: "identityNames", Type: 61},
+			{Name: "accountName", Type: 3},
+		},
+		OutArgs: []_gen_ipc.MethodArgument{
+			{Name: "", Type: 65},
+		},
+	}
 	result.Methods["Claim"] = _gen_ipc.MethodSignature{
 		InArgs: []_gen_ipc.MethodArgument{},
 		OutArgs: []_gen_ipc.MethodArgument{
@@ -1126,6 +1184,13 @@ func (__gen_s *ServerStubNode) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Ser
 		OutArgs: []_gen_ipc.MethodArgument{
 			{Name: "", Type: 2},
 			{Name: "", Type: 65},
+		},
+	}
+	result.Methods["ListAssociations"] = _gen_ipc.MethodSignature{
+		InArgs: []_gen_ipc.MethodArgument{},
+		OutArgs: []_gen_ipc.MethodArgument{
+			{Name: "associations", Type: 70},
+			{Name: "err", Type: 65},
 		},
 	}
 	result.Methods["Reset"] = _gen_ipc.MethodSignature{
@@ -1149,7 +1214,13 @@ func (__gen_s *ServerStubNode) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Ser
 				_gen_wiretype.FieldType{Type: 0x42, Name: "Profiles"},
 			},
 			"veyron.io/veyron/veyron2/services/mgmt/binary.Description", []string(nil)},
-	}
+		_gen_wiretype.StructType{
+			[]_gen_wiretype.FieldType{
+				_gen_wiretype.FieldType{Type: 0x3, Name: "IdentityName"},
+				_gen_wiretype.FieldType{Type: 0x3, Name: "AccountName"},
+			},
+			"veyron.io/veyron/veyron2/services/mgmt/node.Association", []string(nil)},
+		_gen_wiretype.SliceType{Elem: 0x45, Name: "", Tags: []string(nil)}}
 	var ss _gen_ipc.ServiceSignature
 	var firstAdded int
 	ss, _ = __gen_s.ServerStubObject.Signature(call)
@@ -1297,5 +1368,15 @@ func (__gen_s *ServerStubNode) IsRunnable(call _gen_ipc.ServerCall, Description 
 
 func (__gen_s *ServerStubNode) Reset(call _gen_ipc.ServerCall, Deadline uint64) (err error) {
 	err = __gen_s.service.Reset(call, Deadline)
+	return
+}
+
+func (__gen_s *ServerStubNode) AssociateAccount(call _gen_ipc.ServerCall, identityNames []string, accountName string) (err error) {
+	err = __gen_s.service.AssociateAccount(call, identityNames, accountName)
+	return
+}
+
+func (__gen_s *ServerStubNode) ListAssociations(call _gen_ipc.ServerCall) (reply []Association, err error) {
+	reply, err = __gen_s.service.ListAssociations(call)
 	return
 }
