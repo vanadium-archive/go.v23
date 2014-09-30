@@ -257,6 +257,7 @@ var (
 			{"veyron/go/src", "veyron/java/src/vdl/java"},
 			{"roadmap/go/src", "veyron/java/src/vdl/java"},
 			{"third_party/go/src", "SKIP"},
+			{"tools/go/src", "SKIP"},
 		},
 	}
 	optGenJavascriptOutDir = genOutDir{
@@ -264,6 +265,7 @@ var (
 			{"veyron/go/src", "veyron.js/src"},
 			{"roadmap/go/src", "veyron.js/src"},
 			{"third_party/go/src", "SKIP"},
+			{"tools/go/src", "SKIP"},
 		},
 	}
 	optGenJavaOutPkg = xlateRules{
