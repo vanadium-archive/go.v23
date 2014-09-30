@@ -184,7 +184,7 @@ type Runtime interface {
 	// NewClient creates a new Client instance.
 	//
 	// It accepts at least the following options:
-	// LocalID and StreamManager
+	// LocalID, StreamManager, and Namespace
 	//
 	// In particular, if the options include a Client, then NewClient
 	// just returns that.
@@ -192,7 +192,8 @@ type Runtime interface {
 
 	// NewServer creates a new Server instance.
 	//
-	// It accepts at least the following option: StreamManager.
+	// It accepts at least the following options:
+	// LocalID, ServesMountTableOpt, and Namespace
 	NewServer(opts ...ipc.ServerOpt) (ipc.Server, error)
 
 	// Client returns the pre-configured Client that is created when the
@@ -211,7 +212,8 @@ type Runtime interface {
 	// SpanFromContext finds the currently active span.
 	SpanFromContext(ctx context.T) vtrace.Span
 
-	// NewStreamManager creates a new stream manager.
+	// NewStreamManager creates a new stream manager.  The returned stream
+	// manager will be shutdown by the runtime on Cleanup.
 	NewStreamManager(opts ...stream.ManagerOpt) (stream.Manager, error)
 
 	// NewEndpoint returns an Endpoint by parsing the supplied endpoint
