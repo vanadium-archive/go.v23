@@ -48,6 +48,13 @@ type Call interface {
 	// Finish will return immediately with an error indicating the cancellation.
 	// It is safe to call Cancel concurrently with any other Call method.
 	Cancel()
+
+	// RemoteBlesesings returns the blessings that the server provided to authenticate
+	// with the client.
+	//
+	// It returns both the string blessings and a handle to the object that contains
+	// cryptographic proof of the validity of those blessings.
+	RemoteBlessings() ([]string, security.Blessings)
 }
 
 // Stream defines the interface for a bidirectional FIFO stream of typed values.
