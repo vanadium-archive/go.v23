@@ -1,6 +1,7 @@
 package security
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 	"time"
@@ -11,11 +12,16 @@ import (
 // to the Principal and 'roots' for the set of authoritative public
 // keys on blessings recognized by this Principal.
 //
-// It returns an error if 'store' or 'roots' is nil, or store.PublicKey
-// does not match signer.PublicKey.
+// If provided 'roots' is nil then the Principal does not trust any
+// public keys and all subsequent 'AddToRoots' operations fail.
+//
+// It returns an error if store.PublicKey does not match signer.PublicKey.
 func CreatePrincipal(signer Signer, store BlessingStore, roots BlessingRoots) (Principal, error) {
-	if store == nil || roots == nil {
-		return nil, fmt.Errorf("store: %v, roots: %v cannot be nil", store, roots)
+	if store == nil {
+		store = errStore{signer.PublicKey()}
+	}
+	if roots == nil {
+		roots = errRoots{}
 	}
 	if got, want := store.PublicKey(), signer.PublicKey(); !reflect.DeepEqual(got, want) {
 		return nil, fmt.Errorf("store's public key: %v does not match signer's public key: %v", got, want)
@@ -51,7 +57,25 @@ var (
 	blessPurpose     = []byte(SignatureForBlessingCertificates)
 	signPurpose      = []byte(SignatureForMessageSigning)
 	dischargePurpose = []byte(SignatureForDischarge)
+
+	errNilStore = errors.New("underlying BlessingStore object is nil")
+	errNilRoots = errors.New("underlying BlessingRoots object is nil")
 )
+
+type errStore struct {
+	key PublicKey
+}
+
+func (errStore) Add(Blessings, BlessingPattern) error      { return errNilStore }
+func (errStore) ForPeer(peerBlessings ...string) Blessings { return nil }
+func (errStore) SetDefault(blessings Blessings) error      { return errNilStore }
+func (errStore) Default() Blessings                        { return nil }
+func (s errStore) PublicKey() PublicKey                    { return s.key }
+
+type errRoots struct{}
+
+func (errRoots) Add(PublicKey, BlessingPattern) error { return errNilRoots }
+func (errRoots) Recognized(PublicKey, string) error   { return errNilRoots }
 
 type principal struct {
 	signer Signer
@@ -132,6 +156,9 @@ func (p *principal) Roots() BlessingRoots {
 }
 
 func (p *principal) AddToRoots(blessings Blessings) error {
+	if p.roots == nil {
+		return errors.New("principal does not have any BlessingRoots")
+	}
 	chains := blessings.certificateChains()
 	glob := ChainSeparator + AllPrincipals
 	for _, chain := range chains {
@@ -141,7 +168,7 @@ func (p *principal) AddToRoots(blessings Blessings) error {
 		}
 		pattern := BlessingPattern(chain[0].Extension) + glob
 		if err := p.roots.Add(root, pattern); err != nil {
-			return fmt.Errorf("failed to Add root: %v for pattern: %v to this principal's roots: %v", root, pattern)
+			return fmt.Errorf("failed to Add root: %v for pattern: %v to this principal's roots: %v", root, pattern, err)
 		}
 	}
 	return nil

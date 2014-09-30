@@ -135,7 +135,11 @@ func blessingForCertificateChain(ctx Context, chain []Certificate) string {
 	}
 	local := ctx.LocalPrincipal()
 	if local == nil {
-		vlog.VI(2).Infof("could not extract blessing as provided Context: %v has LocalPrincipal nil", ctx)
+		vlog.VI(2).Infof("could not extract blessing as provided Context %v has LocalPrincipal nil", ctx)
+		return ""
+	}
+	if local.Roots() == nil {
+		vlog.VI(4).Info("could not extract blessing as no keys are recgonized as valid roots")
 		return ""
 	}
 	if err := local.Roots().Recognized(root, blessing); err != nil {

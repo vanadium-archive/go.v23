@@ -16,16 +16,6 @@ import (
 	"veyron.io/veyron/veyron2/vom"
 )
 
-type store struct {
-	key PublicKey
-}
-
-func (*store) Add(blessings Blessings, forPeers BlessingPattern) error { return nil }
-func (*store) ForPeer(peerBlesssings ...string) Blessings              { return nil }
-func (*store) SetDefault(blessings Blessings) error                    { return nil }
-func (*store) Default() Blessings                                      { return nil }
-func (s *store) PublicKey() PublicKey                                  { return s.key }
-
 type markedRoot struct {
 	root    PublicKey
 	pattern BlessingPattern
@@ -106,8 +96,15 @@ func newECDSASigner(t *testing.T, curve elliptic.Curve) Signer {
 }
 
 func newPrincipal(t *testing.T) Principal {
-	signer := newECDSASigner(t, elliptic.P256())
-	p, err := CreatePrincipal(signer, &store{signer.PublicKey()}, &roots{})
+	p, err := CreatePrincipal(newECDSASigner(t, elliptic.P256()), nil, nil)
+	if err != nil {
+		t.Fatalf("CreatePrincipal failed: %v", err)
+	}
+	return p
+}
+
+func newPrincipalWithRoots(t *testing.T) Principal {
+	p, err := CreatePrincipal(newECDSASigner(t, elliptic.P256()), nil, &roots{})
 	if err != nil {
 		t.Fatalf("CreatePrincipal failed: %v", err)
 	}

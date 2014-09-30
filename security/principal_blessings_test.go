@@ -2,6 +2,7 @@ package security
 
 import (
 	"bytes"
+	"crypto/elliptic"
 	"fmt"
 	"reflect"
 	"testing"
@@ -11,7 +12,7 @@ import (
 
 func TestBlessSelf(t *testing.T) {
 	var (
-		tp = newPrincipal(t) // principal where blessings are tested
+		tp = newPrincipalWithRoots(t) // principal where blessings are tested
 		p  = newPrincipal(t)
 	)
 
@@ -39,7 +40,7 @@ func TestBlessSelf(t *testing.T) {
 
 func TestBless(t *testing.T) {
 	var (
-		tp = newPrincipal(t) // principal where blessings are tested
+		tp = newPrincipalWithRoots(t) // principal where blessings are tested
 
 		p1    = newPrincipal(t)
 		p2    = newPrincipal(t)
@@ -83,7 +84,7 @@ func TestBlessings(t *testing.T) {
 	type s []string
 
 	var (
-		tp = newPrincipal(t) // principal where blessings are tested
+		tp = newPrincipalWithRoots(t) // principal where blessings are tested
 
 		p     = newPrincipal(t)
 		p2    = newPrincipal(t).PublicKey()
@@ -143,6 +144,53 @@ func TestBlessings(t *testing.T) {
 	}
 }
 
+func TestCreatePrincipalWithNilStoreAndRoots(t *testing.T) {
+	p, err := CreatePrincipal(newECDSASigner(t, elliptic.P256()), nil, nil)
+	if err != nil {
+		t.Fatalf("CreatePrincipal failed: %v", err)
+	}
+
+	// Test Roots.
+	r := p.Roots()
+	if r == nil {
+		t.Fatal("Roots() returned nil")
+	}
+	wantErr := "BlessingRoots object is nil"
+	if err := matchesError(r.Add(nil, ""), wantErr); err != nil {
+		t.Error(err)
+	}
+	if err := matchesError(r.Recognized(nil, ""), wantErr); err != nil {
+		t.Error(err)
+	}
+
+	// Test Store.
+	s := p.BlessingStore()
+	if r == nil {
+		t.Fatal("BlessingStore() returned nil")
+	}
+	wantErr = "BlessingStore object is nil"
+	if err := matchesError(s.Add(nil, ""), wantErr); err != nil {
+		t.Error(err)
+	}
+	if err := matchesError(s.SetDefault(nil), wantErr); err != nil {
+		t.Error(err)
+	}
+	if got := s.ForPeer(); got != nil {
+		t.Errorf("BlessingStore.ForPeer: got %v want nil", got)
+	}
+	if got := s.Default(); got != nil {
+		t.Errorf("BlessingStore.Default: got %v want nil", got)
+	}
+	if got, want := s.PublicKey(), p.PublicKey(); !reflect.DeepEqual(got, want) {
+		t.Errorf("BlessingStore.PublicKey: got %v want %v", got, want)
+	}
+
+	// Test that no blessings are trusted by the principal.
+	if err := checkBlessings(blessSelf(t, p, "alice"), &context{local: p}); err != nil {
+		t.Error(err)
+	}
+}
+
 func TestAddToRoots(t *testing.T) {
 	type s []string
 	var (
@@ -183,7 +231,7 @@ func TestAddToRoots(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		tp := newPrincipal(t) // principal where roots are tested.
+		tp := newPrincipalWithRoots(t) // principal where roots are tested.
 		if err := tp.AddToRoots(test.add); err != nil {
 			t.Error(err)
 			continue
@@ -246,7 +294,10 @@ func TestPrincipalSignaturePurpose(t *testing.T) {
 
 func TestUnionOfBlessings(t *testing.T) {
 	principalTrustingRootsOf := func(roots ...Blessings) Principal {
-		p := newPrincipal(t)
+		if roots == nil {
+			return newPrincipal(t)
+		}
+		p := newPrincipalWithRoots(t)
 		for _, r := range roots {
 			addToRoots(t, p, r)
 		}
@@ -331,7 +382,7 @@ func TestUnionOfBlessings(t *testing.T) {
 
 func TestCertificateCompositionAttack(t *testing.T) {
 	var (
-		tp = newPrincipal(t) // principal for testing blessings.
+		tp = newPrincipalWithRoots(t) // principal for testing blessings.
 
 		p1    = newPrincipal(t)
 		alice = blessSelf(t, p1, "alice")
@@ -388,7 +439,7 @@ func TestCertificateCompositionAttack(t *testing.T) {
 
 func TestCertificateTamperingAttack(t *testing.T) {
 	var (
-		tp = newPrincipal(t) // principal for testing blessings.
+		tp = newPrincipalWithRoots(t) // principal for testing blessings.
 
 		p1 = newPrincipal(t)
 		p2 = newPrincipal(t)
@@ -417,7 +468,7 @@ func TestCertificateTamperingAttack(t *testing.T) {
 
 func TestCertificateChainsTamperingAttack(t *testing.T) {
 	var (
-		tp = newPrincipal(t) // principal for testing blessings.
+		tp = newPrincipalWithRoots(t) // principal for testing blessings.
 
 		p1    = newPrincipal(t)
 		p2    = newPrincipal(t)
