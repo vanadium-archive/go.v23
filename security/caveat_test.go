@@ -74,7 +74,7 @@ func TestPublicKeyThirdPartyCaveat(t *testing.T) {
 		t.Fatal(err)
 	}
 	// Should validate when the discharge is present (and caveats on the discharge are met).
-	d, err := discharger.MintDischarge(tpc, &context{}, newCaveat(MethodCaveat("Method1")))
+	d, err := discharger.MintDischarge(tpc, newCaveat(MethodCaveat("Method1")))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -86,21 +86,17 @@ func TestPublicKeyThirdPartyCaveat(t *testing.T) {
 		t.Fatal(err)
 	}
 	// A discharge minted by another principal should not be respected.
-	if d, err = randomserver.MintDischarge(tpc, &context{}, UnconstrainedUse()); d != nil {
+	if d, err = randomserver.MintDischarge(tpc, UnconstrainedUse()); d != nil {
 		if err := matchesError(tpc.Validate(ctx("Method1", d)), "signature verification on discharge"); err != nil {
 			t.Fatal(err)
 		}
 	}
-	// And discharges should not be minted if the caveat encoded within the ThirdPartyCaveat fails validation.
+	// And ThirdPartyCaveat should not be dischargeable if caveats encoded within it fail validation.
 	tpc, err = NewPublicKeyCaveat(discharger.PublicKey(), "location", ThirdPartyRequirements{}, expired)
 	if err != nil {
 		t.Fatal(err)
 	}
-	d, err = discharger.MintDischarge(tpc, &context{}, UnconstrainedUse())
-	if merr := matchesError(err, "caveat validation on security.unixTimeExpiryCaveat failed"); merr != nil {
-		t.Fatal(err)
-	}
-	if d != nil {
-		t.Fatalf("MintDischarge should not have returned a discharge")
+	if merr := matchesError(tpc.Dischargeable(&context{}), "could not validate embedded restriction security.unixTimeExpiryCaveat"); merr != nil {
+		t.Fatal(merr)
 	}
 }

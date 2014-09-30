@@ -152,12 +152,14 @@ type Principal interface {
 	// Sign uses the private key of the principal to sign message.
 	Sign(message []byte) (Signature, error)
 
-	// MintDischarge generates a discharge for 'tp' after validating any
-	// restrictions specified in it under context.
+	// MintDischarge generates a discharge for 'tp'.
+	//
+	// It assumes that it is okay to generate a discharge, i.e., any
+	// restrictions encoded within 'tp' are satisfied.
 	//
 	// The returned discharge will be usable only if the provided caveats
 	// are met when using the discharge.
-	MintDischarge(tp ThirdPartyCaveat, context Context, caveat Caveat, additionalCaveats ...Caveat) (Discharge, error)
+	MintDischarge(tp ThirdPartyCaveat, caveat Caveat, additionalCaveats ...Caveat) (Discharge, error)
 
 	// PublicKey returns the public key counterpart of the private key held
 	// by the Principal.
@@ -333,6 +335,12 @@ type ThirdPartyCaveat interface {
 	// Requirements lists the information that the third-party requires
 	// in order to issue a discharge.
 	Requirements() ThirdPartyRequirements
+
+	// Dischargeable validates all restrictions encoded within the third-party
+	// caveat under 'context' and returns nil iff they have been satisfied, and
+	// thus ensures that it is okay to generate a discharge for this third-party
+	// caveat.
+	Dischargeable(context Context) error
 
 	// TODO(andreser, ashankar): require the discharger to have a specific
 	// identity so that the private information below is not exposed to

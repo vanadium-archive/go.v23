@@ -1,12 +1,9 @@
 package security
 
 import (
-	"bytes"
 	"fmt"
 	"reflect"
 	"time"
-
-	"veyron.io/veyron/veyron2/vom"
 )
 
 // CreatePrincipal returns a Principal that uses 'signer' for all
@@ -35,7 +32,10 @@ func MintDischargeForPrivateID(signer Signer, cav ThirdPartyCaveat, ctx Context,
 	if err != nil {
 		return nil, err
 	}
-	return p.MintDischarge(cav, ctx, expiry, dischargeCaveats...)
+	if err := cav.Dischargeable(ctx); err != nil {
+		return nil, err
+	}
+	return p.MintDischarge(cav, expiry, dischargeCaveats...)
 }
 
 var (
@@ -103,22 +103,11 @@ func (p *principal) Sign(message []byte) (Signature, error) {
 	return p.signer.Sign(signPurpose, message)
 }
 
-func (p *principal) MintDischarge(tp ThirdPartyCaveat, ctx Context, caveat Caveat, additionalCaveats ...Caveat) (Discharge, error) {
+func (p *principal) MintDischarge(tp ThirdPartyCaveat, caveat Caveat, additionalCaveats ...Caveat) (Discharge, error) {
 	tpcav, ok := tp.(*publicKeyThirdPartyCaveat)
 	if !ok {
 		return nil, fmt.Errorf("principal implementation cannot create discharges for caveats of type %T", tp)
 	}
-	// Validate the caveat encoded within the third-party caveat.
-	for _, cav := range tpcav.Caveats {
-		var validator CaveatValidator
-		if err := vom.NewDecoder(bytes.NewReader(cav.ValidatorVOM)).Decode(&validator); err != nil {
-			return nil, fmt.Errorf("failed to interpret restriction encoded in ThirdPartyCaveat: %v", err)
-		}
-		if err := validator.Validate(ctx); err != nil {
-			return nil, fmt.Errorf("caveat validation on %T failed: %v", validator, err)
-		}
-	}
-	// Create the discharge
 	caveats := additionalCaveats
 	if !isUnconstrainedUseCaveat(caveat) {
 		caveats = append(additionalCaveats, caveat)

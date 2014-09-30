@@ -180,6 +180,20 @@ func (c *publicKeyThirdPartyCaveat) Requirements() ThirdPartyRequirements {
 	return c.DischargerRequirements
 }
 
+func (c *publicKeyThirdPartyCaveat) Dischargeable(context Context) error {
+	// Validate the caveats embedded within this third-party caveat.
+	for _, cav := range c.Caveats {
+		var validator CaveatValidator
+		if err := vom.NewDecoder(bytes.NewReader(cav.ValidatorVOM)).Decode(&validator); err != nil {
+			return fmt.Errorf("failed to interpret restriction embedded in ThirdPartyCaveat: %v", err)
+		}
+		if err := validator.Validate(context); err != nil {
+			return fmt.Errorf("could not validate embedded restriction %T: %v", validator, err)
+		}
+	}
+	return nil
+}
+
 func (c *publicKeyThirdPartyCaveat) discharger() (PublicKey, error) {
 	key, err := UnmarshalPublicKey(c.DischargerKey)
 	if err != nil {
