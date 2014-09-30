@@ -13,6 +13,8 @@ import (
 	"veyron.io/veyron/veyron2/vdl/test_base"
 	"veyron.io/veyron/veyron2/vdl/vdlutil"
 	"veyron.io/veyron/veyron2/wiretype"
+
+	"veyron.io/veyron/veyron/profiles"
 )
 
 var generatedError = errors.New("generated error")
@@ -115,7 +117,7 @@ func TestCalculator(t *testing.T) {
 	if err := server.Serve("", ipc.LeafDispatcher(NewServerCalculator(&serverCalculator{}), nil)); err != nil {
 		t.Fatal(err)
 	}
-	ep, err := server.Listen("tcp", "127.0.0.1:0")
+	ep, err := server.ListenX(profiles.LocalListenSpec)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -350,7 +352,7 @@ func TestArith(t *testing.T) {
 	for i, disp := range dispatchers {
 		server := newServer()
 		defer server.Stop()
-		ep, err := server.Listen("tcp", "127.0.0.1:0")
+		ep, err := server.ListenX(profiles.LocalListenSpec)
 		if err != nil {
 			t.Fatal(err)
 		}
