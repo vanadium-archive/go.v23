@@ -71,6 +71,10 @@ func clientInterfaceOutArg(iface *compile.Interface, method *compile.Method, isS
 }
 
 func processClientInterfaceMethod(iface *compile.Interface, method *compile.Method, env *compile.Env) clientInterfaceMethod {
+	// TODO(toddw): Decide whether we require error as a return arg.
+	if len(method.OutArgs) == 0 {
+		panic("Unexpected to have 0 out args in an interface method")
+	}
 	retArgs := make([]clientInterfaceArg, len(method.OutArgs)-1)
 	// Include all return args except for error.
 	for i := 0; i < len(method.OutArgs)-1; i++ {
