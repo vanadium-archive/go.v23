@@ -3,7 +3,6 @@ package cmds
 import (
 	"bytes"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -24,12 +23,12 @@ func init() {
 	log.SetFlags(log.Lshortfile | log.Ltime | log.Lmicroseconds)
 }
 
-func checkErrors(w io.Writer, env *compile.Env) {
-	if !env.Errors.IsEmpty() {
-		fmt.Fprintf(w, "ERROR\n%v", env.Errors.ToError())
-		fmt.Fprintln(w, `   (run with "vdl -v" for verbose logging or "vdl help" for help)`)
-		os.Exit(2)
+func checkErrors(errs *vdlutil.Errors) error {
+	if errs.IsEmpty() {
+		return nil
 	}
+	return fmt.Errorf(`
+%s   (run with "vdl -v" for verbose logging or "vdl help" for help)`, errs)
 }
 
 // runHelper returns a function that generates a sorted list of transitive
@@ -49,14 +48,15 @@ func runHelper(run func(targets []*build.Package, env *compile.Env)) func(cmd *c
 			env.EnableExperimental()
 		}
 		targets := build.TransitivePackages(args, exts, env.Errors)
-		checkErrors(cmd.Stderr(), env)
+		if err := checkErrors(env.Errors); err != nil {
+			return err
+		}
 		if len(targets) == 0 {
 			// The user's probably confused if we don't end up with any targets.
-			return cmd.Errorf("no target packages specified")
+			return cmd.UsageErrorf("no target packages specified")
 		}
 		run(targets, env)
-		checkErrors(cmd.Stderr(), env)
-		return nil
+		return checkErrors(env.Errors)
 	}
 }
 
