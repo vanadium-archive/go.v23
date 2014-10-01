@@ -64,14 +64,14 @@ The generate flags are:
       just before the package path, and dst is the replacement for src.
       Use commas to separate multiple rules; the first rule matching src is
       used.  The special dst SKIP indicates matching packages are skipped.
-   -java_out_dir=veyron/go/src->veyron/java/src/vdl/java,roadmap/go/src->veyron/java/src/vdl/java,third_party/go/src->SKIP: Same semantics as --go_out_dir but applies to java code generation.
+   -java_out_dir=veyron/go/src->veyron/java/src/vdl/java,roadmap/go/src->veyron/java/src/vdl/java,third_party/go/src->SKIP,tools/go/src->SKIP: Same semantics as --go_out_dir but applies to java code generation.
    -java_out_pkg=veyron.io/veyron/veyron2/vom2/testdata->SKIP,veyron.io->io/veyron: Java output package translation rules.  Must be of the form:
          "src->dst[,s2->d2...]"
       If a VDL package has a prefix src, the prefix will be replaced with dst.
       Use commas to separate multiple rules; the first rule matching src is
       used, and if there are no matching rules, the package remains unchanged.
       The special dst SKIP indicates matching packages are skipped.
-   -js_out_dir=veyron/go/src->veyron.js/src,roadmap/go/src->veyron.js/src,third_party/go/src->SKIP: Same semantics as --go_out_dir but applies to js code generation.
+   -js_out_dir=veyron/go/src->veyron.js/src,roadmap/go/src->veyron.js/src,third_party/go/src->SKIP,tools/go/src->SKIP: Same semantics as --go_out_dir but applies to js code generation.
    -lang=go,java: Comma-separated list of languages to generate, currently supporting go,java,js
    -status=true: Show package names as they are updated
 
@@ -143,14 +143,14 @@ The audit flags are:
       just before the package path, and dst is the replacement for src.
       Use commas to separate multiple rules; the first rule matching src is
       used.  The special dst SKIP indicates matching packages are skipped.
-   -java_out_dir=veyron/go/src->veyron/java/src/vdl/java,roadmap/go/src->veyron/java/src/vdl/java,third_party/go/src->SKIP: Same semantics as --go_out_dir but applies to java code generation.
+   -java_out_dir=veyron/go/src->veyron/java/src/vdl/java,roadmap/go/src->veyron/java/src/vdl/java,third_party/go/src->SKIP,tools/go/src->SKIP: Same semantics as --go_out_dir but applies to java code generation.
    -java_out_pkg=veyron.io/veyron/veyron2/vom2/testdata->SKIP,veyron.io->io/veyron: Java output package translation rules.  Must be of the form:
          "src->dst[,s2->d2...]"
       If a VDL package has a prefix src, the prefix will be replaced with dst.
       Use commas to separate multiple rules; the first rule matching src is
       used, and if there are no matching rules, the package remains unchanged.
       The special dst SKIP indicates matching packages are skipped.
-   -js_out_dir=veyron/go/src->veyron.js/src,roadmap/go/src->veyron.js/src,third_party/go/src->SKIP: Same semantics as --go_out_dir but applies to js code generation.
+   -js_out_dir=veyron/go/src->veyron.js/src,roadmap/go/src->veyron.js/src,third_party/go/src->SKIP,tools/go/src->SKIP: Same semantics as --go_out_dir but applies to js code generation.
    -lang=go,java: Comma-separated list of languages to generate, currently supporting go,java,js
    -status=true: Show package names as they are updated
 
@@ -188,11 +188,10 @@ Help displays usage descriptions for this command, or usage descriptions for
 sub-commands.
 
 Usage:
-   vdl help [flags] <command>
+   vdl help [flags] [command ...]
 
-<command> is an optional sequence of commands to display detailed per-command
-usage.  The special-case "help ..." recursively displays help for this command
-and all sub-commands.
+[command ...] is an optional sequence of commands to display detailed usage.
+The special-case "help ..." recursively displays help for all commands.
 
 The help flags are:
    -style=text: The formatting style for help output, either "text" or "godoc".
