@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"sync"
 
+	// TODO(cnicolaou): consider removing this dependency and relying
+	// on importing a profile to bring it in.
 	google_rt "veyron.io/veyron/veyron/runtimes/google/rt"
 
 	"veyron.io/veyron/veyron2"
