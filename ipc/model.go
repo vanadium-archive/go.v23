@@ -114,6 +114,17 @@ type ListenSpec struct {
 	AddressChooser AddressChooser
 }
 
+func (l ListenSpec) String() string {
+	s := l.Protocol + " " + l.Address
+	if len(l.Proxy) > 0 {
+		s += " proxy(" + l.Proxy + ")"
+	}
+	if l.StreamPublisher != nil {
+		s += " publisher(" + l.StreamName + ")"
+	}
+	return s
+}
+
 // AddressChooser returns the address it prefers out of the set passed to it
 // for the specified network.
 type AddressChooser func(network string, addrs []net.Addr) (net.Addr, error)
