@@ -5,6 +5,7 @@ package build
 import (
 	gobuild "go/build"
 	"io"
+	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -70,18 +71,20 @@ func newPackage(dir string, mode missingMode, exts map[string]bool, errs *vdluti
 // initBaseFileNames initializes BaseFileNames from the Dir.
 func (p *Package) initBaseFileNames(exts map[string]bool) error {
 	vdlutil.Vlog.Printf("Looking for vdl files in package dir %v", p.Dir)
-	fd, err := os.Open(p.Dir)
-	defer fd.Close()
+	infos, err := ioutil.ReadDir(p.Dir)
 	if err != nil {
 		return err
 	}
-	dirFileNames, err := fd.Readdirnames(-1)
-	if err != nil {
-		return err
-	}
-	for _, baseFile := range dirFileNames {
-		if exts[filepath.Ext(baseFile)] {
-			p.BaseFileNames = append(p.BaseFileNames, baseFile)
+	for _, info := range infos {
+		if info.IsDir() {
+			continue
+		}
+		if strings.HasPrefix(info.Name(), ".") {
+			vdlutil.Vlog.Printf("Ignoring file with leading dot %s", filepath.Join(p.Dir, info.Name()))
+			continue
+		}
+		if exts[filepath.Ext(info.Name())] {
+			p.BaseFileNames = append(p.BaseFileNames, info.Name())
 		}
 	}
 	return nil
@@ -259,19 +262,19 @@ func (ds *depSorter) addAllDirs(prefix string) {
 		ds.walkDeps(pkg)
 	}
 	// Now try looking for all dirs under the prefix.
-	fd, err := os.Open(prefix)
-	defer fd.Close()
+	infos, err := ioutil.ReadDir(prefix)
 	if err != nil {
-		return // Silently skip this src dir.
-	}
-	fileInfos, err := fd.Readdir(-1)
-	if err != nil {
-		return // Silently skip this src dir.
+		// Silently skip this prefix.
+		//
+		// TODO(toddw): The rationale is that inaccessible portions of the dir
+		// hierarchy shouldn't cause a failure for "all "or "..." targets.  But
+		// perhaps revisit this, since other types of errors will also be ignored.
+		return
 	}
 	// TODO(toddw): Should we break infinite loops from symlinks / hardlinks?
-	for _, fi := range fileInfos {
-		if fi.IsDir() {
-			ds.addAllDirs(filepath.Join(prefix, fi.Name()))
+	for _, info := range infos {
+		if info.IsDir() {
+			ds.addAllDirs(filepath.Join(prefix, info.Name()))
 		}
 	}
 }
@@ -284,6 +287,14 @@ func (ds *depSorter) resolvePkgDir(pkgDir string, mode missingMode) (*Package, b
 	absDir, err := filepath.Abs(pkgDir)
 	if err != nil {
 		ds.errorf("Couldn't make package dir %v absolute, %v", pkgDir, err)
+	}
+	if strings.HasPrefix(filepath.Base(absDir), ".") {
+		// Avoid descending into ".git" and the like.
+		vdlutil.Vlog.Printf("Ignoring dir with leading dot %s", absDir)
+		if mode == missingIsError {
+			ds.errorf("Package dir with leading dot is invalid %s", absDir)
+		}
+		return nil, false
 	}
 	if existPkg, exists := ds.dirMap[absDir]; exists {
 		return existPkg, false
