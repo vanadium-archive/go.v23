@@ -16,27 +16,25 @@ import (
 type Flow interface {
 	// Flow objects implement the net.Conn interface.
 	net.Conn
-
-	// Returns the local veyron Endpoint
+	// LocalEndpoint returns the local veyron Endpoint
 	LocalEndpoint() naming.Endpoint
-
-	// Returns the remote veyron Endpoint
+	// RemoteEndpoint returns the remote veyron Endpoint
 	RemoteEndpoint() naming.Endpoint
-
+	// LocalPrincipal returns the Principal at the local end of the flow that has authenticated with the remote end.
+	LocalPrincipal() security.Principal
+	// LocalBlessings returns the blessings presented by the local end of the flow during authentication.
+	LocalBlessings() security.Blessings
+	// RemoteBlessings returns the blessings presented by the remote end of the flow during authentication.
+	RemoteBlessings() security.Blessings
 	// Cancel, like Close, closes the Flow but unlike Close discards any queued writes.
 	Cancel()
-
-	// LocalID returns the identity of the local end of a Flow.
-	LocalID() security.PublicID
-
-	// RemoteID returns the identity of the remote end of a Flow.
-	RemoteID() security.PublicID
-
 	// Closed returns true if the flow has been closed or cancelled.
 	IsClosed() bool
-
 	// Closed returns a channel that remains open until the flow has been closed.
 	Closed() <-chan struct{}
+	// TODO(ashankar): Remove both of these once the new security API transition is complete.
+	LocalID() security.PublicID
+	RemoteID() security.PublicID
 }
 
 // FlowOpt is the interface for all Flow options.
