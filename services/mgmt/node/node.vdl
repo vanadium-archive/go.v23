@@ -4,6 +4,7 @@ package node
 
 import (
 	"veyron.io/veyron/veyron2/services/mgmt/binary"
+	"veyron.io/veyron/veyron2/services/mounttable"
 	"veyron.io/veyron/veyron2/services/security/access"
 )
 
@@ -96,6 +97,7 @@ import (
 // In other words, invoking any method using an existing application
 // installation instance as a receiver is well-defined.
 type Application interface {
+	mounttable.Globbable
 	// Install installs the application identified by the argument and
 	// returns an object name suffix that identifies the new installation.
 	//

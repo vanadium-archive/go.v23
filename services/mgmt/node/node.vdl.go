@@ -8,6 +8,8 @@ package node
 import (
 	"veyron.io/veyron/veyron2/services/mgmt/binary"
 
+	"veyron.io/veyron/veyron2/services/mounttable"
+
 	"veyron.io/veyron/veyron2/services/security/access"
 
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
@@ -128,6 +130,7 @@ const _ = _gen_wiretype.TypeIDInvalid
 // Application_ExcludingUniversal is the interface without internal framework-added methods
 // to enable embedding without method collisions.  Not to be used directly by clients.
 type Application_ExcludingUniversal interface {
+	mounttable.Globbable_ExcludingUniversal
 	// Install installs the application identified by the argument and
 	// returns an object name suffix that identifies the new installation.
 	//
@@ -190,7 +193,7 @@ type Application interface {
 
 // ApplicationService is the interface the server implements.
 type ApplicationService interface {
-
+	mounttable.GlobbableService
 	// Install installs the application identified by the argument and
 	// returns an object name suffix that identifies the new installation.
 	//
@@ -267,6 +270,7 @@ func BindApplication(name string, opts ..._gen_ipc.BindOpt) (Application, error)
 		return nil, _gen_vdlutil.ErrTooManyOptionsToBind
 	}
 	stub := &clientStubApplication{defaultClient: client, name: name}
+	stub.Globbable_ExcludingUniversal, _ = mounttable.BindGlobbable(name, client)
 
 	return stub, nil
 }
@@ -277,12 +281,15 @@ func BindApplication(name string, opts ..._gen_ipc.BindOpt) (Application, error)
 // interface, and returns a new server stub.
 func NewServerApplication(server ApplicationService) interface{} {
 	return &ServerStubApplication{
-		service: server,
+		ServerStubGlobbable: *mounttable.NewServerGlobbable(server).(*mounttable.ServerStubGlobbable),
+		service:             server,
 	}
 }
 
 // clientStubApplication implements Application.
 type clientStubApplication struct {
+	mounttable.Globbable_ExcludingUniversal
+
 	defaultClient _gen_ipc.Client
 	name          string
 }
@@ -452,6 +459,8 @@ func (__gen_c *clientStubApplication) GetMethodTags(ctx _gen_context.T, method s
 // ApplicationService and provides an object that satisfies
 // the requirements of veyron2/ipc.ReflectInvoker.
 type ServerStubApplication struct {
+	mounttable.ServerStubGlobbable
+
 	service ApplicationService
 }
 
@@ -459,6 +468,9 @@ func (__gen_s *ServerStubApplication) GetMethodTags(call _gen_ipc.ServerCall, me
 	// TODO(bprosnitz) GetMethodTags() will be replaces with Signature().
 	// Note: This exhibits some weird behavior like returning a nil error if the method isn't found.
 	// This will change when it is replaced with Signature().
+	if resp, err := __gen_s.ServerStubGlobbable.GetMethodTags(call, method); resp != nil || err != nil {
+		return resp, err
+	}
 	switch method {
 	case "Install":
 		return []interface{}{}, nil
@@ -566,6 +578,61 @@ func (__gen_s *ServerStubApplication) Signature(call _gen_ipc.ServerCall) (_gen_
 
 	result.TypeDefs = []_gen_vdlutil.Any{
 		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}}
+	var ss _gen_ipc.ServiceSignature
+	var firstAdded int
+	ss, _ = __gen_s.ServerStubGlobbable.Signature(call)
+	firstAdded = len(result.TypeDefs)
+	for k, v := range ss.Methods {
+		for i, _ := range v.InArgs {
+			if v.InArgs[i].Type >= _gen_wiretype.TypeIDFirst {
+				v.InArgs[i].Type += _gen_wiretype.TypeID(firstAdded)
+			}
+		}
+		for i, _ := range v.OutArgs {
+			if v.OutArgs[i].Type >= _gen_wiretype.TypeIDFirst {
+				v.OutArgs[i].Type += _gen_wiretype.TypeID(firstAdded)
+			}
+		}
+		if v.InStream >= _gen_wiretype.TypeIDFirst {
+			v.InStream += _gen_wiretype.TypeID(firstAdded)
+		}
+		if v.OutStream >= _gen_wiretype.TypeIDFirst {
+			v.OutStream += _gen_wiretype.TypeID(firstAdded)
+		}
+		result.Methods[k] = v
+	}
+	//TODO(bprosnitz) combine type definitions from embeded interfaces in a way that doesn't cause duplication.
+	for _, d := range ss.TypeDefs {
+		switch wt := d.(type) {
+		case _gen_wiretype.SliceType:
+			if wt.Elem >= _gen_wiretype.TypeIDFirst {
+				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+			}
+			d = wt
+		case _gen_wiretype.ArrayType:
+			if wt.Elem >= _gen_wiretype.TypeIDFirst {
+				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+			}
+			d = wt
+		case _gen_wiretype.MapType:
+			if wt.Key >= _gen_wiretype.TypeIDFirst {
+				wt.Key += _gen_wiretype.TypeID(firstAdded)
+			}
+			if wt.Elem >= _gen_wiretype.TypeIDFirst {
+				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+			}
+			d = wt
+		case _gen_wiretype.StructType:
+			for i, fld := range wt.Fields {
+				if fld.Type >= _gen_wiretype.TypeIDFirst {
+					wt.Fields[i].Type += _gen_wiretype.TypeID(firstAdded)
+				}
+			}
+			d = wt
+			// NOTE: other types are missing, but we are upgrading anyways.
+		}
+		result.TypeDefs = append(result.TypeDefs, d)
+	}
 
 	return result, nil
 }
