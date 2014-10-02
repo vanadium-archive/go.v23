@@ -12,14 +12,16 @@ import (
 // testingMode is set to true to simplify tests.
 var testingMode = false
 
-func qualifiedName(data goData, name string, file *compile.File) string {
+func qualifiedIdent(data goData, ident string, file *compile.File) string {
 	if file.Package == data.File.Package {
-		// The name is from the same package - just use it.
-		return name
+		// The identifier is from the same package - just use it.
+		return ident
 	}
-	// The name is defined in a different package - print the import package to
-	// use for this file, along with the name.
-	return data.UserImports.lookupImport(file.Package.Path) + "." + name
+	// The identifier is defined in a different package - qualify with the local
+	// import package name.
+	//
+	// TODO(toddw): handle error if LookupLocal returns "".
+	return data.UserImports.LookupLocal(file.Package.Path) + "." + ident
 }
 
 // typeGo translates vdl.Type into a Go type.
@@ -41,7 +43,7 @@ func typeGo(data goData, t *vdl.Type) string {
 			// Built-in primitives just use their name.
 			return def.Name
 		}
-		return qualifiedName(data, def.Name, def.File)
+		return qualifiedIdent(data, def.Name, def.File)
 	}
 	// Otherwise recurse through the type.
 	switch t.Kind() {
@@ -181,5 +183,5 @@ func commaOneOfTypes(data goData, prefix string, t *vdl.Type) (s string) {
 }
 
 func embedGo(data goData, embed *compile.Interface) string {
-	return qualifiedName(data, embed.Name, embed.File)
+	return qualifiedIdent(data, embed.Name, embed.File)
 }

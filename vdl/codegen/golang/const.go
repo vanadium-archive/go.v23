@@ -9,45 +9,57 @@ import (
 )
 
 func constDefGo(data goData, def *compile.ConstDef) string {
-	return def.Doc + constGo(data, def.Name, def.Value) + def.DocSuffix
+	v := def.Value
+	return fmt.Sprintf("%s%s %s = %s%s", def.Doc, constOrVar(v.Kind()), def.Name, typedConst(data, v), def.DocSuffix)
 }
 
-func constGo(data goData, name string, v *vdl.Value) string {
-	// Handle nil values.
-	if v.IsNil() {
-		return fmt.Sprintf("var %s %s = nil", name, typeGo(data, v.Type()))
-	}
-	// Handle values that are actually defined as Go constants.
-	if k := v.Kind(); isBoolStringOrNumber(k) || k == vdl.Enum {
-		return fmt.Sprintf("const %s = %s", name, typedValueGo(data, v))
-	}
-	// Handle values that are actually defined as Go variables.
-	return fmt.Sprintf("var %s = %s", name, valueGo(data, v))
-}
-
-func isBoolStringOrNumber(k vdl.Kind) bool {
+func constOrVar(k vdl.Kind) string {
 	switch k {
-	case vdl.Bool, vdl.String, vdl.Byte, vdl.Uint16, vdl.Uint32, vdl.Uint64, vdl.Int16, vdl.Int32, vdl.Int64, vdl.Float32, vdl.Float64, vdl.Complex64, vdl.Complex128:
-		return true
+	case vdl.Bool, vdl.Byte, vdl.Uint16, vdl.Uint32, vdl.Uint64, vdl.Int16, vdl.Int32, vdl.Int64, vdl.Float32, vdl.Float64, vdl.Complex64, vdl.Complex128, vdl.String, vdl.Enum:
+		return "const"
 	}
-	return false
+	return "var"
 }
 
-func valueGo(data goData, v *vdl.Value) string {
+func isByteList(t *vdl.Type) bool {
+	return t.Kind() == vdl.List && t.Elem().Kind() == vdl.Byte
+}
+
+// TODO(bprosnitz): Generate the full tag name e.g. security.Read instead of
+// security.Label(1)
+func typedConst(data goData, v *vdl.Value) string {
 	k, t := v.Kind(), v.Type()
-	if t.IsBytes() && k == vdl.List {
-		return typeGo(data, t) + "(" + strconv.Quote(string(v.Bytes())) + ")"
+	valstr := untypedConst(data, v)
+	// Enum already includes the type in its value.
+	// Built-in bool and string are implicitly convertible from literals.
+	if k == vdl.Enum || t == vdl.BoolType || t == vdl.StringType {
+		return valstr
+	}
+	// Everything else requires an explicit type.
+	typestr := typeGo(data, t)
+	switch k {
+	case vdl.Array, vdl.List, vdl.Set, vdl.Map, vdl.Struct:
+		// { } are used instead of ( ) for composites, except for []byte
+		if !isByteList(t) {
+			return typestr + valstr
+		}
+	}
+	return typestr + "(" + valstr + ")"
+}
+
+func untypedConst(data goData, v *vdl.Value) string {
+	k, t := v.Kind(), v.Type()
+	if isByteList(t) {
+		return strconv.Quote(string(v.Bytes()))
 	}
 	switch k {
 	case vdl.Any:
-		if v.IsNil() {
-			return "nil"
+		if elem := v.Elem(); elem != nil {
+			return typedConst(data, elem)
 		}
-		return valueGo(data, v.Elem())
-	case vdl.OneOf:
-		panic("TODO: OneOf constants aren't supported yet!")
-	case vdl.Nilable:
-		panic("TODO: Nilable constants aren't supported yet!")
+		return "nil"
+	case vdl.OneOf, vdl.Nilable, vdl.TypeVal:
+		panic("TODO: oneof, nilable and typeval constants aren't supported yet!")
 	case vdl.Bool:
 		return strconv.FormatBool(v.Bool())
 	case vdl.Byte:
@@ -57,72 +69,73 @@ func valueGo(data goData, v *vdl.Value) string {
 	case vdl.Int16, vdl.Int32, vdl.Int64:
 		return strconv.FormatInt(v.Int(), 10)
 	case vdl.Float32, vdl.Float64:
-		return strconv.FormatFloat(v.Float(), 'g', -1, bitlen(k))
+		return formatFloat(v.Float(), k)
 	case vdl.Complex64, vdl.Complex128:
-		c := v.Complex()
-		s := strconv.FormatFloat(real(c), 'g', -1, bitlen(k)) + "+"
-		s += strconv.FormatFloat(imag(c), 'g', -1, bitlen(k)) + "i"
-		return s
+		switch re, im := real(v.Complex()), imag(v.Complex()); {
+		case im > 0:
+			return formatFloat(re, k) + "+" + formatFloat(im, k) + "i"
+		case im < 0:
+			return formatFloat(re, k) + formatFloat(im, k) + "i"
+		default:
+			return formatFloat(re, k)
+		}
 	case vdl.String:
 		return strconv.Quote(v.RawString())
 	case vdl.Enum:
 		return typeGo(data, t) + v.EnumLabel()
-	case vdl.TypeVal:
-		panic("TODO: TypeVal constants aren't supported yet!")
 	case vdl.Array, vdl.List:
-		s := typeGo(data, t) + "{"
+		s := "{"
 		for ix := 0; ix < v.Len(); ix++ {
-			s += "\n" + valueGo(data, v.Index(ix)) + ","
+			s += "\n" + untypedConst(data, v.Index(ix)) + ","
 		}
 		return s + "\n}"
 	case vdl.Set, vdl.Map:
 		// TODO(toddw): Sort keys to get a deterministic ordering.
-		s := typeGo(data, t) + "{"
+		s := "{"
 		for _, key := range v.Keys() {
-			s += "\n" + valueGo(data, key)
+			s += "\n" + subConst(data, key)
 			if k == vdl.Set {
 				s += ": struct{}{},"
 			} else {
-				elem := v.MapIndex(key)
-				s += ": " + valueGo(data, elem) + ","
+				s += ": " + untypedConst(data, v.MapIndex(key)) + ","
 			}
 		}
 		return s + "\n}"
 	case vdl.Struct:
-		s := typeGo(data, t) + "{"
+		s := "{"
 		for ix := 0; ix < t.NumField(); ix++ {
-			s += "\n" + t.Field(ix).Name + ": " + valueGo(data, v.Field(ix)) + ","
+			s += "\n" + t.Field(ix).Name + ": " + subConst(data, v.Field(ix)) + ","
 		}
 		return s + "\n}"
 	default:
-		panic(fmt.Errorf("vdl: valueGo unhandled kind %v", k))
+		panic(fmt.Errorf("vdl: untypedConst unhandled type: %v %v", k, t))
 	}
 }
 
-// TODO(bprosnitz): Generate the full tag name e.g. security.Read instead of
-// security.Label(1)
-func typedValueGo(data goData, v *vdl.Value) string {
-	// Bool, string and numbers aren't given an explicit type in valueGo, so we
-	// add the type here.  We don't add the type for the built-in bool and string
-	// types - when they're used as top-level constants they're untyped, and when
-	// they're used as top-level values they are implicitly converted to bool and
-	// string anyways.
-	if isBoolStringOrNumber(v.Kind()) {
-		if t := v.Type(); t != vdl.BoolType && t != vdl.StringType {
-			return typeGo(data, t) + "(" + valueGo(data, v) + ")"
-		}
+// subConst deals with a quirk regarding Go composite literals.  Go allows us to
+// elide the type from composite literal Y when the type is implied; basically
+// when Y is contained in another composite literal X.  However it requires the
+// type for Y when X is a struct, and when X is a map and Y is the key.  As such
+// subConst is called for map keys and struct fields.
+func subConst(data goData, v *vdl.Value) string {
+	switch v.Kind() {
+	case vdl.Array, vdl.List, vdl.Set, vdl.Map, vdl.Struct:
+		return typedConst(data, v)
 	}
-	return valueGo(data, v)
+	return untypedConst(data, v)
 }
 
-func bitlen(kind vdl.Kind) int {
+func formatFloat(x float64, kind vdl.Kind) string {
+	var bitSize int
 	switch kind {
 	case vdl.Float32, vdl.Complex64:
-		return 32
+		bitSize = 32
 	case vdl.Float64, vdl.Complex128:
-		return 64
+		bitSize = 64
+	default:
+		panic(fmt.Errorf("vdl: formatFloat unhandled kind: %v", kind))
 	}
-	panic(fmt.Errorf("vdl: bitLen unhandled kind %v", kind))
+	return strconv.FormatFloat(x, 'g', -1, bitSize)
 }
 
 func tagsGo(data goData, tags []*vdl.Value) string {
@@ -131,7 +144,7 @@ func tagsGo(data goData, tags []*vdl.Value) string {
 		if ix > 0 {
 			str += ", "
 		}
-		str += typedValueGo(data, tag)
+		str += typedConst(data, tag)
 	}
 	return str + "}"
 }

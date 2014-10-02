@@ -2,6 +2,7 @@ package vdl
 
 import (
 	"fmt"
+	"strings"
 )
 
 // Kind represents the kind of type that a Type represents.
@@ -89,6 +90,19 @@ func (k Kind) String() string {
 		return "struct"
 	}
 	panic(fmt.Errorf("val: unhandled kind: %d", k))
+}
+
+// SplitIdent splits the given identifier into its package path and local name.
+//   a/b.Foo   -> (a/b, Foo)
+//   a.b/c.Foo -> (a.b/c, Foo)
+//   Foo       -> ("",  Foo)
+//   a/b       -> ("",  a/b)
+func SplitIdent(ident string) (pkgpath, name string) {
+	dot := strings.LastIndex(ident, ".")
+	if dot == -1 {
+		return "", ident
+	}
+	return ident[:dot], ident[dot+1:]
 }
 
 // Type is the representation of a veyron type.  Types are hash-consed; each

@@ -8,6 +8,31 @@ import (
 
 // TODO(toddw): Add tests for ValidKey, ValidOneOfType
 
+func TestSplitIdent(t *testing.T) {
+	tests := []struct {
+		ident, pkgpath, name string
+	}{
+		{".", "", ""},
+		{"a", "", "a"},
+		{"Foo", "", "Foo"},
+		{"a.Foo", "a", "Foo"},
+		{"a/Foo", "", "a/Foo"},
+		{"a/b.Foo", "a/b", "Foo"},
+		{"a.b.Foo", "a.b", "Foo"},
+		{"a/b/c.Foo", "a/b/c", "Foo"},
+		{"a/b.c.Foo", "a/b.c", "Foo"},
+	}
+	for _, test := range tests {
+		pkgpath, name := SplitIdent(test.ident)
+		if got, want := pkgpath, test.pkgpath; got != want {
+			t.Errorf("%s got pkgpath %q, want %q", test.ident, got, want)
+		}
+		if got, want := name, test.name; got != want {
+			t.Errorf("%s got name %q, want %q", test.ident, got, want)
+		}
+	}
+}
+
 var singletons = []struct {
 	k Kind
 	t *Type

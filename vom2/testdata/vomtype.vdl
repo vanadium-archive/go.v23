@@ -1,0 +1,23 @@
+package testdata
+
+type (
+	NBool       bool
+	NString     string
+	NByteSlice  []byte
+	NByte       byte
+	NUint16     uint16
+	NUint32     uint32
+	NUint64     uint64
+	NInt16      int16
+	NInt32      int32
+	NInt64      int64
+	NFloat32    float32
+	NFloat64    float64
+	NComplex64  complex64
+	NComplex128 complex128
+
+	NArray2Uint64    [2]uint64
+	NListUint64      []uint64
+	NSetUint64       set[uint64]
+	NMapUint64String map[uint64]string
+)

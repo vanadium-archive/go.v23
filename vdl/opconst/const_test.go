@@ -11,6 +11,7 @@ import (
 const (
 	noType           = "must be assigned a type"
 	cantConvert      = "can't convert"
+	arentCompatible  = "aren't compatible"
 	overflows        = "overflows"
 	underflows       = "underflows"
 	losesPrecision   = "loses precision"
@@ -196,6 +197,11 @@ func TestConstConvertOK(t *testing.T) {
 				complexValue(vdl.Complex64Type, 0.5), complexValue(complex64TypeN, 0.5)}},
 		{c{Complex(br1, br1)},
 			v{complexValue(vdl.Complex64Type, 1+1i), complexValue(complex64TypeN, 1+1i)}},
+		// Check implicit conversion of untyped bool and string consts.
+		{c{Boolean(true)},
+			v{anyValue(boolValue(vdl.BoolType, true))}},
+		{c{String("abc")},
+			v{anyValue(stringValue(vdl.StringType, "abc"))}},
 	}
 	for _, test := range tests {
 		// Create a slice of consts containing everything in C and V.
@@ -233,13 +239,13 @@ func TestConstConvertError(t *testing.T) {
 				vdl.Int32Type, int32TypeN, vdl.Uint32Type, uint32TypeN,
 				vdl.Float32Type, float32TypeN, vdl.Complex64Type, complex64TypeN,
 				structAIntType, structAIntTypeN},
-			cantConvert},
+			arentCompatible},
 		{String("abc"),
 			ty{vdl.BoolType, boolTypeN,
 				vdl.Int32Type, int32TypeN, vdl.Uint32Type, uint32TypeN,
 				vdl.Float32Type, float32TypeN, vdl.Complex64Type, complex64TypeN,
 				structAIntType, structAIntTypeN},
-			cantConvert},
+			arentCompatible},
 		{Integer(bi1),
 			ty{vdl.BoolType, boolTypeN,
 				vdl.StringType, stringTypeN, bytesType, bytesTypeN, bytes3Type, bytes3TypeN,

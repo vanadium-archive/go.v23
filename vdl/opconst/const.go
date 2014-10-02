@@ -538,10 +538,14 @@ func makeConst(rep interface{}, totype *vdl.Type) (Const, error) {
 		if totype.Kind() == vdl.Bool {
 			return Const{trep, totype}, nil
 		}
+		// Perform implicit conversion of untyped bool to typed bool.
+		return makeConst(vdl.BoolValue(trep), totype)
 	case string:
 		if totype.Kind() == vdl.String || totype.IsBytes() {
 			return Const{trep, totype}, nil
 		}
+		// Perform implicit conversion of untyped string to typed string.
+		return makeConst(vdl.StringValue(trep), totype)
 	case *big.Int:
 		switch totype.Kind() {
 		case vdl.Byte, vdl.Uint16, vdl.Uint32, vdl.Uint64, vdl.Int16, vdl.Int32, vdl.Int64:

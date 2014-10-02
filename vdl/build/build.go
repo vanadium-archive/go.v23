@@ -3,6 +3,7 @@
 package build
 
 import (
+	"fmt"
 	gobuild "go/build"
 	"io"
 	"io/ioutil"
@@ -51,8 +52,8 @@ const (
 )
 
 // New packages always start with an empty Name and Path.  The Name is filled in
-// when we walkDeps, and the Path is only filled in if we process this package
-// via resolvePkgPath.
+// when we addPkgDeps, and the Path is only filled in if we process this
+// package via resolvePackagePath.
 func newPackage(dir string, mode missingMode, exts map[string]bool, errs *vdlutil.Errors) *Package {
 	pkg := &Package{Dir: dir, OpenFilesFunc: openFiles}
 	if err := pkg.initBaseFileNames(exts); err != nil {
@@ -143,6 +144,25 @@ func (p *Package) CloseFiles() error {
 	return err
 }
 
+// SrcDirs returns a list of package source root directories.
+func SrcDirs() ([]string, error) {
+	// TODO(toddw): Currently we use the GOPATH environment variable, we should
+	// probably use VDLPATH instead.
+	gopath := gobuild.Default.SrcDirs()
+	if len(gopath) == 0 {
+		return nil, fmt.Errorf("GOPATH isn't set")
+	}
+	var dirs []string
+	for _, d := range gopath {
+		abs, err := filepath.Abs(d)
+		if err != nil {
+			return nil, fmt.Errorf("couldn't make GOPATH dir %q absolute: %v", d, err)
+		}
+		dirs = append(dirs, abs)
+	}
+	return dirs, nil
+}
+
 // depSorter does the main work of collecting and sorting packages and their
 // dependencies.  We support most of the syntax from the go cmdline tool; both
 // dirs and package paths are supported, and we allow special cases for the
@@ -203,21 +223,14 @@ func makeExts(exts []string) map[string]bool {
 	return ret
 }
 
-func toAbs(dirs []string, errs *vdlutil.Errors) (ret []string) {
-	for _, d := range dirs {
-		if abs, err := filepath.Abs(d); err != nil {
-			errs.Errorf("Couldn't make dir %q absolute: %v", d, err)
-		} else {
-			ret = append(ret, abs)
-		}
-	}
-	return
-}
-
 func newDepSorter(exts []string, errs *vdlutil.Errors) *depSorter {
+	srcDirs, err := SrcDirs()
+	if err != nil {
+		errs.Error(err.Error())
+	}
 	return &depSorter{
 		exts:    makeExts(exts),
-		srcDirs: toAbs(gobuild.Default.SrcDirs(), errs),
+		srcDirs: srcDirs,
 		pathMap: make(map[string]*Package),
 		dirMap:  make(map[string]*Package),
 		sorter:  toposort.NewSorter(),
@@ -239,14 +252,14 @@ func (ds *depSorter) AddCmdLineArg(cmdLineArg string) {
 			// TODO(toddw): Support ... syntax for partial dirnames.
 			ds.addAllDirs(filepath.Clean(strings.TrimSuffix(cmdLineArg, "...")))
 		} else {
-			if pkg, isNew := ds.resolvePkgDir(cmdLineArg, missingIsError); isNew {
-				ds.walkDeps(pkg)
+			if pkg, isNew := ds.resolvePackageDir(cmdLineArg, missingIsError); isNew {
+				ds.addPackageDeps(pkg)
 			}
 		}
 	} else {
 		// It's a package path.
-		if pkg, isNew := ds.resolvePkgPath(cmdLineArg); isNew {
-			ds.walkDeps(pkg)
+		if pkg, isNew := ds.resolvePackagePath(cmdLineArg); isNew {
+			ds.addPackageDeps(pkg)
 		}
 	}
 }
@@ -258,8 +271,8 @@ func (ds *depSorter) errorf(format string, v ...interface{}) {
 // addAllDirs adds all package dirs with the given prefix.
 func (ds *depSorter) addAllDirs(prefix string) {
 	// Try looking in the prefix itself.
-	if pkg, isNew := ds.resolvePkgDir(prefix, missingIsOk); isNew {
-		ds.walkDeps(pkg)
+	if pkg, isNew := ds.resolvePackageDir(prefix, missingIsOk); isNew {
+		ds.addPackageDeps(pkg)
 	}
 	// Now try looking for all dirs under the prefix.
 	infos, err := ioutil.ReadDir(prefix)
@@ -279,11 +292,11 @@ func (ds *depSorter) addAllDirs(prefix string) {
 	}
 }
 
-// resolvePkgDir resolves the pkgDir into a Package.  Returns the package
-// or nil if it couldn't be resolved, along with a bool telling us whether this
-// is the first time we've seen the package.  The missingMode controls whether
-// it's ok for the underlying directory to be missing.
-func (ds *depSorter) resolvePkgDir(pkgDir string, mode missingMode) (*Package, bool) {
+// resolvePackageDir resolves the pkgDir into a Package.  Returns the package or
+// nil if it couldn't be resolved, along with a bool telling us whether this is
+// the first time we've seen the package.  The missingMode controls whether it's
+// ok for the underlying directory to be missing.
+func (ds *depSorter) resolvePackageDir(pkgDir string, mode missingMode) (*Package, bool) {
 	absDir, err := filepath.Abs(pkgDir)
 	if err != nil {
 		ds.errorf("Couldn't make package dir %v absolute, %v", pkgDir, err)
@@ -320,11 +333,11 @@ func (ds *depSorter) resolvePkgDir(pkgDir string, mode missingMode) (*Package, b
 	return newPkg, true
 }
 
-// resolvePkgPath resolves the pkgPath into a Package.  Returns the package
+// resolvePackagePath resolves the pkgPath into a Package.  Returns the package
 // or nil if it couldn't be resolved, along with a bool telling us whether this
 // is the first time we've seen the package.  We don't support relative package
 // paths.
-func (ds *depSorter) resolvePkgPath(pkgPath string) (*Package, bool) {
+func (ds *depSorter) resolvePackagePath(pkgPath string) (*Package, bool) {
 	pkgPath = path.Clean(pkgPath)
 	if existPkg, exists := ds.pathMap[pkgPath]; exists {
 		return existPkg, false
@@ -333,7 +346,7 @@ func (ds *depSorter) resolvePkgPath(pkgPath string) (*Package, bool) {
 	// Look through srcDirs in-order until we find a valid package dir.
 	for _, srcDir := range ds.srcDirs {
 		candidateDir := filepath.Join(srcDir, pkgPath)
-		if pkg, isNew := ds.resolvePkgDir(candidateDir, missingIsOk); pkg != nil {
+		if pkg, isNew := ds.resolvePackageDir(candidateDir, missingIsOk); pkg != nil {
 			vdlutil.Vlog.Printf("Resolved pkg path %v to abs dir %v", pkgPath, pkg.Dir)
 			// Update the pkg path since it might not have been known before.
 			//
@@ -349,23 +362,39 @@ func (ds *depSorter) resolvePkgPath(pkgPath string) (*Package, bool) {
 	return nil, false
 }
 
-// walkDeps adds the pkg and its dependencies to the sorter.  This just does
-// DFS, so technically we could determine the transitive order without using the
-// sorter, but it's nice to use the sorter since it detects cycles for us;
-// otherwise we'd need to keep a separate set.
-func (ds *depSorter) walkDeps(pkg *Package) {
+// addPackageDeps adds the pkg and its dependencies to the sorter.
+func (ds *depSorter) addPackageDeps(pkg *Package) {
 	ds.sorter.AddNode(pkg)
 	pfiles := ParsePackage(pkg, parse.Opts{ImportsOnly: true}, ds.errs)
 	pkg.Name = parse.InferPackageName(pfiles, ds.errs)
 	for _, pf := range pfiles {
-		for _, imp := range pf.Imports {
-			if depPkg, isNew := ds.resolvePkgPath(imp.Path); depPkg != nil {
+		ds.addImportDeps(pkg, pf.Imports)
+	}
+}
+
+// addImportDeps adds transitive dependencies represented by imports to the
+// sorter.  If the pkg is non-nil, an edge is added between the pkg and its
+// dependencies; otherwise each dependency is added as an independent node.
+func (ds *depSorter) addImportDeps(pkg *Package, imports []*parse.Import) {
+	for _, imp := range imports {
+		if depPkg, isNew := ds.resolvePackagePath(imp.Path); depPkg != nil {
+			if pkg != nil {
 				ds.sorter.AddEdge(pkg, depPkg)
-				if isNew {
-					ds.walkDeps(depPkg)
-				}
+			} else {
+				ds.sorter.AddNode(depPkg)
+			}
+			if isNew {
+				ds.addPackageDeps(depPkg)
 			}
 		}
+	}
+}
+
+// AddConfigDeps takes a config file represented by its base file name and src
+// data, and adds all transitive dependencies to the sorter.
+func (ds *depSorter) AddConfigDeps(baseFileName string, src io.Reader) {
+	if pconfig := parse.ParseConfig(baseFileName, src, parse.Opts{ImportsOnly: true}, ds.errs); pconfig != nil {
+		ds.addImportDeps(nil, pconfig.Imports)
 	}
 }
 
@@ -425,6 +454,17 @@ func TransitivePackages(cmdLineArgs, exts []string, errs *vdlutil.Errors) []*Pac
 	for _, cmdLineArg := range cmdLineArgs {
 		ds.AddCmdLineArg(cmdLineArg)
 	}
+	ds.DeduceUnknownPackagePaths()
+	return ds.Sort()
+}
+
+// TransitivePackagesForConfig takes a config file represented by its base file
+// name and src data, and returns all package dependencies in transitive order.
+// The given exts specifies the file name extensions for valid vdl files,
+// e.g. ".vdl".
+func TransitivePackagesForConfig(baseFileName string, src io.Reader, exts []string, errs *vdlutil.Errors) []*Package {
+	ds := newDepSorter(exts, errs)
+	ds.AddConfigDeps(baseFileName, src)
 	ds.DeduceUnknownPackagePaths()
 	return ds.Sort()
 }

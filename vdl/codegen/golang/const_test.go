@@ -14,39 +14,39 @@ func TestConst(t *testing.T) {
 		V    *vdl.Value
 		Want string
 	}{
-		{"True", vdl.BoolValue(true), `const X = true`},
-		{"False", vdl.BoolValue(false), `const X = false`},
-		{"String", vdl.StringValue("abc"), `const X = "abc"`},
-		{"Bytes", vdl.BytesValue([]byte("abc")), `var X = []byte("abc")`},
-		{"Byte", vdl.ByteValue(111), `const X = byte(111)`},
-		{"Uint16", vdl.Uint16Value(222), `const X = uint16(222)`},
-		{"Uint32", vdl.Uint32Value(333), `const X = uint32(333)`},
-		{"Uint64", vdl.Uint64Value(444), `const X = uint64(444)`},
-		{"Int16", vdl.Int16Value(-555), `const X = int16(-555)`},
-		{"Int32", vdl.Int32Value(-666), `const X = int32(-666)`},
-		{"Int64", vdl.Int64Value(-777), `const X = int64(-777)`},
-		{"Float32", vdl.Float32Value(1.5), `const X = float32(1.5)`},
-		{"Float64", vdl.Float64Value(2.5), `const X = float64(2.5)`},
-		{"Complex64", vdl.Complex64Value(1 + 2i), `const X = complex64(1+2i)`},
-		{"Complex128", vdl.Complex128Value(3 + 4i), `const X = complex128(3+4i)`},
-		{"Enum", vdl.ZeroValue(tEnum).AssignEnumLabel("B"), `const X = TestEnumB`},
-		{"Array", vArray, `var X = [3]string{
+		{"True", vdl.BoolValue(true), `true`},
+		{"False", vdl.BoolValue(false), `false`},
+		{"String", vdl.StringValue("abc"), `"abc"`},
+		{"Bytes", vdl.BytesValue([]byte("abc")), `[]byte("abc")`},
+		{"Byte", vdl.ByteValue(111), `byte(111)`},
+		{"Uint16", vdl.Uint16Value(222), `uint16(222)`},
+		{"Uint32", vdl.Uint32Value(333), `uint32(333)`},
+		{"Uint64", vdl.Uint64Value(444), `uint64(444)`},
+		{"Int16", vdl.Int16Value(-555), `int16(-555)`},
+		{"Int32", vdl.Int32Value(-666), `int32(-666)`},
+		{"Int64", vdl.Int64Value(-777), `int64(-777)`},
+		{"Float32", vdl.Float32Value(1.5), `float32(1.5)`},
+		{"Float64", vdl.Float64Value(2.5), `float64(2.5)`},
+		{"Complex64", vdl.Complex64Value(1 + 2i), `complex64(1+2i)`},
+		{"Complex128", vdl.Complex128Value(3 + 4i), `complex128(3+4i)`},
+		{"Enum", vdl.ZeroValue(tEnum).AssignEnumLabel("B"), `TestEnumB`},
+		{"Array", vArray, `[3]string{
 "A",
 "B",
 "C",
 }`},
-		{"List", vList, `var X = []string{
+		{"List", vList, `[]string{
 "A",
 "B",
 "C",
 }`},
-		{"Set", vSet, `var X = map[string]struct{}{
+		{"Set", vSet, `map[string]struct{}{
 "A": struct{}{},
 }`},
-		{"Map", vMap, `var X = map[string]int64{
+		{"Map", vMap, `map[string]int64{
 "A": 1,
 }`},
-		{"Struct", vStruct, `var X = TestStruct{
+		{"Struct", vStruct, `TestStruct{
 A: "foo",
 B: 123,
 }`},
@@ -54,7 +54,7 @@ B: 123,
 	}
 	data := goData{Env: compile.NewEnv(-1)}
 	for _, test := range tests {
-		if got, want := constGo(data, "X", test.V), test.Want; got != want {
+		if got, want := typedConst(data, test.V), test.Want; got != want {
 			t.Errorf("%s\n GOT %s\nWANT %s", test.Name, got, want)
 		}
 	}

@@ -5,13 +5,12 @@ import (
 	"bytes"
 	"fmt"
 	"go/format"
-	"path"
 	"sort"
-	"strconv"
 	"strings"
 	"text/template"
 
 	"veyron.io/veyron/veyron2/vdl"
+	"veyron.io/veyron/veyron2/vdl/codegen"
 	"veyron.io/veyron/veyron2/vdl/compile"
 	"veyron.io/veyron/veyron2/vdl/vdlutil"
 	"veyron.io/veyron/veyron2/wiretype"
@@ -27,17 +26,17 @@ type Opts struct {
 type goData struct {
 	File          *compile.File
 	Env           *compile.Env
-	UserImports   userImports
+	UserImports   codegen.Imports
 	SystemImports []string
 }
 
-// Generate takes a populated compile.File and returns a byte slice containing the
-// generated Go source code.
+// Generate takes a populated compile.File and returns a byte slice containing
+// the generated Go source code.
 func Generate(file *compile.File, env *compile.Env, opts Opts) []byte {
 	data := goData{
 		File:          file,
 		Env:           env,
-		UserImports:   userImportsGo(file),
+		UserImports:   codegen.ImportsForFile(file),
 		SystemImports: systemImportsGo(file),
 	}
 	// The implementation uses the template mechanism from text/template and
@@ -58,55 +57,6 @@ func Generate(file *compile.File, env *compile.Env, opts Opts) []byte {
 		return pretty
 	}
 	return buf.Bytes()
-}
-
-type userImport struct {
-	Local string // Local name of the import; empty if no local name.
-	Path  string // Path of the import; e.g. "veyron.io/veyron/veyron2/vdl"
-	Pkg   string // Set to non-empty Local, otherwise the basename of Path.
-}
-
-// userImports is a slice of userImport, sorted by path name.
-type userImports []*userImport
-
-// lookupImport returns the local package name to use for the given pkgpath,
-// based on the user imports.  It takes advantage of the fact that userImports
-// is always sorted by path.
-func (u userImports) lookupImport(pkgpath string) string {
-	ix := sort.Search(len(u), func(i int) bool { return u[i].Path >= pkgpath })
-	if ix <= len(u) && u[ix].Path == pkgpath {
-		return u[ix].Pkg
-	}
-	panic(fmt.Errorf("vdl: import path %q not found in %v", pkgpath, u))
-}
-
-// userImportsGo returns the actual user imports that we need for file f.  This
-// isn't just the user-supplied f.Imports since the package dependencies may
-// have changed after compilation.
-func userImportsGo(f *compile.File) (ret userImports) {
-	// Walk through the package deps (which are sorted by path) and assign user
-	// imports.  Each import must end up with a unique local name - when we see a
-	// collision we simply add a "_N" suffix where N starts at 2 and increments.
-	seen := make(map[string]bool)
-	for _, dep := range f.PackageDeps {
-		local := ""
-		pkg := path.Base(dep.Path)
-		for ix := 1; true; ix++ {
-			test := pkg
-			if ix > 1 {
-				test += "_" + strconv.Itoa(ix)
-				local = test
-			}
-			if !seen[test] {
-				// We found a unique item - break out.
-				seen[test] = true
-				pkg = test
-				break
-			}
-		}
-		ret = append(ret, &userImport{local, dep.Path, pkg})
-	}
-	return
 }
 
 // systemImportsGo returns a list of required veyron system imports.
@@ -557,7 +507,7 @@ const genGo = `
 {{$file.PackageDef.Doc}}package {{$file.PackageDef.Name}}{{$file.PackageDef.DocSuffix}}
 {{if or $data.UserImports $data.SystemImports}}
 import ({{range $imp := $data.UserImports}}
-{{if $imp.Local}}{{$imp.Local}} {{end}}"{{$imp.Path}}"
+{{if $imp.Name}}{{$imp.Name}} {{end}}"{{$imp.Path}}"
 {{end}}{{if $data.SystemImports}}
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
 	{{range $imp := $data.SystemImports}}{{$imp}}

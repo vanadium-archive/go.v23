@@ -41,6 +41,9 @@ func Compile(pkgpath string, pfiles []*parse.File, env *Env) *Package {
 	if pkg == nil {
 		return nil
 	}
+	if computeDeps(pkg, env); !env.Errors.IsEmpty() {
+		return nil
+	}
 	env.pkgs[pkg.Path] = pkg
 	return pkg
 }
@@ -68,7 +71,13 @@ func CompileConfig(implicit *vdl.Type, pconfig *parse.Config, env *Env) *vdl.Val
 	if pkg == nil {
 		return nil
 	}
-	return compileConst(implicit, pconfig.Config, pkg.Files[0], env)
+	config := compileConst(implicit, pconfig.Config, pkg.Files[0], env)
+	// Wait to compute deps after we've compiled the config const expression,
+	// since it might include the only usage of some of the imports.
+	if computeDeps(pkg, env); !env.Errors.IsEmpty() {
+		return nil
+	}
+	return config
 }
 
 func compile(pkgpath string, pfiles []*parse.File, env *Env) *Package {
@@ -102,9 +111,6 @@ func compile(pkgpath string, pfiles []*parse.File, env *Env) *Package {
 		return nil
 	}
 	if compileInterfaces(pkg, pfiles, env); !env.Errors.IsEmpty() {
-		return nil
-	}
-	if computeDeps(pkg, env); !env.Errors.IsEmpty() {
 		return nil
 	}
 	return pkg
@@ -151,7 +157,7 @@ func computeDeps(pkg *Package, env *Env) {
 	for _, file := range pkg.Files {
 		for _, imp := range file.imports {
 			if !imp.used {
-				env.errorf(file, imp.pos, "import path %q unused")
+				env.errorf(file, imp.pos, "import path %q unused", imp.path)
 			}
 		}
 	}
