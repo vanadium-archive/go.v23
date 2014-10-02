@@ -171,15 +171,8 @@ type Runtime interface {
 	// can be used to access configuration information.
 	Publisher() *config.Publisher
 
-	// NewIdentity creates a new PrivateID with the provided name and a newly
-	// minted private key.
-	NewIdentity(name string) (security.PrivateID, error)
-
-	// PublicIDStore returns the store of PublicIDs held by the Runtime.
-	PublicIDStore() security.PublicIDStore
-
-	// Identity returns the PrivateID used by the runtime.
-	Identity() security.PrivateID
+	// Principal returns the principal that represents this runtime.
+	Principal() security.Principal
 
 	// NewClient creates a new Client instance.
 	//
@@ -293,6 +286,12 @@ type Runtime interface {
 	// down cleanly in advance if desired.  It does, however, drain the
 	// network connections.
 	Cleanup()
+
+	// DEPRECATED: TODO(ataly, ashankar): Get rid of the methods below once
+	// we get rid of old security model.
+	NewIdentity(name string) (security.PrivateID, error)
+	PublicIDStore() security.PublicIDStore
+	Identity() security.PrivateID
 }
 
 // RuntimeFromContext returns the runtime used to generate a given context.
