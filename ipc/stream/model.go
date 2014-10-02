@@ -1,7 +1,7 @@
 package stream
 
 import (
-	"net"
+	"io"
 
 	"veyron.io/veyron/veyron2/naming"
 	"veyron.io/veyron/veyron2/security"
@@ -14,8 +14,8 @@ import (
 // multiple concurrent streams (that may be used for RPCs) over multiple
 // VCs over a single underlying network connection.
 type Flow interface {
-	// Flow objects implement the net.Conn interface.
-	net.Conn
+	io.ReadWriteCloser
+
 	// LocalEndpoint returns the local veyron Endpoint
 	LocalEndpoint() naming.Endpoint
 	// RemoteEndpoint returns the remote veyron Endpoint
@@ -32,6 +32,11 @@ type Flow interface {
 	IsClosed() bool
 	// Closed returns a channel that remains open until the flow has been closed.
 	Closed() <-chan struct{}
+
+	// SetDeadline causes reads and writes to the flow to be
+	// cancelled when the given channel is closed.
+	SetDeadline(deadline <-chan struct{})
+
 	// TODO(ashankar): Remove both of these once the new security API transition is complete.
 	LocalID() security.PublicID
 	RemoteID() security.PublicID
