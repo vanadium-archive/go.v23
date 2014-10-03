@@ -191,15 +191,24 @@ type Principal interface {
 // principal and managing the subset of blessings to be presented to
 // particular peers.
 type BlessingStore interface {
-	// Add adds a set of blessings to the store.
+	// Set marks the set of blessings to be shared with peers.
 	//
-	// These blessings are intended to be shared with peers whose
-	// blessings match the provided pattern.
+	// Set(b, pattern) marks the intention to reveal b to peers
+	// who present blessings of their own matching pattern.
 	//
-	// It is an error to call Add with "blessings" whose public key does
+	// If multiple calls to Set are made with the same pattern, the
+	// last call prevails.
+	//
+	// Set(nil, pattern) can be used to remove the blessings previously
+	// associated with the pattern (by a prior call to Set).
+	//
+	// It is an error to call Set with "blessings" whose public key does
 	// not match the PublicKey of the principal for which this store hosts
 	// blessings.
-	Add(blessings Blessings, forPeers BlessingPattern) error
+	//
+	// Set returns the Blessings object which was previously associated
+	// with the pattern.
+	Set(blessings Blessings, forPeers BlessingPattern) (Blessings, error)
 
 	// ForPeer returns the set of blessings that have been previously
 	// Add-ed to the store with an intent of being shared with peers

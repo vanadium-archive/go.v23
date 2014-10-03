@@ -149,17 +149,20 @@ func TestCreatePrincipalWithNilStoreAndRoots(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreatePrincipal failed: %v", err)
 	}
+	const (
+		noRootsErr = "BlessingRoots object is nil"
+		noStoreErr = "BlessingStore object is nil"
+	)
 
 	// Test Roots.
 	r := p.Roots()
 	if r == nil {
 		t.Fatal("Roots() returned nil")
 	}
-	wantErr := "BlessingRoots object is nil"
-	if err := matchesError(r.Add(nil, ""), wantErr); err != nil {
+	if err := matchesError(r.Add(nil, ""), noRootsErr); err != nil {
 		t.Error(err)
 	}
-	if err := matchesError(r.Recognized(nil, ""), wantErr); err != nil {
+	if err := matchesError(r.Recognized(nil, ""), noRootsErr); err != nil {
 		t.Error(err)
 	}
 
@@ -168,11 +171,10 @@ func TestCreatePrincipalWithNilStoreAndRoots(t *testing.T) {
 	if r == nil {
 		t.Fatal("BlessingStore() returned nil")
 	}
-	wantErr = "BlessingStore object is nil"
-	if err := matchesError(s.Add(nil, ""), wantErr); err != nil {
-		t.Error(err)
+	if _, err := s.Set(nil, ""); matchesError(err, noStoreErr) != nil {
+		t.Error(matchesError(err, noStoreErr))
 	}
-	if err := matchesError(s.SetDefault(nil), wantErr); err != nil {
+	if err := matchesError(s.SetDefault(nil), noStoreErr); err != nil {
 		t.Error(err)
 	}
 	if got := s.ForPeer(); got != nil {
@@ -321,7 +323,7 @@ func TestUnionOfBlessings(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	friend, err := UnionOfBlessings(alicefriend, bobfriend, carol)
+	friend, err := UnionOfBlessings(nil, alicefriend, nil, bobfriend, nil, carol, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -338,16 +340,16 @@ func TestUnionOfBlessings(t *testing.T) {
 	if err := checkBlessings(friend, &context{local: principalTrustingRootsOf(alice), method: "Method"}, "alice/friend"); err != nil {
 		t.Error(err)
 	}
-	if err := checkBlessings(friend, &context{local: principalTrustingRootsOf(alice, carol), method: "Method"}, "alice/friend", "carol"); err != nil {
+	if err := checkBlessings(friend, &context{local: principalTrustingRootsOf(alice, carol), method: "Method"}, "carol", "alice/friend"); err != nil {
 		t.Error(err)
 	}
 	if err := checkBlessings(friend, &context{local: principalTrustingRootsOf(bob), suffix: "Suffix"}, "bob/friend"); err != nil {
 		t.Error(err)
 	}
-	if err := checkBlessings(friend, &context{local: principalTrustingRootsOf(bob, carol), suffix: "Suffix"}, "bob/friend", "carol"); err != nil {
+	if err := checkBlessings(friend, &context{local: principalTrustingRootsOf(bob, carol), suffix: "Suffix"}, "carol", "bob/friend"); err != nil {
 		t.Error(err)
 	}
-	if err := checkBlessings(friend, &context{local: principalTrustingRootsOf(alice, bob, carol), method: "Method", suffix: "Suffix"}, "alice/friend", "bob/friend", "carol"); err != nil {
+	if err := checkBlessings(friend, &context{local: principalTrustingRootsOf(alice, bob, carol), method: "Method", suffix: "Suffix"}, "carol", "alice/friend", "bob/friend"); err != nil {
 		t.Error(err)
 	}
 
@@ -363,13 +365,13 @@ func TestUnionOfBlessings(t *testing.T) {
 	if err := checkBlessings(spouse, &context{local: principalTrustingRootsOf(carol), localID: server}, "carol/spouse"); err != nil {
 		t.Error(err)
 	}
-	if err := checkBlessings(spouse, &context{local: principalTrustingRootsOf(alice, carol), method: "Method", localID: server}, "alice/friend/spouse", "carol/spouse"); err != nil {
+	if err := checkBlessings(spouse, &context{local: principalTrustingRootsOf(alice, carol), method: "Method", localID: server}, "carol/spouse", "alice/friend/spouse"); err != nil {
 		t.Error(err)
 	}
-	if err := checkBlessings(spouse, &context{local: principalTrustingRootsOf(bob, carol), suffix: "Suffix", localID: server}, "bob/friend/spouse", "carol/spouse"); err != nil {
+	if err := checkBlessings(spouse, &context{local: principalTrustingRootsOf(bob, carol), suffix: "Suffix", localID: server}, "carol/spouse", "bob/friend/spouse"); err != nil {
 		t.Error(err)
 	}
-	if err := checkBlessings(spouse, &context{local: principalTrustingRootsOf(alice, bob, carol), suffix: "Suffix", method: "Method", localID: server}, "alice/friend/spouse", "bob/friend/spouse", "carol/spouse"); err != nil {
+	if err := checkBlessings(spouse, &context{local: principalTrustingRootsOf(alice, bob, carol), suffix: "Suffix", method: "Method", localID: server}, "carol/spouse", "alice/friend/spouse", "bob/friend/spouse"); err != nil {
 		t.Error(err)
 	}
 

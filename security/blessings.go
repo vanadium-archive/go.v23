@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"sort"
 	"strings"
 
 	"veyron.io/veyron/veyron2/vlog"
@@ -179,6 +180,9 @@ func NewBlessings(wire WireBlessings) (Blessings, error) {
 //
 // UnionOfBlessings with no arguments returns (nil, nil).
 func UnionOfBlessings(blessings ...Blessings) (Blessings, error) {
+	for len(blessings) > 0 && blessings[0] == nil {
+		blessings = blessings[1:]
+	}
 	switch len(blessings) {
 	case 0:
 		return nil, nil
@@ -188,6 +192,9 @@ func UnionOfBlessings(blessings ...Blessings) (Blessings, error) {
 	key0 := blessings[0].publicKeyDER()
 	var ret blessingsImpl
 	for idx, b := range blessings {
+		if b == nil {
+			continue
+		}
 		if idx > 0 && !bytes.Equal(key0, b.publicKeyDER()) {
 			return nil, errors.New("mismatched public keys")
 		}
@@ -197,5 +204,36 @@ func UnionOfBlessings(blessings ...Blessings) (Blessings, error) {
 	if ret.publicKey, err = UnmarshalPublicKey(key0); err != nil {
 		return nil, err
 	}
+	// For pretty printing, sort the certificate chains so that there is a consistent
+	// ordering, irrespective of the ordering of arugments to UnionOfBlessings.
+	sort.Stable(CertificateChainsSorter(ret.chains))
 	return &ret, nil
+}
+
+type CertificateChainsSorter [][]Certificate
+
+func (c CertificateChainsSorter) Len() int      { return len(c) }
+func (c CertificateChainsSorter) Swap(i, j int) { c[i], c[j] = c[j], c[i] }
+func (c CertificateChainsSorter) Less(i, j int) bool {
+	ci := c[i]
+	cj := c[j]
+	if len(ci) < len(cj) {
+		return true
+	}
+	if len(ci) > len(cj) {
+		return false
+	}
+	// Equal size chains, order by the names in the certificates.
+	N := len(ci)
+	for idx := 0; idx < N; idx++ {
+		ie := ci[idx].Extension
+		je := cj[idx].Extension
+		if ie < je {
+			return true
+		}
+		if ie > je {
+			return false
+		}
+	}
+	return false
 }

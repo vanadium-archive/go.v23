@@ -66,11 +66,11 @@ type errStore struct {
 	key PublicKey
 }
 
-func (errStore) Add(Blessings, BlessingPattern) error      { return errNilStore }
-func (errStore) ForPeer(peerBlessings ...string) Blessings { return nil }
-func (errStore) SetDefault(blessings Blessings) error      { return errNilStore }
-func (errStore) Default() Blessings                        { return nil }
-func (s errStore) PublicKey() PublicKey                    { return s.key }
+func (errStore) Set(Blessings, BlessingPattern) (Blessings, error) { return nil, errNilStore }
+func (errStore) ForPeer(peerBlessings ...string) Blessings         { return nil }
+func (errStore) SetDefault(blessings Blessings) error              { return errNilStore }
+func (errStore) Default() Blessings                                { return nil }
+func (s errStore) PublicKey() PublicKey                            { return s.key }
 
 type errRoots struct{}
 
