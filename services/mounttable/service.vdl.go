@@ -295,6 +295,7 @@ func (__gen_s *ServerStubGlobbable) Signature(call _gen_ipc.ServerCall) (_gen_ip
 			[]_gen_wiretype.FieldType{
 				_gen_wiretype.FieldType{Type: 0x3, Name: "Name"},
 				_gen_wiretype.FieldType{Type: 0x43, Name: "Servers"},
+				_gen_wiretype.FieldType{Type: 0x2, Name: "MT"},
 			},
 			"veyron.io/veyron/veyron2/services/mounttable/types.MountEntry", []string(nil)},
 	}
@@ -342,7 +343,9 @@ type MountTable_ExcludingUniversal interface {
 	// duration.  A server with an expired TTL should never appear in the
 	// results nor affect the operation of any MountTable method, and should
 	// act as if it was never present as far as the interface is concerned.
-	Mount(ctx _gen_context.T, Server string, TTL uint32, opts ..._gen_ipc.CallOpt) (err error)
+	//
+	// Opts represents a bit mask of options.
+	Mount(ctx _gen_context.T, Server string, TTL uint32, Flags types.MountFlag, opts ..._gen_ipc.CallOpt) (err error)
 	// Unmount removes Server from the mount point.  If Server is empty, remove
 	// all servers mounted there.
 	// Returns a non-nil error iff Server remains mounted at the mount point.
@@ -369,7 +372,9 @@ type MountTableService interface {
 	// duration.  A server with an expired TTL should never appear in the
 	// results nor affect the operation of any MountTable method, and should
 	// act as if it was never present as far as the interface is concerned.
-	Mount(context _gen_ipc.ServerContext, Server string, TTL uint32) (err error)
+	//
+	// Opts represents a bit mask of options.
+	Mount(context _gen_ipc.ServerContext, Server string, TTL uint32, Flags types.MountFlag) (err error)
 	// Unmount removes Server from the mount point.  If Server is empty, remove
 	// all servers mounted there.
 	// Returns a non-nil error iff Server remains mounted at the mount point.
@@ -430,9 +435,9 @@ func (__gen_c *clientStubMountTable) client(ctx _gen_context.T) _gen_ipc.Client 
 	return _gen_veyron2.RuntimeFromContext(ctx).Client()
 }
 
-func (__gen_c *clientStubMountTable) Mount(ctx _gen_context.T, Server string, TTL uint32, opts ..._gen_ipc.CallOpt) (err error) {
+func (__gen_c *clientStubMountTable) Mount(ctx _gen_context.T, Server string, TTL uint32, Flags types.MountFlag, opts ..._gen_ipc.CallOpt) (err error) {
 	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Mount", []interface{}{Server, TTL}, opts...); err != nil {
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Mount", []interface{}{Server, TTL, Flags}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&err); ierr != nil {
@@ -530,17 +535,18 @@ func (__gen_s *ServerStubMountTable) Signature(call _gen_ipc.ServerCall) (_gen_i
 		InArgs: []_gen_ipc.MethodArgument{
 			{Name: "Server", Type: 3},
 			{Name: "TTL", Type: 52},
+			{Name: "Flags", Type: 65},
 		},
 		OutArgs: []_gen_ipc.MethodArgument{
-			{Name: "", Type: 65},
+			{Name: "", Type: 66},
 		},
 	}
 	result.Methods["ResolveStep"] = _gen_ipc.MethodSignature{
 		InArgs: []_gen_ipc.MethodArgument{},
 		OutArgs: []_gen_ipc.MethodArgument{
-			{Name: "Servers", Type: 67},
+			{Name: "Servers", Type: 68},
 			{Name: "Suffix", Type: 3},
-			{Name: "Error", Type: 65},
+			{Name: "Error", Type: 66},
 		},
 	}
 	result.Methods["Unmount"] = _gen_ipc.MethodSignature{
@@ -548,18 +554,18 @@ func (__gen_s *ServerStubMountTable) Signature(call _gen_ipc.ServerCall) (_gen_i
 			{Name: "Server", Type: 3},
 		},
 		OutArgs: []_gen_ipc.MethodArgument{
-			{Name: "", Type: 65},
+			{Name: "", Type: 66},
 		},
 	}
 
 	result.TypeDefs = []_gen_vdlutil.Any{
-		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, _gen_wiretype.StructType{
+		_gen_wiretype.NamedPrimitiveType{Type: 0x34, Name: "veyron.io/veyron/veyron2/services/mounttable/types.MountFlag", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, _gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
 				_gen_wiretype.FieldType{Type: 0x3, Name: "Server"},
 				_gen_wiretype.FieldType{Type: 0x34, Name: "TTL"},
 			},
 			"veyron.io/veyron/veyron2/services/mounttable/types.MountedServer", []string(nil)},
-		_gen_wiretype.SliceType{Elem: 0x42, Name: "", Tags: []string(nil)}}
+		_gen_wiretype.SliceType{Elem: 0x43, Name: "", Tags: []string(nil)}}
 	var ss _gen_ipc.ServiceSignature
 	var firstAdded int
 	ss, _ = __gen_s.ServerStubGlobbable.Signature(call)
@@ -637,8 +643,8 @@ func (__gen_s *ServerStubMountTable) UnresolveStep(call _gen_ipc.ServerCall) (re
 	return
 }
 
-func (__gen_s *ServerStubMountTable) Mount(call _gen_ipc.ServerCall, Server string, TTL uint32) (err error) {
-	err = __gen_s.service.Mount(call, Server, TTL)
+func (__gen_s *ServerStubMountTable) Mount(call _gen_ipc.ServerCall, Server string, TTL uint32, Flags types.MountFlag) (err error) {
+	err = __gen_s.service.Mount(call, Server, TTL, Flags)
 	return
 }
 

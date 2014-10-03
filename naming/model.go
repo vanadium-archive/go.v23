@@ -65,6 +65,8 @@ type MountEntry struct {
 	Name string
 	// Servers (if present) specifies the mounted names (Link is empty).
 	Servers []MountedServer
+	// MT is true if servers refer to another mount table.
+	MT bool
 	// An error occurred fulfilling the request.
 	Error error
 }
@@ -80,6 +82,23 @@ type DisableCache bool
 
 func (DisableCache) CacheCtl() {}
 
+// MountOpt is the interface for all Mount options.
+type MountOpt interface {
+	NSMountOpt()
+}
+
+// ReplaceMountOpt requests the mount to replace the previous mount.
+type ReplaceMountOpt bool
+
+func (ReplaceMountOpt) NSMountOpt() {}
+
+// ServesMountTableOpt means the target is a mount table.
+type ServesMountTableOpt bool
+
+func (ServesMountTableOpt) NSMountOpt() {}
+
+// TODO(p): Perhaps add an ACL Opt.
+
 // Namespace provides translation from object names to server object addresses.
 // It represents the interface to a client side library for the MountTable
 // service
@@ -87,7 +106,7 @@ type Namespace interface {
 	// Mount the server object address under the object name, expiring after
 	// the ttl. ttl of zero implies an implementation-specific high value
 	// (essentially, forever).
-	Mount(ctx context.T, name, server string, ttl time.Duration) error
+	Mount(ctx context.T, name, server string, ttl time.Duration, opts ...MountOpt) error
 
 	// Unmount the server object address from the object name, or if server
 	// is empty, unmount all server OAs from the object name.

@@ -133,6 +133,11 @@ type RetryTimeoutOpt time.Duration
 
 func (RetryTimeoutOpt) IPCCallOpt() {}
 
+// NoResolveOpt specifies that the RPC call should not further Resolve the name.
+type NoResolveOpt bool
+
+func (NoResolveOpt) IPCCallOpt() {}
+
 // StreamManager specifies an explicit stream.Manager.
 func StreamManager(sm stream.Manager) StreamManagerOpt {
 	return StreamManagerOpt{sm}

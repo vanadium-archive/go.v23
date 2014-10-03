@@ -4,6 +4,9 @@
 // Package types defines the types used by the mounttable interface.
 package types
 
+// MountFlag is a bit mask of options to the mount call.
+type MountFlag uint32
+
 // MountedServer represents a server mounted on a specific name.
 type MountedServer struct {
 	// Server is the OA that's mounted.
@@ -18,4 +21,10 @@ type MountEntry struct {
 	Name string
 	// Servers (if present) specifies the mounted names.
 	Servers []MountedServer
+	// MT is true if the servers represent mount tables.
+	MT bool
 }
+
+const Replace = MountFlag(1) // Replace means the mount should replace what is currently at the mount point
+
+const MT = MountFlag(2) // MT means that the target server is a mount table.

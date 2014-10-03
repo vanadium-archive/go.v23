@@ -25,15 +25,14 @@ type MountTable interface {
 	// duration.  A server with an expired TTL should never appear in the
 	// results nor affect the operation of any MountTable method, and should
 	// act as if it was never present as far as the interface is concerned.
-	Mount(Server string, TTL uint32) error {security.WriteLabel}
+	//
+	// Opts represents a bit mask of options.
+	Mount(Server string, TTL uint32, Flags types.MountFlag) error {security.WriteLabel}
 
 	// Unmount removes Server from the mount point.  If Server is empty, remove
 	// all servers mounted there.
 	// Returns a non-nil error iff Server remains mounted at the mount point.
 	Unmount(Server string) error {security.WriteLabel}
-
-	// TODO(caprita): We can simplify this to just return []string where
-	// each string already has the suffix baked in, and no ttl.
 
 	// ResolveStep takes the next step in resolving a name.  Returns the next
 	// servers to query and the suffix at those servers.
