@@ -60,18 +60,36 @@ func runHelper(run func(targets []*build.Package, env *compile.Env)) func(cmd *c
 	}
 }
 
-const pkgDesc = `
-<packages> are a list of packages to process, specified as arguments for each
-command.  The format is similar to the go tool.  In its simplest form each
-package is an import path; e.g. "veyron.io/veyron/veyron/lib/vdl".  A package
-that is an absolute path or that contains a "." is interpreted as a file system
-path and denotes the package in that directory.  A package that ends with "..."
-does a wildcard match against all directories with that prefix.  The special
-import path "all" expands to all package directories found in all the GOPATH
-trees.
+var topicPackages = cmdline.Topic{
+	Name:  "packages",
+	Short: "Description of package lists",
+	Long: `
+Most vdl commands apply to a list of packages:
 
-For more information use "go help packages" to see the standard go package
+  vdl command <packages>
+
+<packages> are a list of packages to process, similar to the standard go tool.
+In its simplest form each package is an import path; e.g.
+   "veyron.io/veyron/veyron/lib/vdl"
+
+A package that is an absolute path or that contains a "." is interpreted as a
+file system path and denotes the package in that directory.
+
+A package that ends with "..." does a wildcard match against all directories
+with that prefix.
+
+The special import path "all" expands to all package directories found in all
+the GOPATH trees.
+
+For more information, run "go help packages" to see the standard go package
 documentation.
+`,
+}
+
+const pkgArgName = "<packages>"
+const pkgArgLong = `
+<packages> are a list of packages to process, similar to the standard go tool.
+For more information, run "vdl help packages".
 `
 
 var cmdCompile = &cmdline.Command{
@@ -82,8 +100,8 @@ var cmdCompile = &cmdline.Command{
 Compile compiles packages and their transitive dependencies, but does not
 generate code.  This is useful to sanity-check that your VDL files are valid.
 `,
-	ArgsName: "<packages>",
-	ArgsLong: pkgDesc,
+	ArgsName: pkgArgName,
+	ArgsLong: pkgArgLong,
 }
 
 var cmdGenerate = &cmdline.Command{
@@ -94,8 +112,8 @@ var cmdGenerate = &cmdline.Command{
 Generate compiles packages and their transitive dependencies, and generates code
 in the specified languages.
 `,
-	ArgsName: "<packages>",
-	ArgsLong: pkgDesc,
+	ArgsName: pkgArgName,
+	ArgsLong: pkgArgLong,
 }
 
 var cmdAudit = &cmdline.Command{
@@ -107,8 +125,8 @@ Audit runs the same logic as generate, but doesn't write out generated files.
 Returns a 0 exit code if all packages are up-to-date, otherwise returns a
 non-0 exit code indicating some packages need generation.
 `,
-	ArgsName: "<packages>",
-	ArgsLong: pkgDesc,
+	ArgsName: pkgArgName,
+	ArgsLong: pkgArgLong,
 }
 
 var cmdList = &cmdline.Command{
@@ -127,8 +145,8 @@ dependencies between VDL files within the same package are also not allowed.
 This is more strict than regular Go; it makes it easier to generate code for
 other languages like C++.
 `,
-	ArgsName: "<packages>",
-	ArgsLong: pkgDesc,
+	ArgsName: pkgArgName,
+	ArgsLong: pkgArgLong,
 }
 
 const (
@@ -289,6 +307,7 @@ The vdl tool manages veyron VDL source code.  It's similar to the go tool used
 for managing Go source code.
 `,
 		Children: []*cmdline.Command{cmdGenerate, cmdCompile, cmdAudit, cmdList},
+		Topics:   []cmdline.Topic{topicPackages},
 	}
 
 	// Common flags for the tool itself, applicable to all commands.

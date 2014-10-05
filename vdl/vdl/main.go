@@ -12,7 +12,12 @@ The vdl commands are:
    compile     Compile packages and dependencies, but don't generate code
    audit       Check if any packages are stale and need generation
    list        List package and dependency info in transitive order
-   help        Display help for commands
+   help        Display help for commands or topics
+Run "vdl help [command]" for command usage.
+
+The vdl additional help topics are:
+   packages    Description of package lists
+Run "vdl help [topic]" for topic details.
 
 The vdl flags are:
    -experimental=false: Enable experimental features that may crash the compiler and change without notice.  Intended for VDL compiler developers.
@@ -28,17 +33,8 @@ in the specified languages.
 Usage:
    vdl generate [flags] <packages>
 
-<packages> are a list of packages to process, specified as arguments for each
-command.  The format is similar to the go tool.  In its simplest form each
-package is an import path; e.g. "veyron.io/veyron/veyron/lib/vdl".  A package
-that is an absolute path or that contains a "." is interpreted as a file system
-path and denotes the package in that directory.  A package that ends with "..."
-does a wildcard match against all directories with that prefix.  The special
-import path "all" expands to all package directories found in all the GOPATH
-trees.
-
-For more information use "go help packages" to see the standard go package
-documentation.
+<packages> are a list of packages to process, similar to the standard go tool.
+For more information, run "vdl help packages".
 
 The generate flags are:
    -go_fmt=true: Format generated Go code
@@ -83,17 +79,8 @@ generate code.  This is useful to sanity-check that your VDL files are valid.
 Usage:
    vdl compile [flags] <packages>
 
-<packages> are a list of packages to process, specified as arguments for each
-command.  The format is similar to the go tool.  In its simplest form each
-package is an import path; e.g. "veyron.io/veyron/veyron/lib/vdl".  A package
-that is an absolute path or that contains a "." is interpreted as a file system
-path and denotes the package in that directory.  A package that ends with "..."
-does a wildcard match against all directories with that prefix.  The special
-import path "all" expands to all package directories found in all the GOPATH
-trees.
-
-For more information use "go help packages" to see the standard go package
-documentation.
+<packages> are a list of packages to process, similar to the standard go tool.
+For more information, run "vdl help packages".
 
 The compile flags are:
    -status=true: Show package names while we compile
@@ -107,17 +94,8 @@ non-0 exit code indicating some packages need generation.
 Usage:
    vdl audit [flags] <packages>
 
-<packages> are a list of packages to process, specified as arguments for each
-command.  The format is similar to the go tool.  In its simplest form each
-package is an import path; e.g. "veyron.io/veyron/veyron/lib/vdl".  A package
-that is an absolute path or that contains a "." is interpreted as a file system
-path and denotes the package in that directory.  A package that ends with "..."
-does a wildcard match against all directories with that prefix.  The special
-import path "all" expands to all package directories found in all the GOPATH
-trees.
-
-For more information use "go help packages" to see the standard go package
-documentation.
+<packages> are a list of packages to process, similar to the standard go tool.
+For more information, run "vdl help packages".
 
 The audit flags are:
    -go_fmt=true: Format generated Go code
@@ -170,31 +148,44 @@ other languages like C++.
 Usage:
    vdl list <packages>
 
-<packages> are a list of packages to process, specified as arguments for each
-command.  The format is similar to the go tool.  In its simplest form each
-package is an import path; e.g. "veyron.io/veyron/veyron/lib/vdl".  A package
-that is an absolute path or that contains a "." is interpreted as a file system
-path and denotes the package in that directory.  A package that ends with "..."
-does a wildcard match against all directories with that prefix.  The special
-import path "all" expands to all package directories found in all the GOPATH
-trees.
-
-For more information use "go help packages" to see the standard go package
-documentation.
+<packages> are a list of packages to process, similar to the standard go tool.
+For more information, run "vdl help packages".
 
 Vdl Help
 
-Help displays usage descriptions for this command, or usage descriptions for
-sub-commands.
+Help with no args displays the usage of the parent command.
+Help with args displays the usage of the specified sub-command or help topic.
+"help ..." recursively displays help for all commands and topics.
 
 Usage:
-   vdl help [flags] [command ...]
+   vdl help [flags] [command/topic ...]
 
-[command ...] is an optional sequence of commands to display detailed usage.
-The special-case "help ..." recursively displays help for all commands.
+[command/topic ...] optionally identifies a specific sub-command or help topic.
 
 The help flags are:
    -style=text: The formatting style for help output, either "text" or "godoc".
+
+Vdl Packages (Help Topic)
+
+Most vdl commands apply to a list of packages:
+
+  vdl command <packages>
+
+<packages> are a list of packages to process, similar to the standard go tool.
+In its simplest form each package is an import path; e.g.
+   "veyron.io/veyron/veyron/lib/vdl"
+
+A package that is an absolute path or that contains a "." is interpreted as a
+file system path and denotes the package in that directory.
+
+A package that ends with "..." does a wildcard match against all directories
+with that prefix.
+
+The special import path "all" expands to all package directories found in all
+the GOPATH trees.
+
+For more information, run "go help packages" to see the standard go package
+documentation.
 */
 package main
 
