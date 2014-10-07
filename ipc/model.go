@@ -285,10 +285,12 @@ type ServerContext interface {
 	security.Context
 	context.T
 
-	// Blessing is a credential provided by the client bound to the private key
-	// of the server's identity. It can be nil, in which case the client did
-	// not provide any additional credentials.
-	Blessing() security.PublicID
+	// Blessings returns blessings bound to the server's private key (technically,
+	// the server principal's private key) provided by the client of the RPC.
+	//
+	// Blessings can return nil, which indicates that the client did not
+	// provide any blessings to the server with the request.
+	Blessings() security.Blessings
 	// Server returns the Server that this context is associated with.
 	Server() Server
 }
@@ -314,11 +316,11 @@ type ServerOpt interface {
 	IPCServerOpt()
 }
 
-// Granter is a ClientCallOpt that is used to provide additional credentials
-// (typically in the form of a blessed identity) to a server.
+// Granter is a ClientCallOpt that is used to provide blessings to
+// the server when making an RPC.
 type Granter interface {
 	// Grant grants a blessing to the provided server.
-	Grant(server security.PublicID) (blessing security.PublicID, err error)
+	Grant(server security.Blessings) (blessing security.Blessings, err error)
 
 	// Granter implements the CallOpt interface so that
 	// Granters can be provided as options to an RPC invocation.

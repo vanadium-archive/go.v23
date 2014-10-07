@@ -55,7 +55,7 @@ func (ctx *FakeServerCall) RemoteID() security.PublicID                      { r
 func (*FakeServerCall) LocalPrincipal() security.Principal                   { return nil }
 func (*FakeServerCall) LocalBlessings() security.Blessings                   { return nil }
 func (*FakeServerCall) RemoteBlessings() security.Blessings                  { return nil }
-func (*FakeServerCall) Blessing() security.PublicID                          { return nil }
+func (*FakeServerCall) Blessings() security.Blessings                        { return nil }
 func (*FakeServerCall) LocalEndpoint() naming.Endpoint                       { return nil }
 func (*FakeServerCall) RemoteEndpoint() naming.Endpoint                      { return nil }
 func (*FakeServerCall) Closed() <-chan struct{}                              { return nil }

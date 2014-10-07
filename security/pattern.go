@@ -47,6 +47,23 @@ func (p BlessingPattern) IsValid() bool {
 	return true
 }
 
+// MakeGlob returns a pattern that matches all extensions of the blessings that
+// are matched by 'p'.
+//
+// For example:
+//   delegates := BlessingPattern("alice").Glob()
+//   delegates.MatchedBy("alice")  // Returns true
+//   delegates.MatchedBy("alice/friend/bob") // Returns true
+func (p BlessingPattern) MakeGlob() BlessingPattern {
+	if len(p) == 0 || p == AllPrincipals {
+		return AllPrincipals
+	}
+	if strings.HasSuffix(string(p), ChainSeparator+string(AllPrincipals)) {
+		return p
+	}
+	return BlessingPattern(string(p) + ChainSeparator + string(AllPrincipals))
+}
+
 func (BlessingPattern) matchedByBlessing(patternchain []string, glob bool, b string) bool {
 	// links of the delegation chain in a blessing
 	blessingchain := strings.Split(b, ChainSeparator)

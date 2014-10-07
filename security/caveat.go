@@ -191,6 +191,9 @@ func (c *publicKeyThirdPartyCaveat) Requirements() ThirdPartyRequirements {
 func (c *publicKeyThirdPartyCaveat) Dischargeable(context Context) error {
 	// Validate the caveats embedded within this third-party caveat.
 	for _, cav := range c.Caveats {
+		if isUnconstrainedUseCaveat(cav) {
+			continue
+		}
 		var validator CaveatValidator
 		if err := vom.NewDecoder(bytes.NewReader(cav.ValidatorVOM)).Decode(&validator); err != nil {
 			return fmt.Errorf("failed to interpret restriction embedded in ThirdPartyCaveat: %v", err)

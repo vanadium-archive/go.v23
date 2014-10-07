@@ -94,3 +94,17 @@ func TestIsValid(t *testing.T) {
 		}
 	}
 }
+
+func TestMakeGlob(t *testing.T) {
+	tests := []struct{ before, after BlessingPattern }{
+		{"", "..."},
+		{"...", "..."},
+		{"a", "a/..."},
+		{"a/...", "a/..."},
+	}
+	for _, test := range tests {
+		if got, want := test.before.MakeGlob(), test.after; got != want {
+			t.Errorf("%q.Glob(): Got %q, want %q", test.before, got, want)
+		}
+	}
+}

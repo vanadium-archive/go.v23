@@ -4,6 +4,8 @@
 package ipc
 
 import (
+	"veyron.io/veyron/veyron2/security"
+
 	"veyron.io/veyron/veyron2/vtrace"
 )
 
@@ -35,12 +37,9 @@ type Request struct {
 	//
 	// TODO(toddw): Change to time.Time when a built-in idl time package is added.
 	Timeout int64
-	// HasBlessing is true iff a blessing credential, bound to the identity of
-	// the server (provided by the client) appears immediately after this request
-	// message.
-	// TODO(toddw,ashankar): Ideally, this would be the blessing itself, but
-	// vom currently does not allow for data-type interfaces.
-	HasBlessing bool
+	// GrantedBlessings are blessings bound to the principal running the server,
+	// provided by the client.
+	GrantedBlessings security.WireBlessings
 	// NumDischarges specifies the number of third party caveat discharges that
 	// are sent after the blessing to fulfill its caveats.
 	// TODO(toddw,ashankar,andreser): Ideally, this would be the a slice of

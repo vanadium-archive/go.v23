@@ -512,6 +512,10 @@ func TestBlessingsOnWire(t *testing.T) {
 	if !reflect.DeepEqual(b, got) {
 		t.Fatalf("Got %#v, want %#v", got, b)
 	}
+	// And VomEncoding a Blessings object should be identical to Marshaling it.
+	if got := MarshalBlessings(b); !reflect.DeepEqual(got, wire) {
+		t.Errorf("Got %#v, want %#v", got, wire)
+	}
 	// Putzing around with the wire representation should break the factory function.
 	otherkey, err := newPrincipal(t).PublicKey().MarshalBinary()
 	if err != nil {
@@ -521,6 +525,14 @@ func TestBlessingsOnWire(t *testing.T) {
 	got, err = NewBlessings(wire)
 	if merr := matchesError(err, "invalid Signature in certificate"); merr != nil || got != nil {
 		t.Errorf("Got (%v, %v): %v", got, err, merr)
+	}
+	// Empty wire representation should yield (nil, nil)
+	if got, err := NewBlessings(WireBlessings{}); got != nil || err != nil {
+		t.Errorf("Got (%v, %v) want (nil, nil)", got, err)
+	}
+	// And Marshaling a nil blessing is fine.
+	if got, want := MarshalBlessings(nil), (WireBlessings{}); !reflect.DeepEqual(got, want) {
+		t.Errorf("Got %#v, want %#v", got, want)
 	}
 }
 

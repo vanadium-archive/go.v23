@@ -144,7 +144,7 @@ func blessingForCertificateChain(ctx Context, chain []Certificate) string {
 		return ""
 	}
 	if err := local.Roots().Recognized(root, blessing); err != nil {
-		vlog.VI(4).Infof("could not extract blessing as certificate chain's root: %v is not trusted for blessing: %v", root, blessing)
+		vlog.VI(4).Infof("ignoring blessing %v because %v", blessing, err)
 		return ""
 	}
 
@@ -153,10 +153,11 @@ func blessingForCertificateChain(ctx Context, chain []Certificate) string {
 		for _, cav := range cert.Caveats {
 			var validator CaveatValidator
 			if err := vom.NewDecoder(bytes.NewBuffer(cav.ValidatorVOM)).Decode(&validator); err != nil {
-				// Failed to decode CaveatValidator, cannot validate caveat, so this chain means nothing.
+				vlog.VI(4).Infof("ignoring blessing %v because CaveatValidator decoding failed: %v", blessing, err)
 				return ""
 			}
 			if err := validator.Validate(ctx); err != nil {
+				vlog.VI(4).Infof("ignoring blessing %v because caveat %T failed valdiation: %v", blessing, validator, err)
 				return ""
 			}
 		}
@@ -166,11 +167,23 @@ func blessingForCertificateChain(ctx Context, chain []Certificate) string {
 
 // NewBlessings creates a Blessings object from the provided wire representation.
 func NewBlessings(wire WireBlessings) (Blessings, error) {
+	if len(wire.CertificateChains) == 0 {
+		return nil, nil
+	}
 	var b blessingsImpl
 	if err := b.VomDecode(wire); err != nil {
 		return nil, err
 	}
 	return &b, nil
+}
+
+// MarshalBlessings is the inverse of NewBlessings, converting an in-memory
+// repserentation of Blessings to the wire format.
+func MarshalBlessings(b Blessings) WireBlessings {
+	if b == nil {
+		return WireBlessings{}
+	}
+	return WireBlessings{CertificateChains: b.certificateChains()}
 }
 
 // UnionOfBlessings returns a Blessings object that carries the union of the
