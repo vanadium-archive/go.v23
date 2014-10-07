@@ -64,9 +64,9 @@ func runGenerate(cmd *cmdline.Command, args []string) error {
 	var path string
 	switch len(args) {
 	case 0:
-		srcDirs, err := build.SrcDirs()
-		if err != nil {
-			return cmd.UsageErrorf("couldn't get src dirs to find vomdata file: %v", err)
+		srcDirs := build.SrcDirs()
+		if len(srcDirs) == 0 {
+			return cmd.UsageErrorf("no src dirs; set your VDLPATH to a valid value")
 		}
 		path = guessDataFilePath(debug, srcDirs)
 		if path == "" {
