@@ -18,6 +18,7 @@ Run "vdl help [command]" for command usage.
 
 The vdl additional help topics are:
    packages    Description of package lists
+   vdlpath     Description of VDLPATH environment variable
 Run "vdl help [topic]" for topic details.
 
 The vdl flags are:
@@ -44,19 +45,19 @@ The generate flags are:
          "dir"                  : Generate output rooted at dir
          "src->dst[,s2->d2...]" : Generate output using translation rules
       Assume your source tree is organized as follows:
-      GOPATH=/home/me/code/go
-         /home/me/code/go/src/veyron2/vdl/test_base/base1.vdl
-         /home/me/code/go/src/veyron2/vdl/test_base/base2.vdl
+      VDLPATH=/home/vdl
+         /home/vdl/src/veyron/test_base/base1.vdl
+         /home/vdl/src/veyron/test_base/base2.vdl
       Here's example output under the different modes:
       --go_out_dir=""
-         /home/me/code/go/src/veyron2/vdl/test_base/base1.vdl.go
-         /home/me/code/go/src/veyron2/vdl/test_base/base2.vdl.go
+         /home/vdl/src/veyron/test_base/base1.vdl.go
+         /home/vdl/src/veyron/test_base/base2.vdl.go
       --go_out_dir="/tmp/foo"
-         /tmp/foo/veyron2/vdl/test_base/base1.vdl.go
-         /tmp/foo/veyron2/vdl/test_base/base2.vdl.go
-      --go_out_dir="go/src->foo/bar/src"
-         /home/me/code/foo/bar/src/veyron2/vdl/test_base/base1.vdl.go
-         /home/me/code/foo/bar/src/veyron2/vdl/test_base/base2.vdl.go
+         /tmp/foo/veyron/test_base/base1.vdl.go
+         /tmp/foo/veyron/test_base/base2.vdl.go
+      --go_out_dir="vdl/src->foo/bar/src"
+         /home/foo/bar/src/veyron/test_base/base1.vdl.go
+         /home/foo/bar/src/veyron/test_base/base2.vdl.go
       When the src->dst form is used, src must match the suffix of the path
       just before the package path, and dst is the replacement for src.
       Use commas to separate multiple rules; the first rule matching src is
@@ -105,19 +106,19 @@ The audit flags are:
          "dir"                  : Generate output rooted at dir
          "src->dst[,s2->d2...]" : Generate output using translation rules
       Assume your source tree is organized as follows:
-      GOPATH=/home/me/code/go
-         /home/me/code/go/src/veyron2/vdl/test_base/base1.vdl
-         /home/me/code/go/src/veyron2/vdl/test_base/base2.vdl
+      VDLPATH=/home/vdl
+         /home/vdl/src/veyron/test_base/base1.vdl
+         /home/vdl/src/veyron/test_base/base2.vdl
       Here's example output under the different modes:
       --go_out_dir=""
-         /home/me/code/go/src/veyron2/vdl/test_base/base1.vdl.go
-         /home/me/code/go/src/veyron2/vdl/test_base/base2.vdl.go
+         /home/vdl/src/veyron/test_base/base1.vdl.go
+         /home/vdl/src/veyron/test_base/base2.vdl.go
       --go_out_dir="/tmp/foo"
-         /tmp/foo/veyron2/vdl/test_base/base1.vdl.go
-         /tmp/foo/veyron2/vdl/test_base/base2.vdl.go
-      --go_out_dir="go/src->foo/bar/src"
-         /home/me/code/foo/bar/src/veyron2/vdl/test_base/base1.vdl.go
-         /home/me/code/foo/bar/src/veyron2/vdl/test_base/base2.vdl.go
+         /tmp/foo/veyron/test_base/base1.vdl.go
+         /tmp/foo/veyron/test_base/base2.vdl.go
+      --go_out_dir="vdl/src->foo/bar/src"
+         /home/foo/bar/src/veyron/test_base/base1.vdl.go
+         /home/foo/bar/src/veyron/test_base/base2.vdl.go
       When the src->dst form is used, src must match the suffix of the path
       just before the package path, and dst is the replacement for src.
       Use commas to separate multiple rules; the first rule matching src is
@@ -183,9 +184,35 @@ A package that ends with "..." does a wildcard match against all directories
 with that prefix.
 
 The special import path "all" expands to all package directories found in all
-the GOPATH trees.
+the VDLPATH trees.
 
 For more information, run "go help packages" to see the standard go package
 documentation.
+
+Vdl Vdlpath - help topic
+
+The VDLPATH environment variable is used to resolve import statements.
+It must be set to compile and generate vdl packages.
+
+The format is a colon-separated list of directories, where each directory must
+have a "src/" directory that holds vdl source code.  The path below 'src'
+determines the import path.  If VDLPATH specifies multiple directories, imports
+are resolved by picking the first directory with a matching import name.
+
+An example:
+
+   VDPATH=/home/user/vdlA:/home/user/vdlB
+
+   /home/user/vdlA/
+      src/
+         foo/                 (import "foo" refers here)
+            foo1.vdl
+   /home/user/vdlB/
+      src/
+         foo/                 (this package is ignored)
+            foo2.vdl
+         bar/
+            baz/              (import "bar/baz" refers here)
+               baz.vdl
 */
 package main

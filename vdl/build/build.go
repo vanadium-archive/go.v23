@@ -3,8 +3,6 @@
 package build
 
 import (
-	"fmt"
-	gobuild "go/build"
 	"io"
 	"io/ioutil"
 	"os"
@@ -145,22 +143,16 @@ func (p *Package) CloseFiles() error {
 }
 
 // SrcDirs returns a list of package source root directories.
-func SrcDirs() ([]string, error) {
-	// TODO(toddw): Currently we use the GOPATH environment variable, we should
-	// probably use VDLPATH instead.
-	gopath := gobuild.Default.SrcDirs()
-	if len(gopath) == 0 {
-		return nil, fmt.Errorf("GOPATH isn't set")
-	}
-	var dirs []string
-	for _, d := range gopath {
-		abs, err := filepath.Abs(d)
-		if err != nil {
-			return nil, fmt.Errorf("couldn't make GOPATH dir %q absolute: %v", d, err)
+func SrcDirs() []string {
+	var ret []string
+	for _, dir := range strings.Split(os.Getenv("VDLPATH"), ":") {
+		if dir != "" {
+			if abs, err := filepath.Abs(filepath.Join(dir, "src")); err == nil {
+				ret = append(ret, abs)
+			}
 		}
-		dirs = append(dirs, abs)
 	}
-	return dirs, nil
+	return ret
 }
 
 // depSorter does the main work of collecting and sorting packages and their
@@ -224,9 +216,9 @@ func makeExts(exts []string) map[string]bool {
 }
 
 func newDepSorter(exts []string, errs *vdlutil.Errors) *depSorter {
-	srcDirs, err := SrcDirs()
-	if err != nil {
-		errs.Error(err.Error())
+	srcDirs := SrcDirs()
+	if len(srcDirs) == 0 {
+		errs.Error("No src dirs; set your VDLPATH to a valid value")
 	}
 	return &depSorter{
 		exts:    makeExts(exts),
