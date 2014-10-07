@@ -104,6 +104,8 @@
 package watch
 
 import (
+	"veyron.io/veyron/veyron2/security"
+
 	"veyron.io/veyron/veyron2/services/watch/types"
 
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
@@ -364,7 +366,7 @@ func (__gen_s *ServerStubGlobWatcher) GetMethodTags(call _gen_ipc.ServerCall, me
 	// This will change when it is replaced with Signature().
 	switch method {
 	case "WatchGlob":
-		return []interface{}{}, nil
+		return []interface{}{security.Label(1)}, nil
 	default:
 		return nil, nil
 	}

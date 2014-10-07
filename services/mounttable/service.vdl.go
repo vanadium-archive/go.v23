@@ -28,6 +28,14 @@ const _ = _gen_wiretype.TypeIDInvalid
 // to enable embedding without method collisions.  Not to be used directly by clients.
 type Globbable_ExcludingUniversal interface {
 	// Glob returns all matching entries at the given server.
+	//
+	// Glob returns an entry that exactly matches the pattern only if the
+	// principal has some access to the entry, and read or resolve access to the
+	// parent entry. However, if the pattern expands an entry "p" (e.g. "p/*",
+	// "p/...", "p/[abc]"), Glob returns child entries only if the principal has
+	// read access to "p".
+	// In summary, the principal must have at least resolve access to call Glob,
+	// but may require additional access for certain patterns.
 	Glob(ctx _gen_context.T, pattern string, opts ..._gen_ipc.CallOpt) (reply GlobbableGlobCall, err error)
 }
 type Globbable interface {
@@ -39,6 +47,14 @@ type Globbable interface {
 type GlobbableService interface {
 
 	// Glob returns all matching entries at the given server.
+	//
+	// Glob returns an entry that exactly matches the pattern only if the
+	// principal has some access to the entry, and read or resolve access to the
+	// parent entry. However, if the pattern expands an entry "p" (e.g. "p/*",
+	// "p/...", "p/[abc]"), Glob returns child entries only if the principal has
+	// read access to "p".
+	// In summary, the principal must have at least resolve access to call Glob,
+	// but may require additional access for certain patterns.
 	Glob(context _gen_ipc.ServerContext, pattern string, stream GlobbableServiceGlobStream) (err error)
 }
 
@@ -265,7 +281,7 @@ func (__gen_s *ServerStubGlobbable) GetMethodTags(call _gen_ipc.ServerCall, meth
 	// This will change when it is replaced with Signature().
 	switch method {
 	case "Glob":
-		return []interface{}{security.Label(2)}, nil
+		return []interface{}{security.Label(1)}, nil
 	default:
 		return nil, nil
 	}

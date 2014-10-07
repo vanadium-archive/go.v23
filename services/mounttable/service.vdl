@@ -8,7 +8,15 @@ import (
 
 type Globbable interface {
 	// Glob returns all matching entries at the given server.
-	Glob(pattern string) stream<_, types.MountEntry> error {security.ReadLabel}
+	// 
+	// Glob returns an entry that exactly matches the pattern only if the
+	// principal has some access to the entry, and read or resolve access to the
+	// parent entry. However, if the pattern expands an entry "p" (e.g. "p/*",
+	// "p/...", "p/[abc]"), Glob returns child entries only if the principal has
+	// read access to "p".
+	// In summary, the principal must have at least resolve access to call Glob,
+	// but may require additional access for certain patterns.
+	Glob(pattern string) stream<_, types.MountEntry> error {security.ResolveLabel}
 }
 
 // MountTable defines the interface to talk to a mounttable.
