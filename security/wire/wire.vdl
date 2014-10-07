@@ -54,7 +54,7 @@ type Certificate struct {
 	Signature security.Signature
 }
 
-// ChainPublicID represents the chain implementation of PublicIDs from veyron/runtimes/google/security.
+// ChainPublicID represents the chain implementation of PublicIDs from veyron.io/veyron/veyron/runtimes/google/security.
 // It consists of a chain of certificates such that each certificate is signed using the private key
 // of the previous certificate (i.e., issuer). The certificate's signature is over its contents along
 // with the signature of the issuer certificate (this is done to bind this certificate to the issuer
@@ -66,7 +66,7 @@ type ChainPublicID struct {
 	Certificates []Certificate
 }
 
-// ChainPrivateID represents the chain implementation of PrivateIDs from veyron/runtimes/google/security.
+// ChainPrivateID represents the chain implementation of PrivateIDs from veyron.io/veyron/veyron/runtimes/google/security.
 type ChainPrivateID struct {
 	// PublicID associated with the PrivateID.
 	PublicID ChainPublicID
