@@ -1,29 +1,12 @@
-// Generate package doc via $(vomtestgen --help)
+// The following enables go generate to generate the doc.go file.
+// Things to look out for:
+// 1) go:generate evaluates double-quoted strings into a single argument.
+// 2) go:generate performs $NAME expansion, so the bash cmd can't contain '$'.
+// 3) We generate into a *.tmp file first, otherwise go run will pick up the
+//    initially empty *.go file, and fail.
+//
+//go:generate bash -c "{ echo -e '// This file was auto-generated via go generate.\n// DO NOT UPDATE MANUALLY\n\n/*' && veyron go run *.go -help && echo -e '*/\npackage main'; } > ./doc.go.tmp && mv ./doc.go.tmp ./doc.go"
 
-/*
-The vomtestgen tool generates vom test data, using the vomdata file as input,
-and creating a vdl file as output.
-
-Usage:
-   vomtestgen [flags] [vomdata]
-
-[vomdata] is the path to the vomdata input file, specified in the vdl config
-file format.  It must be of the form "NAME.vdl.config", and the output vdl
-file will be generated at "NAME.vdl".
-
-The config file should export a const []any that contains all of the values
-that will be tested.  Here's an example:
-   config = []any{
-     bool(true), uint64(123), string("abc"),
-   }
-
-If not specified, we'll try to find the file at its canonical location:
-   veyron.io/veyron/veyron2/vom2/testdata/vomdata.vdl.config
-
-The vomtestgen flags are:
-   -exts=.vdl: Comma-separated list of valid VDL file name extensions.
-   -max_errors=-1: Stop processing after this many errors, or -1 for unlimited.
-*/
 package main
 
 func main() {
