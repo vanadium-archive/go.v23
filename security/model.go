@@ -129,6 +129,8 @@ import (
 // Principal represents an entity capable of making or receiving RPCs.
 // Principals have a unique (public, private) key pair, have blessings bound
 // to them and can bless other principals.
+//
+// Multiple goroutines may invoke methods on a Principal simultaneously.
 type Principal interface {
 	// Bless binds extensions of blessings held by this principal to
 	// another principal (represented by its public key).
@@ -278,6 +280,8 @@ type BlessingRoots interface {
 //
 // Blessings objects are meant to be presented to other principals to authenticate
 // and authorize actions.
+//
+// Multiple goroutines may invoke methods on Blessings simultaneously.
 type Blessings interface {
 	// ForContext returns a validated set of (human-readable string) blessings
 	// presented by the principal. These returned blessings (strings) are guaranteed to:
@@ -305,6 +309,8 @@ type Blessings interface {
 }
 
 // Signer is the interface for signing arbitrary length messages using private keys.
+//
+// Multiple goroutines may invoke methods on a Signer simultaneously.
 type Signer interface {
 	// Sign signs an arbitrary length message using the private key associated
 	// with this Signer.
@@ -320,6 +326,8 @@ type Signer interface {
 
 // CaveatValidator is the interface for validating the restrictions specified
 // in a caveat.
+//
+// Multiple goroutines may invoke methods on a CaveatValidator simultaneously.
 type CaveatValidator interface {
 	// Validate returns nil iff the restriction encapsulated in the
 	// corresponding caveat has been satisfied by the provided context.
@@ -329,6 +337,8 @@ type CaveatValidator interface {
 // ThirdPartyCaveat is a restriction on the applicability of a blessing that is
 // considered satisfied only when accompanied with a specific "discharge" from
 // the third-party specified in the caveat.
+//
+// Multiple goroutines may invoke methods on a ThirdPartyCaveat simultaneously.
 type ThirdPartyCaveat interface {
 	// ThidPartyCaveat implements CaveatValidator, where Validate
 	// succeeds iff a discharge for the caveat is available in the Context.
@@ -360,6 +370,8 @@ type ThirdPartyCaveat interface {
 //
 // A discharge may have caveats of its own (including ThirdPartyCaveats) that
 // restrict the context in which the discharge is usable.
+//
+// Multiple goroutines may invoke methods on a Discharge simultaneously.
 type Discharge interface {
 	// ID returns the identifier for the ThirdPartyCaveat this discharge is
 	// associated with.
