@@ -3,7 +3,9 @@
 package i18n
 
 import "strings"
+import "time"
 import "testing"
+import "veyron.io/veyron/veyron2/context"
 
 // testLookupSetAndRemove tests Lookup, Set, and Set-to-empty on *cat.
 func testLookupSetAndRemove(t *testing.T, cat *Catalogue, catName string) {
@@ -183,7 +185,7 @@ func expectNormalizeLangID(t *testing.T, input string, want LangID) {
 	}
 }
 
-// TestNormalizeLangID tests NormalizeLangID()
+// TestNormalizeLangID tests NormalizeLangID().
 func TestNormalizeLangID(t *testing.T) {
 	expectNormalizeLangID(t, "en", "en")
 	expectNormalizeLangID(t, "en-US", "en-US")
@@ -198,8 +200,85 @@ func expectBaseLangID(t *testing.T, input LangID, want LangID) {
 	}
 }
 
-// TestBaseLangID tests BaseLangID()
+// TestBaseLangID tests BaseLangID().
 func TestBaseLangID(t *testing.T) {
 	expectBaseLangID(t, "en", "en")
 	expectBaseLangID(t, "en-US", "en")
+}
+
+// A dummyContext is a basic implementation of context.T for testing.
+type dummyContext map[interface{}]interface{}
+
+// Deadline stubs out context.T's call of the same name.
+func (dc dummyContext) Deadline() (deadline time.Time, ok bool) {
+	return time.Time{}, false
+}
+
+// Done stubs out context.T's call of the same name.
+func (dc dummyContext) Done() (c <-chan struct{}) {
+	return c
+}
+
+// Err stubs out context.T's call of the same name.
+func (dc dummyContext) Err() error {
+	return nil
+}
+
+// Runtime stubs out context.T's call of the same name.
+func (dc dummyContext) Runtime() interface{} {
+	return nil
+}
+
+// Value returns the value corresponding to key in dc's Value map.
+// It implements context.T's Value function.
+func (dc dummyContext) Value(key interface{}) interface{} {
+	return dc[key]
+}
+
+// WithCancel stubs out context.T's call of the same name.
+func (dc dummyContext) WithCancel() (ctx context.T, cancel context.CancelFunc) {
+	return nil, nil
+}
+
+// WithDeadline stubs out context.T's call of the same name.
+func (dc dummyContext) WithDeadline(deadline time.Time) (context.T, context.CancelFunc) {
+	return nil, nil
+}
+
+// WithTimeout stubs out context.T's call of the same name.
+func (dc dummyContext) WithTimeout(timeout time.Duration) (context.T, context.CancelFunc) {
+	return nil, nil
+}
+
+// WithValue returns a dummyContext with Value(key)==val.
+func (dc dummyContext) WithValue(key interface{}, val interface{}) context.T {
+	newDC := make(dummyContext)
+	for k, v := range dc {
+		newDC[k] = v
+	}
+	newDC[key] = val
+	return newDC
+}
+
+// TestBaseLangID tests LangIDFromContext() and ContextWithLangID.
+func TestLangIDFromContext(t *testing.T) {
+	var dcWithoutLangID context.T = make(dummyContext)
+	dcWithEN := ContextWithLangID(dcWithoutLangID, "en")
+	dcWithFR := ContextWithLangID(dcWithEN, "fr")
+	var got LangID
+
+	got = LangIDFromContext(dcWithoutLangID)
+	if got != NoLangID {
+		t.Errorf("LangIDFromContext(dcWithoutLangID); got %v, want \"\"", got)
+	}
+
+	got = LangIDFromContext(dcWithEN)
+	if got != LangID("en") {
+		t.Errorf("LangIDFromContext(dcWithEN); got %v, want \"en\"", got)
+	}
+
+	got = LangIDFromContext(dcWithFR)
+	if got != LangID("fr") {
+		t.Errorf("LangIDFromContext(dcWithFR); got %v, want \"fr\"", got)
+	}
 }

@@ -30,9 +30,11 @@ package i18n
 import "bufio"
 import "fmt"
 import "io"
+import "os"
 import "strconv"
 import "strings"
 import "sync"
+import "veyron.io/veyron/veyron2/context"
 
 // A MsgID identifies a message, without specifying its language.
 type MsgID string
@@ -41,6 +43,9 @@ type MsgID string
 // By convention it should be an IETF language tag:
 //   http://en.wikipedia.org/wiki/IETF_language_tag
 type LangID string
+
+// NoLangID is the empty LangID.
+const NoLangID LangID = ""
 
 // A Catalogue maps (LangID, MsgID) pairs to message format strings.
 type Catalogue struct {
@@ -73,6 +78,25 @@ func (cat *Catalogue) Format(langID LangID, msgID MsgID, v ...interface{}) strin
 		}
 	}
 	return FormatParams(formatStr, v...)
+}
+
+// A langIDKey is used as a key for context.T's Value() map.
+type langIDKey struct{}
+
+// LangIDFromContext returns the LangID associated with a context.T,
+// or the empty LangID if there is none.
+func LangIDFromContext(ctx context.T) (langID LangID) {
+	if ctx != nil {
+		v := ctx.Value(langIDKey{})
+		langID, _ = v.(LangID)
+	}
+	return langID
+}
+
+// ContextWithLangID returns a context based on ctx that has the
+// language ID langID.
+func ContextWithLangID(ctx context.T, langID LangID) context.T {
+	return ctx.WithValue(langIDKey{}, langID)
 }
 
 // Lookup returns the format corresponding to a particular language and MsgID.
@@ -292,4 +316,24 @@ func NormalizeLangID(langID string) LangID {
 // segment of an IETF Languyage ID.
 func BaseLangID(langID LangID) LangID {
 	return langID[:skipNotIn(string(langID), 0, "-")]
+}
+
+// LangIDFromEnv returns a language ID for messages based on the programme's
+// environment variables.  This is suitable only for code not running in the
+// context of an RPC; code in an RPC context should use language information
+// from the RPC context.
+func LangIDFromEnv() LangID {
+	// The order of precedence of these environment variables is taken from
+	// the POSIX definitions in IEEE Std 1003.1-2001.
+	langID := os.Getenv("LC_ALL")
+	if langID == "" {
+		langID = os.Getenv("LC_MESSAGES")
+	}
+	if langID == "" {
+		langID = os.Getenv("LANG")
+	}
+	if langID == "C" || langID == "" {
+		langID = "en-US"
+	}
+	return NormalizeLangID(langID)
 }

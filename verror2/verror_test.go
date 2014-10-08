@@ -2,17 +2,20 @@ package verror2
 
 import (
 	"errors"
+	"runtime"
+	"strings"
 	"testing"
+	"time"
+	"veyron.io/veyron/veyron2/context"
 	"veyron.io/veyron/veyron2/i18n"
 	"veyron.io/veyron/veyron2/verror"
 )
 
 var (
-	// Some error ids.
-	idA      = ID{"A", Failed}
-	idB      = ID{"B", Backoff}
-	idC      = ID{"C", Failed}
-	idAPrime = ID{"A", Backoff}
+	// Some error IDActions.
+	idActionA = IDAction{"A", NoRetry}
+	idActionB = IDAction{"B", RetryBackoff}
+	idActionC = IDAction{"C", NoRetry}
 
 	// Some languages
 	en = i18n.LangID("en")
@@ -56,132 +59,171 @@ var (
 	gEN E
 	gFR E
 	gDE E
+
+	v2EN  E
+	v2FR0 E
+	v2FR1 E
+	v2DE  E
 )
 
 func init() {
 	cat := i18n.Cat()
 	// Set messages for English and French.  Do not set messages for
 	// German, to test the case where the messages are not present.
-	cat.Set(en, idA.MsgID, "{1}: error A: {_}")
-	cat.Set(fr, idA.MsgID, "{1}: erreur A: {_}")
+	cat.Set(en, i18n.MsgID(idActionA.ID), "{1} {2} error A {_}")
+	cat.Set(fr, i18n.MsgID(idActionA.ID), "{1} {2} erreur A {_}")
 
-	cat.Set(en, idB.MsgID, "{1}: problem B: {_}")
-	cat.Set(fr, idB.MsgID, "{1}: problème B: {_}")
+	cat.Set(en, i18n.MsgID(idActionB.ID), "{1} {2} problem B {_}")
+	cat.Set(fr, i18n.MsgID(idActionB.ID), "{1} {2} problème B {_}")
 
-	// Set English and French messages for Unknown and NotFound
+	// Set English and French messages for Unknown and NoExist
 	// to ones the test can predict.
 	// Delete any German messages that may be present.
-	cat.Set(en, Unknown.MsgID, "{1}: unknown error: {_}")
-	cat.Set(fr, Unknown.MsgID, "{1}: erreur inconnu: {_}")
-	cat.Set(de, Unknown.MsgID, "")
+	cat.Set(en, i18n.MsgID(Unknown.ID), "{1} {2} unknown error {_}")
+	cat.Set(fr, i18n.MsgID(Unknown.ID), "{1} {2} erreur inconnu {_}")
+	cat.Set(de, i18n.MsgID(Unknown.ID), "")
 
-	cat.Set(en, NotFound.MsgID, "{1}: not found: {_}")
-	cat.Set(fr, NotFound.MsgID, "{1}: pas trouvé: {_}")
-	cat.Set(de, NotFound.MsgID, "")
+	cat.Set(en, i18n.MsgID(NoExist.ID), "{1} {2} not found {_}")
+	cat.Set(fr, i18n.MsgID(NoExist.ID), "{1} {2} pas trouvé {_}")
+	cat.Set(de, i18n.MsgID(NoExist.ID), "")
 
-	// A first error ID.
-	aEN0 = Make(idA, en, "aEN0", 0)
-	aEN1 = Make(idA, en, "aEN1", 1, 2)
-	aFR0 = Make(idA, fr, "aFR0", 0)
-	aFR1 = Make(idA, fr, "aFR1", 1, 2)
-	aDE0 = Make(idA, de, "aDE0", 0)
-	aDE1 = Make(idA, de, "aDE1", 1, 2)
+	// Set up a context that advertises French, on a server called FooServer,
+	// running an operation called aFR0.
+	ctx := context.T(new(dummyContext))
+	ctx = i18n.ContextWithLangID(ctx, fr)
+	ctx = ContextWithComponentName(ctx, "FooServer")
+	ctx = ContextWithOpName(ctx, "aFR1")
 
-	// A second error ID.
-	bEN0 = Make(idB, en, "bEN0", 0)
-	bEN1 = Make(idB, en, "bEN1", 1, 2)
-	bFR0 = Make(idB, fr, "bFR0", 0)
-	bFR1 = Make(idB, fr, "bFR1", 1, 2)
-	bDE0 = Make(idB, de, "bDE0", 0)
-	bDE1 = Make(idB, de, "bDE1", 1, 2)
+	// A first IDAction in various languages.
+	aEN0 = ExplicitMake(idActionA, en, "server", "aEN0", 0)
+	aEN1 = ExplicitMake(idActionA, en, "server", "aEN1", 1, 2)
+	aFR0 = ExplicitMake(idActionA, fr, "server", "aFR0", 0)
+	aFR1 = Make(idActionA, ctx, 1, 2)
+	aDE0 = ExplicitMake(idActionA, de, "server", "aDE0", 0)
+	aDE1 = ExplicitMake(idActionA, de, "server", "aDE1", 1, 2)
 
-	// The Unknown error ID.
-	uEN0 = Make(Unknown, en, "uEN0", 0)
-	uEN1 = Make(Unknown, en, "uEN1", 1, 2)
-	uFR0 = Make(Unknown, fr, "uFR0", 0)
-	uFR1 = Make(Unknown, fr, "uFR1", 1, 2)
-	uDE0 = Make(Unknown, de, "uDE0", 0)
-	uDE1 = Make(Unknown, de, "uDE1", 1, 2)
+	// A second IDAction in various languages.
+	bEN0 = ExplicitMake(idActionB, en, "server", "bEN0", 0)
+	bEN1 = ExplicitMake(idActionB, en, "server", "bEN1", 1, 2)
+	bFR0 = ExplicitMake(idActionB, fr, "server", "bFR0", 0)
+	bFR1 = ExplicitMake(idActionB, fr, "server", "bFR1", 1, 2)
+	bDE0 = ExplicitMake(idActionB, de, "server", "bDE0", 0)
+	bDE1 = ExplicitMake(idActionB, de, "server", "bDE1", 1, 2)
 
-	// The NotFound error ID.
-	nEN0 = Make(NotFound, en, "nEN0", 0)
-	nEN1 = Make(NotFound, en, "nEN1", 1, 2)
-	nFR0 = Make(NotFound, fr, "nFR0", 0)
-	nFR1 = Make(NotFound, fr, "nFR1", 1, 2)
-	nDE0 = Make(NotFound, de, "nDE0", 0)
-	nDE1 = Make(NotFound, de, "nDE1", 1, 2)
+	// The Unknown error in various languages.
+	uEN0 = ExplicitMake(Unknown, en, "server", "uEN0", 0)
+	uEN1 = ExplicitMake(Unknown, en, "server", "uEN1", 1, 2)
+	uFR0 = ExplicitMake(Unknown, fr, "server", "uFR0", 0)
+	uFR1 = ExplicitMake(Unknown, fr, "server", "uFR1", 1, 2)
+	uDE0 = ExplicitMake(Unknown, de, "server", "uDE0", 0)
+	uDE1 = ExplicitMake(Unknown, de, "server", "uDE1", 1, 2)
+
+	// The NoExist error in various languages.
+	nEN0 = ExplicitMake(NoExist, en, "server", "nEN0", 0)
+	nEN1 = ExplicitMake(NoExist, en, "server", "nEN1", 1, 2)
+	nFR0 = ExplicitMake(NoExist, fr, "server", "nFR0", 0)
+	nFR1 = ExplicitMake(NoExist, fr, "server", "nFR1", 1, 2)
+	nDE0 = ExplicitMake(NoExist, de, "server", "nDE0", 0)
+	nDE1 = ExplicitMake(NoExist, de, "server", "nDE1", 1, 2)
 
 	// Errors derived from verror (as opposed to verror2)
 	verr := verror.Existsf("verror %s", "Exists")
-	vEN = Convert(Unknown, en, verr)
-	vFR = Convert(Unknown, fr, verr)
-	vDE = Convert(Unknown, de, verr)
+	// Set the French for verror.Exists.
+	cat.Set(fr, i18n.MsgID(verror.Exists), "{1} {2} déjà en existence {_}")
+	vEN = ExplicitConvert(Unknown, en, "server", "op", verr)
+	vFR = ExplicitConvert(Unknown, fr, "server", "op", verr)
+	vDE = ExplicitConvert(Unknown, de, "server", "op", verr)
 
 	// Errors derived from Go errors.
 	gerr := errors.New("Go error")
-	gEN = Convert(Unknown, en, gerr)
-	gFR = Convert(Unknown, fr, gerr)
-	gDE = Convert(Unknown, de, gerr)
+	gEN = ExplicitConvert(Unknown, en, "server", "op", gerr)
+	gFR = ExplicitConvert(Unknown, fr, "server", "op", gerr)
+	gDE = ExplicitConvert(Unknown, de, "server", "op", gerr)
+
+	// Errors derived from other verror2 errors.
+	// eEN1 has an English message.
+	v2EN = ExplicitConvert(Unknown, en, "", "", aEN1)        // still in English.
+	v2FR0 = ExplicitConvert(Unknown, fr, "", "", aEN1)       // converted to French, with original server and op.
+	v2FR1 = Convert(Unknown, ctx, aEN1)                      // converted to French, with FooServer aFR1
+	v2DE = ExplicitConvert(Unknown, de, "other", "op", aEN1) // converted to generic, since we lack German.
 }
 
 func TestBasic(t *testing.T) {
 	var tests = []struct {
-		err error
-		id  ID
-		msg string
+		err      error
+		idAction IDAction
+		msg      string
 	}{
-		{aEN0, idA, "aEN0: error A: 0"},
-		{aEN1, idA, "aEN1: error A: 1 2"},
-		{aFR0, idA, "aFR0: erreur A: 0"},
-		{aFR1, idA, "aFR1: erreur A: 1 2"},
-		{aDE0, idA, "A: aDE0 0"},
-		{aDE1, idA, "A: aDE1 1 2"},
+		{aEN0, idActionA, "server aEN0 error A 0"},
+		{aEN1, idActionA, "server aEN1 error A 1 2"},
+		{aFR0, idActionA, "server aFR0 erreur A 0"},
+		{aFR1, idActionA, "FooServer aFR1 erreur A 1 2"},
+		{aDE0, idActionA, "A: server aDE0 0"},
+		{aDE1, idActionA, "A: server aDE1 1 2"},
 
-		{bEN0, idB, "bEN0: problem B: 0"},
-		{bEN1, idB, "bEN1: problem B: 1 2"},
-		{bFR0, idB, "bFR0: problème B: 0"},
-		{bFR1, idB, "bFR1: problème B: 1 2"},
-		{bDE0, idB, "B: bDE0 0"},
-		{bDE1, idB, "B: bDE1 1 2"},
+		{bEN0, idActionB, "server bEN0 problem B 0"},
+		{bEN1, idActionB, "server bEN1 problem B 1 2"},
+		{bFR0, idActionB, "server bFR0 problème B 0"},
+		{bFR1, idActionB, "server bFR1 problème B 1 2"},
+		{bDE0, idActionB, "B: server bDE0 0"},
+		{bDE1, idActionB, "B: server bDE1 1 2"},
 
-		{nEN0, NotFound, "nEN0: not found: 0"},
-		{nEN1, NotFound, "nEN1: not found: 1 2"},
-		{nFR0, NotFound, "nFR0: pas trouvé: 0"},
-		{nFR1, NotFound, "nFR1: pas trouvé: 1 2"},
-		{nDE0, NotFound, "veyron.io/veyron/veyron2/verror.NotFound: nDE0 0"},
-		{nDE1, NotFound, "veyron.io/veyron/veyron2/verror.NotFound: nDE1 1 2"},
+		{nEN0, NoExist, "server nEN0 not found 0"},
+		{nEN1, NoExist, "server nEN1 not found 1 2"},
+		{nFR0, NoExist, "server nFR0 pas trouvé 0"},
+		{nFR1, NoExist, "server nFR1 pas trouvé 1 2"},
+		{nDE0, NoExist, "veyron.io/veyron/veyron2/verror.NoExist: server nDE0 0"},
+		{nDE1, NoExist, "veyron.io/veyron/veyron2/verror.NoExist: server nDE1 1 2"},
 
-		{vEN, Exists, "verror Exists"},
-		{vFR, Exists, "verror Exists"},
-		{vDE, Exists, "verror Exists"},
+		{vEN, Exists, "server op Already exists verror Exists"},
+		{vFR, Exists, "server op déjà en existence verror Exists"},
+		{vDE, Exists, "veyron.io/veyron/veyron2/verror.Exists: server op verror Exists"},
 
-		{gEN, Unknown, "Error: unknown error: Go error"},
-		{gFR, Unknown, "Error: erreur inconnu: Go error"},
-		{gDE, Unknown, "veyron.io/veyron/veyron2/verror.Unknown: Error Go error"},
+		{gEN, Unknown, "server op unknown error Go error"},
+		{gFR, Unknown, "server op erreur inconnu Go error"},
+		{gDE, Unknown, "veyron.io/veyron/veyron2/verror.Unknown: server op Go error"},
+
+		{v2EN, idActionA, "server aEN1 error A 1 2"},
+		{v2FR0, idActionA, "server aEN1 erreur A 1 2"},
+		{v2FR1, idActionA, "FooServer aFR1 erreur A 1 2"},
+		{v2DE, idActionA, "A: other op 1 2"},
 	}
 
-	for _, test := range tests {
-		if ErrorID(test.err) != test.id {
-			t.Errorf("ErrorID(%#v); got %v, want %v", test.err, ErrorID(test.err), test.id)
+	for i, test := range tests {
+		if ErrorID(test.err) != test.idAction.ID {
+			t.Errorf("%d: ErrorID(%#v); got %v, want %v", i, test.err, ErrorID(test.err), test.idAction.ID)
+		}
+		if Action(test.err) != test.idAction.Action {
+			t.Errorf("%d: Action(%#v); got %v, want %v", i, test.err, Action(test.err), test.idAction.Action)
 		}
 		if test.err.Error() != test.msg {
-			t.Errorf("%#v.Error(); got %q, want %q", test.err, test.err.Error(), test.msg)
+			t.Errorf("%d: %#v.Error(); got %q, want %q", i, test.err, test.err.Error(), test.msg)
 		}
-		if !Is(test.err, test.id) {
-			t.Errorf("Is(%#v, %s); got true, want false", test.err, test.id)
+		if !Is(test.err, test.idAction.ID) {
+			t.Errorf("%d: Is(%#v, %s); got true, want false", i, test.err, test.idAction.ID)
 		}
-		if Is(test.err, idC) {
-			t.Errorf("Is(%#v, %s); got true, want false", test.err, idC)
+		if Is(test.err, idActionC.ID) {
+			t.Errorf("%d: Is(%#v, %s); got true, want false", i, test.err, idActionC.ID)
 		}
-		if Is(test.err, idAPrime) {
-			t.Errorf("Is(%#v, %s); got true, want false", test.err, idAPrime)
+
+		stack := Stack(test.err)
+		if stack == nil {
+			t.Errorf("Stack(%q) got nil, want non-nil", ErrorID(test.err))
+		} else if len(stack) < 1 || 2 < len(stack) {
+			t.Errorf("len(Stack(%q)) got %d, want 1 or 2", ErrorID(test.err), len(stack))
+		} else {
+			fnc := runtime.FuncForPC(stack[0])
+			if !strings.Contains(fnc.Name(), "verror2.init") {
+				t.Errorf("Func.Name(Stack(%q)[0]) got %q, want \"verror2.init\"",
+					ErrorID(test.err), fnc.Name())
+			}
 		}
 	}
 }
 
 func TestEqual(t *testing.T) {
 	var equivalanceClasses = [][]E{
-		{aEN0, aEN1, aDE0, aDE1, aDE0, aDE1},
+		{aEN0, aEN1, aDE0, aDE1, aDE0, aDE1, v2EN, v2FR0, v2FR1, v2DE},
 		{bEN0, bEN1, bDE0, bDE1, bDE0, bDE1},
 		{nEN0, nEN1, nDE0, nDE1, nDE0, nDE1},
 		{vEN, vFR, vDE},
@@ -199,4 +241,60 @@ func TestEqual(t *testing.T) {
 			}
 		}
 	}
+}
+
+// A dummyContext is a basic implementation of context.T for testing.
+type dummyContext struct {
+	value map[interface{}]interface{}
+}
+
+// Deadline stubs out context.T's call of the same name.
+func (dc *dummyContext) Deadline() (deadline time.Time, ok bool) {
+	return time.Time{}, false
+}
+
+// Done stubs out context.T's call of the same name.
+func (dc *dummyContext) Done() (c <-chan struct{}) {
+	return c
+}
+
+// Err stubs out context.T's call of the same name.
+func (dc *dummyContext) Err() error {
+	return nil
+}
+
+// Runtime stubs out context.T's call of the same name.
+func (dc *dummyContext) Runtime() interface{} {
+	return nil
+}
+
+// Value returns the value corresponding to key in dc's Value map.
+// It implements context.T's Value function.
+func (dc *dummyContext) Value(key interface{}) interface{} {
+	return dc.value[key]
+}
+
+// WithCancel stubs out context.T's call of the same name.
+func (dc *dummyContext) WithCancel() (ctx context.T, cancel context.CancelFunc) {
+	return nil, nil
+}
+
+// WithDeadline stubs out context.T's call of the same name.
+func (dc *dummyContext) WithDeadline(deadline time.Time) (context.T, context.CancelFunc) {
+	return nil, nil
+}
+
+// WithTimeout stubs out context.T's call of the same name.
+func (dc *dummyContext) WithTimeout(timeout time.Duration) (context.T, context.CancelFunc) {
+	return nil, nil
+}
+
+// WithValue returns a dummyContext with Value(key)==val.
+func (dc *dummyContext) WithValue(key interface{}, val interface{}) context.T {
+	newDC := &dummyContext{make(map[interface{}]interface{})}
+	for key, value := range dc.value {
+		newDC.value[key] = value
+	}
+	newDC.value[key] = val
+	return newDC
 }
