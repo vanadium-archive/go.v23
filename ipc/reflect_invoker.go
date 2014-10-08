@@ -20,6 +20,8 @@ type reflectInvoker struct {
 	methods map[string]methodInfo
 }
 
+var _ Invoker = (*reflectInvoker)(nil)
+
 type methodInfo struct {
 	funcVal  reflect.Value
 	rtInArgs []reflect.Type
