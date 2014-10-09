@@ -70,12 +70,14 @@ func (errStore) Set(Blessings, BlessingPattern) (Blessings, error) { return nil,
 func (errStore) ForPeer(peerBlessings ...string) Blessings         { return nil }
 func (errStore) SetDefault(blessings Blessings) error              { return errNilStore }
 func (errStore) Default() Blessings                                { return nil }
+func (errStore) DebugString() string                               { return errNilStore.Error() }
 func (s errStore) PublicKey() PublicKey                            { return s.key }
 
 type errRoots struct{}
 
 func (errRoots) Add(PublicKey, BlessingPattern) error { return errNilRoots }
 func (errRoots) Recognized(PublicKey, string) error   { return errNilRoots }
+func (errRoots) DebugString() string                  { return errNilRoots.Error() }
 
 type principal struct {
 	signer Signer

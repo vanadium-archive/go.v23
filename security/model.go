@@ -248,6 +248,11 @@ type BlessingStore interface {
 	// this store hosts blessings.
 	PublicKey() PublicKey
 
+	// DebugString return a human-readable string description of the store.
+	// This description is detailed and lists out the contents of the store.
+	// Use fmt.Sprintf("%v", ...) for a more succinct description.
+	DebugString() string
+
 	// TODO(ataly,ashankar): Might add methods so that discharges
 	// can be persisted. e.g,
 	// // AddDischarge adds a Discharge to the store iff there is a
@@ -272,6 +277,11 @@ type BlessingRoots interface {
 	// Recognized returns nil iff the provided root is recognized
 	// as an authority on a pattern that is matched by blessing.
 	Recognized(root PublicKey, blessing string) error
+
+	// DebugString returns a human-readable string description of the roots.
+	// This description is detailed and lists out all the roots. Use
+	// fmt.Sprintf("%v", ...) for a more succinct description.
+	DebugString() string
 }
 
 // Blessings encapsulates all the cryptographic operations required to

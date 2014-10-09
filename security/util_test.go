@@ -42,6 +42,10 @@ func (r *roots) Recognized(root PublicKey, blessing string) error {
 	return fmt.Errorf("root %v not recognized for blessing %q", root, blessing)
 }
 
+func (*roots) DebugString() string {
+	return "BlessingRoots implementation for testing purposes only"
+}
+
 type context struct {
 	method, name, suffix string
 	label                Label
