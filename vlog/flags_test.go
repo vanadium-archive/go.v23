@@ -19,7 +19,7 @@ func TestHelperProcess(t *testing.T) {
 }
 
 func init() {
-	modules.RegisterChild("child", child)
+	modules.RegisterChild("child", "", child)
 }
 
 func child(stdin io.Reader, stdout, stderr io.Writer, env map[string]string, args ...string) error {
@@ -51,7 +51,6 @@ func child(stdin io.Reader, stdout, stderr io.Writer, env map[string]string, arg
 func TestFlags(t *testing.T) {
 	sh := modules.NewShell()
 	defer sh.Cleanup(nil, nil)
-	sh.AddSubprocess("child", "")
 	h, err := sh.Start("child")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
