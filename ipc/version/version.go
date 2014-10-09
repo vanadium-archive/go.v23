@@ -15,6 +15,14 @@ const (
 	// IPCVersion3 uses channel-binding for authentication.
 	// Versions prior to this have broken authentication.
 	IPCVersion3
+
+	// dummy version so that the numeric value of IPCVersion4 is 4
+	dummyVersion3
+
+	// IPCVersion4 uses the new security model (Principal and Blessings objects).
+	// TODO(ashankar,ataly): Remove this comment and all versions prior to version
+	// 3 when the transition to the new model is complete.
+	IPCVersion4
 )
 
 // IPCVersionRange allows you to optionally specify a range of versions to
