@@ -18,14 +18,10 @@ import (
 )
 
 // FakeServerCall implements ipc.ServerContext.
-type FakeServerCall struct {
-	id security.PublicID
-}
+type FakeServerCall struct{}
 
-func NewFakeServerCall(id security.PublicID) *FakeServerCall {
-	return &FakeServerCall{
-		id: id,
-	}
+func NewFakeServerCall() *FakeServerCall {
+	return &FakeServerCall{}
 }
 
 func (*FakeServerCall) Deadline() (deadline time.Time, ok bool) {
@@ -50,8 +46,8 @@ func (*FakeServerCall) Name() string                                         { r
 func (*FakeServerCall) Suffix() string                                       { return "" }
 func (*FakeServerCall) Label() (l security.Label)                            { return }
 func (*FakeServerCall) Discharges() map[string]security.Discharge            { return nil }
-func (ctx *FakeServerCall) LocalID() security.PublicID                       { return ctx.id }
-func (ctx *FakeServerCall) RemoteID() security.PublicID                      { return ctx.id }
+func (*FakeServerCall) LocalID() security.PublicID                           { return nil }
+func (*FakeServerCall) RemoteID() security.PublicID                          { return nil }
 func (*FakeServerCall) LocalPrincipal() security.Principal                   { return nil }
 func (*FakeServerCall) LocalBlessings() security.Blessings                   { return nil }
 func (*FakeServerCall) RemoteBlessings() security.Blessings                  { return nil }
@@ -63,15 +59,13 @@ func (*FakeServerCall) IsClosed() bool                                       { r
 func (*FakeServerCall) Send(item interface{}) error                          { return nil }
 func (*FakeServerCall) Recv(itemptr interface{}) error                       { return nil }
 
-var testPublicID = security.FakePublicID("test")
-
 var (
-	call1 = NewFakeServerCall(testPublicID)
-	call2 = NewFakeServerCall(testPublicID)
-	call3 = NewFakeServerCall(testPublicID)
-	call4 = NewFakeServerCall(testPublicID)
-	call5 = NewFakeServerCall(testPublicID)
-	call6 = NewFakeServerCall(testPublicID)
+	call1 = NewFakeServerCall()
+	call2 = NewFakeServerCall()
+	call3 = NewFakeServerCall()
+	call4 = NewFakeServerCall()
+	call5 = NewFakeServerCall()
+	call6 = NewFakeServerCall()
 )
 
 const defaultLabel = security.AdminLabel

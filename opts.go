@@ -68,6 +68,11 @@ type RuntimeIDOpt struct{ security.PrivateID }
 
 func (RuntimeIDOpt) ROpt() {}
 
+// TODO(ashankar): Remove this once the transition to the new model is complete
+type ForceNewSecurityModel struct{}
+
+func (ForceNewSecurityModel) ROpt() {}
+
 // RuntimeID returns an option specifiying the PrivateID to be used by the
 // local process.
 func RuntimeID(id security.PrivateID) RuntimeIDOpt { return RuntimeIDOpt{id} }
