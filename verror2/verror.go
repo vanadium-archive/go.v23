@@ -65,6 +65,7 @@ import "veyron.io/veyron/veyron2/vom" // For type registration
 import "veyron.io/veyron/veyron2/context"
 import "veyron.io/veyron/veyron2/i18n"
 import "veyron.io/veyron/veyron2/verror" // While converting from verror to verror2
+import "veyron.io/veyron/veyron2/vtrace"
 
 // An ActionCode represents the action expected to be performed by a typical client
 // receiving an error that perhaps it does not understand.
@@ -219,19 +220,10 @@ func ExplicitMake(idAction IDAction, langID i18n.LangID, componentName string, o
 // A componentKey is used as a key for context.T's Value() map.
 type componentKey struct{}
 
-// An opKey is used as a key for context.T's Value() map.
-type opKey struct{}
-
 // ContextWithComponentName returns a context based on ctx that has the
 // componentName that Make() and Convert() can use.
 func ContextWithComponentName(ctx context.T, componentName string) context.T {
 	return ctx.WithValue(componentKey{}, componentName)
-}
-
-// ContextWithOpName returns a context based on ctx that has the
-// opName that Make() and Convert() can use.
-func ContextWithOpName(ctx context.T, opName string) context.T {
-	return ctx.WithValue(opKey{}, opName)
 }
 
 // Make is like ExplicitMake(), but obtains the language, component name, and operation
@@ -253,8 +245,7 @@ func Make(idAction IDAction, ctx context.T, v ...interface{}) E {
 	if ctx != nil {
 		value := ctx.Value(componentKey{})
 		componentName, _ = value.(string)
-		value = ctx.Value(opKey{})
-		opName, _ = value.(string)
+		opName = vtrace.FromContext(ctx).Name()
 	}
 
 	stack := make([]uintptr, 1)
@@ -360,8 +351,7 @@ func Convert(idAction IDAction, ctx context.T, err error) E {
 	if ctx != nil {
 		value := ctx.Value(componentKey{})
 		componentName, _ = value.(string)
-		value = ctx.Value(opKey{})
-		opName, _ = value.(string)
+		opName = vtrace.FromContext(ctx).Name()
 	}
 	stack := make([]uintptr, 1)
 	runtime.Callers(2, stack)

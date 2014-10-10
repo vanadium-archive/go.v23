@@ -11,6 +11,7 @@ import (
 	google_rt "veyron.io/veyron/veyron/runtimes/google/rt"
 
 	"veyron.io/veyron/veyron2"
+	"veyron.io/veyron/veyron2/verror2"
 )
 
 type Factory func(opts ...veyron2.ROpt) (veyron2.Runtime, error)
@@ -82,6 +83,7 @@ func Init(opts ...veyron2.ROpt) veyron2.Runtime {
 		if err != nil {
 			panic(fmt.Sprintf("failed to initialize global runtime: %s", err))
 		}
+		verror2.SetDefaultContext(globalR.NewContext())
 	})
 	return globalR
 }
