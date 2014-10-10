@@ -38,8 +38,15 @@ type Endpoint interface {
 	// Version 2 is the current version for RPC:
 	//   @2@<protocol>@<address>@<routingid>@<rpc version>@<rpc codec>@@
 	//
+	// Version 3 is the new version for RPC:
+	//   @3@<protocol>@<address>@<routingid>@<rpc version>@<rpc codec>@m|s@@
+	//
 	// Along with Network, this method ensures that Endpoint implements net.Addr.
 	String() string
+
+	// VersionedString returns a string in the specified format. If the version
+	// number is unsupported, the current 'default' version will be used.
+	VersionedString(version int) string
 
 	// RoutingID returns the RoutingID associated with this Endpoint.
 	RoutingID() RoutingID
@@ -51,6 +58,9 @@ type Endpoint interface {
 	// whose network is "tcp" and string representation is <host>:<port>,
 	// than the full Veyron endpoint as per the String method above.
 	Addr() net.Addr
+
+	// ServesMountTable returns true if this endpoint serves a mount table.
+	ServesMountTable() bool
 }
 
 // MountedServer represents a server mounted under an object name.
@@ -95,7 +105,8 @@ func (ReplaceMountOpt) NSMountOpt() {}
 // ServesMountTableOpt means the target is a mount table.
 type ServesMountTableOpt bool
 
-func (ServesMountTableOpt) NSMountOpt() {}
+func (ServesMountTableOpt) NSMountOpt()  {}
+func (ServesMountTableOpt) EndpointOpt() {}
 
 // TODO(p): Perhaps add an ACL Opt.
 
