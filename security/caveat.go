@@ -31,6 +31,13 @@ func MethodCaveat(method string, additionalMethods ...string) (Caveat, error) {
 	return NewCaveat(methodCaveat(append(additionalMethods, method)))
 }
 
+/*
+// WARNING: Please do not use this caveat just yet. There is a possible "infinite loop"
+// problem when both security.Context.LocalBlessings and security.Context.RemoteBlessings
+// have a peer-blessings caveat in them.
+//
+// TODO(ashankar,ataly): Fix the infinite loop, or remove this caveat.
+//
 // PeerBlessingsCaveat returns a Caveat that validates iff the peer has a blessing
 // that matches one of the patterns provided as an argument to this function.
 //
@@ -40,6 +47,7 @@ func MethodCaveat(method string, additionalMethods ...string) (Caveat, error) {
 func PeerBlessingsCaveat(pattern BlessingPattern, additionalPatterns ...BlessingPattern) (Caveat, error) {
 	return NewCaveat(peerBlessingsCaveat(append(additionalPatterns, pattern)))
 }
+*/
 
 // digest returns a hash of the contents of c.
 func (c *Caveat) digest(hash Hash) []byte { return hash.sum(c.ValidatorVOM) }
@@ -77,16 +85,21 @@ func (c methodCaveat) Validate(ctx Context) error {
 
 func (c peerBlessingsCaveat) Validate(ctx Context) error {
 	patterns := []BlessingPattern(c)
-	if ctx.LocalID() == nil {
-		return fmt.Errorf("%T=%v fails validation since ctx.LocalID is nil", c, c)
+	var self []string
+	switch {
+	case ctx.LocalBlessings() != nil:
+		self = ctx.LocalBlessings().ForContext(ctx)
+	case ctx.LocalID() != nil:
+		self = ctx.LocalID().Names()
+	default:
+		return fmt.Errorf("%T=%v failed validation since ctx.LocalBlessings and ctx.LocalID is nil", c, c)
 	}
-	peerblessings := ctx.LocalID().Names()
 	for _, p := range patterns {
-		if p.MatchedBy(peerblessings...) {
+		if p.MatchedBy(self...) {
 			return nil
 		}
 	}
-	return fmt.Errorf("%T=%v fails validation for peer with blessings %v", c, c, peerblessings)
+	return fmt.Errorf("%T=%v fails validation for peer with blessings %v", c, c, self)
 }
 
 // DEPRECATED: TODO(ashankar,ataly): Remove when switching from PublicID/PrivateID to Blessings/Principal.

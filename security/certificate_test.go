@@ -5,6 +5,7 @@ import (
 	"crypto/elliptic"
 	"reflect"
 	"testing"
+	"time"
 )
 
 func TestCertificateDigest(t *testing.T) {
@@ -27,7 +28,7 @@ func TestCertificateDigest(t *testing.T) {
 			reflect.TypeOf(""):         []reflect.Value{v("a"), v("b")},
 			reflect.TypeOf(Hash("")):   []reflect.Value{v(SHA256Hash), v(SHA384Hash)},
 			reflect.TypeOf([]byte{}):   []reflect.Value{v([]byte{1}), v([]byte{2})},
-			reflect.TypeOf([]Caveat{}): []reflect.Value{v([]Caveat{newCaveat(MethodCaveat("Method"))}), v([]Caveat{newCaveat(PeerBlessingsCaveat("peer"))})},
+			reflect.TypeOf([]Caveat{}): []reflect.Value{v([]Caveat{newCaveat(MethodCaveat("Method"))}), v([]Caveat{newCaveat(ExpiryCaveat(time.Now()))})},
 		}
 		hashfn = SHA256Hash // hash function used to compute the message digest in tests.
 	)
