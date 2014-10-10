@@ -12,7 +12,7 @@ import (
 
 func TestBlessSelf(t *testing.T) {
 	var (
-		tp = newPrincipalWithRoots(t) // principal where blessings are tested
+		tp = newPrincipal(t) // principal where blessings are tested
 		p  = newPrincipal(t)
 	)
 
@@ -40,7 +40,7 @@ func TestBlessSelf(t *testing.T) {
 
 func TestBless(t *testing.T) {
 	var (
-		tp = newPrincipalWithRoots(t) // principal where blessings are tested
+		tp = newPrincipal(t) // principal where blessings are tested
 
 		p1    = newPrincipal(t)
 		p2    = newPrincipal(t)
@@ -84,7 +84,7 @@ func TestBlessings(t *testing.T) {
 	type s []string
 
 	var (
-		tp = newPrincipalWithRoots(t) // principal where blessings are tested
+		tp = newPrincipal(t) // principal where blessings are tested
 
 		p     = newPrincipal(t)
 		p2    = newPrincipal(t).PublicKey()
@@ -233,7 +233,7 @@ func TestAddToRoots(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		tp := newPrincipalWithRoots(t) // principal where roots are tested.
+		tp := newPrincipal(t) // principal where roots are tested.
 		if err := tp.AddToRoots(test.add); err != nil {
 			t.Error(err)
 			continue
@@ -296,10 +296,7 @@ func TestPrincipalSignaturePurpose(t *testing.T) {
 
 func TestUnionOfBlessings(t *testing.T) {
 	principalTrustingRootsOf := func(roots ...Blessings) Principal {
-		if roots == nil {
-			return newPrincipal(t)
-		}
-		p := newPrincipalWithRoots(t)
+		p := newPrincipal(t)
 		for _, r := range roots {
 			addToRoots(t, p, r)
 		}
@@ -354,24 +351,25 @@ func TestUnionOfBlessings(t *testing.T) {
 	}
 
 	// p can bless p3 further
-	spouse, err := p.Bless(newPrincipal(t).PublicKey(), friend, "spouse", newCaveat(PeerBlessingsCaveat("fake/peer")))
+	// TODO(ashankar,ataly): Replace peerBlessingsCaveat with another, or fix up the "infinite loop" problem during validation.
+	spouse, err := p.Bless(newPrincipal(t).PublicKey(), friend, "spouse", newCaveat(NewCaveat(peerBlessingsCaveat{"peer"})))
 	if err != nil {
 		t.Fatal(err)
 	}
-	server := FakePublicID("peer")
-	if err := checkBlessings(spouse, &context{local: principalTrustingRootsOf()}); err != nil {
+	server := blessSelf(t, newPrincipal(t), "peer")
+	if err := checkBlessings(spouse, &context{local: principalTrustingRootsOf(server)}); err != nil {
 		t.Error(err)
 	}
-	if err := checkBlessings(spouse, &context{local: principalTrustingRootsOf(carol), localID: server}, "carol/spouse"); err != nil {
+	if err := checkBlessings(spouse, &context{local: principalTrustingRootsOf(server, carol), localBlessings: server}, "carol/spouse"); err != nil {
 		t.Error(err)
 	}
-	if err := checkBlessings(spouse, &context{local: principalTrustingRootsOf(alice, carol), method: "Method", localID: server}, "carol/spouse", "alice/friend/spouse"); err != nil {
+	if err := checkBlessings(spouse, &context{local: principalTrustingRootsOf(server, alice, carol), method: "Method", localBlessings: server}, "carol/spouse", "alice/friend/spouse"); err != nil {
 		t.Error(err)
 	}
-	if err := checkBlessings(spouse, &context{local: principalTrustingRootsOf(bob, carol), suffix: "Suffix", localID: server}, "carol/spouse", "bob/friend/spouse"); err != nil {
+	if err := checkBlessings(spouse, &context{local: principalTrustingRootsOf(server, bob, carol), suffix: "Suffix", localBlessings: server}, "carol/spouse", "bob/friend/spouse"); err != nil {
 		t.Error(err)
 	}
-	if err := checkBlessings(spouse, &context{local: principalTrustingRootsOf(alice, bob, carol), suffix: "Suffix", method: "Method", localID: server}, "carol/spouse", "alice/friend/spouse", "bob/friend/spouse"); err != nil {
+	if err := checkBlessings(spouse, &context{local: principalTrustingRootsOf(server, alice, bob, carol), suffix: "Suffix", method: "Method", localBlessings: server}, "carol/spouse", "alice/friend/spouse", "bob/friend/spouse"); err != nil {
 		t.Error(err)
 	}
 
@@ -384,7 +382,7 @@ func TestUnionOfBlessings(t *testing.T) {
 
 func TestCertificateCompositionAttack(t *testing.T) {
 	var (
-		tp = newPrincipalWithRoots(t) // principal for testing blessings.
+		tp = newPrincipal(t) // principal for testing blessings.
 
 		p1    = newPrincipal(t)
 		alice = blessSelf(t, p1, "alice")
@@ -441,7 +439,7 @@ func TestCertificateCompositionAttack(t *testing.T) {
 
 func TestCertificateTamperingAttack(t *testing.T) {
 	var (
-		tp = newPrincipalWithRoots(t) // principal for testing blessings.
+		tp = newPrincipal(t) // principal for testing blessings.
 
 		p1 = newPrincipal(t)
 		p2 = newPrincipal(t)
@@ -470,7 +468,7 @@ func TestCertificateTamperingAttack(t *testing.T) {
 
 func TestCertificateChainsTamperingAttack(t *testing.T) {
 	var (
-		tp = newPrincipalWithRoots(t) // principal for testing blessings.
+		tp = newPrincipal(t) // principal for testing blessings.
 
 		p1    = newPrincipal(t)
 		p2    = newPrincipal(t)

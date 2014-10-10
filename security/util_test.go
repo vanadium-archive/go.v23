@@ -47,11 +47,11 @@ func (*roots) DebugString() string {
 }
 
 type context struct {
-	method, name, suffix string
-	label                Label
-	localID, remoteID    PublicID
-	local                Principal
-	discharges           map[string]Discharge
+	method, name, suffix            string
+	label                           Label
+	local                           Principal
+	localBlessings, remoteBlessings Blessings
+	discharges                      map[string]Discharge
 }
 
 func (c *context) Method() string                   { return c.method }
@@ -59,11 +59,11 @@ func (c *context) Name() string                     { return c.name }
 func (c *context) Suffix() string                   { return c.suffix }
 func (c *context) Label() Label                     { return c.label }
 func (c *context) Discharges() map[string]Discharge { return c.discharges }
-func (c *context) LocalID() PublicID                { return c.localID }
-func (c *context) RemoteID() PublicID               { return c.remoteID }
+func (c *context) LocalID() PublicID                { return nil }
+func (c *context) RemoteID() PublicID               { return nil }
 func (c *context) LocalPrincipal() Principal        { return c.local }
-func (c *context) LocalBlessings() Blessings        { return nil }
-func (c *context) RemoteBlessings() Blessings       { return nil }
+func (c *context) LocalBlessings() Blessings        { return c.localBlessings }
+func (c *context) RemoteBlessings() Blessings       { return c.remoteBlessings }
 func (c *context) LocalEndpoint() naming.Endpoint   { return nil }
 func (c *context) RemoteEndpoint() naming.Endpoint  { return nil }
 
@@ -100,14 +100,6 @@ func newECDSASigner(t *testing.T, curve elliptic.Curve) Signer {
 }
 
 func newPrincipal(t *testing.T) Principal {
-	p, err := CreatePrincipal(newECDSASigner(t, elliptic.P256()), nil, nil)
-	if err != nil {
-		t.Fatalf("CreatePrincipal failed: %v", err)
-	}
-	return p
-}
-
-func newPrincipalWithRoots(t *testing.T) Principal {
 	p, err := CreatePrincipal(newECDSASigner(t, elliptic.P256()), nil, &roots{})
 	if err != nil {
 		t.Fatalf("CreatePrincipal failed: %v", err)
