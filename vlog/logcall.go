@@ -2,7 +2,9 @@ package vlog
 
 import (
 	"fmt"
+	"path"
 	"reflect"
+	"runtime"
 	"sync/atomic"
 
 	"github.com/cosmosnicolaou/llog"
@@ -10,6 +12,18 @@ import (
 
 // logCallLogLevel is the log level beyond which calls are logged.
 const logCallLogLevel = 1
+
+func callerFuncName() string {
+	var funcName string
+	pc, _, _, ok := runtime.Caller(stackSkip + 1)
+	if ok {
+		function := runtime.FuncForPC(pc)
+		if function != nil {
+			funcName = path.Base(function.Name())
+		}
+	}
+	return funcName
+}
 
 // LogCall logs that its caller has been called given the arguments
 // passed to it.  It returns a function that is supposed to be called
@@ -65,17 +79,18 @@ func LogCall(v ...interface{}) func(...interface{}) {
 	if !V(logCallLogLevel) {
 		return func(...interface{}) {}
 	}
+	callerFuncName := callerFuncName()
 	invocationId := newInvocationIdentifier()
 	if len(v) > 0 {
-		Log.log.Printf(llog.InfoLog, "call[%s]: args:%v", invocationId, v)
+		Log.log.Printf(llog.InfoLog, "call[%s %s]: args:%v", callerFuncName, invocationId, v)
 	} else {
-		Log.log.Printf(llog.InfoLog, "call[%s]", invocationId)
+		Log.log.Printf(llog.InfoLog, "call[%s %s]", callerFuncName, invocationId)
 	}
 	return func(v ...interface{}) {
 		if len(v) > 0 {
-			Log.log.Printf(llog.InfoLog, "return[%s]: %v", invocationId, derefSlice(v))
+			Log.log.Printf(llog.InfoLog, "return[%s %s]: %v", callerFuncName, invocationId, derefSlice(v))
 		} else {
-			Log.log.Printf(llog.InfoLog, "return[%s]", invocationId)
+			Log.log.Printf(llog.InfoLog, "return[%s %s]", callerFuncName, invocationId)
 		}
 	}
 }
@@ -93,10 +108,11 @@ func LogCallf(format string, v ...interface{}) func(string, ...interface{}) {
 	if !V(logCallLogLevel) {
 		return func(string, ...interface{}) {}
 	}
+	callerFuncName := callerFuncName()
 	invocationId := newInvocationIdentifier()
-	Log.log.Printf(llog.InfoLog, "call[%s]: %s", invocationId, fmt.Sprintf(format, v...))
+	Log.log.Printf(llog.InfoLog, "call[%s %s]: %s", callerFuncName, invocationId, fmt.Sprintf(format, v...))
 	return func(format string, v ...interface{}) {
-		Log.log.Printf(llog.InfoLog, "return[%s]: %v", invocationId, fmt.Sprintf(format, derefSlice(v)...))
+		Log.log.Printf(llog.InfoLog, "return[%s %s]: %v", callerFuncName, invocationId, fmt.Sprintf(format, derefSlice(v)...))
 	}
 }
 

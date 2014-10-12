@@ -28,14 +28,16 @@ var (
 	Log *logger
 )
 
+const stackSkip = 1
+
 func init() {
-	Log = &logger{log: llog.NewLogger("veyron", 1)}
+	Log = &logger{log: llog.NewLogger("veyron", stackSkip)}
 }
 
 // NewLogger creates a new instance of the logging interface.
 func NewLogger(name string, opts ...LoggingOpts) (Logger, error) {
 	// Create an instance of the runtime with just logging enabled.
-	nl := &logger{log: llog.NewLogger(name, 1)}
+	nl := &logger{log: llog.NewLogger(name, stackSkip)}
 	if err := nl.ConfigureLogger(opts...); err != nil {
 		return nil, err
 	}

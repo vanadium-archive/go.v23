@@ -2,7 +2,6 @@ package vlog_test
 
 import (
 	"bufio"
-	"bytes"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -28,27 +27,33 @@ func ExampleError() {
 	vlog.VI(2).Infof("another spammy message")
 }
 
-func readLogFiles(dir string) (string, error) {
+func readLogFiles(dir string) ([]string, error) {
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	contents := ""
+	var contents []string
 	for _, fi := range files {
+		// Skip symlinks to avoid double-counting log lines.
+		if !fi.Mode().IsRegular() {
+			continue
+		}
 		file, err := os.Open(filepath.Join(dir, fi.Name()))
 		if err != nil {
-			continue
+			return nil, err
 		}
 		scanner := bufio.NewScanner(file)
 		for scanner.Scan() {
-			contents = contents + scanner.Text() + "\n"
+			if line := scanner.Text(); len(line) > 0 && line[0] == 'I' {
+				contents = append(contents, line)
+			}
 		}
 	}
 	return contents, nil
 }
 
 func TestHeaders(t *testing.T) {
-	dir, err := ioutil.TempDir(".", "logtest")
+	dir, err := ioutil.TempDir("", "logtest")
 	defer os.RemoveAll(dir)
 	if err != nil {
 		t.Fatalf("unexpected error: %s", err)
@@ -65,16 +70,10 @@ func TestHeaders(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %s", err)
 	}
-	scanner := bufio.NewScanner(bytes.NewBufferString(contents))
 	fileRE := regexp.MustCompile(`\S+ \S+ \S+ (.*):.*`)
-	got := 0
-	for scanner.Scan() {
-		line := scanner.Text()
-		if line[0] != 'I' {
-			continue
-		}
+	for _, line := range contents {
 		name := fileRE.FindStringSubmatch(line)
-		if len(name) == 0 {
+		if len(name) < 2 {
 			t.Errorf("failed to find file in %s", line)
 			continue
 		}
@@ -82,15 +81,63 @@ func TestHeaders(t *testing.T) {
 			t.Errorf("unexpected file name: %s", name[1])
 			continue
 		}
-		got++
 	}
-	if got != 3 {
-		t.Errorf("failed to match the expected number of lines: %d", got)
+	if want, got := 3, len(contents); want != got {
+		t.Errorf("Expected %d info lines, got %d instead", want, got)
+	}
+}
+
+func myLoggedFunc() {
+	f := vlog.LogCall("entry")
+	f("exit")
+}
+
+func TestLogCall(t *testing.T) {
+	dir, err := ioutil.TempDir("", "logtest")
+	defer os.RemoveAll(dir)
+	if err != nil {
+		t.Fatalf("unexpected error: %s", err)
+	}
+	logger, err := vlog.NewLogger("testHeader", vlog.LogDir(dir), vlog.Level(2))
+	if err != nil {
+		t.Fatalf("unexpected error: %s", err)
+	}
+	saveLog := vlog.Log
+	defer vlog.SetLog(saveLog)
+	vlog.SetLog(logger)
+
+	myLoggedFunc()
+	vlog.FlushLog()
+	contents, err := readLogFiles(dir)
+	if err != nil {
+		t.Fatalf("unexpected error: %s", err)
+	}
+	logCallLineRE := regexp.MustCompile(`\S+ \S+ \S+ ([^:]*):.*(call|return)\[(\S*)`)
+	for _, line := range contents {
+		match := logCallLineRE.FindStringSubmatch(line)
+		if len(match) != 4 {
+			t.Errorf("failed to match %s", line)
+			continue
+		}
+		fileName, callType, funcName := match[1], match[2], match[3]
+		if fileName != "log_test.go" {
+			t.Errorf("unexpected file name: %s", fileName)
+			continue
+		}
+		if callType != "call" && callType != "return" {
+			t.Errorf("unexpected call type: %s", callType)
+		}
+		if funcName != "vlog_test.myLoggedFunc" {
+			t.Errorf("unexpected func name: %s", funcName)
+		}
+	}
+	if want, got := 2, len(contents); want != got {
+		t.Errorf("Expected %d info lines, got %d instead", want, got)
 	}
 }
 
 func TestVModule(t *testing.T) {
-	dir, err := ioutil.TempDir(".", "logtest")
+	dir, err := ioutil.TempDir("", "logtest")
 	defer os.RemoveAll(dir)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
