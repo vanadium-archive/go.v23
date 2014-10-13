@@ -11,7 +11,6 @@ import (
 const (
 	noType           = "must be assigned a type"
 	cantConvert      = "can't convert"
-	arentCompatible  = "aren't compatible"
 	overflows        = "overflows"
 	underflows       = "underflows"
 	losesPrecision   = "loses precision"
@@ -199,9 +198,9 @@ func TestConstConvertOK(t *testing.T) {
 			v{complexValue(vdl.Complex64Type, 1+1i), complexValue(complex64TypeN, 1+1i)}},
 		// Check implicit conversion of untyped bool and string consts.
 		{c{Boolean(true)},
-			v{anyValue(boolValue(vdl.BoolType, true))}},
+			v{boolValue(vdl.BoolType, true), anyValue(boolValue(vdl.BoolType, true))}},
 		{c{String("abc")},
-			v{anyValue(stringValue(vdl.StringType, "abc"))}},
+			v{stringValue(vdl.StringType, "abc"), anyValue(stringValue(vdl.StringType, "abc"))}},
 	}
 	for _, test := range tests {
 		// Create a slice of consts containing everything in C and V.
@@ -214,9 +213,9 @@ func TestConstConvertOK(t *testing.T) {
 		for _, c := range consts {
 			for _, v := range test.V {
 				vt := v.Type()
-				result, err := c.Convert(vt)
-				if got, want := result, FromValue(v); !constEqual(got, want) {
-					t.Errorf("%v.Convert(%v) result got %v, want %v", c, vt, got, want)
+				got, err := c.Convert(vt)
+				if want := FromValue(v); !constEqual(got, want) {
+					t.Errorf("%v.Convert(%v) got %v, want %v", c, vt, got, want)
 				}
 				expectErr(t, err, "", "%v.Convert(%v)", c, vt)
 			}
@@ -239,13 +238,13 @@ func TestConstConvertError(t *testing.T) {
 				vdl.Int32Type, int32TypeN, vdl.Uint32Type, uint32TypeN,
 				vdl.Float32Type, float32TypeN, vdl.Complex64Type, complex64TypeN,
 				structAIntType, structAIntTypeN},
-			arentCompatible},
+			cantConvert},
 		{String("abc"),
 			ty{vdl.BoolType, boolTypeN,
 				vdl.Int32Type, int32TypeN, vdl.Uint32Type, uint32TypeN,
 				vdl.Float32Type, float32TypeN, vdl.Complex64Type, complex64TypeN,
 				structAIntType, structAIntTypeN},
-			arentCompatible},
+			cantConvert},
 		{Integer(bi1),
 			ty{vdl.BoolType, boolTypeN,
 				vdl.StringType, stringTypeN, bytesType, bytesTypeN, bytes3Type, bytes3TypeN,

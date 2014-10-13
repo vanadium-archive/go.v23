@@ -102,7 +102,7 @@ func constValue(v *vdl.Value, pkgPath string, imports codegen.Imports) (string, 
 				if err != nil {
 					return "", err
 				}
-				s += ":" + elemstr
+				s += ": " + elemstr
 			}
 		}
 		return s + "}", nil
@@ -116,7 +116,7 @@ func constValue(v *vdl.Value, pkgPath string, imports codegen.Imports) (string, 
 			if ix > 0 {
 				s += ", "
 			}
-			s += fieldstr
+			s += t.Field(ix).Name + ": " + fieldstr
 		}
 		return s + "}", nil
 	}

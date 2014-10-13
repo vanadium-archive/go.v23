@@ -191,7 +191,6 @@ func compileType(ptype parse.Type, file *File, env *Env) *vdl.Type {
 func compileDefinedType(ptype parse.Type, file *File, env *Env, tbuilder *vdl.TypeBuilder, builders map[string]*typeDefBuilder) vdl.TypeOrPending {
 	switch pt := ptype.(type) {
 	case *parse.TypeEnum:
-		env.experimentalOnly(file, pt.Pos(), "enum not supported")
 		enum := tbuilder.Enum()
 		for _, plabel := range pt.Labels {
 			enum.AppendLabel(plabel.Name)
@@ -208,7 +207,6 @@ func compileDefinedType(ptype parse.Type, file *File, env *Env, tbuilder *vdl.Ty
 		}
 		return st
 	case *parse.TypeOneOf:
-		env.experimentalOnly(file, pt.Pos(), "oneof not supported")
 		oneof := tbuilder.OneOf()
 		for _, ptype := range pt.Types {
 			otype := compileLiteralType(ptype, file, env, tbuilder, builders)
@@ -274,6 +272,7 @@ func compileLiteralType(ptype parse.Type, file *File, env *Env, tbuilder *vdl.Ty
 			return tbuilder.Map().AssignKey(key).AssignElem(elem)
 		}
 	case *parse.TypeNilable:
+		env.experimentalOnly(file, pt.Pos(), "nilable not supported")
 		base := compileLiteralType(pt.Base, file, env, tbuilder, builders)
 		if base != nil {
 			return tbuilder.Nilable().AssignBase(base)

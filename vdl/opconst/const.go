@@ -137,6 +137,21 @@ func (c Const) Convert(t *vdl.Type) (Const, error) {
 	if t == nil {
 		return Const{}, errConvertNil
 	}
+	// If we're trying to convert to Any or OneOf, or if c is already a vdl.Value,
+	// use valconv.Convert to convert as a vdl.Value.
+	_, isValue := c.rep.(*vdl.Value)
+	if isValue || t.Kind() == vdl.Any || t.Kind() == vdl.OneOf {
+		src, err := c.ToValue()
+		if err != nil {
+			return Const{}, err
+		}
+		dst := vdl.ZeroValue(t)
+		if err := valconv.Convert(dst, src); err != nil {
+			return Const{}, err
+		}
+		return FromValue(dst), nil
+	}
+	// Otherwise use makeConst to convert as a Const.
 	return makeConst(c.rep, t)
 }
 
@@ -538,14 +553,10 @@ func makeConst(rep interface{}, totype *vdl.Type) (Const, error) {
 		if totype.Kind() == vdl.Bool {
 			return Const{trep, totype}, nil
 		}
-		// Perform implicit conversion of untyped bool to typed bool.
-		return makeConst(vdl.BoolValue(trep), totype)
 	case string:
 		if totype.Kind() == vdl.String || totype.IsBytes() {
 			return Const{trep, totype}, nil
 		}
-		// Perform implicit conversion of untyped string to typed string.
-		return makeConst(vdl.StringValue(trep), totype)
 	case *big.Int:
 		switch totype.Kind() {
 		case vdl.Byte, vdl.Uint16, vdl.Uint32, vdl.Uint64, vdl.Int16, vdl.Int32, vdl.Int64:
@@ -596,12 +607,6 @@ func makeConst(rep interface{}, totype *vdl.Type) (Const, error) {
 			}
 			return Const{v, totype}, nil
 		}
-	case *vdl.Value:
-		conv := vdl.ZeroValue(totype)
-		if err := valconv.Convert(conv, trep); err != nil {
-			return Const{}, err
-		}
-		return Const{conv, totype}, nil
 	}
 	return Const{}, fmt.Errorf("can't convert %s to %v", cRepString(rep), cRepTypeString(rep, totype))
 }

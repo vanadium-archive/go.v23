@@ -43,6 +43,9 @@ func typedConst(data goData, v *vdl.Value) string {
 		if !isByteList(t) {
 			return typestr + valstr
 		}
+	case vdl.OneOf:
+		// Create the oneof value using the composite literal syntax.
+		return typestr + "{" + valstr + "}"
 	}
 	return typestr + "(" + valstr + ")"
 }
@@ -53,13 +56,13 @@ func untypedConst(data goData, v *vdl.Value) string {
 		return strconv.Quote(string(v.Bytes()))
 	}
 	switch k {
-	case vdl.Any:
+	case vdl.Any, vdl.OneOf, vdl.Nilable:
 		if elem := v.Elem(); elem != nil {
 			return typedConst(data, elem)
 		}
 		return "nil"
-	case vdl.OneOf, vdl.Nilable, vdl.TypeVal:
-		panic("TODO: oneof, nilable and typeval constants aren't supported yet!")
+	case vdl.TypeVal:
+		panic("TODO: typeval constants aren't supported yet!")
 	case vdl.Bool:
 		return strconv.FormatBool(v.Bool())
 	case vdl.Byte:

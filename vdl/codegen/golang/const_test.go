@@ -50,7 +50,11 @@ func TestConst(t *testing.T) {
 A: "foo",
 B: 123,
 }`},
-		// TODO(toddw): Add tests for any, oneof, nilable, typeval
+		{"OneOfABC", vOneOfABC, `TestOneOf{"abc"}`},
+		{"OneOf123", vOneOf123, `TestOneOf{int64(123)}`},
+		{"AnyABC", vAnyABC, `_gen_vdlutil.Any("abc")`},
+		{"Any123", vAny123, `_gen_vdlutil.Any(int64(123))`},
+		// TODO(toddw): Add tests for nilable, typeval
 	}
 	data := goData{Env: compile.NewEnv(-1)}
 	for _, test := range tests {
@@ -61,11 +65,15 @@ B: 123,
 }
 
 var (
-	vArray  = vdl.ZeroValue(tArray)
-	vList   = vdl.ZeroValue(tList)
-	vSet    = vdl.ZeroValue(tSet)
-	vMap    = vdl.ZeroValue(tMap)
-	vStruct = vdl.ZeroValue(tStruct)
+	vArray    = vdl.ZeroValue(tArray)
+	vList     = vdl.ZeroValue(tList)
+	vSet      = vdl.ZeroValue(tSet)
+	vMap      = vdl.ZeroValue(tMap)
+	vStruct   = vdl.ZeroValue(tStruct)
+	vOneOfABC = vdl.ZeroValue(tOneOf)
+	vOneOf123 = vdl.ZeroValue(tOneOf)
+	vAnyABC   = vdl.ZeroValue(vdl.AnyType)
+	vAny123   = vdl.ZeroValue(vdl.AnyType)
 )
 
 func init() {
@@ -82,4 +90,10 @@ func init() {
 
 	vStruct.Field(0).AssignString("foo")
 	vStruct.Field(1).AssignInt(123)
+
+	vOneOfABC.Assign(vdl.StringValue("abc"))
+	vOneOf123.Assign(vdl.Int64Value(123))
+
+	vAnyABC.Assign(vdl.StringValue("abc"))
+	vAny123.Assign(vdl.Int64Value(123))
 }

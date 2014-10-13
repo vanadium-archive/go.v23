@@ -38,3 +38,90 @@ type NListUint64 []uint64
 type NSetUint64 map[uint64]struct{}
 
 type NMapUint64String map[uint64]string
+
+type NStruct struct {
+	A bool
+	B string
+	C int64
+}
+
+type NEnum int
+
+const (
+	NEnumA NEnum = iota
+	NEnumB
+	NEnumC
+)
+
+// AllNEnum holds all labels for NEnum.
+var AllNEnum = []NEnum{NEnumA, NEnumB, NEnumC}
+
+// MakeNEnum creates a NEnum from a string label.
+// Returns true iff the label is valid.
+func MakeNEnum(label string) (x NEnum, ok bool) {
+	ok = x.Assign(label)
+	return
+}
+
+// Assign assigns label to x.
+// Returns true iff the label is valid.
+func (x *NEnum) Assign(label string) bool {
+	switch label {
+	case "A":
+		*x = NEnumA
+		return true
+	case "B":
+		*x = NEnumB
+		return true
+	case "C":
+		*x = NEnumC
+		return true
+	}
+	*x = -1
+	return false
+}
+
+// String returns the string label of x.
+func (x NEnum) String() string {
+	switch x {
+	case NEnumA:
+		return "A"
+	case NEnumB:
+		return "B"
+	case NEnumC:
+		return "C"
+	}
+	return ""
+}
+
+// vdlEnumLabels identifies NEnum as an enum.
+func (NEnum) vdlEnumLabels(struct{ A, B, C bool }) {}
+
+type NOneOf struct{ oneof interface{} }
+
+// MakeNOneOf creates a NOneOf.
+// Returns true iff the oneof value has a valid type.
+func MakeNOneOf(oneof interface{}) (x NOneOf, ok bool) {
+	ok = x.Assign(oneof)
+	return
+}
+
+// Assign assigns oneof to x.
+// Returns true iff the oneof value has a valid type.
+func (x *NOneOf) Assign(oneof interface{}) bool {
+	switch oneof.(type) {
+	case bool, string, int64:
+		x.oneof = oneof
+		return true
+	}
+	x.oneof = nil
+	return false
+}
+
+// OneOf returns the underlying typed value of x.
+func (x NOneOf) OneOf() interface{} {
+	return x.oneof
+}
+
+// vdlOneOfTypes identifies NOneOf as a oneof.
+func (NOneOf) vdlOneOfTypes(_ bool, _ string, _ int64) {}

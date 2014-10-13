@@ -20,4 +20,13 @@ type (
 	NListUint64      []uint64
 	NSetUint64       set[uint64]
 	NMapUint64String map[uint64]string
+
+	NStruct struct {
+		A bool
+		B string
+		C int64
+	}
+
+	NEnum  enum{ A; B; C }
+	NOneOf oneof{ bool; string; int64 }
 )

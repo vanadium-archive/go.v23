@@ -355,11 +355,11 @@ var constTests = []struct {
 	{
 		"TypedInt32Mismatch",
 		cp{{"a", `const Res = int32(true)`, nil,
-			`types "int32" and "bool" aren't compatible`}}},
+			`can't convert true to int32`}}},
 	{
 		"TypedFloat32Mismatch",
 		cp{{"a", `const Res = float32(true)`, nil,
-			`types "float32" and "bool" aren't compatible`}}},
+			`can't convert true to float32`}}},
 
 	// Test explicit user type conversions.
 	{
@@ -388,11 +388,11 @@ var constTests = []struct {
 	{
 		"TypedUserInt32Mismatch",
 		cp{{"a", `type TypedInt int32;const Res = TypedInt(true)`, nil,
-			`types "a.TypedInt int32" and "bool" aren't compatible`}}},
+			`can't convert true to a.TypedInt int32`}}},
 	{
 		"TypedUserFloat32Mismatch",
 		cp{{"a", `type TypedFlt float32;const Res = TypedFlt(true)`, nil,
-			`types "a.TypedFlt float32" and "bool" aren't compatible`}}},
+			`can't convert true to a.TypedFlt float32`}}},
 
 	// Test named consts.
 	{
