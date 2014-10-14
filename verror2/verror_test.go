@@ -150,8 +150,8 @@ func init() {
 	// eEN1 has an English message.
 	v2EN = verror2.ExplicitConvert(verror2.Unknown, en, "", "", aEN1)        // still in English.
 	v2FR0 = verror2.ExplicitConvert(verror2.Unknown, fr, "", "", aEN1)       // converted to French, with original server and op.
-	v2FR1 = verror2.Convert(verror2.Unknown, ctx, aEN1)                      // converted to French, with FooServer aFR1
-	v2DE = verror2.ExplicitConvert(verror2.Unknown, de, "other", "op", aEN1) // converted to generic, since we lack German.
+	v2FR1 = verror2.Convert(verror2.Unknown, ctx, aEN1)                      // converted to French, but still with param[1]==aEN1.
+	v2DE = verror2.ExplicitConvert(verror2.Unknown, de, "other", "op", aEN1) // left as English, since we lack German.
 }
 
 func TestBasic(t *testing.T) {
@@ -191,8 +191,8 @@ func TestBasic(t *testing.T) {
 
 		{v2EN, idActionA, "server aEN1 error A 1 2"},
 		{v2FR0, idActionA, "server aEN1 erreur A 1 2"},
-		{v2FR1, idActionA, "FooServer aFR1 erreur A 1 2"},
-		{v2DE, idActionA, "A: other op 1 2"},
+		{v2FR1, idActionA, "server aEN1 erreur A 1 2"},
+		{v2DE, idActionA, "server aEN1 error A 1 2"},
 	}
 
 	for i, test := range tests {

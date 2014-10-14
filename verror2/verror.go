@@ -253,6 +253,12 @@ func Make(idAction IDAction, ctx context.T, v ...interface{}) E {
 	return makeInternal(idAction, langID, componentName, opName, stack, v...)
 }
 
+// isEmptyString() returns whether v is an empty string.
+func isEmptyString(v interface{}) bool {
+	str, isAString := v.(string)
+	return isAString && str == ""
+}
+
 // convertInternal is like ExplicitConvert(), but takes a slice of PC values as an argument,
 // rather than constructing one from the caller's PC.
 func convertInternal(idAction IDAction, langID i18n.LangID, componentName string, opName string, stack []uintptr, err error) E {
@@ -260,17 +266,41 @@ func convertInternal(idAction IDAction, langID i18n.LangID, componentName string
 		return nil
 	}
 
-	// if err is already a verror2.E:
+	// If err is already a verror2.E, we wish to:
+	//  - retain all set parameters.
+	//  - if not yet set, set parameters 0 and 1 from componentName and
+	//    opName.
+	//  - if langID is set, and we have the appropriate language's format
+	//    in our catalogue, use it.  Otheriwse, retain a message (assuming
+	//    additional parameters were not set) even if the language is not
+	//    correct.
 	if e, _ := err.(E); e != nil {
+		oldParams := e.Params()
+
+		// Create a non-empty format string if we have the language in the catalogue.
+		var formatStr string
+		if langID != i18n.NoLangID {
+			formatStr = i18n.Cat().Lookup(langID, i18n.MsgID(e.ErrorID()))
+		}
+
+		// Ignore the caller-supplied component and operation if we already have them.
+		if componentName != "" && len(oldParams) >= 1 && !isEmptyString(oldParams[0]) {
+			componentName = ""
+		}
+		if opName != "" && len(oldParams) >= 2 && !isEmptyString(oldParams[1]) {
+			opName = ""
+		}
+
+		var msg string
 		var newParams []interface{}
 		if componentName == "" && opName == "" {
-			if langID == i18n.NoLangID {
+			if formatStr == "" {
 				return e // Nothing to change.
 			} else { // Parameter list does not change.
 				newParams = e.Params()
+				msg = i18n.FormatParams(formatStr, newParams...)
 			}
-		} else { // Replace first two parameters.
-			oldParams := e.Params()
+		} else { // Replace at least one of the first two parameters.
 			newLen := len(oldParams)
 			if newLen < 2 {
 				newLen = 2
@@ -283,10 +313,9 @@ func convertInternal(idAction IDAction, langID i18n.LangID, componentName string
 			if opName != "" {
 				newParams[1] = opName
 			}
-		}
-		msg := ""
-		if langID != i18n.NoLangID {
-			msg = i18n.Cat().Format(langID, i18n.MsgID(e.ErrorID()), newParams...)
+			if formatStr != "" {
+				msg = i18n.FormatParams(formatStr, newParams...)
+			}
 		}
 		eStack := e.Stack()
 		newStack := append(make([]uintptr, 0, len(eStack)+len(stack)), eStack...)
