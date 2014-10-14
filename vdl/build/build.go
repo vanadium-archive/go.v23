@@ -18,21 +18,19 @@ import (
 	"veyron.io/veyron/veyron2/vdl/vdlutil"
 )
 
-// Package represents the build information for an vdl package.
+// Package represents the build information for a vdl package.
 type Package struct {
 	// Dir is the absolute directory containing the package files.
-	// E.g. "/home/user/veyron/go/src/veyron/rt/base"
+	// E.g. "/home/user/veyron/vdl/src/foo/bar"
 	Dir string
 	// Name is the name of the package, specified in the vdl files.
-	// E.g. "base"
+	// E.g. "bar"
 	Name string
 	// Path is the package path,
-	// e.g. "veyron.io/veyron/veyron/vdl/lib".  It may be empty if
-	// the path isn't known - e.g. if we're building a directory.
-	// E.g. "veyron.io/veyron/veyron/rt/base"
+	// E.g. "foo/bar".
 	Path string
-	// BaseFileNames is an unordered list of base vdl file names for this
-	// package.  Join these with Dir to get absolute file names.
+	// BaseFileNames is the list of sorted base vdl file names for this package.
+	// Join these with Dir to get absolute file names.
 	BaseFileNames []string
 
 	// OpenFilesFunc is a function that opens the files with the given filenames,
@@ -203,7 +201,7 @@ type depSorter struct {
 	srcDirs []string
 	pathMap map[string]*Package
 	dirMap  map[string]*Package
-	sorter  toposort.Sorter
+	sorter  *toposort.Sorter
 	errs    *vdlutil.Errors
 }
 
@@ -225,7 +223,7 @@ func newDepSorter(exts []string, errs *vdlutil.Errors) *depSorter {
 		srcDirs: srcDirs,
 		pathMap: make(map[string]*Package),
 		dirMap:  make(map[string]*Package),
-		sorter:  toposort.NewSorter(),
+		sorter:  &toposort.Sorter{},
 		errs:    errs,
 	}
 }
@@ -422,7 +420,7 @@ func (ds *depSorter) Sort() (targets []*Package) {
 	// results from interface{} back into *Package.
 	sorted, cycles := ds.sorter.Sort()
 	if len(cycles) > 0 {
-		cycleStr := toposort.PrintCycles(cycles, printPackagePath)
+		cycleStr := toposort.DumpCycles(cycles, printPackagePath)
 		ds.errorf("Cyclic package dependency detected: %v", cycleStr)
 		return
 	}
@@ -487,26 +485,26 @@ func (b byBaseName) Len() int           { return len(b) }
 func (b byBaseName) Less(i, j int) bool { return b[i].BaseName < b[j].BaseName }
 func (b byBaseName) Swap(i, j int)      { b[i], b[j] = b[j], b[i] }
 
-// CompilePackage parses and compiles the given pkg, updates env with the
-// compiled package and returns it.  Errors are reported in env.
+// BuildPackage parses and compiles the given pkg, updates env with the compiled
+// package and returns it.  Errors are reported in env.
 //
 // All imports that pkg depend on must already have been compiled and populated
 // into env.  See TransitivePackages for an easy way to retrieve packages in
 // their transitive order.
-func CompilePackage(pkg *Package, env *compile.Env) *compile.Package {
+func BuildPackage(pkg *Package, env *compile.Env) *compile.Package {
 	pfiles := ParsePackage(pkg, parse.Opts{}, env.Errors)
 	return compile.Compile(pkg.Path, pfiles, env)
 }
 
-// CompileConfig parses and compiles the given config src and returns it.
-// Errors are reported in env; baseFileName is only used for error reporting.
-// If implicit is non-nil and the exported config const is an untyped const
+// BuildConfig parses and compiles the given config src and returns it.  Errors
+// are reported in env; baseFileName is only used for error reporting.  If
+// implicit is non-nil and the exported config const is an untyped const
 // literal, it is assumed to be of that type.
 //
 // All imports that the config src depend on must already have been compiled and
 // populated into env.  See TransitivePackages for an easy way to retrieve
 // packages in their transitive order.
-func CompileConfig(baseFileName string, src io.Reader, implicit *vdl.Type, env *compile.Env) *vdl.Value {
+func BuildConfig(baseFileName string, src io.Reader, implicit *vdl.Type, env *compile.Env) *vdl.Value {
 	pconfig := parse.ParseConfig(baseFileName, src, parse.Opts{}, env.Errors)
 	return compile.CompileConfig(implicit, pconfig, env)
 }

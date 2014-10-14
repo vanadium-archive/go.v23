@@ -67,7 +67,7 @@ func (id ifaceDefiner) SortAndDefine() {
 	// list of interfaces within each file is topologically sorted, and also
 	// deterministic; in the absence of interface embeddings, interfaces are
 	// listed in the same order they were defined in the parsed files.
-	sorter := toposort.NewSorter()
+	var sorter toposort.Sorter
 	for _, pfile := range id.pfiles {
 		for _, pdef := range pfile.Interfaces {
 			b := id.builders[pdef.Name]
@@ -80,7 +80,7 @@ func (id ifaceDefiner) SortAndDefine() {
 	// Sort and check for cycles.
 	sorted, cycles := sorter.Sort()
 	if len(cycles) > 0 {
-		cycleStr := toposort.PrintCycles(cycles, printIfaceBuilderName)
+		cycleStr := toposort.DumpCycles(cycles, printIfaceBuilderName)
 		first := cycles[0][0].(*ifaceBuilder)
 		id.env.errorf(first.def.File, first.def.Pos, "package %v has cyclic interfaces: %v", id.pkg.Name, cycleStr)
 		return

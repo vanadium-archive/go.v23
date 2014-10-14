@@ -96,7 +96,7 @@ func TestParseAndCompile(t *testing.T) {
 		path := path.Join("a/b", test.name)
 		buildPkg := vdltest.FakeBuildPackage(test.name, path, test.files)
 		env := compile.NewEnv(-1)
-		pkg := build.CompilePackage(buildPkg, env)
+		pkg := build.BuildPackage(buildPkg, env)
 		vdltest.ExpectResult(t, env.Errors, test.name, test.errRE)
 		if pkg == nil {
 			continue

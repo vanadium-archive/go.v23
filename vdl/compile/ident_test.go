@@ -33,7 +33,7 @@ func TestIdentConflict(t *testing.T) {
 			test.Name + ".vdl": "package a\n" + test.Data,
 		}
 		buildPkg := vdltest.FakeBuildPackage(test.Name, test.Name, files)
-		if pkg := build.CompilePackage(buildPkg, env); pkg != nil {
+		if pkg := build.BuildPackage(buildPkg, env); pkg != nil {
 			t.Errorf("%s got package, want nil", test.Name)
 		}
 		vdltest.ExpectResult(t, env.Errors, test.Name, "name conflict")
