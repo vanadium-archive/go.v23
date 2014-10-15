@@ -1,8 +1,21 @@
 // Package security provides the API for identity, authentication and
 // authorization.
 //
-// A principal is an entity capable of making or receiving RPCs and has
-// a unique (public, private) key pair.
+// The primitives and APIs defined in this package enable bi-directional,
+// end-to-end authentication between communicating parties; authorization based
+// on that authentication and a database of access rights (ACLs); and secrecy
+// and integrity of all communication.
+//
+// In addition to authorization based on ACLs, veyron supports "blessings"
+// which are typically used by one principal (e.g. alice/phone/app) to delegate
+// constrained authority (often short-lived) to another principal (e.g.
+// bob/tv).
+//
+// A "principal" refers to any entity capable of making or receiving RPCs.
+// Each principal has a unique (public, private) key pair and public key
+// cryptography is used to implement the veyron security model.
+//
+// Delegation
 //
 // Principals have a set of "blessings" in the form of human-readable strings
 // that represent delegations from other principals. Blessings are
@@ -16,21 +29,21 @@
 // ("developer/software/headset") etc.
 //
 // The "root" principal of a delegation chain (i.e., a blessing) is identified
-// by their public key. For example, let's say a principal P1 presents
-// a blessing "a/b/c" to another principal P2. P2 will consider this blessing
+// by their public key. For example, let's say a principal P1 presents a
+// blessing "a/b/c" to another principal P2. P2 will consider this blessing
 // valid iff the public key of the principal that generated the blessing "a"
 // (root of the delegation chain) is recognized as an authority on the blessing
-// "a/b/c" by P2. This allows authorizations for actions to be based
-// on the blessings held by the principal attempting the action.  Cryptographic
-// proof of the validity of blessings is done through chains of certificates
+// "a/b/c" by P2. This allows authorizations for actions to be based on the
+// blessings held by the principal attempting the action.  Cryptographic proof
+// of the validity of blessings is done through chains of certificates
 // encapsulated in the Blessings interface defined in this package. The set of
 // authoritative "root" blessers recognized by a principal is encapsulated in
 // the BlessingRoots interface.
 //
 // Caveats and Discharges
 //
-// Blessings are typically granted under specific restrictions.  For example,
-// a principal with the blessing "johndoe" can bless another principal with
+// Blessings are typically granted under specific restrictions.  For example, a
+// principal with the blessing "johndoe" can bless another principal with
 // "johndoe/friend" allowing the other principal to use the blessing with the
 // caveat that it is valid only for the next 5 minutes and cannot be used to
 // communicate with the banking service.
