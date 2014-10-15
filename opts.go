@@ -60,6 +60,14 @@ import (
 //   demo.MyFuncA(1, 2, 3, FooOption(5), GoodOption("good"))
 //   demo.MyFuncB(FooOption(9), BarOption("bar"))
 
+// RuntimePrincipal represents the principal to be used by the runtime.
+//
+// It wraps the security.Principal interface so that functions representing
+// option annotations can be added.
+type RuntimePrincipal struct{ security.Principal }
+
+func (RuntimePrincipal) ROpt() {}
+
 // RuntimeIDOpt represents the identity to be used by the runtime.
 //
 // It wraps the security.PrivateID interface so that functions representing
