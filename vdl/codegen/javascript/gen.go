@@ -17,7 +17,7 @@ import (
 	"veyron.io/veyron/veyron2/vdl/vdlutil"
 )
 
-type jsData struct {
+type data struct {
 	Pkg *compile.Package
 	Env *compile.Env
 }
@@ -25,7 +25,7 @@ type jsData struct {
 // Generate takes a populated compile.Package and produces a byte slice
 // containing the generated Javascript code.
 func Generate(pkg *compile.Package, env *compile.Env) []byte {
-	data := jsData{
+	data := data{
 		Pkg: pkg,
 		Env: env,
 	}
@@ -39,7 +39,7 @@ func Generate(pkg *compile.Package, env *compile.Env) []byte {
 
 var javascriptTemplate *template.Template
 
-func jsNumOutArgs(method *compile.Method) int {
+func numOutArgs(method *compile.Method) int {
 	return len(method.OutArgs) - 1
 }
 
@@ -53,7 +53,7 @@ func bitlen(kind vdl.Kind) int {
 	panic(fmt.Errorf("vdl: bitLen unhandled kind %v", kind))
 }
 
-func typeJS(data jsData, t *vdl.Type) string {
+func typeJS(data data, t *vdl.Type) string {
 	// This only handles primitive types.
 	if def := data.Env.FindTypeDef(t); def != nil {
 		if def.File == compile.BuiltInFile {
@@ -65,7 +65,7 @@ func typeJS(data jsData, t *vdl.Type) string {
 	panic(fmt.Errorf("vdl: typeJS unhandled type %v %v", t.Kind(), t))
 }
 
-func jsGenMethodTags(data jsData, method *compile.Method) string {
+func genMethodTags(data data, method *compile.Method) string {
 	tags := method.Tags
 	result := "["
 	for _, tag := range tags {
@@ -93,17 +93,138 @@ func valueJS(v *vdl.Value) string {
 		return strconv.FormatFloat(v.Float(), 'g', -1, bitlen(v.Kind()))
 	case vdl.String:
 		return strconv.Quote(v.RawString())
+	case vdl.OneOf:
+		return "{}"
 	}
 
-	// TODO(bjornick): Handle Enum, List, Map, Struct, OneOf, Any, Complex*, Bytes
 	panic(fmt.Errorf("vdl: valueJS unhandled type %v %v", v.Kind(), v.Type()))
+}
+
+func typeStruct(t *vdl.Type) string {
+	switch t.Kind() {
+	case vdl.Any:
+		return "Types.ANY"
+	case vdl.Bool:
+		return "Types.BOOL"
+	case vdl.Byte:
+		return "Types.BYTE"
+	case vdl.Uint16:
+		return "Types.UINT16"
+	case vdl.Uint32:
+		return "Types.UINT32"
+	case vdl.Uint64:
+		return "Types.UINT64"
+	case vdl.Int16:
+		return "Types.INT16"
+	case vdl.Int32:
+		return "Types.INT32"
+	case vdl.Int64:
+		return "Types.INT64"
+	case vdl.Float32:
+		return "Types.FLOAT32"
+	case vdl.Float64:
+		return "Types.FLOAT64"
+	case vdl.Complex64:
+		return "Types.COMPLEX64"
+	case vdl.Complex128:
+		return "Types.COMPLEX128"
+	case vdl.String:
+		return "Types.STRING"
+	case vdl.Enum:
+		enumRes := `{
+    kind: Kind.ENUM,
+    name: '` + t.Name() + `',
+    labels: [`
+		for i := 0; i < t.NumEnumLabel(); i++ {
+			enumRes += "'" + t.EnumLabel(i) + "', "
+		}
+		enumRes += `]
+  }`
+		return enumRes
+	case vdl.TypeVal:
+		return "{}"
+
+	// TODO(bjornick): Handle recursive types and de-duping of the same struct definitions over
+	// and over again.
+	case vdl.Array:
+		return fmt.Sprintf(`{
+    kind: Kind.ARRAY,
+    elem: %s,
+    len: %d
+  }`, typeStruct(t.Elem()), t.Len())
+	case vdl.List:
+		return `{
+    kind: Kind.LIST,
+    elem: ` + typeStruct(t.Elem()) + `
+  }`
+	case vdl.Set:
+		return `{
+    kind: Kind.SET,
+    key: ` + typeStruct(t.Key()) + `
+  }`
+	case vdl.Map:
+		return fmt.Sprintf(`{
+    kind: Kind.MAP,
+    key: %s,
+    elem: %s
+  }`, typeStruct(t.Key()), typeStruct(t.Elem()))
+	case vdl.Struct:
+		result := `{
+    kind: Kind.STRUCT,
+    name: '` + t.Name() + `',
+    fields: [`
+		for i := 0; i < t.NumField(); i++ {
+			f := t.Field(i)
+			result += fmt.Sprintf(`
+    {
+      name: '%s',
+      type: %s
+    },`, f.Name, typeStruct(f.Type))
+		}
+		result += "\n  ]}"
+		return result
+	}
+	return ""
+}
+func generateTypeStub(t *compile.TypeDef) string {
+	name := t.Name
+	wrappedType := true
+	kind := t.Type.Kind()
+	// We can't always have Map be a wrapped type, since the key doesn't
+	// have to be a string.
+	// TODO(bjornick): Handle maps without string keys.
+	switch kind {
+	case vdl.Struct, vdl.Any:
+		wrappedType = false
+	}
+
+	result := "function " + name + "("
+	if wrappedType {
+		result += "val"
+	}
+	result += ") {"
+
+	if wrappedType {
+		result += "\n    this.val = val;\n"
+	} else if kind == vdl.Struct {
+		// TODO(bjornick): Fill these out with default values after we figure
+		// out how to import definitions from other files.
+		result += "\n"
+	}
+	result += "  }\n"
+	result += name + ".prototype._type = " + typeStruct(t.Type) + ";\n"
+
+	result += "  types." + name + " = " + name + ";\n"
+
+	return result
 }
 
 func init() {
 	funcMap := template.FuncMap{
-		"toCamelCase":     vdlutil.ToCamelCase,
-		"jsNumOutArgs":    jsNumOutArgs,
-		"jsGenMethodTags": jsGenMethodTags,
+		"toCamelCase":      vdlutil.ToCamelCase,
+		"numOutArgs":       numOutArgs,
+		"genMethodTags":    genMethodTags,
+		"generateTypeStub": generateTypeStub,
 	}
 	javascriptTemplate = template.Must(template.New("genJS").Funcs(funcMap).Parse(genJS))
 }
@@ -113,29 +234,36 @@ func init() {
 // complicated logic is delegated to the helper functions above.
 //
 // We try to generate code that has somewhat reasonable formatting.
-const genJS = `{{with $data := .}}// This file was auto-generatead by the veyron vdl tool.
+const genJS = `{{with $data := .}}// This file was auto-generated by the veyron vdl tool.
 {{$pkg := $data.Pkg}}
 (function (name, context, definition) {
   if (typeof module !== 'undefined' && module.exports) {
-    module.exports = definition();
+    module.exports = definition(require('veyron'));
   } else {
     context.vdls = context.vdls || {};
-    context.vdls[name] = definition();
+    context.vdls[name] = definition(context.veyron);
   }
-})('{{$pkg.Path}}', this, function() {
+})('{{$pkg.Path}}', this, function(veyron) {
   var services = {
     package: '{{$pkg.Path}}',
   {{range $file := $pkg.Files}}{{range $iface := $file.Interfaces}}  {{$iface.Name}}: {
   {{range $method := $iface.AllMethods}}    {{toCamelCase $method.Name}}: {
 	    numInArgs: {{len $method.InArgs}},
-	    numOutArgs: {{jsNumOutArgs $method}},
+	    numOutArgs: {{numOutArgs $method}},
 	    inputStreaming: {{if $method.InStream}}true{{else}}false{{end}},
 	    outputStreaming: {{if $method.OutStream}}true{{else}}false{{end}},
-	    tags: {{jsGenMethodTags $data $method}}
+	    tags: {{genMethodTags $data $method}}
       },
   {{end}}
     },
   {{end}}{{end}}
   };
+  var Types = veyron.Types;
+  var Kind = veyron.Kind;
+
+  var types = {};
+  {{range $file := $pkg.Files}}{{range $type := $file.TypeDefs}}
+  {{generateTypeStub $type}}
+  {{end}}{{end}}
   return services;
 });{{end}}`
