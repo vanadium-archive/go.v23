@@ -17,7 +17,7 @@ func testConstPackage(t *testing.T, name string, tpkg constPkg, env *compile.Env
 		tpkg.Name + ".vdl": "package " + tpkg.Name + "\n" + tpkg.Data,
 	}
 	buildPkg := vdltest.FakeBuildPackage(tpkg.Name, tpkg.Name, files)
-	pkg := build.CompilePackage(buildPkg, env)
+	pkg := build.BuildPackage(buildPkg, env)
 	vdltest.ExpectResult(t, env.Errors, name, tpkg.ErrRE)
 	if pkg == nil || tpkg.ErrRE != "" {
 		return nil
@@ -48,7 +48,7 @@ func testConfigFile(t *testing.T, name string, tpkg constPkg, env *compile.Env) 
 	// "package a\n" and we have a valid config file.
 	fname := tpkg.Name + ".config"
 	data := "config = Res\n" + tpkg.Data
-	config := build.CompileConfig(fname, strings.NewReader(data), nil, env)
+	config := build.BuildConfig(fname, strings.NewReader(data), nil, env)
 	vdltest.ExpectResult(t, env.Errors, name, tpkg.ErrRE)
 	if config == nil || tpkg.ErrRE != "" {
 		return

@@ -24,7 +24,7 @@ func testType(t *testing.T, test typeTest, experimental bool) {
 			tpkg.Name + ".vdl": "package " + tpkg.Name + "\n" + tpkg.Data,
 		}
 		buildPkg := vdltest.FakeBuildPackage(tpkg.Name, tpkg.Name, files)
-		pkg := build.CompilePackage(buildPkg, env)
+		pkg := build.BuildPackage(buildPkg, env)
 		if tpkg.ErrRE == exp {
 			if experimental {
 				tpkg.ErrRE = "" // in experimental mode the test should pass

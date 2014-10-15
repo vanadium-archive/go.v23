@@ -137,8 +137,8 @@ func compileConfig(debug io.Writer, inName string) (*vdl.Value, error) {
 	// Compile package dependencies in transitive order.
 	deps := build.TransitivePackagesForConfig(basename, data, exts, env.Errors)
 	for _, dep := range deps {
-		if pkg := build.CompilePackage(dep, env); pkg != nil {
-			fmt.Fprintf(debug, "Compiled package %s\n", pkg.Path)
+		if pkg := build.BuildPackage(dep, env); pkg != nil {
+			fmt.Fprintf(debug, "Built package %s\n", pkg.Path)
 		}
 	}
 	// Try to seek back to the beginning of the data file, or if that fails try to
@@ -153,7 +153,7 @@ func compileConfig(debug io.Writer, inName string) (*vdl.Value, error) {
 		}
 	}
 	// Compile config into our test values.
-	config := build.CompileConfig(basename, data, nil, env)
+	config := build.BuildConfig(basename, data, nil, env)
 	if err := env.Errors.ToError(); err != nil {
 		return nil, err
 	}

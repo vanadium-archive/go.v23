@@ -91,7 +91,7 @@ func (cd constDefiner) SortAndDefine() {
 	// list of const defs within each file is topologically sorted, and also
 	// deterministic; other than dependencies, const defs are listed in the same
 	// order they were defined in the parsed files.
-	sorter := toposort.NewSorter()
+	var sorter toposort.Sorter
 	for _, pfile := range cd.pfiles {
 		for _, pdef := range pfile.ConstDefs {
 			b := cd.builders[pdef.Name]
@@ -104,7 +104,7 @@ func (cd constDefiner) SortAndDefine() {
 	// Sort and check for cycles.
 	sorted, cycles := sorter.Sort()
 	if len(cycles) > 0 {
-		cycleStr := toposort.PrintCycles(cycles, printConstBuilderName)
+		cycleStr := toposort.DumpCycles(cycles, printConstBuilderName)
 		first := cycles[0][0].(*constBuilder)
 		cd.env.errorf(first.def.File, first.def.Pos, "package %v has cyclic consts: %v", cd.pkg.Name, cycleStr)
 		return

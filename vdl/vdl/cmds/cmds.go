@@ -394,7 +394,7 @@ for managing Go source code.
 
 func runCompile(targets []*build.Package, env *compile.Env) {
 	for _, target := range targets {
-		pkg := build.CompilePackage(target, env)
+		pkg := build.BuildPackage(target, env)
 		if pkg != nil && optCompileStatus {
 			fmt.Println(pkg.Path)
 		}
@@ -419,7 +419,7 @@ func runAudit(targets []*build.Package, env *compile.Env) {
 func gen(audit bool, targets []*build.Package, env *compile.Env) bool {
 	anychanged := false
 	for _, target := range targets {
-		pkg := build.CompilePackage(target, env)
+		pkg := build.BuildPackage(target, env)
 		if pkg == nil {
 			// Stop at the first package that fails to compile.
 			if env.Errors.IsEmpty() {
