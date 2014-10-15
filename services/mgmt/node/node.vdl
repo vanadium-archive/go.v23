@@ -167,6 +167,13 @@ type Description struct {
 	Profiles set[string]
 }
 
+// Association is a tuple containing an association between a Veyron
+// identity and a system account name.
+type Association struct {
+	IdentityName string
+	AccountName string
+}
+
 // Node can be used to manage a node. The idea is that this interface
 // will be invoked using an object name that identifies the node.
 type Node interface {
@@ -193,4 +200,12 @@ type Node interface {
 	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
 	// are implemented.
 	Reset(Deadline uint64) error
+	// AssociateAccount associates a local  system account name with the provided
+	// Veyron identities. It replaces the existing association if one already exists for that
+	// identity. Setting an AccountName to "" removes the association for each
+	// listed identity.
+	AssociateAccount(identityNames []string, accountName string) error
+	// ListAssociations returns all of the associations between Veyron identities
+	// and system names.
+	ListAssociations() (associations []Association, err error)
 }

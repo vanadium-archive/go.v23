@@ -24,7 +24,7 @@
 // principal with the blessing "johndoe" can delegate to his phone by blessing
 // the phone as "johndoe/phone", which in-turn can delegate to the headset by
 // blessing it as "johndoe/phone/headset". This headset principal may have
-// other blessings bound to it as well. For example, one from the manufaturer
+// other blessings bound to it as well. For example, one from the manufacturer
 // ("manufacturer/model"), one from the developer of the software
 // ("developer/software/headset") etc.
 //
