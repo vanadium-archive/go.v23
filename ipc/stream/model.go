@@ -100,20 +100,12 @@ type Manager interface {
 	//   }
 	// can be used to accept Flows initiated by remote processes to the endpoint
 	// identified by the returned Endpoint.
-	//
-	// Typical options accepted:
-	// veyron2.TLSConfig
-	// veyron2.ServerID
 	Listen(protocol, address string, opts ...ListenerOpt) (Listener, naming.Endpoint, error)
 
 	// Dial creates a VC to the provided remote endpoint.
 	//
 	// Typical options accepted:
-	// TODO(ashankar): Update comment as these option types will change
-	// once we finalize the "public" and "private" ids in veyron2.
-	// veyron2.LocalID - Identity of the caller
-	// veyron2.ServerID - Expected identity of the server
-	// veyron2.TLSConfig
+	// opts.RemoteID - Pattern that the blessings presented by the server must match.
 	//
 	// TODO: Should any of these security related options be made explicit
 	// positional arguments?

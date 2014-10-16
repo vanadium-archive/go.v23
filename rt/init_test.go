@@ -5,6 +5,7 @@ import (
 
 	"veyron.io/veyron/veyron2"
 	"veyron.io/veyron/veyron2/config"
+	"veyron.io/veyron/veyron2/options"
 	"veyron.io/veyron/veyron2/rt"
 )
 
@@ -38,7 +39,7 @@ func (mp *myprofile) Init(veyron2.Runtime, *config.Publisher) error {
 }
 
 func ExampleInitWithProfile() {
-	r := rt.Init(veyron2.ProfileOpt{&myprofile{}})
+	r := rt.Init(options.Profile{&myprofile{}})
 	// Go ahead and use the runtime.
 	log := r.Logger()
 	log.Infof("hello world from my product: %s", r.Profile())
@@ -50,7 +51,7 @@ func ExampleInitWithProfile() {
 //  - tests to catch multiple calls to init with different options
 
 func TestErrorOnNew(t *testing.T) {
-	_, err := rt.New(veyron2.RuntimeOpt{"foo"})
+	_, err := rt.New(options.RuntimeName("foo"))
 	if err == nil {
 		t.Errorf("expected an error!")
 	}

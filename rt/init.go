@@ -11,6 +11,7 @@ import (
 	google_rt "veyron.io/veyron/veyron/runtimes/google/rt"
 
 	"veyron.io/veyron/veyron2"
+	"veyron.io/veyron/veyron2/options"
 	"veyron.io/veyron/veyron2/verror2"
 )
 
@@ -37,7 +38,7 @@ func init() {
 	// We preregister the google runtime factory as a convenience
 	// since otherwise the developer would have to import the google
 	// runtime package in order for it to register itself.
-	RegisterRuntime(veyron2.GoogleRuntimeName, google_rt.New)
+	RegisterRuntime(string(options.GoogleRuntime), google_rt.New)
 	RegisterRuntime("", google_rt.New)
 }
 
@@ -99,7 +100,7 @@ func RegisterProfile(profile veyron2.Profile) {
 }
 
 func prependProfile(profile veyron2.Profile, opts ...veyron2.ROpt) []veyron2.ROpt {
-	return append([]veyron2.ROpt{veyron2.ProfileOpt{profile}}, opts...)
+	return append([]veyron2.ROpt{options.Profile{profile}}, opts...)
 }
 
 func configure(opts ...veyron2.ROpt) (veyron2.Profile, Factory, error) {
@@ -108,10 +109,10 @@ func configure(opts ...veyron2.ROpt) (veyron2.Profile, Factory, error) {
 	name := ""
 	for _, o := range opts {
 		switch v := o.(type) {
-		case veyron2.ProfileOpt:
+		case options.Profile:
 			config.profile = v.Profile
-		case veyron2.RuntimeOpt:
-			name = v.Name
+		case options.RuntimeName:
+			name = string(v)
 		}
 	}
 	runtimes.Lock()
