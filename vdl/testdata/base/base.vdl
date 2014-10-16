@@ -1,5 +1,5 @@
-// Package test_base is a simple single-file test of vdl functionality.
-package test_base
+// Package base is a simple single-file test of vdl functionality.
+package base
 
 // Error ids, that allow stable error checking across different error messages
 // and different address spaces.

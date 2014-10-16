@@ -177,17 +177,24 @@ Most vdl commands apply to a list of packages:
 In its simplest form each package is an import path; e.g.
    "veyron.io/veyron/veyron/lib/vdl"
 
-A package that is an absolute path or that contains a "." is interpreted as a
-file system path and denotes the package in that directory.
+A package that is an absolute path or that begins with a . or .. element is
+interpreted as a file system path, and denotes the package in that directory.
 
-A package that ends with "..." does a wildcard match against all directories
-with that prefix.
+A package is a pattern if it includes one or more "..." wildcards, each of which
+can match any string, including the empty string and strings containing
+slashes.  Such a pattern expands to all packages found in VDLPATH with names
+matching the pattern.  As a special-case, x/... matches x as well as x's
+subdirectories.
 
-The special import path "all" expands to all package directories found in all
-the VDLPATH trees.
+The special-case "all" is a synonym for "...", and denotes all packages found
+in VDLPATH.
 
-For more information, run "go help packages" to see the standard go package
-documentation.
+Import path elements and file names are not allowed to begin with "." or "_";
+such paths are ignored in wildcard matches, and return errors if specified
+explicitly.
+
+Run "vdl help vdlpath" to see docs on VDLPATH.
+Run "go help packages" to see the standard go package docs.
 
 Vdl Vdlpath - help topic
 

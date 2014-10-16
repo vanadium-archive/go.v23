@@ -1,4 +1,4 @@
-package arith
+package vdl_test
 
 import (
 	"errors"
@@ -10,7 +10,8 @@ import (
 	"veyron.io/veyron/veyron2/ipc"
 	"veyron.io/veyron/veyron2/naming"
 	"veyron.io/veyron/veyron2/rt"
-	"veyron.io/veyron/veyron2/vdl/test_base"
+	"veyron.io/veyron/veyron2/vdl/testdata/arith"
+	"veyron.io/veyron/veyron2/vdl/testdata/base"
 	"veyron.io/veyron/veyron2/vdl/vdlutil"
 	"veyron.io/veyron/veyron2/wiretype"
 
@@ -37,7 +38,7 @@ func newServer() ipc.Server {
 	return s
 }
 
-// serverArith implements the Arith interface.
+// serverArith implements the arith.Arith interface.
 type serverArith struct{}
 
 func (*serverArith) Add(_ ipc.ServerContext, A, B int32) (int32, error) {
@@ -48,15 +49,15 @@ func (*serverArith) DivMod(_ ipc.ServerContext, A, B int32) (int32, int32, error
 	return A / B, A % B, nil
 }
 
-func (*serverArith) Sub(_ ipc.ServerContext, args test_base.Args) (int32, error) {
+func (*serverArith) Sub(_ ipc.ServerContext, args base.Args) (int32, error) {
 	return args.A - args.B, nil
 }
 
-func (*serverArith) Mul(_ ipc.ServerContext, nestedArgs test_base.NestedArgs) (int32, error) {
+func (*serverArith) Mul(_ ipc.ServerContext, nestedArgs base.NestedArgs) (int32, error) {
 	return nestedArgs.Args.A * nestedArgs.Args.B, nil
 }
 
-func (*serverArith) Count(_ ipc.ServerContext, Start int32, Stream ArithServiceCountStream) error {
+func (*serverArith) Count(_ ipc.ServerContext, Start int32, Stream arith.ArithServiceCountStream) error {
 	const kNum = 1000
 	sender := Stream.SendStream()
 	for i := int32(0); i < kNum; i++ {
@@ -67,7 +68,7 @@ func (*serverArith) Count(_ ipc.ServerContext, Start int32, Stream ArithServiceC
 	return nil
 }
 
-func (*serverArith) StreamingAdd(_ ipc.ServerContext, Stream ArithServiceStreamingAddStream) (int32, error) {
+func (*serverArith) StreamingAdd(_ ipc.ServerContext, Stream arith.ArithServiceStreamingAddStream) (int32, error) {
 	var total int32
 	rStream := Stream.RecvStream()
 	sender := Stream.SendStream()
@@ -114,7 +115,7 @@ func (*serverCalculator) Off(_ ipc.ServerContext) error {
 func TestCalculator(t *testing.T) {
 	client := newClient()
 	server := newServer()
-	if err := server.Serve("", ipc.LeafDispatcher(NewServerCalculator(&serverCalculator{}), nil)); err != nil {
+	if err := server.Serve("", ipc.LeafDispatcher(arith.NewServerCalculator(&serverCalculator{}), nil)); err != nil {
 		t.Fatal(err)
 	}
 	ep, err := server.ListenX(profiles.LocalListenSpec)
@@ -124,7 +125,7 @@ func TestCalculator(t *testing.T) {
 	root := naming.JoinAddressName(ep.String(), "")
 	ctx := rt.R().NewContext()
 	// Synchronous calls
-	calculator, err := BindCalculator(root, client)
+	calculator, err := arith.BindCalculator(root, client)
 	if err != nil {
 		t.Fatalf("Bind: got %q but expected no error", err)
 	}
@@ -143,19 +144,19 @@ func TestCalculator(t *testing.T) {
 		t.Errorf("Cosine: expected 1 got %f", cosine)
 	}
 
-	arith, err := BindArith(root, client)
+	ar, err := arith.BindArith(root, client)
 	if err != nil {
 		t.Errorf("Bind: got %q but expected no error", err)
 	}
-	sum, err := arith.Add(ctx, 7, 8)
+	sum, err := ar.Add(ctx, 7, 8)
 	if err != nil {
 		t.Errorf("Add: got %q but expected no error", err)
 	}
 	if sum != 15 {
 		t.Errorf("Add: expected 15 got %d", sum)
 	}
-	arith = calculator
-	sum, err = arith.Add(ctx, 7, 8)
+	ar = calculator
+	sum, err = ar.Add(ctx, 7, 8)
 	if err != nil {
 		t.Errorf("Add: got %q but expected no error", err)
 	}
@@ -163,7 +164,7 @@ func TestCalculator(t *testing.T) {
 		t.Errorf("Add: expected 15 got %d", sum)
 	}
 
-	trig, err := BindTrigonometry(root, client)
+	trig, err := arith.BindTrigonometry(root, client)
 	if err != nil {
 		t.Errorf("Bind: got %q but expected no error", err)
 	}
@@ -176,7 +177,7 @@ func TestCalculator(t *testing.T) {
 	}
 
 	// Test auto-generated methods.
-	serverStub := NewServerCalculator(&serverCalculator{}).(*ServerStubCalculator)
+	serverStub := arith.NewServerCalculator(&serverCalculator{}).(*arith.ServerStubCalculator)
 
 	tagTests := []struct {
 		method   string
@@ -319,8 +320,8 @@ func TestCalculator(t *testing.T) {
 		// Arith:
 		wiretype.NamedPrimitiveType{1, "error", nil},
 		wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{36, "A"},
-			wiretype.FieldType{36, "B"}}, "veyron.io/veyron/veyron2/vdl/test_base.Args", nil},
-		wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{67, "Args"}}, "veyron.io/veyron/veyron2/vdl/test_base.NestedArgs", nil},
+			wiretype.FieldType{36, "B"}}, "veyron.io/veyron/veyron2/vdl/testdata/base.Args", nil},
+		wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{67, "Args"}}, "veyron.io/veyron/veyron2/vdl/testdata/base.NestedArgs", nil},
 		wiretype.NamedPrimitiveType{1, "anydata", nil},
 		// Trig:
 		wiretype.NamedPrimitiveType{1, "error", nil},
@@ -341,9 +342,9 @@ func TestArith(t *testing.T) {
 	// anything dispatching to Arith or an interface embedding Arith (like
 	// Calculator) works for a client looking to talk to an Arith service.
 	dispatchers := []ipc.Dispatcher{
-		ipc.LeafDispatcher(NewServerArith(&serverArith{}), nil),
-		ipc.LeafDispatcher(NewServerArith(&serverCalculator{}), nil),
-		ipc.LeafDispatcher(NewServerCalculator(&serverCalculator{}), nil),
+		ipc.LeafDispatcher(arith.NewServerArith(&serverArith{}), nil),
+		ipc.LeafDispatcher(arith.NewServerArith(&serverCalculator{}), nil),
+		ipc.LeafDispatcher(arith.NewServerCalculator(&serverCalculator{}), nil),
 	}
 
 	client := newClient()
@@ -361,40 +362,40 @@ func TestArith(t *testing.T) {
 			t.Fatalf("%d: %v", i, err)
 		}
 		// Synchronous calls
-		arith, err := BindArith(root, client)
+		ar, err := arith.BindArith(root, client)
 		if err != nil {
 			t.Errorf("Bind: got %q but expected no error", err)
 		}
 
-		sum, err := arith.Add(ctx, 7, 8)
+		sum, err := ar.Add(ctx, 7, 8)
 		if err != nil {
 			t.Errorf("Add: got %q but expected no error", err)
 		}
 		if sum != 15 {
 			t.Errorf("Add: expected 15 got %d", sum)
 		}
-		q, r, err := arith.DivMod(ctx, 7, 3)
+		q, r, err := ar.DivMod(ctx, 7, 3)
 		if err != nil {
 			t.Errorf("DivMod: got %q but expected no error", err)
 		}
 		if q != 2 || r != 1 {
 			t.Errorf("DivMod: expected (2,1) got (%d,%d)", q, r)
 		}
-		diff, err := arith.Sub(ctx, test_base.Args{7, 8})
+		diff, err := ar.Sub(ctx, base.Args{7, 8})
 		if err != nil {
 			t.Errorf("Sub: got %q but expected no error", err)
 		}
 		if diff != -1 {
 			t.Errorf("Sub: got %d, expected -1", diff)
 		}
-		prod, err := arith.Mul(ctx, test_base.NestedArgs{test_base.Args{7, 8}})
+		prod, err := ar.Mul(ctx, base.NestedArgs{base.Args{7, 8}})
 		if err != nil {
 			t.Errorf("Mul: got %q, but expected no error", err)
 		}
 		if prod != 56 {
 			t.Errorf("Sub: got %d, expected 56", prod)
 		}
-		stream, err := arith.Count(ctx, 35)
+		stream, err := ar.Count(ctx, 35)
 		if err != nil {
 			t.Fatalf("error while executing Count %v", err)
 		}
@@ -417,7 +418,7 @@ func TestArith(t *testing.T) {
 			t.Errorf("Count failed with %v", err)
 		}
 
-		addStream, err := arith.StreamingAdd(ctx)
+		addStream, err := ar.StreamingAdd(ctx)
 
 		go func() {
 			sender := addStream.SendStream()
@@ -458,13 +459,12 @@ func TestArith(t *testing.T) {
 			t.Errorf("Got %d but expexted %d", total, expectedSum)
 		}
 
-		if err := arith.GenError(ctx); err == nil {
+		if err := ar.GenError(ctx); err == nil {
 			t.Errorf("GenError: got %v but expected %v", err, generatedError)
 		}
 
 		// Client-side stubs
-
-		clientStub := arith.(*clientStubArith)
+		clientStub := ar.(ipc.UniversalServiceMethods)
 
 		tags, err := clientStub.GetMethodTags(ctx, "GenError")
 		expectedTags := []interface{}{"foo", "barz", "hello", int32(129), uint64(36)}
@@ -482,7 +482,7 @@ func TestArith(t *testing.T) {
 
 		// Server-side stubs
 
-		serverStub := NewServerArith(&serverArith{}).(*ServerStubArith)
+		serverStub := arith.NewServerArith(&serverArith{}).(*arith.ServerStubArith)
 
 		tags, err = serverStub.GetMethodTags(nil, "GenError")
 		expectedTags = []interface{}{"foo", "barz", "hello", int32(129), uint64(36)}
@@ -575,8 +575,8 @@ func TestArith(t *testing.T) {
 
 		expectedTypeDefs := []vdlutil.Any{
 			wiretype.NamedPrimitiveType{1, "error", nil},
-			wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{36, "A"}, wiretype.FieldType{36, "B"}}, "veyron.io/veyron/veyron2/vdl/test_base.Args", nil},
-			wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{66, "Args"}}, "veyron.io/veyron/veyron2/vdl/test_base.NestedArgs", nil},
+			wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{36, "A"}, wiretype.FieldType{36, "B"}}, "veyron.io/veyron/veyron2/vdl/testdata/base.Args", nil},
+			wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{66, "Args"}}, "veyron.io/veyron/veyron2/vdl/testdata/base.NestedArgs", nil},
 			wiretype.NamedPrimitiveType{1, "anydata", nil},
 		}
 

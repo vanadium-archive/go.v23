@@ -1,9 +1,9 @@
-package test_base
+package base
 
 // This file contains experimental features, that are not yet supported for all
 // generated languages.  Run the following command to generate Go:
 //
-//   vdl -experimental -exts=.vdl,.vdlexp generate -lang=go veyron2/vdl/...
+//   vdl -experimental -exts=.vdl,.vdlexp generate -lang=go veyron.io/veyron/veyron2/vdl/...
 
 type (
 	NamedEnum       enum{A;B;C}

@@ -27,7 +27,7 @@
 package arith
 
 import (
-	"veyron.io/veyron/veyron2/vdl/test_base"
+	"veyron.io/veyron/veyron2/vdl/testdata/base"
 
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
 	_gen_io "io"
@@ -77,9 +77,9 @@ type Arith_ExcludingUniversal interface {
 	// just like Go.
 	DivMod(ctx _gen_context.T, a int32, b int32, opts ..._gen_ipc.CallOpt) (quot int32, rem int32, err error)
 	// Sub shows that you can use data types defined in other packages.
-	Sub(ctx _gen_context.T, args test_base.Args, opts ..._gen_ipc.CallOpt) (reply int32, err error)
+	Sub(ctx _gen_context.T, args base.Args, opts ..._gen_ipc.CallOpt) (reply int32, err error)
 	// Mul tries another data type defined in another package.
-	Mul(ctx _gen_context.T, nested test_base.NestedArgs, opts ..._gen_ipc.CallOpt) (reply int32, err error)
+	Mul(ctx _gen_context.T, nested base.NestedArgs, opts ..._gen_ipc.CallOpt) (reply int32, err error)
 	// GenError shows that it's fine to have no in args, and no out args other
 	// than "error".  In addition GenError shows the usage of tags.  Tags are a
 	// sequence of constants.  There's no requirement on uniqueness of types or
@@ -106,9 +106,9 @@ type ArithService interface {
 	// just like Go.
 	DivMod(context _gen_ipc.ServerContext, a int32, b int32) (quot int32, rem int32, err error)
 	// Sub shows that you can use data types defined in other packages.
-	Sub(context _gen_ipc.ServerContext, args test_base.Args) (reply int32, err error)
+	Sub(context _gen_ipc.ServerContext, args base.Args) (reply int32, err error)
 	// Mul tries another data type defined in another package.
-	Mul(context _gen_ipc.ServerContext, nested test_base.NestedArgs) (reply int32, err error)
+	Mul(context _gen_ipc.ServerContext, nested base.NestedArgs) (reply int32, err error)
 	// GenError shows that it's fine to have no in args, and no out args other
 	// than "error".  In addition GenError shows the usage of tags.  Tags are a
 	// sequence of constants.  There's no requirement on uniqueness of types or
@@ -532,7 +532,7 @@ func (__gen_c *clientStubArith) DivMod(ctx _gen_context.T, a int32, b int32, opt
 	return
 }
 
-func (__gen_c *clientStubArith) Sub(ctx _gen_context.T, args test_base.Args, opts ..._gen_ipc.CallOpt) (reply int32, err error) {
+func (__gen_c *clientStubArith) Sub(ctx _gen_context.T, args base.Args, opts ..._gen_ipc.CallOpt) (reply int32, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Sub", []interface{}{args}, opts...); err != nil {
 		return
@@ -543,7 +543,7 @@ func (__gen_c *clientStubArith) Sub(ctx _gen_context.T, args test_base.Args, opt
 	return
 }
 
-func (__gen_c *clientStubArith) Mul(ctx _gen_context.T, nested test_base.NestedArgs, opts ..._gen_ipc.CallOpt) (reply int32, err error) {
+func (__gen_c *clientStubArith) Mul(ctx _gen_context.T, nested base.NestedArgs, opts ..._gen_ipc.CallOpt) (reply int32, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Mul", []interface{}{nested}, opts...); err != nil {
 		return
@@ -742,12 +742,12 @@ func (__gen_s *ServerStubArith) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Se
 				_gen_wiretype.FieldType{Type: 0x24, Name: "A"},
 				_gen_wiretype.FieldType{Type: 0x24, Name: "B"},
 			},
-			"veyron.io/veyron/veyron2/vdl/test_base.Args", []string(nil)},
+			"veyron.io/veyron/veyron2/vdl/testdata/base.Args", []string(nil)},
 		_gen_wiretype.StructType{
 			[]_gen_wiretype.FieldType{
 				_gen_wiretype.FieldType{Type: 0x42, Name: "Args"},
 			},
-			"veyron.io/veyron/veyron2/vdl/test_base.NestedArgs", []string(nil)},
+			"veyron.io/veyron/veyron2/vdl/testdata/base.NestedArgs", []string(nil)},
 		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "anydata", Tags: []string(nil)}}
 
 	return result, nil
@@ -781,12 +781,12 @@ func (__gen_s *ServerStubArith) DivMod(call _gen_ipc.ServerCall, a int32, b int3
 	return
 }
 
-func (__gen_s *ServerStubArith) Sub(call _gen_ipc.ServerCall, args test_base.Args) (reply int32, err error) {
+func (__gen_s *ServerStubArith) Sub(call _gen_ipc.ServerCall, args base.Args) (reply int32, err error) {
 	reply, err = __gen_s.service.Sub(call, args)
 	return
 }
 
-func (__gen_s *ServerStubArith) Mul(call _gen_ipc.ServerCall, nested test_base.NestedArgs) (reply int32, err error) {
+func (__gen_s *ServerStubArith) Mul(call _gen_ipc.ServerCall, nested base.NestedArgs) (reply int32, err error) {
 	reply, err = __gen_s.service.Mul(call, nested)
 	return
 }

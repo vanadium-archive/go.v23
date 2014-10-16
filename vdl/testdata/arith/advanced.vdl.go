@@ -4,7 +4,7 @@
 package arith
 
 import (
-	"veyron.io/veyron/veyron2/vdl/test_arith/exp"
+	"veyron.io/veyron/veyron2/vdl/testdata/arith/exp"
 
 	// The non-user imports are prefixed with "_gen_" to prevent collisions.
 	_gen_veyron2 "veyron.io/veyron/veyron2"

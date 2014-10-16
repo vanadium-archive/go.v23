@@ -1,13 +1,49 @@
-// Package build provides utilities to collect vdl build information, and
+// Package build provides utilities to collect VDL build information, and
 // helpers to kick off the parser and compiler.
+//
+// VDL Packages
+//
+// VDL is organized into packages, where a package is a collection of one or
+// more source files.  The files in a package collectively define the types,
+// constants, services and errors belonging to the package; these are called
+// package elements.
+//
+// The package elements in package P may be used in another package Q.  First
+// package Q must import package P, and then refer to the package elements in P.
+// Imports define the package dependency graph, which must be acyclic.
+//
+// Build Strategy
+//
+// The steps to building a VDL package P:
+//   1) Compute the transitive closure of P's dependencies DEPS.
+//   2) Sort DEPS in dependency order.
+//   3) Build each package D in DEPS.
+//   3) Build package P.
+//
+// Building a package P requires that all elements used by P are understood,
+// including elements defined outside of P.  The only way for a change to
+// package Q to affect the build of P is if Q is in the transitive closure of
+// P's package dependencies.  However there may be false positives; the change
+// to Q might not actually affect P.
+//
+// The build process may perform more work than is strictly necessary, because
+// of these false positives.  However it is simple and correct.
+//
+// The TransitivePackages* functions implement build steps 1 and 2.
+//
+// The Build* functions implement build steps 3 and 4.
+//
+// Other functions provide related build information and utilities.
 package build
 
 import (
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -20,15 +56,15 @@ import (
 
 // Package represents the build information for a vdl package.
 type Package struct {
-	// Dir is the absolute directory containing the package files.
-	// E.g. "/home/user/veyron/vdl/src/foo/bar"
-	Dir string
 	// Name is the name of the package, specified in the vdl files.
 	// E.g. "bar"
 	Name string
 	// Path is the package path,
 	// E.g. "foo/bar".
 	Path string
+	// Dir is the absolute directory containing the package files.
+	// E.g. "/home/user/veyron/vdl/src/foo/bar"
+	Dir string
 	// BaseFileNames is the list of sorted base vdl file names for this package.
 	// Join these with Dir to get absolute file names.
 	BaseFileNames []string
@@ -47,19 +83,43 @@ const (
 	missingIsError missingMode = false
 )
 
-// New packages always start with an empty Name and Path.  The Name is filled in
-// when we addPkgDeps, and the Path is only filled in if we process this
-// package via resolvePackagePath.
-func newPackage(dir string, mode missingMode, exts map[string]bool, errs *vdlutil.Errors) *Package {
-	pkg := &Package{Dir: dir, OpenFilesFunc: openFiles}
-	if err := pkg.initBaseFileNames(exts); err != nil {
-		errs.Errorf("Couldn't init vdl file names in package dir %v, %v", pkg.Dir, err)
-		return nil
+func (m missingMode) logOrErrorf(errs *vdlutil.Errors, format string, v ...interface{}) {
+	if m == missingIsOk {
+		vdlutil.Vlog.Printf(format, v...)
+	} else {
+		errs.Errorf(format, v...)
 	}
-	if len(pkg.BaseFileNames) == 0 {
-		if mode == missingIsError {
-			errs.Errorf("No vdl files in dir %v", pkg.Dir)
+}
+
+func pathPrefixDotOrDotDot(path string) bool {
+	// The point of this helper is to catch cases where the path starts with a
+	// . or .. element; note that  ... returns false.
+	spath := filepath.ToSlash(path)
+	return path == "." || path == ".." || strings.HasPrefix(spath, "./") || strings.HasPrefix(spath, "../")
+}
+
+func ignorePathElem(elem string) bool {
+	return (strings.HasPrefix(elem, ".") || strings.HasPrefix(elem, "_")) &&
+		!pathPrefixDotOrDotDot(elem)
+}
+
+// validPackagePath returns true iff the path is valid; i.e. if none of the path
+// elems is ignored.
+func validPackagePath(path string) bool {
+	for _, elem := range strings.Split(path, "/") {
+		if ignorePathElem(elem) {
+			return false
 		}
+	}
+	return true
+}
+
+// New packages always start with an empty Name, which is filled in when we call
+// ds.addPackageAndDeps.
+func newPackage(path, dir string, mode missingMode, exts map[string]bool, errs *vdlutil.Errors) *Package {
+	pkg := &Package{Path: path, Dir: dir, OpenFilesFunc: openFiles}
+	if err := pkg.initBaseFileNames(exts); err != nil {
+		mode.logOrErrorf(errs, "%s: bad package dir (%v)", pkg.Dir, err)
 		return nil
 	}
 	return pkg
@@ -67,7 +127,6 @@ func newPackage(dir string, mode missingMode, exts map[string]bool, errs *vdluti
 
 // initBaseFileNames initializes BaseFileNames from the Dir.
 func (p *Package) initBaseFileNames(exts map[string]bool) error {
-	vdlutil.Vlog.Printf("Looking for vdl files in package dir %v", p.Dir)
 	infos, err := ioutil.ReadDir(p.Dir)
 	if err != nil {
 		return err
@@ -76,13 +135,15 @@ func (p *Package) initBaseFileNames(exts map[string]bool) error {
 		if info.IsDir() {
 			continue
 		}
-		if strings.HasPrefix(info.Name(), ".") {
-			vdlutil.Vlog.Printf("Ignoring file with leading dot %s", filepath.Join(p.Dir, info.Name()))
+		if ignorePathElem(info.Name()) || !exts[filepath.Ext(info.Name())] {
+			vdlutil.Vlog.Printf("%s: ignoring file", filepath.Join(p.Dir, info.Name()))
 			continue
 		}
-		if exts[filepath.Ext(info.Name())] {
-			p.BaseFileNames = append(p.BaseFileNames, info.Name())
-		}
+		vdlutil.Vlog.Printf("%s: adding vdl file", filepath.Join(p.Dir, info.Name()))
+		p.BaseFileNames = append(p.BaseFileNames, info.Name())
+	}
+	if len(p.BaseFileNames) == 0 {
+		return fmt.Errorf("no vdl files")
 	}
 	return nil
 }
@@ -140,10 +201,16 @@ func (p *Package) CloseFiles() error {
 	return err
 }
 
-// SrcDirs returns a list of package source root directories.
+// SrcDirs returns a list of package root source directories, based on the
+// VDLPATH environment variable.
+//
+// VDLPATH is a list of directories separated by filepath.ListSeparator;
+// e.g. the separator is ":" on UNIX, and ";" on Windows.  Each VDLPATH
+// directory must have a "src/" directory that holds vdl source code.  The path
+// below "src/" determines the import path.
 func SrcDirs() []string {
 	var ret []string
-	for _, dir := range strings.Split(os.Getenv("VDLPATH"), ":") {
+	for _, dir := range filepath.SplitList(os.Getenv("VDLPATH")) {
 		if dir != "" {
 			if abs, err := filepath.Abs(filepath.Join(dir, "src")); err == nil {
 				ret = append(ret, abs)
@@ -153,10 +220,21 @@ func SrcDirs() []string {
 	return ret
 }
 
+// IsDirPath returns true iff the path is absolute, or begins with a . or
+// .. element.  The path denotes the package in that directory.
+func IsDirPath(path string) bool {
+	return filepath.IsAbs(path) || pathPrefixDotOrDotDot(path)
+}
+
+// IsImportPath returns true iff !IsDirPath.  The path P denotes the package in
+// directory DIR/src/P, for some DIR listed in SrcDirs.
+func IsImportPath(path string) bool {
+	return !IsDirPath(path)
+}
+
 // depSorter does the main work of collecting and sorting packages and their
-// dependencies.  We support most of the syntax from the go cmdline tool; both
-// dirs and package paths are supported, and we allow special cases for the
-// "all" package and "..." wildcards.
+// dependencies.  The full syntax from the go cmdline tool is supported; we
+// allow both dirs and import paths, as well as the "all" and "..." wildcards.
 //
 // This is slightly complicated because of dirs, and the potential for symlinks.
 // E.g. let's say we have two directories, one a symlink to the other:
@@ -168,29 +246,12 @@ func SrcDirs() []string {
 // dir we'll end up with; file paths form a graph rather than a tree.  For more
 // details see http://plan9.bell-labs.com/sys/doc/lexnames.html
 //
-// This means there's no way to deduce what the package path should be if a user
-// builds a directory rather than a package path.  Luckily we don't always need
-// to know the package path; the only time we must have a package path for a
-// package is if the package is imported by another package (since the lookup is
-// based on package path), but in that case we're performing a forward lookup of
-// the package path, and will guarantee that the package path is filled in.
-// Dirs that the user is building that aren't depended on by other packages
-// won't have a package path, but we don't need one.
-//
-// Alas there's a caveat.  The error definition mechanism currently relies on
-// package path to create implicit error ids, and must be known at the time the
-// package is compiled.  To handle this we cheat in DeduceUnknownPackagePaths
-// and attempt to deduce the package path even if the user builds a directory.
-// This may sometimes be wrong - to ensure correctness the veyron rule is to
-// disallow symlinks within the source tree.  TODO(toddw): Decide whether to
-// keep this restriction, or generate implicit error ids via some other
-// mechanism.
-//
-// The strategy is to compute the topological ordering based on absolute
-// directory names, and fill in package paths if available.  This means that we
-// might have the same logical package listed under different Packages with
-// different absolute dirnames, but that's fine; we'll just generate some
-// packages multiple times.
+// This means that if the user builds a dir (rather than an import path), we
+// might not be able to deduce the package path.  Note that the error definition
+// mechanism relies on the package path to create implicit error ids, and this
+// must be known at the time the package is compiled.  To handle this we call
+// deducePackagePath and attempt to deduce the package path even if the user
+// builds a directory, and return errors if this fails.
 //
 // TODO(toddw): If we care about performance we could serialize the compiled
 // compile.Package information and write it out as compiler-generated artifacts,
@@ -216,7 +277,7 @@ func makeExts(exts []string) map[string]bool {
 func newDepSorter(exts []string, errs *vdlutil.Errors) *depSorter {
 	srcDirs := SrcDirs()
 	if len(srcDirs) == 0 {
-		errs.Error("No src dirs; set your VDLPATH to a valid value")
+		errs.Error("No src dirs; set VDLPATH to a valid value")
 	}
 	return &depSorter{
 		exts:    makeExts(exts),
@@ -228,138 +289,194 @@ func newDepSorter(exts []string, errs *vdlutil.Errors) *depSorter {
 	}
 }
 
-// AddCmdLineArg resolves the cmdLineArg into a package and adds it to the
-// sorter, along with all transitive dependencies.
-func (ds *depSorter) AddCmdLineArg(cmdLineArg string) {
-	// The "all" package is special-cased.
-	if cmdLineArg == "all" {
-		for _, srcDir := range ds.srcDirs {
-			ds.addAllDirs(srcDir)
-		}
-	} else if filepath.IsAbs(cmdLineArg) || strings.Contains(cmdLineArg, ".") {
-		// It's a package dir or pattern.
-		if strings.HasSuffix(cmdLineArg, "...") {
-			// TODO(toddw): Support ... syntax for partial dirnames.
-			ds.addAllDirs(filepath.Clean(strings.TrimSuffix(cmdLineArg, "...")))
-		} else {
-			if pkg, isNew := ds.resolvePackageDir(cmdLineArg, missingIsError); isNew {
-				ds.addPackageDeps(pkg)
-			}
-		}
-	} else {
-		// It's a package path.
-		if pkg, isNew := ds.resolvePackagePath(cmdLineArg); isNew {
-			ds.addPackageDeps(pkg)
-		}
-	}
-}
-
 func (ds *depSorter) errorf(format string, v ...interface{}) {
 	ds.errs.Errorf(format, v...)
 }
 
-// addAllDirs adds all package dirs with the given prefix.
-func (ds *depSorter) addAllDirs(prefix string) {
-	// Try looking in the prefix itself.
-	if pkg, isNew := ds.resolvePackageDir(prefix, missingIsOk); isNew {
-		ds.addPackageDeps(pkg)
+// AddPath adds the package(s) resolved from path to the sorter.
+func (ds *depSorter) AddPath(path string) {
+	if path == "all" {
+		// Special-case "all", with the same behavior as Go.
+		path = "..."
 	}
-	// Now try looking for all dirs under the prefix.
-	infos, err := ioutil.ReadDir(prefix)
+	isDirPath := IsDirPath(path)
+	dots := strings.Index(path, "...")
+	switch {
+	case dots >= 0:
+		ds.resolveWildcardPath(isDirPath, path[:dots], path[dots:])
+	case isDirPath:
+		ds.resolveDirPath(path, "", missingIsError)
+	default:
+		ds.resolveImportPath(path)
+	}
+}
+
+// resolveWildcardPath resolves wildcards for both dir and import paths.  The
+// prefix is everything before the first "...", and the suffix is everything
+// including and after the first "..."; note that multiple "..." wildcards may
+// occur within the suffix.
+//
+// The strategy is to compute one or more root directories that contain
+// everything that could possibly be matched, along with a filename pattern to
+// match against.  Then we walk through each root directory, matching against
+// the pattern.
+func (ds *depSorter) resolveWildcardPath(isDirPath bool, prefix, suffix string) {
+	var rootDirs []string // root directories to walk through
+	var pattern string    // pattern to match against, starting after root dir
+	switch {
+	case isDirPath:
+		// prefix and suffix are directory paths.
+		dir, pre := filepath.Split(prefix)
+		pattern = filepath.Clean(pre + suffix)
+		rootDirs = append(rootDirs, filepath.Clean(dir))
+	default:
+		// prefix and suffix are slash-separated import paths.
+		slashDir, pre := path.Split(prefix)
+		pattern = filepath.Clean(pre + filepath.FromSlash(suffix))
+		dir := filepath.FromSlash(slashDir)
+		for _, srcDir := range ds.srcDirs {
+			rootDirs = append(rootDirs, filepath.Join(srcDir, dir))
+		}
+	}
+	matcher, err := createMatcher(pattern)
 	if err != nil {
-		// Silently skip this prefix.
-		//
-		// TODO(toddw): The rationale is that inaccessible portions of the dir
-		// hierarchy shouldn't cause a failure for "all "or "..." targets.  But
-		// perhaps revisit this, since other types of errors will also be ignored.
+		ds.errorf("%v", err)
 		return
 	}
-	// TODO(toddw): Should we break infinite loops from symlinks / hardlinks?
-	for _, info := range infos {
-		if info.IsDir() {
-			ds.addAllDirs(filepath.Join(prefix, info.Name()))
-		}
+	// Walk through root dirs and subdirs, looking for matches.
+	for _, root := range rootDirs {
+		filepath.Walk(root, func(rootAndPath string, info os.FileInfo, err error) error {
+			// Ignore errors and non-directory elements.
+			if err != nil || !info.IsDir() {
+				return nil
+			}
+			// Skip the dir and subdirs if the elem should be ignored.
+			_, elem := filepath.Split(rootAndPath)
+			if ignorePathElem(elem) {
+				vdlutil.Vlog.Printf("%s: ignoring dir", rootAndPath)
+				return filepath.SkipDir
+			}
+			// Ignore the dir if it doesn't match our pattern.  We still process the
+			// subdirs since they still might match.
+			//
+			// TODO(toddw): We could add an optimization to skip subdirs that can't
+			// possibly match the matcher.  E.g. given pattern "a..." we can skip
+			// the subdirs if the dir doesn't start with "a".
+			matchPath := rootAndPath[len(root):]
+			if strings.HasPrefix(matchPath, pathSeparator) {
+				matchPath = matchPath[len(pathSeparator):]
+			}
+			if !matcher.MatchString(matchPath) {
+				return nil
+			}
+			// Finally resolve the dir.
+			ds.resolveDirPath(rootAndPath, "", missingIsOk)
+			return nil
+		})
 	}
 }
 
-// resolvePackageDir resolves the pkgDir into a Package.  Returns the package or
-// nil if it couldn't be resolved, along with a bool telling us whether this is
-// the first time we've seen the package.  The missingMode controls whether it's
-// ok for the underlying directory to be missing.
-func (ds *depSorter) resolvePackageDir(pkgDir string, mode missingMode) (*Package, bool) {
-	absDir, err := filepath.Abs(pkgDir)
+const pathSeparator = string(filepath.Separator)
+
+// createMatcher creates a regexp matcher out of the file pattern.
+func createMatcher(pattern string) (*regexp.Regexp, error) {
+	rePat := regexp.QuoteMeta(pattern)
+	rePat = strings.Replace(rePat, `\.\.\.`, `.*`, -1)
+	// Add special-case so that x/... also matches x.
+	slashDotStar := regexp.QuoteMeta(pathSeparator) + ".*"
+	if strings.HasSuffix(rePat, slashDotStar) {
+		rePat = rePat[:len(rePat)-len(slashDotStar)] + "(" + slashDotStar + ")?"
+	}
+	rePat = `^` + rePat + `$`
+	matcher, err := regexp.Compile(rePat)
 	if err != nil {
-		ds.errorf("Couldn't make package dir %v absolute, %v", pkgDir, err)
+		return nil, fmt.Errorf("Can't compile package path regexp %s: %v", rePat, err)
 	}
-	if strings.HasPrefix(filepath.Base(absDir), ".") {
-		// Avoid descending into ".git" and the like.
-		vdlutil.Vlog.Printf("Ignoring dir with leading dot %s", absDir)
-		if mode == missingIsError {
-			ds.errorf("Package dir with leading dot is invalid %s", absDir)
+	return matcher, nil
+}
+
+// resolveDirPath resolves dir into a Package.  Returns the package, or nil if
+// it can't be resolved.  The pkgPath is used to set the path of the returned
+// package; if it is empty, we attempt to deduce the package path.  The
+// missingMode controls whether it's ok for the underlying directory to be
+// missing.
+func (ds *depSorter) resolveDirPath(dir, pkgPath string, mode missingMode) *Package {
+	// If the package already exists in our dir map, we can just return it.
+	absDir, err := filepath.Abs(dir)
+	if err != nil {
+		ds.errorf("%s: can't make absolute (%v)", dir, err)
+	}
+	if pkg := ds.dirMap[absDir]; pkg != nil {
+		return pkg
+	}
+	// Ensure pkgPath is initialized, and corresponds to exactly one package.
+	if pkgPath == "" {
+		if pkgPath, err = ds.deducePackagePath(absDir); err != nil {
+			ds.errorf("%s: can't deduce package path (%v)", absDir, err)
+			return nil
 		}
-		return nil, false
 	}
-	if existPkg, exists := ds.dirMap[absDir]; exists {
-		return existPkg, false
+	if !validPackagePath(pkgPath) {
+		mode.logOrErrorf(ds.errs, "%s: package path %q is invalid", absDir, pkgPath)
+		return nil
 	}
+	if pkg := ds.pathMap[pkgPath]; pkg != nil {
+		mode.logOrErrorf(ds.errs, "%s: package path %q already resolved from %s", absDir, pkgPath, pkg.Dir)
+		return nil
+	}
+	// Make sure the directory really exists, and add the package and deps.
 	fileInfo, err := os.Stat(absDir)
 	if err != nil {
-		if mode == missingIsError {
-			ds.errorf(err.Error())
-		}
-		return nil, false
+		mode.logOrErrorf(ds.errs, "%s: can't stat (%v)", absDir, err)
+		return nil
 	}
 	if !fileInfo.IsDir() {
-		if mode == missingIsError {
-			ds.errorf("Expected %v to be a directory", absDir)
-		}
-		return nil, false
+		mode.logOrErrorf(ds.errs, "%s: package isn't a directory", absDir)
+		return nil
 	}
-	newPkg := newPackage(absDir, mode, ds.exts, ds.errs)
-	if newPkg == nil {
-		return nil, false
-	}
-	ds.dirMap[newPkg.Dir] = newPkg
-	return newPkg, true
+	return ds.addPackageAndDeps(pkgPath, absDir, mode)
 }
 
-// resolvePackagePath resolves the pkgPath into a Package.  Returns the package
-// or nil if it couldn't be resolved, along with a bool telling us whether this
-// is the first time we've seen the package.  We don't support relative package
-// paths.
-func (ds *depSorter) resolvePackagePath(pkgPath string) (*Package, bool) {
+// resolveImportPath resolves pkgPath into a Package.  Returns the package, or
+// nil if it can't be resolved.
+func (ds *depSorter) resolveImportPath(pkgPath string) *Package {
 	pkgPath = path.Clean(pkgPath)
-	if existPkg, exists := ds.pathMap[pkgPath]; exists {
-		return existPkg, false
+	if pkg := ds.pathMap[pkgPath]; pkg != nil {
+		return pkg
 	}
-
+	if !validPackagePath(pkgPath) {
+		ds.errorf("Import path %q is invalid", pkgPath)
+		return nil
+	}
 	// Look through srcDirs in-order until we find a valid package dir.
 	for _, srcDir := range ds.srcDirs {
-		candidateDir := filepath.Join(srcDir, pkgPath)
-		if pkg, isNew := ds.resolvePackageDir(candidateDir, missingIsOk); pkg != nil {
-			vdlutil.Vlog.Printf("Resolved pkg path %v to abs dir %v", pkgPath, pkg.Dir)
-			// Update the pkg path since it might not have been known before.
-			//
-			// TODO(toddw): Should we handle hardlinks / symlinks?
-			pkg.Path = pkgPath
-			ds.pathMap[pkg.Path] = pkg
-			return pkg, isNew
+		candidateDir := filepath.Join(srcDir, filepath.FromSlash(pkgPath))
+		if pkg := ds.resolveDirPath(candidateDir, pkgPath, missingIsOk); pkg != nil {
+			vdlutil.Vlog.Printf("%s: resolved import path %q", pkg.Dir, pkgPath)
+			return pkg
 		}
 	}
-
-	// We couldn't find a valid package dir corresponding to this path.
-	ds.errorf("Couldn't resolve package path %v", pkgPath)
-	return nil, false
+	// We can't find a valid dir corresponding to this import path.
+	ds.errorf("Can't resolve import path %q", pkgPath)
+	return nil
 }
 
-// addPackageDeps adds the pkg and its dependencies to the sorter.
-func (ds *depSorter) addPackageDeps(pkg *Package) {
+// addPackageAndDeps adds the pkg and its dependencies to the sorter.
+func (ds *depSorter) addPackageAndDeps(path, dir string, mode missingMode) *Package {
+	pkg := newPackage(path, dir, mode, ds.exts, ds.errs)
+	if pkg == nil {
+		return nil
+	}
+	vdlutil.Vlog.Printf("%s: resolved package path %q", pkg.Dir, pkg.Path)
+	ds.dirMap[pkg.Dir] = pkg
+	ds.pathMap[pkg.Path] = pkg
 	ds.sorter.AddNode(pkg)
 	pfiles := ParsePackage(pkg, parse.Opts{ImportsOnly: true}, ds.errs)
 	pkg.Name = parse.InferPackageName(pfiles, ds.errs)
 	for _, pf := range pfiles {
 		ds.addImportDeps(pkg, pf.Imports)
 	}
+	return pkg
 }
 
 // addImportDeps adds transitive dependencies represented by imports to the
@@ -367,14 +484,11 @@ func (ds *depSorter) addPackageDeps(pkg *Package) {
 // dependencies; otherwise each dependency is added as an independent node.
 func (ds *depSorter) addImportDeps(pkg *Package, imports []*parse.Import) {
 	for _, imp := range imports {
-		if depPkg, isNew := ds.resolvePackagePath(imp.Path); depPkg != nil {
+		if dep := ds.resolveImportPath(imp.Path); dep != nil {
 			if pkg != nil {
-				ds.sorter.AddEdge(pkg, depPkg)
+				ds.sorter.AddEdge(pkg, dep)
 			} else {
-				ds.sorter.AddNode(depPkg)
-			}
-			if isNew {
-				ds.addPackageDeps(depPkg)
+				ds.sorter.AddNode(dep)
 			}
 		}
 	}
@@ -388,30 +502,20 @@ func (ds *depSorter) AddConfigDeps(baseFileName string, src io.Reader) {
 	}
 }
 
-// DeduceUnknownPackagePaths attempts to deduce unknown package paths, by
-// looking for prefix matches against the src dirs.  The resulting package path
-// may be incorrect even if no errors are reported; see the main depSorter
-// comment for details.
-func (ds *depSorter) DeduceUnknownPackagePaths() {
-	for _, pkg := range ds.dirMap {
-		if len(pkg.Path) > 0 {
-			continue
-		}
-		for _, srcDir := range ds.srcDirs {
-			if strings.HasPrefix(pkg.Dir, srcDir) {
-				relPath, err := filepath.Rel(srcDir, pkg.Dir)
-				if err != nil {
-					ds.errorf("Couldn't compute relative path src=%s dir=%s", srcDir, pkg.Dir)
-					continue
-				}
-				pkg.Path = path.Clean(filepath.ToSlash(relPath))
-				break
+// deducePackagePath deduces the package path for dir, by looking for prefix
+// matches against the src dirs.  The resulting package path may be incorrect
+// even if no errors are reported; see the depSorter comment for details.
+func (ds *depSorter) deducePackagePath(dir string) (string, error) {
+	for _, srcDir := range ds.srcDirs {
+		if strings.HasPrefix(dir, srcDir) {
+			relPath, err := filepath.Rel(srcDir, dir)
+			if err != nil {
+				return "", err
 			}
-		}
-		if len(pkg.Path) == 0 {
-			ds.errorf("Couldn't deduce package path for %s", pkg.Dir)
+			return path.Clean(filepath.ToSlash(relPath)), nil
 		}
 	}
+	return "", fmt.Errorf("no matching SrcDirs")
 }
 
 // Sort sorts all targets and returns the resulting list of Packages.
@@ -421,7 +525,7 @@ func (ds *depSorter) Sort() (targets []*Package) {
 	sorted, cycles := ds.sorter.Sort()
 	if len(cycles) > 0 {
 		cycleStr := toposort.DumpCycles(cycles, printPackagePath)
-		ds.errorf("Cyclic package dependency detected: %v", cycleStr)
+		ds.errorf("Cyclic package dependency: %v", cycleStr)
 		return
 	}
 	targets = make([]*Package, len(sorted))
@@ -435,27 +539,41 @@ func printPackagePath(v interface{}) string {
 	return v.(*Package).Path
 }
 
-// TransitivePackages takes a list of cmdline args representing packages, and
-// returns all packages (either explicitly added or a transitive dependency) in
-// transitive order.  The given exts specifies the file name extensions for
-// valid vdl files, e.g. ".vdl".
-func TransitivePackages(cmdLineArgs, exts []string, errs *vdlutil.Errors) []*Package {
+// TransitivePackages takes a list of paths, and returns the corresponding
+// packages and transitive dependencies, ordered by dependency.  Each path may
+// either be a directory (IsDirPath) or an import (IsImportPath).
+//
+// A path is a pattern if it includes one or more "..." wildcards, each of which
+// can match any string, including the empty string and strings containing
+// slashes.  Such a pattern expands to all packages found in SrcDirs with names
+// matching the pattern.  As a special-case, x/... matches x as well as x's
+// subdirectories.
+//
+// The special-case "all" is a synonym for "...", and denotes all packages found
+// in SrcDirs.
+//
+// Import path elements and file names are not allowed to begin with "." or "_";
+// such paths are ignored in wildcard matches, and return errors if specified
+// explicitly.
+//
+// The given exts specifies the file name extensions for valid vdl files;
+// e.g. ".vdl".
+func TransitivePackages(paths, exts []string, errs *vdlutil.Errors) []*Package {
 	ds := newDepSorter(exts, errs)
-	for _, cmdLineArg := range cmdLineArgs {
-		ds.AddCmdLineArg(cmdLineArg)
+	for _, path := range paths {
+		ds.AddPath(path)
 	}
-	ds.DeduceUnknownPackagePaths()
 	return ds.Sort()
 }
 
 // TransitivePackagesForConfig takes a config file represented by its base file
 // name and src data, and returns all package dependencies in transitive order.
+//
 // The given exts specifies the file name extensions for valid vdl files,
 // e.g. ".vdl".
 func TransitivePackagesForConfig(baseFileName string, src io.Reader, exts []string, errs *vdlutil.Errors) []*Package {
 	ds := newDepSorter(exts, errs)
 	ds.AddConfigDeps(baseFileName, src)
-	ds.DeduceUnknownPackagePaths()
 	return ds.Sort()
 }
 
@@ -465,7 +583,7 @@ func ParsePackage(pkg *Package, opts parse.Opts, errs *vdlutil.Errors) (pfiles [
 	vdlutil.Vlog.Printf("Parsing package %s %q, dir %s", pkg.Name, pkg.Path, pkg.Dir)
 	files, err := pkg.OpenFiles()
 	if err != nil {
-		errs.Errorf("Couldn't open vdl files %v, %v", pkg.BaseFileNames, err)
+		errs.Errorf("Can't open vdl files %v, %v", pkg.BaseFileNames, err)
 		return nil
 	}
 	for filename, src := range files {
@@ -488,9 +606,8 @@ func (b byBaseName) Swap(i, j int)      { b[i], b[j] = b[j], b[i] }
 // BuildPackage parses and compiles the given pkg, updates env with the compiled
 // package and returns it.  Errors are reported in env.
 //
-// All imports that pkg depend on must already have been compiled and populated
-// into env.  See TransitivePackages for an easy way to retrieve packages in
-// their transitive order.
+// All imports that pkg depend on must have already been compiled and populated
+// into env.
 func BuildPackage(pkg *Package, env *compile.Env) *compile.Package {
 	pfiles := ParsePackage(pkg, parse.Opts{}, env.Errors)
 	return compile.Compile(pkg.Path, pfiles, env)
@@ -501,9 +618,8 @@ func BuildPackage(pkg *Package, env *compile.Env) *compile.Package {
 // implicit is non-nil and the exported config const is an untyped const
 // literal, it is assumed to be of that type.
 //
-// All imports that the config src depend on must already have been compiled and
-// populated into env.  See TransitivePackages for an easy way to retrieve
-// packages in their transitive order.
+// All imports that the config src depend on must have already been compiled and
+// populated into env.
 func BuildConfig(baseFileName string, src io.Reader, implicit *vdl.Type, env *compile.Env) *vdl.Value {
 	pconfig := parse.ParseConfig(baseFileName, src, parse.Opts{}, env.Errors)
 	return compile.CompileConfig(implicit, pconfig, env)
