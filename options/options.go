@@ -161,12 +161,6 @@ func (RuntimeName) ROpt() {}
 // implementation.
 const GoogleRuntime RuntimeName = "google"
 
-// HTTPDebug specifies the address on which an HTTP server will be run for
-// debugging the process.
-type HTTPDebug string
-
-func (HTTPDebug) ROpt() {}
-
 // Create a server that will be used to serve a MountTable. This server
 // cannot be used for any other purpose.
 type ServesMountTable bool
