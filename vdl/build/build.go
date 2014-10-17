@@ -76,15 +76,27 @@ type Package struct {
 	openedFiles []io.Closer // files that need to be closed
 }
 
-type missingMode bool
+// UnknownPathMode specifies the behavior when an unknown path is encountered.
+type UnknownPathMode int
 
 const (
-	missingIsOk    missingMode = true
-	missingIsError missingMode = false
+	UnknownPathIsIgnored UnknownPathMode = iota // Silently ignore unknown paths
+	UnknownPathIsError                          // Produce error for unknown paths
 )
 
-func (m missingMode) logOrErrorf(errs *vdlutil.Errors, format string, v ...interface{}) {
-	if m == missingIsOk {
+func (m UnknownPathMode) String() string {
+	switch m {
+	case UnknownPathIsIgnored:
+		return "UnknownPathIsIgnored"
+	case UnknownPathIsError:
+		return "UnknownPathIsError"
+	default:
+		return fmt.Sprintf("UnknownPathMode(%d)", m)
+	}
+}
+
+func (m UnknownPathMode) logOrErrorf(errs *vdlutil.Errors, format string, v ...interface{}) {
+	if m == UnknownPathIsIgnored {
 		vdlutil.Vlog.Printf(format, v...)
 	} else {
 		errs.Errorf(format, v...)
@@ -116,7 +128,7 @@ func validPackagePath(path string) bool {
 
 // New packages always start with an empty Name, which is filled in when we call
 // ds.addPackageAndDeps.
-func newPackage(path, dir string, mode missingMode, exts map[string]bool, errs *vdlutil.Errors) *Package {
+func newPackage(path, dir string, mode UnknownPathMode, exts map[string]bool, errs *vdlutil.Errors) *Package {
 	pkg := &Package{Path: path, Dir: dir, OpenFilesFunc: openFiles}
 	if err := pkg.initBaseFileNames(exts); err != nil {
 		mode.logOrErrorf(errs, "%s: bad package dir (%v)", pkg.Dir, err)
@@ -293,8 +305,9 @@ func (ds *depSorter) errorf(format string, v ...interface{}) {
 	ds.errs.Errorf(format, v...)
 }
 
-// AddPath adds the package(s) resolved from path to the sorter.
-func (ds *depSorter) AddPath(path string) {
+// ResolvePath resolves path into package(s) and adds them to the sorter.
+// Returns true iff path could be resolved.
+func (ds *depSorter) ResolvePath(path string, mode UnknownPathMode) bool {
 	if path == "all" {
 		// Special-case "all", with the same behavior as Go.
 		path = "..."
@@ -303,24 +316,24 @@ func (ds *depSorter) AddPath(path string) {
 	dots := strings.Index(path, "...")
 	switch {
 	case dots >= 0:
-		ds.resolveWildcardPath(isDirPath, path[:dots], path[dots:])
+		return ds.resolveWildcardPath(isDirPath, path[:dots], path[dots:])
 	case isDirPath:
-		ds.resolveDirPath(path, "", missingIsError)
+		return ds.resolveDirPath(path, "", mode) != nil
 	default:
-		ds.resolveImportPath(path)
+		return ds.resolveImportPath(path, mode) != nil
 	}
 }
 
 // resolveWildcardPath resolves wildcards for both dir and import paths.  The
 // prefix is everything before the first "...", and the suffix is everything
 // including and after the first "..."; note that multiple "..." wildcards may
-// occur within the suffix.
+// occur within the suffix.  Returns true iff any packages were resolved.
 //
 // The strategy is to compute one or more root directories that contain
 // everything that could possibly be matched, along with a filename pattern to
 // match against.  Then we walk through each root directory, matching against
 // the pattern.
-func (ds *depSorter) resolveWildcardPath(isDirPath bool, prefix, suffix string) {
+func (ds *depSorter) resolveWildcardPath(isDirPath bool, prefix, suffix string) bool {
 	var rootDirs []string // root directories to walk through
 	var pattern string    // pattern to match against, starting after root dir
 	switch {
@@ -341,9 +354,10 @@ func (ds *depSorter) resolveWildcardPath(isDirPath bool, prefix, suffix string) 
 	matcher, err := createMatcher(pattern)
 	if err != nil {
 		ds.errorf("%v", err)
-		return
+		return false
 	}
 	// Walk through root dirs and subdirs, looking for matches.
+	resolvedAny := false
 	for _, root := range rootDirs {
 		filepath.Walk(root, func(rootAndPath string, info os.FileInfo, err error) error {
 			// Ignore errors and non-directory elements.
@@ -370,10 +384,13 @@ func (ds *depSorter) resolveWildcardPath(isDirPath bool, prefix, suffix string) 
 				return nil
 			}
 			// Finally resolve the dir.
-			ds.resolveDirPath(rootAndPath, "", missingIsOk)
+			if ds.resolveDirPath(rootAndPath, "", UnknownPathIsIgnored) != nil {
+				resolvedAny = true
+			}
 			return nil
 		})
 	}
+	return resolvedAny
 }
 
 const pathSeparator = string(filepath.Separator)
@@ -397,10 +414,8 @@ func createMatcher(pattern string) (*regexp.Regexp, error) {
 
 // resolveDirPath resolves dir into a Package.  Returns the package, or nil if
 // it can't be resolved.  The pkgPath is used to set the path of the returned
-// package; if it is empty, we attempt to deduce the package path.  The
-// missingMode controls whether it's ok for the underlying directory to be
-// missing.
-func (ds *depSorter) resolveDirPath(dir, pkgPath string, mode missingMode) *Package {
+// package; if it is empty, we attempt to deduce the package path.
+func (ds *depSorter) resolveDirPath(dir, pkgPath string, mode UnknownPathMode) *Package {
 	// If the package already exists in our dir map, we can just return it.
 	absDir, err := filepath.Abs(dir)
 	if err != nil {
@@ -427,7 +442,7 @@ func (ds *depSorter) resolveDirPath(dir, pkgPath string, mode missingMode) *Pack
 	// Make sure the directory really exists, and add the package and deps.
 	fileInfo, err := os.Stat(absDir)
 	if err != nil {
-		mode.logOrErrorf(ds.errs, "%s: can't stat (%v)", absDir, err)
+		mode.logOrErrorf(ds.errs, "%v", err)
 		return nil
 	}
 	if !fileInfo.IsDir() {
@@ -439,30 +454,33 @@ func (ds *depSorter) resolveDirPath(dir, pkgPath string, mode missingMode) *Pack
 
 // resolveImportPath resolves pkgPath into a Package.  Returns the package, or
 // nil if it can't be resolved.
-func (ds *depSorter) resolveImportPath(pkgPath string) *Package {
+func (ds *depSorter) resolveImportPath(pkgPath string, mode UnknownPathMode) *Package {
 	pkgPath = path.Clean(pkgPath)
 	if pkg := ds.pathMap[pkgPath]; pkg != nil {
 		return pkg
 	}
 	if !validPackagePath(pkgPath) {
-		ds.errorf("Import path %q is invalid", pkgPath)
+		mode.logOrErrorf(ds.errs, "Import path %q is invalid", pkgPath)
 		return nil
 	}
 	// Look through srcDirs in-order until we find a valid package dir.
+	var dirs []string
 	for _, srcDir := range ds.srcDirs {
-		candidateDir := filepath.Join(srcDir, filepath.FromSlash(pkgPath))
-		if pkg := ds.resolveDirPath(candidateDir, pkgPath, missingIsOk); pkg != nil {
+		dir := filepath.Join(srcDir, filepath.FromSlash(pkgPath))
+		if pkg := ds.resolveDirPath(dir, pkgPath, UnknownPathIsIgnored); pkg != nil {
 			vdlutil.Vlog.Printf("%s: resolved import path %q", pkg.Dir, pkgPath)
 			return pkg
 		}
+		dirs = append(dirs, dir)
 	}
 	// We can't find a valid dir corresponding to this import path.
-	ds.errorf("Can't resolve import path %q", pkgPath)
+	detail := "   " + strings.Join(dirs, "\n   ")
+	mode.logOrErrorf(ds.errs, "Can't resolve import path %q in any of:\n%s", pkgPath, detail)
 	return nil
 }
 
 // addPackageAndDeps adds the pkg and its dependencies to the sorter.
-func (ds *depSorter) addPackageAndDeps(path, dir string, mode missingMode) *Package {
+func (ds *depSorter) addPackageAndDeps(path, dir string, mode UnknownPathMode) *Package {
 	pkg := newPackage(path, dir, mode, ds.exts, ds.errs)
 	if pkg == nil {
 		return nil
@@ -484,7 +502,7 @@ func (ds *depSorter) addPackageAndDeps(path, dir string, mode missingMode) *Pack
 // dependencies; otherwise each dependency is added as an independent node.
 func (ds *depSorter) addImportDeps(pkg *Package, imports []*parse.Import) {
 	for _, imp := range imports {
-		if dep := ds.resolveImportPath(imp.Path); dep != nil {
+		if dep := ds.resolveImportPath(imp.Path, UnknownPathIsError); dep != nil {
 			if pkg != nil {
 				ds.sorter.AddEdge(pkg, dep)
 			} else {
@@ -519,20 +537,21 @@ func (ds *depSorter) deducePackagePath(dir string) (string, error) {
 }
 
 // Sort sorts all targets and returns the resulting list of Packages.
-func (ds *depSorter) Sort() (targets []*Package) {
-	// The topoSort does all the work for us - we just need to unpack the
-	// results from interface{} back into *Package.
+func (ds *depSorter) Sort() []*Package {
 	sorted, cycles := ds.sorter.Sort()
 	if len(cycles) > 0 {
 		cycleStr := toposort.DumpCycles(cycles, printPackagePath)
 		ds.errorf("Cyclic package dependency: %v", cycleStr)
-		return
+		return nil
 	}
-	targets = make([]*Package, len(sorted))
+	if len(sorted) == 0 {
+		return nil
+	}
+	targets := make([]*Package, len(sorted))
 	for ix, iface := range sorted {
 		targets[ix] = iface.(*Package)
 	}
-	return
+	return targets
 }
 
 func printPackagePath(v interface{}) string {
@@ -556,12 +575,15 @@ func printPackagePath(v interface{}) string {
 // such paths are ignored in wildcard matches, and return errors if specified
 // explicitly.
 //
-// The given exts specifies the file name extensions for valid vdl files;
-// e.g. ".vdl".
-func TransitivePackages(paths, exts []string, errs *vdlutil.Errors) []*Package {
+// The exts arg specifies the file name extensions for valid vdl files;
+// e.g. ".vdl".  The mode specifies whether we should ignore or produce errors
+// for paths that don't resolve to any packages.
+func TransitivePackages(paths, exts []string, mode UnknownPathMode, errs *vdlutil.Errors) []*Package {
 	ds := newDepSorter(exts, errs)
 	for _, path := range paths {
-		ds.AddPath(path)
+		if !ds.ResolvePath(path, mode) {
+			mode.logOrErrorf(errs, "Can't resolve %q to any packages", path)
+		}
 	}
 	return ds.Sort()
 }
@@ -569,7 +591,7 @@ func TransitivePackages(paths, exts []string, errs *vdlutil.Errors) []*Package {
 // TransitivePackagesForConfig takes a config file represented by its base file
 // name and src data, and returns all package dependencies in transitive order.
 //
-// The given exts specifies the file name extensions for valid vdl files,
+// The exts arg specifies the file name extensions for valid vdl files,
 // e.g. ".vdl".
 func TransitivePackagesForConfig(baseFileName string, src io.Reader, exts []string, errs *vdlutil.Errors) []*Package {
 	ds := newDepSorter(exts, errs)

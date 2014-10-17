@@ -47,13 +47,13 @@ func runHelper(run func(targets []*build.Package, env *compile.Env)) func(cmd *c
 		if flagExperimental {
 			env.EnableExperimental()
 		}
-		targets := build.TransitivePackages(args, exts, env.Errors)
+		mode := build.UnknownPathIsError
+		if flagIgnoreUnknown {
+			mode = build.UnknownPathIsIgnored
+		}
+		targets := build.TransitivePackages(args, exts, mode, env.Errors)
 		if err := checkErrors(env.Errors); err != nil {
 			return err
-		}
-		if len(targets) == 0 {
-			// The user's probably confused if we don't end up with any targets.
-			return cmd.UsageErrorf("no target packages specified")
 		}
 		run(targets, env)
 		return checkErrors(env.Errors)
@@ -297,10 +297,11 @@ func (x *genOutDir) Set(value string) error {
 
 var (
 	// Common flags for the tool itself, applicable to all commands.
-	flagVerbose      bool
-	flagMaxErrors    int
-	flagExts         string
-	flagExperimental bool
+	flagVerbose       bool
+	flagMaxErrors     int
+	flagExts          string
+	flagExperimental  bool
+	flagIgnoreUnknown bool
 
 	// Options for each command.
 	optCompileStatus bool
@@ -352,6 +353,7 @@ for managing Go source code.
 	vdlcmd.Flags.IntVar(&flagMaxErrors, "max_errors", -1, "Stop processing after this many errors, or -1 for unlimited.")
 	vdlcmd.Flags.StringVar(&flagExts, "exts", ".vdl", "Comma-separated list of valid VDL file name extensions.")
 	vdlcmd.Flags.BoolVar(&flagExperimental, "experimental", false, "Enable experimental features that may crash the compiler and change without notice.  Intended for VDL compiler developers.")
+	vdlcmd.Flags.BoolVar(&flagIgnoreUnknown, "ignore_unknown", false, "Ignore unknown packages provided on the command line.")
 
 	// Options for compile.
 	cmdCompile.Flags.BoolVar(&optCompileStatus, "status", true, "Show package names while we compile")
