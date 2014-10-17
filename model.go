@@ -300,6 +300,9 @@ func RuntimeFromContext(ctx context.T) Runtime {
 	return ctx.Runtime().(Runtime)
 }
 
+// The name for the google runtime implementation
+const GoogleRuntimeName = "google"
+
 // The runtime must provide two package level functions, R and NewR.
 // R returns the initialized global instance of the Runtime. NewR will
 // create and initialiaze a new instance of the Runtime; it will typically

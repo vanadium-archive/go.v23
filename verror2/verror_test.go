@@ -5,12 +5,15 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+
 	"veyron.io/veyron/veyron2"
 	"veyron.io/veyron/veyron2/i18n"
 	"veyron.io/veyron/veyron2/rt"
 	"veyron.io/veyron/veyron2/verror"
 	"veyron.io/veyron/veyron2/verror2"
 	"veyron.io/veyron/veyron2/vtrace"
+
+	_ "veyron.io/veyron/veyron/profiles"
 )
 
 var (

@@ -4,11 +4,8 @@ package rt
 
 import (
 	"fmt"
+	"os"
 	"sync"
-
-	// TODO(cnicolaou): consider removing this dependency and relying
-	// on importing a profile to bring it in.
-	google_rt "veyron.io/veyron/veyron/runtimes/google/rt"
 
 	"veyron.io/veyron/veyron2"
 	"veyron.io/veyron/veyron2/options"
@@ -35,11 +32,6 @@ var (
 
 func init() {
 	runtimes.registered = make(map[string]Factory)
-	// We preregister the google runtime factory as a convenience
-	// since otherwise the developer would have to import the google
-	// runtime package in order for it to register itself.
-	RegisterRuntime(string(options.GoogleRuntime), google_rt.New)
-	RegisterRuntime("", google_rt.New)
 }
 
 // RegisterRuntime registers a runtime name and associated Factory.
@@ -82,7 +74,7 @@ func Init(opts ...veyron2.ROpt) veyron2.Runtime {
 		var err error
 		globalR, err = New(opts...)
 		if err != nil {
-			panic(fmt.Sprintf("failed to initialize global runtime: %s", err))
+			panic(fmt.Sprintf("%s: failed to initialize global runtime: %s", os.Args[0], err))
 		}
 		verror2.SetDefaultContext(globalR.NewContext())
 	})
@@ -106,7 +98,7 @@ func prependProfile(profile veyron2.Profile, opts ...veyron2.ROpt) []veyron2.ROp
 func configure(opts ...veyron2.ROpt) (veyron2.Profile, Factory, error) {
 	config.Lock()
 	defer config.Unlock()
-	name := ""
+	name := veyron2.GoogleRuntimeName
 	for _, o := range opts {
 		switch v := o.(type) {
 		case options.Profile:
