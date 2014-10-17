@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	vtest "veyron.io/veyron/veyron/lib/testutil"
+	"veyron.io/veyron/veyron/lib/testutil"
 
 	"veyron.io/veyron/veyron2/context"
 	"veyron.io/veyron/veyron2/ipc"
@@ -16,6 +16,8 @@ import (
 	"veyron.io/veyron/veyron2/security"
 	"veyron.io/veyron/veyron2/verror"
 )
+
+func init() { testutil.Init() }
 
 // FakeServerCall implements ipc.ServerContext.
 type FakeServerCall struct{}
@@ -243,7 +245,7 @@ func TestReflectInvokerPanic(t *testing.T) {
 		{nostub{}, "forgot to wrap your server with the IDL-generated stub"},
 	}
 	for _, test := range tests {
-		got := vtest.CallAndRecover(func() { ipc.ReflectInvoker(test.obj) })
+		got := testutil.CallAndRecover(func() { ipc.ReflectInvoker(test.obj) })
 		if !regexp.MustCompile(test.regexp).MatchString(fmt.Sprint(got)) {
 			t.Errorf(`ReflectInvoker(%T) got panic "%v", want regexp "%v"`, test.obj, got, test.regexp)
 		}

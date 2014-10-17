@@ -10,6 +10,8 @@ import (
 	"veyron.io/veyron/veyron/lib/testutil"
 )
 
+func init() { testutil.Init() }
+
 func expectErr(t *testing.T, err error, wantstr string, format string, args ...interface{}) bool {
 	gotstr := fmt.Sprint(err)
 	msg := fmt.Sprintf(format, args...)

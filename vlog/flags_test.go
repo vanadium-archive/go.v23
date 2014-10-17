@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"veyron.io/veyron/veyron/lib/modules"
-	_ "veyron.io/veyron/veyron/lib/testutil"
+	"veyron.io/veyron/veyron/lib/testutil"
 
 	"veyron.io/veyron/veyron2/vlog"
 )
@@ -19,6 +19,7 @@ func TestHelperProcess(t *testing.T) {
 }
 
 func init() {
+	testutil.Init()
 	modules.RegisterChild("child", "", child)
 }
 
