@@ -116,59 +116,57 @@ func TestIsDirImportPath(t *testing.T) {
 	}
 }
 
+// The cwd is set to the directory containing this file.  Currently we have the
+// following directory structure:
+//   .../veyron/go/src/veyron.io/veyron/veyron2/vdl/build/build_test.go
+// So by backtracking a few times, we end up at the top:
+//   .../veyron/go
+const vdlpath = "../../../../../.."
+
+var allModes = []build.UnknownPathMode{
+	build.UnknownPathIsIgnored,
+	build.UnknownPathIsError,
+}
+
 func TestTransitivePackages(t *testing.T) {
-	// The cwd is set to the directory containing this file.  Currently we have
-	// the following directory structure:
-	//   .../veyron/go/src/veyron.io/veyron/veyron2/vdl/build/build_test.go
-	// So by backtracking a few times, we end up at the top:
-	//   .../veyron/go
-	const vdlpath = "../../../../../.."
 	if err := os.Setenv("VDLPATH", vdlpath); err != nil {
 		t.Fatalf("Setenv(VDLPATH, %q) failed: %v", vdlpath, err)
 	}
 	tests := []struct {
 		InPaths, OutPaths []string
-		ErrRE             string
 	}{
-		{nil, nil, ""},
-		{[]string{}, nil, ""},
+		{nil, nil},
+		{[]string{}, nil},
 		// Single-package, both import and dir path.
 		{
 			[]string{"veyron.io/veyron/veyron2/vdl/testdata/base"},
 			[]string{"veyron.io/veyron/veyron2/vdl/testdata/base"},
-			"",
 		},
 		{
 			[]string{"../testdata/base"},
 			[]string{"veyron.io/veyron/veyron2/vdl/testdata/base"},
-			"",
 		},
 		// Single-package with wildcard, both import and dir path.
 		{
 			[]string{"veyron.io/veyron/veyron2/vdl/testdata/base..."},
 			[]string{"veyron.io/veyron/veyron2/vdl/testdata/base"},
-			"",
 		},
 		{
 			[]string{"veyron.io/veyron/veyron2/vdl/testdata/base/..."},
 			[]string{"veyron.io/veyron/veyron2/vdl/testdata/base"},
-			"",
 		},
 		{
 			[]string{"../testdata/base..."},
 			[]string{"veyron.io/veyron/veyron2/vdl/testdata/base"},
-			"",
 		},
 		{
 			[]string{"../testdata/base/..."},
 			[]string{"veyron.io/veyron/veyron2/vdl/testdata/base"},
-			"",
 		},
 		// Redundant specification as both import and dir path.
 		{
 			[]string{"veyron.io/veyron/veyron2/vdl/testdata/base", "../testdata/base"},
 			[]string{"veyron.io/veyron/veyron2/vdl/testdata/base"},
-			"",
 		},
 		{
 			[]string{"veyron.io/veyron/veyron2/vdl/testdata/arith", "../testdata/arith"},
@@ -177,7 +175,6 @@ func TestTransitivePackages(t *testing.T) {
 				"veyron.io/veyron/veyron2/vdl/testdata/base",
 				"veyron.io/veyron/veyron2/vdl/testdata/arith",
 			},
-			"",
 		},
 		// Wildcards as both import and dir path.
 		{
@@ -187,7 +184,6 @@ func TestTransitivePackages(t *testing.T) {
 				"veyron.io/veyron/veyron2/vdl/testdata/base",
 				"veyron.io/veyron/veyron2/vdl/testdata/arith",
 			},
-			"",
 		},
 		{
 			[]string{"veyron.io/veyron/veyron2/vdl/testdata/..."},
@@ -196,7 +192,6 @@ func TestTransitivePackages(t *testing.T) {
 				"veyron.io/veyron/veyron2/vdl/testdata/base",
 				"veyron.io/veyron/veyron2/vdl/testdata/arith",
 			},
-			"",
 		},
 		{
 			[]string{"../testdata..."},
@@ -205,7 +200,6 @@ func TestTransitivePackages(t *testing.T) {
 				"veyron.io/veyron/veyron2/vdl/testdata/base",
 				"veyron.io/veyron/veyron2/vdl/testdata/arith",
 			},
-			"",
 		},
 		{
 			[]string{"../testdata/..."},
@@ -214,7 +208,6 @@ func TestTransitivePackages(t *testing.T) {
 				"veyron.io/veyron/veyron2/vdl/testdata/base",
 				"veyron.io/veyron/veyron2/vdl/testdata/arith",
 			},
-			"",
 		},
 		// Multi-Wildcards as both import and dir path.
 		{
@@ -224,7 +217,6 @@ func TestTransitivePackages(t *testing.T) {
 				"veyron.io/veyron/veyron2/vdl/testdata/base",
 				"veyron.io/veyron/veyron2/vdl/testdata/arith",
 			},
-			"",
 		},
 		{
 			[]string{"../../../...vdl/testdata/..."},
@@ -233,83 +225,102 @@ func TestTransitivePackages(t *testing.T) {
 				"veyron.io/veyron/veyron2/vdl/testdata/base",
 				"veyron.io/veyron/veyron2/vdl/testdata/arith",
 			},
-			"",
 		},
 		// Multi-Wildcards as both import and dir path.
 		{
 			[]string{"v...vdl/testdata/...exp"},
 			[]string{"veyron.io/veyron/veyron2/vdl/testdata/arith/exp"},
-			"",
 		},
 		{
 			[]string{"../../../...vdl/testdata/...exp"},
 			[]string{"veyron.io/veyron/veyron2/vdl/testdata/arith/exp"},
-			"",
 		},
+	}
+	exts := []string{".vdl"}
+	for _, test := range tests {
+		// All modes should result in the same successful output.
+		for _, mode := range allModes {
+			name := fmt.Sprintf("%v %v", mode, test.InPaths)
+			errs := vdlutil.NewErrors(-1)
+			pkgs := build.TransitivePackages(test.InPaths, exts, mode, errs)
+			vdltest.ExpectResult(t, errs, name, "")
+			var got []string
+			for _, pkg := range pkgs {
+				got = append(got, pkg.Path)
+			}
+			if want := []string(test.OutPaths); !reflect.DeepEqual(got, want) {
+				t.Errorf("%v got %v, want %v", name, got, want)
+			}
+		}
+	}
+}
+
+func TestTransitivePackagesUnknownPathError(t *testing.T) {
+	if err := os.Setenv("VDLPATH", vdlpath); err != nil {
+		t.Fatalf("Setenv(VDLPATH, %q) failed: %v", vdlpath, err)
+	}
+	tests := []struct {
+		InPaths []string
+		ErrRE   string
+	}{
 		// Non-existent as both import and dir path.
 		{
 			[]string{"noexist"},
-			nil,
-			`Can't resolve import path "noexist"`,
+			`Can't resolve "noexist" to any packages`,
 		},
 		{
 			[]string{"./noexist"},
-			nil,
-			"./noexist: can't stat",
+			`Can't resolve "./noexist" to any packages`,
 		},
 		// Invalid package path, as both import and dir path.
 		{
 			[]string{".foo"},
-			nil,
 			`Import path ".foo" is invalid`,
 		},
 		{
 			[]string{"foo/.bar"},
-			nil,
 			`Import path "foo/.bar" is invalid`,
 		},
 		{
 			[]string{"_foo"},
-			nil,
 			`Import path "_foo" is invalid`,
 		},
 		{
 			[]string{"foo/_bar"},
-			nil,
 			`Import path "foo/_bar" is invalid`,
 		},
 		{
 			[]string{"../../../../../.foo"},
-			nil,
 			`package path ".foo" is invalid`,
 		},
 		{
 			[]string{"../../../../../foo/.bar"},
-			nil,
 			`package path "foo/.bar" is invalid`,
 		},
 		{
 			[]string{"../../../../../_foo"},
-			nil,
 			`package path "_foo" is invalid`,
 		},
 		{
 			[]string{"../../../../../foo/_bar"},
-			nil,
 			`package path "foo/_bar" is invalid`,
 		},
 	}
 	exts := []string{".vdl"}
-	for i, test := range tests {
-		errs := vdlutil.NewErrors(-1)
-		pkgs := build.TransitivePackages(test.InPaths, exts, errs)
-		vdltest.ExpectResult(t, errs, fmt.Sprintf("test%d", i), test.ErrRE)
-		var got []string
-		for _, pkg := range pkgs {
-			got = append(got, pkg.Path)
-		}
-		if want := []string(test.OutPaths); !reflect.DeepEqual(got, want) {
-			t.Errorf("%v got %v, want %v", test.InPaths, got, want)
+	for _, test := range tests {
+		for _, mode := range allModes {
+			name := fmt.Sprintf("%v %v", mode, test.InPaths)
+			errs := vdlutil.NewErrors(-1)
+			pkgs := build.TransitivePackages(test.InPaths, exts, mode, errs)
+			errRE := test.ErrRE
+			if mode == build.UnknownPathIsIgnored {
+				// Ignore mode returns success, while error mode returns error.
+				errRE = ""
+			}
+			vdltest.ExpectResult(t, errs, name, errRE)
+			if pkgs != nil {
+				t.Errorf("%v got unexpected packages %v", name, pkgs)
+			}
 		}
 	}
 }

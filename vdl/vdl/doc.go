@@ -24,6 +24,7 @@ Run "vdl help [topic]" for topic details.
 The vdl flags are:
    -experimental=false: Enable experimental features that may crash the compiler and change without notice.  Intended for VDL compiler developers.
    -exts=.vdl: Comma-separated list of valid VDL file name extensions.
+   -ignore_unknown=false: Ignore unknown packages provided on the command line.
    -max_errors=-1: Stop processing after this many errors, or -1 for unlimited.
    -v=false: Turn on verbose logging.
 
