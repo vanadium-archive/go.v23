@@ -369,6 +369,9 @@ type MountTable_ExcludingUniversal interface {
 	// ResolveStep takes the next step in resolving a name.  Returns the next
 	// servers to query and the suffix at those servers.
 	ResolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (Servers []types.MountedServer, Suffix string, err error)
+	// ResolveStepX takes the next step in resolving a name.  Returns the next
+	// servers to query and the suffix at those servers.
+	ResolveStepX(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply types.MountEntry, err error)
 }
 type MountTable interface {
 	_gen_ipc.UniversalServiceMethods
@@ -398,6 +401,9 @@ type MountTableService interface {
 	// ResolveStep takes the next step in resolving a name.  Returns the next
 	// servers to query and the suffix at those servers.
 	ResolveStep(context _gen_ipc.ServerContext) (Servers []types.MountedServer, Suffix string, err error)
+	// ResolveStepX takes the next step in resolving a name.  Returns the next
+	// servers to query and the suffix at those servers.
+	ResolveStepX(context _gen_ipc.ServerContext) (reply types.MountEntry, err error)
 }
 
 // BindMountTable returns the client stub implementing the MountTable
@@ -484,6 +490,17 @@ func (__gen_c *clientStubMountTable) ResolveStep(ctx _gen_context.T, opts ..._ge
 	return
 }
 
+func (__gen_c *clientStubMountTable) ResolveStepX(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply types.MountEntry, err error) {
+	var call _gen_ipc.Call
+	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "ResolveStepX", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&reply, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
 func (__gen_c *clientStubMountTable) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
 	var call _gen_ipc.Call
 	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
@@ -540,6 +557,8 @@ func (__gen_s *ServerStubMountTable) GetMethodTags(call _gen_ipc.ServerCall, met
 		return []interface{}{security.Label(4)}, nil
 	case "ResolveStep":
 		return []interface{}{security.Label(2)}, nil
+	case "ResolveStepX":
+		return []interface{}{security.Label(2)}, nil
 	default:
 		return nil, nil
 	}
@@ -565,6 +584,13 @@ func (__gen_s *ServerStubMountTable) Signature(call _gen_ipc.ServerCall) (_gen_i
 			{Name: "Error", Type: 66},
 		},
 	}
+	result.Methods["ResolveStepX"] = _gen_ipc.MethodSignature{
+		InArgs: []_gen_ipc.MethodArgument{},
+		OutArgs: []_gen_ipc.MethodArgument{
+			{Name: "Entry", Type: 69},
+			{Name: "Error", Type: 66},
+		},
+	}
 	result.Methods["Unmount"] = _gen_ipc.MethodSignature{
 		InArgs: []_gen_ipc.MethodArgument{
 			{Name: "Server", Type: 3},
@@ -581,7 +607,14 @@ func (__gen_s *ServerStubMountTable) Signature(call _gen_ipc.ServerCall) (_gen_i
 				_gen_wiretype.FieldType{Type: 0x34, Name: "TTL"},
 			},
 			"veyron.io/veyron/veyron2/services/mounttable/types.MountedServer", []string(nil)},
-		_gen_wiretype.SliceType{Elem: 0x43, Name: "", Tags: []string(nil)}}
+		_gen_wiretype.SliceType{Elem: 0x43, Name: "", Tags: []string(nil)}, _gen_wiretype.StructType{
+			[]_gen_wiretype.FieldType{
+				_gen_wiretype.FieldType{Type: 0x3, Name: "Name"},
+				_gen_wiretype.FieldType{Type: 0x44, Name: "Servers"},
+				_gen_wiretype.FieldType{Type: 0x2, Name: "MT"},
+			},
+			"veyron.io/veyron/veyron2/services/mounttable/types.MountEntry", []string(nil)},
+	}
 	var ss _gen_ipc.ServiceSignature
 	var firstAdded int
 	ss, _ = __gen_s.ServerStubGlobbable.Signature(call)
@@ -671,5 +704,10 @@ func (__gen_s *ServerStubMountTable) Unmount(call _gen_ipc.ServerCall, Server st
 
 func (__gen_s *ServerStubMountTable) ResolveStep(call _gen_ipc.ServerCall) (Servers []types.MountedServer, Suffix string, err error) {
 	Servers, Suffix, err = __gen_s.service.ResolveStep(call)
+	return
+}
+
+func (__gen_s *ServerStubMountTable) ResolveStepX(call _gen_ipc.ServerCall) (reply types.MountEntry, err error) {
+	reply, err = __gen_s.service.ResolveStepX(call)
 	return
 }

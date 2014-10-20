@@ -8,7 +8,7 @@ import (
 
 type Globbable interface {
 	// Glob returns all matching entries at the given server.
-	// 
+	//
 	// Glob returns an entry that exactly matches the pattern only if the
 	// principal has some access to the entry, and read or resolve access to the
 	// parent entry. However, if the pattern expands an entry "p" (e.g. "p/*",
@@ -45,6 +45,10 @@ type MountTable interface {
 	// ResolveStep takes the next step in resolving a name.  Returns the next
 	// servers to query and the suffix at those servers.
 	ResolveStep() (Servers []types.MountedServer, Suffix string, Error error) {security.ReadLabel}
+
+	// ResolveStepX takes the next step in resolving a name.  Returns the next
+	// servers to query and the suffix at those servers.
+	ResolveStepX() (Entry types.MountEntry, Error error) {security.ReadLabel}
 
 	Globbable
 }
