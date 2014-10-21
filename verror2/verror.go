@@ -25,7 +25,7 @@
 //      err = verror2.ExplicitMake(someNewError, i18n.LangIDFromContext(ctx),
 //              "my_component", "op_name", "procedure_name", "object_name")
 // If the language, component and/or operation name are unknown, use i18n.NoLangID
-// or the emptry string, respectively.
+// or the empty string, respectively.
 //
 // Because of the convention for the first two parameters, messages in the
 // catalogue typically look like this (at least for left-to-right languages):
@@ -128,7 +128,7 @@ type E interface {
 
 	// Stack returns list of PC values where ExplicitMake/Make/Context/ContextCtx
 	// were invoked on the error.  StackToStr() converts this to a string.
-	// This information is not incorporating into the error string;
+	// This information is not incorporated into the error string;
 	// it is intended to help debugging by developers.
 	Stack() []uintptr
 }
