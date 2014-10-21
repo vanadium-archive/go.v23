@@ -442,7 +442,7 @@ func gen(audit bool, targets []*build.Package, env *compile.Env) bool {
 		for _, gl := range optGenLangs {
 			switch gl {
 			case genLangGo:
-				dir, err := xlateOutDir(target, optGenGoOutDir, pkg.Path)
+				dir, err := xlateOutDir(target.Dir, target.Path, optGenGoOutDir, pkg.Path)
 				if handleErrorOrSkip("--go_out_dir", err, env) {
 					continue
 				}
@@ -458,7 +458,7 @@ func gen(audit bool, targets []*build.Package, env *compile.Env) bool {
 				if handleErrorOrSkip("--java_out_pkg", err, env) {
 					continue
 				}
-				dir, err := xlateOutDir(target, optGenJavaOutDir, pkgPath)
+				dir, err := xlateOutDir(target.Dir, target.Path, optGenJavaOutDir, pkgPath)
 				if handleErrorOrSkip("--java_out_dir", err, env) {
 					continue
 				}
@@ -473,11 +473,25 @@ func gen(audit bool, targets []*build.Package, env *compile.Env) bool {
 					}
 				}
 			case genLangJavascript:
-				dir, err := xlateOutDir(target, optGenJavascriptOutDir, pkg.Path)
+				dir, err := xlateOutDir(target.Dir, target.Path, optGenJavascriptOutDir, pkg.Path)
 				if handleErrorOrSkip("--js_out_dir", err, env) {
 					continue
 				}
-				data := javascript.Generate(pkg, env)
+				path := func(importPath string) string {
+					prefix := filepath.Clean(target.Dir[0 : len(target.Dir)-len(target.Path)])
+					pkgDir := filepath.FromSlash(filepath.Join(prefix, importPath))
+					fullDir, err := xlateOutDir(pkgDir, importPath, optGenJavascriptOutDir, importPath)
+					if err != nil {
+						panic(err)
+					}
+					cleanPath, err := filepath.Rel(dir, fullDir)
+					if err != nil {
+						panic(err)
+					}
+					return cleanPath
+				}
+
+				data := javascript.Generate(pkg, env, path)
 				if writeFile(audit, data, dir, pkg.Name+".js", env) {
 					pkgchanged = true
 				}
@@ -530,19 +544,18 @@ func handleErrorOrSkip(prefix string, err error, env *compile.Env) bool {
 
 var errSkip = fmt.Errorf("SKIP")
 
-func xlateOutDir(pkg *build.Package, outdir genOutDir, outPkgPath string) (string, error) {
+func xlateOutDir(dir, path string, outdir genOutDir, outPkgPath string) (string, error) {
 	// Strip package path from the directory.
-	dir := pkg.Dir
-	if !strings.HasSuffix(dir, pkg.Path) {
-		return "", fmt.Errorf("package dir %q doesn't end with package path %q", dir, pkg.Path)
+	if !strings.HasSuffix(dir, path) {
+		return "", fmt.Errorf("package dir %q doesn't end with package path %q", dir, path)
 	}
-	dir = filepath.Clean(dir[:len(dir)-len(pkg.Path)])
+	dir = filepath.Clean(dir[:len(dir)-len(path)])
 
 	switch {
 	case outdir.dir != "":
-		return filepath.Join(outdir.dir, outPkgPath), nil
+		return filepath.Join(outdir.dir, filepath.FromSlash(outPkgPath)), nil
 	case len(outdir.rules) == 0:
-		return filepath.Join(dir, outPkgPath), nil
+		return filepath.Join(dir, filepath.FromSlash(outPkgPath)), nil
 	}
 	// Try translation rules in order.
 	for _, xlate := range outdir.rules {
@@ -554,7 +567,7 @@ func xlateOutDir(pkg *build.Package, outdir genOutDir, outPkgPath string) (strin
 			return "", errSkip
 		}
 		d = filepath.Clean(d[:len(d)-len(xlate.src)])
-		return filepath.Join(d, xlate.dst, outPkgPath), nil
+		return filepath.Join(d, xlate.dst, filepath.FromSlash(outPkgPath)), nil
 	}
 	return "", fmt.Errorf("package prefix %q doesn't match translation rules %q", dir, outdir)
 }

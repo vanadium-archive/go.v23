@@ -36,7 +36,7 @@ func Generate(file *compile.File, env *compile.Env, opts Opts) []byte {
 	data := goData{
 		File:          file,
 		Env:           env,
-		UserImports:   codegen.ImportsForFile(file),
+		UserImports:   codegen.ImportsForFiles(file),
 		SystemImports: systemImportsGo(file),
 	}
 	// The implementation uses the template mechanism from text/template and

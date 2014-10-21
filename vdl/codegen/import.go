@@ -52,14 +52,34 @@ func uniqueImport(pkgName, pkgPath string, seen map[string]bool) Import {
 	}
 }
 
-// ImportsForFile returns the imports required for the given file f.
-func ImportsForFile(f *compile.File) Imports {
+type pkgSorter []*compile.Package
+
+func (s pkgSorter) Len() int { return len(s) }
+
+func (s pkgSorter) Less(i, j int) bool { return s[i].Path < s[j].Path }
+
+func (s pkgSorter) Swap(i, j int) { s[j], s[i] = s[i], s[j] }
+
+// ImportsForFiles returns the imports required for the given files.
+func ImportsForFiles(files ...*compile.File) Imports {
+	seenPath := make(map[string]bool)
+	pkgs := pkgSorter{}
+
+	for _, f := range files {
+		for _, dep := range f.PackageDeps {
+			if seenPath[dep.Path] {
+				continue
+			}
+			seenPath[dep.Path] = true
+			pkgs = append(pkgs, dep)
+		}
+	}
+	sort.Sort(pkgs)
+
 	var ret Imports
-	seen := make(map[string]bool)
-	// Note that f.PackageDeps is already sorted by path, so we're guaranteed that
-	// the returned Imports are also sorted by path.
-	for _, dep := range f.PackageDeps {
-		ret = append(ret, uniqueImport(dep.Name, dep.Path, seen))
+	seenName := make(map[string]bool)
+	for _, dep := range pkgs {
+		ret = append(ret, uniqueImport(dep.Name, dep.Path, seenName))
 	}
 	return ret
 }
