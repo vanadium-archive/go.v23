@@ -8,7 +8,7 @@
 // format strings.  The intent is to provide a primitive form of Sprintf()
 // in a way where the format string can depend upon the language.
 //
-// i18n.MsgID is a string that identitifies a set of meessage format strings
+// i18n.MsgID is a string that identitifies a set of message format strings
 // that have the same meaning, but may be available in multiple languages.
 //
 // i18n.Lang is a string that identifies a language.
