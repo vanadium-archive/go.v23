@@ -199,7 +199,7 @@ type Principal interface {
 	// match the pattern "alice/...", and root public key of the chain
 	// "charlie/family/daughter" as an authority on all blessings that
 	// match the pattern "charlie/...".
-	AddToRoots(blessing Blessings) error
+	AddToRoots(blessings Blessings) error
 }
 
 // BlessingStore is the interface for storing blessings bound to a

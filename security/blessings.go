@@ -178,7 +178,7 @@ func NewBlessings(wire WireBlessings) (Blessings, error) {
 }
 
 // MarshalBlessings is the inverse of NewBlessings, converting an in-memory
-// repserentation of Blessings to the wire format.
+// representation of Blessings to the wire format.
 func MarshalBlessings(b Blessings) WireBlessings {
 	if b == nil {
 		return WireBlessings{}
