@@ -52,12 +52,10 @@ func (b *blessingsImpl) String() string {
 	blessings := make([]string, len(b.chains))
 	for chainidx, chain := range b.chains {
 		onechain := make([]string, len(chain))
-		ncaveats := 0
 		for certidx, cert := range chain {
-			ncaveats += len(cert.Caveats)
 			onechain[certidx] = cert.Extension
 		}
-		blessings[chainidx] = fmt.Sprintf("%v(%d caveats)", strings.Join(onechain, ChainSeparator), ncaveats)
+		blessings[chainidx] = fmt.Sprintf("%v", strings.Join(onechain, ChainSeparator))
 	}
 	return strings.Join(blessings, "#")
 }
