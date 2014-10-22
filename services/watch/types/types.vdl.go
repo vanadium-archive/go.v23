@@ -47,7 +47,6 @@ type GlobRequest struct {
 //     resume the stream from this point (e.g., if it is too far
 //     behind in the stream), it can return the
 //     ErrUnknownResumeMarker error.
-//     ResumeMarkers are received in lexicographical order.
 //
 // An implementation MUST support the empty string "" marker
 // (initial state fetching) and the "now" marker. It need not
