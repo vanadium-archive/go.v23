@@ -262,18 +262,15 @@ func generateTypeStub(data data, t *compile.TypeDef) string {
 		wrappedType = false
 	}
 
-	result := "function " + name + "("
-	if wrappedType {
-		result += "val"
-	}
-	result += ") {"
+	result := "function " + name + "(val) {"
 
 	if wrappedType {
 		result += "\n    this.val = val;\n"
 	} else if kind == vdl.Struct {
+		result += "\n    val = val || {};"
 		for i := 0; i < t.Type.NumField(); i++ {
 			field := t.Type.Field(i)
-			result += "\n    this." + field.Name + " = " + defaultValue(data, field.Type) + ";"
+			result += fmt.Sprintf("\n    this.%s = val.%s || %s;", field.Name, field.Name, defaultValue(data, field.Type))
 		}
 		result += "\n"
 	} else if kind == vdl.Enum {

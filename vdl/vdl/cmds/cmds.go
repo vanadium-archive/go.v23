@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -479,7 +480,7 @@ func gen(audit bool, targets []*build.Package, env *compile.Env) bool {
 				}
 				path := func(importPath string) string {
 					prefix := filepath.Clean(target.Dir[0 : len(target.Dir)-len(target.Path)])
-					pkgDir := filepath.FromSlash(filepath.Join(prefix, importPath))
+					pkgDir := filepath.Join(prefix, filepath.FromSlash(importPath))
 					fullDir, err := xlateOutDir(pkgDir, importPath, optGenJavascriptOutDir, importPath)
 					if err != nil {
 						panic(err)
@@ -488,11 +489,12 @@ func gen(audit bool, targets []*build.Package, env *compile.Env) bool {
 					if err != nil {
 						panic(err)
 					}
-					return cleanPath
+					return filepath.Join(cleanPath, path.Base(importPath))
 				}
 
 				data := javascript.Generate(pkg, env, path)
-				if writeFile(audit, data, dir, pkg.Name+".js", env) {
+				name := filepath.Base(target.Dir)
+				if writeFile(audit, data, dir, name+".js", env) {
 					pkgchanged = true
 				}
 			default:
@@ -545,6 +547,7 @@ func handleErrorOrSkip(prefix string, err error, env *compile.Env) bool {
 var errSkip = fmt.Errorf("SKIP")
 
 func xlateOutDir(dir, path string, outdir genOutDir, outPkgPath string) (string, error) {
+	path, outPkgPath = filepath.FromSlash(path), filepath.FromSlash(outPkgPath)
 	// Strip package path from the directory.
 	if !strings.HasSuffix(dir, path) {
 		return "", fmt.Errorf("package dir %q doesn't end with package path %q", dir, path)
@@ -553,9 +556,9 @@ func xlateOutDir(dir, path string, outdir genOutDir, outPkgPath string) (string,
 
 	switch {
 	case outdir.dir != "":
-		return filepath.Join(outdir.dir, filepath.FromSlash(outPkgPath)), nil
+		return filepath.Join(outdir.dir, outPkgPath), nil
 	case len(outdir.rules) == 0:
-		return filepath.Join(dir, filepath.FromSlash(outPkgPath)), nil
+		return filepath.Join(dir, outPkgPath), nil
 	}
 	// Try translation rules in order.
 	for _, xlate := range outdir.rules {
@@ -567,7 +570,7 @@ func xlateOutDir(dir, path string, outdir genOutDir, outPkgPath string) (string,
 			return "", errSkip
 		}
 		d = filepath.Clean(d[:len(d)-len(xlate.src)])
-		return filepath.Join(d, xlate.dst, filepath.FromSlash(outPkgPath)), nil
+		return filepath.Join(d, xlate.dst, outPkgPath), nil
 	}
 	return "", fmt.Errorf("package prefix %q doesn't match translation rules %q", dir, outdir)
 }
