@@ -54,7 +54,7 @@ func (c *Caveat) digest(hash Hash) []byte { return hash.sum(c.ValidatorVOM) }
 
 func (c *Caveat) String() string {
 	var validator CaveatValidator
-	if err := vom.NewDecoder(bytes.NewReader(c.ValidatorVOM)).Decode(&validator); err != nil {
+	if err := vom.NewDecoder(bytes.NewReader(c.ValidatorVOM)).Decode(&validator); err == nil {
 		return fmt.Sprintf("%T(%v)", validator, validator)
 	}
 	// If we could "peek" the type of the encoded object via the VOM-API, that may be a better message?
@@ -68,6 +68,10 @@ func (c unixTimeExpiryCaveat) Validate(ctx Context) error {
 		return fmt.Errorf("%T(%v=%v) fails validation at %v", c, c, expiry, now)
 	}
 	return nil
+}
+
+func (c unixTimeExpiryCaveat) String() string {
+	return fmt.Sprintf("%v = %v", int64(c), time.Unix(int64(c), 0))
 }
 
 func (c methodCaveat) Validate(ctx Context) error {
