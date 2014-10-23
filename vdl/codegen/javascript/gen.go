@@ -9,6 +9,7 @@ package javascript
 import (
 	"bytes"
 	"fmt"
+	"path/filepath"
 	"strconv"
 	"text/template"
 
@@ -302,7 +303,10 @@ func generateConstDefinition(data data, c *compile.ConstDef) string {
 }
 
 func importPath(data data, path string) string {
-	return data.GenerateImport(path)
+	// We need to prefix all of these paths with a ./ to tell node that the path is relative to
+	// the current directory.  Sadly filepath.Join(".", foo) == foo, so we have to do it
+	// explicitly.
+	return "." + string(filepath.Separator) + data.GenerateImport(path)
 
 }
 
