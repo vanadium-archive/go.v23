@@ -118,7 +118,7 @@ func TestCalculator(t *testing.T) {
 	if err := server.Serve("", ipc.LeafDispatcher(arith.NewServerCalculator(&serverCalculator{}), nil)); err != nil {
 		t.Fatal(err)
 	}
-	ep, err := server.ListenX(profiles.LocalListenSpec)
+	ep, err := server.Listen(profiles.LocalListenSpec)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -353,7 +353,7 @@ func TestArith(t *testing.T) {
 	for i, disp := range dispatchers {
 		server := newServer()
 		defer server.Stop()
-		ep, err := server.ListenX(profiles.LocalListenSpec)
+		ep, err := server.Listen(profiles.LocalListenSpec)
 		if err != nil {
 			t.Fatal(err)
 		}

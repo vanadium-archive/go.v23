@@ -148,21 +148,7 @@ type AddressChooser func(network string, addrs []Address) ([]Address, error)
 
 // Server defines the interface for managing a collection of services.
 type Server interface {
-	// Listen creates a listening network endpoint for the Server.  The
-	// meaning of the arguments are similar to those which Go's net.Listen
-	// accepts.
-	// For the special protocol "veyron", the address can also be:
-	// - a formatted Veyron endpoint
-	// - an Object name which resolves to an endpoint
-	//
-	// Listen may be called multiple times to listen on multiple endpoints.
-	// The returned endpoint represents an address that will be published
-	// with the mount table when Publish (below) is called.
-	Listen(protocol, address string) (naming.Endpoint, error)
-
-	// TODO(cnicolaou): rename ListenX to Listen in a subsequent CL.
-	//
-	// ListenX creates a listening network endpoint for the Server
+	// Listen creates a listening network endpoint for the Server
 	// as specified by its ListenSpec parameter. If the ListenSpec does not
 	// specify a loopback address then the Server will dynamically adapt to
 	// changes in its network address. It will do so by reading config.Setting
@@ -178,7 +164,7 @@ type Server interface {
 	// mount table even though this may change if dynamic address changes
 	// occur.
 	// Listen may be called multiple times.
-	ListenX(spec *ListenSpec) (naming.Endpoint, error)
+	Listen(spec ListenSpec) (naming.Endpoint, error)
 
 	// Serve performs two related functions:
 	// 1. it publishes the services available at the network addresses
