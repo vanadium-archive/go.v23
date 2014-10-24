@@ -129,47 +129,58 @@ func unTypedConst(data data, v *vdl.Value) string {
 	panic(fmt.Errorf("vdl: unTypedConst unhandled type %v %v", v.Kind(), v.Type()))
 }
 
+func primitiveWithOptionalName(primitive, name string) string {
+	if name == "" {
+		return "Types." + primitive
+	}
+	return "{kind: Kind." + primitive + ", name: '" + name + "'}"
+}
+
 func typeStruct(t *vdl.Type) string {
+	nameField := ""
+	if t.Name() != "" {
+		nameField = "\n    name: '" + t.Name() + "',"
+	}
+
 	switch t.Kind() {
 	case vdl.Any:
-		return "Types.ANY"
+		return primitiveWithOptionalName("ANY", t.Name())
 	case vdl.Bool:
-		return "Types.BOOL"
+		return primitiveWithOptionalName("BOOL", t.Name())
 	case vdl.Byte:
-		return "Types.BYTE"
+		return primitiveWithOptionalName("BYTE", t.Name())
 	case vdl.Uint16:
-		return "Types.UINT16"
+		return primitiveWithOptionalName("UINT16", t.Name())
 	case vdl.Uint32:
-		return "Types.UINT32"
+		return primitiveWithOptionalName("UINT32", t.Name())
 	case vdl.Uint64:
-		return "Types.UINT64"
+		return primitiveWithOptionalName("UINT64", t.Name())
 	case vdl.Int16:
-		return "Types.INT16"
+		return primitiveWithOptionalName("INT16", t.Name())
 	case vdl.Int32:
-		return "Types.INT32"
+		return primitiveWithOptionalName("INT32", t.Name())
 	case vdl.Int64:
-		return "Types.INT64"
+		return primitiveWithOptionalName("INT64", t.Name())
 	case vdl.Float32:
-		return "Types.FLOAT32"
+		return primitiveWithOptionalName("FLOAT32", t.Name())
 	case vdl.Float64:
-		return "Types.FLOAT64"
+		return primitiveWithOptionalName("FLOAT64", t.Name())
 	case vdl.Complex64:
-		return "Types.COMPLEX64"
+		return primitiveWithOptionalName("COMPLEX64", t.Name())
 	case vdl.Complex128:
-		return "Types.COMPLEX128"
+		return primitiveWithOptionalName("COMPLEX128", t.Name())
 	case vdl.String:
-		return "Types.STRING"
+		return primitiveWithOptionalName("STRING", t.Name())
 	case vdl.Enum:
-		enumRes := `{
-    kind: Kind.ENUM,
-    name: '` + t.Name() + `',
-    labels: [`
+		labels := ""
 		for i := 0; i < t.NumEnumLabel(); i++ {
-			enumRes += "'" + t.EnumLabel(i) + "', "
+			labels += "'" + t.EnumLabel(i) + "', "
 		}
-		enumRes += `]
-  }`
-		return enumRes
+		return fmt.Sprintf(`{
+    kind: Kind.ENUM,
+    name: '%s',
+    labels: [%s]
+  }`, t.Name(), labels)
 	case vdl.TypeVal:
 		return "{}"
 
@@ -177,41 +188,41 @@ func typeStruct(t *vdl.Type) string {
 	// and over again.
 	case vdl.Array:
 		return fmt.Sprintf(`{
-    kind: Kind.ARRAY,
+    kind: Kind.ARRAY,%s
     elem: %s,
     len: %d
-  }`, typeStruct(t.Elem()), t.Len())
+  }`, nameField, typeStruct(t.Elem()), t.Len())
 	case vdl.List:
 		return `{
-    kind: Kind.LIST,
+    kind: Kind.LIST,` + nameField + `
     elem: ` + typeStruct(t.Elem()) + `
   }`
 	case vdl.Set:
 		return `{
-    kind: Kind.SET,
+    kind: Kind.SET,` + nameField + `
     key: ` + typeStruct(t.Key()) + `
   }`
 	case vdl.Map:
 		return fmt.Sprintf(`{
-    kind: Kind.MAP,
+    kind: Kind.MAP,%s
     key: %s,
     elem: %s
-  }`, typeStruct(t.Key()), typeStruct(t.Elem()))
+  }`, nameField, typeStruct(t.Key()), typeStruct(t.Elem()))
 	case vdl.Struct:
-		result := `{
-    kind: Kind.STRUCT,
-    name: '` + t.Name() + `',
-    fields: [`
+		fields := ""
 		for i := 0; i < t.NumField(); i++ {
 			f := t.Field(i)
-			result += fmt.Sprintf(`
+			fields += fmt.Sprintf(`
     {
       name: '%s',
       type: %s
     },`, f.Name, typeStruct(f.Type))
 		}
-		result += "\n  ]}"
-		return result
+		return fmt.Sprintf(`{
+    kind: Kind.STRUCT,
+    name: '%s',
+    fields: [%s
+  ]}`, t.Name(), fields)
 	}
 	return ""
 }

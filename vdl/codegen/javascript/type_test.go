@@ -26,30 +26,66 @@ func TestType(t *testing.T) {
 		{vdl.Float64Type, `Types.FLOAT64`},
 		{vdl.Complex64Type, `Types.COMPLEX64`},
 		{vdl.Complex128Type, `Types.COMPLEX128`},
-		{tEnum, `{
+		{tNamedBool, `{kind: Kind.BOOL, name: 'NamedBool'}`},
+		{tEnum,
+			`{
     kind: Kind.ENUM,
     name: 'TestEnum',
     labels: ['A', 'B', 'C', ]
   }`},
-		{tArray, `{
+		{tArray,
+			`{
     kind: Kind.ARRAY,
     elem: Types.STRING,
     len: 3
   }`},
-		{tList, `{
+		{tNamedArray,
+			`{
+    kind: Kind.ARRAY,
+    name: 'NamedArray',
+    elem: Types.STRING,
+    len: 3
+  }`},
+		{tList,
+			`{
     kind: Kind.LIST,
     elem: Types.STRING
   }`},
-		{tSet, `{
+		{tNamedList,
+			`{
+    kind: Kind.LIST,
+    name: 'NamedList',
+    elem: Types.STRING
+  }`},
+
+		{tSet,
+			`{
     kind: Kind.SET,
     key: Types.STRING
   }`},
-		{tMap, `{
+		{tNamedSet,
+			`{
+    kind: Kind.SET,
+    name: 'NamedSet',
+    key: Types.STRING
+  }`},
+
+		{tMap,
+			`{
     kind: Kind.MAP,
     key: Types.STRING,
     elem: Types.INT64
   }`},
-		{tStruct, `{
+		{tNamedMap,
+			`{
+    kind: Kind.MAP,
+    name: 'NamedMap',
+    key: Types.STRING,
+    elem: Types.INT64
+  }`},
+
+		{tStruct,
+			`{
     kind: Kind.STRUCT,
     name: 'TestStruct',
     fields: [
@@ -81,5 +117,10 @@ var (
 		vdl.StructField{"A", vdl.StringType},
 		vdl.StructField{"B", vdl.Int64Type},
 	))
-	tOneOf = vdl.NamedType("TestOneOf", vdl.OneOfType(vdl.StringType, vdl.Int64Type))
+	tOneOf      = vdl.NamedType("TestOneOf", vdl.OneOfType(vdl.StringType, vdl.Int64Type))
+	tNamedArray = vdl.NamedType("NamedArray", tArray)
+	tNamedList  = vdl.NamedType("NamedList", tList)
+	tNamedSet   = vdl.NamedType("NamedSet", tSet)
+	tNamedMap   = vdl.NamedType("NamedMap", tMap)
+	tNamedBool  = vdl.NamedType("NamedBool", vdl.BoolType)
 )
