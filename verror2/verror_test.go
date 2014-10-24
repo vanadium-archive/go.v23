@@ -136,9 +136,9 @@ func init() {
 	nDE1 = verror2.ExplicitMake(verror2.NoExist, de, "server", "nDE1", 1, 2)
 
 	// Errors derived from verror (as opposed to verror2)
-	verr := verror.Existsf("verror %s", "Exists")
-	// Set the French for verror.Exists.
-	cat.Set(fr, i18n.MsgID(verror.Exists), "{1} {2} déjà en existence {_}")
+	verr := verror.NoExistOrNoAccessf("verror %s", "NoExistOrNoAccess")
+	// Set the French for verror.NoExist.
+	cat.Set(fr, i18n.MsgID(verror.NoExistOrNoAccess), "{1} {2} n'existe pas ou accès refusé {_}")
 	vEN = verror2.ExplicitConvert(verror2.Unknown, en, "server", "op", verr)
 	vFR = verror2.ExplicitConvert(verror2.Unknown, fr, "server", "op", verr)
 	vDE = verror2.ExplicitConvert(verror2.Unknown, de, "server", "op", verr)
@@ -184,9 +184,9 @@ func TestBasic(t *testing.T) {
 		{nDE0, verror2.NoExist, "veyron.io/veyron/veyron2/verror.NoExist: server nDE0 0"},
 		{nDE1, verror2.NoExist, "veyron.io/veyron/veyron2/verror.NoExist: server nDE1 1 2"},
 
-		{vEN, verror2.Exists, "server op Already exists verror Exists"},
-		{vFR, verror2.Exists, "server op déjà en existence verror Exists"},
-		{vDE, verror2.Exists, "veyron.io/veyron/veyron2/verror.Exists: server op verror Exists"},
+		{vEN, verror2.NoExistOrNoAccess, "server op Does not exist or access denied verror NoExistOrNoAccess"},
+		{vFR, verror2.NoExistOrNoAccess, "server op n'existe pas ou accès refusé verror NoExistOrNoAccess"},
+		{vDE, verror2.NoExistOrNoAccess, "veyron.io/veyron/veyron2/verror.NoExistOrNoAccess: server op verror NoExistOrNoAccess"},
 
 		{gEN, verror2.Unknown, "server op unknown error Go error"},
 		{gFR, verror2.Unknown, "server op erreur inconnu Go error"},
