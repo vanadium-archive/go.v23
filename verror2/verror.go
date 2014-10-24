@@ -447,7 +447,7 @@ var (
 	Aborted           = Register(pkgPath+".Aborted", NoRetry, "{1} {2} Aborted {_}")
 	BadArg            = Register(pkgPath+".BadArg", NoRetry, "{1} {2} Bad argument {_}")
 	BadProtocol       = Register(pkgPath+".BadProtocol", NoRetry, "{1} {2} Bad protocol or type {_}")
-	Exists            = Register(pkgPath+".Exists", NoRetry, "{1} {2} Already exists {_}")
+	Exist             = Register(pkgPath+".Exist", NoRetry, "{1} {2} Already exists {_}")
 	Internal          = Register(pkgPath+".Internal", NoRetry, "{1} {2} Internal error {_}")
 	NoAccess          = Register(pkgPath+".NoAccess", NoRetry, "{1} {2} Access denied {_}")
 	NoExist           = Register(pkgPath+".NoExist", NoRetry, "{1} {2} Does not exist {_}")
