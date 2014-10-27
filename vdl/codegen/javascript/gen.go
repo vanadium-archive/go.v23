@@ -223,6 +223,16 @@ func typeStruct(t *vdl.Type) string {
     name: '%s',
     fields: [%s
   ]}`, t.Name(), fields)
+	case vdl.OneOf:
+		types := ""
+		for i := 0; i < t.NumOneOfType(); i++ {
+			types += typeStruct(t.OneOfType(i)) + ", "
+		}
+		return fmt.Sprintf(`{
+    kind: Kind.ONEOF,
+    name: '%s',
+    types: [%s]
+  }`, t.Name(), types)
 	}
 	return ""
 }
