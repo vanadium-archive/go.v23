@@ -292,7 +292,12 @@ func generateTypeStub(data data, t *compile.TypeDef) string {
 		result += "\n    val = val || {};"
 		for i := 0; i < t.Type.NumField(); i++ {
 			field := t.Type.Field(i)
-			result += fmt.Sprintf("\n    this.%s = val.%s || %s;", field.Name, field.Name, defaultValue(data, field.Type))
+			result += fmt.Sprintf(`
+    if (val.hasOwnProperty('%s')) {
+      this.%s = val.%s;
+    } else {
+      this.%s = %s;
+    }`, field.Name, field.Name, field.Name, field.Name, defaultValue(data, field.Type))
 		}
 		result += "\n"
 	} else if kind == vdl.Enum {
