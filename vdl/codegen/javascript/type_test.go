@@ -97,9 +97,13 @@ func TestType(t *testing.T) {
       name: 'B',
       type: Types.INT64
     },
-  ]}`},
+  ]}`}, {tOneOf,
+			`{
+    kind: Kind.ONEOF,
+    name: 'TestOneOf',
+    types: [Types.STRING, Types.INT64, ]
+  }`},
 	}
-	// TODO(bjornick): Handle OneOf types when we have support in javascript.
 	for _, test := range tests {
 		if got, want := typeStruct(test.T), test.Want; got != want {
 			t.Errorf("%s\nGOT \n%s\nWANT \n%s", test.T, got, want)
