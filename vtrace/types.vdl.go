@@ -28,6 +28,9 @@ type SpanRecord struct {
 	ID     uniqueid.ID // The ID of the Span.
 	Parent uniqueid.ID // The ID of this Span's parent.
 	Name   string      // The Name of this span.
+	// TODO(mattr): These should both be time types.
+	Start int64 // The start time of this span in ns since the epoch.
+	End   int64 // The end time of this span in ns since the epoch.
 	// A series of annotations.
 	// TODO(mattr): Allow richer annotations.
 	Annotations []Annotation

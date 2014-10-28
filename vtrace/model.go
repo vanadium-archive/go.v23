@@ -96,18 +96,21 @@ type Span interface {
 	// Name returns the name of the span.
 	Name() string
 
-	// uniqueid.ID returns the uniqueid.ID of the span.
+	// ID returns the uniqueid.ID of the span.
 	ID() uniqueid.ID
 
 	// Parent returns the uniqueid.ID of this spans parent span.
 	Parent() uniqueid.ID
 
-	// Add an annotation to the trace.  Where Spans represent time periods
-	// Annotations represent data thats relevant at a specific moment.
-	// TODO(mattr): Allow richer annotations with structured data.  I also
-	// plan to add special annotations for important events such as start
-	// and end times.  We also need another method to End the span.
+	// Annotate adds an annotation to the trace.  Where Spans represent
+	// time periods Annotations represent data thats relevant at a
+	// specific moment.  TODO(mattr): Allow richer annotations with
+	// structured data.
 	Annotate(msg string)
+
+	// Finish ends the span, marking the end time.  The span should
+	// not be used after Finish is called.
+	Finish()
 
 	// Trace returns the Trace this Span is a member of.
 	Trace() Trace
