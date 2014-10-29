@@ -137,7 +137,7 @@ func unTypedConst(d data, v *vdl.Value, unTypedFields bool) string {
 		s := "{"
 		t := v.Type()
 		for ix := 0; ix < t.NumField(); ix++ {
-			s += "\n  '" + t.Field(ix).Name + "': " + recursiveConst(d, v.Field(ix)) + ","
+			s += "\n  '" + vdlutil.ToCamelCase(t.Field(ix).Name) + "': " + recursiveConst(d, v.Field(ix)) + ","
 		}
 		return s + "\n}"
 
@@ -309,12 +309,13 @@ func generateTypeStub(data data, t *compile.TypeDef) string {
 		result += "\n    val = val || {};"
 		for i := 0; i < t.Type.NumField(); i++ {
 			field := t.Type.Field(i)
+			name := vdlutil.ToCamelCase(field.Name)
 			result += fmt.Sprintf(`
     if (val.hasOwnProperty('%s')) {
       this.%s = val.%s;
     } else {
       this.%s = %s;
-    }`, field.Name, field.Name, field.Name, field.Name, defaultValue(data, field.Type))
+    }`, name, name, name, name, defaultValue(data, field.Type))
 		}
 		result += "\n"
 	} else if kind == vdl.Enum {
@@ -325,6 +326,9 @@ func generateTypeStub(data data, t *compile.TypeDef) string {
 	result += "  }\n"
 	result += name + ".prototype._type = " + typeStruct(t.Type) + ";\n"
 
+	if wrappedType {
+		result += name + ".prototype._wrappedType = true;\n"
+	}
 	result += "  types." + name + " = " + name + ";\n"
 
 	return result
