@@ -28,8 +28,8 @@ public interface {{ .ServiceName }} {{ .Extends }} {
 
     {{/* Generate the method signature. */}}
     {{ $method.Doc }}
-    public {{ $method.RetType }} {{ $method.Name }}(final io.veyron.veyron.veyron2.ipc.Context context{{ $method.Args }}) throws io.veyron.veyron.veyron2.ipc.VeyronException;
-    public {{ $method.RetType }} {{ $method.Name }}(final io.veyron.veyron.veyron2.ipc.Context context{{ $method.Args }}, final io.veyron.veyron.veyron2.Options veyronOpts) throws io.veyron.veyron.veyron2.ipc.VeyronException;
+    public {{ $method.RetType }} {{ $method.Name }}(final io.veyron.veyron.veyron2.context.Context context{{ $method.Args }}) throws io.veyron.veyron.veyron2.ipc.VeyronException;
+    public {{ $method.RetType }} {{ $method.Name }}(final io.veyron.veyron.veyron2.context.Context context{{ $method.Args }}, final io.veyron.veyron.veyron2.Options veyronOpts) throws io.veyron.veyron.veyron2.ipc.VeyronException;
 {{ end }}
 }
 `
