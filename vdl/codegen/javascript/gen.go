@@ -69,7 +69,13 @@ func genMethodTags(data data, method *compile.Method) string {
 	return result
 }
 
-func unTypedConst(data data, v *vdl.Value) string {
+func unTypedConst(d data, v *vdl.Value, unTypedFields bool) string {
+	recursiveConst := func(d data, v *vdl.Value) string {
+		if unTypedFields {
+			return unTypedConst(d, v, unTypedFields)
+		}
+		return typedConst(d, v)
+	}
 	switch v.Kind() {
 	case vdl.Bool:
 		if v.Bool() {
@@ -89,7 +95,7 @@ func unTypedConst(data data, v *vdl.Value) string {
 		return strconv.Quote(v.RawString())
 	case vdl.OneOf, vdl.Any, vdl.Nilable:
 		if elem := v.Elem(); elem != nil {
-			return typedConst(data, elem)
+			return recursiveConst(d, elem)
 		}
 		return "null"
 	case vdl.Complex64, vdl.Complex128:
@@ -98,18 +104,29 @@ func unTypedConst(data data, v *vdl.Value) string {
 		return strconv.FormatInt(int64(v.EnumIndex()), 10)
 	case vdl.Array, vdl.List:
 		s := "["
+		isByteArray := v.Type().Elem().Kind() == vdl.Byte
 		for ix := 0; ix < v.Len(); ix++ {
-			s += "\n" + typedConst(data, v.Index(ix)) + ","
+			var val string
+			if isByteArray {
+				val = unTypedConst(d, v.Index(ix), unTypedFields)
+			} else {
+				val = recursiveConst(d, v.Index(ix))
+			}
+			s += "\n" + val + ","
 		}
-		return s + "\n]"
+		s += "\n]"
+		if isByteArray {
+			return "new Uint8Array(" + s + ")"
+		}
+		return s
 	case vdl.Set, vdl.Map:
 		s := "{"
 		for _, key := range v.Keys() {
-			s += "\n  " + unTypedConst(data, key) + ":"
+			s += "\n  " + unTypedConst(d, key, unTypedFields) + ":"
 			if v.Kind() == vdl.Set {
 				s += "true"
 			} else {
-				s += typedConst(data, v.MapIndex(key))
+				s += recursiveConst(d, v.MapIndex(key))
 			}
 			s += ","
 			// TODO(bjornick): Deal with non-string keys.
@@ -120,7 +137,7 @@ func unTypedConst(data data, v *vdl.Value) string {
 		s := "{"
 		t := v.Type()
 		for ix := 0; ix < t.NumField(); ix++ {
-			s += "\n  '" + t.Field(ix).Name + "': " + typedConst(data, v.Field(ix)) + ","
+			s += "\n  '" + t.Field(ix).Name + "': " + recursiveConst(d, v.Field(ix)) + ","
 		}
 		return s + "\n}"
 
@@ -314,18 +331,58 @@ func generateTypeStub(data data, t *compile.TypeDef) string {
 }
 
 func typedConst(data data, v *vdl.Value) string {
-	valstr := unTypedConst(data, v)
+	valstr := unTypedConst(data, v, false)
 	t := v.Type()
 	if def := data.Env.FindTypeDef(t); def != nil {
 		if def.File != compile.BuiltInFile {
 			return fmt.Sprintf("new %s(%s)", qualifiedIdent(data, def.Name, def.File), valstr)
 		}
 	}
+	switch t.Kind() {
+	case vdl.Bool:
+		return "new Builtins.Bool(" + valstr + ")"
+	case vdl.Byte:
+		return "new Builtins.Byte(" + valstr + ")"
+	case vdl.Uint16:
+		return "new Builtins.Uint16(" + valstr + ")"
+	case vdl.Uint32:
+		return "new Builtins.Uint32(" + valstr + ")"
+	case vdl.Uint64:
+		return "new Builtins.Uint64(" + valstr + ")"
+	case vdl.Int16:
+		return "new Builtins.Int16(" + valstr + ")"
+	case vdl.Int32:
+		return "new Builtins.Int32(" + valstr + ")"
+	case vdl.Int64:
+		return "new Builtins.Int64(" + valstr + ")"
+	case vdl.Float32:
+		return "new Builtins.Float32(" + valstr + ")"
+	case vdl.Float64:
+		return "new Builtins.Float64(" + valstr + ")"
+	case vdl.Complex64:
+		return "new Builtins.Complex64(" + valstr + ")"
+	case vdl.Complex128:
+		return "new Builtins.Complex128(" + valstr + ")"
+	case vdl.Array:
+		return "new Builtins.Array(" + valstr + ", " + typeStruct(t) + ")"
+	case vdl.List:
+		return "new Builtins.List(" + valstr + ", " + typeStruct(t) + ")"
+	case vdl.Set:
+		return "new Builtins.Set(" + valstr + ", " + typeStruct(t) + ")"
+	case vdl.Map:
+		return "new Builtins.Map(" + valstr + ", " + typeStruct(t) + ")"
+	}
 	return valstr
 }
 
-func generateConstDefinition(data data, c *compile.ConstDef) string {
-	return fmt.Sprintf("  %s: %s,", c.Name, typedConst(data, c.Value))
+func generateConstDefinition(data data, c *compile.ConstDef, typed bool) string {
+	val := ""
+	if typed {
+		val = typedConst(data, c.Value)
+	} else {
+		val = unTypedConst(data, c.Value, true)
+	}
+	return fmt.Sprintf("  %s: %s,", c.Name, val)
 }
 
 func importPath(data data, path string) string {
@@ -376,18 +433,24 @@ var vom = require('vom');
 var Types = vom.Types;
 var Kind = vom.Kind;
 var Complex = vom.Complex;
+var Builtins = vom.Builtins;
 
 var types = {};
 {{range $file := $pkg.Files}}{{range $type := $file.TypeDefs}}
 {{generateTypeStub $data $type}}
 {{end}}{{end}}
 
-var consts = { {{range $file := $pkg.Files}}{{range $const := $file.ConstDefs}}
-{{generateConstDefinition $data $const}}{{end}}{{end}}
+var typedConsts = { {{range $file := $pkg.Files}}{{range $const := $file.ConstDefs}}
+{{generateConstDefinition $data $const true}}{{end}}{{end}}
 };
+var consts = { {{range $file := $pkg.Files}}{{range $const := $file.ConstDefs}}
+{{generateConstDefinition $data $const false}}{{end}}{{end}}
+};
+
 module.exports = {
   types: types,
   services: services,
   consts: consts,
+  typedConsts: typedConsts,
 };
 {{end}}`
