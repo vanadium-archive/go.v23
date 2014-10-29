@@ -71,7 +71,7 @@ type RuntimeID struct{ security.PrivateID }
 
 func (RuntimeID) ROpt() {}
 
-// TODO(ashankar): Remove this once the transition to the new model is complete
+// TODO(ashankar): Remove. DEPRECATED HAS NO EFFECT
 type ForceNewSecurityModel struct{}
 
 func (ForceNewSecurityModel) ROpt() {}
