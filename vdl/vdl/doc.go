@@ -22,11 +22,17 @@ The vdl additional help topics are:
 Run "vdl help [topic]" for topic details.
 
 The vdl flags are:
-   -experimental=false: Enable experimental features that may crash the compiler and change without notice.  Intended for VDL compiler developers.
-   -exts=.vdl: Comma-separated list of valid VDL file name extensions.
-   -ignore_unknown=false: Ignore unknown packages provided on the command line.
-   -max_errors=-1: Stop processing after this many errors, or -1 for unlimited.
-   -v=false: Turn on verbose logging.
+ -experimental=false
+   Enable experimental features that may crash the compiler and change without
+   notice.  Intended for VDL compiler developers.
+ -exts=.vdl
+   Comma-separated list of valid VDL file name extensions.
+ -ignore_unknown=false
+   Ignore unknown packages provided on the command line.
+ -max_errors=-1
+   Stop processing after this many errors, or -1 for unlimited.
+ -v=false
+   Turn on verbose logging.
 
 Vdl Generate
 
@@ -39,17 +45,19 @@ Usage:
 <packages> are a list of packages to process, similar to the standard go tool.
 For more information, run "vdl help packages".
 
-The generate flags are:
-   -go_fmt=true: Format generated Go code
-   -go_out_dir=: Go output directory.  There are three modes:
-         ""                     : Generate output in-place in the source tree
-         "dir"                  : Generate output rooted at dir
-         "src->dst[,s2->d2...]" : Generate output using translation rules
-      Assume your source tree is organized as follows:
+The vdl generate flags are:
+ -go_fmt=true
+   Format generated Go code
+ -go_out_dir=
+   Go output directory.  There are three modes:
+      ""                     : Generate output in-place in the source tree
+      "dir"                  : Generate output rooted at dir
+      "src->dst[,s2->d2...]" : Generate output using translation rules
+   Assume your source tree is organized as follows:
       VDLPATH=/home/vdl
          /home/vdl/src/veyron/test_base/base1.vdl
          /home/vdl/src/veyron/test_base/base2.vdl
-      Here's example output under the different modes:
+   Here's example output under the different modes:
       --go_out_dir=""
          /home/vdl/src/veyron/test_base/base1.vdl.go
          /home/vdl/src/veyron/test_base/base2.vdl.go
@@ -59,20 +67,26 @@ The generate flags are:
       --go_out_dir="vdl/src->foo/bar/src"
          /home/foo/bar/src/veyron/test_base/base1.vdl.go
          /home/foo/bar/src/veyron/test_base/base2.vdl.go
-      When the src->dst form is used, src must match the suffix of the path
-      just before the package path, and dst is the replacement for src.
-      Use commas to separate multiple rules; the first rule matching src is
-      used.  The special dst SKIP indicates matching packages are skipped.
-   -java_out_dir=veyron/go/src->veyron/java/src/vdl/java,roadmap/go/src->veyron/java/src/vdl/java,third_party/go/src->SKIP,tools/go/src->SKIP: Same semantics as --go_out_dir but applies to java code generation.
-   -java_out_pkg=veyron.io/veyron/veyron2/vom2/testdata->SKIP,veyron.io->io/veyron: Java output package translation rules.  Must be of the form:
-         "src->dst[,s2->d2...]"
-      If a VDL package has a prefix src, the prefix will be replaced with dst.
-      Use commas to separate multiple rules; the first rule matching src is
-      used, and if there are no matching rules, the package remains unchanged.
-      The special dst SKIP indicates matching packages are skipped.
-   -js_out_dir=veyron/go/src->veyron.js/src,roadmap/go/src->veyron.js/src,third_party/go/src->SKIP,tools/go/src->SKIP: Same semantics as --go_out_dir but applies to js code generation.
-   -lang=go,java: Comma-separated list of languages to generate, currently supporting go,java,js
-   -status=true: Show package names as they are updated
+   When the src->dst form is used, src must match the suffix of the path just
+   before the package path, and dst is the replacement for src.  Use commas to
+   separate multiple rules; the first rule matching src is used.  The special
+   dst SKIP indicates matching packages are skipped.
+ -java_out_dir=veyron/go/src->veyron/java/src/vdl/java,roadmap/go/src->veyron/java/src/vdl/java,third_party/go/src->SKIP,tools/go/src->SKIP
+   Same semantics as --go_out_dir but applies to java code generation.
+ -java_out_pkg=veyron.io/veyron/veyron2/vom2/testdata->SKIP,veyron.io->io/veyron
+   Java output package translation rules.  Must be of the form:
+      "src->dst[,s2->d2...]"
+   If a VDL package has a prefix src, the prefix will be replaced with dst.  Use
+   commas to separate multiple rules; the first rule matching src is used, and
+   if there are no matching rules, the package remains unchanged.  The special
+   dst SKIP indicates matching packages are skipped.
+ -js_out_dir=veyron/go/src->veyron.js/src,roadmap/go/src->veyron.js/src,third_party/go/src->SKIP,tools/go/src->SKIP
+   Same semantics as --go_out_dir but applies to js code generation.
+ -lang=go,java
+   Comma-separated list of languages to generate, currently supporting
+   go,java,js
+ -status=true
+   Show package names as they are updated
 
 Vdl Compile
 
@@ -85,14 +99,15 @@ Usage:
 <packages> are a list of packages to process, similar to the standard go tool.
 For more information, run "vdl help packages".
 
-The compile flags are:
-   -status=true: Show package names while we compile
+The vdl compile flags are:
+ -status=true
+   Show package names while we compile
 
 Vdl Audit
 
 Audit runs the same logic as generate, but doesn't write out generated files.
-Returns a 0 exit code if all packages are up-to-date, otherwise returns a
-non-0 exit code indicating some packages need generation.
+Returns a 0 exit code if all packages are up-to-date, otherwise returns a non-0
+exit code indicating some packages need generation.
 
 Usage:
    vdl audit [flags] <packages>
@@ -100,17 +115,19 @@ Usage:
 <packages> are a list of packages to process, similar to the standard go tool.
 For more information, run "vdl help packages".
 
-The audit flags are:
-   -go_fmt=true: Format generated Go code
-   -go_out_dir=: Go output directory.  There are three modes:
-         ""                     : Generate output in-place in the source tree
-         "dir"                  : Generate output rooted at dir
-         "src->dst[,s2->d2...]" : Generate output using translation rules
-      Assume your source tree is organized as follows:
+The vdl audit flags are:
+ -go_fmt=true
+   Format generated Go code
+ -go_out_dir=
+   Go output directory.  There are three modes:
+      ""                     : Generate output in-place in the source tree
+      "dir"                  : Generate output rooted at dir
+      "src->dst[,s2->d2...]" : Generate output using translation rules
+   Assume your source tree is organized as follows:
       VDLPATH=/home/vdl
          /home/vdl/src/veyron/test_base/base1.vdl
          /home/vdl/src/veyron/test_base/base2.vdl
-      Here's example output under the different modes:
+   Here's example output under the different modes:
       --go_out_dir=""
          /home/vdl/src/veyron/test_base/base1.vdl.go
          /home/vdl/src/veyron/test_base/base2.vdl.go
@@ -120,20 +137,26 @@ The audit flags are:
       --go_out_dir="vdl/src->foo/bar/src"
          /home/foo/bar/src/veyron/test_base/base1.vdl.go
          /home/foo/bar/src/veyron/test_base/base2.vdl.go
-      When the src->dst form is used, src must match the suffix of the path
-      just before the package path, and dst is the replacement for src.
-      Use commas to separate multiple rules; the first rule matching src is
-      used.  The special dst SKIP indicates matching packages are skipped.
-   -java_out_dir=veyron/go/src->veyron/java/src/vdl/java,roadmap/go/src->veyron/java/src/vdl/java,third_party/go/src->SKIP,tools/go/src->SKIP: Same semantics as --go_out_dir but applies to java code generation.
-   -java_out_pkg=veyron.io/veyron/veyron2/vom2/testdata->SKIP,veyron.io->io/veyron: Java output package translation rules.  Must be of the form:
-         "src->dst[,s2->d2...]"
-      If a VDL package has a prefix src, the prefix will be replaced with dst.
-      Use commas to separate multiple rules; the first rule matching src is
-      used, and if there are no matching rules, the package remains unchanged.
-      The special dst SKIP indicates matching packages are skipped.
-   -js_out_dir=veyron/go/src->veyron.js/src,roadmap/go/src->veyron.js/src,third_party/go/src->SKIP,tools/go/src->SKIP: Same semantics as --go_out_dir but applies to js code generation.
-   -lang=go,java: Comma-separated list of languages to generate, currently supporting go,java,js
-   -status=true: Show package names as they are updated
+   When the src->dst form is used, src must match the suffix of the path just
+   before the package path, and dst is the replacement for src.  Use commas to
+   separate multiple rules; the first rule matching src is used.  The special
+   dst SKIP indicates matching packages are skipped.
+ -java_out_dir=veyron/go/src->veyron/java/src/vdl/java,roadmap/go/src->veyron/java/src/vdl/java,third_party/go/src->SKIP,tools/go/src->SKIP
+   Same semantics as --go_out_dir but applies to java code generation.
+ -java_out_pkg=veyron.io/veyron/veyron2/vom2/testdata->SKIP,veyron.io->io/veyron
+   Java output package translation rules.  Must be of the form:
+      "src->dst[,s2->d2...]"
+   If a VDL package has a prefix src, the prefix will be replaced with dst.  Use
+   commas to separate multiple rules; the first rule matching src is used, and
+   if there are no matching rules, the package remains unchanged.  The special
+   dst SKIP indicates matching packages are skipped.
+ -js_out_dir=veyron/go/src->veyron.js/src,roadmap/go/src->veyron.js/src,third_party/go/src->SKIP,tools/go/src->SKIP
+   Same semantics as --go_out_dir but applies to js code generation.
+ -lang=go,java
+   Comma-separated list of languages to generate, currently supporting
+   go,java,js
+ -status=true
+   Show package names as they are updated
 
 Vdl List
 
@@ -157,22 +180,31 @@ For more information, run "vdl help packages".
 Vdl Help
 
 Help with no args displays the usage of the parent command.
+
 Help with args displays the usage of the specified sub-command or help topic.
+
 "help ..." recursively displays help for all commands and topics.
+
+The output is formatted to a target width in runes.  The target width is
+determined by checking the environment variable CMDLINE_WIDTH, falling back on
+the terminal width from the OS, falling back on 80 chars.  By setting
+CMDLINE_WIDTH=x, if x > 0 the width is x, if x < 0 the width is unlimited, and
+if x == 0 or is unset one of the fallbacks is used.
 
 Usage:
    vdl help [flags] [command/topic ...]
 
 [command/topic ...] optionally identifies a specific sub-command or help topic.
 
-The help flags are:
-   -style=text: The formatting style for help output, either "text" or "godoc".
+The vdl help flags are:
+ -style=text
+   The formatting style for help output, either "text" or "godoc".
 
 Vdl Packages - help topic
 
 Most vdl commands apply to a list of packages:
 
-  vdl command <packages>
+   vdl command <packages>
 
 <packages> are a list of packages to process, similar to the standard go tool.
 In its simplest form each package is an import path; e.g.
@@ -182,25 +214,24 @@ A package that is an absolute path or that begins with a . or .. element is
 interpreted as a file system path, and denotes the package in that directory.
 
 A package is a pattern if it includes one or more "..." wildcards, each of which
-can match any string, including the empty string and strings containing
-slashes.  Such a pattern expands to all packages found in VDLPATH with names
-matching the pattern.  As a special-case, x/... matches x as well as x's
-subdirectories.
+can match any string, including the empty string and strings containing slashes.
+Such a pattern expands to all packages found in VDLPATH with names matching the
+pattern.  As a special-case, x/... matches x as well as x's subdirectories.
 
-The special-case "all" is a synonym for "...", and denotes all packages found
-in VDLPATH.
+The special-case "all" is a synonym for "...", and denotes all packages found in
+VDLPATH.
 
 Import path elements and file names are not allowed to begin with "." or "_";
 such paths are ignored in wildcard matches, and return errors if specified
 explicitly.
 
-Run "vdl help vdlpath" to see docs on VDLPATH.
-Run "go help packages" to see the standard go package docs.
+ Run "vdl help vdlpath" to see docs on VDLPATH.
+ Run "go help packages" to see the standard go package docs.
 
 Vdl Vdlpath - help topic
 
-The VDLPATH environment variable is used to resolve import statements.
-It must be set to compile and generate vdl packages.
+The VDLPATH environment variable is used to resolve import statements. It must
+be set to compile and generate vdl packages.
 
 The format is a colon-separated list of directories, where each directory must
 have a "src/" directory that holds vdl source code.  The path below 'src'

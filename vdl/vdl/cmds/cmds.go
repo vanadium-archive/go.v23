@@ -67,7 +67,7 @@ var topicPackages = cmdline.Topic{
 	Long: `
 Most vdl commands apply to a list of packages:
 
-  vdl command <packages>
+   vdl command <packages>
 
 <packages> are a list of packages to process, similar to the standard go tool.
 In its simplest form each package is an import path; e.g.
@@ -89,8 +89,8 @@ Import path elements and file names are not allowed to begin with "." or "_";
 such paths are ignored in wildcard matches, and return errors if specified
 explicitly.
 
-Run "vdl help vdlpath" to see docs on VDLPATH.
-Run "go help packages" to see the standard go package docs.
+ Run "vdl help vdlpath" to see docs on VDLPATH.
+ Run "go help packages" to see the standard go package docs.
 `,
 }
 
@@ -363,38 +363,38 @@ for managing Go source code.
 	cmdGenerate.Flags.Var(&optGenLangs, "lang", "Comma-separated list of languages to generate, currently supporting "+genLangAll.String())
 	cmdGenerate.Flags.BoolVar(&optGenGoFmt, "go_fmt", true, "Format generated Go code")
 	cmdGenerate.Flags.BoolVar(&optGenStatus, "status", true, "Show package names as they are updated")
-	cmdGenerate.Flags.Var(&optGenGoOutDir, "go_out_dir",
-		`Go output directory.  There are three modes:
-         ""                     : Generate output in-place in the source tree
-         "dir"                  : Generate output rooted at dir
-         "src->dst[,s2->d2...]" : Generate output using translation rules
-      Assume your source tree is organized as follows:
-      VDLPATH=/home/vdl
-         /home/vdl/src/veyron/test_base/base1.vdl
-         /home/vdl/src/veyron/test_base/base2.vdl
-      Here's example output under the different modes:
-      --go_out_dir=""
-         /home/vdl/src/veyron/test_base/base1.vdl.go
-         /home/vdl/src/veyron/test_base/base2.vdl.go
-      --go_out_dir="/tmp/foo"
-         /tmp/foo/veyron/test_base/base1.vdl.go
-         /tmp/foo/veyron/test_base/base2.vdl.go
-      --go_out_dir="vdl/src->foo/bar/src"
-         /home/foo/bar/src/veyron/test_base/base1.vdl.go
-         /home/foo/bar/src/veyron/test_base/base2.vdl.go
-      When the src->dst form is used, src must match the suffix of the path
-      just before the package path, and dst is the replacement for src.
-      Use commas to separate multiple rules; the first rule matching src is
-      used.  The special dst SKIP indicates matching packages are skipped.`)
+	cmdGenerate.Flags.Var(&optGenGoOutDir, "go_out_dir", `
+Go output directory.  There are three modes:
+   ""                     : Generate output in-place in the source tree
+   "dir"                  : Generate output rooted at dir
+   "src->dst[,s2->d2...]" : Generate output using translation rules
+Assume your source tree is organized as follows:
+   VDLPATH=/home/vdl
+      /home/vdl/src/veyron/test_base/base1.vdl
+      /home/vdl/src/veyron/test_base/base2.vdl
+Here's example output under the different modes:
+   --go_out_dir=""
+      /home/vdl/src/veyron/test_base/base1.vdl.go
+      /home/vdl/src/veyron/test_base/base2.vdl.go
+   --go_out_dir="/tmp/foo"
+      /tmp/foo/veyron/test_base/base1.vdl.go
+      /tmp/foo/veyron/test_base/base2.vdl.go
+   --go_out_dir="vdl/src->foo/bar/src"
+      /home/foo/bar/src/veyron/test_base/base1.vdl.go
+      /home/foo/bar/src/veyron/test_base/base2.vdl.go
+When the src->dst form is used, src must match the suffix of the path just
+before the package path, and dst is the replacement for src.  Use commas to
+separate multiple rules; the first rule matching src is used.  The special dst
+SKIP indicates matching packages are skipped.`)
 	cmdGenerate.Flags.Var(&optGenJavaOutDir, "java_out_dir",
 		"Same semantics as --go_out_dir but applies to java code generation.")
-	cmdGenerate.Flags.Var(&optGenJavaOutPkg, "java_out_pkg",
-		`Java output package translation rules.  Must be of the form:
-         "src->dst[,s2->d2...]"
-      If a VDL package has a prefix src, the prefix will be replaced with dst.
-      Use commas to separate multiple rules; the first rule matching src is
-      used, and if there are no matching rules, the package remains unchanged.
-      The special dst SKIP indicates matching packages are skipped.`)
+	cmdGenerate.Flags.Var(&optGenJavaOutPkg, "java_out_pkg", `
+Java output package translation rules.  Must be of the form:
+   "src->dst[,s2->d2...]"
+If a VDL package has a prefix src, the prefix will be replaced with dst.  Use
+commas to separate multiple rules; the first rule matching src is used, and if
+there are no matching rules, the package remains unchanged.  The special dst
+SKIP indicates matching packages are skipped.`)
 	cmdGenerate.Flags.Var(&optGenJavascriptOutDir, "js_out_dir",
 		"Same semantics as --go_out_dir but applies to js code generation.")
 	// Options for audit are identical to generate.

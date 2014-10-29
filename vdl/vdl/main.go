@@ -5,7 +5,7 @@
 // 3) We generate into a *.tmp file first, otherwise go run will pick up the
 //    initially empty *.go file, and fail.
 //
-//go:generate bash -c "{ echo -e '// This file was auto-generated via go generate.\n// DO NOT UPDATE MANUALLY\n\n/*' && veyron go run *.go help -style=godoc ... && echo -e '*/\npackage main'; } > ./doc.go.tmp && mv ./doc.go.tmp ./doc.go"
+//go:generate bash -c "{ echo -e '// This file was auto-generated via go generate.\n// DO NOT UPDATE MANUALLY\n\n/*' && CMDLINE_WIDTH=80 veyron go run *.go help -style=godoc ... && echo -e '*/\npackage main'; } > ./doc.go.tmp && mv ./doc.go.tmp ./doc.go"
 
 package main
 
