@@ -9,10 +9,8 @@
 //   2) Semicolons may be omitted before a closing ')' or '}'.  This is
 //      implemented via the osemi rule below.
 //
-// To generate the grammar.go source file containing the parser, run the
-// following command.  It'll also generate a grammar.y.debug file containing a
-// list of all states produced for the parser, and some stats.
-//   go tool yacc -o grammar.y.go -v grammar.y.debug grammar.y && go fmt grammar.y.go
+// To generate the grammar.go source file containing the parser, run
+// grammar_gen.sh in this same directory, or run go generate on this package.
 
 ////////////////////////////////////////////////////////////////////////
 // Declarations section.
@@ -104,17 +102,18 @@ func ensureNonEmptyToken(yylex yyLexer, tok strPos, errMsg string) {
 %token <pos>      ';' ':' ',' '.' '(' ')' '[' ']' '{' '}' '<' '>' '='
 %token <pos>      '!' '+' '-' '*' '/' '%' '|' '&' '^' '?'
 %token <pos>      tOROR tANDAND tLE tGE tNE tEQEQ tLSH tRSH
-%token <pos>      tPACKAGE tIMPORT tTYPE tENUM tSET tMAP tSTRUCT tONEOF
-%token <pos>      tINTERFACE tSTREAM tCONST tERRORID
+%token <pos>      tCONST tENUM tERRORID tIMPORT tINTERFACE tMAP tONEOF tPACKAGE
+%token <pos>      tSET tSTREAM tSTRUCT tTYPE tTYPEOBJECT
 %token <strpos>   tIDENT tSTRLIT
 %token <intpos>   tINTLIT
 %token <ratpos>   tRATLIT
 %token <imagpos>  tIMAGLIT
 
+// Labeled rules holding typed values.
 %type <strpos>     nameref
 %type <namepos>    label_spec
 %type <nameposes>  label_spec_list
-%type <typeexpr>   type otype
+%type <typeexpr>   type type_no_typeobject otype
 %type <typeexprs>  type_comma_list type_semi_list streamargs
 %type <fields>     field_spec_list field_spec named_arg_list inargs outargs
 %type <iface>      iface_item_list iface_item
@@ -250,7 +249,22 @@ type_spec:
     *tds = append(*tds, &TypeDef{Type:$2, NamePos:NamePos{Name:$1.str, Pos:$1.pos}})
   }
 
-type:
+// The type_no_typeobject rule is necessary to avoid a shift/reduce conflict
+// between type conversions and typeobject const expressions.  E.g.
+//   type(expr)       // type conversion
+//   typeobject(type) // typeobject const expression
+//
+// We've chosen similar syntax to make it easier for the user to remember how to
+// use the feature, but since "typeobject" is itself a type, there is a problem.
+// We resolve the conflict by restricting the type conversion to the rule:
+//   type_no_typeobject '(' expr ')'
+//
+// Note that if we wanted to add general-purpose functions with the func(expr)
+// syntax, we'll need to pull nameref out of type_no_typeobject, and parse both
+// func(expr) and nameref(expr) into a generic structure.  We can't use that
+// same mechanism for typeobject, since the thing inside the parens is a value
+// expression for type conversions, but a type expression for typeobject.
+type_no_typeobject:
   nameref
   { $$ = &TypeNamed{Name:$1.str, P:$1.pos} }
 | '[' tINTLIT ']' type
@@ -271,6 +285,13 @@ type:
   { $$ = &TypeOneOf{Types:$3, P:$1} }
 | '?' type
   { $$ = &TypeNilable{Base:$2, P:$1} }
+
+// The type rule expands to all the actual types, including typeobject.
+type:
+  type_no_typeobject
+  { $$ = $1}
+| tTYPEOBJECT
+  { $$ = &TypeNamed{Name:"typeobject", P:$1} }
 
 label_spec_list:
   label_spec
@@ -496,8 +517,10 @@ unary_expr:
   { $$ = &ConstUnaryOp{"-", $2, $1} }
 | '^' unary_expr
   { $$ = &ConstUnaryOp{"^", $2, $1} }
-| type '(' expr ')'
+| type_no_typeobject '(' expr ')'
   { $$ = &ConstTypeConv{$1, $3, $1.Pos()} }
+| tTYPEOBJECT '(' type ')'
+  { $$ = &ConstTypeObject{$3, $1} }
 // TODO(bprosnitz) Add .real() and .imag() for complex.
 
 operand:

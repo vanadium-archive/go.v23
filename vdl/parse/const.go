@@ -59,6 +59,12 @@ type ConstTypeConv struct {
 	P    Pos
 }
 
+// ConstTypeObject represents typeobject; a type used as a value.
+type ConstTypeObject struct {
+	Type Type
+	P    Pos
+}
+
 // ConstUnaryOp represents all unary operations.
 type ConstUnaryOp struct {
 	Op   string
@@ -129,6 +135,9 @@ func (c *ConstIndexed) String() string {
 func (c *ConstTypeConv) String() string {
 	return c.Type.String() + "(" + c.Expr.String() + ")"
 }
+func (c *ConstTypeObject) String() string {
+	return c.Type.String()
+}
 func (c *ConstUnaryOp) String() string {
 	return c.Op + c.Expr.String()
 }
@@ -142,5 +151,6 @@ func (c *ConstCompositeLit) Pos() Pos { return c.P }
 func (c *ConstNamed) Pos() Pos        { return c.P }
 func (c *ConstIndexed) Pos() Pos      { return c.P }
 func (c *ConstTypeConv) Pos() Pos     { return c.P }
+func (c *ConstTypeObject) Pos() Pos   { return c.P }
 func (c *ConstUnaryOp) Pos() Pos      { return c.P }
 func (c *ConstBinaryOp) Pos() Pos     { return c.P }

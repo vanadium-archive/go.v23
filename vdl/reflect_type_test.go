@@ -17,7 +17,7 @@ type rtTest struct {
 var rtKeyTests = []rtTest{
 	// Unnamed scalars
 	{reflect.TypeOf((*interface{})(nil)).Elem(), AnyType},
-	{reflect.TypeOf((*Type)(nil)), TypeValType},
+	{reflect.TypeOf((*Type)(nil)), TypeObjectType},
 	{reflect.TypeOf(bool(false)), BoolType},
 	{reflect.TypeOf(uint8(0)), ByteType},
 	{reflect.TypeOf(uint16(0)), Uint16Type},
@@ -37,7 +37,7 @@ var rtKeyTests = []rtTest{
 	{reflect.TypeOf(string("")), StringType},
 	// Named scalars
 	{reflect.TypeOf((*nInterface)(nil)).Elem(), AnyType},
-	{reflect.TypeOf(nType(nil)), TypeValType},
+	{reflect.TypeOf(nType(nil)), TypeObjectType},
 	{reflect.TypeOf(nBool(false)), rtN("Bool", BoolType)},
 	{reflect.TypeOf(nUint8(0)), rtN("Uint8", ByteType)},
 	{reflect.TypeOf(nUint16(0)), rtN("Uint16", Uint16Type)},
@@ -57,7 +57,7 @@ var rtKeyTests = []rtTest{
 	{reflect.TypeOf(nString("")), rtN("String", StringType)},
 	// Unnamed arrays
 	{reflect.TypeOf([3]interface{}{}), ArrayType(3, AnyType)},
-	{reflect.TypeOf([3]*Type{}), ArrayType(3, TypeValType)},
+	{reflect.TypeOf([3]*Type{}), ArrayType(3, TypeObjectType)},
 	{reflect.TypeOf([3]bool{}), ArrayType(3, BoolType)},
 	{reflect.TypeOf([3]uint8{}), ArrayType(3, ByteType)},
 	{reflect.TypeOf([3]uint16{}), ArrayType(3, Uint16Type)},
@@ -77,7 +77,7 @@ var rtKeyTests = []rtTest{
 	{reflect.TypeOf([3]string{}), ArrayType(3, StringType)},
 	// Named arrays
 	{reflect.TypeOf(nArray3Interface{}), rtNArray("Interface", AnyType)},
-	{reflect.TypeOf(nArray3TypeVal{}), rtNArray("TypeVal", TypeValType)},
+	{reflect.TypeOf(nArray3TypeObject{}), rtNArray("TypeObject", TypeObjectType)},
 	{reflect.TypeOf(nArray3Bool{}), rtNArray("Bool", BoolType)},
 	{reflect.TypeOf(nArray3Uint8{}), rtNArray("Uint8", ByteType)},
 	{reflect.TypeOf(nArray3Uint16{}), rtNArray("Uint16", Uint16Type)},
@@ -97,7 +97,7 @@ var rtKeyTests = []rtTest{
 	{reflect.TypeOf(nArray3String{}), rtNArray("String", StringType)},
 	// Unnamed structs
 	{reflect.TypeOf(struct{ X interface{} }{}), StructType(StructField{"X", AnyType})},
-	{reflect.TypeOf(struct{ X *Type }{}), StructType(StructField{"X", TypeValType})},
+	{reflect.TypeOf(struct{ X *Type }{}), StructType(StructField{"X", TypeObjectType})},
 	{reflect.TypeOf(struct{ X bool }{}), StructType(StructField{"X", BoolType})},
 	{reflect.TypeOf(struct{ X uint8 }{}), StructType(StructField{"X", ByteType})},
 	{reflect.TypeOf(struct{ X uint16 }{}), StructType(StructField{"X", Uint16Type})},
@@ -117,7 +117,7 @@ var rtKeyTests = []rtTest{
 	{reflect.TypeOf(struct{ X string }{}), StructType(StructField{"X", StringType})},
 	// Named structs
 	{reflect.TypeOf(nStructInterface{}), rtNStruct("Interface", AnyType)},
-	{reflect.TypeOf(nStructTypeVal{}), rtNStruct("TypeVal", TypeValType)},
+	{reflect.TypeOf(nStructTypeObject{}), rtNStruct("TypeObject", TypeObjectType)},
 	{reflect.TypeOf(nStructBool{}), rtNStruct("Bool", BoolType)},
 	{reflect.TypeOf(nStructUint8{}), rtNStruct("Uint8", ByteType)},
 	{reflect.TypeOf(nStructUint16{}), rtNStruct("Uint16", Uint16Type)},
@@ -144,7 +144,7 @@ var rtKeyTests = []rtTest{
 var rtNonKeyTests = []rtTest{
 	// Unnamed slices
 	{reflect.TypeOf([]interface{}{}), ListType(AnyType)},
-	{reflect.TypeOf([]*Type{}), ListType(TypeValType)},
+	{reflect.TypeOf([]*Type{}), ListType(TypeObjectType)},
 	{reflect.TypeOf([]bool{}), ListType(BoolType)},
 	{reflect.TypeOf([]uint8{}), ListType(ByteType)},
 	{reflect.TypeOf([]uint16{}), ListType(Uint16Type)},
@@ -164,7 +164,7 @@ var rtNonKeyTests = []rtTest{
 	{reflect.TypeOf([]string{}), ListType(StringType)},
 	// Named slices
 	{reflect.TypeOf(nSliceInterface{}), rtNSlice("Interface", AnyType)},
-	{reflect.TypeOf(nSliceTypeVal{}), rtNSlice("TypeVal", TypeValType)},
+	{reflect.TypeOf(nSliceTypeObject{}), rtNSlice("TypeObject", TypeObjectType)},
 	{reflect.TypeOf(nSliceBool{}), rtNSlice("Bool", BoolType)},
 	{reflect.TypeOf(nSliceUint8{}), rtNSlice("Uint8", ByteType)},
 	{reflect.TypeOf(nSliceUint16{}), rtNSlice("Uint16", Uint16Type)},
@@ -184,7 +184,7 @@ var rtNonKeyTests = []rtTest{
 	{reflect.TypeOf(nSliceString{}), rtNSlice("String", StringType)},
 	// Unnamed sets
 	{reflect.TypeOf(map[interface{}]struct{}{}), rtSet(AnyType)},
-	{reflect.TypeOf(map[*Type]struct{}{}), rtSet(TypeValType)},
+	{reflect.TypeOf(map[*Type]struct{}{}), rtSet(TypeObjectType)},
 	{reflect.TypeOf(map[bool]struct{}{}), rtSet(BoolType)},
 	{reflect.TypeOf(map[uint8]struct{}{}), rtSet(ByteType)},
 	{reflect.TypeOf(map[uint16]struct{}{}), rtSet(Uint16Type)},
@@ -204,7 +204,7 @@ var rtNonKeyTests = []rtTest{
 	{reflect.TypeOf(map[string]struct{}{}), rtSet(StringType)},
 	// Named sets
 	{reflect.TypeOf(nSetInterface{}), rtNSet("Interface", AnyType)},
-	{reflect.TypeOf(nSetTypeVal{}), rtNSet("TypeVal", TypeValType)},
+	{reflect.TypeOf(nSetTypeObject{}), rtNSet("TypeObject", TypeObjectType)},
 	{reflect.TypeOf(nSetBool{}), rtNSet("Bool", BoolType)},
 	{reflect.TypeOf(nSetUint8{}), rtNSet("Uint8", ByteType)},
 	{reflect.TypeOf(nSetUint16{}), rtNSet("Uint16", Uint16Type)},
@@ -224,7 +224,7 @@ var rtNonKeyTests = []rtTest{
 	{reflect.TypeOf(nSetString{}), rtNSet("String", StringType)},
 	// Unnamed maps
 	{reflect.TypeOf(map[interface{}]interface{}{}), rtMap(AnyType)},
-	{reflect.TypeOf(map[*Type]*Type{}), rtMap(TypeValType)},
+	{reflect.TypeOf(map[*Type]*Type{}), rtMap(TypeObjectType)},
 	{reflect.TypeOf(map[bool]bool{}), rtMap(BoolType)},
 	{reflect.TypeOf(map[uint8]uint8{}), rtMap(ByteType)},
 	{reflect.TypeOf(map[uint16]uint16{}), rtMap(Uint16Type)},
@@ -244,7 +244,7 @@ var rtNonKeyTests = []rtTest{
 	{reflect.TypeOf(map[string]string{}), rtMap(StringType)},
 	// Named maps
 	{reflect.TypeOf(nMapInterface{}), rtNMap("Interface", AnyType)},
-	{reflect.TypeOf(nMapTypeVal{}), rtNMap("TypeVal", TypeValType)},
+	{reflect.TypeOf(nMapTypeObject{}), rtNMap("TypeObject", TypeObjectType)},
 	{reflect.TypeOf(nMapBool{}), rtNMap("Bool", BoolType)},
 	{reflect.TypeOf(nMapUint8{}), rtNMap("Uint8", ByteType)},
 	{reflect.TypeOf(nMapUint16{}), rtNMap("Uint16", Uint16Type)},
@@ -341,7 +341,7 @@ func allTests() []rtTest {
 	// Add all types we can generate via reflect; no arrays and structs.
 	for _, test := range rtKeyTests {
 		switch test.t.Kind() {
-		case Any, TypeVal, Nilable:
+		case Any, TypeObject, Nilable:
 			tests = append(tests, rtTest{reflect.PtrTo(test.rt), test.t})
 		default:
 			tests = append(tests, rtTest{reflect.PtrTo(test.rt), NilableType(test.t)})
@@ -352,7 +352,7 @@ func allTests() []rtTest {
 	// Now generate types from everything we have so far, for more complicated subtypes.
 	for _, test := range tests {
 		switch test.t.Kind() {
-		case Any, TypeVal, Nilable:
+		case Any, TypeObject, Nilable:
 			tests = append(tests, rtTest{reflect.PtrTo(test.rt), test.t})
 		default:
 			tests = append(tests, rtTest{reflect.PtrTo(test.rt), NilableType(test.t)})
@@ -391,7 +391,7 @@ type rtErrorTest struct {
 }
 
 var rtErrorTests = []rtErrorTest{
-	{reflect.Type(nil), `invalid val.TypeOf(nil)`},
+	{reflect.Type(nil), `invalid vdl.TypeOf(nil)`},
 	{reflect.TypeOf(make(chan int64)), `type "chan int64" not supported`},
 	{reflect.TypeOf(func() {}), `type "func()" not supported`},
 	{reflect.TypeOf(unsafe.Pointer(uintptr(0))), `type "unsafe.Pointer" not supported`},

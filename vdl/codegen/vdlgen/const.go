@@ -22,8 +22,8 @@ func TypedConst(v *vdl.Value, pkgPath string, imports codegen.Imports) (string, 
 		return "", err
 	}
 	switch {
-	case k == vdl.Enum || k == vdl.TypeVal || t == vdl.BoolType || t == vdl.StringType:
-		// Enum and TypeVal already include the type in their value.
+	case k == vdl.Enum || k == vdl.TypeObject || t == vdl.BoolType || t == vdl.StringType:
+		// Enum and TypeObject already include the type in their value.
 		// Built-in bool and string are implicitly convertible from literals.
 		return valstr, nil
 	}
@@ -120,7 +120,7 @@ func constValue(v *vdl.Value, pkgPath string, imports codegen.Imports) (string, 
 		}
 		return s + "}", nil
 	}
-	// Enum and TypeVal always require the typestr.
+	// Enum and TypeObject always require the typestr.
 	typestr, err := Type(t, pkgPath, imports)
 	if err != nil {
 		return "", err
@@ -128,8 +128,8 @@ func constValue(v *vdl.Value, pkgPath string, imports codegen.Imports) (string, 
 	switch k {
 	case vdl.Enum:
 		return typestr + "." + v.EnumLabel(), nil
-	case vdl.TypeVal:
-		return "typeval(" + typestr + ")", nil
+	case vdl.TypeObject:
+		return "typeobject(" + typestr + ")", nil
 	default:
 		return "", fmt.Errorf("vdlgen.Const unhandled type: %v %v", k, t)
 	}

@@ -110,8 +110,9 @@ import (
 	_gen_wiretype "veyron.io/veyron/veyron2/wiretype"
 )
 
-// TODO(bprosnitz) Remove this line once signatures are updated to use typevals.
-// It corrects a bug where _gen_wiretype is unused in VDL pacakges where only bootstrap types are used on interfaces.
+// TODO(toddw): Remove this line once the new signature support is done.
+// It corrects a bug where _gen_wiretype is unused in VDL pacakges where only
+// bootstrap types are used on interfaces.
 const _ = _gen_wiretype.TypeIDInvalid
 
 // The etag passed to SetACL is invalid.  Likely, another client set

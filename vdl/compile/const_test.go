@@ -103,6 +103,14 @@ func makeIntList(vals ...int64) *vdl.Value {
 	return listv
 }
 
+func makeIntArray(vals ...int64) *vdl.Value {
+	arrayv := vdl.ZeroValue(vdl.ArrayType(len(vals), vdl.Int64Type))
+	for index, v := range vals {
+		arrayv.Index(index).AssignInt(v)
+	}
+	return arrayv
+}
+
 func makeStringSet(keys ...string) *vdl.Value {
 	setv := vdl.ZeroValue(vdl.SetType(vdl.StringType))
 	for _, k := range keys {
@@ -119,14 +127,27 @@ func makeStringIntMap(m map[string]int64) *vdl.Value {
 	return mapv
 }
 
-func makeStruct(name string, x int64, y string, z bool) *vdl.Value {
-	t := vdl.NamedType(name, vdl.StructType([]vdl.StructField{
+func makeStructType(name string) *vdl.Type {
+	return vdl.NamedType(name, vdl.StructType([]vdl.StructField{
 		{"X", vdl.Int64Type}, {"Y", vdl.StringType}, {"Z", vdl.BoolType},
 	}...))
-	structv := vdl.ZeroValue(t)
+}
+
+func makeStruct(name string, x int64, y string, z bool) *vdl.Value {
+	structv := vdl.ZeroValue(makeStructType(name))
 	structv.Field(0).AssignInt(x)
 	structv.Field(1).AssignString(y)
 	structv.Field(2).AssignBool(z)
+	return structv
+}
+
+func makeStructTypeObjectType(name string) *vdl.Type {
+	return vdl.NamedType(name, vdl.StructType(vdl.StructField{"T", vdl.TypeObjectType}))
+}
+
+func makeStructTypeObject(name string, t *vdl.Type) *vdl.Value {
+	structv := vdl.ZeroValue(makeStructTypeObjectType(name))
+	structv.Field(0).AssignTypeObject(t)
 	return structv
 }
 
@@ -222,6 +243,44 @@ var constTests = []struct {
 	{
 		"InvalidIndexBaseType",
 		cp{{"a", `type A struct{}; const B = A{}; const Res = B["ok"]`, nil, "illegal use of index operator with unsupported type"}}},
+
+	// Test array literals.
+	{
+		"IntArray",
+		cp{{"a", `const Res = [3]int64{0,1,2}`, makeIntArray(0, 1, 2), ""}}},
+	{
+		"IntArrayKeys",
+		cp{{"a", `const Res = [3]int64{1:1, 2:2, 0:0}`, makeIntArray(0, 1, 2), ""}}},
+	{
+		"IntArrayMixedKey",
+		cp{{"a", `const Res = [3]int64{1:1, 2, 0:0}`, makeIntArray(0, 1, 2), ""}}},
+	{
+		"IntArrayDupKey",
+		cp{{"a", `const Res = [3]int64{2:2, 1:1, 0}`, nil, "duplicate index 2"}}},
+	{
+		"IntArrayInvalidIndex",
+		cp{{"a", `const Res = [3]int64{"a":2, 1:1, 2:2}`, nil, "invalid index"}}},
+	{
+		"IntArrayInvalidValue",
+		cp{{"a", `const Res = [3]int64{0,1,"c"}`, nil, "invalid array value"}}},
+	{
+		"IndexingNamedList",
+		cp{{"a", `const A = [3]int64{3,4,2}; const Res=A[1]`, vdl.Int64Value(4), ""}}},
+	{
+		"IndexingUnnamedArray",
+		cp{{"a", `const Res = [3]int64{3,4,2}[1]`, nil, "cannot apply index operator to unnamed constant"}}},
+	{
+		"TypedArrayIndexing",
+		cp{{"a", `const A = [3]int64{3,4,2};  const Res = A[int16(1)]`, vdl.Int64Value(4), ""}}},
+	{
+		"NegativeArrayIndexing",
+		cp{{"a", `const A = [3]int64{3,4,2}; const Res = A[-1]`, nil, "error converting index [(]const -1 overflows uint64[)]"}}},
+	{
+		"OutOfBoundsArrayIndexing",
+		cp{{"a", `const A = [3]int64{3,4,2}; const Res = A[10]`, nil, "index out of bounds"}}},
+	{
+		"InvalidIndexType",
+		cp{{"a", `const A = [3]int64{3,4,2}; const Res = A["ok"]`, nil, "error converting"}}},
 
 	// Test set literals.
 	{
@@ -393,6 +452,47 @@ var constTests = []struct {
 		"TypedUserFloat32Mismatch",
 		cp{{"a", `type TypedFlt float32;const Res = TypedFlt(true)`, nil,
 			`can't convert true to a.TypedFlt float32`}}},
+
+	// Test typeobject consts.
+	{
+		"TypeObjectBool",
+		cp{{"a", `const Res = typeobject(bool)`, vdl.TypeObjectValue(vdl.BoolType), ""}}},
+	{
+		"TypeObjectString",
+		cp{{"a", `const Res = typeobject(string)`, vdl.TypeObjectValue(vdl.StringType), ""}}},
+	{
+		"TypeObjectInt32",
+		cp{{"a", `const Res = typeobject(int32)`, vdl.TypeObjectValue(vdl.Int32Type), ""}}},
+	{
+		"TypeObjectFloat32",
+		cp{{"a", `const Res = typeobject(float32)`, vdl.TypeObjectValue(vdl.Float32Type), ""}}},
+	{
+		"TypeObjectComplex64",
+		cp{{"a", `const Res = typeobject(complex64)`, vdl.TypeObjectValue(vdl.Complex64Type), ""}}},
+	{
+		"TypeObjectTypeObject",
+		cp{{"a", `const Res = typeobject(typeobject)`, vdl.TypeObjectValue(vdl.TypeObjectType), ""}}},
+	{
+		"TypeObjectList",
+		cp{{"a", `const Res = typeobject([]string)`, vdl.TypeObjectValue(vdl.ListType(vdl.StringType)), ""}}},
+	{
+		"TypeObjectArray",
+		cp{{"a", `const Res = typeobject([3]int64)`, vdl.TypeObjectValue(vdl.ArrayType(3, vdl.Int64Type)), ""}}},
+	{
+		"TypeObjectSet",
+		cp{{"a", `const Res = typeobject(set[string])`, vdl.TypeObjectValue(vdl.SetType(vdl.StringType)), ""}}},
+	{
+		"TypeObjectMap",
+		cp{{"a", `const Res = typeobject(map[string]int32)`, vdl.TypeObjectValue(vdl.MapType(vdl.StringType, vdl.Int32Type)), ""}}},
+	{
+		"TypeObjectStruct",
+		cp{{"a", `type A struct{X int64;Y string;Z bool}; const Res = typeobject(A)`, vdl.TypeObjectValue(makeStructType("a.A")), ""}}},
+	{
+		"TypeObjectStructField",
+		cp{{"a", `type A struct{T typeobject}; const Res = A{typeobject(bool)}`, makeStructTypeObject("a.A", vdl.BoolType), ""}}},
+	{
+		"TypeObjectEnum",
+		cp{{"a", `type A enum{X;Y;Z}; const Res = typeobject(A)`, vdl.TypeObjectValue(vdl.NamedType("a.A", vdl.EnumType("X", "Y", "Z"))), ""}}},
 
 	// Test named consts.
 	{

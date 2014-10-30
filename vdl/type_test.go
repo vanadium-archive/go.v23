@@ -52,7 +52,7 @@ var singletons = []struct {
 	{Complex64, Complex64Type, "complex64"},
 	{Complex128, Complex128Type, "complex128"},
 	{String, StringType, "string"},
-	{TypeVal, TypeValType, "typeval"},
+	{TypeObject, TypeObjectType, "typeobject"},
 }
 
 type l []string
@@ -115,7 +115,7 @@ func allTypes() (types []*Type) {
 		for _, test2 := range singletons {
 			types = append(types, MapType(test.t, test2.t))
 		}
-		if test.k != Any && test.k != TypeVal {
+		if test.k != Any && test.k != TypeObject {
 			types = append(types, NamedType("Named"+test.s, test.t))
 		}
 		if test.k != Any {
@@ -470,8 +470,8 @@ func TestNamedTypes(t *testing.T) {
 	for _, test := range singletons {
 		var errstr string
 		switch test.k {
-		case Any, TypeVal:
-			errstr = "any and typeval cannot be renamed"
+		case Any, TypeObject:
+			errstr = "any and typeobject cannot be renamed"
 		}
 		name := "Named" + test.s
 		var x *Type
@@ -590,7 +590,7 @@ func TestHashConsTypes(t *testing.T) {
 	for iter := 0; iter < 3; iter++ {
 		for _, a := range singletons {
 			types[iter] = append(types[iter], a.t)
-			if a.t != AnyType && a.t != TypeValType {
+			if a.t != AnyType && a.t != TypeObjectType {
 				types[iter] = append(types[iter], NamedType("Named"+a.s, a.t))
 			}
 			if a.t != AnyType {
@@ -933,7 +933,7 @@ func TestUniqueTypeNames(t *testing.T) {
 func makeAllPending(builder *TypeBuilder) []PendingType {
 	var ret []PendingType
 	for _, test := range singletons {
-		if test.k != Any && test.k != TypeVal {
+		if test.k != Any && test.k != TypeObject {
 			ret = append(ret, builder.Named("Named"+test.s).AssignBase(test.t))
 		}
 	}

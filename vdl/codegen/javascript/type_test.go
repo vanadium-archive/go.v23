@@ -12,7 +12,7 @@ func TestType(t *testing.T) {
 		Want string
 	}{
 		{vdl.AnyType, `Types.ANY`},
-		{vdl.TypeValType, `{}`},
+		{vdl.TypeObjectType, `{}`},
 		{vdl.BoolType, `Types.BOOL`},
 		{vdl.StringType, `Types.STRING`},
 		{vdl.ByteType, `Types.BYTE`},

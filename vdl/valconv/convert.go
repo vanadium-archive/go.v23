@@ -147,7 +147,7 @@ func createFinTarget(c convTarget, tt *vdl.Type) convTarget {
 				c.rv.Set(reflect.New(c.rv.Type().Elem()))
 			}
 			if c.rv.Type().Elem() == rtType {
-				// Stop at *vdl.Type to allow TypeVal values to be assigned.
+				// Stop at *vdl.Type to allow TypeObject values to be assigned.
 				return c
 			}
 			c.rv = c.rv.Elem()
@@ -318,13 +318,13 @@ func (c convTarget) FromEnumLabel(src string, tt *vdl.Type) error {
 	return c.FromString(src, tt)
 }
 
-// FromTypeVal implements the Target interface method.
-func (c convTarget) FromTypeVal(src *vdl.Type) error {
-	fin, fill, err := startConvert(c, vdl.TypeValType)
+// FromTypeObject implements the Target interface method.
+func (c convTarget) FromTypeObject(src *vdl.Type) error {
+	fin, fill, err := startConvert(c, vdl.TypeObjectType)
 	if err != nil {
 		return err
 	}
-	if err := fill.fromTypeVal(src); err != nil {
+	if err := fill.fromTypeObject(src); err != nil {
 		return err
 	}
 	return finishConvert(fin, fill)
@@ -632,19 +632,19 @@ func (c convTarget) fromBytes(src []byte) error {
 	return fmt.Errorf("invalid conversion from []byte to %v", c.tt)
 }
 
-func (c convTarget) fromTypeVal(src *vdl.Type) error {
+func (c convTarget) fromTypeObject(src *vdl.Type) error {
 	if c.vv == nil {
 		if rtPtrToType.ConvertibleTo(c.rv.Type()) {
 			c.rv.Set(reflect.ValueOf(src).Convert(c.rv.Type()))
 			return nil
 		}
 	} else {
-		if c.tt == vdl.TypeValType {
-			c.vv.AssignTypeVal(src)
+		if c.tt == vdl.TypeObjectType {
+			c.vv.AssignTypeObject(src)
 			return nil
 		}
 	}
-	return fmt.Errorf("invalid conversion from typeval to %v", c.tt)
+	return fmt.Errorf("invalid conversion from typeobject to %v", c.tt)
 }
 
 // StartOneOf implements the Target interface method.

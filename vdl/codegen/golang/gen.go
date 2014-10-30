@@ -70,7 +70,7 @@ func systemImportsGo(f *compile.File) []string {
 		// Import for vdlutil.Any
 		set[`_gen_vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"`] = true
 	}
-	if f.TypeDeps[vdl.TypeValType] {
+	if f.TypeDeps[vdl.TypeObjectType] {
 		// Import for vdl.Type
 		set[`_gen_vdl "veyron.io/veyron/veyron2/vdl"`] = true
 	}
@@ -520,8 +520,9 @@ import ({{range $imp := $data.UserImports}}
 	{{constDefGo $data $cdef}}
 {{end}}
 {{if $file.Interfaces}}
-// TODO(bprosnitz) Remove this line once signatures are updated to use typevals.
-// It corrects a bug where _gen_wiretype is unused in VDL pacakges where only bootstrap types are used on interfaces.
+// TODO(toddw): Remove this line once the new signature support is done.
+// It corrects a bug where _gen_wiretype is unused in VDL pacakges where only
+// bootstrap types are used on interfaces.
 const _ = _gen_wiretype.TypeIDInvalid
 {{end}}
 {{range $eid := $file.ErrorIDs}}

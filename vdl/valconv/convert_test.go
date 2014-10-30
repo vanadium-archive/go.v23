@@ -24,8 +24,8 @@ var (
 		bytes3Value(bytes3Type, "ABC"), bytes3Value(bytes3TypeN, "ABC"),
 		vdl.ZeroValue(enumTypeN).AssignEnumLabel("ABC"),
 	}
-	vvTypeValBool = []*vdl.Value{
-		vdl.TypeValValue(vdl.BoolType),
+	vvTypeObjectBool = []*vdl.Value{
+		vdl.TypeObjectValue(vdl.BoolType),
 	}
 	vvSeq123 = []*vdl.Value{
 		seqNumValue(array3Uint64Type, 1, 2, 3),
@@ -145,7 +145,7 @@ var (
 		nString("ABC"), nSliceUint8("ABC"), nArray3Uint8{'A', 'B', 'C'},
 		nEnumABC,
 	}
-	rvTypeValBool = []interface{}{
+	rvTypeObjectBool = []interface{}{
 		vdl.BoolType, nType(vdl.BoolType),
 	}
 	rvSeq123 = []interface{}{
@@ -248,7 +248,7 @@ var (
 
 	ttBools           = ttTypes(vvBoolTrue)
 	ttStrs            = ttTypes(vvStrABC)
-	ttTypeVals        = ttTypes(vvTypeValBool)
+	ttTypeObjects     = ttTypes(vvTypeObjectBool)
 	ttSeq123          = ttTypes(vvSeq123)
 	ttSet123          = ttTypes(vvSet123)
 	ttSetMap123       = ttTypes(vvSetMap123)
@@ -280,11 +280,11 @@ var (
 	ttComplexes   = ttUnion(ttComplex64s, ttComplex128s)
 	ttIntegers    = ttUnion(ttUints, ttInts)
 	ttNumbers     = ttUnion(ttIntegers, ttFloats, ttComplexes)
-	ttAllTypes    = ttUnion(ttBools, ttStrs, ttTypeVals, ttNumbers, ttSeq123, ttSetMap123, ttSetMapStructXYZ, ttMapStructVWXNum)
+	ttAllTypes    = ttUnion(ttBools, ttStrs, ttTypeObjects, ttNumbers, ttSeq123, ttSetMap123, ttSetMapStructXYZ, ttMapStructVWXNum)
 
 	rtBools           = rtTypes(rvBoolTrue)
 	rtStrs            = rtTypes(rvStrABC)
-	rtTypeVals        = rtTypes(rvTypeValBool)
+	rtTypeObjects     = rtTypes(rvTypeObjectBool)
 	rtSeq123          = rtTypes(rvSeq123)
 	rtSet123          = rtTypes(rvSet123)
 	rtSetMap123       = rtTypes(rvSetMap123)
@@ -325,7 +325,7 @@ var (
 	rtComplexes = rtUnion(rtComplex64s, rtComplex128s)
 	rtIntegers  = rtUnion(rtUints, rtInts)
 	rtNumbers   = rtUnion(rtIntegers, rtFloats, rtComplexes)
-	rtAllTypes  = rtUnion(rtBools, rtStrs, rtTypeVals, rtNumbers, rtSeq123, rtSetMap123, rtSetMapStructXYZ, rtMapStructVWXNum)
+	rtAllTypes  = rtUnion(rtBools, rtStrs, rtTypeObjects, rtNumbers, rtSeq123, rtSetMap123, rtSetMapStructXYZ, rtMapStructVWXNum)
 
 	rtInterface = reflect.TypeOf((*interface{})(nil)).Elem()
 )
@@ -660,7 +660,7 @@ func TestConverter(t *testing.T) {
 		{vvFromInt(float64MaxInt), rvFromInt(float64MaxInt)},
 		{vvFromInt(float32MinInt), rvFromInt(float32MinInt)},
 		{vvFromInt(float64MinInt), rvFromInt(float64MinInt)},
-		{vvTypeValBool, rvTypeValBool},
+		{vvTypeObjectBool, rvTypeObjectBool},
 		{vvSeq123, rvSeq123},
 		{vvSetMap123, rvSetMap123},
 		{vvMap123FalseTrue, rvMap123FalseTrue},
@@ -853,7 +853,7 @@ func testConverterWantSrc(t *testing.T, vvrvWant, vvrvSrc vvrv) {
 		testConvert(t, &dst, src, vvWant, 1)
 		testConvert(t, &dst, src, vvWant, 1)
 		rtSrc := reflect.TypeOf(src)
-		ttSrc, err := vdl.TypeOf(src)
+		ttSrc, err := vdl.TypeFromReflect(rtSrc)
 		if err != nil {
 			t.Error(err)
 			continue
@@ -935,8 +935,8 @@ func TestConverterError(t *testing.T) {
 			vvBoolTrue, rvBoolTrue},
 		{ttOtherThan(ttAllTypes, ttStrs), rtOtherThan(rtAllTypes, rtStrs),
 			vvStrABC, rvStrABC},
-		{ttOtherThan(ttAllTypes, ttTypeVals), rtOtherThan(rtAllTypes, rtTypeVals),
-			vvTypeValBool, rvTypeValBool},
+		{ttOtherThan(ttAllTypes, ttTypeObjects), rtOtherThan(rtAllTypes, rtTypeObjects),
+			vvTypeObjectBool, rvTypeObjectBool},
 		{ttOtherThan(ttAllTypes, ttSeq123), rtOtherThan(rtAllTypes, rtSeq123),
 			vvSeq123, rvSeq123},
 		{ttOtherThan(ttAllTypes, ttSetMap123), rtOtherThan(rtAllTypes, rtSetMap123),

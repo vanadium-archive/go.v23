@@ -6,6 +6,7 @@ import (
 
 	"veyron.io/veyron/veyron2/vdl"
 	"veyron.io/veyron/veyron2/vdl/compile"
+	"veyron.io/veyron/veyron2/vdl/parse"
 )
 
 func constDefGo(data goData, def *compile.ConstDef) string {
@@ -30,9 +31,9 @@ func isByteList(t *vdl.Type) bool {
 func typedConst(data goData, v *vdl.Value) string {
 	k, t := v.Kind(), v.Type()
 	valstr := untypedConst(data, v)
-	// Enum already includes the type in its value.
+	// Enum and TypeObject already include the type in their values.
 	// Built-in bool and string are implicitly convertible from literals.
-	if k == vdl.Enum || t == vdl.BoolType || t == vdl.StringType {
+	if k == vdl.Enum || k == vdl.TypeObject || t == vdl.BoolType || t == vdl.StringType {
 		return valstr
 	}
 	// Everything else requires an explicit type.
@@ -61,8 +62,27 @@ func untypedConst(data goData, v *vdl.Value) string {
 			return typedConst(data, elem)
 		}
 		return "nil"
-	case vdl.TypeVal:
-		panic("TODO: typeval constants aren't supported yet!")
+	case vdl.TypeObject:
+		// We special-case Any and TypeObject, since they cannot be named by the
+		// user, and are simple to return statically.
+		switch v.TypeObject() {
+		case vdl.AnyType:
+			return "_gen_vdl.AnyType"
+		case vdl.TypeObjectType:
+			return "_gen_vdl.TypeObjectType"
+		}
+		// The strategy is either brilliant or a huge hack.  The "proper" way to do
+		// this would be to generate the Go code that builds a *vdl.Type directly
+		// using vdl.TypeBuilder, But the rest of this file can already generate the
+		// Go code to construct a value of any other type, and vdl.TypeOf converts
+		// from a Go value back into *vdl.Type.
+		//
+		// So we perform a roundtrip, converting from an in-memory *vdl.Type into
+		// the Go code that represents the zero value for the type, back into a
+		// *vdl.Type in the generated code via vdl.TypeOf.  This results in less
+		// generator and generated code.
+		zero := vdl.ZeroValue(v.TypeObject())
+		return "_gen_vdl.TypeOf(" + typedConst(data, zero) + ")"
 	case vdl.Bool:
 		return strconv.FormatBool(v.Bool())
 	case vdl.Byte:
@@ -87,6 +107,9 @@ func untypedConst(data goData, v *vdl.Value) string {
 	case vdl.Enum:
 		return typeGo(data, t) + v.EnumLabel()
 	case vdl.Array, vdl.List:
+		if v.IsZero() {
+			return "{}"
+		}
 		s := "{"
 		for ix := 0; ix < v.Len(); ix++ {
 			s += "\n" + untypedConst(data, v.Index(ix)) + ","
@@ -94,6 +117,9 @@ func untypedConst(data goData, v *vdl.Value) string {
 		return s + "\n}"
 	case vdl.Set, vdl.Map:
 		// TODO(toddw): Sort keys to get a deterministic ordering.
+		if v.IsZero() {
+			return "{}"
+		}
 		s := "{"
 		for _, key := range v.Keys() {
 			s += "\n" + subConst(data, key)
@@ -105,13 +131,17 @@ func untypedConst(data goData, v *vdl.Value) string {
 		}
 		return s + "\n}"
 	case vdl.Struct:
+		if v.IsZero() {
+			return "{}"
+		}
 		s := "{"
 		for ix := 0; ix < t.NumField(); ix++ {
 			s += "\n" + t.Field(ix).Name + ": " + subConst(data, v.Field(ix)) + ","
 		}
 		return s + "\n}"
 	default:
-		panic(fmt.Errorf("vdl: untypedConst unhandled type: %v %v", k, t))
+		data.Env.Errorf(data.File, parse.Pos{}, "%v untypedConst not implemented for %v %v", t, k)
+		return "INVALID"
 	}
 }
 

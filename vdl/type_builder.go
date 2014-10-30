@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	errNameNonEmpty   = errors.New("any and typeval cannot be renamed")
+	errNameNonEmpty   = errors.New("any and typeobject cannot be renamed")
 	errNoLabels       = errors.New("no enum labels")
 	errLabelEmpty     = errors.New("empty enum label")
 	errHasLabels      = errors.New("labels only valid for enum")
@@ -47,7 +47,7 @@ var (
 	Complex64Type  = primitiveType(Complex64)
 	Complex128Type = primitiveType(Complex128)
 	StringType     = primitiveType(String)
-	TypeValType    = primitiveType(TypeVal)
+	TypeObjectType = primitiveType(TypeObject)
 )
 
 func primitiveType(k Kind) *Type {
@@ -640,7 +640,7 @@ func validType(t *Type, seen map[*Type]bool) error {
 	}
 	// Check name
 	switch t.kind {
-	case Any, TypeVal:
+	case Any, TypeObject:
 		if t.name != "" {
 			return errNameNonEmpty
 		}

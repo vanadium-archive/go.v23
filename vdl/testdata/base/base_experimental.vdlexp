@@ -24,6 +24,23 @@ const (
 	Cset   = set[int32]{1}
 	// TODO(toddw): test multiple items after ordering is fixed.
 	//cmap   = map[int32]string{1: "A", 2: "B", 3: "C"}
-	cmap   = map[int32]string{1: "A"}
-	Cargs = Args{1, 2}
+	Cmap   = map[int32]string{1: "A"}
+	Cargs  = Args{1, 2}
+
+	CTVbool      = typeobject(bool)
+	CTVstring    = typeobject(string)
+	CTVbytes     = typeobject([]byte)
+	CTVbyte      = typeobject(byte)
+	CTVuint16    = typeobject(uint16)
+	CTVint16     = typeobject(int16)
+	CTVfloat32   = typeobject(float32)
+	CTVcomplex64 = typeobject(complex64)
+	CTVenum      = typeobject(NamedEnum)
+	CTVArray     = typeobject([3]string)
+	CTVList      = typeobject([]string)
+	CTVSet       = typeobject(set[string])
+	CTVMap       = typeobject(map[string]int64)
+	CTVStruct    = typeobject(ScalarsExp)
+	CTVOneOf     = typeobject(NamedOneOf)
+	CTVAny       = typeobject(any)
 )

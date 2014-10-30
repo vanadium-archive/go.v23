@@ -80,8 +80,8 @@ func javaBuiltInType(typ *vdl.Type, forceClass bool) (string, bool) {
 		return "org.apache.commons.math3.complex.Complex", true
 	case vdl.String:
 		return "java.lang.String", true
-	// TODO(spetrovic): handle typeval correctly.
-	case vdl.TypeVal:
+	// TODO(spetrovic): handle typeobject correctly.
+	case vdl.TypeObject:
 		return "java.lang.Object", true
 	case vdl.Any:
 		return "io.veyron.veyron.veyron2.vdl.Any", true

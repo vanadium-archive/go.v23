@@ -150,7 +150,7 @@ func (td typeDefiner) Define() {
 			continue // keep going to catch  more errors
 		case *vdl.Type:
 			if tbase == ErrorType {
-				td.env.errorf(file, def.Pos, "error cannot be renamed")
+				td.env.Errorf(file, def.Pos, "error cannot be renamed")
 				continue // keep going to catch more errors
 			}
 			def.BaseType = tbase
@@ -231,7 +231,7 @@ func compileDefinedType(ptype parse.Type, file *File, env *Env, tbuilder *vdl.Ty
 		//   type C struct{X ?string} // ok
 		//   type C ?string           // bad
 		//   type D ?struct{X string} // bad
-		env.errorf(file, ptype.Pos(), "can't define type based on top-level nilable")
+		env.Errorf(file, ptype.Pos(), "can't define type based on top-level nilable")
 		return nil
 	}
 	return lit
@@ -249,7 +249,7 @@ func compileLiteralType(ptype parse.Type, file *File, env *Env, tbuilder *vdl.Ty
 		if b, ok := builders[pt.Name]; ok {
 			return b.pending
 		}
-		env.errorf(file, pt.Pos(), "type %s undefined", pt.Name)
+		env.Errorf(file, pt.Pos(), "type %s undefined", pt.Name)
 	case *parse.TypeArray:
 		elem := compileLiteralType(pt.Elem, file, env, tbuilder, builders)
 		if elem != nil {
@@ -278,7 +278,7 @@ func compileLiteralType(ptype parse.Type, file *File, env *Env, tbuilder *vdl.Ty
 			return tbuilder.Nilable().AssignBase(base)
 		}
 	default:
-		env.errorf(file, pt.Pos(), "unnamed %s type invalid (type must be defined)", ptype.Kind())
+		env.Errorf(file, pt.Pos(), "unnamed %s type invalid (type must be defined)", ptype.Kind())
 	}
 	return nil
 }

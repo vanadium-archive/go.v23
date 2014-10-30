@@ -3,6 +3,11 @@
 
 package base
 
+import (
+	// The non-user imports are prefixed with "_gen_" to prevent collisions.
+	_gen_vdl "veyron.io/veyron/veyron2/vdl"
+)
+
 type NamedEnum int
 
 const (
@@ -111,7 +116,7 @@ var Cset = map[int32]struct{}{
 
 // TODO(toddw): test multiple items after ordering is fixed.
 //cmap   = map[int32]string{1: "A", 2: "B", 3: "C"}
-var cmap = map[int32]string{
+var Cmap = map[int32]string{
 	1: "A",
 }
 
@@ -119,3 +124,35 @@ var Cargs = Args{
 	A: 1,
 	B: 2,
 }
+
+var CTVbool = _gen_vdl.TypeOf(false)
+
+var CTVstring = _gen_vdl.TypeOf("")
+
+var CTVbytes = _gen_vdl.TypeOf([]byte(""))
+
+var CTVbyte = _gen_vdl.TypeOf(byte(0))
+
+var CTVuint16 = _gen_vdl.TypeOf(uint16(0))
+
+var CTVint16 = _gen_vdl.TypeOf(int16(0))
+
+var CTVfloat32 = _gen_vdl.TypeOf(float32(0))
+
+var CTVcomplex64 = _gen_vdl.TypeOf(complex64(0))
+
+var CTVenum = _gen_vdl.TypeOf(NamedEnumA)
+
+var CTVArray = _gen_vdl.TypeOf([3]string{})
+
+var CTVList = _gen_vdl.TypeOf([]string{})
+
+var CTVSet = _gen_vdl.TypeOf(map[string]struct{}{})
+
+var CTVMap = _gen_vdl.TypeOf(map[string]int64{})
+
+var CTVStruct = _gen_vdl.TypeOf(ScalarsExp{})
+
+var CTVOneOf = _gen_vdl.TypeOf(NamedOneOf{false})
+
+var CTVAny = _gen_vdl.AnyType

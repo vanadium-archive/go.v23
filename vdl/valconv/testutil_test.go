@@ -67,7 +67,7 @@ type (
 	nString     string
 	// Arrays
 	nArray3Interface  [3]nInterface
-	nArray3TypeVal    [3]*vdl.Type
+	nArray3TypeObject [3]*vdl.Type
 	nArray3Bool       [3]bool
 	nArray3Uint8      [3]uint8
 	nArray3Uint16     [3]uint16
@@ -87,7 +87,7 @@ type (
 	nArray3String     [3]string
 	// Structs
 	nStructInterface  struct{ X nInterface }
-	nStructTypeVal    struct{ X *vdl.Type }
+	nStructTypeObject struct{ X *vdl.Type }
 	nStructBool       struct{ X bool }
 	nStructUint8      struct{ X uint8 }
 	nStructUint16     struct{ X uint16 }
@@ -107,7 +107,7 @@ type (
 	nStructString     struct{ X string }
 	// Slices
 	nSliceInterface  []nInterface
-	nSliceTypeVal    []*vdl.Type
+	nSliceTypeObject []*vdl.Type
 	nSliceBool       []bool
 	nSliceUint8      []uint8
 	nSliceUint16     []uint16
@@ -127,7 +127,7 @@ type (
 	nSliceString     []string
 	// Sets
 	nSetInterface  map[nInterface]struct{}
-	nSetTypeVal    map[*vdl.Type]struct{}
+	nSetTypeObject map[*vdl.Type]struct{}
 	nSetBool       map[bool]struct{}
 	nSetUint8      map[uint8]struct{}
 	nSetUint16     map[uint16]struct{}
@@ -147,7 +147,7 @@ type (
 	nSetString     map[string]struct{}
 	// Maps
 	nMapInterface  map[nInterface]nInterface
-	nMapTypeVal    map[*vdl.Type]*vdl.Type
+	nMapTypeObject map[*vdl.Type]*vdl.Type
 	nMapBool       map[bool]bool
 	nMapUint8      map[uint8]uint8
 	nMapUint16     map[uint16]uint16

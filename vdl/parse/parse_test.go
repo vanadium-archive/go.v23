@@ -608,6 +608,18 @@ const bar = pkg.box(false)`,
 					cn("false", 3, 21), pos(3, 13)}}}},
 		nil},
 	{
+		"TypeObjectConst",
+		`package testpkg
+const foo = typeobject(bool)
+const bar = typeobject(pkg.box)`,
+		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
+			ConstDefs: []*parse.ConstDef{
+				{NamePos: np("foo", 2, 7), Expr: &parse.ConstTypeObject{tn("bool", 2, 24),
+					pos(2, 13)}},
+				{NamePos: np("bar", 3, 7), Expr: &parse.ConstTypeObject{tn("pkg.box", 3, 24),
+					pos(3, 13)}}}},
+		nil},
+	{
 		"BinaryOpConst",
 		`package testpkg
 const a = true || false

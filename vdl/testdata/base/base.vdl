@@ -47,7 +47,7 @@ type Scalars struct {
 	A12 string
 	A13 error
 	A14 any
-	A15 typeval
+	A15 typeobject
 
 	B0  NamedBool
 	B1  NamedByte

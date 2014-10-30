@@ -28,7 +28,7 @@ type Value struct {
 	rep interface{} // see zeroRep for allowed types
 }
 
-var zeroTypeVal = AnyType // the zero TypeVal returns the any type
+var zeroTypeObject = AnyType // the zero TypeObject returns the any type
 
 // enumIndex represents an enum value by the index of its label.
 type enumIndex int
@@ -55,8 +55,8 @@ func zeroRep(t *Type) interface{} {
 		return ""
 	case Enum:
 		return enumIndex(0)
-	case TypeVal:
-		return zeroTypeVal
+	case TypeObject:
+		return zeroTypeObject
 	case Array:
 		return make(repSequence, t.len)
 	case List:
@@ -91,7 +91,7 @@ func isZeroRep(t *Type, rep interface{}) bool {
 	case enumIndex:
 		return trep == 0
 	case *Type:
-		return trep == zeroTypeVal
+		return trep == zeroTypeObject
 	case repBytes:
 		return trep.IsZero(t)
 	case *byte:
@@ -210,23 +210,23 @@ func StringValue(x string) *Value { return ZeroValue(StringType).AssignString(x)
 // BytesValue is a convenience to create a []byte value.  The bytes are copied.
 func BytesValue(x []byte) *Value { return ZeroValue(ListType(ByteType)).AssignBytes(x) }
 
-// TypeValValue is a convenience to create a TypeVal value.
-func TypeValValue(x *Type) *Value { return ZeroValue(TypeValType).AssignTypeVal(x) }
+// TypeObjectValue is a convenience to create a TypeObject value.
+func TypeObjectValue(x *Type) *Value { return ZeroValue(TypeObjectType).AssignTypeObject(x) }
 
 // ZeroValue returns a new Value of type t representing the zero value for t:
-//   o Bool:    false
-//   o Numbers: 0
-//   o String:  ""
-//   o Enum:    label at index 0
-//   o TypeVal: AnyType
-//   o List:    empty collection
-//   o Set:     empty collection
-//   o Map:     empty collection
-//   o Array:   zero values for all elems
-//   o Struct:  zero values for all fields
-//   o OneOf:   zero value of the type at index 0
-//   o Any:     nil value, representing nonexistence
-//   o Nilable: nil value, representing nonexistence
+//   o Bool:       false
+//   o Numbers:    0
+//   o String:     ""
+//   o Enum:       label at index 0
+//   o TypeObject: AnyType
+//   o List:       empty collection
+//   o Set:        empty collection
+//   o Map:        empty collection
+//   o Array:      zero values for all elems
+//   o Struct:     zero values for all fields
+//   o OneOf:      zero value of the type at index 0
+//   o Any:        nil value, representing nonexistence
+//   o Nilable:    nil value, representing nonexistence
 //
 // Panics if t == nil.
 func ZeroValue(t *Type) *Value {
@@ -411,9 +411,9 @@ func (v *Value) EnumLabel() string {
 	return v.t.labels[int(v.rep.(enumIndex))]
 }
 
-// TypeVal returns the underlying value of a TypeVal.
-func (v *Value) TypeVal() *Type {
-	v.t.checkKind("TypeVal", TypeVal)
+// TypeObject returns the underlying value of a TypeObject.
+func (v *Value) TypeObject() *Type {
+	v.t.checkKind("TypeObject", TypeObject)
 	return v.rep.(*Type)
 }
 
@@ -623,12 +623,12 @@ func (v *Value) AssignEnumLabel(label string) *Value {
 	return v
 }
 
-// AssignTypeVal assigns the underlying TypeVal to x.  If x == nil we assign the
-// zero TypeVal.
-func (v *Value) AssignTypeVal(x *Type) *Value {
-	v.t.checkKind("AssignTypeVal", TypeVal)
+// AssignTypeObject assigns the underlying TypeObject to x.  If x == nil we
+// assign the zero TypeObject.
+func (v *Value) AssignTypeObject(x *Type) *Value {
+	v.t.checkKind("AssignTypeObject", TypeObject)
 	if x == nil {
-		x = zeroTypeVal
+		x = zeroTypeObject
 	}
 	v.rep = x
 	return v

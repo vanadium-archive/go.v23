@@ -37,7 +37,7 @@ func typeGo(data goData, t *vdl.Type) string {
 		switch {
 		case t == vdl.AnyType:
 			return "_gen_vdlutil.Any"
-		case t == vdl.TypeValType:
+		case t == vdl.TypeObjectType:
 			return "*_gen_vdl.Type"
 		case def.File == compile.BuiltInFile:
 			// Built-in primitives just use their name.

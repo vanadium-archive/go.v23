@@ -82,7 +82,7 @@ func (id ifaceDefiner) SortAndDefine() {
 	if len(cycles) > 0 {
 		cycleStr := toposort.DumpCycles(cycles, printIfaceBuilderName)
 		first := cycles[0][0].(*ifaceBuilder)
-		id.env.errorf(first.def.File, first.def.Pos, "package %v has cyclic interfaces: %v", id.pkg.Name, cycleStr)
+		id.env.Errorf(first.def.File, first.def.Pos, "package %v has cyclic interfaces: %v", id.pkg.Name, cycleStr)
 		return
 	}
 	// Define all interfaces.  Since we add the interfaces as we go and evaluate
@@ -124,14 +124,14 @@ func (id ifaceDefiner) defineEmbeds(b *ifaceBuilder) {
 	seen := make(map[string]*parse.NamePos)
 	for _, pe := range b.pdef.Embeds {
 		if dup := seen[pe.Name]; dup != nil {
-			id.env.errorf(file, pe.Pos, "interface %s duplicate embedding (previous at %s)", pe.Name, dup.Pos)
+			id.env.Errorf(file, pe.Pos, "interface %s duplicate embedding (previous at %s)", pe.Name, dup.Pos)
 			continue // keep going to catch more errors
 		}
 		seen[pe.Name] = pe
 		// Resolve the embedded interface.
 		embed, _ := id.env.ResolveInterface(pe.Name, file)
 		if embed == nil {
-			id.env.errorf(file, pe.Pos, "interface %s undefined", pe.Name)
+			id.env.Errorf(file, pe.Pos, "interface %s undefined", pe.Name)
 			continue // keep going to catch more errors
 		}
 		def.Embeds = append(def.Embeds, embed)
@@ -143,12 +143,12 @@ func (id ifaceDefiner) defineMethods(b *ifaceBuilder) {
 	seen := make(map[string]*parse.Method)
 	for _, pm := range b.pdef.Methods {
 		if dup := seen[pm.Name]; dup != nil {
-			id.env.errorf(file, pm.Pos, "method %s redefined (previous at %s)", pm.Name, dup.Pos)
+			id.env.Errorf(file, pm.Pos, "method %s redefined (previous at %s)", pm.Name, dup.Pos)
 			continue // keep going to catch more errors
 		}
 		seen[pm.Name] = pm
 		if err := ValidExportedIdent(pm.Name); err != nil {
-			id.env.errorf(file, pm.Pos, "method %s name (%s)", pm.Name, err)
+			id.env.Errorf(file, pm.Pos, "method %s name (%s)", pm.Name, err)
 			continue // keep going to catch more errors
 		}
 		m := &Method{NamePos: NamePos(pm.NamePos)}
@@ -171,12 +171,12 @@ func (id ifaceDefiner) defineArgs(io, mname string, pargs []*parse.Field, file *
 	seen := make(map[string]*parse.Field)
 	for _, parg := range pargs {
 		if dup := seen[parg.Name]; dup != nil && parg.Name != "" {
-			id.env.errorf(file, parg.Pos, "method %s arg %s duplicate name (previous at %s)", mname, parg.Name, dup.Pos)
+			id.env.Errorf(file, parg.Pos, "method %s arg %s duplicate name (previous at %s)", mname, parg.Name, dup.Pos)
 			continue // keep going to catch more errors
 		}
 		seen[parg.Name] = parg
 		if io == out && len(pargs) > 2 && parg.Name == "" {
-			id.env.errorf(file, parg.Pos, "method %s out arg unnamed (must name all out args if there are more than 2)", mname)
+			id.env.Errorf(file, parg.Pos, "method %s out arg unnamed (must name all out args if there are more than 2)", mname)
 			continue // keep going to catch more errors
 		}
 		if parg.Name != "" {

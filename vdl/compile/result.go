@@ -183,10 +183,9 @@ func (e *Env) EvalConst(name string, file *File) (opconst.Const, error) {
 	return opconst.Const{}, fmt.Errorf("%s undefined", name)
 }
 
-// errorf and the fpString{,f} functions are helpers for error reporting; we
-// want all errors to consistently contain the file and position of the error
-// when possible.
-func (e *Env) errorf(file *File, pos parse.Pos, format string, v ...interface{}) {
+// Errorf is a helper for error reporting, to consistently contain the file and
+// position of the error when possible.
+func (e *Env) Errorf(file *File, pos parse.Pos, format string, v ...interface{}) {
 	e.Errors.Error(fpStringf(file, pos, format, v...))
 }
 

@@ -28,7 +28,7 @@ const (
 	Complex128 // {real,imag} each 64 bit IEEE 754 floating point
 	String     // unicode string (encoded as UTF-8 in memory)
 	Enum       // one of a set of labels
-	TypeVal    // type represented as a value
+	TypeObject // type represented as a value
 	// Composite kinds
 	Array  // fixed-length ordered sequence of elements
 	List   // variable-length ordered sequence of elements
@@ -76,8 +76,8 @@ func (k Kind) String() string {
 		return "string"
 	case Enum:
 		return "enum"
-	case TypeVal:
-		return "typeval"
+	case TypeObject:
+		return "typeobject"
 	case Array:
 		return "array"
 	case List:

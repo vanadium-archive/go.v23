@@ -57,7 +57,7 @@ func TestValue(t *testing.T) {
 		{List, ListType(ByteType), `[]byte("")`},
 		{Array, ArrayType(3, ByteType), `[3]byte("\x00\x00\x00")`},
 		{Enum, EnumType("A", "B", "C"), "enum{A;B;C}(A)"},
-		{TypeVal, TypeValType, "typeval(any)"},
+		{TypeObject, TypeObjectType, "typeobject(any)"},
 		{Array, ArrayType(2, StringType), `[2]string{"", ""}`},
 		{List, ListType(StringType), "[]string{}"},
 		{Set, SetType(StringType), "set[string]{}"},
@@ -112,7 +112,7 @@ func TestValue(t *testing.T) {
 		assignComplex(t, x)
 		assignString(t, x)
 		assignEnum(t, x)
-		assignTypeVal(t, x)
+		assignTypeObject(t, x)
 		assignArray(t, x)
 		assignList(t, x)
 		assignSet(t, x)
@@ -383,27 +383,27 @@ func assignEnum(t *testing.T, x *Value) {
 	}
 }
 
-func assignTypeVal(t *testing.T, x *Value) {
-	newval, newstr := BoolType, "typeval(bool)"
-	if x.Kind() == TypeVal {
-		if got, want := x.TypeVal(), zeroTypeVal; got != want {
-			t.Errorf(`TypeVal zero value got %v, want %v`, got, want)
+func assignTypeObject(t *testing.T, x *Value) {
+	newval, newstr := BoolType, "typeobject(bool)"
+	if x.Kind() == TypeObject {
+		if got, want := x.TypeObject(), zeroTypeObject; got != want {
+			t.Errorf(`TypeObject zero value got %v, want %v`, got, want)
 		}
-		x.AssignTypeVal(newval)
-		if got, want := x.TypeVal(), newval; got != want {
-			t.Errorf(`TypeVal assign value got %v, want %v`, got, want)
+		x.AssignTypeObject(newval)
+		if got, want := x.TypeObject(), newval; got != want {
+			t.Errorf(`TypeObject assign value got %v, want %v`, got, want)
 		}
 		if got, want := x.String(), newstr; got != want {
-			t.Errorf(`TypeVal string got %v, want %v`, got, want)
+			t.Errorf(`TypeObject string got %v, want %v`, got, want)
 		}
-		x.AssignTypeVal(nil) // assigning nil sets the zero typeval
-		if got, want := x.TypeVal(), zeroTypeVal; got != want {
-			t.Errorf(`TypeVal assign value got %v, want %v`, got, want)
+		x.AssignTypeObject(nil) // assigning nil sets the zero typeobject
+		if got, want := x.TypeObject(), zeroTypeObject; got != want {
+			t.Errorf(`TypeObject assign value got %v, want %v`, got, want)
 		}
-		x.AssignTypeVal(newval)
+		x.AssignTypeObject(newval)
 	} else {
-		expectMismatchedKind(t, func() { x.TypeVal() })
-		expectMismatchedKind(t, func() { x.AssignTypeVal(newval) })
+		expectMismatchedKind(t, func() { x.TypeObject() })
+		expectMismatchedKind(t, func() { x.AssignTypeObject(newval) })
 	}
 }
 

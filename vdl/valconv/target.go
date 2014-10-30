@@ -41,8 +41,8 @@ type Target interface {
 	// FromEnumLabel converts from the src enum label to the target, where tt
 	// represents the concrete type of enum.
 	FromEnumLabel(src string, tt *vdl.Type) error
-	// FromTypeVal converts from the src type to the target.
-	FromTypeVal(src *vdl.Type) error
+	// FromTypeObject converts from the src type to the target.
+	FromTypeObject(src *vdl.Type) error
 	// FromNil converts from a nil (nonexistent) value of type tt, where tt must
 	// be of kind Nilable or Any.
 	FromNil(tt *vdl.Type) error
@@ -150,7 +150,7 @@ func FromReflect(target Target, rv reflect.Value) error {
 			return target.FromNil(tt)
 		case rt.ConvertibleTo(rtPtrToType):
 			// If rv is convertible to *vdl.Type, fill from it directly.
-			return target.FromTypeVal(rv.Convert(rtPtrToType).Interface().(*vdl.Type))
+			return target.FromTypeObject(rv.Convert(rtPtrToType).Interface().(*vdl.Type))
 		case rt.ConvertibleTo(rtPtrToValue):
 			// If rv is convertible to *vdl.Value, fill from it directly.
 			return FromValue(target, rv.Convert(rtPtrToValue).Interface().(*vdl.Value))
@@ -335,8 +335,8 @@ func FromValue(target Target, vv *vdl.Value) error {
 		return target.FromString(vv.RawString(), tt)
 	case vdl.Enum:
 		return target.FromEnumLabel(vv.EnumLabel(), tt)
-	case vdl.TypeVal:
-		return target.FromTypeVal(vv.TypeVal())
+	case vdl.TypeObject:
+		return target.FromTypeObject(vv.TypeObject())
 	case vdl.Array, vdl.List:
 		listTarget, err := target.StartList(tt, vv.Len())
 		if err != nil {

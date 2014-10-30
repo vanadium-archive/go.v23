@@ -106,7 +106,7 @@ func (cd constDefiner) SortAndDefine() {
 	if len(cycles) > 0 {
 		cycleStr := toposort.DumpCycles(cycles, printConstBuilderName)
 		first := cycles[0][0].(*constBuilder)
-		cd.env.errorf(first.def.File, first.def.Pos, "package %v has cyclic consts: %v", cd.pkg.Name, cycleStr)
+		cd.env.Errorf(first.def.File, first.def.Pos, "package %v has cyclic consts: %v", cd.pkg.Name, cycleStr)
 		return
 	}
 	// Define all consts.  Since we add the const defs as we go and evaluate in
@@ -137,7 +137,7 @@ func addConstDef(def *ConstDef, env *Env) {
 // in this package.
 func (cd constDefiner) getLocalDeps(pexpr parse.ConstExpr) constBuilderSet {
 	switch pe := pexpr.(type) {
-	case nil, *parse.ConstLit:
+	case nil, *parse.ConstLit, *parse.ConstTypeObject:
 		return nil
 	case *parse.ConstCompositeLit:
 		var deps constBuilderSet
@@ -263,7 +263,7 @@ func evalConstExpr(implicit *vdl.Type, pexpr parse.ConstExpr, file *File, env *E
 				return opconst.FromValue(v)
 			}
 		default:
-			env.errorf(file, pe.Pos(), "illegal use of index operator with unsupported type")
+			env.Errorf(file, pe.Pos(), "illegal use of index operator with unsupported type")
 		}
 	case *parse.ConstTypeConv:
 		t := compileType(pe.Type, file, env)
@@ -277,11 +277,17 @@ func evalConstExpr(implicit *vdl.Type, pexpr parse.ConstExpr, file *File, env *E
 			break
 		}
 		return res
+	case *parse.ConstTypeObject:
+		t := compileType(pe.Type, file, env)
+		if t == nil {
+			break
+		}
+		return opconst.FromValue(vdl.TypeObjectValue(t))
 	case *parse.ConstUnaryOp:
 		x := evalConstExpr(nil, pe.Expr, file, env)
 		op := opconst.ToUnaryOp(pe.Op)
 		if op == opconst.InvalidUnaryOp {
-			env.errorf(file, pe.Pos(), "unary %s undefined", pe.Op)
+			env.Errorf(file, pe.Pos(), "unary %s undefined", pe.Op)
 			break
 		}
 		if !x.IsValid() {
@@ -298,7 +304,7 @@ func evalConstExpr(implicit *vdl.Type, pexpr parse.ConstExpr, file *File, env *E
 		y := evalConstExpr(nil, pe.Rexpr, file, env)
 		op := opconst.ToBinaryOp(pe.Op)
 		if op == opconst.InvalidBinaryOp {
-			env.errorf(file, pe.Pos(), "binary %s undefined", pe.Op)
+			env.Errorf(file, pe.Pos(), "binary %s undefined", pe.Op)
 			break
 		}
 		if !x.IsValid() || !y.IsValid() {
@@ -335,7 +341,7 @@ func evalListIndex(exprVal *vdl.Value, indexExpr parse.ConstExpr, file *File, en
 	}
 
 	if indexVal.Uint() >= uint64(exprVal.Len()) {
-		env.errorf(file, indexExpr.Pos(), "index out of bounds of array")
+		env.Errorf(file, indexExpr.Pos(), "index out of bounds of array")
 		return nil
 	}
 	return exprVal.Index(int(indexVal.Uint()))
@@ -353,7 +359,7 @@ func evalMapIndex(exprVal *vdl.Value, indexExpr parse.ConstExpr, file *File, env
 	if mapItemVal == nil {
 		// Unlike normal go code, it is probably undesirable to return nil here.
 		// It is very likely this is an error.
-		env.errorf(file, indexExpr.Pos(), "map key not in map")
+		env.Errorf(file, indexExpr.Pos(), "map key not in map")
 		return nil
 	}
 	return mapItemVal
@@ -364,7 +370,7 @@ func evalMapIndex(exprVal *vdl.Value, indexExpr parse.ConstExpr, file *File, env
 // always use the implicit type from the parent composite type.
 func evalCompLit(t *vdl.Type, lit *parse.ConstCompositeLit, file *File, env *Env) *vdl.Value {
 	if t == nil {
-		env.errorf(file, lit.Pos(), "missing type for composite literal")
+		env.Errorf(file, lit.Pos(), "missing type for composite literal")
 		return nil
 	}
 	switch t.Kind() {
@@ -377,7 +383,7 @@ func evalCompLit(t *vdl.Type, lit *parse.ConstCompositeLit, file *File, env *Env
 	case vdl.Struct:
 		return evalStructLit(t, lit, file, env)
 	}
-	env.errorf(file, lit.Pos(), "%v invalid type for composite literal", t)
+	env.Errorf(file, lit.Pos(), "%v invalid type for composite literal", t)
 	return nil
 }
 
@@ -388,7 +394,7 @@ func evalListLit(t *vdl.Type, lit *parse.ConstCompositeLit, file *File, env *Env
 	assigned := make(map[int]bool)
 	for _, kv := range lit.KVList {
 		if kv.Value == nil {
-			env.errorf(file, lit.Pos(), "missing value in %s", desc)
+			env.Errorf(file, lit.Pos(), "missing value in %s", desc)
 			return nil
 		}
 		// Set the index to the key, if it exists.  Semantics are looser than
@@ -414,13 +420,13 @@ func evalListLit(t *vdl.Type, lit *parse.ConstCompositeLit, file *File, env *Env
 		// Make sure the index hasn't been assigned already, and adjust the list
 		// length as necessary.
 		if assigned[index] {
-			env.errorf(file, kv.Value.Pos(), "duplicate index %d in %s", index, desc)
+			env.Errorf(file, kv.Value.Pos(), "duplicate index %d in %s", index, desc)
 			return nil
 		}
 		assigned[index] = true
 		if index >= listv.Len() {
 			if t.Kind() == vdl.Array {
-				env.errorf(file, kv.Value.Pos(), "index %d out of range in %s", index, desc)
+				env.Errorf(file, kv.Value.Pos(), "index %d out of range in %s", index, desc)
 				return nil
 			}
 			listv.AssignLen(index + 1)
@@ -441,11 +447,11 @@ func evalSetLit(t *vdl.Type, lit *parse.ConstCompositeLit, file *File, env *Env)
 	desc := fmt.Sprintf("%v set literal", t)
 	for _, kv := range lit.KVList {
 		if kv.Key != nil {
-			env.errorf(file, kv.Key.Pos(), "invalid index in %s", desc)
+			env.Errorf(file, kv.Key.Pos(), "invalid index in %s", desc)
 			return nil
 		}
 		if kv.Value == nil {
-			env.errorf(file, lit.Pos(), "missing key in %s", desc)
+			env.Errorf(file, lit.Pos(), "missing key in %s", desc)
 			return nil
 		}
 		// Evaluate the key and make sure it hasn't been assigned already.
@@ -454,7 +460,7 @@ func evalSetLit(t *vdl.Type, lit *parse.ConstCompositeLit, file *File, env *Env)
 			return nil
 		}
 		if setv.ContainsKey(key) {
-			env.errorf(file, kv.Value.Pos(), "duplicate key %v in %s", key, desc)
+			env.Errorf(file, kv.Value.Pos(), "duplicate key %v in %s", key, desc)
 			return nil
 		}
 		setv.AssignSetKey(key)
@@ -467,11 +473,11 @@ func evalMapLit(t *vdl.Type, lit *parse.ConstCompositeLit, file *File, env *Env)
 	desc := fmt.Sprintf("%v map literal", t)
 	for _, kv := range lit.KVList {
 		if kv.Key == nil {
-			env.errorf(file, lit.Pos(), "missing key in %s", desc)
+			env.Errorf(file, lit.Pos(), "missing key in %s", desc)
 			return nil
 		}
 		if kv.Value == nil {
-			env.errorf(file, lit.Pos(), "missing elem in %s", desc)
+			env.Errorf(file, lit.Pos(), "missing elem in %s", desc)
 			return nil
 		}
 		// Evaluate the key and make sure it hasn't been assigned already.
@@ -480,7 +486,7 @@ func evalMapLit(t *vdl.Type, lit *parse.ConstCompositeLit, file *File, env *Env)
 			return nil
 		}
 		if mapv.ContainsKey(key) {
-			env.errorf(file, kv.Key.Pos(), "duplicate key %v in %s", key, desc)
+			env.Errorf(file, kv.Key.Pos(), "duplicate key %v in %s", key, desc)
 			return nil
 		}
 		// Evaluate the value and perform the assignment.
@@ -501,11 +507,11 @@ func evalStructLit(t *vdl.Type, lit *parse.ConstCompositeLit, file *File, env *E
 	assigned := make(map[int]bool)
 	for index, kv := range lit.KVList {
 		if kv.Value == nil {
-			env.errorf(file, lit.Pos(), "missing field value in %s", desc)
+			env.Errorf(file, lit.Pos(), "missing field value in %s", desc)
 			return nil
 		}
 		if haskeys != (kv.Key != nil) {
-			env.errorf(file, kv.Value.Pos(), "mixed key:value and value in %s", desc)
+			env.Errorf(file, kv.Value.Pos(), "mixed key:value and value in %s", desc)
 			return nil
 		}
 		// Get the field description, either from the key or the index.
@@ -514,25 +520,25 @@ func evalStructLit(t *vdl.Type, lit *parse.ConstCompositeLit, file *File, env *E
 			// There is an explicit field name specified.
 			fname, ok := kv.Key.(*parse.ConstNamed)
 			if !ok {
-				env.errorf(file, kv.Key.Pos(), "invalid field name %q in %s", kv.Key.String(), desc)
+				env.Errorf(file, kv.Key.Pos(), "invalid field name %q in %s", kv.Key.String(), desc)
 				return nil
 			}
 			field, index = t.FieldByName(fname.Name)
 			if index < 0 {
-				env.errorf(file, kv.Key.Pos(), "unknown field %q in %s", fname.Name, desc)
+				env.Errorf(file, kv.Key.Pos(), "unknown field %q in %s", fname.Name, desc)
 				return nil
 			}
 		} else {
 			// No field names, just use the index position.
 			if index >= t.NumField() {
-				env.errorf(file, kv.Value.Pos(), "too many fields in %s", desc)
+				env.Errorf(file, kv.Value.Pos(), "too many fields in %s", desc)
 				return nil
 			}
 			field = t.Field(index)
 		}
 		// Make sure the field hasn't been assigned already.
 		if assigned[index] {
-			env.errorf(file, kv.Value.Pos(), "duplicate field %q in %s", field.Name, desc)
+			env.Errorf(file, kv.Value.Pos(), "duplicate field %q in %s", field.Name, desc)
 			return nil
 		}
 		assigned[index] = true
@@ -544,7 +550,7 @@ func evalStructLit(t *vdl.Type, lit *parse.ConstCompositeLit, file *File, env *E
 		structv.Field(index).Assign(value)
 	}
 	if !haskeys && 0 < len(assigned) && len(assigned) < t.NumField() {
-		env.errorf(file, lit.Pos(), "too few fields in %s", desc)
+		env.Errorf(file, lit.Pos(), "too few fields in %s", desc)
 		return nil
 	}
 	return structv
@@ -561,7 +567,7 @@ func evalTypedValue(what string, target *vdl.Type, pexpr parse.ConstExpr, file *
 	if c.Type() != nil {
 		// Typed const - confirm it may be assigned to the target type.
 		if !target.AssignableFrom(c.Type()) {
-			env.errorf(file, pexpr.Pos(), "invalid %v (%v not assignable from %v)", what, target, c)
+			env.Errorf(file, pexpr.Pos(), "invalid %v (%v not assignable from %v)", what, target, c)
 			return nil
 		}
 	} else {

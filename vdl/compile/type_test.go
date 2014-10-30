@@ -107,8 +107,8 @@ var typeTests = []typeTest{
 	{"Complex128", tp{{"a", `type Res complex128`, vdl.Complex128Type, ""}}},
 	{"String", tp{{"a", `type Res string`, vdl.StringType, ""}}},
 	{"Bytes", tp{{"a", `type Res []byte`, bytesType, ""}}},
-	{"Typeval", tp{{"a", `type Res typeval`, nil, "any and typeval cannot be renamed"}}},
-	{"Any", tp{{"a", `type Res any`, nil, "any and typeval cannot be renamed"}}},
+	{"Typeobject", tp{{"a", `type Res typeobject`, nil, "any and typeobject cannot be renamed"}}},
+	{"Any", tp{{"a", `type Res any`, nil, "any and typeobject cannot be renamed"}}},
 	{"Error", tp{{"a", `type Res error`, nil, "error cannot be renamed"}}},
 
 	// Test composite vdl.

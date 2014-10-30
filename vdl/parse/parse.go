@@ -2,6 +2,8 @@
 // Parse function is the main entry point.
 package parse
 
+//go:generate ./grammar_gen.sh
+
 // This is the only file in this package that uses the yacc-generated parser
 // with entrypoint yyParse.  The result of the parse is the simple parse.File
 // representation, which is used by the compilation stage.
@@ -176,18 +178,19 @@ func lexGenEOF(yylex yyLexer) {
 }
 
 var keywords = map[string]int{
-	"package":   tPACKAGE,
-	"import":    tIMPORT,
-	"type":      tTYPE,
-	"enum":      tENUM,
-	"set":       tSET,
-	"map":       tMAP,
-	"struct":    tSTRUCT,
-	"oneof":     tONEOF,
-	"interface": tINTERFACE,
-	"stream":    tSTREAM,
-	"const":     tCONST,
-	"errorid":   tERRORID,
+	"const":      tCONST,
+	"enum":       tENUM,
+	"errorid":    tERRORID,
+	"import":     tIMPORT,
+	"interface":  tINTERFACE,
+	"map":        tMAP,
+	"oneof":      tONEOF,
+	"package":    tPACKAGE,
+	"set":        tSET,
+	"stream":     tSTREAM,
+	"struct":     tSTRUCT,
+	"type":       tTYPE,
+	"typeobject": tTYPEOBJECT,
 }
 
 type nextRune struct {

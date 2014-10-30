@@ -408,8 +408,8 @@ func (e *binaryEncoder) FromEnumLabel(src string, tt *vdl.Type) error {
 	return nil
 }
 
-func (e *binaryEncoder) FromTypeVal(src *vdl.Type) error {
-	if err := e.prepareType(vdl.TypeValType, vdl.TypeVal); err != nil {
+func (e *binaryEncoder) FromTypeObject(src *vdl.Type) error {
+	if err := e.prepareType(vdl.TypeObjectType, vdl.TypeObject); err != nil {
 		return err
 	}
 	id, err := e.encodeUnsentTypes(src)

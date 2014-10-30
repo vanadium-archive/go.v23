@@ -17,7 +17,7 @@ import (
 // Compatibility is commutative.  The basic rules:
 //   o Nilability is ignored for all rules (e.g. ?int is compatible with int).
 //   o Bool is only compatible with bool.
-//   o TypeVal is only compatible with TypeVal.
+//   o TypeObject is only compatible with TypeObject.
 //   o Numbers are mutually compatible.
 //   o String, enum, []byte and [N]byte are mutually compatible.
 //   o Array and list are compatible if their elems are compatible.
@@ -122,7 +122,7 @@ func compat(a, b *vdl.Type, seenA, seenB map[*vdl.Type]bool) bool {
 	if ax, bx := a.Kind() == vdl.Bool, b.Kind() == vdl.Bool; ax || bx {
 		return ax && bx
 	}
-	if ax, bx := a.Kind() == vdl.TypeVal, b.Kind() == vdl.TypeVal; ax || bx {
+	if ax, bx := a.Kind() == vdl.TypeObject, b.Kind() == vdl.TypeObject; ax || bx {
 		return ax && bx
 	}
 	// We must check if either a or b is []byte and handle it here first, to

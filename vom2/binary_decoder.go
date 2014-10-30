@@ -220,7 +220,7 @@ func (d *binaryDecoder) decodeValue(t *vdl.Type, target valconv.Target) error {
 			return errIndexOutOfRange
 		}
 		return target.FromEnumLabel(t.EnumLabel(int(index)), t)
-		// TODO: TypeVal
+		// TODO: TypeObject
 	case vdl.Array, vdl.List:
 		len, err := binaryDecodeLenOrArrayLen(d.buf, t)
 		if err != nil {
@@ -379,7 +379,7 @@ func (d *binaryDecoder) ignoreValue(t *vdl.Type) error {
 		return binaryIgnoreUint(d.buf)
 	case vdl.String:
 		return binaryIgnoreString(d.buf)
-		// TODO(toddw): decode TypeVal
+		// TODO(toddw): decode TypeObject
 	case vdl.Array, vdl.List, vdl.Set, vdl.Map:
 		len, err := binaryDecodeLenOrArrayLen(d.buf, t)
 		if err != nil {

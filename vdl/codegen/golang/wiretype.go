@@ -51,7 +51,7 @@ func (wtc *wireTypeConverter) bootstrapTypeID(t *vdl.Type) wiretype.TypeID {
 		return wiretype.TypeIDString
 	case vdl.Any, vdl.OneOf:
 		return wiretype.TypeIDInterface
-	case vdl.TypeVal:
+	case vdl.TypeObject:
 		return wiretype.TypeIDTypeID
 	default:
 		panic(fmt.Sprintf("unknown primitive type: %v", t))

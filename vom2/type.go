@@ -235,19 +235,19 @@ var (
 	bootstrapTypeToID map[*vdl.Type]TypeID
 	bootstrapKindToID map[vdl.Kind]TypeID
 
-	wireNamedType      = bootstrapTypeOf(WireNamed{})
-	wireEnumType       = bootstrapTypeOf(WireEnum{})
-	wireArrayType      = bootstrapTypeOf(WireArray{})
-	wireListType       = bootstrapTypeOf(WireList{})
-	wireSetType        = bootstrapTypeOf(WireSet{})
-	wireMapType        = bootstrapTypeOf(WireMap{})
-	wireStructType     = bootstrapTypeOf(WireStruct{})
-	wireFieldType      = bootstrapTypeOf(WireField{})
-	wireFieldListType  = bootstrapTypeOf([]WireField{})
-	wireOneOfType      = bootstrapTypeOf(WireOneOf{})
-	wireByteListType   = bootstrapTypeOf([]byte{})
-	wireStringListType = bootstrapTypeOf([]string{})
-	wireTypeListType   = bootstrapTypeOf([]*vdl.Type{})
+	wireNamedType      = vdl.TypeOf(WireNamed{})
+	wireEnumType       = vdl.TypeOf(WireEnum{})
+	wireArrayType      = vdl.TypeOf(WireArray{})
+	wireListType       = vdl.TypeOf(WireList{})
+	wireSetType        = vdl.TypeOf(WireSet{})
+	wireMapType        = vdl.TypeOf(WireMap{})
+	wireStructType     = vdl.TypeOf(WireStruct{})
+	wireFieldType      = vdl.TypeOf(WireField{})
+	wireFieldListType  = vdl.TypeOf([]WireField{})
+	wireOneOfType      = vdl.TypeOf(WireOneOf{})
+	wireByteListType   = vdl.TypeOf([]byte{})
+	wireStringListType = vdl.TypeOf([]string{})
+	wireTypeListType   = vdl.TypeOf([]*vdl.Type{})
 )
 
 func init() {
@@ -257,7 +257,7 @@ func init() {
 	// The basic bootstrap types can be converted between type, id and kind.
 	for id, t := range map[TypeID]*vdl.Type{
 		WireAnyID:        vdl.AnyType,
-		WireTypeID:       vdl.TypeValType,
+		WireTypeID:       vdl.TypeObjectType,
 		WireBoolID:       vdl.BoolType,
 		WireStringID:     vdl.StringType,
 		WireByteID:       vdl.ByteType,
@@ -295,12 +295,4 @@ func init() {
 		bootstrapIDToType[id] = t
 		bootstrapTypeToID[t] = id
 	}
-}
-
-func bootstrapTypeOf(v interface{}) *vdl.Type {
-	t, err := vdl.TypeOf(v)
-	if err != nil {
-		panic(verror.Internalf("vom: can't take TypeOf(%T %#v)", v, v))
-	}
-	return t
 }

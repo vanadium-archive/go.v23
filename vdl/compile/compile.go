@@ -121,11 +121,11 @@ func compileImports(pkg *Package, pfiles []*parse.File, env *Env) {
 		file, pfile := pkg.Files[index], pfiles[index]
 		for _, pimp := range pfile.Imports {
 			if dep := env.ResolvePackage(pimp.Path); dep == nil {
-				env.errorf(file, pimp.Pos, "import path %q not found", pimp.Path)
+				env.Errorf(file, pimp.Pos, "import path %q not found", pimp.Path)
 			}
 			local := pimp.LocalName()
 			if dup := file.imports[local]; dup != nil {
-				env.errorf(file, pimp.Pos, "import %s reused (previous at %s)", local, dup.pos)
+				env.Errorf(file, pimp.Pos, "import %s reused (previous at %s)", local, dup.pos)
 				continue
 			}
 			file.imports[local] = &importPath{pimp.Path, pimp.Pos, false}
@@ -140,7 +140,7 @@ func compileErrorIDs(pkg *Package, pfiles []*parse.File, env *Env) {
 		for _, peid := range pfile.ErrorIDs {
 			eid := (*ErrorID)(peid)
 			if dup := seen[eid.Name]; dup != nil {
-				env.errorf(file, eid.Pos, "error id %s reused (previous at %s)", eid.Name, dup.Pos)
+				env.Errorf(file, eid.Pos, "error id %s reused (previous at %s)", eid.Name, dup.Pos)
 				continue
 			}
 			if eid.ID == "" {
@@ -157,7 +157,7 @@ func computeDeps(pkg *Package, env *Env) {
 	for _, file := range pkg.Files {
 		for _, imp := range file.imports {
 			if !imp.used {
-				env.errorf(file, imp.pos, "import path %q unused", imp.path)
+				env.Errorf(file, imp.pos, "import path %q unused", imp.path)
 			}
 		}
 	}
@@ -173,7 +173,7 @@ func computeDeps(pkg *Package, env *Env) {
 		}
 		// Consts contribute the packages of their value types.
 		for _, def := range file.ConstDefs {
-			addTypeDeps(def.Value.Type(), pkg, env, tdeps, pdeps)
+			addValueTypeDeps(def.Value, pkg, env, tdeps, pdeps)
 		}
 		// Interfaces contribute the packages of their arg types and tag types, as
 		// well as embedded interfaces.
@@ -195,7 +195,7 @@ func computeDeps(pkg *Package, env *Env) {
 					addTypeDeps(stream, pkg, env, tdeps, pdeps)
 				}
 				for _, tag := range method.Tags {
-					addTypeDeps(tag.Type(), pkg, env, tdeps, pdeps)
+					addValueTypeDeps(tag, pkg, env, tdeps, pdeps)
 				}
 			}
 		}
@@ -229,8 +229,10 @@ func addTypeDeps(t *vdl.Type, pkg *Package, env *Env, tdeps map[*vdl.Type]bool, 
 // Add immediate package deps for subtypes of t.
 func addSubTypeDeps(t *vdl.Type, pkg *Package, env *Env, tdeps map[*vdl.Type]bool, pdeps map[*Package]bool) {
 	switch t.Kind() {
-	case vdl.List:
+	case vdl.Array, vdl.List:
 		addTypeDeps(t.Elem(), pkg, env, tdeps, pdeps)
+	case vdl.Set:
+		addTypeDeps(t.Key(), pkg, env, tdeps, pdeps)
 	case vdl.Map:
 		addTypeDeps(t.Key(), pkg, env, tdeps, pdeps)
 		addTypeDeps(t.Elem(), pkg, env, tdeps, pdeps)
@@ -242,6 +244,51 @@ func addSubTypeDeps(t *vdl.Type, pkg *Package, env *Env, tdeps map[*vdl.Type]boo
 		for ix := 0; ix < t.NumOneOfType(); ix++ {
 			addTypeDeps(t.OneOfType(ix), pkg, env, tdeps, pdeps)
 		}
+	}
+}
+
+// Add immediate package deps for v.Type(), and subvalues.  We must traverse the
+// value to know which types are actually used; e.g. an empty struct doesn't
+// have a dependency on its field types.
+//
+// The purpose of this method is to identify the package and type dependencies
+// for const or tag values.
+func addValueTypeDeps(v *vdl.Value, pkg *Package, env *Env, tdeps map[*vdl.Type]bool, pdeps map[*Package]bool) {
+	t := v.Type()
+	if def := env.typeDefs[t]; def != nil {
+		// We don't track transitive dependencies, only immediate dependencies.
+		tdeps[t] = true
+		pdeps[def.File.Package] = true
+		return
+	}
+	// Traverse subvalues recursively.
+	switch t.Kind() {
+	case vdl.Array, vdl.List:
+		for ix := 0; ix < v.Len(); ix++ {
+			addValueTypeDeps(v.Index(ix), pkg, env, tdeps, pdeps)
+		}
+	case vdl.Set, vdl.Map:
+		for _, key := range v.Keys() {
+			addValueTypeDeps(key, pkg, env, tdeps, pdeps)
+			if t.Kind() == vdl.Map {
+				addValueTypeDeps(v.MapIndex(key), pkg, env, tdeps, pdeps)
+			}
+		}
+	case vdl.Struct:
+		// There are no subvalues to track if the value is 0.
+		if v.IsZero() {
+			return
+		}
+		for ix := 0; ix < t.NumField(); ix++ {
+			addValueTypeDeps(v.Field(ix), pkg, env, tdeps, pdeps)
+		}
+	case vdl.Any, vdl.OneOf, vdl.Nilable:
+		if elem := v.Elem(); elem != nil {
+			addValueTypeDeps(elem, pkg, env, tdeps, pdeps)
+		}
+	case vdl.TypeObject:
+		// TypeObject has dependencies on everything its zero value depends on.
+		addValueTypeDeps(vdl.ZeroValue(v.TypeObject()), pkg, env, tdeps, pdeps)
 	}
 }
 

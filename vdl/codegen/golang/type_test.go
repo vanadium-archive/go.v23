@@ -14,7 +14,7 @@ func TestType(t *testing.T) {
 		Want string
 	}{
 		{vdl.AnyType, `_gen_vdlutil.Any`},
-		{vdl.TypeValType, `*_gen_vdl.Type`},
+		{vdl.TypeObjectType, `*_gen_vdl.Type`},
 		{vdl.BoolType, `bool`},
 		{vdl.StringType, `string`},
 		{vdl.ListType(vdl.ByteType), `[]byte`},

@@ -154,8 +154,9 @@ const SixSquared = uint64(36)
 
 const FiveSquared = int32(25)
 
-// TODO(bprosnitz) Remove this line once signatures are updated to use typevals.
-// It corrects a bug where _gen_wiretype is unused in VDL pacakges where only bootstrap types are used on interfaces.
+// TODO(toddw): Remove this line once the new signature support is done.
+// It corrects a bug where _gen_wiretype is unused in VDL pacakges where only
+// bootstrap types are used on interfaces.
 const _ = _gen_wiretype.TypeIDInvalid
 
 const ErrIDFoo = _gen_verror.ID("veyron.io/veyron/veyron2/vdl/testdata/base.ErrIDFoo")

@@ -60,9 +60,13 @@ func getBuiltType(top TypeOrPending) *Type {
 }
 
 // TypeOf returns the type corresponding to v.  It's a helper for calling
-// TypeFromReflect.
-func TypeOf(v interface{}) (*Type, error) {
-	return TypeFromReflect(reflect.TypeOf(v))
+// TypeFromReflect, and panics on any errors.
+func TypeOf(v interface{}) *Type {
+	t, err := TypeFromReflect(reflect.TypeOf(v))
+	if err != nil {
+		panic(fmt.Errorf("vdl: can't take TypeOf(%T): %v", v, err))
+	}
+	return t
 }
 
 // Normalize the rt type.  The VDL type system represents the concept of
@@ -95,7 +99,7 @@ func lookupType(rt reflect.Type) *Type {
 	case rtInterface, rtValue:
 		return AnyType
 	case rtType:
-		return TypeValType
+		return TypeObjectType
 	}
 	return nil
 }
@@ -343,8 +347,8 @@ func MatchOneOfReflectType(oneof reflect.Type, target *Type) reflect.Type {
 }
 
 var (
-	errTypeFromReflectNil   = errors.New("invalid val.TypeOf(nil)")
-	errTypeFromReflectValue = errors.New("invalid val.TypeOf(reflect.Value{})")
+	errTypeFromReflectNil   = errors.New("invalid vdl.TypeOf(nil)")
+	errTypeFromReflectValue = errors.New("invalid vdl.TypeOf(reflect.Value{})")
 
 	rtInterface          = reflect.TypeOf((*interface{})(nil)).Elem()
 	rtBool               = reflect.TypeOf(false)
