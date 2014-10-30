@@ -139,12 +139,6 @@ type Namespace struct{ naming.Namespace }
 func (Namespace) IPCClientOpt() {}
 func (Namespace) IPCServerOpt() {}
 
-// NamespaceRoots wraps an array of strings so that we specify the root
-// of the Namespace when initializing the runtime.
-type NamespaceRoots []string
-
-func (NamespaceRoots) ROpt() {}
-
 // Profile wraps the veyron2.Profile interface so that we can add
 // functions representing the option annotations
 type Profile struct{ veyron2.Profile }
