@@ -59,9 +59,8 @@ const Windows = OperatingSystem("windows")
 
 const UnsupportedOS = OperatingSystem("unsupported")
 
-// TODO(toddw): Remove this line once the new signature support is done.
-// It corrects a bug where _gen_wiretype is unused in VDL pacakges where only
-// bootstrap types are used on interfaces.
+// TODO(bprosnitz) Remove this line once signatures are updated to use typevals.
+// It corrects a bug where _gen_wiretype is unused in VDL pacakges where only bootstrap types are used on interfaces.
 const _ = _gen_wiretype.TypeIDInvalid
 
 // Builder describes an interface for building binaries from source.
