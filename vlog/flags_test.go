@@ -52,7 +52,7 @@ func child(stdin io.Reader, stdout, stderr io.Writer, env map[string]string, arg
 func TestFlags(t *testing.T) {
 	sh := modules.NewShell()
 	defer sh.Cleanup(nil, nil)
-	h, err := sh.Start("child")
+	h, err := sh.Start("child", nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
