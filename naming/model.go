@@ -65,8 +65,8 @@ type Endpoint interface {
 
 // MountedServer represents a server mounted under an object name.
 type MountedServer struct {
-	Server string        // Server is an object address (OA): endpoint + suffix
-	TTL    time.Duration // Time-To-Live, after which the mount expires.
+	Server  string    // Server is an object address (OA): endpoint + suffix
+	Expires time.Time // Absolute time after which the mount expires.
 }
 
 // MountEntry represents a name mounted in the mounttable.
@@ -126,9 +126,16 @@ type Namespace interface {
 	// Resolve the object name into its mounted servers.
 	Resolve(ctx context.T, name string) (names []string, err error)
 
+	// Resolve the object name into its mounted servers.
+	ResolveX(ctx context.T, name string) (entry *MountEntry, err error)
+
 	// ResolveToMountTable resolves the object name into the mounttables
 	// directly responsible for the name.
 	ResolveToMountTable(ctx context.T, name string) (names []string, err error)
+
+	// ResolveToMountTable resolves the object name into the mounttables
+	// directly responsible for the name.
+	ResolveToMountTableX(ctx context.T, name string) (entry *MountEntry, err error)
 
 	// FlushCacheEntry flushes resolution information cached for the name.  If
 	// anything was flushed it returns true.

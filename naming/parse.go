@@ -64,6 +64,14 @@ func MakeTerminal(name string) string {
 	return MakeTerminalAtIndex(name, 0)
 }
 
+func ToStringSlice(e *MountEntry) []string {
+	var names []string
+	for _, s := range e.Servers {
+		names = append(names, MakeTerminal(JoinAddressName(s.Server, e.Name)))
+	}
+	return names
+}
+
 // TODO(cnicolaou): if this function doesn't end up being used then make it
 // private.
 
