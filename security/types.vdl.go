@@ -184,8 +184,6 @@ const SHA384Hash = Hash("SHA384") // SHA384 cryptographic hash function defined 
 
 const SHA512Hash = Hash("SHA512") // SHA512 cryptographic hash function defined in FIPS 180-2.
 
-const NoHash = Hash("") // Identity hash function. TODO(ashankar,ataly): REMOVE THIS BEFORE RELEASE. This is NOT a cryptographic hash function.
-
 const SignatureForMessageSigning = "S" // Signature.Purpose used by a Principal to sign arbitrary messages.
 
 const SignatureForBlessingCertificates = "B" // Signature.Purpose used by a Principal when signing Certificates for creating blessings.

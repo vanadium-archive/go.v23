@@ -25,12 +25,6 @@ type PublicKey interface {
 	// happy with a 256-bit hash function.
 	hash() Hash
 	implementationsOnlyInThisPackage()
-
-	// TODO(ashankar): Transitional method that should be removed once the "wire"
-	// package is removed prior to the 0.1 release.
-	// At the time this comment was written, the only clients for this method
-	// were in packages/types that are intended to be removed.
-	DO_NOT_USE() *ecdsa.PublicKey
 }
 
 type ecdsaPublicKey struct {
@@ -39,7 +33,6 @@ type ecdsaPublicKey struct {
 
 func (pk *ecdsaPublicKey) MarshalBinary() ([]byte, error)    { return x509.MarshalPKIXPublicKey(pk.key) }
 func (pk *ecdsaPublicKey) String() string                    { return publicKeyString(pk) }
-func (pk *ecdsaPublicKey) DO_NOT_USE() *ecdsa.PublicKey      { return pk.key }
 func (pk *ecdsaPublicKey) implementationsOnlyInThisPackage() {}
 func (pk *ecdsaPublicKey) hash() Hash {
 	if nbits := pk.key.Curve.Params().BitSize; nbits <= 160 {

@@ -61,11 +61,6 @@ func messageDigest(hash Hash, purpose, message []byte) []byte {
 	if message = hash.sum(message); message == nil {
 		return nil
 	}
-	// TODO(ashankar): Remove this when switching to the new security API that actually sets the Purpose field.
-	// Kept for backward compatibility till the switch is made.
-	if purpose == nil {
-		return hash.sum(message)
-	}
 	if purpose = hash.sum(purpose); purpose == nil {
 		return nil
 	}
@@ -76,8 +71,6 @@ func messageDigest(hash Hash, purpose, message []byte) []byte {
 // Returns nil if data is nil or hash is not recognized.
 func (hash Hash) sum(data []byte) []byte {
 	switch hash {
-	case NoHash:
-		return data
 	case SHA1Hash:
 		h := sha1.Sum(data)
 		return h[:]
