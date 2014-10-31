@@ -217,15 +217,15 @@ func UnionOfBlessings(blessings ...Blessings) (Blessings, error) {
 	}
 	// For pretty printing, sort the certificate chains so that there is a consistent
 	// ordering, irrespective of the ordering of arugments to UnionOfBlessings.
-	sort.Stable(CertificateChainsSorter(ret.chains))
+	sort.Stable(certificateChainsSorter(ret.chains))
 	return &ret, nil
 }
 
-type CertificateChainsSorter [][]Certificate
+type certificateChainsSorter [][]Certificate
 
-func (c CertificateChainsSorter) Len() int      { return len(c) }
-func (c CertificateChainsSorter) Swap(i, j int) { c[i], c[j] = c[j], c[i] }
-func (c CertificateChainsSorter) Less(i, j int) bool {
+func (c certificateChainsSorter) Len() int      { return len(c) }
+func (c certificateChainsSorter) Swap(i, j int) { c[i], c[j] = c[j], c[i] }
+func (c certificateChainsSorter) Less(i, j int) bool {
 	ci := c[i]
 	cj := c[j]
 	if len(ci) < len(cj) {

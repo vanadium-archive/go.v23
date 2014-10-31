@@ -436,7 +436,3 @@ type Context interface {
 type Authorizer interface {
 	Authorize(context Context) error
 }
-
-// DEPRECATED: TODO(ashankar,ataly): Remove this once the transition is complete.
-type PublicID interface {
-}
