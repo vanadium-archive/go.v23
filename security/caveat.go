@@ -93,10 +93,8 @@ func (c peerBlessingsCaveat) Validate(ctx Context) error {
 	switch {
 	case ctx.LocalBlessings() != nil:
 		self = ctx.LocalBlessings().ForContext(ctx)
-	case ctx.LocalID() != nil:
-		self = ctx.LocalID().Names()
 	default:
-		return fmt.Errorf("%T=%v failed validation since ctx.LocalBlessings and ctx.LocalID is nil", c, c)
+		return fmt.Errorf("%T=%v failed validation since ctx.LocalBlessings is nil", c, c)
 	}
 	for _, p := range patterns {
 		if p.MatchedBy(self...) {
@@ -104,20 +102,6 @@ func (c peerBlessingsCaveat) Validate(ctx Context) error {
 		}
 	}
 	return fmt.Errorf("%T=%v fails validation for peer with blessings %v", c, c, self)
-}
-
-// DEPRECATED: TODO(ashankar,ataly): Remove when switching from PublicID/PrivateID to Blessings/Principal.
-type Expiry struct {
-	IssueTime  time.Time
-	ExpiryTime time.Time
-}
-
-func (v *Expiry) Validate(context Context) error {
-	now := time.Now()
-	if now.Before(v.IssueTime) || now.After(v.ExpiryTime) {
-		return fmt.Errorf("%#v forbids credential from being used at this time(%v)", v, now)
-	}
-	return nil
 }
 
 // UnconstrainedUse returns a Caveat implementation that never fails to

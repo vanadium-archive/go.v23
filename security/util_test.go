@@ -59,8 +59,6 @@ func (c *context) Name() string                     { return c.name }
 func (c *context) Suffix() string                   { return c.suffix }
 func (c *context) Label() Label                     { return c.label }
 func (c *context) Discharges() map[string]Discharge { return c.discharges }
-func (c *context) LocalID() PublicID                { return nil }
-func (c *context) RemoteID() PublicID               { return nil }
 func (c *context) LocalPrincipal() Principal        { return c.local }
 func (c *context) LocalBlessings() Blessings        { return c.localBlessings }
 func (c *context) RemoteBlessings() Blessings       { return c.remoteBlessings }

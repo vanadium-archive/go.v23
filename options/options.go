@@ -63,28 +63,6 @@ type RuntimePrincipal struct{ security.Principal }
 
 func (RuntimePrincipal) ROpt() {}
 
-// RuntimeID represents the identity to be used by the runtime.
-//
-// It wraps the security.PrivateID interface so that functions representing
-// option annotations can be added.
-type RuntimeID struct{ security.PrivateID }
-
-func (RuntimeID) ROpt() {}
-
-// TODO(ashankar): Remove. DEPRECATED HAS NO EFFECT
-type ForceNewSecurityModel struct{}
-
-func (ForceNewSecurityModel) ROpt() {}
-
-// LocalID represents the PublicID to be used by the local end of an IPC.
-//
-// It wraps the security.PrivateID interface so that functions representing
-// option annotations can be added.
-type LocalID struct{ security.PublicID }
-
-func (LocalID) IPCClientOpt() {}
-func (LocalID) IPCServerOpt() {}
-
 // RemoteID specifies a pattern identifying the set of valid remote identities for
 // a call.
 type RemoteID security.BlessingPattern

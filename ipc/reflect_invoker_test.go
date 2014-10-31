@@ -48,8 +48,6 @@ func (*FakeServerCall) Name() string                                         { r
 func (*FakeServerCall) Suffix() string                                       { return "" }
 func (*FakeServerCall) Label() (l security.Label)                            { return }
 func (*FakeServerCall) Discharges() map[string]security.Discharge            { return nil }
-func (*FakeServerCall) LocalID() security.PublicID                           { return nil }
-func (*FakeServerCall) RemoteID() security.PublicID                          { return nil }
 func (*FakeServerCall) LocalPrincipal() security.Principal                   { return nil }
 func (*FakeServerCall) LocalBlessings() security.Blessings                   { return nil }
 func (*FakeServerCall) RemoteBlessings() security.Blessings                  { return nil }

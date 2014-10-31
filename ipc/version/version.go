@@ -8,20 +8,10 @@ const (
 	// we don't know the relevant version numbers.  In this case the IPC
 	// implementation will have to guess the correct values.
 	UnknownIPCVersion IPCVersion = iota
-
-	// IPCVersion2 uses VOM for encoding signatures.
-	IPCVersion2
-
-	// IPCVersion3 uses channel-binding for authentication.
-	// Versions prior to this have broken authentication.
-	IPCVersion3
-
-	// dummy version so that the numeric value of IPCVersion4 is 4
-	dummyVersion3
-
-	// IPCVersion4 uses the new security model (Principal and Blessings objects).
-	// TODO(ashankar,ataly): Remove this comment and all versions prior to version
-	// 3 when the transition to the new model is complete.
+	// Deprecated versions
+	ipcVersion2
+	ipcVersion3
+	ipcDummyVersion3 // So that the numeric value of IPCVersion4 is 4
 	IPCVersion4
 )
 

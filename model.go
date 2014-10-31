@@ -177,7 +177,7 @@ type Runtime interface {
 	// NewClient creates a new Client instance.
 	//
 	// It accepts at least the following options:
-	// LocalID, StreamManager, and Namespace
+	// StreamManager, and Namespace
 	//
 	// In particular, if the options include a Client, then NewClient
 	// just returns that.
@@ -186,7 +186,7 @@ type Runtime interface {
 	// NewServer creates a new Server instance.
 	//
 	// It accepts at least the following options:
-	// LocalID, ServesMountTableOpt, and Namespace
+	// ServesMountTableOpt, and Namespace
 	NewServer(opts ...ipc.ServerOpt) (ipc.Server, error)
 
 	// Client returns the pre-configured Client that is created when the
@@ -286,12 +286,6 @@ type Runtime interface {
 	// down cleanly in advance if desired.  It does, however, drain the
 	// network connections.
 	Cleanup()
-
-	// DEPRECATED: TODO(ataly, ashankar): Get rid of the methods below once
-	// we get rid of old security model.
-	NewIdentity(name string) (security.PrivateID, error)
-	PublicIDStore() security.PublicIDStore
-	Identity() security.PrivateID
 }
 
 // RuntimeFromContext returns the runtime used to generate a given context.

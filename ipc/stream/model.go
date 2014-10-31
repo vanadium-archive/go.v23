@@ -36,10 +36,6 @@ type Flow interface {
 	// SetDeadline causes reads and writes to the flow to be
 	// cancelled when the given channel is closed.
 	SetDeadline(deadline <-chan struct{})
-
-	// TODO(ashankar): Remove both of these once the new security API transition is complete.
-	LocalID() security.PublicID
-	RemoteID() security.PublicID
 }
 
 // FlowOpt is the interface for all Flow options.

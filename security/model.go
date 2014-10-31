@@ -134,10 +134,7 @@
 //  p2.BlessingStore().SetDefault(default)
 package security
 
-import (
-	"time"
-	"veyron.io/veyron/veyron2/naming"
-)
+import "veyron.io/veyron/veyron2/naming"
 
 // Principal represents an entity capable of making or receiving RPCs.
 // Principals have a unique (public, private) key pair, have blessings bound
@@ -433,9 +430,6 @@ type Context interface {
 	// RemoteEndpoint() returns the Endpoint of the principal at the remote end
 	// of communication.
 	RemoteEndpoint() naming.Endpoint
-
-	LocalID() PublicID  // DEPRECATED TODO(ashankar,ataly): Remove
-	RemoteID() PublicID // DEPRECATED TODO(ashankar,ataly): Remove
 }
 
 // Authorizer is the interface for performing authorization checks.
@@ -444,27 +438,5 @@ type Authorizer interface {
 }
 
 // DEPRECATED: TODO(ashankar,ataly): Remove this once the transition is complete.
-type PublicIDStore interface {
-	Add(id PublicID, peerPattern BlessingPattern) error
-	ForPeer(peer PublicID) (PublicID, error)
-	DefaultPublicID() (PublicID, error)
-	SetDefaultBlessingPattern(pattern BlessingPattern) error
-}
-
-// DEPRECATED: TODO(ashankar,ataly): Remove this once the transition is complete.
 type PublicID interface {
-	Names() []string
-	PublicKey() PublicKey
-	Authorize(context Context) (PublicID, error)
-	ThirdPartyCaveats() []ThirdPartyCaveat
-}
-
-// DEPRECATED: TODO(ashankar,ataly): Remove this once transition is complete.
-type PrivateID interface {
-	PublicID() PublicID
-	Bless(blessee PublicID, blessingName string, duration time.Duration, caveats []Caveat) (PublicID, error)
-	Derive(publicID PublicID) (PrivateID, error)
-	MintDischarge(caveat ThirdPartyCaveat, context Context, duration time.Duration, caveats []Caveat) (Discharge, error)
-	Sign(message []byte) (Signature, error)
-	PublicKey() PublicKey
 }

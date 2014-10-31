@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-	"time"
 )
 
 // CreatePrincipal returns a Principal that uses 'signer' for all
@@ -27,21 +26,6 @@ func CreatePrincipal(signer Signer, store BlessingStore, roots BlessingRoots) (P
 		return nil, fmt.Errorf("store's public key: %v does not match signer's public key: %v", got, want)
 	}
 	return &principal{signer: signer, store: store, roots: roots}, nil
-}
-
-// TODO(ataly, ashankar): GET RID OF THIS METHOD
-// This method is a hack for getting MintDischarge to work on PrivateIDs.
-// It should go away as soon as we replace PrivateIDs with Principals.
-func MintDischargeForPrivateID(signer Signer, cav ThirdPartyCaveat, ctx Context, duration time.Duration, dischargeCaveats []Caveat) (Discharge, error) {
-	p := &principal{signer: signer}
-	expiry, err := ExpiryCaveat(time.Now().Add(duration))
-	if err != nil {
-		return nil, err
-	}
-	if err := cav.Dischargeable(ctx); err != nil {
-		return nil, err
-	}
-	return p.MintDischarge(cav, expiry, dischargeCaveats...)
 }
 
 var (
