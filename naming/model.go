@@ -162,7 +162,8 @@ type Namespace interface {
 	// relative to. All relative names passed to the methods above
 	// will be interpreted as relative to these roots. The roots
 	// will be tried in the order that they are specified in the parameter
-	// list for SetRoots.
+	// list for SetRoots. Calling SetRoots with no arguments will clear the
+	// currently configured set of roots.
 	SetRoots(roots ...string) error
 
 	// Roots returns the currently configured roots. An empty slice is
