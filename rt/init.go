@@ -98,16 +98,22 @@ func prependProfile(profile veyron2.Profile, opts ...veyron2.ROpt) []veyron2.ROp
 func configure(opts ...veyron2.ROpt) (veyron2.Profile, Factory, error) {
 	config.Lock()
 	defer config.Unlock()
-	name := veyron2.GoogleRuntimeName
+	name := ""
 	for _, o := range opts {
 		switch v := o.(type) {
 		case options.Profile:
 			config.profile = v.Profile
-		case options.RuntimeName:
-			name = string(v)
 		}
 	}
 	runtimes.Lock()
+	if len(name) == 0 {
+		// Let the profile specify the runtime, use a default otherwise.
+		if config.profile != nil {
+			name = config.profile.Runtime()
+		} else {
+			name = veyron2.GoogleRuntimeName
+		}
+	}
 	config.factory = runtimes.registered[name]
 	runtimes.Unlock()
 

@@ -123,15 +123,8 @@ type Profile struct{ veyron2.Profile }
 
 func (Profile) ROpt() {}
 
-// RuntimeName wraps the name of the runtime so that we can add
-// functions representing the option annotations
-type RuntimeName string
-
-func (RuntimeName) ROpt() {}
-
-// GoogleRuntime is the RuntimeName option to use to force the Google runtime
-// implementation.
-const GoogleRuntime RuntimeName = "google"
+// GoogleRuntime is the name of the Google runtime implementation.
+const GoogleRuntime = "google"
 
 // Create a server that will be used to serve a MountTable. This server
 // cannot be used for any other purpose.
