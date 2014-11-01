@@ -129,6 +129,9 @@ type Logger interface {
 	// Stats returns stats on how many lines/bytes haven been written to
 	// this set of logs per severity level.
 	Stats() LevelStats
+
+	// LogDir returns the currently configured directory for storing logs.
+	LogDir() string
 }
 
 // Runtime defines the methods that the runtime must implement.

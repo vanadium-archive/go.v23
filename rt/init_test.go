@@ -109,10 +109,11 @@ func (*mockRuntime) Logger() vlog.Logger                            { return nil
 func (*mockRuntime) NewLogger(name string, opts ...vlog.LoggingOpts) (vlog.Logger, error) {
 	return nil, nil
 }
-func (*mockRuntime) Stop()                         {}
-func (*mockRuntime) ForceStop()                    {}
-func (*mockRuntime) WaitForStop(chan<- string)     {}
-func (*mockRuntime) AdvanceGoal(delta int)         {}
-func (*mockRuntime) AdvanceProgress(delta int)     {}
-func (*mockRuntime) TrackTask(chan<- veyron2.Task) {}
-func (*mockRuntime) Cleanup()                      {}
+func (*mockRuntime) ConfigureReservedName(string, ipc.Dispatcher, ...ipc.ServerOpt) {}
+func (*mockRuntime) Stop()                                                          {}
+func (*mockRuntime) ForceStop()                                                     {}
+func (*mockRuntime) WaitForStop(chan<- string)                                      {}
+func (*mockRuntime) AdvanceGoal(delta int)                                          {}
+func (*mockRuntime) AdvanceProgress(delta int)                                      {}
+func (*mockRuntime) TrackTask(chan<- veyron2.Task)                                  {}
+func (*mockRuntime) Cleanup()                                                       {}
