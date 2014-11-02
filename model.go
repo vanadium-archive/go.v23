@@ -286,6 +286,13 @@ type Runtime interface {
 	// down cleanly in advance if desired.  It does, however, drain the
 	// network connections.
 	Cleanup()
+
+	// ConfigureReservedName sets and configures a dispatcher for the
+	// reserved portion of the name space (i.e. __<reservedPrefix>).
+	// Only one dispatcher may be registered, with subsequent calls
+	// overriding previous settings; this restriction  may be relaxed
+	// in the future.
+	ConfigureReservedName(reservedPrefix string, server ipc.Dispatcher, opts ...ipc.ServerOpt)
 }
 
 // RuntimeFromContext returns the runtime used to generate a given context.

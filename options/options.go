@@ -50,8 +50,10 @@ import (
 	"time"
 
 	"veyron.io/veyron/veyron2"
+	"veyron.io/veyron/veyron2/ipc"
 	"veyron.io/veyron/veyron2/ipc/stream"
 	"veyron.io/veyron/veyron2/naming"
+
 	"veyron.io/veyron/veyron2/security"
 )
 
@@ -132,8 +134,11 @@ type ServesMountTable bool
 
 func (ServesMountTable) IPCServerOpt() {}
 
-// DebugAuthorizer specifies the authorizer that controls access to framework
-// provided debug objects on this server.
-type DebugAuthorizer struct{ security.Authorizer }
+// ReservedNameDispatcher specifies the dispatcher that controls access
+// to framework managed portion of the namespace.
+type ReservedNameDispatcher struct {
+	Prefix     string
+	Dispatcher ipc.Dispatcher
+}
 
-func (DebugAuthorizer) IPCServerOpt() {}
+func (ReservedNameDispatcher) IPCServerOpt() {}

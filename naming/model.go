@@ -170,3 +170,10 @@ type Namespace interface {
 	// returned if no roots are configured.
 	Roots() []string
 }
+
+// When this prefix is present at the beginning of an object name suffix, the
+// server may intercept the request and handle it internally. This is used to
+// provide debugging, monitoring and other common functionality across all
+// servers. Applications cannot use any name component that starts with this
+// prefix.
+const ReservedNamePrefix = "__"
