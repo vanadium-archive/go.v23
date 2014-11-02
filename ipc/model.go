@@ -205,10 +205,15 @@ const DebugKeyword = "__debug"
 // Dispatcher defines the interface that a server must implement to handle
 // method invocations on named objects.
 type Dispatcher interface {
-	// Lookup returns an Invoker that serves the requested method for the
-	// object identified by the given suffix.  Returning a nil Invoker
-	// with a nil error indicates this Dispatcher does not support the
-	// requested method on the requested suffix.
+	// Lookup returns an arbitrary object, which may be an Invoker, for
+	// the requested method of the object identified by the given suffix.
+	// If an non-Invoker object is returned, then the request will be handled
+	// using a system supplied Invoker that uses reflection to match
+	// the incoming request to the returned object's method set. If an
+	// Invoker is returned, then it will be used to perform the request.
+	// Returning a nil object with a nil error indicates that this
+	// Dispatcher does not support the requested method on the
+	// requested suffix.
 	//
 	// An Authorizer is also returned to allow control over authorization checks.
 	// Returning a nil Authorizer indicates the default authorization checks
@@ -219,7 +224,7 @@ type Dispatcher interface {
 	//
 	// Lookup may be invoked concurrently by the underlying RPC system, and hence
 	// must be thread-safe.
-	Lookup(suffix, method string) (Invoker, security.Authorizer, error)
+	Lookup(suffix, method string) (interface{}, security.Authorizer, error)
 }
 
 // Invoker defines the interface used by the server for invoking methods on
