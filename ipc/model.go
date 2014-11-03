@@ -166,21 +166,53 @@ type Server interface {
 	// Listen may be called multiple times.
 	Listen(spec ListenSpec) (naming.Endpoint, error)
 
-	// Serve performs two related functions:
-	// 1. it publishes the services available at the network addresses
-	// created using Listen to the mount table as <name>, thereafter
-	// resolving <name> via the mount table will return these network addresses.
-	// 2. it associates a dispatcher to handle RPC invocations received
-	// on those addresses.
-	// Serve may be called multiple times with different names to publish the
-	// same address using different names. The dispatcher may not be changed
-	// once it has been set to a non-nil value, subsequent calls to Serve
-	// should pass in either the original value of the dispatcher or nil.
+	// TODO(cnicolaou): change the behaviour of the methods so that they
+	// can be called only once, update the documentation then. Then
+	// provide AddName()/RemoveName() methods to add/remove entries from
+	// the mount table.
+
+	// Serve associates object with name by publishing the address
+	// of this server with the mount table under the supplied name.
+	// RPCs invoked on the supplied name will be delivered to methods
+	// implemented by the supplied object.
+	// It is an error to call Serve if ServeDispatcher has already been
+	// called.
+	//
+	// Serve may be called multiple times with different names to publish
+	// the object under different names. The object may not be changed once
+	// it has been set to a non-nil value, subsequent calls to Serve should
+	// pass in either the original value of the object or nil.
 	// It is considered an error to call Listen after Serve, as is calling
 	// Serve before Listen.
 	// If name is an empty string, no attempt will made to publish that
 	// name to a mount table.
-	Serve(name string, disp Dispatcher) error
+	//
+	// Serve will arrange to use a default security Authorizer which
+	// can be over ridden with the options.Authorizer option to
+	// runtime.NewServer factory method.
+	// TODO(cnicolaou): consider providing an ipc.Authorizer parameter here
+	// instead of having it be an option to NewServer.
+	Serve(name string, object interface{}) error
+
+	// ServeDispatcher associates dispatcher with the portion of the mount
+	// table's name space for which name is a prefix, by publishing the
+	// address of this dispatcher with the mount table under the supplied name.
+	// RPCs invoked on the supplied name will be delivered to the supplied
+	// Dispatcher's Lookup method which will in turn return the object
+	// and security.Authorizer used to serve the actual RPC call.
+	// It is an error to call ServeDispatcher if Serve has already been
+	// called.
+	//
+	// ServeDispatcher may be called multiple times with different names to
+	// publish the same Dispatcher under different names. The Dispatcher may
+	// not be changed once it has been set to a non-nil value, subsequent
+	// calls to ServeDispatcher should pass in either the original value of
+	// the dispatcher or nil.
+	// It is considered an error to call Listen after ServeDispatcher, as is
+	// calling ServeDispatcher before Listen.
+	// If name is an empty string, no attempt will made to publish that
+	// name to a mount table.
+	ServeDispatcher(name string, disp Dispatcher) error
 
 	// Published returns the rooted names that this server's services have
 	// been published as.
