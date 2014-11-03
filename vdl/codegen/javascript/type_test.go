@@ -90,11 +90,11 @@ func TestType(t *testing.T) {
     name: 'TestStruct',
     fields: [
     {
-      name: 'A',
+      name: 'a',
       type: Types.STRING
     },
     {
-      name: 'B',
+      name: 'b',
       type: Types.INT64
     },
   ]}`}, {tOneOf,
