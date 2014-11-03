@@ -120,7 +120,6 @@ func unTypedConst(d data, v *vdl.Value, unTypedFields bool) string {
 		}
 		return s
 	case vdl.Set, vdl.Map:
-		keyType := v.Type().Key()
 		s := "new VomMap(["
 		for _, key := range v.Keys() {
 			s += "\n  [" + unTypedConst(d, key, true) + ", "
