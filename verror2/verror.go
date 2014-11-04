@@ -453,4 +453,5 @@ var (
 	NoExist           = Register(pkgPath+".NoExist", NoRetry, "{1} {2} Does not exist {_}")
 	NoExistOrNoAccess = Register(pkgPath+".NoExistOrNoAccess", NoRetry, "{1} {2} Does not exist or access denied {_}")
 	Timeout           = Register(pkgPath+".Timeout", NoRetry, "{1} {2} Timeout {_}")
+	Cancelled         = Register(pkgPath+".Cancelled", NoRetry, "{1} {2} Cancelled {_}")
 )
