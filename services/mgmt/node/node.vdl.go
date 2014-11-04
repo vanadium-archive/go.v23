@@ -6,6 +6,8 @@
 package node
 
 import (
+	"veyron.io/veyron/veyron2/security"
+
 	"veyron.io/veyron/veyron2/services/mgmt/binary"
 
 	"veyron.io/veyron/veyron2/services/mounttable"
@@ -138,6 +140,8 @@ type Association struct {
 // installation instance as a receiver is well-defined.
 type ApplicationClientMethods interface {
 	mounttable.GlobbableClientMethods
+	// Object provides access control for Veyron objects.
+	access.ObjectClientMethods
 	// Install installs the application identified by the argument and
 	// returns an object name suffix that identifies the new installation.
 	//
@@ -152,6 +156,7 @@ type ApplicationClientMethods interface {
 	// The suffix will contain the title of the application as a prefix,
 	// which can then be used to control all the installations of the given
 	// application.
+	// TODO(rjkroege): Use customized labels.
 	Install(ctx __context.T, Name string, opts ...__ipc.CallOpt) (string, error)
 	// Refresh refreshes the state of application installation(s)
 	// instance(s).
@@ -208,7 +213,7 @@ func ApplicationClient(name string, opts ...__ipc.BindOpt) ApplicationClientStub
 			client = clientOpt
 		}
 	}
-	return implApplicationClientStub{name, client, mounttable.GlobbableClient(name, client)}
+	return implApplicationClientStub{name, client, mounttable.GlobbableClient(name, client), access.ObjectClient(name, client)}
 }
 
 type implApplicationClientStub struct {
@@ -216,6 +221,7 @@ type implApplicationClientStub struct {
 	client __ipc.Client
 
 	mounttable.GlobbableClientStub
+	access.ObjectClientStub
 }
 
 func (c implApplicationClientStub) c(ctx __context.T) __ipc.Client {
@@ -461,6 +467,8 @@ func (c implApplicationClientStub) GetMethodTags(ctx __context.T, method string,
 // installation instance as a receiver is well-defined.
 type ApplicationServerMethods interface {
 	mounttable.GlobbableServerMethods
+	// Object provides access control for Veyron objects.
+	access.ObjectServerMethods
 	// Install installs the application identified by the argument and
 	// returns an object name suffix that identifies the new installation.
 	//
@@ -475,6 +483,7 @@ type ApplicationServerMethods interface {
 	// The suffix will contain the title of the application as a prefix,
 	// which can then be used to control all the installations of the given
 	// application.
+	// TODO(rjkroege): Use customized labels.
 	Install(ctx __ipc.ServerContext, Name string) (string, error)
 	// Refresh refreshes the state of application installation(s)
 	// instance(s).
@@ -524,6 +533,8 @@ type ApplicationServerMethods interface {
 // ipc.ServerContext or a typed streaming context there.
 type ApplicationServerStubMethods interface {
 	mounttable.GlobbableServerStubMethods
+	// Object provides access control for Veyron objects.
+	access.ObjectServerStubMethods
 	// Install installs the application identified by the argument and
 	// returns an object name suffix that identifies the new installation.
 	//
@@ -538,6 +549,7 @@ type ApplicationServerStubMethods interface {
 	// The suffix will contain the title of the application as a prefix,
 	// which can then be used to control all the installations of the given
 	// application.
+	// TODO(rjkroege): Use customized labels.
 	Install(call __ipc.ServerCall, Name string) (string, error)
 	// Refresh refreshes the state of application installation(s)
 	// instance(s).
@@ -596,6 +608,7 @@ func ApplicationServer(impl ApplicationServerMethods) ApplicationServerStub {
 	stub := implApplicationServerStub{
 		impl:                impl,
 		GlobbableServerStub: mounttable.GlobbableServer(impl),
+		ObjectServerStub:    access.ObjectServer(impl),
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
@@ -612,6 +625,7 @@ type implApplicationServerStub struct {
 	gs   *__ipc.GlobState
 
 	mounttable.GlobbableServerStub
+	access.ObjectServerStub
 }
 
 func (s implApplicationServerStub) Install(call __ipc.ServerCall, i0 string) (string, error) {
@@ -667,29 +681,32 @@ func (s implApplicationServerStub) GetMethodTags(call __ipc.ServerCall, method s
 	if resp, err := s.GlobbableServerStub.GetMethodTags(call, method); resp != nil || err != nil {
 		return resp, err
 	}
+	if resp, err := s.ObjectServerStub.GetMethodTags(call, method); resp != nil || err != nil {
+		return resp, err
+	}
 	switch method {
 	case "Install":
-		return []interface{}{}, nil
+		return []interface{}{security.Label(4)}, nil
 	case "Refresh":
-		return []interface{}{}, nil
+		return []interface{}{security.Label(8)}, nil
 	case "Restart":
-		return []interface{}{}, nil
+		return []interface{}{security.Label(4)}, nil
 	case "Resume":
-		return []interface{}{}, nil
+		return []interface{}{security.Label(4)}, nil
 	case "Revert":
-		return []interface{}{}, nil
+		return []interface{}{security.Label(8)}, nil
 	case "Start":
-		return []interface{}{}, nil
+		return []interface{}{security.Label(2)}, nil
 	case "Stop":
-		return []interface{}{}, nil
+		return []interface{}{security.Label(8)}, nil
 	case "Suspend":
-		return []interface{}{}, nil
+		return []interface{}{security.Label(4)}, nil
 	case "Uninstall":
-		return []interface{}{}, nil
+		return []interface{}{security.Label(8)}, nil
 	case "Update":
-		return []interface{}{}, nil
+		return []interface{}{security.Label(8)}, nil
 	case "UpdateTo":
-		return []interface{}{}, nil
+		return []interface{}{security.Label(8)}, nil
 	default:
 		return nil, nil
 	}
@@ -830,6 +847,59 @@ func (s implApplicationServerStub) Signature(call __ipc.ServerCall) (__ipc.Servi
 		}
 		result.TypeDefs = append(result.TypeDefs, d)
 	}
+	ss, _ = s.ObjectServerStub.Signature(call)
+	firstAdded = len(result.TypeDefs)
+	for k, v := range ss.Methods {
+		for i, _ := range v.InArgs {
+			if v.InArgs[i].Type >= __wiretype.TypeIDFirst {
+				v.InArgs[i].Type += __wiretype.TypeID(firstAdded)
+			}
+		}
+		for i, _ := range v.OutArgs {
+			if v.OutArgs[i].Type >= __wiretype.TypeIDFirst {
+				v.OutArgs[i].Type += __wiretype.TypeID(firstAdded)
+			}
+		}
+		if v.InStream >= __wiretype.TypeIDFirst {
+			v.InStream += __wiretype.TypeID(firstAdded)
+		}
+		if v.OutStream >= __wiretype.TypeIDFirst {
+			v.OutStream += __wiretype.TypeID(firstAdded)
+		}
+		result.Methods[k] = v
+	}
+	//TODO(bprosnitz) combine type definitions from embeded interfaces in a way that doesn't cause duplication.
+	for _, d := range ss.TypeDefs {
+		switch wt := d.(type) {
+		case __wiretype.SliceType:
+			if wt.Elem >= __wiretype.TypeIDFirst {
+				wt.Elem += __wiretype.TypeID(firstAdded)
+			}
+			d = wt
+		case __wiretype.ArrayType:
+			if wt.Elem >= __wiretype.TypeIDFirst {
+				wt.Elem += __wiretype.TypeID(firstAdded)
+			}
+			d = wt
+		case __wiretype.MapType:
+			if wt.Key >= __wiretype.TypeIDFirst {
+				wt.Key += __wiretype.TypeID(firstAdded)
+			}
+			if wt.Elem >= __wiretype.TypeIDFirst {
+				wt.Elem += __wiretype.TypeID(firstAdded)
+			}
+			d = wt
+		case __wiretype.StructType:
+			for i, fld := range wt.Fields {
+				if fld.Type >= __wiretype.TypeIDFirst {
+					wt.Fields[i].Type += __wiretype.TypeID(firstAdded)
+				}
+			}
+			d = wt
+			// NOTE: other types are missing, but we are upgrading anyways.
+		}
+		result.TypeDefs = append(result.TypeDefs, d)
+	}
 
 	return result, nil
 }
@@ -840,8 +910,6 @@ func (s implApplicationServerStub) Signature(call __ipc.ServerCall) (__ipc.Servi
 // Node can be used to manage a node. The idea is that this interface
 // will be invoked using an object name that identifies the node.
 type NodeClientMethods interface {
-	// Object provides access control for Veyron objects.
-	access.ObjectClientMethods
 	// Application can be used to manage applications on a device. The
 	// idea is that this interace will be invoked using an object name that
 	// identifies the application and its installations and instances
@@ -970,14 +1038,13 @@ func NodeClient(name string, opts ...__ipc.BindOpt) NodeClientStub {
 			client = clientOpt
 		}
 	}
-	return implNodeClientStub{name, client, access.ObjectClient(name, client), ApplicationClient(name, client)}
+	return implNodeClientStub{name, client, ApplicationClient(name, client)}
 }
 
 type implNodeClientStub struct {
 	name   string
 	client __ipc.Client
 
-	access.ObjectClientStub
 	ApplicationClientStub
 }
 
@@ -1082,8 +1149,6 @@ func (c implNodeClientStub) GetMethodTags(ctx __context.T, method string, opts .
 // Node can be used to manage a node. The idea is that this interface
 // will be invoked using an object name that identifies the node.
 type NodeServerMethods interface {
-	// Object provides access control for Veyron objects.
-	access.ObjectServerMethods
 	// Application can be used to manage applications on a device. The
 	// idea is that this interace will be invoked using an object name that
 	// identifies the application and its installations and instances
@@ -1204,8 +1269,6 @@ type NodeServerMethods interface {
 // argument for each method is always ipc.ServerCall here, while it is either
 // ipc.ServerContext or a typed streaming context there.
 type NodeServerStubMethods interface {
-	// Object provides access control for Veyron objects.
-	access.ObjectServerStubMethods
 	// Application can be used to manage applications on a device. The
 	// idea is that this interace will be invoked using an object name that
 	// identifies the application and its installations and instances
@@ -1334,8 +1397,7 @@ type NodeServerStub interface {
 // an object that may be used by ipc.Server.
 func NodeServer(impl NodeServerMethods) NodeServerStub {
 	stub := implNodeServerStub{
-		impl:                  impl,
-		ObjectServerStub:      access.ObjectServer(impl),
+		impl: impl,
 		ApplicationServerStub: ApplicationServer(impl),
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
@@ -1352,7 +1414,6 @@ type implNodeServerStub struct {
 	impl NodeServerMethods
 	gs   *__ipc.GlobState
 
-	access.ObjectServerStub
 	ApplicationServerStub
 }
 
@@ -1386,9 +1447,6 @@ func (s implNodeServerStub) VGlob() *__ipc.GlobState {
 
 func (s implNodeServerStub) GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error) {
 	// TODO(toddw): Replace with new DescribeInterfaces implementation.
-	if resp, err := s.ObjectServerStub.GetMethodTags(call, method); resp != nil || err != nil {
-		return resp, err
-	}
 	if resp, err := s.ApplicationServerStub.GetMethodTags(call, method); resp != nil || err != nil {
 		return resp, err
 	}
@@ -1481,59 +1539,6 @@ func (s implNodeServerStub) Signature(call __ipc.ServerCall) (__ipc.ServiceSigna
 		__wiretype.SliceType{Elem: 0x45, Name: "", Tags: []string(nil)}}
 	var ss __ipc.ServiceSignature
 	var firstAdded int
-	ss, _ = s.ObjectServerStub.Signature(call)
-	firstAdded = len(result.TypeDefs)
-	for k, v := range ss.Methods {
-		for i, _ := range v.InArgs {
-			if v.InArgs[i].Type >= __wiretype.TypeIDFirst {
-				v.InArgs[i].Type += __wiretype.TypeID(firstAdded)
-			}
-		}
-		for i, _ := range v.OutArgs {
-			if v.OutArgs[i].Type >= __wiretype.TypeIDFirst {
-				v.OutArgs[i].Type += __wiretype.TypeID(firstAdded)
-			}
-		}
-		if v.InStream >= __wiretype.TypeIDFirst {
-			v.InStream += __wiretype.TypeID(firstAdded)
-		}
-		if v.OutStream >= __wiretype.TypeIDFirst {
-			v.OutStream += __wiretype.TypeID(firstAdded)
-		}
-		result.Methods[k] = v
-	}
-	//TODO(bprosnitz) combine type definitions from embeded interfaces in a way that doesn't cause duplication.
-	for _, d := range ss.TypeDefs {
-		switch wt := d.(type) {
-		case __wiretype.SliceType:
-			if wt.Elem >= __wiretype.TypeIDFirst {
-				wt.Elem += __wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case __wiretype.ArrayType:
-			if wt.Elem >= __wiretype.TypeIDFirst {
-				wt.Elem += __wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case __wiretype.MapType:
-			if wt.Key >= __wiretype.TypeIDFirst {
-				wt.Key += __wiretype.TypeID(firstAdded)
-			}
-			if wt.Elem >= __wiretype.TypeIDFirst {
-				wt.Elem += __wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case __wiretype.StructType:
-			for i, fld := range wt.Fields {
-				if fld.Type >= __wiretype.TypeIDFirst {
-					wt.Fields[i].Type += __wiretype.TypeID(firstAdded)
-				}
-			}
-			d = wt
-			// NOTE: other types are missing, but we are upgrading anyways.
-		}
-		result.TypeDefs = append(result.TypeDefs, d)
-	}
 	ss, _ = s.ApplicationServerStub.Signature(call)
 	firstAdded = len(result.TypeDefs)
 	for k, v := range ss.Methods {

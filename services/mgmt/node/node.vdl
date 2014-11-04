@@ -3,6 +3,7 @@
 package node
 
 import (
+	"veyron.io/veyron/veyron2/security"
 	"veyron.io/veyron/veyron2/services/mgmt/binary"
 	"veyron.io/veyron/veyron2/services/mounttable"
 	"veyron.io/veyron/veyron2/services/security/access"
@@ -98,6 +99,10 @@ import (
 // installation instance as a receiver is well-defined.
 type Application interface {
 	mounttable.Globbable
+	// Object provides GetACL/SetACL methods to read/modify ACLs for the
+	// Application methods. After a device has been claimed, only the
+	// claimant will be able to modify the ACLs for the node.
+	access.Object
 	// Install installs the application identified by the argument and
 	// returns an object name suffix that identifies the new installation.
 	//
@@ -112,23 +117,24 @@ type Application interface {
 	// The suffix will contain the title of the application as a prefix,
 	// which can then be used to control all the installations of the given
 	// application.
-	Install(Name string) (string, error)
+	// TODO(rjkroege): Use customized labels.
+	Install(Name string) (string, error) {security.WriteLabel}
 	// Refresh refreshes the state of application installation(s)
 	// instance(s).
-	Refresh() error
+	Refresh() error {security.AdminLabel}
 	// Restart restarts execution of application installation(s)
 	// instance(s).
-	Restart() error
+	Restart() error {security.WriteLabel}
 	// Resume resumes execution of application installation(s)
 	// instance(s).
-	Resume() error
+	Resume() error {security.WriteLabel}
 	// Revert reverts application installation(s) to the most recent
 	// previous installation.
-	Revert() error
+	Revert() error {security.AdminLabel}
 	// Start starts an instance of application installation(s) and
 	// returns the object name(s) that identifies/identify the new
 	// instance(s).
-	Start() ([]string, error)
+	Start() ([]string, error) {security.ReadLabel}
 	// Stop attempts a clean shutdown of application installation(s)
 	// instance(s). If the deadline (in seconds) is non-zero and the
 	// instance(s) in questions are still running after the given deadline,
@@ -136,22 +142,22 @@ type Application interface {
 	//
 	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
 	// are implemented.
-	Stop(Deadline uint32) error
+	Stop(Deadline uint32) error {security.AdminLabel}
 	// Suspend suspends execution of application installation(s)
 	// instance(s).
-	Suspend() error
+	Suspend() error {security.WriteLabel}
 	// Uninstall uninstalls application installation(s).
-	Uninstall() error
+	Uninstall() error {security.AdminLabel}
 	// Update updates the application installation(s) from the object name
 	// provided during Install.  If the new application envelope contains a
 	// different application title, the update does not occur, and an error
 	// is returned.
-	Update() error
+	Update() error {security.AdminLabel}
 	// UpdateTo updates the application installation(s) to the application
 	// specified by the object name argument.  If the new application
 	// envelope contains a different application title, the update does not
 	// occur, and an error is returned.
-	UpdateTo(Name string) error
+	UpdateTo(Name string) error {security.AdminLabel}
 }
 
 // Description enumerates the profiles that a Node supports.
@@ -177,10 +183,6 @@ type Association struct {
 // Node can be used to manage a node. The idea is that this interface
 // will be invoked using an object name that identifies the node.
 type Node interface {
-	// Object provides GetACL/SetACL methods to read/modify ACLs for the
-	// node methods. After a device has been claimed only the claimer will
-	// be able to modify the ACLs for the node.
-	access.Object
 	// Each method of the Application interface invoked at the node
 	// level applies to all applications installed on the node (and
 	// their installations and instances where applicable).
