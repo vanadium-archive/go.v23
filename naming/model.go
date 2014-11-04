@@ -5,15 +5,20 @@ import (
 	"time"
 
 	"veyron.io/veyron/veyron2/context"
-	"veyron.io/veyron/veyron2/verror"
+
+	verror "veyron.io/veyron/veyron2/verror2"
+)
+
+const (
+	pkgPath = "veyron.io/veyron/veyron2/naming"
 )
 
 var (
-	ErrNameExists              = verror.Existsf("Name already exists")
-	ErrNoSuchName              = verror.NoExistf("Name doesn't exist")
-	ErrNoSuchNameRoot          = verror.NoExistf("Name doesn't exist: root of namespace")
-	ErrResolutionDepthExceeded = verror.Abortedf("Resolution depth exceeded")
-	ErrNoMountTable            = verror.Internalf("No mount table available")
+	ErrNameExists              = verror.Register(pkgPath+".nameExists", verror.NoRetry, "{1} {2} Name exists {_}")
+	ErrNoSuchName              = verror.Register(pkgPath+".nameDoesntExist", verror.NoRetry, "{1} {2} Name {3} doesn't exist {_}")
+	ErrNoSuchNameRoot          = verror.Register(pkgPath+".rootNameDoesntExist", verror.NoRetry, "{1} {2} Namespace root name {3} doesn't exist {_}")
+	ErrResolutionDepthExceeded = verror.Register(pkgPath+".resolutionDepthExceeded", verror.NoRetry, "{1} {2} Resolution depth exceeded {_}")
+	ErrNoMountTable            = verror.Register(pkgPath+".noMounttable", verror.NoRetry, "{1} {2} No mounttable {_}")
 )
 
 // Endpoint represents unique identifiers for entities communicating over a
