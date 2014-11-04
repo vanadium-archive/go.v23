@@ -60,13 +60,14 @@ func init() {
 func runGenerate(cmd *cmdline.Command, args []string) error {
 	debug := new(bytes.Buffer)
 	defer dumpDebug(cmd.Stderr(), debug)
+	env := compile.NewEnv(optGenMaxErrors)
 	// Get the input datafile path.
 	var path string
 	switch len(args) {
 	case 0:
-		srcDirs := build.SrcDirs()
-		if len(srcDirs) == 0 {
-			return cmd.UsageErrorf("no src dirs; set your VDLPATH to a valid value")
+		srcDirs := build.SrcDirs(env.Errors)
+		if err := env.Errors.ToError(); err != nil {
+			return cmd.UsageErrorf("%v", err)
 		}
 		path = guessDataFilePath(debug, srcDirs)
 		if path == "" {
@@ -87,7 +88,7 @@ func runGenerate(cmd *cmdline.Command, args []string) error {
 	if err := os.Remove(outName); err == nil {
 		fmt.Fprintf(debug, "Removed output file %v\n", outName)
 	}
-	config, err := compileConfig(debug, inName)
+	config, err := compileConfig(debug, inName, env)
 	if err != nil {
 		return err
 	}
@@ -122,7 +123,7 @@ func guessDataFilePath(debug io.Writer, srcDirs []string) string {
 	return ""
 }
 
-func compileConfig(debug io.Writer, inName string) (*vdl.Value, error) {
+func compileConfig(debug io.Writer, inName string, env *compile.Env) (*vdl.Value, error) {
 	basename := filepath.Base(inName)
 	data, err := os.Open(inName)
 	if err != nil {
@@ -132,10 +133,10 @@ func compileConfig(debug io.Writer, inName string) (*vdl.Value, error) {
 	if stat, err := data.Stat(); err != nil || stat.IsDir() {
 		return nil, fmt.Errorf("vomdata file %s is a directory", inName)
 	}
-	exts := strings.Split(optGenExts, ",")
-	env := compile.NewEnv(optGenMaxErrors)
+	var opts build.Opts
+	opts.Extensions = strings.Split(optGenExts, ",")
 	// Compile package dependencies in transitive order.
-	deps := build.TransitivePackagesForConfig(basename, data, exts, env.Errors)
+	deps := build.TransitivePackagesForConfig(basename, data, opts, env.Errors)
 	for _, dep := range deps {
 		if pkg := build.BuildPackage(dep, env); pkg != nil {
 			fmt.Fprintf(debug, "Built package %s\n", pkg.Path)

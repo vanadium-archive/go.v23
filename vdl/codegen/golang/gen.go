@@ -12,16 +12,11 @@ import (
 	"veyron.io/veyron/veyron2/vdl"
 	"veyron.io/veyron/veyron2/vdl/codegen"
 	"veyron.io/veyron/veyron2/vdl/compile"
+	vdlroot "veyron.io/veyron/veyron2/vdl/vdlroot/src/vdl"
 	"veyron.io/veyron/veyron2/vdl/vdlutil"
 	"veyron.io/veyron/veyron2/wiretype"
 	"veyron.io/veyron/veyron2/wiretype/build"
 )
-
-// Opts specifies options for generating Go files.
-type Opts struct {
-	// Fmt specifies whether to run gofmt on the generated source.
-	Fmt bool
-}
 
 type goData struct {
 	File          *compile.File
@@ -32,7 +27,7 @@ type goData struct {
 
 // Generate takes a populated compile.File and returns a byte slice containing
 // the generated Go source code.
-func Generate(file *compile.File, env *compile.Env, opts Opts) []byte {
+func Generate(file *compile.File, env *compile.Env, config vdlroot.GoConfig) []byte {
 	data := goData{
 		File:          file,
 		Env:           env,
@@ -46,7 +41,7 @@ func Generate(file *compile.File, env *compile.Env, opts Opts) []byte {
 		// We shouldn't see an error; it means our template is buggy.
 		panic(fmt.Errorf("vdl: couldn't execute template: %v", err))
 	}
-	if opts.Fmt {
+	if !config.NoFmt {
 		// Use gofmt to format the generated source.
 		pretty, err := format.Source(buf.Bytes())
 		if err != nil {

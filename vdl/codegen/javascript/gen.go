@@ -16,6 +16,7 @@ import (
 	"veyron.io/veyron/veyron2/vdl"
 	"veyron.io/veyron/veyron2/vdl/codegen"
 	"veyron.io/veyron/veyron2/vdl/compile"
+	vdlroot "veyron.io/veyron/veyron2/vdl/vdlroot/src/vdl"
 	"veyron.io/veyron/veyron2/vdl/vdlutil"
 )
 
@@ -28,7 +29,7 @@ type data struct {
 
 // Generate takes a populated compile.Package and produces a byte slice
 // containing the generated Javascript code.
-func Generate(pkg *compile.Package, env *compile.Env, genImport func(string) string) []byte {
+func Generate(pkg *compile.Package, env *compile.Env, genImport func(string) string, config vdlroot.JavascriptConfig) []byte {
 	data := data{
 		Pkg:            pkg,
 		Env:            env,

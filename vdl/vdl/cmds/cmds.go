@@ -11,12 +11,14 @@ import (
 	"strings"
 
 	"veyron.io/veyron/veyron/lib/cmdline"
+	"veyron.io/veyron/veyron/lib/textutil"
 
 	"veyron.io/veyron/veyron2/vdl/build"
 	"veyron.io/veyron/veyron2/vdl/codegen/golang"
 	"veyron.io/veyron/veyron2/vdl/codegen/java"
 	"veyron.io/veyron/veyron2/vdl/codegen/javascript"
 	"veyron.io/veyron/veyron2/vdl/compile"
+	vdlroot "veyron.io/veyron/veyron2/vdl/vdlroot/src/vdl"
 	"veyron.io/veyron/veyron2/vdl/vdlutil"
 )
 
@@ -43,7 +45,6 @@ func runHelper(run func(targets []*build.Package, env *compile.Env)) func(cmd *c
 			// If the user doesn't specify any targets, the cwd is implied.
 			args = append(args, ".")
 		}
-		exts := strings.Split(flagExts, ",")
 		env := compile.NewEnv(flagMaxErrors)
 		if flagExperimental {
 			env.EnableExperimental()
@@ -52,7 +53,10 @@ func runHelper(run func(targets []*build.Package, env *compile.Env)) func(cmd *c
 		if flagIgnoreUnknown {
 			mode = build.UnknownPathIsIgnored
 		}
-		targets := build.TransitivePackages(args, exts, mode, env.Errors)
+		var opts build.Opts
+		opts.Extensions = strings.Split(flagExts, ",")
+		opts.VDLConfigName = flagVDLConfig
+		targets := build.TransitivePackages(args, mode, opts, env.Errors)
 		if err := checkErrors(env.Errors); err != nil {
 			return err
 		}
@@ -124,6 +128,35 @@ An example:
 `,
 }
 
+var topicVdlRoot = cmdline.Topic{
+	Name:  "vdlroot",
+	Short: "Description of VDLROOT environment variable",
+	Long: `
+The VDLROOT environment variable is similar to VDLPATH, but instead of pointing
+to multiple user source directories, it points at a single source directory
+containing the standard vdl packages.
+
+Setting VDLROOT is optional.
+
+If VDLROOT is empty, we try to construct it out of the VEYRON_ROOT environment
+variable.  It is an error if both VDLROOT and VEYRON_ROOT are empty.
+`,
+}
+
+var topicVdlConfig = cmdline.Topic{
+	Name:  "vdl.config",
+	Short: "Description of vdl.config files",
+	Long: `
+Each vdl source package P may contain an optional file "vdl.config" within the P
+directory.  This file specifies additional configuration for the vdl tool.
+
+The format of this file is described by the vdl.Config type in the "vdl"
+standard package, located at VDLROOT/src/vdl/config.go.
+
+If the file does not exist, we use the zero value of vdl.Config.
+`,
+}
+
 const pkgArgName = "<packages>"
 const pkgArgLong = `
 <packages> are a list of packages to process, similar to the standard go tool.
@@ -187,28 +220,9 @@ other languages like C++.
 	ArgsLong: pkgArgLong,
 }
 
-const (
-	genLangGo         genLang = "go"
-	genLangJava               = "java"
-	genLangJavascript         = "js"
-)
+var genLangAll = genLangs(vdlroot.AllGenLanguage)
 
-var genLangAll = genLangs{genLangGo, genLangJava, genLangJavascript}
-
-type genLang string
-
-func (l genLang) String() string { return string(l) }
-
-func genLangFromString(str string) (genLang, error) {
-	for _, l := range genLangAll {
-		if l == genLang(str) {
-			return l, nil
-		}
-	}
-	return "", fmt.Errorf("unknown language %s", str)
-}
-
-type genLangs []genLang
+type genLangs []vdlroot.GenLanguage
 
 func (gls genLangs) String() string {
 	var ret string
@@ -216,7 +230,8 @@ func (gls genLangs) String() string {
 		if i > 0 {
 			ret += ","
 		}
-		ret += gl.String()
+		// We call ToLower to convert from "Go" to "go".
+		ret += strings.ToLower(gl.String())
 	}
 	return ret
 }
@@ -225,11 +240,12 @@ func (gls *genLangs) Set(value string) error {
 	// If the flag is repeated on the cmdline it is overridden.  Duplicates within
 	// the comma separated list are ignored, and retain their original ordering.
 	*gls = genLangs{}
-	seen := make(map[genLang]bool)
+	seen := make(map[vdlroot.GenLanguage]bool)
 	for _, str := range strings.Split(value, ",") {
-		gl, err := genLangFromString(str)
-		if err != nil {
-			return err
+		// We call Title to convert from "go" to "Go".
+		gl, ok := vdlroot.MakeGenLanguage(strings.Title(str))
+		if !ok {
+			return fmt.Errorf("%q isn't a valid generate language", str)
 		}
 		if !seen[gl] {
 			seen[gl] = true
@@ -301,13 +317,13 @@ var (
 	flagVerbose       bool
 	flagMaxErrors     int
 	flagExts          string
+	flagVDLConfig     string
 	flagExperimental  bool
 	flagIgnoreUnknown bool
 
 	// Options for each command.
 	optCompileStatus bool
 	optGenStatus     bool
-	optGenGoFmt      bool
 	optGenGoOutDir   = genOutDir{}
 	optGenJavaOutDir = genOutDir{
 		rules: xlateRules{
@@ -315,6 +331,8 @@ var (
 			{"roadmap/go/src", "veyron/java/src/vdl/java"},
 			{"third_party/go/src", "SKIP"},
 			{"tools/go/src", "SKIP"},
+			// TODO(toddw): Skip vdlroot java generation for now.
+			{"veyron/go/src/veyron.io/veyron/veyron2/vdl/vdlroot/src", "SKIP"},
 		},
 	}
 	optGenJavascriptOutDir = genOutDir{
@@ -323,6 +341,8 @@ var (
 			{"roadmap/go/src", "veyron.js/src"},
 			{"third_party/go/src", "SKIP"},
 			{"tools/go/src", "SKIP"},
+			// TODO(toddw): Skip vdlroot javascript generation for now.
+			{"veyron/go/src/veyron.io/veyron/veyron2/vdl/vdlroot/src", "SKIP"},
 		},
 	}
 	optGenJavaOutPkg = xlateRules{
@@ -333,7 +353,8 @@ var (
 		{"veyron.io/veyron/veyron2/vom2/testdata", "SKIP"},
 		{"veyron.io", "io/veyron"},
 	}
-	optGenLangs = genLangs{genLangGo, genLangJava} // TODO: javascript
+	// TODO(bjornick): Add javascript to the default gen langs.
+	optGenLangs = genLangs{vdlroot.GenLanguageGo, vdlroot.GenLanguageJava}
 )
 
 // Root returns the root command for the VDL tool.
@@ -346,13 +367,14 @@ The vdl tool manages veyron VDL source code.  It's similar to the go tool used
 for managing Go source code.
 `,
 		Children: []*cmdline.Command{cmdGenerate, cmdCompile, cmdAudit, cmdList},
-		Topics:   []cmdline.Topic{topicPackages, topicVdlPath},
+		Topics:   []cmdline.Topic{topicPackages, topicVdlPath, topicVdlRoot, topicVdlConfig},
 	}
 
 	// Common flags for the tool itself, applicable to all commands.
 	vdlcmd.Flags.BoolVar(&flagVerbose, "v", false, "Turn on verbose logging.")
 	vdlcmd.Flags.IntVar(&flagMaxErrors, "max_errors", -1, "Stop processing after this many errors, or -1 for unlimited.")
 	vdlcmd.Flags.StringVar(&flagExts, "exts", ".vdl", "Comma-separated list of valid VDL file name extensions.")
+	vdlcmd.Flags.StringVar(&flagVDLConfig, "vdl.config", "vdl.config", "Basename of the optional per-package config file.")
 	vdlcmd.Flags.BoolVar(&flagExperimental, "experimental", false, "Enable experimental features that may crash the compiler and change without notice.  Intended for VDL compiler developers.")
 	vdlcmd.Flags.BoolVar(&flagIgnoreUnknown, "ignore_unknown", false, "Ignore unknown packages provided on the command line.")
 
@@ -361,8 +383,9 @@ for managing Go source code.
 
 	// Options for generate.
 	cmdGenerate.Flags.Var(&optGenLangs, "lang", "Comma-separated list of languages to generate, currently supporting "+genLangAll.String())
-	cmdGenerate.Flags.BoolVar(&optGenGoFmt, "go_fmt", true, "Format generated Go code")
 	cmdGenerate.Flags.BoolVar(&optGenStatus, "status", true, "Show package names as they are updated")
+	// TODO(toddw): Move out_dir configuration into vdl.config, and provide a
+	// generic override mechanism for vdl.config.
 	cmdGenerate.Flags.Var(&optGenGoOutDir, "go_out_dir", `
 Go output directory.  There are three modes:
    ""                     : Generate output in-place in the source tree
@@ -423,6 +446,12 @@ func runAudit(targets []*build.Package, env *compile.Env) {
 	}
 }
 
+func shouldGenerate(config vdlroot.Config, lang vdlroot.GenLanguage) bool {
+	// If config.GenLanguages is empty, all languages are allowed to be generated.
+	_, ok := config.GenLanguages[lang]
+	return len(config.GenLanguages) == 0 || ok
+}
+
 // gen generates the given targets with env.  If audit is true, only checks
 // whether any packages are stale; otherwise files will actually be written out.
 // Returns true if any packages are stale.
@@ -439,22 +468,28 @@ func gen(audit bool, targets []*build.Package, env *compile.Env) bool {
 		}
 		// TODO(toddw): Skip code generation if the semantic contents of the
 		// generated file haven't changed.
+		config := target.Config
 		pkgchanged := false
 		for _, gl := range optGenLangs {
 			switch gl {
-			case genLangGo:
+			case vdlroot.GenLanguageGo:
+				if !shouldGenerate(config, vdlroot.GenLanguageGo) {
+					continue
+				}
 				dir, err := xlateOutDir(target.Dir, target.Path, optGenGoOutDir, pkg.Path)
 				if handleErrorOrSkip("--go_out_dir", err, env) {
 					continue
 				}
 				for _, file := range pkg.Files {
-					opts := golang.Opts{Fmt: optGenGoFmt}
-					data := golang.Generate(file, env, opts)
+					data := golang.Generate(file, env, config.Go)
 					if writeFile(audit, data, dir, file.BaseName+".go", env) {
 						pkgchanged = true
 					}
 				}
-			case genLangJava:
+			case vdlroot.GenLanguageJava:
+				if !shouldGenerate(config, vdlroot.GenLanguageJava) {
+					continue
+				}
 				pkgPath, err := xlatePkgPath(pkg.Path, optGenJavaOutPkg)
 				if handleErrorOrSkip("--java_out_pkg", err, env) {
 					continue
@@ -467,13 +502,16 @@ func gen(audit bool, targets []*build.Package, env *compile.Env) bool {
 					result, _ := xlatePkgPath(pkgPath, optGenJavaOutPkg)
 					return result
 				})
-				for _, file := range java.Generate(pkg, env) {
+				for _, file := range java.Generate(pkg, env, config.Java) {
 					fileDir := filepath.Join(dir, file.Dir)
 					if writeFile(audit, file.Data, fileDir, file.Name, env) {
 						pkgchanged = true
 					}
 				}
-			case genLangJavascript:
+			case vdlroot.GenLanguageJavascript:
+				if !shouldGenerate(config, vdlroot.GenLanguageJavascript) {
+					continue
+				}
 				dir, err := xlateOutDir(target.Dir, target.Path, optGenJavascriptOutDir, pkg.Path)
 				if handleErrorOrSkip("--js_out_dir", err, env) {
 					continue
@@ -491,8 +529,7 @@ func gen(audit bool, targets []*build.Package, env *compile.Env) bool {
 					}
 					return filepath.Join(cleanPath, path.Base(importPath))
 				}
-
-				data := javascript.Generate(pkg, env, path)
+				data := javascript.Generate(pkg, env, path, config.Javascript)
 				name := filepath.Base(target.Dir)
 				if writeFile(audit, data, dir, name+".js", env) {
 					pkgchanged = true
@@ -591,10 +628,11 @@ func xlatePkgPath(pkgPath string, rules xlateRules) (string, error) {
 func runList(targets []*build.Package, env *compile.Env) {
 	for tx, target := range targets {
 		num := fmt.Sprintf("%d", tx)
-		fmt.Println(num, strings.Repeat("=", 80-len(num)))
-		fmt.Printf("Name: %v\n", target.Name)
-		fmt.Printf("Path: %v\n", target.Path)
-		fmt.Printf("Dir:  %v\n", target.Dir)
+		fmt.Printf("%s %s\n", num, strings.Repeat("=", termWidth()-len(num)-1))
+		fmt.Printf("Name:   %v\n", target.Name)
+		fmt.Printf("Config: %+v\n", target.Config)
+		fmt.Printf("Path:   %v\n", target.Path)
+		fmt.Printf("Dir:    %v\n", target.Dir)
 		if len(target.BaseFileNames) > 0 {
 			fmt.Print("Files:\n")
 			for _, file := range target.BaseFileNames {
@@ -602,4 +640,11 @@ func runList(targets []*build.Package, env *compile.Env) {
 			}
 		}
 	}
+}
+
+func termWidth() int {
+	if _, width, err := textutil.TerminalSize(); err == nil && width > 0 {
+		return width
+	}
+	return 80 // have a reasonable default
 }

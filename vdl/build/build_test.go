@@ -3,11 +3,18 @@ package build_test
 import (
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 
+	"veyron.io/veyron/veyron2/vdl"
 	"veyron.io/veyron/veyron2/vdl/build"
+	"veyron.io/veyron/veyron2/vdl/compile"
+	"veyron.io/veyron/veyron2/vdl/testdata/base"
+	"veyron.io/veyron/veyron2/vdl/valconv"
+	vdlroot "veyron.io/veyron/veyron2/vdl/vdlroot/src/vdl"
 	"veyron.io/veyron/veyron2/vdl/vdltest"
 	"veyron.io/veyron/veyron2/vdl/vdlutil"
 )
@@ -17,7 +24,82 @@ func init() {
 	//vdlutil.SetVerbose()
 }
 
-func TestSrcDirs(t *testing.T) {
+// The cwd is set to the directory containing this file.  Currently we have the
+// following directory structure:
+//   .../veyron/go/src/veyron.io/veyron/veyron2/vdl/build/build_test.go
+// We want to end up with the following:
+//   VDLROOT = .../veyron/go/src/veyron.io/veyron/veyron2/vdl/vdlroot
+//   VDLPATH = .../veyron/go
+//
+// TODO(toddw): Put a full VDLPATH tree under ../testdata and only use that.
+const (
+	defaultVDLRoot = "../vdlroot"
+	defaultVDLPath = "../../../../../.."
+)
+
+func setEnvironment(t *testing.T, vdlroot, vdlpath string) bool {
+	errRoot := os.Setenv("VDLROOT", vdlroot)
+	errPath := os.Setenv("VDLPATH", vdlpath)
+	if errRoot != nil {
+		t.Errorf("Setenv(VDLROOT, %q) failed: %v", vdlroot, errRoot)
+	}
+	if errPath != nil {
+		t.Errorf("Setenv(VDLPATH, %q) failed: %v", vdlpath, errPath)
+	}
+	return errRoot == nil && errPath == nil
+}
+
+func setVeyronRoot(t *testing.T, root string) bool {
+	if err := os.Setenv("VEYRON_ROOT", root); err != nil {
+		t.Errorf("Setenv(VEYRON_ROOT, %q) failed: %v", root, err)
+		return false
+	}
+	return true
+}
+
+// Tests the VDLROOT part of SrcDirs().
+func TestSrcDirsVdlRoot(t *testing.T) {
+	cwd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("Getwd() failed: %v", err)
+	}
+	abs := func(relative string) string {
+		return filepath.Join(cwd, relative)
+	}
+	tests := []struct {
+		VDLRoot    string
+		VeyronRoot string
+		Want       []string
+		ErrRE      string
+	}{
+		{"", "", nil, "Either VDLROOT or VEYRON_ROOT must be set"},
+		{"/a", "", []string{"/a/src"}, ""},
+		{"/a/b/c", "", []string{"/a/b/c/src"}, ""},
+		{"", "/veyron", []string{"/veyron/veyron/go/src/veyron.io/veyron/veyron2/vdl/vdlroot/src"}, ""},
+		{"", "/a/b/c", []string{"/a/b/c/veyron/go/src/veyron.io/veyron/veyron2/vdl/vdlroot/src"}, ""},
+		// If both VDLROOT and VEYRON_ROOT are specified, VDLROOT takes precedence.
+		{"/a", "/veyron", []string{"/a/src"}, ""},
+		{"/a/b/c", "/x/y/z", []string{"/a/b/c/src"}, ""},
+	}
+	for _, test := range tests {
+		if !setEnvironment(t, test.VDLRoot, defaultVDLPath) || !setVeyronRoot(t, test.VeyronRoot) {
+			continue
+		}
+		name := fmt.Sprintf("%+v", test)
+		errs := vdlutil.NewErrors(-1)
+		got := build.SrcDirs(errs)
+		vdltest.ExpectResult(t, errs, name, test.ErrRE)
+		// Every result will have our valid VDLPATH srcdir.
+		vdlpathsrc := filepath.Join(abs(defaultVDLPath), "src")
+		want := append(test.Want, vdlpathsrc)
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("SrcDirs(%s) got %v, want %v", name, got, want)
+		}
+	}
+}
+
+// Tests the VDLPATH part of SrcDirs().
+func TestSrcDirsVdlPath(t *testing.T) {
 	cwd, err := os.Getwd()
 	if err != nil {
 		t.Fatalf("Getwd() failed: %v", err)
@@ -51,16 +133,27 @@ func TestSrcDirs(t *testing.T) {
 		{":::/a/1::::b/2::::/c/3:::", []string{"/a/1/src", abs("b/2/src"), "/c/3/src"}},
 	}
 	for _, test := range tests {
-		if err := os.Setenv("VDLPATH", test.VDLPath); err != nil {
-			t.Errorf("Setenv(VDLPATH, %q) failed: %v", err)
+		if !setEnvironment(t, defaultVDLRoot, test.VDLPath) {
 			continue
 		}
-		if got, want := build.SrcDirs(), test.Want; !reflect.DeepEqual(got, want) {
-			t.Errorf("SrcDirs(%q) got %v, want %v", test.VDLPath, got, want)
+		name := fmt.Sprintf("SrcDirs(%q)", test.VDLPath)
+		errs := vdlutil.NewErrors(-1)
+		got := build.SrcDirs(errs)
+		var errRE string
+		if test.Want == nil {
+			errRE = "No src dirs; set VDLPATH to a valid value"
+		}
+		vdltest.ExpectResult(t, errs, name, errRE)
+		// Every result will have our valid VDLROOT srcdir.
+		vdlrootsrc := filepath.Join(abs(defaultVDLRoot), "src")
+		want := append([]string{vdlrootsrc}, test.Want...)
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("%s got %v, want %v", name, got, want)
 		}
 	}
 }
 
+// Tests Is{Dir,Import}Path.
 func TestIsDirImportPath(t *testing.T) {
 	tests := []struct {
 		Path  string
@@ -116,21 +209,15 @@ func TestIsDirImportPath(t *testing.T) {
 	}
 }
 
-// The cwd is set to the directory containing this file.  Currently we have the
-// following directory structure:
-//   .../veyron/go/src/veyron.io/veyron/veyron2/vdl/build/build_test.go
-// So by backtracking a few times, we end up at the top:
-//   .../veyron/go
-const vdlpath = "../../../../../.."
-
 var allModes = []build.UnknownPathMode{
 	build.UnknownPathIsIgnored,
 	build.UnknownPathIsError,
 }
 
+// Tests TransitivePackages success cases.
 func TestTransitivePackages(t *testing.T) {
-	if err := os.Setenv("VDLPATH", vdlpath); err != nil {
-		t.Fatalf("Setenv(VDLPATH, %q) failed: %v", vdlpath, err)
+	if !setEnvironment(t, defaultVDLRoot, defaultVDLPath) {
+		t.Fatalf("Couldn't setEnvironment")
 	}
 	tests := []struct {
 		InPaths, OutPaths []string
@@ -183,6 +270,7 @@ func TestTransitivePackages(t *testing.T) {
 				"veyron.io/veyron/veyron2/vdl/testdata/arith/exp",
 				"veyron.io/veyron/veyron2/vdl/testdata/base",
 				"veyron.io/veyron/veyron2/vdl/testdata/arith",
+				"veyron.io/veyron/veyron2/vdl/testdata/testconfig",
 			},
 		},
 		{
@@ -191,6 +279,7 @@ func TestTransitivePackages(t *testing.T) {
 				"veyron.io/veyron/veyron2/vdl/testdata/arith/exp",
 				"veyron.io/veyron/veyron2/vdl/testdata/base",
 				"veyron.io/veyron/veyron2/vdl/testdata/arith",
+				"veyron.io/veyron/veyron2/vdl/testdata/testconfig",
 			},
 		},
 		{
@@ -199,6 +288,7 @@ func TestTransitivePackages(t *testing.T) {
 				"veyron.io/veyron/veyron2/vdl/testdata/arith/exp",
 				"veyron.io/veyron/veyron2/vdl/testdata/base",
 				"veyron.io/veyron/veyron2/vdl/testdata/arith",
+				"veyron.io/veyron/veyron2/vdl/testdata/testconfig",
 			},
 		},
 		{
@@ -207,6 +297,7 @@ func TestTransitivePackages(t *testing.T) {
 				"veyron.io/veyron/veyron2/vdl/testdata/arith/exp",
 				"veyron.io/veyron/veyron2/vdl/testdata/base",
 				"veyron.io/veyron/veyron2/vdl/testdata/arith",
+				"veyron.io/veyron/veyron2/vdl/testdata/testconfig",
 			},
 		},
 		// Multi-Wildcards as both import and dir path.
@@ -216,6 +307,7 @@ func TestTransitivePackages(t *testing.T) {
 				"veyron.io/veyron/veyron2/vdl/testdata/arith/exp",
 				"veyron.io/veyron/veyron2/vdl/testdata/base",
 				"veyron.io/veyron/veyron2/vdl/testdata/arith",
+				"veyron.io/veyron/veyron2/vdl/testdata/testconfig",
 			},
 		},
 		{
@@ -224,6 +316,7 @@ func TestTransitivePackages(t *testing.T) {
 				"veyron.io/veyron/veyron2/vdl/testdata/arith/exp",
 				"veyron.io/veyron/veyron2/vdl/testdata/base",
 				"veyron.io/veyron/veyron2/vdl/testdata/arith",
+				"veyron.io/veyron/veyron2/vdl/testdata/testconfig",
 			},
 		},
 		// Multi-Wildcards as both import and dir path.
@@ -236,13 +329,12 @@ func TestTransitivePackages(t *testing.T) {
 			[]string{"veyron.io/veyron/veyron2/vdl/testdata/arith/exp"},
 		},
 	}
-	exts := []string{".vdl"}
 	for _, test := range tests {
 		// All modes should result in the same successful output.
 		for _, mode := range allModes {
 			name := fmt.Sprintf("%v %v", mode, test.InPaths)
 			errs := vdlutil.NewErrors(-1)
-			pkgs := build.TransitivePackages(test.InPaths, exts, mode, errs)
+			pkgs := build.TransitivePackages(test.InPaths, mode, build.Opts{}, errs)
 			vdltest.ExpectResult(t, errs, name, "")
 			var got []string
 			for _, pkg := range pkgs {
@@ -255,9 +347,10 @@ func TestTransitivePackages(t *testing.T) {
 	}
 }
 
+// Tests TransitivePackages error cases.
 func TestTransitivePackagesUnknownPathError(t *testing.T) {
-	if err := os.Setenv("VDLPATH", vdlpath); err != nil {
-		t.Fatalf("Setenv(VDLPATH, %q) failed: %v", vdlpath, err)
+	if !setEnvironment(t, defaultVDLRoot, defaultVDLPath) {
+		t.Fatalf("Couldn't setEnvironment")
 	}
 	tests := []struct {
 		InPaths []string
@@ -306,12 +399,11 @@ func TestTransitivePackagesUnknownPathError(t *testing.T) {
 			`package path "foo/_bar" is invalid`,
 		},
 	}
-	exts := []string{".vdl"}
 	for _, test := range tests {
 		for _, mode := range allModes {
 			name := fmt.Sprintf("%v %v", mode, test.InPaths)
 			errs := vdlutil.NewErrors(-1)
-			pkgs := build.TransitivePackages(test.InPaths, exts, mode, errs)
+			pkgs := build.TransitivePackages(test.InPaths, mode, build.Opts{}, errs)
 			errRE := test.ErrRE
 			if mode == build.UnknownPathIsIgnored {
 				// Ignore mode returns success, while error mode returns error.
@@ -322,5 +414,92 @@ func TestTransitivePackagesUnknownPathError(t *testing.T) {
 				t.Errorf("%v got unexpected packages %v", name, pkgs)
 			}
 		}
+	}
+}
+
+// Tests vdl.config file support.
+func TestPackageConfig(t *testing.T) {
+	if !setEnvironment(t, defaultVDLRoot, defaultVDLPath) {
+		t.Fatalf("Couldn't setEnvironment")
+	}
+	tests := []struct {
+		Path   string
+		Config vdlroot.Config
+	}{
+		{"veyron.io/veyron/veyron2/vdl/testdata/base", vdlroot.Config{}},
+		{
+			"veyron.io/veyron/veyron2/vdl/testdata/testconfig",
+			vdlroot.Config{
+				GenLanguages: map[vdlroot.GenLanguage]struct{}{vdlroot.GenLanguageGo: struct{}{}},
+			},
+		},
+	}
+	for _, test := range tests {
+		name := path.Base(test.Path)
+		env := compile.NewEnv(-1)
+		deps := build.TransitivePackages([]string{test.Path}, build.UnknownPathIsError, build.Opts{}, env.Errors)
+		vdltest.ExpectResult(t, env.Errors, name, "")
+		if len(deps) != 1 {
+			t.Fatalf("TransitivePackages(%q) got %v, want 1 dep", name, deps)
+		}
+		if got, want := deps[0].Name, name; got != want {
+			t.Errorf("TransitivePackages(%q) got Name %q, want %q", name, got, want)
+		}
+		if got, want := deps[0].Path, test.Path; got != want {
+			t.Errorf("TransitivePackages(%q) got Path %q, want %q", name, got, want)
+		}
+		if got, want := deps[0].Config, test.Config; !reflect.DeepEqual(got, want) {
+			t.Errorf("TransitivePackages(%q) got Config %+v, want %+v", name, got, want)
+		}
+	}
+}
+
+// Tests BuildConfig, BuildConfigValue and TransitivePackagesForConfig.
+func TestBuildConfig(t *testing.T) {
+	if !setEnvironment(t, defaultVDLRoot, defaultVDLPath) {
+		t.Fatalf("Couldn't setEnvironment")
+	}
+	tests := []struct {
+		Src   string
+		Value interface{}
+	}{
+		{
+			`config = x;import "veyron.io/veyron/veyron2/vdl/testdata/base";const x = base.NamedBool(true)`,
+			base.NamedBool(true),
+		},
+		{
+			`config = x;import "veyron.io/veyron/veyron2/vdl/testdata/base";const x = base.NamedString("abc")`,
+			base.NamedString("abc"),
+		},
+		{
+			`config = x;import "veyron.io/veyron/veyron2/vdl/testdata/base";const x = base.Args{1, 2}`,
+			base.Args{1, 2},
+		},
+	}
+	for _, test := range tests {
+		// Build import package dependencies.
+		env := compile.NewEnv(-1)
+		deps := build.TransitivePackagesForConfig("file", strings.NewReader(test.Src), build.Opts{}, env.Errors)
+		for _, dep := range deps {
+			build.BuildPackage(dep, env)
+		}
+		vdltest.ExpectResult(t, env.Errors, test.Src, "")
+		// Test BuildConfig
+		wantV := vdl.ZeroValue(vdl.TypeOf(test.Value))
+		if err := valconv.Convert(wantV, test.Value); err != nil {
+			t.Errorf("Convert(%v) got error %v, want nil", test.Value, err)
+		}
+		gotV := build.BuildConfig("file", strings.NewReader(test.Src), nil, env)
+		if !vdl.EqualValue(gotV, wantV) {
+			t.Errorf("BuildConfig(%v) got %v, want %v", test.Src, gotV, wantV)
+		}
+		vdltest.ExpectResult(t, env.Errors, test.Src, "")
+		// TestBuildConfigValue
+		gotRV := reflect.New(reflect.TypeOf(test.Value))
+		build.BuildConfigValue("file", strings.NewReader(test.Src), env, gotRV.Interface())
+		if got, want := gotRV.Elem().Interface(), test.Value; !reflect.DeepEqual(got, want) {
+			t.Errorf("BuildConfigValue(%v) got %v, want %v", test.Src, got, want)
+		}
+		vdltest.ExpectResult(t, env.Errors, test.Src, "")
 	}
 }

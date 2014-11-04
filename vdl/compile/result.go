@@ -29,8 +29,13 @@ type Env struct {
 
 // NewEnv creates a new Env, allowing up to maxErrors errors before we stop.
 func NewEnv(maxErrors int) *Env {
+	return NewEnvWithErrors(vdlutil.NewErrors(maxErrors))
+}
+
+// NewEnvWithErrors creates a new Env, using the given errs to collect errors.
+func NewEnvWithErrors(errs *vdlutil.Errors) *Env {
 	env := &Env{
-		Errors:    vdlutil.NewErrors(maxErrors),
+		Errors:    errs,
 		pkgs:      make(map[string]*Package),
 		typeDefs:  make(map[*vdl.Type]*TypeDef),
 		constDefs: make(map[*vdl.Value]*ConstDef),

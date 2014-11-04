@@ -1137,3 +1137,49 @@ type foo interface{}`,
 		nil,
 		[]string{"config files may not contain error, type or interface definitions"}},
 }
+
+func configImports(imports ...string) *parse.Config {
+	config := new(parse.Config)
+	for _, i := range imports {
+		config.Imports = append(config.Imports, &parse.Import{Path: i})
+	}
+	return config
+}
+
+func TestConfigHasImport(t *testing.T) {
+	config := configImports("a", "b/c")
+	tests := []struct {
+		Path string
+		Want bool
+	}{
+		{"a", true},
+		{"b/c", true},
+		{"b", false},
+		{"c", false},
+		{"d", false},
+	}
+	for _, test := range tests {
+		if got, want := config.HasImport(test.Path), test.Want; got != want {
+			t.Errorf("HasImport(%q) got %v, want %v", test.Path, got, want)
+		}
+	}
+}
+
+func TestConfigAddImports(t *testing.T) {
+	tests := []struct {
+		Base    *parse.Config
+		Imports []string
+		Want    *parse.Config
+	}{
+		{configImports(), []string{"a", "b/c"}, configImports("a", "b/c")},
+		{configImports("a"), []string{"a", "b/c"}, configImports("a", "b/c")},
+		{configImports("a", "b/c"), []string{"a", "b/c"}, configImports("a", "b/c")},
+		{configImports("a", "b/c"), []string{"a", "b/c", "d"}, configImports("a", "b/c", "d")},
+	}
+	for _, test := range tests {
+		test.Base.AddImports(test.Imports...)
+		if got, want := test.Base, test.Want; !reflect.DeepEqual(got, want) {
+			t.Errorf("AddImports(%q) got %v, want %v", test.Imports, got, want)
+		}
+	}
+}

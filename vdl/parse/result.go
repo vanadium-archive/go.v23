@@ -65,6 +65,25 @@ type Config struct {
 	ConstDefs []*ConstDef // Consts defined in this file.
 }
 
+// AddImports adds the path imports that don't already exist to c.
+func (c *Config) AddImports(path ...string) {
+	for _, p := range path {
+		if !c.HasImport(p) {
+			c.Imports = append(c.Imports, &Import{Path: p})
+		}
+	}
+}
+
+// HasImport returns true iff path exists in c.Imports.
+func (c *Config) HasImport(path string) bool {
+	for _, imp := range c.Imports {
+		if imp.Path == path {
+			return true
+		}
+	}
+	return false
+}
+
 // Import represents an import definition, which is used to import other
 // packages into an vdl file.  An example of the syntax in the vdl file:
 //   import foo "some/package/path"

@@ -43,6 +43,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"reflect"
 	"regexp"
 	"sort"
 	"strings"
@@ -51,6 +52,8 @@ import (
 	"veyron.io/veyron/veyron2/vdl"
 	"veyron.io/veyron/veyron2/vdl/compile"
 	"veyron.io/veyron/veyron2/vdl/parse"
+	"veyron.io/veyron/veyron2/vdl/valconv"
+	vdlroot "veyron.io/veyron/veyron2/vdl/vdlroot/src/vdl"
 	"veyron.io/veyron/veyron2/vdl/vdlutil"
 )
 
@@ -68,6 +71,10 @@ type Package struct {
 	// BaseFileNames is the list of sorted base vdl file names for this package.
 	// Join these with Dir to get absolute file names.
 	BaseFileNames []string
+	// Config is the configuration for this package, specified by an optional
+	// "vdl.config" file in the package directory.  If no "vdl.config" file
+	// exists, the zero value of Config is used.
+	Config vdlroot.Config
 
 	// OpenFilesFunc is a function that opens the files with the given filenames,
 	// and returns a map from base file name to file contents.
@@ -128,16 +135,23 @@ func validPackagePath(path string) bool {
 
 // New packages always start with an empty Name, which is filled in when we call
 // ds.addPackageAndDeps.
-func newPackage(path, dir string, mode UnknownPathMode, exts map[string]bool, errs *vdlutil.Errors) *Package {
+func newPackage(path, dir string, mode UnknownPathMode, opts Opts, vdlenv *compile.Env) *Package {
 	pkg := &Package{Path: path, Dir: dir, OpenFilesFunc: openFiles}
-	if err := pkg.initBaseFileNames(exts); err != nil {
-		mode.logOrErrorf(errs, "%s: bad package dir (%v)", pkg.Dir, err)
+	if err := pkg.initBaseFileNames(opts.exts()); err != nil {
+		mode.logOrErrorf(vdlenv.Errors, "%s: bad package dir (%v)", pkg.Dir, err)
+		return nil
+	}
+	// TODO(toddw): Add a mechanism in vdlutil.Errors to distinguish categories of
+	// errors, so that it's more obvious when errors are coming from vdl.config
+	// files vs *.vdl files.
+	origErrors := vdlenv.Errors.NumErrors()
+	if pkg.initVDLConfig(opts, vdlenv); origErrors != vdlenv.Errors.NumErrors() {
 		return nil
 	}
 	return pkg
 }
 
-// initBaseFileNames initializes BaseFileNames from the Dir.
+// initBaseFileNames initializes p.BaseFileNames from the contents of p.Dir.
 func (p *Package) initBaseFileNames(exts map[string]bool) error {
 	infos, err := ioutil.ReadDir(p.Dir)
 	if err != nil {
@@ -158,6 +172,25 @@ func (p *Package) initBaseFileNames(exts map[string]bool) error {
 		return fmt.Errorf("no vdl files")
 	}
 	return nil
+}
+
+// initVDLConfig initializes p.Config based on the optional vdl.config file.
+func (p *Package) initVDLConfig(opts Opts, vdlenv *compile.Env) {
+	path := filepath.Join(p.Dir, opts.vdlConfigName())
+	configData, err := os.Open(path)
+	switch {
+	case os.IsNotExist(err):
+		return
+	case err != nil:
+		vdlenv.Errors.Errorf("%s: couldn't open (%v)", path, err)
+		return
+	}
+	// Build the vdl.config file with an implicit "vdl" import.  Note that the
+	// actual "vdl" package has already been populated into vdlenv.
+	BuildConfigValueImplicitImports(opts.vdlConfigName(), configData, []string{"vdl"}, vdlenv, &p.Config)
+	if err := configData.Close(); err != nil {
+		vdlenv.Errors.Errorf("%s: couldn't close (%v)", path, err)
+	}
 }
 
 // OpenFiles opens all files in the package and returns a map from base file
@@ -214,22 +247,63 @@ func (p *Package) CloseFiles() error {
 }
 
 // SrcDirs returns a list of package root source directories, based on the
-// VDLPATH environment variable.
+// VDLPATH, VDLROOT and VEYRON_ROOT environment variables.
 //
 // VDLPATH is a list of directories separated by filepath.ListSeparator;
 // e.g. the separator is ":" on UNIX, and ";" on Windows.  Each VDLPATH
 // directory must have a "src/" directory that holds vdl source code.  The path
 // below "src/" determines the import path.
-func SrcDirs() []string {
-	var ret []string
+//
+// VDLROOT is a single directory specifying the location of the standard vdl
+// packages.  It has the same requirements as VDLPATH components.  If VDLROOT is
+// empty, we use VEYRON_ROOT to construct the VDLROOT.  An error is reported if
+// neither VDLROOT nor VEYRON_ROOT is specified.
+func SrcDirs(errs *vdlutil.Errors) []string {
+	var srcDirs []string
+	if root := vdlRootSrcDir(errs); root != "" {
+		srcDirs = append(srcDirs, root)
+	}
+	return append(srcDirs, vdlPathSrcDirs(errs)...)
+}
+
+func vdlRootSrcDir(errs *vdlutil.Errors) string {
+	vdlroot := os.Getenv("VDLROOT")
+	if vdlroot == "" {
+		// Try to construct VDLROOT out of VEYRON_ROOT.
+		veyronroot := os.Getenv("VEYRON_ROOT")
+		if veyronroot == "" {
+			errs.Error("Either VDLROOT or VEYRON_ROOT must be set")
+			return ""
+		}
+		vdlroot = filepath.Join(veyronroot, "veyron", "go", "src", "veyron.io", "veyron", "veyron2", "vdl", "vdlroot")
+	}
+	src := filepath.Join(vdlroot, "src")
+	abs, err := filepath.Abs(src)
+	if err != nil {
+		errs.Errorf("VDLROOT src dir %q can't be made absolute (%v)", src, err)
+		return ""
+	}
+	return abs
+}
+
+func vdlPathSrcDirs(errs *vdlutil.Errors) []string {
+	var srcDirs []string
 	for _, dir := range filepath.SplitList(os.Getenv("VDLPATH")) {
 		if dir != "" {
-			if abs, err := filepath.Abs(filepath.Join(dir, "src")); err == nil {
-				ret = append(ret, abs)
+			src := filepath.Join(dir, "src")
+			abs, err := filepath.Abs(src)
+			if err != nil {
+				errs.Errorf("VDLPATH src dir %q can't be made absolute (%v)", src, err)
+				continue // keep going to collect all errors
 			}
+			srcDirs = append(srcDirs, abs)
 		}
 	}
-	return ret
+	if len(srcDirs) == 0 {
+		errs.Error("No src dirs; set VDLPATH to a valid value")
+		return nil
+	}
+	return srcDirs
 }
 
 // IsDirPath returns true iff the path is absolute, or begins with a . or
@@ -270,35 +344,44 @@ func IsImportPath(path string) bool {
 // similar to how the regular go tool generates *.a files under the top-level
 // pkg directory.
 type depSorter struct {
-	exts    map[string]bool // file extensions of valid vdl files.
+	opts    Opts
 	srcDirs []string
 	pathMap map[string]*Package
 	dirMap  map[string]*Package
 	sorter  *toposort.Sorter
 	errs    *vdlutil.Errors
+	vdlenv  *compile.Env
 }
 
-func makeExts(exts []string) map[string]bool {
-	ret := make(map[string]bool)
-	for _, e := range exts {
-		ret[e] = true
-	}
-	return ret
-}
-
-func newDepSorter(exts []string, errs *vdlutil.Errors) *depSorter {
-	srcDirs := SrcDirs()
-	if len(srcDirs) == 0 {
-		errs.Error("No src dirs; set VDLPATH to a valid value")
-	}
+func rawDepSorter(opts Opts, errs *vdlutil.Errors) *depSorter {
 	return &depSorter{
-		exts:    makeExts(exts),
-		srcDirs: srcDirs,
+		opts:    opts,
+		srcDirs: SrcDirs(errs),
 		pathMap: make(map[string]*Package),
 		dirMap:  make(map[string]*Package),
 		sorter:  &toposort.Sorter{},
 		errs:    errs,
+		vdlenv:  compile.NewEnvWithErrors(errs),
 	}
+}
+
+func newDepSorter(opts Opts, errs *vdlutil.Errors) *depSorter {
+	// Resolve the "vdl" import and build all transitive packages into vdlenv.
+	// This special env is used when building "vdl.config" files, which have the
+	// implicit "vdl" import.
+	ds := rawDepSorter(opts, errs)
+	vdlenv := ds.vdlenv
+	if !ds.ResolvePath("vdl", UnknownPathIsError) {
+		errs.Errorf(`Can't resolve standard "vdl" package`)
+	}
+	for _, pkg := range ds.Sort() {
+		BuildPackage(pkg, vdlenv)
+	}
+	// We must return an empty depSorter to ensure the returned transitive
+	// packages don't include "vdl" if the user didn't specify it.
+	ds = rawDepSorter(opts, errs)
+	ds.vdlenv = vdlenv
+	return ds
 }
 
 func (ds *depSorter) errorf(format string, v ...interface{}) {
@@ -481,7 +564,7 @@ func (ds *depSorter) resolveImportPath(pkgPath string, mode UnknownPathMode) *Pa
 
 // addPackageAndDeps adds the pkg and its dependencies to the sorter.
 func (ds *depSorter) addPackageAndDeps(path, dir string, mode UnknownPathMode) *Package {
-	pkg := newPackage(path, dir, mode, ds.exts, ds.errs)
+	pkg := newPackage(path, dir, mode, ds.opts, ds.vdlenv)
 	if pkg == nil {
 		return nil
 	}
@@ -558,6 +641,35 @@ func printPackagePath(v interface{}) string {
 	return v.(*Package).Path
 }
 
+// Opts specifies additional options for collecting build information.
+type Opts struct {
+	// Extensions specifies the file name extensions for valid vdl files.  If
+	// empty we use ".vdl" by default.
+	Extensions []string
+
+	// VDLConfigName specifies the name of the optional config file in each vdl
+	// source package.  If empty we use "vdl.config" by default.
+	VDLConfigName string
+}
+
+func (o Opts) exts() map[string]bool {
+	ret := make(map[string]bool)
+	for _, e := range o.Extensions {
+		ret[e] = true
+	}
+	if len(ret) == 0 {
+		ret[".vdl"] = true
+	}
+	return ret
+}
+
+func (o Opts) vdlConfigName() string {
+	if o.VDLConfigName != "" {
+		return o.VDLConfigName
+	}
+	return "vdl.config"
+}
+
 // TransitivePackages takes a list of paths, and returns the corresponding
 // packages and transitive dependencies, ordered by dependency.  Each path may
 // either be a directory (IsDirPath) or an import (IsImportPath).
@@ -575,11 +687,10 @@ func printPackagePath(v interface{}) string {
 // such paths are ignored in wildcard matches, and return errors if specified
 // explicitly.
 //
-// The exts arg specifies the file name extensions for valid vdl files;
-// e.g. ".vdl".  The mode specifies whether we should ignore or produce errors
-// for paths that don't resolve to any packages.
-func TransitivePackages(paths, exts []string, mode UnknownPathMode, errs *vdlutil.Errors) []*Package {
-	ds := newDepSorter(exts, errs)
+// The mode specifies whether we should ignore or produce errors for paths that
+// don't resolve to any packages.  The opts arg specifies additional options.
+func TransitivePackages(paths []string, mode UnknownPathMode, opts Opts, errs *vdlutil.Errors) []*Package {
+	ds := newDepSorter(opts, errs)
 	for _, path := range paths {
 		if !ds.ResolvePath(path, mode) {
 			mode.logOrErrorf(errs, "Can't resolve %q to any packages", path)
@@ -591,10 +702,9 @@ func TransitivePackages(paths, exts []string, mode UnknownPathMode, errs *vdluti
 // TransitivePackagesForConfig takes a config file represented by its base file
 // name and src data, and returns all package dependencies in transitive order.
 //
-// The exts arg specifies the file name extensions for valid vdl files,
-// e.g. ".vdl".
-func TransitivePackagesForConfig(baseFileName string, src io.Reader, exts []string, errs *vdlutil.Errors) []*Package {
-	ds := newDepSorter(exts, errs)
+// The opts arg specifies additional options.
+func TransitivePackagesForConfig(baseFileName string, src io.Reader, opts Opts, errs *vdlutil.Errors) []*Package {
+	ds := newDepSorter(opts, errs)
 	ds.AddConfigDeps(baseFileName, src)
 	return ds.Sort()
 }
@@ -643,6 +753,37 @@ func BuildPackage(pkg *Package, env *compile.Env) *compile.Package {
 // All imports that the config src depend on must have already been compiled and
 // populated into env.
 func BuildConfig(baseFileName string, src io.Reader, implicit *vdl.Type, env *compile.Env) *vdl.Value {
+	return BuildConfigImplicitImports(baseFileName, src, implicit, []string{}, env)
+}
+
+// BuildConfigImplicitImports is like BuildConfig, and allows additional fake
+// imports to be injected into the config file represented in src.
+func BuildConfigImplicitImports(baseFileName string, src io.Reader, implicit *vdl.Type, imports []string, env *compile.Env) *vdl.Value {
 	pconfig := parse.ParseConfig(baseFileName, src, parse.Opts{}, env.Errors)
+	if pconfig != nil {
+		pconfig.AddImports(imports...)
+	}
 	return compile.CompileConfig(implicit, pconfig, env)
+}
+
+// BuildConfigValue is a convenience function that runs BuildConfig, and then
+// converts the result into value.
+func BuildConfigValue(baseFileName string, src io.Reader, env *compile.Env, value interface{}) {
+	BuildConfigValueImplicitImports(baseFileName, src, []string{}, env, value)
+}
+
+// BuildConfigValueImplicitImports is a convenience function that runs
+// BuildConfigImplicitImports, and then converts the result into value.
+func BuildConfigValueImplicitImports(baseFileName string, src io.Reader, imports []string, env *compile.Env, value interface{}) {
+	vconfig := BuildConfigImplicitImports(baseFileName, src, vdl.TypeOf(value), imports, env)
+	if vconfig == nil {
+		return
+	}
+	target, err := valconv.ReflectTarget(reflect.ValueOf(value))
+	if err != nil {
+		env.Errors.Errorf("Can't create reflect target for %T (%v)", value, err)
+	}
+	if err := valconv.FromValue(target, vconfig); err != nil {
+		env.Errors.Errorf("Can't convert to %T from %v (%v)", value, vconfig, err)
+	}
 }
