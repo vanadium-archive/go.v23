@@ -5,11 +5,8 @@ import (
 	"reflect"
 	"sync"
 
-	"veyron.io/veyron/veyron2/security"
 	"veyron.io/veyron/veyron2/verror"
 )
-
-const defaultLabel = security.AdminLabel
 
 var (
 	errWrongNumInArgs = verror.BadArgf("ipc: wrong number of in-args")
@@ -25,8 +22,8 @@ var _ Invoker = (*reflectInvoker)(nil)
 type methodInfo struct {
 	funcVal  reflect.Value
 	rtInArgs []reflect.Type
-	// Label is special - it's not memoized since it may change per instance.
-	label security.Label
+	// Tags are special - they are not memoized since they may change per instance.
+	tags []interface{}
 }
 
 // ReflectInvoker returns an Invoker implementation that uses reflection to make
@@ -46,10 +43,10 @@ func ReflectInvoker(obj interface{}) Invoker {
 	if len(methods) == 0 {
 		panic(fmt.Errorf("ipc: object type %T has no compatible methods: %v", obj, TypeCheckMethods(obj)))
 	}
-	// Copy the memoized methods, so we can fill in the label.
+	// Copy the memoized methods, so we can fill in the tags.
 	methodsCopy := make(map[string]methodInfo, len(methods))
 	for name, info := range methods {
-		info.label = getMethodLabel(obj, name)
+		info.tags = getMethodTags(obj, name)
 		methodsCopy[name] = info
 	}
 	return reflectInvoker{rcvr, methodsCopy}
@@ -60,27 +57,22 @@ type serverGetMethodTags interface {
 	GetMethodTags(c ServerCall, method string) ([]interface{}, error)
 }
 
-// getMethodLabel retrieves the security acl label for the given method.
-func getMethodLabel(obj interface{}, method string) security.Label {
+// getMethodTags extracts any tags associated with obj.method
+func getMethodTags(obj interface{}, method string) []interface{} {
 	if tagger, _ := obj.(serverGetMethodTags); tagger != nil {
-		if tags, err := tagger.GetMethodTags(nil, method); err == nil {
-			for _, tag := range tags {
-				if label, ok := tag.(security.Label); ok && security.IsValidLabel(label) {
-					return label
-				}
-			}
-		}
+		tags, _ := tagger.GetMethodTags(nil, method)
+		return tags
 	}
-	return defaultLabel
+	return nil
 }
 
 // Prepare implements the Invoker.Prepare method.
-func (ri reflectInvoker) Prepare(method string, _ int) ([]interface{}, security.Label, error) {
+func (ri reflectInvoker) Prepare(method string, _ int) ([]interface{}, []interface{}, error) {
 	info, ok := ri.methods[method]
 	if !ok {
-		return nil, defaultLabel, verror.NoExistf("ipc: unknown method '%s'", method)
+		return nil, nil, verror.NoExistf("ipc: unknown method '%s'", method)
 	}
-	// Return the memoized label and new in-arg objects.
+	// Return the memoized tags and new in-arg objects.
 	var argptrs []interface{}
 	if len(info.rtInArgs) > 0 {
 		argptrs = make([]interface{}, len(info.rtInArgs))
@@ -89,7 +81,7 @@ func (ri reflectInvoker) Prepare(method string, _ int) ([]interface{}, security.
 		}
 	}
 
-	return argptrs, info.label, nil
+	return argptrs, info.tags, nil
 }
 
 // Invoke implements the Invoker.Invoke method.

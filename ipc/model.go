@@ -271,9 +271,9 @@ type Invoker interface {
 	//
 	// numArgs specifies the number of input arguments sent by the client - it may
 	// be used to support method overloading, e.g. for different versions of a
-	// method with the same name.  The returned security label is used in the
-	// subsequent authorization check.
-	Prepare(method string, numArgs int) (argptrs []interface{}, label security.Label, err error)
+	// method with the same name.  The returned "tags" are arbitary objects used
+	// as method tags, typically in the VDL specification of a Veyron service.
+	Prepare(method string, numArgs int) (argptrs, tags []interface{}, err error)
 
 	// Invoke is the second stage of method invocation.  It is passed the method
 	// name, the in-flight call context, and the argptrs returned by Prepare,

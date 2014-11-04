@@ -68,7 +68,14 @@ var (
 	call6 = NewFakeServerCall()
 )
 
-const defaultLabel = security.AdminLabel
+// test tags.
+const (
+	tagAlpha   = "alpha"
+	tagBeta    = "beta"
+	tagGamma   = "gamma"
+	tagDelta   = "gamma"
+	tagEpsilon = "epsilon"
+)
 
 // All objects used for success testing are based on testObj, which captures the
 // state from each invocation, so that we may test it against our expectations.
@@ -95,11 +102,11 @@ func (o *notags) Error(c ipc.ServerCall) error                 { o.call = c; ret
 
 type tags struct{ testObj }
 
-func (o *tags) Admin(c ipc.ServerCall) error                    { o.call = c; return nil }
-func (o *tags) Read(c ipc.ServerCall) (int, error)              { o.call = c; return 0, nil }
-func (o *tags) Write(c ipc.ServerCall, _ int) error             { o.call = c; return nil }
-func (o *tags) Monitoring(c ipc.ServerCall, i int) (int, error) { o.call = c; return i, nil }
-func (o *tags) Debug(c ipc.ServerCall, i int, s string) (int, string, error) {
+func (o *tags) Alpha(c ipc.ServerCall) error               { o.call = c; return nil }
+func (o *tags) Beta(c ipc.ServerCall) (int, error)         { o.call = c; return 0, nil }
+func (o *tags) Gamma(c ipc.ServerCall, _ int) error        { o.call = c; return nil }
+func (o *tags) Delta(c ipc.ServerCall, i int) (int, error) { o.call = c; return i, nil }
+func (o *tags) Epsilon(c ipc.ServerCall, i int, s string) (int, string, error) {
 	o.call = c
 	return i, s, nil
 }
@@ -107,16 +114,16 @@ func (o *tags) Error(c ipc.ServerCall) error { o.call = c; return errApp }
 
 func (o *tags) GetMethodTags(c ipc.ServerCall, method string) ([]interface{}, error) {
 	switch method {
-	case "Admin":
-		return []interface{}{security.AdminLabel}, nil
-	case "Read":
-		return []interface{}{security.ReadLabel}, nil
-	case "Write":
-		return []interface{}{security.WriteLabel}, nil
-	case "Monitoring":
-		return []interface{}{security.MonitoringLabel}, nil
-	case "Debug":
-		return []interface{}{security.DebugLabel}, nil
+	case "Alpha":
+		return []interface{}{tagAlpha}, nil
+	case "Beta":
+		return []interface{}{tagBeta}, nil
+	case "Gamma":
+		return []interface{}{tagGamma}, nil
+	case "Delta":
+		return []interface{}{tagDelta}, nil
+	case "Epsilon":
+		return []interface{}{tagEpsilon}, nil
 	default:
 		return []interface{}{}, nil
 	}
@@ -129,24 +136,24 @@ func TestReflectInvoker(t *testing.T) {
 		method string
 		call   ipc.ServerCall
 		// Expected results:
-		label   security.Label
+		tag     interface{}
 		args    v
 		results v
 		err     error
 	}
 	tests := []testcase{
-		{&notags{}, "Method1", call1, defaultLabel, nil, v{nil}, nil},
-		{&notags{}, "Method2", call2, defaultLabel, nil, v{0, nil}, nil},
-		{&notags{}, "Method3", call3, defaultLabel, v{0}, v{nil}, nil},
-		{&notags{}, "Method4", call4, defaultLabel, v{11}, v{11, nil}, nil},
-		{&notags{}, "Method5", call5, defaultLabel, nil, v{1}, nil},
-		{&notags{}, "Error", call6, defaultLabel, nil, v{errApp}, nil},
-		{&tags{}, "Admin", call1, security.AdminLabel, nil, v{nil}, nil},
-		{&tags{}, "Read", call2, security.ReadLabel, nil, v{0, nil}, nil},
-		{&tags{}, "Write", call3, security.WriteLabel, v{0}, v{nil}, nil},
-		{&tags{}, "Monitoring", call4, security.MonitoringLabel, v{11}, v{11, nil}, nil},
-		{&tags{}, "Debug", call5, security.DebugLabel, v{11, "b"}, v{11, "b", nil}, nil},
-		{&tags{}, "Error", call1, defaultLabel, nil, v{errApp}, nil},
+		{&notags{}, "Method1", call1, nil, nil, v{nil}, nil},
+		{&notags{}, "Method2", call2, nil, nil, v{0, nil}, nil},
+		{&notags{}, "Method3", call3, nil, v{0}, v{nil}, nil},
+		{&notags{}, "Method4", call4, nil, v{11}, v{11, nil}, nil},
+		{&notags{}, "Method5", call5, nil, nil, v{1}, nil},
+		{&notags{}, "Error", call6, nil, nil, v{errApp}, nil},
+		{&tags{}, "Alpha", call1, tagAlpha, nil, v{nil}, nil},
+		{&tags{}, "Beta", call2, tagBeta, nil, v{0, nil}, nil},
+		{&tags{}, "Gamma", call3, tagGamma, v{0}, v{nil}, nil},
+		{&tags{}, "Delta", call4, tagDelta, v{11}, v{11, nil}, nil},
+		{&tags{}, "Epsilon", call5, tagEpsilon, v{11, "b"}, v{11, "b", nil}, nil},
+		{&tags{}, "Error", call1, nil, nil, v{errApp}, nil},
 	}
 	name := func(t testcase) string {
 		return fmt.Sprintf("%T.%s()", t.obj, t.method)
@@ -154,15 +161,19 @@ func TestReflectInvoker(t *testing.T) {
 	for _, test := range tests {
 		invoker := ipc.ReflectInvoker(test.obj)
 		// Call Invoker.Prepare and check results.
-		argptrs, label, err := invoker.Prepare(test.method, len(test.args))
+		argptrs, tags, err := invoker.Prepare(test.method, len(test.args))
 		if err != nil {
 			t.Errorf("%s Prepare unexpected error: %v", name(test), err)
 		}
 		if !equalPtrValTypes(argptrs, test.args) {
 			t.Errorf("%s Prepare got argptrs %v, want args %v", name(test), printTypes(argptrs), printTypes(toPtrs(test.args)))
 		}
-		if label != test.label {
-			t.Errorf("%s Prepare got label %q, want %q", name(test), label, test.label)
+		var tag interface{}
+		if len(tags) > 0 {
+			tag = tags[0]
+		}
+		if tag != test.tag {
+			t.Errorf("%s Prepare got tags %v, want %v", name(test), tags, []interface{}{test.tag})
 		}
 		// Call Invoker.Invoke and check results.
 		results, err := invoker.Invoke(test.method, test.call, toPtrs(test.args))
@@ -299,11 +310,11 @@ func TestTypeCheckMethods(t *testing.T) {
 			"LastServerCall": ipc.ErrNumInArgs,
 		}},
 		{&tags{}, map[string]error{
-			"Admin":          nil,
-			"Read":           nil,
-			"Write":          nil,
-			"Monitoring":     nil,
-			"Debug":          nil,
+			"Alpha":          nil,
+			"Beta":           nil,
+			"Gamma":          nil,
+			"Delta":          nil,
+			"Epsilon":        nil,
 			"Error":          nil,
 			"GetMethodTags":  nil,
 			"LastServerCall": ipc.ErrNumInArgs,
