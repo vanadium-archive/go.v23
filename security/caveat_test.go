@@ -11,17 +11,18 @@ import (
 func TestCaveats(t *testing.T) {
 	var (
 		self  = newPrincipal(t)
-		ctx   = &context{method: "Foo", local: self, localBlessings: blessSelf(t, self, "alice/phone/friend")}
+		now   = time.Now()
+		ctx   = &context{timestamp: now, method: "Foo", local: self, localBlessings: blessSelf(t, self, "alice/phone/friend")}
 		C     = newCaveat
 		tests = []struct {
 			cav Caveat
 			ok  bool
 		}{
 			// NewCaveat
-			{C(NewCaveat(unixTimeExpiryCaveat(time.Now().Add(time.Hour).Unix()))), true},
+			{C(NewCaveat(unixTimeExpiryCaveat(now.Add(time.Second).Unix()))), true},
 			// ExpiryCaveat
-			{C(ExpiryCaveat(time.Now().Add(time.Hour))), true},
-			{C(ExpiryCaveat(time.Now().Add(-1 * time.Hour))), false},
+			{C(ExpiryCaveat(now.Add(time.Second))), true},
+			{C(ExpiryCaveat(now.Add(-1 * time.Second))), false},
 			// MethodCaveat
 			{C(MethodCaveat("Foo")), true},
 			{C(MethodCaveat("Bar")), false},
@@ -56,12 +57,13 @@ func TestCaveats(t *testing.T) {
 
 func TestPublicKeyThirdPartyCaveat(t *testing.T) {
 	var (
-		valid        = newCaveat(ExpiryCaveat(time.Now().Add(24 * time.Hour)))
-		expired      = newCaveat(ExpiryCaveat(time.Now().Add(-24 * time.Hour)))
+		now          = time.Now()
+		valid        = newCaveat(ExpiryCaveat(now.Add(time.Second)))
+		expired      = newCaveat(ExpiryCaveat(now.Add(-1 * time.Second)))
 		discharger   = newPrincipal(t)
 		randomserver = newPrincipal(t)
 		ctx          = func(method string, discharges ...Discharge) Context {
-			ctx := &context{method: method, discharges: make(map[string]Discharge)}
+			ctx := &context{timestamp: now, method: method, discharges: make(map[string]Discharge)}
 			for _, d := range discharges {
 				ctx.discharges[d.ID()] = d
 			}
@@ -100,7 +102,7 @@ func TestPublicKeyThirdPartyCaveat(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if merr := matchesError(tpc.Dischargeable(&context{}), "could not validate embedded restriction security.unixTimeExpiryCaveat"); merr != nil {
+	if merr := matchesError(tpc.Dischargeable(&context{timestamp: now}), "could not validate embedded restriction security.unixTimeExpiryCaveat"); merr != nil {
 		t.Fatal(merr)
 	}
 }

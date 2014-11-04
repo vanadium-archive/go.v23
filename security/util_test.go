@@ -11,6 +11,7 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 
 	"veyron.io/veyron/veyron2/naming"
 	"veyron.io/veyron/veyron2/vom"
@@ -52,9 +53,12 @@ type context struct {
 	local                           Principal
 	localBlessings, remoteBlessings Blessings
 	discharges                      map[string]Discharge
+	timestamp                       time.Time
 }
 
+func (c *context) Timestamp() time.Time             { return c.timestamp }
 func (c *context) Method() string                   { return c.method }
+func (c *context) MethodTags() []interface{}        { return nil }
 func (c *context) Name() string                     { return c.name }
 func (c *context) Suffix() string                   { return c.suffix }
 func (c *context) Label() Label                     { return c.label }

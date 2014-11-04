@@ -43,7 +43,9 @@ func (*FakeServerCall) WithTimeout(timeout time.Duration) (context.T, context.Ca
 }
 func (*FakeServerCall) WithValue(key interface{}, val interface{}) context.T { return nil }
 func (*FakeServerCall) Server() ipc.Server                                   { return nil }
+func (*FakeServerCall) Timestamp() (t time.Time)                             { return t }
 func (*FakeServerCall) Method() string                                       { return "" }
+func (*FakeServerCall) MethodTags() []interface{}                            { return nil }
 func (*FakeServerCall) Name() string                                         { return "" }
 func (*FakeServerCall) Suffix() string                                       { return "" }
 func (*FakeServerCall) Label() (l security.Label)                            { return }

@@ -134,7 +134,10 @@
 //  p2.BlessingStore().SetDefault(default)
 package security
 
-import "veyron.io/veyron/veyron2/naming"
+import (
+	"time"
+	"veyron.io/veyron/veyron2/naming"
+)
 
 // Principal represents an entity capable of making or receiving RPCs.
 // Principals have a unique (public, private) key pair, have blessings bound
@@ -404,14 +407,19 @@ type Discharge interface {
 
 // Context defines the state available for authorizing a principal.
 type Context interface {
+	// Timestamp at which the authorization state is to be checked.
+	Timestamp() time.Time
 	// Method returns the method being invoked.
 	Method() string
+	// Tags attached to the method, typically through the interface specification in VDL.
+	MethodTags() []interface{}
 	// Name returns the object name on which the method is being invoked.
 	Name() string
 	// Suffix returns the object name suffix for the request.
 	// TODO(ashankar,caprita): Remove? Name() should be sufficient?
 	Suffix() string
 	// Label returns the method's security label.
+	// TODO(ashankar): Remove? (Only one of this or MethodTags should survive by November 10, 2014)
 	Label() Label
 	// Discharges maps a ThirdPartyCaveat identifier to the corresponding
 	// discharges.

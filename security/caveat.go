@@ -62,7 +62,7 @@ func (c *Caveat) String() string {
 }
 
 func (c unixTimeExpiryCaveat) Validate(ctx Context) error {
-	now := time.Now()
+	now := ctx.Timestamp()
 	expiry := time.Unix(int64(c), 0)
 	if now.After(expiry) {
 		return fmt.Errorf("%T(%v=%v) fails validation at %v", c, c, expiry, now)
