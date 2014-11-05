@@ -1,7 +1,9 @@
 package mgmt
 
 const (
-	ParentNodeManagerConfigKey = "PARENT_NODE_MANAGER_NAME"
-	ChildNodeManagerConfigKey  = "CHILD_NODE_MANAGER_NAME"
-	AppCycleManagerConfigKey   = "CHILD_APP_CYCLE_MANAGER_NAME"
+	ParentNameConfigKey      = "MGMT_PARENT_PROCESS_NAME"
+	ChildNameConfigKey       = "MGMT_CHILD_PROCESS_NAME"
+	AppCycleManagerConfigKey = "MGMT_APP_CYCLE_MANAGER_NAME"
+	AddressConfigKey         = "MGMT_CHILD_PROCESS_ADDRESS"
+	ProtocolConfigKey        = "MGMT_CHILD_PROCESS_PROTOCOL"
 )
