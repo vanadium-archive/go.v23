@@ -80,11 +80,19 @@ type MountEntry struct {
 	Name string
 	// Servers (if present) specifies the mounted names (Link is empty).
 	Servers []MountedServer
-	// MT is true if servers refer to another mount table.
-	MT bool
+	// mt is true if servers refer to another mount table.
+	mt bool
 	// An error occurred fulfilling the request.
 	Error error
 }
+
+// ServesMountTable returns true if the mount entry represents servers that are
+// mount tables.
+// TODO(p): When the endpoint actually has this fact encoded in, use that.
+func (e *MountEntry) ServesMountTable() bool { return e.mt }
+
+// SetServesMountTable sets whether or not this is a mount table.
+func (e *MountEntry) SetServesMountTable(v bool) { e.mt = v }
 
 // CacheCtl is a cache control for the resolution cache.
 type CacheCtl interface {
