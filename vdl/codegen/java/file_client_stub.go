@@ -36,11 +36,11 @@ public final class {{ .ServiceName }}Stub implements {{ .FullServiceName }} {
 
     // Methods from interface UniversalServiceMethods.
     @Override
-    public io.veyron.veyron.veyron2.ipc.ServiceSignature getSignature(io.veyron.veyron.veyron2.context.Context context) throws io.veyron.veyron.veyron2.ipc.VeyronException {
+    public io.veyron.veyron.veyron2.ipc.ServiceSignature getSignature(io.veyron.veyron.veyron2.context.Context context) throws io.veyron.veyron.veyron2.VeyronException {
         return getSignature(context, null);
     }
     @Override
-    public io.veyron.veyron.veyron2.ipc.ServiceSignature getSignature(io.veyron.veyron.veyron2.context.Context context, io.veyron.veyron.veyron2.Options veyronOpts) throws io.veyron.veyron.veyron2.ipc.VeyronException {
+    public io.veyron.veyron.veyron2.ipc.ServiceSignature getSignature(io.veyron.veyron.veyron2.context.Context context, io.veyron.veyron.veyron2.Options veyronOpts) throws io.veyron.veyron.veyron2.VeyronException {
         // Add VDL path option.
         // NOTE(spetrovic): this option is temporary and will be removed soon after we switch
         // Java to encoding/decoding from vom.Value objects.
@@ -66,12 +66,12 @@ public final class {{ .ServiceName }}Stub implements {{ .FullServiceName }} {
 {{ range $method := .Methods }}
     {{/* The optionless overload simply calls the overload with options */}}
     @Override
-    public {{ $method.RetType }} {{ $method.Name }}(final io.veyron.veyron.veyron2.context.Context context{{ $method.DeclarationArgs }}) throws io.veyron.veyron.veyron2.ipc.VeyronException {
+    public {{ $method.RetType }} {{ $method.Name }}(final io.veyron.veyron.veyron2.context.Context context{{ $method.DeclarationArgs }}) throws io.veyron.veyron.veyron2.VeyronException {
         {{if $method.Returns }}return{{ end }} {{ $method.Name }}(context{{ $method.CallingArgs }}, null);
     }
     {{/* The main client stub method body */}}
     @Override
-    public {{ $method.RetType }} {{ $method.Name }}(final io.veyron.veyron.veyron2.context.Context context{{ $method.DeclarationArgs }}, io.veyron.veyron.veyron2.Options veyronOpts) throws io.veyron.veyron.veyron2.ipc.VeyronException {
+    public {{ $method.RetType }} {{ $method.Name }}(final io.veyron.veyron.veyron2.context.Context context{{ $method.DeclarationArgs }}, io.veyron.veyron.veyron2.Options veyronOpts) throws io.veyron.veyron.veyron2.VeyronException {
         {{/* Ensure the options object is initialized and populated */}}
         // Add VDL path option.
         // NOTE(spetrovic): this option is temporary and will be removed soon after we switch
@@ -117,11 +117,11 @@ public final class {{ .ServiceName }}Stub implements {{ .FullServiceName }} {
         {{else }} {{/* else $method.NotStreaming */}}
         return new io.veyron.veyron.veyron2.vdl.ClientStream<{{ $method.SendType }}, {{ $method.RecvType }}, {{ $method.DeclaredObjectRetType }}>() {
             @Override
-            public void send(final {{ $method.SendType }} item) throws io.veyron.veyron.veyron2.ipc.VeyronException {
+            public void send(final {{ $method.SendType }} item) throws io.veyron.veyron.veyron2.VeyronException {
                 call.send(item);
             }
             @Override
-            public {{ $method.RecvType }} recv() throws java.io.EOFException, io.veyron.veyron.veyron2.ipc.VeyronException {
+            public {{ $method.RecvType }} recv() throws java.io.EOFException, io.veyron.veyron.veyron2.VeyronException {
                 final com.google.common.reflect.TypeToken<?> type = new com.google.common.reflect.TypeToken<{{ $method.RecvType }}>() {
                     private static final long serialVersionUID = 1L;
                 };
@@ -129,11 +129,11 @@ public final class {{ .ServiceName }}Stub implements {{ .FullServiceName }} {
                 try {
                     return ({{ $method.RecvType }})result;
                 } catch (java.lang.ClassCastException e) {
-                    throw new io.veyron.veyron.veyron2.ipc.VeyronException("Unexpected result type: " + result.getClass().getCanonicalName());
+                    throw new io.veyron.veyron.veyron2.VeyronException("Unexpected result type: " + result.getClass().getCanonicalName());
                 }
             }
             @Override
-            public {{ $method.DeclaredObjectRetType }} finish() throws io.veyron.veyron.veyron2.ipc.VeyronException {
+            public {{ $method.DeclaredObjectRetType }} finish() throws io.veyron.veyron.veyron2.VeyronException {
                 {{ if $method.IsVoid }}
                 final com.google.common.reflect.TypeToken<?>[] resultTypes = new com.google.common.reflect.TypeToken<?>[]{};
                 call.finish(resultTypes);
@@ -155,12 +155,12 @@ public final class {{ .ServiceName }}Stub implements {{ .FullServiceName }} {
 {{/* Iterate over methods from embeded services and generate code to delegate the work */}}
 {{ range $eMethod := .EmbedMethods }}
     @Override
-    public {{ $eMethod.RetType }} {{ $eMethod.Name }}(final io.veyron.veyron.veyron2.context.Context context{{ $eMethod.DeclarationArgs }}) throws io.veyron.veyron.veyron2.ipc.VeyronException {
+    public {{ $eMethod.RetType }} {{ $eMethod.Name }}(final io.veyron.veyron.veyron2.context.Context context{{ $eMethod.DeclarationArgs }}) throws io.veyron.veyron.veyron2.VeyronException {
         {{/* e.g. return this.stubArith.cosine(context, [args]) */}}
         {{ if $eMethod.Returns }}return{{ end }} this.{{ $eMethod.LocalStubVarName }}.{{ $eMethod.Name }}(context{{ $eMethod.CallingArgs }});
     }
     @Override
-    public {{ $eMethod.RetType }} {{ $eMethod.Name }}(final io.veyron.veyron.veyron2.context.Context context{{ $eMethod.DeclarationArgs }}, io.veyron.veyron.veyron2.Options veyronOpts) throws io.veyron.veyron.veyron2.ipc.VeyronException {
+    public {{ $eMethod.RetType }} {{ $eMethod.Name }}(final io.veyron.veyron.veyron2.context.Context context{{ $eMethod.DeclarationArgs }}, io.veyron.veyron.veyron2.Options veyronOpts) throws io.veyron.veyron.veyron2.VeyronException {
         {{/* e.g. return this.stubArith.cosine(context, [args], options) */}}
         {{ if $eMethod.Returns }}return{{ end }}  this.{{ $eMethod.LocalStubVarName }}.{{ $eMethod.Name }}(context{{ $eMethod.CallingArgs }}, veyronOpts);
     }

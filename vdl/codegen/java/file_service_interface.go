@@ -23,7 +23,7 @@ public interface {{ .ServiceName }} {{ .Extends }} {
 {{ range $method := .Methods }}
     {{/* Generate the method signature. */}}
     {{ $method.Doc }}
-    public {{ $method.RetType }} {{ $method.Name }}(final io.veyron.veyron.veyron2.ipc.ServerContext context{{ $method.Args }}) throws io.veyron.veyron.veyron2.ipc.VeyronException;
+    public {{ $method.RetType }} {{ $method.Name }}(final io.veyron.veyron.veyron2.ipc.ServerContext context{{ $method.Args }}) throws io.veyron.veyron.veyron2.VeyronException;
 {{ end }}
 }
 `

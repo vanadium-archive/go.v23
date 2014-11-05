@@ -34,8 +34,8 @@ public final class {{ .ServiceName }}ServiceWrapper {
     /**
      * Returns a description of this service.
      */
-     public io.veyron.veyron.veyron2.ipc.ServiceSignature signature(io.veyron.veyron.veyron2.ipc.ServerCall call) throws io.veyron.veyron.veyron2.ipc.VeyronException {
-         throw new io.veyron.veyron.veyron2.ipc.VeyronException("Signature method not yet supported for Java servers");
+     public io.veyron.veyron.veyron2.ipc.ServiceSignature signature(io.veyron.veyron.veyron2.ipc.ServerCall call) throws io.veyron.veyron.veyron2.VeyronException {
+         throw new io.veyron.veyron.veyron2.VeyronException("Signature method not yet supported for Java servers");
      }
 
     /**
@@ -63,15 +63,15 @@ public final class {{ .ServiceName }}ServiceWrapper {
 
      {{/* Iterate over methods defined directly in the body of this service */}}
     {{ range $method := .Methods }}
-    public {{ $method.RetType }} {{ $method.Name }}(final io.veyron.veyron.veyron2.ipc.ServerCall call{{ $method.DeclarationArgs }}) throws io.veyron.veyron.veyron2.ipc.VeyronException {
+    public {{ $method.RetType }} {{ $method.Name }}(final io.veyron.veyron.veyron2.ipc.ServerCall call{{ $method.DeclarationArgs }}) throws io.veyron.veyron.veyron2.VeyronException {
         {{ if $method.IsStreaming }}
         final io.veyron.veyron.veyron2.vdl.Stream<{{ $method.SendType }}, {{ $method.RecvType }}> stream = new io.veyron.veyron.veyron2.vdl.Stream<{{ $method.SendType }}, {{ $method.RecvType }}>() {
             @Override
-            public void send({{ $method.SendType }} item) throws io.veyron.veyron.veyron2.ipc.VeyronException {
+            public void send({{ $method.SendType }} item) throws io.veyron.veyron.veyron2.VeyronException {
                 call.send(item);
             }
             @Override
-            public {{ $method.RecvType }} recv() throws java.io.EOFException, io.veyron.veyron.veyron2.ipc.VeyronException {
+            public {{ $method.RecvType }} recv() throws java.io.EOFException, io.veyron.veyron.veyron2.VeyronException {
                 final com.google.common.reflect.TypeToken<?> type = new com.google.common.reflect.TypeToken< {{ $method.RecvType }} >() {
                     private static final long serialVersionUID = 1L;
                 };
@@ -79,7 +79,7 @@ public final class {{ .ServiceName }}ServiceWrapper {
                 try {
                     return ({{ $method.RecvType }})result;
                 } catch (java.lang.ClassCastException e) {
-                    throw new io.veyron.veyron.veyron2.ipc.VeyronException("Unexpected result type: " + result.getClass().getCanonicalName());
+                    throw new io.veyron.veyron.veyron2.VeyronException("Unexpected result type: " + result.getClass().getCanonicalName());
                 }
             }
         };
@@ -90,7 +90,7 @@ public final class {{ .ServiceName }}ServiceWrapper {
 
 {{/* Iterate over methods from embeded services and generate code to delegate the work */}}
 {{ range $eMethod := .EmbedMethods }}
-    public {{ $eMethod.RetType }} {{ $eMethod.Name }}(final io.veyron.veyron.veyron2.ipc.ServerCall call{{ $eMethod.DeclarationArgs }}) throws io.veyron.veyron.veyron2.ipc.VeyronException {
+    public {{ $eMethod.RetType }} {{ $eMethod.Name }}(final io.veyron.veyron.veyron2.ipc.ServerCall call{{ $eMethod.DeclarationArgs }}) throws io.veyron.veyron.veyron2.VeyronException {
         {{/* e.g. return this.stubArith.cosine(call, [args], options) */}}
         {{ if $eMethod.Returns }}return{{ end }}  this.{{ $eMethod.LocalWrapperVarName }}.{{ $eMethod.Name }}(call{{ $eMethod.CallingArgs }});
     }

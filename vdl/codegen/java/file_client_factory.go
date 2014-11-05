@@ -14,15 +14,15 @@ package {{ .PackagePath }};
 
 /* Factory for binding to {{ .ServiceName }} interfaces. */
 public final class {{ .ServiceName }}Factory {
-    public static {{ .ServiceName }} bind(final java.lang.String name) throws io.veyron.veyron.veyron2.ipc.VeyronException {
+    public static {{ .ServiceName }} bind(final java.lang.String name) throws io.veyron.veyron.veyron2.VeyronException {
         return bind(name, null);
     }
-    public static {{ .ServiceName }} bind(final java.lang.String name, final io.veyron.veyron.veyron2.Options veyronOpts) throws io.veyron.veyron.veyron2.ipc.VeyronException {
+    public static {{ .ServiceName }} bind(final java.lang.String name, final io.veyron.veyron.veyron2.Options veyronOpts) throws io.veyron.veyron.veyron2.VeyronException {
         io.veyron.veyron.veyron2.ipc.Client client = null;
         if (veyronOpts != null && veyronOpts.get(io.veyron.veyron.veyron2.OptionDefs.CLIENT) != null) {
             client = veyronOpts.get(io.veyron.veyron.veyron2.OptionDefs.CLIENT, io.veyron.veyron.veyron2.ipc.Client.class);
         } else if (veyronOpts != null && veyronOpts.get(io.veyron.veyron.veyron2.OptionDefs.RUNTIME) != null) {
-            client = veyronOpts.get(io.veyron.veyron.veyron2.OptionDefs.RUNTIME, io.veyron.veyron.veyron2.Runtime.class).getClient();
+            client = veyronOpts.get(io.veyron.veyron.veyron2.OptionDefs.RUNTIME, io.veyron.veyron.veyron2.VRuntime.class).getClient();
         } else {
             client = io.veyron.veyron.veyron2.RuntimeFactory.defaultRuntime().getClient();
         }
