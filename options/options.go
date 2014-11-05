@@ -65,12 +65,6 @@ type RuntimePrincipal struct{ security.Principal }
 
 func (RuntimePrincipal) ROpt() {}
 
-// RemoteID specifies a pattern identifying the set of valid remote identities for
-// a call.
-type RemoteID security.BlessingPattern
-
-func (RemoteID) IPCCallOpt() {}
-
 // VCSecurityLevel represents the level of confidentiality of data transmitted
 // and received over a VC.
 type VCSecurityLevel int
