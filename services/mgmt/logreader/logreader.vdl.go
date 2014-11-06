@@ -220,9 +220,27 @@ func BindLogFile(name string, opts ..._gen_ipc.BindOpt) (LogFile, error) {
 // It takes a regular server implementing the LogFileService
 // interface, and returns a new server stub.
 func NewServerLogFile(server LogFileService) interface{} {
-	return &ServerStubLogFile{
+	stub := &ServerStubLogFile{
 		service: server,
 	}
+	var gs _gen_ipc.GlobState
+	var self interface{} = stub
+	// VAllGlobber is implemented by the server object, which is wrapped in
+	// a VDL generated server stub.
+	if x, ok := self.(_gen_ipc.VAllGlobber); ok {
+		gs.VAllGlobber = x
+	}
+	// VAllGlobber is implemented by the server object without using a VDL
+	// generated stub.
+	if x, ok := server.(_gen_ipc.VAllGlobber); ok {
+		gs.VAllGlobber = x
+	}
+	// VChildrenGlobber is implemented in the server object.
+	if x, ok := server.(_gen_ipc.VChildrenGlobber); ok {
+		gs.VChildrenGlobber = x
+	}
+	stub.gs = &gs
+	return stub
 }
 
 // clientStubLogFile implements LogFile.
@@ -296,6 +314,7 @@ func (__gen_c *clientStubLogFile) GetMethodTags(ctx _gen_context.T, method strin
 // the requirements of veyron2/ipc.ReflectInvoker.
 type ServerStubLogFile struct {
 	service LogFileService
+	gs      *_gen_ipc.GlobState
 }
 
 func (__gen_s *ServerStubLogFile) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
@@ -363,6 +382,10 @@ func (__gen_s *ServerStubLogFile) UnresolveStep(call _gen_ipc.ServerCall) (reply
 		reply[i] = _gen_naming.Join(p, call.Name())
 	}
 	return
+}
+
+func (__gen_s *ServerStubLogFile) VGlob() *_gen_ipc.GlobState {
+	return __gen_s.gs
 }
 
 func (__gen_s *ServerStubLogFile) Size(call _gen_ipc.ServerCall) (reply int64, err error) {

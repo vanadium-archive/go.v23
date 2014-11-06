@@ -270,6 +270,50 @@ type Invoker interface {
 	// Note that argptrs is a slice of pointers to the argument objects; each
 	// pointer must be dereferenced to obtain the actual arg value.
 	Invoke(method string, call ServerCall, argptrs []interface{}) (results []interface{}, err error)
+
+	// The VGlobber allows objects to take part in the namespace.
+	// TODO(rthellend): Uncomment when all implementations have been
+	// updated.
+	//VGlobber
+}
+
+// VGlobber allows objects to take part in the namespace. Service objects may
+// choose to implement either the VAllGlobber interface, or the VChildrenGlobber
+// interface.
+//
+// The VAllGlobber interface is the same as mounttable.Globbable. The object
+// implements the Glob method defined in veyron.io/veyron/veyron2/services/mounttable.
+// Each object must support Glob requests that will be applied to itself and the
+// entire namespace below it.
+//
+// The VChildrenGlobber interface is simpler. Each object only has to return
+// a list of the objects immediately below itself in the namespace graph.
+type VGlobber interface {
+	// VGlob returns a GlobState with references to the interface that the
+	// object implements. Only one implementation is needed to participate
+	// in the namespace.
+	VGlob() *GlobState
+}
+
+// GlobState indicates which Glob interface the object implements.
+type GlobState struct {
+	VAllGlobber      VAllGlobber
+	VChildrenGlobber VChildrenGlobber
+}
+
+// VAllGlobber is the same interface as mounttable.Globbable.
+type VAllGlobber interface {
+	// TODO(rthellend): Rename this and the Globbable interface to VGlob
+	// when toddw's Signature changes are all done.
+	Glob(ctx ServerCall, pattern string) error
+}
+
+// VChildrenGlobber is a simple interface to publish the relationship between
+// nodes in the namespace graph.
+type VChildrenGlobber interface {
+	// VGlobChildren returns the names of the receiver's immediate children.
+	// It should return an error if the receiver doesn't exist.
+	VGlobChildren() ([]string, error)
 }
 
 // Unresolver defines the interface to be implemented by service objects

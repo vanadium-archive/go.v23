@@ -94,11 +94,29 @@ func BindStats(name string, opts ..._gen_ipc.BindOpt) (Stats, error) {
 // It takes a regular server implementing the StatsService
 // interface, and returns a new server stub.
 func NewServerStats(server StatsService) interface{} {
-	return &ServerStubStats{
+	stub := &ServerStubStats{
 		ServerStubGlobbable:   *mounttable.NewServerGlobbable(server).(*mounttable.ServerStubGlobbable),
 		ServerStubGlobWatcher: *watch.NewServerGlobWatcher(server).(*watch.ServerStubGlobWatcher),
 		service:               server,
 	}
+	var gs _gen_ipc.GlobState
+	var self interface{} = stub
+	// VAllGlobber is implemented by the server object, which is wrapped in
+	// a VDL generated server stub.
+	if x, ok := self.(_gen_ipc.VAllGlobber); ok {
+		gs.VAllGlobber = x
+	}
+	// VAllGlobber is implemented by the server object without using a VDL
+	// generated stub.
+	if x, ok := server.(_gen_ipc.VAllGlobber); ok {
+		gs.VAllGlobber = x
+	}
+	// VChildrenGlobber is implemented in the server object.
+	if x, ok := server.(_gen_ipc.VChildrenGlobber); ok {
+		gs.VChildrenGlobber = x
+	}
+	stub.gs = &gs
+	return stub
 }
 
 // clientStubStats implements Stats.
@@ -169,6 +187,7 @@ type ServerStubStats struct {
 	watch.ServerStubGlobWatcher
 
 	service StatsService
+	gs      *_gen_ipc.GlobState
 }
 
 func (__gen_s *ServerStubStats) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
@@ -329,6 +348,10 @@ func (__gen_s *ServerStubStats) UnresolveStep(call _gen_ipc.ServerCall) (reply [
 		reply[i] = _gen_naming.Join(p, call.Name())
 	}
 	return
+}
+
+func (__gen_s *ServerStubStats) VGlob() *_gen_ipc.GlobState {
+	return __gen_s.gs
 }
 
 func (__gen_s *ServerStubStats) Value(call _gen_ipc.ServerCall) (reply _gen_vdlutil.Any, err error) {

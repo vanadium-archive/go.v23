@@ -209,9 +209,27 @@ func BindGlobbable(name string, opts ..._gen_ipc.BindOpt) (Globbable, error) {
 // It takes a regular server implementing the GlobbableService
 // interface, and returns a new server stub.
 func NewServerGlobbable(server GlobbableService) interface{} {
-	return &ServerStubGlobbable{
+	stub := &ServerStubGlobbable{
 		service: server,
 	}
+	var gs _gen_ipc.GlobState
+	var self interface{} = stub
+	// VAllGlobber is implemented by the server object, which is wrapped in
+	// a VDL generated server stub.
+	if x, ok := self.(_gen_ipc.VAllGlobber); ok {
+		gs.VAllGlobber = x
+	}
+	// VAllGlobber is implemented by the server object without using a VDL
+	// generated stub.
+	if x, ok := server.(_gen_ipc.VAllGlobber); ok {
+		gs.VAllGlobber = x
+	}
+	// VChildrenGlobber is implemented in the server object.
+	if x, ok := server.(_gen_ipc.VChildrenGlobber); ok {
+		gs.VChildrenGlobber = x
+	}
+	stub.gs = &gs
+	return stub
 }
 
 // clientStubGlobbable implements Globbable.
@@ -274,6 +292,7 @@ func (__gen_c *clientStubGlobbable) GetMethodTags(ctx _gen_context.T, method str
 // the requirements of veyron2/ipc.ReflectInvoker.
 type ServerStubGlobbable struct {
 	service GlobbableService
+	gs      *_gen_ipc.GlobState
 }
 
 func (__gen_s *ServerStubGlobbable) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
@@ -336,6 +355,10 @@ func (__gen_s *ServerStubGlobbable) UnresolveStep(call _gen_ipc.ServerCall) (rep
 		reply[i] = _gen_naming.Join(p, call.Name())
 	}
 	return
+}
+
+func (__gen_s *ServerStubGlobbable) VGlob() *_gen_ipc.GlobState {
+	return __gen_s.gs
 }
 
 func (__gen_s *ServerStubGlobbable) Glob(call _gen_ipc.ServerCall, pattern string) (err error) {
@@ -437,10 +460,28 @@ func BindMountTable(name string, opts ..._gen_ipc.BindOpt) (MountTable, error) {
 // It takes a regular server implementing the MountTableService
 // interface, and returns a new server stub.
 func NewServerMountTable(server MountTableService) interface{} {
-	return &ServerStubMountTable{
+	stub := &ServerStubMountTable{
 		ServerStubGlobbable: *NewServerGlobbable(server).(*ServerStubGlobbable),
 		service:             server,
 	}
+	var gs _gen_ipc.GlobState
+	var self interface{} = stub
+	// VAllGlobber is implemented by the server object, which is wrapped in
+	// a VDL generated server stub.
+	if x, ok := self.(_gen_ipc.VAllGlobber); ok {
+		gs.VAllGlobber = x
+	}
+	// VAllGlobber is implemented by the server object without using a VDL
+	// generated stub.
+	if x, ok := server.(_gen_ipc.VAllGlobber); ok {
+		gs.VAllGlobber = x
+	}
+	// VChildrenGlobber is implemented in the server object.
+	if x, ok := server.(_gen_ipc.VChildrenGlobber); ok {
+		gs.VChildrenGlobber = x
+	}
+	stub.gs = &gs
+	return stub
 }
 
 // clientStubMountTable implements MountTable.
@@ -542,6 +583,7 @@ type ServerStubMountTable struct {
 	ServerStubGlobbable
 
 	service MountTableService
+	gs      *_gen_ipc.GlobState
 }
 
 func (__gen_s *ServerStubMountTable) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
@@ -691,6 +733,10 @@ func (__gen_s *ServerStubMountTable) UnresolveStep(call _gen_ipc.ServerCall) (re
 		reply[i] = _gen_naming.Join(p, call.Name())
 	}
 	return
+}
+
+func (__gen_s *ServerStubMountTable) VGlob() *_gen_ipc.GlobState {
+	return __gen_s.gs
 }
 
 func (__gen_s *ServerStubMountTable) Mount(call _gen_ipc.ServerCall, Server string, TTL uint32, Flags types.MountFlag) (err error) {
