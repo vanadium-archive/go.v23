@@ -820,10 +820,28 @@ func Bind{{$iface.Name}}(name string, opts ..._gen_ipc.BindOpt) ({{$iface.Name}}
 // It takes a regular server implementing the {{$iface.Name}}Service
 // interface, and returns a new server stub.
 func NewServer{{$iface.Name}}(server {{$iface.Name}}Service) interface{} {
-	return &ServerStub{{$iface.Name}}{
+	stub := &ServerStub{{$iface.Name}}{
 {{range $embed := $iface.Embeds}}	{{prefixName $embed.Name "ServerStub"}}: *{{prefixName (embedGo $data $embed) "NewServer"}}(server).(*{{prefixName (embedGo $data $embed) "ServerStub"}}),
 {{end}}	service: server,
 	}
+	var gs _gen_ipc.GlobState
+	var self interface{} = stub
+	// VAllGlobber is implemented by the server object, which is wrapped in
+	// a VDL generated server stub.
+	if x, ok := self.(_gen_ipc.VAllGlobber); ok {
+		gs.VAllGlobber = x
+	}
+	// VAllGlobber is implemented by the server object without using a VDL
+	// generated stub.
+	if x, ok := server.(_gen_ipc.VAllGlobber); ok {
+		gs.VAllGlobber = x
+	}
+	// VChildrenGlobber is implemented in the server object.
+	if x, ok := server.(_gen_ipc.VChildrenGlobber); ok {
+		gs.VChildrenGlobber = x
+	}
+	stub.gs = &gs
+	return stub
 }
 
 // clientStub{{$iface.Name}} implements {{$iface.Name}}.
@@ -888,6 +906,7 @@ type ServerStub{{$iface.Name}} struct {
 {{range $embed := $iface.Embeds}}	{{prefixName (embedGo $data $embed) "ServerStub"}}
 {{end}}
 	service {{$iface.Name}}Service
+	gs      *_gen_ipc.GlobState
 }
 
 func (__gen_s *ServerStub{{$iface.Name}}) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
@@ -993,6 +1012,10 @@ func (__gen_s *ServerStub{{$iface.Name}}) UnresolveStep(call _gen_ipc.ServerCall
 		reply[i] = _gen_naming.Join(p, call.Name())
 	}
 	return
+}
+
+func (__gen_s *ServerStub{{$iface.Name}}) VGlob() *_gen_ipc.GlobState {
+	return __gen_s.gs
 }
 
 {{range $method := $iface.Methods}}

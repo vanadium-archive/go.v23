@@ -250,7 +250,7 @@ func TestReflectInvokerPanic(t *testing.T) {
 		regexp string
 	}
 	tests := []testcase{
-		{nil, "no compatible methods"},
+		{nil, "nil object is incompatible"},
 		{struct{}{}, "no compatible methods"},
 		{nocompat{}, "no compatible methods"},
 		{nostub{}, "forgot to wrap your server with the IDL-generated stub"},

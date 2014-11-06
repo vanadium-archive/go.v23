@@ -15,6 +15,7 @@ var (
 type reflectInvoker struct {
 	rcvr    reflect.Value
 	methods map[string]methodInfo
+	gs      *GlobState
 }
 
 var _ Invoker = (*reflectInvoker)(nil)
@@ -30,26 +31,33 @@ type methodInfo struct {
 // each compatible exported method in obj available.  Each exported method must
 // take ipc.ServerCall as the first in-arg. Methods not doing so are silently
 // ignored.
-//
-// Panics if obj has no compatible methods, and on common errors in method
-// specifications.
 func ReflectInvoker(obj interface{}) Invoker {
-	var rcvr reflect.Value
-	var methods map[string]methodInfo
-	if obj != nil {
-		rcvr = reflect.ValueOf(obj)
-		methods = getMethods(rcvr.Type())
+	if obj == nil {
+		panic(fmt.Errorf("ipc: nil object is incompatible with ReflectInvoker"))
 	}
-	if len(methods) == 0 {
-		panic(fmt.Errorf("ipc: object type %T has no compatible methods: %v", obj, TypeCheckMethods(obj)))
-	}
+	rcvr := reflect.ValueOf(obj)
+	methods := getMethods(rcvr.Type())
 	// Copy the memoized methods, so we can fill in the tags.
 	methodsCopy := make(map[string]methodInfo, len(methods))
 	for name, info := range methods {
 		info.tags = getMethodTags(obj, name)
 		methodsCopy[name] = info
 	}
-	return reflectInvoker{rcvr, methodsCopy}
+	// Determine whether and how the object implements Glob.
+	gs := &GlobState{}
+	if x, ok := obj.(VGlobber); ok {
+		gs = x.VGlob()
+	}
+	if x, ok := obj.(VAllGlobber); ok {
+		gs.VAllGlobber = x
+	}
+	if x, ok := obj.(VChildrenGlobber); ok {
+		gs.VChildrenGlobber = x
+	}
+	if len(methods) == 0 && (gs == nil || (gs.VAllGlobber == nil && gs.VChildrenGlobber == nil)) {
+		panic(fmt.Errorf("ipc: object type %T has no compatible methods: %v", obj, TypeCheckMethods(obj)))
+	}
+	return reflectInvoker{rcvr, methodsCopy, gs}
 }
 
 // serverGetMethodTags is a helper interface to check if GetMethodTags is implemented on an object
@@ -109,6 +117,12 @@ func (ri reflectInvoker) Invoke(method string, call ServerCall, argptrs []interf
 		results[ix] = r.Interface()
 	}
 	return results, nil
+}
+
+// VGlob returns GlobState for the object, e.g. whether and how it implements
+// the Glob interface.
+func (ri reflectInvoker) VGlob() *GlobState {
+	return ri.gs
 }
 
 // We memoize the results of makeMethods in a registry, to avoid expensive
