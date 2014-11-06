@@ -11,9 +11,7 @@ import (
 	"reflect"
 	"strings"
 	"testing"
-	"time"
 
-	"veyron.io/veyron/veyron2/naming"
 	"veyron.io/veyron/veyron2/vom"
 )
 
@@ -46,28 +44,6 @@ func (r *roots) Recognized(root PublicKey, blessing string) error {
 func (*roots) DebugString() string {
 	return "BlessingRoots implementation for testing purposes only"
 }
-
-type context struct {
-	method, name, suffix            string
-	label                           Label
-	local                           Principal
-	localBlessings, remoteBlessings Blessings
-	discharges                      map[string]Discharge
-	timestamp                       time.Time
-}
-
-func (c *context) Timestamp() time.Time             { return c.timestamp }
-func (c *context) Method() string                   { return c.method }
-func (c *context) MethodTags() []interface{}        { return nil }
-func (c *context) Name() string                     { return c.name }
-func (c *context) Suffix() string                   { return c.suffix }
-func (c *context) Label() Label                     { return c.label }
-func (c *context) Discharges() map[string]Discharge { return c.discharges }
-func (c *context) LocalPrincipal() Principal        { return c.local }
-func (c *context) LocalBlessings() Blessings        { return c.localBlessings }
-func (c *context) RemoteBlessings() Blessings       { return c.remoteBlessings }
-func (c *context) LocalEndpoint() naming.Endpoint   { return nil }
-func (c *context) RemoteEndpoint() naming.Endpoint  { return nil }
 
 func newCaveat(c Caveat, err error) Caveat {
 	if err != nil {

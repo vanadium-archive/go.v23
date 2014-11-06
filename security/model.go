@@ -425,6 +425,7 @@ type Context interface {
 	// discharges.
 	// TODO(ataly, ashankar): Discharges should return map[string][]Discharge,
 	// i.e, it should map a ThirdPartyCaveat identifier to a set of Discharges.
+	// TODO(ataly, ashankar): Rename to RemoteDischarges.
 	Discharges() map[string]Discharge
 	// LocalPrincipal returns the principal used to authenticate to the remote end.
 	LocalPrincipal() Principal
@@ -438,6 +439,13 @@ type Context interface {
 	// RemoteEndpoint() returns the Endpoint of the principal at the remote end
 	// of communication.
 	RemoteEndpoint() naming.Endpoint
+
+	// TODO(ashankar,ataly): Disallow Context interface implementations
+	// in other packages for now?
+	// For now, the only way to create a Context is to use the factory function
+	// defined in this package. May revisit this, but till the API stabilizes,
+	// better to avoid multiple implementations.
+	// canOnlyBeImplementedInThisPackageForNow()
 }
 
 // Authorizer is the interface for performing authorization checks.

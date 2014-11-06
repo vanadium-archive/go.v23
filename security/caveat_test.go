@@ -10,9 +10,14 @@ import (
 
 func TestCaveats(t *testing.T) {
 	var (
-		self  = newPrincipal(t)
-		now   = time.Now()
-		ctx   = &context{timestamp: now, method: "Foo", local: self, localBlessings: blessSelf(t, self, "alice/phone/friend")}
+		self = newPrincipal(t)
+		now  = time.Now()
+		ctx  = NewContext(&ContextParams{
+			Timestamp:      now,
+			Method:         "Foo",
+			LocalPrincipal: self,
+			LocalBlessings: blessSelf(t, self, "alice/phone/friend"),
+		})
 		C     = newCaveat
 		tests = []struct {
 			cav Caveat
@@ -42,7 +47,7 @@ func TestCaveats(t *testing.T) {
 			*/
 		}
 	)
-	self.AddToRoots(ctx.localBlessings)
+	self.AddToRoots(ctx.LocalBlessings())
 	for idx, test := range tests {
 		var validator CaveatValidator
 		if err := vom.NewDecoder(bytes.NewReader(test.cav.ValidatorVOM)).Decode(&validator); err != nil {
@@ -63,11 +68,15 @@ func TestPublicKeyThirdPartyCaveat(t *testing.T) {
 		discharger   = newPrincipal(t)
 		randomserver = newPrincipal(t)
 		ctx          = func(method string, discharges ...Discharge) Context {
-			ctx := &context{timestamp: now, method: method, discharges: make(map[string]Discharge)}
-			for _, d := range discharges {
-				ctx.discharges[d.ID()] = d
+			params := &ContextParams{
+				Timestamp:        now,
+				Method:           method,
+				RemoteDischarges: make(map[string]Discharge),
 			}
-			return ctx
+			for _, d := range discharges {
+				params.RemoteDischarges[d.ID()] = d
+			}
+			return NewContext(params)
 		}
 	)
 
@@ -102,7 +111,7 @@ func TestPublicKeyThirdPartyCaveat(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if merr := matchesError(tpc.Dischargeable(&context{timestamp: now}), "could not validate embedded restriction security.unixTimeExpiryCaveat"); merr != nil {
+	if merr := matchesError(tpc.Dischargeable(NewContext(&ContextParams{Timestamp: now})), "could not validate embedded restriction security.unixTimeExpiryCaveat"); merr != nil {
 		t.Fatal(merr)
 	}
 }
