@@ -335,3 +335,46 @@ func TestTypeCheckMethods(t *testing.T) {
 		}
 	}
 }
+
+type vGlobberObject struct {
+	gs *ipc.GlobState
+}
+
+func (o *vGlobberObject) VGlob() *ipc.GlobState {
+	return o.gs
+}
+
+type vAllGlobberObject struct{}
+
+func (vAllGlobberObject) Glob(call ipc.ServerCall, pattern string) error {
+	return nil
+}
+
+type vChildrenGlobberObject struct{}
+
+func (vChildrenGlobberObject) VGlobChildren() ([]string, error) {
+	return nil, nil
+}
+
+func TestReflectInvokerVGlob(t *testing.T) {
+	vAllGlobber := vAllGlobberObject{}
+	vChildrenGlobber := vChildrenGlobberObject{}
+	gs := &ipc.GlobState{VAllGlobber: vAllGlobber}
+	vGlobber := &vGlobberObject{gs}
+
+	testcases := []struct {
+		obj      interface{}
+		expected *ipc.GlobState
+	}{
+		{vGlobber, gs},
+		{vAllGlobber, &ipc.GlobState{VAllGlobber: vAllGlobber}},
+		{vChildrenGlobber, &ipc.GlobState{VChildrenGlobber: vChildrenGlobber}},
+	}
+
+	for _, tc := range testcases {
+		ri := ipc.ReflectInvoker(tc.obj)
+		if got := ri.VGlob(); !reflect.DeepEqual(got, tc.expected) {
+			t.Errorf("Unexpected result for %#v. Got %#v, want %#v", tc.obj, got, tc.expected)
+		}
+	}
+}

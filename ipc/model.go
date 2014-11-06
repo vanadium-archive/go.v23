@@ -272,9 +272,7 @@ type Invoker interface {
 	Invoke(method string, call ServerCall, argptrs []interface{}) (results []interface{}, err error)
 
 	// The VGlobber allows objects to take part in the namespace.
-	// TODO(rthellend): Uncomment when all implementations have been
-	// updated.
-	//VGlobber
+	VGlobber
 }
 
 // VGlobber allows objects to take part in the namespace. Service objects may
