@@ -115,7 +115,7 @@ func (*serverCalculator) Off(_ ipc.ServerContext) error {
 func TestCalculator(t *testing.T) {
 	client := newClient()
 	server := newServer()
-	if err := server.Serve("", ipc.LeafDispatcher(arith.NewServerCalculator(&serverCalculator{}), nil)); err != nil {
+	if err := server.Serve("", arith.NewServerCalculator(&serverCalculator{}), nil); err != nil {
 		t.Fatal(err)
 	}
 	ep, err := server.Listen(profiles.LocalListenSpec)
@@ -358,7 +358,7 @@ func TestArith(t *testing.T) {
 			t.Fatal(err)
 		}
 		root := naming.JoinAddressName(ep.String(), "")
-		if err := server.Serve("", disp); err != nil {
+		if err := server.ServeDispatcher("", disp); err != nil {
 			t.Fatalf("%d: %v", i, err)
 		}
 		// Synchronous calls
