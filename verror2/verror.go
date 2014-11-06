@@ -229,8 +229,6 @@ func ContextWithComponentName(ctx context.T, componentName string) context.T {
 // Make is like ExplicitMake(), but obtains the language, component name, and operation
 // name from the specified context.T.   ctx may be nil.
 func Make(idAction IDAction, ctx context.T, v ...interface{}) E {
-	langID := i18n.LangIDFromContext(ctx)
-
 	// Use a default context if ctx is nil.  defaultCtx may also be nil, so
 	// further nil checks are required below.
 	if ctx == nil {
@@ -238,6 +236,7 @@ func Make(idAction IDAction, ctx context.T, v ...interface{}) E {
 		ctx = defaultCtx
 		defaultCtxLock.RUnlock()
 	}
+	langID := i18n.LangIDFromContext(ctx)
 
 	// Attempt to get component name and operation from the context.
 	var componentName string
