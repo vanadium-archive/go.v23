@@ -65,6 +65,16 @@ type RuntimePrincipal struct{ security.Principal }
 
 func (RuntimePrincipal) ROpt() {}
 
+// ServerBlessings represents the blessings presented by a process (a "server")
+// accepting network connections from other processes ("clients").
+//
+// If none is provided, implementations typically use the "default" blessings
+// from the BlessingStore of the Principal.
+type ServerBlessings struct{ security.Blessings }
+
+func (ServerBlessings) IPCServerOpt()         {}
+func (ServerBlessings) IPCStreamListenerOpt() {}
+
 // VCSecurityLevel represents the level of confidentiality of data transmitted
 // and received over a VC.
 type VCSecurityLevel int
