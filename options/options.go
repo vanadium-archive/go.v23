@@ -131,7 +131,6 @@ func (ServesMountTable) IPCServerOpt() {}
 // ReservedNameDispatcher specifies the dispatcher that controls access
 // to framework managed portion of the namespace.
 type ReservedNameDispatcher struct {
-	Prefix     string
 	Dispatcher ipc.Dispatcher
 }
 

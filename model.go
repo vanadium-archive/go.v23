@@ -288,11 +288,10 @@ type Runtime interface {
 	Cleanup()
 
 	// ConfigureReservedName sets and configures a dispatcher for the
-	// reserved portion of the name space (i.e. __<reservedPrefix>).
+	// reserved portion of the name space, i.e. any path starting with '__'
 	// Only one dispatcher may be registered, with subsequent calls
-	// overriding previous settings; this restriction  may be relaxed
-	// in the future.
-	ConfigureReservedName(reservedPrefix string, server ipc.Dispatcher, opts ...ipc.ServerOpt)
+	// overriding previous settings.
+	ConfigureReservedName(server ipc.Dispatcher, opts ...ipc.ServerOpt)
 }
 
 // RuntimeFromContext returns the runtime used to generate a given context.
