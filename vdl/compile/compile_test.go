@@ -133,6 +133,21 @@ type Scalars struct {
 	M any
 }
 
+type KeyScalars struct {
+	A bool
+	B byte
+	C int32
+	D int64
+	E uint32
+	F uint64
+	G float32
+	H float64
+	I complex64
+	J complex128
+	K string
+	L error
+}
+
 type CompComp struct {
 	A Composites
 	B []Composites
@@ -172,7 +187,7 @@ type Composites struct {
 	A Scalars
 	B []Scalars
 	C map[string]Scalars
-	D map[Scalars][]map[string]complex128
+	D map[KeyScalars][]map[string]complex128
 }
 
 const (

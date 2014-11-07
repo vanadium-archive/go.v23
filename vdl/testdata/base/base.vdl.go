@@ -94,13 +94,44 @@ type Scalars struct {
 	B12 NamedString
 }
 
+// These are all scalars that may be used as map or set keys.
+type KeyScalars struct {
+	A0  bool
+	A1  byte
+	A2  uint16
+	A3  uint32
+	A4  uint64
+	A5  int16
+	A6  int32
+	A7  int64
+	A8  float32
+	A9  float64
+	A10 complex64
+	A11 complex128
+	A12 string
+	A13 error
+	B0  NamedBool
+	B1  NamedByte
+	B2  NamedUint16
+	B3  NamedUint32
+	B4  NamedUint64
+	B5  NamedInt16
+	B6  NamedInt32
+	B7  NamedInt64
+	B8  NamedFloat32
+	B9  NamedFloat64
+	B10 NamedComplex64
+	B11 NamedComplex128
+	B12 NamedString
+}
+
 type Composites struct {
 	A0 Scalars
 	A1 [2]Scalars
 	A2 []Scalars
-	A3 map[Scalars]struct{}
+	A3 map[KeyScalars]struct{}
 	A4 map[string]Scalars
-	A5 map[Scalars][]map[string]complex128
+	A5 map[KeyScalars][]map[string]complex128
 }
 
 type CompComp struct {
@@ -108,7 +139,7 @@ type CompComp struct {
 	A1 [2]Composites
 	A2 []Composites
 	A3 map[string]Composites
-	A4 map[Scalars][]map[string]Composites
+	A4 map[KeyScalars][]map[string]Composites
 }
 
 // NestedArgs is defined before Args; that's allowed in regular Go, and also
@@ -883,10 +914,10 @@ func (s implServiceBServerStub) Signature(call __ipc.ServerCall) (__ipc.ServiceS
 	result.Methods["MethodB1"] = __ipc.MethodSignature{
 		InArgs: []__ipc.MethodArgument{
 			{Name: "a", Type: 82},
-			{Name: "b", Type: 90},
+			{Name: "b", Type: 91},
 		},
 		OutArgs: []__ipc.MethodArgument{
-			{Name: "c", Type: 96},
+			{Name: "c", Type: 97},
 			{Name: "err", Type: 66},
 		},
 	}
@@ -925,23 +956,54 @@ func (s implServiceBServerStub) Signature(call __ipc.ServerCall) (__ipc.ServiceS
 				__wiretype.FieldType{Type: 0x51, Name: "B12"},
 			},
 			"veyron.io/veyron/veyron2/vdl/testdata/base.Scalars", []string(nil)},
-		__wiretype.ArrayType{Elem: 0x52, Len: 0x2, Name: "", Tags: []string(nil)}, __wiretype.SliceType{Elem: 0x52, Name: "", Tags: []string(nil)}, __wiretype.MapType{Key: 0x52, Elem: 0x2, Name: "", Tags: []string(nil)}, __wiretype.MapType{Key: 0x3, Elem: 0x52, Name: "", Tags: []string(nil)}, __wiretype.MapType{Key: 0x3, Elem: 0x39, Name: "", Tags: []string(nil)}, __wiretype.SliceType{Elem: 0x57, Name: "", Tags: []string(nil)}, __wiretype.MapType{Key: 0x52, Elem: 0x58, Name: "", Tags: []string(nil)}, __wiretype.StructType{
+		__wiretype.ArrayType{Elem: 0x52, Len: 0x2, Name: "", Tags: []string(nil)}, __wiretype.SliceType{Elem: 0x52, Name: "", Tags: []string(nil)}, __wiretype.StructType{
+			[]__wiretype.FieldType{
+				__wiretype.FieldType{Type: 0x2, Name: "A0"},
+				__wiretype.FieldType{Type: 0x41, Name: "A1"},
+				__wiretype.FieldType{Type: 0x33, Name: "A2"},
+				__wiretype.FieldType{Type: 0x34, Name: "A3"},
+				__wiretype.FieldType{Type: 0x35, Name: "A4"},
+				__wiretype.FieldType{Type: 0x23, Name: "A5"},
+				__wiretype.FieldType{Type: 0x24, Name: "A6"},
+				__wiretype.FieldType{Type: 0x25, Name: "A7"},
+				__wiretype.FieldType{Type: 0x19, Name: "A8"},
+				__wiretype.FieldType{Type: 0x1a, Name: "A9"},
+				__wiretype.FieldType{Type: 0x38, Name: "A10"},
+				__wiretype.FieldType{Type: 0x39, Name: "A11"},
+				__wiretype.FieldType{Type: 0x3, Name: "A12"},
+				__wiretype.FieldType{Type: 0x42, Name: "A13"},
+				__wiretype.FieldType{Type: 0x45, Name: "B0"},
+				__wiretype.FieldType{Type: 0x46, Name: "B1"},
+				__wiretype.FieldType{Type: 0x47, Name: "B2"},
+				__wiretype.FieldType{Type: 0x48, Name: "B3"},
+				__wiretype.FieldType{Type: 0x49, Name: "B4"},
+				__wiretype.FieldType{Type: 0x4a, Name: "B5"},
+				__wiretype.FieldType{Type: 0x4b, Name: "B6"},
+				__wiretype.FieldType{Type: 0x4c, Name: "B7"},
+				__wiretype.FieldType{Type: 0x4d, Name: "B8"},
+				__wiretype.FieldType{Type: 0x4e, Name: "B9"},
+				__wiretype.FieldType{Type: 0x4f, Name: "B10"},
+				__wiretype.FieldType{Type: 0x50, Name: "B11"},
+				__wiretype.FieldType{Type: 0x51, Name: "B12"},
+			},
+			"veyron.io/veyron/veyron2/vdl/testdata/base.KeyScalars", []string(nil)},
+		__wiretype.MapType{Key: 0x55, Elem: 0x2, Name: "", Tags: []string(nil)}, __wiretype.MapType{Key: 0x3, Elem: 0x52, Name: "", Tags: []string(nil)}, __wiretype.MapType{Key: 0x3, Elem: 0x39, Name: "", Tags: []string(nil)}, __wiretype.SliceType{Elem: 0x58, Name: "", Tags: []string(nil)}, __wiretype.MapType{Key: 0x55, Elem: 0x59, Name: "", Tags: []string(nil)}, __wiretype.StructType{
 			[]__wiretype.FieldType{
 				__wiretype.FieldType{Type: 0x52, Name: "A0"},
 				__wiretype.FieldType{Type: 0x53, Name: "A1"},
 				__wiretype.FieldType{Type: 0x54, Name: "A2"},
-				__wiretype.FieldType{Type: 0x55, Name: "A3"},
-				__wiretype.FieldType{Type: 0x56, Name: "A4"},
-				__wiretype.FieldType{Type: 0x59, Name: "A5"},
+				__wiretype.FieldType{Type: 0x56, Name: "A3"},
+				__wiretype.FieldType{Type: 0x57, Name: "A4"},
+				__wiretype.FieldType{Type: 0x5a, Name: "A5"},
 			},
 			"veyron.io/veyron/veyron2/vdl/testdata/base.Composites", []string(nil)},
-		__wiretype.ArrayType{Elem: 0x5a, Len: 0x2, Name: "", Tags: []string(nil)}, __wiretype.SliceType{Elem: 0x5a, Name: "", Tags: []string(nil)}, __wiretype.MapType{Key: 0x3, Elem: 0x5a, Name: "", Tags: []string(nil)}, __wiretype.SliceType{Elem: 0x5d, Name: "", Tags: []string(nil)}, __wiretype.MapType{Key: 0x52, Elem: 0x5e, Name: "", Tags: []string(nil)}, __wiretype.StructType{
+		__wiretype.ArrayType{Elem: 0x5b, Len: 0x2, Name: "", Tags: []string(nil)}, __wiretype.SliceType{Elem: 0x5b, Name: "", Tags: []string(nil)}, __wiretype.MapType{Key: 0x3, Elem: 0x5b, Name: "", Tags: []string(nil)}, __wiretype.SliceType{Elem: 0x5e, Name: "", Tags: []string(nil)}, __wiretype.MapType{Key: 0x55, Elem: 0x5f, Name: "", Tags: []string(nil)}, __wiretype.StructType{
 			[]__wiretype.FieldType{
-				__wiretype.FieldType{Type: 0x5a, Name: "A0"},
-				__wiretype.FieldType{Type: 0x5b, Name: "A1"},
-				__wiretype.FieldType{Type: 0x5c, Name: "A2"},
-				__wiretype.FieldType{Type: 0x5d, Name: "A3"},
-				__wiretype.FieldType{Type: 0x5f, Name: "A4"},
+				__wiretype.FieldType{Type: 0x5b, Name: "A0"},
+				__wiretype.FieldType{Type: 0x5c, Name: "A1"},
+				__wiretype.FieldType{Type: 0x5d, Name: "A2"},
+				__wiretype.FieldType{Type: 0x5e, Name: "A3"},
+				__wiretype.FieldType{Type: 0x60, Name: "A4"},
 			},
 			"veyron.io/veyron/veyron2/vdl/testdata/base.CompComp", []string(nil)},
 	}

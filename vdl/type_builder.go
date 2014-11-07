@@ -592,7 +592,7 @@ var (
 
 // typeCons returns the hash-consed Type for a given Type t.
 func typeCons(t *Type) (*Type, error) {
-	if err := validType(t, make(map[*Type]bool)); err != nil {
+	if err := validType(t); err != nil {
 		return nil, err
 	}
 	typeRegMu.Lock()
@@ -628,15 +628,104 @@ func typeConsLocked(t *Type) *Type {
 }
 
 // validType returns a nil error iff t and all subtypes are valid.
-func validType(t *Type, seen map[*Type]bool) error {
-	if t == nil || seen[t] {
-		return nil
+func validType(t *Type) error {
+	allTypes := make(map[*Type]bool)
+	if err := verifyAndCollectAllTypes(t, allTypes); err != nil {
+		return err
+	}
+	if err := existsStrictCycle(allTypes); err != nil {
+		return err
+	}
+	if err := existsInvalidKey(allTypes); err != nil {
+		return err
+	}
+	return nil
+}
+
+// isInvalidKey return true iff a subtype can't be a key
+func isInvalidKey(t *Type, seen map[*Type]bool) bool {
+	if seen[t] {
+		return false
 	}
 	seen[t] = true
+	switch t.kind {
+	case Any, List, Map, Nilable, OneOf, Set, TypeObject:
+		return true
+	case Array:
+		if isInvalidKey(t.elem, seen) {
+			return true
+		}
+	case Struct:
+		for _, x := range t.fields {
+			if isInvalidKey(x.Type, seen) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// existsInvalidKey returns true iff the given Types have an invalid set or map
+func existsInvalidKey(allTypes map[*Type]bool) error {
+	seen := make(map[*Type]bool)
+	for t, _ := range allTypes {
+		if (t.kind == Map || t.kind == Set) && isInvalidKey(t.key, seen) {
+			return fmt.Errorf("invalid key %q in %q", t.key, t)
+		}
+	}
+	return nil
+}
+
+// typeInStrictCycle returns a subtype that belongs to a strict cycle or nil if
+// there are no strict cycles
+func typeInStrictCycle(t *Type, seen map[*Type]int) *Type {
+	if seen[t] == 1 {
+		return t
+	}
+	if seen[t] == 2 {
+		return nil
+	}
+	seen[t] = 1
+	switch t.kind {
+	case Array:
+		if typeInCycle := typeInStrictCycle(t.elem, seen); typeInCycle != nil {
+			return typeInCycle
+		}
+	case Struct:
+		for _, x := range t.fields {
+			if typeInCycle := typeInStrictCycle(x.Type, seen); typeInCycle != nil {
+				return typeInCycle
+			}
+		}
+	}
+	seen[t] = 2
+	return nil
+}
+
+// existsStrictCycle returns a nil error iff the given type set has no strict
+// cycles (e.g. type A struct{Elem: A})
+func existsStrictCycle(allTypes map[*Type]bool) error {
+	seen := make(map[*Type]int)
+	for t, _ := range allTypes {
+		if typeInCycle := typeInStrictCycle(t, seen); typeInCycle != nil {
+			return fmt.Errorf("type %q is inside of a strict cycle", typeInCycle)
+		}
+	}
+	return nil
+}
+
+// validTypeDefinition returns a nil error iff t and all subtypes are correctly
+// defined. If all subtypes are correctly defined allTypes will be filled with
+// all subtypes of the given Type t.
+func verifyAndCollectAllTypes(t *Type, allTypes map[*Type]bool) error {
+	if t == nil || allTypes[t] {
+		return nil
+	}
+	allTypes[t] = true
 	// Check kind
 	switch t.kind {
 	case internalNamed:
-		panic(fmt.Errorf("internal kind %d used in validType", t.kind))
+		panic(fmt.Errorf("internal kind %d used in verifyAndCollectAllTypes", t.kind))
 	}
 	// Check name
 	switch t.kind {
@@ -680,8 +769,8 @@ func validType(t *Type, seen map[*Type]bool) error {
 	// Check key
 	switch t.kind {
 	case Set, Map:
-		if err := ValidKey(t.key); err != nil {
-			return err
+		if t.key == nil {
+			return errKeyNil
 		}
 	default:
 		if t.key != nil {
@@ -753,36 +842,22 @@ func validType(t *Type, seen map[*Type]bool) error {
 		}
 	}
 	// Check subtypes recursively.
-	if err := validType(t.elem, seen); err != nil {
+	if err := verifyAndCollectAllTypes(t.elem, allTypes); err != nil {
 		return err
 	}
-	if err := validType(t.key, seen); err != nil {
+	if err := verifyAndCollectAllTypes(t.key, allTypes); err != nil {
 		return err
 	}
 	for _, x := range t.fields {
-		if err := validType(x.Type, seen); err != nil {
+		if err := verifyAndCollectAllTypes(x.Type, allTypes); err != nil {
 			return err
 		}
 	}
 	for _, x := range t.types {
-		if err := validType(x, seen); err != nil {
+		if err := verifyAndCollectAllTypes(x, allTypes); err != nil {
 			return err
 		}
 	}
-	return nil
-}
-
-// ValidKey returns a nil error iff key may be used as a Set or Map key.
-func ValidKey(key *Type) error {
-	if key == nil {
-		return errKeyNil
-	}
-	if key.kind == Nilable {
-		return fmt.Errorf("invalid nilable key %q", key)
-	}
-	// TODO(toddw): Disallow lists, maps, etc?  Also consider that JSON /
-	// javascript only supports string keys, and doesn't have good support for
-	// object keys.
 	return nil
 }
 

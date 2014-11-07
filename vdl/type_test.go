@@ -111,9 +111,11 @@ func allTypes() (types []*Type) {
 	for index, test := range singletons {
 		types = append(types, test.t, ArrayType(index+1, test.t))
 		types = append(types, test.t, ListType(test.t))
-		types = append(types, test.t, SetType(test.t))
-		for _, test2 := range singletons {
-			types = append(types, MapType(test.t, test2.t))
+		if test.k != Any && test.k != TypeObject {
+			types = append(types, test.t, SetType(test.t))
+			for _, test2 := range singletons {
+				types = append(types, MapType(test.t, test2.t))
+			}
 		}
 		if test.k != Any && test.k != TypeObject {
 			types = append(types, NamedType("Named"+test.s, test.t))
@@ -301,6 +303,15 @@ func TestListTypes(t *testing.T) {
 
 func TestSetTypes(t *testing.T) {
 	for _, test := range singletons {
+		if test.k == Any || test.k == TypeObject {
+			var builder TypeBuilder
+			x := builder.Set().AssignKey(test.t)
+			builder.Build()
+			_, err := x.Built()
+			want := `invalid key "` + test.s + `" in "set[` + test.s + `]"`
+			expectErr(t, err, want, "Unexpected error building Set[%s]:", test.k)
+			continue
+		}
 		x := SetType(test.t)
 		if got, want := x.Kind(), Set; got != want {
 			t.Errorf(`Set %s got kind %q, want %q`, test.k, got, want)
@@ -322,6 +333,15 @@ func TestSetTypes(t *testing.T) {
 
 func TestMapTypes(t *testing.T) {
 	for _, key := range singletons {
+		if key.k == Any || key.k == TypeObject {
+			var builder TypeBuilder
+			x := builder.Map().AssignKey(key.t).AssignElem(key.t)
+			builder.Build()
+			_, err := x.Built()
+			want := `invalid key "` + key.s + `" in "map[` + key.s + `]` + key.s + `"`
+			expectErr(t, err, want, "Unexpected error building Map[%s]%s", key.k, key.k)
+			continue
+		}
 		for _, elem := range singletons {
 			x := MapType(key.t, elem.t)
 			if got, want := x.Kind(), Map; got != want {
@@ -343,6 +363,51 @@ func TestMapTypes(t *testing.T) {
 				t.Errorf(`Map[%s]%s got elem %q, want %q`, key.k, elem.k, got, want)
 			}
 		}
+	}
+}
+
+var validKeys = []*Type{
+	Int32Type,
+	ArrayType(3, Int32Type),
+	StructType(StructField{"A", Int32Type}),
+}
+
+var invalidKeys = []*Type{
+	AnyType,
+	ListType(Int32Type),
+	MapType(Int32Type, Int32Type),
+	NilableType(Int32Type),
+	OneOfType(Int32Type),
+	SetType(Int32Type),
+	TypeObjectType,
+}
+
+func allInvalidKeyTypes(depth int) []*Type {
+	if depth == 0 {
+		return invalidKeys
+	}
+	recursiveTypes := allInvalidKeyTypes(depth - 1)
+	var allTypes []*Type
+	for _, t := range recursiveTypes {
+		allTypes = append(allTypes, ArrayType(3, t))
+		for _, v := range validKeys {
+			allTypes = append(allTypes, StructType(StructField{"T", t}, StructField{"V", v}))
+		}
+	}
+	return allTypes
+}
+
+func TestInvalidMapTypes(t *testing.T) {
+	types := allInvalidKeyTypes(2)
+	for _, x := range types {
+		var builder TypeBuilder
+		m := builder.Map().AssignKey(x).AssignElem(BoolType)
+		s := builder.Set().AssignKey(x)
+		builder.Build()
+		_, errM := m.Built()
+		_, errS := s.Built()
+		expectErr(t, errM, `invalid key`, "Unexpected error building Map[%q]bool", x)
+		expectErr(t, errS, `invalid key`, "Unexpected error building Set[%q]bool", x)
 	}
 }
 
@@ -603,10 +668,14 @@ func TestHashConsTypes(t *testing.T) {
 				lA, lB := "A"+a.s, "B"+b.s
 				name := lA + lB
 				types[iter] = append(types[iter], EnumType(lA, lB))
-				types[iter] = append(types[iter], MapType(a.t, b.t))
+				if a.k != Any && a.k != TypeObject {
+					types[iter] = append(types[iter], MapType(a.t, b.t))
+				}
 				types[iter] = append(types[iter], StructType([]StructField{{lA, a.t}, {lB, b.t}}...))
 				types[iter] = append(types[iter], NamedType("Enum"+name, EnumType(lA, lB)))
-				types[iter] = append(types[iter], NamedType("Map"+name, MapType(a.t, b.t)))
+				if a.k != Any && a.k != TypeObject {
+					types[iter] = append(types[iter], NamedType("Map"+name, MapType(a.t, b.t)))
+				}
 				types[iter] = append(types[iter], NamedType("Struct"+name, StructType([]StructField{{lA, a.t}, {lB, b.t}}...)))
 				if a.t != b.t && a.k != Any && b.k != Any {
 					types[iter] = append(types[iter], OneOfType(a.t, b.t))
@@ -741,6 +810,19 @@ func TestSelfRecursiveType(t *testing.T) {
 	}
 }
 
+func TestStrictCycleType(t *testing.T) {
+	var builder TypeBuilder
+	a, b := builder.Named("A"), builder.Named("B")
+	stA, stB := builder.Struct(), builder.Struct()
+	a.AssignBase(stA)
+	b.AssignBase(stB)
+	stA.AppendField("X", Int32Type).AppendField("B", b)
+	stB.AppendField("X", Int32Type).AppendField("A", a)
+	if ok := builder.Build(); ok != false {
+		t.Errorf(`Type A struct{X int32; B B struct{X int32; A A}} should not be valid`)
+	}
+}
+
 func TestMutuallyRecursiveType(t *testing.T) {
 	build := func() (*Type, error, *Type, error, *Type, error, *Type, error) {
 		// type D A
@@ -755,7 +837,9 @@ func TestMutuallyRecursiveType(t *testing.T) {
 		b.AssignBase(stB)
 		c.AssignBase(stC)
 		stA.AppendField("X", Int32Type).AppendField("B", b).AppendField("C", c)
-		stB.AppendField("Y", Int32Type).AppendField("A", a).AppendField("C", c)
+		aOrNil := builder.Nilable()
+		aOrNil.AssignBase(a)
+		stB.AppendField("Y", Int32Type).AppendField("A", aOrNil).AppendField("C", c)
 		stC.AppendField("Z", StringType)
 		builder.Build()
 		builtD, derr := d.Built()
@@ -775,7 +859,7 @@ func TestMutuallyRecursiveType(t *testing.T) {
 	if got, want := d.Name(), "D"; got != want {
 		t.Errorf(`D Name got %q, want %q`, got, want)
 	}
-	if got, want := d.String(), "D struct{X int32;B B struct{Y int32;A A struct{X int32;B B;C C struct{Z string}};C C};C C}"; got != want {
+	if got, want := d.String(), "D struct{X int32;B B struct{Y int32;A ?A struct{X int32;B B;C C struct{Z string}};C C};C C}"; got != want {
 		t.Errorf(`D String got %q, want %q`, got, want)
 	}
 	if got, want := d.NumField(), 3; got != want {
@@ -806,7 +890,7 @@ func TestMutuallyRecursiveType(t *testing.T) {
 	if got, want := a.Name(), "A"; got != want {
 		t.Errorf(`A Name got %q, want %q`, got, want)
 	}
-	if got, want := a.String(), "A struct{X int32;B B struct{Y int32;A A;C C struct{Z string}};C C}"; got != want {
+	if got, want := a.String(), "A struct{X int32;B B struct{Y int32;A ?A;C C struct{Z string}};C C}"; got != want {
 		t.Errorf(`A String got %q, want %q`, got, want)
 	}
 	if got, want := a.NumField(), 3; got != want {
@@ -837,7 +921,7 @@ func TestMutuallyRecursiveType(t *testing.T) {
 	if got, want := b.Name(), "B"; got != want {
 		t.Errorf(`B Name got %q, want %q`, got, want)
 	}
-	if got, want := b.String(), "B struct{Y int32;A A struct{X int32;B B;C C struct{Z string}};C C}"; got != want {
+	if got, want := b.String(), "B struct{Y int32;A ?A struct{X int32;B B;C C struct{Z string}};C C}"; got != want {
 		t.Errorf(`B String got %q, want %q`, got, want)
 	}
 	if got, want := b.NumField(), 3; got != want {
@@ -852,7 +936,7 @@ func TestMutuallyRecursiveType(t *testing.T) {
 	if got, want := b.Field(1).Name, "A"; got != want {
 		t.Errorf(`B Field(1).Name got %q, want %q`, got, want)
 	}
-	if got, want := b.Field(1).Type, a; got != want {
+	if got, want := b.Field(1).Type, NilableType(a); got != want {
 		t.Errorf(`B Field(1).Type got %q, want %q`, got, want)
 	}
 	if got, want := b.Field(2).Name, "C"; got != want {
