@@ -4,8 +4,8 @@
 package security
 
 import (
-	// The non-user imports are prefixed with "_gen_" to prevent collisions.
-	_gen_vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
+	// The non-user imports are prefixed with "__" to prevent collisions.
+	__vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
 )
 
 // BlessingPattern is a pattern that is matched by specific blessings.
@@ -112,9 +112,9 @@ type ThirdPartyRequirements struct {
 // caveats to the discharge that bind the discharge to the impetus, thereby
 // rendering the discharge unsuable for any other purpose.
 type DischargeImpetus struct {
-	Server    []BlessingPattern  // The client intends to use the discharge to communicate with a server that has a blessing matching one of the patterns in this set.
-	Method    string             // Name of the method being invoked by the client.
-	Arguments []_gen_vdlutil.Any // Arguments to the method invocation.
+	Server    []BlessingPattern // The client intends to use the discharge to communicate with a server that has a blessing matching one of the patterns in this set.
+	Method    string            // Name of the method being invoked by the client.
+	Arguments []__vdlutil.Any   // Arguments to the method invocation.
 }
 
 // Certificate represents the cryptographic proof of the binding of

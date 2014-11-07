@@ -7,14 +7,6 @@ import (
 	"strconv"
 )
 
-var (
-	// Error returned when the Bind<Service> name function is called with invalid options.
-	ErrTooManyOptionsToBind = errors.New("too many options to Bind...., at most a single Runtime or a single ipc.Client is provided")
-
-	// Error returns when an unrecognized option is provided to Bind<Service>.
-	ErrUnrecognizedOption = errors.New("unrecognized option")
-)
-
 // Errors holds a buffer of encountered errors.  The point is to try displaying
 // all errors to the user rather than just the first.  We cutoff at MaxErrors to
 // ensure if something's really messed up we won't spew errors forever.  Set

@@ -7,28 +7,27 @@ package logreader
 import (
 	"veyron.io/veyron/veyron2/services/mgmt/logreader/types"
 
-	// The non-user imports are prefixed with "_gen_" to prevent collisions.
-	_gen_io "io"
-	_gen_veyron2 "veyron.io/veyron/veyron2"
-	_gen_context "veyron.io/veyron/veyron2/context"
-	_gen_ipc "veyron.io/veyron/veyron2/ipc"
-	_gen_naming "veyron.io/veyron/veyron2/naming"
-	_gen_vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
-	_gen_wiretype "veyron.io/veyron/veyron2/wiretype"
+	// The non-user imports are prefixed with "__" to prevent collisions.
+	__io "io"
+	__veyron2 "veyron.io/veyron/veyron2"
+	__context "veyron.io/veyron/veyron2/context"
+	__ipc "veyron.io/veyron/veyron2/ipc"
+	__vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
+	__wiretype "veyron.io/veyron/veyron2/wiretype"
 )
 
 // TODO(toddw): Remove this line once the new signature support is done.
-// It corrects a bug where _gen_wiretype is unused in VDL pacakges where only
+// It corrects a bug where __wiretype is unused in VDL pacakges where only
 // bootstrap types are used on interfaces.
-const _ = _gen_wiretype.TypeIDInvalid
+const _ = __wiretype.TypeIDInvalid
 
+// LogFileClientMethods is the client interface
+// containing LogFile methods.
+//
 // LogFile can be used to access log files remotely.
-// LogFile is the interface the client binds and uses.
-// LogFile_ExcludingUniversal is the interface without internal framework-added methods
-// to enable embedding without method collisions.  Not to be used directly by clients.
-type LogFile_ExcludingUniversal interface {
+type LogFileClientMethods interface {
 	// Size returns the number of bytes in the receiving object.
-	Size(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply int64, err error)
+	Size(__context.T, ...__ipc.CallOpt) (int64, error)
 	// ReadLog receives up to NumEntries log entries starting at the
 	// StartPos offset (in bytes) in the receiving object. Each stream chunk
 	// contains one log entry.
@@ -42,102 +41,140 @@ type LogFile_ExcludingUniversal interface {
 	//
 	// The returned error will be EOF if and only if ReadLog reached the
 	// end of the file and no log entries were returned.
-	ReadLog(ctx _gen_context.T, StartPos int64, NumEntries int32, Follow bool, opts ..._gen_ipc.CallOpt) (reply LogFileReadLogCall, err error)
-}
-type LogFile interface {
-	_gen_ipc.UniversalServiceMethods
-	LogFile_ExcludingUniversal
+	ReadLog(ctx __context.T, StartPos int64, NumEntries int32, Follow bool, opts ...__ipc.CallOpt) (LogFileReadLogCall, error)
 }
 
-// LogFileService is the interface the server implements.
-type LogFileService interface {
-
-	// Size returns the number of bytes in the receiving object.
-	Size(context _gen_ipc.ServerContext) (reply int64, err error)
-	// ReadLog receives up to NumEntries log entries starting at the
-	// StartPos offset (in bytes) in the receiving object. Each stream chunk
-	// contains one log entry.
-	//
-	// If Follow is true, ReadLog will block and wait for more entries to
-	// arrive when it reaches the end of the file.
-	//
-	// ReadLog returns the position where it stopped reading, i.e. the
-	// position where the next entry starts. This value can be used as
-	// StartPos for successive calls to ReadLog.
-	//
-	// The returned error will be EOF if and only if ReadLog reached the
-	// end of the file and no log entries were returned.
-	ReadLog(context _gen_ipc.ServerContext, StartPos int64, NumEntries int32, Follow bool, stream LogFileServiceReadLogStream) (reply int64, err error)
+// LogFileClientStub adds universal methods to LogFileClientMethods.
+type LogFileClientStub interface {
+	LogFileClientMethods
+	__ipc.UniversalServiceMethods
 }
 
-// LogFileReadLogCall is the interface for call object of the method
-// ReadLog in the service interface LogFile.
-type LogFileReadLogCall interface {
-	// RecvStream returns the recv portion of the stream
+// LogFileClient returns a client stub for LogFile.
+func LogFileClient(name string, opts ...__ipc.BindOpt) LogFileClientStub {
+	var client __ipc.Client
+	for _, opt := range opts {
+		if clientOpt, ok := opt.(__ipc.Client); ok {
+			client = clientOpt
+		}
+	}
+	return implLogFileClientStub{name, client}
+}
+
+type implLogFileClientStub struct {
+	name   string
+	client __ipc.Client
+}
+
+func (c implLogFileClientStub) c(ctx __context.T) __ipc.Client {
+	if c.client != nil {
+		return c.client
+	}
+	return __veyron2.RuntimeFromContext(ctx).Client()
+}
+
+func (c implLogFileClientStub) Size(ctx __context.T, opts ...__ipc.CallOpt) (o0 int64, err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "Size", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&o0, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (c implLogFileClientStub) ReadLog(ctx __context.T, i0 int64, i1 int32, i2 bool, opts ...__ipc.CallOpt) (ocall LogFileReadLogCall, err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "ReadLog", []interface{}{i0, i1, i2}, opts...); err != nil {
+		return
+	}
+	ocall = &implLogFileReadLogCall{call, implLogFileReadLogClientRecv{call: call}}
+	return
+}
+
+func (c implLogFileClientStub) Signature(ctx __context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&o0, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (c implLogFileClientStub) GetMethodTags(ctx __context.T, method string, opts ...__ipc.CallOpt) (o0 []interface{}, err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&o0, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+// LogFileReadLogClientStream is the client stream for LogFile.ReadLog.
+type LogFileReadLogClientStream interface {
+	// RecvStream returns the receiver side of the client stream.
 	RecvStream() interface {
-		// Advance stages an element so the client can retrieve it
-		// with Value.  Advance returns true iff there is an
-		// element to retrieve.  The client must call Advance before
-		// calling Value. Advance may block if an element is not
-		// immediately available.
+		// Advance stages an item so that it may be retrieved via Value.  Returns
+		// true iff there is an item to retrieve.  Advance must be called before
+		// Value is called.  May block if an item is not available.
 		Advance() bool
-
-		// Value returns the element that was staged by Advance.
-		// Value may panic if Advance returned false or was not
-		// called at all.  Value does not block.
+		// Value returns the item that was staged by Advance.  May panic if Advance
+		// returned false or was not called.  Never blocks.
 		Value() types.LogEntry
-
-		// Err returns a non-nil error iff the stream encountered
-		// any errors.  Err does not block.
+		// Err returns any error encountered by Advance.  Never blocks.
 		Err() error
 	}
+}
 
-	// Finish blocks until the server is done and returns the positional
-	// return values for call.
+// LogFileReadLogCall represents the call returned from LogFile.ReadLog.
+type LogFileReadLogCall interface {
+	LogFileReadLogClientStream
+	// Finish blocks until the server is done, and returns the positional return
+	// values for call.
 	//
-	// If Cancel has been called, Finish will return immediately; the output of
-	// Finish could either be an error signalling cancelation, or the correct
-	// positional return values from the server depending on the timing of the
-	// call.
+	// Finish returns immediately if Cancel has been called; depending on the
+	// timing the output could either be an error signaling cancelation, or the
+	// valid positional return values from the server.
 	//
 	// Calling Finish is mandatory for releasing stream resources, unless Cancel
-	// has been called or any of the other methods return an error.
-	// Finish should be called at most once.
-	Finish() (reply int64, err error)
-
-	// Cancel cancels the RPC, notifying the server to stop processing.  It
-	// is safe to call Cancel concurrently with any of the other stream methods.
+	// has been called or any of the other methods return an error.  Finish should
+	// be called at most once.
+	Finish() (int64, error)
+	// Cancel cancels the RPC, notifying the server to stop processing.  It is
+	// safe to call Cancel concurrently with any of the other stream methods.
 	// Calling Cancel after Finish has returned is a no-op.
 	Cancel()
 }
 
-type implLogFileReadLogStreamIterator struct {
-	clientCall _gen_ipc.Call
-	val        types.LogEntry
-	err        error
+type implLogFileReadLogClientRecv struct {
+	call __ipc.Call
+	val  types.LogEntry
+	err  error
 }
 
-func (c *implLogFileReadLogStreamIterator) Advance() bool {
+func (c *implLogFileReadLogClientRecv) Advance() bool {
 	c.val = types.LogEntry{}
-	c.err = c.clientCall.Recv(&c.val)
+	c.err = c.call.Recv(&c.val)
 	return c.err == nil
 }
-
-func (c *implLogFileReadLogStreamIterator) Value() types.LogEntry {
+func (c *implLogFileReadLogClientRecv) Value() types.LogEntry {
 	return c.val
 }
-
-func (c *implLogFileReadLogStreamIterator) Err() error {
-	if c.err == _gen_io.EOF {
+func (c *implLogFileReadLogClientRecv) Err() error {
+	if c.err == __io.EOF {
 		return nil
 	}
 	return c.err
 }
 
-// Implementation of the LogFileReadLogCall interface that is not exported.
 type implLogFileReadLogCall struct {
-	clientCall _gen_ipc.Call
-	readStream implLogFileReadLogStreamIterator
+	call __ipc.Call
+	recv implLogFileReadLogClientRecv
 }
 
 func (c *implLogFileReadLogCall) RecvStream() interface {
@@ -145,182 +182,111 @@ func (c *implLogFileReadLogCall) RecvStream() interface {
 	Value() types.LogEntry
 	Err() error
 } {
-	return &c.readStream
+	return &c.recv
 }
-
-func (c *implLogFileReadLogCall) Finish() (reply int64, err error) {
-	if ierr := c.clientCall.Finish(&reply, &err); ierr != nil {
+func (c *implLogFileReadLogCall) Finish() (o0 int64, err error) {
+	if ierr := c.call.Finish(&o0, &err); ierr != nil {
 		err = ierr
 	}
 	return
 }
-
 func (c *implLogFileReadLogCall) Cancel() {
-	c.clientCall.Cancel()
+	c.call.Cancel()
 }
 
-type implLogFileServiceReadLogStreamSender struct {
-	serverCall _gen_ipc.ServerCall
-}
-
-func (s *implLogFileServiceReadLogStreamSender) Send(item types.LogEntry) error {
-	return s.serverCall.Send(item)
-}
-
-// LogFileServiceReadLogStream is the interface for streaming responses of the method
-// ReadLog in the service interface LogFile.
-type LogFileServiceReadLogStream interface {
-	// SendStream returns the send portion of the stream.
-	SendStream() interface {
-		// Send places the item onto the output stream, blocking if there is no buffer
-		// space available.  If the client has canceled, an error is returned.
-		Send(item types.LogEntry) error
-	}
-}
-
-// Implementation of the LogFileServiceReadLogStream interface that is not exported.
-type implLogFileServiceReadLogStream struct {
-	writer implLogFileServiceReadLogStreamSender
-}
-
-func (s *implLogFileServiceReadLogStream) SendStream() interface {
-	// Send places the item onto the output stream, blocking if there is no buffer
-	// space available.  If the client has canceled, an error is returned.
-	Send(item types.LogEntry) error
-} {
-	return &s.writer
-}
-
-// BindLogFile returns the client stub implementing the LogFile
-// interface.
+// LogFileServerMethods is the interface a server writer
+// implements for LogFile.
 //
-// If no _gen_ipc.Client is specified, the default _gen_ipc.Client in the
-// global Runtime is used.
-func BindLogFile(name string, opts ..._gen_ipc.BindOpt) (LogFile, error) {
-	var client _gen_ipc.Client
-	switch len(opts) {
-	case 0:
-		// Do nothing.
-	case 1:
-		if clientOpt, ok := opts[0].(_gen_ipc.Client); opts[0] == nil || ok {
-			client = clientOpt
-		} else {
-			return nil, _gen_vdlutil.ErrUnrecognizedOption
-		}
-	default:
-		return nil, _gen_vdlutil.ErrTooManyOptionsToBind
-	}
-	stub := &clientStubLogFile{defaultClient: client, name: name}
-
-	return stub, nil
+// LogFile can be used to access log files remotely.
+type LogFileServerMethods interface {
+	// Size returns the number of bytes in the receiving object.
+	Size(__ipc.ServerContext) (int64, error)
+	// ReadLog receives up to NumEntries log entries starting at the
+	// StartPos offset (in bytes) in the receiving object. Each stream chunk
+	// contains one log entry.
+	//
+	// If Follow is true, ReadLog will block and wait for more entries to
+	// arrive when it reaches the end of the file.
+	//
+	// ReadLog returns the position where it stopped reading, i.e. the
+	// position where the next entry starts. This value can be used as
+	// StartPos for successive calls to ReadLog.
+	//
+	// The returned error will be EOF if and only if ReadLog reached the
+	// end of the file and no log entries were returned.
+	ReadLog(ctx LogFileReadLogContext, StartPos int64, NumEntries int32, Follow bool) (int64, error)
 }
 
-// NewServerLogFile creates a new server stub.
-//
-// It takes a regular server implementing the LogFileService
-// interface, and returns a new server stub.
-func NewServerLogFile(server LogFileService) interface{} {
-	stub := &ServerStubLogFile{
-		service: server,
+// LogFileServerStubMethods is the server interface containing
+// LogFile methods, as expected by ipc.Server.  The difference between
+// this interface and LogFileServerMethods is that the first context
+// argument for each method is always ipc.ServerCall here, while it is either
+// ipc.ServerContext or a typed streaming context there.
+type LogFileServerStubMethods interface {
+	// Size returns the number of bytes in the receiving object.
+	Size(__ipc.ServerCall) (int64, error)
+	// ReadLog receives up to NumEntries log entries starting at the
+	// StartPos offset (in bytes) in the receiving object. Each stream chunk
+	// contains one log entry.
+	//
+	// If Follow is true, ReadLog will block and wait for more entries to
+	// arrive when it reaches the end of the file.
+	//
+	// ReadLog returns the position where it stopped reading, i.e. the
+	// position where the next entry starts. This value can be used as
+	// StartPos for successive calls to ReadLog.
+	//
+	// The returned error will be EOF if and only if ReadLog reached the
+	// end of the file and no log entries were returned.
+	ReadLog(call __ipc.ServerCall, StartPos int64, NumEntries int32, Follow bool) (int64, error)
+}
+
+// LogFileServerStub adds universal methods to LogFileServerStubMethods.
+type LogFileServerStub interface {
+	LogFileServerStubMethods
+	// GetMethodTags will be replaced with DescribeInterfaces.
+	GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error)
+	// Signature will be replaced with DescribeInterfaces.
+	Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error)
+}
+
+// LogFileServer returns a server stub for LogFile.
+// It converts an implementation of LogFileServerMethods into
+// an object that may be used by ipc.Server.
+func LogFileServer(impl LogFileServerMethods) LogFileServerStub {
+	stub := implLogFileServerStub{
+		impl: impl,
 	}
-	var gs _gen_ipc.GlobState
-	var self interface{} = stub
-	// VAllGlobber is implemented by the server object, which is wrapped in
-	// a VDL generated server stub.
-	if x, ok := self.(_gen_ipc.VAllGlobber); ok {
-		gs.VAllGlobber = x
+	// Initialize GlobState; always check the stub itself first, to handle the
+	// case where the user has the Glob method defined in their VDL source.
+	if gs := __ipc.NewGlobState(stub); gs != nil {
+		stub.gs = gs
+	} else if gs := __ipc.NewGlobState(impl); gs != nil {
+		stub.gs = gs
 	}
-	// VAllGlobber is implemented by the server object without using a VDL
-	// generated stub.
-	if x, ok := server.(_gen_ipc.VAllGlobber); ok {
-		gs.VAllGlobber = x
-	}
-	// VChildrenGlobber is implemented in the server object.
-	if x, ok := server.(_gen_ipc.VChildrenGlobber); ok {
-		gs.VChildrenGlobber = x
-	}
-	stub.gs = &gs
 	return stub
 }
 
-// clientStubLogFile implements LogFile.
-type clientStubLogFile struct {
-	defaultClient _gen_ipc.Client
-	name          string
+type implLogFileServerStub struct {
+	impl LogFileServerMethods
+	gs   *__ipc.GlobState
 }
 
-func (__gen_c *clientStubLogFile) client(ctx _gen_context.T) _gen_ipc.Client {
-	if __gen_c.defaultClient != nil {
-		return __gen_c.defaultClient
-	}
-	return _gen_veyron2.RuntimeFromContext(ctx).Client()
+func (s implLogFileServerStub) Size(call __ipc.ServerCall) (int64, error) {
+	return s.impl.Size(call)
 }
 
-func (__gen_c *clientStubLogFile) Size(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply int64, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Size", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
-		err = ierr
-	}
-	return
+func (s implLogFileServerStub) ReadLog(call __ipc.ServerCall, i0 int64, i1 int32, i2 bool) (int64, error) {
+	ctx := &implLogFileReadLogContext{call, implLogFileReadLogServerSend{call}}
+	return s.impl.ReadLog(ctx, i0, i1, i2)
 }
 
-func (__gen_c *clientStubLogFile) ReadLog(ctx _gen_context.T, StartPos int64, NumEntries int32, Follow bool, opts ..._gen_ipc.CallOpt) (reply LogFileReadLogCall, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "ReadLog", []interface{}{StartPos, NumEntries, Follow}, opts...); err != nil {
-		return
-	}
-	reply = &implLogFileReadLogCall{clientCall: call, readStream: implLogFileReadLogStreamIterator{clientCall: call}}
-	return
+func (s implLogFileServerStub) VGlob() *__ipc.GlobState {
+	return s.gs
 }
 
-func (__gen_c *clientStubLogFile) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
-func (__gen_c *clientStubLogFile) Signature(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
-func (__gen_c *clientStubLogFile) GetMethodTags(ctx _gen_context.T, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
-// ServerStubLogFile wraps a server that implements
-// LogFileService and provides an object that satisfies
-// the requirements of veyron2/ipc.ReflectInvoker.
-type ServerStubLogFile struct {
-	service LogFileService
-	gs      *_gen_ipc.GlobState
-}
-
-func (__gen_s *ServerStubLogFile) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
-	// TODO(bprosnitz) GetMethodTags() will be replaces with Signature().
-	// Note: This exhibits some weird behavior like returning a nil error if the method isn't found.
-	// This will change when it is replaced with Signature().
+func (s implLogFileServerStub) GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error) {
+	// TODO(toddw): Replace with new DescribeInterfaces implementation.
 	switch method {
 	case "Size":
 		return []interface{}{}, nil
@@ -331,34 +297,35 @@ func (__gen_s *ServerStubLogFile) GetMethodTags(call _gen_ipc.ServerCall, method
 	}
 }
 
-func (__gen_s *ServerStubLogFile) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
-	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
-	result.Methods["ReadLog"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{
+func (s implLogFileServerStub) Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error) {
+	// TODO(toddw) Replace with new DescribeInterfaces implementation.
+	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
+	result.Methods["ReadLog"] = __ipc.MethodSignature{
+		InArgs: []__ipc.MethodArgument{
 			{Name: "StartPos", Type: 37},
 			{Name: "NumEntries", Type: 36},
 			{Name: "Follow", Type: 2},
 		},
-		OutArgs: []_gen_ipc.MethodArgument{
+		OutArgs: []__ipc.MethodArgument{
 			{Name: "", Type: 37},
 			{Name: "", Type: 65},
 		},
 
 		OutStream: 66,
 	}
-	result.Methods["Size"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{},
-		OutArgs: []_gen_ipc.MethodArgument{
+	result.Methods["Size"] = __ipc.MethodSignature{
+		InArgs: []__ipc.MethodArgument{},
+		OutArgs: []__ipc.MethodArgument{
 			{Name: "", Type: 37},
 			{Name: "", Type: 65},
 		},
 	}
 
-	result.TypeDefs = []_gen_vdlutil.Any{
-		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, _gen_wiretype.StructType{
-			[]_gen_wiretype.FieldType{
-				_gen_wiretype.FieldType{Type: 0x25, Name: "Position"},
-				_gen_wiretype.FieldType{Type: 0x3, Name: "Line"},
+	result.TypeDefs = []__vdlutil.Any{
+		__wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, __wiretype.StructType{
+			[]__wiretype.FieldType{
+				__wiretype.FieldType{Type: 0x25, Name: "Position"},
+				__wiretype.FieldType{Type: 0x3, Name: "Line"},
 			},
 			"veyron.io/veyron/veyron2/services/mgmt/logreader/types.LogEntry", []string(nil)},
 	}
@@ -366,35 +333,38 @@ func (__gen_s *ServerStubLogFile) Signature(call _gen_ipc.ServerCall) (_gen_ipc.
 	return result, nil
 }
 
-func (__gen_s *ServerStubLogFile) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
-	if unresolver, ok := __gen_s.service.(_gen_ipc.Unresolver); ok {
-		return unresolver.UnresolveStep(call)
+// LogFileReadLogServerStream is the server stream for LogFile.ReadLog.
+type LogFileReadLogServerStream interface {
+	// SendStream returns the send side of the server stream.
+	SendStream() interface {
+		// Send places the item onto the output stream.  Returns errors encountered
+		// while sending.  Blocks if there is no buffer space; will unblock when
+		// buffer space is available.
+		Send(item types.LogEntry) error
 	}
-	if call.Server() == nil {
-		return
-	}
-	var published []string
-	if published, err = call.Server().Published(); err != nil || published == nil {
-		return
-	}
-	reply = make([]string, len(published))
-	for i, p := range published {
-		reply[i] = _gen_naming.Join(p, call.Name())
-	}
-	return
 }
 
-func (__gen_s *ServerStubLogFile) VGlob() *_gen_ipc.GlobState {
-	return __gen_s.gs
+// LogFileReadLogContext represents the context passed to LogFile.ReadLog.
+type LogFileReadLogContext interface {
+	__ipc.ServerContext
+	LogFileReadLogServerStream
 }
 
-func (__gen_s *ServerStubLogFile) Size(call _gen_ipc.ServerCall) (reply int64, err error) {
-	reply, err = __gen_s.service.Size(call)
-	return
+type implLogFileReadLogServerSend struct {
+	call __ipc.ServerCall
 }
 
-func (__gen_s *ServerStubLogFile) ReadLog(call _gen_ipc.ServerCall, StartPos int64, NumEntries int32, Follow bool) (reply int64, err error) {
-	stream := &implLogFileServiceReadLogStream{writer: implLogFileServiceReadLogStreamSender{serverCall: call}}
-	reply, err = __gen_s.service.ReadLog(call, StartPos, NumEntries, Follow, stream)
-	return
+func (s *implLogFileReadLogServerSend) Send(item types.LogEntry) error {
+	return s.call.Send(item)
+}
+
+type implLogFileReadLogContext struct {
+	__ipc.ServerContext
+	send implLogFileReadLogServerSend
+}
+
+func (s *implLogFileReadLogContext) SendStream() interface {
+	Send(item types.LogEntry) error
+} {
+	return &s.send
 }

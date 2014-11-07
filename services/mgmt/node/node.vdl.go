@@ -12,14 +12,18 @@ import (
 
 	"veyron.io/veyron/veyron2/services/security/access"
 
-	// The non-user imports are prefixed with "_gen_" to prevent collisions.
-	_gen_veyron2 "veyron.io/veyron/veyron2"
-	_gen_context "veyron.io/veyron/veyron2/context"
-	_gen_ipc "veyron.io/veyron/veyron2/ipc"
-	_gen_naming "veyron.io/veyron/veyron2/naming"
-	_gen_vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
-	_gen_wiretype "veyron.io/veyron/veyron2/wiretype"
+	// The non-user imports are prefixed with "__" to prevent collisions.
+	__veyron2 "veyron.io/veyron/veyron2"
+	__context "veyron.io/veyron/veyron2/context"
+	__ipc "veyron.io/veyron/veyron2/ipc"
+	__vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
+	__wiretype "veyron.io/veyron/veyron2/wiretype"
 )
+
+// TODO(toddw): Remove this line once the new signature support is done.
+// It corrects a bug where __wiretype is unused in VDL pacakges where only
+// bootstrap types are used on interfaces.
+const _ = __wiretype.TypeIDInvalid
 
 // Description enumerates the profiles that a Node supports.
 type Description struct {
@@ -41,11 +45,9 @@ type Association struct {
 	AccountName  string
 }
 
-// TODO(toddw): Remove this line once the new signature support is done.
-// It corrects a bug where _gen_wiretype is unused in VDL pacakges where only
-// bootstrap types are used on interfaces.
-const _ = _gen_wiretype.TypeIDInvalid
-
+// ApplicationClientMethods is the client interface
+// containing Application methods.
+//
 // Application can be used to manage applications on a device. The
 // idea is that this interace will be invoked using an object name that
 // identifies the application and its installations and instances
@@ -134,11 +136,8 @@ const _ = _gen_wiretype.TypeIDInvalid
 //
 // In other words, invoking any method using an existing application
 // installation instance as a receiver is well-defined.
-// Application is the interface the client binds and uses.
-// Application_ExcludingUniversal is the interface without internal framework-added methods
-// to enable embedding without method collisions.  Not to be used directly by clients.
-type Application_ExcludingUniversal interface {
-	mounttable.Globbable_ExcludingUniversal
+type ApplicationClientMethods interface {
+	mounttable.GlobbableClientMethods
 	// Install installs the application identified by the argument and
 	// returns an object name suffix that identifies the new installation.
 	//
@@ -153,23 +152,23 @@ type Application_ExcludingUniversal interface {
 	// The suffix will contain the title of the application as a prefix,
 	// which can then be used to control all the installations of the given
 	// application.
-	Install(ctx _gen_context.T, Name string, opts ..._gen_ipc.CallOpt) (reply string, err error)
+	Install(ctx __context.T, Name string, opts ...__ipc.CallOpt) (string, error)
 	// Refresh refreshes the state of application installation(s)
 	// instance(s).
-	Refresh(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error)
+	Refresh(__context.T, ...__ipc.CallOpt) error
 	// Restart restarts execution of application installation(s)
 	// instance(s).
-	Restart(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error)
+	Restart(__context.T, ...__ipc.CallOpt) error
 	// Resume resumes execution of application installation(s)
 	// instance(s).
-	Resume(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error)
+	Resume(__context.T, ...__ipc.CallOpt) error
 	// Revert reverts application installation(s) to the most recent
 	// previous installation.
-	Revert(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error)
+	Revert(__context.T, ...__ipc.CallOpt) error
 	// Start starts an instance of application installation(s) and
 	// returns the object name(s) that identifies/identify the new
 	// instance(s).
-	Start(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error)
+	Start(__context.T, ...__ipc.CallOpt) ([]string, error)
 	// Stop attempts a clean shutdown of application installation(s)
 	// instance(s). If the deadline (in seconds) is non-zero and the
 	// instance(s) in questions are still running after the given deadline,
@@ -177,325 +176,495 @@ type Application_ExcludingUniversal interface {
 	//
 	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
 	// are implemented.
-	Stop(ctx _gen_context.T, Deadline uint32, opts ..._gen_ipc.CallOpt) (err error)
+	Stop(ctx __context.T, Deadline uint32, opts ...__ipc.CallOpt) error
 	// Suspend suspends execution of application installation(s)
 	// instance(s).
-	Suspend(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error)
+	Suspend(__context.T, ...__ipc.CallOpt) error
 	// Uninstall uninstalls application installation(s).
-	Uninstall(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error)
+	Uninstall(__context.T, ...__ipc.CallOpt) error
 	// Update updates the application installation(s) from the object name
 	// provided during Install.  If the new application envelope contains a
 	// different application title, the update does not occur, and an error
 	// is returned.
-	Update(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error)
+	Update(__context.T, ...__ipc.CallOpt) error
 	// UpdateTo updates the application installation(s) to the application
 	// specified by the object name argument.  If the new application
 	// envelope contains a different application title, the update does not
 	// occur, and an error is returned.
-	UpdateTo(ctx _gen_context.T, Name string, opts ..._gen_ipc.CallOpt) (err error)
-}
-type Application interface {
-	_gen_ipc.UniversalServiceMethods
-	Application_ExcludingUniversal
+	UpdateTo(ctx __context.T, Name string, opts ...__ipc.CallOpt) error
 }
 
-// ApplicationService is the interface the server implements.
-type ApplicationService interface {
-	mounttable.GlobbableService
-	// Install installs the application identified by the argument and
-	// returns an object name suffix that identifies the new installation.
-	//
-	// The argument should be an object name for an application envelope.
-	// The service it identifies must implement repository.Application, and
-	// is expected to return either the requested version (if the object name
-	// encodes a specific version), or otherwise the latest available version,
-	// as appropriate.
-	//
-	// The returned suffix, when appended to the name used to reach the
-	// receiver for Install, can be used to control the installation object.
-	// The suffix will contain the title of the application as a prefix,
-	// which can then be used to control all the installations of the given
-	// application.
-	Install(context _gen_ipc.ServerContext, Name string) (reply string, err error)
-	// Refresh refreshes the state of application installation(s)
-	// instance(s).
-	Refresh(context _gen_ipc.ServerContext) (err error)
-	// Restart restarts execution of application installation(s)
-	// instance(s).
-	Restart(context _gen_ipc.ServerContext) (err error)
-	// Resume resumes execution of application installation(s)
-	// instance(s).
-	Resume(context _gen_ipc.ServerContext) (err error)
-	// Revert reverts application installation(s) to the most recent
-	// previous installation.
-	Revert(context _gen_ipc.ServerContext) (err error)
-	// Start starts an instance of application installation(s) and
-	// returns the object name(s) that identifies/identify the new
-	// instance(s).
-	Start(context _gen_ipc.ServerContext) (reply []string, err error)
-	// Stop attempts a clean shutdown of application installation(s)
-	// instance(s). If the deadline (in seconds) is non-zero and the
-	// instance(s) in questions are still running after the given deadline,
-	// shutdown of the instance(s) is enforced.
-	//
-	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
-	// are implemented.
-	Stop(context _gen_ipc.ServerContext, Deadline uint32) (err error)
-	// Suspend suspends execution of application installation(s)
-	// instance(s).
-	Suspend(context _gen_ipc.ServerContext) (err error)
-	// Uninstall uninstalls application installation(s).
-	Uninstall(context _gen_ipc.ServerContext) (err error)
-	// Update updates the application installation(s) from the object name
-	// provided during Install.  If the new application envelope contains a
-	// different application title, the update does not occur, and an error
-	// is returned.
-	Update(context _gen_ipc.ServerContext) (err error)
-	// UpdateTo updates the application installation(s) to the application
-	// specified by the object name argument.  If the new application
-	// envelope contains a different application title, the update does not
-	// occur, and an error is returned.
-	UpdateTo(context _gen_ipc.ServerContext, Name string) (err error)
+// ApplicationClientStub adds universal methods to ApplicationClientMethods.
+type ApplicationClientStub interface {
+	ApplicationClientMethods
+	__ipc.UniversalServiceMethods
 }
 
-// BindApplication returns the client stub implementing the Application
-// interface.
-//
-// If no _gen_ipc.Client is specified, the default _gen_ipc.Client in the
-// global Runtime is used.
-func BindApplication(name string, opts ..._gen_ipc.BindOpt) (Application, error) {
-	var client _gen_ipc.Client
-	switch len(opts) {
-	case 0:
-		// Do nothing.
-	case 1:
-		if clientOpt, ok := opts[0].(_gen_ipc.Client); opts[0] == nil || ok {
+// ApplicationClient returns a client stub for Application.
+func ApplicationClient(name string, opts ...__ipc.BindOpt) ApplicationClientStub {
+	var client __ipc.Client
+	for _, opt := range opts {
+		if clientOpt, ok := opt.(__ipc.Client); ok {
 			client = clientOpt
-		} else {
-			return nil, _gen_vdlutil.ErrUnrecognizedOption
 		}
-	default:
-		return nil, _gen_vdlutil.ErrTooManyOptionsToBind
 	}
-	stub := &clientStubApplication{defaultClient: client, name: name}
-	stub.Globbable_ExcludingUniversal, _ = mounttable.BindGlobbable(name, client)
-
-	return stub, nil
+	return implApplicationClientStub{name, client, mounttable.GlobbableClient(name, client)}
 }
 
-// NewServerApplication creates a new server stub.
+type implApplicationClientStub struct {
+	name   string
+	client __ipc.Client
+
+	mounttable.GlobbableClientStub
+}
+
+func (c implApplicationClientStub) c(ctx __context.T) __ipc.Client {
+	if c.client != nil {
+		return c.client
+	}
+	return __veyron2.RuntimeFromContext(ctx).Client()
+}
+
+func (c implApplicationClientStub) Install(ctx __context.T, i0 string, opts ...__ipc.CallOpt) (o0 string, err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "Install", []interface{}{i0}, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&o0, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (c implApplicationClientStub) Refresh(ctx __context.T, opts ...__ipc.CallOpt) (err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "Refresh", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (c implApplicationClientStub) Restart(ctx __context.T, opts ...__ipc.CallOpt) (err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "Restart", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (c implApplicationClientStub) Resume(ctx __context.T, opts ...__ipc.CallOpt) (err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "Resume", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (c implApplicationClientStub) Revert(ctx __context.T, opts ...__ipc.CallOpt) (err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "Revert", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (c implApplicationClientStub) Start(ctx __context.T, opts ...__ipc.CallOpt) (o0 []string, err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "Start", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&o0, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (c implApplicationClientStub) Stop(ctx __context.T, i0 uint32, opts ...__ipc.CallOpt) (err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "Stop", []interface{}{i0}, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (c implApplicationClientStub) Suspend(ctx __context.T, opts ...__ipc.CallOpt) (err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "Suspend", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (c implApplicationClientStub) Uninstall(ctx __context.T, opts ...__ipc.CallOpt) (err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "Uninstall", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (c implApplicationClientStub) Update(ctx __context.T, opts ...__ipc.CallOpt) (err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "Update", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (c implApplicationClientStub) UpdateTo(ctx __context.T, i0 string, opts ...__ipc.CallOpt) (err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "UpdateTo", []interface{}{i0}, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (c implApplicationClientStub) Signature(ctx __context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&o0, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (c implApplicationClientStub) GetMethodTags(ctx __context.T, method string, opts ...__ipc.CallOpt) (o0 []interface{}, err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&o0, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+// ApplicationServerMethods is the interface a server writer
+// implements for Application.
 //
-// It takes a regular server implementing the ApplicationService
-// interface, and returns a new server stub.
-func NewServerApplication(server ApplicationService) interface{} {
-	stub := &ServerStubApplication{
-		ServerStubGlobbable: *mounttable.NewServerGlobbable(server).(*mounttable.ServerStubGlobbable),
-		service:             server,
+// Application can be used to manage applications on a device. The
+// idea is that this interace will be invoked using an object name that
+// identifies the application and its installations and instances
+// where applicable.
+//
+// In particular, the interface methods can be divided into three
+// groups based on their intended receiver:
+//
+// 1) Method receiver is an application:
+// -- Install()
+//
+// 2) Method receiver is an application installation:
+// -- Start()
+// -- Uninstall()
+// -- Update()
+//
+// 3) Method receiver is application installation instance:
+// -- Refresh()
+// -- Restart()
+// -- Resume()
+// -- Stop()
+// -- Suspend()
+//
+// For groups 2) and 3), the suffix that specifies the receiver can
+// optionally omit the installation and/or instance, in which case the
+// operation applies to all installations and/or instances in the
+// scope of the suffix.
+//
+// Examples:
+// # Install Google Maps on the node.
+// device/apps.Install("/google.com/appstore/maps") --> "google maps/0"
+//
+// # Start an instance of the previously installed maps application installation.
+// device/apps/google maps/0.Start() --> { "0" }
+//
+// # Start a second instance of the previously installed maps application installation.
+// device/apps/google maps/0.Start() --> { "1" }
+//
+// # Stop the first instance previously started.
+// device/apps/google maps/0/0.Stop()
+//
+// # Install a second Google Maps installation.
+// device/apps.Install("/google.com/appstore/maps") --> "google maps/1"
+//
+// # Start an instance for all maps application installations.
+// device/apps/google maps.Start() --> {"0/2", "1/0"}
+//
+// # Refresh the state of all instances of all maps application installations.
+// device/apps/google maps.Refresh()
+//
+// # Refresh the state of all instances of the maps application installation
+// identified by the given suffix.
+// device/apps/google maps/0.Refresh()
+//
+// # Refresh the state of the maps application installation instance identified by
+// the given suffix.
+// device/apps/google maps/0/2.Refresh()
+//
+// # Update the second maps installation to the latest version available.
+// device/apps/google maps/1.Update()
+//
+// # Update the first maps installation to a specific version.
+// device/apps/google maps/0.UpdateTo("/google.com/appstore/beta/maps")
+//
+// Further, the following methods complement one another:
+// -- Install() and Uninstall()
+// -- Start() and Stop()
+// -- Suspend() and Resume()
+//
+// Finally, an application installation instance can be in one of
+// three abstract states: 1) "does not exist", 2) "running", or 3)
+// "suspended". The interface methods transition between these
+// abstract states using the following state machine:
+//
+// apply(Start(), "does not exists") = "running"
+// apply(Refresh(), "running") = "running"
+// apply(Refresh(), "suspended") = "suspended"
+// apply(Restart(), "running") = "running"
+// apply(Restart(), "suspended") = "running"
+// apply(Resume(), "suspended") = "running"
+// apply(Resume(), "running") = "running"
+// apply(Stop(), "running") = "does not exist"
+// apply(Stop(), "suspended") = "does not exist"
+// apply(Suspend(), "running") = "suspended"
+// apply(Suspend(), "suspended") = "suspended"
+//
+// In other words, invoking any method using an existing application
+// installation instance as a receiver is well-defined.
+type ApplicationServerMethods interface {
+	mounttable.GlobbableServerMethods
+	// Install installs the application identified by the argument and
+	// returns an object name suffix that identifies the new installation.
+	//
+	// The argument should be an object name for an application envelope.
+	// The service it identifies must implement repository.Application, and
+	// is expected to return either the requested version (if the object name
+	// encodes a specific version), or otherwise the latest available version,
+	// as appropriate.
+	//
+	// The returned suffix, when appended to the name used to reach the
+	// receiver for Install, can be used to control the installation object.
+	// The suffix will contain the title of the application as a prefix,
+	// which can then be used to control all the installations of the given
+	// application.
+	Install(ctx __ipc.ServerContext, Name string) (string, error)
+	// Refresh refreshes the state of application installation(s)
+	// instance(s).
+	Refresh(__ipc.ServerContext) error
+	// Restart restarts execution of application installation(s)
+	// instance(s).
+	Restart(__ipc.ServerContext) error
+	// Resume resumes execution of application installation(s)
+	// instance(s).
+	Resume(__ipc.ServerContext) error
+	// Revert reverts application installation(s) to the most recent
+	// previous installation.
+	Revert(__ipc.ServerContext) error
+	// Start starts an instance of application installation(s) and
+	// returns the object name(s) that identifies/identify the new
+	// instance(s).
+	Start(__ipc.ServerContext) ([]string, error)
+	// Stop attempts a clean shutdown of application installation(s)
+	// instance(s). If the deadline (in seconds) is non-zero and the
+	// instance(s) in questions are still running after the given deadline,
+	// shutdown of the instance(s) is enforced.
+	//
+	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
+	// are implemented.
+	Stop(ctx __ipc.ServerContext, Deadline uint32) error
+	// Suspend suspends execution of application installation(s)
+	// instance(s).
+	Suspend(__ipc.ServerContext) error
+	// Uninstall uninstalls application installation(s).
+	Uninstall(__ipc.ServerContext) error
+	// Update updates the application installation(s) from the object name
+	// provided during Install.  If the new application envelope contains a
+	// different application title, the update does not occur, and an error
+	// is returned.
+	Update(__ipc.ServerContext) error
+	// UpdateTo updates the application installation(s) to the application
+	// specified by the object name argument.  If the new application
+	// envelope contains a different application title, the update does not
+	// occur, and an error is returned.
+	UpdateTo(ctx __ipc.ServerContext, Name string) error
+}
+
+// ApplicationServerStubMethods is the server interface containing
+// Application methods, as expected by ipc.Server.  The difference between
+// this interface and ApplicationServerMethods is that the first context
+// argument for each method is always ipc.ServerCall here, while it is either
+// ipc.ServerContext or a typed streaming context there.
+type ApplicationServerStubMethods interface {
+	mounttable.GlobbableServerStubMethods
+	// Install installs the application identified by the argument and
+	// returns an object name suffix that identifies the new installation.
+	//
+	// The argument should be an object name for an application envelope.
+	// The service it identifies must implement repository.Application, and
+	// is expected to return either the requested version (if the object name
+	// encodes a specific version), or otherwise the latest available version,
+	// as appropriate.
+	//
+	// The returned suffix, when appended to the name used to reach the
+	// receiver for Install, can be used to control the installation object.
+	// The suffix will contain the title of the application as a prefix,
+	// which can then be used to control all the installations of the given
+	// application.
+	Install(call __ipc.ServerCall, Name string) (string, error)
+	// Refresh refreshes the state of application installation(s)
+	// instance(s).
+	Refresh(__ipc.ServerCall) error
+	// Restart restarts execution of application installation(s)
+	// instance(s).
+	Restart(__ipc.ServerCall) error
+	// Resume resumes execution of application installation(s)
+	// instance(s).
+	Resume(__ipc.ServerCall) error
+	// Revert reverts application installation(s) to the most recent
+	// previous installation.
+	Revert(__ipc.ServerCall) error
+	// Start starts an instance of application installation(s) and
+	// returns the object name(s) that identifies/identify the new
+	// instance(s).
+	Start(__ipc.ServerCall) ([]string, error)
+	// Stop attempts a clean shutdown of application installation(s)
+	// instance(s). If the deadline (in seconds) is non-zero and the
+	// instance(s) in questions are still running after the given deadline,
+	// shutdown of the instance(s) is enforced.
+	//
+	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
+	// are implemented.
+	Stop(call __ipc.ServerCall, Deadline uint32) error
+	// Suspend suspends execution of application installation(s)
+	// instance(s).
+	Suspend(__ipc.ServerCall) error
+	// Uninstall uninstalls application installation(s).
+	Uninstall(__ipc.ServerCall) error
+	// Update updates the application installation(s) from the object name
+	// provided during Install.  If the new application envelope contains a
+	// different application title, the update does not occur, and an error
+	// is returned.
+	Update(__ipc.ServerCall) error
+	// UpdateTo updates the application installation(s) to the application
+	// specified by the object name argument.  If the new application
+	// envelope contains a different application title, the update does not
+	// occur, and an error is returned.
+	UpdateTo(call __ipc.ServerCall, Name string) error
+}
+
+// ApplicationServerStub adds universal methods to ApplicationServerStubMethods.
+type ApplicationServerStub interface {
+	ApplicationServerStubMethods
+	// GetMethodTags will be replaced with DescribeInterfaces.
+	GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error)
+	// Signature will be replaced with DescribeInterfaces.
+	Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error)
+}
+
+// ApplicationServer returns a server stub for Application.
+// It converts an implementation of ApplicationServerMethods into
+// an object that may be used by ipc.Server.
+func ApplicationServer(impl ApplicationServerMethods) ApplicationServerStub {
+	stub := implApplicationServerStub{
+		impl:                impl,
+		GlobbableServerStub: mounttable.GlobbableServer(impl),
 	}
-	var gs _gen_ipc.GlobState
-	var self interface{} = stub
-	// VAllGlobber is implemented by the server object, which is wrapped in
-	// a VDL generated server stub.
-	if x, ok := self.(_gen_ipc.VAllGlobber); ok {
-		gs.VAllGlobber = x
+	// Initialize GlobState; always check the stub itself first, to handle the
+	// case where the user has the Glob method defined in their VDL source.
+	if gs := __ipc.NewGlobState(stub); gs != nil {
+		stub.gs = gs
+	} else if gs := __ipc.NewGlobState(impl); gs != nil {
+		stub.gs = gs
 	}
-	// VAllGlobber is implemented by the server object without using a VDL
-	// generated stub.
-	if x, ok := server.(_gen_ipc.VAllGlobber); ok {
-		gs.VAllGlobber = x
-	}
-	// VChildrenGlobber is implemented in the server object.
-	if x, ok := server.(_gen_ipc.VChildrenGlobber); ok {
-		gs.VChildrenGlobber = x
-	}
-	stub.gs = &gs
 	return stub
 }
 
-// clientStubApplication implements Application.
-type clientStubApplication struct {
-	mounttable.Globbable_ExcludingUniversal
+type implApplicationServerStub struct {
+	impl ApplicationServerMethods
+	gs   *__ipc.GlobState
 
-	defaultClient _gen_ipc.Client
-	name          string
+	mounttable.GlobbableServerStub
 }
 
-func (__gen_c *clientStubApplication) client(ctx _gen_context.T) _gen_ipc.Client {
-	if __gen_c.defaultClient != nil {
-		return __gen_c.defaultClient
-	}
-	return _gen_veyron2.RuntimeFromContext(ctx).Client()
+func (s implApplicationServerStub) Install(call __ipc.ServerCall, i0 string) (string, error) {
+	return s.impl.Install(call, i0)
 }
 
-func (__gen_c *clientStubApplication) Install(ctx _gen_context.T, Name string, opts ..._gen_ipc.CallOpt) (reply string, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Install", []interface{}{Name}, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
-		err = ierr
-	}
-	return
+func (s implApplicationServerStub) Refresh(call __ipc.ServerCall) error {
+	return s.impl.Refresh(call)
 }
 
-func (__gen_c *clientStubApplication) Refresh(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Refresh", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
-	return
+func (s implApplicationServerStub) Restart(call __ipc.ServerCall) error {
+	return s.impl.Restart(call)
 }
 
-func (__gen_c *clientStubApplication) Restart(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Restart", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
-	return
+func (s implApplicationServerStub) Resume(call __ipc.ServerCall) error {
+	return s.impl.Resume(call)
 }
 
-func (__gen_c *clientStubApplication) Resume(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Resume", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
-	return
+func (s implApplicationServerStub) Revert(call __ipc.ServerCall) error {
+	return s.impl.Revert(call)
 }
 
-func (__gen_c *clientStubApplication) Revert(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Revert", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
-	return
+func (s implApplicationServerStub) Start(call __ipc.ServerCall) ([]string, error) {
+	return s.impl.Start(call)
 }
 
-func (__gen_c *clientStubApplication) Start(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Start", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
-		err = ierr
-	}
-	return
+func (s implApplicationServerStub) Stop(call __ipc.ServerCall, i0 uint32) error {
+	return s.impl.Stop(call, i0)
 }
 
-func (__gen_c *clientStubApplication) Stop(ctx _gen_context.T, Deadline uint32, opts ..._gen_ipc.CallOpt) (err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Stop", []interface{}{Deadline}, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
-	return
+func (s implApplicationServerStub) Suspend(call __ipc.ServerCall) error {
+	return s.impl.Suspend(call)
 }
 
-func (__gen_c *clientStubApplication) Suspend(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Suspend", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
-	return
+func (s implApplicationServerStub) Uninstall(call __ipc.ServerCall) error {
+	return s.impl.Uninstall(call)
 }
 
-func (__gen_c *clientStubApplication) Uninstall(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Uninstall", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
-	return
+func (s implApplicationServerStub) Update(call __ipc.ServerCall) error {
+	return s.impl.Update(call)
 }
 
-func (__gen_c *clientStubApplication) Update(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Update", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
-	return
+func (s implApplicationServerStub) UpdateTo(call __ipc.ServerCall, i0 string) error {
+	return s.impl.UpdateTo(call, i0)
 }
 
-func (__gen_c *clientStubApplication) UpdateTo(ctx _gen_context.T, Name string, opts ..._gen_ipc.CallOpt) (err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "UpdateTo", []interface{}{Name}, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
-	return
+func (s implApplicationServerStub) VGlob() *__ipc.GlobState {
+	return s.gs
 }
 
-func (__gen_c *clientStubApplication) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
-func (__gen_c *clientStubApplication) Signature(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
-func (__gen_c *clientStubApplication) GetMethodTags(ctx _gen_context.T, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
-// ServerStubApplication wraps a server that implements
-// ApplicationService and provides an object that satisfies
-// the requirements of veyron2/ipc.ReflectInvoker.
-type ServerStubApplication struct {
-	mounttable.ServerStubGlobbable
-
-	service ApplicationService
-	gs      *_gen_ipc.GlobState
-}
-
-func (__gen_s *ServerStubApplication) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
-	// TODO(bprosnitz) GetMethodTags() will be replaces with Signature().
-	// Note: This exhibits some weird behavior like returning a nil error if the method isn't found.
-	// This will change when it is replaced with Signature().
-	if resp, err := __gen_s.ServerStubGlobbable.GetMethodTags(call, method); resp != nil || err != nil {
+func (s implApplicationServerStub) GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error) {
+	// TODO(toddw): Replace with new DescribeInterfaces implementation.
+	if resp, err := s.GlobbableServerStub.GetMethodTags(call, method); resp != nil || err != nil {
 		return resp, err
 	}
 	switch method {
@@ -526,133 +695,134 @@ func (__gen_s *ServerStubApplication) GetMethodTags(call _gen_ipc.ServerCall, me
 	}
 }
 
-func (__gen_s *ServerStubApplication) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
-	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
-	result.Methods["Install"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{
+func (s implApplicationServerStub) Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error) {
+	// TODO(toddw) Replace with new DescribeInterfaces implementation.
+	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
+	result.Methods["Install"] = __ipc.MethodSignature{
+		InArgs: []__ipc.MethodArgument{
 			{Name: "Name", Type: 3},
 		},
-		OutArgs: []_gen_ipc.MethodArgument{
+		OutArgs: []__ipc.MethodArgument{
 			{Name: "", Type: 3},
 			{Name: "", Type: 65},
 		},
 	}
-	result.Methods["Refresh"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{},
-		OutArgs: []_gen_ipc.MethodArgument{
+	result.Methods["Refresh"] = __ipc.MethodSignature{
+		InArgs: []__ipc.MethodArgument{},
+		OutArgs: []__ipc.MethodArgument{
 			{Name: "", Type: 65},
 		},
 	}
-	result.Methods["Restart"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{},
-		OutArgs: []_gen_ipc.MethodArgument{
+	result.Methods["Restart"] = __ipc.MethodSignature{
+		InArgs: []__ipc.MethodArgument{},
+		OutArgs: []__ipc.MethodArgument{
 			{Name: "", Type: 65},
 		},
 	}
-	result.Methods["Resume"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{},
-		OutArgs: []_gen_ipc.MethodArgument{
+	result.Methods["Resume"] = __ipc.MethodSignature{
+		InArgs: []__ipc.MethodArgument{},
+		OutArgs: []__ipc.MethodArgument{
 			{Name: "", Type: 65},
 		},
 	}
-	result.Methods["Revert"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{},
-		OutArgs: []_gen_ipc.MethodArgument{
+	result.Methods["Revert"] = __ipc.MethodSignature{
+		InArgs: []__ipc.MethodArgument{},
+		OutArgs: []__ipc.MethodArgument{
 			{Name: "", Type: 65},
 		},
 	}
-	result.Methods["Start"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{},
-		OutArgs: []_gen_ipc.MethodArgument{
+	result.Methods["Start"] = __ipc.MethodSignature{
+		InArgs: []__ipc.MethodArgument{},
+		OutArgs: []__ipc.MethodArgument{
 			{Name: "", Type: 61},
 			{Name: "", Type: 65},
 		},
 	}
-	result.Methods["Stop"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{
+	result.Methods["Stop"] = __ipc.MethodSignature{
+		InArgs: []__ipc.MethodArgument{
 			{Name: "Deadline", Type: 52},
 		},
-		OutArgs: []_gen_ipc.MethodArgument{
+		OutArgs: []__ipc.MethodArgument{
 			{Name: "", Type: 65},
 		},
 	}
-	result.Methods["Suspend"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{},
-		OutArgs: []_gen_ipc.MethodArgument{
+	result.Methods["Suspend"] = __ipc.MethodSignature{
+		InArgs: []__ipc.MethodArgument{},
+		OutArgs: []__ipc.MethodArgument{
 			{Name: "", Type: 65},
 		},
 	}
-	result.Methods["Uninstall"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{},
-		OutArgs: []_gen_ipc.MethodArgument{
+	result.Methods["Uninstall"] = __ipc.MethodSignature{
+		InArgs: []__ipc.MethodArgument{},
+		OutArgs: []__ipc.MethodArgument{
 			{Name: "", Type: 65},
 		},
 	}
-	result.Methods["Update"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{},
-		OutArgs: []_gen_ipc.MethodArgument{
+	result.Methods["Update"] = __ipc.MethodSignature{
+		InArgs: []__ipc.MethodArgument{},
+		OutArgs: []__ipc.MethodArgument{
 			{Name: "", Type: 65},
 		},
 	}
-	result.Methods["UpdateTo"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{
+	result.Methods["UpdateTo"] = __ipc.MethodSignature{
+		InArgs: []__ipc.MethodArgument{
 			{Name: "Name", Type: 3},
 		},
-		OutArgs: []_gen_ipc.MethodArgument{
+		OutArgs: []__ipc.MethodArgument{
 			{Name: "", Type: 65},
 		},
 	}
 
-	result.TypeDefs = []_gen_vdlutil.Any{
-		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}}
-	var ss _gen_ipc.ServiceSignature
+	result.TypeDefs = []__vdlutil.Any{
+		__wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}}
+	var ss __ipc.ServiceSignature
 	var firstAdded int
-	ss, _ = __gen_s.ServerStubGlobbable.Signature(call)
+	ss, _ = s.GlobbableServerStub.Signature(call)
 	firstAdded = len(result.TypeDefs)
 	for k, v := range ss.Methods {
 		for i, _ := range v.InArgs {
-			if v.InArgs[i].Type >= _gen_wiretype.TypeIDFirst {
-				v.InArgs[i].Type += _gen_wiretype.TypeID(firstAdded)
+			if v.InArgs[i].Type >= __wiretype.TypeIDFirst {
+				v.InArgs[i].Type += __wiretype.TypeID(firstAdded)
 			}
 		}
 		for i, _ := range v.OutArgs {
-			if v.OutArgs[i].Type >= _gen_wiretype.TypeIDFirst {
-				v.OutArgs[i].Type += _gen_wiretype.TypeID(firstAdded)
+			if v.OutArgs[i].Type >= __wiretype.TypeIDFirst {
+				v.OutArgs[i].Type += __wiretype.TypeID(firstAdded)
 			}
 		}
-		if v.InStream >= _gen_wiretype.TypeIDFirst {
-			v.InStream += _gen_wiretype.TypeID(firstAdded)
+		if v.InStream >= __wiretype.TypeIDFirst {
+			v.InStream += __wiretype.TypeID(firstAdded)
 		}
-		if v.OutStream >= _gen_wiretype.TypeIDFirst {
-			v.OutStream += _gen_wiretype.TypeID(firstAdded)
+		if v.OutStream >= __wiretype.TypeIDFirst {
+			v.OutStream += __wiretype.TypeID(firstAdded)
 		}
 		result.Methods[k] = v
 	}
 	//TODO(bprosnitz) combine type definitions from embeded interfaces in a way that doesn't cause duplication.
 	for _, d := range ss.TypeDefs {
 		switch wt := d.(type) {
-		case _gen_wiretype.SliceType:
-			if wt.Elem >= _gen_wiretype.TypeIDFirst {
-				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+		case __wiretype.SliceType:
+			if wt.Elem >= __wiretype.TypeIDFirst {
+				wt.Elem += __wiretype.TypeID(firstAdded)
 			}
 			d = wt
-		case _gen_wiretype.ArrayType:
-			if wt.Elem >= _gen_wiretype.TypeIDFirst {
-				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+		case __wiretype.ArrayType:
+			if wt.Elem >= __wiretype.TypeIDFirst {
+				wt.Elem += __wiretype.TypeID(firstAdded)
 			}
 			d = wt
-		case _gen_wiretype.MapType:
-			if wt.Key >= _gen_wiretype.TypeIDFirst {
-				wt.Key += _gen_wiretype.TypeID(firstAdded)
+		case __wiretype.MapType:
+			if wt.Key >= __wiretype.TypeIDFirst {
+				wt.Key += __wiretype.TypeID(firstAdded)
 			}
-			if wt.Elem >= _gen_wiretype.TypeIDFirst {
-				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+			if wt.Elem >= __wiretype.TypeIDFirst {
+				wt.Elem += __wiretype.TypeID(firstAdded)
 			}
 			d = wt
-		case _gen_wiretype.StructType:
+		case __wiretype.StructType:
 			for i, fld := range wt.Fields {
-				if fld.Type >= _gen_wiretype.TypeIDFirst {
-					wt.Fields[i].Type += _gen_wiretype.TypeID(firstAdded)
+				if fld.Type >= __wiretype.TypeIDFirst {
+					wt.Fields[i].Type += __wiretype.TypeID(firstAdded)
 				}
 			}
 			d = wt
@@ -664,91 +834,14 @@ func (__gen_s *ServerStubApplication) Signature(call _gen_ipc.ServerCall) (_gen_
 	return result, nil
 }
 
-func (__gen_s *ServerStubApplication) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
-	if unresolver, ok := __gen_s.service.(_gen_ipc.Unresolver); ok {
-		return unresolver.UnresolveStep(call)
-	}
-	if call.Server() == nil {
-		return
-	}
-	var published []string
-	if published, err = call.Server().Published(); err != nil || published == nil {
-		return
-	}
-	reply = make([]string, len(published))
-	for i, p := range published {
-		reply[i] = _gen_naming.Join(p, call.Name())
-	}
-	return
-}
-
-func (__gen_s *ServerStubApplication) VGlob() *_gen_ipc.GlobState {
-	return __gen_s.gs
-}
-
-func (__gen_s *ServerStubApplication) Install(call _gen_ipc.ServerCall, Name string) (reply string, err error) {
-	reply, err = __gen_s.service.Install(call, Name)
-	return
-}
-
-func (__gen_s *ServerStubApplication) Refresh(call _gen_ipc.ServerCall) (err error) {
-	err = __gen_s.service.Refresh(call)
-	return
-}
-
-func (__gen_s *ServerStubApplication) Restart(call _gen_ipc.ServerCall) (err error) {
-	err = __gen_s.service.Restart(call)
-	return
-}
-
-func (__gen_s *ServerStubApplication) Resume(call _gen_ipc.ServerCall) (err error) {
-	err = __gen_s.service.Resume(call)
-	return
-}
-
-func (__gen_s *ServerStubApplication) Revert(call _gen_ipc.ServerCall) (err error) {
-	err = __gen_s.service.Revert(call)
-	return
-}
-
-func (__gen_s *ServerStubApplication) Start(call _gen_ipc.ServerCall) (reply []string, err error) {
-	reply, err = __gen_s.service.Start(call)
-	return
-}
-
-func (__gen_s *ServerStubApplication) Stop(call _gen_ipc.ServerCall, Deadline uint32) (err error) {
-	err = __gen_s.service.Stop(call, Deadline)
-	return
-}
-
-func (__gen_s *ServerStubApplication) Suspend(call _gen_ipc.ServerCall) (err error) {
-	err = __gen_s.service.Suspend(call)
-	return
-}
-
-func (__gen_s *ServerStubApplication) Uninstall(call _gen_ipc.ServerCall) (err error) {
-	err = __gen_s.service.Uninstall(call)
-	return
-}
-
-func (__gen_s *ServerStubApplication) Update(call _gen_ipc.ServerCall) (err error) {
-	err = __gen_s.service.Update(call)
-	return
-}
-
-func (__gen_s *ServerStubApplication) UpdateTo(call _gen_ipc.ServerCall, Name string) (err error) {
-	err = __gen_s.service.UpdateTo(call, Name)
-	return
-}
-
+// NodeClientMethods is the client interface
+// containing Node methods.
+//
 // Node can be used to manage a node. The idea is that this interface
 // will be invoked using an object name that identifies the node.
-// Node is the interface the client binds and uses.
-// Node_ExcludingUniversal is the interface without internal framework-added methods
-// to enable embedding without method collisions.  Not to be used directly by clients.
-type Node_ExcludingUniversal interface {
+type NodeClientMethods interface {
 	// Object provides access control for Veyron objects.
-	access.Object_ExcludingUniversal
+	access.ObjectClientMethods
 	// Application can be used to manage applications on a device. The
 	// idea is that this interace will be invoked using an object name that
 	// identifies the application and its installations and instances
@@ -837,345 +930,466 @@ type Node_ExcludingUniversal interface {
 	//
 	// In other words, invoking any method using an existing application
 	// installation instance as a receiver is well-defined.
-	Application_ExcludingUniversal
+	ApplicationClientMethods
 	// Claim is used to claim ownership of a Node running on a device
 	// by blessing its identity. By default, after this call all node
 	// methods will be access protected to the identity of the claimer.
-	Claim(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error)
+	Claim(__context.T, ...__ipc.CallOpt) error
 	// Describe generates a description of the node.
-	Describe(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply Description, err error)
+	Describe(__context.T, ...__ipc.CallOpt) (Description, error)
 	// IsRunnable checks if the node can execute the given binary.
-	IsRunnable(ctx _gen_context.T, Description binary.Description, opts ..._gen_ipc.CallOpt) (reply bool, err error)
+	IsRunnable(ctx __context.T, Description binary.Description, opts ...__ipc.CallOpt) (bool, error)
 	// Reset resets the node. If the deadline is non-zero and the node
 	// in question is still running after the given deadline expired,
 	// reset of the node is enforced.
 	//
 	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
 	// are implemented.
-	Reset(ctx _gen_context.T, Deadline uint64, opts ..._gen_ipc.CallOpt) (err error)
+	Reset(ctx __context.T, Deadline uint64, opts ...__ipc.CallOpt) error
 	// AssociateAccount associates a local  system account name with the provided
 	// Veyron identities. It replaces the existing association if one already exists for that
 	// identity. Setting an AccountName to "" removes the association for each
 	// listed identity.
-	AssociateAccount(ctx _gen_context.T, identityNames []string, accountName string, opts ..._gen_ipc.CallOpt) (err error)
+	AssociateAccount(ctx __context.T, identityNames []string, accountName string, opts ...__ipc.CallOpt) error
 	// ListAssociations returns all of the associations between Veyron identities
 	// and system names.
-	ListAssociations(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []Association, err error)
-}
-type Node interface {
-	_gen_ipc.UniversalServiceMethods
-	Node_ExcludingUniversal
+	ListAssociations(__context.T, ...__ipc.CallOpt) (associations []Association, err error)
 }
 
-// NodeService is the interface the server implements.
-type NodeService interface {
-
-	// Object provides access control for Veyron objects.
-	access.ObjectService
-	// Application can be used to manage applications on a device. The
-	// idea is that this interace will be invoked using an object name that
-	// identifies the application and its installations and instances
-	// where applicable.
-	//
-	// In particular, the interface methods can be divided into three
-	// groups based on their intended receiver:
-	//
-	// 1) Method receiver is an application:
-	// -- Install()
-	//
-	// 2) Method receiver is an application installation:
-	// -- Start()
-	// -- Uninstall()
-	// -- Update()
-	//
-	// 3) Method receiver is application installation instance:
-	// -- Refresh()
-	// -- Restart()
-	// -- Resume()
-	// -- Stop()
-	// -- Suspend()
-	//
-	// For groups 2) and 3), the suffix that specifies the receiver can
-	// optionally omit the installation and/or instance, in which case the
-	// operation applies to all installations and/or instances in the
-	// scope of the suffix.
-	//
-	// Examples:
-	// # Install Google Maps on the node.
-	// device/apps.Install("/google.com/appstore/maps") --> "google maps/0"
-	//
-	// # Start an instance of the previously installed maps application installation.
-	// device/apps/google maps/0.Start() --> { "0" }
-	//
-	// # Start a second instance of the previously installed maps application installation.
-	// device/apps/google maps/0.Start() --> { "1" }
-	//
-	// # Stop the first instance previously started.
-	// device/apps/google maps/0/0.Stop()
-	//
-	// # Install a second Google Maps installation.
-	// device/apps.Install("/google.com/appstore/maps") --> "google maps/1"
-	//
-	// # Start an instance for all maps application installations.
-	// device/apps/google maps.Start() --> {"0/2", "1/0"}
-	//
-	// # Refresh the state of all instances of all maps application installations.
-	// device/apps/google maps.Refresh()
-	//
-	// # Refresh the state of all instances of the maps application installation
-	// identified by the given suffix.
-	// device/apps/google maps/0.Refresh()
-	//
-	// # Refresh the state of the maps application installation instance identified by
-	// the given suffix.
-	// device/apps/google maps/0/2.Refresh()
-	//
-	// # Update the second maps installation to the latest version available.
-	// device/apps/google maps/1.Update()
-	//
-	// # Update the first maps installation to a specific version.
-	// device/apps/google maps/0.UpdateTo("/google.com/appstore/beta/maps")
-	//
-	// Further, the following methods complement one another:
-	// -- Install() and Uninstall()
-	// -- Start() and Stop()
-	// -- Suspend() and Resume()
-	//
-	// Finally, an application installation instance can be in one of
-	// three abstract states: 1) "does not exist", 2) "running", or 3)
-	// "suspended". The interface methods transition between these
-	// abstract states using the following state machine:
-	//
-	// apply(Start(), "does not exists") = "running"
-	// apply(Refresh(), "running") = "running"
-	// apply(Refresh(), "suspended") = "suspended"
-	// apply(Restart(), "running") = "running"
-	// apply(Restart(), "suspended") = "running"
-	// apply(Resume(), "suspended") = "running"
-	// apply(Resume(), "running") = "running"
-	// apply(Stop(), "running") = "does not exist"
-	// apply(Stop(), "suspended") = "does not exist"
-	// apply(Suspend(), "running") = "suspended"
-	// apply(Suspend(), "suspended") = "suspended"
-	//
-	// In other words, invoking any method using an existing application
-	// installation instance as a receiver is well-defined.
-	ApplicationService
-	// Claim is used to claim ownership of a Node running on a device
-	// by blessing its identity. By default, after this call all node
-	// methods will be access protected to the identity of the claimer.
-	Claim(context _gen_ipc.ServerContext) (err error)
-	// Describe generates a description of the node.
-	Describe(context _gen_ipc.ServerContext) (reply Description, err error)
-	// IsRunnable checks if the node can execute the given binary.
-	IsRunnable(context _gen_ipc.ServerContext, Description binary.Description) (reply bool, err error)
-	// Reset resets the node. If the deadline is non-zero and the node
-	// in question is still running after the given deadline expired,
-	// reset of the node is enforced.
-	//
-	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
-	// are implemented.
-	Reset(context _gen_ipc.ServerContext, Deadline uint64) (err error)
-	// AssociateAccount associates a local  system account name with the provided
-	// Veyron identities. It replaces the existing association if one already exists for that
-	// identity. Setting an AccountName to "" removes the association for each
-	// listed identity.
-	AssociateAccount(context _gen_ipc.ServerContext, identityNames []string, accountName string) (err error)
-	// ListAssociations returns all of the associations between Veyron identities
-	// and system names.
-	ListAssociations(context _gen_ipc.ServerContext) (reply []Association, err error)
+// NodeClientStub adds universal methods to NodeClientMethods.
+type NodeClientStub interface {
+	NodeClientMethods
+	__ipc.UniversalServiceMethods
 }
 
-// BindNode returns the client stub implementing the Node
-// interface.
-//
-// If no _gen_ipc.Client is specified, the default _gen_ipc.Client in the
-// global Runtime is used.
-func BindNode(name string, opts ..._gen_ipc.BindOpt) (Node, error) {
-	var client _gen_ipc.Client
-	switch len(opts) {
-	case 0:
-		// Do nothing.
-	case 1:
-		if clientOpt, ok := opts[0].(_gen_ipc.Client); opts[0] == nil || ok {
+// NodeClient returns a client stub for Node.
+func NodeClient(name string, opts ...__ipc.BindOpt) NodeClientStub {
+	var client __ipc.Client
+	for _, opt := range opts {
+		if clientOpt, ok := opt.(__ipc.Client); ok {
 			client = clientOpt
-		} else {
-			return nil, _gen_vdlutil.ErrUnrecognizedOption
 		}
-	default:
-		return nil, _gen_vdlutil.ErrTooManyOptionsToBind
 	}
-	stub := &clientStubNode{defaultClient: client, name: name}
-	stub.Object_ExcludingUniversal, _ = access.BindObject(name, client)
-	stub.Application_ExcludingUniversal, _ = BindApplication(name, client)
-
-	return stub, nil
+	return implNodeClientStub{name, client, access.ObjectClient(name, client), ApplicationClient(name, client)}
 }
 
-// NewServerNode creates a new server stub.
+type implNodeClientStub struct {
+	name   string
+	client __ipc.Client
+
+	access.ObjectClientStub
+	ApplicationClientStub
+}
+
+func (c implNodeClientStub) c(ctx __context.T) __ipc.Client {
+	if c.client != nil {
+		return c.client
+	}
+	return __veyron2.RuntimeFromContext(ctx).Client()
+}
+
+func (c implNodeClientStub) Claim(ctx __context.T, opts ...__ipc.CallOpt) (err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "Claim", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (c implNodeClientStub) Describe(ctx __context.T, opts ...__ipc.CallOpt) (o0 Description, err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "Describe", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&o0, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (c implNodeClientStub) IsRunnable(ctx __context.T, i0 binary.Description, opts ...__ipc.CallOpt) (o0 bool, err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "IsRunnable", []interface{}{i0}, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&o0, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (c implNodeClientStub) Reset(ctx __context.T, i0 uint64, opts ...__ipc.CallOpt) (err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "Reset", []interface{}{i0}, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (c implNodeClientStub) AssociateAccount(ctx __context.T, i0 []string, i1 string, opts ...__ipc.CallOpt) (err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "AssociateAccount", []interface{}{i0, i1}, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (c implNodeClientStub) ListAssociations(ctx __context.T, opts ...__ipc.CallOpt) (o0 []Association, err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "ListAssociations", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&o0, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (c implNodeClientStub) Signature(ctx __context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&o0, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (c implNodeClientStub) GetMethodTags(ctx __context.T, method string, opts ...__ipc.CallOpt) (o0 []interface{}, err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&o0, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+// NodeServerMethods is the interface a server writer
+// implements for Node.
 //
-// It takes a regular server implementing the NodeService
-// interface, and returns a new server stub.
-func NewServerNode(server NodeService) interface{} {
-	stub := &ServerStubNode{
-		ServerStubObject:      *access.NewServerObject(server).(*access.ServerStubObject),
-		ServerStubApplication: *NewServerApplication(server).(*ServerStubApplication),
-		service:               server,
+// Node can be used to manage a node. The idea is that this interface
+// will be invoked using an object name that identifies the node.
+type NodeServerMethods interface {
+	// Object provides access control for Veyron objects.
+	access.ObjectServerMethods
+	// Application can be used to manage applications on a device. The
+	// idea is that this interace will be invoked using an object name that
+	// identifies the application and its installations and instances
+	// where applicable.
+	//
+	// In particular, the interface methods can be divided into three
+	// groups based on their intended receiver:
+	//
+	// 1) Method receiver is an application:
+	// -- Install()
+	//
+	// 2) Method receiver is an application installation:
+	// -- Start()
+	// -- Uninstall()
+	// -- Update()
+	//
+	// 3) Method receiver is application installation instance:
+	// -- Refresh()
+	// -- Restart()
+	// -- Resume()
+	// -- Stop()
+	// -- Suspend()
+	//
+	// For groups 2) and 3), the suffix that specifies the receiver can
+	// optionally omit the installation and/or instance, in which case the
+	// operation applies to all installations and/or instances in the
+	// scope of the suffix.
+	//
+	// Examples:
+	// # Install Google Maps on the node.
+	// device/apps.Install("/google.com/appstore/maps") --> "google maps/0"
+	//
+	// # Start an instance of the previously installed maps application installation.
+	// device/apps/google maps/0.Start() --> { "0" }
+	//
+	// # Start a second instance of the previously installed maps application installation.
+	// device/apps/google maps/0.Start() --> { "1" }
+	//
+	// # Stop the first instance previously started.
+	// device/apps/google maps/0/0.Stop()
+	//
+	// # Install a second Google Maps installation.
+	// device/apps.Install("/google.com/appstore/maps") --> "google maps/1"
+	//
+	// # Start an instance for all maps application installations.
+	// device/apps/google maps.Start() --> {"0/2", "1/0"}
+	//
+	// # Refresh the state of all instances of all maps application installations.
+	// device/apps/google maps.Refresh()
+	//
+	// # Refresh the state of all instances of the maps application installation
+	// identified by the given suffix.
+	// device/apps/google maps/0.Refresh()
+	//
+	// # Refresh the state of the maps application installation instance identified by
+	// the given suffix.
+	// device/apps/google maps/0/2.Refresh()
+	//
+	// # Update the second maps installation to the latest version available.
+	// device/apps/google maps/1.Update()
+	//
+	// # Update the first maps installation to a specific version.
+	// device/apps/google maps/0.UpdateTo("/google.com/appstore/beta/maps")
+	//
+	// Further, the following methods complement one another:
+	// -- Install() and Uninstall()
+	// -- Start() and Stop()
+	// -- Suspend() and Resume()
+	//
+	// Finally, an application installation instance can be in one of
+	// three abstract states: 1) "does not exist", 2) "running", or 3)
+	// "suspended". The interface methods transition between these
+	// abstract states using the following state machine:
+	//
+	// apply(Start(), "does not exists") = "running"
+	// apply(Refresh(), "running") = "running"
+	// apply(Refresh(), "suspended") = "suspended"
+	// apply(Restart(), "running") = "running"
+	// apply(Restart(), "suspended") = "running"
+	// apply(Resume(), "suspended") = "running"
+	// apply(Resume(), "running") = "running"
+	// apply(Stop(), "running") = "does not exist"
+	// apply(Stop(), "suspended") = "does not exist"
+	// apply(Suspend(), "running") = "suspended"
+	// apply(Suspend(), "suspended") = "suspended"
+	//
+	// In other words, invoking any method using an existing application
+	// installation instance as a receiver is well-defined.
+	ApplicationServerMethods
+	// Claim is used to claim ownership of a Node running on a device
+	// by blessing its identity. By default, after this call all node
+	// methods will be access protected to the identity of the claimer.
+	Claim(__ipc.ServerContext) error
+	// Describe generates a description of the node.
+	Describe(__ipc.ServerContext) (Description, error)
+	// IsRunnable checks if the node can execute the given binary.
+	IsRunnable(ctx __ipc.ServerContext, Description binary.Description) (bool, error)
+	// Reset resets the node. If the deadline is non-zero and the node
+	// in question is still running after the given deadline expired,
+	// reset of the node is enforced.
+	//
+	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
+	// are implemented.
+	Reset(ctx __ipc.ServerContext, Deadline uint64) error
+	// AssociateAccount associates a local  system account name with the provided
+	// Veyron identities. It replaces the existing association if one already exists for that
+	// identity. Setting an AccountName to "" removes the association for each
+	// listed identity.
+	AssociateAccount(ctx __ipc.ServerContext, identityNames []string, accountName string) error
+	// ListAssociations returns all of the associations between Veyron identities
+	// and system names.
+	ListAssociations(__ipc.ServerContext) (associations []Association, err error)
+}
+
+// NodeServerStubMethods is the server interface containing
+// Node methods, as expected by ipc.Server.  The difference between
+// this interface and NodeServerMethods is that the first context
+// argument for each method is always ipc.ServerCall here, while it is either
+// ipc.ServerContext or a typed streaming context there.
+type NodeServerStubMethods interface {
+	// Object provides access control for Veyron objects.
+	access.ObjectServerStubMethods
+	// Application can be used to manage applications on a device. The
+	// idea is that this interace will be invoked using an object name that
+	// identifies the application and its installations and instances
+	// where applicable.
+	//
+	// In particular, the interface methods can be divided into three
+	// groups based on their intended receiver:
+	//
+	// 1) Method receiver is an application:
+	// -- Install()
+	//
+	// 2) Method receiver is an application installation:
+	// -- Start()
+	// -- Uninstall()
+	// -- Update()
+	//
+	// 3) Method receiver is application installation instance:
+	// -- Refresh()
+	// -- Restart()
+	// -- Resume()
+	// -- Stop()
+	// -- Suspend()
+	//
+	// For groups 2) and 3), the suffix that specifies the receiver can
+	// optionally omit the installation and/or instance, in which case the
+	// operation applies to all installations and/or instances in the
+	// scope of the suffix.
+	//
+	// Examples:
+	// # Install Google Maps on the node.
+	// device/apps.Install("/google.com/appstore/maps") --> "google maps/0"
+	//
+	// # Start an instance of the previously installed maps application installation.
+	// device/apps/google maps/0.Start() --> { "0" }
+	//
+	// # Start a second instance of the previously installed maps application installation.
+	// device/apps/google maps/0.Start() --> { "1" }
+	//
+	// # Stop the first instance previously started.
+	// device/apps/google maps/0/0.Stop()
+	//
+	// # Install a second Google Maps installation.
+	// device/apps.Install("/google.com/appstore/maps") --> "google maps/1"
+	//
+	// # Start an instance for all maps application installations.
+	// device/apps/google maps.Start() --> {"0/2", "1/0"}
+	//
+	// # Refresh the state of all instances of all maps application installations.
+	// device/apps/google maps.Refresh()
+	//
+	// # Refresh the state of all instances of the maps application installation
+	// identified by the given suffix.
+	// device/apps/google maps/0.Refresh()
+	//
+	// # Refresh the state of the maps application installation instance identified by
+	// the given suffix.
+	// device/apps/google maps/0/2.Refresh()
+	//
+	// # Update the second maps installation to the latest version available.
+	// device/apps/google maps/1.Update()
+	//
+	// # Update the first maps installation to a specific version.
+	// device/apps/google maps/0.UpdateTo("/google.com/appstore/beta/maps")
+	//
+	// Further, the following methods complement one another:
+	// -- Install() and Uninstall()
+	// -- Start() and Stop()
+	// -- Suspend() and Resume()
+	//
+	// Finally, an application installation instance can be in one of
+	// three abstract states: 1) "does not exist", 2) "running", or 3)
+	// "suspended". The interface methods transition between these
+	// abstract states using the following state machine:
+	//
+	// apply(Start(), "does not exists") = "running"
+	// apply(Refresh(), "running") = "running"
+	// apply(Refresh(), "suspended") = "suspended"
+	// apply(Restart(), "running") = "running"
+	// apply(Restart(), "suspended") = "running"
+	// apply(Resume(), "suspended") = "running"
+	// apply(Resume(), "running") = "running"
+	// apply(Stop(), "running") = "does not exist"
+	// apply(Stop(), "suspended") = "does not exist"
+	// apply(Suspend(), "running") = "suspended"
+	// apply(Suspend(), "suspended") = "suspended"
+	//
+	// In other words, invoking any method using an existing application
+	// installation instance as a receiver is well-defined.
+	ApplicationServerStubMethods
+	// Claim is used to claim ownership of a Node running on a device
+	// by blessing its identity. By default, after this call all node
+	// methods will be access protected to the identity of the claimer.
+	Claim(__ipc.ServerCall) error
+	// Describe generates a description of the node.
+	Describe(__ipc.ServerCall) (Description, error)
+	// IsRunnable checks if the node can execute the given binary.
+	IsRunnable(call __ipc.ServerCall, Description binary.Description) (bool, error)
+	// Reset resets the node. If the deadline is non-zero and the node
+	// in question is still running after the given deadline expired,
+	// reset of the node is enforced.
+	//
+	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
+	// are implemented.
+	Reset(call __ipc.ServerCall, Deadline uint64) error
+	// AssociateAccount associates a local  system account name with the provided
+	// Veyron identities. It replaces the existing association if one already exists for that
+	// identity. Setting an AccountName to "" removes the association for each
+	// listed identity.
+	AssociateAccount(call __ipc.ServerCall, identityNames []string, accountName string) error
+	// ListAssociations returns all of the associations between Veyron identities
+	// and system names.
+	ListAssociations(__ipc.ServerCall) (associations []Association, err error)
+}
+
+// NodeServerStub adds universal methods to NodeServerStubMethods.
+type NodeServerStub interface {
+	NodeServerStubMethods
+	// GetMethodTags will be replaced with DescribeInterfaces.
+	GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error)
+	// Signature will be replaced with DescribeInterfaces.
+	Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error)
+}
+
+// NodeServer returns a server stub for Node.
+// It converts an implementation of NodeServerMethods into
+// an object that may be used by ipc.Server.
+func NodeServer(impl NodeServerMethods) NodeServerStub {
+	stub := implNodeServerStub{
+		impl:                  impl,
+		ObjectServerStub:      access.ObjectServer(impl),
+		ApplicationServerStub: ApplicationServer(impl),
 	}
-	var gs _gen_ipc.GlobState
-	var self interface{} = stub
-	// VAllGlobber is implemented by the server object, which is wrapped in
-	// a VDL generated server stub.
-	if x, ok := self.(_gen_ipc.VAllGlobber); ok {
-		gs.VAllGlobber = x
+	// Initialize GlobState; always check the stub itself first, to handle the
+	// case where the user has the Glob method defined in their VDL source.
+	if gs := __ipc.NewGlobState(stub); gs != nil {
+		stub.gs = gs
+	} else if gs := __ipc.NewGlobState(impl); gs != nil {
+		stub.gs = gs
 	}
-	// VAllGlobber is implemented by the server object without using a VDL
-	// generated stub.
-	if x, ok := server.(_gen_ipc.VAllGlobber); ok {
-		gs.VAllGlobber = x
-	}
-	// VChildrenGlobber is implemented in the server object.
-	if x, ok := server.(_gen_ipc.VChildrenGlobber); ok {
-		gs.VChildrenGlobber = x
-	}
-	stub.gs = &gs
 	return stub
 }
 
-// clientStubNode implements Node.
-type clientStubNode struct {
-	access.Object_ExcludingUniversal
-	Application_ExcludingUniversal
+type implNodeServerStub struct {
+	impl NodeServerMethods
+	gs   *__ipc.GlobState
 
-	defaultClient _gen_ipc.Client
-	name          string
+	access.ObjectServerStub
+	ApplicationServerStub
 }
 
-func (__gen_c *clientStubNode) client(ctx _gen_context.T) _gen_ipc.Client {
-	if __gen_c.defaultClient != nil {
-		return __gen_c.defaultClient
-	}
-	return _gen_veyron2.RuntimeFromContext(ctx).Client()
+func (s implNodeServerStub) Claim(call __ipc.ServerCall) error {
+	return s.impl.Claim(call)
 }
 
-func (__gen_c *clientStubNode) Claim(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Claim", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
-	return
+func (s implNodeServerStub) Describe(call __ipc.ServerCall) (Description, error) {
+	return s.impl.Describe(call)
 }
 
-func (__gen_c *clientStubNode) Describe(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply Description, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Describe", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
-		err = ierr
-	}
-	return
+func (s implNodeServerStub) IsRunnable(call __ipc.ServerCall, i0 binary.Description) (bool, error) {
+	return s.impl.IsRunnable(call, i0)
 }
 
-func (__gen_c *clientStubNode) IsRunnable(ctx _gen_context.T, Description binary.Description, opts ..._gen_ipc.CallOpt) (reply bool, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "IsRunnable", []interface{}{Description}, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
-		err = ierr
-	}
-	return
+func (s implNodeServerStub) Reset(call __ipc.ServerCall, i0 uint64) error {
+	return s.impl.Reset(call, i0)
 }
 
-func (__gen_c *clientStubNode) Reset(ctx _gen_context.T, Deadline uint64, opts ..._gen_ipc.CallOpt) (err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Reset", []interface{}{Deadline}, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
-	return
+func (s implNodeServerStub) AssociateAccount(call __ipc.ServerCall, i0 []string, i1 string) error {
+	return s.impl.AssociateAccount(call, i0, i1)
 }
 
-func (__gen_c *clientStubNode) AssociateAccount(ctx _gen_context.T, identityNames []string, accountName string, opts ..._gen_ipc.CallOpt) (err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "AssociateAccount", []interface{}{identityNames, accountName}, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
-	return
+func (s implNodeServerStub) ListAssociations(call __ipc.ServerCall) ([]Association, error) {
+	return s.impl.ListAssociations(call)
 }
 
-func (__gen_c *clientStubNode) ListAssociations(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []Association, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "ListAssociations", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
-		err = ierr
-	}
-	return
+func (s implNodeServerStub) VGlob() *__ipc.GlobState {
+	return s.gs
 }
 
-func (__gen_c *clientStubNode) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
-func (__gen_c *clientStubNode) Signature(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
-func (__gen_c *clientStubNode) GetMethodTags(ctx _gen_context.T, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
-// ServerStubNode wraps a server that implements
-// NodeService and provides an object that satisfies
-// the requirements of veyron2/ipc.ReflectInvoker.
-type ServerStubNode struct {
-	access.ServerStubObject
-	ServerStubApplication
-
-	service NodeService
-	gs      *_gen_ipc.GlobState
-}
-
-func (__gen_s *ServerStubNode) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
-	// TODO(bprosnitz) GetMethodTags() will be replaces with Signature().
-	// Note: This exhibits some weird behavior like returning a nil error if the method isn't found.
-	// This will change when it is replaced with Signature().
-	if resp, err := __gen_s.ServerStubObject.GetMethodTags(call, method); resp != nil || err != nil {
+func (s implNodeServerStub) GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error) {
+	// TODO(toddw): Replace with new DescribeInterfaces implementation.
+	if resp, err := s.ObjectServerStub.GetMethodTags(call, method); resp != nil || err != nil {
 		return resp, err
 	}
-	if resp, err := __gen_s.ServerStubApplication.GetMethodTags(call, method); resp != nil || err != nil {
+	if resp, err := s.ApplicationServerStub.GetMethodTags(call, method); resp != nil || err != nil {
 		return resp, err
 	}
 	switch method {
@@ -1196,122 +1410,123 @@ func (__gen_s *ServerStubNode) GetMethodTags(call _gen_ipc.ServerCall, method st
 	}
 }
 
-func (__gen_s *ServerStubNode) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
-	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
-	result.Methods["AssociateAccount"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{
+func (s implNodeServerStub) Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error) {
+	// TODO(toddw) Replace with new DescribeInterfaces implementation.
+	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
+	result.Methods["AssociateAccount"] = __ipc.MethodSignature{
+		InArgs: []__ipc.MethodArgument{
 			{Name: "identityNames", Type: 61},
 			{Name: "accountName", Type: 3},
 		},
-		OutArgs: []_gen_ipc.MethodArgument{
+		OutArgs: []__ipc.MethodArgument{
 			{Name: "", Type: 65},
 		},
 	}
-	result.Methods["Claim"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{},
-		OutArgs: []_gen_ipc.MethodArgument{
+	result.Methods["Claim"] = __ipc.MethodSignature{
+		InArgs: []__ipc.MethodArgument{},
+		OutArgs: []__ipc.MethodArgument{
 			{Name: "", Type: 65},
 		},
 	}
-	result.Methods["Describe"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{},
-		OutArgs: []_gen_ipc.MethodArgument{
+	result.Methods["Describe"] = __ipc.MethodSignature{
+		InArgs: []__ipc.MethodArgument{},
+		OutArgs: []__ipc.MethodArgument{
 			{Name: "", Type: 67},
 			{Name: "", Type: 65},
 		},
 	}
-	result.Methods["IsRunnable"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{
+	result.Methods["IsRunnable"] = __ipc.MethodSignature{
+		InArgs: []__ipc.MethodArgument{
 			{Name: "Description", Type: 68},
 		},
-		OutArgs: []_gen_ipc.MethodArgument{
+		OutArgs: []__ipc.MethodArgument{
 			{Name: "", Type: 2},
 			{Name: "", Type: 65},
 		},
 	}
-	result.Methods["ListAssociations"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{},
-		OutArgs: []_gen_ipc.MethodArgument{
+	result.Methods["ListAssociations"] = __ipc.MethodSignature{
+		InArgs: []__ipc.MethodArgument{},
+		OutArgs: []__ipc.MethodArgument{
 			{Name: "associations", Type: 70},
 			{Name: "err", Type: 65},
 		},
 	}
-	result.Methods["Reset"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{
+	result.Methods["Reset"] = __ipc.MethodSignature{
+		InArgs: []__ipc.MethodArgument{
 			{Name: "Deadline", Type: 53},
 		},
-		OutArgs: []_gen_ipc.MethodArgument{
+		OutArgs: []__ipc.MethodArgument{
 			{Name: "", Type: 65},
 		},
 	}
 
-	result.TypeDefs = []_gen_vdlutil.Any{
-		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, _gen_wiretype.MapType{Key: 0x3, Elem: 0x2, Name: "", Tags: []string(nil)}, _gen_wiretype.StructType{
-			[]_gen_wiretype.FieldType{
-				_gen_wiretype.FieldType{Type: 0x42, Name: "Profiles"},
+	result.TypeDefs = []__vdlutil.Any{
+		__wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, __wiretype.MapType{Key: 0x3, Elem: 0x2, Name: "", Tags: []string(nil)}, __wiretype.StructType{
+			[]__wiretype.FieldType{
+				__wiretype.FieldType{Type: 0x42, Name: "Profiles"},
 			},
 			"veyron.io/veyron/veyron2/services/mgmt/node.Description", []string(nil)},
-		_gen_wiretype.StructType{
-			[]_gen_wiretype.FieldType{
-				_gen_wiretype.FieldType{Type: 0x3, Name: "Name"},
-				_gen_wiretype.FieldType{Type: 0x42, Name: "Profiles"},
+		__wiretype.StructType{
+			[]__wiretype.FieldType{
+				__wiretype.FieldType{Type: 0x3, Name: "Name"},
+				__wiretype.FieldType{Type: 0x42, Name: "Profiles"},
 			},
 			"veyron.io/veyron/veyron2/services/mgmt/binary.Description", []string(nil)},
-		_gen_wiretype.StructType{
-			[]_gen_wiretype.FieldType{
-				_gen_wiretype.FieldType{Type: 0x3, Name: "IdentityName"},
-				_gen_wiretype.FieldType{Type: 0x3, Name: "AccountName"},
+		__wiretype.StructType{
+			[]__wiretype.FieldType{
+				__wiretype.FieldType{Type: 0x3, Name: "IdentityName"},
+				__wiretype.FieldType{Type: 0x3, Name: "AccountName"},
 			},
 			"veyron.io/veyron/veyron2/services/mgmt/node.Association", []string(nil)},
-		_gen_wiretype.SliceType{Elem: 0x45, Name: "", Tags: []string(nil)}}
-	var ss _gen_ipc.ServiceSignature
+		__wiretype.SliceType{Elem: 0x45, Name: "", Tags: []string(nil)}}
+	var ss __ipc.ServiceSignature
 	var firstAdded int
-	ss, _ = __gen_s.ServerStubObject.Signature(call)
+	ss, _ = s.ObjectServerStub.Signature(call)
 	firstAdded = len(result.TypeDefs)
 	for k, v := range ss.Methods {
 		for i, _ := range v.InArgs {
-			if v.InArgs[i].Type >= _gen_wiretype.TypeIDFirst {
-				v.InArgs[i].Type += _gen_wiretype.TypeID(firstAdded)
+			if v.InArgs[i].Type >= __wiretype.TypeIDFirst {
+				v.InArgs[i].Type += __wiretype.TypeID(firstAdded)
 			}
 		}
 		for i, _ := range v.OutArgs {
-			if v.OutArgs[i].Type >= _gen_wiretype.TypeIDFirst {
-				v.OutArgs[i].Type += _gen_wiretype.TypeID(firstAdded)
+			if v.OutArgs[i].Type >= __wiretype.TypeIDFirst {
+				v.OutArgs[i].Type += __wiretype.TypeID(firstAdded)
 			}
 		}
-		if v.InStream >= _gen_wiretype.TypeIDFirst {
-			v.InStream += _gen_wiretype.TypeID(firstAdded)
+		if v.InStream >= __wiretype.TypeIDFirst {
+			v.InStream += __wiretype.TypeID(firstAdded)
 		}
-		if v.OutStream >= _gen_wiretype.TypeIDFirst {
-			v.OutStream += _gen_wiretype.TypeID(firstAdded)
+		if v.OutStream >= __wiretype.TypeIDFirst {
+			v.OutStream += __wiretype.TypeID(firstAdded)
 		}
 		result.Methods[k] = v
 	}
 	//TODO(bprosnitz) combine type definitions from embeded interfaces in a way that doesn't cause duplication.
 	for _, d := range ss.TypeDefs {
 		switch wt := d.(type) {
-		case _gen_wiretype.SliceType:
-			if wt.Elem >= _gen_wiretype.TypeIDFirst {
-				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+		case __wiretype.SliceType:
+			if wt.Elem >= __wiretype.TypeIDFirst {
+				wt.Elem += __wiretype.TypeID(firstAdded)
 			}
 			d = wt
-		case _gen_wiretype.ArrayType:
-			if wt.Elem >= _gen_wiretype.TypeIDFirst {
-				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+		case __wiretype.ArrayType:
+			if wt.Elem >= __wiretype.TypeIDFirst {
+				wt.Elem += __wiretype.TypeID(firstAdded)
 			}
 			d = wt
-		case _gen_wiretype.MapType:
-			if wt.Key >= _gen_wiretype.TypeIDFirst {
-				wt.Key += _gen_wiretype.TypeID(firstAdded)
+		case __wiretype.MapType:
+			if wt.Key >= __wiretype.TypeIDFirst {
+				wt.Key += __wiretype.TypeID(firstAdded)
 			}
-			if wt.Elem >= _gen_wiretype.TypeIDFirst {
-				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+			if wt.Elem >= __wiretype.TypeIDFirst {
+				wt.Elem += __wiretype.TypeID(firstAdded)
 			}
 			d = wt
-		case _gen_wiretype.StructType:
+		case __wiretype.StructType:
 			for i, fld := range wt.Fields {
-				if fld.Type >= _gen_wiretype.TypeIDFirst {
-					wt.Fields[i].Type += _gen_wiretype.TypeID(firstAdded)
+				if fld.Type >= __wiretype.TypeIDFirst {
+					wt.Fields[i].Type += __wiretype.TypeID(firstAdded)
 				}
 			}
 			d = wt
@@ -1319,52 +1534,52 @@ func (__gen_s *ServerStubNode) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Ser
 		}
 		result.TypeDefs = append(result.TypeDefs, d)
 	}
-	ss, _ = __gen_s.ServerStubApplication.Signature(call)
+	ss, _ = s.ApplicationServerStub.Signature(call)
 	firstAdded = len(result.TypeDefs)
 	for k, v := range ss.Methods {
 		for i, _ := range v.InArgs {
-			if v.InArgs[i].Type >= _gen_wiretype.TypeIDFirst {
-				v.InArgs[i].Type += _gen_wiretype.TypeID(firstAdded)
+			if v.InArgs[i].Type >= __wiretype.TypeIDFirst {
+				v.InArgs[i].Type += __wiretype.TypeID(firstAdded)
 			}
 		}
 		for i, _ := range v.OutArgs {
-			if v.OutArgs[i].Type >= _gen_wiretype.TypeIDFirst {
-				v.OutArgs[i].Type += _gen_wiretype.TypeID(firstAdded)
+			if v.OutArgs[i].Type >= __wiretype.TypeIDFirst {
+				v.OutArgs[i].Type += __wiretype.TypeID(firstAdded)
 			}
 		}
-		if v.InStream >= _gen_wiretype.TypeIDFirst {
-			v.InStream += _gen_wiretype.TypeID(firstAdded)
+		if v.InStream >= __wiretype.TypeIDFirst {
+			v.InStream += __wiretype.TypeID(firstAdded)
 		}
-		if v.OutStream >= _gen_wiretype.TypeIDFirst {
-			v.OutStream += _gen_wiretype.TypeID(firstAdded)
+		if v.OutStream >= __wiretype.TypeIDFirst {
+			v.OutStream += __wiretype.TypeID(firstAdded)
 		}
 		result.Methods[k] = v
 	}
 	//TODO(bprosnitz) combine type definitions from embeded interfaces in a way that doesn't cause duplication.
 	for _, d := range ss.TypeDefs {
 		switch wt := d.(type) {
-		case _gen_wiretype.SliceType:
-			if wt.Elem >= _gen_wiretype.TypeIDFirst {
-				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+		case __wiretype.SliceType:
+			if wt.Elem >= __wiretype.TypeIDFirst {
+				wt.Elem += __wiretype.TypeID(firstAdded)
 			}
 			d = wt
-		case _gen_wiretype.ArrayType:
-			if wt.Elem >= _gen_wiretype.TypeIDFirst {
-				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+		case __wiretype.ArrayType:
+			if wt.Elem >= __wiretype.TypeIDFirst {
+				wt.Elem += __wiretype.TypeID(firstAdded)
 			}
 			d = wt
-		case _gen_wiretype.MapType:
-			if wt.Key >= _gen_wiretype.TypeIDFirst {
-				wt.Key += _gen_wiretype.TypeID(firstAdded)
+		case __wiretype.MapType:
+			if wt.Key >= __wiretype.TypeIDFirst {
+				wt.Key += __wiretype.TypeID(firstAdded)
 			}
-			if wt.Elem >= _gen_wiretype.TypeIDFirst {
-				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+			if wt.Elem >= __wiretype.TypeIDFirst {
+				wt.Elem += __wiretype.TypeID(firstAdded)
 			}
 			d = wt
-		case _gen_wiretype.StructType:
+		case __wiretype.StructType:
 			for i, fld := range wt.Fields {
-				if fld.Type >= _gen_wiretype.TypeIDFirst {
-					wt.Fields[i].Type += _gen_wiretype.TypeID(firstAdded)
+				if fld.Type >= __wiretype.TypeIDFirst {
+					wt.Fields[i].Type += __wiretype.TypeID(firstAdded)
 				}
 			}
 			d = wt
@@ -1374,56 +1589,4 @@ func (__gen_s *ServerStubNode) Signature(call _gen_ipc.ServerCall) (_gen_ipc.Ser
 	}
 
 	return result, nil
-}
-
-func (__gen_s *ServerStubNode) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
-	if unresolver, ok := __gen_s.service.(_gen_ipc.Unresolver); ok {
-		return unresolver.UnresolveStep(call)
-	}
-	if call.Server() == nil {
-		return
-	}
-	var published []string
-	if published, err = call.Server().Published(); err != nil || published == nil {
-		return
-	}
-	reply = make([]string, len(published))
-	for i, p := range published {
-		reply[i] = _gen_naming.Join(p, call.Name())
-	}
-	return
-}
-
-func (__gen_s *ServerStubNode) VGlob() *_gen_ipc.GlobState {
-	return __gen_s.gs
-}
-
-func (__gen_s *ServerStubNode) Claim(call _gen_ipc.ServerCall) (err error) {
-	err = __gen_s.service.Claim(call)
-	return
-}
-
-func (__gen_s *ServerStubNode) Describe(call _gen_ipc.ServerCall) (reply Description, err error) {
-	reply, err = __gen_s.service.Describe(call)
-	return
-}
-
-func (__gen_s *ServerStubNode) IsRunnable(call _gen_ipc.ServerCall, Description binary.Description) (reply bool, err error) {
-	reply, err = __gen_s.service.IsRunnable(call, Description)
-	return
-}
-
-func (__gen_s *ServerStubNode) Reset(call _gen_ipc.ServerCall, Deadline uint64) (err error) {
-	err = __gen_s.service.Reset(call, Deadline)
-	return
-}
-
-func (__gen_s *ServerStubNode) AssociateAccount(call _gen_ipc.ServerCall, identityNames []string, accountName string) (err error) {
-	err = __gen_s.service.AssociateAccount(call, identityNames, accountName)
-	return
-}
-
-func (__gen_s *ServerStubNode) ListAssociations(call _gen_ipc.ServerCall) (reply []Association, err error) {
-	reply, err = __gen_s.service.ListAssociations(call)
-	return
 }

@@ -21,12 +21,9 @@
 //
 // SetACL completely replaces the ACL. To perform an atomic read-modify-write
 // of the ACL, use the etag parameter.
-//   n, err := access.BindObject(name)
-//   if err != nil {
-//      return err
-//   }
+//   client := access.ObjectClient(name)
 //   for {
-//     acl, etag, err := n.GetACL()
+//     acl, etag, err := client.GetACL()
 //     if err != nil {
 //       return err
 //     }
@@ -35,7 +32,7 @@
 //     acl.In[newPattern] = acl.In[newPattern] | newLabel
 //     // Use the same etag with the modified acl to ensure that no other client
 //     // has modified the acl since GetACL returned.
-//     if err := n.SetACL(acl, etag); err != nil {
+//     if err := client.SetACL(acl, etag); err != nil {
 //       if verror.Is(err, access.ErrBadEtag) {
 //         // Another client replaced the ACL after our GetACL returned.
 //         // Try again.
@@ -100,34 +97,33 @@ package access
 import (
 	"veyron.io/veyron/veyron2/security"
 
-	// The non-user imports are prefixed with "_gen_" to prevent collisions.
-	_gen_veyron2 "veyron.io/veyron/veyron2"
-	_gen_context "veyron.io/veyron/veyron2/context"
-	_gen_ipc "veyron.io/veyron/veyron2/ipc"
-	_gen_naming "veyron.io/veyron/veyron2/naming"
-	_gen_vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
-	_gen_verror "veyron.io/veyron/veyron2/verror"
-	_gen_wiretype "veyron.io/veyron/veyron2/wiretype"
+	// The non-user imports are prefixed with "__" to prevent collisions.
+	__veyron2 "veyron.io/veyron/veyron2"
+	__context "veyron.io/veyron/veyron2/context"
+	__ipc "veyron.io/veyron/veyron2/ipc"
+	__vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
+	__verror "veyron.io/veyron/veyron2/verror"
+	__wiretype "veyron.io/veyron/veyron2/wiretype"
 )
 
 // TODO(toddw): Remove this line once the new signature support is done.
-// It corrects a bug where _gen_wiretype is unused in VDL pacakges where only
+// It corrects a bug where __wiretype is unused in VDL pacakges where only
 // bootstrap types are used on interfaces.
-const _ = _gen_wiretype.TypeIDInvalid
+const _ = __wiretype.TypeIDInvalid
 
 // The etag passed to SetACL is invalid.  Likely, another client set
 // the ACL already and invalidated the etag.  Use GetACL to fetch a
 // fresh etag.
-const ErrBadEtag = _gen_verror.ID("veyron.io/veyron/veyron2/services/security/access.ErrBadEtag")
+const ErrBadEtag = __verror.ID("veyron.io/veyron/veyron2/services/security/access.ErrBadEtag")
 
 // The ACL is too big.  Use groups to represent large sets of principals.
-const ErrTooBig = _gen_verror.ID("veyron.io/veyron/veyron2/services/security/access.ErrTooBig")
+const ErrTooBig = __verror.ID("veyron.io/veyron/veyron2/services/security/access.ErrTooBig")
 
+// ObjectClientMethods is the client interface
+// containing Object methods.
+//
 // Object provides access control for Veyron objects.
-// Object is the interface the client binds and uses.
-// Object_ExcludingUniversal is the interface without internal framework-added methods
-// to enable embedding without method collisions.  Not to be used directly by clients.
-type Object_ExcludingUniversal interface {
+type ObjectClientMethods interface {
 	// SetACL replaces the current ACL for an object.  etag allows for optional,
 	// optimistic concurrency control.  If non-empty, etag's value must come
 	// from GetACL.  If any client has successfully called SetACL in the
@@ -143,112 +139,46 @@ type Object_ExcludingUniversal interface {
 	// endpoint.  To modify the mount point's ACL, use ResolveToMountTable
 	// to get an endpoint and call SetACL on that.  This means that clients
 	// must know when a name refers to a mount point to change its ACL.
-	SetACL(ctx _gen_context.T, acl security.ACL, etag string, opts ..._gen_ipc.CallOpt) (err error)
+	SetACL(ctx __context.T, acl security.ACL, etag string, opts ...__ipc.CallOpt) error
 	// GetACL returns the complete, current ACL for an object.  The returned etag
 	// can be passed to a subsequent call to SetACL for optimistic concurrency
 	// control. A successful call to SetACL will invalidate etag, and the client
 	// must call GetACL again to get the current etag.
-	GetACL(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (acl security.ACL, etag string, err error)
-}
-type Object interface {
-	_gen_ipc.UniversalServiceMethods
-	Object_ExcludingUniversal
+	GetACL(__context.T, ...__ipc.CallOpt) (acl security.ACL, etag string, err error)
 }
 
-// ObjectService is the interface the server implements.
-type ObjectService interface {
-
-	// SetACL replaces the current ACL for an object.  etag allows for optional,
-	// optimistic concurrency control.  If non-empty, etag's value must come
-	// from GetACL.  If any client has successfully called SetACL in the
-	// meantime, the etag will be stale and SetACL will fail.
-	//
-	// ACL objects are expected to be small.  It is up to the implementation to
-	// define the exact limit, though it should probably be around 100KB.  Large
-	// lists of principals should use the Group API or blessings.
-	//
-	// There is some ambiguity when calling SetACL on a mount point.  Does it
-	// affect the mount itself or does it affect the service endpoint that the
-	// mount points to?  The chosen behavior is that it affects the service
-	// endpoint.  To modify the mount point's ACL, use ResolveToMountTable
-	// to get an endpoint and call SetACL on that.  This means that clients
-	// must know when a name refers to a mount point to change its ACL.
-	SetACL(context _gen_ipc.ServerContext, acl security.ACL, etag string) (err error)
-	// GetACL returns the complete, current ACL for an object.  The returned etag
-	// can be passed to a subsequent call to SetACL for optimistic concurrency
-	// control. A successful call to SetACL will invalidate etag, and the client
-	// must call GetACL again to get the current etag.
-	GetACL(context _gen_ipc.ServerContext) (acl security.ACL, etag string, err error)
+// ObjectClientStub adds universal methods to ObjectClientMethods.
+type ObjectClientStub interface {
+	ObjectClientMethods
+	__ipc.UniversalServiceMethods
 }
 
-// BindObject returns the client stub implementing the Object
-// interface.
-//
-// If no _gen_ipc.Client is specified, the default _gen_ipc.Client in the
-// global Runtime is used.
-func BindObject(name string, opts ..._gen_ipc.BindOpt) (Object, error) {
-	var client _gen_ipc.Client
-	switch len(opts) {
-	case 0:
-		// Do nothing.
-	case 1:
-		if clientOpt, ok := opts[0].(_gen_ipc.Client); opts[0] == nil || ok {
+// ObjectClient returns a client stub for Object.
+func ObjectClient(name string, opts ...__ipc.BindOpt) ObjectClientStub {
+	var client __ipc.Client
+	for _, opt := range opts {
+		if clientOpt, ok := opt.(__ipc.Client); ok {
 			client = clientOpt
-		} else {
-			return nil, _gen_vdlutil.ErrUnrecognizedOption
 		}
-	default:
-		return nil, _gen_vdlutil.ErrTooManyOptionsToBind
 	}
-	stub := &clientStubObject{defaultClient: client, name: name}
-
-	return stub, nil
+	return implObjectClientStub{name, client}
 }
 
-// NewServerObject creates a new server stub.
-//
-// It takes a regular server implementing the ObjectService
-// interface, and returns a new server stub.
-func NewServerObject(server ObjectService) interface{} {
-	stub := &ServerStubObject{
-		service: server,
-	}
-	var gs _gen_ipc.GlobState
-	var self interface{} = stub
-	// VAllGlobber is implemented by the server object, which is wrapped in
-	// a VDL generated server stub.
-	if x, ok := self.(_gen_ipc.VAllGlobber); ok {
-		gs.VAllGlobber = x
-	}
-	// VAllGlobber is implemented by the server object without using a VDL
-	// generated stub.
-	if x, ok := server.(_gen_ipc.VAllGlobber); ok {
-		gs.VAllGlobber = x
-	}
-	// VChildrenGlobber is implemented in the server object.
-	if x, ok := server.(_gen_ipc.VChildrenGlobber); ok {
-		gs.VChildrenGlobber = x
-	}
-	stub.gs = &gs
-	return stub
+type implObjectClientStub struct {
+	name   string
+	client __ipc.Client
 }
 
-// clientStubObject implements Object.
-type clientStubObject struct {
-	defaultClient _gen_ipc.Client
-	name          string
-}
-
-func (__gen_c *clientStubObject) client(ctx _gen_context.T) _gen_ipc.Client {
-	if __gen_c.defaultClient != nil {
-		return __gen_c.defaultClient
+func (c implObjectClientStub) c(ctx __context.T) __ipc.Client {
+	if c.client != nil {
+		return c.client
 	}
-	return _gen_veyron2.RuntimeFromContext(ctx).Client()
+	return __veyron2.RuntimeFromContext(ctx).Client()
 }
 
-func (__gen_c *clientStubObject) SetACL(ctx _gen_context.T, acl security.ACL, etag string, opts ..._gen_ipc.CallOpt) (err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "SetACL", []interface{}{acl, etag}, opts...); err != nil {
+func (c implObjectClientStub) SetACL(ctx __context.T, i0 security.ACL, i1 string, opts ...__ipc.CallOpt) (err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "SetACL", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&err); ierr != nil {
@@ -257,62 +187,141 @@ func (__gen_c *clientStubObject) SetACL(ctx _gen_context.T, acl security.ACL, et
 	return
 }
 
-func (__gen_c *clientStubObject) GetACL(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (acl security.ACL, etag string, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "GetACL", nil, opts...); err != nil {
+func (c implObjectClientStub) GetACL(ctx __context.T, opts ...__ipc.CallOpt) (o0 security.ACL, o1 string, err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "GetACL", nil, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&acl, &etag, &err); ierr != nil {
+	if ierr := call.Finish(&o0, &o1, &err); ierr != nil {
 		err = ierr
 	}
 	return
 }
 
-func (__gen_c *clientStubObject) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+func (c implObjectClientStub) Signature(ctx __context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
+	if ierr := call.Finish(&o0, &err); ierr != nil {
 		err = ierr
 	}
 	return
 }
 
-func (__gen_c *clientStubObject) Signature(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
+func (c implObjectClientStub) GetMethodTags(ctx __context.T, method string, opts ...__ipc.CallOpt) (o0 []interface{}, err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
+	if ierr := call.Finish(&o0, &err); ierr != nil {
 		err = ierr
 	}
 	return
 }
 
-func (__gen_c *clientStubObject) GetMethodTags(ctx _gen_context.T, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
-		err = ierr
-	}
-	return
+// ObjectServerMethods is the interface a server writer
+// implements for Object.
+//
+// Object provides access control for Veyron objects.
+type ObjectServerMethods interface {
+	// SetACL replaces the current ACL for an object.  etag allows for optional,
+	// optimistic concurrency control.  If non-empty, etag's value must come
+	// from GetACL.  If any client has successfully called SetACL in the
+	// meantime, the etag will be stale and SetACL will fail.
+	//
+	// ACL objects are expected to be small.  It is up to the implementation to
+	// define the exact limit, though it should probably be around 100KB.  Large
+	// lists of principals should use the Group API or blessings.
+	//
+	// There is some ambiguity when calling SetACL on a mount point.  Does it
+	// affect the mount itself or does it affect the service endpoint that the
+	// mount points to?  The chosen behavior is that it affects the service
+	// endpoint.  To modify the mount point's ACL, use ResolveToMountTable
+	// to get an endpoint and call SetACL on that.  This means that clients
+	// must know when a name refers to a mount point to change its ACL.
+	SetACL(ctx __ipc.ServerContext, acl security.ACL, etag string) error
+	// GetACL returns the complete, current ACL for an object.  The returned etag
+	// can be passed to a subsequent call to SetACL for optimistic concurrency
+	// control. A successful call to SetACL will invalidate etag, and the client
+	// must call GetACL again to get the current etag.
+	GetACL(__ipc.ServerContext) (acl security.ACL, etag string, err error)
 }
 
-// ServerStubObject wraps a server that implements
-// ObjectService and provides an object that satisfies
-// the requirements of veyron2/ipc.ReflectInvoker.
-type ServerStubObject struct {
-	service ObjectService
-	gs      *_gen_ipc.GlobState
+// ObjectServerStubMethods is the server interface containing
+// Object methods, as expected by ipc.Server.  The difference between
+// this interface and ObjectServerMethods is that the first context
+// argument for each method is always ipc.ServerCall here, while it is either
+// ipc.ServerContext or a typed streaming context there.
+type ObjectServerStubMethods interface {
+	// SetACL replaces the current ACL for an object.  etag allows for optional,
+	// optimistic concurrency control.  If non-empty, etag's value must come
+	// from GetACL.  If any client has successfully called SetACL in the
+	// meantime, the etag will be stale and SetACL will fail.
+	//
+	// ACL objects are expected to be small.  It is up to the implementation to
+	// define the exact limit, though it should probably be around 100KB.  Large
+	// lists of principals should use the Group API or blessings.
+	//
+	// There is some ambiguity when calling SetACL on a mount point.  Does it
+	// affect the mount itself or does it affect the service endpoint that the
+	// mount points to?  The chosen behavior is that it affects the service
+	// endpoint.  To modify the mount point's ACL, use ResolveToMountTable
+	// to get an endpoint and call SetACL on that.  This means that clients
+	// must know when a name refers to a mount point to change its ACL.
+	SetACL(call __ipc.ServerCall, acl security.ACL, etag string) error
+	// GetACL returns the complete, current ACL for an object.  The returned etag
+	// can be passed to a subsequent call to SetACL for optimistic concurrency
+	// control. A successful call to SetACL will invalidate etag, and the client
+	// must call GetACL again to get the current etag.
+	GetACL(__ipc.ServerCall) (acl security.ACL, etag string, err error)
 }
 
-func (__gen_s *ServerStubObject) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
-	// TODO(bprosnitz) GetMethodTags() will be replaces with Signature().
-	// Note: This exhibits some weird behavior like returning a nil error if the method isn't found.
-	// This will change when it is replaced with Signature().
+// ObjectServerStub adds universal methods to ObjectServerStubMethods.
+type ObjectServerStub interface {
+	ObjectServerStubMethods
+	// GetMethodTags will be replaced with DescribeInterfaces.
+	GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error)
+	// Signature will be replaced with DescribeInterfaces.
+	Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error)
+}
+
+// ObjectServer returns a server stub for Object.
+// It converts an implementation of ObjectServerMethods into
+// an object that may be used by ipc.Server.
+func ObjectServer(impl ObjectServerMethods) ObjectServerStub {
+	stub := implObjectServerStub{
+		impl: impl,
+	}
+	// Initialize GlobState; always check the stub itself first, to handle the
+	// case where the user has the Glob method defined in their VDL source.
+	if gs := __ipc.NewGlobState(stub); gs != nil {
+		stub.gs = gs
+	} else if gs := __ipc.NewGlobState(impl); gs != nil {
+		stub.gs = gs
+	}
+	return stub
+}
+
+type implObjectServerStub struct {
+	impl ObjectServerMethods
+	gs   *__ipc.GlobState
+}
+
+func (s implObjectServerStub) SetACL(call __ipc.ServerCall, i0 security.ACL, i1 string) error {
+	return s.impl.SetACL(call, i0, i1)
+}
+
+func (s implObjectServerStub) GetACL(call __ipc.ServerCall) (security.ACL, string, error) {
+	return s.impl.GetACL(call)
+}
+
+func (s implObjectServerStub) VGlob() *__ipc.GlobState {
+	return s.gs
+}
+
+func (s implObjectServerStub) GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error) {
+	// TODO(toddw): Replace with new DescribeInterfaces implementation.
 	switch method {
 	case "SetACL":
 		return []interface{}{security.Label(8)}, nil
@@ -323,66 +332,35 @@ func (__gen_s *ServerStubObject) GetMethodTags(call _gen_ipc.ServerCall, method 
 	}
 }
 
-func (__gen_s *ServerStubObject) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
-	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
-	result.Methods["GetACL"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{},
-		OutArgs: []_gen_ipc.MethodArgument{
+func (s implObjectServerStub) Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error) {
+	// TODO(toddw) Replace with new DescribeInterfaces implementation.
+	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
+	result.Methods["GetACL"] = __ipc.MethodSignature{
+		InArgs: []__ipc.MethodArgument{},
+		OutArgs: []__ipc.MethodArgument{
 			{Name: "acl", Type: 69},
 			{Name: "etag", Type: 3},
 			{Name: "err", Type: 70},
 		},
 	}
-	result.Methods["SetACL"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{
+	result.Methods["SetACL"] = __ipc.MethodSignature{
+		InArgs: []__ipc.MethodArgument{
 			{Name: "acl", Type: 69},
 			{Name: "etag", Type: 3},
 		},
-		OutArgs: []_gen_ipc.MethodArgument{
+		OutArgs: []__ipc.MethodArgument{
 			{Name: "", Type: 70},
 		},
 	}
 
-	result.TypeDefs = []_gen_vdlutil.Any{
-		_gen_wiretype.NamedPrimitiveType{Type: 0x3, Name: "veyron.io/veyron/veyron2/security.BlessingPattern", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x34, Name: "veyron.io/veyron/veyron2/security.LabelSet", Tags: []string(nil)}, _gen_wiretype.MapType{Key: 0x41, Elem: 0x42, Name: "", Tags: []string(nil)}, _gen_wiretype.MapType{Key: 0x3, Elem: 0x42, Name: "", Tags: []string(nil)}, _gen_wiretype.StructType{
-			[]_gen_wiretype.FieldType{
-				_gen_wiretype.FieldType{Type: 0x43, Name: "In"},
-				_gen_wiretype.FieldType{Type: 0x44, Name: "NotIn"},
+	result.TypeDefs = []__vdlutil.Any{
+		__wiretype.NamedPrimitiveType{Type: 0x3, Name: "veyron.io/veyron/veyron2/security.BlessingPattern", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x34, Name: "veyron.io/veyron/veyron2/security.LabelSet", Tags: []string(nil)}, __wiretype.MapType{Key: 0x41, Elem: 0x42, Name: "", Tags: []string(nil)}, __wiretype.MapType{Key: 0x3, Elem: 0x42, Name: "", Tags: []string(nil)}, __wiretype.StructType{
+			[]__wiretype.FieldType{
+				__wiretype.FieldType{Type: 0x43, Name: "In"},
+				__wiretype.FieldType{Type: 0x44, Name: "NotIn"},
 			},
 			"veyron.io/veyron/veyron2/security.ACL", []string(nil)},
-		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}}
+		__wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}}
 
 	return result, nil
-}
-
-func (__gen_s *ServerStubObject) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
-	if unresolver, ok := __gen_s.service.(_gen_ipc.Unresolver); ok {
-		return unresolver.UnresolveStep(call)
-	}
-	if call.Server() == nil {
-		return
-	}
-	var published []string
-	if published, err = call.Server().Published(); err != nil || published == nil {
-		return
-	}
-	reply = make([]string, len(published))
-	for i, p := range published {
-		reply[i] = _gen_naming.Join(p, call.Name())
-	}
-	return
-}
-
-func (__gen_s *ServerStubObject) VGlob() *_gen_ipc.GlobState {
-	return __gen_s.gs
-}
-
-func (__gen_s *ServerStubObject) SetACL(call _gen_ipc.ServerCall, acl security.ACL, etag string) (err error) {
-	err = __gen_s.service.SetACL(call, acl, etag)
-	return
-}
-
-func (__gen_s *ServerStubObject) GetACL(call _gen_ipc.ServerCall) (acl security.ACL, etag string, err error) {
-	acl, etag, err = __gen_s.service.GetACL(call)
-	return
 }

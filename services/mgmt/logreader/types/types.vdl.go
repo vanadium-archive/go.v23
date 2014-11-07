@@ -5,8 +5,8 @@
 package types
 
 import (
-	// The non-user imports are prefixed with "_gen_" to prevent collisions.
-	_gen_verror "veyron.io/veyron/veyron2/verror"
+	// The non-user imports are prefixed with "__" to prevent collisions.
+	__verror "veyron.io/veyron/veyron2/verror"
 )
 
 // LogLine is a log entry from a log file.
@@ -22,4 +22,4 @@ type LogEntry struct {
 const AllEntries = int32(-1)
 
 // This error indicates that the end of the file was reached.
-const EOF = _gen_verror.ID("veyron.io/veyron/veyron2/services/mgmt/logreader/types.EOF")
+const EOF = __verror.ID("veyron.io/veyron/veyron2/services/mgmt/logreader/types.EOF")
