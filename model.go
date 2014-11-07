@@ -186,7 +186,7 @@ type Runtime interface {
 	// NewServer creates a new Server instance.
 	//
 	// It accepts at least the following options:
-	// ServesMountTableOpt, and Namespace
+	// ServesMountTable, ServerBlessings, and Namespace
 	NewServer(opts ...ipc.ServerOpt) (ipc.Server, error)
 
 	// Client returns the pre-configured Client that is created when the
