@@ -5,15 +5,19 @@
 package appcycle
 
 import (
-	// The non-user imports are prefixed with "_gen_" to prevent collisions.
-	_gen_io "io"
-	_gen_veyron2 "veyron.io/veyron/veyron2"
-	_gen_context "veyron.io/veyron/veyron2/context"
-	_gen_ipc "veyron.io/veyron/veyron2/ipc"
-	_gen_naming "veyron.io/veyron/veyron2/naming"
-	_gen_vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
-	_gen_wiretype "veyron.io/veyron/veyron2/wiretype"
+	// The non-user imports are prefixed with "__" to prevent collisions.
+	__io "io"
+	__veyron2 "veyron.io/veyron/veyron2"
+	__context "veyron.io/veyron/veyron2/context"
+	__ipc "veyron.io/veyron/veyron2/ipc"
+	__vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
+	__wiretype "veyron.io/veyron/veyron2/wiretype"
 )
+
+// TODO(toddw): Remove this line once the new signature support is done.
+// It corrects a bug where __wiretype is unused in VDL pacakges where only
+// bootstrap types are used on interfaces.
+const _ = __wiretype.TypeIDInvalid
 
 // Task is streamed by Stop to provide the client with a sense of the progress
 // of the shutdown.
@@ -30,241 +34,62 @@ type Task struct {
 	Goal     int32
 }
 
-// TODO(toddw): Remove this line once the new signature support is done.
-// It corrects a bug where _gen_wiretype is unused in VDL pacakges where only
-// bootstrap types are used on interfaces.
-const _ = _gen_wiretype.TypeIDInvalid
-
+// AppCycleClientMethods is the client interface
+// containing AppCycle methods.
+//
 // AppCycle interfaces with the process running a veyron runtime.
-// AppCycle is the interface the client binds and uses.
-// AppCycle_ExcludingUniversal is the interface without internal framework-added methods
-// to enable embedding without method collisions.  Not to be used directly by clients.
-type AppCycle_ExcludingUniversal interface {
+type AppCycleClientMethods interface {
 	// Stop initiates shutdown of the server.  It streams back periodic
 	// updates to give the client an idea of how the shutdown is
 	// progressing.
-	Stop(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply AppCycleStopCall, err error)
+	Stop(__context.T, ...__ipc.CallOpt) (AppCycleStopCall, error)
 	// ForceStop tells the server to shut down right away.  It can be issued
 	// while a Stop is outstanding if for example the client does not want
 	// to wait any longer.
-	ForceStop(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error)
-}
-type AppCycle interface {
-	_gen_ipc.UniversalServiceMethods
-	AppCycle_ExcludingUniversal
+	ForceStop(__context.T, ...__ipc.CallOpt) error
 }
 
-// AppCycleService is the interface the server implements.
-type AppCycleService interface {
-
-	// Stop initiates shutdown of the server.  It streams back periodic
-	// updates to give the client an idea of how the shutdown is
-	// progressing.
-	Stop(context _gen_ipc.ServerContext, stream AppCycleServiceStopStream) (err error)
-	// ForceStop tells the server to shut down right away.  It can be issued
-	// while a Stop is outstanding if for example the client does not want
-	// to wait any longer.
-	ForceStop(context _gen_ipc.ServerContext) (err error)
+// AppCycleClientStub adds universal methods to AppCycleClientMethods.
+type AppCycleClientStub interface {
+	AppCycleClientMethods
+	__ipc.UniversalServiceMethods
 }
 
-// AppCycleStopCall is the interface for call object of the method
-// Stop in the service interface AppCycle.
-type AppCycleStopCall interface {
-	// RecvStream returns the recv portion of the stream
-	RecvStream() interface {
-		// Advance stages an element so the client can retrieve it
-		// with Value.  Advance returns true iff there is an
-		// element to retrieve.  The client must call Advance before
-		// calling Value. Advance may block if an element is not
-		// immediately available.
-		Advance() bool
-
-		// Value returns the element that was staged by Advance.
-		// Value may panic if Advance returned false or was not
-		// called at all.  Value does not block.
-		Value() Task
-
-		// Err returns a non-nil error iff the stream encountered
-		// any errors.  Err does not block.
-		Err() error
-	}
-
-	// Finish blocks until the server is done and returns the positional
-	// return values for call.
-	//
-	// If Cancel has been called, Finish will return immediately; the output of
-	// Finish could either be an error signalling cancelation, or the correct
-	// positional return values from the server depending on the timing of the
-	// call.
-	//
-	// Calling Finish is mandatory for releasing stream resources, unless Cancel
-	// has been called or any of the other methods return an error.
-	// Finish should be called at most once.
-	Finish() (err error)
-
-	// Cancel cancels the RPC, notifying the server to stop processing.  It
-	// is safe to call Cancel concurrently with any of the other stream methods.
-	// Calling Cancel after Finish has returned is a no-op.
-	Cancel()
-}
-
-type implAppCycleStopStreamIterator struct {
-	clientCall _gen_ipc.Call
-	val        Task
-	err        error
-}
-
-func (c *implAppCycleStopStreamIterator) Advance() bool {
-	c.val = Task{}
-	c.err = c.clientCall.Recv(&c.val)
-	return c.err == nil
-}
-
-func (c *implAppCycleStopStreamIterator) Value() Task {
-	return c.val
-}
-
-func (c *implAppCycleStopStreamIterator) Err() error {
-	if c.err == _gen_io.EOF {
-		return nil
-	}
-	return c.err
-}
-
-// Implementation of the AppCycleStopCall interface that is not exported.
-type implAppCycleStopCall struct {
-	clientCall _gen_ipc.Call
-	readStream implAppCycleStopStreamIterator
-}
-
-func (c *implAppCycleStopCall) RecvStream() interface {
-	Advance() bool
-	Value() Task
-	Err() error
-} {
-	return &c.readStream
-}
-
-func (c *implAppCycleStopCall) Finish() (err error) {
-	if ierr := c.clientCall.Finish(&err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
-func (c *implAppCycleStopCall) Cancel() {
-	c.clientCall.Cancel()
-}
-
-type implAppCycleServiceStopStreamSender struct {
-	serverCall _gen_ipc.ServerCall
-}
-
-func (s *implAppCycleServiceStopStreamSender) Send(item Task) error {
-	return s.serverCall.Send(item)
-}
-
-// AppCycleServiceStopStream is the interface for streaming responses of the method
-// Stop in the service interface AppCycle.
-type AppCycleServiceStopStream interface {
-	// SendStream returns the send portion of the stream.
-	SendStream() interface {
-		// Send places the item onto the output stream, blocking if there is no buffer
-		// space available.  If the client has canceled, an error is returned.
-		Send(item Task) error
-	}
-}
-
-// Implementation of the AppCycleServiceStopStream interface that is not exported.
-type implAppCycleServiceStopStream struct {
-	writer implAppCycleServiceStopStreamSender
-}
-
-func (s *implAppCycleServiceStopStream) SendStream() interface {
-	// Send places the item onto the output stream, blocking if there is no buffer
-	// space available.  If the client has canceled, an error is returned.
-	Send(item Task) error
-} {
-	return &s.writer
-}
-
-// BindAppCycle returns the client stub implementing the AppCycle
-// interface.
-//
-// If no _gen_ipc.Client is specified, the default _gen_ipc.Client in the
-// global Runtime is used.
-func BindAppCycle(name string, opts ..._gen_ipc.BindOpt) (AppCycle, error) {
-	var client _gen_ipc.Client
-	switch len(opts) {
-	case 0:
-		// Do nothing.
-	case 1:
-		if clientOpt, ok := opts[0].(_gen_ipc.Client); opts[0] == nil || ok {
+// AppCycleClient returns a client stub for AppCycle.
+func AppCycleClient(name string, opts ...__ipc.BindOpt) AppCycleClientStub {
+	var client __ipc.Client
+	for _, opt := range opts {
+		if clientOpt, ok := opt.(__ipc.Client); ok {
 			client = clientOpt
-		} else {
-			return nil, _gen_vdlutil.ErrUnrecognizedOption
 		}
-	default:
-		return nil, _gen_vdlutil.ErrTooManyOptionsToBind
 	}
-	stub := &clientStubAppCycle{defaultClient: client, name: name}
-
-	return stub, nil
+	return implAppCycleClientStub{name, client}
 }
 
-// NewServerAppCycle creates a new server stub.
-//
-// It takes a regular server implementing the AppCycleService
-// interface, and returns a new server stub.
-func NewServerAppCycle(server AppCycleService) interface{} {
-	stub := &ServerStubAppCycle{
-		service: server,
-	}
-	var gs _gen_ipc.GlobState
-	var self interface{} = stub
-	// VAllGlobber is implemented by the server object, which is wrapped in
-	// a VDL generated server stub.
-	if x, ok := self.(_gen_ipc.VAllGlobber); ok {
-		gs.VAllGlobber = x
-	}
-	// VAllGlobber is implemented by the server object without using a VDL
-	// generated stub.
-	if x, ok := server.(_gen_ipc.VAllGlobber); ok {
-		gs.VAllGlobber = x
-	}
-	// VChildrenGlobber is implemented in the server object.
-	if x, ok := server.(_gen_ipc.VChildrenGlobber); ok {
-		gs.VChildrenGlobber = x
-	}
-	stub.gs = &gs
-	return stub
+type implAppCycleClientStub struct {
+	name   string
+	client __ipc.Client
 }
 
-// clientStubAppCycle implements AppCycle.
-type clientStubAppCycle struct {
-	defaultClient _gen_ipc.Client
-	name          string
-}
-
-func (__gen_c *clientStubAppCycle) client(ctx _gen_context.T) _gen_ipc.Client {
-	if __gen_c.defaultClient != nil {
-		return __gen_c.defaultClient
+func (c implAppCycleClientStub) c(ctx __context.T) __ipc.Client {
+	if c.client != nil {
+		return c.client
 	}
-	return _gen_veyron2.RuntimeFromContext(ctx).Client()
+	return __veyron2.RuntimeFromContext(ctx).Client()
 }
 
-func (__gen_c *clientStubAppCycle) Stop(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply AppCycleStopCall, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Stop", nil, opts...); err != nil {
+func (c implAppCycleClientStub) Stop(ctx __context.T, opts ...__ipc.CallOpt) (ocall AppCycleStopCall, err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "Stop", nil, opts...); err != nil {
 		return
 	}
-	reply = &implAppCycleStopCall{clientCall: call, readStream: implAppCycleStopStreamIterator{clientCall: call}}
+	ocall = &implAppCycleStopCall{call, implAppCycleStopClientRecv{call: call}}
 	return
 }
 
-func (__gen_c *clientStubAppCycle) ForceStop(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "ForceStop", nil, opts...); err != nil {
+func (c implAppCycleClientStub) ForceStop(ctx __context.T, opts ...__ipc.CallOpt) (err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "ForceStop", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&err); ierr != nil {
@@ -273,51 +98,184 @@ func (__gen_c *clientStubAppCycle) ForceStop(ctx _gen_context.T, opts ..._gen_ip
 	return
 }
 
-func (__gen_c *clientStubAppCycle) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+func (c implAppCycleClientStub) Signature(ctx __context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
+	if ierr := call.Finish(&o0, &err); ierr != nil {
 		err = ierr
 	}
 	return
 }
 
-func (__gen_c *clientStubAppCycle) Signature(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
+func (c implAppCycleClientStub) GetMethodTags(ctx __context.T, method string, opts ...__ipc.CallOpt) (o0 []interface{}, err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
+	if ierr := call.Finish(&o0, &err); ierr != nil {
 		err = ierr
 	}
 	return
 }
 
-func (__gen_c *clientStubAppCycle) GetMethodTags(ctx _gen_context.T, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
-		return
+// AppCycleStopClientStream is the client stream for AppCycle.Stop.
+type AppCycleStopClientStream interface {
+	// RecvStream returns the receiver side of the client stream.
+	RecvStream() interface {
+		// Advance stages an item so that it may be retrieved via Value.  Returns
+		// true iff there is an item to retrieve.  Advance must be called before
+		// Value is called.  May block if an item is not available.
+		Advance() bool
+		// Value returns the item that was staged by Advance.  May panic if Advance
+		// returned false or was not called.  Never blocks.
+		Value() Task
+		// Err returns any error encountered by Advance.  Never blocks.
+		Err() error
 	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
+}
+
+// AppCycleStopCall represents the call returned from AppCycle.Stop.
+type AppCycleStopCall interface {
+	AppCycleStopClientStream
+	// Finish blocks until the server is done, and returns the positional return
+	// values for call.
+	//
+	// Finish returns immediately if Cancel has been called; depending on the
+	// timing the output could either be an error signaling cancelation, or the
+	// valid positional return values from the server.
+	//
+	// Calling Finish is mandatory for releasing stream resources, unless Cancel
+	// has been called or any of the other methods return an error.  Finish should
+	// be called at most once.
+	Finish() error
+	// Cancel cancels the RPC, notifying the server to stop processing.  It is
+	// safe to call Cancel concurrently with any of the other stream methods.
+	// Calling Cancel after Finish has returned is a no-op.
+	Cancel()
+}
+
+type implAppCycleStopClientRecv struct {
+	call __ipc.Call
+	val  Task
+	err  error
+}
+
+func (c *implAppCycleStopClientRecv) Advance() bool {
+	c.val = Task{}
+	c.err = c.call.Recv(&c.val)
+	return c.err == nil
+}
+func (c *implAppCycleStopClientRecv) Value() Task {
+	return c.val
+}
+func (c *implAppCycleStopClientRecv) Err() error {
+	if c.err == __io.EOF {
+		return nil
+	}
+	return c.err
+}
+
+type implAppCycleStopCall struct {
+	call __ipc.Call
+	recv implAppCycleStopClientRecv
+}
+
+func (c *implAppCycleStopCall) RecvStream() interface {
+	Advance() bool
+	Value() Task
+	Err() error
+} {
+	return &c.recv
+}
+func (c *implAppCycleStopCall) Finish() (err error) {
+	if ierr := c.call.Finish(&err); ierr != nil {
 		err = ierr
 	}
 	return
 }
-
-// ServerStubAppCycle wraps a server that implements
-// AppCycleService and provides an object that satisfies
-// the requirements of veyron2/ipc.ReflectInvoker.
-type ServerStubAppCycle struct {
-	service AppCycleService
-	gs      *_gen_ipc.GlobState
+func (c *implAppCycleStopCall) Cancel() {
+	c.call.Cancel()
 }
 
-func (__gen_s *ServerStubAppCycle) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
-	// TODO(bprosnitz) GetMethodTags() will be replaces with Signature().
-	// Note: This exhibits some weird behavior like returning a nil error if the method isn't found.
-	// This will change when it is replaced with Signature().
+// AppCycleServerMethods is the interface a server writer
+// implements for AppCycle.
+//
+// AppCycle interfaces with the process running a veyron runtime.
+type AppCycleServerMethods interface {
+	// Stop initiates shutdown of the server.  It streams back periodic
+	// updates to give the client an idea of how the shutdown is
+	// progressing.
+	Stop(AppCycleStopContext) error
+	// ForceStop tells the server to shut down right away.  It can be issued
+	// while a Stop is outstanding if for example the client does not want
+	// to wait any longer.
+	ForceStop(__ipc.ServerContext) error
+}
+
+// AppCycleServerStubMethods is the server interface containing
+// AppCycle methods, as expected by ipc.Server.  The difference between
+// this interface and AppCycleServerMethods is that the first context
+// argument for each method is always ipc.ServerCall here, while it is either
+// ipc.ServerContext or a typed streaming context there.
+type AppCycleServerStubMethods interface {
+	// Stop initiates shutdown of the server.  It streams back periodic
+	// updates to give the client an idea of how the shutdown is
+	// progressing.
+	Stop(__ipc.ServerCall) error
+	// ForceStop tells the server to shut down right away.  It can be issued
+	// while a Stop is outstanding if for example the client does not want
+	// to wait any longer.
+	ForceStop(__ipc.ServerCall) error
+}
+
+// AppCycleServerStub adds universal methods to AppCycleServerStubMethods.
+type AppCycleServerStub interface {
+	AppCycleServerStubMethods
+	// GetMethodTags will be replaced with DescribeInterfaces.
+	GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error)
+	// Signature will be replaced with DescribeInterfaces.
+	Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error)
+}
+
+// AppCycleServer returns a server stub for AppCycle.
+// It converts an implementation of AppCycleServerMethods into
+// an object that may be used by ipc.Server.
+func AppCycleServer(impl AppCycleServerMethods) AppCycleServerStub {
+	stub := implAppCycleServerStub{
+		impl: impl,
+	}
+	// Initialize GlobState; always check the stub itself first, to handle the
+	// case where the user has the Glob method defined in their VDL source.
+	if gs := __ipc.NewGlobState(stub); gs != nil {
+		stub.gs = gs
+	} else if gs := __ipc.NewGlobState(impl); gs != nil {
+		stub.gs = gs
+	}
+	return stub
+}
+
+type implAppCycleServerStub struct {
+	impl AppCycleServerMethods
+	gs   *__ipc.GlobState
+}
+
+func (s implAppCycleServerStub) Stop(call __ipc.ServerCall) error {
+	ctx := &implAppCycleStopContext{call, implAppCycleStopServerSend{call}}
+	return s.impl.Stop(ctx)
+}
+
+func (s implAppCycleServerStub) ForceStop(call __ipc.ServerCall) error {
+	return s.impl.ForceStop(call)
+}
+
+func (s implAppCycleServerStub) VGlob() *__ipc.GlobState {
+	return s.gs
+}
+
+func (s implAppCycleServerStub) GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error) {
+	// TODO(toddw): Replace with new DescribeInterfaces implementation.
 	switch method {
 	case "Stop":
 		return []interface{}{}, nil
@@ -328,28 +286,29 @@ func (__gen_s *ServerStubAppCycle) GetMethodTags(call _gen_ipc.ServerCall, metho
 	}
 }
 
-func (__gen_s *ServerStubAppCycle) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
-	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
-	result.Methods["ForceStop"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{},
-		OutArgs: []_gen_ipc.MethodArgument{
+func (s implAppCycleServerStub) Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error) {
+	// TODO(toddw) Replace with new DescribeInterfaces implementation.
+	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
+	result.Methods["ForceStop"] = __ipc.MethodSignature{
+		InArgs: []__ipc.MethodArgument{},
+		OutArgs: []__ipc.MethodArgument{
 			{Name: "", Type: 65},
 		},
 	}
-	result.Methods["Stop"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{},
-		OutArgs: []_gen_ipc.MethodArgument{
+	result.Methods["Stop"] = __ipc.MethodSignature{
+		InArgs: []__ipc.MethodArgument{},
+		OutArgs: []__ipc.MethodArgument{
 			{Name: "", Type: 65},
 		},
 
 		OutStream: 66,
 	}
 
-	result.TypeDefs = []_gen_vdlutil.Any{
-		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, _gen_wiretype.StructType{
-			[]_gen_wiretype.FieldType{
-				_gen_wiretype.FieldType{Type: 0x24, Name: "Progress"},
-				_gen_wiretype.FieldType{Type: 0x24, Name: "Goal"},
+	result.TypeDefs = []__vdlutil.Any{
+		__wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, __wiretype.StructType{
+			[]__wiretype.FieldType{
+				__wiretype.FieldType{Type: 0x24, Name: "Progress"},
+				__wiretype.FieldType{Type: 0x24, Name: "Goal"},
 			},
 			"veyron.io/veyron/veyron2/services/mgmt/appcycle.Task", []string(nil)},
 	}
@@ -357,35 +316,38 @@ func (__gen_s *ServerStubAppCycle) Signature(call _gen_ipc.ServerCall) (_gen_ipc
 	return result, nil
 }
 
-func (__gen_s *ServerStubAppCycle) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
-	if unresolver, ok := __gen_s.service.(_gen_ipc.Unresolver); ok {
-		return unresolver.UnresolveStep(call)
+// AppCycleStopServerStream is the server stream for AppCycle.Stop.
+type AppCycleStopServerStream interface {
+	// SendStream returns the send side of the server stream.
+	SendStream() interface {
+		// Send places the item onto the output stream.  Returns errors encountered
+		// while sending.  Blocks if there is no buffer space; will unblock when
+		// buffer space is available.
+		Send(item Task) error
 	}
-	if call.Server() == nil {
-		return
-	}
-	var published []string
-	if published, err = call.Server().Published(); err != nil || published == nil {
-		return
-	}
-	reply = make([]string, len(published))
-	for i, p := range published {
-		reply[i] = _gen_naming.Join(p, call.Name())
-	}
-	return
 }
 
-func (__gen_s *ServerStubAppCycle) VGlob() *_gen_ipc.GlobState {
-	return __gen_s.gs
+// AppCycleStopContext represents the context passed to AppCycle.Stop.
+type AppCycleStopContext interface {
+	__ipc.ServerContext
+	AppCycleStopServerStream
 }
 
-func (__gen_s *ServerStubAppCycle) Stop(call _gen_ipc.ServerCall) (err error) {
-	stream := &implAppCycleServiceStopStream{writer: implAppCycleServiceStopStreamSender{serverCall: call}}
-	err = __gen_s.service.Stop(call, stream)
-	return
+type implAppCycleStopServerSend struct {
+	call __ipc.ServerCall
 }
 
-func (__gen_s *ServerStubAppCycle) ForceStop(call _gen_ipc.ServerCall) (err error) {
-	err = __gen_s.service.ForceStop(call)
-	return
+func (s *implAppCycleStopServerSend) Send(item Task) error {
+	return s.call.Send(item)
+}
+
+type implAppCycleStopContext struct {
+	__ipc.ServerContext
+	send implAppCycleStopServerSend
+}
+
+func (s *implAppCycleStopContext) SendStream() interface {
+	Send(item Task) error
+} {
+	return &s.send
 }

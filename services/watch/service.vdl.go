@@ -108,110 +108,150 @@ import (
 
 	"veyron.io/veyron/veyron2/services/watch/types"
 
-	// The non-user imports are prefixed with "_gen_" to prevent collisions.
-	_gen_io "io"
-	_gen_veyron2 "veyron.io/veyron/veyron2"
-	_gen_context "veyron.io/veyron/veyron2/context"
-	_gen_ipc "veyron.io/veyron/veyron2/ipc"
-	_gen_naming "veyron.io/veyron/veyron2/naming"
-	_gen_vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
-	_gen_wiretype "veyron.io/veyron/veyron2/wiretype"
+	// The non-user imports are prefixed with "__" to prevent collisions.
+	__io "io"
+	__veyron2 "veyron.io/veyron/veyron2"
+	__context "veyron.io/veyron/veyron2/context"
+	__ipc "veyron.io/veyron/veyron2/ipc"
+	__vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
+	__wiretype "veyron.io/veyron/veyron2/wiretype"
 )
 
 // TODO(toddw): Remove this line once the new signature support is done.
-// It corrects a bug where _gen_wiretype is unused in VDL pacakges where only
+// It corrects a bug where __wiretype is unused in VDL pacakges where only
 // bootstrap types are used on interfaces.
-const _ = _gen_wiretype.TypeIDInvalid
+const _ = __wiretype.TypeIDInvalid
 
+// GlobWatcherClientMethods is the client interface
+// containing GlobWatcher methods.
+//
 // GlobWatcher allows a client to receive updates for changes to objects
 // that match a pattern.  See the package comments for details.
-// GlobWatcher is the interface the client binds and uses.
-// GlobWatcher_ExcludingUniversal is the interface without internal framework-added methods
-// to enable embedding without method collisions.  Not to be used directly by clients.
-type GlobWatcher_ExcludingUniversal interface {
+type GlobWatcherClientMethods interface {
 	// WatchGlob returns a stream of changes that match a pattern.
-	WatchGlob(ctx _gen_context.T, Req types.GlobRequest, opts ..._gen_ipc.CallOpt) (reply GlobWatcherWatchGlobCall, err error)
-}
-type GlobWatcher interface {
-	_gen_ipc.UniversalServiceMethods
-	GlobWatcher_ExcludingUniversal
+	WatchGlob(ctx __context.T, Req types.GlobRequest, opts ...__ipc.CallOpt) (GlobWatcherWatchGlobCall, error)
 }
 
-// GlobWatcherService is the interface the server implements.
-type GlobWatcherService interface {
-
-	// WatchGlob returns a stream of changes that match a pattern.
-	WatchGlob(context _gen_ipc.ServerContext, Req types.GlobRequest, stream GlobWatcherServiceWatchGlobStream) (err error)
+// GlobWatcherClientStub adds universal methods to GlobWatcherClientMethods.
+type GlobWatcherClientStub interface {
+	GlobWatcherClientMethods
+	__ipc.UniversalServiceMethods
 }
 
-// GlobWatcherWatchGlobCall is the interface for call object of the method
-// WatchGlob in the service interface GlobWatcher.
-type GlobWatcherWatchGlobCall interface {
-	// RecvStream returns the recv portion of the stream
+// GlobWatcherClient returns a client stub for GlobWatcher.
+func GlobWatcherClient(name string, opts ...__ipc.BindOpt) GlobWatcherClientStub {
+	var client __ipc.Client
+	for _, opt := range opts {
+		if clientOpt, ok := opt.(__ipc.Client); ok {
+			client = clientOpt
+		}
+	}
+	return implGlobWatcherClientStub{name, client}
+}
+
+type implGlobWatcherClientStub struct {
+	name   string
+	client __ipc.Client
+}
+
+func (c implGlobWatcherClientStub) c(ctx __context.T) __ipc.Client {
+	if c.client != nil {
+		return c.client
+	}
+	return __veyron2.RuntimeFromContext(ctx).Client()
+}
+
+func (c implGlobWatcherClientStub) WatchGlob(ctx __context.T, i0 types.GlobRequest, opts ...__ipc.CallOpt) (ocall GlobWatcherWatchGlobCall, err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "WatchGlob", []interface{}{i0}, opts...); err != nil {
+		return
+	}
+	ocall = &implGlobWatcherWatchGlobCall{call, implGlobWatcherWatchGlobClientRecv{call: call}}
+	return
+}
+
+func (c implGlobWatcherClientStub) Signature(ctx __context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&o0, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (c implGlobWatcherClientStub) GetMethodTags(ctx __context.T, method string, opts ...__ipc.CallOpt) (o0 []interface{}, err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&o0, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+// GlobWatcherWatchGlobClientStream is the client stream for GlobWatcher.WatchGlob.
+type GlobWatcherWatchGlobClientStream interface {
+	// RecvStream returns the receiver side of the client stream.
 	RecvStream() interface {
-		// Advance stages an element so the client can retrieve it
-		// with Value.  Advance returns true iff there is an
-		// element to retrieve.  The client must call Advance before
-		// calling Value. Advance may block if an element is not
-		// immediately available.
+		// Advance stages an item so that it may be retrieved via Value.  Returns
+		// true iff there is an item to retrieve.  Advance must be called before
+		// Value is called.  May block if an item is not available.
 		Advance() bool
-
-		// Value returns the element that was staged by Advance.
-		// Value may panic if Advance returned false or was not
-		// called at all.  Value does not block.
+		// Value returns the item that was staged by Advance.  May panic if Advance
+		// returned false or was not called.  Never blocks.
 		Value() types.Change
-
-		// Err returns a non-nil error iff the stream encountered
-		// any errors.  Err does not block.
+		// Err returns any error encountered by Advance.  Never blocks.
 		Err() error
 	}
+}
 
-	// Finish blocks until the server is done and returns the positional
-	// return values for call.
+// GlobWatcherWatchGlobCall represents the call returned from GlobWatcher.WatchGlob.
+type GlobWatcherWatchGlobCall interface {
+	GlobWatcherWatchGlobClientStream
+	// Finish blocks until the server is done, and returns the positional return
+	// values for call.
 	//
-	// If Cancel has been called, Finish will return immediately; the output of
-	// Finish could either be an error signalling cancelation, or the correct
-	// positional return values from the server depending on the timing of the
-	// call.
+	// Finish returns immediately if Cancel has been called; depending on the
+	// timing the output could either be an error signaling cancelation, or the
+	// valid positional return values from the server.
 	//
 	// Calling Finish is mandatory for releasing stream resources, unless Cancel
-	// has been called or any of the other methods return an error.
-	// Finish should be called at most once.
-	Finish() (err error)
-
-	// Cancel cancels the RPC, notifying the server to stop processing.  It
-	// is safe to call Cancel concurrently with any of the other stream methods.
+	// has been called or any of the other methods return an error.  Finish should
+	// be called at most once.
+	Finish() error
+	// Cancel cancels the RPC, notifying the server to stop processing.  It is
+	// safe to call Cancel concurrently with any of the other stream methods.
 	// Calling Cancel after Finish has returned is a no-op.
 	Cancel()
 }
 
-type implGlobWatcherWatchGlobStreamIterator struct {
-	clientCall _gen_ipc.Call
-	val        types.Change
-	err        error
+type implGlobWatcherWatchGlobClientRecv struct {
+	call __ipc.Call
+	val  types.Change
+	err  error
 }
 
-func (c *implGlobWatcherWatchGlobStreamIterator) Advance() bool {
+func (c *implGlobWatcherWatchGlobClientRecv) Advance() bool {
 	c.val = types.Change{}
-	c.err = c.clientCall.Recv(&c.val)
+	c.err = c.call.Recv(&c.val)
 	return c.err == nil
 }
-
-func (c *implGlobWatcherWatchGlobStreamIterator) Value() types.Change {
+func (c *implGlobWatcherWatchGlobClientRecv) Value() types.Change {
 	return c.val
 }
-
-func (c *implGlobWatcherWatchGlobStreamIterator) Err() error {
-	if c.err == _gen_io.EOF {
+func (c *implGlobWatcherWatchGlobClientRecv) Err() error {
+	if c.err == __io.EOF {
 		return nil
 	}
 	return c.err
 }
 
-// Implementation of the GlobWatcherWatchGlobCall interface that is not exported.
 type implGlobWatcherWatchGlobCall struct {
-	clientCall _gen_ipc.Call
-	readStream implGlobWatcherWatchGlobStreamIterator
+	call __ipc.Call
+	recv implGlobWatcherWatchGlobClientRecv
 }
 
 func (c *implGlobWatcherWatchGlobCall) RecvStream() interface {
@@ -219,171 +259,80 @@ func (c *implGlobWatcherWatchGlobCall) RecvStream() interface {
 	Value() types.Change
 	Err() error
 } {
-	return &c.readStream
+	return &c.recv
 }
-
 func (c *implGlobWatcherWatchGlobCall) Finish() (err error) {
-	if ierr := c.clientCall.Finish(&err); ierr != nil {
+	if ierr := c.call.Finish(&err); ierr != nil {
 		err = ierr
 	}
 	return
 }
-
 func (c *implGlobWatcherWatchGlobCall) Cancel() {
-	c.clientCall.Cancel()
+	c.call.Cancel()
 }
 
-type implGlobWatcherServiceWatchGlobStreamSender struct {
-	serverCall _gen_ipc.ServerCall
-}
-
-func (s *implGlobWatcherServiceWatchGlobStreamSender) Send(item types.Change) error {
-	return s.serverCall.Send(item)
-}
-
-// GlobWatcherServiceWatchGlobStream is the interface for streaming responses of the method
-// WatchGlob in the service interface GlobWatcher.
-type GlobWatcherServiceWatchGlobStream interface {
-	// SendStream returns the send portion of the stream.
-	SendStream() interface {
-		// Send places the item onto the output stream, blocking if there is no buffer
-		// space available.  If the client has canceled, an error is returned.
-		Send(item types.Change) error
-	}
-}
-
-// Implementation of the GlobWatcherServiceWatchGlobStream interface that is not exported.
-type implGlobWatcherServiceWatchGlobStream struct {
-	writer implGlobWatcherServiceWatchGlobStreamSender
-}
-
-func (s *implGlobWatcherServiceWatchGlobStream) SendStream() interface {
-	// Send places the item onto the output stream, blocking if there is no buffer
-	// space available.  If the client has canceled, an error is returned.
-	Send(item types.Change) error
-} {
-	return &s.writer
-}
-
-// BindGlobWatcher returns the client stub implementing the GlobWatcher
-// interface.
+// GlobWatcherServerMethods is the interface a server writer
+// implements for GlobWatcher.
 //
-// If no _gen_ipc.Client is specified, the default _gen_ipc.Client in the
-// global Runtime is used.
-func BindGlobWatcher(name string, opts ..._gen_ipc.BindOpt) (GlobWatcher, error) {
-	var client _gen_ipc.Client
-	switch len(opts) {
-	case 0:
-		// Do nothing.
-	case 1:
-		if clientOpt, ok := opts[0].(_gen_ipc.Client); opts[0] == nil || ok {
-			client = clientOpt
-		} else {
-			return nil, _gen_vdlutil.ErrUnrecognizedOption
-		}
-	default:
-		return nil, _gen_vdlutil.ErrTooManyOptionsToBind
-	}
-	stub := &clientStubGlobWatcher{defaultClient: client, name: name}
-
-	return stub, nil
+// GlobWatcher allows a client to receive updates for changes to objects
+// that match a pattern.  See the package comments for details.
+type GlobWatcherServerMethods interface {
+	// WatchGlob returns a stream of changes that match a pattern.
+	WatchGlob(ctx GlobWatcherWatchGlobContext, Req types.GlobRequest) error
 }
 
-// NewServerGlobWatcher creates a new server stub.
-//
-// It takes a regular server implementing the GlobWatcherService
-// interface, and returns a new server stub.
-func NewServerGlobWatcher(server GlobWatcherService) interface{} {
-	stub := &ServerStubGlobWatcher{
-		service: server,
+// GlobWatcherServerStubMethods is the server interface containing
+// GlobWatcher methods, as expected by ipc.Server.  The difference between
+// this interface and GlobWatcherServerMethods is that the first context
+// argument for each method is always ipc.ServerCall here, while it is either
+// ipc.ServerContext or a typed streaming context there.
+type GlobWatcherServerStubMethods interface {
+	// WatchGlob returns a stream of changes that match a pattern.
+	WatchGlob(call __ipc.ServerCall, Req types.GlobRequest) error
+}
+
+// GlobWatcherServerStub adds universal methods to GlobWatcherServerStubMethods.
+type GlobWatcherServerStub interface {
+	GlobWatcherServerStubMethods
+	// GetMethodTags will be replaced with DescribeInterfaces.
+	GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error)
+	// Signature will be replaced with DescribeInterfaces.
+	Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error)
+}
+
+// GlobWatcherServer returns a server stub for GlobWatcher.
+// It converts an implementation of GlobWatcherServerMethods into
+// an object that may be used by ipc.Server.
+func GlobWatcherServer(impl GlobWatcherServerMethods) GlobWatcherServerStub {
+	stub := implGlobWatcherServerStub{
+		impl: impl,
 	}
-	var gs _gen_ipc.GlobState
-	var self interface{} = stub
-	// VAllGlobber is implemented by the server object, which is wrapped in
-	// a VDL generated server stub.
-	if x, ok := self.(_gen_ipc.VAllGlobber); ok {
-		gs.VAllGlobber = x
+	// Initialize GlobState; always check the stub itself first, to handle the
+	// case where the user has the Glob method defined in their VDL source.
+	if gs := __ipc.NewGlobState(stub); gs != nil {
+		stub.gs = gs
+	} else if gs := __ipc.NewGlobState(impl); gs != nil {
+		stub.gs = gs
 	}
-	// VAllGlobber is implemented by the server object without using a VDL
-	// generated stub.
-	if x, ok := server.(_gen_ipc.VAllGlobber); ok {
-		gs.VAllGlobber = x
-	}
-	// VChildrenGlobber is implemented in the server object.
-	if x, ok := server.(_gen_ipc.VChildrenGlobber); ok {
-		gs.VChildrenGlobber = x
-	}
-	stub.gs = &gs
 	return stub
 }
 
-// clientStubGlobWatcher implements GlobWatcher.
-type clientStubGlobWatcher struct {
-	defaultClient _gen_ipc.Client
-	name          string
+type implGlobWatcherServerStub struct {
+	impl GlobWatcherServerMethods
+	gs   *__ipc.GlobState
 }
 
-func (__gen_c *clientStubGlobWatcher) client(ctx _gen_context.T) _gen_ipc.Client {
-	if __gen_c.defaultClient != nil {
-		return __gen_c.defaultClient
-	}
-	return _gen_veyron2.RuntimeFromContext(ctx).Client()
+func (s implGlobWatcherServerStub) WatchGlob(call __ipc.ServerCall, i0 types.GlobRequest) error {
+	ctx := &implGlobWatcherWatchGlobContext{call, implGlobWatcherWatchGlobServerSend{call}}
+	return s.impl.WatchGlob(ctx, i0)
 }
 
-func (__gen_c *clientStubGlobWatcher) WatchGlob(ctx _gen_context.T, Req types.GlobRequest, opts ..._gen_ipc.CallOpt) (reply GlobWatcherWatchGlobCall, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "WatchGlob", []interface{}{Req}, opts...); err != nil {
-		return
-	}
-	reply = &implGlobWatcherWatchGlobCall{clientCall: call, readStream: implGlobWatcherWatchGlobStreamIterator{clientCall: call}}
-	return
+func (s implGlobWatcherServerStub) VGlob() *__ipc.GlobState {
+	return s.gs
 }
 
-func (__gen_c *clientStubGlobWatcher) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
-func (__gen_c *clientStubGlobWatcher) Signature(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
-func (__gen_c *clientStubGlobWatcher) GetMethodTags(ctx _gen_context.T, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
-// ServerStubGlobWatcher wraps a server that implements
-// GlobWatcherService and provides an object that satisfies
-// the requirements of veyron2/ipc.ReflectInvoker.
-type ServerStubGlobWatcher struct {
-	service GlobWatcherService
-	gs      *_gen_ipc.GlobState
-}
-
-func (__gen_s *ServerStubGlobWatcher) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
-	// TODO(bprosnitz) GetMethodTags() will be replaces with Signature().
-	// Note: This exhibits some weird behavior like returning a nil error if the method isn't found.
-	// This will change when it is replaced with Signature().
+func (s implGlobWatcherServerStub) GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error) {
+	// TODO(toddw): Replace with new DescribeInterfaces implementation.
 	switch method {
 	case "WatchGlob":
 		return []interface{}{security.Label(1)}, nil
@@ -392,33 +341,34 @@ func (__gen_s *ServerStubGlobWatcher) GetMethodTags(call _gen_ipc.ServerCall, me
 	}
 }
 
-func (__gen_s *ServerStubGlobWatcher) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
-	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
-	result.Methods["WatchGlob"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{
+func (s implGlobWatcherServerStub) Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error) {
+	// TODO(toddw) Replace with new DescribeInterfaces implementation.
+	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
+	result.Methods["WatchGlob"] = __ipc.MethodSignature{
+		InArgs: []__ipc.MethodArgument{
 			{Name: "Req", Type: 67},
 		},
-		OutArgs: []_gen_ipc.MethodArgument{
+		OutArgs: []__ipc.MethodArgument{
 			{Name: "", Type: 68},
 		},
 
 		OutStream: 70,
 	}
 
-	result.TypeDefs = []_gen_vdlutil.Any{
-		_gen_wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, _gen_wiretype.SliceType{Elem: 0x41, Name: "veyron.io/veyron/veyron2/services/watch/types.ResumeMarker", Tags: []string(nil)}, _gen_wiretype.StructType{
-			[]_gen_wiretype.FieldType{
-				_gen_wiretype.FieldType{Type: 0x3, Name: "Pattern"},
-				_gen_wiretype.FieldType{Type: 0x42, Name: "ResumeMarker"},
+	result.TypeDefs = []__vdlutil.Any{
+		__wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, __wiretype.SliceType{Elem: 0x41, Name: "veyron.io/veyron/veyron2/services/watch/types.ResumeMarker", Tags: []string(nil)}, __wiretype.StructType{
+			[]__wiretype.FieldType{
+				__wiretype.FieldType{Type: 0x3, Name: "Pattern"},
+				__wiretype.FieldType{Type: 0x42, Name: "ResumeMarker"},
 			},
 			"veyron.io/veyron/veyron2/services/watch/types.GlobRequest", []string(nil)},
-		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "anydata", Tags: []string(nil)}, _gen_wiretype.StructType{
-			[]_gen_wiretype.FieldType{
-				_gen_wiretype.FieldType{Type: 0x3, Name: "Name"},
-				_gen_wiretype.FieldType{Type: 0x24, Name: "State"},
-				_gen_wiretype.FieldType{Type: 0x45, Name: "Value"},
-				_gen_wiretype.FieldType{Type: 0x42, Name: "ResumeMarker"},
-				_gen_wiretype.FieldType{Type: 0x2, Name: "Continued"},
+		__wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x1, Name: "anydata", Tags: []string(nil)}, __wiretype.StructType{
+			[]__wiretype.FieldType{
+				__wiretype.FieldType{Type: 0x3, Name: "Name"},
+				__wiretype.FieldType{Type: 0x24, Name: "State"},
+				__wiretype.FieldType{Type: 0x45, Name: "Value"},
+				__wiretype.FieldType{Type: 0x42, Name: "ResumeMarker"},
+				__wiretype.FieldType{Type: 0x2, Name: "Continued"},
 			},
 			"veyron.io/veyron/veyron2/services/watch/types.Change", []string(nil)},
 	}
@@ -426,30 +376,38 @@ func (__gen_s *ServerStubGlobWatcher) Signature(call _gen_ipc.ServerCall) (_gen_
 	return result, nil
 }
 
-func (__gen_s *ServerStubGlobWatcher) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
-	if unresolver, ok := __gen_s.service.(_gen_ipc.Unresolver); ok {
-		return unresolver.UnresolveStep(call)
+// GlobWatcherWatchGlobServerStream is the server stream for GlobWatcher.WatchGlob.
+type GlobWatcherWatchGlobServerStream interface {
+	// SendStream returns the send side of the server stream.
+	SendStream() interface {
+		// Send places the item onto the output stream.  Returns errors encountered
+		// while sending.  Blocks if there is no buffer space; will unblock when
+		// buffer space is available.
+		Send(item types.Change) error
 	}
-	if call.Server() == nil {
-		return
-	}
-	var published []string
-	if published, err = call.Server().Published(); err != nil || published == nil {
-		return
-	}
-	reply = make([]string, len(published))
-	for i, p := range published {
-		reply[i] = _gen_naming.Join(p, call.Name())
-	}
-	return
 }
 
-func (__gen_s *ServerStubGlobWatcher) VGlob() *_gen_ipc.GlobState {
-	return __gen_s.gs
+// GlobWatcherWatchGlobContext represents the context passed to GlobWatcher.WatchGlob.
+type GlobWatcherWatchGlobContext interface {
+	__ipc.ServerContext
+	GlobWatcherWatchGlobServerStream
 }
 
-func (__gen_s *ServerStubGlobWatcher) WatchGlob(call _gen_ipc.ServerCall, Req types.GlobRequest) (err error) {
-	stream := &implGlobWatcherServiceWatchGlobStream{writer: implGlobWatcherServiceWatchGlobStreamSender{serverCall: call}}
-	err = __gen_s.service.WatchGlob(call, Req, stream)
-	return
+type implGlobWatcherWatchGlobServerSend struct {
+	call __ipc.ServerCall
+}
+
+func (s *implGlobWatcherWatchGlobServerSend) Send(item types.Change) error {
+	return s.call.Send(item)
+}
+
+type implGlobWatcherWatchGlobContext struct {
+	__ipc.ServerContext
+	send implGlobWatcherWatchGlobServerSend
+}
+
+func (s *implGlobWatcherWatchGlobContext) SendStream() interface {
+	Send(item types.Change) error
+} {
+	return &s.send
 }

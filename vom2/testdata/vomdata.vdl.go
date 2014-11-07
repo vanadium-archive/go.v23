@@ -4,15 +4,15 @@
 package testdata
 
 import (
-	// The non-user imports are prefixed with "_gen_" to prevent collisions.
-	_gen_vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
+	// The non-user imports are prefixed with "__" to prevent collisions.
+	__vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
 )
 
 // TestCase represents an individual testcase for vom encoding and decoding.
 type TestCase struct {
-	Name  string           // Name of the testcase
-	Value _gen_vdlutil.Any // Value to test
-	Hex   string           // Hex pattern representing vom encoding of Value
+	Name  string        // Name of the testcase
+	Value __vdlutil.Any // Value to test
+	Hex   string        // Hex pattern representing vom encoding of Value
 }
 
 // Tests contains the testcases to use to test vom encoding and decoding.

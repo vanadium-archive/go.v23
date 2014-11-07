@@ -18,12 +18,9 @@
 //
 // SetACL completely replaces the ACL. To perform an atomic read-modify-write
 // of the ACL, use the etag parameter.
-//   n, err := access.BindObject(name)
-//   if err != nil {
-//      return err
-//   }
+//   client := access.ObjectClient(name)
 //   for {
-//     acl, etag, err := n.GetACL()
+//     acl, etag, err := client.GetACL()
 //     if err != nil {
 //       return err
 //     }
@@ -32,7 +29,7 @@
 //     acl.In[newPattern] = acl.In[newPattern] | newLabel
 //     // Use the same etag with the modified acl to ensure that no other client
 //     // has modified the acl since GetACL returned.
-//     if err := n.SetACL(acl, etag); err != nil {
+//     if err := client.SetACL(acl, etag); err != nil {
 //       if verror.Is(err, access.ErrBadEtag) {
 //         // Another client replaced the ACL after our GetACL returned.
 //         // Try again.

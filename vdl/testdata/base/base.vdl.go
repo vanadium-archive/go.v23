@@ -5,17 +5,21 @@
 package base
 
 import (
-	// The non-user imports are prefixed with "_gen_" to prevent collisions.
-	_gen_io "io"
-	_gen_veyron2 "veyron.io/veyron/veyron2"
-	_gen_context "veyron.io/veyron/veyron2/context"
-	_gen_ipc "veyron.io/veyron/veyron2/ipc"
-	_gen_naming "veyron.io/veyron/veyron2/naming"
-	_gen_vdl "veyron.io/veyron/veyron2/vdl"
-	_gen_vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
-	_gen_verror "veyron.io/veyron/veyron2/verror"
-	_gen_wiretype "veyron.io/veyron/veyron2/wiretype"
+	// The non-user imports are prefixed with "__" to prevent collisions.
+	__io "io"
+	__veyron2 "veyron.io/veyron/veyron2"
+	__context "veyron.io/veyron/veyron2/context"
+	__ipc "veyron.io/veyron/veyron2/ipc"
+	__vdl "veyron.io/veyron/veyron2/vdl"
+	__vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
+	__verror "veyron.io/veyron/veyron2/verror"
+	__wiretype "veyron.io/veyron/veyron2/wiretype"
 )
+
+// TODO(toddw): Remove this line once the new signature support is done.
+// It corrects a bug where __wiretype is unused in VDL pacakges where only
+// bootstrap types are used on interfaces.
+const _ = __wiretype.TypeIDInvalid
 
 type NamedBool bool
 
@@ -73,8 +77,8 @@ type Scalars struct {
 	A11 complex128
 	A12 string
 	A13 error
-	A14 _gen_vdlutil.Any
-	A15 *_gen_vdl.Type
+	A14 __vdlutil.Any
+	A15 *__vdl.Type
 	B0  NamedBool
 	B1  NamedByte
 	B2  NamedUint16
@@ -154,447 +158,51 @@ const SixSquared = uint64(36)
 
 const FiveSquared = int32(25)
 
-// TODO(toddw): Remove this line once the new signature support is done.
-// It corrects a bug where _gen_wiretype is unused in VDL pacakges where only
-// bootstrap types are used on interfaces.
-const _ = _gen_wiretype.TypeIDInvalid
+const ErrIDFoo = __verror.ID("veyron.io/veyron/veyron2/vdl/testdata/base.ErrIDFoo")
 
-const ErrIDFoo = _gen_verror.ID("veyron.io/veyron/veyron2/vdl/testdata/base.ErrIDFoo")
+const ErrIDBar = __verror.ID("some/path.ErrIdOther")
 
-const ErrIDBar = _gen_verror.ID("some/path.ErrIdOther")
-
-// ServiceA is the interface the client binds and uses.
-// ServiceA_ExcludingUniversal is the interface without internal framework-added methods
-// to enable embedding without method collisions.  Not to be used directly by clients.
-type ServiceA_ExcludingUniversal interface {
-	MethodA1(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error)
-	MethodA2(ctx _gen_context.T, a int32, b string, opts ..._gen_ipc.CallOpt) (reply string, err error)
-	MethodA3(ctx _gen_context.T, a int32, opts ..._gen_ipc.CallOpt) (reply ServiceAMethodA3Call, err error)
-	MethodA4(ctx _gen_context.T, a int32, opts ..._gen_ipc.CallOpt) (reply ServiceAMethodA4Call, err error)
-}
-type ServiceA interface {
-	_gen_ipc.UniversalServiceMethods
-	ServiceA_ExcludingUniversal
+// ServiceAClientMethods is the client interface
+// containing ServiceA methods.
+type ServiceAClientMethods interface {
+	MethodA1(__context.T, ...__ipc.CallOpt) error
+	MethodA2(ctx __context.T, a int32, b string, opts ...__ipc.CallOpt) (s string, err error)
+	MethodA3(ctx __context.T, a int32, opts ...__ipc.CallOpt) (ServiceAMethodA3Call, error)
+	MethodA4(ctx __context.T, a int32, opts ...__ipc.CallOpt) (ServiceAMethodA4Call, error)
 }
 
-// ServiceAService is the interface the server implements.
-type ServiceAService interface {
-	MethodA1(context _gen_ipc.ServerContext) (err error)
-	MethodA2(context _gen_ipc.ServerContext, a int32, b string) (reply string, err error)
-	MethodA3(context _gen_ipc.ServerContext, a int32, stream ServiceAServiceMethodA3Stream) (reply string, err error)
-	MethodA4(context _gen_ipc.ServerContext, a int32, stream ServiceAServiceMethodA4Stream) (err error)
+// ServiceAClientStub adds universal methods to ServiceAClientMethods.
+type ServiceAClientStub interface {
+	ServiceAClientMethods
+	__ipc.UniversalServiceMethods
 }
 
-// ServiceAMethodA3Call is the interface for call object of the method
-// MethodA3 in the service interface ServiceA.
-type ServiceAMethodA3Call interface {
-	// RecvStream returns the recv portion of the stream
-	RecvStream() interface {
-		// Advance stages an element so the client can retrieve it
-		// with Value.  Advance returns true iff there is an
-		// element to retrieve.  The client must call Advance before
-		// calling Value. Advance may block if an element is not
-		// immediately available.
-		Advance() bool
-
-		// Value returns the element that was staged by Advance.
-		// Value may panic if Advance returned false or was not
-		// called at all.  Value does not block.
-		Value() Scalars
-
-		// Err returns a non-nil error iff the stream encountered
-		// any errors.  Err does not block.
-		Err() error
-	}
-
-	// Finish blocks until the server is done and returns the positional
-	// return values for call.
-	//
-	// If Cancel has been called, Finish will return immediately; the output of
-	// Finish could either be an error signalling cancelation, or the correct
-	// positional return values from the server depending on the timing of the
-	// call.
-	//
-	// Calling Finish is mandatory for releasing stream resources, unless Cancel
-	// has been called or any of the other methods return an error.
-	// Finish should be called at most once.
-	Finish() (reply string, err error)
-
-	// Cancel cancels the RPC, notifying the server to stop processing.  It
-	// is safe to call Cancel concurrently with any of the other stream methods.
-	// Calling Cancel after Finish has returned is a no-op.
-	Cancel()
-}
-
-type implServiceAMethodA3StreamIterator struct {
-	clientCall _gen_ipc.Call
-	val        Scalars
-	err        error
-}
-
-func (c *implServiceAMethodA3StreamIterator) Advance() bool {
-	c.val = Scalars{}
-	c.err = c.clientCall.Recv(&c.val)
-	return c.err == nil
-}
-
-func (c *implServiceAMethodA3StreamIterator) Value() Scalars {
-	return c.val
-}
-
-func (c *implServiceAMethodA3StreamIterator) Err() error {
-	if c.err == _gen_io.EOF {
-		return nil
-	}
-	return c.err
-}
-
-// Implementation of the ServiceAMethodA3Call interface that is not exported.
-type implServiceAMethodA3Call struct {
-	clientCall _gen_ipc.Call
-	readStream implServiceAMethodA3StreamIterator
-}
-
-func (c *implServiceAMethodA3Call) RecvStream() interface {
-	Advance() bool
-	Value() Scalars
-	Err() error
-} {
-	return &c.readStream
-}
-
-func (c *implServiceAMethodA3Call) Finish() (reply string, err error) {
-	if ierr := c.clientCall.Finish(&reply, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
-func (c *implServiceAMethodA3Call) Cancel() {
-	c.clientCall.Cancel()
-}
-
-type implServiceAServiceMethodA3StreamSender struct {
-	serverCall _gen_ipc.ServerCall
-}
-
-func (s *implServiceAServiceMethodA3StreamSender) Send(item Scalars) error {
-	return s.serverCall.Send(item)
-}
-
-// ServiceAServiceMethodA3Stream is the interface for streaming responses of the method
-// MethodA3 in the service interface ServiceA.
-type ServiceAServiceMethodA3Stream interface {
-	// SendStream returns the send portion of the stream.
-	SendStream() interface {
-		// Send places the item onto the output stream, blocking if there is no buffer
-		// space available.  If the client has canceled, an error is returned.
-		Send(item Scalars) error
-	}
-}
-
-// Implementation of the ServiceAServiceMethodA3Stream interface that is not exported.
-type implServiceAServiceMethodA3Stream struct {
-	writer implServiceAServiceMethodA3StreamSender
-}
-
-func (s *implServiceAServiceMethodA3Stream) SendStream() interface {
-	// Send places the item onto the output stream, blocking if there is no buffer
-	// space available.  If the client has canceled, an error is returned.
-	Send(item Scalars) error
-} {
-	return &s.writer
-}
-
-// ServiceAMethodA4Call is the interface for call object of the method
-// MethodA4 in the service interface ServiceA.
-type ServiceAMethodA4Call interface {
-	// RecvStream returns the recv portion of the stream
-	RecvStream() interface {
-		// Advance stages an element so the client can retrieve it
-		// with Value.  Advance returns true iff there is an
-		// element to retrieve.  The client must call Advance before
-		// calling Value. Advance may block if an element is not
-		// immediately available.
-		Advance() bool
-
-		// Value returns the element that was staged by Advance.
-		// Value may panic if Advance returned false or was not
-		// called at all.  Value does not block.
-		Value() string
-
-		// Err returns a non-nil error iff the stream encountered
-		// any errors.  Err does not block.
-		Err() error
-	}
-
-	// SendStream returns the send portion of the stream
-	SendStream() interface {
-		// Send places the item onto the output stream, blocking if there is no
-		// buffer space available.  Calls to Send after having called Close
-		// or Cancel will fail.  Any blocked Send calls will be unblocked upon
-		// calling Cancel.
-		Send(item int32) error
-
-		// Close indicates to the server that no more items will be sent;
-		// server Recv calls will receive io.EOF after all sent items.  This is
-		// an optional call - it's used by streaming clients that need the
-		// server to receive the io.EOF terminator before the client calls
-		// Finish (for example, if the client needs to continue receiving items
-		// from the server after having finished sending).
-		// Calls to Close after having called Cancel will fail.
-		// Like Send, Close blocks when there's no buffer space available.
-		Close() error
-	}
-
-	// Finish performs the equivalent of SendStream().Close, then blocks until the server
-	// is done, and returns the positional return values for call.
-	// If Cancel has been called, Finish will return immediately; the output of
-	// Finish could either be an error signalling cancelation, or the correct
-	// positional return values from the server depending on the timing of the
-	// call.
-	//
-	// Calling Finish is mandatory for releasing stream resources, unless Cancel
-	// has been called or any of the other methods return an error.
-	// Finish should be called at most once.
-	Finish() (err error)
-
-	// Cancel cancels the RPC, notifying the server to stop processing.  It
-	// is safe to call Cancel concurrently with any of the other stream methods.
-	// Calling Cancel after Finish has returned is a no-op.
-	Cancel()
-}
-
-type implServiceAMethodA4StreamSender struct {
-	clientCall _gen_ipc.Call
-}
-
-func (c *implServiceAMethodA4StreamSender) Send(item int32) error {
-	return c.clientCall.Send(item)
-}
-
-func (c *implServiceAMethodA4StreamSender) Close() error {
-	return c.clientCall.CloseSend()
-}
-
-type implServiceAMethodA4StreamIterator struct {
-	clientCall _gen_ipc.Call
-	val        string
-	err        error
-}
-
-func (c *implServiceAMethodA4StreamIterator) Advance() bool {
-	c.err = c.clientCall.Recv(&c.val)
-	return c.err == nil
-}
-
-func (c *implServiceAMethodA4StreamIterator) Value() string {
-	return c.val
-}
-
-func (c *implServiceAMethodA4StreamIterator) Err() error {
-	if c.err == _gen_io.EOF {
-		return nil
-	}
-	return c.err
-}
-
-// Implementation of the ServiceAMethodA4Call interface that is not exported.
-type implServiceAMethodA4Call struct {
-	clientCall  _gen_ipc.Call
-	writeStream implServiceAMethodA4StreamSender
-	readStream  implServiceAMethodA4StreamIterator
-}
-
-func (c *implServiceAMethodA4Call) SendStream() interface {
-	Send(item int32) error
-	Close() error
-} {
-	return &c.writeStream
-}
-
-func (c *implServiceAMethodA4Call) RecvStream() interface {
-	Advance() bool
-	Value() string
-	Err() error
-} {
-	return &c.readStream
-}
-
-func (c *implServiceAMethodA4Call) Finish() (err error) {
-	if ierr := c.clientCall.Finish(&err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
-func (c *implServiceAMethodA4Call) Cancel() {
-	c.clientCall.Cancel()
-}
-
-type implServiceAServiceMethodA4StreamSender struct {
-	serverCall _gen_ipc.ServerCall
-}
-
-func (s *implServiceAServiceMethodA4StreamSender) Send(item string) error {
-	return s.serverCall.Send(item)
-}
-
-type implServiceAServiceMethodA4StreamIterator struct {
-	serverCall _gen_ipc.ServerCall
-	val        int32
-	err        error
-}
-
-func (s *implServiceAServiceMethodA4StreamIterator) Advance() bool {
-	s.err = s.serverCall.Recv(&s.val)
-	return s.err == nil
-}
-
-func (s *implServiceAServiceMethodA4StreamIterator) Value() int32 {
-	return s.val
-}
-
-func (s *implServiceAServiceMethodA4StreamIterator) Err() error {
-	if s.err == _gen_io.EOF {
-		return nil
-	}
-	return s.err
-}
-
-// ServiceAServiceMethodA4Stream is the interface for streaming responses of the method
-// MethodA4 in the service interface ServiceA.
-type ServiceAServiceMethodA4Stream interface {
-	// SendStream returns the send portion of the stream.
-	SendStream() interface {
-		// Send places the item onto the output stream, blocking if there is no buffer
-		// space available.  If the client has canceled, an error is returned.
-		Send(item string) error
-	}
-	// RecvStream returns the recv portion of the stream
-	RecvStream() interface {
-		// Advance stages an element so the client can retrieve it
-		// with Value.  Advance returns true iff there is an
-		// element to retrieve.  The client must call Advance before
-		// calling Value.  Advance may block if an element is not
-		// immediately available.
-		Advance() bool
-
-		// Value returns the element that was staged by Advance.
-		// Value may panic if Advance returned false or was not
-		// called at all.  Value does not block.
-		Value() int32
-
-		// Err returns a non-nil error iff the stream encountered
-		// any errors.  Err does not block.
-		Err() error
-	}
-}
-
-// Implementation of the ServiceAServiceMethodA4Stream interface that is not exported.
-type implServiceAServiceMethodA4Stream struct {
-	writer implServiceAServiceMethodA4StreamSender
-	reader implServiceAServiceMethodA4StreamIterator
-}
-
-func (s *implServiceAServiceMethodA4Stream) SendStream() interface {
-	// Send places the item onto the output stream, blocking if there is no buffer
-	// space available.  If the client has canceled, an error is returned.
-	Send(item string) error
-} {
-	return &s.writer
-}
-
-func (s *implServiceAServiceMethodA4Stream) RecvStream() interface {
-	// Advance stages an element so the client can retrieve it
-	// with Value.  Advance returns true iff there is an
-	// element to retrieve.  The client must call Advance before
-	// calling Value.  The client must call Cancel if it does
-	// not iterate through all elements (i.e. until Advance
-	// returns false).  Advance may block if an element is not
-	// immediately available.
-	Advance() bool
-
-	// Value returns the element that was staged by Advance.
-	// Value may panic if Advance returned false or was not
-	// called at all.  Value does not block.
-	Value() int32
-
-	// Err returns a non-nil error iff the stream encountered
-	// any errors.  Err does not block.
-	Err() error
-} {
-	return &s.reader
-}
-
-// BindServiceA returns the client stub implementing the ServiceA
-// interface.
-//
-// If no _gen_ipc.Client is specified, the default _gen_ipc.Client in the
-// global Runtime is used.
-func BindServiceA(name string, opts ..._gen_ipc.BindOpt) (ServiceA, error) {
-	var client _gen_ipc.Client
-	switch len(opts) {
-	case 0:
-		// Do nothing.
-	case 1:
-		if clientOpt, ok := opts[0].(_gen_ipc.Client); opts[0] == nil || ok {
+// ServiceAClient returns a client stub for ServiceA.
+func ServiceAClient(name string, opts ...__ipc.BindOpt) ServiceAClientStub {
+	var client __ipc.Client
+	for _, opt := range opts {
+		if clientOpt, ok := opt.(__ipc.Client); ok {
 			client = clientOpt
-		} else {
-			return nil, _gen_vdlutil.ErrUnrecognizedOption
 		}
-	default:
-		return nil, _gen_vdlutil.ErrTooManyOptionsToBind
 	}
-	stub := &clientStubServiceA{defaultClient: client, name: name}
-
-	return stub, nil
+	return implServiceAClientStub{name, client}
 }
 
-// NewServerServiceA creates a new server stub.
-//
-// It takes a regular server implementing the ServiceAService
-// interface, and returns a new server stub.
-func NewServerServiceA(server ServiceAService) interface{} {
-	stub := &ServerStubServiceA{
-		service: server,
-	}
-	var gs _gen_ipc.GlobState
-	var self interface{} = stub
-	// VAllGlobber is implemented by the server object, which is wrapped in
-	// a VDL generated server stub.
-	if x, ok := self.(_gen_ipc.VAllGlobber); ok {
-		gs.VAllGlobber = x
-	}
-	// VAllGlobber is implemented by the server object without using a VDL
-	// generated stub.
-	if x, ok := server.(_gen_ipc.VAllGlobber); ok {
-		gs.VAllGlobber = x
-	}
-	// VChildrenGlobber is implemented in the server object.
-	if x, ok := server.(_gen_ipc.VChildrenGlobber); ok {
-		gs.VChildrenGlobber = x
-	}
-	stub.gs = &gs
-	return stub
+type implServiceAClientStub struct {
+	name   string
+	client __ipc.Client
 }
 
-// clientStubServiceA implements ServiceA.
-type clientStubServiceA struct {
-	defaultClient _gen_ipc.Client
-	name          string
-}
-
-func (__gen_c *clientStubServiceA) client(ctx _gen_context.T) _gen_ipc.Client {
-	if __gen_c.defaultClient != nil {
-		return __gen_c.defaultClient
+func (c implServiceAClientStub) c(ctx __context.T) __ipc.Client {
+	if c.client != nil {
+		return c.client
 	}
-	return _gen_veyron2.RuntimeFromContext(ctx).Client()
+	return __veyron2.RuntimeFromContext(ctx).Client()
 }
 
-func (__gen_c *clientStubServiceA) MethodA1(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "MethodA1", nil, opts...); err != nil {
+func (c implServiceAClientStub) MethodA1(ctx __context.T, opts ...__ipc.CallOpt) (err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "MethodA1", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&err); ierr != nil {
@@ -603,80 +211,323 @@ func (__gen_c *clientStubServiceA) MethodA1(ctx _gen_context.T, opts ..._gen_ipc
 	return
 }
 
-func (__gen_c *clientStubServiceA) MethodA2(ctx _gen_context.T, a int32, b string, opts ..._gen_ipc.CallOpt) (reply string, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "MethodA2", []interface{}{a, b}, opts...); err != nil {
+func (c implServiceAClientStub) MethodA2(ctx __context.T, i0 int32, i1 string, opts ...__ipc.CallOpt) (o0 string, err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "MethodA2", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
+	if ierr := call.Finish(&o0, &err); ierr != nil {
 		err = ierr
 	}
 	return
 }
 
-func (__gen_c *clientStubServiceA) MethodA3(ctx _gen_context.T, a int32, opts ..._gen_ipc.CallOpt) (reply ServiceAMethodA3Call, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "MethodA3", []interface{}{a}, opts...); err != nil {
+func (c implServiceAClientStub) MethodA3(ctx __context.T, i0 int32, opts ...__ipc.CallOpt) (ocall ServiceAMethodA3Call, err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "MethodA3", []interface{}{i0}, opts...); err != nil {
 		return
 	}
-	reply = &implServiceAMethodA3Call{clientCall: call, readStream: implServiceAMethodA3StreamIterator{clientCall: call}}
+	ocall = &implServiceAMethodA3Call{call, implServiceAMethodA3ClientRecv{call: call}}
 	return
 }
 
-func (__gen_c *clientStubServiceA) MethodA4(ctx _gen_context.T, a int32, opts ..._gen_ipc.CallOpt) (reply ServiceAMethodA4Call, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "MethodA4", []interface{}{a}, opts...); err != nil {
+func (c implServiceAClientStub) MethodA4(ctx __context.T, i0 int32, opts ...__ipc.CallOpt) (ocall ServiceAMethodA4Call, err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "MethodA4", []interface{}{i0}, opts...); err != nil {
 		return
 	}
-	reply = &implServiceAMethodA4Call{clientCall: call, writeStream: implServiceAMethodA4StreamSender{clientCall: call}, readStream: implServiceAMethodA4StreamIterator{clientCall: call}}
+	ocall = &implServiceAMethodA4Call{call, implServiceAMethodA4ClientRecv{call: call}, implServiceAMethodA4ClientSend{call}}
 	return
 }
 
-func (__gen_c *clientStubServiceA) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+func (c implServiceAClientStub) Signature(ctx __context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
+	if ierr := call.Finish(&o0, &err); ierr != nil {
 		err = ierr
 	}
 	return
 }
 
-func (__gen_c *clientStubServiceA) Signature(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
+func (c implServiceAClientStub) GetMethodTags(ctx __context.T, method string, opts ...__ipc.CallOpt) (o0 []interface{}, err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
+	if ierr := call.Finish(&o0, &err); ierr != nil {
 		err = ierr
 	}
 	return
 }
 
-func (__gen_c *clientStubServiceA) GetMethodTags(ctx _gen_context.T, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
-		return
+// ServiceAMethodA3ClientStream is the client stream for ServiceA.MethodA3.
+type ServiceAMethodA3ClientStream interface {
+	// RecvStream returns the receiver side of the client stream.
+	RecvStream() interface {
+		// Advance stages an item so that it may be retrieved via Value.  Returns
+		// true iff there is an item to retrieve.  Advance must be called before
+		// Value is called.  May block if an item is not available.
+		Advance() bool
+		// Value returns the item that was staged by Advance.  May panic if Advance
+		// returned false or was not called.  Never blocks.
+		Value() Scalars
+		// Err returns any error encountered by Advance.  Never blocks.
+		Err() error
 	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
+}
+
+// ServiceAMethodA3Call represents the call returned from ServiceA.MethodA3.
+type ServiceAMethodA3Call interface {
+	ServiceAMethodA3ClientStream
+	// Finish blocks until the server is done, and returns the positional return
+	// values for call.
+	//
+	// Finish returns immediately if Cancel has been called; depending on the
+	// timing the output could either be an error signaling cancelation, or the
+	// valid positional return values from the server.
+	//
+	// Calling Finish is mandatory for releasing stream resources, unless Cancel
+	// has been called or any of the other methods return an error.  Finish should
+	// be called at most once.
+	Finish() (s string, err error)
+	// Cancel cancels the RPC, notifying the server to stop processing.  It is
+	// safe to call Cancel concurrently with any of the other stream methods.
+	// Calling Cancel after Finish has returned is a no-op.
+	Cancel()
+}
+
+type implServiceAMethodA3ClientRecv struct {
+	call __ipc.Call
+	val  Scalars
+	err  error
+}
+
+func (c *implServiceAMethodA3ClientRecv) Advance() bool {
+	c.val = Scalars{}
+	c.err = c.call.Recv(&c.val)
+	return c.err == nil
+}
+func (c *implServiceAMethodA3ClientRecv) Value() Scalars {
+	return c.val
+}
+func (c *implServiceAMethodA3ClientRecv) Err() error {
+	if c.err == __io.EOF {
+		return nil
+	}
+	return c.err
+}
+
+type implServiceAMethodA3Call struct {
+	call __ipc.Call
+	recv implServiceAMethodA3ClientRecv
+}
+
+func (c *implServiceAMethodA3Call) RecvStream() interface {
+	Advance() bool
+	Value() Scalars
+	Err() error
+} {
+	return &c.recv
+}
+func (c *implServiceAMethodA3Call) Finish() (o0 string, err error) {
+	if ierr := c.call.Finish(&o0, &err); ierr != nil {
 		err = ierr
 	}
 	return
 }
-
-// ServerStubServiceA wraps a server that implements
-// ServiceAService and provides an object that satisfies
-// the requirements of veyron2/ipc.ReflectInvoker.
-type ServerStubServiceA struct {
-	service ServiceAService
-	gs      *_gen_ipc.GlobState
+func (c *implServiceAMethodA3Call) Cancel() {
+	c.call.Cancel()
 }
 
-func (__gen_s *ServerStubServiceA) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
-	// TODO(bprosnitz) GetMethodTags() will be replaces with Signature().
-	// Note: This exhibits some weird behavior like returning a nil error if the method isn't found.
-	// This will change when it is replaced with Signature().
+// ServiceAMethodA4ClientStream is the client stream for ServiceA.MethodA4.
+type ServiceAMethodA4ClientStream interface {
+	// RecvStream returns the receiver side of the client stream.
+	RecvStream() interface {
+		// Advance stages an item so that it may be retrieved via Value.  Returns
+		// true iff there is an item to retrieve.  Advance must be called before
+		// Value is called.  May block if an item is not available.
+		Advance() bool
+		// Value returns the item that was staged by Advance.  May panic if Advance
+		// returned false or was not called.  Never blocks.
+		Value() string
+		// Err returns any error encountered by Advance.  Never blocks.
+		Err() error
+	}
+	// SendStream returns the send side of the client stream.
+	SendStream() interface {
+		// Send places the item onto the output stream.  Returns errors encountered
+		// while sending, or if Send is called after Close or Cancel.  Blocks if
+		// there is no buffer space; will unblock when buffer space is available or
+		// after Cancel.
+		Send(item int32) error
+		// Close indicates to the server that no more items will be sent; server
+		// Recv calls will receive io.EOF after all sent items.  This is an optional
+		// call - e.g. a client might call Close if it needs to continue receiving
+		// items from the server after it's done sending.  Returns errors
+		// encountered while closing, or if Close is called after Cancel.  Like
+		// Send, blocks if there is no buffer space available.
+		Close() error
+	}
+}
+
+// ServiceAMethodA4Call represents the call returned from ServiceA.MethodA4.
+type ServiceAMethodA4Call interface {
+	ServiceAMethodA4ClientStream
+	// Finish performs the equivalent of SendStream().Close, then blocks until
+	// the server is done, and returns the positional return values for the call.
+	//
+	// Finish returns immediately if Cancel has been called; depending on the
+	// timing the output could either be an error signaling cancelation, or the
+	// valid positional return values from the server.
+	//
+	// Calling Finish is mandatory for releasing stream resources, unless Cancel
+	// has been called or any of the other methods return an error.  Finish should
+	// be called at most once.
+	Finish() error
+	// Cancel cancels the RPC, notifying the server to stop processing.  It is
+	// safe to call Cancel concurrently with any of the other stream methods.
+	// Calling Cancel after Finish has returned is a no-op.
+	Cancel()
+}
+
+type implServiceAMethodA4ClientRecv struct {
+	call __ipc.Call
+	val  string
+	err  error
+}
+
+func (c *implServiceAMethodA4ClientRecv) Advance() bool {
+	c.err = c.call.Recv(&c.val)
+	return c.err == nil
+}
+func (c *implServiceAMethodA4ClientRecv) Value() string {
+	return c.val
+}
+func (c *implServiceAMethodA4ClientRecv) Err() error {
+	if c.err == __io.EOF {
+		return nil
+	}
+	return c.err
+}
+
+type implServiceAMethodA4ClientSend struct {
+	call __ipc.Call
+}
+
+func (c *implServiceAMethodA4ClientSend) Send(item int32) error {
+	return c.call.Send(item)
+}
+func (c *implServiceAMethodA4ClientSend) Close() error {
+	return c.call.CloseSend()
+}
+
+type implServiceAMethodA4Call struct {
+	call __ipc.Call
+	recv implServiceAMethodA4ClientRecv
+	send implServiceAMethodA4ClientSend
+}
+
+func (c *implServiceAMethodA4Call) RecvStream() interface {
+	Advance() bool
+	Value() string
+	Err() error
+} {
+	return &c.recv
+}
+func (c *implServiceAMethodA4Call) SendStream() interface {
+	Send(item int32) error
+	Close() error
+} {
+	return &c.send
+}
+func (c *implServiceAMethodA4Call) Finish() (err error) {
+	if ierr := c.call.Finish(&err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+func (c *implServiceAMethodA4Call) Cancel() {
+	c.call.Cancel()
+}
+
+// ServiceAServerMethods is the interface a server writer
+// implements for ServiceA.
+type ServiceAServerMethods interface {
+	MethodA1(__ipc.ServerContext) error
+	MethodA2(ctx __ipc.ServerContext, a int32, b string) (s string, err error)
+	MethodA3(ctx ServiceAMethodA3Context, a int32) (s string, err error)
+	MethodA4(ctx ServiceAMethodA4Context, a int32) error
+}
+
+// ServiceAServerStubMethods is the server interface containing
+// ServiceA methods, as expected by ipc.Server.  The difference between
+// this interface and ServiceAServerMethods is that the first context
+// argument for each method is always ipc.ServerCall here, while it is either
+// ipc.ServerContext or a typed streaming context there.
+type ServiceAServerStubMethods interface {
+	MethodA1(__ipc.ServerCall) error
+	MethodA2(call __ipc.ServerCall, a int32, b string) (s string, err error)
+	MethodA3(call __ipc.ServerCall, a int32) (s string, err error)
+	MethodA4(call __ipc.ServerCall, a int32) error
+}
+
+// ServiceAServerStub adds universal methods to ServiceAServerStubMethods.
+type ServiceAServerStub interface {
+	ServiceAServerStubMethods
+	// GetMethodTags will be replaced with DescribeInterfaces.
+	GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error)
+	// Signature will be replaced with DescribeInterfaces.
+	Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error)
+}
+
+// ServiceAServer returns a server stub for ServiceA.
+// It converts an implementation of ServiceAServerMethods into
+// an object that may be used by ipc.Server.
+func ServiceAServer(impl ServiceAServerMethods) ServiceAServerStub {
+	stub := implServiceAServerStub{
+		impl: impl,
+	}
+	// Initialize GlobState; always check the stub itself first, to handle the
+	// case where the user has the Glob method defined in their VDL source.
+	if gs := __ipc.NewGlobState(stub); gs != nil {
+		stub.gs = gs
+	} else if gs := __ipc.NewGlobState(impl); gs != nil {
+		stub.gs = gs
+	}
+	return stub
+}
+
+type implServiceAServerStub struct {
+	impl ServiceAServerMethods
+	gs   *__ipc.GlobState
+}
+
+func (s implServiceAServerStub) MethodA1(call __ipc.ServerCall) error {
+	return s.impl.MethodA1(call)
+}
+
+func (s implServiceAServerStub) MethodA2(call __ipc.ServerCall, i0 int32, i1 string) (string, error) {
+	return s.impl.MethodA2(call, i0, i1)
+}
+
+func (s implServiceAServerStub) MethodA3(call __ipc.ServerCall, i0 int32) (string, error) {
+	ctx := &implServiceAMethodA3Context{call, implServiceAMethodA3ServerSend{call}}
+	return s.impl.MethodA3(ctx, i0)
+}
+
+func (s implServiceAServerStub) MethodA4(call __ipc.ServerCall, i0 int32) error {
+	ctx := &implServiceAMethodA4Context{call, implServiceAMethodA4ServerRecv{call: call}, implServiceAMethodA4ServerSend{call}}
+	return s.impl.MethodA4(ctx, i0)
+}
+
+func (s implServiceAServerStub) VGlob() *__ipc.GlobState {
+	return s.gs
+}
+
+func (s implServiceAServerStub) GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error) {
+	// TODO(toddw): Replace with new DescribeInterfaces implementation.
 	switch method {
 	case "MethodA1":
 		return []interface{}{}, nil
@@ -691,78 +542,79 @@ func (__gen_s *ServerStubServiceA) GetMethodTags(call _gen_ipc.ServerCall, metho
 	}
 }
 
-func (__gen_s *ServerStubServiceA) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
-	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
-	result.Methods["MethodA1"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{},
-		OutArgs: []_gen_ipc.MethodArgument{
+func (s implServiceAServerStub) Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error) {
+	// TODO(toddw) Replace with new DescribeInterfaces implementation.
+	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
+	result.Methods["MethodA1"] = __ipc.MethodSignature{
+		InArgs: []__ipc.MethodArgument{},
+		OutArgs: []__ipc.MethodArgument{
 			{Name: "", Type: 65},
 		},
 	}
-	result.Methods["MethodA2"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{
+	result.Methods["MethodA2"] = __ipc.MethodSignature{
+		InArgs: []__ipc.MethodArgument{
 			{Name: "a", Type: 36},
 			{Name: "b", Type: 3},
 		},
-		OutArgs: []_gen_ipc.MethodArgument{
+		OutArgs: []__ipc.MethodArgument{
 			{Name: "s", Type: 3},
 			{Name: "err", Type: 65},
 		},
 	}
-	result.Methods["MethodA3"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{
+	result.Methods["MethodA3"] = __ipc.MethodSignature{
+		InArgs: []__ipc.MethodArgument{
 			{Name: "a", Type: 36},
 		},
-		OutArgs: []_gen_ipc.MethodArgument{
+		OutArgs: []__ipc.MethodArgument{
 			{Name: "s", Type: 3},
 			{Name: "err", Type: 65},
 		},
 
 		OutStream: 82,
 	}
-	result.Methods["MethodA4"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{
+	result.Methods["MethodA4"] = __ipc.MethodSignature{
+		InArgs: []__ipc.MethodArgument{
 			{Name: "a", Type: 36},
 		},
-		OutArgs: []_gen_ipc.MethodArgument{
+		OutArgs: []__ipc.MethodArgument{
 			{Name: "", Type: 65},
 		},
 		InStream:  36,
 		OutStream: 3,
 	}
 
-	result.TypeDefs = []_gen_vdlutil.Any{
-		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "anydata", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x7, Name: "TypeID", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x2, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedBool", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x32, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedByte", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x33, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedUint16", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x34, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedUint32", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x35, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedUint64", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x23, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedInt16", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x24, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedInt32", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x25, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedInt64", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x19, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedFloat32", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x1a, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedFloat64", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x38, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedComplex64", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x39, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedComplex128", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x3, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedString", Tags: []string(nil)}, _gen_wiretype.StructType{
-			[]_gen_wiretype.FieldType{
-				_gen_wiretype.FieldType{Type: 0x2, Name: "A0"},
-				_gen_wiretype.FieldType{Type: 0x42, Name: "A1"},
-				_gen_wiretype.FieldType{Type: 0x33, Name: "A2"},
-				_gen_wiretype.FieldType{Type: 0x34, Name: "A3"},
-				_gen_wiretype.FieldType{Type: 0x35, Name: "A4"},
-				_gen_wiretype.FieldType{Type: 0x23, Name: "A5"},
-				_gen_wiretype.FieldType{Type: 0x24, Name: "A6"},
-				_gen_wiretype.FieldType{Type: 0x25, Name: "A7"},
-				_gen_wiretype.FieldType{Type: 0x19, Name: "A8"},
-				_gen_wiretype.FieldType{Type: 0x1a, Name: "A9"},
-				_gen_wiretype.FieldType{Type: 0x38, Name: "A10"},
-				_gen_wiretype.FieldType{Type: 0x39, Name: "A11"},
-				_gen_wiretype.FieldType{Type: 0x3, Name: "A12"},
-				_gen_wiretype.FieldType{Type: 0x41, Name: "A13"},
-				_gen_wiretype.FieldType{Type: 0x43, Name: "A14"},
-				_gen_wiretype.FieldType{Type: 0x44, Name: "A15"},
-				_gen_wiretype.FieldType{Type: 0x45, Name: "B0"},
-				_gen_wiretype.FieldType{Type: 0x46, Name: "B1"},
-				_gen_wiretype.FieldType{Type: 0x47, Name: "B2"},
-				_gen_wiretype.FieldType{Type: 0x48, Name: "B3"},
-				_gen_wiretype.FieldType{Type: 0x49, Name: "B4"},
-				_gen_wiretype.FieldType{Type: 0x4a, Name: "B5"},
-				_gen_wiretype.FieldType{Type: 0x4b, Name: "B6"},
-				_gen_wiretype.FieldType{Type: 0x4c, Name: "B7"},
-				_gen_wiretype.FieldType{Type: 0x4d, Name: "B8"},
-				_gen_wiretype.FieldType{Type: 0x4e, Name: "B9"},
-				_gen_wiretype.FieldType{Type: 0x4f, Name: "B10"},
-				_gen_wiretype.FieldType{Type: 0x50, Name: "B11"},
-				_gen_wiretype.FieldType{Type: 0x51, Name: "B12"},
+	result.TypeDefs = []__vdlutil.Any{
+		__wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x1, Name: "anydata", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x7, Name: "TypeID", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x2, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedBool", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x32, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedByte", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x33, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedUint16", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x34, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedUint32", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x35, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedUint64", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x23, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedInt16", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x24, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedInt32", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x25, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedInt64", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x19, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedFloat32", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x1a, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedFloat64", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x38, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedComplex64", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x39, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedComplex128", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x3, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedString", Tags: []string(nil)}, __wiretype.StructType{
+			[]__wiretype.FieldType{
+				__wiretype.FieldType{Type: 0x2, Name: "A0"},
+				__wiretype.FieldType{Type: 0x42, Name: "A1"},
+				__wiretype.FieldType{Type: 0x33, Name: "A2"},
+				__wiretype.FieldType{Type: 0x34, Name: "A3"},
+				__wiretype.FieldType{Type: 0x35, Name: "A4"},
+				__wiretype.FieldType{Type: 0x23, Name: "A5"},
+				__wiretype.FieldType{Type: 0x24, Name: "A6"},
+				__wiretype.FieldType{Type: 0x25, Name: "A7"},
+				__wiretype.FieldType{Type: 0x19, Name: "A8"},
+				__wiretype.FieldType{Type: 0x1a, Name: "A9"},
+				__wiretype.FieldType{Type: 0x38, Name: "A10"},
+				__wiretype.FieldType{Type: 0x39, Name: "A11"},
+				__wiretype.FieldType{Type: 0x3, Name: "A12"},
+				__wiretype.FieldType{Type: 0x41, Name: "A13"},
+				__wiretype.FieldType{Type: 0x43, Name: "A14"},
+				__wiretype.FieldType{Type: 0x44, Name: "A15"},
+				__wiretype.FieldType{Type: 0x45, Name: "B0"},
+				__wiretype.FieldType{Type: 0x46, Name: "B1"},
+				__wiretype.FieldType{Type: 0x47, Name: "B2"},
+				__wiretype.FieldType{Type: 0x48, Name: "B3"},
+				__wiretype.FieldType{Type: 0x49, Name: "B4"},
+				__wiretype.FieldType{Type: 0x4a, Name: "B5"},
+				__wiretype.FieldType{Type: 0x4b, Name: "B6"},
+				__wiretype.FieldType{Type: 0x4c, Name: "B7"},
+				__wiretype.FieldType{Type: 0x4d, Name: "B8"},
+				__wiretype.FieldType{Type: 0x4e, Name: "B9"},
+				__wiretype.FieldType{Type: 0x4f, Name: "B10"},
+				__wiretype.FieldType{Type: 0x50, Name: "B11"},
+				__wiretype.FieldType{Type: 0x51, Name: "B12"},
 			},
 			"veyron.io/veyron/veyron2/vdl/testdata/base.Scalars", []string(nil)},
 	}
@@ -770,196 +622,251 @@ func (__gen_s *ServerStubServiceA) Signature(call _gen_ipc.ServerCall) (_gen_ipc
 	return result, nil
 }
 
-func (__gen_s *ServerStubServiceA) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
-	if unresolver, ok := __gen_s.service.(_gen_ipc.Unresolver); ok {
-		return unresolver.UnresolveStep(call)
+// ServiceAMethodA3ServerStream is the server stream for ServiceA.MethodA3.
+type ServiceAMethodA3ServerStream interface {
+	// SendStream returns the send side of the server stream.
+	SendStream() interface {
+		// Send places the item onto the output stream.  Returns errors encountered
+		// while sending.  Blocks if there is no buffer space; will unblock when
+		// buffer space is available.
+		Send(item Scalars) error
 	}
-	if call.Server() == nil {
-		return
+}
+
+// ServiceAMethodA3Context represents the context passed to ServiceA.MethodA3.
+type ServiceAMethodA3Context interface {
+	__ipc.ServerContext
+	ServiceAMethodA3ServerStream
+}
+
+type implServiceAMethodA3ServerSend struct {
+	call __ipc.ServerCall
+}
+
+func (s *implServiceAMethodA3ServerSend) Send(item Scalars) error {
+	return s.call.Send(item)
+}
+
+type implServiceAMethodA3Context struct {
+	__ipc.ServerContext
+	send implServiceAMethodA3ServerSend
+}
+
+func (s *implServiceAMethodA3Context) SendStream() interface {
+	Send(item Scalars) error
+} {
+	return &s.send
+}
+
+// ServiceAMethodA4ServerStream is the server stream for ServiceA.MethodA4.
+type ServiceAMethodA4ServerStream interface {
+	// RecvStream returns the receiver side of the server stream.
+	RecvStream() interface {
+		// Advance stages an item so that it may be retrieved via Value.  Returns
+		// true iff there is an item to retrieve.  Advance must be called before
+		// Value is called.  May block if an item is not available.
+		Advance() bool
+		// Value returns the item that was staged by Advance.  May panic if Advance
+		// returned false or was not called.  Never blocks.
+		Value() int32
+		// Err returns any error encountered by Advance.  Never blocks.
+		Err() error
 	}
-	var published []string
-	if published, err = call.Server().Published(); err != nil || published == nil {
-		return
+	// SendStream returns the send side of the server stream.
+	SendStream() interface {
+		// Send places the item onto the output stream.  Returns errors encountered
+		// while sending.  Blocks if there is no buffer space; will unblock when
+		// buffer space is available.
+		Send(item string) error
 	}
-	reply = make([]string, len(published))
-	for i, p := range published {
-		reply[i] = _gen_naming.Join(p, call.Name())
+}
+
+// ServiceAMethodA4Context represents the context passed to ServiceA.MethodA4.
+type ServiceAMethodA4Context interface {
+	__ipc.ServerContext
+	ServiceAMethodA4ServerStream
+}
+
+type implServiceAMethodA4ServerRecv struct {
+	call __ipc.ServerCall
+	val  int32
+	err  error
+}
+
+func (s *implServiceAMethodA4ServerRecv) Advance() bool {
+	s.err = s.call.Recv(&s.val)
+	return s.err == nil
+}
+func (s *implServiceAMethodA4ServerRecv) Value() int32 {
+	return s.val
+}
+func (s *implServiceAMethodA4ServerRecv) Err() error {
+	if s.err == __io.EOF {
+		return nil
 	}
-	return
+	return s.err
 }
 
-func (__gen_s *ServerStubServiceA) VGlob() *_gen_ipc.GlobState {
-	return __gen_s.gs
+type implServiceAMethodA4ServerSend struct {
+	call __ipc.ServerCall
 }
 
-func (__gen_s *ServerStubServiceA) MethodA1(call _gen_ipc.ServerCall) (err error) {
-	err = __gen_s.service.MethodA1(call)
-	return
+func (s *implServiceAMethodA4ServerSend) Send(item string) error {
+	return s.call.Send(item)
 }
 
-func (__gen_s *ServerStubServiceA) MethodA2(call _gen_ipc.ServerCall, a int32, b string) (reply string, err error) {
-	reply, err = __gen_s.service.MethodA2(call, a, b)
-	return
+type implServiceAMethodA4Context struct {
+	__ipc.ServerContext
+	recv implServiceAMethodA4ServerRecv
+	send implServiceAMethodA4ServerSend
 }
 
-func (__gen_s *ServerStubServiceA) MethodA3(call _gen_ipc.ServerCall, a int32) (reply string, err error) {
-	stream := &implServiceAServiceMethodA3Stream{writer: implServiceAServiceMethodA3StreamSender{serverCall: call}}
-	reply, err = __gen_s.service.MethodA3(call, a, stream)
-	return
+func (s *implServiceAMethodA4Context) RecvStream() interface {
+	Advance() bool
+	Value() int32
+	Err() error
+} {
+	return &s.recv
+}
+func (s *implServiceAMethodA4Context) SendStream() interface {
+	Send(item string) error
+} {
+	return &s.send
 }
 
-func (__gen_s *ServerStubServiceA) MethodA4(call _gen_ipc.ServerCall, a int32) (err error) {
-	stream := &implServiceAServiceMethodA4Stream{reader: implServiceAServiceMethodA4StreamIterator{serverCall: call}, writer: implServiceAServiceMethodA4StreamSender{serverCall: call}}
-	err = __gen_s.service.MethodA4(call, a, stream)
-	return
+// ServiceBClientMethods is the client interface
+// containing ServiceB methods.
+type ServiceBClientMethods interface {
+	ServiceAClientMethods
+	MethodB1(ctx __context.T, a Scalars, b Composites, opts ...__ipc.CallOpt) (c CompComp, err error)
 }
 
-// ServiceB is the interface the client binds and uses.
-// ServiceB_ExcludingUniversal is the interface without internal framework-added methods
-// to enable embedding without method collisions.  Not to be used directly by clients.
-type ServiceB_ExcludingUniversal interface {
-	ServiceA_ExcludingUniversal
-	MethodB1(ctx _gen_context.T, a Scalars, b Composites, opts ..._gen_ipc.CallOpt) (reply CompComp, err error)
-}
-type ServiceB interface {
-	_gen_ipc.UniversalServiceMethods
-	ServiceB_ExcludingUniversal
+// ServiceBClientStub adds universal methods to ServiceBClientMethods.
+type ServiceBClientStub interface {
+	ServiceBClientMethods
+	__ipc.UniversalServiceMethods
 }
 
-// ServiceBService is the interface the server implements.
-type ServiceBService interface {
-	ServiceAService
-	MethodB1(context _gen_ipc.ServerContext, a Scalars, b Composites) (reply CompComp, err error)
-}
-
-// BindServiceB returns the client stub implementing the ServiceB
-// interface.
-//
-// If no _gen_ipc.Client is specified, the default _gen_ipc.Client in the
-// global Runtime is used.
-func BindServiceB(name string, opts ..._gen_ipc.BindOpt) (ServiceB, error) {
-	var client _gen_ipc.Client
-	switch len(opts) {
-	case 0:
-		// Do nothing.
-	case 1:
-		if clientOpt, ok := opts[0].(_gen_ipc.Client); opts[0] == nil || ok {
+// ServiceBClient returns a client stub for ServiceB.
+func ServiceBClient(name string, opts ...__ipc.BindOpt) ServiceBClientStub {
+	var client __ipc.Client
+	for _, opt := range opts {
+		if clientOpt, ok := opt.(__ipc.Client); ok {
 			client = clientOpt
-		} else {
-			return nil, _gen_vdlutil.ErrUnrecognizedOption
 		}
-	default:
-		return nil, _gen_vdlutil.ErrTooManyOptionsToBind
 	}
-	stub := &clientStubServiceB{defaultClient: client, name: name}
-	stub.ServiceA_ExcludingUniversal, _ = BindServiceA(name, client)
-
-	return stub, nil
+	return implServiceBClientStub{name, client, ServiceAClient(name, client)}
 }
 
-// NewServerServiceB creates a new server stub.
-//
-// It takes a regular server implementing the ServiceBService
-// interface, and returns a new server stub.
-func NewServerServiceB(server ServiceBService) interface{} {
-	stub := &ServerStubServiceB{
-		ServerStubServiceA: *NewServerServiceA(server).(*ServerStubServiceA),
-		service:            server,
+type implServiceBClientStub struct {
+	name   string
+	client __ipc.Client
+
+	ServiceAClientStub
+}
+
+func (c implServiceBClientStub) c(ctx __context.T) __ipc.Client {
+	if c.client != nil {
+		return c.client
 	}
-	var gs _gen_ipc.GlobState
-	var self interface{} = stub
-	// VAllGlobber is implemented by the server object, which is wrapped in
-	// a VDL generated server stub.
-	if x, ok := self.(_gen_ipc.VAllGlobber); ok {
-		gs.VAllGlobber = x
+	return __veyron2.RuntimeFromContext(ctx).Client()
+}
+
+func (c implServiceBClientStub) MethodB1(ctx __context.T, i0 Scalars, i1 Composites, opts ...__ipc.CallOpt) (o0 CompComp, err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "MethodB1", []interface{}{i0, i1}, opts...); err != nil {
+		return
 	}
-	// VAllGlobber is implemented by the server object without using a VDL
-	// generated stub.
-	if x, ok := server.(_gen_ipc.VAllGlobber); ok {
-		gs.VAllGlobber = x
+	if ierr := call.Finish(&o0, &err); ierr != nil {
+		err = ierr
 	}
-	// VChildrenGlobber is implemented in the server object.
-	if x, ok := server.(_gen_ipc.VChildrenGlobber); ok {
-		gs.VChildrenGlobber = x
+	return
+}
+
+func (c implServiceBClientStub) Signature(ctx __context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
+		return
 	}
-	stub.gs = &gs
+	if ierr := call.Finish(&o0, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (c implServiceBClientStub) GetMethodTags(ctx __context.T, method string, opts ...__ipc.CallOpt) (o0 []interface{}, err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&o0, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+// ServiceBServerMethods is the interface a server writer
+// implements for ServiceB.
+type ServiceBServerMethods interface {
+	ServiceAServerMethods
+	MethodB1(ctx __ipc.ServerContext, a Scalars, b Composites) (c CompComp, err error)
+}
+
+// ServiceBServerStubMethods is the server interface containing
+// ServiceB methods, as expected by ipc.Server.  The difference between
+// this interface and ServiceBServerMethods is that the first context
+// argument for each method is always ipc.ServerCall here, while it is either
+// ipc.ServerContext or a typed streaming context there.
+type ServiceBServerStubMethods interface {
+	ServiceAServerStubMethods
+	MethodB1(call __ipc.ServerCall, a Scalars, b Composites) (c CompComp, err error)
+}
+
+// ServiceBServerStub adds universal methods to ServiceBServerStubMethods.
+type ServiceBServerStub interface {
+	ServiceBServerStubMethods
+	// GetMethodTags will be replaced with DescribeInterfaces.
+	GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error)
+	// Signature will be replaced with DescribeInterfaces.
+	Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error)
+}
+
+// ServiceBServer returns a server stub for ServiceB.
+// It converts an implementation of ServiceBServerMethods into
+// an object that may be used by ipc.Server.
+func ServiceBServer(impl ServiceBServerMethods) ServiceBServerStub {
+	stub := implServiceBServerStub{
+		impl:               impl,
+		ServiceAServerStub: ServiceAServer(impl),
+	}
+	// Initialize GlobState; always check the stub itself first, to handle the
+	// case where the user has the Glob method defined in their VDL source.
+	if gs := __ipc.NewGlobState(stub); gs != nil {
+		stub.gs = gs
+	} else if gs := __ipc.NewGlobState(impl); gs != nil {
+		stub.gs = gs
+	}
 	return stub
 }
 
-// clientStubServiceB implements ServiceB.
-type clientStubServiceB struct {
-	ServiceA_ExcludingUniversal
+type implServiceBServerStub struct {
+	impl ServiceBServerMethods
+	gs   *__ipc.GlobState
 
-	defaultClient _gen_ipc.Client
-	name          string
+	ServiceAServerStub
 }
 
-func (__gen_c *clientStubServiceB) client(ctx _gen_context.T) _gen_ipc.Client {
-	if __gen_c.defaultClient != nil {
-		return __gen_c.defaultClient
-	}
-	return _gen_veyron2.RuntimeFromContext(ctx).Client()
+func (s implServiceBServerStub) MethodB1(call __ipc.ServerCall, i0 Scalars, i1 Composites) (CompComp, error) {
+	return s.impl.MethodB1(call, i0, i1)
 }
 
-func (__gen_c *clientStubServiceB) MethodB1(ctx _gen_context.T, a Scalars, b Composites, opts ..._gen_ipc.CallOpt) (reply CompComp, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "MethodB1", []interface{}{a, b}, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
-		err = ierr
-	}
-	return
+func (s implServiceBServerStub) VGlob() *__ipc.GlobState {
+	return s.gs
 }
 
-func (__gen_c *clientStubServiceB) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
-func (__gen_c *clientStubServiceB) Signature(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
-func (__gen_c *clientStubServiceB) GetMethodTags(ctx _gen_context.T, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
-// ServerStubServiceB wraps a server that implements
-// ServiceBService and provides an object that satisfies
-// the requirements of veyron2/ipc.ReflectInvoker.
-type ServerStubServiceB struct {
-	ServerStubServiceA
-
-	service ServiceBService
-	gs      *_gen_ipc.GlobState
-}
-
-func (__gen_s *ServerStubServiceB) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
-	// TODO(bprosnitz) GetMethodTags() will be replaces with Signature().
-	// Note: This exhibits some weird behavior like returning a nil error if the method isn't found.
-	// This will change when it is replaced with Signature().
-	if resp, err := __gen_s.ServerStubServiceA.GetMethodTags(call, method); resp != nil || err != nil {
+func (s implServiceBServerStub) GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error) {
+	// TODO(toddw): Replace with new DescribeInterfaces implementation.
+	if resp, err := s.ServiceAServerStub.GetMethodTags(call, method); resp != nil || err != nil {
 		return resp, err
 	}
 	switch method {
@@ -970,121 +877,122 @@ func (__gen_s *ServerStubServiceB) GetMethodTags(call _gen_ipc.ServerCall, metho
 	}
 }
 
-func (__gen_s *ServerStubServiceB) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
-	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
-	result.Methods["MethodB1"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{
+func (s implServiceBServerStub) Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error) {
+	// TODO(toddw) Replace with new DescribeInterfaces implementation.
+	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
+	result.Methods["MethodB1"] = __ipc.MethodSignature{
+		InArgs: []__ipc.MethodArgument{
 			{Name: "a", Type: 82},
 			{Name: "b", Type: 90},
 		},
-		OutArgs: []_gen_ipc.MethodArgument{
+		OutArgs: []__ipc.MethodArgument{
 			{Name: "c", Type: 96},
 			{Name: "err", Type: 66},
 		},
 	}
 
-	result.TypeDefs = []_gen_vdlutil.Any{
-		_gen_wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "anydata", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x7, Name: "TypeID", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x2, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedBool", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x32, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedByte", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x33, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedUint16", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x34, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedUint32", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x35, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedUint64", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x23, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedInt16", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x24, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedInt32", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x25, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedInt64", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x19, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedFloat32", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x1a, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedFloat64", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x38, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedComplex64", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x39, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedComplex128", Tags: []string(nil)}, _gen_wiretype.NamedPrimitiveType{Type: 0x3, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedString", Tags: []string(nil)}, _gen_wiretype.StructType{
-			[]_gen_wiretype.FieldType{
-				_gen_wiretype.FieldType{Type: 0x2, Name: "A0"},
-				_gen_wiretype.FieldType{Type: 0x41, Name: "A1"},
-				_gen_wiretype.FieldType{Type: 0x33, Name: "A2"},
-				_gen_wiretype.FieldType{Type: 0x34, Name: "A3"},
-				_gen_wiretype.FieldType{Type: 0x35, Name: "A4"},
-				_gen_wiretype.FieldType{Type: 0x23, Name: "A5"},
-				_gen_wiretype.FieldType{Type: 0x24, Name: "A6"},
-				_gen_wiretype.FieldType{Type: 0x25, Name: "A7"},
-				_gen_wiretype.FieldType{Type: 0x19, Name: "A8"},
-				_gen_wiretype.FieldType{Type: 0x1a, Name: "A9"},
-				_gen_wiretype.FieldType{Type: 0x38, Name: "A10"},
-				_gen_wiretype.FieldType{Type: 0x39, Name: "A11"},
-				_gen_wiretype.FieldType{Type: 0x3, Name: "A12"},
-				_gen_wiretype.FieldType{Type: 0x42, Name: "A13"},
-				_gen_wiretype.FieldType{Type: 0x43, Name: "A14"},
-				_gen_wiretype.FieldType{Type: 0x44, Name: "A15"},
-				_gen_wiretype.FieldType{Type: 0x45, Name: "B0"},
-				_gen_wiretype.FieldType{Type: 0x46, Name: "B1"},
-				_gen_wiretype.FieldType{Type: 0x47, Name: "B2"},
-				_gen_wiretype.FieldType{Type: 0x48, Name: "B3"},
-				_gen_wiretype.FieldType{Type: 0x49, Name: "B4"},
-				_gen_wiretype.FieldType{Type: 0x4a, Name: "B5"},
-				_gen_wiretype.FieldType{Type: 0x4b, Name: "B6"},
-				_gen_wiretype.FieldType{Type: 0x4c, Name: "B7"},
-				_gen_wiretype.FieldType{Type: 0x4d, Name: "B8"},
-				_gen_wiretype.FieldType{Type: 0x4e, Name: "B9"},
-				_gen_wiretype.FieldType{Type: 0x4f, Name: "B10"},
-				_gen_wiretype.FieldType{Type: 0x50, Name: "B11"},
-				_gen_wiretype.FieldType{Type: 0x51, Name: "B12"},
+	result.TypeDefs = []__vdlutil.Any{
+		__wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x1, Name: "anydata", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x7, Name: "TypeID", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x2, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedBool", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x32, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedByte", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x33, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedUint16", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x34, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedUint32", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x35, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedUint64", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x23, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedInt16", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x24, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedInt32", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x25, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedInt64", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x19, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedFloat32", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x1a, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedFloat64", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x38, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedComplex64", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x39, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedComplex128", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x3, Name: "veyron.io/veyron/veyron2/vdl/testdata/base.NamedString", Tags: []string(nil)}, __wiretype.StructType{
+			[]__wiretype.FieldType{
+				__wiretype.FieldType{Type: 0x2, Name: "A0"},
+				__wiretype.FieldType{Type: 0x41, Name: "A1"},
+				__wiretype.FieldType{Type: 0x33, Name: "A2"},
+				__wiretype.FieldType{Type: 0x34, Name: "A3"},
+				__wiretype.FieldType{Type: 0x35, Name: "A4"},
+				__wiretype.FieldType{Type: 0x23, Name: "A5"},
+				__wiretype.FieldType{Type: 0x24, Name: "A6"},
+				__wiretype.FieldType{Type: 0x25, Name: "A7"},
+				__wiretype.FieldType{Type: 0x19, Name: "A8"},
+				__wiretype.FieldType{Type: 0x1a, Name: "A9"},
+				__wiretype.FieldType{Type: 0x38, Name: "A10"},
+				__wiretype.FieldType{Type: 0x39, Name: "A11"},
+				__wiretype.FieldType{Type: 0x3, Name: "A12"},
+				__wiretype.FieldType{Type: 0x42, Name: "A13"},
+				__wiretype.FieldType{Type: 0x43, Name: "A14"},
+				__wiretype.FieldType{Type: 0x44, Name: "A15"},
+				__wiretype.FieldType{Type: 0x45, Name: "B0"},
+				__wiretype.FieldType{Type: 0x46, Name: "B1"},
+				__wiretype.FieldType{Type: 0x47, Name: "B2"},
+				__wiretype.FieldType{Type: 0x48, Name: "B3"},
+				__wiretype.FieldType{Type: 0x49, Name: "B4"},
+				__wiretype.FieldType{Type: 0x4a, Name: "B5"},
+				__wiretype.FieldType{Type: 0x4b, Name: "B6"},
+				__wiretype.FieldType{Type: 0x4c, Name: "B7"},
+				__wiretype.FieldType{Type: 0x4d, Name: "B8"},
+				__wiretype.FieldType{Type: 0x4e, Name: "B9"},
+				__wiretype.FieldType{Type: 0x4f, Name: "B10"},
+				__wiretype.FieldType{Type: 0x50, Name: "B11"},
+				__wiretype.FieldType{Type: 0x51, Name: "B12"},
 			},
 			"veyron.io/veyron/veyron2/vdl/testdata/base.Scalars", []string(nil)},
-		_gen_wiretype.ArrayType{Elem: 0x52, Len: 0x2, Name: "", Tags: []string(nil)}, _gen_wiretype.SliceType{Elem: 0x52, Name: "", Tags: []string(nil)}, _gen_wiretype.MapType{Key: 0x52, Elem: 0x2, Name: "", Tags: []string(nil)}, _gen_wiretype.MapType{Key: 0x3, Elem: 0x52, Name: "", Tags: []string(nil)}, _gen_wiretype.MapType{Key: 0x3, Elem: 0x39, Name: "", Tags: []string(nil)}, _gen_wiretype.SliceType{Elem: 0x57, Name: "", Tags: []string(nil)}, _gen_wiretype.MapType{Key: 0x52, Elem: 0x58, Name: "", Tags: []string(nil)}, _gen_wiretype.StructType{
-			[]_gen_wiretype.FieldType{
-				_gen_wiretype.FieldType{Type: 0x52, Name: "A0"},
-				_gen_wiretype.FieldType{Type: 0x53, Name: "A1"},
-				_gen_wiretype.FieldType{Type: 0x54, Name: "A2"},
-				_gen_wiretype.FieldType{Type: 0x55, Name: "A3"},
-				_gen_wiretype.FieldType{Type: 0x56, Name: "A4"},
-				_gen_wiretype.FieldType{Type: 0x59, Name: "A5"},
+		__wiretype.ArrayType{Elem: 0x52, Len: 0x2, Name: "", Tags: []string(nil)}, __wiretype.SliceType{Elem: 0x52, Name: "", Tags: []string(nil)}, __wiretype.MapType{Key: 0x52, Elem: 0x2, Name: "", Tags: []string(nil)}, __wiretype.MapType{Key: 0x3, Elem: 0x52, Name: "", Tags: []string(nil)}, __wiretype.MapType{Key: 0x3, Elem: 0x39, Name: "", Tags: []string(nil)}, __wiretype.SliceType{Elem: 0x57, Name: "", Tags: []string(nil)}, __wiretype.MapType{Key: 0x52, Elem: 0x58, Name: "", Tags: []string(nil)}, __wiretype.StructType{
+			[]__wiretype.FieldType{
+				__wiretype.FieldType{Type: 0x52, Name: "A0"},
+				__wiretype.FieldType{Type: 0x53, Name: "A1"},
+				__wiretype.FieldType{Type: 0x54, Name: "A2"},
+				__wiretype.FieldType{Type: 0x55, Name: "A3"},
+				__wiretype.FieldType{Type: 0x56, Name: "A4"},
+				__wiretype.FieldType{Type: 0x59, Name: "A5"},
 			},
 			"veyron.io/veyron/veyron2/vdl/testdata/base.Composites", []string(nil)},
-		_gen_wiretype.ArrayType{Elem: 0x5a, Len: 0x2, Name: "", Tags: []string(nil)}, _gen_wiretype.SliceType{Elem: 0x5a, Name: "", Tags: []string(nil)}, _gen_wiretype.MapType{Key: 0x3, Elem: 0x5a, Name: "", Tags: []string(nil)}, _gen_wiretype.SliceType{Elem: 0x5d, Name: "", Tags: []string(nil)}, _gen_wiretype.MapType{Key: 0x52, Elem: 0x5e, Name: "", Tags: []string(nil)}, _gen_wiretype.StructType{
-			[]_gen_wiretype.FieldType{
-				_gen_wiretype.FieldType{Type: 0x5a, Name: "A0"},
-				_gen_wiretype.FieldType{Type: 0x5b, Name: "A1"},
-				_gen_wiretype.FieldType{Type: 0x5c, Name: "A2"},
-				_gen_wiretype.FieldType{Type: 0x5d, Name: "A3"},
-				_gen_wiretype.FieldType{Type: 0x5f, Name: "A4"},
+		__wiretype.ArrayType{Elem: 0x5a, Len: 0x2, Name: "", Tags: []string(nil)}, __wiretype.SliceType{Elem: 0x5a, Name: "", Tags: []string(nil)}, __wiretype.MapType{Key: 0x3, Elem: 0x5a, Name: "", Tags: []string(nil)}, __wiretype.SliceType{Elem: 0x5d, Name: "", Tags: []string(nil)}, __wiretype.MapType{Key: 0x52, Elem: 0x5e, Name: "", Tags: []string(nil)}, __wiretype.StructType{
+			[]__wiretype.FieldType{
+				__wiretype.FieldType{Type: 0x5a, Name: "A0"},
+				__wiretype.FieldType{Type: 0x5b, Name: "A1"},
+				__wiretype.FieldType{Type: 0x5c, Name: "A2"},
+				__wiretype.FieldType{Type: 0x5d, Name: "A3"},
+				__wiretype.FieldType{Type: 0x5f, Name: "A4"},
 			},
 			"veyron.io/veyron/veyron2/vdl/testdata/base.CompComp", []string(nil)},
 	}
-	var ss _gen_ipc.ServiceSignature
+	var ss __ipc.ServiceSignature
 	var firstAdded int
-	ss, _ = __gen_s.ServerStubServiceA.Signature(call)
+	ss, _ = s.ServiceAServerStub.Signature(call)
 	firstAdded = len(result.TypeDefs)
 	for k, v := range ss.Methods {
 		for i, _ := range v.InArgs {
-			if v.InArgs[i].Type >= _gen_wiretype.TypeIDFirst {
-				v.InArgs[i].Type += _gen_wiretype.TypeID(firstAdded)
+			if v.InArgs[i].Type >= __wiretype.TypeIDFirst {
+				v.InArgs[i].Type += __wiretype.TypeID(firstAdded)
 			}
 		}
 		for i, _ := range v.OutArgs {
-			if v.OutArgs[i].Type >= _gen_wiretype.TypeIDFirst {
-				v.OutArgs[i].Type += _gen_wiretype.TypeID(firstAdded)
+			if v.OutArgs[i].Type >= __wiretype.TypeIDFirst {
+				v.OutArgs[i].Type += __wiretype.TypeID(firstAdded)
 			}
 		}
-		if v.InStream >= _gen_wiretype.TypeIDFirst {
-			v.InStream += _gen_wiretype.TypeID(firstAdded)
+		if v.InStream >= __wiretype.TypeIDFirst {
+			v.InStream += __wiretype.TypeID(firstAdded)
 		}
-		if v.OutStream >= _gen_wiretype.TypeIDFirst {
-			v.OutStream += _gen_wiretype.TypeID(firstAdded)
+		if v.OutStream >= __wiretype.TypeIDFirst {
+			v.OutStream += __wiretype.TypeID(firstAdded)
 		}
 		result.Methods[k] = v
 	}
 	//TODO(bprosnitz) combine type definitions from embeded interfaces in a way that doesn't cause duplication.
 	for _, d := range ss.TypeDefs {
 		switch wt := d.(type) {
-		case _gen_wiretype.SliceType:
-			if wt.Elem >= _gen_wiretype.TypeIDFirst {
-				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+		case __wiretype.SliceType:
+			if wt.Elem >= __wiretype.TypeIDFirst {
+				wt.Elem += __wiretype.TypeID(firstAdded)
 			}
 			d = wt
-		case _gen_wiretype.ArrayType:
-			if wt.Elem >= _gen_wiretype.TypeIDFirst {
-				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+		case __wiretype.ArrayType:
+			if wt.Elem >= __wiretype.TypeIDFirst {
+				wt.Elem += __wiretype.TypeID(firstAdded)
 			}
 			d = wt
-		case _gen_wiretype.MapType:
-			if wt.Key >= _gen_wiretype.TypeIDFirst {
-				wt.Key += _gen_wiretype.TypeID(firstAdded)
+		case __wiretype.MapType:
+			if wt.Key >= __wiretype.TypeIDFirst {
+				wt.Key += __wiretype.TypeID(firstAdded)
 			}
-			if wt.Elem >= _gen_wiretype.TypeIDFirst {
-				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+			if wt.Elem >= __wiretype.TypeIDFirst {
+				wt.Elem += __wiretype.TypeID(firstAdded)
 			}
 			d = wt
-		case _gen_wiretype.StructType:
+		case __wiretype.StructType:
 			for i, fld := range wt.Fields {
-				if fld.Type >= _gen_wiretype.TypeIDFirst {
-					wt.Fields[i].Type += _gen_wiretype.TypeID(firstAdded)
+				if fld.Type >= __wiretype.TypeIDFirst {
+					wt.Fields[i].Type += __wiretype.TypeID(firstAdded)
 				}
 			}
 			d = wt
@@ -1094,31 +1002,4 @@ func (__gen_s *ServerStubServiceB) Signature(call _gen_ipc.ServerCall) (_gen_ipc
 	}
 
 	return result, nil
-}
-
-func (__gen_s *ServerStubServiceB) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
-	if unresolver, ok := __gen_s.service.(_gen_ipc.Unresolver); ok {
-		return unresolver.UnresolveStep(call)
-	}
-	if call.Server() == nil {
-		return
-	}
-	var published []string
-	if published, err = call.Server().Published(); err != nil || published == nil {
-		return
-	}
-	reply = make([]string, len(published))
-	for i, p := range published {
-		reply[i] = _gen_naming.Join(p, call.Name())
-	}
-	return
-}
-
-func (__gen_s *ServerStubServiceB) VGlob() *_gen_ipc.GlobState {
-	return __gen_s.gs
-}
-
-func (__gen_s *ServerStubServiceB) MethodB1(call _gen_ipc.ServerCall, a Scalars, b Composites) (reply CompComp, err error) {
-	reply, err = __gen_s.service.MethodB1(call, a, b)
-	return
 }

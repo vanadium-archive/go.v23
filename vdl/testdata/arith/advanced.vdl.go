@@ -6,152 +6,165 @@ package arith
 import (
 	"veyron.io/veyron/veyron2/vdl/testdata/arith/exp"
 
-	// The non-user imports are prefixed with "_gen_" to prevent collisions.
-	_gen_veyron2 "veyron.io/veyron/veyron2"
-	_gen_context "veyron.io/veyron/veyron2/context"
-	_gen_ipc "veyron.io/veyron/veyron2/ipc"
-	_gen_naming "veyron.io/veyron/veyron2/naming"
-	_gen_vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
-	_gen_wiretype "veyron.io/veyron/veyron2/wiretype"
+	// The non-user imports are prefixed with "__" to prevent collisions.
+	__veyron2 "veyron.io/veyron/veyron2"
+	__context "veyron.io/veyron/veyron2/context"
+	__ipc "veyron.io/veyron/veyron2/ipc"
+	__vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
+	__wiretype "veyron.io/veyron/veyron2/wiretype"
 )
 
 // TODO(toddw): Remove this line once the new signature support is done.
-// It corrects a bug where _gen_wiretype is unused in VDL pacakges where only
+// It corrects a bug where __wiretype is unused in VDL pacakges where only
 // bootstrap types are used on interfaces.
-const _ = _gen_wiretype.TypeIDInvalid
+const _ = __wiretype.TypeIDInvalid
 
+// TrigonometryClientMethods is the client interface
+// containing Trigonometry methods.
+//
 // Trigonometry is an interface that specifies a couple trigonometric functions.
-// Trigonometry is the interface the client binds and uses.
-// Trigonometry_ExcludingUniversal is the interface without internal framework-added methods
-// to enable embedding without method collisions.  Not to be used directly by clients.
-type Trigonometry_ExcludingUniversal interface {
-	Sine(ctx _gen_context.T, angle float64, opts ..._gen_ipc.CallOpt) (reply float64, err error)
-	Cosine(ctx _gen_context.T, angle float64, opts ..._gen_ipc.CallOpt) (reply float64, err error)
-}
-type Trigonometry interface {
-	_gen_ipc.UniversalServiceMethods
-	Trigonometry_ExcludingUniversal
+type TrigonometryClientMethods interface {
+	Sine(ctx __context.T, angle float64, opts ...__ipc.CallOpt) (float64, error)
+	Cosine(ctx __context.T, angle float64, opts ...__ipc.CallOpt) (float64, error)
 }
 
-// TrigonometryService is the interface the server implements.
-type TrigonometryService interface {
-	Sine(context _gen_ipc.ServerContext, angle float64) (reply float64, err error)
-	Cosine(context _gen_ipc.ServerContext, angle float64) (reply float64, err error)
+// TrigonometryClientStub adds universal methods to TrigonometryClientMethods.
+type TrigonometryClientStub interface {
+	TrigonometryClientMethods
+	__ipc.UniversalServiceMethods
 }
 
-// BindTrigonometry returns the client stub implementing the Trigonometry
-// interface.
-//
-// If no _gen_ipc.Client is specified, the default _gen_ipc.Client in the
-// global Runtime is used.
-func BindTrigonometry(name string, opts ..._gen_ipc.BindOpt) (Trigonometry, error) {
-	var client _gen_ipc.Client
-	switch len(opts) {
-	case 0:
-		// Do nothing.
-	case 1:
-		if clientOpt, ok := opts[0].(_gen_ipc.Client); opts[0] == nil || ok {
+// TrigonometryClient returns a client stub for Trigonometry.
+func TrigonometryClient(name string, opts ...__ipc.BindOpt) TrigonometryClientStub {
+	var client __ipc.Client
+	for _, opt := range opts {
+		if clientOpt, ok := opt.(__ipc.Client); ok {
 			client = clientOpt
-		} else {
-			return nil, _gen_vdlutil.ErrUnrecognizedOption
 		}
-	default:
-		return nil, _gen_vdlutil.ErrTooManyOptionsToBind
 	}
-	stub := &clientStubTrigonometry{defaultClient: client, name: name}
-
-	return stub, nil
+	return implTrigonometryClientStub{name, client}
 }
 
-// NewServerTrigonometry creates a new server stub.
+type implTrigonometryClientStub struct {
+	name   string
+	client __ipc.Client
+}
+
+func (c implTrigonometryClientStub) c(ctx __context.T) __ipc.Client {
+	if c.client != nil {
+		return c.client
+	}
+	return __veyron2.RuntimeFromContext(ctx).Client()
+}
+
+func (c implTrigonometryClientStub) Sine(ctx __context.T, i0 float64, opts ...__ipc.CallOpt) (o0 float64, err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "Sine", []interface{}{i0}, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&o0, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (c implTrigonometryClientStub) Cosine(ctx __context.T, i0 float64, opts ...__ipc.CallOpt) (o0 float64, err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "Cosine", []interface{}{i0}, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&o0, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (c implTrigonometryClientStub) Signature(ctx __context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&o0, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (c implTrigonometryClientStub) GetMethodTags(ctx __context.T, method string, opts ...__ipc.CallOpt) (o0 []interface{}, err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&o0, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+// TrigonometryServerMethods is the interface a server writer
+// implements for Trigonometry.
 //
-// It takes a regular server implementing the TrigonometryService
-// interface, and returns a new server stub.
-func NewServerTrigonometry(server TrigonometryService) interface{} {
-	return &ServerStubTrigonometry{
-		service: server,
-	}
+// Trigonometry is an interface that specifies a couple trigonometric functions.
+type TrigonometryServerMethods interface {
+	Sine(ctx __ipc.ServerContext, angle float64) (float64, error)
+	Cosine(ctx __ipc.ServerContext, angle float64) (float64, error)
 }
 
-// clientStubTrigonometry implements Trigonometry.
-type clientStubTrigonometry struct {
-	defaultClient _gen_ipc.Client
-	name          string
+// TrigonometryServerStubMethods is the server interface containing
+// Trigonometry methods, as expected by ipc.Server.  The difference between
+// this interface and TrigonometryServerMethods is that the first context
+// argument for each method is always ipc.ServerCall here, while it is either
+// ipc.ServerContext or a typed streaming context there.
+type TrigonometryServerStubMethods interface {
+	Sine(call __ipc.ServerCall, angle float64) (float64, error)
+	Cosine(call __ipc.ServerCall, angle float64) (float64, error)
 }
 
-func (__gen_c *clientStubTrigonometry) client(ctx _gen_context.T) _gen_ipc.Client {
-	if __gen_c.defaultClient != nil {
-		return __gen_c.defaultClient
-	}
-	return _gen_veyron2.RuntimeFromContext(ctx).Client()
+// TrigonometryServerStub adds universal methods to TrigonometryServerStubMethods.
+type TrigonometryServerStub interface {
+	TrigonometryServerStubMethods
+	// GetMethodTags will be replaced with DescribeInterfaces.
+	GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error)
+	// Signature will be replaced with DescribeInterfaces.
+	Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error)
 }
 
-func (__gen_c *clientStubTrigonometry) Sine(ctx _gen_context.T, angle float64, opts ..._gen_ipc.CallOpt) (reply float64, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Sine", []interface{}{angle}, opts...); err != nil {
-		return
+// TrigonometryServer returns a server stub for Trigonometry.
+// It converts an implementation of TrigonometryServerMethods into
+// an object that may be used by ipc.Server.
+func TrigonometryServer(impl TrigonometryServerMethods) TrigonometryServerStub {
+	stub := implTrigonometryServerStub{
+		impl: impl,
 	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
-		err = ierr
+	// Initialize GlobState; always check the stub itself first, to handle the
+	// case where the user has the Glob method defined in their VDL source.
+	if gs := __ipc.NewGlobState(stub); gs != nil {
+		stub.gs = gs
+	} else if gs := __ipc.NewGlobState(impl); gs != nil {
+		stub.gs = gs
 	}
-	return
+	return stub
 }
 
-func (__gen_c *clientStubTrigonometry) Cosine(ctx _gen_context.T, angle float64, opts ..._gen_ipc.CallOpt) (reply float64, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Cosine", []interface{}{angle}, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
-		err = ierr
-	}
-	return
+type implTrigonometryServerStub struct {
+	impl TrigonometryServerMethods
+	gs   *__ipc.GlobState
 }
 
-func (__gen_c *clientStubTrigonometry) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
-		err = ierr
-	}
-	return
+func (s implTrigonometryServerStub) Sine(call __ipc.ServerCall, i0 float64) (float64, error) {
+	return s.impl.Sine(call, i0)
 }
 
-func (__gen_c *clientStubTrigonometry) Signature(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
-		err = ierr
-	}
-	return
+func (s implTrigonometryServerStub) Cosine(call __ipc.ServerCall, i0 float64) (float64, error) {
+	return s.impl.Cosine(call, i0)
 }
 
-func (__gen_c *clientStubTrigonometry) GetMethodTags(ctx _gen_context.T, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
-		err = ierr
-	}
-	return
+func (s implTrigonometryServerStub) VGlob() *__ipc.GlobState {
+	return s.gs
 }
 
-// ServerStubTrigonometry wraps a server that implements
-// TrigonometryService and provides an object that satisfies
-// the requirements of veyron2/ipc.ReflectInvoker.
-type ServerStubTrigonometry struct {
-	service TrigonometryService
-}
-
-func (__gen_s *ServerStubTrigonometry) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
-	// TODO(bprosnitz) GetMethodTags() will be replaces with Signature().
-	// Note: This exhibits some weird behavior like returning a nil error if the method isn't found.
-	// This will change when it is replaced with Signature().
+func (s implTrigonometryServerStub) GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error) {
+	// TODO(toddw): Replace with new DescribeInterfaces implementation.
 	switch method {
 	case "Sine":
 		return []interface{}{}, nil
@@ -162,248 +175,229 @@ func (__gen_s *ServerStubTrigonometry) GetMethodTags(call _gen_ipc.ServerCall, m
 	}
 }
 
-func (__gen_s *ServerStubTrigonometry) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
-	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
-	result.Methods["Cosine"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{
+func (s implTrigonometryServerStub) Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error) {
+	// TODO(toddw) Replace with new DescribeInterfaces implementation.
+	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
+	result.Methods["Cosine"] = __ipc.MethodSignature{
+		InArgs: []__ipc.MethodArgument{
 			{Name: "angle", Type: 26},
 		},
-		OutArgs: []_gen_ipc.MethodArgument{
+		OutArgs: []__ipc.MethodArgument{
 			{Name: "", Type: 26},
 			{Name: "", Type: 65},
 		},
 	}
-	result.Methods["Sine"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{
+	result.Methods["Sine"] = __ipc.MethodSignature{
+		InArgs: []__ipc.MethodArgument{
 			{Name: "angle", Type: 26},
 		},
-		OutArgs: []_gen_ipc.MethodArgument{
+		OutArgs: []__ipc.MethodArgument{
 			{Name: "", Type: 26},
 			{Name: "", Type: 65},
 		},
 	}
 
-	result.TypeDefs = []_gen_vdlutil.Any{
-		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}}
+	result.TypeDefs = []__vdlutil.Any{
+		__wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}}
 
 	return result, nil
 }
 
-func (__gen_s *ServerStubTrigonometry) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
-	if unresolver, ok := __gen_s.service.(_gen_ipc.Unresolver); ok {
-		return unresolver.UnresolveStep(call)
-	}
-	if call.Server() == nil {
-		return
-	}
-	var published []string
-	if published, err = call.Server().Published(); err != nil || published == nil {
-		return
-	}
-	reply = make([]string, len(published))
-	for i, p := range published {
-		reply[i] = _gen_naming.Join(p, call.Name())
-	}
-	return
-}
-
-func (__gen_s *ServerStubTrigonometry) Sine(call _gen_ipc.ServerCall, angle float64) (reply float64, err error) {
-	reply, err = __gen_s.service.Sine(call, angle)
-	return
-}
-
-func (__gen_s *ServerStubTrigonometry) Cosine(call _gen_ipc.ServerCall, angle float64) (reply float64, err error) {
-	reply, err = __gen_s.service.Cosine(call, angle)
-	return
-}
-
+// AdvancedMathClientMethods is the client interface
+// containing AdvancedMath methods.
+//
 // AdvancedMath is an interface for more advanced math than arith.  It embeds
 // interfaces defined both in the same file and in an external package; and in
 // turn it is embedded by arith.Calculator (which is in the same package but
 // different file) to verify that embedding works in all these scenarios.
-// AdvancedMath is the interface the client binds and uses.
-// AdvancedMath_ExcludingUniversal is the interface without internal framework-added methods
-// to enable embedding without method collisions.  Not to be used directly by clients.
-type AdvancedMath_ExcludingUniversal interface {
+type AdvancedMathClientMethods interface {
 	// Trigonometry is an interface that specifies a couple trigonometric functions.
-	Trigonometry_ExcludingUniversal
-	exp.Exp_ExcludingUniversal
-}
-type AdvancedMath interface {
-	_gen_ipc.UniversalServiceMethods
-	AdvancedMath_ExcludingUniversal
+	TrigonometryClientMethods
+	exp.ExpClientMethods
 }
 
-// AdvancedMathService is the interface the server implements.
-type AdvancedMathService interface {
-
-	// Trigonometry is an interface that specifies a couple trigonometric functions.
-	TrigonometryService
-	exp.ExpService
+// AdvancedMathClientStub adds universal methods to AdvancedMathClientMethods.
+type AdvancedMathClientStub interface {
+	AdvancedMathClientMethods
+	__ipc.UniversalServiceMethods
 }
 
-// BindAdvancedMath returns the client stub implementing the AdvancedMath
-// interface.
-//
-// If no _gen_ipc.Client is specified, the default _gen_ipc.Client in the
-// global Runtime is used.
-func BindAdvancedMath(name string, opts ..._gen_ipc.BindOpt) (AdvancedMath, error) {
-	var client _gen_ipc.Client
-	switch len(opts) {
-	case 0:
-		// Do nothing.
-	case 1:
-		if clientOpt, ok := opts[0].(_gen_ipc.Client); opts[0] == nil || ok {
+// AdvancedMathClient returns a client stub for AdvancedMath.
+func AdvancedMathClient(name string, opts ...__ipc.BindOpt) AdvancedMathClientStub {
+	var client __ipc.Client
+	for _, opt := range opts {
+		if clientOpt, ok := opt.(__ipc.Client); ok {
 			client = clientOpt
-		} else {
-			return nil, _gen_vdlutil.ErrUnrecognizedOption
 		}
-	default:
-		return nil, _gen_vdlutil.ErrTooManyOptionsToBind
 	}
-	stub := &clientStubAdvancedMath{defaultClient: client, name: name}
-	stub.Trigonometry_ExcludingUniversal, _ = BindTrigonometry(name, client)
-	stub.Exp_ExcludingUniversal, _ = exp.BindExp(name, client)
-
-	return stub, nil
+	return implAdvancedMathClientStub{name, client, TrigonometryClient(name, client), exp.ExpClient(name, client)}
 }
 
-// NewServerAdvancedMath creates a new server stub.
+type implAdvancedMathClientStub struct {
+	name   string
+	client __ipc.Client
+
+	TrigonometryClientStub
+	exp.ExpClientStub
+}
+
+func (c implAdvancedMathClientStub) c(ctx __context.T) __ipc.Client {
+	if c.client != nil {
+		return c.client
+	}
+	return __veyron2.RuntimeFromContext(ctx).Client()
+}
+
+func (c implAdvancedMathClientStub) Signature(ctx __context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&o0, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (c implAdvancedMathClientStub) GetMethodTags(ctx __context.T, method string, opts ...__ipc.CallOpt) (o0 []interface{}, err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&o0, &err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+// AdvancedMathServerMethods is the interface a server writer
+// implements for AdvancedMath.
 //
-// It takes a regular server implementing the AdvancedMathService
-// interface, and returns a new server stub.
-func NewServerAdvancedMath(server AdvancedMathService) interface{} {
-	return &ServerStubAdvancedMath{
-		ServerStubTrigonometry: *NewServerTrigonometry(server).(*ServerStubTrigonometry),
-		ServerStubExp:          *exp.NewServerExp(server).(*exp.ServerStubExp),
-		service:                server,
-	}
+// AdvancedMath is an interface for more advanced math than arith.  It embeds
+// interfaces defined both in the same file and in an external package; and in
+// turn it is embedded by arith.Calculator (which is in the same package but
+// different file) to verify that embedding works in all these scenarios.
+type AdvancedMathServerMethods interface {
+	// Trigonometry is an interface that specifies a couple trigonometric functions.
+	TrigonometryServerMethods
+	exp.ExpServerMethods
 }
 
-// clientStubAdvancedMath implements AdvancedMath.
-type clientStubAdvancedMath struct {
-	Trigonometry_ExcludingUniversal
-	exp.Exp_ExcludingUniversal
-
-	defaultClient _gen_ipc.Client
-	name          string
+// AdvancedMathServerStubMethods is the server interface containing
+// AdvancedMath methods, as expected by ipc.Server.  The difference between
+// this interface and AdvancedMathServerMethods is that the first context
+// argument for each method is always ipc.ServerCall here, while it is either
+// ipc.ServerContext or a typed streaming context there.
+type AdvancedMathServerStubMethods interface {
+	// Trigonometry is an interface that specifies a couple trigonometric functions.
+	TrigonometryServerStubMethods
+	exp.ExpServerStubMethods
 }
 
-func (__gen_c *clientStubAdvancedMath) client(ctx _gen_context.T) _gen_ipc.Client {
-	if __gen_c.defaultClient != nil {
-		return __gen_c.defaultClient
-	}
-	return _gen_veyron2.RuntimeFromContext(ctx).Client()
+// AdvancedMathServerStub adds universal methods to AdvancedMathServerStubMethods.
+type AdvancedMathServerStub interface {
+	AdvancedMathServerStubMethods
+	// GetMethodTags will be replaced with DescribeInterfaces.
+	GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error)
+	// Signature will be replaced with DescribeInterfaces.
+	Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error)
 }
 
-func (__gen_c *clientStubAdvancedMath) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
-		return
+// AdvancedMathServer returns a server stub for AdvancedMath.
+// It converts an implementation of AdvancedMathServerMethods into
+// an object that may be used by ipc.Server.
+func AdvancedMathServer(impl AdvancedMathServerMethods) AdvancedMathServerStub {
+	stub := implAdvancedMathServerStub{
+		impl: impl,
+		TrigonometryServerStub: TrigonometryServer(impl),
+		ExpServerStub:          exp.ExpServer(impl),
 	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
-		err = ierr
+	// Initialize GlobState; always check the stub itself first, to handle the
+	// case where the user has the Glob method defined in their VDL source.
+	if gs := __ipc.NewGlobState(stub); gs != nil {
+		stub.gs = gs
+	} else if gs := __ipc.NewGlobState(impl); gs != nil {
+		stub.gs = gs
 	}
-	return
+	return stub
 }
 
-func (__gen_c *clientStubAdvancedMath) Signature(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
-		err = ierr
-	}
-	return
+type implAdvancedMathServerStub struct {
+	impl AdvancedMathServerMethods
+	gs   *__ipc.GlobState
+
+	TrigonometryServerStub
+	exp.ExpServerStub
 }
 
-func (__gen_c *clientStubAdvancedMath) GetMethodTags(ctx _gen_context.T, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
-		err = ierr
-	}
-	return
+func (s implAdvancedMathServerStub) VGlob() *__ipc.GlobState {
+	return s.gs
 }
 
-// ServerStubAdvancedMath wraps a server that implements
-// AdvancedMathService and provides an object that satisfies
-// the requirements of veyron2/ipc.ReflectInvoker.
-type ServerStubAdvancedMath struct {
-	ServerStubTrigonometry
-	exp.ServerStubExp
-
-	service AdvancedMathService
-}
-
-func (__gen_s *ServerStubAdvancedMath) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
-	// TODO(bprosnitz) GetMethodTags() will be replaces with Signature().
-	// Note: This exhibits some weird behavior like returning a nil error if the method isn't found.
-	// This will change when it is replaced with Signature().
-	if resp, err := __gen_s.ServerStubTrigonometry.GetMethodTags(call, method); resp != nil || err != nil {
+func (s implAdvancedMathServerStub) GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error) {
+	// TODO(toddw): Replace with new DescribeInterfaces implementation.
+	if resp, err := s.TrigonometryServerStub.GetMethodTags(call, method); resp != nil || err != nil {
 		return resp, err
 	}
-	if resp, err := __gen_s.ServerStubExp.GetMethodTags(call, method); resp != nil || err != nil {
+	if resp, err := s.ExpServerStub.GetMethodTags(call, method); resp != nil || err != nil {
 		return resp, err
 	}
 	return nil, nil
 }
 
-func (__gen_s *ServerStubAdvancedMath) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
-	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
+func (s implAdvancedMathServerStub) Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error) {
+	// TODO(toddw) Replace with new DescribeInterfaces implementation.
+	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
 
-	result.TypeDefs = []_gen_vdlutil.Any{}
-	var ss _gen_ipc.ServiceSignature
+	result.TypeDefs = []__vdlutil.Any{}
+	var ss __ipc.ServiceSignature
 	var firstAdded int
-	ss, _ = __gen_s.ServerStubTrigonometry.Signature(call)
+	ss, _ = s.TrigonometryServerStub.Signature(call)
 	firstAdded = len(result.TypeDefs)
 	for k, v := range ss.Methods {
 		for i, _ := range v.InArgs {
-			if v.InArgs[i].Type >= _gen_wiretype.TypeIDFirst {
-				v.InArgs[i].Type += _gen_wiretype.TypeID(firstAdded)
+			if v.InArgs[i].Type >= __wiretype.TypeIDFirst {
+				v.InArgs[i].Type += __wiretype.TypeID(firstAdded)
 			}
 		}
 		for i, _ := range v.OutArgs {
-			if v.OutArgs[i].Type >= _gen_wiretype.TypeIDFirst {
-				v.OutArgs[i].Type += _gen_wiretype.TypeID(firstAdded)
+			if v.OutArgs[i].Type >= __wiretype.TypeIDFirst {
+				v.OutArgs[i].Type += __wiretype.TypeID(firstAdded)
 			}
 		}
-		if v.InStream >= _gen_wiretype.TypeIDFirst {
-			v.InStream += _gen_wiretype.TypeID(firstAdded)
+		if v.InStream >= __wiretype.TypeIDFirst {
+			v.InStream += __wiretype.TypeID(firstAdded)
 		}
-		if v.OutStream >= _gen_wiretype.TypeIDFirst {
-			v.OutStream += _gen_wiretype.TypeID(firstAdded)
+		if v.OutStream >= __wiretype.TypeIDFirst {
+			v.OutStream += __wiretype.TypeID(firstAdded)
 		}
 		result.Methods[k] = v
 	}
 	//TODO(bprosnitz) combine type definitions from embeded interfaces in a way that doesn't cause duplication.
 	for _, d := range ss.TypeDefs {
 		switch wt := d.(type) {
-		case _gen_wiretype.SliceType:
-			if wt.Elem >= _gen_wiretype.TypeIDFirst {
-				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+		case __wiretype.SliceType:
+			if wt.Elem >= __wiretype.TypeIDFirst {
+				wt.Elem += __wiretype.TypeID(firstAdded)
 			}
 			d = wt
-		case _gen_wiretype.ArrayType:
-			if wt.Elem >= _gen_wiretype.TypeIDFirst {
-				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+		case __wiretype.ArrayType:
+			if wt.Elem >= __wiretype.TypeIDFirst {
+				wt.Elem += __wiretype.TypeID(firstAdded)
 			}
 			d = wt
-		case _gen_wiretype.MapType:
-			if wt.Key >= _gen_wiretype.TypeIDFirst {
-				wt.Key += _gen_wiretype.TypeID(firstAdded)
+		case __wiretype.MapType:
+			if wt.Key >= __wiretype.TypeIDFirst {
+				wt.Key += __wiretype.TypeID(firstAdded)
 			}
-			if wt.Elem >= _gen_wiretype.TypeIDFirst {
-				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+			if wt.Elem >= __wiretype.TypeIDFirst {
+				wt.Elem += __wiretype.TypeID(firstAdded)
 			}
 			d = wt
-		case _gen_wiretype.StructType:
+		case __wiretype.StructType:
 			for i, fld := range wt.Fields {
-				if fld.Type >= _gen_wiretype.TypeIDFirst {
-					wt.Fields[i].Type += _gen_wiretype.TypeID(firstAdded)
+				if fld.Type >= __wiretype.TypeIDFirst {
+					wt.Fields[i].Type += __wiretype.TypeID(firstAdded)
 				}
 			}
 			d = wt
@@ -411,52 +405,52 @@ func (__gen_s *ServerStubAdvancedMath) Signature(call _gen_ipc.ServerCall) (_gen
 		}
 		result.TypeDefs = append(result.TypeDefs, d)
 	}
-	ss, _ = __gen_s.ServerStubExp.Signature(call)
+	ss, _ = s.ExpServerStub.Signature(call)
 	firstAdded = len(result.TypeDefs)
 	for k, v := range ss.Methods {
 		for i, _ := range v.InArgs {
-			if v.InArgs[i].Type >= _gen_wiretype.TypeIDFirst {
-				v.InArgs[i].Type += _gen_wiretype.TypeID(firstAdded)
+			if v.InArgs[i].Type >= __wiretype.TypeIDFirst {
+				v.InArgs[i].Type += __wiretype.TypeID(firstAdded)
 			}
 		}
 		for i, _ := range v.OutArgs {
-			if v.OutArgs[i].Type >= _gen_wiretype.TypeIDFirst {
-				v.OutArgs[i].Type += _gen_wiretype.TypeID(firstAdded)
+			if v.OutArgs[i].Type >= __wiretype.TypeIDFirst {
+				v.OutArgs[i].Type += __wiretype.TypeID(firstAdded)
 			}
 		}
-		if v.InStream >= _gen_wiretype.TypeIDFirst {
-			v.InStream += _gen_wiretype.TypeID(firstAdded)
+		if v.InStream >= __wiretype.TypeIDFirst {
+			v.InStream += __wiretype.TypeID(firstAdded)
 		}
-		if v.OutStream >= _gen_wiretype.TypeIDFirst {
-			v.OutStream += _gen_wiretype.TypeID(firstAdded)
+		if v.OutStream >= __wiretype.TypeIDFirst {
+			v.OutStream += __wiretype.TypeID(firstAdded)
 		}
 		result.Methods[k] = v
 	}
 	//TODO(bprosnitz) combine type definitions from embeded interfaces in a way that doesn't cause duplication.
 	for _, d := range ss.TypeDefs {
 		switch wt := d.(type) {
-		case _gen_wiretype.SliceType:
-			if wt.Elem >= _gen_wiretype.TypeIDFirst {
-				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+		case __wiretype.SliceType:
+			if wt.Elem >= __wiretype.TypeIDFirst {
+				wt.Elem += __wiretype.TypeID(firstAdded)
 			}
 			d = wt
-		case _gen_wiretype.ArrayType:
-			if wt.Elem >= _gen_wiretype.TypeIDFirst {
-				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+		case __wiretype.ArrayType:
+			if wt.Elem >= __wiretype.TypeIDFirst {
+				wt.Elem += __wiretype.TypeID(firstAdded)
 			}
 			d = wt
-		case _gen_wiretype.MapType:
-			if wt.Key >= _gen_wiretype.TypeIDFirst {
-				wt.Key += _gen_wiretype.TypeID(firstAdded)
+		case __wiretype.MapType:
+			if wt.Key >= __wiretype.TypeIDFirst {
+				wt.Key += __wiretype.TypeID(firstAdded)
 			}
-			if wt.Elem >= _gen_wiretype.TypeIDFirst {
-				wt.Elem += _gen_wiretype.TypeID(firstAdded)
+			if wt.Elem >= __wiretype.TypeIDFirst {
+				wt.Elem += __wiretype.TypeID(firstAdded)
 			}
 			d = wt
-		case _gen_wiretype.StructType:
+		case __wiretype.StructType:
 			for i, fld := range wt.Fields {
-				if fld.Type >= _gen_wiretype.TypeIDFirst {
-					wt.Fields[i].Type += _gen_wiretype.TypeID(firstAdded)
+				if fld.Type >= __wiretype.TypeIDFirst {
+					wt.Fields[i].Type += __wiretype.TypeID(firstAdded)
 				}
 			}
 			d = wt
@@ -466,22 +460,4 @@ func (__gen_s *ServerStubAdvancedMath) Signature(call _gen_ipc.ServerCall) (_gen
 	}
 
 	return result, nil
-}
-
-func (__gen_s *ServerStubAdvancedMath) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
-	if unresolver, ok := __gen_s.service.(_gen_ipc.Unresolver); ok {
-		return unresolver.UnresolveStep(call)
-	}
-	if call.Server() == nil {
-		return
-	}
-	var published []string
-	if published, err = call.Server().Published(); err != nil || published == nil {
-		return
-	}
-	reply = make([]string, len(published))
-	for i, p := range published {
-		reply[i] = _gen_naming.Join(p, call.Name())
-	}
-	return
 }

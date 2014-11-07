@@ -316,12 +316,6 @@ type VChildrenGlobber interface {
 	VGlobChildren() ([]string, error)
 }
 
-// Unresolver defines the interface to be implemented by service objects
-// that want to define their custom UnresolveStep functionality.
-type Unresolver interface {
-	UnresolveStep(context ServerContext) ([]string, error)
-}
-
 // ServerCall defines the interface for each in-flight call on the server.
 type ServerCall interface {
 	Stream

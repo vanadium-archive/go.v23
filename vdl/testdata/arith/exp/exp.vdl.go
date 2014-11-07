@@ -6,138 +6,143 @@
 package exp
 
 import (
-	// The non-user imports are prefixed with "_gen_" to prevent collisions.
-	_gen_veyron2 "veyron.io/veyron/veyron2"
-	_gen_context "veyron.io/veyron/veyron2/context"
-	_gen_ipc "veyron.io/veyron/veyron2/ipc"
-	_gen_naming "veyron.io/veyron/veyron2/naming"
-	_gen_vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
-	_gen_wiretype "veyron.io/veyron/veyron2/wiretype"
+	// The non-user imports are prefixed with "__" to prevent collisions.
+	__veyron2 "veyron.io/veyron/veyron2"
+	__context "veyron.io/veyron/veyron2/context"
+	__ipc "veyron.io/veyron/veyron2/ipc"
+	__vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
+	__wiretype "veyron.io/veyron/veyron2/wiretype"
 )
 
 // TODO(toddw): Remove this line once the new signature support is done.
-// It corrects a bug where _gen_wiretype is unused in VDL pacakges where only
+// It corrects a bug where __wiretype is unused in VDL pacakges where only
 // bootstrap types are used on interfaces.
-const _ = _gen_wiretype.TypeIDInvalid
+const _ = __wiretype.TypeIDInvalid
 
-// Exp is the interface the client binds and uses.
-// Exp_ExcludingUniversal is the interface without internal framework-added methods
-// to enable embedding without method collisions.  Not to be used directly by clients.
-type Exp_ExcludingUniversal interface {
-	Exp(ctx _gen_context.T, x float64, opts ..._gen_ipc.CallOpt) (reply float64, err error)
-}
-type Exp interface {
-	_gen_ipc.UniversalServiceMethods
-	Exp_ExcludingUniversal
+// ExpClientMethods is the client interface
+// containing Exp methods.
+type ExpClientMethods interface {
+	Exp(ctx __context.T, x float64, opts ...__ipc.CallOpt) (float64, error)
 }
 
-// ExpService is the interface the server implements.
-type ExpService interface {
-	Exp(context _gen_ipc.ServerContext, x float64) (reply float64, err error)
+// ExpClientStub adds universal methods to ExpClientMethods.
+type ExpClientStub interface {
+	ExpClientMethods
+	__ipc.UniversalServiceMethods
 }
 
-// BindExp returns the client stub implementing the Exp
-// interface.
-//
-// If no _gen_ipc.Client is specified, the default _gen_ipc.Client in the
-// global Runtime is used.
-func BindExp(name string, opts ..._gen_ipc.BindOpt) (Exp, error) {
-	var client _gen_ipc.Client
-	switch len(opts) {
-	case 0:
-		// Do nothing.
-	case 1:
-		if clientOpt, ok := opts[0].(_gen_ipc.Client); opts[0] == nil || ok {
+// ExpClient returns a client stub for Exp.
+func ExpClient(name string, opts ...__ipc.BindOpt) ExpClientStub {
+	var client __ipc.Client
+	for _, opt := range opts {
+		if clientOpt, ok := opt.(__ipc.Client); ok {
 			client = clientOpt
-		} else {
-			return nil, _gen_vdlutil.ErrUnrecognizedOption
 		}
-	default:
-		return nil, _gen_vdlutil.ErrTooManyOptionsToBind
 	}
-	stub := &clientStubExp{defaultClient: client, name: name}
-
-	return stub, nil
+	return implExpClientStub{name, client}
 }
 
-// NewServerExp creates a new server stub.
-//
-// It takes a regular server implementing the ExpService
-// interface, and returns a new server stub.
-func NewServerExp(server ExpService) interface{} {
-	return &ServerStubExp{
-		service: server,
+type implExpClientStub struct {
+	name   string
+	client __ipc.Client
+}
+
+func (c implExpClientStub) c(ctx __context.T) __ipc.Client {
+	if c.client != nil {
+		return c.client
 	}
+	return __veyron2.RuntimeFromContext(ctx).Client()
 }
 
-// clientStubExp implements Exp.
-type clientStubExp struct {
-	defaultClient _gen_ipc.Client
-	name          string
-}
-
-func (__gen_c *clientStubExp) client(ctx _gen_context.T) _gen_ipc.Client {
-	if __gen_c.defaultClient != nil {
-		return __gen_c.defaultClient
-	}
-	return _gen_veyron2.RuntimeFromContext(ctx).Client()
-}
-
-func (__gen_c *clientStubExp) Exp(ctx _gen_context.T, x float64, opts ..._gen_ipc.CallOpt) (reply float64, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Exp", []interface{}{x}, opts...); err != nil {
+func (c implExpClientStub) Exp(ctx __context.T, i0 float64, opts ...__ipc.CallOpt) (o0 float64, err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "Exp", []interface{}{i0}, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
+	if ierr := call.Finish(&o0, &err); ierr != nil {
 		err = ierr
 	}
 	return
 }
 
-func (__gen_c *clientStubExp) UnresolveStep(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply []string, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "UnresolveStep", nil, opts...); err != nil {
+func (c implExpClientStub) Signature(ctx __context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
+	if ierr := call.Finish(&o0, &err); ierr != nil {
 		err = ierr
 	}
 	return
 }
 
-func (__gen_c *clientStubExp) Signature(ctx _gen_context.T, opts ..._gen_ipc.CallOpt) (reply _gen_ipc.ServiceSignature, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "Signature", nil, opts...); err != nil {
+func (c implExpClientStub) GetMethodTags(ctx __context.T, method string, opts ...__ipc.CallOpt) (o0 []interface{}, err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
+	if ierr := call.Finish(&o0, &err); ierr != nil {
 		err = ierr
 	}
 	return
 }
 
-func (__gen_c *clientStubExp) GetMethodTags(ctx _gen_context.T, method string, opts ..._gen_ipc.CallOpt) (reply []interface{}, err error) {
-	var call _gen_ipc.Call
-	if call, err = __gen_c.client(ctx).StartCall(ctx, __gen_c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&reply, &err); ierr != nil {
-		err = ierr
-	}
-	return
+// ExpServerMethods is the interface a server writer
+// implements for Exp.
+type ExpServerMethods interface {
+	Exp(ctx __ipc.ServerContext, x float64) (float64, error)
 }
 
-// ServerStubExp wraps a server that implements
-// ExpService and provides an object that satisfies
-// the requirements of veyron2/ipc.ReflectInvoker.
-type ServerStubExp struct {
-	service ExpService
+// ExpServerStubMethods is the server interface containing
+// Exp methods, as expected by ipc.Server.  The difference between
+// this interface and ExpServerMethods is that the first context
+// argument for each method is always ipc.ServerCall here, while it is either
+// ipc.ServerContext or a typed streaming context there.
+type ExpServerStubMethods interface {
+	Exp(call __ipc.ServerCall, x float64) (float64, error)
 }
 
-func (__gen_s *ServerStubExp) GetMethodTags(call _gen_ipc.ServerCall, method string) ([]interface{}, error) {
-	// TODO(bprosnitz) GetMethodTags() will be replaces with Signature().
-	// Note: This exhibits some weird behavior like returning a nil error if the method isn't found.
-	// This will change when it is replaced with Signature().
+// ExpServerStub adds universal methods to ExpServerStubMethods.
+type ExpServerStub interface {
+	ExpServerStubMethods
+	// GetMethodTags will be replaced with DescribeInterfaces.
+	GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error)
+	// Signature will be replaced with DescribeInterfaces.
+	Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error)
+}
+
+// ExpServer returns a server stub for Exp.
+// It converts an implementation of ExpServerMethods into
+// an object that may be used by ipc.Server.
+func ExpServer(impl ExpServerMethods) ExpServerStub {
+	stub := implExpServerStub{
+		impl: impl,
+	}
+	// Initialize GlobState; always check the stub itself first, to handle the
+	// case where the user has the Glob method defined in their VDL source.
+	if gs := __ipc.NewGlobState(stub); gs != nil {
+		stub.gs = gs
+	} else if gs := __ipc.NewGlobState(impl); gs != nil {
+		stub.gs = gs
+	}
+	return stub
+}
+
+type implExpServerStub struct {
+	impl ExpServerMethods
+	gs   *__ipc.GlobState
+}
+
+func (s implExpServerStub) Exp(call __ipc.ServerCall, i0 float64) (float64, error) {
+	return s.impl.Exp(call, i0)
+}
+
+func (s implExpServerStub) VGlob() *__ipc.GlobState {
+	return s.gs
+}
+
+func (s implExpServerStub) GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error) {
+	// TODO(toddw): Replace with new DescribeInterfaces implementation.
 	switch method {
 	case "Exp":
 		return []interface{}{}, nil
@@ -146,43 +151,21 @@ func (__gen_s *ServerStubExp) GetMethodTags(call _gen_ipc.ServerCall, method str
 	}
 }
 
-func (__gen_s *ServerStubExp) Signature(call _gen_ipc.ServerCall) (_gen_ipc.ServiceSignature, error) {
-	result := _gen_ipc.ServiceSignature{Methods: make(map[string]_gen_ipc.MethodSignature)}
-	result.Methods["Exp"] = _gen_ipc.MethodSignature{
-		InArgs: []_gen_ipc.MethodArgument{
+func (s implExpServerStub) Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error) {
+	// TODO(toddw) Replace with new DescribeInterfaces implementation.
+	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
+	result.Methods["Exp"] = __ipc.MethodSignature{
+		InArgs: []__ipc.MethodArgument{
 			{Name: "x", Type: 26},
 		},
-		OutArgs: []_gen_ipc.MethodArgument{
+		OutArgs: []__ipc.MethodArgument{
 			{Name: "", Type: 26},
 			{Name: "", Type: 65},
 		},
 	}
 
-	result.TypeDefs = []_gen_vdlutil.Any{
-		_gen_wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}}
+	result.TypeDefs = []__vdlutil.Any{
+		__wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}}
 
 	return result, nil
-}
-
-func (__gen_s *ServerStubExp) UnresolveStep(call _gen_ipc.ServerCall) (reply []string, err error) {
-	if unresolver, ok := __gen_s.service.(_gen_ipc.Unresolver); ok {
-		return unresolver.UnresolveStep(call)
-	}
-	if call.Server() == nil {
-		return
-	}
-	var published []string
-	if published, err = call.Server().Published(); err != nil || published == nil {
-		return
-	}
-	reply = make([]string, len(published))
-	for i, p := range published {
-		reply[i] = _gen_naming.Join(p, call.Name())
-	}
-	return
-}
-
-func (__gen_s *ServerStubExp) Exp(call _gen_ipc.ServerCall, x float64) (reply float64, err error) {
-	reply, err = __gen_s.service.Exp(call, x)
-	return
 }

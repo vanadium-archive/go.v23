@@ -50,6 +50,10 @@ const (
 // Things to note:
 //   * There must be at least 1 out-arg, and the last out-arg must be error.
 type Arith interface {
+	// NoArgs demonstrates that it's fine to have no arguments.
+	// TODO(toddw): Re-enable this when supported by java.
+	//NoArgs()
+
 	// Add is a typical method with multiple input and output arguments.
 	Add(a int32, b int32) (int32, error)
 
@@ -70,7 +74,7 @@ type Arith interface {
 	GenError() error {"foo", "bar" + "z", Hello, int32(Int64Const + 1), base.SixSquared}
 
 	// Count shows using only an int32 out-stream type, with no in-stream type.
-	Count(Start int32) stream<_, int32> error
+	Count(start int32) stream<_, int32> error
 
 	// StreamingAdd shows a bidirectional stream.
 	StreamingAdd() stream<int32, int32> (total int32, err error)

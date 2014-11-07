@@ -41,6 +41,12 @@ func newServer() ipc.Server {
 // serverArith implements the arith.Arith interface.
 type serverArith struct{}
 
+var numNoArgsCalls int
+
+func (*serverArith) NoArgs(ipc.ServerContext) {
+	numNoArgsCalls++
+}
+
 func (*serverArith) Add(_ ipc.ServerContext, A, B int32) (int32, error) {
 	return A + B, nil
 }
@@ -57,27 +63,24 @@ func (*serverArith) Mul(_ ipc.ServerContext, nestedArgs base.NestedArgs) (int32,
 	return nestedArgs.Args.A * nestedArgs.Args.B, nil
 }
 
-func (*serverArith) Count(_ ipc.ServerContext, Start int32, Stream arith.ArithServiceCountStream) error {
+func (*serverArith) Count(ctx arith.ArithCountContext, start int32) error {
 	const kNum = 1000
-	sender := Stream.SendStream()
 	for i := int32(0); i < kNum; i++ {
-		if err := sender.Send(Start + i); err != nil {
+		if err := ctx.SendStream().Send(start + i); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (*serverArith) StreamingAdd(_ ipc.ServerContext, Stream arith.ArithServiceStreamingAddStream) (int32, error) {
+func (*serverArith) StreamingAdd(ctx arith.ArithStreamingAddContext) (int32, error) {
 	var total int32
-	rStream := Stream.RecvStream()
-	sender := Stream.SendStream()
-	for rStream.Advance() {
-		value := rStream.Value()
+	for ctx.RecvStream().Advance() {
+		value := ctx.RecvStream().Value()
 		total += value
-		sender.Send(total)
+		ctx.SendStream().Send(total)
 	}
-	return total, rStream.Err()
+	return total, ctx.RecvStream().Err()
 }
 
 func (*serverArith) GenError(_ ipc.ServerContext) error {
@@ -115,7 +118,7 @@ func (*serverCalculator) Off(_ ipc.ServerContext) error {
 func TestCalculator(t *testing.T) {
 	client := newClient()
 	server := newServer()
-	if err := server.Serve("", arith.NewServerCalculator(&serverCalculator{}), nil); err != nil {
+	if err := server.Serve("", arith.CalculatorServer(&serverCalculator{}), nil); err != nil {
 		t.Fatal(err)
 	}
 	ep, err := server.Listen(profiles.LocalListenSpec)
@@ -125,10 +128,7 @@ func TestCalculator(t *testing.T) {
 	root := naming.JoinAddressName(ep.String(), "")
 	ctx := rt.R().NewContext()
 	// Synchronous calls
-	calculator, err := arith.BindCalculator(root, client)
-	if err != nil {
-		t.Fatalf("Bind: got %q but expected no error", err)
-	}
+	calculator := arith.CalculatorClient(root, client)
 	sine, err := calculator.Sine(ctx, 0)
 	if err != nil {
 		t.Errorf("Sine: got %q but expected no error", err)
@@ -144,10 +144,7 @@ func TestCalculator(t *testing.T) {
 		t.Errorf("Cosine: expected 1 got %f", cosine)
 	}
 
-	ar, err := arith.BindArith(root, client)
-	if err != nil {
-		t.Errorf("Bind: got %q but expected no error", err)
-	}
+	ar := arith.ArithClient(root, client)
 	sum, err := ar.Add(ctx, 7, 8)
 	if err != nil {
 		t.Errorf("Add: got %q but expected no error", err)
@@ -164,10 +161,7 @@ func TestCalculator(t *testing.T) {
 		t.Errorf("Add: expected 15 got %d", sum)
 	}
 
-	trig, err := arith.BindTrigonometry(root, client)
-	if err != nil {
-		t.Errorf("Bind: got %q but expected no error", err)
-	}
+	trig := arith.TrigonometryClient(root, client)
 	cosine, err = trig.Cosine(ctx, 0)
 	if err != nil {
 		t.Errorf("Cosine: got %q but expected no error", err)
@@ -177,7 +171,7 @@ func TestCalculator(t *testing.T) {
 	}
 
 	// Test auto-generated methods.
-	serverStub := arith.NewServerCalculator(&serverCalculator{}).(*arith.ServerStubCalculator)
+	serverStub := arith.CalculatorServer(&serverCalculator{})
 
 	tagTests := []struct {
 		method   string
@@ -244,7 +238,7 @@ func TestCalculator(t *testing.T) {
 		},
 		"Count": ipc.MethodSignature{
 			InArgs: []ipc.MethodArgument{
-				{Name: "Start", Type: 36},
+				{Name: "start", Type: 36},
 			},
 			OutArgs: []ipc.MethodArgument{
 				{Name: "", Type: 66},
@@ -342,9 +336,9 @@ func TestArith(t *testing.T) {
 	// anything dispatching to Arith or an interface embedding Arith (like
 	// Calculator) works for a client looking to talk to an Arith service.
 	dispatchers := []ipc.Dispatcher{
-		ipc.LeafDispatcher(arith.NewServerArith(&serverArith{}), nil),
-		ipc.LeafDispatcher(arith.NewServerArith(&serverCalculator{}), nil),
-		ipc.LeafDispatcher(arith.NewServerCalculator(&serverCalculator{}), nil),
+		ipc.LeafDispatcher(arith.ArithServer(&serverArith{}), nil),
+		ipc.LeafDispatcher(arith.ArithServer(&serverCalculator{}), nil),
+		ipc.LeafDispatcher(arith.CalculatorServer(&serverCalculator{}), nil),
 	}
 
 	client := newClient()
@@ -362,11 +356,17 @@ func TestArith(t *testing.T) {
 			t.Fatalf("%d: %v", i, err)
 		}
 		// Synchronous calls
-		ar, err := arith.BindArith(root, client)
-		if err != nil {
-			t.Errorf("Bind: got %q but expected no error", err)
-		}
-
+		ar := arith.ArithClient(root, client)
+		/*
+			      // TODO(toddw): Re-enable this when supported by java.
+						oldCalls := numNoArgsCalls
+						if err := ar.NoArgs(ctx); err != nil {
+							t.Errorf("NoArgs: got %q but expected no error", err)
+						}
+						if got, want := numNoArgsCalls - oldCalls, 1; got != want {
+							t.Errorf("NoArgs calls: got %d, want %d", got, want)
+						}
+		*/
 		sum, err := ar.Add(ctx, 7, 8)
 		if err != nil {
 			t.Errorf("Add: got %q but expected no error", err)
@@ -482,7 +482,7 @@ func TestArith(t *testing.T) {
 
 		// Server-side stubs
 
-		serverStub := arith.NewServerArith(&serverArith{}).(*arith.ServerStubArith)
+		serverStub := arith.ArithServer(&serverArith{})
 
 		tags, err = serverStub.GetMethodTags(nil, "GenError")
 		expectedTags = []interface{}{"foo", "barz", "hello", int32(129), uint64(36)}
@@ -542,7 +542,7 @@ func TestArith(t *testing.T) {
 			},
 			"Count": ipc.MethodSignature{
 				InArgs: []ipc.MethodArgument{
-					{Name: "Start", Type: 36},
+					{Name: "start", Type: 36},
 				},
 				OutArgs: []ipc.MethodArgument{
 					{Name: "", Type: 65},
