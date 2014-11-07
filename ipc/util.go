@@ -10,3 +10,17 @@ func NewGlobState(obj interface{}) *GlobState {
 	}
 	return nil
 }
+
+// VChildrenGlobberInvoker returns an Invoker for an object that implements the
+// VGlobChildren interface, and nothing else.
+func VChildrenGlobberInvoker(children ...string) Invoker {
+	return ReflectInvoker(&obj{children})
+}
+
+type obj struct {
+	children []string
+}
+
+func (o obj) VGlobChildren() ([]string, error) {
+	return o.children, nil
+}

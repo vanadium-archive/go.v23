@@ -174,3 +174,8 @@ func TrimSuffix(name, suffix string) string {
 	}
 	return name
 }
+
+// IsReserved returns true if name is a reserved name.
+func IsReserved(name string) bool {
+	return strings.HasPrefix(name, ReservedNamePrefix)
+}
