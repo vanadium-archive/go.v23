@@ -102,7 +102,7 @@ func unTypedConst(d data, v *vdl.Value, unTypedFields bool) string {
 	case vdl.Complex64, vdl.Complex128:
 		return fmt.Sprintf("new Complex(%f, %f)", real(v.Complex()), imag(v.Complex()))
 	case vdl.Enum:
-		return strconv.FormatInt(int64(v.EnumIndex()), 10)
+		return fmt.Sprintf("'%s'", v.EnumLabel())
 	case vdl.Array, vdl.List:
 		s := "["
 		isByteArray := v.Type().Elem().Kind() == vdl.Byte
@@ -324,9 +324,10 @@ func generateTypeStub(data data, t *compile.TypeDef) string {
 		}
 		result += "\n"
 	} else if kind == vdl.Enum {
-		// The default value of an enum type is the first label which is mapped
-		// to 0.
-		result += "\n    this.val = 0;\n"
+		// The default value of an enum type is the first label.
+		// TODO(alexfandrianto): Isn't this case unreachable? Only vdl.Struct and
+		// vdl.Any have wrappedType == false.
+		result += "\n    this.val = '" + t.Type.EnumLabel(0) + "';\n"
 	}
 	result += "  }\n"
 	result += name + ".prototype._type = " + typeStruct(t.Type) + ";\n"
