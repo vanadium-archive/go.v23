@@ -337,6 +337,9 @@ func generateTypeStub(data data, t *compile.TypeDef) string {
 	}
 	result += "  types." + name + " = " + name + ";\n"
 
+	// Register this new type.
+	result += fmt.Sprintf("Registry.addConstructor(%s.prototype._type, %s);\n", name, name)
+
 	return result
 }
 
@@ -348,6 +351,7 @@ func typedConst(data data, v *vdl.Value) string {
 			return fmt.Sprintf("new %s(%s)", qualifiedIdent(data, def.Name, def.File), valstr)
 		}
 	}
+
 	switch t.Kind() {
 	case vdl.Bool:
 		return "new Builtins.Bool(" + valstr + ")"
@@ -427,6 +431,7 @@ var Types = vom.Types;
 var Kind = vom.Kind;
 var Complex = vom.Complex;
 var Builtins = vom.Builtins;
+var Registry = vom.Registry;
 
 {{$pkg := $data.Pkg}}
 {{if $data.UserImports}}{{range $imp := $data.UserImports}}
