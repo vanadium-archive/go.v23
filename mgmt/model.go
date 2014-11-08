@@ -6,4 +6,5 @@ const (
 	AppCycleManagerConfigKey = "MGMT_APP_CYCLE_MANAGER_NAME"
 	AddressConfigKey         = "MGMT_CHILD_PROCESS_ADDRESS"
 	ProtocolConfigKey        = "MGMT_CHILD_PROCESS_PROTOCOL"
+	ParentBlessingConfigKey  = "MGMT_PARENT_BLESSING_PEER_PATTERN"
 )
