@@ -134,6 +134,11 @@ public final class {{.Type}} implements java.util.List<{{.ElemType}}>, android.o
         return impl.toArray(array);
     }
     @Override
+    public java.lang.String toString() {
+        return io.veyron.veyron.veyron2.vdl.JSONUtil.getGsonBuilder().create().toJson(this);
+    }
+
+    @Override
     public int describeContents() {
         return 0;
     }

@@ -98,6 +98,10 @@ public final class {{.Type}} implements java.util.Map<{{.KeyType}}, {{.ElemType}
     public java.util.Collection<{{.ElemType}}> values() {
         return impl.values();
     }
+    @Override
+    public java.lang.String toString() {
+        return io.veyron.veyron.veyron2.vdl.JSONUtil.getGsonBuilder().create().toJson(this);
+    }
 
     @Override
     public int describeContents() {

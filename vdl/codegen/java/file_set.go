@@ -102,6 +102,10 @@ public final class {{.Type}} implements java.util.Set<{{.KeyType}}>, android.os.
     public <T> T[] toArray(T[] array) {
         return impl.toArray(array);
     }
+    @Override
+    public java.lang.String toString() {
+        return io.veyron.veyron.veyron2.vdl.JSONUtil.getGsonBuilder().create().toJson(this);
+    }
 
     @Override
     public int describeContents() {

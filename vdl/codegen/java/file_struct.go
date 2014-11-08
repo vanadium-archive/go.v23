@@ -82,6 +82,11 @@ public final class {{.Name}} implements android.os.Parcelable, java.io.Serializa
         return result;
     }
     @Override
+    public java.lang.String toString() {
+    	return io.veyron.veyron.veyron2.vdl.JSONUtil.getGsonBuilder().create().toJson(this);
+    }
+
+    @Override
     public int describeContents() {
     	return 0;
     }
