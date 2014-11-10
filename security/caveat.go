@@ -52,7 +52,7 @@ func PeerBlessingsCaveat(pattern BlessingPattern, additionalPatterns ...Blessing
 // digest returns a hash of the contents of c.
 func (c *Caveat) digest(hash Hash) []byte { return hash.sum(c.ValidatorVOM) }
 
-func (c *Caveat) String() string {
+func (c Caveat) String() string {
 	var validator CaveatValidator
 	if err := vom.NewDecoder(bytes.NewReader(c.ValidatorVOM)).Decode(&validator); err == nil {
 		return fmt.Sprintf("%T(%v)", validator, validator)
