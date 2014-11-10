@@ -37,7 +37,7 @@ func serverInterfaceOutArg(method *compile.Method, iface *compile.Interface, env
 	case 2:
 		return javaType(method.OutArgs[0].Type, false, env)
 	default:
-		return javaPath(path.Join(interfaceFullyQualifiedName(iface), method.Name+"Out"))
+		return javaPath(path.Join(interfaceFullyQualifiedName(iface)+"Client", method.Name+"Out"))
 	}
 }
 

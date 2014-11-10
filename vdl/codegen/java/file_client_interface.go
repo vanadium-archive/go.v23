@@ -59,7 +59,7 @@ func clientInterfaceNonStreamingOutArg(iface *compile.Interface, method *compile
 	case 2:
 		return javaType(method.OutArgs[0].Type, useClass, env)
 	default:
-		return javaPath(path.Join(interfaceFullyQualifiedName(iface), method.Name+"Out"))
+		return javaPath(path.Join(interfaceFullyQualifiedName(iface)+"Client", method.Name+"Out"))
 	}
 }
 
