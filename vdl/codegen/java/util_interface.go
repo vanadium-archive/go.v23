@@ -37,15 +37,16 @@ func javaClientExtendsStr(embeds []*compile.Interface) string {
 	buf.WriteString("extends ")
 	for _, embed := range embeds {
 		buf.WriteString(javaPath(interfaceFullyQualifiedName(embed)))
+		buf.WriteString("Client")
 		buf.WriteString(", ")
 	}
 	buf.WriteString("io.veyron.veyron.veyron2.ipc.UniversalServiceMethods")
 	return buf.String()
 }
 
-// javaServiceExtendsStr creates an extends clause for a service interface
+// javaServerExtendsStr creates an extends clause for a server interface
 // e.g. "extends com.a.B, com.d.E"
-func javaServiceExtendsStr(embeds []*compile.Interface) string {
+func javaServerExtendsStr(embeds []*compile.Interface) string {
 	if len(embeds) == 0 {
 		return ""
 	}
@@ -56,7 +57,7 @@ func javaServiceExtendsStr(embeds []*compile.Interface) string {
 			buf.WriteString(", ")
 		}
 		buf.WriteString(javaPath(interfaceFullyQualifiedName(embed)))
-		buf.WriteString("Service")
+		buf.WriteString("Server")
 	}
 	return buf.String()
 }
