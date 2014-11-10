@@ -116,4 +116,5 @@ func (*mockRuntime) WaitForStop(chan<- string)                              {}
 func (*mockRuntime) AdvanceGoal(delta int)                                  {}
 func (*mockRuntime) AdvanceProgress(delta int)                              {}
 func (*mockRuntime) TrackTask(chan<- veyron2.Task)                          {}
+func (*mockRuntime) VtraceStore() vtrace.Store                              { return nil }
 func (*mockRuntime) Cleanup()                                               {}

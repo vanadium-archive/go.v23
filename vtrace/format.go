@@ -134,9 +134,9 @@ func FormatTrace(w io.Writer, record *TraceRecord, loc *time.Location) {
 // FormatTraces writes a text description of all the given traces to
 // the given writer.  Times will be formatted according to the given
 // location, if loc is nil local times will be used.
-func FormatTraces(w io.Writer, records []*TraceRecord, loc *time.Location) {
+func FormatTraces(w io.Writer, records []TraceRecord, loc *time.Location) {
 	fmt.Fprintf(w, "Vtrace traces:\n")
-	for _, record := range records {
-		FormatTrace(w, record, loc)
+	for i := range records {
+		FormatTrace(w, &records[i], loc)
 	}
 }

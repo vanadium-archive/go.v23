@@ -132,3 +132,12 @@ func WithNewSpan(ctx context.T, name string) (context.T, Span) {
 func FromContext(ctx context.T) Span {
 	return ctx.Runtime().(spanManager).SpanFromContext(ctx)
 }
+
+type Store interface {
+	// TraceRecords returns TraceRecords for all traces saved in the store.
+	TraceRecords() []TraceRecord
+
+	// TraceRecord returns a TraceRecord for a given ID.  Returns
+	// nil if the given id is not present.
+	TraceRecord(id uniqueid.ID) *TraceRecord
+}

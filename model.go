@@ -292,6 +292,9 @@ type Runtime interface {
 	// Only one dispatcher may be registered, with subsequent calls
 	// overriding previous settings.
 	ConfigureReservedName(server ipc.Dispatcher, opts ...ipc.ServerOpt)
+
+	// VtraceStore gets the vtrace store for this runtime.
+	VtraceStore() vtrace.Store
 }
 
 // RuntimeFromContext returns the runtime used to generate a given context.
