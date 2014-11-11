@@ -63,14 +63,20 @@ func Generate(pkg *compile.Package, env *compile.Env, config vdlroot.JavaConfig)
 		// Separate file for all typedefs.
 		for _, tdef := range file.TypeDefs {
 			switch tdef.Type.Kind() {
-			case vdl.List:
-				ret = append(ret, genJavaListFile(tdef, env))
 			case vdl.Array:
 				ret = append(ret, genJavaArrayFile(tdef, env))
-			case vdl.Set:
-				ret = append(ret, genJavaSetFile(tdef, env))
+			case vdl.Complex64, vdl.Complex128:
+				ret = append(ret, genJavaComplexFile(tdef, env))
+			case vdl.Enum:
+				ret = append(ret, genJavaEnumFile(tdef, env))
+			case vdl.List:
+				ret = append(ret, genJavaListFile(tdef, env))
 			case vdl.Map:
 				ret = append(ret, genJavaMapFile(tdef, env))
+			case vdl.OneOf:
+				ret = append(ret, genJavaOneOfFile(tdef, env))
+			case vdl.Set:
+				ret = append(ret, genJavaSetFile(tdef, env))
 			case vdl.Struct:
 				ret = append(ret, genJavaStructFile(tdef, env))
 			default:
