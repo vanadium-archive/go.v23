@@ -10,8 +10,6 @@ import (
 
 	"veyron.io/veyron/veyron2/services/mgmt/binary"
 
-	"veyron.io/veyron/veyron2/services/mounttable"
-
 	"veyron.io/veyron/veyron2/services/security/access"
 
 	// The non-user imports are prefixed with "__" to prevent collisions.
@@ -139,7 +137,6 @@ type Association struct {
 // In other words, invoking any method using an existing application
 // installation instance as a receiver is well-defined.
 type ApplicationClientMethods interface {
-	mounttable.GlobbableClientMethods
 	// Object provides access control for Veyron objects.
 	access.ObjectClientMethods
 	// Install installs the application identified by the argument and
@@ -213,14 +210,13 @@ func ApplicationClient(name string, opts ...__ipc.BindOpt) ApplicationClientStub
 			client = clientOpt
 		}
 	}
-	return implApplicationClientStub{name, client, mounttable.GlobbableClient(name, client), access.ObjectClient(name, client)}
+	return implApplicationClientStub{name, client, access.ObjectClient(name, client)}
 }
 
 type implApplicationClientStub struct {
 	name   string
 	client __ipc.Client
 
-	mounttable.GlobbableClientStub
 	access.ObjectClientStub
 }
 
@@ -466,7 +462,6 @@ func (c implApplicationClientStub) GetMethodTags(ctx __context.T, method string,
 // In other words, invoking any method using an existing application
 // installation instance as a receiver is well-defined.
 type ApplicationServerMethods interface {
-	mounttable.GlobbableServerMethods
 	// Object provides access control for Veyron objects.
 	access.ObjectServerMethods
 	// Install installs the application identified by the argument and
@@ -532,7 +527,6 @@ type ApplicationServerMethods interface {
 // argument for each method is always ipc.ServerCall here, while it is either
 // ipc.ServerContext or a typed streaming context there.
 type ApplicationServerStubMethods interface {
-	mounttable.GlobbableServerStubMethods
 	// Object provides access control for Veyron objects.
 	access.ObjectServerStubMethods
 	// Install installs the application identified by the argument and
@@ -606,9 +600,8 @@ type ApplicationServerStub interface {
 // an object that may be used by ipc.Server.
 func ApplicationServer(impl ApplicationServerMethods) ApplicationServerStub {
 	stub := implApplicationServerStub{
-		impl:                impl,
-		GlobbableServerStub: mounttable.GlobbableServer(impl),
-		ObjectServerStub:    access.ObjectServer(impl),
+		impl:             impl,
+		ObjectServerStub: access.ObjectServer(impl),
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
@@ -624,7 +617,6 @@ type implApplicationServerStub struct {
 	impl ApplicationServerMethods
 	gs   *__ipc.GlobState
 
-	mounttable.GlobbableServerStub
 	access.ObjectServerStub
 }
 
@@ -678,9 +670,6 @@ func (s implApplicationServerStub) VGlob() *__ipc.GlobState {
 
 func (s implApplicationServerStub) GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error) {
 	// TODO(toddw): Replace with new DescribeInterfaces implementation.
-	if resp, err := s.GlobbableServerStub.GetMethodTags(call, method); resp != nil || err != nil {
-		return resp, err
-	}
 	if resp, err := s.ObjectServerStub.GetMethodTags(call, method); resp != nil || err != nil {
 		return resp, err
 	}
@@ -794,59 +783,6 @@ func (s implApplicationServerStub) Signature(call __ipc.ServerCall) (__ipc.Servi
 		__wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}}
 	var ss __ipc.ServiceSignature
 	var firstAdded int
-	ss, _ = s.GlobbableServerStub.Signature(call)
-	firstAdded = len(result.TypeDefs)
-	for k, v := range ss.Methods {
-		for i, _ := range v.InArgs {
-			if v.InArgs[i].Type >= __wiretype.TypeIDFirst {
-				v.InArgs[i].Type += __wiretype.TypeID(firstAdded)
-			}
-		}
-		for i, _ := range v.OutArgs {
-			if v.OutArgs[i].Type >= __wiretype.TypeIDFirst {
-				v.OutArgs[i].Type += __wiretype.TypeID(firstAdded)
-			}
-		}
-		if v.InStream >= __wiretype.TypeIDFirst {
-			v.InStream += __wiretype.TypeID(firstAdded)
-		}
-		if v.OutStream >= __wiretype.TypeIDFirst {
-			v.OutStream += __wiretype.TypeID(firstAdded)
-		}
-		result.Methods[k] = v
-	}
-	//TODO(bprosnitz) combine type definitions from embeded interfaces in a way that doesn't cause duplication.
-	for _, d := range ss.TypeDefs {
-		switch wt := d.(type) {
-		case __wiretype.SliceType:
-			if wt.Elem >= __wiretype.TypeIDFirst {
-				wt.Elem += __wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case __wiretype.ArrayType:
-			if wt.Elem >= __wiretype.TypeIDFirst {
-				wt.Elem += __wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case __wiretype.MapType:
-			if wt.Key >= __wiretype.TypeIDFirst {
-				wt.Key += __wiretype.TypeID(firstAdded)
-			}
-			if wt.Elem >= __wiretype.TypeIDFirst {
-				wt.Elem += __wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case __wiretype.StructType:
-			for i, fld := range wt.Fields {
-				if fld.Type >= __wiretype.TypeIDFirst {
-					wt.Fields[i].Type += __wiretype.TypeID(firstAdded)
-				}
-			}
-			d = wt
-			// NOTE: other types are missing, but we are upgrading anyways.
-		}
-		result.TypeDefs = append(result.TypeDefs, d)
-	}
 	ss, _ = s.ObjectServerStub.Signature(call)
 	firstAdded = len(result.TypeDefs)
 	for k, v := range ss.Methods {
