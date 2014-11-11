@@ -8,7 +8,11 @@ import (
 
 // NewContext creates a Context.
 func NewContext(params *ContextParams) Context {
-	return &context{*params}
+	ctx := &context{*params}
+	if params.Timestamp.IsZero() {
+		ctx.params.Timestamp = time.Now()
+	}
+	return ctx
 }
 
 // ContextParams is used to create Context objects using the NewContext
@@ -43,10 +47,10 @@ func (c *context) Label() Label {
 	}
 	return AdminLabel
 }
-func (c *context) LocalPrincipal() Principal        { return c.params.LocalPrincipal }
-func (c *context) LocalBlessings() Blessings        { return c.params.LocalBlessings }
-func (c *context) RemoteBlessings() Blessings       { return c.params.RemoteBlessings }
-func (c *context) LocalEndpoint() naming.Endpoint   { return c.params.LocalEndpoint }
-func (c *context) RemoteEndpoint() naming.Endpoint  { return c.params.RemoteEndpoint }
-func (c *context) Discharges() map[string]Discharge { return c.params.RemoteDischarges }
-func (c *context) String() string                   { return fmt.Sprintf("%+v", c.params) }
+func (c *context) LocalPrincipal() Principal              { return c.params.LocalPrincipal }
+func (c *context) LocalBlessings() Blessings              { return c.params.LocalBlessings }
+func (c *context) RemoteBlessings() Blessings             { return c.params.RemoteBlessings }
+func (c *context) LocalEndpoint() naming.Endpoint         { return c.params.LocalEndpoint }
+func (c *context) RemoteEndpoint() naming.Endpoint        { return c.params.RemoteEndpoint }
+func (c *context) RemoteDischarges() map[string]Discharge { return c.params.RemoteDischarges }
+func (c *context) String() string                         { return fmt.Sprintf("%+v", c.params) }

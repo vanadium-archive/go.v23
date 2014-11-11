@@ -140,7 +140,7 @@ func (c *publicKeyThirdPartyCaveat) Validate(ctx Context) error {
 	if len(ctx.Method()) == 0 && len(ctx.Name()) == 0 && len(ctx.Suffix()) == 0 {
 		return nil
 	}
-	discharge, ok := ctx.Discharges()[c.ID()]
+	discharge, ok := ctx.RemoteDischarges()[c.ID()]
 	if !ok {
 		return fmt.Errorf("missing discharge for caveat(id=%v)", c.ID())
 	}

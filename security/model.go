@@ -425,8 +425,7 @@ type Context interface {
 	// discharges.
 	// TODO(ataly, ashankar): Discharges should return map[string][]Discharge,
 	// i.e, it should map a ThirdPartyCaveat identifier to a set of Discharges.
-	// TODO(ataly, ashankar): Rename to RemoteDischarges.
-	Discharges() map[string]Discharge
+	RemoteDischarges() map[string]Discharge
 	// LocalPrincipal returns the principal used to authenticate to the remote end.
 	LocalPrincipal() Principal
 	// LocalBlessings returns the blessings sent to the remote end for authentication.

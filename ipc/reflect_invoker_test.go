@@ -12,7 +12,6 @@ import (
 
 	"veyron.io/veyron/veyron2/context"
 	"veyron.io/veyron/veyron2/ipc"
-	"veyron.io/veyron/veyron2/naming"
 	"veyron.io/veyron/veyron2/security"
 	"veyron.io/veyron/veyron2/verror"
 )
@@ -20,10 +19,10 @@ import (
 func init() { testutil.Init() }
 
 // FakeServerCall implements ipc.ServerContext.
-type FakeServerCall struct{}
+type FakeServerCall struct{ security.Context }
 
 func NewFakeServerCall() *FakeServerCall {
-	return &FakeServerCall{}
+	return &FakeServerCall{security.NewContext(&security.ContextParams{})}
 }
 
 func (*FakeServerCall) Deadline() (deadline time.Time, ok bool) {
@@ -43,19 +42,7 @@ func (*FakeServerCall) WithTimeout(timeout time.Duration) (context.T, context.Ca
 }
 func (*FakeServerCall) WithValue(key interface{}, val interface{}) context.T { return nil }
 func (*FakeServerCall) Server() ipc.Server                                   { return nil }
-func (*FakeServerCall) Timestamp() (t time.Time)                             { return t }
-func (*FakeServerCall) Method() string                                       { return "" }
-func (*FakeServerCall) MethodTags() []interface{}                            { return nil }
-func (*FakeServerCall) Name() string                                         { return "" }
-func (*FakeServerCall) Suffix() string                                       { return "" }
-func (*FakeServerCall) Label() (l security.Label)                            { return }
-func (*FakeServerCall) Discharges() map[string]security.Discharge            { return nil }
-func (*FakeServerCall) LocalPrincipal() security.Principal                   { return nil }
-func (*FakeServerCall) LocalBlessings() security.Blessings                   { return nil }
-func (*FakeServerCall) RemoteBlessings() security.Blessings                  { return nil }
 func (*FakeServerCall) Blessings() security.Blessings                        { return nil }
-func (*FakeServerCall) LocalEndpoint() naming.Endpoint                       { return nil }
-func (*FakeServerCall) RemoteEndpoint() naming.Endpoint                      { return nil }
 func (*FakeServerCall) Closed() <-chan struct{}                              { return nil }
 func (*FakeServerCall) IsClosed() bool                                       { return false }
 func (*FakeServerCall) Send(item interface{}) error                          { return nil }
