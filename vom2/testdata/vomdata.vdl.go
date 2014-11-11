@@ -5,6 +5,7 @@ package testdata
 
 import (
 	// The non-user imports are prefixed with "__" to prevent collisions.
+	__vdl "veyron.io/veyron/veyron2/vdl"
 	__vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
 )
 
@@ -487,5 +488,185 @@ var Tests = []TestCase{
 		Name:  "NOneOf(int64(-123))",
 		Value: NOneOf{int64(-123)},
 		Hex:   "80ff813619012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e4f6e654f66020303040b00ff82030bfff5",
+	},
+	{
+		Name:  "typeobject(bool)",
+		Value: __vdl.TypeOf(false),
+		Hex:   "800403",
+	},
+	{
+		Name:  "typeobject(uint16)",
+		Value: __vdl.TypeOf(uint16(0)),
+		Hex:   "800406",
+	},
+	{
+		Name:  "typeobject(uint32)",
+		Value: __vdl.TypeOf(uint32(0)),
+		Hex:   "800407",
+	},
+	{
+		Name:  "typeobject(uint64)",
+		Value: __vdl.TypeOf(uint64(0)),
+		Hex:   "800408",
+	},
+	{
+		Name:  "typeobject(int16)",
+		Value: __vdl.TypeOf(int16(0)),
+		Hex:   "800409",
+	},
+	{
+		Name:  "typeobject(int32)",
+		Value: __vdl.TypeOf(int32(0)),
+		Hex:   "80040a",
+	},
+	{
+		Name:  "typeobject(int64)",
+		Value: __vdl.TypeOf(int64(0)),
+		Hex:   "80040b",
+	},
+	{
+		Name:  "typeobject(int16)",
+		Value: __vdl.TypeOf(int16(0)),
+		Hex:   "800409",
+	},
+	{
+		Name:  "typeobject(int32)",
+		Value: __vdl.TypeOf(int32(0)),
+		Hex:   "80040a",
+	},
+	{
+		Name:  "typeobject(int64)",
+		Value: __vdl.TypeOf(int64(0)),
+		Hex:   "80040b",
+	},
+	{
+		Name:  "typeobject(float32)",
+		Value: __vdl.TypeOf(float32(0)),
+		Hex:   "80040c",
+	},
+	{
+		Name:  "typeobject(float64)",
+		Value: __vdl.TypeOf(float64(0)),
+		Hex:   "80040d",
+	},
+	{
+		Name:  "typeobject(complex64)",
+		Value: __vdl.TypeOf(complex64(0)),
+		Hex:   "80040e",
+	},
+	{
+		Name:  "typeobject(complex128)",
+		Value: __vdl.TypeOf(complex128(0)),
+		Hex:   "80040f",
+	},
+	{
+		Name:  "typeobject(NBool)",
+		Value: __vdl.TypeOf(NBool(false)),
+		Hex:   "80ff813210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e426f6f6c0203000441",
+	},
+	{
+		Name:  "typeobject(NUint16)",
+		Value: __vdl.TypeOf(NUint16(0)),
+		Hex:   "80ff813410012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e55696e7431360206000441",
+	},
+	{
+		Name:  "typeobject(NUint32)",
+		Value: __vdl.TypeOf(NUint32(0)),
+		Hex:   "80ff813410012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e55696e7433320207000441",
+	},
+	{
+		Name:  "typeobject(NUint64)",
+		Value: __vdl.TypeOf(NUint64(0)),
+		Hex:   "80ff813410012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e55696e7436340208000441",
+	},
+	{
+		Name:  "typeobject(NInt16)",
+		Value: __vdl.TypeOf(NInt16(0)),
+		Hex:   "80ff813310012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e496e7431360209000441",
+	},
+	{
+		Name:  "typeobject(NInt32)",
+		Value: __vdl.TypeOf(NInt32(0)),
+		Hex:   "80ff813310012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e496e743332020a000441",
+	},
+	{
+		Name:  "typeobject(NInt64)",
+		Value: __vdl.TypeOf(NInt64(0)),
+		Hex:   "80ff813310012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e496e743634020b000441",
+	},
+	{
+		Name:  "typeobject(NFloat32)",
+		Value: __vdl.TypeOf(NFloat32(0)),
+		Hex:   "80ff813510012f766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e466c6f61743332020c000441",
+	},
+	{
+		Name:  "typeobject(NFloat64)",
+		Value: __vdl.TypeOf(NFloat64(0)),
+		Hex:   "80ff813510012f766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e466c6f61743634020d000441",
+	},
+	{
+		Name:  "typeobject(NComplex64)",
+		Value: __vdl.TypeOf(NComplex64(0)),
+		Hex:   "80ff8137100131766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e436f6d706c65783634020e000441",
+	},
+	{
+		Name:  "typeobject(NComplex128)",
+		Value: __vdl.TypeOf(NComplex128(0)),
+		Hex:   "80ff8138100132766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e436f6d706c6578313238020f000441",
+	},
+	{
+		Name:  "typeobject([2]uint64)",
+		Value: __vdl.TypeOf([2]uint64{}),
+		Hex:   "80ff81061202080302000441",
+	},
+	{
+		Name:  "typeobject(NArray2Uint64)",
+		Value: __vdl.TypeOf(NArray2Uint64{}),
+		Hex:   "80ff813c120134766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e41727261793255696e74363402080302000441",
+	},
+	{
+		Name:  "typeobject([]uint64)",
+		Value: __vdl.TypeOf([]uint64{}),
+		Hex:   "80ff8104130208000441",
+	},
+	{
+		Name:  "typeobject(NListUint64)",
+		Value: __vdl.TypeOf(NListUint64{}),
+		Hex:   "80ff8138130132766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e4c69737455696e7436340208000441",
+	},
+	{
+		Name:  "typeobject(set[uint64])",
+		Value: __vdl.TypeOf(map[uint64]struct{}{}),
+		Hex:   "80ff8104140208000441",
+	},
+	{
+		Name:  "typeobject(NSetUint64)",
+		Value: __vdl.TypeOf(NSetUint64{}),
+		Hex:   "80ff8137140131766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e53657455696e7436340208000441",
+	},
+	{
+		Name:  "typeobject(map[uint64]string)",
+		Value: __vdl.TypeOf(map[uint64]string{}),
+		Hex:   "80ff81061502080304000441",
+	},
+	{
+		Name:  "typeobject(NMapUint64String)",
+		Value: __vdl.TypeOf(NMapUint64String{}),
+		Hex:   "80ff813f150137766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e4d617055696e743634537472696e6702080304000441",
+	},
+	{
+		Name:  "typeobject(NStruct)",
+		Value: __vdl.TypeOf(NStruct{}),
+		Hex:   "80ff814616012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e5374727563740203010141020300010142020400010143020b00000441",
+	},
+	{
+		Name:  "typeobject(NEnum)",
+		Value: __vdl.TypeOf(NEnumA),
+		Hex:   "80ff813811012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e456e756d0203014101420143000441",
+	},
+	{
+		Name:  "typeobject(NOneOf)",
+		Value: __vdl.TypeOf(NOneOf{false}),
+		Hex:   "80ff813619012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e4f6e654f66020303040b000441",
 	},
 }

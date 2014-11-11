@@ -256,10 +256,9 @@ func addSubTypeDeps(t *vdl.Type, pkg *Package, env *Env, tdeps map[*vdl.Type]boo
 func addValueTypeDeps(v *vdl.Value, pkg *Package, env *Env, tdeps map[*vdl.Type]bool, pdeps map[*Package]bool) {
 	t := v.Type()
 	if def := env.typeDefs[t]; def != nil {
-		// We don't track transitive dependencies, only immediate dependencies.
 		tdeps[t] = true
 		pdeps[def.File.Package] = true
-		return
+		// Fall through to track transitive dependencies, based on the subvalues.
 	}
 	// Traverse subvalues recursively.
 	switch t.Kind() {
