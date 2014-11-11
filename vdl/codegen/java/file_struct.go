@@ -16,17 +16,24 @@ package {{.PackagePath}};
 /**
  * type {{.Name}} {{.VdlTypeString}} {{.Doc}}
  **/
-public final class {{.Name}} implements android.os.Parcelable, java.io.Serializable {
-    static final long serialVersionUID = 0L;
-
+public final class {{.Name}} extends io.veyron.veyron.veyron2.vdl.AbstractVdlStruct
+        implements android.os.Parcelable {
     {{/* Field declarations */}}
     {{ range $field := .Fields }}
       @com.google.gson.annotations.SerializedName("{{$field.Name}}")
       private {{$field.Type}} {{$field.LowercaseName}};
     {{ end }}
 
-    {{/* Constructor */}}
+    public static final io.veyron.veyron.veyron2.vdl.VdlType VDL_TYPE =
+            io.veyron.veyron.veyron2.vdl.Types.getVdlTypeFromReflection({{.Name}}.class);
+
+    {{/* Constructors */}}
+    public {{.Name}}() {
+        super(VDL_TYPE);
+    }
+
     public {{.Name}}({{ .FieldsAsArgs }}) {
+        this();
         {{ range $field := .Fields }}
             this.{{$field.LowercaseName}} = {{$field.LowercaseName}};
         {{ end }}
@@ -37,6 +44,7 @@ public final class {{.Name}} implements android.os.Parcelable, java.io.Serializa
     public {{$field.Type}} get{{$field.Name}}() {
         return this.{{$field.LowercaseName}};
     }
+
     public void set{{$field.Name}}({{$field.Type}} {{$field.LowercaseName}}) {
         this.{{$field.LowercaseName}} = {{$field.LowercaseName}};
     }
@@ -72,6 +80,7 @@ public final class {{.Name}} implements android.os.Parcelable, java.io.Serializa
         {{ end }} {{/* range over fields */}}
         return true;
     }
+
     @Override
     public int hashCode() {
         int result = 1;
@@ -81,37 +90,58 @@ public final class {{.Name}} implements android.os.Parcelable, java.io.Serializa
         {{ end }}
         return result;
     }
+
     @Override
     public java.lang.String toString() {
-    	return io.veyron.veyron.veyron2.vdl.JSONUtil.getGsonBuilder().create().toJson(this);
+        String result = "{";
+        {{ range $index, $field := .Fields }}
+            {{ if gt $index 0 }}
+                result += ", ";
+            {{ end }}
+            result += "{{$field.LowercaseName}}:" + {{$field.LowercaseName}};
+        {{ end }}
+        return result + "}";
     }
 
     @Override
     public int describeContents() {
-    	return 0;
+        return 0;
     }
+
     @Override
     public void writeToParcel(android.os.Parcel out, int flags) {
-    	{{ range $field := .Fields }}
-    		io.veyron.veyron.veyron2.vdl.ParcelUtil.writeValue(out, {{$field.LowercaseName}});
-    	{{ end }}
+        try {
+        {{ range $field := .Fields }}
+            io.veyron.veyron.veyron2.vdl.ParcelUtil.writeValue(out, {{$field.LowercaseName}},
+                getClass().getDeclaredField("{{$field.LowercaseName}}").getGenericType());
+        {{ end }}
+        } catch (NoSuchFieldException | SecurityException e) {
+            // do nothing
+        }
     }
-	public static final android.os.Parcelable.Creator<{{.Name}}> CREATOR
-		= new android.os.Parcelable.Creator<{{.Name}}>() {
-		@Override
-		public {{.Name}} createFromParcel(android.os.Parcel in) {
-			return new {{.Name}}(in);
-		}
-		@Override
-		public {{.Name}}[] newArray(int size) {
-			return new {{.Name}}[size];
-		}
-	};
-	private {{.Name}}(android.os.Parcel in) {
-		{{ range $field := .Fields }}
-			this.{{$field.LowercaseName}} = ({{$field.Type}}) io.veyron.veyron.veyron2.vdl.ParcelUtil.readValue(in, getClass().getClassLoader(), this.{{$field.LowercaseName}});
-		{{ end }}
-	}
+
+    public static final android.os.Parcelable.Creator<{{.Name}}> CREATOR
+        = new android.os.Parcelable.Creator<{{.Name}}>() {
+        @SuppressWarnings("unchecked")
+        @Override
+        public {{.Name}} createFromParcel(android.os.Parcel in) {
+            {{.Name}} value = new {{.Name}}();
+            try {
+            {{ range $field := .Fields }}
+                value.set{{$field.Name}}(({{$field.Type}}) io.veyron.veyron.veyron2.vdl.ParcelUtil.readValue(
+                in, getClass().getClassLoader(), getClass().getDeclaredField("{{$field.LowercaseName}}").getGenericType()));
+            {{ end }}
+            } catch (NoSuchFieldException | SecurityException e) {
+                // do nothing
+            }
+            return value;
+        }
+
+        @Override
+        public {{.Name}}[] newArray(int size) {
+            return new {{.Name}}[size];
+        }
+    };
 }`
 
 type structDefinitionField struct {
@@ -168,7 +198,7 @@ func genJavaStructFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo {
 		Name:          tdef.Name,
 		PackagePath:   javaPath(javaGenPkgPath(tdef.File.Package.Path)),
 		Source:        tdef.File.BaseName,
-		VdlTypeString: tdef.BaseType.String(),
+		VdlTypeString: tdef.Type.String(),
 	}
 	var buf bytes.Buffer
 	err := parseTmpl("struct", structTmpl).Execute(&buf, data)

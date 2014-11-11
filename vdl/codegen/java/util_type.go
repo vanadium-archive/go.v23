@@ -8,6 +8,7 @@ import (
 
 	"veyron.io/veyron/veyron2/vdl"
 	"veyron.io/veyron/veyron2/vdl/compile"
+	"veyron.io/veyron/veyron2/vdl/vdlutil"
 )
 
 func javaFullyQualifiedNamedType(def *compile.TypeDef, forceClass bool, env *compile.Env) string {
@@ -76,13 +77,14 @@ func javaBuiltInType(typ *vdl.Type, forceClass bool) (string, bool) {
 		} else {
 			return "double", false
 		}
-	case vdl.Complex64, vdl.Complex128:
-		return "org.apache.commons.math3.complex.Complex", true
+	case vdl.Complex64:
+		return "io.veyron.veyron.veyron2.vdl.VdlComplex64", true
+	case vdl.Complex128:
+		return "io.veyron.veyron.veyron2.vdl.VdlComplex128", true
 	case vdl.String:
 		return "java.lang.String", true
-	// TODO(spetrovic): handle typeobject correctly.
 	case vdl.TypeObject:
-		return "java.lang.Object", true
+		return "io.veyron.veyron.veyron2.vdl.VdlTypeObject", true
 	case vdl.Any:
 		return "io.veyron.veyron.veyron2.vdl.Any", true
 	default:
@@ -100,11 +102,15 @@ func javaType(t *vdl.Type, forceClass bool, env *compile.Env) string {
 	}
 	switch t.Kind() {
 	case vdl.Array:
-		return fmt.Sprintf("%s[]", javaType(t.Elem(), false, env))
+		if !forceClass {
+			return fmt.Sprintf("%s[]", javaType(t.Elem(), false, env))
+		} else {
+			return fmt.Sprintf("%s<%s>", "java.util.List", javaType(t.Elem(), true, env))
+		}
 	case vdl.List:
 		// NOTE(spetrovic): We represent byte lists as Java byte arrays, as it's doubtful anybody
 		// would want to use them as Java lists.
-		if javaType(t.Elem(), false, env) == "byte" {
+		if !forceClass && javaType(t.Elem(), false, env) == "byte" {
 			return fmt.Sprintf("byte[]")
 		}
 		return fmt.Sprintf("%s<%s>", "java.util.List", javaType(t.Elem(), true, env))
@@ -116,6 +122,15 @@ func javaType(t *vdl.Type, forceClass bool, env *compile.Env) string {
 		log.Fatalf("vdl: javaType unhandled type %v %v", t.Kind(), t)
 		return ""
 	}
+}
+
+func javaVdlPrimitiveType(kind vdl.Kind) string {
+	switch kind {
+	case vdl.Bool, vdl.Byte, vdl.Uint16, vdl.Uint32, vdl.Uint64, vdl.Int16, vdl.Int32, vdl.Int64, vdl.Float32, vdl.Float64, vdl.Complex128, vdl.Complex64, vdl.String:
+		return "io.veyron.veyron.veyron2.vdl.Vdl" + vdlutil.FirstRuneToUpper(kind.String())
+	}
+	log.Fatalf("val: unhandled kind: %v", kind)
+	return ""
 }
 
 // javaHashCode returns the java code for the hashCode() computation for a given type.
