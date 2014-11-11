@@ -145,9 +145,9 @@ func unTypedConst(d data, v *vdl.Value, unTypedFields bool) string {
 			s += "\n  '" + vdlutil.ToCamelCase(t.Field(ix).Name) + "': " + recursiveConst(d, v.Field(ix)) + ","
 		}
 		return s + "\n}"
-
+	case vdl.TypeObject:
+		return typeStruct(v.TypeObject())
 	}
-
 	panic(fmt.Errorf("vdl: unTypedConst unhandled type %v %v", v.Kind(), v.Type()))
 }
 
@@ -155,7 +155,7 @@ func primitiveWithOptionalName(primitive, name string) string {
 	if name == "" {
 		return "Types." + primitive
 	}
-	return "{kind: Kind." + primitive + ", name: '" + name + "'}"
+	return "new vom.Type({kind: Kind." + primitive + ", name: '" + name + "'})"
 }
 
 func typeStruct(t *vdl.Type) string {
@@ -193,43 +193,40 @@ func typeStruct(t *vdl.Type) string {
 		return primitiveWithOptionalName("COMPLEX128", t.Name())
 	case vdl.String:
 		return primitiveWithOptionalName("STRING", t.Name())
+	case vdl.TypeObject:
+		return primitiveWithOptionalName("TYPEOBJECT", t.Name())
 	case vdl.Enum:
 		labels := ""
 		for i := 0; i < t.NumEnumLabel(); i++ {
 			labels += "'" + t.EnumLabel(i) + "', "
 		}
-		return fmt.Sprintf(`{
+		return fmt.Sprintf(`new vom.Type({
     kind: Kind.ENUM,
     name: '%s',
     labels: [%s]
-  }`, t.Name(), labels)
-	case vdl.TypeObject:
-		return "{}"
-
-	// TODO(bjornick): Handle recursive types and de-duping of the same struct definitions over
-	// and over again.
+  })`, t.Name(), labels)
 	case vdl.Array:
-		return fmt.Sprintf(`{
+		return fmt.Sprintf(`new vom.Type({
     kind: Kind.ARRAY,%s
     elem: %s,
     len: %d
-  }`, nameField, typeStruct(t.Elem()), t.Len())
+  })`, nameField, typeStruct(t.Elem()), t.Len())
 	case vdl.List:
-		return `{
+		return `new vom.Type({
     kind: Kind.LIST,` + nameField + `
     elem: ` + typeStruct(t.Elem()) + `
-  }`
+  })`
 	case vdl.Set:
-		return `{
+		return `new vom.Type({
     kind: Kind.SET,` + nameField + `
     key: ` + typeStruct(t.Key()) + `
-  }`
+  })`
 	case vdl.Map:
-		return fmt.Sprintf(`{
+		return fmt.Sprintf(`new vom.Type({
     kind: Kind.MAP,%s
     key: %s,
     elem: %s
-  }`, nameField, typeStruct(t.Key()), typeStruct(t.Elem()))
+  })`, nameField, typeStruct(t.Key()), typeStruct(t.Elem()))
 	case vdl.Struct:
 		fields := ""
 		for i := 0; i < t.NumField(); i++ {
@@ -240,21 +237,21 @@ func typeStruct(t *vdl.Type) string {
       type: %s
     },`, vdlutil.ToCamelCase(f.Name), typeStruct(f.Type))
 		}
-		return fmt.Sprintf(`{
+		return fmt.Sprintf(`new vom.Type({
     kind: Kind.STRUCT,
     name: '%s',
     fields: [%s
-  ]}`, t.Name(), fields)
+  ]})`, t.Name(), fields)
 	case vdl.OneOf:
 		types := ""
 		for i := 0; i < t.NumOneOfType(); i++ {
 			types += typeStruct(t.OneOfType(i)) + ", "
 		}
-		return fmt.Sprintf(`{
+		return fmt.Sprintf(`new vom.Type({
     kind: Kind.ONEOF,
     name: '%s',
     types: [%s]
-  }`, t.Name(), types)
+  })`, t.Name(), types)
 	}
 	return ""
 }

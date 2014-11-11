@@ -12,7 +12,7 @@ func TestType(t *testing.T) {
 		Want string
 	}{
 		{vdl.AnyType, `Types.ANY`},
-		{vdl.TypeObjectType, `{}`},
+		{vdl.TypeObjectType, `Types.TYPEOBJECT`},
 		{vdl.BoolType, `Types.BOOL`},
 		{vdl.StringType, `Types.STRING`},
 		{vdl.ByteType, `Types.BYTE`},
@@ -26,66 +26,66 @@ func TestType(t *testing.T) {
 		{vdl.Float64Type, `Types.FLOAT64`},
 		{vdl.Complex64Type, `Types.COMPLEX64`},
 		{vdl.Complex128Type, `Types.COMPLEX128`},
-		{tNamedBool, `{kind: Kind.BOOL, name: 'NamedBool'}`},
+		{tNamedBool, `new vom.Type({kind: Kind.BOOL, name: 'NamedBool'})`},
 		{tEnum,
-			`{
+			`new vom.Type({
     kind: Kind.ENUM,
     name: 'TestEnum',
     labels: ['A', 'B', 'C', ]
-  }`},
+  })`},
 		{tArray,
-			`{
+			`new vom.Type({
     kind: Kind.ARRAY,
     elem: Types.STRING,
     len: 3
-  }`},
+  })`},
 		{tNamedArray,
-			`{
+			`new vom.Type({
     kind: Kind.ARRAY,
     name: 'NamedArray',
     elem: Types.STRING,
     len: 3
-  }`},
+  })`},
 		{tList,
-			`{
+			`new vom.Type({
     kind: Kind.LIST,
     elem: Types.STRING
-  }`},
+  })`},
 		{tNamedList,
-			`{
+			`new vom.Type({
     kind: Kind.LIST,
     name: 'NamedList',
     elem: Types.STRING
-  }`},
+  })`},
 
 		{tSet,
-			`{
+			`new vom.Type({
     kind: Kind.SET,
     key: Types.STRING
-  }`},
+  })`},
 		{tNamedSet,
-			`{
+			`new vom.Type({
     kind: Kind.SET,
     name: 'NamedSet',
     key: Types.STRING
-  }`},
+  })`},
 
 		{tMap,
-			`{
+			`new vom.Type({
     kind: Kind.MAP,
     key: Types.STRING,
     elem: Types.INT64
-  }`},
+  })`},
 		{tNamedMap,
-			`{
+			`new vom.Type({
     kind: Kind.MAP,
     name: 'NamedMap',
     key: Types.STRING,
     elem: Types.INT64
-  }`},
+  })`},
 
 		{tStruct,
-			`{
+			`new vom.Type({
     kind: Kind.STRUCT,
     name: 'TestStruct',
     fields: [
@@ -97,12 +97,12 @@ func TestType(t *testing.T) {
       name: 'b',
       type: Types.INT64
     },
-  ]}`}, {tOneOf,
-			`{
+  ]})`}, {tOneOf,
+			`new vom.Type({
     kind: Kind.ONEOF,
     name: 'TestOneOf',
     types: [Types.STRING, Types.INT64, ]
-  }`},
+  })`},
 	}
 	for _, test := range tests {
 		if got, want := typeStruct(test.T), test.Want; got != want {
