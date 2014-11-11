@@ -220,7 +220,16 @@ func (d *binaryDecoder) decodeValue(t *vdl.Type, target valconv.Target) error {
 			return errIndexOutOfRange
 		}
 		return target.FromEnumLabel(t.EnumLabel(int(index)), t)
-		// TODO: TypeObject
+	case vdl.TypeObject:
+		id, err := binaryDecodeUint(d.buf)
+		if err != nil {
+			return err
+		}
+		typeobj, err := d.recvTypes.LookupOrBuildType(TypeID(id))
+		if err != nil {
+			return err
+		}
+		return target.FromTypeObject(typeobj)
 	case vdl.Array, vdl.List:
 		len, err := binaryDecodeLenOrArrayLen(d.buf, t)
 		if err != nil {
@@ -368,7 +377,7 @@ func (d *binaryDecoder) ignoreValue(t *vdl.Type) error {
 	switch kind := t.Kind(); kind {
 	case vdl.Bool, vdl.Byte:
 		return d.buf.Skip(1)
-	case vdl.Uint16, vdl.Uint32, vdl.Uint64, vdl.Int16, vdl.Int32, vdl.Int64, vdl.Float32, vdl.Float64, vdl.Enum:
+	case vdl.Uint16, vdl.Uint32, vdl.Uint64, vdl.Int16, vdl.Int32, vdl.Int64, vdl.Float32, vdl.Float64, vdl.Enum, vdl.TypeObject:
 		// The underlying encoding of all these types is based on uint.
 		return binaryIgnoreUint(d.buf)
 	case vdl.Complex64, vdl.Complex128:
@@ -379,7 +388,6 @@ func (d *binaryDecoder) ignoreValue(t *vdl.Type) error {
 		return binaryIgnoreUint(d.buf)
 	case vdl.String:
 		return binaryIgnoreString(d.buf)
-		// TODO(toddw): decode TypeObject
 	case vdl.Array, vdl.List, vdl.Set, vdl.Map:
 		len, err := binaryDecodeLenOrArrayLen(d.buf, t)
 		if err != nil {

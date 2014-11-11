@@ -19,8 +19,9 @@ import (
 )
 
 const (
-	testpkg = "veyron.io/veyron/veyron2/vom2/testdata"
-	vomdata = testpkg + "/vomdata.vdl.config"
+	testpkg          = "veyron.io/veyron/veyron2/vom2/testdata"
+	vomdataCanonical = testpkg + "/" + vomdataConfig
+	vomdataConfig    = "vomdata.vdl.config"
 )
 
 var cmdGenerate = &cmdline.Command{
@@ -44,7 +45,7 @@ that will be tested.  Here's an example:
    }
 
 If not specified, we'll try to find the file at its canonical location:
-   ` + vomdata,
+   ` + vomdataCanonical,
 }
 
 var (
@@ -114,7 +115,7 @@ func guessDataFilePath(debug io.Writer, srcDirs []string) string {
 	// Try to guess the data file path by looking for the canonical vomdata input
 	// file in each of our source directories.
 	for _, dir := range srcDirs {
-		guess := filepath.Join(dir, vomdata)
+		guess := filepath.Join(dir, vomdataCanonical)
 		if stat, err := os.Stat(guess); err == nil && !stat.IsDir() {
 			fmt.Fprintf(debug, "Found vomdata file %s\n", guess)
 			return guess
@@ -168,7 +169,7 @@ func generate(config *vdl.Value) ([]byte, error) {
 	}
 	buf := new(bytes.Buffer)
 	fmt.Fprintf(buf, `// This file was auto-generated via "vomtest generate".
-// DO NOT UPDATE MANUALLY; read the comments in the vomdata source file.
+// DO NOT UPDATE MANUALLY; read the comments in `+vomdataConfig+`.
 
 package testdata
 `)

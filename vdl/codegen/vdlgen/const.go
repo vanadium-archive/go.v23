@@ -121,14 +121,18 @@ func constValue(v *vdl.Value, pkgPath string, imports codegen.Imports) (string, 
 		return s + "}", nil
 	}
 	// Enum and TypeObject always require the typestr.
-	typestr, err := Type(t, pkgPath, imports)
-	if err != nil {
-		return "", err
-	}
 	switch k {
 	case vdl.Enum:
+		typestr, err := Type(t, pkgPath, imports)
+		if err != nil {
+			return "", err
+		}
 		return typestr + "." + v.EnumLabel(), nil
 	case vdl.TypeObject:
+		typestr, err := Type(v.TypeObject(), pkgPath, imports)
+		if err != nil {
+			return "", err
+		}
 		return "typeobject(" + typestr + ")", nil
 	default:
 		return "", fmt.Errorf("vdlgen.Const unhandled type: %v %v", k, t)
