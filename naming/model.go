@@ -69,12 +69,16 @@ type Endpoint interface {
 }
 
 // MountedServer represents a server mounted under an object name.
+//
+// TODO(toddw): Consolidate with VDLMountedServer once vdl supports time.
 type MountedServer struct {
 	Server  string    // Server is an object address (OA): endpoint + suffix
 	Expires time.Time // Absolute time after which the mount expires.
 }
 
 // MountEntry represents a name mounted in the mounttable.
+//
+// TODO(toddw): Consolidate with VDLMountEntry once vdl supports time.
 type MountEntry struct {
 	// Name is the mounted name.
 	Name string

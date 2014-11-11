@@ -5,9 +5,9 @@
 package mounttable
 
 import (
-	"veyron.io/veyron/veyron2/security"
+	"veyron.io/veyron/veyron2/naming"
 
-	"veyron.io/veyron/veyron2/services/mounttable/types"
+	"veyron.io/veyron/veyron2/security"
 
 	// The non-user imports are prefixed with "__" to prevent collisions.
 	__io "io"
@@ -108,7 +108,7 @@ type GlobbableGlobClientStream interface {
 		Advance() bool
 		// Value returns the item that was staged by Advance.  May panic if Advance
 		// returned false or was not called.  Never blocks.
-		Value() types.MountEntry
+		Value() naming.VDLMountEntry
 		// Err returns any error encountered by Advance.  Never blocks.
 		Err() error
 	}
@@ -136,16 +136,16 @@ type GlobbableGlobCall interface {
 
 type implGlobbableGlobClientRecv struct {
 	call __ipc.Call
-	val  types.MountEntry
+	val  naming.VDLMountEntry
 	err  error
 }
 
 func (c *implGlobbableGlobClientRecv) Advance() bool {
-	c.val = types.MountEntry{}
+	c.val = naming.VDLMountEntry{}
 	c.err = c.call.Recv(&c.val)
 	return c.err == nil
 }
-func (c *implGlobbableGlobClientRecv) Value() types.MountEntry {
+func (c *implGlobbableGlobClientRecv) Value() naming.VDLMountEntry {
 	return c.val
 }
 func (c *implGlobbableGlobClientRecv) Err() error {
@@ -162,7 +162,7 @@ type implGlobbableGlobCall struct {
 
 func (c *implGlobbableGlobCall) RecvStream() interface {
 	Advance() bool
-	Value() types.MountEntry
+	Value() naming.VDLMountEntry
 	Err() error
 } {
 	return &c.recv
@@ -280,14 +280,14 @@ func (s implGlobbableServerStub) Signature(call __ipc.ServerCall) (__ipc.Service
 				__wiretype.FieldType{Type: 0x3, Name: "Server"},
 				__wiretype.FieldType{Type: 0x34, Name: "TTL"},
 			},
-			"veyron.io/veyron/veyron2/services/mounttable/types.MountedServer", []string(nil)},
+			"veyron.io/veyron/veyron2/naming.VDLMountedServer", []string(nil)},
 		__wiretype.SliceType{Elem: 0x42, Name: "", Tags: []string(nil)}, __wiretype.StructType{
 			[]__wiretype.FieldType{
 				__wiretype.FieldType{Type: 0x3, Name: "Name"},
 				__wiretype.FieldType{Type: 0x43, Name: "Servers"},
 				__wiretype.FieldType{Type: 0x2, Name: "MT"},
 			},
-			"veyron.io/veyron/veyron2/services/mounttable/types.MountEntry", []string(nil)},
+			"veyron.io/veyron/veyron2/naming.VDLMountEntry", []string(nil)},
 	}
 
 	return result, nil
@@ -300,7 +300,7 @@ type GlobbableGlobServerStream interface {
 		// Send places the item onto the output stream.  Returns errors encountered
 		// while sending.  Blocks if there is no buffer space; will unblock when
 		// buffer space is available.
-		Send(item types.MountEntry) error
+		Send(item naming.VDLMountEntry) error
 	}
 }
 
@@ -314,7 +314,7 @@ type implGlobbableGlobServerSend struct {
 	call __ipc.ServerCall
 }
 
-func (s *implGlobbableGlobServerSend) Send(item types.MountEntry) error {
+func (s *implGlobbableGlobServerSend) Send(item naming.VDLMountEntry) error {
 	return s.call.Send(item)
 }
 
@@ -324,7 +324,7 @@ type implGlobbableGlobContext struct {
 }
 
 func (s *implGlobbableGlobContext) SendStream() interface {
-	Send(item types.MountEntry) error
+	Send(item naming.VDLMountEntry) error
 } {
 	return &s.send
 }
@@ -347,17 +347,17 @@ type MountTableClientMethods interface {
 	// act as if it was never present as far as the interface is concerned.
 	//
 	// Opts represents a bit mask of options.
-	Mount(ctx __context.T, Server string, TTL uint32, Flags types.MountFlag, opts ...__ipc.CallOpt) error
+	Mount(ctx __context.T, Server string, TTL uint32, Flags naming.MountFlag, opts ...__ipc.CallOpt) error
 	// Unmount removes Server from the mount point.  If Server is empty, remove
 	// all servers mounted there.
 	// Returns a non-nil error iff Server remains mounted at the mount point.
 	Unmount(ctx __context.T, Server string, opts ...__ipc.CallOpt) error
 	// ResolveStep takes the next step in resolving a name.  Returns the next
 	// servers to query and the suffix at those servers.
-	ResolveStep(__context.T, ...__ipc.CallOpt) (Servers []types.MountedServer, Suffix string, err error)
+	ResolveStep(__context.T, ...__ipc.CallOpt) (Servers []naming.VDLMountedServer, Suffix string, err error)
 	// ResolveStepX takes the next step in resolving a name.  Returns the next
 	// servers to query and the suffix at those servers.
-	ResolveStepX(__context.T, ...__ipc.CallOpt) (Entry types.MountEntry, err error)
+	ResolveStepX(__context.T, ...__ipc.CallOpt) (Entry naming.VDLMountEntry, err error)
 }
 
 // MountTableClientStub adds universal methods to MountTableClientMethods.
@@ -391,7 +391,7 @@ func (c implMountTableClientStub) c(ctx __context.T) __ipc.Client {
 	return __veyron2.RuntimeFromContext(ctx).Client()
 }
 
-func (c implMountTableClientStub) Mount(ctx __context.T, i0 string, i1 uint32, i2 types.MountFlag, opts ...__ipc.CallOpt) (err error) {
+func (c implMountTableClientStub) Mount(ctx __context.T, i0 string, i1 uint32, i2 naming.MountFlag, opts ...__ipc.CallOpt) (err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Mount", []interface{}{i0, i1, i2}, opts...); err != nil {
 		return
@@ -413,7 +413,7 @@ func (c implMountTableClientStub) Unmount(ctx __context.T, i0 string, opts ...__
 	return
 }
 
-func (c implMountTableClientStub) ResolveStep(ctx __context.T, opts ...__ipc.CallOpt) (o0 []types.MountedServer, o1 string, err error) {
+func (c implMountTableClientStub) ResolveStep(ctx __context.T, opts ...__ipc.CallOpt) (o0 []naming.VDLMountedServer, o1 string, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "ResolveStep", nil, opts...); err != nil {
 		return
@@ -424,7 +424,7 @@ func (c implMountTableClientStub) ResolveStep(ctx __context.T, opts ...__ipc.Cal
 	return
 }
 
-func (c implMountTableClientStub) ResolveStepX(ctx __context.T, opts ...__ipc.CallOpt) (o0 types.MountEntry, err error) {
+func (c implMountTableClientStub) ResolveStepX(ctx __context.T, opts ...__ipc.CallOpt) (o0 naming.VDLMountEntry, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "ResolveStepX", nil, opts...); err != nil {
 		return
@@ -475,17 +475,17 @@ type MountTableServerMethods interface {
 	// act as if it was never present as far as the interface is concerned.
 	//
 	// Opts represents a bit mask of options.
-	Mount(ctx __ipc.ServerContext, Server string, TTL uint32, Flags types.MountFlag) error
+	Mount(ctx __ipc.ServerContext, Server string, TTL uint32, Flags naming.MountFlag) error
 	// Unmount removes Server from the mount point.  If Server is empty, remove
 	// all servers mounted there.
 	// Returns a non-nil error iff Server remains mounted at the mount point.
 	Unmount(ctx __ipc.ServerContext, Server string) error
 	// ResolveStep takes the next step in resolving a name.  Returns the next
 	// servers to query and the suffix at those servers.
-	ResolveStep(__ipc.ServerContext) (Servers []types.MountedServer, Suffix string, Error error)
+	ResolveStep(__ipc.ServerContext) (Servers []naming.VDLMountedServer, Suffix string, Error error)
 	// ResolveStepX takes the next step in resolving a name.  Returns the next
 	// servers to query and the suffix at those servers.
-	ResolveStepX(__ipc.ServerContext) (Entry types.MountEntry, Error error)
+	ResolveStepX(__ipc.ServerContext) (Entry naming.VDLMountEntry, Error error)
 }
 
 // MountTableServerStubMethods is the server interface containing
@@ -507,17 +507,17 @@ type MountTableServerStubMethods interface {
 	// act as if it was never present as far as the interface is concerned.
 	//
 	// Opts represents a bit mask of options.
-	Mount(call __ipc.ServerCall, Server string, TTL uint32, Flags types.MountFlag) error
+	Mount(call __ipc.ServerCall, Server string, TTL uint32, Flags naming.MountFlag) error
 	// Unmount removes Server from the mount point.  If Server is empty, remove
 	// all servers mounted there.
 	// Returns a non-nil error iff Server remains mounted at the mount point.
 	Unmount(call __ipc.ServerCall, Server string) error
 	// ResolveStep takes the next step in resolving a name.  Returns the next
 	// servers to query and the suffix at those servers.
-	ResolveStep(__ipc.ServerCall) (Servers []types.MountedServer, Suffix string, Error error)
+	ResolveStep(__ipc.ServerCall) (Servers []naming.VDLMountedServer, Suffix string, Error error)
 	// ResolveStepX takes the next step in resolving a name.  Returns the next
 	// servers to query and the suffix at those servers.
-	ResolveStepX(__ipc.ServerCall) (Entry types.MountEntry, Error error)
+	ResolveStepX(__ipc.ServerCall) (Entry naming.VDLMountEntry, Error error)
 }
 
 // MountTableServerStub adds universal methods to MountTableServerStubMethods.
@@ -554,7 +554,7 @@ type implMountTableServerStub struct {
 	GlobbableServerStub
 }
 
-func (s implMountTableServerStub) Mount(call __ipc.ServerCall, i0 string, i1 uint32, i2 types.MountFlag) error {
+func (s implMountTableServerStub) Mount(call __ipc.ServerCall, i0 string, i1 uint32, i2 naming.MountFlag) error {
 	return s.impl.Mount(call, i0, i1, i2)
 }
 
@@ -562,11 +562,11 @@ func (s implMountTableServerStub) Unmount(call __ipc.ServerCall, i0 string) erro
 	return s.impl.Unmount(call, i0)
 }
 
-func (s implMountTableServerStub) ResolveStep(call __ipc.ServerCall) ([]types.MountedServer, string, error) {
+func (s implMountTableServerStub) ResolveStep(call __ipc.ServerCall) ([]naming.VDLMountedServer, string, error) {
 	return s.impl.ResolveStep(call)
 }
 
-func (s implMountTableServerStub) ResolveStepX(call __ipc.ServerCall) (types.MountEntry, error) {
+func (s implMountTableServerStub) ResolveStepX(call __ipc.ServerCall) (naming.VDLMountEntry, error) {
 	return s.impl.ResolveStepX(call)
 }
 
@@ -631,19 +631,19 @@ func (s implMountTableServerStub) Signature(call __ipc.ServerCall) (__ipc.Servic
 	}
 
 	result.TypeDefs = []__vdlutil.Any{
-		__wiretype.NamedPrimitiveType{Type: 0x34, Name: "veyron.io/veyron/veyron2/services/mounttable/types.MountFlag", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, __wiretype.StructType{
+		__wiretype.NamedPrimitiveType{Type: 0x34, Name: "veyron.io/veyron/veyron2/naming.MountFlag", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, __wiretype.StructType{
 			[]__wiretype.FieldType{
 				__wiretype.FieldType{Type: 0x3, Name: "Server"},
 				__wiretype.FieldType{Type: 0x34, Name: "TTL"},
 			},
-			"veyron.io/veyron/veyron2/services/mounttable/types.MountedServer", []string(nil)},
+			"veyron.io/veyron/veyron2/naming.VDLMountedServer", []string(nil)},
 		__wiretype.SliceType{Elem: 0x43, Name: "", Tags: []string(nil)}, __wiretype.StructType{
 			[]__wiretype.FieldType{
 				__wiretype.FieldType{Type: 0x3, Name: "Name"},
 				__wiretype.FieldType{Type: 0x44, Name: "Servers"},
 				__wiretype.FieldType{Type: 0x2, Name: "MT"},
 			},
-			"veyron.io/veyron/veyron2/services/mounttable/types.MountEntry", []string(nil)},
+			"veyron.io/veyron/veyron2/naming.VDLMountEntry", []string(nil)},
 	}
 	var ss __ipc.ServiceSignature
 	var firstAdded int
