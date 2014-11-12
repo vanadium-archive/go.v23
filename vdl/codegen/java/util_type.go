@@ -102,15 +102,11 @@ func javaType(t *vdl.Type, forceClass bool, env *compile.Env) string {
 	}
 	switch t.Kind() {
 	case vdl.Array:
-		if !forceClass {
-			return fmt.Sprintf("%s[]", javaType(t.Elem(), false, env))
-		} else {
-			return fmt.Sprintf("%s<%s>", "java.util.List", javaType(t.Elem(), true, env))
-		}
+		return fmt.Sprintf("%s[]", javaType(t.Elem(), false, env))
 	case vdl.List:
 		// NOTE(spetrovic): We represent byte lists as Java byte arrays, as it's doubtful anybody
 		// would want to use them as Java lists.
-		if !forceClass && javaType(t.Elem(), false, env) == "byte" {
+		if javaType(t.Elem(), false, env) == "byte" {
 			return fmt.Sprintf("byte[]")
 		}
 		return fmt.Sprintf("%s<%s>", "java.util.List", javaType(t.Elem(), true, env))

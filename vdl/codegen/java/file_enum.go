@@ -34,13 +34,12 @@ public final class {{.Name}} extends io.veyron.veyron.veyron2.vdl.VdlEnum {
     }
 
     public static {{.Name}} valueOf(String name) {
-        switch (name) {
         {{ range $label := .EnumLabels }}
-            case "{{$label}}": return {{$label}};
+            if ("{{$label}}".equals(name)) {
+                return {{$label}};
+            }
         {{ end }}
-            default:
-                throw new java.lang.IllegalArgumentException();
-        }
+        throw new java.lang.IllegalArgumentException();
     }
 
     @Override

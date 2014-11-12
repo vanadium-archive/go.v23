@@ -115,7 +115,7 @@ public final class {{.Name}} extends io.veyron.veyron.veyron2.vdl.AbstractVdlStr
             io.veyron.veyron.veyron2.vdl.ParcelUtil.writeValue(out, {{$field.LowercaseName}},
                 getClass().getDeclaredField("{{$field.LowercaseName}}").getGenericType());
         {{ end }}
-        } catch (NoSuchFieldException | SecurityException e) {
+        } catch (NoSuchFieldException e) {
             // do nothing
         }
     }
@@ -128,10 +128,10 @@ public final class {{.Name}} extends io.veyron.veyron.veyron2.vdl.AbstractVdlStr
             {{.Name}} value = new {{.Name}}();
             try {
             {{ range $field := .Fields }}
-                value.set{{$field.Name}}(({{$field.Type}}) io.veyron.veyron.veyron2.vdl.ParcelUtil.readValue(
+                value.set{{$field.Name}}(({{$field.Class}}) io.veyron.veyron.veyron2.vdl.ParcelUtil.readValue(
                 in, getClass().getClassLoader(), getClass().getDeclaredField("{{$field.LowercaseName}}").getGenericType()));
             {{ end }}
-            } catch (NoSuchFieldException | SecurityException e) {
+            } catch (NoSuchFieldException e) {
                 // do nothing
             }
             return value;
@@ -151,6 +151,7 @@ type structDefinitionField struct {
 	LowercaseName       string
 	Name                string
 	Type                string
+	Class               string
 }
 
 func javaFieldArgStr(structType *vdl.Type, env *compile.Env) string {
@@ -180,6 +181,7 @@ func genJavaStructFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo {
 			LowercaseName:       vdlutil.ToCamelCase(fld.Name),
 			Name:                fld.Name,
 			Type:                javaType(fld.Type, false, env),
+			Class:               javaType(fld.Type, true, env),
 		}
 	}
 
