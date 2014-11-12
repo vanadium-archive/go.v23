@@ -522,77 +522,18 @@ type ApplicationServerMethods interface {
 }
 
 // ApplicationServerStubMethods is the server interface containing
-// Application methods, as expected by ipc.Server.  The difference between
-// this interface and ApplicationServerMethods is that the first context
-// argument for each method is always ipc.ServerCall here, while it is either
-// ipc.ServerContext or a typed streaming context there.
-type ApplicationServerStubMethods interface {
-	// Object provides access control for Veyron objects.
-	access.ObjectServerStubMethods
-	// Install installs the application identified by the argument and
-	// returns an object name suffix that identifies the new installation.
-	//
-	// The argument should be an object name for an application envelope.
-	// The service it identifies must implement repository.Application, and
-	// is expected to return either the requested version (if the object name
-	// encodes a specific version), or otherwise the latest available version,
-	// as appropriate.
-	//
-	// The returned suffix, when appended to the name used to reach the
-	// receiver for Install, can be used to control the installation object.
-	// The suffix will contain the title of the application as a prefix,
-	// which can then be used to control all the installations of the given
-	// application.
-	// TODO(rjkroege): Use customized labels.
-	Install(call __ipc.ServerCall, Name string) (string, error)
-	// Refresh refreshes the state of application installation(s)
-	// instance(s).
-	Refresh(__ipc.ServerCall) error
-	// Restart restarts execution of application installation(s)
-	// instance(s).
-	Restart(__ipc.ServerCall) error
-	// Resume resumes execution of application installation(s)
-	// instance(s).
-	Resume(__ipc.ServerCall) error
-	// Revert reverts application installation(s) to the most recent
-	// previous installation.
-	Revert(__ipc.ServerCall) error
-	// Start starts an instance of application installation(s) and
-	// returns the object name(s) that identifies/identify the new
-	// instance(s).
-	Start(__ipc.ServerCall) ([]string, error)
-	// Stop attempts a clean shutdown of application installation(s)
-	// instance(s). If the deadline (in seconds) is non-zero and the
-	// instance(s) in questions are still running after the given deadline,
-	// shutdown of the instance(s) is enforced.
-	//
-	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
-	// are implemented.
-	Stop(call __ipc.ServerCall, Deadline uint32) error
-	// Suspend suspends execution of application installation(s)
-	// instance(s).
-	Suspend(__ipc.ServerCall) error
-	// Uninstall uninstalls application installation(s).
-	Uninstall(__ipc.ServerCall) error
-	// Update updates the application installation(s) from the object name
-	// provided during Install.  If the new application envelope contains a
-	// different application title, the update does not occur, and an error
-	// is returned.
-	Update(__ipc.ServerCall) error
-	// UpdateTo updates the application installation(s) to the application
-	// specified by the object name argument.  If the new application
-	// envelope contains a different application title, the update does not
-	// occur, and an error is returned.
-	UpdateTo(call __ipc.ServerCall, Name string) error
-}
+// Application methods, as expected by ipc.Server.
+// There is no difference between this interface and ApplicationServerMethods
+// since there are no streaming methods.
+type ApplicationServerStubMethods ApplicationServerMethods
 
 // ApplicationServerStub adds universal methods to ApplicationServerStubMethods.
 type ApplicationServerStub interface {
 	ApplicationServerStubMethods
 	// GetMethodTags will be replaced with DescribeInterfaces.
-	GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error)
+	GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error)
 	// Signature will be replaced with DescribeInterfaces.
-	Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error)
+	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
 // ApplicationServer returns a server stub for Application.
@@ -615,62 +556,61 @@ func ApplicationServer(impl ApplicationServerMethods) ApplicationServerStub {
 
 type implApplicationServerStub struct {
 	impl ApplicationServerMethods
-	gs   *__ipc.GlobState
-
 	access.ObjectServerStub
+	gs *__ipc.GlobState
 }
 
-func (s implApplicationServerStub) Install(call __ipc.ServerCall, i0 string) (string, error) {
-	return s.impl.Install(call, i0)
+func (s implApplicationServerStub) Install(ctx __ipc.ServerContext, i0 string) (string, error) {
+	return s.impl.Install(ctx, i0)
 }
 
-func (s implApplicationServerStub) Refresh(call __ipc.ServerCall) error {
-	return s.impl.Refresh(call)
+func (s implApplicationServerStub) Refresh(ctx __ipc.ServerContext) error {
+	return s.impl.Refresh(ctx)
 }
 
-func (s implApplicationServerStub) Restart(call __ipc.ServerCall) error {
-	return s.impl.Restart(call)
+func (s implApplicationServerStub) Restart(ctx __ipc.ServerContext) error {
+	return s.impl.Restart(ctx)
 }
 
-func (s implApplicationServerStub) Resume(call __ipc.ServerCall) error {
-	return s.impl.Resume(call)
+func (s implApplicationServerStub) Resume(ctx __ipc.ServerContext) error {
+	return s.impl.Resume(ctx)
 }
 
-func (s implApplicationServerStub) Revert(call __ipc.ServerCall) error {
-	return s.impl.Revert(call)
+func (s implApplicationServerStub) Revert(ctx __ipc.ServerContext) error {
+	return s.impl.Revert(ctx)
 }
 
-func (s implApplicationServerStub) Start(call __ipc.ServerCall) ([]string, error) {
-	return s.impl.Start(call)
+func (s implApplicationServerStub) Start(ctx __ipc.ServerContext) ([]string, error) {
+	return s.impl.Start(ctx)
 }
 
-func (s implApplicationServerStub) Stop(call __ipc.ServerCall, i0 uint32) error {
-	return s.impl.Stop(call, i0)
+func (s implApplicationServerStub) Stop(ctx __ipc.ServerContext, i0 uint32) error {
+	return s.impl.Stop(ctx, i0)
 }
 
-func (s implApplicationServerStub) Suspend(call __ipc.ServerCall) error {
-	return s.impl.Suspend(call)
+func (s implApplicationServerStub) Suspend(ctx __ipc.ServerContext) error {
+	return s.impl.Suspend(ctx)
 }
 
-func (s implApplicationServerStub) Uninstall(call __ipc.ServerCall) error {
-	return s.impl.Uninstall(call)
+func (s implApplicationServerStub) Uninstall(ctx __ipc.ServerContext) error {
+	return s.impl.Uninstall(ctx)
 }
 
-func (s implApplicationServerStub) Update(call __ipc.ServerCall) error {
-	return s.impl.Update(call)
+func (s implApplicationServerStub) Update(ctx __ipc.ServerContext) error {
+	return s.impl.Update(ctx)
 }
 
-func (s implApplicationServerStub) UpdateTo(call __ipc.ServerCall, i0 string) error {
-	return s.impl.UpdateTo(call, i0)
+func (s implApplicationServerStub) UpdateTo(ctx __ipc.ServerContext, i0 string) error {
+	return s.impl.UpdateTo(ctx, i0)
 }
 
 func (s implApplicationServerStub) VGlob() *__ipc.GlobState {
 	return s.gs
 }
 
-func (s implApplicationServerStub) GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error) {
+func (s implApplicationServerStub) GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error) {
 	// TODO(toddw): Replace with new DescribeInterfaces implementation.
-	if resp, err := s.ObjectServerStub.GetMethodTags(call, method); resp != nil || err != nil {
+	if resp, err := s.ObjectServerStub.GetMethodTags(ctx, method); resp != nil || err != nil {
 		return resp, err
 	}
 	switch method {
@@ -701,7 +641,7 @@ func (s implApplicationServerStub) GetMethodTags(call __ipc.ServerCall, method s
 	}
 }
 
-func (s implApplicationServerStub) Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error) {
+func (s implApplicationServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
 	// TODO(toddw) Replace with new DescribeInterfaces implementation.
 	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
 	result.Methods["Install"] = __ipc.MethodSignature{
@@ -783,7 +723,7 @@ func (s implApplicationServerStub) Signature(call __ipc.ServerCall) (__ipc.Servi
 		__wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}}
 	var ss __ipc.ServiceSignature
 	var firstAdded int
-	ss, _ = s.ObjectServerStub.Signature(call)
+	ss, _ = s.ObjectServerStub.Signature(ctx)
 	firstAdded = len(result.TypeDefs)
 	for k, v := range ss.Methods {
 		for i, _ := range v.InArgs {
@@ -1200,132 +1140,18 @@ type NodeServerMethods interface {
 }
 
 // NodeServerStubMethods is the server interface containing
-// Node methods, as expected by ipc.Server.  The difference between
-// this interface and NodeServerMethods is that the first context
-// argument for each method is always ipc.ServerCall here, while it is either
-// ipc.ServerContext or a typed streaming context there.
-type NodeServerStubMethods interface {
-	// Application can be used to manage applications on a device. The
-	// idea is that this interace will be invoked using an object name that
-	// identifies the application and its installations and instances
-	// where applicable.
-	//
-	// In particular, the interface methods can be divided into three
-	// groups based on their intended receiver:
-	//
-	// 1) Method receiver is an application:
-	// -- Install()
-	//
-	// 2) Method receiver is an application installation:
-	// -- Start()
-	// -- Uninstall()
-	// -- Update()
-	//
-	// 3) Method receiver is application installation instance:
-	// -- Refresh()
-	// -- Restart()
-	// -- Resume()
-	// -- Stop()
-	// -- Suspend()
-	//
-	// For groups 2) and 3), the suffix that specifies the receiver can
-	// optionally omit the installation and/or instance, in which case the
-	// operation applies to all installations and/or instances in the
-	// scope of the suffix.
-	//
-	// Examples:
-	// # Install Google Maps on the node.
-	// device/apps.Install("/google.com/appstore/maps") --> "google maps/0"
-	//
-	// # Start an instance of the previously installed maps application installation.
-	// device/apps/google maps/0.Start() --> { "0" }
-	//
-	// # Start a second instance of the previously installed maps application installation.
-	// device/apps/google maps/0.Start() --> { "1" }
-	//
-	// # Stop the first instance previously started.
-	// device/apps/google maps/0/0.Stop()
-	//
-	// # Install a second Google Maps installation.
-	// device/apps.Install("/google.com/appstore/maps") --> "google maps/1"
-	//
-	// # Start an instance for all maps application installations.
-	// device/apps/google maps.Start() --> {"0/2", "1/0"}
-	//
-	// # Refresh the state of all instances of all maps application installations.
-	// device/apps/google maps.Refresh()
-	//
-	// # Refresh the state of all instances of the maps application installation
-	// identified by the given suffix.
-	// device/apps/google maps/0.Refresh()
-	//
-	// # Refresh the state of the maps application installation instance identified by
-	// the given suffix.
-	// device/apps/google maps/0/2.Refresh()
-	//
-	// # Update the second maps installation to the latest version available.
-	// device/apps/google maps/1.Update()
-	//
-	// # Update the first maps installation to a specific version.
-	// device/apps/google maps/0.UpdateTo("/google.com/appstore/beta/maps")
-	//
-	// Further, the following methods complement one another:
-	// -- Install() and Uninstall()
-	// -- Start() and Stop()
-	// -- Suspend() and Resume()
-	//
-	// Finally, an application installation instance can be in one of
-	// three abstract states: 1) "does not exist", 2) "running", or 3)
-	// "suspended". The interface methods transition between these
-	// abstract states using the following state machine:
-	//
-	// apply(Start(), "does not exists") = "running"
-	// apply(Refresh(), "running") = "running"
-	// apply(Refresh(), "suspended") = "suspended"
-	// apply(Restart(), "running") = "running"
-	// apply(Restart(), "suspended") = "running"
-	// apply(Resume(), "suspended") = "running"
-	// apply(Resume(), "running") = "running"
-	// apply(Stop(), "running") = "does not exist"
-	// apply(Stop(), "suspended") = "does not exist"
-	// apply(Suspend(), "running") = "suspended"
-	// apply(Suspend(), "suspended") = "suspended"
-	//
-	// In other words, invoking any method using an existing application
-	// installation instance as a receiver is well-defined.
-	ApplicationServerStubMethods
-	// Claim is used to claim ownership of a Node running on a device
-	// by blessing its identity. By default, after this call all node
-	// methods will be access protected to the identity of the claimer.
-	Claim(__ipc.ServerCall) error
-	// Describe generates a description of the node.
-	Describe(__ipc.ServerCall) (Description, error)
-	// IsRunnable checks if the node can execute the given binary.
-	IsRunnable(call __ipc.ServerCall, Description binary.Description) (bool, error)
-	// Reset resets the node. If the deadline is non-zero and the node
-	// in question is still running after the given deadline expired,
-	// reset of the node is enforced.
-	//
-	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
-	// are implemented.
-	Reset(call __ipc.ServerCall, Deadline uint64) error
-	// AssociateAccount associates a local  system account name with the provided
-	// Veyron identities. It replaces the existing association if one already exists for that
-	// identity. Setting an AccountName to "" removes the association for each
-	// listed identity.
-	AssociateAccount(call __ipc.ServerCall, identityNames []string, accountName string) error
-	// ListAssociations returns all of the associations between Veyron identities
-	// and system names.
-	ListAssociations(__ipc.ServerCall) (associations []Association, err error)
-}
+// Node methods, as expected by ipc.Server.
+// There is no difference between this interface and NodeServerMethods
+// since there are no streaming methods.
+type NodeServerStubMethods NodeServerMethods
 
 // NodeServerStub adds universal methods to NodeServerStubMethods.
 type NodeServerStub interface {
 	NodeServerStubMethods
 	// GetMethodTags will be replaced with DescribeInterfaces.
-	GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error)
+	GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error)
 	// Signature will be replaced with DescribeInterfaces.
-	Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error)
+	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
 // NodeServer returns a server stub for Node.
@@ -1348,42 +1174,41 @@ func NodeServer(impl NodeServerMethods) NodeServerStub {
 
 type implNodeServerStub struct {
 	impl NodeServerMethods
-	gs   *__ipc.GlobState
-
 	ApplicationServerStub
+	gs *__ipc.GlobState
 }
 
-func (s implNodeServerStub) Claim(call __ipc.ServerCall) error {
-	return s.impl.Claim(call)
+func (s implNodeServerStub) Claim(ctx __ipc.ServerContext) error {
+	return s.impl.Claim(ctx)
 }
 
-func (s implNodeServerStub) Describe(call __ipc.ServerCall) (Description, error) {
-	return s.impl.Describe(call)
+func (s implNodeServerStub) Describe(ctx __ipc.ServerContext) (Description, error) {
+	return s.impl.Describe(ctx)
 }
 
-func (s implNodeServerStub) IsRunnable(call __ipc.ServerCall, i0 binary.Description) (bool, error) {
-	return s.impl.IsRunnable(call, i0)
+func (s implNodeServerStub) IsRunnable(ctx __ipc.ServerContext, i0 binary.Description) (bool, error) {
+	return s.impl.IsRunnable(ctx, i0)
 }
 
-func (s implNodeServerStub) Reset(call __ipc.ServerCall, i0 uint64) error {
-	return s.impl.Reset(call, i0)
+func (s implNodeServerStub) Reset(ctx __ipc.ServerContext, i0 uint64) error {
+	return s.impl.Reset(ctx, i0)
 }
 
-func (s implNodeServerStub) AssociateAccount(call __ipc.ServerCall, i0 []string, i1 string) error {
-	return s.impl.AssociateAccount(call, i0, i1)
+func (s implNodeServerStub) AssociateAccount(ctx __ipc.ServerContext, i0 []string, i1 string) error {
+	return s.impl.AssociateAccount(ctx, i0, i1)
 }
 
-func (s implNodeServerStub) ListAssociations(call __ipc.ServerCall) ([]Association, error) {
-	return s.impl.ListAssociations(call)
+func (s implNodeServerStub) ListAssociations(ctx __ipc.ServerContext) ([]Association, error) {
+	return s.impl.ListAssociations(ctx)
 }
 
 func (s implNodeServerStub) VGlob() *__ipc.GlobState {
 	return s.gs
 }
 
-func (s implNodeServerStub) GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error) {
+func (s implNodeServerStub) GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error) {
 	// TODO(toddw): Replace with new DescribeInterfaces implementation.
-	if resp, err := s.ApplicationServerStub.GetMethodTags(call, method); resp != nil || err != nil {
+	if resp, err := s.ApplicationServerStub.GetMethodTags(ctx, method); resp != nil || err != nil {
 		return resp, err
 	}
 	switch method {
@@ -1404,7 +1229,7 @@ func (s implNodeServerStub) GetMethodTags(call __ipc.ServerCall, method string) 
 	}
 }
 
-func (s implNodeServerStub) Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error) {
+func (s implNodeServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
 	// TODO(toddw) Replace with new DescribeInterfaces implementation.
 	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
 	result.Methods["AssociateAccount"] = __ipc.MethodSignature{
@@ -1475,7 +1300,7 @@ func (s implNodeServerStub) Signature(call __ipc.ServerCall) (__ipc.ServiceSigna
 		__wiretype.SliceType{Elem: 0x45, Name: "", Tags: []string(nil)}}
 	var ss __ipc.ServiceSignature
 	var firstAdded int
-	ss, _ = s.ApplicationServerStub.Signature(call)
+	ss, _ = s.ApplicationServerStub.Signature(ctx)
 	firstAdded = len(result.TypeDefs)
 	for k, v := range ss.Methods {
 		for i, _ := range v.InArgs {

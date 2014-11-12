@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"reflect"
 	"regexp"
+	"strings"
 	"testing"
 	"time"
 
@@ -69,39 +70,39 @@ const (
 // All objects used for success testing are based on testObj, which captures the
 // state from each invocation, so that we may test it against our expectations.
 type testObj struct {
-	call ipc.ServerCall
+	ctx ipc.ServerContext
 }
 
-func (o testObj) LastServerCall() ipc.ServerCall { return o.call }
+func (o testObj) LastContext() ipc.ServerContext { return o.ctx }
 
 type testObjIface interface {
-	LastServerCall() ipc.ServerCall
+	LastContext() ipc.ServerContext
 }
 
 var errApp = errors.New("app error")
 
 type notags struct{ testObj }
 
-func (o *notags) Method1(c ipc.ServerCall) error               { o.call = c; return nil }
-func (o *notags) Method2(c ipc.ServerCall) (int, error)        { o.call = c; return 0, nil }
-func (o *notags) Method3(c ipc.ServerCall, _ int) error        { o.call = c; return nil }
-func (o *notags) Method4(c ipc.ServerCall, i int) (int, error) { o.call = c; return i, nil }
-func (o *notags) Method5(c ipc.ServerCall) int                 { o.call = c; return 1 }
-func (o *notags) Error(c ipc.ServerCall) error                 { o.call = c; return errApp }
+func (o *notags) Method1(c ipc.ServerContext) error               { o.ctx = c; return nil }
+func (o *notags) Method2(c ipc.ServerContext) (int, error)        { o.ctx = c; return 0, nil }
+func (o *notags) Method3(c ipc.ServerContext, _ int) error        { o.ctx = c; return nil }
+func (o *notags) Method4(c ipc.ServerContext, i int) (int, error) { o.ctx = c; return i, nil }
+func (o *notags) Method5(c ipc.ServerContext) int                 { o.ctx = c; return 1 }
+func (o *notags) Error(c ipc.ServerContext) error                 { o.ctx = c; return errApp }
 
 type tags struct{ testObj }
 
-func (o *tags) Alpha(c ipc.ServerCall) error               { o.call = c; return nil }
-func (o *tags) Beta(c ipc.ServerCall) (int, error)         { o.call = c; return 0, nil }
-func (o *tags) Gamma(c ipc.ServerCall, _ int) error        { o.call = c; return nil }
-func (o *tags) Delta(c ipc.ServerCall, i int) (int, error) { o.call = c; return i, nil }
-func (o *tags) Epsilon(c ipc.ServerCall, i int, s string) (int, string, error) {
-	o.call = c
+func (o *tags) Alpha(c ipc.ServerContext) error               { o.ctx = c; return nil }
+func (o *tags) Beta(c ipc.ServerContext) (int, error)         { o.ctx = c; return 0, nil }
+func (o *tags) Gamma(c ipc.ServerContext, _ int) error        { o.ctx = c; return nil }
+func (o *tags) Delta(c ipc.ServerContext, i int) (int, error) { o.ctx = c; return i, nil }
+func (o *tags) Epsilon(c ipc.ServerContext, i int, s string) (int, string, error) {
+	o.ctx = c
 	return i, s, nil
 }
-func (o *tags) Error(c ipc.ServerCall) error { o.call = c; return errApp }
+func (o *tags) Error(c ipc.ServerContext) error { o.ctx = c; return errApp }
 
-func (o *tags) GetMethodTags(c ipc.ServerCall, method string) ([]interface{}, error) {
+func (o *tags) GetMethodTags(c ipc.ServerContext, method string) ([]interface{}, error) {
 	switch method {
 	case "Alpha":
 		return []interface{}{tagAlpha}, nil
@@ -172,8 +173,8 @@ func TestReflectInvoker(t *testing.T) {
 		if !reflect.DeepEqual(v(results), test.results) {
 			t.Errorf("%s Invoke got results %v, want %v", name(test), results, test.results)
 		}
-		if call := test.obj.LastServerCall(); call != test.call {
-			t.Errorf("%s Invoke got call %v, want %v", name(test), call, test.call)
+		if ctx := test.obj.LastContext(); ctx != test.call {
+			t.Errorf("%s Invoke got ctx %v, want %v", name(test), ctx, test.call)
 		}
 	}
 }
@@ -218,18 +219,79 @@ func toPtrs(vals []interface{}) []interface{} {
 	return valptrs
 }
 
-type nocompat struct{}
+type (
+	badcontext        struct{}
+	noInitContext     struct{ ipc.ServerContext }
+	badInit1Context   struct{ ipc.ServerContext }
+	badInit2Context   struct{ ipc.ServerContext }
+	badInit3Context   struct{ ipc.ServerContext }
+	noSendRecvContext struct{ ipc.ServerContext }
+	badSend1Context   struct{ ipc.ServerContext }
+	badSend2Context   struct{ ipc.ServerContext }
+	badSend3Context   struct{ ipc.ServerContext }
+	badRecv1Context   struct{ ipc.ServerContext }
+	badRecv2Context   struct{ ipc.ServerContext }
+	badRecv3Context   struct{ ipc.ServerContext }
 
-func (nocompat) notExported(ipc.ServerCall) error  { return nil }
-func (nocompat) NumInArgs() error                  { return nil }
-func (nocompat) NoInServerCall1(int) error         { return nil }
-func (nocompat) NoInServerCall2(int, string) error { return nil }
+	badVGlob         struct{}
+	badVGlobChildren struct{}
+)
 
-type nostub struct{}
+func (badcontext) notExported(ipc.ServerContext) error { return nil }
+func (badcontext) NonRPC1() error                      { return nil }
+func (badcontext) NonRPC2(int) error                   { return nil }
+func (badcontext) NonRPC3(int, string) error           { return nil }
+func (badcontext) NonRPC4(*badcontext) error           { return nil }
+func (badcontext) NoInit(*noInitContext) error         { return nil }
+func (badcontext) BadInit1(*badInit1Context) error     { return nil }
+func (badcontext) BadInit2(*badInit2Context) error     { return nil }
+func (badcontext) BadInit3(*badInit3Context) error     { return nil }
+func (badcontext) NoSendRecv(*noSendRecvContext) error { return nil }
+func (badcontext) BadSend1(*badSend1Context) error     { return nil }
+func (badcontext) BadSend2(*badSend2Context) error     { return nil }
+func (badcontext) BadSend3(*badSend3Context) error     { return nil }
+func (badcontext) BadRecv1(*badRecv1Context) error     { return nil }
+func (badcontext) BadRecv2(*badRecv2Context) error     { return nil }
+func (badcontext) BadRecv3(*badRecv3Context) error     { return nil }
 
-// NoStub takes ipc.ServerContext rather than ipc.ServerCall as the first arg, a
-// common mistake where the server isn't wrapped with the IDL-generated stub.
-func (nostub) NoStub(ipc.ServerContext) error { return nil }
+func (*badInit1Context) Init()                    {}
+func (*badInit2Context) Init(int)                 {}
+func (*badInit3Context) Init(ipc.ServerCall, int) {}
+func (*noSendRecvContext) Init(ipc.ServerCall)    {}
+func (*badSend1Context) Init(ipc.ServerCall)      {}
+func (*badSend1Context) SendStream()              {}
+func (*badSend2Context) Init(ipc.ServerCall)      {}
+func (*badSend2Context) SendStream() interface {
+	Send() error
+} {
+	return nil
+}
+func (*badSend3Context) Init(ipc.ServerCall) {}
+func (*badSend3Context) SendStream() interface {
+	Send(int)
+} {
+	return nil
+}
+func (*badRecv1Context) Init(ipc.ServerCall) {}
+func (*badRecv1Context) RecvStream()         {}
+func (*badRecv2Context) Init(ipc.ServerCall) {}
+func (*badRecv2Context) RecvStream() interface {
+	Advance() bool
+	Value() int
+} {
+	return nil
+}
+func (*badRecv3Context) Init(ipc.ServerCall) {}
+func (*badRecv3Context) RecvStream() interface {
+	Advance()
+	Value() int
+	Error() error
+} {
+	return nil
+}
+
+func (badVGlob) VGlob()                 {}
+func (badVGlobChildren) VGlobChildren() {}
 
 func TestReflectInvokerPanic(t *testing.T) {
 	type testcase struct {
@@ -239,8 +301,9 @@ func TestReflectInvokerPanic(t *testing.T) {
 	tests := []testcase{
 		{nil, "nil object is incompatible"},
 		{struct{}{}, "no compatible methods"},
-		{nocompat{}, "no compatible methods"},
-		{nostub{}, "forgot to wrap your server with the IDL-generated stub"},
+		{badcontext{}, "invalid streaming context"},
+		{badVGlob{}, "VGlob must have signature"},
+		{badVGlobChildren{}, "VGlobChildren must have signature"},
 	}
 	for _, test := range tests {
 		got := testutil.CallAndRecover(func() { ipc.ReflectInvoker(test.obj) })
@@ -282,43 +345,82 @@ func TestReflectInvokerErrors(t *testing.T) {
 	}
 }
 
+const (
+	badInit = `Init must have signature`
+	badSend = `SendStream must have signature`
+	badRecv = `RecvStream must have signature`
+)
+
 func TestTypeCheckMethods(t *testing.T) {
 	type testcase struct {
-		obj    interface{}
-		expect map[string]error
+		obj  interface{}
+		want map[string]string
 	}
 	tests := []testcase{
 		{struct{}{}, nil},
-		{&notags{}, map[string]error{
-			"Method1":        nil,
-			"Method2":        nil,
-			"Method3":        nil,
-			"Method4":        nil,
-			"Method5":        nil,
-			"Error":          nil,
-			"LastServerCall": ipc.ErrNumInArgs,
+		{&notags{}, map[string]string{
+			"Method1":     "",
+			"Method2":     "",
+			"Method3":     "",
+			"Method4":     "",
+			"Method5":     "",
+			"Error":       "",
+			"LastContext": ipc.ErrNonRPCMethod.Error(),
 		}},
-		{&tags{}, map[string]error{
-			"Alpha":          nil,
-			"Beta":           nil,
-			"Gamma":          nil,
-			"Delta":          nil,
-			"Epsilon":        nil,
-			"Error":          nil,
-			"GetMethodTags":  nil,
-			"LastServerCall": ipc.ErrNumInArgs,
+		{&tags{}, map[string]string{
+			"Alpha":         "",
+			"Beta":          "",
+			"Gamma":         "",
+			"Delta":         "",
+			"Epsilon":       "",
+			"Error":         "",
+			"GetMethodTags": "",
+			"LastContext":   ipc.ErrNonRPCMethod.Error(),
 		}},
-		{nocompat{}, map[string]error{
-			"notExported":     ipc.ErrMethodNotExported,
-			"NumInArgs":       ipc.ErrNumInArgs,
-			"NoInServerCall1": ipc.ErrInServerCall,
-			"NoInServerCall2": ipc.ErrInServerCall,
+		{badcontext{}, map[string]string{
+			"notExported": ipc.ErrMethodNotExported.Error(),
+			"NonRPC1":     ipc.ErrNonRPCMethod.Error(),
+			"NonRPC2":     ipc.ErrNonRPCMethod.Error(),
+			"NonRPC3":     ipc.ErrNonRPCMethod.Error(),
+			"NonRPC4":     ipc.ErrNonRPCMethod.Error(),
+			"NoInit":      "must have Init method",
+			"BadInit1":    badInit,
+			"BadInit2":    badInit,
+			"BadInit3":    badInit,
+			"NoSendRecv":  "must have at least one of RecvStream or SendStream",
+			"BadSend1":    badSend,
+			"BadSend2":    badSend,
+			"BadSend3":    badSend,
+			"BadRecv1":    badRecv,
+			"BadRecv2":    badRecv,
+			"BadRecv3":    badRecv,
+		}},
+		{&badVGlob{}, map[string]string{
+			"VGlob": ipc.ErrBadVGlob.Error(),
+		}},
+		{&badVGlobChildren{}, map[string]string{
+			"VGlobChildren": ipc.ErrBadVGlobChildren.Error(),
 		}},
 	}
 	for _, test := range tests {
-		actual := ipc.TypeCheckMethods(test.obj)
-		if !reflect.DeepEqual(actual, test.expect) {
-			t.Errorf("TypeCheckMethods(%T) got %v, want %v", test.obj, actual, test.expect)
+		typecheck := ipc.TypeCheckMethods(test.obj)
+		if got, want := typecheck, test.want; (got == nil) != (want == nil) {
+			t.Errorf("TypeCheckMethods(%T) got %v, want %v", test.obj, got, want)
+		}
+		if got, want := len(typecheck), len(test.want); got != want {
+			t.Errorf("TypeCheckMethods(%T) got len %d, want %d", test.obj, got, want)
+		}
+		for wantKey, wantVal := range test.want {
+			gotVal, ok := typecheck[wantKey]
+			if !ok {
+				t.Errorf("TypeCheckMethods(%T) got %v, want key %q", test.obj, typecheck, wantKey)
+			}
+			if wantVal == "" && gotVal != nil {
+				t.Errorf("TypeCheckMethods(%T) got method %q %q, want %q", test.obj, wantKey, gotVal, wantVal)
+			}
+			if got, want := fmt.Sprint(gotVal), wantVal; !strings.Contains(got, want) {
+				t.Errorf("TypeCheckMethods(%T) got method %q %q, want substr %q", test.obj, wantKey, got, want)
+			}
 		}
 	}
 }
@@ -333,7 +435,7 @@ func (o *vGlobberObject) VGlob() *ipc.GlobState {
 
 type vAllGlobberObject struct{}
 
-func (vAllGlobberObject) Glob(call ipc.ServerCall, pattern string) error {
+func (vAllGlobberObject) Glob(ctx *ipc.GlobContextStub, pattern string) error {
 	return nil
 }
 

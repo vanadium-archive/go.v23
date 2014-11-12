@@ -83,7 +83,7 @@ func (c implAppCycleClientStub) Stop(ctx __context.T, opts ...__ipc.CallOpt) (oc
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Stop", nil, opts...); err != nil {
 		return
 	}
-	ocall = &implAppCycleStopCall{call, implAppCycleStopClientRecv{call: call}}
+	ocall = &implAppCycleStopCall{Call: call}
 	return
 }
 
@@ -122,7 +122,7 @@ func (c implAppCycleClientStub) GetMethodTags(ctx __context.T, method string, op
 
 // AppCycleStopClientStream is the client stream for AppCycle.Stop.
 type AppCycleStopClientStream interface {
-	// RecvStream returns the receiver side of the client stream.
+	// RecvStream returns the receiver side of the AppCycle.Stop client stream.
 	RecvStream() interface {
 		// Advance stages an item so that it may be retrieved via Value.  Returns
 		// true iff there is an item to retrieve.  Advance must be called before
@@ -156,30 +156,10 @@ type AppCycleStopCall interface {
 	Cancel()
 }
 
-type implAppCycleStopClientRecv struct {
-	call __ipc.Call
-	val  Task
-	err  error
-}
-
-func (c *implAppCycleStopClientRecv) Advance() bool {
-	c.val = Task{}
-	c.err = c.call.Recv(&c.val)
-	return c.err == nil
-}
-func (c *implAppCycleStopClientRecv) Value() Task {
-	return c.val
-}
-func (c *implAppCycleStopClientRecv) Err() error {
-	if c.err == __io.EOF {
-		return nil
-	}
-	return c.err
-}
-
 type implAppCycleStopCall struct {
-	call __ipc.Call
-	recv implAppCycleStopClientRecv
+	__ipc.Call
+	valRecv Task
+	errRecv error
 }
 
 func (c *implAppCycleStopCall) RecvStream() interface {
@@ -187,16 +167,32 @@ func (c *implAppCycleStopCall) RecvStream() interface {
 	Value() Task
 	Err() error
 } {
-	return &c.recv
+	return implAppCycleStopCallRecv{c}
+}
+
+type implAppCycleStopCallRecv struct {
+	c *implAppCycleStopCall
+}
+
+func (c implAppCycleStopCallRecv) Advance() bool {
+	c.c.valRecv = Task{}
+	c.c.errRecv = c.c.Recv(&c.c.valRecv)
+	return c.c.errRecv == nil
+}
+func (c implAppCycleStopCallRecv) Value() Task {
+	return c.c.valRecv
+}
+func (c implAppCycleStopCallRecv) Err() error {
+	if c.c.errRecv == __io.EOF {
+		return nil
+	}
+	return c.c.errRecv
 }
 func (c *implAppCycleStopCall) Finish() (err error) {
-	if ierr := c.call.Finish(&err); ierr != nil {
+	if ierr := c.Call.Finish(&err); ierr != nil {
 		err = ierr
 	}
 	return
-}
-func (c *implAppCycleStopCall) Cancel() {
-	c.call.Cancel()
 }
 
 // AppCycleServerMethods is the interface a server writer
@@ -215,28 +211,27 @@ type AppCycleServerMethods interface {
 }
 
 // AppCycleServerStubMethods is the server interface containing
-// AppCycle methods, as expected by ipc.Server.  The difference between
-// this interface and AppCycleServerMethods is that the first context
-// argument for each method is always ipc.ServerCall here, while it is either
-// ipc.ServerContext or a typed streaming context there.
+// AppCycle methods, as expected by ipc.Server.
+// The only difference between this interface and AppCycleServerMethods
+// is the streaming methods.
 type AppCycleServerStubMethods interface {
 	// Stop initiates shutdown of the server.  It streams back periodic
 	// updates to give the client an idea of how the shutdown is
 	// progressing.
-	Stop(__ipc.ServerCall) error
+	Stop(*AppCycleStopContextStub) error
 	// ForceStop tells the server to shut down right away.  It can be issued
 	// while a Stop is outstanding if for example the client does not want
 	// to wait any longer.
-	ForceStop(__ipc.ServerCall) error
+	ForceStop(__ipc.ServerContext) error
 }
 
 // AppCycleServerStub adds universal methods to AppCycleServerStubMethods.
 type AppCycleServerStub interface {
 	AppCycleServerStubMethods
 	// GetMethodTags will be replaced with DescribeInterfaces.
-	GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error)
+	GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error)
 	// Signature will be replaced with DescribeInterfaces.
-	Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error)
+	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
 // AppCycleServer returns a server stub for AppCycle.
@@ -261,20 +256,19 @@ type implAppCycleServerStub struct {
 	gs   *__ipc.GlobState
 }
 
-func (s implAppCycleServerStub) Stop(call __ipc.ServerCall) error {
-	ctx := &implAppCycleStopContext{call, implAppCycleStopServerSend{call}}
+func (s implAppCycleServerStub) Stop(ctx *AppCycleStopContextStub) error {
 	return s.impl.Stop(ctx)
 }
 
-func (s implAppCycleServerStub) ForceStop(call __ipc.ServerCall) error {
-	return s.impl.ForceStop(call)
+func (s implAppCycleServerStub) ForceStop(ctx __ipc.ServerContext) error {
+	return s.impl.ForceStop(ctx)
 }
 
 func (s implAppCycleServerStub) VGlob() *__ipc.GlobState {
 	return s.gs
 }
 
-func (s implAppCycleServerStub) GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error) {
+func (s implAppCycleServerStub) GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error) {
 	// TODO(toddw): Replace with new DescribeInterfaces implementation.
 	switch method {
 	case "Stop":
@@ -286,7 +280,7 @@ func (s implAppCycleServerStub) GetMethodTags(call __ipc.ServerCall, method stri
 	}
 }
 
-func (s implAppCycleServerStub) Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error) {
+func (s implAppCycleServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
 	// TODO(toddw) Replace with new DescribeInterfaces implementation.
 	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
 	result.Methods["ForceStop"] = __ipc.MethodSignature{
@@ -318,7 +312,7 @@ func (s implAppCycleServerStub) Signature(call __ipc.ServerCall) (__ipc.ServiceS
 
 // AppCycleStopServerStream is the server stream for AppCycle.Stop.
 type AppCycleStopServerStream interface {
-	// SendStream returns the send side of the server stream.
+	// SendStream returns the send side of the AppCycle.Stop server stream.
 	SendStream() interface {
 		// Send places the item onto the output stream.  Returns errors encountered
 		// while sending.  Blocks if there is no buffer space; will unblock when
@@ -333,21 +327,28 @@ type AppCycleStopContext interface {
 	AppCycleStopServerStream
 }
 
-type implAppCycleStopServerSend struct {
-	call __ipc.ServerCall
+// AppCycleStopContextStub is a wrapper that converts ipc.ServerCall into
+// a typesafe stub that implements AppCycleStopContext.
+type AppCycleStopContextStub struct {
+	__ipc.ServerCall
 }
 
-func (s *implAppCycleStopServerSend) Send(item Task) error {
-	return s.call.Send(item)
+// Init initializes AppCycleStopContextStub from ipc.ServerCall.
+func (s *AppCycleStopContextStub) Init(call __ipc.ServerCall) {
+	s.ServerCall = call
 }
 
-type implAppCycleStopContext struct {
-	__ipc.ServerContext
-	send implAppCycleStopServerSend
-}
-
-func (s *implAppCycleStopContext) SendStream() interface {
+// SendStream returns the send side of the AppCycle.Stop server stream.
+func (s *AppCycleStopContextStub) SendStream() interface {
 	Send(item Task) error
 } {
-	return &s.send
+	return implAppCycleStopContextSend{s}
+}
+
+type implAppCycleStopContextSend struct {
+	s *AppCycleStopContextStub
+}
+
+func (s implAppCycleStopContextSend) Send(item Task) error {
+	return s.s.Send(item)
 }

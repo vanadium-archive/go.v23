@@ -99,7 +99,7 @@ func (c implPProfClientStub) Profile(ctx __context.T, i0 string, i1 int32, opts 
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Profile", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
-	ocall = &implPProfProfileCall{call, implPProfProfileClientRecv{call: call}}
+	ocall = &implPProfProfileCall{Call: call}
 	return
 }
 
@@ -108,7 +108,7 @@ func (c implPProfClientStub) CPUProfile(ctx __context.T, i0 int32, opts ...__ipc
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "CPUProfile", []interface{}{i0}, opts...); err != nil {
 		return
 	}
-	ocall = &implPProfCPUProfileCall{call, implPProfCPUProfileClientRecv{call: call}}
+	ocall = &implPProfCPUProfileCall{Call: call}
 	return
 }
 
@@ -147,7 +147,7 @@ func (c implPProfClientStub) GetMethodTags(ctx __context.T, method string, opts 
 
 // PProfProfileClientStream is the client stream for PProf.Profile.
 type PProfProfileClientStream interface {
-	// RecvStream returns the receiver side of the client stream.
+	// RecvStream returns the receiver side of the PProf.Profile client stream.
 	RecvStream() interface {
 		// Advance stages an item so that it may be retrieved via Value.  Returns
 		// true iff there is an item to retrieve.  Advance must be called before
@@ -181,29 +181,10 @@ type PProfProfileCall interface {
 	Cancel()
 }
 
-type implPProfProfileClientRecv struct {
-	call __ipc.Call
-	val  []byte
-	err  error
-}
-
-func (c *implPProfProfileClientRecv) Advance() bool {
-	c.err = c.call.Recv(&c.val)
-	return c.err == nil
-}
-func (c *implPProfProfileClientRecv) Value() []byte {
-	return c.val
-}
-func (c *implPProfProfileClientRecv) Err() error {
-	if c.err == __io.EOF {
-		return nil
-	}
-	return c.err
-}
-
 type implPProfProfileCall struct {
-	call __ipc.Call
-	recv implPProfProfileClientRecv
+	__ipc.Call
+	valRecv []byte
+	errRecv error
 }
 
 func (c *implPProfProfileCall) RecvStream() interface {
@@ -211,21 +192,36 @@ func (c *implPProfProfileCall) RecvStream() interface {
 	Value() []byte
 	Err() error
 } {
-	return &c.recv
+	return implPProfProfileCallRecv{c}
+}
+
+type implPProfProfileCallRecv struct {
+	c *implPProfProfileCall
+}
+
+func (c implPProfProfileCallRecv) Advance() bool {
+	c.c.errRecv = c.c.Recv(&c.c.valRecv)
+	return c.c.errRecv == nil
+}
+func (c implPProfProfileCallRecv) Value() []byte {
+	return c.c.valRecv
+}
+func (c implPProfProfileCallRecv) Err() error {
+	if c.c.errRecv == __io.EOF {
+		return nil
+	}
+	return c.c.errRecv
 }
 func (c *implPProfProfileCall) Finish() (err error) {
-	if ierr := c.call.Finish(&err); ierr != nil {
+	if ierr := c.Call.Finish(&err); ierr != nil {
 		err = ierr
 	}
 	return
 }
-func (c *implPProfProfileCall) Cancel() {
-	c.call.Cancel()
-}
 
 // PProfCPUProfileClientStream is the client stream for PProf.CPUProfile.
 type PProfCPUProfileClientStream interface {
-	// RecvStream returns the receiver side of the client stream.
+	// RecvStream returns the receiver side of the PProf.CPUProfile client stream.
 	RecvStream() interface {
 		// Advance stages an item so that it may be retrieved via Value.  Returns
 		// true iff there is an item to retrieve.  Advance must be called before
@@ -259,29 +255,10 @@ type PProfCPUProfileCall interface {
 	Cancel()
 }
 
-type implPProfCPUProfileClientRecv struct {
-	call __ipc.Call
-	val  []byte
-	err  error
-}
-
-func (c *implPProfCPUProfileClientRecv) Advance() bool {
-	c.err = c.call.Recv(&c.val)
-	return c.err == nil
-}
-func (c *implPProfCPUProfileClientRecv) Value() []byte {
-	return c.val
-}
-func (c *implPProfCPUProfileClientRecv) Err() error {
-	if c.err == __io.EOF {
-		return nil
-	}
-	return c.err
-}
-
 type implPProfCPUProfileCall struct {
-	call __ipc.Call
-	recv implPProfCPUProfileClientRecv
+	__ipc.Call
+	valRecv []byte
+	errRecv error
 }
 
 func (c *implPProfCPUProfileCall) RecvStream() interface {
@@ -289,16 +266,31 @@ func (c *implPProfCPUProfileCall) RecvStream() interface {
 	Value() []byte
 	Err() error
 } {
-	return &c.recv
+	return implPProfCPUProfileCallRecv{c}
+}
+
+type implPProfCPUProfileCallRecv struct {
+	c *implPProfCPUProfileCall
+}
+
+func (c implPProfCPUProfileCallRecv) Advance() bool {
+	c.c.errRecv = c.c.Recv(&c.c.valRecv)
+	return c.c.errRecv == nil
+}
+func (c implPProfCPUProfileCallRecv) Value() []byte {
+	return c.c.valRecv
+}
+func (c implPProfCPUProfileCallRecv) Err() error {
+	if c.c.errRecv == __io.EOF {
+		return nil
+	}
+	return c.c.errRecv
 }
 func (c *implPProfCPUProfileCall) Finish() (err error) {
-	if ierr := c.call.Finish(&err); ierr != nil {
+	if ierr := c.Call.Finish(&err); ierr != nil {
 		err = ierr
 	}
 	return
-}
-func (c *implPProfCPUProfileCall) Cancel() {
-	c.call.Cancel()
 }
 
 // PProfServerMethods is the interface a server writer
@@ -324,37 +316,36 @@ type PProfServerMethods interface {
 }
 
 // PProfServerStubMethods is the server interface containing
-// PProf methods, as expected by ipc.Server.  The difference between
-// this interface and PProfServerMethods is that the first context
-// argument for each method is always ipc.ServerCall here, while it is either
-// ipc.ServerContext or a typed streaming context there.
+// PProf methods, as expected by ipc.Server.
+// The only difference between this interface and PProfServerMethods
+// is the streaming methods.
 type PProfServerStubMethods interface {
 	// CmdLine returns the command-line arguments of the server, including
 	// the name of the executable.
-	CmdLine(__ipc.ServerCall) ([]string, error)
+	CmdLine(__ipc.ServerContext) ([]string, error)
 	// Profiles returns the list of available profiles.
-	Profiles(__ipc.ServerCall) ([]string, error)
+	Profiles(__ipc.ServerContext) ([]string, error)
 	// Profile streams the requested profile. The debug parameter enables
 	// additional output. Passing debug=0 includes only the hexadecimal
 	// addresses that pprof needs. Passing debug=1 adds comments translating
 	// addresses to function names and line numbers, so that a programmer
 	// can read the profile without tools.
-	Profile(call __ipc.ServerCall, name string, debug int32) error
+	Profile(ctx *PProfProfileContextStub, name string, debug int32) error
 	// CPUProfile enables CPU profiling for the requested duration and
 	// streams the profile data.
-	CPUProfile(call __ipc.ServerCall, seconds int32) error
+	CPUProfile(ctx *PProfCPUProfileContextStub, seconds int32) error
 	// Symbol looks up the program counters and returns their respective
 	// function names.
-	Symbol(call __ipc.ServerCall, programCounters []uint64) ([]string, error)
+	Symbol(ctx __ipc.ServerContext, programCounters []uint64) ([]string, error)
 }
 
 // PProfServerStub adds universal methods to PProfServerStubMethods.
 type PProfServerStub interface {
 	PProfServerStubMethods
 	// GetMethodTags will be replaced with DescribeInterfaces.
-	GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error)
+	GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error)
 	// Signature will be replaced with DescribeInterfaces.
-	Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error)
+	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
 // PProfServer returns a server stub for PProf.
@@ -379,33 +370,31 @@ type implPProfServerStub struct {
 	gs   *__ipc.GlobState
 }
 
-func (s implPProfServerStub) CmdLine(call __ipc.ServerCall) ([]string, error) {
-	return s.impl.CmdLine(call)
+func (s implPProfServerStub) CmdLine(ctx __ipc.ServerContext) ([]string, error) {
+	return s.impl.CmdLine(ctx)
 }
 
-func (s implPProfServerStub) Profiles(call __ipc.ServerCall) ([]string, error) {
-	return s.impl.Profiles(call)
+func (s implPProfServerStub) Profiles(ctx __ipc.ServerContext) ([]string, error) {
+	return s.impl.Profiles(ctx)
 }
 
-func (s implPProfServerStub) Profile(call __ipc.ServerCall, i0 string, i1 int32) error {
-	ctx := &implPProfProfileContext{call, implPProfProfileServerSend{call}}
+func (s implPProfServerStub) Profile(ctx *PProfProfileContextStub, i0 string, i1 int32) error {
 	return s.impl.Profile(ctx, i0, i1)
 }
 
-func (s implPProfServerStub) CPUProfile(call __ipc.ServerCall, i0 int32) error {
-	ctx := &implPProfCPUProfileContext{call, implPProfCPUProfileServerSend{call}}
+func (s implPProfServerStub) CPUProfile(ctx *PProfCPUProfileContextStub, i0 int32) error {
 	return s.impl.CPUProfile(ctx, i0)
 }
 
-func (s implPProfServerStub) Symbol(call __ipc.ServerCall, i0 []uint64) ([]string, error) {
-	return s.impl.Symbol(call, i0)
+func (s implPProfServerStub) Symbol(ctx __ipc.ServerContext, i0 []uint64) ([]string, error) {
+	return s.impl.Symbol(ctx, i0)
 }
 
 func (s implPProfServerStub) VGlob() *__ipc.GlobState {
 	return s.gs
 }
 
-func (s implPProfServerStub) GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error) {
+func (s implPProfServerStub) GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error) {
 	// TODO(toddw): Replace with new DescribeInterfaces implementation.
 	switch method {
 	case "CmdLine":
@@ -423,7 +412,7 @@ func (s implPProfServerStub) GetMethodTags(call __ipc.ServerCall, method string)
 	}
 }
 
-func (s implPProfServerStub) Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error) {
+func (s implPProfServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
 	// TODO(toddw) Replace with new DescribeInterfaces implementation.
 	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
 	result.Methods["CPUProfile"] = __ipc.MethodSignature{
@@ -479,7 +468,7 @@ func (s implPProfServerStub) Signature(call __ipc.ServerCall) (__ipc.ServiceSign
 
 // PProfProfileServerStream is the server stream for PProf.Profile.
 type PProfProfileServerStream interface {
-	// SendStream returns the send side of the server stream.
+	// SendStream returns the send side of the PProf.Profile server stream.
 	SendStream() interface {
 		// Send places the item onto the output stream.  Returns errors encountered
 		// while sending.  Blocks if there is no buffer space; will unblock when
@@ -494,28 +483,35 @@ type PProfProfileContext interface {
 	PProfProfileServerStream
 }
 
-type implPProfProfileServerSend struct {
-	call __ipc.ServerCall
+// PProfProfileContextStub is a wrapper that converts ipc.ServerCall into
+// a typesafe stub that implements PProfProfileContext.
+type PProfProfileContextStub struct {
+	__ipc.ServerCall
 }
 
-func (s *implPProfProfileServerSend) Send(item []byte) error {
-	return s.call.Send(item)
+// Init initializes PProfProfileContextStub from ipc.ServerCall.
+func (s *PProfProfileContextStub) Init(call __ipc.ServerCall) {
+	s.ServerCall = call
 }
 
-type implPProfProfileContext struct {
-	__ipc.ServerContext
-	send implPProfProfileServerSend
-}
-
-func (s *implPProfProfileContext) SendStream() interface {
+// SendStream returns the send side of the PProf.Profile server stream.
+func (s *PProfProfileContextStub) SendStream() interface {
 	Send(item []byte) error
 } {
-	return &s.send
+	return implPProfProfileContextSend{s}
+}
+
+type implPProfProfileContextSend struct {
+	s *PProfProfileContextStub
+}
+
+func (s implPProfProfileContextSend) Send(item []byte) error {
+	return s.s.Send(item)
 }
 
 // PProfCPUProfileServerStream is the server stream for PProf.CPUProfile.
 type PProfCPUProfileServerStream interface {
-	// SendStream returns the send side of the server stream.
+	// SendStream returns the send side of the PProf.CPUProfile server stream.
 	SendStream() interface {
 		// Send places the item onto the output stream.  Returns errors encountered
 		// while sending.  Blocks if there is no buffer space; will unblock when
@@ -530,21 +526,28 @@ type PProfCPUProfileContext interface {
 	PProfCPUProfileServerStream
 }
 
-type implPProfCPUProfileServerSend struct {
-	call __ipc.ServerCall
+// PProfCPUProfileContextStub is a wrapper that converts ipc.ServerCall into
+// a typesafe stub that implements PProfCPUProfileContext.
+type PProfCPUProfileContextStub struct {
+	__ipc.ServerCall
 }
 
-func (s *implPProfCPUProfileServerSend) Send(item []byte) error {
-	return s.call.Send(item)
+// Init initializes PProfCPUProfileContextStub from ipc.ServerCall.
+func (s *PProfCPUProfileContextStub) Init(call __ipc.ServerCall) {
+	s.ServerCall = call
 }
 
-type implPProfCPUProfileContext struct {
-	__ipc.ServerContext
-	send implPProfCPUProfileServerSend
-}
-
-func (s *implPProfCPUProfileContext) SendStream() interface {
+// SendStream returns the send side of the PProf.CPUProfile server stream.
+func (s *PProfCPUProfileContextStub) SendStream() interface {
 	Send(item []byte) error
 } {
-	return &s.send
+	return implPProfCPUProfileContextSend{s}
+}
+
+type implPProfCPUProfileContextSend struct {
+	s *PProfCPUProfileContextStub
+}
+
+func (s implPProfCPUProfileContextSend) Send(item []byte) error {
+	return s.s.Send(item)
 }

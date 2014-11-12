@@ -94,21 +94,18 @@ type ExpServerMethods interface {
 }
 
 // ExpServerStubMethods is the server interface containing
-// Exp methods, as expected by ipc.Server.  The difference between
-// this interface and ExpServerMethods is that the first context
-// argument for each method is always ipc.ServerCall here, while it is either
-// ipc.ServerContext or a typed streaming context there.
-type ExpServerStubMethods interface {
-	Exp(call __ipc.ServerCall, x float64) (float64, error)
-}
+// Exp methods, as expected by ipc.Server.
+// There is no difference between this interface and ExpServerMethods
+// since there are no streaming methods.
+type ExpServerStubMethods ExpServerMethods
 
 // ExpServerStub adds universal methods to ExpServerStubMethods.
 type ExpServerStub interface {
 	ExpServerStubMethods
 	// GetMethodTags will be replaced with DescribeInterfaces.
-	GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error)
+	GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error)
 	// Signature will be replaced with DescribeInterfaces.
-	Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error)
+	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
 // ExpServer returns a server stub for Exp.
@@ -133,15 +130,15 @@ type implExpServerStub struct {
 	gs   *__ipc.GlobState
 }
 
-func (s implExpServerStub) Exp(call __ipc.ServerCall, i0 float64) (float64, error) {
-	return s.impl.Exp(call, i0)
+func (s implExpServerStub) Exp(ctx __ipc.ServerContext, i0 float64) (float64, error) {
+	return s.impl.Exp(ctx, i0)
 }
 
 func (s implExpServerStub) VGlob() *__ipc.GlobState {
 	return s.gs
 }
 
-func (s implExpServerStub) GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error) {
+func (s implExpServerStub) GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error) {
 	// TODO(toddw): Replace with new DescribeInterfaces implementation.
 	switch method {
 	case "Exp":
@@ -151,7 +148,7 @@ func (s implExpServerStub) GetMethodTags(call __ipc.ServerCall, method string) (
 	}
 }
 
-func (s implExpServerStub) Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error) {
+func (s implExpServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
 	// TODO(toddw) Replace with new DescribeInterfaces implementation.
 	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
 	result.Methods["Exp"] = __ipc.MethodSignature{

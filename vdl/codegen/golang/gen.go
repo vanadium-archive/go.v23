@@ -117,29 +117,32 @@ var goTemplate *template.Template
 // off to a regular function.
 func init() {
 	funcMap := template.FuncMap{
-		"genpkg":            genpkg,
-		"typeGo":            typeGo,
-		"typeDefGo":         typeDefGo,
-		"constDefGo":        constDefGo,
-		"tagsGo":            tagsGo,
-		"embedGo":           embedGo,
-		"isStreamingMethod": isStreamingMethod,
-		"docBreak":          docBreak,
-		"argTypes":          argTypes,
-		"argNameTypes":      argNameTypes,
-		"argParens":         argParens,
-		"uniqueName":        uniqueName,
-		"uniqueNameImpl":    uniqueNameImpl,
-		"hasFinalError":     hasFinalError,
-		"stripFinalError":   stripFinalError,
-		"serverContextType": serverContextType,
-		"outArgsClient":     outArgsClient,
-		"clientStubImpl":    clientStubImpl,
-		"clientFinishImpl":  clientFinishImpl,
-		"serverStubImpl":    serverStubImpl,
-		"signatureMethods":  signatureMethods,
-		"signatureTypeDefs": signatureTypeDefs,
-		"reInitStreamValue": reInitStreamValue,
+		"genpkg":                genpkg,
+		"typeGo":                typeGo,
+		"typeDefGo":             typeDefGo,
+		"constDefGo":            constDefGo,
+		"tagsGo":                tagsGo,
+		"embedGo":               embedGo,
+		"isStreamingMethod":     isStreamingMethod,
+		"hasStreamingMethods":   hasStreamingMethods,
+		"isGlobbableGlob":       isGlobbableGlob,
+		"docBreak":              docBreak,
+		"argTypes":              argTypes,
+		"argNameTypes":          argNameTypes,
+		"argParens":             argParens,
+		"uniqueName":            uniqueName,
+		"uniqueNameImpl":        uniqueNameImpl,
+		"hasFinalError":         hasFinalError,
+		"stripFinalError":       stripFinalError,
+		"serverContextType":     serverContextType,
+		"serverContextStubType": serverContextStubType,
+		"outArgsClient":         outArgsClient,
+		"clientStubImpl":        clientStubImpl,
+		"clientFinishImpl":      clientFinishImpl,
+		"serverStubImpl":        serverStubImpl,
+		"signatureMethods":      signatureMethods,
+		"signatureTypeDefs":     signatureTypeDefs,
+		"reInitStreamValue":     reInitStreamValue,
 	}
 	goTemplate = template.Must(template.New("genGo").Funcs(funcMap).Parse(genGo))
 }
@@ -155,6 +158,24 @@ func genpkg(file *compile.File, pkg string) string {
 
 func isStreamingMethod(method *compile.Method) bool {
 	return method.InStream != nil || method.OutStream != nil
+}
+
+func hasStreamingMethods(methods []*compile.Method) bool {
+	for _, method := range methods {
+		if isStreamingMethod(method) {
+			return true
+		}
+	}
+	return false
+}
+
+// isGlobbableGlob returns true iff iface and method represent the standard
+// Globbable.Glob method.  This is special-cased to use the standard
+// ipc.GlobContext, rather than generating one, so that our framework code can
+// use it as well.
+func isGlobbableGlob(iface *compile.Interface, method *compile.Method) bool {
+	const globPath = "veyron.io/veyron/veyron2/services/mounttable"
+	return iface.File.Package.Path == globPath && iface.Name == "Globbable" && method.Name == "Glob"
 }
 
 // docBreak adds a "//\n" break to separate previous comment lines and doc.  If
@@ -177,8 +198,11 @@ func argTypes(data goData, args []*compile.Arg) string {
 
 // argNames returns a comma-separated list of each name from args.  The names
 // are of the form prefixD, where D is the position of the argument.
-func argNames(prefix, last string, args []*compile.Arg) string {
+func argNames(prefix, first, last string, args []*compile.Arg) string {
 	var result []string
+	if first != "" {
+		result = append(result, first)
+	}
 	for ix := 0; ix < len(args); ix++ {
 		result = append(result, fmt.Sprintf("%s%d", prefix, ix))
 	}
@@ -262,11 +286,26 @@ func stripFinalError(args []*compile.Arg) []*compile.Arg {
 	return args
 }
 
-// The first arg of every server method is a context, but the type is either a
-// typed context for streams, or regular ipc.ServerContext for non-streams.
+// The first arg of every server method is a context; the type is either a typed
+// context for streams, or ipc.ServerContext for non-streams.
 func serverContextType(prefix string, iface *compile.Interface, method *compile.Method) string {
-	if isStreamingMethod(method) {
+	switch {
+	case isGlobbableGlob(iface, method):
+		return prefix + "__ipc.GlobContext"
+	case isStreamingMethod(method):
 		return prefix + uniqueName(iface, method, "Context")
+	}
+	return prefix + "__ipc.ServerContext"
+}
+
+// The first arg of every server stub method is a context; the type is either a
+// typed context stub for streams, or ipc.ServerContext for non-streams.
+func serverContextStubType(prefix string, iface *compile.Interface, method *compile.Method) string {
+	switch {
+	case isGlobbableGlob(iface, method):
+		return prefix + "*__ipc.GlobContextStub"
+	case isStreamingMethod(method):
+		return prefix + "*" + uniqueName(iface, method, "ContextStub")
 	}
 	return prefix + "__ipc.ServerContext"
 }
@@ -287,29 +326,22 @@ func clientStubImpl(data goData, iface *compile.Interface, method *compile.Metho
 	var buf bytes.Buffer
 	inargs := "nil"
 	if len(method.InArgs) > 0 {
-		inargs = "[]interface{}{" + argNames("i", "", method.InArgs) + "}"
+		inargs = "[]interface{}{" + argNames("i", "", "", method.InArgs) + "}"
 	}
 	fmt.Fprint(&buf, "\tvar call __ipc.Call\n")
 	fmt.Fprintf(&buf, "\tif call, err = c.c(ctx).StartCall(ctx, c.name, %q, %s, opts...); err != nil {\n\t\treturn\n\t}\n", method.Name, inargs)
 	switch {
 	case isStreamingMethod(method):
-		fmt.Fprintf(&buf, "ocall = &%s{call", uniqueNameImpl(iface, method, "Call"))
-		if method.OutStream != nil {
-			fmt.Fprintf(&buf, ", %s{call: call}", uniqueNameImpl(iface, method, "ClientRecv"))
-		}
-		if method.InStream != nil {
-			fmt.Fprintf(&buf, ", %s{call}", uniqueNameImpl(iface, method, "ClientSend"))
-		}
-		fmt.Fprint(&buf, "}\n")
+		fmt.Fprintf(&buf, "ocall = &%s{Call: call}\n", uniqueNameImpl(iface, method, "Call"))
 	default:
-		fmt.Fprintf(&buf, "%s\n", clientFinishImpl("", method))
+		fmt.Fprintf(&buf, "%s\n", clientFinishImpl("call", method))
 	}
 	fmt.Fprint(&buf, "\treturn")
 	return buf.String() // the caller writes the trailing newline
 }
 
 // clientFinishImpl returns the client finish implementation for method.
-func clientFinishImpl(prefix string, method *compile.Method) string {
+func clientFinishImpl(varname string, method *compile.Method) string {
 	// The client side always returns a final error, regardless of whether the
 	// method actually includes a final error.  But the actual Finish call should
 	// only include "&err" if method.OutArgs includes it.
@@ -317,30 +349,19 @@ func clientFinishImpl(prefix string, method *compile.Method) string {
 	if hasFinalError(method.OutArgs) {
 		lastArg = "&err"
 	}
-	outargs := argNames("&o", lastArg, stripFinalError(method.OutArgs))
-	return fmt.Sprintf("\tif ierr := %scall.Finish(%s); ierr != nil {\n\t\terr = ierr\n\t}", prefix, outargs)
+	outargs := argNames("&o", "", lastArg, stripFinalError(method.OutArgs))
+	return fmt.Sprintf("\tif ierr := %s.Finish(%s); ierr != nil {\n\t\terr = ierr\n\t}", varname, outargs)
 }
 
 // serverStubImpl returns the interface method server stub implementation.
 func serverStubImpl(data goData, iface *compile.Interface, method *compile.Method) string {
 	var buf bytes.Buffer
-	inargs := append([]string{"call"}, strings.Split(argNames("i", "", method.InArgs), ", ")...)
-	if isStreamingMethod(method) {
-		inargs[0] = "ctx"
-		fmt.Fprintf(&buf, "\tctx := &%s{call", uniqueNameImpl(iface, method, "Context"))
-		if method.InStream != nil {
-			fmt.Fprintf(&buf, ", %s{call: call}", uniqueNameImpl(iface, method, "ServerRecv"))
-		}
-		if method.OutStream != nil {
-			fmt.Fprintf(&buf, ", %s{call}", uniqueNameImpl(iface, method, "ServerSend"))
-		}
-		fmt.Fprintf(&buf, "}\n")
-	}
+	inargs := argNames("i", "ctx", "", method.InArgs)
 	fmt.Fprint(&buf, "\t")
 	if len(method.OutArgs) > 0 {
 		fmt.Fprint(&buf, "return ")
 	}
-	fmt.Fprintf(&buf, "s.impl.%s(%s)", method.Name, strings.Join(inargs, ", "))
+	fmt.Fprintf(&buf, "s.impl.%s(%s)", method.Name, inargs)
 	return buf.String() // the caller writes the trailing newline
 }
 
@@ -477,7 +498,7 @@ const _ = __wiretype.TypeIDInvalid
 {{$eid.Doc}}const {{$eid.Name}} = {{genpkg $file "verror"}}ID("{{$eid.ID}}"){{$eid.DocSuffix}}
 {{end}}
 
-{{range $iface := $file.Interfaces}}
+{{range $iface := $file.Interfaces}}{{$ifaceStreaming := hasStreamingMethods $iface.AllMethods}}
 // {{$iface.Name}}ClientMethods is the client interface
 // containing {{$iface.Name}} methods.
 {{docBreak $iface.Doc}}type {{$iface.Name}}ClientMethods interface { {{range $embed := $iface.Embeds}}
@@ -547,13 +568,13 @@ func (c impl{{$iface.Name}}ClientStub) GetMethodTags(ctx __context.T, method str
 {{range $method := $iface.Methods}}{{if isStreamingMethod $method}}
 {{$clientStream := uniqueName $iface $method "ClientStream"}}
 {{$clientCall := uniqueName $iface $method "Call"}}
-{{$clientRecvImpl := uniqueNameImpl $iface $method "ClientRecv"}}
-{{$clientSendImpl := uniqueNameImpl $iface $method "ClientSend"}}
 {{$clientCallImpl := uniqueNameImpl $iface $method "Call"}}
+{{$clientRecvImpl := uniqueNameImpl $iface $method "CallRecv"}}
+{{$clientSendImpl := uniqueNameImpl $iface $method "CallSend"}}
 
 // {{$clientStream}} is the client stream for {{$iface.Name}}.{{$method.Name}}.
 type {{$clientStream}} interface { {{if $method.OutStream}}
-	// RecvStream returns the receiver side of the client stream.
+	// RecvStream returns the receiver side of the {{$iface.Name}}.{{$method.Name}} client stream.
 	RecvStream() interface {
 		// Advance stages an item so that it may be retrieved via Value.  Returns
 		// true iff there is an item to retrieve.  Advance must be called before
@@ -565,7 +586,7 @@ type {{$clientStream}} interface { {{if $method.OutStream}}
 		// Err returns any error encountered by Advance.  Never blocks.
 		Err() error
 	} {{end}}{{if $method.InStream}}
-	// SendStream returns the send side of the client stream.
+	// SendStream returns the send side of the {{$iface.Name}}.{{$method.Name}} client stream.
 	SendStream() interface {
 		// Send places the item onto the output stream.  Returns errors encountered
 		// while sending, or if Send is called after Close or Cancel.  Blocks if
@@ -604,43 +625,10 @@ type {{$clientCall}} interface {
 	Cancel()
 }
 
-{{if $method.OutStream}}
-type {{$clientRecvImpl}} struct {
-	call __ipc.Call
-	val {{typeGo $data $method.OutStream}}
-	err error
-}
-
-func (c *{{$clientRecvImpl}}) Advance() bool {
-	{{reInitStreamValue $data $method.OutStream "c.val"}}c.err = c.call.Recv(&c.val)
-	return c.err == nil
-}
-func (c *{{$clientRecvImpl}}) Value() {{typeGo $data $method.OutStream}} {
-	return c.val
-}
-func (c *{{$clientRecvImpl}}) Err() error {
-	if c.err == __io.EOF {
-		return nil
-	}
-	return c.err
-}
-{{end}}{{if $method.InStream}}
-type {{$clientSendImpl}} struct {
-	call __ipc.Call
-}
-
-func (c *{{$clientSendImpl}}) Send(item {{typeGo $data $method.InStream}}) error {
-	return c.call.Send(item)
-}
-func (c *{{$clientSendImpl}}) Close() error {
-	return c.call.CloseSend()
-}
-{{end}}
-
 type {{$clientCallImpl}} struct {
-	call __ipc.Call{{if $method.OutStream}}
-	recv {{$clientRecvImpl}}{{end}}{{if $method.InStream}}
-	send {{$clientSendImpl}}{{end}}
+	__ipc.Call{{if $method.OutStream}}
+	valRecv {{typeGo $data $method.OutStream}}
+	errRecv error{{end}}
 }
 
 {{if $method.OutStream}}func (c *{{$clientCallImpl}}) RecvStream() interface {
@@ -648,21 +636,47 @@ type {{$clientCallImpl}} struct {
 	Value() {{typeGo $data $method.OutStream}}
 	Err() error
 } {
-	return &c.recv
+	return {{$clientRecvImpl}}{c}
+}
+
+type {{$clientRecvImpl}} struct {
+	c *{{$clientCallImpl}}
+}
+
+func (c {{$clientRecvImpl}}) Advance() bool {
+	{{reInitStreamValue $data $method.OutStream "c.c.valRecv"}}c.c.errRecv = c.c.Recv(&c.c.valRecv)
+	return c.c.errRecv == nil
+}
+func (c {{$clientRecvImpl}}) Value() {{typeGo $data $method.OutStream}} {
+	return c.c.valRecv
+}
+func (c {{$clientRecvImpl}}) Err() error {
+	if c.c.errRecv == __io.EOF {
+		return nil
+	}
+	return c.c.errRecv
 }
 {{end}}{{if $method.InStream}}func (c *{{$clientCallImpl}}) SendStream() interface {
 	Send(item {{typeGo $data $method.InStream}}) error
 	Close() error
 } {
-	return &c.send
+	return {{$clientSendImpl}}{c}
+}
+
+type {{$clientSendImpl}} struct {
+	c *{{$clientCallImpl}}
+}
+
+func (c {{$clientSendImpl}}) Send(item {{typeGo $data $method.InStream}}) error {
+	return c.c.Send(item)
+}
+func (c {{$clientSendImpl}}) Close() error {
+	return c.c.CloseSend()
 }
 {{end}}func (c *{{$clientCallImpl}}) Finish() {{argParens (argNameTypes "o" "" "err error" $data (stripFinalError $method.OutArgs))}} { {{if not (hasFinalError $method.OutArgs)}}
 	// No final "&err" in the Finish call; vdl didn't have a final error.{{end}}
-{{clientFinishImpl "c." $method}}
+{{clientFinishImpl "c.Call" $method}}
 	return
-}
-func (c *{{$clientCallImpl}}) Cancel() {
-  c.call.Cancel()
 }
 {{end}}{{end}}
 
@@ -674,22 +688,25 @@ func (c *{{$clientCallImpl}}) Cancel() {
 }
 
 // {{$iface.Name}}ServerStubMethods is the server interface containing
-// {{$iface.Name}} methods, as expected by ipc.Server.  The difference between
-// this interface and {{$iface.Name}}ServerMethods is that the first context
-// argument for each method is always ipc.ServerCall here, while it is either
-// ipc.ServerContext or a typed streaming context there.
-type {{$iface.Name}}ServerStubMethods interface { {{range $embed := $iface.Embeds}}
+// {{$iface.Name}} methods, as expected by ipc.Server.{{if $ifaceStreaming}}
+// The only difference between this interface and {{$iface.Name}}ServerMethods
+// is the streaming methods.{{else}}
+// There is no difference between this interface and {{$iface.Name}}ServerMethods
+// since there are no streaming methods.{{end}}
+type {{$iface.Name}}ServerStubMethods {{if $ifaceStreaming}}interface { {{range $embed := $iface.Embeds}}
 	{{$embed.Doc}}{{embedGo $data $embed}}ServerStubMethods{{$embed.DocSuffix}}{{end}}{{range $method := $iface.Methods}}
-	{{$method.Doc}}{{$method.Name}}({{argNameTypes "" "call __ipc.ServerCall" "" $data $method.InArgs}}) {{argParens (argNameTypes "" "" "" $data $method.OutArgs)}}{{$method.DocSuffix}}{{end}}
+	{{$method.Doc}}{{$method.Name}}({{argNameTypes "" (serverContextStubType "ctx " $iface $method) "" $data $method.InArgs}}) {{argParens (argNameTypes "" "" "" $data $method.OutArgs)}}{{$method.DocSuffix}}{{end}}
 }
+{{else}}{{$iface.Name}}ServerMethods
+{{end}}
 
 // {{$iface.Name}}ServerStub adds universal methods to {{$iface.Name}}ServerStubMethods.
 type {{$iface.Name}}ServerStub interface {
 	{{$iface.Name}}ServerStubMethods
 	// GetMethodTags will be replaced with DescribeInterfaces.
-	GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error)
+	GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error)
 	// Signature will be replaced with DescribeInterfaces.
-	Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error)
+	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
 // {{$iface.Name}}Server returns a server stub for {{$iface.Name}}.
@@ -711,14 +728,13 @@ func {{$iface.Name}}Server(impl {{$iface.Name}}ServerMethods) {{$iface.Name}}Ser
 }
 
 type impl{{$iface.Name}}ServerStub struct {
-	impl {{$iface.Name}}ServerMethods
-	gs   *__ipc.GlobState
-{{range $embed := $iface.Embeds}}
+	impl {{$iface.Name}}ServerMethods{{range $embed := $iface.Embeds}}
 	{{embedGo $data $embed}}ServerStub{{end}}
+	gs *__ipc.GlobState
 }
 
 {{range $method := $iface.Methods}}
-func (s impl{{$iface.Name}}ServerStub) {{$method.Name}}({{argNameTypes "i" "call __ipc.ServerCall" "" $data $method.InArgs}}) {{argParens (argTypes $data $method.OutArgs)}} {
+func (s impl{{$iface.Name}}ServerStub) {{$method.Name}}({{argNameTypes "i" (serverContextStubType "ctx " $iface $method) "" $data $method.InArgs}}) {{argParens (argTypes $data $method.OutArgs)}} {
 {{serverStubImpl $data $iface $method}}
 }
 {{end}}
@@ -727,9 +743,9 @@ func (s impl{{$iface.Name}}ServerStub) VGlob() *__ipc.GlobState {
 	return s.gs
 }
 
-func (s impl{{$iface.Name}}ServerStub) GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error) {
+func (s impl{{$iface.Name}}ServerStub) GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error) {
 	// TODO(toddw): Replace with new DescribeInterfaces implementation.
-	{{range $embed := $iface.Embeds}}	if resp, err := s.{{$embed.Name}}ServerStub.GetMethodTags(call, method); resp != nil || err != nil {
+	{{range $embed := $iface.Embeds}}	if resp, err := s.{{$embed.Name}}ServerStub.GetMethodTags(ctx, method); resp != nil || err != nil {
 			return resp, err
 		}
 	{{end}}{{if $iface.Methods}}	switch method { {{range $method := $iface.Methods}}
@@ -740,7 +756,7 @@ func (s impl{{$iface.Name}}ServerStub) GetMethodTags(call __ipc.ServerCall, meth
 		}{{else}}	return nil, nil{{end}}
 }
 
-func (s impl{{$iface.Name}}ServerStub) Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error) {
+func (s impl{{$iface.Name}}ServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
 	// TODO(toddw) Replace with new DescribeInterfaces implementation.
 	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
 {{range $mname, $method := signatureMethods $iface}}{{printf "\tresult.Methods[%q] = __ipc.MethodSignature{" $mname}}
@@ -755,7 +771,7 @@ func (s impl{{$iface.Name}}ServerStub) Signature(call __ipc.ServerCall) (__ipc.S
 result.TypeDefs = {{signatureTypeDefs $iface}}
 {{if $iface.Embeds}}	var ss __ipc.ServiceSignature
 var firstAdded int
-{{range $embeds := $iface.Embeds}}	ss, _ = s.{{$embeds.Name}}ServerStub.Signature(call)
+{{range $embeds := $iface.Embeds}}	ss, _ = s.{{$embeds.Name}}ServerStub.Signature(ctx)
 	firstAdded = len(result.TypeDefs)
 	for k, v := range ss.Methods {
 		for i, _ := range v.InArgs {
@@ -813,16 +829,18 @@ var firstAdded int
 	return result, nil
 }
 
-{{range $method := $iface.Methods}}{{if isStreamingMethod $method}}
+{{range $method := $iface.Methods}}
+{{if isStreamingMethod $method}}
+{{if not (isGlobbableGlob $iface $method)}}
 {{$serverStream := uniqueName $iface $method "ServerStream"}}
 {{$serverContext := uniqueName $iface $method "Context"}}
-{{$serverRecvImpl := uniqueNameImpl $iface $method "ServerRecv"}}
-{{$serverSendImpl := uniqueNameImpl $iface $method "ServerSend"}}
-{{$serverContextImpl := uniqueNameImpl $iface $method "Context"}}
+{{$serverContextStub := uniqueName $iface $method "ContextStub"}}
+{{$serverRecvImpl := uniqueNameImpl $iface $method "ContextRecv"}}
+{{$serverSendImpl := uniqueNameImpl $iface $method "ContextSend"}}
 
 // {{$serverStream}} is the server stream for {{$iface.Name}}.{{$method.Name}}.
 type {{$serverStream}} interface { {{if $method.InStream}}
-	// RecvStream returns the receiver side of the server stream.
+	// RecvStream returns the receiver side of the {{$iface.Name}}.{{$method.Name}} server stream.
 	RecvStream() interface {
 		// Advance stages an item so that it may be retrieved via Value.  Returns
 		// true iff there is an item to retrieve.  Advance must be called before
@@ -834,7 +852,7 @@ type {{$serverStream}} interface { {{if $method.InStream}}
 		// Err returns any error encountered by Advance.  Never blocks.
 		Err() error
 	} {{end}}{{if $method.OutStream}}
-	// SendStream returns the send side of the server stream.
+	// SendStream returns the send side of the {{$iface.Name}}.{{$method.Name}} server stream.
 	SendStream() interface {
 		// Send places the item onto the output stream.  Returns errors encountered
 		// while sending.  Blocks if there is no buffer space; will unblock when
@@ -849,56 +867,61 @@ type {{$serverContext}} interface {
 	{{$serverStream}}
 }
 
-{{if $method.InStream}}
-type {{$serverRecvImpl}} struct {
-	call __ipc.ServerCall
-	val  {{typeGo $data $method.InStream}}
-	err  error
+// {{$serverContextStub}} is a wrapper that converts ipc.ServerCall into
+// a typesafe stub that implements {{$serverContext}}.
+type {{$serverContextStub}} struct {
+	__ipc.ServerCall{{if $method.InStream}}
+	valRecv {{typeGo $data $method.InStream}}
+	errRecv error{{end}}
 }
 
-func (s *{{$serverRecvImpl}}) Advance() bool {
-	{{reInitStreamValue $data $method.InStream "s.val"}}s.err = s.call.Recv(&s.val)
-	return s.err == nil
-}
-func (s *{{$serverRecvImpl}}) Value() {{typeGo $data $method.InStream}} {
-	return s.val
-}
-func (s *{{$serverRecvImpl}}) Err() error {
-	if s.err == __io.EOF {
-		return nil
-	}
-	return s.err
-}
-{{end}}{{if $method.OutStream}}
-type {{$serverSendImpl}} struct {
-	call __ipc.ServerCall
+// Init initializes {{$serverContextStub}} from ipc.ServerCall.
+func (s *{{$serverContextStub}}) Init(call __ipc.ServerCall) {
+	s.ServerCall = call
 }
 
-func (s *{{$serverSendImpl}}) Send(item {{typeGo $data $method.OutStream}}) error {
-	return s.call.Send(item)
-}
-{{end}}
-
-type {{$serverContextImpl}} struct {
-	__ipc.ServerContext{{if $method.InStream}}
-	recv {{$serverRecvImpl}}{{end}}{{if $method.OutStream}}
-	send {{$serverSendImpl}}{{end}}
-}
-
-{{if $method.InStream}}func (s  *{{$serverContextImpl}}) RecvStream() interface {
+{{if $method.InStream}}// RecvStream returns the receiver side of the {{$iface.Name}}.{{$method.Name}} server stream.
+func (s  *{{$serverContextStub}}) RecvStream() interface {
 	Advance() bool
 	Value() {{typeGo $data $method.InStream}}
 	Err() error
 } {
-	return &s.recv
+	return {{$serverRecvImpl}}{s}
 }
-{{end}}{{if $method.OutStream}}func (s *{{$serverContextImpl}}) SendStream() interface {
+
+type {{$serverRecvImpl}} struct {
+	s *{{$serverContextStub}}
+}
+
+func (s {{$serverRecvImpl}}) Advance() bool {
+	{{reInitStreamValue $data $method.InStream "s.s.valRecv"}}s.s.errRecv = s.s.Recv(&s.s.valRecv)
+	return s.s.errRecv == nil
+}
+func (s {{$serverRecvImpl}}) Value() {{typeGo $data $method.InStream}} {
+	return s.s.valRecv
+}
+func (s {{$serverRecvImpl}}) Err() error {
+	if s.s.errRecv == __io.EOF {
+		return nil
+	}
+	return s.s.errRecv
+}
+{{end}}{{if $method.OutStream}}// SendStream returns the send side of the {{$iface.Name}}.{{$method.Name}} server stream.
+func (s *{{$serverContextStub}}) SendStream() interface {
 	Send(item {{typeGo $data $method.OutStream}}) error
 } {
-	return &s.send
+	return {{$serverSendImpl}}{s}
+}
+
+type {{$serverSendImpl}} struct {
+	s *{{$serverContextStub}}
+}
+
+func (s {{$serverSendImpl}}) Send(item {{typeGo $data $method.OutStream}}) error {
+	return s.s.Send(item)
 }
 {{end}}
-{{end}}{{end}}
+{{end}}{{end}}{{end}}
 
 {{end}}{{end}}
 `

@@ -133,26 +133,18 @@ type ApplicationServerMethods interface {
 }
 
 // ApplicationServerStubMethods is the server interface containing
-// Application methods, as expected by ipc.Server.  The difference between
-// this interface and ApplicationServerMethods is that the first context
-// argument for each method is always ipc.ServerCall here, while it is either
-// ipc.ServerContext or a typed streaming context there.
-type ApplicationServerStubMethods interface {
-	// Match checks if any of the given profiles contains an application
-	// envelope for the given application version (specified through the
-	// object name suffix) and if so, returns this envelope. If multiple
-	// profile matches are possible, the method returns the first
-	// matching profile, respecting the order of the input argument.
-	Match(call __ipc.ServerCall, Profiles []string) (application.Envelope, error)
-}
+// Application methods, as expected by ipc.Server.
+// There is no difference between this interface and ApplicationServerMethods
+// since there are no streaming methods.
+type ApplicationServerStubMethods ApplicationServerMethods
 
 // ApplicationServerStub adds universal methods to ApplicationServerStubMethods.
 type ApplicationServerStub interface {
 	ApplicationServerStubMethods
 	// GetMethodTags will be replaced with DescribeInterfaces.
-	GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error)
+	GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error)
 	// Signature will be replaced with DescribeInterfaces.
-	Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error)
+	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
 // ApplicationServer returns a server stub for Application.
@@ -177,15 +169,15 @@ type implApplicationServerStub struct {
 	gs   *__ipc.GlobState
 }
 
-func (s implApplicationServerStub) Match(call __ipc.ServerCall, i0 []string) (application.Envelope, error) {
-	return s.impl.Match(call, i0)
+func (s implApplicationServerStub) Match(ctx __ipc.ServerContext, i0 []string) (application.Envelope, error) {
+	return s.impl.Match(ctx, i0)
 }
 
 func (s implApplicationServerStub) VGlob() *__ipc.GlobState {
 	return s.gs
 }
 
-func (s implApplicationServerStub) GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error) {
+func (s implApplicationServerStub) GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error) {
 	// TODO(toddw): Replace with new DescribeInterfaces implementation.
 	switch method {
 	case "Match":
@@ -195,7 +187,7 @@ func (s implApplicationServerStub) GetMethodTags(call __ipc.ServerCall, method s
 	}
 }
 
-func (s implApplicationServerStub) Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error) {
+func (s implApplicationServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
 	// TODO(toddw) Replace with new DescribeInterfaces implementation.
 	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
 	result.Methods["Match"] = __ipc.MethodSignature{
@@ -335,7 +327,7 @@ func (c implBinaryClientStub) Download(ctx __context.T, i0 int32, opts ...__ipc.
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Download", []interface{}{i0}, opts...); err != nil {
 		return
 	}
-	ocall = &implBinaryDownloadCall{call, implBinaryDownloadClientRecv{call: call}}
+	ocall = &implBinaryDownloadCall{Call: call}
 	return
 }
 
@@ -366,7 +358,7 @@ func (c implBinaryClientStub) Upload(ctx __context.T, i0 int32, opts ...__ipc.Ca
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Upload", []interface{}{i0}, opts...); err != nil {
 		return
 	}
-	ocall = &implBinaryUploadCall{call, implBinaryUploadClientSend{call}}
+	ocall = &implBinaryUploadCall{Call: call}
 	return
 }
 
@@ -394,7 +386,7 @@ func (c implBinaryClientStub) GetMethodTags(ctx __context.T, method string, opts
 
 // BinaryDownloadClientStream is the client stream for Binary.Download.
 type BinaryDownloadClientStream interface {
-	// RecvStream returns the receiver side of the client stream.
+	// RecvStream returns the receiver side of the Binary.Download client stream.
 	RecvStream() interface {
 		// Advance stages an item so that it may be retrieved via Value.  Returns
 		// true iff there is an item to retrieve.  Advance must be called before
@@ -428,29 +420,10 @@ type BinaryDownloadCall interface {
 	Cancel()
 }
 
-type implBinaryDownloadClientRecv struct {
-	call __ipc.Call
-	val  []byte
-	err  error
-}
-
-func (c *implBinaryDownloadClientRecv) Advance() bool {
-	c.err = c.call.Recv(&c.val)
-	return c.err == nil
-}
-func (c *implBinaryDownloadClientRecv) Value() []byte {
-	return c.val
-}
-func (c *implBinaryDownloadClientRecv) Err() error {
-	if c.err == __io.EOF {
-		return nil
-	}
-	return c.err
-}
-
 type implBinaryDownloadCall struct {
-	call __ipc.Call
-	recv implBinaryDownloadClientRecv
+	__ipc.Call
+	valRecv []byte
+	errRecv error
 }
 
 func (c *implBinaryDownloadCall) RecvStream() interface {
@@ -458,21 +431,36 @@ func (c *implBinaryDownloadCall) RecvStream() interface {
 	Value() []byte
 	Err() error
 } {
-	return &c.recv
+	return implBinaryDownloadCallRecv{c}
+}
+
+type implBinaryDownloadCallRecv struct {
+	c *implBinaryDownloadCall
+}
+
+func (c implBinaryDownloadCallRecv) Advance() bool {
+	c.c.errRecv = c.c.Recv(&c.c.valRecv)
+	return c.c.errRecv == nil
+}
+func (c implBinaryDownloadCallRecv) Value() []byte {
+	return c.c.valRecv
+}
+func (c implBinaryDownloadCallRecv) Err() error {
+	if c.c.errRecv == __io.EOF {
+		return nil
+	}
+	return c.c.errRecv
 }
 func (c *implBinaryDownloadCall) Finish() (err error) {
-	if ierr := c.call.Finish(&err); ierr != nil {
+	if ierr := c.Call.Finish(&err); ierr != nil {
 		err = ierr
 	}
 	return
 }
-func (c *implBinaryDownloadCall) Cancel() {
-	c.call.Cancel()
-}
 
 // BinaryUploadClientStream is the client stream for Binary.Upload.
 type BinaryUploadClientStream interface {
-	// SendStream returns the send side of the client stream.
+	// SendStream returns the send side of the Binary.Upload client stream.
 	SendStream() interface {
 		// Send places the item onto the output stream.  Returns errors encountered
 		// while sending, or if Send is called after Close or Cancel.  Blocks if
@@ -509,36 +497,32 @@ type BinaryUploadCall interface {
 	Cancel()
 }
 
-type implBinaryUploadClientSend struct {
-	call __ipc.Call
-}
-
-func (c *implBinaryUploadClientSend) Send(item []byte) error {
-	return c.call.Send(item)
-}
-func (c *implBinaryUploadClientSend) Close() error {
-	return c.call.CloseSend()
-}
-
 type implBinaryUploadCall struct {
-	call __ipc.Call
-	send implBinaryUploadClientSend
+	__ipc.Call
 }
 
 func (c *implBinaryUploadCall) SendStream() interface {
 	Send(item []byte) error
 	Close() error
 } {
-	return &c.send
+	return implBinaryUploadCallSend{c}
+}
+
+type implBinaryUploadCallSend struct {
+	c *implBinaryUploadCall
+}
+
+func (c implBinaryUploadCallSend) Send(item []byte) error {
+	return c.c.Send(item)
+}
+func (c implBinaryUploadCallSend) Close() error {
+	return c.c.CloseSend()
 }
 func (c *implBinaryUploadCall) Finish() (err error) {
-	if ierr := c.call.Finish(&err); ierr != nil {
+	if ierr := c.Call.Finish(&err); ierr != nil {
 		err = ierr
 	}
 	return
-}
-func (c *implBinaryUploadCall) Cancel() {
-	c.call.Cancel()
 }
 
 // BinaryServerMethods is the interface a server writer
@@ -599,52 +583,51 @@ type BinaryServerMethods interface {
 }
 
 // BinaryServerStubMethods is the server interface containing
-// Binary methods, as expected by ipc.Server.  The difference between
-// this interface and BinaryServerMethods is that the first context
-// argument for each method is always ipc.ServerCall here, while it is either
-// ipc.ServerContext or a typed streaming context there.
+// Binary methods, as expected by ipc.Server.
+// The only difference between this interface and BinaryServerMethods
+// is the streaming methods.
 type BinaryServerStubMethods interface {
 	// Create expresses the intent to create a binary identified by the
 	// object name suffix consisting of the given number of parts. If
 	// the suffix identifies a binary that has already been created, the
 	// method returns an error.
-	Create(call __ipc.ServerCall, nparts int32) error
+	Create(ctx __ipc.ServerContext, nparts int32) error
 	// Delete deletes the binary identified by the object name
 	// suffix. If the binary that has not been created, the method
 	// returns an error.
-	Delete(__ipc.ServerCall) error
+	Delete(__ipc.ServerContext) error
 	// Download opens a stream that can used for downloading the given
 	// part of the binary identified by the object name suffix. If the
 	// binary part has not been uploaded, the method returns an
 	// error. If the Delete() method is invoked when the Download()
 	// method is in progress, the outcome the Download() method is
 	// undefined.
-	Download(call __ipc.ServerCall, part int32) error
+	Download(ctx *BinaryDownloadContextStub, part int32) error
 	// DownloadURL returns a transient URL from which the binary
 	// identified by the object name suffix can be downloaded using the
 	// HTTP protocol. If not all parts of the binary have been uploaded,
 	// the method returns an error.
-	DownloadURL(__ipc.ServerCall) (URL string, TTL int64, err error)
+	DownloadURL(__ipc.ServerContext) (URL string, TTL int64, err error)
 	// Stat returns information describing the parts of the binary
 	// identified by the object name suffix. If the binary has not been
 	// created, the method returns an error.
-	Stat(__ipc.ServerCall) ([]binary.PartInfo, error)
+	Stat(__ipc.ServerContext) ([]binary.PartInfo, error)
 	// Upload opens a stream that can be used for uploading the given
 	// part of the binary identified by the object name suffix. If the
 	// binary has not been created, the method returns an error. If the
 	// binary part has been uploaded, the method returns an error. If
 	// the same binary part is being uploaded by another caller, the
 	// method returns an error.
-	Upload(call __ipc.ServerCall, part int32) error
+	Upload(ctx *BinaryUploadContextStub, part int32) error
 }
 
 // BinaryServerStub adds universal methods to BinaryServerStubMethods.
 type BinaryServerStub interface {
 	BinaryServerStubMethods
 	// GetMethodTags will be replaced with DescribeInterfaces.
-	GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error)
+	GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error)
 	// Signature will be replaced with DescribeInterfaces.
-	Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error)
+	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
 // BinaryServer returns a server stub for Binary.
@@ -669,29 +652,27 @@ type implBinaryServerStub struct {
 	gs   *__ipc.GlobState
 }
 
-func (s implBinaryServerStub) Create(call __ipc.ServerCall, i0 int32) error {
-	return s.impl.Create(call, i0)
+func (s implBinaryServerStub) Create(ctx __ipc.ServerContext, i0 int32) error {
+	return s.impl.Create(ctx, i0)
 }
 
-func (s implBinaryServerStub) Delete(call __ipc.ServerCall) error {
-	return s.impl.Delete(call)
+func (s implBinaryServerStub) Delete(ctx __ipc.ServerContext) error {
+	return s.impl.Delete(ctx)
 }
 
-func (s implBinaryServerStub) Download(call __ipc.ServerCall, i0 int32) error {
-	ctx := &implBinaryDownloadContext{call, implBinaryDownloadServerSend{call}}
+func (s implBinaryServerStub) Download(ctx *BinaryDownloadContextStub, i0 int32) error {
 	return s.impl.Download(ctx, i0)
 }
 
-func (s implBinaryServerStub) DownloadURL(call __ipc.ServerCall) (string, int64, error) {
-	return s.impl.DownloadURL(call)
+func (s implBinaryServerStub) DownloadURL(ctx __ipc.ServerContext) (string, int64, error) {
+	return s.impl.DownloadURL(ctx)
 }
 
-func (s implBinaryServerStub) Stat(call __ipc.ServerCall) ([]binary.PartInfo, error) {
-	return s.impl.Stat(call)
+func (s implBinaryServerStub) Stat(ctx __ipc.ServerContext) ([]binary.PartInfo, error) {
+	return s.impl.Stat(ctx)
 }
 
-func (s implBinaryServerStub) Upload(call __ipc.ServerCall, i0 int32) error {
-	ctx := &implBinaryUploadContext{call, implBinaryUploadServerRecv{call: call}}
+func (s implBinaryServerStub) Upload(ctx *BinaryUploadContextStub, i0 int32) error {
 	return s.impl.Upload(ctx, i0)
 }
 
@@ -699,7 +680,7 @@ func (s implBinaryServerStub) VGlob() *__ipc.GlobState {
 	return s.gs
 }
 
-func (s implBinaryServerStub) GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error) {
+func (s implBinaryServerStub) GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error) {
 	// TODO(toddw): Replace with new DescribeInterfaces implementation.
 	switch method {
 	case "Create":
@@ -719,7 +700,7 @@ func (s implBinaryServerStub) GetMethodTags(call __ipc.ServerCall, method string
 	}
 }
 
-func (s implBinaryServerStub) Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error) {
+func (s implBinaryServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
 	// TODO(toddw) Replace with new DescribeInterfaces implementation.
 	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
 	result.Methods["Create"] = __ipc.MethodSignature{
@@ -785,7 +766,7 @@ func (s implBinaryServerStub) Signature(call __ipc.ServerCall) (__ipc.ServiceSig
 
 // BinaryDownloadServerStream is the server stream for Binary.Download.
 type BinaryDownloadServerStream interface {
-	// SendStream returns the send side of the server stream.
+	// SendStream returns the send side of the Binary.Download server stream.
 	SendStream() interface {
 		// Send places the item onto the output stream.  Returns errors encountered
 		// while sending.  Blocks if there is no buffer space; will unblock when
@@ -800,28 +781,35 @@ type BinaryDownloadContext interface {
 	BinaryDownloadServerStream
 }
 
-type implBinaryDownloadServerSend struct {
-	call __ipc.ServerCall
+// BinaryDownloadContextStub is a wrapper that converts ipc.ServerCall into
+// a typesafe stub that implements BinaryDownloadContext.
+type BinaryDownloadContextStub struct {
+	__ipc.ServerCall
 }
 
-func (s *implBinaryDownloadServerSend) Send(item []byte) error {
-	return s.call.Send(item)
+// Init initializes BinaryDownloadContextStub from ipc.ServerCall.
+func (s *BinaryDownloadContextStub) Init(call __ipc.ServerCall) {
+	s.ServerCall = call
 }
 
-type implBinaryDownloadContext struct {
-	__ipc.ServerContext
-	send implBinaryDownloadServerSend
-}
-
-func (s *implBinaryDownloadContext) SendStream() interface {
+// SendStream returns the send side of the Binary.Download server stream.
+func (s *BinaryDownloadContextStub) SendStream() interface {
 	Send(item []byte) error
 } {
-	return &s.send
+	return implBinaryDownloadContextSend{s}
+}
+
+type implBinaryDownloadContextSend struct {
+	s *BinaryDownloadContextStub
+}
+
+func (s implBinaryDownloadContextSend) Send(item []byte) error {
+	return s.s.Send(item)
 }
 
 // BinaryUploadServerStream is the server stream for Binary.Upload.
 type BinaryUploadServerStream interface {
-	// RecvStream returns the receiver side of the server stream.
+	// RecvStream returns the receiver side of the Binary.Upload server stream.
 	RecvStream() interface {
 		// Advance stages an item so that it may be retrieved via Value.  Returns
 		// true iff there is an item to retrieve.  Advance must be called before
@@ -841,37 +829,44 @@ type BinaryUploadContext interface {
 	BinaryUploadServerStream
 }
 
-type implBinaryUploadServerRecv struct {
-	call __ipc.ServerCall
-	val  []byte
-	err  error
+// BinaryUploadContextStub is a wrapper that converts ipc.ServerCall into
+// a typesafe stub that implements BinaryUploadContext.
+type BinaryUploadContextStub struct {
+	__ipc.ServerCall
+	valRecv []byte
+	errRecv error
 }
 
-func (s *implBinaryUploadServerRecv) Advance() bool {
-	s.err = s.call.Recv(&s.val)
-	return s.err == nil
-}
-func (s *implBinaryUploadServerRecv) Value() []byte {
-	return s.val
-}
-func (s *implBinaryUploadServerRecv) Err() error {
-	if s.err == __io.EOF {
-		return nil
-	}
-	return s.err
+// Init initializes BinaryUploadContextStub from ipc.ServerCall.
+func (s *BinaryUploadContextStub) Init(call __ipc.ServerCall) {
+	s.ServerCall = call
 }
 
-type implBinaryUploadContext struct {
-	__ipc.ServerContext
-	recv implBinaryUploadServerRecv
-}
-
-func (s *implBinaryUploadContext) RecvStream() interface {
+// RecvStream returns the receiver side of the Binary.Upload server stream.
+func (s *BinaryUploadContextStub) RecvStream() interface {
 	Advance() bool
 	Value() []byte
 	Err() error
 } {
-	return &s.recv
+	return implBinaryUploadContextRecv{s}
+}
+
+type implBinaryUploadContextRecv struct {
+	s *BinaryUploadContextStub
+}
+
+func (s implBinaryUploadContextRecv) Advance() bool {
+	s.s.errRecv = s.s.Recv(&s.s.valRecv)
+	return s.s.errRecv == nil
+}
+func (s implBinaryUploadContextRecv) Value() []byte {
+	return s.s.valRecv
+}
+func (s implBinaryUploadContextRecv) Err() error {
+	if s.s.errRecv == __io.EOF {
+		return nil
+	}
+	return s.s.errRecv
 }
 
 // ProfileClientMethods is the client interface
@@ -984,28 +979,18 @@ type ProfileServerMethods interface {
 }
 
 // ProfileServerStubMethods is the server interface containing
-// Profile methods, as expected by ipc.Server.  The difference between
-// this interface and ProfileServerMethods is that the first context
-// argument for each method is always ipc.ServerCall here, while it is either
-// ipc.ServerContext or a typed streaming context there.
-type ProfileServerStubMethods interface {
-	// Label is the human-readable profile key for the profile,
-	// e.g. "linux-media". The label can be used to uniquely identify
-	// the profile (for the purpose of matching application binaries and
-	// nodes).
-	Label(__ipc.ServerCall) (string, error)
-	// Description is a free-text description of the profile, meant for
-	// human consumption.
-	Description(__ipc.ServerCall) (string, error)
-}
+// Profile methods, as expected by ipc.Server.
+// There is no difference between this interface and ProfileServerMethods
+// since there are no streaming methods.
+type ProfileServerStubMethods ProfileServerMethods
 
 // ProfileServerStub adds universal methods to ProfileServerStubMethods.
 type ProfileServerStub interface {
 	ProfileServerStubMethods
 	// GetMethodTags will be replaced with DescribeInterfaces.
-	GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error)
+	GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error)
 	// Signature will be replaced with DescribeInterfaces.
-	Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error)
+	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
 // ProfileServer returns a server stub for Profile.
@@ -1030,19 +1015,19 @@ type implProfileServerStub struct {
 	gs   *__ipc.GlobState
 }
 
-func (s implProfileServerStub) Label(call __ipc.ServerCall) (string, error) {
-	return s.impl.Label(call)
+func (s implProfileServerStub) Label(ctx __ipc.ServerContext) (string, error) {
+	return s.impl.Label(ctx)
 }
 
-func (s implProfileServerStub) Description(call __ipc.ServerCall) (string, error) {
-	return s.impl.Description(call)
+func (s implProfileServerStub) Description(ctx __ipc.ServerContext) (string, error) {
+	return s.impl.Description(ctx)
 }
 
 func (s implProfileServerStub) VGlob() *__ipc.GlobState {
 	return s.gs
 }
 
-func (s implProfileServerStub) GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error) {
+func (s implProfileServerStub) GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error) {
 	// TODO(toddw): Replace with new DescribeInterfaces implementation.
 	switch method {
 	case "Label":
@@ -1054,7 +1039,7 @@ func (s implProfileServerStub) GetMethodTags(call __ipc.ServerCall, method strin
 	}
 }
 
-func (s implProfileServerStub) Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error) {
+func (s implProfileServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
 	// TODO(toddw) Replace with new DescribeInterfaces implementation.
 	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
 	result.Methods["Description"] = __ipc.MethodSignature{

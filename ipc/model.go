@@ -303,7 +303,7 @@ type GlobState struct {
 type VAllGlobber interface {
 	// TODO(rthellend): Rename this and the Globbable interface to VGlob
 	// when toddw's Signature changes are all done.
-	Glob(ctx ServerCall, pattern string) error
+	Glob(ctx *GlobContextStub, pattern string) error
 }
 
 // VChildrenGlobber is a simple interface to publish the relationship between

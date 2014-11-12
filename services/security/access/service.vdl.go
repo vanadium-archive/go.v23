@@ -249,41 +249,18 @@ type ObjectServerMethods interface {
 }
 
 // ObjectServerStubMethods is the server interface containing
-// Object methods, as expected by ipc.Server.  The difference between
-// this interface and ObjectServerMethods is that the first context
-// argument for each method is always ipc.ServerCall here, while it is either
-// ipc.ServerContext or a typed streaming context there.
-type ObjectServerStubMethods interface {
-	// SetACL replaces the current ACL for an object.  etag allows for optional,
-	// optimistic concurrency control.  If non-empty, etag's value must come
-	// from GetACL.  If any client has successfully called SetACL in the
-	// meantime, the etag will be stale and SetACL will fail.
-	//
-	// ACL objects are expected to be small.  It is up to the implementation to
-	// define the exact limit, though it should probably be around 100KB.  Large
-	// lists of principals should use the Group API or blessings.
-	//
-	// There is some ambiguity when calling SetACL on a mount point.  Does it
-	// affect the mount itself or does it affect the service endpoint that the
-	// mount points to?  The chosen behavior is that it affects the service
-	// endpoint.  To modify the mount point's ACL, use ResolveToMountTable
-	// to get an endpoint and call SetACL on that.  This means that clients
-	// must know when a name refers to a mount point to change its ACL.
-	SetACL(call __ipc.ServerCall, acl security.ACL, etag string) error
-	// GetACL returns the complete, current ACL for an object.  The returned etag
-	// can be passed to a subsequent call to SetACL for optimistic concurrency
-	// control. A successful call to SetACL will invalidate etag, and the client
-	// must call GetACL again to get the current etag.
-	GetACL(__ipc.ServerCall) (acl security.ACL, etag string, err error)
-}
+// Object methods, as expected by ipc.Server.
+// There is no difference between this interface and ObjectServerMethods
+// since there are no streaming methods.
+type ObjectServerStubMethods ObjectServerMethods
 
 // ObjectServerStub adds universal methods to ObjectServerStubMethods.
 type ObjectServerStub interface {
 	ObjectServerStubMethods
 	// GetMethodTags will be replaced with DescribeInterfaces.
-	GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error)
+	GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error)
 	// Signature will be replaced with DescribeInterfaces.
-	Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error)
+	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
 // ObjectServer returns a server stub for Object.
@@ -308,19 +285,19 @@ type implObjectServerStub struct {
 	gs   *__ipc.GlobState
 }
 
-func (s implObjectServerStub) SetACL(call __ipc.ServerCall, i0 security.ACL, i1 string) error {
-	return s.impl.SetACL(call, i0, i1)
+func (s implObjectServerStub) SetACL(ctx __ipc.ServerContext, i0 security.ACL, i1 string) error {
+	return s.impl.SetACL(ctx, i0, i1)
 }
 
-func (s implObjectServerStub) GetACL(call __ipc.ServerCall) (security.ACL, string, error) {
-	return s.impl.GetACL(call)
+func (s implObjectServerStub) GetACL(ctx __ipc.ServerContext) (security.ACL, string, error) {
+	return s.impl.GetACL(ctx)
 }
 
 func (s implObjectServerStub) VGlob() *__ipc.GlobState {
 	return s.gs
 }
 
-func (s implObjectServerStub) GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error) {
+func (s implObjectServerStub) GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error) {
 	// TODO(toddw): Replace with new DescribeInterfaces implementation.
 	switch method {
 	case "SetACL":
@@ -332,7 +309,7 @@ func (s implObjectServerStub) GetMethodTags(call __ipc.ServerCall, method string
 	}
 }
 
-func (s implObjectServerStub) Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error) {
+func (s implObjectServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
 	// TODO(toddw) Replace with new DescribeInterfaces implementation.
 	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
 	result.Methods["GetACL"] = __ipc.MethodSignature{

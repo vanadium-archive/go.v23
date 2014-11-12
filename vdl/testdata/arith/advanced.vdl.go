@@ -111,22 +111,18 @@ type TrigonometryServerMethods interface {
 }
 
 // TrigonometryServerStubMethods is the server interface containing
-// Trigonometry methods, as expected by ipc.Server.  The difference between
-// this interface and TrigonometryServerMethods is that the first context
-// argument for each method is always ipc.ServerCall here, while it is either
-// ipc.ServerContext or a typed streaming context there.
-type TrigonometryServerStubMethods interface {
-	Sine(call __ipc.ServerCall, angle float64) (float64, error)
-	Cosine(call __ipc.ServerCall, angle float64) (float64, error)
-}
+// Trigonometry methods, as expected by ipc.Server.
+// There is no difference between this interface and TrigonometryServerMethods
+// since there are no streaming methods.
+type TrigonometryServerStubMethods TrigonometryServerMethods
 
 // TrigonometryServerStub adds universal methods to TrigonometryServerStubMethods.
 type TrigonometryServerStub interface {
 	TrigonometryServerStubMethods
 	// GetMethodTags will be replaced with DescribeInterfaces.
-	GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error)
+	GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error)
 	// Signature will be replaced with DescribeInterfaces.
-	Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error)
+	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
 // TrigonometryServer returns a server stub for Trigonometry.
@@ -151,19 +147,19 @@ type implTrigonometryServerStub struct {
 	gs   *__ipc.GlobState
 }
 
-func (s implTrigonometryServerStub) Sine(call __ipc.ServerCall, i0 float64) (float64, error) {
-	return s.impl.Sine(call, i0)
+func (s implTrigonometryServerStub) Sine(ctx __ipc.ServerContext, i0 float64) (float64, error) {
+	return s.impl.Sine(ctx, i0)
 }
 
-func (s implTrigonometryServerStub) Cosine(call __ipc.ServerCall, i0 float64) (float64, error) {
-	return s.impl.Cosine(call, i0)
+func (s implTrigonometryServerStub) Cosine(ctx __ipc.ServerContext, i0 float64) (float64, error) {
+	return s.impl.Cosine(ctx, i0)
 }
 
 func (s implTrigonometryServerStub) VGlob() *__ipc.GlobState {
 	return s.gs
 }
 
-func (s implTrigonometryServerStub) GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error) {
+func (s implTrigonometryServerStub) GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error) {
 	// TODO(toddw): Replace with new DescribeInterfaces implementation.
 	switch method {
 	case "Sine":
@@ -175,7 +171,7 @@ func (s implTrigonometryServerStub) GetMethodTags(call __ipc.ServerCall, method 
 	}
 }
 
-func (s implTrigonometryServerStub) Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error) {
+func (s implTrigonometryServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
 	// TODO(toddw) Replace with new DescribeInterfaces implementation.
 	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
 	result.Methods["Cosine"] = __ipc.MethodSignature{
@@ -284,23 +280,18 @@ type AdvancedMathServerMethods interface {
 }
 
 // AdvancedMathServerStubMethods is the server interface containing
-// AdvancedMath methods, as expected by ipc.Server.  The difference between
-// this interface and AdvancedMathServerMethods is that the first context
-// argument for each method is always ipc.ServerCall here, while it is either
-// ipc.ServerContext or a typed streaming context there.
-type AdvancedMathServerStubMethods interface {
-	// Trigonometry is an interface that specifies a couple trigonometric functions.
-	TrigonometryServerStubMethods
-	exp.ExpServerStubMethods
-}
+// AdvancedMath methods, as expected by ipc.Server.
+// There is no difference between this interface and AdvancedMathServerMethods
+// since there are no streaming methods.
+type AdvancedMathServerStubMethods AdvancedMathServerMethods
 
 // AdvancedMathServerStub adds universal methods to AdvancedMathServerStubMethods.
 type AdvancedMathServerStub interface {
 	AdvancedMathServerStubMethods
 	// GetMethodTags will be replaced with DescribeInterfaces.
-	GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error)
+	GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error)
 	// Signature will be replaced with DescribeInterfaces.
-	Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error)
+	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
 // AdvancedMathServer returns a server stub for AdvancedMath.
@@ -324,35 +315,34 @@ func AdvancedMathServer(impl AdvancedMathServerMethods) AdvancedMathServerStub {
 
 type implAdvancedMathServerStub struct {
 	impl AdvancedMathServerMethods
-	gs   *__ipc.GlobState
-
 	TrigonometryServerStub
 	exp.ExpServerStub
+	gs *__ipc.GlobState
 }
 
 func (s implAdvancedMathServerStub) VGlob() *__ipc.GlobState {
 	return s.gs
 }
 
-func (s implAdvancedMathServerStub) GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error) {
+func (s implAdvancedMathServerStub) GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error) {
 	// TODO(toddw): Replace with new DescribeInterfaces implementation.
-	if resp, err := s.TrigonometryServerStub.GetMethodTags(call, method); resp != nil || err != nil {
+	if resp, err := s.TrigonometryServerStub.GetMethodTags(ctx, method); resp != nil || err != nil {
 		return resp, err
 	}
-	if resp, err := s.ExpServerStub.GetMethodTags(call, method); resp != nil || err != nil {
+	if resp, err := s.ExpServerStub.GetMethodTags(ctx, method); resp != nil || err != nil {
 		return resp, err
 	}
 	return nil, nil
 }
 
-func (s implAdvancedMathServerStub) Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error) {
+func (s implAdvancedMathServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
 	// TODO(toddw) Replace with new DescribeInterfaces implementation.
 	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
 
 	result.TypeDefs = []__vdlutil.Any{}
 	var ss __ipc.ServiceSignature
 	var firstAdded int
-	ss, _ = s.TrigonometryServerStub.Signature(call)
+	ss, _ = s.TrigonometryServerStub.Signature(ctx)
 	firstAdded = len(result.TypeDefs)
 	for k, v := range ss.Methods {
 		for i, _ := range v.InArgs {
@@ -405,7 +395,7 @@ func (s implAdvancedMathServerStub) Signature(call __ipc.ServerCall) (__ipc.Serv
 		}
 		result.TypeDefs = append(result.TypeDefs, d)
 	}
-	ss, _ = s.ExpServerStub.Signature(call)
+	ss, _ = s.ExpServerStub.Signature(ctx)
 	firstAdded = len(result.TypeDefs)
 	for k, v := range ss.Methods {
 		for i, _ := range v.InArgs {

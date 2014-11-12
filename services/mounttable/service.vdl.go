@@ -72,7 +72,7 @@ func (c implGlobbableClientStub) Glob(ctx __context.T, i0 string, opts ...__ipc.
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Glob", []interface{}{i0}, opts...); err != nil {
 		return
 	}
-	ocall = &implGlobbableGlobCall{call, implGlobbableGlobClientRecv{call: call}}
+	ocall = &implGlobbableGlobCall{Call: call}
 	return
 }
 
@@ -100,7 +100,7 @@ func (c implGlobbableClientStub) GetMethodTags(ctx __context.T, method string, o
 
 // GlobbableGlobClientStream is the client stream for Globbable.Glob.
 type GlobbableGlobClientStream interface {
-	// RecvStream returns the receiver side of the client stream.
+	// RecvStream returns the receiver side of the Globbable.Glob client stream.
 	RecvStream() interface {
 		// Advance stages an item so that it may be retrieved via Value.  Returns
 		// true iff there is an item to retrieve.  Advance must be called before
@@ -134,30 +134,10 @@ type GlobbableGlobCall interface {
 	Cancel()
 }
 
-type implGlobbableGlobClientRecv struct {
-	call __ipc.Call
-	val  naming.VDLMountEntry
-	err  error
-}
-
-func (c *implGlobbableGlobClientRecv) Advance() bool {
-	c.val = naming.VDLMountEntry{}
-	c.err = c.call.Recv(&c.val)
-	return c.err == nil
-}
-func (c *implGlobbableGlobClientRecv) Value() naming.VDLMountEntry {
-	return c.val
-}
-func (c *implGlobbableGlobClientRecv) Err() error {
-	if c.err == __io.EOF {
-		return nil
-	}
-	return c.err
-}
-
 type implGlobbableGlobCall struct {
-	call __ipc.Call
-	recv implGlobbableGlobClientRecv
+	__ipc.Call
+	valRecv naming.VDLMountEntry
+	errRecv error
 }
 
 func (c *implGlobbableGlobCall) RecvStream() interface {
@@ -165,16 +145,32 @@ func (c *implGlobbableGlobCall) RecvStream() interface {
 	Value() naming.VDLMountEntry
 	Err() error
 } {
-	return &c.recv
+	return implGlobbableGlobCallRecv{c}
+}
+
+type implGlobbableGlobCallRecv struct {
+	c *implGlobbableGlobCall
+}
+
+func (c implGlobbableGlobCallRecv) Advance() bool {
+	c.c.valRecv = naming.VDLMountEntry{}
+	c.c.errRecv = c.c.Recv(&c.c.valRecv)
+	return c.c.errRecv == nil
+}
+func (c implGlobbableGlobCallRecv) Value() naming.VDLMountEntry {
+	return c.c.valRecv
+}
+func (c implGlobbableGlobCallRecv) Err() error {
+	if c.c.errRecv == __io.EOF {
+		return nil
+	}
+	return c.c.errRecv
 }
 func (c *implGlobbableGlobCall) Finish() (err error) {
-	if ierr := c.call.Finish(&err); ierr != nil {
+	if ierr := c.Call.Finish(&err); ierr != nil {
 		err = ierr
 	}
 	return
-}
-func (c *implGlobbableGlobCall) Cancel() {
-	c.call.Cancel()
 }
 
 // GlobbableServerMethods is the interface a server writer
@@ -189,14 +185,13 @@ type GlobbableServerMethods interface {
 	// read access to "p".
 	// In summary, the principal must have at least resolve access to call Glob,
 	// but may require additional access for certain patterns.
-	Glob(ctx GlobbableGlobContext, pattern string) error
+	Glob(ctx __ipc.GlobContext, pattern string) error
 }
 
 // GlobbableServerStubMethods is the server interface containing
-// Globbable methods, as expected by ipc.Server.  The difference between
-// this interface and GlobbableServerMethods is that the first context
-// argument for each method is always ipc.ServerCall here, while it is either
-// ipc.ServerContext or a typed streaming context there.
+// Globbable methods, as expected by ipc.Server.
+// The only difference between this interface and GlobbableServerMethods
+// is the streaming methods.
 type GlobbableServerStubMethods interface {
 	// Glob returns all matching entries at the given server.
 	//
@@ -207,16 +202,16 @@ type GlobbableServerStubMethods interface {
 	// read access to "p".
 	// In summary, the principal must have at least resolve access to call Glob,
 	// but may require additional access for certain patterns.
-	Glob(call __ipc.ServerCall, pattern string) error
+	Glob(ctx *__ipc.GlobContextStub, pattern string) error
 }
 
 // GlobbableServerStub adds universal methods to GlobbableServerStubMethods.
 type GlobbableServerStub interface {
 	GlobbableServerStubMethods
 	// GetMethodTags will be replaced with DescribeInterfaces.
-	GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error)
+	GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error)
 	// Signature will be replaced with DescribeInterfaces.
-	Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error)
+	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
 // GlobbableServer returns a server stub for Globbable.
@@ -241,8 +236,7 @@ type implGlobbableServerStub struct {
 	gs   *__ipc.GlobState
 }
 
-func (s implGlobbableServerStub) Glob(call __ipc.ServerCall, i0 string) error {
-	ctx := &implGlobbableGlobContext{call, implGlobbableGlobServerSend{call}}
+func (s implGlobbableServerStub) Glob(ctx *__ipc.GlobContextStub, i0 string) error {
 	return s.impl.Glob(ctx, i0)
 }
 
@@ -250,7 +244,7 @@ func (s implGlobbableServerStub) VGlob() *__ipc.GlobState {
 	return s.gs
 }
 
-func (s implGlobbableServerStub) GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error) {
+func (s implGlobbableServerStub) GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error) {
 	// TODO(toddw): Replace with new DescribeInterfaces implementation.
 	switch method {
 	case "Glob":
@@ -260,7 +254,7 @@ func (s implGlobbableServerStub) GetMethodTags(call __ipc.ServerCall, method str
 	}
 }
 
-func (s implGlobbableServerStub) Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error) {
+func (s implGlobbableServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
 	// TODO(toddw) Replace with new DescribeInterfaces implementation.
 	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
 	result.Methods["Glob"] = __ipc.MethodSignature{
@@ -291,42 +285,6 @@ func (s implGlobbableServerStub) Signature(call __ipc.ServerCall) (__ipc.Service
 	}
 
 	return result, nil
-}
-
-// GlobbableGlobServerStream is the server stream for Globbable.Glob.
-type GlobbableGlobServerStream interface {
-	// SendStream returns the send side of the server stream.
-	SendStream() interface {
-		// Send places the item onto the output stream.  Returns errors encountered
-		// while sending.  Blocks if there is no buffer space; will unblock when
-		// buffer space is available.
-		Send(item naming.VDLMountEntry) error
-	}
-}
-
-// GlobbableGlobContext represents the context passed to Globbable.Glob.
-type GlobbableGlobContext interface {
-	__ipc.ServerContext
-	GlobbableGlobServerStream
-}
-
-type implGlobbableGlobServerSend struct {
-	call __ipc.ServerCall
-}
-
-func (s *implGlobbableGlobServerSend) Send(item naming.VDLMountEntry) error {
-	return s.call.Send(item)
-}
-
-type implGlobbableGlobContext struct {
-	__ipc.ServerContext
-	send implGlobbableGlobServerSend
-}
-
-func (s *implGlobbableGlobContext) SendStream() interface {
-	Send(item naming.VDLMountEntry) error
-} {
-	return &s.send
 }
 
 // MountTableClientMethods is the client interface
@@ -489,10 +447,9 @@ type MountTableServerMethods interface {
 }
 
 // MountTableServerStubMethods is the server interface containing
-// MountTable methods, as expected by ipc.Server.  The difference between
-// this interface and MountTableServerMethods is that the first context
-// argument for each method is always ipc.ServerCall here, while it is either
-// ipc.ServerContext or a typed streaming context there.
+// MountTable methods, as expected by ipc.Server.
+// The only difference between this interface and MountTableServerMethods
+// is the streaming methods.
 type MountTableServerStubMethods interface {
 	GlobbableServerStubMethods
 	// Mount Server (a global name) onto the receiver.
@@ -507,26 +464,26 @@ type MountTableServerStubMethods interface {
 	// act as if it was never present as far as the interface is concerned.
 	//
 	// Opts represents a bit mask of options.
-	Mount(call __ipc.ServerCall, Server string, TTL uint32, Flags naming.MountFlag) error
+	Mount(ctx __ipc.ServerContext, Server string, TTL uint32, Flags naming.MountFlag) error
 	// Unmount removes Server from the mount point.  If Server is empty, remove
 	// all servers mounted there.
 	// Returns a non-nil error iff Server remains mounted at the mount point.
-	Unmount(call __ipc.ServerCall, Server string) error
+	Unmount(ctx __ipc.ServerContext, Server string) error
 	// ResolveStep takes the next step in resolving a name.  Returns the next
 	// servers to query and the suffix at those servers.
-	ResolveStep(__ipc.ServerCall) (Servers []naming.VDLMountedServer, Suffix string, Error error)
+	ResolveStep(__ipc.ServerContext) (Servers []naming.VDLMountedServer, Suffix string, Error error)
 	// ResolveStepX takes the next step in resolving a name.  Returns the next
 	// servers to query and the suffix at those servers.
-	ResolveStepX(__ipc.ServerCall) (Entry naming.VDLMountEntry, Error error)
+	ResolveStepX(__ipc.ServerContext) (Entry naming.VDLMountEntry, Error error)
 }
 
 // MountTableServerStub adds universal methods to MountTableServerStubMethods.
 type MountTableServerStub interface {
 	MountTableServerStubMethods
 	// GetMethodTags will be replaced with DescribeInterfaces.
-	GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error)
+	GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error)
 	// Signature will be replaced with DescribeInterfaces.
-	Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error)
+	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
 // MountTableServer returns a server stub for MountTable.
@@ -549,34 +506,33 @@ func MountTableServer(impl MountTableServerMethods) MountTableServerStub {
 
 type implMountTableServerStub struct {
 	impl MountTableServerMethods
-	gs   *__ipc.GlobState
-
 	GlobbableServerStub
+	gs *__ipc.GlobState
 }
 
-func (s implMountTableServerStub) Mount(call __ipc.ServerCall, i0 string, i1 uint32, i2 naming.MountFlag) error {
-	return s.impl.Mount(call, i0, i1, i2)
+func (s implMountTableServerStub) Mount(ctx __ipc.ServerContext, i0 string, i1 uint32, i2 naming.MountFlag) error {
+	return s.impl.Mount(ctx, i0, i1, i2)
 }
 
-func (s implMountTableServerStub) Unmount(call __ipc.ServerCall, i0 string) error {
-	return s.impl.Unmount(call, i0)
+func (s implMountTableServerStub) Unmount(ctx __ipc.ServerContext, i0 string) error {
+	return s.impl.Unmount(ctx, i0)
 }
 
-func (s implMountTableServerStub) ResolveStep(call __ipc.ServerCall) ([]naming.VDLMountedServer, string, error) {
-	return s.impl.ResolveStep(call)
+func (s implMountTableServerStub) ResolveStep(ctx __ipc.ServerContext) ([]naming.VDLMountedServer, string, error) {
+	return s.impl.ResolveStep(ctx)
 }
 
-func (s implMountTableServerStub) ResolveStepX(call __ipc.ServerCall) (naming.VDLMountEntry, error) {
-	return s.impl.ResolveStepX(call)
+func (s implMountTableServerStub) ResolveStepX(ctx __ipc.ServerContext) (naming.VDLMountEntry, error) {
+	return s.impl.ResolveStepX(ctx)
 }
 
 func (s implMountTableServerStub) VGlob() *__ipc.GlobState {
 	return s.gs
 }
 
-func (s implMountTableServerStub) GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error) {
+func (s implMountTableServerStub) GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error) {
 	// TODO(toddw): Replace with new DescribeInterfaces implementation.
-	if resp, err := s.GlobbableServerStub.GetMethodTags(call, method); resp != nil || err != nil {
+	if resp, err := s.GlobbableServerStub.GetMethodTags(ctx, method); resp != nil || err != nil {
 		return resp, err
 	}
 	switch method {
@@ -593,7 +549,7 @@ func (s implMountTableServerStub) GetMethodTags(call __ipc.ServerCall, method st
 	}
 }
 
-func (s implMountTableServerStub) Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error) {
+func (s implMountTableServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
 	// TODO(toddw) Replace with new DescribeInterfaces implementation.
 	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
 	result.Methods["Mount"] = __ipc.MethodSignature{
@@ -647,7 +603,7 @@ func (s implMountTableServerStub) Signature(call __ipc.ServerCall) (__ipc.Servic
 	}
 	var ss __ipc.ServiceSignature
 	var firstAdded int
-	ss, _ = s.GlobbableServerStub.Signature(call)
+	ss, _ = s.GlobbableServerStub.Signature(ctx)
 	firstAdded = len(result.TypeDefs)
 	for k, v := range ss.Methods {
 		for i, _ := range v.InArgs {

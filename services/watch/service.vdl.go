@@ -166,7 +166,7 @@ func (c implGlobWatcherClientStub) WatchGlob(ctx __context.T, i0 types.GlobReque
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "WatchGlob", []interface{}{i0}, opts...); err != nil {
 		return
 	}
-	ocall = &implGlobWatcherWatchGlobCall{call, implGlobWatcherWatchGlobClientRecv{call: call}}
+	ocall = &implGlobWatcherWatchGlobCall{Call: call}
 	return
 }
 
@@ -194,7 +194,7 @@ func (c implGlobWatcherClientStub) GetMethodTags(ctx __context.T, method string,
 
 // GlobWatcherWatchGlobClientStream is the client stream for GlobWatcher.WatchGlob.
 type GlobWatcherWatchGlobClientStream interface {
-	// RecvStream returns the receiver side of the client stream.
+	// RecvStream returns the receiver side of the GlobWatcher.WatchGlob client stream.
 	RecvStream() interface {
 		// Advance stages an item so that it may be retrieved via Value.  Returns
 		// true iff there is an item to retrieve.  Advance must be called before
@@ -228,30 +228,10 @@ type GlobWatcherWatchGlobCall interface {
 	Cancel()
 }
 
-type implGlobWatcherWatchGlobClientRecv struct {
-	call __ipc.Call
-	val  types.Change
-	err  error
-}
-
-func (c *implGlobWatcherWatchGlobClientRecv) Advance() bool {
-	c.val = types.Change{}
-	c.err = c.call.Recv(&c.val)
-	return c.err == nil
-}
-func (c *implGlobWatcherWatchGlobClientRecv) Value() types.Change {
-	return c.val
-}
-func (c *implGlobWatcherWatchGlobClientRecv) Err() error {
-	if c.err == __io.EOF {
-		return nil
-	}
-	return c.err
-}
-
 type implGlobWatcherWatchGlobCall struct {
-	call __ipc.Call
-	recv implGlobWatcherWatchGlobClientRecv
+	__ipc.Call
+	valRecv types.Change
+	errRecv error
 }
 
 func (c *implGlobWatcherWatchGlobCall) RecvStream() interface {
@@ -259,16 +239,32 @@ func (c *implGlobWatcherWatchGlobCall) RecvStream() interface {
 	Value() types.Change
 	Err() error
 } {
-	return &c.recv
+	return implGlobWatcherWatchGlobCallRecv{c}
+}
+
+type implGlobWatcherWatchGlobCallRecv struct {
+	c *implGlobWatcherWatchGlobCall
+}
+
+func (c implGlobWatcherWatchGlobCallRecv) Advance() bool {
+	c.c.valRecv = types.Change{}
+	c.c.errRecv = c.c.Recv(&c.c.valRecv)
+	return c.c.errRecv == nil
+}
+func (c implGlobWatcherWatchGlobCallRecv) Value() types.Change {
+	return c.c.valRecv
+}
+func (c implGlobWatcherWatchGlobCallRecv) Err() error {
+	if c.c.errRecv == __io.EOF {
+		return nil
+	}
+	return c.c.errRecv
 }
 func (c *implGlobWatcherWatchGlobCall) Finish() (err error) {
-	if ierr := c.call.Finish(&err); ierr != nil {
+	if ierr := c.Call.Finish(&err); ierr != nil {
 		err = ierr
 	}
 	return
-}
-func (c *implGlobWatcherWatchGlobCall) Cancel() {
-	c.call.Cancel()
 }
 
 // GlobWatcherServerMethods is the interface a server writer
@@ -282,22 +278,21 @@ type GlobWatcherServerMethods interface {
 }
 
 // GlobWatcherServerStubMethods is the server interface containing
-// GlobWatcher methods, as expected by ipc.Server.  The difference between
-// this interface and GlobWatcherServerMethods is that the first context
-// argument for each method is always ipc.ServerCall here, while it is either
-// ipc.ServerContext or a typed streaming context there.
+// GlobWatcher methods, as expected by ipc.Server.
+// The only difference between this interface and GlobWatcherServerMethods
+// is the streaming methods.
 type GlobWatcherServerStubMethods interface {
 	// WatchGlob returns a stream of changes that match a pattern.
-	WatchGlob(call __ipc.ServerCall, Req types.GlobRequest) error
+	WatchGlob(ctx *GlobWatcherWatchGlobContextStub, Req types.GlobRequest) error
 }
 
 // GlobWatcherServerStub adds universal methods to GlobWatcherServerStubMethods.
 type GlobWatcherServerStub interface {
 	GlobWatcherServerStubMethods
 	// GetMethodTags will be replaced with DescribeInterfaces.
-	GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error)
+	GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error)
 	// Signature will be replaced with DescribeInterfaces.
-	Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error)
+	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
 // GlobWatcherServer returns a server stub for GlobWatcher.
@@ -322,8 +317,7 @@ type implGlobWatcherServerStub struct {
 	gs   *__ipc.GlobState
 }
 
-func (s implGlobWatcherServerStub) WatchGlob(call __ipc.ServerCall, i0 types.GlobRequest) error {
-	ctx := &implGlobWatcherWatchGlobContext{call, implGlobWatcherWatchGlobServerSend{call}}
+func (s implGlobWatcherServerStub) WatchGlob(ctx *GlobWatcherWatchGlobContextStub, i0 types.GlobRequest) error {
 	return s.impl.WatchGlob(ctx, i0)
 }
 
@@ -331,7 +325,7 @@ func (s implGlobWatcherServerStub) VGlob() *__ipc.GlobState {
 	return s.gs
 }
 
-func (s implGlobWatcherServerStub) GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error) {
+func (s implGlobWatcherServerStub) GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error) {
 	// TODO(toddw): Replace with new DescribeInterfaces implementation.
 	switch method {
 	case "WatchGlob":
@@ -341,7 +335,7 @@ func (s implGlobWatcherServerStub) GetMethodTags(call __ipc.ServerCall, method s
 	}
 }
 
-func (s implGlobWatcherServerStub) Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error) {
+func (s implGlobWatcherServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
 	// TODO(toddw) Replace with new DescribeInterfaces implementation.
 	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
 	result.Methods["WatchGlob"] = __ipc.MethodSignature{
@@ -378,7 +372,7 @@ func (s implGlobWatcherServerStub) Signature(call __ipc.ServerCall) (__ipc.Servi
 
 // GlobWatcherWatchGlobServerStream is the server stream for GlobWatcher.WatchGlob.
 type GlobWatcherWatchGlobServerStream interface {
-	// SendStream returns the send side of the server stream.
+	// SendStream returns the send side of the GlobWatcher.WatchGlob server stream.
 	SendStream() interface {
 		// Send places the item onto the output stream.  Returns errors encountered
 		// while sending.  Blocks if there is no buffer space; will unblock when
@@ -393,21 +387,28 @@ type GlobWatcherWatchGlobContext interface {
 	GlobWatcherWatchGlobServerStream
 }
 
-type implGlobWatcherWatchGlobServerSend struct {
-	call __ipc.ServerCall
+// GlobWatcherWatchGlobContextStub is a wrapper that converts ipc.ServerCall into
+// a typesafe stub that implements GlobWatcherWatchGlobContext.
+type GlobWatcherWatchGlobContextStub struct {
+	__ipc.ServerCall
 }
 
-func (s *implGlobWatcherWatchGlobServerSend) Send(item types.Change) error {
-	return s.call.Send(item)
+// Init initializes GlobWatcherWatchGlobContextStub from ipc.ServerCall.
+func (s *GlobWatcherWatchGlobContextStub) Init(call __ipc.ServerCall) {
+	s.ServerCall = call
 }
 
-type implGlobWatcherWatchGlobContext struct {
-	__ipc.ServerContext
-	send implGlobWatcherWatchGlobServerSend
-}
-
-func (s *implGlobWatcherWatchGlobContext) SendStream() interface {
+// SendStream returns the send side of the GlobWatcher.WatchGlob server stream.
+func (s *GlobWatcherWatchGlobContextStub) SendStream() interface {
 	Send(item types.Change) error
 } {
-	return &s.send
+	return implGlobWatcherWatchGlobContextSend{s}
+}
+
+type implGlobWatcherWatchGlobContextSend struct {
+	s *GlobWatcherWatchGlobContextStub
+}
+
+func (s implGlobWatcherWatchGlobContextSend) Send(item types.Change) error {
+	return s.s.Send(item)
 }

@@ -133,10 +133,9 @@ type StatsServerMethods interface {
 }
 
 // StatsServerStubMethods is the server interface containing
-// Stats methods, as expected by ipc.Server.  The difference between
-// this interface and StatsServerMethods is that the first context
-// argument for each method is always ipc.ServerCall here, while it is either
-// ipc.ServerContext or a typed streaming context there.
+// Stats methods, as expected by ipc.Server.
+// The only difference between this interface and StatsServerMethods
+// is the streaming methods.
 type StatsServerStubMethods interface {
 	mounttable.GlobbableServerStubMethods
 	// GlobWatcher allows a client to receive updates for changes to objects
@@ -146,16 +145,16 @@ type StatsServerStubMethods interface {
 	// of the value is implementation specific.
 	// Some objects may not have a value, in which case, Value() returns
 	// a NoValue error.
-	Value(__ipc.ServerCall) (__vdlutil.Any, error)
+	Value(__ipc.ServerContext) (__vdlutil.Any, error)
 }
 
 // StatsServerStub adds universal methods to StatsServerStubMethods.
 type StatsServerStub interface {
 	StatsServerStubMethods
 	// GetMethodTags will be replaced with DescribeInterfaces.
-	GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error)
+	GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error)
 	// Signature will be replaced with DescribeInterfaces.
-	Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error)
+	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
 // StatsServer returns a server stub for Stats.
@@ -179,26 +178,25 @@ func StatsServer(impl StatsServerMethods) StatsServerStub {
 
 type implStatsServerStub struct {
 	impl StatsServerMethods
-	gs   *__ipc.GlobState
-
 	mounttable.GlobbableServerStub
 	watch.GlobWatcherServerStub
+	gs *__ipc.GlobState
 }
 
-func (s implStatsServerStub) Value(call __ipc.ServerCall) (__vdlutil.Any, error) {
-	return s.impl.Value(call)
+func (s implStatsServerStub) Value(ctx __ipc.ServerContext) (__vdlutil.Any, error) {
+	return s.impl.Value(ctx)
 }
 
 func (s implStatsServerStub) VGlob() *__ipc.GlobState {
 	return s.gs
 }
 
-func (s implStatsServerStub) GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error) {
+func (s implStatsServerStub) GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error) {
 	// TODO(toddw): Replace with new DescribeInterfaces implementation.
-	if resp, err := s.GlobbableServerStub.GetMethodTags(call, method); resp != nil || err != nil {
+	if resp, err := s.GlobbableServerStub.GetMethodTags(ctx, method); resp != nil || err != nil {
 		return resp, err
 	}
-	if resp, err := s.GlobWatcherServerStub.GetMethodTags(call, method); resp != nil || err != nil {
+	if resp, err := s.GlobWatcherServerStub.GetMethodTags(ctx, method); resp != nil || err != nil {
 		return resp, err
 	}
 	switch method {
@@ -209,7 +207,7 @@ func (s implStatsServerStub) GetMethodTags(call __ipc.ServerCall, method string)
 	}
 }
 
-func (s implStatsServerStub) Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error) {
+func (s implStatsServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
 	// TODO(toddw) Replace with new DescribeInterfaces implementation.
 	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
 	result.Methods["Value"] = __ipc.MethodSignature{
@@ -224,7 +222,7 @@ func (s implStatsServerStub) Signature(call __ipc.ServerCall) (__ipc.ServiceSign
 		__wiretype.NamedPrimitiveType{Type: 0x1, Name: "anydata", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}}
 	var ss __ipc.ServiceSignature
 	var firstAdded int
-	ss, _ = s.GlobbableServerStub.Signature(call)
+	ss, _ = s.GlobbableServerStub.Signature(ctx)
 	firstAdded = len(result.TypeDefs)
 	for k, v := range ss.Methods {
 		for i, _ := range v.InArgs {
@@ -277,7 +275,7 @@ func (s implStatsServerStub) Signature(call __ipc.ServerCall) (__ipc.ServiceSign
 		}
 		result.TypeDefs = append(result.TypeDefs, d)
 	}
-	ss, _ = s.GlobWatcherServerStub.Signature(call)
+	ss, _ = s.GlobWatcherServerStub.Signature(ctx)
 	firstAdded = len(result.TypeDefs)
 	for k, v := range ss.Methods {
 		for i, _ := range v.InArgs {

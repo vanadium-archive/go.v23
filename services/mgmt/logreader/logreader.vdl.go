@@ -89,7 +89,7 @@ func (c implLogFileClientStub) ReadLog(ctx __context.T, i0 int64, i1 int32, i2 b
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "ReadLog", []interface{}{i0, i1, i2}, opts...); err != nil {
 		return
 	}
-	ocall = &implLogFileReadLogCall{call, implLogFileReadLogClientRecv{call: call}}
+	ocall = &implLogFileReadLogCall{Call: call}
 	return
 }
 
@@ -117,7 +117,7 @@ func (c implLogFileClientStub) GetMethodTags(ctx __context.T, method string, opt
 
 // LogFileReadLogClientStream is the client stream for LogFile.ReadLog.
 type LogFileReadLogClientStream interface {
-	// RecvStream returns the receiver side of the client stream.
+	// RecvStream returns the receiver side of the LogFile.ReadLog client stream.
 	RecvStream() interface {
 		// Advance stages an item so that it may be retrieved via Value.  Returns
 		// true iff there is an item to retrieve.  Advance must be called before
@@ -151,30 +151,10 @@ type LogFileReadLogCall interface {
 	Cancel()
 }
 
-type implLogFileReadLogClientRecv struct {
-	call __ipc.Call
-	val  types.LogEntry
-	err  error
-}
-
-func (c *implLogFileReadLogClientRecv) Advance() bool {
-	c.val = types.LogEntry{}
-	c.err = c.call.Recv(&c.val)
-	return c.err == nil
-}
-func (c *implLogFileReadLogClientRecv) Value() types.LogEntry {
-	return c.val
-}
-func (c *implLogFileReadLogClientRecv) Err() error {
-	if c.err == __io.EOF {
-		return nil
-	}
-	return c.err
-}
-
 type implLogFileReadLogCall struct {
-	call __ipc.Call
-	recv implLogFileReadLogClientRecv
+	__ipc.Call
+	valRecv types.LogEntry
+	errRecv error
 }
 
 func (c *implLogFileReadLogCall) RecvStream() interface {
@@ -182,16 +162,32 @@ func (c *implLogFileReadLogCall) RecvStream() interface {
 	Value() types.LogEntry
 	Err() error
 } {
-	return &c.recv
+	return implLogFileReadLogCallRecv{c}
+}
+
+type implLogFileReadLogCallRecv struct {
+	c *implLogFileReadLogCall
+}
+
+func (c implLogFileReadLogCallRecv) Advance() bool {
+	c.c.valRecv = types.LogEntry{}
+	c.c.errRecv = c.c.Recv(&c.c.valRecv)
+	return c.c.errRecv == nil
+}
+func (c implLogFileReadLogCallRecv) Value() types.LogEntry {
+	return c.c.valRecv
+}
+func (c implLogFileReadLogCallRecv) Err() error {
+	if c.c.errRecv == __io.EOF {
+		return nil
+	}
+	return c.c.errRecv
 }
 func (c *implLogFileReadLogCall) Finish() (o0 int64, err error) {
-	if ierr := c.call.Finish(&o0, &err); ierr != nil {
+	if ierr := c.Call.Finish(&o0, &err); ierr != nil {
 		err = ierr
 	}
 	return
-}
-func (c *implLogFileReadLogCall) Cancel() {
-	c.call.Cancel()
 }
 
 // LogFileServerMethods is the interface a server writer
@@ -218,13 +214,12 @@ type LogFileServerMethods interface {
 }
 
 // LogFileServerStubMethods is the server interface containing
-// LogFile methods, as expected by ipc.Server.  The difference between
-// this interface and LogFileServerMethods is that the first context
-// argument for each method is always ipc.ServerCall here, while it is either
-// ipc.ServerContext or a typed streaming context there.
+// LogFile methods, as expected by ipc.Server.
+// The only difference between this interface and LogFileServerMethods
+// is the streaming methods.
 type LogFileServerStubMethods interface {
 	// Size returns the number of bytes in the receiving object.
-	Size(__ipc.ServerCall) (int64, error)
+	Size(__ipc.ServerContext) (int64, error)
 	// ReadLog receives up to NumEntries log entries starting at the
 	// StartPos offset (in bytes) in the receiving object. Each stream chunk
 	// contains one log entry.
@@ -238,16 +233,16 @@ type LogFileServerStubMethods interface {
 	//
 	// The returned error will be EOF if and only if ReadLog reached the
 	// end of the file and no log entries were returned.
-	ReadLog(call __ipc.ServerCall, StartPos int64, NumEntries int32, Follow bool) (int64, error)
+	ReadLog(ctx *LogFileReadLogContextStub, StartPos int64, NumEntries int32, Follow bool) (int64, error)
 }
 
 // LogFileServerStub adds universal methods to LogFileServerStubMethods.
 type LogFileServerStub interface {
 	LogFileServerStubMethods
 	// GetMethodTags will be replaced with DescribeInterfaces.
-	GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error)
+	GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error)
 	// Signature will be replaced with DescribeInterfaces.
-	Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error)
+	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
 // LogFileServer returns a server stub for LogFile.
@@ -272,12 +267,11 @@ type implLogFileServerStub struct {
 	gs   *__ipc.GlobState
 }
 
-func (s implLogFileServerStub) Size(call __ipc.ServerCall) (int64, error) {
-	return s.impl.Size(call)
+func (s implLogFileServerStub) Size(ctx __ipc.ServerContext) (int64, error) {
+	return s.impl.Size(ctx)
 }
 
-func (s implLogFileServerStub) ReadLog(call __ipc.ServerCall, i0 int64, i1 int32, i2 bool) (int64, error) {
-	ctx := &implLogFileReadLogContext{call, implLogFileReadLogServerSend{call}}
+func (s implLogFileServerStub) ReadLog(ctx *LogFileReadLogContextStub, i0 int64, i1 int32, i2 bool) (int64, error) {
 	return s.impl.ReadLog(ctx, i0, i1, i2)
 }
 
@@ -285,7 +279,7 @@ func (s implLogFileServerStub) VGlob() *__ipc.GlobState {
 	return s.gs
 }
 
-func (s implLogFileServerStub) GetMethodTags(call __ipc.ServerCall, method string) ([]interface{}, error) {
+func (s implLogFileServerStub) GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error) {
 	// TODO(toddw): Replace with new DescribeInterfaces implementation.
 	switch method {
 	case "Size":
@@ -297,7 +291,7 @@ func (s implLogFileServerStub) GetMethodTags(call __ipc.ServerCall, method strin
 	}
 }
 
-func (s implLogFileServerStub) Signature(call __ipc.ServerCall) (__ipc.ServiceSignature, error) {
+func (s implLogFileServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
 	// TODO(toddw) Replace with new DescribeInterfaces implementation.
 	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
 	result.Methods["ReadLog"] = __ipc.MethodSignature{
@@ -335,7 +329,7 @@ func (s implLogFileServerStub) Signature(call __ipc.ServerCall) (__ipc.ServiceSi
 
 // LogFileReadLogServerStream is the server stream for LogFile.ReadLog.
 type LogFileReadLogServerStream interface {
-	// SendStream returns the send side of the server stream.
+	// SendStream returns the send side of the LogFile.ReadLog server stream.
 	SendStream() interface {
 		// Send places the item onto the output stream.  Returns errors encountered
 		// while sending.  Blocks if there is no buffer space; will unblock when
@@ -350,21 +344,28 @@ type LogFileReadLogContext interface {
 	LogFileReadLogServerStream
 }
 
-type implLogFileReadLogServerSend struct {
-	call __ipc.ServerCall
+// LogFileReadLogContextStub is a wrapper that converts ipc.ServerCall into
+// a typesafe stub that implements LogFileReadLogContext.
+type LogFileReadLogContextStub struct {
+	__ipc.ServerCall
 }
 
-func (s *implLogFileReadLogServerSend) Send(item types.LogEntry) error {
-	return s.call.Send(item)
+// Init initializes LogFileReadLogContextStub from ipc.ServerCall.
+func (s *LogFileReadLogContextStub) Init(call __ipc.ServerCall) {
+	s.ServerCall = call
 }
 
-type implLogFileReadLogContext struct {
-	__ipc.ServerContext
-	send implLogFileReadLogServerSend
-}
-
-func (s *implLogFileReadLogContext) SendStream() interface {
+// SendStream returns the send side of the LogFile.ReadLog server stream.
+func (s *LogFileReadLogContextStub) SendStream() interface {
 	Send(item types.LogEntry) error
 } {
-	return &s.send
+	return implLogFileReadLogContextSend{s}
+}
+
+type implLogFileReadLogContextSend struct {
+	s *LogFileReadLogContextStub
+}
+
+func (s implLogFileReadLogContextSend) Send(item types.LogEntry) error {
+	return s.s.Send(item)
 }
