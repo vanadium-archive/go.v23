@@ -13,6 +13,11 @@ const (
 	ipcVersion3
 	ipcDummyVersion3 // So that the numeric value of IPCVersion4 is 4
 	IPCVersion4
+
+	// IPCVersion5 uses the new security model (Principal and Blessings objects),
+	// and sends discharges for third-party caveats on the server's blessings
+	// during authentication.
+	IPCVersion5
 )
 
 // IPCVersionRange allows you to optionally specify a range of versions to

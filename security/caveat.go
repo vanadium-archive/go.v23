@@ -132,14 +132,6 @@ func NewPublicKeyCaveat(discharger PublicKey, location string, requirements Thir
 }
 
 func (c *publicKeyThirdPartyCaveat) Validate(ctx Context) error {
-	// TODO(ashankar,ataly): REMOVE THIS HACK!
-	// This test below effectively disables third-party caveat validation on "servers"
-	// (i.e., when no method is known). Remove this hack after fixing the VC auth protocol
-	// so that Discharges associated with a server's blessings are sent by the server to
-	// the client.
-	if len(ctx.Method()) == 0 && len(ctx.Name()) == 0 && len(ctx.Suffix()) == 0 {
-		return nil
-	}
 	discharge, ok := ctx.RemoteDischarges()[c.ID()]
 	if !ok {
 		return fmt.Errorf("missing discharge for caveat(id=%v)", c.ID())
