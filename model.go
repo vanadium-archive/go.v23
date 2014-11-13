@@ -146,8 +146,8 @@ type Profile interface {
 	Name() string
 
 	// Runtime returns the name of the Runtime that this Profile requires,
-	// or "" to indicate that it will work with any runtime.
-	Runtime() string
+	// and options to be passed to the Runtime factory.
+	Runtime() (string, []ROpt)
 
 	// Description returns the Description of the Platform.
 	Platform() *Platform

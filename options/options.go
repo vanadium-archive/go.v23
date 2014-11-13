@@ -129,6 +129,14 @@ type Profile struct{ veyron2.Profile }
 
 func (Profile) ROpt() {}
 
+// PreferredProtocolOrder instructs the Runtime implementation to select
+// endpoints with the specified protocols and to order them in the
+// specified order.
+type PreferredProtocols []string
+
+func (PreferredProtocols) ROpt()         {}
+func (PreferredProtocols) IPCClientOpt() {}
+
 // GoogleRuntime is the name of the Google runtime implementation.
 const GoogleRuntime = "google"
 

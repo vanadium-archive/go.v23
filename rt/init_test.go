@@ -31,8 +31,8 @@ func (mp *myprofile) Name() string {
 	return "test"
 }
 
-func (mp *myprofile) Runtime() string {
-	return "mock"
+func (mp *myprofile) Runtime() (string, []veyron2.ROpt) {
+	return "mock", nil
 }
 
 func (mp *myprofile) Platform() *veyron2.Platform {

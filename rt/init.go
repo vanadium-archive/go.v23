@@ -48,10 +48,11 @@ func RegisterRuntime(name string, factory Factory) {
 // be used in unit tests and any situation where a single global runtime
 // instance is inappropriate.
 func New(opts ...veyron2.ROpt) (veyron2.Runtime, error) {
-	profile, factory, err := configure(opts...)
+	profile, profileOpts, factory, err := configure(opts...)
 	if err != nil {
 		return nil, err
 	}
+	opts = append(profileOpts, opts...)
 	return factory(prependProfile(profile, opts...)...)
 }
 
@@ -95,37 +96,34 @@ func prependProfile(profile veyron2.Profile, opts ...veyron2.ROpt) []veyron2.ROp
 	return append([]veyron2.ROpt{options.Profile{profile}}, opts...)
 }
 
-func configure(opts ...veyron2.ROpt) (veyron2.Profile, Factory, error) {
+func configure(opts ...veyron2.ROpt) (veyron2.Profile, []veyron2.ROpt, Factory, error) {
 	config.Lock()
 	defer config.Unlock()
-	name := ""
 	for _, o := range opts {
 		switch v := o.(type) {
 		case options.Profile:
+			// Can override a registered profile.
 			config.profile = v.Profile
 		}
 	}
 	runtimes.Lock()
-	if len(name) == 0 {
-		// Let the profile specify the runtime, use a default otherwise.
-		if config.profile != nil {
-			name = config.profile.Runtime()
-		} else {
-			name = veyron2.GoogleRuntimeName
-		}
+	defer runtimes.Unlock()
+	// Let the profile specify the runtime, use a default otherwise.
+	ropts := []veyron2.ROpt{}
+	name := ""
+	if config.profile != nil {
+		name, ropts = config.profile.Runtime()
+	} else {
+		name = veyron2.GoogleRuntimeName
 	}
 	config.factory = runtimes.registered[name]
-	runtimes.Unlock()
 
 	// We must have a factory, but not necessarily a profile.
 	if config.factory == nil {
-		return nil, nil, fmt.Errorf("no runtime factory has been found for %q", name)
+		return nil, nil, nil, fmt.Errorf("no runtime factory has been found for %q", name)
 	}
-	if config.profile != nil {
-		// We have a profile, so it must be compatible with the runtime.
-		if config.profile.Runtime() != name {
-			return nil, nil, fmt.Errorf("profile %q needs runtime %q, not %q", config.profile.Name(), config.profile.Runtime(), name)
-		}
+	if config.profile == nil {
+		return nil, nil, nil, fmt.Errorf("no profile has been registered nor specified")
 	}
-	return config.profile, config.factory, nil
+	return config.profile, ropts, config.factory, nil
 }
