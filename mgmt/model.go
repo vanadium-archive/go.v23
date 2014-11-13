@@ -7,4 +7,5 @@ const (
 	AddressConfigKey         = "MGMT_CHILD_PROCESS_ADDRESS"
 	ProtocolConfigKey        = "MGMT_CHILD_PROCESS_PROTOCOL"
 	ParentBlessingConfigKey  = "MGMT_PARENT_BLESSING_PEER_PATTERN"
+	SecurityAgentFDConfigKey = "MGMT_SECURITY_AGENT_FD"
 )
