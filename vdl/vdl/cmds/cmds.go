@@ -346,11 +346,6 @@ var (
 		},
 	}
 	optGenJavaOutPkg = xlateRules{
-		// Temporarily skip java generation of vom testdata.
-		//
-		// TODO(toddw): Re-enable after updating java codegen to support consts of
-		// all types.
-		{"veyron.io/veyron/veyron2/vom2/testdata", "SKIP"},
 		{"veyron.io", "io/veyron"},
 	}
 	// TODO(bjornick): Add javascript to the default gen langs.

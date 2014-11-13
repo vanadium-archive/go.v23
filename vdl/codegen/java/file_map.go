@@ -70,8 +70,8 @@ func genJavaMapFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo {
 	}{
 		AccessModifier: accessModifierForName(tdef.Name),
 		Doc:            javaDocInComment(tdef.Doc),
-		ElemType:       javaType(tdef.Type.Key(), true, env),
-		KeyType:        javaType(tdef.Type.Elem(), true, env),
+		ElemType:       javaType(tdef.Type.Elem(), true, env),
+		KeyType:        javaType(tdef.Type.Key(), true, env),
 		Name:           javaTypeName,
 		Package:        javaPath(javaGenPkgPath(tdef.File.Package.Path)),
 		SourceFile:     tdef.File.BaseName,

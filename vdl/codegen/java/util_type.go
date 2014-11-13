@@ -19,6 +19,11 @@ func javaFullyQualifiedNamedType(def *compile.TypeDef, forceClass bool, env *com
 	return javaPath(path.Join(javaGenPkgPath(def.File.Package.Path), def.Name))
 }
 
+// javaReflectType returns java.reflect.Type string for provided VDL type.
+func javaReflectType(t *vdl.Type, env *compile.Env) string {
+	return fmt.Sprintf("new com.google.common.reflect.TypeToken<%s>(){}.getType()", javaType(t, true, env))
+}
+
 // javaBuiltInType returns the type name for the provided built in type
 // definition, forcing the use of a java class (e.g., java.lang.Integer) if so
 // desired.  This method also returns a boolean value indicating whether the
@@ -86,7 +91,7 @@ func javaBuiltInType(typ *vdl.Type, forceClass bool) (string, bool) {
 	case vdl.TypeObject:
 		return "io.veyron.veyron.veyron2.vdl.VdlTypeObject", true
 	case vdl.Any:
-		return "io.veyron.veyron.veyron2.vdl.Any", true
+		return "io.veyron.veyron.veyron2.vdl.VdlAny", true
 	default:
 		return "", false
 	}

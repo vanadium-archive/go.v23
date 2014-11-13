@@ -12,8 +12,12 @@ import (
 // javaConstVal returns the value string for the provided constant value.
 func javaConstVal(v *vdl.Value, env *compile.Env) (ret string) {
 	ret = javaVal(v, env)
+	switch v.Type().Kind() {
+	case vdl.Complex64, vdl.Complex128, vdl.Enum, vdl.OneOf:
+		return
+	}
 	if def := env.FindTypeDef(v.Type()); def != nil && def.File != compile.BuiltInFile { // User-defined type.
-		ret = "new " + javaType(v.Type(), false, env) + "(" + ret + ")"
+		ret = fmt.Sprintf("new %s(%s)", javaType(v.Type(), false, env), ret)
 	}
 	return
 }
@@ -56,13 +60,70 @@ func javaVal(v *vdl.Value, env *compile.Env) string {
 	case vdl.Complex64, vdl.Complex128:
 		r := strconv.FormatFloat(real(v.Complex()), 'g', -1, bitlen(v.Kind()))
 		i := strconv.FormatFloat(imag(v.Complex()), 'g', -1, bitlen(v.Kind()))
+		if v.Kind() == vdl.Complex64 {
+			r = r + "f"
+			i = i + "f"
+		}
 		return fmt.Sprintf("new %s(%s, %s)", javaType(v.Type(), true, env), r, i)
 	case vdl.String:
 		return strconv.Quote(v.RawString())
+	case vdl.Any:
+		elemReflectTypeStr := javaReflectType(v.Elem().Type(), env)
+		elemStr := javaConstVal(v.Elem(), env)
+		return fmt.Sprintf("new %s(%s, %s)", javaType(v.Type(), false, env), elemReflectTypeStr, elemStr)
+	case vdl.Array:
+		ret := fmt.Sprintf("new %s[] {", javaType(v.Type().Elem(), true, env))
+		for i := 0; i < v.Len(); i++ {
+			if i > 0 {
+				ret = ret + ", "
+			}
+			ret = ret + javaConstVal(v.Index(i), env)
+		}
+		return ret + "}"
+	case vdl.Enum:
+		return fmt.Sprintf("%s.%s", javaType(v.Type(), false, env), v.EnumLabel())
+	case vdl.List:
+		elemTypeStr := javaType(v.Type().Elem(), true, env)
+		ret := fmt.Sprintf("new com.google.common.collect.ImmutableList.Builder<%s>()", elemTypeStr)
+		for i := 0; i < v.Len(); i++ {
+			ret = fmt.Sprintf("%s.add(%s)", ret, javaConstVal(v.Index(i), env))
+		}
+		return ret + ".build()"
+	case vdl.Map:
+		keyTypeStr := javaType(v.Type().Key(), true, env)
+		elemTypeStr := javaType(v.Type().Elem(), true, env)
+		ret := fmt.Sprintf("new com.google.common.collect.ImmutableMap.Builder<%s, %s>()", keyTypeStr, elemTypeStr)
+		for _, key := range v.Keys() {
+			keyStr := javaConstVal(key, env)
+			elemStr := javaConstVal(v.MapIndex(key), env)
+			ret = fmt.Sprintf("%s.put(%s, %s)", ret, keyStr, elemStr)
+		}
+		return ret + ".build()"
+	case vdl.OneOf:
+		elemReflectTypeStr := javaReflectType(v.Elem().Type(), env)
+		elemStr := javaConstVal(v.Elem(), env)
+		return fmt.Sprintf("new %s().assignValue(%s, %s)", javaType(v.Type(), false, env), elemReflectTypeStr, elemStr)
+	case vdl.Set:
+		keyTypeStr := javaType(v.Type().Key(), true, env)
+		ret := fmt.Sprintf("new com.google.common.collect.ImmutableSet.Builder<%s>()", keyTypeStr)
+		for _, key := range v.Keys() {
+			ret = fmt.Sprintf("%s.add(%s)", ret, javaConstVal(key, env))
+		}
+		return ret + ".build()"
+	case vdl.Struct:
+		var ret string
+		for i := 0; i < v.Type().NumField(); i++ {
+			if i > 0 {
+				ret = ret + ", "
+			}
+			ret = ret + javaConstVal(v.Field(i), env)
+		}
+		return ret
+	case vdl.TypeObject:
+		return fmt.Sprintf("new %s(%s)", javaType(v.Type(), false, env), javaReflectType(v.TypeObject(), env))
 	}
 	if v.Type().IsBytes() {
 		return strconv.Quote(string(v.Bytes()))
 	}
-	// TODO(spetrovic): Handle Enum, List, Map, Struct, OneOf, Any
 	panic(fmt.Errorf("vdl: javaVal unhandled type %v %v", v.Kind(), v.Type()))
 }
