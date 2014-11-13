@@ -17,6 +17,7 @@ package {{.PackagePath}};
 /**
  * type {{.Name}} {{.VdlTypeString}} {{.Doc}}
  **/
+@io.veyron.veyron.veyron2.vdl.GeneratedFromVdlType("{{.VdlTypeName}}")
 {{ .AccessModifier }} final class {{.Name}} extends {{.VdlComplex}} {
     public static final io.veyron.veyron.veyron2.vdl.VdlType VDL_TYPE =
             io.veyron.veyron.veyron2.vdl.Types.getVdlTypeFromReflection({{.Name}}.class);
@@ -66,6 +67,7 @@ func genJavaComplexFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo {
 		Source         string
 		ValueType      string
 		VdlComplex     string
+		VdlTypeName    string
 		VdlTypeString  string
 	}{
 		AccessModifier: accessModifierForName(tdef.Name),
@@ -75,6 +77,7 @@ func genJavaComplexFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo {
 		Source:         tdef.File.BaseName,
 		ValueType:      ValueType,
 		VdlComplex:     javaVdlPrimitiveType(tdef.Type.Kind()),
+		VdlTypeName:    tdef.Type.Name(),
 		VdlTypeString:  tdef.Type.String(),
 	}
 	var buf bytes.Buffer

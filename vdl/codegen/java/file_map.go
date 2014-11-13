@@ -15,6 +15,7 @@ package {{.Package}};
 /**
  * type {{.Name}} {{.VdlTypeString}} {{.Doc}}
  **/
+@io.veyron.veyron.veyron2.vdl.GeneratedFromVdlType("{{.VdlTypeName}}")
 {{ .AccessModifier }} final class {{.Name}} extends io.veyron.veyron.veyron2.vdl.VdlMap<{{.KeyType}}, {{.ElemType}}> {
     public static final io.veyron.veyron.veyron2.vdl.VdlType VDL_TYPE =
             io.veyron.veyron.veyron2.vdl.Types.getVdlTypeFromReflection({{.Name}}.class);
@@ -66,6 +67,7 @@ func genJavaMapFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo {
 		Name           string
 		Package        string
 		SourceFile     string
+		VdlTypeName    string
 		VdlTypeString  string
 	}{
 		AccessModifier: accessModifierForName(tdef.Name),
@@ -75,6 +77,7 @@ func genJavaMapFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo {
 		Name:           javaTypeName,
 		Package:        javaPath(javaGenPkgPath(tdef.File.Package.Path)),
 		SourceFile:     tdef.File.BaseName,
+		VdlTypeName:    tdef.Type.Name(),
 		VdlTypeString:  tdef.BaseType.String(),
 	}
 	var buf bytes.Buffer

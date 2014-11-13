@@ -15,6 +15,7 @@ package {{.PackagePath}};
 /**
  * type {{.Name}} {{.VdlTypeString}} {{.Doc}}
  **/
+@io.veyron.veyron.veyron2.vdl.GeneratedFromVdlType("{{.VdlTypeName}}")
 {{ .AccessModifier }} final class {{.Name}} extends io.veyron.veyron.veyron2.vdl.VdlOneOf {
     public static final com.google.common.collect.ImmutableList<com.google.common.reflect.TypeToken<?>> TYPES =
             new com.google.common.collect.ImmutableList.Builder<com.google.common.reflect.TypeToken<?>>()
@@ -46,6 +47,7 @@ func genJavaOneOfFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo {
 		Name           string
 		PackagePath    string
 		Source         string
+		VdlTypeName    string
 		VdlTypeString  string
 	}{
 		AccessModifier: accessModifierForName(tdef.Name),
@@ -54,6 +56,7 @@ func genJavaOneOfFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo {
 		Name:           javaTypeName,
 		PackagePath:    javaPath(javaGenPkgPath(tdef.File.Package.Path)),
 		Source:         tdef.File.BaseName,
+		VdlTypeName:    tdef.Type.Name(),
 		VdlTypeString:  tdef.Type.String(),
 	}
 	var buf bytes.Buffer
