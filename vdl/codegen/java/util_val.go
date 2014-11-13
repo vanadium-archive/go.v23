@@ -13,7 +13,7 @@ import (
 func javaConstVal(v *vdl.Value, env *compile.Env) (ret string) {
 	ret = javaVal(v, env)
 	switch v.Type().Kind() {
-	case vdl.Complex64, vdl.Complex128, vdl.Enum, vdl.OneOf:
+	case vdl.Complex64, vdl.Complex128, vdl.Enum, vdl.OneOf, vdl.Uint16, vdl.Uint32, vdl.Uint64:
 		return
 	}
 	if def := env.FindTypeDef(v.Type()); def != nil && def.File != compile.BuiltInFile { // User-defined type.
@@ -37,15 +37,15 @@ func javaVal(v *vdl.Value, env *compile.Env) string {
 	case vdl.Byte:
 		return "(byte)" + strconv.FormatUint(uint64(v.Byte()), 10)
 	case vdl.Uint16:
-		return "(short)" + strconv.FormatUint(v.Uint(), 10)
+		return fmt.Sprintf("new %s((short) %s)", javaType(v.Type(), true, env), strconv.FormatUint(v.Uint(), 10))
 	case vdl.Int16:
 		return "(short)" + strconv.FormatInt(v.Int(), 10)
 	case vdl.Uint32:
-		return strconv.FormatUint(v.Uint(), 10)
+		return fmt.Sprintf("new %s(%s)", javaType(v.Type(), true, env), strconv.FormatUint(v.Uint(), 10))
 	case vdl.Int32:
 		return strconv.FormatInt(v.Int(), 10)
 	case vdl.Uint64:
-		return strconv.FormatUint(v.Uint(), 10) + longSuffix
+		return fmt.Sprintf("new %s(%s)", javaType(v.Type(), true, env), strconv.FormatUint(v.Uint(), 10)+longSuffix)
 	case vdl.Int64:
 		return strconv.FormatInt(v.Int(), 10) + longSuffix
 	case vdl.Float32, vdl.Float64:
