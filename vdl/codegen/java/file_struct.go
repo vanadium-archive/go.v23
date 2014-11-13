@@ -32,12 +32,14 @@ package {{.PackagePath}};
         super(VDL_TYPE);
     }
 
+    {{ if .FieldsAsArgs }}
     public {{.Name}}({{ .FieldsAsArgs }}) {
         this();
         {{ range $field := .Fields }}
             this.{{$field.LowercaseName}} = {{$field.LowercaseName}};
         {{ end }}
     }
+    {{ end }}
 
     {{/* Getters and setters */}}
     {{ range $field := .Fields }}
@@ -110,14 +112,14 @@ package {{.PackagePath}};
 
     @Override
     public void writeToParcel(android.os.Parcel out, int flags) {
-        try {
         {{ range $field := .Fields }}
+        try {
             io.veyron.veyron.veyron2.vdl.ParcelUtil.writeValue(out, {{$field.LowercaseName}},
                 getClass().getDeclaredField("{{$field.LowercaseName}}").getGenericType());
-        {{ end }}
         } catch (NoSuchFieldException e) {
             // do nothing
         }
+        {{ end }}
     }
 
     public static final android.os.Parcelable.Creator<{{.Name}}> CREATOR
@@ -126,14 +128,14 @@ package {{.PackagePath}};
         @Override
         public {{.Name}} createFromParcel(android.os.Parcel in) {
             {{.Name}} value = new {{.Name}}();
-            try {
             {{ range $field := .Fields }}
+            try {
                 value.set{{$field.Name}}(({{$field.Class}}) io.veyron.veyron.veyron2.vdl.ParcelUtil.readValue(
                 in, getClass().getClassLoader(), getClass().getDeclaredField("{{$field.LowercaseName}}").getGenericType()));
-            {{ end }}
             } catch (NoSuchFieldException e) {
                 // do nothing
             }
+            {{ end }}
             return value;
         }
 
