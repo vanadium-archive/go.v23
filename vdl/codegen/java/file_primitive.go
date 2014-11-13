@@ -15,6 +15,7 @@ package {{.PackagePath}};
 /**
  * type {{.Name}} {{.VdlTypeString}} {{.Doc}}
  **/
+@io.veyron.veyron.veyron2.vdl.GeneratedFromVdlType("{{.VdlTypeName}}")
 {{ .AccessModifier }} final class {{.Name}} extends {{.VdlType}} {
     public static final io.veyron.veyron.veyron2.vdl.VdlType VDL_TYPE =
             io.veyron.veyron.veyron2.vdl.Types.getVdlTypeFromReflection({{.Name}}.class);
@@ -78,6 +79,7 @@ func genJavaPrimitiveFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo 
 		ValueType      string
 		ValueClass     string
 		VdlType        string
+		VdlTypeName    string
 		VdlTypeString  string
 	}{
 		AccessModifier: accessModifierForName(tdef.Name),
@@ -88,6 +90,7 @@ func genJavaPrimitiveFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo 
 		ValueType:      valueType,
 		ValueClass:     valueClass,
 		VdlType:        javaVdlPrimitiveType(tdef.Type.Kind()),
+		VdlTypeName:    tdef.Type.Name(),
 		VdlTypeString:  tdef.Type.String(),
 	}
 	var buf bytes.Buffer
