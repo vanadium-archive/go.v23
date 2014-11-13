@@ -52,19 +52,25 @@ func javaBuiltInType(typ *vdl.Type, forceClass bool) (string, bool) {
 		} else {
 			return "byte", false
 		}
-	case vdl.Uint16, vdl.Int16:
+	case vdl.Uint16:
+		return "io.veyron.veyron.veyron2.vdl.VdlUint16", true
+	case vdl.Int16:
 		if forceClass {
 			return "java.lang.Short", true
 		} else {
 			return "short", false
 		}
-	case vdl.Uint32, vdl.Int32:
+	case vdl.Uint32:
+		return "io.veyron.veyron.veyron2.vdl.VdlUint32", true
+	case vdl.Int32:
 		if forceClass {
 			return "java.lang.Integer", true
 		} else {
 			return "int", false
 		}
-	case vdl.Uint64, vdl.Int64:
+	case vdl.Uint64:
+		return "io.veyron.veyron.veyron2.vdl.VdlUint64", true
+	case vdl.Int64:
 		if forceClass {
 			return "java.lang.Long", true
 		} else {
@@ -140,11 +146,11 @@ func javaHashCode(name string, ty *vdl.Type, env *compile.Env) string {
 		switch ty.Kind() {
 		case vdl.Bool:
 			return fmt.Sprintf("java.lang.Boolean.valueOf(%s).hashCode()", name)
-		case vdl.Byte, vdl.Uint16, vdl.Int16:
+		case vdl.Byte, vdl.Int16:
 			return "(int)" + name
-		case vdl.Uint32, vdl.Int32:
+		case vdl.Int32:
 			return name
-		case vdl.Uint64, vdl.Int64:
+		case vdl.Int64:
 			return fmt.Sprintf("java.lang.Long.valueOf(%s).hashCode()", name)
 		case vdl.Float32:
 			return fmt.Sprintf("java.lang.Float.valueOf(%s).hashCode()", name)

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"log"
 
+	"veyron.io/veyron/veyron2/vdl"
 	"veyron.io/veyron/veyron2/vdl/compile"
 )
 
@@ -20,7 +21,7 @@ package {{.PackagePath}};
     public static final io.veyron.veyron.veyron2.vdl.VdlType VDL_TYPE =
             io.veyron.veyron.veyron2.vdl.Types.getVdlTypeFromReflection({{.Name}}.class);
 
-    public {{.Name}}({{.ValueType}} value) {
+    public {{.Name}}({{.ConstructorType}} value) {
         super(VDL_TYPE, value);
     }
 
@@ -47,8 +48,8 @@ package {{.PackagePath}};
         if (!type.equals(new com.google.gson.reflect.TypeToken<{{.Name}}>(){})) {
             return null;
         }
-        final com.google.gson.TypeAdapter<{{.ValueClass}}> delegate =
-                gson.getAdapter(new com.google.gson.reflect.TypeToken<{{.ValueClass}}>() {});
+        final com.google.gson.TypeAdapter<{{.TypeAdapterDelegateClass}}> delegate =
+                gson.getAdapter(new com.google.gson.reflect.TypeToken<{{.TypeAdapterDelegateClass}}>() {});
         return new com.google.gson.TypeAdapter<T>() {
             @Override
             public void write(com.google.gson.stream.JsonWriter out, T value) throws java.io.IOException {
@@ -65,33 +66,63 @@ package {{.PackagePath}};
 }
 `
 
+// javaConstructorType returns java type that is used as a constructor argument
+// type for a VDL primitive.
+func javaConstructorType(t *vdl.Type) string {
+	switch t.Kind() {
+	case vdl.Uint16:
+		return "short"
+	case vdl.Uint32:
+		return "int"
+	case vdl.Uint64:
+		return "long"
+	default:
+		constructorType, _ := javaBuiltInType(t, false)
+		return constructorType
+	}
+}
+
+// javaConstructorType returns java class that is used as a type adapter delegate
+// argument for a VDL primitive.
+func javaTypeAdapterDelegateClass(t *vdl.Type) string {
+	switch t.Kind() {
+	case vdl.Uint16:
+		return "java.lang.Short"
+	case vdl.Uint32:
+		return "java.lang.Integer"
+	case vdl.Uint64:
+		return "java.lang.Long"
+	default:
+		typeAdapterDelegateClass, _ := javaBuiltInType(t, true)
+		return typeAdapterDelegateClass
+	}
+}
+
 // genJavaPrimitiveFile generates the Java class file for the provided user-defined type.
 func genJavaPrimitiveFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo {
-	valueType, _ := javaBuiltInType(tdef.Type, false)
-	valueClass, _ := javaBuiltInType(tdef.Type, true)
 	javaTypeName := toUpperCamelCase(tdef.Name)
 	data := struct {
-		AccessModifier string
-		Doc            string
-		Name           string
-		PackagePath    string
-		Source         string
-		ValueType      string
-		ValueClass     string
-		VdlType        string
-		VdlTypeName    string
-		VdlTypeString  string
+		AccessModifier           string
+		Doc                      string
+		Name                     string
+		PackagePath              string
+		Source                   string
+		ConstructorType          string
+		TypeAdapterDelegateClass string
+		VdlType                  string
+		VdlTypeName              string
+		VdlTypeString            string
 	}{
-		AccessModifier: accessModifierForName(tdef.Name),
-		Doc:            javaDocInComment(tdef.Doc),
-		Name:           javaTypeName,
-		PackagePath:    javaPath(javaGenPkgPath(tdef.File.Package.Path)),
-		Source:         tdef.File.BaseName,
-		ValueType:      valueType,
-		ValueClass:     valueClass,
-		VdlType:        javaVdlPrimitiveType(tdef.Type.Kind()),
-		VdlTypeName:    tdef.Type.Name(),
-		VdlTypeString:  tdef.Type.String(),
+		AccessModifier:           accessModifierForName(tdef.Name),
+		Doc:                      javaDocInComment(tdef.Doc),
+		Name:                     javaTypeName,
+		PackagePath:              javaPath(javaGenPkgPath(tdef.File.Package.Path)),
+		Source:                   tdef.File.BaseName,
+		ConstructorType:          javaConstructorType(tdef.Type),
+		TypeAdapterDelegateClass: javaTypeAdapterDelegateClass(tdef.Type),
+		VdlType:                  javaVdlPrimitiveType(tdef.Type.Kind()),
+		VdlTypeName:              tdef.Type.Name(),
+		VdlTypeString:            tdef.Type.String(),
 	}
 	var buf bytes.Buffer
 	err := parseTmpl("primitive", primitiveTmpl).Execute(&buf, data)
