@@ -103,3 +103,13 @@ func (ls *LabelSet) UnmarshalJSON(b []byte) error {
 	}
 	return ls.fromString(s)
 }
+
+// TODO(ashankar): Remove this when the new label mechanism is deployed.
+func LabelFromMethodTags(tags []interface{}) Label {
+	for _, t := range tags {
+		if l, ok := t.(Label); ok {
+			return l
+		}
+	}
+	return AdminLabel
+}

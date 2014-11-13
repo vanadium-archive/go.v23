@@ -136,6 +136,7 @@ package security
 
 import (
 	"time"
+
 	"veyron.io/veyron/veyron2/naming"
 )
 
@@ -414,9 +415,9 @@ type Context interface {
 	// Tags attached to the method, typically through the interface specification in VDL.
 	MethodTags() []interface{}
 	// Name returns the object name on which the method is being invoked.
+	// TODO(ashankar,toddw): Remove; same as Suffix.
 	Name() string
 	// Suffix returns the object name suffix for the request.
-	// TODO(ashankar,caprita): Remove? Name() should be sufficient?
 	Suffix() string
 	// Label returns the method's security label.
 	// TODO(ashankar): Remove? (Only one of this or MethodTags should survive by November 10, 2014)

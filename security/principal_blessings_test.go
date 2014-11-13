@@ -57,7 +57,7 @@ func TestBless(t *testing.T) {
 			return NewContext(&ContextParams{
 				LocalPrincipal: tp,
 				Method:         method,
-				Name:           suffix,
+				Suffix:         suffix,
 			})
 		}
 	)
@@ -325,7 +325,7 @@ func TestUnionOfBlessings(t *testing.T) {
 		ctx = func(method, suffix string, recognized ...Blessings) Context {
 			params := &ContextParams{
 				Method:         method,
-				Name:           suffix,
+				Suffix:         suffix,
 				LocalPrincipal: newPrincipal(t),
 			}
 			for _, r := range recognized {
