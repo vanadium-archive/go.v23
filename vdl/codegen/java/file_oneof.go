@@ -15,7 +15,7 @@ package {{.PackagePath}};
 /**
  * type {{.Name}} {{.VdlTypeString}} {{.Doc}}
  **/
-public final class {{.Name}} extends io.veyron.veyron.veyron2.vdl.VdlOneOf {
+{{ .AccessModifier }} final class {{.Name}} extends io.veyron.veyron.veyron2.vdl.VdlOneOf {
     public static final com.google.common.collect.ImmutableList<com.google.common.reflect.TypeToken<?>> TYPES =
             new com.google.common.collect.ImmutableList.Builder<com.google.common.reflect.TypeToken<?>>()
     {{ range $type := .OneOfTypes }}
@@ -38,20 +38,23 @@ func genJavaOneOfFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo {
 	for i := 0; i < tdef.Type.NumOneOfType(); i++ {
 		types[i] = javaType(tdef.Type.OneOfType(i), true, env)
 	}
+	javaTypeName := toUpperCamelCase(tdef.Name)
 	data := struct {
-		OneOfTypes    []string
-		Doc           string
-		Name          string
-		PackagePath   string
-		Source        string
-		VdlTypeString string
+		AccessModifier string
+		OneOfTypes     []string
+		Doc            string
+		Name           string
+		PackagePath    string
+		Source         string
+		VdlTypeString  string
 	}{
-		OneOfTypes:    types,
-		Doc:           javaDocInComment(tdef.Doc),
-		Name:          tdef.Name,
-		PackagePath:   javaPath(javaGenPkgPath(tdef.File.Package.Path)),
-		Source:        tdef.File.BaseName,
-		VdlTypeString: tdef.Type.String(),
+		AccessModifier: accessModifierForName(tdef.Name),
+		OneOfTypes:     types,
+		Doc:            javaDocInComment(tdef.Doc),
+		Name:           javaTypeName,
+		PackagePath:    javaPath(javaGenPkgPath(tdef.File.Package.Path)),
+		Source:         tdef.File.BaseName,
+		VdlTypeString:  tdef.Type.String(),
 	}
 	var buf bytes.Buffer
 	err := parseTmpl("oneOf", oneOfTmpl).Execute(&buf, data)
@@ -59,7 +62,7 @@ func genJavaOneOfFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo {
 		log.Fatalf("vdl: couldn't execute oneOf template: %v", err)
 	}
 	return JavaFileInfo{
-		Name: tdef.Name + ".java",
+		Name: javaTypeName + ".java",
 		Data: buf.Bytes(),
 	}
 }

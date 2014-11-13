@@ -19,12 +19,12 @@ public final class {{ .ClassName }} {
     {{/*Constants*/}}
     {{ range $const := $file.Consts }}
     {{ $const.Doc }}
-    public static final {{ $const.Type }} {{ $const.Name }} = {{ $const.Value }};
+    {{ $const.AccessModifier }} static final {{ $const.Type }} {{ $const.Name }} = {{ $const.Value }};
     {{ end }}
     {{/*Error IDs*/}}
     {{ range $errorid := $file.ErrorIDs }}
     {{ $errorid.Doc }}
-    public static final java.lang.String {{ $errorid.Name }} = "{{ $errorid.ID }}";
+    {{ $errorid.AccessModifier }} static final java.lang.String {{ $errorid.Name }} = "{{ $errorid.ID }}";
     {{ end }}
 
     {{ end }}
@@ -32,16 +32,18 @@ public final class {{ .ClassName }} {
 `
 
 type constConst struct {
-	Doc   string
-	Type  string
-	Name  string
-	Value string
+	AccessModifier string
+	Doc            string
+	Type           string
+	Name           string
+	Value          string
 }
 
 type constErrorID struct {
-	Doc  string
-	Name string
-	ID   string
+	AccessModifier string
+	Doc            string
+	Name           string
+	ID             string
 }
 
 type constFile struct {
@@ -72,6 +74,7 @@ func genJavaConstFile(pkg *compile.Package, env *compile.Env) *JavaFileInfo {
 	for i, file := range pkg.Files {
 		consts := make([]constConst, len(file.ConstDefs))
 		for j, cnst := range file.ConstDefs {
+			consts[j].AccessModifier = accessModifierForName(cnst.Name)
 			consts[j].Doc = javaDoc(cnst.Doc)
 			consts[j].Type = javaType(cnst.Value.Type(), false, env)
 			consts[j].Name = toConstCase(cnst.Name)
@@ -79,6 +82,7 @@ func genJavaConstFile(pkg *compile.Package, env *compile.Env) *JavaFileInfo {
 		}
 		errorids := make([]constErrorID, len(file.ErrorIDs))
 		for j, errorid := range file.ErrorIDs {
+			errorids[j].AccessModifier = accessModifierForName(errorid.Name)
 			errorids[j].Doc = javaDoc(errorid.Doc)
 			errorids[j].Name = toConstCase(errorid.Name)
 			errorids[j].ID = errorid.ID

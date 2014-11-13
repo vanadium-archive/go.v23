@@ -15,7 +15,7 @@ package {{.PackagePath}};
 /**
  * type {{.Name}} {{.VdlTypeString}} {{.Doc}}
  **/
-public final class {{.Name}} extends {{.VdlType}} {
+{{ .AccessModifier }} final class {{.Name}} extends {{.VdlType}} {
     public static final io.veyron.veyron.veyron2.vdl.VdlType VDL_TYPE =
             io.veyron.veyron.veyron2.vdl.Types.getVdlTypeFromReflection({{.Name}}.class);
 
@@ -68,24 +68,27 @@ public final class {{.Name}} extends {{.VdlType}} {
 func genJavaPrimitiveFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo {
 	valueType, _ := javaBuiltInType(tdef.Type, false)
 	valueClass, _ := javaBuiltInType(tdef.Type, true)
+	javaTypeName := toUpperCamelCase(tdef.Name)
 	data := struct {
-		VdlType       string
-		ValueType     string
-		ValueClass    string
-		Doc           string
-		Name          string
-		PackagePath   string
-		Source        string
-		VdlTypeString string
+		AccessModifier string
+		Doc            string
+		Name           string
+		PackagePath    string
+		Source         string
+		ValueType      string
+		ValueClass     string
+		VdlType        string
+		VdlTypeString  string
 	}{
-		VdlType:       javaVdlPrimitiveType(tdef.Type.Kind()),
-		ValueType:     valueType,
-		ValueClass:    valueClass,
-		Doc:           javaDocInComment(tdef.Doc),
-		Name:          tdef.Name,
-		PackagePath:   javaPath(javaGenPkgPath(tdef.File.Package.Path)),
-		Source:        tdef.File.BaseName,
-		VdlTypeString: tdef.Type.String(),
+		AccessModifier: accessModifierForName(tdef.Name),
+		Doc:            javaDocInComment(tdef.Doc),
+		Name:           javaTypeName,
+		PackagePath:    javaPath(javaGenPkgPath(tdef.File.Package.Path)),
+		Source:         tdef.File.BaseName,
+		ValueType:      valueType,
+		ValueClass:     valueClass,
+		VdlType:        javaVdlPrimitiveType(tdef.Type.Kind()),
+		VdlTypeString:  tdef.Type.String(),
 	}
 	var buf bytes.Buffer
 	err := parseTmpl("primitive", primitiveTmpl).Execute(&buf, data)
@@ -93,7 +96,7 @@ func genJavaPrimitiveFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo 
 		log.Fatalf("vdl: couldn't execute primitive template: %v", err)
 	}
 	return JavaFileInfo{
-		Name: tdef.Name + ".java",
+		Name: javaTypeName + ".java",
 		Data: buf.Bytes(),
 	}
 }

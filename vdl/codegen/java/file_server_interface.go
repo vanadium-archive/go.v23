@@ -19,11 +19,11 @@ package {{ .PackagePath }};
 	serverWrapper = {{ .ServerWrapperPath }}.class,
 	vdlPathName = "{{ .ServerVDLPath }}"
 )
-public interface {{ .ServiceName }}Server {{ .Extends }} {
+{{ .AccessModifier }} interface {{ .ServiceName }}Server {{ .Extends }} {
 {{ range $method := .Methods }}
     {{/* Generate the method signature. */}}
     {{ $method.Doc }}
-    public {{ $method.RetType }} {{ $method.Name }}(final io.veyron.veyron.veyron2.ipc.ServerContext context{{ $method.Args }}) throws io.veyron.veyron.veyron2.VeyronException;
+    {{ $method.AccessModifier }} {{ $method.RetType }} {{ $method.Name }}(final io.veyron.veyron.veyron2.ipc.ServerContext context{{ $method.Args }}) throws io.veyron.veyron.veyron2.VeyronException;
 {{ end }}
 }
 `
@@ -42,10 +42,11 @@ func serverInterfaceOutArg(method *compile.Method, iface *compile.Interface, env
 }
 
 type serverInterfaceMethod struct {
-	Args    string
-	Doc     string
-	Name    string
-	RetType string
+	AccessModifier string
+	Args           string
+	Doc            string
+	Name           string
+	RetType        string
 }
 
 func processServerInterfaceMethod(method *compile.Method, iface *compile.Interface, env *compile.Env) serverInterfaceMethod {
@@ -54,10 +55,11 @@ func processServerInterfaceMethod(method *compile.Method, iface *compile.Interfa
 		args += fmt.Sprintf(", io.veyron.veyron.veyron2.vdl.Stream<%s, %s> stream", javaType(method.InStream, true, env), javaType(method.OutStream, true, env))
 	}
 	return serverInterfaceMethod{
-		Name:    vdlutil.ToCamelCase(method.Name),
-		Doc:     method.Doc,
-		RetType: serverInterfaceOutArg(method, iface, env),
-		Args:    args,
+		AccessModifier: accessModifierForName(method.Name),
+		Args:           args,
+		Doc:            method.Doc,
+		Name:           vdlutil.ToCamelCase(method.Name),
+		RetType:        serverInterfaceOutArg(method, iface, env),
 	}
 }
 
@@ -68,7 +70,9 @@ func genJavaServerInterfaceFile(iface *compile.Interface, env *compile.Env) Java
 	for i, method := range iface.Methods {
 		methods[i] = processServerInterfaceMethod(method, iface, env)
 	}
+	javaServiceName := toUpperCamelCase(iface.Name)
 	data := struct {
+		AccessModifier    string
 		Extends           string
 		Methods           []serverInterfaceMethod
 		PackagePath       string
@@ -78,13 +82,14 @@ func genJavaServerInterfaceFile(iface *compile.Interface, env *compile.Env) Java
 		ServerWrapperPath string
 		Source            string
 	}{
+		AccessModifier:    accessModifierForName(iface.Name),
 		Extends:           javaServerExtendsStr(iface.Embeds),
 		Methods:           methods,
 		PackagePath:       javaPath(javaGenPkgPath(iface.File.Package.Path)),
 		ServerDoc:         javaDoc(iface.Doc),
-		ServiceName:       iface.Name,
+		ServiceName:       javaServiceName,
 		ServerVDLPath:     path.Join(iface.File.Package.Path, iface.Name+"ServerMethods"),
-		ServerWrapperPath: javaPath(javaGenPkgPath(path.Join(iface.File.Package.Path, javaGenImplDir, iface.Name+"ServerWrapper"))),
+		ServerWrapperPath: javaPath(javaGenPkgPath(path.Join(iface.File.Package.Path, javaServiceName+"ServerWrapper"))),
 		Source:            iface.File.BaseName,
 	}
 	var buf bytes.Buffer
@@ -93,7 +98,7 @@ func genJavaServerInterfaceFile(iface *compile.Interface, env *compile.Env) Java
 		log.Fatalf("vdl: couldn't execute struct template: %v", err)
 	}
 	return JavaFileInfo{
-		Name: iface.Name + "Server.java",
+		Name: javaServiceName + "Server.java",
 		Data: buf.Bytes(),
 	}
 }

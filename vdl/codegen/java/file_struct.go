@@ -16,7 +16,7 @@ package {{.PackagePath}};
 /**
  * type {{.Name}} {{.VdlTypeString}} {{.Doc}}
  **/
-public final class {{.Name}} extends io.veyron.veyron.veyron2.vdl.AbstractVdlStruct
+{{ .AccessModifier }} final class {{.Name}} extends io.veyron.veyron.veyron2.vdl.AbstractVdlStruct
         implements android.os.Parcelable {
     {{/* Field declarations */}}
     {{ range $field := .Fields }}
@@ -41,11 +41,11 @@ public final class {{.Name}} extends io.veyron.veyron.veyron2.vdl.AbstractVdlStr
 
     {{/* Getters and setters */}}
     {{ range $field := .Fields }}
-    public {{$field.Type}} get{{$field.Name}}() {
+    {{ $field.AccessModifier }} {{$field.Type}} get{{$field.Name}}() {
         return this.{{$field.LowercaseName}};
     }
 
-    public void set{{$field.Name}}({{$field.Type}} {{$field.LowercaseName}}) {
+    {{ $field.AccessModifier }} void set{{$field.Name}}({{$field.Type}} {{$field.LowercaseName}}) {
         this.{{$field.LowercaseName}} = {{$field.LowercaseName}};
     }
     {{ end }}
@@ -145,13 +145,14 @@ public final class {{.Name}} extends io.veyron.veyron.veyron2.vdl.AbstractVdlStr
 }`
 
 type structDefinitionField struct {
+	AccessModifier      string
+	Class               string
 	HashcodeComputation string
 	IsClass             bool
 	IsArray             bool
 	LowercaseName       string
 	Name                string
 	Type                string
-	Class               string
 }
 
 func javaFieldArgStr(structType *vdl.Type, env *compile.Env) string {
@@ -175,32 +176,36 @@ func genJavaStructFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo {
 	for i := 0; i < tdef.Type.NumField(); i++ {
 		fld := tdef.Type.Field(i)
 		fields[i] = structDefinitionField{
+			AccessModifier:      accessModifierForName(fld.Name),
+			Class:               javaType(fld.Type, true, env),
 			HashcodeComputation: javaHashCode(vdlutil.ToCamelCase(fld.Name), fld.Type, env),
 			IsClass:             isClass(fld.Type, env),
 			IsArray:             isJavaNativeArray(fld.Type, env),
 			LowercaseName:       vdlutil.ToCamelCase(fld.Name),
 			Name:                fld.Name,
 			Type:                javaType(fld.Type, false, env),
-			Class:               javaType(fld.Type, true, env),
 		}
 	}
 
+	javaTypeName := toUpperCamelCase(tdef.Name)
 	data := struct {
-		Doc           string
-		Fields        []structDefinitionField
-		FieldsAsArgs  string
-		Name          string
-		PackagePath   string
-		Source        string
-		VdlTypeString string
+		AccessModifier string
+		Doc            string
+		Fields         []structDefinitionField
+		FieldsAsArgs   string
+		Name           string
+		PackagePath    string
+		Source         string
+		VdlTypeString  string
 	}{
-		Doc:           javaDocInComment(tdef.Doc),
-		Fields:        fields,
-		FieldsAsArgs:  javaFieldArgStr(tdef.Type, env),
-		Name:          tdef.Name,
-		PackagePath:   javaPath(javaGenPkgPath(tdef.File.Package.Path)),
-		Source:        tdef.File.BaseName,
-		VdlTypeString: tdef.Type.String(),
+		AccessModifier: accessModifierForName(tdef.Name),
+		Doc:            javaDocInComment(tdef.Doc),
+		Fields:         fields,
+		FieldsAsArgs:   javaFieldArgStr(tdef.Type, env),
+		Name:           javaTypeName,
+		PackagePath:    javaPath(javaGenPkgPath(tdef.File.Package.Path)),
+		Source:         tdef.File.BaseName,
+		VdlTypeString:  tdef.Type.String(),
 	}
 	var buf bytes.Buffer
 	err := parseTmpl("struct", structTmpl).Execute(&buf, data)
@@ -208,7 +213,7 @@ func genJavaStructFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo {
 		log.Fatalf("vdl: couldn't execute struct template: %v", err)
 	}
 	return JavaFileInfo{
-		Name: tdef.Name + ".java",
+		Name: javaTypeName + ".java",
 		Data: buf.Bytes(),
 	}
 }

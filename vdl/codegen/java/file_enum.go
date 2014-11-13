@@ -15,7 +15,7 @@ package {{.PackagePath}};
 /**
  * type {{.Name}} {{.VdlTypeString}} {{.Doc}}
  **/
-public final class {{.Name}} extends io.veyron.veyron.veyron2.vdl.VdlEnum {
+{{ .AccessModifier }} final class {{.Name}} extends io.veyron.veyron.veyron2.vdl.VdlEnum {
     {{ range $label := .EnumLabels }}
         public static final {{$.Name}} {{$label}};
     {{ end }}
@@ -70,20 +70,23 @@ func genJavaEnumFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo {
 	for i := 0; i < tdef.Type.NumEnumLabel(); i++ {
 		labels[i] = tdef.Type.EnumLabel(i)
 	}
+	javaTypeName := toUpperCamelCase(tdef.Name)
 	data := struct {
-		EnumLabels    []string
-		Doc           string
-		Name          string
-		PackagePath   string
-		Source        string
-		VdlTypeString string
+		AccessModifier string
+		EnumLabels     []string
+		Doc            string
+		Name           string
+		PackagePath    string
+		Source         string
+		VdlTypeString  string
 	}{
-		EnumLabels:    labels,
-		Doc:           javaDocInComment(tdef.Doc),
-		Name:          tdef.Name,
-		PackagePath:   javaPath(javaGenPkgPath(tdef.File.Package.Path)),
-		Source:        tdef.File.BaseName,
-		VdlTypeString: tdef.Type.String(),
+		AccessModifier: accessModifierForName(tdef.Name),
+		EnumLabels:     labels,
+		Doc:            javaDocInComment(tdef.Doc),
+		Name:           javaTypeName,
+		PackagePath:    javaPath(javaGenPkgPath(tdef.File.Package.Path)),
+		Source:         tdef.File.BaseName,
+		VdlTypeString:  tdef.Type.String(),
 	}
 	var buf bytes.Buffer
 	err := parseTmpl("enum", enumTmpl).Execute(&buf, data)
@@ -91,7 +94,7 @@ func genJavaEnumFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo {
 		log.Fatalf("vdl: couldn't execute enum template: %v", err)
 	}
 	return JavaFileInfo{
-		Name: tdef.Name + ".java",
+		Name: javaTypeName + ".java",
 		Data: buf.Bytes(),
 	}
 }

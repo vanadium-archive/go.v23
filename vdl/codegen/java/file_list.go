@@ -14,7 +14,7 @@ package {{.Package}};
 /**
  * type {{.Name}} {{.VdlTypeString}} {{.Doc}}
  **/
-public final class {{.Name}} extends io.veyron.veyron.veyron2.vdl.VdlList<{{.ElemType}}> {
+{{ .AccessModifier }} final class {{.Name}} extends io.veyron.veyron.veyron2.vdl.VdlList<{{.ElemType}}> {
     public static final io.veyron.veyron.veyron2.vdl.VdlType VDL_TYPE =
             io.veyron.veyron.veyron2.vdl.Types.getVdlTypeFromReflection({{.Name}}.class);
 
@@ -52,20 +52,23 @@ public final class {{.Name}} extends io.veyron.veyron.veyron2.vdl.VdlList<{{.Ele
 
 // genJavaListFile generates the Java class file for the provided named list type.
 func genJavaListFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo {
+	javaTypeName := toUpperCamelCase(tdef.Name)
 	data := struct {
-		Doc           string
-		ElemType      string
-		Name          string
-		Package       string
-		SourceFile    string
-		VdlTypeString string
+		AccessModifier string
+		Doc            string
+		ElemType       string
+		Name           string
+		Package        string
+		SourceFile     string
+		VdlTypeString  string
 	}{
-		Doc:           javaDocInComment(tdef.Doc),
-		ElemType:      javaType(tdef.Type.Elem(), true, env),
-		Name:          tdef.Name,
-		Package:       javaPath(javaGenPkgPath(tdef.File.Package.Path)),
-		SourceFile:    tdef.File.BaseName,
-		VdlTypeString: tdef.Type.String(),
+		AccessModifier: accessModifierForName(tdef.Name),
+		Doc:            javaDocInComment(tdef.Doc),
+		ElemType:       javaType(tdef.Type.Elem(), true, env),
+		Name:           javaTypeName,
+		Package:        javaPath(javaGenPkgPath(tdef.File.Package.Path)),
+		SourceFile:     tdef.File.BaseName,
+		VdlTypeString:  tdef.Type.String(),
 	}
 	var buf bytes.Buffer
 	err := parseTmpl("list", listTmpl).Execute(&buf, data)
@@ -73,7 +76,7 @@ func genJavaListFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo {
 		log.Fatalf("vdl: couldn't execute list template: %v", err)
 	}
 	return JavaFileInfo{
-		Name: tdef.Name + ".java",
+		Name: javaTypeName + ".java",
 		Data: buf.Bytes(),
 	}
 }

@@ -15,7 +15,7 @@ package {{.Package}};
 /**
  * type {{.Name}} {{.VdlTypeString}} {{.Doc}}
  **/
-public final class {{.Name}} extends io.veyron.veyron.veyron2.vdl.VdlMap<{{.KeyType}}, {{.ElemType}}> {
+{{ .AccessModifier }} final class {{.Name}} extends io.veyron.veyron.veyron2.vdl.VdlMap<{{.KeyType}}, {{.ElemType}}> {
     public static final io.veyron.veyron.veyron2.vdl.VdlType VDL_TYPE =
             io.veyron.veyron.veyron2.vdl.Types.getVdlTypeFromReflection({{.Name}}.class);
 
@@ -57,22 +57,25 @@ public final class {{.Name}} extends io.veyron.veyron.veyron2.vdl.VdlMap<{{.KeyT
 
 // genJavaMapFile generates the Java class file for the provided named map type.
 func genJavaMapFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo {
+	javaTypeName := toUpperCamelCase(tdef.Name)
 	data := struct {
-		Doc           string
-		ElemType      string
-		KeyType       string
-		Name          string
-		Package       string
-		SourceFile    string
-		VdlTypeString string
+		AccessModifier string
+		Doc            string
+		ElemType       string
+		KeyType        string
+		Name           string
+		Package        string
+		SourceFile     string
+		VdlTypeString  string
 	}{
-		Doc:           javaDocInComment(tdef.Doc),
-		ElemType:      javaType(tdef.Type.Key(), true, env),
-		KeyType:       javaType(tdef.Type.Elem(), true, env),
-		Name:          tdef.Name,
-		Package:       javaPath(javaGenPkgPath(tdef.File.Package.Path)),
-		SourceFile:    tdef.File.BaseName,
-		VdlTypeString: tdef.BaseType.String(),
+		AccessModifier: accessModifierForName(tdef.Name),
+		Doc:            javaDocInComment(tdef.Doc),
+		ElemType:       javaType(tdef.Type.Key(), true, env),
+		KeyType:        javaType(tdef.Type.Elem(), true, env),
+		Name:           javaTypeName,
+		Package:        javaPath(javaGenPkgPath(tdef.File.Package.Path)),
+		SourceFile:     tdef.File.BaseName,
+		VdlTypeString:  tdef.BaseType.String(),
 	}
 	var buf bytes.Buffer
 	err := parseTmpl("map", mapTmpl).Execute(&buf, data)
@@ -80,7 +83,7 @@ func genJavaMapFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo {
 		log.Fatalf("vdl: couldn't execute map template: %v", err)
 	}
 	return JavaFileInfo{
-		Name: tdef.Name + ".java",
+		Name: javaTypeName + ".java",
 		Data: buf.Bytes(),
 	}
 }

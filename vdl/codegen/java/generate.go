@@ -7,9 +7,6 @@ import (
 	vdlroot "veyron.io/veyron/veyron2/vdl/vdlroot/src/vdl"
 )
 
-// javaGenImplDir is the directory in which implementation details for the generated interfaces should be put.
-const javaGenImplDir = "gen_impl"
-
 // pkgPathXlator is the function used to translate a VDL package path
 // into a Java package path.  If nil, no translation takes place.
 var pkgPathXlator func(path string) string

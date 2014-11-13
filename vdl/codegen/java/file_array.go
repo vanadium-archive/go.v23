@@ -15,7 +15,7 @@ package {{.Package}};
 /**
  * type {{.Name}} {{.VdlTypeString}} {{.Doc}}
  **/
-public final class {{.Name}} extends io.veyron.veyron.veyron2.vdl.VdlArray<{{.ElemType}}> {
+{{ .AccessModifier }} final class {{.Name}} extends io.veyron.veyron.veyron2.vdl.VdlArray<{{.ElemType}}> {
     public static final int LENGTH = {{.Length}};
 
     public static final io.veyron.veyron.veyron2.vdl.VdlType VDL_TYPE =
@@ -55,22 +55,25 @@ public final class {{.Name}} extends io.veyron.veyron.veyron2.vdl.VdlArray<{{.El
 
 // genJavaArrayFile generates the Java class file for the provided named array type.
 func genJavaArrayFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo {
+	javaTypeName := toUpperCamelCase(tdef.Name)
 	data := struct {
-		Doc           string
-		ElemType      string
-		Length        int
-		Name          string
-		Package       string
-		SourceFile    string
-		VdlTypeString string
+		AccessModifier string
+		Doc            string
+		ElemType       string
+		Length         int
+		Name           string
+		Package        string
+		SourceFile     string
+		VdlTypeString  string
 	}{
-		Doc:           javaDocInComment(tdef.Doc),
-		ElemType:      javaType(tdef.Type.Elem(), true, env),
-		Length:        tdef.Type.Len(),
-		Name:          tdef.Name,
-		Package:       javaPath(javaGenPkgPath(tdef.File.Package.Path)),
-		SourceFile:    tdef.File.BaseName,
-		VdlTypeString: tdef.Type.String(),
+		AccessModifier: accessModifierForName(tdef.Name),
+		Doc:            javaDocInComment(tdef.Doc),
+		ElemType:       javaType(tdef.Type.Elem(), true, env),
+		Length:         tdef.Type.Len(),
+		Name:           javaTypeName,
+		Package:        javaPath(javaGenPkgPath(tdef.File.Package.Path)),
+		SourceFile:     tdef.File.BaseName,
+		VdlTypeString:  tdef.Type.String(),
 	}
 	var buf bytes.Buffer
 	err := parseTmpl("array", arrayTmpl).Execute(&buf, data)
@@ -78,7 +81,7 @@ func genJavaArrayFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo {
 		log.Fatalf("vdl: couldn't execute array template: %v", err)
 	}
 	return JavaFileInfo{
-		Name: tdef.Name + ".java",
+		Name: javaTypeName + ".java",
 		Data: buf.Bytes(),
 	}
 }

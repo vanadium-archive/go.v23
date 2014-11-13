@@ -17,7 +17,7 @@ package {{.PackagePath}};
 /**
  * type {{.Name}} {{.VdlTypeString}} {{.Doc}}
  **/
-public final class {{.Name}} extends {{.VdlComplex}} {
+{{ .AccessModifier }} final class {{.Name}} extends {{.VdlComplex}} {
     public static final io.veyron.veyron.veyron2.vdl.VdlType VDL_TYPE =
             io.veyron.veyron.veyron2.vdl.Types.getVdlTypeFromReflection({{.Name}}.class);
 
@@ -57,22 +57,25 @@ func genJavaComplexFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo {
 	default:
 		panic(fmt.Errorf("val: unhandled kind: %v", kind))
 	}
+	javaTypeName := toUpperCamelCase(tdef.Name)
 	data := struct {
-		VdlComplex    string
-		ValueType     string
-		Doc           string
-		Name          string
-		PackagePath   string
-		Source        string
-		VdlTypeString string
+		AccessModifier string
+		Doc            string
+		Name           string
+		PackagePath    string
+		Source         string
+		ValueType      string
+		VdlComplex     string
+		VdlTypeString  string
 	}{
-		VdlComplex:    javaVdlPrimitiveType(tdef.Type.Kind()),
-		ValueType:     ValueType,
-		Doc:           javaDocInComment(tdef.Doc),
-		Name:          tdef.Name,
-		PackagePath:   javaPath(javaGenPkgPath(tdef.File.Package.Path)),
-		Source:        tdef.File.BaseName,
-		VdlTypeString: tdef.Type.String(),
+		AccessModifier: accessModifierForName(tdef.Name),
+		Doc:            javaDocInComment(tdef.Doc),
+		Name:           javaTypeName,
+		PackagePath:    javaPath(javaGenPkgPath(tdef.File.Package.Path)),
+		Source:         tdef.File.BaseName,
+		ValueType:      ValueType,
+		VdlComplex:     javaVdlPrimitiveType(tdef.Type.Kind()),
+		VdlTypeString:  tdef.Type.String(),
 	}
 	var buf bytes.Buffer
 	err := parseTmpl("complex", complexTmpl).Execute(&buf, data)
@@ -80,7 +83,7 @@ func genJavaComplexFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo {
 		log.Fatalf("vdl: couldn't execute VDL complex template: %v", err)
 	}
 	return JavaFileInfo{
-		Name: tdef.Name + ".java",
+		Name: javaTypeName + ".java",
 		Data: buf.Bytes(),
 	}
 }
