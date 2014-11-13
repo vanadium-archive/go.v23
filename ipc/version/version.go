@@ -18,6 +18,9 @@ const (
 	// and sends discharges for third-party caveats on the server's blessings
 	// during authentication.
 	IPCVersion5
+
+	// IPCVersion6 adds control channel encryption to IPCVersion5.
+	IPCVersion6
 )
 
 // IPCVersionRange allows you to optionally specify a range of versions to
