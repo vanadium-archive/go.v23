@@ -520,16 +520,15 @@ func TestCertificateChainsTamperingAttack(t *testing.T) {
 }
 
 func TestBlessingsOnWire(t *testing.T) {
+	// Test that the blessing obtained after roundtripping is identical to the original.
 	b, err := newPrincipal(t).BlessSelf("self")
 	if err != nil {
 		t.Fatal(err)
 	}
 	buf := new(bytes.Buffer)
-	if err := vom.NewEncoder(buf).Encode(b); err != nil {
+	if err := vom.NewEncoder(buf).Encode(MarshalBlessings(b)); err != nil {
 		t.Fatal(err)
 	}
-	// Even though the Blessings object was encoded "directly", should be
-	// able to decode into the concrete type of the wire representation.
 	var wire WireBlessings
 	if err := vom.NewDecoder(buf).Decode(&wire); err != nil {
 		t.Fatal(err)
@@ -540,10 +539,6 @@ func TestBlessingsOnWire(t *testing.T) {
 	}
 	if !reflect.DeepEqual(b, got) {
 		t.Fatalf("Got %#v, want %#v", got, b)
-	}
-	// And VomEncoding a Blessings object should be identical to Marshaling it.
-	if got := MarshalBlessings(b); !reflect.DeepEqual(got, wire) {
-		t.Errorf("Got %#v, want %#v", got, wire)
 	}
 	// Putzing around with the wire representation should break the factory function.
 	otherkey, err := newPrincipal(t).PublicKey().MarshalBinary()
@@ -586,7 +581,7 @@ func TestBlessingsOnWireWithMissingCertificates(t *testing.T) {
 		buf  = new(bytes.Buffer)
 		wire WireBlessings
 	)
-	if err := vom.NewEncoder(buf).Encode(leaf); err != nil {
+	if err := vom.NewEncoder(buf).Encode(MarshalBlessings(leaf)); err != nil {
 		t.Fatal(err)
 	}
 	if err := vom.NewDecoder(buf).Decode(&wire); err != nil {
@@ -646,5 +641,27 @@ func TestBlessingsOnWireWithMissingCertificates(t *testing.T) {
 			t.Errorf("%d: %v", idx, merr)
 		}
 		wire.CertificateChains[idx] = chain
+	}
+}
+
+func TestBlessingsCannotBeVomEncodedOrDecoded(t *testing.T) {
+	b, err := newPrincipal(t).BlessSelf("self")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Test that directly vom encoding security.Blessings fails.
+	buf := new(bytes.Buffer)
+	if err := vom.NewEncoder(buf).Encode(b); err == nil {
+		t.Fatal("Directly vom encoding security.Blessings unexpectedly succeeded")
+	}
+
+	// Test that directly vom decoding into security.Blessings fails.
+	if err := vom.NewEncoder(buf).Encode(MarshalBlessings(b)); err != nil {
+		t.Fatal(err)
+	}
+	var decoded Blessings
+	if err := vom.NewDecoder(buf).Decode(&decoded); err == nil {
+		t.Fatal("Direct vom dencoding into security.Blessings unexpectedly succeeded")
 	}
 }
