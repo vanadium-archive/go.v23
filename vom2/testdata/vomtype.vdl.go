@@ -125,3 +125,16 @@ func (x NOneOf) OneOf() interface{} {
 
 // vdlOneOfTypes identifies NOneOf as a oneof.
 func (NOneOf) vdlOneOfTypes(_ bool, _ string, _ int64) {}
+
+// Nested Custom Types
+type MBool NBool
+
+type MStruct struct {
+	A bool
+	B NBool
+	C MBool
+}
+
+type MList []NListUint64
+
+type MMap map[NFloat32]NListUint64

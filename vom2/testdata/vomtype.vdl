@@ -29,4 +29,21 @@ type (
 
 	NEnum  enum{ A; B; C }
 	NOneOf oneof{ bool; string; int64 }
+
+	// Nested Custom Types
+	MBool   NBool
+	MStruct struct {
+	  A bool
+	  B NBool
+	  C MBool
+	}
+	MList   []NListUint64
+	MMap map[NFloat32]NListUint64
+
+	/* TODO(bprosnitz) Handle recursive type generation in Javascript.
+	// Recursive Type Definitions
+	RecA []RecA
+	RecX []RecY
+	RecY []RecX
+	*/
 )

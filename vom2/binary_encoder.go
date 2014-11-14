@@ -94,57 +94,68 @@ func (e *binaryEncoder) FinishEncode() error {
 	return e.writeMsg(e.bufV, +int64(id), hasBinaryMsgLen(encType))
 }
 
-// encodeUnsentTypes writes type definitions for t and all subtypes that haven't
-// been sent yet.  Returns the type ID assigned to t.
-func (e *binaryEncoder) encodeUnsentTypes(t *vdl.Type) (TypeID, error) {
-	id, isNew := e.sentTypes.LookupOrAssignID(t)
-	if isNew {
-		if err := e.encodeType(t, id); err != nil {
-			return 0, err
-		}
-	}
-	return id, nil
-}
-
-// encodeType performs recursive depth-first pre-order traversal of the type
-// graph, encoding unexplored types along the way.  Any types that have already
-// been explored (even if they're still pending encoding) terminate that branch
-// of the traversal, to ensure termination for recursive types.
-func (e *binaryEncoder) encodeType(t *vdl.Type, id TypeID) error {
-	// Encode the wire type.  We may assign new type ids, but we never recursively
-	// encode type messages.  WireType is represented as a struct, which always
-	// encodes the message length.
-	const encodeMsgLen = true
-	e.bufT.Reset()
-	e.bufT.Grow(paddingLen)
-	children := e.encodeWireType(e.bufT, t)
-	if err := e.writeMsg(e.bufT, -int64(id), encodeMsgLen); err != nil {
-		return err
-	}
-
-	// Now continue the recursive pre-order traversal of the unexplored children.
-	for _, child := range children {
-		if err := e.encodeType(child.t, child.id); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-type typeAndID struct {
-	t  *vdl.Type
-	id TypeID
-}
-
-// encodeWireType encodes the wire type corresponding to t into buf.  Returns
-// the unexplored children subtypes of t, which also need to be encoded.
+// encodeUnsentTypes encodes the wire type corresponding to t into the type
+// buffer e.bufT. It does this recursively in depth-first order, encoding any
+// children of the type before  the type itself. Type ids are allocated in the
+// order that we recurse and consequentially may be sent out of sequential
+// order if type information for children is sent (before the parent type).
 //
 // The wire type is manually encoded via direct calls to binaryEncode*.  An
 // alternative would be to convert t into its WireType representation, but
 // that's slower and more complicated.
 //
 // TODO(toddw): Consider converting to WireType after oneof is implemented.
-func (e *binaryEncoder) encodeWireType(buf *encbuf, t *vdl.Type) (children []typeAndID) {
+func (e *binaryEncoder) encodeUnsentTypes(t *vdl.Type) (TypeID, error) {
+	// Lookup a type ID for t or assign a new one.
+	id, isNew := e.sentTypes.LookupOrAssignID(t)
+	if !isNew {
+		return id, nil
+	}
+
+	// Encode child types and collect their IDs.
+	var elemID TypeID
+	var keyID TypeID
+	var fieldIDs []TypeID
+	var oneofIDs []TypeID
+	var err error
+	switch t.Kind() {
+	case vdl.Array, vdl.List:
+		if elemID, err = e.encodeUnsentTypes(t.Elem()); err != nil {
+			return 0, err
+		}
+	case vdl.Set:
+		if keyID, err = e.encodeUnsentTypes(t.Key()); err != nil {
+			return 0, err
+		}
+	case vdl.Map:
+		if keyID, err = e.encodeUnsentTypes(t.Key()); err != nil {
+			return 0, err
+		}
+		if elemID, err = e.encodeUnsentTypes(t.Elem()); err != nil {
+			return 0, err
+		}
+	case vdl.Struct:
+		fieldIDs = make([]TypeID, t.NumField())
+		for x := 0; x < t.NumField(); x++ {
+			if fieldIDs[x], err = e.encodeUnsentTypes(t.Field(x).Type); err != nil {
+				return 0, err
+			}
+		}
+	case vdl.OneOf:
+		oneofIDs = make([]TypeID, t.NumOneOfType())
+		for x := 0; x < t.NumOneOfType(); x++ {
+			if oneofIDs[x], err = e.encodeUnsentTypes(t.OneOfType(x)); err != nil {
+				return 0, err
+			}
+		}
+	}
+
+	// Setup the buffer for writing a new type.
+	buf := e.bufT
+	buf.Reset()
+	buf.Grow(paddingLen)
+
+	// Construct the type
 	switch kind := t.Kind(); kind {
 	case vdl.Bool, vdl.Byte, vdl.Uint16, vdl.Uint32, vdl.Uint64, vdl.Int16, vdl.Int32, vdl.Int64, vdl.Float32, vdl.Float64, vdl.Complex64, vdl.Complex128, vdl.String:
 		binaryEncodeUint(buf, uint64(WireNamedID))
@@ -153,7 +164,6 @@ func (e *binaryEncoder) encodeWireType(buf *encbuf, t *vdl.Type) (children []typ
 		binaryEncodeUint(buf, 2)
 		binaryEncodeUint(buf, uint64(bootstrapKindToID[kind]))
 		binaryEncodeUint(buf, 0)
-		return
 	case vdl.Enum:
 		binaryEncodeUint(buf, uint64(WireEnumID))
 		binaryEncodeUint(buf, 1)
@@ -164,12 +174,7 @@ func (e *binaryEncoder) encodeWireType(buf *encbuf, t *vdl.Type) (children []typ
 			binaryEncodeString(buf, t.EnumLabel(x))
 		}
 		binaryEncodeUint(buf, 0)
-		return
 	case vdl.Array:
-		elemID, isNew := e.sentTypes.LookupOrAssignID(t.Elem())
-		if isNew {
-			children = append(children, typeAndID{t.Elem(), elemID})
-		}
 		binaryEncodeUint(buf, uint64(WireArrayID))
 		if t.Name() != "" {
 			binaryEncodeUint(buf, 1)
@@ -180,12 +185,7 @@ func (e *binaryEncoder) encodeWireType(buf *encbuf, t *vdl.Type) (children []typ
 		binaryEncodeUint(buf, 3)
 		binaryEncodeUint(buf, uint64(t.Len()))
 		binaryEncodeUint(buf, 0)
-		return
 	case vdl.List:
-		elemID, isNew := e.sentTypes.LookupOrAssignID(t.Elem())
-		if isNew {
-			children = append(children, typeAndID{t.Elem(), elemID})
-		}
 		binaryEncodeUint(buf, uint64(WireListID))
 		if t.Name() != "" {
 			binaryEncodeUint(buf, 1)
@@ -194,12 +194,7 @@ func (e *binaryEncoder) encodeWireType(buf *encbuf, t *vdl.Type) (children []typ
 		binaryEncodeUint(buf, 2)
 		binaryEncodeUint(buf, uint64(elemID))
 		binaryEncodeUint(buf, 0)
-		return
 	case vdl.Set:
-		keyID, isNew := e.sentTypes.LookupOrAssignID(t.Key())
-		if isNew {
-			children = append(children, typeAndID{t.Key(), keyID})
-		}
 		binaryEncodeUint(buf, uint64(WireSetID))
 		if t.Name() != "" {
 			binaryEncodeUint(buf, 1)
@@ -208,16 +203,7 @@ func (e *binaryEncoder) encodeWireType(buf *encbuf, t *vdl.Type) (children []typ
 		binaryEncodeUint(buf, 2)
 		binaryEncodeUint(buf, uint64(keyID))
 		binaryEncodeUint(buf, 0)
-		return
 	case vdl.Map:
-		keyID, isNew := e.sentTypes.LookupOrAssignID(t.Key())
-		if isNew {
-			children = append(children, typeAndID{t.Key(), keyID})
-		}
-		elemID, isNew := e.sentTypes.LookupOrAssignID(t.Elem())
-		if isNew {
-			children = append(children, typeAndID{t.Elem(), elemID})
-		}
 		binaryEncodeUint(buf, uint64(WireMapID))
 		if t.Name() != "" {
 			binaryEncodeUint(buf, 1)
@@ -228,46 +214,41 @@ func (e *binaryEncoder) encodeWireType(buf *encbuf, t *vdl.Type) (children []typ
 		binaryEncodeUint(buf, 3)
 		binaryEncodeUint(buf, uint64(elemID))
 		binaryEncodeUint(buf, 0)
-		return
 	case vdl.Struct:
 		binaryEncodeUint(buf, uint64(WireStructID))
 		binaryEncodeUint(buf, 1)
 		binaryEncodeString(buf, t.Name())
 		binaryEncodeUint(buf, 2)
 		binaryEncodeUint(buf, uint64(t.NumField()))
-		for x := 0; x < t.NumField(); x++ {
-			field := t.Field(x)
-			fieldID, isNew := e.sentTypes.LookupOrAssignID(field.Type)
-			if isNew {
-				children = append(children, typeAndID{field.Type, fieldID})
-			}
+
+		for x := 0; x < len(fieldIDs); x++ {
+			fieldID := fieldIDs[x]
 			binaryEncodeUint(buf, 1)
-			binaryEncodeString(buf, field.Name)
+			binaryEncodeString(buf, t.Field(x).Name)
 			binaryEncodeUint(buf, 2)
 			binaryEncodeUint(buf, uint64(fieldID))
 			binaryEncodeUint(buf, 0)
 		}
 		binaryEncodeUint(buf, 0)
-		return
 	case vdl.OneOf:
 		binaryEncodeUint(buf, uint64(WireOneOfID))
 		binaryEncodeUint(buf, 1)
 		binaryEncodeString(buf, t.Name())
 		binaryEncodeUint(buf, 2)
 		binaryEncodeUint(buf, uint64(t.NumOneOfType()))
-		for x := 0; x < t.NumOneOfType(); x++ {
-			one := t.OneOfType(x)
-			oneID, isNew := e.sentTypes.LookupOrAssignID(one)
-			if isNew {
-				children = append(children, typeAndID{one, oneID})
-			}
-			binaryEncodeUint(buf, uint64(oneID))
+		for x := 0; x < len(oneofIDs); x++ {
+			oneofID := oneofIDs[x]
+			binaryEncodeUint(buf, uint64(oneofID))
 		}
 		binaryEncodeUint(buf, 0)
-		return
 	default:
-		panic(fmt.Errorf("vom2: encodeWireType unhandled type %v", t))
+		panic(fmt.Errorf("vom2: encodeUnsentTypes unhandled type %v", t))
 	}
+
+	// Write the type definition message.
+	const encodeMsgLen = true
+	err = e.writeMsg(buf, -int64(id), encodeMsgLen)
+	return id, err
 }
 
 // prepareType prepares to encode a value of type tt, checking to make sure it

@@ -191,7 +191,11 @@ func createFillTarget(fin convTarget, tt *vdl.Type) (convTarget, error) {
 				return convTarget{}, fmt.Errorf("%v not assignable from *vdl.Value", fin.rv.Type())
 			}
 			return valueConv(vdl.ZeroValue(tt)), nil
-		case reflect.Array, reflect.Slice, reflect.Map:
+		case reflect.Slice:
+			fin.rv.Set(reflect.MakeSlice(fin.rv.Type(), 0, 0)) // start with an empty (non-nil) slice
+		case reflect.Map:
+			fin.rv.Set(reflect.MakeMap(fin.rv.Type())) // start with an empty (non-nil) map
+		case reflect.Array:
 			fin.rv.Set(reflect.Zero(fin.rv.Type())) // start with zero collections
 		}
 	} else {
@@ -678,6 +682,7 @@ type oneofTarget struct {
 
 // StartList implements the Target interface method.
 func (c convTarget) StartList(tt *vdl.Type, len int) (ListTarget, error) {
+	// TODO(bprosnitz) Re-think allocation strategy and possibly use len (currently unused).
 	fin, fill, err := startConvert(c, tt)
 	return compConvTarget{fin, fill}, err
 }
