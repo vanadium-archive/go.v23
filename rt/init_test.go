@@ -43,10 +43,12 @@ func (mp *myprofile) String() string {
 	return "myprofile on " + mp.Platform().String()
 }
 
-func (mp *myprofile) Init(veyron2.Runtime, *config.Publisher) error {
+func (mp *myprofile) Init(veyron2.Runtime, *config.Publisher) (veyron2.AppCycle, error) {
 	mp.called++
-	return nil
+	return nil, nil
 }
+
+func (mp *myprofile) Cleanup() {}
 
 func ExampleInitWithProfile() {
 	r := rt.Init(options.Profile{&myprofile{}})
@@ -91,7 +93,9 @@ func TestRTNew(t *testing.T) {
 
 type mockRuntime struct{}
 
-func (*mockRuntime) Profile() veyron2.Profile                               { return nil }
+func (*mockRuntime) Profile() veyron2.Profile   { return nil }
+func (*mockRuntime) AppCycle() veyron2.AppCycle { return nil }
+
 func (*mockRuntime) Publisher() *config.Publisher                           { return nil }
 func (*mockRuntime) Principal() security.Principal                          { return nil }
 func (*mockRuntime) NewClient(opts ...ipc.ClientOpt) (ipc.Client, error)    { return nil, nil }
@@ -110,11 +114,5 @@ func (*mockRuntime) NewLogger(name string, opts ...vlog.LoggingOpts) (vlog.Logge
 	return nil, nil
 }
 func (*mockRuntime) ConfigureReservedName(ipc.Dispatcher, ...ipc.ServerOpt) {}
-func (*mockRuntime) Stop()                                                  {}
-func (*mockRuntime) ForceStop()                                             {}
-func (*mockRuntime) WaitForStop(chan<- string)                              {}
-func (*mockRuntime) AdvanceGoal(delta int)                                  {}
-func (*mockRuntime) AdvanceProgress(delta int)                              {}
-func (*mockRuntime) TrackTask(chan<- veyron2.Task)                          {}
 func (*mockRuntime) VtraceStore() vtrace.Store                              { return nil }
 func (*mockRuntime) Cleanup()                                               {}
