@@ -62,6 +62,10 @@ func TestBless(t *testing.T) {
 		}
 	)
 	addToRoots(t, tp, alice)
+	// p1 blessing p2 'with' nil Blessings should fail.
+	if b, err := p1.Bless(p2.PublicKey(), nil, "friend", UnconstrainedUse()); err == nil {
+		t.Errorf("p1 was able to extend a nil blessing to produce: %v", b)
+	}
 	// p1 blessing p2 as "alice/friend" for "Suffix.Method"
 	friend, err := p1.Bless(p2.PublicKey(), alice, "friend", newCaveat(MethodCaveat("Method")), newSuffixCaveat("Suffix"))
 	if err != nil {

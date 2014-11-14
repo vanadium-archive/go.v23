@@ -70,6 +70,9 @@ type principal struct {
 }
 
 func (p *principal) Bless(key PublicKey, with Blessings, extension string, caveat Caveat, additionalCaveats ...Caveat) (Blessings, error) {
+	if with == nil {
+		return nil, errors.New("the Blessings to bless 'with' must be non-nil")
+	}
 	if !reflect.DeepEqual(with.PublicKey(), p.PublicKey()) {
 		return nil, fmt.Errorf("Principal with public key %v cannot extend blessing with public key %v", p.PublicKey(), with.PublicKey())
 	}
