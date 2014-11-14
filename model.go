@@ -39,7 +39,7 @@ const (
 // the fields, see the Task struct in the veyron2/services/mgmt/appcycle
 // package, which it mirrors.
 type Task struct {
-	Progress, Goal int
+	Progress, Goal int32
 }
 
 // Platform describes the hardware and software environment that this
@@ -153,12 +153,63 @@ type Profile interface {
 	Platform() *Platform
 
 	// Init is called by the Runtime once it has been initialized and
-	// command line flags have been parsed. Init will be called once and
-	// only once by the Runtime.
-	Init(rt Runtime, p *config.Publisher) error
+	// command line flags have been parsed. It returns an instance of
+	// the AppCycle interface to be used for managing this runtime.
+	// Init will be called once and only once by the Runtime.
+	Init(rt Runtime, p *config.Publisher) (AppCycle, error)
 
-	// TODO(cnicolaou): provide a Cleanup method for the profile.
 	String() string
+
+	// Cleanup shuts down any internal state maintained by the Profile.
+	// It will be called by the Runtime from its Cleanup method.
+	Cleanup()
+}
+
+// AppCycle is the interface for managing the shutdown of a runtime
+// remotely and locally. An appropriate instance of this is provided by
+// the Profile to the runtime implementation which in turn arranges to
+// serve it on an appropriate network address.
+type AppCycle interface {
+	// Stop causes all the channels returned by WaitForStop to return the
+	// LocalStop message, to give the application a chance to shut down.
+	// Stop does not block.  If any of the channels are not receiving,
+	// the message is not sent on them.
+	// If WaitForStop had never been called, Stop acts like ForceStop.
+	Stop()
+
+	// ForceStop causes the application to exit immediately with an error
+	// code.
+	ForceStop()
+
+	// WaitForStop takes in a channel on which a stop event will be
+	// conveyed.  The stop event is represented by a string identifying the
+	// source of the event.  For example, when Stop is called locally, the
+	// LocalStop message will be received on the channel.  If the channel is
+	// not being received on, or is full, no message is sent on it.
+	//
+	// The channel is assumed to remain open while messages could be sent on
+	// it.  The channel will be automatically closed during the call to
+	// Cleanup.
+	WaitForStop(chan<- string)
+
+	// AdvanceGoal extends the goal value in the shutdown task tracker.
+	// Non-positive delta is ignored.
+	AdvanceGoal(delta int32)
+	// AdvanceProgress advances the progress value in the shutdown task
+	// tracker.  Non-positive delta is ignored.
+	AdvanceProgress(delta int32)
+	// TrackTask registers a channel to receive task updates (a Task will be
+	// sent on the channel if either the goal or progress values of the
+	// task have changed).  If the channel is not being received on, or is
+	// full, no Task is sent on it.
+	//
+	// The channel is assumed to remain open while Tasks could be sent on
+	// it.
+	TrackTask(chan<- Task)
+
+	// Remote returns an object to serve the remotely accessible AppCycle
+	// interface (as defined in veyron2/services/mgmt/appcycle)
+	Remote() interface{}
 }
 
 // Runtime is the interface that concrete Veyron implementations must
@@ -166,6 +217,9 @@ type Profile interface {
 type Runtime interface {
 	// Profile returns the current processes' Profile.
 	Profile() Profile
+
+	// AppCycle returns the current processes' AppCycle interface.
+	AppCycle() AppCycle
 
 	// Publisher returns a configuration Publisher that
 	// can be used to access configuration information.
@@ -239,43 +293,6 @@ type Runtime interface {
 	// NewLogger creates a new instance of the logging interface that is
 	// separate from the one provided by Runtime.
 	NewLogger(name string, opts ...vlog.LoggingOpts) (vlog.Logger, error)
-
-	// Stop causes all the channels returned by WaitForStop to return the
-	// LocalStop message, to give the application a chance to shut down.
-	// Stop does not block.  If any of the channels are not receiving,
-	// the message is not sent on them.
-	// If WaitForStop had never been called, Stop acts like ForceStop.
-	Stop()
-
-	// ForceStop causes the application to exit immediately with an error
-	// code.
-	ForceStop()
-
-	// WaitForStop takes in a channel on which a stop event will be
-	// conveyed.  The stop event is represented by a string identifying the
-	// source of the event.  For example, when Stop is called locally, the
-	// LocalStop message will be received on the channel.  If the channel is
-	// not being received on, or is full, no message is sent on it.
-	//
-	// The channel is assumed to remain open while messages could be sent on
-	// it.  The channel will be automatically closed during the call to
-	// Cleanup.
-	WaitForStop(chan<- string)
-
-	// AdvanceGoal extends the goal value in the shutdown task tracker.
-	// Non-positive delta is ignored.
-	AdvanceGoal(delta int)
-	// AdvanceProgress advances the progress value in the shutdown task
-	// tracker.  Non-positive delta is ignored.
-	AdvanceProgress(delta int)
-	// TrackTask registers a channel to receive task updates (a Task will be
-	// sent on the channel if either the goal or progress values of the
-	// task have changed).  If the channel is not being received on, or is
-	// full, no Task is sent on it.
-	//
-	// The channel is assumed to remain open while Tasks could be sent on
-	// it.
-	TrackTask(chan<- Task)
 
 	// Cleanup cleanly shuts down any internal state, logging, goroutines
 	// etc spawned and managed by the runtime. It is useful for cases where
