@@ -27,6 +27,17 @@ func javaVal(v *vdl.Value, env *compile.Env) string {
 	const longSuffix = "L"
 	const floatSuffix = "f"
 
+	if v.Kind() == vdl.Array || (v.Kind() == vdl.List && v.Type().Elem().Kind() == vdl.Byte && v.Type().Name() == "") {
+		ret := fmt.Sprintf("new %s[] {", javaType(v.Type().Elem(), false, env))
+		for i := 0; i < v.Len(); i++ {
+			if i > 0 {
+				ret = ret + ", "
+			}
+			ret = ret + javaConstVal(v.Index(i), env)
+		}
+		return ret + "}"
+	}
+
 	switch v.Kind() {
 	case vdl.Bool:
 		if v.Bool() {
@@ -71,15 +82,6 @@ func javaVal(v *vdl.Value, env *compile.Env) string {
 		elemReflectTypeStr := javaReflectType(v.Elem().Type(), env)
 		elemStr := javaConstVal(v.Elem(), env)
 		return fmt.Sprintf("new %s(%s, %s)", javaType(v.Type(), false, env), elemReflectTypeStr, elemStr)
-	case vdl.Array:
-		ret := fmt.Sprintf("new %s[] {", javaType(v.Type().Elem(), true, env))
-		for i := 0; i < v.Len(); i++ {
-			if i > 0 {
-				ret = ret + ", "
-			}
-			ret = ret + javaConstVal(v.Index(i), env)
-		}
-		return ret + "}"
 	case vdl.Enum:
 		return fmt.Sprintf("%s.%s", javaType(v.Type(), false, env), v.EnumLabel())
 	case vdl.List:
@@ -121,9 +123,6 @@ func javaVal(v *vdl.Value, env *compile.Env) string {
 		return ret
 	case vdl.TypeObject:
 		return fmt.Sprintf("new %s(%s)", javaType(v.Type(), false, env), javaReflectType(v.TypeObject(), env))
-	}
-	if v.Type().IsBytes() {
-		return strconv.Quote(string(v.Bytes()))
 	}
 	panic(fmt.Errorf("vdl: javaVal unhandled type %v %v", v.Kind(), v.Type()))
 }
