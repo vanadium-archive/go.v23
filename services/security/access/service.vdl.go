@@ -209,17 +209,6 @@ func (c implObjectClientStub) Signature(ctx __context.T, opts ...__ipc.CallOpt) 
 	return
 }
 
-func (c implObjectClientStub) GetMethodTags(ctx __context.T, method string, opts ...__ipc.CallOpt) (o0 []interface{}, err error) {
-	var call __ipc.Call
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
 // ObjectServerMethods is the interface a server writer
 // implements for Object.
 //
@@ -257,9 +246,9 @@ type ObjectServerStubMethods ObjectServerMethods
 // ObjectServerStub adds universal methods to ObjectServerStubMethods.
 type ObjectServerStub interface {
 	ObjectServerStubMethods
-	// GetMethodTags will be replaced with DescribeInterfaces.
-	GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error)
-	// Signature will be replaced with DescribeInterfaces.
+	// Describe the Object interfaces.
+	Describe__() []__ipc.InterfaceDesc
+	// Signature will be replaced with Describe__.
 	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
@@ -297,20 +286,46 @@ func (s implObjectServerStub) VGlob() *__ipc.GlobState {
 	return s.gs
 }
 
-func (s implObjectServerStub) GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error) {
-	// TODO(toddw): Replace with new DescribeInterfaces implementation.
-	switch method {
-	case "SetACL":
-		return []interface{}{security.Label(8)}, nil
-	case "GetACL":
-		return []interface{}{security.Label(8)}, nil
-	default:
-		return nil, nil
-	}
+func (s implObjectServerStub) Describe__() []__ipc.InterfaceDesc {
+	return []__ipc.InterfaceDesc{ObjectDesc}
+}
+
+// ObjectDesc describes the Object interface.
+var ObjectDesc __ipc.InterfaceDesc = descObject
+
+// descObject hides the desc to keep godoc clean.
+var descObject = __ipc.InterfaceDesc{
+	Name:    "Object",
+	PkgPath: "veyron.io/veyron/veyron2/services/security/access",
+	Doc:     "// Object provides access control for Veyron objects.",
+	Methods: []__ipc.MethodDesc{
+		{
+			Name: "SetACL",
+			Doc:  "// SetACL replaces the current ACL for an object.  etag allows for optional,\n// optimistic concurrency control.  If non-empty, etag's value must come\n// from GetACL.  If any client has successfully called SetACL in the\n// meantime, the etag will be stale and SetACL will fail.\n//\n// ACL objects are expected to be small.  It is up to the implementation to\n// define the exact limit, though it should probably be around 100KB.  Large\n// lists of principals should use the Group API or blessings.\n//\n// There is some ambiguity when calling SetACL on a mount point.  Does it\n// affect the mount itself or does it affect the service endpoint that the\n// mount points to?  The chosen behavior is that it affects the service\n// endpoint.  To modify the mount point's ACL, use ResolveToMountTable\n// to get an endpoint and call SetACL on that.  This means that clients\n// must know when a name refers to a mount point to change its ACL.",
+			InArgs: []__ipc.ArgDesc{
+				{"acl", ``},  // security.ACL
+				{"etag", ``}, // string
+			},
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // error
+			},
+			Tags: []__vdlutil.Any{security.Label(8)},
+		},
+		{
+			Name: "GetACL",
+			Doc:  "// GetACL returns the complete, current ACL for an object.  The returned etag\n// can be passed to a subsequent call to SetACL for optimistic concurrency\n// control. A successful call to SetACL will invalidate etag, and the client\n// must call GetACL again to get the current etag.",
+			OutArgs: []__ipc.ArgDesc{
+				{"acl", ``},  // security.ACL
+				{"etag", ``}, // string
+				{"err", ``},  // error
+			},
+			Tags: []__vdlutil.Any{security.Label(8)},
+		},
+	},
 }
 
 func (s implObjectServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
-	// TODO(toddw) Replace with new DescribeInterfaces implementation.
+	// TODO(toddw): Replace with new Describe__ implementation.
 	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
 	result.Methods["GetACL"] = __ipc.MethodSignature{
 		InArgs: []__ipc.MethodArgument{},

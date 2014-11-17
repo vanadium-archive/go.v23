@@ -14,6 +14,8 @@ import (
 	"veyron.io/veyron/veyron2/context"
 	"veyron.io/veyron/veyron2/ipc"
 	"veyron.io/veyron/veyron2/security"
+	"veyron.io/veyron/veyron2/vdl"
+	"veyron.io/veyron/veyron2/vdl/vdlutil"
 	"veyron.io/veyron/veyron2/verror"
 )
 
@@ -102,21 +104,16 @@ func (o *tags) Epsilon(c ipc.ServerContext, i int, s string) (int, string, error
 }
 func (o *tags) Error(c ipc.ServerContext) error { o.ctx = c; return errApp }
 
-func (o *tags) GetMethodTags(c ipc.ServerContext, method string) ([]interface{}, error) {
-	switch method {
-	case "Alpha":
-		return []interface{}{tagAlpha}, nil
-	case "Beta":
-		return []interface{}{tagBeta}, nil
-	case "Gamma":
-		return []interface{}{tagGamma}, nil
-	case "Delta":
-		return []interface{}{tagDelta}, nil
-	case "Epsilon":
-		return []interface{}{tagEpsilon}, nil
-	default:
-		return []interface{}{}, nil
-	}
+func (o *tags) Describe__() []ipc.InterfaceDesc {
+	return []ipc.InterfaceDesc{{
+		Methods: []ipc.MethodDesc{
+			{Name: "Alpha", Tags: []vdlutil.Any{tagAlpha}},
+			{Name: "Beta", Tags: []vdlutil.Any{tagBeta}},
+			{Name: "Gamma", Tags: []vdlutil.Any{tagGamma}},
+			{Name: "Delta", Tags: []vdlutil.Any{tagDelta}},
+			{Name: "Epsilon", Tags: []vdlutil.Any{tagEpsilon}},
+		},
+	}}
 }
 
 func TestReflectInvoker(t *testing.T) {
@@ -126,7 +123,7 @@ func TestReflectInvoker(t *testing.T) {
 		method string
 		call   ipc.ServerCall
 		// Expected results:
-		tag     interface{}
+		tag     vdlutil.Any
 		args    v
 		results v
 		err     error
@@ -158,12 +155,12 @@ func TestReflectInvoker(t *testing.T) {
 		if !equalPtrValTypes(argptrs, test.args) {
 			t.Errorf("%s Prepare got argptrs %v, want args %v", name(test), printTypes(argptrs), printTypes(toPtrs(test.args)))
 		}
-		var tag interface{}
+		var tag vdlutil.Any
 		if len(tags) > 0 {
 			tag = tags[0]
 		}
 		if tag != test.tag {
-			t.Errorf("%s Prepare got tags %v, want %v", name(test), tags, []interface{}{test.tag})
+			t.Errorf("%s Prepare got tags %v, want %v", name(test), tags, []vdlutil.Any{test.tag})
 		}
 		// Call Invoker.Invoke and check results.
 		results, err := invoker.Invoke(test.method, test.call, toPtrs(test.args))
@@ -217,6 +214,227 @@ func toPtrs(vals []interface{}) []interface{} {
 		valptrs[ix] = rvValPtr.Interface()
 	}
 	return valptrs
+}
+
+type (
+	sigTest           struct{}
+	stringBoolContext struct{ ipc.ServerContext }
+)
+
+func (*stringBoolContext) Init(ipc.ServerCall) {}
+func (*stringBoolContext) RecvStream() interface {
+	Advance() bool
+	Value() string
+	Err() error
+} {
+	return nil
+}
+func (*stringBoolContext) SendStream() interface {
+	Send(item bool) error
+} {
+	return nil
+}
+
+func (sigTest) Sig1(ipc.ServerContext)                             {}
+func (sigTest) Sig2(ipc.ServerContext, int32, string) error        { return nil }
+func (sigTest) Sig3(*stringBoolContext, float64) ([]uint32, error) { return nil, nil }
+func (sigTest) Sig4(ipc.ServerCall, int32, string) (int32, string) { return 0, "" }
+func (sigTest) Describe__() []ipc.InterfaceDesc {
+	return []ipc.InterfaceDesc{
+		{
+			Name:    "Iface1",
+			PkgPath: "a/b/c",
+			Doc:     "Doc Iface1",
+			Embeds: []ipc.EmbedDesc{
+				{Name: "Iface1Embed1", PkgPath: "x/y", Doc: "Doc embed1"},
+			},
+			Methods: []ipc.MethodDesc{
+				{
+					Name:   "Sig3",
+					Doc:    "Doc Sig3",
+					InArgs: []ipc.ArgDesc{{Name: "i0_3", Doc: "Doc i0_3"}},
+					OutArgs: []ipc.ArgDesc{
+						{Name: "o0_3", Doc: "Doc o0_3"}, {Name: "err_3", Doc: "Doc err_3"}},
+					InStream:  ipc.ArgDesc{Name: "is_3", Doc: "Doc is_3"},
+					OutStream: ipc.ArgDesc{Name: "os_3", Doc: "Doc os_3"},
+					Tags:      []vdlutil.Any{"a", "b", int32(123)},
+				},
+			},
+		},
+		{
+			Name:    "Iface2",
+			PkgPath: "d/e/f",
+			Doc:     "Doc Iface2",
+			Methods: []ipc.MethodDesc{
+				{
+					// The same Sig3 method is described here in a different interface.
+					Name:   "Sig3",
+					Doc:    "Doc Sig3x",
+					InArgs: []ipc.ArgDesc{{Name: "i0_3x", Doc: "Doc i0_3x"}},
+					OutArgs: []ipc.ArgDesc{
+						{Name: "o0_3x", Doc: "Doc o0_3x"}, {Name: "err_3x", Doc: "Doc err_3x"}},
+					InStream:  ipc.ArgDesc{Name: "is_3x", Doc: "Doc is_3x"},
+					OutStream: ipc.ArgDesc{Name: "os_3x", Doc: "Doc os_3x"},
+					// Must have the same tags as every other definition of this method.
+					Tags: []vdlutil.Any{"a", "b", int32(123)},
+				},
+				{
+					Name: "Sig4",
+					Doc:  "Doc Sig4",
+					InArgs: []ipc.ArgDesc{
+						{Name: "i0_4", Doc: "Doc i0_4"}, {Name: "i1_4", Doc: "Doc i1_4"}},
+					OutArgs: []ipc.ArgDesc{
+						{Name: "o0_4", Doc: "Doc o0_4"}, {Name: "o1_4", Doc: "Doc o1_4"}},
+				},
+			},
+		},
+	}
+}
+
+func TestReflectInvokerSignature(t *testing.T) {
+	tests := []struct {
+		Method string // empty to invoke Signature rather than MethodSignature
+		Want   interface{}
+	}{
+		// Tests of MethodSignature.
+		{"Sig1", ipc.MethodSig{Name: "Sig1"}},
+		{"Sig2", ipc.MethodSig{
+			Name:    "Sig2",
+			InArgs:  []ipc.ArgSig{{Type: vdl.Int32Type}, {Type: vdl.StringType}},
+			OutArgs: []ipc.ArgSig{{Type: vdl.ErrorType}},
+		}},
+		{"Sig3", ipc.MethodSig{
+			Name: "Sig3",
+			Doc:  "Doc Sig3",
+			InArgs: []ipc.ArgSig{
+				{Name: "i0_3", Doc: "Doc i0_3", Type: vdl.Float64Type}},
+			OutArgs: []ipc.ArgSig{
+				{Name: "o0_3", Doc: "Doc o0_3", Type: vdl.ListType(vdl.Uint32Type)},
+				{Name: "err_3", Doc: "Doc err_3", Type: vdl.ErrorType}},
+			InStreamHACK: ipc.ArgSig{
+				Name: "is_3", Doc: "Doc is_3", Type: vdl.StringType},
+			OutStreamHACK: ipc.ArgSig{
+				Name: "os_3", Doc: "Doc os_3", Type: vdl.BoolType},
+			HasInStreamHACK:  true,
+			HasOutStreamHACK: true,
+			Tags:             []vdlutil.Any{"a", "b", int32(123)},
+		}},
+		{"Sig4", ipc.MethodSig{
+			Name: "Sig4",
+			Doc:  "Doc Sig4",
+			InArgs: []ipc.ArgSig{
+				{Name: "i0_4", Doc: "Doc i0_4", Type: vdl.Int32Type},
+				{Name: "i1_4", Doc: "Doc i1_4", Type: vdl.StringType}},
+			OutArgs: []ipc.ArgSig{
+				{Name: "o0_4", Doc: "Doc o0_4", Type: vdl.Int32Type},
+				{Name: "o1_4", Doc: "Doc o1_4", Type: vdl.StringType}},
+			// Since ipc.ServerCall is used, we must assume streaming with any.
+			InStreamHACK:     ipc.ArgSig{Type: vdl.AnyType},
+			OutStreamHACK:    ipc.ArgSig{Type: vdl.AnyType},
+			HasInStreamHACK:  true,
+			HasOutStreamHACK: true,
+		}},
+		// Test Signature, which always returns the "true" information collected via
+		// reflection, and enhances it with user-provided descriptions.
+		{"", []ipc.InterfaceSig{
+			{
+				Name:    "Iface1",
+				PkgPath: "a/b/c",
+				Doc:     "Doc Iface1",
+				Embeds: []ipc.EmbedSig{
+					{Name: "Iface1Embed1", PkgPath: "x/y", Doc: "Doc embed1"},
+				},
+				Methods: []ipc.MethodSig{
+					{
+						Name: "Sig3",
+						Doc:  "Doc Sig3",
+						InArgs: []ipc.ArgSig{
+							{Name: "i0_3", Doc: "Doc i0_3", Type: vdl.Float64Type},
+						},
+						OutArgs: []ipc.ArgSig{
+							{Name: "o0_3", Doc: "Doc o0_3", Type: vdl.ListType(vdl.Uint32Type)},
+							{Name: "err_3", Doc: "Doc err_3", Type: vdl.ErrorType},
+						},
+						InStreamHACK: ipc.ArgSig{
+							Name: "is_3", Doc: "Doc is_3", Type: vdl.StringType},
+						OutStreamHACK: ipc.ArgSig{
+							Name: "os_3", Doc: "Doc os_3", Type: vdl.BoolType},
+						HasInStreamHACK:  true,
+						HasOutStreamHACK: true,
+						Tags:             []vdlutil.Any{"a", "b", int32(123)},
+					},
+				},
+			},
+			{
+				Name:    "Iface2",
+				PkgPath: "d/e/f",
+				Doc:     "Doc Iface2",
+				Methods: []ipc.MethodSig{
+					{
+						Name: "Sig3",
+						Doc:  "Doc Sig3x",
+						InArgs: []ipc.ArgSig{
+							{Name: "i0_3x", Doc: "Doc i0_3x", Type: vdl.Float64Type},
+						},
+						OutArgs: []ipc.ArgSig{
+							{Name: "o0_3x", Doc: "Doc o0_3x", Type: vdl.ListType(vdl.Uint32Type)},
+							{Name: "err_3x", Doc: "Doc err_3x", Type: vdl.ErrorType},
+						},
+						InStreamHACK: ipc.ArgSig{
+							Name: "is_3x", Doc: "Doc is_3x", Type: vdl.StringType},
+						OutStreamHACK: ipc.ArgSig{
+							Name: "os_3x", Doc: "Doc os_3x", Type: vdl.BoolType},
+						HasInStreamHACK:  true,
+						HasOutStreamHACK: true,
+						Tags:             []vdlutil.Any{"a", "b", int32(123)},
+					},
+					{
+						Name: "Sig4",
+						Doc:  "Doc Sig4",
+						InArgs: []ipc.ArgSig{
+							{Name: "i0_4", Doc: "Doc i0_4", Type: vdl.Int32Type},
+							{Name: "i1_4", Doc: "Doc i1_4", Type: vdl.StringType},
+						},
+						OutArgs: []ipc.ArgSig{
+							{Name: "o0_4", Doc: "Doc o0_4", Type: vdl.Int32Type},
+							{Name: "o1_4", Doc: "Doc o1_4", Type: vdl.StringType},
+						},
+						InStreamHACK:     ipc.ArgSig{Type: vdl.AnyType},
+						OutStreamHACK:    ipc.ArgSig{Type: vdl.AnyType},
+						HasInStreamHACK:  true,
+						HasOutStreamHACK: true,
+					},
+				},
+			},
+			{
+				Doc: "The empty interface contains methods not attached to any interface.",
+				Methods: []ipc.MethodSig{
+					{Name: "Sig1"},
+					{
+						Name:    "Sig2",
+						InArgs:  []ipc.ArgSig{{Type: vdl.Int32Type}, {Type: vdl.StringType}},
+						OutArgs: []ipc.ArgSig{{Type: vdl.ErrorType}},
+					},
+				},
+			},
+		}},
+	}
+	for _, test := range tests {
+		invoker := ipc.ReflectInvoker(sigTest{})
+		var got interface{}
+		var err error
+		if test.Method == "" {
+			got, err = invoker.Signature(nil)
+		} else {
+			got, err = invoker.MethodSignature(nil, test.Method)
+		}
+		if err != nil {
+			t.Errorf("%q got error %v", test.Method, err)
+		}
+		if want := test.Want; !reflect.DeepEqual(got, want) {
+			t.Errorf("%q got %#v, want %#v", test.Method, got, want)
+		}
+	}
 }
 
 type (
@@ -299,7 +517,7 @@ func TestReflectInvokerPanic(t *testing.T) {
 		regexp string
 	}
 	tests := []testcase{
-		{nil, "nil object is incompatible"},
+		{nil, `ReflectInvoker\(nil\) is invalid`},
 		{struct{}{}, "no compatible methods"},
 		{badcontext{}, "invalid streaming context"},
 		{badVGlob{}, "VGlob must have signature"},
@@ -322,7 +540,7 @@ func TestReflectInvokerErrors(t *testing.T) {
 		prepareErr error
 		invokeErr  error
 	}
-	expectedError := verror.NoExistf("ipc: unknown method 'UnknownMethod'")
+	expectedError := verror.NoExistf(`ipc: unknown method "UnknownMethod"`)
 	tests := []testcase{
 		{&notags{}, "UnknownMethod", v{}, expectedError, expectedError},
 		{&tags{}, "UnknownMethod", v{}, expectedError, expectedError},
@@ -368,14 +586,14 @@ func TestTypeCheckMethods(t *testing.T) {
 			"LastContext": ipc.ErrNonRPCMethod.Error(),
 		}},
 		{&tags{}, map[string]string{
-			"Alpha":         "",
-			"Beta":          "",
-			"Gamma":         "",
-			"Delta":         "",
-			"Epsilon":       "",
-			"Error":         "",
-			"GetMethodTags": "",
-			"LastContext":   ipc.ErrNonRPCMethod.Error(),
+			"Alpha":       "",
+			"Beta":        "",
+			"Gamma":       "",
+			"Delta":       "",
+			"Epsilon":     "",
+			"Error":       "",
+			"LastContext": ipc.ErrNonRPCMethod.Error(),
+			"Describe__":  ipc.ErrReservedMethod.Error(),
 		}},
 		{badcontext{}, map[string]string{
 			"notExported": ipc.ErrMethodNotExported.Error(),
@@ -408,7 +626,7 @@ func TestTypeCheckMethods(t *testing.T) {
 			t.Errorf("TypeCheckMethods(%T) got %v, want %v", test.obj, got, want)
 		}
 		if got, want := len(typecheck), len(test.want); got != want {
-			t.Errorf("TypeCheckMethods(%T) got len %d, want %d", test.obj, got, want)
+			t.Errorf("TypeCheckMethods(%T) got len %d, want %d (got %q, want %q)", test.obj, got, want, typecheck, test.want)
 		}
 		for wantKey, wantVal := range test.want {
 			gotVal, ok := typecheck[wantKey]

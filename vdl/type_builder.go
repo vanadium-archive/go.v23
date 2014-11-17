@@ -50,6 +50,15 @@ var (
 	TypeObjectType = primitiveType(TypeObject)
 )
 
+// Built-in types defined by the system.
+var (
+	// TODO(toddw): Describe error in a built-in VDL file.
+	ErrorType = NamedType("error", StructType(
+		StructField{"Id", StringType},
+		StructField{"Msg", StringType},
+	))
+)
+
 func primitiveType(k Kind) *Type {
 	prim, err := typeCons(&Type{kind: k})
 	if err != nil {

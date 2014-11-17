@@ -79,6 +79,10 @@ func normalizeType(rt reflect.Type) reflect.Type {
 	for rt.Kind() == reflect.Ptr && rt.Elem().Kind() == reflect.Ptr {
 		rt = rt.Elem()
 	}
+	// Special-case the error type.
+	if rt == rtError || (rt.Kind() == reflect.Ptr && rt.Elem() == rtError) {
+		return rtError
+	}
 	// Collapse all interfaces to interface{}.
 	if rt.Kind() == reflect.Interface || (rt.Kind() == reflect.Ptr && rt.Elem().Kind() == reflect.Interface) {
 		return rtInterface
@@ -96,6 +100,8 @@ func lookupType(rt reflect.Type) *Type {
 		rt = rt.Elem()
 	}
 	switch rt {
+	case rtError:
+		return ErrorType
 	case rtInterface, rtValue:
 		return AnyType
 	case rtType:
@@ -353,6 +359,7 @@ var (
 	rtInterface          = reflect.TypeOf((*interface{})(nil)).Elem()
 	rtBool               = reflect.TypeOf(false)
 	rtString             = reflect.TypeOf("")
+	rtError              = reflect.TypeOf((*error)(nil)).Elem()
 	rtType               = reflect.TypeOf(Type{})
 	rtValue              = reflect.TypeOf(Value{})
 	rtReflectValue       = reflect.TypeOf(reflect.Value{})

@@ -7,8 +7,46 @@ import (
 	"veyron.io/veyron/veyron2/wiretype"
 
 	// The non-user imports are prefixed with "__" to prevent collisions.
+	__vdl "veyron.io/veyron/veyron2/vdl"
 	__vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
 )
+
+// InterfaceSig describes the signature of an interface.
+type InterfaceSig struct {
+	Name    string
+	PkgPath string
+	Doc     string
+	Embeds  []EmbedSig  // No special ordering.
+	Methods []MethodSig // Ordered by method name.
+}
+
+// EmbedSig describes the signature of an embedded interface.
+type EmbedSig struct {
+	Name    string
+	PkgPath string
+	Doc     string
+}
+
+// MethodSig describes the signature of an interface method.
+type MethodSig struct {
+	Name    string
+	Doc     string
+	InArgs  []ArgSig // Input arguments
+	OutArgs []ArgSig // Output arguments
+	// TODO(toddw): Remove Has{In,Out}StreamHACK when optional is available.
+	InStreamHACK     ArgSig          // Input stream
+	OutStreamHACK    ArgSig          // Output stream
+	HasInStreamHACK  bool            // Does InStreamHack contain valid data?
+	HasOutStreamHACK bool            // Does OutStreamHack contain valid data?
+	Tags             []__vdlutil.Any // Method tags
+}
+
+// ArgSig describes the signature of a single argument.
+type ArgSig struct {
+	Name string
+	Doc  string
+	Type *__vdl.Type // Type of the argument.
+}
 
 // ServiceSignature represents the signature of the service. This includes type information needed
 // to resolve the method argument types.

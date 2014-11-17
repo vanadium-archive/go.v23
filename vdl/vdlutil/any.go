@@ -10,6 +10,8 @@ import (
 // vdl type gets translated into vdlutil.Any when generating Go code.  We define a
 // special type rather than just using "interface{}" to make it easy to add
 // special-case logic when necessary.
+//
+// TODO(toddw): Move this to veyron2/vdl and rename to AnyRep
 type Any interface{}
 
 // RegisterType is like gob.Register() - it must be called to register the

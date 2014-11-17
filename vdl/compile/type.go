@@ -149,7 +149,7 @@ func (td typeDefiner) Define() {
 		case nil:
 			continue // keep going to catch  more errors
 		case *vdl.Type:
-			if tbase == ErrorType {
+			if tbase == vdl.ErrorType {
 				td.env.Errorf(file, def.Pos, "error cannot be renamed")
 				continue // keep going to catch more errors
 			}
@@ -323,12 +323,3 @@ func addTypeDef(def *TypeDef, env *Env) {
 		env.typeDefs[def.Type] = def
 	}
 }
-
-var (
-	// Built-in types defined by the compiler.
-	// TODO(toddw): Represent error in a built-in VDL file.
-	ErrorType = vdl.NamedType("error", vdl.StructType(
-		vdl.StructField{"Id", vdl.StringType},
-		vdl.StructField{"Msg", vdl.StringType},
-	))
-)

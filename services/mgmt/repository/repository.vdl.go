@@ -99,17 +99,6 @@ func (c implApplicationClientStub) Signature(ctx __context.T, opts ...__ipc.Call
 	return
 }
 
-func (c implApplicationClientStub) GetMethodTags(ctx __context.T, method string, opts ...__ipc.CallOpt) (o0 []interface{}, err error) {
-	var call __ipc.Call
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
 // ApplicationServerMethods is the interface a server writer
 // implements for Application.
 //
@@ -141,9 +130,9 @@ type ApplicationServerStubMethods ApplicationServerMethods
 // ApplicationServerStub adds universal methods to ApplicationServerStubMethods.
 type ApplicationServerStub interface {
 	ApplicationServerStubMethods
-	// GetMethodTags will be replaced with DescribeInterfaces.
-	GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error)
-	// Signature will be replaced with DescribeInterfaces.
+	// Describe the Application interfaces.
+	Describe__() []__ipc.InterfaceDesc
+	// Signature will be replaced with Describe__.
 	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
@@ -177,18 +166,36 @@ func (s implApplicationServerStub) VGlob() *__ipc.GlobState {
 	return s.gs
 }
 
-func (s implApplicationServerStub) GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error) {
-	// TODO(toddw): Replace with new DescribeInterfaces implementation.
-	switch method {
-	case "Match":
-		return []interface{}{security.Label(2)}, nil
-	default:
-		return nil, nil
-	}
+func (s implApplicationServerStub) Describe__() []__ipc.InterfaceDesc {
+	return []__ipc.InterfaceDesc{ApplicationDesc}
+}
+
+// ApplicationDesc describes the Application interface.
+var ApplicationDesc __ipc.InterfaceDesc = descApplication
+
+// descApplication hides the desc to keep godoc clean.
+var descApplication = __ipc.InterfaceDesc{
+	Name:    "Application",
+	PkgPath: "veyron.io/veyron/veyron2/services/mgmt/repository",
+	Doc:     "// Application provides access to application envelopes. An\n// application envelope is identified by an application name and an\n// application version, which are specified through the object name,\n// and a profile name, which is specified using a method argument.\n//\n// Example:\n// /apps/search/v1.Match([]string{\"base\", \"media\"})\n//   returns an application envelope that can be used for downloading\n//   and executing the \"search\" application, version \"v1\", runnable\n//   on either the \"base\" or \"media\" profile.",
+	Methods: []__ipc.MethodDesc{
+		{
+			Name: "Match",
+			Doc:  "// Match checks if any of the given profiles contains an application\n// envelope for the given application version (specified through the\n// object name suffix) and if so, returns this envelope. If multiple\n// profile matches are possible, the method returns the first\n// matching profile, respecting the order of the input argument.",
+			InArgs: []__ipc.ArgDesc{
+				{"Profiles", ``}, // []string
+			},
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // application.Envelope
+				{"", ``}, // error
+			},
+			Tags: []__vdlutil.Any{security.Label(2)},
+		},
+	},
 }
 
 func (s implApplicationServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
-	// TODO(toddw) Replace with new DescribeInterfaces implementation.
+	// TODO(toddw): Replace with new Describe__ implementation.
 	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
 	result.Methods["Match"] = __ipc.MethodSignature{
 		InArgs: []__ipc.MethodArgument{
@@ -365,17 +372,6 @@ func (c implBinaryClientStub) Upload(ctx __context.T, i0 int32, opts ...__ipc.Ca
 func (c implBinaryClientStub) Signature(ctx __context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
-func (c implBinaryClientStub) GetMethodTags(ctx __context.T, method string, opts ...__ipc.CallOpt) (o0 []interface{}, err error) {
-	var call __ipc.Call
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&o0, &err); ierr != nil {
@@ -624,9 +620,9 @@ type BinaryServerStubMethods interface {
 // BinaryServerStub adds universal methods to BinaryServerStubMethods.
 type BinaryServerStub interface {
 	BinaryServerStubMethods
-	// GetMethodTags will be replaced with DescribeInterfaces.
-	GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error)
-	// Signature will be replaced with DescribeInterfaces.
+	// Describe the Binary interfaces.
+	Describe__() []__ipc.InterfaceDesc
+	// Signature will be replaced with Describe__.
 	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
@@ -680,28 +676,84 @@ func (s implBinaryServerStub) VGlob() *__ipc.GlobState {
 	return s.gs
 }
 
-func (s implBinaryServerStub) GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error) {
-	// TODO(toddw): Replace with new DescribeInterfaces implementation.
-	switch method {
-	case "Create":
-		return []interface{}{security.Label(4)}, nil
-	case "Delete":
-		return []interface{}{security.Label(4)}, nil
-	case "Download":
-		return []interface{}{security.Label(2)}, nil
-	case "DownloadURL":
-		return []interface{}{security.Label(2)}, nil
-	case "Stat":
-		return []interface{}{security.Label(2)}, nil
-	case "Upload":
-		return []interface{}{security.Label(4)}, nil
-	default:
-		return nil, nil
-	}
+func (s implBinaryServerStub) Describe__() []__ipc.InterfaceDesc {
+	return []__ipc.InterfaceDesc{BinaryDesc}
+}
+
+// BinaryDesc describes the Binary interface.
+var BinaryDesc __ipc.InterfaceDesc = descBinary
+
+// descBinary hides the desc to keep godoc clean.
+var descBinary = __ipc.InterfaceDesc{
+	Name:    "Binary",
+	PkgPath: "veyron.io/veyron/veyron2/services/mgmt/repository",
+	Doc:     "// Binary can be used to store and retrieve veyron application\n// binaries.\n//\n// To create a binary, clients first invoke the Create() method that\n// specifies the number of parts the binary consists of. Clients then\n// uploads the individual parts through the Upload() method, which\n// identifies the part being uploaded. To resume an upload after a\n// failure, clients invoke the UploadStatus() method, which returns a\n// slice that identifies which parts are missing.\n//\n// To download a binary, clients first invoke Stat(), which returns\n// information describing the binary, including the number of parts\n// the binary consists of. Clients then download the individual parts\n// through the Download() method, which identifies the part being\n// downloaded. Alternatively, clients can download the binary through\n// HTTP using a transient URL available through the DownloadURL()\n// method.\n//\n// To delete the binary, clients invoke the Delete() method.",
+	Methods: []__ipc.MethodDesc{
+		{
+			Name: "Create",
+			Doc:  "// Create expresses the intent to create a binary identified by the\n// object name suffix consisting of the given number of parts. If\n// the suffix identifies a binary that has already been created, the\n// method returns an error.",
+			InArgs: []__ipc.ArgDesc{
+				{"nparts", ``}, // int32
+			},
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // error
+			},
+			Tags: []__vdlutil.Any{security.Label(4)},
+		},
+		{
+			Name: "Delete",
+			Doc:  "// Delete deletes the binary identified by the object name\n// suffix. If the binary that has not been created, the method\n// returns an error.",
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // error
+			},
+			Tags: []__vdlutil.Any{security.Label(4)},
+		},
+		{
+			Name: "Download",
+			Doc:  "// Download opens a stream that can used for downloading the given\n// part of the binary identified by the object name suffix. If the\n// binary part has not been uploaded, the method returns an\n// error. If the Delete() method is invoked when the Download()\n// method is in progress, the outcome the Download() method is\n// undefined.",
+			InArgs: []__ipc.ArgDesc{
+				{"part", ``}, // int32
+			},
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // error
+			},
+			Tags: []__vdlutil.Any{security.Label(2)},
+		},
+		{
+			Name: "DownloadURL",
+			Doc:  "// DownloadURL returns a transient URL from which the binary\n// identified by the object name suffix can be downloaded using the\n// HTTP protocol. If not all parts of the binary have been uploaded,\n// the method returns an error.",
+			OutArgs: []__ipc.ArgDesc{
+				{"URL", ``}, // string
+				{"TTL", ``}, // int64
+				{"err", ``}, // error
+			},
+			Tags: []__vdlutil.Any{security.Label(2)},
+		},
+		{
+			Name: "Stat",
+			Doc:  "// Stat returns information describing the parts of the binary\n// identified by the object name suffix. If the binary has not been\n// created, the method returns an error.",
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // []binary.PartInfo
+				{"", ``}, // error
+			},
+			Tags: []__vdlutil.Any{security.Label(2)},
+		},
+		{
+			Name: "Upload",
+			Doc:  "// Upload opens a stream that can be used for uploading the given\n// part of the binary identified by the object name suffix. If the\n// binary has not been created, the method returns an error. If the\n// binary part has been uploaded, the method returns an error. If\n// the same binary part is being uploaded by another caller, the\n// method returns an error.",
+			InArgs: []__ipc.ArgDesc{
+				{"part", ``}, // int32
+			},
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // error
+			},
+			Tags: []__vdlutil.Any{security.Label(4)},
+		},
+	},
 }
 
 func (s implBinaryServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
-	// TODO(toddw) Replace with new DescribeInterfaces implementation.
+	// TODO(toddw): Replace with new Describe__ implementation.
 	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
 	result.Methods["Create"] = __ipc.MethodSignature{
 		InArgs: []__ipc.MethodArgument{
@@ -949,17 +1001,6 @@ func (c implProfileClientStub) Signature(ctx __context.T, opts ...__ipc.CallOpt)
 	return
 }
 
-func (c implProfileClientStub) GetMethodTags(ctx __context.T, method string, opts ...__ipc.CallOpt) (o0 []interface{}, err error) {
-	var call __ipc.Call
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
 // ProfileServerMethods is the interface a server writer
 // implements for Profile.
 //
@@ -987,9 +1028,9 @@ type ProfileServerStubMethods ProfileServerMethods
 // ProfileServerStub adds universal methods to ProfileServerStubMethods.
 type ProfileServerStub interface {
 	ProfileServerStubMethods
-	// GetMethodTags will be replaced with DescribeInterfaces.
-	GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error)
-	// Signature will be replaced with DescribeInterfaces.
+	// Describe the Profile interfaces.
+	Describe__() []__ipc.InterfaceDesc
+	// Signature will be replaced with Describe__.
 	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
@@ -1027,20 +1068,42 @@ func (s implProfileServerStub) VGlob() *__ipc.GlobState {
 	return s.gs
 }
 
-func (s implProfileServerStub) GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error) {
-	// TODO(toddw): Replace with new DescribeInterfaces implementation.
-	switch method {
-	case "Label":
-		return []interface{}{security.Label(2)}, nil
-	case "Description":
-		return []interface{}{security.Label(2)}, nil
-	default:
-		return nil, nil
-	}
+func (s implProfileServerStub) Describe__() []__ipc.InterfaceDesc {
+	return []__ipc.InterfaceDesc{ProfileDesc}
+}
+
+// ProfileDesc describes the Profile interface.
+var ProfileDesc __ipc.InterfaceDesc = descProfile
+
+// descProfile hides the desc to keep godoc clean.
+var descProfile = __ipc.InterfaceDesc{
+	Name:    "Profile",
+	PkgPath: "veyron.io/veyron/veyron2/services/mgmt/repository",
+	Doc:     "// Profile abstracts a device's ability to run binaries, and hides\n// specifics such as the operating system, hardware architecture, and\n// the set of installed libraries. Profiles describe binaries and\n// devices, and are used to match them.",
+	Methods: []__ipc.MethodDesc{
+		{
+			Name: "Label",
+			Doc:  "// Label is the human-readable profile key for the profile,\n// e.g. \"linux-media\". The label can be used to uniquely identify\n// the profile (for the purpose of matching application binaries and\n// nodes).",
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // string
+				{"", ``}, // error
+			},
+			Tags: []__vdlutil.Any{security.Label(2)},
+		},
+		{
+			Name: "Description",
+			Doc:  "// Description is a free-text description of the profile, meant for\n// human consumption.",
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // string
+				{"", ``}, // error
+			},
+			Tags: []__vdlutil.Any{security.Label(2)},
+		},
+	},
 }
 
 func (s implProfileServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
-	// TODO(toddw) Replace with new DescribeInterfaces implementation.
+	// TODO(toddw): Replace with new Describe__ implementation.
 	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
 	result.Methods["Description"] = __ipc.MethodSignature{
 		InArgs: []__ipc.MethodArgument{},

@@ -3,19 +3,76 @@ package ipc
 import (
 	"fmt"
 	"reflect"
+	"sort"
 	"sync"
 
+	"veyron.io/veyron/veyron2/vdl"
+	"veyron.io/veyron/veyron2/vdl/valconv"
+	"veyron.io/veyron/veyron2/vdl/vdlutil"
 	"veyron.io/veyron/veyron2/verror"
 )
 
+// Describer may be implemented by an underlying object served by the
+// ReflectInvoker, in order to describe the interfaces that the object
+// implements.  This describes all data in InterfaceSig that the ReflectInvoker
+// cannot obtain through reflection; basically everything except the method
+// names and types.
+//
+// Note that a single object may implement multiple interfaces; to describe such
+// an object, simply return more than one elem in the returned list.
+type Describer interface {
+	// Describe the underlying object.  The implementation must be idempotent
+	// across different instances of the same underlying type; the ReflectInvoker
+	// calls this once per type and caches the results.
+	Describe__() []InterfaceDesc
+}
+
+// InterfaceDesc describes an interface; it is similar to InterfaceSig, without
+// the information that can be obtained via reflection.
+type InterfaceDesc struct {
+	Name    string
+	PkgPath string
+	Doc     string
+	Embeds  []EmbedDesc
+	Methods []MethodDesc
+}
+
+// EmbedDesc describes an embedded interface; it is similar to EmbedSig, without
+// the information that can be obtained via reflection.
+type EmbedDesc struct {
+	Name    string
+	PkgPath string
+	Doc     string
+}
+
+// MethodDesc describes an interface method; it is similar to MethodSig, without
+// the information that can be obtained via reflection.
+type MethodDesc struct {
+	Name      string
+	Doc       string
+	InArgs    []ArgDesc     // Input arguments
+	OutArgs   []ArgDesc     // Output arguments
+	InStream  ArgDesc       // Input stream (client to server)
+	OutStream ArgDesc       // Output stream (server to client)
+	Tags      []vdlutil.Any // Method tags
+}
+
+// ArgDesc describes an argument; it is similar to ArgSig, without the
+// information that can be obtained via reflection.
+type ArgDesc struct {
+	Name string
+	Doc  string
+}
+
 type reflectInvoker struct {
 	rcvr    reflect.Value
-	methods map[string]methodInfo
-	gs      *GlobState
+	methods map[string]methodInfo // used by Prepare and Invoke
+	sig     []InterfaceSig        // used by Signature and MethodSignature
 }
 
 var _ Invoker = (*reflectInvoker)(nil)
 
+// methodInfo holds the runtime information necessary for Prepare and Invoke.
 type methodInfo struct {
 	rvFunc   reflect.Value  // Function representing the method.
 	rtInArgs []reflect.Type // In arg types, not including receiver and context.
@@ -25,64 +82,80 @@ type methodInfo struct {
 	rtStreamCtx     reflect.Type
 	rvStreamCtxInit reflect.Value
 
-	// Tags are not memoized since they may change per instance.
-	tags []interface{}
+	tags []interface{} // Tags from the signature.
 }
 
 // ReflectInvoker returns an Invoker implementation that uses reflection to make
-// each compatible exported method in obj available.  Each exported method must
-// take ipc.ServerCall as the first in-arg. Methods not doing so are silently
-// ignored.
+// each compatible exported method in obj available.  E.g.:
+//
+//   type impl struct{}
+//   func (impl) NonStreaming(ctx ipc.ServerContext, ...) (...)
+//   func (impl) Streaming(ctx *MyContext, ...) (...)
+//
+// The first in-arg must be a context.  For non-streaming methods it must be
+// ipc.ServerContext.  For streaming methods, it must be a pointer to a struct
+// that implements ipc.ServerCall, and also adds typesafe streaming wrappers.
+// Here's an example that streams int32 from client to server, and string from
+// server to client:
+//
+//   type MyContext struct { ipc.ServerCall }
+//
+//   // Init initializes MyContext via ipc.ServerCall.
+//   func (*MyContext) Init(ipc.ServerCall) {...}
+//
+//   // RecvStream returns the receiver side of the server stream.
+//   func (*MyContext) RecvStream() interface {
+//     Advance() bool
+//     Value() int32
+//     Err() error
+//   } {...}
+//
+//   // SendStream returns the sender side of the server stream.
+//   func (*MyContext) SendStream() interface {
+//     Send(item string) error
+//   } {...}
+//
+// We require the streaming context arg to have this structure so that we can
+// capture the streaming in and out arg types via reflection.  We require it to
+// be a concrete type with an Init func so that we can create new instances,
+// also via reflection.
+//
+// As a temporary special-case, we also allow generic streaming methods:
+//
+//   func (impl) Generic(call ipc.ServerCall, ...) (...)
+//
+// The problem with allowing this form is that via reflection we can no longer
+// determine whether the server performs streaming, or what the streaming in and
+// out types are.
+// TODO(toddw): Remove this special-case.
+//
+// The ReflectInvoker silently ignores unexported methods, and exported methods
+// whose first argument doesn't implement ipc.ServerContext.  All other methods
+// must follow the above rules; bad method types cause a panic.  You can use
+// TypeCheckMethods to dynamically check that all rules are obeyed.
+//
+// If obj implements the Describer interface, we'll use it to describe portions
+// of the object signature that cannot be retrieved via reflection;
+// e.g. method tags, documentation, variable names, etc.
 func ReflectInvoker(obj interface{}) Invoker {
-	if obj == nil {
-		panic(fmt.Errorf("ipc: nil object is incompatible with ReflectInvoker"))
+	rt := reflect.TypeOf(obj)
+	info := reflectCache.lookup(rt)
+	if info == nil {
+		// Concurrent calls may cause reflectCache.set to be called multiple times.
+		// This race is benign; the info for a given type never changes.
+		info = newReflectInfo(obj)
+		reflectCache.set(rt, info)
 	}
-	rcvr := reflect.ValueOf(obj)
-	methods := getMethods(rcvr.Type())
-	// Copy the memoized methods, so we can fill in the tags.
-	methodsCopy := make(map[string]methodInfo, len(methods))
-	for name, info := range methods {
-		info.tags = getMethodTags(obj, name)
-		methodsCopy[name] = info
-	}
-	// Determine whether and how the object implements Glob.
-	gs := &GlobState{}
-	if x, ok := obj.(VGlobber); ok {
-		gs = x.VGlob()
-	}
-	if x, ok := obj.(VAllGlobber); ok {
-		gs.VAllGlobber = x
-	}
-	if x, ok := obj.(VChildrenGlobber); ok {
-		gs.VChildrenGlobber = x
-	}
-	if len(methods) == 0 && (gs == nil || (gs.VAllGlobber == nil && gs.VChildrenGlobber == nil)) {
-		panic(fmt.Errorf("ipc: object type %T has no compatible methods: %q", obj, TypeCheckMethods(obj)))
-	}
-	return reflectInvoker{rcvr, methodsCopy, gs}
-}
-
-// serverGetMethodTags is a helper interface to check if GetMethodTags is implemented on an object
-type serverGetMethodTags interface {
-	GetMethodTags(c ServerContext, method string) ([]interface{}, error)
-}
-
-// getMethodTags extracts any tags associated with obj.method
-func getMethodTags(obj interface{}, method string) []interface{} {
-	if tagger, _ := obj.(serverGetMethodTags); tagger != nil {
-		tags, _ := tagger.GetMethodTags(nil, method)
-		return tags
-	}
-	return nil
+	return reflectInvoker{reflect.ValueOf(obj), info.methods, info.sig}
 }
 
 // Prepare implements the Invoker.Prepare method.
 func (ri reflectInvoker) Prepare(method string, _ int) ([]interface{}, []interface{}, error) {
 	info, ok := ri.methods[method]
 	if !ok {
-		return nil, nil, verror.NoExistf("ipc: unknown method '%s'", method)
+		return nil, nil, verror.NoExistf("ipc: unknown method %q", method)
 	}
-	// Return the memoized tags and new in-arg objects.
+	// Return the tags and new in-arg objects.
 	var argptrs []interface{}
 	if len(info.rtInArgs) > 0 {
 		argptrs = make([]interface{}, len(info.rtInArgs))
@@ -98,7 +171,7 @@ func (ri reflectInvoker) Prepare(method string, _ int) ([]interface{}, []interfa
 func (ri reflectInvoker) Invoke(method string, call ServerCall, argptrs []interface{}) ([]interface{}, error) {
 	info, ok := ri.methods[method]
 	if !ok {
-		return nil, verror.NoExistf("ipc: unknown method '%s'", method)
+		return nil, verror.NoExistf("ipc: unknown method %q", method)
 	}
 	// Create the reflect.Value args for the invocation.  The receiver of the
 	// method is always first, followed by the required context arg.
@@ -132,68 +205,127 @@ func (ri reflectInvoker) Invoke(method string, call ServerCall, argptrs []interf
 	return results, nil
 }
 
-// VGlob returns GlobState for the object, e.g. whether and how it implements
-// the Glob interface.
+// Signature implements the Invoker.Signature method.
+func (ri reflectInvoker) Signature(ctx ServerContext) ([]InterfaceSig, error) {
+	return ri.sig, nil
+}
+
+// MethodSignature implements the Invoker.MethodSignature method.
+func (ri reflectInvoker) MethodSignature(ctx ServerContext, method string) (MethodSig, error) {
+	// Return the first method in any interface with the given method name.
+	for _, iface := range ri.sig {
+		if msig, ok := iface.FindMethod(method); ok {
+			return msig, nil
+		}
+	}
+	return MethodSig{}, verror.NoExistf("ipc: unknown method %q", method)
+}
+
+// VGlob implements the Invoker.VGlobber interface.
 func (ri reflectInvoker) VGlob() *GlobState {
-	return ri.gs
+	return determineGlobState(ri.rcvr.Interface())
 }
 
-// We memoize the results of makeMethods in a registry, to avoid expensive
-// reflection calls.  There is no GC; the total set of types in a single address
-// space is expected to be bounded and small.
-var (
-	methodsRegistry   map[reflect.Type]map[string]methodInfo
-	methodsRegistryMu sync.RWMutex
-)
-
-func init() {
-	methodsRegistry = make(map[reflect.Type]map[string]methodInfo)
+// reflectRegistry is a locked map from reflect.Type to reflection info, which
+// is expensive to compute.  The only instance is reflectCache, which is a
+// global cache to speed up repeated lookups.  There is no GC; the total set of
+// types in a single address space is expected to be bounded and small.
+type reflectRegistry struct {
+	sync.RWMutex
+	infoMap map[reflect.Type]*reflectInfo
 }
 
-func getMethods(rt reflect.Type) map[string]methodInfo {
-	methodsRegistryMu.RLock()
-	exist, ok := methodsRegistry[rt]
-	methodsRegistryMu.RUnlock()
-	if ok {
-		// Return previously memoized result.
-		return exist
+type reflectInfo struct {
+	methods map[string]methodInfo
+	sig     []InterfaceSig
+}
+
+func (reg reflectRegistry) lookup(rt reflect.Type) *reflectInfo {
+	reg.RLock()
+	info := reg.infoMap[rt]
+	reg.RUnlock()
+	return info
+}
+
+// set the entry for (rt, info).  Is a no-op if rt already exists in the map.
+func (reg reflectRegistry) set(rt reflect.Type, info *reflectInfo) {
+	reg.Lock()
+	if exist := reg.infoMap[rt]; exist == nil {
+		reg.infoMap[rt] = info
 	}
-	// There is a race here; if getMethods is called concurrently, multiple
-	// goroutines may each make their own method map.  This is wasted work, but
-	// still correct - each newly created method map is identical.
-	methods := makeMethods(rt)
-	methodsRegistryMu.Lock()
-	if exist, ok := methodsRegistry[rt]; ok {
-		methodsRegistryMu.Unlock()
-		return exist
-	}
-	methodsRegistry[rt] = methods
-	methodsRegistryMu.Unlock()
-	return methods
+	reg.Unlock()
 }
 
-func makeMethods(rt reflect.Type) map[string]methodInfo {
-	methods := make(map[string]methodInfo, rt.NumMethod())
+var reflectCache = reflectRegistry{infoMap: make(map[reflect.Type]*reflectInfo)}
+
+// newReflectInfo returns reflection information that is expensive to compute.
+// Although it is passed an object rather than a type, it guarantees that the
+// returned information is always the same for all instances of a given type.
+func newReflectInfo(obj interface{}) *reflectInfo {
+	if obj == nil {
+		panic(fmt.Errorf("ipc: ReflectInvoker(nil) is invalid"))
+	}
+	// First make methodInfos, based on reflect.Type, which also captures the name
+	// and in, out and streaming types of each method in methodSigs.  This
+	// information is guaranteed to be correct, since it's based on reflection on
+	// the underlying object.
+	rt := reflect.TypeOf(obj)
+	methodInfos, methodSigs := makeMethods(rt)
+	if len(methodInfos) == 0 && determineGlobState(obj) == nil {
+		panic(fmt.Errorf("ipc: type %v has no compatible methods: %q", rt, TypeCheckMethods(obj)))
+	}
+	// Now attach method tags to each methodInfo.  Since this is based on the desc
+	// provided by the user, there's no guarantee it's "correct", but if the same
+	// method is described by multiple interfaces, we check the tags are the same.
+	desc := describe(obj)
+	if verr := attachMethodTags(methodInfos, desc); verror.Is(verr, verror.Aborted) {
+		panic(fmt.Errorf("ipc: type %v tag error: %v", rt, verr))
+	}
+	// Finally create the signature.  This combines the desc provided by the user
+	// with the methodSigs computed via reflection.  We ensure that the method
+	// names and types computed via reflection always remains in the final sig;
+	// the desc is merely used to augment the signature.
+	sig := makeSig(desc, methodSigs)
+	return &reflectInfo{methodInfos, sig}
+}
+
+// determineGlobState determines whether and how obj implements Glob.  Returns
+// nil iff obj doesn't implement Glob, based solely on the type of obj.
+func determineGlobState(obj interface{}) *GlobState {
+	if x, ok := obj.(VGlobber); ok {
+		return x.VGlob()
+	}
+	return NewGlobState(obj)
+}
+
+func describe(obj interface{}) []InterfaceDesc {
+	if d, ok := obj.(Describer); ok {
+		// Describe__ must not vary across instances of the same underlying type.
+		return d.Describe__()
+	}
+	return nil
+}
+
+func makeMethods(rt reflect.Type) (map[string]methodInfo, map[string]MethodSig) {
+	infos := make(map[string]methodInfo, rt.NumMethod())
+	sigs := make(map[string]MethodSig, rt.NumMethod())
 	for mx := 0; mx < rt.NumMethod(); mx++ {
 		method := rt.Method(mx)
 		// Silently skip incompatible methods, except for Aborted errors.
-		info, verr := makeMethodInfo(method)
-		if verr != nil {
+		var sig MethodSig
+		if verr := typeCheckMethod(method, &sig); verr != nil {
 			if verror.Is(verr, verror.Aborted) {
-				panic(fmt.Errorf("%s.%s: %v", rt.String(), method.Name, verr))
+				panic(fmt.Errorf("ipc: %s.%s: %v", rt.String(), method.Name, verr))
 			}
 			continue
 		}
-		methods[method.Name] = info
+		infos[method.Name] = makeMethodInfo(method)
+		sigs[method.Name] = sig
 	}
-	return methods
+	return infos, sigs
 }
 
-// makeMethodInfo makes a methodInfo from a method type.
-func makeMethodInfo(method reflect.Method) (methodInfo, verror.E) {
-	if verr := typeCheckMethod(method); verr != nil {
-		return methodInfo{}, verr
-	}
+func makeMethodInfo(method reflect.Method) methodInfo {
 	info := methodInfo{rvFunc: method.Func}
 	mtype := method.Type
 	for ix := 2; ix < mtype.NumIn(); ix++ { // Skip receiver and context
@@ -207,28 +339,29 @@ func makeMethodInfo(method reflect.Method) (methodInfo, verror.E) {
 		mInit, _ := in1.MethodByName("Init")
 		info.rvStreamCtxInit = mInit.Func
 	}
-	return info, nil
+	return info
 }
 
 var (
-	rtServerCall     = reflect.TypeOf((*ServerCall)(nil)).Elem()
-	rtServerContext  = reflect.TypeOf((*ServerContext)(nil)).Elem()
-	rtBool           = reflect.TypeOf(bool(false))
-	rtError          = reflect.TypeOf((*error)(nil)).Elem()
-	rtSliceOfString  = reflect.TypeOf([]string{})
-	rtPtrToGlobState = reflect.TypeOf((*GlobState)(nil))
+	rtServerCall           = reflect.TypeOf((*ServerCall)(nil)).Elem()
+	rtServerContext        = reflect.TypeOf((*ServerContext)(nil)).Elem()
+	rtBool                 = reflect.TypeOf(bool(false))
+	rtError                = reflect.TypeOf((*error)(nil)).Elem()
+	rtSliceOfString        = reflect.TypeOf([]string{})
+	rtPtrToGlobState       = reflect.TypeOf((*GlobState)(nil))
+	rtSliceOfInterfaceDesc = reflect.TypeOf([]InterfaceDesc{})
 
 	// ReflectInvoker will panic iff the error is Aborted, otherwise it will
 	// silently ignore the error.
 	ErrReservedMethod    = verror.Internalf("Reserved method")
 	ErrMethodNotExported = verror.BadArgf("Method not exported")
 	ErrNonRPCMethod      = verror.BadArgf("Non-rpc method.  We require at least 1 in-arg." + useContext)
-	ErrInServerCall      = verror.Abortedf("First in-arg ipc.ServerCall is invalid; cannot determine streaming types." + forgotWrap)
+	ErrInServerCall      = verror.Abortedf("Context arg ipc.ServerCall is invalid; cannot determine streaming types." + forgotWrap)
 	ErrBadVGlob          = verror.Abortedf("VGlob must have signature VGlob() *ipc.GlobState")
 	ErrBadVGlobChildren  = verror.Abortedf("VGlobChildren must have signature VGlobChildren() ([]string, error)")
 )
 
-func typeCheckMethod(method reflect.Method) verror.E {
+func typeCheckMethod(method reflect.Method, sig *MethodSig) verror.E {
 	if verr := typeCheckReservedMethod(method); verr != nil {
 		return verr
 	}
@@ -236,6 +369,7 @@ func typeCheckMethod(method reflect.Method) verror.E {
 	if method.PkgPath != "" {
 		return ErrMethodNotExported
 	}
+	sig.Name = method.Name
 	mtype := method.Type
 	// Method must have at least 2 in args (receiver, context).
 	if in := mtype.NumIn(); in < 2 {
@@ -243,10 +377,12 @@ func typeCheckMethod(method reflect.Method) verror.E {
 	}
 	switch in1 := mtype.In(1); {
 	case in1 == rtServerCall:
-		// If the first context arg is ipc.ServerCall, there's no way for us to
-		// figure out whether the method performs streaming, or what the stream
-		// types are.
-		//
+		// If the first context arg is ipc.ServerCall, we do not know whether the
+		// method performs streaming, or what the stream types are.
+		sig.InStreamHACK.Type = vdl.AnyType
+		sig.OutStreamHACK.Type = vdl.AnyType
+		sig.HasInStreamHACK = true
+		sig.HasOutStreamHACK = true
 		// We can either disallow ipc.ServerCall, at the expense of more boilerplate
 		// for users that don't use the VDL but want to perform streaming.  Or we
 		// can allow it, but won't be able to determine whether the server uses the
@@ -258,18 +394,24 @@ func typeCheckMethod(method reflect.Method) verror.E {
 		// Non-streaming method.
 	case in1.Implements(rtServerContext):
 		// Streaming method, validate context argument.
-		if verr := typeCheckStreamingContext(in1); verr != nil {
+		if verr := typeCheckStreamingContext(in1, sig); verr != nil {
 			return verr
 		}
 	default:
 		return ErrNonRPCMethod
 	}
-	// TODO(toddw): Ensure all arg types are valid VDL types.
-	return nil
+	return typeCheckMethodArgs(mtype, sig)
 }
 
 func typeCheckReservedMethod(method reflect.Method) verror.E {
 	switch method.Name {
+	case "Describe__":
+		// Describe__() []InterfaceDesc
+		if t := method.Type; t.NumIn() != 1 || t.NumOut() != 1 ||
+			t.Out(0) != rtSliceOfInterfaceDesc {
+			return ErrBadVGlob
+		}
+		return ErrReservedMethod
 	case "VGlob":
 		// VGlob() *GlobState
 		if t := method.Type; t.NumIn() != 1 || t.NumOut() != 1 ||
@@ -288,24 +430,24 @@ func typeCheckReservedMethod(method reflect.Method) verror.E {
 	return nil
 }
 
-func typeCheckStreamingContext(ctx reflect.Type) verror.E {
+func typeCheckStreamingContext(ctx reflect.Type, sig *MethodSig) verror.E {
 	// The context must be a pointer to a struct.
 	if ctx.Kind() != reflect.Ptr || ctx.Elem().Kind() != reflect.Struct {
-		return verror.Abortedf("First in-arg %s is invalid streaming context; must be pointer to a struct representing the typesafe streaming context."+forgotWrap, ctx)
+		return verror.Abortedf("Context arg %s is invalid streaming context; must be pointer to a struct representing the typesafe streaming context."+forgotWrap, ctx)
 	}
 	// Must have Init(ipc.ServerCall) method.
 	mInit, hasInit := ctx.MethodByName("Init")
 	if !hasInit {
-		return verror.Abortedf("First in-arg %s is invalid streaming context; must have Init method."+forgotWrap, ctx)
+		return verror.Abortedf("Context arg %s is invalid streaming context; must have Init method."+forgotWrap, ctx)
 	}
 	if t := mInit.Type; t.NumIn() != 2 || t.In(0).Kind() != reflect.Ptr || t.In(1) != rtServerCall || t.NumOut() != 0 {
-		return verror.Abortedf("First in-arg %s is invalid streaming context; Init must have signature func (*) Init(ipc.ServerCall)."+forgotWrap, ctx)
+		return verror.Abortedf("Context arg %s is invalid streaming context; Init must have signature func (*) Init(ipc.ServerCall)."+forgotWrap, ctx)
 	}
-	// Must have either RecvStream or SendStream method.
+	// Must have either RecvStream or SendStream method, or both.
 	mRecvStream, hasRecvStream := ctx.MethodByName("RecvStream")
 	mSendStream, hasSendStream := ctx.MethodByName("SendStream")
 	if !hasRecvStream && !hasSendStream {
-		return verror.Abortedf("First in-arg %s is invalid streaming context; must have at least one of RecvStream or SendStream methods."+forgotWrap, ctx)
+		return verror.Abortedf("Context arg %s is invalid streaming context; must have at least one of RecvStream or SendStream methods."+forgotWrap, ctx)
 	}
 	if hasRecvStream {
 		// func (*) RecvStream() interface{ Advance() bool; Value() _; Err() error }
@@ -317,12 +459,18 @@ func typeCheckStreamingContext(ctx reflect.Type) verror.E {
 		mA, hasA := tRecv.Out(0).MethodByName("Advance")
 		mV, hasV := tRecv.Out(0).MethodByName("Value")
 		mE, hasE := tRecv.Out(0).MethodByName("Err")
-		if tA, tV, tE := mA.Type, mV.Type, mE.Type; !hasA || !hasV || !hasE ||
+		tA, tV, tE := mA.Type, mV.Type, mE.Type
+		if !hasA || !hasV || !hasE ||
 			tA.NumIn() != 0 || tA.NumOut() != 1 || tA.Out(0) != rtBool ||
-			tV.NumIn() != 0 || tV.NumOut() != 1 || // tV.Out(0) is out-stream type
+			tV.NumIn() != 0 || tV.NumOut() != 1 || // tV.Out(0) is in-stream type
 			tE.NumIn() != 0 || tE.NumOut() != 1 || tE.Out(0) != rtError {
 			return errRecvStream(ctx)
 		}
+		var err error
+		if sig.InStreamHACK.Type, err = vdl.TypeFromReflect(tV.Out(0)); err != nil {
+			return verror.Abortedf("Invalid in-stream type: %v", err)
+		}
+		sig.HasInStreamHACK = true
 	}
 	if hasSendStream {
 		// func (*) SendStream() interface{ Send(_) error }
@@ -332,11 +480,17 @@ func typeCheckStreamingContext(ctx reflect.Type) verror.E {
 			return errSendStream(ctx)
 		}
 		mS, hasS := tSend.Out(0).MethodByName("Send")
-		if tS := mS.Type; !hasS ||
-			tS.NumIn() != 1 || // tS.In(0) is in-stream type
+		tS := mS.Type
+		if !hasS ||
+			tS.NumIn() != 1 || // tS.In(0) is out-stream type
 			tS.NumOut() != 1 || tS.Out(0) != rtError {
 			return errSendStream(ctx)
 		}
+		var err error
+		if sig.OutStreamHACK.Type, err = vdl.TypeFromReflect(tS.In(0)); err != nil {
+			return verror.Abortedf("Invalid out-stream type: %v", err)
+		}
+		sig.HasOutStreamHACK = true
 	}
 	return nil
 }
@@ -347,11 +501,167 @@ const (
 )
 
 func errRecvStream(rt reflect.Type) verror.E {
-	return verror.Abortedf("First in-arg %s is invalid streaming context; RecvStream must have signature func (*) RecvStream() interface{ Advance() bool; Value() _; Err() error }."+forgotWrap, rt)
+	return verror.Abortedf("Context arg %s is invalid streaming context; RecvStream must have signature func (*) RecvStream() interface{ Advance() bool; Value() _; Err() error }."+forgotWrap, rt)
 }
 
 func errSendStream(rt reflect.Type) verror.E {
-	return verror.Abortedf("First in-arg %s is invalid streaming context; SendStream must have signature func (*) SendStream() interface{ Send(_) error }."+forgotWrap, rt)
+	return verror.Abortedf("Context arg %s is invalid streaming context; SendStream must have signature func (*) SendStream() interface{ Send(_) error }."+forgotWrap, rt)
+}
+
+func typeCheckMethodArgs(mtype reflect.Type, sig *MethodSig) verror.E {
+	// Start in-args from 2 to skip receiver and context arguments.
+	for index := 2; index < mtype.NumIn(); index++ {
+		vdlType, err := vdl.TypeFromReflect(mtype.In(index))
+		if err != nil {
+			return verror.Abortedf("Invalid in-arg %d type: %v", index-2, err)
+		}
+		(*sig).InArgs = append((*sig).InArgs, ArgSig{Type: vdlType})
+	}
+	for index := 0; index < mtype.NumOut(); index++ {
+		vdlType, err := vdl.TypeFromReflect(mtype.Out(index))
+		if err != nil {
+			return verror.Abortedf("Invalid out-arg %d type: %v", index, err)
+		}
+		(*sig).OutArgs = append((*sig).OutArgs, ArgSig{Type: vdlType})
+	}
+	return nil
+}
+
+func makeSig(desc []InterfaceDesc, methods map[string]MethodSig) []InterfaceSig {
+	var sig []InterfaceSig
+	used := make(map[string]bool, len(methods))
+	// Loop through the user-provided desc, attaching descriptions to the actual
+	// method types to create our final signatures.  Ignore user-provided
+	// descriptions of interfaces or methods that don't exist.
+	for _, descIface := range desc {
+		var sigMethods []MethodSig
+		for _, descMethod := range descIface.Methods {
+			sigMethod, ok := methods[descMethod.Name]
+			if ok {
+				// The method name and all types are already populated in sigMethod;
+				// fill in the rest of the description.
+				sigMethod.Doc = descMethod.Doc
+				sigMethod.InArgs = makeArgSigs(sigMethod.InArgs, descMethod.InArgs)
+				sigMethod.OutArgs = makeArgSigs(sigMethod.OutArgs, descMethod.OutArgs)
+				sigMethod.InStreamHACK = makeArgSig(sigMethod.InStreamHACK, descMethod.InStream)
+				sigMethod.OutStreamHACK = makeArgSig(sigMethod.OutStreamHACK, descMethod.OutStream)
+				if sigMethod.InStreamHACK.Type != nil {
+					sigMethod.HasInStreamHACK = true
+				}
+				if sigMethod.OutStreamHACK.Type != nil {
+					sigMethod.HasOutStreamHACK = true
+				}
+				sigMethod.Tags = descMethod.Tags
+				sigMethods = append(sigMethods, sigMethod)
+				used[sigMethod.Name] = true
+			}
+		}
+		if len(sigMethods) > 0 {
+			sort.Sort(OrderByMethodName(sigMethods))
+			sigIface := InterfaceSig{
+				Name:    descIface.Name,
+				PkgPath: descIface.PkgPath,
+				Doc:     descIface.Doc,
+				Methods: sigMethods,
+			}
+			for _, descEmbed := range descIface.Embeds {
+				sigEmbed := EmbedSig{
+					Name:    descEmbed.Name,
+					PkgPath: descEmbed.PkgPath,
+					Doc:     descEmbed.Doc,
+				}
+				sigIface.Embeds = append(sigIface.Embeds, sigEmbed)
+			}
+			sig = append(sig, sigIface)
+		}
+	}
+	// Add all unused methods into the catch-all empty interface.
+	var unusedMethods []MethodSig
+	for _, method := range methods {
+		if !used[method.Name] {
+			unusedMethods = append(unusedMethods, method)
+		}
+	}
+	if len(unusedMethods) > 0 {
+		const unusedDoc = "The empty interface contains methods not attached to any interface."
+		sort.Sort(OrderByMethodName(unusedMethods))
+		sig = append(sig, InterfaceSig{Doc: unusedDoc, Methods: unusedMethods})
+	}
+	return sig
+}
+
+func makeArgSigs(sigs []ArgSig, descs []ArgDesc) []ArgSig {
+	result := make([]ArgSig, len(sigs))
+	for index, sig := range sigs {
+		if index < len(descs) {
+			sig = makeArgSig(sig, descs[index])
+		}
+		result[index] = sig
+	}
+	return result
+}
+
+func makeArgSig(sig ArgSig, desc ArgDesc) ArgSig {
+	sig.Name = desc.Name
+	sig.Doc = desc.Doc
+	return sig
+}
+
+// convertTags tries to convert each tag into a vdl.Value, to capture any
+// conversion error.  Returns a single vdl.Value containing a slice of the tag
+// values, to make it easy to perform equality-comparison of lists of tags.
+func convertTags(tags []vdlutil.Any) (*vdl.Value, verror.E) {
+	result := vdl.ZeroValue(vdl.ListType(vdl.AnyType)).AssignLen(len(tags))
+	for index, tag := range tags {
+		if err := valconv.Convert(result.Index(index), tag); err != nil {
+			return nil, verror.Abortedf("invalid tag %d: %v", index, err)
+		}
+	}
+	return result, nil
+}
+
+// extractTagsForMethod returns the tags associated with the given method name.
+// If the desc lists the same method under multiple interfaces, we require all
+// versions to have an identical list of tags.
+func extractTagsForMethod(desc []InterfaceDesc, name string) ([]vdlutil.Any, verror.E) {
+	var first *vdl.Value
+	var tags []vdlutil.Any
+	for _, descIface := range desc {
+		for _, descMethod := range descIface.Methods {
+			if name == descMethod.Name {
+				switch vdlTags, verr := convertTags(descMethod.Tags); {
+				case verr != nil:
+					return nil, verr
+				case first == nil:
+					first = vdlTags
+					tags = descMethod.Tags
+				case !vdl.EqualValue(first, vdlTags):
+					return nil, verror.Abortedf("different tags %q and %q", first, vdlTags)
+				}
+			}
+		}
+	}
+	return tags, nil
+}
+
+// attachMethodTags sets methodInfo.tags to the tags that will be returned in
+// Prepare.  This also performs type checking on the tags.
+func attachMethodTags(infos map[string]methodInfo, desc []InterfaceDesc) verror.E {
+	for name, info := range infos {
+		tags, verr := extractTagsForMethod(desc, name)
+		if verr != nil {
+			return verror.Abortedf("method %q: %v", name, verr)
+		}
+		// TODO(toddw): Change tags to []vdlutil.Any and remove this conversion.
+		if len(tags) > 0 {
+			info.tags = make([]interface{}, len(tags))
+			for index, tag := range tags {
+				info.tags[index] = tag
+			}
+			infos[name] = info
+		}
+	}
+	return nil
 }
 
 // TypeCheckMethods type checks each method in obj, and returns a map from
@@ -363,13 +673,18 @@ func errSendStream(rt reflect.Type) verror.E {
 // This is useful for debugging why a particular method isn't available via
 // ReflectInvoker.
 func TypeCheckMethods(obj interface{}) map[string]error {
-	rt := reflect.TypeOf(obj)
+	rt, desc := reflect.TypeOf(obj), describe(obj)
 	var check map[string]error
 	if rt != nil && rt.NumMethod() > 0 {
 		check = make(map[string]error, rt.NumMethod())
 		for mx := 0; mx < rt.NumMethod(); mx++ {
 			method := rt.Method(mx)
-			check[method.Name] = typeCheckMethod(method)
+			var sig MethodSig
+			verr := typeCheckMethod(method, &sig)
+			if verr == nil {
+				_, verr = extractTagsForMethod(desc, method.Name)
+			}
+			check[method.Name] = verr
 		}
 	}
 	return check

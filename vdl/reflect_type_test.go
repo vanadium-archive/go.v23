@@ -131,18 +131,21 @@ var rtKeyTests = []rtTest{
 var rtNonKeyTests = []rtTest{
 	// Unnamed scalars
 	{reflect.TypeOf((*interface{})(nil)).Elem(), AnyType},
+	{reflect.TypeOf((*error)(nil)).Elem(), ErrorType},
 	{reflect.TypeOf((*Type)(nil)), TypeObjectType},
-	// Named scalars
+	// Named scalars (we cannot detect the error type if it is named)
 	{reflect.TypeOf((*nInterface)(nil)).Elem(), AnyType},
 	{reflect.TypeOf(nType(nil)), TypeObjectType},
 	// Unnamed arrays
 	{reflect.TypeOf([3]interface{}{}), ArrayType(3, AnyType)},
+	{reflect.TypeOf([3]error{}), ArrayType(3, ErrorType)},
 	{reflect.TypeOf([3]*Type{}), ArrayType(3, TypeObjectType)},
 	// Named arrays
 	{reflect.TypeOf(nArray3Interface{}), rtNArray("Interface", AnyType)},
 	{reflect.TypeOf(nArray3TypeObject{}), rtNArray("TypeObject", TypeObjectType)},
 	// Unnamed structs
 	{reflect.TypeOf(struct{ X interface{} }{}), StructType(StructField{"X", AnyType})},
+	{reflect.TypeOf(struct{ X error }{}), StructType(StructField{"X", ErrorType})},
 	{reflect.TypeOf(struct{ X *Type }{}), StructType(StructField{"X", TypeObjectType})},
 	// Named structs
 	{reflect.TypeOf(nStructInterface{}), rtNStruct("Interface", AnyType)},
@@ -151,6 +154,7 @@ var rtNonKeyTests = []rtTest{
 	{reflect.TypeOf(nOneOf{}), rtN("OneOf", OneOfType(BoolType, StringType, Int64Type))},
 	// Unnamed slices
 	{reflect.TypeOf([]interface{}{}), ListType(AnyType)},
+	{reflect.TypeOf([]error{}), ListType(ErrorType)},
 	{reflect.TypeOf([]*Type{}), ListType(TypeObjectType)},
 	{reflect.TypeOf([]bool{}), ListType(BoolType)},
 	{reflect.TypeOf([]uint8{}), ListType(ByteType)},
@@ -339,8 +343,8 @@ func allTests() []rtTest {
 	copy(tests[n:], rtNonKeyTests)
 	// Add all types we can generate via reflect; no arrays and structs.
 	for _, test := range rtKeyTests {
-		switch test.t.Kind() {
-		case Any, TypeObject, Nilable:
+		switch k := test.t.Kind(); {
+		case k == Any || k == TypeObject || k == Nilable || test.t == ErrorType:
 			tests = append(tests, rtTest{reflect.PtrTo(test.rt), test.t})
 		default:
 			tests = append(tests, rtTest{reflect.PtrTo(test.rt), NilableType(test.t)})
@@ -350,8 +354,8 @@ func allTests() []rtTest {
 	}
 	// Now generate types from everything we have so far, for more complicated subtypes.
 	for _, test := range tests {
-		switch test.t.Kind() {
-		case Any, TypeObject, Nilable:
+		switch k := test.t.Kind(); {
+		case k == Any || k == TypeObject || k == Nilable || test.t == ErrorType:
 			tests = append(tests, rtTest{reflect.PtrTo(test.rt), test.t})
 		default:
 			tests = append(tests, rtTest{reflect.PtrTo(test.rt), NilableType(test.t)})

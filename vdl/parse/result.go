@@ -3,6 +3,8 @@ package parse
 import (
 	"fmt"
 	"path"
+	"strconv"
+	"strings"
 
 	"veyron.io/veyron/veyron2/vdl/vdlutil"
 )
@@ -145,3 +147,18 @@ func (x *Interface) String() string { return fmt.Sprintf("%+v", *x) }
 func (x *Method) String() string    { return fmt.Sprintf("%+v", *x) }
 func (x *Field) String() string     { return fmt.Sprintf("%+v", *x) }
 func (x *NamePos) String() string   { return fmt.Sprintf("%+v", *x) }
+
+// QuoteStripDoc takes a Doc string, which includes comment markers /**/ and
+// double-slash, and returns a raw-quoted string.
+//
+// TODO(toddw): This should remove comment markers.  This is non-trivial, since
+// we should handle removing leading whitespace "rectangles", and might want to
+// retain inline /**/ or adjacent /**/ on the same line.  For now we just leave
+// them in the output.
+func QuoteStripDoc(doc string) string {
+	trimmed := strings.Trim(doc, "\n")
+	if strconv.CanBackquote(doc) {
+		return "`" + trimmed + "`"
+	}
+	return strconv.Quote(trimmed)
+}
