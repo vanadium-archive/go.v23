@@ -102,15 +102,19 @@ func addToRoots(t *testing.T, p Principal, b Blessings) {
 func checkBlessings(b Blessings, c Context, want ...string) error {
 	// Validate the integrity of the bits.
 	buf := new(bytes.Buffer)
-	if err := vom.NewEncoder(buf).Encode(b); err != nil {
+	if err := vom.NewEncoder(buf).Encode(MarshalBlessings(b)); err != nil {
 		return err
 	}
-	var decoded Blessings
-	if err := vom.NewDecoder(buf).Decode(&decoded); err != nil {
+	var wire WireBlessings
+	if err := vom.NewDecoder(buf).Decode(&wire); err != nil {
+		return err
+	}
+	decoded, err := NewBlessings(wire)
+	if err != nil {
 		return err
 	}
 	if !reflect.DeepEqual(decoded, b) {
-		return fmt.Errorf("reflect.DeepEqual(%v, %v) failed after validBlessing", decoded, b)
+		return fmt.Errorf("reflect.DeepEqual(%v, %v) failed after roundtripping", decoded, b)
 	}
 	// And now check them under the right context
 	got := b.ForContext(c)

@@ -60,46 +60,6 @@ func (b *blessingsImpl) String() string {
 	return strings.Join(blessings, "#")
 }
 
-// TODO(toddw,ashankar): See comment for VomDecode
-func (b *blessingsImpl) VomEncode() (WireBlessings, error) {
-	return WireBlessings{b.chains}, nil
-}
-
-// TODO(toddw,ashankar): When vom2 and config file support for VDL is
-// in place, then get rid of VomEncode and VomDecode from here and instead
-// in the config file for types.vdl specify a factory function that will
-// convert between the "wire" type and the "in-memory"
-// type (Blessings=blessingsImpl) via factory functions that will do the
-// integrity checks.
-func (b *blessingsImpl) VomDecode(wire WireBlessings) error {
-	certchains := wire.CertificateChains
-	if len(certchains) == 0 || len(certchains[0]) == 0 {
-		return errEmptyChain
-	}
-	// Public keys should match for all chains.
-	marshaledkey := certchains[0][len(certchains[0])-1].PublicKey
-	key, err := validateCertificateChain(certchains[0])
-	if err != nil {
-		return err
-	}
-	for i := 1; i < len(certchains); i++ {
-		chain := certchains[i]
-		if len(chain) == 0 {
-			return errEmptyChain
-		}
-		cert := chain[len(chain)-1]
-		if !bytes.Equal(marshaledkey, cert.PublicKey) {
-			return errors.New("invalid blessings: two certificate chains that bind to different public keys")
-		}
-		if _, err := validateCertificateChain(chain); err != nil {
-			return err
-		}
-	}
-	b.chains = certchains
-	b.publicKey = key
-	return nil
-}
-
 func validateCertificateChain(chain []Certificate) (PublicKey, error) {
 	parent := &Signature{}
 	key, err := UnmarshalPublicKey(chain[0].PublicKey)
@@ -169,9 +129,31 @@ func NewBlessings(wire WireBlessings) (Blessings, error) {
 		return nil, nil
 	}
 	var b blessingsImpl
-	if err := b.VomDecode(wire); err != nil {
+	certchains := wire.CertificateChains
+	if len(certchains) == 0 || len(certchains[0]) == 0 {
+		return nil, errEmptyChain
+	}
+	// Public keys should match for all chains.
+	marshaledkey := certchains[0][len(certchains[0])-1].PublicKey
+	key, err := validateCertificateChain(certchains[0])
+	if err != nil {
 		return nil, err
 	}
+	for i := 1; i < len(certchains); i++ {
+		chain := certchains[i]
+		if len(chain) == 0 {
+			return nil, errEmptyChain
+		}
+		cert := chain[len(chain)-1]
+		if !bytes.Equal(marshaledkey, cert.PublicKey) {
+			return nil, errors.New("invalid blessings: two certificate chains that bind to different public keys")
+		}
+		if _, err := validateCertificateChain(chain); err != nil {
+			return nil, err
+		}
+	}
+	b.chains = certchains
+	b.publicKey = key
 	return &b, nil
 }
 

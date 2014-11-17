@@ -154,6 +154,11 @@ type Caveat struct {
 // provide a factory function that converts this wire representation to
 // a more usable object to inspect and manipulate these blessings. For
 // example, the NewBlessings factory function in Go.
+// TODO(toddw,ashankar): When vom2 and config file support for VDL is
+// in place, then in the config file for types.vdl specify a factory function
+// that will convert between the "wire" type and the "in-memory"
+// type (Blessings=blessingsImpl) via factory functions that will do the
+// integrity checks.
 type WireBlessings struct {
 	// CertificateChains is an array of chains of certificates that bind
 	// a blessing to the public key in the last certificate of the chain.
