@@ -281,7 +281,7 @@ func addValueTypeDeps(v *vdl.Value, pkg *Package, env *Env, tdeps map[*vdl.Type]
 		for ix := 0; ix < t.NumField(); ix++ {
 			addValueTypeDeps(v.Field(ix), pkg, env, tdeps, pdeps)
 		}
-	case vdl.Any, vdl.OneOf, vdl.Nilable:
+	case vdl.Any, vdl.OneOf, vdl.Optional:
 		if elem := v.Elem(); elem != nil {
 			addValueTypeDeps(elem, pkg, env, tdeps, pdeps)
 		}

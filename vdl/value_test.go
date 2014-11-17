@@ -167,11 +167,11 @@ func TestValue(t *testing.T) {
 			t.Errorf(`%s Equal after Assign(x), y: %v, z: %v`, test.k, y, z)
 		}
 
-		// Test nilable types
+		// Test optional types
 		if test.k == Any {
 			continue
 		}
-		ntype := NilableType(test.t)
+		ntype := OptionalType(test.t)
 
 		// nx == nil
 		nx := ZeroValue(ntype)
@@ -184,7 +184,7 @@ func TestValue(t *testing.T) {
 		if !nx.IsNil() {
 			t.Errorf(`ZeroValue(?%s) isn't nil`, test.k)
 		}
-		if got, want := nx.Kind(), Nilable; got != want {
+		if got, want := nx.Kind(), Optional; got != want {
 			t.Errorf(`ZeroValue(?%s) got kind %v, want %v`, test.k, got, want)
 		}
 		if got, want := nx.Type(), ntype; got != want {
@@ -204,7 +204,7 @@ func TestValue(t *testing.T) {
 		if ny.IsNil() {
 			t.Errorf(`NonNilZeroValue(?%s) is nil`, test.k)
 		}
-		if got, want := ny.Kind(), Nilable; got != want {
+		if got, want := ny.Kind(), Optional; got != want {
 			t.Errorf(`NonNilZeroValue(?%s) got kind %v, want %v`, test.k, got, want)
 		}
 		if got, want := ny.Type(), ntype; got != want {
@@ -857,7 +857,7 @@ func assignOneOf(t *testing.T, x *Value) {
 		if got, want := x.String(), `oneof{int64;string}(string("A"))`; got != want {
 			t.Errorf(`OneOf assign string got %v, want %v`, got, want)
 		}
-	} else if x.Kind() != Any && x.Kind() != Nilable {
+	} else if x.Kind() != Any && x.Kind() != Optional {
 		expectMismatchedKind(t, func() { x.Elem() })
 	}
 }
@@ -881,7 +881,7 @@ func assignAny(t *testing.T, x *Value) {
 		if got, want := x.String(), `any(string("A"))`; got != want {
 			t.Errorf(`Any assign string got %v, want %v`, got, want)
 		}
-	} else if x.Kind() != OneOf && x.Kind() != Nilable {
+	} else if x.Kind() != OneOf && x.Kind() != Optional {
 		expectMismatchedKind(t, func() { x.Elem() })
 	}
 }

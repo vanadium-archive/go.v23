@@ -119,7 +119,7 @@ var typeTests = []typeTest{
 	{"Map", tp{{"a", `type Res map[int32]string`, vdl.MapType(vdl.Int32Type, vdl.StringType), ""}}},
 	{"Struct", tp{{"a", `type Res struct{A int32;B string}`, vdl.StructType([]vdl.StructField{{"A", vdl.Int32Type}, {"B", vdl.StringType}}...), ""}}},
 	{"OneOf", tp{{"a", `type Res oneof{bool;int32;string}`, vdl.OneOfType(vdl.BoolType, vdl.Int32Type, vdl.StringType), ""}}},
-	{"Nilable", tp{{"a", `type Res oneof{bool;?int32;?string}`, vdl.OneOfType(vdl.BoolType, vdl.NilableType(vdl.Int32Type), vdl.NilableType(vdl.StringType)), exp}}},
+	{"Optional", tp{{"a", `type Res oneof{bool;?int32;?string}`, vdl.OneOfType(vdl.BoolType, vdl.OptionalType(vdl.Int32Type), vdl.OptionalType(vdl.StringType)), exp}}},
 
 	// Test named types based on named types.
 	{"NBool", tp{{"a", `type Res x;type x bool`, namedX(vdl.BoolType), ""}}},
@@ -143,7 +143,7 @@ var typeTests = []typeTest{
 	{"NMap", tp{{"a", `type Res x;type x map[int32]string`, namedX(vdl.MapType(vdl.Int32Type, vdl.StringType)), ""}}},
 	{"NStruct", tp{{"a", `type Res x;type x struct{A int32;B string}`, namedX(vdl.StructType([]vdl.StructField{{"A", vdl.Int32Type}, {"B", vdl.StringType}}...)), ""}}},
 	{"NOneOf", tp{{"a", `type Res x; type x oneof{bool;int32;string}`, namedX(vdl.OneOfType(vdl.BoolType, vdl.Int32Type, vdl.StringType)), ""}}},
-	{"NNilable", tp{{"a", `type Res x; type x oneof{bool;?int32;?string}`, namedX(vdl.OneOfType(vdl.BoolType, vdl.NilableType(vdl.Int32Type), vdl.NilableType(vdl.StringType))), exp}}},
+	{"NOptional", tp{{"a", `type Res x; type x oneof{bool;?int32;?string}`, namedX(vdl.OneOfType(vdl.BoolType, vdl.OptionalType(vdl.Int32Type), vdl.OptionalType(vdl.StringType))), exp}}},
 
 	// Test multi-package types
 	{"MultiPkgSameTypeName", tp{
@@ -171,5 +171,5 @@ var typeTests = []typeTest{
 	{"UnnamedEnum", tp{{"a", `type Res []enum{A;B;C}`, nil, "unnamed enum type invalid"}}},
 	{"UnnamedStruct", tp{{"a", `type Res []struct{A int32}`, nil, "unnamed struct type invalid"}}},
 	{"UnnamedOneOf", tp{{"a", `type Res []oneof{bool;int32;string}`, nil, "unnamed oneof type invalid"}}},
-	{"TopLevelNilable", tp{{"a", `type Res ?bool`, nil, "can't define type based on top-level nilable"}}},
+	{"TopLevelOptional", tp{{"a", `type Res ?bool`, nil, "can't define type based on top-level optional"}}},
 }

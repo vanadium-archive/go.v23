@@ -433,7 +433,7 @@ type foo oneof{
 					P:     pos(2, 10)}}}},
 		nil},
 	{
-		"TypeNilable",
+		"TypeOptional",
 		`package testpkg
 type foo oneof{A;?B;?C}`,
 		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
@@ -441,12 +441,12 @@ type foo oneof{A;?B;?C}`,
 				{NamePos: np("foo", 2, 6), Type: &parse.TypeOneOf{
 					Types: []parse.Type{
 						tn("A", 2, 16),
-						&parse.TypeNilable{Base: tn("B", 2, 19), P: pos(2, 18)},
-						&parse.TypeNilable{Base: tn("C", 2, 22), P: pos(2, 21)}},
+						&parse.TypeOptional{Base: tn("B", 2, 19), P: pos(2, 18)},
+						&parse.TypeOptional{Base: tn("C", 2, 22), P: pos(2, 21)}},
 					P: pos(2, 10)}}}},
 		nil},
 	{
-		"TypeNilableNewlines",
+		"TypeOptionalNewlines",
 		`package testpkg
 type foo oneof{
   A
@@ -458,8 +458,8 @@ type foo oneof{
 				{NamePos: np("foo", 2, 6), Type: &parse.TypeOneOf{
 					Types: []parse.Type{
 						tn("A", 3, 3),
-						&parse.TypeNilable{Base: tn("B", 4, 4), P: pos(4, 3)},
-						&parse.TypeNilable{Base: tn("C", 5, 4), P: pos(5, 3)}},
+						&parse.TypeOptional{Base: tn("B", 4, 4), P: pos(4, 3)},
+						&parse.TypeOptional{Base: tn("C", 5, 4), P: pos(5, 3)}},
 					P: pos(2, 10)}}}},
 		nil},
 	{

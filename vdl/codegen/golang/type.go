@@ -47,7 +47,7 @@ func typeGo(data goData, t *vdl.Type) string {
 	}
 	// Otherwise recurse through the type.
 	switch t.Kind() {
-	case vdl.Nilable:
+	case vdl.Optional:
 		return "*" + typeGo(data, t.Elem())
 	case vdl.Array:
 		return "[" + strconv.Itoa(t.Len()) + "]" + typeGo(data, t.Elem())

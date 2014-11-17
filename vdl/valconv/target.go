@@ -44,7 +44,7 @@ type Target interface {
 	// FromTypeObject converts from the src type to the target.
 	FromTypeObject(src *vdl.Type) error
 	// FromNil converts from a nil (nonexistent) value of type tt, where tt must
-	// be of kind Nilable or Any.
+	// be of kind Optional or Any.
 	FromNil(tt *vdl.Type) error
 
 	// StartList prepares conversion from a list or array of type tt, with the
@@ -157,7 +157,7 @@ func FromReflect(target Target, rv reflect.Value) error {
 		}
 		rt, rv = rt.Elem(), rv.Elem()
 	}
-	if tt.Kind() == vdl.Nilable {
+	if tt.Kind() == vdl.Optional {
 		tt = tt.Elem() // flatten tt to match rt and rv
 	}
 	// Recursive walk through the reflect value to fill in target.
@@ -305,7 +305,7 @@ func FromValue(target Target, vv *vdl.Value) error {
 		return target.FromBytes(vv.Bytes(), tt)
 	}
 	switch vv.Kind() {
-	case vdl.Any, vdl.Nilable:
+	case vdl.Any, vdl.Optional:
 		if vv.IsNil() {
 			return target.FromNil(tt)
 		}

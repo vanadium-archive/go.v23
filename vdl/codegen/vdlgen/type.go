@@ -29,7 +29,7 @@ func Type(t *vdl.Type, pkgPath string, imports codegen.Imports) (string, error) 
 	case vdl.Any, vdl.Bool, vdl.Byte, vdl.Uint16, vdl.Uint32, vdl.Uint64, vdl.Int16, vdl.Int32, vdl.Int64, vdl.Float32, vdl.Float64, vdl.Complex64, vdl.Complex128, vdl.String, vdl.TypeObject:
 		// Built-in types are named the same as their kind.
 		return t.Kind().String(), nil
-	case vdl.Nilable:
+	case vdl.Optional:
 		elem, err := Type(t.Elem(), pkgPath, imports)
 		if err != nil {
 			return "", err

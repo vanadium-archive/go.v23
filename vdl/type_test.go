@@ -121,7 +121,7 @@ func allTypes() (types []*Type) {
 			types = append(types, NamedType("Named"+test.s, test.t))
 		}
 		if test.k != Any {
-			types = append(types, NilableType(test.t))
+			types = append(types, OptionalType(test.t))
 		}
 	}
 	for _, test := range enums {
@@ -154,7 +154,7 @@ func TestTypeMismatch(t *testing.T) {
 		if k != Array {
 			expectMismatchedKind(t, func() { ty.Len() })
 		}
-		if k != Nilable && k != Array && k != List && k != Map {
+		if k != Optional && k != Array && k != List && k != Map {
 			expectMismatchedKind(t, func() { ty.Elem() })
 		}
 		if k != Set && k != Map {
@@ -194,25 +194,25 @@ func TestSingletonTypes(t *testing.T) {
 	}
 }
 
-func TestNilableTypes(t *testing.T) {
+func TestOptionalTypes(t *testing.T) {
 	for _, test := range singletons {
 		if test.k == Any {
 			continue
 		}
-		nilable := NilableType(test.t)
-		if got, want := nilable.Kind(), Nilable; got != want {
-			t.Errorf(`%s got kind %q, want %q`, nilable, got, want)
+		opt := OptionalType(test.t)
+		if got, want := opt.Kind(), Optional; got != want {
+			t.Errorf(`%s got kind %q, want %q`, opt, got, want)
 		}
-		if got, want := nilable.Name(), ""; got != want {
-			t.Errorf(`%s got name %q, want %q`, nilable, got, want)
+		if got, want := opt.Name(), ""; got != want {
+			t.Errorf(`%s got name %q, want %q`, opt, got, want)
 		}
-		if got, want := Nilable.String(), "nilable"; got != want {
-			t.Errorf(`%s got kind %q, want %q`, nilable, got, want)
+		if got, want := Optional.String(), "optional"; got != want {
+			t.Errorf(`%s got kind %q, want %q`, opt, got, want)
 		}
-		if got, want := nilable.String(), "?"+test.s; got != want {
-			t.Errorf(`%s got string %q, want %q`, nilable, got, want)
+		if got, want := opt.String(), "?"+test.s; got != want {
+			t.Errorf(`%s got string %q, want %q`, opt, got, want)
 		}
-		testSingleton(t, test.k, nilable.Elem(), test.s)
+		testSingleton(t, test.k, opt.Elem(), test.s)
 	}
 }
 
@@ -376,7 +376,7 @@ var invalidKeys = []*Type{
 	AnyType,
 	ListType(Int32Type),
 	MapType(Int32Type, Int32Type),
-	NilableType(Int32Type),
+	OptionalType(Int32Type),
 	OneOfType(Int32Type),
 	SetType(Int32Type),
 	TypeObjectType,
@@ -659,8 +659,8 @@ func TestHashConsTypes(t *testing.T) {
 				types[iter] = append(types[iter], NamedType("Named"+a.s, a.t))
 			}
 			if a.t != AnyType {
-				types[iter] = append(types[iter], NilableType(a.t))
-				types[iter] = append(types[iter], NamedType("Nilable"+a.s, NilableType(a.t)))
+				types[iter] = append(types[iter], OptionalType(a.t))
+				types[iter] = append(types[iter], NamedType("Optional"+a.s, OptionalType(a.t)))
 			}
 			types[iter] = append(types[iter], ListType(a.t))
 			types[iter] = append(types[iter], NamedType("List"+a.s, ListType(a.t)))
@@ -708,25 +708,25 @@ func TestAssignableFrom(t *testing.T) {
 		expect bool
 	}{
 		{BoolType, BoolType, true},
-		{NilableType(BoolType), NilableType(BoolType), true},
+		{OptionalType(BoolType), OptionalType(BoolType), true},
 		{AnyType, BoolType, true},
-		{AnyType, NilableType(BoolType), true},
+		{AnyType, OptionalType(BoolType), true},
 		{AnyType, OneOfType(BoolType, Int32Type), true},
-		{OneOfType(BoolType, NilableType(Int32Type)), BoolType, true},
-		{OneOfType(BoolType, NilableType(Int32Type)), NilableType(Int32Type), true},
+		{OneOfType(BoolType, OptionalType(Int32Type)), BoolType, true},
+		{OneOfType(BoolType, OptionalType(Int32Type)), OptionalType(Int32Type), true},
 
 		{BoolType, Int32Type, false},
 		{BoolType, AnyType, false},
-		{BoolType, NilableType(BoolType), false},
+		{BoolType, OptionalType(BoolType), false},
 		{BoolType, OneOfType(BoolType), false},
 		{BoolType, OneOfType(BoolType, Int32Type), false},
-		{OneOfType(BoolType), NilableType(BoolType), false},
+		{OneOfType(BoolType), OptionalType(BoolType), false},
 		{OneOfType(BoolType), StringType, false},
 		{OneOfType(BoolType, Int32Type), StringType, false},
-		{NilableType(BoolType), BoolType, false},
-		{NilableType(BoolType), StringType, false},
-		{NilableType(OneOfType(BoolType)), NilableType(BoolType), false},
-		{OneOfType(NilableType(BoolType)), BoolType, false},
+		{OptionalType(BoolType), BoolType, false},
+		{OptionalType(BoolType), StringType, false},
+		{OptionalType(OneOfType(BoolType)), OptionalType(BoolType), false},
+		{OneOfType(OptionalType(BoolType)), BoolType, false},
 	}
 	for _, test := range tests {
 		if test.t.AssignableFrom(test.f) != test.expect {
@@ -837,7 +837,7 @@ func TestMutuallyRecursiveType(t *testing.T) {
 		b.AssignBase(stB)
 		c.AssignBase(stC)
 		stA.AppendField("X", Int32Type).AppendField("B", b).AppendField("C", c)
-		aOrNil := builder.Nilable()
+		aOrNil := builder.Optional()
 		aOrNil.AssignBase(a)
 		stB.AppendField("Y", Int32Type).AppendField("A", aOrNil).AppendField("C", c)
 		stC.AppendField("Z", StringType)
@@ -936,7 +936,7 @@ func TestMutuallyRecursiveType(t *testing.T) {
 	if got, want := b.Field(1).Name, "A"; got != want {
 		t.Errorf(`B Field(1).Name got %q, want %q`, got, want)
 	}
-	if got, want := b.Field(1).Type, NilableType(a); got != want {
+	if got, want := b.Field(1).Type, OptionalType(a); got != want {
 		t.Errorf(`B Field(1).Type got %q, want %q`, got, want)
 	}
 	if got, want := b.Field(2).Name, "C"; got != want {

@@ -65,7 +65,7 @@ func zeroRep(t *Type) interface{} {
 		return zeroRepMap(t.key)
 	case Struct:
 		return make(repSequence, len(t.fields))
-	case Any, Nilable:
+	case Any, Optional:
 		return (*Value)(nil) // nil represents nonexistence
 	case OneOf:
 		return ZeroValue(t.types[0])
@@ -107,7 +107,7 @@ func isZeroRep(t *Type, rep interface{}) bool {
 		}
 	case *Value:
 		switch t.Kind() {
-		case Any, Nilable:
+		case Any, Optional:
 			return trep == nil
 		case OneOf:
 			return trep.t == t.types[0] && trep.IsZero()
@@ -159,7 +159,7 @@ func stringRep(t *Type, rep interface{}) string {
 		switch {
 		case trep == nil:
 			return "nil"
-		case t.kind == Nilable:
+		case t.kind == Optional:
 			return stringRep(t.elem, trep.rep) // don't include the type
 		}
 		return trep.String() // include the type
@@ -226,7 +226,7 @@ func TypeObjectValue(x *Type) *Value { return ZeroValue(TypeObjectType).AssignTy
 //   o Struct:     zero values for all fields
 //   o OneOf:      zero value of the type at index 0
 //   o Any:        nil value, representing nonexistence
-//   o Nilable:    nil value, representing nonexistence
+//   o Optional:   nil value, representing nonexistence
 //
 // Panics if t == nil.
 func ZeroValue(t *Type) *Value {
@@ -237,7 +237,7 @@ func ZeroValue(t *Type) *Value {
 }
 
 // NonNilZeroValue returns a new Value of type t representing the non-nil zero
-// value for t.  It is is the same as ZeroValue, except if t is Nilable, in
+// value for t.  It is is the same as ZeroValue, except if t is Optional, in
 // which case it returns a Value representing the zero value of the elem type.
 //
 // Panics if t == nil or t is Any.
@@ -248,7 +248,7 @@ func NonNilZeroValue(t *Type) *Value {
 	switch t.kind {
 	case Any:
 		panic(errNonNilZeroAny)
-	case Nilable:
+	case Optional:
 		return &Value{t, ZeroValue(t.elem)}
 	}
 	return ZeroValue(t)
@@ -309,7 +309,7 @@ func (v *Value) IsZero() bool {
 	return isZeroRep(v.t, v.rep)
 }
 
-// IsNil returns true iff v is Nilable or Any and has the nil value.
+// IsNil returns true iff v is Optional or Any and has the nil value.
 func (v *Value) IsNil() bool {
 	vrep, ok := v.rep.(*Value)
 	return ok && vrep == nil
@@ -480,9 +480,9 @@ func (v *Value) Field(index int) *Value {
 }
 
 // Elem returns the element value contained in the underlying Any, OneOf or
-// Nilable.  Returns nil if v.IsNil() == true.
+// Optional.  Returns nil if v.IsNil() == true.
 func (v *Value) Elem() *Value {
-	v.t.checkKind("Elem", Any, OneOf, Nilable)
+	v.t.checkKind("Elem", Any, OneOf, Optional)
 	return v.rep.(*Value)
 }
 

@@ -537,7 +537,7 @@ func constToInt(x Const) (*big.Int, error) {
 // and conversion checks on numeric values.  If totype is nil the resulting
 // const is untyped.
 //
-// TODO(toddw): Update to handle conversions to nilable types.
+// TODO(toddw): Update to handle conversions to optional types.
 func makeConst(rep interface{}, totype *vdl.Type) (Const, error) {
 	if rep == nil {
 		return Const{}, errInvalidConst

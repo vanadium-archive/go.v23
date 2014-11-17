@@ -433,7 +433,7 @@ func attachTypeComments(t Type, cm *commentMap, suffix bool) {
 		for _, t := range tu.Types {
 			attachTypeComments(t, cm, suffix)
 		}
-	case *TypeNilable:
+	case *TypeOptional:
 		attachTypeComments(tu.Base, cm, suffix)
 	case *TypeNamed:
 		// Terminate the recursion at named types.

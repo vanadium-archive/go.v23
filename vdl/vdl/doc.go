@@ -75,7 +75,7 @@ The vdl generate flags are:
    dst SKIP indicates matching packages are skipped.
  -java_out_dir=veyron/go/src->veyron/java/src/vdl/java,roadmap/go/src->veyron/java/src/vdl/java,third_party/go/src->SKIP,tools/go/src->SKIP,veyron/go/src/veyron.io/veyron/veyron2/vdl/vdlroot/src->SKIP
    Same semantics as --go_out_dir but applies to java code generation.
- -java_out_pkg=veyron.io/veyron/veyron2/vom2/testdata->SKIP,veyron.io->io/veyron
+ -java_out_pkg=veyron.io->io/veyron
    Java output package translation rules.  Must be of the form:
       "src->dst[,s2->d2...]"
    If a VDL package has a prefix src, the prefix will be replaced with dst.  Use
@@ -143,7 +143,7 @@ The vdl audit flags are:
    dst SKIP indicates matching packages are skipped.
  -java_out_dir=veyron/go/src->veyron/java/src/vdl/java,roadmap/go/src->veyron/java/src/vdl/java,third_party/go/src->SKIP,tools/go/src->SKIP,veyron/go/src/veyron.io/veyron/veyron2/vdl/vdlroot/src->SKIP
    Same semantics as --go_out_dir but applies to java code generation.
- -java_out_pkg=veyron.io/veyron/veyron2/vom2/testdata->SKIP,veyron.io->io/veyron
+ -java_out_pkg=veyron.io->io/veyron
    Java output package translation rules.  Must be of the form:
       "src->dst[,s2->d2...]"
    If a VDL package has a prefix src, the prefix will be replaced with dst.  Use
@@ -260,6 +260,8 @@ The VDLROOT environment variable is similar to VDLPATH, but instead of pointing
 to multiple user source directories, it points at a single source directory
 containing the standard vdl packages.
 
+Setting VDLROOT is optional.
+
 If VDLROOT is empty, we try to construct it out of the VEYRON_ROOT environment
 variable.  It is an error if both VDLROOT and VEYRON_ROOT are empty.
 
@@ -269,7 +271,7 @@ Each vdl source package P may contain an optional file "vdl.config" within the P
 directory.  This file specifies additional configuration for the vdl tool.
 
 The format of this file is described by the vdl.Config type in the "vdl"
-standard package, located under VDLROOT/src/vdl.
+standard package, located at VDLROOT/src/vdl/config.go.
 
 If the file does not exist, we use the zero value of vdl.Config.
 */

@@ -70,8 +70,8 @@ func TypeOf(v interface{}) *Type {
 }
 
 // Normalize the rt type.  The VDL type system represents the concept of
-// pointers as Nilable (?), and doesn't allow multiple nilables (??int) or
-// Nilable Any (?any).  In addition all interfaces are represented with the
+// pointers as Optional (?), and doesn't allow multiple Optionals (??int) or
+// Optional Any (?any).  In addition all interfaces are represented with the
 // single Any type.  By normalizing the rt type we simplify the type creation
 // logic, and also reduce redundancy in the rtCache.
 func normalizeType(rt reflect.Type) reflect.Type {
@@ -188,15 +188,15 @@ func makeTypeFromReflect(rt reflect.Type, builder *TypeBuilder, pending map[refl
 	}
 	switch {
 	case rt.Kind() == reflect.Ptr:
-		// Pointers are turned into Nilable.
-		nilable := builder.Nilable()
-		pending[rt] = nilable
+		// Pointers are turned into Optional.
+		opt := builder.Optional()
+		pending[rt] = opt
 		base, err := typeFromReflect(rt.Elem(), builder, pending)
 		if err != nil {
 			return nil, err
 		}
-		nilable.AssignBase(base)
-		return nilable, nil
+		opt.AssignBase(base)
+		return opt, nil
 	case rt.PkgPath() == "":
 		// Unnamed types are made directly.  There's no way to create a recursive
 		// type based solely on unnamed types, so it's ok to to update pending

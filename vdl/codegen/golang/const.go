@@ -57,7 +57,7 @@ func untypedConst(data goData, v *vdl.Value) string {
 		return strconv.Quote(string(v.Bytes()))
 	}
 	switch k {
-	case vdl.Any, vdl.OneOf, vdl.Nilable:
+	case vdl.Any, vdl.OneOf, vdl.Optional:
 		if elem := v.Elem(); elem != nil {
 			return typedConst(data, elem)
 		}

@@ -10,9 +10,9 @@ type Kind uint
 
 const (
 	// Variant kinds
-	Any     Kind = iota // any type
-	OneOf               // one of a set of types
-	Nilable             // value may be nil, indicating it doesn't exist
+	Any      Kind = iota // any type
+	OneOf                // one of a set of types
+	Optional             // value might not exist
 	// Scalar kinds
 	Bool       // boolean
 	Byte       // 8 bit unsigned integer
@@ -46,8 +46,8 @@ func (k Kind) String() string {
 		return "any"
 	case OneOf:
 		return "oneof"
-	case Nilable:
-		return "nilable"
+	case Optional:
+		return "optional"
 	case Bool:
 		return "bool"
 	case Byte:
@@ -123,7 +123,7 @@ type Type struct {
 	name   string        // used by all kinds
 	labels []string      // used by Enum
 	len    int           // used by Array
-	elem   *Type         // used by Nilable, Array, List, Map
+	elem   *Type         // used by Optional, Array, List, Map
 	key    *Type         // used by Set, Map
 	fields []StructField // used by Struct
 	types  []*Type       // used by OneOf
@@ -187,9 +187,9 @@ func (t *Type) Len() int {
 	return t.len
 }
 
-// Elem returns the element type of an Nilable, Array, List or Map.
+// Elem returns the element type of an Optional, Array, List or Map.
 func (t *Type) Elem() *Type {
-	t.checkKind("Elem", Nilable, Array, List, Map)
+	t.checkKind("Elem", Optional, Array, List, Map)
 	return t.elem
 }
 

@@ -71,7 +71,7 @@ B: 123,
 		{"TypeObjectOneOf", vdl.TypeObjectValue(tOneOf), `__vdl.TypeOf(TestOneOf{""})`},
 		{"TypeObjectAny", vdl.TypeObjectValue(vdl.AnyType), `__vdl.AnyType`},
 		{"TypeObjectTypeObject", vdl.TypeObjectValue(vdl.TypeObjectType), `__vdl.TypeObjectType`},
-		// TODO(toddw): Add tests for nilable
+		// TODO(toddw): Add tests for optional types.
 	}
 	data := goData{Env: compile.NewEnv(-1)}
 	for _, test := range tests {

@@ -42,10 +42,10 @@ import (
 // checking.  This seems fine in practice since type compatibility is weaker
 // than value convertibility, and since recursive types are not common.
 func compatible(a, b *vdl.Type) bool {
-	if a.Kind() == vdl.Nilable {
+	if a.Kind() == vdl.Optional {
 		a = a.Elem()
 	}
-	if b.Kind() == vdl.Nilable {
+	if b.Kind() == vdl.Optional {
 		b = b.Elem()
 	}
 	key := compatKey(a, b)
@@ -96,10 +96,10 @@ func (reg compatRegistry) update(key [2]*vdl.Type, compat bool) {
 
 // compat is a recursive helper that implements compatible.
 func compat(a, b *vdl.Type, seenA, seenB map[*vdl.Type]bool) bool {
-	if a.Kind() == vdl.Nilable {
+	if a.Kind() == vdl.Optional {
 		a = a.Elem()
 	}
-	if b.Kind() == vdl.Nilable {
+	if b.Kind() == vdl.Optional {
 		b = b.Elem()
 	}
 	if a == b || seenA[a] || seenB[b] {

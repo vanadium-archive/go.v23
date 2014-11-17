@@ -789,8 +789,8 @@ func testConverterWantSrc(t *testing.T, vvrvWant, vvrvSrc vvrv) {
 		vvDst := vdl.ZeroValue(vdl.AnyType)
 		testConvert(t, vvDst, vvSrc, anyValue(vvSrc), 0)
 		testConvert(t, vvDst, vvSrc, anyValue(vvSrc), 0)
-		// Test filling Nilable from *Value
-		ttNil := vdl.NilableType(vvSrc.Type())
+		// Test filling Optional from *Value
+		ttNil := vdl.OptionalType(vvSrc.Type())
 		vvNil := vdl.ZeroValue(ttNil)
 		vvNilWant := vdl.NonNilZeroValue(ttNil)
 		vvNilWant.Elem().Assign(vvSrc)

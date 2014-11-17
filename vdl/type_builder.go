@@ -9,26 +9,26 @@ import (
 )
 
 var (
-	errNameNonEmpty   = errors.New("any and typeobject cannot be renamed")
-	errNoLabels       = errors.New("no enum labels")
-	errLabelEmpty     = errors.New("empty enum label")
-	errHasLabels      = errors.New("labels only valid for enum")
-	errLenZero        = errors.New("negative or zero array length")
-	errLenNonZero     = errors.New("length only valid for array")
-	errNilableElemBad = errors.New("nilable elem type must not be nilable or any")
-	errElemNil        = errors.New("nil elem type")
-	errElemNonNil     = errors.New("elem only valid for array, list and map")
-	errKeyNil         = errors.New("nil key type")
-	errKeyNonNil      = errors.New("key only valid for set and map")
-	errFieldTypeNil   = errors.New("nil struct field type")
-	errFieldNameEmpty = errors.New("empty struct field name")
-	errHasFields      = errors.New("fields only valid for struct")
-	errOneOfTypeBad   = errors.New("type in oneof must not be nil, oneof or any")
-	errNoTypes        = errors.New("no oneof types")
-	errHasTypes       = errors.New("types only valid on oneof")
-	errBaseNil        = errors.New("nil base type for named type")
-	errBaseCycle      = errors.New("invalid named type cycle")
-	errNotBuilt       = errors.New("TypeBuilder.Build must be called before Pending.Built")
+	errNameNonEmpty    = errors.New("any and typeobject cannot be renamed")
+	errNoLabels        = errors.New("no enum labels")
+	errLabelEmpty      = errors.New("empty enum label")
+	errHasLabels       = errors.New("labels only valid for enum")
+	errLenZero         = errors.New("negative or zero array length")
+	errLenNonZero      = errors.New("length only valid for array")
+	errOptionalElemBad = errors.New("optional elem type must not be optional or any")
+	errElemNil         = errors.New("nil elem type")
+	errElemNonNil      = errors.New("elem only valid for array, list and map")
+	errKeyNil          = errors.New("nil key type")
+	errKeyNonNil       = errors.New("key only valid for set and map")
+	errFieldTypeNil    = errors.New("nil struct field type")
+	errFieldNameEmpty  = errors.New("empty struct field name")
+	errHasFields       = errors.New("fields only valid for struct")
+	errOneOfTypeBad    = errors.New("type in oneof must not be nil, oneof or any")
+	errNoTypes         = errors.New("no oneof types")
+	errHasTypes        = errors.New("types only valid on oneof")
+	errBaseNil         = errors.New("nil base type for named type")
+	errBaseCycle       = errors.New("invalid named type cycle")
+	errNotBuilt        = errors.New("TypeBuilder.Build must be called before Pending.Built")
 )
 
 // Primitive types, the basis for all other types.  All have empty names.
@@ -85,12 +85,12 @@ type PendingType interface {
 	Built() (*Type, error)
 }
 
-// PendingNilable represents an Nilable type that is being built.  Given a base
-// type that is non-nilable, you can build a new type that is nilable.
-type PendingNilable interface {
+// PendingOptional represents an Optional type that is being built.  Given a base
+// type that is non-optional, you can build a new type that is optional.
+type PendingOptional interface {
 	PendingType
-	// AssignBase assigns the Nilable base type.
-	AssignBase(base TypeOrPending) PendingNilable
+	// AssignBase assigns the Optional base type.
+	AssignBase(base TypeOrPending) PendingOptional
 }
 
 // PendingEnum represents an Enum type that is being built.
@@ -175,18 +175,18 @@ type (
 	// Each pending object holds a *Type that it fills in as the user calls
 	// methods to describe the type.  When Build is called, the type is
 	// hash-consed to the final result.
-	pendingNilable struct{ *pending }
-	pendingEnum    struct{ *pending }
-	pendingArray   struct{ *pending }
-	pendingList    struct{ *pending }
-	pendingSet     struct{ *pending }
-	pendingMap     struct{ *pending }
-	pendingStruct  struct{ *pending }
-	pendingOneOf   struct{ *pending }
-	pendingNamed   struct{ *pending }
+	pendingOptional struct{ *pending }
+	pendingEnum     struct{ *pending }
+	pendingArray    struct{ *pending }
+	pendingList     struct{ *pending }
+	pendingSet      struct{ *pending }
+	pendingMap      struct{ *pending }
+	pendingStruct   struct{ *pending }
+	pendingOneOf    struct{ *pending }
+	pendingNamed    struct{ *pending }
 )
 
-func (p pendingNilable) AssignBase(base TypeOrPending) PendingNilable {
+func (p pendingOptional) AssignBase(base TypeOrPending) PendingOptional {
 	p.elem = base.ptype()
 	return p
 }
@@ -285,9 +285,9 @@ func (b *TypeBuilder) add(t *Type) *pending {
 	return p
 }
 
-// Nilable returns PendingNilable, used to describe an Nilable type.
-func (b *TypeBuilder) Nilable() PendingNilable {
-	return pendingNilable{b.add(&Type{kind: Nilable})}
+// Optional returns PendingOptional, used to describe an Optional type.
+func (b *TypeBuilder) Optional() PendingOptional {
+	return pendingOptional{b.add(&Type{kind: Optional})}
 }
 
 // Enum returns PendingEnum, used to describe an Enum type.
@@ -414,11 +414,11 @@ func checkedBuild(b TypeBuilder, p PendingType) *Type {
 	return t
 }
 
-// NilableType is a helper using TypeBuilder to create a single Nilable type.
+// OptionalType is a helper using TypeBuilder to create a single Optional type.
 // Panics on all errors.
-func NilableType(base *Type) *Type {
+func OptionalType(base *Type) *Type {
 	var b TypeBuilder
-	return checkedBuild(b, b.Nilable().AssignBase(base))
+	return checkedBuild(b, b.Optional().AssignBase(base))
 }
 
 // EnumType is a helper using TypeBuilder to create a single Enum type.
@@ -556,7 +556,7 @@ func uniqueTypeStr(t *Type, seen map[*Type]bool) string {
 		s += " "
 	}
 	switch t.kind {
-	case Nilable:
+	case Optional:
 		return s + "?" + uniqueTypeStr(t.elem, seen)
 	case Enum:
 		return s + "enum{" + strings.Join(t.labels, ";") + "}"
@@ -658,7 +658,7 @@ func isInvalidKey(t *Type, seen map[*Type]bool) bool {
 	}
 	seen[t] = true
 	switch t.kind {
-	case Any, List, Map, Nilable, OneOf, Set, TypeObject:
+	case Any, List, Map, Optional, OneOf, Set, TypeObject:
 		return true
 	case Array:
 		if isInvalidKey(t.elem, seen) {
@@ -760,15 +760,15 @@ func verifyAndCollectAllTypes(t *Type, allTypes map[*Type]bool) error {
 		if t.elem == nil {
 			return errElemNil
 		}
-	case Nilable:
+	case Optional:
 		if t.elem == nil {
 			return errElemNil
 		}
 		switch t.elem.kind {
-		case Nilable, Any:
+		case Optional, Any:
 			// Disallow ?? since the concept doesn't seem useful.
 			// Disallow ?any to avoid confusion, since any already has a nil value.
-			return errNilableElemBad
+			return errOptionalElemBad
 		}
 	default:
 		if t.elem != nil {
@@ -834,9 +834,9 @@ func verifyAndCollectAllTypes(t *Type, allTypes map[*Type]bool) error {
 			if err := ValidOneOfType(one); err != nil {
 				return err
 			}
-			// Each type may only occur once in the set, in either its nilable or
-			// non-nilable form.
-			if one.kind == Nilable {
+			// Each type may only occur once in the set, in either its optional or
+			// non-optional form.
+			if one.kind == Optional {
 				one = one.elem
 			}
 			unique := uniqueTypeStr(one, make(map[*Type]bool))

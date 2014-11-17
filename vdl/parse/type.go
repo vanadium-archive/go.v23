@@ -65,8 +65,8 @@ type TypeOneOf struct {
 	P     Pos
 }
 
-// TypeNilable represents nilable types.
-type TypeNilable struct {
+// TypeOptional represents optional types.
+type TypeOptional struct {
 	Base Type
 	P    Pos
 }
@@ -77,25 +77,25 @@ type TypeDef struct {
 	Type    Type // the underlying type of the type definition.
 }
 
-func (t *TypeNamed) Pos() Pos   { return t.P }
-func (t *TypeEnum) Pos() Pos    { return t.P }
-func (t *TypeArray) Pos() Pos   { return t.P }
-func (t *TypeList) Pos() Pos    { return t.P }
-func (t *TypeSet) Pos() Pos     { return t.P }
-func (t *TypeMap) Pos() Pos     { return t.P }
-func (t *TypeStruct) Pos() Pos  { return t.P }
-func (t *TypeOneOf) Pos() Pos   { return t.P }
-func (t *TypeNilable) Pos() Pos { return t.P }
+func (t *TypeNamed) Pos() Pos    { return t.P }
+func (t *TypeEnum) Pos() Pos     { return t.P }
+func (t *TypeArray) Pos() Pos    { return t.P }
+func (t *TypeList) Pos() Pos     { return t.P }
+func (t *TypeSet) Pos() Pos      { return t.P }
+func (t *TypeMap) Pos() Pos      { return t.P }
+func (t *TypeStruct) Pos() Pos   { return t.P }
+func (t *TypeOneOf) Pos() Pos    { return t.P }
+func (t *TypeOptional) Pos() Pos { return t.P }
 
-func (t *TypeNamed) Kind() string   { return "named" }
-func (t *TypeEnum) Kind() string    { return "enum" }
-func (t *TypeArray) Kind() string   { return "array" }
-func (t *TypeList) Kind() string    { return "list" }
-func (t *TypeSet) Kind() string     { return "set" }
-func (t *TypeMap) Kind() string     { return "map" }
-func (t *TypeStruct) Kind() string  { return "struct" }
-func (t *TypeOneOf) Kind() string   { return "oneof" }
-func (t *TypeNilable) Kind() string { return "nilable" }
+func (t *TypeNamed) Kind() string    { return "named" }
+func (t *TypeEnum) Kind() string     { return "enum" }
+func (t *TypeArray) Kind() string    { return "array" }
+func (t *TypeList) Kind() string     { return "list" }
+func (t *TypeSet) Kind() string      { return "set" }
+func (t *TypeMap) Kind() string      { return "map" }
+func (t *TypeStruct) Kind() string   { return "struct" }
+func (t *TypeOneOf) Kind() string    { return "oneof" }
+func (t *TypeOptional) Kind() string { return "optional" }
 
 func (t *TypeNamed) String() string { return t.Name }
 func (t *TypeEnum) String() string {
@@ -132,7 +132,7 @@ func (t *TypeOneOf) String() string {
 	}
 	return result + "}"
 }
-func (t *TypeNilable) String() string { return fmt.Sprintf("?%v", t.Base) }
+func (t *TypeOptional) String() string { return fmt.Sprintf("?%v", t.Base) }
 
 func (t *TypeDef) String() string {
 	return fmt.Sprintf("(%v %v %v)", t.Pos, t.Name, t.Type)

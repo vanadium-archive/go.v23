@@ -284,7 +284,7 @@ type_no_typeobject:
 | tONEOF '{' type_semi_list osemi '}'
   { $$ = &TypeOneOf{Types:$3, P:$1} }
 | '?' type
-  { $$ = &TypeNilable{Base:$2, P:$1} }
+  { $$ = &TypeOptional{Base:$2, P:$1} }
 
 // The type rule expands to all the actual types, including typeobject.
 type:

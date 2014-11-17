@@ -94,7 +94,7 @@ func unTypedConst(d data, v *vdl.Value, unTypedFields bool) string {
 		return strconv.FormatFloat(v.Float(), 'g', -1, bitlen(v.Kind()))
 	case vdl.String:
 		return strconv.Quote(v.RawString())
-	case vdl.OneOf, vdl.Any, vdl.Nilable:
+	case vdl.OneOf, vdl.Any, vdl.Optional:
 		if elem := v.Elem(); elem != nil {
 			return recursiveConst(d, elem)
 		}
@@ -273,7 +273,7 @@ func defaultValue(data data, t *vdl.Type) string {
 		}
 	}
 	switch t.Kind() {
-	case vdl.Nilable:
+	case vdl.Optional:
 		return "null"
 	case vdl.Array, vdl.List:
 		return "[]"

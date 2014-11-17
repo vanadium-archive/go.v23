@@ -114,8 +114,8 @@ func extractValue(rv reflect.Value) *vdl.Value {
 // fill in.
 func startConvert(c convTarget, tt *vdl.Type) (fin, fill convTarget, err error) {
 	switch tt.Kind() {
-	case vdl.Any, vdl.Nilable:
-		return convTarget{}, convTarget{}, fmt.Errorf("any or nilable type %q can't be used as conversion src", tt)
+	case vdl.Any, vdl.Optional:
+		return convTarget{}, convTarget{}, fmt.Errorf("any or optional type %q can't be used as conversion src", tt)
 	}
 	if !compatible(c.tt, tt) {
 		return convTarget{}, convTarget{}, fmt.Errorf("types %q and %q aren't compatible", c.tt, tt)
@@ -152,12 +152,12 @@ func createFinTarget(c convTarget, tt *vdl.Type) convTarget {
 			}
 			c.rv = c.rv.Elem()
 		}
-		if c.tt.Kind() == vdl.Nilable {
+		if c.tt.Kind() == vdl.Optional {
 			c.tt = c.tt.Elem() // flatten c.tt to match c.rv
 		}
 	} else {
-		// Flatten nilable, creating non-nil values as necessary.
-		if c.vv.Kind() == vdl.Nilable {
+		// Flatten optional, creating non-nil values as necessary.
+		if c.vv.Kind() == vdl.Optional {
 			if c.vv.IsNil() {
 				c.vv.Assign(vdl.NonNilZeroValue(c.tt))
 			}
@@ -342,7 +342,7 @@ func (c convTarget) FromNil(tt *vdl.Type) error {
 	// are set correctly.  If we do this we'll also need to reset all struct
 	// fields before conversion.
 	switch tt.Kind() {
-	case vdl.Any, vdl.Nilable:
+	case vdl.Any, vdl.Optional:
 		if compatible(c.tt, tt) {
 			return nil
 		}

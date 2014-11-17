@@ -218,12 +218,12 @@ func compileDefinedType(ptype parse.Type, file *File, env *Env, tbuilder *vdl.Ty
 		return oneof
 	}
 	lit := compileLiteralType(ptype, file, env, tbuilder, builders)
-	if _, ok := lit.(vdl.PendingNilable); ok {
-		// Don't allow Nilable at the top-level of a type definition.  The purpose
+	if _, ok := lit.(vdl.PendingOptional); ok {
+		// Don't allow Optional at the top-level of a type definition.  The purpose
 		// of this rule is twofold:
-		// 1) Reduce confusion; the Nilable modifier cannot be hidden in a type
+		// 1) Reduce confusion; the Optional modifier cannot be hidden in a type
 		//    definition, it must be explicitly mentioned on each use.
-		// 2) The Nilable concept is typically translated to pointers in generated
+		// 2) The Optional concept is typically translated to pointers in generated
 		//    languages, and many languages don't support named pointer types.
 		//
 		//   type A string            // ok
@@ -231,7 +231,7 @@ func compileDefinedType(ptype parse.Type, file *File, env *Env, tbuilder *vdl.Ty
 		//   type C struct{X ?string} // ok
 		//   type C ?string           // bad
 		//   type D ?struct{X string} // bad
-		env.Errorf(file, ptype.Pos(), "can't define type based on top-level nilable")
+		env.Errorf(file, ptype.Pos(), "can't define type based on top-level optional")
 		return nil
 	}
 	return lit
@@ -271,11 +271,11 @@ func compileLiteralType(ptype parse.Type, file *File, env *Env, tbuilder *vdl.Ty
 		if key != nil && elem != nil {
 			return tbuilder.Map().AssignKey(key).AssignElem(elem)
 		}
-	case *parse.TypeNilable:
-		env.experimentalOnly(file, pt.Pos(), "nilable not supported")
+	case *parse.TypeOptional:
+		env.experimentalOnly(file, pt.Pos(), "optional not supported")
 		base := compileLiteralType(pt.Base, file, env, tbuilder, builders)
 		if base != nil {
-			return tbuilder.Nilable().AssignBase(base)
+			return tbuilder.Optional().AssignBase(base)
 		}
 	default:
 		env.Errorf(file, pt.Pos(), "unnamed %s type invalid (type must be defined)", ptype.Kind())

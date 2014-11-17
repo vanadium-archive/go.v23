@@ -6,12 +6,13 @@ import (
 	"veyron.io/veyron/veyron2/vom"
 )
 
-// Any is a special type used by the veyron vdl compiler.  The built-in "any"
-// vdl type gets translated into vdlutil.Any when generating Go code.  We define a
-// special type rather than just using "interface{}" to make it easy to add
-// special-case logic when necessary.
-//
-// TODO(toddw): Move this to veyron2/vdl and rename to AnyRep
+// TODO(toddw): Move Any into veyron2/vdl as AnyRep, and remove this file
+// completely, when vom2 is deployed.  We don't need RegisterType in vom2, but
+// still need it for vom1 to work.
+
+// Any represents a value of the Any type in generated Go code.  We define a
+// special type rather than just using interface{} in generated code, to make it
+// easy to identify and add special-casing later.
 type Any interface{}
 
 // RegisterType is like gob.Register() - it must be called to register the

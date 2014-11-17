@@ -783,7 +783,7 @@ yydefault:
 	case 48:
 		//line grammar.y:287
 		{
-			yyVAL.typeexpr = &TypeNilable{Base: yyS[yypt-0].typeexpr, P: yyS[yypt-1].pos}
+			yyVAL.typeexpr = &TypeOptional{Base: yyS[yypt-0].typeexpr, P: yyS[yypt-1].pos}
 		}
 	case 49:
 		//line grammar.y:292

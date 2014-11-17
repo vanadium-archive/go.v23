@@ -345,10 +345,10 @@ func allTests() []rtTest {
 	// Add all types we can generate via reflect; no arrays and structs.
 	for _, test := range rtKeyTests {
 		switch k := test.t.Kind(); {
-		case k == Any || k == TypeObject || k == Nilable || test.t == ErrorType:
+		case k == Any || k == TypeObject || k == Optional || test.t == ErrorType:
 			tests = append(tests, rtTest{reflect.PtrTo(test.rt), test.t})
 		default:
-			tests = append(tests, rtTest{reflect.PtrTo(test.rt), NilableType(test.t)})
+			tests = append(tests, rtTest{reflect.PtrTo(test.rt), OptionalType(test.t)})
 		}
 		tests = append(tests, rtTest{reflect.SliceOf(test.rt), ListType(test.t)})
 		tests = append(tests, rtTest{reflect.MapOf(test.rt, test.rt), MapType(test.t, test.t)})
@@ -356,10 +356,10 @@ func allTests() []rtTest {
 	// Now generate types from everything we have so far, for more complicated subtypes.
 	for _, test := range tests {
 		switch k := test.t.Kind(); {
-		case k == Any || k == TypeObject || k == Nilable || test.t == ErrorType:
+		case k == Any || k == TypeObject || k == Optional || test.t == ErrorType:
 			tests = append(tests, rtTest{reflect.PtrTo(test.rt), test.t})
 		default:
-			tests = append(tests, rtTest{reflect.PtrTo(test.rt), NilableType(test.t)})
+			tests = append(tests, rtTest{reflect.PtrTo(test.rt), OptionalType(test.t)})
 		}
 		tests = append(tests, rtTest{reflect.SliceOf(test.rt), ListType(test.t)})
 		for _, key := range rtKeyTests {

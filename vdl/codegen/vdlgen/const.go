@@ -49,7 +49,7 @@ func constValue(v *vdl.Value, pkgPath string, imports codegen.Imports) (string, 
 		return strconv.Quote(string(v.Bytes())), nil
 	}
 	switch k {
-	case vdl.Any, vdl.OneOf, vdl.Nilable:
+	case vdl.Any, vdl.OneOf, vdl.Optional:
 		return TypedConst(v.Elem(), pkgPath, imports)
 	case vdl.Bool:
 		return strconv.FormatBool(v.Bool()), nil
