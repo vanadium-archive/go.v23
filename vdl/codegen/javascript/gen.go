@@ -266,7 +266,7 @@ func qualifiedIdent(data data, name string, file *compile.File) string {
 func defaultValue(data data, t *vdl.Type) string {
 	if def := data.Env.FindTypeDef(t); def != nil {
 		switch {
-		case t == vdl.AnyType || t == vdl.TypeObjectType || t == compile.ErrorType:
+		case t == vdl.AnyType || t == vdl.TypeObjectType || t == vdl.ErrorType:
 			return "null"
 		case def.File != compile.BuiltInFile:
 			return "new " + qualifiedIdent(data, def.Name, def.File) + "()"

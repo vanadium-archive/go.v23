@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	"veyron.io/veyron/veyron2/vdl"
-	"veyron.io/veyron/veyron2/vdl/compile"
 	"veyron.io/veyron/veyron2/vdl/vdlutil"
 	"veyron.io/veyron/veyron2/wiretype"
 	"veyron.io/veyron/veyron2/wiretype/build"
@@ -59,7 +58,7 @@ func (wtc *wireTypeConverter) bootstrapTypeID(t *vdl.Type) wiretype.TypeID {
 }
 
 func (wtc *wireTypeConverter) wireType(typ *vdl.Type) vdlutil.Any {
-	if typ == compile.ErrorType {
+	if typ == vdl.ErrorType {
 		// Hack error as an interface for now, since that was the old behavior.
 		return wiretype.NamedPrimitiveType{
 			Type: wtc.bootstrapTypeID(vdl.AnyType),

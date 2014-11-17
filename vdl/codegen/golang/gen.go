@@ -12,6 +12,7 @@ import (
 	"veyron.io/veyron/veyron2/vdl"
 	"veyron.io/veyron/veyron2/vdl/codegen"
 	"veyron.io/veyron/veyron2/vdl/compile"
+	"veyron.io/veyron/veyron2/vdl/parse"
 	vdlroot "veyron.io/veyron/veyron2/vdl/vdlroot/src/vdl"
 	"veyron.io/veyron/veyron2/vdl/vdlutil"
 	"veyron.io/veyron/veyron2/wiretype"
@@ -121,12 +122,13 @@ func init() {
 		"typeGo":                typeGo,
 		"typeDefGo":             typeDefGo,
 		"constDefGo":            constDefGo,
-		"tagsGo":                tagsGo,
+		"typedConst":            typedConst,
 		"embedGo":               embedGo,
 		"isStreamingMethod":     isStreamingMethod,
 		"hasStreamingMethods":   hasStreamingMethods,
 		"isGlobbableGlob":       isGlobbableGlob,
 		"docBreak":              docBreak,
+		"quoteStripDoc":         parse.QuoteStripDoc,
 		"argTypes":              argTypes,
 		"argNameTypes":          argNameTypes,
 		"argParens":             argParens,
@@ -275,7 +277,7 @@ func uniqueNameImpl(iface *compile.Interface, method *compile.Method, suffix str
 
 // hasFinalError returns true iff the last arg in args is an error.
 func hasFinalError(args []*compile.Arg) bool {
-	return len(args) > 0 && args[len(args)-1].Type == compile.ErrorType
+	return len(args) > 0 && args[len(args)-1].Type == vdl.ErrorType
 }
 
 // stripFinalError returns args without a final error arg.
@@ -554,17 +556,6 @@ func (c impl{{$iface.Name}}ClientStub) Signature(ctx __context.T, opts ...__ipc.
 	return
 }
 
-func (c impl{{$iface.Name}}ClientStub) GetMethodTags(ctx __context.T, method string, opts ...__ipc.CallOpt) (o0 []interface{}, err error) {
-	var call __ipc.Call
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
 {{range $method := $iface.Methods}}{{if isStreamingMethod $method}}
 {{$clientStream := uniqueName $iface $method "ClientStream"}}
 {{$clientCall := uniqueName $iface $method "Call"}}
@@ -703,9 +694,9 @@ type {{$iface.Name}}ServerStubMethods {{if $ifaceStreaming}}interface { {{range 
 // {{$iface.Name}}ServerStub adds universal methods to {{$iface.Name}}ServerStubMethods.
 type {{$iface.Name}}ServerStub interface {
 	{{$iface.Name}}ServerStubMethods
-	// GetMethodTags will be replaced with DescribeInterfaces.
-	GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error)
-	// Signature will be replaced with DescribeInterfaces.
+	// Describe the {{$iface.Name}} interfaces.
+	Describe__() []__ipc.InterfaceDesc
+	// Signature will be replaced with Describe__.
 	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
@@ -743,21 +734,38 @@ func (s impl{{$iface.Name}}ServerStub) VGlob() *__ipc.GlobState {
 	return s.gs
 }
 
-func (s impl{{$iface.Name}}ServerStub) GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error) {
-	// TODO(toddw): Replace with new DescribeInterfaces implementation.
-	{{range $embed := $iface.Embeds}}	if resp, err := s.{{$embed.Name}}ServerStub.GetMethodTags(ctx, method); resp != nil || err != nil {
-			return resp, err
-		}
-	{{end}}{{if $iface.Methods}}	switch method { {{range $method := $iface.Methods}}
-		case "{{$method.Name}}":
-			return {{tagsGo $data $method.Tags}}, nil{{end}}
-		default:
-			return nil, nil
-		}{{else}}	return nil, nil{{end}}
+func (s impl{{$iface.Name}}ServerStub) Describe__() []__ipc.InterfaceDesc {
+	return []__ipc.InterfaceDesc{ {{$iface.Name}}Desc{{range $embed := $iface.Embeds}}, {{embedGo $data $embed}}Desc{{end}} }
+}
+
+// {{$iface.Name}}Desc describes the {{$iface.Name}} interface.
+var {{$iface.Name}}Desc __ipc.InterfaceDesc = desc{{$iface.Name}}
+
+// desc{{$iface.Name}} hides the desc to keep godoc clean.
+var desc{{$iface.Name}} = __ipc.InterfaceDesc{ {{if $iface.Name}}
+	Name: "{{$iface.Name}}",{{end}}{{if $iface.File.Package.Path}}
+	PkgPath: "{{$iface.File.Package.Path}}",{{end}}{{if $iface.Doc}}
+	Doc: {{quoteStripDoc $iface.Doc}},{{end}}{{if $iface.Embeds}}
+	Embeds: []__ipc.EmbedDesc{ {{range $embed := $iface.Embeds}}
+		{ "{{$embed.Name}}", "{{$embed.File.Package.Path}}", {{quoteStripDoc $embed.Doc}} },{{end}}
+	},{{end}}{{if $iface.Methods}}
+	Methods: []__ipc.MethodDesc{ {{range $method := $iface.Methods}}
+		{ {{if $method.Name}}
+			Name: "{{$method.Name}}",{{end}}{{if $method.Doc}}
+			Doc: {{quoteStripDoc $method.Doc}},{{end}}{{if $method.InArgs}}
+			InArgs: []__ipc.ArgDesc{ {{range $arg := $method.InArgs}}
+				{ "{{$arg.Name}}", {{quoteStripDoc $arg.Doc}} }, // {{typeGo $data $arg.Type}}{{end}}
+			},{{end}}{{if $method.OutArgs}}
+			OutArgs: []__ipc.ArgDesc{ {{range $arg := $method.OutArgs}}
+				{ "{{$arg.Name}}", {{quoteStripDoc $arg.Doc}} }, // {{typeGo $data $arg.Type}}{{end}}
+			},{{end}}{{if $method.Tags}}
+			Tags: []__vdlutil.Any{ {{range $tag := $method.Tags}}{{typedConst $data $tag}} ,{{end}} },{{end}}
+		},{{end}}
+	},{{end}}
 }
 
 func (s impl{{$iface.Name}}ServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
-	// TODO(toddw) Replace with new DescribeInterfaces implementation.
+	// TODO(toddw): Replace with new Describe__ implementation.
 	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
 {{range $mname, $method := signatureMethods $iface}}{{printf "\tresult.Methods[%q] = __ipc.MethodSignature{" $mname}}
 		InArgs:[]__ipc.MethodArgument{

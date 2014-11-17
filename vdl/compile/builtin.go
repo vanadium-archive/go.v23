@@ -30,7 +30,7 @@ func init() {
 	builtInType("complex128", vdl.Complex128Type)
 	builtInType("string", vdl.StringType)
 	builtInType("typeobject", vdl.TypeObjectType)
-	builtInType("error", ErrorType)
+	builtInType("error", vdl.ErrorType)
 	// Built-in consts
 	builtInConst("true", TrueConst)
 	builtInConst("false", FalseConst)

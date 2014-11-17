@@ -260,7 +260,7 @@ type Invoker interface {
 	// be used to support method overloading, e.g. for different versions of a
 	// method with the same name.  The returned "tags" are arbitary objects used
 	// as method tags, typically in the VDL specification of a Veyron service.
-	Prepare(method string, numArgs int) (argptrs, tags []interface{}, err error)
+	Prepare(method string, numArgs int) (argptrs, tags []interface{}, _ error)
 
 	// Invoke is the second stage of method invocation.  It is passed the method
 	// name, the in-flight call context, and the argptrs returned by Prepare,
@@ -269,9 +269,17 @@ type Invoker interface {
 	//
 	// Note that argptrs is a slice of pointers to the argument objects; each
 	// pointer must be dereferenced to obtain the actual arg value.
-	Invoke(method string, call ServerCall, argptrs []interface{}) (results []interface{}, err error)
+	Invoke(method string, call ServerCall, argptrs []interface{}) (results []interface{}, _ error)
 
-	// The VGlobber allows objects to take part in the namespace.
+	// Signature corresponds to the reserved __Signature method; it returns the
+	// signatures of the interfaces the underlying object implements.
+	Signature(ctx ServerContext) ([]InterfaceSig, error)
+
+	// MethodSignature corresponds to the reserved __MethodSignature method; it
+	// returns the signature of the given method.
+	MethodSignature(ctx ServerContext, method string) (MethodSig, error)
+
+	// VGlobber allows objects to take part in the namespace.
 	VGlobber
 }
 
@@ -314,14 +322,17 @@ type VChildrenGlobber interface {
 	VGlobChildren() ([]string, error)
 }
 
-// ServerCall defines the interface for each in-flight call on the server.
+// ServerCall defines the in-flight context for a server method call, including
+// methods to stream args and results.
+//
+// TODO(toddw): Rename to ServerStreamContext.
 type ServerCall interface {
 	Stream
 	ServerContext
 }
 
-// Context defines the in-flight call state on the server, not including methods
-// to stream args and results.
+// ServerContext defines the in-flight context for a server method call, not
+// including methods to stream args and results.
 type ServerContext interface {
 	security.Context
 	context.T

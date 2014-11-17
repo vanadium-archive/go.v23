@@ -90,17 +90,6 @@ func (c implTrigonometryClientStub) Signature(ctx __context.T, opts ...__ipc.Cal
 	return
 }
 
-func (c implTrigonometryClientStub) GetMethodTags(ctx __context.T, method string, opts ...__ipc.CallOpt) (o0 []interface{}, err error) {
-	var call __ipc.Call
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
 // TrigonometryServerMethods is the interface a server writer
 // implements for Trigonometry.
 //
@@ -119,9 +108,9 @@ type TrigonometryServerStubMethods TrigonometryServerMethods
 // TrigonometryServerStub adds universal methods to TrigonometryServerStubMethods.
 type TrigonometryServerStub interface {
 	TrigonometryServerStubMethods
-	// GetMethodTags will be replaced with DescribeInterfaces.
-	GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error)
-	// Signature will be replaced with DescribeInterfaces.
+	// Describe the Trigonometry interfaces.
+	Describe__() []__ipc.InterfaceDesc
+	// Signature will be replaced with Describe__.
 	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
@@ -159,20 +148,44 @@ func (s implTrigonometryServerStub) VGlob() *__ipc.GlobState {
 	return s.gs
 }
 
-func (s implTrigonometryServerStub) GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error) {
-	// TODO(toddw): Replace with new DescribeInterfaces implementation.
-	switch method {
-	case "Sine":
-		return []interface{}{}, nil
-	case "Cosine":
-		return []interface{}{}, nil
-	default:
-		return nil, nil
-	}
+func (s implTrigonometryServerStub) Describe__() []__ipc.InterfaceDesc {
+	return []__ipc.InterfaceDesc{TrigonometryDesc}
+}
+
+// TrigonometryDesc describes the Trigonometry interface.
+var TrigonometryDesc __ipc.InterfaceDesc = descTrigonometry
+
+// descTrigonometry hides the desc to keep godoc clean.
+var descTrigonometry = __ipc.InterfaceDesc{
+	Name:    "Trigonometry",
+	PkgPath: "veyron.io/veyron/veyron2/vdl/testdata/arith",
+	Doc:     "// Trigonometry is an interface that specifies a couple trigonometric functions.",
+	Methods: []__ipc.MethodDesc{
+		{
+			Name: "Sine",
+			InArgs: []__ipc.ArgDesc{
+				{"angle", ``}, // float64
+			},
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // float64
+				{"", ``}, // error
+			},
+		},
+		{
+			Name: "Cosine",
+			InArgs: []__ipc.ArgDesc{
+				{"angle", ``}, // float64
+			},
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // float64
+				{"", ``}, // error
+			},
+		},
+	},
 }
 
 func (s implTrigonometryServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
-	// TODO(toddw) Replace with new DescribeInterfaces implementation.
+	// TODO(toddw): Replace with new Describe__ implementation.
 	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
 	result.Methods["Cosine"] = __ipc.MethodSignature{
 		InArgs: []__ipc.MethodArgument{
@@ -255,17 +268,6 @@ func (c implAdvancedMathClientStub) Signature(ctx __context.T, opts ...__ipc.Cal
 	return
 }
 
-func (c implAdvancedMathClientStub) GetMethodTags(ctx __context.T, method string, opts ...__ipc.CallOpt) (o0 []interface{}, err error) {
-	var call __ipc.Call
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
 // AdvancedMathServerMethods is the interface a server writer
 // implements for AdvancedMath.
 //
@@ -288,9 +290,9 @@ type AdvancedMathServerStubMethods AdvancedMathServerMethods
 // AdvancedMathServerStub adds universal methods to AdvancedMathServerStubMethods.
 type AdvancedMathServerStub interface {
 	AdvancedMathServerStubMethods
-	// GetMethodTags will be replaced with DescribeInterfaces.
-	GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error)
-	// Signature will be replaced with DescribeInterfaces.
+	// Describe the AdvancedMath interfaces.
+	Describe__() []__ipc.InterfaceDesc
+	// Signature will be replaced with Describe__.
 	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
@@ -324,19 +326,26 @@ func (s implAdvancedMathServerStub) VGlob() *__ipc.GlobState {
 	return s.gs
 }
 
-func (s implAdvancedMathServerStub) GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error) {
-	// TODO(toddw): Replace with new DescribeInterfaces implementation.
-	if resp, err := s.TrigonometryServerStub.GetMethodTags(ctx, method); resp != nil || err != nil {
-		return resp, err
-	}
-	if resp, err := s.ExpServerStub.GetMethodTags(ctx, method); resp != nil || err != nil {
-		return resp, err
-	}
-	return nil, nil
+func (s implAdvancedMathServerStub) Describe__() []__ipc.InterfaceDesc {
+	return []__ipc.InterfaceDesc{AdvancedMathDesc, TrigonometryDesc, exp.ExpDesc}
+}
+
+// AdvancedMathDesc describes the AdvancedMath interface.
+var AdvancedMathDesc __ipc.InterfaceDesc = descAdvancedMath
+
+// descAdvancedMath hides the desc to keep godoc clean.
+var descAdvancedMath = __ipc.InterfaceDesc{
+	Name:    "AdvancedMath",
+	PkgPath: "veyron.io/veyron/veyron2/vdl/testdata/arith",
+	Doc:     "// AdvancedMath is an interface for more advanced math than arith.  It embeds\n// interfaces defined both in the same file and in an external package; and in\n// turn it is embedded by arith.Calculator (which is in the same package but\n// different file) to verify that embedding works in all these scenarios.",
+	Embeds: []__ipc.EmbedDesc{
+		{"Trigonometry", "veyron.io/veyron/veyron2/vdl/testdata/arith", "// Trigonometry is an interface that specifies a couple trigonometric functions."},
+		{"Exp", "veyron.io/veyron/veyron2/vdl/testdata/arith/exp", ``},
+	},
 }
 
 func (s implAdvancedMathServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
-	// TODO(toddw) Replace with new DescribeInterfaces implementation.
+	// TODO(toddw): Replace with new Describe__ implementation.
 	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
 
 	result.TypeDefs = []__vdlutil.Any{}

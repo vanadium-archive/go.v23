@@ -172,23 +172,85 @@ func TestCalculator(t *testing.T) {
 
 	// Test auto-generated methods.
 	serverStub := arith.CalculatorServer(&serverCalculator{})
-
-	tagTests := []struct {
-		method   string
-		expected []interface{}
-	}{
-		{"GenError", []interface{}{"foo", "barz", "hello", int32(129), uint64(36)}},
-		{"Off", []interface{}{"offtag"}},
-	}
-	for _, tagTest := range tagTests {
-		tags, err := serverStub.GetMethodTags(nil, tagTest.method)
-		if err != nil {
-			t.Errorf("Error calling GetMethodTags(%q): ", tagTest.method, err)
-		}
-		if !reflect.DeepEqual(tags, tagTest.expected) {
-			t.Errorf("GetMethodTags(%q): got %v but expected %v", tagTest.method, tags, tagTest.expected)
-		}
-	}
+	expectDesc(t, serverStub.Describe__(), []ipc.InterfaceDesc{
+		{
+			Name:    "Calculator",
+			PkgPath: "veyron.io/veyron/veyron2/vdl/testdata/arith",
+			Embeds: []ipc.EmbedDesc{
+				{
+					Name:    "Arith",
+					PkgPath: "veyron.io/veyron/veyron2/vdl/testdata/arith",
+				},
+				{
+					Name:    "AdvancedMath",
+					PkgPath: "veyron.io/veyron/veyron2/vdl/testdata/arith",
+				},
+			},
+			Methods: []ipc.MethodDesc{
+				{Name: "On", OutArgs: []ipc.ArgDesc{{}}},
+				{Name: "Off", OutArgs: []ipc.ArgDesc{{}}, Tags: []vdlutil.Any{"offtag"}},
+			},
+		},
+		{
+			Name:    "Arith",
+			PkgPath: "veyron.io/veyron/veyron2/vdl/testdata/arith",
+			Methods: []ipc.MethodDesc{
+				{
+					Name:    "Add",
+					InArgs:  []ipc.ArgDesc{{Name: "a"}, {Name: "b"}},
+					OutArgs: []ipc.ArgDesc{{}, {}},
+				},
+				{
+					Name:    "DivMod",
+					InArgs:  []ipc.ArgDesc{{Name: "a"}, {Name: "b"}},
+					OutArgs: []ipc.ArgDesc{{Name: "quot"}, {Name: "rem"}, {Name: "err"}},
+				},
+				{
+					Name:    "Sub",
+					InArgs:  []ipc.ArgDesc{{Name: "args"}},
+					OutArgs: []ipc.ArgDesc{{}, {}},
+				},
+				{
+					Name:    "Mul",
+					InArgs:  []ipc.ArgDesc{{Name: "nested"}},
+					OutArgs: []ipc.ArgDesc{{}, {}},
+				},
+				{
+					Name:    "GenError",
+					OutArgs: []ipc.ArgDesc{{}},
+					Tags:    []vdlutil.Any{"foo", "barz", "hello", int32(129), uint64(0x24)},
+				},
+				{
+					Name:    "Count",
+					InArgs:  []ipc.ArgDesc{{Name: "start"}},
+					OutArgs: []ipc.ArgDesc{{}},
+				},
+				{
+					Name:    "StreamingAdd",
+					OutArgs: []ipc.ArgDesc{{Name: "total"}, {Name: "err"}},
+				},
+				{
+					Name:    "QuoteAny",
+					InArgs:  []ipc.ArgDesc{{Name: "a"}},
+					OutArgs: []ipc.ArgDesc{{}, {}},
+				},
+			},
+		},
+		{
+			Name:    "AdvancedMath",
+			PkgPath: "veyron.io/veyron/veyron2/vdl/testdata/arith",
+			Embeds: []ipc.EmbedDesc{
+				{
+					Name:    "Trigonometry",
+					PkgPath: "veyron.io/veyron/veyron2/vdl/testdata/arith",
+				},
+				{
+					Name:    "Exp",
+					PkgPath: "veyron.io/veyron/veyron2/vdl/testdata/arith/exp",
+				}},
+		},
+	})
+	// TODO(toddw): Remove this test.
 	signature, err := serverStub.Signature(nil)
 	expectedSignature := map[string]ipc.MethodSignature{
 		"Add": ipc.MethodSignature{
@@ -466,15 +528,6 @@ func TestArith(t *testing.T) {
 		// Client-side stubs
 		clientStub := ar.(ipc.UniversalServiceMethods)
 
-		tags, err := clientStub.GetMethodTags(ctx, "GenError")
-		expectedTags := []interface{}{"foo", "barz", "hello", int32(129), uint64(36)}
-		if err != nil {
-			t.Error(`Error calling GetMethodTags("GenError"): `, err)
-		}
-		if !reflect.DeepEqual(tags, expectedTags) {
-			t.Errorf("GetMethodTags: got %v but expected %v", tags, expectedTags)
-		}
-
 		if _, err := clientStub.Signature(ctx); err != nil {
 			// TODO(bprosnitz) Check that the signature is the expected signature.
 			t.Errorf("Failed to get signature from client: %v", err)
@@ -483,16 +536,55 @@ func TestArith(t *testing.T) {
 		// Server-side stubs
 
 		serverStub := arith.ArithServer(&serverArith{})
+		expectDesc(t, serverStub.Describe__(), []ipc.InterfaceDesc{
+			{
+				Name:    "Arith",
+				PkgPath: "veyron.io/veyron/veyron2/vdl/testdata/arith",
+				Methods: []ipc.MethodDesc{
+					{
+						Name:    "Add",
+						InArgs:  []ipc.ArgDesc{{Name: "a"}, {Name: "b"}},
+						OutArgs: []ipc.ArgDesc{{}, {}},
+					},
+					{
+						Name:    "DivMod",
+						InArgs:  []ipc.ArgDesc{{Name: "a"}, {Name: "b"}},
+						OutArgs: []ipc.ArgDesc{{Name: "quot"}, {Name: "rem"}, {Name: "err"}},
+					},
+					{
+						Name:    "Sub",
+						InArgs:  []ipc.ArgDesc{{Name: "args"}},
+						OutArgs: []ipc.ArgDesc{{}, {}},
+					},
+					{
+						Name:    "Mul",
+						InArgs:  []ipc.ArgDesc{{Name: "nested"}},
+						OutArgs: []ipc.ArgDesc{{}, {}},
+					},
+					{
+						Name:    "GenError",
+						OutArgs: []ipc.ArgDesc{{}},
+						Tags:    []vdlutil.Any{"foo", "barz", "hello", int32(129), uint64(0x24)},
+					},
+					{
+						Name:    "Count",
+						InArgs:  []ipc.ArgDesc{{Name: "start"}},
+						OutArgs: []ipc.ArgDesc{{}},
+					},
+					{
+						Name:    "StreamingAdd",
+						OutArgs: []ipc.ArgDesc{{Name: "total"}, {Name: "err"}},
+					},
+					{
+						Name:    "QuoteAny",
+						InArgs:  []ipc.ArgDesc{{Name: "a"}},
+						OutArgs: []ipc.ArgDesc{{}, {}},
+					},
+				},
+			},
+		})
 
-		tags, err = serverStub.GetMethodTags(nil, "GenError")
-		expectedTags = []interface{}{"foo", "barz", "hello", int32(129), uint64(36)}
-		if err != nil {
-			t.Error(`Error calling GetMethodTags("GenError"): `, err)
-		}
-		if !reflect.DeepEqual(tags, expectedTags) {
-			t.Errorf("GetMethodTags: got %v but expected %v", tags, expectedTags)
-		}
-
+		// TODO(toddw): Remove this test.
 		signature, err := serverStub.Signature(nil)
 		expectedSignature := map[string]ipc.MethodSignature{
 			"Add": ipc.MethodSignature{
@@ -582,6 +674,35 @@ func TestArith(t *testing.T) {
 
 		if !reflect.DeepEqual(signature.TypeDefs, expectedTypeDefs) {
 			t.Errorf("Signature TypeDefs: got %v but expected %v", signature.TypeDefs, expectedTypeDefs)
+		}
+	}
+}
+
+func expectDesc(t *testing.T, got, want []ipc.InterfaceDesc) {
+	stripDesc(got)
+	stripDesc(want)
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("Describe__ got %#v, want %#v", got, want)
+	}
+}
+
+func stripDesc(desc []ipc.InterfaceDesc) {
+	// Don't bother testing the documentation, to avoid spurious changes.
+	for i := range desc {
+		desc[i].Doc = ""
+		for j := range desc[i].Embeds {
+			desc[i].Embeds[j].Doc = ""
+		}
+		for j := range desc[i].Methods {
+			desc[i].Methods[j].Doc = ""
+			for k := range desc[i].Methods[j].InArgs {
+				desc[i].Methods[j].InArgs[k].Doc = ""
+			}
+			for k := range desc[i].Methods[j].OutArgs {
+				desc[i].Methods[j].OutArgs[k].Doc = ""
+			}
+			desc[i].Methods[j].InStream.Doc = ""
+			desc[i].Methods[j].OutStream.Doc = ""
 		}
 	}
 }

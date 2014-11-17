@@ -282,17 +282,6 @@ func (c implServiceAClientStub) Signature(ctx __context.T, opts ...__ipc.CallOpt
 	return
 }
 
-func (c implServiceAClientStub) GetMethodTags(ctx __context.T, method string, opts ...__ipc.CallOpt) (o0 []interface{}, err error) {
-	var call __ipc.Call
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
 // ServiceAMethodA3ClientStream is the client stream for ServiceA.MethodA3.
 type ServiceAMethodA3ClientStream interface {
 	// RecvStream returns the receiver side of the ServiceA.MethodA3 client stream.
@@ -497,9 +486,9 @@ type ServiceAServerStubMethods interface {
 // ServiceAServerStub adds universal methods to ServiceAServerStubMethods.
 type ServiceAServerStub interface {
 	ServiceAServerStubMethods
-	// GetMethodTags will be replaced with DescribeInterfaces.
-	GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error)
-	// Signature will be replaced with DescribeInterfaces.
+	// Describe the ServiceA interfaces.
+	Describe__() []__ipc.InterfaceDesc
+	// Signature will be replaced with Describe__.
 	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
@@ -545,24 +534,60 @@ func (s implServiceAServerStub) VGlob() *__ipc.GlobState {
 	return s.gs
 }
 
-func (s implServiceAServerStub) GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error) {
-	// TODO(toddw): Replace with new DescribeInterfaces implementation.
-	switch method {
-	case "MethodA1":
-		return []interface{}{}, nil
-	case "MethodA2":
-		return []interface{}{}, nil
-	case "MethodA3":
-		return []interface{}{"tag", uint64(6)}, nil
-	case "MethodA4":
-		return []interface{}{}, nil
-	default:
-		return nil, nil
-	}
+func (s implServiceAServerStub) Describe__() []__ipc.InterfaceDesc {
+	return []__ipc.InterfaceDesc{ServiceADesc}
+}
+
+// ServiceADesc describes the ServiceA interface.
+var ServiceADesc __ipc.InterfaceDesc = descServiceA
+
+// descServiceA hides the desc to keep godoc clean.
+var descServiceA = __ipc.InterfaceDesc{
+	Name:    "ServiceA",
+	PkgPath: "veyron.io/veyron/veyron2/vdl/testdata/base",
+	Methods: []__ipc.MethodDesc{
+		{
+			Name: "MethodA1",
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // error
+			},
+		},
+		{
+			Name: "MethodA2",
+			InArgs: []__ipc.ArgDesc{
+				{"a", ``}, // int32
+				{"b", ``}, // string
+			},
+			OutArgs: []__ipc.ArgDesc{
+				{"s", ``},   // string
+				{"err", ``}, // error
+			},
+		},
+		{
+			Name: "MethodA3",
+			InArgs: []__ipc.ArgDesc{
+				{"a", ``}, // int32
+			},
+			OutArgs: []__ipc.ArgDesc{
+				{"s", ``},   // string
+				{"err", ``}, // error
+			},
+			Tags: []__vdlutil.Any{"tag", uint64(6)},
+		},
+		{
+			Name: "MethodA4",
+			InArgs: []__ipc.ArgDesc{
+				{"a", ``}, // int32
+			},
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // error
+			},
+		},
+	},
 }
 
 func (s implServiceAServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
-	// TODO(toddw) Replace with new DescribeInterfaces implementation.
+	// TODO(toddw): Replace with new Describe__ implementation.
 	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
 	result.Methods["MethodA1"] = __ipc.MethodSignature{
 		InArgs: []__ipc.MethodArgument{},
@@ -828,17 +853,6 @@ func (c implServiceBClientStub) Signature(ctx __context.T, opts ...__ipc.CallOpt
 	return
 }
 
-func (c implServiceBClientStub) GetMethodTags(ctx __context.T, method string, opts ...__ipc.CallOpt) (o0 []interface{}, err error) {
-	var call __ipc.Call
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
 // ServiceBServerMethods is the interface a server writer
 // implements for ServiceB.
 type ServiceBServerMethods interface {
@@ -858,9 +872,9 @@ type ServiceBServerStubMethods interface {
 // ServiceBServerStub adds universal methods to ServiceBServerStubMethods.
 type ServiceBServerStub interface {
 	ServiceBServerStubMethods
-	// GetMethodTags will be replaced with DescribeInterfaces.
-	GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error)
-	// Signature will be replaced with DescribeInterfaces.
+	// Describe the ServiceB interfaces.
+	Describe__() []__ipc.InterfaceDesc
+	// Signature will be replaced with Describe__.
 	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
@@ -896,21 +910,37 @@ func (s implServiceBServerStub) VGlob() *__ipc.GlobState {
 	return s.gs
 }
 
-func (s implServiceBServerStub) GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error) {
-	// TODO(toddw): Replace with new DescribeInterfaces implementation.
-	if resp, err := s.ServiceAServerStub.GetMethodTags(ctx, method); resp != nil || err != nil {
-		return resp, err
-	}
-	switch method {
-	case "MethodB1":
-		return []interface{}{}, nil
-	default:
-		return nil, nil
-	}
+func (s implServiceBServerStub) Describe__() []__ipc.InterfaceDesc {
+	return []__ipc.InterfaceDesc{ServiceBDesc, ServiceADesc}
+}
+
+// ServiceBDesc describes the ServiceB interface.
+var ServiceBDesc __ipc.InterfaceDesc = descServiceB
+
+// descServiceB hides the desc to keep godoc clean.
+var descServiceB = __ipc.InterfaceDesc{
+	Name:    "ServiceB",
+	PkgPath: "veyron.io/veyron/veyron2/vdl/testdata/base",
+	Embeds: []__ipc.EmbedDesc{
+		{"ServiceA", "veyron.io/veyron/veyron2/vdl/testdata/base", ``},
+	},
+	Methods: []__ipc.MethodDesc{
+		{
+			Name: "MethodB1",
+			InArgs: []__ipc.ArgDesc{
+				{"a", ``}, // Scalars
+				{"b", ``}, // Composites
+			},
+			OutArgs: []__ipc.ArgDesc{
+				{"c", ``},   // CompComp
+				{"err", ``}, // error
+			},
+		},
+	},
 }
 
 func (s implServiceBServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
-	// TODO(toddw) Replace with new DescribeInterfaces implementation.
+	// TODO(toddw): Replace with new Describe__ implementation.
 	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
 	result.Methods["MethodB1"] = __ipc.MethodSignature{
 		InArgs: []__ipc.MethodArgument{

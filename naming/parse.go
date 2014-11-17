@@ -103,6 +103,14 @@ func IsReserved(name string) bool {
 	return strings.HasPrefix(name, ReservedNamePrefix)
 }
 
+// StripReserved returns the name stripped of the reserved prefix.
+func StripReserved(name string) string {
+	if IsReserved(name) {
+		return name[len(ReservedNamePrefix):]
+	}
+	return name
+}
+
 // Clean reduces multiple adjacent slashes to a single slash.
 // It also removes any trailing slash.
 func Clean(name string) string {

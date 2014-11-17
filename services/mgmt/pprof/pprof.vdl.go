@@ -134,17 +134,6 @@ func (c implPProfClientStub) Signature(ctx __context.T, opts ...__ipc.CallOpt) (
 	return
 }
 
-func (c implPProfClientStub) GetMethodTags(ctx __context.T, method string, opts ...__ipc.CallOpt) (o0 []interface{}, err error) {
-	var call __ipc.Call
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
 // PProfProfileClientStream is the client stream for PProf.Profile.
 type PProfProfileClientStream interface {
 	// RecvStream returns the receiver side of the PProf.Profile client stream.
@@ -342,9 +331,9 @@ type PProfServerStubMethods interface {
 // PProfServerStub adds universal methods to PProfServerStubMethods.
 type PProfServerStub interface {
 	PProfServerStubMethods
-	// GetMethodTags will be replaced with DescribeInterfaces.
-	GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error)
-	// Signature will be replaced with DescribeInterfaces.
+	// Describe the PProf interfaces.
+	Describe__() []__ipc.InterfaceDesc
+	// Signature will be replaced with Describe__.
 	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
@@ -394,26 +383,71 @@ func (s implPProfServerStub) VGlob() *__ipc.GlobState {
 	return s.gs
 }
 
-func (s implPProfServerStub) GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error) {
-	// TODO(toddw): Replace with new DescribeInterfaces implementation.
-	switch method {
-	case "CmdLine":
-		return []interface{}{}, nil
-	case "Profiles":
-		return []interface{}{}, nil
-	case "Profile":
-		return []interface{}{}, nil
-	case "CPUProfile":
-		return []interface{}{}, nil
-	case "Symbol":
-		return []interface{}{}, nil
-	default:
-		return nil, nil
-	}
+func (s implPProfServerStub) Describe__() []__ipc.InterfaceDesc {
+	return []__ipc.InterfaceDesc{PProfDesc}
+}
+
+// PProfDesc describes the PProf interface.
+var PProfDesc __ipc.InterfaceDesc = descPProf
+
+// descPProf hides the desc to keep godoc clean.
+var descPProf = __ipc.InterfaceDesc{
+	Name:    "PProf",
+	PkgPath: "veyron.io/veyron/veyron2/services/mgmt/pprof",
+	Methods: []__ipc.MethodDesc{
+		{
+			Name: "CmdLine",
+			Doc:  "// CmdLine returns the command-line arguments of the server, including\n// the name of the executable.",
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // []string
+				{"", ``}, // error
+			},
+		},
+		{
+			Name: "Profiles",
+			Doc:  "// Profiles returns the list of available profiles.",
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // []string
+				{"", ``}, // error
+			},
+		},
+		{
+			Name: "Profile",
+			Doc:  "// Profile streams the requested profile. The debug parameter enables\n// additional output. Passing debug=0 includes only the hexadecimal\n// addresses that pprof needs. Passing debug=1 adds comments translating\n// addresses to function names and line numbers, so that a programmer\n// can read the profile without tools.",
+			InArgs: []__ipc.ArgDesc{
+				{"name", ``},  // string
+				{"debug", ``}, // int32
+			},
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // error
+			},
+		},
+		{
+			Name: "CPUProfile",
+			Doc:  "// CPUProfile enables CPU profiling for the requested duration and\n// streams the profile data.",
+			InArgs: []__ipc.ArgDesc{
+				{"seconds", ``}, // int32
+			},
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // error
+			},
+		},
+		{
+			Name: "Symbol",
+			Doc:  "// Symbol looks up the program counters and returns their respective\n// function names.",
+			InArgs: []__ipc.ArgDesc{
+				{"programCounters", ``}, // []uint64
+			},
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // []string
+				{"", ``}, // error
+			},
+		},
+	},
 }
 
 func (s implPProfServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
-	// TODO(toddw) Replace with new DescribeInterfaces implementation.
+	// TODO(toddw): Replace with new Describe__ implementation.
 	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
 	result.Methods["CPUProfile"] = __ipc.MethodSignature{
 		InArgs: []__ipc.MethodArgument{

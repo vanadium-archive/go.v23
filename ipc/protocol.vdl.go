@@ -75,6 +75,9 @@ type Response struct {
 // or negative integers (which may indicate a bug).
 const NoTimeout = int64(9223372036854775807)
 
-// GlobMethod is the name of the method that the ipc server implements to allow
-// transversing the namespace.
+// TODO(toddw): Rename GlobMethod to ReservedGlob.
 const GlobMethod = "__Glob"
+
+const ReservedSignature = "__Signature"
+
+const ReservedMethodSignature = "__MethodSignature"

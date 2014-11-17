@@ -1,6 +1,7 @@
 package ipc
 
 import (
+	"sort"
 	"veyron.io/veyron/veyron2/naming"
 )
 
@@ -72,4 +73,23 @@ type implGlobContextSend struct {
 
 func (s implGlobContextSend) Send(item naming.VDLMountEntry) error {
 	return s.s.ServerCall.Send(item)
+}
+
+// OrderByMethodName implements sort.Interface, ordering by method name.
+type OrderByMethodName []MethodSig
+
+func (s OrderByMethodName) Len() int           { return len(s) }
+func (s OrderByMethodName) Less(i, j int) bool { return s[i].Name < s[j].Name }
+func (s OrderByMethodName) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
+
+// FindMethod returns the signature of the given method and true iff the method
+// exists, otherwise returns an empty signature and false.
+func (s *InterfaceSig) FindMethod(method string) (MethodSig, bool) {
+	// We're guaranteed the methods are ordered by name, so do binary search.
+	f := func(i int) bool { return s.Methods[i].Name >= method }
+	ix := sort.Search(len(s.Methods), f)
+	if ix < len(s.Methods) && s.Methods[ix].Name == method {
+		return s.Methods[ix], true
+	}
+	return MethodSig{}, false
 }

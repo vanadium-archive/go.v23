@@ -87,17 +87,6 @@ func (c implGlobbableClientStub) Signature(ctx __context.T, opts ...__ipc.CallOp
 	return
 }
 
-func (c implGlobbableClientStub) GetMethodTags(ctx __context.T, method string, opts ...__ipc.CallOpt) (o0 []interface{}, err error) {
-	var call __ipc.Call
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
 // GlobbableGlobClientStream is the client stream for Globbable.Glob.
 type GlobbableGlobClientStream interface {
 	// RecvStream returns the receiver side of the Globbable.Glob client stream.
@@ -208,9 +197,9 @@ type GlobbableServerStubMethods interface {
 // GlobbableServerStub adds universal methods to GlobbableServerStubMethods.
 type GlobbableServerStub interface {
 	GlobbableServerStubMethods
-	// GetMethodTags will be replaced with DescribeInterfaces.
-	GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error)
-	// Signature will be replaced with DescribeInterfaces.
+	// Describe the Globbable interfaces.
+	Describe__() []__ipc.InterfaceDesc
+	// Signature will be replaced with Describe__.
 	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
@@ -244,18 +233,34 @@ func (s implGlobbableServerStub) VGlob() *__ipc.GlobState {
 	return s.gs
 }
 
-func (s implGlobbableServerStub) GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error) {
-	// TODO(toddw): Replace with new DescribeInterfaces implementation.
-	switch method {
-	case "Glob":
-		return []interface{}{security.Label(1)}, nil
-	default:
-		return nil, nil
-	}
+func (s implGlobbableServerStub) Describe__() []__ipc.InterfaceDesc {
+	return []__ipc.InterfaceDesc{GlobbableDesc}
+}
+
+// GlobbableDesc describes the Globbable interface.
+var GlobbableDesc __ipc.InterfaceDesc = descGlobbable
+
+// descGlobbable hides the desc to keep godoc clean.
+var descGlobbable = __ipc.InterfaceDesc{
+	Name:    "Globbable",
+	PkgPath: "veyron.io/veyron/veyron2/services/mounttable",
+	Methods: []__ipc.MethodDesc{
+		{
+			Name: "Glob",
+			Doc:  "// Glob returns all matching entries at the given server.\n//\n// Glob returns an entry that exactly matches the pattern only if the\n// principal has some access to the entry, and read or resolve access to the\n// parent entry. However, if the pattern expands an entry \"p\" (e.g. \"p/*\",\n// \"p/...\", \"p/[abc]\"), Glob returns child entries only if the principal has\n// read access to \"p\".\n// In summary, the principal must have at least resolve access to call Glob,\n// but may require additional access for certain patterns.",
+			InArgs: []__ipc.ArgDesc{
+				{"pattern", ``}, // string
+			},
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // error
+			},
+			Tags: []__vdlutil.Any{security.Label(1)},
+		},
+	},
 }
 
 func (s implGlobbableServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
-	// TODO(toddw) Replace with new DescribeInterfaces implementation.
+	// TODO(toddw): Replace with new Describe__ implementation.
 	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
 	result.Methods["Glob"] = __ipc.MethodSignature{
 		InArgs: []__ipc.MethodArgument{
@@ -404,17 +409,6 @@ func (c implMountTableClientStub) Signature(ctx __context.T, opts ...__ipc.CallO
 	return
 }
 
-func (c implMountTableClientStub) GetMethodTags(ctx __context.T, method string, opts ...__ipc.CallOpt) (o0 []interface{}, err error) {
-	var call __ipc.Call
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
 // MountTableServerMethods is the interface a server writer
 // implements for MountTable.
 //
@@ -480,9 +474,9 @@ type MountTableServerStubMethods interface {
 // MountTableServerStub adds universal methods to MountTableServerStubMethods.
 type MountTableServerStub interface {
 	MountTableServerStubMethods
-	// GetMethodTags will be replaced with DescribeInterfaces.
-	GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error)
-	// Signature will be replaced with DescribeInterfaces.
+	// Describe the MountTable interfaces.
+	Describe__() []__ipc.InterfaceDesc
+	// Signature will be replaced with Describe__.
 	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
@@ -530,27 +524,70 @@ func (s implMountTableServerStub) VGlob() *__ipc.GlobState {
 	return s.gs
 }
 
-func (s implMountTableServerStub) GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error) {
-	// TODO(toddw): Replace with new DescribeInterfaces implementation.
-	if resp, err := s.GlobbableServerStub.GetMethodTags(ctx, method); resp != nil || err != nil {
-		return resp, err
-	}
-	switch method {
-	case "Mount":
-		return []interface{}{security.Label(4)}, nil
-	case "Unmount":
-		return []interface{}{security.Label(4)}, nil
-	case "ResolveStep":
-		return []interface{}{security.Label(2)}, nil
-	case "ResolveStepX":
-		return []interface{}{security.Label(2)}, nil
-	default:
-		return nil, nil
-	}
+func (s implMountTableServerStub) Describe__() []__ipc.InterfaceDesc {
+	return []__ipc.InterfaceDesc{MountTableDesc, GlobbableDesc}
+}
+
+// MountTableDesc describes the MountTable interface.
+var MountTableDesc __ipc.InterfaceDesc = descMountTable
+
+// descMountTable hides the desc to keep godoc clean.
+var descMountTable = __ipc.InterfaceDesc{
+	Name:    "MountTable",
+	PkgPath: "veyron.io/veyron/veyron2/services/mounttable",
+	Doc:     "// MountTable defines the interface to talk to a mounttable.",
+	Embeds: []__ipc.EmbedDesc{
+		{"Globbable", "veyron.io/veyron/veyron2/services/mounttable", ``},
+	},
+	Methods: []__ipc.MethodDesc{
+		{
+			Name: "Mount",
+			Doc:  "// Mount Server (a global name) onto the receiver.\n// Subsequent mounts add to the servers mounted there.  The multiple\n// servers are considered equivalent and are meant solely for\n// availability, i.e., no load balancing is guaranteed.\n//\n// TTL is the number of seconds the mount is to last unless refreshed by\n// another mount of the same server.  A TTL of 0 represents an infinite\n// duration.  A server with an expired TTL should never appear in the\n// results nor affect the operation of any MountTable method, and should\n// act as if it was never present as far as the interface is concerned.\n//\n// Opts represents a bit mask of options.",
+			InArgs: []__ipc.ArgDesc{
+				{"Server", ``}, // string
+				{"TTL", ``},    // uint32
+				{"Flags", ``},  // naming.MountFlag
+			},
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // error
+			},
+			Tags: []__vdlutil.Any{security.Label(4)},
+		},
+		{
+			Name: "Unmount",
+			Doc:  "// Unmount removes Server from the mount point.  If Server is empty, remove\n// all servers mounted there.\n// Returns a non-nil error iff Server remains mounted at the mount point.",
+			InArgs: []__ipc.ArgDesc{
+				{"Server", ``}, // string
+			},
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // error
+			},
+			Tags: []__vdlutil.Any{security.Label(4)},
+		},
+		{
+			Name: "ResolveStep",
+			Doc:  "// ResolveStep takes the next step in resolving a name.  Returns the next\n// servers to query and the suffix at those servers.",
+			OutArgs: []__ipc.ArgDesc{
+				{"Servers", ``}, // []naming.VDLMountedServer
+				{"Suffix", ``},  // string
+				{"Error", ``},   // error
+			},
+			Tags: []__vdlutil.Any{security.Label(2)},
+		},
+		{
+			Name: "ResolveStepX",
+			Doc:  "// ResolveStepX takes the next step in resolving a name.  Returns the next\n// servers to query and the suffix at those servers.",
+			OutArgs: []__ipc.ArgDesc{
+				{"Entry", ``}, // naming.VDLMountEntry
+				{"Error", ``}, // error
+			},
+			Tags: []__vdlutil.Any{security.Label(2)},
+		},
+	},
 }
 
 func (s implMountTableServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
-	// TODO(toddw) Replace with new DescribeInterfaces implementation.
+	// TODO(toddw): Replace with new Describe__ implementation.
 	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
 	result.Methods["Mount"] = __ipc.MethodSignature{
 		InArgs: []__ipc.MethodArgument{

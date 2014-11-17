@@ -97,17 +97,6 @@ func (c implStoreClientStub) Signature(ctx __context.T, opts ...__ipc.CallOpt) (
 	return
 }
 
-func (c implStoreClientStub) GetMethodTags(ctx __context.T, method string, opts ...__ipc.CallOpt) (o0 []interface{}, err error) {
-	var call __ipc.Call
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
 // StoreAllTracesClientStream is the client stream for Store.AllTraces.
 type StoreAllTracesClientStream interface {
 	// RecvStream returns the receiver side of the Store.AllTraces client stream.
@@ -210,9 +199,9 @@ type StoreServerStubMethods interface {
 // StoreServerStub adds universal methods to StoreServerStubMethods.
 type StoreServerStub interface {
 	StoreServerStubMethods
-	// GetMethodTags will be replaced with DescribeInterfaces.
-	GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error)
-	// Signature will be replaced with DescribeInterfaces.
+	// Describe the Store interfaces.
+	Describe__() []__ipc.InterfaceDesc
+	// Signature will be replaced with Describe__.
 	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
@@ -250,20 +239,43 @@ func (s implStoreServerStub) VGlob() *__ipc.GlobState {
 	return s.gs
 }
 
-func (s implStoreServerStub) GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error) {
-	// TODO(toddw): Replace with new DescribeInterfaces implementation.
-	switch method {
-	case "Trace":
-		return []interface{}{security.Label(2)}, nil
-	case "AllTraces":
-		return []interface{}{security.Label(2)}, nil
-	default:
-		return nil, nil
-	}
+func (s implStoreServerStub) Describe__() []__ipc.InterfaceDesc {
+	return []__ipc.InterfaceDesc{StoreDesc}
+}
+
+// StoreDesc describes the Store interface.
+var StoreDesc __ipc.InterfaceDesc = descStore
+
+// descStore hides the desc to keep godoc clean.
+var descStore = __ipc.InterfaceDesc{
+	Name:    "Store",
+	PkgPath: "veyron.io/veyron/veyron2/services/mgmt/vtrace",
+	Methods: []__ipc.MethodDesc{
+		{
+			Name: "Trace",
+			Doc:  "// Trace returns the trace that matches the given ID.\n// Will return a NoExists error if no matching trace was found.",
+			InArgs: []__ipc.ArgDesc{
+				{"", ``}, // uniqueid.ID
+			},
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // vtrace.TraceRecord
+				{"", ``}, // error
+			},
+			Tags: []__vdlutil.Any{security.Label(2)},
+		},
+		{
+			Name: "AllTraces",
+			Doc:  "// AllTraces returns TraceRecords for all traces the server currently\n// knows about.",
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // error
+			},
+			Tags: []__vdlutil.Any{security.Label(2)},
+		},
+	},
 }
 
 func (s implStoreServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
-	// TODO(toddw) Replace with new DescribeInterfaces implementation.
+	// TODO(toddw): Replace with new Describe__ implementation.
 	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
 	result.Methods["AllTraces"] = __ipc.MethodSignature{
 		InArgs: []__ipc.MethodArgument{},

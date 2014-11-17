@@ -359,17 +359,6 @@ func (c implApplicationClientStub) Signature(ctx __context.T, opts ...__ipc.Call
 	return
 }
 
-func (c implApplicationClientStub) GetMethodTags(ctx __context.T, method string, opts ...__ipc.CallOpt) (o0 []interface{}, err error) {
-	var call __ipc.Call
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
 // ApplicationServerMethods is the interface a server writer
 // implements for Application.
 //
@@ -530,9 +519,9 @@ type ApplicationServerStubMethods ApplicationServerMethods
 // ApplicationServerStub adds universal methods to ApplicationServerStubMethods.
 type ApplicationServerStub interface {
 	ApplicationServerStubMethods
-	// GetMethodTags will be replaced with DescribeInterfaces.
-	GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error)
-	// Signature will be replaced with DescribeInterfaces.
+	// Describe the Application interfaces.
+	Describe__() []__ipc.InterfaceDesc
+	// Signature will be replaced with Describe__.
 	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
@@ -608,41 +597,126 @@ func (s implApplicationServerStub) VGlob() *__ipc.GlobState {
 	return s.gs
 }
 
-func (s implApplicationServerStub) GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error) {
-	// TODO(toddw): Replace with new DescribeInterfaces implementation.
-	if resp, err := s.ObjectServerStub.GetMethodTags(ctx, method); resp != nil || err != nil {
-		return resp, err
-	}
-	switch method {
-	case "Install":
-		return []interface{}{security.Label(4)}, nil
-	case "Refresh":
-		return []interface{}{security.Label(8)}, nil
-	case "Restart":
-		return []interface{}{security.Label(4)}, nil
-	case "Resume":
-		return []interface{}{security.Label(4)}, nil
-	case "Revert":
-		return []interface{}{security.Label(8)}, nil
-	case "Start":
-		return []interface{}{security.Label(2)}, nil
-	case "Stop":
-		return []interface{}{security.Label(8)}, nil
-	case "Suspend":
-		return []interface{}{security.Label(4)}, nil
-	case "Uninstall":
-		return []interface{}{security.Label(8)}, nil
-	case "Update":
-		return []interface{}{security.Label(8)}, nil
-	case "UpdateTo":
-		return []interface{}{security.Label(8)}, nil
-	default:
-		return nil, nil
-	}
+func (s implApplicationServerStub) Describe__() []__ipc.InterfaceDesc {
+	return []__ipc.InterfaceDesc{ApplicationDesc, access.ObjectDesc}
+}
+
+// ApplicationDesc describes the Application interface.
+var ApplicationDesc __ipc.InterfaceDesc = descApplication
+
+// descApplication hides the desc to keep godoc clean.
+var descApplication = __ipc.InterfaceDesc{
+	Name:    "Application",
+	PkgPath: "veyron.io/veyron/veyron2/services/mgmt/node",
+	Doc:     "// Application can be used to manage applications on a device. The\n// idea is that this interace will be invoked using an object name that\n// identifies the application and its installations and instances\n// where applicable.\n//\n// In particular, the interface methods can be divided into three\n// groups based on their intended receiver:\n//\n// 1) Method receiver is an application:\n// -- Install()\n//\n// 2) Method receiver is an application installation:\n// -- Start()\n// -- Uninstall()\n// -- Update()\n//\n// 3) Method receiver is application installation instance:\n// -- Refresh()\n// -- Restart()\n// -- Resume()\n// -- Stop()\n// -- Suspend()\n//\n// For groups 2) and 3), the suffix that specifies the receiver can\n// optionally omit the installation and/or instance, in which case the\n// operation applies to all installations and/or instances in the\n// scope of the suffix.\n//\n// Examples:\n// # Install Google Maps on the node.\n// device/apps.Install(\"/google.com/appstore/maps\") --> \"google maps/0\"\n//\n// # Start an instance of the previously installed maps application installation.\n// device/apps/google maps/0.Start() --> { \"0\" }\n//\n// # Start a second instance of the previously installed maps application installation.\n// device/apps/google maps/0.Start() --> { \"1\" }\n//\n// # Stop the first instance previously started.\n// device/apps/google maps/0/0.Stop()\n//\n// # Install a second Google Maps installation.\n// device/apps.Install(\"/google.com/appstore/maps\") --> \"google maps/1\"\n//\n// # Start an instance for all maps application installations.\n// device/apps/google maps.Start() --> {\"0/2\", \"1/0\"}\n//\n// # Refresh the state of all instances of all maps application installations.\n// device/apps/google maps.Refresh()\n//\n// # Refresh the state of all instances of the maps application installation\n// identified by the given suffix.\n// device/apps/google maps/0.Refresh()\n//\n// # Refresh the state of the maps application installation instance identified by\n// the given suffix.\n// device/apps/google maps/0/2.Refresh()\n//\n// # Update the second maps installation to the latest version available.\n// device/apps/google maps/1.Update()\n//\n// # Update the first maps installation to a specific version.\n// device/apps/google maps/0.UpdateTo(\"/google.com/appstore/beta/maps\")\n//\n// Further, the following methods complement one another:\n// -- Install() and Uninstall()\n// -- Start() and Stop()\n// -- Suspend() and Resume()\n//\n// Finally, an application installation instance can be in one of\n// three abstract states: 1) \"does not exist\", 2) \"running\", or 3)\n// \"suspended\". The interface methods transition between these\n// abstract states using the following state machine:\n//\n// apply(Start(), \"does not exists\") = \"running\"\n// apply(Refresh(), \"running\") = \"running\"\n// apply(Refresh(), \"suspended\") = \"suspended\"\n// apply(Restart(), \"running\") = \"running\"\n// apply(Restart(), \"suspended\") = \"running\"\n// apply(Resume(), \"suspended\") = \"running\"\n// apply(Resume(), \"running\") = \"running\"\n// apply(Stop(), \"running\") = \"does not exist\"\n// apply(Stop(), \"suspended\") = \"does not exist\"\n// apply(Suspend(), \"running\") = \"suspended\"\n// apply(Suspend(), \"suspended\") = \"suspended\"\n//\n// In other words, invoking any method using an existing application\n// installation instance as a receiver is well-defined.",
+	Embeds: []__ipc.EmbedDesc{
+		{"Object", "veyron.io/veyron/veyron2/services/security/access", "// Object provides access control for Veyron objects."},
+	},
+	Methods: []__ipc.MethodDesc{
+		{
+			Name: "Install",
+			Doc:  "// Install installs the application identified by the argument and\n// returns an object name suffix that identifies the new installation.\n//\n// The argument should be an object name for an application envelope.\n// The service it identifies must implement repository.Application, and\n// is expected to return either the requested version (if the object name\n// encodes a specific version), or otherwise the latest available version,\n// as appropriate.\n//\n// The returned suffix, when appended to the name used to reach the\n// receiver for Install, can be used to control the installation object.\n// The suffix will contain the title of the application as a prefix,\n// which can then be used to control all the installations of the given\n// application.\n// TODO(rjkroege): Use customized labels.",
+			InArgs: []__ipc.ArgDesc{
+				{"Name", ``}, // string
+			},
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // string
+				{"", ``}, // error
+			},
+			Tags: []__vdlutil.Any{security.Label(4)},
+		},
+		{
+			Name: "Refresh",
+			Doc:  "// Refresh refreshes the state of application installation(s)\n// instance(s).",
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // error
+			},
+			Tags: []__vdlutil.Any{security.Label(8)},
+		},
+		{
+			Name: "Restart",
+			Doc:  "// Restart restarts execution of application installation(s)\n// instance(s).",
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // error
+			},
+			Tags: []__vdlutil.Any{security.Label(4)},
+		},
+		{
+			Name: "Resume",
+			Doc:  "// Resume resumes execution of application installation(s)\n// instance(s).",
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // error
+			},
+			Tags: []__vdlutil.Any{security.Label(4)},
+		},
+		{
+			Name: "Revert",
+			Doc:  "// Revert reverts application installation(s) to the most recent\n// previous installation.",
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // error
+			},
+			Tags: []__vdlutil.Any{security.Label(8)},
+		},
+		{
+			Name: "Start",
+			Doc:  "// Start starts an instance of application installation(s) and\n// returns the object name(s) that identifies/identify the new\n// instance(s).",
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // []string
+				{"", ``}, // error
+			},
+			Tags: []__vdlutil.Any{security.Label(2)},
+		},
+		{
+			Name: "Stop",
+			Doc:  "// Stop attempts a clean shutdown of application installation(s)\n// instance(s). If the deadline (in seconds) is non-zero and the\n// instance(s) in questions are still running after the given deadline,\n// shutdown of the instance(s) is enforced.\n//\n// TODO(jsimsa): Switch deadline to time.Duration when built-in types\n// are implemented.",
+			InArgs: []__ipc.ArgDesc{
+				{"Deadline", ``}, // uint32
+			},
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // error
+			},
+			Tags: []__vdlutil.Any{security.Label(8)},
+		},
+		{
+			Name: "Suspend",
+			Doc:  "// Suspend suspends execution of application installation(s)\n// instance(s).",
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // error
+			},
+			Tags: []__vdlutil.Any{security.Label(4)},
+		},
+		{
+			Name: "Uninstall",
+			Doc:  "// Uninstall uninstalls application installation(s).",
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // error
+			},
+			Tags: []__vdlutil.Any{security.Label(8)},
+		},
+		{
+			Name: "Update",
+			Doc:  "// Update updates the application installation(s) from the object name\n// provided during Install.  If the new application envelope contains a\n// different application title, the update does not occur, and an error\n// is returned.",
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // error
+			},
+			Tags: []__vdlutil.Any{security.Label(8)},
+		},
+		{
+			Name: "UpdateTo",
+			Doc:  "// UpdateTo updates the application installation(s) to the application\n// specified by the object name argument.  If the new application\n// envelope contains a different application title, the update does not\n// occur, and an error is returned.",
+			InArgs: []__ipc.ArgDesc{
+				{"Name", ``}, // string
+			},
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // error
+			},
+			Tags: []__vdlutil.Any{security.Label(8)},
+		},
+	},
 }
 
 func (s implApplicationServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
-	// TODO(toddw) Replace with new DescribeInterfaces implementation.
+	// TODO(toddw): Replace with new Describe__ implementation.
 	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
 	result.Methods["Install"] = __ipc.MethodSignature{
 		InArgs: []__ipc.MethodArgument{
@@ -1008,17 +1082,6 @@ func (c implNodeClientStub) Signature(ctx __context.T, opts ...__ipc.CallOpt) (o
 	return
 }
 
-func (c implNodeClientStub) GetMethodTags(ctx __context.T, method string, opts ...__ipc.CallOpt) (o0 []interface{}, err error) {
-	var call __ipc.Call
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
 // NodeServerMethods is the interface a server writer
 // implements for Node.
 //
@@ -1148,9 +1211,9 @@ type NodeServerStubMethods NodeServerMethods
 // NodeServerStub adds universal methods to NodeServerStubMethods.
 type NodeServerStub interface {
 	NodeServerStubMethods
-	// GetMethodTags will be replaced with DescribeInterfaces.
-	GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error)
-	// Signature will be replaced with DescribeInterfaces.
+	// Describe the Node interfaces.
+	Describe__() []__ipc.InterfaceDesc
+	// Signature will be replaced with Describe__.
 	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
@@ -1206,31 +1269,82 @@ func (s implNodeServerStub) VGlob() *__ipc.GlobState {
 	return s.gs
 }
 
-func (s implNodeServerStub) GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error) {
-	// TODO(toddw): Replace with new DescribeInterfaces implementation.
-	if resp, err := s.ApplicationServerStub.GetMethodTags(ctx, method); resp != nil || err != nil {
-		return resp, err
-	}
-	switch method {
-	case "Claim":
-		return []interface{}{}, nil
-	case "Describe":
-		return []interface{}{}, nil
-	case "IsRunnable":
-		return []interface{}{}, nil
-	case "Reset":
-		return []interface{}{}, nil
-	case "AssociateAccount":
-		return []interface{}{}, nil
-	case "ListAssociations":
-		return []interface{}{}, nil
-	default:
-		return nil, nil
-	}
+func (s implNodeServerStub) Describe__() []__ipc.InterfaceDesc {
+	return []__ipc.InterfaceDesc{NodeDesc, ApplicationDesc}
+}
+
+// NodeDesc describes the Node interface.
+var NodeDesc __ipc.InterfaceDesc = descNode
+
+// descNode hides the desc to keep godoc clean.
+var descNode = __ipc.InterfaceDesc{
+	Name:    "Node",
+	PkgPath: "veyron.io/veyron/veyron2/services/mgmt/node",
+	Doc:     "// Node can be used to manage a node. The idea is that this interface\n// will be invoked using an object name that identifies the node.",
+	Embeds: []__ipc.EmbedDesc{
+		{"Application", "veyron.io/veyron/veyron2/services/mgmt/node", "// Application can be used to manage applications on a device. The\n// idea is that this interace will be invoked using an object name that\n// identifies the application and its installations and instances\n// where applicable.\n//\n// In particular, the interface methods can be divided into three\n// groups based on their intended receiver:\n//\n// 1) Method receiver is an application:\n// -- Install()\n//\n// 2) Method receiver is an application installation:\n// -- Start()\n// -- Uninstall()\n// -- Update()\n//\n// 3) Method receiver is application installation instance:\n// -- Refresh()\n// -- Restart()\n// -- Resume()\n// -- Stop()\n// -- Suspend()\n//\n// For groups 2) and 3), the suffix that specifies the receiver can\n// optionally omit the installation and/or instance, in which case the\n// operation applies to all installations and/or instances in the\n// scope of the suffix.\n//\n// Examples:\n// # Install Google Maps on the node.\n// device/apps.Install(\"/google.com/appstore/maps\") --> \"google maps/0\"\n//\n// # Start an instance of the previously installed maps application installation.\n// device/apps/google maps/0.Start() --> { \"0\" }\n//\n// # Start a second instance of the previously installed maps application installation.\n// device/apps/google maps/0.Start() --> { \"1\" }\n//\n// # Stop the first instance previously started.\n// device/apps/google maps/0/0.Stop()\n//\n// # Install a second Google Maps installation.\n// device/apps.Install(\"/google.com/appstore/maps\") --> \"google maps/1\"\n//\n// # Start an instance for all maps application installations.\n// device/apps/google maps.Start() --> {\"0/2\", \"1/0\"}\n//\n// # Refresh the state of all instances of all maps application installations.\n// device/apps/google maps.Refresh()\n//\n// # Refresh the state of all instances of the maps application installation\n// identified by the given suffix.\n// device/apps/google maps/0.Refresh()\n//\n// # Refresh the state of the maps application installation instance identified by\n// the given suffix.\n// device/apps/google maps/0/2.Refresh()\n//\n// # Update the second maps installation to the latest version available.\n// device/apps/google maps/1.Update()\n//\n// # Update the first maps installation to a specific version.\n// device/apps/google maps/0.UpdateTo(\"/google.com/appstore/beta/maps\")\n//\n// Further, the following methods complement one another:\n// -- Install() and Uninstall()\n// -- Start() and Stop()\n// -- Suspend() and Resume()\n//\n// Finally, an application installation instance can be in one of\n// three abstract states: 1) \"does not exist\", 2) \"running\", or 3)\n// \"suspended\". The interface methods transition between these\n// abstract states using the following state machine:\n//\n// apply(Start(), \"does not exists\") = \"running\"\n// apply(Refresh(), \"running\") = \"running\"\n// apply(Refresh(), \"suspended\") = \"suspended\"\n// apply(Restart(), \"running\") = \"running\"\n// apply(Restart(), \"suspended\") = \"running\"\n// apply(Resume(), \"suspended\") = \"running\"\n// apply(Resume(), \"running\") = \"running\"\n// apply(Stop(), \"running\") = \"does not exist\"\n// apply(Stop(), \"suspended\") = \"does not exist\"\n// apply(Suspend(), \"running\") = \"suspended\"\n// apply(Suspend(), \"suspended\") = \"suspended\"\n//\n// In other words, invoking any method using an existing application\n// installation instance as a receiver is well-defined."},
+	},
+	Methods: []__ipc.MethodDesc{
+		{
+			Name: "Claim",
+			Doc:  "// Claim is used to claim ownership of a Node running on a device\n// by blessing its identity. By default, after this call all node\n// methods will be access protected to the identity of the claimer.",
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // error
+			},
+		},
+		{
+			Name: "Describe",
+			Doc:  "// Describe generates a description of the node.",
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // Description
+				{"", ``}, // error
+			},
+		},
+		{
+			Name: "IsRunnable",
+			Doc:  "// IsRunnable checks if the node can execute the given binary.",
+			InArgs: []__ipc.ArgDesc{
+				{"Description", ``}, // binary.Description
+			},
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // bool
+				{"", ``}, // error
+			},
+		},
+		{
+			Name: "Reset",
+			Doc:  "// Reset resets the node. If the deadline is non-zero and the node\n// in question is still running after the given deadline expired,\n// reset of the node is enforced.\n//\n// TODO(jsimsa): Switch deadline to time.Duration when built-in types\n// are implemented.",
+			InArgs: []__ipc.ArgDesc{
+				{"Deadline", ``}, // uint64
+			},
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // error
+			},
+		},
+		{
+			Name: "AssociateAccount",
+			Doc:  "// AssociateAccount associates a local  system account name with the provided\n// Veyron identities. It replaces the existing association if one already exists for that\n// identity. Setting an AccountName to \"\" removes the association for each\n// listed identity.",
+			InArgs: []__ipc.ArgDesc{
+				{"identityNames", ``}, // []string
+				{"accountName", ``},   // string
+			},
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // error
+			},
+		},
+		{
+			Name: "ListAssociations",
+			Doc:  "// ListAssociations returns all of the associations between Veyron identities\n// and system names.",
+			OutArgs: []__ipc.ArgDesc{
+				{"associations", ``}, // []Association
+				{"err", ``},          // error
+			},
+		},
+	},
 }
 
 func (s implNodeServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
-	// TODO(toddw) Replace with new DescribeInterfaces implementation.
+	// TODO(toddw): Replace with new Describe__ implementation.
 	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
 	result.Methods["AssociateAccount"] = __ipc.MethodSignature{
 		InArgs: []__ipc.MethodArgument{

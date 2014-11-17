@@ -158,6 +158,10 @@ errorid(
 	//   Terminal
 )
 
-// GlobMethod is the name of the method that the ipc server implements to allow
-// transversing the namespace.
-const GlobMethod = "__Glob"
+// The reserved method names that we currently understand.
+const (
+	// TODO(toddw): Rename GlobMethod to ReservedGlob.
+	GlobMethod = "__Glob"
+	ReservedSignature = "__Signature"
+	ReservedMethodSignature = "__MethodSignature"
+)

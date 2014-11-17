@@ -1,5 +1,6 @@
 package valconv
 
+// TODO(toddw): Move vdl/valconv back into vdl, but keep vdl/opconst separate.
 // TODO(toddw): Merge with vdl/testutil_test.go and vdl/opconst/testutil_test.go
 
 import (
@@ -7,11 +8,19 @@ import (
 	"strings"
 	"testing"
 
-	"veyron.io/veyron/veyron/lib/testutil"
 	"veyron.io/veyron/veyron2/vdl"
 )
 
-func init() { testutil.Init() }
+// CallAndRecover calls the function f and returns the result of recover().
+// This minimizes the scope of the deferred recover, to ensure f is actually the
+// function that paniced.
+func CallAndRecover(f func()) (result interface{}) {
+	defer func() {
+		result = recover()
+	}()
+	f()
+	return
+}
 
 func expectErr(t *testing.T, err error, wantstr string, format string, args ...interface{}) bool {
 	gotstr := fmt.Sprint(err)
@@ -28,7 +37,7 @@ func expectErr(t *testing.T, err error, wantstr string, format string, args ...i
 }
 
 func expectPanic(t *testing.T, f func(), wantstr string, format string, args ...interface{}) {
-	got := testutil.CallAndRecover(f)
+	got := CallAndRecover(f)
 	gotstr := fmt.Sprint(got)
 	msg := fmt.Sprintf(format, args...)
 	if wantstr != "" && !strings.Contains(gotstr, wantstr) {

@@ -170,14 +170,3 @@ func formatFloat(x float64, kind vdl.Kind) string {
 	}
 	return strconv.FormatFloat(x, 'g', -1, bitSize)
 }
-
-func tagsGo(data goData, tags []*vdl.Value) string {
-	str := "[]interface{}{"
-	for ix, tag := range tags {
-		if ix > 0 {
-			str += ", "
-		}
-		str += typedConst(data, tag)
-	}
-	return str + "}"
-}

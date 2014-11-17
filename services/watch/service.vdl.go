@@ -181,17 +181,6 @@ func (c implGlobWatcherClientStub) Signature(ctx __context.T, opts ...__ipc.Call
 	return
 }
 
-func (c implGlobWatcherClientStub) GetMethodTags(ctx __context.T, method string, opts ...__ipc.CallOpt) (o0 []interface{}, err error) {
-	var call __ipc.Call
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
 // GlobWatcherWatchGlobClientStream is the client stream for GlobWatcher.WatchGlob.
 type GlobWatcherWatchGlobClientStream interface {
 	// RecvStream returns the receiver side of the GlobWatcher.WatchGlob client stream.
@@ -289,9 +278,9 @@ type GlobWatcherServerStubMethods interface {
 // GlobWatcherServerStub adds universal methods to GlobWatcherServerStubMethods.
 type GlobWatcherServerStub interface {
 	GlobWatcherServerStubMethods
-	// GetMethodTags will be replaced with DescribeInterfaces.
-	GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error)
-	// Signature will be replaced with DescribeInterfaces.
+	// Describe the GlobWatcher interfaces.
+	Describe__() []__ipc.InterfaceDesc
+	// Signature will be replaced with Describe__.
 	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
@@ -325,18 +314,35 @@ func (s implGlobWatcherServerStub) VGlob() *__ipc.GlobState {
 	return s.gs
 }
 
-func (s implGlobWatcherServerStub) GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error) {
-	// TODO(toddw): Replace with new DescribeInterfaces implementation.
-	switch method {
-	case "WatchGlob":
-		return []interface{}{security.Label(1)}, nil
-	default:
-		return nil, nil
-	}
+func (s implGlobWatcherServerStub) Describe__() []__ipc.InterfaceDesc {
+	return []__ipc.InterfaceDesc{GlobWatcherDesc}
+}
+
+// GlobWatcherDesc describes the GlobWatcher interface.
+var GlobWatcherDesc __ipc.InterfaceDesc = descGlobWatcher
+
+// descGlobWatcher hides the desc to keep godoc clean.
+var descGlobWatcher = __ipc.InterfaceDesc{
+	Name:    "GlobWatcher",
+	PkgPath: "veyron.io/veyron/veyron2/services/watch",
+	Doc:     "// GlobWatcher allows a client to receive updates for changes to objects\n// that match a pattern.  See the package comments for details.",
+	Methods: []__ipc.MethodDesc{
+		{
+			Name: "WatchGlob",
+			Doc:  "// WatchGlob returns a stream of changes that match a pattern.",
+			InArgs: []__ipc.ArgDesc{
+				{"Req", ``}, // types.GlobRequest
+			},
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // error
+			},
+			Tags: []__vdlutil.Any{security.Label(1)},
+		},
+	},
 }
 
 func (s implGlobWatcherServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
-	// TODO(toddw) Replace with new DescribeInterfaces implementation.
+	// TODO(toddw): Replace with new Describe__ implementation.
 	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
 	result.Methods["WatchGlob"] = __ipc.MethodSignature{
 		InArgs: []__ipc.MethodArgument{

@@ -217,17 +217,6 @@ func (c implArithClientStub) Signature(ctx __context.T, opts ...__ipc.CallOpt) (
 	return
 }
 
-func (c implArithClientStub) GetMethodTags(ctx __context.T, method string, opts ...__ipc.CallOpt) (o0 []interface{}, err error) {
-	var call __ipc.Call
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
 // ArithCountClientStream is the client stream for Arith.Count.
 type ArithCountClientStream interface {
 	// RecvStream returns the receiver side of the Arith.Count client stream.
@@ -467,9 +456,9 @@ type ArithServerStubMethods interface {
 // ArithServerStub adds universal methods to ArithServerStubMethods.
 type ArithServerStub interface {
 	ArithServerStubMethods
-	// GetMethodTags will be replaced with DescribeInterfaces.
-	GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error)
-	// Signature will be replaced with DescribeInterfaces.
+	// Describe the Arith interfaces.
+	Describe__() []__ipc.InterfaceDesc
+	// Signature will be replaced with Describe__.
 	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
@@ -531,32 +520,108 @@ func (s implArithServerStub) VGlob() *__ipc.GlobState {
 	return s.gs
 }
 
-func (s implArithServerStub) GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error) {
-	// TODO(toddw): Replace with new DescribeInterfaces implementation.
-	switch method {
-	case "Add":
-		return []interface{}{}, nil
-	case "DivMod":
-		return []interface{}{}, nil
-	case "Sub":
-		return []interface{}{}, nil
-	case "Mul":
-		return []interface{}{}, nil
-	case "GenError":
-		return []interface{}{"foo", "barz", "hello", int32(129), uint64(36)}, nil
-	case "Count":
-		return []interface{}{}, nil
-	case "StreamingAdd":
-		return []interface{}{}, nil
-	case "QuoteAny":
-		return []interface{}{}, nil
-	default:
-		return nil, nil
-	}
+func (s implArithServerStub) Describe__() []__ipc.InterfaceDesc {
+	return []__ipc.InterfaceDesc{ArithDesc}
+}
+
+// ArithDesc describes the Arith interface.
+var ArithDesc __ipc.InterfaceDesc = descArith
+
+// descArith hides the desc to keep godoc clean.
+var descArith = __ipc.InterfaceDesc{
+	Name:    "Arith",
+	PkgPath: "veyron.io/veyron/veyron2/vdl/testdata/arith",
+	Doc:     "// Arith is an example of an interface definition for an arithmetic service.\n// Things to note:\n//   * There must be at least 1 out-arg, and the last out-arg must be error.",
+	Methods: []__ipc.MethodDesc{
+		{
+			Name: "Add",
+			Doc:  "// Add is a typical method with multiple input and output arguments.",
+			InArgs: []__ipc.ArgDesc{
+				{"a", ``}, // int32
+				{"b", ``}, // int32
+			},
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // int32
+				{"", ``}, // error
+			},
+		},
+		{
+			Name: "DivMod",
+			Doc:  "// DivMod shows that runs of args with the same type can use the short form,\n// just like Go.",
+			InArgs: []__ipc.ArgDesc{
+				{"a", ``}, // int32
+				{"b", ``}, // int32
+			},
+			OutArgs: []__ipc.ArgDesc{
+				{"quot", ``}, // int32
+				{"rem", ``},  // int32
+				{"err", ``},  // error
+			},
+		},
+		{
+			Name: "Sub",
+			Doc:  "// Sub shows that you can use data types defined in other packages.",
+			InArgs: []__ipc.ArgDesc{
+				{"args", ``}, // base.Args
+			},
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // int32
+				{"", ``}, // error
+			},
+		},
+		{
+			Name: "Mul",
+			Doc:  "// Mul tries another data type defined in another package.",
+			InArgs: []__ipc.ArgDesc{
+				{"nested", ``}, // base.NestedArgs
+			},
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // int32
+				{"", ``}, // error
+			},
+		},
+		{
+			Name: "GenError",
+			Doc:  "// GenError shows that it's fine to have no in args, and no out args other\n// than \"error\".  In addition GenError shows the usage of tags.  Tags are a\n// sequence of constants.  There's no requirement on uniqueness of types or\n// values, and regular const expressions may also be used.",
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // error
+			},
+			Tags: []__vdlutil.Any{"foo", "barz", "hello", int32(129), uint64(36)},
+		},
+		{
+			Name: "Count",
+			Doc:  "// Count shows using only an int32 out-stream type, with no in-stream type.",
+			InArgs: []__ipc.ArgDesc{
+				{"start", ``}, // int32
+			},
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // error
+			},
+		},
+		{
+			Name: "StreamingAdd",
+			Doc:  "// StreamingAdd shows a bidirectional stream.",
+			OutArgs: []__ipc.ArgDesc{
+				{"total", ``}, // int32
+				{"err", ``},   // error
+			},
+		},
+		{
+			Name: "QuoteAny",
+			Doc:  "// QuoteAny shows the any built-in type, representing a value of any type.",
+			InArgs: []__ipc.ArgDesc{
+				{"a", ``}, // __vdlutil.Any
+			},
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // __vdlutil.Any
+				{"", ``}, // error
+			},
+		},
+	},
 }
 
 func (s implArithServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
-	// TODO(toddw) Replace with new DescribeInterfaces implementation.
+	// TODO(toddw): Replace with new Describe__ implementation.
 	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
 	result.Methods["Add"] = __ipc.MethodSignature{
 		InArgs: []__ipc.MethodArgument{
@@ -857,17 +922,6 @@ func (c implCalculatorClientStub) Signature(ctx __context.T, opts ...__ipc.CallO
 	return
 }
 
-func (c implCalculatorClientStub) GetMethodTags(ctx __context.T, method string, opts ...__ipc.CallOpt) (o0 []interface{}, err error) {
-	var call __ipc.Call
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "GetMethodTags", []interface{}{method}, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
 // CalculatorServerMethods is the interface a server writer
 // implements for Calculator.
 type CalculatorServerMethods interface {
@@ -905,9 +959,9 @@ type CalculatorServerStubMethods interface {
 // CalculatorServerStub adds universal methods to CalculatorServerStubMethods.
 type CalculatorServerStub interface {
 	CalculatorServerStubMethods
-	// GetMethodTags will be replaced with DescribeInterfaces.
-	GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error)
-	// Signature will be replaced with DescribeInterfaces.
+	// Describe the Calculator interfaces.
+	Describe__() []__ipc.InterfaceDesc
+	// Signature will be replaced with Describe__.
 	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
@@ -949,26 +1003,40 @@ func (s implCalculatorServerStub) VGlob() *__ipc.GlobState {
 	return s.gs
 }
 
-func (s implCalculatorServerStub) GetMethodTags(ctx __ipc.ServerContext, method string) ([]interface{}, error) {
-	// TODO(toddw): Replace with new DescribeInterfaces implementation.
-	if resp, err := s.ArithServerStub.GetMethodTags(ctx, method); resp != nil || err != nil {
-		return resp, err
-	}
-	if resp, err := s.AdvancedMathServerStub.GetMethodTags(ctx, method); resp != nil || err != nil {
-		return resp, err
-	}
-	switch method {
-	case "On":
-		return []interface{}{}, nil
-	case "Off":
-		return []interface{}{"offtag"}, nil
-	default:
-		return nil, nil
-	}
+func (s implCalculatorServerStub) Describe__() []__ipc.InterfaceDesc {
+	return []__ipc.InterfaceDesc{CalculatorDesc, ArithDesc, AdvancedMathDesc}
+}
+
+// CalculatorDesc describes the Calculator interface.
+var CalculatorDesc __ipc.InterfaceDesc = descCalculator
+
+// descCalculator hides the desc to keep godoc clean.
+var descCalculator = __ipc.InterfaceDesc{
+	Name:    "Calculator",
+	PkgPath: "veyron.io/veyron/veyron2/vdl/testdata/arith",
+	Embeds: []__ipc.EmbedDesc{
+		{"Arith", "veyron.io/veyron/veyron2/vdl/testdata/arith", "// Arith is an example of an interface definition for an arithmetic service.\n// Things to note:\n//   * There must be at least 1 out-arg, and the last out-arg must be error."},
+		{"AdvancedMath", "veyron.io/veyron/veyron2/vdl/testdata/arith", "// AdvancedMath is an interface for more advanced math than arith.  It embeds\n// interfaces defined both in the same file and in an external package; and in\n// turn it is embedded by arith.Calculator (which is in the same package but\n// different file) to verify that embedding works in all these scenarios."},
+	},
+	Methods: []__ipc.MethodDesc{
+		{
+			Name: "On",
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // error
+			},
+		},
+		{
+			Name: "Off",
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // error
+			},
+			Tags: []__vdlutil.Any{"offtag"},
+		},
+	},
 }
 
 func (s implCalculatorServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
-	// TODO(toddw) Replace with new DescribeInterfaces implementation.
+	// TODO(toddw): Replace with new Describe__ implementation.
 	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
 	result.Methods["Off"] = __ipc.MethodSignature{
 		InArgs: []__ipc.MethodArgument{},
