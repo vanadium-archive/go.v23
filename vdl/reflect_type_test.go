@@ -3,6 +3,7 @@ package vdl
 import (
 	"fmt"
 	"reflect"
+	"sync"
 	"testing"
 	"unsafe"
 )
@@ -370,10 +371,22 @@ func allTests() []rtTest {
 }
 
 func TestTypeFromReflect(t *testing.T) {
+	// Make sure we can create all types without the cache.
 	rtCacheEnabled = false
 	testTypeFromReflect(t, "no cache")
+	// Enable the cache, and make multiple goroutines update the same types
+	// concurrently.  This should expose locking issues in the cache.
 	rtCacheEnabled = true
-	testTypeFromReflect(t, "cache")
+	var done sync.WaitGroup
+	for i := 0; i < 3; i++ {
+		done.Add(1)
+		go func() {
+			testTypeFromReflect(t, fmt.Sprintf("cache%d", i))
+			done.Done()
+		}()
+	}
+	done.Wait()
+	// Final test with all types already cached.
 	testTypeFromReflect(t, "all cached")
 }
 

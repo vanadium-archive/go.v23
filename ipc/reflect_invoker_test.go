@@ -19,6 +19,8 @@ import (
 	"veyron.io/veyron/veyron2/verror"
 )
 
+// TODO(toddw): Add multi-goroutine tests of reflectCache locking.
+
 func init() { testutil.Init() }
 
 // FakeServerCall implements ipc.ServerContext.

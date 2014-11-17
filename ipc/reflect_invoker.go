@@ -240,7 +240,7 @@ type reflectInfo struct {
 	sig     []InterfaceSig
 }
 
-func (reg reflectRegistry) lookup(rt reflect.Type) *reflectInfo {
+func (reg *reflectRegistry) lookup(rt reflect.Type) *reflectInfo {
 	reg.RLock()
 	info := reg.infoMap[rt]
 	reg.RUnlock()
@@ -248,7 +248,7 @@ func (reg reflectRegistry) lookup(rt reflect.Type) *reflectInfo {
 }
 
 // set the entry for (rt, info).  Is a no-op if rt already exists in the map.
-func (reg reflectRegistry) set(rt reflect.Type, info *reflectInfo) {
+func (reg *reflectRegistry) set(rt reflect.Type, info *reflectInfo) {
 	reg.Lock()
 	if exist := reg.infoMap[rt]; exist == nil {
 		reg.infoMap[rt] = info
@@ -256,7 +256,7 @@ func (reg reflectRegistry) set(rt reflect.Type, info *reflectInfo) {
 	reg.Unlock()
 }
 
-var reflectCache = reflectRegistry{infoMap: make(map[reflect.Type]*reflectInfo)}
+var reflectCache = &reflectRegistry{infoMap: make(map[reflect.Type]*reflectInfo)}
 
 // newReflectInfo returns reflection information that is expensive to compute.
 // Although it is passed an object rather than a type, it guarantees that the

@@ -16,11 +16,11 @@ type rtRegistry struct {
 }
 
 var (
-	rtCache        = rtRegistry{rtmap: make(map[reflect.Type]*Type)}
+	rtCache        = &rtRegistry{rtmap: make(map[reflect.Type]*Type)}
 	rtCacheEnabled = true
 )
 
-func (reg rtRegistry) lookup(rt reflect.Type) *Type {
+func (reg *rtRegistry) lookup(rt reflect.Type) *Type {
 	if !rtCacheEnabled {
 		return nil
 	}
@@ -30,7 +30,7 @@ func (reg rtRegistry) lookup(rt reflect.Type) *Type {
 	return t
 }
 
-func (reg rtRegistry) update(pending map[reflect.Type]TypeOrPending) {
+func (reg *rtRegistry) update(pending map[reflect.Type]TypeOrPending) {
 	if !rtCacheEnabled {
 		return
 	}
