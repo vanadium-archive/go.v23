@@ -64,7 +64,7 @@ func (ls LabelSet) String() string {
 	return b.String()
 }
 
-func (ls *LabelSet) fromString(s string) error {
+func (ls *LabelSet) FromString(s string) error {
 	for i := 0; i < len(s); i++ {
 		switch s[i] {
 		case 'X', 'x':
@@ -101,7 +101,7 @@ func (ls *LabelSet) UnmarshalJSON(b []byte) error {
 	if err := json.Unmarshal(b, &s); err != nil {
 		return err
 	}
-	return ls.fromString(s)
+	return ls.FromString(s)
 }
 
 // TODO(ashankar): Remove this when the new label mechanism is deployed.
