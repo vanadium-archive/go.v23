@@ -380,10 +380,10 @@ func TestTypeFromReflect(t *testing.T) {
 	var done sync.WaitGroup
 	for i := 0; i < 3; i++ {
 		done.Add(1)
-		go func() {
+		go func(i int) {
 			testTypeFromReflect(t, fmt.Sprintf("cache%d", i))
 			done.Done()
-		}()
+		}(i)
 	}
 	done.Wait()
 	// Final test with all types already cached.
