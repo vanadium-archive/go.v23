@@ -219,26 +219,27 @@ type Server interface {
 // Dispatcher defines the interface that a server must implement to handle
 // method invocations on named objects.
 type Dispatcher interface {
-	// Lookup returns an arbitrary object, which may be an Invoker, for
-	// the requested method of the object identified by the given suffix.
-	// If an non-Invoker object is returned, then the request will be handled
-	// using a system supplied Invoker that uses reflection to match
-	// the incoming request to the returned object's method set. If an
-	// Invoker is returned, then it will be used to perform the request.
-	// Returning a nil object with a nil error indicates that this
-	// Dispatcher does not support the requested method on the
-	// requested suffix.
+	// Lookup returns the service implementation for the object identified
+	// by the given suffix.
 	//
-	// An Authorizer is also returned to allow control over authorization checks.
-	// Returning a nil Authorizer indicates the default authorization checks
-	// should be used.
+	// Lookup may return either an Invoker, or a non-Invoker object that
+	// implements the service interface for the suffix. When a non-Invoker
+	// object is returned, the incoming request will be handled using
+	// reflection to match the request to the returned object's method set.
+	//
+	// Returning a nil object indicates that this Dispatcher does not
+	// support the requested suffix.
+	//
+	// An Authorizer is also returned to allow control over authorization
+	// checks. Returning a nil Authorizer indicates the default
+	// authorization checks should be used.
 	//
 	// Returning any non-nil error indicates the dispatch lookup has failed.
 	// The error will be delivered back to the client.
 	//
-	// Lookup may be invoked concurrently by the underlying RPC system, and hence
-	// must be thread-safe.
-	Lookup(suffix, method string) (interface{}, security.Authorizer, error)
+	// Lookup may be called concurrently by the underlying RPC system, and
+	// hence must be thread-safe.
+	Lookup(suffix string) (interface{}, security.Authorizer, error)
 }
 
 // Invoker defines the interface used by the server for invoking methods on
