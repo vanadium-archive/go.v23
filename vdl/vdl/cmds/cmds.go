@@ -10,9 +10,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"veyron.io/veyron/veyron/lib/cmdline"
-	"veyron.io/veyron/veyron/lib/textutil"
-
+	"veyron.io/lib/cmdline"
+	"veyron.io/lib/textutil"
 	"veyron.io/veyron/veyron2/vdl/build"
 	"veyron.io/veyron/veyron2/vdl/codegen/golang"
 	"veyron.io/veyron/veyron2/vdl/codegen/java"
