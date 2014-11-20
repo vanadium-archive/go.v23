@@ -59,6 +59,8 @@ package verror2
 
 import "fmt"
 import "io"
+import "os"
+import "path/filepath"
 import "runtime"
 import "sync"
 import "veyron.io/veyron/veyron2/vom" // For type registration
@@ -97,7 +99,7 @@ type IDAction struct {
 // inserts a message into the default i18n Catalogue in US English.
 // Other languages can be added by adding to the Catalogue.
 func Register(id verror.ID, action ActionCode, englishText string) IDAction {
-	i18n.Cat().SetWithBase(i18n.LangID("en-US"), i18n.MsgID(id), englishText)
+	i18n.Cat().SetWithBase(defaultLangID(i18n.NoLangID), i18n.MsgID(id), englishText)
 	return IDAction{id, action}
 }
 
@@ -195,6 +197,15 @@ func StackToText(w io.Writer, stack []uintptr) (err error) {
 	return err
 }
 
+// defaultLangID returns langID is it is not i18n.NoLangID, and the default
+// value of US English otherwise.
+func defaultLangID(langID i18n.LangID) i18n.LangID {
+	if langID == i18n.NoLangID {
+		langID = "en-US"
+	}
+	return langID
+}
+
 // makeInternal is like ExplicitMake(), but takes a slice of PC values as an argument,
 // rather than constructing one from the caller's PC.
 func makeInternal(idAction IDAction, langID i18n.LangID, componentName string, opName string, stack []uintptr, v ...interface{}) E {
@@ -229,24 +240,7 @@ func ContextWithComponentName(ctx context.T, componentName string) context.T {
 // Make is like ExplicitMake(), but obtains the language, component name, and operation
 // name from the specified context.T.   ctx may be nil.
 func Make(idAction IDAction, ctx context.T, v ...interface{}) E {
-	// Use a default context if ctx is nil.  defaultCtx may also be nil, so
-	// further nil checks are required below.
-	if ctx == nil {
-		defaultCtxLock.RLock()
-		ctx = defaultCtx
-		defaultCtxLock.RUnlock()
-	}
-	langID := i18n.LangIDFromContext(ctx)
-
-	// Attempt to get component name and operation from the context.
-	var componentName string
-	var opName string
-	if ctx != nil {
-		value := ctx.Value(componentKey{})
-		componentName, _ = value.(string)
-		opName = vtrace.FromContext(ctx).Name()
-	}
-
+	langID, componentName, opName := dataFromContext(ctx)
 	stack := make([]uintptr, 1)
 	runtime.Callers(2, stack)
 	return makeInternal(idAction, langID, componentName, opName, stack, v...)
@@ -364,7 +358,15 @@ func Convert(idAction IDAction, ctx context.T, err error) E {
 	if err == nil {
 		return nil
 	}
+	langID, componentName, opName := dataFromContext(ctx)
+	stack := make([]uintptr, 1)
+	runtime.Callers(2, stack)
+	return convertInternal(idAction, langID, componentName, opName, stack, err)
+}
 
+// dataFromContext reads the languageID, component name, and operation name
+// from the context, using defaults as appropriate.
+func dataFromContext(ctx context.T) (langID i18n.LangID, componentName string, opName string) {
 	// Use a default context if ctx is nil.  defaultCtx may also be nil, so
 	// further nil checks are required below.
 	if ctx == nil {
@@ -372,18 +374,16 @@ func Convert(idAction IDAction, ctx context.T, err error) E {
 		ctx = defaultCtx
 		defaultCtxLock.RUnlock()
 	}
-
-	// Attempt to get component name and operation from the context.
-	var componentName string
-	var opName string
 	if ctx != nil {
+		langID = i18n.LangIDFromContext(ctx)
 		value := ctx.Value(componentKey{})
 		componentName, _ = value.(string)
 		opName = vtrace.FromContext(ctx).Name()
 	}
-	stack := make([]uintptr, 1)
-	runtime.Callers(2, stack)
-	return convertInternal(idAction, i18n.LangIDFromContext(ctx), componentName, opName, stack, err)
+	if componentName == "" {
+		componentName = filepath.Base(os.Args[0])
+	}
+	return defaultLangID(langID), componentName, opName
 }
 
 // Standard is a standard implementation of E.
