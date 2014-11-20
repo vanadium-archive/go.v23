@@ -16,10 +16,13 @@
 // A message format string is a string containing substrings of the form {<number>}
 // which are replaced by the corresponding position parameter (numbered from 1),
 // or {_}, which is replaced by all otherwise unused parameters.
-// For example, if the format:
-//      {3}: foo {2} bar {_} ({3})
+// If a substring is of the form {:<number>}, {<number>:}, {:<number>:}, {:_},
+// {_:}, or {:_:}, and the corresponding parameters are not the empty string,
+// the parameter is preceded by ": " or followed by ":"  or both,
+// respectively.  For example, if the format:
+//      {3:} foo {2} bar{:_} ({3})
 // is used with the cat.Format example above, it yields:
-//      3rd: foo 2nd bar 1st 4th (3rd)
+//      3rd: foo 2nd bar: 1st 4th (3rd)
 //
 // The positional parameters may have any type, and are printed in their
 // default formatting.  If particular formatting is desired, the parameter
@@ -74,7 +77,7 @@ func (cat *Catalogue) Format(langID LangID, msgID MsgID, v ...interface{}) strin
 	if formatStr == "" {
 		formatStr = string(msgID)
 		if len(v) != 0 {
-			formatStr += ": {_}"
+			formatStr += "{:_}"
 		}
 	}
 	return FormatParams(formatStr, v...)
@@ -118,48 +121,82 @@ func (cat *Catalogue) Lookup(langID LangID, msgID MsgID) (result string) {
 // list of positional parameters unused by other {...} sequences.
 // Missing parameters are replaced with "?".
 func FormatParams(formatStr string, v ...interface{}) (result string) {
-	prefix := ""                 // The text before {_}, if any.
-	underbar := false            // Whether {_} appears in formatStr.
-	used := make([]bool, len(v)) // used[i] indicates whether v[i] has been used.
+	prefix := ""                   // The text before {_}, if any.
+	underbar := false              // Whether {_} appears in formatStr.
+	underbarLeadingColon := false  // true if {:_}
+	underbarTrailingColon := false // true if {_:}
+	used := make([]bool, len(v))   // used[i] indicates whether v[i] has been used.
 	for i := 0; i != len(formatStr); {
 		if braceIndex := skipNotIn(formatStr, i, "{"); braceIndex == len(formatStr) {
 			// No more positional parameters.
 			result += formatStr[i:]
 			i = len(formatStr)
-		} else if strings.HasPrefix(formatStr[braceIndex+1:], "_}") {
-			underbar = true
-			prefix += result + formatStr[i:braceIndex]
-			result = ""
-			i = braceIndex + 3
-		} else if endIndex := skipIn(formatStr, braceIndex+1, "0123456789"); endIndex != len(formatStr) &&
-			endIndex != braceIndex+1 && formatStr[endIndex] == '}' {
-
-			// Well-formed {digits}.
-			n, _ := strconv.Atoi(formatStr[braceIndex+1 : endIndex])
-			if 1 <= n && n < len(v)+1 {
-				result += formatStr[i:braceIndex] + fmt.Sprint(v[n-1])
-				used[n-1] = true
-			} else {
-				result += formatStr[i:braceIndex] + "?" // No such positional parameter.
+		} else {
+			digitsIndex := braceIndex + 1
+			leadingColon := (digitsIndex < len(formatStr) && formatStr[digitsIndex] == ':')
+			if leadingColon {
+				digitsIndex++
 			}
-			i = endIndex + 1
-		} else { // No digits, or no '}'; add the '{' to result.
-			result += formatStr[i : braceIndex+1]
-			i = braceIndex + 1
+			if strings.HasPrefix(formatStr[digitsIndex:], "_}") || strings.HasPrefix(formatStr[digitsIndex:], "_:}") {
+				underbar = true
+				underbarLeadingColon = leadingColon
+				prefix += result + formatStr[i:braceIndex]
+				result = ""
+				underbarTrailingColon = false
+				i = digitsIndex + 2
+				if formatStr[digitsIndex+1] == ':' {
+					underbarTrailingColon = true
+					i++
+				}
+			} else if endIndex := skipIn(formatStr, digitsIndex, "0123456789"); endIndex != len(formatStr) &&
+				endIndex != digitsIndex && (formatStr[endIndex] == '}' || strings.HasPrefix(formatStr[endIndex:], ":}")) {
+
+				// Well-formed {digits}.
+				n, _ := strconv.Atoi(formatStr[digitsIndex:endIndex])
+				formattedParameter := "?" // Used if no such positional parmeter.
+				if 1 <= n && n < len(v)+1 {
+					formattedParameter = fmt.Sprint(v[n-1])
+					used[n-1] = true
+				}
+				result += formatStr[i:braceIndex]
+				if leadingColon && formattedParameter != "" {
+					result += ": "
+				}
+				result += formattedParameter
+				i = endIndex + 1
+				if formatStr[endIndex] == ':' {
+					if formattedParameter != "" {
+						result += ":"
+					}
+					i++
+				}
+			} else { // No digits, or no '}'; add the '{' to result.
+				result += formatStr[i : braceIndex+1]
+				i = braceIndex + 1
+			}
 		}
 	}
 	if underbar { // insert unused parameters
 		first := true
+		paramStr := ""
 		for i := 0; i != len(v); i++ {
 			if !used[i] {
 				if !first {
-					prefix += " "
+					paramStr += " "
 				}
 				first = false
-				prefix += fmt.Sprint(v[i])
+				paramStr += fmt.Sprint(v[i])
 			}
 		}
-		result = prefix + result
+		if paramStr != "" {
+			if underbarLeadingColon {
+				paramStr = ": " + paramStr
+			}
+			if underbarTrailingColon {
+				paramStr += ":"
+			}
+		}
+		result = prefix + paramStr + result
 	}
 	return result
 }

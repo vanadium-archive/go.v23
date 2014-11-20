@@ -92,6 +92,53 @@ func TestFormatParams(t *testing.T) {
 		"{_} foo {_}{-1}", "1st", "2nd", "3rd", "4th")
 	expectFormatParams(t, "{ foo }2nd",
 		"{ foo }{2}", "1st", "2nd", "3rd", "4th")
+
+	// Test the formatting of colon-formats.
+	expectFormatParams(t, "", "{:_}")
+	expectFormatParams(t, "", "{_:}")
+	expectFormatParams(t, "", "{:_:}")
+
+	expectFormatParams(t, ": 1st 2nd", "{:_}", "1st", "2nd")
+	expectFormatParams(t, "1st 2nd:", "{_:}", "1st", "2nd")
+	expectFormatParams(t, ": 1st 2nd:", "{:_:}", "1st", "2nd")
+
+	expectFormatParams(t, "", "{:_}", "")
+	expectFormatParams(t, "", "{_:}", "")
+	expectFormatParams(t, "", "{:_:}", "")
+
+	expectFormatParams(t, ": 1st", "{:1}", "1st")
+	expectFormatParams(t, "1st:", "{1:}", "1st")
+	expectFormatParams(t, ": 1st:", "{:1:}", "1st")
+
+	expectFormatParams(t, "", "{:1}", "")
+	expectFormatParams(t, "", "{1:}", "")
+	expectFormatParams(t, "", "{:1:}", "")
+
+	expectFormatParams(t, "?: ? ?: ?: ?: ?", "{0}{:1} {2:} {3}{:4:} {5}")
+
+	expectFormatParams(t, "{: foo }?", "{: foo }{2}")
+	expectFormatParams(t, "{ foo :}?", "{ foo :}{2}")
+	expectFormatParams(t, "{: foo :}?", "{: foo :}{2}")
+
+	expectFormatParams(t, "3rd: foo 2nd bar: 1st 4th (3rd)",
+		"{3:} foo {2} bar{:_} ({3})", "1st", "2nd", "3rd", "4th")
+
+	expectFormatParams(t, "?: foo: 4th ?",
+		"{0:} foo{:4} {5}", "1st", "2nd", "3rd", "4th")
+
+	expectFormatParams(t, " foo: 1st 2nd 3rd 4th{-1}",
+		"{_:} foo{:_}{-1}", "1st", "2nd", "3rd", "4th")
+
+	expectFormatParams(t, "{ foo }: 2nd",
+		"{4:}{ foo }{:2}", "1st", "2nd", "3rd", "")
+
+	expectFormatParams(t, "1st foo 2nd: bar: 3rd wombat: 4th: numbat",
+		"{1} foo {2:} bar{:3} wombat{:4:} numbat",
+		"1st", "2nd", "3rd", "4th")
+
+	expectFormatParams(t, " foo  bar wombat numbat",
+		"{1} foo {2:} bar{:3} wombat{:4:} numbat",
+		"", "", "", "")
 }
 
 var mergeData string = `# In what follows we use the "languages" "fwd" and "back".
