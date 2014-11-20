@@ -20,7 +20,7 @@ package {{.PackagePath}};
 @io.veyron.veyron.veyron2.vdl.GeneratedFromVdlType("{{.VdlTypeName}}")
 {{ .AccessModifier }} final class {{.Name}} extends {{.VdlComplex}} {
     public static final io.veyron.veyron.veyron2.vdl.VdlType VDL_TYPE =
-            io.veyron.veyron.veyron2.vdl.Types.getVdlTypeFromReflection({{.Name}}.class);
+            io.veyron.veyron.veyron2.vdl.Types.getVdlTypeFromReflect({{.Name}}.class);
 
     public {{.Name}}({{.ValueType}} real, {{.ValueType}} imag) {
         super(VDL_TYPE, real, imag);

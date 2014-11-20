@@ -20,7 +20,7 @@ package {{.Package}};
     public static final int LENGTH = {{.Length}};
 
     public static final io.veyron.veyron.veyron2.vdl.VdlType VDL_TYPE =
-            io.veyron.veyron.veyron2.vdl.Types.getVdlTypeFromReflection({{.Name}}.class);
+            io.veyron.veyron.veyron2.vdl.Types.getVdlTypeFromReflect({{.Name}}.class);
 
     public {{.Name}}({{.ElemType}}[] impl) {
         super(VDL_TYPE, impl);

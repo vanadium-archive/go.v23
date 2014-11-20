@@ -17,7 +17,7 @@ package {{.Package}};
 @io.veyron.veyron.veyron2.vdl.GeneratedFromVdlType("{{.VdlTypeName}}")
 {{ .AccessModifier }} final class {{.Name}} extends io.veyron.veyron.veyron2.vdl.VdlList<{{.ElemType}}> {
     public static final io.veyron.veyron.veyron2.vdl.VdlType VDL_TYPE =
-            io.veyron.veyron.veyron2.vdl.Types.getVdlTypeFromReflection({{.Name}}.class);
+            io.veyron.veyron.veyron2.vdl.Types.getVdlTypeFromReflect({{.Name}}.class);
 
     public {{.Name}}(java.util.List<{{.ElemType}}> impl) {
         super(VDL_TYPE, impl);

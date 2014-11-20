@@ -22,7 +22,7 @@ package {{.PackagePath}};
     {{ end }}
 
     public static final io.veyron.veyron.veyron2.vdl.VdlType VDL_TYPE =
-            io.veyron.veyron.veyron2.vdl.Types.getVdlTypeFromReflection({{.Name}}.class);
+            io.veyron.veyron.veyron2.vdl.Types.getVdlTypeFromReflect({{.Name}}.class);
 
     static {
         {{ range $label := .EnumLabels }}
