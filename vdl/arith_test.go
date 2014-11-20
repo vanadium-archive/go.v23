@@ -249,6 +249,49 @@ func TestCalculator(t *testing.T) {
 					PkgPath: "veyron.io/veyron/veyron2/vdl/testdata/arith/exp",
 				}},
 		},
+		{
+			Name:    "Trigonometry",
+			PkgPath: "veyron.io/veyron/veyron2/vdl/testdata/arith",
+			Doc:     "// Trigonometry is an interface that specifies a couple trigonometric functions.",
+			Methods: []ipc.MethodDesc{
+				{
+					Name: "Sine",
+					InArgs: []ipc.ArgDesc{
+						{"angle", ``}, // float64
+					},
+					OutArgs: []ipc.ArgDesc{
+						{"", ``}, // float64
+						{"", ``}, // error
+					},
+				},
+				{
+					Name: "Cosine",
+					InArgs: []ipc.ArgDesc{
+						{"angle", ``}, // float64
+					},
+					OutArgs: []ipc.ArgDesc{
+						{"", ``}, // float64
+						{"", ``}, // error
+					},
+				},
+			},
+		},
+		{
+			Name:    "Exp",
+			PkgPath: "veyron.io/veyron/veyron2/vdl/testdata/arith/exp",
+			Methods: []ipc.MethodDesc{
+				{
+					Name: "Exp",
+					InArgs: []ipc.ArgDesc{
+						{"x", ``}, // float64
+					},
+					OutArgs: []ipc.ArgDesc{
+						{"", ``}, // float64
+						{"", ``}, // error
+					},
+				},
+			},
+		},
 	})
 	// TODO(toddw): Remove this test.
 	signature, err := serverStub.Signature(nil)

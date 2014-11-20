@@ -27,6 +27,8 @@
 package arith
 
 import (
+	"veyron.io/veyron/veyron2/vdl/testdata/arith/exp"
+
 	"veyron.io/veyron/veyron2/vdl/testdata/base"
 
 	// The non-user imports are prefixed with "__" to prevent collisions.
@@ -1004,7 +1006,7 @@ func (s implCalculatorServerStub) VGlob() *__ipc.GlobState {
 }
 
 func (s implCalculatorServerStub) Describe__() []__ipc.InterfaceDesc {
-	return []__ipc.InterfaceDesc{CalculatorDesc, ArithDesc, AdvancedMathDesc}
+	return []__ipc.InterfaceDesc{CalculatorDesc, ArithDesc, AdvancedMathDesc, TrigonometryDesc, exp.ExpDesc}
 }
 
 // CalculatorDesc describes the Calculator interface.

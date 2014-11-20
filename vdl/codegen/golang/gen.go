@@ -735,7 +735,7 @@ func (s impl{{$iface.Name}}ServerStub) VGlob() *__ipc.GlobState {
 }
 
 func (s impl{{$iface.Name}}ServerStub) Describe__() []__ipc.InterfaceDesc {
-	return []__ipc.InterfaceDesc{ {{$iface.Name}}Desc{{range $embed := $iface.Embeds}}, {{embedGo $data $embed}}Desc{{end}} }
+	return []__ipc.InterfaceDesc{ {{$iface.Name}}Desc{{range $embed := $iface.TransitiveEmbeds}}, {{embedGo $data $embed}}Desc{{end}} }
 }
 
 // {{$iface.Name}}Desc describes the {{$iface.Name}} interface.

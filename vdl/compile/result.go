@@ -418,7 +418,6 @@ func (x *Interface) String() string {
 	c.File = nil // avoid infinite loop
 	return fmt.Sprintf("%+v", c)
 }
-
 func (x *Interface) AllMethods() []*Method {
 	result := make([]*Method, len(x.Methods))
 	copy(result, x.Methods)
@@ -426,6 +425,20 @@ func (x *Interface) AllMethods() []*Method {
 		result = append(result, embed.AllMethods()...)
 	}
 	return result
+}
+func (x *Interface) TransitiveEmbeds() []*Interface {
+	return x.transitiveEmbeds(make(map[*Interface]bool))
+}
+func (x *Interface) transitiveEmbeds(seen map[*Interface]bool) []*Interface {
+	var ret []*Interface
+	for _, e := range x.Embeds {
+		if !seen[e] {
+			seen[e] = true
+			ret = append(ret, e)
+			ret = append(ret, e.transitiveEmbeds(seen)...)
+		}
+	}
+	return ret
 }
 
 // We might consider allowing more characters, but we'll need to ensure they're

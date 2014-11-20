@@ -1270,7 +1270,7 @@ func (s implNodeServerStub) VGlob() *__ipc.GlobState {
 }
 
 func (s implNodeServerStub) Describe__() []__ipc.InterfaceDesc {
-	return []__ipc.InterfaceDesc{NodeDesc, ApplicationDesc}
+	return []__ipc.InterfaceDesc{NodeDesc, ApplicationDesc, access.ObjectDesc}
 }
 
 // NodeDesc describes the Node interface.

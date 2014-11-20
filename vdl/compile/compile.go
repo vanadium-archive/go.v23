@@ -178,7 +178,7 @@ func computeDeps(pkg *Package, env *Env) {
 		// Interfaces contribute the packages of their arg types and tag types, as
 		// well as embedded interfaces.
 		for _, iface := range file.Interfaces {
-			for _, embed := range iface.Embeds {
+			for _, embed := range iface.TransitiveEmbeds() {
 				pdeps[embed.File.Package] = true
 			}
 			for _, method := range iface.Methods {
