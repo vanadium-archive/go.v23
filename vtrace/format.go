@@ -122,7 +122,7 @@ func formatTime(when int64, loc *time.Location) string {
 func FormatTrace(w io.Writer, record *TraceRecord, loc *time.Location) {
 	if root := buildTree(record); root != nil {
 		fmt.Fprintf(w, "Trace - %x (%s, %s)\n",
-			record.ID[12:],
+			record.ID,
 			formatTime(root.span.Start, loc),
 			formatTime(root.span.End, loc))
 		for _, c := range root.children {

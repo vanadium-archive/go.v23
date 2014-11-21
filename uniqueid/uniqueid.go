@@ -8,6 +8,7 @@ package uniqueid
 import (
 	"crypto/rand"
 	"encoding/binary"
+	"fmt"
 	"sync"
 )
 
@@ -16,6 +17,19 @@ var random = RandomGenerator{}
 // Valid returns true if the given ID is valid.
 func Valid(id ID) bool {
 	return id != ID{}
+}
+
+func FromHexString(s string) (ID, error) {
+	var id ID
+	var slice []byte
+	if _, err := fmt.Sscanf(s, "%x", &slice); err != nil {
+		return id, err
+	}
+	if len(slice) != len(id) {
+		return id, fmt.Errorf("Cannot convert %s to ID, size mismatch.", s)
+	}
+	copy(id[:], slice)
+	return id, nil
 }
 
 // A RandomGenerator can generate random IDs.
