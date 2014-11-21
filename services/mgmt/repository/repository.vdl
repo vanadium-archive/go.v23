@@ -48,10 +48,11 @@ type Application interface {
 // To delete the binary, clients invoke the Delete() method.
 type Binary interface {
 	// Create expresses the intent to create a binary identified by the
-	// object name suffix consisting of the given number of parts. If
-	// the suffix identifies a binary that has already been created, the
-	// method returns an error.
-	Create(nparts int32) error {security.WriteLabel}
+	// object name suffix consisting of the given number of parts. The
+	// mediaType is the RFC 2046 media type of the object. If the suffix
+	// identifies a binary that has already been created, the method
+	// returns an error.
+	Create(nparts int32, mediaType string) error {security.WriteLabel}
 	// Delete deletes the binary identified by the object name
 	// suffix. If the binary that has not been created, the method
 	// returns an error.
@@ -69,9 +70,9 @@ type Binary interface {
 	// the method returns an error.
 	DownloadURL() (URL string, TTL int64, err error) {security.ReadLabel}
 	// Stat returns information describing the parts of the binary
-	// identified by the object name suffix. If the binary has not been
-	// created, the method returns an error.
-	Stat() ([]binary.PartInfo, error) {security.ReadLabel}
+	// identified by the object name suffix, and its RFC 2046 media type.
+	// If the binary has not been created, the method returns an error.
+	Stat() (Parts []binary.PartInfo, MediaType string, err error) {security.ReadLabel}
 	// Upload opens a stream that can be used for uploading the given
 	// part of the binary identified by the object name suffix. If the
 	// binary has not been created, the method returns an error. If the

@@ -12,12 +12,24 @@ type Envelope struct {
 	//
 	// A change in the title signals a new application.
 	Title string
-	// Arguments is an array of command-line arguments to be used when
-	// executing the binary.
+	// Args is an array of command-line arguments to be used when executing
+	// the binary.
 	Args []string
 	// Binary is an object name that identifies the application binary.
 	Binary string
-	// Environment is a map that stores the environment variable values
-	// to be used when executing the binary.
+	// Env is an array that stores the environment variable values to be
+	// used when executing the binary.
 	Env []string
+	// Packages is a map of packages to install on the local filesystem
+	// before executing the binary. The map key is the local directory
+	// name, relative to the instance's initial work directory, where the
+	// package should be installed. The map value is the object name of the
+	// package, e.g. With key=pkg1,value=binaryrepo/configfiles, the
+	// "configfiles" package will be installed under the "pkg1" directory.
+	// Each object's media type determines how to install it.
+	//
+	// The keys must be valid directory names, without path separators.
+	//
+	// Any number of packages may be specified.
+	Packages map[string]string
 }

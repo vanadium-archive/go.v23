@@ -202,18 +202,19 @@ func (s implApplicationServerStub) Signature(ctx __ipc.ServerContext) (__ipc.Ser
 			{Name: "Profiles", Type: 61},
 		},
 		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 65},
 			{Name: "", Type: 66},
+			{Name: "", Type: 67},
 		},
 	}
 
 	result.TypeDefs = []__vdlutil.Any{
-		__wiretype.StructType{
+		__wiretype.MapType{Key: 0x3, Elem: 0x3, Name: "", Tags: []string(nil)}, __wiretype.StructType{
 			[]__wiretype.FieldType{
 				__wiretype.FieldType{Type: 0x3, Name: "Title"},
 				__wiretype.FieldType{Type: 0x3d, Name: "Args"},
 				__wiretype.FieldType{Type: 0x3, Name: "Binary"},
 				__wiretype.FieldType{Type: 0x3d, Name: "Env"},
+				__wiretype.FieldType{Type: 0x41, Name: "Packages"},
 			},
 			"veyron.io/veyron/veyron2/services/mgmt/application.Envelope", []string(nil)},
 		__wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}}
@@ -245,10 +246,11 @@ func (s implApplicationServerStub) Signature(ctx __ipc.ServerContext) (__ipc.Ser
 // To delete the binary, clients invoke the Delete() method.
 type BinaryClientMethods interface {
 	// Create expresses the intent to create a binary identified by the
-	// object name suffix consisting of the given number of parts. If
-	// the suffix identifies a binary that has already been created, the
-	// method returns an error.
-	Create(ctx __context.T, nparts int32, opts ...__ipc.CallOpt) error
+	// object name suffix consisting of the given number of parts. The
+	// mediaType is the RFC 2046 media type of the object. If the suffix
+	// identifies a binary that has already been created, the method
+	// returns an error.
+	Create(ctx __context.T, nparts int32, mediaType string, opts ...__ipc.CallOpt) error
 	// Delete deletes the binary identified by the object name
 	// suffix. If the binary that has not been created, the method
 	// returns an error.
@@ -266,9 +268,9 @@ type BinaryClientMethods interface {
 	// the method returns an error.
 	DownloadURL(__context.T, ...__ipc.CallOpt) (URL string, TTL int64, err error)
 	// Stat returns information describing the parts of the binary
-	// identified by the object name suffix. If the binary has not been
-	// created, the method returns an error.
-	Stat(__context.T, ...__ipc.CallOpt) ([]binary.PartInfo, error)
+	// identified by the object name suffix, and its RFC 2046 media type.
+	// If the binary has not been created, the method returns an error.
+	Stat(__context.T, ...__ipc.CallOpt) (Parts []binary.PartInfo, MediaType string, err error)
 	// Upload opens a stream that can be used for uploading the given
 	// part of the binary identified by the object name suffix. If the
 	// binary has not been created, the method returns an error. If the
@@ -307,9 +309,9 @@ func (c implBinaryClientStub) c(ctx __context.T) __ipc.Client {
 	return __veyron2.RuntimeFromContext(ctx).Client()
 }
 
-func (c implBinaryClientStub) Create(ctx __context.T, i0 int32, opts ...__ipc.CallOpt) (err error) {
+func (c implBinaryClientStub) Create(ctx __context.T, i0 int32, i1 string, opts ...__ipc.CallOpt) (err error) {
 	var call __ipc.Call
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Create", []interface{}{i0}, opts...); err != nil {
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "Create", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&err); ierr != nil {
@@ -349,12 +351,12 @@ func (c implBinaryClientStub) DownloadURL(ctx __context.T, opts ...__ipc.CallOpt
 	return
 }
 
-func (c implBinaryClientStub) Stat(ctx __context.T, opts ...__ipc.CallOpt) (o0 []binary.PartInfo, err error) {
+func (c implBinaryClientStub) Stat(ctx __context.T, opts ...__ipc.CallOpt) (o0 []binary.PartInfo, o1 string, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Stat", nil, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
+	if ierr := call.Finish(&o0, &o1, &err); ierr != nil {
 		err = ierr
 	}
 	return
@@ -545,10 +547,11 @@ func (c *implBinaryUploadCall) Finish() (err error) {
 // To delete the binary, clients invoke the Delete() method.
 type BinaryServerMethods interface {
 	// Create expresses the intent to create a binary identified by the
-	// object name suffix consisting of the given number of parts. If
-	// the suffix identifies a binary that has already been created, the
-	// method returns an error.
-	Create(ctx __ipc.ServerContext, nparts int32) error
+	// object name suffix consisting of the given number of parts. The
+	// mediaType is the RFC 2046 media type of the object. If the suffix
+	// identifies a binary that has already been created, the method
+	// returns an error.
+	Create(ctx __ipc.ServerContext, nparts int32, mediaType string) error
 	// Delete deletes the binary identified by the object name
 	// suffix. If the binary that has not been created, the method
 	// returns an error.
@@ -566,9 +569,9 @@ type BinaryServerMethods interface {
 	// the method returns an error.
 	DownloadURL(__ipc.ServerContext) (URL string, TTL int64, err error)
 	// Stat returns information describing the parts of the binary
-	// identified by the object name suffix. If the binary has not been
-	// created, the method returns an error.
-	Stat(__ipc.ServerContext) ([]binary.PartInfo, error)
+	// identified by the object name suffix, and its RFC 2046 media type.
+	// If the binary has not been created, the method returns an error.
+	Stat(__ipc.ServerContext) (Parts []binary.PartInfo, MediaType string, err error)
 	// Upload opens a stream that can be used for uploading the given
 	// part of the binary identified by the object name suffix. If the
 	// binary has not been created, the method returns an error. If the
@@ -584,10 +587,11 @@ type BinaryServerMethods interface {
 // is the streaming methods.
 type BinaryServerStubMethods interface {
 	// Create expresses the intent to create a binary identified by the
-	// object name suffix consisting of the given number of parts. If
-	// the suffix identifies a binary that has already been created, the
-	// method returns an error.
-	Create(ctx __ipc.ServerContext, nparts int32) error
+	// object name suffix consisting of the given number of parts. The
+	// mediaType is the RFC 2046 media type of the object. If the suffix
+	// identifies a binary that has already been created, the method
+	// returns an error.
+	Create(ctx __ipc.ServerContext, nparts int32, mediaType string) error
 	// Delete deletes the binary identified by the object name
 	// suffix. If the binary that has not been created, the method
 	// returns an error.
@@ -605,9 +609,9 @@ type BinaryServerStubMethods interface {
 	// the method returns an error.
 	DownloadURL(__ipc.ServerContext) (URL string, TTL int64, err error)
 	// Stat returns information describing the parts of the binary
-	// identified by the object name suffix. If the binary has not been
-	// created, the method returns an error.
-	Stat(__ipc.ServerContext) ([]binary.PartInfo, error)
+	// identified by the object name suffix, and its RFC 2046 media type.
+	// If the binary has not been created, the method returns an error.
+	Stat(__ipc.ServerContext) (Parts []binary.PartInfo, MediaType string, err error)
 	// Upload opens a stream that can be used for uploading the given
 	// part of the binary identified by the object name suffix. If the
 	// binary has not been created, the method returns an error. If the
@@ -648,8 +652,8 @@ type implBinaryServerStub struct {
 	gs   *__ipc.GlobState
 }
 
-func (s implBinaryServerStub) Create(ctx __ipc.ServerContext, i0 int32) error {
-	return s.impl.Create(ctx, i0)
+func (s implBinaryServerStub) Create(ctx __ipc.ServerContext, i0 int32, i1 string) error {
+	return s.impl.Create(ctx, i0, i1)
 }
 
 func (s implBinaryServerStub) Delete(ctx __ipc.ServerContext) error {
@@ -664,7 +668,7 @@ func (s implBinaryServerStub) DownloadURL(ctx __ipc.ServerContext) (string, int6
 	return s.impl.DownloadURL(ctx)
 }
 
-func (s implBinaryServerStub) Stat(ctx __ipc.ServerContext) ([]binary.PartInfo, error) {
+func (s implBinaryServerStub) Stat(ctx __ipc.ServerContext) ([]binary.PartInfo, string, error) {
 	return s.impl.Stat(ctx)
 }
 
@@ -691,9 +695,10 @@ var descBinary = __ipc.InterfaceDesc{
 	Methods: []__ipc.MethodDesc{
 		{
 			Name: "Create",
-			Doc:  "// Create expresses the intent to create a binary identified by the\n// object name suffix consisting of the given number of parts. If\n// the suffix identifies a binary that has already been created, the\n// method returns an error.",
+			Doc:  "// Create expresses the intent to create a binary identified by the\n// object name suffix consisting of the given number of parts. The\n// mediaType is the RFC 2046 media type of the object. If the suffix\n// identifies a binary that has already been created, the method\n// returns an error.",
 			InArgs: []__ipc.ArgDesc{
-				{"nparts", ``}, // int32
+				{"nparts", ``},    // int32
+				{"mediaType", ``}, // string
 			},
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
@@ -731,10 +736,11 @@ var descBinary = __ipc.InterfaceDesc{
 		},
 		{
 			Name: "Stat",
-			Doc:  "// Stat returns information describing the parts of the binary\n// identified by the object name suffix. If the binary has not been\n// created, the method returns an error.",
+			Doc:  "// Stat returns information describing the parts of the binary\n// identified by the object name suffix, and its RFC 2046 media type.\n// If the binary has not been created, the method returns an error.",
 			OutArgs: []__ipc.ArgDesc{
-				{"", ``}, // []binary.PartInfo
-				{"", ``}, // error
+				{"Parts", ``},     // []binary.PartInfo
+				{"MediaType", ``}, // string
+				{"err", ``},       // error
 			},
 			Tags: []__vdlutil.Any{security.Label(2)},
 		},
@@ -758,6 +764,7 @@ func (s implBinaryServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceS
 	result.Methods["Create"] = __ipc.MethodSignature{
 		InArgs: []__ipc.MethodArgument{
 			{Name: "nparts", Type: 36},
+			{Name: "mediaType", Type: 3},
 		},
 		OutArgs: []__ipc.MethodArgument{
 			{Name: "", Type: 65},
@@ -790,8 +797,9 @@ func (s implBinaryServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceS
 	result.Methods["Stat"] = __ipc.MethodSignature{
 		InArgs: []__ipc.MethodArgument{},
 		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 69},
-			{Name: "", Type: 65},
+			{Name: "Parts", Type: 69},
+			{Name: "MediaType", Type: 3},
+			{Name: "err", Type: 65},
 		},
 	}
 	result.Methods["Upload"] = __ipc.MethodSignature{
