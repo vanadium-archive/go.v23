@@ -704,20 +704,26 @@ func TestConverterOneOf(t *testing.T) {
 	rv123 := int64(123)
 	rvAbc := string("Abc")
 	rvStruct123 := nStructInt64{123}
-	// values for oneof{bool;string;struct}
-	vvTrueBSS := vdl.ZeroValue(oneOfBSSTypeN).Assign(vvTrue)
-	vvAbcBSS := vdl.ZeroValue(oneOfBSSTypeN).Assign(vvAbc)
-	vvStruct123BSS := vdl.ZeroValue(oneOfBSSTypeN).Assign(vvStruct123)
-	rvTrueBSS := mustmakeOneOfBSS(rvTrue)
-	rvAbcBSS := mustmakeOneOfBSS(rvAbc)
-	rvStruct123BSS := mustmakeOneOfBSS(rvStruct123)
-	// values for oneof{int64;string;struct}
-	vv123ISS := vdl.ZeroValue(oneOfISSTypeN).Assign(vv123)
-	vvAbcISS := vdl.ZeroValue(oneOfISSTypeN).Assign(vvAbc)
-	vvStruct123ISS := vdl.ZeroValue(oneOfISSTypeN).Assign(vvStruct123)
-	rv123ISS := mustmakeOneOfISS(rv123)
-	rvAbcISS := mustmakeOneOfISS(rvAbc)
-	rvStruct123ISS := mustmakeOneOfISS(rvStruct123)
+	// values for oneof{A bool;B string;C struct}
+	vvTrueABC := vdl.ZeroValue(oneOfABCTypeN).AssignOneOfField(0, vvTrue)
+	vvAbcABC := vdl.ZeroValue(oneOfABCTypeN).AssignOneOfField(1, vvAbc)
+	vvStruct123ABC := vdl.ZeroValue(oneOfABCTypeN).AssignOneOfField(2, vvStruct123)
+	rvTrueABC := nOneOfABCA{rvTrue}
+	rvAbcABC := nOneOfABCB{rvAbc}
+	rvStruct123ABC := nOneOfABCC{rvStruct123}
+	rvTrueABCi := nOneOfABC(rvTrueABC)
+	rvAbcABCi := nOneOfABC(rvAbcABC)
+	rvStruct123ABCi := nOneOfABC(rvStruct123ABC)
+	// values for oneof{B string;C struct;D int64}
+	vvAbcBCD := vdl.ZeroValue(oneOfBCDTypeN).AssignOneOfField(0, vvAbc)
+	vvStruct123BCD := vdl.ZeroValue(oneOfBCDTypeN).AssignOneOfField(1, vvStruct123)
+	vv123BCD := vdl.ZeroValue(oneOfBCDTypeN).AssignOneOfField(2, vv123)
+	rvAbcBCD := nOneOfBCDB{rvAbc}
+	rvStruct123BCD := nOneOfBCDC{rvStruct123}
+	rv123BCD := nOneOfBCDD{rv123}
+	rvAbcBCDi := nOneOfBCD(rvAbcBCD)
+	rvStruct123BCDi := nOneOfBCD(rvStruct123BCD)
+	rv123BCDi := nOneOfBCD(rv123BCD)
 
 	tests := []struct {
 		vvWant *vdl.Value
@@ -725,35 +731,31 @@ func TestConverterOneOf(t *testing.T) {
 		vvSrc  *vdl.Value
 		rvSrc  interface{}
 	}{
-		// Convert source oneof to component.
-		{vvTrue, rvTrue, vvTrueBSS, rvTrueBSS},
-		{vv123, rv123, vv123ISS, rv123ISS},
-		{vvAbc, rvAbc, vvAbcBSS, rvAbcBSS},
-		{vvAbc, rvAbc, vvAbcISS, rvAbcISS},
-		{vvStruct123, rvStruct123, vvStruct123BSS, rvStruct123BSS},
-		{vvStruct123, rvStruct123, vvStruct123ISS, rvStruct123ISS},
-
-		// Convert source component to target oneof.
-		{vvTrueBSS, rvTrueBSS, vvTrue, rvTrue},
-		{vv123ISS, rv123ISS, vv123, rv123},
-		{vvAbcBSS, rvAbcBSS, vvAbc, rvAbc},
-		{vvAbcISS, rvAbcISS, vvAbc, rvAbc},
-		{vvStruct123BSS, rvStruct123BSS, vvStruct123, rvStruct123},
-		{vvStruct123ISS, rvStruct123ISS, vvStruct123, rvStruct123},
-
 		// Convert source and target same oneof.
-		{vvTrueBSS, rvTrueBSS, vvTrueBSS, rvTrueBSS},
-		{vv123ISS, rv123ISS, vv123ISS, rv123ISS},
-		{vvAbcBSS, rvAbcBSS, vvAbcBSS, rvAbcBSS},
-		{vvAbcISS, rvAbcISS, vvAbcISS, rvAbcISS},
-		{vvStruct123BSS, rvStruct123BSS, vvStruct123BSS, rvStruct123BSS},
-		{vvStruct123ISS, rvStruct123ISS, vvStruct123ISS, rvStruct123ISS},
+		{vvTrueABC, rvTrueABC, vvTrueABC, rvTrueABC},
+		{vv123BCD, rv123BCD, vv123BCD, rv123BCD},
+		{vvAbcABC, rvAbcABC, vvAbcABC, rvAbcABC},
+		{vvAbcBCD, rvAbcBCD, vvAbcBCD, rvAbcBCD},
+		{vvStruct123ABC, rvStruct123ABC, vvStruct123ABC, rvStruct123ABC},
+		{vvStruct123BCD, rvStruct123BCD, vvStruct123BCD, rvStruct123BCD},
+		// Same thing, but with pointers to the interface type.
+		{vvTrueABC, &rvTrueABCi, vvTrueABC, &rvTrueABCi},
+		{vv123BCD, &rv123BCDi, vv123BCD, &rv123BCD},
+		{vvAbcABC, &rvAbcABCi, vvAbcABC, &rvAbcABC},
+		{vvAbcBCD, &rvAbcBCDi, vvAbcBCD, &rvAbcBCD},
+		{vvStruct123ABC, &rvStruct123ABCi, vvStruct123ABC, &rvStruct123ABCi},
+		{vvStruct123BCD, &rvStruct123BCDi, vvStruct123BCD, &rvStruct123BCDi},
 
 		// Convert source and target different oneof.
-		{vvAbcBSS, rvAbcBSS, vvAbcISS, rvAbcISS},
-		{vvAbcISS, rvAbcISS, vvAbcBSS, rvAbcBSS},
-		{vvStruct123BSS, rvStruct123BSS, vvStruct123ISS, rvStruct123ISS},
-		{vvStruct123ISS, rvStruct123ISS, vvStruct123BSS, rvStruct123BSS},
+		{vvAbcABC, rvAbcABC, vvAbcBCD, rvAbcBCD},
+		{vvAbcBCD, rvAbcBCD, vvAbcABC, rvAbcABC},
+		{vvStruct123ABC, rvStruct123ABC, vvStruct123BCD, rvStruct123BCD},
+		{vvStruct123BCD, rvStruct123BCD, vvStruct123ABC, rvStruct123ABC},
+		// Same thing, but with pointers to the interface type.
+		{vvAbcABC, &rvAbcABCi, vvAbcBCD, &rvAbcBCDi},
+		{vvAbcBCD, &rvAbcBCDi, vvAbcABC, &rvAbcABCi},
+		{vvStruct123ABC, &rvStruct123ABCi, vvStruct123BCD, &rvStruct123BCDi},
+		{vvStruct123BCD, &rvStruct123BCDi, vvStruct123ABC, &rvStruct123ABCi},
 	}
 	for _, test := range tests {
 		testConverterWantSrc(t,

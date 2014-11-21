@@ -185,157 +185,156 @@ var yyExca = []int{
 	-1, 40,
 	12, 39,
 	16, 39,
-	-2, 117,
-	-1, 199,
-	17, 140,
-	-2, 135,
-	-1, 267,
-	17, 140,
-	-2, 135,
+	-2, 116,
+	-1, 198,
+	17, 139,
+	-2, 134,
+	-1, 265,
+	17, 139,
+	-2, 134,
 }
 
-const yyNprod = 141
+const yyNprod = 140
 const yyPrivate = 57344
 
 var yyTokenNames []string
 var yyStates []string
 
-const yyLast = 748
+const yyLast = 753
 
 var yyAct = []int{
 
-	166, 236, 159, 227, 119, 167, 198, 122, 40, 165,
-	96, 55, 115, 152, 58, 57, 211, 27, 225, 110,
-	228, 179, 42, 123, 43, 158, 21, 261, 22, 23,
-	120, 30, 31, 32, 172, 34, 56, 20, 153, 33,
-	49, 146, 145, 94, 13, 10, 241, 107, 121, 95,
-	44, 58, 57, 228, 46, 48, 175, 45, 105, 47,
-	123, 35, 50, 36, 37, 38, 39, 124, 125, 126,
+	166, 234, 158, 197, 165, 40, 159, 115, 119, 225,
+	156, 167, 152, 96, 58, 57, 122, 27, 210, 110,
+	226, 42, 123, 43, 223, 120, 259, 179, 172, 153,
+	30, 31, 32, 146, 145, 34, 56, 13, 33, 49,
+	10, 239, 7, 94, 23, 182, 178, 107, 121, 44,
+	16, 175, 95, 46, 48, 105, 45, 55, 47, 226,
+	35, 50, 36, 37, 38, 39, 123, 124, 125, 126,
 	127, 128, 129, 130, 131, 132, 133, 134, 135, 136,
 	137, 138, 139, 140, 141, 103, 58, 57, 123, 142,
-	118, 144, 109, 114, 147, 120, 7, 52, 105, 169,
-	63, 23, 64, 265, 182, 105, 271, 105, 105, 105,
-	105, 62, 264, 25, 178, 16, 249, 28, 269, 238,
-	220, 218, 215, 177, 212, 103, 105, 171, 255, 181,
-	120, 53, 103, 117, 103, 103, 103, 103, 172, 205,
-	43, 106, 260, 101, 100, 256, 97, 102, 84, 85,
-	86, 87, 191, 103, 190, 149, 49, 188, 105, 99,
-	92, 98, 192, 93, 18, 258, 44, 196, 105, 91,
-	46, 48, 90, 45, 232, 47, 203, 104, 50, 208,
-	26, 105, 206, 230, 223, 103, 209, 143, 201, 184,
-	237, 89, 88, 91, 150, 103, 154, 155, 160, 162,
-	105, 222, 105, 213, 105, 202, 105, 235, 103, 221,
-	267, 251, 231, 199, 229, 173, 210, 224, 233, 216,
-	207, 76, 77, 78, 204, 80, 197, 103, 193, 103,
-	189, 103, 234, 103, 82, 83, 168, 113, 112, 239,
-	244, 111, 248, 54, 229, 24, 105, 187, 9, 105,
-	250, 253, 180, 105, 11, 12, 263, 194, 105, 176,
-	105, 105, 6, 245, 14, 15, 8, 17, 270, 266,
-	173, 116, 170, 103, 105, 61, 103, 259, 252, 60,
-	103, 59, 43, 108, 19, 103, 1, 103, 103, 214,
-	164, 160, 41, 217, 262, 219, 254, 29, 49, 226,
-	246, 103, 2, 3, 4, 5, 243, 156, 44, 240,
-	161, 51, 46, 48, 151, 45, 0, 47, 0, 104,
-	50, 0, 0, 0, 0, 74, 75, 76, 77, 78,
-	79, 80, 81, 0, 42, 160, 43, 0, 247, 163,
-	82, 83, 194, 30, 31, 32, 0, 257, 0, 160,
-	217, 33, 49, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 44, 268, 0, 0, 46, 48, 0, 45,
-	42, 47, 43, 35, 50, 36, 37, 38, 39, 30,
-	31, 32, 0, 0, 0, 0, 0, 33, 49, 0,
-	237, 0, 43, 0, 0, 0, 0, 0, 44, 0,
-	0, 0, 46, 48, 0, 45, 0, 47, 49, 35,
-	50, 36, 37, 38, 39, 242, 43, 0, 44, 0,
-	0, 0, 46, 48, 0, 45, 0, 47, 0, 104,
-	50, 0, 49, 0, 0, 195, 0, 0, 0, 43,
-	0, 0, 44, 0, 0, 0, 46, 48, 0, 45,
-	0, 47, 43, 104, 50, 49, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 44, 0, 0, 49, 46,
-	48, 0, 45, 0, 47, 0, 104, 50, 44, 0,
-	0, 174, 46, 48, 0, 45, 0, 47, 43, 104,
-	50, 157, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 43, 0, 0, 49, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 44, 0, 0, 49, 46, 48,
-	0, 45, 0, 47, 0, 104, 50, 44, 0, 0,
-	0, 46, 48, 200, 45, 0, 47, 0, 104, 50,
-	0, 0, 68, 69, 0, 0, 74, 75, 76, 77,
-	78, 79, 80, 81, 0, 66, 67, 70, 71, 72,
-	73, 82, 83, 186, 0, 0, 68, 69, 0, 0,
-	74, 75, 76, 77, 78, 79, 80, 81, 0, 66,
-	67, 70, 71, 72, 73, 82, 83, 185, 0, 0,
+	120, 144, 109, 118, 147, 105, 269, 58, 57, 253,
+	247, 169, 105, 25, 105, 105, 105, 105, 21, 114,
+	22, 23, 161, 43, 204, 263, 106, 52, 254, 20,
+	267, 53, 171, 105, 262, 103, 236, 177, 218, 49,
+	217, 214, 103, 120, 103, 103, 103, 103, 181, 44,
+	172, 211, 101, 46, 48, 63, 45, 64, 47, 117,
+	104, 50, 100, 103, 97, 105, 62, 76, 77, 78,
+	18, 80, 191, 188, 190, 105, 149, 102, 192, 92,
+	82, 83, 93, 196, 91, 99, 26, 90, 105, 207,
+	98, 12, 202, 258, 256, 103, 230, 228, 205, 28,
+	14, 15, 208, 17, 221, 103, 215, 105, 200, 105,
+	220, 105, 212, 219, 184, 201, 235, 143, 103, 89,
+	227, 222, 88, 91, 150, 229, 154, 155, 160, 160,
+	84, 85, 86, 87, 265, 249, 231, 103, 198, 103,
+	233, 103, 209, 206, 203, 173, 232, 193, 243, 227,
+	246, 105, 242, 237, 105, 248, 251, 189, 105, 168,
+	113, 112, 257, 105, 261, 105, 105, 2, 3, 4,
+	5, 180, 111, 54, 264, 24, 268, 187, 6, 105,
+	9, 103, 8, 176, 103, 116, 11, 194, 103, 170,
+	61, 60, 59, 103, 108, 103, 103, 42, 19, 43,
+	173, 1, 163, 164, 41, 260, 30, 31, 32, 103,
+	252, 29, 224, 250, 33, 49, 244, 43, 241, 213,
+	238, 160, 51, 216, 151, 44, 0, 0, 0, 46,
+	48, 0, 45, 49, 47, 0, 35, 50, 36, 37,
+	38, 39, 0, 44, 0, 0, 0, 46, 48, 0,
+	45, 0, 47, 0, 104, 50, 0, 0, 0, 0,
+	0, 0, 42, 160, 43, 0, 245, 0, 0, 0,
+	194, 30, 31, 32, 0, 255, 0, 160, 216, 33,
+	49, 0, 235, 0, 43, 0, 0, 0, 0, 0,
+	44, 266, 0, 0, 46, 48, 0, 45, 0, 47,
+	49, 35, 50, 36, 37, 38, 39, 240, 43, 0,
+	44, 0, 0, 0, 46, 48, 0, 45, 0, 47,
+	0, 104, 50, 0, 49, 0, 0, 195, 0, 0,
+	0, 43, 0, 0, 44, 0, 0, 0, 46, 48,
+	0, 45, 0, 47, 43, 104, 50, 49, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 44, 0, 0,
+	49, 46, 48, 0, 45, 0, 47, 0, 104, 50,
+	44, 0, 0, 174, 46, 48, 0, 45, 0, 47,
+	43, 104, 50, 162, 74, 75, 76, 77, 78, 79,
+	80, 81, 0, 0, 0, 0, 49, 0, 43, 82,
+	83, 157, 0, 0, 0, 0, 44, 0, 0, 0,
+	46, 48, 0, 45, 49, 47, 43, 104, 50, 0,
+	0, 0, 0, 0, 44, 0, 0, 0, 46, 48,
+	0, 45, 49, 47, 0, 104, 50, 0, 0, 0,
+	0, 0, 44, 0, 0, 0, 46, 48, 199, 45,
+	0, 47, 0, 104, 50, 0, 0, 68, 69, 0,
+	0, 74, 75, 76, 77, 78, 79, 80, 81, 0,
+	66, 67, 70, 71, 72, 73, 82, 83, 186, 0,
+	0, 68, 69, 0, 0, 74, 75, 76, 77, 78,
+	79, 80, 81, 0, 66, 67, 70, 71, 72, 73,
+	82, 83, 185, 0, 0, 68, 69, 0, 0, 74,
+	75, 76, 77, 78, 79, 80, 81, 0, 66, 67,
+	70, 71, 72, 73, 82, 83, 183, 0, 0, 0,
+	0, 68, 69, 0, 0, 74, 75, 76, 77, 78,
+	79, 80, 81, 0, 66, 67, 70, 71, 72, 73,
+	82, 83, 148, 0, 0, 0, 0, 68, 69, 0,
+	0, 74, 75, 76, 77, 78, 79, 80, 81, 65,
+	66, 67, 70, 71, 72, 73, 82, 83, 0, 68,
+	69, 0, 0, 74, 75, 76, 77, 78, 79, 80,
+	81, 0, 66, 67, 70, 71, 72, 73, 82, 83,
 	68, 69, 0, 0, 74, 75, 76, 77, 78, 79,
 	80, 81, 0, 66, 67, 70, 71, 72, 73, 82,
-	83, 183, 0, 0, 0, 0, 68, 69, 0, 0,
-	74, 75, 76, 77, 78, 79, 80, 81, 0, 66,
-	67, 70, 71, 72, 73, 82, 83, 148, 0, 0,
-	0, 0, 68, 69, 0, 0, 74, 75, 76, 77,
-	78, 79, 80, 81, 65, 66, 67, 70, 71, 72,
-	73, 82, 83, 0, 68, 69, 0, 0, 74, 75,
-	76, 77, 78, 79, 80, 81, 0, 66, 67, 70,
-	71, 72, 73, 82, 83, 68, 69, 0, 0, 74,
-	75, 76, 77, 78, 79, 80, 81, 0, 66, 67,
-	70, 71, 72, 73, 82, 83, 68, 69, 0, 0,
-	74, 75, 76, 77, 78, 79, 80, 81, 0, 0,
-	67, 70, 71, 72, 73, 82, 83, 68, 69, 0,
-	0, 74, 75, 76, 77, 78, 79, 80, 81, 0,
-	0, 0, 70, 71, 72, 73, 82, 83,
+	83, 68, 69, 0, 0, 74, 75, 76, 77, 78,
+	79, 80, 81, 0, 0, 67, 70, 71, 72, 73,
+	82, 83, 68, 69, 0, 0, 74, 75, 76, 77,
+	78, 79, 80, 81, 0, 0, 0, 70, 71, 72,
+	73, 82, 83,
 }
 var yyPact = []int{
 
-	298, -1000, 50, 50, -7, -7, -1000, -8, -1000, -1000,
-	95, -1000, -13, 237, 59, -13, 358, 59, -1000, 235,
-	-1000, -1000, -1000, -1, -1000, 61, -1000, 646, -1000, -1000,
-	358, 358, 358, 358, 180, 179, -1000, -1000, -1000, -1000,
-	158, 149, 358, -5, 130, 147, 145, 128, 127, 487,
-	-1000, 125, -1000, 61, -1000, 34, -1000, -1000, -34, 233,
-	230, 229, 81, 78, 36, -1000, 358, 358, 358, 358,
-	358, 358, 358, 358, 358, 358, 358, 358, 358, 358,
-	358, 358, 358, 358, -1000, -1000, -1000, -1000, 358, 487,
-	358, -10, -11, 358, 624, 140, 487, -14, 487, 487,
-	474, 487, -1000, -1000, -1000, 182, 322, -1000, 228, -1000,
-	-1000, -1000, -1000, -1000, 86, -1000, -1000, 438, 43, -1000,
-	94, 8, -1000, 84, 688, 709, 303, 303, 303, 303,
-	303, 303, 197, 197, -1000, -1000, -1000, 197, -1000, 197,
-	-1000, -1000, 598, 176, 572, -1000, -1000, 548, -1000, 487,
-	-1000, 222, -1000, -1000, 139, 137, 220, -1000, -1000, 425,
-	-1000, 218, -1000, -1000, 203, -1000, 524, 175, -38, -1000,
-	216, -1000, 487, -1000, 123, -1000, 212, -1000, 358, -1000,
-	208, -1000, -37, -1000, -1000, -1000, -1000, -1000, 107, -14,
-	-1000, 487, 105, 487, -1000, 487, 104, 487, 103, 358,
-	358, -1000, -1000, 171, -18, 1, 170, -22, 667, 161,
-	-29, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000,
-	-1000, -1000, 667, -1000, -1000, -1000, 199, -1000, 178, 182,
-	-1000, -1000, -1000, -1000, 102, -32, -2, 402, -1000, -1000,
-	378, 98, -1000, 201, 268, -1000, 112, -1000, -1000, 126,
-	152, 487, 487, 129, -1000, 10, -1000, 93, -1000, -1000,
-	-1000, -1000, 200, 667, -1000, 487, 101, 358, 87, -1000,
-	667, -1000,
+	253, -1000, -4, -4, -12, -12, -1000, -15, -1000, -1000,
+	30, -1000, 69, 257, 2, 69, 340, 2, -1000, 255,
+	-1000, -1000, -1000, 45, -1000, 106, -1000, 651, -1000, -1000,
+	340, 340, 340, 340, 200, 197, -1000, -1000, -1000, -1000,
+	163, 158, 340, -2, 138, 166, 161, 136, 126, 492,
+	-1000, 100, -1000, 106, -1000, 34, -1000, -1000, -34, 254,
+	243, 242, 97, 81, 36, -1000, 340, 340, 340, 340,
+	340, 340, 340, 340, 340, 340, 340, 340, 340, 340,
+	340, 340, 340, 340, -1000, -1000, -1000, -1000, 340, 492,
+	340, -18, -19, 340, 629, 151, 492, -23, 492, 492,
+	474, 456, -1000, -1000, -1000, 202, 275, -1000, 241, -1000,
+	-1000, -1000, -1000, -1000, 88, -1000, -1000, 420, 38, -1000,
+	26, 14, -1000, 25, 693, 714, 452, 452, 452, 452,
+	452, 452, 133, 133, -1000, -1000, -1000, 133, -1000, 133,
+	-1000, -1000, 603, 191, 577, -1000, -1000, 553, -1000, 492,
+	-1000, 239, -1000, -1000, 149, 147, 229, -1000, -1000, 407,
+	-1000, 229, -1000, -1000, 218, -1000, 529, 185, -38, -1000,
+	226, -1000, 492, -1000, 98, -1000, 225, -1000, 340, -1000,
+	224, -1000, -35, -1000, -1000, -1000, -1000, -1000, 124, -23,
+	-1000, 492, 114, 492, -1000, 492, 113, 111, 340, 340,
+	-1000, -1000, 181, -24, 7, 174, -27, 672, 173, -30,
+	-1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000,
+	672, -1000, -1000, -1000, 222, -1000, 194, 202, -1000, -1000,
+	-1000, -1000, 109, -32, -7, 384, -1000, -1000, 360, 82,
+	-1000, 215, 293, -1000, 83, -1000, -1000, 99, 171, 492,
+	492, 170, -1000, 9, -1000, 105, -1000, -1000, -1000, -1000,
+	214, 672, -1000, 492, 103, 340, 77, -1000, 672, -1000,
 }
 var yyPgo = []int{
 
-	0, 8, 13, 314, 97, 35, 311, 2, 310, 309,
-	307, 25, 306, 1, 300, 299, 3, 0, 117, 297,
-	296, 294, 292, 9, 290, 286, 262, 255, 164, 113,
-	248, 284, 283, 5, 36, 281, 279, 275, 272, 12,
-	271, 259, 4, 252, 7, 6,
+	0, 5, 12, 314, 117, 35, 312, 6, 310, 10,
+	2, 308, 1, 306, 302, 9, 0, 189, 301, 300,
+	295, 294, 4, 293, 291, 268, 181, 160, 103, 270,
+	288, 284, 11, 36, 282, 281, 280, 279, 7, 275,
+	273, 8, 261, 16, 3,
 }
 var yyR1 = []int{
 
-	0, 25, 25, 25, 25, 28, 28, 28, 28, 26,
-	26, 30, 30, 27, 27, 31, 31, 31, 32, 32,
-	34, 34, 29, 29, 29, 29, 35, 35, 35, 35,
-	36, 36, 36, 37, 37, 37, 38, 38, 39, 5,
-	5, 5, 5, 5, 5, 5, 5, 5, 5, 4,
-	4, 3, 3, 2, 10, 10, 11, 7, 7, 8,
-	8, 40, 40, 15, 15, 16, 16, 13, 13, 13,
-	12, 12, 14, 14, 14, 9, 9, 9, 9, 20,
-	20, 20, 21, 21, 41, 41, 42, 17, 17, 17,
-	17, 17, 17, 17, 17, 17, 17, 17, 17, 17,
-	17, 17, 17, 17, 17, 17, 18, 18, 18, 18,
-	18, 18, 18, 19, 19, 19, 19, 19, 19, 19,
-	19, 19, 19, 22, 22, 24, 24, 23, 23, 43,
-	43, 44, 44, 1, 1, 6, 6, 33, 33, 45,
-	45,
+	0, 24, 24, 24, 24, 27, 27, 27, 27, 25,
+	25, 29, 29, 26, 26, 30, 30, 30, 31, 31,
+	33, 33, 28, 28, 28, 28, 34, 34, 34, 34,
+	35, 35, 35, 36, 36, 36, 37, 37, 38, 5,
+	5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
+	4, 4, 3, 3, 2, 9, 9, 10, 7, 7,
+	39, 39, 14, 14, 15, 15, 12, 12, 12, 11,
+	11, 13, 13, 13, 8, 8, 8, 8, 19, 19,
+	19, 20, 20, 40, 40, 41, 16, 16, 16, 16,
+	16, 16, 16, 16, 16, 16, 16, 16, 16, 16,
+	16, 16, 16, 16, 16, 17, 17, 17, 17, 17,
+	17, 17, 18, 18, 18, 18, 18, 18, 18, 18,
+	18, 18, 21, 21, 23, 23, 22, 22, 42, 42,
+	43, 43, 1, 1, 6, 6, 32, 32, 44, 44,
 }
 var yyR2 = []int{
 
@@ -343,79 +342,76 @@ var yyR2 = []int{
 	3, 0, 4, 0, 3, 3, 5, 2, 1, 3,
 	1, 2, 0, 3, 3, 3, 3, 5, 2, 2,
 	3, 5, 2, 3, 5, 2, 1, 3, 2, 1,
-	4, 3, 5, 4, 5, 5, 3, 5, 2, 1,
-	1, 1, 3, 1, 1, 3, 2, 1, 3, 1,
-	3, 4, 6, 1, 3, 5, 1, 2, 4, 4,
-	1, 3, 0, 1, 1, 0, 3, 4, 6, 0,
-	2, 4, 1, 3, 1, 3, 3, 1, 3, 3,
+	4, 3, 5, 4, 5, 5, 3, 5, 3, 2,
+	1, 1, 1, 3, 1, 1, 3, 2, 1, 3,
+	4, 6, 1, 3, 5, 1, 2, 4, 4, 1,
+	3, 0, 1, 1, 0, 3, 4, 6, 0, 2,
+	4, 1, 3, 1, 3, 3, 1, 3, 3, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-	3, 3, 3, 3, 3, 3, 1, 2, 2, 2,
-	2, 4, 4, 1, 1, 1, 1, 1, 1, 3,
-	4, 4, 3, 3, 5, 1, 3, 1, 3, 1,
-	3, 1, 3, 1, 3, 0, 1, 0, 1, 0,
-	1,
+	3, 3, 3, 3, 3, 1, 2, 2, 2, 2,
+	4, 4, 1, 1, 1, 1, 1, 1, 3, 4,
+	4, 3, 3, 5, 1, 3, 1, 3, 1, 3,
+	1, 3, 1, 3, 0, 1, 0, 1, 0, 1,
 }
 var yyChk = []int{
 
-	-1000, -25, 4, 5, 6, 7, -26, 46, -26, -30,
-	52, -30, -27, 52, -27, -27, 20, -27, -28, -31,
-	50, 39, 41, 42, 8, -29, -28, -17, -18, -19,
+	-1000, -24, 4, 5, 6, 7, -25, 46, -25, -29,
+	52, -29, -26, 52, -26, -26, 20, -26, -27, -30,
+	50, 39, 41, 42, 8, -28, -27, -16, -17, -18,
 	21, 22, 23, 29, -5, 51, 53, 54, 55, 56,
-	-1, -22, 12, 14, 40, 47, 44, 49, 45, 30,
-	52, -6, -4, -29, 8, 12, -34, 53, 52, -35,
-	-36, -37, 50, 39, 41, 8, 31, 32, 18, 19,
+	-1, -21, 12, 14, 40, 47, 44, 49, 45, 30,
+	52, -6, -4, -28, 8, 12, -33, 53, 52, -34,
+	-35, -36, 50, 39, 41, 8, 31, 32, 18, 19,
 	33, 34, 35, 36, 22, 23, 24, 25, 26, 27,
-	28, 29, 37, 38, -18, -18, -18, -18, 12, 12,
-	14, 11, 11, 14, -17, 54, 15, 16, 14, 14,
-	16, 16, -4, -5, 51, -1, 16, 13, -32, -34,
-	53, 8, 8, 8, 12, -39, -40, 52, 12, -42,
-	52, 12, -44, 52, -17, -17, -17, -17, -17, -17,
-	-17, -17, -17, -17, -17, -17, -17, -17, -17, -17,
-	-17, -17, -17, -4, -17, 52, 52, -17, 13, 15,
-	-4, -3, -2, 52, -4, -4, -10, 17, -11, -7,
-	-4, -8, -4, 17, -24, -23, -17, -33, 8, 13,
-	-38, -39, 52, -4, 43, 13, -41, -42, 20, 13,
-	-43, -44, 20, 13, 13, 15, 15, -4, -33, 8,
-	15, 15, -33, 8, -4, 10, -33, 8, -45, 10,
-	9, 13, -34, -33, 8, 16, -33, 8, -17, -33,
-	8, 53, 17, -2, -4, 17, -11, -4, 17, -4,
-	17, -23, -17, 13, -39, 17, -15, -16, 52, -1,
-	13, -42, 13, -44, -33, 8, -13, 12, 17, -16,
-	-9, 48, 13, -12, -7, -11, -14, -4, -13, 18,
-	-45, 10, 10, -45, -20, 16, 19, -4, 13, -11,
-	13, 17, -21, -17, 19, 10, -45, 10, -4, 17,
-	-17, 19,
+	28, 29, 37, 38, -17, -17, -17, -17, 12, 12,
+	14, 11, 11, 14, -16, 54, 15, 16, 14, 14,
+	16, 16, -4, -5, 51, -1, 16, 13, -31, -33,
+	53, 8, 8, 8, 12, -38, -39, 52, 12, -41,
+	52, 12, -43, 52, -16, -16, -16, -16, -16, -16,
+	-16, -16, -16, -16, -16, -16, -16, -16, -16, -16,
+	-16, -16, -16, -4, -16, 52, 52, -16, 13, 15,
+	-4, -3, -2, 52, -4, -4, -9, 17, -10, -7,
+	-4, -9, 17, 17, -23, -22, -16, -32, 8, 13,
+	-37, -38, 52, -4, 43, 13, -40, -41, 20, 13,
+	-42, -43, 20, 13, 13, 15, 15, -4, -32, 8,
+	15, 15, -32, 8, -4, 10, -32, -44, 10, 9,
+	13, -33, -32, 8, 16, -32, 8, -16, -32, 8,
+	53, 17, -2, -4, 17, -10, -4, 17, 17, -22,
+	-16, 13, -38, 17, -14, -15, 52, -1, 13, -41,
+	13, -43, -32, 8, -12, 12, 17, -15, -8, 48,
+	13, -11, -7, -10, -13, -4, -12, 18, -44, 10,
+	10, -44, -19, 16, 19, -4, 13, -10, 13, 17,
+	-20, -16, 19, 10, -44, 10, -4, 17, -16, 19,
 }
 var yyDef = []int{
 
 	0, -2, 9, 9, 11, 11, 13, 0, 13, 13,
-	0, 13, 5, 0, 22, 5, 135, 22, 1, 0,
-	6, 7, 8, 0, 10, 2, 3, 0, 87, 106,
-	135, 135, 135, 135, 49, 50, 113, 114, 115, 116,
-	-2, 118, 135, 0, 0, 0, 0, 0, 0, 0,
-	133, 0, 136, 4, 14, 0, 17, 20, 0, 0,
-	0, 0, 0, 0, 0, 12, 135, 135, 135, 135,
-	135, 135, 135, 135, 135, 135, 135, 135, 135, 135,
-	135, 135, 135, 135, 107, 108, 109, 110, 135, 0,
-	135, 0, 0, 135, 0, 0, 0, 0, 0, 0,
-	0, 0, 48, 49, 50, 39, 135, 15, 137, 18,
+	0, 13, 5, 0, 22, 5, 134, 22, 1, 0,
+	6, 7, 8, 0, 10, 2, 3, 0, 86, 105,
+	134, 134, 134, 134, 50, 51, 112, 113, 114, 115,
+	-2, 117, 134, 0, 0, 0, 0, 0, 0, 0,
+	132, 0, 135, 4, 14, 0, 17, 20, 0, 0,
+	0, 0, 0, 0, 0, 12, 134, 134, 134, 134,
+	134, 134, 134, 134, 134, 134, 134, 134, 134, 134,
+	134, 134, 134, 134, 106, 107, 108, 109, 134, 0,
+	134, 0, 0, 134, 0, 0, 0, 0, 0, 0,
+	0, 0, 49, 50, 51, 39, 134, 15, 136, 18,
 	21, 23, 24, 25, 0, 28, 29, 0, 0, 32,
-	0, 0, 35, 131, 88, 89, 90, 91, 92, 93,
-	94, 95, 96, 97, 98, 99, 100, 101, 102, 103,
-	104, 105, 0, 0, 0, 134, 119, 0, 122, 0,
-	41, 137, 51, 53, 0, 0, 137, 46, 54, 0,
-	57, 137, 59, 123, 139, 125, 127, 0, 138, 26,
-	137, 36, 0, 38, 0, 30, 137, 84, 135, 33,
-	137, 129, 0, 111, 112, 121, 120, 40, 0, 138,
-	43, 0, 0, 138, 56, 0, 0, 138, 0, -2,
-	135, 16, 19, 0, 138, 0, 0, 138, 86, 0,
-	138, 132, 42, 52, 44, 45, 55, 58, 47, 60,
-	124, 126, 128, 27, 37, 61, 137, 63, 133, 66,
-	31, 85, 34, 130, 0, 138, 75, 0, 62, 64,
-	72, 0, 67, 139, 139, 70, 79, 73, 74, 0,
-	0, 140, 140, 0, 65, 135, 76, 0, 68, 71,
-	69, 80, 139, 82, 77, 0, 0, -2, 0, 81,
-	83, 78,
+	0, 0, 35, 130, 87, 88, 89, 90, 91, 92,
+	93, 94, 95, 96, 97, 98, 99, 100, 101, 102,
+	103, 104, 0, 0, 0, 133, 118, 0, 121, 0,
+	41, 136, 52, 54, 0, 0, 136, 46, 55, 0,
+	58, 136, 48, 122, 138, 124, 126, 0, 137, 26,
+	136, 36, 0, 38, 0, 30, 136, 83, 134, 33,
+	136, 128, 0, 110, 111, 120, 119, 40, 0, 137,
+	43, 0, 0, 137, 57, 0, 0, 0, -2, 134,
+	16, 19, 0, 137, 0, 0, 137, 85, 0, 137,
+	131, 42, 53, 44, 45, 56, 59, 47, 123, 125,
+	127, 27, 37, 60, 136, 62, 132, 65, 31, 84,
+	34, 129, 0, 137, 74, 0, 61, 63, 71, 0,
+	66, 138, 138, 69, 78, 72, 73, 0, 0, 139,
+	139, 0, 64, 134, 75, 0, 67, 70, 68, 79,
+	138, 81, 76, 0, 0, -2, 0, 80, 82, 77,
 }
 var yyTok1 = []int{
 
@@ -778,50 +774,55 @@ yydefault:
 	case 47:
 		//line grammar.y:285
 		{
-			yyVAL.typeexpr = &TypeOneOf{Types: yyS[yypt-2].typeexprs, P: yyS[yypt-4].pos}
+			yyVAL.typeexpr = &TypeOneOf{Fields: yyS[yypt-2].fields, P: yyS[yypt-4].pos}
 		}
 	case 48:
 		//line grammar.y:287
 		{
-			yyVAL.typeexpr = &TypeOptional{Base: yyS[yypt-0].typeexpr, P: yyS[yypt-1].pos}
+			yyVAL.typeexpr = &TypeOneOf{P: yyS[yypt-2].pos}
 		}
 	case 49:
-		//line grammar.y:292
+		//line grammar.y:289
 		{
-			yyVAL.typeexpr = yyS[yypt-0].typeexpr
+			yyVAL.typeexpr = &TypeOptional{Base: yyS[yypt-0].typeexpr, P: yyS[yypt-1].pos}
 		}
 	case 50:
 		//line grammar.y:294
 		{
-			yyVAL.typeexpr = &TypeNamed{Name: "typeobject", P: yyS[yypt-0].pos}
+			yyVAL.typeexpr = yyS[yypt-0].typeexpr
 		}
 	case 51:
-		//line grammar.y:298
+		//line grammar.y:296
 		{
-			yyVAL.nameposes = []NamePos{yyS[yypt-0].namepos}
+			yyVAL.typeexpr = &TypeNamed{Name: "typeobject", P: yyS[yypt-0].pos}
 		}
 	case 52:
 		//line grammar.y:300
 		{
-			yyVAL.nameposes = append(yyS[yypt-2].nameposes, yyS[yypt-0].namepos)
+			yyVAL.nameposes = []NamePos{yyS[yypt-0].namepos}
 		}
 	case 53:
-		//line grammar.y:304
+		//line grammar.y:302
 		{
-			yyVAL.namepos = NamePos{Name: yyS[yypt-0].strpos.str, Pos: yyS[yypt-0].strpos.pos}
+			yyVAL.nameposes = append(yyS[yypt-2].nameposes, yyS[yypt-0].namepos)
 		}
 	case 54:
-		//line grammar.y:308
+		//line grammar.y:306
 		{
-			yyVAL.fields = yyS[yypt-0].fields
+			yyVAL.namepos = NamePos{Name: yyS[yypt-0].strpos.str, Pos: yyS[yypt-0].strpos.pos}
 		}
 	case 55:
 		//line grammar.y:310
 		{
-			yyVAL.fields = append(yyS[yypt-2].fields, yyS[yypt-0].fields...)
+			yyVAL.fields = yyS[yypt-0].fields
 		}
 	case 56:
-		//line grammar.y:348
+		//line grammar.y:312
+		{
+			yyVAL.fields = append(yyS[yypt-2].fields, yyS[yypt-0].fields...)
+		}
+	case 57:
+		//line grammar.y:350
 		{
 			if names, ok := typeListToStrList(yylex, yyS[yypt-1].typeexprs); ok {
 				for _, n := range names {
@@ -831,394 +832,384 @@ yydefault:
 				lexPosErrorf(yylex, yyS[yypt-0].typeexpr.Pos(), "perhaps you forgot a comma before %q?.", yyS[yypt-0].typeexpr.String())
 			}
 		}
-	case 57:
-		//line grammar.y:360
-		{
-			yyVAL.typeexprs = []Type{yyS[yypt-0].typeexpr}
-		}
 	case 58:
 		//line grammar.y:362
 		{
-			yyVAL.typeexprs = append(yyS[yypt-2].typeexprs, yyS[yypt-0].typeexpr)
-		}
-	case 59:
-		//line grammar.y:366
-		{
 			yyVAL.typeexprs = []Type{yyS[yypt-0].typeexpr}
 		}
-	case 60:
-		//line grammar.y:368
+	case 59:
+		//line grammar.y:364
 		{
 			yyVAL.typeexprs = append(yyS[yypt-2].typeexprs, yyS[yypt-0].typeexpr)
 		}
-	case 61:
-		//line grammar.y:374
+	case 60:
+		//line grammar.y:370
 		{
 			ifs := &lexVDLFile(yylex).Interfaces
 			*ifs = append(*ifs, &Interface{NamePos: NamePos{Name: yyS[yypt-3].strpos.str, Pos: yyS[yypt-3].strpos.pos}})
 		}
-	case 62:
-		//line grammar.y:379
+	case 61:
+		//line grammar.y:375
 		{
 			yyS[yypt-2].iface.Name, yyS[yypt-2].iface.Pos = yyS[yypt-5].strpos.str, yyS[yypt-5].strpos.pos
 			ifs := &lexVDLFile(yylex).Interfaces
 			*ifs = append(*ifs, yyS[yypt-2].iface)
 		}
-	case 63:
-		//line grammar.y:387
+	case 62:
+		//line grammar.y:383
 		{
 			yyVAL.iface = yyS[yypt-0].iface
 		}
-	case 64:
-		//line grammar.y:389
+	case 63:
+		//line grammar.y:385
 		{
 			yyS[yypt-2].iface.Embeds = append(yyS[yypt-2].iface.Embeds, yyS[yypt-0].iface.Embeds...)
 			yyS[yypt-2].iface.Methods = append(yyS[yypt-2].iface.Methods, yyS[yypt-0].iface.Methods...)
 			yyVAL.iface = yyS[yypt-2].iface
 		}
-	case 65:
-		//line grammar.y:397
+	case 64:
+		//line grammar.y:393
 		{
 			yyVAL.iface = &Interface{Methods: []*Method{{InArgs: yyS[yypt-3].fields, InStream: yyS[yypt-2].typeexprs[0], OutStream: yyS[yypt-2].typeexprs[1], OutArgs: yyS[yypt-1].fields, Tags: yyS[yypt-0].constexprs, NamePos: NamePos{Name: yyS[yypt-4].strpos.str, Pos: yyS[yypt-4].strpos.pos}}}}
+		}
+	case 65:
+		//line grammar.y:395
+		{
+			yyVAL.iface = &Interface{Embeds: []*NamePos{{Name: yyS[yypt-0].strpos.str, Pos: yyS[yypt-0].strpos.pos}}}
 		}
 	case 66:
 		//line grammar.y:399
 		{
-			yyVAL.iface = &Interface{Embeds: []*NamePos{{Name: yyS[yypt-0].strpos.str, Pos: yyS[yypt-0].strpos.pos}}}
-		}
-	case 67:
-		//line grammar.y:403
-		{
 			yyVAL.fields = nil
 		}
-	case 68:
-		//line grammar.y:405
+	case 67:
+		//line grammar.y:401
 		{
 			yyVAL.fields = yyS[yypt-2].fields
 		}
-	case 69:
-		//line grammar.y:409
+	case 68:
+		//line grammar.y:405
 		{
 			for _, t := range yyS[yypt-2].typeexprs {
 				yyVAL.fields = append(yyVAL.fields, &Field{Type: t, NamePos: NamePos{Pos: t.Pos()}})
 			}
 		}
-	case 70:
-		//line grammar.y:419
+	case 69:
+		//line grammar.y:415
 		{
 			yyVAL.fields = yyS[yypt-0].fields
 		}
-	case 71:
-		//line grammar.y:421
+	case 70:
+		//line grammar.y:417
 		{
 			yyVAL.fields = append(yyS[yypt-2].fields, yyS[yypt-0].fields...)
 		}
-	case 72:
-		//line grammar.y:427
+	case 71:
+		//line grammar.y:423
 		{
 			yyVAL.fields = nil
 		}
-	case 73:
-		//line grammar.y:429
+	case 72:
+		//line grammar.y:425
 		{
 			yyVAL.fields = []*Field{{Type: yyS[yypt-0].typeexpr, NamePos: NamePos{Pos: yyS[yypt-0].typeexpr.Pos()}}}
+		}
+	case 73:
+		//line grammar.y:427
+		{
+			yyVAL.fields = yyS[yypt-0].fields
 		}
 	case 74:
 		//line grammar.y:431
 		{
-			yyVAL.fields = yyS[yypt-0].fields
+			yyVAL.typeexprs = []Type{nil, nil}
 		}
 	case 75:
-		//line grammar.y:435
+		//line grammar.y:433
 		{
 			yyVAL.typeexprs = []Type{nil, nil}
 		}
 	case 76:
-		//line grammar.y:437
-		{
-			yyVAL.typeexprs = []Type{nil, nil}
-		}
-	case 77:
-		//line grammar.y:439
+		//line grammar.y:435
 		{
 			yyVAL.typeexprs = []Type{yyS[yypt-1].typeexpr, nil}
+		}
+	case 77:
+		//line grammar.y:437
+		{
+			yyVAL.typeexprs = []Type{yyS[yypt-3].typeexpr, yyS[yypt-1].typeexpr}
 		}
 	case 78:
 		//line grammar.y:441
 		{
-			yyVAL.typeexprs = []Type{yyS[yypt-3].typeexpr, yyS[yypt-1].typeexpr}
+			yyVAL.constexprs = nil
 		}
 	case 79:
-		//line grammar.y:445
+		//line grammar.y:443
 		{
 			yyVAL.constexprs = nil
 		}
 	case 80:
-		//line grammar.y:447
+		//line grammar.y:445
 		{
-			yyVAL.constexprs = nil
+			yyVAL.constexprs = yyS[yypt-2].constexprs
 		}
 	case 81:
 		//line grammar.y:449
 		{
-			yyVAL.constexprs = yyS[yypt-2].constexprs
-		}
-	case 82:
-		//line grammar.y:453
-		{
 			yyVAL.constexprs = []ConstExpr{yyS[yypt-0].constexpr}
 		}
-	case 83:
-		//line grammar.y:455
+	case 82:
+		//line grammar.y:451
 		{
 			yyVAL.constexprs = append(yyS[yypt-2].constexprs, yyS[yypt-0].constexpr)
 		}
-	case 86:
-		//line grammar.y:464
+	case 85:
+		//line grammar.y:460
 		{
 			cds := &lexVDLFile(yylex).ConstDefs
 			*cds = append(*cds, &ConstDef{Expr: yyS[yypt-0].constexpr, NamePos: NamePos{Name: yyS[yypt-2].strpos.str, Pos: yyS[yypt-2].strpos.pos}})
 		}
-	case 87:
-		//line grammar.y:471
+	case 86:
+		//line grammar.y:467
 		{
 			yyVAL.constexpr = yyS[yypt-0].constexpr
 		}
-	case 88:
-		//line grammar.y:473
+	case 87:
+		//line grammar.y:469
 		{
 			yyVAL.constexpr = &ConstBinaryOp{"||", yyS[yypt-2].constexpr, yyS[yypt-0].constexpr, yyS[yypt-1].pos}
 		}
-	case 89:
-		//line grammar.y:475
+	case 88:
+		//line grammar.y:471
 		{
 			yyVAL.constexpr = &ConstBinaryOp{"&&", yyS[yypt-2].constexpr, yyS[yypt-0].constexpr, yyS[yypt-1].pos}
 		}
-	case 90:
-		//line grammar.y:477
+	case 89:
+		//line grammar.y:473
 		{
 			yyVAL.constexpr = &ConstBinaryOp{"<", yyS[yypt-2].constexpr, yyS[yypt-0].constexpr, yyS[yypt-1].pos}
 		}
-	case 91:
-		//line grammar.y:479
+	case 90:
+		//line grammar.y:475
 		{
 			yyVAL.constexpr = &ConstBinaryOp{">", yyS[yypt-2].constexpr, yyS[yypt-0].constexpr, yyS[yypt-1].pos}
 		}
-	case 92:
-		//line grammar.y:481
+	case 91:
+		//line grammar.y:477
 		{
 			yyVAL.constexpr = &ConstBinaryOp{"<=", yyS[yypt-2].constexpr, yyS[yypt-0].constexpr, yyS[yypt-1].pos}
 		}
-	case 93:
-		//line grammar.y:483
+	case 92:
+		//line grammar.y:479
 		{
 			yyVAL.constexpr = &ConstBinaryOp{">=", yyS[yypt-2].constexpr, yyS[yypt-0].constexpr, yyS[yypt-1].pos}
 		}
-	case 94:
-		//line grammar.y:485
+	case 93:
+		//line grammar.y:481
 		{
 			yyVAL.constexpr = &ConstBinaryOp{"!=", yyS[yypt-2].constexpr, yyS[yypt-0].constexpr, yyS[yypt-1].pos}
 		}
-	case 95:
-		//line grammar.y:487
+	case 94:
+		//line grammar.y:483
 		{
 			yyVAL.constexpr = &ConstBinaryOp{"==", yyS[yypt-2].constexpr, yyS[yypt-0].constexpr, yyS[yypt-1].pos}
 		}
-	case 96:
-		//line grammar.y:489
+	case 95:
+		//line grammar.y:485
 		{
 			yyVAL.constexpr = &ConstBinaryOp{"+", yyS[yypt-2].constexpr, yyS[yypt-0].constexpr, yyS[yypt-1].pos}
 		}
-	case 97:
-		//line grammar.y:491
+	case 96:
+		//line grammar.y:487
 		{
 			yyVAL.constexpr = &ConstBinaryOp{"-", yyS[yypt-2].constexpr, yyS[yypt-0].constexpr, yyS[yypt-1].pos}
 		}
-	case 98:
-		//line grammar.y:493
+	case 97:
+		//line grammar.y:489
 		{
 			yyVAL.constexpr = &ConstBinaryOp{"*", yyS[yypt-2].constexpr, yyS[yypt-0].constexpr, yyS[yypt-1].pos}
 		}
-	case 99:
-		//line grammar.y:495
+	case 98:
+		//line grammar.y:491
 		{
 			yyVAL.constexpr = &ConstBinaryOp{"/", yyS[yypt-2].constexpr, yyS[yypt-0].constexpr, yyS[yypt-1].pos}
 		}
-	case 100:
-		//line grammar.y:497
+	case 99:
+		//line grammar.y:493
 		{
 			yyVAL.constexpr = &ConstBinaryOp{"%", yyS[yypt-2].constexpr, yyS[yypt-0].constexpr, yyS[yypt-1].pos}
 		}
-	case 101:
-		//line grammar.y:499
+	case 100:
+		//line grammar.y:495
 		{
 			yyVAL.constexpr = &ConstBinaryOp{"|", yyS[yypt-2].constexpr, yyS[yypt-0].constexpr, yyS[yypt-1].pos}
 		}
-	case 102:
-		//line grammar.y:501
+	case 101:
+		//line grammar.y:497
 		{
 			yyVAL.constexpr = &ConstBinaryOp{"&", yyS[yypt-2].constexpr, yyS[yypt-0].constexpr, yyS[yypt-1].pos}
 		}
-	case 103:
-		//line grammar.y:503
+	case 102:
+		//line grammar.y:499
 		{
 			yyVAL.constexpr = &ConstBinaryOp{"^", yyS[yypt-2].constexpr, yyS[yypt-0].constexpr, yyS[yypt-1].pos}
 		}
-	case 104:
-		//line grammar.y:505
+	case 103:
+		//line grammar.y:501
 		{
 			yyVAL.constexpr = &ConstBinaryOp{"<<", yyS[yypt-2].constexpr, yyS[yypt-0].constexpr, yyS[yypt-1].pos}
+		}
+	case 104:
+		//line grammar.y:503
+		{
+			yyVAL.constexpr = &ConstBinaryOp{">>", yyS[yypt-2].constexpr, yyS[yypt-0].constexpr, yyS[yypt-1].pos}
 		}
 	case 105:
 		//line grammar.y:507
 		{
-			yyVAL.constexpr = &ConstBinaryOp{">>", yyS[yypt-2].constexpr, yyS[yypt-0].constexpr, yyS[yypt-1].pos}
-		}
-	case 106:
-		//line grammar.y:511
-		{
 			yyVAL.constexpr = yyS[yypt-0].constexpr
 		}
-	case 107:
-		//line grammar.y:513
+	case 106:
+		//line grammar.y:509
 		{
 			yyVAL.constexpr = &ConstUnaryOp{"!", yyS[yypt-0].constexpr, yyS[yypt-1].pos}
 		}
-	case 108:
-		//line grammar.y:515
+	case 107:
+		//line grammar.y:511
 		{
 			yyVAL.constexpr = &ConstUnaryOp{"+", yyS[yypt-0].constexpr, yyS[yypt-1].pos}
 		}
-	case 109:
-		//line grammar.y:517
+	case 108:
+		//line grammar.y:513
 		{
 			yyVAL.constexpr = &ConstUnaryOp{"-", yyS[yypt-0].constexpr, yyS[yypt-1].pos}
 		}
-	case 110:
-		//line grammar.y:519
+	case 109:
+		//line grammar.y:515
 		{
 			yyVAL.constexpr = &ConstUnaryOp{"^", yyS[yypt-0].constexpr, yyS[yypt-1].pos}
 		}
-	case 111:
-		//line grammar.y:521
+	case 110:
+		//line grammar.y:517
 		{
 			yyVAL.constexpr = &ConstTypeConv{yyS[yypt-3].typeexpr, yyS[yypt-1].constexpr, yyS[yypt-3].typeexpr.Pos()}
 		}
-	case 112:
-		//line grammar.y:523
+	case 111:
+		//line grammar.y:519
 		{
 			yyVAL.constexpr = &ConstTypeObject{yyS[yypt-1].typeexpr, yyS[yypt-3].pos}
 		}
-	case 113:
-		//line grammar.y:528
+	case 112:
+		//line grammar.y:524
 		{
 			yyVAL.constexpr = &ConstLit{yyS[yypt-0].strpos.str, yyS[yypt-0].strpos.pos}
 		}
-	case 114:
-		//line grammar.y:530
+	case 113:
+		//line grammar.y:526
 		{
 			yyVAL.constexpr = &ConstLit{yyS[yypt-0].intpos.int, yyS[yypt-0].intpos.pos}
 		}
-	case 115:
-		//line grammar.y:532
+	case 114:
+		//line grammar.y:528
 		{
 			yyVAL.constexpr = &ConstLit{yyS[yypt-0].ratpos.rat, yyS[yypt-0].ratpos.pos}
 		}
-	case 116:
-		//line grammar.y:534
+	case 115:
+		//line grammar.y:530
 		{
 			yyVAL.constexpr = &ConstLit{yyS[yypt-0].imagpos.imag, yyS[yypt-0].imagpos.pos}
 		}
-	case 117:
-		//line grammar.y:536
+	case 116:
+		//line grammar.y:532
 		{
 			yyVAL.constexpr = &ConstNamed{yyS[yypt-0].strpos.str, yyS[yypt-0].strpos.pos}
 		}
-	case 118:
-		//line grammar.y:538
+	case 117:
+		//line grammar.y:534
 		{
 			yyVAL.constexpr = yyS[yypt-0].complit
 		}
-	case 119:
-		//line grammar.y:540
+	case 118:
+		//line grammar.y:536
 		{
 			lexPosErrorf(yylex, yyS[yypt-1].pos, "cannot apply selector operator to unnamed constant")
 		}
-	case 120:
-		//line grammar.y:542
+	case 119:
+		//line grammar.y:538
 		{
 			lexPosErrorf(yylex, yyS[yypt-2].pos, "cannot apply index operator to unnamed constant")
 		}
-	case 121:
-		//line grammar.y:544
+	case 120:
+		//line grammar.y:540
 		{
 			yyVAL.constexpr = &ConstIndexed{&ConstNamed{yyS[yypt-3].strpos.str, yyS[yypt-3].strpos.pos}, yyS[yypt-1].constexpr, yyS[yypt-3].strpos.pos}
+		}
+	case 121:
+		//line grammar.y:542
+		{
+			yyVAL.constexpr = yyS[yypt-1].constexpr
 		}
 	case 122:
 		//line grammar.y:546
 		{
-			yyVAL.constexpr = yyS[yypt-1].constexpr
+			yyVAL.complit = &ConstCompositeLit{yyS[yypt-2].typeexpr, nil, yyS[yypt-1].pos}
 		}
 	case 123:
-		//line grammar.y:550
+		//line grammar.y:548
 		{
-			yyVAL.complit = &ConstCompositeLit{yyS[yypt-2].typeexpr, nil, yyS[yypt-1].pos}
+			yyVAL.complit = &ConstCompositeLit{yyS[yypt-4].typeexpr, yyS[yypt-2].kvlits, yyS[yypt-3].pos}
 		}
 	case 124:
 		//line grammar.y:552
 		{
-			yyVAL.complit = &ConstCompositeLit{yyS[yypt-4].typeexpr, yyS[yypt-2].kvlits, yyS[yypt-3].pos}
+			yyVAL.kvlits = []KVLit{yyS[yypt-0].kvlit}
 		}
 	case 125:
-		//line grammar.y:556
+		//line grammar.y:554
 		{
-			yyVAL.kvlits = []KVLit{yyS[yypt-0].kvlit}
+			yyVAL.kvlits = append(yyS[yypt-2].kvlits, yyS[yypt-0].kvlit)
 		}
 	case 126:
 		//line grammar.y:558
 		{
-			yyVAL.kvlits = append(yyS[yypt-2].kvlits, yyS[yypt-0].kvlit)
-		}
-	case 127:
-		//line grammar.y:562
-		{
 			yyVAL.kvlit = KVLit{Value: yyS[yypt-0].constexpr}
 		}
-	case 128:
-		//line grammar.y:564
+	case 127:
+		//line grammar.y:560
 		{
 			yyVAL.kvlit = KVLit{Key: yyS[yypt-2].constexpr, Value: yyS[yypt-0].constexpr}
 		}
-	case 131:
-		//line grammar.y:573
+	case 130:
+		//line grammar.y:569
 		{
 			eds := &lexVDLFile(yylex).ErrorIDs
 			*eds = append(*eds, &ErrorID{NamePos: NamePos{Name: yyS[yypt-0].strpos.str, Pos: yyS[yypt-0].strpos.pos}})
 		}
-	case 132:
-		//line grammar.y:578
+	case 131:
+		//line grammar.y:574
 		{
 			ensureNonEmptyToken(yylex, yyS[yypt-0].strpos, "error id must be non-empty if specified")
 			eds := &lexVDLFile(yylex).ErrorIDs
 			*eds = append(*eds, &ErrorID{ID: yyS[yypt-0].strpos.str, NamePos: NamePos{Name: yyS[yypt-2].strpos.str, Pos: yyS[yypt-2].strpos.pos}})
 		}
-	case 133:
-		//line grammar.y:589
+	case 132:
+		//line grammar.y:585
 		{
 			yyVAL.strpos = yyS[yypt-0].strpos
+		}
+	case 133:
+		//line grammar.y:587
+		{
+			yyVAL.strpos = strPos{yyS[yypt-2].strpos.str + "." + yyS[yypt-0].strpos.str, yyS[yypt-2].strpos.pos}
 		}
 	case 134:
 		//line grammar.y:591
 		{
-			yyVAL.strpos = strPos{yyS[yypt-2].strpos.str + "." + yyS[yypt-0].strpos.str, yyS[yypt-2].strpos.pos}
-		}
-	case 135:
-		//line grammar.y:595
-		{
 			yyVAL.typeexpr = nil
 		}
-	case 136:
-		//line grammar.y:597
+	case 135:
+		//line grammar.y:593
 		{
 			yyVAL.typeexpr = yyS[yypt-0].typeexpr
 		}

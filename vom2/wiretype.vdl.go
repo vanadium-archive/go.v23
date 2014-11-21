@@ -41,22 +41,22 @@ type WireMap struct {
 	Elem TypeID
 }
 
+// WireField represents a field in a struct or oneof.
+type WireField struct {
+	Name string
+	Type TypeID
+}
+
 // WireStruct represents a struct type definition.
 type WireStruct struct {
 	Name   string
 	Fields []WireField
 }
 
-// WireField represents a field in a struct.
-type WireField struct {
-	Name string
-	Type TypeID
-}
-
 // WireOneOf represents a oneof type definition.
 type WireOneOf struct {
-	Name  string
-	Types []TypeID
+	Name   string
+	Fields []WireField
 }
 
 // TypeID uniquely identifies a type definition within a vom stream.

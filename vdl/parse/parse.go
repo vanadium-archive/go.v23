@@ -430,8 +430,13 @@ func attachTypeComments(t Type, cm *commentMap, suffix bool) {
 			attachTypeComments(field.Type, cm, suffix)
 		}
 	case *TypeOneOf:
-		for _, t := range tu.Types {
-			attachTypeComments(t, cm, suffix)
+		for _, field := range tu.Fields {
+			if suffix {
+				field.DocSuffix = cm.getDocSuffix(field.Pos)
+			} else {
+				field.Doc = cm.getDoc(field.Pos)
+			}
+			attachTypeComments(field.Type, cm, suffix)
 		}
 	case *TypeOptional:
 		attachTypeComments(tu.Base, cm, suffix)

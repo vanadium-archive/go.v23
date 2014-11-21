@@ -65,17 +65,11 @@ type Target interface {
 	// FinishMap finishes a prior StartMap call.
 	FinishMap(x MapTarget) error
 
-	// StartStruct prepares conversion from a struct of type tt.  FinishStruct
-	// must be called to finish the struct.
-	StartStruct(tt *vdl.Type) (StructTarget, error)
-	// FinishStruct finishes a prior StartStruct call.
-	FinishStruct(x StructTarget) error
-
-	// StartOneOf prepares conversion from a oneof of type tt.  FinishOneOf must
-	// be called to finish the oneof.
-	StartOneOf(tt *vdl.Type) (Target, error)
-	// FinishOneOf finishes a prior StartOneOf call.
-	FinishOneOf(x Target) error
+	// StartFields prepares conversion from a struct or oneof of type tt.
+	// FinishFields must be called to finish the fields.
+	StartFields(tt *vdl.Type) (FieldsTarget, error)
+	// FinishFields finishes a prior StartFields call.
+	FinishFields(x FieldsTarget) error
 }
 
 // ListTarget represents conversion from a list or array.
@@ -96,8 +90,7 @@ type SetTarget interface {
 	// to finish the key.
 	StartKey() (key Target, _ error)
 	// FinishKey finishes a prior StartKey call.  An error with ID verror.NotFound
-	// indicates the underlying target is a struct that doesn't have the given
-	// field name.
+	// indicates the field name doesn't exist on the target.
 	FinishKey(key Target) error
 }
 
@@ -107,19 +100,18 @@ type MapTarget interface {
 	// be called to finish the key.
 	StartKey() (key Target, _ error)
 	// FinishKeyStartField finishes a prior StartKey call, and starts the
-	// associated field.  An error with ID verror.NotFound indicates the
-	// underlying target is a struct that doesn't have the given field name.
+	// associated field.  An error with ID verror.NotFound indicates the field
+	// name doesn't exist on the target.
 	FinishKeyStartField(key Target) (field Target, _ error)
 	// FinishField finishes a prior FinishKeyStartField call.
 	FinishField(key, field Target) error
 }
 
-// StructTarget represents conversion from a struct.
-type StructTarget interface {
-	// StartField prepares conversion of the struct field with the given name.
+// FieldsTarget represents conversion from struct or oneof fields.
+type FieldsTarget interface {
+	// StartField prepares conversion of the field with the given name.
 	// FinishField must be called to finish the field.  An error with ID
-	// verror.NotFound indicates the underlying target is a struct that doesn't
-	// have the given field name.
+	// verror.NotFound indicates the field name doesn't exist on the target.
 	StartField(name string) (key, field Target, _ error)
 	// FinishField finishes a prior StartField call.
 	FinishField(key, field Target) error
@@ -138,15 +130,18 @@ func Convert(target, src interface{}) error {
 // FromReflect converts from rv to the target, by walking through rv and calling
 // the appropriate methods on the target.
 func FromReflect(target Target, rv reflect.Value) error {
-	rt := rv.Type()
-	tt, err := vdl.TypeFromReflect(rt)
-	if err != nil {
-		return err
+	// Special-case to treat interface{}(nil) as any(nil).
+	if !rv.IsValid() {
+		return target.FromNil(vdl.AnyType)
 	}
-	// Flatten pointers in rv and handle special cases.
-	for rt.Kind() == reflect.Ptr {
-		switch {
+	// Flatten pointers and interfaces in rv, and handle special-cases.
+	for rv.Kind() == reflect.Ptr || rv.Kind() == reflect.Interface {
+		switch rt := rv.Type(); {
 		case rv.IsNil():
+			tt, err := vdl.TypeFromReflect(rt)
+			if err != nil {
+				return err
+			}
 			return target.FromNil(tt)
 		case rt.ConvertibleTo(rtPtrToType):
 			// If rv is convertible to *vdl.Type, fill from it directly.
@@ -155,30 +150,42 @@ func FromReflect(target Target, rv reflect.Value) error {
 			// If rv is convertible to *vdl.Value, fill from it directly.
 			return FromValue(target, rv.Convert(rtPtrToValue).Interface().(*vdl.Value))
 		}
-		rt, rv = rt.Elem(), rv.Elem()
+		rv = rv.Elem()
 	}
-	if tt.Kind() == vdl.Optional {
-		tt = tt.Elem() // flatten tt to match rt and rv
+	// Initialize vdl type.
+	rt := rv.Type()
+	tt, err := vdl.TypeFromReflect(rt)
+	if err != nil {
+		return err
 	}
 	// Recursive walk through the reflect value to fill in target.
 	//
 	// First handle special-cases enum and oneof.  Note that vdl.TypeFromReflect
-	// has already validated the String and OneOf methods, so we can call without
-	// error checking.
+	// has already validated the methods, so we can call without error checking.
 	switch tt.Kind() {
 	case vdl.Enum:
-		out := rv.MethodByName("String").Call(nil)
-		return target.FromEnumLabel(out[0].String(), tt)
+		label := rv.MethodByName("String").Call(nil)[0].String()
+		return target.FromEnumLabel(label, tt)
 	case vdl.OneOf:
-		oneof, err := target.StartOneOf(tt)
+		// We're guaranteed rv is the concrete field struct.
+		name := rv.MethodByName("Name").Call(nil)[0].String()
+		fieldsTarget, err := target.StartFields(tt)
 		if err != nil {
 			return err
 		}
-		elem := rv.MethodByName("OneOf").Call(nil)[0]
-		if err := FromReflect(oneof, elem); err != nil {
+		key, field, err := fieldsTarget.StartField(name)
+		if err != nil {
+			return err // no verror.NoExist special-case; oneof field is required
+		}
+		// Grab the "Value" field of the concrete field struct.
+		rvFieldValue := rv.Field(0)
+		if err := FromReflect(field, rvFieldValue); err != nil {
 			return err
 		}
-		return target.FinishOneOf(oneof)
+		if err := fieldsTarget.FinishField(key, field); err != nil {
+			return err
+		}
+		return target.FinishFields(fieldsTarget)
 	}
 	// Now handle special-case bytes.
 	if isRTBytes(rt) {
@@ -186,11 +193,6 @@ func FromReflect(target Target, rv reflect.Value) error {
 	}
 	// Handle standard kinds.
 	switch rt.Kind() {
-	case reflect.Interface:
-		if rv.IsNil() {
-			return target.FromNil(tt)
-		}
-		return FromReflect(target, rv.Elem())
 	case reflect.Bool:
 		return target.FromBool(rv.Bool(), tt)
 	case reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uint, reflect.Uintptr:
@@ -237,7 +239,7 @@ func FromReflect(target Target, rv reflect.Value) error {
 				}
 				switch err := setTarget.FinishKey(key); {
 				case verror.Is(err, verror.NoExist):
-					continue
+					continue // silently drop unknown fields
 				case err != nil:
 					return err
 				}
@@ -259,7 +261,7 @@ func FromReflect(target Target, rv reflect.Value) error {
 			field, err := mapTarget.FinishKeyStartField(key)
 			switch {
 			case verror.Is(err, verror.NoExist):
-				continue
+				continue // silently drop unknown fields
 			case err != nil:
 				return err
 			}
@@ -272,26 +274,26 @@ func FromReflect(target Target, rv reflect.Value) error {
 		}
 		return target.FinishMap(mapTarget)
 	case reflect.Struct:
-		structTarget, err := target.StartStruct(tt)
+		fieldsTarget, err := target.StartFields(tt)
 		if err != nil {
 			return err
 		}
 		for fx := 0; fx < rt.NumField(); fx++ {
-			key, field, err := structTarget.StartField(rt.Field(fx).Name)
+			key, field, err := fieldsTarget.StartField(rt.Field(fx).Name)
 			switch {
 			case verror.Is(err, verror.NoExist):
-				continue
+				continue // silently drop unknown fields
 			case err != nil:
 				return err
 			}
 			if err := FromReflect(field, rv.Field(fx)); err != nil {
 				return err
 			}
-			if err := structTarget.FinishField(key, field); err != nil {
+			if err := fieldsTarget.FinishField(key, field); err != nil {
 				return err
 			}
 		}
-		return target.FinishStruct(structTarget)
+		return target.FinishFields(fieldsTarget)
 	default:
 		return fmt.Errorf("FromReflect invalid type %v", rt)
 	}
@@ -310,15 +312,6 @@ func FromValue(target Target, vv *vdl.Value) error {
 			return target.FromNil(tt)
 		}
 		return FromValue(target, vv.Elem())
-	case vdl.OneOf:
-		oneof, err := target.StartOneOf(tt)
-		if err != nil {
-			return err
-		}
-		if err := FromValue(oneof, vv.Elem()); err != nil {
-			return err
-		}
-		return target.FinishOneOf(oneof)
 	case vdl.Bool:
 		return target.FromBool(vv.Bool(), tt)
 	case vdl.Byte:
@@ -370,7 +363,7 @@ func FromValue(target Target, vv *vdl.Value) error {
 			}
 			switch err := setTarget.FinishKey(key); {
 			case verror.Is(err, verror.NoExist):
-				continue
+				continue // silently drop unknown fields
 			case err != nil:
 				return err
 			}
@@ -392,7 +385,7 @@ func FromValue(target Target, vv *vdl.Value) error {
 			field, err := mapTarget.FinishKeyStartField(key)
 			switch {
 			case verror.Is(err, verror.NoExist):
-				continue
+				continue // silently drop unknown fields
 			case err != nil:
 				return err
 			}
@@ -405,26 +398,43 @@ func FromValue(target Target, vv *vdl.Value) error {
 		}
 		return target.FinishMap(mapTarget)
 	case vdl.Struct:
-		structTarget, err := target.StartStruct(tt)
+		fieldsTarget, err := target.StartFields(tt)
 		if err != nil {
 			return err
 		}
 		for fx := 0; fx < tt.NumField(); fx++ {
-			key, field, err := structTarget.StartField(tt.Field(fx).Name)
+			key, field, err := fieldsTarget.StartField(tt.Field(fx).Name)
 			switch {
 			case verror.Is(err, verror.NoExist):
-				continue
+				continue // silently drop unknown fields
 			case err != nil:
 				return err
 			}
 			if err := FromValue(field, vv.Field(fx)); err != nil {
 				return err
 			}
-			if err := structTarget.FinishField(key, field); err != nil {
+			if err := fieldsTarget.FinishField(key, field); err != nil {
 				return err
 			}
 		}
-		return target.FinishStruct(structTarget)
+		return target.FinishFields(fieldsTarget)
+	case vdl.OneOf:
+		fieldsTarget, err := target.StartFields(tt)
+		if err != nil {
+			return err
+		}
+		fx, vvFieldValue := vv.OneOfField()
+		key, field, err := fieldsTarget.StartField(tt.Field(fx).Name)
+		if err != nil {
+			return err // no verror.NoExist special-case; oneof field is required
+		}
+		if err := FromValue(field, vvFieldValue); err != nil {
+			return err
+		}
+		if err := fieldsTarget.FinishField(key, field); err != nil {
+			return err
+		}
+		return target.FinishFields(fieldsTarget)
 	default:
 		panic(fmt.Errorf("FromValue unhandled %v %v", tt.Kind(), tt))
 	}

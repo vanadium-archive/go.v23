@@ -60,73 +60,41 @@ package vom2
 TODO: Describe user-defined coders (VomEncode?)
 TODO: Describe wire format, something like this:
 
+// THIS IS THE NEW PROTOCOL, IT'S NOT IMPLEMENTED YET.
+
 Wire protocol.  Type ids are either in the bootstrap range (less than 65), or
 are uniquely assigned by the encoder and received by the decoder.
 
   VOM:
-    Message*
-  Message:
-    (TypeDef | ValueDef)
-  TypeDef: #WireType is one of {Slice,Map,Struct}Type#
-    int(-typeID) uint(len(Message)) encoded_WireType
-  ValueDef:
-    int(+typeID) primitive
-  | int(+typeID) uint(len(Message)) CompositeValue
-  CompositeValue:
-    SliceV | MapV | StructV | AnyV
+    (TypeMsg | ValueMsg)*
+  TypeMsg:
+    -typeID len(TypeMsg) encoded_WireType
+  ValueMsg:
+    +typeID primitive
+  | +typeID len(Msg) CompositeV
   Value:
-    primitive |  CompositeValue
-  SliceV:
-    uint(len) Value*len
+    primitive |  CompositeV
+  CompositeV:
+    ListV | SetV | MapV | StructV | OneOfV | AnyV
+  ListV:
+    len Value*len
+  SetV:
+    len Value*len
   MapV:
-    uint(len) (Value Value)*len
-  StructV: #initial field index -1, field 0 has delta 1, zero fields not encoded#
-    (uint(fieldDelta) Value)* uint(0)
+    len (Value Value)*len
+  StructV:
+    (index Value)* END  // index is the 0-based field index
+  OneOfV:
+    index Value         // index is the 0-based field index
   AnyV:
-    int(0) #nil# | int(+typeID) Value
+    +typeID Value
 
-//////////
-type encBinary struct {}
-func (e *encBinary) encode(w io.Writer) error
+  primitive: // variable-length unsigned integer
+    00-7F // 1-byte value in range 0-127
+    80-8F // Reserved flags
+    90-FF // Multi-byte value, FF=2 bytes, FE=3 bytes, ...
 
-func (e *encBinary) encType(t *Type) error
-
-func (e *encBinary) encNil() error
-func (e *encBinary) encBool(v bool) error
-func (e *encBinary) encUint(v uint64) error
-func (e *encBinary) encInt(v int64) error
-func (e *encBinary) encFloat(v float64) error
-func (e *encBinary) encString(v string) error
-
-func (e *encBinary) encStartSlice(len int) error
-func (e *encBinary) encFinishSlice() error
-
-func (e *encBinary) encStartMap(len int) error
-func (e *encBinary) encFinishMap() error
-
-func (e *encBinary) encStartStruct() error
-func (e *encBinary) encStructField(index int) error
-func (e *encBinary) encFinishStruct() error
-
-type decBinary struct {}
-func (d *decBinary) decode(r io.Reader) error
-
-func (d *decBinary) decType(t *Type) error
-
-func (d *decBinary) decNil() error
-func (d *decBinary) decBool(v bool) error
-func (d *decBinary) decUint(v uint64) error
-func (d *decBinary) decInt(v int64) error
-func (d *decBinary) decFloat(v float64) error
-func (d *decBinary) decString(v string) error
-
-func (d *decBinary) decStartSlice(len int) error
-func (d *decBinary) decFinishSlice() error
-
-func (d *decBinary) decStartMap(len int) error
-func (d *decBinary) decFinishMap() error
-
-func (d *decBinary) decStartStruct() error
-func (d *decBinary) decStructField(index int) error
-func (d *decBinary) decFinishStruct() error
+  flags:
+    80  // NOEXIST - used to indicate a non-existent optional / any value.
+    81  // END     - used to terminate structs.
 */

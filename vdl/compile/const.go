@@ -382,6 +382,8 @@ func evalCompLit(t *vdl.Type, lit *parse.ConstCompositeLit, file *File, env *Env
 		return evalMapLit(t, lit, file, env)
 	case vdl.Struct:
 		return evalStructLit(t, lit, file, env)
+	case vdl.OneOf:
+		return evalOneOfLit(t, lit, file, env)
 	}
 	env.Errorf(file, lit.Pos(), "%v invalid type for composite literal", t)
 	return nil
@@ -515,7 +517,7 @@ func evalStructLit(t *vdl.Type, lit *parse.ConstCompositeLit, file *File, env *E
 			return nil
 		}
 		// Get the field description, either from the key or the index.
-		var field vdl.StructField
+		var field vdl.Field
 		if kv.Key != nil {
 			// There is an explicit field name specified.
 			fname, ok := kv.Key.(*parse.ConstNamed)
@@ -554,6 +556,39 @@ func evalStructLit(t *vdl.Type, lit *parse.ConstCompositeLit, file *File, env *E
 		return nil
 	}
 	return structv
+}
+
+func evalOneOfLit(t *vdl.Type, lit *parse.ConstCompositeLit, file *File, env *Env) *vdl.Value {
+	// We require exactly one kv with an explicit key.
+	oneofv := vdl.ZeroValue(t)
+	desc := fmt.Sprintf("%v oneof literal", t)
+	if len(lit.KVList) != 1 {
+		env.Errorf(file, lit.Pos(), "invalid %s (must have exactly one entry)", desc)
+		return nil
+	}
+	kv := lit.KVList[0]
+	if kv.Key == nil || kv.Value == nil {
+		env.Errorf(file, lit.Pos(), "invalid %s (must have explicit key and value)", desc)
+		return nil
+	}
+	// Get the field description.
+	fname, ok := kv.Key.(*parse.ConstNamed)
+	if !ok {
+		env.Errorf(file, kv.Key.Pos(), "invalid field name %q in %s", kv.Key.String(), desc)
+		return nil
+	}
+	field, index := t.FieldByName(fname.Name)
+	if index < 0 {
+		env.Errorf(file, kv.Key.Pos(), "unknown field %q in %s", fname.Name, desc)
+		return nil
+	}
+	// Evaluate the value and perform the assignment.
+	value := evalTypedValue("oneof field", field.Type, kv.Value, file, env)
+	if value == nil {
+		return nil
+	}
+	oneofv.AssignOneOfField(index, value)
+	return oneofv
 }
 
 // evalTypedValue evaluates pexpr into a vdl.Value.  If a non-nil value is

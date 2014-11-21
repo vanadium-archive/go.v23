@@ -186,15 +186,16 @@ func (dt *decoderTypes) makeBaseType(wt *vdl.Value, builder *vdl.TypeBuilder, pe
 		}
 		return base, nil
 	case wireOneOfType:
-		vTypes := wt.Field(1)
+		vFields := wt.Field(1)
 		base := builder.OneOf()
-		for ix := 0; ix < vTypes.Len(); ix++ {
-			oneID := TypeID(vTypes.Index(ix).Uint())
-			one, err := dt.lookupOrMakeType(oneID, builder, pending)
+		for ix := 0; ix < vFields.Len(); ix++ {
+			vf := vFields.Index(ix)
+			fname, fieldID := vf.Field(0).RawString(), TypeID(vf.Field(1).Uint())
+			field, err := dt.lookupOrMakeType(fieldID, builder, pending)
 			if err != nil {
 				return nil, err
 			}
-			base.AppendType(one)
+			base.AppendField(fname, field)
 		}
 		return base, nil
 	default:

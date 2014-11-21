@@ -102,8 +102,10 @@ func javaVal(v *vdl.Value, env *compile.Env) string {
 		}
 		return ret + ".build()"
 	case vdl.OneOf:
-		elemReflectTypeStr := javaReflectType(v.Elem().Type(), env)
-		elemStr := javaConstVal(v.Elem(), env)
+		// TODO(rogulenko): Update to new oneof.
+		_, field := v.OneOfField()
+		elemReflectTypeStr := javaReflectType(field.Type(), env)
+		elemStr := javaConstVal(field, env)
 		return fmt.Sprintf("new %s().assignValue(%s, %s)", javaType(v.Type(), false, env), elemReflectTypeStr, elemStr)
 	case vdl.Set:
 		keyTypeStr := javaType(v.Type().Key(), true, env)

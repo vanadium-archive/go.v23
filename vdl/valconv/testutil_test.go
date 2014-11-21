@@ -290,78 +290,72 @@ func (x nEnum) String() string {
 	return ""
 }
 
-func (nEnum) vdlEnumLabels(struct{ A, B, C, ABC bool }) {}
+func (nEnum) __DescribeEnum(struct{ A, B, C, ABC nEnum }) {}
 
 var enumTypeN = vdl.NamedType("nEnum", vdl.EnumType("A", "B", "C", "ABC"))
 
-// oneof{bool;string;StructInt64}
-type nOneOfBSS struct{ oneof interface{} }
-
-func makeOneOfBSS(oneof interface{}) (x nOneOfBSS, ok bool) {
-	ok = x.Assign(oneof)
-	return
-}
-
-func mustmakeOneOfBSS(oneof interface{}) nOneOfBSS {
-	x, ok := makeOneOfBSS(oneof)
-	if !ok {
-		panic(fmt.Errorf("can't make nOneOfBSS from %[1]T %[1]v", oneof))
+// oneof{A bool;B string;C nStructInt64}
+type (
+	nOneOfABC interface {
+		Index() int
+		Name() string
+		__DescribeOneOf(__nOneOfABCDesc)
 	}
-	return x
-}
+	nOneOfABCA struct{ Value bool }
+	nOneOfABCB struct{ Value string }
+	nOneOfABCC struct{ Value nStructInt64 }
 
-func (x *nOneOfBSS) Assign(oneof interface{}) bool {
-	switch oneof.(type) {
-	case bool, string, nStructInt64:
-		x.oneof = oneof
-		return true
+	__nOneOfABCDesc struct {
+		nOneOfABC
+		A nOneOfABCA
+		B nOneOfABCB
+		C nOneOfABCC
 	}
-	x.oneof = nil
-	return false
-}
+)
 
-func (x nOneOfBSS) OneOf() interface{} {
-	return x.oneof
-}
+func (nOneOfABCA) Name() string                    { return "A" }
+func (nOneOfABCA) Index() int                      { return 0 }
+func (nOneOfABCA) __DescribeOneOf(__nOneOfABCDesc) {}
+func (nOneOfABCB) Name() string                    { return "B" }
+func (nOneOfABCB) Index() int                      { return 1 }
+func (nOneOfABCB) __DescribeOneOf(__nOneOfABCDesc) {}
+func (nOneOfABCC) Name() string                    { return "C" }
+func (nOneOfABCC) Index() int                      { return 2 }
+func (nOneOfABCC) __DescribeOneOf(__nOneOfABCDesc) {}
 
-func (nOneOfBSS) vdlOneOfTypes(_ bool, _ string, _ nStructInt64) {}
-
-// oneof{int64;string;StructInt64}
-type nOneOfISS struct{ oneof interface{} }
-
-func makeOneOfISS(oneof interface{}) (x nOneOfISS, ok bool) {
-	ok = x.Assign(oneof)
-	return
-}
-
-func mustmakeOneOfISS(oneof interface{}) nOneOfISS {
-	x, ok := makeOneOfISS(oneof)
-	if !ok {
-		panic(fmt.Errorf("can't make nOneOfISS from %[1]T %[1]v", oneof))
+// oneof{B string;C nStructInt64;D int64}
+type (
+	nOneOfBCD interface {
+		Index() int
+		Name() string
+		__DescribeOneOf(__nOneOfBCDDesc)
 	}
-	return x
-}
+	nOneOfBCDB struct{ Value string }
+	nOneOfBCDC struct{ Value nStructInt64 }
+	nOneOfBCDD struct{ Value int64 }
 
-func (x *nOneOfISS) Assign(oneof interface{}) bool {
-	switch oneof.(type) {
-	case int64, string, nStructInt64:
-		x.oneof = oneof
-		return true
+	__nOneOfBCDDesc struct {
+		nOneOfBCD
+		B nOneOfBCDB
+		C nOneOfBCDC
+		D nOneOfBCDD
 	}
-	x.oneof = nil
-	return false
-}
+)
 
-func (x nOneOfISS) OneOf() interface{} {
-	return x.oneof
-}
-
-func (nOneOfISS) vdlOneOfTypes(_ int64, _ string, _ nStructInt64) {}
+func (nOneOfBCDB) Name() string                    { return "B" }
+func (nOneOfBCDB) Index() int                      { return 0 }
+func (nOneOfBCDB) __DescribeOneOf(__nOneOfBCDDesc) {}
+func (nOneOfBCDC) Name() string                    { return "C" }
+func (nOneOfBCDC) Index() int                      { return 1 }
+func (nOneOfBCDC) __DescribeOneOf(__nOneOfBCDDesc) {}
+func (nOneOfBCDD) Name() string                    { return "D" }
+func (nOneOfBCDD) Index() int                      { return 2 }
+func (nOneOfBCDD) __DescribeOneOf(__nOneOfBCDDesc) {}
 
 var (
-	structInt64TypeN = vdl.NamedType("veyron.io/veyron/veyron2/vdl/valconv.nStructInt64", vdl.StructType(vdl.StructField{"X", vdl.Int64Type}))
-	oneOfBSSTypeN    = vdl.NamedType("veyron.io/veyron/veyron2/vdl/valconv.nOneOfBSS", vdl.OneOfType(vdl.BoolType, vdl.StringType, structInt64TypeN))
-	oneOfISSTypeN    = vdl.NamedType("veyron.io/veyron/veyron2/vdl/valconv.nOneOfISS", vdl.OneOfType(vdl.Int64Type, vdl.StringType, structInt64TypeN))
+	structInt64TypeN = vdl.NamedType("veyron.io/veyron/veyron2/vdl/valconv.nStructInt64", vdl.StructType(vdl.Field{"X", vdl.Int64Type}))
+	oneOfABCTypeN    = vdl.NamedType("veyron.io/veyron/veyron2/vdl/valconv.nOneOfABC", vdl.OneOfType([]vdl.Field{{"A", vdl.BoolType}, {"B", vdl.StringType}, {"C", structInt64TypeN}}...))
+	oneOfBCDTypeN    = vdl.NamedType("veyron.io/veyron/veyron2/vdl/valconv.nOneOfBCD", vdl.OneOfType([]vdl.Field{{"B", vdl.StringType}, {"C", structInt64TypeN}, {"D", vdl.Int64Type}}...))
 )
 
 // Define a bunch of *Type types used in tests.
@@ -425,10 +419,10 @@ var (
 	setStringTypeN     = vdl.NamedType("nSetString", vdl.SetType(stringTypeN))
 	mapStringBoolType  = vdl.MapType(vdl.StringType, vdl.BoolType)
 	mapStringBoolTypeN = vdl.NamedType("nMapStringBool", vdl.MapType(stringTypeN, boolTypeN))
-	structXYZBoolType  = vdl.StructType(vdl.StructField{"X", vdl.BoolType}, vdl.StructField{"Y", vdl.BoolType}, vdl.StructField{"Z", vdl.BoolType})
-	structXYZBoolTypeN = vdl.NamedType("nStructXYZBool", vdl.StructType(vdl.StructField{"X", boolTypeN}, vdl.StructField{"Y", boolTypeN}, vdl.StructField{"Z", boolTypeN}))
-	structWXBoolType   = vdl.StructType(vdl.StructField{"W", vdl.BoolType}, vdl.StructField{"X", vdl.BoolType})
-	structWXBoolTypeN  = vdl.NamedType("nStructWXBool", vdl.StructType(vdl.StructField{"W", boolTypeN}, vdl.StructField{"X", boolTypeN}))
+	structXYZBoolType  = vdl.StructType(vdl.Field{"X", vdl.BoolType}, vdl.Field{"Y", vdl.BoolType}, vdl.Field{"Z", vdl.BoolType})
+	structXYZBoolTypeN = vdl.NamedType("nStructXYZBool", vdl.StructType(vdl.Field{"X", boolTypeN}, vdl.Field{"Y", boolTypeN}, vdl.Field{"Z", boolTypeN}))
+	structWXBoolType   = vdl.StructType(vdl.Field{"W", vdl.BoolType}, vdl.Field{"X", vdl.BoolType})
+	structWXBoolTypeN  = vdl.NamedType("nStructWXBool", vdl.StructType(vdl.Field{"W", boolTypeN}, vdl.Field{"X", boolTypeN}))
 	// Composite types representing maps of strings to numbers.
 	mapStringUint64Type     = vdl.MapType(vdl.StringType, vdl.Uint64Type)
 	mapStringUint64TypeN    = vdl.NamedType("nMapStringUint64", vdl.MapType(stringTypeN, uint64TypeN))
@@ -438,24 +432,24 @@ var (
 	mapStringFloat64TypeN   = vdl.NamedType("nMapStringFloat64", vdl.MapType(stringTypeN, float64TypeN))
 	mapStringComplex64Type  = vdl.MapType(vdl.StringType, vdl.Complex64Type)
 	mapStringComplex64TypeN = vdl.NamedType("nMapStringComplex64", vdl.MapType(stringTypeN, complex64TypeN))
-	structVWXUint64Type     = vdl.StructType(vdl.StructField{"V", vdl.Uint64Type}, vdl.StructField{"W", vdl.Uint64Type}, vdl.StructField{"X", vdl.Uint64Type})
-	structVWXUint64TypeN    = vdl.NamedType("nStructVWXUint64", vdl.StructType(vdl.StructField{"V", uint64TypeN}, vdl.StructField{"W", uint64TypeN}, vdl.StructField{"X", uint64TypeN}))
-	structVWXInt64Type      = vdl.StructType(vdl.StructField{"V", vdl.Int64Type}, vdl.StructField{"W", vdl.Int64Type}, vdl.StructField{"X", vdl.Int64Type})
-	structVWXInt64TypeN     = vdl.NamedType("nStructVWXInt64", vdl.StructType(vdl.StructField{"V", int64TypeN}, vdl.StructField{"W", int64TypeN}, vdl.StructField{"X", int64TypeN}))
-	structVWXFloat64Type    = vdl.StructType(vdl.StructField{"V", vdl.Float64Type}, vdl.StructField{"W", vdl.Float64Type}, vdl.StructField{"X", vdl.Float64Type})
-	structVWXFloat64TypeN   = vdl.NamedType("nStructVWXFloat64", vdl.StructType(vdl.StructField{"V", float64TypeN}, vdl.StructField{"W", float64TypeN}, vdl.StructField{"X", float64TypeN}))
-	structVWXComplex64Type  = vdl.StructType(vdl.StructField{"V", vdl.Complex64Type}, vdl.StructField{"W", vdl.Complex64Type}, vdl.StructField{"X", vdl.Complex64Type})
-	structVWXComplex64TypeN = vdl.NamedType("nStructVWXComplex64", vdl.StructType(vdl.StructField{"V", complex64TypeN}, vdl.StructField{"W", complex64TypeN}, vdl.StructField{"X", complex64TypeN}))
-	structUVUint64Type      = vdl.StructType(vdl.StructField{"U", vdl.Uint64Type}, vdl.StructField{"V", vdl.Uint64Type})
-	structUVUint64TypeN     = vdl.NamedType("nStructUVUint64", vdl.StructType(vdl.StructField{"U", uint64TypeN}, vdl.StructField{"V", uint64TypeN}))
-	structUVInt64Type       = vdl.StructType(vdl.StructField{"U", vdl.Int64Type}, vdl.StructField{"V", vdl.Int64Type})
-	structUVInt64TypeN      = vdl.NamedType("nStructUVInt64", vdl.StructType(vdl.StructField{"U", int64TypeN}, vdl.StructField{"V", int64TypeN}))
-	structUVFloat64Type     = vdl.StructType(vdl.StructField{"U", vdl.Float64Type}, vdl.StructField{"V", vdl.Float64Type})
-	structUVFloat64TypeN    = vdl.NamedType("nStructUVFloat64", vdl.StructType(vdl.StructField{"U", float64TypeN}, vdl.StructField{"V", float64TypeN}))
-	structUVComplex64Type   = vdl.StructType(vdl.StructField{"U", vdl.Complex64Type}, vdl.StructField{"V", vdl.Complex64Type})
-	structUVComplex64TypeN  = vdl.NamedType("nStructUVComplex64", vdl.StructType(vdl.StructField{"U", complex64TypeN}, vdl.StructField{"V", complex64TypeN}))
+	structVWXUint64Type     = vdl.StructType(vdl.Field{"V", vdl.Uint64Type}, vdl.Field{"W", vdl.Uint64Type}, vdl.Field{"X", vdl.Uint64Type})
+	structVWXUint64TypeN    = vdl.NamedType("nStructVWXUint64", vdl.StructType(vdl.Field{"V", uint64TypeN}, vdl.Field{"W", uint64TypeN}, vdl.Field{"X", uint64TypeN}))
+	structVWXInt64Type      = vdl.StructType(vdl.Field{"V", vdl.Int64Type}, vdl.Field{"W", vdl.Int64Type}, vdl.Field{"X", vdl.Int64Type})
+	structVWXInt64TypeN     = vdl.NamedType("nStructVWXInt64", vdl.StructType(vdl.Field{"V", int64TypeN}, vdl.Field{"W", int64TypeN}, vdl.Field{"X", int64TypeN}))
+	structVWXFloat64Type    = vdl.StructType(vdl.Field{"V", vdl.Float64Type}, vdl.Field{"W", vdl.Float64Type}, vdl.Field{"X", vdl.Float64Type})
+	structVWXFloat64TypeN   = vdl.NamedType("nStructVWXFloat64", vdl.StructType(vdl.Field{"V", float64TypeN}, vdl.Field{"W", float64TypeN}, vdl.Field{"X", float64TypeN}))
+	structVWXComplex64Type  = vdl.StructType(vdl.Field{"V", vdl.Complex64Type}, vdl.Field{"W", vdl.Complex64Type}, vdl.Field{"X", vdl.Complex64Type})
+	structVWXComplex64TypeN = vdl.NamedType("nStructVWXComplex64", vdl.StructType(vdl.Field{"V", complex64TypeN}, vdl.Field{"W", complex64TypeN}, vdl.Field{"X", complex64TypeN}))
+	structUVUint64Type      = vdl.StructType(vdl.Field{"U", vdl.Uint64Type}, vdl.Field{"V", vdl.Uint64Type})
+	structUVUint64TypeN     = vdl.NamedType("nStructUVUint64", vdl.StructType(vdl.Field{"U", uint64TypeN}, vdl.Field{"V", uint64TypeN}))
+	structUVInt64Type       = vdl.StructType(vdl.Field{"U", vdl.Int64Type}, vdl.Field{"V", vdl.Int64Type})
+	structUVInt64TypeN      = vdl.NamedType("nStructUVInt64", vdl.StructType(vdl.Field{"U", int64TypeN}, vdl.Field{"V", int64TypeN}))
+	structUVFloat64Type     = vdl.StructType(vdl.Field{"U", vdl.Float64Type}, vdl.Field{"V", vdl.Float64Type})
+	structUVFloat64TypeN    = vdl.NamedType("nStructUVFloat64", vdl.StructType(vdl.Field{"U", float64TypeN}, vdl.Field{"V", float64TypeN}))
+	structUVComplex64Type   = vdl.StructType(vdl.Field{"U", vdl.Complex64Type}, vdl.Field{"V", vdl.Complex64Type})
+	structUVComplex64TypeN  = vdl.NamedType("nStructUVComplex64", vdl.StructType(vdl.Field{"U", complex64TypeN}, vdl.Field{"V", complex64TypeN}))
 
-	structAIntType  = vdl.StructType(vdl.StructField{"A", vdl.Int64Type})
+	structAIntType  = vdl.StructType(vdl.Field{"A", vdl.Int64Type})
 	structAIntTypeN = vdl.NamedType("nStructA", structAIntType)
 
 	// Types that cannot be converted to sets.  Although we represent sets as
@@ -465,8 +459,8 @@ var (
 	emptyTypeN          = vdl.NamedType("nEmpty", vdl.StructType())
 	mapStringEmptyType  = vdl.MapType(vdl.StringType, emptyType)
 	mapStringEmptyTypeN = vdl.NamedType("nMapStringEmpty", vdl.MapType(stringTypeN, emptyTypeN))
-	structXYZEmptyType  = vdl.StructType(vdl.StructField{"X", emptyType}, vdl.StructField{"Y", emptyType}, vdl.StructField{"Z", emptyType})
-	structXYZEmptyTypeN = vdl.NamedType("nStructXYZEmpty", vdl.StructType(vdl.StructField{"X", emptyTypeN}, vdl.StructField{"Y", emptyTypeN}, vdl.StructField{"Z", emptyTypeN}))
+	structXYZEmptyType  = vdl.StructType(vdl.Field{"X", emptyType}, vdl.Field{"Y", emptyType}, vdl.Field{"Z", emptyType})
+	structXYZEmptyTypeN = vdl.NamedType("nStructXYZEmpty", vdl.StructType(vdl.Field{"X", emptyTypeN}, vdl.Field{"Y", emptyTypeN}, vdl.Field{"Z", emptyTypeN}))
 )
 
 func anyValue(x *vdl.Value) *vdl.Value                  { return vdl.ZeroValue(vdl.AnyType).Assign(x) }

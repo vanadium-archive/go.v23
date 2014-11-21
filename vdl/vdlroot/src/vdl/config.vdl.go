@@ -27,12 +27,12 @@ const (
 	GenLanguageJavascript
 )
 
-// AllGenLanguage holds all labels for GenLanguage.
-var AllGenLanguage = []GenLanguage{GenLanguageGo, GenLanguageJava, GenLanguageJavascript}
+// GenLanguageAll holds all labels for GenLanguage.
+var GenLanguageAll = []GenLanguage{GenLanguageGo, GenLanguageJava, GenLanguageJavascript}
 
-// MakeGenLanguage creates a GenLanguage from a string label.
+// GenLanguageFromString creates a GenLanguage from a string label.
 // Returns true iff the label is valid.
-func MakeGenLanguage(label string) (x GenLanguage, ok bool) {
+func GenLanguageFromString(label string) (x GenLanguage, ok bool) {
 	ok = x.Assign(label)
 	return
 }
@@ -68,8 +68,8 @@ func (x GenLanguage) String() string {
 	return ""
 }
 
-// vdlEnumLabels identifies GenLanguage as an enum.
-func (GenLanguage) vdlEnumLabels(struct{ Go, Java, Javascript bool }) {}
+// __DescribeEnum describes the GenLanguage enum type.
+func (GenLanguage) __DescribeEnum(struct{ Go, Java, Javascript GenLanguage }) {}
 
 // GoConfig specifies go specific configuration.
 type GoConfig struct {

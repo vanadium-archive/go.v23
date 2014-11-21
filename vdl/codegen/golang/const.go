@@ -44,9 +44,6 @@ func typedConst(data goData, v *vdl.Value) string {
 		if !isByteList(t) {
 			return typestr + valstr
 		}
-	case vdl.OneOf:
-		// Create the oneof value using the composite literal syntax.
-		return typestr + "{" + valstr + "}"
 	}
 	return typestr + "(" + valstr + ")"
 }
@@ -57,9 +54,15 @@ func untypedConst(data goData, v *vdl.Value) string {
 		return strconv.Quote(string(v.Bytes()))
 	}
 	switch k {
-	case vdl.Any, vdl.OneOf, vdl.Optional:
+	case vdl.Any:
 		if elem := v.Elem(); elem != nil {
 			return typedConst(data, elem)
+		}
+		return "nil"
+	case vdl.Optional:
+		// TODO(toddw): This only works for composite literals.
+		if elem := v.Elem(); elem != nil {
+			return "&" + typedConst(data, elem)
 		}
 		return "nil"
 	case vdl.TypeObject:
@@ -67,7 +70,12 @@ func untypedConst(data goData, v *vdl.Value) string {
 		// user, and are simple to return statically.
 		switch v.TypeObject() {
 		case vdl.AnyType:
-			return "__vdl.AnyType"
+			// TODO(toddw): We should just return __vdl.AnyType here, but that makes
+			// our package dependency tracking more complicated for system imports.
+			// Normally every dependency on the Any type requires a Go import for
+			// __vdlutil because of __vdlutil.Any.  Fix this when vdlutil.Any is
+			// renamed to into vdl.AnyRep.
+			return "__vdl.TypeOf((*__vdlutil.Any)(nil))"
 		case vdl.TypeObjectType:
 			return "__vdl.TypeObjectType"
 		}
@@ -139,6 +147,9 @@ func untypedConst(data goData, v *vdl.Value) string {
 			s += "\n" + t.Field(ix).Name + ": " + subConst(data, v.Field(ix)) + ","
 		}
 		return s + "\n}"
+	case vdl.OneOf:
+		ix, field := v.OneOfField()
+		return typeGo(data, t) + t.Field(ix).Name + "{" + typedConst(data, field) + "}"
 	default:
 		data.Env.Errorf(data.File, parse.Pos{}, "%v untypedConst not implemented for %v %v", t, k)
 		return "INVALID"

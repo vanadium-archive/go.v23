@@ -114,7 +114,7 @@ func ensureNonEmptyToken(yylex yyLexer, tok strPos, errMsg string) {
 %type <namepos>    label_spec
 %type <nameposes>  label_spec_list
 %type <typeexpr>   type type_no_typeobject otype
-%type <typeexprs>  type_comma_list type_semi_list streamargs
+%type <typeexprs>  type_comma_list streamargs
 %type <fields>     field_spec_list field_spec named_arg_list inargs outargs
 %type <iface>      iface_item_list iface_item
 %type <constexpr>  expr unary_expr operand
@@ -281,8 +281,10 @@ type_no_typeobject:
   { $$ = &TypeStruct{Fields:$3, P:$1} }
 | tSTRUCT '{' '}'
   { $$ = &TypeStruct{P:$1} }
-| tONEOF '{' type_semi_list osemi '}'
-  { $$ = &TypeOneOf{Types:$3, P:$1} }
+| tONEOF '{' field_spec_list osemi '}'
+  { $$ = &TypeOneOf{Fields:$3, P:$1} }
+| tONEOF '{' '}'
+  { $$ = &TypeOneOf{P:$1} }
 | '?' type
   { $$ = &TypeOptional{Base:$2, P:$1} }
 
@@ -359,12 +361,6 @@ type_comma_list:
   type
   { $$ = []Type{$1} }
 | type_comma_list ',' type
-  { $$ = append($1, $3) }
-
-type_semi_list:
-  type
-  { $$ = []Type{$1} }
-| type_semi_list ';' type
   { $$ = append($1, $3) }
 
 // INTERFACE DEFINITIONS

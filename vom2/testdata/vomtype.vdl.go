@@ -53,12 +53,12 @@ const (
 	NEnumC
 )
 
-// AllNEnum holds all labels for NEnum.
-var AllNEnum = []NEnum{NEnumA, NEnumB, NEnumC}
+// NEnumAll holds all labels for NEnum.
+var NEnumAll = []NEnum{NEnumA, NEnumB, NEnumC}
 
-// MakeNEnum creates a NEnum from a string label.
+// NEnumFromString creates a NEnum from a string label.
 // Returns true iff the label is valid.
-func MakeNEnum(label string) (x NEnum, ok bool) {
+func NEnumFromString(label string) (x NEnum, ok bool) {
 	ok = x.Assign(label)
 	return
 }
@@ -94,37 +94,45 @@ func (x NEnum) String() string {
 	return ""
 }
 
-// vdlEnumLabels identifies NEnum as an enum.
-func (NEnum) vdlEnumLabels(struct{ A, B, C bool }) {}
+// __DescribeEnum describes the NEnum enum type.
+func (NEnum) __DescribeEnum(struct{ A, B, C NEnum }) {}
 
-type NOneOf struct{ oneof interface{} }
-
-// MakeNOneOf creates a NOneOf.
-// Returns true iff the oneof value has a valid type.
-func MakeNOneOf(oneof interface{}) (x NOneOf, ok bool) {
-	ok = x.Assign(oneof)
-	return
-}
-
-// Assign assigns oneof to x.
-// Returns true iff the oneof value has a valid type.
-func (x *NOneOf) Assign(oneof interface{}) bool {
-	switch oneof.(type) {
-	case bool, string, int64:
-		x.oneof = oneof
-		return true
+type (
+	// NOneOf represents any single field of the NOneOf oneof type.
+	NOneOf interface {
+		// Index returns the field index.
+		Index() int
+		// Name returns the field name.
+		Name() string
+		// __DescribeOneOf describes the NOneOf oneof type.
+		__DescribeOneOf(__NOneOfDesc)
 	}
-	x.oneof = nil
-	return false
-}
+	// NOneOfA represents field A of the NOneOf oneof type.
+	NOneOfA struct{ Value bool }
+	// NOneOfB represents field B of the NOneOf oneof type.
+	NOneOfB struct{ Value string }
+	// NOneOfC represents field C of the NOneOf oneof type.
+	NOneOfC struct{ Value int64 }
+	// __NOneOfDesc describes the NOneOf oneof type.
+	__NOneOfDesc struct {
+		NOneOf
+		A NOneOfA
+		B NOneOfB
+		C NOneOfC
+	}
+)
 
-// OneOf returns the underlying typed value of x.
-func (x NOneOf) OneOf() interface{} {
-	return x.oneof
-}
+func (NOneOfA) Index() int                   { return 0 }
+func (NOneOfA) Name() string                 { return "A" }
+func (NOneOfA) __DescribeOneOf(__NOneOfDesc) {}
 
-// vdlOneOfTypes identifies NOneOf as a oneof.
-func (NOneOf) vdlOneOfTypes(_ bool, _ string, _ int64) {}
+func (NOneOfB) Index() int                   { return 1 }
+func (NOneOfB) Name() string                 { return "B" }
+func (NOneOfB) __DescribeOneOf(__NOneOfDesc) {}
+
+func (NOneOfC) Index() int                   { return 2 }
+func (NOneOfC) Name() string                 { return "C" }
+func (NOneOfC) __DescribeOneOf(__NOneOfDesc) {}
 
 // Nested Custom Types
 type MBool NBool

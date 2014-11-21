@@ -411,55 +411,65 @@ type foo struct{
 	{
 		"TypeOneOf",
 		`package testpkg
-type foo oneof{A;B;C}`,
+type foo oneof{A a;B b;C c}`,
 		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
 			TypeDefs: []*parse.TypeDef{
 				{NamePos: np("foo", 2, 6), Type: &parse.TypeOneOf{
-					Types: []parse.Type{tn("A", 2, 16), tn("B", 2, 18), tn("C", 2, 20)},
-					P:     pos(2, 10)}}}},
+					Fields: []*parse.Field{
+						{NamePos: np("A", 2, 16), Type: tn("a", 2, 18)},
+						{NamePos: np("B", 2, 20), Type: tn("b", 2, 22)},
+						{NamePos: np("C", 2, 24), Type: tn("c", 2, 26)}},
+					P: pos(2, 10)}}}},
 		nil},
 	{
 		"TypeOneOfNewlines",
 		`package testpkg
 type foo oneof{
-  A
-  B
-  C
+  A a
+  B b
+  C c
 }`,
 		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
 			TypeDefs: []*parse.TypeDef{
 				{NamePos: np("foo", 2, 6), Type: &parse.TypeOneOf{
-					Types: []parse.Type{tn("A", 3, 3), tn("B", 4, 3), tn("C", 5, 3)},
-					P:     pos(2, 10)}}}},
+					Fields: []*parse.Field{
+						{NamePos: np("A", 3, 3), Type: tn("a", 3, 5)},
+						{NamePos: np("B", 4, 3), Type: tn("b", 4, 5)},
+						{NamePos: np("C", 5, 3), Type: tn("c", 5, 5)}},
+					P: pos(2, 10)}}}},
 		nil},
 	{
 		"TypeOptional",
 		`package testpkg
-type foo oneof{A;?B;?C}`,
+type foo oneof{A a;B ?b;C ?c}`,
 		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
 			TypeDefs: []*parse.TypeDef{
 				{NamePos: np("foo", 2, 6), Type: &parse.TypeOneOf{
-					Types: []parse.Type{
-						tn("A", 2, 16),
-						&parse.TypeOptional{Base: tn("B", 2, 19), P: pos(2, 18)},
-						&parse.TypeOptional{Base: tn("C", 2, 22), P: pos(2, 21)}},
+					Fields: []*parse.Field{
+						{NamePos: np("A", 2, 16), Type: tn("a", 2, 18)},
+						{NamePos: np("B", 2, 20),
+							Type: &parse.TypeOptional{Base: tn("b", 2, 23), P: pos(2, 22)}},
+						{NamePos: np("C", 2, 25),
+							Type: &parse.TypeOptional{Base: tn("c", 2, 28), P: pos(2, 27)}}},
 					P: pos(2, 10)}}}},
 		nil},
 	{
 		"TypeOptionalNewlines",
 		`package testpkg
 type foo oneof{
-  A
-  ?B
-  ?C
+  A a
+  B ?b
+  C ?c
 }`,
 		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
 			TypeDefs: []*parse.TypeDef{
 				{NamePos: np("foo", 2, 6), Type: &parse.TypeOneOf{
-					Types: []parse.Type{
-						tn("A", 3, 3),
-						&parse.TypeOptional{Base: tn("B", 4, 4), P: pos(4, 3)},
-						&parse.TypeOptional{Base: tn("C", 5, 4), P: pos(5, 3)}},
+					Fields: []*parse.Field{
+						{NamePos: np("A", 3, 3), Type: tn("a", 3, 5)},
+						{NamePos: np("B", 4, 3),
+							Type: &parse.TypeOptional{Base: tn("b", 4, 6), P: pos(4, 5)}},
+						{NamePos: np("C", 5, 3),
+							Type: &parse.TypeOptional{Base: tn("c", 5, 6), P: pos(5, 5)}}},
 					P: pos(2, 10)}}}},
 		nil},
 	{

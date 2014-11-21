@@ -61,8 +61,8 @@ type TypeStruct struct {
 
 // TypeOneOf represents oneof types.
 type TypeOneOf struct {
-	Types []Type
-	P     Pos
+	Fields []*Field
+	P      Pos
 }
 
 // TypeOptional represents optional types.
@@ -124,11 +124,11 @@ func (t *TypeStruct) String() string {
 }
 func (t *TypeOneOf) String() string {
 	result := "oneof{"
-	for index, t := range t.Types {
+	for index, field := range t.Fields {
 		if index > 0 {
 			result += ";"
 		}
-		result += t.String()
+		result += field.Name + " " + field.Type.String()
 	}
 	return result + "}"
 }

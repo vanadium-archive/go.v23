@@ -1,6 +1,7 @@
 package compile_test
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
@@ -34,7 +35,7 @@ func matchConstRes(t *testing.T, tname string, tpkg constPkg, cdefs []*compile.C
 	for _, cdef := range cdefs {
 		if cdef.Name == "Res" {
 			if got, want := cdef.Value, tpkg.ExpectRes; !vdl.EqualValue(got, want) {
-				t.Errorf("%s value got %s(%s), want %s(%s)", tname, got.Type(), got, want.Type(), want)
+				t.Errorf("%s value got %s, want %s", tname, got, want)
 			}
 			return
 		}
@@ -54,7 +55,7 @@ func testConfigFile(t *testing.T, name string, tpkg constPkg, env *compile.Env) 
 		return
 	}
 	if got, want := config, tpkg.ExpectRes; !vdl.EqualValue(got, want) {
-		t.Errorf("%s value got %s(%s), want %s(%s)", name, got.Type(), got, want.Type(), want)
+		t.Errorf("%s value got %s, want %s", name, got, want)
 	}
 }
 
@@ -128,7 +129,7 @@ func makeStringIntMap(m map[string]int64) *vdl.Value {
 }
 
 func makeStructType(name string) *vdl.Type {
-	return vdl.NamedType(name, vdl.StructType([]vdl.StructField{
+	return vdl.NamedType(name, vdl.StructType([]vdl.Field{
 		{"X", vdl.Int64Type}, {"Y", vdl.StringType}, {"Z", vdl.BoolType},
 	}...))
 }
@@ -141,8 +142,29 @@ func makeStruct(name string, x int64, y string, z bool) *vdl.Value {
 	return structv
 }
 
+func makeOneOfType(name string) *vdl.Type {
+	return vdl.NamedType(name, vdl.OneOfType([]vdl.Field{
+		{"X", vdl.Int64Type}, {"Y", vdl.StringType}, {"Z", vdl.BoolType},
+	}...))
+}
+
+func makeOneOf(name string, val interface{}) *vdl.Value {
+	oneofv := vdl.ZeroValue(makeOneOfType(name))
+	switch tval := val.(type) {
+	case int64:
+		oneofv.AssignOneOfField(0, vdl.Int64Value(tval))
+	case string:
+		oneofv.AssignOneOfField(1, vdl.StringValue(tval))
+	case bool:
+		oneofv.AssignOneOfField(2, vdl.BoolValue(tval))
+	default:
+		panic(fmt.Errorf("makeOneOf unhandled %T %v", val, val))
+	}
+	return oneofv
+}
+
 func makeStructTypeObjectType(name string) *vdl.Type {
-	return vdl.NamedType(name, vdl.StructType(vdl.StructField{"T", vdl.TypeObjectType}))
+	return vdl.NamedType(name, vdl.StructType(vdl.Field{"T", vdl.TypeObjectType}))
 }
 
 func makeStructTypeObject(name string, t *vdl.Type) *vdl.Value {
@@ -152,10 +174,10 @@ func makeStructTypeObject(name string, t *vdl.Type) *vdl.Value {
 }
 
 func makeABStruct() *vdl.Value {
-	tA := vdl.NamedType("a.A", vdl.StructType([]vdl.StructField{
+	tA := vdl.NamedType("a.A", vdl.StructType([]vdl.Field{
 		{"X", vdl.Int64Type}, {"Y", vdl.StringType},
 	}...))
-	tB := vdl.NamedType("a.B", vdl.StructType(vdl.StructField{"Z", vdl.ListType(tA)}))
+	tB := vdl.NamedType("a.B", vdl.StructType(vdl.Field{"Z", vdl.ListType(tA)}))
 	res := vdl.ZeroValue(tB)
 	listv := res.Field(0).AssignLen(2)
 	listv.Index(0).Field(0).AssignInt(1)
@@ -378,6 +400,35 @@ var constTests = []struct {
 	{
 		"SelectorOnUnnamedStruct",
 		cp{{"a", `type A struct{X int64;Y string}; const Res = A{2,"b"}.Y`, nil, "cannot apply selector operator to unnamed constant"}}},
+
+	// Test oneof literals.
+	{
+		"OneOfX",
+		cp{{"a", `type A oneof{X int64;Y string;Z bool}; const Res = A{X: 123}`, makeOneOf("a.A", int64(123)), ""}}},
+	{
+		"OneOfY",
+		cp{{"a", `type A oneof{X int64;Y string;Z bool}; const Res = A{Y: "abc"}`, makeOneOf("a.A", "abc"), ""}}},
+	{
+		"OneOfZ",
+		cp{{"a", `type A oneof{X int64;Y string;Z bool}; const Res = A{Z: true}`, makeOneOf("a.A", true), ""}}},
+	{
+		"OneOfInvalidFieldName",
+		cp{{"a", `type A oneof{X int64;Y string;Z bool}; const Res = A{1+1: true}`, nil, `invalid field name`}}},
+	{
+		"OneOfUnknownFieldName",
+		cp{{"a", `type A oneof{X int64;Y string;Z bool}; const Res = A{ZZZ: true}`, nil, `unknown field "ZZZ"`}}},
+	{
+		"OneOfTooManyFields",
+		cp{{"a", `type A oneof{X int64;Y string;Z bool}; const Res = A{X: 123, Y: "abc"}`, nil, `must have exactly one entry`}}},
+	{
+		"OneOfTooFewFields",
+		cp{{"a", `type A oneof{X int64;Y string;Z bool}; const Res = A{}`, nil, `must have exactly one entry`}}},
+	{
+		"OneOfInvalidField",
+		cp{{"a", `type A oneof{X int64;Y string;Z bool}; const Res = A{Y: 1}`, nil, `invalid oneof field`}}},
+	{
+		"OneOfNoValue",
+		cp{{"a", `type A oneof{X int64;Y string;Z bool}; const Res = A{Y}`, nil, `must have explicit key and value`}}},
 
 	// Test enums.
 	{

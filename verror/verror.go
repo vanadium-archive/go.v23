@@ -97,6 +97,8 @@ func ConvertWithDefault(id ID, err error) E {
 
 // Standard is the standard implementation of E.
 type Standard struct {
+	// The field names and order must be kept in sync with vdl.ErrorType defined
+	// in veyron.io/veyron/veyron2/vdl/type_builder.go.
 	ID  ID
 	Msg string
 }

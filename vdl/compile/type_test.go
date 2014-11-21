@@ -117,9 +117,9 @@ var typeTests = []typeTest{
 	{"List", tp{{"a", `type Res []int32`, vdl.ListType(vdl.Int32Type), ""}}},
 	{"Set", tp{{"a", `type Res set[int32]`, vdl.SetType(vdl.Int32Type), ""}}},
 	{"Map", tp{{"a", `type Res map[int32]string`, vdl.MapType(vdl.Int32Type, vdl.StringType), ""}}},
-	{"Struct", tp{{"a", `type Res struct{A int32;B string}`, vdl.StructType([]vdl.StructField{{"A", vdl.Int32Type}, {"B", vdl.StringType}}...), ""}}},
-	{"OneOf", tp{{"a", `type Res oneof{bool;int32;string}`, vdl.OneOfType(vdl.BoolType, vdl.Int32Type, vdl.StringType), ""}}},
-	{"Optional", tp{{"a", `type Res oneof{bool;?int32;?string}`, vdl.OneOfType(vdl.BoolType, vdl.OptionalType(vdl.Int32Type), vdl.OptionalType(vdl.StringType)), exp}}},
+	{"Struct", tp{{"a", `type Res struct{A int32;B string}`, vdl.StructType([]vdl.Field{{"A", vdl.Int32Type}, {"B", vdl.StringType}}...), ""}}},
+	{"OneOf", tp{{"a", `type Res oneof{A bool;B int32;C string}`, vdl.OneOfType([]vdl.Field{{"A", vdl.BoolType}, {"B", vdl.Int32Type}, {"C", vdl.StringType}}...), ""}}},
+	{"Optional", tp{{"a", `type Res oneof{A bool;B ?int32;C ?string}`, vdl.OneOfType([]vdl.Field{{"A", vdl.BoolType}, {"B", vdl.OptionalType(vdl.Int32Type)}, {"C", vdl.OptionalType(vdl.StringType)}}...), ""}}},
 
 	// Test named types based on named types.
 	{"NBool", tp{{"a", `type Res x;type x bool`, namedX(vdl.BoolType), ""}}},
@@ -141,9 +141,9 @@ var typeTests = []typeTest{
 	{"NList", tp{{"a", `type Res x;type x []int32`, namedX(vdl.ListType(vdl.Int32Type)), ""}}},
 	{"NSet", tp{{"a", `type Res x;type x set[int32]`, namedX(vdl.SetType(vdl.Int32Type)), ""}}},
 	{"NMap", tp{{"a", `type Res x;type x map[int32]string`, namedX(vdl.MapType(vdl.Int32Type, vdl.StringType)), ""}}},
-	{"NStruct", tp{{"a", `type Res x;type x struct{A int32;B string}`, namedX(vdl.StructType([]vdl.StructField{{"A", vdl.Int32Type}, {"B", vdl.StringType}}...)), ""}}},
-	{"NOneOf", tp{{"a", `type Res x; type x oneof{bool;int32;string}`, namedX(vdl.OneOfType(vdl.BoolType, vdl.Int32Type, vdl.StringType)), ""}}},
-	{"NOptional", tp{{"a", `type Res x; type x oneof{bool;?int32;?string}`, namedX(vdl.OneOfType(vdl.BoolType, vdl.OptionalType(vdl.Int32Type), vdl.OptionalType(vdl.StringType))), exp}}},
+	{"NStruct", tp{{"a", `type Res x;type x struct{A int32;B string}`, namedX(vdl.StructType([]vdl.Field{{"A", vdl.Int32Type}, {"B", vdl.StringType}}...)), ""}}},
+	{"NOneOf", tp{{"a", `type Res x; type x oneof{A bool;B int32;C string}`, namedX(vdl.OneOfType([]vdl.Field{{"A", vdl.BoolType}, {"B", vdl.Int32Type}, {"C", vdl.StringType}}...)), ""}}},
+	{"NOptional", tp{{"a", `type Res x; type x oneof{A bool;B ?int32;C ?string}`, namedX(vdl.OneOfType([]vdl.Field{{"A", vdl.BoolType}, {"B", vdl.OptionalType(vdl.Int32Type)}, {"C", vdl.OptionalType(vdl.StringType)}}...)), ""}}},
 
 	// Test multi-package types
 	{"MultiPkgSameTypeName", tp{
@@ -170,6 +170,6 @@ var typeTests = []typeTest{
 	{"Undefined", tp{{"a", `type Res foo`, nil, "type foo undefined"}}},
 	{"UnnamedEnum", tp{{"a", `type Res []enum{A;B;C}`, nil, "unnamed enum type invalid"}}},
 	{"UnnamedStruct", tp{{"a", `type Res []struct{A int32}`, nil, "unnamed struct type invalid"}}},
-	{"UnnamedOneOf", tp{{"a", `type Res []oneof{bool;int32;string}`, nil, "unnamed oneof type invalid"}}},
+	{"UnnamedOneOf", tp{{"a", `type Res []oneof{A bool;B int32;C string}`, nil, "unnamed oneof type invalid"}}},
 	{"TopLevelOptional", tp{{"a", `type Res ?bool`, nil, "can't define type based on top-level optional"}}},
 }

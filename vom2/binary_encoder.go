@@ -19,7 +19,7 @@ var (
 	_ valconv.ListTarget   = (*binaryEncoder)(nil)
 	_ valconv.SetTarget    = (*binaryEncoder)(nil)
 	_ valconv.MapTarget    = (*binaryEncoder)(nil)
-	_ valconv.StructTarget = (*binaryEncoder)(nil)
+	_ valconv.FieldsTarget = (*binaryEncoder)(nil)
 )
 
 type binaryEncoder struct {
@@ -116,7 +116,6 @@ func (e *binaryEncoder) encodeUnsentTypes(t *vdl.Type) (TypeID, error) {
 	var elemID TypeID
 	var keyID TypeID
 	var fieldIDs []TypeID
-	var oneofIDs []TypeID
 	var err error
 	switch t.Kind() {
 	case vdl.Array, vdl.List:
@@ -134,17 +133,10 @@ func (e *binaryEncoder) encodeUnsentTypes(t *vdl.Type) (TypeID, error) {
 		if elemID, err = e.encodeUnsentTypes(t.Elem()); err != nil {
 			return 0, err
 		}
-	case vdl.Struct:
+	case vdl.Struct, vdl.OneOf:
 		fieldIDs = make([]TypeID, t.NumField())
 		for x := 0; x < t.NumField(); x++ {
 			if fieldIDs[x], err = e.encodeUnsentTypes(t.Field(x).Type); err != nil {
-				return 0, err
-			}
-		}
-	case vdl.OneOf:
-		oneofIDs = make([]TypeID, t.NumOneOfType())
-		for x := 0; x < t.NumOneOfType(); x++ {
-			if oneofIDs[x], err = e.encodeUnsentTypes(t.OneOfType(x)); err != nil {
 				return 0, err
 			}
 		}
@@ -214,13 +206,16 @@ func (e *binaryEncoder) encodeUnsentTypes(t *vdl.Type) (TypeID, error) {
 		binaryEncodeUint(buf, 3)
 		binaryEncodeUint(buf, uint64(elemID))
 		binaryEncodeUint(buf, 0)
-	case vdl.Struct:
-		binaryEncodeUint(buf, uint64(WireStructID))
+	case vdl.Struct, vdl.OneOf:
+		id := WireStructID
+		if kind == vdl.OneOf {
+			id = WireOneOfID
+		}
+		binaryEncodeUint(buf, uint64(id))
 		binaryEncodeUint(buf, 1)
 		binaryEncodeString(buf, t.Name())
 		binaryEncodeUint(buf, 2)
 		binaryEncodeUint(buf, uint64(t.NumField()))
-
 		for x := 0; x < len(fieldIDs); x++ {
 			fieldID := fieldIDs[x]
 			binaryEncodeUint(buf, 1)
@@ -228,17 +223,6 @@ func (e *binaryEncoder) encodeUnsentTypes(t *vdl.Type) (TypeID, error) {
 			binaryEncodeUint(buf, 2)
 			binaryEncodeUint(buf, uint64(fieldID))
 			binaryEncodeUint(buf, 0)
-		}
-		binaryEncodeUint(buf, 0)
-	case vdl.OneOf:
-		binaryEncodeUint(buf, uint64(WireOneOfID))
-		binaryEncodeUint(buf, 1)
-		binaryEncodeString(buf, t.Name())
-		binaryEncodeUint(buf, 2)
-		binaryEncodeUint(buf, uint64(t.NumOneOfType()))
-		for x := 0; x < len(oneofIDs); x++ {
-			oneofID := oneofIDs[x]
-			binaryEncodeUint(buf, uint64(oneofID))
 		}
 		binaryEncodeUint(buf, 0)
 	default:
@@ -265,30 +249,22 @@ func (e *binaryEncoder) prepareType(t *vdl.Type, kinds ...vdl.Kind) error {
 // unvalidatedPrepareType encodes any unsent types, and handles encoding type
 // ids for variant types.
 func (e *binaryEncoder) unvalidatedPrepareType(tt *vdl.Type) error {
+	id, err := e.encodeUnsentTypes(tt)
+	if err != nil {
+		return err
+	}
 	switch top := e.topType(); {
 	case top == nil:
 		// Encoding the top-level.  We postpone encoding of the id until writeMsg is
 		// called, to handle positive and negative ids, and the message length.
-		_, err := e.encodeUnsentTypes(tt)
-		if err != nil {
-			return err
-		}
 		e.pushType(tt)
-		return nil
-	case top == tt:
-		// Encoding a concrete sub-type, nothing more to do.
-		return nil
-	case top.Kind() == vdl.Any || (top.Kind() == vdl.OneOf && top.OneOfIndex(tt) >= 0):
-		// Encoding a variant sub-type, encode unsent types and id.
-		id, err := e.encodeUnsentTypes(tt)
-		if err != nil {
-			return err
-		}
+	case top.Kind() == vdl.Any:
+		// Encode the type id.
 		binaryEncodeUint(e.bufV, uint64(id))
-		return nil
-	default:
+	case top != tt:
 		return verror.BadArgf("encoder type stack mismatch, got %q, top type %q", tt, top)
 	}
+	return nil
 }
 
 func (e *binaryEncoder) pushType(tt *vdl.Type) {
@@ -402,6 +378,8 @@ func (e *binaryEncoder) FromTypeObject(src *vdl.Type) error {
 }
 
 func (e *binaryEncoder) FromNil(tt *vdl.Type) error {
+	// TODO(toddw): Implement optional values with the new flags mechanism.
+	//
 	// We need figure out whether FromNil applies to pointers or interfaces, and
 	// fix target.go to do the right thing.
 	panic("TODO")
@@ -436,16 +414,8 @@ func (e *binaryEncoder) StartMap(tt *vdl.Type, len int) (valconv.MapTarget, erro
 	return e, nil
 }
 
-func (e *binaryEncoder) StartStruct(tt *vdl.Type) (valconv.StructTarget, error) {
-	if err := e.prepareType(tt, vdl.Struct); err != nil {
-		return nil, err
-	}
-	e.pushType(tt)
-	return e, nil
-}
-
-func (e *binaryEncoder) StartOneOf(tt *vdl.Type) (valconv.Target, error) {
-	if err := e.prepareType(tt, vdl.OneOf); err != nil {
+func (e *binaryEncoder) StartFields(tt *vdl.Type) (valconv.FieldsTarget, error) {
+	if err := e.prepareType(tt, vdl.Struct, vdl.OneOf); err != nil {
 		return nil, err
 	}
 	e.pushType(tt)
@@ -464,12 +434,11 @@ func (e *binaryEncoder) FinishMap(valconv.MapTarget) error {
 	return e.popType()
 }
 
-func (e *binaryEncoder) FinishStruct(valconv.StructTarget) error {
-	binaryEncodeUint(e.bufV, 0)
-	return e.popType()
-}
-
-func (e *binaryEncoder) FinishOneOf(valconv.Target) error {
+func (e *binaryEncoder) FinishFields(valconv.FieldsTarget) error {
+	if top := e.topType(); top != nil && top.Kind() == vdl.Struct {
+		// Write the struct terminator; don't write for oneof.
+		binaryEncodeUint(e.bufV, 0)
+	}
 	return e.popType()
 }
 
@@ -500,13 +469,14 @@ func (e *binaryEncoder) FinishField(key, field valconv.Target) error {
 }
 
 func (e *binaryEncoder) StartField(name string) (_, _ valconv.Target, _ error) {
-	// Structs are encoded as a sequence of fields, in any order.  Each field
-	// starts with its absolute 1-based index, followed by the value.  The 0 index
-	// indicates the end of the struct.
+	// TODO(toddw): Change the encoding to the new scheme described in doc.go.
 	top := e.topType()
 	if top == nil {
 		return nil, nil, errEncodeBadTypeStack
 	}
+	// Struct and OneOf are encoded as a sequence of fields, in any order.  Each
+	// field starts with its absolute 1-based index, followed by the value.  OneOf
+	// always consists of a single field, while structs use a 0 terminator.
 	if vfield, index := top.FieldByName(name); index >= 0 {
 		e.pushType(vfield.Type)
 		binaryEncodeUint(e.bufV, uint64(index)+1)

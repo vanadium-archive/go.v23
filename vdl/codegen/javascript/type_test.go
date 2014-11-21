@@ -118,10 +118,13 @@ var (
 	tSet    = vdl.SetType(vdl.StringType)
 	tMap    = vdl.MapType(vdl.StringType, vdl.Int64Type)
 	tStruct = vdl.NamedType("TestStruct", vdl.StructType(
-		vdl.StructField{"A", vdl.StringType},
-		vdl.StructField{"B", vdl.Int64Type},
+		vdl.Field{"A", vdl.StringType},
+		vdl.Field{"B", vdl.Int64Type},
 	))
-	tOneOf      = vdl.NamedType("TestOneOf", vdl.OneOfType(vdl.StringType, vdl.Int64Type))
+	tOneOf = vdl.NamedType("TestOneOf", vdl.OneOfType(
+		vdl.Field{"A", vdl.StringType},
+		vdl.Field{"B", vdl.Int64Type},
+	))
 	tNamedArray = vdl.NamedType("NamedArray", tArray)
 	tNamedList  = vdl.NamedType("NamedList", tList)
 	tNamedSet   = vdl.NamedType("NamedSet", tSet)

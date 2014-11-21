@@ -65,12 +65,12 @@ func zeroRep(t *Type) interface{} {
 		return zeroRepMap(t.key)
 	case Struct:
 		return make(repSequence, len(t.fields))
+	case OneOf:
+		return repOneOf{0, ZeroValue(t.fields[0].Type)}
 	case Any, Optional:
 		return (*Value)(nil) // nil represents nonexistence
-	case OneOf:
-		return ZeroValue(t.types[0])
 	default:
-		panic(fmt.Errorf("val: unhandled kind: %v", t.kind))
+		panic(fmt.Errorf("vdl: unhandled kind: %v", t.kind))
 	}
 }
 
@@ -105,15 +105,12 @@ func isZeroRep(t *Type, rep interface{}) bool {
 		case Array, Struct:
 			return trep.AllValuesZero()
 		}
+	case repOneOf:
+		return trep.IsZero()
 	case *Value:
-		switch t.Kind() {
-		case Any, Optional:
-			return trep == nil
-		case OneOf:
-			return trep.t == t.types[0] && trep.IsZero()
-		}
+		return trep == nil
 	}
-	panic(fmt.Errorf("val: isZeroRep unhandled %v %T %v", t, rep, rep))
+	panic(fmt.Errorf("vdl: isZeroRep unhandled %v %T %v", t, rep, rep))
 }
 
 func copyRep(t *Type, rep interface{}) interface{} {
@@ -128,10 +125,12 @@ func copyRep(t *Type, rep interface{}) interface{} {
 		return copyRepMap(trep)
 	case repSequence:
 		return copyRepSequence(trep)
+	case repOneOf:
+		return copyRepOneOf(trep)
 	case *Value:
 		return CopyValue(trep)
 	default:
-		panic(fmt.Errorf("val: copyRep unhandled %v %T %v", t.kind, rep, rep))
+		panic(fmt.Errorf("vdl: copyRep unhandled %v %T %v", t.kind, rep, rep))
 	}
 }
 
@@ -155,6 +154,8 @@ func stringRep(t *Type, rep interface{}) string {
 		return trep.String()
 	case repSequence:
 		return trep.String(t)
+	case repOneOf:
+		return trep.String(t)
 	case *Value:
 		switch {
 		case trep == nil:
@@ -164,7 +165,7 @@ func stringRep(t *Type, rep interface{}) string {
 		}
 		return trep.String() // include the type
 	default:
-		panic(fmt.Errorf("val: stringRep unhandled %v %T %v", t.kind, rep, rep))
+		panic(fmt.Errorf("vdl: stringRep unhandled %v %T %v", t.kind, rep, rep))
 	}
 }
 
@@ -294,13 +295,15 @@ func EqualValue(a, b *Value) bool {
 	case repBytes:
 		return bytes.Equal(arep, b.rep.(repBytes))
 	case repMap:
-		return equalRepMap(a.t, arep, b.rep.(repMap))
+		return equalRepMap(arep, b.rep.(repMap))
 	case repSequence:
 		return equalRepSequence(arep, b.rep.(repSequence))
+	case repOneOf:
+		return equalRepOneOf(arep, b.rep.(repOneOf))
 	case *Value:
 		return EqualValue(arep, b.rep.(*Value))
 	default:
-		panic(fmt.Errorf("val: Equal unhandled %v %T %v", a.t.kind, arep, arep))
+		panic(fmt.Errorf("vdl: EqualValue unhandled %v %T %v", a.t.kind, arep, arep))
 	}
 }
 
@@ -342,7 +345,7 @@ func (v *Value) Byte() byte {
 	case *byte:
 		return *trep
 	}
-	panic(fmt.Errorf("val: Byte mismatched rep %v %T %v", v.t, v.rep, v.rep))
+	panic(fmt.Errorf("vdl: Byte mismatched rep %v %T %v", v.t, v.rep, v.rep))
 }
 
 // Uint returns the underlying value of a Uint{16,32,64}.
@@ -383,7 +386,7 @@ func (v *Value) String() string {
 		return "INVALID"
 	}
 	switch v.t.Kind() {
-	case Array, List, Set, Map, Struct:
+	case Array, List, Set, Map, Struct, OneOf:
 		// { } are used instead of ( ) for composites, except for []byte and [N]byte
 		if !v.t.IsBytes() {
 			return v.t.String() + stringRep(v.t, v.rep)
@@ -459,7 +462,7 @@ func (v *Value) Keys() []*Value {
 // ContainsKey returns true iff key is present in the underlying Set or Map.
 func (v *Value) ContainsKey(key *Value) bool {
 	v.t.checkKind("ContainsKey", Set, Map)
-	_, ok := v.rep.(repMap).Index(v.t, key)
+	_, ok := v.rep.(repMap).Index(typedCopy(v.t.key, key))
 	return ok
 }
 
@@ -468,21 +471,30 @@ func (v *Value) ContainsKey(key *Value) bool {
 // to the map's key type.
 func (v *Value) MapIndex(key *Value) *Value {
 	v.t.checkKind("MapIndex", Map)
-	val, _ := v.rep.(repMap).Index(v.t, key)
+	val, _ := v.rep.(repMap).Index(typedCopy(v.t.key, key))
 	return val
 }
 
 // Field returns the Struct field at the given index.  Panics if the index is
 // out of range.
+//
+// TODO(toddw): Rename to StructField.
 func (v *Value) Field(index int) *Value {
 	v.t.checkKind("Field", Struct)
 	return v.rep.(repSequence).Index(v.t.fields[index].Type, index)
 }
 
-// Elem returns the element value contained in the underlying Any, OneOf or
-// Optional.  Returns nil if v.IsNil() == true.
+// OneOfIndex returns the field index and value from the underlying OneOf.
+func (v *Value) OneOfField() (int, *Value) {
+	v.t.checkKind("OneOfField", OneOf)
+	oneof := v.rep.(repOneOf)
+	return oneof.index, oneof.value
+}
+
+// Elem returns the element value contained in the underlying Any or Optional.
+// Returns nil if v.IsNil() == true.
 func (v *Value) Elem() *Value {
-	v.t.checkKind("Elem", Any, OneOf, Optional)
+	v.t.checkKind("Elem", Any, Optional)
 	return v.rep.(*Value)
 }
 
@@ -495,16 +507,23 @@ func (v *Value) Assign(x *Value) *Value {
 		// Assign(nil) sets the zero value.
 		v.rep = zeroRep(v.t)
 	case v.t == x.t:
-		// Types are identical (including Any or OneOf), v holds a copy of the
-		// underlying rep.
+		// Types are identical, v is assigned a copy of the underlying rep.
 		v.rep = copyRep(x.t, x.rep)
-	case v.t.kind == Any || (v.t.kind == OneOf && v.t.OneOfIndex(x.t) != -1):
-		// Assigning into Any or OneOf, v holds a copy of the value.
+	case v.t.kind == Any:
+		// Assigning into Any, v is assigned a copy of the value.
 		v.rep = CopyValue(x)
 	default:
 		panic(fmt.Errorf("vdl: value of type %q not assignable from %q", v.t, x.t))
 	}
 	return v
+}
+
+// typedCopy makes a copy of v, returning a result of type t.  Panics if values
+// of type t aren't assignable from v.
+func typedCopy(t *Type, v *Value) *Value {
+	cp := &Value{t: t}
+	cp.Assign(v)
+	return cp
 }
 
 // AssignBool assigns the underlying Bool to x.
@@ -523,7 +542,7 @@ func (v *Value) AssignByte(x byte) *Value {
 	case *byte:
 		*trep = x
 	default:
-		panic(fmt.Errorf("val: AssignByte mismatched rep %v %T %v", v.t, v.rep, v.rep))
+		panic(fmt.Errorf("vdl: AssignByte mismatched rep %v %T %v", v.t, v.rep, v.rep))
 	}
 	return v
 }
@@ -572,7 +591,7 @@ func (v *Value) AssignBytes(x []byte) *Value {
 	case Array:
 		rep := v.rep.(repBytes)
 		if v.t.len != len(x) {
-			panic(fmt.Errorf("val: AssignBytes on type [%d]byte with len %d", v.t.len, len(x)))
+			panic(fmt.Errorf("vdl: AssignBytes on type [%d]byte with len %d", v.t.len, len(x)))
 		}
 		copy(rep, x)
 	case List:
@@ -605,7 +624,7 @@ func (v *Value) CopyBytes(x []byte) *Value {
 func (v *Value) AssignEnumIndex(index int) *Value {
 	v.t.checkKind("AssignEnumIndex", Enum)
 	if index < 0 || index >= len(v.t.labels) {
-		panic(fmt.Errorf("val: enum %q index %d out of range", v.t.name, index))
+		panic(fmt.Errorf("vdl: enum %q index %d out of range", v.t.name, index))
 	}
 	v.rep = enumIndex(index)
 	return v
@@ -617,7 +636,7 @@ func (v *Value) AssignEnumLabel(label string) *Value {
 	v.t.checkKind("AssignEnumLabel", Enum)
 	index := v.t.EnumIndex(label)
 	if index == -1 {
-		panic(fmt.Errorf("val: enum %q doesn't have label %q", v.t.name, label))
+		panic(fmt.Errorf("vdl: enum %q doesn't have label %q", v.t.name, label))
 	}
 	v.rep = enumIndex(index)
 	return v
@@ -672,26 +691,38 @@ func (v *Value) AssignLen(n int) *Value {
 // assignable to the set's key type.
 func (v *Value) AssignSetKey(key *Value) *Value {
 	v.t.checkKind("AssignSetKey", Set)
-	v.rep.(repMap).Assign(v.t, key, nil)
+	v.rep.(repMap).Assign(typedCopy(v.t.key, key), nil)
 	return v
 }
 
 // DeleteSetKey deletes key from the underlying Set.
 func (v *Value) DeleteSetKey(key *Value) *Value {
 	v.t.checkKind("DeleteSetKey", Set)
-	v.rep.(repMap).Delete(v.t, key)
+	v.rep.(repMap).Delete(typedCopy(v.t.key, key))
 	return v
 }
 
-// AssignMapIndex assigns the value associated with key to val in the underlying
-// Map.  If val is nil, AssignMapIndex deletes the key from the Map.  Panics if
-// the key isn't assignable to the map's key type, and ditto for val.
-func (v *Value) AssignMapIndex(key, val *Value) *Value {
+// AssignMapIndex assigns the value associated with key to elem in the
+// underlying Map.  If elem is nil, AssignMapIndex deletes the key from the Map.
+// Panics if the key isn't assignable to the map's key type, and ditto for elem.
+func (v *Value) AssignMapIndex(key, elem *Value) *Value {
 	v.t.checkKind("AssignMapIndex", Map)
-	if val == nil {
-		v.rep.(repMap).Delete(v.t, key)
+	if elem == nil {
+		v.rep.(repMap).Delete(typedCopy(v.t.key, key))
 	} else {
-		v.rep.(repMap).Assign(v.t, key, val)
+		v.rep.(repMap).Assign(typedCopy(v.t.key, key), typedCopy(v.t.elem, elem))
 	}
+	return v
+}
+
+// AssignOneOfField assigns the field index and value to the underlying OneOf.
+// Panics if the index is out of range, or if the value isn't assignable to the
+// field type.
+func (v *Value) AssignOneOfField(index int, value *Value) *Value {
+	v.t.checkKind("AssignOneOfField", OneOf)
+	if index >= len(v.t.fields) {
+		panic(fmt.Errorf("vdl: oneof %q index %d out of range", v.t, index))
+	}
+	v.rep = repOneOf{index, typedCopy(v.t.fields[index].Type, value)}
 	return v
 }

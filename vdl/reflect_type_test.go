@@ -89,23 +89,23 @@ var rtKeyTests = []rtTest{
 	{reflect.TypeOf(nArray3Complex128{}), rtNArray("Complex128", Complex128Type)},
 	{reflect.TypeOf(nArray3String{}), rtNArray("String", StringType)},
 	// Unnamed structs
-	{reflect.TypeOf(struct{ X bool }{}), StructType(StructField{"X", BoolType})},
-	{reflect.TypeOf(struct{ X uint8 }{}), StructType(StructField{"X", ByteType})},
-	{reflect.TypeOf(struct{ X uint16 }{}), StructType(StructField{"X", Uint16Type})},
-	{reflect.TypeOf(struct{ X uint32 }{}), StructType(StructField{"X", Uint32Type})},
-	{reflect.TypeOf(struct{ X uint64 }{}), StructType(StructField{"X", Uint64Type})},
-	{reflect.TypeOf(struct{ X uint }{}), StructType(StructField{"X", testUintType()})},
-	{reflect.TypeOf(struct{ X uintptr }{}), StructType(StructField{"X", testUintptrType()})},
-	{reflect.TypeOf(struct{ X int8 }{}), StructType(StructField{"X", Int16Type})},
-	{reflect.TypeOf(struct{ X int16 }{}), StructType(StructField{"X", Int16Type})},
-	{reflect.TypeOf(struct{ X int32 }{}), StructType(StructField{"X", Int32Type})},
-	{reflect.TypeOf(struct{ X int64 }{}), StructType(StructField{"X", Int64Type})},
-	{reflect.TypeOf(struct{ X int }{}), StructType(StructField{"X", testIntType()})},
-	{reflect.TypeOf(struct{ X float32 }{}), StructType(StructField{"X", Float32Type})},
-	{reflect.TypeOf(struct{ X float64 }{}), StructType(StructField{"X", Float64Type})},
-	{reflect.TypeOf(struct{ X complex64 }{}), StructType(StructField{"X", Complex64Type})},
-	{reflect.TypeOf(struct{ X complex128 }{}), StructType(StructField{"X", Complex128Type})},
-	{reflect.TypeOf(struct{ X string }{}), StructType(StructField{"X", StringType})},
+	{reflect.TypeOf(struct{ X bool }{}), StructType(Field{"X", BoolType})},
+	{reflect.TypeOf(struct{ X uint8 }{}), StructType(Field{"X", ByteType})},
+	{reflect.TypeOf(struct{ X uint16 }{}), StructType(Field{"X", Uint16Type})},
+	{reflect.TypeOf(struct{ X uint32 }{}), StructType(Field{"X", Uint32Type})},
+	{reflect.TypeOf(struct{ X uint64 }{}), StructType(Field{"X", Uint64Type})},
+	{reflect.TypeOf(struct{ X uint }{}), StructType(Field{"X", testUintType()})},
+	{reflect.TypeOf(struct{ X uintptr }{}), StructType(Field{"X", testUintptrType()})},
+	{reflect.TypeOf(struct{ X int8 }{}), StructType(Field{"X", Int16Type})},
+	{reflect.TypeOf(struct{ X int16 }{}), StructType(Field{"X", Int16Type})},
+	{reflect.TypeOf(struct{ X int32 }{}), StructType(Field{"X", Int32Type})},
+	{reflect.TypeOf(struct{ X int64 }{}), StructType(Field{"X", Int64Type})},
+	{reflect.TypeOf(struct{ X int }{}), StructType(Field{"X", testIntType()})},
+	{reflect.TypeOf(struct{ X float32 }{}), StructType(Field{"X", Float32Type})},
+	{reflect.TypeOf(struct{ X float64 }{}), StructType(Field{"X", Float64Type})},
+	{reflect.TypeOf(struct{ X complex64 }{}), StructType(Field{"X", Complex64Type})},
+	{reflect.TypeOf(struct{ X complex128 }{}), StructType(Field{"X", Complex128Type})},
+	{reflect.TypeOf(struct{ X string }{}), StructType(Field{"X", StringType})},
 	// Named structs
 	{reflect.TypeOf(nStructBool{}), rtNStruct("Bool", BoolType)},
 	{reflect.TypeOf(nStructUint8{}), rtNStruct("Uint8", ByteType)},
@@ -126,6 +126,10 @@ var rtKeyTests = []rtTest{
 	{reflect.TypeOf(nStructString{}), rtNStruct("String", StringType)},
 	// Special-case types
 	{reflect.TypeOf(nEnum(0)), rtN("Enum", EnumType("A", "B", "C"))},
+	{reflect.TypeOf((*nOneOf)(nil)).Elem(), oneOfTypeN},
+	{reflect.TypeOf(nOneOfA{}), oneOfTypeN},
+	{reflect.TypeOf(nOneOfB{}), oneOfTypeN},
+	{reflect.TypeOf(nOneOfC{}), oneOfTypeN},
 }
 
 // rtNonKeyTests contains types that may not be used as map keys.
@@ -145,14 +149,12 @@ var rtNonKeyTests = []rtTest{
 	{reflect.TypeOf(nArray3Interface{}), rtNArray("Interface", AnyType)},
 	{reflect.TypeOf(nArray3TypeObject{}), rtNArray("TypeObject", TypeObjectType)},
 	// Unnamed structs
-	{reflect.TypeOf(struct{ X interface{} }{}), StructType(StructField{"X", AnyType})},
-	{reflect.TypeOf(struct{ X error }{}), StructType(StructField{"X", ErrorType})},
-	{reflect.TypeOf(struct{ X *Type }{}), StructType(StructField{"X", TypeObjectType})},
+	{reflect.TypeOf(struct{ X interface{} }{}), StructType(Field{"X", AnyType})},
+	{reflect.TypeOf(struct{ X error }{}), StructType(Field{"X", ErrorType})},
+	{reflect.TypeOf(struct{ X *Type }{}), StructType(Field{"X", TypeObjectType})},
 	// Named structs
 	{reflect.TypeOf(nStructInterface{}), rtNStruct("Interface", AnyType)},
 	{reflect.TypeOf(nStructTypeObject{}), rtNStruct("TypeObject", TypeObjectType)},
-	// Special-case types
-	{reflect.TypeOf(nOneOf{}), rtN("OneOf", OneOfType(BoolType, StringType, Int64Type))},
 	// Unnamed slices
 	{reflect.TypeOf([]interface{}{}), ListType(AnyType)},
 	{reflect.TypeOf([]error{}), ListType(ErrorType)},
@@ -314,7 +316,7 @@ func rtNArray(suffix string, base *Type) *Type {
 }
 
 func rtNStruct(suffix string, base *Type) *Type {
-	return NamedType("veyron.io/veyron/veyron2/vdl.nStruct"+suffix, StructType(StructField{"X", base}))
+	return NamedType("veyron.io/veyron/veyron2/vdl.nStruct"+suffix, StructType(Field{"X", base}))
 }
 
 func rtNSlice(suffix string, base *Type) *Type {
@@ -425,18 +427,24 @@ var rtErrorTests = []rtErrorTest{
 	{reflect.TypeOf(nBadEnumAssign4(0)), badEnumAssign},
 	{reflect.TypeOf(nBadOneOf1{}), badOneOf},
 	{reflect.TypeOf(nBadOneOf2{}), badOneOf},
-	{reflect.TypeOf(nBadOneOfAssign1{}), badOneOfAssign},
-	{reflect.TypeOf(nBadOneOfAssign2{}), badOneOfAssign},
-	{reflect.TypeOf(nBadOneOfAssign3{}), badOneOfAssign},
-	{reflect.TypeOf(nBadOneOfAssign4{}), badOneOfAssign},
+	{reflect.TypeOf(nBadOneOf3{}), badOneOf},
+	{reflect.TypeOf(nBadOneOf4{}), badOneOf},
+	{reflect.TypeOf(nBadOneOfUnexp{}), badOneOfUnexp},
+	{reflect.TypeOf(nBadOneOfField1{}), badOneOfField},
+	{reflect.TypeOf(nBadOneOfField2{}), badOneOfField},
+	{reflect.TypeOf(nBadOneOfField3{}), badOneOfField},
+	{reflect.TypeOf(nBadOneOfName1{}), badOneOfName},
+	{reflect.TypeOf(nBadOneOfName2{}), badOneOfName},
 }
 
 const (
-	badEnum        = `must have method vdlEnumLabels with no out-args and one struct in-arg`
-	badEnumString  = `must have method String() string`
-	badEnumAssign  = `must have pointer method Assign(string) bool`
-	badOneOf       = `must have method vdlOneOfTypes with no out-args and at least one in-arg`
-	badOneOfAssign = `must have pointer method Assign(interface{}) bool`
+	badEnum       = `must have method __DescribeEnum(struct{...})`
+	badEnumString = `must have method String() string`
+	badEnumAssign = `must have pointer method Assign(string) bool`
+	badOneOf      = `must have method __DescribeOneOf(struct{...})`
+	badOneOfUnexp = `must be exported`
+	badOneOfField = `bad concrete field type`
+	badOneOfName  = `must have method Name() string`
 )
 
 type (
@@ -451,73 +459,123 @@ type (
 	nBadEnumAssign3 int
 	nBadEnumAssign4 int
 
-	nBadOneOf1       struct{ oneof interface{} }
-	nBadOneOf2       struct{ oneof interface{} }
-	nBadOneOfAssign1 struct{ oneof interface{} }
-	nBadOneOfAssign2 struct{ oneof interface{} }
-	nBadOneOfAssign3 struct{ oneof interface{} }
-	nBadOneOfAssign4 struct{ oneof interface{} }
+	nBadOneOf1      struct{}
+	nBadOneOf2      struct{}
+	nBadOneOf3      struct{}
+	nBadOneOf4      struct{}
+	nBadOneOfUnexp  struct{}
+	nBadOneOfField1 struct{}
+	nBadOneOfField2 struct{}
+	nBadOneOfField3 struct{}
+	nBadOneOfName1  struct{}
+	nBadOneOfName2  struct{}
 )
 
-// No labels
-func (nBadEnum1) vdlEnumLabels() { panic("X") }
+// No description
+func (nBadEnum1) __DescribeEnum() { panic("X") }
 
 // In-arg isn't a struct
-func (nBadEnum2) vdlEnumLabels(int) { panic("X") }
+func (nBadEnum2) __DescribeEnum(int) { panic("X") }
 
 // Can't have out-arg
-func (nBadEnum3) vdlEnumLabels(struct{ A bool }) error { panic("X") }
+func (nBadEnum3) __DescribeEnum(struct{ A bool }) error { panic("X") }
 
 // No String method
-func (nBadEnumString1) vdlEnumLabels(struct{ A bool }) { panic("X") }
+func (nBadEnumString1) __DescribeEnum(struct{ A bool }) { panic("X") }
 
 // String method isn't String() string
-func (nBadEnumString2) vdlEnumLabels(struct{ A bool }) { panic("X") }
-func (nBadEnumString2) String()                        { panic("X") }
+func (nBadEnumString2) __DescribeEnum(struct{ A bool }) { panic("X") }
+func (nBadEnumString2) String()                         { panic("X") }
 
 // String method isn't String() string
-func (nBadEnumString3) vdlEnumLabels(struct{ A bool }) { panic("X") }
-func (nBadEnumString3) String() bool                   { panic("X") }
+func (nBadEnumString3) __DescribeEnum(struct{ A bool }) { panic("X") }
+func (nBadEnumString3) String() bool                    { panic("X") }
 
 // No Assign method
-func (nBadEnumAssign1) vdlEnumLabels(struct{ A bool }) { panic("X") }
-func (nBadEnumAssign1) String() string                 { panic("X") }
+func (nBadEnumAssign1) __DescribeEnum(struct{ A bool }) { panic("X") }
+func (nBadEnumAssign1) String() string                  { panic("X") }
 
 // Assign method isn't Assign(string) bool
-func (nBadEnumAssign2) vdlEnumLabels(struct{ A bool }) { panic("X") }
-func (nBadEnumAssign2) String() string                 { panic("X") }
-func (nBadEnumAssign2) Assign()                        { panic("X") }
+func (nBadEnumAssign2) __DescribeEnum(struct{ A bool }) { panic("X") }
+func (nBadEnumAssign2) String() string                  { panic("X") }
+func (nBadEnumAssign2) Assign()                         { panic("X") }
 
 // Assign method isn't Assign(string) bool
-func (nBadEnumAssign3) vdlEnumLabels(struct{ A bool }) { panic("X") }
-func (nBadEnumAssign3) String() string                 { panic("X") }
-func (nBadEnumAssign3) Assign(bool) bool               { panic("X") }
+func (nBadEnumAssign3) __DescribeEnum(struct{ A bool }) { panic("X") }
+func (nBadEnumAssign3) String() string                  { panic("X") }
+func (nBadEnumAssign3) Assign(bool) bool                { panic("X") }
 
 // Assign method receiver isn't a pointer
-func (nBadEnumAssign4) vdlEnumLabels(struct{ A bool }) { panic("X") }
-func (nBadEnumAssign4) String() string                 { panic("X") }
-func (nBadEnumAssign4) Assign(string) bool             { panic("X") }
+func (nBadEnumAssign4) __DescribeEnum(struct{ A bool }) { panic("X") }
+func (nBadEnumAssign4) String() string                  { panic("X") }
+func (nBadEnumAssign4) Assign(string) bool              { panic("X") }
 
-// No types
-func (nBadOneOf1) vdlOneOfTypes() { panic("X") }
+// No description
+func (nBadOneOf1) __DescribeOneOf() { panic("X") }
+
+// No oneof interface type in description
+func (nBadOneOf2) __DescribeOneOf(struct{}) { panic("X") }
+
+// No fields in description
+func (nBadOneOf3) __DescribeOneOf(struct{ nOneOf }) { panic("X") }
 
 // Can't have out-arg
-func (nBadOneOf2) vdlOneOfTypes() error { panic("X") }
+func (nBadOneOf4) __DescribeOneOf(struct {
+	nOneOf
+	A nOneOfA
+}) error {
+	panic("X")
+}
 
-// No Assign method
-func (nBadOneOfAssign1) vdlOneOfTypes(bool) { panic("X") }
+// Field name isn't exported
+func (nBadOneOfUnexp) __DescribeOneOf(struct {
+	nOneOf
+	a nOneOfA
+}) {
+	panic("X")
+}
 
-// Assign method isn't Assign(interface{}) bool
-func (nBadOneOfAssign2) vdlOneOfTypes(bool) { panic("X") }
-func (nBadOneOfAssign2) Assign()            { panic("X") }
+// Field type isn't struct
+func (nBadOneOfField1) __DescribeOneOf(struct {
+	nOneOf
+	A bool
+}) {
+	panic("X")
+}
 
-// Assign method isn't Assign(interface{}) bool
-func (nBadOneOfAssign3) vdlOneOfTypes(bool) { panic("X") }
-func (nBadOneOfAssign3) Assign(bool) bool   { panic("X") }
+// Field type has no field
+func (nBadOneOfField2) __DescribeOneOf(struct {
+	nOneOf
+	A struct{}
+}) {
+	panic("X")
+}
 
-// Assign method receiver isn't pointer
-func (nBadOneOfAssign4) vdlOneOfTypes(bool)      { panic("X") }
-func (nBadOneOfAssign4) Assign(interface{}) bool { panic("X") }
+// Field type name isn't "Value"
+func (nBadOneOfField3) __DescribeOneOf(struct {
+	nOneOf
+	A struct{ value bool }
+}) {
+	panic("X")
+}
+
+// Name method isn't Name() string
+func (nBadOneOfName1) Name() { panic("X") }
+func (nBadOneOfName1) __DescribeOneOf(struct {
+	nOneOf
+	A struct{ Value bool }
+}) {
+	panic("X")
+}
+
+// Name method isn't Name() string
+func (nBadOneOfName2) Name() bool { panic("X") }
+func (nBadOneOfName2) __DescribeOneOf(struct {
+	nOneOf
+	A struct{ Value bool }
+}) {
+	panic("X")
+}
 
 func allErrorTests() []rtErrorTest {
 	// Start with base error tests
@@ -548,29 +606,4 @@ func TestTypeFromReflectError(t *testing.T) {
 			t.Errorf("TypeFromReflect(%v) got type %v, want nil", test.rt, got)
 		}
 	}
-}
-
-func TestMatchOneOfReflectType(t *testing.T) {
-	tests := []struct {
-		OneOf  reflect.Type
-		Target *Type
-		Want   reflect.Type
-	}{
-		// nOneOf is oneof{bool;string;int64}
-		{reflect.TypeOf(nOneOf{}), BoolType, reflect.TypeOf(false)},
-		{reflect.TypeOf(nOneOf{}), StringType, reflect.TypeOf("")},
-		{reflect.TypeOf(nOneOf{}), Int64Type, reflect.TypeOf(int64(0))},
-		// Only exact type matches at the moment.
-		{reflect.TypeOf(nOneOf{}), emptyType, nil},
-		{reflect.TypeOf(nOneOf{}), Int32Type, nil},
-		{reflect.TypeOf(nOneOf{}), boolTypeN, nil},
-		{reflect.TypeOf(nOneOf{}), stringTypeN, nil},
-		{reflect.TypeOf(nOneOf{}), int64TypeN, nil},
-	}
-	for _, test := range tests {
-		if got := MatchOneOfReflectType(test.OneOf, test.Target); got != test.Want {
-			t.Errorf("MatchOneOfReflectType(%v, %v) got %v, want %v", test.OneOf, test.Target, got, test.Want)
-		}
-	}
-
 }

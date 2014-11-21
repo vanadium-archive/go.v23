@@ -55,12 +55,12 @@ const (
 	TestEnumC
 )
 
-// AllTestEnum holds all labels for TestEnum.
-var AllTestEnum = []TestEnum{TestEnumA, TestEnumB, TestEnumC}
+// TestEnumAll holds all labels for TestEnum.
+var TestEnumAll = []TestEnum{TestEnumA, TestEnumB, TestEnumC}
 
-// MakeTestEnum creates a TestEnum from a string label.
+// TestEnumFromString creates a TestEnum from a string label.
 // Returns true iff the label is valid.
-func MakeTestEnum(label string) (x TestEnum, ok bool) {
+func TestEnumFromString(label string) (x TestEnum, ok bool) {
 	ok = x.Assign(label)
 	return
 }
@@ -96,40 +96,41 @@ func (x TestEnum) String() string {
 	return ""
 }
 
-// vdlEnumLabels identifies TestEnum as an enum.
-func (TestEnum) vdlEnumLabels(struct{ A, B, C bool }) {}`},
+// __DescribeEnum describes the TestEnum enum type.
+func (TestEnum) __DescribeEnum(struct{ A, B, C TestEnum }) {}`},
 		{tStruct, `type TestStruct struct {
 	A string
 	B int64
 }`},
-		{tOneOf, `type TestOneOf struct{ oneof interface{} }
-
-// MakeTestOneOf creates a TestOneOf.
-// Returns true iff the oneof value has a valid type.
-func MakeTestOneOf(oneof interface{}) (x TestOneOf, ok bool) {
-	ok = x.Assign(oneof)
-	return
-}
-
-// Assign assigns oneof to x.
-// Returns true iff the oneof value has a valid type.
-func (x *TestOneOf) Assign(oneof interface{}) bool {
-	switch oneof.(type) {
-	case string, int64:
-		x.oneof = oneof
-		return true
+		{tOneOf, `type (
+	// TestOneOf represents any single field of the TestOneOf oneof type.
+	TestOneOf interface {
+		// Index returns the field index.
+		Index() int
+		// Name returns the field name.
+		Name() string
+		// __DescribeOneOf describes the TestOneOf oneof type.
+		__DescribeOneOf(__TestOneOfDesc)
 	}
-	x.oneof = nil
-	return false
-}
+	// TestOneOfA represents field A of the TestOneOf oneof type.
+	TestOneOfA struct{ Value string }
+	// TestOneOfB represents field B of the TestOneOf oneof type.
+	TestOneOfB struct{ Value int64 }
+	// __TestOneOfDesc describes the TestOneOf oneof type.
+	__TestOneOfDesc struct {
+		TestOneOf
+		A TestOneOfA
+		B TestOneOfB
+	}
+)
 
-// OneOf returns the underlying typed value of x.
-func (x TestOneOf) OneOf() interface{} {
-	return x.oneof
-}
+func (TestOneOfA) Index() int { return 0 }
+func (TestOneOfA) Name() string { return "A" }
+func (TestOneOfA) __DescribeOneOf(__TestOneOfDesc) {}
 
-// vdlOneOfTypes identifies TestOneOf as a oneof.
-func (TestOneOf) vdlOneOfTypes(_ string, _ int64) {}`},
+func (TestOneOfB) Index() int { return 1 }
+func (TestOneOfB) Name() string { return "B" }
+func (TestOneOfB) __DescribeOneOf(__TestOneOfDesc) {}`},
 	}
 	data := goData{Env: compile.NewEnv(-1)}
 	for _, test := range tests {
@@ -142,7 +143,7 @@ func (TestOneOf) vdlOneOfTypes(_ string, _ int64) {}`},
 		case vdl.Enum:
 			def.LabelDoc = make([]string, test.T.NumEnumLabel())
 			def.LabelDocSuffix = make([]string, test.T.NumEnumLabel())
-		case vdl.Struct:
+		case vdl.Struct, vdl.OneOf:
 			def.FieldDoc = make([]string, test.T.NumField())
 			def.FieldDocSuffix = make([]string, test.T.NumField())
 		}
@@ -159,8 +160,11 @@ var (
 	tSet    = vdl.SetType(vdl.StringType)
 	tMap    = vdl.MapType(vdl.StringType, vdl.Int64Type)
 	tStruct = vdl.NamedType("TestStruct", vdl.StructType(
-		vdl.StructField{"A", vdl.StringType},
-		vdl.StructField{"B", vdl.Int64Type},
+		vdl.Field{"A", vdl.StringType},
+		vdl.Field{"B", vdl.Int64Type},
 	))
-	tOneOf = vdl.NamedType("TestOneOf", vdl.OneOfType(vdl.StringType, vdl.Int64Type))
+	tOneOf = vdl.NamedType("TestOneOf", vdl.OneOfType(
+		vdl.Field{"A", vdl.StringType},
+		vdl.Field{"B", vdl.Int64Type},
+	))
 )

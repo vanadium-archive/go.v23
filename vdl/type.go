@@ -11,7 +11,6 @@ type Kind uint
 const (
 	// Variant kinds
 	Any      Kind = iota // any type
-	OneOf                // one of a set of types
 	Optional             // value might not exist
 	// Scalar kinds
 	Bool       // boolean
@@ -34,7 +33,11 @@ const (
 	List   // variable-length ordered sequence of elements
 	Set    // unordered collection of distinct keys
 	Map    // unordered association between distinct keys and values
-	Struct // ordered sequence of fields, each with a name and value
+	Struct // conjunction of an ordered sequence of (name,type) fields
+	OneOf  // disjunction of an ordered sequence of (name,type) fields
+
+	// TODO(toddw): Rename OneOf to Union, to make it sounds less like Any and
+	// more like Struct.
 
 	// Internal kinds; they never appear in a *Type returned to the user.
 	internalNamed // placeholder for named types while they're being built.
@@ -44,8 +47,6 @@ func (k Kind) String() string {
 	switch k {
 	case Any:
 		return "any"
-	case OneOf:
-		return "oneof"
 	case Optional:
 		return "optional"
 	case Bool:
@@ -88,6 +89,8 @@ func (k Kind) String() string {
 		return "map"
 	case Struct:
 		return "struct"
+	case OneOf:
+		return "oneof"
 	}
 	panic(fmt.Errorf("val: unhandled kind: %d", k))
 }
@@ -119,19 +122,18 @@ func SplitIdent(ident string) (pkgpath, name string) {
 //     Children []Node
 //   }
 type Type struct {
-	kind   Kind          // used by all kinds
-	name   string        // used by all kinds
-	labels []string      // used by Enum
-	len    int           // used by Array
-	elem   *Type         // used by Optional, Array, List, Map
-	key    *Type         // used by Set, Map
-	fields []StructField // used by Struct
-	types  []*Type       // used by OneOf
-	unique string        // used by all kinds, filled in by typeCons
+	kind   Kind     // used by all kinds
+	name   string   // used by all kinds
+	labels []string // used by Enum
+	len    int      // used by Array
+	elem   *Type    // used by Optional, Array, List, Map
+	key    *Type    // used by Set, Map
+	fields []Field  // used by Struct, OneOf
+	unique string   // used by all kinds, filled in by typeCons
 }
 
-// StructField describes a single field in a Struct.
-type StructField struct {
+// Field describes a single field in a Struct or OneOf.
+type Field struct {
 	Name string
 	Type *Type
 }
@@ -199,63 +201,35 @@ func (t *Type) Key() *Type {
 	return t.key
 }
 
-// Field returns a description of the Struct field at the given index.
-func (t *Type) Field(index int) StructField {
-	t.checkKind("Field", Struct)
+// Field returns a description of the Struct or OneOf field at the given index.
+func (t *Type) Field(index int) Field {
+	t.checkKind("Field", Struct, OneOf)
 	return t.fields[index]
 }
 
-// FieldByName returns a description of the Struct field with the given name,
-// and its integer field index.  Returns -1 if the field name doesn't exist.
-func (t *Type) FieldByName(name string) (StructField, int) {
-	t.checkKind("FieldByName", Struct)
+// FieldByName returns a description of the Struct or OneOf field with the given
+// name, and its integer field index.  Returns -1 if the name doesn't exist.
+func (t *Type) FieldByName(name string) (Field, int) {
+	t.checkKind("FieldByName", Struct, OneOf)
 	// We typically have a small number of fields, so linear search is fine.
 	for index, f := range t.fields {
 		if f.Name == name {
 			return f, index
 		}
 	}
-	return StructField{}, -1
+	return Field{}, -1
 }
 
-// NumField returns the number of fields in a Struct.
+// NumField returns the number of fields in a Struct or OneOf.
 func (t *Type) NumField() int {
-	t.checkKind("NumField", Struct)
+	t.checkKind("NumField", Struct, OneOf)
 	return len(t.fields)
 }
 
-// OneOfType returns the OneOf type at the given index.
-func (t *Type) OneOfType(index int) *Type {
-	t.checkKind("OneofType", OneOf)
-	return t.types[index]
-}
-
-// OneOfIndex returns the OneOf index for the given target type.  Returns -1 if
-// target doesn't exist.
-func (t *Type) OneOfIndex(target *Type) int {
-	t.checkKind("OneOfIndex", OneOf)
-	// We typically have a small number of types, so linear search is fine.
-	for index, one := range t.types {
-		if one == target {
-			return index
-		}
-	}
-	return -1
-}
-
-// NumOneOfType returns the number of types in a OneOf.
-func (t *Type) NumOneOfType() int {
-	t.checkKind("NumOneOfType", OneOf)
-	return len(t.types)
-}
-
 // AssignableFrom returns true iff a value of type t may be assigned from a
-// value of type f.  The following cases are allowed:
-// + Types t and f are identical, or
-// + Type t is Any, or
-// + Type t is OneOf, and f is one of the types in t.
+// value of type f; either types t and f are identical, or type t is Any.
 func (t *Type) AssignableFrom(f *Type) bool {
-	return t == f || t.kind == Any || (t.kind == OneOf && t.OneOfIndex(f) != -1)
+	return t == f || t.kind == Any
 }
 
 // ptype implements the TypeOrPending interface.

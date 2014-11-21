@@ -1,9 +1,5 @@
 package vdl
 
-import (
-	"fmt"
-)
-
 // This file contains the non-trivial "rep" types, which are the representation
 // of values of certain types.
 
@@ -125,19 +121,19 @@ func copyRepMap(rep repMap) repMap {
 	return cp
 }
 
-func equalRepMap(maptype *Type, a, b repMap) bool {
+func equalRepMap(a, b repMap) bool {
 	if a.Len() != b.Len() {
 		return false
 	}
 	if a.fastIndex != nil {
 		for _, akv := range a.fastIndex {
-			if !b.hasKV(maptype, akv) {
+			if !b.hasKV(akv) {
 				return false
 			}
 		}
 	} else {
 		for _, akv := range *a.slowIndex {
-			if !b.hasKV(maptype, akv) {
+			if !b.hasKV(akv) {
 				return false
 			}
 		}
@@ -145,8 +141,8 @@ func equalRepMap(maptype *Type, a, b repMap) bool {
 	return true
 }
 
-func (rep repMap) hasKV(maptype *Type, kv kvPair) bool {
-	val, ok := rep.Index(maptype, kv.key)
+func (rep repMap) hasKV(kv kvPair) bool {
+	val, ok := rep.Index(kv.key)
 	if !ok {
 		return false
 	}
@@ -202,10 +198,7 @@ func (rep repMap) Keys() []*Value {
 	}
 }
 
-func (rep repMap) Index(maptype *Type, key *Value) (*Value, bool) {
-	if !maptype.key.AssignableFrom(key.t) {
-		panic(fmt.Errorf("val: map type %v can't be indexed with key type %v", maptype, key.t))
-	}
+func (rep repMap) Index(key *Value) (*Value, bool) {
 	if rep.fastIndex != nil {
 		if kv, ok := rep.fastIndex[fastKeyRep(key)]; ok {
 			return kv.val, true
@@ -220,32 +213,22 @@ func (rep repMap) Index(maptype *Type, key *Value) (*Value, bool) {
 	return nil, false
 }
 
-func (rep repMap) Assign(maptype *Type, key, val *Value) {
-	if !maptype.key.AssignableFrom(key.t) {
-		panic(fmt.Errorf("val: map type %v can't be assigned with key type %v", maptype, key.t))
-	}
-	if val != nil && !maptype.elem.AssignableFrom(val.t) {
-		panic(fmt.Errorf("val: map type %v can't be assigned with elem type %v", maptype, val.t))
-	}
-	// TODO(toddw): Copy key and val?
+func (rep repMap) Assign(key, elem *Value) {
 	if rep.fastIndex != nil {
-		rep.fastIndex[fastKeyRep(key)] = kvPair{key, val}
+		rep.fastIndex[fastKeyRep(key)] = kvPair{key, elem}
 	} else {
 		for ix := 0; ix < len(*rep.slowIndex); ix++ {
 			if EqualValue((*rep.slowIndex)[ix].key, key) {
-				(*rep.slowIndex)[ix].val = val
+				(*rep.slowIndex)[ix].val = elem
 				return
 			}
 		}
 		// The key doesn't exist in the slow index; append it.
-		*rep.slowIndex = append(*rep.slowIndex, kvPair{key, val})
+		*rep.slowIndex = append(*rep.slowIndex, kvPair{key, elem})
 	}
 }
 
-func (rep repMap) Delete(maptype *Type, key *Value) {
-	if !maptype.key.AssignableFrom(key.t) {
-		panic(fmt.Errorf("val: map type %v can't be assigned with key type %v", maptype, key.t))
-	}
+func (rep repMap) Delete(key *Value) {
 	if rep.fastIndex != nil {
 		delete(rep.fastIndex, fastKeyRep(key))
 	} else {
@@ -340,4 +323,28 @@ func (rep repSequence) Index(t *Type, index int) *Value {
 	newval := ZeroValue(t)
 	rep[index] = newval
 	return newval
+}
+
+// repOneOf represents a OneOf value, which includes the field index of its
+// type, and the underlying elem.
+type repOneOf struct {
+	index int
+	value *Value
+}
+
+func copyRepOneOf(rep repOneOf) repOneOf {
+	return repOneOf{rep.index, CopyValue(rep.value)}
+}
+
+func equalRepOneOf(a, b repOneOf) bool {
+	return a.index == b.index && EqualValue(a.value, b.value)
+}
+
+func (rep repOneOf) IsZero() bool {
+	return rep.index == 0 && rep.value.IsZero()
+}
+
+func (rep repOneOf) String(t *Type) string {
+	v := rep.value
+	return "{" + t.fields[rep.index].Name + ": " + stringRep(v.t, v.rep) + "}"
 }

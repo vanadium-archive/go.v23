@@ -255,7 +255,7 @@ type Invoker interface {
 	// pointers to argument objects, which will be used by the framework to decode
 	// the arguments sent by the client.  If the arg types are known, argptrs
 	// should contain pointers to args of the appropriate type.  Otherwise argptrs
-	// may contain vom.Value objects to support generic arg decoding.
+	// may contain *vdl.Value objects to support generic arg decoding.
 	//
 	// numArgs specifies the number of input arguments sent by the client - it may
 	// be used to support method overloading, e.g. for different versions of a

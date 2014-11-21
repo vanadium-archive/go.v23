@@ -219,7 +219,7 @@ other languages like C++.
 	ArgsLong: pkgArgLong,
 }
 
-var genLangAll = genLangs(vdlroot.AllGenLanguage)
+var genLangAll = genLangs(vdlroot.GenLanguageAll)
 
 type genLangs []vdlroot.GenLanguage
 
@@ -242,7 +242,7 @@ func (gls *genLangs) Set(value string) error {
 	seen := make(map[vdlroot.GenLanguage]bool)
 	for _, str := range strings.Split(value, ",") {
 		// We call Title to convert from "go" to "Go".
-		gl, ok := vdlroot.MakeGenLanguage(strings.Title(str))
+		gl, ok := vdlroot.GenLanguageFromString(strings.Title(str))
 		if !ok {
 			return fmt.Errorf("%q isn't a valid generate language", str)
 		}

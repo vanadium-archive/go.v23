@@ -94,7 +94,9 @@ func unTypedConst(d data, v *vdl.Value, unTypedFields bool) string {
 		return strconv.FormatFloat(v.Float(), 'g', -1, bitlen(v.Kind()))
 	case vdl.String:
 		return strconv.Quote(v.RawString())
-	case vdl.OneOf, vdl.Any, vdl.Optional:
+	case vdl.OneOf:
+		return "null" // TODO(bprosnitz)
+	case vdl.Any, vdl.Optional:
 		if elem := v.Elem(); elem != nil {
 			return recursiveConst(d, elem)
 		}
@@ -243,9 +245,10 @@ func typeStruct(t *vdl.Type) string {
     fields: [%s
   ]})`, t.Name(), fields)
 	case vdl.OneOf:
+		// TODO(bprosnitz): Implement new oneof.
 		types := ""
-		for i := 0; i < t.NumOneOfType(); i++ {
-			types += typeStruct(t.OneOfType(i)) + ", "
+		for i := 0; i < t.NumField(); i++ {
+			types += typeStruct(t.Field(i).Type) + ", "
 		}
 		return fmt.Sprintf(`new vom.Type({
     kind: Kind.ONEOF,

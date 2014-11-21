@@ -281,22 +281,37 @@ func (x nEnum) String() string {
 	return ""
 }
 
-func (nEnum) vdlEnumLabels(struct{ A, B, C bool }) {}
+func (nEnum) __DescribeEnum(struct{ A, B, C bool }) {}
 
 // Special case oneof isn't regularly expressible in Go.
-type nOneOf struct{ oneof interface{} }
-
-func (x *nOneOf) Assign(oneof interface{}) bool {
-	switch oneof.(type) {
-	case bool, string, int64:
-		x.oneof = oneof
-		return true
+//   type nOneOf oneof{A bool;B string;C int32}
+type (
+	nOneOf interface {
+		Index() int
+		Name() string
+		__DescribeOneOf(__nOneOfDesc)
 	}
-	x.oneof = nil
-	return false
-}
+	nOneOfA struct{ Value bool }
+	nOneOfB struct{ Value string }
+	nOneOfC struct{ Value int32 }
 
-func (nOneOf) vdlOneOfTypes(_ bool, _ string, _ int64) {}
+	__nOneOfDesc struct {
+		nOneOf
+		A nOneOfA
+		B nOneOfB
+		C nOneOfC
+	}
+)
+
+func (nOneOfA) Name() string                 { return "A" }
+func (nOneOfA) Index() int                   { return 0 }
+func (nOneOfA) __DescribeOneOf(__nOneOfDesc) {}
+func (nOneOfB) Name() string                 { return "B" }
+func (nOneOfB) Index() int                   { return 1 }
+func (nOneOfB) __DescribeOneOf(__nOneOfDesc) {}
+func (nOneOfC) Name() string                 { return "C" }
+func (nOneOfC) Index() int                   { return 2 }
+func (nOneOfC) __DescribeOneOf(__nOneOfDesc) {}
 
 // Define a bunch of *Type types used in tests.
 var (
@@ -359,10 +374,10 @@ var (
 	setStringTypeN     = NamedType("nSetString", SetType(stringTypeN))
 	mapStringBoolType  = MapType(StringType, BoolType)
 	mapStringBoolTypeN = NamedType("nMapStringBool", MapType(stringTypeN, boolTypeN))
-	structXYZBoolType  = StructType(StructField{"X", BoolType}, StructField{"Y", BoolType}, StructField{"Z", BoolType})
-	structXYZBoolTypeN = NamedType("nStructXYZBool", StructType(StructField{"X", boolTypeN}, StructField{"Y", boolTypeN}, StructField{"Z", boolTypeN}))
-	structWXBoolType   = StructType(StructField{"W", BoolType}, StructField{"X", BoolType})
-	structWXBoolTypeN  = NamedType("nStructWXBool", StructType(StructField{"W", boolTypeN}, StructField{"X", boolTypeN}))
+	structXYZBoolType  = StructType(Field{"X", BoolType}, Field{"Y", BoolType}, Field{"Z", BoolType})
+	structXYZBoolTypeN = NamedType("nStructXYZBool", StructType(Field{"X", boolTypeN}, Field{"Y", boolTypeN}, Field{"Z", boolTypeN}))
+	structWXBoolType   = StructType(Field{"W", BoolType}, Field{"X", BoolType})
+	structWXBoolTypeN  = NamedType("nStructWXBool", StructType(Field{"W", boolTypeN}, Field{"X", boolTypeN}))
 	// Composite types representing maps of strings to numbers.
 	mapStringUint64Type     = MapType(StringType, Uint64Type)
 	mapStringUint64TypeN    = NamedType("nMapStringUint64", MapType(stringTypeN, uint64TypeN))
@@ -372,25 +387,27 @@ var (
 	mapStringFloat64TypeN   = NamedType("nMapStringFloat64", MapType(stringTypeN, float64TypeN))
 	mapStringComplex64Type  = MapType(StringType, Complex64Type)
 	mapStringComplex64TypeN = NamedType("nMapStringComplex64", MapType(stringTypeN, complex64TypeN))
-	structVWXUint64Type     = StructType(StructField{"V", Uint64Type}, StructField{"W", Uint64Type}, StructField{"X", Uint64Type})
-	structVWXUint64TypeN    = NamedType("nStructVWXUint64", StructType(StructField{"V", uint64TypeN}, StructField{"W", uint64TypeN}, StructField{"X", uint64TypeN}))
-	structVWXInt64Type      = StructType(StructField{"V", Int64Type}, StructField{"W", Int64Type}, StructField{"X", Int64Type})
-	structVWXInt64TypeN     = NamedType("nStructVWXInt64", StructType(StructField{"V", int64TypeN}, StructField{"W", int64TypeN}, StructField{"X", int64TypeN}))
-	structVWXFloat64Type    = StructType(StructField{"V", Float64Type}, StructField{"W", Float64Type}, StructField{"X", Float64Type})
-	structVWXFloat64TypeN   = NamedType("nStructVWXFloat64", StructType(StructField{"V", float64TypeN}, StructField{"W", float64TypeN}, StructField{"X", float64TypeN}))
-	structVWXComplex64Type  = StructType(StructField{"V", Complex64Type}, StructField{"W", Complex64Type}, StructField{"X", Complex64Type})
-	structVWXComplex64TypeN = NamedType("nStructVWXComplex64", StructType(StructField{"V", complex64TypeN}, StructField{"W", complex64TypeN}, StructField{"X", complex64TypeN}))
-	structUVUint64Type      = StructType(StructField{"U", Uint64Type}, StructField{"V", Uint64Type})
-	structUVUint64TypeN     = NamedType("nStructUVUint64", StructType(StructField{"U", uint64TypeN}, StructField{"V", uint64TypeN}))
-	structUVInt64Type       = StructType(StructField{"U", Int64Type}, StructField{"V", Int64Type})
-	structUVInt64TypeN      = NamedType("nStructUVInt64", StructType(StructField{"U", int64TypeN}, StructField{"V", int64TypeN}))
-	structUVFloat64Type     = StructType(StructField{"U", Float64Type}, StructField{"V", Float64Type})
-	structUVFloat64TypeN    = NamedType("nStructUVFloat64", StructType(StructField{"U", float64TypeN}, StructField{"V", float64TypeN}))
-	structUVComplex64Type   = StructType(StructField{"U", Complex64Type}, StructField{"V", Complex64Type})
-	structUVComplex64TypeN  = NamedType("nStructUVComplex64", StructType(StructField{"U", complex64TypeN}, StructField{"V", complex64TypeN}))
+	structVWXUint64Type     = StructType(Field{"V", Uint64Type}, Field{"W", Uint64Type}, Field{"X", Uint64Type})
+	structVWXUint64TypeN    = NamedType("nStructVWXUint64", StructType(Field{"V", uint64TypeN}, Field{"W", uint64TypeN}, Field{"X", uint64TypeN}))
+	structVWXInt64Type      = StructType(Field{"V", Int64Type}, Field{"W", Int64Type}, Field{"X", Int64Type})
+	structVWXInt64TypeN     = NamedType("nStructVWXInt64", StructType(Field{"V", int64TypeN}, Field{"W", int64TypeN}, Field{"X", int64TypeN}))
+	structVWXFloat64Type    = StructType(Field{"V", Float64Type}, Field{"W", Float64Type}, Field{"X", Float64Type})
+	structVWXFloat64TypeN   = NamedType("nStructVWXFloat64", StructType(Field{"V", float64TypeN}, Field{"W", float64TypeN}, Field{"X", float64TypeN}))
+	structVWXComplex64Type  = StructType(Field{"V", Complex64Type}, Field{"W", Complex64Type}, Field{"X", Complex64Type})
+	structVWXComplex64TypeN = NamedType("nStructVWXComplex64", StructType(Field{"V", complex64TypeN}, Field{"W", complex64TypeN}, Field{"X", complex64TypeN}))
+	structUVUint64Type      = StructType(Field{"U", Uint64Type}, Field{"V", Uint64Type})
+	structUVUint64TypeN     = NamedType("nStructUVUint64", StructType(Field{"U", uint64TypeN}, Field{"V", uint64TypeN}))
+	structUVInt64Type       = StructType(Field{"U", Int64Type}, Field{"V", Int64Type})
+	structUVInt64TypeN      = NamedType("nStructUVInt64", StructType(Field{"U", int64TypeN}, Field{"V", int64TypeN}))
+	structUVFloat64Type     = StructType(Field{"U", Float64Type}, Field{"V", Float64Type})
+	structUVFloat64TypeN    = NamedType("nStructUVFloat64", StructType(Field{"U", float64TypeN}, Field{"V", float64TypeN}))
+	structUVComplex64Type   = StructType(Field{"U", Complex64Type}, Field{"V", Complex64Type})
+	structUVComplex64TypeN  = NamedType("nStructUVComplex64", StructType(Field{"U", complex64TypeN}, Field{"V", complex64TypeN}))
 
-	structAIntType  = StructType(StructField{"A", Int64Type})
+	structAIntType  = StructType(Field{"A", Int64Type})
 	structAIntTypeN = NamedType("nStructA", structAIntType)
+
+	oneOfTypeN = rtN("OneOf", OneOfType([]Field{{"A", BoolType}, {"B", StringType}, {"C", Int32Type}}...))
 
 	// Types that cannot be converted to sets.  Although we represent sets as
 	// map[key]struct{} on the Go side, we don't allow these as general
@@ -399,8 +416,8 @@ var (
 	emptyTypeN          = NamedType("nEmpty", StructType())
 	mapStringEmptyType  = MapType(StringType, emptyType)
 	mapStringEmptyTypeN = NamedType("nMapStringEmpty", MapType(stringTypeN, emptyTypeN))
-	structXYZEmptyType  = StructType(StructField{"X", emptyType}, StructField{"Y", emptyType}, StructField{"Z", emptyType})
-	structXYZEmptyTypeN = NamedType("nStructXYZEmpty", StructType(StructField{"X", emptyTypeN}, StructField{"Y", emptyTypeN}, StructField{"Z", emptyTypeN}))
+	structXYZEmptyType  = StructType(Field{"X", emptyType}, Field{"Y", emptyType}, Field{"Z", emptyType})
+	structXYZEmptyTypeN = NamedType("nStructXYZEmpty", StructType(Field{"X", emptyTypeN}, Field{"Y", emptyTypeN}, Field{"Z", emptyTypeN}))
 )
 
 func anyValue(x *Value) *Value                  { return ZeroValue(AnyType).Assign(x) }

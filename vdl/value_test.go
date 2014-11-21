@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	keyType = StructType([]StructField{{"I", Int64Type}, {"S", StringType}}...)
+	keyType = StructType([]Field{{"I", Int64Type}, {"S", StringType}}...)
 
 	strA, strB, strC = StringValue("A"), StringValue("B"), StringValue("C")
 	int1, int2       = Int64Value(1), Int64Value(2)
@@ -64,8 +64,8 @@ func TestValue(t *testing.T) {
 		{Set, SetType(keyType), "set[struct{I int64;S string}]{}"},
 		{Map, MapType(StringType, Int64Type), "map[string]int64{}"},
 		{Map, MapType(keyType, Int64Type), "map[struct{I int64;S string}]int64{}"},
-		{Struct, StructType([]StructField{{"A", Int64Type}, {"B", StringType}, {"C", BoolType}}...), `struct{A int64;B string;C bool}{A: 0, B: "", C: false}`},
-		{OneOf, OneOfType(Int64Type, StringType), "oneof{int64;string}(int64(0))"},
+		{Struct, StructType([]Field{{"A", Int64Type}, {"B", StringType}, {"C", BoolType}}...), `struct{A int64;B string;C bool}{A: 0, B: "", C: false}`},
+		{OneOf, OneOfType([]Field{{"A", Int64Type}, {"B", StringType}, {"C", BoolType}}...), `oneof{A int64;B string;C bool}{A: 0}`},
 		{Any, AnyType, "any(nil)"},
 	}
 	for _, test := range tests {
@@ -840,25 +840,30 @@ func assignStruct(t *testing.T, x *Value) {
 
 func assignOneOf(t *testing.T, x *Value) {
 	if x.Kind() == OneOf {
-		if got, want := x.Elem(), Int64Value(0); !EqualValue(got, want) {
-			t.Errorf(`OneOf zero value got %v, want %v`, got, want)
+		goti, gotv := x.OneOfField()
+		if got, want := goti, 0; got != want {
+			t.Errorf(`OneOf zero value got index %v, want %v`, got, want)
 		}
-		x.Assign(int1)
-		if got, want := x.Elem(), int1; !EqualValue(got, want) {
-			t.Errorf(`OneOf assign value got %v, want %v`, got, want)
+		if got, want := gotv, Int64Value(0); !EqualValue(got, want) {
+			t.Errorf(`OneOf zero value got value %v, want %v`, got, want)
 		}
-		if got, want := x.String(), "oneof{int64;string}(int64(1))"; got != want {
-			t.Errorf(`OneOf assign string got %v, want %v`, got, want)
+		x.AssignOneOfField(1, strA)
+		goti, gotv = x.OneOfField()
+		if got, want := goti, 1; got != want {
+			t.Errorf(`OneOf assign B value got index %v, want %v`, got, want)
 		}
-		x.Assign(strA)
-		if got, want := x.Elem(), strA; !EqualValue(got, want) {
-			t.Errorf(`OneOf assign value got %v, want %v`, got, want)
+		if got, want := gotv, strA; !EqualValue(got, want) {
+			t.Errorf(`OneOf assign B value got value %v, want %v`, got, want)
 		}
-		if got, want := x.String(), `oneof{int64;string}(string("A"))`; got != want {
-			t.Errorf(`OneOf assign string got %v, want %v`, got, want)
+		if x.IsZero() {
+			t.Errorf(`OneOf assign B value is zero`)
 		}
-	} else if x.Kind() != Any && x.Kind() != Optional {
-		expectMismatchedKind(t, func() { x.Elem() })
+		if got, want := x.String(), `oneof{A int64;B string;C bool}{B: "A"}`; got != want {
+			t.Errorf(`OneOf assign B value got %v, want %v`, got, want)
+		}
+	} else {
+		expectMismatchedKind(t, func() { x.OneOfField() })
+		expectMismatchedKind(t, func() { x.AssignOneOfField(0, nil) })
 	}
 }
 
@@ -881,7 +886,7 @@ func assignAny(t *testing.T, x *Value) {
 		if got, want := x.String(), `any(string("A"))`; got != want {
 			t.Errorf(`Any assign string got %v, want %v`, got, want)
 		}
-	} else if x.Kind() != OneOf && x.Kind() != Optional {
+	} else if x.Kind() != Optional {
 		expectMismatchedKind(t, func() { x.Elem() })
 	}
 }

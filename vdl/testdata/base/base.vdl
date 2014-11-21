@@ -28,7 +28,7 @@ type (
 	NamedSet        set[string]
 	NamedMap        map[string]float32
 	NamedStruct     struct{A bool;B string;C int32}
-	//NamedOneOf      oneof{bool;string;int32}
+	//NamedOneOf      oneof{A bool;B string;C int32}
 )
 
 type Scalars struct {
@@ -81,7 +81,7 @@ type KeyScalars struct {
 	A10 complex64
 	A11 complex128
 	A12 string
-	A13 error
+	//A13 error
 
 	B0  NamedBool
 	B1  NamedByte

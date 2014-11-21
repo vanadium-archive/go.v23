@@ -25,10 +25,10 @@ type TypeDef struct {
 	//   type Struct2 Struct;          Struct
 	BaseType *vdl.Type
 
-	LabelDoc       []string // [only valid for enum] docs for each label
-	LabelDocSuffix []string // [only valid for enum] suffix docs for each label
-	FieldDoc       []string // [only valid for struct] docs for each field
-	FieldDocSuffix []string // [only valid for struct] suffix docs for each field
+	LabelDoc       []string // [valid for enum] docs for each label
+	LabelDocSuffix []string // [valid for enum] suffix docs for each label
+	FieldDoc       []string // [valid for struct, oneof] docs for each field
+	FieldDocSuffix []string // [valid for struct, oneof] suffix docs for each field
 	File           *File    // parent file that this type is defined in
 }
 
@@ -123,17 +123,24 @@ func (td typeDefiner) makeTypeDefBuilder(file *File, pdef *parse.TypeDef) *typeD
 			ret.def.LabelDocSuffix[index] = plabel.DocSuffix
 		}
 	case *parse.TypeStruct:
-		ret.def.FieldDoc = make([]string, len(pt.Fields))
-		ret.def.FieldDocSuffix = make([]string, len(pt.Fields))
-		for index, pfield := range pt.Fields {
-			_, err := ValidIdent(pfield.Name)
-			if err != nil {
-				td.env.prefixErrorf(file, pfield.Pos, err, "invalid struct field name %s", pfield.Name)
-				return nil
-			}
-			ret.def.FieldDoc[index] = pfield.Doc
-			ret.def.FieldDocSuffix[index] = pfield.DocSuffix
+		ret = attachFieldDoc(ret, pt.Fields, file, td.env)
+	case *parse.TypeOneOf:
+		ret = attachFieldDoc(ret, pt.Fields, file, td.env)
+	}
+	return ret
+}
+
+func attachFieldDoc(ret *typeDefBuilder, fields []*parse.Field, file *File, env *Env) *typeDefBuilder {
+	ret.def.FieldDoc = make([]string, len(fields))
+	ret.def.FieldDocSuffix = make([]string, len(fields))
+	for index, pfield := range fields {
+		_, err := ValidIdent(pfield.Name)
+		if err != nil {
+			env.prefixErrorf(file, pfield.Pos, err, "invalid field name %s", pfield.Name)
+			return nil
 		}
+		ret.def.FieldDoc[index] = pfield.Doc
+		ret.def.FieldDocSuffix[index] = pfield.DocSuffix
 	}
 	return ret
 }
@@ -208,12 +215,12 @@ func compileDefinedType(ptype parse.Type, file *File, env *Env, tbuilder *vdl.Ty
 		return st
 	case *parse.TypeOneOf:
 		oneof := tbuilder.OneOf()
-		for _, ptype := range pt.Types {
-			otype := compileLiteralType(ptype, file, env, tbuilder, builders)
-			if otype == nil {
+		for _, pfield := range pt.Fields {
+			ftype := compileLiteralType(pfield.Type, file, env, tbuilder, builders)
+			if ftype == nil {
 				return nil
 			}
-			oneof.AppendType(otype)
+			oneof.AppendField(pfield.Name, ftype)
 		}
 		return oneof
 	}
@@ -272,7 +279,6 @@ func compileLiteralType(ptype parse.Type, file *File, env *Env, tbuilder *vdl.Ty
 			return tbuilder.Map().AssignKey(key).AssignElem(elem)
 		}
 	case *parse.TypeOptional:
-		env.experimentalOnly(file, pt.Pos(), "optional not supported")
 		base := compileLiteralType(pt.Base, file, env, tbuilder, builders)
 		if base != nil {
 			return tbuilder.Optional().AssignBase(base)

@@ -109,7 +109,6 @@ type KeyScalars struct {
 	A10 complex64
 	A11 complex128
 	A12 string
-	A13 error
 	B0  NamedBool
 	B1  NamedByte
 	B2  NamedUint16
@@ -1002,7 +1001,6 @@ func (s implServiceBServerStub) Signature(ctx __ipc.ServerContext) (__ipc.Servic
 				__wiretype.FieldType{Type: 0x38, Name: "A10"},
 				__wiretype.FieldType{Type: 0x39, Name: "A11"},
 				__wiretype.FieldType{Type: 0x3, Name: "A12"},
-				__wiretype.FieldType{Type: 0x42, Name: "A13"},
 				__wiretype.FieldType{Type: 0x45, Name: "B0"},
 				__wiretype.FieldType{Type: 0x46, Name: "B1"},
 				__wiretype.FieldType{Type: 0x47, Name: "B2"},

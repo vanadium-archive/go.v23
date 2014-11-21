@@ -8,32 +8,39 @@ import (
 )
 
 // compatible returns true if types a and b are compatible with each other.
-// Type compatibility is a lower threshold than value convertibility; values of
-// incompatible types are never convertible, while values of compatible types
-// might not be convertible.  E.g. float32 and byte are compatible, and
-// float32(1.0) is convertible with byte(1), but float32(-1.0) is not
-// convertible with any byte value.
 //
-// Compatibility is commutative.  The basic rules:
-//   o Nilability is ignored for all rules (e.g. ?int is compatible with int).
-//   o Bool is only compatible with bool.
+// Compatibility is checked before every value conversion; it is the first-pass
+// filter that disallows certain conversions.  Values of incompatible types are
+// never convertible, while values of compatible types might not be convertible.
+// E.g. float32 and byte are compatible types, and float32(1.0) is convertible
+// to/from byte(1), but float32(1.5) is not convertible to/from any byte value.
+//
+// The reason we have a type compatibility check is to disallow invalid
+// conversions that are hard to catch while converting values.  E.g. conversions
+// between values of []bool and []float32 are invalid, but this is hard to catch
+// if both lists are empty.
+//
+// Compatibility is reversible and transitive, except for the special Any type.
+// Here are the rules:
+//   o Any is compatible with all types.
+//   o Optional is ignored for all rules (e.g. ?int is treated as int).
+//   o Bool is only compatible with Bool.
 //   o TypeObject is only compatible with TypeObject.
 //   o Numbers are mutually compatible.
 //   o String, enum, []byte and [N]byte are mutually compatible.
 //   o Array and list are compatible if their elems are compatible.
-//   o Set, map and struct are compatible if keys K* are compatible,
-//     and fields F* are compatible:
-//     - set[Ka] is compatible with set[Kb] and map[Kb]bool
-//       (all bools must be true)
-//     - map[string]Fa is compatible with struct{_ Fb, _ Fc, ...}
-//     - transitively combining the first two rules:
-//       set[string] is compatible with map[string]bool and struct{_ bool, ...}
-//       (all bools must be true)
-//     - Two structs are compatible if all fields with the same name are
-//       compatible, and at least one field as the same name or one of the
-//       structs is empty.
-//   o OneOf X is compatible with type Y if any type in X is compatible with Y.
-//   o Any is compatible with anything.
+//   o Set, map and struct are compatible if all keys K* are compatible,
+//     and all fields F* are compatible:
+//     - map[string]F* is compatible with struct{_ F*; ...}
+//     - set[K*] is compatible with set[K*] and map[K*]bool
+//       (during conversion all bools in the map must be true)
+//     - set[string] is compatible with struct{_ bool; ...}
+//       (by transitively combining the first two rules)
+//     - Two struct types are compatible if all fields with the same name are
+//       compatible, and at least one field has the same name, or one of the
+//       types is an empty struct.
+//   o Two oneof types are compatible if all fields with the same name are
+//     compatible, and at least one field has the same name.
 //
 // Recursive types are checked for compatibility up to the first occurrence of a
 // cycle in either type.  This leaves open the possibility of "obvious" false
@@ -41,6 +48,19 @@ import (
 // favoring a simpler implementation and better performance over exhaustive
 // checking.  This seems fine in practice since type compatibility is weaker
 // than value convertibility, and since recursive types are not common.
+//
+// TODO(toddw): In the future we might allow the following compatibility:
+//   oneof{A t2}  <-> map[string]t1  # oneof behaves like struct
+//   oneof{A t2}  <-> t1             # first-field special case
+//   struct{A t2} <-> t1             # first-field special case
+//
+// The advantage of allowing these rules is that it gives users a powerful
+// mechanism for backwards/forwards compatibility.  The disadvantage is that
+// we'd need more special cases, making it harder to understand and implement
+// the rules.  E.g. we'd need to disallow transitivity for these links,
+// otherwise we'd end up with nonsensical conversions:
+//
+//   oneof{A string} <-> string <-> oneof{B string}
 func compatible(a, b *vdl.Type) bool {
 	if a.Kind() == vdl.Optional {
 		a = a.Elem()
@@ -69,26 +89,28 @@ type compatRegistry struct {
 
 // TODO(toddw): Change this to a fixed-size LRU cache, otherwise it can grow
 // without bounds and exhaust our memory.
-var compatCache = compatRegistry{compat: make(map[[2]*vdl.Type]bool)}
+var compatCache = &compatRegistry{compat: make(map[[2]*vdl.Type]bool)}
 
 // The compat cache key is just the two types, which are already hash-consed.
 // We make a minor attempt to normalize the order.
 func compatKey(a, b *vdl.Type) [2]*vdl.Type {
 	if a.Kind() > b.Kind() ||
-		(a.Kind() == vdl.Struct && b.Kind() == vdl.Struct && a.NumField() > b.NumField()) {
+		(a.Kind() == vdl.Enum && b.Kind() == vdl.Enum && a.NumEnumLabel() > b.NumEnumLabel()) ||
+		(a.Kind() == vdl.Struct && b.Kind() == vdl.Struct && a.NumField() > b.NumField()) ||
+		(a.Kind() == vdl.OneOf && b.Kind() == vdl.OneOf && a.NumField() > b.NumField()) {
 		a, b = b, a
 	}
 	return [2]*vdl.Type{a, b}
 }
 
-func (reg compatRegistry) lookup(key [2]*vdl.Type) (bool, bool) {
+func (reg *compatRegistry) lookup(key [2]*vdl.Type) (bool, bool) {
 	reg.Lock()
 	compat, ok := reg.compat[key]
 	reg.Unlock()
 	return compat, ok
 }
 
-func (reg compatRegistry) update(key [2]*vdl.Type, compat bool) {
+func (reg *compatRegistry) update(key [2]*vdl.Type, compat bool) {
 	reg.Lock()
 	reg.compat[key] = compat
 	reg.Unlock()
@@ -96,6 +118,7 @@ func (reg compatRegistry) update(key [2]*vdl.Type, compat bool) {
 
 // compat is a recursive helper that implements compatible.
 func compat(a, b *vdl.Type, seenA, seenB map[*vdl.Type]bool) bool {
+	// Normalize and break cycles from recursive types.
 	if a.Kind() == vdl.Optional {
 		a = a.Elem()
 	}
@@ -106,14 +129,9 @@ func compat(a, b *vdl.Type, seenA, seenB map[*vdl.Type]bool) bool {
 		return true
 	}
 	seenA[a], seenB[b] = true, true
-	// Handle variant cases Any and OneOf
-	switch {
-	case a.Kind() == vdl.Any || b.Kind() == vdl.Any:
+	// Handle Any
+	if a.Kind() == vdl.Any || b.Kind() == vdl.Any {
 		return true
-	case a.Kind() == vdl.OneOf:
-		return compatOneOf(a, b, seenA, seenB)
-	case b.Kind() == vdl.OneOf:
-		return compatOneOf(b, a, seenB, seenA)
 	}
 	// Handle simple scalar vdl.
 	if ax, bx := ttIsNumber(a), ttIsNumber(b); ax || bx {
@@ -167,7 +185,16 @@ func compat(a, b *vdl.Type, seenA, seenB map[*vdl.Type]bool) bool {
 		case vdl.Map:
 			return compatStructKeyElem(a, b.Key(), b.Elem(), seenA, seenB)
 		case vdl.Struct:
-			return compatStructStruct(a, b, seenA, seenB)
+			if ttIsEmptyStruct(a) || ttIsEmptyStruct(b) {
+				return true // empty struct is compatible with all other structs
+			}
+			return compatFields(a, b, seenA, seenB)
+		}
+		return false
+	case vdl.OneOf:
+		switch b.Kind() {
+		case vdl.OneOf:
+			return compatFields(a, b, seenA, seenB)
 		}
 		return false
 	default:
@@ -191,17 +218,6 @@ func ttIsEmptyStruct(tt *vdl.Type) bool {
 	return tt.Kind() == vdl.Struct && tt.NumField() == 0
 }
 
-// REQUIRED: a is OneOf
-func compatOneOf(a, b *vdl.Type, seenA, seenB map[*vdl.Type]bool) bool {
-	// OneOf is a disjunction - only one of the types needs to be compatible.
-	for ax := 0; ax < a.NumOneOfType(); ax++ {
-		if compat(a.OneOfType(ax), b, seenA, seenB) {
-			return true
-		}
-	}
-	return false
-}
-
 // REQUIRED: a is Map
 func compatMapKeyElem(a, bKey, bElem *vdl.Type, seenA, seenB map[*vdl.Type]bool) bool {
 	return compat(a.Key(), bKey, seenA, seenB) && compat(a.Elem(), bElem, seenA, seenB)
@@ -209,7 +225,7 @@ func compatMapKeyElem(a, bKey, bElem *vdl.Type, seenA, seenB map[*vdl.Type]bool)
 
 // REQUIRED: a is Struct
 func compatStructKeyElem(a, bKey, bElem *vdl.Type, seenA, seenB map[*vdl.Type]bool) bool {
-	// Struct is a conjunction, all fields must be compatible.
+	// All struct fields must be compatible.
 	if ttIsEmptyStruct(a) {
 		return false // empty struct isn't compatible with set or map
 	}
@@ -224,14 +240,12 @@ func compatStructKeyElem(a, bKey, bElem *vdl.Type, seenA, seenB map[*vdl.Type]bo
 	return true
 }
 
-// REQUIRED: a and b are Struct
-func compatStructStruct(a, b *vdl.Type, seenA, seenB map[*vdl.Type]bool) bool {
-	// Struct is a conjunction, all fields with the same name must be compatible.
-	if ttIsEmptyStruct(a) || ttIsEmptyStruct(b) {
-		return true // empty struct is compatible all other structs
-	}
+// REQUIRED: a and b are either Struct or OneOf
+func compatFields(a, b *vdl.Type, seenA, seenB map[*vdl.Type]bool) bool {
+	// All fields with the same name must be compatible, and at least one field
+	// must match.
 	if a.NumField() > b.NumField() {
-		a, b, seenA, seenB = b, a, seenB, seenA
+		a, seenA, b, seenB = b, seenB, a, seenA
 	}
 	fieldMatch := false
 	for ax := 0; ax < a.NumField(); ax++ {
@@ -245,6 +259,5 @@ func compatStructStruct(a, b *vdl.Type, seenA, seenB map[*vdl.Type]bool) bool {
 		}
 		fieldMatch = true
 	}
-	// At least one field must have matched.
 	return fieldMatch
 }

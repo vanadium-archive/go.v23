@@ -6,7 +6,6 @@ import (
 
 	"veyron.io/veyron/veyron2/vdl"
 	"veyron.io/veyron/veyron2/vdl/compile"
-	"veyron.io/veyron/veyron2/vdl/vdlutil"
 )
 
 // testingMode is set to true to simplify tests.
@@ -76,11 +75,11 @@ func typeDefGo(data goData, def *compile.TypeDef) string {
 			s += def.LabelDocSuffix[ix]
 		}
 		s += fmt.Sprintf("\n)"+
-			"\n\n// %[2]s%[1]s holds all labels for %[1]s."+
-			"\nvar %[2]s%[1]s = []%[1]s{%[4]s}"+
-			"\n\n// %[3]s%[1]s creates a %[1]s from a string label."+
+			"\n\n// %[1]sAll holds all labels for %[1]s."+
+			"\nvar %[1]sAll = []%[1]s{%[2]s}"+
+			"\n\n// %[1]sFromString creates a %[1]s from a string label."+
 			"\n// Returns true iff the label is valid."+
-			"\nfunc %[3]s%[1]s(label string) (x %[1]s, ok bool) {"+
+			"\nfunc %[1]sFromString(label string) (x %[1]s, ok bool) {"+
 			"\n\tok = x.Assign(label)"+
 			"\n\treturn"+
 			"\n}"+
@@ -89,8 +88,6 @@ func typeDefGo(data goData, def *compile.TypeDef) string {
 			"\nfunc (x *%[1]s) Assign(label string) bool {"+
 			"\n\tswitch label {",
 			def.Name,
-			vdlutil.FirstRuneToExportCase("all", def.Exported),
-			vdlutil.FirstRuneToExportCase("make", def.Exported),
 			commaEnumLabels(def.Name, t))
 		for ix := 0; ix < t.NumEnumLabel(); ix++ {
 			s += fmt.Sprintf("\n\tcase %[2]q:"+
@@ -111,8 +108,8 @@ func typeDefGo(data goData, def *compile.TypeDef) string {
 		s += fmt.Sprintf("\n\t}"+
 			"\n\treturn \"\""+
 			"\n}"+
-			"\n\n// vdlEnumLabels identifies %[1]s as an enum."+
-			"\nfunc (%[1]s) vdlEnumLabels(struct{ %[2]s bool }) {}",
+			"\n\n// __DescribeEnum describes the %[1]s enum type."+
+			"\nfunc (%[1]s) __DescribeEnum(struct{ %[2]s %[1]s }) {}",
 			def.Name, commaEnumLabels("", t))
 		return s
 	case vdl.Struct:
@@ -125,35 +122,36 @@ func typeDefGo(data goData, def *compile.TypeDef) string {
 		s += "\n}"
 		return s + def.DocSuffix
 	case vdl.OneOf:
-		s += fmt.Sprintf("struct{ oneof interface{} }%[2]s"+
-			"\n\n// %[3]s%[1]s creates a %[1]s."+
-			"\n// Returns true iff the oneof value has a valid type."+
-			"\nfunc %[3]s%[1]s(oneof interface{}) (x %[1]s, ok bool) {"+
-			"\n\tok = x.Assign(oneof)"+
-			"\n\treturn"+
-			"\n}"+
-			"\n\n// Assign assigns oneof to x."+
-			"\n// Returns true iff the oneof value has a valid type."+
-			"\nfunc (x *%[1]s) Assign(oneof interface{}) bool {"+
-			"\n\tswitch oneof.(type) {"+
-			"\n\tcase %[4]s:"+
-			"\n\t\tx.oneof = oneof"+
-			"\n\t\treturn true"+
-			"\n\t}"+
-			"\n\tx.oneof = nil"+
-			"\n\treturn false"+
-			"\n}"+
-			"\n\n// OneOf returns the underlying typed value of x."+
-			"\nfunc (x %[1]s) OneOf() interface{} {"+
-			"\n\treturn x.oneof"+
-			"\n}"+
-			"\n\n// vdlOneOfTypes identifies %[1]s as a oneof."+
-			"\nfunc (%[1]s) vdlOneOfTypes(%[5]s) {}",
-			def.Name,
-			def.DocSuffix,
-			vdlutil.FirstRuneToExportCase("make", def.Exported),
-			commaOneOfTypes(data, "", t),
-			commaOneOfTypes(data, "_ ", t))
+		s = fmt.Sprintf("type ("+
+			"\n\t// %[1]s represents any single field of the %[1]s oneof type."+
+			"\n\t%[2]s%[1]s interface {"+
+			"\n\t\t// Index returns the field index."+
+			"\n\t\tIndex() int"+
+			"\n\t\t// Name returns the field name."+
+			"\n\t\tName() string"+
+			"\n\t\t// __DescribeOneOf describes the %[1]s oneof type."+
+			"\n\t\t__DescribeOneOf(__%[1]sDesc)"+
+			"\n\t}%[3]s", def.Name, docBreak(def.Doc), def.DocSuffix)
+		for ix := 0; ix < t.NumField(); ix++ {
+			f := t.Field(ix)
+			s += fmt.Sprintf("\n\t// %[1]s%[2]s represents field %[2]s of the %[1]s oneof type."+
+				"\n\t%[4]s%[1]s%[2]s struct{ Value %[3]s }%[5]s",
+				def.Name, f.Name, typeGo(data, f.Type),
+				docBreak(def.FieldDoc[ix]), def.FieldDocSuffix[ix])
+		}
+		s += fmt.Sprintf("\n\t// __%[1]sDesc describes the %[1]s oneof type."+
+			"\n\t__%[1]sDesc struct {"+
+			"\n\t\t%[1]s", def.Name)
+		for ix := 0; ix < t.NumField(); ix++ {
+			s += fmt.Sprintf("\n\t\t%[2]s %[1]s%[2]s", def.Name, t.Field(ix).Name)
+		}
+		s += fmt.Sprintf("\n\t}\n)")
+		for ix := 0; ix < t.NumField(); ix++ {
+			s += fmt.Sprintf("\n\nfunc (%[1]s%[2]s) Index() int { return %[3]d }"+
+				"\nfunc (%[1]s%[2]s) Name() string { return \"%[2]s\" }"+
+				"\nfunc (%[1]s%[2]s) __DescribeOneOf(__%[1]sDesc) {}",
+				def.Name, t.Field(ix).Name, ix)
+		}
 		return s
 	default:
 		return s + typeGo(data, def.BaseType) + def.DocSuffix
@@ -167,17 +165,6 @@ func commaEnumLabels(prefix string, t *vdl.Type) (s string) {
 		}
 		s += prefix
 		s += t.EnumLabel(ix)
-	}
-	return
-}
-
-func commaOneOfTypes(data goData, prefix string, t *vdl.Type) (s string) {
-	for ix := 0; ix < t.NumOneOfType(); ix++ {
-		if ix > 0 {
-			s += ", "
-		}
-		s += prefix
-		s += typeGo(data, t.OneOfType(ix))
 	}
 	return
 }

@@ -32,7 +32,7 @@ func TypedConst(v *vdl.Value, pkgPath string, imports codegen.Imports) (string, 
 		return "", err
 	}
 	switch k {
-	case vdl.Array, vdl.List, vdl.Set, vdl.Map, vdl.Struct:
+	case vdl.Array, vdl.List, vdl.Set, vdl.Map, vdl.Struct, vdl.OneOf:
 		// { } are used instead of ( ) for composites, except for []byte and [N]byte
 		if !t.IsBytes() {
 			return typestr + valstr, nil
@@ -49,7 +49,7 @@ func constValue(v *vdl.Value, pkgPath string, imports codegen.Imports) (string, 
 		return strconv.Quote(string(v.Bytes())), nil
 	}
 	switch k {
-	case vdl.Any, vdl.OneOf, vdl.Optional:
+	case vdl.Any, vdl.Optional:
 		return TypedConst(v.Elem(), pkgPath, imports)
 	case vdl.Bool:
 		return strconv.FormatBool(v.Bool()), nil
@@ -119,6 +119,13 @@ func constValue(v *vdl.Value, pkgPath string, imports codegen.Imports) (string, 
 			s += t.Field(ix).Name + ": " + fieldstr
 		}
 		return s + "}", nil
+	case vdl.OneOf:
+		index, value := v.OneOfField()
+		valuestr, err := constValue(value, pkgPath, imports)
+		if err != nil {
+			return "", err
+		}
+		return "{" + t.Field(index).Name + ": " + valuestr + "}", nil
 	}
 	// Enum and TypeObject always require the typestr.
 	switch k {

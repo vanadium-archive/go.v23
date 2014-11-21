@@ -145,7 +145,6 @@ type KeyScalars struct {
 	I complex64
 	J complex128
 	K string
-	L error
 }
 
 type CompComp struct {
@@ -202,6 +201,6 @@ type ServiceB interface {
 `
 
 func expectPkg1(t *testing.T, name string, pkg *compile.Package) {
-	// TODO(toddw): veryfiy real expectations, and add more tests.
+	// TODO(toddw): verify real expectations, and add more tests.
 	fmt.Println(pkg)
 }

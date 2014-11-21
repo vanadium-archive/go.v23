@@ -7,7 +7,7 @@ package base
 
 type (
 	NamedEnum       enum{A;B;C}
-	NamedOneOf      oneof{bool;string;int32}
+	NamedOneOf      oneof{A bool;B string;C int32}
 )
 
 type ScalarsExp struct {
@@ -17,6 +17,7 @@ type ScalarsExp struct {
 
 const (
 	Cenum  = NamedEnum.A
+	Coneof = NamedOneOf{A: true}
 	Carray = [3]int32{1, 2, 3}
 	Clist  = []int32{1, 2, 3}
 	// TODO(toddw): test multiple items after ordering is fixed.

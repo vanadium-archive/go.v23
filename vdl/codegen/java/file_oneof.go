@@ -35,9 +35,10 @@ package {{.PackagePath}};
 
 // genJavaOneOfFile generates the Java class file for the provided user-defined oneOf type.
 func genJavaOneOfFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo {
-	types := make([]string, tdef.Type.NumOneOfType())
-	for i := 0; i < tdef.Type.NumOneOfType(); i++ {
-		types[i] = javaType(tdef.Type.OneOfType(i), true, env)
+	// TODO(rogulenko): Update to new oneof.
+	types := make([]string, tdef.Type.NumField())
+	for i := 0; i < tdef.Type.NumField(); i++ {
+		types[i] = javaType(tdef.Type.Field(i).Type, true, env)
 	}
 	javaTypeName := toUpperCamelCase(tdef.Name)
 	data := struct {

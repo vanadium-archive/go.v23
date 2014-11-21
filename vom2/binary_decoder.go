@@ -80,7 +80,7 @@ func (d *binaryDecoder) decodeValueType() (*vdl.Type, error) {
 			}
 			return t, nil
 		}
-		// This is a type definition message, the TypeID is -id.
+		// This is a type message, the TypeID is -id.
 		tid := TypeID(-id)
 		// Decode the WireType like a regular value, and store it in recvTypes.  The
 		// type will actually be built when a value message arrives using this tid.
@@ -312,7 +312,7 @@ func (d *binaryDecoder) decodeValue(t *vdl.Type, target valconv.Target) error {
 		}
 		return target.FinishMap(mapTarget)
 	case vdl.Struct:
-		structTarget, err := target.StartStruct(t)
+		fieldsTarget, err := target.StartFields(t)
 		if err != nil {
 			return err
 		}
@@ -325,10 +325,10 @@ func (d *binaryDecoder) decodeValue(t *vdl.Type, target valconv.Target) error {
 			case index > uint64(t.NumField()):
 				return errIndexOutOfRange
 			case index == 0:
-				return target.FinishStruct(structTarget)
+				return target.FinishFields(fieldsTarget)
 			}
 			tfield := t.Field(int(index - 1))
-			switch key, field, err := structTarget.StartField(tfield.Name); {
+			switch key, field, err := fieldsTarget.StartField(tfield.Name); {
 			case verror.Is(err, verror.NoExist):
 				if err := d.ignoreValue(tfield.Type); err != nil {
 					return err
@@ -339,14 +339,33 @@ func (d *binaryDecoder) decodeValue(t *vdl.Type, target valconv.Target) error {
 				if err := d.decodeValue(tfield.Type, field); err != nil {
 					return err
 				}
-				if err := structTarget.FinishField(key, field); err != nil {
+				if err := fieldsTarget.FinishField(key, field); err != nil {
 					return err
 				}
 			}
 		}
-	case vdl.Any, vdl.OneOf:
-		// TODO(toddw): Change OneOf encoding after optionality is introduced in
-		// struct fields.
+	case vdl.OneOf:
+		fieldsTarget, err := target.StartFields(t)
+		if err != nil {
+			return err
+		}
+		index, err := binaryDecodeUint(d.buf)
+		switch {
+		case err != nil:
+			return err
+		case index == 0 || index > uint64(t.NumField()):
+			return errIndexOutOfRange
+		}
+		tfield := t.Field(int(index - 1))
+		key, field, err := fieldsTarget.StartField(tfield.Name)
+		if err != nil {
+			return err
+		}
+		if err := d.decodeValue(tfield.Type, field); err != nil {
+			return err
+		}
+		return fieldsTarget.FinishField(key, field)
+	case vdl.Any:
 		switch id, err := binaryDecodeUint(d.buf); {
 		case err != nil:
 			return err

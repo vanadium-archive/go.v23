@@ -15,17 +15,15 @@ var (
 	errHasLabels       = errors.New("labels only valid for enum")
 	errLenZero         = errors.New("negative or zero array length")
 	errLenNonZero      = errors.New("length only valid for array")
-	errOptionalElemBad = errors.New("optional elem type must not be optional or any")
+	errOptionalElemBad = errors.New("optional elem type must not be optional, any or error")
 	errElemNil         = errors.New("nil elem type")
 	errElemNonNil      = errors.New("elem only valid for array, list and map")
 	errKeyNil          = errors.New("nil key type")
 	errKeyNonNil       = errors.New("key only valid for set and map")
-	errFieldTypeNil    = errors.New("nil struct field type")
-	errFieldNameEmpty  = errors.New("empty struct field name")
-	errHasFields       = errors.New("fields only valid for struct")
-	errOneOfTypeBad    = errors.New("type in oneof must not be nil, oneof or any")
-	errNoTypes         = errors.New("no oneof types")
-	errHasTypes        = errors.New("types only valid on oneof")
+	errFieldTypeNil    = errors.New("nil field type")
+	errFieldNameEmpty  = errors.New("empty field name")
+	errNoFields        = errors.New("no oneof fields")
+	errHasFields       = errors.New("fields only valid for struct or oneof")
 	errBaseNil         = errors.New("nil base type for named type")
 	errBaseCycle       = errors.New("invalid named type cycle")
 	errNotBuilt        = errors.New("TypeBuilder.Build must be called before Pending.Built")
@@ -50,14 +48,14 @@ var (
 	TypeObjectType = primitiveType(TypeObject)
 )
 
-// Built-in types defined by the system.
-var (
-	// TODO(toddw): Describe error in a built-in VDL file.
-	ErrorType = NamedType("error", StructType(
-		StructField{"Id", StringType},
-		StructField{"Msg", StringType},
-	))
-)
+// ErrorType describes the built-in error type.
+//
+// TODO(toddw): Describe error in a built-in VDL file based on verror2.  At the
+// moment this definition must be kept in sync with verror.Standard.
+var ErrorType = OptionalType(NamedType("error", StructType(
+	Field{"Id", StringType},
+	Field{"Msg", StringType},
+)))
 
 func primitiveType(k Kind) *Type {
 	prim, err := typeCons(&Type{kind: k})
@@ -147,11 +145,12 @@ type PendingStruct interface {
 // PendingOneOf represents a OneOf type that is being built.
 type PendingOneOf interface {
 	PendingType
-	// AppendType appends the type t to the OneOf.  The ordering of types is
-	// preserved; different orderings create different types.
-	AppendType(t TypeOrPending) PendingOneOf
-	// NumOneOfType returns the number of types appended so far.
-	NumOneOfType() int
+	// AppendField appends the OneOf field with the given name and t.  The name
+	// must not be empty.  The ordering of fields is preserved; different
+	// orderings create different types.
+	AppendField(name string, t TypeOrPending) PendingOneOf
+	// NumField returns the number of fields appended so far.
+	NumField() int
 }
 
 // PendingNamed represents a named type that is being built.  Given a base type
@@ -227,7 +226,7 @@ func (p pendingMap) AssignElem(elem TypeOrPending) PendingMap {
 }
 
 func (p pendingStruct) AppendField(name string, t TypeOrPending) PendingStruct {
-	p.fields = append(p.fields, StructField{name, t.ptype()})
+	p.fields = append(p.fields, Field{name, t.ptype()})
 	return p
 }
 
@@ -235,13 +234,13 @@ func (p pendingStruct) NumField() int {
 	return len(p.fields)
 }
 
-func (p pendingOneOf) AppendType(t TypeOrPending) PendingOneOf {
-	p.types = append(p.types, t.ptype())
+func (p pendingOneOf) AppendField(name string, t TypeOrPending) PendingOneOf {
+	p.fields = append(p.fields, Field{name, t.ptype()})
 	return p
 }
 
-func (p pendingOneOf) NumOneOfType() int {
-	return len(p.types)
+func (p pendingOneOf) NumField() int {
+	return len(p.fields)
 }
 
 func (p pendingNamed) AssignBase(base TypeOrPending) PendingNamed {
@@ -462,7 +461,7 @@ func MapType(key, elem *Type) *Type {
 
 // StructType is a helper using TypeBuilder to create a single Struct type.
 // Panics on all errors.
-func StructType(fields ...StructField) *Type {
+func StructType(fields ...Field) *Type {
 	var b TypeBuilder
 	s := b.Struct()
 	for _, f := range fields {
@@ -473,11 +472,11 @@ func StructType(fields ...StructField) *Type {
 
 // OneOfType is a helper using TypeBuilder to create a single OneOf type.
 // Panics on all errors.
-func OneOfType(types ...*Type) *Type {
+func OneOfType(fields ...Field) *Type {
 	var b TypeBuilder
 	o := b.OneOf()
-	for _, t := range types {
-		o.AppendType(t)
+	for _, f := range fields {
+		o.AppendField(f.Name, f.Type)
 	}
 	return checkedBuild(b, o)
 }
@@ -511,11 +510,6 @@ func enforceUniqueNames(t *Type, names map[string]*Type) error {
 	}
 	for _, x := range t.fields {
 		if err := enforceUniqueNames(x.Type, names); err != nil {
-			return err
-		}
-	}
-	for _, x := range t.types {
-		if err := enforceUniqueNames(x, names); err != nil {
 			return err
 		}
 	}
@@ -568,22 +562,17 @@ func uniqueTypeStr(t *Type, seen map[*Type]bool) string {
 		return s + "set[" + uniqueTypeStr(t.key, seen) + "]"
 	case Map:
 		return s + "map[" + uniqueTypeStr(t.key, seen) + "]" + uniqueTypeStr(t.elem, seen)
-	case Struct:
-		s += "struct{"
+	case Struct, OneOf:
+		if t.kind == Struct {
+			s += "struct{"
+		} else {
+			s += "oneof{"
+		}
 		for index, f := range t.fields {
 			if index > 0 {
 				s += ";"
 			}
 			s += f.Name + " " + uniqueTypeStr(f.Type, seen)
-		}
-		return s + "}"
-	case OneOf:
-		s += "oneof{"
-		for index, one := range t.types {
-			if index > 0 {
-				s += ";"
-			}
-			s += uniqueTypeStr(one, seen)
 		}
 		return s + "}"
 	default:
@@ -630,9 +619,6 @@ func typeConsLocked(t *Type) *Type {
 	for index := range t.fields {
 		t.fields[index].Type = typeConsLocked(t.fields[index].Type)
 	}
-	for index := range t.types {
-		t.types[index] = typeConsLocked(t.types[index])
-	}
 	return t
 }
 
@@ -658,13 +644,13 @@ func isInvalidKey(t *Type, seen map[*Type]bool) bool {
 	}
 	seen[t] = true
 	switch t.kind {
-	case Any, List, Map, Optional, OneOf, Set, TypeObject:
+	case Any, List, Map, Optional, Set, TypeObject:
 		return true
 	case Array:
 		if isInvalidKey(t.elem, seen) {
 			return true
 		}
-	case Struct:
+	case Struct, OneOf:
 		for _, x := range t.fields {
 			if isInvalidKey(x.Type, seen) {
 				return true
@@ -700,7 +686,7 @@ func typeInStrictCycle(t *Type, seen map[*Type]int) *Type {
 		if typeInCycle := typeInStrictCycle(t.elem, seen); typeInCycle != nil {
 			return typeInCycle
 		}
-	case Struct:
+	case Struct, OneOf:
 		for _, x := range t.fields {
 			if typeInCycle := typeInStrictCycle(x.Type, seen); typeInCycle != nil {
 				return typeInCycle
@@ -761,13 +747,14 @@ func verifyAndCollectAllTypes(t *Type, allTypes map[*Type]bool) error {
 			return errElemNil
 		}
 	case Optional:
-		if t.elem == nil {
+		e := t.elem
+		if e == nil {
 			return errElemNil
 		}
-		switch t.elem.kind {
-		case Optional, Any:
-			// Disallow ?? since the concept doesn't seem useful.
+		if e.kind == Optional || e.kind == Any {
+			// Disallow ?? since it's confusing and hard to implement.
 			// Disallow ?any to avoid confusion, since any already has a nil value.
+			// Disallow ?error to avoid confusion, since error is already optional.
 			return errOptionalElemBad
 		}
 	default:
@@ -804,7 +791,7 @@ func verifyAndCollectAllTypes(t *Type, allTypes map[*Type]bool) error {
 	}
 	// Check fields
 	switch t.kind {
-	case Struct:
+	case Struct, OneOf:
 		seenFields := make(map[string]bool, len(t.fields))
 		for _, f := range t.fields {
 			if f.Type == nil {
@@ -814,40 +801,19 @@ func verifyAndCollectAllTypes(t *Type, allTypes map[*Type]bool) error {
 				return errFieldNameEmpty
 			}
 			if seenFields[f.Name] {
-				return fmt.Errorf("struct %q has duplicate field name %q", t.name, f.Name)
+				return fmt.Errorf("%q has duplicate field name %q", t.name, f.Name)
 			}
 			seenFields[f.Name] = true
+		}
+		// We allow struct{} but not oneof{}; we rely on oneof having at least one
+		// field, and we special-case field 0.  E.g. the zero value of oneof is the
+		// zero value of the type of field 0.
+		if t.kind == OneOf && len(t.fields) == 0 {
+			return errNoFields
 		}
 	default:
 		if len(t.fields) > 0 {
 			return errHasFields
-		}
-	}
-	// Check types
-	switch t.kind {
-	case OneOf:
-		if len(t.types) == 0 {
-			return errNoTypes
-		}
-		seenTypes := make(map[string]bool, len(t.types))
-		for _, one := range t.types {
-			if err := ValidOneOfType(one); err != nil {
-				return err
-			}
-			// Each type may only occur once in the set, in either its optional or
-			// non-optional form.
-			if one.kind == Optional {
-				one = one.elem
-			}
-			unique := uniqueTypeStr(one, make(map[*Type]bool))
-			if seenTypes[unique] {
-				return fmt.Errorf("duplicate oneof type: %s", unique)
-			}
-			seenTypes[unique] = true
-		}
-	default:
-		if len(t.types) > 0 {
-			return errHasTypes
 		}
 	}
 	// Check subtypes recursively.
@@ -861,19 +827,6 @@ func verifyAndCollectAllTypes(t *Type, allTypes map[*Type]bool) error {
 		if err := verifyAndCollectAllTypes(x.Type, allTypes); err != nil {
 			return err
 		}
-	}
-	for _, x := range t.types {
-		if err := verifyAndCollectAllTypes(x, allTypes); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// ValidOneOfType returns a nil error iff t may be contained in a OneOf type.
-func ValidOneOfType(t *Type) error {
-	if t == nil || t.kind == OneOf || t.kind == Any {
-		return errOneOfTypeBad
 	}
 	return nil
 }

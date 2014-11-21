@@ -4,8 +4,9 @@
 package base
 
 import (
-	// The non-user imports are prefixed with "_gen_" to prevent collisions.
-	_gen_vdl "veyron.io/veyron/veyron2/vdl"
+	// The non-user imports are prefixed with "__" to prevent collisions.
+	__vdl "veyron.io/veyron/veyron2/vdl"
+	__vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
 )
 
 type NamedEnum int
@@ -16,12 +17,12 @@ const (
 	NamedEnumC
 )
 
-// AllNamedEnum holds all labels for NamedEnum.
-var AllNamedEnum = []NamedEnum{NamedEnumA, NamedEnumB, NamedEnumC}
+// NamedEnumAll holds all labels for NamedEnum.
+var NamedEnumAll = []NamedEnum{NamedEnumA, NamedEnumB, NamedEnumC}
 
-// MakeNamedEnum creates a NamedEnum from a string label.
+// NamedEnumFromString creates a NamedEnum from a string label.
 // Returns true iff the label is valid.
-func MakeNamedEnum(label string) (x NamedEnum, ok bool) {
+func NamedEnumFromString(label string) (x NamedEnum, ok bool) {
 	ok = x.Assign(label)
 	return
 }
@@ -57,37 +58,45 @@ func (x NamedEnum) String() string {
 	return ""
 }
 
-// vdlEnumLabels identifies NamedEnum as an enum.
-func (NamedEnum) vdlEnumLabels(struct{ A, B, C bool }) {}
+// __DescribeEnum describes the NamedEnum enum type.
+func (NamedEnum) __DescribeEnum(struct{ A, B, C NamedEnum }) {}
 
-type NamedOneOf struct{ oneof interface{} }
-
-// MakeNamedOneOf creates a NamedOneOf.
-// Returns true iff the oneof value has a valid type.
-func MakeNamedOneOf(oneof interface{}) (x NamedOneOf, ok bool) {
-	ok = x.Assign(oneof)
-	return
-}
-
-// Assign assigns oneof to x.
-// Returns true iff the oneof value has a valid type.
-func (x *NamedOneOf) Assign(oneof interface{}) bool {
-	switch oneof.(type) {
-	case bool, string, int32:
-		x.oneof = oneof
-		return true
+type (
+	// NamedOneOf represents any single field of the NamedOneOf oneof type.
+	NamedOneOf interface {
+		// Index returns the field index.
+		Index() int
+		// Name returns the field name.
+		Name() string
+		// __DescribeOneOf describes the NamedOneOf oneof type.
+		__DescribeOneOf(__NamedOneOfDesc)
 	}
-	x.oneof = nil
-	return false
-}
+	// NamedOneOfA represents field A of the NamedOneOf oneof type.
+	NamedOneOfA struct{ Value bool }
+	// NamedOneOfB represents field B of the NamedOneOf oneof type.
+	NamedOneOfB struct{ Value string }
+	// NamedOneOfC represents field C of the NamedOneOf oneof type.
+	NamedOneOfC struct{ Value int32 }
+	// __NamedOneOfDesc describes the NamedOneOf oneof type.
+	__NamedOneOfDesc struct {
+		NamedOneOf
+		A NamedOneOfA
+		B NamedOneOfB
+		C NamedOneOfC
+	}
+)
 
-// OneOf returns the underlying typed value of x.
-func (x NamedOneOf) OneOf() interface{} {
-	return x.oneof
-}
+func (NamedOneOfA) Index() int                       { return 0 }
+func (NamedOneOfA) Name() string                     { return "A" }
+func (NamedOneOfA) __DescribeOneOf(__NamedOneOfDesc) {}
 
-// vdlOneOfTypes identifies NamedOneOf as a oneof.
-func (NamedOneOf) vdlOneOfTypes(_ bool, _ string, _ int32) {}
+func (NamedOneOfB) Index() int                       { return 1 }
+func (NamedOneOfB) Name() string                     { return "B" }
+func (NamedOneOfB) __DescribeOneOf(__NamedOneOfDesc) {}
+
+func (NamedOneOfC) Index() int                       { return 2 }
+func (NamedOneOfC) Name() string                     { return "C" }
+func (NamedOneOfC) __DescribeOneOf(__NamedOneOfDesc) {}
 
 type ScalarsExp struct {
 	B13 NamedEnum
@@ -95,6 +104,8 @@ type ScalarsExp struct {
 }
 
 const Cenum = NamedEnumA
+
+var Coneof = NamedOneOf(NamedOneOfA{true})
 
 var Carray = [3]int32{
 	1,
@@ -125,34 +136,34 @@ var Cargs = Args{
 	B: 2,
 }
 
-var CTVbool = _gen_vdl.TypeOf(false)
+var CTVbool = __vdl.TypeOf(false)
 
-var CTVstring = _gen_vdl.TypeOf("")
+var CTVstring = __vdl.TypeOf("")
 
-var CTVbytes = _gen_vdl.TypeOf([]byte(""))
+var CTVbytes = __vdl.TypeOf([]byte(""))
 
-var CTVbyte = _gen_vdl.TypeOf(byte(0))
+var CTVbyte = __vdl.TypeOf(byte(0))
 
-var CTVuint16 = _gen_vdl.TypeOf(uint16(0))
+var CTVuint16 = __vdl.TypeOf(uint16(0))
 
-var CTVint16 = _gen_vdl.TypeOf(int16(0))
+var CTVint16 = __vdl.TypeOf(int16(0))
 
-var CTVfloat32 = _gen_vdl.TypeOf(float32(0))
+var CTVfloat32 = __vdl.TypeOf(float32(0))
 
-var CTVcomplex64 = _gen_vdl.TypeOf(complex64(0))
+var CTVcomplex64 = __vdl.TypeOf(complex64(0))
 
-var CTVenum = _gen_vdl.TypeOf(NamedEnumA)
+var CTVenum = __vdl.TypeOf(NamedEnumA)
 
-var CTVArray = _gen_vdl.TypeOf([3]string{})
+var CTVArray = __vdl.TypeOf([3]string{})
 
-var CTVList = _gen_vdl.TypeOf([]string{})
+var CTVList = __vdl.TypeOf([]string{})
 
-var CTVSet = _gen_vdl.TypeOf(map[string]struct{}{})
+var CTVSet = __vdl.TypeOf(map[string]struct{}{})
 
-var CTVMap = _gen_vdl.TypeOf(map[string]int64{})
+var CTVMap = __vdl.TypeOf(map[string]int64{})
 
-var CTVStruct = _gen_vdl.TypeOf(ScalarsExp{})
+var CTVStruct = __vdl.TypeOf(ScalarsExp{})
 
-var CTVOneOf = _gen_vdl.TypeOf(NamedOneOf{false})
+var CTVOneOf = __vdl.TypeOf(NamedOneOf(NamedOneOfA{false}))
 
-var CTVAny = _gen_vdl.AnyType
+var CTVAny = __vdl.TypeOf((*__vdlutil.Any)(nil))

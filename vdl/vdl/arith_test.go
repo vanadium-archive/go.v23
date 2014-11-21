@@ -1,4 +1,9 @@
-package vdl_test
+package main_test
+
+// This test assumes the vdl packages under veyron2/vdl/testdata have been
+// compiled using the vdl binary, and runs end-to-end ipc tests against the
+// generated output.  It's meant as a final sanity check of the vdl compiler; by
+// using the compiled results we're behaving as an end-user would behave.
 
 import (
 	"errors"
