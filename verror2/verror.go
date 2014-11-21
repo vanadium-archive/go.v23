@@ -453,13 +453,16 @@ var (
 	// Success, Unknown or Internal are intended for general use by
 	// all system components. Unknown and Internal should only be used
 	// when a more specific error is not available.
+
 	Success  = Register(pkgPath+".Success", NoRetry, "{1:}{2:} Success{:_}") // Success; the nil error.
 	Unknown  = Register(pkgPath+".Unknown", NoRetry, "{1:}{2:} Error{:_}")   // The unknown error.
 	Internal = Register(pkgPath+".Internal", NoRetry, "{1:}{2:} Internal error{:_}")
 
 	// BadArg is used when the parameters to an operation are invalid or
 	// incorrectly formatted.
-	BadArg = Register(pkgPath+".BadArg", NoRetry, "{1:}{2:} Bad argument{:_}")
+	// BadState is used when an method is called on an object with
+	BadArg   = Register(pkgPath+".BadArg", NoRetry, "{1:}{2:} Bad argument{:_}")
+	BadState = Register(pkgPath+".BadState", NoRetry, "{1:}{2:} Invalid state: {:_}")
 
 	// Exist and NoExist are intended for use all system components that
 	// have the notion of a 'name' or 'key' that may or may not exist. The
