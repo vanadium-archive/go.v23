@@ -15,7 +15,6 @@ const (
 	outPkgPath = "veyron.io/veyron/veyron2/vdl/testdata/base"
 )
 
-// Compares generated VDL files against the copy in the repo.
 func TestVDLGenerator(t *testing.T) {
 	// Setup the vdl command-line.
 	cmd := Root()
