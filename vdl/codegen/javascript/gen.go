@@ -25,7 +25,6 @@ type data struct {
 	Env            *compile.Env
 	GenerateImport func(string) string
 	UserImports    codegen.Imports
-	TypeNames      typeNames
 }
 
 // Generate takes a populated compile.Package and produces a byte slice
@@ -36,7 +35,6 @@ func Generate(pkg *compile.Package, env *compile.Env, genImport func(string) str
 		Env:            env,
 		GenerateImport: genImport,
 		UserImports:    codegen.ImportsForFiles(pkg.Files...),
-		TypeNames:      newTypeNames(pkg),
 	}
 	var buf bytes.Buffer
 	if err := javascriptTemplate.Execute(&buf, data); err != nil {
@@ -62,19 +60,23 @@ func bitlen(kind vdl.Kind) int {
 	panic(fmt.Errorf("vdl: bitLen unhandled kind %v", kind))
 }
 
-func genMethodTags(names typeNames, method *compile.Method) string {
+func genMethodTags(data data, method *compile.Method) string {
 	tags := method.Tags
 	result := "["
 	for _, tag := range tags {
-		result += typedConst(names, tag) + ", "
+		result += typedConst(data, tag) + ", "
 	}
 	result += "]"
 	return result
 }
 
-// untypedConst generates a javascript string representing a constant that is
-// not wrapped with type information.
-func untypedConst(names typeNames, v *vdl.Value) string {
+func unTypedConst(d data, v *vdl.Value, unTypedFields bool) string {
+	recursiveConst := func(d data, v *vdl.Value) string {
+		if unTypedFields {
+			return unTypedConst(d, v, unTypedFields)
+		}
+		return typedConst(d, v)
+	}
 	switch v.Kind() {
 	case vdl.Bool:
 		if v.Bool() {
@@ -92,14 +94,9 @@ func untypedConst(names typeNames, v *vdl.Value) string {
 		return strconv.FormatFloat(v.Float(), 'g', -1, bitlen(v.Kind()))
 	case vdl.String:
 		return strconv.Quote(v.RawString())
-	case vdl.OneOf, vdl.Any:
-		if v.Elem() != nil {
-			return typedConst(names, v.Elem())
-		}
-		return "null"
-	case vdl.Optional:
-		if v.Elem() != nil {
-			return untypedConst(names, v.Elem())
+	case vdl.OneOf, vdl.Any, vdl.Optional:
+		if elem := v.Elem(); elem != nil {
+			return recursiveConst(d, elem)
 		}
 		return "null"
 	case vdl.Complex64, vdl.Complex128:
@@ -107,54 +104,51 @@ func untypedConst(names typeNames, v *vdl.Value) string {
 	case vdl.Enum:
 		return fmt.Sprintf("'%s'", v.EnumLabel())
 	case vdl.Array, vdl.List:
-		result := "["
+		s := "["
 		isByteArray := v.Type().Elem().Kind() == vdl.Byte
 		for ix := 0; ix < v.Len(); ix++ {
 			var val string
-			val = untypedConst(names, v.Index(ix))
-			result += "\n" + val + ","
-		}
-		result += "\n]"
-		if isByteArray {
-			return "new Uint8Array(" + result + ")"
-		}
-		return result
-	case vdl.Set:
-		result := "new Set(["
-		for _, key := range v.Keys() {
-			result += "\n  " + untypedConst(names, key) + ", "
-		}
-		result += "])"
-		return result
-	case vdl.Map:
-		result := "new Map(["
-		for i, key := range v.Keys() {
-			if i > 0 {
-				result += ","
+			if isByteArray {
+				val = unTypedConst(d, v.Index(ix), unTypedFields)
+			} else {
+				val = recursiveConst(d, v.Index(ix))
 			}
-			result += fmt.Sprintf("\n  [%s, %s]",
-				untypedConst(names, key),
-				untypedConst(names, v.MapIndex(key)))
-
+			s += "\n" + val + ","
 		}
-		result += "])"
-		return result
+		s += "\n]"
+		if isByteArray {
+			return "new Uint8Array(" + s + ")"
+		}
+		return s
+	case vdl.Set:
+		s := "new Set(["
+		for _, key := range v.Keys() {
+			s += "\n  " + unTypedConst(d, key, true) + ", "
+		}
+		return s + "])"
+	case vdl.Map:
+		s := "new Map(["
+		for _, key := range v.Keys() {
+			s += "\n  [" + unTypedConst(d, key, true) + ", "
+			if v.Kind() == vdl.Set {
+				s += "true"
+			} else {
+				s += recursiveConst(d, v.MapIndex(key))
+			}
+			s += "],"
+		}
+		return s + "])"
 	case vdl.Struct:
-		result := "{"
+		s := "{"
 		t := v.Type()
 		for ix := 0; ix < t.NumField(); ix++ {
-			result += "\n  '" +
-				vdlutil.ToCamelCase(t.Field(ix).Name) +
-				"': " +
-				untypedConst(names, v.Field(ix)) +
-				","
+			s += "\n  '" + vdlutil.ToCamelCase(t.Field(ix).Name) + "': " + recursiveConst(d, v.Field(ix)) + ","
 		}
-		return result + "\n}"
+		return s + "\n}"
 	case vdl.TypeObject:
-		return names.LookupName(v.TypeObject())
-	default:
-		panic(fmt.Errorf("vdl: untypedConst unhandled type %v %v", v.Kind(), v.Type()))
+		return typeStruct(v.TypeObject())
 	}
+	panic(fmt.Errorf("vdl: unTypedConst unhandled type %v %v", v.Kind(), v.Type()))
 }
 
 func primitiveWithOptionalName(primitive, name string) string {
@@ -164,19 +158,242 @@ func primitiveWithOptionalName(primitive, name string) string {
 	return "new vom.Type({kind: Kind." + primitive + ", name: '" + name + "'})"
 }
 
-// typedConst returns a javascript string representing a const that is always
-// wrapped with type information
-func typedConst(names typeNames, v *vdl.Value) string {
-	switch v.Kind() {
-	case vdl.Any:
-		// Don't wrap variant types here, because they will be wrapped in utypedConst.
-		// NOTE: OneOf is not a variant type.
-		return untypedConst(names, v)
-	default:
-		return fmt.Sprintf("new (Registry.lookupOrCreateConstructor(%s))(%s)",
-			names.LookupName(v.Type()),
-			untypedConst(names, v))
+func typeStruct(t *vdl.Type) string {
+	nameField := ""
+	if t.Name() != "" {
+		nameField = "\n    name: '" + t.Name() + "',"
 	}
+
+	switch t.Kind() {
+	case vdl.Any:
+		return primitiveWithOptionalName("ANY", t.Name())
+	case vdl.Bool:
+		return primitiveWithOptionalName("BOOL", t.Name())
+	case vdl.Byte:
+		return primitiveWithOptionalName("BYTE", t.Name())
+	case vdl.Uint16:
+		return primitiveWithOptionalName("UINT16", t.Name())
+	case vdl.Uint32:
+		return primitiveWithOptionalName("UINT32", t.Name())
+	case vdl.Uint64:
+		return primitiveWithOptionalName("UINT64", t.Name())
+	case vdl.Int16:
+		return primitiveWithOptionalName("INT16", t.Name())
+	case vdl.Int32:
+		return primitiveWithOptionalName("INT32", t.Name())
+	case vdl.Int64:
+		return primitiveWithOptionalName("INT64", t.Name())
+	case vdl.Float32:
+		return primitiveWithOptionalName("FLOAT32", t.Name())
+	case vdl.Float64:
+		return primitiveWithOptionalName("FLOAT64", t.Name())
+	case vdl.Complex64:
+		return primitiveWithOptionalName("COMPLEX64", t.Name())
+	case vdl.Complex128:
+		return primitiveWithOptionalName("COMPLEX128", t.Name())
+	case vdl.String:
+		return primitiveWithOptionalName("STRING", t.Name())
+	case vdl.TypeObject:
+		return primitiveWithOptionalName("TYPEOBJECT", t.Name())
+	case vdl.Enum:
+		labels := ""
+		for i := 0; i < t.NumEnumLabel(); i++ {
+			labels += "'" + t.EnumLabel(i) + "', "
+		}
+		return fmt.Sprintf(`new vom.Type({
+    kind: Kind.ENUM,
+    name: '%s',
+    labels: [%s]
+  })`, t.Name(), labels)
+	case vdl.Array:
+		return fmt.Sprintf(`new vom.Type({
+    kind: Kind.ARRAY,%s
+    elem: %s,
+    len: %d
+  })`, nameField, typeStruct(t.Elem()), t.Len())
+	case vdl.List:
+		return `new vom.Type({
+    kind: Kind.LIST,` + nameField + `
+    elem: ` + typeStruct(t.Elem()) + `
+  })`
+	case vdl.Set:
+		return `new vom.Type({
+    kind: Kind.SET,` + nameField + `
+    key: ` + typeStruct(t.Key()) + `
+  })`
+	case vdl.Map:
+		return fmt.Sprintf(`new vom.Type({
+    kind: Kind.MAP,%s
+    key: %s,
+    elem: %s
+  })`, nameField, typeStruct(t.Key()), typeStruct(t.Elem()))
+	case vdl.Struct:
+		fields := ""
+		for i := 0; i < t.NumField(); i++ {
+			f := t.Field(i)
+			fields += fmt.Sprintf(`
+    {
+      name: '%s',
+      type: %s
+    },`, vdlutil.ToCamelCase(f.Name), typeStruct(f.Type))
+		}
+		return fmt.Sprintf(`new vom.Type({
+    kind: Kind.STRUCT,
+    name: '%s',
+    fields: [%s
+  ]})`, t.Name(), fields)
+	case vdl.OneOf:
+		types := ""
+		for i := 0; i < t.NumOneOfType(); i++ {
+			types += typeStruct(t.OneOfType(i)) + ", "
+		}
+		return fmt.Sprintf(`new vom.Type({
+    kind: Kind.ONEOF,
+    name: '%s',
+    types: [%s]
+  })`, t.Name(), types)
+	}
+	return ""
+}
+
+func qualifiedIdent(data data, name string, file *compile.File) string {
+	if data.Pkg.Path == file.Package.Path {
+		return name
+	}
+	return data.UserImports.LookupLocal(file.Package.Path) + "." + name
+}
+
+func defaultValue(data data, t *vdl.Type) string {
+	if def := data.Env.FindTypeDef(t); def != nil {
+		switch {
+		case t == vdl.AnyType || t == vdl.TypeObjectType || t == vdl.ErrorType:
+			return "null"
+		case def.File != compile.BuiltInFile:
+			return "new " + qualifiedIdent(data, def.Name, def.File) + "()"
+		}
+	}
+	switch t.Kind() {
+	case vdl.Optional:
+		return "null"
+	case vdl.Array, vdl.List:
+		return "[]"
+	case vdl.Set, vdl.Map:
+		return "{}"
+	case vdl.Byte, vdl.Uint16, vdl.Uint32, vdl.Uint64, vdl.Int16, vdl.Int32, vdl.Int64, vdl.Float32, vdl.Float64:
+		return "0"
+	case vdl.Complex64, vdl.Complex128:
+		return "new Complex(0, 0)"
+	case vdl.String:
+		return "''"
+	case vdl.Bool:
+		return "false"
+	}
+	panic(fmt.Sprintf("Unhandled type %v", t))
+}
+
+func generateTypeStub(data data, t *compile.TypeDef) string {
+	name := t.Name
+	wrappedType := true
+	kind := t.Type.Kind()
+	// We can't always have Map be a wrapped type, since the key doesn't
+	// have to be a string.
+	// TODO(bjornick): Handle maps without string keys.
+	switch kind {
+	case vdl.Struct, vdl.Any:
+		wrappedType = false
+	}
+
+	result := "function " + name + "(val) {"
+
+	if wrappedType {
+		result += "\n    this.val = val;\n"
+	} else if kind == vdl.Struct {
+		result += "\n    val = val || {};"
+		for i := 0; i < t.Type.NumField(); i++ {
+			field := t.Type.Field(i)
+			name := vdlutil.ToCamelCase(field.Name)
+			result += fmt.Sprintf(`
+    if (val.hasOwnProperty('%s')) {
+      this.%s = val.%s;
+    } else {
+      this.%s = %s;
+    }`, name, name, name, name, defaultValue(data, field.Type))
+		}
+		result += "\n"
+	} else if kind == vdl.Enum {
+		// The default value of an enum type is the first label.
+		// TODO(alexfandrianto): Isn't this case unreachable? Only vdl.Struct and
+		// vdl.Any have wrappedType == false.
+		result += "\n    this.val = '" + t.Type.EnumLabel(0) + "';\n"
+	}
+	result += "  }\n"
+	result += name + ".prototype._type = " + typeStruct(t.Type) + ";\n"
+
+	if wrappedType {
+		result += name + ".prototype._wrappedType = true;\n"
+	}
+	result += "  types." + name + " = " + name + ";\n"
+
+	// Register this new type.
+	result += fmt.Sprintf("Registry.addConstructor(%s.prototype._type, %s);\n", name, name)
+
+	return result
+}
+
+func typedConst(data data, v *vdl.Value) string {
+	valstr := unTypedConst(data, v, false)
+	t := v.Type()
+	if def := data.Env.FindTypeDef(t); def != nil {
+		if def.File != compile.BuiltInFile {
+			return fmt.Sprintf("new %s(%s)", qualifiedIdent(data, def.Name, def.File), valstr)
+		}
+	}
+
+	switch t.Kind() {
+	case vdl.Bool:
+		return "new Builtins.Bool(" + valstr + ")"
+	case vdl.Byte:
+		return "new Builtins.Byte(" + valstr + ")"
+	case vdl.Uint16:
+		return "new Builtins.Uint16(" + valstr + ")"
+	case vdl.Uint32:
+		return "new Builtins.Uint32(" + valstr + ")"
+	case vdl.Uint64:
+		return "new Builtins.Uint64(" + valstr + ")"
+	case vdl.Int16:
+		return "new Builtins.Int16(" + valstr + ")"
+	case vdl.Int32:
+		return "new Builtins.Int32(" + valstr + ")"
+	case vdl.Int64:
+		return "new Builtins.Int64(" + valstr + ")"
+	case vdl.Float32:
+		return "new Builtins.Float32(" + valstr + ")"
+	case vdl.Float64:
+		return "new Builtins.Float64(" + valstr + ")"
+	case vdl.Complex64:
+		return "new Builtins.Complex64(" + valstr + ")"
+	case vdl.Complex128:
+		return "new Builtins.Complex128(" + valstr + ")"
+	case vdl.Array:
+		return "new Builtins.Array(" + valstr + ", " + typeStruct(t) + ")"
+	case vdl.List:
+		return "new Builtins.List(" + valstr + ", " + typeStruct(t) + ")"
+	case vdl.Set:
+		return "new Builtins.Set(" + valstr + ", " + typeStruct(t) + ")"
+	case vdl.Map:
+		return "new Builtins.Map(" + valstr + ", " + typeStruct(t) + ")"
+	}
+	return valstr
+}
+
+func generateConstDefinition(data data, c *compile.ConstDef, typed bool) string {
+	val := ""
+	if typed {
+		val = typedConst(data, c.Value)
+	} else {
+		val = unTypedConst(data, c.Value, true)
+	}
+	return fmt.Sprintf("  %s: %s,", c.Name, val)
 }
 
 func importPath(data data, path string) string {
@@ -189,12 +406,12 @@ func importPath(data data, path string) string {
 
 func init() {
 	funcMap := template.FuncMap{
-		"toCamelCase":               vdlutil.ToCamelCase,
-		"numOutArgs":                numOutArgs,
-		"genMethodTags":             genMethodTags,
-		"makeTypeDefinitionsString": makeTypeDefinitionsString,
-		"typedConst":                typedConst,
-		"importPath":                importPath,
+		"toCamelCase":             vdlutil.ToCamelCase,
+		"numOutArgs":              numOutArgs,
+		"genMethodTags":           genMethodTags,
+		"generateTypeStub":        generateTypeStub,
+		"generateConstDefinition": generateConstDefinition,
+		"importPath":              importPath,
 	}
 	javascriptTemplate = template.Must(template.New("genJS").Funcs(funcMap).Parse(genJS))
 }
@@ -208,7 +425,6 @@ const genJS = `{{with $data := .}}// This file was auto-generated by the veyron 
 var vom = require('vom');
 // TODO(bjornick): Remove unused imports.
 var Types = vom.Types;
-var Type = vom.Type;
 var Kind = vom.Kind;
 var Complex = vom.Complex;
 var Builtins = vom.Builtins;
@@ -225,7 +441,7 @@ package: '{{$pkg.Path}}',
     numOutArgs: {{numOutArgs $method}},
     inputStreaming: {{if $method.InStream}}true{{else}}false{{end}},
     outputStreaming: {{if $method.OutStream}}true{{else}}false{{end}},
-    tags: {{genMethodTags $data.TypeNames $method }}
+    tags: {{genMethodTags $data $method}}
 },
 {{end}}
 },
@@ -233,15 +449,21 @@ package: '{{$pkg.Path}}',
 };
 
 var types = {};
-{{makeTypeDefinitionsString $data.TypeNames }}
+{{range $file := $pkg.Files}}{{range $type := $file.TypeDefs}}
+{{generateTypeStub $data $type}}
+{{end}}{{end}}
 
+var typedConsts = { {{range $file := $pkg.Files}}{{range $const := $file.ConstDefs}}
+{{generateConstDefinition $data $const true}}{{end}}{{end}}
+};
 var consts = { {{range $file := $pkg.Files}}{{range $const := $file.ConstDefs}}
-  {{$const.Name}}: {{typedConst $data.TypeNames $const.Value}},{{end}}{{end}}
+{{generateConstDefinition $data $const false}}{{end}}{{end}}
 };
 
 module.exports = {
   types: types,
   services: services,
   consts: consts,
+  typedConsts: typedConsts,
 };
 {{end}}`
