@@ -57,6 +57,7 @@
 // first Convert() call that does have these values.
 package verror2
 
+import "bytes"
 import "fmt"
 import "io"
 import "os"
@@ -132,7 +133,7 @@ type E interface {
 	// were invoked on the error.  StackToStr() converts this to a string.
 	// This information is not incorporated into the error string;
 	// it is intended to help debugging by developers.
-	Stack() []uintptr
+	Stack() PCs
 }
 
 // ErrorID returns the ID of the given err, or Unknown if the err has no ID.
@@ -174,15 +175,24 @@ func Equal(a, b error) bool {
 	return ErrorID(a) == ErrorID(b)
 }
 
+// PCs represents a list of PC locations
+type PCs []uintptr
+
 // Stack returns the list of PC locations where the error was created and transferred
 // within this address space, or an empty list if err does not implement E.
-func Stack(err error) []uintptr {
+func Stack(err error) PCs {
 	if err != nil {
 		if e, ok := err.(E); ok {
 			return e.Stack()
 		}
 	}
 	return nil
+}
+
+func (st PCs) String() string {
+	buf := bytes.NewBufferString("")
+	StackToText(buf, st)
+	return buf.String()
 }
 
 // StackToText emits on w a text representation of stack, which is typically
@@ -431,7 +441,7 @@ func (e Standard) HasMessage() bool {
 }
 
 // Stack returns the set of PCs of callers of *Make() and *Convert().
-func (e Standard) Stack() []uintptr {
+func (e Standard) Stack() PCs {
 	stackIntPtr := make([]uintptr, len(e.stackPCs))
 	copy(stackIntPtr, e.stackPCs)
 	return stackIntPtr
@@ -439,18 +449,51 @@ func (e Standard) Stack() []uintptr {
 
 const pkgPath = "veyron.io/veyron/veyron2/verror"
 
-// Some standard error codes.
 var (
-	Success           = Register(pkgPath+".Success", NoRetry, "{1} {2} Success {_}") // Success; the nil error.
-	Unknown           = Register(pkgPath+".Unknown", NoRetry, "{1} {2} Error {_}")   // The unknown error.
-	Aborted           = Register(pkgPath+".Aborted", NoRetry, "{1} {2} Aborted {_}")
-	BadArg            = Register(pkgPath+".BadArg", NoRetry, "{1} {2} Bad argument {_}")
-	BadProtocol       = Register(pkgPath+".BadProtocol", NoRetry, "{1} {2} Bad protocol or type {_}")
-	Exist             = Register(pkgPath+".Exist", NoRetry, "{1} {2} Already exists {_}")
-	Internal          = Register(pkgPath+".Internal", NoRetry, "{1} {2} Internal error {_}")
-	NoAccess          = Register(pkgPath+".NoAccess", NoRetry, "{1} {2} Access denied {_}")
-	NoExist           = Register(pkgPath+".NoExist", NoRetry, "{1} {2} Does not exist {_}")
-	NoExistOrNoAccess = Register(pkgPath+".NoExistOrNoAccess", NoRetry, "{1} {2} Does not exist or access denied {_}")
-	Timeout           = Register(pkgPath+".Timeout", NoRetry, "{1} {2} Timeout {_}")
-	Cancelled         = Register(pkgPath+".Cancelled", NoRetry, "{1} {2} Cancelled {_}")
+	// Success, Unknown or Internal are intended for general use by
+	// all system components. Unknown and Internal should only be used
+	// when a more specific error is not available.
+	Success  = Register(pkgPath+".Success", NoRetry, "{1:}{2:} Success{:_}") // Success; the nil error.
+	Unknown  = Register(pkgPath+".Unknown", NoRetry, "{1:}{2:} Error{:_}")   // The unknown error.
+	Internal = Register(pkgPath+".Internal", NoRetry, "{1:}{2:} Internal error{:_}")
+
+	// BadArg is used when the parameters to an operation are invalid or
+	// incorrectly formatted.
+	BadArg = Register(pkgPath+".BadArg", NoRetry, "{1:}{2:} Bad argument{:_}")
+
+	// Exist and NoExist are intended for use all system components that
+	// have the notion of a 'name' or 'key' that may or may not exist. The
+	// operation generating these errors should be retried with the same
+	// parameters unless some other remediating action is taken first.
+	// NoExistOrNoAccess is intended for use when the component does not
+	// want to reveal the distinction between an object existing and being
+	// inaccessible and an object existing at all.
+	Exist             = Register(pkgPath+".Exist", NoRetry, "{1:}{2:} Already exists{:_}")
+	NoExist           = Register(pkgPath+".NoExist", NoRetry, "{1:}{2:} Does not exist{:_}")
+	NoExistOrNoAccess = Register(pkgPath+".NoExistOrNoAccess", NoRetry, "{1:}{2:} Does not exist or access denied{:_}")
+
+	// The following errors can occur during the process of establishing
+	// an RPC connection.
+	// NoExist (see above) is returned if the name of the server fails to
+	// resolve any addresses.
+	// NoServers is returned when the servers returned for the supplied name
+	// are somehow unusable or unreachable by the client.
+	// NoAccess is returned when a server does not authorize a client.
+	// NotTrusted is returned when a client does not trust a server.
+	NoServers        = Register(pkgPath+".NoServers", RetryRefetch, "{1:}{2:} No usable servers found{:_}")
+	NoAccess         = Register(pkgPath+".NoAccess", RetryRefetch, "{1:}{2:} Access denied{:_}")
+	NotTrusted       = Register(pkgPath+"NotTrusted", RetryRefetch, "{1:}{2:} Client does not trust server{:_}")
+	NoServersAndAuth = Register(pkgPath+".NoServersAndAuth", RetryRefetch, "{1:}{2:} Has no usable servers and is either not trusted or access was denied{:_}")
+
+	// The following errors can occur for an RPC that is in process.
+	// Aborted is returned when the framework or the server abort the
+	// in process RPC.
+	// BadProtocol is returned when some form of protocol or codec error
+	// is encountered.
+	// Cancelled is returned when the client or server cancel an RPC.
+	// Timeout is returned when the client times out waiting for a response.
+	Aborted     = Register(pkgPath+".Aborted", NoRetry, "{1:}{2:} Aborted{:_}")
+	BadProtocol = Register(pkgPath+".BadProtocol", NoRetry, "{1:}{2:} Bad protocol or type{:_}")
+	Cancelled   = Register(pkgPath+".Cancelled", NoRetry, "{1:}{2:} Cancelled{:_}")
+	Timeout     = Register(pkgPath+".Timeout", NoRetry, "{1:}{2:} Timeout{:_}")
 )

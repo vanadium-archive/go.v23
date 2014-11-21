@@ -184,7 +184,7 @@ func TestBasic(t *testing.T) {
 		{nDE0, verror2.NoExist, "veyron.io/veyron/veyron2/verror.NoExist: server nDE0 0"},
 		{nDE1, verror2.NoExist, "veyron.io/veyron/veyron2/verror.NoExist: server nDE1 1 2"},
 
-		{vEN, verror2.NoExistOrNoAccess, "server op Does not exist or access denied verror NoExistOrNoAccess"},
+		{vEN, verror2.NoExistOrNoAccess, "server:op: Does not exist or access denied: verror NoExistOrNoAccess"},
 		{vFR, verror2.NoExistOrNoAccess, "server op n'existe pas ou accès refusé verror NoExistOrNoAccess"},
 		{vDE, verror2.NoExistOrNoAccess, "veyron.io/veyron/veyron2/verror.NoExistOrNoAccess: server op verror NoExistOrNoAccess"},
 
