@@ -102,11 +102,16 @@ type Span interface {
 	// Parent returns the uniqueid.ID of this spans parent span.
 	Parent() uniqueid.ID
 
-	// Annotate adds an annotation to the trace.  Where Spans represent
+	// Annotate adds a string annotation to the trace.  Where Spans
+	// represent time periods Annotations represent data thats relevant
+	// at a specific moment.
+	Annotate(s string)
+
+	// Annotatef adds an annotation to the trace.  Where Spans represent
 	// time periods Annotations represent data thats relevant at a
-	// specific moment.  TODO(mattr): Allow richer annotations with
-	// structured data.
-	Annotate(msg string)
+	// specific moment.
+	// format and a are interpreted as with fmt.Printf.
+	Annotatef(format string, a ...interface{})
 
 	// Finish ends the span, marking the end time.  The span should
 	// not be used after Finish is called.
