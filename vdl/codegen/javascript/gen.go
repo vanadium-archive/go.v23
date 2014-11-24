@@ -152,7 +152,7 @@ func untypedConst(names typeNames, v *vdl.Value) string {
 		return result + "\n}"
 	case vdl.OneOf:
 		ix, innerVal := v.OneOfField()
-		return fmt.Sprintf("{ %q: %v }", v.Type().Field(ix).Name, untypedConst(names, innerVal))
+		return fmt.Sprintf("{ %q: %v }", vdlutil.ToCamelCase(v.Type().Field(ix).Name), untypedConst(names, innerVal))
 	case vdl.TypeObject:
 		return names.LookupName(v.TypeObject())
 	default:
