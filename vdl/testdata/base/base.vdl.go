@@ -170,6 +170,14 @@ const Cfloat32 = float32(6)
 
 const Cfloat64 = float64(7)
 
+const CNamedBool = NamedBool(true)
+
+var CNamedStruct = NamedStruct{
+	A: true,
+	B: "test",
+	C: 0,
+}
+
 const Ccomplex64 = complex64(8 + 9i)
 
 const Ccomplex128 = complex128(10 + 11i)
