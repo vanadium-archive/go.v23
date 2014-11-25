@@ -365,12 +365,23 @@ func (d *binaryDecoder) decodeValue(t *vdl.Type, target valconv.Target) error {
 			return err
 		}
 		return fieldsTarget.FinishField(key, field)
+	case vdl.Optional:
+		switch exists, err := binaryDecodeUint(d.buf); {
+		case err != nil:
+			return err
+		case exists == 0:
+			return target.FromNil(t)
+		case exists == 1:
+			return d.decodeValue(t.Elem(), target)
+		default:
+			return verror.BadProtocolf("vom: optional exists tag got %d, want 0 or 1", exists)
+		}
 	case vdl.Any:
 		switch id, err := binaryDecodeUint(d.buf); {
 		case err != nil:
 			return err
 		case id == 0:
-			return target.FromNil(nil) // TODO: Fix nil handling.
+			return target.FromNil(vdl.AnyType)
 		default:
 			subType, err := d.recvTypes.LookupOrBuildType(TypeID(id))
 			if err != nil {

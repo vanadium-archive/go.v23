@@ -85,9 +85,10 @@ func reflectConv(rv reflect.Value, tt *vdl.Type) (convTarget, error) {
 	}
 	if !rv.CanSet() && rv.Kind() == reflect.Ptr && !rv.IsNil() {
 		// Dereference the pointer a single time to make rv settable.  Also remove
-		// optional from tt if the resulting type is no longer a pointer.
+		// optional from tt if the resulting type is no longer a pointer, except for
+		// the special error type, which is always optional.
 		rv = rv.Elem()
-		if rv.Kind() != reflect.Ptr && tt.Kind() == vdl.Optional {
+		if rv.Kind() != reflect.Ptr && tt.Kind() == vdl.Optional && tt != vdl.ErrorType {
 			tt = tt.Elem()
 		}
 	}
@@ -102,11 +103,8 @@ func valueConv(vv *vdl.Value) convTarget {
 }
 
 func extractValue(rv reflect.Value) *vdl.Value {
-	for rv.Kind() == reflect.Ptr {
-		switch {
-		case rv.IsNil():
-			return nil
-		case rv.Type().ConvertibleTo(rtPtrToValue):
+	for rv.Kind() == reflect.Ptr && !rv.IsNil() {
+		if rv.Type().ConvertibleTo(rtPtrToValue) {
 			return rv.Convert(rtPtrToValue).Interface().(*vdl.Value)
 		}
 		rv = rv.Elem()
@@ -119,9 +117,8 @@ func extractValue(rv reflect.Value) *vdl.Value {
 // the final target to assign to, and fill represents the target to actually
 // fill in.
 func startConvert(c convTarget, tt *vdl.Type) (fin, fill convTarget, err error) {
-	switch tt.Kind() {
-	case vdl.Any, vdl.Optional:
-		return convTarget{}, convTarget{}, fmt.Errorf("any or optional type %q can't be used as conversion src", tt)
+	if tt.Kind() == vdl.Any {
+		return convTarget{}, convTarget{}, fmt.Errorf("can't convert from type %q - either call target.FromNil or target.From* for the element value", tt)
 	}
 	if !compatible(c.tt, tt) {
 		return convTarget{}, convTarget{}, fmt.Errorf("types %q and %q aren't compatible", c.tt, tt)
@@ -134,19 +131,27 @@ func startConvert(c convTarget, tt *vdl.Type) (fin, fill convTarget, err error) 
 	return fin, fill, nil
 }
 
+// setZeroVDLValue checks whether rv is convertible to *vdl.Value, and if so,
+// sets rv to the zero value of tt, returning the resulting value.
+func setZeroVDLValue(rv reflect.Value, tt *vdl.Type) *vdl.Value {
+	if rv.Type().ConvertibleTo(rtPtrToValue) {
+		vv := rv.Convert(rtPtrToValue).Interface().(*vdl.Value)
+		if !vv.IsValid() {
+			vv = vdl.ZeroValue(tt)
+			rv.Set(reflect.ValueOf(vv).Convert(rv.Type()))
+		}
+		return vv
+	}
+	return nil
+}
+
 // createFinTarget returns the fin target for the conversion, flattening
 // pointers and creating new non-nil values as necessary.
 func createFinTarget(c convTarget, tt *vdl.Type) convTarget {
 	if c.vv == nil {
-		// Flatten pointers, creating new values as necessary.
+		// Create new pointers down to the final non-pointer value.
 		for c.rv.Kind() == reflect.Ptr {
-			if c.rv.Type().Elem() == rtValue {
-				// c.rv has underlying type *vdl.Value, fill from it directly.
-				vv := c.rv.Convert(rtPtrToValue).Interface().(*vdl.Value)
-				if !vv.IsValid() {
-					vv = vdl.ZeroValue(tt)
-					c.rv.Set(reflect.ValueOf(vv).Convert(c.rv.Type()))
-				}
+			if vv := setZeroVDLValue(c.rv, tt); vv.IsValid() {
 				return valueConv(vv)
 			}
 			if c.rv.IsNil() {
@@ -162,11 +167,9 @@ func createFinTarget(c convTarget, tt *vdl.Type) convTarget {
 			c.tt = c.tt.Elem() // flatten c.tt to match c.rv
 		}
 	} else {
-		// Flatten optional, creating non-nil values as necessary.
-		if c.vv.Kind() == vdl.Optional {
-			if c.vv.IsNil() {
-				c.vv.Assign(vdl.NonNilZeroValue(c.tt))
-			}
+		// Create a non-nil value for optional types.
+		if c.tt.Kind() == vdl.Optional {
+			c.vv.Assign(vdl.NonNilZeroValue(c.tt))
 			c.tt, c.vv = c.tt.Elem(), c.vv.Elem()
 		}
 	}
@@ -205,22 +208,28 @@ func createFillTarget(fin convTarget, tt *vdl.Type) (convTarget, error) {
 				// in, based on the tt type we're converting *from*.
 				//
 				// TODO(toddw): Add type registration and create real Go objects?
-				return valueConv(vdl.ZeroValue(tt)), nil
+				if tt.Kind() == vdl.Optional {
+					return convTarget{tt: tt, vv: vdl.ZeroValue(tt.Elem())}, nil
+				}
+				return convTarget{tt: tt, vv: vdl.ZeroValue(tt)}, nil
 			}
 			return convTarget{}, fmt.Errorf("internal error - cannot convert to Go type %v vdl type %v from %v", fin.rv.Type(), fin.tt, tt)
 		case reflect.Slice:
 			fin.rv.Set(reflect.MakeSlice(fin.rv.Type(), 0, 0)) // start with non-nil slice
 		case reflect.Map:
 			fin.rv.Set(reflect.MakeMap(fin.rv.Type())) // start with non-nil map
-		case reflect.Array:
-			fin.rv.Set(reflect.New(fin.rv.Type()).Elem()) // start with zero array
+		default:
+			fin.rv.Set(reflect.New(fin.rv.Type()).Elem()) // start with zero item
 		}
 	} else {
 		switch fin.vv.Kind() {
 		case vdl.Any:
-			return valueConv(vdl.ZeroValue(tt)), nil
-		case vdl.Array, vdl.List, vdl.Set, vdl.Map:
-			fin.vv.Assign(nil) // start with zero collections
+			if tt.Kind() == vdl.Optional {
+				return convTarget{tt: tt, vv: vdl.ZeroValue(tt.Elem())}, nil
+			}
+			return convTarget{tt: tt, vv: vdl.ZeroValue(tt)}, nil
+		default:
+			fin.vv.Assign(nil) // start with zero item
 		}
 	}
 	return fin, nil
@@ -249,7 +258,11 @@ func finishConvert(fin, fill convTarget) error {
 						return err
 					}
 				default:
-					rvFill = reflect.ValueOf(fill.vv)
+					if fill.tt.Kind() == vdl.Optional {
+						rvFill = reflect.ValueOf(vdl.OptionalValue(fill.vv))
+					} else {
+						rvFill = reflect.ValueOf(fill.vv)
+					}
 				}
 			}
 			if to, from := fin.rv.Type(), rvFill.Type(); !from.AssignableTo(to) {
@@ -260,7 +273,11 @@ func finishConvert(fin, fill convTarget) error {
 	} else {
 		switch fin.vv.Kind() {
 		case vdl.Any:
-			fin.vv.Assign(fill.vv)
+			if fill.tt.Kind() == vdl.Optional {
+				fin.vv.Assign(vdl.OptionalValue(fill.vv))
+			} else {
+				fin.vv.Assign(fill.vv)
+			}
 		}
 	}
 	return nil
@@ -296,6 +313,52 @@ func makeReflectOneOf(rv reflect.Value, vv *vdl.Value) (reflect.Value, error) {
 		return reflect.Value{}, err
 	}
 	return rvField, nil
+}
+
+func removeOptional(tt *vdl.Type) *vdl.Type {
+	if tt.Kind() == vdl.Optional {
+		tt = tt.Elem()
+	}
+	return tt
+}
+
+// FromNil implements the Target interface method.
+func (c convTarget) FromNil(tt *vdl.Type) error {
+	if !compatible(c.tt, tt) {
+		return fmt.Errorf("types %q and %q aren't compatible", c.tt, tt)
+	}
+	if !tt.CanBeNil() || !c.tt.CanBeNil() {
+		return fmt.Errorf("invalid conversion from %v(nil) to %v", tt, c.tt)
+	}
+	if c.vv == nil {
+		// The strategy is to create new pointers down to either a single pointer,
+		// or the final interface, and set that to nil.  We create all the pointers
+		// to be consistent with our behavior in the non-nil case, where we
+		// similarly create all the pointers.  It also makes the tests simpler.
+		for c.rv.Kind() == reflect.Ptr {
+			if vv := setZeroVDLValue(c.rv, tt); vv.IsValid() {
+				return nil
+			}
+			if k := c.rv.Type().Elem().Kind(); k != reflect.Ptr && k != reflect.Interface {
+				break
+			}
+			// Next elem is a pointer or interface, keep looping.
+			if c.rv.IsNil() {
+				c.rv.Set(reflect.New(c.rv.Type().Elem()))
+			}
+			c.rv = c.rv.Elem()
+		}
+		// Now rv.Type() is either a single pointer or an interface; either way
+		// setting its zero value will give us nil.
+		c.rv.Set(reflect.Zero(c.rv.Type()))
+	} else {
+		vvNil := vdl.ZeroValue(tt)
+		if to, from := c.vv.Type(), vvNil; !to.AssignableFrom(from) {
+			return fmt.Errorf("%v not assignable from %v", to, from)
+		}
+		c.vv.Assign(vvNil)
+	}
+	return nil
 }
 
 // FromBool implements the Target interface method.
@@ -391,24 +454,6 @@ func (c convTarget) FromTypeObject(src *vdl.Type) error {
 		return err
 	}
 	return finishConvert(fin, fill)
-}
-
-// FromNil implements the Target interface method.
-func (c convTarget) FromNil(tt *vdl.Type) error {
-	// Only perform type-checking; assume the target starts at its zero value.
-	//
-	// TODO(toddw): Consider setting the target to nil, so that non-zero targets
-	// are set correctly.  If we do this we'll also need to reset all struct
-	// fields before conversion.
-	//
-	// TODO(toddw): Set nil errors and add tests.
-	switch tt.Kind() {
-	case vdl.Any, vdl.Optional:
-		if compatible(c.tt, tt) {
-			return nil
-		}
-	}
-	return fmt.Errorf("invalid conversion from nil %v to %v", tt, c.tt)
 }
 
 func (c convTarget) fromBool(src bool) error {
@@ -643,9 +688,10 @@ func (c convTarget) fromComplex(src complex128) error {
 }
 
 func (c convTarget) fromBytes(src []byte) error {
+	tt := removeOptional(c.tt)
 	if c.vv == nil {
 		switch {
-		case c.tt.Kind() == vdl.Enum:
+		case tt.Kind() == vdl.Enum:
 			// Handle special-case enum first, by calling the Assign method.  Note
 			// that vdl.TypeFromReflect has already validated the Assign method, so we
 			// can call without error checking.
@@ -678,17 +724,17 @@ func (c convTarget) fromBytes(src []byte) error {
 			c.vv.AssignString(string(src)) // TODO(toddw): check utf8
 			return nil
 		case vdl.Array:
-			if c.tt.IsBytes() && c.tt.Len() == len(src) {
+			if c.vv.Type().IsBytes() && c.vv.Type().Len() == len(src) {
 				c.vv.AssignBytes(src)
 				return nil
 			}
 		case vdl.List:
-			if c.tt.IsBytes() {
+			if c.vv.Type().IsBytes() {
 				c.vv.AssignBytes(src)
 				return nil
 			}
 		case vdl.Enum:
-			if index := c.tt.EnumIndex(string(src)); index >= 0 {
+			if index := c.vv.Type().EnumIndex(string(src)); index >= 0 {
 				c.vv.AssignEnumIndex(index)
 				return nil
 			}
@@ -704,7 +750,7 @@ func (c convTarget) fromTypeObject(src *vdl.Type) error {
 			return nil
 		}
 	} else {
-		if c.tt == vdl.TypeObjectType {
+		if c.vv.Kind() == vdl.TypeObject {
 			c.vv.AssignTypeObject(src)
 			return nil
 		}
@@ -816,13 +862,14 @@ func (cc compConvTarget) FinishKey(key Target) error {
 }
 
 func (c convTarget) startElem(index int) (convTarget, error) {
+	tt := removeOptional(c.tt)
 	if c.vv == nil {
 		switch c.rv.Kind() {
 		case reflect.Array:
 			if index >= c.rv.Len() {
 				return convTarget{}, errArrayIndex
 			}
-			return reflectConv(c.rv.Index(index), c.tt.Elem())
+			return reflectConv(c.rv.Index(index), tt.Elem())
 		case reflect.Slice:
 			newlen := index + 1
 			if newlen < c.rv.Len() {
@@ -835,7 +882,7 @@ func (c convTarget) startElem(index int) (convTarget, error) {
 			} else {
 				c.rv.SetLen(newlen)
 			}
-			return reflectConv(c.rv.Index(index), c.tt.Elem())
+			return reflectConv(c.rv.Index(index), tt.Elem())
 		}
 	} else {
 		switch c.vv.Kind() {
@@ -871,10 +918,11 @@ func (c convTarget) finishElem(elem convTarget) error {
 }
 
 func (c convTarget) startKey() (convTarget, error) {
+	tt := removeOptional(c.tt)
 	if c.vv == nil {
 		switch c.rv.Kind() {
 		case reflect.Map:
-			return reflectConv(reflect.New(c.rv.Type().Key()).Elem(), c.tt.Key())
+			return reflectConv(reflect.New(c.rv.Type().Key()).Elem(), tt.Key())
 		case reflect.Struct:
 			// The key for struct is the field name, which is a string.
 			return reflectConv(reflect.New(rtString).Elem(), vdl.StringType)
@@ -882,7 +930,7 @@ func (c convTarget) startKey() (convTarget, error) {
 	} else {
 		switch c.vv.Kind() {
 		case vdl.Set, vdl.Map:
-			return valueConv(vdl.ZeroValue(c.tt.Key())), nil
+			return valueConv(vdl.ZeroValue(tt.Key())), nil
 		case vdl.Struct, vdl.OneOf:
 			// The key for struct and oneof is the field name, which is a string.
 			return valueConv(vdl.ZeroValue(vdl.StringType)), nil
@@ -892,6 +940,7 @@ func (c convTarget) startKey() (convTarget, error) {
 }
 
 func (c convTarget) finishKeyStartField(key convTarget) (convTarget, error) {
+	tt := removeOptional(c.tt)
 	// There are various special-cases regarding bool values below.  These are to
 	// handle different representations of sets; the following types are all
 	// convertible to each other:
@@ -905,7 +954,7 @@ func (c convTarget) finishKeyStartField(key convTarget) (convTarget, error) {
 			var rvField reflect.Value
 			var ttField *vdl.Type
 			switch rtField := c.rv.Type().Elem(); {
-			case c.tt.Kind() == vdl.Set:
+			case tt.Kind() == vdl.Set:
 				// The map actually represents a set
 				rvField = reflect.New(rtBool).Elem()
 				rvField.SetBool(true)
@@ -913,25 +962,25 @@ func (c convTarget) finishKeyStartField(key convTarget) (convTarget, error) {
 			case rtField.Kind() == reflect.Bool:
 				rvField = reflect.New(rtField).Elem()
 				rvField.SetBool(true)
-				ttField = c.tt.Elem()
+				ttField = tt.Elem()
 			default:
 				rvField = reflect.New(rtField).Elem()
-				ttField = c.tt.Elem()
+				ttField = tt.Elem()
 			}
 			return reflectConv(rvField, ttField)
 		case reflect.Struct:
-			if c.tt.Kind() == vdl.OneOf {
+			if tt.Kind() == vdl.OneOf {
 				// Special-case: the fill target is a oneof concrete field struct.  This
 				// means that we should only return a field if the field name matches.
 				name := c.rv.MethodByName("Name").Call(nil)[0].String()
 				if name != key.rv.String() {
 					return convTarget{}, errFieldNotFound
 				}
-				ttField, _ := c.tt.FieldByName(name)
+				ttField, _ := tt.FieldByName(name)
 				return reflectConv(c.rv.FieldByName("Value"), ttField.Type)
 			}
 			rvField := c.rv.FieldByName(key.rv.String())
-			ttField, index := c.tt.FieldByName(key.rv.String())
+			ttField, index := tt.FieldByName(key.rv.String())
 			if !rvField.IsValid() || index < 0 {
 				// TODO(toddw): Add a way to track extra and missing fields.
 				return convTarget{}, errFieldNotFound
@@ -946,13 +995,13 @@ func (c convTarget) finishKeyStartField(key convTarget) (convTarget, error) {
 		case vdl.Set:
 			return valueConv(vdl.BoolValue(true)), nil
 		case vdl.Map:
-			vvField := vdl.ZeroValue(c.tt.Elem())
+			vvField := vdl.ZeroValue(tt.Elem())
 			if vvField.Kind() == vdl.Bool {
 				vvField.AssignBool(true)
 			}
 			return valueConv(vvField), nil
 		case vdl.Struct:
-			_, index := c.tt.FieldByName(key.vv.RawString())
+			_, index := tt.FieldByName(key.vv.RawString())
 			if index < 0 {
 				// TODO(toddw): Add a way to track extra and missing fields.
 				return convTarget{}, errFieldNotFound
@@ -963,7 +1012,7 @@ func (c convTarget) finishKeyStartField(key convTarget) (convTarget, error) {
 			}
 			return valueConv(vvField), nil
 		case vdl.OneOf:
-			f, index := c.tt.FieldByName(key.vv.RawString())
+			f, index := tt.FieldByName(key.vv.RawString())
 			if index < 0 {
 				return convTarget{}, errFieldNotFound
 			}
@@ -975,19 +1024,17 @@ func (c convTarget) finishKeyStartField(key convTarget) (convTarget, error) {
 }
 
 func (c convTarget) finishField(key, field convTarget) error {
+	tt := removeOptional(c.tt)
 	// The special-case handling of bool fields matches the special-cases in
 	// FinishKeyStartField.
 	if c.vv == nil {
 		switch c.rv.Kind() {
 		case reflect.Map:
-			if c.rv.IsNil() {
-				c.rv.Set(reflect.MakeMap(c.rv.Type()))
-			}
 			rvField := field.rv
-			if c.tt.Kind() == vdl.Set {
+			if tt.Kind() == vdl.Set {
 				// The map actually represents a set
 				if !field.rv.Bool() {
-					return fmt.Errorf("%v can only be converted from true fields", c.tt)
+					return fmt.Errorf("%v can only be converted from true fields", tt)
 				}
 				rvField = reflect.Zero(c.rv.Type().Elem())
 			}
@@ -1000,7 +1047,7 @@ func (c convTarget) finishField(key, field convTarget) error {
 		switch c.vv.Kind() {
 		case vdl.Set:
 			if !field.vv.Bool() {
-				return fmt.Errorf("%v can only be converted from true fields", c.tt)
+				return fmt.Errorf("%v can only be converted from true fields", tt)
 			}
 			c.vv.AssignSetKey(key.vv)
 			return nil
@@ -1010,7 +1057,7 @@ func (c convTarget) finishField(key, field convTarget) error {
 		case vdl.Struct:
 			return nil
 		case vdl.OneOf:
-			_, index := c.tt.FieldByName(key.vv.RawString())
+			_, index := tt.FieldByName(key.vv.RawString())
 			c.vv.AssignOneOfField(index, field.vv)
 			return nil
 		}

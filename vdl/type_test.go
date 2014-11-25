@@ -6,8 +6,6 @@ import (
 	"testing"
 )
 
-// TODO(toddw): Add tests for ValidKey, ValidOneOfType
-
 func TestSplitIdent(t *testing.T) {
 	tests := []struct {
 		ident, pkgpath, name string
@@ -107,19 +105,14 @@ var oneofs = []struct {
 
 func allTypes() (types []*Type) {
 	for index, test := range singletons {
-		types = append(types, test.t, ArrayType(index+1, test.t))
-		types = append(types, test.t, ListType(test.t))
-		if test.k != Any && test.k != TypeObject {
-			types = append(types, test.t, SetType(test.t))
+		types = append(types, test.t)
+		types = append(types, ArrayType(index+1, test.t))
+		types = append(types, ListType(test.t))
+		if test.t.CanBeKey() {
+			types = append(types, SetType(test.t))
 			for _, test2 := range singletons {
 				types = append(types, MapType(test.t, test2.t))
 			}
-		}
-		if test.k != Any && test.k != TypeObject {
-			types = append(types, NamedType("Named"+test.s, test.t))
-		}
-		if test.k != Any {
-			types = append(types, OptionalType(test.t))
 		}
 	}
 	for _, test := range enums {
@@ -135,6 +128,16 @@ func allTypes() (types []*Type) {
 	for _, test := range oneofs {
 		if test.errstr == "" {
 			types = append(types, OneOfType(test.fields...))
+		}
+	}
+	for ix, t := range types {
+		if t.CanBeNamed() {
+			types = append(types, NamedType(fmt.Sprint("Named%d", ix), t))
+		}
+	}
+	for _, t := range types {
+		if t.CanBeOptional() {
+			types = append(types, OptionalType(t))
 		}
 	}
 	return
@@ -188,24 +191,17 @@ func TestSingletonTypes(t *testing.T) {
 }
 
 func TestOptionalTypes(t *testing.T) {
-	for _, test := range singletons {
-		if test.k == Any {
+	for _, test := range allTypes() {
+		if !test.CanBeOptional() {
 			continue
 		}
-		opt := OptionalType(test.t)
+		opt := OptionalType(test)
 		if got, want := opt.Kind(), Optional; got != want {
 			t.Errorf(`%s got kind %q, want %q`, opt, got, want)
 		}
 		if got, want := opt.Name(), ""; got != want {
 			t.Errorf(`%s got name %q, want %q`, opt, got, want)
 		}
-		if got, want := Optional.String(), "optional"; got != want {
-			t.Errorf(`%s got kind %q, want %q`, opt, got, want)
-		}
-		if got, want := opt.String(), "?"+test.s; got != want {
-			t.Errorf(`%s got string %q, want %q`, opt, got, want)
-		}
-		testSingleton(t, test.k, opt.Elem(), test.s)
 	}
 }
 
@@ -370,7 +366,7 @@ var invalidKeys = []*Type{
 	AnyType,
 	ListType(Int32Type),
 	MapType(Int32Type, Int32Type),
-	OptionalType(Int32Type),
+	OptionalType(NamedType("Foo", StructType(Field{"A", Int32Type}))),
 	SetType(Int32Type),
 	TypeObjectType,
 }
@@ -652,12 +648,16 @@ func TestHashConsTypes(t *testing.T) {
 	for iter := 0; iter < 3; iter++ {
 		for _, a := range singletons {
 			types[iter] = append(types[iter], a.t)
-			if a.t != AnyType && a.t != TypeObjectType {
+			if a.t.CanBeNamed() {
 				types[iter] = append(types[iter], NamedType("Named"+a.s, a.t))
 			}
-			if a.t != AnyType {
+			if a.t.CanBeOptional() {
 				types[iter] = append(types[iter], OptionalType(a.t))
 				types[iter] = append(types[iter], NamedType("Optional"+a.s, OptionalType(a.t)))
+			}
+			if a.t.CanBeKey() {
+				types[iter] = append(types[iter], SetType(a.t))
+				types[iter] = append(types[iter], NamedType("Set"+a.s, SetType(a.t)))
 			}
 			types[iter] = append(types[iter], ListType(a.t))
 			types[iter] = append(types[iter], NamedType("List"+a.s, ListType(a.t)))
@@ -665,17 +665,16 @@ func TestHashConsTypes(t *testing.T) {
 				lA, lB := "A"+a.s, "B"+b.s
 				name := lA + lB
 				types[iter] = append(types[iter], EnumType(lA, lB))
-				if a.k != Any && a.k != TypeObject {
-					types[iter] = append(types[iter], MapType(a.t, b.t))
-				}
-				types[iter] = append(types[iter], StructType([]Field{{lA, a.t}, {lB, b.t}}...))
-				types[iter] = append(types[iter], OneOfType([]Field{{lA, a.t}, {lB, b.t}}...))
 				types[iter] = append(types[iter], NamedType("Enum"+name, EnumType(lA, lB)))
-				if a.k != Any && a.k != TypeObject {
+				if a.t.CanBeKey() {
+					types[iter] = append(types[iter], MapType(a.t, b.t))
 					types[iter] = append(types[iter], NamedType("Map"+name, MapType(a.t, b.t)))
 				}
-				types[iter] = append(types[iter], NamedType("Struct"+name, StructType([]Field{{lA, a.t}, {lB, b.t}}...)))
-				types[iter] = append(types[iter], NamedType("OneOf"+name, OneOfType([]Field{{lA, a.t}, {lB, b.t}}...)))
+				fields := []Field{{lA, a.t}, {lB, b.t}}
+				types[iter] = append(types[iter], StructType(fields...))
+				types[iter] = append(types[iter], NamedType("Struct"+name, StructType(fields...)))
+				types[iter] = append(types[iter], OneOfType(fields...))
+				types[iter] = append(types[iter], NamedType("OneOf"+name, OneOfType(fields...)))
 			}
 		}
 	}
@@ -698,26 +697,29 @@ func TestHashConsTypes(t *testing.T) {
 func TestAssignableFrom(t *testing.T) {
 	// Systematic testing of AssignableFrom over allTypes will just duplicate the
 	// actual logic, so we just spot-check some results manually.
+	optType := OptionalType(NamedType("X", StructType(Field{"A", BoolType})))
+	optValue := ZeroValue(optType)
 	tests := []struct {
-		t, f   *Type
+		to     *Type
+		from   *Value
 		expect bool
 	}{
-		{BoolType, BoolType, true},
-		{OptionalType(BoolType), OptionalType(BoolType), true},
-		{AnyType, BoolType, true},
-		{AnyType, OptionalType(BoolType), true},
-		{AnyType, OneOfType(Field{"A", BoolType}), true},
+		{BoolType, BoolValue(false), true},
+		{optType, optValue, true},
+		{optType, ZeroValue(AnyType), true},
+		{AnyType, BoolValue(false), true},
+		{AnyType, optValue, true},
+		{AnyType, ZeroValue(AnyType), true},
 
-		{BoolType, Int32Type, false},
-		{BoolType, AnyType, false},
-		{BoolType, OptionalType(BoolType), false},
-		{BoolType, OneOfType(Field{"A", BoolType}), false},
-		{OptionalType(BoolType), BoolType, false},
-		{OptionalType(BoolType), StringType, false},
+		{BoolType, Int32Value(123), false},
+		{BoolType, optValue, false},
+		{BoolType, AnyValue(optValue), false},
+		{optType, BoolValue(false), false},
+		{optType, AnyValue(optValue), false},
 	}
 	for _, test := range tests {
-		if test.t.AssignableFrom(test.f) != test.expect {
-			t.Errorf(`%v.AssignableFrom(%v) expect %v`, test.t, test.f, test.expect)
+		if test.to.AssignableFrom(test.from) != test.expect {
+			t.Errorf(`%v.AssignableFrom(%v) expect %v`, test.to, test.from, test.expect)
 		}
 	}
 }
@@ -813,8 +815,8 @@ func TestStrictCycleType(t *testing.T) {
 func TestMutuallyRecursiveType(t *testing.T) {
 	build := func() (*Type, error, *Type, error, *Type, error, *Type, error) {
 		// type D A
-		// type A struct{X int32;B B;C C}
-		// type B struct{Y int32;A A;C C}
+		// type A struct{X int32;B  B;C C}
+		// type B struct{Y int32;A ?A;C C}
 		// type C struct{Z string}
 		var builder TypeBuilder
 		a, b, c, d := builder.Named("A"), builder.Named("B"), builder.Named("C"), builder.Named("D")
@@ -825,7 +827,7 @@ func TestMutuallyRecursiveType(t *testing.T) {
 		c.AssignBase(stC)
 		stA.AppendField("X", Int32Type).AppendField("B", b).AppendField("C", c)
 		aOrNil := builder.Optional()
-		aOrNil.AssignBase(a)
+		aOrNil.AssignElem(a)
 		stB.AppendField("Y", Int32Type).AppendField("A", aOrNil).AppendField("C", c)
 		stC.AppendField("Z", StringType)
 		builder.Build()
@@ -1004,7 +1006,7 @@ func TestUniqueTypeNames(t *testing.T) {
 func makeAllPending(builder *TypeBuilder) []PendingType {
 	var ret []PendingType
 	for _, test := range singletons {
-		if test.k != Any && test.k != TypeObject {
+		if test.t.CanBeNamed() {
 			ret = append(ret, builder.Named("Named"+test.s).AssignBase(test.t))
 		}
 	}

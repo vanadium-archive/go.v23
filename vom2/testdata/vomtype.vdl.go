@@ -141,6 +141,7 @@ type MStruct struct {
 	A bool
 	B NBool
 	C MBool
+	D *NStruct
 }
 
 type MList []NListUint64

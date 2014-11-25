@@ -373,20 +373,31 @@ func evalCompLit(t *vdl.Type, lit *parse.ConstCompositeLit, file *File, env *Env
 		env.Errorf(file, lit.Pos(), "missing type for composite literal")
 		return nil
 	}
+	isOptional := false
+	if t.Kind() == vdl.Optional {
+		isOptional = true
+		t = t.Elem()
+	}
+	var v *vdl.Value
 	switch t.Kind() {
 	case vdl.Array, vdl.List:
-		return evalListLit(t, lit, file, env)
+		v = evalListLit(t, lit, file, env)
 	case vdl.Set:
-		return evalSetLit(t, lit, file, env)
+		v = evalSetLit(t, lit, file, env)
 	case vdl.Map:
-		return evalMapLit(t, lit, file, env)
+		v = evalMapLit(t, lit, file, env)
 	case vdl.Struct:
-		return evalStructLit(t, lit, file, env)
+		v = evalStructLit(t, lit, file, env)
 	case vdl.OneOf:
-		return evalOneOfLit(t, lit, file, env)
+		v = evalOneOfLit(t, lit, file, env)
+	default:
+		env.Errorf(file, lit.Pos(), "%v invalid type for composite literal", t)
+		return nil
 	}
-	env.Errorf(file, lit.Pos(), "%v invalid type for composite literal", t)
-	return nil
+	if v != nil && isOptional {
+		v = vdl.OptionalValue(v)
+	}
+	return v
 }
 
 func evalListLit(t *vdl.Type, lit *parse.ConstCompositeLit, file *File, env *Env) *vdl.Value {
@@ -599,13 +610,7 @@ func evalTypedValue(what string, target *vdl.Type, pexpr parse.ConstExpr, file *
 	if !c.IsValid() {
 		return nil
 	}
-	if c.Type() != nil {
-		// Typed const - confirm it may be assigned to the target type.
-		if !target.AssignableFrom(c.Type()) {
-			env.Errorf(file, pexpr.Pos(), "invalid %v (%v not assignable from %v)", what, target, c)
-			return nil
-		}
-	} else {
+	if c.Type() == nil {
 		// Untyped const - make it typed by converting to the target type.
 		convert, err := c.Convert(target)
 		if err != nil {
@@ -618,12 +623,18 @@ func evalTypedValue(what string, target *vdl.Type, pexpr parse.ConstExpr, file *
 	v, err := c.ToValue()
 	if err != nil {
 		env.prefixErrorf(file, pexpr.Pos(), err, "internal error: invalid %v")
+		return nil
+	}
+	if !target.AssignableFrom(v) {
+		env.Errorf(file, pexpr.Pos(), "invalid %v (%v not assignable from %v)", what, target, v)
+		return nil
 	}
 	return v
 }
 
 var (
 	// Built-in consts defined by the compiler.
+	NilConst   = vdl.ZeroValue(vdl.AnyType) // nil == any(nil)
 	TrueConst  = vdl.BoolValue(true)
 	FalseConst = vdl.BoolValue(false)
 )

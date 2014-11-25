@@ -279,9 +279,9 @@ func compileLiteralType(ptype parse.Type, file *File, env *Env, tbuilder *vdl.Ty
 			return tbuilder.Map().AssignKey(key).AssignElem(elem)
 		}
 	case *parse.TypeOptional:
-		base := compileLiteralType(pt.Base, file, env, tbuilder, builders)
-		if base != nil {
-			return tbuilder.Optional().AssignBase(base)
+		elem := compileLiteralType(pt.Base, file, env, tbuilder, builders)
+		if elem != nil {
+			return tbuilder.Optional().AssignElem(elem)
 		}
 	default:
 		env.Errorf(file, pt.Pos(), "unnamed %s type invalid (type must be defined)", ptype.Kind())

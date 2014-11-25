@@ -92,7 +92,7 @@ func (k Kind) String() string {
 	case OneOf:
 		return "oneof"
 	}
-	panic(fmt.Errorf("val: unhandled kind: %d", k))
+	panic(fmt.Errorf("vdl: unhandled kind: %d", k))
 }
 
 // SplitIdent splits the given identifier into its package path and local name.
@@ -150,6 +150,44 @@ func (t *Type) String() string {
 		return t.unique
 	}
 	return uniqueTypeStr(t, make(map[*Type]bool))
+}
+
+// CanBeNil returns true iff values of t can be nil.
+//
+// Any and Optional values can be nil.
+func (t *Type) CanBeNil() bool {
+	return t.kind == Any || t.kind == Optional
+}
+
+// CanBeNamed returns true iff t can be made into a named type.
+//
+// Any and TypeObject cannot be named.
+func (t *Type) CanBeNamed() bool {
+	return t.kind != Any && t.kind != TypeObject
+}
+
+// CanBeKey returns true iff t can be used as a set or map key.
+//
+// Any, List, Map, Optional, Set and TypeObject cannot be keys, nor can
+// composite types that contain these types.
+func (t *Type) CanBeKey() bool {
+	return isValidKey(t, make(map[*Type]bool))
+}
+
+// CanBeOptional returns true iff t can be made into an optional type.
+//
+// Only named structs can be optional.
+func (t *Type) CanBeOptional() bool {
+	// Our philosophy is that we should retain the full type information in our
+	// generated code, and generating annotations to distinguish optional from
+	// non-optional types is awkward for unnamed types.
+	//
+	// Allowing optionality for named types other than structs is also awkward.
+	// E.g. if we allowed optional named maps, it's unclear how we'd generate it
+	// in Go.  We might just generate a map, which is already a reference type and
+	// may be nil, but then we can't distinguish optional map types from
+	// non-optional map types.
+	return t.name != "" && t.kind == Struct
 }
 
 // IsBytes returns true iff the kind of type is []byte or [N]byte.
@@ -226,21 +264,27 @@ func (t *Type) NumField() int {
 	return len(t.fields)
 }
 
-// AssignableFrom returns true iff a value of type t may be assigned from a
-// value of type f; either types t and f are identical, or type t is Any.
-func (t *Type) AssignableFrom(f *Type) bool {
-	return t == f || t.kind == Any
+// AssignableFrom returns true iff values of t may be assigned from f:
+//   o Allowed if t and the type of f are identical.
+//   o Allowed if t is Any.
+//   o Allowed if t is Optional, and f is Any(nil).
+//
+// The first rule establishes strict static typing.  The second rule relaxes
+// things for Any, which is dynamically typed.  The third rule relaxes things
+// further, to allow implicit conversions from Any(nil) to all Optional types.
+func (t *Type) AssignableFrom(f *Value) bool {
+	return t == f.t || t.kind == Any || (t.kind == Optional && f.t.kind == Any && f.IsNil())
 }
 
 // ptype implements the TypeOrPending interface.
 func (t *Type) ptype() *Type { return t }
 
 func (t *Type) errKind(method string, allowed ...Kind) error {
-	return fmt.Errorf("val: %s mismatched kind; got: %v, want: %v", method, t, allowed)
+	return fmt.Errorf("vdl: %s mismatched kind; got: %v, want: %v", method, t, allowed)
 }
 
 func (t *Type) errBytes(method string) error {
-	return fmt.Errorf("val: %s mismatched type; got: %v, want: bytes", method, t)
+	return fmt.Errorf("vdl: %s mismatched type; got: %v, want: bytes", method, t)
 }
 
 func (t *Type) checkKind(method string, allowed ...Kind) {

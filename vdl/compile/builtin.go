@@ -32,6 +32,7 @@ func init() {
 	builtInType("typeobject", vdl.TypeObjectType)
 	builtInType("error", vdl.ErrorType)
 	// Built-in consts
+	builtInConst("nil", NilConst)
 	builtInConst("true", TrueConst)
 	builtInConst("false", FalseConst)
 }

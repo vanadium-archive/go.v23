@@ -95,25 +95,27 @@ type (
 	nArray3Complex128 [3]complex128
 	nArray3String     [3]string
 	// Structs
-	nStructInterface  struct{ X nInterface }
-	nStructTypeObject struct{ X *vdl.Type }
-	nStructBool       struct{ X bool }
-	nStructUint8      struct{ X uint8 }
-	nStructUint16     struct{ X uint16 }
-	nStructUint32     struct{ X uint32 }
-	nStructUint64     struct{ X uint64 }
-	nStructUint       struct{ X uint }
-	nStructUintptr    struct{ X uintptr }
-	nStructInt8       struct{ X int8 }
-	nStructInt16      struct{ X int16 }
-	nStructInt32      struct{ X int32 }
-	nStructInt64      struct{ X int64 }
-	nStructInt        struct{ X int }
-	nStructFloat32    struct{ X float32 }
-	nStructFloat64    struct{ X float64 }
-	nStructComplex64  struct{ X complex64 }
-	nStructComplex128 struct{ X complex128 }
-	nStructString     struct{ X string }
+	nStructInterface      struct{ X nInterface }
+	nStructTypeObject     struct{ X *vdl.Type }
+	nStructBool           struct{ X bool }
+	nStructUint8          struct{ X uint8 }
+	nStructUint16         struct{ X uint16 }
+	nStructUint32         struct{ X uint32 }
+	nStructUint64         struct{ X uint64 }
+	nStructUint           struct{ X uint }
+	nStructUintptr        struct{ X uintptr }
+	nStructInt8           struct{ X int8 }
+	nStructInt16          struct{ X int16 }
+	nStructInt32          struct{ X int32 }
+	nStructInt64          struct{ X int64 }
+	nStructInt            struct{ X int }
+	nStructFloat32        struct{ X float32 }
+	nStructFloat64        struct{ X float64 }
+	nStructComplex64      struct{ X complex64 }
+	nStructComplex128     struct{ X complex128 }
+	nStructString         struct{ X string }
+	nStructOptionalStruct struct{ X *nStructInt }
+	nStructOptionalAny    struct{ X interface{} }
 	// Slices
 	nSliceInterface  []nInterface
 	nSliceTypeObject []*vdl.Type

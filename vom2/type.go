@@ -198,6 +198,13 @@ func (dt *decoderTypes) makeBaseType(wt *vdl.Value, builder *vdl.TypeBuilder, pe
 			base.AppendField(fname, field)
 		}
 		return base, nil
+	case wireOptionalType:
+		elemID := TypeID(wt.Field(1).Uint())
+		elem, err := dt.lookupOrMakeType(elemID, builder, pending)
+		if err != nil {
+			return nil, err
+		}
+		return builder.Optional().AssignElem(elem), nil
 	default:
 		return nil, verror.BadProtocolf("vom: unknown wire type definition %v", wt)
 	}
@@ -246,6 +253,7 @@ var (
 	wireFieldType      = vdl.TypeOf(WireField{})
 	wireFieldListType  = vdl.TypeOf([]WireField{})
 	wireOneOfType      = vdl.TypeOf(WireOneOf{})
+	wireOptionalType   = vdl.TypeOf(WireOptional{})
 	wireByteListType   = vdl.TypeOf([]byte{})
 	wireStringListType = vdl.TypeOf([]string{})
 	wireTypeListType   = vdl.TypeOf([]*vdl.Type{})
@@ -289,6 +297,7 @@ func init() {
 		WireFieldID:      wireFieldType,
 		WireFieldListID:  wireFieldListType,
 		WireOneOfID:      wireOneOfType,
+		WireOptionalID:   wireOptionalType,
 		WireByteListID:   wireByteListType,
 		WireStringListID: wireStringListType,
 		WireTypeListID:   wireTypeListType,

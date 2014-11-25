@@ -169,6 +169,13 @@ func stringRep(t *Type, rep interface{}) string {
 	}
 }
 
+// AnyValue is a convenience to create an Any value.
+func AnyValue(x *Value) *Value { return ZeroValue(AnyType).Assign(x) }
+
+// OptionalValue returns an optional value with elem assigned to x.  Panics if
+// the type of x cannot be made optional.
+func OptionalValue(x *Value) *Value { return &Value{OptionalType(x.t), x} }
+
 // BoolValue is a convenience to create a Bool value.
 func BoolValue(x bool) *Value { return ZeroValue(BoolType).AssignBool(x) }
 
@@ -512,6 +519,9 @@ func (v *Value) Assign(x *Value) *Value {
 	case v.t.kind == Any:
 		// Assigning into Any, v is assigned a copy of the value.
 		v.rep = CopyValue(x)
+	case v.t.kind == Optional && x.t.kind == Any && x.IsNil():
+		// Assigning into Optional from Any(nil), v is reset to nil.
+		v.rep = (*Value)(nil)
 	default:
 		panic(fmt.Errorf("vdl: value of type %q not assignable from %q", v.t, x.t))
 	}

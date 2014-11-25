@@ -17,7 +17,22 @@ func TypedConst(v *vdl.Value, pkgPath string, imports codegen.Imports) (string, 
 		return "nil", nil
 	}
 	k, t := v.Kind(), v.Type()
-	valstr, err := constValue(v, pkgPath, imports)
+	typestr, err := Type(t, pkgPath, imports)
+	if err != nil {
+		return "", err
+	}
+	if k == vdl.Optional {
+		// TODO(toddw): This only works if the optional elem is a composite literal.
+		if elem := v.Elem(); elem != nil {
+			elemstr, err := untypedConst(elem, pkgPath, imports)
+			if err != nil {
+				return "", err
+			}
+			return typestr + elemstr, nil
+		}
+		return typestr + "(nil)", nil
+	}
+	valstr, err := untypedConst(v, pkgPath, imports)
 	if err != nil {
 		return "", err
 	}
@@ -26,10 +41,6 @@ func TypedConst(v *vdl.Value, pkgPath string, imports codegen.Imports) (string, 
 		// Enum and TypeObject already include the type in their value.
 		// Built-in bool and string are implicitly convertible from literals.
 		return valstr, nil
-	}
-	typestr, err := Type(t, pkgPath, imports)
-	if err != nil {
-		return "", err
 	}
 	switch k {
 	case vdl.Array, vdl.List, vdl.Set, vdl.Map, vdl.Struct, vdl.OneOf:
@@ -41,16 +52,24 @@ func TypedConst(v *vdl.Value, pkgPath string, imports codegen.Imports) (string, 
 	return typestr + "(" + valstr + ")", nil
 }
 
-// constValue returns the untyped vdl const corresponding to v, in the given
+// untypedConst returns the untyped vdl const corresponding to v, in the given
 // pkgPath, with the given imports.
-func constValue(v *vdl.Value, pkgPath string, imports codegen.Imports) (string, error) {
+func untypedConst(v *vdl.Value, pkgPath string, imports codegen.Imports) (string, error) {
 	k, t := v.Kind(), v.Type()
 	if t.IsBytes() {
 		return strconv.Quote(string(v.Bytes())), nil
 	}
 	switch k {
-	case vdl.Any, vdl.Optional:
-		return TypedConst(v.Elem(), pkgPath, imports)
+	case vdl.Any:
+		if elem := v.Elem(); elem != nil {
+			return TypedConst(elem, pkgPath, imports)
+		}
+		return "nil", nil
+	case vdl.Optional:
+		if elem := v.Elem(); elem != nil {
+			return untypedConst(elem, pkgPath, imports)
+		}
+		return "nil", nil
 	case vdl.Bool:
 		return strconv.FormatBool(v.Bool()), nil
 	case vdl.Byte:
@@ -75,7 +94,7 @@ func constValue(v *vdl.Value, pkgPath string, imports codegen.Imports) (string, 
 	case vdl.Array, vdl.List:
 		s := "{"
 		for ix := 0; ix < v.Len(); ix++ {
-			elemstr, err := constValue(v.Index(ix), pkgPath, imports)
+			elemstr, err := untypedConst(v.Index(ix), pkgPath, imports)
 			if err != nil {
 				return "", err
 			}
@@ -89,7 +108,7 @@ func constValue(v *vdl.Value, pkgPath string, imports codegen.Imports) (string, 
 		// TODO(toddw): Sort keys to get a deterministic ordering.
 		s := "{"
 		for ix, key := range v.Keys() {
-			keystr, err := constValue(key, pkgPath, imports)
+			keystr, err := untypedConst(key, pkgPath, imports)
 			if err != nil {
 				return "", err
 			}
@@ -98,7 +117,7 @@ func constValue(v *vdl.Value, pkgPath string, imports codegen.Imports) (string, 
 			}
 			s += keystr
 			if k == vdl.Map {
-				elemstr, err := constValue(v.MapIndex(key), pkgPath, imports)
+				elemstr, err := untypedConst(v.MapIndex(key), pkgPath, imports)
 				if err != nil {
 					return "", err
 				}
@@ -109,7 +128,7 @@ func constValue(v *vdl.Value, pkgPath string, imports codegen.Imports) (string, 
 	case vdl.Struct:
 		s := "{"
 		for ix := 0; ix < t.NumField(); ix++ {
-			fieldstr, err := constValue(v.Field(ix), pkgPath, imports)
+			fieldstr, err := untypedConst(v.Field(ix), pkgPath, imports)
 			if err != nil {
 				return "", err
 			}
@@ -121,7 +140,7 @@ func constValue(v *vdl.Value, pkgPath string, imports codegen.Imports) (string, 
 		return s + "}", nil
 	case vdl.OneOf:
 		index, value := v.OneOfField()
-		valuestr, err := constValue(value, pkgPath, imports)
+		valuestr, err := untypedConst(value, pkgPath, imports)
 		if err != nil {
 			return "", err
 		}

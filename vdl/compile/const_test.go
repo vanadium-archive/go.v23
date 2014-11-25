@@ -192,6 +192,30 @@ func makeEnumXYZ(name, label string) *vdl.Value {
 	return vdl.ZeroValue(t).AssignEnumLabel(label)
 }
 
+func makeCyclicStructType() *vdl.Type {
+	// type A struct {X string;Z ?A}
+	var builder vdl.TypeBuilder
+	a := builder.Struct().AppendField("X", vdl.StringType)
+	n := builder.Named("a.A").AssignBase(a)
+	a.AppendField("Z", builder.Optional().AssignElem(n))
+	builder.Build()
+	ty, err := n.Built()
+	if err != nil {
+		panic(fmt.Errorf("Builder failed: %v", err))
+	}
+	return ty
+}
+
+func makeCyclicStruct(x string, z *vdl.Value) *vdl.Value {
+	ty := makeCyclicStructType()
+	ret := vdl.ZeroValue(ty)
+	ret.Field(0).AssignString(x)
+	if z != nil {
+		ret.Field(1).Assign(vdl.OptionalValue(z))
+	}
+	return ret
+}
+
 type constPkg struct {
 	Name      string
 	Data      string
@@ -429,6 +453,29 @@ var constTests = []struct {
 	{
 		"OneOfNoValue",
 		cp{{"a", `type A oneof{X int64;Y string;Z bool}; const Res = A{Y}`, nil, `must have explicit key and value`}}},
+
+	// Test optional and nil.
+	{
+		"OptionalNil",
+		cp{{"a", `type A struct{X int64;Y string;Z bool}; const Res = ?A(nil)`, vdl.ZeroValue(vdl.OptionalType(makeStructType("a.A"))), ""}}},
+	{
+		"Optional",
+		cp{{"a", `type A struct{X int64;Y string;Z bool}; const Res = ?A{1,"b",true}`, vdl.OptionalValue(makeStruct("a.A", 1, "b", true)), ""}}},
+	{
+		"OptionalCyclicNil",
+		cp{{"a", `type A struct{X string;Z ?A}; const Res = A{"a",nil}`, makeCyclicStruct("a", nil), ""}}},
+	{
+		"OptionalCyclic",
+		cp{{"a", `type A struct{X string;Z ?A}; const Res = A{"a",{"b",{"c",nil}}}`, makeCyclicStruct("a", makeCyclicStruct("b", makeCyclicStruct("c", nil))), ""}}},
+	{
+		"OptionalCyclicExplicitType",
+		cp{{"a", `type A struct{X string;Z ?A}; const Res = A{"a",?A{"b",?A{"c",nil}}}`, makeCyclicStruct("a", makeCyclicStruct("b", makeCyclicStruct("c", nil))), ""}}},
+	{
+		"OptionalCyclicTypeMismatch",
+		cp{{"a", `type A struct{X string;Z ?A}; const Res = A{"a","b"}`, nil, `can't convert "b" to \?a.A`}}},
+	{
+		"OptionalCyclicExplicitTypeMismatch",
+		cp{{"a", `type A struct{X string;Z ?A}; const Res = A{"a",A{}}`, nil, `not assignable from a.A`}}},
 
 	// Test enums.
 	{

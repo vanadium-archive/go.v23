@@ -30,6 +30,13 @@ func isByteList(t *vdl.Type) bool {
 // security.Label(1)
 func typedConst(data goData, v *vdl.Value) string {
 	k, t := v.Kind(), v.Type()
+	if k == vdl.Optional {
+		// TODO(toddw): This only works if the optional elem is a composite literal.
+		if elem := v.Elem(); elem != nil {
+			return "&" + typedConst(data, elem)
+		}
+		return "(" + typeGo(data, t) + ")(nil)" // results in (*Foo)(nil)
+	}
 	valstr := untypedConst(data, v)
 	// Enum and TypeObject already include the type in their values.
 	// Built-in bool and string are implicitly convertible from literals.
@@ -60,9 +67,8 @@ func untypedConst(data goData, v *vdl.Value) string {
 		}
 		return "nil"
 	case vdl.Optional:
-		// TODO(toddw): This only works for composite literals.
 		if elem := v.Elem(); elem != nil {
-			return "&" + typedConst(data, elem)
+			return untypedConst(data, elem)
 		}
 		return "nil"
 	case vdl.TypeObject:
@@ -163,7 +169,7 @@ func untypedConst(data goData, v *vdl.Value) string {
 // subConst is called for map keys and struct fields.
 func subConst(data goData, v *vdl.Value) string {
 	switch v.Kind() {
-	case vdl.Array, vdl.List, vdl.Set, vdl.Map, vdl.Struct:
+	case vdl.Array, vdl.List, vdl.Set, vdl.Map, vdl.Struct, vdl.Optional:
 		return typedConst(data, v)
 	}
 	return untypedConst(data, v)

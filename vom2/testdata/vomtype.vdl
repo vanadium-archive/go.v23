@@ -33,12 +33,13 @@ type (
 	// Nested Custom Types
 	MBool   NBool
 	MStruct struct {
-	  A bool
-	  B NBool
-	  C MBool
+		A bool
+		B NBool
+		C MBool
+		D ?NStruct
 	}
-	MList   []NListUint64
-	MMap map[NFloat32]NListUint64
+	MList []NListUint64
+	MMap  map[NFloat32]NListUint64
 
 	/* TODO(bprosnitz) Handle recursive type generation in Javascript.
 	// Recursive Type Definitions

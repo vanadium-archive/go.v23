@@ -764,6 +764,42 @@ func TestConverterOneOf(t *testing.T) {
 	}
 }
 
+// Test successful conversions to and from nil values.
+func TestConverterNil(t *testing.T) {
+	vvNil := vdl.ZeroValue(vdl.AnyType)
+	rvNil := new(interface{})
+	vvNilError := vdl.ZeroValue(vdl.ErrorType)
+	rvNilError := new(error)
+	vvNilPtrStruct := vdl.ZeroValue(vdl.TypeOf((*nStructInt)(nil)))
+	rvNilPtrStruct := (*nStructInt)(nil)
+	vvStructNilStructField := vdl.ZeroValue(vdl.TypeOf(nStructOptionalStruct{}))
+	rvStructNilStructField := nStructOptionalStruct{X: nil}
+	vvStructNilAnyField := vdl.ZeroValue(vdl.TypeOf(nStructOptionalAny{}))
+	rvStructNilAnyField := nStructOptionalAny{X: nil}
+	tests := []struct {
+		vvWant *vdl.Value
+		rvWant interface{}
+		vvSrc  *vdl.Value
+		rvSrc  interface{}
+	}{
+		// Conversion source and target are the same.
+		{vvNil, rvNil, vvNil, rvNil},
+		{vvNilError, rvNilError, vvNilError, rvNilError},
+		{vvNilPtrStruct, rvNilPtrStruct, vvNilPtrStruct, rvNilPtrStruct},
+		{vvStructNilStructField, rvStructNilStructField, vvStructNilStructField, rvStructNilStructField},
+		{vvStructNilAnyField, rvStructNilAnyField, vvStructNilAnyField, rvStructNilAnyField},
+		// All typed nil targets may be converted from any(nil).
+		{vvNilError, rvNilError, vvNil, rvNil},
+		{vvNilPtrStruct, rvNilPtrStruct, vvNil, rvNil},
+		{vvStructNilStructField, rvStructNilStructField, vvStructNilAnyField, rvStructNilAnyField},
+	}
+	for _, test := range tests {
+		testConverterWantSrc(t,
+			vvrv{[]*vdl.Value{test.vvWant}, []interface{}{test.rvWant}},
+			vvrv{[]*vdl.Value{test.vvSrc}, []interface{}{test.rvSrc}})
+	}
+}
+
 type vvrv struct {
 	vv []*vdl.Value
 	rv []interface{}
@@ -778,48 +814,53 @@ func testConverterWantSrc(t *testing.T, vvrvWant, vvrvSrc vvrv) {
 		for _, vvWant := range vvrvWant.vv {
 			// Test filling *Value from *Value
 			vvDst := vdl.ZeroValue(vvWant.Type())
-			testConvert(t, vvDst, vvSrc, vvWant, 0)
-			testConvert(t, vvDst, vvSrc, vvWant, 0)
+			testConvert(t, "vv1", vvDst, vvSrc, vvWant, 0, false)
+			testConvert(t, "vv2", vvDst, vvSrc, vvWant, 0, false)
 		}
 		for _, want := range vvrvWant.rv {
 			// Test filling reflect.Value from *Value
 			dst := reflect.New(reflect.TypeOf(want)).Interface()
-			testConvert(t, dst, vvSrc, want, 1)
-			testConvert(t, dst, vvSrc, want, 1)
+			testConvert(t, "vv3", dst, vvSrc, want, 1, false)
+			testConvert(t, "vv4", dst, vvSrc, want, 1, false)
 		}
 		// Test filling Any from *Value
 		vvDst := vdl.ZeroValue(vdl.AnyType)
-		testConvert(t, vvDst, vvSrc, anyValue(vvSrc), 0)
-		testConvert(t, vvDst, vvSrc, anyValue(vvSrc), 0)
+		testConvert(t, "vv5", vvDst, vvSrc, anyValue(vvSrc), 0, false)
+		testConvert(t, "vv6", vvDst, vvSrc, anyValue(vvSrc), 0, false)
 		// Test filling Optional from *Value
-		ttNil := vdl.OptionalType(vvSrc.Type())
-		vvNil := vdl.ZeroValue(ttNil)
-		vvNilWant := vdl.NonNilZeroValue(ttNil)
-		vvNilWant.Elem().Assign(vvSrc)
-		testConvert(t, vvNil, vvSrc, vvNilWant, 0)
-		testConvert(t, vvNil, vvSrc, vvNilWant, 0)
+		if vvSrc.Type().CanBeOptional() {
+			ttNil := vdl.OptionalType(vvSrc.Type())
+			vvNil := vdl.ZeroValue(ttNil)
+			vvOptWant := vdl.OptionalValue(vvSrc)
+			testConvert(t, "vv7", vvNil, vvSrc, vvOptWant, 0, false)
+			testConvert(t, "vv8", vvNil, vvSrc, vvOptWant, 0, false)
+		}
 		// Test filling **Value(nil) from *Value
 		var vvValue *vdl.Value
-		testConvert(t, &vvValue, vvSrc, vvSrc, 1)
-		testConvert(t, &vvValue, vvSrc, vvSrc, 1)
+		testConvert(t, "vv9", &vvValue, vvSrc, vvSrc, 1, false)
+		testConvert(t, "vv10", &vvValue, vvSrc, vvSrc, 1, false)
 		// Test filling interface{} from *Value
 		var dst interface{}
-		testConvert(t, &dst, vvSrc, vvSrc, 1)
-		testConvert(t, &dst, vvSrc, vvSrc, 1)
+		var want interface{} = vvSrc
+		if vvSrc.Type().CanBeNil() && vvSrc.IsNil() {
+			want = dst // filling interface{} from any(nil) yields nil.
+		}
+		testConvert(t, "vv11", &dst, vvSrc, want, 1, false)
+		testConvert(t, "vv12", &dst, vvSrc, want, 1, false)
 		if vvSrc.Kind() == vdl.Struct {
 			// Every struct may be converted to the empty struct
-			testConvert(t, vdl.ZeroValue(emptyType), vvSrc, vdl.ZeroValue(emptyType), 0)
-			testConvert(t, vdl.ZeroValue(emptyTypeN), vvSrc, vdl.ZeroValue(emptyTypeN), 0)
+			testConvert(t, "vv13", vdl.ZeroValue(emptyType), vvSrc, vdl.ZeroValue(emptyType), 0, false)
+			testConvert(t, "vv14", vdl.ZeroValue(emptyTypeN), vvSrc, vdl.ZeroValue(emptyTypeN), 0, false)
 			var empty struct{}
 			var emptyN nEmpty
-			testConvert(t, &empty, vvSrc, struct{}{}, 1)
-			testConvert(t, &emptyN, vvSrc, nEmpty{}, 1)
+			testConvert(t, "vv15", &empty, vvSrc, struct{}{}, 1, false)
+			testConvert(t, "vv16", &emptyN, vvSrc, nEmpty{}, 1, false)
 			// The empty struct may be converted to the zero value of any struct
 			vvZeroSrc := vdl.ZeroValue(vvSrc.Type())
-			testConvert(t, vdl.ZeroValue(vvSrc.Type()), vdl.ZeroValue(emptyType), vvZeroSrc, 0)
-			testConvert(t, vdl.ZeroValue(vvSrc.Type()), vdl.ZeroValue(emptyTypeN), vvZeroSrc, 0)
-			testConvert(t, vdl.ZeroValue(vvSrc.Type()), struct{}{}, vvZeroSrc, 0)
-			testConvert(t, vdl.ZeroValue(vvSrc.Type()), nEmpty{}, vvZeroSrc, 0)
+			testConvert(t, "vv17", vdl.ZeroValue(vvSrc.Type()), vdl.ZeroValue(emptyType), vvZeroSrc, 0, false)
+			testConvert(t, "vv18", vdl.ZeroValue(vvSrc.Type()), vdl.ZeroValue(emptyTypeN), vvZeroSrc, 0, false)
+			testConvert(t, "vv19", vdl.ZeroValue(vvSrc.Type()), struct{}{}, vvZeroSrc, 0, false)
+			testConvert(t, "vv20", vdl.ZeroValue(vvSrc.Type()), nEmpty{}, vvZeroSrc, 0, false)
 		}
 	}
 
@@ -828,14 +869,14 @@ func testConverterWantSrc(t *testing.T, vvrvWant, vvrvSrc vvrv) {
 		for _, vvWant := range vvrvWant.vv {
 			// Test filling *Value from reflect.Value
 			vvDst := vdl.ZeroValue(vvWant.Type())
-			testConvert(t, vvDst, src, vvWant, 0)
-			testConvert(t, vvDst, src, vvWant, 0)
+			testConvert(t, "rv1", vvDst, src, vvWant, 0, false)
+			testConvert(t, "rv2", vvDst, src, vvWant, 0, false)
 		}
 		for _, want := range vvrvWant.rv {
 			// Test filling reflect.Value from reflect.Value
 			dst := reflect.New(reflect.TypeOf(want)).Interface()
-			testConvert(t, dst, src, want, 1)
-			testConvert(t, dst, src, want, 1)
+			testConvert(t, "rv3", dst, src, want, 1, false)
+			testConvert(t, "rv4", dst, src, want, 1, false)
 		}
 		var vvWant *vdl.Value
 		if err := Convert(&vvWant, src); err != nil {
@@ -844,16 +885,20 @@ func testConverterWantSrc(t *testing.T, vvrvWant, vvrvSrc vvrv) {
 		}
 		// Test filling Any from reflect.Value
 		vvDst := vdl.ZeroValue(vdl.AnyType)
-		testConvert(t, vvDst, src, anyValue(vvWant), 0)
-		testConvert(t, vvDst, src, anyValue(vvWant), 0)
+		testConvert(t, "rv5", vvDst, src, anyValue(vvWant), 0, true)
+		testConvert(t, "rv6", vvDst, src, anyValue(vvWant), 0, true)
 		// Test filling **Value(nil) from reflect.Value
 		var vvValue *vdl.Value
-		testConvert(t, &vvValue, src, vvWant, 1)
-		testConvert(t, &vvValue, src, vvWant, 1)
+		testConvert(t, "rv7", &vvValue, src, vvWant, 1, false)
+		testConvert(t, "rv8", &vvValue, src, vvWant, 1, false)
 		// Test filling interface{} from reflect.Value
 		var dst interface{}
-		testConvert(t, &dst, src, vvWant, 1)
-		testConvert(t, &dst, src, vvWant, 1)
+		var want interface{} = vvWant
+		if vvWant.Type().CanBeNil() && vvWant.IsNil() {
+			want = dst // filling interface{} from any(nil) yields nil.
+		}
+		testConvert(t, "rv9", &dst, src, want, 1, true)
+		testConvert(t, "rv10", &dst, src, want, 1, true)
 		rtSrc := reflect.TypeOf(src)
 		ttSrc, err := vdl.TypeFromReflect(rtSrc)
 		if err != nil {
@@ -862,34 +907,49 @@ func testConverterWantSrc(t *testing.T, vvrvWant, vvrvSrc vvrv) {
 		}
 		if rtSrc.Kind() == reflect.Struct && ttSrc.Kind() != vdl.OneOf {
 			// Every struct may be converted to the empty struct
-			testConvert(t, vdl.ZeroValue(emptyType), src, vdl.ZeroValue(emptyType), 0)
-			testConvert(t, vdl.ZeroValue(emptyTypeN), src, vdl.ZeroValue(emptyTypeN), 0)
+			testConvert(t, "rv11", vdl.ZeroValue(emptyType), src, vdl.ZeroValue(emptyType), 0, false)
+			testConvert(t, "rv12", vdl.ZeroValue(emptyTypeN), src, vdl.ZeroValue(emptyTypeN), 0, false)
 			var empty struct{}
 			var emptyN nEmpty
-			testConvert(t, &empty, src, struct{}{}, 1)
-			testConvert(t, &emptyN, src, nEmpty{}, 1)
+			testConvert(t, "rv13", &empty, src, struct{}{}, 1, false)
+			testConvert(t, "rv14", &emptyN, src, nEmpty{}, 1, false)
 			// The empty struct may be converted to the zero value of any struct
 			rvZeroSrc := reflect.Zero(rtSrc).Interface()
-			testConvert(t, reflect.New(rtSrc).Interface(), vdl.ZeroValue(emptyType), rvZeroSrc, 1)
-			testConvert(t, reflect.New(rtSrc).Interface(), vdl.ZeroValue(emptyTypeN), rvZeroSrc, 1)
-			testConvert(t, reflect.New(rtSrc).Interface(), struct{}{}, rvZeroSrc, 1)
-			testConvert(t, reflect.New(rtSrc).Interface(), nEmpty{}, rvZeroSrc, 1)
+			testConvert(t, "rv15", reflect.New(rtSrc).Interface(), vdl.ZeroValue(emptyType), rvZeroSrc, 1, false)
+			testConvert(t, "rv16", reflect.New(rtSrc).Interface(), vdl.ZeroValue(emptyTypeN), rvZeroSrc, 1, false)
+			testConvert(t, "rv17", reflect.New(rtSrc).Interface(), struct{}{}, rvZeroSrc, 1, false)
+			testConvert(t, "rv18", reflect.New(rtSrc).Interface(), nEmpty{}, rvZeroSrc, 1, false)
 		}
 	}
 }
 
-func testConvert(t *testing.T, dst, src, want interface{}, deref int) {
+func testConvert(t *testing.T, prefix string, dst, src, want interface{}, deref int, optWant bool) {
 	const ptrDepth = 3
 	rvDst := reflect.ValueOf(dst)
 	for dstptrs := 0; dstptrs < ptrDepth; dstptrs++ {
 		rvSrc := reflect.ValueOf(src)
 		for srcptrs := 0; srcptrs < ptrDepth; srcptrs++ {
-			tname := fmt.Sprintf("ReflectTarget(%v).From(%v)", rvDst.Type(), rvSrc.Type())
+			tname := fmt.Sprintf("%s ReflectTarget(%v).From(%v)", prefix, rvDst.Type(), rvSrc.Type())
+			// This is tricky - if optWant is set and we've added pointers to src, we
+			// might need to change the want value to become optional.
+			eWant := want
+			if optWant && srcptrs > 0 {
+				if vvWant, ok := want.(*vdl.Value); ok {
+					switch {
+					case vvWant.Kind() == vdl.Any && !vvWant.IsNil() && vvWant.Elem().Type().CanBeOptional():
+						// Turn any(struct{...}) into any(?struct{...})
+						eWant = anyValue(vdl.OptionalValue(vvWant.Elem()))
+					case vvWant.Type().CanBeOptional():
+						// Turn struct{...} into ?struct{...}
+						eWant = vdl.OptionalValue(vvWant)
+					}
+				}
+			}
 			target, err := ReflectTarget(rvDst)
 			expectErr(t, err, "", tname)
 			err = FromReflect(target, rvSrc)
 			expectErr(t, err, "", tname)
-			expectConvert(t, tname, dst, want, deref)
+			expectConvert(t, tname, dst, eWant, deref)
 			// Next iteration adds a pointer to src.
 			rvNewSrc := reflect.New(rvSrc.Type())
 			rvNewSrc.Elem().Set(rvSrc)

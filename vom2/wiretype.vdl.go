@@ -3,60 +3,66 @@
 
 package vom2
 
-// WireNamed represents a named type definition.
+// WireNamed represents a type definition for named primitives.
 type WireNamed struct {
 	Name string
 	Base TypeID
 }
 
-// WireEnum represents an enum type definition.
+// WireEnum represents an type definition for enum types.
 type WireEnum struct {
 	Name   string
 	Labels []string
 }
 
-// WireArray represents an array type definition.
+// WireArray represents an type definition for array types.
 type WireArray struct {
 	Name string
 	Elem TypeID
 	Len  uint64
 }
 
-// WireList represents a list type definition.
+// WireList represents a type definition for list types.
 type WireList struct {
 	Name string
 	Elem TypeID
 }
 
-// WireSet represents a set type definition.
+// WireSet represents a type definition for set types.
 type WireSet struct {
 	Name string
 	Key  TypeID
 }
 
-// WireMap represents a map type definition.
+// WireMap represents a type definition for map types.
 type WireMap struct {
 	Name string
 	Key  TypeID
 	Elem TypeID
 }
 
-// WireField represents a field in a struct or oneof.
+// WireField represents a field in a struct or oneof type.
 type WireField struct {
 	Name string
 	Type TypeID
 }
 
-// WireStruct represents a struct type definition.
+// WireStruct represents a type definition for struct types.
 type WireStruct struct {
 	Name   string
 	Fields []WireField
 }
 
-// WireOneOf represents a oneof type definition.
+// WireOneOf represents a type definition for oneof types.
 type WireOneOf struct {
 	Name   string
 	Fields []WireField
+}
+
+// WireOptional represents an type definition for optional types.
+type WireOptional struct {
+	Name string
+	Elem TypeID
 }
 
 // TypeID uniquely identifies a type definition within a vom stream.
@@ -113,6 +119,8 @@ const WireFieldID = TypeID(23)
 const WireFieldListID = TypeID(24)
 
 const WireOneOfID = TypeID(25)
+
+const WireOptionalID = TypeID(29)
 
 // Other commonly used composites
 const WireByteListID = TypeID(26)

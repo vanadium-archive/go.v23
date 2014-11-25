@@ -134,14 +134,16 @@ func FromReflect(target Target, rv reflect.Value) error {
 	if !rv.IsValid() {
 		return target.FromNil(vdl.AnyType)
 	}
+	// Initialize vdl type.  If tt is Optional, we'll keep it as such, even though
+	// we're flattening the rv value.
+	tt, err := vdl.TypeFromReflect(rv.Type())
+	if err != nil {
+		return err
+	}
 	// Flatten pointers and interfaces in rv, and handle special-cases.
 	for rv.Kind() == reflect.Ptr || rv.Kind() == reflect.Interface {
 		switch rt := rv.Type(); {
 		case rv.IsNil():
-			tt, err := vdl.TypeFromReflect(rt)
-			if err != nil {
-				return err
-			}
 			return target.FromNil(tt)
 		case rt.ConvertibleTo(rtPtrToType):
 			// If rv is convertible to *vdl.Type, fill from it directly.
@@ -152,17 +154,16 @@ func FromReflect(target Target, rv reflect.Value) error {
 		}
 		rv = rv.Elem()
 	}
-	// Initialize vdl type.
 	rt := rv.Type()
-	tt, err := vdl.TypeFromReflect(rt)
-	if err != nil {
-		return err
+	ttNonOptional := tt
+	if tt.Kind() == vdl.Optional {
+		ttNonOptional = tt.Elem()
 	}
 	// Recursive walk through the reflect value to fill in target.
 	//
 	// First handle special-cases enum and oneof.  Note that vdl.TypeFromReflect
 	// has already validated the methods, so we can call without error checking.
-	switch tt.Kind() {
+	switch ttNonOptional.Kind() {
 	case vdl.Enum:
 		label := rv.MethodByName("String").Call(nil)[0].String()
 		return target.FromEnumLabel(label, tt)
@@ -224,7 +225,7 @@ func FromReflect(target Target, rv reflect.Value) error {
 		}
 		return target.FinishList(listTarget)
 	case reflect.Map:
-		if tt.Kind() == vdl.Set {
+		if ttNonOptional.Kind() == vdl.Set {
 			setTarget, err := target.StartSet(tt, rv.Len())
 			if err != nil {
 				return err
@@ -303,15 +304,26 @@ func FromReflect(target Target, rv reflect.Value) error {
 // the appropriate methods on the target.
 func FromValue(target Target, vv *vdl.Value) error {
 	tt := vv.Type()
-	if tt.IsBytes() {
-		return target.FromBytes(vv.Bytes(), tt)
-	}
-	switch vv.Kind() {
-	case vdl.Any, vdl.Optional:
+	if tt.Kind() == vdl.Any {
 		if vv.IsNil() {
 			return target.FromNil(tt)
 		}
-		return FromValue(target, vv.Elem())
+		// Non-nil any simply converts from the elem.
+		vv = vv.Elem()
+		tt = vv.Type()
+	}
+	if tt.Kind() == vdl.Optional {
+		if vv.IsNil() {
+			return target.FromNil(tt)
+		}
+		// Non-nil optional is special - we keep tt as the optional type, but use
+		// the elem value for the actual value below.
+		vv = vv.Elem()
+	}
+	if vv.Type().IsBytes() {
+		return target.FromBytes(vv.Bytes(), tt)
+	}
+	switch vv.Kind() {
 	case vdl.Bool:
 		return target.FromBool(vv.Bool(), tt)
 	case vdl.Byte:
@@ -402,8 +414,8 @@ func FromValue(target Target, vv *vdl.Value) error {
 		if err != nil {
 			return err
 		}
-		for fx := 0; fx < tt.NumField(); fx++ {
-			key, field, err := fieldsTarget.StartField(tt.Field(fx).Name)
+		for fx := 0; fx < vv.Type().NumField(); fx++ {
+			key, field, err := fieldsTarget.StartField(vv.Type().Field(fx).Name)
 			switch {
 			case verror.Is(err, verror.NoExist):
 				continue // silently drop unknown fields
@@ -424,7 +436,7 @@ func FromValue(target Target, vv *vdl.Value) error {
 			return err
 		}
 		fx, vvFieldValue := vv.OneOfField()
-		key, field, err := fieldsTarget.StartField(tt.Field(fx).Name)
+		key, field, err := fieldsTarget.StartField(vv.Type().Field(fx).Name)
 		if err != nil {
 			return err // no verror.NoExist special-case; oneof field is required
 		}
@@ -436,6 +448,6 @@ func FromValue(target Target, vv *vdl.Value) error {
 		}
 		return target.FinishFields(fieldsTarget)
 	default:
-		panic(fmt.Errorf("FromValue unhandled %v %v", tt.Kind(), tt))
+		panic(fmt.Errorf("FromValue unhandled %v %v", vv.Kind(), tt))
 	}
 }

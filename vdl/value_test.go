@@ -168,7 +168,7 @@ func TestValue(t *testing.T) {
 		}
 
 		// Test optional types
-		if test.k == Any {
+		if !test.t.CanBeOptional() {
 			continue
 		}
 		ntype := OptionalType(test.t)

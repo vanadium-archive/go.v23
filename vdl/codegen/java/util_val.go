@@ -125,6 +125,9 @@ func javaVal(v *vdl.Value, env *compile.Env) string {
 		return ret
 	case vdl.TypeObject:
 		return fmt.Sprintf("new %s(%s)", javaType(v.Type(), false, env), javaReflectType(v.TypeObject(), env))
+	case vdl.Optional:
+		// TODO(rogulenko): Implement optional values.
+		return ""
 	}
 	panic(fmt.Errorf("vdl: javaVal unhandled type %v %v", v.Kind(), v.Type()))
 }

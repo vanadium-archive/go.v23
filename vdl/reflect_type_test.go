@@ -135,6 +135,7 @@ var rtKeyTests = []rtTest{
 // rtNonKeyTests contains types that may not be used as map keys.
 var rtNonKeyTests = []rtTest{
 	// Unnamed scalars
+	{reflect.Type(nil), AnyType},
 	{reflect.TypeOf((*interface{})(nil)).Elem(), AnyType},
 	{reflect.TypeOf((*error)(nil)).Elem(), ErrorType},
 	{reflect.TypeOf((*Type)(nil)), TypeObjectType},
@@ -344,24 +345,25 @@ func allTests() []rtTest {
 	tests := make([]rtTest, len(rtKeyTests)+len(rtNonKeyTests))
 	n := copy(tests, rtKeyTests)
 	copy(tests[n:], rtNonKeyTests)
-	// Add all types we can generate via reflect; no arrays and structs.
+	// Add all types we can generate via reflect.
 	for _, test := range rtKeyTests {
-		switch k := test.t.Kind(); {
-		case k == Any || k == TypeObject || k == Optional || test.t == ErrorType:
-			tests = append(tests, rtTest{reflect.PtrTo(test.rt), test.t})
-		default:
+		if test.t.CanBeOptional() {
 			tests = append(tests, rtTest{reflect.PtrTo(test.rt), OptionalType(test.t)})
+		} else {
+			tests = append(tests, rtTest{reflect.PtrTo(test.rt), test.t})
 		}
 		tests = append(tests, rtTest{reflect.SliceOf(test.rt), ListType(test.t)})
 		tests = append(tests, rtTest{reflect.MapOf(test.rt, test.rt), MapType(test.t, test.t)})
 	}
 	// Now generate types from everything we have so far, for more complicated subtypes.
 	for _, test := range tests {
-		switch k := test.t.Kind(); {
-		case k == Any || k == TypeObject || k == Optional || test.t == ErrorType:
-			tests = append(tests, rtTest{reflect.PtrTo(test.rt), test.t})
-		default:
+		if test.rt == nil {
+			continue
+		}
+		if test.t.CanBeOptional() {
 			tests = append(tests, rtTest{reflect.PtrTo(test.rt), OptionalType(test.t)})
+		} else {
+			tests = append(tests, rtTest{reflect.PtrTo(test.rt), test.t})
 		}
 		tests = append(tests, rtTest{reflect.SliceOf(test.rt), ListType(test.t)})
 		for _, key := range rtKeyTests {
@@ -409,11 +411,10 @@ type rtErrorTest struct {
 }
 
 var rtErrorTests = []rtErrorTest{
-	{reflect.Type(nil), `invalid vdl.TypeOf(nil)`},
 	{reflect.TypeOf(make(chan int64)), `type "chan int64" not supported`},
 	{reflect.TypeOf(func() {}), `type "func()" not supported`},
 	{reflect.TypeOf(unsafe.Pointer(uintptr(0))), `type "unsafe.Pointer" not supported`},
-	{reflect.TypeOf(map[*int64]string{}), `invalid key "?int64" in "map[?int64]string"`},
+	{reflect.TypeOf(map[*int64]string{}), `invalid key "*int64" in "map[*int64]string"`},
 	{reflect.TypeOf(struct{ a int64 }{}), `type "struct { a int64 }" only has unexported fields`},
 	{reflect.TypeOf(nBadEnum1(0)), badEnum},
 	{reflect.TypeOf(nBadEnum2(0)), badEnum},

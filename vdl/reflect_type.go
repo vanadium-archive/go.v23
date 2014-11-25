@@ -69,12 +69,16 @@ func TypeOf(v interface{}) *Type {
 	return t
 }
 
-// Normalize the rt type.  The VDL type system represents the concept of
-// pointers as Optional, and doesn't allow multiple Optionals or Optional Any or
-// Error (??int, ?any, ?error).  All Go interfaces are represented with the
-// single Any type, except for Go interfaces that describe OneOf types.  By
-// normalizing the rt type we simplify type creation, and also reduce redundancy
-// in the rtCache.
+// Normalize the rt type.  The VDL type system Optional is represented as a Go
+// pointer.  Only structs may be optional in VDL, but we still allow the pointer
+// forms of other types in Go.  E.g. VDL doesn't allow ?map, but we do allow Go
+// **map, and consider that to be a VDL map; the pointers are flattened away.
+//
+// In addition all Go interfaces are represented with the single Any type,
+// except for Go interfaces that describe OneOf types.
+//
+// By normalizing the rt type we simplify type creation, and also reduce
+// redundancy in the rtCache.
 func normalizeType(rt reflect.Type) reflect.Type {
 	// Flatten rt to no pointers, and rtAtMostOnePtr to at most one pointer.
 	rtAtMostOnePtr := rt
@@ -84,19 +88,22 @@ func normalizeType(rt reflect.Type) reflect.Type {
 			rtAtMostOnePtr = rt
 		}
 	}
-	// Special-case the error type.
-	if rt == rtError {
+	// Handle special cases.  OneOf may be either an interface or a struct, and
+	// should be handled first.
+	if _, isOneOf := rt.MethodByName("__DescribeOneOf"); isOneOf {
+		return rt
+	}
+	switch {
+	case rt == rtError:
 		return rtError
-	}
-	// Collapse all interfaces to interface{}, except for interfaces that describe
-	// OneOf types.  We allow Optional OneOf types.
-	if rt.Kind() == reflect.Interface {
-		if _, isOneOf := rt.MethodByName("__DescribeOneOf"); isOneOf {
-			return rtAtMostOnePtr
-		}
+	case rt.Kind() == reflect.Interface:
+		// Collapse all interfaces to interface{}
 		return rtInterface
+	case rt.Kind() == reflect.Struct && rt.PkgPath() != "":
+		// Named structs may be optional, so we keep the pointer.
+		return rtAtMostOnePtr
 	}
-	return rtAtMostOnePtr
+	return rt
 }
 
 // Lookup the rt type and return the corresponding *Type.  Returns a non-nil
@@ -125,7 +132,7 @@ func lookupType(rt reflect.Type) *Type {
 // unexported fields.
 func TypeFromReflect(rt reflect.Type) (*Type, error) {
 	if rt == nil {
-		return nil, errTypeFromReflectNil
+		return AnyType, nil
 	}
 	rt = normalizeType(rt)
 	if t := lookupType(rt); t != nil {
@@ -200,11 +207,11 @@ func makeTypeFromReflect(rt reflect.Type, builder *TypeBuilder, pending map[refl
 		// Pointers are turned into Optional.
 		opt := builder.Optional()
 		pending[rt] = opt
-		base, err := typeFromReflect(rt.Elem(), builder, pending)
+		elem, err := typeFromReflect(rt.Elem(), builder, pending)
 		if err != nil {
 			return nil, err
 		}
-		opt.AssignBase(base)
+		opt.AssignElem(elem)
 		return opt, nil
 	case rt.PkgPath() == "":
 		// Unnamed types are made directly.  There's no way to create a recursive
@@ -399,6 +406,9 @@ func makeUnnamedFromReflect(rt reflect.Type, builder *TypeBuilder, pending map[r
 		}
 		return builder.List().AssignElem(elem), nil
 	case reflect.Map:
+		if rt.Key().Kind() == reflect.Ptr {
+			return nil, fmt.Errorf("invalid key %q in %q", rt.Key(), rt)
+		}
 		key, err := typeFromReflect(rt.Key(), builder, pending)
 		if err != nil {
 			return nil, err
@@ -438,7 +448,6 @@ func makeUnnamedFromReflect(rt reflect.Type, builder *TypeBuilder, pending map[r
 }
 
 var (
-	errTypeFromReflectNil   = errors.New("invalid vdl.TypeOf(nil)")
 	errTypeFromReflectValue = errors.New("invalid vdl.TypeOf(reflect.Value{})")
 
 	rtInterface          = reflect.TypeOf((*interface{})(nil)).Elem()

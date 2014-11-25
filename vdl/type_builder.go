@@ -9,24 +9,23 @@ import (
 )
 
 var (
-	errNameNonEmpty    = errors.New("any and typeobject cannot be renamed")
-	errNoLabels        = errors.New("no enum labels")
-	errLabelEmpty      = errors.New("empty enum label")
-	errHasLabels       = errors.New("labels only valid for enum")
-	errLenZero         = errors.New("negative or zero array length")
-	errLenNonZero      = errors.New("length only valid for array")
-	errOptionalElemBad = errors.New("optional elem type must not be optional, any or error")
-	errElemNil         = errors.New("nil elem type")
-	errElemNonNil      = errors.New("elem only valid for array, list and map")
-	errKeyNil          = errors.New("nil key type")
-	errKeyNonNil       = errors.New("key only valid for set and map")
-	errFieldTypeNil    = errors.New("nil field type")
-	errFieldNameEmpty  = errors.New("empty field name")
-	errNoFields        = errors.New("no oneof fields")
-	errHasFields       = errors.New("fields only valid for struct or oneof")
-	errBaseNil         = errors.New("nil base type for named type")
-	errBaseCycle       = errors.New("invalid named type cycle")
-	errNotBuilt        = errors.New("TypeBuilder.Build must be called before Pending.Built")
+	errNameNonEmpty   = errors.New("any and typeobject cannot be renamed")
+	errNoLabels       = errors.New("no enum labels")
+	errLabelEmpty     = errors.New("empty enum label")
+	errHasLabels      = errors.New("labels only valid for enum")
+	errLenZero        = errors.New("negative or zero array length")
+	errLenNonZero     = errors.New("length only valid for array")
+	errElemNil        = errors.New("nil elem type")
+	errElemNonNil     = errors.New("elem only valid for array, list and map")
+	errKeyNil         = errors.New("nil key type")
+	errKeyNonNil      = errors.New("key only valid for set and map")
+	errFieldTypeNil   = errors.New("nil field type")
+	errFieldNameEmpty = errors.New("empty field name")
+	errNoFields       = errors.New("no oneof fields")
+	errHasFields      = errors.New("fields only valid for struct or oneof")
+	errBaseNil        = errors.New("nil base type for named type")
+	errBaseCycle      = errors.New("invalid named type cycle")
+	errNotBuilt       = errors.New("TypeBuilder.Build must be called before Pending.Built")
 )
 
 // Primitive types, the basis for all other types.  All have empty names.
@@ -87,8 +86,8 @@ type PendingType interface {
 // type that is non-optional, you can build a new type that is optional.
 type PendingOptional interface {
 	PendingType
-	// AssignBase assigns the Optional base type.
-	AssignBase(base TypeOrPending) PendingOptional
+	// AssignElem assigns the Optional elem type.
+	AssignElem(elem TypeOrPending) PendingOptional
 }
 
 // PendingEnum represents an Enum type that is being built.
@@ -185,8 +184,8 @@ type (
 	pendingNamed    struct{ *pending }
 )
 
-func (p pendingOptional) AssignBase(base TypeOrPending) PendingOptional {
-	p.elem = base.ptype()
+func (p pendingOptional) AssignElem(elem TypeOrPending) PendingOptional {
+	p.elem = elem.ptype()
 	return p
 }
 
@@ -415,9 +414,9 @@ func checkedBuild(b TypeBuilder, p PendingType) *Type {
 
 // OptionalType is a helper using TypeBuilder to create a single Optional type.
 // Panics on all errors.
-func OptionalType(base *Type) *Type {
+func OptionalType(elem *Type) *Type {
 	var b TypeBuilder
-	return checkedBuild(b, b.Optional().AssignBase(base))
+	return checkedBuild(b, b.Optional().AssignElem(elem))
 }
 
 // EnumType is a helper using TypeBuilder to create a single Enum type.
@@ -637,34 +636,33 @@ func validType(t *Type) error {
 	return nil
 }
 
-// isInvalidKey return true iff a subtype can't be a key
-func isInvalidKey(t *Type, seen map[*Type]bool) bool {
+// isValidKey returns true iff t is a valid set or map key.
+func isValidKey(t *Type, seen map[*Type]bool) bool {
 	if seen[t] {
-		return false
+		return true
 	}
 	seen[t] = true
 	switch t.kind {
 	case Any, List, Map, Optional, Set, TypeObject:
-		return true
+		return false
 	case Array:
-		if isInvalidKey(t.elem, seen) {
-			return true
-		}
+		return isValidKey(t.elem, seen)
 	case Struct, OneOf:
 		for _, x := range t.fields {
-			if isInvalidKey(x.Type, seen) {
-				return true
+			if !isValidKey(x.Type, seen) {
+				return false
 			}
 		}
 	}
-	return false
+	return true
 }
 
-// existsInvalidKey returns true iff the given Types have an invalid set or map
+// existsInvalidKey returns a nil error iff the given Types all have valid set
+// and map keys.
 func existsInvalidKey(allTypes map[*Type]bool) error {
 	seen := make(map[*Type]bool)
 	for t, _ := range allTypes {
-		if (t.kind == Map || t.kind == Set) && isInvalidKey(t.key, seen) {
+		if (t.kind == Map || t.kind == Set) && !isValidKey(t.key, seen) {
 			return fmt.Errorf("invalid key %q in %q", t.key, t)
 		}
 	}
@@ -709,9 +707,9 @@ func existsStrictCycle(allTypes map[*Type]bool) error {
 	return nil
 }
 
-// validTypeDefinition returns a nil error iff t and all subtypes are correctly
-// defined. If all subtypes are correctly defined allTypes will be filled with
-// all subtypes of the given Type t.
+// verifyAndCollectAllTypes returns a nil error iff t and all subtypes are
+// correctly defined. If all subtypes are correctly defined allTypes will be
+// filled with all subtypes of the given Type t.
 func verifyAndCollectAllTypes(t *Type, allTypes map[*Type]bool) error {
 	if t == nil || allTypes[t] {
 		return nil
@@ -747,15 +745,11 @@ func verifyAndCollectAllTypes(t *Type, allTypes map[*Type]bool) error {
 			return errElemNil
 		}
 	case Optional:
-		e := t.elem
-		if e == nil {
+		if t.elem == nil {
 			return errElemNil
 		}
-		if e.kind == Optional || e.kind == Any {
-			// Disallow ?? since it's confusing and hard to implement.
-			// Disallow ?any to avoid confusion, since any already has a nil value.
-			// Disallow ?error to avoid confusion, since error is already optional.
-			return errOptionalElemBad
+		if !t.elem.CanBeOptional() {
+			return fmt.Errorf("invalid optional type %q", t)
 		}
 	default:
 		if t.elem != nil {
