@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"text/template"
 
 	"veyron.io/veyron/veyron2/vdl"
@@ -180,12 +181,98 @@ func typedConst(names typeNames, v *vdl.Value) string {
 	}
 }
 
+// Returns the JS version of the method signature.
+func generateMethodSignature(method *compile.Method, names typeNames) string {
+	return fmt.Sprintf(`{
+    name: '%s',
+    doc: %s,
+    inArgs: %s,
+    outArgs: %s,
+    inStreamHACK: %s,
+    outStreamHACK: %s,
+    hasInStreamHACK: %t,
+    hasOutStreamHACK: %t,
+    tags: %s
+  }`,
+		vdlutil.ToCamelCase(method.Name),
+		quoteStripDoc(method.Doc),
+		generateMethodArguments(method.InArgs, names),
+		generateMethodArguments(method.OutArgs, names), // Note: includes the error argument.
+		generateMethodStreamingHACK(method.InStream, names),
+		generateMethodStreamingHACK(method.OutStream, names),
+		generateMethodStreamingHasHACK(method.InStream, names),
+		generateMethodStreamingHasHACK(method.OutStream, names),
+		genMethodTags(names, method))
+}
+
+// Get the typeobject string for the given vdl type. Uses the Registry to find
+// the correct constructor, then extracts the type.
+// e.g. "Registry.lookupOrCreateConstructor(_typeNamedBool).prototype._type"
+func getConstructorDefinitionString(t *vdl.Type, names typeNames) string {
+	return fmt.Sprintf("Registry.lookupOrCreateConstructor(%s).prototype._type", names.LookupName(t))
+}
+
+// Returns a slice describing the method's arguments.
+func generateMethodArguments(args []*compile.Arg, names typeNames) string {
+	ret := "["
+	for _, arg := range args {
+		ret += fmt.Sprintf(`{
+      name: '%s',
+      doc: %s,
+      type: %s
+    },
+    `, arg.Name, quoteStripDoc(arg.Doc), getConstructorDefinitionString(arg.Type, names))
+	}
+	ret += "]"
+	return ret
+}
+
+// Returns the VOM type of the stream.
+func generateMethodStreamingHACK(streaming *vdl.Type, names typeNames) string {
+	if streaming == nil {
+		// TODO(alexfandrianto): Remove this HACK in a HACK.
+		// The veyron.js test's deepEqual prevents using "null" or "{}".
+		return `{
+      name: '',
+      doc: '',
+      type: Types.ANY
+    }`
+	}
+	return getConstructorDefinitionString(streaming, names)
+}
+
+// Returns the bool for whether the stream exists or not
+func generateMethodStreamingHasHACK(streaming *vdl.Type, names typeNames) bool {
+	return streaming != nil
+}
+
+// Returns a slice of embeddings with the proper qualified identifiers.
+func generateEmbeds(embeds []*compile.Interface) string {
+	result := "["
+	for _, embed := range embeds {
+		result += fmt.Sprintf(`{
+      name: '%s',
+      pkgPath: '%s',
+      doc: %s
+    },
+    `, embed.Name, embed.File.Package.Path, quoteStripDoc(embed.Doc))
+	}
+	result += "]"
+	return result
+}
+
 func importPath(data data, path string) string {
 	// We need to prefix all of these paths with a ./ to tell node that the path is relative to
 	// the current directory.  Sadly filepath.Join(".", foo) == foo, so we have to do it
 	// explicitly.
 	return "." + string(filepath.Separator) + data.GenerateImport(path)
+}
 
+func quoteStripDoc(doc string) string {
+	// TODO(alexfandrianto): We need to handle '// ' and '\n' in the docstring.
+	// It would also be nice to single-quote the whole string.
+	trimmed := strings.Trim(doc, "\n")
+	return strconv.Quote(trimmed)
 }
 
 func init() {
@@ -195,7 +282,10 @@ func init() {
 		"genMethodTags":             genMethodTags,
 		"makeTypeDefinitionsString": makeTypeDefinitionsString,
 		"typedConst":                typedConst,
+		"generateEmbeds":            generateEmbeds,
+		"generateMethodSignature":   generateMethodSignature,
 		"importPath":                importPath,
+		"quoteStripDoc":             quoteStripDoc,
 	}
 	javascriptTemplate = template.Must(template.New("genJS").Funcs(funcMap).Parse(genJS))
 }
@@ -215,9 +305,26 @@ var Complex = vom.Complex;
 var Builtins = vom.Builtins;
 var Registry = vom.Registry;
 
+{{/* Define additional imported modules. */}}
 {{$pkg := $data.Pkg}}
 {{if $data.UserImports}}{{range $imp := $data.UserImports}}
 var {{$imp.Local}} = require('{{importPath $data $imp.Path}}');{{end}}{{end}}
+
+{{/* Define any types introduced by the VDL file. */}}
+var types = {};
+{{makeTypeDefinitionsString $data.TypeNames }}
+
+{{/* Define all constants as typed constants. */}}
+var consts = { {{range $file := $pkg.Files}}{{range $const := $file.ConstDefs}}
+  {{$const.Name}}: {{typedConst $data.TypeNames $const.Value}},{{end}}{{end}}
+};
+
+{{/* TODO(alexfandrianto): Find a common place to put NotImplementedMethod. */}}
+function NotImplementedMethod(name) {
+  throw new Error('Method ' + name + ' not implemented');
+}
+
+{{/* TODO(alexfandrianto): Remove this section. It's redundant with serviceDefs */}}
 var services = {
 package: '{{$pkg.Path}}',
 {{range $file := $pkg.Files}}{{range $iface := $file.Interfaces}}  {{$iface.Name}}: {
@@ -233,15 +340,52 @@ package: '{{$pkg.Path}}',
 {{end}}{{end}}
 };
 
-var types = {};
-{{makeTypeDefinitionsString $data.TypeNames }}
-
-var consts = { {{range $file := $pkg.Files}}{{range $const := $file.ConstDefs}}
-  {{$const.Name}}: {{typedConst $data.TypeNames $const.Value}},{{end}}{{end}}
+{{/* Define service exports from the VDL. */}}
+var serviceDefs = {
+  package: '{{$pkg.Path}}',
+{{range $file := $pkg.Files}}
+  {{range $iface := $file.Interfaces}}
+  {{$iface.Name}}: {{$iface.Name}},
+  {{end}}
+{{end}}
 };
+
+{{/* Define each of those service interfaces here, including method stubs and
+     service signature. */}}
+{{range $file := $pkg.Files}}
+  {{range $iface := $file.Interfaces}}
+    {{/* Define the service interface. */}}
+function {{$iface.Name}}(){}
+    {{range $method := $iface.AllMethods}}
+      {{/* Add each method to the service prototype. */}}
+{{$iface.Name}}.prototype.{{$method.Name}} = NotImplementedMethod;
+    {{end}}
+    {{/* Define the service's signature function. */}}
+{{$iface.Name}}.prototype.signature = function {{$iface.Name}}Signature() {
+  return _{{$iface.Name}}Signature;
+};
+    {{/* The service signature encodes the same info as ipc.InterfaceSig.
+         TODO(alexfandrianto): We want to associate the signature type here, but
+         it's complicated. https://github.com/veyron/release-issues/issues/432
+         For now, we need to pass the type in manually into encode. */}}
+var _{{$iface.Name}}Signature = {
+  name: '{{$iface.Name}}',
+  pkgPath: '{{$pkg.Path}}',
+  doc: {{quoteStripDoc $iface.Doc}},
+  embeds: {{generateEmbeds $iface.Embeds}},
+  methods: [
+    {{range $method := $iface.AllMethods}}
+      {{/* Each method signature contains the information in ipc.MethodSig. */}}
+    {{generateMethodSignature $method $data.TypeNames}},
+    {{end}}
+  ]
+};
+  {{end}}
+{{end}}
 
 module.exports = {
   types: types,
+  serviceDefs: serviceDefs,
   services: services,
   consts: consts,
 };

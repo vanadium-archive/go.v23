@@ -97,7 +97,7 @@ func makeTypeFieldAssignmentString(jsname string, t *vdl.Type, jsnames typeNames
 }
 
 // makeConstructorDefinitionString creates a string that defines the constructor for the type.
-// e.g. "types.NamedBool = RegistrylookupOrCreateConstructor(_typeNamedBool)"
+// e.g. "types.NamedBool = Registry.lookupOrCreateConstructor(_typeNamedBool)"
 func makeConstructorDefinitionString(jsname string, t *vdl.Type) string {
 	_, name := vdl.SplitIdent(t.Name())
 	return fmt.Sprintf("types.%s = Registry.lookupOrCreateConstructor(%s, %q);\n", name, jsname, name)
