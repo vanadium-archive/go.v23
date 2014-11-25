@@ -16,35 +16,62 @@ package {{.PackagePath}};
  * type {{.Name}} {{.VdlTypeString}} {{.Doc}}
  **/
 @io.veyron.veyron.veyron2.vdl.GeneratedFromVdlType("{{.VdlTypeName}}")
-{{ .AccessModifier }} final class {{.Name}} extends io.veyron.veyron.veyron2.vdl.VdlOneOf {
-    public static final com.google.common.collect.ImmutableList<com.google.common.reflect.TypeToken<?>> TYPES =
-            new com.google.common.collect.ImmutableList.Builder<com.google.common.reflect.TypeToken<?>>()
-    {{ range $type := .OneOfTypes }}
-            .add(new com.google.common.reflect.TypeToken<{{$type}}>(){})
+{{ .AccessModifier }} class {{.Name}} extends io.veyron.veyron.veyron2.vdl.VdlOneOf {
+    {{ range $index, $field := .Fields }}
+    public static class {{$field.Name}} extends {{$.Name}} {
+        private {{$field.Type}} elem;
+
+        public {{$field.Name}}({{$field.Type}} elem) {
+            super({{$index}}, elem);
+            this.elem = elem;
+        }
+
+        @Override
+        public {{$field.Class}} getElem() {
+            return elem;
+        }
+
+        @Override
+        public int hashCode() {
+            return {{$field.HashcodeComputation}};
+        }
+    }
     {{ end }}
-            .build();
 
     public static final io.veyron.veyron.veyron2.vdl.VdlType VDL_TYPE =
             io.veyron.veyron.veyron2.vdl.Types.getVdlTypeFromReflect({{.Name}}.class);
 
-    public {{.Name}}() {
-        super(VDL_TYPE);
+    public {{.Name}}(int index, java.io.Serializable value) {
+        super(VDL_TYPE, index, value);
     }
 }
 `
 
+type oneOfDefinitionField struct {
+	Class               string
+	HashcodeComputation string
+	Name                string
+	Type                string
+}
+
 // genJavaOneOfFile generates the Java class file for the provided user-defined oneOf type.
 func genJavaOneOfFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo {
 	// TODO(rogulenko): Update to new oneof.
-	types := make([]string, tdef.Type.NumField())
+	fields := make([]oneOfDefinitionField, tdef.Type.NumField())
 	for i := 0; i < tdef.Type.NumField(); i++ {
-		types[i] = javaType(tdef.Type.Field(i).Type, true, env)
+		fld := tdef.Type.Field(i)
+		fields[i] = oneOfDefinitionField{
+			Class:               javaType(fld.Type, true, env),
+			HashcodeComputation: javaHashCode("elem", fld.Type, env),
+			Name:                fld.Name,
+			Type:                javaType(fld.Type, false, env),
+		}
 	}
 	javaTypeName := toUpperCamelCase(tdef.Name)
 	data := struct {
 		AccessModifier string
-		OneOfTypes     []string
 		Doc            string
+		Fields         []oneOfDefinitionField
 		Name           string
 		PackagePath    string
 		Source         string
@@ -52,8 +79,8 @@ func genJavaOneOfFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo {
 		VdlTypeString  string
 	}{
 		AccessModifier: accessModifierForName(tdef.Name),
-		OneOfTypes:     types,
 		Doc:            javaDocInComment(tdef.Doc),
+		Fields:         fields,
 		Name:           javaTypeName,
 		PackagePath:    javaPath(javaGenPkgPath(tdef.File.Package.Path)),
 		Source:         tdef.File.BaseName,

@@ -102,11 +102,10 @@ func javaVal(v *vdl.Value, env *compile.Env) string {
 		}
 		return ret + ".build()"
 	case vdl.OneOf:
-		// TODO(rogulenko): Update to new oneof.
-		_, field := v.OneOfField()
-		elemReflectTypeStr := javaReflectType(field.Type(), env)
-		elemStr := javaConstVal(field, env)
-		return fmt.Sprintf("new %s().assignValue(%s, %s)", javaType(v.Type(), false, env), elemReflectTypeStr, elemStr)
+		index, value := v.OneOfField()
+		name := v.Type().Field(index).Name
+		elemStr := javaConstVal(value, env)
+		return fmt.Sprintf("new %s.%s(%s)", javaType(v.Type(), false, env), name, elemStr)
 	case vdl.Set:
 		keyTypeStr := javaType(v.Type().Key(), true, env)
 		ret := fmt.Sprintf("new com.google.common.collect.ImmutableSet.Builder<%s>()", keyTypeStr)
