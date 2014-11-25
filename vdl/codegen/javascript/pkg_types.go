@@ -123,7 +123,7 @@ func addTypesInConst(v *vdl.Value, names typeNames, nextIndex int) int {
 	case vdl.TypeObject:
 		nextIndex = getInnerTypes(v.TypeObject(), names, nextIndex)
 	case vdl.Any:
-		if !v.Elem().IsNil() {
+		if !v.IsNil() {
 			nextIndex = getInnerTypes(v.Elem().Type(), names, nextIndex)
 		}
 	}
@@ -152,7 +152,7 @@ func addTypesInConst(v *vdl.Value, names typeNames, nextIndex int) int {
 		_, innerVal := v.OneOfField()
 		nextIndex = addTypesInConst(innerVal, names, nextIndex)
 	case vdl.Any, vdl.Optional:
-		if !v.Elem().IsNil() {
+		if !v.IsNil() {
 			nextIndex = addTypesInConst(v.Elem(), names, nextIndex)
 
 		}
