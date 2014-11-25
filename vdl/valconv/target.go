@@ -134,16 +134,18 @@ func FromReflect(target Target, rv reflect.Value) error {
 	if !rv.IsValid() {
 		return target.FromNil(vdl.AnyType)
 	}
-	// Initialize vdl type.  If tt is Optional, we'll keep it as such, even though
-	// we're flattening the rv value.
-	tt, err := vdl.TypeFromReflect(rv.Type())
-	if err != nil {
-		return err
-	}
-	// Flatten pointers and interfaces in rv, and handle special-cases.
+	// Flatten pointers and interfaces in rv, and handle special-cases.  We track
+	// whether the final flattened value had any pointers via hasPtr, in order to
+	// track optional types correctly.
+	hasPtr := false
 	for rv.Kind() == reflect.Ptr || rv.Kind() == reflect.Interface {
+		hasPtr = rv.Kind() == reflect.Ptr
 		switch rt := rv.Type(); {
 		case rv.IsNil():
+			tt, err := vdl.TypeFromReflect(rv.Type())
+			if err != nil {
+				return err
+			}
 			return target.FromNil(tt)
 		case rt.ConvertibleTo(rtPtrToType):
 			// If rv is convertible to *vdl.Type, fill from it directly.
@@ -154,10 +156,19 @@ func FromReflect(target Target, rv reflect.Value) error {
 		}
 		rv = rv.Elem()
 	}
+	// Initialize type information.  The optionality is a bit tricky.  Both rt and
+	// rv refer to the flattened value, with no pointers or interfaces.  But tt
+	// refers to the optional type, iff the original value had a pointer.  This is
+	// required so that each of the Target.From* methods can get full type
+	// information, including optionality.
 	rt := rv.Type()
+	tt, err := vdl.TypeFromReflect(rv.Type())
+	if err != nil {
+		return err
+	}
 	ttNonOptional := tt
-	if tt.Kind() == vdl.Optional {
-		ttNonOptional = tt.Elem()
+	if tt.CanBeOptional() && hasPtr {
+		tt = vdl.OptionalType(tt)
 	}
 	// Recursive walk through the reflect value to fill in target.
 	//
