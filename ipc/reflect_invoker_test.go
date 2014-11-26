@@ -453,8 +453,8 @@ type (
 	badRecv2Context   struct{ ipc.ServerContext }
 	badRecv3Context   struct{ ipc.ServerContext }
 
-	badVGlob         struct{}
-	badVGlobChildren struct{}
+	badVGlob        struct{}
+	badGlobChildren struct{}
 )
 
 func (badcontext) notExported(ipc.ServerContext) error { return nil }
@@ -511,7 +511,7 @@ func (*badRecv3Context) RecvStream() interface {
 }
 
 func (badVGlob) VGlob()                 {}
-func (badVGlobChildren) VGlobChildren() {}
+func (badGlobChildren) GlobChildren__() {}
 
 func TestReflectInvokerPanic(t *testing.T) {
 	type testcase struct {
@@ -523,7 +523,7 @@ func TestReflectInvokerPanic(t *testing.T) {
 		{struct{}{}, "no compatible methods"},
 		{badcontext{}, "invalid streaming context"},
 		{badVGlob{}, "VGlob must have signature"},
-		{badVGlobChildren{}, "VGlobChildren must have signature"},
+		{badGlobChildren{}, "GlobChildren__ must have signature"},
 	}
 	for _, test := range tests {
 		got := testutil.CallAndRecover(func() { ipc.ReflectInvoker(test.obj) })
@@ -618,8 +618,8 @@ func TestTypeCheckMethods(t *testing.T) {
 		{&badVGlob{}, map[string]string{
 			"VGlob": ipc.ErrBadVGlob.Error(),
 		}},
-		{&badVGlobChildren{}, map[string]string{
-			"VGlobChildren": ipc.ErrBadVGlobChildren.Error(),
+		{&badGlobChildren{}, map[string]string{
+			"GlobChildren__": ipc.ErrBadGlobChildren.Error(),
 		}},
 	}
 	for _, test := range tests {
@@ -653,22 +653,22 @@ func (o *vGlobberObject) VGlob() *ipc.GlobState {
 	return o.gs
 }
 
-type vAllGlobberObject struct{}
+type allGlobberObject struct{}
 
-func (vAllGlobberObject) Glob(ctx *ipc.GlobContextStub, pattern string) error {
+func (allGlobberObject) Glob(ctx *ipc.GlobContextStub, pattern string) error {
 	return nil
 }
 
-type vChildrenGlobberObject struct{}
+type childrenGlobberObject struct{}
 
-func (vChildrenGlobberObject) VGlobChildren() ([]string, error) {
+func (childrenGlobberObject) GlobChildren__() (<-chan string, error) {
 	return nil, nil
 }
 
 func TestReflectInvokerVGlob(t *testing.T) {
-	vAllGlobber := vAllGlobberObject{}
-	vChildrenGlobber := vChildrenGlobberObject{}
-	gs := &ipc.GlobState{VAllGlobber: vAllGlobber}
+	allGlobber := allGlobberObject{}
+	childrenGlobber := childrenGlobberObject{}
+	gs := &ipc.GlobState{AllGlobber: allGlobber}
 	vGlobber := &vGlobberObject{gs}
 
 	testcases := []struct {
@@ -676,8 +676,8 @@ func TestReflectInvokerVGlob(t *testing.T) {
 		expected *ipc.GlobState
 	}{
 		{vGlobber, gs},
-		{vAllGlobber, &ipc.GlobState{VAllGlobber: vAllGlobber}},
-		{vChildrenGlobber, &ipc.GlobState{VChildrenGlobber: vChildrenGlobber}},
+		{allGlobber, &ipc.GlobState{AllGlobber: allGlobber}},
+		{childrenGlobber, &ipc.GlobState{ChildrenGlobber: childrenGlobber}},
 	}
 
 	for _, tc := range testcases {

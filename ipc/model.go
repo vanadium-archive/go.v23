@@ -280,47 +280,49 @@ type Invoker interface {
 	// returns the signature of the given method.
 	MethodSignature(ctx ServerContext, method string) (MethodSig, error)
 
-	// VGlobber allows objects to take part in the namespace.
-	VGlobber
+	// Globber allows objects to take part in the namespace.
+	Globber
 }
 
-// VGlobber allows objects to take part in the namespace. Service objects may
-// choose to implement either the VAllGlobber interface, or the VChildrenGlobber
+// Globber allows objects to take part in the namespace. Service objects may
+// choose to implement either the AllGlobber interface, or the ChildrenGlobber
 // interface.
 //
-// The VAllGlobber interface is the same as mounttable.Globbable. The object
+// The AllGlobber interface is the same as mounttable.Globbable. The object
 // implements the Glob method defined in veyron.io/veyron/veyron2/services/mounttable.
 // Each object must support Glob requests that will be applied to itself and the
 // entire namespace below it.
 //
-// The VChildrenGlobber interface is simpler. Each object only has to return
+// The ChildrenGlobber interface is simpler. Each object only has to return
 // a list of the objects immediately below itself in the namespace graph.
-type VGlobber interface {
+type Globber interface {
 	// VGlob returns a GlobState with references to the interface that the
 	// object implements. Only one implementation is needed to participate
 	// in the namespace.
+	// TODO(rthellend): Rename to Globber()
 	VGlob() *GlobState
 }
 
 // GlobState indicates which Glob interface the object implements.
 type GlobState struct {
-	VAllGlobber      VAllGlobber
-	VChildrenGlobber VChildrenGlobber
+	AllGlobber      AllGlobber
+	ChildrenGlobber ChildrenGlobber
 }
 
-// VAllGlobber is the same interface as mounttable.Globbable.
-type VAllGlobber interface {
-	// TODO(rthellend): Rename this and the Globbable interface to VGlob
+// AllGlobber is the same interface as mounttable.Globbable.
+type AllGlobber interface {
+	// TODO(rthellend): Rename this and the Globbable interface to Glob__
 	// when toddw's Signature changes are all done.
 	Glob(ctx *GlobContextStub, pattern string) error
 }
 
-// VChildrenGlobber is a simple interface to publish the relationship between
+// ChildrenGlobber is a simple interface to publish the relationship between
 // nodes in the namespace graph.
-type VChildrenGlobber interface {
-	// VGlobChildren returns the names of the receiver's immediate children.
-	// It should return an error if the receiver doesn't exist.
-	VGlobChildren() ([]string, error)
+type ChildrenGlobber interface {
+	// GlobChildren__ returns the names of the receiver's immediate children
+	// on a channel.  It should return an error if the receiver doesn't
+	// exist.
+	GlobChildren__() (<-chan string, error)
 }
 
 // ServerCall defines the in-flight context for a server method call, including

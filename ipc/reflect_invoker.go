@@ -221,7 +221,7 @@ func (ri reflectInvoker) MethodSignature(ctx ServerContext, method string) (Meth
 	return MethodSig{}, verror.NoExistf("ipc: unknown method %q", method)
 }
 
-// VGlob implements the Invoker.VGlobber interface.
+// VGlob implements the Invoker.Globber interface.
 func (ri reflectInvoker) VGlob() *GlobState {
 	return determineGlobState(ri.rcvr.Interface())
 }
@@ -292,7 +292,7 @@ func newReflectInfo(obj interface{}) *reflectInfo {
 // determineGlobState determines whether and how obj implements Glob.  Returns
 // nil iff obj doesn't implement Glob, based solely on the type of obj.
 func determineGlobState(obj interface{}) *GlobState {
-	if x, ok := obj.(VGlobber); ok {
+	if x, ok := obj.(Globber); ok {
 		return x.VGlob()
 	}
 	return NewGlobState(obj)
@@ -347,7 +347,7 @@ var (
 	rtServerContext        = reflect.TypeOf((*ServerContext)(nil)).Elem()
 	rtBool                 = reflect.TypeOf(bool(false))
 	rtError                = reflect.TypeOf((*error)(nil)).Elem()
-	rtSliceOfString        = reflect.TypeOf([]string{})
+	rtStringChan           = reflect.TypeOf((<-chan string)(nil))
 	rtPtrToGlobState       = reflect.TypeOf((*GlobState)(nil))
 	rtSliceOfInterfaceDesc = reflect.TypeOf([]InterfaceDesc{})
 
@@ -358,7 +358,7 @@ var (
 	ErrNonRPCMethod      = verror.BadArgf("Non-rpc method.  We require at least 1 in-arg." + useContext)
 	ErrInServerCall      = verror.Abortedf("Context arg ipc.ServerCall is invalid; cannot determine streaming types." + forgotWrap)
 	ErrBadVGlob          = verror.Abortedf("VGlob must have signature VGlob() *ipc.GlobState")
-	ErrBadVGlobChildren  = verror.Abortedf("VGlobChildren must have signature VGlobChildren() ([]string, error)")
+	ErrBadGlobChildren   = verror.Abortedf("GlobChildren__ must have signature GlobChildren__() (<-chan string, error)")
 )
 
 func typeCheckMethod(method reflect.Method, sig *MethodSig) verror.E {
@@ -419,11 +419,11 @@ func typeCheckReservedMethod(method reflect.Method) verror.E {
 			return ErrBadVGlob
 		}
 		return ErrReservedMethod
-	case "VGlobChildren":
-		// VGlobChildren() ([]string, error)
+	case "GlobChildren__":
+		// GlobChildren() (<-chan string, error)
 		if t := method.Type; t.NumIn() != 1 || t.NumOut() != 2 ||
-			t.Out(0) != rtSliceOfString || t.Out(1) != rtError {
-			return ErrBadVGlobChildren
+			t.Out(0) != rtStringChan || t.Out(1) != rtError {
+			return ErrBadGlobChildren
 		}
 		return ErrReservedMethod
 	}
