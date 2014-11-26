@@ -116,6 +116,26 @@ type authorizer struct {
 }
 
 func (a *authorizer) Authorize(ctx security.Context) error {
+	// TODO(ashankar,toddw,jsimsa): Hack for the Signature RPC.
+	//
+	// The vdl-compiler generates a "Signature" method, but that method
+	// does not have any access tags associated with it (and since the
+	// space of access tags is customizable by the application developer,
+	// there is no way for the vdl-compiler to know the right tag to put).
+	// As a result, the Signature method ends up with no ACL and thus
+	// all blessings are disallowed.
+	//
+	// As of December 2014, Todd was working on a different scheme for these
+	// generated methods, making them "reserved" methods. Once that mechanism
+	// is in place, remove this hack and all reserved methods will use an
+	// access policy appropriate for them and distinct from the access policy
+	// for application methods.
+	//
+	// In the mean time, we risk leaking the interface description to all
+	// principals in the world.
+	if ctx.Method() == "Signature" {
+		return nil
+	}
 	// "Self-RPCs" are always authorized.
 	if l, r := ctx.LocalBlessings(), ctx.RemoteBlessings(); l != nil && r != nil && reflect.DeepEqual(l.PublicKey(), r.PublicKey()) {
 		return nil
