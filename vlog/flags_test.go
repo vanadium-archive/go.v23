@@ -50,7 +50,10 @@ func child(stdin io.Reader, stdout, stderr io.Writer, env map[string]string, arg
 }
 
 func TestFlags(t *testing.T) {
-	sh := modules.NewShell()
+	sh, err := modules.NewShell(nil)
+	if err != nil {
+		t.Fatalf("unexpected error: %s", err)
+	}
 	defer sh.Cleanup(nil, nil)
 	h, err := sh.Start("child", nil)
 	if err != nil {
