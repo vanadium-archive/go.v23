@@ -3,25 +3,31 @@ package vdlutil
 import (
 	"encoding/gob"
 
+	"veyron.io/veyron/veyron2/vdl"
 	"veyron.io/veyron/veyron2/vom"
 )
 
-// TODO(toddw): Move Any into veyron2/vdl as AnyRep, and remove this file
-// completely, when vom2 is deployed.  We don't need RegisterType in vom2, but
-// still need it for vom1 to work.
+// TODO(toddw): Move the contents of this file to the vdl package after the vom2
+// transition.  We can't just move it now since vom has too many bad
+// dependencies that we don't want to pull in to the vdl package.
 
 // Any represents a value of the Any type in generated Go code.  We define a
 // special type rather than just using interface{} in generated code, to make it
 // easy to identify and add special-casing later.
+//
+// TODO(toddw): Rename to AnyRep
 type Any interface{}
 
-// RegisterType is like gob.Register() - it must be called to register the
-// concrete types you'll be sending through the Any type.
-func RegisterType(value interface{}) {
-	gob.Register(value)
-	vom.Register(value)
+func init() {
+	// TODO(toddw): Remove this call after the vom2 transition.
+	vom.Register((*Any)(nil))
 }
 
-func init() {
-	RegisterType((*Any)(nil))
+// Register is a convenience that registers the value with gob, vom and vdl.
+// TODO(toddw): Remove after the vom2 transition, and change calls to
+// vdl.Register.
+func Register(value interface{}) {
+	gob.Register(value)
+	vom.Register(value)
+	vdl.Register(value)
 }

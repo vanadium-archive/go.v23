@@ -10,6 +10,7 @@ import (
 	__veyron2 "veyron.io/veyron/veyron2"
 	__context "veyron.io/veyron/veyron2/context"
 	__ipc "veyron.io/veyron/veyron2/ipc"
+	__vdl "veyron.io/veyron/veyron2/vdl"
 	__vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
 	__wiretype "veyron.io/veyron/veyron2/wiretype"
 )
@@ -32,6 +33,15 @@ const _ = __wiretype.TypeIDInvalid
 type Task struct {
 	Progress int32
 	Goal     int32
+}
+
+func (Task) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/services/mgmt/appcycle.Task"
+}) {
+}
+
+func init() {
+	__vdl.Register(Task{})
 }
 
 // AppCycleClientMethods is the client interface

@@ -31,14 +31,13 @@ func NewDecoder(r io.Reader) (*Decoder, error) {
 	buf, types := newDecbuf(r), newDecoderTypes()
 	magic, err := buf.PeekByte()
 	if err != nil {
-		return nil, err
+		return nil, verror.BadProtocolf("error reading magic byte %v", err)
 	}
-	if magic == binaryMagicByte {
-		buf.Skip(1)
-		return &Decoder{newBinaryDecoder(buf, types)}, nil
+	if magic != binaryMagicByte {
+		return nil, verror.BadProtocolf("bad magic byte, got %x, want %x", magic, binaryMagicByte)
 	}
-	// TODO(toddw): Implement JSON decoder
-	return nil, errTODO
+	buf.Skip(1)
+	return &Decoder{newBinaryDecoder(buf, types)}, nil
 }
 
 // Decode reads the next value from the reader and stores it in value v.

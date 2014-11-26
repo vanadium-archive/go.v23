@@ -6,6 +6,7 @@ package types
 
 import (
 	// The non-user imports are prefixed with "__" to prevent collisions.
+	__vdl "veyron.io/veyron/veyron2/vdl"
 	__verror "veyron.io/veyron/veyron2/verror"
 )
 
@@ -15,6 +16,15 @@ type LogEntry struct {
 	Position int64
 	// The content of the log entry.
 	Line string
+}
+
+func (LogEntry) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/services/mgmt/logreader/types.LogEntry"
+}) {
+}
+
+func init() {
+	__vdl.Register(LogEntry{})
 }
 
 // A special NumEntries value that indicates that all entries should be

@@ -292,7 +292,7 @@ func (x nEnum) String() string {
 	return ""
 }
 
-func (nEnum) __DescribeEnum(struct{ A, B, C, ABC nEnum }) {}
+func (nEnum) __VDLReflect(struct{ Enum struct{ A, B, C, ABC string } }) {}
 
 var enumTypeN = vdl.NamedType("nEnum", vdl.EnumType("A", "B", "C", "ABC"))
 
@@ -301,58 +301,62 @@ type (
 	nOneOfABC interface {
 		Index() int
 		Name() string
-		__DescribeOneOf(__nOneOfABCDesc)
+		__VDLReflect(__nOneOfABCReflect)
 	}
 	nOneOfABCA struct{ Value bool }
 	nOneOfABCB struct{ Value string }
 	nOneOfABCC struct{ Value nStructInt64 }
 
-	__nOneOfABCDesc struct {
-		nOneOfABC
-		A nOneOfABCA
-		B nOneOfABCB
-		C nOneOfABCC
+	__nOneOfABCReflect struct {
+		Type  nOneOfABC
+		OneOf struct {
+			A nOneOfABCA
+			B nOneOfABCB
+			C nOneOfABCC
+		}
 	}
 )
 
 func (nOneOfABCA) Name() string                    { return "A" }
 func (nOneOfABCA) Index() int                      { return 0 }
-func (nOneOfABCA) __DescribeOneOf(__nOneOfABCDesc) {}
+func (nOneOfABCA) __VDLReflect(__nOneOfABCReflect) {}
 func (nOneOfABCB) Name() string                    { return "B" }
 func (nOneOfABCB) Index() int                      { return 1 }
-func (nOneOfABCB) __DescribeOneOf(__nOneOfABCDesc) {}
+func (nOneOfABCB) __VDLReflect(__nOneOfABCReflect) {}
 func (nOneOfABCC) Name() string                    { return "C" }
 func (nOneOfABCC) Index() int                      { return 2 }
-func (nOneOfABCC) __DescribeOneOf(__nOneOfABCDesc) {}
+func (nOneOfABCC) __VDLReflect(__nOneOfABCReflect) {}
 
 // oneof{B string;C nStructInt64;D int64}
 type (
 	nOneOfBCD interface {
 		Index() int
 		Name() string
-		__DescribeOneOf(__nOneOfBCDDesc)
+		__VDLReflect(__nOneOfBCDDesc)
 	}
 	nOneOfBCDB struct{ Value string }
 	nOneOfBCDC struct{ Value nStructInt64 }
 	nOneOfBCDD struct{ Value int64 }
 
 	__nOneOfBCDDesc struct {
-		nOneOfBCD
-		B nOneOfBCDB
-		C nOneOfBCDC
-		D nOneOfBCDD
+		Type  nOneOfBCD
+		OneOf struct {
+			B nOneOfBCDB
+			C nOneOfBCDC
+			D nOneOfBCDD
+		}
 	}
 )
 
-func (nOneOfBCDB) Name() string                    { return "B" }
-func (nOneOfBCDB) Index() int                      { return 0 }
-func (nOneOfBCDB) __DescribeOneOf(__nOneOfBCDDesc) {}
-func (nOneOfBCDC) Name() string                    { return "C" }
-func (nOneOfBCDC) Index() int                      { return 1 }
-func (nOneOfBCDC) __DescribeOneOf(__nOneOfBCDDesc) {}
-func (nOneOfBCDD) Name() string                    { return "D" }
-func (nOneOfBCDD) Index() int                      { return 2 }
-func (nOneOfBCDD) __DescribeOneOf(__nOneOfBCDDesc) {}
+func (nOneOfBCDB) Name() string                 { return "B" }
+func (nOneOfBCDB) Index() int                   { return 0 }
+func (nOneOfBCDB) __VDLReflect(__nOneOfBCDDesc) {}
+func (nOneOfBCDC) Name() string                 { return "C" }
+func (nOneOfBCDC) Index() int                   { return 1 }
+func (nOneOfBCDC) __VDLReflect(__nOneOfBCDDesc) {}
+func (nOneOfBCDD) Name() string                 { return "D" }
+func (nOneOfBCDD) Index() int                   { return 2 }
+func (nOneOfBCDD) __VDLReflect(__nOneOfBCDDesc) {}
 
 var (
 	structInt64TypeN = vdl.NamedType("veyron.io/veyron/veyron2/vdl/valconv.nStructInt64", vdl.StructType(vdl.Field{"X", vdl.Int64Type}))

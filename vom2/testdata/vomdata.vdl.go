@@ -16,6 +16,15 @@ type TestCase struct {
 	Hex   string        // Hex pattern representing vom encoding of Value
 }
 
+func (TestCase) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vom2/testdata.TestCase"
+}) {
+}
+
+func init() {
+	__vdl.Register(TestCase{})
+}
+
 // Tests contains the testcases to use to test vom encoding and decoding.
 //
 // TODO(toddw): Add hex breakdown comments for each testcase.
@@ -564,7 +573,7 @@ var Tests = []TestCase{
 				4,
 				2,
 			},
-			{},
+			nil,
 			{
 				99,
 			},
@@ -718,32 +727,32 @@ var Tests = []TestCase{
 	},
 	{
 		Name:  "typeobject([]uint64)",
-		Value: __vdl.TypeOf([]uint64{}),
+		Value: __vdl.TypeOf([]uint64(nil)),
 		Hex:   "80ff8104130208000441",
 	},
 	{
 		Name:  "typeobject(NListUint64)",
-		Value: __vdl.TypeOf(NListUint64{}),
+		Value: __vdl.TypeOf(NListUint64(nil)),
 		Hex:   "80ff8138130132766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e4c69737455696e7436340208000441",
 	},
 	{
 		Name:  "typeobject(set[uint64])",
-		Value: __vdl.TypeOf(map[uint64]struct{}{}),
+		Value: __vdl.TypeOf(map[uint64]struct{}(nil)),
 		Hex:   "80ff8104140208000441",
 	},
 	{
 		Name:  "typeobject(NSetUint64)",
-		Value: __vdl.TypeOf(NSetUint64{}),
+		Value: __vdl.TypeOf(NSetUint64(nil)),
 		Hex:   "80ff8137140131766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e53657455696e7436340208000441",
 	},
 	{
 		Name:  "typeobject(map[uint64]string)",
-		Value: __vdl.TypeOf(map[uint64]string{}),
+		Value: __vdl.TypeOf(map[uint64]string(nil)),
 		Hex:   "80ff81061502080304000441",
 	},
 	{
 		Name:  "typeobject(NMapUint64String)",
-		Value: __vdl.TypeOf(NMapUint64String{}),
+		Value: __vdl.TypeOf(NMapUint64String(nil)),
 		Hex:   "80ff813f150137766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e4d617055696e743634537472696e6702080304000441",
 	},
 	{

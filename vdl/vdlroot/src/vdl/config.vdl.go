@@ -4,6 +4,11 @@
 // Package vdl describes the configuration for the vdl tool.
 package vdl
 
+import (
+	// The non-user imports are prefixed with "__" to prevent collisions.
+	__vdl "veyron.io/veyron/veyron2/vdl"
+)
+
 // Config specifies the configuration for the vdl tool.  This is typically
 // represented in optional "vdl.config" files in each vdl source package.  Each
 // "vdl.config" file implicitly imports this package.  E.g. you may refer to
@@ -16,6 +21,11 @@ type Config struct {
 	Go         GoConfig
 	Java       JavaConfig
 	Javascript JavascriptConfig
+}
+
+func (Config) __VDLReflect(struct {
+	Name string "vdl.Config"
+}) {
 }
 
 // GenLanguage enumerates the known code generation languages.
@@ -68,8 +78,11 @@ func (x GenLanguage) String() string {
 	return ""
 }
 
-// __DescribeEnum describes the GenLanguage enum type.
-func (GenLanguage) __DescribeEnum(struct{ Go, Java, Javascript GenLanguage }) {}
+func (GenLanguage) __VDLReflect(struct {
+	Name string "vdl.GenLanguage"
+	Enum struct{ Go, Java, Javascript string }
+}) {
+}
 
 // GoConfig specifies go specific configuration.
 type GoConfig struct {
@@ -77,10 +90,33 @@ type GoConfig struct {
 	NoFmt bool
 }
 
+func (GoConfig) __VDLReflect(struct {
+	Name string "vdl.GoConfig"
+}) {
+}
+
 // JavaConfig specifies java specific configuration.
 type JavaConfig struct {
 }
 
+func (JavaConfig) __VDLReflect(struct {
+	Name string "vdl.JavaConfig"
+}) {
+}
+
 // JavascriptConfig specifies javascript specific configuration.
 type JavascriptConfig struct {
+}
+
+func (JavascriptConfig) __VDLReflect(struct {
+	Name string "vdl.JavascriptConfig"
+}) {
+}
+
+func init() {
+	__vdl.Register(Config{})
+	__vdl.Register(GenLanguageGo)
+	__vdl.Register(GoConfig{})
+	__vdl.Register(JavaConfig{})
+	__vdl.Register(JavascriptConfig{})
 }

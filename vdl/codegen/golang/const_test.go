@@ -30,6 +30,11 @@ func TestConst(t *testing.T) {
 		{"Complex64", vdl.Complex64Value(1 + 2i), `complex64(1+2i)`},
 		{"Complex128", vdl.Complex128Value(3 + 4i), `complex128(3+4i)`},
 		{"Enum", vdl.ZeroValue(tEnum).AssignEnumLabel("B"), `TestEnumB`},
+		{"EmptyArray", vEmptyArray, "[3]string{}"},
+		{"EmptyList", vEmptyList, "[]string(nil)"},
+		{"EmptySet", vEmptySet, "map[string]struct{}(nil)"},
+		{"EmptyMap", vEmptyMap, "map[string]int64(nil)"},
+		{"EmptyStruct", vEmptyStruct, "TestStruct{}"},
 		{"Array", vArray, `[3]string{
 "A",
 "B",
@@ -64,9 +69,9 @@ B: 123,
 		{"TypeObjectComplex64", vdl.TypeObjectValue(vdl.Complex64Type), `__vdl.TypeOf(complex64(0))`},
 		{"TypeObjectEnum", vdl.TypeObjectValue(tEnum), `__vdl.TypeOf(TestEnumA)`},
 		{"TypeObjectArray", vdl.TypeObjectValue(tArray), `__vdl.TypeOf([3]string{})`},
-		{"TypeObjectList", vdl.TypeObjectValue(tList), `__vdl.TypeOf([]string{})`},
-		{"TypeObjectSet", vdl.TypeObjectValue(tSet), `__vdl.TypeOf(map[string]struct{}{})`},
-		{"TypeObjectMap", vdl.TypeObjectValue(tMap), `__vdl.TypeOf(map[string]int64{})`},
+		{"TypeObjectList", vdl.TypeObjectValue(tList), `__vdl.TypeOf([]string(nil))`},
+		{"TypeObjectSet", vdl.TypeObjectValue(tSet), `__vdl.TypeOf(map[string]struct{}(nil))`},
+		{"TypeObjectMap", vdl.TypeObjectValue(tMap), `__vdl.TypeOf(map[string]int64(nil))`},
 		{"TypeObjectStruct", vdl.TypeObjectValue(tStruct), `__vdl.TypeOf(TestStruct{})`},
 		{"TypeObjectOneOf", vdl.TypeObjectValue(tOneOf), `__vdl.TypeOf(TestOneOf(TestOneOfA{""}))`},
 		{"TypeObjectAny", vdl.TypeObjectValue(vdl.AnyType), `__vdl.TypeOf((*__vdlutil.Any)(nil))`},
@@ -82,6 +87,12 @@ B: 123,
 }
 
 var (
+	vEmptyArray  = vdl.ZeroValue(tArray)
+	vEmptyList   = vdl.ZeroValue(tList)
+	vEmptySet    = vdl.ZeroValue(tSet)
+	vEmptyMap    = vdl.ZeroValue(tMap)
+	vEmptyStruct = vdl.ZeroValue(tStruct)
+
 	vArray    = vdl.ZeroValue(tArray)
 	vList     = vdl.ZeroValue(tList)
 	vSet      = vdl.ZeroValue(tSet)

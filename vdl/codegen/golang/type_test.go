@@ -96,11 +96,19 @@ func (x TestEnum) String() string {
 	return ""
 }
 
-// __DescribeEnum describes the TestEnum enum type.
-func (TestEnum) __DescribeEnum(struct{ A, B, C TestEnum }) {}`},
+func (TestEnum) __VDLReflect(struct{
+	Name string "TestEnum"
+	Enum struct{ A, B, C string }
+}) {
+}`},
 		{tStruct, `type TestStruct struct {
 	A string
 	B int64
+}
+
+func (TestStruct) __VDLReflect(struct{
+	Name string "TestStruct"
+}) {
 }`},
 		{tOneOf, `type (
 	// TestOneOf represents any single field of the TestOneOf oneof type.
@@ -109,28 +117,31 @@ func (TestEnum) __DescribeEnum(struct{ A, B, C TestEnum }) {}`},
 		Index() int
 		// Name returns the field name.
 		Name() string
-		// __DescribeOneOf describes the TestOneOf oneof type.
-		__DescribeOneOf(__TestOneOfDesc)
+		// __VDLReflect describes the TestOneOf oneof type.
+		__VDLReflect(__TestOneOfReflect)
 	}
 	// TestOneOfA represents field A of the TestOneOf oneof type.
 	TestOneOfA struct{ Value string }
 	// TestOneOfB represents field B of the TestOneOf oneof type.
 	TestOneOfB struct{ Value int64 }
-	// __TestOneOfDesc describes the TestOneOf oneof type.
-	__TestOneOfDesc struct {
-		TestOneOf
-		A TestOneOfA
-		B TestOneOfB
+	// __TestOneOfReflect describes the TestOneOf oneof type.
+	__TestOneOfReflect struct {
+		Name string "TestOneOf"
+		Type TestOneOf
+		OneOf struct {
+			A TestOneOfA
+			B TestOneOfB
+		}
 	}
 )
 
 func (TestOneOfA) Index() int { return 0 }
 func (TestOneOfA) Name() string { return "A" }
-func (TestOneOfA) __DescribeOneOf(__TestOneOfDesc) {}
+func (TestOneOfA) __VDLReflect(__TestOneOfReflect) {}
 
 func (TestOneOfB) Index() int { return 1 }
 func (TestOneOfB) Name() string { return "B" }
-func (TestOneOfB) __DescribeOneOf(__TestOneOfDesc) {}`},
+func (TestOneOfB) __VDLReflect(__TestOneOfReflect) {}`},
 	}
 	data := goData{Env: compile.NewEnv(-1)}
 	for _, test := range tests {

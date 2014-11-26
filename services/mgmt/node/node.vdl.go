@@ -14,6 +14,7 @@ import (
 	__veyron2 "veyron.io/veyron/veyron2"
 	__context "veyron.io/veyron/veyron2/context"
 	__ipc "veyron.io/veyron/veyron2/ipc"
+	__vdl "veyron.io/veyron/veyron2/vdl"
 	__vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
 	__wiretype "veyron.io/veyron/veyron2/wiretype"
 )
@@ -36,11 +37,26 @@ type Description struct {
 	Profiles map[string]struct{}
 }
 
+func (Description) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/services/mgmt/node.Description"
+}) {
+}
+
 // Association is a tuple containing an association between a Veyron
 // identity and a system account name.
 type Association struct {
 	IdentityName string
 	AccountName  string
+}
+
+func (Association) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/services/mgmt/node.Association"
+}) {
+}
+
+func init() {
+	__vdl.Register(Description{})
+	__vdl.Register(Association{})
 }
 
 // ApplicationClientMethods is the client interface

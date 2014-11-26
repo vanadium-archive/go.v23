@@ -19,6 +19,7 @@ var (
 // connections, for proxying (though global uniqueness is not strictly
 // required) and determining if different names resolve to the same endpoint.
 type RoutingID struct {
+	// TODO(toddw): This can't be encoded via vom2, since no fields are exported.
 	value [routingIDLength]byte
 }
 

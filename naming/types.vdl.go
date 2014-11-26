@@ -3,8 +3,18 @@
 
 package naming
 
+import (
+	// The non-user imports are prefixed with "__" to prevent collisions.
+	__vdl "veyron.io/veyron/veyron2/vdl"
+)
+
 // MountFlag is a bit mask of options to the mount call.
 type MountFlag uint32
+
+func (MountFlag) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/naming.MountFlag"
+}) {
+}
 
 // VDLMountedServer represents a server mounted on a specific name.
 type VDLMountedServer struct {
@@ -12,6 +22,11 @@ type VDLMountedServer struct {
 	Server string
 	// TTL is the remaining time (in seconds) before the mount entry expires.
 	TTL uint32
+}
+
+func (VDLMountedServer) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/naming.VDLMountedServer"
+}) {
 }
 
 // MountEntry represents a given name mounted in the mounttable.
@@ -22,6 +37,17 @@ type VDLMountEntry struct {
 	Servers []VDLMountedServer
 	// MT is true if the servers represent mount tables.
 	MT bool
+}
+
+func (VDLMountEntry) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/naming.VDLMountEntry"
+}) {
+}
+
+func init() {
+	__vdl.Register(MountFlag(0))
+	__vdl.Register(VDLMountedServer{})
+	__vdl.Register(VDLMountEntry{})
 }
 
 const Replace = MountFlag(1) // Replace means the mount should replace what is currently at the mount point

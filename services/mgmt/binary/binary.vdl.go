@@ -5,6 +5,11 @@
 // application binaries.
 package binary
 
+import (
+	// The non-user imports are prefixed with "__" to prevent collisions.
+	__vdl "veyron.io/veyron/veyron2/vdl"
+)
+
 // Description describes a binary. Binaries are named and have been
 // determined to run on some set of profiles. The mechanism for
 // determing profiles is specifically not specified and left to the
@@ -27,12 +32,27 @@ type Description struct {
 	Profiles map[string]bool
 }
 
+func (Description) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/services/mgmt/binary.Description"
+}) {
+}
+
 // PartInfo holds information describing a binary part.
 type PartInfo struct {
 	// Checksum holds the hex-encoded MD5 checksum of the binary part.
 	Checksum string
 	// Size holds the binary part size in bytes.
 	Size int64
+}
+
+func (PartInfo) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/services/mgmt/binary.PartInfo"
+}) {
+}
+
+func init() {
+	__vdl.Register(Description{})
+	__vdl.Register(PartInfo{})
 }
 
 const MissingChecksum = ""

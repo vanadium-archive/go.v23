@@ -109,7 +109,7 @@ func (c peerBlessingsCaveat) Validate(ctx Context) error {
 // to another principal.
 func UnconstrainedUse() Caveat { return Caveat{} }
 
-func isUnconstrainedUseCaveat(c Caveat) bool { return c.ValidatorVOM == nil }
+func isUnconstrainedUseCaveat(c Caveat) bool { return len(c.ValidatorVOM) == 0 }
 
 // NewPublicKeyCaveat returns a security.ThirdPartyCaveat which requires a
 // discharge from a principal identified by the public key 'key' and present

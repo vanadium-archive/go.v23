@@ -5,11 +5,19 @@ package vtrace
 
 import (
 	"veyron.io/veyron/veyron2/uniqueid"
+
+	// The non-user imports are prefixed with "__" to prevent collisions.
+	__vdl "veyron.io/veyron/veyron2/vdl"
 )
 
 type TraceRecord struct {
 	ID    uniqueid.ID
 	Spans []SpanRecord
+}
+
+func (TraceRecord) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vtrace.TraceRecord"
+}) {
 }
 
 // An Annotation represents data that is relevant at a specific moment.
@@ -21,6 +29,11 @@ type Annotation struct {
 	// The annotation message.
 	// TODO(mattr): Allow richer annotations.
 	Message string
+}
+
+func (Annotation) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vtrace.Annotation"
+}) {
 }
 
 // A SpanRecord is the wire format for a Span.
@@ -36,16 +49,31 @@ type SpanRecord struct {
 	Annotations []Annotation
 }
 
+func (SpanRecord) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vtrace.SpanRecord"
+}) {
+}
+
 // TraceMethod specifies the mechanism by which this trace's data should
 // be collected (if it is to be collected at all).
 // TODO(mattr): This should be an enum or perhaps flags.
 type TraceMethod int32
+
+func (TraceMethod) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vtrace.TraceMethod"
+}) {
+}
 
 // Request is the object that carries trace informtion between processes.
 type Request struct {
 	SpanID  uniqueid.ID // The ID of the span that originated the RPC call.
 	TraceID uniqueid.ID // The ID of the trace this call is a part of.
 	Method  TraceMethod // The method of collection for the trace.
+}
+
+func (Request) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vtrace.Request"
+}) {
 }
 
 type Response struct {
@@ -56,6 +84,20 @@ type Response struct {
 	// Trace is collected trace data.  This may be empty.
 	// TODO(mattr): This should be optional if we support that feature.
 	Trace TraceRecord
+}
+
+func (Response) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vtrace.Response"
+}) {
+}
+
+func init() {
+	__vdl.Register(TraceRecord{})
+	__vdl.Register(Annotation{})
+	__vdl.Register(SpanRecord{})
+	__vdl.Register(TraceMethod(0))
+	__vdl.Register(Request{})
+	__vdl.Register(Response{})
 }
 
 // None means that the trace should not be collected.

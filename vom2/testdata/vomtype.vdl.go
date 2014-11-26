@@ -3,46 +3,146 @@
 
 package testdata
 
+import (
+	// The non-user imports are prefixed with "__" to prevent collisions.
+	__vdl "veyron.io/veyron/veyron2/vdl"
+)
+
 type NBool bool
+
+func (NBool) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vom2/testdata.NBool"
+}) {
+}
 
 type NString string
 
+func (NString) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vom2/testdata.NString"
+}) {
+}
+
 type NByteSlice []byte
+
+func (NByteSlice) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vom2/testdata.NByteSlice"
+}) {
+}
 
 type NByte byte
 
+func (NByte) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vom2/testdata.NByte"
+}) {
+}
+
 type NUint16 uint16
+
+func (NUint16) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vom2/testdata.NUint16"
+}) {
+}
 
 type NUint32 uint32
 
+func (NUint32) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vom2/testdata.NUint32"
+}) {
+}
+
 type NUint64 uint64
+
+func (NUint64) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vom2/testdata.NUint64"
+}) {
+}
 
 type NInt16 int16
 
+func (NInt16) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vom2/testdata.NInt16"
+}) {
+}
+
 type NInt32 int32
+
+func (NInt32) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vom2/testdata.NInt32"
+}) {
+}
 
 type NInt64 int64
 
+func (NInt64) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vom2/testdata.NInt64"
+}) {
+}
+
 type NFloat32 float32
+
+func (NFloat32) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vom2/testdata.NFloat32"
+}) {
+}
 
 type NFloat64 float64
 
+func (NFloat64) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vom2/testdata.NFloat64"
+}) {
+}
+
 type NComplex64 complex64
+
+func (NComplex64) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vom2/testdata.NComplex64"
+}) {
+}
 
 type NComplex128 complex128
 
+func (NComplex128) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vom2/testdata.NComplex128"
+}) {
+}
+
 type NArray2Uint64 [2]uint64
+
+func (NArray2Uint64) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vom2/testdata.NArray2Uint64"
+}) {
+}
 
 type NListUint64 []uint64
 
+func (NListUint64) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vom2/testdata.NListUint64"
+}) {
+}
+
 type NSetUint64 map[uint64]struct{}
 
+func (NSetUint64) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vom2/testdata.NSetUint64"
+}) {
+}
+
 type NMapUint64String map[uint64]string
+
+func (NMapUint64String) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vom2/testdata.NMapUint64String"
+}) {
+}
 
 type NStruct struct {
 	A bool
 	B string
 	C int64
+}
+
+func (NStruct) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vom2/testdata.NStruct"
+}) {
 }
 
 type NEnum int
@@ -94,8 +194,11 @@ func (x NEnum) String() string {
 	return ""
 }
 
-// __DescribeEnum describes the NEnum enum type.
-func (NEnum) __DescribeEnum(struct{ A, B, C NEnum }) {}
+func (NEnum) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vom2/testdata.NEnum"
+	Enum struct{ A, B, C string }
+}) {
+}
 
 type (
 	// NOneOf represents any single field of the NOneOf oneof type.
@@ -104,8 +207,8 @@ type (
 		Index() int
 		// Name returns the field name.
 		Name() string
-		// __DescribeOneOf describes the NOneOf oneof type.
-		__DescribeOneOf(__NOneOfDesc)
+		// __VDLReflect describes the NOneOf oneof type.
+		__VDLReflect(__NOneOfReflect)
 	}
 	// NOneOfA represents field A of the NOneOf oneof type.
 	NOneOfA struct{ Value bool }
@@ -113,29 +216,37 @@ type (
 	NOneOfB struct{ Value string }
 	// NOneOfC represents field C of the NOneOf oneof type.
 	NOneOfC struct{ Value int64 }
-	// __NOneOfDesc describes the NOneOf oneof type.
-	__NOneOfDesc struct {
-		NOneOf
-		A NOneOfA
-		B NOneOfB
-		C NOneOfC
+	// __NOneOfReflect describes the NOneOf oneof type.
+	__NOneOfReflect struct {
+		Name  string "veyron.io/veyron/veyron2/vom2/testdata.NOneOf"
+		Type  NOneOf
+		OneOf struct {
+			A NOneOfA
+			B NOneOfB
+			C NOneOfC
+		}
 	}
 )
 
 func (NOneOfA) Index() int                   { return 0 }
 func (NOneOfA) Name() string                 { return "A" }
-func (NOneOfA) __DescribeOneOf(__NOneOfDesc) {}
+func (NOneOfA) __VDLReflect(__NOneOfReflect) {}
 
 func (NOneOfB) Index() int                   { return 1 }
 func (NOneOfB) Name() string                 { return "B" }
-func (NOneOfB) __DescribeOneOf(__NOneOfDesc) {}
+func (NOneOfB) __VDLReflect(__NOneOfReflect) {}
 
 func (NOneOfC) Index() int                   { return 2 }
 func (NOneOfC) Name() string                 { return "C" }
-func (NOneOfC) __DescribeOneOf(__NOneOfDesc) {}
+func (NOneOfC) __VDLReflect(__NOneOfReflect) {}
 
 // Nested Custom Types
 type MBool NBool
+
+func (MBool) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vom2/testdata.MBool"
+}) {
+}
 
 type MStruct struct {
 	A bool
@@ -144,6 +255,49 @@ type MStruct struct {
 	D *NStruct
 }
 
+func (MStruct) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vom2/testdata.MStruct"
+}) {
+}
+
 type MList []NListUint64
 
+func (MList) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vom2/testdata.MList"
+}) {
+}
+
 type MMap map[NFloat32]NListUint64
+
+func (MMap) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vom2/testdata.MMap"
+}) {
+}
+
+func init() {
+	__vdl.Register(NBool(false))
+	__vdl.Register(NString(""))
+	__vdl.Register(NByteSlice(""))
+	__vdl.Register(NByte(0))
+	__vdl.Register(NUint16(0))
+	__vdl.Register(NUint32(0))
+	__vdl.Register(NUint64(0))
+	__vdl.Register(NInt16(0))
+	__vdl.Register(NInt32(0))
+	__vdl.Register(NInt64(0))
+	__vdl.Register(NFloat32(0))
+	__vdl.Register(NFloat64(0))
+	__vdl.Register(NComplex64(0))
+	__vdl.Register(NComplex128(0))
+	__vdl.Register(NArray2Uint64{})
+	__vdl.Register(NListUint64(nil))
+	__vdl.Register(NSetUint64(nil))
+	__vdl.Register(NMapUint64String(nil))
+	__vdl.Register(NStruct{})
+	__vdl.Register(NEnumA)
+	__vdl.Register(NOneOf(NOneOfA{false}))
+	__vdl.Register(MBool(false))
+	__vdl.Register(MStruct{})
+	__vdl.Register(MList(nil))
+	__vdl.Register(MMap(nil))
+}

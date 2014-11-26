@@ -1,8 +1,6 @@
 package vom2
 
-import (
-	"io"
-)
+import "io"
 
 const minBufFree = 1024 // buffers always have at least 1K free after growth
 

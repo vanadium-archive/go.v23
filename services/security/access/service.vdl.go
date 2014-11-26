@@ -101,6 +101,7 @@ import (
 	__veyron2 "veyron.io/veyron/veyron2"
 	__context "veyron.io/veyron/veyron2/context"
 	__ipc "veyron.io/veyron/veyron2/ipc"
+	__vdl "veyron.io/veyron/veyron2/vdl"
 	__vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
 	__verror "veyron.io/veyron/veyron2/verror"
 	__wiretype "veyron.io/veyron/veyron2/wiretype"
@@ -133,6 +134,11 @@ type ACL struct {
 	NotIn []string
 }
 
+func (ACL) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/services/security/access.ACL"
+}) {
+}
+
 // TaggedACLMap maps string tags to access control lists specifying the
 // blessings required to invoke methods with that tag.
 //
@@ -142,12 +148,28 @@ type ACL struct {
 // (http://en.wikipedia.org/wiki/Role-based_access_control)
 type TaggedACLMap map[string]ACL
 
+func (TaggedACLMap) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/services/security/access.TaggedACLMap"
+}) {
+}
+
 // Tag is used to associate methods with an ACL in a TaggedACLMap.
 //
 // While services can define their own tag type and values, many
 // services should be able to use the type and values defined in
 // this package.
 type Tag string
+
+func (Tag) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/services/security/access.Tag"
+}) {
+}
+
+func init() {
+	__vdl.Register(ACL{})
+	__vdl.Register(TaggedACLMap(nil))
+	__vdl.Register(Tag(""))
+}
 
 const Admin = Tag("Admin") // Operations that require privileged access for object administration.
 

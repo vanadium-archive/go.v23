@@ -416,9 +416,10 @@ var rtErrorTests = []rtErrorTest{
 	{reflect.TypeOf(unsafe.Pointer(uintptr(0))), `type "unsafe.Pointer" not supported`},
 	{reflect.TypeOf(map[*int64]string{}), `invalid key "*int64" in "map[*int64]string"`},
 	{reflect.TypeOf(struct{ a int64 }{}), `type "struct { a int64 }" only has unexported fields`},
-	{reflect.TypeOf(nBadEnum1(0)), badEnum},
-	{reflect.TypeOf(nBadEnum2(0)), badEnum},
-	{reflect.TypeOf(nBadEnum3(0)), badEnum},
+	{reflect.TypeOf(nBadDescribe1{}), badDescribe},
+	{reflect.TypeOf(nBadDescribe2{}), badDescribe},
+	{reflect.TypeOf(nBadDescribe3{}), badDescribe},
+	{reflect.TypeOf(nBadEnumNoLabels(0)), `no labels`},
 	{reflect.TypeOf(nBadEnumString1(0)), badEnumString},
 	{reflect.TypeOf(nBadEnumString2(0)), badEnumString},
 	{reflect.TypeOf(nBadEnumString3(0)), badEnumString},
@@ -426,11 +427,8 @@ var rtErrorTests = []rtErrorTest{
 	{reflect.TypeOf(nBadEnumAssign2(0)), badEnumAssign},
 	{reflect.TypeOf(nBadEnumAssign3(0)), badEnumAssign},
 	{reflect.TypeOf(nBadEnumAssign4(0)), badEnumAssign},
-	{reflect.TypeOf(nBadOneOf1{}), badOneOf},
-	{reflect.TypeOf(nBadOneOf2{}), badOneOf},
-	{reflect.TypeOf(nBadOneOf3{}), badOneOf},
-	{reflect.TypeOf(nBadOneOf4{}), badOneOf},
-	{reflect.TypeOf(nBadOneOfUnexp{}), badOneOfUnexp},
+	{reflect.TypeOf(nBadOneOfNoFields{}), `no fields`},
+	{reflect.TypeOf(nBadOneOfUnexp{}), `must be exported`},
 	{reflect.TypeOf(nBadOneOfField1{}), badOneOfField},
 	{reflect.TypeOf(nBadOneOfField2{}), badOneOfField},
 	{reflect.TypeOf(nBadOneOfField3{}), badOneOfField},
@@ -439,141 +437,132 @@ var rtErrorTests = []rtErrorTest{
 }
 
 const (
-	badEnum       = `must have method __DescribeEnum(struct{...})`
+	badDescribe   = `invalid __VDLReflect (want __VDLReflect(struct{...}))`
 	badEnumString = `must have method String() string`
 	badEnumAssign = `must have pointer method Assign(string) bool`
-	badOneOf      = `must have method __DescribeOneOf(struct{...})`
-	badOneOfUnexp = `must be exported`
 	badOneOfField = `bad concrete field type`
 	badOneOfName  = `must have method Name() string`
 )
 
 type (
-	nBadEnum1       int
-	nBadEnum2       int
-	nBadEnum3       int
-	nBadEnumString1 int
-	nBadEnumString2 int
-	nBadEnumString3 int
-	nBadEnumAssign1 int
-	nBadEnumAssign2 int
-	nBadEnumAssign3 int
-	nBadEnumAssign4 int
+	nBadDescribe1 struct{}
+	nBadDescribe2 struct{}
+	nBadDescribe3 struct{}
 
-	nBadOneOf1      struct{}
-	nBadOneOf2      struct{}
-	nBadOneOf3      struct{}
-	nBadOneOf4      struct{}
-	nBadOneOfUnexp  struct{}
-	nBadOneOfField1 struct{}
-	nBadOneOfField2 struct{}
-	nBadOneOfField3 struct{}
-	nBadOneOfName1  struct{}
-	nBadOneOfName2  struct{}
+	nBadEnumNoLabels int
+	nBadEnumString1  int
+	nBadEnumString2  int
+	nBadEnumString3  int
+	nBadEnumAssign1  int
+	nBadEnumAssign2  int
+	nBadEnumAssign3  int
+	nBadEnumAssign4  int
+
+	nBadOneOfNoFields struct{}
+	nBadOneOfUnexp    struct{}
+	nBadOneOfField1   struct{}
+	nBadOneOfField2   struct{}
+	nBadOneOfField3   struct{}
+	nBadOneOfName1    struct{ Value bool }
+	nBadOneOfName2    struct{ Value bool }
 )
 
 // No description
-func (nBadEnum1) __DescribeEnum() { panic("X") }
+func (nBadDescribe1) __VDLReflect() { panic("X") }
 
 // In-arg isn't a struct
-func (nBadEnum2) __DescribeEnum(int) { panic("X") }
+func (nBadDescribe2) __VDLReflect(int) { panic("X") }
 
 // Can't have out-arg
-func (nBadEnum3) __DescribeEnum(struct{ A bool }) error { panic("X") }
+func (nBadDescribe3) __VDLReflect(struct{}) error { panic("X") }
+
+// No enum labels
+func (nBadEnumNoLabels) __VDLReflect(struct{ Enum struct{} }) { panic("X") }
 
 // No String method
-func (nBadEnumString1) __DescribeEnum(struct{ A bool }) { panic("X") }
+func (nBadEnumString1) __VDLReflect(struct{ Enum struct{ A string } }) { panic("X") }
 
 // String method isn't String() string
-func (nBadEnumString2) __DescribeEnum(struct{ A bool }) { panic("X") }
-func (nBadEnumString2) String()                         { panic("X") }
+func (nBadEnumString2) __VDLReflect(struct{ Enum struct{ A string } }) { panic("X") }
+func (nBadEnumString2) String()                                        { panic("X") }
 
 // String method isn't String() string
-func (nBadEnumString3) __DescribeEnum(struct{ A bool }) { panic("X") }
-func (nBadEnumString3) String() bool                    { panic("X") }
+func (nBadEnumString3) __VDLReflect(struct{ Enum struct{ A string } }) { panic("X") }
+func (nBadEnumString3) String() bool                                   { panic("X") }
 
 // No Assign method
-func (nBadEnumAssign1) __DescribeEnum(struct{ A bool }) { panic("X") }
-func (nBadEnumAssign1) String() string                  { panic("X") }
+func (nBadEnumAssign1) __VDLReflect(struct{ Enum struct{ A string } }) { panic("X") }
+func (nBadEnumAssign1) String() string                                 { panic("X") }
 
 // Assign method isn't Assign(string) bool
-func (nBadEnumAssign2) __DescribeEnum(struct{ A bool }) { panic("X") }
-func (nBadEnumAssign2) String() string                  { panic("X") }
-func (nBadEnumAssign2) Assign()                         { panic("X") }
+func (nBadEnumAssign2) __VDLReflect(struct{ Enum struct{ A string } }) { panic("X") }
+func (nBadEnumAssign2) String() string                                 { panic("X") }
+func (nBadEnumAssign2) Assign()                                        { panic("X") }
 
 // Assign method isn't Assign(string) bool
-func (nBadEnumAssign3) __DescribeEnum(struct{ A bool }) { panic("X") }
-func (nBadEnumAssign3) String() string                  { panic("X") }
-func (nBadEnumAssign3) Assign(bool) bool                { panic("X") }
+func (nBadEnumAssign3) __VDLReflect(struct{ Enum struct{ A string } }) { panic("X") }
+func (nBadEnumAssign3) String() string                                 { panic("X") }
+func (nBadEnumAssign3) Assign(bool) bool                               { panic("X") }
 
 // Assign method receiver isn't a pointer
-func (nBadEnumAssign4) __DescribeEnum(struct{ A bool }) { panic("X") }
-func (nBadEnumAssign4) String() string                  { panic("X") }
-func (nBadEnumAssign4) Assign(string) bool              { panic("X") }
+func (nBadEnumAssign4) __VDLReflect(struct{ Enum struct{ A string } }) { panic("X") }
+func (nBadEnumAssign4) String() string                                 { panic("X") }
+func (nBadEnumAssign4) Assign(string) bool                             { panic("X") }
 
-// No description
-func (nBadOneOf1) __DescribeOneOf() { panic("X") }
-
-// No oneof interface type in description
-func (nBadOneOf2) __DescribeOneOf(struct{}) { panic("X") }
-
-// No fields in description
-func (nBadOneOf3) __DescribeOneOf(struct{ nOneOf }) { panic("X") }
-
-// Can't have out-arg
-func (nBadOneOf4) __DescribeOneOf(struct {
-	nOneOf
-	A nOneOfA
-}) error {
+// No oneof fields
+func (nBadOneOfNoFields) __VDLReflect(struct {
+	Type  nOneOf
+	OneOf struct{}
+}) {
 	panic("X")
 }
 
 // Field name isn't exported
-func (nBadOneOfUnexp) __DescribeOneOf(struct {
-	nOneOf
-	a nOneOfA
+func (nBadOneOfUnexp) __VDLReflect(struct {
+	Type  nOneOf
+	OneOf struct{ a nOneOfA }
 }) {
 	panic("X")
 }
 
 // Field type isn't struct
-func (nBadOneOfField1) __DescribeOneOf(struct {
-	nOneOf
-	A bool
+func (nBadOneOfField1) __VDLReflect(struct {
+	Type  nOneOf
+	OneOf struct{ A bool }
 }) {
 	panic("X")
 }
 
 // Field type has no field
-func (nBadOneOfField2) __DescribeOneOf(struct {
-	nOneOf
-	A struct{}
+func (nBadOneOfField2) __VDLReflect(struct {
+	Type  nOneOf
+	OneOf struct{ A struct{} }
 }) {
 	panic("X")
 }
 
 // Field type name isn't "Value"
-func (nBadOneOfField3) __DescribeOneOf(struct {
-	nOneOf
-	A struct{ value bool }
+func (nBadOneOfField3) __VDLReflect(struct {
+	Type  nOneOf
+	OneOf struct{ A struct{ value bool } }
 }) {
 	panic("X")
 }
 
 // Name method isn't Name() string
 func (nBadOneOfName1) Name() { panic("X") }
-func (nBadOneOfName1) __DescribeOneOf(struct {
-	nOneOf
-	A struct{ Value bool }
+func (nBadOneOfName1) __VDLReflect(struct {
+	Type  nOneOf
+	OneOf struct{ A nBadOneOfName1 }
 }) {
 	panic("X")
 }
 
 // Name method isn't Name() string
 func (nBadOneOfName2) Name() bool { panic("X") }
-func (nBadOneOfName2) __DescribeOneOf(struct {
-	nOneOf
-	A struct{ Value bool }
+func (nBadOneOfName2) __VDLReflect(struct {
+	Type  nOneOf
+	OneOf struct{ A nBadOneOfName2 }
 }) {
 	panic("X")
 }

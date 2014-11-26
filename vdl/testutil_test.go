@@ -281,7 +281,7 @@ func (x nEnum) String() string {
 	return ""
 }
 
-func (nEnum) __DescribeEnum(struct{ A, B, C bool }) {}
+func (nEnum) __VDLReflect(struct{ Enum struct{ A, B, C string } }) {}
 
 // Special case oneof isn't regularly expressible in Go.
 //   type nOneOf oneof{A bool;B string;C int32}
@@ -289,29 +289,31 @@ type (
 	nOneOf interface {
 		Index() int
 		Name() string
-		__DescribeOneOf(__nOneOfDesc)
+		__VDLReflect(__nOneOfReflect)
 	}
 	nOneOfA struct{ Value bool }
 	nOneOfB struct{ Value string }
 	nOneOfC struct{ Value int32 }
 
-	__nOneOfDesc struct {
-		nOneOf
-		A nOneOfA
-		B nOneOfB
-		C nOneOfC
+	__nOneOfReflect struct {
+		Type  nOneOf
+		OneOf struct {
+			A nOneOfA
+			B nOneOfB
+			C nOneOfC
+		}
 	}
 )
 
 func (nOneOfA) Name() string                 { return "A" }
 func (nOneOfA) Index() int                   { return 0 }
-func (nOneOfA) __DescribeOneOf(__nOneOfDesc) {}
+func (nOneOfA) __VDLReflect(__nOneOfReflect) {}
 func (nOneOfB) Name() string                 { return "B" }
 func (nOneOfB) Index() int                   { return 1 }
-func (nOneOfB) __DescribeOneOf(__nOneOfDesc) {}
+func (nOneOfB) __VDLReflect(__nOneOfReflect) {}
 func (nOneOfC) Name() string                 { return "C" }
 func (nOneOfC) Index() int                   { return 2 }
-func (nOneOfC) __DescribeOneOf(__nOneOfDesc) {}
+func (nOneOfC) __VDLReflect(__nOneOfReflect) {}
 
 // Define a bunch of *Type types used in tests.
 var (

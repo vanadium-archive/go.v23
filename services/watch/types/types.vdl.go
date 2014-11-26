@@ -6,6 +6,7 @@ package types
 
 import (
 	// The non-user imports are prefixed with "__" to prevent collisions.
+	__vdl "veyron.io/veyron/veyron2/vdl"
 	__vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
 )
 
@@ -18,6 +19,11 @@ type GlobRequest struct {
 	// ResumeMarker specifies how to resume from a previous Watch call.
 	// See the ResumeMarker type for detailed comments.
 	ResumeMarker ResumeMarker
+}
+
+func (GlobRequest) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/services/watch/types.GlobRequest"
+}) {
 }
 
 // ResumeMarker specifies how much of the existing underlying state
@@ -53,6 +59,11 @@ type GlobRequest struct {
 // support resuming from a specific point.
 type ResumeMarker []byte
 
+func (ResumeMarker) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/services/watch/types.ResumeMarker"
+}) {
+}
+
 // Change is the new value for a watched entity.
 type Change struct {
 	// Name is the Object name of the entity that changed.  This name is relative
@@ -72,6 +83,17 @@ type Change struct {
 	// If true, this Change is followed by more Changes that are in the
 	// same group as this Change.
 	Continued bool
+}
+
+func (Change) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/services/watch/types.Change"
+}) {
+}
+
+func init() {
+	__vdl.Register(GlobRequest{})
+	__vdl.Register(ResumeMarker(""))
+	__vdl.Register(Change{})
 }
 
 // The entity exists and its full value is included in Value.

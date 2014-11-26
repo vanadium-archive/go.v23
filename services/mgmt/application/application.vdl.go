@@ -4,6 +4,11 @@
 // Package application defines the type for describing an application.
 package application
 
+import (
+	// The non-user imports are prefixed with "__" to prevent collisions.
+	__vdl "veyron.io/veyron/veyron2/vdl"
+)
+
 // Envelope is a collection of metadata that describes an application.
 type Envelope struct {
 	// Title is the publisher-assigned application title.  Application
@@ -32,6 +37,15 @@ type Envelope struct {
 	//
 	// Any number of packages may be specified.
 	Packages map[string]string
+}
+
+func (Envelope) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/services/mgmt/application.Envelope"
+}) {
+}
+
+func init() {
+	__vdl.Register(Envelope{})
 }
 
 // Node manager application envelopes must present this title.

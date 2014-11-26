@@ -7,6 +7,9 @@ import (
 	"veyron.io/veyron/veyron2/security"
 
 	"veyron.io/veyron/veyron2/vtrace"
+
+	// The non-user imports are prefixed with "__" to prevent collisions.
+	__vdl "veyron.io/veyron/veyron2/vdl"
 )
 
 // Request describes the request header sent by the client to the server.  A
@@ -50,6 +53,11 @@ type Request struct {
 	TraceRequest vtrace.Request
 }
 
+func (Request) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/ipc.Request"
+}) {
+}
+
 // Response describes the response header sent by the server to the client.  A
 // zero response header is sent before each streaming arg.  Thereafter a
 // non-zero response header is sent at the end of the RPC call, right before
@@ -67,6 +75,16 @@ type Response struct {
 	// TraceResponse maintains the vtrace context between clients and servers.
 	// In some cases trace data will be included in this response as well.
 	TraceResponse vtrace.Response
+}
+
+func (Response) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/ipc.Response"
+}) {
+}
+
+func init() {
+	__vdl.Register(Request{})
+	__vdl.Register(Response{})
 }
 
 // NoTimeout specifies that no timeout is desired.

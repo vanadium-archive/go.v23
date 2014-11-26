@@ -17,6 +17,7 @@ import (
 	__veyron2 "veyron.io/veyron/veyron2"
 	__context "veyron.io/veyron/veyron2/context"
 	__ipc "veyron.io/veyron/veyron2/ipc"
+	__vdl "veyron.io/veyron/veyron2/vdl"
 	__vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
 	__wiretype "veyron.io/veyron/veyron2/wiretype"
 )
@@ -30,6 +31,15 @@ const _ = __wiretype.TypeIDInvalid
 type MediaInfo struct {
 	Type     string // The media-type (RFC 2046)
 	Encoding string // The file encoding is optional and can be either "gzip" or "bzip2".
+}
+
+func (MediaInfo) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/services/mgmt/repository.MediaInfo"
+}) {
+}
+
+func init() {
+	__vdl.Register(MediaInfo{})
 }
 
 // ApplicationClientMethods is the client interface

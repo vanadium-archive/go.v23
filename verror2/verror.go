@@ -64,7 +64,7 @@ import "os"
 import "path/filepath"
 import "runtime"
 import "sync"
-import "veyron.io/veyron/veyron2/vom" // For type registration
+
 import "veyron.io/veyron/veyron2/context"
 import "veyron.io/veyron/veyron2/i18n"
 import "veyron.io/veyron/veyron2/verror" // While converting from verror to verror2
@@ -397,15 +397,17 @@ func dataFromContext(ctx context.T) (langID i18n.LangID, componentName string, o
 }
 
 // Standard is a standard implementation of E.
+//
+// This must be kept in sync with the vdl.ErrorType defined in
+// veyron.io/veyron/veyron2/vdl.
+//
+// TODO(toddw): Move this definition to a common vdl file, and change it to be a
+// better wire format (e.g. no nested structs).
 type Standard struct {
 	IDAction  IDAction
 	Msg       string        // Error message; empty if no language known.
 	ParamList []interface{} // The variadic parameters given to ExplicitMake().
 	stackPCs  []uintptr     // PCs of callers of *Make() and *Convert().
-}
-
-func init() {
-	vom.Register(Standard{})
 }
 
 // ErrorID returns the error id.

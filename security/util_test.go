@@ -12,6 +12,7 @@ import (
 	"strings"
 	"testing"
 
+	"veyron.io/veyron/veyron2/vdl/vdlutil"
 	"veyron.io/veyron/veyron2/vom"
 )
 
@@ -138,5 +139,5 @@ func matchesError(got error, want string) error {
 }
 
 func init() {
-	vom.Register(suffixCaveat(""))
+	vdlutil.Register(suffixCaveat(""))
 }

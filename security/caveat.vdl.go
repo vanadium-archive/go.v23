@@ -3,10 +3,20 @@
 
 package security
 
+import (
+	// The non-user imports are prefixed with "__" to prevent collisions.
+	__vdl "veyron.io/veyron/veyron2/vdl"
+)
+
 // unixTimeExpiryCaveat represents a caveat that validates iff the current
 // time is before the time specified in the caveat (in seconds since
 // January 1, 1970 UTC).
 type unixTimeExpiryCaveat int64
+
+func (unixTimeExpiryCaveat) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/security.unixTimeExpiryCaveat"
+}) {
+}
 
 // methodCaveat represents a caveat that validates iff the method being invoked
 // is included in this list. An empty list implies that no method can be
@@ -14,10 +24,20 @@ type unixTimeExpiryCaveat int64
 // but cannot act as a client).
 type methodCaveat []string
 
+func (methodCaveat) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/security.methodCaveat"
+}) {
+}
+
 // peerBlessingsCaveat represents a caveat that validates iff the peer being
 // communicated with presents a blessing that matches one of the patterns
 // included in this list.
 type peerBlessingsCaveat []BlessingPattern
+
+func (peerBlessingsCaveat) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/security.peerBlessingsCaveat"
+}) {
+}
 
 // publicKeyThirdPartyCaveat represents a third-party caveat that requires
 // discharges to be issued by a principal identified by a public key.
@@ -49,6 +69,11 @@ type publicKeyThirdPartyCaveat struct {
 	DischargerRequirements ThirdPartyRequirements
 }
 
+func (publicKeyThirdPartyCaveat) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/security.publicKeyThirdPartyCaveat"
+}) {
+}
+
 // publicKeyDischarge represents the discharge issued for publicKeyThirdPartyCaveats.
 //
 // The message digest of this structure is computed as follows:
@@ -59,4 +84,17 @@ type publicKeyDischarge struct {
 	ThirdPartyCaveatID string    // ID of the third party caveat for which this discharge was issued.
 	Caveats            []Caveat  // Caveats on the use of this discharge.
 	Signature          Signature // Signature of the content hash of this discharge by the discharger.
+}
+
+func (publicKeyDischarge) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/security.publicKeyDischarge"
+}) {
+}
+
+func init() {
+	__vdl.Register(unixTimeExpiryCaveat(0))
+	__vdl.Register(methodCaveat(nil))
+	__vdl.Register(peerBlessingsCaveat(nil))
+	__vdl.Register(publicKeyThirdPartyCaveat{})
+	__vdl.Register(publicKeyDischarge{})
 }

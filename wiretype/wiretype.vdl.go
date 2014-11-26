@@ -3,16 +3,31 @@
 
 package wiretype
 
+import (
+	// The non-user imports are prefixed with "__" to prevent collisions.
+	__vdl "veyron.io/veyron/veyron2/vdl"
+)
+
 // TypeID serves as a reference to a type definition.  The TypeID is only unique
 // within a single Encoder / Decoder stream; different streams may use different
 // TypeIDs to represent the same types.
 type TypeID uint64
+
+func (TypeID) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/wiretype.TypeID"
+}) {
+}
 
 // NamedPrimitiveType adds name and tag meta-information to a primitive type.
 type NamedPrimitiveType struct {
 	Type TypeID
 	Name string
 	Tags []string
+}
+
+func (NamedPrimitiveType) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/wiretype.NamedPrimitiveType"
+}) {
 }
 
 // SliceType represents a variable-length sequence of Elem values.
@@ -22,12 +37,22 @@ type SliceType struct {
 	Tags []string
 }
 
+func (SliceType) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/wiretype.SliceType"
+}) {
+}
+
 // ArrayType represents a fixed-length sequence of Elem values.
 type ArrayType struct {
 	Elem TypeID
 	Len  uint64
 	Name string
 	Tags []string
+}
+
+func (ArrayType) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/wiretype.ArrayType"
+}) {
 }
 
 // MapType represents an unordered collection of Key,Elem values, where each Key
@@ -41,10 +66,20 @@ type MapType struct {
 	Tags []string
 }
 
+func (MapType) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/wiretype.MapType"
+}) {
+}
+
 // FieldType represents a single possibly-named field in a struct.
 type FieldType struct {
 	Type TypeID
 	Name string
+}
+
+func (FieldType) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/wiretype.FieldType"
+}) {
 }
 
 // StructType represents a struct; a sequence of fields.
@@ -54,6 +89,11 @@ type StructType struct {
 	Tags   []string
 }
 
+func (StructType) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/wiretype.StructType"
+}) {
+}
+
 // WARNING: DEPRECATED
 // TODO(bprosnitz) Remove this.
 // PtrType represents a pointer; a value referencing an underlying Elem value.
@@ -61,4 +101,20 @@ type PtrType struct {
 	Elem TypeID
 	Name string
 	Tags []string
+}
+
+func (PtrType) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/wiretype.PtrType"
+}) {
+}
+
+func init() {
+	__vdl.Register(TypeID(0))
+	__vdl.Register(NamedPrimitiveType{})
+	__vdl.Register(SliceType{})
+	__vdl.Register(ArrayType{})
+	__vdl.Register(MapType{})
+	__vdl.Register(FieldType{})
+	__vdl.Register(StructType{})
+	__vdl.Register(PtrType{})
 }

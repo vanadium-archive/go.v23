@@ -90,7 +90,7 @@ func normalizeType(rt reflect.Type) reflect.Type {
 	}
 	// Handle special cases.  OneOf may be either an interface or a struct, and
 	// should be handled first.
-	if _, isOneOf := rt.MethodByName("__DescribeOneOf"); isOneOf {
+	if isOneOf(rt) {
 		return rt
 	}
 	switch {
@@ -178,7 +178,7 @@ func typeFromReflect(rt reflect.Type, builder *TypeBuilder, pending map[reflect.
 
 // validateType returns a non-nil error if rt is not a valid vdl type.
 func validateType(rt reflect.Type) error {
-	// First flatten all pointers.
+	// Flatten pointers to simplify the checks.
 	for rt.Kind() == reflect.Ptr {
 		rt = rt.Elem()
 	}
@@ -202,8 +202,7 @@ func makeTypeFromReflect(rt reflect.Type, builder *TypeBuilder, pending map[refl
 	if err := validateType(rt); err != nil {
 		return nil, err
 	}
-	switch {
-	case rt.Kind() == reflect.Ptr:
+	if rt.Kind() == reflect.Ptr {
 		// Pointers are turned into Optional.
 		opt := builder.Optional()
 		pending[rt] = opt
@@ -213,41 +212,34 @@ func makeTypeFromReflect(rt reflect.Type, builder *TypeBuilder, pending map[refl
 		}
 		opt.AssignElem(elem)
 		return opt, nil
-	case rt.PkgPath() == "":
+	}
+	ri, err := DeriveReflectInfo(rt)
+	if err != nil {
+		return nil, err
+	}
+	if ri.WireName == "" {
 		// Unnamed types are made directly.  There's no way to create a recursive
 		// type based solely on unnamed types, so it's ok to to update pending
 		// *after* making the unnamed type.
-		unnamed, err := makeUnnamedFromReflect(rt, builder, pending)
+		unnamed, err := makeUnnamedFromReflect(ri, builder, pending)
 		if err != nil {
 			return nil, err
 		}
-		pending[rt] = unnamed
+		pending[ri.WireType] = unnamed
 		return unnamed, nil
 	}
 	// Named types are trickier, since they may be recursive.  First create the
-	// named type and add it to pending.  We must special-case oneof types; we
-	// allow rt to be either the interface type (Foo below) or one of the concrete
-	// field types (FooA or FooB below), and in all cases we want the name to be
-	// based on the interface type, and all keys in the pending map to point to
+	// named type and add it to pending.  We must special-case oneof types; the
+	// interface type and all field types are keyed in the pending map to point to
 	// the created vdl type.
-	name, keys := rt.PkgPath()+"."+rt.Name(), []reflect.Type{rt}
-	switch rtOneOf, fields, err := DescribeOneOf(rt); {
-	case err != nil:
-		return nil, err
-	case rtOneOf != nil:
-		name = rtOneOf.PkgPath() + "." + rtOneOf.Name()
-		keys = []reflect.Type{rtOneOf}
-		for _, f := range fields {
-			keys = append(keys, f.Type)
-		}
-	}
-	named := builder.Named(name)
-	for _, key := range keys {
-		pending[key] = named
+	named := builder.Named(ri.WireName)
+	pending[ri.WireType] = named
+	for _, oneofField := range ri.OneOfFields {
+		pending[oneofField.RepType] = named
 	}
 	// Now make the unnamed underlying type.  Recursive types will find the
 	// existing entry in pending, and avoid the infinite loop.
-	unnamed, err := makeUnnamedFromReflect(rt, builder, pending)
+	unnamed, err := makeUnnamedFromReflect(ri, builder, pending)
 	if err != nil {
 		return nil, err
 	}
@@ -256,134 +248,22 @@ func makeTypeFromReflect(rt reflect.Type, builder *TypeBuilder, pending map[refl
 	return named, nil
 }
 
-// describeEnum returns a non-nil rtEnum if rt is an enum type, along with the
-// enum labels and a nil error.  Returns a non-nil error iff rt is an enum type
-// but is mis-specified.  Returns all nils if rt isn't an enum type.
-//
-// Enum has the following format; assume vdl type Foo enum{A;B}
-//   type Foo int
-//   const (
-//     FooA Foo = iota
-//     FooB
-//   )
-//   func (Foo) __DescribeEnum(struct{ A, B Foo }) {}
-//   func (Foo) String() string {}
-//   func (*Foo) Assign(string) bool {}
-func describeEnum(rt reflect.Type) (rtEnum reflect.Type, labels []string, _ error) {
-	if method, ok := rt.MethodByName("__DescribeEnum"); ok {
-		mtype := method.Type
-		// Note that mtype.In(0) is the method receiver.
-		if mtype.NumOut() != 0 || mtype.NumIn() != 2 || mtype.In(1).Kind() != reflect.Struct {
-			return nil, nil, fmt.Errorf("enum type %q must have method __DescribeEnum(struct{...})", rt)
-		}
-		rtDesc := mtype.In(1)
-		for ix := 0; ix < rtDesc.NumField(); ix++ {
-			labels = append(labels, rtDesc.Field(ix).Name)
-		}
-		if s, ok := rt.MethodByName("String"); !ok || s.Type.NumIn() != 1 ||
-			s.Type.NumOut() != 1 || s.Type.Out(0) != rtString {
-			return nil, nil, fmt.Errorf("enum type %q must have method String() string", rt)
-		}
-		_, nonptr := rt.MethodByName("Assign")
-		if a, ok := reflect.PtrTo(rt).MethodByName("Assign"); !ok || nonptr ||
-			a.Type.NumIn() != 2 || a.Type.In(1) != rtString ||
-			a.Type.NumOut() != 1 || a.Type.Out(0) != rtBool {
-			return nil, nil, fmt.Errorf("enum type %q must have pointer method Assign(string) bool", rt)
-		}
-		rtEnum = rt
-	}
-	return
-}
-
-// DescribeOneOf returns a non-nil rtOneOf if rt is a oneof type, along with the
-// fields from the description __FooDesc, and a nil error.  Returns a non-nil
-// error iff rt is a oneof type but is mis-specified.  Returns all nils if rt
-// isn't a oneof type.
-//
-// OneOf has the following format; assume vdl type Foo oneof{A bool; B string}
-//   type (
-//     // Foo is the oneof interface type, that can hold any field.
-//     Foo interface {
-//       Index() int
-//       Name() string
-//       __DescribeOneOf(__FooDesc)
-//     }
-//     // FooA and FooB are the concrete field types.
-//     FooA struct { Value bool }
-//     FooB struct { Value string }
-//     // __FooDesc lets us re-construct the oneof type via reflection.
-//     __FooDesc struct {
-//       Foo    // Tells us the oneof interface type.
-//       A FooA // Tells us field 0 has name A and concrete type FooA.
-//       B FooB // Tells us field 1 has name B and concrete type FooB.
-//     }
-//   )
-//
-// TODO(toddw): Unexport after vdl/valconv is merged into this package.
-func DescribeOneOf(rt reflect.Type) (rtOneOf reflect.Type, fields []reflect.StructField, _ error) {
-	if method, ok := rt.MethodByName("__DescribeOneOf"); ok {
-		mtype := method.Type
-		// If rt is a non-interface type (e.g. FooA and FooB above), mtype includes
-		// the receiver as the first in-arg, otherwise (e.g. Foo above) it doesn't.
-		offsetIn := 1
-		if rt.Kind() == reflect.Interface {
-			offsetIn = 0
-		}
-		if mtype.NumOut() != 0 || mtype.NumIn() != 1+offsetIn {
-			return nil, nil, fmt.Errorf("oneof type %q must have method __DescribeOneOf(struct{...})", rt)
-		}
-		// rtDesc corresponds to __FooDesc above.
-		rtDesc := mtype.In(offsetIn)
-		if rtDesc.Kind() != reflect.Struct || rtDesc.NumField() < 2 {
-			return nil, nil, fmt.Errorf("oneof type %q must have method __DescribeOneOf(struct{...})", rt)
-		}
-		// rtOneOf corresponds to field Foo in __FooDesc above.
-		rtOneOf = rtDesc.Field(0).Type
-		if rtOneOf.Kind() != reflect.Interface || rtOneOf.PkgPath() == "" {
-			return nil, nil, fmt.Errorf("oneof type %q has bad interface type %q", rt, rtOneOf)
-		}
-		// Loop through the concrete fields of the description.
-		for ix := 1; ix < rtDesc.NumField(); ix++ {
-			f := rtDesc.Field(ix)
-			if f.PkgPath != "" {
-				return nil, nil, fmt.Errorf("oneof type %q field %q.%q must be exported", rt, f.PkgPath, f.Name)
-			}
-			// f.Type corresponds to FooA and FooB in __FooDesc above.
-			if f.Type.Kind() != reflect.Struct || f.Type.NumField() != 1 || f.Type.Field(0).Name != "Value" {
-				return nil, nil, fmt.Errorf("oneof type %q field %q has bad concrete field type %q", rt, f.Name, f.Type)
-			}
-			fields = append(fields, f)
-		}
-		if n, ok := rt.MethodByName("Name"); !ok || n.Type.NumIn() != offsetIn ||
-			n.Type.NumOut() != 1 || n.Type.Out(0) != rtString {
-			return nil, nil, fmt.Errorf("oneof type %q must have method Name() string", rt)
-		}
-	}
-	return
-}
-
 // makeUnnamedFromReflect makes the underlying unnamed Type or PendingType
-// corresponding to rt.
-func makeUnnamedFromReflect(rt reflect.Type, builder *TypeBuilder, pending map[reflect.Type]TypeOrPending) (TypeOrPending, error) {
+// corresponding to ri.
+func makeUnnamedFromReflect(ri *ReflectInfo, builder *TypeBuilder, pending map[reflect.Type]TypeOrPending) (TypeOrPending, error) {
 	// Handle enum types
-	switch rtEnum, labels, err := describeEnum(rt); {
-	case err != nil:
-		return nil, err
-	case rtEnum != nil:
+	if len(ri.EnumLabels) > 0 {
 		enum := builder.Enum()
-		for _, label := range labels {
+		for _, label := range ri.EnumLabels {
 			enum.AppendLabel(label)
 		}
 		return enum, nil
 	}
 	// Handle oneof types
-	switch rtOneOf, fields, err := DescribeOneOf(rt); {
-	case err != nil:
-		return nil, err
-	case rtOneOf != nil:
+	if len(ri.OneOfFields) > 0 {
 		oneof := builder.OneOf()
-		for _, f := range fields {
-			in, err := typeFromReflect(f.Type.Field(0).Type, builder, pending)
+		for _, f := range ri.OneOfFields {
+			in, err := typeFromReflect(f.Type, builder, pending)
 			if err != nil {
 				return nil, err
 			}
@@ -392,6 +272,7 @@ func makeUnnamedFromReflect(rt reflect.Type, builder *TypeBuilder, pending map[r
 		return oneof, nil
 	}
 	// Handle composite types
+	rt := ri.WireType
 	switch rt.Kind() {
 	case reflect.Array:
 		elem, err := typeFromReflect(rt.Elem(), builder, pending)
@@ -441,7 +322,7 @@ func makeUnnamedFromReflect(rt reflect.Type, builder *TypeBuilder, pending map[r
 		return st, nil
 	}
 	// Handle scalar types
-	if t := rtScalarTypes[rt.Kind()]; t != nil {
+	if t := typeFromRTKind[rt.Kind()]; t != nil {
 		return t, nil
 	}
 	panic(fmt.Errorf("val: makeUnnamedFromReflect unhandled %v %v", rt.Kind(), rt))
@@ -452,14 +333,26 @@ var (
 
 	rtInterface          = reflect.TypeOf((*interface{})(nil)).Elem()
 	rtBool               = reflect.TypeOf(false)
+	rtByte               = reflect.TypeOf(byte(0))
+	rtUint16             = reflect.TypeOf(uint16(0))
+	rtUint32             = reflect.TypeOf(uint32(0))
+	rtUint64             = reflect.TypeOf(uint64(0))
+	rtInt16              = reflect.TypeOf(int16(0))
+	rtInt32              = reflect.TypeOf(int32(0))
+	rtInt64              = reflect.TypeOf(int64(0))
+	rtFloat32            = reflect.TypeOf(float32(0))
+	rtFloat64            = reflect.TypeOf(float64(0))
+	rtComplex64          = reflect.TypeOf(complex64(0))
+	rtComplex128         = reflect.TypeOf(complex128(0))
 	rtString             = reflect.TypeOf("")
 	rtError              = reflect.TypeOf((*error)(nil)).Elem()
 	rtType               = reflect.TypeOf(Type{})
+	rtPtrToType          = reflect.TypeOf((*Type)(nil))
 	rtValue              = reflect.TypeOf(Value{})
 	rtReflectValue       = reflect.TypeOf(reflect.Value{})
 	rtUnnamedEmptyStruct = reflect.TypeOf(struct{}{})
 
-	rtScalarTypes = [...]*Type{
+	typeFromRTKind = [...]*Type{
 		reflect.Bool:       BoolType,
 		reflect.Uint8:      ByteType,
 		reflect.Uint16:     Uint16Type,

@@ -15,6 +15,7 @@ import (
 	__veyron2 "veyron.io/veyron/veyron2"
 	__context "veyron.io/veyron/veyron2/context"
 	__ipc "veyron.io/veyron/veyron2/ipc"
+	__vdl "veyron.io/veyron/veyron2/vdl"
 	__vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
 	__wiretype "veyron.io/veyron/veyron2/wiretype"
 )
@@ -27,16 +28,43 @@ const _ = __wiretype.TypeIDInvalid
 // Architecture specifies the hardware architecture of a host.
 type Architecture string
 
+func (Architecture) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/services/mgmt/build.Architecture"
+}) {
+}
+
 // Format specifies the file format of a host.
 type Format string
 
+func (Format) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/services/mgmt/build.Format"
+}) {
+}
+
 // OperatingSystem specifies the operating system of a host.
 type OperatingSystem string
+
+func (OperatingSystem) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/services/mgmt/build.OperatingSystem"
+}) {
+}
 
 // File records the name and contents of a file.
 type File struct {
 	Name     string
 	Contents []byte
+}
+
+func (File) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/services/mgmt/build.File"
+}) {
+}
+
+func init() {
+	__vdl.Register(Architecture(""))
+	__vdl.Register(Format(""))
+	__vdl.Register(OperatingSystem(""))
+	__vdl.Register(File{})
 }
 
 const X86 = Architecture("386")

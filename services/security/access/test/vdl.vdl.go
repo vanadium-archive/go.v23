@@ -9,6 +9,7 @@ import (
 	__veyron2 "veyron.io/veyron/veyron2"
 	__context "veyron.io/veyron/veyron2/context"
 	__ipc "veyron.io/veyron/veyron2/ipc"
+	__vdl "veyron.io/veyron/veyron2/vdl"
 	__vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
 	__wiretype "veyron.io/veyron/veyron2/wiretype"
 )
@@ -21,6 +22,15 @@ const _ = __wiretype.TypeIDInvalid
 // Any package can define tags (of arbitrary types) to be attached to methods.
 // This type can be used to index into a TaggedACLMap.
 type MyTag string
+
+func (MyTag) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/services/security/access/test.MyTag"
+}) {
+}
+
+func init() {
+	__vdl.Register(MyTag(""))
+}
 
 // For this example/unittest, there are three possible values of MyTag,
 // each represented by a single-character string.

@@ -8,6 +8,7 @@ import (
 
 	"veyron.io/veyron/veyron2/vdl"
 	"veyron.io/veyron/veyron2/verror"
+	"veyron.io/veyron/veyron2/verror2"
 )
 
 // Target represents a generic conversion target; objects that implement this
@@ -153,6 +154,8 @@ func FromReflect(target Target, rv reflect.Value) error {
 		case rt.ConvertibleTo(rtPtrToValue):
 			// If rv is convertible to *vdl.Value, fill from it directly.
 			return FromValue(target, rv.Convert(rtPtrToValue).Interface().(*vdl.Value))
+		case rt.ConvertibleTo(rtError):
+			return fromError(target, rv.Interface().(error))
 		}
 		rv = rv.Elem()
 	}
@@ -162,6 +165,9 @@ func FromReflect(target Target, rv reflect.Value) error {
 	// required so that each of the Target.From* methods can get full type
 	// information, including optionality.
 	rt := rv.Type()
+	if rt.ConvertibleTo(rtError) {
+		return fromError(target, rv.Interface().(error))
+	}
 	tt, err := vdl.TypeFromReflect(rv.Type())
 	if err != nil {
 		return err
@@ -309,6 +315,41 @@ func FromReflect(target Target, rv reflect.Value) error {
 	default:
 		return fmt.Errorf("FromReflect invalid type %v", rt)
 	}
+}
+
+// fromError handles all rv values that implement the error interface.
+// TODO(toddw): box our interface values to constrain this?
+func fromError(target Target, err error) error {
+	// Convert from err into verror2, and then encode manually.  We can't just
+	// call FromReflect since that'll cause a recursive loop.  The verror types
+	// are defined like this:
+	//
+	// type ID         string
+	// type ActionCode uint32
+	// type IDAction struct {
+	//   ID     verror.ID
+	//   Action ActionCode
+	// }
+	// type Standard struct {
+	//   IDAction  IDAction
+	//   Msg       string
+	//   ParamList []interface{}
+	// }
+	e := verror2.ExplicitConvert(verror2.Unknown, "", "", "", err)
+	verr := vdl.NonNilZeroValue(vdl.ErrorType)
+	vv := verr.Elem()
+	vv.Field(0).Field(0).AssignString(string(e.ErrorID()))
+	vv.Field(0).Field(1).AssignUint(uint64(e.Action()))
+	vv.Field(1).AssignString(e.Error())
+	vv.Field(2).AssignLen(len(e.Params()))
+	for ix, p := range e.Params() {
+		var pVDL *vdl.Value
+		if err := Convert(&pVDL, p); err != nil {
+			return err
+		}
+		vv.Field(2).Index(ix).Assign(pVDL)
+	}
+	return FromValue(target, verr)
 }
 
 // FromValue converts from vv to the target, by walking through vv and calling

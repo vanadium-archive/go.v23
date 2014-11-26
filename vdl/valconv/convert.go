@@ -12,6 +12,7 @@ import (
 
 	"veyron.io/veyron/veyron2/vdl"
 	"veyron.io/veyron/veyron2/verror"
+	"veyron.io/veyron/veyron2/verror2"
 )
 
 var (
@@ -22,15 +23,15 @@ var (
 )
 
 var (
-	rtByte           = reflect.TypeOf(byte(0))
-	rtBool           = reflect.TypeOf(bool(false))
-	rtString         = reflect.TypeOf(string(""))
-	rtType           = reflect.TypeOf(vdl.Type{})
-	rtValue          = reflect.TypeOf(vdl.Value{})
-	rtPtrToType      = reflect.PtrTo(rtType)
-	rtPtrToValue     = reflect.PtrTo(rtValue)
-	rtError          = reflect.TypeOf((*error)(nil)).Elem()
-	rtVErrorStandard = reflect.TypeOf(verror.Standard{})
+	rtByte            = reflect.TypeOf(byte(0))
+	rtBool            = reflect.TypeOf(bool(false))
+	rtString          = reflect.TypeOf(string(""))
+	rtType            = reflect.TypeOf(vdl.Type{})
+	rtValue           = reflect.TypeOf(vdl.Value{})
+	rtPtrToType       = reflect.PtrTo(rtType)
+	rtPtrToValue      = reflect.PtrTo(rtValue)
+	rtError           = reflect.TypeOf((*error)(nil)).Elem()
+	rtVError2Standard = reflect.TypeOf(verror2.Standard{})
 )
 
 // convTarget represents the state and logic for value conversion.
@@ -191,10 +192,7 @@ func createFillTarget(fin convTarget, tt *vdl.Type) (convTarget, error) {
 			switch {
 			case fin.rv.Type() == rtError:
 				// Create the standard verror struct to fill in.
-				//
-				// TODO(toddw): Update to verror2.Standard; be careful of package deps.
-				// TODO(toddw): Add type registration and create other Go error objects?
-				return reflectConv(reflect.New(rtVErrorStandard).Elem(), fin.tt)
+				return reflectConv(reflect.New(rtVError2Standard).Elem(), fin.tt)
 			case fin.tt.Kind() == vdl.OneOf:
 				// The fin target is a oneof interface.  Since we don't know the oneof
 				// field name yet, we don't know which concrete type to use.  So we
@@ -203,23 +201,32 @@ func createFillTarget(fin convTarget, tt *vdl.Type) (convTarget, error) {
 				// TODO(toddw): This is probably very slow.  We should benchmark and
 				// probably re-design our conversion strategy.
 				return valueConv(vdl.ZeroValue(fin.tt)), nil
-			case fin.tt.Kind() == vdl.Any:
-				// We're converting into an any, so create a concrete *vdl.Value to fill
-				// in, based on the tt type we're converting *from*.
-				//
-				// TODO(toddw): Add type registration and create real Go objects?
-				if tt.Kind() == vdl.Optional {
-					return convTarget{tt: tt, vv: vdl.ZeroValue(tt.Elem())}, nil
-				}
-				return convTarget{tt: tt, vv: vdl.ZeroValue(tt)}, nil
+			case fin.tt.Kind() != vdl.Any:
+				return convTarget{}, fmt.Errorf("internal error - cannot convert to Go type %v vdl type %v from %v", fin.rv.Type(), fin.tt, tt)
 			}
-			return convTarget{}, fmt.Errorf("internal error - cannot convert to Go type %v vdl type %v from %v", fin.rv.Type(), fin.tt, tt)
-		case reflect.Slice:
-			fin.rv.Set(reflect.MakeSlice(fin.rv.Type(), 0, 0)) // start with non-nil slice
-		case reflect.Map:
-			fin.rv.Set(reflect.MakeMap(fin.rv.Type())) // start with non-nil map
+			// We're converting into any, and tt is the type we're converting *from*.
+			// First handle the special-case *vdl.Type.
+			if tt.Kind() == vdl.TypeObject {
+				return reflectConv(reflect.New(rtPtrToType).Elem(), vdl.TypeObjectType)
+			}
+			// Try to create a reflect.Type out of tt, and if it exists, create a real
+			// object to fill in.
+			if rt := vdl.ReflectFromType(tt); rt != nil {
+				rv := reflect.New(rt).Elem()
+				if rt.Kind() == reflect.Ptr {
+					rv.Set(reflect.New(rt.Elem()))
+					return reflectConv(rv.Elem(), tt)
+				}
+				return reflectConv(rv, tt)
+			}
+			// We don't have the type name in our registry, so create a concrete
+			// *vdl.Value to fill in, based on tt.
+			if tt.Kind() == vdl.Optional {
+				return convTarget{tt: tt, vv: vdl.ZeroValue(tt.Elem())}, nil
+			}
+			return convTarget{tt: tt, vv: vdl.ZeroValue(tt)}, nil
 		default:
-			fin.rv.Set(reflect.New(fin.rv.Type()).Elem()) // start with zero item
+			fin.rv.Set(reflect.New(fin.rv.Type()).Elem())
 		}
 	} else {
 		switch fin.vv.Kind() {
@@ -244,8 +251,13 @@ func finishConvert(fin, fill convTarget) error {
 		switch fin.rv.Kind() {
 		case reflect.Interface:
 			// The fill value may be set to either rv or vv in startConvert above.
-			rvFill := fill.rv
-			if fill.vv != nil {
+			var rvFill reflect.Value
+			if fill.vv == nil {
+				rvFill = fill.rv
+				if fill.tt.Kind() == vdl.Optional {
+					rvFill = fill.rv.Addr()
+				}
+			} else {
 				switch fin.tt.Kind() {
 				case vdl.OneOf:
 					// Special-case: the fin target is a oneof interface.  This is a bit
@@ -290,21 +302,21 @@ func finishConvert(fin, fill convTarget) error {
 func makeReflectOneOf(rv reflect.Value, vv *vdl.Value) (reflect.Value, error) {
 	// TODO(toddw): Cache the field types for faster access, after merging this
 	// into the vdl package.
-	rtOneOf, rtFields, err := vdl.DescribeOneOf(rv.Type())
+	ri, err := vdl.DeriveReflectInfo(rv.Type())
 	switch {
 	case err != nil:
 		return reflect.Value{}, err
-	case rtOneOf == nil || vv.Kind() != vdl.OneOf:
+	case len(ri.OneOfFields) == 0 || vv.Kind() != vdl.OneOf:
 		return reflect.Value{}, fmt.Errorf("vdl: makeReflectOneOf(%v, %v) must only be called on OneOf", rv.Type(), vv.Type())
 	}
 	index, vvField := vv.OneOfField()
-	if index >= len(rtFields) {
-		return reflect.Value{}, fmt.Errorf("vdl: makeReflectOneOf(%v, %v) field index %d out of range, len(rtFields)=%d", rv.Type(), vv.Type(), index, len(rtFields))
+	if index >= len(ri.OneOfFields) {
+		return reflect.Value{}, fmt.Errorf("vdl: makeReflectOneOf(%v, %v) field index %d out of range, len=%d", rv.Type(), vv.Type(), index, len(ri.OneOfFields))
 	}
 	// Run our regular conversion from vvField to rvField.  Keep in mind that
 	// rvField is the concrete oneof struct, so we convert into Field(0), which
 	// corresponds to the "Value" field.
-	rvField := reflect.New(rtFields[index].Type).Elem()
+	rvField := reflect.New(ri.OneOfFields[index].RepType).Elem()
 	target, err := ReflectTarget(rvField.Field(0))
 	if err != nil {
 		return reflect.Value{}, err
@@ -1037,6 +1049,9 @@ func (c convTarget) finishField(key, field convTarget) error {
 					return fmt.Errorf("%v can only be converted from true fields", tt)
 				}
 				rvField = reflect.Zero(c.rv.Type().Elem())
+			}
+			if c.rv.IsNil() {
+				c.rv.Set(reflect.MakeMap(c.rv.Type()))
 			}
 			c.rv.SetMapIndex(key.rv, rvField)
 			return nil

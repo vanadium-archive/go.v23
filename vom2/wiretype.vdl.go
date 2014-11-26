@@ -3,16 +3,31 @@
 
 package vom2
 
+import (
+	// The non-user imports are prefixed with "__" to prevent collisions.
+	__vdl "veyron.io/veyron/veyron2/vdl"
+)
+
 // WireNamed represents a type definition for named primitives.
 type WireNamed struct {
 	Name string
 	Base TypeID
 }
 
+func (WireNamed) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vom2.WireNamed"
+}) {
+}
+
 // WireEnum represents an type definition for enum types.
 type WireEnum struct {
 	Name   string
 	Labels []string
+}
+
+func (WireEnum) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vom2.WireEnum"
+}) {
 }
 
 // WireArray represents an type definition for array types.
@@ -22,16 +37,31 @@ type WireArray struct {
 	Len  uint64
 }
 
+func (WireArray) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vom2.WireArray"
+}) {
+}
+
 // WireList represents a type definition for list types.
 type WireList struct {
 	Name string
 	Elem TypeID
 }
 
+func (WireList) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vom2.WireList"
+}) {
+}
+
 // WireSet represents a type definition for set types.
 type WireSet struct {
 	Name string
 	Key  TypeID
+}
+
+func (WireSet) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vom2.WireSet"
+}) {
 }
 
 // WireMap represents a type definition for map types.
@@ -41,10 +71,20 @@ type WireMap struct {
 	Elem TypeID
 }
 
+func (WireMap) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vom2.WireMap"
+}) {
+}
+
 // WireField represents a field in a struct or oneof type.
 type WireField struct {
 	Name string
 	Type TypeID
+}
+
+func (WireField) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vom2.WireField"
+}) {
 }
 
 // WireStruct represents a type definition for struct types.
@@ -53,10 +93,20 @@ type WireStruct struct {
 	Fields []WireField
 }
 
+func (WireStruct) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vom2.WireStruct"
+}) {
+}
+
 // WireOneOf represents a type definition for oneof types.
 type WireOneOf struct {
 	Name   string
 	Fields []WireField
+}
+
+func (WireOneOf) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vom2.WireOneOf"
+}) {
 }
 
 // WireOptional represents an type definition for optional types.
@@ -65,8 +115,32 @@ type WireOptional struct {
 	Elem TypeID
 }
 
+func (WireOptional) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vom2.WireOptional"
+}) {
+}
+
 // TypeID uniquely identifies a type definition within a vom stream.
 type TypeID uint64
+
+func (TypeID) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vom2.TypeID"
+}) {
+}
+
+func init() {
+	__vdl.Register(WireNamed{})
+	__vdl.Register(WireEnum{})
+	__vdl.Register(WireArray{})
+	__vdl.Register(WireList{})
+	__vdl.Register(WireSet{})
+	__vdl.Register(WireMap{})
+	__vdl.Register(WireField{})
+	__vdl.Register(WireStruct{})
+	__vdl.Register(WireOneOf{})
+	__vdl.Register(WireOptional{})
+	__vdl.Register(TypeID(0))
+}
 
 // Primitives
 const WireAnyID = TypeID(1)

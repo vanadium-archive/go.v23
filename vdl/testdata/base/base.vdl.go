@@ -23,43 +23,133 @@ const _ = __wiretype.TypeIDInvalid
 
 type NamedBool bool
 
+func (NamedBool) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vdl/testdata/base.NamedBool"
+}) {
+}
+
 type NamedByte byte
+
+func (NamedByte) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vdl/testdata/base.NamedByte"
+}) {
+}
 
 type NamedUint16 uint16
 
+func (NamedUint16) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vdl/testdata/base.NamedUint16"
+}) {
+}
+
 type NamedUint32 uint32
+
+func (NamedUint32) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vdl/testdata/base.NamedUint32"
+}) {
+}
 
 type NamedUint64 uint64
 
+func (NamedUint64) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vdl/testdata/base.NamedUint64"
+}) {
+}
+
 type NamedInt16 int16
+
+func (NamedInt16) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vdl/testdata/base.NamedInt16"
+}) {
+}
 
 type NamedInt32 int32
 
+func (NamedInt32) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vdl/testdata/base.NamedInt32"
+}) {
+}
+
 type NamedInt64 int64
+
+func (NamedInt64) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vdl/testdata/base.NamedInt64"
+}) {
+}
 
 type NamedFloat32 float32
 
+func (NamedFloat32) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vdl/testdata/base.NamedFloat32"
+}) {
+}
+
 type NamedFloat64 float64
+
+func (NamedFloat64) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vdl/testdata/base.NamedFloat64"
+}) {
+}
 
 type NamedComplex64 complex64
 
+func (NamedComplex64) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vdl/testdata/base.NamedComplex64"
+}) {
+}
+
 type NamedComplex128 complex128
 
+func (NamedComplex128) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vdl/testdata/base.NamedComplex128"
+}) {
+}
+
 type NamedString string
+
+func (NamedString) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vdl/testdata/base.NamedString"
+}) {
+}
 
 //NamedEnum       enum{A;B;C}
 type NamedArray [2]bool
 
+func (NamedArray) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vdl/testdata/base.NamedArray"
+}) {
+}
+
 type NamedList []uint32
+
+func (NamedList) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vdl/testdata/base.NamedList"
+}) {
+}
 
 type NamedSet map[string]struct{}
 
+func (NamedSet) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vdl/testdata/base.NamedSet"
+}) {
+}
+
 type NamedMap map[string]float32
+
+func (NamedMap) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vdl/testdata/base.NamedMap"
+}) {
+}
 
 type NamedStruct struct {
 	A bool
 	B string
 	C int32
+}
+
+func (NamedStruct) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vdl/testdata/base.NamedStruct"
+}) {
 }
 
 type Scalars struct {
@@ -94,6 +184,11 @@ type Scalars struct {
 	B12 NamedString
 }
 
+func (Scalars) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vdl/testdata/base.Scalars"
+}) {
+}
+
 // These are all scalars that may be used as map or set keys.
 type KeyScalars struct {
 	A0  bool
@@ -124,6 +219,11 @@ type KeyScalars struct {
 	B12 NamedString
 }
 
+func (KeyScalars) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vdl/testdata/base.KeyScalars"
+}) {
+}
+
 type Composites struct {
 	A0 Scalars
 	A1 [2]Scalars
@@ -131,6 +231,11 @@ type Composites struct {
 	A3 map[KeyScalars]struct{}
 	A4 map[string]Scalars
 	A5 map[KeyScalars][]map[string]complex128
+}
+
+func (Composites) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vdl/testdata/base.Composites"
+}) {
 }
 
 type CompComp struct {
@@ -141,6 +246,11 @@ type CompComp struct {
 	A4 map[KeyScalars][]map[string]Composites
 }
 
+func (CompComp) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vdl/testdata/base.CompComp"
+}) {
+}
+
 // NestedArgs is defined before Args; that's allowed in regular Go, and also
 // allowed in our vdl files.  The compiler will re-order dependent types to ease
 // code generation in other languages.
@@ -148,10 +258,47 @@ type NestedArgs struct {
 	Args Args
 }
 
+func (NestedArgs) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vdl/testdata/base.NestedArgs"
+}) {
+}
+
 // Args will be reordered to show up before NestedArgs in the generated output.
 type Args struct {
 	A int32
 	B int32
+}
+
+func (Args) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vdl/testdata/base.Args"
+}) {
+}
+
+func init() {
+	__vdl.Register(NamedBool(false))
+	__vdl.Register(NamedByte(0))
+	__vdl.Register(NamedUint16(0))
+	__vdl.Register(NamedUint32(0))
+	__vdl.Register(NamedUint64(0))
+	__vdl.Register(NamedInt16(0))
+	__vdl.Register(NamedInt32(0))
+	__vdl.Register(NamedInt64(0))
+	__vdl.Register(NamedFloat32(0))
+	__vdl.Register(NamedFloat64(0))
+	__vdl.Register(NamedComplex64(0))
+	__vdl.Register(NamedComplex128(0))
+	__vdl.Register(NamedString(""))
+	__vdl.Register(NamedArray{})
+	__vdl.Register(NamedList(nil))
+	__vdl.Register(NamedSet(nil))
+	__vdl.Register(NamedMap(nil))
+	__vdl.Register(NamedStruct{})
+	__vdl.Register(Scalars{})
+	__vdl.Register(KeyScalars{})
+	__vdl.Register(Composites{})
+	__vdl.Register(CompComp{})
+	__vdl.Register(NestedArgs{})
+	__vdl.Register(Args{})
 }
 
 const Cbool = true

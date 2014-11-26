@@ -5,6 +5,7 @@ package security
 
 import (
 	// The non-user imports are prefixed with "__" to prevent collisions.
+	__vdl "veyron.io/veyron/veyron2/vdl"
 	__vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
 )
 
@@ -26,11 +27,26 @@ import (
 // invalid.
 type BlessingPattern string
 
+func (BlessingPattern) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/security.BlessingPattern"
+}) {
+}
+
 // Label is an access control right, like Read, Write, Admin, etc.
 type Label uint32
 
+func (Label) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/security.Label"
+}) {
+}
+
 // LabelSet is a set of access control labels, represented as a bitmask.
 type LabelSet Label
+
+func (LabelSet) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/security.LabelSet"
+}) {
+}
 
 // ACL (Access Control List) tracks the set of blessings that grant
 // access to an object and the type of access the blessing grants.
@@ -74,8 +90,18 @@ type ACL struct {
 	NotIn map[string]LabelSet
 }
 
+func (ACL) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/security.ACL"
+}) {
+}
+
 // Hash identifies a cryptographic hash function approved for use in signature algorithms.
 type Hash string
+
+func (Hash) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/security.Hash"
+}) {
+}
 
 // Signature represents a digital signature.
 type Signature struct {
@@ -90,6 +116,11 @@ type Signature struct {
 	S []byte
 }
 
+func (Signature) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/security.Signature"
+}) {
+}
+
 // ThirdPartyRequirements specifies the information required by the third-party
 // that will issue discharges for third-party caveats.
 //
@@ -99,6 +130,11 @@ type ThirdPartyRequirements struct {
 	ReportServer    bool // The blessings presented by the server of an IPC call.
 	ReportMethod    bool // The name of the method being invoked.
 	ReportArguments bool // Arguments to the method being invoked.
+}
+
+func (ThirdPartyRequirements) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/security.ThirdPartyRequirements"
+}) {
 }
 
 // DischargeImpetus encapsulates the motivation for a discharge being sought.
@@ -117,6 +153,11 @@ type DischargeImpetus struct {
 	Arguments []__vdlutil.Any   // Arguments to the method invocation.
 }
 
+func (DischargeImpetus) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/security.DischargeImpetus"
+}) {
+}
+
 // Certificate represents the cryptographic proof of the binding of
 // extensions of a blessing held by one principal to another (represented by
 // a public key) under specific caveats.
@@ -131,6 +172,11 @@ type Certificate struct {
 	Signature Signature // Signature by the blessing principal that binds the extension to the public key.
 }
 
+func (Certificate) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/security.Certificate"
+}) {
+}
+
 // Caveat is a condition on the validity of a blessing/discharge.
 //
 // These conditions are provided when asking a principal to create
@@ -143,6 +189,11 @@ type Caveat struct {
 	// ValidatorVOM holds the VOM-encoded bytes of the CaveatValidator
 	// that validates this caveat.
 	ValidatorVOM []byte
+}
+
+func (Caveat) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/security.Caveat"
+}) {
 }
 
 // WireBlessings encapsulates wire format of a set of blessings and the
@@ -163,6 +214,25 @@ type WireBlessings struct {
 	// CertificateChains is an array of chains of certificates that bind
 	// a blessing to the public key in the last certificate of the chain.
 	CertificateChains [][]Certificate
+}
+
+func (WireBlessings) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/security.WireBlessings"
+}) {
+}
+
+func init() {
+	__vdl.Register(BlessingPattern(""))
+	__vdl.Register(Label(0))
+	__vdl.Register(LabelSet(0))
+	__vdl.Register(ACL{})
+	__vdl.Register(Hash(""))
+	__vdl.Register(Signature{})
+	__vdl.Register(ThirdPartyRequirements{})
+	__vdl.Register(DischargeImpetus{})
+	__vdl.Register(Certificate{})
+	__vdl.Register(Caveat{})
+	__vdl.Register(WireBlessings{})
 }
 
 const AllPrincipals = BlessingPattern("...") // Glob pattern that matches all blessings.

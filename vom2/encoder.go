@@ -5,10 +5,7 @@ import (
 	"reflect"
 
 	"veyron.io/veyron/veyron2/vdl/valconv"
-	"veyron.io/veyron/veyron2/verror"
 )
-
-var errTODO = verror.Internalf("TODO: NOT IMPLEMENTED")
 
 // Encoder manages the transmission and marshaling of typed values to the other
 // side of a connection.

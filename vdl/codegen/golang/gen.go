@@ -70,6 +70,10 @@ func systemImportsGo(f *compile.File) []string {
 		// Import for vdl.Type
 		set[`__vdl "veyron.io/veyron/veyron2/vdl"`] = true
 	}
+	if len(f.TypeDefs) > 0 {
+		// Import for vdl.Register to register all defined types.
+		set[`__vdl "veyron.io/veyron/veyron2/vdl"`] = true
+	}
 	if len(f.Interfaces) > 0 {
 		// Imports for the generated method: {interface name}Client.
 		set[`__veyron2 "veyron.io/veyron/veyron2"`] = true
@@ -123,6 +127,7 @@ func init() {
 		"typeDefGo":             typeDefGo,
 		"constDefGo":            constDefGo,
 		"typedConst":            typedConst,
+		"typedZeroValue":        typedZeroValue,
 		"embedGo":               embedGo,
 		"isStreamingMethod":     isStreamingMethod,
 		"hasStreamingMethods":   hasStreamingMethods,
@@ -200,13 +205,18 @@ func argTypes(data goData, args []*compile.Arg) string {
 
 // argNames returns a comma-separated list of each name from args.  The names
 // are of the form prefixD, where D is the position of the argument.
-func argNames(prefix, first, last string, args []*compile.Arg) string {
+func argNames(boxPrefix, prefix, first, last string, args []*compile.Arg) string {
 	var result []string
 	if first != "" {
 		result = append(result, first)
 	}
-	for ix := 0; ix < len(args); ix++ {
-		result = append(result, fmt.Sprintf("%s%d", prefix, ix))
+	for ix, arg := range args {
+		p := prefix
+		if arg.Type == vdl.ErrorType {
+			// TODO(toddw): Also need to box user-defined external interfaces.
+			p = boxPrefix + prefix
+		}
+		result = append(result, fmt.Sprintf("%s%d", p, ix))
 	}
 	if last != "" {
 		result = append(result, last)
@@ -328,7 +338,7 @@ func clientStubImpl(data goData, iface *compile.Interface, method *compile.Metho
 	var buf bytes.Buffer
 	inargs := "nil"
 	if len(method.InArgs) > 0 {
-		inargs = "[]interface{}{" + argNames("i", "", "", method.InArgs) + "}"
+		inargs = "[]interface{}{" + argNames("&", "i", "", "", method.InArgs) + "}"
 	}
 	fmt.Fprint(&buf, "\tvar call __ipc.Call\n")
 	fmt.Fprintf(&buf, "\tif call, err = c.c(ctx).StartCall(ctx, c.name, %q, %s, opts...); err != nil {\n\t\treturn\n\t}\n", method.Name, inargs)
@@ -351,14 +361,14 @@ func clientFinishImpl(varname string, method *compile.Method) string {
 	if hasFinalError(method.OutArgs) {
 		lastArg = "&err"
 	}
-	outargs := argNames("&o", "", lastArg, stripFinalError(method.OutArgs))
+	outargs := argNames("", "&o", "", lastArg, stripFinalError(method.OutArgs))
 	return fmt.Sprintf("\tif ierr := %s.Finish(%s); ierr != nil {\n\t\terr = ierr\n\t}", varname, outargs)
 }
 
 // serverStubImpl returns the interface method server stub implementation.
 func serverStubImpl(data goData, iface *compile.Interface, method *compile.Method) string {
 	var buf bytes.Buffer
-	inargs := argNames("i", "ctx", "", method.InArgs)
+	inargs := argNames("", "i", "ctx", "", method.InArgs)
 	fmt.Fprint(&buf, "\t")
 	if len(method.OutArgs) > 0 {
 		fmt.Fprint(&buf, "return ")
@@ -491,6 +501,9 @@ const _ = __wiretype.TypeIDInvalid
 {{if $file.TypeDefs}}{{range $tdef := $file.TypeDefs}}
 {{typeDefGo $data $tdef}}
 {{end}}{{end}}
+{{if $file.TypeDefs}}func init() { {{range $tdef := $file.TypeDefs}}
+	__vdl.Register({{typedZeroValue $data $tdef}}){{end}}
+}{{end}}
 
 {{range $cdef := $file.ConstDefs}}
 {{constDefGo $data $cdef}}

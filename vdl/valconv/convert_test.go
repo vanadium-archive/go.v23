@@ -842,11 +842,22 @@ func testConverterWantSrc(t *testing.T, vvrvWant, vvrvSrc vvrv) {
 		// Test filling interface{} from *Value
 		var dst interface{}
 		var want interface{} = vvSrc
-		if vvSrc.Type().CanBeNil() && vvSrc.IsNil() {
-			want = dst // filling interface{} from any(nil) yields nil.
+		if vdl.ReflectFromType(vvSrc.Type()) == nil {
+			// We only run these tests if we *can't* create an actual Go object for
+			// this type, so we'll end up with *vdl.Value.
+			//
+			// The problem is that we don't know what value to expect.  It seems
+			// pointless to run a conversion to the rv src, since it's a
+			// self-fulfilling test.  So we just skip this, and let the rv tests below
+			// check Go object generation.
+			//
+			// TODO(toddw): Test with parallel rv and vv, to get better coverage.
+			if vvSrc.Type().CanBeNil() && vvSrc.IsNil() {
+				want = nil // filling interface{} from any(nil) yields nil.
+			}
+			testConvert(t, "vv11", &dst, vvSrc, want, 1, false)
+			testConvert(t, "vv12", &dst, vvSrc, want, 1, false)
 		}
-		testConvert(t, "vv11", &dst, vvSrc, want, 1, false)
-		testConvert(t, "vv12", &dst, vvSrc, want, 1, false)
 		if vvSrc.Kind() == vdl.Struct {
 			// Every struct may be converted to the empty struct
 			testConvert(t, "vv13", vdl.ZeroValue(emptyType), vvSrc, vdl.ZeroValue(emptyType), 0, false)
@@ -866,6 +877,7 @@ func testConverterWantSrc(t *testing.T, vvrvWant, vvrvSrc vvrv) {
 
 	// Tests of filling from reflect.Value
 	for _, src := range vvrvSrc.rv {
+		rtSrc := reflect.TypeOf(src)
 		for _, vvWant := range vvrvWant.vv {
 			// Test filling *Value from reflect.Value
 			vvDst := vdl.ZeroValue(vvWant.Type())
@@ -893,13 +905,26 @@ func testConverterWantSrc(t *testing.T, vvrvWant, vvrvSrc vvrv) {
 		testConvert(t, "rv8", &vvValue, src, vvWant, 1, false)
 		// Test filling interface{} from reflect.Value
 		var dst interface{}
-		var want interface{} = vvWant
+		var want interface{} = src
+		if srcInt8, ok := src.(int8); ok {
+			// VDL represents int8 as int6, so set our expectations accordingly.
+			want = int16(srcInt8)
+		}
+		if rtSrc != rtPtrToType && rtSrc.ConvertibleTo(rtPtrToType) {
+			// VDL doesn't represent named TypeObject, so our converter automatically
+			// creates *vdl.Type.
+			want = reflect.ValueOf(src).Convert(rtPtrToType).Interface().(*vdl.Type)
+		}
+		if vdl.ReflectFromType(vvWant.Type()) == nil {
+			// We can't create an actual Go object for this type; e.g. perhaps it's
+			// named, and isn't registered.  We should get a *vdl.Value back.
+			want = vvWant
+		}
 		if vvWant.Type().CanBeNil() && vvWant.IsNil() {
-			want = dst // filling interface{} from any(nil) yields nil.
+			want = nil // filling interface{} from any(nil) yields nil.
 		}
 		testConvert(t, "rv9", &dst, src, want, 1, true)
 		testConvert(t, "rv10", &dst, src, want, 1, true)
-		rtSrc := reflect.TypeOf(src)
 		ttSrc, err := vdl.TypeFromReflect(rtSrc)
 		if err != nil {
 			t.Error(err)

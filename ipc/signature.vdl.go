@@ -20,11 +20,21 @@ type InterfaceSig struct {
 	Methods []MethodSig // Ordered by method name.
 }
 
+func (InterfaceSig) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/ipc.InterfaceSig"
+}) {
+}
+
 // EmbedSig describes the signature of an embedded interface.
 type EmbedSig struct {
 	Name    string
 	PkgPath string
 	Doc     string
+}
+
+func (EmbedSig) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/ipc.EmbedSig"
+}) {
 }
 
 // MethodSig describes the signature of an interface method.
@@ -41,11 +51,21 @@ type MethodSig struct {
 	Tags             []__vdlutil.Any // Method tags
 }
 
+func (MethodSig) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/ipc.MethodSig"
+}) {
+}
+
 // ArgSig describes the signature of a single argument.
 type ArgSig struct {
 	Name string
 	Doc  string
 	Type *__vdl.Type // Type of the argument.
+}
+
+func (ArgSig) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/ipc.ArgSig"
+}) {
 }
 
 // ServiceSignature represents the signature of the service. This includes type information needed
@@ -54,6 +74,11 @@ type ArgSig struct {
 type ServiceSignature struct {
 	TypeDefs []__vdlutil.Any // A slice of wiretype structures form the type definition.
 	Methods  map[string]MethodSignature
+}
+
+func (ServiceSignature) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/ipc.ServiceSignature"
+}) {
 }
 
 // MethodSignature represents the structure for passing around method
@@ -65,8 +90,28 @@ type MethodSignature struct {
 	OutStream wiretype.TypeID
 }
 
+func (MethodSignature) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/ipc.MethodSignature"
+}) {
+}
+
 // MethodArgument represents the argument to a method in a method signature.
 type MethodArgument struct {
 	Name string // Argument name
 	Type wiretype.TypeID
+}
+
+func (MethodArgument) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/ipc.MethodArgument"
+}) {
+}
+
+func init() {
+	__vdl.Register(InterfaceSig{})
+	__vdl.Register(EmbedSig{})
+	__vdl.Register(MethodSig{})
+	__vdl.Register(ArgSig{})
+	__vdl.Register(ServiceSignature{})
+	__vdl.Register(MethodSignature{})
+	__vdl.Register(MethodArgument{})
 }

@@ -50,10 +50,14 @@ var (
 // ErrorType describes the built-in error type.
 //
 // TODO(toddw): Describe error in a built-in VDL file based on verror2.  At the
-// moment this definition must be kept in sync with verror.Standard.
+// moment this definition must be kept in sync with verror2.Standard.
 var ErrorType = OptionalType(NamedType("error", StructType(
-	Field{"Id", StringType},
+	Field{"IDAction", StructType(
+		Field{"ID", StringType},
+		Field{"Action", Uint32Type},
+	)},
 	Field{"Msg", StringType},
+	Field{"ParamList", ListType(AnyType)},
 )))
 
 func primitiveType(k Kind) *Type {

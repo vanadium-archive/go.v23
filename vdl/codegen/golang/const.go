@@ -26,6 +26,11 @@ func isByteList(t *vdl.Type) bool {
 	return t.Kind() == vdl.List && t.Elem().Kind() == vdl.Byte
 }
 
+// typedZeroValue returns the zero value of the type defined by def.
+func typedZeroValue(data goData, def *compile.TypeDef) string {
+	return typedConst(data, vdl.ZeroValue(def.Type))
+}
+
 // TODO(bprosnitz): Generate the full tag name e.g. security.Read instead of
 // security.Label(1)
 func typedConst(data goData, v *vdl.Value) string {
@@ -45,10 +50,15 @@ func typedConst(data goData, v *vdl.Value) string {
 	}
 	// Everything else requires an explicit type.
 	typestr := typeGo(data, t)
+	// { } are used instead of ( ) for composites
 	switch k {
-	case vdl.Array, vdl.List, vdl.Set, vdl.Map, vdl.Struct:
-		// { } are used instead of ( ) for composites, except for []byte
-		if !isByteList(t) {
+	case vdl.Array, vdl.Struct:
+		return typestr + valstr
+	case vdl.List, vdl.Set, vdl.Map:
+		// Special-case []byte, which we generate as a type conversion from string,
+		// and empty variable-length collections, which we generate as a type
+		// conversion from nil.
+		if !isByteList(t) && !v.IsZero() {
 			return typestr + valstr
 		}
 	}
@@ -120,9 +130,18 @@ func untypedConst(data goData, v *vdl.Value) string {
 		return strconv.Quote(v.RawString())
 	case vdl.Enum:
 		return typeGo(data, t) + v.EnumLabel()
-	case vdl.Array, vdl.List:
+	case vdl.Array:
 		if v.IsZero() {
 			return "{}"
+		}
+		s := "{"
+		for ix := 0; ix < v.Len(); ix++ {
+			s += "\n" + untypedConst(data, v.Index(ix)) + ","
+		}
+		return s + "\n}"
+	case vdl.List:
+		if v.IsZero() {
+			return "nil"
 		}
 		s := "{"
 		for ix := 0; ix < v.Len(); ix++ {
@@ -132,7 +151,7 @@ func untypedConst(data goData, v *vdl.Value) string {
 	case vdl.Set, vdl.Map:
 		// TODO(toddw): Sort keys to get a deterministic ordering.
 		if v.IsZero() {
-			return "{}"
+			return "nil"
 		}
 		s := "{"
 		for _, key := range v.Keys() {
