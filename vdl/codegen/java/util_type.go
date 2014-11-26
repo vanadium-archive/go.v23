@@ -126,8 +126,7 @@ func javaType(t *vdl.Type, forceClass bool, env *compile.Env) string {
 	case vdl.Map:
 		return fmt.Sprintf("%s<%s, %s>", "java.util.Map", javaType(t.Key(), true, env), javaType(t.Elem(), true, env))
 	case vdl.Optional:
-		// TODO(rogulenko): Implement optional types.
-		return ""
+		return fmt.Sprintf("io.veyron.veyron.veyron2.vdl.VdlOptional<%s>", javaType(t.Elem(), true, env))
 	default:
 		log.Fatalf("vdl: javaType unhandled type %v %v", t.Kind(), t)
 		return ""
