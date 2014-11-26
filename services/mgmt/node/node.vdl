@@ -3,7 +3,6 @@
 package node
 
 import (
-	"veyron.io/veyron/veyron2/security"
 	"veyron.io/veyron/veyron2/services/mgmt/binary"
 	"veyron.io/veyron/veyron2/services/security/access"
 )
@@ -116,23 +115,23 @@ type Application interface {
 	// which can then be used to control all the installations of the given
 	// application.
 	// TODO(rjkroege): Use customized labels.
-	Install(Name string) (string, error) {security.WriteLabel}
+	Install(Name string) (string, error) {access.Write}
 	// Refresh refreshes the state of application installation(s)
 	// instance(s).
-	Refresh() error {security.AdminLabel}
+	Refresh() error {access.Admin}
 	// Restart restarts execution of application installation(s)
 	// instance(s).
-	Restart() error {security.WriteLabel}
+	Restart() error {access.Write}
 	// Resume resumes execution of application installation(s)
 	// instance(s).
-	Resume() error {security.WriteLabel}
+	Resume() error {access.Write}
 	// Revert reverts application installation(s) to the most recent
 	// previous installation.
-	Revert() error {security.AdminLabel}
+	Revert() error {access.Admin}
 	// Start starts an instance of application installation(s) and
 	// returns the object name(s) that identifies/identify the new
 	// instance(s).
-	Start() ([]string, error) {security.ReadLabel}
+	Start() ([]string, error) {access.Read}
 	// Stop attempts a clean shutdown of application installation(s)
 	// instance(s). If the deadline (in seconds) is non-zero and the
 	// instance(s) in questions are still running after the given deadline,
@@ -140,22 +139,22 @@ type Application interface {
 	//
 	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
 	// are implemented.
-	Stop(Deadline uint32) error {security.AdminLabel}
+	Stop(Deadline uint32) error {access.Admin}
 	// Suspend suspends execution of application installation(s)
 	// instance(s).
-	Suspend() error {security.WriteLabel}
+	Suspend() error {access.Write}
 	// Uninstall uninstalls application installation(s).
-	Uninstall() error {security.AdminLabel}
+	Uninstall() error {access.Admin}
 	// Update updates the application installation(s) from the object name
 	// provided during Install.  If the new application envelope contains a
 	// different application title, the update does not occur, and an error
 	// is returned.
-	Update() error {security.AdminLabel}
+	Update() error {access.Admin}
 	// UpdateTo updates the application installation(s) to the application
 	// specified by the object name argument.  If the new application
 	// envelope contains a different application title, the update does not
 	// occur, and an error is returned.
-	UpdateTo(Name string) error {security.AdminLabel}
+	UpdateTo(Name string) error {access.Admin}
 }
 
 // Description enumerates the profiles that a Node supports.
@@ -188,24 +187,24 @@ type Node interface {
 	// Claim is used to claim ownership of a Node running on a device
 	// by blessing its identity. By default, after this call all node
 	// methods will be access protected to the identity of the claimer.
-	Claim() error
+	Claim() error {access.Admin}
 	// Describe generates a description of the node.
-	Describe() (Description, error)
+	Describe() (Description, error) {access.Admin}
 	// IsRunnable checks if the node can execute the given binary.
-	IsRunnable(Description binary.Description) (bool, error)
+	IsRunnable(Description binary.Description) (bool, error) {access.Admin}
 	// Reset resets the node. If the deadline is non-zero and the node
 	// in question is still running after the given deadline expired,
 	// reset of the node is enforced.
 	//
 	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
 	// are implemented.
-	Reset(Deadline uint64) error
+	Reset(Deadline uint64) error {access.Admin}
 	// AssociateAccount associates a local  system account name with the provided
 	// Veyron identities. It replaces the existing association if one already exists for that
 	// identity. Setting an AccountName to "" removes the association for each
 	// listed identity.
-	AssociateAccount(identityNames []string, accountName string) error
+	AssociateAccount(identityNames []string, accountName string) error {access.Admin}
 	// ListAssociations returns all of the associations between Veyron identities
 	// and system names.
-	ListAssociations() (associations []Association, err error)
+	ListAssociations() (associations []Association, err error) {access.Admin}
 }

@@ -104,7 +104,7 @@
 package watch
 
 import (
-	"veyron.io/veyron/veyron2/security"
+	"veyron.io/veyron/veyron2/services/security/access"
 
 	"veyron.io/veyron/veyron2/services/watch/types"
 
@@ -336,7 +336,7 @@ var descGlobWatcher = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{security.Label(1)},
+			Tags: []__vdlutil.Any{access.Tag("Resolve")},
 		},
 	},
 }

@@ -419,9 +419,6 @@ type Context interface {
 	Name() string
 	// Suffix returns the object name suffix for the request.
 	Suffix() string
-	// Label returns the method's security label.
-	// TODO(ashankar): Remove? (Only one of this or MethodTags should survive by November 10, 2014)
-	Label() Label
 	// Discharges maps a ThirdPartyCaveat identifier to the corresponding
 	// discharges.
 	// TODO(ataly, ashankar): Discharges should return map[string][]Discharge,

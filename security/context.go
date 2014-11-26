@@ -55,14 +55,11 @@ func (p *ContextParams) Copy(c Context) {
 
 type context struct{ params ContextParams }
 
-func (c *context) Timestamp() time.Time      { return c.params.Timestamp }
-func (c *context) Method() string            { return c.params.Method }
-func (c *context) MethodTags() []interface{} { return c.params.MethodTags }
-func (c *context) Name() string              { return c.params.Suffix }
-func (c *context) Suffix() string            { return c.params.Suffix }
-func (c *context) Label() Label {
-	return LabelFromMethodTags(c.params.MethodTags)
-}
+func (c *context) Timestamp() time.Time                   { return c.params.Timestamp }
+func (c *context) Method() string                         { return c.params.Method }
+func (c *context) MethodTags() []interface{}              { return c.params.MethodTags }
+func (c *context) Name() string                           { return c.params.Suffix }
+func (c *context) Suffix() string                         { return c.params.Suffix }
 func (c *context) LocalPrincipal() Principal              { return c.params.LocalPrincipal }
 func (c *context) LocalBlessings() Blessings              { return c.params.LocalBlessings }
 func (c *context) RemoteBlessings() Blessings             { return c.params.RemoteBlessings }

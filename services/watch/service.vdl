@@ -101,7 +101,7 @@
 package watch
 
 import (
-    "veyron.io/veyron/veyron2/security"
+    "veyron.io/veyron/veyron2/services/security/access"
     "veyron.io/veyron/veyron2/services/watch/types"
 )
 
@@ -109,5 +109,5 @@ import (
 // that match a pattern.  See the package comments for details.
 type GlobWatcher interface {
   // WatchGlob returns a stream of changes that match a pattern.
-  WatchGlob(Req types.GlobRequest) stream<_, types.Change> error {security.ResolveLabel}
+  WatchGlob(Req types.GlobRequest) stream<_, types.Change> error {access.Resolve}
 }

@@ -3,9 +3,9 @@
 package repository
 
 import (
-	"veyron.io/veyron/veyron2/security"
 	"veyron.io/veyron/veyron2/services/mgmt/application"
 	"veyron.io/veyron/veyron2/services/mgmt/binary"
+	"veyron.io/veyron/veyron2/services/security/access"
 )
 
 // Application provides access to application envelopes. An
@@ -24,7 +24,7 @@ type Application interface {
 	// object name suffix) and if so, returns this envelope. If multiple
 	// profile matches are possible, the method returns the first
 	// matching profile, respecting the order of the input argument.
-	Match(Profiles []string) (application.Envelope, error) {security.ReadLabel}
+	Match(Profiles []string) (application.Envelope, error) {access.Read}
 }
 
 // MediaInfo contains the metadata information for a binary.
@@ -58,34 +58,34 @@ type Binary interface {
 	// mediaInfo argument contains metadata for the binary. If the suffix
 	// identifies a binary that has already been created, the method
 	// returns an error.
-	Create(nparts int32, mediaInfo MediaInfo) error {security.WriteLabel}
+	Create(nparts int32, mediaInfo MediaInfo) error {access.Write}
 	// Delete deletes the binary identified by the object name
 	// suffix. If the binary that has not been created, the method
 	// returns an error.
-	Delete() error {security.WriteLabel}
+	Delete() error {access.Write}
 	// Download opens a stream that can used for downloading the given
 	// part of the binary identified by the object name suffix. If the
 	// binary part has not been uploaded, the method returns an
 	// error. If the Delete() method is invoked when the Download()
 	// method is in progress, the outcome the Download() method is
 	// undefined.
-	Download(part int32) stream<_, []byte> error {security.ReadLabel}
+	Download(part int32) stream<_, []byte> error {access.Read}
 	// DownloadURL returns a transient URL from which the binary
 	// identified by the object name suffix can be downloaded using the
 	// HTTP protocol. If not all parts of the binary have been uploaded,
 	// the method returns an error.
-	DownloadURL() (URL string, TTL int64, err error) {security.ReadLabel}
+	DownloadURL() (URL string, TTL int64, err error) {access.Read}
 	// Stat returns information describing the parts of the binary
 	// identified by the object name suffix, and its RFC 2046 media type.
 	// If the binary has not been created, the method returns an error.
-	Stat() (Parts []binary.PartInfo, MediaInfo MediaInfo, err error) {security.ReadLabel}
+	Stat() (Parts []binary.PartInfo, MediaInfo MediaInfo, err error) {access.Read}
 	// Upload opens a stream that can be used for uploading the given
 	// part of the binary identified by the object name suffix. If the
 	// binary has not been created, the method returns an error. If the
 	// binary part has been uploaded, the method returns an error. If
 	// the same binary part is being uploaded by another caller, the
 	// method returns an error.
-	Upload(part int32) stream<[]byte> error {security.WriteLabel}
+	Upload(part int32) stream<[]byte> error {access.Write}
 }
 
 // Profile abstracts a device's ability to run binaries, and hides
@@ -97,8 +97,8 @@ type Profile interface {
 	// e.g. "linux-media". The label can be used to uniquely identify
 	// the profile (for the purpose of matching application binaries and
 	// nodes).
-	Label() (string, error) {security.ReadLabel}
+	Label() (string, error) {access.Read}
 	// Description is a free-text description of the profile, meant for
 	// human consumption.
-	Description() (string, error) {security.ReadLabel}
+	Description() (string, error) {access.Read}
 }

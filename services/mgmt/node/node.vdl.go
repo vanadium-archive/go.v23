@@ -6,8 +6,6 @@
 package node
 
 import (
-	"veyron.io/veyron/veyron2/security"
-
 	"veyron.io/veyron/veyron2/services/mgmt/binary"
 
 	"veyron.io/veyron/veyron2/services/security/access"
@@ -138,6 +136,47 @@ type Association struct {
 // installation instance as a receiver is well-defined.
 type ApplicationClientMethods interface {
 	// Object provides access control for Veyron objects.
+	//
+	// Veyron services implementing dynamic access control would typically
+	// embed this interface and tag additional methods defined by the service
+	// with one of Admin, Read, Write, Resolve etc. For example,
+	// the VDL definition of the object would be:
+	//
+	//   package mypackage
+	//
+	//   import "veyron.io/veyron/veyron2/security/access"
+	//
+	//   type MyObject interface {
+	//     access.Object
+	//     MyRead()  (string, error) {access.Read}
+	//     MyWrite(string) error     {access.Write}
+	//   }
+	//
+	// If the set of pre-defined tags is insufficient, services may define their
+	// own tag type and annotate all methods with this new type.
+	// Instead of embedding this Object interface, define SetACL and GetACL in
+	// their own interface. Authorization policies will typically respect
+	// annotations of a single type. For example, the VDL definition of an object
+	// would be:
+	//
+	//  package mypackage
+	//
+	//  import "veyron.io/veyron/veyron2/security/access"
+	//
+	//  type MyTag string
+	//
+	//  const (
+	//    Blue = MyTag("Blue")
+	//    Red  = MyTag("Red")
+	//  )
+	//
+	//  type MyObject interface {
+	//    MyMethod() (string, error) {Blue}
+	//
+	//    // Allow clients to change access via the access.Object interface:
+	//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}
+	//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}
+	//  }
 	access.ObjectClientMethods
 	// Install installs the application identified by the argument and
 	// returns an object name suffix that identifies the new installation.
@@ -452,6 +491,47 @@ func (c implApplicationClientStub) Signature(ctx __context.T, opts ...__ipc.Call
 // installation instance as a receiver is well-defined.
 type ApplicationServerMethods interface {
 	// Object provides access control for Veyron objects.
+	//
+	// Veyron services implementing dynamic access control would typically
+	// embed this interface and tag additional methods defined by the service
+	// with one of Admin, Read, Write, Resolve etc. For example,
+	// the VDL definition of the object would be:
+	//
+	//   package mypackage
+	//
+	//   import "veyron.io/veyron/veyron2/security/access"
+	//
+	//   type MyObject interface {
+	//     access.Object
+	//     MyRead()  (string, error) {access.Read}
+	//     MyWrite(string) error     {access.Write}
+	//   }
+	//
+	// If the set of pre-defined tags is insufficient, services may define their
+	// own tag type and annotate all methods with this new type.
+	// Instead of embedding this Object interface, define SetACL and GetACL in
+	// their own interface. Authorization policies will typically respect
+	// annotations of a single type. For example, the VDL definition of an object
+	// would be:
+	//
+	//  package mypackage
+	//
+	//  import "veyron.io/veyron/veyron2/security/access"
+	//
+	//  type MyTag string
+	//
+	//  const (
+	//    Blue = MyTag("Blue")
+	//    Red  = MyTag("Red")
+	//  )
+	//
+	//  type MyObject interface {
+	//    MyMethod() (string, error) {Blue}
+	//
+	//    // Allow clients to change access via the access.Object interface:
+	//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}
+	//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}
+	//  }
 	access.ObjectServerMethods
 	// Install installs the application identified by the argument and
 	// returns an object name suffix that identifies the new installation.
@@ -610,7 +690,7 @@ var descApplication = __ipc.InterfaceDesc{
 	PkgPath: "veyron.io/veyron/veyron2/services/mgmt/node",
 	Doc:     "// Application can be used to manage applications on a device. The\n// idea is that this interace will be invoked using an object name that\n// identifies the application and its installations and instances\n// where applicable.\n//\n// In particular, the interface methods can be divided into three\n// groups based on their intended receiver:\n//\n// 1) Method receiver is an application:\n// -- Install()\n//\n// 2) Method receiver is an application installation:\n// -- Start()\n// -- Uninstall()\n// -- Update()\n//\n// 3) Method receiver is application installation instance:\n// -- Refresh()\n// -- Restart()\n// -- Resume()\n// -- Stop()\n// -- Suspend()\n//\n// For groups 2) and 3), the suffix that specifies the receiver can\n// optionally omit the installation and/or instance, in which case the\n// operation applies to all installations and/or instances in the\n// scope of the suffix.\n//\n// Examples:\n// # Install Google Maps on the node.\n// device/apps.Install(\"/google.com/appstore/maps\") --> \"google maps/0\"\n//\n// # Start an instance of the previously installed maps application installation.\n// device/apps/google maps/0.Start() --> { \"0\" }\n//\n// # Start a second instance of the previously installed maps application installation.\n// device/apps/google maps/0.Start() --> { \"1\" }\n//\n// # Stop the first instance previously started.\n// device/apps/google maps/0/0.Stop()\n//\n// # Install a second Google Maps installation.\n// device/apps.Install(\"/google.com/appstore/maps\") --> \"google maps/1\"\n//\n// # Start an instance for all maps application installations.\n// device/apps/google maps.Start() --> {\"0/2\", \"1/0\"}\n//\n// # Refresh the state of all instances of all maps application installations.\n// device/apps/google maps.Refresh()\n//\n// # Refresh the state of all instances of the maps application installation\n// identified by the given suffix.\n// device/apps/google maps/0.Refresh()\n//\n// # Refresh the state of the maps application installation instance identified by\n// the given suffix.\n// device/apps/google maps/0/2.Refresh()\n//\n// # Update the second maps installation to the latest version available.\n// device/apps/google maps/1.Update()\n//\n// # Update the first maps installation to a specific version.\n// device/apps/google maps/0.UpdateTo(\"/google.com/appstore/beta/maps\")\n//\n// Further, the following methods complement one another:\n// -- Install() and Uninstall()\n// -- Start() and Stop()\n// -- Suspend() and Resume()\n//\n// Finally, an application installation instance can be in one of\n// three abstract states: 1) \"does not exist\", 2) \"running\", or 3)\n// \"suspended\". The interface methods transition between these\n// abstract states using the following state machine:\n//\n// apply(Start(), \"does not exists\") = \"running\"\n// apply(Refresh(), \"running\") = \"running\"\n// apply(Refresh(), \"suspended\") = \"suspended\"\n// apply(Restart(), \"running\") = \"running\"\n// apply(Restart(), \"suspended\") = \"running\"\n// apply(Resume(), \"suspended\") = \"running\"\n// apply(Resume(), \"running\") = \"running\"\n// apply(Stop(), \"running\") = \"does not exist\"\n// apply(Stop(), \"suspended\") = \"does not exist\"\n// apply(Suspend(), \"running\") = \"suspended\"\n// apply(Suspend(), \"suspended\") = \"suspended\"\n//\n// In other words, invoking any method using an existing application\n// installation instance as a receiver is well-defined.",
 	Embeds: []__ipc.EmbedDesc{
-		{"Object", "veyron.io/veyron/veyron2/services/security/access", "// Object provides access control for Veyron objects."},
+		{"Object", "veyron.io/veyron/veyron2/services/security/access", "// Object provides access control for Veyron objects.\n//\n// Veyron services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"veyron.io/veyron/veyron2/security/access\"\n//\n//   type MyObject interface {\n//     access.Object\n//     MyRead()  (string, error) {access.Read}\n//     MyWrite(string) error     {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetACL and GetACL in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"veyron.io/veyron/veyron2/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}\n//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}\n//  }"},
 	},
 	Methods: []__ipc.MethodDesc{
 		{
@@ -623,7 +703,7 @@ var descApplication = __ipc.InterfaceDesc{
 				{"", ``}, // string
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{security.Label(4)},
+			Tags: []__vdlutil.Any{access.Tag("Write")},
 		},
 		{
 			Name: "Refresh",
@@ -631,7 +711,7 @@ var descApplication = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{security.Label(8)},
+			Tags: []__vdlutil.Any{access.Tag("Admin")},
 		},
 		{
 			Name: "Restart",
@@ -639,7 +719,7 @@ var descApplication = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{security.Label(4)},
+			Tags: []__vdlutil.Any{access.Tag("Write")},
 		},
 		{
 			Name: "Resume",
@@ -647,7 +727,7 @@ var descApplication = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{security.Label(4)},
+			Tags: []__vdlutil.Any{access.Tag("Write")},
 		},
 		{
 			Name: "Revert",
@@ -655,7 +735,7 @@ var descApplication = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{security.Label(8)},
+			Tags: []__vdlutil.Any{access.Tag("Admin")},
 		},
 		{
 			Name: "Start",
@@ -664,7 +744,7 @@ var descApplication = __ipc.InterfaceDesc{
 				{"", ``}, // []string
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{security.Label(2)},
+			Tags: []__vdlutil.Any{access.Tag("Read")},
 		},
 		{
 			Name: "Stop",
@@ -675,7 +755,7 @@ var descApplication = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{security.Label(8)},
+			Tags: []__vdlutil.Any{access.Tag("Admin")},
 		},
 		{
 			Name: "Suspend",
@@ -683,7 +763,7 @@ var descApplication = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{security.Label(4)},
+			Tags: []__vdlutil.Any{access.Tag("Write")},
 		},
 		{
 			Name: "Uninstall",
@@ -691,7 +771,7 @@ var descApplication = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{security.Label(8)},
+			Tags: []__vdlutil.Any{access.Tag("Admin")},
 		},
 		{
 			Name: "Update",
@@ -699,7 +779,7 @@ var descApplication = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{security.Label(8)},
+			Tags: []__vdlutil.Any{access.Tag("Admin")},
 		},
 		{
 			Name: "UpdateTo",
@@ -710,7 +790,7 @@ var descApplication = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{security.Label(8)},
+			Tags: []__vdlutil.Any{access.Tag("Admin")},
 		},
 	},
 }
@@ -1291,6 +1371,7 @@ var descNode = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
+			Tags: []__vdlutil.Any{access.Tag("Admin")},
 		},
 		{
 			Name: "Describe",
@@ -1299,6 +1380,7 @@ var descNode = __ipc.InterfaceDesc{
 				{"", ``}, // Description
 				{"", ``}, // error
 			},
+			Tags: []__vdlutil.Any{access.Tag("Admin")},
 		},
 		{
 			Name: "IsRunnable",
@@ -1310,6 +1392,7 @@ var descNode = __ipc.InterfaceDesc{
 				{"", ``}, // bool
 				{"", ``}, // error
 			},
+			Tags: []__vdlutil.Any{access.Tag("Admin")},
 		},
 		{
 			Name: "Reset",
@@ -1320,6 +1403,7 @@ var descNode = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
+			Tags: []__vdlutil.Any{access.Tag("Admin")},
 		},
 		{
 			Name: "AssociateAccount",
@@ -1331,6 +1415,7 @@ var descNode = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
+			Tags: []__vdlutil.Any{access.Tag("Admin")},
 		},
 		{
 			Name: "ListAssociations",
@@ -1339,6 +1424,7 @@ var descNode = __ipc.InterfaceDesc{
 				{"associations", ``}, // []Association
 				{"err", ``},          // error
 			},
+			Tags: []__vdlutil.Any{access.Tag("Admin")},
 		},
 	},
 }

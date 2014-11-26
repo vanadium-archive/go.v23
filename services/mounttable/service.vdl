@@ -3,7 +3,7 @@ package mounttable
 
 import (
 	"veyron.io/veyron/veyron2/naming"
-	"veyron.io/veyron/veyron2/security"
+	"veyron.io/veyron/veyron2/services/security/access"
 )
 
 type Globbable interface {
@@ -16,7 +16,7 @@ type Globbable interface {
 	// read access to "p".
 	// In summary, the principal must have at least resolve access to call Glob,
 	// but may require additional access for certain patterns.
-	Glob(pattern string) stream<_, naming.VDLMountEntry> error {security.ResolveLabel}
+	Glob(pattern string) stream<_, naming.VDLMountEntry> error {access.Resolve}
 }
 
 // MountTable defines the interface to talk to a mounttable.
@@ -35,20 +35,20 @@ type MountTable interface {
 	// act as if it was never present as far as the interface is concerned.
 	//
 	// Opts represents a bit mask of options.
-	Mount(Server string, TTL uint32, Flags naming.MountFlag) error {security.WriteLabel}
+	Mount(Server string, TTL uint32, Flags naming.MountFlag) error {access.Write}
 
 	// Unmount removes Server from the mount point.  If Server is empty, remove
 	// all servers mounted there.
 	// Returns a non-nil error iff Server remains mounted at the mount point.
-	Unmount(Server string) error {security.WriteLabel}
+	Unmount(Server string) error {access.Write}
 
 	// ResolveStep takes the next step in resolving a name.  Returns the next
 	// servers to query and the suffix at those servers.
-	ResolveStep() (Servers []naming.VDLMountedServer, Suffix string, Error error) {security.ReadLabel}
+	ResolveStep() (Servers []naming.VDLMountedServer, Suffix string, Error error) {access.Read}
 
 	// ResolveStepX takes the next step in resolving a name.  Returns the next
 	// servers to query and the suffix at those servers.
-	ResolveStepX() (Entry naming.VDLMountEntry, Error error) {security.ReadLabel}
+	ResolveStepX() (Entry naming.VDLMountEntry, Error error) {access.Read}
 
 	Globbable
 }

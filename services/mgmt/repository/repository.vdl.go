@@ -6,11 +6,11 @@
 package repository
 
 import (
-	"veyron.io/veyron/veyron2/security"
-
 	"veyron.io/veyron/veyron2/services/mgmt/application"
 
 	"veyron.io/veyron/veyron2/services/mgmt/binary"
+
+	"veyron.io/veyron/veyron2/services/security/access"
 
 	// The non-user imports are prefixed with "__" to prevent collisions.
 	__io "io"
@@ -195,7 +195,7 @@ var descApplication = __ipc.InterfaceDesc{
 				{"", ``}, // application.Envelope
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{security.Label(2)},
+			Tags: []__vdlutil.Any{access.Tag("Read")},
 		},
 	},
 }
@@ -709,7 +709,7 @@ var descBinary = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{security.Label(4)},
+			Tags: []__vdlutil.Any{access.Tag("Write")},
 		},
 		{
 			Name: "Delete",
@@ -717,7 +717,7 @@ var descBinary = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{security.Label(4)},
+			Tags: []__vdlutil.Any{access.Tag("Write")},
 		},
 		{
 			Name: "Download",
@@ -728,7 +728,7 @@ var descBinary = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{security.Label(2)},
+			Tags: []__vdlutil.Any{access.Tag("Read")},
 		},
 		{
 			Name: "DownloadURL",
@@ -738,7 +738,7 @@ var descBinary = __ipc.InterfaceDesc{
 				{"TTL", ``}, // int64
 				{"err", ``}, // error
 			},
-			Tags: []__vdlutil.Any{security.Label(2)},
+			Tags: []__vdlutil.Any{access.Tag("Read")},
 		},
 		{
 			Name: "Stat",
@@ -748,7 +748,7 @@ var descBinary = __ipc.InterfaceDesc{
 				{"MediaInfo", ``}, // MediaInfo
 				{"err", ``},       // error
 			},
-			Tags: []__vdlutil.Any{security.Label(2)},
+			Tags: []__vdlutil.Any{access.Tag("Read")},
 		},
 		{
 			Name: "Upload",
@@ -759,7 +759,7 @@ var descBinary = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{security.Label(4)},
+			Tags: []__vdlutil.Any{access.Tag("Write")},
 		},
 	},
 }
@@ -1108,7 +1108,7 @@ var descProfile = __ipc.InterfaceDesc{
 				{"", ``}, // string
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{security.Label(2)},
+			Tags: []__vdlutil.Any{access.Tag("Read")},
 		},
 		{
 			Name: "Description",
@@ -1117,7 +1117,7 @@ var descProfile = __ipc.InterfaceDesc{
 				{"", ``}, // string
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{security.Label(2)},
+			Tags: []__vdlutil.Any{access.Tag("Read")},
 		},
 	},
 }

@@ -7,7 +7,7 @@ package mounttable
 import (
 	"veyron.io/veyron/veyron2/naming"
 
-	"veyron.io/veyron/veyron2/security"
+	"veyron.io/veyron/veyron2/services/security/access"
 
 	// The non-user imports are prefixed with "__" to prevent collisions.
 	__io "io"
@@ -254,7 +254,7 @@ var descGlobbable = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{security.Label(1)},
+			Tags: []__vdlutil.Any{access.Tag("Resolve")},
 		},
 	},
 }
@@ -551,7 +551,7 @@ var descMountTable = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{security.Label(4)},
+			Tags: []__vdlutil.Any{access.Tag("Write")},
 		},
 		{
 			Name: "Unmount",
@@ -562,7 +562,7 @@ var descMountTable = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{security.Label(4)},
+			Tags: []__vdlutil.Any{access.Tag("Write")},
 		},
 		{
 			Name: "ResolveStep",
@@ -572,7 +572,7 @@ var descMountTable = __ipc.InterfaceDesc{
 				{"Suffix", ``},  // string
 				{"Error", ``},   // error
 			},
-			Tags: []__vdlutil.Any{security.Label(2)},
+			Tags: []__vdlutil.Any{access.Tag("Read")},
 		},
 		{
 			Name: "ResolveStepX",
@@ -581,7 +581,7 @@ var descMountTable = __ipc.InterfaceDesc{
 				{"Entry", ``}, // naming.VDLMountEntry
 				{"Error", ``}, // error
 			},
-			Tags: []__vdlutil.Any{security.Label(2)},
+			Tags: []__vdlutil.Any{access.Tag("Read")},
 		},
 	},
 }

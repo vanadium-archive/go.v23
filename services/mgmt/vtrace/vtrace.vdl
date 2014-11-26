@@ -3,7 +3,7 @@
 package vtrace
 
 import (
-	"veyron.io/veyron/veyron2/security"
+	"veyron.io/veyron/veyron2/services/security/access"
 	"veyron.io/veyron/veyron2/uniqueid"
 	"veyron.io/veyron/veyron2/vtrace"
 )
@@ -11,9 +11,9 @@ import (
 type Store interface {
 	// Trace returns the trace that matches the given ID.
 	// Will return a NoExists error if no matching trace was found.
-	Trace(uniqueid.ID) (vtrace.TraceRecord, error) {security.ReadLabel}
+	Trace(uniqueid.ID) (vtrace.TraceRecord, error) {access.Read}
 
 	// AllTraces returns TraceRecords for all traces the server currently
 	// knows about.
-	AllTraces() stream<_, vtrace.TraceRecord> error {security.ReadLabel}
+	AllTraces() stream<_, vtrace.TraceRecord> error {access.Read}
 }

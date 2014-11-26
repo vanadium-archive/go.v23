@@ -1,4 +1,4 @@
-// Package access defines the service for dynamic access control
+// Package access defines types and services for dynamic access control
 // in Veyron.  Examples: "allow app to read this photo", "prevent user
 // from modifying this file".
 //
@@ -9,24 +9,24 @@
 //
 // Overview
 //
-// Every Veyron object supports GetACL and SetACL methods.  An ACL (Access
-// Control List) contains blessings, groups, and the labels that principals
-// with these blessings and group memberships can access for that object.
+// Veyron objects provide GetACL and SetACL methods.  An ACL (Access Control
+// List) contains the set of blessings that grant principals access to the
+// object. All methods on objects can have "tags" on them and the access
+// control list used for the method is selected based on that tag (from a
+// TaggedACLMap).
 //
 // An object can have multiple names, so GetACL and SetACL can be invoked on
 // any of these names, but the object itself has a single ACL.
 //
-// SetACL completely replaces the ACL. To perform an atomic read-modify-write
-// of the ACL, use the etag parameter.
+// SetACL completely replaces the TaggedACLMap. To perform an atomic
+// read-modify-write of the ACL, use the etag parameter.
 //   client := access.ObjectClient(name)
 //   for {
 //     acl, etag, err := client.GetACL()
 //     if err != nil {
 //       return err
 //     }
-//     // Add newLabel to the LabelSet.
-//     // TODO(kash): Update when we switch labels to strings instead of ints.
-//     acl.In[newPattern] = acl.In[newPattern] | newLabel
+//     acl[newTag] = ACL{In: []security.BlessingPattern{newPattern}}
 //     // Use the same etag with the modified acl to ensure that no other client
 //     // has modified the acl since GetACL returned.
 //     if err := client.SetACL(acl, etag); err != nil {
@@ -47,26 +47,26 @@
 // All methods that create an object (e.g. Put, Mount, Link) should take an
 // optional ACL parameter.  If the ACL is not specified, the new object, O,
 // copies its ACL from the parent.  Subsequent changes to the parent ACL are
-// not automatically propagated to O.  Instead, a client library could do
-// recursive ACL changes if desired.
+// not automatically propagated to O.  Instead, a client library must make
+// recursive ACL changes.
 //
-// security.ResolveLabel is required on all components of a name, except the
-// last one, in order to access the object referenced by that name.  For
-// example, for principal P to access the name "a/b/c", P must have resolve
-// access to "a" and "a/b".
+// Resolve access is required on all components of a name, except the last one, in
+// order to access the object referenced by that name.  For example, for
+// principal P to access the name "a/b/c", P must have resolve access to "a"
+// and "a/b".
 //
-// security.ResolveLabel means that a principal can traverse that component of
-// the name to access the child.  It does not give the principal permission to
-// list the children via Glob or a similar method.  For example, a server
-// might have an object named "home" with a child for each user of the system.
-// If these users were allowed to list the contents of "home", they could
-// discover the other users of the system.  That could be a privacy violation.
-// Without ResolveLabel, every user of the system would need read access to
-// "home" to access "home/<user>".  If the user called Glob("home/*"), it
-// would then be up to the server to filter out the names that the user could
-// not access.  That could be a very expensive operation if there were a lot
-// of children of "home".  ResolveLabel protects these servers against
-// potential denial of service attacks on these large, shared directories.
+// The Resolve tag means that a principal can traverse that component of the name to
+// access the child.  It does not give the principal permission to list the
+// children via Glob or a similar method.  For example, a server might have an
+// object named "home" with a child for each user of the system.  If these
+// users were allowed to list the contents of "home", they could discover the
+// other users of the system.  That could be a privacy violation.  Without
+// Resolve, every user of the system would need read access to "home" to
+// access "home/<user>".  If the user called Glob("home/*"), it would then be
+// up to the server to filter out the names that the user could not access.
+// That could be a very expensive operation if there were a lot of children of
+// "home".  Resolve protects these servers against potential denial of
+// service attacks on these large, shared directories.
 //
 // Groups and blessings allow for sweeping access changes.  A group is
 // suitable for saying that the same set of principals have access to a set of
@@ -91,11 +91,99 @@
 // directory.
 package access
 
-import (
-  "veyron.io/veyron/veyron2/security"
+import "veyron.io/veyron/veyron2/security"
+
+// ACL represents an Access Control List - a set of blessings that should be
+// granted access.
+type ACL struct {
+  // In denotes the set of blessings (represented as BlessingPatterns) that
+  // should be granted access, unless blacklisted by an entry in NotIn.
+  //
+  // For example:
+  //   In: {"alice/family/..."}
+  // grants access to a principal that presents at least one of "alice",
+  // "alice/family", "alice/family/friend" etc. as a blessing.
+  In []security.BlessingPattern
+
+  // NotIn denotes the set of blessings (and their delegates) that
+  // have been explicitly blacklisted from the In set.
+  //
+  // For example:
+  //   In: {"alice/friend/..."}, NotIn: {"alice/friend/bob"}
+  // grants access to principals that present "alice", "alice/friend",
+  // "alice/friend/carol" etc. but NOT to a principal that presents
+  // "alice/friend/bob" or "alice/friend/bob/spouse" etc.
+  NotIn []string
+
+  // TODO(ashankar,ataly): Groups API and group identifiers here.
+}
+
+// TaggedACLMap maps string tags to access control lists specifying the
+// blessings required to invoke methods with that tag.
+//
+// These tags are meant to add a layer of interposition between the set of
+// users (blessings, specifically) and the set of methods, much like "Roles" do
+// in Role Based Access Control.
+// (http://en.wikipedia.org/wiki/Role-based_access_control)
+type TaggedACLMap map[string]ACL
+
+// Tag is used to associate methods with an ACL in a TaggedACLMap.
+//
+// While services can define their own tag type and values, many
+// services should be able to use the type and values defined in
+// this package.
+type Tag string
+
+const (
+  Admin   = Tag("Admin")    // Operations that require privileged access for object administration.
+  Debug   = Tag("Debug")    // Operations that return debugging information (e.g., logs, statistics etc.) about the object.
+  Read    = Tag("Read")     // Operations that do not mutate the state of the object.
+  Write   = Tag("Write")    // Operations that mutate the state of the object.
+  Resolve = Tag("Resolve")  // Operations involving namespace navigation.
 )
 
 // Object provides access control for Veyron objects.
+//
+// Veyron services implementing dynamic access control would typically
+// embed this interface and tag additional methods defined by the service
+// with one of Admin, Read, Write, Resolve etc. For example,
+// the VDL definition of the object would be:
+//
+//   package mypackage
+//
+//   import "veyron.io/veyron/veyron2/security/access"
+//
+//   type MyObject interface {
+//     access.Object
+//     MyRead()  (string, error) {access.Read}
+//     MyWrite(string) error     {access.Write}
+//   }
+//
+// If the set of pre-defined tags is insufficient, services may define their
+// own tag type and annotate all methods with this new type.
+// Instead of embedding this Object interface, define SetACL and GetACL in
+// their own interface. Authorization policies will typically respect
+// annotations of a single type. For example, the VDL definition of an object
+// would be:
+//
+//  package mypackage
+//
+//  import "veyron.io/veyron/veyron2/security/access"
+//
+//  type MyTag string
+//
+//  const (
+//    Blue = MyTag("Blue")
+//    Red  = MyTag("Red")
+//  )
+//
+//  type MyObject interface {
+//    MyMethod() (string, error) {Blue}
+//
+//    // Allow clients to change access via the access.Object interface:
+//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}
+//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}
+//  }
 type Object interface {
   // SetACL replaces the current ACL for an object.  etag allows for optional,
   // optimistic concurrency control.  If non-empty, etag's value must come
@@ -112,13 +200,13 @@ type Object interface {
   // endpoint.  To modify the mount point's ACL, use ResolveToMountTable
   // to get an endpoint and call SetACL on that.  This means that clients
   // must know when a name refers to a mount point to change its ACL.
-  SetACL(acl security.ACL, etag string) error {security.AdminLabel}
+  SetACL(acl TaggedACLMap, etag string) error {Admin}
 
   // GetACL returns the complete, current ACL for an object.  The returned etag
   // can be passed to a subsequent call to SetACL for optimistic concurrency
   // control. A successful call to SetACL will invalidate etag, and the client
   // must call GetACL again to get the current etag.
-  GetACL() (acl security.ACL, etag string, err error) {security.AdminLabel}
+  GetACL() (acl TaggedACLMap, etag string, err error) {Admin}
 }
 
 errorid (

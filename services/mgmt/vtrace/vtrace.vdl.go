@@ -6,7 +6,7 @@
 package vtrace
 
 import (
-	"veyron.io/veyron/veyron2/security"
+	"veyron.io/veyron/veyron2/services/security/access"
 
 	"veyron.io/veyron/veyron2/uniqueid"
 
@@ -261,7 +261,7 @@ var descStore = __ipc.InterfaceDesc{
 				{"", ``}, // vtrace.TraceRecord
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{security.Label(2)},
+			Tags: []__vdlutil.Any{access.Tag("Read")},
 		},
 		{
 			Name: "AllTraces",
@@ -269,7 +269,7 @@ var descStore = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{security.Label(2)},
+			Tags: []__vdlutil.Any{access.Tag("Read")},
 		},
 	},
 }
