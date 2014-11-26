@@ -56,7 +56,6 @@ type oneOfDefinitionField struct {
 
 // genJavaOneOfFile generates the Java class file for the provided user-defined oneOf type.
 func genJavaOneOfFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo {
-	// TODO(rogulenko): Update to new oneof.
 	fields := make([]oneOfDefinitionField, tdef.Type.NumField())
 	for i := 0; i < tdef.Type.NumField(); i++ {
 		fld := tdef.Type.Field(i)

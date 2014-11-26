@@ -11,6 +11,10 @@ import (
 
 // javaConstVal returns the value string for the provided constant value.
 func javaConstVal(v *vdl.Value, env *compile.Env) (ret string) {
+	if v == nil {
+		return "null"
+	}
+
 	ret = javaVal(v, env)
 	switch v.Type().Kind() {
 	case vdl.Complex64, vdl.Complex128, vdl.Enum, vdl.OneOf, vdl.Uint16, vdl.Uint32, vdl.Uint64:
@@ -125,8 +129,11 @@ func javaVal(v *vdl.Value, env *compile.Env) string {
 	case vdl.TypeObject:
 		return fmt.Sprintf("new %s(%s)", javaType(v.Type(), false, env), javaReflectType(v.TypeObject(), env))
 	case vdl.Optional:
-		// TODO(rogulenko): Implement optional values.
-		return ""
+		if v.Elem() != nil {
+			return fmt.Sprintf("new %s(%s)", javaType(v.Type(), false, env), javaConstVal(v.Elem(), env))
+		} else {
+			return fmt.Sprintf("new %s(%s)", javaType(v.Type(), false, env), javaReflectType(v.Type(), env))
+		}
 	}
 	panic(fmt.Errorf("vdl: javaVal unhandled type %v %v", v.Kind(), v.Type()))
 }
