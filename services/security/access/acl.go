@@ -155,7 +155,7 @@ func readTaggedACLMapSupportingOldFormat(r io.Reader) (m TaggedACLMap, oldformat
 	}
 	// Decode into both formats (because JSON decoding typically won't fail).
 	var (
-		oldACL     security.ACL
+		oldACL     security.DeprecatedACL
 		olderr     = json.NewDecoder(bytes.NewBuffer(cpy.Bytes())).Decode(&oldACL)
 		newerr     = json.NewDecoder(&cpy).Decode(&m)
 		oldhasdata = (len(oldACL.In) + len(oldACL.NotIn)) > 0
@@ -170,13 +170,13 @@ func readTaggedACLMapSupportingOldFormat(r io.Reader) (m TaggedACLMap, oldformat
 	m = make(TaggedACLMap)
 	xlate := func(labels security.LabelSet) []string {
 		var tags []string
-		if (uint32(labels) & 1) != 0 {
+		if (uint32(labels) & uint32(security.ResolveLabel)) != 0 {
 			tags = append(tags, "Resolve")
 		}
-		if (uint32(labels) & 2) != 0 {
+		if (uint32(labels) & uint32(security.ReadLabel)) != 0 {
 			tags = append(tags, "Read")
 		}
-		if (uint32(labels) & 4) != 0 {
+		if (uint32(labels) & uint32(security.WriteLabel)) != 0 {
 			tags = append(tags, "Write")
 		}
 		if (uint32(labels) & 8) != 0 {

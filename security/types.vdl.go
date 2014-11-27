@@ -32,7 +32,8 @@ func (BlessingPattern) __VDLReflect(struct {
 }) {
 }
 
-// Label is an access control right, like Read, Write, Admin, etc.
+// DEPRECATED: DO NOT USE
+// TODO(ashankar): Remove before release.
 type Label uint32
 
 func (Label) __VDLReflect(struct {
@@ -40,7 +41,8 @@ func (Label) __VDLReflect(struct {
 }) {
 }
 
-// LabelSet is a set of access control labels, represented as a bitmask.
+// DEPRECATED: DO NOT USE
+// TODO(ashankar): Remove before release.
 type LabelSet Label
 
 func (LabelSet) __VDLReflect(struct {
@@ -48,50 +50,15 @@ func (LabelSet) __VDLReflect(struct {
 }) {
 }
 
-// ACL (Access Control List) tracks the set of blessings that grant
-// access to an object and the type of access the blessing grants.
-//
-// When a principal presents multiple blessings, it should be authorized
-// if any one of those blessings matches the ACL. Since the principal
-// chooses the subset of its blessings to share (and can thus withold
-// any particular one), requiring all presented blessings to match the
-// ACL does not provide any security benefits.
-type ACL struct {
-	// In denotes the set of blessings (represented as BlessingPatterns)
-	// that grant access to an object, unless blacklisted by an entry in
-	// NotIn.
-	//
-	// For example:
-	//
-	//  In: {"foo/bar": "R"}
-	//
-	// grants "Read" access to a principal that holds the blessing "foo/bar"
-	// or a delegator of "foo/bar" ("foo"), but
-	// not delegates of "foo/bar" (like "foo/bar/a" or "foo/bar/b").
-	//
-	// While:
-	//
-	//  In: {"foo/bar/...": "R"}
-	//
-	// grants "Read" access to "foo/bar", all its delegates (like "foo/bar/baz")
-	// and its delegators ("foo").
-	In map[BlessingPattern]LabelSet
-	// NotIn denotes the set of blessings (and their delegates) that
-	// are explicitly blacklisted from specific kinds of access.
-	//
-	// The NotIn list is meant to be used as an override. For example:
-	//
-	//  In: {"foo/...": "RW"}, NotIn: {"foo/bar": "W"}
-	//
-	// will grant "Read" and "Write" access to "foo" and all its delegates
-	// ("foo/friend", "foo/family" etc.) EXCEPT to "foo/bar" and its
-	// delegates (e.g. "foo/bar/baz"), who only get "Read" access since
-	// "Write" access has been explicitly blacklisted for them.
+// DEPRECATED: DO NOT USE: See the veyron2/services/security/access package.
+// TODO(ashankar): Remove before release.
+type DeprecatedACL struct {
+	In    map[BlessingPattern]LabelSet
 	NotIn map[string]LabelSet
 }
 
-func (ACL) __VDLReflect(struct {
-	Name string "veyron.io/veyron/veyron2/security.ACL"
+func (DeprecatedACL) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/security.DeprecatedACL"
 }) {
 }
 
@@ -225,7 +192,7 @@ func init() {
 	__vdl.Register(BlessingPattern(""))
 	__vdl.Register(Label(0))
 	__vdl.Register(LabelSet(0))
-	__vdl.Register(ACL{})
+	__vdl.Register(DeprecatedACL{})
 	__vdl.Register(Hash(""))
 	__vdl.Register(Signature{})
 	__vdl.Register(ThirdPartyRequirements{})

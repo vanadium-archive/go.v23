@@ -87,14 +87,15 @@ func TestTaggedACLMapSerialization(t *testing.T) {
 }
 
 func TestTaggedACLMapConversionFromOldFormat(t *testing.T) {
+	allLabels := security.LabelSet(security.AdminLabel | security.ReadLabel | security.WriteLabel | security.DebugLabel | security.MonitoringLabel | security.ResolveLabel)
 	oldformat := new(bytes.Buffer)
-	if err := json.NewEncoder(oldformat).Encode(security.ACL{
+	if err := json.NewEncoder(oldformat).Encode(security.DeprecatedACL{
 		In: map[security.BlessingPattern]security.LabelSet{
-			"user/...": security.AllLabels,
+			"user/...": allLabels,
 			"reader":   security.LabelSet(security.ReadLabel),
 		},
 		NotIn: map[string]security.LabelSet{
-			"user/bad":      security.AllLabels,
+			"user/bad":      allLabels,
 			"user/kindabad": security.LabelSet(security.AdminLabel),
 		},
 	}); err != nil {

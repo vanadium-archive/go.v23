@@ -6,23 +6,7 @@ import (
 	"fmt"
 )
 
-var (
-	// ValidLabels is the set of all valid Labels for IPC methods.
-	ValidLabels = []Label{ResolveLabel, ReadLabel, WriteLabel, AdminLabel, DebugLabel, MonitoringLabel}
-
-	// AllLabels is a LabelSet containing all ValidLabels.
-	AllLabels = LabelSet(ResolveLabel | ReadLabel | WriteLabel | AdminLabel | DebugLabel | MonitoringLabel)
-)
-
-// IsValidLabel tests whether a label is a member of the defined valid set.
-func IsValidLabel(l Label) bool {
-	for _, s := range ValidLabels {
-		if s == l {
-			return true
-		}
-	}
-	return false
-}
+var validLabels = []Label{ResolveLabel, ReadLabel, WriteLabel, AdminLabel, DebugLabel, MonitoringLabel}
 
 // String representation of a Label.
 func (l Label) String() string {
@@ -43,21 +27,11 @@ func (l Label) String() string {
 	return ""
 }
 
-// HasLabel returns true iff the LabelSet contains at least one of the provided labels.
-func (ls LabelSet) HasLabel(label Label, additionalLabels ...Label) bool {
-	for _, l := range append([]Label{label}, additionalLabels...) {
-		if l != Label(0) && (ls&LabelSet(l)) == LabelSet(l) {
-			return true
-		}
-	}
-	return false
-}
-
 // String representation of a LabelSet.
 func (ls LabelSet) String() string {
 	b := bytes.NewBufferString("")
-	for _, l := range ValidLabels {
-		if ls.HasLabel(l) {
+	for _, l := range validLabels {
+		if uint32(ls)&uint32(l) != 0 {
 			b.WriteString(l.String())
 		}
 	}
@@ -102,14 +76,4 @@ func (ls *LabelSet) UnmarshalJSON(b []byte) error {
 		return err
 	}
 	return ls.FromString(s)
-}
-
-// TODO(ashankar): Remove this when the new label mechanism is deployed.
-func LabelFromMethodTags(tags []interface{}) Label {
-	for _, t := range tags {
-		if l, ok := t.(Label); ok {
-			return l
-		}
-	}
-	return AdminLabel
 }

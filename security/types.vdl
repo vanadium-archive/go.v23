@@ -18,56 +18,19 @@ package security
 // invalid.
 type BlessingPattern string
 
-// Label is an access control right, like Read, Write, Admin, etc.
+// DEPRECATED: DO NOT USE
+// TODO(ashankar): Remove before release.
 type Label uint32
 
-// LabelSet is a set of access control labels, represented as a bitmask.
+// DEPRECATED: DO NOT USE
+// TODO(ashankar): Remove before release.
 type LabelSet Label
 
-// ACL (Access Control List) tracks the set of blessings that grant
-// access to an object and the type of access the blessing grants.
-//
-// When a principal presents multiple blessings, it should be authorized
-// if any one of those blessings matches the ACL. Since the principal
-// chooses the subset of its blessings to share (and can thus withold
-// any particular one), requiring all presented blessings to match the
-// ACL does not provide any security benefits.
-type ACL struct {
-  // In denotes the set of blessings (represented as BlessingPatterns)
-  // that grant access to an object, unless blacklisted by an entry in
-  // NotIn.
-  //
-  // For example:
-  //
-  //  In: {"foo/bar": "R"}
-  //
-  // grants "Read" access to a principal that holds the blessing "foo/bar"
-  // or a delegator of "foo/bar" ("foo"), but
-  // not delegates of "foo/bar" (like "foo/bar/a" or "foo/bar/b").
-  //
-  // While:
-  //
-  //  In: {"foo/bar/...": "R"}
-  //
-  // grants "Read" access to "foo/bar", all its delegates (like "foo/bar/baz")
-  // and its delegators ("foo").
+// DEPRECATED: DO NOT USE: See the veyron2/services/security/access package.
+// TODO(ashankar): Remove before release.
+type DeprecatedACL struct {
   In map[BlessingPattern]LabelSet
-
-  // NotIn denotes the set of blessings (and their delegates) that
-  // are explicitly blacklisted from specific kinds of access.
-  //
-  // The NotIn list is meant to be used as an override. For example:
-  //
-  //  In: {"foo/...": "RW"}, NotIn: {"foo/bar": "W"}
-  //
-  // will grant "Read" and "Write" access to "foo" and all its delegates
-  // ("foo/friend", "foo/family" etc.) EXCEPT to "foo/bar" and its
-  // delegates (e.g. "foo/bar/baz"), who only get "Read" access since
-  // "Write" access has been explicitly blacklisted for them.
   NotIn map[string]LabelSet
-
-  // TODO(ataly,ashankar): Add group membership clauses to
-  // this structure once the group API is more concrete.
 }
 
 // Hash identifies a cryptographic hash function approved for use in signature algorithms.
