@@ -24,7 +24,7 @@ type Config struct {
 }
 
 func (Config) __VDLReflect(struct {
-	Name string "vdl.Config"
+	Name string "veyron.io/veyron/veyron2/vdl/vdlroot/src/vdl.Config"
 }) {
 }
 
@@ -79,7 +79,7 @@ func (x GenLanguage) String() string {
 }
 
 func (GenLanguage) __VDLReflect(struct {
-	Name string "vdl.GenLanguage"
+	Name string "veyron.io/veyron/veyron2/vdl/vdlroot/src/vdl.GenLanguage"
 	Enum struct{ Go, Java, Javascript string }
 }) {
 }
@@ -91,7 +91,7 @@ type GoConfig struct {
 }
 
 func (GoConfig) __VDLReflect(struct {
-	Name string "vdl.GoConfig"
+	Name string "veyron.io/veyron/veyron2/vdl/vdlroot/src/vdl.GoConfig"
 }) {
 }
 
@@ -100,7 +100,7 @@ type JavaConfig struct {
 }
 
 func (JavaConfig) __VDLReflect(struct {
-	Name string "vdl.JavaConfig"
+	Name string "veyron.io/veyron/veyron2/vdl/vdlroot/src/vdl.JavaConfig"
 }) {
 }
 
@@ -109,7 +109,7 @@ type JavascriptConfig struct {
 }
 
 func (JavascriptConfig) __VDLReflect(struct {
-	Name string "vdl.JavascriptConfig"
+	Name string "veyron.io/veyron/veyron2/vdl/vdlroot/src/vdl.JavascriptConfig"
 }) {
 }
 
