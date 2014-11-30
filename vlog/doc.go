@@ -51,7 +51,7 @@
 //		a stack trace will be written to the Info log whenever execution
 //		hits that statement. (Unlike with -vmodule, the ".go" must be
 //		present.)
-//	-v=0 or -vv=0
+//	-v=0
 //		Enable V-leveled logging at the specified level.
 //	-vmodule=""
 //		The syntax of the argument is a comma-separated list of pattern=N,

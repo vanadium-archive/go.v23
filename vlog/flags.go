@@ -29,7 +29,6 @@ var flagDefs = []struct {
 	{"alsologtostderr", &alsoToStderr, true, "log to standard error as well as files"},
 	{"max_stack_buf_size", &maxStackBufSize, 4192 * 1024, "max size in bytes of the buffer to use for logging stack traces"},
 	{"v", &verbosity, nil, "log level for V logs"},
-	{"vv", &verbosity, nil, "log level for V logs"},
 	{"stderrthreshold", &stderrThreshold, nil, "logs at or above this threshold go to stderr"},
 	{"vmodule", &vmodule, nil, "comma-separated list of pattern=N settings for file-filtered logging"},
 	{"log_backtrace_at", &traceLocation, nil, "when logging hits line file:N, emit a stack trace"},
