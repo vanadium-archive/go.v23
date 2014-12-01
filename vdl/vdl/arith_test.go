@@ -12,6 +12,7 @@ import (
 	"reflect"
 	"testing"
 
+	"veyron.io/veyron/veyron2"
 	"veyron.io/veyron/veyron2/ipc"
 	"veyron.io/veyron/veyron2/naming"
 	"veyron.io/veyron/veyron2/rt"
@@ -25,8 +26,7 @@ import (
 
 var generatedError = errors.New("generated error")
 
-func newClient() ipc.Client {
-	r := rt.Init()
+func newClient(r veyron2.Runtime) ipc.Client {
 	c, err := r.NewClient()
 	if err != nil {
 		panic(err)
@@ -34,8 +34,7 @@ func newClient() ipc.Client {
 	return c
 }
 
-func newServer() ipc.Server {
-	r := rt.Init()
+func newServer(r veyron2.Runtime) ipc.Server {
 	s, err := r.NewServer()
 	if err != nil {
 		panic(err)
@@ -121,8 +120,14 @@ func (*serverCalculator) Off(_ ipc.ServerContext) error {
 }
 
 func TestCalculator(t *testing.T) {
-	client := newClient()
-	server := newServer()
+	r, err := rt.New()
+	if err != nil {
+		t.Fatalf("Error initializing runtime: %v", err)
+	}
+	defer r.Cleanup()
+
+	client := newClient(r)
+	server := newServer(r)
 	if err := server.Serve("", arith.CalculatorServer(&serverCalculator{}), nil); err != nil {
 		t.Fatal(err)
 	}
@@ -131,7 +136,7 @@ func TestCalculator(t *testing.T) {
 		t.Fatal(err)
 	}
 	root := naming.JoinAddressName(ep.String(), "")
-	ctx := rt.R().NewContext()
+	ctx := r.NewContext()
 	// Synchronous calls
 	calculator := arith.CalculatorClient(root, client)
 	sine, err := calculator.Sine(ctx, 0)
@@ -440,6 +445,12 @@ func TestCalculator(t *testing.T) {
 }
 
 func TestArith(t *testing.T) {
+	r, err := rt.New()
+	if err != nil {
+		t.Fatalf("Error initializing runtime: %v", err)
+	}
+	defer r.Cleanup()
+
 	// TODO(bprosnitz) Split this test up -- it is quite long and hard to debug.
 
 	// We try a few types of dispatchers on the server side, to verify that
@@ -451,11 +462,11 @@ func TestArith(t *testing.T) {
 		ipc.LeafDispatcher(arith.CalculatorServer(&serverCalculator{}), nil),
 	}
 
-	client := newClient()
-	ctx := rt.R().NewContext()
+	client := newClient(r)
+	ctx := r.NewContext()
 
 	for i, disp := range dispatchers {
-		server := newServer()
+		server := newServer(r)
 		defer server.Stop()
 		ep, err := server.Listen(profiles.LocalListenSpec)
 		if err != nil {
