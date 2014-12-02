@@ -263,7 +263,7 @@ func (s implAppCycleServerStub) ForceStop(ctx __ipc.ServerContext) error {
 	return s.impl.ForceStop(ctx)
 }
 
-func (s implAppCycleServerStub) VGlob() *__ipc.GlobState {
+func (s implAppCycleServerStub) Globber() *__ipc.GlobState {
 	return s.gs
 }
 

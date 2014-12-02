@@ -689,7 +689,7 @@ func (s implApplicationServerStub) UpdateTo(ctx __ipc.ServerContext, i0 string) 
 	return s.impl.UpdateTo(ctx, i0)
 }
 
-func (s implApplicationServerStub) VGlob() *__ipc.GlobState {
+func (s implApplicationServerStub) Globber() *__ipc.GlobState {
 	return s.gs
 }
 
@@ -1361,7 +1361,7 @@ func (s implNodeServerStub) ListAssociations(ctx __ipc.ServerContext) ([]Associa
 	return s.impl.ListAssociations(ctx)
 }
 
-func (s implNodeServerStub) VGlob() *__ipc.GlobState {
+func (s implNodeServerStub) Globber() *__ipc.GlobState {
 	return s.gs
 }
 

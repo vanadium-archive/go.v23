@@ -288,19 +288,17 @@ type Invoker interface {
 // choose to implement either the AllGlobber interface, or the ChildrenGlobber
 // interface.
 //
-// The AllGlobber interface is the same as mounttable.Globbable. The object
-// implements the Glob method defined in veyron.io/veyron/veyron2/services/mounttable.
-// Each object must support Glob requests that will be applied to itself and the
-// entire namespace below it.
+// The AllGlobber interface lets the object handle complex glob requests for
+// the entire namespace below the receiver object, i.e. "a/b".Glob__("...")
+// must return the name of all the objects under "a/b".
 //
 // The ChildrenGlobber interface is simpler. Each object only has to return
 // a list of the objects immediately below itself in the namespace graph.
 type Globber interface {
-	// VGlob returns a GlobState with references to the interface that the
+	// Globber returns a GlobState with references to the interface that the
 	// object implements. Only one implementation is needed to participate
 	// in the namespace.
-	// TODO(rthellend): Rename to Globber()
-	VGlob() *GlobState
+	Globber() *GlobState
 }
 
 // GlobState indicates which Glob interface the object implements.
@@ -309,11 +307,15 @@ type GlobState struct {
 	ChildrenGlobber ChildrenGlobber
 }
 
-// AllGlobber is the same interface as mounttable.Globbable.
+// AllGlobber is a powerful interface that allows the object to enumerate the
+// the entire namespace below the receiver object. Every object that implements
+// it must be able to handle glob requests that could match any object below
+// itself. E.g. "a/b".Glob__("*/*"), "a/b".Glob__("c/..."), etc.
 type AllGlobber interface {
-	// TODO(rthellend): Rename this and the Globbable interface to Glob__
-	// when toddw's Signature changes are all done.
-	Glob(ctx *GlobContextStub, pattern string) error
+	// Glob__ returns a MountEntry for the objects that match the given
+	// pattern in the namespace below the receiver object. All the names
+	// returned are relative to the receiver.
+	Glob__(ctx ServerContext, pattern string) (<-chan naming.VDLMountEntry, error)
 }
 
 // ChildrenGlobber is a simple interface to publish the relationship between
@@ -322,7 +324,7 @@ type ChildrenGlobber interface {
 	// GlobChildren__ returns the names of the receiver's immediate children
 	// on a channel.  It should return an error if the receiver doesn't
 	// exist.
-	GlobChildren__() (<-chan string, error)
+	GlobChildren__(ctx ServerContext) (<-chan string, error)
 }
 
 // ServerCall defines the in-flight context for a server method call, including

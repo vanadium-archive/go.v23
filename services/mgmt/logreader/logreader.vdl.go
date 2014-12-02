@@ -264,7 +264,7 @@ func (s implLogFileServerStub) ReadLog(ctx *LogFileReadLogContextStub, i0 int64,
 	return s.impl.ReadLog(ctx, i0, i1, i2)
 }
 
-func (s implLogFileServerStub) VGlob() *__ipc.GlobState {
+func (s implLogFileServerStub) Globber() *__ipc.GlobState {
 	return s.gs
 }
 

@@ -144,7 +144,7 @@ func (s implTrigonometryServerStub) Cosine(ctx __ipc.ServerContext, i0 float64) 
 	return s.impl.Cosine(ctx, i0)
 }
 
-func (s implTrigonometryServerStub) VGlob() *__ipc.GlobState {
+func (s implTrigonometryServerStub) Globber() *__ipc.GlobState {
 	return s.gs
 }
 
@@ -322,7 +322,7 @@ type implAdvancedMathServerStub struct {
 	gs *__ipc.GlobState
 }
 
-func (s implAdvancedMathServerStub) VGlob() *__ipc.GlobState {
+func (s implAdvancedMathServerStub) Globber() *__ipc.GlobState {
 	return s.gs
 }
 

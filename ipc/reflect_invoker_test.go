@@ -13,6 +13,7 @@ import (
 
 	"veyron.io/veyron/veyron2/context"
 	"veyron.io/veyron/veyron2/ipc"
+	"veyron.io/veyron/veyron2/naming"
 	"veyron.io/veyron/veyron2/security"
 	"veyron.io/veyron/veyron2/vdl"
 	"veyron.io/veyron/veyron2/vdl/vdlutil"
@@ -453,8 +454,10 @@ type (
 	badRecv2Context   struct{ ipc.ServerContext }
 	badRecv3Context   struct{ ipc.ServerContext }
 
-	badVGlob        struct{}
-	badGlobChildren struct{}
+	badGlobber       struct{}
+	badGlob          struct{}
+	badGlobChildren  struct{}
+	badGlobChildren2 struct{}
 )
 
 func (badcontext) notExported(ipc.ServerContext) error { return nil }
@@ -510,8 +513,10 @@ func (*badRecv3Context) RecvStream() interface {
 	return nil
 }
 
-func (badVGlob) VGlob()                 {}
-func (badGlobChildren) GlobChildren__() {}
+func (badGlobber) Globber()                                     {}
+func (badGlob) Glob__()                                         {}
+func (badGlobChildren) GlobChildren__(ipc.ServerContext)        {}
+func (badGlobChildren2) GlobChildren__() (<-chan string, error) { return nil, nil }
 
 func TestReflectInvokerPanic(t *testing.T) {
 	type testcase struct {
@@ -522,8 +527,10 @@ func TestReflectInvokerPanic(t *testing.T) {
 		{nil, `ReflectInvoker\(nil\) is invalid`},
 		{struct{}{}, "no compatible methods"},
 		{badcontext{}, "invalid streaming context"},
-		{badVGlob{}, "VGlob must have signature"},
+		{badGlobber{}, "Globber must have signature"},
+		{badGlob{}, "Glob__ must have signature"},
 		{badGlobChildren{}, "GlobChildren__ must have signature"},
+		{badGlobChildren2{}, "GlobChildren__ must have signature"},
 	}
 	for _, test := range tests {
 		got := testutil.CallAndRecover(func() { ipc.ReflectInvoker(test.obj) })
@@ -615,10 +622,16 @@ func TestTypeCheckMethods(t *testing.T) {
 			"BadRecv2":    badRecv,
 			"BadRecv3":    badRecv,
 		}},
-		{&badVGlob{}, map[string]string{
-			"VGlob": ipc.ErrBadVGlob.Error(),
+		{&badGlobber{}, map[string]string{
+			"Globber": ipc.ErrBadGlobber.Error(),
+		}},
+		{&badGlob{}, map[string]string{
+			"Glob__": ipc.ErrBadGlob.Error(),
 		}},
 		{&badGlobChildren{}, map[string]string{
+			"GlobChildren__": ipc.ErrBadGlobChildren.Error(),
+		}},
+		{&badGlobChildren2{}, map[string]string{
 			"GlobChildren__": ipc.ErrBadGlobChildren.Error(),
 		}},
 	}
@@ -649,23 +662,23 @@ type vGlobberObject struct {
 	gs *ipc.GlobState
 }
 
-func (o *vGlobberObject) VGlob() *ipc.GlobState {
+func (o *vGlobberObject) Globber() *ipc.GlobState {
 	return o.gs
 }
 
 type allGlobberObject struct{}
 
-func (allGlobberObject) Glob(ctx *ipc.GlobContextStub, pattern string) error {
-	return nil
+func (allGlobberObject) Glob__(ctx ipc.ServerContext, pattern string) (<-chan naming.VDLMountEntry, error) {
+	return nil, nil
 }
 
 type childrenGlobberObject struct{}
 
-func (childrenGlobberObject) GlobChildren__() (<-chan string, error) {
+func (childrenGlobberObject) GlobChildren__(ipc.ServerContext) (<-chan string, error) {
 	return nil, nil
 }
 
-func TestReflectInvokerVGlob(t *testing.T) {
+func TestReflectInvokerGlobber(t *testing.T) {
 	allGlobber := allGlobberObject{}
 	childrenGlobber := childrenGlobberObject{}
 	gs := &ipc.GlobState{AllGlobber: allGlobber}
@@ -682,7 +695,7 @@ func TestReflectInvokerVGlob(t *testing.T) {
 
 	for _, tc := range testcases {
 		ri := ipc.ReflectInvoker(tc.obj)
-		if got := ri.VGlob(); !reflect.DeepEqual(got, tc.expected) {
+		if got := ri.Globber(); !reflect.DeepEqual(got, tc.expected) {
 			t.Errorf("Unexpected result for %#v. Got %#v, want %#v", tc.obj, got, tc.expected)
 		}
 	}

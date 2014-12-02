@@ -434,7 +434,7 @@ func (s implObjectServerStub) GetACL(ctx __ipc.ServerContext) (TaggedACLMap, str
 	return s.impl.GetACL(ctx)
 }
 
-func (s implObjectServerStub) VGlob() *__ipc.GlobState {
+func (s implObjectServerStub) Globber() *__ipc.GlobState {
 	return s.gs
 }
 

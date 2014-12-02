@@ -216,7 +216,7 @@ func (s implMyObjectServerStub) AllTags(ctx __ipc.ServerContext) error {
 	return s.impl.AllTags(ctx)
 }
 
-func (s implMyObjectServerStub) VGlob() *__ipc.GlobState {
+func (s implMyObjectServerStub) Globber() *__ipc.GlobState {
 	return s.gs
 }
 

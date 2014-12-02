@@ -6,8 +6,6 @@
 package stats
 
 import (
-	"veyron.io/veyron/veyron2/services/mounttable"
-
 	"veyron.io/veyron/veyron2/services/watch"
 
 	// The non-user imports are prefixed with "__" to prevent collisions.
@@ -34,7 +32,6 @@ const _ = __wiretype.TypeIDInvalid
 // primarily numeric in nature, e.g. counters, memory usage, latency metrics,
 // etc.
 type StatsClientMethods interface {
-	mounttable.GlobbableClientMethods
 	// GlobWatcher allows a client to receive updates for changes to objects
 	// that match a pattern.  See the package comments for details.
 	watch.GlobWatcherClientMethods
@@ -59,14 +56,13 @@ func StatsClient(name string, opts ...__ipc.BindOpt) StatsClientStub {
 			client = clientOpt
 		}
 	}
-	return implStatsClientStub{name, client, mounttable.GlobbableClient(name, client), watch.GlobWatcherClient(name, client)}
+	return implStatsClientStub{name, client, watch.GlobWatcherClient(name, client)}
 }
 
 type implStatsClientStub struct {
 	name   string
 	client __ipc.Client
 
-	mounttable.GlobbableClientStub
 	watch.GlobWatcherClientStub
 }
 
@@ -110,7 +106,6 @@ func (c implStatsClientStub) Signature(ctx __context.T, opts ...__ipc.CallOpt) (
 // primarily numeric in nature, e.g. counters, memory usage, latency metrics,
 // etc.
 type StatsServerMethods interface {
-	mounttable.GlobbableServerMethods
 	// GlobWatcher allows a client to receive updates for changes to objects
 	// that match a pattern.  See the package comments for details.
 	watch.GlobWatcherServerMethods
@@ -126,7 +121,6 @@ type StatsServerMethods interface {
 // The only difference between this interface and StatsServerMethods
 // is the streaming methods.
 type StatsServerStubMethods interface {
-	mounttable.GlobbableServerStubMethods
 	// GlobWatcher allows a client to receive updates for changes to objects
 	// that match a pattern.  See the package comments for details.
 	watch.GlobWatcherServerStubMethods
@@ -151,8 +145,7 @@ type StatsServerStub interface {
 // an object that may be used by ipc.Server.
 func StatsServer(impl StatsServerMethods) StatsServerStub {
 	stub := implStatsServerStub{
-		impl:                  impl,
-		GlobbableServerStub:   mounttable.GlobbableServer(impl),
+		impl: impl,
 		GlobWatcherServerStub: watch.GlobWatcherServer(impl),
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
@@ -167,7 +160,6 @@ func StatsServer(impl StatsServerMethods) StatsServerStub {
 
 type implStatsServerStub struct {
 	impl StatsServerMethods
-	mounttable.GlobbableServerStub
 	watch.GlobWatcherServerStub
 	gs *__ipc.GlobState
 }
@@ -176,12 +168,12 @@ func (s implStatsServerStub) Value(ctx __ipc.ServerContext) (__vdlutil.Any, erro
 	return s.impl.Value(ctx)
 }
 
-func (s implStatsServerStub) VGlob() *__ipc.GlobState {
+func (s implStatsServerStub) Globber() *__ipc.GlobState {
 	return s.gs
 }
 
 func (s implStatsServerStub) Describe__() []__ipc.InterfaceDesc {
-	return []__ipc.InterfaceDesc{StatsDesc, mounttable.GlobbableDesc, watch.GlobWatcherDesc}
+	return []__ipc.InterfaceDesc{StatsDesc, watch.GlobWatcherDesc}
 }
 
 // StatsDesc describes the Stats interface.
@@ -193,7 +185,6 @@ var descStats = __ipc.InterfaceDesc{
 	PkgPath: "veyron.io/veyron/veyron2/services/mgmt/stats",
 	Doc:     "// The Stats interface is used to access stats for troubleshooting and\n// monitoring purposes. The stats objects are discoverable via the Globbable\n// interface and watchable via the GlobWatcher interface.\n//\n// The types of the object values are implementation specific, but should be\n// primarily numeric in nature, e.g. counters, memory usage, latency metrics,\n// etc.",
 	Embeds: []__ipc.EmbedDesc{
-		{"Globbable", "veyron.io/veyron/veyron2/services/mounttable", ``},
 		{"GlobWatcher", "veyron.io/veyron/veyron2/services/watch", "// GlobWatcher allows a client to receive updates for changes to objects\n// that match a pattern.  See the package comments for details."},
 	},
 	Methods: []__ipc.MethodDesc{
@@ -223,59 +214,6 @@ func (s implStatsServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSi
 		__wiretype.NamedPrimitiveType{Type: 0x1, Name: "anydata", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}}
 	var ss __ipc.ServiceSignature
 	var firstAdded int
-	ss, _ = s.GlobbableServerStub.Signature(ctx)
-	firstAdded = len(result.TypeDefs)
-	for k, v := range ss.Methods {
-		for i, _ := range v.InArgs {
-			if v.InArgs[i].Type >= __wiretype.TypeIDFirst {
-				v.InArgs[i].Type += __wiretype.TypeID(firstAdded)
-			}
-		}
-		for i, _ := range v.OutArgs {
-			if v.OutArgs[i].Type >= __wiretype.TypeIDFirst {
-				v.OutArgs[i].Type += __wiretype.TypeID(firstAdded)
-			}
-		}
-		if v.InStream >= __wiretype.TypeIDFirst {
-			v.InStream += __wiretype.TypeID(firstAdded)
-		}
-		if v.OutStream >= __wiretype.TypeIDFirst {
-			v.OutStream += __wiretype.TypeID(firstAdded)
-		}
-		result.Methods[k] = v
-	}
-	//TODO(bprosnitz) combine type definitions from embeded interfaces in a way that doesn't cause duplication.
-	for _, d := range ss.TypeDefs {
-		switch wt := d.(type) {
-		case __wiretype.SliceType:
-			if wt.Elem >= __wiretype.TypeIDFirst {
-				wt.Elem += __wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case __wiretype.ArrayType:
-			if wt.Elem >= __wiretype.TypeIDFirst {
-				wt.Elem += __wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case __wiretype.MapType:
-			if wt.Key >= __wiretype.TypeIDFirst {
-				wt.Key += __wiretype.TypeID(firstAdded)
-			}
-			if wt.Elem >= __wiretype.TypeIDFirst {
-				wt.Elem += __wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case __wiretype.StructType:
-			for i, fld := range wt.Fields {
-				if fld.Type >= __wiretype.TypeIDFirst {
-					wt.Fields[i].Type += __wiretype.TypeID(firstAdded)
-				}
-			}
-			d = wt
-			// NOTE: other types are missing, but we are upgrading anyways.
-		}
-		result.TypeDefs = append(result.TypeDefs, d)
-	}
 	ss, _ = s.GlobWatcherServerStub.Signature(ctx)
 	firstAdded = len(result.TypeDefs)
 	for k, v := range ss.Methods {

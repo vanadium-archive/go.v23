@@ -123,7 +123,7 @@ func (s implExpServerStub) Exp(ctx __ipc.ServerContext, i0 float64) (float64, er
 	return s.impl.Exp(ctx, i0)
 }
 
-func (s implExpServerStub) VGlob() *__ipc.GlobState {
+func (s implExpServerStub) Globber() *__ipc.GlobState {
 	return s.gs
 }
 

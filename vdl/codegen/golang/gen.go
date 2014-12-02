@@ -131,7 +131,6 @@ func init() {
 		"embedGo":               embedGo,
 		"isStreamingMethod":     isStreamingMethod,
 		"hasStreamingMethods":   hasStreamingMethods,
-		"isGlobbableGlob":       isGlobbableGlob,
 		"docBreak":              docBreak,
 		"quoteStripDoc":         parse.QuoteStripDoc,
 		"argTypes":              argTypes,
@@ -174,15 +173,6 @@ func hasStreamingMethods(methods []*compile.Method) bool {
 		}
 	}
 	return false
-}
-
-// isGlobbableGlob returns true iff iface and method represent the standard
-// Globbable.Glob method.  This is special-cased to use the standard
-// ipc.GlobContext, rather than generating one, so that our framework code can
-// use it as well.
-func isGlobbableGlob(iface *compile.Interface, method *compile.Method) bool {
-	const globPath = "veyron.io/veyron/veyron2/services/mounttable"
-	return iface.File.Package.Path == globPath && iface.Name == "Globbable" && method.Name == "Glob"
 }
 
 // docBreak adds a "//\n" break to separate previous comment lines and doc.  If
@@ -301,10 +291,7 @@ func stripFinalError(args []*compile.Arg) []*compile.Arg {
 // The first arg of every server method is a context; the type is either a typed
 // context for streams, or ipc.ServerContext for non-streams.
 func serverContextType(prefix string, iface *compile.Interface, method *compile.Method) string {
-	switch {
-	case isGlobbableGlob(iface, method):
-		return prefix + "__ipc.GlobContext"
-	case isStreamingMethod(method):
+	if isStreamingMethod(method) {
 		return prefix + uniqueName(iface, method, "Context")
 	}
 	return prefix + "__ipc.ServerContext"
@@ -313,10 +300,7 @@ func serverContextType(prefix string, iface *compile.Interface, method *compile.
 // The first arg of every server stub method is a context; the type is either a
 // typed context stub for streams, or ipc.ServerContext for non-streams.
 func serverContextStubType(prefix string, iface *compile.Interface, method *compile.Method) string {
-	switch {
-	case isGlobbableGlob(iface, method):
-		return prefix + "*__ipc.GlobContextStub"
-	case isStreamingMethod(method):
+	if isStreamingMethod(method) {
 		return prefix + "*" + uniqueName(iface, method, "ContextStub")
 	}
 	return prefix + "__ipc.ServerContext"
@@ -743,7 +727,7 @@ func (s impl{{$iface.Name}}ServerStub) {{$method.Name}}({{argNameTypes "i" (serv
 }
 {{end}}
 
-func (s impl{{$iface.Name}}ServerStub) VGlob() *__ipc.GlobState {
+func (s impl{{$iface.Name}}ServerStub) Globber() *__ipc.GlobState {
 	return s.gs
 }
 
@@ -852,7 +836,6 @@ var firstAdded int
 
 {{range $method := $iface.Methods}}
 {{if isStreamingMethod $method}}
-{{if not (isGlobbableGlob $iface $method)}}
 {{$serverStream := uniqueName $iface $method "ServerStream"}}
 {{$serverContext := uniqueName $iface $method "Context"}}
 {{$serverContextStub := uniqueName $iface $method "ContextStub"}}
@@ -941,7 +924,6 @@ type {{$serverSendImpl}} struct {
 func (s {{$serverSendImpl}}) Send(item {{typeGo $data $method.OutStream}}) error {
 	return s.s.Send(item)
 }
-{{end}}
 {{end}}{{end}}{{end}}
 
 {{end}}{{end}}

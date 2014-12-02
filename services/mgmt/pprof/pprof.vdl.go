@@ -379,7 +379,7 @@ func (s implPProfServerStub) Symbol(ctx __ipc.ServerContext, i0 []uint64) ([]str
 	return s.impl.Symbol(ctx, i0)
 }
 
-func (s implPProfServerStub) VGlob() *__ipc.GlobState {
+func (s implPProfServerStub) Globber() *__ipc.GlobState {
 	return s.gs
 }
 

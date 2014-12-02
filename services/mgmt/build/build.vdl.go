@@ -336,7 +336,7 @@ func (s implBuilderServerStub) Describe(ctx __ipc.ServerContext, i0 string) (bin
 	return s.impl.Describe(ctx, i0)
 }
 
-func (s implBuilderServerStub) VGlob() *__ipc.GlobState {
+func (s implBuilderServerStub) Globber() *__ipc.GlobState {
 	return s.gs
 }
 

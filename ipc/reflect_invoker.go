@@ -6,6 +6,7 @@ import (
 	"sort"
 	"sync"
 
+	"veyron.io/veyron/veyron2/naming"
 	"veyron.io/veyron/veyron2/vdl"
 	"veyron.io/veyron/veyron2/vdl/valconv"
 	"veyron.io/veyron/veyron2/vdl/vdlutil"
@@ -221,8 +222,8 @@ func (ri reflectInvoker) MethodSignature(ctx ServerContext, method string) (Meth
 	return MethodSig{}, verror.NoExistf("ipc: unknown method %q", method)
 }
 
-// VGlob implements the Invoker.Globber interface.
-func (ri reflectInvoker) VGlob() *GlobState {
+// Globber implements the ipc.Globber interface.
+func (ri reflectInvoker) Globber() *GlobState {
 	return determineGlobState(ri.rcvr.Interface())
 }
 
@@ -293,7 +294,7 @@ func newReflectInfo(obj interface{}) *reflectInfo {
 // nil iff obj doesn't implement Glob, based solely on the type of obj.
 func determineGlobState(obj interface{}) *GlobState {
 	if x, ok := obj.(Globber); ok {
-		return x.VGlob()
+		return x.Globber()
 	}
 	return NewGlobState(obj)
 }
@@ -347,7 +348,9 @@ var (
 	rtServerContext        = reflect.TypeOf((*ServerContext)(nil)).Elem()
 	rtBool                 = reflect.TypeOf(bool(false))
 	rtError                = reflect.TypeOf((*error)(nil)).Elem()
+	rtString               = reflect.TypeOf("")
 	rtStringChan           = reflect.TypeOf((<-chan string)(nil))
+	rtMountEntryChan       = reflect.TypeOf((<-chan naming.VDLMountEntry)(nil))
 	rtPtrToGlobState       = reflect.TypeOf((*GlobState)(nil))
 	rtSliceOfInterfaceDesc = reflect.TypeOf([]InterfaceDesc{})
 
@@ -357,8 +360,10 @@ var (
 	ErrMethodNotExported = verror.BadArgf("Method not exported")
 	ErrNonRPCMethod      = verror.BadArgf("Non-rpc method.  We require at least 1 in-arg." + useContext)
 	ErrInServerCall      = verror.Abortedf("Context arg ipc.ServerCall is invalid; cannot determine streaming types." + forgotWrap)
-	ErrBadVGlob          = verror.Abortedf("VGlob must have signature VGlob() *ipc.GlobState")
-	ErrBadGlobChildren   = verror.Abortedf("GlobChildren__ must have signature GlobChildren__() (<-chan string, error)")
+	ErrBadDescribe       = verror.Abortedf("Describe__ must have signature Describe__() []ipc.InterfaceDesc")
+	ErrBadGlobber        = verror.Abortedf("Globber must have signature Globber() *ipc.GlobState")
+	ErrBadGlob           = verror.Abortedf("Glob__ must have signature Glob__(ipc.ServerContext, pattern string) (<-chan naming.VDLMountEntry, error)")
+	ErrBadGlobChildren   = verror.Abortedf("GlobChildren__ must have signature GlobChildren__(ipc.ServerContext) (<-chan string, error)")
 )
 
 func typeCheckMethod(method reflect.Method, sig *MethodSig) verror.E {
@@ -409,19 +414,28 @@ func typeCheckReservedMethod(method reflect.Method) verror.E {
 		// Describe__() []InterfaceDesc
 		if t := method.Type; t.NumIn() != 1 || t.NumOut() != 1 ||
 			t.Out(0) != rtSliceOfInterfaceDesc {
-			return ErrBadVGlob
+			return ErrBadDescribe
 		}
 		return ErrReservedMethod
-	case "VGlob":
-		// VGlob() *GlobState
+	case "Globber":
+		// Globber() *GlobState
 		if t := method.Type; t.NumIn() != 1 || t.NumOut() != 1 ||
 			t.Out(0) != rtPtrToGlobState {
-			return ErrBadVGlob
+			return ErrBadGlobber
+		}
+		return ErrReservedMethod
+	case "Glob__":
+		// Glob__(ipc.ServerContext, string) (<-chan naming.VDLMountEntry, error)
+		if t := method.Type; t.NumIn() != 3 || t.NumOut() != 2 ||
+			t.In(1) != rtServerContext || t.In(2) != rtString ||
+			t.Out(0) != rtMountEntryChan || t.Out(1) != rtError {
+			return ErrBadGlob
 		}
 		return ErrReservedMethod
 	case "GlobChildren__":
-		// GlobChildren() (<-chan string, error)
-		if t := method.Type; t.NumIn() != 1 || t.NumOut() != 2 ||
+		// GlobChildren__(ipc.ServerContext) (<-chan string, error)
+		if t := method.Type; t.NumIn() != 2 || t.NumOut() != 2 ||
+			t.In(1) != rtServerContext ||
 			t.Out(0) != rtStringChan || t.Out(1) != rtError {
 			return ErrBadGlobChildren
 		}

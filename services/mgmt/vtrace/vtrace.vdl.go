@@ -235,7 +235,7 @@ func (s implStoreServerStub) AllTraces(ctx *StoreAllTracesContextStub) error {
 	return s.impl.AllTraces(ctx)
 }
 
-func (s implStoreServerStub) VGlob() *__ipc.GlobState {
+func (s implStoreServerStub) Globber() *__ipc.GlobState {
 	return s.gs
 }
 

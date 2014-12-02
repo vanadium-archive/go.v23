@@ -310,7 +310,7 @@ func (s implGlobWatcherServerStub) WatchGlob(ctx *GlobWatcherWatchGlobContextStu
 	return s.impl.WatchGlob(ctx, i0)
 }
 
-func (s implGlobWatcherServerStub) VGlob() *__ipc.GlobState {
+func (s implGlobWatcherServerStub) Globber() *__ipc.GlobState {
 	return s.gs
 }
 

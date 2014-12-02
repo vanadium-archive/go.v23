@@ -10,7 +10,6 @@ import (
 	"veyron.io/veyron/veyron2/services/security/access"
 
 	// The non-user imports are prefixed with "__" to prevent collisions.
-	__io "io"
 	__veyron2 "veyron.io/veyron/veyron2"
 	__context "veyron.io/veyron/veyron2/context"
 	__ipc "veyron.io/veyron/veyron2/ipc"
@@ -23,281 +22,11 @@ import (
 // bootstrap types are used on interfaces.
 const _ = __wiretype.TypeIDInvalid
 
-// GlobbableClientMethods is the client interface
-// containing Globbable methods.
-type GlobbableClientMethods interface {
-	// Glob returns all matching entries at the given server.
-	//
-	// Glob returns an entry that exactly matches the pattern only if the
-	// principal has some access to the entry, and read or resolve access to the
-	// parent entry. However, if the pattern expands an entry "p" (e.g. "p/*",
-	// "p/...", "p/[abc]"), Glob returns child entries only if the principal has
-	// read access to "p".
-	// In summary, the principal must have at least resolve access to call Glob,
-	// but may require additional access for certain patterns.
-	Glob(ctx __context.T, pattern string, opts ...__ipc.CallOpt) (GlobbableGlobCall, error)
-}
-
-// GlobbableClientStub adds universal methods to GlobbableClientMethods.
-type GlobbableClientStub interface {
-	GlobbableClientMethods
-	__ipc.UniversalServiceMethods
-}
-
-// GlobbableClient returns a client stub for Globbable.
-func GlobbableClient(name string, opts ...__ipc.BindOpt) GlobbableClientStub {
-	var client __ipc.Client
-	for _, opt := range opts {
-		if clientOpt, ok := opt.(__ipc.Client); ok {
-			client = clientOpt
-		}
-	}
-	return implGlobbableClientStub{name, client}
-}
-
-type implGlobbableClientStub struct {
-	name   string
-	client __ipc.Client
-}
-
-func (c implGlobbableClientStub) c(ctx __context.T) __ipc.Client {
-	if c.client != nil {
-		return c.client
-	}
-	return __veyron2.RuntimeFromContext(ctx).Client()
-}
-
-func (c implGlobbableClientStub) Glob(ctx __context.T, i0 string, opts ...__ipc.CallOpt) (ocall GlobbableGlobCall, err error) {
-	var call __ipc.Call
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Glob", []interface{}{i0}, opts...); err != nil {
-		return
-	}
-	ocall = &implGlobbableGlobCall{Call: call}
-	return
-}
-
-func (c implGlobbableClientStub) Signature(ctx __context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
-	var call __ipc.Call
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
-// GlobbableGlobClientStream is the client stream for Globbable.Glob.
-type GlobbableGlobClientStream interface {
-	// RecvStream returns the receiver side of the Globbable.Glob client stream.
-	RecvStream() interface {
-		// Advance stages an item so that it may be retrieved via Value.  Returns
-		// true iff there is an item to retrieve.  Advance must be called before
-		// Value is called.  May block if an item is not available.
-		Advance() bool
-		// Value returns the item that was staged by Advance.  May panic if Advance
-		// returned false or was not called.  Never blocks.
-		Value() naming.VDLMountEntry
-		// Err returns any error encountered by Advance.  Never blocks.
-		Err() error
-	}
-}
-
-// GlobbableGlobCall represents the call returned from Globbable.Glob.
-type GlobbableGlobCall interface {
-	GlobbableGlobClientStream
-	// Finish blocks until the server is done, and returns the positional return
-	// values for call.
-	//
-	// Finish returns immediately if Cancel has been called; depending on the
-	// timing the output could either be an error signaling cancelation, or the
-	// valid positional return values from the server.
-	//
-	// Calling Finish is mandatory for releasing stream resources, unless Cancel
-	// has been called or any of the other methods return an error.  Finish should
-	// be called at most once.
-	Finish() error
-	// Cancel cancels the RPC, notifying the server to stop processing.  It is
-	// safe to call Cancel concurrently with any of the other stream methods.
-	// Calling Cancel after Finish has returned is a no-op.
-	Cancel()
-}
-
-type implGlobbableGlobCall struct {
-	__ipc.Call
-	valRecv naming.VDLMountEntry
-	errRecv error
-}
-
-func (c *implGlobbableGlobCall) RecvStream() interface {
-	Advance() bool
-	Value() naming.VDLMountEntry
-	Err() error
-} {
-	return implGlobbableGlobCallRecv{c}
-}
-
-type implGlobbableGlobCallRecv struct {
-	c *implGlobbableGlobCall
-}
-
-func (c implGlobbableGlobCallRecv) Advance() bool {
-	c.c.valRecv = naming.VDLMountEntry{}
-	c.c.errRecv = c.c.Recv(&c.c.valRecv)
-	return c.c.errRecv == nil
-}
-func (c implGlobbableGlobCallRecv) Value() naming.VDLMountEntry {
-	return c.c.valRecv
-}
-func (c implGlobbableGlobCallRecv) Err() error {
-	if c.c.errRecv == __io.EOF {
-		return nil
-	}
-	return c.c.errRecv
-}
-func (c *implGlobbableGlobCall) Finish() (err error) {
-	if ierr := c.Call.Finish(&err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
-// GlobbableServerMethods is the interface a server writer
-// implements for Globbable.
-type GlobbableServerMethods interface {
-	// Glob returns all matching entries at the given server.
-	//
-	// Glob returns an entry that exactly matches the pattern only if the
-	// principal has some access to the entry, and read or resolve access to the
-	// parent entry. However, if the pattern expands an entry "p" (e.g. "p/*",
-	// "p/...", "p/[abc]"), Glob returns child entries only if the principal has
-	// read access to "p".
-	// In summary, the principal must have at least resolve access to call Glob,
-	// but may require additional access for certain patterns.
-	Glob(ctx __ipc.GlobContext, pattern string) error
-}
-
-// GlobbableServerStubMethods is the server interface containing
-// Globbable methods, as expected by ipc.Server.
-// The only difference between this interface and GlobbableServerMethods
-// is the streaming methods.
-type GlobbableServerStubMethods interface {
-	// Glob returns all matching entries at the given server.
-	//
-	// Glob returns an entry that exactly matches the pattern only if the
-	// principal has some access to the entry, and read or resolve access to the
-	// parent entry. However, if the pattern expands an entry "p" (e.g. "p/*",
-	// "p/...", "p/[abc]"), Glob returns child entries only if the principal has
-	// read access to "p".
-	// In summary, the principal must have at least resolve access to call Glob,
-	// but may require additional access for certain patterns.
-	Glob(ctx *__ipc.GlobContextStub, pattern string) error
-}
-
-// GlobbableServerStub adds universal methods to GlobbableServerStubMethods.
-type GlobbableServerStub interface {
-	GlobbableServerStubMethods
-	// Describe the Globbable interfaces.
-	Describe__() []__ipc.InterfaceDesc
-	// Signature will be replaced with Describe__.
-	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
-}
-
-// GlobbableServer returns a server stub for Globbable.
-// It converts an implementation of GlobbableServerMethods into
-// an object that may be used by ipc.Server.
-func GlobbableServer(impl GlobbableServerMethods) GlobbableServerStub {
-	stub := implGlobbableServerStub{
-		impl: impl,
-	}
-	// Initialize GlobState; always check the stub itself first, to handle the
-	// case where the user has the Glob method defined in their VDL source.
-	if gs := __ipc.NewGlobState(stub); gs != nil {
-		stub.gs = gs
-	} else if gs := __ipc.NewGlobState(impl); gs != nil {
-		stub.gs = gs
-	}
-	return stub
-}
-
-type implGlobbableServerStub struct {
-	impl GlobbableServerMethods
-	gs   *__ipc.GlobState
-}
-
-func (s implGlobbableServerStub) Glob(ctx *__ipc.GlobContextStub, i0 string) error {
-	return s.impl.Glob(ctx, i0)
-}
-
-func (s implGlobbableServerStub) VGlob() *__ipc.GlobState {
-	return s.gs
-}
-
-func (s implGlobbableServerStub) Describe__() []__ipc.InterfaceDesc {
-	return []__ipc.InterfaceDesc{GlobbableDesc}
-}
-
-// GlobbableDesc describes the Globbable interface.
-var GlobbableDesc __ipc.InterfaceDesc = descGlobbable
-
-// descGlobbable hides the desc to keep godoc clean.
-var descGlobbable = __ipc.InterfaceDesc{
-	Name:    "Globbable",
-	PkgPath: "veyron.io/veyron/veyron2/services/mounttable",
-	Methods: []__ipc.MethodDesc{
-		{
-			Name: "Glob",
-			Doc:  "// Glob returns all matching entries at the given server.\n//\n// Glob returns an entry that exactly matches the pattern only if the\n// principal has some access to the entry, and read or resolve access to the\n// parent entry. However, if the pattern expands an entry \"p\" (e.g. \"p/*\",\n// \"p/...\", \"p/[abc]\"), Glob returns child entries only if the principal has\n// read access to \"p\".\n// In summary, the principal must have at least resolve access to call Glob,\n// but may require additional access for certain patterns.",
-			InArgs: []__ipc.ArgDesc{
-				{"pattern", ``}, // string
-			},
-			OutArgs: []__ipc.ArgDesc{
-				{"", ``}, // error
-			},
-			Tags: []__vdlutil.Any{access.Tag("Resolve")},
-		},
-	},
-}
-
-func (s implGlobbableServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
-	// TODO(toddw): Replace with new Describe__ implementation.
-	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
-	result.Methods["Glob"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{
-			{Name: "pattern", Type: 3},
-		},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 65},
-		},
-
-		OutStream: 68,
-	}
-
-	result.TypeDefs = []__vdlutil.Any{
-		__wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, __wiretype.StructType{
-			[]__wiretype.FieldType{
-				__wiretype.FieldType{Type: 0x3, Name: "Server"},
-				__wiretype.FieldType{Type: 0x34, Name: "TTL"},
-			},
-			"veyron.io/veyron/veyron2/naming.VDLMountedServer", []string(nil)},
-		__wiretype.SliceType{Elem: 0x42, Name: "", Tags: []string(nil)}, __wiretype.StructType{
-			[]__wiretype.FieldType{
-				__wiretype.FieldType{Type: 0x3, Name: "Name"},
-				__wiretype.FieldType{Type: 0x43, Name: "Servers"},
-				__wiretype.FieldType{Type: 0x2, Name: "MT"},
-			},
-			"veyron.io/veyron/veyron2/naming.VDLMountEntry", []string(nil)},
-	}
-
-	return result, nil
-}
-
 // MountTableClientMethods is the client interface
 // containing MountTable methods.
 //
 // MountTable defines the interface to talk to a mounttable.
 type MountTableClientMethods interface {
-	GlobbableClientMethods
 	// Mount Server (a global name) onto the receiver.
 	// Subsequent mounts add to the servers mounted there.  The multiple
 	// servers are considered equivalent and are meant solely for
@@ -337,14 +66,12 @@ func MountTableClient(name string, opts ...__ipc.BindOpt) MountTableClientStub {
 			client = clientOpt
 		}
 	}
-	return implMountTableClientStub{name, client, GlobbableClient(name, client)}
+	return implMountTableClientStub{name, client}
 }
 
 type implMountTableClientStub struct {
 	name   string
 	client __ipc.Client
-
-	GlobbableClientStub
 }
 
 func (c implMountTableClientStub) c(ctx __context.T) __ipc.Client {
@@ -414,7 +141,6 @@ func (c implMountTableClientStub) Signature(ctx __context.T, opts ...__ipc.CallO
 //
 // MountTable defines the interface to talk to a mounttable.
 type MountTableServerMethods interface {
-	GlobbableServerMethods
 	// Mount Server (a global name) onto the receiver.
 	// Subsequent mounts add to the servers mounted there.  The multiple
 	// servers are considered equivalent and are meant solely for
@@ -442,34 +168,9 @@ type MountTableServerMethods interface {
 
 // MountTableServerStubMethods is the server interface containing
 // MountTable methods, as expected by ipc.Server.
-// The only difference between this interface and MountTableServerMethods
-// is the streaming methods.
-type MountTableServerStubMethods interface {
-	GlobbableServerStubMethods
-	// Mount Server (a global name) onto the receiver.
-	// Subsequent mounts add to the servers mounted there.  The multiple
-	// servers are considered equivalent and are meant solely for
-	// availability, i.e., no load balancing is guaranteed.
-	//
-	// TTL is the number of seconds the mount is to last unless refreshed by
-	// another mount of the same server.  A TTL of 0 represents an infinite
-	// duration.  A server with an expired TTL should never appear in the
-	// results nor affect the operation of any MountTable method, and should
-	// act as if it was never present as far as the interface is concerned.
-	//
-	// Opts represents a bit mask of options.
-	Mount(ctx __ipc.ServerContext, Server string, TTL uint32, Flags naming.MountFlag) error
-	// Unmount removes Server from the mount point.  If Server is empty, remove
-	// all servers mounted there.
-	// Returns a non-nil error iff Server remains mounted at the mount point.
-	Unmount(ctx __ipc.ServerContext, Server string) error
-	// ResolveStep takes the next step in resolving a name.  Returns the next
-	// servers to query and the suffix at those servers.
-	ResolveStep(__ipc.ServerContext) (Servers []naming.VDLMountedServer, Suffix string, Error error)
-	// ResolveStepX takes the next step in resolving a name.  Returns the next
-	// servers to query and the suffix at those servers.
-	ResolveStepX(__ipc.ServerContext) (Entry naming.VDLMountEntry, Error error)
-}
+// There is no difference between this interface and MountTableServerMethods
+// since there are no streaming methods.
+type MountTableServerStubMethods MountTableServerMethods
 
 // MountTableServerStub adds universal methods to MountTableServerStubMethods.
 type MountTableServerStub interface {
@@ -485,8 +186,7 @@ type MountTableServerStub interface {
 // an object that may be used by ipc.Server.
 func MountTableServer(impl MountTableServerMethods) MountTableServerStub {
 	stub := implMountTableServerStub{
-		impl:                impl,
-		GlobbableServerStub: GlobbableServer(impl),
+		impl: impl,
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
@@ -500,8 +200,7 @@ func MountTableServer(impl MountTableServerMethods) MountTableServerStub {
 
 type implMountTableServerStub struct {
 	impl MountTableServerMethods
-	GlobbableServerStub
-	gs *__ipc.GlobState
+	gs   *__ipc.GlobState
 }
 
 func (s implMountTableServerStub) Mount(ctx __ipc.ServerContext, i0 string, i1 uint32, i2 naming.MountFlag) error {
@@ -520,12 +219,12 @@ func (s implMountTableServerStub) ResolveStepX(ctx __ipc.ServerContext) (naming.
 	return s.impl.ResolveStepX(ctx)
 }
 
-func (s implMountTableServerStub) VGlob() *__ipc.GlobState {
+func (s implMountTableServerStub) Globber() *__ipc.GlobState {
 	return s.gs
 }
 
 func (s implMountTableServerStub) Describe__() []__ipc.InterfaceDesc {
-	return []__ipc.InterfaceDesc{MountTableDesc, GlobbableDesc}
+	return []__ipc.InterfaceDesc{MountTableDesc}
 }
 
 // MountTableDesc describes the MountTable interface.
@@ -536,9 +235,6 @@ var descMountTable = __ipc.InterfaceDesc{
 	Name:    "MountTable",
 	PkgPath: "veyron.io/veyron/veyron2/services/mounttable",
 	Doc:     "// MountTable defines the interface to talk to a mounttable.",
-	Embeds: []__ipc.EmbedDesc{
-		{"Globbable", "veyron.io/veyron/veyron2/services/mounttable", ``},
-	},
 	Methods: []__ipc.MethodDesc{
 		{
 			Name: "Mount",
@@ -637,61 +333,6 @@ func (s implMountTableServerStub) Signature(ctx __ipc.ServerContext) (__ipc.Serv
 				__wiretype.FieldType{Type: 0x2, Name: "MT"},
 			},
 			"veyron.io/veyron/veyron2/naming.VDLMountEntry", []string(nil)},
-	}
-	var ss __ipc.ServiceSignature
-	var firstAdded int
-	ss, _ = s.GlobbableServerStub.Signature(ctx)
-	firstAdded = len(result.TypeDefs)
-	for k, v := range ss.Methods {
-		for i, _ := range v.InArgs {
-			if v.InArgs[i].Type >= __wiretype.TypeIDFirst {
-				v.InArgs[i].Type += __wiretype.TypeID(firstAdded)
-			}
-		}
-		for i, _ := range v.OutArgs {
-			if v.OutArgs[i].Type >= __wiretype.TypeIDFirst {
-				v.OutArgs[i].Type += __wiretype.TypeID(firstAdded)
-			}
-		}
-		if v.InStream >= __wiretype.TypeIDFirst {
-			v.InStream += __wiretype.TypeID(firstAdded)
-		}
-		if v.OutStream >= __wiretype.TypeIDFirst {
-			v.OutStream += __wiretype.TypeID(firstAdded)
-		}
-		result.Methods[k] = v
-	}
-	//TODO(bprosnitz) combine type definitions from embeded interfaces in a way that doesn't cause duplication.
-	for _, d := range ss.TypeDefs {
-		switch wt := d.(type) {
-		case __wiretype.SliceType:
-			if wt.Elem >= __wiretype.TypeIDFirst {
-				wt.Elem += __wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case __wiretype.ArrayType:
-			if wt.Elem >= __wiretype.TypeIDFirst {
-				wt.Elem += __wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case __wiretype.MapType:
-			if wt.Key >= __wiretype.TypeIDFirst {
-				wt.Key += __wiretype.TypeID(firstAdded)
-			}
-			if wt.Elem >= __wiretype.TypeIDFirst {
-				wt.Elem += __wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case __wiretype.StructType:
-			for i, fld := range wt.Fields {
-				if fld.Type >= __wiretype.TypeIDFirst {
-					wt.Fields[i].Type += __wiretype.TypeID(firstAdded)
-				}
-			}
-			d = wt
-			// NOTE: other types are missing, but we are upgrading anyways.
-		}
-		result.TypeDefs = append(result.TypeDefs, d)
 	}
 
 	return result, nil

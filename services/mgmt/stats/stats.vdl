@@ -3,7 +3,6 @@
 package stats
 
 import (
-	"veyron.io/veyron/veyron2/services/mounttable"
 	"veyron.io/veyron/veyron2/services/watch"
 )
 
@@ -15,8 +14,6 @@ import (
 // primarily numeric in nature, e.g. counters, memory usage, latency metrics,
 // etc.
 type Stats interface {
-	// Stats objects are discoverable in the namespace.
-	mounttable.Globbable
 	// Stats objects can be watched. Updates are streamed to the watcher.
 	watch.GlobWatcher
 	// Value returns the current value of an object, or an error. The type

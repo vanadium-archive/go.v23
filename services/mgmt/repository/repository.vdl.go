@@ -178,7 +178,7 @@ func (s implApplicationServerStub) Match(ctx __ipc.ServerContext, i0 []string) (
 	return s.impl.Match(ctx, i0)
 }
 
-func (s implApplicationServerStub) VGlob() *__ipc.GlobState {
+func (s implApplicationServerStub) Globber() *__ipc.GlobState {
 	return s.gs
 }
 
@@ -692,7 +692,7 @@ func (s implBinaryServerStub) Upload(ctx *BinaryUploadContextStub, i0 int32) err
 	return s.impl.Upload(ctx, i0)
 }
 
-func (s implBinaryServerStub) VGlob() *__ipc.GlobState {
+func (s implBinaryServerStub) Globber() *__ipc.GlobState {
 	return s.gs
 }
 
@@ -1094,7 +1094,7 @@ func (s implProfileServerStub) Description(ctx __ipc.ServerContext) (string, err
 	return s.impl.Description(ctx)
 }
 
-func (s implProfileServerStub) VGlob() *__ipc.GlobState {
+func (s implProfileServerStub) Globber() *__ipc.GlobState {
 	return s.gs
 }
 

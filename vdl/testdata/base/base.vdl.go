@@ -684,7 +684,7 @@ func (s implServiceAServerStub) MethodA4(ctx *ServiceAMethodA4ContextStub, i0 in
 	return s.impl.MethodA4(ctx, i0)
 }
 
-func (s implServiceAServerStub) VGlob() *__ipc.GlobState {
+func (s implServiceAServerStub) Globber() *__ipc.GlobState {
 	return s.gs
 }
 
@@ -1060,7 +1060,7 @@ func (s implServiceBServerStub) MethodB1(ctx __ipc.ServerContext, i0 Scalars, i1
 	return s.impl.MethodB1(ctx, i0, i1)
 }
 
-func (s implServiceBServerStub) VGlob() *__ipc.GlobState {
+func (s implServiceBServerStub) Globber() *__ipc.GlobState {
 	return s.gs
 }
 

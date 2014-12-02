@@ -6,19 +6,6 @@ import (
 	"veyron.io/veyron/veyron2/services/security/access"
 )
 
-type Globbable interface {
-	// Glob returns all matching entries at the given server.
-	//
-	// Glob returns an entry that exactly matches the pattern only if the
-	// principal has some access to the entry, and read or resolve access to the
-	// parent entry. However, if the pattern expands an entry "p" (e.g. "p/*",
-	// "p/...", "p/[abc]"), Glob returns child entries only if the principal has
-	// read access to "p".
-	// In summary, the principal must have at least resolve access to call Glob,
-	// but may require additional access for certain patterns.
-	Glob(pattern string) stream<_, naming.VDLMountEntry> error {access.Resolve}
-}
-
 // MountTable defines the interface to talk to a mounttable.
 type MountTable interface {
 	// In all methods of MountTable, the receiver is the name bound to.
@@ -49,6 +36,4 @@ type MountTable interface {
 	// ResolveStepX takes the next step in resolving a name.  Returns the next
 	// servers to query and the suffix at those servers.
 	ResolveStepX() (Entry naming.VDLMountEntry, Error error) {access.Read}
-
-	Globbable
 }

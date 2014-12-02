@@ -518,7 +518,7 @@ func (s implArithServerStub) QuoteAny(ctx __ipc.ServerContext, i0 __vdlutil.Any)
 	return s.impl.QuoteAny(ctx, i0)
 }
 
-func (s implArithServerStub) VGlob() *__ipc.GlobState {
+func (s implArithServerStub) Globber() *__ipc.GlobState {
 	return s.gs
 }
 
@@ -1001,7 +1001,7 @@ func (s implCalculatorServerStub) Off(ctx __ipc.ServerContext) error {
 	return s.impl.Off(ctx)
 }
 
-func (s implCalculatorServerStub) VGlob() *__ipc.GlobState {
+func (s implCalculatorServerStub) Globber() *__ipc.GlobState {
 	return s.gs
 }
 
