@@ -328,6 +328,15 @@ func TestTransitivePackages(t *testing.T) {
 			[]string{"../../../...vdl/testdata/...exp"},
 			[]string{"veyron.io/veyron/veyron2/vdl/testdata/arith/exp"},
 		},
+		// Standard vdl package, as both import and dir path.
+		{
+			[]string{"veyron.io/veyron/veyron2/vdl/vdlroot/src/vdl"},
+			[]string{"vdl"},
+		},
+		{
+			[]string{"../vdlroot/src/vdl"},
+			[]string{"vdl"},
+		},
 	}
 	for _, test := range tests {
 		// All modes should result in the same successful output.

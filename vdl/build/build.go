@@ -401,7 +401,7 @@ func (ds *depSorter) ResolvePath(path string, mode UnknownPathMode) bool {
 	case dots >= 0:
 		return ds.resolveWildcardPath(isDirPath, path[:dots], path[dots:])
 	case isDirPath:
-		return ds.resolveDirPath(path, "", mode) != nil
+		return ds.resolveDirPath(path, mode) != nil
 	default:
 		return ds.resolveImportPath(path, mode) != nil
 	}
@@ -467,7 +467,7 @@ func (ds *depSorter) resolveWildcardPath(isDirPath bool, prefix, suffix string) 
 				return nil
 			}
 			// Finally resolve the dir.
-			if ds.resolveDirPath(rootAndPath, "", UnknownPathIsIgnored) != nil {
+			if ds.resolveDirPath(rootAndPath, UnknownPathIsIgnored) != nil {
 				resolvedAny = true
 			}
 			return nil
@@ -496,9 +496,8 @@ func createMatcher(pattern string) (*regexp.Regexp, error) {
 }
 
 // resolveDirPath resolves dir into a Package.  Returns the package, or nil if
-// it can't be resolved.  The pkgPath is used to set the path of the returned
-// package; if it is empty, we attempt to deduce the package path.
-func (ds *depSorter) resolveDirPath(dir, pkgPath string, mode UnknownPathMode) *Package {
+// it can't be resolved.
+func (ds *depSorter) resolveDirPath(dir string, mode UnknownPathMode) *Package {
 	// If the package already exists in our dir map, we can just return it.
 	absDir, err := filepath.Abs(dir)
 	if err != nil {
@@ -507,12 +506,16 @@ func (ds *depSorter) resolveDirPath(dir, pkgPath string, mode UnknownPathMode) *
 	if pkg := ds.dirMap[absDir]; pkg != nil {
 		return pkg
 	}
-	// Ensure pkgPath is initialized, and corresponds to exactly one package.
-	if pkgPath == "" {
-		if pkgPath, err = ds.deducePackagePath(absDir); err != nil {
-			ds.errorf("%s: can't deduce package path (%v)", absDir, err)
-			return nil
-		}
+	// Deduce the package path, and ensure it corresponds to exactly one package.
+	// We always deduce the package path from the package directory, even if we
+	// originally resolved from an import path, and thus already "know" the
+	// package path.  This is to ensure we correctly handle vdl standard packages.
+	// E.g. if we're given "veyron.io/veyron/veyron2/vdl/vdlroot/src/vdl" as an
+	// import path, the resulting package path must be "vdl".
+	pkgPath, err := ds.deducePackagePath(absDir)
+	if err != nil {
+		ds.errorf("%s: can't deduce package path (%v)", absDir, err)
+		return nil
 	}
 	if !validPackagePath(pkgPath) {
 		mode.logOrErrorf(ds.errs, "%s: package path %q is invalid", absDir, pkgPath)
@@ -550,7 +553,7 @@ func (ds *depSorter) resolveImportPath(pkgPath string, mode UnknownPathMode) *Pa
 	var dirs []string
 	for _, srcDir := range ds.srcDirs {
 		dir := filepath.Join(srcDir, filepath.FromSlash(pkgPath))
-		if pkg := ds.resolveDirPath(dir, pkgPath, UnknownPathIsIgnored); pkg != nil {
+		if pkg := ds.resolveDirPath(dir, UnknownPathIsIgnored); pkg != nil {
 			vdlutil.Vlog.Printf("%s: resolved import path %q", pkg.Dir, pkgPath)
 			return pkg
 		}
