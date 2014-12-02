@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"veyron.io/veyron/veyron2/vdl"
-	"veyron.io/veyron/veyron2/vdl/vdlutil"
 )
 
 // makeTypeDefinitionsString generates a string that defines the specified types.
@@ -88,7 +87,7 @@ func makeTypeFieldAssignmentString(jsname string, t *vdl.Type, jsnames typeNames
 				str += ", "
 			}
 			field := t.Field(i)
-			str += fmt.Sprintf("{name: %q, type: %s}", vdlutil.ToCamelCase(field.Name), jsnames.LookupName(field.Type))
+			str += fmt.Sprintf("{name: %q, type: %s}", field.Name, jsnames.LookupName(field.Type))
 		}
 		str += "];\n"
 	}

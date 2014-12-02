@@ -194,7 +194,7 @@ func generateMethodSignature(method *compile.Method, names typeNames) string {
     hasOutStreamHACK: %t,
     tags: %s
   }`,
-		vdlutil.ToCamelCase(method.Name),
+		method.Name,
 		quoteStripDoc(method.Doc),
 		generateMethodArguments(method.InArgs, names),
 		generateMethodArguments(method.OutArgs, names), // Note: includes the error argument.
@@ -205,23 +205,17 @@ func generateMethodSignature(method *compile.Method, names typeNames) string {
 		genMethodTags(names, method))
 }
 
-// Get the typeobject string for the given vdl type. Uses the Registry to find
-// the correct constructor, then extracts the type.
-// e.g. "Registry.lookupOrCreateConstructor(_typeNamedBool).prototype._type"
-func getConstructorDefinitionString(t *vdl.Type, names typeNames) string {
-	return fmt.Sprintf("Registry.lookupOrCreateConstructor(%s).prototype._type", names.LookupName(t))
-}
-
 // Returns a slice describing the method's arguments.
 func generateMethodArguments(args []*compile.Arg, names typeNames) string {
 	ret := "["
 	for _, arg := range args {
-		ret += fmt.Sprintf(`{
+		ret += fmt.Sprintf(
+			`{
       name: '%s',
       doc: %s,
       type: %s
     },
-    `, arg.Name, quoteStripDoc(arg.Doc), getConstructorDefinitionString(arg.Type, names))
+    `, arg.Name, quoteStripDoc(arg.Doc), names.LookupName(arg.Type))
 	}
 	ret += "]"
 	return ret
@@ -229,16 +223,19 @@ func generateMethodArguments(args []*compile.Arg, names typeNames) string {
 
 // Returns the VOM type of the stream.
 func generateMethodStreamingHACK(streaming *vdl.Type, names typeNames) string {
-	if streaming == nil {
-		// TODO(alexfandrianto): Remove this HACK in a HACK.
-		// The veyron.js test's deepEqual prevents using "null" or "{}".
-		return `{
+	typeStr := "Types.ANY"
+	if streaming != nil {
+		typeStr = names.LookupName(streaming)
+	}
+	// TODO(alexfandrianto): Remove this HACK in a HACK.
+	// The veyron.js test's deepEqual prevents using "null" or "{}".
+	return fmt.Sprintf(
+		`{
       name: '',
       doc: '',
-      type: Types.ANY
-    }`
-	}
-	return getConstructorDefinitionString(streaming, names)
+      type: %s
+    }`,
+		typeStr)
 }
 
 // Returns the bool for whether the stream exists or not
@@ -328,7 +325,7 @@ function NotImplementedMethod(name) {
 var services = {
 package: '{{$pkg.Path}}',
 {{range $file := $pkg.Files}}{{range $iface := $file.Interfaces}}  {{$iface.Name}}: {
-{{range $method := $iface.AllMethods}}    {{toCamelCase $method.Name}}: {
+{{range $method := $iface.AllMethods}}    {{$method.Name}}: {
     numInArgs: {{len $method.InArgs}},
     numOutArgs: {{numOutArgs $method}},
     inputStreaming: {{if $method.InStream}}true{{else}}false{{end}},
