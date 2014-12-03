@@ -41,24 +41,15 @@ package {{ .PackagePath }};
     }
     @Override
     public io.veyron.veyron.veyron2.ipc.ServiceSignature getSignature(io.veyron.veyron.veyron2.context.Context context, io.veyron.veyron.veyron2.Options veyronOpts) throws io.veyron.veyron.veyron2.VeyronException {
-        // Add VDL path option.
-        // NOTE(spetrovic): this option is temporary and will be removed soon after we switch
-        // Java to encoding/decoding from vom.Value objects.
-        if (veyronOpts == null) veyronOpts = new io.veyron.veyron.veyron2.Options();
-        if (!veyronOpts.has(io.veyron.veyron.veyron2.OptionDefs.VDL_INTERFACE_PATH)) {
-            veyronOpts.set(io.veyron.veyron.veyron2.OptionDefs.VDL_INTERFACE_PATH, {{ .ServiceName }}ClientStub.vdlIfacePathOpt);
-        }
         // Start the call.
-        final io.veyron.veyron.veyron2.ipc.Client.Call call = this.client.startCall(context, this.veyronName, "signature", new java.lang.Object[0], veyronOpts);
+        final io.veyron.veyron.veyron2.ipc.Client.Call _call = this.client.startCall(context, this.veyronName, "signature", new java.lang.Object[0], new java.lang.reflect.Type[0], veyronOpts);
 
         // Finish the call.
-        final com.google.common.reflect.TypeToken<?>[] resultTypes = new com.google.common.reflect.TypeToken<?>[]{
-            new com.google.common.reflect.TypeToken<io.veyron.veyron.veyron2.ipc.ServiceSignature>() {
-                private static final long serialVersionUID = 1L;
-            },
+        final java.lang.reflect.Type[] _resultTypes = new java.lang.reflect.Type[]{
+            new com.google.common.reflect.TypeToken<io.veyron.veyron.veyron2.ipc.ServiceSignature>() {}.getType(),
         };
-        final java.lang.Object[] results = call.finish(resultTypes);
-        return (io.veyron.veyron.veyron2.ipc.ServiceSignature)results[0];
+        final java.lang.Object[] _results = _call.finish(_resultTypes);
+        return (io.veyron.veyron.veyron2.ipc.ServiceSignature)_results[0];
     }
 
     // Methods from interface {{ .ServiceName }}Client.
@@ -67,49 +58,39 @@ package {{ .PackagePath }};
     {{/* The optionless overload simply calls the overload with options */}}
     @Override
     {{ $method.AccessModifier }} {{ $method.RetType }} {{ $method.Name }}(final io.veyron.veyron.veyron2.context.Context context{{ $method.DeclarationArgs }}) throws io.veyron.veyron.veyron2.VeyronException {
-        {{if $method.Returns }}return{{ end }} {{ $method.Name }}(context{{ $method.CallingArgs }}, null);
+        {{if $method.Returns }}return{{ end }} {{ $method.Name }}(context{{ $method.CallingArgsLeadingComma }}, null);
     }
     {{/* The main client stub method body */}}
     @Override
     {{ $method.AccessModifier }} {{ $method.RetType }} {{ $method.Name }}(final io.veyron.veyron.veyron2.context.Context context{{ $method.DeclarationArgs }}, io.veyron.veyron.veyron2.Options veyronOpts) throws io.veyron.veyron.veyron2.VeyronException {
-        {{/* Ensure the options object is initialized and populated */}}
-        // Add VDL path option.
-        // NOTE(spetrovic): this option is temporary and will be removed soon after we switch
-        // Java to encoding/decoding from vom.Value objects.
-        if (veyronOpts == null) veyronOpts = new io.veyron.veyron.veyron2.Options();
-        if (!veyronOpts.has(io.veyron.veyron.veyron2.OptionDefs.VDL_INTERFACE_PATH)) {
-            veyronOpts.set(io.veyron.veyron.veyron2.OptionDefs.VDL_INTERFACE_PATH, {{ .ServiceName }}ClientStub.vdlIfacePathOpt);
-        }
-
         {{/* Start the veyron call */}}
         // Start the call.
-        final java.lang.Object[] inArgs = new java.lang.Object[]{ {{ $method.NoCommaArgNames }} };
-        final io.veyron.veyron.veyron2.ipc.Client.Call call = this.client.startCall(context, this.veyronName, "{{ $method.Name }}", inArgs, veyronOpts);
+        final java.lang.Object[] _args = new java.lang.Object[]{ {{ $method.CallingArgs }} };
+        final java.lang.reflect.Type[] _argTypes = new java.lang.reflect.Type[]{ {{ $method.CallingArgTypes }} };
+        final io.veyron.veyron.veyron2.ipc.Client.Call _call = this.client.startCall(context, this.veyronName, "{{ $method.Name }}", _args, _argTypes, veyronOpts);
 
         // Finish the call.
         {{/* Now handle returning from the function. */}}
         {{ if $method.NotStreaming }}
 
         {{ if $method.IsVoid }}
-        final com.google.common.reflect.TypeToken<?>[] resultTypes = new com.google.common.reflect.TypeToken<?>[]{};
-        call.finish(resultTypes);
+        final java.lang.reflect.Type[] _resultTypes = new java.lang.reflect.Type[]{};
+        _call.finish(_resultTypes);
         {{ else }} {{/* else $method.IsVoid */}}
-        final com.google.common.reflect.TypeToken<?>[] resultTypes = new com.google.common.reflect.TypeToken<?>[]{
+        final java.lang.reflect.Type[] _resultTypes = new java.lang.reflect.Type[]{
             {{ range $outArg := $method.OutArgs }}
-            new com.google.common.reflect.TypeToken<{{ $outArg.Type }}>() {
-                private static final long serialVersionUID = 1L;
-            },
+            new com.google.common.reflect.TypeToken<{{ $outArg.Type }}>() {}.getType(),
             {{ end }}
         };
-        final java.lang.Object[] results = call.finish(resultTypes);
+        final java.lang.Object[] _results = _call.finish(_resultTypes);
         {{ if $method.MultipleReturn }}
-        final {{ $method.DeclaredObjectRetType }} ret = new {{ $method.DeclaredObjectRetType }}();
+        final {{ $method.DeclaredObjectRetType }} _ret = new {{ $method.DeclaredObjectRetType }}();
             {{ range $i, $outArg := $method.OutArgs }}
-        ret.{{ $outArg.FieldName }} = ({{ $outArg.Type }})results[{{ $i }}];
+        _ret.{{ $outArg.FieldName }} = ({{ $outArg.Type }})_results[{{ $i }}];
             {{ end }} {{/* end range over outargs */}}
-        return ret;
+        return _ret;
         {{ else }} {{/* end if $method.MultipleReturn */}}
-        return ({{ $method.DeclaredObjectRetType }})results[0];
+        return ({{ $method.DeclaredObjectRetType }})_results[0];
         {{ end }} {{/* end if $method.MultipleReturn */}}
 
         {{ end }} {{/* end if $method.IsVoid */}}
@@ -118,14 +99,13 @@ package {{ .PackagePath }};
         return new io.veyron.veyron.veyron2.vdl.ClientStream<{{ $method.SendType }}, {{ $method.RecvType }}, {{ $method.DeclaredObjectRetType }}>() {
             @Override
             public void send(final {{ $method.SendType }} item) throws io.veyron.veyron.veyron2.VeyronException {
-                call.send(item);
+                final java.lang.reflect.Type type = new com.google.common.reflect.TypeToken<{{ $method.SendType }}>() {}.getType();
+                _call.send(item, type);
             }
             @Override
             public {{ $method.RecvType }} recv() throws java.io.EOFException, io.veyron.veyron.veyron2.VeyronException {
-                final com.google.common.reflect.TypeToken<?> type = new com.google.common.reflect.TypeToken<{{ $method.RecvType }}>() {
-                    private static final long serialVersionUID = 1L;
-                };
-                final java.lang.Object result = call.recv(type);
+                final java.lang.reflect.Type type = new com.google.common.reflect.TypeToken<{{ $method.RecvType }}>() {}.getType();
+                final java.lang.Object result = _call.recv(type);
                 try {
                     return ({{ $method.RecvType }})result;
                 } catch (java.lang.ClassCastException e) {
@@ -135,16 +115,14 @@ package {{ .PackagePath }};
             @Override
             public {{ $method.DeclaredObjectRetType }} finish() throws io.veyron.veyron.veyron2.VeyronException {
                 {{ if $method.IsVoid }}
-                final com.google.common.reflect.TypeToken<?>[] resultTypes = new com.google.common.reflect.TypeToken<?>[]{};
-                call.finish(resultTypes);
+                final java.lang.reflect.Type[] resultTypes = new java.lang.reflect.Type[]{};
+                _call.finish(resultTypes);
                 return null;
                 {{ else }} {{/* else $method.IsVoid */}}
-                final com.google.common.reflect.TypeToken<?>[] resultTypes = new com.google.common.reflect.TypeToken<?>[]{
-                    new com.google.common.reflect.TypeToken<{{ $method.DeclaredObjectRetType }}>() {
-                        private static final long serialVersionUID = 1L;
-                    }
+                final java.lang.reflect.Type[] resultTypes = new java.lang.reflect.Type[]{
+                    new com.google.common.reflect.TypeToken<{{ $method.DeclaredObjectRetType }}>() {}.getType()
                 };
-                return ({{ $method.DeclaredObjectRetType }})call.finish(resultTypes)[0];
+                return ({{ $method.DeclaredObjectRetType }})_call.finish(resultTypes)[0];
                 {{ end }} {{/* end if $method.IsVoid */}}
             }
         };
@@ -157,12 +135,12 @@ package {{ .PackagePath }};
     @Override
     {{ $eMethod.AccessModifier }} {{ $eMethod.RetType }} {{ $eMethod.Name }}(final io.veyron.veyron.veyron2.context.Context context{{ $eMethod.DeclarationArgs }}) throws io.veyron.veyron.veyron2.VeyronException {
         {{/* e.g. return this.stubArith.cosine(context, [args]) */}}
-        {{ if $eMethod.Returns }}return{{ end }} this.{{ $eMethod.LocalStubVarName }}.{{ $eMethod.Name }}(context{{ $eMethod.CallingArgs }});
+        {{ if $eMethod.Returns }}return{{ end }} this.{{ $eMethod.LocalStubVarName }}.{{ $eMethod.Name }}(context{{ $eMethod.CallingArgsLeadingComma }});
     }
     @Override
     {{ $eMethod.AccessModifier }} {{ $eMethod.RetType }} {{ $eMethod.Name }}(final io.veyron.veyron.veyron2.context.Context context{{ $eMethod.DeclarationArgs }}, io.veyron.veyron.veyron2.Options veyronOpts) throws io.veyron.veyron.veyron2.VeyronException {
         {{/* e.g. return this.stubArith.cosine(context, [args], options) */}}
-        {{ if $eMethod.Returns }}return{{ end }}  this.{{ $eMethod.LocalStubVarName }}.{{ $eMethod.Name }}(context{{ $eMethod.CallingArgs }}, veyronOpts);
+        {{ if $eMethod.Returns }}return{{ end }}  this.{{ $eMethod.LocalStubVarName }}.{{ $eMethod.Name }}(context{{ $eMethod.CallingArgsLeadingComma }}, veyronOpts);
     }
 {{ end }}
 
@@ -175,31 +153,32 @@ type clientStubMethodOutArg struct {
 }
 
 type clientStubMethod struct {
-	AccessModifier        string
-	CallingArgs           string
-	DeclarationArgs       string
-	DeclaredObjectRetType string
-	IsVoid                bool
-	MultipleReturn        bool
-	Name                  string
-	NoCommaArgNames       string
-	NotStreaming          bool
-	OutArgs               []clientStubMethodOutArg
-	RecvType              string
-	RetType               string
-	Returns               bool
-	SendType              string
-	ServiceName           string
+	AccessModifier          string
+	CallingArgs             string
+	CallingArgTypes         string
+	CallingArgsLeadingComma string
+	DeclarationArgs         string
+	DeclaredObjectRetType   string
+	IsVoid                  bool
+	MultipleReturn          bool
+	Name                    string
+	NotStreaming            bool
+	OutArgs                 []clientStubMethodOutArg
+	RecvType                string
+	RetType                 string
+	Returns                 bool
+	SendType                string
+	ServiceName             string
 }
 
 type clientStubEmbedMethod struct {
-	AccessModifier   string
-	CallingArgs      string
-	DeclarationArgs  string
-	LocalStubVarName string
-	Name             string
-	RetType          string
-	Returns          bool
+	AccessModifier          string
+	CallingArgsLeadingComma string
+	DeclarationArgs         string
+	LocalStubVarName        string
+	Name                    string
+	RetType                 string
+	Returns                 bool
 }
 
 type clientStubEmbed struct {
@@ -214,33 +193,34 @@ func processClientStubMethod(iface *compile.Interface, method *compile.Method, e
 		outArgs[i].Type = javaType(method.OutArgs[i].Type, true, env)
 	}
 	return clientStubMethod{
-		AccessModifier:        accessModifierForName(method.Name),
-		CallingArgs:           javaCallingArgStr(method.InArgs, true),
-		DeclarationArgs:       javaDeclarationArgStr(method.InArgs, env, true),
-		DeclaredObjectRetType: clientInterfaceNonStreamingOutArg(iface, method, true, env),
-		IsVoid:                len(method.OutArgs) < 2,
-		MultipleReturn:        len(method.OutArgs) > 2,
-		Name:                  vdlutil.ToCamelCase(method.Name),
-		NoCommaArgNames:       javaCallingArgStr(method.InArgs, false),
-		NotStreaming:          !isStreamingMethod(method),
-		OutArgs:               outArgs,
-		RecvType:              javaType(method.OutStream, true, env),
-		RetType:               clientInterfaceOutArg(iface, method, false, env),
-		Returns:               len(method.OutArgs) >= 2 || isStreamingMethod(method),
-		SendType:              javaType(method.InStream, true, env),
-		ServiceName:           toUpperCamelCase(iface.Name),
+		AccessModifier:          accessModifierForName(method.Name),
+		CallingArgs:             javaCallingArgStr(method.InArgs, false),
+		CallingArgTypes:         javaCallingArgTypeStr(method.InArgs, env),
+		CallingArgsLeadingComma: javaCallingArgStr(method.InArgs, true),
+		DeclarationArgs:         javaDeclarationArgStr(method.InArgs, env, true),
+		DeclaredObjectRetType:   clientInterfaceNonStreamingOutArg(iface, method, true, env),
+		IsVoid:                  len(method.OutArgs) < 2,
+		MultipleReturn:          len(method.OutArgs) > 2,
+		Name:                    vdlutil.ToCamelCase(method.Name),
+		NotStreaming:            !isStreamingMethod(method),
+		OutArgs:                 outArgs,
+		RecvType:                javaType(method.OutStream, true, env),
+		RetType:                 clientInterfaceOutArg(iface, method, false, env),
+		Returns:                 len(method.OutArgs) >= 2 || isStreamingMethod(method),
+		SendType:                javaType(method.InStream, true, env),
+		ServiceName:             toUpperCamelCase(iface.Name),
 	}
 }
 
 func processClientStubEmbedMethod(iface *compile.Interface, embedMethod *compile.Method, env *compile.Env) clientStubEmbedMethod {
 	return clientStubEmbedMethod{
-		AccessModifier:   accessModifierForName(embedMethod.Name),
-		CallingArgs:      javaCallingArgStr(embedMethod.InArgs, true),
-		DeclarationArgs:  javaDeclarationArgStr(embedMethod.InArgs, env, true),
-		LocalStubVarName: vdlutil.ToCamelCase(iface.Name) + "ClientStub",
-		Name:             vdlutil.ToCamelCase(embedMethod.Name),
-		RetType:          clientInterfaceOutArg(iface, embedMethod, false, env),
-		Returns:          len(embedMethod.OutArgs) >= 2 || isStreamingMethod(embedMethod),
+		AccessModifier:          accessModifierForName(embedMethod.Name),
+		CallingArgsLeadingComma: javaCallingArgStr(embedMethod.InArgs, true),
+		DeclarationArgs:         javaDeclarationArgStr(embedMethod.InArgs, env, true),
+		LocalStubVarName:        vdlutil.ToCamelCase(iface.Name) + "ClientStub",
+		Name:                    vdlutil.ToCamelCase(embedMethod.Name),
+		RetType:                 clientInterfaceOutArg(iface, embedMethod, false, env),
+		Returns:                 len(embedMethod.OutArgs) >= 2 || isStreamingMethod(embedMethod),
 	}
 }
 

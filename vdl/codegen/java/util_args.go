@@ -43,3 +43,17 @@ func javaCallingArgStr(args []*compile.Arg, leadingComma bool) string {
 	}
 	return buf.String()
 }
+
+// javaCallingArgTypeStr creates a comma separated string of arg types.
+func javaCallingArgTypeStr(args []*compile.Arg, env *compile.Env) string {
+	var buf bytes.Buffer
+	for i, arg := range args {
+		if i > 0 {
+			buf.WriteString(", ")
+		}
+		buf.WriteString("new com.google.common.reflect.TypeToken<")
+		buf.WriteString(javaType(arg.Type, true, env))
+		buf.WriteString(">(){}.getType()")
+	}
+	return buf.String()
+}

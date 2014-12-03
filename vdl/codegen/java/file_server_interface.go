@@ -16,8 +16,7 @@ package {{ .PackagePath }};
 
 {{ .ServerDoc }}
 @io.veyron.veyron.veyron2.vdl.VeyronServer(
-	serverWrapper = {{ .ServerWrapperPath }}.class,
-	vdlPathName = "{{ .ServerVDLPath }}"
+	serverWrapper = {{ .ServerWrapperPath }}.class
 )
 {{ .AccessModifier }} interface {{ .ServiceName }}Server {{ .Extends }} {
 {{ range $method := .Methods }}

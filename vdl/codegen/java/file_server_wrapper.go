@@ -68,13 +68,12 @@ package {{ .PackagePath }};
         final io.veyron.veyron.veyron2.vdl.Stream<{{ $method.SendType }}, {{ $method.RecvType }}> stream = new io.veyron.veyron.veyron2.vdl.Stream<{{ $method.SendType }}, {{ $method.RecvType }}>() {
             @Override
             public void send({{ $method.SendType }} item) throws io.veyron.veyron.veyron2.VeyronException {
-                call.send(item);
+                final java.lang.reflect.Type type = new com.google.common.reflect.TypeToken< {{ $method.SendType }} >() {}.getType();
+                call.send(item, type);
             }
             @Override
             public {{ $method.RecvType }} recv() throws java.io.EOFException, io.veyron.veyron.veyron2.VeyronException {
-                final com.google.common.reflect.TypeToken<?> type = new com.google.common.reflect.TypeToken< {{ $method.RecvType }} >() {
-                    private static final long serialVersionUID = 1L;
-                };
+                final java.lang.reflect.Type type = new com.google.common.reflect.TypeToken< {{ $method.RecvType }} >() {}.getType();
                 final java.lang.Object result = call.recv(type);
                 try {
                     return ({{ $method.RecvType }})result;
