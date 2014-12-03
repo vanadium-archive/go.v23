@@ -15,7 +15,6 @@ package {{ .PackagePath }};
 
 /* Client stub for interface: {{ .ServiceName }}Client. */
 {{ .AccessModifier }} final class {{ .ServiceName }}ClientStub implements {{ .FullServiceName }}Client {
-    private static final java.lang.String vdlIfacePathOpt = "{{ .VDLIfacePathName }}";
     private final io.veyron.veyron.veyron2.ipc.Client client;
     private final java.lang.String veyronName;
 

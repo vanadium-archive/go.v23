@@ -34,14 +34,16 @@ package {{ .PackagePath }};
     /**
      * Returns a description of this server.
      */
-     public io.veyron.veyron.veyron2.ipc.ServiceSignature signature(io.veyron.veyron.veyron2.ipc.ServerCall call) throws io.veyron.veyron.veyron2.VeyronException {
-         throw new io.veyron.veyron.veyron2.VeyronException("Signature method not yet supported for Java servers");
-     }
+    @SuppressWarnings("unused")
+    public io.veyron.veyron.veyron2.ipc.ServiceSignature signature(io.veyron.veyron.veyron2.ipc.ServerCall call) throws io.veyron.veyron.veyron2.VeyronException {
+        throw new io.veyron.veyron.veyron2.VeyronException("Signature method not yet supported for Java servers");
+    }
 
     /**
      * Returns all tags associated with the provided method or null if the method isn't implemented
      * by this server.
      */
+    @SuppressWarnings("unused")
     public java.lang.Object[] getMethodTags(final io.veyron.veyron.veyron2.ipc.ServerCall call, final java.lang.String method) {
         {{ range $methodName, $tags := .MethodTags }}
         if ("{{ $methodName }}".equals(method)) {
