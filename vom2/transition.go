@@ -21,3 +21,9 @@ func init() {
 func IsEnabled() bool {
 	return enabled
 }
+
+// SetEnabled explicitly enables/disables the vom2 transition.  The passed-in
+// value overrides the value set in VEYRON_VOM2 environment variable.
+func SetEnabled(val bool) {
+	enabled = val
+}
