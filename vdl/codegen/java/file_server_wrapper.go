@@ -65,7 +65,7 @@ package {{ .PackagePath }};
     {{ range $method := .Methods }}
     {{ $method.AccessModifier }} {{ $method.RetType }} {{ $method.Name }}(final io.veyron.veyron.veyron2.ipc.ServerCall call{{ $method.DeclarationArgs }}) throws io.veyron.veyron.veyron2.VeyronException {
         {{ if $method.IsStreaming }}
-        final io.veyron.veyron.veyron2.vdl.Stream<{{ $method.SendType }}, {{ $method.RecvType }}> stream = new io.veyron.veyron.veyron2.vdl.Stream<{{ $method.SendType }}, {{ $method.RecvType }}>() {
+        final io.veyron.veyron.veyron2.vdl.Stream<{{ $method.SendType }}, {{ $method.RecvType }}> _stream = new io.veyron.veyron.veyron2.vdl.Stream<{{ $method.SendType }}, {{ $method.RecvType }}>() {
             @Override
             public void send({{ $method.SendType }} item) throws io.veyron.veyron.veyron2.VeyronException {
                 final java.lang.reflect.Type type = new com.google.common.reflect.TypeToken< {{ $method.SendType }} >() {}.getType();
@@ -83,7 +83,7 @@ package {{ .PackagePath }};
             }
         };
         {{ end }} {{/* end if $method.IsStreaming */}}
-        {{ if $method.Returns }} return {{ end }} this.server.{{ $method.Name }}( call {{ $method.CallingArgs }} {{ if $method.IsStreaming }} ,stream {{ end }} );
+        {{ if $method.Returns }} return {{ end }} this.server.{{ $method.Name }}( call {{ $method.CallingArgs }} {{ if $method.IsStreaming }} ,_stream {{ end }} );
     }
 {{end}}
 
