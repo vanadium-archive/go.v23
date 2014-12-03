@@ -261,7 +261,7 @@ var descStore = __ipc.InterfaceDesc{
 				{"", ``}, // vtrace.TraceRecord
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Read")},
+			Tags: []__vdlutil.Any{access.Tag("Debug")},
 		},
 		{
 			Name: "AllTraces",
@@ -269,7 +269,7 @@ var descStore = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Read")},
+			Tags: []__vdlutil.Any{access.Tag("Debug")},
 		},
 	},
 }

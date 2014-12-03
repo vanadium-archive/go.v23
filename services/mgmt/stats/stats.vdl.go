@@ -6,6 +6,8 @@
 package stats
 
 import (
+	"veyron.io/veyron/veyron2/services/security/access"
+
 	"veyron.io/veyron/veyron2/services/watch"
 
 	// The non-user imports are prefixed with "__" to prevent collisions.
@@ -195,6 +197,7 @@ var descStats = __ipc.InterfaceDesc{
 				{"", ``}, // __vdlutil.Any
 				{"", ``}, // error
 			},
+			Tags: []__vdlutil.Any{access.Tag("Debug")},
 		},
 	},
 }
