@@ -45,9 +45,7 @@ func makeTypeFieldAssignmentString(jsname string, t *vdl.Type, jsnames typeNames
 	str := fmt.Sprintf("%s.kind = %s;\n", jsname, jsKind(t.Kind()))
 
 	// name
-	if t.Name() != "" {
-		str += fmt.Sprintf("%s.name = %q;\n", jsname, t.Name())
-	}
+	str += fmt.Sprintf("%s.name = %q;\n", jsname, t.Name())
 
 	// labels
 	if t.Kind() == vdl.Enum {
