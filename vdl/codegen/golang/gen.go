@@ -13,7 +13,7 @@ import (
 	"veyron.io/veyron/veyron2/vdl/codegen"
 	"veyron.io/veyron/veyron2/vdl/compile"
 	"veyron.io/veyron/veyron2/vdl/parse"
-	vdlroot "veyron.io/veyron/veyron2/vdl/vdlroot/src/vdl"
+	"veyron.io/veyron/veyron2/vdl/vdlroot/src/vdltool"
 	"veyron.io/veyron/veyron2/vdl/vdlutil"
 	"veyron.io/veyron/veyron2/wiretype"
 	"veyron.io/veyron/veyron2/wiretype/build"
@@ -28,7 +28,7 @@ type goData struct {
 
 // Generate takes a populated compile.File and returns a byte slice containing
 // the generated Go source code.
-func Generate(file *compile.File, env *compile.Env, config vdlroot.GoConfig) []byte {
+func Generate(file *compile.File, env *compile.Env, config vdltool.GoConfig) []byte {
 	data := goData{
 		File:          file,
 		Env:           env,

@@ -11,63 +11,6 @@ import (
 	__vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
 )
 
-// InterfaceSig describes the signature of an interface.
-type InterfaceSig struct {
-	Name    string
-	PkgPath string
-	Doc     string
-	Embeds  []EmbedSig  // No special ordering.
-	Methods []MethodSig // Ordered by method name.
-}
-
-func (InterfaceSig) __VDLReflect(struct {
-	Name string "veyron.io/veyron/veyron2/ipc.InterfaceSig"
-}) {
-}
-
-// EmbedSig describes the signature of an embedded interface.
-type EmbedSig struct {
-	Name    string
-	PkgPath string
-	Doc     string
-}
-
-func (EmbedSig) __VDLReflect(struct {
-	Name string "veyron.io/veyron/veyron2/ipc.EmbedSig"
-}) {
-}
-
-// MethodSig describes the signature of an interface method.
-type MethodSig struct {
-	Name    string
-	Doc     string
-	InArgs  []ArgSig // Input arguments
-	OutArgs []ArgSig // Output arguments
-	// TODO(toddw): Remove Has{In,Out}StreamHACK when optional is available.
-	InStreamHACK     ArgSig          // Input stream
-	OutStreamHACK    ArgSig          // Output stream
-	HasInStreamHACK  bool            // Does InStreamHack contain valid data?
-	HasOutStreamHACK bool            // Does OutStreamHack contain valid data?
-	Tags             []__vdlutil.Any // Method tags
-}
-
-func (MethodSig) __VDLReflect(struct {
-	Name string "veyron.io/veyron/veyron2/ipc.MethodSig"
-}) {
-}
-
-// ArgSig describes the signature of a single argument.
-type ArgSig struct {
-	Name string
-	Doc  string
-	Type *__vdl.Type // Type of the argument.
-}
-
-func (ArgSig) __VDLReflect(struct {
-	Name string "veyron.io/veyron/veyron2/ipc.ArgSig"
-}) {
-}
-
 // ServiceSignature represents the signature of the service. This includes type information needed
 // to resolve the method argument types.
 // TODO(bprosnitz) Rename this and move it to wiretype.
@@ -107,10 +50,6 @@ func (MethodArgument) __VDLReflect(struct {
 }
 
 func init() {
-	__vdl.Register(InterfaceSig{})
-	__vdl.Register(EmbedSig{})
-	__vdl.Register(MethodSig{})
-	__vdl.Register(ArgSig{})
 	__vdl.Register(ServiceSignature{})
 	__vdl.Register(MethodSignature{})
 	__vdl.Register(MethodArgument{})

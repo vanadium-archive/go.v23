@@ -4,16 +4,29 @@ import (
 	"veyron.io/veyron/veyron2/vdl/vdlutil"
 )
 
+// ReservedMode indicates which mode to perform reserved-word checking:
+//   ReservedNormal    - Check the given identifier.
+//   ReservedCamelCase - Check the given identifier in lower-camel-case.
+type ReservedMode int
+
+const (
+	ReservedNormal ReservedMode = iota
+	ReservedCamelCase
+)
+
 // reservedWord checks if identifiers are reserved after they are converted to the native form for the language.
-func reservedWord(ident string) bool {
-	return reservedWordJava(ident) ||
-		reservedWordJavascript(ident) ||
+func reservedWord(ident string, mode ReservedMode) bool {
+	return reservedWordJava(ident, mode) ||
+		reservedWordJavascript(ident, mode) ||
 		reservedWordGo(ident)
 	// TODO(bprosnitz) Other identifiers? (set, assert, raise, with, etc)
 }
 
-func reservedWordJava(ident string) bool {
-	_, isReserved := javaReservedWords[vdlutil.ToCamelCase(ident)]
+func reservedWordJava(ident string, mode ReservedMode) bool {
+	if mode == ReservedCamelCase {
+		ident = vdlutil.ToCamelCase(ident)
+	}
+	_, isReserved := javaReservedWords[ident]
 	return isReserved
 }
 
@@ -103,8 +116,11 @@ var goReservedWords = map[string]bool{
 	"var":         true,
 }
 
-func reservedWordJavascript(ident string) bool {
-	_, isReserved := javascriptReservedWords[vdlutil.ToCamelCase(ident)]
+func reservedWordJavascript(ident string, mode ReservedMode) bool {
+	if mode == ReservedCamelCase {
+		ident = vdlutil.ToCamelCase(ident)
+	}
+	_, isReserved := javascriptReservedWords[ident]
 	return isReserved
 }
 

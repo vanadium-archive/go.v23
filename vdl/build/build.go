@@ -53,7 +53,7 @@ import (
 	"veyron.io/veyron/veyron2/vdl/compile"
 	"veyron.io/veyron/veyron2/vdl/parse"
 	"veyron.io/veyron/veyron2/vdl/valconv"
-	vdlroot "veyron.io/veyron/veyron2/vdl/vdlroot/src/vdl"
+	"veyron.io/veyron/veyron2/vdl/vdlroot/src/vdltool"
 	"veyron.io/veyron/veyron2/vdl/vdlutil"
 )
 
@@ -74,7 +74,7 @@ type Package struct {
 	// Config is the configuration for this package, specified by an optional
 	// "vdl.config" file in the package directory.  If no "vdl.config" file
 	// exists, the zero value of Config is used.
-	Config vdlroot.Config
+	Config vdltool.Config
 
 	// OpenFilesFunc is a function that opens the files with the given filenames,
 	// and returns a map from base file name to file contents.
@@ -185,9 +185,9 @@ func (p *Package) initVDLConfig(opts Opts, vdlenv *compile.Env) {
 		vdlenv.Errors.Errorf("%s: couldn't open (%v)", path, err)
 		return
 	}
-	// Build the vdl.config file with an implicit "vdl" import.  Note that the
-	// actual "vdl" package has already been populated into vdlenv.
-	BuildConfigValueImplicitImports(opts.vdlConfigName(), configData, []string{"vdl"}, vdlenv, &p.Config)
+	// Build the vdl.config file with an implicit "vdltool" import.  Note that the
+	// actual "vdltool" package has already been populated into vdlenv.
+	BuildConfigValueImplicitImports(opts.vdlConfigName(), configData, []string{"vdltool"}, vdlenv, &p.Config)
 	if err := configData.Close(); err != nil {
 		vdlenv.Errors.Errorf("%s: couldn't close (%v)", path, err)
 	}
@@ -366,19 +366,19 @@ func rawDepSorter(opts Opts, errs *vdlutil.Errors) *depSorter {
 }
 
 func newDepSorter(opts Opts, errs *vdlutil.Errors) *depSorter {
-	// Resolve the "vdl" import and build all transitive packages into vdlenv.
+	// Resolve the "vdltool" import and build all transitive packages into vdlenv.
 	// This special env is used when building "vdl.config" files, which have the
-	// implicit "vdl" import.
+	// implicit "vdltool" import.
 	ds := rawDepSorter(opts, errs)
 	vdlenv := ds.vdlenv
-	if !ds.ResolvePath("vdl", UnknownPathIsError) {
-		errs.Errorf(`Can't resolve standard "vdl" package`)
+	if !ds.ResolvePath("vdltool", UnknownPathIsError) {
+		errs.Errorf(`Can't resolve "vdltool" package`)
 	}
 	for _, pkg := range ds.Sort() {
 		BuildPackage(pkg, vdlenv)
 	}
 	// We must return an empty depSorter to ensure the returned transitive
-	// packages don't include "vdl" if the user didn't specify it.
+	// packages don't include "vdltool" if the user didn't specify it.
 	ds = rawDepSorter(opts, errs)
 	ds.vdlenv = vdlenv
 	return ds
@@ -510,8 +510,8 @@ func (ds *depSorter) resolveDirPath(dir string, mode UnknownPathMode) *Package {
 	// We always deduce the package path from the package directory, even if we
 	// originally resolved from an import path, and thus already "know" the
 	// package path.  This is to ensure we correctly handle vdl standard packages.
-	// E.g. if we're given "veyron.io/veyron/veyron2/vdl/vdlroot/src/vdl" as an
-	// import path, the resulting package path must be "vdl".
+	// E.g. if we're given "veyron.io/veyron/veyron2/vdl/vdlroot/src/vdltool" as
+	// an import path, the resulting package path must be "vdltool".
 	pkgPath, err := ds.deducePackagePath(absDir)
 	if err != nil {
 		ds.errorf("%s: can't deduce package path (%v)", absDir, err)

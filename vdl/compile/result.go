@@ -450,11 +450,11 @@ var (
 // ValidIdent returns (exported, err) where err is non-nil iff the identifer is
 // valid, and exported is true if the identifier is exported.
 // Valid: "^[A-Za-z][A-Za-z0-9_]*$"
-func ValidIdent(ident string) (bool, error) {
+func ValidIdent(ident string, mode ReservedMode) (bool, error) {
 	if re := regexpIdent; !re.MatchString(ident) {
 		return false, fmt.Errorf("%q invalid, allowed regexp: %q", ident, re)
 	}
-	if reservedWord(ident) {
+	if reservedWord(ident, mode) {
 		return false, fmt.Errorf("%q invalid identifier (keyword in a generated language)", ident)
 	}
 	return ident[0] >= 'A' && ident[0] <= 'Z', nil
@@ -462,8 +462,8 @@ func ValidIdent(ident string) (bool, error) {
 
 // ValidExportedIdent returns a non-nil error iff the identifier is valid and
 // exported.
-func ValidExportedIdent(ident string) error {
-	exported, err := ValidIdent(ident)
+func ValidExportedIdent(ident string, mode ReservedMode) error {
+	exported, err := ValidIdent(ident, mode)
 	if err != nil {
 		return err
 	}

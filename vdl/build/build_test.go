@@ -14,7 +14,7 @@ import (
 	"veyron.io/veyron/veyron2/vdl/compile"
 	"veyron.io/veyron/veyron2/vdl/testdata/base"
 	"veyron.io/veyron/veyron2/vdl/valconv"
-	vdlroot "veyron.io/veyron/veyron2/vdl/vdlroot/src/vdl"
+	"veyron.io/veyron/veyron2/vdl/vdlroot/src/vdltool"
 	"veyron.io/veyron/veyron2/vdl/vdltest"
 	"veyron.io/veyron/veyron2/vdl/vdlutil"
 )
@@ -330,12 +330,12 @@ func TestTransitivePackages(t *testing.T) {
 		},
 		// Standard vdl package, as both import and dir path.
 		{
-			[]string{"veyron.io/veyron/veyron2/vdl/vdlroot/src/vdl"},
-			[]string{"vdl"},
+			[]string{"veyron.io/veyron/veyron2/vdl/vdlroot/src/vdltool"},
+			[]string{"vdltool"},
 		},
 		{
-			[]string{"../vdlroot/src/vdl"},
-			[]string{"vdl"},
+			[]string{"../vdlroot/src/vdltool"},
+			[]string{"vdltool"},
 		},
 	}
 	for _, test := range tests {
@@ -433,13 +433,13 @@ func TestPackageConfig(t *testing.T) {
 	}
 	tests := []struct {
 		Path   string
-		Config vdlroot.Config
+		Config vdltool.Config
 	}{
-		{"veyron.io/veyron/veyron2/vdl/testdata/base", vdlroot.Config{}},
+		{"veyron.io/veyron/veyron2/vdl/testdata/base", vdltool.Config{}},
 		{
 			"veyron.io/veyron/veyron2/vdl/testdata/testconfig",
-			vdlroot.Config{
-				GenLanguages: map[vdlroot.GenLanguage]struct{}{vdlroot.GenLanguageGo: struct{}{}},
+			vdltool.Config{
+				GenLanguages: map[vdltool.GenLanguage]struct{}{vdltool.GenLanguageGo: struct{}{}},
 			},
 		},
 	}
