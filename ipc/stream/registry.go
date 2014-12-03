@@ -3,15 +3,16 @@ package stream
 import (
 	"net"
 	"sync"
+	"time"
 )
 
 // DialerFunc is the function used to create net.Conn objects given a
 // protocol-specific string representation of an address.
-type DialerFunc func(address string) (net.Conn, error)
+type DialerFunc func(protocol, address string, timeout time.Duration) (net.Conn, error)
 
 // ListenerFunc is the function used to create net.Listener objects given a
 // protocol-specific string representation of the address a server will listen on.
-type ListenerFunc func(address string) (net.Listener, error)
+type ListenerFunc func(protocol, address string) (net.Listener, error)
 
 // RegisterProtocol makes available a Dialer and a Listener to
 // RegisteredNetwork.
