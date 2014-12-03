@@ -17,7 +17,7 @@ import (
 	"veyron.io/veyron/veyron2/vdl"
 	"veyron.io/veyron/veyron2/vdl/codegen"
 	"veyron.io/veyron/veyron2/vdl/compile"
-	vdlroot "veyron.io/veyron/veyron2/vdl/vdlroot/src/vdl"
+	"veyron.io/veyron/veyron2/vdl/vdlroot/src/vdltool"
 	"veyron.io/veyron/veyron2/vdl/vdlutil"
 )
 
@@ -31,7 +31,7 @@ type data struct {
 
 // Generate takes a populated compile.Package and produces a byte slice
 // containing the generated Javascript code.
-func Generate(pkg *compile.Package, env *compile.Env, genImport func(string) string, config vdlroot.JavascriptConfig) []byte {
+func Generate(pkg *compile.Package, env *compile.Env, genImport func(string) string, config vdltool.JavascriptConfig) []byte {
 	data := data{
 		Pkg:            pkg,
 		Env:            env,
@@ -188,20 +188,16 @@ func generateMethodSignature(method *compile.Method, names typeNames) string {
     doc: %s,
     inArgs: %s,
     outArgs: %s,
-    inStreamHACK: %s,
-    outStreamHACK: %s,
-    hasInStreamHACK: %t,
-    hasOutStreamHACK: %t,
+    inStream: %s,
+    outStream: %s,
     tags: %s
   }`,
 		method.Name,
 		quoteStripDoc(method.Doc),
 		generateMethodArguments(method.InArgs, names),
 		generateMethodArguments(method.OutArgs, names), // Note: includes the error argument.
-		generateMethodStreamingHACK(method.InStream, names),
-		generateMethodStreamingHACK(method.OutStream, names),
-		generateMethodStreamingHasHACK(method.InStream, names),
-		generateMethodStreamingHasHACK(method.OutStream, names),
+		generateMethodStreaming(method.InStream, names),
+		generateMethodStreaming(method.OutStream, names),
 		genMethodTags(names, method))
 }
 
@@ -222,25 +218,17 @@ func generateMethodArguments(args []*compile.Arg, names typeNames) string {
 }
 
 // Returns the VOM type of the stream.
-func generateMethodStreamingHACK(streaming *vdl.Type, names typeNames) string {
-	typeStr := "Types.ANY"
-	if streaming != nil {
-		typeStr = names.LookupName(streaming)
+func generateMethodStreaming(streaming *vdl.Type, names typeNames) string {
+	if streaming == nil {
+		return "null"
 	}
-	// TODO(alexfandrianto): Remove this HACK in a HACK.
-	// The veyron.js test's deepEqual prevents using "null" or "{}".
 	return fmt.Sprintf(
 		`{
       name: '',
       doc: '',
       type: %s
     }`,
-		typeStr)
-}
-
-// Returns the bool for whether the stream exists or not
-func generateMethodStreamingHasHACK(streaming *vdl.Type, names typeNames) bool {
-	return streaming != nil
+		names.LookupName(streaming))
 }
 
 // Returns a slice of embeddings with the proper qualified identifiers.
@@ -361,7 +349,7 @@ function {{$iface.Name}}(){}
 {{$iface.Name}}.prototype.signature = function {{$iface.Name}}Signature() {
   return _{{$iface.Name}}Signature;
 };
-    {{/* The service signature encodes the same info as ipc.InterfaceSig.
+    {{/* The service signature encodes the same info as signature.Interface.
          TODO(alexfandrianto): We want to associate the signature type here, but
          it's complicated. https://github.com/veyron/release-issues/issues/432
          For now, we need to pass the type in manually into encode. */}}

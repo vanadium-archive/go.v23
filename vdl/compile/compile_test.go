@@ -31,7 +31,7 @@ func TestValidExportedIdent(t *testing.T) {
 		{"Xyz_123", ""},
 	}
 	for _, test := range tests {
-		err := compile.ValidExportedIdent(test.ident)
+		err := compile.ValidExportedIdent(test.ident, compile.ReservedNormal)
 		errstr := fmt.Sprint(err)
 		if test.errstr != "" && !strings.Contains(errstr, test.errstr) {
 			t.Errorf(`ValidExportedIdent(%s) got error %q, want substr %q`, test.ident, errstr, test.errstr)
@@ -67,7 +67,7 @@ func TestValidIdent(t *testing.T) {
 		{"xyz_123", false, ""},
 	}
 	for _, test := range tests {
-		exported, err := compile.ValidIdent(test.name)
+		exported, err := compile.ValidIdent(test.name, compile.ReservedNormal)
 		errstr := fmt.Sprint(err)
 		if test.errstr != "" && !strings.Contains(errstr, test.errstr) {
 			t.Errorf(`ValidIdent(%s) got error %q, want substr %q`, test.name, errstr, test.errstr)

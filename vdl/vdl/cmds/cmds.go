@@ -17,7 +17,7 @@ import (
 	"veyron.io/veyron/veyron2/vdl/codegen/java"
 	"veyron.io/veyron/veyron2/vdl/codegen/javascript"
 	"veyron.io/veyron/veyron2/vdl/compile"
-	vdlroot "veyron.io/veyron/veyron2/vdl/vdlroot/src/vdl"
+	"veyron.io/veyron/veyron2/vdl/vdlroot/src/vdltool"
 	"veyron.io/veyron/veyron2/vdl/vdlutil"
 )
 
@@ -219,9 +219,9 @@ other languages like C++.
 	ArgsLong: pkgArgLong,
 }
 
-var genLangAll = genLangs(vdlroot.GenLanguageAll)
+var genLangAll = genLangs(vdltool.GenLanguageAll)
 
-type genLangs []vdlroot.GenLanguage
+type genLangs []vdltool.GenLanguage
 
 func (gls genLangs) String() string {
 	var ret string
@@ -239,10 +239,10 @@ func (gls *genLangs) Set(value string) error {
 	// If the flag is repeated on the cmdline it is overridden.  Duplicates within
 	// the comma separated list are ignored, and retain their original ordering.
 	*gls = genLangs{}
-	seen := make(map[vdlroot.GenLanguage]bool)
+	seen := make(map[vdltool.GenLanguage]bool)
 	for _, str := range strings.Split(value, ",") {
 		// We call Title to convert from "go" to "Go".
-		gl, ok := vdlroot.GenLanguageFromString(strings.Title(str))
+		gl, ok := vdltool.GenLanguageFromString(strings.Title(str))
 		if !ok {
 			return fmt.Errorf("%q isn't a valid generate language", str)
 		}
@@ -348,7 +348,7 @@ var (
 		{"veyron.io", "io/veyron"},
 	}
 	// TODO(bjornick): Add javascript to the default gen langs.
-	optGenLangs = genLangs{vdlroot.GenLanguageGo, vdlroot.GenLanguageJava}
+	optGenLangs = genLangs{vdltool.GenLanguageGo, vdltool.GenLanguageJava}
 )
 
 // Root returns the root command for the VDL tool.
@@ -440,7 +440,7 @@ func runAudit(targets []*build.Package, env *compile.Env) {
 	}
 }
 
-func shouldGenerate(config vdlroot.Config, lang vdlroot.GenLanguage) bool {
+func shouldGenerate(config vdltool.Config, lang vdltool.GenLanguage) bool {
 	// If config.GenLanguages is empty, all languages are allowed to be generated.
 	_, ok := config.GenLanguages[lang]
 	return len(config.GenLanguages) == 0 || ok
@@ -466,8 +466,8 @@ func gen(audit bool, targets []*build.Package, env *compile.Env) bool {
 		pkgchanged := false
 		for _, gl := range optGenLangs {
 			switch gl {
-			case vdlroot.GenLanguageGo:
-				if !shouldGenerate(config, vdlroot.GenLanguageGo) {
+			case vdltool.GenLanguageGo:
+				if !shouldGenerate(config, vdltool.GenLanguageGo) {
 					continue
 				}
 				dir, err := xlateOutDir(target.Dir, target.Path, optGenGoOutDir, pkg.Path)
@@ -480,8 +480,8 @@ func gen(audit bool, targets []*build.Package, env *compile.Env) bool {
 						pkgchanged = true
 					}
 				}
-			case vdlroot.GenLanguageJava:
-				if !shouldGenerate(config, vdlroot.GenLanguageJava) {
+			case vdltool.GenLanguageJava:
+				if !shouldGenerate(config, vdltool.GenLanguageJava) {
 					continue
 				}
 				pkgPath, err := xlatePkgPath(pkg.Path, optGenJavaOutPkg)
@@ -502,8 +502,8 @@ func gen(audit bool, targets []*build.Package, env *compile.Env) bool {
 						pkgchanged = true
 					}
 				}
-			case vdlroot.GenLanguageJavascript:
-				if !shouldGenerate(config, vdlroot.GenLanguageJavascript) {
+			case vdltool.GenLanguageJavascript:
+				if !shouldGenerate(config, vdltool.GenLanguageJavascript) {
 					continue
 				}
 				dir, err := xlateOutDir(target.Dir, target.Path, optGenJavascriptOutDir, pkg.Path)
@@ -578,6 +578,15 @@ func handleErrorOrSkip(prefix string, err error, env *compile.Env) bool {
 var errSkip = fmt.Errorf("SKIP")
 
 func xlateOutDir(dir, path string, outdir genOutDir, outPkgPath string) (string, error) {
+	// Detect the special vdltool package, and put it in its canonical location.
+	// TODO(toddw): This is a hack; we need all vdlroot standard packages to show
+	// up in the canonical location, rather than just vdltool.
+	if path == "vdltool" {
+		path = "veyron.io/veyron/veyron2/vdl/vdlroot/src/vdltool"
+	}
+	if outPkgPath == "vdltool" {
+		outPkgPath = "veyron.io/veyron/veyron2/vdl/vdlroot/src/vdltool"
+	}
 	path, outPkgPath = filepath.FromSlash(path), filepath.FromSlash(outPkgPath)
 	// Strip package path from the directory.
 	if !strings.HasSuffix(dir, path) {

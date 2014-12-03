@@ -16,6 +16,7 @@ import (
 	"veyron.io/veyron/veyron2/naming"
 	"veyron.io/veyron/veyron2/security"
 	"veyron.io/veyron/veyron2/vdl"
+	"veyron.io/veyron/veyron2/vdl/vdlroot/src/signature"
 	"veyron.io/veyron/veyron2/vdl/vdlutil"
 	"veyron.io/veyron/veyron2/verror"
 )
@@ -300,71 +301,65 @@ func TestReflectInvokerSignature(t *testing.T) {
 		Want   interface{}
 	}{
 		// Tests of MethodSignature.
-		{"Sig1", ipc.MethodSig{Name: "Sig1"}},
-		{"Sig2", ipc.MethodSig{
+		{"Sig1", signature.Method{Name: "Sig1"}},
+		{"Sig2", signature.Method{
 			Name:    "Sig2",
-			InArgs:  []ipc.ArgSig{{Type: vdl.Int32Type}, {Type: vdl.StringType}},
-			OutArgs: []ipc.ArgSig{{Type: vdl.ErrorType}},
+			InArgs:  []signature.Arg{{Type: vdl.Int32Type}, {Type: vdl.StringType}},
+			OutArgs: []signature.Arg{{Type: vdl.ErrorType}},
 		}},
-		{"Sig3", ipc.MethodSig{
+		{"Sig3", signature.Method{
 			Name: "Sig3",
 			Doc:  "Doc Sig3",
-			InArgs: []ipc.ArgSig{
+			InArgs: []signature.Arg{
 				{Name: "i0_3", Doc: "Doc i0_3", Type: vdl.Float64Type}},
-			OutArgs: []ipc.ArgSig{
+			OutArgs: []signature.Arg{
 				{Name: "o0_3", Doc: "Doc o0_3", Type: vdl.ListType(vdl.Uint32Type)},
 				{Name: "err_3", Doc: "Doc err_3", Type: vdl.ErrorType}},
-			InStreamHACK: ipc.ArgSig{
+			InStream: &signature.Arg{
 				Name: "is_3", Doc: "Doc is_3", Type: vdl.StringType},
-			OutStreamHACK: ipc.ArgSig{
+			OutStream: &signature.Arg{
 				Name: "os_3", Doc: "Doc os_3", Type: vdl.BoolType},
-			HasInStreamHACK:  true,
-			HasOutStreamHACK: true,
-			Tags:             []vdlutil.Any{"a", "b", int32(123)},
+			Tags: []vdlutil.Any{"a", "b", int32(123)},
 		}},
-		{"Sig4", ipc.MethodSig{
+		{"Sig4", signature.Method{
 			Name: "Sig4",
 			Doc:  "Doc Sig4",
-			InArgs: []ipc.ArgSig{
+			InArgs: []signature.Arg{
 				{Name: "i0_4", Doc: "Doc i0_4", Type: vdl.Int32Type},
 				{Name: "i1_4", Doc: "Doc i1_4", Type: vdl.StringType}},
-			OutArgs: []ipc.ArgSig{
+			OutArgs: []signature.Arg{
 				{Name: "o0_4", Doc: "Doc o0_4", Type: vdl.Int32Type},
 				{Name: "o1_4", Doc: "Doc o1_4", Type: vdl.StringType}},
 			// Since ipc.ServerCall is used, we must assume streaming with any.
-			InStreamHACK:     ipc.ArgSig{Type: vdl.AnyType},
-			OutStreamHACK:    ipc.ArgSig{Type: vdl.AnyType},
-			HasInStreamHACK:  true,
-			HasOutStreamHACK: true,
+			InStream:  &signature.Arg{Type: vdl.AnyType},
+			OutStream: &signature.Arg{Type: vdl.AnyType},
 		}},
 		// Test Signature, which always returns the "true" information collected via
 		// reflection, and enhances it with user-provided descriptions.
-		{"", []ipc.InterfaceSig{
+		{"", []signature.Interface{
 			{
 				Name:    "Iface1",
 				PkgPath: "a/b/c",
 				Doc:     "Doc Iface1",
-				Embeds: []ipc.EmbedSig{
+				Embeds: []signature.Embed{
 					{Name: "Iface1Embed1", PkgPath: "x/y", Doc: "Doc embed1"},
 				},
-				Methods: []ipc.MethodSig{
+				Methods: []signature.Method{
 					{
 						Name: "Sig3",
 						Doc:  "Doc Sig3",
-						InArgs: []ipc.ArgSig{
+						InArgs: []signature.Arg{
 							{Name: "i0_3", Doc: "Doc i0_3", Type: vdl.Float64Type},
 						},
-						OutArgs: []ipc.ArgSig{
+						OutArgs: []signature.Arg{
 							{Name: "o0_3", Doc: "Doc o0_3", Type: vdl.ListType(vdl.Uint32Type)},
 							{Name: "err_3", Doc: "Doc err_3", Type: vdl.ErrorType},
 						},
-						InStreamHACK: ipc.ArgSig{
+						InStream: &signature.Arg{
 							Name: "is_3", Doc: "Doc is_3", Type: vdl.StringType},
-						OutStreamHACK: ipc.ArgSig{
+						OutStream: &signature.Arg{
 							Name: "os_3", Doc: "Doc os_3", Type: vdl.BoolType},
-						HasInStreamHACK:  true,
-						HasOutStreamHACK: true,
-						Tags:             []vdlutil.Any{"a", "b", int32(123)},
+						Tags: []vdlutil.Any{"a", "b", int32(123)},
 					},
 				},
 			},
@@ -372,51 +367,47 @@ func TestReflectInvokerSignature(t *testing.T) {
 				Name:    "Iface2",
 				PkgPath: "d/e/f",
 				Doc:     "Doc Iface2",
-				Methods: []ipc.MethodSig{
+				Methods: []signature.Method{
 					{
 						Name: "Sig3",
 						Doc:  "Doc Sig3x",
-						InArgs: []ipc.ArgSig{
+						InArgs: []signature.Arg{
 							{Name: "i0_3x", Doc: "Doc i0_3x", Type: vdl.Float64Type},
 						},
-						OutArgs: []ipc.ArgSig{
+						OutArgs: []signature.Arg{
 							{Name: "o0_3x", Doc: "Doc o0_3x", Type: vdl.ListType(vdl.Uint32Type)},
 							{Name: "err_3x", Doc: "Doc err_3x", Type: vdl.ErrorType},
 						},
-						InStreamHACK: ipc.ArgSig{
+						InStream: &signature.Arg{
 							Name: "is_3x", Doc: "Doc is_3x", Type: vdl.StringType},
-						OutStreamHACK: ipc.ArgSig{
+						OutStream: &signature.Arg{
 							Name: "os_3x", Doc: "Doc os_3x", Type: vdl.BoolType},
-						HasInStreamHACK:  true,
-						HasOutStreamHACK: true,
-						Tags:             []vdlutil.Any{"a", "b", int32(123)},
+						Tags: []vdlutil.Any{"a", "b", int32(123)},
 					},
 					{
 						Name: "Sig4",
 						Doc:  "Doc Sig4",
-						InArgs: []ipc.ArgSig{
+						InArgs: []signature.Arg{
 							{Name: "i0_4", Doc: "Doc i0_4", Type: vdl.Int32Type},
 							{Name: "i1_4", Doc: "Doc i1_4", Type: vdl.StringType},
 						},
-						OutArgs: []ipc.ArgSig{
+						OutArgs: []signature.Arg{
 							{Name: "o0_4", Doc: "Doc o0_4", Type: vdl.Int32Type},
 							{Name: "o1_4", Doc: "Doc o1_4", Type: vdl.StringType},
 						},
-						InStreamHACK:     ipc.ArgSig{Type: vdl.AnyType},
-						OutStreamHACK:    ipc.ArgSig{Type: vdl.AnyType},
-						HasInStreamHACK:  true,
-						HasOutStreamHACK: true,
+						InStream:  &signature.Arg{Type: vdl.AnyType},
+						OutStream: &signature.Arg{Type: vdl.AnyType},
 					},
 				},
 			},
 			{
 				Doc: "The empty interface contains methods not attached to any interface.",
-				Methods: []ipc.MethodSig{
+				Methods: []signature.Method{
 					{Name: "Sig1"},
 					{
 						Name:    "Sig2",
-						InArgs:  []ipc.ArgSig{{Type: vdl.Int32Type}, {Type: vdl.StringType}},
-						OutArgs: []ipc.ArgSig{{Type: vdl.ErrorType}},
+						InArgs:  []signature.Arg{{Type: vdl.Int32Type}, {Type: vdl.StringType}},
+						OutArgs: []signature.Arg{{Type: vdl.ErrorType}},
 					},
 				},
 			},

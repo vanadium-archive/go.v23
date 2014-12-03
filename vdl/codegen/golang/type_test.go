@@ -148,7 +148,7 @@ func (TestOneOfB) __VDLReflect(__TestOneOfReflect) {}`},
 		def := &compile.TypeDef{
 			NamePos:  compile.NamePos{Name: test.T.Name()},
 			Type:     test.T,
-			Exported: compile.ValidExportedIdent(test.T.Name()) == nil,
+			Exported: compile.ValidExportedIdent(test.T.Name(), compile.ReservedNormal) == nil,
 		}
 		switch test.T.Kind() {
 		case vdl.Enum:

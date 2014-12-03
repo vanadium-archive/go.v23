@@ -63,7 +63,7 @@ func (cd constDefiner) Declare() {
 	for ix := range cd.pkg.Files {
 		file, pfile := cd.pkg.Files[ix], cd.pfiles[ix]
 		for _, pdef := range pfile.ConstDefs {
-			export, err := ValidIdent(pdef.Name)
+			export, err := ValidIdent(pdef.Name, ReservedNormal)
 			if err != nil {
 				cd.env.prefixErrorf(file, pdef.Pos, err, "const %s invalid name", pdef.Name)
 				continue // keep going to catch more errors

@@ -7,6 +7,7 @@ import (
 	"veyron.io/veyron/veyron2/context"
 	"veyron.io/veyron/veyron2/naming"
 	"veyron.io/veyron/veyron2/security"
+	"veyron.io/veyron/veyron2/vdl/vdlroot/src/signature"
 )
 
 // Client represents the interface for making RPC calls.  There may be multiple
@@ -274,11 +275,11 @@ type Invoker interface {
 
 	// Signature corresponds to the reserved __Signature method; it returns the
 	// signatures of the interfaces the underlying object implements.
-	Signature(ctx ServerContext) ([]InterfaceSig, error)
+	Signature(ctx ServerContext) ([]signature.Interface, error)
 
 	// MethodSignature corresponds to the reserved __MethodSignature method; it
 	// returns the signature of the given method.
-	MethodSignature(ctx ServerContext, method string) (MethodSig, error)
+	MethodSignature(ctx ServerContext, method string) (signature.Method, error)
 
 	// Globber allows objects to take part in the namespace.
 	Globber

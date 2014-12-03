@@ -9,15 +9,16 @@ import (
 	"veyron.io/veyron/veyron2/naming"
 	"veyron.io/veyron/veyron2/vdl"
 	"veyron.io/veyron/veyron2/vdl/valconv"
+	"veyron.io/veyron/veyron2/vdl/vdlroot/src/signature"
 	"veyron.io/veyron/veyron2/vdl/vdlutil"
 	"veyron.io/veyron/veyron2/verror"
 )
 
 // Describer may be implemented by an underlying object served by the
 // ReflectInvoker, in order to describe the interfaces that the object
-// implements.  This describes all data in InterfaceSig that the ReflectInvoker
-// cannot obtain through reflection; basically everything except the method
-// names and types.
+// implements.  This describes all data in signature.Interface that the
+// ReflectInvoker cannot obtain through reflection; basically everything except
+// the method names and types.
 //
 // Note that a single object may implement multiple interfaces; to describe such
 // an object, simply return more than one elem in the returned list.
@@ -28,8 +29,8 @@ type Describer interface {
 	Describe__() []InterfaceDesc
 }
 
-// InterfaceDesc describes an interface; it is similar to InterfaceSig, without
-// the information that can be obtained via reflection.
+// InterfaceDesc describes an interface; it is similar to signature.Interface,
+// without the information that can be obtained via reflection.
 type InterfaceDesc struct {
 	Name    string
 	PkgPath string
@@ -38,16 +39,16 @@ type InterfaceDesc struct {
 	Methods []MethodDesc
 }
 
-// EmbedDesc describes an embedded interface; it is similar to EmbedSig, without
-// the information that can be obtained via reflection.
+// EmbedDesc describes an embedded interface; it is similar to signature.Embed,
+// without the information that can be obtained via reflection.
 type EmbedDesc struct {
 	Name    string
 	PkgPath string
 	Doc     string
 }
 
-// MethodDesc describes an interface method; it is similar to MethodSig, without
-// the information that can be obtained via reflection.
+// MethodDesc describes an interface method; it is similar to signature.Method,
+// without the information that can be obtained via reflection.
 type MethodDesc struct {
 	Name      string
 	Doc       string
@@ -58,7 +59,7 @@ type MethodDesc struct {
 	Tags      []vdlutil.Any // Method tags
 }
 
-// ArgDesc describes an argument; it is similar to ArgSig, without the
+// ArgDesc describes an argument; it is similar to signature.Arg, without the
 // information that can be obtained via reflection.
 type ArgDesc struct {
 	Name string
@@ -68,7 +69,7 @@ type ArgDesc struct {
 type reflectInvoker struct {
 	rcvr    reflect.Value
 	methods map[string]methodInfo // used by Prepare and Invoke
-	sig     []InterfaceSig        // used by Signature and MethodSignature
+	sig     []signature.Interface // used by Signature and MethodSignature
 }
 
 var _ Invoker = (*reflectInvoker)(nil)
@@ -207,19 +208,19 @@ func (ri reflectInvoker) Invoke(method string, call ServerCall, argptrs []interf
 }
 
 // Signature implements the Invoker.Signature method.
-func (ri reflectInvoker) Signature(ctx ServerContext) ([]InterfaceSig, error) {
+func (ri reflectInvoker) Signature(ctx ServerContext) ([]signature.Interface, error) {
 	return ri.sig, nil
 }
 
 // MethodSignature implements the Invoker.MethodSignature method.
-func (ri reflectInvoker) MethodSignature(ctx ServerContext, method string) (MethodSig, error) {
+func (ri reflectInvoker) MethodSignature(ctx ServerContext, method string) (signature.Method, error) {
 	// Return the first method in any interface with the given method name.
 	for _, iface := range ri.sig {
 		if msig, ok := iface.FindMethod(method); ok {
 			return msig, nil
 		}
 	}
-	return MethodSig{}, verror.NoExistf("ipc: unknown method %q", method)
+	return signature.Method{}, verror.NoExistf("ipc: unknown method %q", method)
 }
 
 // Globber implements the ipc.Globber interface.
@@ -238,7 +239,7 @@ type reflectRegistry struct {
 
 type reflectInfo struct {
 	methods map[string]methodInfo
-	sig     []InterfaceSig
+	sig     []signature.Interface
 }
 
 func (reg *reflectRegistry) lookup(rt reflect.Type) *reflectInfo {
@@ -307,13 +308,13 @@ func describe(obj interface{}) []InterfaceDesc {
 	return nil
 }
 
-func makeMethods(rt reflect.Type) (map[string]methodInfo, map[string]MethodSig) {
+func makeMethods(rt reflect.Type) (map[string]methodInfo, map[string]signature.Method) {
 	infos := make(map[string]methodInfo, rt.NumMethod())
-	sigs := make(map[string]MethodSig, rt.NumMethod())
+	sigs := make(map[string]signature.Method, rt.NumMethod())
 	for mx := 0; mx < rt.NumMethod(); mx++ {
 		method := rt.Method(mx)
 		// Silently skip incompatible methods, except for Aborted errors.
-		var sig MethodSig
+		var sig signature.Method
 		if verr := typeCheckMethod(method, &sig); verr != nil {
 			if verror.Is(verr, verror.Aborted) {
 				panic(fmt.Errorf("ipc: %s.%s: %v", rt.String(), method.Name, verr))
@@ -366,7 +367,7 @@ var (
 	ErrBadGlobChildren   = verror.Abortedf("GlobChildren__ must have signature GlobChildren__(ipc.ServerContext) (<-chan string, error)")
 )
 
-func typeCheckMethod(method reflect.Method, sig *MethodSig) verror.E {
+func typeCheckMethod(method reflect.Method, sig *signature.Method) verror.E {
 	if verr := typeCheckReservedMethod(method); verr != nil {
 		return verr
 	}
@@ -384,10 +385,8 @@ func typeCheckMethod(method reflect.Method, sig *MethodSig) verror.E {
 	case in1 == rtServerCall:
 		// If the first context arg is ipc.ServerCall, we do not know whether the
 		// method performs streaming, or what the stream types are.
-		sig.InStreamHACK.Type = vdl.AnyType
-		sig.OutStreamHACK.Type = vdl.AnyType
-		sig.HasInStreamHACK = true
-		sig.HasOutStreamHACK = true
+		sig.InStream = &signature.Arg{Type: vdl.AnyType}
+		sig.OutStream = &signature.Arg{Type: vdl.AnyType}
 		// We can either disallow ipc.ServerCall, at the expense of more boilerplate
 		// for users that don't use the VDL but want to perform streaming.  Or we
 		// can allow it, but won't be able to determine whether the server uses the
@@ -444,7 +443,7 @@ func typeCheckReservedMethod(method reflect.Method) verror.E {
 	return nil
 }
 
-func typeCheckStreamingContext(ctx reflect.Type, sig *MethodSig) verror.E {
+func typeCheckStreamingContext(ctx reflect.Type, sig *signature.Method) verror.E {
 	// The context must be a pointer to a struct.
 	if ctx.Kind() != reflect.Ptr || ctx.Elem().Kind() != reflect.Struct {
 		return verror.Abortedf("Context arg %s is invalid streaming context; must be pointer to a struct representing the typesafe streaming context."+forgotWrap, ctx)
@@ -480,11 +479,11 @@ func typeCheckStreamingContext(ctx reflect.Type, sig *MethodSig) verror.E {
 			tE.NumIn() != 0 || tE.NumOut() != 1 || tE.Out(0) != rtError {
 			return errRecvStream(ctx)
 		}
-		var err error
-		if sig.InStreamHACK.Type, err = vdl.TypeFromReflect(tV.Out(0)); err != nil {
+		inType, err := vdl.TypeFromReflect(tV.Out(0))
+		if err != nil {
 			return verror.Abortedf("Invalid in-stream type: %v", err)
 		}
-		sig.HasInStreamHACK = true
+		sig.InStream = &signature.Arg{Type: inType}
 	}
 	if hasSendStream {
 		// func (*) SendStream() interface{ Send(_) error }
@@ -500,11 +499,11 @@ func typeCheckStreamingContext(ctx reflect.Type, sig *MethodSig) verror.E {
 			tS.NumOut() != 1 || tS.Out(0) != rtError {
 			return errSendStream(ctx)
 		}
-		var err error
-		if sig.OutStreamHACK.Type, err = vdl.TypeFromReflect(tS.In(0)); err != nil {
+		outType, err := vdl.TypeFromReflect(tS.In(0))
+		if err != nil {
 			return verror.Abortedf("Invalid out-stream type: %v", err)
 		}
-		sig.HasOutStreamHACK = true
+		sig.OutStream = &signature.Arg{Type: outType}
 	}
 	return nil
 }
@@ -522,33 +521,33 @@ func errSendStream(rt reflect.Type) verror.E {
 	return verror.Abortedf("Context arg %s is invalid streaming context; SendStream must have signature func (*) SendStream() interface{ Send(_) error }."+forgotWrap, rt)
 }
 
-func typeCheckMethodArgs(mtype reflect.Type, sig *MethodSig) verror.E {
+func typeCheckMethodArgs(mtype reflect.Type, sig *signature.Method) verror.E {
 	// Start in-args from 2 to skip receiver and context arguments.
 	for index := 2; index < mtype.NumIn(); index++ {
 		vdlType, err := vdl.TypeFromReflect(mtype.In(index))
 		if err != nil {
 			return verror.Abortedf("Invalid in-arg %d type: %v", index-2, err)
 		}
-		(*sig).InArgs = append((*sig).InArgs, ArgSig{Type: vdlType})
+		(*sig).InArgs = append((*sig).InArgs, signature.Arg{Type: vdlType})
 	}
 	for index := 0; index < mtype.NumOut(); index++ {
 		vdlType, err := vdl.TypeFromReflect(mtype.Out(index))
 		if err != nil {
 			return verror.Abortedf("Invalid out-arg %d type: %v", index, err)
 		}
-		(*sig).OutArgs = append((*sig).OutArgs, ArgSig{Type: vdlType})
+		(*sig).OutArgs = append((*sig).OutArgs, signature.Arg{Type: vdlType})
 	}
 	return nil
 }
 
-func makeSig(desc []InterfaceDesc, methods map[string]MethodSig) []InterfaceSig {
-	var sig []InterfaceSig
+func makeSig(desc []InterfaceDesc, methods map[string]signature.Method) []signature.Interface {
+	var sig []signature.Interface
 	used := make(map[string]bool, len(methods))
 	// Loop through the user-provided desc, attaching descriptions to the actual
 	// method types to create our final signatures.  Ignore user-provided
 	// descriptions of interfaces or methods that don't exist.
 	for _, descIface := range desc {
-		var sigMethods []MethodSig
+		var sigMethods []signature.Method
 		for _, descMethod := range descIface.Methods {
 			sigMethod, ok := methods[descMethod.Name]
 			if ok {
@@ -557,29 +556,23 @@ func makeSig(desc []InterfaceDesc, methods map[string]MethodSig) []InterfaceSig 
 				sigMethod.Doc = descMethod.Doc
 				sigMethod.InArgs = makeArgSigs(sigMethod.InArgs, descMethod.InArgs)
 				sigMethod.OutArgs = makeArgSigs(sigMethod.OutArgs, descMethod.OutArgs)
-				sigMethod.InStreamHACK = makeArgSig(sigMethod.InStreamHACK, descMethod.InStream)
-				sigMethod.OutStreamHACK = makeArgSig(sigMethod.OutStreamHACK, descMethod.OutStream)
-				if sigMethod.InStreamHACK.Type != nil {
-					sigMethod.HasInStreamHACK = true
-				}
-				if sigMethod.OutStreamHACK.Type != nil {
-					sigMethod.HasOutStreamHACK = true
-				}
+				sigMethod.InStream = fillArgSig(sigMethod.InStream, descMethod.InStream)
+				sigMethod.OutStream = fillArgSig(sigMethod.OutStream, descMethod.OutStream)
 				sigMethod.Tags = descMethod.Tags
 				sigMethods = append(sigMethods, sigMethod)
 				used[sigMethod.Name] = true
 			}
 		}
 		if len(sigMethods) > 0 {
-			sort.Sort(OrderByMethodName(sigMethods))
-			sigIface := InterfaceSig{
+			sort.Sort(signature.SortableMethods(sigMethods))
+			sigIface := signature.Interface{
 				Name:    descIface.Name,
 				PkgPath: descIface.PkgPath,
 				Doc:     descIface.Doc,
 				Methods: sigMethods,
 			}
 			for _, descEmbed := range descIface.Embeds {
-				sigEmbed := EmbedSig{
+				sigEmbed := signature.Embed{
 					Name:    descEmbed.Name,
 					PkgPath: descEmbed.PkgPath,
 					Doc:     descEmbed.Doc,
@@ -590,7 +583,7 @@ func makeSig(desc []InterfaceDesc, methods map[string]MethodSig) []InterfaceSig 
 		}
 	}
 	// Add all unused methods into the catch-all empty interface.
-	var unusedMethods []MethodSig
+	var unusedMethods []signature.Method
 	for _, method := range methods {
 		if !used[method.Name] {
 			unusedMethods = append(unusedMethods, method)
@@ -598,27 +591,31 @@ func makeSig(desc []InterfaceDesc, methods map[string]MethodSig) []InterfaceSig 
 	}
 	if len(unusedMethods) > 0 {
 		const unusedDoc = "The empty interface contains methods not attached to any interface."
-		sort.Sort(OrderByMethodName(unusedMethods))
-		sig = append(sig, InterfaceSig{Doc: unusedDoc, Methods: unusedMethods})
+		sort.Sort(signature.SortableMethods(unusedMethods))
+		sig = append(sig, signature.Interface{Doc: unusedDoc, Methods: unusedMethods})
 	}
 	return sig
 }
 
-func makeArgSigs(sigs []ArgSig, descs []ArgDesc) []ArgSig {
-	result := make([]ArgSig, len(sigs))
+func makeArgSigs(sigs []signature.Arg, descs []ArgDesc) []signature.Arg {
+	result := make([]signature.Arg, len(sigs))
 	for index, sig := range sigs {
 		if index < len(descs) {
-			sig = makeArgSig(sig, descs[index])
+			sig = *fillArgSig(&sig, descs[index])
 		}
 		result[index] = sig
 	}
 	return result
 }
 
-func makeArgSig(sig ArgSig, desc ArgDesc) ArgSig {
-	sig.Name = desc.Name
-	sig.Doc = desc.Doc
-	return sig
+func fillArgSig(sig *signature.Arg, desc ArgDesc) *signature.Arg {
+	if sig == nil {
+		return nil
+	}
+	ret := *sig
+	ret.Name = desc.Name
+	ret.Doc = desc.Doc
+	return &ret
 }
 
 // convertTags tries to convert each tag into a vdl.Value, to capture any
@@ -693,7 +690,7 @@ func TypeCheckMethods(obj interface{}) map[string]error {
 		check = make(map[string]error, rt.NumMethod())
 		for mx := 0; mx < rt.NumMethod(); mx++ {
 			method := rt.Method(mx)
-			var sig MethodSig
+			var sig signature.Method
 			verr := typeCheckMethod(method, &sig)
 			if verr == nil {
 				_, verr = extractTagsForMethod(desc, method.Name)
