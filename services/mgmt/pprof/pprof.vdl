@@ -3,22 +3,24 @@
 // http://code.google.com/p/google-perftools/.
 package pprof
 
+import "veyron.io/veyron/veyron2/services/security/access"
+
 type PProf interface {
 	// CmdLine returns the command-line arguments of the server, including
 	// the name of the executable.
-	CmdLine() ([]string, error)
+	CmdLine() ([]string, error) {access.Debug}
 	// Profiles returns the list of available profiles.
-	Profiles() ([]string, error)
+	Profiles() ([]string, error) {access.Debug}
 	// Profile streams the requested profile. The debug parameter enables
 	// additional output. Passing debug=0 includes only the hexadecimal
 	// addresses that pprof needs. Passing debug=1 adds comments translating
 	// addresses to function names and line numbers, so that a programmer
 	// can read the profile without tools.
-	Profile(name string, debug int32) stream<_, []byte> error
+	Profile(name string, debug int32) stream<_, []byte> error {access.Debug}
 	// CPUProfile enables CPU profiling for the requested duration and
 	// streams the profile data.
-	CPUProfile(seconds int32) stream<_, []byte> error
+	CPUProfile(seconds int32) stream<_, []byte> error {access.Debug}
 	// Symbol looks up the program counters and returns their respective
 	// function names.
-	Symbol(programCounters []uint64) ([]string, error)
+	Symbol(programCounters []uint64) ([]string, error) {access.Debug}
 }

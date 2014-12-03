@@ -7,6 +7,8 @@ package logreader
 import (
 	"veyron.io/veyron/veyron2/services/mgmt/logreader/types"
 
+	"veyron.io/veyron/veyron2/services/security/access"
+
 	// The non-user imports are prefixed with "__" to prevent collisions.
 	__io "io"
 	__veyron2 "veyron.io/veyron/veyron2"
@@ -288,6 +290,7 @@ var descLogFile = __ipc.InterfaceDesc{
 				{"", ``}, // int64
 				{"", ``}, // error
 			},
+			Tags: []__vdlutil.Any{access.Tag("Debug")},
 		},
 		{
 			Name: "ReadLog",
@@ -301,6 +304,7 @@ var descLogFile = __ipc.InterfaceDesc{
 				{"", ``}, // int64
 				{"", ``}, // error
 			},
+			Tags: []__vdlutil.Any{access.Tag("Debug")},
 		},
 	},
 }

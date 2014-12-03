@@ -7,6 +7,8 @@
 package pprof
 
 import (
+	"veyron.io/veyron/veyron2/services/security/access"
+
 	// The non-user imports are prefixed with "__" to prevent collisions.
 	__io "io"
 	__veyron2 "veyron.io/veyron/veyron2"
@@ -402,6 +404,7 @@ var descPProf = __ipc.InterfaceDesc{
 				{"", ``}, // []string
 				{"", ``}, // error
 			},
+			Tags: []__vdlutil.Any{access.Tag("Debug")},
 		},
 		{
 			Name: "Profiles",
@@ -410,6 +413,7 @@ var descPProf = __ipc.InterfaceDesc{
 				{"", ``}, // []string
 				{"", ``}, // error
 			},
+			Tags: []__vdlutil.Any{access.Tag("Debug")},
 		},
 		{
 			Name: "Profile",
@@ -421,6 +425,7 @@ var descPProf = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
+			Tags: []__vdlutil.Any{access.Tag("Debug")},
 		},
 		{
 			Name: "CPUProfile",
@@ -431,6 +436,7 @@ var descPProf = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
+			Tags: []__vdlutil.Any{access.Tag("Debug")},
 		},
 		{
 			Name: "Symbol",
@@ -442,6 +448,7 @@ var descPProf = __ipc.InterfaceDesc{
 				{"", ``}, // []string
 				{"", ``}, // error
 			},
+			Tags: []__vdlutil.Any{access.Tag("Debug")},
 		},
 	},
 }
