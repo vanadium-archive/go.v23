@@ -175,10 +175,8 @@ func (e *binaryEncoder) encodeUnsentTypes(t *vdl.Type) (TypeID, error) {
 			id = WireOptionalID
 		}
 		binaryEncodeUint(buf, uint64(id))
-		if t.Name() != "" {
-			binaryEncodeUint(buf, 1)
-			binaryEncodeString(buf, t.Name())
-		}
+		binaryEncodeUint(buf, 1)
+		binaryEncodeString(buf, t.Name())
 		binaryEncodeUint(buf, 2)
 		binaryEncodeUint(buf, uint64(elemID))
 		if kind == vdl.Array {
@@ -188,19 +186,15 @@ func (e *binaryEncoder) encodeUnsentTypes(t *vdl.Type) (TypeID, error) {
 		binaryEncodeUint(buf, 0)
 	case vdl.Set:
 		binaryEncodeUint(buf, uint64(WireSetID))
-		if t.Name() != "" {
-			binaryEncodeUint(buf, 1)
-			binaryEncodeString(buf, t.Name())
-		}
+		binaryEncodeUint(buf, 1)
+		binaryEncodeString(buf, t.Name())
 		binaryEncodeUint(buf, 2)
 		binaryEncodeUint(buf, uint64(keyID))
 		binaryEncodeUint(buf, 0)
 	case vdl.Map:
 		binaryEncodeUint(buf, uint64(WireMapID))
-		if t.Name() != "" {
-			binaryEncodeUint(buf, 1)
-			binaryEncodeString(buf, t.Name())
-		}
+		binaryEncodeUint(buf, 1)
+		binaryEncodeString(buf, t.Name())
 		binaryEncodeUint(buf, 2)
 		binaryEncodeUint(buf, uint64(keyID))
 		binaryEncodeUint(buf, 3)
