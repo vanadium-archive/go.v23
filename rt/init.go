@@ -26,8 +26,9 @@ var (
 		registered map[string]Factory
 	}
 
-	once    sync.Once
-	globalR veyron2.Runtime
+	once       sync.Once
+	verrorOnce sync.Once
+	globalR    veyron2.Runtime
 )
 
 func init() {
@@ -53,7 +54,13 @@ func New(opts ...veyron2.ROpt) (veyron2.Runtime, error) {
 		return nil, err
 	}
 	opts = append(profileOpts, opts...)
-	return factory(prependProfile(profile, opts...)...)
+	r, err := factory(prependProfile(profile, opts...)...)
+	if err == nil {
+		verrorOnce.Do(func() {
+			verror2.SetDefaultContext(r.NewContext())
+		})
+	}
+	return r, err
 }
 
 // R returns the global Runtime instance. It can only be called after
@@ -77,7 +84,6 @@ func Init(opts ...veyron2.ROpt) veyron2.Runtime {
 		if err != nil {
 			panic(fmt.Sprintf("%s: failed to initialize global runtime: %s", os.Args[0], err))
 		}
-		verror2.SetDefaultContext(globalR.NewContext())
 	})
 	return globalR
 }
