@@ -51,7 +51,7 @@ type serverInterfaceMethod struct {
 func processServerInterfaceMethod(method *compile.Method, iface *compile.Interface, env *compile.Env) serverInterfaceMethod {
 	args := javaDeclarationArgStr(method.InArgs, env, true)
 	if isStreamingMethod(method) {
-		args += fmt.Sprintf(", io.veyron.veyron.veyron2.vdl.Stream<%s, %s> stream", javaType(method.InStream, true, env), javaType(method.OutStream, true, env))
+		args += fmt.Sprintf(", io.veyron.veyron.veyron2.vdl.Stream<%s, %s> stream", javaType(method.OutStream, true, env), javaType(method.InStream, true, env))
 	}
 	return serverInterfaceMethod{
 		AccessModifier: accessModifierForName(method.Name),

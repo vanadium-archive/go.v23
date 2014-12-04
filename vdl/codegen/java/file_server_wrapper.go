@@ -134,10 +134,10 @@ func processServerWrapperMethod(iface *compile.Interface, method *compile.Method
 		DeclarationArgs: javaDeclarationArgStr(method.InArgs, env, true),
 		IsStreaming:     isStreamingMethod(method),
 		Name:            vdlutil.ToCamelCase(method.Name),
-		RecvType:        javaType(method.OutStream, true, env),
+		RecvType:        javaType(method.InStream, true, env),
 		RetType:         clientInterfaceOutArg(iface, method, true, env),
 		Returns:         len(method.OutArgs) >= 2,
-		SendType:        javaType(method.InStream, true, env),
+		SendType:        javaType(method.OutStream, true, env),
 	}
 }
 
