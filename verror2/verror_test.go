@@ -74,7 +74,11 @@ var (
 var globalRT veyron2.Runtime
 
 func init() {
-	globalRT = rt.Init()
+	var err error
+	globalRT, err = rt.New()
+	if err != nil {
+		panic(err)
+	}
 
 	cat := i18n.Cat()
 	// Set messages for English and French.  Do not set messages for

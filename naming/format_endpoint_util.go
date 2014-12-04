@@ -57,9 +57,14 @@ func init() {
 }
 
 func main() {
-	r := rt.Init()
+	runtime, err := rt.New()
+	if err != nil {
+		vlog.Fatalf("Could not initialize runtime: %v", err)
+	}
+	defer runtime.Cleanup()
+
 	for _, a := range hostPortFlags.addrs {
-		ep, err := r.NewEndpoint(naming.FormatEndpoint(a.protocol, a.address))
+		ep, err := runtime.NewEndpoint(naming.FormatEndpoint(a.protocol, a.address))
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "%s: %s\n", ep, err)
 			os.Exit(1)
