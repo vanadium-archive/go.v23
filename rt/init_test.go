@@ -70,15 +70,6 @@ func ExampleInitWithProfile() {
 // runtime, but only bar is available.
 //  - tests to catch multiple calls to init with different options
 
-func TestErrorOnNew(t *testing.T) {
-	profile := &myprofile{}
-	rt.RegisterProfile(profile)
-	_, err := rt.New(&options.Profile{profile})
-	if err == nil {
-		t.Errorf("expected an error!")
-	}
-}
-
 func TestRTNew(t *testing.T) {
 	profile := &myprofile{}
 	rt.RegisterProfile(profile)

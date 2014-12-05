@@ -4,6 +4,7 @@ package rt
 
 import (
 	"fmt"
+	"runtime"
 	"sync"
 
 	"veyron.io/veyron/veyron2"
@@ -13,11 +14,22 @@ import (
 
 type Factory func(opts ...veyron2.ROpt) (veyron2.Runtime, error)
 
+func printStack(stack []uintptr) string {
+	s := ""
+	for _, pc := range stack {
+		fnc := runtime.FuncForPC(pc)
+		file, line := fnc.FileLine(pc)
+		s += fmt.Sprintf("%s:%d: %s\n", file, line, fnc.Name())
+	}
+	return s
+}
+
 var (
-	config struct {
+	runtimeConfig struct {
 		sync.Mutex
-		profile veyron2.Profile
-		factory Factory
+		profile      veyron2.Profile
+		profileStack []uintptr
+		factory      Factory
 	}
 
 	runtimes struct {
@@ -63,12 +75,28 @@ func New(opts ...veyron2.ROpt) (veyron2.Runtime, error) {
 
 // RegisterProfile registers the specified Profile.
 // It must be called before the Init or New functions in this package
-// are called; typically it will be called by an init function. If called
-// multiple times, the last call 'wins'.
+// are called; typically it will be called by an init function. It will panic
+// if called more than once.
 func RegisterProfile(profile veyron2.Profile) {
-	config.Lock()
-	defer config.Unlock()
-	config.profile = profile
+	runtimeConfig.Lock()
+	defer runtimeConfig.Unlock()
+	if runtimeConfig.profile != nil {
+		str := fmt.Sprintf("A profile, %q, has already been registered.\n", runtimeConfig.profile.Name())
+		str += `This is most likely because a library package is importing a profile.
+Look for imports of the form 'v.io/profiles/...' and remove them.
+Profiles should only be imported in your main package.
+Previous registration was from:
+`
+		str += printStack(runtimeConfig.profileStack)
+		str += "Current registration is from:\n"
+		stack := make([]uintptr, 1)
+		runtime.Callers(2, stack)
+		str += printStack(stack)
+		panic(str)
+	}
+	runtimeConfig.profile = profile
+	runtimeConfig.profileStack = make([]uintptr, 1)
+	runtime.Callers(2, runtimeConfig.profileStack)
 }
 
 func prependProfile(profile veyron2.Profile, opts ...veyron2.ROpt) []veyron2.ROpt {
@@ -76,13 +104,13 @@ func prependProfile(profile veyron2.Profile, opts ...veyron2.ROpt) []veyron2.ROp
 }
 
 func configure(opts ...veyron2.ROpt) (veyron2.Profile, []veyron2.ROpt, Factory, error) {
-	config.Lock()
-	defer config.Unlock()
+	runtimeConfig.Lock()
+	defer runtimeConfig.Unlock()
 	for _, o := range opts {
 		switch v := o.(type) {
 		case options.Profile:
 			// Can override a registered profile.
-			config.profile = v.Profile
+			runtimeConfig.profile = v.Profile
 		}
 	}
 	runtimes.Lock()
@@ -90,19 +118,24 @@ func configure(opts ...veyron2.ROpt) (veyron2.Profile, []veyron2.ROpt, Factory, 
 	// Let the profile specify the runtime, use a default otherwise.
 	ropts := []veyron2.ROpt{}
 	name := ""
-	if config.profile != nil {
-		name, ropts = config.profile.Runtime()
+	if runtimeConfig.profile != nil {
+		name, ropts = runtimeConfig.profile.Runtime()
 	} else {
 		name = veyron2.GoogleRuntimeName
 	}
-	config.factory = runtimes.registered[name]
+	runtimeConfig.factory = runtimes.registered[name]
 
 	// We must have a factory, but not necessarily a profile.
-	if config.factory == nil {
-		return nil, nil, nil, fmt.Errorf("no runtime factory has been found for %q", name)
+	if runtimeConfig.factory == nil {
+		str := fmt.Sprintf("No runtime factory has been found for %q", name)
+		str += `This is most likely because your main package has not imported
+		a profile, or that profile does not import a runtime implementation`
+		return nil, nil, nil, fmt.Errorf(str)
 	}
-	if config.profile == nil {
-		return nil, nil, nil, fmt.Errorf("no profile has been registered nor specified")
+	if runtimeConfig.profile == nil {
+		str := `No profile has been registered nor specified. This is most likely because your main package has not imported a profile`
+		return nil, nil, nil, fmt.Errorf(str)
+
 	}
-	return config.profile, ropts, config.factory, nil
+	return runtimeConfig.profile, ropts, runtimeConfig.factory, nil
 }
