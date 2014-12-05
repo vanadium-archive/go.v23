@@ -4,7 +4,6 @@ package rt
 
 import (
 	"fmt"
-	"os"
 	"sync"
 
 	"veyron.io/veyron/veyron2"
@@ -28,7 +27,6 @@ var (
 
 	once       sync.Once
 	verrorOnce sync.Once
-	globalR    veyron2.Runtime
 )
 
 func init() {
@@ -61,31 +59,6 @@ func New(opts ...veyron2.ROpt) (veyron2.Runtime, error) {
 		})
 	}
 	return r, err
-}
-
-// R returns the global Runtime instance. It can only be called after
-// Init has been called.
-func R() veyron2.Runtime {
-	return globalR
-}
-
-// Init returns the initialized global instance of the runtime.
-// Calling it multiple times will always return the result of the
-// first call to Init (ignoring subsequently provided options).
-// All Veyron apps should call Init as the first call in their main
-// function, it will call flag.Parse internally. It will panic on
-// encountering an error.
-func Init(opts ...veyron2.ROpt) veyron2.Runtime {
-	// TODO(cnicolaou): check that subsequent calls to Init use the same
-	// or compatible options as the first one.
-	once.Do(func() {
-		var err error
-		globalR, err = New(opts...)
-		if err != nil {
-			panic(fmt.Sprintf("%s: failed to initialize global runtime: %s", os.Args[0], err))
-		}
-	})
-	return globalR
 }
 
 // RegisterProfile registers the specified Profile.

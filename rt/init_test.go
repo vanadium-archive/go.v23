@@ -17,7 +17,11 @@ import (
 )
 
 func ExampleInit() {
-	r := rt.Init()
+	r, err := rt.New()
+	if err != nil {
+		panic(err)
+	}
+
 	// Go ahead and use the runtime.
 	log := r.Logger()
 	log.Infof("hello world")
@@ -51,7 +55,11 @@ func (mp *myprofile) Init(veyron2.Runtime, *config.Publisher) (veyron2.AppCycle,
 func (mp *myprofile) Cleanup() {}
 
 func ExampleInitWithProfile() {
-	r := rt.Init(options.Profile{&myprofile{}})
+	r, err := rt.New(options.Profile{&myprofile{}})
+	if err != nil {
+		panic(err)
+	}
+
 	// Go ahead and use the runtime.
 	log := r.Logger()
 	log.Infof("hello world from my product: %s", r.Profile())
@@ -84,7 +92,7 @@ func TestRTNew(t *testing.T) {
 		return runtime, nil
 	}
 	rt.RegisterRuntime("mock", factory)
-	rt.Init()
+	rt.New()
 	rt.New()
 	if got, want := profile.called, 2; got != want {
 		t.Errorf("profile called %d times, want %d", got, want)
