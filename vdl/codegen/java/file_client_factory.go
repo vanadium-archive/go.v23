@@ -21,10 +21,8 @@ package {{ .PackagePath }};
         io.veyron.veyron.veyron2.ipc.Client client = null;
         if (veyronOpts != null && veyronOpts.get(io.veyron.veyron.veyron2.OptionDefs.CLIENT) != null) {
             client = veyronOpts.get(io.veyron.veyron.veyron2.OptionDefs.CLIENT, io.veyron.veyron.veyron2.ipc.Client.class);
-        } else if (veyronOpts != null && veyronOpts.get(io.veyron.veyron.veyron2.OptionDefs.RUNTIME) != null) {
-            client = veyronOpts.get(io.veyron.veyron.veyron2.OptionDefs.RUNTIME, io.veyron.veyron.veyron2.VRuntime.class).getClient();
         } else {
-            client = io.veyron.veyron.veyron2.RuntimeFactory.defaultRuntime().getClient();
+            client = io.veyron.veyron.veyron2.VRuntime.getClient();
         }
         return new {{ .StubName }}(client, name);
     }
