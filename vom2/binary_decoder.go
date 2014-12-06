@@ -376,7 +376,10 @@ func (d *binaryDecoder) decodeValue(tt *vdl.Type, target valconv.Target) error {
 		if err := d.decodeValue(tfield.Type, field); err != nil {
 			return err
 		}
-		return fieldsTarget.FinishField(key, field)
+		if err := fieldsTarget.FinishField(key, field); err != nil {
+			return err
+		}
+		return target.FinishFields(fieldsTarget)
 	case vdl.Any:
 		switch id, err := binaryDecodeUint(d.buf); {
 		case err != nil:
