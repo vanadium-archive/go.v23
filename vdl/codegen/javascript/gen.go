@@ -172,7 +172,7 @@ func primitiveWithOptionalName(primitive, name string) string {
 // wrapped with type information
 func typedConst(names typeNames, v *vdl.Value) string {
 	switch v.Kind() {
-	case vdl.Any:
+	case vdl.Any, vdl.TypeObject:
 		return untypedConst(names, v)
 	default:
 		return fmt.Sprintf("new (Registry.lookupOrCreateConstructor(%s))(%s)",
