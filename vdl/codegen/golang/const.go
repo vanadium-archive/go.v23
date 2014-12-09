@@ -131,7 +131,10 @@ func untypedConst(data goData, v *vdl.Value) string {
 	case vdl.Enum:
 		return typeGo(data, t) + v.EnumLabel()
 	case vdl.Array:
-		if v.IsZero() {
+		if v.IsZero() && !t.ContainsKind(vdl.WalkInline, vdl.TypeObject, vdl.OneOf) {
+			// We can't rely on the golang zero-value array if t contains inline
+			// typeobject or oneof, since the golang zero-value for these types is
+			// different from the vdl zero-value for these types.
 			return "{}"
 		}
 		s := "{"
@@ -164,14 +167,23 @@ func untypedConst(data goData, v *vdl.Value) string {
 		}
 		return s + "\n}"
 	case vdl.Struct:
-		if v.IsZero() {
-			return "{}"
-		}
 		s := "{"
+		hasFields := false
 		for ix := 0; ix < t.NumField(); ix++ {
-			s += "\n" + t.Field(ix).Name + ": " + subConst(data, v.Field(ix)) + ","
+			vf := v.Field(ix)
+			if !vf.IsZero() || vf.Type().ContainsKind(vdl.WalkInline, vdl.TypeObject, vdl.OneOf) {
+				// We can't rely on the golang zero-value for this field, even if it's a
+				// vdl zero value, if the field contains inline typeobject or oneof,
+				// since the golang zero-value for these types is different from the vdl
+				// zero-value for these types.
+				s += "\n" + t.Field(ix).Name + ": " + subConst(data, vf) + ","
+				hasFields = true
+			}
 		}
-		return s + "\n}"
+		if hasFields {
+			s += "\n"
+		}
+		return s + "}"
 	case vdl.OneOf:
 		ix, field := v.OneOfField()
 		return typeGo(data, t) + t.Field(ix).Name + "{" + typedConst(data, field) + "}"

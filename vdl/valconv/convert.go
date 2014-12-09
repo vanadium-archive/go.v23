@@ -187,12 +187,13 @@ func createFinTarget(c convTarget, tt *vdl.Type) convTarget {
 // If fin is already a concrete type it's used directly as the fill target.
 func createFillTarget(fin convTarget, tt *vdl.Type) (convTarget, error) {
 	if fin.vv == nil {
-		switch fin.rv.Kind() {
-		case reflect.Interface:
+		if fin.rv.Kind() == reflect.Interface {
+			// We're converting into an interface, so we can't just fill into the fin
+			// target directly.  Return the appropriate fill value.
 			switch {
-			case fin.rv.Type() == rtError:
+			case fin.rv.Type() == rtError || tt == vdl.ErrorType:
 				// Create the standard verror struct to fill in.
-				return reflectConv(reflect.New(rtVError2Standard).Elem(), fin.tt)
+				return reflectConv(reflect.New(rtVError2Standard).Elem(), vdl.ErrorType)
 			case fin.tt.Kind() == vdl.OneOf:
 				// The fin target is a oneof interface.  Since we don't know the oneof
 				// field name yet, we don't know which concrete type to use.  So we
@@ -225,9 +226,10 @@ func createFillTarget(fin convTarget, tt *vdl.Type) (convTarget, error) {
 				return convTarget{tt: tt, vv: vdl.ZeroValue(tt.Elem())}, nil
 			}
 			return convTarget{tt: tt, vv: vdl.ZeroValue(tt)}, nil
-		default:
-			fin.rv.Set(reflect.New(fin.rv.Type()).Elem())
 		}
+		// We're not converting into an interface, so we can fill into the fin
+		// target directly.  Assign an appropriate zero value.
+		fin.rv.Set(rvSettableZeroValue(fin.rv.Type(), tt))
 	} else {
 		switch fin.vv.Kind() {
 		case vdl.Any:
@@ -293,6 +295,68 @@ func finishConvert(fin, fill convTarget) error {
 		}
 	}
 	return nil
+}
+
+// rvSettableZeroValue returns a settable zero value corresponding to rt / tt.
+// This isn't trivial since VDL and Go define zero values slightly differently.
+// In particular in VDL:
+//    TypeObject: AnyType
+//    OneOf:      zero value of the type at index 0
+// These are translated into Go as follows, with their standard Go zero values:
+//    *vdl.Type: nil
+//    interface: nil
+// Thus we must special-case values of these types.
+//
+// TODO(toddw): This logic is recursive and complicated because our convTarget
+// methods don't take the convTarget as a pointer receiver, so we can't mutate
+// the target as we decode.  When we split convTarget into separate valueTarget
+// and reflectTarget objects, we should also take the target as a pointer
+// receiver.  That'll simplify this logic.
+func rvSettableZeroValue(rt reflect.Type, tt *vdl.Type) reflect.Value {
+	rv := reflect.New(rt).Elem()
+	// Easy fastpath; if the type doesn't contain inline typeobject or oneof, the
+	// regular Go zero value is good enough.
+	if !tt.ContainsKind(vdl.WalkInline, vdl.TypeObject, vdl.OneOf) {
+		return rv
+	}
+	// Handle typeobject, which has the zero value of AnyType.
+	if rtPtrToType.ConvertibleTo(rt) {
+		return reflect.ValueOf(vdl.AnyType).Convert(rt)
+	}
+	// Handle composite types with inline subtypes.
+	switch {
+	case tt.Kind() == vdl.OneOf:
+		if rt.Kind() == reflect.Struct {
+			// OneOf struct, which represents a single field.
+			rv.Field(0).Set(rvSettableZeroValue(rt.Field(0).Type, tt.Field(0).Type))
+			return rv
+		}
+		// OneOf interface, which represents one of the fields.  Initialize with the
+		// zero value of the type at index 0.
+		ri, err := vdl.DeriveReflectInfo(rt)
+		if err != nil {
+			panic(fmt.Errorf("valconv: invalid oneof type rt: %v tt: %v err: %v", rt, tt, err))
+		}
+		rv.Set(rvSettableZeroValue(ri.OneOfFields[0].RepType, tt.Field(0).Type))
+		return rv
+	case rt.Kind() == reflect.Array:
+		for ix := 0; ix < rt.Len(); ix++ {
+			rv.Index(ix).Set(rvSettableZeroValue(rt.Elem(), tt.Elem()))
+		}
+		return rv
+	case rt.Kind() == reflect.Struct:
+		for ix := 0; ix < rt.NumField(); ix++ {
+			rtField := rt.Field(ix)
+			ttField, index := tt.FieldByName(rtField.Name)
+			if index < 0 {
+				// Ignore fields that aren't described in tt; e.g. unexported fields.
+				continue
+			}
+			rv.Field(ix).Set(rvSettableZeroValue(rtField.Type, ttField.Type))
+		}
+		return rv
+	}
+	panic(fmt.Errorf("valconv: rvSettableZeroValue unhandled rt: %v tt: %v", rt, tt))
 }
 
 // makeReflectOneOf returns the oneof concrete struct based on the oneof
@@ -935,7 +999,7 @@ func (c convTarget) startKey() (convTarget, error) {
 	if c.vv == nil {
 		switch c.rv.Kind() {
 		case reflect.Map:
-			return reflectConv(reflect.New(c.rv.Type().Key()).Elem(), tt.Key())
+			return reflectConv(rvSettableZeroValue(c.rv.Type().Key(), tt.Key()), tt.Key())
 		case reflect.Struct:
 			// The key for struct is the field name, which is a string.
 			return reflectConv(reflect.New(rtString).Elem(), vdl.StringType)
@@ -964,21 +1028,22 @@ func (c convTarget) finishKeyStartField(key convTarget) (convTarget, error) {
 	if c.vv == nil {
 		switch c.rv.Kind() {
 		case reflect.Map:
-			var rvField reflect.Value
 			var ttField *vdl.Type
+			var rvField reflect.Value
 			switch rtField := c.rv.Type().Elem(); {
 			case tt.Kind() == vdl.Set:
 				// The map actually represents a set
+				ttField = vdl.BoolType
 				rvField = reflect.New(rtBool).Elem()
 				rvField.SetBool(true)
-				ttField = vdl.BoolType
 			case rtField.Kind() == reflect.Bool:
+				ttField = tt.Elem()
 				rvField = reflect.New(rtField).Elem()
 				rvField.SetBool(true)
-				ttField = tt.Elem()
 			default:
-				rvField = reflect.New(rtField).Elem()
+				// TODO(toddw): This doesn't work correctly for map[_]any.
 				ttField = tt.Elem()
+				rvField = rvSettableZeroValue(rtField, ttField)
 			}
 			return reflectConv(rvField, ttField)
 		case reflect.Struct:

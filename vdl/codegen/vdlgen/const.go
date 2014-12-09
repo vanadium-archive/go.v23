@@ -92,6 +92,9 @@ func untypedConst(v *vdl.Value, pkgPath string, imports codegen.Imports) (string
 	case vdl.String:
 		return strconv.Quote(v.RawString()), nil
 	case vdl.Array, vdl.List:
+		if v.IsZero() {
+			return "{}", nil
+		}
 		s := "{"
 		for ix := 0; ix < v.Len(); ix++ {
 			elemstr, err := untypedConst(v.Index(ix), pkgPath, imports)
@@ -127,15 +130,21 @@ func untypedConst(v *vdl.Value, pkgPath string, imports codegen.Imports) (string
 		return s + "}", nil
 	case vdl.Struct:
 		s := "{"
+		hasFields := false
 		for ix := 0; ix < t.NumField(); ix++ {
-			fieldstr, err := untypedConst(v.Field(ix), pkgPath, imports)
+			vf := v.Field(ix)
+			if vf.IsZero() {
+				continue
+			}
+			fieldstr, err := untypedConst(vf, pkgPath, imports)
 			if err != nil {
 				return "", err
 			}
-			if ix > 0 {
+			if hasFields {
 				s += ", "
 			}
 			s += t.Field(ix).Name + ": " + fieldstr
+			hasFields = true
 		}
 		return s + "}", nil
 	case vdl.OneOf:

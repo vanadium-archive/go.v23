@@ -219,6 +219,11 @@ func addTypeDeps(t *vdl.Type, pkg *Package, env *Env, tdeps map[*vdl.Type]bool, 
 		// We don't track transitive dependencies, only immediate dependencies.
 		tdeps[t] = true
 		pdeps[def.File.Package] = true
+		if t == vdl.TypeObjectType {
+			// Special-case: usage of typeobject implies usage of any, since the zero
+			// value for typeobject is any.
+			addTypeDeps(vdl.AnyType, pkg, env, tdeps, pdeps)
+		}
 		return
 	}
 	// Not all types have TypeDefs; e.g. unnamed lists have no corresponding

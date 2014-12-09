@@ -37,6 +37,7 @@ type (
 		B NBool
 		C MBool
 		D ?NStruct
+		E typeobject
 	}
 	MList []NListUint64
 	MMap  map[NFloat32]NListUint64

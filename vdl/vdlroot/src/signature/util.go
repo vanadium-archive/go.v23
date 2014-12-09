@@ -20,3 +20,16 @@ func (s *Interface) FindMethod(method string) (Method, bool) {
 	}
 	return Method{}, false
 }
+
+// FirstMethod returns the signature of the given method and true iff the method
+// exists, otherwise returns an empty signature and false.  If the method exists
+// in more than one interface, we return the signature from the the first
+// interface with the given method.
+func FirstMethod(sig []Interface, method string) (Method, bool) {
+	for _, s := range sig {
+		if msig, ok := s.FindMethod(method); ok {
+			return msig, true
+		}
+	}
+	return Method{}, false
+}

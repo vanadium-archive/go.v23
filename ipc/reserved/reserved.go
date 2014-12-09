@@ -7,13 +7,18 @@ import (
 	"veyron.io/veyron/veyron2/vdl/vdlroot/src/signature"
 )
 
-func client(ctx context.T, opts []ipc.CallOpt) ipc.Client {
+func cl(ctx context.T, client ipc.Client) ipc.Client {
+	if client != nil {
+		return client
+	}
 	return veyron2.RuntimeFromContext(ctx).Client()
 }
 
-// Signature returns the signature for the given name.
-func Signature(ctx context.T, name string, opts ...ipc.CallOpt) ([]signature.Interface, error) {
-	call, err := client(ctx, opts).StartCall(ctx, name, ipc.ReservedSignature, nil, opts...)
+// Signature invokes the reserved signature RPC on the given name, and returns
+// the results.  The client will be used to invoke the RPC - if it is nil, the
+// default client from the runtime is used.
+func Signature(ctx context.T, client ipc.Client, name string, opts ...ipc.CallOpt) ([]signature.Interface, error) {
+	call, err := cl(ctx, client).StartCall(ctx, name, ipc.ReservedSignature, nil, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -24,10 +29,12 @@ func Signature(ctx context.T, name string, opts ...ipc.CallOpt) ([]signature.Int
 	return sig, err
 }
 
-// MethodSignature returns the method signature for the given name and method.
-func MethodSignature(ctx context.T, name, method string, opts ...ipc.CallOpt) (signature.Method, error) {
+// MethodSignature invokes the reserved method signature RPC on the given name,
+// and returns the results.  The client will be used to invoke the RPC - if it
+// is nil, the default client from the runtime is used.
+func MethodSignature(ctx context.T, client ipc.Client, name, method string, opts ...ipc.CallOpt) (signature.Method, error) {
 	args := []interface{}{method}
-	call, err := client(ctx, opts).StartCall(ctx, name, ipc.ReservedMethodSignature, args, opts...)
+	call, err := cl(ctx, client).StartCall(ctx, name, ipc.ReservedMethodSignature, args, opts...)
 	if err != nil {
 		return signature.Method{}, err
 	}

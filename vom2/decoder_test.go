@@ -75,6 +75,10 @@ func TestNilDecoding(t *testing.T) {
 			map[string]int64{},
 			map[string]int64(nil),
 		},
+		{
+			(*vdl.Type)(nil),
+			vdl.AnyType,
+		},
 	}
 	for _, test := range tests {
 		var buf bytes.Buffer

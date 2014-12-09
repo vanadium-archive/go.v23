@@ -67,5 +67,7 @@ func init() {
 	__vdl.Register(Interface{})
 	__vdl.Register(Embed{})
 	__vdl.Register(Method{})
-	__vdl.Register(Arg{})
+	__vdl.Register(Arg{
+		Type: __vdl.TypeOf((*__vdlutil.Any)(nil)),
+	})
 }

@@ -182,6 +182,12 @@ func testSingleton(t *testing.T, k Kind, ty *Type, s string) {
 	if got, want := ty.String(), s; got != want {
 		t.Errorf(`%s got string %q, want %q`, k, got, want)
 	}
+	if !ty.ContainsKind(WalkAll, k) {
+		t.Errorf(`%s !ContainsKind(WalkAll, %v)`, k, k)
+	}
+	if !ty.ContainsType(WalkAll, ty) {
+		t.Errorf(`%s !ContainsType(WalkAll, %v)`, k, ty)
+	}
 }
 
 func TestSingletonTypes(t *testing.T) {
@@ -201,6 +207,12 @@ func TestOptionalTypes(t *testing.T) {
 		}
 		if got, want := opt.Name(), ""; got != want {
 			t.Errorf(`%s got name %q, want %q`, opt, got, want)
+		}
+		if !test.ContainsKind(WalkAll, Optional, test.Kind()) {
+			t.Errorf(`%s !ContainsKind(WalkAll, Optional, %v)`, opt, test.Kind())
+		}
+		if !test.ContainsType(WalkAll, opt, test) {
+			t.Errorf(`%s !ContainsType(WalkAll, %v, %v)`, opt, opt, test)
 		}
 	}
 }
@@ -241,6 +253,12 @@ func TestEnumTypes(t *testing.T) {
 				t.Errorf(`Enum %s got index[%s] %d, want %d`, test.name, label, got, want)
 			}
 		}
+		if !x.ContainsKind(WalkAll, Enum) {
+			t.Errorf(`Enum %s !ContainsKind(WalkAll, Enum)`, test.name)
+		}
+		if !x.ContainsType(WalkAll, x) {
+			t.Errorf(`Enum %s !ContainsType(WalkAll, %v)`, test.name, x)
+		}
 	}
 }
 
@@ -266,6 +284,12 @@ func TestArrayTypes(t *testing.T) {
 		if got, want := x.Elem(), test.t; got != want {
 			t.Errorf(`Array %s got elem %q, want %q`, test.k, got, want)
 		}
+		if !x.ContainsKind(WalkAll, Array, test.k) {
+			t.Errorf(`Array %s !ContainsKind(WalkAll, Array, %v)`, test.k, test.k)
+		}
+		if !x.ContainsType(WalkAll, x, test.t) {
+			t.Errorf(`Array %s !ContainsType(WalkAll, %v, %v)`, test.k, x, test.t)
+		}
 	}
 }
 
@@ -286,6 +310,12 @@ func TestListTypes(t *testing.T) {
 		}
 		if got, want := x.Elem(), test.t; got != want {
 			t.Errorf(`List %s got elem %q, want %q`, test.k, got, want)
+		}
+		if !x.ContainsKind(WalkAll, List, test.k) {
+			t.Errorf(`List %s !ContainsKind(WalkAll, List, %v)`, test.k, test.k)
+		}
+		if !x.ContainsType(WalkAll, x, test.t) {
+			t.Errorf(`List %s !ContainsType(WalkAll, %v, %v)`, test.k, x, test.t)
 		}
 	}
 }
@@ -316,6 +346,12 @@ func TestSetTypes(t *testing.T) {
 		}
 		if got, want := x.Key(), test.t; got != want {
 			t.Errorf(`Set %s got key %q, want %q`, test.k, got, want)
+		}
+		if !x.ContainsKind(WalkAll, Set, test.k) {
+			t.Errorf(`Set %s !ContainsKind(WalkAll, Set, %v)`, test.k, test.k)
+		}
+		if !x.ContainsType(WalkAll, x, test.t) {
+			t.Errorf(`Set %s !ContainsType(WalkAll, %v, %v)`, test.k, x, test.t)
 		}
 	}
 }
@@ -350,6 +386,12 @@ func TestMapTypes(t *testing.T) {
 			}
 			if got, want := x.Elem(), elem.t; got != want {
 				t.Errorf(`Map[%s]%s got elem %q, want %q`, key.k, elem.k, got, want)
+			}
+			if !x.ContainsKind(WalkAll, Map, key.k, elem.k) {
+				t.Errorf(`Map[%s]%s !ContainsKind(WalkAll, Map, %v, %v)`, key.k, elem.k, key.k, elem.k)
+			}
+			if !x.ContainsType(WalkAll, x, key.t, elem.t) {
+				t.Errorf(`Map[%s]%s !ContainsType(WalkAll, %v, %v, %v)`, key.k, elem.k, x, key.t, elem.t)
 			}
 		}
 	}
@@ -428,6 +470,12 @@ func TestStructTypes(t *testing.T) {
 		if got, want := x.NumField(), len(test.fields); got != want {
 			t.Errorf(`Struct %s got num fields %d, want %d`, test.name, got, want)
 		}
+		if !x.ContainsKind(WalkAll, Struct) {
+			t.Errorf(`Struct %s !ContainsKind(WalkAll, Struct)`, test.name)
+		}
+		if !x.ContainsType(WalkAll, x) {
+			t.Errorf(`Struct %s !ContainsType(WalkAll, %v)`, test.name, x)
+		}
 		for index, field := range test.fields {
 			if got, want := x.Field(index), field; got != want {
 				t.Errorf(`Struct %s got field[%d] %v, want %v`, test.name, index, got, want)
@@ -438,6 +486,12 @@ func TestStructTypes(t *testing.T) {
 			}
 			if wanti := index; goti != wanti {
 				t.Errorf(`Struct %s got field[%s] index %d, want %d`, test.name, field.Name, goti, wanti)
+			}
+			if !x.ContainsKind(WalkAll, field.Type.Kind()) {
+				t.Errorf(`Struct %s !ContainsKind(WalkAll, field[%d])`, test.name, index)
+			}
+			if !x.ContainsType(WalkAll, field.Type) {
+				t.Errorf(`Struct %s !ContainsType(WalkAll, field[%d])`, test.name, index)
 			}
 		}
 	}
@@ -490,6 +544,12 @@ func TestOneOfTypes(t *testing.T) {
 		if got, want := x.NumField(), len(test.fields); got != want {
 			t.Errorf(`OneOf %s got num fields %d, want %d`, test.name, got, want)
 		}
+		if !x.ContainsKind(WalkAll, OneOf) {
+			t.Errorf(`OneOf %s !ContainsKind(WalkAll, OneOf)`, test.name)
+		}
+		if !x.ContainsType(WalkAll, x) {
+			t.Errorf(`OneOf %s !ContainsType(WalkAll, %v)`, test.name, x)
+		}
 		for index, field := range test.fields {
 			if got, want := x.Field(index), field; got != want {
 				t.Errorf(`OneOf %s got field[%d] %v, want %v`, test.name, index, got, want)
@@ -500,6 +560,12 @@ func TestOneOfTypes(t *testing.T) {
 			}
 			if wanti := index; goti != wanti {
 				t.Errorf(`OneOf %s got field[%s] index %d, want %d`, test.name, field.Name, goti, wanti)
+			}
+			if !x.ContainsKind(WalkAll, field.Type.Kind()) {
+				t.Errorf(`OneOf %s !ContainsKind(WalkAll, field[%d])`, test.name, index)
+			}
+			if !x.ContainsType(WalkAll, field.Type) {
+				t.Errorf(`OneOf %s !ContainsType(WalkAll, field[%d])`, test.name, index)
 			}
 		}
 	}
@@ -771,6 +837,12 @@ func TestSelfRecursiveType(t *testing.T) {
 	if got, want := n.Field(1).Type, c; got != want {
 		t.Errorf(`node Field(1).Type got %q, want %q`, got, want)
 	}
+	if !n.ContainsKind(WalkAll, String, Struct, List) {
+		t.Errorf(`node !ContainsKind(WalkAll, String, Struct, List)`)
+	}
+	if !n.ContainsType(WalkAll, StringType, n, c) {
+		t.Errorf(`node !ContainsType(WalkAll, string, %v, %v)`, n, c)
+	}
 	// Check children
 	if got, want := c.Kind(), List; got != want {
 		t.Errorf(`children Kind got %s, want %s`, got, want)
@@ -783,6 +855,12 @@ func TestSelfRecursiveType(t *testing.T) {
 	}
 	if got, want := c.Elem(), n; got != want {
 		t.Errorf(`children Elem got %q, want %q`, got, want)
+	}
+	if !c.ContainsKind(WalkAll, String, Struct, List) {
+		t.Errorf(`children !ContainsKind(WalkAll, String, Struct, List)`)
+	}
+	if !c.ContainsType(WalkAll, StringType, n, c) {
+		t.Errorf(`children !ContainsType(WalkAll, string, %v, %v)`, n, c)
 	}
 	// Check hash-consing
 	for iter := 0; iter < 5; iter++ {
@@ -872,6 +950,12 @@ func TestMutuallyRecursiveType(t *testing.T) {
 	if got, want := d.Field(2).Type, c; got != want {
 		t.Errorf(`D Field(2).Type got %q, want %q`, got, want)
 	}
+	if !d.ContainsKind(WalkAll, Int32, String, Struct, Optional) {
+		t.Errorf(`D !ContainsKind(WalkAll, Int32, String, Struct, Optional)`)
+	}
+	if !d.ContainsType(WalkAll, Int32Type, StringType, d, a, b, c) {
+		t.Errorf(`D !ContainsType(WalkAll, int32, string, %v, %v, %v, %v)`, d, a, b, c)
+	}
 	// Check A
 	if got, want := a.Kind(), Struct; got != want {
 		t.Errorf(`A Kind got %s, want %s`, got, want)
@@ -902,6 +986,12 @@ func TestMutuallyRecursiveType(t *testing.T) {
 	}
 	if got, want := a.Field(2).Type, c; got != want {
 		t.Errorf(`A Field(2).Type got %q, want %q`, got, want)
+	}
+	if !a.ContainsKind(WalkAll, Int32, String, Struct, Optional) {
+		t.Errorf(`A !ContainsKind(WalkAll, Int32, String, Struct, Optional)`)
+	}
+	if !a.ContainsType(WalkAll, Int32Type, StringType, a, b, c) {
+		t.Errorf(`A !ContainsType(WalkAll, int32, string, %v, %v, %v)`, a, b, c)
 	}
 	// Check B
 	if got, want := b.Kind(), Struct; got != want {
@@ -934,6 +1024,12 @@ func TestMutuallyRecursiveType(t *testing.T) {
 	if got, want := b.Field(2).Type, c; got != want {
 		t.Errorf(`B Field(2).Type got %q, want %q`, got, want)
 	}
+	if !b.ContainsKind(WalkAll, Int32, String, Struct, Optional) {
+		t.Errorf(`B !ContainsKind(WalkAll, Int32, String, Struct, Optional)`)
+	}
+	if !b.ContainsType(WalkAll, Int32Type, StringType, a, b, c) {
+		t.Errorf(`B !ContainsType(WalkAll, int32, string, %v, %v, %v)`, a, b, c)
+	}
 	// Check C
 	if got, want := c.Kind(), Struct; got != want {
 		t.Errorf(`C Kind got %s, want %s`, got, want)
@@ -952,6 +1048,12 @@ func TestMutuallyRecursiveType(t *testing.T) {
 	}
 	if got, want := c.Field(0).Type, StringType; got != want {
 		t.Errorf(`C Field(0).Type got %q, want %q`, got, want)
+	}
+	if !c.ContainsKind(WalkAll, String, Struct) {
+		t.Errorf(`C !ContainsKind(WalkAll, String, Struct)`)
+	}
+	if !c.ContainsType(WalkAll, StringType, c) {
+		t.Errorf(`C !ContainsType(WalkAll, string, %v)`, c)
 	}
 	// Check hash-consing
 	for iter := 0; iter < 5; iter++ {

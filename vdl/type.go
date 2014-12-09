@@ -303,3 +303,85 @@ func (t *Type) checkIsBytes(method string) {
 		panic(t.errBytes(method))
 	}
 }
+
+// ContainsKind returns true iff t or subtypes of t match any of the kinds.
+func (t *Type) ContainsKind(mode WalkMode, kinds ...Kind) bool {
+	return !t.Walk(mode, func(visit *Type) bool {
+		for _, k := range kinds {
+			if k == visit.Kind() {
+				return false
+			}
+		}
+		return true
+	})
+}
+
+// ContainsType returns true iff t or subtypes of t match any of the types.
+func (t *Type) ContainsType(mode WalkMode, types ...*Type) bool {
+	return !t.Walk(mode, func(visit *Type) bool {
+		for _, ty := range types {
+			if ty == visit {
+				return false
+			}
+		}
+		return true
+	})
+}
+
+// Walk performs a DFS walk through the type graph starting from t, calling fn
+// for each visited type.  If fn returns false on a visited type, the walk is
+// terminated early, and false is returned by Walk.  The mode controls which
+// types in the type graph we will visit.
+func (t *Type) Walk(mode WalkMode, fn func(*Type) bool) bool {
+	return typeWalk(mode, t, fn, make(map[*Type]bool))
+}
+
+// WalkMode is the mode to perform a Walk through the type graph.
+type WalkMode int
+
+const (
+	// WalkAll indicates we should walk through all types in the type graph.
+	WalkAll WalkMode = iota
+	// WalkInline indicates we should only visit subtypes of array, struct and
+	// oneof.  Values of array, struct and oneof always include values of their
+	// subtypes, thus the subtypes are considered to be inline.  Values of
+	// optional, list, set and map might not include values of their subtypes, and
+	// are not considered to be inline.
+	WalkInline
+)
+
+func (t *Type) subTypesInline() bool {
+	switch t.kind {
+	case Array, Struct, OneOf:
+		return true
+	}
+	return false
+}
+
+func typeWalk(mode WalkMode, t *Type, fn func(*Type) bool, seen map[*Type]bool) bool {
+	if seen[t] {
+		return true
+	}
+	seen[t] = true
+	if !fn(t) {
+		return false
+	}
+	if mode == WalkInline && !t.subTypesInline() {
+		return true
+	}
+	switch t.kind {
+	case Optional, Array, List:
+		return typeWalk(mode, t.elem, fn, seen)
+	case Set:
+		return typeWalk(mode, t.key, fn, seen)
+	case Map:
+		return typeWalk(mode, t.key, fn, seen) && typeWalk(mode, t.elem, fn, seen)
+	case Struct, OneOf:
+		for _, field := range t.fields {
+			if !typeWalk(mode, field.Type, fn, seen) {
+				return false
+			}
+		}
+	}
+	return true
+}

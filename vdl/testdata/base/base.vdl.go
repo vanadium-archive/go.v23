@@ -293,10 +293,66 @@ func init() {
 	__vdl.Register(NamedSet(nil))
 	__vdl.Register(NamedMap(nil))
 	__vdl.Register(NamedStruct{})
-	__vdl.Register(Scalars{})
+	__vdl.Register(Scalars{
+		A15: __vdl.TypeOf((*__vdlutil.Any)(nil)),
+	})
 	__vdl.Register(KeyScalars{})
-	__vdl.Register(Composites{})
-	__vdl.Register(CompComp{})
+	__vdl.Register(Composites{
+		A0: Scalars{
+			A15: __vdl.TypeOf((*__vdlutil.Any)(nil)),
+		},
+		A1: [2]Scalars{
+			{
+				A15: __vdl.TypeOf((*__vdlutil.Any)(nil)),
+			},
+			{
+				A15: __vdl.TypeOf((*__vdlutil.Any)(nil)),
+			},
+		},
+	})
+	__vdl.Register(CompComp{
+		A0: Composites{
+			A0: Scalars{
+				A15: __vdl.TypeOf((*__vdlutil.Any)(nil)),
+			},
+			A1: [2]Scalars{
+				{
+					A15: __vdl.TypeOf((*__vdlutil.Any)(nil)),
+				},
+				{
+					A15: __vdl.TypeOf((*__vdlutil.Any)(nil)),
+				},
+			},
+		},
+		A1: [2]Composites{
+			{
+				A0: Scalars{
+					A15: __vdl.TypeOf((*__vdlutil.Any)(nil)),
+				},
+				A1: [2]Scalars{
+					{
+						A15: __vdl.TypeOf((*__vdlutil.Any)(nil)),
+					},
+					{
+						A15: __vdl.TypeOf((*__vdlutil.Any)(nil)),
+					},
+				},
+			},
+			{
+				A0: Scalars{
+					A15: __vdl.TypeOf((*__vdlutil.Any)(nil)),
+				},
+				A1: [2]Scalars{
+					{
+						A15: __vdl.TypeOf((*__vdlutil.Any)(nil)),
+					},
+					{
+						A15: __vdl.TypeOf((*__vdlutil.Any)(nil)),
+					},
+				},
+			},
+		},
+	})
 	__vdl.Register(NestedArgs{})
 	__vdl.Register(Args{})
 }
@@ -322,7 +378,6 @@ const CNamedBool = NamedBool(true)
 var CNamedStruct = NamedStruct{
 	A: true,
 	B: "test",
-	C: 0,
 }
 
 const Ccomplex64 = complex64(8 + 9i)

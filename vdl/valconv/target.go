@@ -147,6 +147,14 @@ func FromReflect(target Target, rv reflect.Value) error {
 			if err != nil {
 				return err
 			}
+			switch {
+			case tt.Kind() == vdl.TypeObject:
+				// Treat nil *vdl.Type as vdl.AnyType.
+				return target.FromTypeObject(vdl.AnyType)
+			case tt.Kind() == vdl.OneOf && rt.Kind() == reflect.Interface:
+				// Treat nil OneOf interface as the value of the type at index 0.
+				return FromValue(target, vdl.ZeroValue(tt))
+			}
 			return target.FromNil(tt)
 		case rt.ConvertibleTo(rtPtrToType):
 			// If rv is convertible to *vdl.Type, fill from it directly.

@@ -136,10 +136,13 @@ var rtKeyTests = []rtTest{
 var rtNonKeyTests = []rtTest{
 	// Unnamed scalars
 	{reflect.Type(nil), AnyType},
+	{reflect.TypeOf((*interface{})(nil)), AnyType},
 	{reflect.TypeOf((*interface{})(nil)).Elem(), AnyType},
+	{reflect.TypeOf((*error)(nil)), ErrorType},
 	{reflect.TypeOf((*error)(nil)).Elem(), ErrorType},
 	{reflect.TypeOf((*Type)(nil)), TypeObjectType},
 	// Named scalars (we cannot detect the error type if it is named)
+	{reflect.TypeOf((*nInterface)(nil)), AnyType},
 	{reflect.TypeOf((*nInterface)(nil)).Elem(), AnyType},
 	{reflect.TypeOf(nType(nil)), TypeObjectType},
 	// Unnamed arrays

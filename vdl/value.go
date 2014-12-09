@@ -8,8 +8,8 @@ import (
 )
 
 var (
-	errNilType       = errors.New("nil type")
-	errNonNilZeroAny = errors.New("any has an unknown non-nil zero value")
+	errNilType       = errors.New("vdl: nil *Type is invalid")
+	errNonNilZeroAny = errors.New("vdl: the any type doesn't have a non-nil zero value")
 )
 
 // Value is the generic representation of any value expressible in veyron.  All

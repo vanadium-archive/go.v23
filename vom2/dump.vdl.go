@@ -211,6 +211,8 @@ func (DumpKind) __VDLReflect(struct {
 
 func init() {
 	__vdl.Register(Primitive(PrimitivePBool{false}))
-	__vdl.Register(DumpAtom{})
+	__vdl.Register(DumpAtom{
+		Data: PrimitivePBool{false},
+	})
 	__vdl.Register(DumpKindMagic)
 }
