@@ -206,8 +206,8 @@ func (c *publicKeyThirdPartyCaveat) discharger() (PublicKey, error) {
 	return key, nil
 }
 
-func (c *publicKeyThirdPartyCaveat) String() string {
-	return fmt.Sprintf("%T: %v@%v [%+v]", c, c.ID(), c.Location(), c.Requirements())
+func (c publicKeyThirdPartyCaveat) String() string {
+	return fmt.Sprintf("%v@%v [%+v]", c.ID(), c.Location(), c.Requirements())
 }
 
 func (d *publicKeyDischarge) ID() string { return d.ThirdPartyCaveatID }
