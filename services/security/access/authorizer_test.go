@@ -6,6 +6,7 @@ import (
 	"crypto/rand"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"reflect"
 	"testing"
 
@@ -167,6 +168,7 @@ func TestTaggedACLAuthorizerFromFile(t *testing.T) {
 	}
 	filename := file.Name()
 	file.Close()
+	defer os.Remove(filename)
 
 	var (
 		authorizer, _  = TaggedACLAuthorizerFromFile(filename, reflect.TypeOf(test.Read))

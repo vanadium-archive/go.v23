@@ -25,6 +25,7 @@ func TestVDLGenerator(t *testing.T) {
 	if err != nil {
 		t.Fatalf("TempDir() failed: %v", err)
 	}
+	defer os.RemoveAll(outDir)
 	// TODO(toddw): test the generated java and javascript files too.
 	outOpt := fmt.Sprintf("--go_out_dir=%s", outDir)
 	if err := cmd.Execute([]string{"generate", "--lang=go", outOpt, testDir}); err != nil {
