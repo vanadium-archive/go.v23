@@ -74,6 +74,12 @@ func systemImportsGo(f *compile.File) []string {
 		// Import for vdl.Register to register all defined types.
 		set[`__vdl "veyron.io/veyron/veyron2/vdl"`] = true
 	}
+	for _, td := range f.TypeDefs {
+		if td.Type.Kind() == vdl.Enum {
+			// Import for fmt.Errorf to define Enum types.
+			set[`__fmt "fmt"`] = true
+		}
+	}
 	if len(f.Interfaces) > 0 {
 		// Imports for the generated method: {interface name}Client.
 		set[`__veyron2 "veyron.io/veyron/veyron2"`] = true

@@ -26,8 +26,6 @@ func init() {
 }
 
 // Tests contains the testcases to use to test vom encoding and decoding.
-//
-// TODO(toddw): Add hex breakdown comments for each testcase.
 var Tests = []TestCase{
 	{
 		Name:  "true",
@@ -65,9 +63,14 @@ var Tests = []TestCase{
 		Hex:   "800a00",
 	},
 	{
-		Name:  "byte(8)",
-		Value: byte(8),
-		Hex:   "800a08",
+		Name:  "byte(127)",
+		Value: byte(127),
+		Hex:   "800a7f",
+	},
+	{
+		Name:  "byte(255)",
+		Value: byte(255),
+		Hex:   "800aff",
 	},
 	{
 		Name:  "uint16(0)",
@@ -75,9 +78,64 @@ var Tests = []TestCase{
 		Hex:   "800c00",
 	},
 	{
-		Name:  "uint16(16)",
-		Value: uint16(16),
-		Hex:   "800c10",
+		Name:  "uint16(1)",
+		Value: uint16(1),
+		Hex:   "800c01",
+	},
+	{
+		Name:  "uint16(2)",
+		Value: uint16(2),
+		Hex:   "800c02",
+	},
+	{
+		Name:  "uint16(63)",
+		Value: uint16(63),
+		Hex:   "800c3f",
+	},
+	{
+		Name:  "uint16(64)",
+		Value: uint16(64),
+		Hex:   "800c40",
+	},
+	{
+		Name:  "uint16(127)",
+		Value: uint16(127),
+		Hex:   "800c7f",
+	},
+	{
+		Name:  "uint16(128)",
+		Value: uint16(128),
+		Hex:   "800cff80",
+	},
+	{
+		Name:  "uint16(255)",
+		Value: uint16(255),
+		Hex:   "800cffff",
+	},
+	{
+		Name:  "uint16(256)",
+		Value: uint16(256),
+		Hex:   "800cfe0100",
+	},
+	{
+		Name:  "uint16(32766)",
+		Value: uint16(32766),
+		Hex:   "800cfe7ffe",
+	},
+	{
+		Name:  "uint16(32767)",
+		Value: uint16(32767),
+		Hex:   "800cfe7fff",
+	},
+	{
+		Name:  "uint16(65534)",
+		Value: uint16(65534),
+		Hex:   "800cfefffe",
+	},
+	{
+		Name:  "uint16(65535)",
+		Value: uint16(65535),
+		Hex:   "800cfeffff",
 	},
 	{
 		Name:  "uint32(0)",
@@ -85,9 +143,44 @@ var Tests = []TestCase{
 		Hex:   "800e00",
 	},
 	{
-		Name:  "uint32(32)",
-		Value: uint32(32),
-		Hex:   "800e20",
+		Name:  "uint32(8388606)",
+		Value: uint32(8388606),
+		Hex:   "800efd7ffffe",
+	},
+	{
+		Name:  "uint32(8388607)",
+		Value: uint32(8388607),
+		Hex:   "800efd7fffff",
+	},
+	{
+		Name:  "uint32(16777214)",
+		Value: uint32(16777214),
+		Hex:   "800efdfffffe",
+	},
+	{
+		Name:  "uint32(16777215)",
+		Value: uint32(16777215),
+		Hex:   "800efdffffff",
+	},
+	{
+		Name:  "uint32(2147483646)",
+		Value: uint32(2147483646),
+		Hex:   "800efc7ffffffe",
+	},
+	{
+		Name:  "uint32(2147483647)",
+		Value: uint32(2147483647),
+		Hex:   "800efc7fffffff",
+	},
+	{
+		Name:  "uint32(4294967294)",
+		Value: uint32(4294967294),
+		Hex:   "800efcfffffffe",
+	},
+	{
+		Name:  "uint32(4294967295)",
+		Value: uint32(4294967295),
+		Hex:   "800efcffffffff",
 	},
 	{
 		Name:  "uint64(0)",
@@ -95,9 +188,84 @@ var Tests = []TestCase{
 		Hex:   "801000",
 	},
 	{
-		Name:  "uint64(64)",
-		Value: uint64(64),
-		Hex:   "801040",
+		Name:  "uint64(549755813886)",
+		Value: uint64(549755813886),
+		Hex:   "8010fb7ffffffffe",
+	},
+	{
+		Name:  "uint64(549755813887)",
+		Value: uint64(549755813887),
+		Hex:   "8010fb7fffffffff",
+	},
+	{
+		Name:  "uint64(1099511627774)",
+		Value: uint64(1099511627774),
+		Hex:   "8010fbfffffffffe",
+	},
+	{
+		Name:  "uint64(1099511627775)",
+		Value: uint64(1099511627775),
+		Hex:   "8010fbffffffffff",
+	},
+	{
+		Name:  "uint64(140737488355326)",
+		Value: uint64(140737488355326),
+		Hex:   "8010fa7ffffffffffe",
+	},
+	{
+		Name:  "uint64(140737488355327)",
+		Value: uint64(140737488355327),
+		Hex:   "8010fa7fffffffffff",
+	},
+	{
+		Name:  "uint64(281474976710654)",
+		Value: uint64(281474976710654),
+		Hex:   "8010fafffffffffffe",
+	},
+	{
+		Name:  "uint64(281474976710655)",
+		Value: uint64(281474976710655),
+		Hex:   "8010faffffffffffff",
+	},
+	{
+		Name:  "uint64(36028797018963966)",
+		Value: uint64(36028797018963966),
+		Hex:   "8010f97ffffffffffffe",
+	},
+	{
+		Name:  "uint64(36028797018963967)",
+		Value: uint64(36028797018963967),
+		Hex:   "8010f97fffffffffffff",
+	},
+	{
+		Name:  "uint64(72057594037927934)",
+		Value: uint64(72057594037927934),
+		Hex:   "8010f9fffffffffffffe",
+	},
+	{
+		Name:  "uint64(72057594037927935)",
+		Value: uint64(72057594037927935),
+		Hex:   "8010f9ffffffffffffff",
+	},
+	{
+		Name:  "uint64(9223372036854775806)",
+		Value: uint64(9223372036854775806),
+		Hex:   "8010f87ffffffffffffffe",
+	},
+	{
+		Name:  "uint64(9223372036854775807)",
+		Value: uint64(9223372036854775807),
+		Hex:   "8010f87fffffffffffffff",
+	},
+	{
+		Name:  "uint64(18446744073709551614)",
+		Value: uint64(18446744073709551614),
+		Hex:   "8010f8fffffffffffffffe",
+	},
+	{
+		Name:  "uint64(18446744073709551615)",
+		Value: uint64(18446744073709551615),
+		Hex:   "8010f8ffffffffffffffff",
 	},
 	{
 		Name:  "int16(0)",
@@ -105,14 +273,54 @@ var Tests = []TestCase{
 		Hex:   "801200",
 	},
 	{
-		Name:  "int16(16)",
-		Value: int16(16),
-		Hex:   "801220",
+		Name:  "int16(1)",
+		Value: int16(1),
+		Hex:   "801202",
 	},
 	{
-		Name:  "int16(-16)",
-		Value: int16(-16),
-		Hex:   "80121f",
+		Name:  "int16(2)",
+		Value: int16(2),
+		Hex:   "801204",
+	},
+	{
+		Name:  "int16(63)",
+		Value: int16(63),
+		Hex:   "80127e",
+	},
+	{
+		Name:  "int16(64)",
+		Value: int16(64),
+		Hex:   "8012ff80",
+	},
+	{
+		Name:  "int16(127)",
+		Value: int16(127),
+		Hex:   "8012fffe",
+	},
+	{
+		Name:  "int16(128)",
+		Value: int16(128),
+		Hex:   "8012fe0100",
+	},
+	{
+		Name:  "int16(255)",
+		Value: int16(255),
+		Hex:   "8012fe01fe",
+	},
+	{
+		Name:  "int16(256)",
+		Value: int16(256),
+		Hex:   "8012fe0200",
+	},
+	{
+		Name:  "int16(32766)",
+		Value: int16(32766),
+		Hex:   "8012fefffc",
+	},
+	{
+		Name:  "int16(32767)",
+		Value: int16(32767),
+		Hex:   "8012fefffe",
 	},
 	{
 		Name:  "int32(0)",
@@ -120,14 +328,34 @@ var Tests = []TestCase{
 		Hex:   "801400",
 	},
 	{
-		Name:  "int32(32)",
-		Value: int32(32),
-		Hex:   "801440",
+		Name:  "int32(8388606)",
+		Value: int32(8388606),
+		Hex:   "8014fdfffffc",
 	},
 	{
-		Name:  "int32(-32)",
-		Value: int32(-32),
-		Hex:   "80143f",
+		Name:  "int32(8388607)",
+		Value: int32(8388607),
+		Hex:   "8014fdfffffe",
+	},
+	{
+		Name:  "int32(16777214)",
+		Value: int32(16777214),
+		Hex:   "8014fc01fffffc",
+	},
+	{
+		Name:  "int32(16777215)",
+		Value: int32(16777215),
+		Hex:   "8014fc01fffffe",
+	},
+	{
+		Name:  "int32(2147483646)",
+		Value: int32(2147483646),
+		Hex:   "8014fcfffffffc",
+	},
+	{
+		Name:  "int32(2147483647)",
+		Value: int32(2147483647),
+		Hex:   "8014fcfffffffe",
 	},
 	{
 		Name:  "int64(0)",
@@ -135,14 +363,224 @@ var Tests = []TestCase{
 		Hex:   "801600",
 	},
 	{
-		Name:  "int64(64)",
-		Value: int64(64),
-		Hex:   "8016ff80",
+		Name:  "int64(549755813886)",
+		Value: int64(549755813886),
+		Hex:   "8016fbfffffffffc",
 	},
 	{
-		Name:  "int64(-64)",
-		Value: int64(-64),
-		Hex:   "80167f",
+		Name:  "int64(549755813887)",
+		Value: int64(549755813887),
+		Hex:   "8016fbfffffffffe",
+	},
+	{
+		Name:  "int64(1099511627774)",
+		Value: int64(1099511627774),
+		Hex:   "8016fa01fffffffffc",
+	},
+	{
+		Name:  "int64(1099511627775)",
+		Value: int64(1099511627775),
+		Hex:   "8016fa01fffffffffe",
+	},
+	{
+		Name:  "int64(140737488355326)",
+		Value: int64(140737488355326),
+		Hex:   "8016fafffffffffffc",
+	},
+	{
+		Name:  "int64(140737488355327)",
+		Value: int64(140737488355327),
+		Hex:   "8016fafffffffffffe",
+	},
+	{
+		Name:  "int64(281474976710654)",
+		Value: int64(281474976710654),
+		Hex:   "8016f901fffffffffffc",
+	},
+	{
+		Name:  "int64(281474976710655)",
+		Value: int64(281474976710655),
+		Hex:   "8016f901fffffffffffe",
+	},
+	{
+		Name:  "int64(36028797018963966)",
+		Value: int64(36028797018963966),
+		Hex:   "8016f9fffffffffffffc",
+	},
+	{
+		Name:  "int64(36028797018963967)",
+		Value: int64(36028797018963967),
+		Hex:   "8016f9fffffffffffffe",
+	},
+	{
+		Name:  "int64(72057594037927934)",
+		Value: int64(72057594037927934),
+		Hex:   "8016f801fffffffffffffc",
+	},
+	{
+		Name:  "int64(72057594037927935)",
+		Value: int64(72057594037927935),
+		Hex:   "8016f801fffffffffffffe",
+	},
+	{
+		Name:  "int64(9223372036854775806)",
+		Value: int64(9223372036854775806),
+		Hex:   "8016f8fffffffffffffffc",
+	},
+	{
+		Name:  "int64(9223372036854775807)",
+		Value: int64(9223372036854775807),
+		Hex:   "8016f8fffffffffffffffe",
+	},
+	{
+		Name:  "int16(-1)",
+		Value: int16(-1),
+		Hex:   "801201",
+	},
+	{
+		Name:  "int16(-2)",
+		Value: int16(-2),
+		Hex:   "801203",
+	},
+	{
+		Name:  "int16(-64)",
+		Value: int16(-64),
+		Hex:   "80127f",
+	},
+	{
+		Name:  "int16(-65)",
+		Value: int16(-65),
+		Hex:   "8012ff81",
+	},
+	{
+		Name:  "int16(-128)",
+		Value: int16(-128),
+		Hex:   "8012ffff",
+	},
+	{
+		Name:  "int16(-129)",
+		Value: int16(-129),
+		Hex:   "8012fe0101",
+	},
+	{
+		Name:  "int16(-256)",
+		Value: int16(-256),
+		Hex:   "8012fe01ff",
+	},
+	{
+		Name:  "int16(-257)",
+		Value: int16(-257),
+		Hex:   "8012fe0201",
+	},
+	{
+		Name:  "int16(-32767)",
+		Value: int16(-32767),
+		Hex:   "8012fefffd",
+	},
+	{
+		Name:  "int16(-32768)",
+		Value: int16(-32768),
+		Hex:   "8012feffff",
+	},
+	{
+		Name:  "int32(-8388607)",
+		Value: int32(-8388607),
+		Hex:   "8014fdfffffd",
+	},
+	{
+		Name:  "int32(-8388608)",
+		Value: int32(-8388608),
+		Hex:   "8014fdffffff",
+	},
+	{
+		Name:  "int32(-16777215)",
+		Value: int32(-16777215),
+		Hex:   "8014fc01fffffd",
+	},
+	{
+		Name:  "int32(-16777216)",
+		Value: int32(-16777216),
+		Hex:   "8014fc01ffffff",
+	},
+	{
+		Name:  "int32(-2147483647)",
+		Value: int32(-2147483647),
+		Hex:   "8014fcfffffffd",
+	},
+	{
+		Name:  "int32(-2147483648)",
+		Value: int32(-2147483648),
+		Hex:   "8014fcffffffff",
+	},
+	{
+		Name:  "int64(-549755813887)",
+		Value: int64(-549755813887),
+		Hex:   "8016fbfffffffffd",
+	},
+	{
+		Name:  "int64(-549755813888)",
+		Value: int64(-549755813888),
+		Hex:   "8016fbffffffffff",
+	},
+	{
+		Name:  "int64(-1099511627775)",
+		Value: int64(-1099511627775),
+		Hex:   "8016fa01fffffffffd",
+	},
+	{
+		Name:  "int64(-1099511627776)",
+		Value: int64(-1099511627776),
+		Hex:   "8016fa01ffffffffff",
+	},
+	{
+		Name:  "int64(-140737488355327)",
+		Value: int64(-140737488355327),
+		Hex:   "8016fafffffffffffd",
+	},
+	{
+		Name:  "int64(-140737488355328)",
+		Value: int64(-140737488355328),
+		Hex:   "8016faffffffffffff",
+	},
+	{
+		Name:  "int64(-281474976710655)",
+		Value: int64(-281474976710655),
+		Hex:   "8016f901fffffffffffd",
+	},
+	{
+		Name:  "int64(-281474976710656)",
+		Value: int64(-281474976710656),
+		Hex:   "8016f901ffffffffffff",
+	},
+	{
+		Name:  "int64(-36028797018963967)",
+		Value: int64(-36028797018963967),
+		Hex:   "8016f9fffffffffffffd",
+	},
+	{
+		Name:  "int64(-36028797018963968)",
+		Value: int64(-36028797018963968),
+		Hex:   "8016f9ffffffffffffff",
+	},
+	{
+		Name:  "int64(-72057594037927935)",
+		Value: int64(-72057594037927935),
+		Hex:   "8016f801fffffffffffffd",
+	},
+	{
+		Name:  "int64(-72057594037927936)",
+		Value: int64(-72057594037927936),
+		Hex:   "8016f801ffffffffffffff",
+	},
+	{
+		Name:  "int64(-9223372036854775807)",
+		Value: int64(-9223372036854775807),
+		Hex:   "8016f8fffffffffffffffd",
+	},
+	{
+		Name:  "int64(-9223372036854775808)",
+		Value: int64(-9223372036854775808),
+		Hex:   "8016f8ffffffffffffffff",
 	},
 	{
 		Name:  "float32(0)",
@@ -240,9 +678,14 @@ var Tests = []TestCase{
 		Hex:   "80ff813210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e42797465020500ff8200",
 	},
 	{
-		Name:  "NByte(8)",
-		Value: NByte(8),
-		Hex:   "80ff813210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e42797465020500ff8208",
+		Name:  "NByte(127)",
+		Value: NByte(127),
+		Hex:   "80ff813210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e42797465020500ff827f",
+	},
+	{
+		Name:  "NByte(255)",
+		Value: NByte(255),
+		Hex:   "80ff813210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e42797465020500ff82ff",
 	},
 	{
 		Name:  "NUint16(0)",
@@ -250,9 +693,9 @@ var Tests = []TestCase{
 		Hex:   "80ff813410012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e55696e743136020600ff8200",
 	},
 	{
-		Name:  "NUint16(16)",
-		Value: NUint16(16),
-		Hex:   "80ff813410012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e55696e743136020600ff8210",
+		Name:  "NUint16(65535)",
+		Value: NUint16(65535),
+		Hex:   "80ff813410012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e55696e743136020600ff82feffff",
 	},
 	{
 		Name:  "NUint32(0)",
@@ -260,9 +703,9 @@ var Tests = []TestCase{
 		Hex:   "80ff813410012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e55696e743332020700ff8200",
 	},
 	{
-		Name:  "NUint32(32)",
-		Value: NUint32(32),
-		Hex:   "80ff813410012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e55696e743332020700ff8220",
+		Name:  "NUint32(4294967295)",
+		Value: NUint32(4294967295),
+		Hex:   "80ff813410012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e55696e743332020700ff82fcffffffff",
 	},
 	{
 		Name:  "NUint64(0)",
@@ -270,9 +713,9 @@ var Tests = []TestCase{
 		Hex:   "80ff813410012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e55696e743634020800ff8200",
 	},
 	{
-		Name:  "NUint64(64)",
-		Value: NUint64(64),
-		Hex:   "80ff813410012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e55696e743634020800ff8240",
+		Name:  "NUint64(18446744073709551615)",
+		Value: NUint64(18446744073709551615),
+		Hex:   "80ff813410012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e55696e743634020800ff82f8ffffffffffffffff",
 	},
 	{
 		Name:  "NInt16(0)",
@@ -280,14 +723,14 @@ var Tests = []TestCase{
 		Hex:   "80ff813310012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e496e743136020900ff8200",
 	},
 	{
-		Name:  "NInt16(16)",
-		Value: NInt16(16),
-		Hex:   "80ff813310012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e496e743136020900ff8220",
+		Name:  "NInt16(32767)",
+		Value: NInt16(32767),
+		Hex:   "80ff813310012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e496e743136020900ff82fefffe",
 	},
 	{
-		Name:  "NInt16(-16)",
-		Value: NInt16(-16),
-		Hex:   "80ff813310012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e496e743136020900ff821f",
+		Name:  "NInt16(-32768)",
+		Value: NInt16(-32768),
+		Hex:   "80ff813310012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e496e743136020900ff82feffff",
 	},
 	{
 		Name:  "NInt32(0)",
@@ -295,14 +738,14 @@ var Tests = []TestCase{
 		Hex:   "80ff813310012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e496e743332020a00ff8200",
 	},
 	{
-		Name:  "NInt32(32)",
-		Value: NInt32(32),
-		Hex:   "80ff813310012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e496e743332020a00ff8240",
+		Name:  "NInt32(2147483647)",
+		Value: NInt32(2147483647),
+		Hex:   "80ff813310012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e496e743332020a00ff82fcfffffffe",
 	},
 	{
-		Name:  "NInt32(-32)",
-		Value: NInt32(-32),
-		Hex:   "80ff813310012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e496e743332020a00ff823f",
+		Name:  "NInt32(-2147483648)",
+		Value: NInt32(-2147483648),
+		Hex:   "80ff813310012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e496e743332020a00ff82fcffffffff",
 	},
 	{
 		Name:  "NInt64(0)",
@@ -310,14 +753,14 @@ var Tests = []TestCase{
 		Hex:   "80ff813310012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e496e743634020b00ff8200",
 	},
 	{
-		Name:  "NInt64(64)",
-		Value: NInt64(64),
-		Hex:   "80ff813310012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e496e743634020b00ff82ff80",
+		Name:  "NInt64(9223372036854775807)",
+		Value: NInt64(9223372036854775807),
+		Hex:   "80ff813310012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e496e743634020b00ff82f8fffffffffffffffe",
 	},
 	{
-		Name:  "NInt64(-64)",
-		Value: NInt64(-64),
-		Hex:   "80ff813310012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e496e743634020b00ff827f",
+		Name:  "NInt64(-9223372036854775808)",
+		Value: NInt64(-9223372036854775808),
+		Hex:   "80ff813310012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e496e743634020b00ff82f8ffffffffffffffff",
 	},
 	{
 		Name:  "NFloat32(0)",

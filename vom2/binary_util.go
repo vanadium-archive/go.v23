@@ -220,7 +220,7 @@ func binaryPeekUint(buf *decbuf) (uint64, int, error) {
 	}
 	// Handle multi-byte encoding.
 	byteLen := int(-int8(firstByte))
-	if byteLen > uint64Size {
+	if byteLen < 1 || byteLen > uint64Size {
 		return 0, 0, errUintOverflow
 	}
 	byteLen++ // account for initial len byte

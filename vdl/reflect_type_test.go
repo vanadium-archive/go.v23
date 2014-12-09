@@ -423,10 +423,10 @@ var rtErrorTests = []rtErrorTest{
 	{reflect.TypeOf(nBadEnumString1(0)), badEnumString},
 	{reflect.TypeOf(nBadEnumString2(0)), badEnumString},
 	{reflect.TypeOf(nBadEnumString3(0)), badEnumString},
-	{reflect.TypeOf(nBadEnumAssign1(0)), badEnumAssign},
-	{reflect.TypeOf(nBadEnumAssign2(0)), badEnumAssign},
-	{reflect.TypeOf(nBadEnumAssign3(0)), badEnumAssign},
-	{reflect.TypeOf(nBadEnumAssign4(0)), badEnumAssign},
+	{reflect.TypeOf(nBadEnumSet1(0)), badEnumSet},
+	{reflect.TypeOf(nBadEnumSet2(0)), badEnumSet},
+	{reflect.TypeOf(nBadEnumSet3(0)), badEnumSet},
+	{reflect.TypeOf(nBadEnumSet4(0)), badEnumSet},
 	{reflect.TypeOf(nBadOneOfNoFields{}), `no fields`},
 	{reflect.TypeOf(nBadOneOfUnexp{}), `must be exported`},
 	{reflect.TypeOf(nBadOneOfField1{}), badOneOfField},
@@ -439,7 +439,7 @@ var rtErrorTests = []rtErrorTest{
 const (
 	badDescribe   = `invalid __VDLReflect (want __VDLReflect(struct{...}))`
 	badEnumString = `must have method String() string`
-	badEnumAssign = `must have pointer method Assign(string) bool`
+	badEnumSet    = `must have pointer method Set(string) error`
 	badOneOfField = `bad concrete field type`
 	badOneOfName  = `must have method Name() string`
 )
@@ -453,10 +453,10 @@ type (
 	nBadEnumString1  int
 	nBadEnumString2  int
 	nBadEnumString3  int
-	nBadEnumAssign1  int
-	nBadEnumAssign2  int
-	nBadEnumAssign3  int
-	nBadEnumAssign4  int
+	nBadEnumSet1     int
+	nBadEnumSet2     int
+	nBadEnumSet3     int
+	nBadEnumSet4     int
 
 	nBadOneOfNoFields struct{}
 	nBadOneOfUnexp    struct{}
@@ -490,24 +490,24 @@ func (nBadEnumString2) String()                                        { panic("
 func (nBadEnumString3) __VDLReflect(struct{ Enum struct{ A string } }) { panic("X") }
 func (nBadEnumString3) String() bool                                   { panic("X") }
 
-// No Assign method
-func (nBadEnumAssign1) __VDLReflect(struct{ Enum struct{ A string } }) { panic("X") }
-func (nBadEnumAssign1) String() string                                 { panic("X") }
+// No Set method
+func (nBadEnumSet1) __VDLReflect(struct{ Enum struct{ A string } }) { panic("X") }
+func (nBadEnumSet1) String() string                                 { panic("X") }
 
-// Assign method isn't Assign(string) bool
-func (nBadEnumAssign2) __VDLReflect(struct{ Enum struct{ A string } }) { panic("X") }
-func (nBadEnumAssign2) String() string                                 { panic("X") }
-func (nBadEnumAssign2) Assign()                                        { panic("X") }
+// Set method isn't Set(string) error
+func (nBadEnumSet2) __VDLReflect(struct{ Enum struct{ A string } }) { panic("X") }
+func (nBadEnumSet2) String() string                                 { panic("X") }
+func (nBadEnumSet2) Set()                                           { panic("X") }
 
-// Assign method isn't Assign(string) bool
-func (nBadEnumAssign3) __VDLReflect(struct{ Enum struct{ A string } }) { panic("X") }
-func (nBadEnumAssign3) String() string                                 { panic("X") }
-func (nBadEnumAssign3) Assign(bool) bool                               { panic("X") }
+// Set method isn't Set(string) error
+func (nBadEnumSet3) __VDLReflect(struct{ Enum struct{ A string } }) { panic("X") }
+func (nBadEnumSet3) String() string                                 { panic("X") }
+func (nBadEnumSet3) Set(bool) error                                 { panic("X") }
 
-// Assign method receiver isn't a pointer
-func (nBadEnumAssign4) __VDLReflect(struct{ Enum struct{ A string } }) { panic("X") }
-func (nBadEnumAssign4) String() string                                 { panic("X") }
-func (nBadEnumAssign4) Assign(string) bool                             { panic("X") }
+// Set method receiver isn't a pointer
+func (nBadEnumSet4) __VDLReflect(struct{ Enum struct{ A string } }) { panic("X") }
+func (nBadEnumSet4) String() string                                 { panic("X") }
+func (nBadEnumSet4) Set(string) error                               { panic("X") }
 
 // No oneof fields
 func (nBadOneOfNoFields) __VDLReflect(struct {

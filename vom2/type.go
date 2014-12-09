@@ -225,6 +225,8 @@ func (dt *decoderTypes) AddWireType(id TypeID, wt *vdl.Value) error {
 	if id < WireTypeFirstUserID {
 		return verror.BadProtocolf("vom: type %q id %d invalid, the min user id is %d", wt, id, WireTypeFirstUserID)
 	}
+	// TODO(toddw): Allow duplicates according to some heuristic (e.g. only
+	// identical, or only if the later one is a "superset", etc).
 	if dup := dt.idToWire[id]; dup != nil {
 		return verror.BadProtocolf("vom: type %q id %d already defined as %q", wt, id, dup)
 	}

@@ -59,28 +59,26 @@ const (
 var TestEnumAll = []TestEnum{TestEnumA, TestEnumB, TestEnumC}
 
 // TestEnumFromString creates a TestEnum from a string label.
-// Returns true iff the label is valid.
-func TestEnumFromString(label string) (x TestEnum, ok bool) {
-	ok = x.Assign(label)
+func TestEnumFromString(label string) (x TestEnum, err error) {
+	err = x.Set(label)
 	return
 }
 
-// Assign assigns label to x.
-// Returns true iff the label is valid.
-func (x *TestEnum) Assign(label string) bool {
+// Set assigns label to x.
+func (x *TestEnum) Set(label string) error {
 	switch label {
-	case "A":
+	case "A", "a":
 		*x = TestEnumA
-		return true
-	case "B":
+		return nil
+	case "B", "b":
 		*x = TestEnumB
-		return true
-	case "C":
+		return nil
+	case "C", "c":
 		*x = TestEnumC
-		return true
+		return nil
 	}
 	*x = -1
-	return false
+	return __fmt.Errorf("unknown label %q in TestEnum", label)
 }
 
 // String returns the string label of x.
@@ -115,6 +113,8 @@ func (TestStruct) __VDLReflect(struct{
 	TestOneOf interface {
 		// Index returns the field index.
 		Index() int
+		// Interface returns the field value as an interface.
+		Interface() interface{}
 		// Name returns the field name.
 		Name() string
 		// __VDLReflect describes the TestOneOf oneof type.
@@ -135,13 +135,15 @@ func (TestStruct) __VDLReflect(struct{
 	}
 )
 
-func (TestOneOfA) Index() int { return 0 }
-func (TestOneOfA) Name() string { return "A" }
-func (TestOneOfA) __VDLReflect(__TestOneOfReflect) {}
+func (x TestOneOfA) Index() int { return 0 }
+func (x TestOneOfA) Interface() interface{} { return x.Value }
+func (x TestOneOfA) Name() string { return "A" }
+func (x TestOneOfA) __VDLReflect(__TestOneOfReflect) {}
 
-func (TestOneOfB) Index() int { return 1 }
-func (TestOneOfB) Name() string { return "B" }
-func (TestOneOfB) __VDLReflect(__TestOneOfReflect) {}`},
+func (x TestOneOfB) Index() int { return 1 }
+func (x TestOneOfB) Interface() interface{} { return x.Value }
+func (x TestOneOfB) Name() string { return "B" }
+func (x TestOneOfB) __VDLReflect(__TestOneOfReflect) {}`},
 	}
 	data := goData{Env: compile.NewEnv(-1)}
 	for _, test := range tests {

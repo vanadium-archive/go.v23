@@ -21,6 +21,8 @@ type encoder interface {
 
 // NewBinaryEncoder returns a new Encoder that writes to the given writer in the
 // binary format.  The binary format is compact and fast.
+//
+// TODO(toddw): Rename to NewEncoder.
 func NewBinaryEncoder(w io.Writer) (*Encoder, error) {
 	// The binary format always starts with a magic byte.
 	_, err := w.Write([]byte{binaryMagicByte})
@@ -28,12 +30,6 @@ func NewBinaryEncoder(w io.Writer) (*Encoder, error) {
 		return nil, err
 	}
 	return &Encoder{newBinaryEncoder(w, newEncoderTypes())}, nil
-}
-
-// NewJSONEncoder returns a new Encoder that writes to the given writer in the
-// JSON format.  The JSON format is simpler but slower.
-func NewJSONEncoder(w io.Writer) (*Encoder, error) {
-	panic("NOT IMPLEMENTED")
 }
 
 // Encode transmits the value v.  Values of type T are encodable as long as the

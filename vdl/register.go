@@ -310,7 +310,7 @@ func DeriveReflectInfo(rt reflect.Type) (*ReflectInfo, error) {
 //     Enum struct { A, B Foo }
 //   }) {}
 //   func (Foo) String() string {}
-//   func (*Foo) Assign(string) bool {}
+//   func (*Foo) Set(string) error {}
 func describeEnum(enumReflect, rt reflect.Type, ri *ReflectInfo) error {
 	if rt != ri.WireType || rt.Kind() == reflect.Interface {
 		return fmt.Errorf("enum type %q invalid (mismatched type %q)", rt, ri.WireType)
@@ -326,11 +326,11 @@ func describeEnum(enumReflect, rt reflect.Type, ri *ReflectInfo) error {
 		s.Type.NumOut() != 1 || s.Type.Out(0) != rtString {
 		return fmt.Errorf("enum type %q must have method String() string", rt)
 	}
-	_, nonptr := rt.MethodByName("Assign")
-	if a, ok := reflect.PtrTo(rt).MethodByName("Assign"); !ok || nonptr ||
+	_, nonptr := rt.MethodByName("Set")
+	if a, ok := reflect.PtrTo(rt).MethodByName("Set"); !ok || nonptr ||
 		a.Type.NumIn() != 2 || a.Type.In(1) != rtString ||
-		a.Type.NumOut() != 1 || a.Type.Out(0) != rtBool {
-		return fmt.Errorf("enum type %q must have pointer method Assign(string) bool", rt)
+		a.Type.NumOut() != 1 || a.Type.Out(0) != rtError {
+		return fmt.Errorf("enum type %q must have pointer method Set(string) error", rt)
 	}
 	return nil
 }

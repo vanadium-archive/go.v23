@@ -6,6 +6,7 @@ package vdltool
 
 import (
 	// The non-user imports are prefixed with "__" to prevent collisions.
+	__fmt "fmt"
 	__vdl "veyron.io/veyron/veyron2/vdl"
 )
 
@@ -41,28 +42,26 @@ const (
 var GenLanguageAll = []GenLanguage{GenLanguageGo, GenLanguageJava, GenLanguageJavascript}
 
 // GenLanguageFromString creates a GenLanguage from a string label.
-// Returns true iff the label is valid.
-func GenLanguageFromString(label string) (x GenLanguage, ok bool) {
-	ok = x.Assign(label)
+func GenLanguageFromString(label string) (x GenLanguage, err error) {
+	err = x.Set(label)
 	return
 }
 
-// Assign assigns label to x.
-// Returns true iff the label is valid.
-func (x *GenLanguage) Assign(label string) bool {
+// Set assigns label to x.
+func (x *GenLanguage) Set(label string) error {
 	switch label {
-	case "Go":
+	case "Go", "go":
 		*x = GenLanguageGo
-		return true
-	case "Java":
+		return nil
+	case "Java", "java":
 		*x = GenLanguageJava
-		return true
-	case "Javascript":
+		return nil
+	case "Javascript", "javascript":
 		*x = GenLanguageJavascript
-		return true
+		return nil
 	}
 	*x = -1
-	return false
+	return __fmt.Errorf("unknown label %q in vdltool.GenLanguage", label)
 }
 
 // String returns the string label of x.

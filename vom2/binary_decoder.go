@@ -74,11 +74,11 @@ func (d *binaryDecoder) decodeValueType() (*vdl.Type, error) {
 		case id > 0:
 			// This is a value message, the TypeID is +id.
 			tid := TypeID(+id)
-			t, err := d.recvTypes.LookupOrBuildType(tid)
+			tt, err := d.recvTypes.LookupOrBuildType(tid)
 			if err != nil {
 				return nil, err
 			}
-			return t, nil
+			return tt, nil
 		}
 		// This is a type message, the TypeID is -id.
 		tid := TypeID(-id)
@@ -142,30 +142,32 @@ func (d *binaryDecoder) decodeValueMsg(t *vdl.Type, target valconv.Target) error
 		}
 		d.buf.SetLimit(msgLen)
 	}
-	if err := d.decodeValue(t, target); err != nil {
+	err := d.decodeValue(t, target)
+	leftover := d.buf.RemoveLimit()
+	switch {
+	case err != nil:
 		return err
-	}
-	if leftover := d.buf.RemoveLimit(); leftover > 0 {
+	case leftover > 0:
 		return verror.BadProtocolf("vom: %d leftover bytes", leftover)
 	}
 	return nil
 }
 
-// decodeValue decodes the rest of the message assuming type t.
+// decodeValue decodes the rest of the message assuming type tt.
 func (d *binaryDecoder) decodeValue(tt *vdl.Type, target valconv.Target) error {
-	ttNonOptional := tt
+	ttFrom := tt
 	if tt.Kind() == vdl.Optional {
-		switch exists, err := binaryDecodeUint(d.buf); {
+		switch exists, err := d.buf.ReadByte(); {
 		case err != nil:
 			return err
 		case exists == 0:
-			return target.FromNil(tt)
+			return target.FromNil(ttFrom)
 		case exists != 1:
 			return verror.BadProtocolf("vom: optional exists tag got %d, want 0 or 1", exists)
 		}
-		ttNonOptional = tt.Elem()
+		tt = tt.Elem()
 	}
-	if ttNonOptional.IsBytes() {
+	if tt.IsBytes() {
 		len, err := binaryDecodeLenOrArrayLen(d.buf, tt)
 		if err != nil {
 			return err
@@ -174,39 +176,39 @@ func (d *binaryDecoder) decodeValue(tt *vdl.Type, target valconv.Target) error {
 		if err != nil {
 			return err
 		}
-		return target.FromBytes(bytes, tt)
+		return target.FromBytes(bytes, ttFrom)
 	}
-	switch kind := ttNonOptional.Kind(); kind {
+	switch kind := tt.Kind(); kind {
 	case vdl.Bool:
 		v, err := binaryDecodeBool(d.buf)
 		if err != nil {
 			return err
 		}
-		return target.FromBool(v, tt)
+		return target.FromBool(v, ttFrom)
 	case vdl.Byte:
 		v, err := d.buf.ReadByte()
 		if err != nil {
 			return err
 		}
-		return target.FromUint(uint64(v), tt)
+		return target.FromUint(uint64(v), ttFrom)
 	case vdl.Uint16, vdl.Uint32, vdl.Uint64:
 		v, err := binaryDecodeUint(d.buf)
 		if err != nil {
 			return err
 		}
-		return target.FromUint(v, tt)
+		return target.FromUint(v, ttFrom)
 	case vdl.Int16, vdl.Int32, vdl.Int64:
 		v, err := binaryDecodeInt(d.buf)
 		if err != nil {
 			return err
 		}
-		return target.FromInt(v, tt)
+		return target.FromInt(v, ttFrom)
 	case vdl.Float32, vdl.Float64:
 		v, err := binaryDecodeFloat(d.buf)
 		if err != nil {
 			return err
 		}
-		return target.FromFloat(v, tt)
+		return target.FromFloat(v, ttFrom)
 	case vdl.Complex64, vdl.Complex128:
 		re, err := binaryDecodeFloat(d.buf)
 		if err != nil {
@@ -216,22 +218,22 @@ func (d *binaryDecoder) decodeValue(tt *vdl.Type, target valconv.Target) error {
 		if err != nil {
 			return err
 		}
-		return target.FromComplex(complex(re, im), tt)
+		return target.FromComplex(complex(re, im), ttFrom)
 	case vdl.String:
 		v, err := binaryDecodeString(d.buf)
 		if err != nil {
 			return err
 		}
-		return target.FromString(v, tt)
+		return target.FromString(v, ttFrom)
 	case vdl.Enum:
 		index, err := binaryDecodeUint(d.buf)
 		switch {
 		case err != nil:
 			return err
-		case index >= uint64(ttNonOptional.NumEnumLabel()):
+		case index >= uint64(tt.NumEnumLabel()):
 			return errIndexOutOfRange
 		}
-		return target.FromEnumLabel(ttNonOptional.EnumLabel(int(index)), tt)
+		return target.FromEnumLabel(tt.EnumLabel(int(index)), ttFrom)
 	case vdl.TypeObject:
 		id, err := binaryDecodeUint(d.buf)
 		if err != nil {
@@ -243,11 +245,11 @@ func (d *binaryDecoder) decodeValue(tt *vdl.Type, target valconv.Target) error {
 		}
 		return target.FromTypeObject(typeobj)
 	case vdl.Array, vdl.List:
-		len, err := binaryDecodeLenOrArrayLen(d.buf, ttNonOptional)
+		len, err := binaryDecodeLenOrArrayLen(d.buf, tt)
 		if err != nil {
 			return err
 		}
-		listTarget, err := target.StartList(tt, len)
+		listTarget, err := target.StartList(ttFrom, len)
 		if err != nil {
 			return err
 		}
@@ -256,7 +258,7 @@ func (d *binaryDecoder) decodeValue(tt *vdl.Type, target valconv.Target) error {
 			if err != nil {
 				return err
 			}
-			if err := d.decodeValue(ttNonOptional.Elem(), elem); err != nil {
+			if err := d.decodeValue(tt.Elem(), elem); err != nil {
 				return err
 			}
 			if err := listTarget.FinishElem(elem); err != nil {
@@ -269,7 +271,7 @@ func (d *binaryDecoder) decodeValue(tt *vdl.Type, target valconv.Target) error {
 		if err != nil {
 			return err
 		}
-		setTarget, err := target.StartSet(tt, len)
+		setTarget, err := target.StartSet(ttFrom, len)
 		if err != nil {
 			return err
 		}
@@ -278,7 +280,7 @@ func (d *binaryDecoder) decodeValue(tt *vdl.Type, target valconv.Target) error {
 			if err != nil {
 				return err
 			}
-			if err := d.decodeValue(ttNonOptional.Key(), key); err != nil {
+			if err := d.decodeValue(tt.Key(), key); err != nil {
 				return err
 			}
 			switch err := setTarget.FinishKey(key); {
@@ -294,7 +296,7 @@ func (d *binaryDecoder) decodeValue(tt *vdl.Type, target valconv.Target) error {
 		if err != nil {
 			return err
 		}
-		mapTarget, err := target.StartMap(tt, len)
+		mapTarget, err := target.StartMap(ttFrom, len)
 		if err != nil {
 			return err
 		}
@@ -303,18 +305,18 @@ func (d *binaryDecoder) decodeValue(tt *vdl.Type, target valconv.Target) error {
 			if err != nil {
 				return err
 			}
-			if err := d.decodeValue(ttNonOptional.Key(), key); err != nil {
+			if err := d.decodeValue(tt.Key(), key); err != nil {
 				return err
 			}
 			switch field, err := mapTarget.FinishKeyStartField(key); {
 			case verror.Is(err, verror.NoExist):
-				if err := d.ignoreValue(ttNonOptional.Elem()); err != nil {
+				if err := d.ignoreValue(tt.Elem()); err != nil {
 					return err
 				}
 			case err != nil:
 				return err
 			default:
-				if err := d.decodeValue(ttNonOptional.Elem(), field); err != nil {
+				if err := d.decodeValue(tt.Elem(), field); err != nil {
 					return err
 				}
 				if err := mapTarget.FinishField(key, field); err != nil {
@@ -324,7 +326,7 @@ func (d *binaryDecoder) decodeValue(tt *vdl.Type, target valconv.Target) error {
 		}
 		return target.FinishMap(mapTarget)
 	case vdl.Struct:
-		fieldsTarget, err := target.StartFields(tt)
+		fieldsTarget, err := target.StartFields(ttFrom)
 		if err != nil {
 			return err
 		}
@@ -334,21 +336,21 @@ func (d *binaryDecoder) decodeValue(tt *vdl.Type, target valconv.Target) error {
 			switch {
 			case err != nil:
 				return err
-			case index > uint64(ttNonOptional.NumField()):
+			case index > uint64(tt.NumField()):
 				return errIndexOutOfRange
 			case index == 0:
 				return target.FinishFields(fieldsTarget)
 			}
-			tfield := ttNonOptional.Field(int(index - 1))
-			switch key, field, err := fieldsTarget.StartField(tfield.Name); {
+			ttfield := tt.Field(int(index - 1))
+			switch key, field, err := fieldsTarget.StartField(ttfield.Name); {
 			case verror.Is(err, verror.NoExist):
-				if err := d.ignoreValue(tfield.Type); err != nil {
+				if err := d.ignoreValue(ttfield.Type); err != nil {
 					return err
 				}
 			case err != nil:
 				return err
 			default:
-				if err := d.decodeValue(tfield.Type, field); err != nil {
+				if err := d.decodeValue(ttfield.Type, field); err != nil {
 					return err
 				}
 				if err := fieldsTarget.FinishField(key, field); err != nil {
@@ -357,7 +359,7 @@ func (d *binaryDecoder) decodeValue(tt *vdl.Type, target valconv.Target) error {
 			}
 		}
 	case vdl.OneOf:
-		fieldsTarget, err := target.StartFields(tt)
+		fieldsTarget, err := target.StartFields(ttFrom)
 		if err != nil {
 			return err
 		}
@@ -365,15 +367,15 @@ func (d *binaryDecoder) decodeValue(tt *vdl.Type, target valconv.Target) error {
 		switch {
 		case err != nil:
 			return err
-		case index == 0 || index > uint64(ttNonOptional.NumField()):
+		case index == 0 || index > uint64(tt.NumField()):
 			return errIndexOutOfRange
 		}
-		tfield := ttNonOptional.Field(int(index - 1))
-		key, field, err := fieldsTarget.StartField(tfield.Name)
+		ttfield := tt.Field(int(index - 1))
+		key, field, err := fieldsTarget.StartField(ttfield.Name)
 		if err != nil {
 			return err
 		}
-		if err := d.decodeValue(tfield.Type, field); err != nil {
+		if err := d.decodeValue(ttfield.Type, field); err != nil {
 			return err
 		}
 		if err := fieldsTarget.FinishField(key, field); err != nil {
@@ -387,11 +389,11 @@ func (d *binaryDecoder) decodeValue(tt *vdl.Type, target valconv.Target) error {
 		case id == 0:
 			return target.FromNil(vdl.AnyType)
 		default:
-			subType, err := d.recvTypes.LookupOrBuildType(TypeID(id))
+			elemType, err := d.recvTypes.LookupOrBuildType(TypeID(id))
 			if err != nil {
 				return err
 			}
-			return d.decodeValue(subType, target)
+			return d.decodeValue(elemType, target)
 		}
 	default:
 		panic(verror.Internalf("vom: decodeValue unhandled type %v", tt))
@@ -451,8 +453,8 @@ func (d *binaryDecoder) ignoreValue(t *vdl.Type) error {
 			case index == 0:
 				return nil
 			default:
-				tfield := t.Field(int(index - 1))
-				if err := d.ignoreValue(tfield.Type); err != nil {
+				ttfield := t.Field(int(index - 1))
+				if err := d.ignoreValue(ttfield.Type); err != nil {
 					return err
 				}
 			}
@@ -464,11 +466,11 @@ func (d *binaryDecoder) ignoreValue(t *vdl.Type) error {
 		case id == 0:
 			return nil
 		default:
-			subType, err := d.recvTypes.LookupOrBuildType(TypeID(id))
+			elemType, err := d.recvTypes.LookupOrBuildType(TypeID(id))
 			if err != nil {
 				return err
 			}
-			return d.ignoreValue(subType)
+			return d.ignoreValue(elemType)
 		}
 	default:
 		panic(verror.Internalf("vom: ignoreValue unhandled type %v", t))

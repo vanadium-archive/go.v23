@@ -186,8 +186,6 @@ type TestCase struct {
 }
 
 // Tests contains the testcases to use to test vom encoding and decoding.
-//
-// TODO(toddw): Add hex breakdown comments for each testcase.
 const Tests = []TestCase {`)
 	for ix := 0; ix < config.Len(); ix++ {
 		value := config.Index(ix)
@@ -200,16 +198,17 @@ const Tests = []TestCase {`)
 		if err != nil {
 			return nil, fmt.Errorf("couldn't generate const %v: %v", value, err)
 		}
-		vomhex, err := toVomHex(value)
+		vomhex, vomdump, err := toVomHex(value)
 		if err != nil {
 			return nil, err
 		}
 		fmt.Fprintf(buf, `
+%[3]s
 	{
 		%#[1]q,
 		%[1]s,
 		%[2]q,
-	},`, valstr, vomhex)
+	},`, valstr, vomhex, vomdump)
 	}
 	fmt.Fprintf(buf, `
 }
@@ -217,17 +216,23 @@ const Tests = []TestCase {`)
 	return buf.Bytes(), nil
 }
 
-func toVomHex(value *vdl.Value) (string, error) {
+func toVomHex(value *vdl.Value) (string, string, error) {
 	buf := new(bytes.Buffer)
 	enc, err := vom2.NewBinaryEncoder(buf)
 	if err != nil {
-		return "", fmt.Errorf("vom.NewBinaryEncoder failed: %v", err)
+		return "", "", fmt.Errorf("vom.NewBinaryEncoder failed: %v", err)
 	}
 	if err := enc.Encode(value); err != nil {
-		return "", fmt.Errorf("vom.Encode(%v) failed: %v", value, err)
+		return "", "", fmt.Errorf("vom.Encode(%v) failed: %v", value, err)
+	}
+	vombytes := buf.String()
+	const pre = "\t// "
+	vomdump := pre + strings.Replace(vom2.Dump(buf.Bytes()), "\n", "\n"+pre, -1)
+	if strings.HasSuffix(vomdump, "\n"+pre) {
+		vomdump = vomdump[:len(vomdump)-len("\n"+pre)]
 	}
 	// TODO(toddw): Add hex pattern bracketing for map and set.
-	return fmt.Sprintf("%x", buf.String()), nil
+	return fmt.Sprintf("%x", vombytes), vomdump, nil
 }
 
 func writeFile(data []byte, outName string) error {

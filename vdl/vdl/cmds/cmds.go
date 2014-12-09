@@ -229,8 +229,7 @@ func (gls genLangs) String() string {
 		if i > 0 {
 			ret += ","
 		}
-		// We call ToLower to convert from "Go" to "go".
-		ret += strings.ToLower(gl.String())
+		ret += gl.String()
 	}
 	return ret
 }
@@ -241,10 +240,9 @@ func (gls *genLangs) Set(value string) error {
 	*gls = genLangs{}
 	seen := make(map[vdltool.GenLanguage]bool)
 	for _, str := range strings.Split(value, ",") {
-		// We call Title to convert from "go" to "Go".
-		gl, ok := vdltool.GenLanguageFromString(strings.Title(str))
-		if !ok {
-			return fmt.Errorf("%q isn't a valid generate language", str)
+		gl, err := vdltool.GenLanguageFromString(str)
+		if err != nil {
+			return err
 		}
 		if !seen[gl] {
 			seen[gl] = true

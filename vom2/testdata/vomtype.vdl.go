@@ -5,6 +5,7 @@ package testdata
 
 import (
 	// The non-user imports are prefixed with "__" to prevent collisions.
+	__fmt "fmt"
 	__vdl "veyron.io/veyron/veyron2/vdl"
 )
 
@@ -157,28 +158,26 @@ const (
 var NEnumAll = []NEnum{NEnumA, NEnumB, NEnumC}
 
 // NEnumFromString creates a NEnum from a string label.
-// Returns true iff the label is valid.
-func NEnumFromString(label string) (x NEnum, ok bool) {
-	ok = x.Assign(label)
+func NEnumFromString(label string) (x NEnum, err error) {
+	err = x.Set(label)
 	return
 }
 
-// Assign assigns label to x.
-// Returns true iff the label is valid.
-func (x *NEnum) Assign(label string) bool {
+// Set assigns label to x.
+func (x *NEnum) Set(label string) error {
 	switch label {
-	case "A":
+	case "A", "a":
 		*x = NEnumA
-		return true
-	case "B":
+		return nil
+	case "B", "b":
 		*x = NEnumB
-		return true
-	case "C":
+		return nil
+	case "C", "c":
 		*x = NEnumC
-		return true
+		return nil
 	}
 	*x = -1
-	return false
+	return __fmt.Errorf("unknown label %q in testdata.NEnum", label)
 }
 
 // String returns the string label of x.
@@ -205,6 +204,8 @@ type (
 	NOneOf interface {
 		// Index returns the field index.
 		Index() int
+		// Interface returns the field value as an interface.
+		Interface() interface{}
 		// Name returns the field name.
 		Name() string
 		// __VDLReflect describes the NOneOf oneof type.
@@ -228,17 +229,20 @@ type (
 	}
 )
 
-func (NOneOfA) Index() int                   { return 0 }
-func (NOneOfA) Name() string                 { return "A" }
-func (NOneOfA) __VDLReflect(__NOneOfReflect) {}
+func (x NOneOfA) Index() int                   { return 0 }
+func (x NOneOfA) Interface() interface{}       { return x.Value }
+func (x NOneOfA) Name() string                 { return "A" }
+func (x NOneOfA) __VDLReflect(__NOneOfReflect) {}
 
-func (NOneOfB) Index() int                   { return 1 }
-func (NOneOfB) Name() string                 { return "B" }
-func (NOneOfB) __VDLReflect(__NOneOfReflect) {}
+func (x NOneOfB) Index() int                   { return 1 }
+func (x NOneOfB) Interface() interface{}       { return x.Value }
+func (x NOneOfB) Name() string                 { return "B" }
+func (x NOneOfB) __VDLReflect(__NOneOfReflect) {}
 
-func (NOneOfC) Index() int                   { return 2 }
-func (NOneOfC) Name() string                 { return "C" }
-func (NOneOfC) __VDLReflect(__NOneOfReflect) {}
+func (x NOneOfC) Index() int                   { return 2 }
+func (x NOneOfC) Interface() interface{}       { return x.Value }
+func (x NOneOfC) Name() string                 { return "C" }
+func (x NOneOfC) __VDLReflect(__NOneOfReflect) {}
 
 // Nested Custom Types
 type MBool NBool

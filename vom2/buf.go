@@ -101,6 +101,13 @@ func newDecbuf(r io.Reader) *decbuf {
 	}
 }
 
+// Reset resets the buffer so it has no data.
+func (b *decbuf) Reset() {
+	b.beg = 0
+	b.end = 0
+	b.lim = -1
+}
+
 // SetLimit sets a limit to the bytes that are returned by decbuf; after a limit
 // is set, subsequent reads cannot read past the limit, even if more bytes are
 // available.  Attempts to read past the limit return io.EOF.  Call RemoveLimit
@@ -138,9 +145,8 @@ func (b *decbuf) fill(min int) error {
 		b.beg = 0
 		b.buf = newbuf
 	default:
-		// The buffer is big enough.  Copy existing data to the front.
-		b.end = copy(b.buf, b.buf[b.beg:b.end])
-		b.beg = 0
+		// The buffer is big enough.  Move existing data to the front.
+		b.moveDataToFront()
 	}
 	// INVARIANT: len(b.buf)-b.beg >= min
 	//
@@ -155,6 +161,12 @@ func (b *decbuf) fill(min int) error {
 		}
 	}
 	return nil
+}
+
+// moveDataToFront moves existing data in buf to the front, so that b.beg is 0.
+func (b *decbuf) moveDataToFront() {
+	b.end = copy(b.buf, b.buf[b.beg:b.end])
+	b.beg = 0
 }
 
 // ReadBuf returns a buffer with the next n bytes, and increments the read

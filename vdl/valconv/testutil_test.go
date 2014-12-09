@@ -259,23 +259,23 @@ const (
 	nEnumABC
 )
 
-func (x *nEnum) Assign(label string) bool {
+func (x *nEnum) Set(label string) error {
 	switch label {
 	case "A":
 		*x = nEnumA
-		return true
+		return nil
 	case "B":
 		*x = nEnumB
-		return true
+		return nil
 	case "C":
 		*x = nEnumC
-		return true
+		return nil
 	case "ABC":
 		*x = nEnumABC
-		return true
+		return nil
 	}
 	*x = -1
-	return false
+	return fmt.Errorf("unknown label %q in nEnum", label)
 }
 
 func (x nEnum) String() string {

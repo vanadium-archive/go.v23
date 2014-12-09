@@ -3,6 +3,7 @@ package golang
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"veyron.io/veyron/veyron2/vdl"
 	"veyron.io/veyron/veyron2/vdl/compile"
@@ -21,6 +22,13 @@ func fileLocalIdent(data goData, ident string, file *compile.File) string {
 	//
 	// TODO(toddw): handle error if LookupLocal returns "".
 	return data.UserImports.LookupLocal(file.Package.Path) + "." + ident
+}
+
+func packageIdent(file *compile.File, ident string) string {
+	if file != nil && file.Package != nil {
+		return file.Package.Name + "." + ident
+	}
+	return ident
 }
 
 func qualifiedIdent(file *compile.File, ident string) string {
@@ -85,29 +93,27 @@ func typeDefGo(data goData, def *compile.TypeDef) string {
 			"\n\n// %[1]sAll holds all labels for %[1]s."+
 			"\nvar %[1]sAll = []%[1]s{%[2]s}"+
 			"\n\n// %[1]sFromString creates a %[1]s from a string label."+
-			"\n// Returns true iff the label is valid."+
-			"\nfunc %[1]sFromString(label string) (x %[1]s, ok bool) {"+
-			"\n\tok = x.Assign(label)"+
+			"\nfunc %[1]sFromString(label string) (x %[1]s, err error) {"+
+			"\n\terr = x.Set(label)"+
 			"\n\treturn"+
 			"\n}"+
-			"\n\n// Assign assigns label to x."+
-			"\n// Returns true iff the label is valid."+
-			"\nfunc (x *%[1]s) Assign(label string) bool {"+
+			"\n\n// Set assigns label to x."+
+			"\nfunc (x *%[1]s) Set(label string) error {"+
 			"\n\tswitch label {",
 			def.Name,
 			commaEnumLabels(def.Name, t))
 		for ix := 0; ix < t.NumEnumLabel(); ix++ {
-			s += fmt.Sprintf("\n\tcase %[2]q:"+
+			s += fmt.Sprintf("\n\tcase %[2]q, %[3]q:"+
 				"\n\t\t*x = %[1]s%[2]s"+
-				"\n\t\treturn true", def.Name, t.EnumLabel(ix))
+				"\n\t\treturn nil", def.Name, t.EnumLabel(ix), strings.ToLower(t.EnumLabel(ix)))
 		}
 		s += fmt.Sprintf("\n\t}"+
 			"\n\t*x = -1"+
-			"\n\treturn false"+
+			"\n\treturn __fmt.Errorf(\"unknown label %%q in %[2]s\", label)"+
 			"\n}"+
 			"\n\n// String returns the string label of x."+
 			"\nfunc (x %[1]s) String() string {"+
-			"\n\tswitch x {", def.Name)
+			"\n\tswitch x {", def.Name, packageIdent(def.File, def.Name))
 		for ix := 0; ix < t.NumEnumLabel(); ix++ {
 			s += fmt.Sprintf("\n\tcase %[1]s%[2]s:"+
 				"\n\t\treturn %[2]q", def.Name, t.EnumLabel(ix))
@@ -143,6 +149,8 @@ func typeDefGo(data goData, def *compile.TypeDef) string {
 			"\n\t%[2]s%[1]s interface {"+
 			"\n\t\t// Index returns the field index."+
 			"\n\t\tIndex() int"+
+			"\n\t\t// Interface returns the field value as an interface."+
+			"\n\t\tInterface() interface{}"+
 			"\n\t\t// Name returns the field name."+
 			"\n\t\tName() string"+
 			"\n\t\t// __VDLReflect describes the %[1]s oneof type."+
@@ -165,9 +173,10 @@ func typeDefGo(data goData, def *compile.TypeDef) string {
 		}
 		s += fmt.Sprintf("\n\t\t}\n\t}\n)")
 		for ix := 0; ix < t.NumField(); ix++ {
-			s += fmt.Sprintf("\n\nfunc (%[1]s%[2]s) Index() int { return %[3]d }"+
-				"\nfunc (%[1]s%[2]s) Name() string { return \"%[2]s\" }"+
-				"\nfunc (%[1]s%[2]s) __VDLReflect(__%[1]sReflect) {}",
+			s += fmt.Sprintf("\n\nfunc (x %[1]s%[2]s) Index() int { return %[3]d }"+
+				"\nfunc (x %[1]s%[2]s) Interface() interface{} { return x.Value }"+
+				"\nfunc (x %[1]s%[2]s) Name() string { return \"%[2]s\" }"+
+				"\nfunc (x %[1]s%[2]s) __VDLReflect(__%[1]sReflect) {}",
 				def.Name, t.Field(ix).Name, ix)
 		}
 		return s

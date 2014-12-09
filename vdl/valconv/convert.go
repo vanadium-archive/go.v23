@@ -709,10 +709,11 @@ func (c convTarget) fromBytes(src []byte) error {
 			// can call without error checking.
 			if c.rv.CanAddr() {
 				in := []reflect.Value{reflect.ValueOf(string(src))}
-				out := c.rv.Addr().MethodByName("Assign").Call(in)
-				if out[0].Bool() {
-					return nil
+				out := c.rv.Addr().MethodByName("Set").Call(in)
+				if ierr := out[0].Interface(); ierr != nil {
+					return ierr.(error)
 				}
+				return nil
 			}
 		case c.rv.Kind() == reflect.String:
 			c.rv.SetString(string(src)) // TODO(toddw): check utf8
