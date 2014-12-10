@@ -15,9 +15,10 @@ package {{.PackagePath}};
 /**
  * type {{.Name}} {{.VdlTypeString}} {{.Doc}}
  **/
-@io.veyron.veyron.veyron2.vdl.GeneratedFromVdlName("{{.VdlTypeName}}")
+@io.veyron.veyron.veyron2.vdl.GeneratedFromVdl(name = "{{.VdlTypeName}}")
 {{ .AccessModifier }} class {{.Name}} extends io.veyron.veyron.veyron2.vdl.VdlOneOf {
     {{ range $index, $field := .Fields }}
+    @io.veyron.veyron.veyron2.vdl.GeneratedFromVdl(name = "{{$field.Name}}", index = {{$index}})
     public static class {{$field.Name}} extends {{$.Name}} {
         private {{$field.Type}} elem;
 

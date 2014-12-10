@@ -16,12 +16,12 @@ package {{.PackagePath}};
 /**
  * type {{.Name}} {{.VdlTypeString}} {{.Doc}}
  **/
-@io.veyron.veyron.veyron2.vdl.GeneratedFromVdlName("{{.VdlTypeName}}")
+@io.veyron.veyron.veyron2.vdl.GeneratedFromVdl(name = "{{.VdlTypeName}}")
 {{ .AccessModifier }} final class {{.Name}} extends io.veyron.veyron.veyron2.vdl.AbstractVdlStruct
         implements android.os.Parcelable {
     {{/* Field declarations */}}
-    {{ range $field := .Fields }}
-      @io.veyron.veyron.veyron2.vdl.GeneratedFromVdlName("{{$field.Name}}")
+    {{ range $index, $field := .Fields }}
+      @io.veyron.veyron.veyron2.vdl.GeneratedFromVdl(name = "{{$field.Name}}", index = {{$index}})
       private {{$field.Type}} {{$field.LowercaseName}};
     {{ end }}
 

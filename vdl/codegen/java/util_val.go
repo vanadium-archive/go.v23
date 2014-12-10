@@ -56,7 +56,7 @@ func javaVal(v *vdl.Value, env *compile.Env) string {
 	case vdl.Int16:
 		return "(short)" + strconv.FormatInt(v.Int(), 10)
 	case vdl.Uint32:
-		return fmt.Sprintf("new %s(%s)", javaType(v.Type(), true, env), strconv.FormatUint(v.Uint(), 10))
+		return fmt.Sprintf("new %s((int) %s)", javaType(v.Type(), true, env), strconv.FormatUint(v.Uint(), 10)+longSuffix)
 	case vdl.Int32:
 		return strconv.FormatInt(v.Int(), 10)
 	case vdl.Uint64:
