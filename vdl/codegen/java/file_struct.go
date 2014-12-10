@@ -16,12 +16,12 @@ package {{.PackagePath}};
 /**
  * type {{.Name}} {{.VdlTypeString}} {{.Doc}}
  **/
-@io.veyron.veyron.veyron2.vdl.GeneratedFromVdlType("{{.VdlTypeName}}")
+@io.veyron.veyron.veyron2.vdl.GeneratedFromVdlName("{{.VdlTypeName}}")
 {{ .AccessModifier }} final class {{.Name}} extends io.veyron.veyron.veyron2.vdl.AbstractVdlStruct
         implements android.os.Parcelable {
     {{/* Field declarations */}}
     {{ range $field := .Fields }}
-      @com.google.gson.annotations.SerializedName("{{$field.Name}}")
+      @io.veyron.veyron.veyron2.vdl.GeneratedFromVdlName("{{$field.Name}}")
       private {{$field.Type}} {{$field.LowercaseName}};
     {{ end }}
 

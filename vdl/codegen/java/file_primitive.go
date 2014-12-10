@@ -16,7 +16,7 @@ package {{.PackagePath}};
 /**
  * type {{.Name}} {{.VdlTypeString}} {{.Doc}}
  **/
-@io.veyron.veyron.veyron2.vdl.GeneratedFromVdlType("{{.VdlTypeName}}")
+@io.veyron.veyron.veyron2.vdl.GeneratedFromVdlName("{{.VdlTypeName}}")
 {{ .AccessModifier }} final class {{.Name}} extends {{.VdlType}} {
     public static final io.veyron.veyron.veyron2.vdl.VdlType VDL_TYPE =
             io.veyron.veyron.veyron2.vdl.Types.getVdlTypeFromReflect({{.Name}}.class);
@@ -40,28 +40,6 @@ package {{.PackagePath}};
 
     public {{.Name}}() {
         super(VDL_TYPE);
-    }
-
-    @Override
-    public <T> com.google.gson.TypeAdapter<T> create(com.google.gson.Gson gson,
-            com.google.gson.reflect.TypeToken<T> type) {
-        if (!type.equals(new com.google.gson.reflect.TypeToken<{{.Name}}>(){})) {
-            return null;
-        }
-        final com.google.gson.TypeAdapter<{{.TypeAdapterDelegateClass}}> delegate =
-                gson.getAdapter(new com.google.gson.reflect.TypeToken<{{.TypeAdapterDelegateClass}}>() {});
-        return new com.google.gson.TypeAdapter<T>() {
-            @Override
-            public void write(com.google.gson.stream.JsonWriter out, T value) throws java.io.IOException {
-                delegate.write(out, (({{.Name}}) value).getValue());
-            }
-
-            @SuppressWarnings("unchecked")
-            @Override
-            public T read(com.google.gson.stream.JsonReader in) throws java.io.IOException {
-                return (T) new {{.Name}}(delegate.read(in));
-            }
-        };
     }
 }
 `

@@ -15,7 +15,7 @@ package {{.Package}};
 /**
  * type {{.Name}} {{.VdlTypeString}} {{.Doc}}
  **/
-@io.veyron.veyron.veyron2.vdl.GeneratedFromVdlType("{{.VdlTypeName}}")
+@io.veyron.veyron.veyron2.vdl.GeneratedFromVdlName("{{.VdlTypeName}}")
 {{ .AccessModifier }} final class {{.Name}} extends io.veyron.veyron.veyron2.vdl.VdlArray<{{.ElemType}}> {
     public static final int LENGTH = {{.Length}};
 
