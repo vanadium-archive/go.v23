@@ -48,5 +48,5 @@ func init() {
 	__vdl.Register(Envelope{})
 }
 
-// Node manager application envelopes must present this title.
-const NodeManagerTitle = "node manager"
+// Device manager application envelopes must present this title.
+const DeviceManagerTitle = "device manager"

@@ -8,7 +8,7 @@ import "os"
 var enabled = false
 
 func init() {
-	// The env var must start with VEYRON_, in order for the node manager to pass
+	// The env var must start with VEYRON_, in order for the device manager to pass
 	// it through, for veyron.io/veyron/veyron/services/mgmt/node/impl test.
 	if os.Getenv("VEYRON_VOM2") != "" {
 		enabled = true

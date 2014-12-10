@@ -1,8 +1,8 @@
 // Package application defines the type for describing an application.
 package application
 
-// Node manager application envelopes must present this title.
-const NodeManagerTitle = "node manager"
+// Device manager application envelopes must present this title.
+const DeviceManagerTitle = "device manager"
 
 // Envelope is a collection of metadata that describes an application.
 type Envelope struct {

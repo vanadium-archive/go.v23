@@ -96,7 +96,7 @@ type Profile interface {
 	// Label is the human-readable profile key for the profile,
 	// e.g. "linux-media". The label can be used to uniquely identify
 	// the profile (for the purpose of matching application binaries and
-	// nodes).
+	// devices).
 	Label() (string, error) {access.Read}
 	// Description is a free-text description of the profile, meant for
 	// human consumption.

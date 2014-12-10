@@ -962,7 +962,7 @@ type ProfileClientMethods interface {
 	// Label is the human-readable profile key for the profile,
 	// e.g. "linux-media". The label can be used to uniquely identify
 	// the profile (for the purpose of matching application binaries and
-	// nodes).
+	// devices).
 	Label(__context.T, ...__ipc.CallOpt) (string, error)
 	// Description is a free-text description of the profile, meant for
 	// human consumption.
@@ -1042,7 +1042,7 @@ type ProfileServerMethods interface {
 	// Label is the human-readable profile key for the profile,
 	// e.g. "linux-media". The label can be used to uniquely identify
 	// the profile (for the purpose of matching application binaries and
-	// nodes).
+	// devices).
 	Label(__ipc.ServerContext) (string, error)
 	// Description is a free-text description of the profile, meant for
 	// human consumption.
@@ -1113,7 +1113,7 @@ var descProfile = __ipc.InterfaceDesc{
 	Methods: []__ipc.MethodDesc{
 		{
 			Name: "Label",
-			Doc:  "// Label is the human-readable profile key for the profile,\n// e.g. \"linux-media\". The label can be used to uniquely identify\n// the profile (for the purpose of matching application binaries and\n// nodes).",
+			Doc:  "// Label is the human-readable profile key for the profile,\n// e.g. \"linux-media\". The label can be used to uniquely identify\n// the profile (for the purpose of matching application binaries and\n// devices).",
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // string
 				{"", ``}, // error
