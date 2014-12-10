@@ -234,6 +234,28 @@ func TestBasic(t *testing.T) {
 	}
 }
 
+func tester() (verror2.E, verror2.E) {
+	l1 := verror2.ExplicitMake(idActionA, en, "server", "aEN0", 0)
+	return l1, verror2.ExplicitMake(idActionA, en, "server", "aEN0", 1)
+}
+
+func TestStack(t *testing.T) {
+	l1, l2 := tester()
+	stack1 := l1.Stack().String()
+	stack2 := l2.Stack().String()
+	if stack1 == stack2 {
+		t.Errorf("expected %q and %q to differ", stack1, stack2)
+	}
+	for _, stack := range []string{stack1, stack2} {
+		if got, want := strings.Count(stack, "\n"), 1; got != want {
+			t.Errorf("got %d, want %d", got, want)
+		}
+		if !strings.Contains(stack, "verror2_test.tester") {
+			t.Errorf("got %q, doesn't contain 'verror2_test.tester", stack)
+		}
+	}
+}
+
 func TestEqual(t *testing.T) {
 	var equivalanceClasses = [][]verror2.E{
 		{aEN0, aEN1, aDE0, aDE1, aDE0, aDE1, v2EN, v2FR0, v2FR1, v2DE},
