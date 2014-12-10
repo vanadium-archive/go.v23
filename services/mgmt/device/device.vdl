@@ -1,6 +1,6 @@
-// Package node supports managing a device and applications running on
+// Package device supports managing a device and applications running on
 // the device.
-package node
+package device
 
 import (
 	"veyron.io/veyron/veyron2/services/mgmt/binary"
