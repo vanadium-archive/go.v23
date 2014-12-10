@@ -324,10 +324,7 @@ var (
 	optGenGoOutDir   = genOutDir{}
 	optGenJavaOutDir = genOutDir{
 		rules: xlateRules{
-			{"veyron/go/src", "veyron/java/src/vdl/java"},
-			{"roadmap/go/src", "veyron/java/src/vdl/java"},
-			{"third_party/go/src", "SKIP"},
-			{"tools/go/src", "SKIP"},
+			{"go/src", "java/src/vdl/java"},
 			// TODO(toddw): Skip vdlroot java generation for now.
 			{"veyron/go/src/veyron.io/veyron/veyron2/vdl/vdlroot/src", "SKIP"},
 		},
