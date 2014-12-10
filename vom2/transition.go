@@ -5,7 +5,7 @@ package vom2
 
 import "os"
 
-var enabled = false
+var enabled = true
 
 func init() {
 	// The env var must start with VEYRON_, in order for the device manager
