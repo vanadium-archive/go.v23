@@ -36,6 +36,14 @@
 // above, this would lead to the output:
 //      my_component op_name The new error object_name
 //
+// If a substring is of the form {:<number>}, {<number>:}, {:<number>:}, {:_},
+// {_:}, or {:_:}, and the corresponding parameters are not the empty string,
+// the parameter is preceded by ": " or followed by ":"  or both,
+// respectively.  For example, if the format:
+//      {3:} foo {2} bar{:_} ({3})
+// is used with the cat.Format example above, it yields:
+//      3rd: foo 2nd bar: 1st 4th (3rd)
+//
 // The Convert() and ExplicitConvert() calls are like Make() and ExplicitMake(),
 // but convert existing errors (with their parameters, if applicable)
 // to verror2 errors with given language, component name, and operation name,
