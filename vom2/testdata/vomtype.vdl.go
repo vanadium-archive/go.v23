@@ -259,6 +259,7 @@ type MStruct struct {
 	C MBool
 	D *NStruct
 	E *__vdl.Type
+	F __vdlutil.Any
 }
 
 func (MStruct) __VDLReflect(struct {

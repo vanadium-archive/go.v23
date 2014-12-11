@@ -252,10 +252,6 @@ func (e *binaryEncoder) prepareTypeHelper(tt *vdl.Type, fromNil bool) error {
 	if err != nil {
 		return err
 	}
-	// Encode the optional "exists" byte, to distinguish from non-existent values.
-	if tt.Kind() == vdl.Optional && !fromNil {
-		binaryEncodeUint(e.bufV, 1)
-	}
 	switch top := e.topType(); {
 	case top == nil:
 		// Encoding the top-level.  We postpone encoding of the id until writeMsg is
@@ -268,6 +264,12 @@ func (e *binaryEncoder) prepareTypeHelper(tt *vdl.Type, fromNil bool) error {
 		}
 	case top != tt:
 		return verror.BadArgf("encoder type stack mismatch, got %q, top type %q", tt, top)
+	}
+	// Encode the optional "exists" byte, to distinguish from non-existent values.
+	// Note that if we have an any(?foo), we must encode the type id for ?foo
+	// first, before we encode the exists byte.
+	if tt.Kind() == vdl.Optional && !fromNil {
+		binaryEncodeUint(e.bufV, 1)
 	}
 	return nil
 }

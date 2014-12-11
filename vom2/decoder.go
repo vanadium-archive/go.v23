@@ -2,6 +2,7 @@ package vom2
 
 import (
 	"io"
+	"os"
 	"reflect"
 
 	"veyron.io/veyron/veyron2/vdl/valconv"
@@ -23,6 +24,13 @@ type decoder interface {
 	Decode(target valconv.Target) error
 	DecodeRaw(raw *RawValue) error
 	Ignore() error
+}
+
+// This is only used for debugging; add this as the first line of NewDecoder to
+// dump formatted vom bytes to stdout:
+//   r = teeDump(r)
+func teeDump(r io.Reader) io.Reader {
+	return io.TeeReader(r, NewDumper(NewDumpWriter(os.Stdout)))
 }
 
 // NewDecoder returns a new Decoder that reads from the given reader.  The

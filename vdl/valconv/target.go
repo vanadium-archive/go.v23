@@ -180,22 +180,22 @@ func FromReflect(target Target, rv reflect.Value) error {
 	if err != nil {
 		return err
 	}
-	ttNonOptional := tt
+	ttFrom := tt
 	if tt.CanBeOptional() && hasPtr {
-		tt = vdl.OptionalType(tt)
+		ttFrom = vdl.OptionalType(tt)
 	}
 	// Recursive walk through the reflect value to fill in target.
 	//
 	// First handle special-cases enum and oneof.  Note that vdl.TypeFromReflect
 	// has already validated the methods, so we can call without error checking.
-	switch ttNonOptional.Kind() {
+	switch tt.Kind() {
 	case vdl.Enum:
 		label := rv.MethodByName("String").Call(nil)[0].String()
-		return target.FromEnumLabel(label, tt)
+		return target.FromEnumLabel(label, ttFrom)
 	case vdl.OneOf:
 		// We're guaranteed rv is the concrete field struct.
 		name := rv.MethodByName("Name").Call(nil)[0].String()
-		fieldsTarget, err := target.StartFields(tt)
+		fieldsTarget, err := target.StartFields(ttFrom)
 		if err != nil {
 			return err
 		}
@@ -215,24 +215,24 @@ func FromReflect(target Target, rv reflect.Value) error {
 	}
 	// Now handle special-case bytes.
 	if isRTBytes(rt) {
-		return target.FromBytes(rtBytes(rv), tt)
+		return target.FromBytes(rtBytes(rv), ttFrom)
 	}
 	// Handle standard kinds.
 	switch rt.Kind() {
 	case reflect.Bool:
-		return target.FromBool(rv.Bool(), tt)
+		return target.FromBool(rv.Bool(), ttFrom)
 	case reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uint, reflect.Uintptr:
-		return target.FromUint(rv.Uint(), tt)
+		return target.FromUint(rv.Uint(), ttFrom)
 	case reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Int:
-		return target.FromInt(rv.Int(), tt)
+		return target.FromInt(rv.Int(), ttFrom)
 	case reflect.Float32, reflect.Float64:
-		return target.FromFloat(rv.Float(), tt)
+		return target.FromFloat(rv.Float(), ttFrom)
 	case reflect.Complex64, reflect.Complex128:
-		return target.FromComplex(rv.Complex(), tt)
+		return target.FromComplex(rv.Complex(), ttFrom)
 	case reflect.String:
-		return target.FromString(rv.String(), tt)
+		return target.FromString(rv.String(), ttFrom)
 	case reflect.Array, reflect.Slice:
-		listTarget, err := target.StartList(tt, rv.Len())
+		listTarget, err := target.StartList(ttFrom, rv.Len())
 		if err != nil {
 			return err
 		}
@@ -250,8 +250,8 @@ func FromReflect(target Target, rv reflect.Value) error {
 		}
 		return target.FinishList(listTarget)
 	case reflect.Map:
-		if ttNonOptional.Kind() == vdl.Set {
-			setTarget, err := target.StartSet(tt, rv.Len())
+		if tt.Kind() == vdl.Set {
+			setTarget, err := target.StartSet(ttFrom, rv.Len())
 			if err != nil {
 				return err
 			}
@@ -272,7 +272,7 @@ func FromReflect(target Target, rv reflect.Value) error {
 			}
 			return target.FinishSet(setTarget)
 		}
-		mapTarget, err := target.StartMap(tt, rv.Len())
+		mapTarget, err := target.StartMap(ttFrom, rv.Len())
 		if err != nil {
 			return err
 		}
@@ -300,7 +300,7 @@ func FromReflect(target Target, rv reflect.Value) error {
 		}
 		return target.FinishMap(mapTarget)
 	case reflect.Struct:
-		fieldsTarget, err := target.StartFields(tt)
+		fieldsTarget, err := target.StartFields(ttFrom)
 		if err != nil {
 			return err
 		}
