@@ -86,6 +86,8 @@ type MountEntry struct {
 	Servers []MountedServer
 	// mt is true if servers refer to another mount table.
 	mt bool
+	// Pattern is a security.BlessingPattern that should match the servers.
+	Pattern string
 	// An error occurred fulfilling the request.
 	Error error
 }
@@ -135,6 +137,11 @@ type ResolveOpt interface {
 type RootBlessingPatternOpt string
 
 func (RootBlessingPatternOpt) NSResolveOpt() {}
+
+// SkipResolveOpt specifies that resolve should skip resolving and only parse patterns.
+type SkipResolveOpt struct{}
+
+func (SkipResolveOpt) NSResolveOpt() {}
 
 // TODO(p): Perhaps add an ACL Opt.
 
