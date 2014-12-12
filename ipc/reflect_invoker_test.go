@@ -26,12 +26,15 @@ import (
 func init() { testutil.Init() }
 
 // FakeServerCall implements ipc.ServerContext.
-type FakeServerCall struct{ security.Context }
+type FakeServerCall struct {
+	security security.Context
+}
 
 func NewFakeServerCall() *FakeServerCall {
 	return &FakeServerCall{security.NewContext(&security.ContextParams{})}
 }
 
+func (call *FakeServerCall) Context() context.T { return call }
 func (*FakeServerCall) Deadline() (deadline time.Time, ok bool) {
 	var t time.Time
 	return t, false
@@ -54,6 +57,25 @@ func (*FakeServerCall) Closed() <-chan struct{}                              { r
 func (*FakeServerCall) IsClosed() bool                                       { return false }
 func (*FakeServerCall) Send(item interface{}) error                          { return nil }
 func (*FakeServerCall) Recv(itemptr interface{}) error                       { return nil }
+func (call *FakeServerCall) Timestamp() time.Time                            { return call.security.Timestamp() }
+func (call *FakeServerCall) Method() string                                  { return call.security.Method() }
+func (call *FakeServerCall) MethodTags() []interface{}                       { return call.security.MethodTags() }
+func (call *FakeServerCall) Name() string                                    { return call.security.Name() }
+func (call *FakeServerCall) Suffix() string                                  { return call.security.Suffix() }
+func (call *FakeServerCall) RemoteDischarges() map[string]security.Discharge {
+	return call.security.RemoteDischarges()
+}
+func (call *FakeServerCall) LocalPrincipal() security.Principal {
+	return call.security.LocalPrincipal()
+}
+func (call *FakeServerCall) LocalBlessings() security.Blessings {
+	return call.security.LocalBlessings()
+}
+func (call *FakeServerCall) RemoteBlessings() security.Blessings {
+	return call.security.RemoteBlessings()
+}
+func (call *FakeServerCall) LocalEndpoint() naming.Endpoint  { return call.security.LocalEndpoint() }
+func (call *FakeServerCall) RemoteEndpoint() naming.Endpoint { return call.security.RemoteEndpoint() }
 
 var (
 	call1 = NewFakeServerCall()
