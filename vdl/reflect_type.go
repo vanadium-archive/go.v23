@@ -10,8 +10,10 @@ import (
 
 // rtRegistry is a map from reflect.Type to *Type.  The only instance is
 // rtCache, which is a global cache to speed up repeated lookups.
+//
+// All locking is performed in TypeFromReflect.
 type rtRegistry struct {
-	sync.Mutex
+	sync.RWMutex
 	rtmap map[reflect.Type]*Type
 }
 
@@ -20,25 +22,24 @@ var (
 	rtCacheEnabled = true
 )
 
+func (reg *rtRegistry) reset() {
+	reg.rtmap = make(map[reflect.Type]*Type)
+}
+
 func (reg *rtRegistry) lookup(rt reflect.Type) *Type {
 	if !rtCacheEnabled {
 		return nil
 	}
-	reg.Lock()
-	t := reg.rtmap[rt]
-	reg.Unlock()
-	return t
+	return reg.rtmap[rt]
 }
 
 func (reg *rtRegistry) update(pending map[reflect.Type]TypeOrPending) {
 	if !rtCacheEnabled {
 		return
 	}
-	reg.Lock()
 	for rt, top := range pending {
 		reg.rtmap[rt] = getBuiltType(top)
 	}
-	reg.Unlock()
 }
 
 // getBuiltType returns the built type from top.  Panics if the type couldn't be
@@ -106,12 +107,9 @@ func normalizeType(rt reflect.Type) reflect.Type {
 	return rt
 }
 
-// Lookup the rt type and return the corresponding *Type.  Returns a non-nil
-// *Type if rt exists in the cache, or has a well-known conversion.
-func lookupType(rt reflect.Type) *Type {
-	if t := rtCache.lookup(rt); t != nil {
-		return t
-	}
+// basicType returns the *Type corresponding to rt for basic types that cannot
+// be named by the user, and have a well-known conversion.
+func basicType(rt reflect.Type) *Type {
 	for rt.Kind() == reflect.Ptr {
 		rt = rt.Elem()
 	}
@@ -135,19 +133,51 @@ func TypeFromReflect(rt reflect.Type) (*Type, error) {
 		return AnyType, nil
 	}
 	rt = normalizeType(rt)
-	if t := lookupType(rt); t != nil {
+	if t := basicType(rt); t != nil {
 		return t, nil
 	}
+	// Fastpath - grab the reader lock and check if rt is already in the cache.
+	rtCache.RLock()
+	t := rtCache.lookup(rt)
+	rtCache.RUnlock()
+	if t != nil {
+		return t, nil
+	}
+	// Slowpath - grab the writer lock.  We hold the lock even while building the
+	// type, since TypeBuilder requires that if two types are identical, they must
+	// be represented by the same Type or PendingType.  Here's an example:
+	//   type Str string
+	//   type Foo struct { A, B Str }
+	//
+	// If we built type Foo without the lock, we might end up with this ordering:
+	//    thread_1 build Foo
+	//    thread_1 build Foo.A
+	//
+	//    thread_2 build Foo
+	//    thread_2 build Foo.A
+	//    thread_2 build Foo.B
+	//    thread_2 update map
+	//
+	//    thread_1 build Foo.B // type Str found in map, different from Foo.A
+	//
+	// The problem is that thread_1 now has two different representations of Str
+	// in its TypeBuilder - it built type Str itself for Foo.A, and it found Str
+	// from the map for Foo.B.  The TypeBuilder notices this inconsistency, and
+	// returns an error.
+	//
+	// Side note: you might think there's a simpler fix; if each thread updated
+	// the map (under the lock) as it built each type, we wouldn't need to lock
+	// the entire type-building operation.  But note that TypeBuilder only returns
+	// PendingType as types are being built, and only returns the final Type when
+	// Build is called at the very end, in order to support cyclic types.
+	rtCache.Lock()
+	defer rtCache.Unlock()
 	// The strategy is to recursively populate the builder with the type and
 	// subtypes, keeping track of new types in pending.  After all types have been
 	// populated, we build the types and update rtCache with all pending types.
-	//
-	// Concurrent updates may cause rtCache to be updated multiple times.  This
-	// race is benign; we always end up with the same result, and we never mutate
-	// a type once it has been returned.
 	builder := new(TypeBuilder)
 	pending := make(map[reflect.Type]TypeOrPending)
-	result, err := makeTypeFromReflect(rt, builder, pending)
+	result, err := typeFromReflectLocked(rt, builder, pending)
 	if err != nil {
 		return nil, err
 	}
@@ -160,12 +190,17 @@ func TypeFromReflect(rt reflect.Type) (*Type, error) {
 	return getBuiltType(result), nil
 }
 
-// typeFromReflect returns the Type or PendingType corresponding to rt.  It
-// either returns the type directly from the cache or pending map, or makes the
-// type based on rt.
-func typeFromReflect(rt reflect.Type, builder *TypeBuilder, pending map[reflect.Type]TypeOrPending) (TypeOrPending, error) {
+// typeFromReflectLocked returns the Type or PendingType corresponding to rt.
+// It either returns the type directly from the cache or pending map, or makes
+// the type based on rt.
+//
+// REQUIRES: rtCache is locked
+func typeFromReflectLocked(rt reflect.Type, builder *TypeBuilder, pending map[reflect.Type]TypeOrPending) (TypeOrPending, error) {
 	rt = normalizeType(rt)
-	if t := lookupType(rt); t != nil {
+	if t := basicType(rt); t != nil {
+		return t, nil
+	}
+	if t := rtCache.lookup(rt); t != nil {
 		return t, nil
 	}
 	if p, ok := pending[rt]; ok {
@@ -173,7 +208,7 @@ func typeFromReflect(rt reflect.Type, builder *TypeBuilder, pending map[reflect.
 		// infinite loops from recursive types.
 		return p, nil
 	}
-	return makeTypeFromReflect(rt, builder, pending)
+	return makeTypeFromReflectLocked(rt, builder, pending)
 }
 
 // validateType returns a non-nil error if rt is not a valid vdl type.
@@ -193,12 +228,13 @@ func validateType(rt reflect.Type) error {
 	return nil
 }
 
-// makeTypeFromReflect makes the Type or PendingType corresponding to rt.  Calls
-// typeFromReflect to recursively generate subtypes.
+// makeTypeFromReflectLocked makes the Type or PendingType corresponding to rt.
+// Calls typeFromReflect to recursively generate subtypes.
 //
+// REQUIRES: rtCache is locked
 // PRE-CONDITION:  rt doesn't exist in rtCache or pending.
 // POST-CONDITION: rt exists in pending.
-func makeTypeFromReflect(rt reflect.Type, builder *TypeBuilder, pending map[reflect.Type]TypeOrPending) (TypeOrPending, error) {
+func makeTypeFromReflectLocked(rt reflect.Type, builder *TypeBuilder, pending map[reflect.Type]TypeOrPending) (TypeOrPending, error) {
 	if err := validateType(rt); err != nil {
 		return nil, err
 	}
@@ -206,7 +242,7 @@ func makeTypeFromReflect(rt reflect.Type, builder *TypeBuilder, pending map[refl
 		// Pointers are turned into Optional.
 		opt := builder.Optional()
 		pending[rt] = opt
-		elem, err := typeFromReflect(rt.Elem(), builder, pending)
+		elem, err := typeFromReflectLocked(rt.Elem(), builder, pending)
 		if err != nil {
 			return nil, err
 		}
@@ -221,7 +257,7 @@ func makeTypeFromReflect(rt reflect.Type, builder *TypeBuilder, pending map[refl
 		// Unnamed types are made directly.  There's no way to create a recursive
 		// type based solely on unnamed types, so it's ok to to update pending
 		// *after* making the unnamed type.
-		unnamed, err := makeUnnamedFromReflect(ri, builder, pending)
+		unnamed, err := makeUnnamedFromReflectLocked(ri, builder, pending)
 		if err != nil {
 			return nil, err
 		}
@@ -239,7 +275,7 @@ func makeTypeFromReflect(rt reflect.Type, builder *TypeBuilder, pending map[refl
 	}
 	// Now make the unnamed underlying type.  Recursive types will find the
 	// existing entry in pending, and avoid the infinite loop.
-	unnamed, err := makeUnnamedFromReflect(ri, builder, pending)
+	unnamed, err := makeUnnamedFromReflectLocked(ri, builder, pending)
 	if err != nil {
 		return nil, err
 	}
@@ -248,9 +284,11 @@ func makeTypeFromReflect(rt reflect.Type, builder *TypeBuilder, pending map[refl
 	return named, nil
 }
 
-// makeUnnamedFromReflect makes the underlying unnamed Type or PendingType
+// makeUnnamedFromReflectLocked makes the underlying unnamed Type or PendingType
 // corresponding to ri.
-func makeUnnamedFromReflect(ri *ReflectInfo, builder *TypeBuilder, pending map[reflect.Type]TypeOrPending) (TypeOrPending, error) {
+//
+// REQUIRES: rtCache is locked
+func makeUnnamedFromReflectLocked(ri *ReflectInfo, builder *TypeBuilder, pending map[reflect.Type]TypeOrPending) (TypeOrPending, error) {
 	// Handle enum types
 	if len(ri.EnumLabels) > 0 {
 		enum := builder.Enum()
@@ -263,7 +301,7 @@ func makeUnnamedFromReflect(ri *ReflectInfo, builder *TypeBuilder, pending map[r
 	if len(ri.OneOfFields) > 0 {
 		oneof := builder.OneOf()
 		for _, f := range ri.OneOfFields {
-			in, err := typeFromReflect(f.Type, builder, pending)
+			in, err := typeFromReflectLocked(f.Type, builder, pending)
 			if err != nil {
 				return nil, err
 			}
@@ -275,13 +313,13 @@ func makeUnnamedFromReflect(ri *ReflectInfo, builder *TypeBuilder, pending map[r
 	rt := ri.WireType
 	switch rt.Kind() {
 	case reflect.Array:
-		elem, err := typeFromReflect(rt.Elem(), builder, pending)
+		elem, err := typeFromReflectLocked(rt.Elem(), builder, pending)
 		if err != nil {
 			return nil, err
 		}
 		return builder.Array().AssignLen(rt.Len()).AssignElem(elem), nil
 	case reflect.Slice:
-		elem, err := typeFromReflect(rt.Elem(), builder, pending)
+		elem, err := typeFromReflectLocked(rt.Elem(), builder, pending)
 		if err != nil {
 			return nil, err
 		}
@@ -290,7 +328,7 @@ func makeUnnamedFromReflect(ri *ReflectInfo, builder *TypeBuilder, pending map[r
 		if rt.Key().Kind() == reflect.Ptr {
 			return nil, fmt.Errorf("invalid key %q in %q", rt.Key(), rt)
 		}
-		key, err := typeFromReflect(rt.Key(), builder, pending)
+		key, err := typeFromReflectLocked(rt.Key(), builder, pending)
 		if err != nil {
 			return nil, err
 		}
@@ -298,7 +336,7 @@ func makeUnnamedFromReflect(ri *ReflectInfo, builder *TypeBuilder, pending map[r
 			// The map actually represents a set
 			return builder.Set().AssignKey(key), nil
 		}
-		elem, err := typeFromReflect(rt.Elem(), builder, pending)
+		elem, err := typeFromReflectLocked(rt.Elem(), builder, pending)
 		if err != nil {
 			return nil, err
 		}
@@ -310,7 +348,7 @@ func makeUnnamedFromReflect(ri *ReflectInfo, builder *TypeBuilder, pending map[r
 			if rtField.PkgPath != "" {
 				continue // field isn't exported
 			}
-			field, err := typeFromReflect(rtField.Type, builder, pending)
+			field, err := typeFromReflectLocked(rtField.Type, builder, pending)
 			if err != nil {
 				return nil, err
 			}
@@ -325,7 +363,7 @@ func makeUnnamedFromReflect(ri *ReflectInfo, builder *TypeBuilder, pending map[r
 	if t := typeFromRTKind[rt.Kind()]; t != nil {
 		return t, nil
 	}
-	panic(fmt.Errorf("val: makeUnnamedFromReflect unhandled %v %v", rt.Kind(), rt))
+	panic(fmt.Errorf("val: makeUnnamedFromReflectLocked unhandled %v %v", rt.Kind(), rt))
 }
 
 var (
