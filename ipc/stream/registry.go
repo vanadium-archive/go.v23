@@ -33,14 +33,24 @@ func RegisterProtocol(protocol string, dialer DialerFunc, listener ListenerFunc)
 
 // RegisteredProtocol returns the Dialer and Listener registered with a
 // previous call to RegisterProtocol.
-//
-// If the Dialer is nil, the client is expected to use net.Dial instead and
-// if Listener is nil, the client is expected to use net.Listen instead.
 func RegisteredProtocol(protocol string) (DialerFunc, ListenerFunc) {
 	registryLock.RLock()
 	e := registry[protocol]
 	registryLock.RUnlock()
 	return e.d, e.l
+}
+
+// RegisteredProtocols returns the list of protocols that have been previously
+// registered using RegisterProtocol. The underlying implementation will
+// support additional protocols such as those supported by the native RPC stack.
+func RegisteredProtocols() []string {
+	registryLock.RLock()
+	defer registryLock.RUnlock()
+	p := make([]string, 0, len(registry))
+	for k, _ := range registry {
+		p = append(p, k)
+	}
+	return p
 }
 
 type registryEntry struct {

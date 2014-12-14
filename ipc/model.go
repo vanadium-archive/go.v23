@@ -1,7 +1,9 @@
 package ipc
 
 import (
+	"fmt"
 	"net"
+	"strings"
 
 	"veyron.io/veyron/veyron2/config"
 	"veyron.io/veyron/veyron2/context"
@@ -88,18 +90,24 @@ const (
 	RmAddrsSettingDesc  = "Addresses that have been removed since last change"
 )
 
-// ListenSpec specifies the information required to create a listening
-// network endpoint for a server and, optionally, the name of a proxy
+// ListenAddrs is the set of protocol, address pairs to listen on.
+// An anonymous struct is used to to more easily initialize a ListenSpec
+// from a different package.
+//
+// For TCP, the address must be in <ip>:<port> format. The <ip> may be
+// omitted, but the <port> can not (choose a port of 0 to have the system
+// allocate one).
+type ListenAddrs []struct {
+	Protocol, Address string
+}
+
+// ListenSpec specifies the information required to create a set of listening
+// network endpoints for a server and, optionally, the name of a proxy
 // to use in conjunction with that listener.
 type ListenSpec struct {
-	// The network protocol to use
-	Protocol string
-	// A protocol specific address.
-	// TCP:
-	// For TCP, the address must be in <ip>:<port> format. The <ip> may be
-	// omitted, but the <port> can not (choose a port of 0 to have the system
-	// allocate one).
-	Address string
+	// The addresses to listen on.
+	Addrs ListenAddrs
+
 	// The name of a proxy to be used to proxy connections to this listener.
 	Proxy string
 
@@ -133,14 +141,17 @@ type Address interface {
 }
 
 func (l ListenSpec) String() string {
-	s := l.Protocol + " " + l.Address
+	s := ""
+	for _, a := range l.Addrs {
+		s += fmt.Sprintf("(%q, %q) ", a.Protocol, a.Address)
+	}
 	if len(l.Proxy) > 0 {
-		s += " proxy(" + l.Proxy + ")"
+		s += "proxy(" + l.Proxy + ") "
 	}
 	if l.StreamPublisher != nil {
-		s += " publisher(" + l.StreamName + ")"
+		s += "publisher(" + l.StreamName + ")"
 	}
-	return s
+	return strings.TrimSpace(s)
 }
 
 // AddressChooser returns the address it prefers out of the set passed to it
@@ -150,16 +161,16 @@ type AddressChooser func(network string, addrs []Address) ([]Address, error)
 // Server defines the interface for managing a collection of services.
 type Server interface {
 	// Listen creates a listening network endpoint for the Server
-	// as specified by its ListenSpec parameter. If the ListenSpec does not
-	// specify a loopback address then the Server will dynamically adapt to
-	// changes in its network address. It will do so by reading config.Setting
-	// values from a config.Publisher stream called 'roaming'. By default
-	// it will use the Publisher associated with the runtime used to create
-	// the server. This may be overridden by creating a server with a
-	// veyron2.RoamingPublisherOpt to specify an alternate config.Publisher
-	// and stream name on that publisher.
-	// The set of expected Settings is defined by the
-	// New<setting>Functions above.
+	// as specified by its ListenSpec parameter. If any of the listen
+	// addresses passed in the ListenSpec are 'unspecified' (e.g. don't
+	// include a fixed address such as in ":0") and the ListenSpec includes
+	// a Publisher, then 'roaming' support will be enabled. In this mode
+	// the server will listen for changes in the network configuration
+	// using a Stream created on the supplied Publisher and change the
+	// set of Endpoints it publishes to the mount table accordingly.
+	// The set of expected Settings received over the Stream is defined
+	// by the New<setting>Functions above. The Publisher is ignored if
+	// all of the addresses are specified.
 	//
 	// The returned endpoint reflects the initial endpoint published to the
 	// mount table even though this may change if dynamic address changes
