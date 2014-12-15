@@ -44,7 +44,7 @@ package {{.Package}};
             java.lang.reflect.Type elemType =
                     new com.google.common.reflect.TypeToken<{{.ElemType}}>(){}.getType();
             java.util.Map<?, ?> map = io.veyron.veyron.veyron2.vdl.ParcelUtil.readMap(
-                    in, getClass().getClassLoader(), keyType, elemType);
+                    in, {{.Name}}.class.getClassLoader(), keyType, elemType);
             return new {{.Name}}((java.util.Map<{{.KeyType}}, {{.ElemType}}>) map);
         }
 

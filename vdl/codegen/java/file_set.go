@@ -40,7 +40,7 @@ package {{.Package}};
             java.lang.reflect.Type keyType =
                     new com.google.common.reflect.TypeToken<{{.KeyType}}>(){}.getType();
             java.util.Set<?> set = io.veyron.veyron.veyron2.vdl.ParcelUtil.readSet(
-                    in, getClass().getClassLoader(), keyType);
+                    in, {{.Name}}.class.getClassLoader(), keyType);
             return new {{.Name}}((java.util.Set<{{.KeyType}}>) set);
         }
 

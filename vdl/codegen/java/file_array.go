@@ -42,7 +42,7 @@ package {{.Package}};
             java.lang.reflect.Type elemType =
                     new com.google.common.reflect.TypeToken<{{.ElemType}}>(){}.getType();
             Object[] array = io.veyron.veyron.veyron2.vdl.ParcelUtil.readList(
-                    in, getClass().getClassLoader(), elemType).toArray();
+                    in, {{.Name}}.class.getClassLoader(), elemType).toArray();
             return new {{.Name}}(({{.ElemType}}[]) array);
         }
 

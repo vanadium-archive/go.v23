@@ -60,7 +60,7 @@ func javaVal(v *vdl.Value, env *compile.Env) string {
 	case vdl.Int32:
 		return strconv.FormatInt(v.Int(), 10)
 	case vdl.Uint64:
-		return fmt.Sprintf("new %s(%s)", javaType(v.Type(), true, env), strconv.FormatUint(v.Uint(), 10)+longSuffix)
+		return fmt.Sprintf("new %s(%s)", javaType(v.Type(), true, env), strconv.FormatInt(int64(v.Uint()), 10)+longSuffix)
 	case vdl.Int64:
 		return strconv.FormatInt(v.Int(), 10) + longSuffix
 	case vdl.Float32, vdl.Float64:
@@ -83,6 +83,9 @@ func javaVal(v *vdl.Value, env *compile.Env) string {
 	case vdl.String:
 		return strconv.Quote(v.RawString())
 	case vdl.Any:
+		if v.Elem() == nil {
+			return fmt.Sprintf("new %s()", javaType(v.Type(), false, env))
+		}
 		elemReflectTypeStr := javaReflectType(v.Elem().Type(), env)
 		elemStr := javaConstVal(v.Elem(), env)
 		return fmt.Sprintf("new %s(%s, %s)", javaType(v.Type(), false, env), elemReflectTypeStr, elemStr)

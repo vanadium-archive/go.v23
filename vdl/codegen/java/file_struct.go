@@ -132,7 +132,7 @@ package {{.PackagePath}};
             {{ range $field := .Fields }}
             try {
                 value.set{{$field.Name}}(({{$field.Class}}) io.veyron.veyron.veyron2.vdl.ParcelUtil.readValue(
-                in, getClass().getClassLoader(), getClass().getDeclaredField("{{$field.LowercaseName}}").getGenericType()));
+                in, value.getClass().getClassLoader(), value.getClass().getDeclaredField("{{$field.LowercaseName}}").getGenericType()));
             } catch (NoSuchFieldException e) {
                 // do nothing
             }
