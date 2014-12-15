@@ -15,6 +15,9 @@ import (
 // public keys and all subsequent 'AddToRoots' operations fail.
 //
 // It returns an error if store.PublicKey does not match signer.PublicKey.
+//
+// NOTE: veyron/lib/testutil/security provides utility methods for creating
+// principals for testing purposes.
 func CreatePrincipal(signer Signer, store BlessingStore, roots BlessingRoots) (Principal, error) {
 	if store == nil {
 		store = errStore{signer.PublicKey()}
