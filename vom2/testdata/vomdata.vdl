@@ -97,6 +97,16 @@ const Tests = []TestCase {
 		"800a7f",
 	},
 	// 80                   Magic                            128 [vom version 0]
+	// 0a                   MsgID                              5
+	//                      ValueMsg                           5 [byte]
+	// ff                   PrimValue                        255 [byte]
+	// DumpStatus{MsgID: 5, MsgN: 3, Value: byte(255)}
+	{
+		`byte(255)`,
+		byte(255),
+		"800aff",
+	},
+	// 80                   Magic                            128 [vom version 0]
 	// 0c                   MsgID                              6
 	//                      ValueMsg                           6 [uint16]
 	// 00                   PrimValue                          0 [uint]
@@ -327,6 +337,166 @@ const Tests = []TestCase {
 		"801000",
 	},
 	// 80                   Magic                            128 [vom version 0]
+	// 10                   MsgID                              8
+	//                      ValueMsg                           8 [uint64]
+	// fb7ffffffffe         PrimValue               549755813886 [uint]
+	// DumpStatus{MsgID: 8, MsgN: 8, Value: uint64(549755813886)}
+	{
+		`uint64(549755813886)`,
+		uint64(549755813886),
+		"8010fb7ffffffffe",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 10                   MsgID                              8
+	//                      ValueMsg                           8 [uint64]
+	// fb7fffffffff         PrimValue               549755813887 [uint]
+	// DumpStatus{MsgID: 8, MsgN: 8, Value: uint64(549755813887)}
+	{
+		`uint64(549755813887)`,
+		uint64(549755813887),
+		"8010fb7fffffffff",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 10                   MsgID                              8
+	//                      ValueMsg                           8 [uint64]
+	// fbfffffffffe         PrimValue              1099511627774 [uint]
+	// DumpStatus{MsgID: 8, MsgN: 8, Value: uint64(1099511627774)}
+	{
+		`uint64(1099511627774)`,
+		uint64(1099511627774),
+		"8010fbfffffffffe",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 10                   MsgID                              8
+	//                      ValueMsg                           8 [uint64]
+	// fbffffffffff         PrimValue              1099511627775 [uint]
+	// DumpStatus{MsgID: 8, MsgN: 8, Value: uint64(1099511627775)}
+	{
+		`uint64(1099511627775)`,
+		uint64(1099511627775),
+		"8010fbffffffffff",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 10                   MsgID                              8
+	//                      ValueMsg                           8 [uint64]
+	// fa7ffffffffffe       PrimValue            140737488355326 [uint]
+	// DumpStatus{MsgID: 8, MsgN: 9, Value: uint64(140737488355326)}
+	{
+		`uint64(140737488355326)`,
+		uint64(140737488355326),
+		"8010fa7ffffffffffe",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 10                   MsgID                              8
+	//                      ValueMsg                           8 [uint64]
+	// fa7fffffffffff       PrimValue            140737488355327 [uint]
+	// DumpStatus{MsgID: 8, MsgN: 9, Value: uint64(140737488355327)}
+	{
+		`uint64(140737488355327)`,
+		uint64(140737488355327),
+		"8010fa7fffffffffff",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 10                   MsgID                              8
+	//                      ValueMsg                           8 [uint64]
+	// fafffffffffffe       PrimValue            281474976710654 [uint]
+	// DumpStatus{MsgID: 8, MsgN: 9, Value: uint64(281474976710654)}
+	{
+		`uint64(281474976710654)`,
+		uint64(281474976710654),
+		"8010fafffffffffffe",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 10                   MsgID                              8
+	//                      ValueMsg                           8 [uint64]
+	// faffffffffffff       PrimValue            281474976710655 [uint]
+	// DumpStatus{MsgID: 8, MsgN: 9, Value: uint64(281474976710655)}
+	{
+		`uint64(281474976710655)`,
+		uint64(281474976710655),
+		"8010faffffffffffff",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 10                   MsgID                              8
+	//                      ValueMsg                           8 [uint64]
+	// f97ffffffffffffe     PrimValue          36028797018963966 [uint]
+	// DumpStatus{MsgID: 8, MsgN: 10, Value: uint64(36028797018963966)}
+	{
+		`uint64(36028797018963966)`,
+		uint64(36028797018963966),
+		"8010f97ffffffffffffe",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 10                   MsgID                              8
+	//                      ValueMsg                           8 [uint64]
+	// f97fffffffffffff     PrimValue          36028797018963967 [uint]
+	// DumpStatus{MsgID: 8, MsgN: 10, Value: uint64(36028797018963967)}
+	{
+		`uint64(36028797018963967)`,
+		uint64(36028797018963967),
+		"8010f97fffffffffffff",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 10                   MsgID                              8
+	//                      ValueMsg                           8 [uint64]
+	// f9fffffffffffffe     PrimValue          72057594037927934 [uint]
+	// DumpStatus{MsgID: 8, MsgN: 10, Value: uint64(72057594037927934)}
+	{
+		`uint64(72057594037927934)`,
+		uint64(72057594037927934),
+		"8010f9fffffffffffffe",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 10                   MsgID                              8
+	//                      ValueMsg                           8 [uint64]
+	// f9ffffffffffffff     PrimValue          72057594037927935 [uint]
+	// DumpStatus{MsgID: 8, MsgN: 10, Value: uint64(72057594037927935)}
+	{
+		`uint64(72057594037927935)`,
+		uint64(72057594037927935),
+		"8010f9ffffffffffffff",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 10                   MsgID                              8
+	//                      ValueMsg                           8 [uint64]
+	// f87ffffffffffffffe   PrimValue        9223372036854775806 [uint]
+	// DumpStatus{MsgID: 8, MsgN: 11, Value: uint64(9223372036854775806)}
+	{
+		`uint64(9223372036854775806)`,
+		uint64(9223372036854775806),
+		"8010f87ffffffffffffffe",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 10                   MsgID                              8
+	//                      ValueMsg                           8 [uint64]
+	// f87fffffffffffffff   PrimValue        9223372036854775807 [uint]
+	// DumpStatus{MsgID: 8, MsgN: 11, Value: uint64(9223372036854775807)}
+	{
+		`uint64(9223372036854775807)`,
+		uint64(9223372036854775807),
+		"8010f87fffffffffffffff",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 10                   MsgID                              8
+	//                      ValueMsg                           8 [uint64]
+	// f8fffffffffffffffe   PrimValue       18446744073709551614 [uint]
+	// DumpStatus{MsgID: 8, MsgN: 11, Value: uint64(18446744073709551614)}
+	{
+		`uint64(18446744073709551614)`,
+		uint64(18446744073709551614),
+		"8010f8fffffffffffffffe",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 10                   MsgID                              8
+	//                      ValueMsg                           8 [uint64]
+	// f8ffffffffffffffff   PrimValue       18446744073709551615 [uint]
+	// DumpStatus{MsgID: 8, MsgN: 11, Value: uint64(18446744073709551615)}
+	{
+		`uint64(18446744073709551615)`,
+		uint64(18446744073709551615),
+		"8010f8ffffffffffffffff",
+	},
+	// 80                   Magic                            128 [vom version 0]
 	// 12                   MsgID                              9
 	//                      ValueMsg                           9 [int16]
 	// 00                   PrimValue                          0 [int]
@@ -517,6 +687,166 @@ const Tests = []TestCase {
 		"801600",
 	},
 	// 80                   Magic                            128 [vom version 0]
+	// 16                   MsgID                             11
+	//                      ValueMsg                          11 [int64]
+	// 02                   PrimValue                          1 [int]
+	// DumpStatus{MsgID: 11, MsgN: 3, Value: int64(1)}
+	{
+		`int64(1)`,
+		int64(1),
+		"801602",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 16                   MsgID                             11
+	//                      ValueMsg                          11 [int64]
+	// 04                   PrimValue                          2 [int]
+	// DumpStatus{MsgID: 11, MsgN: 3, Value: int64(2)}
+	{
+		`int64(2)`,
+		int64(2),
+		"801604",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 16                   MsgID                             11
+	//                      ValueMsg                          11 [int64]
+	// fbfffffffffc         PrimValue               549755813886 [int]
+	// DumpStatus{MsgID: 11, MsgN: 8, Value: int64(549755813886)}
+	{
+		`int64(549755813886)`,
+		int64(549755813886),
+		"8016fbfffffffffc",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 16                   MsgID                             11
+	//                      ValueMsg                          11 [int64]
+	// fbfffffffffe         PrimValue               549755813887 [int]
+	// DumpStatus{MsgID: 11, MsgN: 8, Value: int64(549755813887)}
+	{
+		`int64(549755813887)`,
+		int64(549755813887),
+		"8016fbfffffffffe",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 16                   MsgID                             11
+	//                      ValueMsg                          11 [int64]
+	// fa01fffffffffc       PrimValue              1099511627774 [int]
+	// DumpStatus{MsgID: 11, MsgN: 9, Value: int64(1099511627774)}
+	{
+		`int64(1099511627774)`,
+		int64(1099511627774),
+		"8016fa01fffffffffc",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 16                   MsgID                             11
+	//                      ValueMsg                          11 [int64]
+	// fa01fffffffffe       PrimValue              1099511627775 [int]
+	// DumpStatus{MsgID: 11, MsgN: 9, Value: int64(1099511627775)}
+	{
+		`int64(1099511627775)`,
+		int64(1099511627775),
+		"8016fa01fffffffffe",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 16                   MsgID                             11
+	//                      ValueMsg                          11 [int64]
+	// fafffffffffffc       PrimValue            140737488355326 [int]
+	// DumpStatus{MsgID: 11, MsgN: 9, Value: int64(140737488355326)}
+	{
+		`int64(140737488355326)`,
+		int64(140737488355326),
+		"8016fafffffffffffc",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 16                   MsgID                             11
+	//                      ValueMsg                          11 [int64]
+	// fafffffffffffe       PrimValue            140737488355327 [int]
+	// DumpStatus{MsgID: 11, MsgN: 9, Value: int64(140737488355327)}
+	{
+		`int64(140737488355327)`,
+		int64(140737488355327),
+		"8016fafffffffffffe",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 16                   MsgID                             11
+	//                      ValueMsg                          11 [int64]
+	// f901fffffffffffc     PrimValue            281474976710654 [int]
+	// DumpStatus{MsgID: 11, MsgN: 10, Value: int64(281474976710654)}
+	{
+		`int64(281474976710654)`,
+		int64(281474976710654),
+		"8016f901fffffffffffc",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 16                   MsgID                             11
+	//                      ValueMsg                          11 [int64]
+	// f901fffffffffffe     PrimValue            281474976710655 [int]
+	// DumpStatus{MsgID: 11, MsgN: 10, Value: int64(281474976710655)}
+	{
+		`int64(281474976710655)`,
+		int64(281474976710655),
+		"8016f901fffffffffffe",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 16                   MsgID                             11
+	//                      ValueMsg                          11 [int64]
+	// f9fffffffffffffc     PrimValue          36028797018963966 [int]
+	// DumpStatus{MsgID: 11, MsgN: 10, Value: int64(36028797018963966)}
+	{
+		`int64(36028797018963966)`,
+		int64(36028797018963966),
+		"8016f9fffffffffffffc",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 16                   MsgID                             11
+	//                      ValueMsg                          11 [int64]
+	// f9fffffffffffffe     PrimValue          36028797018963967 [int]
+	// DumpStatus{MsgID: 11, MsgN: 10, Value: int64(36028797018963967)}
+	{
+		`int64(36028797018963967)`,
+		int64(36028797018963967),
+		"8016f9fffffffffffffe",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 16                   MsgID                             11
+	//                      ValueMsg                          11 [int64]
+	// f801fffffffffffffc   PrimValue          72057594037927934 [int]
+	// DumpStatus{MsgID: 11, MsgN: 11, Value: int64(72057594037927934)}
+	{
+		`int64(72057594037927934)`,
+		int64(72057594037927934),
+		"8016f801fffffffffffffc",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 16                   MsgID                             11
+	//                      ValueMsg                          11 [int64]
+	// f801fffffffffffffe   PrimValue          72057594037927935 [int]
+	// DumpStatus{MsgID: 11, MsgN: 11, Value: int64(72057594037927935)}
+	{
+		`int64(72057594037927935)`,
+		int64(72057594037927935),
+		"8016f801fffffffffffffe",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 16                   MsgID                             11
+	//                      ValueMsg                          11 [int64]
+	// f8fffffffffffffffc   PrimValue        9223372036854775806 [int]
+	// DumpStatus{MsgID: 11, MsgN: 11, Value: int64(9223372036854775806)}
+	{
+		`int64(9223372036854775806)`,
+		int64(9223372036854775806),
+		"8016f8fffffffffffffffc",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 16                   MsgID                             11
+	//                      ValueMsg                          11 [int64]
+	// f8fffffffffffffffe   PrimValue        9223372036854775807 [int]
+	// DumpStatus{MsgID: 11, MsgN: 11, Value: int64(9223372036854775807)}
+	{
+		`int64(9223372036854775807)`,
+		int64(9223372036854775807),
+		"8016f8fffffffffffffffe",
+	},
+	// 80                   Magic                            128 [vom version 0]
 	// 12                   MsgID                              9
 	//                      ValueMsg                           9 [int16]
 	// 01                   PrimValue                         -1 [int]
@@ -675,6 +1005,166 @@ const Tests = []TestCase {
 		`int32(-2147483648)`,
 		int32(-2147483648),
 		"8014fcffffffff",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 16                   MsgID                             11
+	//                      ValueMsg                          11 [int64]
+	// 01                   PrimValue                         -1 [int]
+	// DumpStatus{MsgID: 11, MsgN: 3, Value: int64(-1)}
+	{
+		`int64(-1)`,
+		int64(-1),
+		"801601",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 16                   MsgID                             11
+	//                      ValueMsg                          11 [int64]
+	// 03                   PrimValue                         -2 [int]
+	// DumpStatus{MsgID: 11, MsgN: 3, Value: int64(-2)}
+	{
+		`int64(-2)`,
+		int64(-2),
+		"801603",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 16                   MsgID                             11
+	//                      ValueMsg                          11 [int64]
+	// fbfffffffffd         PrimValue              -549755813887 [int]
+	// DumpStatus{MsgID: 11, MsgN: 8, Value: int64(-549755813887)}
+	{
+		`int64(-549755813887)`,
+		int64(-549755813887),
+		"8016fbfffffffffd",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 16                   MsgID                             11
+	//                      ValueMsg                          11 [int64]
+	// fbffffffffff         PrimValue              -549755813888 [int]
+	// DumpStatus{MsgID: 11, MsgN: 8, Value: int64(-549755813888)}
+	{
+		`int64(-549755813888)`,
+		int64(-549755813888),
+		"8016fbffffffffff",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 16                   MsgID                             11
+	//                      ValueMsg                          11 [int64]
+	// fa01fffffffffd       PrimValue             -1099511627775 [int]
+	// DumpStatus{MsgID: 11, MsgN: 9, Value: int64(-1099511627775)}
+	{
+		`int64(-1099511627775)`,
+		int64(-1099511627775),
+		"8016fa01fffffffffd",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 16                   MsgID                             11
+	//                      ValueMsg                          11 [int64]
+	// fa01ffffffffff       PrimValue             -1099511627776 [int]
+	// DumpStatus{MsgID: 11, MsgN: 9, Value: int64(-1099511627776)}
+	{
+		`int64(-1099511627776)`,
+		int64(-1099511627776),
+		"8016fa01ffffffffff",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 16                   MsgID                             11
+	//                      ValueMsg                          11 [int64]
+	// fafffffffffffd       PrimValue           -140737488355327 [int]
+	// DumpStatus{MsgID: 11, MsgN: 9, Value: int64(-140737488355327)}
+	{
+		`int64(-140737488355327)`,
+		int64(-140737488355327),
+		"8016fafffffffffffd",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 16                   MsgID                             11
+	//                      ValueMsg                          11 [int64]
+	// faffffffffffff       PrimValue           -140737488355328 [int]
+	// DumpStatus{MsgID: 11, MsgN: 9, Value: int64(-140737488355328)}
+	{
+		`int64(-140737488355328)`,
+		int64(-140737488355328),
+		"8016faffffffffffff",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 16                   MsgID                             11
+	//                      ValueMsg                          11 [int64]
+	// f901fffffffffffd     PrimValue           -281474976710655 [int]
+	// DumpStatus{MsgID: 11, MsgN: 10, Value: int64(-281474976710655)}
+	{
+		`int64(-281474976710655)`,
+		int64(-281474976710655),
+		"8016f901fffffffffffd",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 16                   MsgID                             11
+	//                      ValueMsg                          11 [int64]
+	// f901ffffffffffff     PrimValue           -281474976710656 [int]
+	// DumpStatus{MsgID: 11, MsgN: 10, Value: int64(-281474976710656)}
+	{
+		`int64(-281474976710656)`,
+		int64(-281474976710656),
+		"8016f901ffffffffffff",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 16                   MsgID                             11
+	//                      ValueMsg                          11 [int64]
+	// f9fffffffffffffd     PrimValue         -36028797018963967 [int]
+	// DumpStatus{MsgID: 11, MsgN: 10, Value: int64(-36028797018963967)}
+	{
+		`int64(-36028797018963967)`,
+		int64(-36028797018963967),
+		"8016f9fffffffffffffd",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 16                   MsgID                             11
+	//                      ValueMsg                          11 [int64]
+	// f9ffffffffffffff     PrimValue         -36028797018963968 [int]
+	// DumpStatus{MsgID: 11, MsgN: 10, Value: int64(-36028797018963968)}
+	{
+		`int64(-36028797018963968)`,
+		int64(-36028797018963968),
+		"8016f9ffffffffffffff",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 16                   MsgID                             11
+	//                      ValueMsg                          11 [int64]
+	// f801fffffffffffffd   PrimValue         -72057594037927935 [int]
+	// DumpStatus{MsgID: 11, MsgN: 11, Value: int64(-72057594037927935)}
+	{
+		`int64(-72057594037927935)`,
+		int64(-72057594037927935),
+		"8016f801fffffffffffffd",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 16                   MsgID                             11
+	//                      ValueMsg                          11 [int64]
+	// f801ffffffffffffff   PrimValue         -72057594037927936 [int]
+	// DumpStatus{MsgID: 11, MsgN: 11, Value: int64(-72057594037927936)}
+	{
+		`int64(-72057594037927936)`,
+		int64(-72057594037927936),
+		"8016f801ffffffffffffff",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 16                   MsgID                             11
+	//                      ValueMsg                          11 [int64]
+	// f8fffffffffffffffd   PrimValue       -9223372036854775807 [int]
+	// DumpStatus{MsgID: 11, MsgN: 11, Value: int64(-9223372036854775807)}
+	{
+		`int64(-9223372036854775807)`,
+		int64(-9223372036854775807),
+		"8016f8fffffffffffffffd",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 16                   MsgID                             11
+	//                      ValueMsg                          11 [int64]
+	// f8ffffffffffffffff   PrimValue       -9223372036854775808 [int]
+	// DumpStatus{MsgID: 11, MsgN: 11, Value: int64(-9223372036854775808)}
+	{
+		`int64(-9223372036854775808)`,
+		int64(-9223372036854775808),
+		"8016f8ffffffffffffffff",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 18                   MsgID                             12
@@ -975,6 +1465,26 @@ const Tests = []TestCase {
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
 	//                      TypeMsg                           65
+	// 32                   MsgLen                            50
+	// 10                   TypeID                            16 [veyron.io/veyron/veyron2/vom2.WireNamed struct{Name string;Base veyron.io/veyron/veyron2/vom2.TypeID uint64}]
+	// 01                   Index                              1 [veyron.io/veyron/veyron2/vom2.WireNamed.Name]
+	// 2c                   ByteLen                           44 [string len]
+	// 766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e42797465 PrimValue       veyron.io/veyron/veyron2/vom2/testdata.NByte [string]
+	// 02                   Index                              2 [veyron.io/veyron/veyron2/vom2.WireNamed.Base]
+	// 05                   PrimValue                          5 [uint]
+	// 00                   End                                0 [veyron.io/veyron/veyron2/vom2.WireNamed END]
+	// ff82                 MsgID                             65
+	//                      ValueMsg                          65 [veyron.io/veyron/veyron2/vom2/testdata.NByte byte]
+	// ff                   PrimValue                        255 [byte]
+	// DumpStatus{MsgID: 65, MsgN: 3, Value: veyron.io/veyron/veyron2/vom2/testdata.NByte byte(255)}
+	{
+		`NByte(255)`,
+		NByte(255),
+		"80ff813210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e42797465020500ff82ff",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// ff81                 MsgID                            -65
+	//                      TypeMsg                           65
 	// 34                   MsgLen                            52
 	// 10                   TypeID                            16 [veyron.io/veyron/veyron2/vom2.WireNamed struct{Name string;Base veyron.io/veyron/veyron2/vom2.TypeID uint64}]
 	// 01                   Index                              1 [veyron.io/veyron/veyron2/vom2.WireNamed.Name]
@@ -1071,6 +1581,26 @@ const Tests = []TestCase {
 		`NUint64(0)`,
 		NUint64(0),
 		"80ff813410012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e55696e743634020800ff8200",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// ff81                 MsgID                            -65
+	//                      TypeMsg                           65
+	// 34                   MsgLen                            52
+	// 10                   TypeID                            16 [veyron.io/veyron/veyron2/vom2.WireNamed struct{Name string;Base veyron.io/veyron/veyron2/vom2.TypeID uint64}]
+	// 01                   Index                              1 [veyron.io/veyron/veyron2/vom2.WireNamed.Name]
+	// 2e                   ByteLen                           46 [string len]
+	// 766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e55696e743634 PrimValue       veyron.io/veyron/veyron2/vom2/testdata.NUint64 [string]
+	// 02                   Index                              2 [veyron.io/veyron/veyron2/vom2.WireNamed.Base]
+	// 08                   PrimValue                          8 [uint]
+	// 00                   End                                0 [veyron.io/veyron/veyron2/vom2.WireNamed END]
+	// ff82                 MsgID                             65
+	//                      ValueMsg                          65 [veyron.io/veyron/veyron2/vom2/testdata.NUint64 uint64]
+	// f8ffffffffffffffff   PrimValue       18446744073709551615 [uint]
+	// DumpStatus{MsgID: 65, MsgN: 11, Value: veyron.io/veyron/veyron2/vom2/testdata.NUint64 uint64(18446744073709551615)}
+	{
+		`NUint64(18446744073709551615)`,
+		NUint64(18446744073709551615),
+		"80ff813410012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e55696e743634020800ff82f8ffffffffffffffff",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -1211,6 +1741,46 @@ const Tests = []TestCase {
 		`NInt64(0)`,
 		NInt64(0),
 		"80ff813310012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e496e743634020b00ff8200",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// ff81                 MsgID                            -65
+	//                      TypeMsg                           65
+	// 33                   MsgLen                            51
+	// 10                   TypeID                            16 [veyron.io/veyron/veyron2/vom2.WireNamed struct{Name string;Base veyron.io/veyron/veyron2/vom2.TypeID uint64}]
+	// 01                   Index                              1 [veyron.io/veyron/veyron2/vom2.WireNamed.Name]
+	// 2d                   ByteLen                           45 [string len]
+	// 766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e496e743634 PrimValue       veyron.io/veyron/veyron2/vom2/testdata.NInt64 [string]
+	// 02                   Index                              2 [veyron.io/veyron/veyron2/vom2.WireNamed.Base]
+	// 0b                   PrimValue                         11 [uint]
+	// 00                   End                                0 [veyron.io/veyron/veyron2/vom2.WireNamed END]
+	// ff82                 MsgID                             65
+	//                      ValueMsg                          65 [veyron.io/veyron/veyron2/vom2/testdata.NInt64 int64]
+	// f8fffffffffffffffe   PrimValue        9223372036854775807 [int]
+	// DumpStatus{MsgID: 65, MsgN: 11, Value: veyron.io/veyron/veyron2/vom2/testdata.NInt64 int64(9223372036854775807)}
+	{
+		`NInt64(9223372036854775807)`,
+		NInt64(9223372036854775807),
+		"80ff813310012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e496e743634020b00ff82f8fffffffffffffffe",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// ff81                 MsgID                            -65
+	//                      TypeMsg                           65
+	// 33                   MsgLen                            51
+	// 10                   TypeID                            16 [veyron.io/veyron/veyron2/vom2.WireNamed struct{Name string;Base veyron.io/veyron/veyron2/vom2.TypeID uint64}]
+	// 01                   Index                              1 [veyron.io/veyron/veyron2/vom2.WireNamed.Name]
+	// 2d                   ByteLen                           45 [string len]
+	// 766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e496e743634 PrimValue       veyron.io/veyron/veyron2/vom2/testdata.NInt64 [string]
+	// 02                   Index                              2 [veyron.io/veyron/veyron2/vom2.WireNamed.Base]
+	// 0b                   PrimValue                         11 [uint]
+	// 00                   End                                0 [veyron.io/veyron/veyron2/vom2.WireNamed END]
+	// ff82                 MsgID                             65
+	//                      ValueMsg                          65 [veyron.io/veyron/veyron2/vom2/testdata.NInt64 int64]
+	// f8ffffffffffffffff   PrimValue       -9223372036854775808 [int]
+	// DumpStatus{MsgID: 65, MsgN: 11, Value: veyron.io/veyron/veyron2/vom2/testdata.NInt64 int64(-9223372036854775808)}
+	{
+		`NInt64(-9223372036854775808)`,
+		NInt64(-9223372036854775808),
+		"80ff813310012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e496e743634020b00ff82f8ffffffffffffffff",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65

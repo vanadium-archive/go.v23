@@ -8,6 +8,7 @@ package javascript
 
 import (
 	"bytes"
+	"encoding/binary"
 	"fmt"
 	"path/filepath"
 	"strconv"
@@ -73,6 +74,45 @@ func genMethodTags(names typeNames, method *compile.Method) string {
 	return result
 }
 
+// Format the given int64 into a JS BigInt.
+func formatUint64BigInt(v uint64) string {
+	buffer := make([]byte, 8)
+	binary.BigEndian.PutUint64(buffer, v)
+	sign := "0"
+	if v > 0 {
+		sign = "1"
+	}
+	return fmt.Sprintf("new BigInt(%s, %s)", sign, formatByteBuffer(buffer))
+}
+
+// Format the given int64 into a JS BigInt.
+func formatInt64BigInt(v int64) string {
+	buffer := make([]byte, 8)
+	var sign int64 = 0
+	if v > 0 {
+		sign = 1
+	} else if v < 0 {
+		sign = -1
+	}
+	binary.BigEndian.PutUint64(buffer, uint64(v*sign)) // Adjust value by sign.
+
+	return fmt.Sprintf("new BigInt(%d, %s)", sign, formatByteBuffer(buffer))
+}
+
+// Given a buffer of bytes, create the JS Uint8Array that corresponds to it.
+func formatByteBuffer(buffer []byte) string {
+	buf := bytes.TrimLeft(buffer, "\x00") // trim leading zeros
+	str := "new Uint8Array(["
+	for i, b := range buf {
+		if i > 0 {
+			str += ", "
+		}
+		str += fmt.Sprintf("%#x", b)
+	}
+	str += "])"
+	return str
+}
+
 // untypedConst generates a javascript string representing a constant that is
 // not wrapped with type information.
 func untypedConst(names typeNames, v *vdl.Value) string {
@@ -85,10 +125,14 @@ func untypedConst(names typeNames, v *vdl.Value) string {
 		}
 	case vdl.Byte:
 		return strconv.FormatUint(uint64(v.Byte()), 10)
-	case vdl.Uint16, vdl.Uint32, vdl.Uint64:
+	case vdl.Uint16, vdl.Uint32:
 		return strconv.FormatUint(v.Uint(), 10)
-	case vdl.Int16, vdl.Int32, vdl.Int64:
+	case vdl.Int16, vdl.Int32:
 		return strconv.FormatInt(v.Int(), 10)
+	case vdl.Uint64:
+		return formatUint64BigInt(v.Uint())
+	case vdl.Int64:
+		return formatInt64BigInt(v.Int())
 	case vdl.Float32, vdl.Float64:
 		return strconv.FormatFloat(v.Float(), 'g', -1, bitlen(v.Kind()))
 	case vdl.String:
@@ -286,6 +330,7 @@ var vom = require('vom');
 var Types = vom.Types;
 var Type = vom.Type;
 var Kind = vom.Kind;
+var BigInt = vom.BigInt;
 var Complex = vom.Complex;
 var Builtins = vom.Builtins;
 var Registry = vom.Registry;
