@@ -467,6 +467,7 @@ var (
 	Success  = Register(pkgPath+".Success", NoRetry, "{1:}{2:} Success{:_}") // Success; the nil error.
 	Unknown  = Register(pkgPath+".Unknown", NoRetry, "{1:}{2:} Error{:_}")   // The unknown error.
 	Internal = Register(pkgPath+".Internal", NoRetry, "{1:}{2:} Internal error{:_}")
+	EOF      = Register(pkgPath+".EOF", NoRetry, "{1:}{2:} EOF{:_}")
 
 	// BadArg is used when the parameters to an operation are invalid or
 	// incorrectly formatted.
