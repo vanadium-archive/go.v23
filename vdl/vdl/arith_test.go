@@ -131,11 +131,11 @@ func TestCalculator(t *testing.T) {
 	if err := server.Serve("", arith.CalculatorServer(&serverCalculator{}), nil); err != nil {
 		t.Fatal(err)
 	}
-	ep, err := server.Listen(profiles.LocalListenSpec)
+	eps, err := server.Listen(profiles.LocalListenSpec)
 	if err != nil {
 		t.Fatal(err)
 	}
-	root := naming.JoinAddressName(ep.String(), "")
+	root := naming.JoinAddressName(eps[0].String(), "")
 	ctx := r.NewContext()
 	// Synchronous calls
 	calculator := arith.CalculatorClient(root, client)
@@ -468,11 +468,11 @@ func TestArith(t *testing.T) {
 	for i, disp := range dispatchers {
 		server := newServer(r)
 		defer server.Stop()
-		ep, err := server.Listen(profiles.LocalListenSpec)
+		eps, err := server.Listen(profiles.LocalListenSpec)
 		if err != nil {
 			t.Fatal(err)
 		}
-		root := naming.JoinAddressName(ep.String(), "")
+		root := naming.JoinAddressName(eps[0].String(), "")
 		if err := server.ServeDispatcher("", disp); err != nil {
 			t.Fatalf("%d: %v", i, err)
 		}

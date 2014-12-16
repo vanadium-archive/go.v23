@@ -10,6 +10,7 @@ import (
 	"veyron.io/veyron/veyron2/naming"
 	"veyron.io/veyron/veyron2/security"
 	"veyron.io/veyron/veyron2/vdl/vdlroot/src/signature"
+	verror "veyron.io/veyron/veyron2/verror2"
 )
 
 // Client represents the interface for making RPC calls.  There may be multiple
@@ -123,6 +124,20 @@ type ListenSpec struct {
 	AddressChooser AddressChooser
 }
 
+// ListenError is the error type returned by Listen. It implements Error
+// and verror.E. The signature for Listen uses the built-in error type
+// for better compatibility with surrounding code, any returned non-nil
+// value can be converted to ListenError. ErrorDetails is useful in the case
+// where multiple addresses are included in the ListenSpec and the caller
+// needs to determine which of those encountered errors. In general, it
+// is sufficient to act on the ListenError itself.
+type ListenError interface {
+	// TODO(cnicolaou, m3b): consider moving this kind of 'multi-error' into
+	// verror2.
+	ErrorDetail() map[struct{ Protocol, Address string }]error
+	verror.E
+}
+
 // NetworkInterface represents a network interface.
 type NetworkInterface interface {
 	// Networks returns the set of networks accessible over this interface.
@@ -172,11 +187,20 @@ type Server interface {
 	// by the New<setting>Functions above. The Publisher is ignored if
 	// all of the addresses are specified.
 	//
-	// The returned endpoint reflects the initial endpoint published to the
-	// mount table even though this may change if dynamic address changes
-	// occur.
 	// Listen may be called multiple times.
-	Listen(spec ListenSpec) (naming.Endpoint, error)
+	//
+	// Listen returns the set of endpoints that can be used to reach
+	// this server. A single listen address in the ListenSpec can lead
+	// to multiple such endpoints (e.g. :0 on a device with multiple interfaces
+	// or that is being proxied). In the case where multiple listen addresses
+	// are used it is not possible to tell which listen address supports which
+	// Endpoint. If there is need to associate endpoints with specific
+	// listen addresses then Listen should be called separately for each one.
+	//
+	// Any non-nil value of error can be converted to a ListenError. If
+	// error is nil and at least one address was supplied in the ListenSpec
+	// then ListenEndpoints will include at least one Endpoint.
+	Listen(spec ListenSpec) ([]naming.Endpoint, error)
 
 	// Serve associates object with name by publishing the address
 	// of this server with the mount table under the supplied name and using
@@ -220,6 +244,12 @@ type Server interface {
 	// Publish("a") and Publish("b") were called on this server, then
 	// Published would return ["mtep/mt/a", "mtep/mt/b"].
 	Published() ([]string, error)
+
+	// ListenStatus returns the current 'listen' status of the server, in
+	// particular, the status of proxy connections and the current set of
+	// exported endpoints.
+	// TODO(cnicolaou): implement this.
+	// ListenStatus() ([]ProxyStatus, ListenEndpoints)
 
 	// Stop gracefully stops all services on this Server.  New calls are
 	// rejected, but any in-flight calls are allowed to complete.  All
