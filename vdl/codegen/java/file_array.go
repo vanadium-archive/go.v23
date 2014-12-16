@@ -41,9 +41,9 @@ package {{.Package}};
         public {{.Name}} createFromParcel(android.os.Parcel in) {
             java.lang.reflect.Type elemType =
                     new com.google.common.reflect.TypeToken<{{.ElemType}}>(){}.getType();
-            Object[] array = io.veyron.veyron.veyron2.vdl.ParcelUtil.readList(
-                    in, {{.Name}}.class.getClassLoader(), elemType).toArray();
-            return new {{.Name}}(({{.ElemType}}[]) array);
+            final {{.ElemType}}[] array = io.veyron.veyron.veyron2.vdl.ParcelUtil.readList(
+                    in, {{.Name}}.class.getClassLoader(), elemType).toArray(new {{.ElemType}}[0]);
+            return new {{.Name}}(array);
         }
 
         @Override
