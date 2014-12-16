@@ -47,7 +47,20 @@ func (b *blessingsImpl) publicKeyDER() []byte {
 	return chain[len(chain)-1].PublicKey
 }
 func (b *blessingsImpl) certificateChains() [][]Certificate { return b.chains }
-
+func (b *blessingsImpl) blessingsByNameForPrincipal(p Principal, pattern BlessingPattern) Blessings {
+	var ret blessingsImpl
+	for _, chain := range b.chains {
+		blessing := nameForPrincipal(p, chain)
+		if len(blessing) > 0 && pattern.MatchedBy(blessing) {
+			ret.chains = append(ret.chains, chain)
+		}
+	}
+	if len(ret.chains) > 0 {
+		ret.publicKey = b.publicKey
+		return &ret
+	}
+	return nil
+}
 func (b *blessingsImpl) String() string {
 	blessings := make([]string, len(b.chains))
 	for chainidx, chain := range b.chains {
@@ -58,6 +71,32 @@ func (b *blessingsImpl) String() string {
 		blessings[chainidx] = fmt.Sprintf("%v", strings.Join(onechain, ChainSeparator))
 	}
 	return strings.Join(blessings, "#")
+}
+
+func nameForPrincipal(p Principal, chain []Certificate) string {
+	// Verify the chain belongs to this principal
+	pKey, err := p.PublicKey().MarshalBinary()
+	if err != nil || !bytes.Equal(chain[len(chain)-1].PublicKey, pKey) {
+		return ""
+	}
+	blessing := chain[0].Extension
+	for i := 1; i < len(chain); i++ {
+		blessing += ChainSeparator
+		blessing += chain[i].Extension
+	}
+	// Verify that the root of the chain is recognized as an authority
+	// on blessing.
+	rootKey, err := UnmarshalPublicKey(chain[0].PublicKey)
+	if err != nil {
+		return ""
+	}
+	if p.Roots() == nil {
+		return ""
+	}
+	if err := p.Roots().Recognized(rootKey, blessing); err != nil {
+		return ""
+	}
+	return blessing
 }
 
 func validateCertificateChain(chain []Certificate) (PublicKey, error) {
@@ -85,7 +124,7 @@ func blessingForCertificateChain(ctx Context, chain []Certificate) string {
 		blessing += chain[i].Extension
 	}
 
-	// Verify that the root of the chain is reconized as an authority
+	// Verify that the root of the chain is recognized as an authority
 	// on blessing.
 	root, err := UnmarshalPublicKey(chain[0].PublicKey)
 	if err != nil {

@@ -57,6 +57,7 @@ func (errStore) Set(Blessings, BlessingPattern) (Blessings, error) { return nil,
 func (errStore) ForPeer(peerBlessings ...string) Blessings         { return nil }
 func (errStore) SetDefault(blessings Blessings) error              { return errNilStore }
 func (errStore) Default() Blessings                                { return nil }
+func (errStore) PeerBlessings() map[BlessingPattern]Blessings      { return nil }
 func (errStore) DebugString() string                               { return errNilStore.Error() }
 func (s errStore) PublicKey() PublicKey                            { return s.key }
 
@@ -137,6 +138,34 @@ func (p *principal) MintDischarge(tp ThirdPartyCaveat, caveat Caveat, additional
 
 func (p *principal) PublicKey() PublicKey {
 	return p.signer.PublicKey()
+}
+
+func (p *principal) BlessingsInfo(b Blessings) (blessings []string) {
+	bImpl, ok := b.(*blessingsImpl)
+	if !ok {
+		return
+	}
+	for _, chain := range bImpl.certificateChains() {
+		name := nameForPrincipal(p, chain)
+		if len(name) > 0 {
+			blessings = append(blessings, name)
+		}
+	}
+	return
+}
+
+func (p *principal) BlessingsByName(name BlessingPattern) []Blessings {
+	var matched []Blessings
+	for _, b := range p.store.PeerBlessings() {
+		bImpl, ok := b.(*blessingsImpl)
+		if !ok {
+			return nil
+		}
+		if b := bImpl.blessingsByNameForPrincipal(p, name); b != nil {
+			matched = append(matched, b)
+		}
+	}
+	return matched
 }
 
 func (p *principal) BlessingStore() BlessingStore {

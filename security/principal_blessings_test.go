@@ -98,6 +98,61 @@ func TestBless(t *testing.T) {
 	}
 }
 
+func TestBlessingsInfo(t *testing.T) {
+	var (
+		p1    = newPrincipal(t)
+		alice = blessSelf(t, p1, "alice")
+		p2    = newPrincipal(t)
+		bob   = blessSelf(t, p2, "bob")
+	)
+	addToRoots(t, p2, alice)
+	alicefriend, err := p1.Bless(p2.PublicKey(), alice, "friend", UnconstrainedUse())
+	if err != nil {
+		t.Fatal(err)
+	}
+	bobfriend, err := p2.Bless(p2.PublicKey(), bob, "friend", UnconstrainedUse())
+	if err != nil {
+		t.Fatal(err)
+	}
+	aliceAndBobFriend, err := UnionOfBlessings(alicefriend, bobfriend)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tests := []struct {
+		blessings Blessings
+		names     []string
+	}{
+		{
+			blessings: bob,
+			names:     nil,
+		},
+		{
+			blessings: alicefriend,
+			names:     []string{"alice/friend"},
+		},
+		{
+			blessings: aliceAndBobFriend,
+			names:     []string{"alice/friend"},
+		},
+		{
+			blessings: alice,
+			names:     nil,
+		},
+	}
+	for _, test := range tests {
+		b := p2.BlessingsInfo(test.blessings)
+		if len(b) != len(test.names) {
+			t.Errorf("BlessingsInfo(%s) did not return expected number of matches wanted:%d got:%d", test.blessings, len(test.names), len(b))
+		} else {
+			for i, name := range test.names {
+				if name != b[i] {
+					t.Errorf("BlessingsInfo(%s) did not match expected:%s got:%s", name, b[i])
+				}
+			}
+		}
+	}
+}
+
 func TestBlessings(t *testing.T) {
 	type s []string
 
@@ -187,7 +242,7 @@ func TestCreatePrincipalWithNilStoreAndRoots(t *testing.T) {
 
 	// Test Store.
 	s := p.BlessingStore()
-	if r == nil {
+	if s == nil {
 		t.Fatal("BlessingStore() returned nil")
 	}
 	if _, err := s.Set(nil, ""); matchesError(err, noStoreErr) != nil {

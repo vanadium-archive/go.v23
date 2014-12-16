@@ -181,6 +181,19 @@ type Principal interface {
 	// by the Principal.
 	PublicKey() PublicKey
 
+	// BlessingsByName returns Blessings granted to this Principal from
+	// recongized authorities and whose human-readable strings match a
+	// given name pattern. BlessingsByName does not check the validity
+	// of the caveats in the returned Blessings.
+	BlessingsByName(name BlessingPattern) []Blessings
+
+	// BlessingsInfo returns human-readable strings for blessings that have
+	// been granted to this Principal from recognized authorites. BlessingInfo
+	// does not validate caveats on 'blessings' and thus may NOT be valid in
+	// certain contexts. Use Blessings.ForContext(ctx) to determine the set
+	// of valid blessing strings in a particular context.
+	BlessingsInfo(blessings Blessings) []string
+
 	// BlessingsStore provides access to the BlessingStore containing blessings
 	// that have been granted to this principal.
 	BlessingStore() BlessingStore
@@ -239,7 +252,7 @@ type BlessingStore interface {
 	// SetDefault sets up the Blessings made available on a subsequent call
 	// to Default.
 	//
-	// It is an error to call SetDefault with Blesssings whose public key
+	// It is an error to call SetDefault with Blessings whose public key
 	// does not match the PublicKey of the principal for which this store
 	// hosts blessings.
 	SetDefault(blessings Blessings) error
@@ -261,6 +274,10 @@ type BlessingStore interface {
 	// PublicKey returns the public key of the Principal for which
 	// this store hosts blessings.
 	PublicKey() PublicKey
+
+	// PeerBlessings returns all the blessings that the BlessingStore
+	// currently holds for various peers.
+	PeerBlessings() map[BlessingPattern]Blessings
 
 	// DebugString return a human-readable string description of the store.
 	// This description is detailed and lists out the contents of the store.
