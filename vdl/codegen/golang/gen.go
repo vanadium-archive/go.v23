@@ -582,17 +582,19 @@ type {{$clientStream}} interface { {{if $method.OutStream}}
 	} {{end}}{{if $method.InStream}}
 	// SendStream returns the send side of the {{$iface.Name}}.{{$method.Name}} client stream.
 	SendStream() interface {
-		// Send places the item onto the output stream.  Returns errors encountered
-		// while sending, or if Send is called after Close or Cancel.  Blocks if
-		// there is no buffer space; will unblock when buffer space is available or
-		// after Cancel.
+		// Send places the item onto the output stream.  Returns errors
+		// encountered while sending, or if Send is called after Close or
+		// the stream has been canceled.  Blocks if there is no buffer
+		// space; will unblock when buffer space is available or after
+		// the stream has been canceled.
 		Send(item {{typeGo $data $method.InStream}}) error
-		// Close indicates to the server that no more items will be sent; server
-		// Recv calls will receive io.EOF after all sent items.  This is an optional
-		// call - e.g. a client might call Close if it needs to continue receiving
-		// items from the server after it's done sending.  Returns errors
-		// encountered while closing, or if Close is called after Cancel.  Like
-		// Send, blocks if there is no buffer space available.
+		// Close indicates to the server that no more items will be sent;
+		// server Recv calls will receive io.EOF after all sent items.
+		// This is an optional call - e.g. a client might call Close if it
+		// needs to continue receiving items from the server after it's
+		// done sending.  Returns errors encountered while closing, or if
+		// Close is called after the stream has been canceled.  Like Send,
+		// blocks if there is no buffer space available.
 		Close() error
 	} {{end}}
 }
@@ -605,18 +607,14 @@ type {{$clientCall}} interface {
 	// Finish blocks until the server is done, and returns the positional return
 	// values for call.{{end}}
 	//
-	// Finish returns immediately if Cancel has been called; depending on the
+	// Finish returns immediately if the call has been canceled; depending on the
 	// timing the output could either be an error signaling cancelation, or the
 	// valid positional return values from the server.
 	//
-	// Calling Finish is mandatory for releasing stream resources, unless Cancel
-	// has been called or any of the other methods return an error.  Finish should
+	// Calling Finish is mandatory for releasing stream resources, unless the call
+	// has been canceled or any of the other methods return an error.  Finish should
 	// be called at most once.
 	Finish() {{argParens (argNameTypes "" "" "err error" $data (stripFinalError $method.OutArgs))}}
-	// Cancel cancels the RPC, notifying the server to stop processing.  It is
-	// safe to call Cancel concurrently with any of the other stream methods.
-	// Calling Cancel after Finish has returned is a no-op.
-	Cancel()
 }
 
 type {{$clientCallImpl}} struct {

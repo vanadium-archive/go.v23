@@ -48,11 +48,6 @@ type Call interface {
 	// with the positional output results (of any arity).
 	Finish(resultptrs ...interface{}) error
 
-	// Cancel the call.  The server will stop processing, if possible.  Calls to
-	// Finish will return immediately with an error indicating the cancellation.
-	// It is safe to call Cancel concurrently with any other Call method.
-	Cancel()
-
 	// RemoteBlesesings returns the blessings that the server provided to authenticate
 	// with the client.
 	//

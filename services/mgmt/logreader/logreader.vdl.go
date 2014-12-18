@@ -128,18 +128,14 @@ type LogFileReadLogCall interface {
 	// Finish blocks until the server is done, and returns the positional return
 	// values for call.
 	//
-	// Finish returns immediately if Cancel has been called; depending on the
+	// Finish returns immediately if the call has been canceled; depending on the
 	// timing the output could either be an error signaling cancelation, or the
 	// valid positional return values from the server.
 	//
-	// Calling Finish is mandatory for releasing stream resources, unless Cancel
-	// has been called or any of the other methods return an error.  Finish should
+	// Calling Finish is mandatory for releasing stream resources, unless the call
+	// has been canceled or any of the other methods return an error.  Finish should
 	// be called at most once.
 	Finish() (int64, error)
-	// Cancel cancels the RPC, notifying the server to stop processing.  It is
-	// safe to call Cancel concurrently with any of the other stream methods.
-	// Calling Cancel after Finish has returned is a no-op.
-	Cancel()
 }
 
 type implLogFileReadLogCall struct {
