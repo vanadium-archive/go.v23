@@ -76,7 +76,7 @@ func (WireMap) __VDLReflect(struct {
 }) {
 }
 
-// WireField represents a field in a struct or oneof type.
+// WireField represents a field in a struct or union type.
 type WireField struct {
 	Name string
 	Type TypeID
@@ -98,14 +98,14 @@ func (WireStruct) __VDLReflect(struct {
 }) {
 }
 
-// WireOneOf represents a type definition for oneof types.
-type WireOneOf struct {
+// WireUnion represents a type definition for union types.
+type WireUnion struct {
 	Name   string
 	Fields []WireField
 }
 
-func (WireOneOf) __VDLReflect(struct {
-	Name string "veyron.io/veyron/veyron2/vom2.WireOneOf"
+func (WireUnion) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vom2.WireUnion"
 }) {
 }
 
@@ -137,7 +137,7 @@ func init() {
 	__vdl.Register(WireMap{})
 	__vdl.Register(WireField{})
 	__vdl.Register(WireStruct{})
-	__vdl.Register(WireOneOf{})
+	__vdl.Register(WireUnion{})
 	__vdl.Register(WireOptional{})
 	__vdl.Register(TypeID(0))
 }
@@ -192,7 +192,7 @@ const WireFieldID = TypeID(23)
 
 const WireFieldListID = TypeID(24)
 
-const WireOneOfID = TypeID(25)
+const WireUnionID = TypeID(25)
 
 const WireOptionalID = TypeID(29)
 

@@ -160,10 +160,10 @@ type MountTableServerMethods interface {
 	Unmount(ctx __ipc.ServerContext, Server string) error
 	// ResolveStep takes the next step in resolving a name.  Returns the next
 	// servers to query and the suffix at those servers.
-	ResolveStep(__ipc.ServerContext) (Servers []naming.VDLMountedServer, Suffix string, Error error)
+	ResolveStep(__ipc.ServerContext) (Servers []naming.VDLMountedServer, Suffix string, err error)
 	// ResolveStepX takes the next step in resolving a name.  Returns the next
 	// servers to query and the suffix at those servers.
-	ResolveStepX(__ipc.ServerContext) (Entry naming.VDLMountEntry, Error error)
+	ResolveStepX(__ipc.ServerContext) (Entry naming.VDLMountEntry, err error)
 }
 
 // MountTableServerStubMethods is the server interface containing
@@ -266,7 +266,7 @@ var descMountTable = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"Servers", ``}, // []naming.VDLMountedServer
 				{"Suffix", ``},  // string
-				{"Error", ``},   // error
+				{"err", ``},     // error
 			},
 			Tags: []__vdlutil.Any{access.Tag("Read")},
 		},
@@ -275,7 +275,7 @@ var descMountTable = __ipc.InterfaceDesc{
 			Doc:  "// ResolveStepX takes the next step in resolving a name.  Returns the next\n// servers to query and the suffix at those servers.",
 			OutArgs: []__ipc.ArgDesc{
 				{"Entry", ``}, // naming.VDLMountEntry
-				{"Error", ``}, // error
+				{"err", ``},   // error
 			},
 			Tags: []__vdlutil.Any{access.Tag("Read")},
 		},
@@ -300,14 +300,14 @@ func (s implMountTableServerStub) Signature(ctx __ipc.ServerContext) (__ipc.Serv
 		OutArgs: []__ipc.MethodArgument{
 			{Name: "Servers", Type: 68},
 			{Name: "Suffix", Type: 3},
-			{Name: "Error", Type: 66},
+			{Name: "err", Type: 66},
 		},
 	}
 	result.Methods["ResolveStepX"] = __ipc.MethodSignature{
 		InArgs: []__ipc.MethodArgument{},
 		OutArgs: []__ipc.MethodArgument{
 			{Name: "Entry", Type: 69},
-			{Name: "Error", Type: 66},
+			{Name: "err", Type: 66},
 		},
 	}
 	result.Methods["Unmount"] = __ipc.MethodSignature{

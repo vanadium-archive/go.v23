@@ -7,7 +7,7 @@ import (
 	"veyron.io/veyron/veyron2/verror"
 )
 
-// TODO: Replace this with vdl oneof!
+// TODO: Replace this with vdl union!
 type WireType interface{}
 
 // encoderTypes maintains the mapping from type to type id, used by the encoder.
@@ -129,7 +129,7 @@ func (dt *decoderTypes) makeType(id TypeID, builder *vdl.TypeBuilder, pending ma
 }
 
 func (dt *decoderTypes) makeBaseType(wt *vdl.Value, builder *vdl.TypeBuilder, pending map[TypeID]vdl.PendingType) (vdl.PendingType, error) {
-	// TODO(toddw): Consider changing wt to WireType after oneof is implemented.
+	// TODO(toddw): Consider changing wt to WireType after union is implemented.
 	switch wt.Type() {
 	case wireNamedType:
 		return nil, verror.BadProtocolf("vom: NamedType has empty name: %v", wt)
@@ -185,9 +185,9 @@ func (dt *decoderTypes) makeBaseType(wt *vdl.Value, builder *vdl.TypeBuilder, pe
 			base.AppendField(fname, field)
 		}
 		return base, nil
-	case wireOneOfType:
+	case wireUnionType:
 		vFields := wt.Field(1)
-		base := builder.OneOf()
+		base := builder.Union()
 		for ix := 0; ix < vFields.Len(); ix++ {
 			vf := vFields.Index(ix)
 			fname, fieldID := vf.Field(0).RawString(), TypeID(vf.Field(1).Uint())
@@ -254,7 +254,7 @@ var (
 	wireStructType     = vdl.TypeOf(WireStruct{})
 	wireFieldType      = vdl.TypeOf(WireField{})
 	wireFieldListType  = vdl.TypeOf([]WireField{})
-	wireOneOfType      = vdl.TypeOf(WireOneOf{})
+	wireUnionType      = vdl.TypeOf(WireUnion{})
 	wireOptionalType   = vdl.TypeOf(WireOptional{})
 	wireByteListType   = vdl.TypeOf([]byte{})
 	wireStringListType = vdl.TypeOf([]string{})
@@ -298,7 +298,7 @@ func init() {
 		WireStructID:     wireStructType,
 		WireFieldID:      wireFieldType,
 		WireFieldListID:  wireFieldListType,
-		WireOneOfID:      wireOneOfType,
+		WireUnionID:      wireUnionType,
 		WireOptionalID:   wireOptionalType,
 		WireByteListID:   wireByteListType,
 		WireStringListID: wireStringListType,

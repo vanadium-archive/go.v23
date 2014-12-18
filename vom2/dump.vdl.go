@@ -10,7 +10,7 @@ import (
 )
 
 type (
-	// Primitive represents any single field of the Primitive oneof type.
+	// Primitive represents any single field of the Primitive union type.
 	//
 	// Primitive represents one of the primitive vom values.  All vom values are
 	// composed of combinations of these primitives.
@@ -21,26 +21,26 @@ type (
 		Interface() interface{}
 		// Name returns the field name.
 		Name() string
-		// __VDLReflect describes the Primitive oneof type.
+		// __VDLReflect describes the Primitive union type.
 		__VDLReflect(__PrimitiveReflect)
 	}
-	// PrimitivePBool represents field PBool of the Primitive oneof type.
+	// PrimitivePBool represents field PBool of the Primitive union type.
 	PrimitivePBool struct{ Value bool }
-	// PrimitivePByte represents field PByte of the Primitive oneof type.
+	// PrimitivePByte represents field PByte of the Primitive union type.
 	PrimitivePByte struct{ Value byte }
-	// PrimitivePUint represents field PUint of the Primitive oneof type.
+	// PrimitivePUint represents field PUint of the Primitive union type.
 	PrimitivePUint struct{ Value uint64 }
-	// PrimitivePInt represents field PInt of the Primitive oneof type.
+	// PrimitivePInt represents field PInt of the Primitive union type.
 	PrimitivePInt struct{ Value int64 }
-	// PrimitivePFloat represents field PFloat of the Primitive oneof type.
+	// PrimitivePFloat represents field PFloat of the Primitive union type.
 	PrimitivePFloat struct{ Value float64 }
-	// PrimitivePString represents field PString of the Primitive oneof type.
+	// PrimitivePString represents field PString of the Primitive union type.
 	PrimitivePString struct{ Value string }
-	// __PrimitiveReflect describes the Primitive oneof type.
+	// __PrimitiveReflect describes the Primitive union type.
 	__PrimitiveReflect struct {
 		Name  string "veyron.io/veyron/veyron2/vom2.Primitive"
 		Type  Primitive
-		OneOf struct {
+		Union struct {
 			PBool   PrimitivePBool
 			PByte   PrimitivePByte
 			PUint   PrimitivePUint

@@ -64,6 +64,6 @@ func Type(t *vdl.Type, pkgPath string, imports codegen.Imports) (string, error) 
 		}
 		return "map[" + key + "]" + elem, nil
 	}
-	// Enum, OneOf and Struct must be named.
+	// Enum, Union and Struct must be named.
 	return "", fmt.Errorf("vdl: types of kind %q must be named", t.Kind())
 }

@@ -70,8 +70,8 @@ func Generate(pkg *compile.Package, env *compile.Env, config vdltool.JavaConfig)
 				ret = append(ret, genJavaListFile(tdef, env))
 			case vdl.Map:
 				ret = append(ret, genJavaMapFile(tdef, env))
-			case vdl.OneOf:
-				ret = append(ret, genJavaOneOfFile(tdef, env))
+			case vdl.Union:
+				ret = append(ret, genJavaUnionFile(tdef, env))
 			case vdl.Set:
 				ret = append(ret, genJavaSetFile(tdef, env))
 			case vdl.Struct:

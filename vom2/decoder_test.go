@@ -25,9 +25,9 @@ func TestBinaryDecoder(t *testing.T) {
 		if err != nil {
 			t.Fatalf("%s: DeriveReflectInfo(%v) failed: %v", test.Name, rtWant, err)
 		}
-		if len(ri.OneOfFields) > 0 {
-			// Special case for oneof types, to decode into the oneof interface.
-			testDecode(t, test.Name+" [oneof iface]", data, ri.WireType, want)
+		if len(ri.UnionFields) > 0 {
+			// Special case for union types, to decode into the union interface.
+			testDecode(t, test.Name+" [union iface]", data, ri.WireType, want)
 		}
 	}
 }

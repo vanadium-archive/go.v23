@@ -21,8 +21,8 @@ var (
 	errKeyNonNil      = errors.New("key only valid for set and map")
 	errFieldTypeNil   = errors.New("nil field type")
 	errFieldNameEmpty = errors.New("empty field name")
-	errNoFields       = errors.New("no oneof fields")
-	errHasFields      = errors.New("fields only valid for struct or oneof")
+	errNoFields       = errors.New("no union fields")
+	errHasFields      = errors.New("fields only valid for struct or union")
 	errBaseNil        = errors.New("nil base type for named type")
 	errBaseCycle      = errors.New("invalid named type cycle")
 	errNotBuilt       = errors.New("TypeBuilder.Build must be called before Pending.Built")
@@ -147,13 +147,13 @@ type PendingStruct interface {
 	NumField() int
 }
 
-// PendingOneOf represents a OneOf type that is being built.
-type PendingOneOf interface {
+// PendingUnion represents a Union type that is being built.
+type PendingUnion interface {
 	PendingType
-	// AppendField appends the OneOf field with the given name and t.  The name
+	// AppendField appends the Union field with the given name and t.  The name
 	// must not be empty.  The ordering of fields is preserved; different
 	// orderings create different types.
-	AppendField(name string, t TypeOrPending) PendingOneOf
+	AppendField(name string, t TypeOrPending) PendingUnion
 	// NumField returns the number of fields appended so far.
 	NumField() int
 }
@@ -186,7 +186,7 @@ type (
 	pendingSet      struct{ *pending }
 	pendingMap      struct{ *pending }
 	pendingStruct   struct{ *pending }
-	pendingOneOf    struct{ *pending }
+	pendingUnion    struct{ *pending }
 	pendingNamed    struct{ *pending }
 )
 
@@ -239,12 +239,12 @@ func (p pendingStruct) NumField() int {
 	return len(p.fields)
 }
 
-func (p pendingOneOf) AppendField(name string, t TypeOrPending) PendingOneOf {
+func (p pendingUnion) AppendField(name string, t TypeOrPending) PendingUnion {
 	p.fields = append(p.fields, Field{name, t.ptype()})
 	return p
 }
 
-func (p pendingOneOf) NumField() int {
+func (p pendingUnion) NumField() int {
 	return len(p.fields)
 }
 
@@ -324,9 +324,9 @@ func (b *TypeBuilder) Struct() PendingStruct {
 	return pendingStruct{b.add(&Type{kind: Struct})}
 }
 
-// OneOf returns PendingOneOf, used to describe a OneOf type.
-func (b *TypeBuilder) OneOf() PendingOneOf {
-	return pendingOneOf{b.add(&Type{kind: OneOf})}
+// Union returns PendingUnion, used to describe a Union type.
+func (b *TypeBuilder) Union() PendingUnion {
+	return pendingUnion{b.add(&Type{kind: Union})}
 }
 
 // Named returns PendingNamed, used to describe a named type based on another
@@ -475,11 +475,11 @@ func StructType(fields ...Field) *Type {
 	return checkedBuild(b, s)
 }
 
-// OneOfType is a helper using TypeBuilder to create a single OneOf type.
+// UnionType is a helper using TypeBuilder to create a single Union type.
 // Panics on all errors.
-func OneOfType(fields ...Field) *Type {
+func UnionType(fields ...Field) *Type {
 	var b TypeBuilder
-	o := b.OneOf()
+	o := b.Union()
 	for _, f := range fields {
 		o.AppendField(f.Name, f.Type)
 	}
@@ -567,11 +567,11 @@ func uniqueTypeStr(t *Type, seen map[*Type]bool) string {
 		return s + "set[" + uniqueTypeStr(t.key, seen) + "]"
 	case Map:
 		return s + "map[" + uniqueTypeStr(t.key, seen) + "]" + uniqueTypeStr(t.elem, seen)
-	case Struct, OneOf:
+	case Struct, Union:
 		if t.kind == Struct {
 			s += "struct{"
 		} else {
-			s += "oneof{"
+			s += "union{"
 		}
 		for index, f := range t.fields {
 			if index > 0 {
@@ -653,7 +653,7 @@ func isValidKey(t *Type, seen map[*Type]bool) bool {
 		return false
 	case Array:
 		return isValidKey(t.elem, seen)
-	case Struct, OneOf:
+	case Struct, Union:
 		for _, x := range t.fields {
 			if !isValidKey(x.Type, seen) {
 				return false
@@ -690,7 +690,7 @@ func typeInStrictCycle(t *Type, seen map[*Type]int) *Type {
 		if typeInCycle := typeInStrictCycle(t.elem, seen); typeInCycle != nil {
 			return typeInCycle
 		}
-	case Struct, OneOf:
+	case Struct, Union:
 		for _, x := range t.fields {
 			if typeInCycle := typeInStrictCycle(x.Type, seen); typeInCycle != nil {
 				return typeInCycle
@@ -791,7 +791,7 @@ func verifyAndCollectAllTypes(t *Type, allTypes map[*Type]bool) error {
 	}
 	// Check fields
 	switch t.kind {
-	case Struct, OneOf:
+	case Struct, Union:
 		seenFields := make(map[string]bool, len(t.fields))
 		for _, f := range t.fields {
 			if f.Type == nil {
@@ -805,10 +805,10 @@ func verifyAndCollectAllTypes(t *Type, allTypes map[*Type]bool) error {
 			}
 			seenFields[f.Name] = true
 		}
-		// We allow struct{} but not oneof{}; we rely on oneof having at least one
-		// field, and we special-case field 0.  E.g. the zero value of oneof is the
+		// We allow struct{} but not union{}; we rely on union having at least one
+		// field, and we special-case field 0.  E.g. the zero value of union is the
 		// zero value of the type of field 0.
-		if t.kind == OneOf && len(t.fields) == 0 {
+		if t.kind == Union && len(t.fields) == 0 {
 			return errNoFields
 		}
 	default:

@@ -101,7 +101,7 @@ type BuilderClientMethods interface {
 	Build(ctx __context.T, Arch Architecture, OS OperatingSystem, opts ...__ipc.CallOpt) (BuilderBuildCall, error)
 	// Describe generates a description for a binary identified by
 	// the given Object name.
-	Describe(ctx __context.T, Name string, opts ...__ipc.CallOpt) (binary.Description, error)
+	Describe(ctx __context.T, name string, opts ...__ipc.CallOpt) (binary.Description, error)
 }
 
 // BuilderClientStub adds universal methods to BuilderClientMethods.
@@ -281,7 +281,7 @@ type BuilderServerMethods interface {
 	Build(ctx BuilderBuildContext, Arch Architecture, OS OperatingSystem) ([]byte, error)
 	// Describe generates a description for a binary identified by
 	// the given Object name.
-	Describe(ctx __ipc.ServerContext, Name string) (binary.Description, error)
+	Describe(ctx __ipc.ServerContext, name string) (binary.Description, error)
 }
 
 // BuilderServerStubMethods is the server interface containing
@@ -294,7 +294,7 @@ type BuilderServerStubMethods interface {
 	Build(ctx *BuilderBuildContextStub, Arch Architecture, OS OperatingSystem) ([]byte, error)
 	// Describe generates a description for a binary identified by
 	// the given Object name.
-	Describe(ctx __ipc.ServerContext, Name string) (binary.Description, error)
+	Describe(ctx __ipc.ServerContext, name string) (binary.Description, error)
 }
 
 // BuilderServerStub adds universal methods to BuilderServerStubMethods.
@@ -369,7 +369,7 @@ var descBuilder = __ipc.InterfaceDesc{
 			Name: "Describe",
 			Doc:  "// Describe generates a description for a binary identified by\n// the given Object name.",
 			InArgs: []__ipc.ArgDesc{
-				{"Name", ``}, // string
+				{"name", ``}, // string
 			},
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // binary.Description
@@ -396,7 +396,7 @@ func (s implBuilderServerStub) Signature(ctx __ipc.ServerContext) (__ipc.Service
 	}
 	result.Methods["Describe"] = __ipc.MethodSignature{
 		InArgs: []__ipc.MethodArgument{
-			{Name: "Name", Type: 3},
+			{Name: "name", Type: 3},
 		},
 		OutArgs: []__ipc.MethodArgument{
 			{Name: "", Type: 72},

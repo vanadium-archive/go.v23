@@ -74,7 +74,7 @@ either a type or a value.  All values are typed.  Here's the protocol grammar:
   Value:
     primitive |  CompositeV
   CompositeV:
-    ArrayV | ListV | SetV | MapV | StructV | OneOfV | OptionalV | AnyV
+    ArrayV | ListV | SetV | MapV | StructV | UnionV | OptionalV | AnyV
   ArrayV:
     Value*len
   ListV:
@@ -85,7 +85,7 @@ either a type or a value.  All values are typed.  Here's the protocol grammar:
     len (Value Value)*len
   StructV:
     (index Value)* 0  // index is the 1-based field index
-  OneOfV:
+  UnionV:
     index Value       // index is the 1-based field index
   OptionalV:
     0 // nil
@@ -116,7 +116,7 @@ either a type or a value.  All values are typed.  Here's the protocol grammar:
   Value:
     primitive |  CompositeV
   CompositeV:
-    ArrayV | ListV | SetV | MapV | StructV | OneOfV | AnyV
+    ArrayV | ListV | SetV | MapV | StructV | UnionV | AnyV
   ArrayV:
     len Value*len // TODO(toddw): len only used to distinguish NIL_VALUE
   ListV:
@@ -127,7 +127,7 @@ either a type or a value.  All values are typed.  Here's the protocol grammar:
     len (Value Value)*len
   StructV:
     (index Value)* END  // index is the 0-based field index
-  OneOfV:
+  UnionV:
     index Value         // index is the 0-based field index
   AnyV:
     typeID Value
@@ -213,7 +213,7 @@ User-defined TypeIDs larger than 127 are encoded as regular multi-byte var256.
 
 TODO(toddw): For small value encoding to be useful, we'll want to use it for all
 values that can fit, but we'll be dropping the sizes of int and uint, and the
-type names.  Now that OneOf is labeled, the only issue is Any.  And now that we
+type names.  Now that Union is labeled, the only issue is Any.  And now that we
 have Signature with type information, maybe we can drop the type names
 regularly, and only send them when the Signature says "Any".  This also impacts
 where we perform value conversions - does it happen on the server or the client?

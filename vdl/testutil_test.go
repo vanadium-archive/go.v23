@@ -283,37 +283,37 @@ func (x nEnum) String() string {
 
 func (nEnum) __VDLReflect(struct{ Enum struct{ A, B, C string } }) {}
 
-// Special case oneof isn't regularly expressible in Go.
-//   type nOneOf oneof{A bool;B string;C int32}
+// Special case union isn't regularly expressible in Go.
+//   type nUnion union{A bool;B string;C int32}
 type (
-	nOneOf interface {
+	nUnion interface {
 		Index() int
 		Name() string
-		__VDLReflect(__nOneOfReflect)
+		__VDLReflect(__nUnionReflect)
 	}
-	nOneOfA struct{ Value bool }
-	nOneOfB struct{ Value string }
-	nOneOfC struct{ Value int32 }
+	nUnionA struct{ Value bool }
+	nUnionB struct{ Value string }
+	nUnionC struct{ Value int32 }
 
-	__nOneOfReflect struct {
-		Type  nOneOf
-		OneOf struct {
-			A nOneOfA
-			B nOneOfB
-			C nOneOfC
+	__nUnionReflect struct {
+		Type  nUnion
+		Union struct {
+			A nUnionA
+			B nUnionB
+			C nUnionC
 		}
 	}
 )
 
-func (nOneOfA) Name() string                 { return "A" }
-func (nOneOfA) Index() int                   { return 0 }
-func (nOneOfA) __VDLReflect(__nOneOfReflect) {}
-func (nOneOfB) Name() string                 { return "B" }
-func (nOneOfB) Index() int                   { return 1 }
-func (nOneOfB) __VDLReflect(__nOneOfReflect) {}
-func (nOneOfC) Name() string                 { return "C" }
-func (nOneOfC) Index() int                   { return 2 }
-func (nOneOfC) __VDLReflect(__nOneOfReflect) {}
+func (nUnionA) Name() string                 { return "A" }
+func (nUnionA) Index() int                   { return 0 }
+func (nUnionA) __VDLReflect(__nUnionReflect) {}
+func (nUnionB) Name() string                 { return "B" }
+func (nUnionB) Index() int                   { return 1 }
+func (nUnionB) __VDLReflect(__nUnionReflect) {}
+func (nUnionC) Name() string                 { return "C" }
+func (nUnionC) Index() int                   { return 2 }
+func (nUnionC) __VDLReflect(__nUnionReflect) {}
 
 // Define a bunch of *Type types used in tests.
 var (
@@ -409,7 +409,7 @@ var (
 	structAIntType  = StructType(Field{"A", Int64Type})
 	structAIntTypeN = NamedType("nStructA", structAIntType)
 
-	oneOfTypeN = rtN("OneOf", OneOfType([]Field{{"A", BoolType}, {"B", StringType}, {"C", Int32Type}}...))
+	unionTypeN = rtN("Union", UnionType([]Field{{"A", BoolType}, {"B", StringType}, {"C", Int32Type}}...))
 
 	// Types that cannot be converted to sets.  Although we represent sets as
 	// map[key]struct{} on the Go side, we don't allow these as general

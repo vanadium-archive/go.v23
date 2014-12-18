@@ -2,7 +2,7 @@ package vom2
 
 // Primitive represents one of the primitive vom values.  All vom values are
 // composed of combinations of these primitives.
-type Primitive oneof {
+type Primitive union {
 	PBool   bool
 	PByte   byte
 	PUint   uint64

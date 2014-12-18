@@ -1,7 +1,7 @@
 package vom2
 
 /* TODO(toddw): Use this as the WireType, instead of any.
-type WireType oneof{
+type WireType union{
 	WireNamed
 	WireEnum
 	WireArray
@@ -9,7 +9,7 @@ type WireType oneof{
 	WireSet
 	WireMap
 	WireStruct
-	WireOneOf
+	WireUnion
 }
 */
 
@@ -51,7 +51,7 @@ type WireMap struct {
 	Elem TypeID
 }
 
-// WireField represents a field in a struct or oneof type.
+// WireField represents a field in a struct or union type.
 type WireField struct {
 	Name string
 	Type TypeID
@@ -63,8 +63,8 @@ type WireStruct struct {
 	Fields []WireField
 }
 
-// WireOneOf represents a type definition for oneof types.
-type WireOneOf struct {
+// WireUnion represents a type definition for union types.
+type WireUnion struct {
 	Name   string
 	Fields []WireField
 }
@@ -106,7 +106,7 @@ const (
 	WireStructID    = TypeID(22)
 	WireFieldID     = TypeID(23)
 	WireFieldListID = TypeID(24)
-	WireOneOfID     = TypeID(25)
+	WireUnionID     = TypeID(25)
 	WireOptionalID  = TypeID(29)
 	// Other commonly used composites
 	WireByteListID   = TypeID(26)
@@ -143,7 +143,7 @@ const (
 	WireIDNameType = TypeID(18)
 	WireIDLabels   = TypeID(19) // enum
 	WireIDKeyElem  = TypeID(20) // array, list, set, map, optional
-	WireIDFields   = TypeID(21) // struct, oneof
+	WireIDFields   = TypeID(21) // struct, union
 	// Other commonly used composites
 	WireIDNameTypeList = TypeID(22)
 	WireIDStringList   = TypeID(23)

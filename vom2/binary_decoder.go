@@ -358,7 +358,7 @@ func (d *binaryDecoder) decodeValue(tt *vdl.Type, target valconv.Target) error {
 				}
 			}
 		}
-	case vdl.OneOf:
+	case vdl.Union:
 		fieldsTarget, err := target.StartFields(ttFrom)
 		if err != nil {
 			return err
@@ -459,7 +459,7 @@ func (d *binaryDecoder) ignoreValue(t *vdl.Type) error {
 				}
 			}
 		}
-	case vdl.Any, vdl.OneOf:
+	case vdl.Any, vdl.Union:
 		switch id, err := binaryDecodeUint(d.buf); {
 		case err != nil:
 			return err

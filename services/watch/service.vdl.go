@@ -129,7 +129,7 @@ const _ = __wiretype.TypeIDInvalid
 // that match a pattern.  See the package comments for details.
 type GlobWatcherClientMethods interface {
 	// WatchGlob returns a stream of changes that match a pattern.
-	WatchGlob(ctx __context.T, Req types.GlobRequest, opts ...__ipc.CallOpt) (GlobWatcherWatchGlobCall, error)
+	WatchGlob(ctx __context.T, req types.GlobRequest, opts ...__ipc.CallOpt) (GlobWatcherWatchGlobCall, error)
 }
 
 // GlobWatcherClientStub adds universal methods to GlobWatcherClientMethods.
@@ -263,7 +263,7 @@ func (c *implGlobWatcherWatchGlobCall) Finish() (err error) {
 // that match a pattern.  See the package comments for details.
 type GlobWatcherServerMethods interface {
 	// WatchGlob returns a stream of changes that match a pattern.
-	WatchGlob(ctx GlobWatcherWatchGlobContext, Req types.GlobRequest) error
+	WatchGlob(ctx GlobWatcherWatchGlobContext, req types.GlobRequest) error
 }
 
 // GlobWatcherServerStubMethods is the server interface containing
@@ -272,7 +272,7 @@ type GlobWatcherServerMethods interface {
 // is the streaming methods.
 type GlobWatcherServerStubMethods interface {
 	// WatchGlob returns a stream of changes that match a pattern.
-	WatchGlob(ctx *GlobWatcherWatchGlobContextStub, Req types.GlobRequest) error
+	WatchGlob(ctx *GlobWatcherWatchGlobContextStub, req types.GlobRequest) error
 }
 
 // GlobWatcherServerStub adds universal methods to GlobWatcherServerStubMethods.
@@ -331,7 +331,7 @@ var descGlobWatcher = __ipc.InterfaceDesc{
 			Name: "WatchGlob",
 			Doc:  "// WatchGlob returns a stream of changes that match a pattern.",
 			InArgs: []__ipc.ArgDesc{
-				{"Req", ``}, // types.GlobRequest
+				{"req", ``}, // types.GlobRequest
 			},
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
@@ -346,7 +346,7 @@ func (s implGlobWatcherServerStub) Signature(ctx __ipc.ServerContext) (__ipc.Ser
 	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
 	result.Methods["WatchGlob"] = __ipc.MethodSignature{
 		InArgs: []__ipc.MethodArgument{
-			{Name: "Req", Type: 67},
+			{Name: "req", Type: 67},
 		},
 		OutArgs: []__ipc.MethodArgument{
 			{Name: "", Type: 68},

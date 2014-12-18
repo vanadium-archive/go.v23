@@ -388,8 +388,8 @@ func evalCompLit(t *vdl.Type, lit *parse.ConstCompositeLit, file *File, env *Env
 		v = evalMapLit(t, lit, file, env)
 	case vdl.Struct:
 		v = evalStructLit(t, lit, file, env)
-	case vdl.OneOf:
-		v = evalOneOfLit(t, lit, file, env)
+	case vdl.Union:
+		v = evalUnionLit(t, lit, file, env)
 	default:
 		env.Errorf(file, lit.Pos(), "%v invalid type for composite literal", t)
 		return nil
@@ -569,10 +569,10 @@ func evalStructLit(t *vdl.Type, lit *parse.ConstCompositeLit, file *File, env *E
 	return structv
 }
 
-func evalOneOfLit(t *vdl.Type, lit *parse.ConstCompositeLit, file *File, env *Env) *vdl.Value {
+func evalUnionLit(t *vdl.Type, lit *parse.ConstCompositeLit, file *File, env *Env) *vdl.Value {
 	// We require exactly one kv with an explicit key.
-	oneofv := vdl.ZeroValue(t)
-	desc := fmt.Sprintf("%v oneof literal", t)
+	unionv := vdl.ZeroValue(t)
+	desc := fmt.Sprintf("%v union literal", t)
 	if len(lit.KVList) != 1 {
 		env.Errorf(file, lit.Pos(), "invalid %s (must have exactly one entry)", desc)
 		return nil
@@ -594,12 +594,12 @@ func evalOneOfLit(t *vdl.Type, lit *parse.ConstCompositeLit, file *File, env *En
 		return nil
 	}
 	// Evaluate the value and perform the assignment.
-	value := evalTypedValue("oneof field", field.Type, kv.Value, file, env)
+	value := evalTypedValue("union field", field.Type, kv.Value, file, env)
 	if value == nil {
 		return nil
 	}
-	oneofv.AssignOneOfField(index, value)
-	return oneofv
+	unionv.AssignUnionField(index, value)
+	return unionv
 }
 
 // evalTypedValue evaluates pexpr into a vdl.Value.  If a non-nil value is

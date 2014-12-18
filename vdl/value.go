@@ -65,8 +65,8 @@ func zeroRep(t *Type) interface{} {
 		return zeroRepMap(t.key)
 	case Struct:
 		return make(repSequence, len(t.fields))
-	case OneOf:
-		return repOneOf{0, ZeroValue(t.fields[0].Type)}
+	case Union:
+		return repUnion{0, ZeroValue(t.fields[0].Type)}
 	case Any, Optional:
 		return (*Value)(nil) // nil represents nonexistence
 	default:
@@ -105,7 +105,7 @@ func isZeroRep(t *Type, rep interface{}) bool {
 		case Array, Struct:
 			return trep.AllValuesZero()
 		}
-	case repOneOf:
+	case repUnion:
 		return trep.IsZero()
 	case *Value:
 		return trep == nil
@@ -125,8 +125,8 @@ func copyRep(t *Type, rep interface{}) interface{} {
 		return copyRepMap(trep)
 	case repSequence:
 		return copyRepSequence(trep)
-	case repOneOf:
-		return copyRepOneOf(trep)
+	case repUnion:
+		return copyRepUnion(trep)
 	case *Value:
 		return CopyValue(trep)
 	default:
@@ -154,7 +154,7 @@ func stringRep(t *Type, rep interface{}) string {
 		return trep.String()
 	case repSequence:
 		return trep.String(t)
-	case repOneOf:
+	case repUnion:
 		return trep.String(t)
 	case *Value:
 		switch {
@@ -232,7 +232,7 @@ func TypeObjectValue(x *Type) *Value { return ZeroValue(TypeObjectType).AssignTy
 //   o Map:        empty collection
 //   o Array:      zero values for all elems
 //   o Struct:     zero values for all fields
-//   o OneOf:      zero value of the type at index 0
+//   o Union:      zero value of the type at index 0
 //   o Any:        nil value, representing nonexistence
 //   o Optional:   nil value, representing nonexistence
 //
@@ -305,8 +305,8 @@ func EqualValue(a, b *Value) bool {
 		return equalRepMap(arep, b.rep.(repMap))
 	case repSequence:
 		return equalRepSequence(arep, b.rep.(repSequence))
-	case repOneOf:
-		return equalRepOneOf(arep, b.rep.(repOneOf))
+	case repUnion:
+		return equalRepUnion(arep, b.rep.(repUnion))
 	case *Value:
 		return EqualValue(arep, b.rep.(*Value))
 	default:
@@ -393,7 +393,7 @@ func (v *Value) String() string {
 		return "INVALID"
 	}
 	switch v.t.Kind() {
-	case Array, List, Set, Map, Struct, OneOf:
+	case Array, List, Set, Map, Struct, Union:
 		// { } are used instead of ( ) for composites, except for []byte and [N]byte
 		if !v.t.IsBytes() {
 			return v.t.String() + stringRep(v.t, v.rep)
@@ -491,11 +491,11 @@ func (v *Value) Field(index int) *Value {
 	return v.rep.(repSequence).Index(v.t.fields[index].Type, index)
 }
 
-// OneOfIndex returns the field index and value from the underlying OneOf.
-func (v *Value) OneOfField() (int, *Value) {
-	v.t.checkKind("OneOfField", OneOf)
-	oneof := v.rep.(repOneOf)
-	return oneof.index, oneof.value
+// UnionIndex returns the field index and value from the underlying Union.
+func (v *Value) UnionField() (int, *Value) {
+	v.t.checkKind("UnionField", Union)
+	union := v.rep.(repUnion)
+	return union.index, union.value
 }
 
 // Elem returns the element value contained in the underlying Any or Optional.
@@ -725,14 +725,14 @@ func (v *Value) AssignMapIndex(key, elem *Value) *Value {
 	return v
 }
 
-// AssignOneOfField assigns the field index and value to the underlying OneOf.
+// AssignUnionField assigns the field index and value to the underlying Union.
 // Panics if the index is out of range, or if the value isn't assignable to the
 // field type.
-func (v *Value) AssignOneOfField(index int, value *Value) *Value {
-	v.t.checkKind("AssignOneOfField", OneOf)
+func (v *Value) AssignUnionField(index int, value *Value) *Value {
+	v.t.checkKind("AssignUnionField", Union)
 	if index >= len(v.t.fields) {
-		panic(fmt.Errorf("vdl: oneof %q index %d out of range", v.t, index))
+		panic(fmt.Errorf("vdl: union %q index %d out of range", v.t, index))
 	}
-	v.rep = repOneOf{index, typedCopy(v.t.fields[index].Type, value)}
+	v.rep = repUnion{index, typedCopy(v.t.fields[index].Type, value)}
 	return v
 }

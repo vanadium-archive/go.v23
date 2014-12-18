@@ -48,7 +48,7 @@ func (wtc *wireTypeConverter) bootstrapTypeID(t *vdl.Type) wiretype.TypeID {
 		return wiretype.TypeIDComplex128
 	case vdl.String:
 		return wiretype.TypeIDString
-	case vdl.Any, vdl.OneOf:
+	case vdl.Any, vdl.Union:
 		return wiretype.TypeIDInterface
 	case vdl.TypeObject:
 		return wiretype.TypeIDTypeID
@@ -107,8 +107,8 @@ func (wtc *wireTypeConverter) wireType(typ *vdl.Type) vdlutil.Any {
 			Fields: flds,
 			Name:   typ.Name(),
 		}
-	case vdl.OneOf:
-		// Hack oneof as a named any for now, this will all go away with vom2.
+	case vdl.Union:
+		// Hack union as a named any for now, this will all go away with vom2.
 		return wiretype.NamedPrimitiveType{
 			Type: wtc.bootstrapTypeID(vdl.AnyType),
 			Name: typ.Name(),

@@ -76,7 +76,7 @@ func TypeOf(v interface{}) *Type {
 // **map, and consider that to be a VDL map; the pointers are flattened away.
 //
 // In addition all Go interfaces are represented with the single Any type,
-// except for Go interfaces that describe OneOf types.
+// except for Go interfaces that describe Union types.
 //
 // By normalizing the rt type we simplify type creation, and also reduce
 // redundancy in the rtCache.
@@ -89,9 +89,9 @@ func normalizeType(rt reflect.Type) reflect.Type {
 			rtAtMostOnePtr = rt
 		}
 	}
-	// Handle special cases.  OneOf may be either an interface or a struct, and
+	// Handle special cases.  Union may be either an interface or a struct, and
 	// should be handled first.
-	if isOneOf(rt) {
+	if isUnion(rt) {
 		return rt
 	}
 	switch {
@@ -265,13 +265,13 @@ func makeTypeFromReflectLocked(rt reflect.Type, builder *TypeBuilder, pending ma
 		return unnamed, nil
 	}
 	// Named types are trickier, since they may be recursive.  First create the
-	// named type and add it to pending.  We must special-case oneof types; the
+	// named type and add it to pending.  We must special-case union types; the
 	// interface type and all field types are keyed in the pending map to point to
 	// the created vdl type.
 	named := builder.Named(ri.WireName)
 	pending[ri.WireType] = named
-	for _, oneofField := range ri.OneOfFields {
-		pending[oneofField.RepType] = named
+	for _, unionField := range ri.UnionFields {
+		pending[unionField.RepType] = named
 	}
 	// Now make the unnamed underlying type.  Recursive types will find the
 	// existing entry in pending, and avoid the infinite loop.
@@ -297,17 +297,17 @@ func makeUnnamedFromReflectLocked(ri *ReflectInfo, builder *TypeBuilder, pending
 		}
 		return enum, nil
 	}
-	// Handle oneof types
-	if len(ri.OneOfFields) > 0 {
-		oneof := builder.OneOf()
-		for _, f := range ri.OneOfFields {
+	// Handle union types
+	if len(ri.UnionFields) > 0 {
+		union := builder.Union()
+		for _, f := range ri.UnionFields {
 			in, err := typeFromReflectLocked(f.Type, builder, pending)
 			if err != nil {
 				return nil, err
 			}
-			oneof.AppendField(f.Name, in)
+			union.AppendField(f.Name, in)
 		}
-		return oneof, nil
+		return union, nil
 	}
 	// Handle composite types
 	rt := ri.WireType

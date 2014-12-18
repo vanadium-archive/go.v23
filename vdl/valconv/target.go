@@ -66,7 +66,7 @@ type Target interface {
 	// FinishMap finishes a prior StartMap call.
 	FinishMap(x MapTarget) error
 
-	// StartFields prepares conversion from a struct or oneof of type tt.
+	// StartFields prepares conversion from a struct or union of type tt.
 	// FinishFields must be called to finish the fields.
 	StartFields(tt *vdl.Type) (FieldsTarget, error)
 	// FinishFields finishes a prior StartFields call.
@@ -108,7 +108,7 @@ type MapTarget interface {
 	FinishField(key, field Target) error
 }
 
-// FieldsTarget represents conversion from struct or oneof fields.
+// FieldsTarget represents conversion from struct or union fields.
 type FieldsTarget interface {
 	// StartField prepares conversion of the field with the given name.
 	// FinishField must be called to finish the field.  An error with ID
@@ -151,8 +151,8 @@ func FromReflect(target Target, rv reflect.Value) error {
 			case tt.Kind() == vdl.TypeObject:
 				// Treat nil *vdl.Type as vdl.AnyType.
 				return target.FromTypeObject(vdl.AnyType)
-			case tt.Kind() == vdl.OneOf && rt.Kind() == reflect.Interface:
-				// Treat nil OneOf interface as the value of the type at index 0.
+			case tt.Kind() == vdl.Union && rt.Kind() == reflect.Interface:
+				// Treat nil Union interface as the value of the type at index 0.
 				return FromValue(target, vdl.ZeroValue(tt))
 			}
 			return target.FromNil(tt)
@@ -186,13 +186,13 @@ func FromReflect(target Target, rv reflect.Value) error {
 	}
 	// Recursive walk through the reflect value to fill in target.
 	//
-	// First handle special-cases enum and oneof.  Note that vdl.TypeFromReflect
+	// First handle special-cases enum and union.  Note that vdl.TypeFromReflect
 	// has already validated the methods, so we can call without error checking.
 	switch tt.Kind() {
 	case vdl.Enum:
 		label := rv.MethodByName("String").Call(nil)[0].String()
 		return target.FromEnumLabel(label, ttFrom)
-	case vdl.OneOf:
+	case vdl.Union:
 		// We're guaranteed rv is the concrete field struct.
 		name := rv.MethodByName("Name").Call(nil)[0].String()
 		fieldsTarget, err := target.StartFields(ttFrom)
@@ -201,7 +201,7 @@ func FromReflect(target Target, rv reflect.Value) error {
 		}
 		key, field, err := fieldsTarget.StartField(name)
 		if err != nil {
-			return err // no verror.NoExist special-case; oneof field is required
+			return err // no verror.NoExist special-case; union field is required
 		}
 		// Grab the "Value" field of the concrete field struct.
 		rvFieldValue := rv.Field(0)
@@ -490,15 +490,15 @@ func FromValue(target Target, vv *vdl.Value) error {
 			}
 		}
 		return target.FinishFields(fieldsTarget)
-	case vdl.OneOf:
+	case vdl.Union:
 		fieldsTarget, err := target.StartFields(tt)
 		if err != nil {
 			return err
 		}
-		fx, vvFieldValue := vv.OneOfField()
+		fx, vvFieldValue := vv.UnionField()
 		key, field, err := fieldsTarget.StartField(vv.Type().Field(fx).Name)
 		if err != nil {
-			return err // no verror.NoExist special-case; oneof field is required
+			return err // no verror.NoExist special-case; union field is required
 		}
 		if err := FromValue(field, vvFieldValue); err != nil {
 			return err

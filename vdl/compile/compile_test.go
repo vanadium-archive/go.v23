@@ -175,8 +175,8 @@ const (
 
 type ServiceA interface {
 	MethodA1() error
-	MethodA2(a int32, b string) (s string, err error)
-	MethodA3(a int32) stream<_, Scalars> (s string, err error) {"tag", Six}
+	MethodA2(a int32, b string) (s string | error)
+	MethodA3(a int32) stream<_, Scalars> (s string | error) {"tag", Six}
 	MethodA4(a int32) stream<int32, string> error
 }
 `
@@ -196,7 +196,7 @@ const (
 
 type ServiceB interface {
 	ServiceA
-	MethodB1(a Scalars, b Composites) (c CompComp, err error)
+	MethodB1(a Scalars, b Composites) (c CompComp | error)
 }
 `
 

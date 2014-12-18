@@ -48,8 +48,8 @@ type File struct {
 type Builder interface {
 	// Build streams sources to the build server, which then attempts to
 	// build the sources and streams back the compiled binaries.
-	Build(Arch Architecture, OS OperatingSystem) stream<File,File> ([]byte, error)
+	Build(Arch Architecture, OS OperatingSystem) stream<File,File> ([]byte | error)
 	// Describe generates a description for a binary identified by
 	// the given Object name.
-	Describe(Name string) (binary.Description, error)
+	Describe(name string) (binary.Description | error)
 }

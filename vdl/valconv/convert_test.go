@@ -692,9 +692,9 @@ func TestConverterStructDropIgnore(t *testing.T) {
 	}
 }
 
-// Test successful conversions to and from oneof values.
-func TestConverterOneOf(t *testing.T) {
-	// values for oneof component types
+// Test successful conversions to and from union values.
+func TestConverterUnion(t *testing.T) {
+	// values for union component types
 	vvTrue := vdl.BoolValue(true)
 	vv123 := vdl.Int64Value(123)
 	vvAbc := vdl.StringValue("Abc")
@@ -704,26 +704,26 @@ func TestConverterOneOf(t *testing.T) {
 	rv123 := int64(123)
 	rvAbc := string("Abc")
 	rvStruct123 := nStructInt64{123}
-	// values for oneof{A bool;B string;C struct}
-	vvTrueABC := vdl.ZeroValue(oneOfABCTypeN).AssignOneOfField(0, vvTrue)
-	vvAbcABC := vdl.ZeroValue(oneOfABCTypeN).AssignOneOfField(1, vvAbc)
-	vvStruct123ABC := vdl.ZeroValue(oneOfABCTypeN).AssignOneOfField(2, vvStruct123)
-	rvTrueABC := nOneOfABCA{rvTrue}
-	rvAbcABC := nOneOfABCB{rvAbc}
-	rvStruct123ABC := nOneOfABCC{rvStruct123}
-	rvTrueABCi := nOneOfABC(rvTrueABC)
-	rvAbcABCi := nOneOfABC(rvAbcABC)
-	rvStruct123ABCi := nOneOfABC(rvStruct123ABC)
-	// values for oneof{B string;C struct;D int64}
-	vvAbcBCD := vdl.ZeroValue(oneOfBCDTypeN).AssignOneOfField(0, vvAbc)
-	vvStruct123BCD := vdl.ZeroValue(oneOfBCDTypeN).AssignOneOfField(1, vvStruct123)
-	vv123BCD := vdl.ZeroValue(oneOfBCDTypeN).AssignOneOfField(2, vv123)
-	rvAbcBCD := nOneOfBCDB{rvAbc}
-	rvStruct123BCD := nOneOfBCDC{rvStruct123}
-	rv123BCD := nOneOfBCDD{rv123}
-	rvAbcBCDi := nOneOfBCD(rvAbcBCD)
-	rvStruct123BCDi := nOneOfBCD(rvStruct123BCD)
-	rv123BCDi := nOneOfBCD(rv123BCD)
+	// values for union{A bool;B string;C struct}
+	vvTrueABC := vdl.ZeroValue(unionABCTypeN).AssignUnionField(0, vvTrue)
+	vvAbcABC := vdl.ZeroValue(unionABCTypeN).AssignUnionField(1, vvAbc)
+	vvStruct123ABC := vdl.ZeroValue(unionABCTypeN).AssignUnionField(2, vvStruct123)
+	rvTrueABC := nUnionABCA{rvTrue}
+	rvAbcABC := nUnionABCB{rvAbc}
+	rvStruct123ABC := nUnionABCC{rvStruct123}
+	rvTrueABCi := nUnionABC(rvTrueABC)
+	rvAbcABCi := nUnionABC(rvAbcABC)
+	rvStruct123ABCi := nUnionABC(rvStruct123ABC)
+	// values for union{B string;C struct;D int64}
+	vvAbcBCD := vdl.ZeroValue(unionBCDTypeN).AssignUnionField(0, vvAbc)
+	vvStruct123BCD := vdl.ZeroValue(unionBCDTypeN).AssignUnionField(1, vvStruct123)
+	vv123BCD := vdl.ZeroValue(unionBCDTypeN).AssignUnionField(2, vv123)
+	rvAbcBCD := nUnionBCDB{rvAbc}
+	rvStruct123BCD := nUnionBCDC{rvStruct123}
+	rv123BCD := nUnionBCDD{rv123}
+	rvAbcBCDi := nUnionBCD(rvAbcBCD)
+	rvStruct123BCDi := nUnionBCD(rvStruct123BCD)
+	rv123BCDi := nUnionBCD(rv123BCD)
 
 	tests := []struct {
 		vvWant *vdl.Value
@@ -731,7 +731,7 @@ func TestConverterOneOf(t *testing.T) {
 		vvSrc  *vdl.Value
 		rvSrc  interface{}
 	}{
-		// Convert source and target same oneof.
+		// Convert source and target same union.
 		{vvTrueABC, rvTrueABC, vvTrueABC, rvTrueABC},
 		{vv123BCD, rv123BCD, vv123BCD, rv123BCD},
 		{vvAbcABC, rvAbcABC, vvAbcABC, rvAbcABC},
@@ -746,7 +746,7 @@ func TestConverterOneOf(t *testing.T) {
 		{vvStruct123ABC, &rvStruct123ABCi, vvStruct123ABC, &rvStruct123ABCi},
 		{vvStruct123BCD, &rvStruct123BCDi, vvStruct123BCD, &rvStruct123BCDi},
 
-		// Convert source and target different oneof.
+		// Convert source and target different union.
 		{vvAbcABC, rvAbcABC, vvAbcBCD, rvAbcBCD},
 		{vvAbcBCD, rvAbcBCD, vvAbcABC, rvAbcABC},
 		{vvStruct123ABC, rvStruct123ABC, vvStruct123BCD, rvStruct123BCD},
@@ -930,7 +930,7 @@ func testConverterWantSrc(t *testing.T, vvrvWant, vvrvSrc vvrv) {
 			t.Error(err)
 			continue
 		}
-		if rtSrc.Kind() == reflect.Struct && ttSrc.Kind() != vdl.OneOf {
+		if rtSrc.Kind() == reflect.Struct && ttSrc.Kind() != vdl.Union {
 			// Every struct may be converted to the empty struct
 			testConvert(t, "rv11", vdl.ZeroValue(emptyType), src, vdl.ZeroValue(emptyType), 0, false)
 			testConvert(t, "rv12", vdl.ZeroValue(emptyTypeN), src, vdl.ZeroValue(emptyTypeN), 0, false)

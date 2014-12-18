@@ -59,8 +59,8 @@ type TypeStruct struct {
 	P      Pos
 }
 
-// TypeOneOf represents oneof types.
-type TypeOneOf struct {
+// TypeUnion represents union types.
+type TypeUnion struct {
 	Fields []*Field
 	P      Pos
 }
@@ -84,7 +84,7 @@ func (t *TypeList) Pos() Pos     { return t.P }
 func (t *TypeSet) Pos() Pos      { return t.P }
 func (t *TypeMap) Pos() Pos      { return t.P }
 func (t *TypeStruct) Pos() Pos   { return t.P }
-func (t *TypeOneOf) Pos() Pos    { return t.P }
+func (t *TypeUnion) Pos() Pos    { return t.P }
 func (t *TypeOptional) Pos() Pos { return t.P }
 
 func (t *TypeNamed) Kind() string    { return "named" }
@@ -94,7 +94,7 @@ func (t *TypeList) Kind() string     { return "list" }
 func (t *TypeSet) Kind() string      { return "set" }
 func (t *TypeMap) Kind() string      { return "map" }
 func (t *TypeStruct) Kind() string   { return "struct" }
-func (t *TypeOneOf) Kind() string    { return "oneof" }
+func (t *TypeUnion) Kind() string    { return "union" }
 func (t *TypeOptional) Kind() string { return "optional" }
 
 func (t *TypeNamed) String() string { return t.Name }
@@ -122,8 +122,8 @@ func (t *TypeStruct) String() string {
 	}
 	return result + "}"
 }
-func (t *TypeOneOf) String() string {
-	result := "oneof{"
+func (t *TypeUnion) String() string {
+	result := "union{"
 	for index, field := range t.Fields {
 		if index > 0 {
 			result += ";"

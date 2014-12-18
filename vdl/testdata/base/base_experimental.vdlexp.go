@@ -5,6 +5,7 @@ package base
 
 import (
 	// The non-user imports are prefixed with "__" to prevent collisions.
+	__fmt "fmt"
 	__vdl "veyron.io/veyron/veyron2/vdl"
 	__vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
 )
@@ -21,28 +22,26 @@ const (
 var NamedEnumAll = []NamedEnum{NamedEnumA, NamedEnumB, NamedEnumC}
 
 // NamedEnumFromString creates a NamedEnum from a string label.
-// Returns true iff the label is valid.
-func NamedEnumFromString(label string) (x NamedEnum, ok bool) {
-	ok = x.Assign(label)
+func NamedEnumFromString(label string) (x NamedEnum, err error) {
+	err = x.Set(label)
 	return
 }
 
-// Assign assigns label to x.
-// Returns true iff the label is valid.
-func (x *NamedEnum) Assign(label string) bool {
+// Set assigns label to x.
+func (x *NamedEnum) Set(label string) error {
 	switch label {
-	case "A":
+	case "A", "a":
 		*x = NamedEnumA
-		return true
-	case "B":
+		return nil
+	case "B", "b":
 		*x = NamedEnumB
-		return true
-	case "C":
+		return nil
+	case "C", "c":
 		*x = NamedEnumC
-		return true
+		return nil
 	}
 	*x = -1
-	return false
+	return __fmt.Errorf("unknown label %q in base.NamedEnum", label)
 }
 
 // String returns the string label of x.
@@ -58,54 +57,78 @@ func (x NamedEnum) String() string {
 	return ""
 }
 
-// __DescribeEnum describes the NamedEnum enum type.
-func (NamedEnum) __DescribeEnum(struct{ A, B, C NamedEnum }) {}
+func (NamedEnum) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vdl/testdata/base.NamedEnum"
+	Enum struct{ A, B, C string }
+}) {
+}
 
 type (
-	// NamedOneOf represents any single field of the NamedOneOf oneof type.
-	NamedOneOf interface {
+	// NamedUnion represents any single field of the NamedUnion union type.
+	NamedUnion interface {
 		// Index returns the field index.
 		Index() int
+		// Interface returns the field value as an interface.
+		Interface() interface{}
 		// Name returns the field name.
 		Name() string
-		// __DescribeOneOf describes the NamedOneOf oneof type.
-		__DescribeOneOf(__NamedOneOfDesc)
+		// __VDLReflect describes the NamedUnion union type.
+		__VDLReflect(__NamedUnionReflect)
 	}
-	// NamedOneOfA represents field A of the NamedOneOf oneof type.
-	NamedOneOfA struct{ Value bool }
-	// NamedOneOfB represents field B of the NamedOneOf oneof type.
-	NamedOneOfB struct{ Value string }
-	// NamedOneOfC represents field C of the NamedOneOf oneof type.
-	NamedOneOfC struct{ Value int32 }
-	// __NamedOneOfDesc describes the NamedOneOf oneof type.
-	__NamedOneOfDesc struct {
-		NamedOneOf
-		A NamedOneOfA
-		B NamedOneOfB
-		C NamedOneOfC
+	// NamedUnionA represents field A of the NamedUnion union type.
+	NamedUnionA struct{ Value bool }
+	// NamedUnionB represents field B of the NamedUnion union type.
+	NamedUnionB struct{ Value string }
+	// NamedUnionC represents field C of the NamedUnion union type.
+	NamedUnionC struct{ Value int32 }
+	// __NamedUnionReflect describes the NamedUnion union type.
+	__NamedUnionReflect struct {
+		Name  string "veyron.io/veyron/veyron2/vdl/testdata/base.NamedUnion"
+		Type  NamedUnion
+		Union struct {
+			A NamedUnionA
+			B NamedUnionB
+			C NamedUnionC
+		}
 	}
 )
 
-func (NamedOneOfA) Index() int                       { return 0 }
-func (NamedOneOfA) Name() string                     { return "A" }
-func (NamedOneOfA) __DescribeOneOf(__NamedOneOfDesc) {}
+func (x NamedUnionA) Index() int                       { return 0 }
+func (x NamedUnionA) Interface() interface{}           { return x.Value }
+func (x NamedUnionA) Name() string                     { return "A" }
+func (x NamedUnionA) __VDLReflect(__NamedUnionReflect) {}
 
-func (NamedOneOfB) Index() int                       { return 1 }
-func (NamedOneOfB) Name() string                     { return "B" }
-func (NamedOneOfB) __DescribeOneOf(__NamedOneOfDesc) {}
+func (x NamedUnionB) Index() int                       { return 1 }
+func (x NamedUnionB) Interface() interface{}           { return x.Value }
+func (x NamedUnionB) Name() string                     { return "B" }
+func (x NamedUnionB) __VDLReflect(__NamedUnionReflect) {}
 
-func (NamedOneOfC) Index() int                       { return 2 }
-func (NamedOneOfC) Name() string                     { return "C" }
-func (NamedOneOfC) __DescribeOneOf(__NamedOneOfDesc) {}
+func (x NamedUnionC) Index() int                       { return 2 }
+func (x NamedUnionC) Interface() interface{}           { return x.Value }
+func (x NamedUnionC) Name() string                     { return "C" }
+func (x NamedUnionC) __VDLReflect(__NamedUnionReflect) {}
 
 type ScalarsExp struct {
 	B13 NamedEnum
-	B14 NamedOneOf
+	B14 NamedUnion
+}
+
+func (ScalarsExp) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/vdl/testdata/base.ScalarsExp"
+}) {
+}
+
+func init() {
+	__vdl.Register(NamedEnumA)
+	__vdl.Register(NamedUnion(NamedUnionA{false}))
+	__vdl.Register(ScalarsExp{
+		B14: NamedUnionA{false},
+	})
 }
 
 const Cenum = NamedEnumA
 
-var Coneof = NamedOneOf(NamedOneOfA{true})
+var Cunion = NamedUnion(NamedUnionA{true})
 
 var Carray = [3]int32{
 	1,
@@ -156,14 +179,16 @@ var CTVenum = __vdl.TypeOf(NamedEnumA)
 
 var CTVArray = __vdl.TypeOf([3]string{})
 
-var CTVList = __vdl.TypeOf([]string{})
+var CTVList = __vdl.TypeOf([]string(nil))
 
-var CTVSet = __vdl.TypeOf(map[string]struct{}{})
+var CTVSet = __vdl.TypeOf(map[string]struct{}(nil))
 
-var CTVMap = __vdl.TypeOf(map[string]int64{})
+var CTVMap = __vdl.TypeOf(map[string]int64(nil))
 
-var CTVStruct = __vdl.TypeOf(ScalarsExp{})
+var CTVStruct = __vdl.TypeOf(ScalarsExp{
+	B14: NamedUnionA{false},
+})
 
-var CTVOneOf = __vdl.TypeOf(NamedOneOf(NamedOneOfA{false}))
+var CTVUnion = __vdl.TypeOf(NamedUnion(NamedUnionA{false}))
 
 var CTVAny = __vdl.TypeOf((*__vdlutil.Any)(nil))

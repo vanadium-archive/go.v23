@@ -15,6 +15,7 @@ import (
 	"io"
 	"log"
 	"math/big"
+	"path"
 	"strconv"
 	"strings"
 	"text/scanner"
@@ -27,35 +28,35 @@ type Opts struct {
 	ImportsOnly bool // Only parse imports; skip everything else.
 }
 
-// Parse takes a base file name, the contents of the vdl file src, and the
+// Parse takes a file name, the contents of the vdl file src, and the
 // accumulated errors, and parses the vdl into a parse.File containing the parse
 // tree.  Returns nil if any errors are encountered, with errs containing more
 // information.  Otherwise returns the parsed File.
-func Parse(baseFileName string, src io.Reader, opts Opts, errs *vdlutil.Errors) *File {
+func Parse(fileName string, src io.Reader, opts Opts, errs *vdlutil.Errors) *File {
 	mode := modeFile
 	if opts.ImportsOnly {
 		mode = modeFileImports
 	}
-	return parse(baseFileName, src, mode, errs)
+	return parse(fileName, src, mode, errs)
 }
 
-// ParseConfig takes a base file name, the contents of the config file src, and
-// the accumulated errors, and parses the config into a parse.Config containing
-// the parse tree.  Returns nil if any errors are encountered, with errs
-// containing more information.  Otherwise returns the parsed Config.
-func ParseConfig(baseFileName string, src io.Reader, opts Opts, errs *vdlutil.Errors) *Config {
+// ParseConfig takes a file name, the contents of the config file src, and the
+// accumulated errors, and parses the config into a parse.Config containing the
+// parse tree.  Returns nil if any errors are encountered, with errs containing
+// more information.  Otherwise returns the parsed Config.
+func ParseConfig(fileName string, src io.Reader, opts Opts, errs *vdlutil.Errors) *Config {
 	mode := modeConfig
 	if opts.ImportsOnly {
 		mode = modeConfigImports
 	}
 	// Since the syntax is so similar between config files and vdl files, we just
 	// parse it as a vdl file and populate Config afterwards.
-	file := parse(baseFileName, src, mode, errs)
+	file := parse(fileName, src, mode, errs)
 	if file == nil {
 		return nil
 	}
 	if len(file.ErrorIDs) > 0 || len(file.TypeDefs) > 0 || len(file.Interfaces) > 0 {
-		errs.Errorf("%s config files may not contain error, type or interface definitions", baseFileName)
+		errs.Errorf("%s: config files may not contain error, type or interface definitions", fileName)
 		return nil
 	}
 	config := &Config{
@@ -76,14 +77,14 @@ func ParseConfig(baseFileName string, src io.Reader, opts Opts, errs *vdlutil.Er
 	return config
 }
 
-func parse(baseFileName string, src io.Reader, mode mode, errs *vdlutil.Errors) *File {
+func parse(fileName string, src io.Reader, mode mode, errs *vdlutil.Errors) *File {
 	if errs == nil {
 		log.Fatal("Nil errors specified for Parse")
 	}
 	startErrs := errs.NumErrors()
-	lex := newLexer(baseFileName, src, mode, errs)
+	lex := newLexer(fileName, src, mode, errs)
 	if errCode := yyParse(lex); errCode != 0 {
-		errs.Errorf("%s yyParse returned error code %v", baseFileName, errCode)
+		errs.Errorf("%s: yyParse returned error code %v", fileName, errCode)
 	}
 	lex.attachComments()
 	if mode == modeFile || mode == modeConfig {
@@ -117,6 +118,7 @@ const (
 // concrete lexer type, and retrieve a pointer to the parse result.
 type lexer struct {
 	// Fields for lexing / scanning the input source file.
+	name    string
 	scanner scanner.Scanner
 	mode    mode
 	errs    *vdlutil.Errors
@@ -129,8 +131,8 @@ type lexer struct {
 	vdlFile  *File
 }
 
-func newLexer(baseFileName string, src io.Reader, mode mode, errs *vdlutil.Errors) *lexer {
-	l := &lexer{mode: mode, errs: errs, vdlFile: &File{BaseName: baseFileName}}
+func newLexer(fileName string, src io.Reader, mode mode, errs *vdlutil.Errors) *lexer {
+	l := &lexer{name: fileName, mode: mode, errs: errs, vdlFile: &File{BaseName: path.Base(fileName)}}
 	l.comments.init()
 	l.scanner.Init(src)
 	// Don't produce character literal tokens, but do scan comments.
@@ -184,13 +186,13 @@ var keywords = map[string]int{
 	"import":     tIMPORT,
 	"interface":  tINTERFACE,
 	"map":        tMAP,
-	"oneof":      tONEOF,
 	"package":    tPACKAGE,
 	"set":        tSET,
 	"stream":     tSTREAM,
 	"struct":     tSTRUCT,
 	"type":       tTYPE,
 	"typeobject": tTYPEOBJECT,
+	"union":      tUNION,
 }
 
 type nextRune struct {
@@ -429,7 +431,7 @@ func attachTypeComments(t Type, cm *commentMap, suffix bool) {
 			}
 			attachTypeComments(field.Type, cm, suffix)
 		}
-	case *TypeOneOf:
+	case *TypeUnion:
 		for _, field := range tu.Fields {
 			if suffix {
 				field.DocSuffix = cm.getDocSuffix(field.Pos)
@@ -667,5 +669,5 @@ func (l *lexer) posErrorf(pos Pos, format string, v ...interface{}) {
 	if pos.IsValid() {
 		posstr = pos.String()
 	}
-	l.errs.Errorf(l.vdlFile.BaseName+":"+posstr+" "+format, v...)
+	l.errs.Errorf(l.name+":"+posstr+" "+format, v...)
 }

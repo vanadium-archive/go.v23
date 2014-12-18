@@ -61,7 +61,7 @@ type ApplicationClientMethods interface {
 	// object name suffix) and if so, returns this envelope. If multiple
 	// profile matches are possible, the method returns the first
 	// matching profile, respecting the order of the input argument.
-	Match(ctx __context.T, Profiles []string, opts ...__ipc.CallOpt) (application.Envelope, error)
+	Match(ctx __context.T, profiles []string, opts ...__ipc.CallOpt) (application.Envelope, error)
 }
 
 // ApplicationClientStub adds universal methods to ApplicationClientMethods.
@@ -134,7 +134,7 @@ type ApplicationServerMethods interface {
 	// object name suffix) and if so, returns this envelope. If multiple
 	// profile matches are possible, the method returns the first
 	// matching profile, respecting the order of the input argument.
-	Match(ctx __ipc.ServerContext, Profiles []string) (application.Envelope, error)
+	Match(ctx __ipc.ServerContext, profiles []string) (application.Envelope, error)
 }
 
 // ApplicationServerStubMethods is the server interface containing
@@ -199,7 +199,7 @@ var descApplication = __ipc.InterfaceDesc{
 			Name: "Match",
 			Doc:  "// Match checks if any of the given profiles contains an application\n// envelope for the given application version (specified through the\n// object name suffix) and if so, returns this envelope. If multiple\n// profile matches are possible, the method returns the first\n// matching profile, respecting the order of the input argument.",
 			InArgs: []__ipc.ArgDesc{
-				{"Profiles", ``}, // []string
+				{"profiles", ``}, // []string
 			},
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // application.Envelope
@@ -215,7 +215,7 @@ func (s implApplicationServerStub) Signature(ctx __ipc.ServerContext) (__ipc.Ser
 	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
 	result.Methods["Match"] = __ipc.MethodSignature{
 		InArgs: []__ipc.MethodArgument{
-			{Name: "Profiles", Type: 61},
+			{Name: "profiles", Type: 61},
 		},
 		OutArgs: []__ipc.MethodArgument{
 			{Name: "", Type: 66},

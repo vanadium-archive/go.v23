@@ -241,7 +241,7 @@ func addSubTypeDeps(t *vdl.Type, pkg *Package, env *Env, tdeps map[*vdl.Type]boo
 	case vdl.Map:
 		addTypeDeps(t.Key(), pkg, env, tdeps, pdeps)
 		addTypeDeps(t.Elem(), pkg, env, tdeps, pdeps)
-	case vdl.Struct, vdl.OneOf:
+	case vdl.Struct, vdl.Union:
 		for ix := 0; ix < t.NumField(); ix++ {
 			addTypeDeps(t.Field(ix).Type, pkg, env, tdeps, pdeps)
 		}
@@ -282,8 +282,8 @@ func addValueTypeDeps(v *vdl.Value, pkg *Package, env *Env, tdeps map[*vdl.Type]
 		for ix := 0; ix < t.NumField(); ix++ {
 			addValueTypeDeps(v.Field(ix), pkg, env, tdeps, pdeps)
 		}
-	case vdl.OneOf:
-		_, field := v.OneOfField()
+	case vdl.Union:
+		_, field := v.UnionField()
 		addValueTypeDeps(field, pkg, env, tdeps, pdeps)
 	case vdl.Any, vdl.Optional:
 		if elem := v.Elem(); elem != nil {

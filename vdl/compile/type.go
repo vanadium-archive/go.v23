@@ -27,8 +27,8 @@ type TypeDef struct {
 
 	LabelDoc       []string // [valid for enum] docs for each label
 	LabelDocSuffix []string // [valid for enum] suffix docs for each label
-	FieldDoc       []string // [valid for struct, oneof] docs for each field
-	FieldDocSuffix []string // [valid for struct, oneof] suffix docs for each field
+	FieldDoc       []string // [valid for struct, union] docs for each field
+	FieldDocSuffix []string // [valid for struct, union] suffix docs for each field
 	File           *File    // parent file that this type is defined in
 }
 
@@ -123,7 +123,7 @@ func (td typeDefiner) makeTypeDefBuilder(file *File, pdef *parse.TypeDef) *typeD
 		}
 	case *parse.TypeStruct:
 		ret = attachFieldDoc(ret, pt.Fields, file, td.env)
-	case *parse.TypeOneOf:
+	case *parse.TypeUnion:
 		ret = attachFieldDoc(ret, pt.Fields, file, td.env)
 	}
 	return ret
@@ -192,7 +192,7 @@ func compileType(ptype parse.Type, file *File, env *Env) *vdl.Type {
 }
 
 // compileDefinedType compiles ptype.  It can handle definitions based on enum,
-// struct and oneof, as well as definitions based on any literal type.
+// struct and union, as well as definitions based on any literal type.
 func compileDefinedType(ptype parse.Type, file *File, env *Env, tbuilder *vdl.TypeBuilder, builders map[string]*typeDefBuilder) vdl.TypeOrPending {
 	switch pt := ptype.(type) {
 	case *parse.TypeEnum:
@@ -211,16 +211,16 @@ func compileDefinedType(ptype parse.Type, file *File, env *Env, tbuilder *vdl.Ty
 			st.AppendField(pfield.Name, ftype)
 		}
 		return st
-	case *parse.TypeOneOf:
-		oneof := tbuilder.OneOf()
+	case *parse.TypeUnion:
+		union := tbuilder.Union()
 		for _, pfield := range pt.Fields {
 			ftype := compileLiteralType(pfield.Type, file, env, tbuilder, builders)
 			if ftype == nil {
 				return nil
 			}
-			oneof.AppendField(pfield.Name, ftype)
+			union.AppendField(pfield.Name, ftype)
 		}
-		return oneof
+		return union
 	}
 	lit := compileLiteralType(ptype, file, env, tbuilder, builders)
 	if _, ok := lit.(vdl.PendingOptional); ok {
@@ -243,7 +243,7 @@ func compileDefinedType(ptype parse.Type, file *File, env *Env, tbuilder *vdl.Ty
 }
 
 // compileLiteralType compiles ptype.  It can handle any literal type.  Note
-// that enum, struct and oneof are required to be defined and named, and aren't
+// that enum, struct and union are required to be defined and named, and aren't
 // allowed as regular literal types.
 func compileLiteralType(ptype parse.Type, file *File, env *Env, tbuilder *vdl.TypeBuilder, builders map[string]*typeDefBuilder) vdl.TypeOrPending {
 	switch pt := ptype.(type) {

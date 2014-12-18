@@ -722,7 +722,7 @@ func ParsePackage(pkg *Package, opts parse.Opts, errs *vdlutil.Errors) (pfiles [
 		return nil
 	}
 	for filename, src := range files {
-		if pf := parse.Parse(filename, src, opts, errs); pf != nil {
+		if pf := parse.Parse(path.Join(pkg.Path, filename), src, opts, errs); pf != nil {
 			pfiles = append(pfiles, pf)
 		}
 	}

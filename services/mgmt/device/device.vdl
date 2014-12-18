@@ -115,7 +115,7 @@ type Application interface {
 	// which can then be used to control all the installations of the given
 	// application.
 	// TODO(rjkroege): Use customized labels.
-	Install(Name string) (string, error) {access.Write}
+	Install(name string) (string | error) {access.Write}
 	// Refresh refreshes the state of application installation(s)
 	// instance(s).
 	Refresh() error {access.Admin}
@@ -131,7 +131,7 @@ type Application interface {
 	// Start starts an instance of application installation(s) and
 	// returns the object name(s) that identifies/identify the new
 	// instance(s).
-	Start() ([]string, error) {access.Read}
+	Start() ([]string | error) {access.Read}
 	// Stop attempts a clean shutdown of application installation(s)
 	// instance(s). If the deadline (in seconds) is non-zero and the
 	// instance(s) in questions are still running after the given deadline,
@@ -139,7 +139,7 @@ type Application interface {
 	//
 	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
 	// are implemented.
-	Stop(Deadline uint32) error {access.Admin}
+	Stop(deadline uint32) error {access.Admin}
 	// Suspend suspends execution of application installation(s)
 	// instance(s).
 	Suspend() error {access.Write}
@@ -154,7 +154,7 @@ type Application interface {
 	// specified by the object name argument.  If the new application
 	// envelope contains a different application title, the update does not
 	// occur, and an error is returned.
-	UpdateTo(Name string) error {access.Admin}
+	UpdateTo(name string) error {access.Admin}
 }
 
 // Description enumerates the profiles that a Device supports.
@@ -189,16 +189,16 @@ type Device interface {
 	// access protected to the identity of the claimer.
 	Claim() error {access.Admin}
 	// Describe generates a description of the device.
-	Describe() (Description, error) {access.Admin}
+	Describe() (Description | error) {access.Admin}
 	// IsRunnable checks if the device can execute the given binary.
-	IsRunnable(Description binary.Description) (bool, error) {access.Admin}
+	IsRunnable(description binary.Description) (bool | error) {access.Admin}
 	// Reset resets the device. If the deadline is non-zero and the device
 	// in question is still running after the given deadline expired,
 	// reset of the device is enforced.
 	//
 	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
 	// are implemented.
-	Reset(Deadline uint64) error {access.Admin}
+	Reset(deadline uint64) error {access.Admin}
 	// AssociateAccount associates a local  system account name with the provided
 	// Veyron identities. It replaces the existing association if one already exists for that
 	// identity. Setting an AccountName to "" removes the association for each
@@ -206,5 +206,5 @@ type Device interface {
 	AssociateAccount(identityNames []string, accountName string) error {access.Admin}
 	// ListAssociations returns all of the associations between Veyron identities
 	// and system names.
-	ListAssociations() (associations []Association, err error) {access.Admin}
+	ListAssociations() ([]Association | error) {access.Admin}
 }

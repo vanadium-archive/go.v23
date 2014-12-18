@@ -109,5 +109,5 @@ import (
 // that match a pattern.  See the package comments for details.
 type GlobWatcher interface {
   // WatchGlob returns a stream of changes that match a pattern.
-  WatchGlob(Req types.GlobRequest) stream<_, types.Change> error {access.Resolve}
+  WatchGlob(req types.GlobRequest) stream<_, types.Change> error {access.Resolve}
 }

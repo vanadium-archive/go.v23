@@ -108,42 +108,42 @@ func (TestStruct) __VDLReflect(struct{
 	Name string "TestStruct"
 }) {
 }`},
-		{tOneOf, `type (
-	// TestOneOf represents any single field of the TestOneOf oneof type.
-	TestOneOf interface {
+		{tUnion, `type (
+	// TestUnion represents any single field of the TestUnion union type.
+	TestUnion interface {
 		// Index returns the field index.
 		Index() int
 		// Interface returns the field value as an interface.
 		Interface() interface{}
 		// Name returns the field name.
 		Name() string
-		// __VDLReflect describes the TestOneOf oneof type.
-		__VDLReflect(__TestOneOfReflect)
+		// __VDLReflect describes the TestUnion union type.
+		__VDLReflect(__TestUnionReflect)
 	}
-	// TestOneOfA represents field A of the TestOneOf oneof type.
-	TestOneOfA struct{ Value string }
-	// TestOneOfB represents field B of the TestOneOf oneof type.
-	TestOneOfB struct{ Value int64 }
-	// __TestOneOfReflect describes the TestOneOf oneof type.
-	__TestOneOfReflect struct {
-		Name string "TestOneOf"
-		Type TestOneOf
-		OneOf struct {
-			A TestOneOfA
-			B TestOneOfB
+	// TestUnionA represents field A of the TestUnion union type.
+	TestUnionA struct{ Value string }
+	// TestUnionB represents field B of the TestUnion union type.
+	TestUnionB struct{ Value int64 }
+	// __TestUnionReflect describes the TestUnion union type.
+	__TestUnionReflect struct {
+		Name string "TestUnion"
+		Type TestUnion
+		Union struct {
+			A TestUnionA
+			B TestUnionB
 		}
 	}
 )
 
-func (x TestOneOfA) Index() int { return 0 }
-func (x TestOneOfA) Interface() interface{} { return x.Value }
-func (x TestOneOfA) Name() string { return "A" }
-func (x TestOneOfA) __VDLReflect(__TestOneOfReflect) {}
+func (x TestUnionA) Index() int { return 0 }
+func (x TestUnionA) Interface() interface{} { return x.Value }
+func (x TestUnionA) Name() string { return "A" }
+func (x TestUnionA) __VDLReflect(__TestUnionReflect) {}
 
-func (x TestOneOfB) Index() int { return 1 }
-func (x TestOneOfB) Interface() interface{} { return x.Value }
-func (x TestOneOfB) Name() string { return "B" }
-func (x TestOneOfB) __VDLReflect(__TestOneOfReflect) {}`},
+func (x TestUnionB) Index() int { return 1 }
+func (x TestUnionB) Interface() interface{} { return x.Value }
+func (x TestUnionB) Name() string { return "B" }
+func (x TestUnionB) __VDLReflect(__TestUnionReflect) {}`},
 	}
 	data := goData{Env: compile.NewEnv(-1)}
 	for _, test := range tests {
@@ -156,7 +156,7 @@ func (x TestOneOfB) __VDLReflect(__TestOneOfReflect) {}`},
 		case vdl.Enum:
 			def.LabelDoc = make([]string, test.T.NumEnumLabel())
 			def.LabelDocSuffix = make([]string, test.T.NumEnumLabel())
-		case vdl.Struct, vdl.OneOf:
+		case vdl.Struct, vdl.Union:
 			def.FieldDoc = make([]string, test.T.NumField())
 			def.FieldDocSuffix = make([]string, test.T.NumField())
 		}
@@ -176,7 +176,7 @@ var (
 		vdl.Field{"A", vdl.StringType},
 		vdl.Field{"B", vdl.Int64Type},
 	))
-	tOneOf = vdl.NamedType("TestOneOf", vdl.OneOfType(
+	tUnion = vdl.NamedType("TestUnion", vdl.UnionType(
 		vdl.Field{"A", vdl.StringType},
 		vdl.Field{"B", vdl.Int64Type},
 	))

@@ -137,10 +137,10 @@ func (c Const) Convert(t *vdl.Type) (Const, error) {
 	if t == nil {
 		return Const{}, errConvertNil
 	}
-	// If we're trying to convert to Any or OneOf, or if c is already a vdl.Value,
+	// If we're trying to convert to Any or Union, or if c is already a vdl.Value,
 	// use valconv.Convert to convert as a vdl.Value.
 	_, isValue := c.rep.(*vdl.Value)
-	if isValue || t.Kind() == vdl.Any || t.Kind() == vdl.OneOf {
+	if isValue || t.Kind() == vdl.Any || t.Kind() == vdl.Union {
 		src, err := c.ToValue()
 		if err != nil {
 			return Const{}, err

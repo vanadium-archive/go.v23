@@ -701,12 +701,12 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target valconv.Target) error {
 				return err
 			}
 		}
-	case vdl.OneOf:
+	case vdl.Union:
 		fieldsTarget, err := target.StartFields(ttFrom)
 		if err != nil {
 			return err
 		}
-		d.prepareAtom("waiting for oneof field index")
+		d.prepareAtom("waiting for union field index")
 		index, err := binaryDecodeUint(d.buf)
 		switch {
 		case err != nil:

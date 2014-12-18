@@ -325,26 +325,26 @@ func (rep repSequence) Index(t *Type, index int) *Value {
 	return newval
 }
 
-// repOneOf represents a OneOf value, which includes the field index of its
+// repUnion represents a Union value, which includes the field index of its
 // type, and the underlying elem.
-type repOneOf struct {
+type repUnion struct {
 	index int
 	value *Value
 }
 
-func copyRepOneOf(rep repOneOf) repOneOf {
-	return repOneOf{rep.index, CopyValue(rep.value)}
+func copyRepUnion(rep repUnion) repUnion {
+	return repUnion{rep.index, CopyValue(rep.value)}
 }
 
-func equalRepOneOf(a, b repOneOf) bool {
+func equalRepUnion(a, b repUnion) bool {
 	return a.index == b.index && EqualValue(a.value, b.value)
 }
 
-func (rep repOneOf) IsZero() bool {
+func (rep repUnion) IsZero() bool {
 	return rep.index == 0 && rep.value.IsZero()
 }
 
-func (rep repOneOf) String(t *Type) string {
+func (rep repUnion) String(t *Type) string {
 	v := rep.value
 	return "{" + t.fields[rep.index].Name + ": " + stringRep(v.t, v.rep) + "}"
 }

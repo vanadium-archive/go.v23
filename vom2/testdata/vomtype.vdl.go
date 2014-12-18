@@ -201,49 +201,49 @@ func (NEnum) __VDLReflect(struct {
 }
 
 type (
-	// NOneOf represents any single field of the NOneOf oneof type.
-	NOneOf interface {
+	// NUnion represents any single field of the NUnion union type.
+	NUnion interface {
 		// Index returns the field index.
 		Index() int
 		// Interface returns the field value as an interface.
 		Interface() interface{}
 		// Name returns the field name.
 		Name() string
-		// __VDLReflect describes the NOneOf oneof type.
-		__VDLReflect(__NOneOfReflect)
+		// __VDLReflect describes the NUnion union type.
+		__VDLReflect(__NUnionReflect)
 	}
-	// NOneOfA represents field A of the NOneOf oneof type.
-	NOneOfA struct{ Value bool }
-	// NOneOfB represents field B of the NOneOf oneof type.
-	NOneOfB struct{ Value string }
-	// NOneOfC represents field C of the NOneOf oneof type.
-	NOneOfC struct{ Value int64 }
-	// __NOneOfReflect describes the NOneOf oneof type.
-	__NOneOfReflect struct {
-		Name  string "veyron.io/veyron/veyron2/vom2/testdata.NOneOf"
-		Type  NOneOf
-		OneOf struct {
-			A NOneOfA
-			B NOneOfB
-			C NOneOfC
+	// NUnionA represents field A of the NUnion union type.
+	NUnionA struct{ Value bool }
+	// NUnionB represents field B of the NUnion union type.
+	NUnionB struct{ Value string }
+	// NUnionC represents field C of the NUnion union type.
+	NUnionC struct{ Value int64 }
+	// __NUnionReflect describes the NUnion union type.
+	__NUnionReflect struct {
+		Name  string "veyron.io/veyron/veyron2/vom2/testdata.NUnion"
+		Type  NUnion
+		Union struct {
+			A NUnionA
+			B NUnionB
+			C NUnionC
 		}
 	}
 )
 
-func (x NOneOfA) Index() int                   { return 0 }
-func (x NOneOfA) Interface() interface{}       { return x.Value }
-func (x NOneOfA) Name() string                 { return "A" }
-func (x NOneOfA) __VDLReflect(__NOneOfReflect) {}
+func (x NUnionA) Index() int                   { return 0 }
+func (x NUnionA) Interface() interface{}       { return x.Value }
+func (x NUnionA) Name() string                 { return "A" }
+func (x NUnionA) __VDLReflect(__NUnionReflect) {}
 
-func (x NOneOfB) Index() int                   { return 1 }
-func (x NOneOfB) Interface() interface{}       { return x.Value }
-func (x NOneOfB) Name() string                 { return "B" }
-func (x NOneOfB) __VDLReflect(__NOneOfReflect) {}
+func (x NUnionB) Index() int                   { return 1 }
+func (x NUnionB) Interface() interface{}       { return x.Value }
+func (x NUnionB) Name() string                 { return "B" }
+func (x NUnionB) __VDLReflect(__NUnionReflect) {}
 
-func (x NOneOfC) Index() int                   { return 2 }
-func (x NOneOfC) Interface() interface{}       { return x.Value }
-func (x NOneOfC) Name() string                 { return "C" }
-func (x NOneOfC) __VDLReflect(__NOneOfReflect) {}
+func (x NUnionC) Index() int                   { return 2 }
+func (x NUnionC) Interface() interface{}       { return x.Value }
+func (x NUnionC) Name() string                 { return "C" }
+func (x NUnionC) __VDLReflect(__NUnionReflect) {}
 
 // Nested Custom Types
 type MBool NBool
@@ -302,7 +302,7 @@ func init() {
 	__vdl.Register(NMapUint64String(nil))
 	__vdl.Register(NStruct{})
 	__vdl.Register(NEnumA)
-	__vdl.Register(NOneOf(NOneOfA{false}))
+	__vdl.Register(NUnion(NUnionA{false}))
 	__vdl.Register(MBool(false))
 	__vdl.Register(MStruct{
 		E: __vdl.TypeOf((*__vdlutil.Any)(nil)),

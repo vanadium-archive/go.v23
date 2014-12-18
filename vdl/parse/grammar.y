@@ -102,8 +102,8 @@ func ensureNonEmptyToken(yylex yyLexer, tok strPos, errMsg string) {
 %token <pos>      ';' ':' ',' '.' '(' ')' '[' ']' '{' '}' '<' '>' '='
 %token <pos>      '!' '+' '-' '*' '/' '%' '|' '&' '^' '?'
 %token <pos>      tOROR tANDAND tLE tGE tNE tEQEQ tLSH tRSH
-%token <pos>      tCONST tENUM tERRORID tIMPORT tINTERFACE tMAP tONEOF tPACKAGE
-%token <pos>      tSET tSTREAM tSTRUCT tTYPE tTYPEOBJECT
+%token <pos>      tCONST tENUM tERRORID tIMPORT tINTERFACE tMAP tPACKAGE
+%token <pos>      tSET tSTREAM tSTRUCT tTYPE tTYPEOBJECT tUNION
 %token <strpos>   tIDENT tSTRLIT
 %token <intpos>   tINTLIT
 %token <ratpos>   tRATLIT
@@ -281,10 +281,10 @@ type_no_typeobject:
   { $$ = &TypeStruct{Fields:$3, P:$1} }
 | tSTRUCT '{' '}'
   { $$ = &TypeStruct{P:$1} }
-| tONEOF '{' field_spec_list osemi '}'
-  { $$ = &TypeOneOf{Fields:$3, P:$1} }
-| tONEOF '{' '}'
-  { $$ = &TypeOneOf{P:$1} }
+| tUNION '{' field_spec_list osemi '}'
+  { $$ = &TypeUnion{Fields:$3, P:$1} }
+| tUNION '{' '}'
+  { $$ = &TypeUnion{P:$1} }
 | '?' type
   { $$ = &TypeOptional{Base:$2, P:$1} }
 
@@ -364,7 +364,6 @@ type_comma_list:
   { $$ = append($1, $3) }
 
 // INTERFACE DEFINITIONS
-// TODO(toddw): Rename to service.
 interface_spec:
   tIDENT tINTERFACE '{' '}'
   {
@@ -416,15 +415,34 @@ named_arg_list:
 | named_arg_list ',' field_spec
   { $$ = append($1, $3...) }
 
-// The outargs accept everything regular inargs accept, and are also allowed to
-// be empty or contain a single non-parenthesized type without an arg name.
+// The outargs use special syntax to denote the error associated with each
+// method.  For parsing we accept these forms:
+//  error
+//  (string | error)
+//  (a, b string, c bool | error)
+//
+// Everywhere "error" appears above, we actually let the parser accept any type.
+// This is because parser syntax errors are hard to understand; instead we check
+// that the last return-arg must be "error" in the compiler.
+//
+// TODO(toddw): For now we leave the error in the list of out-args, so that the
+// rest of our code works the same way.  As the next step of this change, we
+// need to remove the error from the list of out-args, and remove associated
+// special-cases throughout our codebase.
 outargs:
-  // Empty.
-  { $$ = nil }
-| type
+  type
   { $$ = []*Field{{Type:$1, NamePos:NamePos{Pos:$1.Pos()}}} }
-| inargs
-  { $$ = $1 }
+| '(' named_arg_list ocomma '|' type ')'
+  { $$ = append($2, &Field{Type:$5, NamePos:NamePos{Name: "err", Pos:$5.Pos()}}) }
+| '(' type_comma_list ocomma '|' type ')'
+  // Just like Go, we allow a list of types without variable names.  See the
+  // field_spec rule for a workaround to avoid a reduce/reduce conflict.
+  {
+    for _, t := range $2 {
+      $$ = append($$, &Field{Type:t, NamePos:NamePos{Pos:t.Pos()}})
+    }
+    $$ = append($$, &Field{Type:$5, NamePos:NamePos{Pos:$5.Pos()}})
+  }
 
 streamargs:
   // Empty.

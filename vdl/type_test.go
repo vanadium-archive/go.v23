@@ -87,20 +87,20 @@ var structs = []struct {
 	{"ABCD", f{{"A", BoolType}, {"B", Int32Type}, {"C", Uint64Type}, {"D", StringType}}, "ABCD struct{A bool;B int32;C uint64;D string}", ""},
 }
 
-var oneofs = []struct {
+var unions = []struct {
 	name   string
 	fields f
 	str    string
 	errstr string
 }{
-	{"FailNoFields", f{}, "", "no oneof fields"},
+	{"FailNoFields", f{}, "", "no union fields"},
 	{"FailFieldName", f{{"", BoolType}}, "", "empty field name"},
 	{"FailDupFields", f{{"A", BoolType}, {"A", Int32Type}}, "", "duplicate field name"},
 	{"FailNilFieldType", f{{"A", nil}}, "", "nil field type"},
-	{"A", f{{"A", BoolType}}, "A oneof{A bool}", ""},
-	{"AB", f{{"A", BoolType}, {"B", Int32Type}}, "AB oneof{A bool;B int32}", ""},
-	{"ABC", f{{"A", BoolType}, {"B", Int32Type}, {"C", Uint64Type}}, "ABC oneof{A bool;B int32;C uint64}", ""},
-	{"ABCD", f{{"A", BoolType}, {"B", Int32Type}, {"C", Uint64Type}, {"D", StringType}}, "ABCD oneof{A bool;B int32;C uint64;D string}", ""},
+	{"A", f{{"A", BoolType}}, "A union{A bool}", ""},
+	{"AB", f{{"A", BoolType}, {"B", Int32Type}}, "AB union{A bool;B int32}", ""},
+	{"ABC", f{{"A", BoolType}, {"B", Int32Type}, {"C", Uint64Type}}, "ABC union{A bool;B int32;C uint64}", ""},
+	{"ABCD", f{{"A", BoolType}, {"B", Int32Type}, {"C", Uint64Type}, {"D", StringType}}, "ABCD union{A bool;B int32;C uint64;D string}", ""},
 }
 
 func allTypes() (types []*Type) {
@@ -125,9 +125,9 @@ func allTypes() (types []*Type) {
 			types = append(types, StructType(test.fields...))
 		}
 	}
-	for _, test := range oneofs {
+	for _, test := range unions {
 		if test.errstr == "" {
-			types = append(types, OneOfType(test.fields...))
+			types = append(types, UnionType(test.fields...))
 		}
 	}
 	for ix, t := range types {
@@ -161,7 +161,7 @@ func TestTypeMismatch(t *testing.T) {
 		if k != Set && k != Map {
 			expectMismatchedKind(t, func() { ty.Key() })
 		}
-		if k != Struct && k != OneOf {
+		if k != Struct && k != Union {
 			expectMismatchedKind(t, func() { ty.Field(0) })
 			expectMismatchedKind(t, func() { ty.FieldByName("") })
 			expectMismatchedKind(t, func() { ty.NumField() })
@@ -401,7 +401,7 @@ var validKeys = []*Type{
 	Int32Type,
 	ArrayType(3, Int32Type),
 	StructType(Field{"A", Int32Type}),
-	OneOfType(Field{"A", Int32Type}),
+	UnionType(Field{"A", Int32Type}),
 }
 
 var invalidKeys = []*Type{
@@ -516,76 +516,76 @@ func TestStructTypes(t *testing.T) {
 	}
 }
 
-func TestOneOfTypes(t *testing.T) {
-	for _, test := range oneofs {
+func TestUnionTypes(t *testing.T) {
+	for _, test := range unions {
 		var x *Type
 		create := func() {
-			x = OneOfType(test.fields...)
+			x = UnionType(test.fields...)
 			if test.name != "" {
 				x = NamedType(test.name, x)
 			}
 		}
-		expectPanic(t, create, test.errstr, "%s OneOfType", test.name)
+		expectPanic(t, create, test.errstr, "%s UnionType", test.name)
 		if x == nil {
 			continue
 		}
-		if got, want := x.Kind(), OneOf; got != want {
-			t.Errorf(`OneOf %s got kind %q, want %q`, test.name, got, want)
+		if got, want := x.Kind(), Union; got != want {
+			t.Errorf(`Union %s got kind %q, want %q`, test.name, got, want)
 		}
-		if got, want := x.Kind().String(), "oneof"; got != want {
-			t.Errorf(`OneOf %s got kind %q, want %q`, test.name, got, want)
+		if got, want := x.Kind().String(), "union"; got != want {
+			t.Errorf(`Union %s got kind %q, want %q`, test.name, got, want)
 		}
 		if got, want := x.Name(), test.name; got != want {
-			t.Errorf(`OneOf %s got name %q, want %q`, test.name, got, want)
+			t.Errorf(`Union %s got name %q, want %q`, test.name, got, want)
 		}
 		if got, want := x.String(), test.str; got != want {
-			t.Errorf(`OneOf %s got string %q, want %q`, test.name, got, want)
+			t.Errorf(`Union %s got string %q, want %q`, test.name, got, want)
 		}
 		if got, want := x.NumField(), len(test.fields); got != want {
-			t.Errorf(`OneOf %s got num fields %d, want %d`, test.name, got, want)
+			t.Errorf(`Union %s got num fields %d, want %d`, test.name, got, want)
 		}
-		if !x.ContainsKind(WalkAll, OneOf) {
-			t.Errorf(`OneOf %s !ContainsKind(WalkAll, OneOf)`, test.name)
+		if !x.ContainsKind(WalkAll, Union) {
+			t.Errorf(`Union %s !ContainsKind(WalkAll, Union)`, test.name)
 		}
 		if !x.ContainsType(WalkAll, x) {
-			t.Errorf(`OneOf %s !ContainsType(WalkAll, %v)`, test.name, x)
+			t.Errorf(`Union %s !ContainsType(WalkAll, %v)`, test.name, x)
 		}
 		for index, field := range test.fields {
 			if got, want := x.Field(index), field; got != want {
-				t.Errorf(`OneOf %s got field[%d] %v, want %v`, test.name, index, got, want)
+				t.Errorf(`Union %s got field[%d] %v, want %v`, test.name, index, got, want)
 			}
 			gotf, goti := x.FieldByName(field.Name)
 			if wantf := field; gotf != wantf {
-				t.Errorf(`OneOf %s got field[%s] %v, want %v`, test.name, field.Name, gotf, wantf)
+				t.Errorf(`Union %s got field[%s] %v, want %v`, test.name, field.Name, gotf, wantf)
 			}
 			if wanti := index; goti != wanti {
-				t.Errorf(`OneOf %s got field[%s] index %d, want %d`, test.name, field.Name, goti, wanti)
+				t.Errorf(`Union %s got field[%s] index %d, want %d`, test.name, field.Name, goti, wanti)
 			}
 			if !x.ContainsKind(WalkAll, field.Type.Kind()) {
-				t.Errorf(`OneOf %s !ContainsKind(WalkAll, field[%d])`, test.name, index)
+				t.Errorf(`Union %s !ContainsKind(WalkAll, field[%d])`, test.name, index)
 			}
 			if !x.ContainsType(WalkAll, field.Type) {
-				t.Errorf(`OneOf %s !ContainsType(WalkAll, field[%d])`, test.name, index)
+				t.Errorf(`Union %s !ContainsType(WalkAll, field[%d])`, test.name, index)
 			}
 		}
 	}
 	// Make sure hash consing of struct types respects the ordering of the fields.
 	A, B, C := BoolType, Int32Type, Uint64Type
-	x := OneOfType([]Field{{"A", A}, {"B", B}, {"C", C}}...)
+	x := UnionType([]Field{{"A", A}, {"B", B}, {"C", C}}...)
 	for iter := 0; iter < 10; iter++ {
-		abc := OneOfType([]Field{{"A", A}, {"B", B}, {"C", C}}...)
-		acb := OneOfType([]Field{{"A", A}, {"C", C}, {"B", B}}...)
-		bac := OneOfType([]Field{{"B", B}, {"A", A}, {"C", C}}...)
-		bca := OneOfType([]Field{{"B", B}, {"C", C}, {"A", A}}...)
-		cab := OneOfType([]Field{{"C", C}, {"A", A}, {"B", B}}...)
-		cba := OneOfType([]Field{{"C", C}, {"B", B}, {"A", A}}...)
+		abc := UnionType([]Field{{"A", A}, {"B", B}, {"C", C}}...)
+		acb := UnionType([]Field{{"A", A}, {"C", C}, {"B", B}}...)
+		bac := UnionType([]Field{{"B", B}, {"A", A}, {"C", C}}...)
+		bca := UnionType([]Field{{"B", B}, {"C", C}, {"A", A}}...)
+		cab := UnionType([]Field{{"C", C}, {"A", A}, {"B", B}}...)
+		cba := UnionType([]Field{{"C", C}, {"B", B}, {"A", A}}...)
 		if x != abc || x == acb || x == bac || x == bca || x == cab || x == cba {
-			t.Errorf(`OneOf ABC hash consing broken: %v, %v, %v, %v, %v, %v, %v`, x, abc, acb, bac, bca, cab, cba)
+			t.Errorf(`Union ABC hash consing broken: %v, %v, %v, %v, %v, %v, %v`, x, abc, acb, bac, bca, cab, cba)
 		}
-		ac := OneOfType([]Field{{"A", A}, {"C", C}}...)
-		ca := OneOfType([]Field{{"C", C}, {"A", A}}...)
+		ac := UnionType([]Field{{"A", A}, {"C", C}}...)
+		ca := UnionType([]Field{{"C", C}, {"A", A}}...)
 		if x == ac || x == ca {
-			t.Errorf(`OneOf ABC / AC hash consing broken: %v, %v, %v`, x, ac, ca)
+			t.Errorf(`Union ABC / AC hash consing broken: %v, %v, %v`, x, ac, ca)
 		}
 	}
 }
@@ -739,8 +739,8 @@ func TestHashConsTypes(t *testing.T) {
 				fields := []Field{{lA, a.t}, {lB, b.t}}
 				types[iter] = append(types[iter], StructType(fields...))
 				types[iter] = append(types[iter], NamedType("Struct"+name, StructType(fields...)))
-				types[iter] = append(types[iter], OneOfType(fields...))
-				types[iter] = append(types[iter], NamedType("OneOf"+name, OneOfType(fields...)))
+				types[iter] = append(types[iter], UnionType(fields...))
+				types[iter] = append(types[iter], NamedType("Union"+name, UnionType(fields...)))
 			}
 		}
 	}
@@ -1130,13 +1130,13 @@ func makeAllPending(builder *TypeBuilder) []PendingType {
 			ret = append(ret, builder.Named("Struct"+test.name).AssignBase(base))
 		}
 	}
-	for _, test := range oneofs {
+	for _, test := range unions {
 		if test.errstr == "" {
-			base := builder.OneOf()
+			base := builder.Union()
 			for _, f := range test.fields {
 				base.AppendField(f.Name, f.Type)
 			}
-			ret = append(ret, builder.Named("OneOf"+test.name).AssignBase(base))
+			ret = append(ret, builder.Named("Union"+test.name).AssignBase(base))
 		}
 	}
 	return ret

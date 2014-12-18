@@ -55,8 +55,8 @@ func TestConst(t *testing.T) {
 A: "foo",
 B: 123,
 }`},
-		{"OneOfABC", vOneOfABC, `TestOneOf(TestOneOfA{"abc"})`},
-		{"OneOf123", vOneOf123, `TestOneOf(TestOneOfB{int64(123)})`},
+		{"UnionABC", vUnionABC, `TestUnion(TestUnionA{"abc"})`},
+		{"Union123", vUnion123, `TestUnion(TestUnionB{int64(123)})`},
 		{"AnyABC", vAnyABC, `__vdlutil.Any("abc")`},
 		{"Any123", vAny123, `__vdlutil.Any(int64(123))`},
 		{"TypeObjectBool", vdl.TypeObjectValue(vdl.BoolType), `__vdl.TypeOf(false)`},
@@ -73,7 +73,7 @@ B: 123,
 		{"TypeObjectSet", vdl.TypeObjectValue(tSet), `__vdl.TypeOf(map[string]struct{}(nil))`},
 		{"TypeObjectMap", vdl.TypeObjectValue(tMap), `__vdl.TypeOf(map[string]int64(nil))`},
 		{"TypeObjectStruct", vdl.TypeObjectValue(tStruct), `__vdl.TypeOf(TestStruct{})`},
-		{"TypeObjectOneOf", vdl.TypeObjectValue(tOneOf), `__vdl.TypeOf(TestOneOf(TestOneOfA{""}))`},
+		{"TypeObjectUnion", vdl.TypeObjectValue(tUnion), `__vdl.TypeOf(TestUnion(TestUnionA{""}))`},
 		{"TypeObjectAny", vdl.TypeObjectValue(vdl.AnyType), `__vdl.TypeOf((*__vdlutil.Any)(nil))`},
 		{"TypeObjectTypeObject", vdl.TypeObjectValue(vdl.TypeObjectType), `__vdl.TypeObjectType`},
 		// TODO(toddw): Add tests for optional types.
@@ -98,8 +98,8 @@ var (
 	vSet      = vdl.ZeroValue(tSet)
 	vMap      = vdl.ZeroValue(tMap)
 	vStruct   = vdl.ZeroValue(tStruct)
-	vOneOfABC = vdl.ZeroValue(tOneOf)
-	vOneOf123 = vdl.ZeroValue(tOneOf)
+	vUnionABC = vdl.ZeroValue(tUnion)
+	vUnion123 = vdl.ZeroValue(tUnion)
 	vAnyABC   = vdl.ZeroValue(vdl.AnyType)
 	vAny123   = vdl.ZeroValue(vdl.AnyType)
 )
@@ -119,8 +119,8 @@ func init() {
 	vStruct.Field(0).AssignString("foo")
 	vStruct.Field(1).AssignInt(123)
 
-	vOneOfABC.AssignOneOfField(0, vdl.StringValue("abc"))
-	vOneOf123.AssignOneOfField(1, vdl.Int64Value(123))
+	vUnionABC.AssignUnionField(0, vdl.StringValue("abc"))
+	vUnion123.AssignUnionField(1, vdl.Int64Value(123))
 
 	vAnyABC.Assign(vdl.StringValue("abc"))
 	vAny123.Assign(vdl.Int64Value(123))

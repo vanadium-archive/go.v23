@@ -206,7 +206,7 @@ type Object interface {
   // can be passed to a subsequent call to SetACL for optimistic concurrency
   // control. A successful call to SetACL will invalidate etag, and the client
   // must call GetACL again to get the current etag.
-  GetACL() (acl TaggedACLMap, etag string, err error) {Admin}
+  GetACL() (acl TaggedACLMap, etag string | error) {Admin}
 }
 
 errorid (

@@ -142,25 +142,25 @@ func makeStruct(name string, x int64, y string, z bool) *vdl.Value {
 	return structv
 }
 
-func makeOneOfType(name string) *vdl.Type {
-	return vdl.NamedType(name, vdl.OneOfType([]vdl.Field{
+func makeUnionType(name string) *vdl.Type {
+	return vdl.NamedType(name, vdl.UnionType([]vdl.Field{
 		{"X", vdl.Int64Type}, {"Y", vdl.StringType}, {"Z", vdl.BoolType},
 	}...))
 }
 
-func makeOneOf(name string, val interface{}) *vdl.Value {
-	oneofv := vdl.ZeroValue(makeOneOfType(name))
+func makeUnion(name string, val interface{}) *vdl.Value {
+	unionv := vdl.ZeroValue(makeUnionType(name))
 	switch tval := val.(type) {
 	case int64:
-		oneofv.AssignOneOfField(0, vdl.Int64Value(tval))
+		unionv.AssignUnionField(0, vdl.Int64Value(tval))
 	case string:
-		oneofv.AssignOneOfField(1, vdl.StringValue(tval))
+		unionv.AssignUnionField(1, vdl.StringValue(tval))
 	case bool:
-		oneofv.AssignOneOfField(2, vdl.BoolValue(tval))
+		unionv.AssignUnionField(2, vdl.BoolValue(tval))
 	default:
-		panic(fmt.Errorf("makeOneOf unhandled %T %v", val, val))
+		panic(fmt.Errorf("makeUnion unhandled %T %v", val, val))
 	}
-	return oneofv
+	return unionv
 }
 
 func makeStructTypeObjectType(name string) *vdl.Type {
@@ -425,34 +425,34 @@ var constTests = []struct {
 		"SelectorOnUnnamedStruct",
 		cp{{"a", `type A struct{X int64;Y string}; const Res = A{2,"b"}.Y`, nil, "cannot apply selector operator to unnamed constant"}}},
 
-	// Test oneof literals.
+	// Test union literals.
 	{
-		"OneOfX",
-		cp{{"a", `type A oneof{X int64;Y string;Z bool}; const Res = A{X: 123}`, makeOneOf("a.A", int64(123)), ""}}},
+		"UnionX",
+		cp{{"a", `type A union{X int64;Y string;Z bool}; const Res = A{X: 123}`, makeUnion("a.A", int64(123)), ""}}},
 	{
-		"OneOfY",
-		cp{{"a", `type A oneof{X int64;Y string;Z bool}; const Res = A{Y: "abc"}`, makeOneOf("a.A", "abc"), ""}}},
+		"UnionY",
+		cp{{"a", `type A union{X int64;Y string;Z bool}; const Res = A{Y: "abc"}`, makeUnion("a.A", "abc"), ""}}},
 	{
-		"OneOfZ",
-		cp{{"a", `type A oneof{X int64;Y string;Z bool}; const Res = A{Z: true}`, makeOneOf("a.A", true), ""}}},
+		"UnionZ",
+		cp{{"a", `type A union{X int64;Y string;Z bool}; const Res = A{Z: true}`, makeUnion("a.A", true), ""}}},
 	{
-		"OneOfInvalidFieldName",
-		cp{{"a", `type A oneof{X int64;Y string;Z bool}; const Res = A{1+1: true}`, nil, `invalid field name`}}},
+		"UnionInvalidFieldName",
+		cp{{"a", `type A union{X int64;Y string;Z bool}; const Res = A{1+1: true}`, nil, `invalid field name`}}},
 	{
-		"OneOfUnknownFieldName",
-		cp{{"a", `type A oneof{X int64;Y string;Z bool}; const Res = A{ZZZ: true}`, nil, `unknown field "ZZZ"`}}},
+		"UnionUnknownFieldName",
+		cp{{"a", `type A union{X int64;Y string;Z bool}; const Res = A{ZZZ: true}`, nil, `unknown field "ZZZ"`}}},
 	{
-		"OneOfTooManyFields",
-		cp{{"a", `type A oneof{X int64;Y string;Z bool}; const Res = A{X: 123, Y: "abc"}`, nil, `must have exactly one entry`}}},
+		"UnionTooManyFields",
+		cp{{"a", `type A union{X int64;Y string;Z bool}; const Res = A{X: 123, Y: "abc"}`, nil, `must have exactly one entry`}}},
 	{
-		"OneOfTooFewFields",
-		cp{{"a", `type A oneof{X int64;Y string;Z bool}; const Res = A{}`, nil, `must have exactly one entry`}}},
+		"UnionTooFewFields",
+		cp{{"a", `type A union{X int64;Y string;Z bool}; const Res = A{}`, nil, `must have exactly one entry`}}},
 	{
-		"OneOfInvalidField",
-		cp{{"a", `type A oneof{X int64;Y string;Z bool}; const Res = A{Y: 1}`, nil, `invalid oneof field`}}},
+		"UnionInvalidField",
+		cp{{"a", `type A union{X int64;Y string;Z bool}; const Res = A{Y: 1}`, nil, `invalid union field`}}},
 	{
-		"OneOfNoValue",
-		cp{{"a", `type A oneof{X int64;Y string;Z bool}; const Res = A{Y}`, nil, `must have explicit key and value`}}},
+		"UnionNoValue",
+		cp{{"a", `type A union{X int64;Y string;Z bool}; const Res = A{Y}`, nil, `must have explicit key and value`}}},
 
 	// Test optional and nil.
 	{

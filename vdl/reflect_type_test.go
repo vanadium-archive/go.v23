@@ -126,10 +126,10 @@ var rtKeyTests = []rtTest{
 	{reflect.TypeOf(nStructString{}), rtNStruct("String", StringType)},
 	// Special-case types
 	{reflect.TypeOf(nEnum(0)), rtN("Enum", EnumType("A", "B", "C"))},
-	{reflect.TypeOf((*nOneOf)(nil)).Elem(), oneOfTypeN},
-	{reflect.TypeOf(nOneOfA{}), oneOfTypeN},
-	{reflect.TypeOf(nOneOfB{}), oneOfTypeN},
-	{reflect.TypeOf(nOneOfC{}), oneOfTypeN},
+	{reflect.TypeOf((*nUnion)(nil)).Elem(), unionTypeN},
+	{reflect.TypeOf(nUnionA{}), unionTypeN},
+	{reflect.TypeOf(nUnionB{}), unionTypeN},
+	{reflect.TypeOf(nUnionC{}), unionTypeN},
 }
 
 // rtNonKeyTests contains types that may not be used as map keys.
@@ -430,21 +430,21 @@ var rtErrorTests = []rtErrorTest{
 	{reflect.TypeOf(nBadEnumSet2(0)), badEnumSet},
 	{reflect.TypeOf(nBadEnumSet3(0)), badEnumSet},
 	{reflect.TypeOf(nBadEnumSet4(0)), badEnumSet},
-	{reflect.TypeOf(nBadOneOfNoFields{}), `no fields`},
-	{reflect.TypeOf(nBadOneOfUnexp{}), `must be exported`},
-	{reflect.TypeOf(nBadOneOfField1{}), badOneOfField},
-	{reflect.TypeOf(nBadOneOfField2{}), badOneOfField},
-	{reflect.TypeOf(nBadOneOfField3{}), badOneOfField},
-	{reflect.TypeOf(nBadOneOfName1{}), badOneOfName},
-	{reflect.TypeOf(nBadOneOfName2{}), badOneOfName},
+	{reflect.TypeOf(nBadUnionNoFields{}), `no fields`},
+	{reflect.TypeOf(nBadUnionUnexp{}), `must be exported`},
+	{reflect.TypeOf(nBadUnionField1{}), badUnionField},
+	{reflect.TypeOf(nBadUnionField2{}), badUnionField},
+	{reflect.TypeOf(nBadUnionField3{}), badUnionField},
+	{reflect.TypeOf(nBadUnionName1{}), badUnionName},
+	{reflect.TypeOf(nBadUnionName2{}), badUnionName},
 }
 
 const (
 	badDescribe   = `invalid __VDLReflect (want __VDLReflect(struct{...}))`
 	badEnumString = `must have method String() string`
 	badEnumSet    = `must have pointer method Set(string) error`
-	badOneOfField = `bad concrete field type`
-	badOneOfName  = `must have method Name() string`
+	badUnionField = `bad concrete field type`
+	badUnionName  = `must have method Name() string`
 )
 
 type (
@@ -461,13 +461,13 @@ type (
 	nBadEnumSet3     int
 	nBadEnumSet4     int
 
-	nBadOneOfNoFields struct{}
-	nBadOneOfUnexp    struct{}
-	nBadOneOfField1   struct{}
-	nBadOneOfField2   struct{}
-	nBadOneOfField3   struct{}
-	nBadOneOfName1    struct{ Value bool }
-	nBadOneOfName2    struct{ Value bool }
+	nBadUnionNoFields struct{}
+	nBadUnionUnexp    struct{}
+	nBadUnionField1   struct{}
+	nBadUnionField2   struct{}
+	nBadUnionField3   struct{}
+	nBadUnionName1    struct{ Value bool }
+	nBadUnionName2    struct{ Value bool }
 )
 
 // No description
@@ -512,60 +512,60 @@ func (nBadEnumSet4) __VDLReflect(struct{ Enum struct{ A string } }) { panic("X")
 func (nBadEnumSet4) String() string                                 { panic("X") }
 func (nBadEnumSet4) Set(string) error                               { panic("X") }
 
-// No oneof fields
-func (nBadOneOfNoFields) __VDLReflect(struct {
-	Type  nOneOf
-	OneOf struct{}
+// No union fields
+func (nBadUnionNoFields) __VDLReflect(struct {
+	Type  nUnion
+	Union struct{}
 }) {
 	panic("X")
 }
 
 // Field name isn't exported
-func (nBadOneOfUnexp) __VDLReflect(struct {
-	Type  nOneOf
-	OneOf struct{ a nOneOfA }
+func (nBadUnionUnexp) __VDLReflect(struct {
+	Type  nUnion
+	Union struct{ a nUnionA }
 }) {
 	panic("X")
 }
 
 // Field type isn't struct
-func (nBadOneOfField1) __VDLReflect(struct {
-	Type  nOneOf
-	OneOf struct{ A bool }
+func (nBadUnionField1) __VDLReflect(struct {
+	Type  nUnion
+	Union struct{ A bool }
 }) {
 	panic("X")
 }
 
 // Field type has no field
-func (nBadOneOfField2) __VDLReflect(struct {
-	Type  nOneOf
-	OneOf struct{ A struct{} }
+func (nBadUnionField2) __VDLReflect(struct {
+	Type  nUnion
+	Union struct{ A struct{} }
 }) {
 	panic("X")
 }
 
 // Field type name isn't "Value"
-func (nBadOneOfField3) __VDLReflect(struct {
-	Type  nOneOf
-	OneOf struct{ A struct{ value bool } }
+func (nBadUnionField3) __VDLReflect(struct {
+	Type  nUnion
+	Union struct{ A struct{ value bool } }
 }) {
 	panic("X")
 }
 
 // Name method isn't Name() string
-func (nBadOneOfName1) Name() { panic("X") }
-func (nBadOneOfName1) __VDLReflect(struct {
-	Type  nOneOf
-	OneOf struct{ A nBadOneOfName1 }
+func (nBadUnionName1) Name() { panic("X") }
+func (nBadUnionName1) __VDLReflect(struct {
+	Type  nUnion
+	Union struct{ A nBadUnionName1 }
 }) {
 	panic("X")
 }
 
 // Name method isn't Name() string
-func (nBadOneOfName2) Name() bool { panic("X") }
-func (nBadOneOfName2) __VDLReflect(struct {
-	Type  nOneOf
-	OneOf struct{ A nBadOneOfName2 }
+func (nBadUnionName2) Name() bool { panic("X") }
+func (nBadUnionName2) __VDLReflect(struct {
+	Type  nUnion
+	Union struct{ A nBadUnionName2 }
 }) {
 	panic("X")
 }

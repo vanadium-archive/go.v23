@@ -4,20 +4,22 @@ package base
 // generated languages.  Run the following command to generate Go:
 //
 //   vdl -experimental -exts=.vdl,.vdlexp generate -lang=go veyron.io/veyron/veyron2/vdl/...
+//
+// TODO(toddw): Merge with base.vdl, and remove this file.
 
 type (
 	NamedEnum       enum{A;B;C}
-	NamedOneOf      oneof{A bool;B string;C int32}
+	NamedUnion      union{A bool;B string;C int32}
 )
 
 type ScalarsExp struct {
 	B13 NamedEnum
-	B14 NamedOneOf
+	B14 NamedUnion
 }
 
 const (
 	Cenum  = NamedEnum.A
-	Coneof = NamedOneOf{A: true}
+	Cunion = NamedUnion{A: true}
 	Carray = [3]int32{1, 2, 3}
 	Clist  = []int32{1, 2, 3}
 	// TODO(toddw): test multiple items after ordering is fixed.
@@ -42,6 +44,6 @@ const (
 	CTVSet       = typeobject(set[string])
 	CTVMap       = typeobject(map[string]int64)
 	CTVStruct    = typeobject(ScalarsExp)
-	CTVOneOf     = typeobject(NamedOneOf)
+	CTVUnion     = typeobject(NamedUnion)
 	CTVAny       = typeobject(any)
 )

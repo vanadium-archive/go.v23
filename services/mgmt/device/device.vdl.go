@@ -209,7 +209,7 @@ type ApplicationClientMethods interface {
 	// which can then be used to control all the installations of the given
 	// application.
 	// TODO(rjkroege): Use customized labels.
-	Install(ctx __context.T, Name string, opts ...__ipc.CallOpt) (string, error)
+	Install(ctx __context.T, name string, opts ...__ipc.CallOpt) (string, error)
 	// Refresh refreshes the state of application installation(s)
 	// instance(s).
 	Refresh(__context.T, ...__ipc.CallOpt) error
@@ -233,7 +233,7 @@ type ApplicationClientMethods interface {
 	//
 	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
 	// are implemented.
-	Stop(ctx __context.T, Deadline uint32, opts ...__ipc.CallOpt) error
+	Stop(ctx __context.T, deadline uint32, opts ...__ipc.CallOpt) error
 	// Suspend suspends execution of application installation(s)
 	// instance(s).
 	Suspend(__context.T, ...__ipc.CallOpt) error
@@ -248,7 +248,7 @@ type ApplicationClientMethods interface {
 	// specified by the object name argument.  If the new application
 	// envelope contains a different application title, the update does not
 	// occur, and an error is returned.
-	UpdateTo(ctx __context.T, Name string, opts ...__ipc.CallOpt) error
+	UpdateTo(ctx __context.T, name string, opts ...__ipc.CallOpt) error
 }
 
 // ApplicationClientStub adds universal methods to ApplicationClientMethods.
@@ -564,7 +564,7 @@ type ApplicationServerMethods interface {
 	// which can then be used to control all the installations of the given
 	// application.
 	// TODO(rjkroege): Use customized labels.
-	Install(ctx __ipc.ServerContext, Name string) (string, error)
+	Install(ctx __ipc.ServerContext, name string) (string, error)
 	// Refresh refreshes the state of application installation(s)
 	// instance(s).
 	Refresh(__ipc.ServerContext) error
@@ -588,7 +588,7 @@ type ApplicationServerMethods interface {
 	//
 	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
 	// are implemented.
-	Stop(ctx __ipc.ServerContext, Deadline uint32) error
+	Stop(ctx __ipc.ServerContext, deadline uint32) error
 	// Suspend suspends execution of application installation(s)
 	// instance(s).
 	Suspend(__ipc.ServerContext) error
@@ -603,7 +603,7 @@ type ApplicationServerMethods interface {
 	// specified by the object name argument.  If the new application
 	// envelope contains a different application title, the update does not
 	// occur, and an error is returned.
-	UpdateTo(ctx __ipc.ServerContext, Name string) error
+	UpdateTo(ctx __ipc.ServerContext, name string) error
 }
 
 // ApplicationServerStubMethods is the server interface containing
@@ -713,7 +713,7 @@ var descApplication = __ipc.InterfaceDesc{
 			Name: "Install",
 			Doc:  "// Install installs the application identified by the argument and\n// returns an object name suffix that identifies the new installation.\n//\n// The argument should be an object name for an application envelope.\n// The service it identifies must implement repository.Application, and\n// is expected to return either the requested version (if the object name\n// encodes a specific version), or otherwise the latest available version,\n// as appropriate.\n//\n// The returned suffix, when appended to the name used to reach the\n// receiver for Install, can be used to control the installation object.\n// The suffix will contain the title of the application as a prefix,\n// which can then be used to control all the installations of the given\n// application.\n// TODO(rjkroege): Use customized labels.",
 			InArgs: []__ipc.ArgDesc{
-				{"Name", ``}, // string
+				{"name", ``}, // string
 			},
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // string
@@ -766,7 +766,7 @@ var descApplication = __ipc.InterfaceDesc{
 			Name: "Stop",
 			Doc:  "// Stop attempts a clean shutdown of application installation(s)\n// instance(s). If the deadline (in seconds) is non-zero and the\n// instance(s) in questions are still running after the given deadline,\n// shutdown of the instance(s) is enforced.\n//\n// TODO(jsimsa): Switch deadline to time.Duration when built-in types\n// are implemented.",
 			InArgs: []__ipc.ArgDesc{
-				{"Deadline", ``}, // uint32
+				{"deadline", ``}, // uint32
 			},
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
@@ -801,7 +801,7 @@ var descApplication = __ipc.InterfaceDesc{
 			Name: "UpdateTo",
 			Doc:  "// UpdateTo updates the application installation(s) to the application\n// specified by the object name argument.  If the new application\n// envelope contains a different application title, the update does not\n// occur, and an error is returned.",
 			InArgs: []__ipc.ArgDesc{
-				{"Name", ``}, // string
+				{"name", ``}, // string
 			},
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
@@ -816,7 +816,7 @@ func (s implApplicationServerStub) Signature(ctx __ipc.ServerContext) (__ipc.Ser
 	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
 	result.Methods["Install"] = __ipc.MethodSignature{
 		InArgs: []__ipc.MethodArgument{
-			{Name: "Name", Type: 3},
+			{Name: "name", Type: 3},
 		},
 		OutArgs: []__ipc.MethodArgument{
 			{Name: "", Type: 3},
@@ -856,7 +856,7 @@ func (s implApplicationServerStub) Signature(ctx __ipc.ServerContext) (__ipc.Ser
 	}
 	result.Methods["Stop"] = __ipc.MethodSignature{
 		InArgs: []__ipc.MethodArgument{
-			{Name: "Deadline", Type: 52},
+			{Name: "deadline", Type: 52},
 		},
 		OutArgs: []__ipc.MethodArgument{
 			{Name: "", Type: 65},
@@ -882,7 +882,7 @@ func (s implApplicationServerStub) Signature(ctx __ipc.ServerContext) (__ipc.Ser
 	}
 	result.Methods["UpdateTo"] = __ipc.MethodSignature{
 		InArgs: []__ipc.MethodArgument{
-			{Name: "Name", Type: 3},
+			{Name: "name", Type: 3},
 		},
 		OutArgs: []__ipc.MethodArgument{
 			{Name: "", Type: 65},
@@ -1052,14 +1052,14 @@ type DeviceClientMethods interface {
 	// Describe generates a description of the device.
 	Describe(__context.T, ...__ipc.CallOpt) (Description, error)
 	// IsRunnable checks if the device can execute the given binary.
-	IsRunnable(ctx __context.T, Description binary.Description, opts ...__ipc.CallOpt) (bool, error)
+	IsRunnable(ctx __context.T, description binary.Description, opts ...__ipc.CallOpt) (bool, error)
 	// Reset resets the device. If the deadline is non-zero and the device
 	// in question is still running after the given deadline expired,
 	// reset of the device is enforced.
 	//
 	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
 	// are implemented.
-	Reset(ctx __context.T, Deadline uint64, opts ...__ipc.CallOpt) error
+	Reset(ctx __context.T, deadline uint64, opts ...__ipc.CallOpt) error
 	// AssociateAccount associates a local  system account name with the provided
 	// Veyron identities. It replaces the existing association if one already exists for that
 	// identity. Setting an AccountName to "" removes the association for each
@@ -1067,7 +1067,7 @@ type DeviceClientMethods interface {
 	AssociateAccount(ctx __context.T, identityNames []string, accountName string, opts ...__ipc.CallOpt) error
 	// ListAssociations returns all of the associations between Veyron identities
 	// and system names.
-	ListAssociations(__context.T, ...__ipc.CallOpt) (associations []Association, err error)
+	ListAssociations(__context.T, ...__ipc.CallOpt) ([]Association, error)
 }
 
 // DeviceClientStub adds universal methods to DeviceClientMethods.
@@ -1280,14 +1280,14 @@ type DeviceServerMethods interface {
 	// Describe generates a description of the device.
 	Describe(__ipc.ServerContext) (Description, error)
 	// IsRunnable checks if the device can execute the given binary.
-	IsRunnable(ctx __ipc.ServerContext, Description binary.Description) (bool, error)
+	IsRunnable(ctx __ipc.ServerContext, description binary.Description) (bool, error)
 	// Reset resets the device. If the deadline is non-zero and the device
 	// in question is still running after the given deadline expired,
 	// reset of the device is enforced.
 	//
 	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
 	// are implemented.
-	Reset(ctx __ipc.ServerContext, Deadline uint64) error
+	Reset(ctx __ipc.ServerContext, deadline uint64) error
 	// AssociateAccount associates a local  system account name with the provided
 	// Veyron identities. It replaces the existing association if one already exists for that
 	// identity. Setting an AccountName to "" removes the association for each
@@ -1295,7 +1295,7 @@ type DeviceServerMethods interface {
 	AssociateAccount(ctx __ipc.ServerContext, identityNames []string, accountName string) error
 	// ListAssociations returns all of the associations between Veyron identities
 	// and system names.
-	ListAssociations(__ipc.ServerContext) (associations []Association, err error)
+	ListAssociations(__ipc.ServerContext) ([]Association, error)
 }
 
 // DeviceServerStubMethods is the server interface containing
@@ -1402,7 +1402,7 @@ var descDevice = __ipc.InterfaceDesc{
 			Name: "IsRunnable",
 			Doc:  "// IsRunnable checks if the device can execute the given binary.",
 			InArgs: []__ipc.ArgDesc{
-				{"Description", ``}, // binary.Description
+				{"description", ``}, // binary.Description
 			},
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // bool
@@ -1414,7 +1414,7 @@ var descDevice = __ipc.InterfaceDesc{
 			Name: "Reset",
 			Doc:  "// Reset resets the device. If the deadline is non-zero and the device\n// in question is still running after the given deadline expired,\n// reset of the device is enforced.\n//\n// TODO(jsimsa): Switch deadline to time.Duration when built-in types\n// are implemented.",
 			InArgs: []__ipc.ArgDesc{
-				{"Deadline", ``}, // uint64
+				{"deadline", ``}, // uint64
 			},
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
@@ -1437,8 +1437,8 @@ var descDevice = __ipc.InterfaceDesc{
 			Name: "ListAssociations",
 			Doc:  "// ListAssociations returns all of the associations between Veyron identities\n// and system names.",
 			OutArgs: []__ipc.ArgDesc{
-				{"associations", ``}, // []Association
-				{"err", ``},          // error
+				{"", ``}, // []Association
+				{"", ``}, // error
 			},
 			Tags: []__vdlutil.Any{access.Tag("Admin")},
 		},
@@ -1472,7 +1472,7 @@ func (s implDeviceServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceS
 	}
 	result.Methods["IsRunnable"] = __ipc.MethodSignature{
 		InArgs: []__ipc.MethodArgument{
-			{Name: "Description", Type: 68},
+			{Name: "description", Type: 68},
 		},
 		OutArgs: []__ipc.MethodArgument{
 			{Name: "", Type: 2},
@@ -1482,13 +1482,13 @@ func (s implDeviceServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceS
 	result.Methods["ListAssociations"] = __ipc.MethodSignature{
 		InArgs: []__ipc.MethodArgument{},
 		OutArgs: []__ipc.MethodArgument{
-			{Name: "associations", Type: 70},
-			{Name: "err", Type: 65},
+			{Name: "", Type: 70},
+			{Name: "", Type: 65},
 		},
 	}
 	result.Methods["Reset"] = __ipc.MethodSignature{
 		InArgs: []__ipc.MethodArgument{
-			{Name: "Deadline", Type: 53},
+			{Name: "deadline", Type: 53},
 		},
 		OutArgs: []__ipc.MethodArgument{
 			{Name: "", Type: 65},

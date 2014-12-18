@@ -28,7 +28,7 @@ type (
 	}
 
 	NEnum  enum{ A; B; C }
-	NOneOf oneof{ A  bool; B string; C int64 }
+	NUnion union{ A  bool; B string; C int64 }
 
 	// Nested Custom Types
 	MBool   NBool

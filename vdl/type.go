@@ -34,10 +34,7 @@ const (
 	Set    // unordered collection of distinct keys
 	Map    // unordered association between distinct keys and values
 	Struct // conjunction of an ordered sequence of (name,type) fields
-	OneOf  // disjunction of an ordered sequence of (name,type) fields
-
-	// TODO(toddw): Rename OneOf to Union, to make it sounds less like Any and
-	// more like Struct.
+	Union  // disjunction of an ordered sequence of (name,type) fields
 
 	// Internal kinds; they never appear in a *Type returned to the user.
 	internalNamed // placeholder for named types while they're being built.
@@ -89,8 +86,8 @@ func (k Kind) String() string {
 		return "map"
 	case Struct:
 		return "struct"
-	case OneOf:
-		return "oneof"
+	case Union:
+		return "union"
 	}
 	panic(fmt.Errorf("vdl: unhandled kind: %d", k))
 }
@@ -128,11 +125,11 @@ type Type struct {
 	len    int      // used by Array
 	elem   *Type    // used by Optional, Array, List, Map
 	key    *Type    // used by Set, Map
-	fields []Field  // used by Struct, OneOf
+	fields []Field  // used by Struct, Union
 	unique string   // used by all kinds, filled in by typeCons
 }
 
-// Field describes a single field in a Struct or OneOf.
+// Field describes a single field in a Struct or Union.
 type Field struct {
 	Name string
 	Type *Type
@@ -239,16 +236,16 @@ func (t *Type) Key() *Type {
 	return t.key
 }
 
-// Field returns a description of the Struct or OneOf field at the given index.
+// Field returns a description of the Struct or Union field at the given index.
 func (t *Type) Field(index int) Field {
-	t.checkKind("Field", Struct, OneOf)
+	t.checkKind("Field", Struct, Union)
 	return t.fields[index]
 }
 
-// FieldByName returns a description of the Struct or OneOf field with the given
+// FieldByName returns a description of the Struct or Union field with the given
 // name, and its integer field index.  Returns -1 if the name doesn't exist.
 func (t *Type) FieldByName(name string) (Field, int) {
-	t.checkKind("FieldByName", Struct, OneOf)
+	t.checkKind("FieldByName", Struct, Union)
 	// We typically have a small number of fields, so linear search is fine.
 	for index, f := range t.fields {
 		if f.Name == name {
@@ -258,9 +255,9 @@ func (t *Type) FieldByName(name string) (Field, int) {
 	return Field{}, -1
 }
 
-// NumField returns the number of fields in a Struct or OneOf.
+// NumField returns the number of fields in a Struct or Union.
 func (t *Type) NumField() int {
-	t.checkKind("NumField", Struct, OneOf)
+	t.checkKind("NumField", Struct, Union)
 	return len(t.fields)
 }
 
@@ -343,7 +340,7 @@ const (
 	// WalkAll indicates we should walk through all types in the type graph.
 	WalkAll WalkMode = iota
 	// WalkInline indicates we should only visit subtypes of array, struct and
-	// oneof.  Values of array, struct and oneof always include values of their
+	// union.  Values of array, struct and union always include values of their
 	// subtypes, thus the subtypes are considered to be inline.  Values of
 	// optional, list, set and map might not include values of their subtypes, and
 	// are not considered to be inline.
@@ -352,7 +349,7 @@ const (
 
 func (t *Type) subTypesInline() bool {
 	switch t.kind {
-	case Array, Struct, OneOf:
+	case Array, Struct, Union:
 		return true
 	}
 	return false
@@ -376,7 +373,7 @@ func typeWalk(mode WalkMode, t *Type, fn func(*Type) bool, seen map[*Type]bool) 
 		return typeWalk(mode, t.key, fn, seen)
 	case Map:
 		return typeWalk(mode, t.key, fn, seen) && typeWalk(mode, t.elem, fn, seen)
-	case Struct, OneOf:
+	case Struct, Union:
 		for _, field := range t.fields {
 			if !typeWalk(mode, field.Type, fn, seen) {
 				return false

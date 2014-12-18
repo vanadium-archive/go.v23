@@ -2517,11 +2517,11 @@ const Tests = []TestCase {
 	// ff81                 MsgID                            -65
 	//                      TypeMsg                           65
 	// 45                   MsgLen                            69
-	// 19                   TypeID                            25 [veyron.io/veyron/veyron2/vom2.WireOneOf struct{Name string;Fields []veyron.io/veyron/veyron2/vom2.WireField struct{Name string;Type veyron.io/veyron/veyron2/vom2.TypeID uint64}}]
-	// 01                   Index                              1 [veyron.io/veyron/veyron2/vom2.WireOneOf.Name]
+	// 19                   TypeID                            25 [veyron.io/veyron/veyron2/vom2.WireUnion struct{Name string;Fields []veyron.io/veyron/veyron2/vom2.WireField struct{Name string;Type veyron.io/veyron/veyron2/vom2.TypeID uint64}}]
+	// 01                   Index                              1 [veyron.io/veyron/veyron2/vom2.WireUnion.Name]
 	// 2d                   ByteLen                           45 [string len]
-	// 766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e4f6e654f66 PrimValue       veyron.io/veyron/veyron2/vom2/testdata.NOneOf [string]
-	// 02                   Index                              2 [veyron.io/veyron/veyron2/vom2.WireOneOf.Fields]
+	// 766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e556e696f6e PrimValue       veyron.io/veyron/veyron2/vom2/testdata.NUnion [string]
+	// 02                   Index                              2 [veyron.io/veyron/veyron2/vom2.WireUnion.Fields]
 	// 03                   ValueLen                           3 [list len]
 	// 01                   Index                              1 [veyron.io/veyron/veyron2/vom2.WireField.Name]
 	// 01                   ByteLen                            1 [string len]
@@ -2541,27 +2541,27 @@ const Tests = []TestCase {
 	// 02                   Index                              2 [veyron.io/veyron/veyron2/vom2.WireField.Type]
 	// 0b                   PrimValue                         11 [uint]
 	// 00                   End                                0 [veyron.io/veyron/veyron2/vom2.WireField END]
-	// 00                   End                                0 [veyron.io/veyron/veyron2/vom2.WireOneOf END]
+	// 00                   End                                0 [veyron.io/veyron/veyron2/vom2.WireUnion END]
 	// ff82                 MsgID                             65
-	//                      ValueMsg                          65 [veyron.io/veyron/veyron2/vom2/testdata.NOneOf oneof{A bool;B string;C int64}]
+	//                      ValueMsg                          65 [veyron.io/veyron/veyron2/vom2/testdata.NUnion union{A bool;B string;C int64}]
 	// 02                   MsgLen                             2
-	// 01                   Index                              1 [veyron.io/veyron/veyron2/vom2/testdata.NOneOf.A]
+	// 01                   Index                              1 [veyron.io/veyron/veyron2/vom2/testdata.NUnion.A]
 	// 01                   PrimValue                       true [bool]
-	// DumpStatus{MsgID: 65, MsgLen: 2, MsgN: 2, Value: veyron.io/veyron/veyron2/vom2/testdata.NOneOf oneof{A bool;B string;C int64}{A: true}}
+	// DumpStatus{MsgID: 65, MsgLen: 2, MsgN: 2, Value: veyron.io/veyron/veyron2/vom2/testdata.NUnion union{A bool;B string;C int64}{A: true}}
 	{
-		`NOneOf{A: true}`,
-		NOneOf{A: true},
-		"80ff814519012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e4f6e654f660203010141020300010142020400010143020b0000ff82020101",
+		`NUnion{A: true}`,
+		NUnion{A: true},
+		"80ff814519012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e556e696f6e0203010141020300010142020400010143020b0000ff82020101",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
 	//                      TypeMsg                           65
 	// 45                   MsgLen                            69
-	// 19                   TypeID                            25 [veyron.io/veyron/veyron2/vom2.WireOneOf struct{Name string;Fields []veyron.io/veyron/veyron2/vom2.WireField struct{Name string;Type veyron.io/veyron/veyron2/vom2.TypeID uint64}}]
-	// 01                   Index                              1 [veyron.io/veyron/veyron2/vom2.WireOneOf.Name]
+	// 19                   TypeID                            25 [veyron.io/veyron/veyron2/vom2.WireUnion struct{Name string;Fields []veyron.io/veyron/veyron2/vom2.WireField struct{Name string;Type veyron.io/veyron/veyron2/vom2.TypeID uint64}}]
+	// 01                   Index                              1 [veyron.io/veyron/veyron2/vom2.WireUnion.Name]
 	// 2d                   ByteLen                           45 [string len]
-	// 766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e4f6e654f66 PrimValue       veyron.io/veyron/veyron2/vom2/testdata.NOneOf [string]
-	// 02                   Index                              2 [veyron.io/veyron/veyron2/vom2.WireOneOf.Fields]
+	// 766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e556e696f6e PrimValue       veyron.io/veyron/veyron2/vom2/testdata.NUnion [string]
+	// 02                   Index                              2 [veyron.io/veyron/veyron2/vom2.WireUnion.Fields]
 	// 03                   ValueLen                           3 [list len]
 	// 01                   Index                              1 [veyron.io/veyron/veyron2/vom2.WireField.Name]
 	// 01                   ByteLen                            1 [string len]
@@ -2581,27 +2581,27 @@ const Tests = []TestCase {
 	// 02                   Index                              2 [veyron.io/veyron/veyron2/vom2.WireField.Type]
 	// 0b                   PrimValue                         11 [uint]
 	// 00                   End                                0 [veyron.io/veyron/veyron2/vom2.WireField END]
-	// 00                   End                                0 [veyron.io/veyron/veyron2/vom2.WireOneOf END]
+	// 00                   End                                0 [veyron.io/veyron/veyron2/vom2.WireUnion END]
 	// ff82                 MsgID                             65
-	//                      ValueMsg                          65 [veyron.io/veyron/veyron2/vom2/testdata.NOneOf oneof{A bool;B string;C int64}]
+	//                      ValueMsg                          65 [veyron.io/veyron/veyron2/vom2/testdata.NUnion union{A bool;B string;C int64}]
 	// 02                   MsgLen                             2
-	// 01                   Index                              1 [veyron.io/veyron/veyron2/vom2/testdata.NOneOf.A]
+	// 01                   Index                              1 [veyron.io/veyron/veyron2/vom2/testdata.NUnion.A]
 	// 00                   PrimValue                      false [bool]
-	// DumpStatus{MsgID: 65, MsgLen: 2, MsgN: 2, Value: veyron.io/veyron/veyron2/vom2/testdata.NOneOf oneof{A bool;B string;C int64}{A: false}}
+	// DumpStatus{MsgID: 65, MsgLen: 2, MsgN: 2, Value: veyron.io/veyron/veyron2/vom2/testdata.NUnion union{A bool;B string;C int64}{A: false}}
 	{
-		`NOneOf{A: false}`,
-		NOneOf{A: false},
-		"80ff814519012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e4f6e654f660203010141020300010142020400010143020b0000ff82020100",
+		`NUnion{A: false}`,
+		NUnion{A: false},
+		"80ff814519012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e556e696f6e0203010141020300010142020400010143020b0000ff82020100",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
 	//                      TypeMsg                           65
 	// 45                   MsgLen                            69
-	// 19                   TypeID                            25 [veyron.io/veyron/veyron2/vom2.WireOneOf struct{Name string;Fields []veyron.io/veyron/veyron2/vom2.WireField struct{Name string;Type veyron.io/veyron/veyron2/vom2.TypeID uint64}}]
-	// 01                   Index                              1 [veyron.io/veyron/veyron2/vom2.WireOneOf.Name]
+	// 19                   TypeID                            25 [veyron.io/veyron/veyron2/vom2.WireUnion struct{Name string;Fields []veyron.io/veyron/veyron2/vom2.WireField struct{Name string;Type veyron.io/veyron/veyron2/vom2.TypeID uint64}}]
+	// 01                   Index                              1 [veyron.io/veyron/veyron2/vom2.WireUnion.Name]
 	// 2d                   ByteLen                           45 [string len]
-	// 766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e4f6e654f66 PrimValue       veyron.io/veyron/veyron2/vom2/testdata.NOneOf [string]
-	// 02                   Index                              2 [veyron.io/veyron/veyron2/vom2.WireOneOf.Fields]
+	// 766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e556e696f6e PrimValue       veyron.io/veyron/veyron2/vom2/testdata.NUnion [string]
+	// 02                   Index                              2 [veyron.io/veyron/veyron2/vom2.WireUnion.Fields]
 	// 03                   ValueLen                           3 [list len]
 	// 01                   Index                              1 [veyron.io/veyron/veyron2/vom2.WireField.Name]
 	// 01                   ByteLen                            1 [string len]
@@ -2621,28 +2621,28 @@ const Tests = []TestCase {
 	// 02                   Index                              2 [veyron.io/veyron/veyron2/vom2.WireField.Type]
 	// 0b                   PrimValue                         11 [uint]
 	// 00                   End                                0 [veyron.io/veyron/veyron2/vom2.WireField END]
-	// 00                   End                                0 [veyron.io/veyron/veyron2/vom2.WireOneOf END]
+	// 00                   End                                0 [veyron.io/veyron/veyron2/vom2.WireUnion END]
 	// ff82                 MsgID                             65
-	//                      ValueMsg                          65 [veyron.io/veyron/veyron2/vom2/testdata.NOneOf oneof{A bool;B string;C int64}]
+	//                      ValueMsg                          65 [veyron.io/veyron/veyron2/vom2/testdata.NUnion union{A bool;B string;C int64}]
 	// 02                   MsgLen                             2
-	// 02                   Index                              2 [veyron.io/veyron/veyron2/vom2/testdata.NOneOf.B]
+	// 02                   Index                              2 [veyron.io/veyron/veyron2/vom2/testdata.NUnion.B]
 	// 00                   ByteLen                            0 [string len]
 	//                      PrimValue                            [string]
-	// DumpStatus{MsgID: 65, MsgLen: 2, MsgN: 2, Value: veyron.io/veyron/veyron2/vom2/testdata.NOneOf oneof{A bool;B string;C int64}{B: ""}}
+	// DumpStatus{MsgID: 65, MsgLen: 2, MsgN: 2, Value: veyron.io/veyron/veyron2/vom2/testdata.NUnion union{A bool;B string;C int64}{B: ""}}
 	{
-		`NOneOf{B: ""}`,
-		NOneOf{B: ""},
-		"80ff814519012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e4f6e654f660203010141020300010142020400010143020b0000ff82020200",
+		`NUnion{B: ""}`,
+		NUnion{B: ""},
+		"80ff814519012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e556e696f6e0203010141020300010142020400010143020b0000ff82020200",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
 	//                      TypeMsg                           65
 	// 45                   MsgLen                            69
-	// 19                   TypeID                            25 [veyron.io/veyron/veyron2/vom2.WireOneOf struct{Name string;Fields []veyron.io/veyron/veyron2/vom2.WireField struct{Name string;Type veyron.io/veyron/veyron2/vom2.TypeID uint64}}]
-	// 01                   Index                              1 [veyron.io/veyron/veyron2/vom2.WireOneOf.Name]
+	// 19                   TypeID                            25 [veyron.io/veyron/veyron2/vom2.WireUnion struct{Name string;Fields []veyron.io/veyron/veyron2/vom2.WireField struct{Name string;Type veyron.io/veyron/veyron2/vom2.TypeID uint64}}]
+	// 01                   Index                              1 [veyron.io/veyron/veyron2/vom2.WireUnion.Name]
 	// 2d                   ByteLen                           45 [string len]
-	// 766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e4f6e654f66 PrimValue       veyron.io/veyron/veyron2/vom2/testdata.NOneOf [string]
-	// 02                   Index                              2 [veyron.io/veyron/veyron2/vom2.WireOneOf.Fields]
+	// 766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e556e696f6e PrimValue       veyron.io/veyron/veyron2/vom2/testdata.NUnion [string]
+	// 02                   Index                              2 [veyron.io/veyron/veyron2/vom2.WireUnion.Fields]
 	// 03                   ValueLen                           3 [list len]
 	// 01                   Index                              1 [veyron.io/veyron/veyron2/vom2.WireField.Name]
 	// 01                   ByteLen                            1 [string len]
@@ -2662,28 +2662,28 @@ const Tests = []TestCase {
 	// 02                   Index                              2 [veyron.io/veyron/veyron2/vom2.WireField.Type]
 	// 0b                   PrimValue                         11 [uint]
 	// 00                   End                                0 [veyron.io/veyron/veyron2/vom2.WireField END]
-	// 00                   End                                0 [veyron.io/veyron/veyron2/vom2.WireOneOf END]
+	// 00                   End                                0 [veyron.io/veyron/veyron2/vom2.WireUnion END]
 	// ff82                 MsgID                             65
-	//                      ValueMsg                          65 [veyron.io/veyron/veyron2/vom2/testdata.NOneOf oneof{A bool;B string;C int64}]
+	//                      ValueMsg                          65 [veyron.io/veyron/veyron2/vom2/testdata.NUnion union{A bool;B string;C int64}]
 	// 05                   MsgLen                             5
-	// 02                   Index                              2 [veyron.io/veyron/veyron2/vom2/testdata.NOneOf.B]
+	// 02                   Index                              2 [veyron.io/veyron/veyron2/vom2/testdata.NUnion.B]
 	// 03                   ByteLen                            3 [string len]
 	// 616263               PrimValue                        abc [string]
-	// DumpStatus{MsgID: 65, MsgLen: 5, MsgN: 5, Value: veyron.io/veyron/veyron2/vom2/testdata.NOneOf oneof{A bool;B string;C int64}{B: "abc"}}
+	// DumpStatus{MsgID: 65, MsgLen: 5, MsgN: 5, Value: veyron.io/veyron/veyron2/vom2/testdata.NUnion union{A bool;B string;C int64}{B: "abc"}}
 	{
-		`NOneOf{B: "abc"}`,
-		NOneOf{B: "abc"},
-		"80ff814519012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e4f6e654f660203010141020300010142020400010143020b0000ff82050203616263",
+		`NUnion{B: "abc"}`,
+		NUnion{B: "abc"},
+		"80ff814519012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e556e696f6e0203010141020300010142020400010143020b0000ff82050203616263",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
 	//                      TypeMsg                           65
 	// 45                   MsgLen                            69
-	// 19                   TypeID                            25 [veyron.io/veyron/veyron2/vom2.WireOneOf struct{Name string;Fields []veyron.io/veyron/veyron2/vom2.WireField struct{Name string;Type veyron.io/veyron/veyron2/vom2.TypeID uint64}}]
-	// 01                   Index                              1 [veyron.io/veyron/veyron2/vom2.WireOneOf.Name]
+	// 19                   TypeID                            25 [veyron.io/veyron/veyron2/vom2.WireUnion struct{Name string;Fields []veyron.io/veyron/veyron2/vom2.WireField struct{Name string;Type veyron.io/veyron/veyron2/vom2.TypeID uint64}}]
+	// 01                   Index                              1 [veyron.io/veyron/veyron2/vom2.WireUnion.Name]
 	// 2d                   ByteLen                           45 [string len]
-	// 766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e4f6e654f66 PrimValue       veyron.io/veyron/veyron2/vom2/testdata.NOneOf [string]
-	// 02                   Index                              2 [veyron.io/veyron/veyron2/vom2.WireOneOf.Fields]
+	// 766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e556e696f6e PrimValue       veyron.io/veyron/veyron2/vom2/testdata.NUnion [string]
+	// 02                   Index                              2 [veyron.io/veyron/veyron2/vom2.WireUnion.Fields]
 	// 03                   ValueLen                           3 [list len]
 	// 01                   Index                              1 [veyron.io/veyron/veyron2/vom2.WireField.Name]
 	// 01                   ByteLen                            1 [string len]
@@ -2703,27 +2703,27 @@ const Tests = []TestCase {
 	// 02                   Index                              2 [veyron.io/veyron/veyron2/vom2.WireField.Type]
 	// 0b                   PrimValue                         11 [uint]
 	// 00                   End                                0 [veyron.io/veyron/veyron2/vom2.WireField END]
-	// 00                   End                                0 [veyron.io/veyron/veyron2/vom2.WireOneOf END]
+	// 00                   End                                0 [veyron.io/veyron/veyron2/vom2.WireUnion END]
 	// ff82                 MsgID                             65
-	//                      ValueMsg                          65 [veyron.io/veyron/veyron2/vom2/testdata.NOneOf oneof{A bool;B string;C int64}]
+	//                      ValueMsg                          65 [veyron.io/veyron/veyron2/vom2/testdata.NUnion union{A bool;B string;C int64}]
 	// 02                   MsgLen                             2
-	// 03                   Index                              3 [veyron.io/veyron/veyron2/vom2/testdata.NOneOf.C]
+	// 03                   Index                              3 [veyron.io/veyron/veyron2/vom2/testdata.NUnion.C]
 	// 00                   PrimValue                          0 [int]
-	// DumpStatus{MsgID: 65, MsgLen: 2, MsgN: 2, Value: veyron.io/veyron/veyron2/vom2/testdata.NOneOf oneof{A bool;B string;C int64}{C: 0}}
+	// DumpStatus{MsgID: 65, MsgLen: 2, MsgN: 2, Value: veyron.io/veyron/veyron2/vom2/testdata.NUnion union{A bool;B string;C int64}{C: 0}}
 	{
-		`NOneOf{C: 0}`,
-		NOneOf{C: 0},
-		"80ff814519012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e4f6e654f660203010141020300010142020400010143020b0000ff82020300",
+		`NUnion{C: 0}`,
+		NUnion{C: 0},
+		"80ff814519012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e556e696f6e0203010141020300010142020400010143020b0000ff82020300",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
 	//                      TypeMsg                           65
 	// 45                   MsgLen                            69
-	// 19                   TypeID                            25 [veyron.io/veyron/veyron2/vom2.WireOneOf struct{Name string;Fields []veyron.io/veyron/veyron2/vom2.WireField struct{Name string;Type veyron.io/veyron/veyron2/vom2.TypeID uint64}}]
-	// 01                   Index                              1 [veyron.io/veyron/veyron2/vom2.WireOneOf.Name]
+	// 19                   TypeID                            25 [veyron.io/veyron/veyron2/vom2.WireUnion struct{Name string;Fields []veyron.io/veyron/veyron2/vom2.WireField struct{Name string;Type veyron.io/veyron/veyron2/vom2.TypeID uint64}}]
+	// 01                   Index                              1 [veyron.io/veyron/veyron2/vom2.WireUnion.Name]
 	// 2d                   ByteLen                           45 [string len]
-	// 766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e4f6e654f66 PrimValue       veyron.io/veyron/veyron2/vom2/testdata.NOneOf [string]
-	// 02                   Index                              2 [veyron.io/veyron/veyron2/vom2.WireOneOf.Fields]
+	// 766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e556e696f6e PrimValue       veyron.io/veyron/veyron2/vom2/testdata.NUnion [string]
+	// 02                   Index                              2 [veyron.io/veyron/veyron2/vom2.WireUnion.Fields]
 	// 03                   ValueLen                           3 [list len]
 	// 01                   Index                              1 [veyron.io/veyron/veyron2/vom2.WireField.Name]
 	// 01                   ByteLen                            1 [string len]
@@ -2743,27 +2743,27 @@ const Tests = []TestCase {
 	// 02                   Index                              2 [veyron.io/veyron/veyron2/vom2.WireField.Type]
 	// 0b                   PrimValue                         11 [uint]
 	// 00                   End                                0 [veyron.io/veyron/veyron2/vom2.WireField END]
-	// 00                   End                                0 [veyron.io/veyron/veyron2/vom2.WireOneOf END]
+	// 00                   End                                0 [veyron.io/veyron/veyron2/vom2.WireUnion END]
 	// ff82                 MsgID                             65
-	//                      ValueMsg                          65 [veyron.io/veyron/veyron2/vom2/testdata.NOneOf oneof{A bool;B string;C int64}]
+	//                      ValueMsg                          65 [veyron.io/veyron/veyron2/vom2/testdata.NUnion union{A bool;B string;C int64}]
 	// 03                   MsgLen                             3
-	// 03                   Index                              3 [veyron.io/veyron/veyron2/vom2/testdata.NOneOf.C]
+	// 03                   Index                              3 [veyron.io/veyron/veyron2/vom2/testdata.NUnion.C]
 	// fff6                 PrimValue                        123 [int]
-	// DumpStatus{MsgID: 65, MsgLen: 3, MsgN: 3, Value: veyron.io/veyron/veyron2/vom2/testdata.NOneOf oneof{A bool;B string;C int64}{C: 123}}
+	// DumpStatus{MsgID: 65, MsgLen: 3, MsgN: 3, Value: veyron.io/veyron/veyron2/vom2/testdata.NUnion union{A bool;B string;C int64}{C: 123}}
 	{
-		`NOneOf{C: 123}`,
-		NOneOf{C: 123},
-		"80ff814519012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e4f6e654f660203010141020300010142020400010143020b0000ff820303fff6",
+		`NUnion{C: 123}`,
+		NUnion{C: 123},
+		"80ff814519012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e556e696f6e0203010141020300010142020400010143020b0000ff820303fff6",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
 	//                      TypeMsg                           65
 	// 45                   MsgLen                            69
-	// 19                   TypeID                            25 [veyron.io/veyron/veyron2/vom2.WireOneOf struct{Name string;Fields []veyron.io/veyron/veyron2/vom2.WireField struct{Name string;Type veyron.io/veyron/veyron2/vom2.TypeID uint64}}]
-	// 01                   Index                              1 [veyron.io/veyron/veyron2/vom2.WireOneOf.Name]
+	// 19                   TypeID                            25 [veyron.io/veyron/veyron2/vom2.WireUnion struct{Name string;Fields []veyron.io/veyron/veyron2/vom2.WireField struct{Name string;Type veyron.io/veyron/veyron2/vom2.TypeID uint64}}]
+	// 01                   Index                              1 [veyron.io/veyron/veyron2/vom2.WireUnion.Name]
 	// 2d                   ByteLen                           45 [string len]
-	// 766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e4f6e654f66 PrimValue       veyron.io/veyron/veyron2/vom2/testdata.NOneOf [string]
-	// 02                   Index                              2 [veyron.io/veyron/veyron2/vom2.WireOneOf.Fields]
+	// 766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e556e696f6e PrimValue       veyron.io/veyron/veyron2/vom2/testdata.NUnion [string]
+	// 02                   Index                              2 [veyron.io/veyron/veyron2/vom2.WireUnion.Fields]
 	// 03                   ValueLen                           3 [list len]
 	// 01                   Index                              1 [veyron.io/veyron/veyron2/vom2.WireField.Name]
 	// 01                   ByteLen                            1 [string len]
@@ -2783,17 +2783,17 @@ const Tests = []TestCase {
 	// 02                   Index                              2 [veyron.io/veyron/veyron2/vom2.WireField.Type]
 	// 0b                   PrimValue                         11 [uint]
 	// 00                   End                                0 [veyron.io/veyron/veyron2/vom2.WireField END]
-	// 00                   End                                0 [veyron.io/veyron/veyron2/vom2.WireOneOf END]
+	// 00                   End                                0 [veyron.io/veyron/veyron2/vom2.WireUnion END]
 	// ff82                 MsgID                             65
-	//                      ValueMsg                          65 [veyron.io/veyron/veyron2/vom2/testdata.NOneOf oneof{A bool;B string;C int64}]
+	//                      ValueMsg                          65 [veyron.io/veyron/veyron2/vom2/testdata.NUnion union{A bool;B string;C int64}]
 	// 03                   MsgLen                             3
-	// 03                   Index                              3 [veyron.io/veyron/veyron2/vom2/testdata.NOneOf.C]
+	// 03                   Index                              3 [veyron.io/veyron/veyron2/vom2/testdata.NUnion.C]
 	// fff5                 PrimValue                       -123 [int]
-	// DumpStatus{MsgID: 65, MsgLen: 3, MsgN: 3, Value: veyron.io/veyron/veyron2/vom2/testdata.NOneOf oneof{A bool;B string;C int64}{C: -123}}
+	// DumpStatus{MsgID: 65, MsgLen: 3, MsgN: 3, Value: veyron.io/veyron/veyron2/vom2/testdata.NUnion union{A bool;B string;C int64}{C: -123}}
 	{
-		`NOneOf{C: -123}`,
-		NOneOf{C: -123},
-		"80ff814519012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e4f6e654f660203010141020300010142020400010143020b0000ff820303fff5",
+		`NUnion{C: -123}`,
+		NUnion{C: -123},
+		"80ff814519012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e556e696f6e0203010141020300010142020400010143020b0000ff820303fff5",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -4442,11 +4442,11 @@ const Tests = []TestCase {
 	// ff81                 MsgID                            -65
 	//                      TypeMsg                           65
 	// 45                   MsgLen                            69
-	// 19                   TypeID                            25 [veyron.io/veyron/veyron2/vom2.WireOneOf struct{Name string;Fields []veyron.io/veyron/veyron2/vom2.WireField struct{Name string;Type veyron.io/veyron/veyron2/vom2.TypeID uint64}}]
-	// 01                   Index                              1 [veyron.io/veyron/veyron2/vom2.WireOneOf.Name]
+	// 19                   TypeID                            25 [veyron.io/veyron/veyron2/vom2.WireUnion struct{Name string;Fields []veyron.io/veyron/veyron2/vom2.WireField struct{Name string;Type veyron.io/veyron/veyron2/vom2.TypeID uint64}}]
+	// 01                   Index                              1 [veyron.io/veyron/veyron2/vom2.WireUnion.Name]
 	// 2d                   ByteLen                           45 [string len]
-	// 766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e4f6e654f66 PrimValue       veyron.io/veyron/veyron2/vom2/testdata.NOneOf [string]
-	// 02                   Index                              2 [veyron.io/veyron/veyron2/vom2.WireOneOf.Fields]
+	// 766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e556e696f6e PrimValue       veyron.io/veyron/veyron2/vom2/testdata.NUnion [string]
+	// 02                   Index                              2 [veyron.io/veyron/veyron2/vom2.WireUnion.Fields]
 	// 03                   ValueLen                           3 [list len]
 	// 01                   Index                              1 [veyron.io/veyron/veyron2/vom2.WireField.Name]
 	// 01                   ByteLen                            1 [string len]
@@ -4466,14 +4466,14 @@ const Tests = []TestCase {
 	// 02                   Index                              2 [veyron.io/veyron/veyron2/vom2.WireField.Type]
 	// 0b                   PrimValue                         11 [uint]
 	// 00                   End                                0 [veyron.io/veyron/veyron2/vom2.WireField END]
-	// 00                   End                                0 [veyron.io/veyron/veyron2/vom2.WireOneOf END]
+	// 00                   End                                0 [veyron.io/veyron/veyron2/vom2.WireUnion END]
 	// 04                   MsgID                              2
 	//                      ValueMsg                           2 [typeobject]
-	// 41                   TypeID                            65 [veyron.io/veyron/veyron2/vom2/testdata.NOneOf oneof{A bool;B string;C int64}]
-	// DumpStatus{MsgID: 2, MsgN: 2, Value: typeobject(veyron.io/veyron/veyron2/vom2/testdata.NOneOf oneof{A bool;B string;C int64})}
+	// 41                   TypeID                            65 [veyron.io/veyron/veyron2/vom2/testdata.NUnion union{A bool;B string;C int64}]
+	// DumpStatus{MsgID: 2, MsgN: 2, Value: typeobject(veyron.io/veyron/veyron2/vom2/testdata.NUnion union{A bool;B string;C int64})}
 	{
-		`typeobject(NOneOf)`,
-		typeobject(NOneOf),
-		"80ff814519012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e4f6e654f660203010141020300010142020400010143020b00000441",
+		`typeobject(NUnion)`,
+		typeobject(NUnion),
+		"80ff814519012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e556e696f6e0203010141020300010142020400010143020b00000441",
 	},
 }

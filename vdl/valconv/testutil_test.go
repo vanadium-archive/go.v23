@@ -296,72 +296,72 @@ func (nEnum) __VDLReflect(struct{ Enum struct{ A, B, C, ABC string } }) {}
 
 var enumTypeN = vdl.NamedType("nEnum", vdl.EnumType("A", "B", "C", "ABC"))
 
-// oneof{A bool;B string;C nStructInt64}
+// union{A bool;B string;C nStructInt64}
 type (
-	nOneOfABC interface {
+	nUnionABC interface {
 		Index() int
 		Name() string
-		__VDLReflect(__nOneOfABCReflect)
+		__VDLReflect(__nUnionABCReflect)
 	}
-	nOneOfABCA struct{ Value bool }
-	nOneOfABCB struct{ Value string }
-	nOneOfABCC struct{ Value nStructInt64 }
+	nUnionABCA struct{ Value bool }
+	nUnionABCB struct{ Value string }
+	nUnionABCC struct{ Value nStructInt64 }
 
-	__nOneOfABCReflect struct {
-		Type  nOneOfABC
-		OneOf struct {
-			A nOneOfABCA
-			B nOneOfABCB
-			C nOneOfABCC
+	__nUnionABCReflect struct {
+		Type  nUnionABC
+		Union struct {
+			A nUnionABCA
+			B nUnionABCB
+			C nUnionABCC
 		}
 	}
 )
 
-func (nOneOfABCA) Name() string                    { return "A" }
-func (nOneOfABCA) Index() int                      { return 0 }
-func (nOneOfABCA) __VDLReflect(__nOneOfABCReflect) {}
-func (nOneOfABCB) Name() string                    { return "B" }
-func (nOneOfABCB) Index() int                      { return 1 }
-func (nOneOfABCB) __VDLReflect(__nOneOfABCReflect) {}
-func (nOneOfABCC) Name() string                    { return "C" }
-func (nOneOfABCC) Index() int                      { return 2 }
-func (nOneOfABCC) __VDLReflect(__nOneOfABCReflect) {}
+func (nUnionABCA) Name() string                    { return "A" }
+func (nUnionABCA) Index() int                      { return 0 }
+func (nUnionABCA) __VDLReflect(__nUnionABCReflect) {}
+func (nUnionABCB) Name() string                    { return "B" }
+func (nUnionABCB) Index() int                      { return 1 }
+func (nUnionABCB) __VDLReflect(__nUnionABCReflect) {}
+func (nUnionABCC) Name() string                    { return "C" }
+func (nUnionABCC) Index() int                      { return 2 }
+func (nUnionABCC) __VDLReflect(__nUnionABCReflect) {}
 
-// oneof{B string;C nStructInt64;D int64}
+// union{B string;C nStructInt64;D int64}
 type (
-	nOneOfBCD interface {
+	nUnionBCD interface {
 		Index() int
 		Name() string
-		__VDLReflect(__nOneOfBCDDesc)
+		__VDLReflect(__nUnionBCDDesc)
 	}
-	nOneOfBCDB struct{ Value string }
-	nOneOfBCDC struct{ Value nStructInt64 }
-	nOneOfBCDD struct{ Value int64 }
+	nUnionBCDB struct{ Value string }
+	nUnionBCDC struct{ Value nStructInt64 }
+	nUnionBCDD struct{ Value int64 }
 
-	__nOneOfBCDDesc struct {
-		Type  nOneOfBCD
-		OneOf struct {
-			B nOneOfBCDB
-			C nOneOfBCDC
-			D nOneOfBCDD
+	__nUnionBCDDesc struct {
+		Type  nUnionBCD
+		Union struct {
+			B nUnionBCDB
+			C nUnionBCDC
+			D nUnionBCDD
 		}
 	}
 )
 
-func (nOneOfBCDB) Name() string                 { return "B" }
-func (nOneOfBCDB) Index() int                   { return 0 }
-func (nOneOfBCDB) __VDLReflect(__nOneOfBCDDesc) {}
-func (nOneOfBCDC) Name() string                 { return "C" }
-func (nOneOfBCDC) Index() int                   { return 1 }
-func (nOneOfBCDC) __VDLReflect(__nOneOfBCDDesc) {}
-func (nOneOfBCDD) Name() string                 { return "D" }
-func (nOneOfBCDD) Index() int                   { return 2 }
-func (nOneOfBCDD) __VDLReflect(__nOneOfBCDDesc) {}
+func (nUnionBCDB) Name() string                 { return "B" }
+func (nUnionBCDB) Index() int                   { return 0 }
+func (nUnionBCDB) __VDLReflect(__nUnionBCDDesc) {}
+func (nUnionBCDC) Name() string                 { return "C" }
+func (nUnionBCDC) Index() int                   { return 1 }
+func (nUnionBCDC) __VDLReflect(__nUnionBCDDesc) {}
+func (nUnionBCDD) Name() string                 { return "D" }
+func (nUnionBCDD) Index() int                   { return 2 }
+func (nUnionBCDD) __VDLReflect(__nUnionBCDDesc) {}
 
 var (
 	structInt64TypeN = vdl.NamedType("veyron.io/veyron/veyron2/vdl/valconv.nStructInt64", vdl.StructType(vdl.Field{"X", vdl.Int64Type}))
-	oneOfABCTypeN    = vdl.NamedType("veyron.io/veyron/veyron2/vdl/valconv.nOneOfABC", vdl.OneOfType([]vdl.Field{{"A", vdl.BoolType}, {"B", vdl.StringType}, {"C", structInt64TypeN}}...))
-	oneOfBCDTypeN    = vdl.NamedType("veyron.io/veyron/veyron2/vdl/valconv.nOneOfBCD", vdl.OneOfType([]vdl.Field{{"B", vdl.StringType}, {"C", structInt64TypeN}, {"D", vdl.Int64Type}}...))
+	unionABCTypeN    = vdl.NamedType("veyron.io/veyron/veyron2/vdl/valconv.nUnionABC", vdl.UnionType([]vdl.Field{{"A", vdl.BoolType}, {"B", vdl.StringType}, {"C", structInt64TypeN}}...))
+	unionBCDTypeN    = vdl.NamedType("veyron.io/veyron/veyron2/vdl/valconv.nUnionBCD", vdl.UnionType([]vdl.Field{{"B", vdl.StringType}, {"C", structInt64TypeN}, {"D", vdl.Int64Type}}...))
 )
 
 // Define a bunch of *Type types used in tests.

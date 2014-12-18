@@ -65,7 +65,7 @@ func TestValue(t *testing.T) {
 		{Map, MapType(StringType, Int64Type), "map[string]int64{}"},
 		{Map, MapType(keyType, Int64Type), "map[struct{I int64;S string}]int64{}"},
 		{Struct, StructType([]Field{{"A", Int64Type}, {"B", StringType}, {"C", BoolType}}...), `struct{A int64;B string;C bool}{A: 0, B: "", C: false}`},
-		{OneOf, OneOfType([]Field{{"A", Int64Type}, {"B", StringType}, {"C", BoolType}}...), `oneof{A int64;B string;C bool}{A: 0}`},
+		{Union, UnionType([]Field{{"A", Int64Type}, {"B", StringType}, {"C", BoolType}}...), `union{A int64;B string;C bool}{A: 0}`},
 		{Any, AnyType, "any(nil)"},
 	}
 	for _, test := range tests {
@@ -118,7 +118,7 @@ func TestValue(t *testing.T) {
 		assignSet(t, x)
 		assignMap(t, x)
 		assignStruct(t, x)
-		assignOneOf(t, x)
+		assignUnion(t, x)
 		assignAny(t, x)
 
 		// Invariant here: x != 0 && y == 0
@@ -838,32 +838,32 @@ func assignStruct(t *testing.T, x *Value) {
 	}
 }
 
-func assignOneOf(t *testing.T, x *Value) {
-	if x.Kind() == OneOf {
-		goti, gotv := x.OneOfField()
+func assignUnion(t *testing.T, x *Value) {
+	if x.Kind() == Union {
+		goti, gotv := x.UnionField()
 		if got, want := goti, 0; got != want {
-			t.Errorf(`OneOf zero value got index %v, want %v`, got, want)
+			t.Errorf(`Union zero value got index %v, want %v`, got, want)
 		}
 		if got, want := gotv, Int64Value(0); !EqualValue(got, want) {
-			t.Errorf(`OneOf zero value got value %v, want %v`, got, want)
+			t.Errorf(`Union zero value got value %v, want %v`, got, want)
 		}
-		x.AssignOneOfField(1, strA)
-		goti, gotv = x.OneOfField()
+		x.AssignUnionField(1, strA)
+		goti, gotv = x.UnionField()
 		if got, want := goti, 1; got != want {
-			t.Errorf(`OneOf assign B value got index %v, want %v`, got, want)
+			t.Errorf(`Union assign B value got index %v, want %v`, got, want)
 		}
 		if got, want := gotv, strA; !EqualValue(got, want) {
-			t.Errorf(`OneOf assign B value got value %v, want %v`, got, want)
+			t.Errorf(`Union assign B value got value %v, want %v`, got, want)
 		}
 		if x.IsZero() {
-			t.Errorf(`OneOf assign B value is zero`)
+			t.Errorf(`Union assign B value is zero`)
 		}
-		if got, want := x.String(), `oneof{A int64;B string;C bool}{B: "A"}`; got != want {
-			t.Errorf(`OneOf assign B value got %v, want %v`, got, want)
+		if got, want := x.String(), `union{A int64;B string;C bool}{B: "A"}`; got != want {
+			t.Errorf(`Union assign B value got %v, want %v`, got, want)
 		}
 	} else {
-		expectMismatchedKind(t, func() { x.OneOfField() })
-		expectMismatchedKind(t, func() { x.AssignOneOfField(0, nil) })
+		expectMismatchedKind(t, func() { x.UnionField() })
+		expectMismatchedKind(t, func() { x.AssignUnionField(0, nil) })
 	}
 }
 

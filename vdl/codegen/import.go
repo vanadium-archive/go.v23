@@ -113,7 +113,7 @@ func (deps pkgDeps) insertIdent(ident string) {
 func (deps pkgDeps) MergeValue(v *vdl.Value) {
 	deps.insertIdent(v.Type().Name())
 	switch v.Kind() {
-	case vdl.Any, vdl.OneOf, vdl.Optional:
+	case vdl.Any, vdl.Union, vdl.Optional:
 		elem := v.Elem()
 		if elem != nil {
 			deps.MergeValue(elem)

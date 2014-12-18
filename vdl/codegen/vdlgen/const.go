@@ -43,7 +43,7 @@ func TypedConst(v *vdl.Value, pkgPath string, imports codegen.Imports) (string, 
 		return valstr, nil
 	}
 	switch k {
-	case vdl.Array, vdl.List, vdl.Set, vdl.Map, vdl.Struct, vdl.OneOf:
+	case vdl.Array, vdl.List, vdl.Set, vdl.Map, vdl.Struct, vdl.Union:
 		// { } are used instead of ( ) for composites, except for []byte and [N]byte
 		if !t.IsBytes() {
 			return typestr + valstr, nil
@@ -147,8 +147,8 @@ func untypedConst(v *vdl.Value, pkgPath string, imports codegen.Imports) (string
 			hasFields = true
 		}
 		return s + "}", nil
-	case vdl.OneOf:
-		index, value := v.OneOfField()
+	case vdl.Union:
+		index, value := v.UnionField()
 		valuestr, err := untypedConst(value, pkgPath, imports)
 		if err != nil {
 			return "", err

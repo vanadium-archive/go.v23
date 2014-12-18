@@ -6,8 +6,8 @@ import (
 
 // Trigonometry is an interface that specifies a couple trigonometric functions.
 type Trigonometry interface {
-	Sine(angle float64) (float64, error)
-	Cosine(angle float64) (float64, error)
+	Sine(angle float64) (float64 | error)
+	Cosine(angle float64) (float64 | error)
 }
 
 // AdvancedMath is an interface for more advanced math than arith.  It embeds

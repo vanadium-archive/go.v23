@@ -181,7 +181,7 @@ func createFinTarget(c convTarget, tt *vdl.Type) convTarget {
 // values of the appropriate type if necessary.  The fill target must be a
 // concrete type; if fin has type interface/any, we'll create a concrete type,
 // and finishConvert will assign fin from the fill target.  The type we choose
-// to create is either a special-case (error or oneof), or based on the tt type
+// to create is either a special-case (error or union), or based on the tt type
 // we're converting *from*.
 //
 // If fin is already a concrete type it's used directly as the fill target.
@@ -194,8 +194,8 @@ func createFillTarget(fin convTarget, tt *vdl.Type) (convTarget, error) {
 			case fin.rv.Type() == rtError || tt == vdl.ErrorType:
 				// Create the standard verror struct to fill in.
 				return reflectConv(reflect.New(rtVError2Standard).Elem(), vdl.ErrorType)
-			case fin.tt.Kind() == vdl.OneOf:
-				// The fin target is a oneof interface.  Since we don't know the oneof
+			case fin.tt.Kind() == vdl.Union:
+				// The fin target is a union interface.  Since we don't know the union
 				// field name yet, we don't know which concrete type to use.  So we
 				// cheat and use *vdl.Value, so that we don't need to choose the type.
 				//
@@ -261,14 +261,14 @@ func finishConvert(fin, fill convTarget) error {
 				}
 			} else {
 				switch fin.tt.Kind() {
-				case vdl.OneOf:
-					// Special-case: the fin target is a oneof interface.  This is a bit
-					// weird; since we didn't know the oneof field name yet, we created a
+				case vdl.Union:
+					// Special-case: the fin target is a union interface.  This is a bit
+					// weird; since we didn't know the union field name yet, we created a
 					// *vdl.Value as the fill target in createFillTarget above.  But now
 					// that it's filled in, we convert it back into the appropriate
 					// concrete field struct, so that it can be used normally.
 					var err error
-					if rvFill, err = makeReflectOneOf(fin.rv, fill.vv); err != nil {
+					if rvFill, err = makeReflectUnion(fin.rv, fill.vv); err != nil {
 						return err
 					}
 				default:
@@ -301,7 +301,7 @@ func finishConvert(fin, fill convTarget) error {
 // This isn't trivial since VDL and Go define zero values slightly differently.
 // In particular in VDL:
 //    TypeObject: AnyType
-//    OneOf:      zero value of the type at index 0
+//    Union:      zero value of the type at index 0
 // These are translated into Go as follows, with their standard Go zero values:
 //    *vdl.Type: nil
 //    interface: nil
@@ -314,9 +314,9 @@ func finishConvert(fin, fill convTarget) error {
 // receiver.  That'll simplify this logic.
 func rvSettableZeroValue(rt reflect.Type, tt *vdl.Type) reflect.Value {
 	rv := reflect.New(rt).Elem()
-	// Easy fastpath; if the type doesn't contain inline typeobject or oneof, the
+	// Easy fastpath; if the type doesn't contain inline typeobject or union, the
 	// regular Go zero value is good enough.
-	if !tt.ContainsKind(vdl.WalkInline, vdl.TypeObject, vdl.OneOf) {
+	if !tt.ContainsKind(vdl.WalkInline, vdl.TypeObject, vdl.Union) {
 		return rv
 	}
 	// Handle typeobject, which has the zero value of AnyType.
@@ -325,19 +325,19 @@ func rvSettableZeroValue(rt reflect.Type, tt *vdl.Type) reflect.Value {
 	}
 	// Handle composite types with inline subtypes.
 	switch {
-	case tt.Kind() == vdl.OneOf:
+	case tt.Kind() == vdl.Union:
 		if rt.Kind() == reflect.Struct {
-			// OneOf struct, which represents a single field.
+			// Union struct, which represents a single field.
 			rv.Field(0).Set(rvSettableZeroValue(rt.Field(0).Type, tt.Field(0).Type))
 			return rv
 		}
-		// OneOf interface, which represents one of the fields.  Initialize with the
+		// Union interface, which represents one of the fields.  Initialize with the
 		// zero value of the type at index 0.
 		ri, err := vdl.DeriveReflectInfo(rt)
 		if err != nil {
-			panic(fmt.Errorf("valconv: invalid oneof type rt: %v tt: %v err: %v", rt, tt, err))
+			panic(fmt.Errorf("valconv: invalid union type rt: %v tt: %v err: %v", rt, tt, err))
 		}
-		rv.Set(rvSettableZeroValue(ri.OneOfFields[0].RepType, tt.Field(0).Type))
+		rv.Set(rvSettableZeroValue(ri.UnionFields[0].RepType, tt.Field(0).Type))
 		return rv
 	case rt.Kind() == reflect.Array:
 		for ix := 0; ix < rt.Len(); ix++ {
@@ -359,28 +359,28 @@ func rvSettableZeroValue(rt reflect.Type, tt *vdl.Type) reflect.Value {
 	panic(fmt.Errorf("valconv: rvSettableZeroValue unhandled rt: %v tt: %v", rt, tt))
 }
 
-// makeReflectOneOf returns the oneof concrete struct based on the oneof
+// makeReflectUnion returns the union concrete struct based on the union
 // interface struct rv, corresponding to the field that is set in vv.  The point
-// of this machinery is to ensure oneof can always be created, without any type
+// of this machinery is to ensure union can always be created, without any type
 // registration.
-func makeReflectOneOf(rv reflect.Value, vv *vdl.Value) (reflect.Value, error) {
+func makeReflectUnion(rv reflect.Value, vv *vdl.Value) (reflect.Value, error) {
 	// TODO(toddw): Cache the field types for faster access, after merging this
 	// into the vdl package.
 	ri, err := vdl.DeriveReflectInfo(rv.Type())
 	switch {
 	case err != nil:
 		return reflect.Value{}, err
-	case len(ri.OneOfFields) == 0 || vv.Kind() != vdl.OneOf:
-		return reflect.Value{}, fmt.Errorf("vdl: makeReflectOneOf(%v, %v) must only be called on OneOf", rv.Type(), vv.Type())
+	case len(ri.UnionFields) == 0 || vv.Kind() != vdl.Union:
+		return reflect.Value{}, fmt.Errorf("vdl: makeReflectUnion(%v, %v) must only be called on Union", rv.Type(), vv.Type())
 	}
-	index, vvField := vv.OneOfField()
-	if index >= len(ri.OneOfFields) {
-		return reflect.Value{}, fmt.Errorf("vdl: makeReflectOneOf(%v, %v) field index %d out of range, len=%d", rv.Type(), vv.Type(), index, len(ri.OneOfFields))
+	index, vvField := vv.UnionField()
+	if index >= len(ri.UnionFields) {
+		return reflect.Value{}, fmt.Errorf("vdl: makeReflectUnion(%v, %v) field index %d out of range, len=%d", rv.Type(), vv.Type(), index, len(ri.UnionFields))
 	}
 	// Run our regular conversion from vvField to rvField.  Keep in mind that
-	// rvField is the concrete oneof struct, so we convert into Field(0), which
+	// rvField is the concrete union struct, so we convert into Field(0), which
 	// corresponds to the "Value" field.
-	rvField := reflect.New(ri.OneOfFields[index].RepType).Elem()
+	rvField := reflect.New(ri.UnionFields[index].RepType).Elem()
 	target, err := ReflectTarget(rvField.Field(0))
 	if err != nil {
 		return reflect.Value{}, err
@@ -1008,8 +1008,8 @@ func (c convTarget) startKey() (convTarget, error) {
 		switch c.vv.Kind() {
 		case vdl.Set, vdl.Map:
 			return valueConv(vdl.ZeroValue(tt.Key())), nil
-		case vdl.Struct, vdl.OneOf:
-			// The key for struct and oneof is the field name, which is a string.
+		case vdl.Struct, vdl.Union:
+			// The key for struct and union is the field name, which is a string.
 			return valueConv(vdl.ZeroValue(vdl.StringType)), nil
 		}
 	}
@@ -1047,8 +1047,8 @@ func (c convTarget) finishKeyStartField(key convTarget) (convTarget, error) {
 			}
 			return reflectConv(rvField, ttField)
 		case reflect.Struct:
-			if tt.Kind() == vdl.OneOf {
-				// Special-case: the fill target is a oneof concrete field struct.  This
+			if tt.Kind() == vdl.Union {
+				// Special-case: the fill target is a union concrete field struct.  This
 				// means that we should only return a field if the field name matches.
 				name := c.rv.MethodByName("Name").Call(nil)[0].String()
 				if name != key.rv.String() {
@@ -1089,7 +1089,7 @@ func (c convTarget) finishKeyStartField(key convTarget) (convTarget, error) {
 				vvField.AssignBool(true)
 			}
 			return valueConv(vvField), nil
-		case vdl.OneOf:
+		case vdl.Union:
 			f, index := tt.FieldByName(key.vv.RawString())
 			if index < 0 {
 				return convTarget{}, errFieldNotFound
@@ -1137,9 +1137,9 @@ func (c convTarget) finishField(key, field convTarget) error {
 			return nil
 		case vdl.Struct:
 			return nil
-		case vdl.OneOf:
+		case vdl.Union:
 			_, index := tt.FieldByName(key.vv.RawString())
-			c.vv.AssignOneOfField(index, field.vv)
+			c.vv.AssignUnionField(index, field.vv)
 			return nil
 		}
 	}

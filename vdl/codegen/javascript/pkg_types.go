@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+
 	"veyron.io/veyron/veyron2/vdl/compile"
 
 	"veyron.io/veyron/veyron2/vdl"
@@ -108,7 +109,7 @@ func getInnerTypes(t *vdl.Type, names typeNames, nextIndex int) int {
 	}
 
 	switch t.Kind() {
-	case vdl.Struct, vdl.OneOf:
+	case vdl.Struct, vdl.Union:
 		for i := 0; i < t.NumField(); i++ {
 			nextIndex = getInnerTypes(t.Field(i).Type, names, nextIndex)
 		}
@@ -148,8 +149,8 @@ func addTypesInConst(v *vdl.Value, names typeNames, nextIndex int) int {
 		for i := 0; i < v.Type().NumField(); i++ {
 			nextIndex = addTypesInConst(v.Field(i), names, nextIndex)
 		}
-	case vdl.OneOf:
-		_, innerVal := v.OneOfField()
+	case vdl.Union:
+		_, innerVal := v.UnionField()
 		nextIndex = addTypesInConst(innerVal, names, nextIndex)
 	case vdl.Any, vdl.Optional:
 		if !v.IsNil() {

@@ -152,8 +152,8 @@ func (id ifaceDefiner) defineMethods(b *ifaceBuilder) {
 			continue // keep going to catch more errors
 		}
 		m := &Method{NamePos: NamePos(pm.NamePos)}
-		m.InArgs = id.defineArgs(in, m.Name, pm.InArgs, file)
-		m.OutArgs = id.defineArgs(out, m.Name, pm.OutArgs, file)
+		m.InArgs = id.defineArgs(in, m.NamePos, pm.InArgs, file)
+		m.OutArgs = id.defineArgs(out, m.NamePos, pm.OutArgs, file)
 		m.InStream = id.defineStreamType(pm.InStream, file)
 		m.OutStream = id.defineStreamType(pm.OutStream, file)
 		m.Tags = id.defineTags(pm.Tags, file)
@@ -161,32 +161,42 @@ func (id ifaceDefiner) defineMethods(b *ifaceBuilder) {
 	}
 }
 
+type inout string
+
 const (
-	in  = "in"
-	out = "out"
+	in  inout = "in"
+	out inout = "out"
 )
 
-func (id ifaceDefiner) defineArgs(io, mname string, pargs []*parse.Field, file *File) (args []*Arg) {
-	// TODO(toddw): Should we require the last out-arg to be "error"?
+func (id ifaceDefiner) defineArgs(io inout, method NamePos, pargs []*parse.Field, file *File) (args []*Arg) {
 	seen := make(map[string]*parse.Field)
+	lastpos := method.Pos
 	for _, parg := range pargs {
+		lastpos = parg.Pos
 		if dup := seen[parg.Name]; dup != nil && parg.Name != "" {
-			id.env.Errorf(file, parg.Pos, "method %s arg %s duplicate name (previous at %s)", mname, parg.Name, dup.Pos)
+			id.env.Errorf(file, parg.Pos, "method %s arg %s duplicate name (previous at %s)", method.Name, parg.Name, dup.Pos)
 			continue // keep going to catch more errors
 		}
 		seen[parg.Name] = parg
 		if io == out && len(pargs) > 2 && parg.Name == "" {
-			id.env.Errorf(file, parg.Pos, "method %s out arg unnamed (must name all out args if there are more than 2)", mname)
+			id.env.Errorf(file, parg.Pos, "method %s out arg unnamed (must name all out args if there are more than 2)", method.Name)
 			continue // keep going to catch more errors
 		}
 		if parg.Name != "" {
 			if _, err := ValidIdent(parg.Name, ReservedCamelCase); err != nil {
-				id.env.prefixErrorf(file, parg.Pos, err, "method %s invalid arg %s", mname, parg.Name)
+				id.env.prefixErrorf(file, parg.Pos, err, "method %s invalid arg %s", method.Name, parg.Name)
 				continue // keep going to catch more errors
 			}
 		}
 		arg := &Arg{NamePos(parg.NamePos), compileType(parg.Type, file, id.env)}
 		args = append(args, arg)
+	}
+	// Make sure the last out-arg has type error.
+	//
+	// TODO(toddw): Change this logic so that the parser doesn't include the error
+	// in the out-args, and remove associated special-cases in our codebase.
+	if io == out && (len(args) == 0 || args[len(args)-1].Type != vdl.ErrorType) {
+		id.env.Errorf(file, lastpos, "method %s doesn't specify error clause", method.Name)
 	}
 	return
 }

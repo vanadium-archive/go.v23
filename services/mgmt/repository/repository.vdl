@@ -24,7 +24,7 @@ type Application interface {
 	// object name suffix) and if so, returns this envelope. If multiple
 	// profile matches are possible, the method returns the first
 	// matching profile, respecting the order of the input argument.
-	Match(Profiles []string) (application.Envelope, error) {access.Read}
+	Match(profiles []string) (application.Envelope | error) {access.Read}
 }
 
 // MediaInfo contains the metadata information for a binary.
@@ -74,11 +74,11 @@ type Binary interface {
 	// identified by the object name suffix can be downloaded using the
 	// HTTP protocol. If not all parts of the binary have been uploaded,
 	// the method returns an error.
-	DownloadURL() (URL string, TTL int64, err error) {access.Read}
+	DownloadURL() (URL string, TTL int64 | error) {access.Read}
 	// Stat returns information describing the parts of the binary
 	// identified by the object name suffix, and its RFC 2046 media type.
 	// If the binary has not been created, the method returns an error.
-	Stat() (Parts []binary.PartInfo, MediaInfo MediaInfo, err error) {access.Read}
+	Stat() (Parts []binary.PartInfo, MediaInfo MediaInfo | error) {access.Read}
 	// Upload opens a stream that can be used for uploading the given
 	// part of the binary identified by the object name suffix. If the
 	// binary has not been created, the method returns an error. If the
@@ -97,8 +97,8 @@ type Profile interface {
 	// e.g. "linux-media". The label can be used to uniquely identify
 	// the profile (for the purpose of matching application binaries and
 	// devices).
-	Label() (string, error) {access.Read}
+	Label() (string | error) {access.Read}
 	// Description is a free-text description of the profile, meant for
 	// human consumption.
-	Description() (string, error) {access.Read}
+	Description() (string | error) {access.Read}
 }

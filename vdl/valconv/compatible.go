@@ -39,7 +39,7 @@ import (
 //     - Two struct types are compatible if all fields with the same name are
 //       compatible, and at least one field has the same name, or one of the
 //       types is an empty struct.
-//   o Two oneof types are compatible if all fields with the same name are
+//   o Two union types are compatible if all fields with the same name are
 //     compatible, and at least one field has the same name.
 //
 // Recursive types are checked for compatibility up to the first occurrence of a
@@ -50,8 +50,8 @@ import (
 // than value convertibility, and since recursive types are not common.
 //
 // TODO(toddw): In the future we might allow the following compatibility:
-//   oneof{A t2}  <-> map[string]t1  # oneof behaves like struct
-//   oneof{A t2}  <-> t1             # first-field special case
+//   union{A t2}  <-> map[string]t1  # union behaves like struct
+//   union{A t2}  <-> t1             # first-field special case
 //   struct{A t2} <-> t1             # first-field special case
 //
 // The advantage of allowing these rules is that it gives users a powerful
@@ -60,7 +60,7 @@ import (
 // the rules.  E.g. we'd need to disallow transitivity for these links,
 // otherwise we'd end up with nonsensical conversions:
 //
-//   oneof{A string} <-> string <-> oneof{B string}
+//   union{A string} <-> string <-> union{B string}
 func compatible(a, b *vdl.Type) bool {
 	if a.Kind() == vdl.Optional {
 		a = a.Elem()
@@ -97,7 +97,7 @@ func compatKey(a, b *vdl.Type) [2]*vdl.Type {
 	if a.Kind() > b.Kind() ||
 		(a.Kind() == vdl.Enum && b.Kind() == vdl.Enum && a.NumEnumLabel() > b.NumEnumLabel()) ||
 		(a.Kind() == vdl.Struct && b.Kind() == vdl.Struct && a.NumField() > b.NumField()) ||
-		(a.Kind() == vdl.OneOf && b.Kind() == vdl.OneOf && a.NumField() > b.NumField()) {
+		(a.Kind() == vdl.Union && b.Kind() == vdl.Union && a.NumField() > b.NumField()) {
 		a, b = b, a
 	}
 	return [2]*vdl.Type{a, b}
@@ -191,9 +191,9 @@ func compat(a, b *vdl.Type, seenA, seenB map[*vdl.Type]bool) bool {
 			return compatFields(a, b, seenA, seenB)
 		}
 		return false
-	case vdl.OneOf:
+	case vdl.Union:
 		switch b.Kind() {
-		case vdl.OneOf:
+		case vdl.Union:
 			return compatFields(a, b, seenA, seenB)
 		}
 		return false
@@ -240,7 +240,7 @@ func compatStructKeyElem(a, bKey, bElem *vdl.Type, seenA, seenB map[*vdl.Type]bo
 	return true
 }
 
-// REQUIRED: a and b are either Struct or OneOf
+// REQUIRED: a and b are either Struct or Union
 func compatFields(a, b *vdl.Type, seenA, seenB map[*vdl.Type]bool) bool {
 	// All fields with the same name must be compatible, and at least one field
 	// must match.

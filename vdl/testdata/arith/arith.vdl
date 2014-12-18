@@ -55,17 +55,17 @@ type Arith interface {
 	//NoArgs()
 
 	// Add is a typical method with multiple input and output arguments.
-	Add(a int32, b int32) (int32, error)
+	Add(a int32, b int32) (int32 | error)
 
 	// DivMod shows that runs of args with the same type can use the short form,
 	// just like Go.
-	DivMod(a, b int32) (quot, rem int32, err error)
+	DivMod(a, b int32) (quot, rem int32 | error)
 
 	// Sub shows that you can use data types defined in other packages.
-	Sub(args base.Args) (int32, error)
+	Sub(args base.Args) (int32 | error)
 
 	// Mul tries another data type defined in another package.
-	Mul(nested base.NestedArgs) (int32, error)
+	Mul(nested base.NestedArgs) (int32 | error)
 
 	// GenError shows that it's fine to have no in args, and no out args other
 	// than "error".  In addition GenError shows the usage of tags.  Tags are a
@@ -77,10 +77,10 @@ type Arith interface {
 	Count(start int32) stream<_, int32> error
 
 	// StreamingAdd shows a bidirectional stream.
-	StreamingAdd() stream<int32, int32> (total int32, err error)
+	StreamingAdd() stream<int32, int32> (total int32 | error)
 
 	// QuoteAny shows the any built-in type, representing a value of any type.
-	QuoteAny(a any) (any, error)
+	QuoteAny(a any) (any | error)
 }
 
 type Calculator interface {
@@ -88,6 +88,6 @@ type Calculator interface {
 	Arith  // Arith provides the interface to basic arithmetic operations.
 	// A calculator has basic advanced function support.
 	AdvancedMath
-	On() error  // On turns the calculator on.
-	Off() error {"offtag"}  // Off turns the calculator off.
+	On() error             // On turns the calculator on.
+	Off() error {"offtag"} // Off turns the calculator off.
 }

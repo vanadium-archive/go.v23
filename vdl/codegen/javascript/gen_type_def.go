@@ -78,7 +78,7 @@ func makeTypeFieldAssignmentString(jsname string, t *vdl.Type, jsnames typeNames
 
 	// fields
 	switch t.Kind() {
-	case vdl.Struct, vdl.OneOf:
+	case vdl.Struct, vdl.Union:
 		str += fmt.Sprintf("%s.fields = [", jsname)
 		for i := 0; i < t.NumField(); i++ {
 			if i > 0 {
@@ -104,10 +104,10 @@ func jsKind(k vdl.Kind) string {
 	switch k {
 	case vdl.Any:
 		return "Kind.ANY"
-	case vdl.OneOf:
-		return "Kind.ONEOF"
+	case vdl.Union:
+		return "Kind.ONEOF" // TODO(alexfandrianto): change to union
 	case vdl.Optional:
-		return "Kind.NILABLE"
+		return "Kind.NILABLE" // TODO(alexfandrianto): change to optional
 	case vdl.Bool:
 		return "Kind.BOOL"
 	case vdl.Byte:

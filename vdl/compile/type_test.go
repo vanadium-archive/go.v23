@@ -118,7 +118,7 @@ var typeTests = []typeTest{
 	{"Set", tp{{"a", `type Res set[int32]`, vdl.SetType(vdl.Int32Type), ""}}},
 	{"Map", tp{{"a", `type Res map[int32]string`, vdl.MapType(vdl.Int32Type, vdl.StringType), ""}}},
 	{"Struct", tp{{"a", `type Res struct{A int32;B string}`, vdl.StructType([]vdl.Field{{"A", vdl.Int32Type}, {"B", vdl.StringType}}...), ""}}},
-	{"OneOf", tp{{"a", `type Res oneof{A bool;B int32;C string}`, vdl.OneOfType([]vdl.Field{{"A", vdl.BoolType}, {"B", vdl.Int32Type}, {"C", vdl.StringType}}...), ""}}},
+	{"Union", tp{{"a", `type Res union{A bool;B int32;C string}`, vdl.UnionType([]vdl.Field{{"A", vdl.BoolType}, {"B", vdl.Int32Type}, {"C", vdl.StringType}}...), ""}}},
 	{"Optional", tp{{"a", `type Res []?x;type x struct{A bool}`, vdl.ListType(vdl.OptionalType(namedX(vdl.StructType(vdl.Field{"A", vdl.BoolType})))), ""}}},
 
 	// Test named types based on named types.
@@ -142,7 +142,7 @@ var typeTests = []typeTest{
 	{"NSet", tp{{"a", `type Res x;type x set[int32]`, namedX(vdl.SetType(vdl.Int32Type)), ""}}},
 	{"NMap", tp{{"a", `type Res x;type x map[int32]string`, namedX(vdl.MapType(vdl.Int32Type, vdl.StringType)), ""}}},
 	{"NStruct", tp{{"a", `type Res x;type x struct{A int32;B string}`, namedX(vdl.StructType([]vdl.Field{{"A", vdl.Int32Type}, {"B", vdl.StringType}}...)), ""}}},
-	{"NOneOf", tp{{"a", `type Res x; type x oneof{A bool;B int32;C string}`, namedX(vdl.OneOfType([]vdl.Field{{"A", vdl.BoolType}, {"B", vdl.Int32Type}, {"C", vdl.StringType}}...)), ""}}},
+	{"NUnion", tp{{"a", `type Res x; type x union{A bool;B int32;C string}`, namedX(vdl.UnionType([]vdl.Field{{"A", vdl.BoolType}, {"B", vdl.Int32Type}, {"C", vdl.StringType}}...)), ""}}},
 
 	// Test multi-package types
 	{"MultiPkgSameTypeName", tp{
@@ -169,6 +169,6 @@ var typeTests = []typeTest{
 	{"Undefined", tp{{"a", `type Res foo`, nil, "type foo undefined"}}},
 	{"UnnamedEnum", tp{{"a", `type Res []enum{A;B;C}`, nil, "unnamed enum type invalid"}}},
 	{"UnnamedStruct", tp{{"a", `type Res []struct{A int32}`, nil, "unnamed struct type invalid"}}},
-	{"UnnamedOneOf", tp{{"a", `type Res []oneof{A bool;B int32;C string}`, nil, "unnamed oneof type invalid"}}},
+	{"UnnamedUnion", tp{{"a", `type Res []union{A bool;B int32;C string}`, nil, "unnamed union type invalid"}}},
 	{"TopLevelOptional", tp{{"a", `type Res ?bool`, nil, "can't define type based on top-level optional"}}},
 }

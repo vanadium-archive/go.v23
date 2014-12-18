@@ -46,7 +46,7 @@ func typeGo(data goData, t *vdl.Type) string {
 		}
 	}
 	// Terminate recursion at defined types, which include both user-defined types
-	// (enum, struct, oneof) and built-in types.
+	// (enum, struct, union) and built-in types.
 	if def := data.Env.FindTypeDef(t); def != nil {
 		switch {
 		case t == vdl.AnyType:
@@ -143,9 +143,9 @@ func typeDefGo(data goData, def *compile.TypeDef) string {
 			"\n}",
 			def.Name, qualifiedIdent(def.File, def.Name))
 		return s
-	case vdl.OneOf:
+	case vdl.Union:
 		s = fmt.Sprintf("type ("+
-			"\n\t// %[1]s represents any single field of the %[1]s oneof type."+
+			"\n\t// %[1]s represents any single field of the %[1]s union type."+
 			"\n\t%[2]s%[1]s interface {"+
 			"\n\t\t// Index returns the field index."+
 			"\n\t\tIndex() int"+
@@ -153,21 +153,21 @@ func typeDefGo(data goData, def *compile.TypeDef) string {
 			"\n\t\tInterface() interface{}"+
 			"\n\t\t// Name returns the field name."+
 			"\n\t\tName() string"+
-			"\n\t\t// __VDLReflect describes the %[1]s oneof type."+
+			"\n\t\t// __VDLReflect describes the %[1]s union type."+
 			"\n\t\t__VDLReflect(__%[1]sReflect)"+
 			"\n\t}%[3]s", def.Name, docBreak(def.Doc), def.DocSuffix)
 		for ix := 0; ix < t.NumField(); ix++ {
 			f := t.Field(ix)
-			s += fmt.Sprintf("\n\t// %[1]s%[2]s represents field %[2]s of the %[1]s oneof type."+
+			s += fmt.Sprintf("\n\t// %[1]s%[2]s represents field %[2]s of the %[1]s union type."+
 				"\n\t%[4]s%[1]s%[2]s struct{ Value %[3]s }%[5]s",
 				def.Name, f.Name, typeGo(data, f.Type),
 				docBreak(def.FieldDoc[ix]), def.FieldDocSuffix[ix])
 		}
-		s += fmt.Sprintf("\n\t// __%[1]sReflect describes the %[1]s oneof type."+
+		s += fmt.Sprintf("\n\t// __%[1]sReflect describes the %[1]s union type."+
 			"\n\t__%[1]sReflect struct {"+
 			"\n\t\tName string %[2]q"+
 			"\n\t\tType %[1]s"+
-			"\n\t\tOneOf struct {", def.Name, qualifiedIdent(def.File, def.Name))
+			"\n\t\tUnion struct {", def.Name, qualifiedIdent(def.File, def.Name))
 		for ix := 0; ix < t.NumField(); ix++ {
 			s += fmt.Sprintf("\n\t\t\t%[2]s %[1]s%[2]s", def.Name, t.Field(ix).Name)
 		}

@@ -34,7 +34,7 @@ func hasBinaryMsgLen(t *vdl.Type) bool {
 		return false
 	}
 	switch t.Kind() {
-	case vdl.Complex64, vdl.Complex128, vdl.Array, vdl.List, vdl.Set, vdl.Map, vdl.Struct, vdl.Any, vdl.OneOf, vdl.Optional:
+	case vdl.Complex64, vdl.Complex128, vdl.Array, vdl.List, vdl.Set, vdl.Map, vdl.Struct, vdl.Any, vdl.Union, vdl.Optional:
 		return true
 	}
 	return false

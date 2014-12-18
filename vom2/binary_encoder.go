@@ -104,7 +104,7 @@ func (e *binaryEncoder) FinishEncode() error {
 // alternative would be to convert t into its WireType representation, but
 // that's slower and more complicated.
 //
-// TODO(toddw): Consider converting to WireType after oneof is implemented.
+// TODO(toddw): Consider converting to WireType after union is implemented.
 func (e *binaryEncoder) encodeUnsentTypes(t *vdl.Type) (TypeID, error) {
 	// Lookup a type ID for t or assign a new one.
 	id, isNew := e.sentTypes.LookupOrAssignID(t)
@@ -133,7 +133,7 @@ func (e *binaryEncoder) encodeUnsentTypes(t *vdl.Type) (TypeID, error) {
 		if elemID, err = e.encodeUnsentTypes(t.Elem()); err != nil {
 			return 0, err
 		}
-	case vdl.Struct, vdl.OneOf:
+	case vdl.Struct, vdl.Union:
 		fieldIDs = make([]TypeID, t.NumField())
 		for x := 0; x < t.NumField(); x++ {
 			if fieldIDs[x], err = e.encodeUnsentTypes(t.Field(x).Type); err != nil {
@@ -200,10 +200,10 @@ func (e *binaryEncoder) encodeUnsentTypes(t *vdl.Type) (TypeID, error) {
 		binaryEncodeUint(buf, 3)
 		binaryEncodeUint(buf, uint64(elemID))
 		binaryEncodeUint(buf, 0)
-	case vdl.Struct, vdl.OneOf:
+	case vdl.Struct, vdl.Union:
 		id := WireStructID
-		if kind == vdl.OneOf {
-			id = WireOneOfID
+		if kind == vdl.Union {
+			id = WireUnionID
 		}
 		binaryEncodeUint(buf, uint64(id))
 		binaryEncodeUint(buf, 1)
@@ -426,7 +426,7 @@ func (e *binaryEncoder) StartMap(tt *vdl.Type, len int) (valconv.MapTarget, erro
 }
 
 func (e *binaryEncoder) StartFields(tt *vdl.Type) (valconv.FieldsTarget, error) {
-	if err := e.prepareType(tt, vdl.Struct, vdl.OneOf); err != nil {
+	if err := e.prepareType(tt, vdl.Struct, vdl.Union); err != nil {
 		return nil, err
 	}
 	e.pushType(tt)
@@ -447,7 +447,7 @@ func (e *binaryEncoder) FinishMap(valconv.MapTarget) error {
 
 func (e *binaryEncoder) FinishFields(valconv.FieldsTarget) error {
 	if top := e.topType(); top != nil && top.Kind() == vdl.Struct || top.Kind() == vdl.Optional && top.Elem().Kind() == vdl.Struct {
-		// Write the struct terminator; don't write for oneof.
+		// Write the struct terminator; don't write for union.
 		binaryEncodeUint(e.bufV, 0)
 	}
 	return e.popType()
@@ -488,11 +488,11 @@ func (e *binaryEncoder) StartField(name string) (_, _ valconv.Target, _ error) {
 	if top.Kind() == vdl.Optional {
 		top = top.Elem()
 	}
-	if k := top.Kind(); k != vdl.Struct && k != vdl.OneOf {
-		return nil, nil, errTypeMismatch(top, vdl.Struct, vdl.OneOf)
+	if k := top.Kind(); k != vdl.Struct && k != vdl.Union {
+		return nil, nil, errTypeMismatch(top, vdl.Struct, vdl.Union)
 	}
-	// Struct and OneOf are encoded as a sequence of fields, in any order.  Each
-	// field starts with its absolute 1-based index, followed by the value.  OneOf
+	// Struct and Union are encoded as a sequence of fields, in any order.  Each
+	// field starts with its absolute 1-based index, followed by the value.  Union
 	// always consists of a single field, while structs use a 0 terminator.
 	if vfield, index := top.FieldByName(name); index >= 0 {
 		e.pushType(vfield.Type)

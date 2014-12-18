@@ -139,27 +139,27 @@ func ReflectInfoFromWireVDL(wire *Type) *ReflectInfo {
 // populated via reflection over the WireType.
 //
 // The type may include a special __VDLReflect function to describe metadata.
-// This is only required for enum and oneof vdl types, which don't have a
+// This is only required for enum and union vdl types, which don't have a
 // canonical Go representation.  All other fields are optional.
 //
 //   type Foo struct{}
 //   func (Foo) __VDLReflect(struct{
-//     // Type represents the base type.  This is used by oneof to describe the
-//     // oneof interface type, as opposed to the concrete struct field types.
+//     // Type represents the base type.  This is used by union to describe the
+//     // union interface type, as opposed to the concrete struct field types.
 //     Type Foo
 //
 //     // Name holds the vdl type name, including the package path, in a tag.
 //     Name string "vdl/pkg.Foo"
 //
-//     // Only one of Enum or OneOf should be set; they're both shown here for
+//     // Only one of Enum or Union should be set; they're both shown here for
 //     // explanatory purposes.
 //
 //     // Enum describes the labels for an enum type.
 //     Enum struct { A, B string }
 //
-//     // OneOf describes the oneof field names, along with the concrete struct
+//     // Union describes the union field names, along with the concrete struct
 //     // field types, which contain the actual field types.
-//     OneOf struct {
+//     Union struct {
 //       A FieldA
 //       B FieldB
 //     }
@@ -185,14 +185,14 @@ type ReflectInfo struct {
 	// represents a vdl enum.
 	EnumLabels []string
 
-	// OneOfFields holds the fields of a oneof; it is non-empty iff the WireType
-	// represents a vdl oneof.
-	OneOfFields []ReflectField
+	// UnionFields holds the fields of a union; it is non-empty iff the WireType
+	// represents a vdl union.
+	UnionFields []ReflectField
 }
 
-// ReflectField describes the reflection info for a OneOf field.
+// ReflectField describes the reflection info for a Union field.
 type ReflectField struct {
-	// Given a vdl type Foo oneof{A bool;B string}, we generate:
+	// Given a vdl type Foo union{A bool;B string}, we generate:
 	//   type Foo interface{...}
 	//   type FooA struct{ Value bool }
 	//   type FooB struct{ Value string }
@@ -218,11 +218,11 @@ func equalRI(a, b *ReflectInfo) bool {
 // Also note that we must disallow mutually cyclic types that have external
 // types, otherwise we can never get the register order correct.
 
-// isOneOf returns true iff rt is a oneof vdl type; it runs a quicker form of
-// DeriveReflectInfo, only to check for oneof.  It's used while normalizing types,
-// and is necessary since the generated oneof type is an interface, and must be
+// isUnion returns true iff rt is a union vdl type; it runs a quicker form of
+// DeriveReflectInfo, only to check for union.  It's used while normalizing types,
+// and is necessary since the generated union type is an interface, and must be
 // distinguished from the any type.
-func isOneOf(rt reflect.Type) bool {
+func isUnion(rt reflect.Type) bool {
 	if method, ok := rt.MethodByName("__VDLReflect"); ok {
 		mtype := method.Type
 		offsetIn := 1
@@ -231,7 +231,7 @@ func isOneOf(rt reflect.Type) bool {
 		}
 		if mtype.NumIn() == 1+offsetIn && mtype.In(offsetIn).Kind() == reflect.Struct {
 			rtReflect := mtype.In(offsetIn)
-			if _, ok := rtReflect.FieldByName("OneOf"); ok {
+			if _, ok := rtReflect.FieldByName("Union"); ok {
 				return true
 			}
 		}
@@ -243,7 +243,7 @@ func isOneOf(rt reflect.Type) bool {
 // REQUIRES: rt has been normalized, and pointers have been flattened.
 //
 // TODO(toddw): Unexport this function when valconv has been merged into this
-// package; it's only used in makeReflectOneOf.
+// package; it's only used in makeReflectUnion.
 func DeriveReflectInfo(rt reflect.Type) (*ReflectInfo, error) {
 	// Set reasonable defaults for types that don't have external types or the
 	// __VDLReflect method.
@@ -284,13 +284,13 @@ func DeriveReflectInfo(rt reflect.Type) (*ReflectInfo, error) {
 				return nil, err
 			}
 		}
-		if field, ok := rtReflect.FieldByName("OneOf"); ok {
-			if err := describeOneOf(field.Type, rt, ri); err != nil {
+		if field, ok := rtReflect.FieldByName("Union"); ok {
+			if err := describeUnion(field.Type, rt, ri); err != nil {
 				return nil, err
 			}
 		}
-		if len(ri.EnumLabels) > 0 && len(ri.OneOfFields) > 0 {
-			return nil, fmt.Errorf("type %q is both an enum and a oneof", rt)
+		if len(ri.EnumLabels) > 0 && len(ri.UnionFields) > 0 {
+			return nil, fmt.Errorf("type %q is both an enum and a union", rt)
 		}
 	}
 	return ri, nil
@@ -335,15 +335,15 @@ func describeEnum(enumReflect, rt reflect.Type, ri *ReflectInfo) error {
 	return nil
 }
 
-// describeOneOf fills in ri; we expect oneofReflect has this format:
+// describeUnion fills in ri; we expect unionReflect has this format:
 //   struct {
 //     A FooA
 //     B FooB
 //   }
 //
-// Here's the full type for vdl type Foo oneof{A bool; B string}
+// Here's the full type for vdl type Foo union{A bool; B string}
 //   type (
-//     // Foo is the oneof interface type, that can hold any field.
+//     // Foo is the union interface type, that can hold any field.
 //     Foo interface {
 //       Index() int
 //       Name() string
@@ -352,32 +352,32 @@ func describeEnum(enumReflect, rt reflect.Type, ri *ReflectInfo) error {
 //     // FooA and FooB are the concrete field types.
 //     FooA struct { Value bool }
 //     FooB struct { Value string }
-//     // __FooReflect lets us re-construct the oneof type via reflection.
+//     // __FooReflect lets us re-construct the union type via reflection.
 //     __FooReflect struct {
-//       Type  Foo // Tells us the oneof interface type.
-//       OneOf struct {
+//       Type  Foo // Tells us the union interface type.
+//       Union struct {
 //         A FooA  // Tells us field 0 has name A and concrete type FooA.
 //         B FooB  // Tells us field 1 has name B and concrete type FooB.
 //       }
 //     }
 //   )
-func describeOneOf(oneofReflect, rt reflect.Type, ri *ReflectInfo) error {
+func describeUnion(unionReflect, rt reflect.Type, ri *ReflectInfo) error {
 	if ri.WireType.Kind() != reflect.Interface {
-		return fmt.Errorf("oneof type %q has non-interface type %q", rt, ri.WireType)
+		return fmt.Errorf("union type %q has non-interface type %q", rt, ri.WireType)
 	}
-	if oneofReflect.Kind() != reflect.Struct || oneofReflect.NumField() == 0 {
-		return fmt.Errorf("oneof type %q invalid (no fields)", rt)
+	if unionReflect.Kind() != reflect.Struct || unionReflect.NumField() == 0 {
+		return fmt.Errorf("union type %q invalid (no fields)", rt)
 	}
-	for ix := 0; ix < oneofReflect.NumField(); ix++ {
-		f := oneofReflect.Field(ix)
+	for ix := 0; ix < unionReflect.NumField(); ix++ {
+		f := unionReflect.Field(ix)
 		if f.PkgPath != "" {
-			return fmt.Errorf("oneof type %q field %q.%q must be exported", rt, f.PkgPath, f.Name)
+			return fmt.Errorf("union type %q field %q.%q must be exported", rt, f.PkgPath, f.Name)
 		}
 		// f.Type corresponds to FooA and FooB in __FooReflect above.
 		if f.Type.Kind() != reflect.Struct || f.Type.NumField() != 1 || f.Type.Field(0).Name != "Value" {
-			return fmt.Errorf("oneof type %q field %q has bad concrete field type %q", rt, f.Name, f.Type)
+			return fmt.Errorf("union type %q field %q has bad concrete field type %q", rt, f.Name, f.Type)
 		}
-		ri.OneOfFields = append(ri.OneOfFields, ReflectField{
+		ri.UnionFields = append(ri.UnionFields, ReflectField{
 			Name:    f.Name,
 			Type:    f.Type.Field(0).Type,
 			RepType: f.Type,
@@ -386,12 +386,12 @@ func describeOneOf(oneofReflect, rt reflect.Type, ri *ReflectInfo) error {
 	// Check for Name method on interface and all concrete field structs.
 	if n, ok := ri.WireType.MethodByName("Name"); !ok || n.Type.NumIn() != 0 ||
 		n.Type.NumOut() != 1 || n.Type.Out(0) != rtString {
-		return fmt.Errorf("oneof interface type %q must have method Name() string", ri.WireType)
+		return fmt.Errorf("union interface type %q must have method Name() string", ri.WireType)
 	}
-	for _, f := range ri.OneOfFields {
+	for _, f := range ri.UnionFields {
 		if n, ok := f.RepType.MethodByName("Name"); !ok || n.Type.NumIn() != 1 ||
 			n.Type.NumOut() != 1 || n.Type.Out(0) != rtString {
-			return fmt.Errorf("oneof field %q type %q must have method Name() string", f.Name, f.RepType)
+			return fmt.Errorf("union field %q type %q must have method Name() string", f.Name, f.RepType)
 		}
 	}
 	return nil
@@ -417,7 +417,7 @@ func ReflectFromType(t *Type) reflect.Type {
 	// We can make some unnamed types via Go reflect.  Everything else drops
 	// through and returns nil.
 	switch t.Kind() {
-	case Any, Array, Enum, OneOf:
+	case Any, Array, Enum, Union:
 		// We can't make unnamed versions of any of these types.
 	case Optional:
 		if elem := ReflectFromType(t.Elem()); elem != nil {
