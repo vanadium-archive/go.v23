@@ -315,6 +315,13 @@ func (nUnionC) Name() string                 { return "C" }
 func (nUnionC) Index() int                   { return 2 }
 func (nUnionC) __VDLReflect(__nUnionReflect) {}
 
+// Special-case error types
+type nonPtrError struct{}
+type ptrError struct{}
+
+func (nonPtrError) Error() string { return "" }
+func (*ptrError) Error() string   { return "" }
+
 // Define a bunch of *Type types used in tests.
 var (
 	// Named scalar types

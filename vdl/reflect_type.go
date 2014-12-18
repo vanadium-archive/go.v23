@@ -95,7 +95,7 @@ func normalizeType(rt reflect.Type) reflect.Type {
 		return rt
 	}
 	switch {
-	case rt == rtError:
+	case rt.ConvertibleTo(rtError) || rtAtMostOnePtr.ConvertibleTo(rtError):
 		return rtError
 	case rt.Kind() == reflect.Interface:
 		// Collapse all interfaces to interface{}

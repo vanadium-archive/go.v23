@@ -163,7 +163,7 @@ func FromReflect(target Target, rv reflect.Value) error {
 			// If rv is convertible to *vdl.Value, fill from it directly.
 			return FromValue(target, rv.Convert(rtPtrToValue).Interface().(*vdl.Value))
 		case rt.ConvertibleTo(rtError):
-			return fromError(target, rv.Interface().(error))
+			return fromError(target, rv.Interface().(error), rt)
 		}
 		rv = rv.Elem()
 	}
@@ -174,7 +174,7 @@ func FromReflect(target Target, rv reflect.Value) error {
 	// information, including optionality.
 	rt := rv.Type()
 	if rt.ConvertibleTo(rtError) {
-		return fromError(target, rv.Interface().(error))
+		return fromError(target, rv.Interface().(error), rt)
 	}
 	tt, err := vdl.TypeFromReflect(rv.Type())
 	if err != nil {
@@ -327,10 +327,29 @@ func FromReflect(target Target, rv reflect.Value) error {
 
 // fromError handles all rv values that implement the error interface.
 // TODO(toddw): box our interface values to constrain this?
-func fromError(target Target, err error) error {
-	// Convert from err into verror2, and then encode manually.  We can't just
-	// call FromReflect since that'll cause a recursive loop.  The verror types
-	// are defined like this:
+func fromError(target Target, err error, rt reflect.Type) error {
+	// Convert from err into verror2, and then into the vdl.Value representation,
+	// and then fill the target.  We can't just call FromReflect since that'll
+	// cause a recursive loop.
+	v, err := vdlValueFromError(err)
+	if err != nil {
+		return err
+	}
+	// The rt arg is the original type of err, and we know that rt is convertible
+	// to error.  If rt is a non-pointer type, or if only the pointer type is
+	// convertible to error, we convert from the non-pointer error struct.  This
+	// ensures that if target is interface{}, we'll create a verror2.Standard with
+	// the right optionality.
+	if rt.Kind() != reflect.Ptr ||
+		(rt.Kind() == reflect.Ptr && !rt.Elem().ConvertibleTo(rtError)) {
+		v = v.Elem()
+	}
+	return FromValue(target, v)
+}
+
+func vdlValueFromError(err error) (*vdl.Value, error) {
+	e := verror2.ExplicitConvert(verror2.Unknown, "", "", "", err)
+	// The verror types are defined like this:
 	//
 	// type ID         string
 	// type ActionCode uint32
@@ -343,7 +362,6 @@ func fromError(target Target, err error) error {
 	//   Msg       string
 	//   ParamList []interface{}
 	// }
-	e := verror2.ExplicitConvert(verror2.Unknown, "", "", "", err)
 	verr := vdl.NonNilZeroValue(vdl.ErrorType)
 	vv := verr.Elem()
 	vv.Field(0).Field(0).AssignString(string(e.ErrorID()))
@@ -353,11 +371,11 @@ func fromError(target Target, err error) error {
 	for ix, p := range e.Params() {
 		var pVDL *vdl.Value
 		if err := Convert(&pVDL, p); err != nil {
-			return err
+			return nil, err
 		}
 		vv.Field(2).Index(ix).Assign(pVDL)
 	}
-	return FromValue(target, verr)
+	return verr, nil
 }
 
 // FromValue converts from vv to the target, by walking through vv and calling

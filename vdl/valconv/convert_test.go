@@ -9,12 +9,33 @@ import (
 	"testing"
 
 	"veyron.io/veyron/veyron2/vdl"
+	"veyron.io/veyron/veyron2/verror"
+	"veyron.io/veyron/veyron2/verror2"
 )
 
 type nValue *vdl.Value
 
 // Each group of values in vvNAME and rvNAME are all mutually convertible.
 var (
+	rvError1 = verror2.Standard{
+		IDAction:  verror2.IDAction{verror.ID("id1"), verror2.NoRetry},
+		Msg:       "msg1",
+		ParamList: nil,
+	}
+	rvError2 = verror2.Standard{
+		IDAction:  verror2.IDAction{verror.ID("id2"), verror2.RetryConnection},
+		Msg:       "msg2",
+		ParamList: []interface{}{"abc", int32(123)},
+	}
+	rvError3 = verror2.Standard{
+		IDAction:  verror2.IDAction{verror.ID("id3"), verror2.RetryBackoff},
+		Msg:       "msg3",
+		ParamList: []interface{}{rvError1, &rvError2},
+	}
+	vvError1 = errorValue(rvError1)
+	vvError2 = errorValue(rvError2)
+	vvError3 = errorValue(rvError3)
+
 	vvBoolTrue = []*vdl.Value{
 		boolValue(vdl.BoolType, true), boolValue(boolTypeN, true),
 	}
@@ -642,6 +663,9 @@ func TestConverter(t *testing.T) {
 		vv []*vdl.Value
 		rv []interface{}
 	}{
+		{[]*vdl.Value{vvError1}, []interface{}{rvError1}},
+		{[]*vdl.Value{vvError2}, []interface{}{rvError2}},
+		{[]*vdl.Value{vvError3}, []interface{}{rvError3}},
 		{vvBoolTrue, rvBoolTrue},
 		{vvStrABC, rvStrABC},
 		{vvFromUint(math.MaxUint8), rvFromUint(math.MaxUint8)},
@@ -842,7 +866,7 @@ func testConverterWantSrc(t *testing.T, vvrvWant, vvrvSrc vvrv) {
 		// Test filling interface{} from *Value
 		var dst interface{}
 		var want interface{} = vvSrc
-		if vdl.ReflectFromType(vvSrc.Type()) == nil {
+		if !canCreateGoObject(vvSrc.Type()) {
 			// We only run these tests if we *can't* create an actual Go object for
 			// this type, so we'll end up with *vdl.Value.
 			//
@@ -906,22 +930,22 @@ func testConverterWantSrc(t *testing.T, vvrvWant, vvrvSrc vvrv) {
 		// Test filling interface{} from reflect.Value
 		var dst interface{}
 		var want interface{} = src
-		if srcInt8, ok := src.(int8); ok {
-			// VDL represents int8 as int6, so set our expectations accordingly.
+		// Handle special-cases for want values.
+		srcInt8, isInt8 := src.(int8)
+		switch {
+		case isInt8:
+			// VDL represents int8 as int16, so set our expectations accordingly.
 			want = int16(srcInt8)
-		}
-		if rtSrc != rtPtrToType && rtSrc.ConvertibleTo(rtPtrToType) {
+		case rtSrc != rtPtrToType && rtSrc.ConvertibleTo(rtPtrToType):
 			// VDL doesn't represent named TypeObject, so our converter automatically
 			// creates *vdl.Type.
 			want = reflect.ValueOf(src).Convert(rtPtrToType).Interface().(*vdl.Type)
-		}
-		if vdl.ReflectFromType(vvWant.Type()) == nil {
+		case vvWant.Type().CanBeNil() && vvWant.IsNil():
+			want = nil // filling interface{} from any(nil) yields nil.
+		case !canCreateGoObject(vvWant.Type()):
 			// We can't create an actual Go object for this type; e.g. perhaps it's
 			// named, and isn't registered.  We should get a *vdl.Value back.
 			want = vvWant
-		}
-		if vvWant.Type().CanBeNil() && vvWant.IsNil() {
-			want = nil // filling interface{} from any(nil) yields nil.
 		}
 		testConvert(t, "rv9", &dst, src, want, 1, true)
 		testConvert(t, "rv10", &dst, src, want, 1, true)
@@ -948,6 +972,13 @@ func testConverterWantSrc(t *testing.T, vvrvWant, vvrvSrc vvrv) {
 	}
 }
 
+// canCreateGoObject returns true iff we can create a regular Go object from a
+// value of type tt.  We can create a real Go object if the Go type for tt has
+// been registered, or if tt is the special-cased error type.
+func canCreateGoObject(tt *vdl.Type) bool {
+	return vdl.ReflectFromType(tt) != nil || tt == vdl.ErrorType || tt == vdl.ErrorType.Elem()
+}
+
 func testConvert(t *testing.T, prefix string, dst, src, want interface{}, deref int, optWant bool) {
 	const ptrDepth = 3
 	rvDst := reflect.ValueOf(dst)
@@ -968,6 +999,8 @@ func testConvert(t *testing.T, prefix string, dst, src, want interface{}, deref 
 						// Turn struct{...} into ?struct{...}
 						eWant = vdl.OptionalValue(vvWant)
 					}
+				} else if errWant, ok := want.(verror2.Standard); ok {
+					eWant = &errWant
 				}
 			}
 			target, err := ReflectTarget(rvDst)
@@ -1001,12 +1034,12 @@ func expectConvert(t *testing.T, tname string, got, want interface{}, deref int)
 	vvWant, ok2 := want.(*vdl.Value)
 	if ok1 && ok2 {
 		if !vdl.EqualValue(vvGot, vvWant) {
-			t.Errorf("%s got %v, want %v", tname, vvGot, vvWant)
+			t.Errorf("%\nGOT  %v\nWANT %v", tname, vvGot, vvWant)
 		}
 		return
 	}
 	if !reflect.DeepEqual(got, want) {
-		t.Errorf("%s got %T %v, want %T %v", tname, got, got, want, want)
+		t.Errorf("%s\nGOT  %#v\nWANT %#v", tname, got, want)
 	}
 }
 

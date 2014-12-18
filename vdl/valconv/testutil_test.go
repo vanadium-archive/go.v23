@@ -479,6 +479,13 @@ func complexValue(t *vdl.Type, x complex128) *vdl.Value { return vdl.ZeroValue(t
 func stringValue(t *vdl.Type, x string) *vdl.Value      { return vdl.ZeroValue(t).AssignString(x) }
 func bytesValue(t *vdl.Type, x string) *vdl.Value       { return vdl.ZeroValue(t).AssignBytes([]byte(x)) }
 func bytes3Value(t *vdl.Type, x string) *vdl.Value      { return vdl.ZeroValue(t).CopyBytes([]byte(x)) }
+func errorValue(e error) *vdl.Value {
+	v, err := vdlValueFromError(e)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
 
 func setStringValue(t *vdl.Type, x ...string) *vdl.Value {
 	res := vdl.ZeroValue(t)
