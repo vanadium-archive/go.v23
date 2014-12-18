@@ -392,6 +392,8 @@ type ServerContext interface {
 	Blessings() security.Blessings
 	// Server returns the Server that this context is associated with.
 	Server() Server
+
+	Context() context.T
 }
 
 // BindOpt is the interface for options provided to Bind<Service> calls in IPC
