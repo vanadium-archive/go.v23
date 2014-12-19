@@ -140,6 +140,8 @@ var rtNonKeyTests = []rtTest{
 	{reflect.TypeOf((*interface{})(nil)).Elem(), AnyType},
 	{reflect.TypeOf((*error)(nil)), ErrorType},
 	{reflect.TypeOf((*error)(nil)).Elem(), ErrorType},
+	{reflect.TypeOf(nonPtrError{}), ErrorType},
+	{reflect.TypeOf(&ptrError{}), ErrorType},
 	{reflect.TypeOf((*Type)(nil)), TypeObjectType},
 	// Named scalars (we cannot detect the error type if it is named)
 	{reflect.TypeOf((*nInterface)(nil)), AnyType},
