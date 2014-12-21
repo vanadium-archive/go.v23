@@ -216,14 +216,18 @@ var (
 	}
 	rvStructXYZTrue = []interface{}{
 		struct{ X, Y, Z bool }{X: true, Y: true, Z: true},
+		struct{ a, X, b, Y, c, Z, d bool }{X: true, Y: true, Z: true},
 		nStructXYZBool{X: true, Y: true, Z: true},
+		nStructXYZBoolUnexported{X: true, Y: true, Z: true},
 	}
 	rvSetMapStructXYZ       = append(append(rvSetXYZ, rvMapXYZTrue...), rvStructXYZTrue...)
 	rvMapStructXYZFalseTrue = []interface{}{
 		map[string]bool{"X": false, "Y": true, "Z": false},
 		nMapStringBool{"X": false, "Y": true, "Z": false},
 		struct{ X, Y, Z bool }{X: false, Y: true, Z: false},
+		struct{ a, X, b, Y, c, Z, d bool }{X: false, Y: true, Z: false},
 		nStructXYZBool{X: false, Y: true, Z: false},
+		nStructXYZBoolUnexported{X: false, Y: true, Z: false},
 	}
 	rvMapStructXYZEmpty = []interface{}{
 		map[string]nEmpty{"X": nEmpty{}, "Y": nEmpty{}, "Z": nEmpty{}},
@@ -249,10 +253,21 @@ var (
 		struct{ V, W, X int64 }{V: 1, W: 2, X: 3},
 		struct{ V, W, X float64 }{V: 1, W: 2, X: 3},
 		struct{ V, W, X complex64 }{V: 1, W: 2, X: 3},
+		struct {
+			// Interleave unexported fields, which are ignored.
+			a bool
+			V int64
+			b string
+			W float64
+			c []byte
+			X complex64
+			d interface{}
+		}{V: 1, W: 2, X: 3},
 		nStructVWXUint64{V: 1, W: 2, X: 3},
 		nStructVWXInt64{V: 1, W: 2, X: 3},
 		nStructVWXFloat64{V: 1, W: 2, X: 3},
 		nStructVWXComplex64{V: 1, W: 2, X: 3},
+		nStructVWXMixed{V: 1, W: 2, X: 3},
 	}
 	rvMapStructVWX123 = append(rvMapVWX123, rvStructVWX123...)
 	rvStructUV01      = []interface{}{
@@ -260,10 +275,19 @@ var (
 		struct{ U, V int64 }{U: 0, V: 1},
 		struct{ U, V float64 }{U: 0, V: 1},
 		struct{ U, V complex64 }{U: 0, V: 1},
+		struct {
+			// Interleave unexported fields, which are ignored.
+			a bool
+			U int64
+			b string
+			V float64
+			c []byte
+		}{U: 0, V: 1},
 		nStructUVUint64{U: 0, V: 1},
 		nStructUVInt64{U: 0, V: 1},
 		nStructUVFloat64{U: 0, V: 1},
 		nStructUVComplex64{U: 0, V: 1},
+		nStructUVMixed{U: 0, V: 1},
 	}
 	rvEmptyStruct = []interface{}{struct{}{}, nEmpty{}}
 

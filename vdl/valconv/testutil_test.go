@@ -191,10 +191,11 @@ type (
 	nMapFloat64Bool    map[nFloat64]nBool
 	nMapComplex64Bool  map[nComplex64]nBool
 	// Composite types representing sets of strings.
-	nMapStringEmpty map[nString]struct{}
-	nMapStringBool  map[nString]nBool
-	nStructXYZBool  struct{ X, Y, Z nBool }
-	nStructWXBool   struct{ W, X nBool }
+	nMapStringEmpty          map[nString]struct{}
+	nMapStringBool           map[nString]nBool
+	nStructXYZBool           struct{ X, Y, Z nBool }
+	nStructXYZBoolUnexported struct{ a, X, b, Y, c, Z, d nBool }
+	nStructWXBool            struct{ W, X nBool }
 	// Composite types representing maps of strings to numbers.
 	nMapStringUint64    map[nString]nUint64
 	nMapStringInt64     map[nString]nInt64
@@ -204,10 +205,28 @@ type (
 	nStructVWXInt64     struct{ V, W, X nInt64 }
 	nStructVWXFloat64   struct{ V, W, X nFloat64 }
 	nStructVWXComplex64 struct{ V, W, X nComplex64 }
-	nStructUVUint64     struct{ U, V nUint64 }
-	nStructUVInt64      struct{ U, V nInt64 }
-	nStructUVFloat64    struct{ U, V nFloat64 }
-	nStructUVComplex64  struct{ U, V nComplex64 }
+	nStructVWXMixed     struct {
+		// Interleave unexported fields, which are ignored.
+		a bool
+		V int64
+		b string
+		W float64
+		c []byte
+		X complex64
+		d interface{}
+	}
+	nStructUVUint64    struct{ U, V nUint64 }
+	nStructUVInt64     struct{ U, V nInt64 }
+	nStructUVFloat64   struct{ U, V nFloat64 }
+	nStructUVComplex64 struct{ U, V nComplex64 }
+	nStructUVMixed     struct {
+		// Interleave unexported fields, which are ignored.
+		a bool
+		U int64
+		b string
+		V float64
+		c []byte
+	}
 	// Types that cannot be converted to sets.  We represent sets as
 	// map[key]struct{} on the Go side, but don't allow map[key]nEmpty.
 	nEmpty           struct{}

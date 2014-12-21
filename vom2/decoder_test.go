@@ -52,54 +52,45 @@ func testDecode(t *testing.T, name, data string, rt reflect.Type, want interface
 	}
 }
 
-// TestNilDecoding tests that go nil and empty composite type values are both
-// decoded as nil values.
-func TestNilDecoding(t *testing.T) {
+// TestRoundtrip tests encoding Input and then decoding results in Want.
+func TestRoundtrip(t *testing.T) {
 	tests := []struct {
-		input interface{}
-		want  interface{}
+		In, Want interface{}
 	}{
+		// Test that encoding nil/empty composites leads to nil.
+		{[]int64(nil), []int64(nil)},
+		{[]int64{}, []int64(nil)},
+		{map[string]int64(nil), map[string]int64(nil)},
+		{map[string]int64{}, map[string]int64(nil)},
+		// Test that encoding nil typeobject leads to AnyType.
+		{(*vdl.Type)(nil), vdl.AnyType},
+		// Test that both encoding and decoding ignore unexported fields.
+		{struct{ a, X, b string }{"a", "XYZ", "b"}, struct{ d, X, e string }{X: "XYZ"}},
 		{
-			[]int64(nil),
-			[]int64(nil),
-		},
-		{
-			[]int64{},
-			[]int64(nil),
-		},
-		{
-			map[string]int64(nil),
-			map[string]int64(nil),
-		},
-		{
-			map[string]int64{},
-			map[string]int64(nil),
-		},
-		{
-			(*vdl.Type)(nil),
-			vdl.AnyType,
+			struct {
+				a bool
+				X string
+				b int64
+			}{true, "XYZ", 123},
+			struct {
+				a complex64
+				X string
+				b []byte
+			}{X: "XYZ"},
 		},
 	}
 	for _, test := range tests {
+		name := fmt.Sprintf("(%#v,%#v)", test.In, test.Want)
 		var buf bytes.Buffer
-		enc, err := NewBinaryEncoder(&buf)
+		encoder, err := NewBinaryEncoder(&buf)
 		if err != nil {
-			t.Fatalf("Error creating new encoder: %v", err)
-		}
-		if err := enc.Encode(test.input); err != nil {
-			t.Errorf("Error encoding %v: %v", test.input, err)
+			t.Errorf("%s: NewBinaryEncoder failed: %v", name, err)
 			continue
 		}
-		dec, err := NewDecoder(bytes.NewBuffer(buf.Bytes()))
-		if err != nil {
-			t.Fatalf("Error creating new decoder: %v", err)
+		if err := encoder.Encode(test.In); err != nil {
+			t.Errorf("%s: binary Encode(%#v) failed: %v", name, test.In, err)
+			continue
 		}
-		var got interface{}
-		if err := dec.Decode(&got); err != nil {
-			t.Errorf("Error decoding %v", err)
-		}
-		if want := test.want; !reflect.DeepEqual(got, want) {
-			t.Errorf("got %v, want %v", got, want)
-		}
+		testDecode(t, name, buf.String(), reflect.TypeOf(test.Want), test.Want)
 	}
 }

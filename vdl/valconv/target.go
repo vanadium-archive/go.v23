@@ -304,15 +304,26 @@ func FromReflect(target Target, rv reflect.Value) error {
 		if err != nil {
 			return err
 		}
-		for fx := 0; fx < rt.NumField(); fx++ {
-			key, field, err := fieldsTarget.StartField(rt.Field(fx).Name)
+		// Loop through tt fields rather than rt fields, since the VDL type tt might
+		// have ignored some of the fields in rt, e.g. unexported fields.
+		for fx := 0; fx < tt.NumField(); fx++ {
+			name := tt.Field(fx).Name
+			key, field, err := fieldsTarget.StartField(name)
 			switch {
 			case verror.Is(err, verror.NoExist):
 				continue // silently drop unknown fields
 			case err != nil:
 				return err
 			}
-			if err := FromReflect(field, rv.Field(fx)); err != nil {
+			rvField := rv.FieldByName(name)
+			if !rvField.IsValid() {
+				// This case occurs if the VDL type tt has a field name that doesn't
+				// eixst in the Go reflect.Type rt.  This should never occur; it
+				// indicates a bug in the vdl.TypeOf logic.  Panic here to give us a
+				// stack trace to make it easier to debug.
+				panic(fmt.Errorf("missing struct field %q, tt: %v, rt: %v", name, tt, rt))
+			}
+			if err := FromReflect(field, rvField); err != nil {
 				return err
 			}
 			if err := fieldsTarget.FinishField(key, field); err != nil {
