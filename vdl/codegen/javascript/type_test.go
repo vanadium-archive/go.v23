@@ -73,15 +73,12 @@ func TestType(t *testing.T) {
 	result := makeTypeDefinitionsString(jsnames)
 
 	expectedResult := `var _type1 = new Type();
-var _type2 = new Type();
 var _typeNamedBool = new Type();
 var _typeNamedList = new Type();
 var _typeNamedStruct = new Type();
 _type1.kind = Kind.LIST;
 _type1.name = "";
-_type1.elem = _type2;
-_type2.kind = Kind.STRING;
-_type2.name = "";
+_type1.elem = Types.STRING;
 _typeNamedBool.kind = Kind.BOOL;
 _typeNamedBool.name = "NamedBool";
 _typeNamedList.kind = Kind.LIST;

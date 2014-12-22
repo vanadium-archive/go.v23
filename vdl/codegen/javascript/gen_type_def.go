@@ -151,3 +151,51 @@ func jsKind(k vdl.Kind) string {
 	}
 	panic(fmt.Errorf("val: unhandled kind: %d", k))
 }
+
+// builtinJSType indicates whether a vdl.Type has built-in type definition in vom.js
+// If true, then it returns a pointer to the type definition in javascript/vom/types.js
+// It assumes a variable named "Types" is already pointing to vom.Types
+func builtinJSType(t *vdl.Type) (string, bool) {
+	_, n := vdl.SplitIdent(t.Name())
+
+	// named types are not built-in.
+	if n != "" {
+		return "", false
+	}
+
+	// switch on supported types in vom.js
+	switch t.Kind() {
+	case vdl.Any:
+		return "Types.ANY", true
+	case vdl.Bool:
+		return "Types.BOOL", true
+	case vdl.Byte:
+		return "Types.BYTE", true
+	case vdl.Uint16:
+		return "Types.UINT16", true
+	case vdl.Uint32:
+		return "Types.UINT32", true
+	case vdl.Uint64:
+		return "Types.UINT64", true
+	case vdl.Int16:
+		return "Types.INT16", true
+	case vdl.Int32:
+		return "Types.INT32", true
+	case vdl.Int64:
+		return "Types.INT64", true
+	case vdl.Float32:
+		return "Types.FLOAT32", true
+	case vdl.Float64:
+		return "Types.FLOAT64", true
+	case vdl.Complex64:
+		return "Types.COMPLEX64", true
+	case vdl.Complex128:
+		return "Types.COMPLEX128", true
+	case vdl.String:
+		return "Types.STRING", true
+	case vdl.TypeObject:
+		return "Types.TYPEOBJECT", true
+	}
+
+	return "", false
+}

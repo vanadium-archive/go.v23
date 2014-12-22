@@ -14,8 +14,10 @@ import (
 type typeNames map[*vdl.Type]string
 
 // LookupName looks up the name of a type.
-// If it is already generated (in tvdn), it looks up the name. Otherwise it
-// produces a name referencing a type in another package of the form
+// If it is already generated (in tn), it looks up the name.
+// If it is an unnamed type with built-in vom.js support (eg. primitives, any)
+// a pointer to the vom type helper (eg. Types.INT32) is produced.
+// Otherwise it produces a name referencing a type in another package of the form
 // "[Package].[Name]".
 func (tn typeNames) LookupName(t *vdl.Type) string {
 	if name, ok := tn[t]; ok {
@@ -23,6 +25,11 @@ func (tn typeNames) LookupName(t *vdl.Type) string {
 	}
 
 	pkgPath, name := vdl.SplitIdent(t.Name())
+
+	if builtInName, ok := builtinJSType(t); ok {
+		return builtInName
+	}
+
 	pkgParts := strings.Split(pkgPath, "/")
 	pkgName := pkgParts[len(pkgParts)-1]
 	return fmt.Sprintf("%s.%s", pkgName, name)
@@ -39,37 +46,6 @@ func (tn typeNames) SortedList() typeNamePairList {
 	return pairs
 }
 
-func newTypeNames(pkg *compile.Package) typeNames {
-	nextIndex := 1
-	names := typeNames{}
-	for _, file := range pkg.Files {
-		for _, def := range file.TypeDefs {
-			nextIndex = getInnerTypes(def.Type, names, nextIndex)
-		}
-		for _, constdef := range file.ConstDefs {
-			nextIndex = getInnerTypes(constdef.Value.Type(), names, nextIndex)
-			nextIndex = addTypesInConst(constdef.Value, names, nextIndex)
-		}
-		for _, interfacedef := range file.Interfaces {
-			for _, method := range interfacedef.AllMethods() {
-				for _, inarg := range method.InArgs {
-					nextIndex = getInnerTypes(inarg.Type, names, nextIndex)
-				}
-				for _, outarg := range method.OutArgs {
-					nextIndex = getInnerTypes(outarg.Type, names, nextIndex)
-				}
-				if method.InStream != nil {
-					nextIndex = getInnerTypes(method.InStream, names, nextIndex)
-				}
-				if method.OutStream != nil {
-					nextIndex = getInnerTypes(method.OutStream, names, nextIndex)
-				}
-			}
-		}
-	}
-	return names
-}
-
 type typeNamePairList []typeNamePair
 type typeNamePair struct {
 	Type *vdl.Type
@@ -80,52 +56,123 @@ func (l typeNamePairList) Len() int           { return len(l) }
 func (l typeNamePairList) Less(i, j int) bool { return l[i].Name < l[j].Name }
 func (l typeNamePairList) Swap(i, j int)      { l[i], l[j] = l[j], l[i] }
 
-func makeName(t *vdl.Type, nextIndex int) (string, int) {
-	var name string
-	if t.Name() != "" {
-		_, n := vdl.SplitIdent(t.Name())
-		name = "_type" + n
-	} else {
-		name = fmt.Sprintf("_type%d", nextIndex)
-		nextIndex++
+// newTypeNames generates typeNames for all new types in a package.
+func newTypeNames(pkg *compile.Package) typeNames {
+	ptn := pkgTypeNames{
+		nextIndex: 1,
+		names:     typeNames{},
+		pkg:       pkg,
 	}
-	return name, nextIndex
+	return ptn.getNames()
 }
 
-func getInnerTypes(t *vdl.Type, names typeNames, nextIndex int) int {
-	if _, ok := names[t]; ok {
-		return nextIndex
+// pkgTypeNames tracks information necessary to define JS types from VDL.
+// The next index that a new type will be auto-generated with previously auto-generated type names
+// package being generated
+type pkgTypeNames struct {
+	nextIndex int
+	names     typeNames
+	pkg       *compile.Package
+}
+
+// getNames generates typeNames for all new types in a package.
+func (p pkgTypeNames) getNames() typeNames {
+	for _, file := range p.pkg.Files {
+		for _, def := range file.TypeDefs {
+			p.addInnerTypes(def.Type)
+		}
+		for _, constdef := range file.ConstDefs {
+			p.addInnerTypes(constdef.Value.Type())
+			p.addTypesInConst(constdef.Value)
+		}
+		for _, interfacedef := range file.Interfaces {
+			for _, method := range interfacedef.AllMethods() {
+				for _, inarg := range method.InArgs {
+					p.addInnerTypes(inarg.Type)
+				}
+				for _, outarg := range method.OutArgs {
+					p.addInnerTypes(outarg.Type)
+				}
+				if method.InStream != nil {
+					p.addInnerTypes(method.InStream)
+				}
+				if method.OutStream != nil {
+					p.addInnerTypes(method.OutStream)
+				}
+			}
+		}
 	}
-	names[t], nextIndex = makeName(t, nextIndex)
+
+	return p.names
+}
+
+// addNameIfNeeded produces a new typeName if:
+// -it is not already generated
+// -it is not from another package
+// -it is not an already a built-in type in vom.js (primitives, any, etc..)
+func (p *pkgTypeNames) addNameIfNeeded(t *vdl.Type) {
+	if _, ok := p.names[t]; ok {
+		return
+	}
+
+	// Do not create name for built-in JS types (primitives, any, etc..)
+	if _, ok := builtinJSType(t); ok {
+		return
+	}
+
+	var name string
+	if t.Name() != "" {
+		pp, n := vdl.SplitIdent(t.Name())
+		// Do not create name for types from other packages.
+		// TODO(aghassemi) TODO(bprosnitz): error is special right now, it is not a VDL type
+		// ideally we can handle error similar to other builtin JS types but VDL error is still in flux.
+		// Issue tracked in https://github.com/veyron/release-issues/issues/654
+
+		if pp != p.pkg.Path && n != "error" {
+			return
+		}
+		name = "_type" + n
+	} else {
+		name = fmt.Sprintf("_type%d", p.nextIndex)
+		p.nextIndex++
+	}
+
+	p.names[t] = name
+}
+
+func (p *pkgTypeNames) addInnerTypes(t *vdl.Type) {
+	if _, ok := p.names[t]; ok {
+		return
+	}
+
+	p.addNameIfNeeded(t)
 
 	switch t.Kind() {
 	case vdl.Optional, vdl.Array, vdl.List, vdl.Map:
-		nextIndex = getInnerTypes(t.Elem(), names, nextIndex)
+		p.addInnerTypes(t.Elem())
 	}
 
 	switch t.Kind() {
 	case vdl.Set, vdl.Map:
-		nextIndex = getInnerTypes(t.Key(), names, nextIndex)
+		p.addInnerTypes(t.Key())
 	}
 
 	switch t.Kind() {
 	case vdl.Struct, vdl.Union:
 		for i := 0; i < t.NumField(); i++ {
-			nextIndex = getInnerTypes(t.Field(i).Type, names, nextIndex)
+			p.addInnerTypes(t.Field(i).Type)
 		}
 	}
-
-	return nextIndex
 }
 
-func addTypesInConst(v *vdl.Value, names typeNames, nextIndex int) int {
+func (p *pkgTypeNames) addTypesInConst(v *vdl.Value) {
 	// Generate the type if it is a typeobject or any.
 	switch v.Kind() {
 	case vdl.TypeObject:
-		nextIndex = getInnerTypes(v.TypeObject(), names, nextIndex)
+		p.addInnerTypes(v.TypeObject())
 	case vdl.Any:
 		if !v.IsNil() {
-			nextIndex = getInnerTypes(v.Elem().Type(), names, nextIndex)
+			p.addInnerTypes(v.Elem().Type())
 		}
 	}
 
@@ -133,31 +180,28 @@ func addTypesInConst(v *vdl.Value, names typeNames, nextIndex int) int {
 	switch v.Kind() {
 	case vdl.List, vdl.Array:
 		for i := 0; i < v.Len(); i++ {
-			nextIndex = addTypesInConst(v.Index(i), names, nextIndex)
+			p.addTypesInConst(v.Index(i))
 		}
 	case vdl.Set:
 		for _, key := range v.Keys() {
-			nextIndex = addTypesInConst(key, names, nextIndex)
+			p.addTypesInConst(key)
 		}
 	case vdl.Map:
 		for _, key := range v.Keys() {
-			nextIndex = addTypesInConst(key, names, nextIndex)
-			nextIndex = addTypesInConst(v.MapIndex(key), names, nextIndex)
+			p.addTypesInConst(key)
+			p.addTypesInConst(v.MapIndex(key))
 
 		}
 	case vdl.Struct:
 		for i := 0; i < v.Type().NumField(); i++ {
-			nextIndex = addTypesInConst(v.Field(i), names, nextIndex)
+			p.addTypesInConst(v.Field(i))
 		}
 	case vdl.Union:
 		_, innerVal := v.UnionField()
-		nextIndex = addTypesInConst(innerVal, names, nextIndex)
+		p.addTypesInConst(innerVal)
 	case vdl.Any, vdl.Optional:
 		if !v.IsNil() {
-			nextIndex = addTypesInConst(v.Elem(), names, nextIndex)
-
+			p.addTypesInConst(v.Elem())
 		}
 	}
-
-	return nextIndex
 }
