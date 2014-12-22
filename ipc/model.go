@@ -377,7 +377,6 @@ type ServerCall interface {
 // including methods to stream args and results.
 type ServerContext interface {
 	security.Context
-	context.T
 
 	// Blessings returns blessings bound to the server's private key (technically,
 	// the server principal's private key) provided by the client of the RPC.
