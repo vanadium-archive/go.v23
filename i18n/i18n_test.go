@@ -143,8 +143,10 @@ func TestFormatParams(t *testing.T) {
 
 var mergeData string = `# In what follows we use the "languages" "fwd" and "back".
 fwd foo "{1} foo to {2}"
-# Next line has a missing trailing double quote.
+# Next line has a missing trailing double quote, so will be ignored.
  back   foo   "{2} from foo {1}
+
+# Comment "quote"
 
 # The following two lines are ignored, since each has fewer than three tokens.
 one
@@ -153,8 +155,8 @@ one two
 fwd 	bar "{1} bar to {2}"
 back bar "{2} from bar {1}" extraneous word
 
-back "funny msg id" "{2} from funny msg id {1}"
-"odd lang id" "funny msg id" "odd and funny"
+back funny.msg.id "{2} from funny msg id {1}"
+odd.lang.id funny.msg.id "odd and\b \"funny\""
 `
 
 // expectLookup verifies that cat.Lookup(lang, msg)==want
@@ -171,7 +173,7 @@ func expectLookup(t *testing.T, cat *Catalogue, want string,
 // expectInMap verifies that m[s]==true.
 func expectInMap(t *testing.T, m map[string]bool, s string) {
 	if !m[s] {
-		t.Errorf("m[%s]==false; want true", s)
+		t.Errorf("m[%#v]==false; want true", s)
 	}
 }
 
@@ -193,11 +195,11 @@ func TestMergeAndOutput(t *testing.T) {
 	// Check that Merge() works.
 	cat.Merge(strings.NewReader(mergeData))
 	expectLookup(t, cat, "{1} foo to {2}", "fwd", "foo", "1")
-	expectLookup(t, cat, "{2} from foo {1}", "back", "foo", "2")
+	expectLookup(t, cat, "", "back", "foo", "2")
 	expectLookup(t, cat, "{1} bar to {2}", "fwd", "bar", "3")
 	expectLookup(t, cat, "{2} from bar {1}", "back", "bar", "4")
-	expectLookup(t, cat, "{2} from funny msg id {1}", "back", "funny msg id", "5")
-	expectLookup(t, cat, "odd and funny", "odd lang id", "funny msg id", "6")
+	expectLookup(t, cat, "{2} from funny msg id {1}", "back", "funny.msg.id", "5")
+	expectLookup(t, cat, "odd and\b \"funny\"", "odd.lang.id", "funny.msg.id", "6")
 
 	// Verify that the result of Output is as expected.
 	var ws writeableString
@@ -214,12 +216,11 @@ func TestMergeAndOutput(t *testing.T) {
 	}
 	expectInMap(t, m, "fwd foo \"{1} foo to {2}\"")
 	expectInMap(t, m, "fwd bar \"{1} bar to {2}\"")
-	expectInMap(t, m, "back foo \"{2} from foo {1}\"")
 	expectInMap(t, m, "back bar \"{2} from bar {1}\"")
-	expectInMap(t, m, "back \"funny msg id\" \"{2} from funny msg id {1}\"")
-	expectInMap(t, m, "\"odd lang id\" \"funny msg id\" \"odd and funny\"")
-	if len(m) != 6 {
-		t.Errorf("wrong number of lines in <%s>", ws.s)
+	expectInMap(t, m, "back funny.msg.id \"{2} from funny msg id {1}\"")
+	expectInMap(t, m, "odd.lang.id funny.msg.id \"odd and\\b \\\"funny\\\"\"")
+	if want := 5; len(m) != want {
+		t.Errorf("wrong number of lines in <%s>; got %d, want %d ", ws.s, len(m), want)
 
 	}
 }

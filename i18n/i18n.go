@@ -265,35 +265,10 @@ func skipNotIn(s string, pos int, set string) int {
 	return pos
 }
 
-// getToken returns the first whitespace-separated or double quoted field in
-// *line, and adjusts *line to refer to the remainder of *line following the
-// field.
-func getToken(line *string) (token string) {
-	startIndex := skipIn(*line, 0, " \t\r\n")
-	if startIndex == len(*line) || (*line)[startIndex] == '#' { // no token, or comment
-		token = ""
-		*line = ""
-	} else if (*line)[startIndex] == '"' { // quoted token
-		endIndex := skipNotIn(*line, startIndex+1, "\"\n")
-		token = (*line)[startIndex+1 : endIndex]
-		if endIndex != len(*line) {
-			endIndex++
-		}
-		*line = (*line)[endIndex:]
-	} else { // unquoted token
-		endIndex := skipNotIn(*line, startIndex, " \t\r\n")
-		token = (*line)[startIndex:endIndex]
-		*line = (*line)[endIndex:]
-	}
-	return token
-}
-
 // Merge merges the data in the lines from *r reader into *cat.
-// Each line form *r is split into fields that are either surrounded by
-// double-quotes, or separated by whitespace e.g.,
-//     field1 "field number 2" "field3"field4
-// If a field starts with an unquoted #, it and all subsequent fields on the
-// line are discarded.
+// Each line from *r is parsed with Scanf("%s %s %q"); that is,
+// the first two fields are whitespace separated, and the third is quoted and escaped.
+// If a line starts with a #, or cannot be parsed, the line is ignored.
 // If the line contains at least three non-discarded fields, the first field is
 // treated as LangID, the second as a i18n.MsgID, and the third as a format
 // string in the specified language.
@@ -301,10 +276,12 @@ func (cat *Catalogue) Merge(r io.Reader) error {
 	bufReader := bufio.NewReader(r)
 	lineStr, err := bufReader.ReadString('\n')
 	for len(lineStr) != 0 {
-		langID := LangID(getToken(&lineStr))
-		msgID := MsgID(getToken(&lineStr))
-		formatStr := getToken(&lineStr)
-		if len(formatStr) != 0 {
+		var langID LangID
+		var msgID MsgID
+		var formatStr string
+		var fields int
+		fields, err = fmt.Sscanf(lineStr, "%s %s %q", &langID, &msgID, &formatStr)
+		if fields == 3 && !strings.HasPrefix(string(langID), "#") {
 			cat.SetWithBase(langID, msgID, formatStr)
 		}
 		lineStr, err = bufReader.ReadString('\n')
@@ -315,19 +292,23 @@ func (cat *Catalogue) Merge(r io.Reader) error {
 	return err
 }
 
+// MergeFromFile calls Merge() on the contents of the named file.
+func (cat *Catalogue) MergeFromFile(filename string) (err error) {
+	var f *os.File
+	if f, err = os.Open(filename); err == nil {
+		err = cat.Merge(f)
+		f.Close()
+	}
+	return err
+}
+
 // Output emits the contents of *cat to *w in the format expected by Merge().
 func (cat *Catalogue) Output(w io.Writer) error {
 	cat.lock.RLock()
 	defer cat.lock.RUnlock()
 	for langID, idToFmt := range cat.formats {
-		if strings.IndexAny(string(langID), " \t") != -1 {
-			langID = "\"" + langID + "\""
-		}
 		for msgID, formatStr := range idToFmt {
-			if strings.IndexAny(string(msgID), " \t") != -1 {
-				msgID = "\"" + msgID + "\""
-			}
-			_, err := fmt.Fprintf(w, "%s %s \"%s\"\n", langID, msgID, formatStr)
+			_, err := fmt.Fprintf(w, "%s %s %q\n", langID, msgID, formatStr)
 			if err != nil {
 				return err
 			}
