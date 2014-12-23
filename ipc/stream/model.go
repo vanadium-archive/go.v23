@@ -40,6 +40,20 @@ type Flow interface {
 	// SetDeadline causes reads and writes to the flow to be
 	// cancelled when the given channel is closed.
 	SetDeadline(deadline <-chan struct{})
+
+	// VCDataCache returns the stream.VCDataCache object that allows information to be
+	// shared across the Flow's parent VC.
+	VCDataCache() VCDataCache
+}
+
+// VCDataCache is a thread-safe store that allows data to be shared across a VC,
+// with the intention of caching data that reappears over multiple flows.
+type VCDataCache interface {
+	// GetOrInsert returns the 'value' associated with 'key'. If an entry already exists in the
+	// cache with the 'key', the 'value' is returned, otherwise 'create' is called to create a new
+	// value N, the cache is updated, and N is returned.  GetOrInsert may be called from
+	// multiple goroutines concurrently.
+	GetOrInsert(key interface{}, create func() interface{}) interface{}
 }
 
 // FlowOpt is the interface for all Flow options.

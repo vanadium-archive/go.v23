@@ -10,6 +10,7 @@ import (
 
 	// The non-user imports are prefixed with "__" to prevent collisions.
 	__vdl "veyron.io/veyron/veyron2/vdl"
+	__vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
 )
 
 // Request describes the request header sent by the client to the server.  A
@@ -43,11 +44,11 @@ type Request struct {
 	// GrantedBlessings are blessings bound to the principal running the server,
 	// provided by the client.
 	GrantedBlessings security.WireBlessings
-	// NumDischarges specifies the number of third party caveat discharges that
+	// Blessings is the blessings of the Client used for the current RPC.
+	Blessings BlessingsRequest
+	// Discharges are third party caveat discharges that
 	// are sent after the blessing to fulfill its caveats.
-	// TODO(toddw,ashankar,andreser): Ideally, this would be the a slice of
-	// discharges, but vom currently does not allow for data-type interfaces.
-	NumDischarges uint64
+	Discharges []__vdlutil.Any
 	// TraceRequest maintains the vtrace context between clients and servers
 	// and specifies additional parameters that control how tracing behaves.
 	TraceRequest vtrace.Request
@@ -75,6 +76,9 @@ type Response struct {
 	// TraceResponse maintains the vtrace context between clients and servers.
 	// In some cases trace data will be included in this response as well.
 	TraceResponse vtrace.Response
+	// AckBlessings is true if the server successfully recevied the client's blessings and
+	// stored them in the server's blessings cache.
+	AckBlessings bool
 }
 
 func (Response) __VDLReflect(struct {
@@ -82,9 +86,29 @@ func (Response) __VDLReflect(struct {
 }) {
 }
 
+// BlessingsRequest represents security.Blessings for a particular request. Since multiple
+// requests on the same VC often use the same blessings, we implement a caching scheme, where
+// the client picks an unused key and sends it along with the blessings.  After the client
+// receives confirmation that the server has received the key, subsequent client requests
+// only send the key.
+// If BlessingRequest.Key is 0 the Client is running in VCSecurityNone and the Blessings
+// information should ignored.
+type BlessingsRequest struct {
+	// Key is the required key that the Client has cached Blessings with.
+	Key uint64
+	// Blessings is optional if the Server has already been notified of Key.
+	Blessings *security.WireBlessings
+}
+
+func (BlessingsRequest) __VDLReflect(struct {
+	Name string "veyron.io/veyron/veyron2/ipc.BlessingsRequest"
+}) {
+}
+
 func init() {
 	__vdl.Register(Request{})
 	__vdl.Register(Response{})
+	__vdl.Register(BlessingsRequest{})
 }
 
 // NoTimeout specifies that no timeout is desired.
