@@ -18,6 +18,7 @@ package compile
 // their own file.
 
 import (
+	"path/filepath"
 	"sort"
 
 	"veyron.io/veyron/veyron2/vdl"
@@ -62,12 +63,13 @@ func CompileConfig(implicit *vdl.Type, pconfig *parse.Config, env *Env) *vdl.Val
 	// just compile it as a single-file vdl package, and compile the exported
 	// config const to retrieve the final exported config value.
 	pfile := &parse.File{
-		BaseName:   pconfig.BaseName,
+		BaseName:   filepath.Base(pconfig.FileName),
 		PackageDef: pconfig.ConfigDef,
 		Imports:    pconfig.Imports,
 		ConstDefs:  pconfig.ConstDefs,
 	}
-	pkg := compile("", []*parse.File{pfile}, env)
+	pkgpath := filepath.ToSlash(filepath.Dir(pconfig.FileName))
+	pkg := compile(pkgpath, []*parse.File{pfile}, env)
 	if pkg == nil {
 		return nil
 	}

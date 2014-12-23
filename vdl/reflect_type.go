@@ -82,12 +82,26 @@ func TypeOf(v interface{}) *Type {
 // redundancy in the rtCache.
 func normalizeType(rt reflect.Type) reflect.Type {
 	// Flatten rt to no pointers, and rtAtMostOnePtr to at most one pointer.
-	rtAtMostOnePtr := rt
+	hasPtr := false
 	for rt.Kind() == reflect.Ptr {
-		rt = rt.Elem()
-		if rt.Kind() == reflect.Ptr {
-			rtAtMostOnePtr = rt
+		if ri := ReflectInfoFromNative(rt); ri != nil {
+			if hasPtr {
+				return normalizeType(reflect.PtrTo(ri.WireType))
+			}
+			return normalizeType(ri.WireType)
 		}
+		hasPtr = true
+		rt = rt.Elem()
+	}
+	if ri := ReflectInfoFromNative(rt); ri != nil {
+		if hasPtr {
+			return normalizeType(reflect.PtrTo(ri.WireType))
+		}
+		return normalizeType(ri.WireType)
+	}
+	rtAtMostOnePtr := rt
+	if hasPtr {
+		rtAtMostOnePtr = reflect.PtrTo(rt)
 	}
 	// Handle special cases.  Union may be either an interface or a struct, and
 	// should be handled first.

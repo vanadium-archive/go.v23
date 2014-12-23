@@ -13,10 +13,11 @@ import (
 // There are two reasons types must be registered:
 //   1) To create a type name -> reflect.Type mapping, so that when we decode
 //      into interface{}, we can generate values of the correct type.
-//   2) To create a wire type <-> external type mapping, so that we can
-//      auto-marshal external types.
+//   2) To create a wire type <-> native type mapping, so that we can
+//      auto-marshal native types.
 //
-// Panics if any mappings are not bijective.  See ReflectInfo for details.
+// Panics if wire is not a valid wire type, or if any mappings are not
+// bijective.  See ReflectInfo for details.
 func Register(wire interface{}) {
 	if wire == nil {
 		return
@@ -36,25 +37,21 @@ func Register(wire interface{}) {
 // rtCache), this information cannot be regenerated at will.  We expect a
 // limited number of types to be used within a single address space.
 type riRegistry struct {
-	sync.Mutex
-	needsUpdate  bool
-	fromName     map[string]*ReflectInfo
-	fromWire     map[reflect.Type]*ReflectInfo
-	fromExternal map[reflect.Type]*ReflectInfo
-	fromWireVDL  map[*Type]*ReflectInfo
+	sync.RWMutex
+	fromName   map[string]*ReflectInfo
+	fromWire   map[reflect.Type]*ReflectInfo
+	fromNative map[reflect.Type]*ReflectInfo
 }
 
 var riReg = &riRegistry{
-	fromName:     make(map[string]*ReflectInfo),
-	fromWire:     make(map[reflect.Type]*ReflectInfo),
-	fromExternal: make(map[reflect.Type]*ReflectInfo),
-	fromWireVDL:  make(map[*Type]*ReflectInfo),
+	fromName:   make(map[string]*ReflectInfo),
+	fromWire:   make(map[reflect.Type]*ReflectInfo),
+	fromNative: make(map[reflect.Type]*ReflectInfo),
 }
 
 func (reg *riRegistry) addReflectInfo(rt reflect.Type, ri *ReflectInfo) {
 	reg.Lock()
 	defer reg.Unlock()
-	reg.needsUpdate = true
 	// Allow duplicates only if they're identical, meaning the same wire type was
 	// registered multiple times.  Otherwise it indicates a non-bijective mapping.
 	if riDup := reg.fromWire[ri.WireType]; riDup != nil && !equalRI(ri, riDup) {
@@ -67,72 +64,56 @@ func (reg *riRegistry) addReflectInfo(rt reflect.Type, ri *ReflectInfo) {
 		}
 		reg.fromName[ri.WireName] = ri
 	}
-	if ri.ExternalType != nil {
-		if riDup := reg.fromExternal[ri.ExternalType]; riDup != nil && !equalRI(ri, riDup) {
-			panic(fmt.Errorf("vdl: Register(%v) duplicate external type %v: %#v and %#v", rt, ri.ExternalType, ri, riDup))
+	if ri.NativeType != nil {
+		if riDup := reg.fromNative[ri.NativeType]; riDup != nil && !equalRI(ri, riDup) {
+			panic(fmt.Errorf("vdl: Register(%v) duplicate native type %v: %#v and %#v", rt, ri.NativeType, ri, riDup))
 		}
-		reg.fromExternal[ri.ExternalType] = ri
-	}
-}
-
-func (reg *riRegistry) maybeUpdateLocked() {
-	if !reg.needsUpdate {
-		return
-	}
-	reg.needsUpdate = false
-	// TODO(toddw): A given VDL type may have multiple ReflectInfos.  Pick the
-	// first for now.
-	for _, ri := range reg.fromWire {
-		wireVDL, err := TypeFromReflect(ri.WireType)
-		if err != nil {
-			continue // TODO(toddw): Handle errors?
-		}
-		if riDup := reg.fromWireVDL[wireVDL]; riDup != nil {
-			continue // TODO(toddw): How do we deal with non-equal dups?
-		}
-		reg.fromWireVDL[wireVDL] = ri
-		// TODO(toddw): register subtypes recursively?
+		reg.fromNative[ri.NativeType] = ri
 	}
 }
 
 // ReflectInfoFromName returns the ReflectInfo for the given vdl type name, or
 // nil if Register has not been called for a type with the given name.
 func ReflectInfoFromName(name string) *ReflectInfo {
-	riReg.Lock()
-	riReg.maybeUpdateLocked()
+	riReg.RLock()
 	ri := riReg.fromName[name]
-	riReg.Unlock()
+	riReg.RUnlock()
 	return ri
 }
 
 // ReflectInfoFromWire returns the ReflectInfo for the given wire type, or nil
 // if Register has not been called for the given wire type.
 func ReflectInfoFromWire(wire reflect.Type) *ReflectInfo {
-	riReg.Lock()
-	riReg.maybeUpdateLocked()
+	riReg.RLock()
 	ri := riReg.fromWire[wire]
-	riReg.Unlock()
+	riReg.RUnlock()
 	return ri
 }
 
-// ReflectInfoFromExternal returns the ReflectInfo for the given external type,
-// or nil if Register has not been called for the given external type.
-func ReflectInfoFromExternal(external reflect.Type) *ReflectInfo {
-	riReg.Lock()
-	riReg.maybeUpdateLocked()
-	ri := riReg.fromExternal[external]
-	riReg.Unlock()
+// ReflectInfoFromNative returns the ReflectInfo for the given native type, or
+// nil if Register has not been called for the given native type.
+func ReflectInfoFromNative(native reflect.Type) *ReflectInfo {
+	riReg.RLock()
+	ri := riReg.fromNative[native]
+	riReg.RUnlock()
 	return ri
 }
 
-// ReflectInfoFromWireVDL returns the ReflectInfo for the given vdl wire type,
-// or nil if Register has not been called for the given wire type.
-func ReflectInfoFromWireVDL(wire *Type) *ReflectInfo {
-	riReg.Lock()
-	riReg.maybeUpdateLocked()
-	ri := riReg.fromWireVDL[wire]
-	riReg.Unlock()
-	return ri
+// WireValueFromNative converts rv into its native type representation.  There
+// are three return cases:
+//   (!IsValid(),  nil): rv doesn't have a native representation.
+//   (!IsValid(), !nil): conversion of rv to native representation failed.
+//   ( IsValid(),  nil): conversion of rv to native representation succeeded.
+func WireValueFromNative(rv reflect.Value) (reflect.Value, error) {
+	ri := ReflectInfoFromNative(rv.Type())
+	if ri == nil {
+		return reflect.Value{}, nil
+	}
+	newWire := reflect.New(ri.WireType)
+	if ierr := ri.FromNativeFunc.Call([]reflect.Value{newWire, rv})[0].Interface(); ierr != nil {
+		return reflect.Value{}, ierr.(error)
+	}
+	return newWire.Elem(), nil
 }
 
 // ReflectInfo holds the reflection information for a type.  All fields are
@@ -173,13 +154,17 @@ type ReflectInfo struct {
 	// vdl package path, e.g. "veyron.io/veyron/veyron2/vdl.Foo".
 	WireName string
 
-	// TODO(toddw): Implement external types and describe them here.
-	//   type Foo struct{}
-	//   func (x *Foo) VDLToExternal() (time.Time, error)
-	//   func (x *Foo) VDLFromExternal(t time.Time) error
-	ExternalType reflect.Type
-	ToExternal   reflect.Value
-	FromExternal reflect.Value
+	// NativeType is the native Go type for the wire type.  Users specify the
+	// native type by adding a pair of conversion functions to the wire type:
+	//
+	//   type Wire ...
+	//   func (x Wire) VDLToNative(n *Native) error
+	//   func (x *Wire) VDLFromNative(n Native) error
+	NativeType reflect.Type
+	// ToNativeFunc holds the VDLToNative function above.
+	ToNativeFunc reflect.Value
+	// ToNativeFunc holds the VDLFromNative function above.
+	FromNativeFunc reflect.Value
 
 	// EnumLabels holds the labels of an enum; it is non-empty iff the WireType
 	// represents a vdl enum.
@@ -189,6 +174,16 @@ type ReflectInfo struct {
 	// represents a vdl union.
 	UnionFields []ReflectField
 }
+
+// TODO(toddw): Currently all wire types must be registered before TypeOf is
+// called.  There's a chicken-and-egg problem; if the user has a package-level
+// "var x = vdl.TypeOf(Native{})" in the same package that the Wire type is
+// defined, where Wire has the Native type, the init order gets screwed up,
+// since the vdl.Register(Wire{}) will occur after the TypeOf.  Perhaps this is
+// rare enough to not worry?  But how about typeobject in the vdl?
+//
+// Also note that we must disallow mutually cyclic types that have native types,
+// otherwise we can never get the register order correct.
 
 // ReflectField describes the reflection info for a Union field.
 type ReflectField struct {
@@ -205,18 +200,6 @@ func equalRI(a, b *ReflectInfo) bool {
 	// Since all information is derived from the WireType, that's all we compare.
 	return a.WireType == b.WireType
 }
-
-// TODO(toddw): TypeFromReflect needs to detect the external type, and translate
-// into the wire type automatically, by checking ReflectInfoFromExternal.  This
-// means that all types must be registered before TypeOf is called.  There's a
-// chicken-and-egg problem here; if the user has a package-level "var x =
-// vdl.TypeOf(External{})" in the same package that the Wire type is defined,
-// where Wire has the External type, the init order gets screwed up, since the
-// vdl.Register(Wire{}) will occur after the TypeOf.  Perhaps this is rare
-// enough to not worry?  But how about typeobject in the vdl?
-//
-// Also note that we must disallow mutually cyclic types that have external
-// types, otherwise we can never get the register order correct.
 
 // isUnion returns true iff rt is a union vdl type; it runs a quicker form of
 // DeriveReflectInfo, only to check for union.  It's used while normalizing types,
@@ -245,12 +228,16 @@ func isUnion(rt reflect.Type) bool {
 // TODO(toddw): Unexport this function when valconv has been merged into this
 // package; it's only used in makeReflectUnion.
 func DeriveReflectInfo(rt reflect.Type) (*ReflectInfo, error) {
-	// Set reasonable defaults for types that don't have external types or the
-	// __VDLReflect method.
+	// Set reasonable defaults for types that don't have the __VDLReflect method
+	// or native types.
 	ri := new(ReflectInfo)
 	ri.WireType = rt
 	if rt.PkgPath() != "" {
 		ri.WireName = rt.PkgPath() + "." + rt.Name()
+	}
+	// Fill in native type info, if it exists.
+	if err := describeNative(rt, ri); err != nil {
+		return nil, err
 	}
 	// If rt is an non-interface type, methods include the receiver as the first
 	// in-arg, otherwise they don't.
@@ -258,8 +245,6 @@ func DeriveReflectInfo(rt reflect.Type) (*ReflectInfo, error) {
 	if rt.Kind() == reflect.Interface {
 		offsetIn = 0
 	}
-	// TODO(toddw): Fill in external type info
-
 	// If rt has a __VDLReflect method, use it to extract metadata.
 	if method, ok := rt.MethodByName("__VDLReflect"); ok {
 		mtype := method.Type
@@ -294,6 +279,49 @@ func DeriveReflectInfo(rt reflect.Type) (*ReflectInfo, error) {
 		}
 	}
 	return ri, nil
+}
+
+// describeNative fills in ri with native type information from rt.  Users
+// specify native type information through a pair of conversion functions on the
+// wire type:
+//
+//   type Wire struct{...}
+//   func (x Wire) VDLToNative(n *Native) error
+//   func (x *Wire) VDLFromNative(n Native) error
+func describeNative(rt reflect.Type, ri *ReflectInfo) error {
+	if rt.Kind() == reflect.Interface {
+		return nil
+	}
+	// Reminder: methods include the receiver as in-arg 0.
+	var to, from reflect.Type
+	if method, ok := rt.MethodByName("VDLToNative"); ok {
+		mtype := method.Type
+		if mtype.NumIn() != 2 || mtype.In(1).Kind() != reflect.Ptr || mtype.NumOut() != 1 || mtype.Out(0) != rtError {
+			return fmt.Errorf("type %q invalid VDLToNative (want method VDLToNative(*Native) error)", rt)
+		}
+		to = mtype.In(1).Elem()
+		ri.ToNativeFunc = method.Func
+	}
+	if method, ok := reflect.PtrTo(rt).MethodByName("VDLFromNative"); ok {
+		mtype := method.Type
+		if _, nonptr := rt.MethodByName("VDLFromNative"); nonptr ||
+			mtype.NumIn() != 2 || mtype.NumOut() != 1 || mtype.Out(0) != rtError {
+			return fmt.Errorf("type %q invalid VDLFromNative (want pointer method VDLFromNative(Native) error)", rt)
+		}
+		from = mtype.In(1)
+		ri.FromNativeFunc = method.Func
+	}
+	switch {
+	case to == nil && from == nil:
+		// Neither VDLToNative nor VDLFromNative is specified.
+		return nil
+	case to != from:
+		// Only one of VDLToNative or VDLFromNative is specified, or the native type
+		// isn't identical for the two functions.
+		return fmt.Errorf("type %q invalid native type (must specify both VDLToNative and VDLFromNative with the same Native type)", rt)
+	}
+	ri.NativeType = to
+	return nil
 }
 
 // describeEnum fills in ri; we expect enumReflect has this format:
@@ -408,11 +436,6 @@ func ReflectFromType(t *Type) reflect.Type {
 			return ri.WireType
 		}
 		return nil
-	}
-	// If the unnamed type is registered, use that.
-	// TODO(toddw): Need the comparison to consider the same type name as equal.
-	if ri := ReflectInfoFromWireVDL(t); ri != nil {
-		return ri.WireType
 	}
 	// We can make some unnamed types via Go reflect.  Everything else drops
 	// through and returns nil.

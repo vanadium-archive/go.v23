@@ -290,6 +290,10 @@ var (
 		nStructUVMixed{U: 0, V: 1},
 	}
 	rvEmptyStruct = []interface{}{struct{}{}, nEmpty{}}
+	rvNative0     = nNative(0)
+	rvNative1     = nNative(1)
+	rvNativeMin   = nNative(-(1 << 63))
+	rvNativeMax   = nNative((1 << 63) - 1)
 
 	ttBools           = ttTypes(vvBoolTrue)
 	ttStrs            = ttTypes(vvStrABC)
@@ -718,6 +722,10 @@ func TestConverter(t *testing.T) {
 		{vvStructWXFalseTrue, rvStructWXFalseTrue},
 		{vvMapStructVWX123, rvMapStructVWX123},
 		{vvStructUV01, rvStructUV01},
+		{nil, []interface{}{rvNative0}},
+		{nil, []interface{}{rvNative1}},
+		{nil, []interface{}{rvNativeMin}},
+		{nil, []interface{}{rvNativeMax}},
 	}
 	for _, test := range tests {
 		testConverterWantSrc(t, vvrv{test.vv, test.rv}, vvrv{test.vv, test.rv})
@@ -1025,7 +1033,12 @@ func testConvert(t *testing.T, prefix string, dst, src, want interface{}, deref 
 					}
 				} else if errWant, ok := want.(verror2.Standard); ok {
 					eWant = &errWant
+				} else if nativeWant, ok := want.(nNative); ok {
+					eWant = &nativeWant
 				}
+				// TODO(toddw): Replace the special-cases for verror2.Standard and
+				// nNative with a general mechanism to change want to be optional, once
+				// optional is allowed for all types.
 			}
 			target, err := ReflectTarget(rvDst)
 			expectErr(t, err, "", tname)
@@ -1058,7 +1071,7 @@ func expectConvert(t *testing.T, tname string, got, want interface{}, deref int)
 	vvWant, ok2 := want.(*vdl.Value)
 	if ok1 && ok2 {
 		if !vdl.EqualValue(vvGot, vvWant) {
-			t.Errorf("%\nGOT  %v\nWANT %v", tname, vvGot, vvWant)
+			t.Errorf("%s\nGOT  %v\nWANT %v", tname, vvGot, vvWant)
 		}
 		return
 	}

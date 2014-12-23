@@ -5,6 +5,7 @@ package valconv
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -376,6 +377,29 @@ func (nUnionBCDC) __VDLReflect(__nUnionBCDDesc) {}
 func (nUnionBCDD) Name() string                 { return "D" }
 func (nUnionBCDD) Index() int                   { return 2 }
 func (nUnionBCDD) __VDLReflect(__nUnionBCDDesc) {}
+
+// nWire and nNative are used to test native type support.
+type nWire struct{ Str string }
+type nNative int64
+
+func (x nWire) VDLToNative(n *nNative) error {
+	*n = 0
+	i, err := strconv.Atoi(x.Str)
+	if err != nil {
+		return err
+	}
+	*n = nNative(i)
+	return nil
+}
+
+func (x *nWire) VDLFromNative(n nNative) error {
+	x.Str = strconv.Itoa(int(n))
+	return nil
+}
+
+func init() {
+	vdl.Register(nWire{})
+}
 
 var (
 	structInt64TypeN = vdl.NamedType("veyron.io/veyron/veyron2/vdl/valconv.nStructInt64", vdl.StructType(vdl.Field{"X", vdl.Int64Type}))

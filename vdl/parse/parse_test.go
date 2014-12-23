@@ -864,7 +864,7 @@ var configTests = []configTest{
 		`// One liner
 // Another line
 config = true`,
-		&parse.Config{BaseName: "testfile", ConfigDef: parse.NamePos{Name: "config", Pos: pos(3, 1), Doc: `// One liner
+		&parse.Config{FileName: "testfile", ConfigDef: parse.NamePos{Name: "config", Pos: pos(3, 1), Doc: `// One liner
 // Another line
 `},
 			Config: cn("true", 3, 10)},
@@ -875,7 +875,7 @@ config = true`,
 Another line
 */
 config = true`,
-		&parse.Config{BaseName: "testfile", ConfigDef: parse.NamePos{Name: "config", Pos: pos(4, 1), Doc: `/* Multi liner
+		&parse.Config{FileName: "testfile", ConfigDef: parse.NamePos{Name: "config", Pos: pos(4, 1), Doc: `/* Multi liner
 Another line
 */
 `},
@@ -886,7 +886,7 @@ Another line
 		`// Extra newline, not config doc
 
 config = true`,
-		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 3, 1),
+		&parse.Config{FileName: "testfile", ConfigDef: np("config", 3, 1),
 			Config: cn("true", 3, 10)},
 		nil},
 	{
@@ -901,19 +901,19 @@ config = true`,
 	{
 		"Config",
 		"config = true;",
-		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
+		&parse.Config{FileName: "testfile", ConfigDef: np("config", 1, 1),
 			Config: cn("true", 1, 10)},
 		nil},
 	{
 		"ConfigNoSemi",
 		"config = true",
-		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
+		&parse.Config{FileName: "testfile", ConfigDef: np("config", 1, 1),
 			Config: cn("true", 1, 10)},
 		nil},
 	{
 		"ConfigNamedConfig",
 		"config = config",
-		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
+		&parse.Config{FileName: "testfile", ConfigDef: np("config", 1, 1),
 			Config: cn("config", 1, 10)},
 		nil},
 	{
@@ -928,14 +928,14 @@ config = true`,
 		`config = foo
 import (
 )`,
-		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
+		&parse.Config{FileName: "testfile", ConfigDef: np("config", 1, 1),
 			Config: cn("foo", 1, 10)},
 		nil},
 	{
 		"OneImport",
 		`config = foo
 import "foo/bar";`,
-		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
+		&parse.Config{FileName: "testfile", ConfigDef: np("config", 1, 1),
 			Imports: []*parse.Import{{Path: "foo/bar", NamePos: np("", 2, 8)}},
 			Config:  cn("foo", 1, 10)},
 		nil},
@@ -943,7 +943,7 @@ import "foo/bar";`,
 		"OneImportLocalNameNoSemi",
 		`config = foo
 import baz "foo/bar"`,
-		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
+		&parse.Config{FileName: "testfile", ConfigDef: np("config", 1, 1),
 			Imports: []*parse.Import{{Path: "foo/bar", NamePos: np("baz", 2, 8)}},
 			Config:  cn("foo", 1, 10)},
 		nil},
@@ -953,7 +953,7 @@ import baz "foo/bar"`,
 import (
   "foo/bar";
 )`,
-		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
+		&parse.Config{FileName: "testfile", ConfigDef: np("config", 1, 1),
 			Imports: []*parse.Import{{Path: "foo/bar", NamePos: np("", 3, 3)}},
 			Config:  cn("foo", 1, 10)},
 		nil},
@@ -963,7 +963,7 @@ import (
 import (
   "foo/bar"
 )`,
-		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
+		&parse.Config{FileName: "testfile", ConfigDef: np("config", 1, 1),
 			Imports: []*parse.Import{{Path: "foo/bar", NamePos: np("", 3, 3)}},
 			Config:  cn("foo", 1, 10)},
 		nil},
@@ -973,7 +973,7 @@ import (
 import (
   baz "foo/bar"
 )`,
-		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
+		&parse.Config{FileName: "testfile", ConfigDef: np("config", 1, 1),
 			Imports: []*parse.Import{{Path: "foo/bar", NamePos: np("baz", 3, 3)}},
 			Config:  cn("foo", 1, 10)},
 		nil},
@@ -986,7 +986,7 @@ import (
   "c/d"
 )
 import "z"`,
-		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
+		&parse.Config{FileName: "testfile", ConfigDef: np("config", 1, 1),
 			Imports: []*parse.Import{
 				{Path: "foo/bar", NamePos: np("", 2, 8)},
 				{Path: "baz", NamePos: np("", 4, 3)},
@@ -1007,37 +1007,37 @@ import (
 	{
 		"BoolConst",
 		`config = true`,
-		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
+		&parse.Config{FileName: "testfile", ConfigDef: np("config", 1, 1),
 			Config: cn("true", 1, 10)},
 		nil},
 	{
 		"StringConst",
 		`config = "abc"`,
-		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
+		&parse.Config{FileName: "testfile", ConfigDef: np("config", 1, 1),
 			Config: cl("abc", 1, 10)},
 		nil},
 	{
 		"IntegerConst",
 		`config = 123`,
-		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
+		&parse.Config{FileName: "testfile", ConfigDef: np("config", 1, 1),
 			Config: cl(big.NewInt(123), 1, 10)},
 		nil},
 	{
 		"FloatConst",
 		`config = 1.5`,
-		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
+		&parse.Config{FileName: "testfile", ConfigDef: np("config", 1, 1),
 			Config: cl(big.NewRat(3, 2), 1, 10)},
 		nil},
 	{
 		"NamedConst",
 		`config = pkg.foo`,
-		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
+		&parse.Config{FileName: "testfile", ConfigDef: np("config", 1, 1),
 			Config: cn("pkg.foo", 1, 10)},
 		nil},
 	{
 		"CompLitConst",
 		`config = {"a","b"}`,
-		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
+		&parse.Config{FileName: "testfile", ConfigDef: np("config", 1, 1),
 			Config: &parse.ConstCompositeLit{
 				KVList: []parse.KVLit{
 					{Value: cl("a", 1, 11)},
@@ -1047,7 +1047,7 @@ import (
 	{
 		"CompLitKVConst",
 		`config = {"a":1,"b":2}`,
-		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
+		&parse.Config{FileName: "testfile", ConfigDef: np("config", 1, 1),
 			Config: &parse.ConstCompositeLit{
 				KVList: []parse.KVLit{
 					{cl("a", 1, 11), cl(big.NewInt(1), 1, 15)},
@@ -1057,7 +1057,7 @@ import (
 	{
 		"CompLitTypedConst",
 		`config = foo{"a","b"}`,
-		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
+		&parse.Config{FileName: "testfile", ConfigDef: np("config", 1, 1),
 			Config: &parse.ConstCompositeLit{
 				Type: tn("foo", 1, 10),
 				KVList: []parse.KVLit{
@@ -1068,7 +1068,7 @@ import (
 	{
 		"CompLitKVTypedConst",
 		`config = foo{"a":1,"b":2}`,
-		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
+		&parse.Config{FileName: "testfile", ConfigDef: np("config", 1, 1),
 			Config: &parse.ConstCompositeLit{
 				Type: tn("foo", 1, 10),
 				KVList: []parse.KVLit{
@@ -1093,7 +1093,7 @@ import (
 		`config = config
 import "foo"
 const config = true`,
-		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
+		&parse.Config{FileName: "testfile", ConfigDef: np("config", 1, 1),
 			Imports: []*parse.Import{{Path: "foo", NamePos: np("", 2, 8)}},
 			Config:  cn("config", 1, 10),
 			ConstDefs: []*parse.ConstDef{
@@ -1104,7 +1104,7 @@ const config = true`,
 		`config = bar
 import "foo"
 const bar = true`,
-		&parse.Config{BaseName: "testfile", ConfigDef: np("config", 1, 1),
+		&parse.Config{FileName: "testfile", ConfigDef: np("config", 1, 1),
 			Imports: []*parse.Import{{Path: "foo", NamePos: np("", 2, 8)}},
 			Config:  cn("bar", 1, 10),
 			ConstDefs: []*parse.ConstDef{

@@ -315,6 +315,34 @@ func (td typeDefiner) Build() {
 			addTypeDef(def, td.env)
 		}
 	}
+	// Make another pass to fill in doc and doc suffix slices for enums, structs
+	// and unions.  Typically these are initialized in makeTypeDefBuilder, based
+	// on the underlying parse data.  But type definitions based on other named
+	// types can't be updated until the base type is actually compiled.
+	//
+	// TODO(toddw): This doesn't actually attach comments from the base type, it
+	// just leaves everything empty.  This is fine for now, but we should revamp
+	// the vdl parsing / comment attaching strategy in the future.
+	for _, file := range td.pkg.Files {
+		for _, def := range file.TypeDefs {
+			switch t := def.Type; t.Kind() {
+			case vdl.Enum:
+				if len(def.LabelDoc) == 0 {
+					def.LabelDoc = make([]string, t.NumEnumLabel())
+				}
+				if len(def.LabelDocSuffix) == 0 {
+					def.LabelDocSuffix = make([]string, t.NumEnumLabel())
+				}
+			case vdl.Struct, vdl.Union:
+				if len(def.FieldDoc) == 0 {
+					def.FieldDoc = make([]string, t.NumField())
+				}
+				if len(def.FieldDocSuffix) == 0 {
+					def.FieldDocSuffix = make([]string, t.NumField())
+				}
+			}
+		}
+	}
 }
 
 // addTypeDef updates our various structures to add a new type def.

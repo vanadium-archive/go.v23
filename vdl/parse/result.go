@@ -60,7 +60,7 @@ type File struct {
 // Config represents a parsed config file.  Config files use a similar syntax as
 // vdl files, with similar concepts.
 type Config struct {
-	BaseName  string      // Base name of the config file, e.g. "foo.config"
+	FileName  string      // Config file name, e.g. "a/b/foo.config"
 	ConfigDef NamePos     // Name, position and docs of the "config" clause
 	Imports   []*Import   // Imports listed in this file.
 	Config    ConstExpr   // Const expression exported from this config.

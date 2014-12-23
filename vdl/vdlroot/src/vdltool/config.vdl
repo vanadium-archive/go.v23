@@ -25,8 +25,34 @@ type GenLanguage enum {
 
 // GoConfig specifies go specific configuration.
 type GoConfig struct {
-	// NoFmt disables gofmt formatting on the generated source.
-	NoFmt bool
+	NativeTypes []GoNativeType
+}
+
+// GoNativeType describes the mapping from a VDL wire type to a Go native type.
+// This is typically used when the Go native type is an idiomatic type
+// convenient for the user, but you still need a standard VDL representation for
+// wire compatibility.  E.g. the VDL time package is necessary for wire
+// compatibility across languages, while generated Go code uses the standard Go
+// time package.
+//
+// The code generator assumes the existence of a pair of conversion functions
+// converting between the wire and native types:
+//   type WireType ...
+//   func (x WireType) VDLToNative(n *Native) error
+//   func (x *WireType) VDLFromNative(n Native) error
+//
+// TODO(toddw): VDL compiler support for native types isn't implemented yet.
+type GoNativeType struct {
+	// WireType is the name of the vdl type that describes the format on the wire.
+	// The wire type must be defined in the vdl package associated with the
+	// vdl.config file; i.e. in the same directory.
+	WireType string
+	// NativeType is the name of the Go native type.  Include the package
+	// qualifier if the Go native type isn't defined in the same package as the
+	// wire type, and add import(s) for the necessary Go packages.
+	NativeType string
+	// Imports lists the Go imports required by NativeType.
+	Imports []string
 }
 
 // JavaConfig specifies java specific configuration.
