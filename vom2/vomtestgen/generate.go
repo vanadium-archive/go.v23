@@ -180,9 +180,10 @@ package testdata
 	fmt.Fprintf(buf, `
 // TestCase represents an individual testcase for vom encoding and decoding.
 type TestCase struct {
-	Name  string // Name of the testcase
-	Value any    // Value to test
-	Hex   string // Hex pattern representing vom encoding of Value
+	Name       string // Name of the testcase
+	Value      any    // Value to test
+	Hex        string // Hex pattern representing vom encoding of Value
+	TypeString string // The string representation of the Type
 }
 
 // Tests contains the testcases to use to test vom encoding and decoding.
@@ -208,7 +209,8 @@ const Tests = []TestCase {`)
 		%#[1]q,
 		%[1]s,
 		%[2]q,
-	},`, valstr, vomhex, vomdump)
+		%[4]q,
+	},`, valstr, vomhex, vomdump, value.Type().String())
 	}
 	fmt.Fprintf(buf, `
 }

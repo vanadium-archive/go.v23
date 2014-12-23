@@ -5,9 +5,10 @@ package testdata
 
 // TestCase represents an individual testcase for vom encoding and decoding.
 type TestCase struct {
-	Name  string // Name of the testcase
-	Value any    // Value to test
-	Hex   string // Hex pattern representing vom encoding of Value
+	Name       string // Name of the testcase
+	Value      any    // Value to test
+	Hex        string // Hex pattern representing vom encoding of Value
+	TypeString string // The string representation of the Type
 }
 
 // Tests contains the testcases to use to test vom encoding and decoding.
@@ -21,6 +22,7 @@ const Tests = []TestCase {
 		`true`,
 		true,
 		"800601",
+		"bool",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 06                   MsgID                              3
@@ -31,6 +33,7 @@ const Tests = []TestCase {
 		`false`,
 		false,
 		"800600",
+		"bool",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 08                   MsgID                              4
@@ -42,6 +45,7 @@ const Tests = []TestCase {
 		`""`,
 		"",
 		"800800",
+		"string",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 08                   MsgID                              4
@@ -53,6 +57,7 @@ const Tests = []TestCase {
 		`"abc"`,
 		"abc",
 		"800803616263",
+		"string",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 34                   MsgID                             26
@@ -64,6 +69,7 @@ const Tests = []TestCase {
 		`[]byte("")`,
 		[]byte(""),
 		"803400",
+		"[]byte",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 34                   MsgID                             26
@@ -75,6 +81,7 @@ const Tests = []TestCase {
 		`[]byte("def")`,
 		[]byte("def"),
 		"803403646566",
+		"[]byte",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 0a                   MsgID                              5
@@ -85,6 +92,7 @@ const Tests = []TestCase {
 		`byte(0)`,
 		byte(0),
 		"800a00",
+		"byte",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 0a                   MsgID                              5
@@ -95,6 +103,7 @@ const Tests = []TestCase {
 		`byte(127)`,
 		byte(127),
 		"800a7f",
+		"byte",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 0a                   MsgID                              5
@@ -105,6 +114,7 @@ const Tests = []TestCase {
 		`byte(255)`,
 		byte(255),
 		"800aff",
+		"byte",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 0c                   MsgID                              6
@@ -115,6 +125,7 @@ const Tests = []TestCase {
 		`uint16(0)`,
 		uint16(0),
 		"800c00",
+		"uint16",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 0c                   MsgID                              6
@@ -125,6 +136,7 @@ const Tests = []TestCase {
 		`uint16(1)`,
 		uint16(1),
 		"800c01",
+		"uint16",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 0c                   MsgID                              6
@@ -135,6 +147,7 @@ const Tests = []TestCase {
 		`uint16(2)`,
 		uint16(2),
 		"800c02",
+		"uint16",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 0c                   MsgID                              6
@@ -145,6 +158,7 @@ const Tests = []TestCase {
 		`uint16(63)`,
 		uint16(63),
 		"800c3f",
+		"uint16",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 0c                   MsgID                              6
@@ -155,6 +169,7 @@ const Tests = []TestCase {
 		`uint16(64)`,
 		uint16(64),
 		"800c40",
+		"uint16",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 0c                   MsgID                              6
@@ -165,6 +180,7 @@ const Tests = []TestCase {
 		`uint16(127)`,
 		uint16(127),
 		"800c7f",
+		"uint16",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 0c                   MsgID                              6
@@ -175,6 +191,7 @@ const Tests = []TestCase {
 		`uint16(128)`,
 		uint16(128),
 		"800cff80",
+		"uint16",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 0c                   MsgID                              6
@@ -185,6 +202,7 @@ const Tests = []TestCase {
 		`uint16(255)`,
 		uint16(255),
 		"800cffff",
+		"uint16",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 0c                   MsgID                              6
@@ -195,6 +213,7 @@ const Tests = []TestCase {
 		`uint16(256)`,
 		uint16(256),
 		"800cfe0100",
+		"uint16",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 0c                   MsgID                              6
@@ -205,6 +224,7 @@ const Tests = []TestCase {
 		`uint16(32766)`,
 		uint16(32766),
 		"800cfe7ffe",
+		"uint16",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 0c                   MsgID                              6
@@ -215,6 +235,7 @@ const Tests = []TestCase {
 		`uint16(32767)`,
 		uint16(32767),
 		"800cfe7fff",
+		"uint16",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 0c                   MsgID                              6
@@ -225,6 +246,7 @@ const Tests = []TestCase {
 		`uint16(65534)`,
 		uint16(65534),
 		"800cfefffe",
+		"uint16",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 0c                   MsgID                              6
@@ -235,6 +257,7 @@ const Tests = []TestCase {
 		`uint16(65535)`,
 		uint16(65535),
 		"800cfeffff",
+		"uint16",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 0e                   MsgID                              7
@@ -245,6 +268,7 @@ const Tests = []TestCase {
 		`uint32(0)`,
 		uint32(0),
 		"800e00",
+		"uint32",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 0e                   MsgID                              7
@@ -255,6 +279,7 @@ const Tests = []TestCase {
 		`uint32(8388606)`,
 		uint32(8388606),
 		"800efd7ffffe",
+		"uint32",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 0e                   MsgID                              7
@@ -265,6 +290,7 @@ const Tests = []TestCase {
 		`uint32(8388607)`,
 		uint32(8388607),
 		"800efd7fffff",
+		"uint32",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 0e                   MsgID                              7
@@ -275,6 +301,7 @@ const Tests = []TestCase {
 		`uint32(16777214)`,
 		uint32(16777214),
 		"800efdfffffe",
+		"uint32",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 0e                   MsgID                              7
@@ -285,6 +312,7 @@ const Tests = []TestCase {
 		`uint32(16777215)`,
 		uint32(16777215),
 		"800efdffffff",
+		"uint32",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 0e                   MsgID                              7
@@ -295,6 +323,7 @@ const Tests = []TestCase {
 		`uint32(2147483646)`,
 		uint32(2147483646),
 		"800efc7ffffffe",
+		"uint32",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 0e                   MsgID                              7
@@ -305,6 +334,7 @@ const Tests = []TestCase {
 		`uint32(2147483647)`,
 		uint32(2147483647),
 		"800efc7fffffff",
+		"uint32",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 0e                   MsgID                              7
@@ -315,6 +345,7 @@ const Tests = []TestCase {
 		`uint32(4294967294)`,
 		uint32(4294967294),
 		"800efcfffffffe",
+		"uint32",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 0e                   MsgID                              7
@@ -325,6 +356,7 @@ const Tests = []TestCase {
 		`uint32(4294967295)`,
 		uint32(4294967295),
 		"800efcffffffff",
+		"uint32",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 10                   MsgID                              8
@@ -335,6 +367,7 @@ const Tests = []TestCase {
 		`uint64(0)`,
 		uint64(0),
 		"801000",
+		"uint64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 10                   MsgID                              8
@@ -345,6 +378,7 @@ const Tests = []TestCase {
 		`uint64(549755813886)`,
 		uint64(549755813886),
 		"8010fb7ffffffffe",
+		"uint64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 10                   MsgID                              8
@@ -355,6 +389,7 @@ const Tests = []TestCase {
 		`uint64(549755813887)`,
 		uint64(549755813887),
 		"8010fb7fffffffff",
+		"uint64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 10                   MsgID                              8
@@ -365,6 +400,7 @@ const Tests = []TestCase {
 		`uint64(1099511627774)`,
 		uint64(1099511627774),
 		"8010fbfffffffffe",
+		"uint64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 10                   MsgID                              8
@@ -375,6 +411,7 @@ const Tests = []TestCase {
 		`uint64(1099511627775)`,
 		uint64(1099511627775),
 		"8010fbffffffffff",
+		"uint64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 10                   MsgID                              8
@@ -385,6 +422,7 @@ const Tests = []TestCase {
 		`uint64(140737488355326)`,
 		uint64(140737488355326),
 		"8010fa7ffffffffffe",
+		"uint64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 10                   MsgID                              8
@@ -395,6 +433,7 @@ const Tests = []TestCase {
 		`uint64(140737488355327)`,
 		uint64(140737488355327),
 		"8010fa7fffffffffff",
+		"uint64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 10                   MsgID                              8
@@ -405,6 +444,7 @@ const Tests = []TestCase {
 		`uint64(281474976710654)`,
 		uint64(281474976710654),
 		"8010fafffffffffffe",
+		"uint64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 10                   MsgID                              8
@@ -415,6 +455,7 @@ const Tests = []TestCase {
 		`uint64(281474976710655)`,
 		uint64(281474976710655),
 		"8010faffffffffffff",
+		"uint64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 10                   MsgID                              8
@@ -425,6 +466,7 @@ const Tests = []TestCase {
 		`uint64(36028797018963966)`,
 		uint64(36028797018963966),
 		"8010f97ffffffffffffe",
+		"uint64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 10                   MsgID                              8
@@ -435,6 +477,7 @@ const Tests = []TestCase {
 		`uint64(36028797018963967)`,
 		uint64(36028797018963967),
 		"8010f97fffffffffffff",
+		"uint64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 10                   MsgID                              8
@@ -445,6 +488,7 @@ const Tests = []TestCase {
 		`uint64(72057594037927934)`,
 		uint64(72057594037927934),
 		"8010f9fffffffffffffe",
+		"uint64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 10                   MsgID                              8
@@ -455,6 +499,7 @@ const Tests = []TestCase {
 		`uint64(72057594037927935)`,
 		uint64(72057594037927935),
 		"8010f9ffffffffffffff",
+		"uint64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 10                   MsgID                              8
@@ -465,6 +510,7 @@ const Tests = []TestCase {
 		`uint64(9223372036854775806)`,
 		uint64(9223372036854775806),
 		"8010f87ffffffffffffffe",
+		"uint64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 10                   MsgID                              8
@@ -475,6 +521,7 @@ const Tests = []TestCase {
 		`uint64(9223372036854775807)`,
 		uint64(9223372036854775807),
 		"8010f87fffffffffffffff",
+		"uint64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 10                   MsgID                              8
@@ -485,6 +532,7 @@ const Tests = []TestCase {
 		`uint64(18446744073709551614)`,
 		uint64(18446744073709551614),
 		"8010f8fffffffffffffffe",
+		"uint64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 10                   MsgID                              8
@@ -495,6 +543,7 @@ const Tests = []TestCase {
 		`uint64(18446744073709551615)`,
 		uint64(18446744073709551615),
 		"8010f8ffffffffffffffff",
+		"uint64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 12                   MsgID                              9
@@ -505,6 +554,7 @@ const Tests = []TestCase {
 		`int16(0)`,
 		int16(0),
 		"801200",
+		"int16",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 12                   MsgID                              9
@@ -515,6 +565,7 @@ const Tests = []TestCase {
 		`int16(1)`,
 		int16(1),
 		"801202",
+		"int16",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 12                   MsgID                              9
@@ -525,6 +576,7 @@ const Tests = []TestCase {
 		`int16(2)`,
 		int16(2),
 		"801204",
+		"int16",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 12                   MsgID                              9
@@ -535,6 +587,7 @@ const Tests = []TestCase {
 		`int16(63)`,
 		int16(63),
 		"80127e",
+		"int16",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 12                   MsgID                              9
@@ -545,6 +598,7 @@ const Tests = []TestCase {
 		`int16(64)`,
 		int16(64),
 		"8012ff80",
+		"int16",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 12                   MsgID                              9
@@ -555,6 +609,7 @@ const Tests = []TestCase {
 		`int16(127)`,
 		int16(127),
 		"8012fffe",
+		"int16",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 12                   MsgID                              9
@@ -565,6 +620,7 @@ const Tests = []TestCase {
 		`int16(128)`,
 		int16(128),
 		"8012fe0100",
+		"int16",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 12                   MsgID                              9
@@ -575,6 +631,7 @@ const Tests = []TestCase {
 		`int16(255)`,
 		int16(255),
 		"8012fe01fe",
+		"int16",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 12                   MsgID                              9
@@ -585,6 +642,7 @@ const Tests = []TestCase {
 		`int16(256)`,
 		int16(256),
 		"8012fe0200",
+		"int16",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 12                   MsgID                              9
@@ -595,6 +653,7 @@ const Tests = []TestCase {
 		`int16(32766)`,
 		int16(32766),
 		"8012fefffc",
+		"int16",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 12                   MsgID                              9
@@ -605,6 +664,7 @@ const Tests = []TestCase {
 		`int16(32767)`,
 		int16(32767),
 		"8012fefffe",
+		"int16",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 14                   MsgID                             10
@@ -615,6 +675,7 @@ const Tests = []TestCase {
 		`int32(0)`,
 		int32(0),
 		"801400",
+		"int32",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 14                   MsgID                             10
@@ -625,6 +686,7 @@ const Tests = []TestCase {
 		`int32(8388606)`,
 		int32(8388606),
 		"8014fdfffffc",
+		"int32",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 14                   MsgID                             10
@@ -635,6 +697,7 @@ const Tests = []TestCase {
 		`int32(8388607)`,
 		int32(8388607),
 		"8014fdfffffe",
+		"int32",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 14                   MsgID                             10
@@ -645,6 +708,7 @@ const Tests = []TestCase {
 		`int32(16777214)`,
 		int32(16777214),
 		"8014fc01fffffc",
+		"int32",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 14                   MsgID                             10
@@ -655,6 +719,7 @@ const Tests = []TestCase {
 		`int32(16777215)`,
 		int32(16777215),
 		"8014fc01fffffe",
+		"int32",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 14                   MsgID                             10
@@ -665,6 +730,7 @@ const Tests = []TestCase {
 		`int32(2147483646)`,
 		int32(2147483646),
 		"8014fcfffffffc",
+		"int32",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 14                   MsgID                             10
@@ -675,6 +741,7 @@ const Tests = []TestCase {
 		`int32(2147483647)`,
 		int32(2147483647),
 		"8014fcfffffffe",
+		"int32",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 16                   MsgID                             11
@@ -685,6 +752,7 @@ const Tests = []TestCase {
 		`int64(0)`,
 		int64(0),
 		"801600",
+		"int64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 16                   MsgID                             11
@@ -695,6 +763,7 @@ const Tests = []TestCase {
 		`int64(1)`,
 		int64(1),
 		"801602",
+		"int64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 16                   MsgID                             11
@@ -705,6 +774,7 @@ const Tests = []TestCase {
 		`int64(2)`,
 		int64(2),
 		"801604",
+		"int64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 16                   MsgID                             11
@@ -715,6 +785,7 @@ const Tests = []TestCase {
 		`int64(549755813886)`,
 		int64(549755813886),
 		"8016fbfffffffffc",
+		"int64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 16                   MsgID                             11
@@ -725,6 +796,7 @@ const Tests = []TestCase {
 		`int64(549755813887)`,
 		int64(549755813887),
 		"8016fbfffffffffe",
+		"int64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 16                   MsgID                             11
@@ -735,6 +807,7 @@ const Tests = []TestCase {
 		`int64(1099511627774)`,
 		int64(1099511627774),
 		"8016fa01fffffffffc",
+		"int64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 16                   MsgID                             11
@@ -745,6 +818,7 @@ const Tests = []TestCase {
 		`int64(1099511627775)`,
 		int64(1099511627775),
 		"8016fa01fffffffffe",
+		"int64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 16                   MsgID                             11
@@ -755,6 +829,7 @@ const Tests = []TestCase {
 		`int64(140737488355326)`,
 		int64(140737488355326),
 		"8016fafffffffffffc",
+		"int64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 16                   MsgID                             11
@@ -765,6 +840,7 @@ const Tests = []TestCase {
 		`int64(140737488355327)`,
 		int64(140737488355327),
 		"8016fafffffffffffe",
+		"int64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 16                   MsgID                             11
@@ -775,6 +851,7 @@ const Tests = []TestCase {
 		`int64(281474976710654)`,
 		int64(281474976710654),
 		"8016f901fffffffffffc",
+		"int64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 16                   MsgID                             11
@@ -785,6 +862,7 @@ const Tests = []TestCase {
 		`int64(281474976710655)`,
 		int64(281474976710655),
 		"8016f901fffffffffffe",
+		"int64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 16                   MsgID                             11
@@ -795,6 +873,7 @@ const Tests = []TestCase {
 		`int64(36028797018963966)`,
 		int64(36028797018963966),
 		"8016f9fffffffffffffc",
+		"int64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 16                   MsgID                             11
@@ -805,6 +884,7 @@ const Tests = []TestCase {
 		`int64(36028797018963967)`,
 		int64(36028797018963967),
 		"8016f9fffffffffffffe",
+		"int64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 16                   MsgID                             11
@@ -815,6 +895,7 @@ const Tests = []TestCase {
 		`int64(72057594037927934)`,
 		int64(72057594037927934),
 		"8016f801fffffffffffffc",
+		"int64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 16                   MsgID                             11
@@ -825,6 +906,7 @@ const Tests = []TestCase {
 		`int64(72057594037927935)`,
 		int64(72057594037927935),
 		"8016f801fffffffffffffe",
+		"int64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 16                   MsgID                             11
@@ -835,6 +917,7 @@ const Tests = []TestCase {
 		`int64(9223372036854775806)`,
 		int64(9223372036854775806),
 		"8016f8fffffffffffffffc",
+		"int64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 16                   MsgID                             11
@@ -845,6 +928,7 @@ const Tests = []TestCase {
 		`int64(9223372036854775807)`,
 		int64(9223372036854775807),
 		"8016f8fffffffffffffffe",
+		"int64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 12                   MsgID                              9
@@ -855,6 +939,7 @@ const Tests = []TestCase {
 		`int16(-1)`,
 		int16(-1),
 		"801201",
+		"int16",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 12                   MsgID                              9
@@ -865,6 +950,7 @@ const Tests = []TestCase {
 		`int16(-2)`,
 		int16(-2),
 		"801203",
+		"int16",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 12                   MsgID                              9
@@ -875,6 +961,7 @@ const Tests = []TestCase {
 		`int16(-64)`,
 		int16(-64),
 		"80127f",
+		"int16",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 12                   MsgID                              9
@@ -885,6 +972,7 @@ const Tests = []TestCase {
 		`int16(-65)`,
 		int16(-65),
 		"8012ff81",
+		"int16",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 12                   MsgID                              9
@@ -895,6 +983,7 @@ const Tests = []TestCase {
 		`int16(-128)`,
 		int16(-128),
 		"8012ffff",
+		"int16",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 12                   MsgID                              9
@@ -905,6 +994,7 @@ const Tests = []TestCase {
 		`int16(-129)`,
 		int16(-129),
 		"8012fe0101",
+		"int16",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 12                   MsgID                              9
@@ -915,6 +1005,7 @@ const Tests = []TestCase {
 		`int16(-256)`,
 		int16(-256),
 		"8012fe01ff",
+		"int16",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 12                   MsgID                              9
@@ -925,6 +1016,7 @@ const Tests = []TestCase {
 		`int16(-257)`,
 		int16(-257),
 		"8012fe0201",
+		"int16",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 12                   MsgID                              9
@@ -935,6 +1027,7 @@ const Tests = []TestCase {
 		`int16(-32767)`,
 		int16(-32767),
 		"8012fefffd",
+		"int16",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 12                   MsgID                              9
@@ -945,6 +1038,7 @@ const Tests = []TestCase {
 		`int16(-32768)`,
 		int16(-32768),
 		"8012feffff",
+		"int16",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 14                   MsgID                             10
@@ -955,6 +1049,7 @@ const Tests = []TestCase {
 		`int32(-8388607)`,
 		int32(-8388607),
 		"8014fdfffffd",
+		"int32",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 14                   MsgID                             10
@@ -965,6 +1060,7 @@ const Tests = []TestCase {
 		`int32(-8388608)`,
 		int32(-8388608),
 		"8014fdffffff",
+		"int32",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 14                   MsgID                             10
@@ -975,6 +1071,7 @@ const Tests = []TestCase {
 		`int32(-16777215)`,
 		int32(-16777215),
 		"8014fc01fffffd",
+		"int32",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 14                   MsgID                             10
@@ -985,6 +1082,7 @@ const Tests = []TestCase {
 		`int32(-16777216)`,
 		int32(-16777216),
 		"8014fc01ffffff",
+		"int32",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 14                   MsgID                             10
@@ -995,6 +1093,7 @@ const Tests = []TestCase {
 		`int32(-2147483647)`,
 		int32(-2147483647),
 		"8014fcfffffffd",
+		"int32",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 14                   MsgID                             10
@@ -1005,6 +1104,7 @@ const Tests = []TestCase {
 		`int32(-2147483648)`,
 		int32(-2147483648),
 		"8014fcffffffff",
+		"int32",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 16                   MsgID                             11
@@ -1015,6 +1115,7 @@ const Tests = []TestCase {
 		`int64(-1)`,
 		int64(-1),
 		"801601",
+		"int64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 16                   MsgID                             11
@@ -1025,6 +1126,7 @@ const Tests = []TestCase {
 		`int64(-2)`,
 		int64(-2),
 		"801603",
+		"int64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 16                   MsgID                             11
@@ -1035,6 +1137,7 @@ const Tests = []TestCase {
 		`int64(-549755813887)`,
 		int64(-549755813887),
 		"8016fbfffffffffd",
+		"int64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 16                   MsgID                             11
@@ -1045,6 +1148,7 @@ const Tests = []TestCase {
 		`int64(-549755813888)`,
 		int64(-549755813888),
 		"8016fbffffffffff",
+		"int64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 16                   MsgID                             11
@@ -1055,6 +1159,7 @@ const Tests = []TestCase {
 		`int64(-1099511627775)`,
 		int64(-1099511627775),
 		"8016fa01fffffffffd",
+		"int64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 16                   MsgID                             11
@@ -1065,6 +1170,7 @@ const Tests = []TestCase {
 		`int64(-1099511627776)`,
 		int64(-1099511627776),
 		"8016fa01ffffffffff",
+		"int64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 16                   MsgID                             11
@@ -1075,6 +1181,7 @@ const Tests = []TestCase {
 		`int64(-140737488355327)`,
 		int64(-140737488355327),
 		"8016fafffffffffffd",
+		"int64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 16                   MsgID                             11
@@ -1085,6 +1192,7 @@ const Tests = []TestCase {
 		`int64(-140737488355328)`,
 		int64(-140737488355328),
 		"8016faffffffffffff",
+		"int64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 16                   MsgID                             11
@@ -1095,6 +1203,7 @@ const Tests = []TestCase {
 		`int64(-281474976710655)`,
 		int64(-281474976710655),
 		"8016f901fffffffffffd",
+		"int64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 16                   MsgID                             11
@@ -1105,6 +1214,7 @@ const Tests = []TestCase {
 		`int64(-281474976710656)`,
 		int64(-281474976710656),
 		"8016f901ffffffffffff",
+		"int64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 16                   MsgID                             11
@@ -1115,6 +1225,7 @@ const Tests = []TestCase {
 		`int64(-36028797018963967)`,
 		int64(-36028797018963967),
 		"8016f9fffffffffffffd",
+		"int64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 16                   MsgID                             11
@@ -1125,6 +1236,7 @@ const Tests = []TestCase {
 		`int64(-36028797018963968)`,
 		int64(-36028797018963968),
 		"8016f9ffffffffffffff",
+		"int64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 16                   MsgID                             11
@@ -1135,6 +1247,7 @@ const Tests = []TestCase {
 		`int64(-72057594037927935)`,
 		int64(-72057594037927935),
 		"8016f801fffffffffffffd",
+		"int64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 16                   MsgID                             11
@@ -1145,6 +1258,7 @@ const Tests = []TestCase {
 		`int64(-72057594037927936)`,
 		int64(-72057594037927936),
 		"8016f801ffffffffffffff",
+		"int64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 16                   MsgID                             11
@@ -1155,6 +1269,7 @@ const Tests = []TestCase {
 		`int64(-9223372036854775807)`,
 		int64(-9223372036854775807),
 		"8016f8fffffffffffffffd",
+		"int64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 16                   MsgID                             11
@@ -1165,6 +1280,7 @@ const Tests = []TestCase {
 		`int64(-9223372036854775808)`,
 		int64(-9223372036854775808),
 		"8016f8ffffffffffffffff",
+		"int64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 18                   MsgID                             12
@@ -1175,6 +1291,7 @@ const Tests = []TestCase {
 		`float32(0)`,
 		float32(0),
 		"801800",
+		"float32",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 18                   MsgID                             12
@@ -1185,6 +1302,7 @@ const Tests = []TestCase {
 		`float32(32.5)`,
 		float32(32.5),
 		"8018fd404040",
+		"float32",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 18                   MsgID                             12
@@ -1195,6 +1313,7 @@ const Tests = []TestCase {
 		`float32(-32.5)`,
 		float32(-32.5),
 		"8018fd4040c0",
+		"float32",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 1a                   MsgID                             13
@@ -1205,6 +1324,7 @@ const Tests = []TestCase {
 		`float64(0)`,
 		float64(0),
 		"801a00",
+		"float64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 1a                   MsgID                             13
@@ -1215,6 +1335,7 @@ const Tests = []TestCase {
 		`float64(64.5)`,
 		float64(64.5),
 		"801afd205040",
+		"float64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 1a                   MsgID                             13
@@ -1225,6 +1346,7 @@ const Tests = []TestCase {
 		`float64(-64.5)`,
 		float64(-64.5),
 		"801afd2050c0",
+		"float64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 1c                   MsgID                             14
@@ -1237,6 +1359,7 @@ const Tests = []TestCase {
 		`complex64(0)`,
 		complex64(0),
 		"801c020000",
+		"complex64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 1c                   MsgID                             14
@@ -1249,6 +1372,7 @@ const Tests = []TestCase {
 		`complex64(64.5+64.5i)`,
 		complex64(64.5+64.5i),
 		"801c08fd205040fd205040",
+		"complex64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 1c                   MsgID                             14
@@ -1261,6 +1385,7 @@ const Tests = []TestCase {
 		`complex64(64.5-64.5i)`,
 		complex64(64.5-64.5i),
 		"801c08fd205040fd2050c0",
+		"complex64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 1e                   MsgID                             15
@@ -1273,6 +1398,7 @@ const Tests = []TestCase {
 		`complex128(0)`,
 		complex128(0),
 		"801e020000",
+		"complex128",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 1e                   MsgID                             15
@@ -1285,6 +1411,7 @@ const Tests = []TestCase {
 		`complex128(128.5+128.5i)`,
 		complex128(128.5+128.5i),
 		"801e08fd106040fd106040",
+		"complex128",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 1e                   MsgID                             15
@@ -1297,6 +1424,7 @@ const Tests = []TestCase {
 		`complex128(128.5-128.5i)`,
 		complex128(128.5-128.5i),
 		"801e08fd106040fd1060c0",
+		"complex128",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -1317,6 +1445,7 @@ const Tests = []TestCase {
 		`NBool(true)`,
 		NBool(true),
 		"80ff813210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e426f6f6c020300ff8201",
+		"veyron.io/veyron/veyron2/vom2/testdata.NBool bool",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -1337,6 +1466,7 @@ const Tests = []TestCase {
 		`NBool(false)`,
 		NBool(false),
 		"80ff813210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e426f6f6c020300ff8200",
+		"veyron.io/veyron/veyron2/vom2/testdata.NBool bool",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -1358,6 +1488,7 @@ const Tests = []TestCase {
 		`NString("")`,
 		NString(""),
 		"80ff813410012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e537472696e67020400ff8200",
+		"veyron.io/veyron/veyron2/vom2/testdata.NString string",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -1379,6 +1510,7 @@ const Tests = []TestCase {
 		`NString("abc")`,
 		NString("abc"),
 		"80ff813410012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e537472696e67020400ff8203616263",
+		"veyron.io/veyron/veyron2/vom2/testdata.NString string",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -1400,6 +1532,7 @@ const Tests = []TestCase {
 		`NByteSlice("")`,
 		NByteSlice(""),
 		"80ff8137130131766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e42797465536c696365020500ff8200",
+		"veyron.io/veyron/veyron2/vom2/testdata.NByteSlice []byte",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -1421,6 +1554,7 @@ const Tests = []TestCase {
 		`NByteSlice("def")`,
 		NByteSlice("def"),
 		"80ff8137130131766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e42797465536c696365020500ff8203646566",
+		"veyron.io/veyron/veyron2/vom2/testdata.NByteSlice []byte",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -1441,6 +1575,7 @@ const Tests = []TestCase {
 		`NByte(0)`,
 		NByte(0),
 		"80ff813210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e42797465020500ff8200",
+		"veyron.io/veyron/veyron2/vom2/testdata.NByte byte",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -1461,6 +1596,7 @@ const Tests = []TestCase {
 		`NByte(127)`,
 		NByte(127),
 		"80ff813210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e42797465020500ff827f",
+		"veyron.io/veyron/veyron2/vom2/testdata.NByte byte",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -1481,6 +1617,7 @@ const Tests = []TestCase {
 		`NByte(255)`,
 		NByte(255),
 		"80ff813210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e42797465020500ff82ff",
+		"veyron.io/veyron/veyron2/vom2/testdata.NByte byte",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -1501,6 +1638,7 @@ const Tests = []TestCase {
 		`NUint16(0)`,
 		NUint16(0),
 		"80ff813410012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e55696e743136020600ff8200",
+		"veyron.io/veyron/veyron2/vom2/testdata.NUint16 uint16",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -1521,6 +1659,7 @@ const Tests = []TestCase {
 		`NUint16(65535)`,
 		NUint16(65535),
 		"80ff813410012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e55696e743136020600ff82feffff",
+		"veyron.io/veyron/veyron2/vom2/testdata.NUint16 uint16",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -1541,6 +1680,7 @@ const Tests = []TestCase {
 		`NUint32(0)`,
 		NUint32(0),
 		"80ff813410012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e55696e743332020700ff8200",
+		"veyron.io/veyron/veyron2/vom2/testdata.NUint32 uint32",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -1561,6 +1701,7 @@ const Tests = []TestCase {
 		`NUint32(4294967295)`,
 		NUint32(4294967295),
 		"80ff813410012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e55696e743332020700ff82fcffffffff",
+		"veyron.io/veyron/veyron2/vom2/testdata.NUint32 uint32",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -1581,6 +1722,7 @@ const Tests = []TestCase {
 		`NUint64(0)`,
 		NUint64(0),
 		"80ff813410012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e55696e743634020800ff8200",
+		"veyron.io/veyron/veyron2/vom2/testdata.NUint64 uint64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -1601,6 +1743,7 @@ const Tests = []TestCase {
 		`NUint64(18446744073709551615)`,
 		NUint64(18446744073709551615),
 		"80ff813410012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e55696e743634020800ff82f8ffffffffffffffff",
+		"veyron.io/veyron/veyron2/vom2/testdata.NUint64 uint64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -1621,6 +1764,7 @@ const Tests = []TestCase {
 		`NInt16(0)`,
 		NInt16(0),
 		"80ff813310012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e496e743136020900ff8200",
+		"veyron.io/veyron/veyron2/vom2/testdata.NInt16 int16",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -1641,6 +1785,7 @@ const Tests = []TestCase {
 		`NInt16(32767)`,
 		NInt16(32767),
 		"80ff813310012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e496e743136020900ff82fefffe",
+		"veyron.io/veyron/veyron2/vom2/testdata.NInt16 int16",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -1661,6 +1806,7 @@ const Tests = []TestCase {
 		`NInt16(-32768)`,
 		NInt16(-32768),
 		"80ff813310012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e496e743136020900ff82feffff",
+		"veyron.io/veyron/veyron2/vom2/testdata.NInt16 int16",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -1681,6 +1827,7 @@ const Tests = []TestCase {
 		`NInt32(0)`,
 		NInt32(0),
 		"80ff813310012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e496e743332020a00ff8200",
+		"veyron.io/veyron/veyron2/vom2/testdata.NInt32 int32",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -1701,6 +1848,7 @@ const Tests = []TestCase {
 		`NInt32(2147483647)`,
 		NInt32(2147483647),
 		"80ff813310012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e496e743332020a00ff82fcfffffffe",
+		"veyron.io/veyron/veyron2/vom2/testdata.NInt32 int32",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -1721,6 +1869,7 @@ const Tests = []TestCase {
 		`NInt32(-2147483648)`,
 		NInt32(-2147483648),
 		"80ff813310012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e496e743332020a00ff82fcffffffff",
+		"veyron.io/veyron/veyron2/vom2/testdata.NInt32 int32",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -1741,6 +1890,7 @@ const Tests = []TestCase {
 		`NInt64(0)`,
 		NInt64(0),
 		"80ff813310012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e496e743634020b00ff8200",
+		"veyron.io/veyron/veyron2/vom2/testdata.NInt64 int64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -1761,6 +1911,7 @@ const Tests = []TestCase {
 		`NInt64(9223372036854775807)`,
 		NInt64(9223372036854775807),
 		"80ff813310012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e496e743634020b00ff82f8fffffffffffffffe",
+		"veyron.io/veyron/veyron2/vom2/testdata.NInt64 int64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -1781,6 +1932,7 @@ const Tests = []TestCase {
 		`NInt64(-9223372036854775808)`,
 		NInt64(-9223372036854775808),
 		"80ff813310012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e496e743634020b00ff82f8ffffffffffffffff",
+		"veyron.io/veyron/veyron2/vom2/testdata.NInt64 int64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -1801,6 +1953,7 @@ const Tests = []TestCase {
 		`NFloat32(0)`,
 		NFloat32(0),
 		"80ff813510012f766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e466c6f61743332020c00ff8200",
+		"veyron.io/veyron/veyron2/vom2/testdata.NFloat32 float32",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -1821,6 +1974,7 @@ const Tests = []TestCase {
 		`NFloat32(32.5)`,
 		NFloat32(32.5),
 		"80ff813510012f766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e466c6f61743332020c00ff82fd404040",
+		"veyron.io/veyron/veyron2/vom2/testdata.NFloat32 float32",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -1841,6 +1995,7 @@ const Tests = []TestCase {
 		`NFloat32(-32.5)`,
 		NFloat32(-32.5),
 		"80ff813510012f766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e466c6f61743332020c00ff82fd4040c0",
+		"veyron.io/veyron/veyron2/vom2/testdata.NFloat32 float32",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -1861,6 +2016,7 @@ const Tests = []TestCase {
 		`NFloat64(0)`,
 		NFloat64(0),
 		"80ff813510012f766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e466c6f61743634020d00ff8200",
+		"veyron.io/veyron/veyron2/vom2/testdata.NFloat64 float64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -1881,6 +2037,7 @@ const Tests = []TestCase {
 		`NFloat64(64.5)`,
 		NFloat64(64.5),
 		"80ff813510012f766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e466c6f61743634020d00ff82fd205040",
+		"veyron.io/veyron/veyron2/vom2/testdata.NFloat64 float64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -1901,6 +2058,7 @@ const Tests = []TestCase {
 		`NFloat64(-64.5)`,
 		NFloat64(-64.5),
 		"80ff813510012f766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e466c6f61743634020d00ff82fd2050c0",
+		"veyron.io/veyron/veyron2/vom2/testdata.NFloat64 float64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -1923,6 +2081,7 @@ const Tests = []TestCase {
 		`NComplex64(0)`,
 		NComplex64(0),
 		"80ff8137100131766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e436f6d706c65783634020e00ff82020000",
+		"veyron.io/veyron/veyron2/vom2/testdata.NComplex64 complex64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -1945,6 +2104,7 @@ const Tests = []TestCase {
 		`NComplex64(64.5+64.5i)`,
 		NComplex64(64.5+64.5i),
 		"80ff8137100131766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e436f6d706c65783634020e00ff8208fd205040fd205040",
+		"veyron.io/veyron/veyron2/vom2/testdata.NComplex64 complex64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -1967,6 +2127,7 @@ const Tests = []TestCase {
 		`NComplex64(64.5-64.5i)`,
 		NComplex64(64.5-64.5i),
 		"80ff8137100131766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e436f6d706c65783634020e00ff8208fd205040fd2050c0",
+		"veyron.io/veyron/veyron2/vom2/testdata.NComplex64 complex64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -1989,6 +2150,7 @@ const Tests = []TestCase {
 		`NComplex128(0)`,
 		NComplex128(0),
 		"80ff8138100132766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e436f6d706c6578313238020f00ff82020000",
+		"veyron.io/veyron/veyron2/vom2/testdata.NComplex128 complex128",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -2011,6 +2173,7 @@ const Tests = []TestCase {
 		`NComplex128(128.5+128.5i)`,
 		NComplex128(128.5+128.5i),
 		"80ff8138100132766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e436f6d706c6578313238020f00ff8208fd106040fd106040",
+		"veyron.io/veyron/veyron2/vom2/testdata.NComplex128 complex128",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -2033,6 +2196,7 @@ const Tests = []TestCase {
 		`NComplex128(128.5-128.5i)`,
 		NComplex128(128.5-128.5i),
 		"80ff8138100132766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e436f6d706c6578313238020f00ff8208fd106040fd1060c0",
+		"veyron.io/veyron/veyron2/vom2/testdata.NComplex128 complex128",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -2058,6 +2222,7 @@ const Tests = []TestCase {
 		`[2]uint64{1, 2}`,
 		[2]uint64{1, 2},
 		"80ff81081201000208030200ff82020102",
+		"[2]uint64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -2083,6 +2248,7 @@ const Tests = []TestCase {
 		`NArray2Uint64{1, 2}`,
 		NArray2Uint64{1, 2},
 		"80ff813c120134766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e41727261793255696e7436340208030200ff82020102",
+		"veyron.io/veyron/veyron2/vom2/testdata.NArray2Uint64 [2]uint64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -2106,6 +2272,7 @@ const Tests = []TestCase {
 		`[]uint64{1, 2}`,
 		[]uint64{1, 2},
 		"80ff8106130100020800ff8203020102",
+		"[]uint64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -2129,6 +2296,7 @@ const Tests = []TestCase {
 		`NListUint64{1, 2}`,
 		NListUint64{1, 2},
 		"80ff8138130132766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e4c69737455696e743634020800ff8203020102",
+		"veyron.io/veyron/veyron2/vom2/testdata.NListUint64 []uint64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -2151,6 +2319,7 @@ const Tests = []TestCase {
 		`set[uint64]{1}`,
 		set[uint64]{1},
 		"80ff8106140100020800ff82020101",
+		"set[uint64]",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -2173,6 +2342,7 @@ const Tests = []TestCase {
 		`NSetUint64{1}`,
 		NSetUint64{1},
 		"80ff8137140131766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e53657455696e743634020800ff82020101",
+		"veyron.io/veyron/veyron2/vom2/testdata.NSetUint64 set[uint64]",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -2199,6 +2369,7 @@ const Tests = []TestCase {
 		`map[uint64]string{1: "abc"}`,
 		map[uint64]string{1: "abc"},
 		"80ff81081501000208030400ff8206010103616263",
+		"map[uint64]string",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -2225,6 +2396,7 @@ const Tests = []TestCase {
 		`NMapUint64String{1: "abc"}`,
 		NMapUint64String{1: "abc"},
 		"80ff813f150137766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e4d617055696e743634537472696e670208030400ff8206010103616263",
+		"veyron.io/veyron/veyron2/vom2/testdata.NMapUint64String map[uint64]string",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -2271,6 +2443,7 @@ const Tests = []TestCase {
 		`NStruct{A: true, B: "abc", C: 123}`,
 		NStruct{A: true, B: "abc", C: 123},
 		"80ff814616012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e5374727563740203010141020300010142020400010143020b0000ff820b0101020361626303fff600",
+		"veyron.io/veyron/veyron2/vom2/testdata.NStruct struct{A bool;B string;C int64}",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff83                 MsgID                            -66
@@ -2320,6 +2493,7 @@ const Tests = []TestCase {
 		`?NStruct(nil)`,
 		?NStruct(nil),
 		"80ff834616012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e5374727563740203010141020300010142020400010143020b0000ff81061d0100024200ff820100",
+		"?veyron.io/veyron/veyron2/vom2/testdata.NStruct struct{A bool;B string;C int64}",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff83                 MsgID                            -66
@@ -2377,6 +2551,7 @@ const Tests = []TestCase {
 		`?NStruct{}`,
 		?NStruct{},
 		"80ff834616012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e5374727563740203010141020300010142020400010143020b0000ff81061d0100024200ff82080101000200030000",
+		"?veyron.io/veyron/veyron2/vom2/testdata.NStruct struct{A bool;B string;C int64}",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff83                 MsgID                            -66
@@ -2434,6 +2609,7 @@ const Tests = []TestCase {
 		`?NStruct{A: true, B: "abc", C: 123}`,
 		?NStruct{A: true, B: "abc", C: 123},
 		"80ff834616012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e5374727563740203010141020300010142020400010143020b0000ff81061d0100024200ff820c010101020361626303fff600",
+		"?veyron.io/veyron/veyron2/vom2/testdata.NStruct struct{A bool;B string;C int64}",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -2460,6 +2636,7 @@ const Tests = []TestCase {
 		`NEnum.A`,
 		NEnum.A,
 		"80ff813811012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e456e756d020301410142014300ff8200",
+		"veyron.io/veyron/veyron2/vom2/testdata.NEnum enum{A;B;C}",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -2486,6 +2663,7 @@ const Tests = []TestCase {
 		`NEnum.B`,
 		NEnum.B,
 		"80ff813811012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e456e756d020301410142014300ff8201",
+		"veyron.io/veyron/veyron2/vom2/testdata.NEnum enum{A;B;C}",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -2512,6 +2690,7 @@ const Tests = []TestCase {
 		`NEnum.C`,
 		NEnum.C,
 		"80ff813811012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e456e756d020301410142014300ff8202",
+		"veyron.io/veyron/veyron2/vom2/testdata.NEnum enum{A;B;C}",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -2552,6 +2731,7 @@ const Tests = []TestCase {
 		`NUnion{A: true}`,
 		NUnion{A: true},
 		"80ff814519012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e556e696f6e0203010141020300010142020400010143020b0000ff82020101",
+		"veyron.io/veyron/veyron2/vom2/testdata.NUnion union{A bool;B string;C int64}",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -2592,6 +2772,7 @@ const Tests = []TestCase {
 		`NUnion{A: false}`,
 		NUnion{A: false},
 		"80ff814519012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e556e696f6e0203010141020300010142020400010143020b0000ff82020100",
+		"veyron.io/veyron/veyron2/vom2/testdata.NUnion union{A bool;B string;C int64}",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -2633,6 +2814,7 @@ const Tests = []TestCase {
 		`NUnion{B: ""}`,
 		NUnion{B: ""},
 		"80ff814519012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e556e696f6e0203010141020300010142020400010143020b0000ff82020200",
+		"veyron.io/veyron/veyron2/vom2/testdata.NUnion union{A bool;B string;C int64}",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -2674,6 +2856,7 @@ const Tests = []TestCase {
 		`NUnion{B: "abc"}`,
 		NUnion{B: "abc"},
 		"80ff814519012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e556e696f6e0203010141020300010142020400010143020b0000ff82050203616263",
+		"veyron.io/veyron/veyron2/vom2/testdata.NUnion union{A bool;B string;C int64}",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -2714,6 +2897,7 @@ const Tests = []TestCase {
 		`NUnion{C: 0}`,
 		NUnion{C: 0},
 		"80ff814519012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e556e696f6e0203010141020300010142020400010143020b0000ff82020300",
+		"veyron.io/veyron/veyron2/vom2/testdata.NUnion union{A bool;B string;C int64}",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -2754,6 +2938,7 @@ const Tests = []TestCase {
 		`NUnion{C: 123}`,
 		NUnion{C: 123},
 		"80ff814519012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e556e696f6e0203010141020300010142020400010143020b0000ff820303fff6",
+		"veyron.io/veyron/veyron2/vom2/testdata.NUnion union{A bool;B string;C int64}",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -2794,6 +2979,7 @@ const Tests = []TestCase {
 		`NUnion{C: -123}`,
 		NUnion{C: -123},
 		"80ff814519012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e556e696f6e0203010141020300010142020400010143020b0000ff820303fff5",
+		"veyron.io/veyron/veyron2/vom2/testdata.NUnion union{A bool;B string;C int64}",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -2814,6 +3000,7 @@ const Tests = []TestCase {
 		`MBool(true)`,
 		MBool(true),
 		"80ff813210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4d426f6f6c020300ff8201",
+		"veyron.io/veyron/veyron2/vom2/testdata.MBool bool",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -2834,6 +3021,7 @@ const Tests = []TestCase {
 		`MBool(false)`,
 		MBool(false),
 		"80ff813210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4d426f6f6c020300ff8200",
+		"veyron.io/veyron/veyron2/vom2/testdata.MBool bool",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff83                 MsgID                            -66
@@ -2961,6 +3149,7 @@ const Tests = []TestCase {
 		`MStruct{A: true, B: true, C: true}`,
 		MStruct{A: true, B: true, C: true},
 		"80ff833210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e426f6f6c020300ff853210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4d426f6f6c020300ff894616012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e5374727563740203010141020300010142020400010143020b0000ff87061d0100024500ff815816012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4d537472756374020601014102030001014202420001014302430001014402440001014502020001014602010000ff820d01010201030104000501060000",
+		"veyron.io/veyron/veyron2/vom2/testdata.MStruct struct{A bool;B veyron.io/veyron/veyron2/vom2/testdata.NBool bool;C veyron.io/veyron/veyron2/vom2/testdata.MBool bool;D ?veyron.io/veyron/veyron2/vom2/testdata.NStruct struct{A bool;B string;C int64};E typeobject;F any}",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff83                 MsgID                            -66
@@ -3088,6 +3277,7 @@ const Tests = []TestCase {
 		`MStruct{}`,
 		MStruct{},
 		"80ff833210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e426f6f6c020300ff853210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4d426f6f6c020300ff894616012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e5374727563740203010141020300010142020400010143020b0000ff87061d0100024500ff815816012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4d537472756374020601014102030001014202420001014302430001014402440001014502020001014602010000ff820d01000200030004000501060000",
+		"veyron.io/veyron/veyron2/vom2/testdata.MStruct struct{A bool;B veyron.io/veyron/veyron2/vom2/testdata.NBool bool;C veyron.io/veyron/veyron2/vom2/testdata.MBool bool;D ?veyron.io/veyron/veyron2/vom2/testdata.NStruct struct{A bool;B string;C int64};E typeobject;F any}",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff83                 MsgID                            -66
@@ -3223,6 +3413,7 @@ const Tests = []TestCase {
 		`MStruct{D: {}}`,
 		MStruct{D: {}},
 		"80ff833210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e426f6f6c020300ff853210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4d426f6f6c020300ff894616012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e5374727563740203010141020300010142020400010143020b0000ff87061d0100024500ff815816012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4d537472756374020601014102030001014202420001014302430001014402440001014502020001014602010000ff82140100020003000401010002000300000501060000",
+		"veyron.io/veyron/veyron2/vom2/testdata.MStruct struct{A bool;B veyron.io/veyron/veyron2/vom2/testdata.NBool bool;C veyron.io/veyron/veyron2/vom2/testdata.MBool bool;D ?veyron.io/veyron/veyron2/vom2/testdata.NStruct struct{A bool;B string;C int64};E typeobject;F any}",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff83                 MsgID                            -66
@@ -3358,6 +3549,7 @@ const Tests = []TestCase {
 		`MStruct{D: {A: true, B: "abc", C: 123}}`,
 		MStruct{D: {A: true, B: "abc", C: 123}},
 		"80ff833210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e426f6f6c020300ff853210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4d426f6f6c020300ff894616012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e5374727563740203010141020300010142020400010143020b0000ff87061d0100024500ff815816012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4d537472756374020601014102030001014202420001014302430001014402440001014502020001014602010000ff821801000200030004010101020361626303fff6000501060000",
+		"veyron.io/veyron/veyron2/vom2/testdata.MStruct struct{A bool;B veyron.io/veyron/veyron2/vom2/testdata.NBool bool;C veyron.io/veyron/veyron2/vom2/testdata.MBool bool;D ?veyron.io/veyron/veyron2/vom2/testdata.NStruct struct{A bool;B string;C int64};E typeobject;F any}",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff83                 MsgID                            -66
@@ -3487,6 +3679,7 @@ const Tests = []TestCase {
 		`MStruct{F: "abc"}`,
 		MStruct{F: "abc"},
 		"80ff833210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e426f6f6c020300ff853210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4d426f6f6c020300ff894616012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e5374727563740203010141020300010142020400010143020b0000ff87061d0100024500ff815816012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4d537472756374020601014102030001014202420001014302430001014402440001014502020001014602010000ff82110100020003000400050106040361626300",
+		"veyron.io/veyron/veyron2/vom2/testdata.MStruct struct{A bool;B veyron.io/veyron/veyron2/vom2/testdata.NBool bool;C veyron.io/veyron/veyron2/vom2/testdata.MBool bool;D ?veyron.io/veyron/veyron2/vom2/testdata.NStruct struct{A bool;B string;C int64};E typeobject;F any}",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff83                 MsgID                            -66
@@ -3615,6 +3808,7 @@ const Tests = []TestCase {
 		`MStruct{F: MBool(true)}`,
 		MStruct{F: MBool(true)},
 		"80ff833210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e426f6f6c020300ff853210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4d426f6f6c020300ff894616012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e5374727563740203010141020300010142020400010143020b0000ff87061d0100024500ff815816012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4d537472756374020601014102030001014202420001014302430001014402440001014502020001014602010000ff820e0100020003000400050106430100",
+		"veyron.io/veyron/veyron2/vom2/testdata.MStruct struct{A bool;B veyron.io/veyron/veyron2/vom2/testdata.NBool bool;C veyron.io/veyron/veyron2/vom2/testdata.MBool bool;D ?veyron.io/veyron/veyron2/vom2/testdata.NStruct struct{A bool;B string;C int64};E typeobject;F any}",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff83                 MsgID                            -66
@@ -3751,6 +3945,7 @@ const Tests = []TestCase {
 		`MStruct{F: ?NStruct{B: "abc"}}`,
 		MStruct{F: ?NStruct{B: "abc"}},
 		"80ff833210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e426f6f6c020300ff853210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4d426f6f6c020300ff894616012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e5374727563740203010141020300010142020400010143020b0000ff87061d0100024500ff815816012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4d537472756374020601014102030001014202420001014302430001014402440001014502020001014602010000ff8218010002000300040005010644010100020361626303000000",
+		"veyron.io/veyron/veyron2/vom2/testdata.MStruct struct{A bool;B veyron.io/veyron/veyron2/vom2/testdata.NBool bool;C veyron.io/veyron/veyron2/vom2/testdata.MBool bool;D ?veyron.io/veyron/veyron2/vom2/testdata.NStruct struct{A bool;B string;C int64};E typeobject;F any}",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff83                 MsgID                            -66
@@ -3788,6 +3983,7 @@ const Tests = []TestCase {
 		`MList{{4, 2}, {}, {99}}`,
 		MList{{4, 2}, {}, {99}},
 		"80ff8338130132766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e4c69737455696e743634020800ff813213012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4d4c697374024200ff820703020402000163",
+		"veyron.io/veyron/veyron2/vom2/testdata.MList []veyron.io/veyron/veyron2/vom2/testdata.NListUint64 []uint64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff83                 MsgID                            -66
@@ -3835,6 +4031,7 @@ const Tests = []TestCase {
 		`MMap{4.5: {2, 3}}`,
 		MMap{4.5: {2, 3}},
 		"80ff833510012f766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e466c6f61743332020c00ff8538130132766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e4c69737455696e743634020800ff813315012b766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4d4d61700242034300ff820701fe1240020203",
+		"veyron.io/veyron/veyron2/vom2/testdata.MMap map[veyron.io/veyron/veyron2/vom2/testdata.NFloat32 float32]veyron.io/veyron/veyron2/vom2/testdata.NListUint64 []uint64",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 04                   MsgID                              2
@@ -3845,6 +4042,7 @@ const Tests = []TestCase {
 		`typeobject(any)`,
 		typeobject(any),
 		"800401",
+		"typeobject",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 04                   MsgID                              2
@@ -3855,6 +4053,7 @@ const Tests = []TestCase {
 		`typeobject(bool)`,
 		typeobject(bool),
 		"800403",
+		"typeobject",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 04                   MsgID                              2
@@ -3865,6 +4064,7 @@ const Tests = []TestCase {
 		`typeobject(uint16)`,
 		typeobject(uint16),
 		"800406",
+		"typeobject",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 04                   MsgID                              2
@@ -3875,6 +4075,7 @@ const Tests = []TestCase {
 		`typeobject(uint32)`,
 		typeobject(uint32),
 		"800407",
+		"typeobject",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 04                   MsgID                              2
@@ -3885,6 +4086,7 @@ const Tests = []TestCase {
 		`typeobject(uint64)`,
 		typeobject(uint64),
 		"800408",
+		"typeobject",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 04                   MsgID                              2
@@ -3895,6 +4097,7 @@ const Tests = []TestCase {
 		`typeobject(int16)`,
 		typeobject(int16),
 		"800409",
+		"typeobject",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 04                   MsgID                              2
@@ -3905,6 +4108,7 @@ const Tests = []TestCase {
 		`typeobject(int32)`,
 		typeobject(int32),
 		"80040a",
+		"typeobject",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 04                   MsgID                              2
@@ -3915,6 +4119,7 @@ const Tests = []TestCase {
 		`typeobject(int64)`,
 		typeobject(int64),
 		"80040b",
+		"typeobject",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 04                   MsgID                              2
@@ -3925,6 +4130,7 @@ const Tests = []TestCase {
 		`typeobject(int16)`,
 		typeobject(int16),
 		"800409",
+		"typeobject",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 04                   MsgID                              2
@@ -3935,6 +4141,7 @@ const Tests = []TestCase {
 		`typeobject(int32)`,
 		typeobject(int32),
 		"80040a",
+		"typeobject",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 04                   MsgID                              2
@@ -3945,6 +4152,7 @@ const Tests = []TestCase {
 		`typeobject(int64)`,
 		typeobject(int64),
 		"80040b",
+		"typeobject",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 04                   MsgID                              2
@@ -3955,6 +4163,7 @@ const Tests = []TestCase {
 		`typeobject(float32)`,
 		typeobject(float32),
 		"80040c",
+		"typeobject",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 04                   MsgID                              2
@@ -3965,6 +4174,7 @@ const Tests = []TestCase {
 		`typeobject(float64)`,
 		typeobject(float64),
 		"80040d",
+		"typeobject",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 04                   MsgID                              2
@@ -3975,6 +4185,7 @@ const Tests = []TestCase {
 		`typeobject(complex64)`,
 		typeobject(complex64),
 		"80040e",
+		"typeobject",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 04                   MsgID                              2
@@ -3985,6 +4196,7 @@ const Tests = []TestCase {
 		`typeobject(complex128)`,
 		typeobject(complex128),
 		"80040f",
+		"typeobject",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -4005,6 +4217,7 @@ const Tests = []TestCase {
 		`typeobject(NBool)`,
 		typeobject(NBool),
 		"80ff813210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e426f6f6c0203000441",
+		"typeobject",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -4025,6 +4238,7 @@ const Tests = []TestCase {
 		`typeobject(NUint16)`,
 		typeobject(NUint16),
 		"80ff813410012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e55696e7431360206000441",
+		"typeobject",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -4045,6 +4259,7 @@ const Tests = []TestCase {
 		`typeobject(NUint32)`,
 		typeobject(NUint32),
 		"80ff813410012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e55696e7433320207000441",
+		"typeobject",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -4065,6 +4280,7 @@ const Tests = []TestCase {
 		`typeobject(NUint64)`,
 		typeobject(NUint64),
 		"80ff813410012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e55696e7436340208000441",
+		"typeobject",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -4085,6 +4301,7 @@ const Tests = []TestCase {
 		`typeobject(NInt16)`,
 		typeobject(NInt16),
 		"80ff813310012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e496e7431360209000441",
+		"typeobject",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -4105,6 +4322,7 @@ const Tests = []TestCase {
 		`typeobject(NInt32)`,
 		typeobject(NInt32),
 		"80ff813310012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e496e743332020a000441",
+		"typeobject",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -4125,6 +4343,7 @@ const Tests = []TestCase {
 		`typeobject(NInt64)`,
 		typeobject(NInt64),
 		"80ff813310012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e496e743634020b000441",
+		"typeobject",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -4145,6 +4364,7 @@ const Tests = []TestCase {
 		`typeobject(NFloat32)`,
 		typeobject(NFloat32),
 		"80ff813510012f766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e466c6f61743332020c000441",
+		"typeobject",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -4165,6 +4385,7 @@ const Tests = []TestCase {
 		`typeobject(NFloat64)`,
 		typeobject(NFloat64),
 		"80ff813510012f766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e466c6f61743634020d000441",
+		"typeobject",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -4185,6 +4406,7 @@ const Tests = []TestCase {
 		`typeobject(NComplex64)`,
 		typeobject(NComplex64),
 		"80ff8137100131766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e436f6d706c65783634020e000441",
+		"typeobject",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -4205,6 +4427,7 @@ const Tests = []TestCase {
 		`typeobject(NComplex128)`,
 		typeobject(NComplex128),
 		"80ff8138100132766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e436f6d706c6578313238020f000441",
+		"typeobject",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -4227,6 +4450,7 @@ const Tests = []TestCase {
 		`typeobject([2]uint64)`,
 		typeobject([2]uint64),
 		"80ff810812010002080302000441",
+		"typeobject",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -4249,6 +4473,7 @@ const Tests = []TestCase {
 		`typeobject(NArray2Uint64)`,
 		typeobject(NArray2Uint64),
 		"80ff813c120134766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e41727261793255696e74363402080302000441",
+		"typeobject",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -4269,6 +4494,7 @@ const Tests = []TestCase {
 		`typeobject([]uint64)`,
 		typeobject([]uint64),
 		"80ff81061301000208000441",
+		"typeobject",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -4289,6 +4515,7 @@ const Tests = []TestCase {
 		`typeobject(NListUint64)`,
 		typeobject(NListUint64),
 		"80ff8138130132766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e4c69737455696e7436340208000441",
+		"typeobject",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -4309,6 +4536,7 @@ const Tests = []TestCase {
 		`typeobject(set[uint64])`,
 		typeobject(set[uint64]),
 		"80ff81061401000208000441",
+		"typeobject",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -4329,6 +4557,7 @@ const Tests = []TestCase {
 		`typeobject(NSetUint64)`,
 		typeobject(NSetUint64),
 		"80ff8137140131766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e53657455696e7436340208000441",
+		"typeobject",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -4351,6 +4580,7 @@ const Tests = []TestCase {
 		`typeobject(map[uint64]string)`,
 		typeobject(map[uint64]string),
 		"80ff810815010002080304000441",
+		"typeobject",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -4373,6 +4603,7 @@ const Tests = []TestCase {
 		`typeobject(NMapUint64String)`,
 		typeobject(NMapUint64String),
 		"80ff813f150137766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e4d617055696e743634537472696e6702080304000441",
+		"typeobject",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -4411,6 +4642,7 @@ const Tests = []TestCase {
 		`typeobject(NStruct)`,
 		typeobject(NStruct),
 		"80ff814616012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e5374727563740203010141020300010142020400010143020b00000441",
+		"typeobject",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -4437,6 +4669,7 @@ const Tests = []TestCase {
 		`typeobject(NEnum)`,
 		typeobject(NEnum),
 		"80ff813811012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e456e756d0203014101420143000441",
+		"typeobject",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
@@ -4475,5 +4708,6 @@ const Tests = []TestCase {
 		`typeobject(NUnion)`,
 		typeobject(NUnion),
 		"80ff814519012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e556e696f6e0203010141020300010142020400010143020b00000441",
+		"typeobject",
 	},
 }
