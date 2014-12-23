@@ -42,17 +42,14 @@ func Generate(file *compile.File, env *compile.Env, config vdltool.GoConfig) []b
 		// We shouldn't see an error; it means our template is buggy.
 		panic(fmt.Errorf("vdl: couldn't execute template: %v", err))
 	}
-	if !config.NoFmt {
-		// Use gofmt to format the generated source.
-		pretty, err := format.Source(buf.Bytes())
-		if err != nil {
-			// We shouldn't see an error; it means we generated invalid code.
-			fmt.Printf("%s", buf.Bytes())
-			panic(fmt.Errorf("vdl: generated invalid Go code: %v", err))
-		}
-		return pretty
+	// Use gofmt to format the generated source.
+	pretty, err := format.Source(buf.Bytes())
+	if err != nil {
+		// We shouldn't see an error; it means we generated invalid code.
+		fmt.Printf("%s", buf.Bytes())
+		panic(fmt.Errorf("vdl: generated invalid Go code: %v", err))
 	}
-	return buf.Bytes()
+	return pretty
 }
 
 // systemImportsGo returns a list of required veyron system imports.

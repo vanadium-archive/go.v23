@@ -50,31 +50,41 @@ type convTarget struct {
 }
 
 // ReflectTarget returns a conversion Target based on the given reflect.Value.
-// Some rules depending on the type of target:
-//   o If target is a valid *vdl.Value, it is filled in directly.
-//   o Otherwise target must be a settable value (i.e. it must be a pointer).
+// Some rules depending on the type of rv:
+//   o If rv is a valid *vdl.Value, it is filled in directly.
+//   o Otherwise rv must be a settable value (i.e. it must be a pointer).
 //   o Pointers are followed, and logically "flattened".
 //   o New values are automatically created for nil pointers.
 //   o Targets convertible to *vdl.Type and *vdl.Value are filled in directly.
-func ReflectTarget(target reflect.Value) (Target, error) {
-	tt, err := vdl.TypeFromReflect(target.Type())
+func ReflectTarget(rv reflect.Value) (Target, error) {
+	if !rv.IsValid() {
+		return nil, errTargetInvalid
+	}
+	if vv := extractValue(rv); vv.IsValid() {
+		return valueConv(vv), nil
+	}
+	if !rv.CanSet() && rv.Kind() == reflect.Ptr && !rv.IsNil() {
+		// Dereference the pointer a single time to make rv settable.
+		rv = rv.Elem()
+	}
+	tt, err := vdl.TypeFromReflect(rv.Type())
 	if err != nil {
 		return nil, err
 	}
-	conv, err := reflectConv(target, tt)
+	target, err := reflectConv(rv, tt)
 	if err != nil {
 		return nil, err
 	}
-	return conv, nil
+	return target, nil
 }
 
 // ValueTarget returns a conversion Target based on the given vdl.Value.
 // Returns an error if the given vdl.Value isn't valid.
-func ValueTarget(target *vdl.Value) (Target, error) {
-	if !target.IsValid() {
+func ValueTarget(vv *vdl.Value) (Target, error) {
+	if !vv.IsValid() {
 		return nil, errTargetInvalid
 	}
-	return valueConv(target), nil
+	return valueConv(vv), nil
 }
 
 func reflectConv(rv reflect.Value, tt *vdl.Type) (convTarget, error) {
@@ -83,15 +93,6 @@ func reflectConv(rv reflect.Value, tt *vdl.Type) (convTarget, error) {
 	}
 	if vv := extractValue(rv); vv.IsValid() {
 		return valueConv(vv), nil
-	}
-	if !rv.CanSet() && rv.Kind() == reflect.Ptr && !rv.IsNil() {
-		// Dereference the pointer a single time to make rv settable.  Also remove
-		// optional from tt if the resulting type is no longer a pointer, except for
-		// the special error type, which is always optional.
-		rv = rv.Elem()
-		if rv.Kind() != reflect.Ptr && tt.Kind() == vdl.Optional && tt != vdl.ErrorType {
-			tt = tt.Elem()
-		}
 	}
 	if !rv.CanSet() {
 		return convTarget{}, errTargetUnsettable
@@ -152,6 +153,7 @@ func createFinTarget(c convTarget, ttFrom *vdl.Type) convTarget {
 	if c.vv == nil {
 		// Create new pointers down to the final non-pointer value.
 		for c.rv.Kind() == reflect.Ptr {
+			// Handle case where rv is *vdl.Value; fill it in directly.
 			if vv := setZeroVDLValue(c.rv, ttFrom); vv.IsValid() {
 				if vv.Kind() == vdl.Optional {
 					vv.Assign(vdl.NonNilZeroValue(vv.Type()))
@@ -159,11 +161,12 @@ func createFinTarget(c convTarget, ttFrom *vdl.Type) convTarget {
 				}
 				return convTarget{tt: ttFrom, vv: vv}
 			}
+			// Set nil pointers to new pointers.
 			if c.rv.IsNil() {
 				c.rv.Set(reflect.New(c.rv.Type().Elem()))
 			}
+			// Stop at *vdl.Type to allow TypeObject values to be assigned.
 			if c.rv.Type().Elem() == rtType {
-				// Stop at *vdl.Type to allow TypeObject values to be assigned.
 				return c
 			}
 			c.rv = c.rv.Elem()
@@ -191,6 +194,18 @@ func createFinTarget(c convTarget, ttFrom *vdl.Type) convTarget {
 // If fin is already a concrete type it's used directly as the fill target.
 func createFillTarget(fin convTarget, ttFrom *vdl.Type) (convTarget, error) {
 	if fin.vv == nil {
+		// Handle case where fin.rv is a native type; return the wire type as the
+		// fill target, and rely on finishConvert to perform the final step of
+		// converting from the wire type to the native type.
+		//
+		// TODO(toddw): This doesn't handle pointer native types.
+		if ri := vdl.ReflectInfoFromNative(fin.rv.Type()); ri != nil {
+			tt, err := vdl.TypeFromReflect(ri.WireType)
+			if err != nil {
+				return convTarget{}, err
+			}
+			return reflectConv(reflect.New(ri.WireType).Elem(), tt)
+		}
 		if fin.rv.Kind() == reflect.Interface {
 			// We're converting into an interface, so we can't just fill into the fin
 			// target directly.  Return the appropriate fill value.
@@ -220,12 +235,16 @@ func createFillTarget(fin convTarget, ttFrom *vdl.Type) (convTarget, error) {
 			// Try to create a reflect.Type out of ttFrom, and if it exists, create a real
 			// object to fill in.
 			if rt := vdl.ReflectFromType(ttFrom); rt != nil {
+				tt, err := vdl.TypeFromReflect(rt)
+				if err != nil {
+					return convTarget{}, err
+				}
 				rv := reflect.New(rt).Elem()
 				for rv.Kind() == reflect.Ptr {
 					rv.Set(reflect.New(rv.Type().Elem()))
 					rv = rv.Elem()
 				}
-				return reflectConv(rv, ttFrom)
+				return reflectConv(rv, tt)
 			}
 			// We don't have the type name in our registry, so create a concrete
 			// *vdl.Value to fill in, based on ttFrom.
@@ -257,14 +276,33 @@ func createFillTarget(fin convTarget, ttFrom *vdl.Type) (convTarget, error) {
 func finishConvert(fin, fill convTarget) error {
 	// The logic here mirrors the logic in createFillTarget.
 	if fin.vv == nil {
+		// Handle mirrored case in createFillTarget where fin.rv is a native type;
+		// fill.rv is the wire type that has been filled in.
+		if ri := vdl.ReflectInfoFromNative(fin.rv.Type()); ri != nil {
+			ierr := ri.ToNativeFunc.Call([]reflect.Value{fill.rv, fin.rv.Addr()})[0].Interface()
+			if ierr != nil {
+				return ierr.(error)
+			}
+			return nil
+		}
 		switch fin.rv.Kind() {
 		case reflect.Interface:
 			// The fill value may be set to either rv or vv in startConvert above.
 			var rvFill reflect.Value
 			if fill.vv == nil {
 				rvFill = fill.rv
+				if ri := vdl.ReflectInfoFromWire(fill.rv.Type()); ri != nil && ri.NativeType != nil {
+					// Handle case where fill.rv is a wire type with a native type; set
+					// rvFill to a new native type and call ToNative to fill it in.
+					newNative := reflect.New(ri.NativeType)
+					ierr := ri.ToNativeFunc.Call([]reflect.Value{fill.rv, newNative})[0].Interface()
+					if ierr != nil {
+						return ierr.(error)
+					}
+					rvFill = newNative.Elem()
+				}
 				if fill.tt.Kind() == vdl.Optional {
-					rvFill = fill.rv.Addr()
+					rvFill = rvFill.Addr()
 				}
 			} else {
 				switch fin.tt.Kind() {

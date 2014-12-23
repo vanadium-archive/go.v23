@@ -176,20 +176,20 @@ func (p *Package) initBaseFileNames(exts map[string]bool) error {
 
 // initVDLConfig initializes p.Config based on the optional vdl.config file.
 func (p *Package) initVDLConfig(opts Opts, vdlenv *compile.Env) {
-	path := filepath.Join(p.Dir, opts.vdlConfigName())
-	configData, err := os.Open(path)
+	name := path.Join(p.Path, opts.vdlConfigName())
+	configData, err := os.Open(filepath.Join(p.Dir, opts.vdlConfigName()))
 	switch {
 	case os.IsNotExist(err):
 		return
 	case err != nil:
-		vdlenv.Errors.Errorf("%s: couldn't open (%v)", path, err)
+		vdlenv.Errors.Errorf("%s: couldn't open (%v)", name, err)
 		return
 	}
 	// Build the vdl.config file with an implicit "vdltool" import.  Note that the
 	// actual "vdltool" package has already been populated into vdlenv.
-	BuildConfigValueImplicitImports(opts.vdlConfigName(), configData, []string{"vdltool"}, vdlenv, &p.Config)
+	BuildConfigValueImplicitImports(name, configData, []string{"vdltool"}, vdlenv, &p.Config)
 	if err := configData.Close(); err != nil {
-		vdlenv.Errors.Errorf("%s: couldn't close (%v)", path, err)
+		vdlenv.Errors.Errorf("%s: couldn't close (%v)", name, err)
 	}
 }
 
@@ -598,10 +598,10 @@ func (ds *depSorter) addImportDeps(pkg *Package, imports []*parse.Import) {
 	}
 }
 
-// AddConfigDeps takes a config file represented by its base file name and src
-// data, and adds all transitive dependencies to the sorter.
-func (ds *depSorter) AddConfigDeps(baseFileName string, src io.Reader) {
-	if pconfig := parse.ParseConfig(baseFileName, src, parse.Opts{ImportsOnly: true}, ds.errs); pconfig != nil {
+// AddConfigDeps takes a config file represented by its file name and src data,
+// and adds all transitive dependencies to the sorter.
+func (ds *depSorter) AddConfigDeps(fileName string, src io.Reader) {
+	if pconfig := parse.ParseConfig(fileName, src, parse.Opts{ImportsOnly: true}, ds.errs); pconfig != nil {
 		ds.addImportDeps(nil, pconfig.Imports)
 	}
 }
@@ -702,13 +702,13 @@ func TransitivePackages(paths []string, mode UnknownPathMode, opts Opts, errs *v
 	return ds.Sort()
 }
 
-// TransitivePackagesForConfig takes a config file represented by its base file
-// name and src data, and returns all package dependencies in transitive order.
+// TransitivePackagesForConfig takes a config file represented by its file name
+// and src data, and returns all package dependencies in transitive order.
 //
 // The opts arg specifies additional options.
-func TransitivePackagesForConfig(baseFileName string, src io.Reader, opts Opts, errs *vdlutil.Errors) []*Package {
+func TransitivePackagesForConfig(fileName string, src io.Reader, opts Opts, errs *vdlutil.Errors) []*Package {
 	ds := newDepSorter(opts, errs)
-	ds.AddConfigDeps(baseFileName, src)
+	ds.AddConfigDeps(fileName, src)
 	return ds.Sort()
 }
 
@@ -749,20 +749,20 @@ func BuildPackage(pkg *Package, env *compile.Env) *compile.Package {
 }
 
 // BuildConfig parses and compiles the given config src and returns it.  Errors
-// are reported in env; baseFileName is only used for error reporting.  If
-// implicit is non-nil and the exported config const is an untyped const
-// literal, it is assumed to be of that type.
+// are reported in env; fileName is only used for error reporting.  If implicit
+// is non-nil and the exported config const is an untyped const literal, it is
+// assumed to be of that type.
 //
 // All imports that the config src depend on must have already been compiled and
 // populated into env.
-func BuildConfig(baseFileName string, src io.Reader, implicit *vdl.Type, env *compile.Env) *vdl.Value {
-	return BuildConfigImplicitImports(baseFileName, src, implicit, []string{}, env)
+func BuildConfig(fileName string, src io.Reader, implicit *vdl.Type, env *compile.Env) *vdl.Value {
+	return BuildConfigImplicitImports(fileName, src, implicit, []string{}, env)
 }
 
 // BuildConfigImplicitImports is like BuildConfig, and allows additional fake
 // imports to be injected into the config file represented in src.
-func BuildConfigImplicitImports(baseFileName string, src io.Reader, implicit *vdl.Type, imports []string, env *compile.Env) *vdl.Value {
-	pconfig := parse.ParseConfig(baseFileName, src, parse.Opts{}, env.Errors)
+func BuildConfigImplicitImports(fileName string, src io.Reader, implicit *vdl.Type, imports []string, env *compile.Env) *vdl.Value {
+	pconfig := parse.ParseConfig(fileName, src, parse.Opts{}, env.Errors)
 	if pconfig != nil {
 		pconfig.AddImports(imports...)
 	}
@@ -771,14 +771,14 @@ func BuildConfigImplicitImports(baseFileName string, src io.Reader, implicit *vd
 
 // BuildConfigValue is a convenience function that runs BuildConfig, and then
 // converts the result into value.
-func BuildConfigValue(baseFileName string, src io.Reader, env *compile.Env, value interface{}) {
-	BuildConfigValueImplicitImports(baseFileName, src, []string{}, env, value)
+func BuildConfigValue(fileName string, src io.Reader, env *compile.Env, value interface{}) {
+	BuildConfigValueImplicitImports(fileName, src, []string{}, env, value)
 }
 
 // BuildConfigValueImplicitImports is a convenience function that runs
 // BuildConfigImplicitImports, and then converts the result into value.
-func BuildConfigValueImplicitImports(baseFileName string, src io.Reader, imports []string, env *compile.Env, value interface{}) {
-	vconfig := BuildConfigImplicitImports(baseFileName, src, vdl.TypeOf(value), imports, env)
+func BuildConfigValueImplicitImports(fileName string, src io.Reader, imports []string, env *compile.Env, value interface{}) {
+	vconfig := BuildConfigImplicitImports(fileName, src, vdl.TypeOf(value), imports, env)
 	if vconfig == nil {
 		return
 	}

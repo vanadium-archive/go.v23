@@ -4,6 +4,7 @@ package vdl
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"testing"
 )
@@ -244,7 +245,8 @@ func recurseABTypes() [2]*Type {
 func recurseAType() *Type { return recurseABTypes()[0] }
 func recurseBType() *Type { return recurseABTypes()[1] }
 
-// Special case enum isn't regularly expressible in Go.
+// Special case enum doesn't have built-in language support in Go.
+//   type nEnum enum{A;B;C}
 type nEnum int
 
 const (
@@ -283,7 +285,7 @@ func (x nEnum) String() string {
 
 func (nEnum) __VDLReflect(struct{ Enum struct{ A, B, C string } }) {}
 
-// Special case union isn't regularly expressible in Go.
+// Special case union doesn't have built-in language support in Go.
 //   type nUnion union{A bool;B string;C int32}
 type (
 	nUnion interface {
@@ -321,6 +323,48 @@ type ptrError struct{}
 
 func (nonPtrError) Error() string { return "" }
 func (*ptrError) Error() string   { return "" }
+
+// nWire and nNative are used to test native type support.
+type nWire struct{ Str string }
+type nNative int64
+
+func (x nWire) VDLToNative(n *nNative) error {
+	*n = 0
+	i, err := strconv.Atoi(x.Str)
+	if err != nil {
+		return err
+	}
+	*n = nNative(i)
+	return nil
+}
+
+func (x *nWire) VDLFromNative(n nNative) error {
+	x.Str = strconv.Itoa(int(n))
+	return nil
+}
+
+// nWireReg and nNativeReg are used to test pre-registered native types.
+type nWireReg struct{ Str string }
+type nNativeReg int64
+
+func (x nWireReg) VDLToNative(n *nNativeReg) error {
+	*n = 0
+	i, err := strconv.Atoi(x.Str)
+	if err != nil {
+		return err
+	}
+	*n = nNativeReg(i)
+	return nil
+}
+
+func (x *nWireReg) VDLFromNative(n nNativeReg) error {
+	x.Str = strconv.Itoa(int(n))
+	return nil
+}
+
+func init() {
+	Register(nWireReg{})
+}
 
 // Define a bunch of *Type types used in tests.
 var (
@@ -416,7 +460,8 @@ var (
 	structAIntType  = StructType(Field{"A", Int64Type})
 	structAIntTypeN = NamedType("nStructA", structAIntType)
 
-	unionTypeN = rtN("Union", UnionType([]Field{{"A", BoolType}, {"B", StringType}, {"C", Int32Type}}...))
+	unionTypeN   = rtN("Union", UnionType([]Field{{"A", BoolType}, {"B", StringType}, {"C", Int32Type}}...))
+	wireRegTypeN = rtN("WireReg", StructType(Field{"Str", StringType}))
 
 	// Types that cannot be converted to sets.  Although we represent sets as
 	// map[key]struct{} on the Go side, we don't allow these as general

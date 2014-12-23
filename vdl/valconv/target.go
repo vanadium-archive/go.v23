@@ -140,6 +140,16 @@ func FromReflect(target Target, rv reflect.Value) error {
 	// track optional types correctly.
 	hasPtr := false
 	for rv.Kind() == reflect.Ptr || rv.Kind() == reflect.Interface {
+		// Handle marshaling from native type to wire type.
+		switch rvWire, err := vdl.WireValueFromNative(rv); {
+		case err != nil:
+			return err
+		case rvWire.IsValid():
+			if hasPtr {
+				return FromReflect(target, rvWire.Addr())
+			}
+			return FromReflect(target, rvWire)
+		}
 		hasPtr = rv.Kind() == reflect.Ptr
 		switch rt := rv.Type(); {
 		case rv.IsNil():
@@ -166,6 +176,16 @@ func FromReflect(target Target, rv reflect.Value) error {
 			return fromError(target, rv.Interface().(error), rt)
 		}
 		rv = rv.Elem()
+	}
+	// Handle marshaling from native type to wire type.
+	switch rvWire, err := vdl.WireValueFromNative(rv); {
+	case err != nil:
+		return err
+	case rvWire.IsValid():
+		if hasPtr {
+			return FromReflect(target, rvWire.Addr())
+		}
+		return FromReflect(target, rvWire)
 	}
 	// Initialize type information.  The optionality is a bit tricky.  Both rt and
 	// rv refer to the flattened value, with no pointers or interfaces.  But tt

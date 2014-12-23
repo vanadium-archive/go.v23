@@ -60,7 +60,7 @@ func ParseConfig(fileName string, src io.Reader, opts Opts, errs *vdlutil.Errors
 		return nil
 	}
 	config := &Config{
-		BaseName:  file.BaseName,
+		FileName:  fileName,
 		ConfigDef: file.PackageDef,
 		Imports:   file.Imports,
 		Config:    file.ConstDefs[0].Expr,
