@@ -247,7 +247,7 @@ func (p *Package) CloseFiles() error {
 }
 
 // SrcDirs returns a list of package root source directories, based on the
-// VDLPATH, VDLROOT and VEYRON_ROOT environment variables.
+// VDLPATH, VDLROOT and VANADIUM_ROOT environment variables.
 //
 // VDLPATH is a list of directories separated by filepath.ListSeparator;
 // e.g. the separator is ":" on UNIX, and ";" on Windows.  Each VDLPATH
@@ -256,8 +256,8 @@ func (p *Package) CloseFiles() error {
 //
 // VDLROOT is a single directory specifying the location of the standard vdl
 // packages.  It has the same requirements as VDLPATH components.  If VDLROOT is
-// empty, we use VEYRON_ROOT to construct the VDLROOT.  An error is reported if
-// neither VDLROOT nor VEYRON_ROOT is specified.
+// empty, we use VANADIUM_ROOT to construct the VDLROOT.  An error is reported if
+// neither VDLROOT nor VANADIUM_ROOT is specified.
 func SrcDirs(errs *vdlutil.Errors) []string {
 	var srcDirs []string
 	if root := vdlRootSrcDir(errs); root != "" {
@@ -269,10 +269,10 @@ func SrcDirs(errs *vdlutil.Errors) []string {
 func vdlRootSrcDir(errs *vdlutil.Errors) string {
 	vdlroot := os.Getenv("VDLROOT")
 	if vdlroot == "" {
-		// Try to construct VDLROOT out of VEYRON_ROOT.
-		veyronroot := os.Getenv("VEYRON_ROOT")
+		// Try to construct VDLROOT out of VANADIUM_ROOT.
+		veyronroot := os.Getenv("VANADIUM_ROOT")
 		if veyronroot == "" {
-			errs.Error("Either VDLROOT or VEYRON_ROOT must be set")
+			errs.Error("Either VDLROOT or VANADIUM_ROOT must be set")
 			return ""
 		}
 		vdlroot = filepath.Join(veyronroot, "veyron", "go", "src", "veyron.io", "veyron", "veyron2", "vdl", "vdlroot")

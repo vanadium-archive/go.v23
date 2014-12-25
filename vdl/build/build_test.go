@@ -50,8 +50,8 @@ func setEnvironment(t *testing.T, vdlroot, vdlpath string) bool {
 }
 
 func setVeyronRoot(t *testing.T, root string) bool {
-	if err := os.Setenv("VEYRON_ROOT", root); err != nil {
-		t.Errorf("Setenv(VEYRON_ROOT, %q) failed: %v", root, err)
+	if err := os.Setenv("VANADIUM_ROOT", root); err != nil {
+		t.Errorf("Setenv(VANADIUM_ROOT, %q) failed: %v", root, err)
 		return false
 	}
 	return true
@@ -72,12 +72,12 @@ func TestSrcDirsVdlRoot(t *testing.T) {
 		Want       []string
 		ErrRE      string
 	}{
-		{"", "", nil, "Either VDLROOT or VEYRON_ROOT must be set"},
+		{"", "", nil, "Either VDLROOT or VANADIUM_ROOT must be set"},
 		{"/a", "", []string{"/a/src"}, ""},
 		{"/a/b/c", "", []string{"/a/b/c/src"}, ""},
 		{"", "/veyron", []string{"/veyron/veyron/go/src/veyron.io/veyron/veyron2/vdl/vdlroot/src"}, ""},
 		{"", "/a/b/c", []string{"/a/b/c/veyron/go/src/veyron.io/veyron/veyron2/vdl/vdlroot/src"}, ""},
-		// If both VDLROOT and VEYRON_ROOT are specified, VDLROOT takes precedence.
+		// If both VDLROOT and VANADIUM_ROOT are specified, VDLROOT takes precedence.
 		{"/a", "/veyron", []string{"/a/src"}, ""},
 		{"/a/b/c", "/x/y/z", []string{"/a/b/c/src"}, ""},
 	}
