@@ -48,13 +48,13 @@ import (
 	"sort"
 	"strings"
 
-	"veyron.io/veyron/veyron/lib/toposort"
-	"veyron.io/veyron/veyron2/vdl"
-	"veyron.io/veyron/veyron2/vdl/compile"
-	"veyron.io/veyron/veyron2/vdl/parse"
-	"veyron.io/veyron/veyron2/vdl/valconv"
-	"veyron.io/veyron/veyron2/vdl/vdlroot/src/vdltool"
-	"veyron.io/veyron/veyron2/vdl/vdlutil"
+	"v.io/veyron/veyron/lib/toposort"
+	"v.io/veyron/veyron2/vdl"
+	"v.io/veyron/veyron2/vdl/compile"
+	"v.io/veyron/veyron2/vdl/parse"
+	"v.io/veyron/veyron2/vdl/valconv"
+	"v.io/veyron/veyron2/vdl/vdlroot/src/vdltool"
+	"v.io/veyron/veyron2/vdl/vdlutil"
 )
 
 // Package represents the build information for a vdl package.
@@ -275,7 +275,7 @@ func vdlRootSrcDir(errs *vdlutil.Errors) string {
 			errs.Error("Either VDLROOT or VANADIUM_ROOT must be set")
 			return ""
 		}
-		vdlroot = filepath.Join(veyronroot, "veyron", "go", "src", "veyron.io", "veyron", "veyron2", "vdl", "vdlroot")
+		vdlroot = filepath.Join(veyronroot, "veyron", "go", "src", "v.io", "veyron", "veyron2", "vdl", "vdlroot")
 	}
 	src := filepath.Join(vdlroot, "src")
 	abs, err := filepath.Abs(src)
@@ -510,7 +510,7 @@ func (ds *depSorter) resolveDirPath(dir string, mode UnknownPathMode) *Package {
 	// We always deduce the package path from the package directory, even if we
 	// originally resolved from an import path, and thus already "know" the
 	// package path.  This is to ensure we correctly handle vdl standard packages.
-	// E.g. if we're given "veyron.io/veyron/veyron2/vdl/vdlroot/src/vdltool" as
+	// E.g. if we're given "v.io/veyron/veyron2/vdl/vdlroot/src/vdltool" as
 	// an import path, the resulting package path must be "vdltool".
 	pkgPath, err := ds.deducePackagePath(absDir)
 	if err != nil {

@@ -1,12 +1,12 @@
 package ipc
 
 import (
-	"veyron.io/veyron/veyron2/verror"
-	"veyron.io/veyron/veyron2/verror2"
-	"veyron.io/veyron/veyron2/vom"
+	"v.io/veyron/veyron2/verror"
+	"v.io/veyron/veyron2/verror2"
+	"v.io/veyron/veyron2/vom"
 
 	// Ensure all standard vdl types are registered.
-	_ "veyron.io/veyron/veyron2/vdl/vdlroot"
+	_ "v.io/veyron/veyron2/vdl/vdlroot"
 )
 
 func init() {

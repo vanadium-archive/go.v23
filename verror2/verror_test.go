@@ -6,14 +6,14 @@ import (
 	"strings"
 	"testing"
 
-	"veyron.io/veyron/veyron2"
-	"veyron.io/veyron/veyron2/i18n"
-	"veyron.io/veyron/veyron2/rt"
-	"veyron.io/veyron/veyron2/verror"
-	"veyron.io/veyron/veyron2/verror2"
-	"veyron.io/veyron/veyron2/vtrace"
+	"v.io/veyron/veyron2"
+	"v.io/veyron/veyron2/i18n"
+	"v.io/veyron/veyron2/rt"
+	"v.io/veyron/veyron2/verror"
+	"v.io/veyron/veyron2/verror2"
+	"v.io/veyron/veyron2/vtrace"
 
-	_ "veyron.io/veyron/veyron/profiles"
+	_ "v.io/veyron/veyron/profiles"
 )
 
 var (
@@ -185,16 +185,16 @@ func TestBasic(t *testing.T) {
 		{nEN1, verror2.NoExist, "server nEN1 not found 1 2"},
 		{nFR0, verror2.NoExist, "server nFR0 pas trouvé 0"},
 		{nFR1, verror2.NoExist, "server nFR1 pas trouvé 1 2"},
-		{nDE0, verror2.NoExist, "veyron.io/veyron/veyron2/verror.NoExist: server nDE0 0"},
-		{nDE1, verror2.NoExist, "veyron.io/veyron/veyron2/verror.NoExist: server nDE1 1 2"},
+		{nDE0, verror2.NoExist, "v.io/veyron/veyron2/verror.NoExist: server nDE0 0"},
+		{nDE1, verror2.NoExist, "v.io/veyron/veyron2/verror.NoExist: server nDE1 1 2"},
 
 		{vEN, verror2.NoExistOrNoAccess, "server:op: Does not exist or access denied: verror NoExistOrNoAccess"},
 		{vFR, verror2.NoExistOrNoAccess, "server op n'existe pas ou accès refusé verror NoExistOrNoAccess"},
-		{vDE, verror2.NoExistOrNoAccess, "veyron.io/veyron/veyron2/verror.NoExistOrNoAccess: server op verror NoExistOrNoAccess"},
+		{vDE, verror2.NoExistOrNoAccess, "v.io/veyron/veyron2/verror.NoExistOrNoAccess: server op verror NoExistOrNoAccess"},
 
 		{gEN, verror2.Unknown, "server op unknown error Go error"},
 		{gFR, verror2.Unknown, "server op erreur inconnu Go error"},
-		{gDE, verror2.Unknown, "veyron.io/veyron/veyron2/verror.Unknown: server op Go error"},
+		{gDE, verror2.Unknown, "v.io/veyron/veyron2/verror.Unknown: server op Go error"},
 
 		{v2EN, idActionA, "server aEN1 error A 1 2"},
 		{v2FR0, idActionA, "server aEN1 erreur A 1 2"},

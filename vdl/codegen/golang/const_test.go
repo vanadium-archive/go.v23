@@ -3,8 +3,8 @@ package golang
 import (
 	"testing"
 
-	"veyron.io/veyron/veyron2/vdl"
-	"veyron.io/veyron/veyron2/vdl/compile"
+	"v.io/veyron/veyron2/vdl"
+	"v.io/veyron/veyron2/vdl/compile"
 )
 
 func TestConst(t *testing.T) {

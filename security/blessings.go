@@ -7,8 +7,8 @@ import (
 	"sort"
 	"strings"
 
-	"veyron.io/veyron/veyron2/vlog"
-	"veyron.io/veyron/veyron2/vom"
+	"v.io/veyron/veyron2/vlog"
+	"v.io/veyron/veyron2/vom"
 )
 
 var errEmptyChain = errors.New("empty certificate chain found")

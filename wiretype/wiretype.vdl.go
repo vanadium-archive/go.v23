@@ -5,7 +5,7 @@ package wiretype
 
 import (
 	// The non-user imports are prefixed with "__" to prevent collisions.
-	__vdl "veyron.io/veyron/veyron2/vdl"
+	__vdl "v.io/veyron/veyron2/vdl"
 )
 
 // TypeID serves as a reference to a type definition.  The TypeID is only unique
@@ -14,7 +14,7 @@ import (
 type TypeID uint64
 
 func (TypeID) __VDLReflect(struct {
-	Name string "veyron.io/veyron/veyron2/wiretype.TypeID"
+	Name string "v.io/veyron/veyron2/wiretype.TypeID"
 }) {
 }
 
@@ -26,7 +26,7 @@ type NamedPrimitiveType struct {
 }
 
 func (NamedPrimitiveType) __VDLReflect(struct {
-	Name string "veyron.io/veyron/veyron2/wiretype.NamedPrimitiveType"
+	Name string "v.io/veyron/veyron2/wiretype.NamedPrimitiveType"
 }) {
 }
 
@@ -38,7 +38,7 @@ type SliceType struct {
 }
 
 func (SliceType) __VDLReflect(struct {
-	Name string "veyron.io/veyron/veyron2/wiretype.SliceType"
+	Name string "v.io/veyron/veyron2/wiretype.SliceType"
 }) {
 }
 
@@ -51,7 +51,7 @@ type ArrayType struct {
 }
 
 func (ArrayType) __VDLReflect(struct {
-	Name string "veyron.io/veyron/veyron2/wiretype.ArrayType"
+	Name string "v.io/veyron/veyron2/wiretype.ArrayType"
 }) {
 }
 
@@ -67,7 +67,7 @@ type MapType struct {
 }
 
 func (MapType) __VDLReflect(struct {
-	Name string "veyron.io/veyron/veyron2/wiretype.MapType"
+	Name string "v.io/veyron/veyron2/wiretype.MapType"
 }) {
 }
 
@@ -78,7 +78,7 @@ type FieldType struct {
 }
 
 func (FieldType) __VDLReflect(struct {
-	Name string "veyron.io/veyron/veyron2/wiretype.FieldType"
+	Name string "v.io/veyron/veyron2/wiretype.FieldType"
 }) {
 }
 
@@ -90,7 +90,7 @@ type StructType struct {
 }
 
 func (StructType) __VDLReflect(struct {
-	Name string "veyron.io/veyron/veyron2/wiretype.StructType"
+	Name string "v.io/veyron/veyron2/wiretype.StructType"
 }) {
 }
 
@@ -104,7 +104,7 @@ type PtrType struct {
 }
 
 func (PtrType) __VDLReflect(struct {
-	Name string "veyron.io/veyron/veyron2/wiretype.PtrType"
+	Name string "v.io/veyron/veyron2/wiretype.PtrType"
 }) {
 }
 

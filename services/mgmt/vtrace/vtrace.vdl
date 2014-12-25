@@ -3,9 +3,9 @@
 package vtrace
 
 import (
-	"veyron.io/veyron/veyron2/services/security/access"
-	"veyron.io/veyron/veyron2/uniqueid"
-	"veyron.io/veyron/veyron2/vtrace"
+	"v.io/veyron/veyron2/services/security/access"
+	"v.io/veyron/veyron2/uniqueid"
+	"v.io/veyron/veyron2/vtrace"
 )
 
 type Store interface {

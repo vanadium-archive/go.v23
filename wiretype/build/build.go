@@ -3,8 +3,8 @@ package build
 import (
 	"reflect"
 
-	"veyron.io/veyron/veyron2/vdl/vdlutil"
-	"veyron.io/veyron/veyron2/wiretype"
+	"v.io/veyron/veyron2/vdl/vdlutil"
+	"v.io/veyron/veyron2/wiretype"
 )
 
 // TypeDefs is a slice of type definitions.

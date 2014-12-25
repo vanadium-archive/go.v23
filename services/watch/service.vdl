@@ -101,8 +101,8 @@
 package watch
 
 import (
-    "veyron.io/veyron/veyron2/services/security/access"
-    "veyron.io/veyron/veyron2/services/watch/types"
+    "v.io/veyron/veyron2/services/security/access"
+    "v.io/veyron/veyron2/services/watch/types"
 )
 
 // GlobWatcher allows a client to receive updates for changes to objects

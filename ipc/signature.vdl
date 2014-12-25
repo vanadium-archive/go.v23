@@ -1,6 +1,6 @@
 package ipc
 
-import "veyron.io/veyron/veyron2/wiretype"
+import "v.io/veyron/veyron2/wiretype"
 
 // DEPRECATED(toddw): REMOVE THE BELOW SUPPORT
 

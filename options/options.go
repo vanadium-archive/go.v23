@@ -49,12 +49,12 @@ package options
 import (
 	"time"
 
-	"veyron.io/veyron/veyron2"
-	"veyron.io/veyron/veyron2/ipc"
-	"veyron.io/veyron/veyron2/ipc/stream"
-	"veyron.io/veyron/veyron2/naming"
+	"v.io/veyron/veyron2"
+	"v.io/veyron/veyron2/ipc"
+	"v.io/veyron/veyron2/ipc/stream"
+	"v.io/veyron/veyron2/naming"
 
-	"veyron.io/veyron/veyron2/security"
+	"v.io/veyron/veyron2/security"
 )
 
 // RuntimePrincipal represents the principal to be used by the runtime.

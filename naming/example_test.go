@@ -3,7 +3,7 @@ package naming_test
 import (
 	"fmt"
 
-	"veyron.io/veyron/veyron2/naming"
+	"v.io/veyron/veyron2/naming"
 )
 
 func ExampleMakeName() {

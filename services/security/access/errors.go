@@ -1,11 +1,11 @@
 package access
 
 import (
-	verror "veyron.io/veyron/veyron2/verror2"
+	verror "v.io/veyron/veyron2/verror2"
 )
 
 // pkgPath is the prefix of errors in this package.
-const pkgPath = "veyron.io/veyron/veyron2/services/security/access"
+const pkgPath = "v.io/veyron/veyron2/services/security/access"
 
 // The etag passed to SetACL is invalid.  Likely, another client set the ACL
 // already and invalidated the etag.  Use GetACL to fetch a fresh etag.

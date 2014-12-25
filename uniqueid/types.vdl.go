@@ -5,14 +5,14 @@ package uniqueid
 
 import (
 	// The non-user imports are prefixed with "__" to prevent collisions.
-	__vdl "veyron.io/veyron/veyron2/vdl"
+	__vdl "v.io/veyron/veyron2/vdl"
 )
 
 // An ID is a likely globally unique identifier.
 type ID [16]byte
 
 func (ID) __VDLReflect(struct {
-	Name string "veyron.io/veyron/veyron2/uniqueid.ID"
+	Name string "v.io/veyron/veyron2/uniqueid.ID"
 }) {
 }
 

@@ -2,8 +2,8 @@
 package mounttable
 
 import (
-	"veyron.io/veyron/veyron2/naming"
-	"veyron.io/veyron/veyron2/services/security/access"
+	"v.io/veyron/veyron2/naming"
+	"v.io/veyron/veyron2/services/security/access"
 )
 
 // MountTable defines the interface to talk to a mounttable.

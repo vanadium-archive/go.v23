@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	"veyron.io/veyron/veyron2/wiretype"
+	"v.io/veyron/veyron2/wiretype"
 )
 
 // encoderBinary handles encoding type and value messages in binary format.

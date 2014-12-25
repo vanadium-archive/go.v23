@@ -7,15 +7,15 @@
 package pprof
 
 import (
-	"veyron.io/veyron/veyron2/services/security/access"
+	"v.io/veyron/veyron2/services/security/access"
 
 	// The non-user imports are prefixed with "__" to prevent collisions.
 	__io "io"
-	__veyron2 "veyron.io/veyron/veyron2"
-	__context "veyron.io/veyron/veyron2/context"
-	__ipc "veyron.io/veyron/veyron2/ipc"
-	__vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
-	__wiretype "veyron.io/veyron/veyron2/wiretype"
+	__veyron2 "v.io/veyron/veyron2"
+	__context "v.io/veyron/veyron2/context"
+	__ipc "v.io/veyron/veyron2/ipc"
+	__vdlutil "v.io/veyron/veyron2/vdl/vdlutil"
+	__wiretype "v.io/veyron/veyron2/wiretype"
 )
 
 // TODO(toddw): Remove this line once the new signature support is done.
@@ -387,7 +387,7 @@ var PProfDesc __ipc.InterfaceDesc = descPProf
 // descPProf hides the desc to keep godoc clean.
 var descPProf = __ipc.InterfaceDesc{
 	Name:    "PProf",
-	PkgPath: "veyron.io/veyron/veyron2/services/mgmt/pprof",
+	PkgPath: "v.io/veyron/veyron2/services/mgmt/pprof",
 	Methods: []__ipc.MethodDesc{
 		{
 			Name: "CmdLine",

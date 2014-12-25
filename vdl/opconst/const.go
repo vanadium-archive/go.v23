@@ -8,8 +8,8 @@ import (
 	"math/big"
 	"strconv"
 
-	"veyron.io/veyron/veyron2/vdl"
-	"veyron.io/veyron/veyron2/vdl/valconv"
+	"v.io/veyron/veyron2/vdl"
+	"v.io/veyron/veyron2/vdl/valconv"
 )
 
 var (

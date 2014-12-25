@@ -2,8 +2,8 @@
 package logreader
 
 import (
-	"veyron.io/veyron/veyron2/services/mgmt/logreader/types"
-	"veyron.io/veyron/veyron2/services/security/access"
+	"v.io/veyron/veyron2/services/mgmt/logreader/types"
+	"v.io/veyron/veyron2/services/security/access"
 )
 
 // LogFile can be used to access log files remotely.

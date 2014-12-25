@@ -12,8 +12,8 @@ import (
 	"strings"
 	"testing"
 
-	"veyron.io/veyron/veyron2/vdl/vdlutil"
-	"veyron.io/veyron/veyron2/vom"
+	"v.io/veyron/veyron2/vdl/vdlutil"
+	"v.io/veyron/veyron2/vom"
 )
 
 type markedRoot struct {

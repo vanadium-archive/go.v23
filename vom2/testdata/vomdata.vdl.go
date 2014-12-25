@@ -5,8 +5,8 @@ package testdata
 
 import (
 	// The non-user imports are prefixed with "__" to prevent collisions.
-	__vdl "veyron.io/veyron/veyron2/vdl"
-	__vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
+	__vdl "v.io/veyron/veyron2/vdl"
+	__vdlutil "v.io/veyron/veyron2/vdl/vdlutil"
 )
 
 // TestCase represents an individual testcase for vom encoding and decoding.
@@ -18,7 +18,7 @@ type TestCase struct {
 }
 
 func (TestCase) __VDLReflect(struct {
-	Name string "veyron.io/veyron/veyron2/vom2/testdata.TestCase"
+	Name string "v.io/veyron/veyron2/vom2/testdata.TestCase"
 }) {
 }
 
@@ -794,217 +794,217 @@ var Tests = []TestCase{
 		Name:       "NBool(true)",
 		Value:      NBool(true),
 		Hex:        "80ff813210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e426f6f6c020300ff8201",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NBool bool",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NBool bool",
 	},
 	{
 		Name:       "NBool(false)",
 		Value:      NBool(false),
 		Hex:        "80ff813210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e426f6f6c020300ff8200",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NBool bool",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NBool bool",
 	},
 	{
 		Name:       "NString(\"\")",
 		Value:      NString(""),
 		Hex:        "80ff813410012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e537472696e67020400ff8200",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NString string",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NString string",
 	},
 	{
 		Name:       "NString(\"abc\")",
 		Value:      NString("abc"),
 		Hex:        "80ff813410012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e537472696e67020400ff8203616263",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NString string",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NString string",
 	},
 	{
 		Name:       "NByteSlice(\"\")",
 		Value:      NByteSlice(""),
 		Hex:        "80ff8137130131766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e42797465536c696365020500ff8200",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NByteSlice []byte",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NByteSlice []byte",
 	},
 	{
 		Name:       "NByteSlice(\"def\")",
 		Value:      NByteSlice("def"),
 		Hex:        "80ff8137130131766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e42797465536c696365020500ff8203646566",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NByteSlice []byte",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NByteSlice []byte",
 	},
 	{
 		Name:       "NByte(0)",
 		Value:      NByte(0),
 		Hex:        "80ff813210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e42797465020500ff8200",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NByte byte",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NByte byte",
 	},
 	{
 		Name:       "NByte(127)",
 		Value:      NByte(127),
 		Hex:        "80ff813210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e42797465020500ff827f",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NByte byte",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NByte byte",
 	},
 	{
 		Name:       "NByte(255)",
 		Value:      NByte(255),
 		Hex:        "80ff813210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e42797465020500ff82ff",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NByte byte",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NByte byte",
 	},
 	{
 		Name:       "NUint16(0)",
 		Value:      NUint16(0),
 		Hex:        "80ff813410012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e55696e743136020600ff8200",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NUint16 uint16",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NUint16 uint16",
 	},
 	{
 		Name:       "NUint16(65535)",
 		Value:      NUint16(65535),
 		Hex:        "80ff813410012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e55696e743136020600ff82feffff",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NUint16 uint16",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NUint16 uint16",
 	},
 	{
 		Name:       "NUint32(0)",
 		Value:      NUint32(0),
 		Hex:        "80ff813410012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e55696e743332020700ff8200",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NUint32 uint32",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NUint32 uint32",
 	},
 	{
 		Name:       "NUint32(4294967295)",
 		Value:      NUint32(4294967295),
 		Hex:        "80ff813410012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e55696e743332020700ff82fcffffffff",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NUint32 uint32",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NUint32 uint32",
 	},
 	{
 		Name:       "NUint64(0)",
 		Value:      NUint64(0),
 		Hex:        "80ff813410012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e55696e743634020800ff8200",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NUint64 uint64",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NUint64 uint64",
 	},
 	{
 		Name:       "NUint64(18446744073709551615)",
 		Value:      NUint64(18446744073709551615),
 		Hex:        "80ff813410012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e55696e743634020800ff82f8ffffffffffffffff",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NUint64 uint64",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NUint64 uint64",
 	},
 	{
 		Name:       "NInt16(0)",
 		Value:      NInt16(0),
 		Hex:        "80ff813310012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e496e743136020900ff8200",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NInt16 int16",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NInt16 int16",
 	},
 	{
 		Name:       "NInt16(32767)",
 		Value:      NInt16(32767),
 		Hex:        "80ff813310012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e496e743136020900ff82fefffe",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NInt16 int16",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NInt16 int16",
 	},
 	{
 		Name:       "NInt16(-32768)",
 		Value:      NInt16(-32768),
 		Hex:        "80ff813310012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e496e743136020900ff82feffff",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NInt16 int16",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NInt16 int16",
 	},
 	{
 		Name:       "NInt32(0)",
 		Value:      NInt32(0),
 		Hex:        "80ff813310012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e496e743332020a00ff8200",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NInt32 int32",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NInt32 int32",
 	},
 	{
 		Name:       "NInt32(2147483647)",
 		Value:      NInt32(2147483647),
 		Hex:        "80ff813310012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e496e743332020a00ff82fcfffffffe",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NInt32 int32",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NInt32 int32",
 	},
 	{
 		Name:       "NInt32(-2147483648)",
 		Value:      NInt32(-2147483648),
 		Hex:        "80ff813310012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e496e743332020a00ff82fcffffffff",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NInt32 int32",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NInt32 int32",
 	},
 	{
 		Name:       "NInt64(0)",
 		Value:      NInt64(0),
 		Hex:        "80ff813310012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e496e743634020b00ff8200",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NInt64 int64",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NInt64 int64",
 	},
 	{
 		Name:       "NInt64(9223372036854775807)",
 		Value:      NInt64(9223372036854775807),
 		Hex:        "80ff813310012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e496e743634020b00ff82f8fffffffffffffffe",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NInt64 int64",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NInt64 int64",
 	},
 	{
 		Name:       "NInt64(-9223372036854775808)",
 		Value:      NInt64(-9223372036854775808),
 		Hex:        "80ff813310012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e496e743634020b00ff82f8ffffffffffffffff",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NInt64 int64",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NInt64 int64",
 	},
 	{
 		Name:       "NFloat32(0)",
 		Value:      NFloat32(0),
 		Hex:        "80ff813510012f766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e466c6f61743332020c00ff8200",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NFloat32 float32",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NFloat32 float32",
 	},
 	{
 		Name:       "NFloat32(32.5)",
 		Value:      NFloat32(32.5),
 		Hex:        "80ff813510012f766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e466c6f61743332020c00ff82fd404040",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NFloat32 float32",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NFloat32 float32",
 	},
 	{
 		Name:       "NFloat32(-32.5)",
 		Value:      NFloat32(-32.5),
 		Hex:        "80ff813510012f766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e466c6f61743332020c00ff82fd4040c0",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NFloat32 float32",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NFloat32 float32",
 	},
 	{
 		Name:       "NFloat64(0)",
 		Value:      NFloat64(0),
 		Hex:        "80ff813510012f766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e466c6f61743634020d00ff8200",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NFloat64 float64",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NFloat64 float64",
 	},
 	{
 		Name:       "NFloat64(64.5)",
 		Value:      NFloat64(64.5),
 		Hex:        "80ff813510012f766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e466c6f61743634020d00ff82fd205040",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NFloat64 float64",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NFloat64 float64",
 	},
 	{
 		Name:       "NFloat64(-64.5)",
 		Value:      NFloat64(-64.5),
 		Hex:        "80ff813510012f766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e466c6f61743634020d00ff82fd2050c0",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NFloat64 float64",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NFloat64 float64",
 	},
 	{
 		Name:       "NComplex64(0)",
 		Value:      NComplex64(0),
 		Hex:        "80ff8137100131766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e436f6d706c65783634020e00ff82020000",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NComplex64 complex64",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NComplex64 complex64",
 	},
 	{
 		Name:       "NComplex64(64.5+64.5i)",
 		Value:      NComplex64(64.5 + 64.5i),
 		Hex:        "80ff8137100131766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e436f6d706c65783634020e00ff8208fd205040fd205040",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NComplex64 complex64",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NComplex64 complex64",
 	},
 	{
 		Name:       "NComplex64(64.5-64.5i)",
 		Value:      NComplex64(64.5 - 64.5i),
 		Hex:        "80ff8137100131766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e436f6d706c65783634020e00ff8208fd205040fd2050c0",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NComplex64 complex64",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NComplex64 complex64",
 	},
 	{
 		Name:       "NComplex128(0)",
 		Value:      NComplex128(0),
 		Hex:        "80ff8138100132766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e436f6d706c6578313238020f00ff82020000",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NComplex128 complex128",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NComplex128 complex128",
 	},
 	{
 		Name:       "NComplex128(128.5+128.5i)",
 		Value:      NComplex128(128.5 + 128.5i),
 		Hex:        "80ff8138100132766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e436f6d706c6578313238020f00ff8208fd106040fd106040",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NComplex128 complex128",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NComplex128 complex128",
 	},
 	{
 		Name:       "NComplex128(128.5-128.5i)",
 		Value:      NComplex128(128.5 - 128.5i),
 		Hex:        "80ff8138100132766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e436f6d706c6578313238020f00ff8208fd106040fd1060c0",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NComplex128 complex128",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NComplex128 complex128",
 	},
 	{
 		Name: "[2]uint64{1, 2}",
@@ -1022,7 +1022,7 @@ var Tests = []TestCase{
 			2,
 		},
 		Hex:        "80ff813c120134766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e41727261793255696e7436340208030200ff82020102",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NArray2Uint64 [2]uint64",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NArray2Uint64 [2]uint64",
 	},
 	{
 		Name: "[]uint64{1, 2}",
@@ -1040,7 +1040,7 @@ var Tests = []TestCase{
 			2,
 		},
 		Hex:        "80ff8138130132766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e4c69737455696e743634020800ff8203020102",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NListUint64 []uint64",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NListUint64 []uint64",
 	},
 	{
 		Name: "set[uint64]{1}",
@@ -1056,7 +1056,7 @@ var Tests = []TestCase{
 			1: struct{}{},
 		},
 		Hex:        "80ff8137140131766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e53657455696e743634020800ff82020101",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NSetUint64 set[uint64]",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NSetUint64 set[uint64]",
 	},
 	{
 		Name: "map[uint64]string{1: \"abc\"}",
@@ -1072,7 +1072,7 @@ var Tests = []TestCase{
 			1: "abc",
 		},
 		Hex:        "80ff813f150137766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e4d617055696e743634537472696e670208030400ff8206010103616263",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NMapUint64String map[uint64]string",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NMapUint64String map[uint64]string",
 	},
 	{
 		Name: "NStruct{A: true, B: \"abc\", C: 123}",
@@ -1082,19 +1082,19 @@ var Tests = []TestCase{
 			C: 123,
 		},
 		Hex:        "80ff814616012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e5374727563740203010141020300010142020400010143020b0000ff820b0101020361626303fff600",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NStruct struct{A bool;B string;C int64}",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NStruct struct{A bool;B string;C int64}",
 	},
 	{
 		Name:       "?NStruct(nil)",
 		Value:      (*NStruct)(nil),
 		Hex:        "80ff834616012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e5374727563740203010141020300010142020400010143020b0000ff81061d0100024200ff820100",
-		TypeString: "?veyron.io/veyron/veyron2/vom2/testdata.NStruct struct{A bool;B string;C int64}",
+		TypeString: "?v.io/veyron/veyron2/vom2/testdata.NStruct struct{A bool;B string;C int64}",
 	},
 	{
 		Name:       "?NStruct{}",
 		Value:      &NStruct{},
 		Hex:        "80ff834616012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e5374727563740203010141020300010142020400010143020b0000ff81061d0100024200ff82080101000200030000",
-		TypeString: "?veyron.io/veyron/veyron2/vom2/testdata.NStruct struct{A bool;B string;C int64}",
+		TypeString: "?v.io/veyron/veyron2/vom2/testdata.NStruct struct{A bool;B string;C int64}",
 	},
 	{
 		Name: "?NStruct{A: true, B: \"abc\", C: 123}",
@@ -1104,79 +1104,79 @@ var Tests = []TestCase{
 			C: 123,
 		},
 		Hex:        "80ff834616012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e5374727563740203010141020300010142020400010143020b0000ff81061d0100024200ff820c010101020361626303fff600",
-		TypeString: "?veyron.io/veyron/veyron2/vom2/testdata.NStruct struct{A bool;B string;C int64}",
+		TypeString: "?v.io/veyron/veyron2/vom2/testdata.NStruct struct{A bool;B string;C int64}",
 	},
 	{
 		Name:       "NEnum.A",
 		Value:      NEnumA,
 		Hex:        "80ff813811012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e456e756d020301410142014300ff8200",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NEnum enum{A;B;C}",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NEnum enum{A;B;C}",
 	},
 	{
 		Name:       "NEnum.B",
 		Value:      NEnumB,
 		Hex:        "80ff813811012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e456e756d020301410142014300ff8201",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NEnum enum{A;B;C}",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NEnum enum{A;B;C}",
 	},
 	{
 		Name:       "NEnum.C",
 		Value:      NEnumC,
 		Hex:        "80ff813811012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e456e756d020301410142014300ff8202",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NEnum enum{A;B;C}",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NEnum enum{A;B;C}",
 	},
 	{
 		Name:       "NUnion{A: true}",
 		Value:      NUnion(NUnionA{true}),
 		Hex:        "80ff814519012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e556e696f6e0203010141020300010142020400010143020b0000ff82020101",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NUnion union{A bool;B string;C int64}",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NUnion union{A bool;B string;C int64}",
 	},
 	{
 		Name:       "NUnion{A: false}",
 		Value:      NUnion(NUnionA{false}),
 		Hex:        "80ff814519012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e556e696f6e0203010141020300010142020400010143020b0000ff82020100",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NUnion union{A bool;B string;C int64}",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NUnion union{A bool;B string;C int64}",
 	},
 	{
 		Name:       "NUnion{B: \"\"}",
 		Value:      NUnion(NUnionB{""}),
 		Hex:        "80ff814519012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e556e696f6e0203010141020300010142020400010143020b0000ff82020200",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NUnion union{A bool;B string;C int64}",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NUnion union{A bool;B string;C int64}",
 	},
 	{
 		Name:       "NUnion{B: \"abc\"}",
 		Value:      NUnion(NUnionB{"abc"}),
 		Hex:        "80ff814519012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e556e696f6e0203010141020300010142020400010143020b0000ff82050203616263",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NUnion union{A bool;B string;C int64}",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NUnion union{A bool;B string;C int64}",
 	},
 	{
 		Name:       "NUnion{C: 0}",
 		Value:      NUnion(NUnionC{int64(0)}),
 		Hex:        "80ff814519012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e556e696f6e0203010141020300010142020400010143020b0000ff82020300",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NUnion union{A bool;B string;C int64}",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NUnion union{A bool;B string;C int64}",
 	},
 	{
 		Name:       "NUnion{C: 123}",
 		Value:      NUnion(NUnionC{int64(123)}),
 		Hex:        "80ff814519012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e556e696f6e0203010141020300010142020400010143020b0000ff820303fff6",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NUnion union{A bool;B string;C int64}",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NUnion union{A bool;B string;C int64}",
 	},
 	{
 		Name:       "NUnion{C: -123}",
 		Value:      NUnion(NUnionC{int64(-123)}),
 		Hex:        "80ff814519012d766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e556e696f6e0203010141020300010142020400010143020b0000ff820303fff5",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.NUnion union{A bool;B string;C int64}",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.NUnion union{A bool;B string;C int64}",
 	},
 	{
 		Name:       "MBool(true)",
 		Value:      MBool(true),
 		Hex:        "80ff813210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4d426f6f6c020300ff8201",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.MBool bool",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.MBool bool",
 	},
 	{
 		Name:       "MBool(false)",
 		Value:      MBool(false),
 		Hex:        "80ff813210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4d426f6f6c020300ff8200",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.MBool bool",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.MBool bool",
 	},
 	{
 		Name: "MStruct{A: true, B: true, C: true}",
@@ -1187,7 +1187,7 @@ var Tests = []TestCase{
 			E: __vdl.TypeOf((*__vdlutil.Any)(nil)),
 		},
 		Hex:        "80ff833210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e426f6f6c020300ff853210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4d426f6f6c020300ff894616012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e5374727563740203010141020300010142020400010143020b0000ff87061d0100024500ff815816012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4d537472756374020601014102030001014202420001014302430001014402440001014502020001014602010000ff820d01010201030104000501060000",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.MStruct struct{A bool;B veyron.io/veyron/veyron2/vom2/testdata.NBool bool;C veyron.io/veyron/veyron2/vom2/testdata.MBool bool;D ?veyron.io/veyron/veyron2/vom2/testdata.NStruct struct{A bool;B string;C int64};E typeobject;F any}",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.MStruct struct{A bool;B v.io/veyron/veyron2/vom2/testdata.NBool bool;C v.io/veyron/veyron2/vom2/testdata.MBool bool;D ?v.io/veyron/veyron2/vom2/testdata.NStruct struct{A bool;B string;C int64};E typeobject;F any}",
 	},
 	{
 		Name: "MStruct{}",
@@ -1195,7 +1195,7 @@ var Tests = []TestCase{
 			E: __vdl.TypeOf((*__vdlutil.Any)(nil)),
 		},
 		Hex:        "80ff833210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e426f6f6c020300ff853210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4d426f6f6c020300ff894616012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e5374727563740203010141020300010142020400010143020b0000ff87061d0100024500ff815816012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4d537472756374020601014102030001014202420001014302430001014402440001014502020001014602010000ff820d01000200030004000501060000",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.MStruct struct{A bool;B veyron.io/veyron/veyron2/vom2/testdata.NBool bool;C veyron.io/veyron/veyron2/vom2/testdata.MBool bool;D ?veyron.io/veyron/veyron2/vom2/testdata.NStruct struct{A bool;B string;C int64};E typeobject;F any}",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.MStruct struct{A bool;B v.io/veyron/veyron2/vom2/testdata.NBool bool;C v.io/veyron/veyron2/vom2/testdata.MBool bool;D ?v.io/veyron/veyron2/vom2/testdata.NStruct struct{A bool;B string;C int64};E typeobject;F any}",
 	},
 	{
 		Name: "MStruct{D: {}}",
@@ -1204,7 +1204,7 @@ var Tests = []TestCase{
 			E: __vdl.TypeOf((*__vdlutil.Any)(nil)),
 		},
 		Hex:        "80ff833210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e426f6f6c020300ff853210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4d426f6f6c020300ff894616012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e5374727563740203010141020300010142020400010143020b0000ff87061d0100024500ff815816012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4d537472756374020601014102030001014202420001014302430001014402440001014502020001014602010000ff82140100020003000401010002000300000501060000",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.MStruct struct{A bool;B veyron.io/veyron/veyron2/vom2/testdata.NBool bool;C veyron.io/veyron/veyron2/vom2/testdata.MBool bool;D ?veyron.io/veyron/veyron2/vom2/testdata.NStruct struct{A bool;B string;C int64};E typeobject;F any}",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.MStruct struct{A bool;B v.io/veyron/veyron2/vom2/testdata.NBool bool;C v.io/veyron/veyron2/vom2/testdata.MBool bool;D ?v.io/veyron/veyron2/vom2/testdata.NStruct struct{A bool;B string;C int64};E typeobject;F any}",
 	},
 	{
 		Name: "MStruct{D: {A: true, B: \"abc\", C: 123}}",
@@ -1217,7 +1217,7 @@ var Tests = []TestCase{
 			E: __vdl.TypeOf((*__vdlutil.Any)(nil)),
 		},
 		Hex:        "80ff833210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e426f6f6c020300ff853210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4d426f6f6c020300ff894616012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e5374727563740203010141020300010142020400010143020b0000ff87061d0100024500ff815816012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4d537472756374020601014102030001014202420001014302430001014402440001014502020001014602010000ff821801000200030004010101020361626303fff6000501060000",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.MStruct struct{A bool;B veyron.io/veyron/veyron2/vom2/testdata.NBool bool;C veyron.io/veyron/veyron2/vom2/testdata.MBool bool;D ?veyron.io/veyron/veyron2/vom2/testdata.NStruct struct{A bool;B string;C int64};E typeobject;F any}",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.MStruct struct{A bool;B v.io/veyron/veyron2/vom2/testdata.NBool bool;C v.io/veyron/veyron2/vom2/testdata.MBool bool;D ?v.io/veyron/veyron2/vom2/testdata.NStruct struct{A bool;B string;C int64};E typeobject;F any}",
 	},
 	{
 		Name: "MStruct{F: \"abc\"}",
@@ -1226,7 +1226,7 @@ var Tests = []TestCase{
 			F: "abc",
 		},
 		Hex:        "80ff833210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e426f6f6c020300ff853210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4d426f6f6c020300ff894616012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e5374727563740203010141020300010142020400010143020b0000ff87061d0100024500ff815816012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4d537472756374020601014102030001014202420001014302430001014402440001014502020001014602010000ff82110100020003000400050106040361626300",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.MStruct struct{A bool;B veyron.io/veyron/veyron2/vom2/testdata.NBool bool;C veyron.io/veyron/veyron2/vom2/testdata.MBool bool;D ?veyron.io/veyron/veyron2/vom2/testdata.NStruct struct{A bool;B string;C int64};E typeobject;F any}",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.MStruct struct{A bool;B v.io/veyron/veyron2/vom2/testdata.NBool bool;C v.io/veyron/veyron2/vom2/testdata.MBool bool;D ?v.io/veyron/veyron2/vom2/testdata.NStruct struct{A bool;B string;C int64};E typeobject;F any}",
 	},
 	{
 		Name: "MStruct{F: MBool(true)}",
@@ -1235,7 +1235,7 @@ var Tests = []TestCase{
 			F: MBool(true),
 		},
 		Hex:        "80ff833210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e426f6f6c020300ff853210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4d426f6f6c020300ff894616012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e5374727563740203010141020300010142020400010143020b0000ff87061d0100024500ff815816012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4d537472756374020601014102030001014202420001014302430001014402440001014502020001014602010000ff820e0100020003000400050106430100",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.MStruct struct{A bool;B veyron.io/veyron/veyron2/vom2/testdata.NBool bool;C veyron.io/veyron/veyron2/vom2/testdata.MBool bool;D ?veyron.io/veyron/veyron2/vom2/testdata.NStruct struct{A bool;B string;C int64};E typeobject;F any}",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.MStruct struct{A bool;B v.io/veyron/veyron2/vom2/testdata.NBool bool;C v.io/veyron/veyron2/vom2/testdata.MBool bool;D ?v.io/veyron/veyron2/vom2/testdata.NStruct struct{A bool;B string;C int64};E typeobject;F any}",
 	},
 	{
 		Name: "MStruct{F: ?NStruct{B: \"abc\"}}",
@@ -1246,7 +1246,7 @@ var Tests = []TestCase{
 			},
 		},
 		Hex:        "80ff833210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e426f6f6c020300ff853210012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4d426f6f6c020300ff894616012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e5374727563740203010141020300010142020400010143020b0000ff87061d0100024500ff815816012e766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4d537472756374020601014102030001014202420001014302430001014402440001014502020001014602010000ff8218010002000300040005010644010100020361626303000000",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.MStruct struct{A bool;B veyron.io/veyron/veyron2/vom2/testdata.NBool bool;C veyron.io/veyron/veyron2/vom2/testdata.MBool bool;D ?veyron.io/veyron/veyron2/vom2/testdata.NStruct struct{A bool;B string;C int64};E typeobject;F any}",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.MStruct struct{A bool;B v.io/veyron/veyron2/vom2/testdata.NBool bool;C v.io/veyron/veyron2/vom2/testdata.MBool bool;D ?v.io/veyron/veyron2/vom2/testdata.NStruct struct{A bool;B string;C int64};E typeobject;F any}",
 	},
 	{
 		Name: "MList{{4, 2}, {}, {99}}",
@@ -1261,7 +1261,7 @@ var Tests = []TestCase{
 			},
 		},
 		Hex:        "80ff8338130132766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e4c69737455696e743634020800ff813213012c766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4d4c697374024200ff820703020402000163",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.MList []veyron.io/veyron/veyron2/vom2/testdata.NListUint64 []uint64",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.MList []v.io/veyron/veyron2/vom2/testdata.NListUint64 []uint64",
 	},
 	{
 		Name: "MMap{4.5: {2, 3}}",
@@ -1272,7 +1272,7 @@ var Tests = []TestCase{
 			},
 		},
 		Hex:        "80ff833510012f766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e466c6f61743332020c00ff8538130132766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4e4c69737455696e743634020800ff813315012b766579726f6e2e696f2f766579726f6e2f766579726f6e322f766f6d322f74657374646174612e4d4d61700242034300ff820701fe1240020203",
-		TypeString: "veyron.io/veyron/veyron2/vom2/testdata.MMap map[veyron.io/veyron/veyron2/vom2/testdata.NFloat32 float32]veyron.io/veyron/veyron2/vom2/testdata.NListUint64 []uint64",
+		TypeString: "v.io/veyron/veyron2/vom2/testdata.MMap map[v.io/veyron/veyron2/vom2/testdata.NFloat32 float32]v.io/veyron/veyron2/vom2/testdata.NListUint64 []uint64",
 	},
 	{
 		Name:       "typeobject(any)",

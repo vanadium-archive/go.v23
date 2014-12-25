@@ -73,10 +73,10 @@ import "path/filepath"
 import "runtime"
 import "sync"
 
-import "veyron.io/veyron/veyron2/context"
-import "veyron.io/veyron/veyron2/i18n"
-import "veyron.io/veyron/veyron2/verror" // While converting from verror to verror2
-import "veyron.io/veyron/veyron2/vtrace"
+import "v.io/veyron/veyron2/context"
+import "v.io/veyron/veyron2/i18n"
+import "v.io/veyron/veyron2/verror" // While converting from verror to verror2
+import "v.io/veyron/veyron2/vtrace"
 
 // An ActionCode represents the action expected to be performed by a typical client
 // receiving an error that perhaps it does not understand.
@@ -407,7 +407,7 @@ func dataFromContext(ctx context.T) (langID i18n.LangID, componentName string, o
 // Standard is a standard implementation of E.
 //
 // This must be kept in sync with the vdl.ErrorType defined in
-// veyron.io/veyron/veyron2/vdl.
+// v.io/veyron/veyron2/vdl.
 //
 // TODO(toddw): Move this definition to a common vdl file, and change it to be a
 // better wire format (e.g. no nested structs).
@@ -457,7 +457,7 @@ func (e Standard) Stack() PCs {
 	return stackIntPtr
 }
 
-const pkgPath = "veyron.io/veyron/veyron2/verror"
+const pkgPath = "v.io/veyron/veyron2/verror"
 
 var (
 	// Success, Unknown or Internal are intended for general use by

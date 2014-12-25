@@ -5,16 +5,16 @@
 package mounttable
 
 import (
-	"veyron.io/veyron/veyron2/naming"
+	"v.io/veyron/veyron2/naming"
 
-	"veyron.io/veyron/veyron2/services/security/access"
+	"v.io/veyron/veyron2/services/security/access"
 
 	// The non-user imports are prefixed with "__" to prevent collisions.
-	__veyron2 "veyron.io/veyron/veyron2"
-	__context "veyron.io/veyron/veyron2/context"
-	__ipc "veyron.io/veyron/veyron2/ipc"
-	__vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
-	__wiretype "veyron.io/veyron/veyron2/wiretype"
+	__veyron2 "v.io/veyron/veyron2"
+	__context "v.io/veyron/veyron2/context"
+	__ipc "v.io/veyron/veyron2/ipc"
+	__vdlutil "v.io/veyron/veyron2/vdl/vdlutil"
+	__wiretype "v.io/veyron/veyron2/wiretype"
 )
 
 // TODO(toddw): Remove this line once the new signature support is done.
@@ -233,7 +233,7 @@ var MountTableDesc __ipc.InterfaceDesc = descMountTable
 // descMountTable hides the desc to keep godoc clean.
 var descMountTable = __ipc.InterfaceDesc{
 	Name:    "MountTable",
-	PkgPath: "veyron.io/veyron/veyron2/services/mounttable",
+	PkgPath: "v.io/veyron/veyron2/services/mounttable",
 	Doc:     "// MountTable defines the interface to talk to a mounttable.",
 	Methods: []__ipc.MethodDesc{
 		{
@@ -320,19 +320,19 @@ func (s implMountTableServerStub) Signature(ctx __ipc.ServerContext) (__ipc.Serv
 	}
 
 	result.TypeDefs = []__vdlutil.Any{
-		__wiretype.NamedPrimitiveType{Type: 0x34, Name: "veyron.io/veyron/veyron2/naming.MountFlag", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, __wiretype.StructType{
+		__wiretype.NamedPrimitiveType{Type: 0x34, Name: "v.io/veyron/veyron2/naming.MountFlag", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, __wiretype.StructType{
 			[]__wiretype.FieldType{
 				__wiretype.FieldType{Type: 0x3, Name: "Server"},
 				__wiretype.FieldType{Type: 0x34, Name: "TTL"},
 			},
-			"veyron.io/veyron/veyron2/naming.VDLMountedServer", []string(nil)},
+			"v.io/veyron/veyron2/naming.VDLMountedServer", []string(nil)},
 		__wiretype.SliceType{Elem: 0x43, Name: "", Tags: []string(nil)}, __wiretype.StructType{
 			[]__wiretype.FieldType{
 				__wiretype.FieldType{Type: 0x3, Name: "Name"},
 				__wiretype.FieldType{Type: 0x44, Name: "Servers"},
 				__wiretype.FieldType{Type: 0x2, Name: "MT"},
 			},
-			"veyron.io/veyron/veyron2/naming.VDLMountEntry", []string(nil)},
+			"v.io/veyron/veyron2/naming.VDLMountEntry", []string(nil)},
 	}
 
 	return result, nil

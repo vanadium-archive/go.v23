@@ -1,7 +1,7 @@
 package ipc
 
 import (
-	"veyron.io/veyron/veyron2/context"
+	"v.io/veyron/veyron2/context"
 )
 
 // UniversalServiceMethods defines the set of methods that are implemented on

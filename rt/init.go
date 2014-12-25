@@ -7,9 +7,9 @@ import (
 	"runtime"
 	"sync"
 
-	"veyron.io/veyron/veyron2"
-	"veyron.io/veyron/veyron2/options"
-	"veyron.io/veyron/veyron2/verror2"
+	"v.io/veyron/veyron2"
+	"v.io/veyron/veyron2/options"
+	"v.io/veyron/veyron2/verror2"
 )
 
 type Factory func(opts ...veyron2.ROpt) (veyron2.Runtime, error)

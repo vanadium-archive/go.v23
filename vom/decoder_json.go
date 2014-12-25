@@ -230,7 +230,7 @@ func (d *decoderJSON) lookupWireDef(typename string) (*wireDef, error) {
 	// multiple times, since makeUnnamedType could have inserted the type first.
 	//
 	// Unnamed types always appear in wireDefs under their full name; if the user
-	// defines "veyron.io/veyron/veyron/lib/vom.Foo" and refers to a pointer as "*Foo", wireDefs
+	// defines "v.io/veyron/veyron/lib/vom.Foo" and refers to a pointer as "*Foo", wireDefs
 	// will only contain "*veyron/lib/vom.Foo".  Subsequent lookups of "*Foo" will
 	// make the unnamed type again, and discover it's already defined here.
 	// TODO(toddw): Insert the short name "*Foo" as well, and remove it when there

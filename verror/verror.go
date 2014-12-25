@@ -10,8 +10,8 @@ import (
 // ID is a unique identifier for errors, allowing stable error
 // checking across different error messages and different address
 // spaces.  By convention the format is "PKGPATH.NAME" - e.g. ErrIDFoo
-// defined in the "veyron.io/veyron/veyron2/verror" package has id
-// "veyron.io/veyron/veyron2/verror.ErrIDFoo".
+// defined in the "v.io/veyron/veyron2/verror" package has id
+// "v.io/veyron/veyron2/verror.ErrIDFoo".
 type ID string
 
 const Unknown = ID("")
@@ -98,7 +98,7 @@ func ConvertWithDefault(id ID, err error) E {
 // Standard is the standard implementation of E.
 type Standard struct {
 	// The field names and order must be kept in sync with vdl.ErrorType defined
-	// in veyron.io/veyron/veyron2/vdl/type_builder.go.
+	// in v.io/veyron/veyron2/vdl/type_builder.go.
 	ID  ID
 	Msg string
 }

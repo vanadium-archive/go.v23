@@ -15,11 +15,11 @@ import (
 	"strings"
 	"text/template"
 
-	"veyron.io/veyron/veyron2/vdl"
-	"veyron.io/veyron/veyron2/vdl/codegen"
-	"veyron.io/veyron/veyron2/vdl/compile"
-	"veyron.io/veyron/veyron2/vdl/vdlroot/src/vdltool"
-	"veyron.io/veyron/veyron2/vdl/vdlutil"
+	"v.io/veyron/veyron2/vdl"
+	"v.io/veyron/veyron2/vdl/codegen"
+	"v.io/veyron/veyron2/vdl/compile"
+	"v.io/veyron/veyron2/vdl/vdlroot/src/vdltool"
+	"v.io/veyron/veyron2/vdl/vdlutil"
 )
 
 type data struct {

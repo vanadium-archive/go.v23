@@ -5,7 +5,7 @@
 package build
 
 import (
-	"veyron.io/veyron/veyron2/services/mgmt/binary"
+	"v.io/veyron/veyron2/services/mgmt/binary"
 )
 
 // Architecture specifies the hardware architecture of a host.

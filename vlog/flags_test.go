@@ -8,10 +8,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"veyron.io/veyron/veyron/lib/modules"
-	"veyron.io/veyron/veyron/lib/testutil"
+	"v.io/veyron/veyron/lib/modules"
+	"v.io/veyron/veyron/lib/testutil"
 
-	"veyron.io/veyron/veyron2/vlog"
+	"v.io/veyron/veyron2/vlog"
 )
 
 func TestHelperProcess(t *testing.T) {

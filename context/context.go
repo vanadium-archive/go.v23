@@ -37,7 +37,7 @@
 //
 //    package auth
 //
-//    import "veyron.io/veyron/veyron2/context"
+//    import "v.io/veyron/veyron2/context"
 //
 //    type Auth struct{...}
 //

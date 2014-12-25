@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 
-	"veyron.io/veyron/veyron2/vdl"
-	"veyron.io/veyron/veyron2/vdl/compile"
+	"v.io/veyron/veyron2/vdl"
+	"v.io/veyron/veyron2/vdl/compile"
 )
 
 const complexTmpl = `

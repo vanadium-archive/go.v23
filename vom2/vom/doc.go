@@ -50,7 +50,7 @@ characters may be input to represent commands:
 This lets you cut-and-paste hex strings into your terminal, and use the commands
 to trigger status or flush calls; i.e. a rudimentary debugging UI.
 
-See veyron.io/veyron/veyron2/vom2.Dumper for details on the dump output.
+See v.io/veyron/veyron2/vom2.Dumper for details on the dump output.
 
 Usage:
    vom dump [flags] [data]

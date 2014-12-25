@@ -5,7 +5,7 @@ package security
 
 import (
 	// The non-user imports are prefixed with "__" to prevent collisions.
-	__vdl "veyron.io/veyron/veyron2/vdl"
+	__vdl "v.io/veyron/veyron2/vdl"
 )
 
 // unixTimeExpiryCaveat represents a caveat that validates iff the current
@@ -14,7 +14,7 @@ import (
 type unixTimeExpiryCaveat int64
 
 func (unixTimeExpiryCaveat) __VDLReflect(struct {
-	Name string "veyron.io/veyron/veyron2/security.unixTimeExpiryCaveat"
+	Name string "v.io/veyron/veyron2/security.unixTimeExpiryCaveat"
 }) {
 }
 
@@ -25,7 +25,7 @@ func (unixTimeExpiryCaveat) __VDLReflect(struct {
 type methodCaveat []string
 
 func (methodCaveat) __VDLReflect(struct {
-	Name string "veyron.io/veyron/veyron2/security.methodCaveat"
+	Name string "v.io/veyron/veyron2/security.methodCaveat"
 }) {
 }
 
@@ -35,7 +35,7 @@ func (methodCaveat) __VDLReflect(struct {
 type peerBlessingsCaveat []BlessingPattern
 
 func (peerBlessingsCaveat) __VDLReflect(struct {
-	Name string "veyron.io/veyron/veyron2/security.peerBlessingsCaveat"
+	Name string "v.io/veyron/veyron2/security.peerBlessingsCaveat"
 }) {
 }
 
@@ -70,7 +70,7 @@ type publicKeyThirdPartyCaveat struct {
 }
 
 func (publicKeyThirdPartyCaveat) __VDLReflect(struct {
-	Name string "veyron.io/veyron/veyron2/security.publicKeyThirdPartyCaveat"
+	Name string "v.io/veyron/veyron2/security.publicKeyThirdPartyCaveat"
 }) {
 }
 
@@ -87,7 +87,7 @@ type publicKeyDischarge struct {
 }
 
 func (publicKeyDischarge) __VDLReflect(struct {
-	Name string "veyron.io/veyron/veyron2/security.publicKeyDischarge"
+	Name string "v.io/veyron/veyron2/security.publicKeyDischarge"
 }) {
 }
 

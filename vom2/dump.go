@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"io"
 
-	"veyron.io/veyron/veyron2/vdl"
-	"veyron.io/veyron/veyron2/vdl/valconv"
-	"veyron.io/veyron/veyron2/verror"
+	"v.io/veyron/veyron2/vdl"
+	"v.io/veyron/veyron2/vdl/valconv"
+	"v.io/veyron/veyron2/verror"
 )
 
 // Dump returns a human-readable dump of the given vom data, in the default

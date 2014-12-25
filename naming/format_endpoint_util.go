@@ -8,10 +8,10 @@ import (
 	"os"
 	"strings"
 
-	"veyron.io/veyron/veyron2/naming"
-	"veyron.io/veyron/veyron2/rt"
+	"v.io/veyron/veyron2/naming"
+	"v.io/veyron/veyron2/rt"
 
-	_ "veyron.io/veyron/veyron/profiles"
+	_ "v.io/veyron/veyron/profiles"
 )
 
 var protocolFlag = protocolFlagVar{"tcp"}

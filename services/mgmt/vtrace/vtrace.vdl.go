@@ -6,19 +6,19 @@
 package vtrace
 
 import (
-	"veyron.io/veyron/veyron2/services/security/access"
+	"v.io/veyron/veyron2/services/security/access"
 
-	"veyron.io/veyron/veyron2/uniqueid"
+	"v.io/veyron/veyron2/uniqueid"
 
-	"veyron.io/veyron/veyron2/vtrace"
+	"v.io/veyron/veyron2/vtrace"
 
 	// The non-user imports are prefixed with "__" to prevent collisions.
 	__io "io"
-	__veyron2 "veyron.io/veyron/veyron2"
-	__context "veyron.io/veyron/veyron2/context"
-	__ipc "veyron.io/veyron/veyron2/ipc"
-	__vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
-	__wiretype "veyron.io/veyron/veyron2/wiretype"
+	__veyron2 "v.io/veyron/veyron2"
+	__context "v.io/veyron/veyron2/context"
+	__ipc "v.io/veyron/veyron2/ipc"
+	__vdlutil "v.io/veyron/veyron2/vdl/vdlutil"
+	__wiretype "v.io/veyron/veyron2/wiretype"
 )
 
 // TODO(toddw): Remove this line once the new signature support is done.
@@ -245,7 +245,7 @@ var StoreDesc __ipc.InterfaceDesc = descStore
 // descStore hides the desc to keep godoc clean.
 var descStore = __ipc.InterfaceDesc{
 	Name:    "Store",
-	PkgPath: "veyron.io/veyron/veyron2/services/mgmt/vtrace",
+	PkgPath: "v.io/veyron/veyron2/services/mgmt/vtrace",
 	Methods: []__ipc.MethodDesc{
 		{
 			Name: "Trace",
@@ -292,12 +292,12 @@ func (s implStoreServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSi
 	}
 
 	result.TypeDefs = []__vdlutil.Any{
-		__wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, __wiretype.ArrayType{Elem: 0x41, Len: 0x10, Name: "veyron.io/veyron/veyron2/uniqueid.ID", Tags: []string(nil)}, __wiretype.StructType{
+		__wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, __wiretype.ArrayType{Elem: 0x41, Len: 0x10, Name: "v.io/veyron/veyron2/uniqueid.ID", Tags: []string(nil)}, __wiretype.StructType{
 			[]__wiretype.FieldType{
 				__wiretype.FieldType{Type: 0x25, Name: "When"},
 				__wiretype.FieldType{Type: 0x3, Name: "Message"},
 			},
-			"veyron.io/veyron/veyron2/vtrace.Annotation", []string(nil)},
+			"v.io/veyron/veyron2/vtrace.Annotation", []string(nil)},
 		__wiretype.SliceType{Elem: 0x43, Name: "", Tags: []string(nil)}, __wiretype.StructType{
 			[]__wiretype.FieldType{
 				__wiretype.FieldType{Type: 0x42, Name: "ID"},
@@ -307,13 +307,13 @@ func (s implStoreServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSi
 				__wiretype.FieldType{Type: 0x25, Name: "End"},
 				__wiretype.FieldType{Type: 0x44, Name: "Annotations"},
 			},
-			"veyron.io/veyron/veyron2/vtrace.SpanRecord", []string(nil)},
+			"v.io/veyron/veyron2/vtrace.SpanRecord", []string(nil)},
 		__wiretype.SliceType{Elem: 0x45, Name: "", Tags: []string(nil)}, __wiretype.StructType{
 			[]__wiretype.FieldType{
 				__wiretype.FieldType{Type: 0x42, Name: "ID"},
 				__wiretype.FieldType{Type: 0x46, Name: "Spans"},
 			},
-			"veyron.io/veyron/veyron2/vtrace.TraceRecord", []string(nil)},
+			"v.io/veyron/veyron2/vtrace.TraceRecord", []string(nil)},
 		__wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}}
 
 	return result, nil

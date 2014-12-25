@@ -3,9 +3,9 @@
 package repository
 
 import (
-	"veyron.io/veyron/veyron2/services/mgmt/application"
-	"veyron.io/veyron/veyron2/services/mgmt/binary"
-	"veyron.io/veyron/veyron2/services/security/access"
+	"v.io/veyron/veyron2/services/mgmt/application"
+	"v.io/veyron/veyron2/services/mgmt/binary"
+	"v.io/veyron/veyron2/services/security/access"
 )
 
 // Application provides access to application envelopes. An

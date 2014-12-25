@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"time"
 
-	"veyron.io/veyron/veyron2/vlog"
-	"veyron.io/veyron/veyron2/vom"
+	"v.io/veyron/veyron2/vlog"
+	"v.io/veyron/veyron2/vom"
 )
 
 // NewCaveat returns a Caveat that requires validation by validator.

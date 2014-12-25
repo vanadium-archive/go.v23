@@ -3,8 +3,8 @@
 package device
 
 import (
-	"veyron.io/veyron/veyron2/services/mgmt/binary"
-	"veyron.io/veyron/veyron2/services/security/access"
+	"v.io/veyron/veyron2/services/mgmt/binary"
+	"v.io/veyron/veyron2/services/security/access"
 )
 
 // Application can be used to manage applications on a device. The

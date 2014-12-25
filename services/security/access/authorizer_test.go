@@ -10,8 +10,8 @@ import (
 	"reflect"
 	"testing"
 
-	"veyron.io/veyron/veyron2/security"
-	"veyron.io/veyron/veyron2/services/security/access/test"
+	"v.io/veyron/veyron2/security"
+	"v.io/veyron/veyron2/services/security/access/test"
 )
 
 // TestTaggedACLAuthorizer is both a test and a demonstration of the use of the

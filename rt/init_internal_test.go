@@ -4,9 +4,9 @@ import (
 	"strings"
 	"testing"
 
-	"veyron.io/veyron/veyron2"
-	"veyron.io/veyron/veyron2/config"
-	"veyron.io/veyron/veyron2/options"
+	"v.io/veyron/veyron2"
+	"v.io/veyron/veyron2/config"
+	"v.io/veyron/veyron2/options"
 )
 
 type myprofile struct {

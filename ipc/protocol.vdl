@@ -1,8 +1,8 @@
 package ipc
 
 import (
-  "veyron.io/veyron/veyron2/security"
-  "veyron.io/veyron/veyron2/vtrace"
+  "v.io/veyron/veyron2/security"
+  "v.io/veyron/veyron2/vtrace"
 )
 
 // The communications between a client and server is based on RPCs.  Assume a

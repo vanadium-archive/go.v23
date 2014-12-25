@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"strconv"
 
-	"veyron.io/veyron/veyron2/vdl"
-	"veyron.io/veyron/veyron2/vdl/codegen"
+	"v.io/veyron/veyron2/vdl"
+	"v.io/veyron/veyron2/vdl/codegen"
 )
 
 // Type returns the vdl type corresponding to t, in the given pkgPath, with the

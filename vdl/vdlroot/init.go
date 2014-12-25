@@ -4,7 +4,7 @@
 package vdlroot
 
 import (
-	_ "veyron.io/veyron/veyron2/vdl/vdlroot/src/signature"
-	_ "veyron.io/veyron/veyron2/vdl/vdlroot/src/time"
-	_ "veyron.io/veyron/veyron2/vdl/vdlroot/src/vdltool"
+	_ "v.io/veyron/veyron2/vdl/vdlroot/src/signature"
+	_ "v.io/veyron/veyron2/vdl/vdlroot/src/time"
+	_ "v.io/veyron/veyron2/vdl/vdlroot/src/vdltool"
 )

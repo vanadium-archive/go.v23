@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"veyron.io/veyron/veyron2/vdl"
+	"v.io/veyron/veyron2/vdl"
 )
 
 // CallAndRecover calls the function f and returns the result of recover().
@@ -238,7 +238,7 @@ type (
 
 func recurseSelfType() *vdl.Type {
 	var builder vdl.TypeBuilder
-	n := builder.Named("veyron.io/veyron/veyron2/vdl.nRecurseSelf")
+	n := builder.Named("v.io/veyron/veyron2/vdl.nRecurseSelf")
 	n.AssignBase(builder.Struct().AppendField("X", builder.List().AssignElem(n)))
 	builder.Build()
 	t, err := n.Built()
@@ -250,8 +250,8 @@ func recurseSelfType() *vdl.Type {
 
 func recurseABTypes() [2]*vdl.Type {
 	var builder vdl.TypeBuilder
-	a := builder.Named("veyron.io/veyron/veyron2/vdl.nRecurseA")
-	b := builder.Named("veyron.io/veyron/veyron2/vdl.nRecurseB")
+	a := builder.Named("v.io/veyron/veyron2/vdl.nRecurseA")
+	b := builder.Named("v.io/veyron/veyron2/vdl.nRecurseB")
 	a.AssignBase(builder.Struct().AppendField("B", builder.List().AssignElem(b)))
 	b.AssignBase(builder.Struct().AppendField("A", builder.List().AssignElem(a)))
 	builder.Build()
@@ -402,9 +402,9 @@ func init() {
 }
 
 var (
-	structInt64TypeN = vdl.NamedType("veyron.io/veyron/veyron2/vdl/valconv.nStructInt64", vdl.StructType(vdl.Field{"X", vdl.Int64Type}))
-	unionABCTypeN    = vdl.NamedType("veyron.io/veyron/veyron2/vdl/valconv.nUnionABC", vdl.UnionType([]vdl.Field{{"A", vdl.BoolType}, {"B", vdl.StringType}, {"C", structInt64TypeN}}...))
-	unionBCDTypeN    = vdl.NamedType("veyron.io/veyron/veyron2/vdl/valconv.nUnionBCD", vdl.UnionType([]vdl.Field{{"B", vdl.StringType}, {"C", structInt64TypeN}, {"D", vdl.Int64Type}}...))
+	structInt64TypeN = vdl.NamedType("v.io/veyron/veyron2/vdl/valconv.nStructInt64", vdl.StructType(vdl.Field{"X", vdl.Int64Type}))
+	unionABCTypeN    = vdl.NamedType("v.io/veyron/veyron2/vdl/valconv.nUnionABC", vdl.UnionType([]vdl.Field{{"A", vdl.BoolType}, {"B", vdl.StringType}, {"C", structInt64TypeN}}...))
+	unionBCDTypeN    = vdl.NamedType("v.io/veyron/veyron2/vdl/valconv.nUnionBCD", vdl.UnionType([]vdl.Field{{"B", vdl.StringType}, {"C", structInt64TypeN}, {"D", vdl.Int64Type}}...))
 )
 
 // Define a bunch of *Type types used in tests.

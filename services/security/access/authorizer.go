@@ -5,8 +5,8 @@ import (
 	"os"
 	"reflect"
 
-	"veyron.io/veyron/veyron2/security"
-	"veyron.io/veyron/veyron2/vlog"
+	"v.io/veyron/veyron2/security"
+	"v.io/veyron/veyron2/vlog"
 )
 
 // TaggedACLAuthorizer implements an authorization policy where access is
@@ -49,10 +49,10 @@ import (
 // (2) Setup the ipc.Dispatcher to use the TaggedACLAuthorizer
 //   import (
 //     "reflect"
-//     "veyron.io/veyron/veyron/security/acl"
+//     "v.io/veyron/veyron/security/acl"
 //
-//     "veyron.io/veyron/veyron2/ipc"
-//     "veyron.io/veyron/veyron2/security"
+//     "v.io/veyron/veyron2/ipc"
+//     "v.io/veyron/veyron2/security"
 //   )
 //
 //   type dispatcher struct{}

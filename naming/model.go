@@ -4,13 +4,13 @@ import (
 	"net"
 	"time"
 
-	"veyron.io/veyron/veyron2/context"
+	"v.io/veyron/veyron2/context"
 
-	verror "veyron.io/veyron/veyron2/verror2"
+	verror "v.io/veyron/veyron2/verror2"
 )
 
 const (
-	pkgPath = "veyron.io/veyron/veyron2/naming"
+	pkgPath = "v.io/veyron/veyron2/naming"
 )
 
 var (

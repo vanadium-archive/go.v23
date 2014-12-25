@@ -6,12 +6,12 @@ import (
 	"sort"
 	"sync"
 
-	"veyron.io/veyron/veyron2/naming"
-	"veyron.io/veyron/veyron2/vdl"
-	"veyron.io/veyron/veyron2/vdl/valconv"
-	"veyron.io/veyron/veyron2/vdl/vdlroot/src/signature"
-	"veyron.io/veyron/veyron2/vdl/vdlutil"
-	"veyron.io/veyron/veyron2/verror"
+	"v.io/veyron/veyron2/naming"
+	"v.io/veyron/veyron2/vdl"
+	"v.io/veyron/veyron2/vdl/valconv"
+	"v.io/veyron/veyron2/vdl/vdlroot/src/signature"
+	"v.io/veyron/veyron2/vdl/vdlutil"
+	"v.io/veyron/veyron2/verror"
 )
 
 // Describer may be implemented by an underlying object served by the

@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"veyron.io/veyron/veyron2/vdl"
-	"veyron.io/veyron/veyron2/vom2/testdata"
+	"v.io/veyron/veyron2/vdl"
+	"v.io/veyron/veyron2/vom2/testdata"
 )
 
 func TestBinaryDecoder(t *testing.T) {

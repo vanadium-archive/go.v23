@@ -8,16 +8,16 @@
 package build
 
 import (
-	"veyron.io/veyron/veyron2/services/mgmt/binary"
+	"v.io/veyron/veyron2/services/mgmt/binary"
 
 	// The non-user imports are prefixed with "__" to prevent collisions.
 	__io "io"
-	__veyron2 "veyron.io/veyron/veyron2"
-	__context "veyron.io/veyron/veyron2/context"
-	__ipc "veyron.io/veyron/veyron2/ipc"
-	__vdl "veyron.io/veyron/veyron2/vdl"
-	__vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
-	__wiretype "veyron.io/veyron/veyron2/wiretype"
+	__veyron2 "v.io/veyron/veyron2"
+	__context "v.io/veyron/veyron2/context"
+	__ipc "v.io/veyron/veyron2/ipc"
+	__vdl "v.io/veyron/veyron2/vdl"
+	__vdlutil "v.io/veyron/veyron2/vdl/vdlutil"
+	__wiretype "v.io/veyron/veyron2/wiretype"
 )
 
 // TODO(toddw): Remove this line once the new signature support is done.
@@ -29,7 +29,7 @@ const _ = __wiretype.TypeIDInvalid
 type Architecture string
 
 func (Architecture) __VDLReflect(struct {
-	Name string "veyron.io/veyron/veyron2/services/mgmt/build.Architecture"
+	Name string "v.io/veyron/veyron2/services/mgmt/build.Architecture"
 }) {
 }
 
@@ -37,7 +37,7 @@ func (Architecture) __VDLReflect(struct {
 type Format string
 
 func (Format) __VDLReflect(struct {
-	Name string "veyron.io/veyron/veyron2/services/mgmt/build.Format"
+	Name string "v.io/veyron/veyron2/services/mgmt/build.Format"
 }) {
 }
 
@@ -45,7 +45,7 @@ func (Format) __VDLReflect(struct {
 type OperatingSystem string
 
 func (OperatingSystem) __VDLReflect(struct {
-	Name string "veyron.io/veyron/veyron2/services/mgmt/build.OperatingSystem"
+	Name string "v.io/veyron/veyron2/services/mgmt/build.OperatingSystem"
 }) {
 }
 
@@ -56,7 +56,7 @@ type File struct {
 }
 
 func (File) __VDLReflect(struct {
-	Name string "veyron.io/veyron/veyron2/services/mgmt/build.File"
+	Name string "v.io/veyron/veyron2/services/mgmt/build.File"
 }) {
 }
 
@@ -348,7 +348,7 @@ var BuilderDesc __ipc.InterfaceDesc = descBuilder
 // descBuilder hides the desc to keep godoc clean.
 var descBuilder = __ipc.InterfaceDesc{
 	Name:    "Builder",
-	PkgPath: "veyron.io/veyron/veyron2/services/mgmt/build",
+	PkgPath: "v.io/veyron/veyron2/services/mgmt/build",
 	Doc:     "// Builder describes an interface for building binaries from source.",
 	Methods: []__ipc.MethodDesc{
 		{
@@ -403,18 +403,18 @@ func (s implBuilderServerStub) Signature(ctx __ipc.ServerContext) (__ipc.Service
 	}
 
 	result.TypeDefs = []__vdlutil.Any{
-		__wiretype.NamedPrimitiveType{Type: 0x3, Name: "veyron.io/veyron/veyron2/services/mgmt/build.Architecture", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x3, Name: "veyron.io/veyron/veyron2/services/mgmt/build.OperatingSystem", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, __wiretype.SliceType{Elem: 0x43, Name: "", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, __wiretype.StructType{
+		__wiretype.NamedPrimitiveType{Type: 0x3, Name: "v.io/veyron/veyron2/services/mgmt/build.Architecture", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x3, Name: "v.io/veyron/veyron2/services/mgmt/build.OperatingSystem", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, __wiretype.SliceType{Elem: 0x43, Name: "", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, __wiretype.StructType{
 			[]__wiretype.FieldType{
 				__wiretype.FieldType{Type: 0x3, Name: "Name"},
 				__wiretype.FieldType{Type: 0x44, Name: "Contents"},
 			},
-			"veyron.io/veyron/veyron2/services/mgmt/build.File", []string(nil)},
+			"v.io/veyron/veyron2/services/mgmt/build.File", []string(nil)},
 		__wiretype.MapType{Key: 0x3, Elem: 0x2, Name: "", Tags: []string(nil)}, __wiretype.StructType{
 			[]__wiretype.FieldType{
 				__wiretype.FieldType{Type: 0x3, Name: "Name"},
 				__wiretype.FieldType{Type: 0x47, Name: "Profiles"},
 			},
-			"veyron.io/veyron/veyron2/services/mgmt/binary.Description", []string(nil)},
+			"v.io/veyron/veyron2/services/mgmt/binary.Description", []string(nil)},
 	}
 
 	return result, nil

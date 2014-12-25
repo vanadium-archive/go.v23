@@ -91,7 +91,7 @@
 // directory.
 package access
 
-import "veyron.io/veyron/veyron2/security"
+import "v.io/veyron/veyron2/security"
 
 // ACL represents an Access Control List - a set of blessings that should be
 // granted access.
@@ -151,7 +151,7 @@ const (
 //
 //   package mypackage
 //
-//   import "veyron.io/veyron/veyron2/security/access"
+//   import "v.io/veyron/veyron2/security/access"
 //
 //   type MyObject interface {
 //     access.Object
@@ -168,7 +168,7 @@ const (
 //
 //  package mypackage
 //
-//  import "veyron.io/veyron/veyron2/security/access"
+//  import "v.io/veyron/veyron2/security/access"
 //
 //  type MyTag string
 //

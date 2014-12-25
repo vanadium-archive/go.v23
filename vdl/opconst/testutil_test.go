@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"veyron.io/veyron/veyron/lib/testutil"
-	"veyron.io/veyron/veyron2/vdl"
+	"v.io/veyron/veyron/lib/testutil"
+	"v.io/veyron/veyron2/vdl"
 )
 
 func init() { testutil.Init() }
@@ -207,7 +207,7 @@ type (
 
 func recurseSelfType() *vdl.Type {
 	var builder vdl.TypeBuilder
-	n := builder.Named("veyron.io/veyron/veyron2/vdl.nRecurseSelf")
+	n := builder.Named("v.io/veyron/veyron2/vdl.nRecurseSelf")
 	n.AssignBase(builder.Struct().AppendField("X", builder.List().AssignElem(n)))
 	builder.Build()
 	t, err := n.Built()
@@ -219,8 +219,8 @@ func recurseSelfType() *vdl.Type {
 
 func recurseABTypes() [2]*vdl.Type {
 	var builder vdl.TypeBuilder
-	a := builder.Named("veyron.io/veyron/veyron2/vdl.nRecurseA")
-	b := builder.Named("veyron.io/veyron/veyron2/vdl.nRecurseB")
+	a := builder.Named("v.io/veyron/veyron2/vdl.nRecurseA")
+	b := builder.Named("v.io/veyron/veyron2/vdl.nRecurseB")
 	a.AssignBase(builder.Struct().AppendField("B", builder.List().AssignElem(b)))
 	b.AssignBase(builder.Struct().AppendField("A", builder.List().AssignElem(a)))
 	builder.Build()

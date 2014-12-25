@@ -6,12 +6,12 @@ package test
 
 import (
 	// The non-user imports are prefixed with "__" to prevent collisions.
-	__veyron2 "veyron.io/veyron/veyron2"
-	__context "veyron.io/veyron/veyron2/context"
-	__ipc "veyron.io/veyron/veyron2/ipc"
-	__vdl "veyron.io/veyron/veyron2/vdl"
-	__vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
-	__wiretype "veyron.io/veyron/veyron2/wiretype"
+	__veyron2 "v.io/veyron/veyron2"
+	__context "v.io/veyron/veyron2/context"
+	__ipc "v.io/veyron/veyron2/ipc"
+	__vdl "v.io/veyron/veyron2/vdl"
+	__vdlutil "v.io/veyron/veyron2/vdl/vdlutil"
+	__wiretype "v.io/veyron/veyron2/wiretype"
 )
 
 // TODO(toddw): Remove this line once the new signature support is done.
@@ -24,7 +24,7 @@ const _ = __wiretype.TypeIDInvalid
 type MyTag string
 
 func (MyTag) __VDLReflect(struct {
-	Name string "veyron.io/veyron/veyron2/services/security/access/test.MyTag"
+	Name string "v.io/veyron/veyron2/services/security/access/test.MyTag"
 }) {
 }
 
@@ -230,7 +230,7 @@ var MyObjectDesc __ipc.InterfaceDesc = descMyObject
 // descMyObject hides the desc to keep godoc clean.
 var descMyObject = __ipc.InterfaceDesc{
 	Name:    "MyObject",
-	PkgPath: "veyron.io/veyron/veyron2/services/security/access/test",
+	PkgPath: "v.io/veyron/veyron2/services/security/access/test",
 	Doc:     "// MyObject demonstrates how tags are attached to methods.",
 	Methods: []__ipc.MethodDesc{
 		{

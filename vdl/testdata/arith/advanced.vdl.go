@@ -4,14 +4,14 @@
 package arith
 
 import (
-	"veyron.io/veyron/veyron2/vdl/testdata/arith/exp"
+	"v.io/veyron/veyron2/vdl/testdata/arith/exp"
 
 	// The non-user imports are prefixed with "__" to prevent collisions.
-	__veyron2 "veyron.io/veyron/veyron2"
-	__context "veyron.io/veyron/veyron2/context"
-	__ipc "veyron.io/veyron/veyron2/ipc"
-	__vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
-	__wiretype "veyron.io/veyron/veyron2/wiretype"
+	__veyron2 "v.io/veyron/veyron2"
+	__context "v.io/veyron/veyron2/context"
+	__ipc "v.io/veyron/veyron2/ipc"
+	__vdlutil "v.io/veyron/veyron2/vdl/vdlutil"
+	__wiretype "v.io/veyron/veyron2/wiretype"
 )
 
 // TODO(toddw): Remove this line once the new signature support is done.
@@ -158,7 +158,7 @@ var TrigonometryDesc __ipc.InterfaceDesc = descTrigonometry
 // descTrigonometry hides the desc to keep godoc clean.
 var descTrigonometry = __ipc.InterfaceDesc{
 	Name:    "Trigonometry",
-	PkgPath: "veyron.io/veyron/veyron2/vdl/testdata/arith",
+	PkgPath: "v.io/veyron/veyron2/vdl/testdata/arith",
 	Doc:     "// Trigonometry is an interface that specifies a couple trigonometric functions.",
 	Methods: []__ipc.MethodDesc{
 		{
@@ -336,11 +336,11 @@ var AdvancedMathDesc __ipc.InterfaceDesc = descAdvancedMath
 // descAdvancedMath hides the desc to keep godoc clean.
 var descAdvancedMath = __ipc.InterfaceDesc{
 	Name:    "AdvancedMath",
-	PkgPath: "veyron.io/veyron/veyron2/vdl/testdata/arith",
+	PkgPath: "v.io/veyron/veyron2/vdl/testdata/arith",
 	Doc:     "// AdvancedMath is an interface for more advanced math than arith.  It embeds\n// interfaces defined both in the same file and in an external package; and in\n// turn it is embedded by arith.Calculator (which is in the same package but\n// different file) to verify that embedding works in all these scenarios.",
 	Embeds: []__ipc.EmbedDesc{
-		{"Trigonometry", "veyron.io/veyron/veyron2/vdl/testdata/arith", "// Trigonometry is an interface that specifies a couple trigonometric functions."},
-		{"Exp", "veyron.io/veyron/veyron2/vdl/testdata/arith/exp", ``},
+		{"Trigonometry", "v.io/veyron/veyron2/vdl/testdata/arith", "// Trigonometry is an interface that specifies a couple trigonometric functions."},
+		{"Exp", "v.io/veyron/veyron2/vdl/testdata/arith/exp", ``},
 	},
 }
 

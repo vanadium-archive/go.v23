@@ -104,17 +104,17 @@
 package watch
 
 import (
-	"veyron.io/veyron/veyron2/services/security/access"
+	"v.io/veyron/veyron2/services/security/access"
 
-	"veyron.io/veyron/veyron2/services/watch/types"
+	"v.io/veyron/veyron2/services/watch/types"
 
 	// The non-user imports are prefixed with "__" to prevent collisions.
 	__io "io"
-	__veyron2 "veyron.io/veyron/veyron2"
-	__context "veyron.io/veyron/veyron2/context"
-	__ipc "veyron.io/veyron/veyron2/ipc"
-	__vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
-	__wiretype "veyron.io/veyron/veyron2/wiretype"
+	__veyron2 "v.io/veyron/veyron2"
+	__context "v.io/veyron/veyron2/context"
+	__ipc "v.io/veyron/veyron2/ipc"
+	__vdlutil "v.io/veyron/veyron2/vdl/vdlutil"
+	__wiretype "v.io/veyron/veyron2/wiretype"
 )
 
 // TODO(toddw): Remove this line once the new signature support is done.
@@ -320,7 +320,7 @@ var GlobWatcherDesc __ipc.InterfaceDesc = descGlobWatcher
 // descGlobWatcher hides the desc to keep godoc clean.
 var descGlobWatcher = __ipc.InterfaceDesc{
 	Name:    "GlobWatcher",
-	PkgPath: "veyron.io/veyron/veyron2/services/watch",
+	PkgPath: "v.io/veyron/veyron2/services/watch",
 	Doc:     "// GlobWatcher allows a client to receive updates for changes to objects\n// that match a pattern.  See the package comments for details.",
 	Methods: []__ipc.MethodDesc{
 		{
@@ -352,12 +352,12 @@ func (s implGlobWatcherServerStub) Signature(ctx __ipc.ServerContext) (__ipc.Ser
 	}
 
 	result.TypeDefs = []__vdlutil.Any{
-		__wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, __wiretype.SliceType{Elem: 0x41, Name: "veyron.io/veyron/veyron2/services/watch/types.ResumeMarker", Tags: []string(nil)}, __wiretype.StructType{
+		__wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, __wiretype.SliceType{Elem: 0x41, Name: "v.io/veyron/veyron2/services/watch/types.ResumeMarker", Tags: []string(nil)}, __wiretype.StructType{
 			[]__wiretype.FieldType{
 				__wiretype.FieldType{Type: 0x3, Name: "Pattern"},
 				__wiretype.FieldType{Type: 0x42, Name: "ResumeMarker"},
 			},
-			"veyron.io/veyron/veyron2/services/watch/types.GlobRequest", []string(nil)},
+			"v.io/veyron/veyron2/services/watch/types.GlobRequest", []string(nil)},
 		__wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x1, Name: "anydata", Tags: []string(nil)}, __wiretype.StructType{
 			[]__wiretype.FieldType{
 				__wiretype.FieldType{Type: 0x3, Name: "Name"},
@@ -366,7 +366,7 @@ func (s implGlobWatcherServerStub) Signature(ctx __ipc.ServerContext) (__ipc.Ser
 				__wiretype.FieldType{Type: 0x42, Name: "ResumeMarker"},
 				__wiretype.FieldType{Type: 0x2, Name: "Continued"},
 			},
-			"veyron.io/veyron/veyron2/services/watch/types.Change", []string(nil)},
+			"v.io/veyron/veyron2/services/watch/types.Change", []string(nil)},
 	}
 
 	return result, nil

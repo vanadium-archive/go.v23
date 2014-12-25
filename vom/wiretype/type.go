@@ -5,10 +5,10 @@ import (
 	"reflect"
 	"strings"
 
-	"veyron.io/veyron/veyron2/vdl/vdlutil"
-	"veyron.io/veyron/veyron2/vom"
-	"veyron.io/veyron/veyron2/wiretype"
-	wiretype_build "veyron.io/veyron/veyron2/wiretype/build"
+	"v.io/veyron/veyron2/vdl/vdlutil"
+	"v.io/veyron/veyron2/vom"
+	"v.io/veyron/veyron2/wiretype"
+	wiretype_build "v.io/veyron/veyron2/wiretype/build"
 )
 
 // Type represents the full type information needed to describe a specific type.

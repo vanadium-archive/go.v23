@@ -37,7 +37,7 @@ import "os"
 import "strconv"
 import "strings"
 import "sync"
-import "veyron.io/veyron/veyron2/context"
+import "v.io/veyron/veyron2/context"
 
 // A MsgID identifies a message, without specifying its language.
 type MsgID string

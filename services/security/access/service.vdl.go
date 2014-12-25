@@ -95,16 +95,16 @@
 package access
 
 import (
-	"veyron.io/veyron/veyron2/security"
+	"v.io/veyron/veyron2/security"
 
 	// The non-user imports are prefixed with "__" to prevent collisions.
-	__veyron2 "veyron.io/veyron/veyron2"
-	__context "veyron.io/veyron/veyron2/context"
-	__ipc "veyron.io/veyron/veyron2/ipc"
-	__vdl "veyron.io/veyron/veyron2/vdl"
-	__vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
-	__verror "veyron.io/veyron/veyron2/verror"
-	__wiretype "veyron.io/veyron/veyron2/wiretype"
+	__veyron2 "v.io/veyron/veyron2"
+	__context "v.io/veyron/veyron2/context"
+	__ipc "v.io/veyron/veyron2/ipc"
+	__vdl "v.io/veyron/veyron2/vdl"
+	__vdlutil "v.io/veyron/veyron2/vdl/vdlutil"
+	__verror "v.io/veyron/veyron2/verror"
+	__wiretype "v.io/veyron/veyron2/wiretype"
 )
 
 // TODO(toddw): Remove this line once the new signature support is done.
@@ -135,7 +135,7 @@ type ACL struct {
 }
 
 func (ACL) __VDLReflect(struct {
-	Name string "veyron.io/veyron/veyron2/services/security/access.ACL"
+	Name string "v.io/veyron/veyron2/services/security/access.ACL"
 }) {
 }
 
@@ -149,7 +149,7 @@ func (ACL) __VDLReflect(struct {
 type TaggedACLMap map[string]ACL
 
 func (TaggedACLMap) __VDLReflect(struct {
-	Name string "veyron.io/veyron/veyron2/services/security/access.TaggedACLMap"
+	Name string "v.io/veyron/veyron2/services/security/access.TaggedACLMap"
 }) {
 }
 
@@ -161,7 +161,7 @@ func (TaggedACLMap) __VDLReflect(struct {
 type Tag string
 
 func (Tag) __VDLReflect(struct {
-	Name string "veyron.io/veyron/veyron2/services/security/access.Tag"
+	Name string "v.io/veyron/veyron2/services/security/access.Tag"
 }) {
 }
 
@@ -184,10 +184,10 @@ const Resolve = Tag("Resolve") // Operations involving namespace navigation.
 // The etag passed to SetACL is invalid.  Likely, another client set
 // the ACL already and invalidated the etag.  Use GetACL to fetch a
 // fresh etag.
-const ErrBadEtag = __verror.ID("veyron.io/veyron/veyron2/services/security/access.ErrBadEtag")
+const ErrBadEtag = __verror.ID("v.io/veyron/veyron2/services/security/access.ErrBadEtag")
 
 // The ACL is too big.  Use groups to represent large sets of principals.
-const ErrTooBig = __verror.ID("veyron.io/veyron/veyron2/services/security/access.ErrTooBig")
+const ErrTooBig = __verror.ID("v.io/veyron/veyron2/services/security/access.ErrTooBig")
 
 // ObjectClientMethods is the client interface
 // containing Object methods.
@@ -201,7 +201,7 @@ const ErrTooBig = __verror.ID("veyron.io/veyron/veyron2/services/security/access
 //
 //   package mypackage
 //
-//   import "veyron.io/veyron/veyron2/security/access"
+//   import "v.io/veyron/veyron2/security/access"
 //
 //   type MyObject interface {
 //     access.Object
@@ -218,7 +218,7 @@ const ErrTooBig = __verror.ID("veyron.io/veyron/veyron2/services/security/access
 //
 //  package mypackage
 //
-//  import "veyron.io/veyron/veyron2/security/access"
+//  import "v.io/veyron/veyron2/security/access"
 //
 //  type MyTag string
 //
@@ -332,7 +332,7 @@ func (c implObjectClientStub) Signature(ctx __context.T, opts ...__ipc.CallOpt) 
 //
 //   package mypackage
 //
-//   import "veyron.io/veyron/veyron2/security/access"
+//   import "v.io/veyron/veyron2/security/access"
 //
 //   type MyObject interface {
 //     access.Object
@@ -349,7 +349,7 @@ func (c implObjectClientStub) Signature(ctx __context.T, opts ...__ipc.CallOpt) 
 //
 //  package mypackage
 //
-//  import "veyron.io/veyron/veyron2/security/access"
+//  import "v.io/veyron/veyron2/security/access"
 //
 //  type MyTag string
 //
@@ -448,8 +448,8 @@ var ObjectDesc __ipc.InterfaceDesc = descObject
 // descObject hides the desc to keep godoc clean.
 var descObject = __ipc.InterfaceDesc{
 	Name:    "Object",
-	PkgPath: "veyron.io/veyron/veyron2/services/security/access",
-	Doc:     "// Object provides access control for Veyron objects.\n//\n// Veyron services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"veyron.io/veyron/veyron2/security/access\"\n//\n//   type MyObject interface {\n//     access.Object\n//     MyRead()  (string, error) {access.Read}\n//     MyWrite(string) error     {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetACL and GetACL in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"veyron.io/veyron/veyron2/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}\n//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}\n//  }",
+	PkgPath: "v.io/veyron/veyron2/services/security/access",
+	Doc:     "// Object provides access control for Veyron objects.\n//\n// Veyron services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/veyron/veyron2/security/access\"\n//\n//   type MyObject interface {\n//     access.Object\n//     MyRead()  (string, error) {access.Read}\n//     MyWrite(string) error     {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetACL and GetACL in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/veyron/veyron2/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}\n//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}\n//  }",
 	Methods: []__ipc.MethodDesc{
 		{
 			Name: "SetACL",
@@ -498,13 +498,13 @@ func (s implObjectServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceS
 	}
 
 	result.TypeDefs = []__vdlutil.Any{
-		__wiretype.NamedPrimitiveType{Type: 0x3, Name: "veyron.io/veyron/veyron2/security.BlessingPattern", Tags: []string(nil)}, __wiretype.SliceType{Elem: 0x41, Name: "", Tags: []string(nil)}, __wiretype.StructType{
+		__wiretype.NamedPrimitiveType{Type: 0x3, Name: "v.io/veyron/veyron2/security.BlessingPattern", Tags: []string(nil)}, __wiretype.SliceType{Elem: 0x41, Name: "", Tags: []string(nil)}, __wiretype.StructType{
 			[]__wiretype.FieldType{
 				__wiretype.FieldType{Type: 0x42, Name: "In"},
 				__wiretype.FieldType{Type: 0x3d, Name: "NotIn"},
 			},
-			"veyron.io/veyron/veyron2/services/security/access.ACL", []string(nil)},
-		__wiretype.MapType{Key: 0x3, Elem: 0x43, Name: "veyron.io/veyron/veyron2/services/security/access.TaggedACLMap", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}}
+			"v.io/veyron/veyron2/services/security/access.ACL", []string(nil)},
+		__wiretype.MapType{Key: 0x3, Elem: 0x43, Name: "v.io/veyron/veyron2/services/security/access.TaggedACLMap", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}}
 
 	return result, nil
 }

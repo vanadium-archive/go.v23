@@ -3,8 +3,8 @@ package vom2
 // TODO(toddw): Add tests.
 
 import (
-	"veyron.io/veyron/veyron2/vdl"
-	"veyron.io/veyron/veyron2/verror"
+	"v.io/veyron/veyron2/vdl"
+	"v.io/veyron/veyron2/verror"
 )
 
 // TODO: Replace this with vdl union!

@@ -4,11 +4,11 @@
 package ipc
 
 import (
-	"veyron.io/veyron/veyron2/wiretype"
+	"v.io/veyron/veyron2/wiretype"
 
 	// The non-user imports are prefixed with "__" to prevent collisions.
-	__vdl "veyron.io/veyron/veyron2/vdl"
-	__vdlutil "veyron.io/veyron/veyron2/vdl/vdlutil"
+	__vdl "v.io/veyron/veyron2/vdl"
+	__vdlutil "v.io/veyron/veyron2/vdl/vdlutil"
 )
 
 // ServiceSignature represents the signature of the service. This includes type information needed
@@ -20,7 +20,7 @@ type ServiceSignature struct {
 }
 
 func (ServiceSignature) __VDLReflect(struct {
-	Name string "veyron.io/veyron/veyron2/ipc.ServiceSignature"
+	Name string "v.io/veyron/veyron2/ipc.ServiceSignature"
 }) {
 }
 
@@ -34,7 +34,7 @@ type MethodSignature struct {
 }
 
 func (MethodSignature) __VDLReflect(struct {
-	Name string "veyron.io/veyron/veyron2/ipc.MethodSignature"
+	Name string "v.io/veyron/veyron2/ipc.MethodSignature"
 }) {
 }
 
@@ -45,7 +45,7 @@ type MethodArgument struct {
 }
 
 func (MethodArgument) __VDLReflect(struct {
-	Name string "veyron.io/veyron/veyron2/ipc.MethodArgument"
+	Name string "v.io/veyron/veyron2/ipc.MethodArgument"
 }) {
 }
 

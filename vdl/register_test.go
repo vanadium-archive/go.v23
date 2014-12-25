@@ -8,7 +8,7 @@ import (
 
 var nUnionWant = &ReflectInfo{
 	WireType: reflect.TypeOf((*nUnion)(nil)).Elem(),
-	WireName: "veyron.io/veyron/veyron2/vdl.nUnion",
+	WireName: "v.io/veyron/veyron2/vdl.nUnion",
 	UnionFields: []ReflectField{
 		{"A", reflect.TypeOf(false), reflect.TypeOf(nUnionA{})},
 		{"B", reflect.TypeOf(string("")), reflect.TypeOf(nUnionB{})},
@@ -27,7 +27,7 @@ var reflectInfoTests = []struct {
 		reflect.TypeOf(nEnumA),
 		&ReflectInfo{
 			WireType:   reflect.TypeOf(nEnumA),
-			WireName:   "veyron.io/veyron/veyron2/vdl.nEnum",
+			WireName:   "v.io/veyron/veyron2/vdl.nEnum",
 			EnumLabels: []string{"A", "B", "C"},
 		},
 	},
@@ -39,7 +39,7 @@ var reflectInfoTests = []struct {
 		reflect.TypeOf(nWire{}),
 		&ReflectInfo{
 			WireType:   reflect.TypeOf(nWire{}),
-			WireName:   "veyron.io/veyron/veyron2/vdl.nWire",
+			WireName:   "v.io/veyron/veyron2/vdl.nWire",
 			NativeType: reflect.TypeOf(nNative(0)),
 		},
 	},

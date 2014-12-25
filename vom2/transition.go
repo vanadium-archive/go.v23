@@ -10,7 +10,7 @@ var enabled = true
 func init() {
 	// The env var must start with VEYRON_, in order for the device manager
 	// to pass it through, for
-	// veyron.io/veyron/veyron/services/mgmt/device/impl test.
+	// v.io/veyron/veyron/services/mgmt/device/impl test.
 	if os.Getenv("VEYRON_VOM2") != "" {
 		enabled = true
 	}

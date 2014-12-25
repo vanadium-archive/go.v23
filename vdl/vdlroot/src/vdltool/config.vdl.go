@@ -7,7 +7,7 @@ package vdltool
 import (
 	// The non-user imports are prefixed with "__" to prevent collisions.
 	__fmt "fmt"
-	__vdl "veyron.io/veyron/veyron2/vdl"
+	__vdl "v.io/veyron/veyron2/vdl"
 )
 
 // Config specifies the configuration for the vdl tool.  This is typically

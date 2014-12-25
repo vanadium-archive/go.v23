@@ -6,7 +6,7 @@ package vom2
 import (
 	// The non-user imports are prefixed with "__" to prevent collisions.
 	__fmt "fmt"
-	__vdl "veyron.io/veyron/veyron2/vdl"
+	__vdl "v.io/veyron/veyron2/vdl"
 )
 
 type (
@@ -38,7 +38,7 @@ type (
 	PrimitivePString struct{ Value string }
 	// __PrimitiveReflect describes the Primitive union type.
 	__PrimitiveReflect struct {
-		Name  string "veyron.io/veyron/veyron2/vom2.Primitive"
+		Name  string "v.io/veyron/veyron2/vom2.Primitive"
 		Type  Primitive
 		Union struct {
 			PBool   PrimitivePBool
@@ -91,7 +91,7 @@ type DumpAtom struct {
 }
 
 func (DumpAtom) __VDLReflect(struct {
-	Name string "veyron.io/veyron/veyron2/vom2.DumpAtom"
+	Name string "v.io/veyron/veyron2/vom2.DumpAtom"
 }) {
 }
 
@@ -204,7 +204,7 @@ func (x DumpKind) String() string {
 }
 
 func (DumpKind) __VDLReflect(struct {
-	Name string "veyron.io/veyron/veyron2/vom2.DumpKind"
+	Name string "v.io/veyron/veyron2/vom2.DumpKind"
 	Enum struct{ Magic, MsgID, TypeMsg, ValueMsg, MsgLen, TypeID, PrimValue, ByteLen, ValueLen, Index, End, NilValue, Exists string }
 }) {
 }

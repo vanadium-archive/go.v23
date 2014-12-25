@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"fmt"
 
-	"veyron.io/veyron/veyron2/vdl/compile"
+	"v.io/veyron/veyron2/vdl/compile"
 )
 
 // javaDeclarationArgStr creates a comma separated string of args to be used in a function declaration
