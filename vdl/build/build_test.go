@@ -49,7 +49,7 @@ func setEnvironment(t *testing.T, vdlroot, vdlpath string) bool {
 	return errRoot == nil && errPath == nil
 }
 
-func setVeyronRoot(t *testing.T, root string) bool {
+func setVanadiumRoot(t *testing.T, root string) bool {
 	if err := os.Setenv("VANADIUM_ROOT", root); err != nil {
 		t.Errorf("Setenv(VANADIUM_ROOT, %q) failed: %v", root, err)
 		return false
@@ -68,7 +68,7 @@ func TestSrcDirsVdlRoot(t *testing.T) {
 	}
 	tests := []struct {
 		VDLRoot    string
-		VeyronRoot string
+		VanadiumRoot string
 		Want       []string
 		ErrRE      string
 	}{
@@ -82,7 +82,7 @@ func TestSrcDirsVdlRoot(t *testing.T) {
 		{"/a/b/c", "/x/y/z", []string{"/a/b/c/src"}, ""},
 	}
 	for _, test := range tests {
-		if !setEnvironment(t, test.VDLRoot, defaultVDLPath) || !setVeyronRoot(t, test.VeyronRoot) {
+		if !setEnvironment(t, test.VDLRoot, defaultVDLPath) || !setVanadiumRoot(t, test.VanadiumRoot) {
 			continue
 		}
 		name := fmt.Sprintf("%+v", test)
