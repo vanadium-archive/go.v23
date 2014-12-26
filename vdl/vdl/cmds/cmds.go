@@ -340,7 +340,7 @@ var (
 		},
 	}
 	optGenJavaOutPkg = xlateRules{
-		{"v.io", "io/veyron"},
+		{"v.io", "io/v"},
 	}
 	// TODO(bjornick): Add javascript to the default gen langs.
 	optGenLangs = genLangs{vdltool.GenLanguageGo, vdltool.GenLanguageJava}

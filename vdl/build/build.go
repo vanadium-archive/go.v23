@@ -275,7 +275,7 @@ func vdlRootSrcDir(errs *vdlutil.Errors) string {
 			errs.Error("Either VDLROOT or VANADIUM_ROOT must be set")
 			return ""
 		}
-		vroot = filepath.Join(vroot, "release", "go", "src", "v.io", "core", "veyron2", "vdl", "vdlroot")
+		vdlroot = filepath.Join(vroot, "release", "go", "src", "v.io", "core", "veyron2", "vdl", "vdlroot")
 	}
 	src := filepath.Join(vdlroot, "src")
 	abs, err := filepath.Abs(src)
