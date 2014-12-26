@@ -67,10 +67,10 @@ func TestSrcDirsVdlRoot(t *testing.T) {
 		return filepath.Join(cwd, relative)
 	}
 	tests := []struct {
-		VDLRoot    string
+		VDLRoot      string
 		VanadiumRoot string
-		Want       []string
-		ErrRE      string
+		Want         []string
+		ErrRE        string
 	}{
 		{"", "", nil, "Either VDLROOT or VANADIUM_ROOT must be set"},
 		{"/a", "", []string{"/a/src"}, ""},

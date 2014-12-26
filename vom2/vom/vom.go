@@ -13,9 +13,9 @@ import (
 	"strings"
 	"unicode"
 
-	"v.io/lib/cmdline"
 	"v.io/core/veyron2/vdl"
 	"v.io/core/veyron2/vom2"
+	"v.io/lib/cmdline"
 )
 
 func main() {
