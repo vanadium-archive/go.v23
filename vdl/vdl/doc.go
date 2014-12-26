@@ -73,9 +73,9 @@ The vdl generate flags are:
    before the package path, and dst is the replacement for src.  Use commas to
    separate multiple rules; the first rule matching src is used.  The special
    dst SKIP indicates matching packages are skipped.
- -java_out_dir=release/go/src->veyron/java/src/vdl/java,roadmap/go/src->veyron/java/src/vdl/java,third_party/go/src->SKIP,tools/go/src->SKIP,release/go/src/v.io/core/veyron2/vdl/vdlroot/src->SKIP
+ -java_out_dir=go/src->java/src/vdl/java,release/go/src/v.io/core/veyron2/vdl/vdlroot/src->SKIP
    Same semantics as --go_out_dir but applies to java code generation.
- -java_out_pkg=v.io->io/veyron
+ -java_out_pkg=v.io->io/v
    Java output package translation rules.  Must be of the form:
       "src->dst[,s2->d2...]"
    If a VDL package has a prefix src, the prefix will be replaced with dst.  Use
@@ -84,9 +84,9 @@ The vdl generate flags are:
    dst SKIP indicates matching packages are skipped.
  -js_out_dir=release/go/src->release/javascript/core/src,roadmap/go/src->release/javascript/core/src,third_party/go/src->SKIP,tools/go/src->SKIP,release/go/src/v.io/core/veyron2/vdl/vdlroot/src->SKIP
    Same semantics as --go_out_dir but applies to js code generation.
- -lang=go,java
+ -lang=Go,Java
    Comma-separated list of languages to generate, currently supporting
-   go,java,javascript
+   Go,Java,Javascript
  -status=true
    Show package names as they are updated
 
@@ -141,9 +141,9 @@ The vdl audit flags are:
    before the package path, and dst is the replacement for src.  Use commas to
    separate multiple rules; the first rule matching src is used.  The special
    dst SKIP indicates matching packages are skipped.
- -java_out_dir=release/go/src->veyron/java/src/vdl/java,roadmap/go/src->veyron/java/src/vdl/java,third_party/go/src->SKIP,tools/go/src->SKIP,release/go/src/v.io/core/veyron2/vdl/vdlroot/src->SKIP
+ -java_out_dir=go/src->java/src/vdl/java,release/go/src/v.io/core/veyron2/vdl/vdlroot/src->SKIP
    Same semantics as --go_out_dir but applies to java code generation.
- -java_out_pkg=v.io->io/veyron
+ -java_out_pkg=v.io->io/v
    Java output package translation rules.  Must be of the form:
       "src->dst[,s2->d2...]"
    If a VDL package has a prefix src, the prefix will be replaced with dst.  Use
@@ -152,9 +152,9 @@ The vdl audit flags are:
    dst SKIP indicates matching packages are skipped.
  -js_out_dir=release/go/src->release/javascript/core/src,roadmap/go/src->release/javascript/core/src,third_party/go/src->SKIP,tools/go/src->SKIP,release/go/src/v.io/core/veyron2/vdl/vdlroot/src->SKIP
    Same semantics as --go_out_dir but applies to js code generation.
- -lang=go,java
+ -lang=Go,Java
    Comma-separated list of languages to generate, currently supporting
-   go,java,javascript
+   Go,Java,Javascript
  -status=true
    Show package names as they are updated
 
