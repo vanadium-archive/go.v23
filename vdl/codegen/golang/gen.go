@@ -9,14 +9,14 @@ import (
 	"strings"
 	"text/template"
 
-	"v.io/veyron/veyron2/vdl"
-	"v.io/veyron/veyron2/vdl/codegen"
-	"v.io/veyron/veyron2/vdl/compile"
-	"v.io/veyron/veyron2/vdl/parse"
-	"v.io/veyron/veyron2/vdl/vdlroot/src/vdltool"
-	"v.io/veyron/veyron2/vdl/vdlutil"
-	"v.io/veyron/veyron2/wiretype"
-	"v.io/veyron/veyron2/wiretype/build"
+	"v.io/core/veyron2/vdl"
+	"v.io/core/veyron2/vdl/codegen"
+	"v.io/core/veyron2/vdl/compile"
+	"v.io/core/veyron2/vdl/parse"
+	"v.io/core/veyron2/vdl/vdlroot/src/vdltool"
+	"v.io/core/veyron2/vdl/vdlutil"
+	"v.io/core/veyron2/wiretype"
+	"v.io/core/veyron2/wiretype/build"
 )
 
 type goData struct {
@@ -61,15 +61,15 @@ func systemImportsGo(f *compile.File) []string {
 	set := make(map[string]bool)
 	if f.TypeDeps[vdl.AnyType] {
 		// Import for vdlutil.Any
-		set[`__vdlutil "v.io/veyron/veyron2/vdl/vdlutil"`] = true
+		set[`__vdlutil "v.io/core/veyron2/vdl/vdlutil"`] = true
 	}
 	if f.TypeDeps[vdl.TypeObjectType] {
 		// Import for vdl.Type
-		set[`__vdl "v.io/veyron/veyron2/vdl"`] = true
+		set[`__vdl "v.io/core/veyron2/vdl"`] = true
 	}
 	if len(f.TypeDefs) > 0 {
 		// Import for vdl.Register to register all defined types.
-		set[`__vdl "v.io/veyron/veyron2/vdl"`] = true
+		set[`__vdl "v.io/core/veyron2/vdl"`] = true
 	}
 	for _, td := range f.TypeDefs {
 		if td.Type.Kind() == vdl.Enum {
@@ -79,21 +79,21 @@ func systemImportsGo(f *compile.File) []string {
 	}
 	if len(f.Interfaces) > 0 {
 		// Imports for the generated method: {interface name}Client.
-		set[`__veyron2 "v.io/veyron/veyron2"`] = true
-		set[`__wiretype "v.io/veyron/veyron2/wiretype"`] = true
-		set[`__ipc "v.io/veyron/veyron2/ipc"`] = true
-		set[`__context "v.io/veyron/veyron2/context"`] = true
-		set[`__vdlutil "v.io/veyron/veyron2/vdl/vdlutil"`] = true
+		set[`__veyron2 "v.io/core/veyron2"`] = true
+		set[`__wiretype "v.io/core/veyron2/wiretype"`] = true
+		set[`__ipc "v.io/core/veyron2/ipc"`] = true
+		set[`__context "v.io/core/veyron2/context"`] = true
+		set[`__vdlutil "v.io/core/veyron2/vdl/vdlutil"`] = true
 		if fileHasStreamingMethods(f) {
 			set[`__io "io"`] = true
 		}
 	}
 	// If the user has specified any error IDs, typically we need to import the
-	// "v.io/veyron/veyron2/verror" package.  However we allow vdl code-generation in the
-	// "v.io/veyron/veyron2/verror" package itself, to specify common error IDs.  Special-case
+	// "v.io/core/veyron2/verror" package.  However we allow vdl code-generation in the
+	// "v.io/core/veyron2/verror" package itself, to specify common error IDs.  Special-case
 	// this scenario to avoid self-cyclic package dependencies.
-	if len(f.ErrorIDs) > 0 && f.Package.Path != "v.io/veyron/veyron2/verror" {
-		set[`__verror "v.io/veyron/veyron2/verror"`] = true
+	if len(f.ErrorIDs) > 0 && f.Package.Path != "v.io/core/veyron2/verror" {
+		set[`__verror "v.io/core/veyron2/verror"`] = true
 	}
 	// Convert the set of imports into a sorted list.
 	var ret sort.StringSlice
@@ -159,7 +159,7 @@ func init() {
 func genpkg(file *compile.File, pkg string) string {
 	// Special-case code generation for the veyron2/verror package, to avoid
 	// adding the "__verror." package qualifier.
-	if file.Package.Path == "v.io/veyron/veyron2/verror" && pkg == "verror" {
+	if file.Package.Path == "v.io/core/veyron2/verror" && pkg == "verror" {
 		return ""
 	}
 	return "__" + pkg + "."

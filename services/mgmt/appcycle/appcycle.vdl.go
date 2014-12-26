@@ -7,12 +7,12 @@ package appcycle
 import (
 	// The non-user imports are prefixed with "__" to prevent collisions.
 	__io "io"
-	__veyron2 "v.io/veyron/veyron2"
-	__context "v.io/veyron/veyron2/context"
-	__ipc "v.io/veyron/veyron2/ipc"
-	__vdl "v.io/veyron/veyron2/vdl"
-	__vdlutil "v.io/veyron/veyron2/vdl/vdlutil"
-	__wiretype "v.io/veyron/veyron2/wiretype"
+	__veyron2 "v.io/core/veyron2"
+	__context "v.io/core/veyron2/context"
+	__ipc "v.io/core/veyron2/ipc"
+	__vdl "v.io/core/veyron2/vdl"
+	__vdlutil "v.io/core/veyron2/vdl/vdlutil"
+	__wiretype "v.io/core/veyron2/wiretype"
 )
 
 // TODO(toddw): Remove this line once the new signature support is done.
@@ -36,7 +36,7 @@ type Task struct {
 }
 
 func (Task) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/services/mgmt/appcycle.Task"
+	Name string "v.io/core/veyron2/services/mgmt/appcycle.Task"
 }) {
 }
 
@@ -273,7 +273,7 @@ var AppCycleDesc __ipc.InterfaceDesc = descAppCycle
 // descAppCycle hides the desc to keep godoc clean.
 var descAppCycle = __ipc.InterfaceDesc{
 	Name:    "AppCycle",
-	PkgPath: "v.io/veyron/veyron2/services/mgmt/appcycle",
+	PkgPath: "v.io/core/veyron2/services/mgmt/appcycle",
 	Doc:     "// AppCycle interfaces with the process running a veyron runtime.",
 	Methods: []__ipc.MethodDesc{
 		{
@@ -317,7 +317,7 @@ func (s implAppCycleServerStub) Signature(ctx __ipc.ServerContext) (__ipc.Servic
 				__wiretype.FieldType{Type: 0x24, Name: "Progress"},
 				__wiretype.FieldType{Type: 0x24, Name: "Goal"},
 			},
-			"v.io/veyron/veyron2/services/mgmt/appcycle.Task", []string(nil)},
+			"v.io/core/veyron2/services/mgmt/appcycle.Task", []string(nil)},
 	}
 
 	return result, nil

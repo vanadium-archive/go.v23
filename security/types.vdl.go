@@ -5,8 +5,8 @@ package security
 
 import (
 	// The non-user imports are prefixed with "__" to prevent collisions.
-	__vdl "v.io/veyron/veyron2/vdl"
-	__vdlutil "v.io/veyron/veyron2/vdl/vdlutil"
+	__vdl "v.io/core/veyron2/vdl"
+	__vdlutil "v.io/core/veyron2/vdl/vdlutil"
 )
 
 // BlessingPattern is a pattern that is matched by specific blessings.
@@ -28,7 +28,7 @@ import (
 type BlessingPattern string
 
 func (BlessingPattern) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/security.BlessingPattern"
+	Name string "v.io/core/veyron2/security.BlessingPattern"
 }) {
 }
 
@@ -37,7 +37,7 @@ func (BlessingPattern) __VDLReflect(struct {
 type Label uint32
 
 func (Label) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/security.Label"
+	Name string "v.io/core/veyron2/security.Label"
 }) {
 }
 
@@ -46,7 +46,7 @@ func (Label) __VDLReflect(struct {
 type LabelSet Label
 
 func (LabelSet) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/security.LabelSet"
+	Name string "v.io/core/veyron2/security.LabelSet"
 }) {
 }
 
@@ -58,7 +58,7 @@ type DeprecatedACL struct {
 }
 
 func (DeprecatedACL) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/security.DeprecatedACL"
+	Name string "v.io/core/veyron2/security.DeprecatedACL"
 }) {
 }
 
@@ -66,7 +66,7 @@ func (DeprecatedACL) __VDLReflect(struct {
 type Hash string
 
 func (Hash) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/security.Hash"
+	Name string "v.io/core/veyron2/security.Hash"
 }) {
 }
 
@@ -84,7 +84,7 @@ type Signature struct {
 }
 
 func (Signature) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/security.Signature"
+	Name string "v.io/core/veyron2/security.Signature"
 }) {
 }
 
@@ -100,7 +100,7 @@ type ThirdPartyRequirements struct {
 }
 
 func (ThirdPartyRequirements) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/security.ThirdPartyRequirements"
+	Name string "v.io/core/veyron2/security.ThirdPartyRequirements"
 }) {
 }
 
@@ -121,7 +121,7 @@ type DischargeImpetus struct {
 }
 
 func (DischargeImpetus) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/security.DischargeImpetus"
+	Name string "v.io/core/veyron2/security.DischargeImpetus"
 }) {
 }
 
@@ -140,7 +140,7 @@ type Certificate struct {
 }
 
 func (Certificate) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/security.Certificate"
+	Name string "v.io/core/veyron2/security.Certificate"
 }) {
 }
 
@@ -159,7 +159,7 @@ type Caveat struct {
 }
 
 func (Caveat) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/security.Caveat"
+	Name string "v.io/core/veyron2/security.Caveat"
 }) {
 }
 
@@ -184,7 +184,7 @@ type WireBlessings struct {
 }
 
 func (WireBlessings) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/security.WireBlessings"
+	Name string "v.io/core/veyron2/security.WireBlessings"
 }) {
 }
 

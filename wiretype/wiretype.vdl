@@ -11,7 +11,7 @@ package wiretype
 // within such decoders, but are otherwise unspecified.  Decoders that simply
 // perform generic decoding have no requirement on name uniqueness.  By
 // convention names are assigned their Go "pkgpath.name",
-// e.g. "v.io/veyron/veyron2/wiretype.NamedPrimitivbeType".
+// e.g. "v.io/core/veyron2/wiretype.NamedPrimitivbeType".
 //
 // The Tags field is used to associate extra meta-information with a type, used
 // to retain implementation-specific details.  E.g. the Go implementation

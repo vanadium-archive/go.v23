@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"strings"
 
-	"v.io/veyron/veyron2/wiretype"
+	"v.io/core/veyron2/wiretype"
 )
 
 const (

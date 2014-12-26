@@ -5,10 +5,10 @@ import (
 	"strings"
 	"testing"
 
-	"v.io/veyron/veyron2/vdl"
-	"v.io/veyron/veyron2/vdl/build"
-	"v.io/veyron/veyron2/vdl/compile"
-	"v.io/veyron/veyron2/vdl/vdltest"
+	"v.io/core/veyron2/vdl"
+	"v.io/core/veyron2/vdl/build"
+	"v.io/core/veyron2/vdl/compile"
+	"v.io/core/veyron2/vdl/vdltest"
 )
 
 func testConstPackage(t *testing.T, name string, tpkg constPkg, env *compile.Env) *compile.Package {

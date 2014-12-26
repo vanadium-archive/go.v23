@@ -1,10 +1,10 @@
 package reserved
 
 import (
-	"v.io/veyron/veyron2"
-	"v.io/veyron/veyron2/context"
-	"v.io/veyron/veyron2/ipc"
-	"v.io/veyron/veyron2/vdl/vdlroot/src/signature"
+	"v.io/core/veyron2"
+	"v.io/core/veyron2/context"
+	"v.io/core/veyron2/ipc"
+	"v.io/core/veyron2/vdl/vdlroot/src/signature"
 )
 
 func cl(ctx context.T, client ipc.Client) ipc.Client {

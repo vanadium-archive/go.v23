@@ -5,7 +5,7 @@ import (
 	"math/big"
 	"testing"
 
-	"v.io/veyron/veyron2/vdl"
+	"v.io/core/veyron2/vdl"
 )
 
 const (

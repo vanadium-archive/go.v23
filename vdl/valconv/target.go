@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"reflect"
 
-	"v.io/veyron/veyron2/vdl"
-	"v.io/veyron/veyron2/verror"
-	"v.io/veyron/veyron2/verror2"
+	"v.io/core/veyron2/vdl"
+	"v.io/core/veyron2/verror"
+	"v.io/core/veyron2/verror2"
 )
 
 // Target represents a generic conversion target; objects that implement this

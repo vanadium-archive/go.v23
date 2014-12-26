@@ -8,7 +8,7 @@ import (
 	"regexp"
 	"testing"
 
-	"v.io/veyron/veyron2/vlog"
+	"v.io/core/veyron2/vlog"
 )
 
 func ExampleConfigure() {

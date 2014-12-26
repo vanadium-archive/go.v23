@@ -1,5 +1,5 @@
 // The following enables go generate to generate the doc.go file.
-//go:generate go run $VANADIUM_ROOT/veyron/go/src/v.io/lib/cmdline/testdata/gendoc.go .
+//go:generate go run $VANADIUM_ROOT/release/go/src/v.io/lib/cmdline/testdata/gendoc.go .
 
 package main
 
@@ -14,8 +14,8 @@ import (
 	"unicode"
 
 	"v.io/lib/cmdline"
-	"v.io/veyron/veyron2/vdl"
-	"v.io/veyron/veyron2/vom2"
+	"v.io/core/veyron2/vdl"
+	"v.io/core/veyron2/vom2"
 )
 
 func main() {
@@ -70,7 +70,7 @@ characters may be input to represent commands:
 This lets you cut-and-paste hex strings into your terminal, and use the commands
 to trigger status or flush calls; i.e. a rudimentary debugging UI.
 
-See v.io/veyron/veyron2/vom2.Dumper for details on the dump output.
+See v.io/core/veyron2/vom2.Dumper for details on the dump output.
 `,
 	ArgsName: "[data]",
 	ArgsLong: "[data] is the data to dump; if not specified, reads from stdin",

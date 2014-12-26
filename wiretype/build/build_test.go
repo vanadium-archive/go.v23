@@ -3,7 +3,7 @@ package build
 import (
 	"testing"
 
-	"v.io/veyron/veyron2/wiretype"
+	"v.io/core/veyron2/wiretype"
 )
 
 // Tests that adding new wiretypes and looking up existing wiretypes with Put() works correctly.

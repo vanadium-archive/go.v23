@@ -1,11 +1,11 @@
 package types
 
 import (
-	verror "v.io/veyron/veyron2/verror2"
+	verror "v.io/core/veyron2/verror2"
 )
 
 // pkgPath is the prefix of errors in this package.
-const pkgPath = "v.io/veyron/veyron2/services/watch/types"
+const pkgPath = "v.io/core/veyron2/services/watch/types"
 
 // The ResumeMarker provided is too far behind in the watch stream.
 var UnknownResumeMarker = verror.Register(

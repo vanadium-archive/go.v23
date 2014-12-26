@@ -6,8 +6,8 @@ package types
 
 import (
 	// The non-user imports are prefixed with "__" to prevent collisions.
-	__vdl "v.io/veyron/veyron2/vdl"
-	__vdlutil "v.io/veyron/veyron2/vdl/vdlutil"
+	__vdl "v.io/core/veyron2/vdl"
+	__vdlutil "v.io/core/veyron2/vdl/vdlutil"
 )
 
 // GlobRequest specifies which entities should be watched and, optionally,
@@ -22,7 +22,7 @@ type GlobRequest struct {
 }
 
 func (GlobRequest) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/services/watch/types.GlobRequest"
+	Name string "v.io/core/veyron2/services/watch/types.GlobRequest"
 }) {
 }
 
@@ -60,7 +60,7 @@ func (GlobRequest) __VDLReflect(struct {
 type ResumeMarker []byte
 
 func (ResumeMarker) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/services/watch/types.ResumeMarker"
+	Name string "v.io/core/veyron2/services/watch/types.ResumeMarker"
 }) {
 }
 
@@ -86,7 +86,7 @@ type Change struct {
 }
 
 func (Change) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/services/watch/types.Change"
+	Name string "v.io/core/veyron2/services/watch/types.Change"
 }) {
 }
 

@@ -8,9 +8,9 @@ import (
 	"reflect"
 	"testing"
 
-	"v.io/veyron/veyron2/vdl"
-	"v.io/veyron/veyron2/verror"
-	"v.io/veyron/veyron2/verror2"
+	"v.io/core/veyron2/vdl"
+	"v.io/core/veyron2/verror"
+	"v.io/core/veyron2/verror2"
 )
 
 type nValue *vdl.Value

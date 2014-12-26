@@ -151,7 +151,7 @@ type ReflectInfo struct {
 	WireType reflect.Type
 
 	// WireName is the vdl type name for the wire type.  Type names include the
-	// vdl package path, e.g. "v.io/veyron/veyron2/vdl.Foo".
+	// vdl package path, e.g. "v.io/core/veyron2/vdl.Foo".
 	WireName string
 
 	// NativeType is the native Go type for the wire type.  Users specify the

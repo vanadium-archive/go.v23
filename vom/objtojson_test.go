@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"v.io/veyron/veyron2/verror"
+	"v.io/core/veyron2/verror"
 )
 
 // TestObjToJSON checks for expected JSON output for a range of objects.
@@ -40,7 +40,7 @@ func TestObjToJSON(t *testing.T) {
 		testCase{true, "true"},
 		testCase{"str", "\"str\""},
 		testCase{nil, "null"},
-		testCase{verror.BadProtocolf("errorText"), "{\"iD\":\"v.io/veyron/veyron2/verror.BadProtocol\", \"msg\":\"errorText\"}"},
+		testCase{verror.BadProtocolf("errorText"), "{\"iD\":\"v.io/core/veyron2/verror.BadProtocol\", \"msg\":\"errorText\"}"},
 		testCase{[]int{4, 3}, "[4, 3]"},
 		testCase{[]float64{}, "[]"},
 		testCase{[]interface{}{1, "One"}, "[1, \"One\"]"},
@@ -71,7 +71,7 @@ func TestObjToJSON(t *testing.T) {
 		}{2, true}: 5}, "{\"{\\\"x\\\": 2, \\\"y\\\": true}\": 5}"},
 		testCase{map[**string]string{&aStringPtr: "B"}, "{\"str\": \"B\"}"},
 		testCase{map[error]string{verror.NoExistf("errorText"): "errorText"},
-			`{"{\"iD\": \"v.io/veyron/veyron2/verror.NoExist\", \"msg\": \"errorText\"}": "errorText"}`},
+			`{"{\"iD\": \"v.io/core/veyron2/verror.NoExist\", \"msg\": \"errorText\"}": "errorText"}`},
 		testCase{map[interface{}]interface{}{4: 1.7, "A": true}, "{\"4\": 1.7, \"\\\"A\\\"\": true}"},
 		testCase{&anInt, "4"},
 		testCase{&aStringPtr, "\"str\""},

@@ -3,18 +3,18 @@
 
 package verror
 
-const Aborted = ID("v.io/veyron/veyron2/verror.Aborted") // Operation aborted, e.g. connection closed.
+const Aborted = ID("v.io/core/veyron2/verror.Aborted") // Operation aborted, e.g. connection closed.
 
-const BadArg = ID("v.io/veyron/veyron2/verror.BadArg") // Requester specified an invalid argument.
+const BadArg = ID("v.io/core/veyron2/verror.BadArg") // Requester specified an invalid argument.
 
-const BadProtocol = ID("v.io/veyron/veyron2/verror.BadProtocol") // Protocol mismatch, including type or argument errors.
+const BadProtocol = ID("v.io/core/veyron2/verror.BadProtocol") // Protocol mismatch, including type or argument errors.
 
-const Exists = ID("v.io/veyron/veyron2/verror.Exists") // Requested entity already exists.
+const Exists = ID("v.io/core/veyron2/verror.Exists") // Requested entity already exists.
 
-const Internal = ID("v.io/veyron/veyron2/verror.Internal") // Internal invariants broken; something is very wrong.
+const Internal = ID("v.io/core/veyron2/verror.Internal") // Internal invariants broken; something is very wrong.
 
-const NoAccess = ID("v.io/veyron/veyron2/verror.NoAccess") // Requested entity exists, but requester may not access it.
+const NoAccess = ID("v.io/core/veyron2/verror.NoAccess") // Requested entity exists, but requester may not access it.
 
-const NoExist = ID("v.io/veyron/veyron2/verror.NoExist") // Requested entity doesn't exist.
+const NoExist = ID("v.io/core/veyron2/verror.NoExist") // Requested entity doesn't exist.
 
-const NoExistOrNoAccess = ID("v.io/veyron/veyron2/verror.NoExistOrNoAccess") // Requested entity doesn't exist, or requester may not access it.
+const NoExistOrNoAccess = ID("v.io/core/veyron2/verror.NoExistOrNoAccess") // Requested entity doesn't exist, or requester may not access it.

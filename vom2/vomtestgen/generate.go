@@ -10,16 +10,16 @@ import (
 	"strings"
 
 	"v.io/lib/cmdline"
-	"v.io/veyron/veyron2/vdl"
-	"v.io/veyron/veyron2/vdl/build"
-	"v.io/veyron/veyron2/vdl/codegen"
-	"v.io/veyron/veyron2/vdl/codegen/vdlgen"
-	"v.io/veyron/veyron2/vdl/compile"
-	"v.io/veyron/veyron2/vom2"
+	"v.io/core/veyron2/vdl"
+	"v.io/core/veyron2/vdl/build"
+	"v.io/core/veyron2/vdl/codegen"
+	"v.io/core/veyron2/vdl/codegen/vdlgen"
+	"v.io/core/veyron2/vdl/compile"
+	"v.io/core/veyron2/vom2"
 )
 
 const (
-	testpkg          = "v.io/veyron/veyron2/vom2/testdata"
+	testpkg          = "v.io/core/veyron2/vom2/testdata"
 	vomdataCanonical = testpkg + "/" + vomdataConfig
 	vomdataConfig    = "vomdata.vdl.config"
 )

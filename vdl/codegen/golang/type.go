@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"strings"
 
-	"v.io/veyron/veyron2/vdl"
-	"v.io/veyron/veyron2/vdl/compile"
+	"v.io/core/veyron2/vdl"
+	"v.io/core/veyron2/vdl/compile"
 )
 
 // testingMode is set to true to simplify tests.

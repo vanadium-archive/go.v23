@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"v.io/veyron/veyron2/verror"
+	"v.io/core/veyron2/verror"
 )
 
 func Example_usage() {

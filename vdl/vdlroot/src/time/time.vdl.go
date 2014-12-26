@@ -11,7 +11,7 @@ package time
 
 import (
 	// The non-user imports are prefixed with "__" to prevent collisions.
-	__vdl "v.io/veyron/veyron2/vdl"
+	__vdl "v.io/core/veyron2/vdl"
 )
 
 // Time represents an absolute point in time with nanosecond precision.

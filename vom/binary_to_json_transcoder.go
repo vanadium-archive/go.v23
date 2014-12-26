@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"unicode"
 
-	"v.io/veyron/veyron2/wiretype"
+	"v.io/core/veyron2/wiretype"
 )
 
 // BinaryToJSONTranscoder transcodes from VOM Binary to JSON.

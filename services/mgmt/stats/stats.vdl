@@ -3,8 +3,8 @@
 package stats
 
 import (
-	"v.io/veyron/veyron2/services/security/access"
-	"v.io/veyron/veyron2/services/watch"
+	"v.io/core/veyron2/services/security/access"
+	"v.io/core/veyron2/services/watch"
 )
 
 // The Stats interface is used to access stats for troubleshooting and

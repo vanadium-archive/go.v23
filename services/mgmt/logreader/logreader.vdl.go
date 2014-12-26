@@ -5,17 +5,17 @@
 package logreader
 
 import (
-	"v.io/veyron/veyron2/services/mgmt/logreader/types"
+	"v.io/core/veyron2/services/mgmt/logreader/types"
 
-	"v.io/veyron/veyron2/services/security/access"
+	"v.io/core/veyron2/services/security/access"
 
 	// The non-user imports are prefixed with "__" to prevent collisions.
 	__io "io"
-	__veyron2 "v.io/veyron/veyron2"
-	__context "v.io/veyron/veyron2/context"
-	__ipc "v.io/veyron/veyron2/ipc"
-	__vdlutil "v.io/veyron/veyron2/vdl/vdlutil"
-	__wiretype "v.io/veyron/veyron2/wiretype"
+	__veyron2 "v.io/core/veyron2"
+	__context "v.io/core/veyron2/context"
+	__ipc "v.io/core/veyron2/ipc"
+	__vdlutil "v.io/core/veyron2/vdl/vdlutil"
+	__wiretype "v.io/core/veyron2/wiretype"
 )
 
 // TODO(toddw): Remove this line once the new signature support is done.
@@ -276,7 +276,7 @@ var LogFileDesc __ipc.InterfaceDesc = descLogFile
 // descLogFile hides the desc to keep godoc clean.
 var descLogFile = __ipc.InterfaceDesc{
 	Name:    "LogFile",
-	PkgPath: "v.io/veyron/veyron2/services/mgmt/logreader",
+	PkgPath: "v.io/core/veyron2/services/mgmt/logreader",
 	Doc:     "// LogFile can be used to access log files remotely.",
 	Methods: []__ipc.MethodDesc{
 		{
@@ -335,7 +335,7 @@ func (s implLogFileServerStub) Signature(ctx __ipc.ServerContext) (__ipc.Service
 				__wiretype.FieldType{Type: 0x25, Name: "Position"},
 				__wiretype.FieldType{Type: 0x3, Name: "Line"},
 			},
-			"v.io/veyron/veyron2/services/mgmt/logreader/types.LogEntry", []string(nil)},
+			"v.io/core/veyron2/services/mgmt/logreader/types.LogEntry", []string(nil)},
 	}
 
 	return result, nil

@@ -6,8 +6,8 @@ package types
 
 import (
 	// The non-user imports are prefixed with "__" to prevent collisions.
-	__verror "v.io/veyron/veyron2/verror"
+	__verror "v.io/core/veyron2/verror"
 )
 
 // This error indicates that the object does not have a value.
-const NoValue = __verror.ID("v.io/veyron/veyron2/services/mgmt/stats/types.NoValue")
+const NoValue = __verror.ID("v.io/core/veyron2/services/mgmt/stats/types.NoValue")

@@ -1,9 +1,9 @@
 package compile
 
 import (
-	"v.io/veyron/veyron/lib/toposort"
-	"v.io/veyron/veyron2/vdl"
-	"v.io/veyron/veyron2/vdl/parse"
+	"v.io/core/veyron/lib/toposort"
+	"v.io/core/veyron2/vdl"
+	"v.io/core/veyron2/vdl/parse"
 )
 
 // compileInterfaces is the "entry point" to the rest of this file.  It takes

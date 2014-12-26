@@ -3,7 +3,7 @@ package base
 // This file contains experimental features, that are not yet supported for all
 // generated languages.  Run the following command to generate Go:
 //
-//   vdl -experimental -exts=.vdl,.vdlexp generate -lang=go v.io/veyron/veyron2/vdl/...
+//   vdl -experimental -exts=.vdl,.vdlexp generate -lang=go v.io/core/veyron2/vdl/...
 //
 // TODO(toddw): Merge with base.vdl, and remove this file.
 

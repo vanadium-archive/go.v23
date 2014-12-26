@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"v.io/veyron/veyron2/naming"
+	"v.io/core/veyron2/naming"
 )
 
 // NewContext creates a Context.

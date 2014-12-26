@@ -4,7 +4,7 @@ import (
 	"io"
 	"reflect"
 
-	"v.io/veyron/veyron2/vdl/valconv"
+	"v.io/core/veyron2/vdl/valconv"
 )
 
 // Encoder manages the transmission and marshaling of typed values to the other

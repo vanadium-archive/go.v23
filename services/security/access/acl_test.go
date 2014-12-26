@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"testing"
 
-	"v.io/veyron/veyron2/security"
+	"v.io/core/veyron2/security"
 )
 
 func TestInclude(t *testing.T) {

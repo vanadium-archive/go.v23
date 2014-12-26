@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"v.io/veyron/veyron2/config"
+	"v.io/core/veyron2/config"
 )
 
 func ExamplePublisher() {

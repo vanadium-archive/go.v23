@@ -9,14 +9,14 @@ import (
 	"strings"
 	"testing"
 
-	"v.io/veyron/veyron2/vdl"
-	"v.io/veyron/veyron2/vdl/build"
-	"v.io/veyron/veyron2/vdl/compile"
-	"v.io/veyron/veyron2/vdl/testdata/base"
-	"v.io/veyron/veyron2/vdl/valconv"
-	"v.io/veyron/veyron2/vdl/vdlroot/src/vdltool"
-	"v.io/veyron/veyron2/vdl/vdltest"
-	"v.io/veyron/veyron2/vdl/vdlutil"
+	"v.io/core/veyron2/vdl"
+	"v.io/core/veyron2/vdl/build"
+	"v.io/core/veyron2/vdl/compile"
+	"v.io/core/veyron2/vdl/testdata/base"
+	"v.io/core/veyron2/vdl/valconv"
+	"v.io/core/veyron2/vdl/vdlroot/src/vdltool"
+	"v.io/core/veyron2/vdl/vdltest"
+	"v.io/core/veyron2/vdl/vdlutil"
 )
 
 func init() {
@@ -26,10 +26,10 @@ func init() {
 
 // The cwd is set to the directory containing this file.  Currently we have the
 // following directory structure:
-//   .../veyron/go/src/v.io/veyron/veyron2/vdl/build/build_test.go
+//   .../release/go/src/v.io/core/veyron2/vdl/build/build_test.go
 // We want to end up with the following:
-//   VDLROOT = .../veyron/go/src/v.io/veyron/veyron2/vdl/vdlroot
-//   VDLPATH = .../veyron/go
+//   VDLROOT = .../release/go/src/v.io/core/veyron2/vdl/vdlroot
+//   VDLPATH = .../release/go
 //
 // TODO(toddw): Put a full VDLPATH tree under ../testdata and only use that.
 const (
@@ -75,8 +75,8 @@ func TestSrcDirsVdlRoot(t *testing.T) {
 		{"", "", nil, "Either VDLROOT or VANADIUM_ROOT must be set"},
 		{"/a", "", []string{"/a/src"}, ""},
 		{"/a/b/c", "", []string{"/a/b/c/src"}, ""},
-		{"", "/veyron", []string{"/veyron/veyron/go/src/v.io/veyron/veyron2/vdl/vdlroot/src"}, ""},
-		{"", "/a/b/c", []string{"/a/b/c/veyron/go/src/v.io/veyron/veyron2/vdl/vdlroot/src"}, ""},
+		{"", "/veyron", []string{"/veyron/release/go/src/v.io/core/veyron2/vdl/vdlroot/src"}, ""},
+		{"", "/a/b/c", []string{"/a/b/c/release/go/src/v.io/core/veyron2/vdl/vdlroot/src"}, ""},
 		// If both VDLROOT and VANADIUM_ROOT are specified, VDLROOT takes precedence.
 		{"/a", "/veyron", []string{"/a/src"}, ""},
 		{"/a/b/c", "/x/y/z", []string{"/a/b/c/src"}, ""},
@@ -226,111 +226,111 @@ func TestTransitivePackages(t *testing.T) {
 		{[]string{}, nil},
 		// Single-package, both import and dir path.
 		{
-			[]string{"v.io/veyron/veyron2/vdl/testdata/base"},
-			[]string{"v.io/veyron/veyron2/vdl/testdata/base"},
+			[]string{"v.io/core/veyron2/vdl/testdata/base"},
+			[]string{"v.io/core/veyron2/vdl/testdata/base"},
 		},
 		{
 			[]string{"../testdata/base"},
-			[]string{"v.io/veyron/veyron2/vdl/testdata/base"},
+			[]string{"v.io/core/veyron2/vdl/testdata/base"},
 		},
 		// Single-package with wildcard, both import and dir path.
 		{
-			[]string{"v.io/veyron/veyron2/vdl/testdata/base..."},
-			[]string{"v.io/veyron/veyron2/vdl/testdata/base"},
+			[]string{"v.io/core/veyron2/vdl/testdata/base..."},
+			[]string{"v.io/core/veyron2/vdl/testdata/base"},
 		},
 		{
-			[]string{"v.io/veyron/veyron2/vdl/testdata/base/..."},
-			[]string{"v.io/veyron/veyron2/vdl/testdata/base"},
+			[]string{"v.io/core/veyron2/vdl/testdata/base/..."},
+			[]string{"v.io/core/veyron2/vdl/testdata/base"},
 		},
 		{
 			[]string{"../testdata/base..."},
-			[]string{"v.io/veyron/veyron2/vdl/testdata/base"},
+			[]string{"v.io/core/veyron2/vdl/testdata/base"},
 		},
 		{
 			[]string{"../testdata/base/..."},
-			[]string{"v.io/veyron/veyron2/vdl/testdata/base"},
+			[]string{"v.io/core/veyron2/vdl/testdata/base"},
 		},
 		// Redundant specification as both import and dir path.
 		{
-			[]string{"v.io/veyron/veyron2/vdl/testdata/base", "../testdata/base"},
-			[]string{"v.io/veyron/veyron2/vdl/testdata/base"},
+			[]string{"v.io/core/veyron2/vdl/testdata/base", "../testdata/base"},
+			[]string{"v.io/core/veyron2/vdl/testdata/base"},
 		},
 		{
-			[]string{"v.io/veyron/veyron2/vdl/testdata/arith", "../testdata/arith"},
+			[]string{"v.io/core/veyron2/vdl/testdata/arith", "../testdata/arith"},
 			[]string{
-				"v.io/veyron/veyron2/vdl/testdata/arith/exp",
-				"v.io/veyron/veyron2/vdl/testdata/base",
-				"v.io/veyron/veyron2/vdl/testdata/arith",
+				"v.io/core/veyron2/vdl/testdata/arith/exp",
+				"v.io/core/veyron2/vdl/testdata/base",
+				"v.io/core/veyron2/vdl/testdata/arith",
 			},
 		},
 		// Wildcards as both import and dir path.
 		{
-			[]string{"v.io/veyron/veyron2/vdl/testdata..."},
+			[]string{"v.io/core/veyron2/vdl/testdata..."},
 			[]string{
-				"v.io/veyron/veyron2/vdl/testdata/arith/exp",
-				"v.io/veyron/veyron2/vdl/testdata/base",
-				"v.io/veyron/veyron2/vdl/testdata/arith",
-				"v.io/veyron/veyron2/vdl/testdata/testconfig",
+				"v.io/core/veyron2/vdl/testdata/arith/exp",
+				"v.io/core/veyron2/vdl/testdata/base",
+				"v.io/core/veyron2/vdl/testdata/arith",
+				"v.io/core/veyron2/vdl/testdata/testconfig",
 			},
 		},
 		{
-			[]string{"v.io/veyron/veyron2/vdl/testdata/..."},
+			[]string{"v.io/core/veyron2/vdl/testdata/..."},
 			[]string{
-				"v.io/veyron/veyron2/vdl/testdata/arith/exp",
-				"v.io/veyron/veyron2/vdl/testdata/base",
-				"v.io/veyron/veyron2/vdl/testdata/arith",
-				"v.io/veyron/veyron2/vdl/testdata/testconfig",
+				"v.io/core/veyron2/vdl/testdata/arith/exp",
+				"v.io/core/veyron2/vdl/testdata/base",
+				"v.io/core/veyron2/vdl/testdata/arith",
+				"v.io/core/veyron2/vdl/testdata/testconfig",
 			},
 		},
 		{
 			[]string{"../testdata..."},
 			[]string{
-				"v.io/veyron/veyron2/vdl/testdata/arith/exp",
-				"v.io/veyron/veyron2/vdl/testdata/base",
-				"v.io/veyron/veyron2/vdl/testdata/arith",
-				"v.io/veyron/veyron2/vdl/testdata/testconfig",
+				"v.io/core/veyron2/vdl/testdata/arith/exp",
+				"v.io/core/veyron2/vdl/testdata/base",
+				"v.io/core/veyron2/vdl/testdata/arith",
+				"v.io/core/veyron2/vdl/testdata/testconfig",
 			},
 		},
 		{
 			[]string{"../testdata/..."},
 			[]string{
-				"v.io/veyron/veyron2/vdl/testdata/arith/exp",
-				"v.io/veyron/veyron2/vdl/testdata/base",
-				"v.io/veyron/veyron2/vdl/testdata/arith",
-				"v.io/veyron/veyron2/vdl/testdata/testconfig",
+				"v.io/core/veyron2/vdl/testdata/arith/exp",
+				"v.io/core/veyron2/vdl/testdata/base",
+				"v.io/core/veyron2/vdl/testdata/arith",
+				"v.io/core/veyron2/vdl/testdata/testconfig",
 			},
 		},
 		// Multi-Wildcards as both import and dir path.
 		{
 			[]string{"v...vdl/testdata/..."},
 			[]string{
-				"v.io/veyron/veyron2/vdl/testdata/arith/exp",
-				"v.io/veyron/veyron2/vdl/testdata/base",
-				"v.io/veyron/veyron2/vdl/testdata/arith",
-				"v.io/veyron/veyron2/vdl/testdata/testconfig",
+				"v.io/core/veyron2/vdl/testdata/arith/exp",
+				"v.io/core/veyron2/vdl/testdata/base",
+				"v.io/core/veyron2/vdl/testdata/arith",
+				"v.io/core/veyron2/vdl/testdata/testconfig",
 			},
 		},
 		{
 			[]string{"../../../...vdl/testdata/..."},
 			[]string{
-				"v.io/veyron/veyron2/vdl/testdata/arith/exp",
-				"v.io/veyron/veyron2/vdl/testdata/base",
-				"v.io/veyron/veyron2/vdl/testdata/arith",
-				"v.io/veyron/veyron2/vdl/testdata/testconfig",
+				"v.io/core/veyron2/vdl/testdata/arith/exp",
+				"v.io/core/veyron2/vdl/testdata/base",
+				"v.io/core/veyron2/vdl/testdata/arith",
+				"v.io/core/veyron2/vdl/testdata/testconfig",
 			},
 		},
 		// Multi-Wildcards as both import and dir path.
 		{
 			[]string{"v...vdl/testdata/...exp"},
-			[]string{"v.io/veyron/veyron2/vdl/testdata/arith/exp"},
+			[]string{"v.io/core/veyron2/vdl/testdata/arith/exp"},
 		},
 		{
 			[]string{"../../../...vdl/testdata/...exp"},
-			[]string{"v.io/veyron/veyron2/vdl/testdata/arith/exp"},
+			[]string{"v.io/core/veyron2/vdl/testdata/arith/exp"},
 		},
 		// Standard vdl package, as both import and dir path.
 		{
-			[]string{"v.io/veyron/veyron2/vdl/vdlroot/src/vdltool"},
+			[]string{"v.io/core/veyron2/vdl/vdlroot/src/vdltool"},
 			[]string{"vdltool"},
 		},
 		{
@@ -435,9 +435,9 @@ func TestPackageConfig(t *testing.T) {
 		Path   string
 		Config vdltool.Config
 	}{
-		{"v.io/veyron/veyron2/vdl/testdata/base", vdltool.Config{}},
+		{"v.io/core/veyron2/vdl/testdata/base", vdltool.Config{}},
 		{
-			"v.io/veyron/veyron2/vdl/testdata/testconfig",
+			"v.io/core/veyron2/vdl/testdata/testconfig",
 			vdltool.Config{
 				GenLanguages: map[vdltool.GenLanguage]struct{}{vdltool.GenLanguageGo: struct{}{}},
 			},
@@ -473,15 +473,15 @@ func TestBuildConfig(t *testing.T) {
 		Value interface{}
 	}{
 		{
-			`config = x;import "v.io/veyron/veyron2/vdl/testdata/base";const x = base.NamedBool(true)`,
+			`config = x;import "v.io/core/veyron2/vdl/testdata/base";const x = base.NamedBool(true)`,
 			base.NamedBool(true),
 		},
 		{
-			`config = x;import "v.io/veyron/veyron2/vdl/testdata/base";const x = base.NamedString("abc")`,
+			`config = x;import "v.io/core/veyron2/vdl/testdata/base";const x = base.NamedString("abc")`,
 			base.NamedString("abc"),
 		},
 		{
-			`config = x;import "v.io/veyron/veyron2/vdl/testdata/base";const x = base.Args{1, 2}`,
+			`config = x;import "v.io/core/veyron2/vdl/testdata/base";const x = base.Args{1, 2}`,
 			base.Args{1, 2},
 		},
 	}

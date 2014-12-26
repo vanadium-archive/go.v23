@@ -7,13 +7,13 @@ package base
 import (
 	// The non-user imports are prefixed with "__" to prevent collisions.
 	__io "io"
-	__veyron2 "v.io/veyron/veyron2"
-	__context "v.io/veyron/veyron2/context"
-	__ipc "v.io/veyron/veyron2/ipc"
-	__vdl "v.io/veyron/veyron2/vdl"
-	__vdlutil "v.io/veyron/veyron2/vdl/vdlutil"
-	__verror "v.io/veyron/veyron2/verror"
-	__wiretype "v.io/veyron/veyron2/wiretype"
+	__veyron2 "v.io/core/veyron2"
+	__context "v.io/core/veyron2/context"
+	__ipc "v.io/core/veyron2/ipc"
+	__vdl "v.io/core/veyron2/vdl"
+	__vdlutil "v.io/core/veyron2/vdl/vdlutil"
+	__verror "v.io/core/veyron2/verror"
+	__wiretype "v.io/core/veyron2/wiretype"
 )
 
 // TODO(toddw): Remove this line once the new signature support is done.
@@ -24,91 +24,91 @@ const _ = __wiretype.TypeIDInvalid
 type NamedBool bool
 
 func (NamedBool) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/vdl/testdata/base.NamedBool"
+	Name string "v.io/core/veyron2/vdl/testdata/base.NamedBool"
 }) {
 }
 
 type NamedByte byte
 
 func (NamedByte) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/vdl/testdata/base.NamedByte"
+	Name string "v.io/core/veyron2/vdl/testdata/base.NamedByte"
 }) {
 }
 
 type NamedUint16 uint16
 
 func (NamedUint16) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/vdl/testdata/base.NamedUint16"
+	Name string "v.io/core/veyron2/vdl/testdata/base.NamedUint16"
 }) {
 }
 
 type NamedUint32 uint32
 
 func (NamedUint32) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/vdl/testdata/base.NamedUint32"
+	Name string "v.io/core/veyron2/vdl/testdata/base.NamedUint32"
 }) {
 }
 
 type NamedUint64 uint64
 
 func (NamedUint64) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/vdl/testdata/base.NamedUint64"
+	Name string "v.io/core/veyron2/vdl/testdata/base.NamedUint64"
 }) {
 }
 
 type NamedInt16 int16
 
 func (NamedInt16) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/vdl/testdata/base.NamedInt16"
+	Name string "v.io/core/veyron2/vdl/testdata/base.NamedInt16"
 }) {
 }
 
 type NamedInt32 int32
 
 func (NamedInt32) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/vdl/testdata/base.NamedInt32"
+	Name string "v.io/core/veyron2/vdl/testdata/base.NamedInt32"
 }) {
 }
 
 type NamedInt64 int64
 
 func (NamedInt64) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/vdl/testdata/base.NamedInt64"
+	Name string "v.io/core/veyron2/vdl/testdata/base.NamedInt64"
 }) {
 }
 
 type NamedFloat32 float32
 
 func (NamedFloat32) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/vdl/testdata/base.NamedFloat32"
+	Name string "v.io/core/veyron2/vdl/testdata/base.NamedFloat32"
 }) {
 }
 
 type NamedFloat64 float64
 
 func (NamedFloat64) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/vdl/testdata/base.NamedFloat64"
+	Name string "v.io/core/veyron2/vdl/testdata/base.NamedFloat64"
 }) {
 }
 
 type NamedComplex64 complex64
 
 func (NamedComplex64) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/vdl/testdata/base.NamedComplex64"
+	Name string "v.io/core/veyron2/vdl/testdata/base.NamedComplex64"
 }) {
 }
 
 type NamedComplex128 complex128
 
 func (NamedComplex128) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/vdl/testdata/base.NamedComplex128"
+	Name string "v.io/core/veyron2/vdl/testdata/base.NamedComplex128"
 }) {
 }
 
 type NamedString string
 
 func (NamedString) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/vdl/testdata/base.NamedString"
+	Name string "v.io/core/veyron2/vdl/testdata/base.NamedString"
 }) {
 }
 
@@ -116,28 +116,28 @@ func (NamedString) __VDLReflect(struct {
 type NamedArray [2]bool
 
 func (NamedArray) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/vdl/testdata/base.NamedArray"
+	Name string "v.io/core/veyron2/vdl/testdata/base.NamedArray"
 }) {
 }
 
 type NamedList []uint32
 
 func (NamedList) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/vdl/testdata/base.NamedList"
+	Name string "v.io/core/veyron2/vdl/testdata/base.NamedList"
 }) {
 }
 
 type NamedSet map[string]struct{}
 
 func (NamedSet) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/vdl/testdata/base.NamedSet"
+	Name string "v.io/core/veyron2/vdl/testdata/base.NamedSet"
 }) {
 }
 
 type NamedMap map[string]float32
 
 func (NamedMap) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/vdl/testdata/base.NamedMap"
+	Name string "v.io/core/veyron2/vdl/testdata/base.NamedMap"
 }) {
 }
 
@@ -148,7 +148,7 @@ type NamedStruct struct {
 }
 
 func (NamedStruct) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/vdl/testdata/base.NamedStruct"
+	Name string "v.io/core/veyron2/vdl/testdata/base.NamedStruct"
 }) {
 }
 
@@ -185,7 +185,7 @@ type Scalars struct {
 }
 
 func (Scalars) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/vdl/testdata/base.Scalars"
+	Name string "v.io/core/veyron2/vdl/testdata/base.Scalars"
 }) {
 }
 
@@ -220,7 +220,7 @@ type KeyScalars struct {
 }
 
 func (KeyScalars) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/vdl/testdata/base.KeyScalars"
+	Name string "v.io/core/veyron2/vdl/testdata/base.KeyScalars"
 }) {
 }
 
@@ -234,7 +234,7 @@ type Composites struct {
 }
 
 func (Composites) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/vdl/testdata/base.Composites"
+	Name string "v.io/core/veyron2/vdl/testdata/base.Composites"
 }) {
 }
 
@@ -247,7 +247,7 @@ type CompComp struct {
 }
 
 func (CompComp) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/vdl/testdata/base.CompComp"
+	Name string "v.io/core/veyron2/vdl/testdata/base.CompComp"
 }) {
 }
 
@@ -259,7 +259,7 @@ type NestedArgs struct {
 }
 
 func (NestedArgs) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/vdl/testdata/base.NestedArgs"
+	Name string "v.io/core/veyron2/vdl/testdata/base.NestedArgs"
 }) {
 }
 
@@ -270,7 +270,7 @@ type Args struct {
 }
 
 func (Args) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/vdl/testdata/base.Args"
+	Name string "v.io/core/veyron2/vdl/testdata/base.Args"
 }) {
 }
 
@@ -398,7 +398,7 @@ const SixSquared = uint64(36)
 
 const FiveSquared = int32(25)
 
-const ErrIDFoo = __verror.ID("v.io/veyron/veyron2/vdl/testdata/base.ErrIDFoo")
+const ErrIDFoo = __verror.ID("v.io/core/veyron2/vdl/testdata/base.ErrIDFoo")
 
 const ErrIDBar = __verror.ID("some/path.ErrIdOther")
 
@@ -747,7 +747,7 @@ var ServiceADesc __ipc.InterfaceDesc = descServiceA
 // descServiceA hides the desc to keep godoc clean.
 var descServiceA = __ipc.InterfaceDesc{
 	Name:    "ServiceA",
-	PkgPath: "v.io/veyron/veyron2/vdl/testdata/base",
+	PkgPath: "v.io/core/veyron2/vdl/testdata/base",
 	Methods: []__ipc.MethodDesc{
 		{
 			Name: "MethodA1",
@@ -831,7 +831,7 @@ func (s implServiceAServerStub) Signature(ctx __ipc.ServerContext) (__ipc.Servic
 	}
 
 	result.TypeDefs = []__vdlutil.Any{
-		__wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x1, Name: "anydata", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x7, Name: "TypeID", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x2, Name: "v.io/veyron/veyron2/vdl/testdata/base.NamedBool", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x32, Name: "v.io/veyron/veyron2/vdl/testdata/base.NamedByte", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x33, Name: "v.io/veyron/veyron2/vdl/testdata/base.NamedUint16", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x34, Name: "v.io/veyron/veyron2/vdl/testdata/base.NamedUint32", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x35, Name: "v.io/veyron/veyron2/vdl/testdata/base.NamedUint64", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x23, Name: "v.io/veyron/veyron2/vdl/testdata/base.NamedInt16", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x24, Name: "v.io/veyron/veyron2/vdl/testdata/base.NamedInt32", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x25, Name: "v.io/veyron/veyron2/vdl/testdata/base.NamedInt64", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x19, Name: "v.io/veyron/veyron2/vdl/testdata/base.NamedFloat32", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x1a, Name: "v.io/veyron/veyron2/vdl/testdata/base.NamedFloat64", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x38, Name: "v.io/veyron/veyron2/vdl/testdata/base.NamedComplex64", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x39, Name: "v.io/veyron/veyron2/vdl/testdata/base.NamedComplex128", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x3, Name: "v.io/veyron/veyron2/vdl/testdata/base.NamedString", Tags: []string(nil)}, __wiretype.StructType{
+		__wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x1, Name: "anydata", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x7, Name: "TypeID", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x2, Name: "v.io/core/veyron2/vdl/testdata/base.NamedBool", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x32, Name: "v.io/core/veyron2/vdl/testdata/base.NamedByte", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x33, Name: "v.io/core/veyron2/vdl/testdata/base.NamedUint16", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x34, Name: "v.io/core/veyron2/vdl/testdata/base.NamedUint32", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x35, Name: "v.io/core/veyron2/vdl/testdata/base.NamedUint64", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x23, Name: "v.io/core/veyron2/vdl/testdata/base.NamedInt16", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x24, Name: "v.io/core/veyron2/vdl/testdata/base.NamedInt32", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x25, Name: "v.io/core/veyron2/vdl/testdata/base.NamedInt64", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x19, Name: "v.io/core/veyron2/vdl/testdata/base.NamedFloat32", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x1a, Name: "v.io/core/veyron2/vdl/testdata/base.NamedFloat64", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x38, Name: "v.io/core/veyron2/vdl/testdata/base.NamedComplex64", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x39, Name: "v.io/core/veyron2/vdl/testdata/base.NamedComplex128", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x3, Name: "v.io/core/veyron2/vdl/testdata/base.NamedString", Tags: []string(nil)}, __wiretype.StructType{
 			[]__wiretype.FieldType{
 				__wiretype.FieldType{Type: 0x2, Name: "A0"},
 				__wiretype.FieldType{Type: 0x42, Name: "A1"},
@@ -863,7 +863,7 @@ func (s implServiceAServerStub) Signature(ctx __ipc.ServerContext) (__ipc.Servic
 				__wiretype.FieldType{Type: 0x50, Name: "B11"},
 				__wiretype.FieldType{Type: 0x51, Name: "B12"},
 			},
-			"v.io/veyron/veyron2/vdl/testdata/base.Scalars", []string(nil)},
+			"v.io/core/veyron2/vdl/testdata/base.Scalars", []string(nil)},
 	}
 
 	return result, nil
@@ -1123,9 +1123,9 @@ var ServiceBDesc __ipc.InterfaceDesc = descServiceB
 // descServiceB hides the desc to keep godoc clean.
 var descServiceB = __ipc.InterfaceDesc{
 	Name:    "ServiceB",
-	PkgPath: "v.io/veyron/veyron2/vdl/testdata/base",
+	PkgPath: "v.io/core/veyron2/vdl/testdata/base",
 	Embeds: []__ipc.EmbedDesc{
-		{"ServiceA", "v.io/veyron/veyron2/vdl/testdata/base", ``},
+		{"ServiceA", "v.io/core/veyron2/vdl/testdata/base", ``},
 	},
 	Methods: []__ipc.MethodDesc{
 		{
@@ -1157,7 +1157,7 @@ func (s implServiceBServerStub) Signature(ctx __ipc.ServerContext) (__ipc.Servic
 	}
 
 	result.TypeDefs = []__vdlutil.Any{
-		__wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x1, Name: "anydata", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x7, Name: "TypeID", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x2, Name: "v.io/veyron/veyron2/vdl/testdata/base.NamedBool", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x32, Name: "v.io/veyron/veyron2/vdl/testdata/base.NamedByte", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x33, Name: "v.io/veyron/veyron2/vdl/testdata/base.NamedUint16", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x34, Name: "v.io/veyron/veyron2/vdl/testdata/base.NamedUint32", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x35, Name: "v.io/veyron/veyron2/vdl/testdata/base.NamedUint64", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x23, Name: "v.io/veyron/veyron2/vdl/testdata/base.NamedInt16", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x24, Name: "v.io/veyron/veyron2/vdl/testdata/base.NamedInt32", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x25, Name: "v.io/veyron/veyron2/vdl/testdata/base.NamedInt64", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x19, Name: "v.io/veyron/veyron2/vdl/testdata/base.NamedFloat32", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x1a, Name: "v.io/veyron/veyron2/vdl/testdata/base.NamedFloat64", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x38, Name: "v.io/veyron/veyron2/vdl/testdata/base.NamedComplex64", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x39, Name: "v.io/veyron/veyron2/vdl/testdata/base.NamedComplex128", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x3, Name: "v.io/veyron/veyron2/vdl/testdata/base.NamedString", Tags: []string(nil)}, __wiretype.StructType{
+		__wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x1, Name: "anydata", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x7, Name: "TypeID", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x2, Name: "v.io/core/veyron2/vdl/testdata/base.NamedBool", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x32, Name: "v.io/core/veyron2/vdl/testdata/base.NamedByte", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x33, Name: "v.io/core/veyron2/vdl/testdata/base.NamedUint16", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x34, Name: "v.io/core/veyron2/vdl/testdata/base.NamedUint32", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x35, Name: "v.io/core/veyron2/vdl/testdata/base.NamedUint64", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x23, Name: "v.io/core/veyron2/vdl/testdata/base.NamedInt16", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x24, Name: "v.io/core/veyron2/vdl/testdata/base.NamedInt32", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x25, Name: "v.io/core/veyron2/vdl/testdata/base.NamedInt64", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x19, Name: "v.io/core/veyron2/vdl/testdata/base.NamedFloat32", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x1a, Name: "v.io/core/veyron2/vdl/testdata/base.NamedFloat64", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x38, Name: "v.io/core/veyron2/vdl/testdata/base.NamedComplex64", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x39, Name: "v.io/core/veyron2/vdl/testdata/base.NamedComplex128", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x3, Name: "v.io/core/veyron2/vdl/testdata/base.NamedString", Tags: []string(nil)}, __wiretype.StructType{
 			[]__wiretype.FieldType{
 				__wiretype.FieldType{Type: 0x2, Name: "A0"},
 				__wiretype.FieldType{Type: 0x41, Name: "A1"},
@@ -1189,7 +1189,7 @@ func (s implServiceBServerStub) Signature(ctx __ipc.ServerContext) (__ipc.Servic
 				__wiretype.FieldType{Type: 0x50, Name: "B11"},
 				__wiretype.FieldType{Type: 0x51, Name: "B12"},
 			},
-			"v.io/veyron/veyron2/vdl/testdata/base.Scalars", []string(nil)},
+			"v.io/core/veyron2/vdl/testdata/base.Scalars", []string(nil)},
 		__wiretype.ArrayType{Elem: 0x52, Len: 0x2, Name: "", Tags: []string(nil)}, __wiretype.SliceType{Elem: 0x52, Name: "", Tags: []string(nil)}, __wiretype.StructType{
 			[]__wiretype.FieldType{
 				__wiretype.FieldType{Type: 0x2, Name: "A0"},
@@ -1219,7 +1219,7 @@ func (s implServiceBServerStub) Signature(ctx __ipc.ServerContext) (__ipc.Servic
 				__wiretype.FieldType{Type: 0x50, Name: "B11"},
 				__wiretype.FieldType{Type: 0x51, Name: "B12"},
 			},
-			"v.io/veyron/veyron2/vdl/testdata/base.KeyScalars", []string(nil)},
+			"v.io/core/veyron2/vdl/testdata/base.KeyScalars", []string(nil)},
 		__wiretype.MapType{Key: 0x55, Elem: 0x2, Name: "", Tags: []string(nil)}, __wiretype.MapType{Key: 0x3, Elem: 0x52, Name: "", Tags: []string(nil)}, __wiretype.MapType{Key: 0x3, Elem: 0x39, Name: "", Tags: []string(nil)}, __wiretype.SliceType{Elem: 0x58, Name: "", Tags: []string(nil)}, __wiretype.MapType{Key: 0x55, Elem: 0x59, Name: "", Tags: []string(nil)}, __wiretype.StructType{
 			[]__wiretype.FieldType{
 				__wiretype.FieldType{Type: 0x52, Name: "A0"},
@@ -1229,7 +1229,7 @@ func (s implServiceBServerStub) Signature(ctx __ipc.ServerContext) (__ipc.Servic
 				__wiretype.FieldType{Type: 0x57, Name: "A4"},
 				__wiretype.FieldType{Type: 0x5a, Name: "A5"},
 			},
-			"v.io/veyron/veyron2/vdl/testdata/base.Composites", []string(nil)},
+			"v.io/core/veyron2/vdl/testdata/base.Composites", []string(nil)},
 		__wiretype.ArrayType{Elem: 0x5b, Len: 0x2, Name: "", Tags: []string(nil)}, __wiretype.SliceType{Elem: 0x5b, Name: "", Tags: []string(nil)}, __wiretype.MapType{Key: 0x3, Elem: 0x5b, Name: "", Tags: []string(nil)}, __wiretype.SliceType{Elem: 0x5e, Name: "", Tags: []string(nil)}, __wiretype.MapType{Key: 0x55, Elem: 0x5f, Name: "", Tags: []string(nil)}, __wiretype.StructType{
 			[]__wiretype.FieldType{
 				__wiretype.FieldType{Type: 0x5b, Name: "A0"},
@@ -1238,7 +1238,7 @@ func (s implServiceBServerStub) Signature(ctx __ipc.ServerContext) (__ipc.Servic
 				__wiretype.FieldType{Type: 0x5e, Name: "A3"},
 				__wiretype.FieldType{Type: 0x60, Name: "A4"},
 			},
-			"v.io/veyron/veyron2/vdl/testdata/base.CompComp", []string(nil)},
+			"v.io/core/veyron2/vdl/testdata/base.CompComp", []string(nil)},
 	}
 	var ss __ipc.ServiceSignature
 	var firstAdded int

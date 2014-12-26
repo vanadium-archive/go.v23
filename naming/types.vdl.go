@@ -5,14 +5,14 @@ package naming
 
 import (
 	// The non-user imports are prefixed with "__" to prevent collisions.
-	__vdl "v.io/veyron/veyron2/vdl"
+	__vdl "v.io/core/veyron2/vdl"
 )
 
 // MountFlag is a bit mask of options to the mount call.
 type MountFlag uint32
 
 func (MountFlag) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/naming.MountFlag"
+	Name string "v.io/core/veyron2/naming.MountFlag"
 }) {
 }
 
@@ -25,7 +25,7 @@ type VDLMountedServer struct {
 }
 
 func (VDLMountedServer) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/naming.VDLMountedServer"
+	Name string "v.io/core/veyron2/naming.VDLMountedServer"
 }) {
 }
 
@@ -40,7 +40,7 @@ type VDLMountEntry struct {
 }
 
 func (VDLMountEntry) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/naming.VDLMountEntry"
+	Name string "v.io/core/veyron2/naming.VDLMountEntry"
 }) {
 }
 

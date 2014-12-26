@@ -19,7 +19,7 @@ will be tested.  Here's an example:
    }
 
 If not specified, we'll try to find the file at its canonical location:
-   v.io/veyron/veyron2/vom2/testdata/vomdata.vdl.config
+   v.io/core/veyron2/vom2/testdata/vomdata.vdl.config
 
 The vomtestgen flags are:
  -exts=.vdl

@@ -12,16 +12,16 @@ import (
 	"reflect"
 	"testing"
 
-	"v.io/veyron/veyron2"
-	"v.io/veyron/veyron2/ipc"
-	"v.io/veyron/veyron2/naming"
-	"v.io/veyron/veyron2/rt"
-	"v.io/veyron/veyron2/vdl/testdata/arith"
-	"v.io/veyron/veyron2/vdl/testdata/base"
-	"v.io/veyron/veyron2/vdl/vdlutil"
-	"v.io/veyron/veyron2/wiretype"
+	"v.io/core/veyron2"
+	"v.io/core/veyron2/ipc"
+	"v.io/core/veyron2/naming"
+	"v.io/core/veyron2/rt"
+	"v.io/core/veyron2/vdl/testdata/arith"
+	"v.io/core/veyron2/vdl/testdata/base"
+	"v.io/core/veyron2/vdl/vdlutil"
+	"v.io/core/veyron2/wiretype"
 
-	"v.io/veyron/veyron/profiles"
+	"v.io/core/veyron/profiles"
 )
 
 var generatedError = errors.New("generated error")
@@ -185,15 +185,15 @@ func TestCalculator(t *testing.T) {
 	expectDesc(t, serverStub.Describe__(), []ipc.InterfaceDesc{
 		{
 			Name:    "Calculator",
-			PkgPath: "v.io/veyron/veyron2/vdl/testdata/arith",
+			PkgPath: "v.io/core/veyron2/vdl/testdata/arith",
 			Embeds: []ipc.EmbedDesc{
 				{
 					Name:    "Arith",
-					PkgPath: "v.io/veyron/veyron2/vdl/testdata/arith",
+					PkgPath: "v.io/core/veyron2/vdl/testdata/arith",
 				},
 				{
 					Name:    "AdvancedMath",
-					PkgPath: "v.io/veyron/veyron2/vdl/testdata/arith",
+					PkgPath: "v.io/core/veyron2/vdl/testdata/arith",
 				},
 			},
 			Methods: []ipc.MethodDesc{
@@ -203,7 +203,7 @@ func TestCalculator(t *testing.T) {
 		},
 		{
 			Name:    "Arith",
-			PkgPath: "v.io/veyron/veyron2/vdl/testdata/arith",
+			PkgPath: "v.io/core/veyron2/vdl/testdata/arith",
 			Methods: []ipc.MethodDesc{
 				{
 					Name:    "Add",
@@ -248,20 +248,20 @@ func TestCalculator(t *testing.T) {
 		},
 		{
 			Name:    "AdvancedMath",
-			PkgPath: "v.io/veyron/veyron2/vdl/testdata/arith",
+			PkgPath: "v.io/core/veyron2/vdl/testdata/arith",
 			Embeds: []ipc.EmbedDesc{
 				{
 					Name:    "Trigonometry",
-					PkgPath: "v.io/veyron/veyron2/vdl/testdata/arith",
+					PkgPath: "v.io/core/veyron2/vdl/testdata/arith",
 				},
 				{
 					Name:    "Exp",
-					PkgPath: "v.io/veyron/veyron2/vdl/testdata/arith/exp",
+					PkgPath: "v.io/core/veyron2/vdl/testdata/arith/exp",
 				}},
 		},
 		{
 			Name:    "Trigonometry",
-			PkgPath: "v.io/veyron/veyron2/vdl/testdata/arith",
+			PkgPath: "v.io/core/veyron2/vdl/testdata/arith",
 			Doc:     "// Trigonometry is an interface that specifies a couple trigonometric functions.",
 			Methods: []ipc.MethodDesc{
 				{
@@ -288,7 +288,7 @@ func TestCalculator(t *testing.T) {
 		},
 		{
 			Name:    "Exp",
-			PkgPath: "v.io/veyron/veyron2/vdl/testdata/arith/exp",
+			PkgPath: "v.io/core/veyron2/vdl/testdata/arith/exp",
 			Methods: []ipc.MethodDesc{
 				{
 					Name: "Exp",
@@ -429,8 +429,8 @@ func TestCalculator(t *testing.T) {
 		// Arith:
 		wiretype.NamedPrimitiveType{1, "error", nil},
 		wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{36, "A"},
-			wiretype.FieldType{36, "B"}}, "v.io/veyron/veyron2/vdl/testdata/base.Args", nil},
-		wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{67, "Args"}}, "v.io/veyron/veyron2/vdl/testdata/base.NestedArgs", nil},
+			wiretype.FieldType{36, "B"}}, "v.io/core/veyron2/vdl/testdata/base.Args", nil},
+		wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{67, "Args"}}, "v.io/core/veyron2/vdl/testdata/base.NestedArgs", nil},
 		wiretype.NamedPrimitiveType{1, "anydata", nil},
 		// Trig:
 		wiretype.NamedPrimitiveType{1, "error", nil},
@@ -598,7 +598,7 @@ func TestArith(t *testing.T) {
 		expectDesc(t, serverStub.Describe__(), []ipc.InterfaceDesc{
 			{
 				Name:    "Arith",
-				PkgPath: "v.io/veyron/veyron2/vdl/testdata/arith",
+				PkgPath: "v.io/core/veyron2/vdl/testdata/arith",
 				Methods: []ipc.MethodDesc{
 					{
 						Name:    "Add",
@@ -726,8 +726,8 @@ func TestArith(t *testing.T) {
 
 		expectedTypeDefs := []vdlutil.Any{
 			wiretype.NamedPrimitiveType{1, "error", nil},
-			wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{36, "A"}, wiretype.FieldType{36, "B"}}, "v.io/veyron/veyron2/vdl/testdata/base.Args", nil},
-			wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{66, "Args"}}, "v.io/veyron/veyron2/vdl/testdata/base.NestedArgs", nil},
+			wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{36, "A"}, wiretype.FieldType{36, "B"}}, "v.io/core/veyron2/vdl/testdata/base.Args", nil},
+			wiretype.StructType{[]wiretype.FieldType{wiretype.FieldType{66, "Args"}}, "v.io/core/veyron2/vdl/testdata/base.NestedArgs", nil},
 			wiretype.NamedPrimitiveType{1, "anydata", nil},
 		}
 

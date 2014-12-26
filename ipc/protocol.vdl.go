@@ -4,13 +4,13 @@
 package ipc
 
 import (
-	"v.io/veyron/veyron2/security"
+	"v.io/core/veyron2/security"
 
-	"v.io/veyron/veyron2/vtrace"
+	"v.io/core/veyron2/vtrace"
 
 	// The non-user imports are prefixed with "__" to prevent collisions.
-	__vdl "v.io/veyron/veyron2/vdl"
-	__vdlutil "v.io/veyron/veyron2/vdl/vdlutil"
+	__vdl "v.io/core/veyron2/vdl"
+	__vdlutil "v.io/core/veyron2/vdl/vdlutil"
 )
 
 // Request describes the request header sent by the client to the server.  A
@@ -55,7 +55,7 @@ type Request struct {
 }
 
 func (Request) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/ipc.Request"
+	Name string "v.io/core/veyron2/ipc.Request"
 }) {
 }
 
@@ -82,7 +82,7 @@ type Response struct {
 }
 
 func (Response) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/ipc.Response"
+	Name string "v.io/core/veyron2/ipc.Response"
 }) {
 }
 
@@ -101,7 +101,7 @@ type BlessingsRequest struct {
 }
 
 func (BlessingsRequest) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/ipc.BlessingsRequest"
+	Name string "v.io/core/veyron2/ipc.BlessingsRequest"
 }) {
 }
 

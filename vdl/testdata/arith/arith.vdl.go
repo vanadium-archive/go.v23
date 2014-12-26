@@ -27,17 +27,17 @@
 package arith
 
 import (
-	"v.io/veyron/veyron2/vdl/testdata/arith/exp"
+	"v.io/core/veyron2/vdl/testdata/arith/exp"
 
-	"v.io/veyron/veyron2/vdl/testdata/base"
+	"v.io/core/veyron2/vdl/testdata/base"
 
 	// The non-user imports are prefixed with "__" to prevent collisions.
 	__io "io"
-	__veyron2 "v.io/veyron/veyron2"
-	__context "v.io/veyron/veyron2/context"
-	__ipc "v.io/veyron/veyron2/ipc"
-	__vdlutil "v.io/veyron/veyron2/vdl/vdlutil"
-	__wiretype "v.io/veyron/veyron2/wiretype"
+	__veyron2 "v.io/core/veyron2"
+	__context "v.io/core/veyron2/context"
+	__ipc "v.io/core/veyron2/ipc"
+	__vdlutil "v.io/core/veyron2/vdl/vdlutil"
+	__wiretype "v.io/core/veyron2/wiretype"
 )
 
 // TODO(toddw): Remove this line once the new signature support is done.
@@ -526,7 +526,7 @@ var ArithDesc __ipc.InterfaceDesc = descArith
 // descArith hides the desc to keep godoc clean.
 var descArith = __ipc.InterfaceDesc{
 	Name:    "Arith",
-	PkgPath: "v.io/veyron/veyron2/vdl/testdata/arith",
+	PkgPath: "v.io/core/veyron2/vdl/testdata/arith",
 	Doc:     "// Arith is an example of an interface definition for an arithmetic service.\n// Things to note:\n//   * There must be at least 1 out-arg, and the last out-arg must be error.",
 	Methods: []__ipc.MethodDesc{
 		{
@@ -699,12 +699,12 @@ func (s implArithServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSi
 				__wiretype.FieldType{Type: 0x24, Name: "A"},
 				__wiretype.FieldType{Type: 0x24, Name: "B"},
 			},
-			"v.io/veyron/veyron2/vdl/testdata/base.Args", []string(nil)},
+			"v.io/core/veyron2/vdl/testdata/base.Args", []string(nil)},
 		__wiretype.StructType{
 			[]__wiretype.FieldType{
 				__wiretype.FieldType{Type: 0x42, Name: "Args"},
 			},
-			"v.io/veyron/veyron2/vdl/testdata/base.NestedArgs", []string(nil)},
+			"v.io/core/veyron2/vdl/testdata/base.NestedArgs", []string(nil)},
 		__wiretype.NamedPrimitiveType{Type: 0x1, Name: "anydata", Tags: []string(nil)}}
 
 	return result, nil
@@ -1009,10 +1009,10 @@ var CalculatorDesc __ipc.InterfaceDesc = descCalculator
 // descCalculator hides the desc to keep godoc clean.
 var descCalculator = __ipc.InterfaceDesc{
 	Name:    "Calculator",
-	PkgPath: "v.io/veyron/veyron2/vdl/testdata/arith",
+	PkgPath: "v.io/core/veyron2/vdl/testdata/arith",
 	Embeds: []__ipc.EmbedDesc{
-		{"Arith", "v.io/veyron/veyron2/vdl/testdata/arith", "// Arith is an example of an interface definition for an arithmetic service.\n// Things to note:\n//   * There must be at least 1 out-arg, and the last out-arg must be error."},
-		{"AdvancedMath", "v.io/veyron/veyron2/vdl/testdata/arith", "// AdvancedMath is an interface for more advanced math than arith.  It embeds\n// interfaces defined both in the same file and in an external package; and in\n// turn it is embedded by arith.Calculator (which is in the same package but\n// different file) to verify that embedding works in all these scenarios."},
+		{"Arith", "v.io/core/veyron2/vdl/testdata/arith", "// Arith is an example of an interface definition for an arithmetic service.\n// Things to note:\n//   * There must be at least 1 out-arg, and the last out-arg must be error."},
+		{"AdvancedMath", "v.io/core/veyron2/vdl/testdata/arith", "// AdvancedMath is an interface for more advanced math than arith.  It embeds\n// interfaces defined both in the same file and in an external package; and in\n// turn it is embedded by arith.Calculator (which is in the same package but\n// different file) to verify that embedding works in all these scenarios."},
 	},
 	Methods: []__ipc.MethodDesc{
 		{

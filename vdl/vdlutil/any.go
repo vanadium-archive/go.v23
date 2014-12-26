@@ -3,8 +3,8 @@ package vdlutil
 import (
 	"encoding/gob"
 
-	"v.io/veyron/veyron2/vdl"
-	"v.io/veyron/veyron2/vom"
+	"v.io/core/veyron2/vdl"
+	"v.io/core/veyron2/vom"
 )
 
 // TODO(toddw): Move the contents of this file to the vdl package after the vom2

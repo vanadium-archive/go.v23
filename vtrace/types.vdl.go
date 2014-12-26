@@ -4,10 +4,10 @@
 package vtrace
 
 import (
-	"v.io/veyron/veyron2/uniqueid"
+	"v.io/core/veyron2/uniqueid"
 
 	// The non-user imports are prefixed with "__" to prevent collisions.
-	__vdl "v.io/veyron/veyron2/vdl"
+	__vdl "v.io/core/veyron2/vdl"
 )
 
 type TraceRecord struct {
@@ -16,7 +16,7 @@ type TraceRecord struct {
 }
 
 func (TraceRecord) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/vtrace.TraceRecord"
+	Name string "v.io/core/veyron2/vtrace.TraceRecord"
 }) {
 }
 
@@ -32,7 +32,7 @@ type Annotation struct {
 }
 
 func (Annotation) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/vtrace.Annotation"
+	Name string "v.io/core/veyron2/vtrace.Annotation"
 }) {
 }
 
@@ -50,7 +50,7 @@ type SpanRecord struct {
 }
 
 func (SpanRecord) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/vtrace.SpanRecord"
+	Name string "v.io/core/veyron2/vtrace.SpanRecord"
 }) {
 }
 
@@ -60,7 +60,7 @@ func (SpanRecord) __VDLReflect(struct {
 type TraceMethod int32
 
 func (TraceMethod) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/vtrace.TraceMethod"
+	Name string "v.io/core/veyron2/vtrace.TraceMethod"
 }) {
 }
 
@@ -72,7 +72,7 @@ type Request struct {
 }
 
 func (Request) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/vtrace.Request"
+	Name string "v.io/core/veyron2/vtrace.Request"
 }) {
 }
 
@@ -87,7 +87,7 @@ type Response struct {
 }
 
 func (Response) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/vtrace.Response"
+	Name string "v.io/core/veyron2/vtrace.Response"
 }) {
 }
 

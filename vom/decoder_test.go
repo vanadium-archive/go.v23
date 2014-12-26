@@ -10,7 +10,7 @@ import (
 	"testing/iotest"
 	"unsafe"
 
-	"v.io/veyron/veyron/runtimes/google/lib/reflectutil"
+	"v.io/core/veyron/runtimes/google/lib/reflectutil"
 )
 
 // We run all of our tests in two different modes - one them gets reads as
@@ -715,7 +715,7 @@ var decodeErrorJSONTests = []struct {
 		e{`vom: json msg doesn't start with label`}},
 	{
 		"NoTypeComma",
-		`["type" "v.io/veyron/veyron/lib/vom.Foo int"]`,
+		`["type" "v.io/core/veyron/lib/vom.Foo int"]`,
 		v{0},
 		e{`vom: json type msg missing typedef comma`}},
 	{
@@ -740,25 +740,25 @@ var decodeErrorJSONTests = []struct {
 		e{`vom: json name has invalid runes: "#foo#"`}},
 	{
 		"BadTypeTags1",
-		`["type", "v.io/veyron/veyron/lib/vom.Foo int", 123]`,
+		`["type", "v.io/core/veyron/lib/vom.Foo int", 123]`,
 		v{0},
 		e{`vom: json expected array; saw start number`}},
 	{
 		"BadTypeTags2",
-		`["type", "v.io/veyron/veyron/lib/vom.Foo int", [123]]`,
+		`["type", "v.io/core/veyron/lib/vom.Foo int", [123]]`,
 		v{0},
 		e{`vom: json expected string; saw start number`}},
 	{
 		"ExtraTypeItem",
-		`["type", "v.io/veyron/veyron/lib/vom.Foo int", ["foo"], 123]`,
+		`["type", "v.io/core/veyron/lib/vom.Foo int", ["foo"], 123]`,
 		v{0},
 		e{`vom: json expected end type msg; saw comma`}},
 	{
 		"DuplicateWireDef",
-		`["type", "v.io/veyron/veyron/lib/vom.Foo int"]
-["type", "v.io/veyron/veyron/lib/vom.Foo int"]`,
+		`["type", "v.io/core/veyron/lib/vom.Foo int"]
+["type", "v.io/core/veyron/lib/vom.Foo int"]`,
 		v{0},
-		e{`vom: json duplicate typedef name "v.io/veyron/veyron/lib/vom.Foo"`}},
+		e{`vom: json duplicate typedef name "v.io/core/veyron/lib/vom.Foo"`}},
 	{
 		"NoValue",
 		`["int"]`,

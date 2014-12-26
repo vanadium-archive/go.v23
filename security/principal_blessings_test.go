@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"v.io/veyron/veyron2/vom"
+	"v.io/core/veyron2/vom"
 )
 
 func TestBlessSelf(t *testing.T) {

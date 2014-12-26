@@ -6,7 +6,7 @@ package application
 
 import (
 	// The non-user imports are prefixed with "__" to prevent collisions.
-	__vdl "v.io/veyron/veyron2/vdl"
+	__vdl "v.io/core/veyron2/vdl"
 )
 
 // Envelope is a collection of metadata that describes an application.
@@ -40,7 +40,7 @@ type Envelope struct {
 }
 
 func (Envelope) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/services/mgmt/application.Envelope"
+	Name string "v.io/core/veyron2/services/mgmt/application.Envelope"
 }) {
 }
 

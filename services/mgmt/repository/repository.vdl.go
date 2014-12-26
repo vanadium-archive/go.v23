@@ -6,20 +6,20 @@
 package repository
 
 import (
-	"v.io/veyron/veyron2/services/mgmt/application"
+	"v.io/core/veyron2/services/mgmt/application"
 
-	"v.io/veyron/veyron2/services/mgmt/binary"
+	"v.io/core/veyron2/services/mgmt/binary"
 
-	"v.io/veyron/veyron2/services/security/access"
+	"v.io/core/veyron2/services/security/access"
 
 	// The non-user imports are prefixed with "__" to prevent collisions.
 	__io "io"
-	__veyron2 "v.io/veyron/veyron2"
-	__context "v.io/veyron/veyron2/context"
-	__ipc "v.io/veyron/veyron2/ipc"
-	__vdl "v.io/veyron/veyron2/vdl"
-	__vdlutil "v.io/veyron/veyron2/vdl/vdlutil"
-	__wiretype "v.io/veyron/veyron2/wiretype"
+	__veyron2 "v.io/core/veyron2"
+	__context "v.io/core/veyron2/context"
+	__ipc "v.io/core/veyron2/ipc"
+	__vdl "v.io/core/veyron2/vdl"
+	__vdlutil "v.io/core/veyron2/vdl/vdlutil"
+	__wiretype "v.io/core/veyron2/wiretype"
 )
 
 // TODO(toddw): Remove this line once the new signature support is done.
@@ -34,7 +34,7 @@ type MediaInfo struct {
 }
 
 func (MediaInfo) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/services/mgmt/repository.MediaInfo"
+	Name string "v.io/core/veyron2/services/mgmt/repository.MediaInfo"
 }) {
 }
 
@@ -192,7 +192,7 @@ var ApplicationDesc __ipc.InterfaceDesc = descApplication
 // descApplication hides the desc to keep godoc clean.
 var descApplication = __ipc.InterfaceDesc{
 	Name:    "Application",
-	PkgPath: "v.io/veyron/veyron2/services/mgmt/repository",
+	PkgPath: "v.io/core/veyron2/services/mgmt/repository",
 	Doc:     "// Application provides access to application envelopes. An\n// application envelope is identified by an application name and an\n// application version, which are specified through the object name,\n// and a profile name, which is specified using a method argument.\n//\n// Example:\n// /apps/search/v1.Match([]string{\"base\", \"media\"})\n//   returns an application envelope that can be used for downloading\n//   and executing the \"search\" application, version \"v1\", runnable\n//   on either the \"base\" or \"media\" profile.",
 	Methods: []__ipc.MethodDesc{
 		{
@@ -232,7 +232,7 @@ func (s implApplicationServerStub) Signature(ctx __ipc.ServerContext) (__ipc.Ser
 				__wiretype.FieldType{Type: 0x3d, Name: "Env"},
 				__wiretype.FieldType{Type: 0x41, Name: "Packages"},
 			},
-			"v.io/veyron/veyron2/services/mgmt/application.Envelope", []string(nil)},
+			"v.io/core/veyron2/services/mgmt/application.Envelope", []string(nil)},
 		__wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}}
 
 	return result, nil
@@ -700,7 +700,7 @@ var BinaryDesc __ipc.InterfaceDesc = descBinary
 // descBinary hides the desc to keep godoc clean.
 var descBinary = __ipc.InterfaceDesc{
 	Name:    "Binary",
-	PkgPath: "v.io/veyron/veyron2/services/mgmt/repository",
+	PkgPath: "v.io/core/veyron2/services/mgmt/repository",
 	Doc:     "// Binary can be used to store and retrieve veyron application\n// binaries.\n//\n// To create a binary, clients first invoke the Create() method that\n// specifies the number of parts the binary consists of. Clients then\n// uploads the individual parts through the Upload() method, which\n// identifies the part being uploaded. To resume an upload after a\n// failure, clients invoke the UploadStatus() method, which returns a\n// slice that identifies which parts are missing.\n//\n// To download a binary, clients first invoke Stat(), which returns\n// information describing the binary, including the number of parts\n// the binary consists of. Clients then download the individual parts\n// through the Download() method, which identifies the part being\n// downloaded. Alternatively, clients can download the binary through\n// HTTP using a transient URL available through the DownloadURL()\n// method.\n//\n// To delete the binary, clients invoke the Delete() method.",
 	Methods: []__ipc.MethodDesc{
 		{
@@ -828,13 +828,13 @@ func (s implBinaryServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceS
 				__wiretype.FieldType{Type: 0x3, Name: "Type"},
 				__wiretype.FieldType{Type: 0x3, Name: "Encoding"},
 			},
-			"v.io/veyron/veyron2/services/mgmt/repository.MediaInfo", []string(nil)},
+			"v.io/core/veyron2/services/mgmt/repository.MediaInfo", []string(nil)},
 		__wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, __wiretype.SliceType{Elem: 0x43, Name: "", Tags: []string(nil)}, __wiretype.StructType{
 			[]__wiretype.FieldType{
 				__wiretype.FieldType{Type: 0x3, Name: "Checksum"},
 				__wiretype.FieldType{Type: 0x25, Name: "Size"},
 			},
-			"v.io/veyron/veyron2/services/mgmt/binary.PartInfo", []string(nil)},
+			"v.io/core/veyron2/services/mgmt/binary.PartInfo", []string(nil)},
 		__wiretype.SliceType{Elem: 0x45, Name: "", Tags: []string(nil)}}
 
 	return result, nil
@@ -1102,7 +1102,7 @@ var ProfileDesc __ipc.InterfaceDesc = descProfile
 // descProfile hides the desc to keep godoc clean.
 var descProfile = __ipc.InterfaceDesc{
 	Name:    "Profile",
-	PkgPath: "v.io/veyron/veyron2/services/mgmt/repository",
+	PkgPath: "v.io/core/veyron2/services/mgmt/repository",
 	Doc:     "// Profile abstracts a device's ability to run binaries, and hides\n// specifics such as the operating system, hardware architecture, and\n// the set of installed libraries. Profiles describe binaries and\n// devices, and are used to match them.",
 	Methods: []__ipc.MethodDesc{
 		{

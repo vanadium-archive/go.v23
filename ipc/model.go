@@ -5,12 +5,12 @@ import (
 	"net"
 	"strings"
 
-	"v.io/veyron/veyron2/config"
-	"v.io/veyron/veyron2/context"
-	"v.io/veyron/veyron2/naming"
-	"v.io/veyron/veyron2/security"
-	"v.io/veyron/veyron2/vdl/vdlroot/src/signature"
-	verror "v.io/veyron/veyron2/verror2"
+	"v.io/core/veyron2/config"
+	"v.io/core/veyron2/context"
+	"v.io/core/veyron2/naming"
+	"v.io/core/veyron2/security"
+	"v.io/core/veyron2/vdl/vdlroot/src/signature"
+	verror "v.io/core/veyron2/verror2"
 )
 
 // Client represents the interface for making RPC calls.  There may be multiple

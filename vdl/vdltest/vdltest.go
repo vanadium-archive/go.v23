@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"v.io/veyron/veyron2/vdl/build"
-	"v.io/veyron/veyron2/vdl/vdlutil"
+	"v.io/core/veyron2/vdl/build"
+	"v.io/core/veyron2/vdl/vdlutil"
 )
 
 // ExpectPass makes sure errs has no errors.

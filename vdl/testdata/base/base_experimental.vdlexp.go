@@ -6,8 +6,8 @@ package base
 import (
 	// The non-user imports are prefixed with "__" to prevent collisions.
 	__fmt "fmt"
-	__vdl "v.io/veyron/veyron2/vdl"
-	__vdlutil "v.io/veyron/veyron2/vdl/vdlutil"
+	__vdl "v.io/core/veyron2/vdl"
+	__vdlutil "v.io/core/veyron2/vdl/vdlutil"
 )
 
 type NamedEnum int
@@ -58,7 +58,7 @@ func (x NamedEnum) String() string {
 }
 
 func (NamedEnum) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/vdl/testdata/base.NamedEnum"
+	Name string "v.io/core/veyron2/vdl/testdata/base.NamedEnum"
 	Enum struct{ A, B, C string }
 }) {
 }
@@ -83,7 +83,7 @@ type (
 	NamedUnionC struct{ Value int32 }
 	// __NamedUnionReflect describes the NamedUnion union type.
 	__NamedUnionReflect struct {
-		Name  string "v.io/veyron/veyron2/vdl/testdata/base.NamedUnion"
+		Name  string "v.io/core/veyron2/vdl/testdata/base.NamedUnion"
 		Type  NamedUnion
 		Union struct {
 			A NamedUnionA
@@ -114,7 +114,7 @@ type ScalarsExp struct {
 }
 
 func (ScalarsExp) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/vdl/testdata/base.ScalarsExp"
+	Name string "v.io/core/veyron2/vdl/testdata/base.ScalarsExp"
 }) {
 }
 

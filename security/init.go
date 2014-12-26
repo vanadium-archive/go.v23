@@ -1,6 +1,6 @@
 package security
 
-import "v.io/veyron/veyron2/vdl/vdlutil"
+import "v.io/core/veyron2/vdl/vdlutil"
 
 func init() {
 	vdlutil.Register(Signature{})

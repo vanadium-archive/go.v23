@@ -48,13 +48,13 @@ import (
 	"sort"
 	"strings"
 
-	"v.io/veyron/veyron/lib/toposort"
-	"v.io/veyron/veyron2/vdl"
-	"v.io/veyron/veyron2/vdl/compile"
-	"v.io/veyron/veyron2/vdl/parse"
-	"v.io/veyron/veyron2/vdl/valconv"
-	"v.io/veyron/veyron2/vdl/vdlroot/src/vdltool"
-	"v.io/veyron/veyron2/vdl/vdlutil"
+	"v.io/core/veyron/lib/toposort"
+	"v.io/core/veyron2/vdl"
+	"v.io/core/veyron2/vdl/compile"
+	"v.io/core/veyron2/vdl/parse"
+	"v.io/core/veyron2/vdl/valconv"
+	"v.io/core/veyron2/vdl/vdlroot/src/vdltool"
+	"v.io/core/veyron2/vdl/vdlutil"
 )
 
 // Package represents the build information for a vdl package.
@@ -270,12 +270,12 @@ func vdlRootSrcDir(errs *vdlutil.Errors) string {
 	vdlroot := os.Getenv("VDLROOT")
 	if vdlroot == "" {
 		// Try to construct VDLROOT out of VANADIUM_ROOT.
-		veyronroot := os.Getenv("VANADIUM_ROOT")
-		if veyronroot == "" {
+		vroot := os.Getenv("VANADIUM_ROOT")
+		if vroot == "" {
 			errs.Error("Either VDLROOT or VANADIUM_ROOT must be set")
 			return ""
 		}
-		vdlroot = filepath.Join(veyronroot, "veyron", "go", "src", "v.io", "veyron", "veyron2", "vdl", "vdlroot")
+		vroot = filepath.Join(vroot, "release", "go", "src", "v.io", "core", "veyron2", "vdl", "vdlroot")
 	}
 	src := filepath.Join(vdlroot, "src")
 	abs, err := filepath.Abs(src)
@@ -324,8 +324,8 @@ func IsImportPath(path string) bool {
 //
 // This is slightly complicated because of dirs, and the potential for symlinks.
 // E.g. let's say we have two directories, one a symlink to the other:
-//   /home/user/veyron/go/src/veyron/rt/base
-//   /home/user/veyron/go/src/veyron/rt2     symlink to rt
+//   /home/user/release/go/src/veyron/rt/base
+//   /home/user/release/go/src/veyron/rt2     symlink to rt
 //
 // The problem is that if the user has cwd pointing at one of the two "base"
 // dirs and specifies a relative directory ".." it's ambiguous which absolute
@@ -510,7 +510,7 @@ func (ds *depSorter) resolveDirPath(dir string, mode UnknownPathMode) *Package {
 	// We always deduce the package path from the package directory, even if we
 	// originally resolved from an import path, and thus already "know" the
 	// package path.  This is to ensure we correctly handle vdl standard packages.
-	// E.g. if we're given "v.io/veyron/veyron2/vdl/vdlroot/src/vdltool" as
+	// E.g. if we're given "v.io/core/veyron2/vdl/vdlroot/src/vdltool" as
 	// an import path, the resulting package path must be "vdltool".
 	pkgPath, err := ds.deducePackagePath(absDir)
 	if err != nil {

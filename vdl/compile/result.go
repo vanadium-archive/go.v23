@@ -6,10 +6,10 @@ import (
 	"regexp"
 	"strings"
 
-	"v.io/veyron/veyron2/vdl"
-	"v.io/veyron/veyron2/vdl/opconst"
-	"v.io/veyron/veyron2/vdl/parse"
-	"v.io/veyron/veyron2/vdl/vdlutil"
+	"v.io/core/veyron2/vdl"
+	"v.io/core/veyron2/vdl/opconst"
+	"v.io/core/veyron2/vdl/parse"
+	"v.io/core/veyron2/vdl/vdlutil"
 )
 
 // Env is the environment for compilation.  It contains all errors that were
@@ -225,7 +225,7 @@ func (e *Env) experimentalOnly(file *File, pos parse.Pos, format string, v ...in
 // Package represents an vdl package, containing a set of files.
 type Package struct {
 	Name  string  // e.g. "base"
-	Path  string  // e.g. "v.io/veyron/veyron/rt/base"
+	Path  string  // e.g. "v.io/core/veyron/rt/base"
 	Files []*File // Files contained in the package
 
 	// We hold some internal maps to make local name resolution cheap and easy.

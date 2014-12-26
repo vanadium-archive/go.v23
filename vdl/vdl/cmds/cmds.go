@@ -10,15 +10,15 @@ import (
 	"path/filepath"
 	"strings"
 
+	"v.io/core/veyron2/vdl/build"
+	"v.io/core/veyron2/vdl/codegen/golang"
+	"v.io/core/veyron2/vdl/codegen/java"
+	"v.io/core/veyron2/vdl/codegen/javascript"
+	"v.io/core/veyron2/vdl/compile"
+	"v.io/core/veyron2/vdl/vdlroot/src/vdltool"
+	"v.io/core/veyron2/vdl/vdlutil"
 	"v.io/lib/cmdline"
 	"v.io/lib/textutil"
-	"v.io/veyron/veyron2/vdl/build"
-	"v.io/veyron/veyron2/vdl/codegen/golang"
-	"v.io/veyron/veyron2/vdl/codegen/java"
-	"v.io/veyron/veyron2/vdl/codegen/javascript"
-	"v.io/veyron/veyron2/vdl/compile"
-	"v.io/veyron/veyron2/vdl/vdlroot/src/vdltool"
-	"v.io/veyron/veyron2/vdl/vdlutil"
 )
 
 func init() {
@@ -74,7 +74,7 @@ Most vdl commands apply to a list of packages:
 
 <packages> are a list of packages to process, similar to the standard go tool.
 In its simplest form each package is an import path; e.g.
-   "v.io/veyron/veyron/lib/vdl"
+   "v.io/core/veyron/lib/vdl"
 
 A package that is an absolute path or that begins with a . or .. element is
 interpreted as a file system path, and denotes the package in that directory.
@@ -326,17 +326,17 @@ var (
 		rules: xlateRules{
 			{"go/src", "java/src/vdl/java"},
 			// TODO(toddw): Skip vdlroot java generation for now.
-			{"veyron/go/src/v.io/veyron/veyron2/vdl/vdlroot/src", "SKIP"},
+			{"release/go/src/v.io/core/veyron2/vdl/vdlroot/src", "SKIP"},
 		},
 	}
 	optGenJavascriptOutDir = genOutDir{
 		rules: xlateRules{
-			{"veyron/go/src", "veyron.js/src"},
-			{"roadmap/go/src", "veyron.js/src"},
+			{"release/go/src", "release/javascript/core/src"},
+			{"roadmap/go/src", "release/javascript/core/src"},
 			{"third_party/go/src", "SKIP"},
 			{"tools/go/src", "SKIP"},
 			// TODO(toddw): Skip vdlroot javascript generation for now.
-			{"veyron/go/src/v.io/veyron/veyron2/vdl/vdlroot/src", "SKIP"},
+			{"release/go/src/v.io/core/veyron2/vdl/vdlroot/src", "SKIP"},
 		},
 	}
 	optGenJavaOutPkg = xlateRules{
@@ -608,9 +608,9 @@ func canonicalPath(path string) string {
 	// up in the canonical location, rather than just vdltool and signature.
 	switch path {
 	case "vdltool":
-		return "v.io/veyron/veyron2/vdl/vdlroot/src/vdltool"
+		return "v.io/core/veyron2/vdl/vdlroot/src/vdltool"
 	case "signature":
-		return "v.io/veyron/veyron2/vdl/vdlroot/src/signature"
+		return "v.io/core/veyron2/vdl/vdlroot/src/signature"
 	}
 	return path
 }

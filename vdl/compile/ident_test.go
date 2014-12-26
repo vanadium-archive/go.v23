@@ -3,9 +3,9 @@ package compile_test
 import (
 	"testing"
 
-	"v.io/veyron/veyron2/vdl/build"
-	"v.io/veyron/veyron2/vdl/compile"
-	"v.io/veyron/veyron2/vdl/vdltest"
+	"v.io/core/veyron2/vdl/build"
+	"v.io/core/veyron2/vdl/compile"
+	"v.io/core/veyron2/vdl/vdltest"
 )
 
 func TestIdentConflict(t *testing.T) {

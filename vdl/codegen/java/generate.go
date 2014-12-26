@@ -2,9 +2,9 @@
 package java
 
 import (
-	"v.io/veyron/veyron2/vdl"
-	"v.io/veyron/veyron2/vdl/compile"
-	"v.io/veyron/veyron2/vdl/vdlroot/src/vdltool"
+	"v.io/core/veyron2/vdl"
+	"v.io/core/veyron2/vdl/compile"
+	"v.io/core/veyron2/vdl/vdlroot/src/vdltool"
 )
 
 // pkgPathXlator is the function used to translate a VDL package path

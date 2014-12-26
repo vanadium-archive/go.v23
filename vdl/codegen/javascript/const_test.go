@@ -3,7 +3,7 @@ package javascript
 import (
 	"testing"
 
-	"v.io/veyron/veyron2/vdl"
+	"v.io/core/veyron2/vdl"
 )
 
 func TestTypedConst(t *testing.T) {

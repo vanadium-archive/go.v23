@@ -13,14 +13,14 @@ package veyron2
 import (
 	"fmt"
 
-	"v.io/veyron/veyron2/config"
-	"v.io/veyron/veyron2/context"
-	"v.io/veyron/veyron2/ipc"
-	"v.io/veyron/veyron2/ipc/stream"
-	"v.io/veyron/veyron2/naming"
-	"v.io/veyron/veyron2/security"
-	"v.io/veyron/veyron2/vlog"
-	"v.io/veyron/veyron2/vtrace"
+	"v.io/core/veyron2/config"
+	"v.io/core/veyron2/context"
+	"v.io/core/veyron2/ipc"
+	"v.io/core/veyron2/ipc/stream"
+	"v.io/core/veyron2/naming"
+	"v.io/core/veyron2/security"
+	"v.io/core/veyron2/vlog"
+	"v.io/core/veyron2/vtrace"
 )
 
 const (

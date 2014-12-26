@@ -6,16 +6,16 @@
 package stats
 
 import (
-	"v.io/veyron/veyron2/services/security/access"
+	"v.io/core/veyron2/services/security/access"
 
-	"v.io/veyron/veyron2/services/watch"
+	"v.io/core/veyron2/services/watch"
 
 	// The non-user imports are prefixed with "__" to prevent collisions.
-	__veyron2 "v.io/veyron/veyron2"
-	__context "v.io/veyron/veyron2/context"
-	__ipc "v.io/veyron/veyron2/ipc"
-	__vdlutil "v.io/veyron/veyron2/vdl/vdlutil"
-	__wiretype "v.io/veyron/veyron2/wiretype"
+	__veyron2 "v.io/core/veyron2"
+	__context "v.io/core/veyron2/context"
+	__ipc "v.io/core/veyron2/ipc"
+	__vdlutil "v.io/core/veyron2/vdl/vdlutil"
+	__wiretype "v.io/core/veyron2/wiretype"
 )
 
 // TODO(toddw): Remove this line once the new signature support is done.
@@ -184,10 +184,10 @@ var StatsDesc __ipc.InterfaceDesc = descStats
 // descStats hides the desc to keep godoc clean.
 var descStats = __ipc.InterfaceDesc{
 	Name:    "Stats",
-	PkgPath: "v.io/veyron/veyron2/services/mgmt/stats",
+	PkgPath: "v.io/core/veyron2/services/mgmt/stats",
 	Doc:     "// The Stats interface is used to access stats for troubleshooting and\n// monitoring purposes. The stats objects are discoverable via the Globbable\n// interface and watchable via the GlobWatcher interface.\n//\n// The types of the object values are implementation specific, but should be\n// primarily numeric in nature, e.g. counters, memory usage, latency metrics,\n// etc.",
 	Embeds: []__ipc.EmbedDesc{
-		{"GlobWatcher", "v.io/veyron/veyron2/services/watch", "// GlobWatcher allows a client to receive updates for changes to objects\n// that match a pattern.  See the package comments for details."},
+		{"GlobWatcher", "v.io/core/veyron2/services/watch", "// GlobWatcher allows a client to receive updates for changes to objects\n// that match a pattern.  See the package comments for details."},
 	},
 	Methods: []__ipc.MethodDesc{
 		{

@@ -7,7 +7,7 @@ package binary
 
 import (
 	// The non-user imports are prefixed with "__" to prevent collisions.
-	__vdl "v.io/veyron/veyron2/vdl"
+	__vdl "v.io/core/veyron2/vdl"
 )
 
 // Description describes a binary. Binaries are named and have been
@@ -33,7 +33,7 @@ type Description struct {
 }
 
 func (Description) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/services/mgmt/binary.Description"
+	Name string "v.io/core/veyron2/services/mgmt/binary.Description"
 }) {
 }
 
@@ -46,7 +46,7 @@ type PartInfo struct {
 }
 
 func (PartInfo) __VDLReflect(struct {
-	Name string "v.io/veyron/veyron2/services/mgmt/binary.PartInfo"
+	Name string "v.io/core/veyron2/services/mgmt/binary.PartInfo"
 }) {
 }
 

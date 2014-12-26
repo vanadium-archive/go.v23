@@ -3,8 +3,8 @@ package golang
 import (
 	"testing"
 
-	"v.io/veyron/veyron2/vdl"
-	"v.io/veyron/veyron2/vdl/compile"
+	"v.io/core/veyron2/vdl"
+	"v.io/core/veyron2/vdl/compile"
 )
 
 func TestType(t *testing.T) {
