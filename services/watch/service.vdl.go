@@ -129,7 +129,7 @@ const _ = __wiretype.TypeIDInvalid
 // that match a pattern.  See the package comments for details.
 type GlobWatcherClientMethods interface {
 	// WatchGlob returns a stream of changes that match a pattern.
-	WatchGlob(ctx __context.T, req types.GlobRequest, opts ...__ipc.CallOpt) (GlobWatcherWatchGlobCall, error)
+	WatchGlob(ctx *__context.T, req types.GlobRequest, opts ...__ipc.CallOpt) (GlobWatcherWatchGlobCall, error)
 }
 
 // GlobWatcherClientStub adds universal methods to GlobWatcherClientMethods.
@@ -154,14 +154,14 @@ type implGlobWatcherClientStub struct {
 	client __ipc.Client
 }
 
-func (c implGlobWatcherClientStub) c(ctx __context.T) __ipc.Client {
+func (c implGlobWatcherClientStub) c(ctx *__context.T) __ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
 	return __veyron2.RuntimeFromContext(ctx).Client()
 }
 
-func (c implGlobWatcherClientStub) WatchGlob(ctx __context.T, i0 types.GlobRequest, opts ...__ipc.CallOpt) (ocall GlobWatcherWatchGlobCall, err error) {
+func (c implGlobWatcherClientStub) WatchGlob(ctx *__context.T, i0 types.GlobRequest, opts ...__ipc.CallOpt) (ocall GlobWatcherWatchGlobCall, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "WatchGlob", []interface{}{i0}, opts...); err != nil {
 		return
@@ -170,7 +170,7 @@ func (c implGlobWatcherClientStub) WatchGlob(ctx __context.T, i0 types.GlobReque
 	return
 }
 
-func (c implGlobWatcherClientStub) Signature(ctx __context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
+func (c implGlobWatcherClientStub) Signature(ctx *__context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
 		return

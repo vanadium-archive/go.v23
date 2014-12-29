@@ -250,12 +250,12 @@ type ObjectClientMethods interface {
 	// endpoint.  To modify the mount point's ACL, use ResolveToMountTable
 	// to get an endpoint and call SetACL on that.  This means that clients
 	// must know when a name refers to a mount point to change its ACL.
-	SetACL(ctx __context.T, acl TaggedACLMap, etag string, opts ...__ipc.CallOpt) error
+	SetACL(ctx *__context.T, acl TaggedACLMap, etag string, opts ...__ipc.CallOpt) error
 	// GetACL returns the complete, current ACL for an object.  The returned etag
 	// can be passed to a subsequent call to SetACL for optimistic concurrency
 	// control. A successful call to SetACL will invalidate etag, and the client
 	// must call GetACL again to get the current etag.
-	GetACL(__context.T, ...__ipc.CallOpt) (acl TaggedACLMap, etag string, err error)
+	GetACL(*__context.T, ...__ipc.CallOpt) (acl TaggedACLMap, etag string, err error)
 }
 
 // ObjectClientStub adds universal methods to ObjectClientMethods.
@@ -280,14 +280,14 @@ type implObjectClientStub struct {
 	client __ipc.Client
 }
 
-func (c implObjectClientStub) c(ctx __context.T) __ipc.Client {
+func (c implObjectClientStub) c(ctx *__context.T) __ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
 	return __veyron2.RuntimeFromContext(ctx).Client()
 }
 
-func (c implObjectClientStub) SetACL(ctx __context.T, i0 TaggedACLMap, i1 string, opts ...__ipc.CallOpt) (err error) {
+func (c implObjectClientStub) SetACL(ctx *__context.T, i0 TaggedACLMap, i1 string, opts ...__ipc.CallOpt) (err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "SetACL", []interface{}{i0, i1}, opts...); err != nil {
 		return
@@ -298,7 +298,7 @@ func (c implObjectClientStub) SetACL(ctx __context.T, i0 TaggedACLMap, i1 string
 	return
 }
 
-func (c implObjectClientStub) GetACL(ctx __context.T, opts ...__ipc.CallOpt) (o0 TaggedACLMap, o1 string, err error) {
+func (c implObjectClientStub) GetACL(ctx *__context.T, opts ...__ipc.CallOpt) (o0 TaggedACLMap, o1 string, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "GetACL", nil, opts...); err != nil {
 		return
@@ -309,7 +309,7 @@ func (c implObjectClientStub) GetACL(ctx __context.T, opts ...__ipc.CallOpt) (o0
 	return
 }
 
-func (c implObjectClientStub) Signature(ctx __context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
+func (c implObjectClientStub) Signature(ctx *__context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
 		return

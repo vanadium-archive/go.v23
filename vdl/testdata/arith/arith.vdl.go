@@ -74,25 +74,25 @@ const Mask = uint64(256)
 //   * There must be at least 1 out-arg, and the last out-arg must be error.
 type ArithClientMethods interface {
 	// Add is a typical method with multiple input and output arguments.
-	Add(ctx __context.T, a int32, b int32, opts ...__ipc.CallOpt) (int32, error)
+	Add(ctx *__context.T, a int32, b int32, opts ...__ipc.CallOpt) (int32, error)
 	// DivMod shows that runs of args with the same type can use the short form,
 	// just like Go.
-	DivMod(ctx __context.T, a int32, b int32, opts ...__ipc.CallOpt) (quot int32, rem int32, err error)
+	DivMod(ctx *__context.T, a int32, b int32, opts ...__ipc.CallOpt) (quot int32, rem int32, err error)
 	// Sub shows that you can use data types defined in other packages.
-	Sub(ctx __context.T, args base.Args, opts ...__ipc.CallOpt) (int32, error)
+	Sub(ctx *__context.T, args base.Args, opts ...__ipc.CallOpt) (int32, error)
 	// Mul tries another data type defined in another package.
-	Mul(ctx __context.T, nested base.NestedArgs, opts ...__ipc.CallOpt) (int32, error)
+	Mul(ctx *__context.T, nested base.NestedArgs, opts ...__ipc.CallOpt) (int32, error)
 	// GenError shows that it's fine to have no in args, and no out args other
 	// than "error".  In addition GenError shows the usage of tags.  Tags are a
 	// sequence of constants.  There's no requirement on uniqueness of types or
 	// values, and regular const expressions may also be used.
-	GenError(__context.T, ...__ipc.CallOpt) error
+	GenError(*__context.T, ...__ipc.CallOpt) error
 	// Count shows using only an int32 out-stream type, with no in-stream type.
-	Count(ctx __context.T, start int32, opts ...__ipc.CallOpt) (ArithCountCall, error)
+	Count(ctx *__context.T, start int32, opts ...__ipc.CallOpt) (ArithCountCall, error)
 	// StreamingAdd shows a bidirectional stream.
-	StreamingAdd(__context.T, ...__ipc.CallOpt) (ArithStreamingAddCall, error)
+	StreamingAdd(*__context.T, ...__ipc.CallOpt) (ArithStreamingAddCall, error)
 	// QuoteAny shows the any built-in type, representing a value of any type.
-	QuoteAny(ctx __context.T, a __vdlutil.Any, opts ...__ipc.CallOpt) (__vdlutil.Any, error)
+	QuoteAny(ctx *__context.T, a __vdlutil.Any, opts ...__ipc.CallOpt) (__vdlutil.Any, error)
 }
 
 // ArithClientStub adds universal methods to ArithClientMethods.
@@ -117,14 +117,14 @@ type implArithClientStub struct {
 	client __ipc.Client
 }
 
-func (c implArithClientStub) c(ctx __context.T) __ipc.Client {
+func (c implArithClientStub) c(ctx *__context.T) __ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
 	return __veyron2.RuntimeFromContext(ctx).Client()
 }
 
-func (c implArithClientStub) Add(ctx __context.T, i0 int32, i1 int32, opts ...__ipc.CallOpt) (o0 int32, err error) {
+func (c implArithClientStub) Add(ctx *__context.T, i0 int32, i1 int32, opts ...__ipc.CallOpt) (o0 int32, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Add", []interface{}{i0, i1}, opts...); err != nil {
 		return
@@ -135,7 +135,7 @@ func (c implArithClientStub) Add(ctx __context.T, i0 int32, i1 int32, opts ...__
 	return
 }
 
-func (c implArithClientStub) DivMod(ctx __context.T, i0 int32, i1 int32, opts ...__ipc.CallOpt) (o0 int32, o1 int32, err error) {
+func (c implArithClientStub) DivMod(ctx *__context.T, i0 int32, i1 int32, opts ...__ipc.CallOpt) (o0 int32, o1 int32, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "DivMod", []interface{}{i0, i1}, opts...); err != nil {
 		return
@@ -146,7 +146,7 @@ func (c implArithClientStub) DivMod(ctx __context.T, i0 int32, i1 int32, opts ..
 	return
 }
 
-func (c implArithClientStub) Sub(ctx __context.T, i0 base.Args, opts ...__ipc.CallOpt) (o0 int32, err error) {
+func (c implArithClientStub) Sub(ctx *__context.T, i0 base.Args, opts ...__ipc.CallOpt) (o0 int32, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Sub", []interface{}{i0}, opts...); err != nil {
 		return
@@ -157,7 +157,7 @@ func (c implArithClientStub) Sub(ctx __context.T, i0 base.Args, opts ...__ipc.Ca
 	return
 }
 
-func (c implArithClientStub) Mul(ctx __context.T, i0 base.NestedArgs, opts ...__ipc.CallOpt) (o0 int32, err error) {
+func (c implArithClientStub) Mul(ctx *__context.T, i0 base.NestedArgs, opts ...__ipc.CallOpt) (o0 int32, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Mul", []interface{}{i0}, opts...); err != nil {
 		return
@@ -168,7 +168,7 @@ func (c implArithClientStub) Mul(ctx __context.T, i0 base.NestedArgs, opts ...__
 	return
 }
 
-func (c implArithClientStub) GenError(ctx __context.T, opts ...__ipc.CallOpt) (err error) {
+func (c implArithClientStub) GenError(ctx *__context.T, opts ...__ipc.CallOpt) (err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "GenError", nil, opts...); err != nil {
 		return
@@ -179,7 +179,7 @@ func (c implArithClientStub) GenError(ctx __context.T, opts ...__ipc.CallOpt) (e
 	return
 }
 
-func (c implArithClientStub) Count(ctx __context.T, i0 int32, opts ...__ipc.CallOpt) (ocall ArithCountCall, err error) {
+func (c implArithClientStub) Count(ctx *__context.T, i0 int32, opts ...__ipc.CallOpt) (ocall ArithCountCall, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Count", []interface{}{i0}, opts...); err != nil {
 		return
@@ -188,7 +188,7 @@ func (c implArithClientStub) Count(ctx __context.T, i0 int32, opts ...__ipc.Call
 	return
 }
 
-func (c implArithClientStub) StreamingAdd(ctx __context.T, opts ...__ipc.CallOpt) (ocall ArithStreamingAddCall, err error) {
+func (c implArithClientStub) StreamingAdd(ctx *__context.T, opts ...__ipc.CallOpt) (ocall ArithStreamingAddCall, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "StreamingAdd", nil, opts...); err != nil {
 		return
@@ -197,7 +197,7 @@ func (c implArithClientStub) StreamingAdd(ctx __context.T, opts ...__ipc.CallOpt
 	return
 }
 
-func (c implArithClientStub) QuoteAny(ctx __context.T, i0 __vdlutil.Any, opts ...__ipc.CallOpt) (o0 __vdlutil.Any, err error) {
+func (c implArithClientStub) QuoteAny(ctx *__context.T, i0 __vdlutil.Any, opts ...__ipc.CallOpt) (o0 __vdlutil.Any, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "QuoteAny", []interface{}{i0}, opts...); err != nil {
 		return
@@ -208,7 +208,7 @@ func (c implArithClientStub) QuoteAny(ctx __context.T, i0 __vdlutil.Any, opts ..
 	return
 }
 
-func (c implArithClientStub) Signature(ctx __context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
+func (c implArithClientStub) Signature(ctx *__context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
 		return
@@ -849,8 +849,8 @@ type CalculatorClientMethods interface {
 	// turn it is embedded by arith.Calculator (which is in the same package but
 	// different file) to verify that embedding works in all these scenarios.
 	AdvancedMathClientMethods
-	On(__context.T, ...__ipc.CallOpt) error  // On turns the calculator on.
-	Off(__context.T, ...__ipc.CallOpt) error // Off turns the calculator off.
+	On(*__context.T, ...__ipc.CallOpt) error  // On turns the calculator on.
+	Off(*__context.T, ...__ipc.CallOpt) error // Off turns the calculator off.
 }
 
 // CalculatorClientStub adds universal methods to CalculatorClientMethods.
@@ -878,14 +878,14 @@ type implCalculatorClientStub struct {
 	AdvancedMathClientStub
 }
 
-func (c implCalculatorClientStub) c(ctx __context.T) __ipc.Client {
+func (c implCalculatorClientStub) c(ctx *__context.T) __ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
 	return __veyron2.RuntimeFromContext(ctx).Client()
 }
 
-func (c implCalculatorClientStub) On(ctx __context.T, opts ...__ipc.CallOpt) (err error) {
+func (c implCalculatorClientStub) On(ctx *__context.T, opts ...__ipc.CallOpt) (err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "On", nil, opts...); err != nil {
 		return
@@ -896,7 +896,7 @@ func (c implCalculatorClientStub) On(ctx __context.T, opts ...__ipc.CallOpt) (er
 	return
 }
 
-func (c implCalculatorClientStub) Off(ctx __context.T, opts ...__ipc.CallOpt) (err error) {
+func (c implCalculatorClientStub) Off(ctx *__context.T, opts ...__ipc.CallOpt) (err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Off", nil, opts...); err != nil {
 		return
@@ -907,7 +907,7 @@ func (c implCalculatorClientStub) Off(ctx __context.T, opts ...__ipc.CallOpt) (e
 	return
 }
 
-func (c implCalculatorClientStub) Signature(ctx __context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
+func (c implCalculatorClientStub) Signature(ctx *__context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
 		return

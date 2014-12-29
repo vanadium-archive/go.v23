@@ -39,17 +39,17 @@ type MountTableClientMethods interface {
 	// act as if it was never present as far as the interface is concerned.
 	//
 	// Opts represents a bit mask of options.
-	Mount(ctx __context.T, Server string, TTL uint32, Flags naming.MountFlag, opts ...__ipc.CallOpt) error
+	Mount(ctx *__context.T, Server string, TTL uint32, Flags naming.MountFlag, opts ...__ipc.CallOpt) error
 	// Unmount removes Server from the mount point.  If Server is empty, remove
 	// all servers mounted there.
 	// Returns a non-nil error iff Server remains mounted at the mount point.
-	Unmount(ctx __context.T, Server string, opts ...__ipc.CallOpt) error
+	Unmount(ctx *__context.T, Server string, opts ...__ipc.CallOpt) error
 	// ResolveStep takes the next step in resolving a name.  Returns the next
 	// servers to query and the suffix at those servers.
-	ResolveStep(__context.T, ...__ipc.CallOpt) (Servers []naming.VDLMountedServer, Suffix string, err error)
+	ResolveStep(*__context.T, ...__ipc.CallOpt) (Servers []naming.VDLMountedServer, Suffix string, err error)
 	// ResolveStepX takes the next step in resolving a name.  Returns the next
 	// servers to query and the suffix at those servers.
-	ResolveStepX(__context.T, ...__ipc.CallOpt) (Entry naming.VDLMountEntry, err error)
+	ResolveStepX(*__context.T, ...__ipc.CallOpt) (Entry naming.VDLMountEntry, err error)
 }
 
 // MountTableClientStub adds universal methods to MountTableClientMethods.
@@ -74,14 +74,14 @@ type implMountTableClientStub struct {
 	client __ipc.Client
 }
 
-func (c implMountTableClientStub) c(ctx __context.T) __ipc.Client {
+func (c implMountTableClientStub) c(ctx *__context.T) __ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
 	return __veyron2.RuntimeFromContext(ctx).Client()
 }
 
-func (c implMountTableClientStub) Mount(ctx __context.T, i0 string, i1 uint32, i2 naming.MountFlag, opts ...__ipc.CallOpt) (err error) {
+func (c implMountTableClientStub) Mount(ctx *__context.T, i0 string, i1 uint32, i2 naming.MountFlag, opts ...__ipc.CallOpt) (err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Mount", []interface{}{i0, i1, i2}, opts...); err != nil {
 		return
@@ -92,7 +92,7 @@ func (c implMountTableClientStub) Mount(ctx __context.T, i0 string, i1 uint32, i
 	return
 }
 
-func (c implMountTableClientStub) Unmount(ctx __context.T, i0 string, opts ...__ipc.CallOpt) (err error) {
+func (c implMountTableClientStub) Unmount(ctx *__context.T, i0 string, opts ...__ipc.CallOpt) (err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Unmount", []interface{}{i0}, opts...); err != nil {
 		return
@@ -103,7 +103,7 @@ func (c implMountTableClientStub) Unmount(ctx __context.T, i0 string, opts ...__
 	return
 }
 
-func (c implMountTableClientStub) ResolveStep(ctx __context.T, opts ...__ipc.CallOpt) (o0 []naming.VDLMountedServer, o1 string, err error) {
+func (c implMountTableClientStub) ResolveStep(ctx *__context.T, opts ...__ipc.CallOpt) (o0 []naming.VDLMountedServer, o1 string, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "ResolveStep", nil, opts...); err != nil {
 		return
@@ -114,7 +114,7 @@ func (c implMountTableClientStub) ResolveStep(ctx __context.T, opts ...__ipc.Cal
 	return
 }
 
-func (c implMountTableClientStub) ResolveStepX(ctx __context.T, opts ...__ipc.CallOpt) (o0 naming.VDLMountEntry, err error) {
+func (c implMountTableClientStub) ResolveStepX(ctx *__context.T, opts ...__ipc.CallOpt) (o0 naming.VDLMountEntry, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "ResolveStepX", nil, opts...); err != nil {
 		return
@@ -125,7 +125,7 @@ func (c implMountTableClientStub) ResolveStepX(ctx __context.T, opts ...__ipc.Ca
 	return
 }
 
-func (c implMountTableClientStub) Signature(ctx __context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
+func (c implMountTableClientStub) Signature(ctx *__context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
 		return

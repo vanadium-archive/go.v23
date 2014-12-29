@@ -61,7 +61,7 @@ type ApplicationClientMethods interface {
 	// object name suffix) and if so, returns this envelope. If multiple
 	// profile matches are possible, the method returns the first
 	// matching profile, respecting the order of the input argument.
-	Match(ctx __context.T, profiles []string, opts ...__ipc.CallOpt) (application.Envelope, error)
+	Match(ctx *__context.T, profiles []string, opts ...__ipc.CallOpt) (application.Envelope, error)
 }
 
 // ApplicationClientStub adds universal methods to ApplicationClientMethods.
@@ -86,14 +86,14 @@ type implApplicationClientStub struct {
 	client __ipc.Client
 }
 
-func (c implApplicationClientStub) c(ctx __context.T) __ipc.Client {
+func (c implApplicationClientStub) c(ctx *__context.T) __ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
 	return __veyron2.RuntimeFromContext(ctx).Client()
 }
 
-func (c implApplicationClientStub) Match(ctx __context.T, i0 []string, opts ...__ipc.CallOpt) (o0 application.Envelope, err error) {
+func (c implApplicationClientStub) Match(ctx *__context.T, i0 []string, opts ...__ipc.CallOpt) (o0 application.Envelope, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Match", []interface{}{i0}, opts...); err != nil {
 		return
@@ -104,7 +104,7 @@ func (c implApplicationClientStub) Match(ctx __context.T, i0 []string, opts ..._
 	return
 }
 
-func (c implApplicationClientStub) Signature(ctx __context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
+func (c implApplicationClientStub) Signature(ctx *__context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
 		return
@@ -266,34 +266,34 @@ type BinaryClientMethods interface {
 	// mediaInfo argument contains metadata for the binary. If the suffix
 	// identifies a binary that has already been created, the method
 	// returns an error.
-	Create(ctx __context.T, nparts int32, mediaInfo MediaInfo, opts ...__ipc.CallOpt) error
+	Create(ctx *__context.T, nparts int32, mediaInfo MediaInfo, opts ...__ipc.CallOpt) error
 	// Delete deletes the binary identified by the object name
 	// suffix. If the binary that has not been created, the method
 	// returns an error.
-	Delete(__context.T, ...__ipc.CallOpt) error
+	Delete(*__context.T, ...__ipc.CallOpt) error
 	// Download opens a stream that can used for downloading the given
 	// part of the binary identified by the object name suffix. If the
 	// binary part has not been uploaded, the method returns an
 	// error. If the Delete() method is invoked when the Download()
 	// method is in progress, the outcome the Download() method is
 	// undefined.
-	Download(ctx __context.T, part int32, opts ...__ipc.CallOpt) (BinaryDownloadCall, error)
+	Download(ctx *__context.T, part int32, opts ...__ipc.CallOpt) (BinaryDownloadCall, error)
 	// DownloadURL returns a transient URL from which the binary
 	// identified by the object name suffix can be downloaded using the
 	// HTTP protocol. If not all parts of the binary have been uploaded,
 	// the method returns an error.
-	DownloadURL(__context.T, ...__ipc.CallOpt) (URL string, TTL int64, err error)
+	DownloadURL(*__context.T, ...__ipc.CallOpt) (URL string, TTL int64, err error)
 	// Stat returns information describing the parts of the binary
 	// identified by the object name suffix, and its RFC 2046 media type.
 	// If the binary has not been created, the method returns an error.
-	Stat(__context.T, ...__ipc.CallOpt) (Parts []binary.PartInfo, MediaInfo MediaInfo, err error)
+	Stat(*__context.T, ...__ipc.CallOpt) (Parts []binary.PartInfo, MediaInfo MediaInfo, err error)
 	// Upload opens a stream that can be used for uploading the given
 	// part of the binary identified by the object name suffix. If the
 	// binary has not been created, the method returns an error. If the
 	// binary part has been uploaded, the method returns an error. If
 	// the same binary part is being uploaded by another caller, the
 	// method returns an error.
-	Upload(ctx __context.T, part int32, opts ...__ipc.CallOpt) (BinaryUploadCall, error)
+	Upload(ctx *__context.T, part int32, opts ...__ipc.CallOpt) (BinaryUploadCall, error)
 }
 
 // BinaryClientStub adds universal methods to BinaryClientMethods.
@@ -318,14 +318,14 @@ type implBinaryClientStub struct {
 	client __ipc.Client
 }
 
-func (c implBinaryClientStub) c(ctx __context.T) __ipc.Client {
+func (c implBinaryClientStub) c(ctx *__context.T) __ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
 	return __veyron2.RuntimeFromContext(ctx).Client()
 }
 
-func (c implBinaryClientStub) Create(ctx __context.T, i0 int32, i1 MediaInfo, opts ...__ipc.CallOpt) (err error) {
+func (c implBinaryClientStub) Create(ctx *__context.T, i0 int32, i1 MediaInfo, opts ...__ipc.CallOpt) (err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Create", []interface{}{i0, i1}, opts...); err != nil {
 		return
@@ -336,7 +336,7 @@ func (c implBinaryClientStub) Create(ctx __context.T, i0 int32, i1 MediaInfo, op
 	return
 }
 
-func (c implBinaryClientStub) Delete(ctx __context.T, opts ...__ipc.CallOpt) (err error) {
+func (c implBinaryClientStub) Delete(ctx *__context.T, opts ...__ipc.CallOpt) (err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Delete", nil, opts...); err != nil {
 		return
@@ -347,7 +347,7 @@ func (c implBinaryClientStub) Delete(ctx __context.T, opts ...__ipc.CallOpt) (er
 	return
 }
 
-func (c implBinaryClientStub) Download(ctx __context.T, i0 int32, opts ...__ipc.CallOpt) (ocall BinaryDownloadCall, err error) {
+func (c implBinaryClientStub) Download(ctx *__context.T, i0 int32, opts ...__ipc.CallOpt) (ocall BinaryDownloadCall, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Download", []interface{}{i0}, opts...); err != nil {
 		return
@@ -356,7 +356,7 @@ func (c implBinaryClientStub) Download(ctx __context.T, i0 int32, opts ...__ipc.
 	return
 }
 
-func (c implBinaryClientStub) DownloadURL(ctx __context.T, opts ...__ipc.CallOpt) (o0 string, o1 int64, err error) {
+func (c implBinaryClientStub) DownloadURL(ctx *__context.T, opts ...__ipc.CallOpt) (o0 string, o1 int64, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "DownloadURL", nil, opts...); err != nil {
 		return
@@ -367,7 +367,7 @@ func (c implBinaryClientStub) DownloadURL(ctx __context.T, opts ...__ipc.CallOpt
 	return
 }
 
-func (c implBinaryClientStub) Stat(ctx __context.T, opts ...__ipc.CallOpt) (o0 []binary.PartInfo, o1 MediaInfo, err error) {
+func (c implBinaryClientStub) Stat(ctx *__context.T, opts ...__ipc.CallOpt) (o0 []binary.PartInfo, o1 MediaInfo, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Stat", nil, opts...); err != nil {
 		return
@@ -378,7 +378,7 @@ func (c implBinaryClientStub) Stat(ctx __context.T, opts ...__ipc.CallOpt) (o0 [
 	return
 }
 
-func (c implBinaryClientStub) Upload(ctx __context.T, i0 int32, opts ...__ipc.CallOpt) (ocall BinaryUploadCall, err error) {
+func (c implBinaryClientStub) Upload(ctx *__context.T, i0 int32, opts ...__ipc.CallOpt) (ocall BinaryUploadCall, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Upload", []interface{}{i0}, opts...); err != nil {
 		return
@@ -387,7 +387,7 @@ func (c implBinaryClientStub) Upload(ctx __context.T, i0 int32, opts ...__ipc.Ca
 	return
 }
 
-func (c implBinaryClientStub) Signature(ctx __context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
+func (c implBinaryClientStub) Signature(ctx *__context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
 		return
@@ -957,10 +957,10 @@ type ProfileClientMethods interface {
 	// e.g. "linux-media". The label can be used to uniquely identify
 	// the profile (for the purpose of matching application binaries and
 	// devices).
-	Label(__context.T, ...__ipc.CallOpt) (string, error)
+	Label(*__context.T, ...__ipc.CallOpt) (string, error)
 	// Description is a free-text description of the profile, meant for
 	// human consumption.
-	Description(__context.T, ...__ipc.CallOpt) (string, error)
+	Description(*__context.T, ...__ipc.CallOpt) (string, error)
 }
 
 // ProfileClientStub adds universal methods to ProfileClientMethods.
@@ -985,14 +985,14 @@ type implProfileClientStub struct {
 	client __ipc.Client
 }
 
-func (c implProfileClientStub) c(ctx __context.T) __ipc.Client {
+func (c implProfileClientStub) c(ctx *__context.T) __ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
 	return __veyron2.RuntimeFromContext(ctx).Client()
 }
 
-func (c implProfileClientStub) Label(ctx __context.T, opts ...__ipc.CallOpt) (o0 string, err error) {
+func (c implProfileClientStub) Label(ctx *__context.T, opts ...__ipc.CallOpt) (o0 string, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Label", nil, opts...); err != nil {
 		return
@@ -1003,7 +1003,7 @@ func (c implProfileClientStub) Label(ctx __context.T, opts ...__ipc.CallOpt) (o0
 	return
 }
 
-func (c implProfileClientStub) Description(ctx __context.T, opts ...__ipc.CallOpt) (o0 string, err error) {
+func (c implProfileClientStub) Description(ctx *__context.T, opts ...__ipc.CallOpt) (o0 string, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Description", nil, opts...); err != nil {
 		return
@@ -1014,7 +1014,7 @@ func (c implProfileClientStub) Description(ctx __context.T, opts ...__ipc.CallOp
 	return
 }
 
-func (c implProfileClientStub) Signature(ctx __context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
+func (c implProfileClientStub) Signature(ctx *__context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
 		return

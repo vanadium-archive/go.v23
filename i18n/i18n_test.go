@@ -3,7 +3,6 @@
 package i18n
 
 import "strings"
-import "time"
 import "testing"
 import "v.io/core/veyron2/context"
 
@@ -254,63 +253,9 @@ func TestBaseLangID(t *testing.T) {
 	expectBaseLangID(t, "en-US", "en")
 }
 
-// A dummyContext is a basic implementation of context.T for testing.
-type dummyContext map[interface{}]interface{}
-
-// Deadline stubs out context.T's call of the same name.
-func (dc dummyContext) Deadline() (deadline time.Time, ok bool) {
-	return time.Time{}, false
-}
-
-// Done stubs out context.T's call of the same name.
-func (dc dummyContext) Done() (c <-chan struct{}) {
-	return c
-}
-
-// Err stubs out context.T's call of the same name.
-func (dc dummyContext) Err() error {
-	return nil
-}
-
-// Runtime stubs out context.T's call of the same name.
-func (dc dummyContext) Runtime() interface{} {
-	return nil
-}
-
-// Value returns the value corresponding to key in dc's Value map.
-// It implements context.T's Value function.
-func (dc dummyContext) Value(key interface{}) interface{} {
-	return dc[key]
-}
-
-// WithCancel stubs out context.T's call of the same name.
-func (dc dummyContext) WithCancel() (ctx context.T, cancel context.CancelFunc) {
-	return nil, nil
-}
-
-// WithDeadline stubs out context.T's call of the same name.
-func (dc dummyContext) WithDeadline(deadline time.Time) (context.T, context.CancelFunc) {
-	return nil, nil
-}
-
-// WithTimeout stubs out context.T's call of the same name.
-func (dc dummyContext) WithTimeout(timeout time.Duration) (context.T, context.CancelFunc) {
-	return nil, nil
-}
-
-// WithValue returns a dummyContext with Value(key)==val.
-func (dc dummyContext) WithValue(key interface{}, val interface{}) context.T {
-	newDC := make(dummyContext)
-	for k, v := range dc {
-		newDC[k] = v
-	}
-	newDC[key] = val
-	return newDC
-}
-
 // TestBaseLangID tests LangIDFromContext() and ContextWithLangID.
 func TestLangIDFromContext(t *testing.T) {
-	var dcWithoutLangID context.T = make(dummyContext)
+	var dcWithoutLangID *context.T = context.NewUninitializedContext(struct{}{})
 	dcWithEN := ContextWithLangID(dcWithoutLangID, "en")
 	dcWithFR := ContextWithLangID(dcWithEN, "fr")
 	var got LangID

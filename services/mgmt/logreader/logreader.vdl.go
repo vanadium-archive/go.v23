@@ -29,7 +29,7 @@ const _ = __wiretype.TypeIDInvalid
 // LogFile can be used to access log files remotely.
 type LogFileClientMethods interface {
 	// Size returns the number of bytes in the receiving object.
-	Size(__context.T, ...__ipc.CallOpt) (int64, error)
+	Size(*__context.T, ...__ipc.CallOpt) (int64, error)
 	// ReadLog receives up to NumEntries log entries starting at the
 	// StartPos offset (in bytes) in the receiving object. Each stream chunk
 	// contains one log entry.
@@ -43,7 +43,7 @@ type LogFileClientMethods interface {
 	//
 	// The returned error will be EOF if and only if ReadLog reached the
 	// end of the file and no log entries were returned.
-	ReadLog(ctx __context.T, StartPos int64, NumEntries int32, Follow bool, opts ...__ipc.CallOpt) (LogFileReadLogCall, error)
+	ReadLog(ctx *__context.T, StartPos int64, NumEntries int32, Follow bool, opts ...__ipc.CallOpt) (LogFileReadLogCall, error)
 }
 
 // LogFileClientStub adds universal methods to LogFileClientMethods.
@@ -68,14 +68,14 @@ type implLogFileClientStub struct {
 	client __ipc.Client
 }
 
-func (c implLogFileClientStub) c(ctx __context.T) __ipc.Client {
+func (c implLogFileClientStub) c(ctx *__context.T) __ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
 	return __veyron2.RuntimeFromContext(ctx).Client()
 }
 
-func (c implLogFileClientStub) Size(ctx __context.T, opts ...__ipc.CallOpt) (o0 int64, err error) {
+func (c implLogFileClientStub) Size(ctx *__context.T, opts ...__ipc.CallOpt) (o0 int64, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Size", nil, opts...); err != nil {
 		return
@@ -86,7 +86,7 @@ func (c implLogFileClientStub) Size(ctx __context.T, opts ...__ipc.CallOpt) (o0 
 	return
 }
 
-func (c implLogFileClientStub) ReadLog(ctx __context.T, i0 int64, i1 int32, i2 bool, opts ...__ipc.CallOpt) (ocall LogFileReadLogCall, err error) {
+func (c implLogFileClientStub) ReadLog(ctx *__context.T, i0 int64, i1 int32, i2 bool, opts ...__ipc.CallOpt) (ocall LogFileReadLogCall, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "ReadLog", []interface{}{i0, i1, i2}, opts...); err != nil {
 		return
@@ -95,7 +95,7 @@ func (c implLogFileClientStub) ReadLog(ctx __context.T, i0 int64, i1 int32, i2 b
 	return
 }
 
-func (c implLogFileClientStub) Signature(ctx __context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
+func (c implLogFileClientStub) Signature(ctx *__context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
 		return

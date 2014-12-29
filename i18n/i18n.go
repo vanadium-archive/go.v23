@@ -88,7 +88,7 @@ type langIDKey struct{}
 
 // LangIDFromContext returns the LangID associated with a context.T,
 // or the empty LangID if there is none.
-func LangIDFromContext(ctx context.T) (langID LangID) {
+func LangIDFromContext(ctx *context.T) (langID LangID) {
 	if ctx != nil {
 		v := ctx.Value(langIDKey{})
 		langID, _ = v.(LangID)
@@ -98,7 +98,7 @@ func LangIDFromContext(ctx context.T) (langID LangID) {
 
 // ContextWithLangID returns a context based on ctx that has the
 // language ID langID.
-func ContextWithLangID(ctx context.T, langID LangID) context.T {
+func ContextWithLangID(ctx *context.T, langID LangID) *context.T {
 	return ctx.WithValue(langIDKey{}, langID)
 }
 

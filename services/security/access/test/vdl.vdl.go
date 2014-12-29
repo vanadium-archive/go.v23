@@ -45,11 +45,11 @@ const Execute = MyTag("X")
 //
 // MyObject demonstrates how tags are attached to methods.
 type MyObjectClientMethods interface {
-	Get(__context.T, ...__ipc.CallOpt) error
-	Put(__context.T, ...__ipc.CallOpt) error
-	Resolve(__context.T, ...__ipc.CallOpt) error
-	NoTags(__context.T, ...__ipc.CallOpt) error // No tags attached to this.
-	AllTags(__context.T, ...__ipc.CallOpt) error
+	Get(*__context.T, ...__ipc.CallOpt) error
+	Put(*__context.T, ...__ipc.CallOpt) error
+	Resolve(*__context.T, ...__ipc.CallOpt) error
+	NoTags(*__context.T, ...__ipc.CallOpt) error // No tags attached to this.
+	AllTags(*__context.T, ...__ipc.CallOpt) error
 }
 
 // MyObjectClientStub adds universal methods to MyObjectClientMethods.
@@ -74,14 +74,14 @@ type implMyObjectClientStub struct {
 	client __ipc.Client
 }
 
-func (c implMyObjectClientStub) c(ctx __context.T) __ipc.Client {
+func (c implMyObjectClientStub) c(ctx *__context.T) __ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
 	return __veyron2.RuntimeFromContext(ctx).Client()
 }
 
-func (c implMyObjectClientStub) Get(ctx __context.T, opts ...__ipc.CallOpt) (err error) {
+func (c implMyObjectClientStub) Get(ctx *__context.T, opts ...__ipc.CallOpt) (err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Get", nil, opts...); err != nil {
 		return
@@ -92,7 +92,7 @@ func (c implMyObjectClientStub) Get(ctx __context.T, opts ...__ipc.CallOpt) (err
 	return
 }
 
-func (c implMyObjectClientStub) Put(ctx __context.T, opts ...__ipc.CallOpt) (err error) {
+func (c implMyObjectClientStub) Put(ctx *__context.T, opts ...__ipc.CallOpt) (err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Put", nil, opts...); err != nil {
 		return
@@ -103,7 +103,7 @@ func (c implMyObjectClientStub) Put(ctx __context.T, opts ...__ipc.CallOpt) (err
 	return
 }
 
-func (c implMyObjectClientStub) Resolve(ctx __context.T, opts ...__ipc.CallOpt) (err error) {
+func (c implMyObjectClientStub) Resolve(ctx *__context.T, opts ...__ipc.CallOpt) (err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Resolve", nil, opts...); err != nil {
 		return
@@ -114,7 +114,7 @@ func (c implMyObjectClientStub) Resolve(ctx __context.T, opts ...__ipc.CallOpt) 
 	return
 }
 
-func (c implMyObjectClientStub) NoTags(ctx __context.T, opts ...__ipc.CallOpt) (err error) {
+func (c implMyObjectClientStub) NoTags(ctx *__context.T, opts ...__ipc.CallOpt) (err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "NoTags", nil, opts...); err != nil {
 		return
@@ -125,7 +125,7 @@ func (c implMyObjectClientStub) NoTags(ctx __context.T, opts ...__ipc.CallOpt) (
 	return
 }
 
-func (c implMyObjectClientStub) AllTags(ctx __context.T, opts ...__ipc.CallOpt) (err error) {
+func (c implMyObjectClientStub) AllTags(ctx *__context.T, opts ...__ipc.CallOpt) (err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "AllTags", nil, opts...); err != nil {
 		return
@@ -136,7 +136,7 @@ func (c implMyObjectClientStub) AllTags(ctx __context.T, opts ...__ipc.CallOpt) 
 	return
 }
 
-func (c implMyObjectClientStub) Signature(ctx __context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
+func (c implMyObjectClientStub) Signature(ctx *__context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
 		return

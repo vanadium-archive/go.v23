@@ -10,5 +10,5 @@ type UniversalServiceMethods interface {
 	// Signature returns a description of the service.
 	//
 	// TODO(toddw): Replace with reserved Signature__ method.
-	Signature(ctx context.T, opts ...CallOpt) (ServiceSignature, error)
+	Signature(ctx *context.T, opts ...CallOpt) (ServiceSignature, error)
 }

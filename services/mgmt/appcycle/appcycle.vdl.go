@@ -52,11 +52,11 @@ type AppCycleClientMethods interface {
 	// Stop initiates shutdown of the server.  It streams back periodic
 	// updates to give the client an idea of how the shutdown is
 	// progressing.
-	Stop(__context.T, ...__ipc.CallOpt) (AppCycleStopCall, error)
+	Stop(*__context.T, ...__ipc.CallOpt) (AppCycleStopCall, error)
 	// ForceStop tells the server to shut down right away.  It can be issued
 	// while a Stop is outstanding if for example the client does not want
 	// to wait any longer.
-	ForceStop(__context.T, ...__ipc.CallOpt) error
+	ForceStop(*__context.T, ...__ipc.CallOpt) error
 }
 
 // AppCycleClientStub adds universal methods to AppCycleClientMethods.
@@ -81,14 +81,14 @@ type implAppCycleClientStub struct {
 	client __ipc.Client
 }
 
-func (c implAppCycleClientStub) c(ctx __context.T) __ipc.Client {
+func (c implAppCycleClientStub) c(ctx *__context.T) __ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
 	return __veyron2.RuntimeFromContext(ctx).Client()
 }
 
-func (c implAppCycleClientStub) Stop(ctx __context.T, opts ...__ipc.CallOpt) (ocall AppCycleStopCall, err error) {
+func (c implAppCycleClientStub) Stop(ctx *__context.T, opts ...__ipc.CallOpt) (ocall AppCycleStopCall, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Stop", nil, opts...); err != nil {
 		return
@@ -97,7 +97,7 @@ func (c implAppCycleClientStub) Stop(ctx __context.T, opts ...__ipc.CallOpt) (oc
 	return
 }
 
-func (c implAppCycleClientStub) ForceStop(ctx __context.T, opts ...__ipc.CallOpt) (err error) {
+func (c implAppCycleClientStub) ForceStop(ctx *__context.T, opts ...__ipc.CallOpt) (err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "ForceStop", nil, opts...); err != nil {
 		return
@@ -108,7 +108,7 @@ func (c implAppCycleClientStub) ForceStop(ctx __context.T, opts ...__ipc.CallOpt
 	return
 }
 
-func (c implAppCycleClientStub) Signature(ctx __context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
+func (c implAppCycleClientStub) Signature(ctx *__context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
 		return

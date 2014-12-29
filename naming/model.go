@@ -152,25 +152,25 @@ type Namespace interface {
 	// Mount the server object address under the object name, expiring after
 	// the ttl. ttl of zero implies an implementation-specific high value
 	// (essentially, forever).
-	Mount(ctx context.T, name, server string, ttl time.Duration, opts ...MountOpt) error
+	Mount(ctx *context.T, name, server string, ttl time.Duration, opts ...MountOpt) error
 
 	// Unmount the server object address from the object name, or if server
 	// is empty, unmount all server OAs from the object name.
-	Unmount(ctx context.T, name, server string) error
+	Unmount(ctx *context.T, name, server string) error
 
 	// Resolve the object name into its mounted servers.
-	Resolve(ctx context.T, name string, opts ...ResolveOpt) (names []string, err error)
+	Resolve(ctx *context.T, name string, opts ...ResolveOpt) (names []string, err error)
 
 	// Resolve the object name into its mounted servers.
-	ResolveX(ctx context.T, name string, opts ...ResolveOpt) (entry *MountEntry, err error)
+	ResolveX(ctx *context.T, name string, opts ...ResolveOpt) (entry *MountEntry, err error)
 
 	// ResolveToMountTable resolves the object name into the mounttables
 	// directly responsible for the name.
-	ResolveToMountTable(ctx context.T, name string, opts ...ResolveOpt) (names []string, err error)
+	ResolveToMountTable(ctx *context.T, name string, opts ...ResolveOpt) (names []string, err error)
 
 	// ResolveToMountTable resolves the object name into the mounttables
 	// directly responsible for the name.
-	ResolveToMountTableX(ctx context.T, name string, opts ...ResolveOpt) (entry *MountEntry, err error)
+	ResolveToMountTableX(ctx *context.T, name string, opts ...ResolveOpt) (entry *MountEntry, err error)
 
 	// FlushCacheEntry flushes resolution information cached for the name.  If
 	// anything was flushed it returns true.
@@ -187,11 +187,11 @@ type Namespace interface {
 	// given name will return the name of a mount table, which is then
 	// followed up the namespace ancestry to obtain a name rooted at a
 	// 'global' (i.e., widely accessible) mount table.
-	Unresolve(ctx context.T, name string) (names []string, err error)
+	Unresolve(ctx *context.T, name string) (names []string, err error)
 
 	// Glob returns all names matching pattern.  If recursive is true, it also
 	// returns all names below the matching ones.
-	Glob(ctx context.T, pattern string) (chan MountEntry, error)
+	Glob(ctx *context.T, pattern string) (chan MountEntry, error)
 
 	// SetRoots sets the roots that the local Namespace is
 	// relative to. All relative names passed to the methods above

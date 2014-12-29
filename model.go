@@ -250,14 +250,14 @@ type Runtime interface {
 	// NewContext creates a new root context.
 	// This should be used when you are doing a new operation that isn't related
 	// to ongoing RPCs.
-	NewContext() context.T
+	NewContext() *context.T
 
 	// WithNewSpan derives a context with a new Span that can be used to
 	// trace and annotate operations across process boundaries.
-	WithNewSpan(ctx context.T, name string) (context.T, vtrace.Span)
+	WithNewSpan(ctx *context.T, name string) (*context.T, vtrace.Span)
 
 	// SpanFromContext finds the currently active span.
-	SpanFromContext(ctx context.T) vtrace.Span
+	SpanFromContext(ctx *context.T) vtrace.Span
 
 	// NewStreamManager creates a new stream manager.  The returned stream
 	// manager will be shutdown by the runtime on Cleanup.
@@ -316,7 +316,7 @@ type Runtime interface {
 
 // RuntimeFromContext returns the runtime used to generate a given context.
 // The result will always be a non-nil Runtime instance.
-func RuntimeFromContext(ctx context.T) Runtime {
+func RuntimeFromContext(ctx *context.T) Runtime {
 	return ctx.Runtime().(Runtime)
 }
 

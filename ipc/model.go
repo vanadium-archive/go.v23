@@ -26,7 +26,7 @@ type Client interface {
 	//
 	// StartCall accepts at least the following options:
 	// veyron2.CallTimeout.
-	StartCall(ctx context.T, name, method string, args []interface{}, opts ...CallOpt) (Call, error)
+	StartCall(ctx *context.T, name, method string, args []interface{}, opts ...CallOpt) (Call, error)
 
 	// Close discards all state associated with this Client.  In-flight calls may
 	// be terminated with an error.
@@ -387,7 +387,7 @@ type ServerContext interface {
 	// Server returns the Server that this context is associated with.
 	Server() Server
 
-	Context() context.T
+	Context() *context.T
 }
 
 // BindOpt is the interface for options provided to Bind<Service> calls in IPC

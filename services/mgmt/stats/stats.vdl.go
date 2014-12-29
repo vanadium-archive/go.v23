@@ -41,7 +41,7 @@ type StatsClientMethods interface {
 	// of the value is implementation specific.
 	// Some objects may not have a value, in which case, Value() returns
 	// a NoValue error.
-	Value(__context.T, ...__ipc.CallOpt) (__vdlutil.Any, error)
+	Value(*__context.T, ...__ipc.CallOpt) (__vdlutil.Any, error)
 }
 
 // StatsClientStub adds universal methods to StatsClientMethods.
@@ -68,14 +68,14 @@ type implStatsClientStub struct {
 	watch.GlobWatcherClientStub
 }
 
-func (c implStatsClientStub) c(ctx __context.T) __ipc.Client {
+func (c implStatsClientStub) c(ctx *__context.T) __ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
 	return __veyron2.RuntimeFromContext(ctx).Client()
 }
 
-func (c implStatsClientStub) Value(ctx __context.T, opts ...__ipc.CallOpt) (o0 __vdlutil.Any, err error) {
+func (c implStatsClientStub) Value(ctx *__context.T, opts ...__ipc.CallOpt) (o0 __vdlutil.Any, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Value", nil, opts...); err != nil {
 		return
@@ -86,7 +86,7 @@ func (c implStatsClientStub) Value(ctx __context.T, opts ...__ipc.CallOpt) (o0 _
 	return
 }
 
-func (c implStatsClientStub) Signature(ctx __context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
+func (c implStatsClientStub) Signature(ctx *__context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
 		return

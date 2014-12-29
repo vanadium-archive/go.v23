@@ -28,21 +28,21 @@ const _ = __wiretype.TypeIDInvalid
 type PProfClientMethods interface {
 	// CmdLine returns the command-line arguments of the server, including
 	// the name of the executable.
-	CmdLine(__context.T, ...__ipc.CallOpt) ([]string, error)
+	CmdLine(*__context.T, ...__ipc.CallOpt) ([]string, error)
 	// Profiles returns the list of available profiles.
-	Profiles(__context.T, ...__ipc.CallOpt) ([]string, error)
+	Profiles(*__context.T, ...__ipc.CallOpt) ([]string, error)
 	// Profile streams the requested profile. The debug parameter enables
 	// additional output. Passing debug=0 includes only the hexadecimal
 	// addresses that pprof needs. Passing debug=1 adds comments translating
 	// addresses to function names and line numbers, so that a programmer
 	// can read the profile without tools.
-	Profile(ctx __context.T, name string, debug int32, opts ...__ipc.CallOpt) (PProfProfileCall, error)
+	Profile(ctx *__context.T, name string, debug int32, opts ...__ipc.CallOpt) (PProfProfileCall, error)
 	// CPUProfile enables CPU profiling for the requested duration and
 	// streams the profile data.
-	CPUProfile(ctx __context.T, seconds int32, opts ...__ipc.CallOpt) (PProfCPUProfileCall, error)
+	CPUProfile(ctx *__context.T, seconds int32, opts ...__ipc.CallOpt) (PProfCPUProfileCall, error)
 	// Symbol looks up the program counters and returns their respective
 	// function names.
-	Symbol(ctx __context.T, programCounters []uint64, opts ...__ipc.CallOpt) ([]string, error)
+	Symbol(ctx *__context.T, programCounters []uint64, opts ...__ipc.CallOpt) ([]string, error)
 }
 
 // PProfClientStub adds universal methods to PProfClientMethods.
@@ -67,14 +67,14 @@ type implPProfClientStub struct {
 	client __ipc.Client
 }
 
-func (c implPProfClientStub) c(ctx __context.T) __ipc.Client {
+func (c implPProfClientStub) c(ctx *__context.T) __ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
 	return __veyron2.RuntimeFromContext(ctx).Client()
 }
 
-func (c implPProfClientStub) CmdLine(ctx __context.T, opts ...__ipc.CallOpt) (o0 []string, err error) {
+func (c implPProfClientStub) CmdLine(ctx *__context.T, opts ...__ipc.CallOpt) (o0 []string, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "CmdLine", nil, opts...); err != nil {
 		return
@@ -85,7 +85,7 @@ func (c implPProfClientStub) CmdLine(ctx __context.T, opts ...__ipc.CallOpt) (o0
 	return
 }
 
-func (c implPProfClientStub) Profiles(ctx __context.T, opts ...__ipc.CallOpt) (o0 []string, err error) {
+func (c implPProfClientStub) Profiles(ctx *__context.T, opts ...__ipc.CallOpt) (o0 []string, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Profiles", nil, opts...); err != nil {
 		return
@@ -96,7 +96,7 @@ func (c implPProfClientStub) Profiles(ctx __context.T, opts ...__ipc.CallOpt) (o
 	return
 }
 
-func (c implPProfClientStub) Profile(ctx __context.T, i0 string, i1 int32, opts ...__ipc.CallOpt) (ocall PProfProfileCall, err error) {
+func (c implPProfClientStub) Profile(ctx *__context.T, i0 string, i1 int32, opts ...__ipc.CallOpt) (ocall PProfProfileCall, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Profile", []interface{}{i0, i1}, opts...); err != nil {
 		return
@@ -105,7 +105,7 @@ func (c implPProfClientStub) Profile(ctx __context.T, i0 string, i1 int32, opts 
 	return
 }
 
-func (c implPProfClientStub) CPUProfile(ctx __context.T, i0 int32, opts ...__ipc.CallOpt) (ocall PProfCPUProfileCall, err error) {
+func (c implPProfClientStub) CPUProfile(ctx *__context.T, i0 int32, opts ...__ipc.CallOpt) (ocall PProfCPUProfileCall, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "CPUProfile", []interface{}{i0}, opts...); err != nil {
 		return
@@ -114,7 +114,7 @@ func (c implPProfClientStub) CPUProfile(ctx __context.T, i0 int32, opts ...__ipc
 	return
 }
 
-func (c implPProfClientStub) Symbol(ctx __context.T, i0 []uint64, opts ...__ipc.CallOpt) (o0 []string, err error) {
+func (c implPProfClientStub) Symbol(ctx *__context.T, i0 []uint64, opts ...__ipc.CallOpt) (o0 []string, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Symbol", []interface{}{i0}, opts...); err != nil {
 		return
@@ -125,7 +125,7 @@ func (c implPProfClientStub) Symbol(ctx __context.T, i0 []uint64, opts ...__ipc.
 	return
 }
 
-func (c implPProfClientStub) Signature(ctx __context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
+func (c implPProfClientStub) Signature(ctx *__context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
 		return

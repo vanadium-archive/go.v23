@@ -505,7 +505,7 @@ const _ = __wiretype.TypeIDInvalid
 // containing {{$iface.Name}} methods.
 {{docBreak $iface.Doc}}type {{$iface.Name}}ClientMethods interface { {{range $embed := $iface.Embeds}}
 	{{$embed.Doc}}{{embedGo $data $embed}}ClientMethods{{$embed.DocSuffix}}{{end}}{{range $method := $iface.Methods}}
-	{{$method.Doc}}{{$method.Name}}({{argNameTypes "" "ctx __context.T" "opts ...__ipc.CallOpt" $data $method.InArgs}}) {{outArgsClient "" $data $iface $method}}{{$method.DocSuffix}}{{end}}
+	{{$method.Doc}}{{$method.Name}}({{argNameTypes "" "ctx *__context.T" "opts ...__ipc.CallOpt" $data $method.InArgs}}) {{outArgsClient "" $data $iface $method}}{{$method.DocSuffix}}{{end}}
 }
 
 // {{$iface.Name}}ClientStub adds universal methods to {{$iface.Name}}ClientMethods.
@@ -532,7 +532,7 @@ type impl{{$iface.Name}}ClientStub struct {
 	{{embedGo $data $embed}}ClientStub{{end}}
 }
 
-func (c impl{{$iface.Name}}ClientStub) c(ctx __context.T) __ipc.Client {
+func (c impl{{$iface.Name}}ClientStub) c(ctx *__context.T) __ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
@@ -540,12 +540,12 @@ func (c impl{{$iface.Name}}ClientStub) c(ctx __context.T) __ipc.Client {
 }
 
 {{range $method := $iface.Methods}}
-func (c impl{{$iface.Name}}ClientStub) {{$method.Name}}({{argNameTypes "i" "ctx __context.T" "opts ...__ipc.CallOpt" $data $method.InArgs}}) {{outArgsClient "o" $data $iface $method}} {
+func (c impl{{$iface.Name}}ClientStub) {{$method.Name}}({{argNameTypes "i" "ctx *__context.T" "opts ...__ipc.CallOpt" $data $method.InArgs}}) {{outArgsClient "o" $data $iface $method}} {
 {{clientStubImpl $data $iface $method}}
 }
 {{end}}
 
-func (c impl{{$iface.Name}}ClientStub) Signature(ctx __context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
+func (c impl{{$iface.Name}}ClientStub) Signature(ctx *__context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
 		return

@@ -251,13 +251,13 @@ type componentKey struct{}
 
 // ContextWithComponentName returns a context based on ctx that has the
 // componentName that Make() and Convert() can use.
-func ContextWithComponentName(ctx context.T, componentName string) context.T {
+func ContextWithComponentName(ctx *context.T, componentName string) *context.T {
 	return ctx.WithValue(componentKey{}, componentName)
 }
 
 // Make is like ExplicitMake(), but obtains the language, component name, and operation
 // name from the specified context.T.   ctx may be nil.
-func Make(idAction IDAction, ctx context.T, v ...interface{}) E {
+func Make(idAction IDAction, ctx *context.T, v ...interface{}) E {
 	langID, componentName, opName := dataFromContext(ctx)
 	stack := make([]uintptr, 1)
 	runtime.Callers(2, stack)
@@ -356,7 +356,7 @@ func ExplicitConvert(idAction IDAction, langID i18n.LangID, componentName string
 
 // defaultCtx is the context used when a nil context.T is passed to Make() or Convert().
 var (
-	defaultCtx     context.T
+	defaultCtx     *context.T
 	defaultCtxLock sync.RWMutex // Protects defaultCtx.
 )
 
@@ -364,7 +364,7 @@ var (
 // passed to Make() or Convert().  It is typically used in standalone
 // programmes that have no RPC context, or in servers for the context of
 // ancillary threads not associated with any particular RPC.
-func SetDefaultContext(ctx context.T) {
+func SetDefaultContext(ctx *context.T) {
 	defaultCtxLock.Lock()
 	defaultCtx = ctx
 	defaultCtxLock.Unlock()
@@ -372,7 +372,7 @@ func SetDefaultContext(ctx context.T) {
 
 // Convert is like ExplicitConvert(), but obtains the language, component and operation names
 // from the specified context.T.   ctx may be nil.
-func Convert(idAction IDAction, ctx context.T, err error) E {
+func Convert(idAction IDAction, ctx *context.T, err error) E {
 	if err == nil {
 		return nil
 	}
@@ -384,7 +384,7 @@ func Convert(idAction IDAction, ctx context.T, err error) E {
 
 // dataFromContext reads the languageID, component name, and operation name
 // from the context, using defaults as appropriate.
-func dataFromContext(ctx context.T) (langID i18n.LangID, componentName string, opName string) {
+func dataFromContext(ctx *context.T) (langID i18n.LangID, componentName string, opName string) {
 	// Use a default context if ctx is nil.  defaultCtx may also be nil, so
 	// further nil checks are required below.
 	if ctx == nil {

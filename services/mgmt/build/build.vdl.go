@@ -98,10 +98,10 @@ const UnsupportedOS = OperatingSystem("unsupported")
 type BuilderClientMethods interface {
 	// Build streams sources to the build server, which then attempts to
 	// build the sources and streams back the compiled binaries.
-	Build(ctx __context.T, Arch Architecture, OS OperatingSystem, opts ...__ipc.CallOpt) (BuilderBuildCall, error)
+	Build(ctx *__context.T, Arch Architecture, OS OperatingSystem, opts ...__ipc.CallOpt) (BuilderBuildCall, error)
 	// Describe generates a description for a binary identified by
 	// the given Object name.
-	Describe(ctx __context.T, name string, opts ...__ipc.CallOpt) (binary.Description, error)
+	Describe(ctx *__context.T, name string, opts ...__ipc.CallOpt) (binary.Description, error)
 }
 
 // BuilderClientStub adds universal methods to BuilderClientMethods.
@@ -126,14 +126,14 @@ type implBuilderClientStub struct {
 	client __ipc.Client
 }
 
-func (c implBuilderClientStub) c(ctx __context.T) __ipc.Client {
+func (c implBuilderClientStub) c(ctx *__context.T) __ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
 	return __veyron2.RuntimeFromContext(ctx).Client()
 }
 
-func (c implBuilderClientStub) Build(ctx __context.T, i0 Architecture, i1 OperatingSystem, opts ...__ipc.CallOpt) (ocall BuilderBuildCall, err error) {
+func (c implBuilderClientStub) Build(ctx *__context.T, i0 Architecture, i1 OperatingSystem, opts ...__ipc.CallOpt) (ocall BuilderBuildCall, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Build", []interface{}{i0, i1}, opts...); err != nil {
 		return
@@ -142,7 +142,7 @@ func (c implBuilderClientStub) Build(ctx __context.T, i0 Architecture, i1 Operat
 	return
 }
 
-func (c implBuilderClientStub) Describe(ctx __context.T, i0 string, opts ...__ipc.CallOpt) (o0 binary.Description, err error) {
+func (c implBuilderClientStub) Describe(ctx *__context.T, i0 string, opts ...__ipc.CallOpt) (o0 binary.Description, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Describe", []interface{}{i0}, opts...); err != nil {
 		return
@@ -153,7 +153,7 @@ func (c implBuilderClientStub) Describe(ctx __context.T, i0 string, opts ...__ip
 	return
 }
 
-func (c implBuilderClientStub) Signature(ctx __context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
+func (c implBuilderClientStub) Signature(ctx *__context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
 		return

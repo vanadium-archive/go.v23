@@ -22,7 +22,7 @@ const _ = __wiretype.TypeIDInvalid
 // ExpClientMethods is the client interface
 // containing Exp methods.
 type ExpClientMethods interface {
-	Exp(ctx __context.T, x float64, opts ...__ipc.CallOpt) (float64, error)
+	Exp(ctx *__context.T, x float64, opts ...__ipc.CallOpt) (float64, error)
 }
 
 // ExpClientStub adds universal methods to ExpClientMethods.
@@ -47,14 +47,14 @@ type implExpClientStub struct {
 	client __ipc.Client
 }
 
-func (c implExpClientStub) c(ctx __context.T) __ipc.Client {
+func (c implExpClientStub) c(ctx *__context.T) __ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
 	return __veyron2.RuntimeFromContext(ctx).Client()
 }
 
-func (c implExpClientStub) Exp(ctx __context.T, i0 float64, opts ...__ipc.CallOpt) (o0 float64, err error) {
+func (c implExpClientStub) Exp(ctx *__context.T, i0 float64, opts ...__ipc.CallOpt) (o0 float64, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Exp", []interface{}{i0}, opts...); err != nil {
 		return
@@ -65,7 +65,7 @@ func (c implExpClientStub) Exp(ctx __context.T, i0 float64, opts ...__ipc.CallOp
 	return
 }
 
-func (c implExpClientStub) Signature(ctx __context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
+func (c implExpClientStub) Signature(ctx *__context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
 		return

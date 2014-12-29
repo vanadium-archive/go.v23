@@ -405,10 +405,10 @@ const ErrIDBar = __verror.ID("some/path.ErrIdOther")
 // ServiceAClientMethods is the client interface
 // containing ServiceA methods.
 type ServiceAClientMethods interface {
-	MethodA1(__context.T, ...__ipc.CallOpt) error
-	MethodA2(ctx __context.T, a int32, b string, opts ...__ipc.CallOpt) (s string, err error)
-	MethodA3(ctx __context.T, a int32, opts ...__ipc.CallOpt) (ServiceAMethodA3Call, error)
-	MethodA4(ctx __context.T, a int32, opts ...__ipc.CallOpt) (ServiceAMethodA4Call, error)
+	MethodA1(*__context.T, ...__ipc.CallOpt) error
+	MethodA2(ctx *__context.T, a int32, b string, opts ...__ipc.CallOpt) (s string, err error)
+	MethodA3(ctx *__context.T, a int32, opts ...__ipc.CallOpt) (ServiceAMethodA3Call, error)
+	MethodA4(ctx *__context.T, a int32, opts ...__ipc.CallOpt) (ServiceAMethodA4Call, error)
 }
 
 // ServiceAClientStub adds universal methods to ServiceAClientMethods.
@@ -433,14 +433,14 @@ type implServiceAClientStub struct {
 	client __ipc.Client
 }
 
-func (c implServiceAClientStub) c(ctx __context.T) __ipc.Client {
+func (c implServiceAClientStub) c(ctx *__context.T) __ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
 	return __veyron2.RuntimeFromContext(ctx).Client()
 }
 
-func (c implServiceAClientStub) MethodA1(ctx __context.T, opts ...__ipc.CallOpt) (err error) {
+func (c implServiceAClientStub) MethodA1(ctx *__context.T, opts ...__ipc.CallOpt) (err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "MethodA1", nil, opts...); err != nil {
 		return
@@ -451,7 +451,7 @@ func (c implServiceAClientStub) MethodA1(ctx __context.T, opts ...__ipc.CallOpt)
 	return
 }
 
-func (c implServiceAClientStub) MethodA2(ctx __context.T, i0 int32, i1 string, opts ...__ipc.CallOpt) (o0 string, err error) {
+func (c implServiceAClientStub) MethodA2(ctx *__context.T, i0 int32, i1 string, opts ...__ipc.CallOpt) (o0 string, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "MethodA2", []interface{}{i0, i1}, opts...); err != nil {
 		return
@@ -462,7 +462,7 @@ func (c implServiceAClientStub) MethodA2(ctx __context.T, i0 int32, i1 string, o
 	return
 }
 
-func (c implServiceAClientStub) MethodA3(ctx __context.T, i0 int32, opts ...__ipc.CallOpt) (ocall ServiceAMethodA3Call, err error) {
+func (c implServiceAClientStub) MethodA3(ctx *__context.T, i0 int32, opts ...__ipc.CallOpt) (ocall ServiceAMethodA3Call, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "MethodA3", []interface{}{i0}, opts...); err != nil {
 		return
@@ -471,7 +471,7 @@ func (c implServiceAClientStub) MethodA3(ctx __context.T, i0 int32, opts ...__ip
 	return
 }
 
-func (c implServiceAClientStub) MethodA4(ctx __context.T, i0 int32, opts ...__ipc.CallOpt) (ocall ServiceAMethodA4Call, err error) {
+func (c implServiceAClientStub) MethodA4(ctx *__context.T, i0 int32, opts ...__ipc.CallOpt) (ocall ServiceAMethodA4Call, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "MethodA4", []interface{}{i0}, opts...); err != nil {
 		return
@@ -480,7 +480,7 @@ func (c implServiceAClientStub) MethodA4(ctx __context.T, i0 int32, opts ...__ip
 	return
 }
 
-func (c implServiceAClientStub) Signature(ctx __context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
+func (c implServiceAClientStub) Signature(ctx *__context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
 		return
@@ -1000,7 +1000,7 @@ func (s implServiceAMethodA4ContextSend) Send(item string) error {
 // containing ServiceB methods.
 type ServiceBClientMethods interface {
 	ServiceAClientMethods
-	MethodB1(ctx __context.T, a Scalars, b Composites, opts ...__ipc.CallOpt) (c CompComp, err error)
+	MethodB1(ctx *__context.T, a Scalars, b Composites, opts ...__ipc.CallOpt) (c CompComp, err error)
 }
 
 // ServiceBClientStub adds universal methods to ServiceBClientMethods.
@@ -1027,14 +1027,14 @@ type implServiceBClientStub struct {
 	ServiceAClientStub
 }
 
-func (c implServiceBClientStub) c(ctx __context.T) __ipc.Client {
+func (c implServiceBClientStub) c(ctx *__context.T) __ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
 	return __veyron2.RuntimeFromContext(ctx).Client()
 }
 
-func (c implServiceBClientStub) MethodB1(ctx __context.T, i0 Scalars, i1 Composites, opts ...__ipc.CallOpt) (o0 CompComp, err error) {
+func (c implServiceBClientStub) MethodB1(ctx *__context.T, i0 Scalars, i1 Composites, opts ...__ipc.CallOpt) (o0 CompComp, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "MethodB1", []interface{}{i0, i1}, opts...); err != nil {
 		return
@@ -1045,7 +1045,7 @@ func (c implServiceBClientStub) MethodB1(ctx __context.T, i0 Scalars, i1 Composi
 	return
 }
 
-func (c implServiceBClientStub) Signature(ctx __context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
+func (c implServiceBClientStub) Signature(ctx *__context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
 		return

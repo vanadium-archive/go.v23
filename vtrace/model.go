@@ -32,7 +32,7 @@
 //
 // In this case the tree would have been created with code like this:
 //
-//    function MakeBlogPost(ctx context.T) {
+//    function MakeBlogPost(ctx *context.T) {
 //        authCtx, _ := vtrace.WithNewSpan(ctx, "Authenticate")
 //        Authenticate(authCtx)
 //        writeCtx, _ := vtrace.WithNewSpan(ctx, "Write To DB")
@@ -124,17 +124,17 @@ type Span interface {
 // spanManager is implemented by veyron2.Runtime, but we can't
 // depend on that here.
 type spanManager interface {
-	WithNewSpan(ctx context.T, name string) (context.T, Span)
-	SpanFromContext(ctx context.T) Span
+	WithNewSpan(ctx *context.T, name string) (*context.T, Span)
+	SpanFromContext(ctx *context.T) Span
 }
 
 // Derive a new context from ctx that has a new Span attached.
-func WithNewSpan(ctx context.T, name string) (context.T, Span) {
+func WithNewSpan(ctx *context.T, name string) (*context.T, Span) {
 	return ctx.Runtime().(spanManager).WithNewSpan(ctx, name)
 }
 
 // Get the currently active span.
-func FromContext(ctx context.T) Span {
+func FromContext(ctx *context.T) Span {
 	return ctx.Runtime().(spanManager).SpanFromContext(ctx)
 }
 

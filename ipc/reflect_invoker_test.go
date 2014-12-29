@@ -27,41 +27,29 @@ func init() { testutil.Init() }
 
 // FakeServerCall implements ipc.ServerContext.
 type FakeServerCall struct {
+	context  *context.T
 	security security.Context
 }
 
 func NewFakeServerCall() *FakeServerCall {
-	return &FakeServerCall{security.NewContext(&security.ContextParams{})}
+	return &FakeServerCall{
+		context:  context.NewUninitializedContext(struct{}{}),
+		security: security.NewContext(&security.ContextParams{}),
+	}
 }
 
-func (call *FakeServerCall) Context() context.T { return call }
-func (*FakeServerCall) Deadline() (deadline time.Time, ok bool) {
-	var t time.Time
-	return t, false
-}
-func (*FakeServerCall) Done() <-chan struct{}                                  { return nil }
-func (*FakeServerCall) Err() error                                             { return nil }
-func (*FakeServerCall) Value(key interface{}) interface{}                      { return nil }
-func (*FakeServerCall) Runtime() interface{}                                   { return nil }
-func (*FakeServerCall) WithCancel() (ctx context.T, cancel context.CancelFunc) { return nil, nil }
-func (*FakeServerCall) WithDeadline(deadline time.Time) (context.T, context.CancelFunc) {
-	return nil, nil
-}
-func (*FakeServerCall) WithTimeout(timeout time.Duration) (context.T, context.CancelFunc) {
-	return nil, nil
-}
-func (*FakeServerCall) WithValue(key interface{}, val interface{}) context.T { return nil }
-func (*FakeServerCall) Server() ipc.Server                                   { return nil }
-func (*FakeServerCall) Blessings() security.Blessings                        { return nil }
-func (*FakeServerCall) Closed() <-chan struct{}                              { return nil }
-func (*FakeServerCall) IsClosed() bool                                       { return false }
-func (*FakeServerCall) Send(item interface{}) error                          { return nil }
-func (*FakeServerCall) Recv(itemptr interface{}) error                       { return nil }
-func (call *FakeServerCall) Timestamp() time.Time                            { return call.security.Timestamp() }
-func (call *FakeServerCall) Method() string                                  { return call.security.Method() }
-func (call *FakeServerCall) MethodTags() []interface{}                       { return call.security.MethodTags() }
-func (call *FakeServerCall) Name() string                                    { return call.security.Name() }
-func (call *FakeServerCall) Suffix() string                                  { return call.security.Suffix() }
+func (call *FakeServerCall) Context() *context.T       { return call.context }
+func (*FakeServerCall) Server() ipc.Server             { return nil }
+func (*FakeServerCall) Blessings() security.Blessings  { return nil }
+func (*FakeServerCall) Closed() <-chan struct{}        { return nil }
+func (*FakeServerCall) IsClosed() bool                 { return false }
+func (*FakeServerCall) Send(item interface{}) error    { return nil }
+func (*FakeServerCall) Recv(itemptr interface{}) error { return nil }
+func (call *FakeServerCall) Timestamp() time.Time      { return call.security.Timestamp() }
+func (call *FakeServerCall) Method() string            { return call.security.Method() }
+func (call *FakeServerCall) MethodTags() []interface{} { return call.security.MethodTags() }
+func (call *FakeServerCall) Name() string              { return call.security.Name() }
+func (call *FakeServerCall) Suffix() string            { return call.security.Suffix() }
 func (call *FakeServerCall) RemoteDischarges() map[string]security.Discharge {
 	return call.security.RemoteDischarges()
 }

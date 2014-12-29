@@ -24,8 +24,8 @@ const _ = __wiretype.TypeIDInvalid
 //
 // Trigonometry is an interface that specifies a couple trigonometric functions.
 type TrigonometryClientMethods interface {
-	Sine(ctx __context.T, angle float64, opts ...__ipc.CallOpt) (float64, error)
-	Cosine(ctx __context.T, angle float64, opts ...__ipc.CallOpt) (float64, error)
+	Sine(ctx *__context.T, angle float64, opts ...__ipc.CallOpt) (float64, error)
+	Cosine(ctx *__context.T, angle float64, opts ...__ipc.CallOpt) (float64, error)
 }
 
 // TrigonometryClientStub adds universal methods to TrigonometryClientMethods.
@@ -50,14 +50,14 @@ type implTrigonometryClientStub struct {
 	client __ipc.Client
 }
 
-func (c implTrigonometryClientStub) c(ctx __context.T) __ipc.Client {
+func (c implTrigonometryClientStub) c(ctx *__context.T) __ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
 	return __veyron2.RuntimeFromContext(ctx).Client()
 }
 
-func (c implTrigonometryClientStub) Sine(ctx __context.T, i0 float64, opts ...__ipc.CallOpt) (o0 float64, err error) {
+func (c implTrigonometryClientStub) Sine(ctx *__context.T, i0 float64, opts ...__ipc.CallOpt) (o0 float64, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Sine", []interface{}{i0}, opts...); err != nil {
 		return
@@ -68,7 +68,7 @@ func (c implTrigonometryClientStub) Sine(ctx __context.T, i0 float64, opts ...__
 	return
 }
 
-func (c implTrigonometryClientStub) Cosine(ctx __context.T, i0 float64, opts ...__ipc.CallOpt) (o0 float64, err error) {
+func (c implTrigonometryClientStub) Cosine(ctx *__context.T, i0 float64, opts ...__ipc.CallOpt) (o0 float64, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Cosine", []interface{}{i0}, opts...); err != nil {
 		return
@@ -79,7 +79,7 @@ func (c implTrigonometryClientStub) Cosine(ctx __context.T, i0 float64, opts ...
 	return
 }
 
-func (c implTrigonometryClientStub) Signature(ctx __context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
+func (c implTrigonometryClientStub) Signature(ctx *__context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
 		return
@@ -250,14 +250,14 @@ type implAdvancedMathClientStub struct {
 	exp.ExpClientStub
 }
 
-func (c implAdvancedMathClientStub) c(ctx __context.T) __ipc.Client {
+func (c implAdvancedMathClientStub) c(ctx *__context.T) __ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
 	return __veyron2.RuntimeFromContext(ctx).Client()
 }
 
-func (c implAdvancedMathClientStub) Signature(ctx __context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
+func (c implAdvancedMathClientStub) Signature(ctx *__context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
 		return

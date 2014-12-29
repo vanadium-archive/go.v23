@@ -31,10 +31,10 @@ const _ = __wiretype.TypeIDInvalid
 type StoreClientMethods interface {
 	// Trace returns the trace that matches the given ID.
 	// Will return a NoExists error if no matching trace was found.
-	Trace(__context.T, uniqueid.ID, ...__ipc.CallOpt) (vtrace.TraceRecord, error)
+	Trace(*__context.T, uniqueid.ID, ...__ipc.CallOpt) (vtrace.TraceRecord, error)
 	// AllTraces returns TraceRecords for all traces the server currently
 	// knows about.
-	AllTraces(__context.T, ...__ipc.CallOpt) (StoreAllTracesCall, error)
+	AllTraces(*__context.T, ...__ipc.CallOpt) (StoreAllTracesCall, error)
 }
 
 // StoreClientStub adds universal methods to StoreClientMethods.
@@ -59,14 +59,14 @@ type implStoreClientStub struct {
 	client __ipc.Client
 }
 
-func (c implStoreClientStub) c(ctx __context.T) __ipc.Client {
+func (c implStoreClientStub) c(ctx *__context.T) __ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
 	return __veyron2.RuntimeFromContext(ctx).Client()
 }
 
-func (c implStoreClientStub) Trace(ctx __context.T, i0 uniqueid.ID, opts ...__ipc.CallOpt) (o0 vtrace.TraceRecord, err error) {
+func (c implStoreClientStub) Trace(ctx *__context.T, i0 uniqueid.ID, opts ...__ipc.CallOpt) (o0 vtrace.TraceRecord, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Trace", []interface{}{i0}, opts...); err != nil {
 		return
@@ -77,7 +77,7 @@ func (c implStoreClientStub) Trace(ctx __context.T, i0 uniqueid.ID, opts ...__ip
 	return
 }
 
-func (c implStoreClientStub) AllTraces(ctx __context.T, opts ...__ipc.CallOpt) (ocall StoreAllTracesCall, err error) {
+func (c implStoreClientStub) AllTraces(ctx *__context.T, opts ...__ipc.CallOpt) (ocall StoreAllTracesCall, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "AllTraces", nil, opts...); err != nil {
 		return
@@ -86,7 +86,7 @@ func (c implStoreClientStub) AllTraces(ctx __context.T, opts ...__ipc.CallOpt) (
 	return
 }
 
-func (c implStoreClientStub) Signature(ctx __context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
+func (c implStoreClientStub) Signature(ctx *__context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
 		return
