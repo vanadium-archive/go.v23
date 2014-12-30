@@ -25,26 +25,9 @@
 // is used. The portion of the name following the address is a
 // relative name.
 //
-// In addition, //, is treated specially by the implementation of the
-// MountTable and is used to instruct the MountTable to stop its
-// resolution process at the point where it encounters the //. The
-// portion of the name from a '//'' onward is referred to as
-// 'terminal' since it terminates the resolution process. An empty
-// name is considered terminal. The use of // is primarily intended
-// for implementing the MountTable and for debugging since it provides
-// a facility for the user to control when resolution stops.
-//
 // Thus:
 //
 // /host:port/a/b/c/d means starting at host:port resolve a/b/c/d and
 // return the terminating server and the relative path from that
 // server.
-//
-// /host:port/a/b//c/d means starting at host:port resolve a/b and
-// return the terminating server and the relative path from that
-// server with c/d appended to it.
-//
-// /host:port//a/b/c/d means do not resolve. Just assume the server is
-// at host:port and the object name at the server is a/b/c/d.
-
 package naming

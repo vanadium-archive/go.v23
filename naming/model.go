@@ -179,16 +179,6 @@ type Namespace interface {
 	// CacheCtl sets controls and returns the current control values.
 	CacheCtl(ctls ...CacheCtl) []CacheCtl
 
-	// TODO(caprita): consider adding a version of Unresolve to the
-	// IDL-generated stub (in addition to UnresolveStep).
-
-	// Unresolve returns the object name that resolves to the given name.
-	// It can be the given name itself, though typically the service at the
-	// given name will return the name of a mount table, which is then
-	// followed up the namespace ancestry to obtain a name rooted at a
-	// 'global' (i.e., widely accessible) mount table.
-	Unresolve(ctx *context.T, name string) (names []string, err error)
-
 	// Glob returns all names matching pattern.  If recursive is true, it also
 	// returns all names below the matching ones.
 	Glob(ctx *context.T, pattern string) (chan MountEntry, error)
