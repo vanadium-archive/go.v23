@@ -99,6 +99,7 @@ func ensureNonEmptyToken(yylex yyLexer, tok strPos, errMsg string) {
 // their id, to make the grammar more readable; multi-char tokens get their own
 // id.  The start* tokens are dummy tokens to kick off the parse.
 %token            startFileImports startFile startConfigImports startConfig
+%token            startExprs
 %token <pos>      ';' ':' ',' '.' '(' ')' '[' ']' '{' '}' '<' '>' '='
 %token <pos>      '!' '+' '-' '*' '/' '%' '|' '&' '^' '?'
 %token <pos>      tOROR tANDAND tLE tGE tNE tEQEQ tLSH tRSH
@@ -118,7 +119,7 @@ func ensureNonEmptyToken(yylex yyLexer, tok strPos, errMsg string) {
 %type <fields>     field_spec_list field_spec named_arg_list inargs outargs
 %type <iface>      iface_item_list iface_item
 %type <constexpr>  expr unary_expr operand
-%type <constexprs> tags tag_list
+%type <constexprs> tags expr_comma_list
 %type <complit>    comp_lit
 %type <kvlit>      kv_lit
 %type <kvlits>     kv_lit_list
@@ -144,17 +145,19 @@ func ensureNonEmptyToken(yylex yyLexer, tok strPos, errMsg string) {
 // files that include error, type or interface definitions occurs afterwards, to
 // improve error reporting.
 start:
-  startFileImports   package imports gen_eof
+  startFileImports   package imports gen_imports_eof
 | startFile          package imports defs
-| startConfigImports config imports gen_eof
+| startConfigImports config imports gen_imports_eof
 | startConfig        config imports defs
+| startExprs         expr_comma_list ';'
+  { lexStoreExprs(yylex, $2) }
 
 // Dummy rule to terminate the parse after the imports, regardless of whether
 // there are any defs.  Defs always start with either the tTYPE, tCONST or
 // tERRORID tokens, and the rule handles all cases - either there's no trailing
 // text (the empty case, which would have resulted in EOF anyways), or there's
 // one or more defs, where we need to force an EOF.
-gen_eof:
+gen_imports_eof:
   // Empty.
   { lexGenEOF(yylex) }
 | tTYPE
@@ -459,13 +462,13 @@ tags:
   { $$ = nil }
 | '{' '}'
   { $$ = nil }
-| '{' tag_list ocomma '}'
+| '{' expr_comma_list ocomma '}'
   { $$ = $2 }
 
-tag_list:
+expr_comma_list:
   expr
   { $$ = []ConstExpr{$1} }
-| tag_list ',' expr
+| expr_comma_list ',' expr
   { $$ = append($1, $3) }
 
 // CONST DEFINITIONS

@@ -239,15 +239,15 @@ var constTests = []struct {
 	{
 		"UntypedInteger",
 		cp{{"a", `const Res = 123`, nil,
-			`final const invalid \(123 must be assigned a type\)`}}},
+			`invalid value \(123 must be assigned a type\)`}}},
 	{
 		"UntypedFloat",
 		cp{{"a", `const Res = 1.5`, nil,
-			`final const invalid \(1\.5 must be assigned a type\)`}}},
+			`invalid value \(1\.5 must be assigned a type\)`}}},
 	{
 		"UntypedComplex",
 		cp{{"a", `const Res = 3.4+9.8i`, nil,
-			`final const invalid \(3\.4\+9\.8i must be assigned a type\)`}}},
+			`invalid value \(3\.4\+9\.8i must be assigned a type\)`}}},
 
 	// Test list literals.
 	{
@@ -264,7 +264,7 @@ var constTests = []struct {
 		cp{{"a", `const Res = []int64{2:2, 1:1, 0}`, nil, "duplicate index 2"}}},
 	{
 		"IntListInvalidIndex",
-		cp{{"a", `const Res = []int64{"a":2, 1:1, 2:2}`, nil, "invalid index"}}},
+		cp{{"a", `const Res = []int64{"a":2, 1:1, 2:2}`, nil, `can't convert "a" to uint64`}}},
 	{
 		"IntListInvalidValue",
 		cp{{"a", `const Res = []int64{0,1,"c"}`, nil, "invalid list value"}}},
@@ -279,7 +279,7 @@ var constTests = []struct {
 		cp{{"a", `const A = []int64{3,4,2};  const Res = A[int16(1)]`, vdl.Int64Value(4), ""}}},
 	{
 		"NegativeListIndexing",
-		cp{{"a", `const A = []int64{3,4,2}; const Res = A[-1]`, nil, "error converting index [(]const -1 overflows uint64[)]"}}},
+		cp{{"a", `const A = []int64{3,4,2}; const Res = A[-1]`, nil, `\(const -1 overflows uint64\)`}}},
 	{
 		"OutOfBoundsListIndexing",
 		cp{{"a", `const A = []int64{3,4,2}; const Res = A[10]`, nil, "index out of bounds"}}},
@@ -305,7 +305,7 @@ var constTests = []struct {
 		cp{{"a", `const Res = [3]int64{2:2, 1:1, 0}`, nil, "duplicate index 2"}}},
 	{
 		"IntArrayInvalidIndex",
-		cp{{"a", `const Res = [3]int64{"a":2, 1:1, 2:2}`, nil, "invalid index"}}},
+		cp{{"a", `const Res = [3]int64{"a":2, 1:1, 2:2}`, nil, `can't convert "a" to uint64`}}},
 	{
 		"IntArrayInvalidValue",
 		cp{{"a", `const Res = [3]int64{0,1,"c"}`, nil, "invalid array value"}}},
@@ -320,7 +320,7 @@ var constTests = []struct {
 		cp{{"a", `const A = [3]int64{3,4,2};  const Res = A[int16(1)]`, vdl.Int64Value(4), ""}}},
 	{
 		"NegativeArrayIndexing",
-		cp{{"a", `const A = [3]int64{3,4,2}; const Res = A[-1]`, nil, "error converting index [(]const -1 overflows uint64[)]"}}},
+		cp{{"a", `const A = [3]int64{3,4,2}; const Res = A[-1]`, nil, `\(const -1 overflows uint64\)`}}},
 	{
 		"OutOfBoundsArrayIndexing",
 		cp{{"a", `const A = [3]int64{3,4,2}; const Res = A[10]`, nil, "index out of bounds"}}},

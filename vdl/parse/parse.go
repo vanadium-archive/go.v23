@@ -32,12 +32,14 @@ type Opts struct {
 // accumulated errors, and parses the vdl into a parse.File containing the parse
 // tree.  Returns nil if any errors are encountered, with errs containing more
 // information.  Otherwise returns the parsed File.
+//
+// TODO(toddw): Rename to ParseFile.
 func Parse(fileName string, src io.Reader, opts Opts, errs *vdlutil.Errors) *File {
-	mode := modeFile
+	start := startFile
 	if opts.ImportsOnly {
-		mode = modeFileImports
+		start = startFileImports
 	}
-	return parse(fileName, src, mode, errs)
+	return parse(fileName, src, start, errs)
 }
 
 // ParseConfig takes a file name, the contents of the config file src, and the
@@ -45,13 +47,13 @@ func Parse(fileName string, src io.Reader, opts Opts, errs *vdlutil.Errors) *Fil
 // parse tree.  Returns nil if any errors are encountered, with errs containing
 // more information.  Otherwise returns the parsed Config.
 func ParseConfig(fileName string, src io.Reader, opts Opts, errs *vdlutil.Errors) *Config {
-	mode := modeConfig
+	start := startConfig
 	if opts.ImportsOnly {
-		mode = modeConfigImports
+		start = startConfigImports
 	}
 	// Since the syntax is so similar between config files and vdl files, we just
 	// parse it as a vdl file and populate Config afterwards.
-	file := parse(fileName, src, mode, errs)
+	file := parse(fileName, src, start, errs)
 	if file == nil {
 		return nil
 	}
@@ -77,33 +79,37 @@ func ParseConfig(fileName string, src io.Reader, opts Opts, errs *vdlutil.Errors
 	return config
 }
 
-func parse(fileName string, src io.Reader, mode mode, errs *vdlutil.Errors) *File {
+func parse(fileName string, src io.Reader, startTok int, errs *vdlutil.Errors) *File {
 	if errs == nil {
 		log.Fatal("Nil errors specified for Parse")
 	}
-	startErrs := errs.NumErrors()
-	lex := newLexer(fileName, src, mode, errs)
+	origErrs := errs.NumErrors()
+	lex := newLexer(fileName, src, startTok, errs)
 	if errCode := yyParse(lex); errCode != 0 {
 		errs.Errorf("%s: yyParse returned error code %v", fileName, errCode)
 	}
 	lex.attachComments()
-	if mode == modeFile || mode == modeConfig {
+	if startTok == startFile || startTok == startConfig {
 		vdlutil.Vlog.Printf("PARSE RESULTS\n\n%v\n\n", lex.vdlFile)
 	}
-	if startErrs != errs.NumErrors() {
+	if origErrs != errs.NumErrors() {
 		return nil
 	}
 	return lex.vdlFile
 }
 
-type mode int
-
-const (
-	modeFileImports mode = iota
-	modeFile
-	modeConfigImports
-	modeConfig
-)
+// ParseExprs parses data into a slice of parsed const expressions.  The input
+// data is specified in VDL syntax, with commas separating multiple expressions.
+// There must be at least one expression specified in data.  Errors are returned
+// in errs.
+func ParseExprs(data string, errs *vdlutil.Errors) []ConstExpr {
+	const name = "exprs"
+	lex := newLexer(name, strings.NewReader(data), startExprs, errs)
+	if errCode := yyParse(lex); errCode != 0 {
+		errs.Errorf("vdl: yyParse returned error code %d", errCode)
+	}
+	return lex.exprs
+}
 
 // lexer implements the yyLexer interface for the yacc-generated parser.
 //
@@ -118,21 +124,24 @@ const (
 // concrete lexer type, and retrieve a pointer to the parse result.
 type lexer struct {
 	// Fields for lexing / scanning the input source file.
-	name    string
-	scanner scanner.Scanner
-	mode    mode
-	errs    *vdlutil.Errors
-	started bool  // Has the dummy start token already been emitted?
-	sawEOF  bool  // Have we already seen the end-of-file?
-	prevTok token // Previous token, used for auto-semicolons and errors.
+	name     string
+	scanner  scanner.Scanner
+	errs     *vdlutil.Errors
+	startTok int   // One of our dummy start tokens.
+	started  bool  // Has the dummy start token already been emitted?
+	sawEOF   bool  // Have we already seen the end-of-file?
+	prevTok  token // Previous token, used for auto-semicolons and errors.
 
-	// Fields holding the result of the parse.
+	// Fields holding the result of file and config parsing.
 	comments commentMap
 	vdlFile  *File
+
+	// Field holding the result of expr parsing.
+	exprs []ConstExpr
 }
 
-func newLexer(fileName string, src io.Reader, mode mode, errs *vdlutil.Errors) *lexer {
-	l := &lexer{name: fileName, mode: mode, errs: errs, vdlFile: &File{BaseName: path.Base(fileName)}}
+func newLexer(fileName string, src io.Reader, startTok int, errs *vdlutil.Errors) *lexer {
+	l := &lexer{name: fileName, errs: errs, startTok: startTok, vdlFile: &File{BaseName: path.Base(fileName)}}
 	l.comments.init()
 	l.scanner.Init(src)
 	// Don't produce character literal tokens, but do scan comments.
@@ -177,6 +186,11 @@ func lexPosErrorf(yylex yyLexer, pos Pos, format string, v ...interface{}) {
 // parse even if the file still has tokens.
 func lexGenEOF(yylex yyLexer) {
 	yylex.(*lexer).sawEOF = true
+}
+
+// lexStoreExprs stores the parsed exprs in the lexer.
+func lexStoreExprs(yylex yyLexer, exprs []ConstExpr) {
+	yylex.(*lexer).exprs = exprs
 }
 
 var keywords = map[string]int{
@@ -624,17 +638,11 @@ func (l *lexer) Lex(lval *yySymType) int {
 	// Emit a dummy start token indicating what type of parse we're performing.
 	if !l.started {
 		l.started = true
-		switch l.mode {
-		case modeFileImports:
-			return startFileImports
-		case modeFile:
-			return startFile
-		case modeConfigImports:
-			return startConfigImports
-		case modeConfig:
-			return startConfig
+		switch l.startTok {
+		case startFileImports, startFile, startConfigImports, startConfig, startExprs:
+			return l.startTok
 		default:
-			panic(fmt.Errorf("vdl: unhandled parse mode %d", l.mode))
+			panic(fmt.Errorf("vdl: unhandled parse start token %d", l.startTok))
 		}
 	}
 	// Always return EOF after we've scanned it.  This ensures we emit EOF on the

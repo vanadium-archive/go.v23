@@ -790,3 +790,28 @@ func BuildConfigValueImplicitImports(fileName string, src io.Reader, imports []s
 		env.Errors.Errorf("Can't convert to %T from %v (%v)", value, vconfig, err)
 	}
 }
+
+// BuildExprs parses and compiles the given data into a slice of values.  The
+// input data is specified in VDL syntax, with commas separating multiple
+// expressions.  There must be at least one expression specified in data.
+// Errors are reported in env.
+//
+// The given types specify the type of each returned value with the same slice
+// position.  If there are more types than returned values, the extra types are
+// ignored.  If there are fewer types than returned values, the last type is
+// used for all remaining values.  Nil entries in types are allowed, and
+// indicate that the expression itself must be fully typed.
+//
+// All imports that the input data depends on must have already been compiled
+// and populated into env.
+func BuildExprs(data string, types []*vdl.Type, env *compile.Env) []*vdl.Value {
+	var values []*vdl.Value
+	var t *vdl.Type
+	for ix, pexpr := range parse.ParseExprs(data, env.Errors) {
+		if ix < len(types) {
+			t = types[ix]
+		}
+		values = append(values, compile.CompileExpr(t, pexpr, env))
+	}
+	return values
+}

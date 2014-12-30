@@ -1177,3 +1177,49 @@ func TestConfigAddImports(t *testing.T) {
 		}
 	}
 }
+
+func TestParseExprs(t *testing.T) {
+	tests := []struct {
+		Data  string
+		Exprs []parse.ConstExpr
+		Err   string
+	}{
+		{``, nil, "syntax error"},
+		{`true`, []parse.ConstExpr{cn("true", 1, 1)}, ""},
+		{`false`, []parse.ConstExpr{cn("false", 1, 1)}, ""},
+		{`abc`, []parse.ConstExpr{cn("abc", 1, 1)}, ""},
+		{`"abc"`, []parse.ConstExpr{cl("abc", 1, 1)}, ""},
+		{`1`, []parse.ConstExpr{cl(big.NewInt(1), 1, 1)}, ""},
+		{`123`, []parse.ConstExpr{cl(big.NewInt(123), 1, 1)}, ""},
+		{`1.0`, []parse.ConstExpr{cl(big.NewRat(1, 1), 1, 1)}, ""},
+		{`1.5`, []parse.ConstExpr{cl(big.NewRat(3, 2), 1, 1)}, ""},
+		{`{1,2}`, []parse.ConstExpr{
+			&parse.ConstCompositeLit{
+				KVList: []parse.KVLit{
+					{Value: cl(big.NewInt(1), 1, 2)},
+					{Value: cl(big.NewInt(2), 1, 4)},
+				},
+				P: pos(1, 1),
+			},
+		}, ""},
+		{`1+2`, []parse.ConstExpr{
+			&parse.ConstBinaryOp{"+",
+				cl(big.NewInt(1), 1, 1),
+				cl(big.NewInt(2), 1, 3),
+				pos(1, 2),
+			},
+		}, ""},
+		{`1,"abc"`, []parse.ConstExpr{
+			cl(big.NewInt(1), 1, 1),
+			cl("abc", 1, 3),
+		}, ""},
+	}
+	for _, test := range tests {
+		errs := vdlutil.NewErrors(-1)
+		exprs := parse.ParseExprs(test.Data, errs)
+		vdltest.ExpectResult(t, errs, test.Data, test.Err)
+		if got, want := exprs, test.Exprs; !reflect.DeepEqual(got, want) {
+			t.Errorf("%s got %v, want %v", test.Data, got, want)
+		}
+	}
+}

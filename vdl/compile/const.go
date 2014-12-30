@@ -181,17 +181,24 @@ func mergeConstBuilderSets(a, b constBuilderSet) constBuilderSet {
 }
 
 // compileConst compiles pexpr into a *vdl.Value.  All named types and consts
-// referenced by pexpr must already be defined.  If implicit is non-nil, untyped
-// composite literals are assumed to be of that type.
-func compileConst(implicit *vdl.Type, pexpr parse.ConstExpr, file *File, env *Env) *vdl.Value {
-	// Evaluate pexpr into opconst.Const, and turn that into vdl.Value.
-	vc := evalConstExpr(implicit, pexpr, file, env)
+// referenced by pexpr must already be defined.  If t is non-nil, the returned
+// value will be of that type.
+func compileConst(t *vdl.Type, pexpr parse.ConstExpr, file *File, env *Env) *vdl.Value {
+	vc := evalConstExpr(t, pexpr, file, env)
 	if !vc.IsValid() {
 		return nil
 	}
+	if t != nil {
+		conv, err := vc.Convert(t)
+		if err != nil {
+			env.prefixErrorf(file, pexpr.Pos(), err, "error converting to type %v", t)
+			return nil
+		}
+		vc = conv
+	}
 	vv, err := vc.ToValue()
 	if err != nil {
-		env.prefixErrorf(file, pexpr.Pos(), err, "final const invalid")
+		env.prefixErrorf(file, pexpr.Pos(), err, "invalid value")
 		return nil
 	}
 	return vv
@@ -241,13 +248,8 @@ func evalConstExpr(implicit *vdl.Type, pexpr parse.ConstExpr, file *File, env *E
 		}
 		return c
 	case *parse.ConstIndexed:
-		expr := evalConstExpr(nil, pe.Expr, file, env)
-		if !expr.IsValid() {
-			break
-		}
-		value, err := expr.ToValue()
-		if err != nil {
-			env.prefixErrorf(file, pe.Pos(), err, "error converting expression to value")
+		value := compileConst(nil, pe.Expr, file, env)
+		if value == nil {
 			break
 		}
 		// TODO(bprosnitz) Should indexing on set also be supported?
@@ -325,26 +327,15 @@ func evalConstExpr(implicit *vdl.Type, pexpr parse.ConstExpr, file *File, env *E
 // Evaluate an indexed list or array to a constant.
 // Inputs are representative of expr[index].
 func evalListIndex(exprVal *vdl.Value, indexExpr parse.ConstExpr, file *File, env *Env) *vdl.Value {
-	index := evalConstExpr(nil, indexExpr, file, env)
-	if !index.IsValid() {
+	index := compileConst(vdl.Uint64Type, indexExpr, file, env)
+	if index == nil {
 		return nil
 	}
-	convertedIndex, err := index.Convert(vdl.Uint64Type)
-	if err != nil {
-		env.prefixErrorf(file, indexExpr.Pos(), err, "error converting index")
-		return nil
-	}
-	indexVal, err := convertedIndex.ToValue()
-	if err != nil {
-		env.prefixErrorf(file, indexExpr.Pos(), err, "error converting index to value")
-		return nil
-	}
-
-	if indexVal.Uint() >= uint64(exprVal.Len()) {
+	if index.Uint() >= uint64(exprVal.Len()) {
 		env.Errorf(file, indexExpr.Pos(), "index out of bounds of array")
 		return nil
 	}
-	return exprVal.Index(int(indexVal.Uint()))
+	return exprVal.Index(int(index.Uint()))
 }
 
 // Evaluate an indexed map to a constant.
@@ -414,21 +405,11 @@ func evalListLit(t *vdl.Type, lit *parse.ConstCompositeLit, file *File, env *Env
 		// values; we allow any key that's convertible to uint64, even if the key is
 		// already typed.
 		if kv.Key != nil {
-			key := evalConstExpr(nil, kv.Key, file, env)
-			if !key.IsValid() {
+			key := compileConst(vdl.Uint64Type, kv.Key, file, env)
+			if key == nil {
 				return nil
 			}
-			ckey, err := key.Convert(vdl.Uint64Type)
-			if err != nil {
-				env.prefixErrorf(file, kv.Key.Pos(), err, "invalid index in %s", desc)
-				return nil
-			}
-			vkey, err := ckey.ToValue()
-			if err != nil {
-				env.prefixErrorf(file, kv.Key.Pos(), err, "invalid index in %s", desc)
-				return nil
-			}
-			index = int(vkey.Uint())
+			index = int(key.Uint())
 		}
 		// Make sure the index hasn't been assigned already, and adjust the list
 		// length as necessary.

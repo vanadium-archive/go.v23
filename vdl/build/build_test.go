@@ -512,3 +512,60 @@ func TestBuildConfig(t *testing.T) {
 		vdltest.ExpectResult(t, env.Errors, test.Src, "")
 	}
 }
+
+type ts []*vdl.Type
+type vs []*vdl.Value
+
+func TestBuildExprs(t *testing.T) {
+	ttArray := vdl.ArrayType(2, vdl.Int32Type)
+	ttStruct := vdl.StructType(vdl.Field{"A", vdl.Int32Type}, vdl.Field{"B", vdl.StringType})
+	vvArray := vdl.ZeroValue(ttArray)
+	vvArray.Index(0).AssignInt(1)
+	vvArray.Index(1).AssignInt(-2)
+	vvStruct := vdl.ZeroValue(ttStruct)
+	vvStruct.Field(0).AssignInt(1)
+	vvStruct.Field(1).AssignString("abc")
+	tests := []struct {
+		Data  string
+		Types ts
+		Want  vs
+		Err   string
+	}{
+		{``, nil, nil, "syntax error"},
+		{`true`, nil, vs{vdl.BoolValue(true)}, ""},
+		{`false`, nil, vs{vdl.BoolValue(false)}, ""},
+		{`"abc"`, nil, vs{vdl.StringValue("abc")}, ""},
+		{`1`, nil, vs{nil}, "1 must be assigned a type"},
+		{`1`, ts{vdl.Int64Type}, vs{vdl.Int64Value(1)}, ""},
+		{`1.0`, ts{vdl.Int64Type}, vs{vdl.Int64Value(1)}, ""},
+		{`1.5`, ts{vdl.Int64Type}, vs{nil}, "loses precision"},
+		{`1.0`, ts{vdl.Float64Type}, vs{vdl.Float64Value(1.0)}, ""},
+		{`1.5`, ts{vdl.Float64Type}, vs{vdl.Float64Value(1.5)}, ""},
+		{`1+2`, ts{vdl.Int64Type}, vs{vdl.Int64Value(3)}, ""},
+		{`1+2,"abc"`, ts{vdl.Int64Type, nil}, vs{vdl.Int64Value(3), vdl.StringValue("abc")}, ""},
+		{`1,2,3`, ts{vdl.Int64Type}, vs{vdl.Int64Value(1), vdl.Int64Value(2), vdl.Int64Value(3)}, ""},
+		{`{1,-2}`, ts{ttArray}, vs{vvArray}, ""},
+		{`{0+1,1-3}`, ts{ttArray}, vs{vvArray}, ""},
+		{`{1,"abc"}`, ts{ttStruct}, vs{vvStruct}, ""},
+		{`{A:1,B:"abc"}`, ts{ttStruct}, vs{vvStruct}, ""},
+		{`{B:"abc",A:1}`, ts{ttStruct}, vs{vvStruct}, ""},
+		{`{B:"a"+"bc",A:1*1}`, ts{ttStruct}, vs{vvStruct}, ""},
+	}
+	for _, test := range tests {
+		env := compile.NewEnv(-1)
+		values := build.BuildExprs(test.Data, test.Types, env)
+		vdltest.ExpectResult(t, env.Errors, test.Data, test.Err)
+		if got, want := len(values), len(test.Want); got != want {
+			t.Errorf("%s got len %d, want %d", test.Data, got, want)
+		}
+		for ix, want := range test.Want {
+			var got *vdl.Value
+			if ix < len(values) {
+				got = values[ix]
+			}
+			if !vdl.EqualValue(got, want) {
+				t.Errorf("%s got value #%d %v, want %v", test.Data, ix, got, want)
+			}
+		}
+	}
+}

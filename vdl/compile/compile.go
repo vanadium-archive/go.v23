@@ -52,9 +52,9 @@ func Compile(pkgpath string, pfiles []*parse.File, env *Env) *Package {
 // CompileConfig compiles a parse.Config into a value.  Returns the compiled
 // value on success, or returns nil and guarantees !env.Errors.IsEmpty().  All
 // imports that the parsed config depend on must already have been compiled and
-// populated into env.  If implicit is non-nil and the exported config const is
-// an untyped const literal, it is assumed to be of that type.
-func CompileConfig(implicit *vdl.Type, pconfig *parse.Config, env *Env) *vdl.Value {
+// populated into env.  If t is non-nil, the returned value will be of that
+// type.
+func CompileConfig(t *vdl.Type, pconfig *parse.Config, env *Env) *vdl.Value {
 	if pconfig == nil || env == nil {
 		env.Errors.Errorf("CompileConfig called with nil config or env")
 		return nil
@@ -73,13 +73,26 @@ func CompileConfig(implicit *vdl.Type, pconfig *parse.Config, env *Env) *vdl.Val
 	if pkg == nil {
 		return nil
 	}
-	config := compileConst(implicit, pconfig.Config, pkg.Files[0], env)
+	config := compileConst(t, pconfig.Config, pkg.Files[0], env)
 	// Wait to compute deps after we've compiled the config const expression,
 	// since it might include the only usage of some of the imports.
 	if computeDeps(pkg, env); !env.Errors.IsEmpty() {
 		return nil
 	}
 	return config
+}
+
+// CompileExpr compiles expr into a value.  Returns the compiled value on
+// success, or returns nil and guarantees !env.Errors.IsEmpty().  All imports
+// that expr depends on must already have been compiled and populated into env.
+// If t is non-nil, the returned value will be of that type.
+func CompileExpr(t *vdl.Type, expr parse.ConstExpr, env *Env) *vdl.Value {
+	// Set up a dummy file and compile expr into a value.
+	file := &File{
+		BaseName: "expr",
+		Package:  newPackage("expr", "expr"),
+	}
+	return compileConst(t, expr, file, env)
 }
 
 func compile(pkgpath string, pfiles []*parse.File, env *Env) *Package {
