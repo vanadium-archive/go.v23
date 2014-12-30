@@ -252,7 +252,7 @@ type componentKey struct{}
 // ContextWithComponentName returns a context based on ctx that has the
 // componentName that Make() and Convert() can use.
 func ContextWithComponentName(ctx *context.T, componentName string) *context.T {
-	return ctx.WithValue(componentKey{}, componentName)
+	return context.WithValue(ctx, componentKey{}, componentName)
 }
 
 // Make is like ExplicitMake(), but obtains the language, component name, and operation

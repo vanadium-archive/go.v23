@@ -99,7 +99,7 @@ func LangIDFromContext(ctx *context.T) (langID LangID) {
 // ContextWithLangID returns a context based on ctx that has the
 // language ID langID.
 func ContextWithLangID(ctx *context.T, langID LangID) *context.T {
-	return ctx.WithValue(langIDKey{}, langID)
+	return context.WithValue(ctx, langIDKey{}, langID)
 }
 
 // Lookup returns the format corresponding to a particular language and MsgID.
