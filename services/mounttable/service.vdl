@@ -6,6 +6,37 @@ import (
 	"v.io/core/veyron2/services/security/access"
 )
 
+// A mount table is a tree of names.  Each name may have something mounted on it,
+// either a terminal server or another mount table server.  If multiple servers are
+// mounted onto the same name, they are considered equivalent, i.e., it is semantically
+// irrelevant which is chosen to pass an RPC to.
+//
+// Access is determined by ACLs at each node in the tree.  When resolving a
+// name like a/b/c/d, one must check the client blessings against the ACLs of each
+// node traversed ("", a, a/b, a/b/c, and a/b/c/d).
+
+type Tag string
+
+const (
+	// Admin allow the client to SetACL or Delete the receiver.  It also subsumes
+	// all the other tags.
+	Admin   = Tag("Admin")
+	// Mount allows the client to Mount or Unmount at the named receiver.
+	// For example, to Mount onto a/b/c requires Mount or Admin access
+	// to a/b/c (and Read, Admin, or Resolve to a and a/b).
+	Mount   = Tag("Mount")
+	// Read allows the client to Glob any children of the node.  Thus to
+	// perform a Glob of a/* one must have Read access to a AND any other
+	// access to each child of a.  It also allows Resolution through the node.
+	Read    = Tag("Read")
+	// Create allows the client to create nodes below the receiver.
+	Create   = Tag("Create")
+	// Resolve allows one to resolve through the receiver.  Thus to Resolve
+	// a/b/c, one needs Admin, Resolve, or Read permission on a, a/b,
+	// and a/b/c.
+	Resolve = Tag("Resolve")
+)
+
 // MountTable defines the interface to talk to a mounttable.
 type MountTable interface {
 	// In all methods of MountTable, the receiver is the name bound to.
@@ -22,18 +53,25 @@ type MountTable interface {
 	// act as if it was never present as far as the interface is concerned.
 	//
 	// Opts represents a bit mask of options.
-	Mount(Server string, TTL uint32, Flags naming.MountFlag) error {access.Write}
+	Mount(Server string, TTL uint32, Flags naming.MountFlag) error
 
-	// Unmount removes Server from the mount point.  If Server is empty, remove
+	// Unmount removes Server from the receiver.  If Server is empty, remove
 	// all servers mounted there.
 	// Returns a non-nil error iff Server remains mounted at the mount point.
-	Unmount(Server string) error {access.Write}
+	Unmount(Server string) error
+
+	// Delete removes the receiver.  If the receiver has children, it will not
+	// be removed unless DeleteSubtree is true in which case the whole subtree is
+	// removed.
+	Delete(DeleteSubtree bool) error
 
 	// ResolveStep takes the next step in resolving a name.  Returns the next
 	// servers to query and the suffix at those servers.
-	ResolveStep() (Servers []naming.VDLMountedServer, Suffix string | error) {access.Read}
+	ResolveStep() (Servers []naming.VDLMountedServer, Suffix string | error)
 
 	// ResolveStepX takes the next step in resolving a name.  Returns the next
 	// servers to query and the suffix at those servers.
-	ResolveStepX() (Entry naming.VDLMountEntry | error) {access.Read}
+	ResolveStepX() (Entry naming.VDLMountEntry | error)
+
+	access.Object
 }
