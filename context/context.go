@@ -156,39 +156,6 @@ func (t *T) Err() error {
 	return nil
 }
 
-// TODO(mattr): Remove these methods after removing their uses.  We should
-// just use the package level functions.
-
-// WithCancel returns a child of the current context along with
-// a function that can be used to cancel it.  After cancel() is
-// called the channels returned by the Done() methods of the new context
-// (and all context further derived from it) will be closed.
-func (t *T) WithCancel() (*T, CancelFunc) {
-	return WithCancel(t)
-}
-
-// WithDeadline returns a child of the current context along with a
-// function that can be used to cancel it at any time (as from
-// WithCancel).  When the deadline is reached the context will be
-// automatically cancelled.
-// Contexts should be cancelled when they are no longer needed
-// so that resources associated with their timers may be released.
-func (t *T) WithDeadline(deadline time.Time) (*T, CancelFunc) {
-	return WithDeadline(t, deadline)
-}
-
-// WithTimeout is similar to WithDeadline except a Duration is given
-// that represents a relative point in time from now.
-func (t *T) WithTimeout(timeout time.Duration) (*T, CancelFunc) {
-	return WithTimeout(t, timeout)
-}
-
-// WithValue returns a child of the current context that will return
-// the given val when Value(key) is called.
-func (t *T) WithValue(key interface{}, val interface{}) *T {
-	return WithValue(t, key, val)
-}
-
 // Done returns a channel which will be closed when this context.T
 // is canceled or exceeds its deadline.  Successive calls will
 // return the same value.  Implementations may return nil if they can

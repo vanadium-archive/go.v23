@@ -59,29 +59,29 @@ func TestRootContext(t *testing.T) {
 }
 
 func TestCancelContext(t *testing.T) {
-	ctx, cancel := testContext().WithCancel()
+	ctx, cancel := WithCancel(testContext())
 	testCancel(t, ctx, cancel)
 
 	// Test cancelling a cancel context which is the child
 	// of a cancellable context.
-	parent, _ := testContext().WithCancel()
-	child, cancel := parent.WithCancel()
+	parent, _ := WithCancel(testContext())
+	child, cancel := WithCancel(parent)
 	cancel()
 	<-child.Done()
 
 	// Test adding a cancellable child context after the parent is
 	// already cancelled.
-	parent, cancel = testContext().WithCancel()
+	parent, cancel = WithCancel(testContext())
 	cancel()
-	child, _ = parent.WithCancel()
+	child, _ = WithCancel(parent)
 	<-child.Done() // The child should have been cancelled right away.
 }
 
 func TestMultiLevelCancelContext(t *testing.T) {
-	c0, c0Cancel := testContext().WithCancel()
-	c1, _ := c0.WithCancel()
-	c2, _ := c1.WithCancel()
-	c3, _ := c2.WithCancel()
+	c0, c0Cancel := WithCancel(testContext())
+	c1, _ := WithCancel(c0)
+	c2, _ := WithCancel(c1)
+	c3, _ := WithCancel(c2)
 	testCancel(t, c3, c0Cancel)
 }
 
@@ -101,42 +101,42 @@ func TestDeadlineContext(t *testing.T) {
 		0,
 	}
 	rootCtx := testContext()
-	cancelCtx, _ := rootCtx.WithCancel()
-	deadlineCtx, _ := rootCtx.WithDeadline(time.Now().Add(time.Hour))
+	cancelCtx, _ := WithCancel(rootCtx)
+	deadlineCtx, _ := WithDeadline(rootCtx, time.Now().Add(time.Hour))
 
 	for _, desiredTimeout := range cases {
 		// Test all the various ways of getting deadline contexts.
 		start := time.Now()
-		ctx, _ := rootCtx.WithDeadline(start.Add(desiredTimeout))
+		ctx, _ := WithDeadline(rootCtx, start.Add(desiredTimeout))
 		testDeadline(t, ctx, start, desiredTimeout)
 
 		start = time.Now()
-		ctx, _ = cancelCtx.WithDeadline(start.Add(desiredTimeout))
+		ctx, _ = WithDeadline(cancelCtx, start.Add(desiredTimeout))
 		testDeadline(t, ctx, start, desiredTimeout)
 
 		start = time.Now()
-		ctx, _ = deadlineCtx.WithDeadline(start.Add(desiredTimeout))
+		ctx, _ = WithDeadline(deadlineCtx, start.Add(desiredTimeout))
 		testDeadline(t, ctx, start, desiredTimeout)
 
 		start = time.Now()
-		ctx, _ = rootCtx.WithTimeout(desiredTimeout)
+		ctx, _ = WithTimeout(rootCtx, desiredTimeout)
 		testDeadline(t, ctx, start, desiredTimeout)
 
 		start = time.Now()
-		ctx, _ = cancelCtx.WithTimeout(desiredTimeout)
+		ctx, _ = WithTimeout(cancelCtx, desiredTimeout)
 		testDeadline(t, ctx, start, desiredTimeout)
 
 		start = time.Now()
-		ctx, _ = deadlineCtx.WithTimeout(desiredTimeout)
+		ctx, _ = WithTimeout(deadlineCtx, desiredTimeout)
 		testDeadline(t, ctx, start, desiredTimeout)
 	}
 
-	ctx, cancel := testContext().WithDeadline(time.Now().Add(100 * time.Hour))
+	ctx, cancel := WithDeadline(testContext(), time.Now().Add(100*time.Hour))
 	testCancel(t, ctx, cancel)
 }
 
 func TestDeadlineContextWithRace(t *testing.T) {
-	ctx, cancel := testContext().WithDeadline(time.Now().Add(100 * time.Hour))
+	ctx, cancel := WithDeadline(testContext(), time.Now().Add(100*time.Hour))
 	var wg sync.WaitGroup
 	wg.Add(10)
 	for i := 0; i < 10; i++ {
@@ -165,9 +165,9 @@ func TestValueContext(t *testing.T) {
 		val2
 		val3
 	)
-	ctx1 := testContext().WithValue(key1, val1)
-	ctx2 := ctx1.WithValue(key2, val2)
-	ctx3 := ctx2.WithValue(key3, val3)
+	ctx1 := WithValue(testContext(), key1, val1)
+	ctx2 := WithValue(ctx1, key2, val2)
+	ctx3 := WithValue(ctx2, key3, val3)
 
 	expected := map[interface{}]interface{}{
 		key1: val1,
