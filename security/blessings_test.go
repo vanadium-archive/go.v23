@@ -1,14 +1,13 @@
 package security
 
 import (
-	"bytes"
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
 	"testing"
 	"time"
 
-	"v.io/core/veyron2/vom"
+	"v.io/core/veyron2/vom2"
 )
 
 func newSigner() Signer {
@@ -32,11 +31,11 @@ func newSigner() Signer {
 //   Marshaled caveat                           :   61 bytes (security.methodCaveat([m]))
 func TestByteSize(t *testing.T) {
 	blessingsize := func(b Blessings) int {
-		var buf bytes.Buffer
-		if err := vom.NewEncoder(&buf).Encode(MarshalBlessings(b)); err != nil {
+		buf, err := vom2.Encode(MarshalBlessings(b))
+		if err != nil {
 			t.Fatal(err)
 		}
-		return buf.Len()
+		return len(buf)
 	}
 	key, err := newSigner().PublicKey().MarshalBinary()
 	if err != nil {

@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"v.io/core/veyron2/vlog"
-	"v.io/core/veyron2/vom"
+	"v.io/core/veyron2/vom2"
 )
 
 var errEmptyChain = errors.New("empty certificate chain found")
@@ -30,13 +30,14 @@ func (b *blessingsImpl) ForContext(ctx Context) []string {
 func (b *blessingsImpl) PublicKey() PublicKey { return b.publicKey }
 func (b *blessingsImpl) ThirdPartyCaveats() []ThirdPartyCaveat {
 	var ret []ThirdPartyCaveat
-	var tpc ThirdPartyCaveat
 	for _, chain := range b.chains {
 		for _, cert := range chain {
 			for _, cav := range cert.Caveats {
-				if err := vom.NewDecoder(bytes.NewBuffer(cav.ValidatorVOM)).Decode(&tpc); err == nil && tpc != nil {
-					ret = append(ret, tpc)
+				var tpc ThirdPartyCaveat
+				if err := vom2.Decode(cav.ValidatorVOM, &tpc); err != nil || tpc == nil {
+					continue
 				}
+				ret = append(ret, tpc)
 			}
 		}
 	}
@@ -149,7 +150,7 @@ func blessingForCertificateChain(ctx Context, chain []Certificate) string {
 	for _, cert := range chain {
 		for _, cav := range cert.Caveats {
 			var validator CaveatValidator
-			if err := vom.NewDecoder(bytes.NewBuffer(cav.ValidatorVOM)).Decode(&validator); err != nil {
+			if err := vom2.Decode(cav.ValidatorVOM, &validator); err != nil {
 				vlog.VI(4).Infof("ignoring blessing %v because CaveatValidator decoding failed: %v", blessing, err)
 				return ""
 			}

@@ -8,16 +8,16 @@ import (
 	"time"
 
 	"v.io/core/veyron2/vlog"
-	"v.io/core/veyron2/vom"
+	"v.io/core/veyron2/vom2"
 )
 
 // NewCaveat returns a Caveat that requires validation by validator.
 func NewCaveat(validator CaveatValidator) (Caveat, error) {
-	var buf bytes.Buffer
-	if err := vom.NewEncoder(&buf).Encode(validator); err != nil {
+	b, err := vom2.Encode(validator)
+	if err != nil {
 		return Caveat{}, err
 	}
-	return Caveat{buf.Bytes()}, nil
+	return Caveat{b}, nil
 }
 
 // ExpiryCaveat returns a Caveat that validates iff the current time is before t.
@@ -54,7 +54,7 @@ func (c *Caveat) digest(hash Hash) []byte { return hash.sum(c.ValidatorVOM) }
 
 func (c Caveat) String() string {
 	var validator CaveatValidator
-	if err := vom.NewDecoder(bytes.NewReader(c.ValidatorVOM)).Decode(&validator); err == nil {
+	if err := vom2.Decode(c.ValidatorVOM, &validator); err == nil {
 		return fmt.Sprintf("%T(%v)", validator, validator)
 	}
 	// If we could "peek" the type of the encoded object via the VOM-API, that may be a better message?
@@ -152,7 +152,7 @@ func (c *publicKeyThirdPartyCaveat) Validate(ctx Context) error {
 	// And all caveats on the discharge must be met.
 	for _, cav := range d.Caveats {
 		var validator CaveatValidator
-		if err := vom.NewDecoder(bytes.NewReader(cav.ValidatorVOM)).Decode(&validator); err != nil {
+		if err := vom2.Decode(cav.ValidatorVOM, &validator); err != nil {
 			return fmt.Errorf("failed to interpret a caveat on the discharge: %v", err)
 		}
 		if err := validator.Validate(ctx); err != nil {
@@ -188,7 +188,7 @@ func (c *publicKeyThirdPartyCaveat) Dischargeable(context Context) error {
 			continue
 		}
 		var validator CaveatValidator
-		if err := vom.NewDecoder(bytes.NewReader(cav.ValidatorVOM)).Decode(&validator); err != nil {
+		if err := vom2.Decode(cav.ValidatorVOM, &validator); err != nil {
 			return fmt.Errorf("failed to interpret restriction embedded in ThirdPartyCaveat: %v", err)
 		}
 		if err := validator.Validate(context); err != nil {
@@ -215,7 +215,7 @@ func (d *publicKeyDischarge) ThirdPartyCaveats() []ThirdPartyCaveat {
 	var ret []ThirdPartyCaveat
 	for _, cav := range d.Caveats {
 		var tpcav ThirdPartyCaveat
-		if err := vom.NewDecoder(bytes.NewReader(cav.ValidatorVOM)).Decode(&tpcav); err == nil {
+		if err := vom2.Decode(cav.ValidatorVOM, &tpcav); err == nil {
 			ret = append(ret, tpcav)
 		}
 	}

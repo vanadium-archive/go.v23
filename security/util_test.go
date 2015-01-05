@@ -3,7 +3,6 @@
 package security
 
 import (
-	"bytes"
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
@@ -13,7 +12,7 @@ import (
 	"testing"
 
 	"v.io/core/veyron2/vdl/vdlutil"
-	"v.io/core/veyron2/vom"
+	"v.io/core/veyron2/vom2"
 )
 
 type markedRoot struct {
@@ -102,12 +101,12 @@ func addToRoots(t *testing.T, p Principal, b Blessings) {
 
 func checkBlessings(b Blessings, c Context, want ...string) error {
 	// Validate the integrity of the bits.
-	buf := new(bytes.Buffer)
-	if err := vom.NewEncoder(buf).Encode(MarshalBlessings(b)); err != nil {
+	buf, err := vom2.Encode(MarshalBlessings(b))
+	if err != nil {
 		return err
 	}
 	var wire WireBlessings
-	if err := vom.NewDecoder(buf).Decode(&wire); err != nil {
+	if err := vom2.Decode(buf, &wire); err != nil {
 		return err
 	}
 	decoded, err := NewBlessings(wire)
