@@ -15,10 +15,10 @@ package {{.Package}};
 /**
  * type {{.Name}} {{.VdlTypeString}} {{.Doc}}
  **/
-@io.veyron.veyron.veyron2.vdl.GeneratedFromVdl(name = "{{.VdlTypeName}}")
-{{ .AccessModifier }} final class {{.Name}} extends io.veyron.veyron.veyron2.vdl.VdlMap<{{.KeyType}}, {{.ElemType}}> {
-    public static final io.veyron.veyron.veyron2.vdl.VdlType VDL_TYPE =
-            io.veyron.veyron.veyron2.vdl.Types.getVdlTypeFromReflect({{.Name}}.class);
+@io.v.core.veyron2.vdl.GeneratedFromVdl(name = "{{.VdlTypeName}}")
+{{ .AccessModifier }} final class {{.Name}} extends io.v.core.veyron2.vdl.VdlMap<{{.KeyType}}, {{.ElemType}}> {
+    public static final io.v.core.veyron2.vdl.VdlType VDL_TYPE =
+            io.v.core.veyron2.vdl.Types.getVdlTypeFromReflect({{.Name}}.class);
 
     public {{.Name}}(java.util.Map<{{.KeyType}}, {{.ElemType}}> impl) {
         super(VDL_TYPE, impl);
@@ -30,7 +30,7 @@ package {{.Package}};
                 new com.google.common.reflect.TypeToken<{{.KeyType}}>(){}.getType();
         java.lang.reflect.Type elemType =
                 new com.google.common.reflect.TypeToken<{{.ElemType}}>(){}.getType();
-        io.veyron.veyron.veyron2.vdl.ParcelUtil.writeMap(out, this, keyType, elemType);
+        io.v.core.veyron2.vdl.ParcelUtil.writeMap(out, this, keyType, elemType);
     }
 
     @SuppressWarnings("hiding")
@@ -43,7 +43,7 @@ package {{.Package}};
                     new com.google.common.reflect.TypeToken<{{.KeyType}}>(){}.getType();
             java.lang.reflect.Type elemType =
                     new com.google.common.reflect.TypeToken<{{.ElemType}}>(){}.getType();
-            java.util.Map<?, ?> map = io.veyron.veyron.veyron2.vdl.ParcelUtil.readMap(
+            java.util.Map<?, ?> map = io.v.core.veyron2.vdl.ParcelUtil.readMap(
                     in, {{.Name}}.class.getClassLoader(), keyType, elemType);
             return new {{.Name}}((java.util.Map<{{.KeyType}}, {{.ElemType}}>) map);
         }

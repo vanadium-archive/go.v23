@@ -16,17 +16,17 @@ package {{.PackagePath}};
 /**
  * type {{.Name}} {{.VdlTypeString}} {{.Doc}}
  **/
-@io.veyron.veyron.veyron2.vdl.GeneratedFromVdl(name = "{{.VdlTypeName}}")
-{{ .AccessModifier }} final class {{.Name}} extends io.veyron.veyron.veyron2.vdl.AbstractVdlStruct
+@io.v.core.veyron2.vdl.GeneratedFromVdl(name = "{{.VdlTypeName}}")
+{{ .AccessModifier }} final class {{.Name}} extends io.v.core.veyron2.vdl.AbstractVdlStruct
         implements android.os.Parcelable {
     {{/* Field declarations */}}
     {{ range $index, $field := .Fields }}
-      @io.veyron.veyron.veyron2.vdl.GeneratedFromVdl(name = "{{$field.Name}}", index = {{$index}})
+      @io.v.core.veyron2.vdl.GeneratedFromVdl(name = "{{$field.Name}}", index = {{$index}})
       private {{$field.Type}} {{$field.LowercaseName}};
     {{ end }}
 
-    public static final io.veyron.veyron.veyron2.vdl.VdlType VDL_TYPE =
-            io.veyron.veyron.veyron2.vdl.Types.getVdlTypeFromReflect({{.Name}}.class);
+    public static final io.v.core.veyron2.vdl.VdlType VDL_TYPE =
+            io.v.core.veyron2.vdl.Types.getVdlTypeFromReflect({{.Name}}.class);
 
     {{/* Constructors */}}
     public {{.Name}}() {
@@ -101,8 +101,12 @@ package {{.PackagePath}};
             {{ if gt $index 0 }}
                 result += ", ";
             {{ end }}
+            {{ if .IsArray }}
+                result += "{{$field.LowercaseName}}:" + java.util.Arrays.toString({{$field.LowercaseName}});
+            {{ else }}
             result += "{{$field.LowercaseName}}:" + {{$field.LowercaseName}};
-        {{ end }}
+            {{ end}} {{/* if is array */}}
+        {{ end }} {{/* range over fields */}}
         return result + "}";
     }
 
@@ -115,7 +119,7 @@ package {{.PackagePath}};
     public void writeToParcel(android.os.Parcel out, int flags) {
         {{ range $field := .Fields }}
         try {
-            io.veyron.veyron.veyron2.vdl.ParcelUtil.writeValue(out, {{$field.LowercaseName}},
+            io.v.core.veyron2.vdl.ParcelUtil.writeValue(out, {{$field.LowercaseName}},
                 getClass().getDeclaredField("{{$field.LowercaseName}}").getGenericType());
         } catch (NoSuchFieldException e) {
             // do nothing
@@ -131,7 +135,7 @@ package {{.PackagePath}};
             {{.Name}} value = new {{.Name}}();
             {{ range $field := .Fields }}
             try {
-                value.set{{$field.Name}}(({{$field.Class}}) io.veyron.veyron.veyron2.vdl.ParcelUtil.readValue(
+                value.set{{$field.Name}}(({{$field.Class}}) io.v.core.veyron2.vdl.ParcelUtil.readValue(
                 in, value.getClass().getClassLoader(), value.getClass().getDeclaredField("{{$field.LowercaseName}}").getGenericType()));
             } catch (NoSuchFieldException e) {
                 // do nothing

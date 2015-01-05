@@ -17,10 +17,10 @@ package {{.PackagePath}};
 /**
  * type {{.Name}} {{.VdlTypeString}} {{.Doc}}
  **/
-@io.veyron.veyron.veyron2.vdl.GeneratedFromVdl(name = "{{.VdlTypeName}}")
+@io.v.core.veyron2.vdl.GeneratedFromVdl(name = "{{.VdlTypeName}}")
 {{ .AccessModifier }} final class {{.Name}} extends {{.VdlComplex}} {
-    public static final io.veyron.veyron.veyron2.vdl.VdlType VDL_TYPE =
-            io.veyron.veyron.veyron2.vdl.Types.getVdlTypeFromReflect({{.Name}}.class);
+    public static final io.v.core.veyron2.vdl.VdlType VDL_TYPE =
+            io.v.core.veyron2.vdl.Types.getVdlTypeFromReflect({{.Name}}.class);
 
     public {{.Name}}({{.ValueType}} real, {{.ValueType}} imag) {
         super(VDL_TYPE, real, imag);

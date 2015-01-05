@@ -15,10 +15,10 @@ package {{.PackagePath}};
 /**
  * type {{.Name}} {{.VdlTypeString}} {{.Doc}}
  **/
-@io.veyron.veyron.veyron2.vdl.GeneratedFromVdl(name = "{{.VdlTypeName}}")
-{{ .AccessModifier }} class {{.Name}} extends io.veyron.veyron.veyron2.vdl.VdlUnion {
+@io.v.core.veyron2.vdl.GeneratedFromVdl(name = "{{.VdlTypeName}}")
+{{ .AccessModifier }} class {{.Name}} extends io.v.core.veyron2.vdl.VdlUnion {
     {{ range $index, $field := .Fields }}
-    @io.veyron.veyron.veyron2.vdl.GeneratedFromVdl(name = "{{$field.Name}}", index = {{$index}})
+    @io.v.core.veyron2.vdl.GeneratedFromVdl(name = "{{$field.Name}}", index = {{$index}})
     public static class {{$field.Name}} extends {{$.Name}} {
         private {{$field.Type}} elem;
 
@@ -39,8 +39,8 @@ package {{.PackagePath}};
     }
     {{ end }}
 
-    public static final io.veyron.veyron.veyron2.vdl.VdlType VDL_TYPE =
-            io.veyron.veyron.veyron2.vdl.Types.getVdlTypeFromReflect({{.Name}}.class);
+    public static final io.v.core.veyron2.vdl.VdlType VDL_TYPE =
+            io.v.core.veyron2.vdl.Types.getVdlTypeFromReflect({{.Name}}.class);
 
     public {{.Name}}(int index, java.io.Serializable value) {
         super(VDL_TYPE, index, value);

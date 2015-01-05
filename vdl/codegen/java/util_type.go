@@ -37,7 +37,7 @@ func javaBuiltInType(typ *vdl.Type, forceClass bool) (string, bool) {
 		}
 	}
 	if typ == vdl.ErrorType {
-		return "io.veyron.veyron.veyron2.VeyronException", true
+		return "io.v.core.veyron2.VeyronException", true
 	}
 	switch typ.Kind() {
 	case vdl.Bool:
@@ -53,7 +53,7 @@ func javaBuiltInType(typ *vdl.Type, forceClass bool) (string, bool) {
 			return "byte", false
 		}
 	case vdl.Uint16:
-		return "io.veyron.veyron.veyron2.vdl.VdlUint16", true
+		return "io.v.core.veyron2.vdl.VdlUint16", true
 	case vdl.Int16:
 		if forceClass {
 			return "java.lang.Short", true
@@ -61,7 +61,7 @@ func javaBuiltInType(typ *vdl.Type, forceClass bool) (string, bool) {
 			return "short", false
 		}
 	case vdl.Uint32:
-		return "io.veyron.veyron.veyron2.vdl.VdlUint32", true
+		return "io.v.core.veyron2.vdl.VdlUint32", true
 	case vdl.Int32:
 		if forceClass {
 			return "java.lang.Integer", true
@@ -69,7 +69,7 @@ func javaBuiltInType(typ *vdl.Type, forceClass bool) (string, bool) {
 			return "int", false
 		}
 	case vdl.Uint64:
-		return "io.veyron.veyron.veyron2.vdl.VdlUint64", true
+		return "io.v.core.veyron2.vdl.VdlUint64", true
 	case vdl.Int64:
 		if forceClass {
 			return "java.lang.Long", true
@@ -89,15 +89,15 @@ func javaBuiltInType(typ *vdl.Type, forceClass bool) (string, bool) {
 			return "double", false
 		}
 	case vdl.Complex64:
-		return "io.veyron.veyron.veyron2.vdl.VdlComplex64", true
+		return "io.v.core.veyron2.vdl.VdlComplex64", true
 	case vdl.Complex128:
-		return "io.veyron.veyron.veyron2.vdl.VdlComplex128", true
+		return "io.v.core.veyron2.vdl.VdlComplex128", true
 	case vdl.String:
 		return "java.lang.String", true
 	case vdl.TypeObject:
-		return "io.veyron.veyron.veyron2.vdl.VdlTypeObject", true
+		return "io.v.core.veyron2.vdl.VdlTypeObject", true
 	case vdl.Any:
-		return "io.veyron.veyron.veyron2.vdl.VdlAny", true
+		return "io.v.core.veyron2.vdl.VdlAny", true
 	default:
 		return "", false
 	}
@@ -126,7 +126,7 @@ func javaType(t *vdl.Type, forceClass bool, env *compile.Env) string {
 	case vdl.Map:
 		return fmt.Sprintf("%s<%s, %s>", "java.util.Map", javaType(t.Key(), true, env), javaType(t.Elem(), true, env))
 	case vdl.Optional:
-		return fmt.Sprintf("io.veyron.veyron.veyron2.vdl.VdlOptional<%s>", javaType(t.Elem(), true, env))
+		return fmt.Sprintf("io.v.core.veyron2.vdl.VdlOptional<%s>", javaType(t.Elem(), true, env))
 	default:
 		log.Fatalf("vdl: javaType unhandled type %v %v", t.Kind(), t)
 		return ""
@@ -136,7 +136,7 @@ func javaType(t *vdl.Type, forceClass bool, env *compile.Env) string {
 func javaVdlPrimitiveType(kind vdl.Kind) string {
 	switch kind {
 	case vdl.Bool, vdl.Byte, vdl.Uint16, vdl.Uint32, vdl.Uint64, vdl.Int16, vdl.Int32, vdl.Int64, vdl.Float32, vdl.Float64, vdl.Complex128, vdl.Complex64, vdl.String:
-		return "io.veyron.veyron.veyron2.vdl.Vdl" + vdlutil.FirstRuneToUpper(kind.String())
+		return "io.v.core.veyron2.vdl.Vdl" + vdlutil.FirstRuneToUpper(kind.String())
 	}
 	log.Fatalf("val: unhandled kind: %v", kind)
 	return ""
@@ -144,6 +144,9 @@ func javaVdlPrimitiveType(kind vdl.Kind) string {
 
 // javaHashCode returns the java code for the hashCode() computation for a given type.
 func javaHashCode(name string, ty *vdl.Type, env *compile.Env) string {
+	if isJavaNativeArray(ty, env) {
+		return fmt.Sprintf("java.util.Arrays.hashCode(%s)", name)
+	}
 	if def := env.FindTypeDef(ty); def != nil && def.File == compile.BuiltInFile {
 		switch ty.Kind() {
 		case vdl.Bool:
@@ -158,8 +161,6 @@ func javaHashCode(name string, ty *vdl.Type, env *compile.Env) string {
 			return fmt.Sprintf("java.lang.Float.valueOf(%s).hashCode()", name)
 		case vdl.Float64:
 			return fmt.Sprintf("java.lang.Double.valueOf(%s).hashCode()", name)
-		case vdl.Array:
-			return fmt.Sprintf("java.util.Arrays.hashCode(%s)", name)
 		}
 	}
 	return fmt.Sprintf("(%s == null ? 0 : %s.hashCode())", name, name)

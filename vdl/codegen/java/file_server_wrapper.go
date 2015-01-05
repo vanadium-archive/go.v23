@@ -35,8 +35,8 @@ package {{ .PackagePath }};
      * Returns a description of this server.
      */
     @SuppressWarnings("unused")
-    public io.veyron.veyron.veyron2.ipc.ServiceSignature signature(io.veyron.veyron.veyron2.ipc.ServerCall call) throws io.veyron.veyron.veyron2.VeyronException {
-        throw new io.veyron.veyron.veyron2.VeyronException("Signature method not yet supported for Java servers");
+    public io.v.core.veyron2.ipc.ServiceSignature signature(io.v.core.veyron2.ipc.ServerCall call) throws io.v.core.veyron2.VeyronException {
+        throw new io.v.core.veyron2.VeyronException("Signature method not yet supported for Java servers");
     }
 
     /**
@@ -44,7 +44,7 @@ package {{ .PackagePath }};
      * by this server.
      */
     @SuppressWarnings("unused")
-    public java.lang.Object[] getMethodTags(final io.veyron.veyron.veyron2.ipc.ServerCall call, final java.lang.String method) {
+    public java.lang.Object[] getMethodTags(final io.v.core.veyron2.ipc.ServerCall call, final java.lang.String method) {
         {{ range $methodName, $tags := .MethodTags }}
         if ("{{ $methodName }}".equals(method)) {
             return new java.lang.Object[] {
@@ -65,22 +65,22 @@ package {{ .PackagePath }};
 
      {{/* Iterate over methods defined directly in the body of this server */}}
     {{ range $method := .Methods }}
-    {{ $method.AccessModifier }} {{ $method.RetType }} {{ $method.Name }}(final io.veyron.veyron.veyron2.ipc.ServerCall call{{ $method.DeclarationArgs }}) throws io.veyron.veyron.veyron2.VeyronException {
+    {{ $method.AccessModifier }} {{ $method.RetType }} {{ $method.Name }}(final io.v.core.veyron2.ipc.ServerCall call{{ $method.DeclarationArgs }}) throws io.v.core.veyron2.VeyronException {
         {{ if $method.IsStreaming }}
-        final io.veyron.veyron.veyron2.vdl.Stream<{{ $method.SendType }}, {{ $method.RecvType }}> _stream = new io.veyron.veyron.veyron2.vdl.Stream<{{ $method.SendType }}, {{ $method.RecvType }}>() {
+        final io.v.core.veyron2.vdl.Stream<{{ $method.SendType }}, {{ $method.RecvType }}> _stream = new io.v.core.veyron2.vdl.Stream<{{ $method.SendType }}, {{ $method.RecvType }}>() {
             @Override
-            public void send({{ $method.SendType }} item) throws io.veyron.veyron.veyron2.VeyronException {
+            public void send({{ $method.SendType }} item) throws io.v.core.veyron2.VeyronException {
                 final java.lang.reflect.Type type = new com.google.common.reflect.TypeToken< {{ $method.SendType }} >() {}.getType();
                 call.send(item, type);
             }
             @Override
-            public {{ $method.RecvType }} recv() throws java.io.EOFException, io.veyron.veyron.veyron2.VeyronException {
+            public {{ $method.RecvType }} recv() throws java.io.EOFException, io.v.core.veyron2.VeyronException {
                 final java.lang.reflect.Type type = new com.google.common.reflect.TypeToken< {{ $method.RecvType }} >() {}.getType();
                 final java.lang.Object result = call.recv(type);
                 try {
                     return ({{ $method.RecvType }})result;
                 } catch (java.lang.ClassCastException e) {
-                    throw new io.veyron.veyron.veyron2.VeyronException("Unexpected result type: " + result.getClass().getCanonicalName());
+                    throw new io.v.core.veyron2.VeyronException("Unexpected result type: " + result.getClass().getCanonicalName());
                 }
             }
         };
@@ -91,7 +91,7 @@ package {{ .PackagePath }};
 
 {{/* Iterate over methods from embeded servers and generate code to delegate the work */}}
 {{ range $eMethod := .EmbedMethods }}
-    {{ $eMethod.AccessModifier }} {{ $eMethod.RetType }} {{ $eMethod.Name }}(final io.veyron.veyron.veyron2.ipc.ServerCall call{{ $eMethod.DeclarationArgs }}) throws io.veyron.veyron.veyron2.VeyronException {
+    {{ $eMethod.AccessModifier }} {{ $eMethod.RetType }} {{ $eMethod.Name }}(final io.v.core.veyron2.ipc.ServerCall call{{ $eMethod.DeclarationArgs }}) throws io.v.core.veyron2.VeyronException {
         {{/* e.g. return this.stubArith.cosine(call, [args], options) */}}
         {{ if $eMethod.Returns }}return{{ end }}  this.{{ $eMethod.LocalWrapperVarName }}.{{ $eMethod.Name }}(call{{ $eMethod.CallingArgs }});
     }

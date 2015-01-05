@@ -15,10 +15,10 @@ package {{.Package}};
 /**
  * {{.Name}} {{.VdlTypeString}} {{.Doc}}
  **/
-@io.veyron.veyron.veyron2.vdl.GeneratedFromVdl(name = "{{.VdlTypeName}}")
-{{ .AccessModifier }} final class {{.Name}} extends io.veyron.veyron.veyron2.vdl.VdlSet<{{.KeyType}}> {
-    public static final io.veyron.veyron.veyron2.vdl.VdlType VDL_TYPE =
-            io.veyron.veyron.veyron2.vdl.Types.getVdlTypeFromReflect({{.Name}}.class);
+@io.v.core.veyron2.vdl.GeneratedFromVdl(name = "{{.VdlTypeName}}")
+{{ .AccessModifier }} final class {{.Name}} extends io.v.core.veyron2.vdl.VdlSet<{{.KeyType}}> {
+    public static final io.v.core.veyron2.vdl.VdlType VDL_TYPE =
+            io.v.core.veyron2.vdl.Types.getVdlTypeFromReflect({{.Name}}.class);
 
     public {{.Name}}(java.util.Set<{{.KeyType}}> impl) {
         super(VDL_TYPE, impl);
@@ -28,7 +28,7 @@ package {{.Package}};
     public void writeToParcel(android.os.Parcel out, int flags) {
         java.lang.reflect.Type keyType =
                 new com.google.common.reflect.TypeToken<{{.KeyType}}>(){}.getType();
-        io.veyron.veyron.veyron2.vdl.ParcelUtil.writeSet(out, this, keyType);
+        io.v.core.veyron2.vdl.ParcelUtil.writeSet(out, this, keyType);
     }
 
     @SuppressWarnings("hiding")
@@ -39,7 +39,7 @@ package {{.Package}};
         public {{.Name}} createFromParcel(android.os.Parcel in) {
             java.lang.reflect.Type keyType =
                     new com.google.common.reflect.TypeToken<{{.KeyType}}>(){}.getType();
-            java.util.Set<?> set = io.veyron.veyron.veyron2.vdl.ParcelUtil.readSet(
+            java.util.Set<?> set = io.v.core.veyron2.vdl.ParcelUtil.readSet(
                     in, {{.Name}}.class.getClassLoader(), keyType);
             return new {{.Name}}((java.util.Set<{{.KeyType}}>) set);
         }

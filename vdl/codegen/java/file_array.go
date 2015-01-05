@@ -15,12 +15,12 @@ package {{.Package}};
 /**
  * type {{.Name}} {{.VdlTypeString}} {{.Doc}}
  **/
-@io.veyron.veyron.veyron2.vdl.GeneratedFromVdl(name = "{{.VdlTypeName}}")
-{{ .AccessModifier }} final class {{.Name}} extends io.veyron.veyron.veyron2.vdl.VdlArray<{{.ElemType}}> {
+@io.v.core.veyron2.vdl.GeneratedFromVdl(name = "{{.VdlTypeName}}")
+{{ .AccessModifier }} final class {{.Name}} extends io.v.core.veyron2.vdl.VdlArray<{{.ElemType}}> {
     public static final int LENGTH = {{.Length}};
 
-    public static final io.veyron.veyron.veyron2.vdl.VdlType VDL_TYPE =
-            io.veyron.veyron.veyron2.vdl.Types.getVdlTypeFromReflect({{.Name}}.class);
+    public static final io.v.core.veyron2.vdl.VdlType VDL_TYPE =
+            io.v.core.veyron2.vdl.Types.getVdlTypeFromReflect({{.Name}}.class);
 
     public {{.Name}}({{.ElemType}}[] impl) {
         super(VDL_TYPE, impl);
@@ -30,7 +30,7 @@ package {{.Package}};
     public void writeToParcel(android.os.Parcel out, int flags) {
         java.lang.reflect.Type elemType =
                 new com.google.common.reflect.TypeToken<{{.ElemType}}>(){}.getType();
-        io.veyron.veyron.veyron2.vdl.ParcelUtil.writeList(out, this, elemType);
+        io.v.core.veyron2.vdl.ParcelUtil.writeList(out, this, elemType);
     }
 
     @SuppressWarnings("hiding")
@@ -41,7 +41,7 @@ package {{.Package}};
         public {{.Name}} createFromParcel(android.os.Parcel in) {
             java.lang.reflect.Type elemType =
                     new com.google.common.reflect.TypeToken<{{.ElemType}}>(){}.getType();
-            final {{.ElemType}}[] array = io.veyron.veyron.veyron2.vdl.ParcelUtil.readList(
+            final {{.ElemType}}[] array = io.v.core.veyron2.vdl.ParcelUtil.readList(
                     in, {{.Name}}.class.getClassLoader(), elemType).toArray(new {{.ElemType}}[0]);
             return new {{.Name}}(array);
         }

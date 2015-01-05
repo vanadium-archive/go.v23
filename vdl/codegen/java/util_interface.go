@@ -40,7 +40,7 @@ func javaClientExtendsStr(embeds []*compile.Interface) string {
 		buf.WriteString("Client")
 		buf.WriteString(", ")
 	}
-	buf.WriteString("io.veyron.veyron.veyron2.ipc.UniversalServiceMethods")
+	buf.WriteString("io.v.core.veyron2.ipc.UniversalServiceMethods")
 	return buf.String()
 }
 
