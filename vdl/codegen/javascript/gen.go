@@ -390,15 +390,11 @@ function {{$iface.Name}}(){}
       {{/* Add each method to the service prototype. */}}
 {{$iface.Name}}.prototype.{{$method.Name}} = NotImplementedMethod;
     {{end}}
-    {{/* Define the service's signature function. */}}
-{{$iface.Name}}.prototype.signature = function {{$iface.Name}}Signature() {
-  return _{{$iface.Name}}Signature;
-};
     {{/* The service signature encodes the same info as signature.Interface.
          TODO(alexfandrianto): We want to associate the signature type here, but
          it's complicated. https://github.com/veyron/release-issues/issues/432
          For now, we need to pass the type in manually into encode. */}}
-var _{{$iface.Name}}Signature = {
+{{$iface.Name}}.prototype._serviceDescription = {
   name: '{{$iface.Name}}',
   pkgPath: '{{$pkg.Path}}',
   doc: {{quoteStripDoc $iface.Doc}},
