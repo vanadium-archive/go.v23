@@ -13,6 +13,7 @@ import (
 	__veyron2 "v.io/core/veyron2"
 	__context "v.io/core/veyron2/context"
 	__ipc "v.io/core/veyron2/ipc"
+	__vdl "v.io/core/veyron2/vdl"
 	__vdlutil "v.io/core/veyron2/vdl/vdlutil"
 	__wiretype "v.io/core/veyron2/wiretype"
 )
@@ -22,11 +23,87 @@ import (
 // bootstrap types are used on interfaces.
 const _ = __wiretype.TypeIDInvalid
 
+type Tag string
+
+func (Tag) __VDLReflect(struct {
+	Name string "v.io/core/veyron2/services/mounttable.Tag"
+}) {
+}
+
+func init() {
+	__vdl.Register(Tag(""))
+}
+
+// Admin allow the client to SetACL or Delete the receiver.  It also subsumes
+// all the other tags.
+const Admin = Tag("Admin")
+
+// Mount allows the client to Mount or Unmount at the named receiver.
+// For example, to Mount onto a/b/c requires Mount or Admin access
+// to a/b/c (and Read, Admin, or Resolve to a and a/b).
+const Mount = Tag("Mount")
+
+// Read allows the client to Glob any children of the node.  Thus to
+// perform a Glob of a/* one must have Read access to a AND any other
+// access to each child of a.  It also allows Resolution through the node.
+const Read = Tag("Read")
+
+// Create allows the client to create nodes below the receiver.
+const Create = Tag("Create")
+
+// Resolve allows one to resolve through the receiver.  Thus to Resolve
+// a/b/c, one needs Admin, Resolve, or Read permission on a, a/b,
+// and a/b/c.
+const Resolve = Tag("Resolve")
+
 // MountTableClientMethods is the client interface
 // containing MountTable methods.
 //
 // MountTable defines the interface to talk to a mounttable.
 type MountTableClientMethods interface {
+	// Object provides access control for Veyron objects.
+	//
+	// Veyron services implementing dynamic access control would typically
+	// embed this interface and tag additional methods defined by the service
+	// with one of Admin, Read, Write, Resolve etc. For example,
+	// the VDL definition of the object would be:
+	//
+	//   package mypackage
+	//
+	//   import "v.io/core/veyron2/security/access"
+	//
+	//   type MyObject interface {
+	//     access.Object
+	//     MyRead()  (string, error) {access.Read}
+	//     MyWrite(string) error     {access.Write}
+	//   }
+	//
+	// If the set of pre-defined tags is insufficient, services may define their
+	// own tag type and annotate all methods with this new type.
+	// Instead of embedding this Object interface, define SetACL and GetACL in
+	// their own interface. Authorization policies will typically respect
+	// annotations of a single type. For example, the VDL definition of an object
+	// would be:
+	//
+	//  package mypackage
+	//
+	//  import "v.io/core/veyron2/security/access"
+	//
+	//  type MyTag string
+	//
+	//  const (
+	//    Blue = MyTag("Blue")
+	//    Red  = MyTag("Red")
+	//  )
+	//
+	//  type MyObject interface {
+	//    MyMethod() (string, error) {Blue}
+	//
+	//    // Allow clients to change access via the access.Object interface:
+	//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}
+	//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}
+	//  }
+	access.ObjectClientMethods
 	// Mount Server (a global name) onto the receiver.
 	// Subsequent mounts add to the servers mounted there.  The multiple
 	// servers are considered equivalent and are meant solely for
@@ -40,10 +117,14 @@ type MountTableClientMethods interface {
 	//
 	// Opts represents a bit mask of options.
 	Mount(ctx *__context.T, Server string, TTL uint32, Flags naming.MountFlag, opts ...__ipc.CallOpt) error
-	// Unmount removes Server from the mount point.  If Server is empty, remove
+	// Unmount removes Server from the receiver.  If Server is empty, remove
 	// all servers mounted there.
 	// Returns a non-nil error iff Server remains mounted at the mount point.
 	Unmount(ctx *__context.T, Server string, opts ...__ipc.CallOpt) error
+	// Delete removes the receiver.  If the receiver has children, it will not
+	// be removed unless DeleteSubtree is true in which case the whole subtree is
+	// removed.
+	Delete(ctx *__context.T, DeleteSubtree bool, opts ...__ipc.CallOpt) error
 	// ResolveStep takes the next step in resolving a name.  Returns the next
 	// servers to query and the suffix at those servers.
 	ResolveStep(*__context.T, ...__ipc.CallOpt) (Servers []naming.VDLMountedServer, Suffix string, err error)
@@ -66,12 +147,14 @@ func MountTableClient(name string, opts ...__ipc.BindOpt) MountTableClientStub {
 			client = clientOpt
 		}
 	}
-	return implMountTableClientStub{name, client}
+	return implMountTableClientStub{name, client, access.ObjectClient(name, client)}
 }
 
 type implMountTableClientStub struct {
 	name   string
 	client __ipc.Client
+
+	access.ObjectClientStub
 }
 
 func (c implMountTableClientStub) c(ctx *__context.T) __ipc.Client {
@@ -95,6 +178,17 @@ func (c implMountTableClientStub) Mount(ctx *__context.T, i0 string, i1 uint32, 
 func (c implMountTableClientStub) Unmount(ctx *__context.T, i0 string, opts ...__ipc.CallOpt) (err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Unmount", []interface{}{i0}, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (c implMountTableClientStub) Delete(ctx *__context.T, i0 bool, opts ...__ipc.CallOpt) (err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "Delete", []interface{}{i0}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&err); ierr != nil {
@@ -141,6 +235,49 @@ func (c implMountTableClientStub) Signature(ctx *__context.T, opts ...__ipc.Call
 //
 // MountTable defines the interface to talk to a mounttable.
 type MountTableServerMethods interface {
+	// Object provides access control for Veyron objects.
+	//
+	// Veyron services implementing dynamic access control would typically
+	// embed this interface and tag additional methods defined by the service
+	// with one of Admin, Read, Write, Resolve etc. For example,
+	// the VDL definition of the object would be:
+	//
+	//   package mypackage
+	//
+	//   import "v.io/core/veyron2/security/access"
+	//
+	//   type MyObject interface {
+	//     access.Object
+	//     MyRead()  (string, error) {access.Read}
+	//     MyWrite(string) error     {access.Write}
+	//   }
+	//
+	// If the set of pre-defined tags is insufficient, services may define their
+	// own tag type and annotate all methods with this new type.
+	// Instead of embedding this Object interface, define SetACL and GetACL in
+	// their own interface. Authorization policies will typically respect
+	// annotations of a single type. For example, the VDL definition of an object
+	// would be:
+	//
+	//  package mypackage
+	//
+	//  import "v.io/core/veyron2/security/access"
+	//
+	//  type MyTag string
+	//
+	//  const (
+	//    Blue = MyTag("Blue")
+	//    Red  = MyTag("Red")
+	//  )
+	//
+	//  type MyObject interface {
+	//    MyMethod() (string, error) {Blue}
+	//
+	//    // Allow clients to change access via the access.Object interface:
+	//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}
+	//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}
+	//  }
+	access.ObjectServerMethods
 	// Mount Server (a global name) onto the receiver.
 	// Subsequent mounts add to the servers mounted there.  The multiple
 	// servers are considered equivalent and are meant solely for
@@ -154,10 +291,14 @@ type MountTableServerMethods interface {
 	//
 	// Opts represents a bit mask of options.
 	Mount(ctx __ipc.ServerContext, Server string, TTL uint32, Flags naming.MountFlag) error
-	// Unmount removes Server from the mount point.  If Server is empty, remove
+	// Unmount removes Server from the receiver.  If Server is empty, remove
 	// all servers mounted there.
 	// Returns a non-nil error iff Server remains mounted at the mount point.
 	Unmount(ctx __ipc.ServerContext, Server string) error
+	// Delete removes the receiver.  If the receiver has children, it will not
+	// be removed unless DeleteSubtree is true in which case the whole subtree is
+	// removed.
+	Delete(ctx __ipc.ServerContext, DeleteSubtree bool) error
 	// ResolveStep takes the next step in resolving a name.  Returns the next
 	// servers to query and the suffix at those servers.
 	ResolveStep(__ipc.ServerContext) (Servers []naming.VDLMountedServer, Suffix string, err error)
@@ -186,7 +327,8 @@ type MountTableServerStub interface {
 // an object that may be used by ipc.Server.
 func MountTableServer(impl MountTableServerMethods) MountTableServerStub {
 	stub := implMountTableServerStub{
-		impl: impl,
+		impl:             impl,
+		ObjectServerStub: access.ObjectServer(impl),
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
@@ -200,7 +342,8 @@ func MountTableServer(impl MountTableServerMethods) MountTableServerStub {
 
 type implMountTableServerStub struct {
 	impl MountTableServerMethods
-	gs   *__ipc.GlobState
+	access.ObjectServerStub
+	gs *__ipc.GlobState
 }
 
 func (s implMountTableServerStub) Mount(ctx __ipc.ServerContext, i0 string, i1 uint32, i2 naming.MountFlag) error {
@@ -209,6 +352,10 @@ func (s implMountTableServerStub) Mount(ctx __ipc.ServerContext, i0 string, i1 u
 
 func (s implMountTableServerStub) Unmount(ctx __ipc.ServerContext, i0 string) error {
 	return s.impl.Unmount(ctx, i0)
+}
+
+func (s implMountTableServerStub) Delete(ctx __ipc.ServerContext, i0 bool) error {
+	return s.impl.Delete(ctx, i0)
 }
 
 func (s implMountTableServerStub) ResolveStep(ctx __ipc.ServerContext) ([]naming.VDLMountedServer, string, error) {
@@ -224,7 +371,7 @@ func (s implMountTableServerStub) Globber() *__ipc.GlobState {
 }
 
 func (s implMountTableServerStub) Describe__() []__ipc.InterfaceDesc {
-	return []__ipc.InterfaceDesc{MountTableDesc}
+	return []__ipc.InterfaceDesc{MountTableDesc, access.ObjectDesc}
 }
 
 // MountTableDesc describes the MountTable interface.
@@ -235,6 +382,9 @@ var descMountTable = __ipc.InterfaceDesc{
 	Name:    "MountTable",
 	PkgPath: "v.io/core/veyron2/services/mounttable",
 	Doc:     "// MountTable defines the interface to talk to a mounttable.",
+	Embeds: []__ipc.EmbedDesc{
+		{"Object", "v.io/core/veyron2/services/security/access", "// Object provides access control for Veyron objects.\n//\n// Veyron services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/core/veyron2/security/access\"\n//\n//   type MyObject interface {\n//     access.Object\n//     MyRead()  (string, error) {access.Read}\n//     MyWrite(string) error     {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetACL and GetACL in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/core/veyron2/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}\n//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}\n//  }"},
+	},
 	Methods: []__ipc.MethodDesc{
 		{
 			Name: "Mount",
@@ -247,18 +397,26 @@ var descMountTable = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Write")},
 		},
 		{
 			Name: "Unmount",
-			Doc:  "// Unmount removes Server from the mount point.  If Server is empty, remove\n// all servers mounted there.\n// Returns a non-nil error iff Server remains mounted at the mount point.",
+			Doc:  "// Unmount removes Server from the receiver.  If Server is empty, remove\n// all servers mounted there.\n// Returns a non-nil error iff Server remains mounted at the mount point.",
 			InArgs: []__ipc.ArgDesc{
 				{"Server", ``}, // string
 			},
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Write")},
+		},
+		{
+			Name: "Delete",
+			Doc:  "// Delete removes the receiver.  If the receiver has children, it will not\n// be removed unless DeleteSubtree is true in which case the whole subtree is\n// removed.",
+			InArgs: []__ipc.ArgDesc{
+				{"DeleteSubtree", ``}, // bool
+			},
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // error
+			},
 		},
 		{
 			Name: "ResolveStep",
@@ -268,7 +426,6 @@ var descMountTable = __ipc.InterfaceDesc{
 				{"Suffix", ``},  // string
 				{"err", ``},     // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Read")},
 		},
 		{
 			Name: "ResolveStepX",
@@ -277,7 +434,6 @@ var descMountTable = __ipc.InterfaceDesc{
 				{"Entry", ``}, // naming.VDLMountEntry
 				{"err", ``},   // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Read")},
 		},
 	},
 }
@@ -285,6 +441,14 @@ var descMountTable = __ipc.InterfaceDesc{
 func (s implMountTableServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
 	// TODO(toddw): Replace with new Describe__ implementation.
 	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
+	result.Methods["Delete"] = __ipc.MethodSignature{
+		InArgs: []__ipc.MethodArgument{
+			{Name: "DeleteSubtree", Type: 2},
+		},
+		OutArgs: []__ipc.MethodArgument{
+			{Name: "", Type: 66},
+		},
+	}
 	result.Methods["Mount"] = __ipc.MethodSignature{
 		InArgs: []__ipc.MethodArgument{
 			{Name: "Server", Type: 3},
@@ -333,6 +497,61 @@ func (s implMountTableServerStub) Signature(ctx __ipc.ServerContext) (__ipc.Serv
 				__wiretype.FieldType{Type: 0x2, Name: "MT"},
 			},
 			"v.io/core/veyron2/naming.VDLMountEntry", []string(nil)},
+	}
+	var ss __ipc.ServiceSignature
+	var firstAdded int
+	ss, _ = s.ObjectServerStub.Signature(ctx)
+	firstAdded = len(result.TypeDefs)
+	for k, v := range ss.Methods {
+		for i, _ := range v.InArgs {
+			if v.InArgs[i].Type >= __wiretype.TypeIDFirst {
+				v.InArgs[i].Type += __wiretype.TypeID(firstAdded)
+			}
+		}
+		for i, _ := range v.OutArgs {
+			if v.OutArgs[i].Type >= __wiretype.TypeIDFirst {
+				v.OutArgs[i].Type += __wiretype.TypeID(firstAdded)
+			}
+		}
+		if v.InStream >= __wiretype.TypeIDFirst {
+			v.InStream += __wiretype.TypeID(firstAdded)
+		}
+		if v.OutStream >= __wiretype.TypeIDFirst {
+			v.OutStream += __wiretype.TypeID(firstAdded)
+		}
+		result.Methods[k] = v
+	}
+	//TODO(bprosnitz) combine type definitions from embeded interfaces in a way that doesn't cause duplication.
+	for _, d := range ss.TypeDefs {
+		switch wt := d.(type) {
+		case __wiretype.SliceType:
+			if wt.Elem >= __wiretype.TypeIDFirst {
+				wt.Elem += __wiretype.TypeID(firstAdded)
+			}
+			d = wt
+		case __wiretype.ArrayType:
+			if wt.Elem >= __wiretype.TypeIDFirst {
+				wt.Elem += __wiretype.TypeID(firstAdded)
+			}
+			d = wt
+		case __wiretype.MapType:
+			if wt.Key >= __wiretype.TypeIDFirst {
+				wt.Key += __wiretype.TypeID(firstAdded)
+			}
+			if wt.Elem >= __wiretype.TypeIDFirst {
+				wt.Elem += __wiretype.TypeID(firstAdded)
+			}
+			d = wt
+		case __wiretype.StructType:
+			for i, fld := range wt.Fields {
+				if fld.Type >= __wiretype.TypeIDFirst {
+					wt.Fields[i].Type += __wiretype.TypeID(firstAdded)
+				}
+			}
+			d = wt
+			// NOTE: other types are missing, but we are upgrading anyways.
+		}
+		result.TypeDefs = append(result.TypeDefs, d)
 	}
 
 	return result, nil
