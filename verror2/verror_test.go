@@ -161,6 +161,56 @@ func init() {
 	v2DE = verror2.ExplicitConvert(verror2.Unknown, de, "other", "op", aEN1) // left as English, since we lack German.
 }
 
+func TestDefaultValues(t *testing.T) {
+	if got, want := verror2.ErrorID(nil), verror.ID(""); got != want {
+		t.Errorf("got: %d, want: %d", got, want)
+	}
+	if got, want := verror2.Action(nil), verror2.NoRetry; got != want {
+		t.Errorf("got: %d, want: %d", got, want)
+	}
+
+	if got, want := verror2.ErrorID(verror2.Standard{}), verror.ID(""); got != want {
+		t.Errorf("got: %d, want: %d", got, want)
+	}
+	if got, want := verror2.Action(verror2.Standard{}), verror2.NoRetry; got != want {
+		t.Errorf("got: %d, want: %d", got, want)
+	}
+
+	if !verror2.Is(nil, verror2.IDAction{}.ID) {
+		t.Errorf("is test failed")
+	}
+	if verror2.Is(nil, verror2.BadArg.ID) {
+		t.Errorf("is test succeeded")
+	}
+	if verror2.Is(nil, verror2.Unknown.ID) {
+		t.Errorf("is test succeeded")
+	}
+
+	if verror2.Is(verror2.ExplicitMake(verror2.Unknown, i18n.NoLangID, "", ""), verror2.IDAction{}.ID) {
+		t.Errorf("is test succeeded")
+	}
+
+	if !verror2.Equal(nil, nil) {
+		t.Errorf("equality test failed")
+	}
+
+	// nil and default IDAction get mapped to Unknown.
+	if !verror2.Equal(nil, verror2.ExplicitMake(verror2.IDAction{}, i18n.NoLangID, "", "")) {
+		t.Errorf("equality test failed")
+	}
+	if verror2.Equal(nil, verror2.ExplicitMake(verror2.Unknown, i18n.NoLangID, "", "")) {
+		t.Errorf("equality test succeeded")
+	}
+	if verror2.Equal(nil, verror2.ExplicitMake(verror2.BadArg, i18n.NoLangID, "", "")) {
+		t.Errorf("equality test succeeded")
+	}
+
+	unknown := verror2.Standard{}
+	if got, want := unknown.Error(), "v.io/core/veyron2/verror.Unknown"; got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
 func TestBasic(t *testing.T) {
 	var tests = []struct {
 		err      error
