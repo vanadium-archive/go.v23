@@ -145,9 +145,10 @@ type E interface {
 }
 
 // ErrorID returns the ID of the given err, or Unknown if the err has no ID.
+// If err is nil then ErrorID returns "".
 func ErrorID(err error) verror.ID {
 	if err == nil {
-		return Success.ID
+		return ""
 	}
 	if e, ok := err.(E); ok {
 		return e.ErrorID()
@@ -224,13 +225,21 @@ func defaultLangID(langID i18n.LangID) i18n.LangID {
 	return langID
 }
 
+func isDefaultIDAction(idAction IDAction) bool {
+	return idAction.ID == "" && idAction.Action == 0
+}
+
 // makeInternal is like ExplicitMake(), but takes a slice of PC values as an argument,
 // rather than constructing one from the caller's PC.
 func makeInternal(idAction IDAction, langID i18n.LangID, componentName string, opName string, stack []uintptr, v ...interface{}) E {
 	msg := ""
 	params := append([]interface{}{componentName, opName}, v...)
 	if langID != i18n.NoLangID {
-		msg = i18n.Cat().Format(langID, i18n.MsgID(idAction.ID), params...)
+		id := idAction.ID
+		if id == "" {
+			id = Unknown.ID
+		}
+		msg = i18n.Cat().Format(langID, i18n.MsgID(id), params...)
 	}
 	return Standard{idAction, msg, params, stack}
 }
@@ -291,7 +300,11 @@ func convertInternal(idAction IDAction, langID i18n.LangID, componentName string
 		// Create a non-empty format string if we have the language in the catalogue.
 		var formatStr string
 		if langID != i18n.NoLangID {
-			formatStr = i18n.Cat().Lookup(langID, i18n.MsgID(e.ErrorID()))
+			id := e.ErrorID()
+			if id == "" {
+				id = Unknown.ID
+			}
+			formatStr = i18n.Cat().Lookup(langID, i18n.MsgID(id))
 		}
 
 		// Ignore the caller-supplied component and operation if we already have them.
@@ -433,6 +446,9 @@ func (e Standard) Action() ActionCode {
 // generated.
 func (e Standard) Error() string {
 	msg := e.Msg
+	if isDefaultIDAction(e.IDAction) && msg == "" {
+		return i18n.Cat().Format(i18n.NoLangID, i18n.MsgID(Unknown.ID), e.ParamList...)
+	}
 	if msg == "" {
 		msg = i18n.Cat().Format(i18n.NoLangID, i18n.MsgID(e.IDAction.ID), e.ParamList...)
 	}
@@ -460,12 +476,11 @@ func (e Standard) Stack() PCs {
 const pkgPath = "v.io/core/veyron2/verror"
 
 var (
-	// Success, Unknown or Internal are intended for general use by
+	// Unknown or Internal are intended for general use by
 	// all system components. Unknown and Internal should only be used
 	// when a more specific error is not available.
-
-	Success  = Register(pkgPath+".Success", NoRetry, "{1:}{2:} Success{:_}") // Success; the nil error.
-	Unknown  = Register(pkgPath+".Unknown", NoRetry, "{1:}{2:} Error{:_}")   // The unknown error.
+	// The default value of IDAction is mapped internally to Unknown.
+	Unknown  = Register(pkgPath+".Unknown", NoRetry, "{1:}{2:} Error{:_}") // The unknown error.
 	Internal = Register(pkgPath+".Internal", NoRetry, "{1:}{2:} Internal error{:_}")
 	EOF      = Register(pkgPath+".EOF", NoRetry, "{1:}{2:} EOF{:_}")
 
