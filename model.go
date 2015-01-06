@@ -12,6 +12,7 @@ package veyron2
 
 import (
 	"fmt"
+	"sync"
 
 	"v.io/core/veyron2/config"
 	"v.io/core/veyron2/context"
@@ -267,7 +268,7 @@ type Runtime interface {
 	// string as per the format described above. It can be used to test
 	// a string to see if it's in valid endpoint format.
 	//
-	// NewEndpoint will accept srings both in the @ format described
+	// NewEndpoint will accept strings both in the @ format described
 	// above and in internet host:port format.
 	//
 	// All implementations of NewEndpoint should provide appropriate
@@ -333,4 +334,216 @@ const GoogleRuntimeName = "google"
 // <package>.NewR(opts ...NewROpt{}) (Runtime, error)
 type ROpt interface {
 	ROpt()
+}
+
+// RuntimeX is the interface that concrete Veyron implementations must
+// implement.  It will not be used directly by application builders.
+// They will instead use the package level functions that mirror these
+// factories.
+// TODO(mattr): Some opts might not make sense now.  For example, the
+// namespace is currently a ServerOpt, but it probably makes more sense
+// to just use the current namespace in the context that is passed
+// to NewServer.  The same for Profile and StreamManager.
+type RuntimeX interface {
+	// Init initilizes the runtime.  It will be called only once.  It
+	// must be called before any other Runtime methods are called.  Its
+	// primary responsability is to populate the initial context with
+	// all required state.
+	Init(ctx *context.T) (*context.T, context.CancelFunc)
+
+	// NewEndpoint returns an Endpoint by parsing the supplied endpoint
+	// string as per the format described above. It can be used to test
+	// a string to see if it's in valid endpoint format.
+	//
+	// NewEndpoint will accept strings both in the @ format described
+	// above and in internet host:port format.
+	//
+	// All implementations of NewEndpoint should provide appropriate
+	// defaults for any endpoint subfields not explicitly provided as
+	// follows:
+	// - a missing protocol will default to a protocol appropriate for the
+	//   implementation hosting NewEndpoint
+	// - a missing host:port will default to :0 - i.e. any port on all
+	//   interfaces
+	// - a missing routing id should default to the null routing id
+	// - a missing codec version should default to AnyCodec
+	// - a missing RPC version should default to the highest version
+	//   supported by the runtime implementation hosting NewEndpoint
+	NewEndpoint(ep string) (naming.Endpoint, error)
+
+	// NewServer creates a new Server instance.
+	//
+	// It accepts at least the following options:
+	// ServesMountTable and ServerBlessings.
+	NewServer(ctx *context.T, opts ...ipc.ServerOpt) (ipc.Server, error)
+
+	// SetNewStreamManager creates a new stream manager and context
+	// with that StreamManager attached.
+	SetNewStreamManager(ctx *context.T, opts ...stream.ManagerOpt) (*context.T, stream.Manager, error)
+
+	// StreamManager returns the current stream manager.
+	StreamManager(ctx *context.T) stream.Manager
+
+	// SetPrincipal attaches a principal to the returned context.
+	SetPrincipal(ctx *context.T, principal security.Principal) (*context.T, error)
+
+	// Principal returns the current Principal.
+	Principal(ctx *context.T) security.Principal
+
+	// SetNewClient creates a new Client instance and attaches it to a
+	// new context.
+	SetNewClient(ctx *context.T, opts ...ipc.ClientOpt) (*context.T, ipc.Client, error)
+
+	// Client returns the current Client.
+	Client(ctx *context.T) ipc.Client
+
+	// SetNewSpan derives a context with a new Span that can be used to
+	// trace and annotate operations across process boundaries.
+	SetNewSpan(ctx *context.T, name string) (*context.T, vtrace.Span)
+
+	// Span finds the currently active span.
+	Span(ctx *context.T) vtrace.Span
+
+	// SetNewNamespace creates a new Namespace and attaches it to the
+	// returned context.
+	SetNewNamespace(ctx *context.T, roots ...string) (*context.T, naming.Namespace, error)
+
+	// Namespace returns the current namespace
+	Namespace(ctx *context.T) naming.Namespace
+
+	// SetNewLogger creates a new Logger and attaches it to the
+	// returned context.
+	SetNewLogger(ctx *context.T, name string, opts ...vlog.LoggingOpts) (*context.T, vlog.Logger, error)
+
+	// Logger returns the current logger.
+	Logger(ctx *context.T) vlog.Logger
+
+	// VtraceStore returns the current vtrace.Store.
+	VtraceStore(ctx *context.T) vtrace.Store
+
+	// SetReservedNameDispatcher sets and configures a dispatcher for the
+	// reserved portion of the name space, i.e. any path starting with '__'.
+	// TODO(mattr): Remove this from the interface once the profile is
+	// available from the context.
+	SetReservedNameDispatcher(ctx *context.T, server ipc.Dispatcher, opts ...ipc.ServerOpt) *context.T
+}
+
+var (
+	runtimeConfig struct {
+		sync.Mutex
+		runtime RuntimeX
+	}
+)
+
+// TODO(mattr): this is a short term hack to put us into a situation
+// where we'll have backward compatibility during the transition from
+// Runtime to RuntimeX.  This will be replaced by a real registration
+// mechanism as in the current rt package.
+// For now, this simply must be called before main begins (in an init).
+func RegisterRuntime(name string, r RuntimeX) {
+	runtimeConfig.Lock()
+	if runtimeConfig.runtime == nil {
+		runtimeConfig.runtime = r
+	}
+	runtimeConfig.Unlock()
+}
+
+// NewEndpoint returns an Endpoint by parsing the supplied endpoint
+// string as per the format described above. It can be used to test
+// a string to see if it's in valid endpoint format.
+//
+// NewEndpoint will accept strings both in the @ format described
+// above and in internet host:port format.
+//
+// All implementations of NewEndpoint should provide appropriate
+// defaults for any endpoint subfields not explicitly provided as
+// follows:
+// - a missing protocol will default to a protocol appropriate for the
+//   implementation hosting NewEndpoint
+// - a missing host:port will default to :0 - i.e. any port on all
+//   interfaces
+// - a missing routing id should default to the null routing id
+// - a missing codec version should default to AnyCodec
+// - a missing RPC version should default to the highest version
+//   supported by the runtime implementation hosting NewEndpoint
+func NewEndpoint(ep string) (naming.Endpoint, error) {
+	return runtimeConfig.runtime.NewEndpoint(ep)
+}
+
+// NewServer creates a new Server instance.
+//
+// It accepts at least the following options:
+// ServesMountTable and ServerBlessings.
+func NewServer(ctx *context.T, opts ...ipc.ServerOpt) (ipc.Server, error) {
+	return runtimeConfig.runtime.NewServer(ctx, opts...)
+}
+
+// SetNewStreamManager creates a new stream manager and context
+// with that StreamManager attached.
+func SetNewStreamManager(ctx *context.T, opts ...stream.ManagerOpt) (*context.T, stream.Manager, error) {
+	return runtimeConfig.runtime.SetNewStreamManager(ctx, opts...)
+}
+
+// StreamManager returns the current stream manager.
+func StreamManager(ctx *context.T) stream.Manager {
+	return runtimeConfig.runtime.StreamManager(ctx)
+}
+
+// SetPrincipal attaches a principal to the returned context.
+func SetPrincipal(ctx *context.T, principal security.Principal) (*context.T, error) {
+	return runtimeConfig.runtime.SetPrincipal(ctx, principal)
+}
+
+// Principal returns the current Principal.
+func Principal(ctx *context.T) security.Principal {
+	return runtimeConfig.runtime.Principal(ctx)
+}
+
+// SetNewClient creates a new Client instance and attaches it to a
+// new context.
+func SetNewClient(ctx *context.T, opts ...ipc.ClientOpt) (*context.T, ipc.Client, error) {
+	return runtimeConfig.runtime.SetNewClient(ctx, opts...)
+}
+
+// Client returns the current Client.
+func Client(ctx *context.T) ipc.Client {
+	return runtimeConfig.runtime.Client(ctx)
+}
+
+// SetNewSpan derives a context with a new Span that can be used to
+// trace and annotate operations across process boundaries.
+func SetNewSpan(ctx *context.T, name string) (*context.T, vtrace.Span) {
+	return runtimeConfig.runtime.SetNewSpan(ctx, name)
+}
+
+// Span finds the currently active span.
+func Span(ctx *context.T) vtrace.Span {
+	return runtimeConfig.runtime.Span(ctx)
+}
+
+// SetNewNamespace creates a new Namespace and attaches it to the
+// returned context.
+func SetNewNamespace(ctx *context.T, roots ...string) (*context.T, naming.Namespace, error) {
+	return runtimeConfig.runtime.SetNewNamespace(ctx, roots...)
+}
+
+// Namespace returns the current namespace.
+func Namespace(ctx *context.T) naming.Namespace {
+	return runtimeConfig.runtime.Namespace(ctx)
+}
+
+// SetNewLogger creates a new Logger and attaches it to the
+// returned context.
+func SetNewLogger(ctx *context.T, name string, opts ...vlog.LoggingOpts) (*context.T, vlog.Logger, error) {
+	return runtimeConfig.runtime.SetNewLogger(ctx, name, opts...)
+}
+
+// Logger returns the current logger.
+func Logger(ctx *context.T) vlog.Logger {
+	return runtimeConfig.runtime.Logger(ctx)
+}
+
+// VtraceStore gets the current vtrace.Store.
+func VtraceStore(ctx *context.T) vtrace.Store {
+	return runtimeConfig.runtime.VtraceStore(ctx)
 }
