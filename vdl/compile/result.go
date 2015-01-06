@@ -20,11 +20,12 @@ import (
 //
 // Always create a new Env via NewEnv; the zero Env is invalid.
 type Env struct {
-	Errors       *vdlutil.Errors
-	pkgs         map[string]*Package
-	typeDefs     map[*vdl.Type]*TypeDef
-	constDefs    map[*vdl.Value]*ConstDef
-	experimental bool // enable experimental features
+	Errors    *vdlutil.Errors
+	pkgs      map[string]*Package
+	typeDefs  map[*vdl.Type]*TypeDef
+	constDefs map[*vdl.Value]*ConstDef
+
+	disallowPathQualifiers bool // Disallow syntax like "a/b/c".Type
 }
 
 // NewEnv creates a new Env, allowing up to maxErrors errors before we stop.
@@ -68,35 +69,61 @@ func (e *Env) ResolvePackage(path string) *Package {
 
 // Resolves a name against the current package and imported package namespace.
 func (e *Env) resolve(name string, file *File) (val interface{}, matched string) {
-	nameParts := strings.Split(name, ".")
-	if len(nameParts) < 1 {
-		return nil, ""
-	}
-
-	builtin := BuiltInPackage.resolve(nameParts[0], false)
-	if builtin != nil {
-		return builtin, nameParts[0]
-	}
-
-	local := file.Package.resolve(nameParts[0], true)
-	if local != nil {
-		return local, nameParts[0]
-	}
-
-	if len(nameParts) >= 2 {
-		path := file.LookupImportPath(nameParts[0])
-		if path != "" {
-			if pkg := e.ResolvePackage(path); pkg != nil {
-				return pkg.resolve(nameParts[1], false), nameParts[0] + "." + nameParts[1]
+	// First handle package-path qualified identifiers, which look like this:
+	//   "a/b/c".Ident   (qualified with package path "a/b/c")
+	// These must be handled first, since the package-path may include dots.
+	if strings.HasPrefix(name, `"`) {
+		if parts := strings.SplitN(name[1:], `".`, 2); len(parts) == 2 {
+			path, remain := parts[0], parts[1]
+			if e.disallowPathQualifiers {
+				// TODO(toddw): Add real position.
+				e.Errorf(file, parse.Pos{}, "package path qualified identifier %s not allowed", name)
+			}
+			if file.ValidateImportPackagePath(path) {
+				if pkg := e.ResolvePackage(path); pkg != nil {
+					if dotParts := strings.Split(remain, "."); len(dotParts) > 0 {
+						if val := pkg.resolve(dotParts[0], false); val != nil {
+							return val, `"` + path + `".` + dotParts[0]
+						}
+					}
+				}
 			}
 		}
 	}
-
+	// Now handle built-in and package-local identifiers.  Examples:
+	//   string
+	//   TypeName
+	//   EnumType.Label
+	//   ConstName
+	//   StructConst.Field
+	//   InterfaceName
+	nameParts := strings.Split(name, ".")
+	if len(nameParts) == 0 {
+		return nil, ""
+	}
+	if builtin := BuiltInPackage.resolve(nameParts[0], false); builtin != nil {
+		return builtin, nameParts[0]
+	}
+	if local := file.Package.resolve(nameParts[0], true); local != nil {
+		return local, nameParts[0]
+	}
+	// Now handle package qualified identifiers, which look like this:
+	//   pkg.Ident   (qualified with local package identifier pkg)
+	if len(nameParts) > 1 {
+		if path := file.LookupImportPath(nameParts[0]); path != "" {
+			if pkg := e.ResolvePackage(path); pkg != nil {
+				if val := pkg.resolve(nameParts[1], false); val != nil {
+					return val, nameParts[0] + "." + nameParts[1]
+				}
+			}
+		}
+	}
+	// No match found.
 	return nil, ""
 }
 
 // ResolveType resolves a name to a type definition.
-// Returns the type def and a string representing the amount of the name that was consumed.
+// Returns the type def and the portion of name that was matched.
 func (e *Env) ResolveType(name string, file *File) (td *TypeDef, matched string) {
 	v, matched := e.resolve(name, file)
 	td, _ = v.(*TypeDef)
@@ -107,7 +134,7 @@ func (e *Env) ResolveType(name string, file *File) (td *TypeDef, matched string)
 }
 
 // ResolveConst resolves a name to a const definition.
-// Returns the const def and a string representing the amount of the name that was consumed.
+// Returns the const def and the portion of name that was matched.
 func (e *Env) ResolveConst(name string, file *File) (cd *ConstDef, matched string) {
 	v, matched := e.resolve(name, file)
 	cd, _ = v.(*ConstDef)
@@ -118,7 +145,7 @@ func (e *Env) ResolveConst(name string, file *File) (cd *ConstDef, matched strin
 }
 
 // ResolveInterface resolves a name to an interface definition.
-// Returns the interface def and a string representing the amount of the name that was consumed.
+// Returns the interface and the portion of name that was matched.
 func (e *Env) ResolveInterface(name string, file *File) (i *Interface, matched string) {
 	v, matched := e.resolve(name, file)
 	i, _ = v.(*Interface)
@@ -148,13 +175,14 @@ func (e *Env) evalSelectorOnConst(def *ConstDef, selector string) (opconst.Const
 // evalSelectorOnType evaluates a selector on a type to a constant.
 // This returns an empty const if a selector is applied on a non-enum type.
 func (e *Env) evalSelectorOnType(def *TypeDef, selector string) (opconst.Const, error) {
-	if def.Type.Kind() != vdl.Enum {
-		return opconst.Const{}, fmt.Errorf("invalid selector on type of kind: %v", def.Type.Kind())
+	t := def.Type
+	if t.Kind() != vdl.Enum {
+		return opconst.Const{}, fmt.Errorf("invalid selector on type of kind: %v", t.Kind())
 	}
-	if def.Type.EnumIndex(selector) < 0 {
-		return opconst.Const{}, fmt.Errorf("invalid label on enum %s: %s", def.Type.Name(), selector)
+	if t.EnumIndex(selector) < 0 {
+		return opconst.Const{}, fmt.Errorf("invalid label on enum %s: %s", t.Name(), selector)
 	}
-	enumVal := vdl.ZeroValue(def.Type)
+	enumVal := vdl.ZeroValue(t)
 	enumVal.AssignEnumLabel(selector)
 	return opconst.FromValue(enumVal), nil
 }
@@ -172,7 +200,6 @@ func (e *Env) EvalConst(name string, file *File) (opconst.Const, error) {
 		}
 		return c, nil
 	}
-
 	if td, matched := e.ResolveType(name, file); td != nil {
 		if matched == name {
 			return opconst.Const{}, fmt.Errorf("%s is a type", name)
@@ -184,7 +211,6 @@ func (e *Env) EvalConst(name string, file *File) (opconst.Const, error) {
 		}
 		return c, nil
 	}
-
 	return opconst.Const{}, fmt.Errorf("%s undefined", name)
 }
 
@@ -206,17 +232,10 @@ func fpStringf(file *File, pos parse.Pos, format string, v ...interface{}) strin
 	return fmt.Sprintf(fpString(file, pos)+" "+format, v...)
 }
 
-// EnableExperimental enables experimental features that may crash the compiler
-// and change without notice.  Intended for VDL compiler developers.
-func (e *Env) EnableExperimental() *Env {
-	e.experimental = true
+// DisallowPathQualifiers disables syntax like "a/b/c".Type.
+func (e *Env) DisallowPathQualifiers() *Env {
+	e.disallowPathQualifiers = true
 	return e
-}
-
-func (e *Env) experimentalOnly(file *File, pos parse.Pos, format string, v ...interface{}) {
-	if !e.experimental {
-		e.Errors.Error(fpStringf(file, pos, format, v...) + " (only allowed in experimental mode)")
-	}
 }
 
 // Representation of the components of an vdl file.  These data types represent
@@ -267,21 +286,17 @@ func (p *Package) ResolveConst(name string) *ConstDef { return p.constDefs[name]
 // ResolveInterface resolves the interface name to its definition.
 func (p *Package) ResolveInterface(name string) *Interface { return p.ifaceDefs[name] }
 
-// resolve resolves a name against a the package.
+// resolve resolves a name against the package.
 // Checks for duplicate definitions should be performed before this is called.
 func (p *Package) resolve(name string, isLocal bool) interface{} {
-	c := p.ResolveConst(name)
-	i := p.ResolveInterface(name)
-	t := p.ResolveType(name)
-
-	if c != nil && (c.Exported || isLocal) {
+	if t := p.ResolveType(name); t != nil && (t.Exported || isLocal) {
+		return t
+	}
+	if c := p.ResolveConst(name); c != nil && (c.Exported || isLocal) {
 		return c
 	}
-	if i != nil && (i.Exported || isLocal) {
+	if i := p.ResolveInterface(name); i != nil && (i.Exported || isLocal) {
 		return i
-	}
-	if t != nil && (t.Exported || isLocal) {
-		return t
 	}
 	return nil
 }
@@ -332,6 +347,18 @@ func (f *File) LookupImportPath(local string) string {
 		return imp.path
 	}
 	return ""
+}
+
+// ValidateImportPackagePath returns true iff path is listed in the file's
+// imports, and marks the import as used.
+func (f *File) ValidateImportPackagePath(path string) bool {
+	for _, imp := range f.imports {
+		if imp.path == path {
+			imp.used = true
+			return true
+		}
+	}
+	return false
 }
 
 // identDetail formats a detail string for calls to DeclareIdent.

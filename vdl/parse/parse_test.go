@@ -1,6 +1,6 @@
 package parse_test
 
-// TODO(toddw): Add tests for embedded interfaces, imaginary literals.
+// TODO(toddw): Add tests for imaginary literals.
 
 import (
 	"math/big"
@@ -19,6 +19,11 @@ func pos(line, col int) parse.Pos {
 
 func np(name string, line, col int) parse.NamePos {
 	return parse.NamePos{Name: name, Pos: pos(line, col)}
+}
+
+func npptr(name string, line, col int) *parse.NamePos {
+	ret := np(name, line, col)
+	return &ret
 }
 
 func tn(name string, line, col int) *parse.TypeNamed {
@@ -272,6 +277,14 @@ type foo bar.baz`,
 		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
 			TypeDefs: []*parse.TypeDef{
 				{NamePos: np("foo", 2, 6), Type: tn("bar.baz", 2, 10)}}},
+		nil},
+	{
+		"TypeNamedQualifiedPath",
+		`package testpkg
+type foo "a/b/c/bar".baz`,
+		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
+			TypeDefs: []*parse.TypeDef{
+				{NamePos: np("foo", 2, 6), Type: tn(`"a/b/c/bar".baz`, 2, 10)}}},
 		nil},
 	{
 		"TypeEnum",
@@ -536,6 +549,22 @@ const bar = pkg.box`,
 			ConstDefs: []*parse.ConstDef{
 				{NamePos: np("foo", 2, 7), Expr: cn("baz", 2, 13)},
 				{NamePos: np("bar", 3, 7), Expr: cn("pkg.box", 3, 13)}}},
+		nil},
+	{
+		"NamedConstQualified",
+		`package testpkg
+const foo = bar.baz`,
+		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
+			ConstDefs: []*parse.ConstDef{
+				{NamePos: np("foo", 2, 7), Expr: cn("bar.baz", 2, 13)}}},
+		nil},
+	{
+		"NamedConstQualifiedPath",
+		`package testpkg
+const foo = "a/b/c/bar".baz`,
+		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
+			ConstDefs: []*parse.ConstDef{
+				{NamePos: np("foo", 2, 7), Expr: cn(`"a/b/c/bar".baz`, 2, 13)}}},
 		nil},
 	{
 		"CompLitConst",
@@ -822,6 +851,30 @@ type foo interface{
 							{NamePos: np("l", 4, 28), Type: tn("n", 4, 33)},
 							{NamePos: np("m", 4, 31), Type: tn("n", 4, 33)},
 							{NamePos: np("err", 4, 37), Type: tn("X", 4, 37)}}}}}}},
+		nil},
+	{
+		"InterfaceEmbed",
+		`package testpkg
+type foo interface{bar}`,
+		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
+			Interfaces: []*parse.Interface{{NamePos: np("foo", 2, 6),
+				Embeds: []*parse.NamePos{npptr("bar", 2, 20)}}}},
+		nil},
+	{
+		"InterfaceEmbedQualified",
+		`package testpkg
+type foo interface{bar.baz}`,
+		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
+			Interfaces: []*parse.Interface{{NamePos: np("foo", 2, 6),
+				Embeds: []*parse.NamePos{npptr("bar.baz", 2, 20)}}}},
+		nil},
+	{
+		"InterfaceEmbedQualifiedPath",
+		`package testpkg
+type foo interface{"a/b/c/bar".baz}`,
+		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
+			Interfaces: []*parse.Interface{{NamePos: np("foo", 2, 6),
+				Embeds: []*parse.NamePos{npptr(`"a/b/c/bar".baz`, 2, 20)}}}},
 		nil},
 	{
 		"FAILInterfaceUnclosedInterface",

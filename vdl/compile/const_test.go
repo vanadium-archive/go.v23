@@ -17,7 +17,8 @@ func testConstPackage(t *testing.T, name string, tpkg constPkg, env *compile.Env
 	files := map[string]string{
 		tpkg.Name + ".vdl": "package " + tpkg.Name + "\n" + tpkg.Data,
 	}
-	buildPkg := vdltest.FakeBuildPackage(tpkg.Name, tpkg.Name, files)
+	pkgPath := "p.kg/" + tpkg.Name // use dots in pkgpath to test tricky cases
+	buildPkg := vdltest.FakeBuildPackage(tpkg.Name, pkgPath, files)
 	pkg := build.BuildPackage(buildPkg, env)
 	vdltest.ExpectResult(t, env.Errors, name, tpkg.ErrRE)
 	if pkg == nil || tpkg.ErrRE != "" {
@@ -62,7 +63,6 @@ func testConfigFile(t *testing.T, name string, tpkg constPkg, env *compile.Env) 
 func TestConst(t *testing.T) {
 	for _, test := range constTests {
 		env := compile.NewEnv(-1)
-		env.EnableExperimental()
 		for _, tpkg := range test.Pkgs {
 			testConstPackage(t, test.Name, tpkg, env)
 		}
@@ -72,7 +72,6 @@ func TestConst(t *testing.T) {
 func TestConfig(t *testing.T) {
 	for _, test := range constTests {
 		env := compile.NewEnv(-1)
-		env.EnableExperimental()
 		// Compile all but the last tpkg as regular packages.
 		for _, tpkg := range test.Pkgs[:len(test.Pkgs)-1] {
 			testConstPackage(t, test.Name, tpkg, env)
@@ -174,10 +173,10 @@ func makeStructTypeObject(name string, t *vdl.Type) *vdl.Value {
 }
 
 func makeABStruct() *vdl.Value {
-	tA := vdl.NamedType("a.A", vdl.StructType([]vdl.Field{
+	tA := vdl.NamedType("p.kg/a.A", vdl.StructType([]vdl.Field{
 		{"X", vdl.Int64Type}, {"Y", vdl.StringType},
 	}...))
-	tB := vdl.NamedType("a.B", vdl.StructType(vdl.Field{"Z", vdl.ListType(tA)}))
+	tB := vdl.NamedType("p.kg/a.B", vdl.StructType(vdl.Field{"Z", vdl.ListType(tA)}))
 	res := vdl.ZeroValue(tB)
 	listv := res.Field(0).AssignLen(2)
 	listv.Index(0).Field(0).AssignInt(1)
@@ -196,7 +195,7 @@ func makeCyclicStructType() *vdl.Type {
 	// type A struct {X string;Z ?A}
 	var builder vdl.TypeBuilder
 	a := builder.Struct().AppendField("X", vdl.StringType)
-	n := builder.Named("a.A").AssignBase(a)
+	n := builder.Named("p.kg/a.A").AssignBase(a)
 	a.AppendField("Z", builder.Optional().AssignElem(n))
 	builder.Build()
 	ty, err := n.Built()
@@ -377,13 +376,13 @@ var constTests = []struct {
 	// Test struct literals.
 	{
 		"StructNoKeys",
-		cp{{"a", `type A struct{X int64;Y string;Z bool}; const Res = A{1,"b",true}`, makeStruct("a.A", 1, "b", true), ""}}},
+		cp{{"a", `type A struct{X int64;Y string;Z bool}; const Res = A{1,"b",true}`, makeStruct("p.kg/a.A", 1, "b", true), ""}}},
 	{
 		"StructKeys",
-		cp{{"a", `type A struct{X int64;Y string;Z bool}; const Res = A{X:1,Y:"b",Z:true}`, makeStruct("a.A", 1, "b", true), ""}}},
+		cp{{"a", `type A struct{X int64;Y string;Z bool}; const Res = A{X:1,Y:"b",Z:true}`, makeStruct("p.kg/a.A", 1, "b", true), ""}}},
 	{
 		"StructKeysShort",
-		cp{{"a", `type A struct{X int64;Y string;Z bool}; const Res = A{Y:"b"}`, makeStruct("a.A", 0, "b", false), ""}}},
+		cp{{"a", `type A struct{X int64;Y string;Z bool}; const Res = A{Y:"b"}`, makeStruct("p.kg/a.A", 0, "b", false), ""}}},
 	{
 		"StructMixedKeys",
 		cp{{"a", `type A struct{X int64;Y string;Z bool}; const Res = A{X:1,"b",Z:true}`, nil, "mixed key:value and value"}}},
@@ -428,13 +427,13 @@ var constTests = []struct {
 	// Test union literals.
 	{
 		"UnionX",
-		cp{{"a", `type A union{X int64;Y string;Z bool}; const Res = A{X: 123}`, makeUnion("a.A", int64(123)), ""}}},
+		cp{{"a", `type A union{X int64;Y string;Z bool}; const Res = A{X: 123}`, makeUnion("p.kg/a.A", int64(123)), ""}}},
 	{
 		"UnionY",
-		cp{{"a", `type A union{X int64;Y string;Z bool}; const Res = A{Y: "abc"}`, makeUnion("a.A", "abc"), ""}}},
+		cp{{"a", `type A union{X int64;Y string;Z bool}; const Res = A{Y: "abc"}`, makeUnion("p.kg/a.A", "abc"), ""}}},
 	{
 		"UnionZ",
-		cp{{"a", `type A union{X int64;Y string;Z bool}; const Res = A{Z: true}`, makeUnion("a.A", true), ""}}},
+		cp{{"a", `type A union{X int64;Y string;Z bool}; const Res = A{Z: true}`, makeUnion("p.kg/a.A", true), ""}}},
 	{
 		"UnionInvalidFieldName",
 		cp{{"a", `type A union{X int64;Y string;Z bool}; const Res = A{1+1: true}`, nil, `invalid field name`}}},
@@ -457,10 +456,10 @@ var constTests = []struct {
 	// Test optional and nil.
 	{
 		"OptionalNil",
-		cp{{"a", `type A struct{X int64;Y string;Z bool}; const Res = ?A(nil)`, vdl.ZeroValue(vdl.OptionalType(makeStructType("a.A"))), ""}}},
+		cp{{"a", `type A struct{X int64;Y string;Z bool}; const Res = ?A(nil)`, vdl.ZeroValue(vdl.OptionalType(makeStructType("p.kg/a.A"))), ""}}},
 	{
 		"Optional",
-		cp{{"a", `type A struct{X int64;Y string;Z bool}; const Res = ?A{1,"b",true}`, vdl.OptionalValue(makeStruct("a.A", 1, "b", true)), ""}}},
+		cp{{"a", `type A struct{X int64;Y string;Z bool}; const Res = ?A{1,"b",true}`, vdl.OptionalValue(makeStruct("p.kg/a.A", 1, "b", true)), ""}}},
 	{
 		"OptionalCyclicNil",
 		cp{{"a", `type A struct{X string;Z ?A}; const Res = A{"a",nil}`, makeCyclicStruct("a", nil), ""}}},
@@ -472,15 +471,15 @@ var constTests = []struct {
 		cp{{"a", `type A struct{X string;Z ?A}; const Res = A{"a",?A{"b",?A{"c",nil}}}`, makeCyclicStruct("a", makeCyclicStruct("b", makeCyclicStruct("c", nil))), ""}}},
 	{
 		"OptionalCyclicTypeMismatch",
-		cp{{"a", `type A struct{X string;Z ?A}; const Res = A{"a","b"}`, nil, `can't convert "b" to \?a.A`}}},
+		cp{{"a", `type A struct{X string;Z ?A}; const Res = A{"a","b"}`, nil, `can't convert "b" to \?p.kg/a.A`}}},
 	{
 		"OptionalCyclicExplicitTypeMismatch",
-		cp{{"a", `type A struct{X string;Z ?A}; const Res = A{"a",A{}}`, nil, `not assignable from a.A`}}},
+		cp{{"a", `type A struct{X string;Z ?A}; const Res = A{"a",A{}}`, nil, `not assignable from p.kg/a.A`}}},
 
 	// Test enums.
 	{
 		"Enum",
-		cp{{"a", `type A enum{X;Y;Z}; const Res = A.X`, makeEnumXYZ("a.A", "X"), ""}}},
+		cp{{"a", `type A enum{X;Y;Z}; const Res = A.X`, makeEnumXYZ("p.kg/a.A", "X"), ""}}},
 	{
 		"EnumNoLabel",
 		cp{{"a", `type A enum{X;Y;Z}; const Res = A`, nil, "A is a type"}}},
@@ -521,35 +520,35 @@ var constTests = []struct {
 	// Test explicit user type conversions.
 	{
 		"TypedUserBool",
-		cp{{"a", `type TypedBool bool;const Res = TypedBool(true)`, namedZero("a.TypedBool", vdl.BoolType).AssignBool(true), ""}}},
+		cp{{"a", `type TypedBool bool;const Res = TypedBool(true)`, namedZero("p.kg/a.TypedBool", vdl.BoolType).AssignBool(true), ""}}},
 	{
 		"TypedUserString",
-		cp{{"a", `type TypedStr string;const Res = TypedStr("abc")`, namedZero("a.TypedStr", vdl.StringType).AssignString("abc"), ""}}},
+		cp{{"a", `type TypedStr string;const Res = TypedStr("abc")`, namedZero("p.kg/a.TypedStr", vdl.StringType).AssignString("abc"), ""}}},
 	{
 		"TypedUserInt32",
-		cp{{"a", `type TypedInt int32;const Res = TypedInt(123)`, namedZero("a.TypedInt", vdl.Int32Type).AssignInt(123), ""}}},
+		cp{{"a", `type TypedInt int32;const Res = TypedInt(123)`, namedZero("p.kg/a.TypedInt", vdl.Int32Type).AssignInt(123), ""}}},
 	{
 		"TypedUserFloat32",
-		cp{{"a", `type TypedFlt float32;const Res = TypedFlt(1.5)`, namedZero("a.TypedFlt", vdl.Float32Type).AssignFloat(1.5), ""}}},
+		cp{{"a", `type TypedFlt float32;const Res = TypedFlt(1.5)`, namedZero("p.kg/a.TypedFlt", vdl.Float32Type).AssignFloat(1.5), ""}}},
 	{
 		"TypedUserComplex64",
-		cp{{"a", `type TypedCpx complex64;const Res = TypedCpx(1.5+2i)`, namedZero("a.TypedCpx", vdl.Complex64Type).AssignComplex(1.5 + 2i), ""}}},
+		cp{{"a", `type TypedCpx complex64;const Res = TypedCpx(1.5+2i)`, namedZero("p.kg/a.TypedCpx", vdl.Complex64Type).AssignComplex(1.5 + 2i), ""}}},
 	{
 		"TypedUserBoolMismatch",
 		cp{{"a", `type TypedBool bool;const Res = TypedBool(1)`, nil,
-			`invalid type conversion \(can't convert 1 to a.TypedBool bool\)`}}},
+			`invalid type conversion \(can't convert 1 to p.kg/a.TypedBool bool\)`}}},
 	{
 		"TypedUserStringMismatch",
 		cp{{"a", `type TypedStr string;const Res = TypedStr(1)`, nil,
-			`invalid type conversion \(can't convert 1 to a.TypedStr string\)`}}},
+			`invalid type conversion \(can't convert 1 to p.kg/a.TypedStr string\)`}}},
 	{
 		"TypedUserInt32Mismatch",
 		cp{{"a", `type TypedInt int32;const Res = TypedInt(true)`, nil,
-			`can't convert true to a.TypedInt int32`}}},
+			`can't convert true to p.kg/a.TypedInt int32`}}},
 	{
 		"TypedUserFloat32Mismatch",
 		cp{{"a", `type TypedFlt float32;const Res = TypedFlt(true)`, nil,
-			`can't convert true to a.TypedFlt float32`}}},
+			`can't convert true to p.kg/a.TypedFlt float32`}}},
 
 	// Test typeobject consts.
 	{
@@ -584,13 +583,13 @@ var constTests = []struct {
 		cp{{"a", `const Res = typeobject(map[string]int32)`, vdl.TypeObjectValue(vdl.MapType(vdl.StringType, vdl.Int32Type)), ""}}},
 	{
 		"TypeObjectStruct",
-		cp{{"a", `type A struct{X int64;Y string;Z bool}; const Res = typeobject(A)`, vdl.TypeObjectValue(makeStructType("a.A")), ""}}},
+		cp{{"a", `type A struct{X int64;Y string;Z bool}; const Res = typeobject(A)`, vdl.TypeObjectValue(makeStructType("p.kg/a.A")), ""}}},
 	{
 		"TypeObjectStructField",
-		cp{{"a", `type A struct{T typeobject}; const Res = A{typeobject(bool)}`, makeStructTypeObject("a.A", vdl.BoolType), ""}}},
+		cp{{"a", `type A struct{T typeobject}; const Res = A{typeobject(bool)}`, makeStructTypeObject("p.kg/a.A", vdl.BoolType), ""}}},
 	{
 		"TypeObjectEnum",
-		cp{{"a", `type A enum{X;Y;Z}; const Res = typeobject(A)`, vdl.TypeObjectValue(vdl.NamedType("a.A", vdl.EnumType("X", "Y", "Z"))), ""}}},
+		cp{{"a", `type A enum{X;Y;Z}; const Res = typeobject(A)`, vdl.TypeObjectValue(vdl.NamedType("p.kg/a.A", vdl.EnumType("X", "Y", "Z"))), ""}}},
 
 	// Test named consts.
 	{
@@ -611,19 +610,19 @@ var constTests = []struct {
 	{
 		"NamedUserBool",
 		cp{{"a", `type TypedBool bool;const foo = TypedBool(true);const Res = foo`,
-			namedZero("a.TypedBool", vdl.BoolType).AssignBool(true), ""}}},
+			namedZero("p.kg/a.TypedBool", vdl.BoolType).AssignBool(true), ""}}},
 	{
 		"NamedUserString",
 		cp{{"a", `type TypedStr string;const foo = TypedStr("abc");const Res = foo`,
-			namedZero("a.TypedStr", vdl.StringType).AssignString("abc"), ""}}},
+			namedZero("p.kg/a.TypedStr", vdl.StringType).AssignString("abc"), ""}}},
 	{
 		"NamedUserInt32",
 		cp{{"a", `type TypedInt int32;const foo = TypedInt(123);const Res = foo`,
-			namedZero("a.TypedInt", vdl.Int32Type).AssignInt(123), ""}}},
+			namedZero("p.kg/a.TypedInt", vdl.Int32Type).AssignInt(123), ""}}},
 	{
 		"NamedUserFloat32",
 		cp{{"a", `type TypedFlt float32;const foo = TypedFlt(1.5);const Res = foo`,
-			namedZero("a.TypedFlt", vdl.Float32Type).AssignFloat(1.5), ""}}},
+			namedZero("p.kg/a.TypedFlt", vdl.Float32Type).AssignFloat(1.5), ""}}},
 	{
 		"ConstNamedI",
 		cp{{"a", `const I = true;const Res = I`, vdl.BoolValue(true), ""}}},
@@ -643,16 +642,16 @@ var constTests = []struct {
 		cp{{"a", `const Res = int32(^1)`, vdl.Int32Value(-2), ""}}},
 	{
 		"TypedNot",
-		cp{{"a", `type TypedBool bool;const Res = !TypedBool(true)`, namedZero("a.TypedBool", vdl.BoolType), ""}}},
+		cp{{"a", `type TypedBool bool;const Res = !TypedBool(true)`, namedZero("p.kg/a.TypedBool", vdl.BoolType), ""}}},
 	{
 		"TypedPos",
-		cp{{"a", `type TypedInt int32;const Res = TypedInt(+123)`, namedZero("a.TypedInt", vdl.Int32Type).AssignInt(123), ""}}},
+		cp{{"a", `type TypedInt int32;const Res = TypedInt(+123)`, namedZero("p.kg/a.TypedInt", vdl.Int32Type).AssignInt(123), ""}}},
 	{
 		"TypedNeg",
-		cp{{"a", `type TypedInt int32;const Res = TypedInt(-123)`, namedZero("a.TypedInt", vdl.Int32Type).AssignInt(-123), ""}}},
+		cp{{"a", `type TypedInt int32;const Res = TypedInt(-123)`, namedZero("p.kg/a.TypedInt", vdl.Int32Type).AssignInt(-123), ""}}},
 	{
 		"TypedComplement",
-		cp{{"a", `type TypedInt int32;const Res = TypedInt(^1)`, namedZero("a.TypedInt", vdl.Int32Type).AssignInt(-2), ""}}},
+		cp{{"a", `type TypedInt int32;const Res = TypedInt(^1)`, namedZero("p.kg/a.TypedInt", vdl.Int32Type).AssignInt(-2), ""}}},
 	{
 		"NamedNot",
 		cp{{"a", `const foo = bool(true);const Res = !foo`, vdl.BoolValue(false), ""}}},
@@ -974,10 +973,13 @@ var constTests = []struct {
 		{"b", `const Res = true`, vdl.BoolValue(true), ""}}},
 	{"MultiPkgDep", cp{
 		{"a", `const Res = x;const x = true`, vdl.BoolValue(true), ""},
-		{"b", `import "a";const Res = a.Res && false`, vdl.BoolValue(false), ""}}},
+		{"b", `import "p.kg/a";const Res = a.Res && false`, vdl.BoolValue(false), ""}}},
+	{"MultiPkgDepQualifiedPath", cp{
+		{"a", `const Res = x;const x = true`, vdl.BoolValue(true), ""},
+		{"b", `import "p.kg/a";const Res = "p.kg/a".Res && false`, vdl.BoolValue(false), ""}}},
 	{"MultiPkgUnexportedConst", cp{
 		{"a", `const Res = x;const x = true`, vdl.BoolValue(true), ""},
-		{"b", `import "a";const Res = a.x && false`, nil, "a.x undefined"}}},
+		{"b", `import "p.kg/a";const Res = a.x && false`, nil, "a.x undefined"}}},
 	{"MultiPkgSamePkgName", cp{
 		{"a", `const Res = true`, vdl.BoolValue(true), ""},
 		{"a", `const Res = true`, nil, "invalid recompile"}}},
@@ -986,5 +988,5 @@ var constTests = []struct {
 		{"b", `const Res = a.Res && false`, nil, "a.Res undefined"}}},
 	{"RedefinitionOfImportedName", cp{
 		{"a", `const Res = true`, vdl.BoolValue(true), ""},
-		{"b", `import "a"; const a = "test"; const Res = a`, nil, "const a name conflict"}}},
+		{"b", `import "p.kg/a"; const a = "test"; const Res = a`, nil, "const a name conflict"}}},
 }

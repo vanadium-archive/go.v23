@@ -45,9 +45,7 @@ func runHelper(run func(targets []*build.Package, env *compile.Env)) func(cmd *c
 			args = append(args, ".")
 		}
 		env := compile.NewEnv(flagMaxErrors)
-		if flagExperimental {
-			env.EnableExperimental()
-		}
+		env.DisallowPathQualifiers()
 		mode := build.UnknownPathIsError
 		if flagIgnoreUnknown {
 			mode = build.UnknownPathIsIgnored
@@ -315,7 +313,6 @@ var (
 	flagMaxErrors     int
 	flagExts          string
 	flagVDLConfig     string
-	flagExperimental  bool
 	flagIgnoreUnknown bool
 
 	// Options for each command.
@@ -364,7 +361,6 @@ for managing Go source code.
 	vdlcmd.Flags.IntVar(&flagMaxErrors, "max_errors", -1, "Stop processing after this many errors, or -1 for unlimited.")
 	vdlcmd.Flags.StringVar(&flagExts, "exts", ".vdl", "Comma-separated list of valid VDL file name extensions.")
 	vdlcmd.Flags.StringVar(&flagVDLConfig, "vdl.config", "vdl.config", "Basename of the optional per-package config file.")
-	vdlcmd.Flags.BoolVar(&flagExperimental, "experimental", false, "Enable experimental features that may crash the compiler and change without notice.  Intended for VDL compiler developers.")
 	vdlcmd.Flags.BoolVar(&flagIgnoreUnknown, "ignore_unknown", false, "Ignore unknown packages provided on the command line.")
 
 	// Options for compile.

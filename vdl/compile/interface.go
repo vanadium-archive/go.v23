@@ -129,9 +129,13 @@ func (id ifaceDefiner) defineEmbeds(b *ifaceBuilder) {
 		}
 		seen[pe.Name] = pe
 		// Resolve the embedded interface.
-		embed, _ := id.env.ResolveInterface(pe.Name, file)
+		embed, matched := id.env.ResolveInterface(pe.Name, file)
 		if embed == nil {
 			id.env.Errorf(file, pe.Pos, "interface %s undefined", pe.Name)
+			continue // keep going to catch more errors
+		}
+		if len(matched) < len(pe.Name) {
+			id.env.Errorf(file, pe.Pos, "interface %s invalid (%s unmatched)", pe.Name, pe.Name[len(matched):])
 			continue // keep going to catch more errors
 		}
 		def.Embeds = append(def.Embeds, embed)

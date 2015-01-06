@@ -248,7 +248,11 @@ func compileDefinedType(ptype parse.Type, file *File, env *Env, tbuilder *vdl.Ty
 func compileLiteralType(ptype parse.Type, file *File, env *Env, tbuilder *vdl.TypeBuilder, builders map[string]*typeDefBuilder) vdl.TypeOrPending {
 	switch pt := ptype.(type) {
 	case *parse.TypeNamed:
-		if def, _ := env.ResolveType(pt.Name, file); def != nil {
+		if def, matched := env.ResolveType(pt.Name, file); def != nil {
+			if len(matched) < len(pt.Name) {
+				env.Errorf(file, pt.Pos(), "type %s invalid (%s unmatched)", pt.Name, pt.Name[len(matched):])
+				return nil
+			}
 			return def.Type
 		}
 		if b, ok := builders[pt.Name]; ok {

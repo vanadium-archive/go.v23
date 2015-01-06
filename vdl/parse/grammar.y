@@ -111,7 +111,7 @@ func ensureNonEmptyToken(yylex yyLexer, tok strPos, errMsg string) {
 %token <imagpos>  tIMAGLIT
 
 // Labeled rules holding typed values.
-%type <strpos>     nameref
+%type <strpos>     nameref dotnameref
 %type <namepos>    label_spec
 %type <nameposes>  label_spec_list
 %type <typeexpr>   type type_no_typeobject otype
@@ -600,11 +600,23 @@ errorid_spec:
 
 // MISC TOKENS
 
-// nameref describes a named reference to another type, interface or const.
+// nameref describes a named reference to another type, interface or const.  We
+// allow the following forms:
+//   foo
+//   foo.bar            (and multi-dot variants)
+//   "pkg/path".foo
+//   "pkg/path".foo.bar (and multi-dot variants)
 nameref:
+  dotnameref
+  { $$ = $1 }
+| tSTRLIT '.' dotnameref
+  { $$ = strPos{"\""+$1.str+"\"."+$3.str, $1.pos} }
+
+// dotnameref describes just the dotted portion of nameref.
+dotnameref:
   tIDENT
   { $$ = $1 }
-| nameref '.' tIDENT
+| dotnameref '.' tIDENT
   { $$ = strPos{$1.str+"."+$3.str, $1.pos} }
 
 otype:

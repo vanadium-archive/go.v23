@@ -9,13 +9,13 @@ import (
 	"v.io/core/veyron2/vdl/vdltest"
 )
 
-const exp = "experimental"
+const qual = "package path qualified identifier"
 
-func testType(t *testing.T, test typeTest, experimental bool) {
+func testType(t *testing.T, test typeTest, qualifiedPaths bool) {
 	env := compile.NewEnv(-1)
-	if experimental {
-		env.EnableExperimental()
-		test.Name = "Exp" + test.Name
+	if !qualifiedPaths {
+		env.DisallowPathQualifiers()
+		test.Name = "NoQual" + test.Name
 	}
 	for _, tpkg := range test.Pkgs {
 		// Compile the package with a single file, and adding the "package foo"
@@ -23,11 +23,12 @@ func testType(t *testing.T, test typeTest, experimental bool) {
 		files := map[string]string{
 			tpkg.Name + ".vdl": "package " + tpkg.Name + "\n" + tpkg.Data,
 		}
-		buildPkg := vdltest.FakeBuildPackage(tpkg.Name, tpkg.Name, files)
+		pkgPath := "p.kg/" + tpkg.Name // use dots in pkgpath to test tricky cases
+		buildPkg := vdltest.FakeBuildPackage(tpkg.Name, pkgPath, files)
 		pkg := build.BuildPackage(buildPkg, env)
-		if tpkg.ErrRE == exp {
-			if experimental {
-				tpkg.ErrRE = "" // in experimental mode the test should pass
+		if tpkg.ErrRE == qual {
+			if qualifiedPaths {
+				tpkg.ErrRE = "" // the test should pass if running with qualified paths.
 			} else {
 				tpkg.ExpectBase = nil // otherwise the test should fail
 			}
@@ -41,7 +42,7 @@ func testType(t *testing.T, test typeTest, experimental bool) {
 }
 
 func TestType(t *testing.T) {
-	// Run all tests in both regular and experimental modes.
+	// Run all tests in both regular and qualfiedPaths mode
 	for _, test := range typeTests {
 		testType(t, test, false)
 	}
@@ -58,7 +59,7 @@ func matchTypeRes(t *testing.T, tname string, tpkg typePkg, tdefs []*compile.Typ
 	for _, tdef := range tdefs {
 		if tdef.Name == "Res" {
 			base := tpkg.ExpectBase
-			resname := tpkg.Name + ".Res"
+			resname := "p.kg/" + tpkg.Name + ".Res"
 			res := vdl.NamedType(resname, base)
 			if got, want := tdef.Type, res; got != want {
 				t.Errorf("%s type got %s, want %s", tname, got, want)
@@ -72,8 +73,8 @@ func matchTypeRes(t *testing.T, tname string, tpkg typePkg, tdefs []*compile.Typ
 	t.Errorf("%s couldn't find Res in package %s", tname, tpkg.Name)
 }
 
-func namedX(base *vdl.Type) *vdl.Type   { return vdl.NamedType("a.x", base) }
-func namedRes(base *vdl.Type) *vdl.Type { return vdl.NamedType("a.Res", base) }
+func namedX(base *vdl.Type) *vdl.Type   { return vdl.NamedType("p.kg/a.x", base) }
+func namedRes(base *vdl.Type) *vdl.Type { return vdl.NamedType("p.kg/a.Res", base) }
 
 var bytesType = vdl.ListType(vdl.ByteType)
 
@@ -150,10 +151,13 @@ var typeTests = []typeTest{
 		{"b", `type Res bool`, vdl.BoolType, ""}}},
 	{"MultiPkgDep", tp{
 		{"a", `type Res x;type x bool`, namedX(vdl.BoolType), ""},
-		{"b", `import "a";type Res []a.Res`, vdl.ListType(namedRes(vdl.BoolType)), ""}}},
+		{"b", `import "p.kg/a";type Res []a.Res`, vdl.ListType(namedRes(vdl.BoolType)), ""}}},
+	{"MultiPkgDepQualifiedPath", tp{
+		{"a", `type Res x;type x bool`, namedX(vdl.BoolType), ""},
+		{"b", `import "p.kg/a";type Res []"p.kg/a".Res`, vdl.ListType(namedRes(vdl.BoolType)), qual}}},
 	{"MultiPkgUnexportedType", tp{
 		{"a", `type Res x;type x bool`, namedX(vdl.BoolType), ""},
-		{"b", `import "a";type Res []a.x`, nil, "type a.x undefined"}}},
+		{"b", `import "p.kg/a";type Res []a.x`, nil, "type a.x undefined"}}},
 	{"MultiPkgSamePkgName", tp{
 		{"a", `type Res bool`, vdl.BoolType, ""},
 		{"a", `type Res bool`, nil, "invalid recompile"}}},
@@ -162,7 +166,7 @@ var typeTests = []typeTest{
 		{"b", `type Res []a.Res`, nil, "type a.Res undefined"}}},
 	{"RedefinitionOfImportedName", tp{
 		{"a", `type Res bool`, vdl.BoolType, ""},
-		{"b", `import "a"; type a string; type Res a`, nil, "type a name conflict"}}},
+		{"b", `import "p.kg/a"; type a string; type Res a`, nil, "type a name conflict"}}},
 
 	// Test errors.
 	{"InvalidName", tp{{"a", `type _Res bool`, nil, "type _Res invalid name"}}},
@@ -171,4 +175,13 @@ var typeTests = []typeTest{
 	{"UnnamedStruct", tp{{"a", `type Res []struct{A int32}`, nil, "unnamed struct type invalid"}}},
 	{"UnnamedUnion", tp{{"a", `type Res []union{A bool;B int32;C string}`, nil, "unnamed union type invalid"}}},
 	{"TopLevelOptional", tp{{"a", `type Res ?bool`, nil, "can't define type based on top-level optional"}}},
+	{"MultiPkgUnmatchedType", tp{
+		{"a", `type Res bool`, vdl.BoolType, ""},
+		{"b", `import "p.kg/a";type Res a.Res.foobar`, nil, `\(\.foobar unmatched\)`}}},
+	{"UnterminatedPath1", tp{
+		{"a", `type Res bool`, vdl.BoolType, ""},
+		{"b", `import "p.kg/a";type Res "a.Res`, nil, "syntax error"}}},
+	{"UnterminatedPath2", tp{
+		{"a", `type Res bool`, vdl.BoolType, ""},
+		{"b", `import "p.kg/a";type Res a".Res`, nil, "syntax error"}}},
 }
