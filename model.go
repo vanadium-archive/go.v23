@@ -157,12 +157,14 @@ type Profile interface {
 	// command line flags have been parsed. It returns an instance of
 	// the AppCycle interface to be used for managing this runtime.
 	// Init will be called once and only once by the Runtime.
+	// TODO(suharshs, mattr): Once we switch to the new profile init func, we can remove this.
 	Init(rt Runtime, p *config.Publisher) (AppCycle, error)
 
 	String() string
 
 	// Cleanup shuts down any internal state maintained by the Profile.
 	// It will be called by the Runtime from its Cleanup method.
+	// TODO(suharshs, mattr): Once we switch to the new profile init func, we can remove this.
 	Cleanup()
 }
 
@@ -349,7 +351,7 @@ type RuntimeX interface {
 	// must be called before any other Runtime methods are called.  Its
 	// primary responsability is to populate the initial context with
 	// all required state.
-	Init(ctx *context.T) (*context.T, context.CancelFunc)
+	Init(ctx *context.T) *context.T
 
 	// NewEndpoint returns an Endpoint by parsing the supplied endpoint
 	// string as per the format described above. It can be used to test
@@ -382,50 +384,62 @@ type RuntimeX interface {
 	SetNewStreamManager(ctx *context.T, opts ...stream.ManagerOpt) (*context.T, stream.Manager, error)
 
 	// StreamManager returns the current stream manager.
-	StreamManager(ctx *context.T) stream.Manager
+	GetStreamManager(ctx *context.T) stream.Manager
 
 	// SetPrincipal attaches a principal to the returned context.
 	SetPrincipal(ctx *context.T, principal security.Principal) (*context.T, error)
 
-	// Principal returns the current Principal.
-	Principal(ctx *context.T) security.Principal
+	// GetPrincipal returns the current Principal.
+	GetPrincipal(ctx *context.T) security.Principal
 
 	// SetNewClient creates a new Client instance and attaches it to a
 	// new context.
 	SetNewClient(ctx *context.T, opts ...ipc.ClientOpt) (*context.T, ipc.Client, error)
 
-	// Client returns the current Client.
-	Client(ctx *context.T) ipc.Client
+	// GetClient returns the current Client.
+	GetClient(ctx *context.T) ipc.Client
 
 	// SetNewSpan derives a context with a new Span that can be used to
 	// trace and annotate operations across process boundaries.
 	SetNewSpan(ctx *context.T, name string) (*context.T, vtrace.Span)
 
-	// Span finds the currently active span.
-	Span(ctx *context.T) vtrace.Span
+	// GetSpan finds the currently active span.
+	GetSpan(ctx *context.T) vtrace.Span
 
 	// SetNewNamespace creates a new Namespace and attaches it to the
 	// returned context.
 	SetNewNamespace(ctx *context.T, roots ...string) (*context.T, naming.Namespace, error)
 
-	// Namespace returns the current namespace
-	Namespace(ctx *context.T) naming.Namespace
+	// GetNamespace returns the current namespace
+	GetNamespace(ctx *context.T) naming.Namespace
 
 	// SetNewLogger creates a new Logger and attaches it to the
 	// returned context.
 	SetNewLogger(ctx *context.T, name string, opts ...vlog.LoggingOpts) (*context.T, vlog.Logger, error)
 
-	// Logger returns the current logger.
-	Logger(ctx *context.T) vlog.Logger
+	// GetLogger returns the current logger.
+	GetLogger(ctx *context.T) vlog.Logger
 
-	// VtraceStore returns the current vtrace.Store.
-	VtraceStore(ctx *context.T) vtrace.Store
+	// GetVtraceStore returns the current vtrace.Store.
+	GetVtraceStore(ctx *context.T) vtrace.Store
 
 	// SetReservedNameDispatcher sets and configures a dispatcher for the
 	// reserved portion of the name space, i.e. any path starting with '__'.
-	// TODO(mattr): Remove this from the interface once the profile is
-	// available from the context.
 	SetReservedNameDispatcher(ctx *context.T, server ipc.Dispatcher, opts ...ipc.ServerOpt) *context.T
+
+	// GetProfile gets the current profile.
+	// TODO(suharshs, mattr): Again not completely sure yet if we actually need this.
+	GetProfile(ctx *context.T) Profile
+
+	// GetAppCycle gets the current AppCycle.
+	// TODO(suharshs, mattr): Determine if this is needed or not based on the use cases
+	// of runtime.AppCycle().
+	GetAppCycle(ctx *context.T) AppCycle
+
+	// GetListenSpec gets the ListenSpec.
+	// TODO(suharshs, mattr): Determine if setting this should also be allowed, or if
+	// only the Profiles should be able to this.
+	GetListenSpec(ctx *context.T) ipc.ListenSpec
 }
 
 var (
@@ -484,9 +498,9 @@ func SetNewStreamManager(ctx *context.T, opts ...stream.ManagerOpt) (*context.T,
 	return runtimeConfig.runtime.SetNewStreamManager(ctx, opts...)
 }
 
-// StreamManager returns the current stream manager.
-func StreamManager(ctx *context.T) stream.Manager {
-	return runtimeConfig.runtime.StreamManager(ctx)
+// GetStreamManager returns the current stream manager.
+func GetStreamManager(ctx *context.T) stream.Manager {
+	return runtimeConfig.runtime.GetStreamManager(ctx)
 }
 
 // SetPrincipal attaches a principal to the returned context.
@@ -494,9 +508,9 @@ func SetPrincipal(ctx *context.T, principal security.Principal) (*context.T, err
 	return runtimeConfig.runtime.SetPrincipal(ctx, principal)
 }
 
-// Principal returns the current Principal.
-func Principal(ctx *context.T) security.Principal {
-	return runtimeConfig.runtime.Principal(ctx)
+// GetPrincipal returns the current Principal.
+func GetPrincipal(ctx *context.T) security.Principal {
+	return runtimeConfig.runtime.GetPrincipal(ctx)
 }
 
 // SetNewClient creates a new Client instance and attaches it to a
@@ -505,9 +519,9 @@ func SetNewClient(ctx *context.T, opts ...ipc.ClientOpt) (*context.T, ipc.Client
 	return runtimeConfig.runtime.SetNewClient(ctx, opts...)
 }
 
-// Client returns the current Client.
-func Client(ctx *context.T) ipc.Client {
-	return runtimeConfig.runtime.Client(ctx)
+// GetClient returns the current Client.
+func GetClient(ctx *context.T) ipc.Client {
+	return runtimeConfig.runtime.GetClient(ctx)
 }
 
 // SetNewSpan derives a context with a new Span that can be used to
@@ -516,9 +530,9 @@ func SetNewSpan(ctx *context.T, name string) (*context.T, vtrace.Span) {
 	return runtimeConfig.runtime.SetNewSpan(ctx, name)
 }
 
-// Span finds the currently active span.
-func Span(ctx *context.T) vtrace.Span {
-	return runtimeConfig.runtime.Span(ctx)
+// GetSpan finds the currently active span.
+func GetSpan(ctx *context.T) vtrace.Span {
+	return runtimeConfig.runtime.GetSpan(ctx)
 }
 
 // SetNewNamespace creates a new Namespace and attaches it to the
@@ -527,9 +541,9 @@ func SetNewNamespace(ctx *context.T, roots ...string) (*context.T, naming.Namesp
 	return runtimeConfig.runtime.SetNewNamespace(ctx, roots...)
 }
 
-// Namespace returns the current namespace.
-func Namespace(ctx *context.T) naming.Namespace {
-	return runtimeConfig.runtime.Namespace(ctx)
+// GetNamespace returns the current namespace.
+func GetNamespace(ctx *context.T) naming.Namespace {
+	return runtimeConfig.runtime.GetNamespace(ctx)
 }
 
 // SetNewLogger creates a new Logger and attaches it to the
@@ -538,12 +552,43 @@ func SetNewLogger(ctx *context.T, name string, opts ...vlog.LoggingOpts) (*conte
 	return runtimeConfig.runtime.SetNewLogger(ctx, name, opts...)
 }
 
-// Logger returns the current logger.
-func Logger(ctx *context.T) vlog.Logger {
-	return runtimeConfig.runtime.Logger(ctx)
+// GetLogger returns the current logger.
+func GetLogger(ctx *context.T) vlog.Logger {
+	return runtimeConfig.runtime.GetLogger(ctx)
 }
 
-// VtraceStore gets the current vtrace.Store.
-func VtraceStore(ctx *context.T) vtrace.Store {
-	return runtimeConfig.runtime.VtraceStore(ctx)
+// GetVtraceStore gets the current vtrace.Store.
+func GetVtraceStore(ctx *context.T) vtrace.Store {
+	return runtimeConfig.runtime.GetVtraceStore(ctx)
+}
+
+// GetProfile gets the current Profile.
+func GetProfile(ctx *context.T) Profile {
+	return runtimeConfig.runtime.GetProfile(ctx)
+}
+
+// GetAppCycle gets the current AppCycle.
+func GetAppCycle(ctx *context.T) AppCycle {
+	return runtimeConfig.runtime.GetAppCycle(ctx)
+}
+
+// GetListenSpec gets the current ListenSpec.
+func GetListenSpec(ctx *context.T) ipc.ListenSpec {
+	return runtimeConfig.runtime.GetListenSpec(ctx)
+}
+
+var (
+	profileInitFunc ProfileInitFunc
+	profileInitMu   sync.Mutex
+)
+
+type ProfileInitFunc func(ctx *context.T) (RuntimeX, *context.T)
+
+func RegisterProfileInit(f ProfileInitFunc) {
+	profileInitMu.Lock()
+	if profileInitFunc != nil {
+		panic("Profile intialization functions can only be registered one time.")
+	}
+	profileInitFunc = f
+	profileInitMu.Unlock()
 }
