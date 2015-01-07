@@ -57,6 +57,8 @@ import (
 	"v.io/core/veyron2/security"
 )
 
+// TODO(suharshs, mattr): Remove the ROpts.
+
 // RuntimePrincipal represents the principal to be used by the runtime.
 //
 // It wraps the security.Principal interface so that functions representing
