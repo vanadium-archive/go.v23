@@ -156,11 +156,10 @@ func TestReflectInvoker(t *testing.T) {
 		{&tags{}, "Epsilon", call5, tagEpsilon, v{11, "b"}, v{11, "b", nil}, nil},
 		{&tags{}, "Error", call1, nil, nil, v{errApp}, nil},
 	}
-	name := func(t testcase) string {
-		return fmt.Sprintf("%T.%s()", t.obj, t.method)
+	name := func(test testcase) string {
+		return fmt.Sprintf("%T.%s()", test.obj, test.method)
 	}
-	for _, test := range tests {
-		invoker := ipc.ReflectInvoker(test.obj)
+	testInvoker := func(test testcase, invoker ipc.Invoker) {
 		// Call Invoker.Prepare and check results.
 		argptrs, tags, err := invoker.Prepare(test.method, len(test.args))
 		if err != nil {
@@ -187,6 +186,15 @@ func TestReflectInvoker(t *testing.T) {
 		if ctx := test.obj.LastContext(); ctx != test.call {
 			t.Errorf("%s Invoke got ctx %v, want %v", name(test), ctx, test.call)
 		}
+	}
+	for _, test := range tests {
+		invoker := ipc.ReflectInvokerOrDie(test.obj)
+		testInvoker(test, invoker)
+		invoker, err := ipc.ReflectInvoker(test.obj)
+		if err != nil {
+			t.Errorf("%s ReflectInvoker got error: %v", name(test), err)
+		}
+		testInvoker(test, invoker)
 	}
 }
 
@@ -424,7 +432,7 @@ func TestReflectInvokerSignature(t *testing.T) {
 		}},
 	}
 	for _, test := range tests {
-		invoker := ipc.ReflectInvoker(sigTest{})
+		invoker := ipc.ReflectInvokerOrDie(sigTest{})
 		var got interface{}
 		var err error
 		if test.Method == "" {
@@ -534,9 +542,17 @@ func TestReflectInvokerPanic(t *testing.T) {
 		{badGlobChildren2{}, "GlobChildren__ must have signature"},
 	}
 	for _, test := range tests {
-		got := testutil.CallAndRecover(func() { ipc.ReflectInvoker(test.obj) })
-		if !regexp.MustCompile(test.regexp).MatchString(fmt.Sprint(got)) {
-			t.Errorf(`ReflectInvoker(%T) got panic "%v", want regexp "%v"`, test.obj, got, test.regexp)
+		re := regexp.MustCompile(test.regexp)
+		invoker, err := ipc.ReflectInvoker(test.obj)
+		if invoker != nil {
+			t.Errorf(`ReflectInvoker(%T) got non-nil invoker`, test.obj)
+		}
+		if !re.MatchString(fmt.Sprint(err)) {
+			t.Errorf(`ReflectInvoker(%T) got error %v, want regexp "%v"`, test.obj, err, test.regexp)
+		}
+		recov := testutil.CallAndRecover(func() { ipc.ReflectInvokerOrDie(test.obj) })
+		if !re.MatchString(fmt.Sprint(recov)) {
+			t.Errorf(`ReflectInvokerOrDie(%T) got panic %v, want regexp "%v"`, test.obj, recov, test.regexp)
 		}
 	}
 }
@@ -555,11 +571,10 @@ func TestReflectInvokerErrors(t *testing.T) {
 		{&notags{}, "UnknownMethod", v{}, expectedError, expectedError},
 		{&tags{}, "UnknownMethod", v{}, expectedError, expectedError},
 	}
-	name := func(t testcase) string {
-		return fmt.Sprintf("%T.%s()", t.obj, t.method)
+	name := func(test testcase) string {
+		return fmt.Sprintf("%T.%s()", test.obj, test.method)
 	}
-	for _, test := range tests {
-		invoker := ipc.ReflectInvoker(test.obj)
+	testInvoker := func(test testcase, invoker ipc.Invoker) {
 		// Call Invoker.Prepare and check error.
 		_, _, err := invoker.Prepare(test.method, len(test.args))
 		if err != test.prepareErr {
@@ -570,6 +585,15 @@ func TestReflectInvokerErrors(t *testing.T) {
 		if err != test.invokeErr {
 			t.Errorf(`%s Invoke got error "%v", want "%v"`, name(test), err, test.invokeErr)
 		}
+	}
+	for _, test := range tests {
+		invoker := ipc.ReflectInvokerOrDie(test.obj)
+		testInvoker(test, invoker)
+		invoker, err := ipc.ReflectInvoker(test.obj)
+		if err != nil {
+			t.Errorf(`%s ReflectInvoker got error %v`, name(test), err)
+		}
+		testInvoker(test, invoker)
 	}
 }
 
@@ -695,7 +719,7 @@ func TestReflectInvokerGlobber(t *testing.T) {
 	}
 
 	for _, tc := range testcases {
-		ri := ipc.ReflectInvoker(tc.obj)
+		ri := ipc.ReflectInvokerOrDie(tc.obj)
 		if got := ri.Globber(); !reflect.DeepEqual(got, tc.expected) {
 			t.Errorf("Unexpected result for %#v. Got %#v, want %#v", tc.obj, got, tc.expected)
 		}
