@@ -220,7 +220,7 @@ func (ri reflectInvoker) Invoke(method string, call ServerCall, argptrs []interf
 
 // Signature implements the Invoker.Signature method.
 func (ri reflectInvoker) Signature(ctx ServerContext) ([]signature.Interface, error) {
-	return ri.sig, nil
+	return signature.CopyInterfaces(ri.sig), nil
 }
 
 // MethodSignature implements the Invoker.MethodSignature method.
@@ -228,7 +228,7 @@ func (ri reflectInvoker) MethodSignature(ctx ServerContext, method string) (sign
 	// Return the first method in any interface with the given method name.
 	for _, iface := range ri.sig {
 		if msig, ok := iface.FindMethod(method); ok {
-			return msig, nil
+			return signature.CopyMethod(msig), nil
 		}
 	}
 	return signature.Method{}, verror.NoExistf("ipc: unknown method %q", method)
