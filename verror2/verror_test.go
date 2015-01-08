@@ -2,6 +2,7 @@ package verror2_test
 
 import (
 	"errors"
+	"fmt"
 	"runtime"
 	"strings"
 	"testing"
@@ -325,5 +326,39 @@ func TestEqual(t *testing.T) {
 				}
 			}
 		}
+	}
+}
+
+func TestSubordinateErrors(t *testing.T) {
+	p := verror2.ExplicitMake(idActionA, en, "server", "aEN0", 0)
+	if p.SubErrors() != nil {
+		t.Errorf("expected nil")
+	}
+	p1 := verror2.Append(p, aEN1, aFR0)
+	r1 := "server aEN0 error A 0 [server aEN1 error A 1 2], [server aFR0 erreur A 0]"
+	if got, want := p1.Error(), r1; got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+	if got, want := len(p1.SubErrors()), 2; got != want {
+		t.Errorf("got %d, want %d", got, want)
+	}
+	p2 := verror2.Append(p, nil, nil, aEN1)
+	if got, want := len(p2.SubErrors()), 1; got != want {
+		t.Errorf("got %d, want %d", got, want)
+	}
+	p2 = verror2.Append(p, fmt.Errorf("Oh"))
+	if got, want := len(p2.SubErrors()), 1; got != want {
+		t.Errorf("got %d, want %d", got, want)
+	}
+	r2 := "server aEN0 error A 0 [verror2.test  unknown error Oh]"
+	if got, want := p2.Error(), r2; got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+	p2str := p2.DebugString()
+	if !strings.Contains(p2str, r2) {
+		t.Errorf("debug string missing error message: %q, %q", p2str, r2)
+	}
+	if !(strings.Contains(p2str, "verror_test.go:333") && strings.Contains(p2str, "verror_test.go:349")) {
+		t.Errorf("debug string missing correct line #: %s", p2str)
 	}
 }

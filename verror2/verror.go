@@ -71,6 +71,7 @@ import "io"
 import "os"
 import "path/filepath"
 import "runtime"
+
 import "sync"
 
 import "v.io/core/veyron2/context"
@@ -113,7 +114,9 @@ func Register(id verror.ID, action ActionCode, englishText string) IDAction {
 }
 
 // E extends the regular error interface with an error ID,
-// some parameters, and a call stack for local debugging.
+// some parameters, a call stack for local debugging and the ability
+// to aggregate mutliple 'subordinate', errors. The Error method returns
+// a string containing the subordinate errors as well as the main one.
 type E interface {
 	error
 
@@ -142,6 +145,13 @@ type E interface {
 	// This information is not incorporated into the error string;
 	// it is intended to help debugging by developers.
 	Stack() PCs
+
+	// SubErrors returns all of the subordinate errors in the order that
+	// they were added to E.
+	SubErrors() []E
+
+	// Returns a string containing the error message, stack traces etcs.
+	DebugString() string
 }
 
 // ErrorID returns the ID of the given err, or Unknown if the err has no ID.
@@ -241,7 +251,7 @@ func makeInternal(idAction IDAction, langID i18n.LangID, componentName string, o
 		}
 		msg = i18n.Cat().Format(langID, i18n.MsgID(id), params...)
 	}
-	return Standard{idAction, msg, params, stack}
+	return Standard{idAction, msg, params, stack, nil}
 }
 
 // ExplicitMake returns an error with the given ID, with an error string in the chosen
@@ -344,7 +354,7 @@ func convertInternal(idAction IDAction, langID i18n.LangID, componentName string
 		eStack := e.Stack()
 		newStack := append(make([]uintptr, 0, len(eStack)+len(stack)), eStack...)
 		newStack = append(newStack, stack...)
-		return Standard{IDAction{e.ErrorID(), e.Action()}, msg, newParams, newStack}
+		return Standard{IDAction{e.ErrorID(), e.Action()}, msg, newParams, newStack, nil}
 	}
 
 	// The following is to aid conversion from verror to verror2
@@ -429,6 +439,7 @@ type Standard struct {
 	Msg       string        // Error message; empty if no language known.
 	ParamList []interface{} // The variadic parameters given to ExplicitMake().
 	stackPCs  []uintptr     // PCs of callers of *Make() and *Convert().
+	subErrs   []E           // Subordinate errors
 }
 
 // ErrorID returns the error id.
@@ -452,6 +463,13 @@ func (e Standard) Error() string {
 	if msg == "" {
 		msg = i18n.Cat().Format(i18n.NoLangID, i18n.MsgID(e.IDAction.ID), e.ParamList...)
 	}
+	if len(e.subErrs) > 0 {
+		str := fmt.Sprintf(" [%s]", e.subErrs[0].Error())
+		for _, s := range e.subErrs[1:] {
+			str += fmt.Sprintf(", [%s]", s.Error())
+		}
+		msg += str
+	}
 	return msg
 }
 
@@ -471,6 +489,57 @@ func (e Standard) Stack() PCs {
 	stackIntPtr := make([]uintptr, len(e.stackPCs))
 	copy(stackIntPtr, e.stackPCs)
 	return stackIntPtr
+}
+
+// SubErrors returns the subordinate errors accumulated into E, or nil
+// if there are no such errors.
+func (e Standard) SubErrors() []E {
+	if len(e.subErrs) == 0 {
+		return nil
+	}
+	r := make([]E, len(e.subErrs))
+	copy(r, e.subErrs)
+	return r
+}
+
+// Append returns a copy of err with the supplied errors appended
+// as subordinate errors.
+func Append(err E, errors ...error) E {
+	e, ok := err.(Standard)
+	if !ok {
+		return err
+	}
+	n := Standard{
+		IDAction:  e.IDAction,
+		Msg:       e.Msg,
+		ParamList: e.ParamList,
+		stackPCs:  e.stackPCs,
+		subErrs:   make([]E, len(e.subErrs), len(e.subErrs)+len(errors)),
+	}
+	copy(n.subErrs, e.subErrs)
+	for _, err := range errors {
+		if err == nil {
+			// nothing
+		} else if s, ok := err.(E); ok {
+			n.subErrs = append(n.subErrs, s)
+		} else {
+			langID, componentName, opName := dataFromContext(nil)
+			stack := make([]uintptr, 1)
+			runtime.Callers(2, stack)
+			s := convertInternal(IDAction{}, langID, componentName, opName, stack, err)
+			n.subErrs = append(n.subErrs, s)
+		}
+	}
+	return n
+}
+
+func (e Standard) DebugString() string {
+	str := e.Error()
+	str += "\n" + e.Stack().String()
+	for _, s := range e.SubErrors() {
+		str += s.Error() + "\n" + s.Stack().String()
+	}
+	return str
 }
 
 const pkgPath = "v.io/core/veyron2/verror"
