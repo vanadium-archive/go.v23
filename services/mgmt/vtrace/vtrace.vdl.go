@@ -63,7 +63,7 @@ func (c implStoreClientStub) c(ctx *__context.T) __ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return __veyron2.RuntimeFromContext(ctx).Client()
+	return __veyron2.GetClient(ctx)
 }
 
 func (c implStoreClientStub) Trace(ctx *__context.T, i0 uniqueid.ID, opts ...__ipc.CallOpt) (o0 vtrace.TraceRecord, err error) {
