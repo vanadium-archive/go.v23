@@ -23,7 +23,7 @@ func ExampleInit() {
 	}
 
 	// Go ahead and use the runtime.
-	log := r.Logger()
+	log := veyron2.GetLogger(r.NewContext())
 	log.Infof("hello world")
 }
 
