@@ -456,16 +456,16 @@ func TestArith(t *testing.T) {
 	// We try a few types of dispatchers on the server side, to verify that
 	// anything dispatching to Arith or an interface embedding Arith (like
 	// Calculator) works for a client looking to talk to an Arith service.
-	dispatchers := []ipc.Dispatcher{
-		ipc.LeafDispatcher(arith.ArithServer(&serverArith{}), nil),
-		ipc.LeafDispatcher(arith.ArithServer(&serverCalculator{}), nil),
-		ipc.LeafDispatcher(arith.CalculatorServer(&serverCalculator{}), nil),
+	objects := []interface{}{
+		arith.ArithServer(&serverArith{}),
+		arith.ArithServer(&serverCalculator{}),
+		arith.CalculatorServer(&serverCalculator{}),
 	}
 
 	client := newClient(r)
 	ctx := r.NewContext()
 
-	for i, disp := range dispatchers {
+	for i, obj := range objects {
 		server := newServer(r)
 		defer server.Stop()
 		eps, err := server.Listen(profiles.LocalListenSpec)
@@ -473,7 +473,7 @@ func TestArith(t *testing.T) {
 			t.Fatal(err)
 		}
 		root := naming.JoinAddressName(eps[0].String(), "")
-		if err := server.ServeDispatcher("", disp); err != nil {
+		if err := server.Serve("", obj, nil); err != nil {
 			t.Fatalf("%d: %v", i, err)
 		}
 		// Synchronous calls

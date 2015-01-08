@@ -197,10 +197,15 @@ type Server interface {
 	// then ListenEndpoints will include at least one Endpoint.
 	Listen(spec ListenSpec) ([]naming.Endpoint, error)
 
-	// Serve associates object with name by publishing the address
-	// of this server with the mount table under the supplied name and using
-	// authorizer to authorize access to it. RPCs invoked on the supplied name
-	// will be delivered to methods implemented by the supplied object.
+	// Serve associates object with name by publishing the address of this
+	// server with the mount table under the supplied name and using
+	// authorizer to authorize access to it. RPCs invoked on the supplied
+	// name will be delivered to methods implemented by the supplied object.
+	//
+	// Reflection is used to match requests to the object's method set.  As
+	// a special-case, if the object implements the Invoker interface, the
+	// Invoker is used to invoke methods directly, without reflection.
+	//
 	// If name is an empty string, no attempt will made to publish that
 	// name to a mount table.
 	//
@@ -211,7 +216,12 @@ type Server interface {
 
 	// ServeDispatcher associates dispatcher with the portion of the mount
 	// table's name space for which name is a prefix, by publishing the
-	// address of this dispatcher with the mount table under the supplied name.
+	// address of this dispatcher with the mount table under the supplied
+	// name.
+	//
+	// If name is an empty string, no attempt will made to publish that name
+	// to a mount table.
+	//
 	// RPCs invoked on the supplied name will be delivered to the supplied
 	// Dispatcher's Lookup method which will in turn return the object
 	// and security.Authorizer used to serve the actual RPC call.
@@ -259,10 +269,10 @@ type Dispatcher interface {
 	// Lookup returns the service implementation for the object identified
 	// by the given suffix.
 	//
-	// Lookup may return either an Invoker, or a non-Invoker object that
-	// implements the service interface for the suffix. When a non-Invoker
-	// object is returned, the incoming request will be handled using
-	// reflection to match the request to the returned object's method set.
+	// Reflection is used to match requests to the service object's method
+	// set.  As a special-case, if the object returned by Lookup implements
+	// the Invoker interface, the Invoker is used to invoke methods
+	// directly, without reflection.
 	//
 	// Returning a nil object indicates that this Dispatcher does not
 	// support the requested suffix.
