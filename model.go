@@ -218,9 +218,6 @@ type AppCycle interface {
 // Runtime is the interface that concrete Veyron implementations must
 // implement.
 type Runtime interface {
-	// Profile returns the current processes' Profile.
-	Profile() Profile
-
 	// Principal returns the principal that represents this runtime.
 	Principal() security.Principal
 

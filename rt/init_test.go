@@ -60,9 +60,11 @@ func ExampleInitWithProfile() {
 		panic(err)
 	}
 
+	ctx := r.NewContext()
+
 	// Go ahead and use the runtime.
-	log := r.Logger()
-	log.Infof("hello world from my product: %s", r.Profile())
+	log := veyron2.GetLogger(ctx)
+	log.Infof("hello world from my product: %s", veyron2.GetProfile(ctx))
 }
 
 // TODO(cnicolaou): add tests to:
