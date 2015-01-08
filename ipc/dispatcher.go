@@ -9,7 +9,7 @@ import (
 // ReflectInvoker to invoke methods. Lookup only succeeds on the empty suffix.
 // The provided auth is returned for successful lookups.
 func LeafDispatcher(obj interface{}, auth security.Authorizer) Dispatcher {
-	return &leafDispatcher{ReflectInvoker(obj), auth}
+	return &leafDispatcher{ReflectInvokerOrDie(obj), auth}
 }
 
 type leafDispatcher struct {

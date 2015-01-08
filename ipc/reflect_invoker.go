@@ -133,22 +133,33 @@ type methodInfo struct {
 //
 // The ReflectInvoker silently ignores unexported methods, and exported methods
 // whose first argument doesn't implement ipc.ServerContext.  All other methods
-// must follow the above rules; bad method types cause a panic.  You can use
-// TypeCheckMethods to dynamically check that all rules are obeyed.
+// must follow the above rules; bad method types cause an error to be returned.
 //
 // If obj implements the Describer interface, we'll use it to describe portions
 // of the object signature that cannot be retrieved via reflection;
 // e.g. method tags, documentation, variable names, etc.
-func ReflectInvoker(obj interface{}) Invoker {
+func ReflectInvoker(obj interface{}) (Invoker, error) {
 	rt := reflect.TypeOf(obj)
 	info := reflectCache.lookup(rt)
 	if info == nil {
 		// Concurrent calls may cause reflectCache.set to be called multiple times.
 		// This race is benign; the info for a given type never changes.
-		info = newReflectInfo(obj)
+		var err error
+		if info, err = newReflectInfo(obj); err != nil {
+			return nil, err
+		}
 		reflectCache.set(rt, info)
 	}
-	return reflectInvoker{reflect.ValueOf(obj), info.methods, info.sig}
+	return reflectInvoker{reflect.ValueOf(obj), info.methods, info.sig}, nil
+}
+
+// ReflectInvokerOrDie is the same as ReflectInvoker, but panics on all errors.
+func ReflectInvokerOrDie(obj interface{}) Invoker {
+	invoker, err := ReflectInvoker(obj)
+	if err != nil {
+		panic(err)
+	}
+	return invoker
 }
 
 // Prepare implements the Invoker.Prepare method.
@@ -263,32 +274,35 @@ var reflectCache = &reflectRegistry{infoMap: make(map[reflect.Type]*reflectInfo)
 // newReflectInfo returns reflection information that is expensive to compute.
 // Although it is passed an object rather than a type, it guarantees that the
 // returned information is always the same for all instances of a given type.
-func newReflectInfo(obj interface{}) *reflectInfo {
+func newReflectInfo(obj interface{}) (*reflectInfo, error) {
 	if obj == nil {
-		panic(fmt.Errorf("ipc: ReflectInvoker(nil) is invalid"))
+		return nil, fmt.Errorf("ipc: ReflectInvoker(nil) is invalid")
 	}
 	// First make methodInfos, based on reflect.Type, which also captures the name
 	// and in, out and streaming types of each method in methodSigs.  This
 	// information is guaranteed to be correct, since it's based on reflection on
 	// the underlying object.
 	rt := reflect.TypeOf(obj)
-	methodInfos, methodSigs := makeMethods(rt)
-	if len(methodInfos) == 0 && determineGlobState(obj) == nil {
-		panic(fmt.Errorf("ipc: type %v has no compatible methods: %q", rt, TypeCheckMethods(obj)))
+	methodInfos, methodSigs, err := makeMethods(rt)
+	switch {
+	case err != nil:
+		return nil, err
+	case len(methodInfos) == 0 && determineGlobState(obj) == nil:
+		return nil, fmt.Errorf("ipc: type %v has no compatible methods: %q", rt, TypeCheckMethods(obj))
 	}
 	// Now attach method tags to each methodInfo.  Since this is based on the desc
 	// provided by the user, there's no guarantee it's "correct", but if the same
 	// method is described by multiple interfaces, we check the tags are the same.
 	desc := describe(obj)
 	if verr := attachMethodTags(methodInfos, desc); verror.Is(verr, verror.Aborted) {
-		panic(fmt.Errorf("ipc: type %v tag error: %v", rt, verr))
+		return nil, fmt.Errorf("ipc: type %v tag error: %v", rt, verr)
 	}
 	// Finally create the signature.  This combines the desc provided by the user
 	// with the methodSigs computed via reflection.  We ensure that the method
 	// names and types computed via reflection always remains in the final sig;
 	// the desc is merely used to augment the signature.
 	sig := makeSig(desc, methodSigs)
-	return &reflectInfo{methodInfos, sig}
+	return &reflectInfo{methodInfos, sig}, nil
 }
 
 // determineGlobState determines whether and how obj implements Glob.  Returns
@@ -308,7 +322,7 @@ func describe(obj interface{}) []InterfaceDesc {
 	return nil
 }
 
-func makeMethods(rt reflect.Type) (map[string]methodInfo, map[string]signature.Method) {
+func makeMethods(rt reflect.Type) (map[string]methodInfo, map[string]signature.Method, error) {
 	infos := make(map[string]methodInfo, rt.NumMethod())
 	sigs := make(map[string]signature.Method, rt.NumMethod())
 	for mx := 0; mx < rt.NumMethod(); mx++ {
@@ -317,14 +331,14 @@ func makeMethods(rt reflect.Type) (map[string]methodInfo, map[string]signature.M
 		var sig signature.Method
 		if verr := typeCheckMethod(method, &sig); verr != nil {
 			if verror.Is(verr, verror.Aborted) {
-				panic(fmt.Errorf("ipc: %s.%s: %v", rt.String(), method.Name, verr))
+				return nil, nil, fmt.Errorf("ipc: %s.%s: %v", rt.String(), method.Name, verr)
 			}
 			continue
 		}
 		infos[method.Name] = makeMethodInfo(method)
 		sigs[method.Name] = sig
 	}
-	return infos, sigs
+	return infos, sigs, nil
 }
 
 func makeMethodInfo(method reflect.Method) methodInfo {

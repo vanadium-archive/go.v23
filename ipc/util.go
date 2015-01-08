@@ -14,7 +14,7 @@ func NewGlobState(obj interface{}) *GlobState {
 // ChildrenGlobberInvoker returns an Invoker for an object that implements the
 // ChildrenGlobber interface, and nothing else.
 func ChildrenGlobberInvoker(children ...string) Invoker {
-	return ReflectInvoker(&obj{children})
+	return ReflectInvokerOrDie(&obj{children})
 }
 
 type obj struct {
