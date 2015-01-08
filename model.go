@@ -310,7 +310,8 @@ type RuntimeX interface {
 	// must be called before any other Runtime methods are called.  Its
 	// primary responsability is to populate the initial context with
 	// all required state.
-	Init(ctx *context.T) *context.T
+	// protocols is a slice of any preferred protocols for this runtime.
+	Init(ctx *context.T, protocols []string) *context.T
 
 	// NewEndpoint returns an Endpoint by parsing the supplied endpoint
 	// string as per the format described above. It can be used to test
