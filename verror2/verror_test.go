@@ -81,6 +81,11 @@ func init() {
 		panic(err)
 	}
 
+	def := globalRT.NewContext()
+	def = i18n.ContextWithLangID(def, en)
+	def = verror2.ContextWithComponentName(def, "verror2.test")
+	verror2.SetDefaultContext(def)
+
 	cat := i18n.Cat()
 	// Set messages for English and French.  Do not set messages for
 	// German, to test the case where the messages are not present.
@@ -358,7 +363,7 @@ func TestSubordinateErrors(t *testing.T) {
 	if !strings.Contains(p2str, r2) {
 		t.Errorf("debug string missing error message: %q, %q", p2str, r2)
 	}
-	if !(strings.Contains(p2str, "verror_test.go:333") && strings.Contains(p2str, "verror_test.go:349")) {
+	if !(strings.Contains(p2str, "verror_test.go:338") && strings.Contains(p2str, "verror_test.go:354")) {
 		t.Errorf("debug string missing correct line #: %s", p2str)
 	}
 }
