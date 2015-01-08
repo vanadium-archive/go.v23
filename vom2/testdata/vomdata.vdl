@@ -4034,6 +4034,67 @@ const Tests = []TestCase {
 		"v.io/core/veyron2/vom2/testdata.MMap map[v.io/core/veyron2/vom2/testdata.NFloat32 float32]v.io/core/veyron2/vom2/testdata.NListUint64 []uint64",
 	},
 	// 80                   Magic                            128 [vom version 0]
+	// ff81                 MsgID                            -65
+	//                      TypeMsg                           65
+	// 2a                   MsgLen                            42
+	// 13                   TypeID                            19 [v.io/core/veyron2/vom2.WireList struct{Name string;Elem v.io/core/veyron2/vom2.TypeID uint64}]
+	// 01                   Index                              1 [v.io/core/veyron2/vom2.WireList.Name]
+	// 24                   ByteLen                           36 [string len]
+	// 762e696f2f636f72652f766579726f6e322f766f6d322f74657374646174612e52656341 PrimValue       v.io/core/veyron2/vom2/testdata.RecA [string]
+	// 02                   Index                              2 [v.io/core/veyron2/vom2.WireList.Elem]
+	// 41                   PrimValue                         65 [uint]
+	// 00                   End                                0 [v.io/core/veyron2/vom2.WireList END]
+	// ff82                 MsgID                             65
+	//                      ValueMsg                          65 [v.io/core/veyron2/vom2/testdata.RecA []v.io/core/veyron2/vom2/testdata.RecA]
+	// 04                   MsgLen                             4
+	// 02                   ValueLen                           2 [list len]
+	// 00                   ValueLen                           0 [list len]
+	// 01                   ValueLen                           1 [list len]
+	// 00                   ValueLen                           0 [list len]
+	// DumpStatus{MsgID: 65, MsgLen: 4, MsgN: 4, Value: v.io/core/veyron2/vom2/testdata.RecA []v.io/core/veyron2/vom2/testdata.RecA{{}, {{}}}}
+	{
+		`RecA{{}, {{}}}`,
+		RecA{{}, {{}}},
+		"80ff812a130124762e696f2f636f72652f766579726f6e322f766f6d322f74657374646174612e52656341024100ff820402000100",
+		"v.io/core/veyron2/vom2/testdata.RecA []v.io/core/veyron2/vom2/testdata.RecA",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// ff83                 MsgID                            -66
+	//                      TypeMsg                           66
+	// 2a                   MsgLen                            42
+	// 13                   TypeID                            19 [v.io/core/veyron2/vom2.WireList struct{Name string;Elem v.io/core/veyron2/vom2.TypeID uint64}]
+	// 01                   Index                              1 [v.io/core/veyron2/vom2.WireList.Name]
+	// 24                   ByteLen                           36 [string len]
+	// 762e696f2f636f72652f766579726f6e322f766f6d322f74657374646174612e52656359 PrimValue       v.io/core/veyron2/vom2/testdata.RecY [string]
+	// 02                   Index                              2 [v.io/core/veyron2/vom2.WireList.Elem]
+	// 41                   PrimValue                         65 [uint]
+	// 00                   End                                0 [v.io/core/veyron2/vom2.WireList END]
+	// ff81                 MsgID                            -65
+	//                      TypeMsg                           65
+	// 2a                   MsgLen                            42
+	// 13                   TypeID                            19 [v.io/core/veyron2/vom2.WireList struct{Name string;Elem v.io/core/veyron2/vom2.TypeID uint64}]
+	// 01                   Index                              1 [v.io/core/veyron2/vom2.WireList.Name]
+	// 24                   ByteLen                           36 [string len]
+	// 762e696f2f636f72652f766579726f6e322f766f6d322f74657374646174612e52656358 PrimValue       v.io/core/veyron2/vom2/testdata.RecX [string]
+	// 02                   Index                              2 [v.io/core/veyron2/vom2.WireList.Elem]
+	// 42                   PrimValue                         66 [uint]
+	// 00                   End                                0 [v.io/core/veyron2/vom2.WireList END]
+	// ff82                 MsgID                             65
+	//                      ValueMsg                          65 [v.io/core/veyron2/vom2/testdata.RecX []v.io/core/veyron2/vom2/testdata.RecY []v.io/core/veyron2/vom2/testdata.RecX]
+	// 05                   MsgLen                             5
+	// 02                   ValueLen                           2 [list len]
+	// 00                   ValueLen                           0 [list len]
+	// 02                   ValueLen                           2 [list len]
+	// 00                   ValueLen                           0 [list len]
+	// 00                   ValueLen                           0 [list len]
+	// DumpStatus{MsgID: 65, MsgLen: 5, MsgN: 5, Value: v.io/core/veyron2/vom2/testdata.RecX []v.io/core/veyron2/vom2/testdata.RecY []v.io/core/veyron2/vom2/testdata.RecX{{}, {{}, {}}}}
+	{
+		`RecX{{}, {{}, {}}}`,
+		RecX{{}, {{}, {}}},
+		"80ff832a130124762e696f2f636f72652f766579726f6e322f766f6d322f74657374646174612e52656359024100ff812a130124762e696f2f636f72652f766579726f6e322f766f6d322f74657374646174612e52656358024200ff82050200020000",
+		"v.io/core/veyron2/vom2/testdata.RecX []v.io/core/veyron2/vom2/testdata.RecY []v.io/core/veyron2/vom2/testdata.RecX",
+	},
+	// 80                   Magic                            128 [vom version 0]
 	// 04                   MsgID                              2
 	//                      ValueMsg                           2 [typeobject]
 	// 01                   TypeID                             1 [any]

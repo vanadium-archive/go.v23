@@ -43,10 +43,8 @@ type (
 	MList []NListUint64
 	MMap  map[NFloat32]NListUint64
 
-	/* TODO(bprosnitz) Handle recursive type generation in Javascript.
 	// Recursive Type Definitions
 	RecA []RecA
 	RecX []RecY
 	RecY []RecX
-	*/
 )

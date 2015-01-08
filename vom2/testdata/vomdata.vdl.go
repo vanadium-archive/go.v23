@@ -1275,6 +1275,29 @@ var Tests = []TestCase{
 		TypeString: "v.io/core/veyron2/vom2/testdata.MMap map[v.io/core/veyron2/vom2/testdata.NFloat32 float32]v.io/core/veyron2/vom2/testdata.NListUint64 []uint64",
 	},
 	{
+		Name: "RecA{{}, {{}}}",
+		Value: RecA{
+			nil,
+			{
+				nil,
+			},
+		},
+		Hex:        "80ff812a130124762e696f2f636f72652f766579726f6e322f766f6d322f74657374646174612e52656341024100ff820402000100",
+		TypeString: "v.io/core/veyron2/vom2/testdata.RecA []v.io/core/veyron2/vom2/testdata.RecA",
+	},
+	{
+		Name: "RecX{{}, {{}, {}}}",
+		Value: RecX{
+			nil,
+			{
+				nil,
+				nil,
+			},
+		},
+		Hex:        "80ff832a130124762e696f2f636f72652f766579726f6e322f766f6d322f74657374646174612e52656359024100ff812a130124762e696f2f636f72652f766579726f6e322f766f6d322f74657374646174612e52656358024200ff82050200020000",
+		TypeString: "v.io/core/veyron2/vom2/testdata.RecX []v.io/core/veyron2/vom2/testdata.RecY []v.io/core/veyron2/vom2/testdata.RecX",
+	},
+	{
 		Name:       "typeobject(any)",
 		Value:      __vdl.TypeOf((*__vdlutil.Any)(nil)),
 		Hex:        "800401",

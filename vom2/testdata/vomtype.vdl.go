@@ -281,6 +281,28 @@ func (MMap) __VDLReflect(struct {
 }) {
 }
 
+// Recursive Type Definitions
+type RecA []RecA
+
+func (RecA) __VDLReflect(struct {
+	Name string "v.io/core/veyron2/vom2/testdata.RecA"
+}) {
+}
+
+type RecX []RecY
+
+func (RecX) __VDLReflect(struct {
+	Name string "v.io/core/veyron2/vom2/testdata.RecX"
+}) {
+}
+
+type RecY []RecX
+
+func (RecY) __VDLReflect(struct {
+	Name string "v.io/core/veyron2/vom2/testdata.RecY"
+}) {
+}
+
 func init() {
 	__vdl.Register(NBool(false))
 	__vdl.Register(NString(""))
@@ -309,4 +331,7 @@ func init() {
 	})
 	__vdl.Register(MList(nil))
 	__vdl.Register(MMap(nil))
+	__vdl.Register(RecA(nil))
+	__vdl.Register(RecX(nil))
+	__vdl.Register(RecY(nil))
 }
