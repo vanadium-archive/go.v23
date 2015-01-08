@@ -221,10 +221,6 @@ type Runtime interface {
 	// Profile returns the current processes' Profile.
 	Profile() Profile
 
-	// Publisher returns a configuration Publisher that
-	// can be used to access configuration information.
-	Publisher() *config.Publisher
-
 	// Principal returns the principal that represents this runtime.
 	Principal() security.Principal
 
@@ -415,6 +411,10 @@ type RuntimeX interface {
 	// TODO(suharshs, mattr): Determine if setting this should also be allowed, or if
 	// only the Profiles should be able to this.
 	GetListenSpec(ctx *context.T) ipc.ListenSpec
+
+	// GetPublisher returns a configuration Publisher that can be used to access
+	// configuration information.
+	GetPublisher(ctx *context.T) *config.Publisher
 }
 
 var (
@@ -550,6 +550,12 @@ func GetAppCycle(ctx *context.T) AppCycle {
 // GetListenSpec gets the current ListenSpec.
 func GetListenSpec(ctx *context.T) ipc.ListenSpec {
 	return runtimeConfig.runtime.GetListenSpec(ctx)
+}
+
+// GetPublisher returns a configuration Publisher that can be used to access
+// configuration information.
+func GetPublisher(ctx *context.T) *config.Publisher {
+	return runtimeConfig.runtime.GetPublisher(ctx)
 }
 
 var (
