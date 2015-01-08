@@ -266,26 +266,6 @@ type Runtime interface {
 	// manager will be shutdown by the runtime on Cleanup.
 	NewStreamManager(opts ...stream.ManagerOpt) (stream.Manager, error)
 
-	// NewEndpoint returns an Endpoint by parsing the supplied endpoint
-	// string as per the format described above. It can be used to test
-	// a string to see if it's in valid endpoint format.
-	//
-	// NewEndpoint will accept strings both in the @ format described
-	// above and in internet host:port format.
-	//
-	// All implementations of NewEndpoint should provide appropriate
-	// defaults for any endpoint subfields not explicitly provided as
-	// follows:
-	// - a missing protocol will default to a protocol appropriate for the
-	//   implementation hosting NewEndpoint
-	// - a missing host:port will default to :0 - i.e. any port on all
-	//   interfaces
-	// - a missing routing id should default to the null routing id
-	// - a missing codec version should default to AnyCodec
-	// - a missing RPC version should default to the highest version
-	//   supported by the runtime implementation hosting NewEndpoint
-	NewEndpoint(ep string) (naming.Endpoint, error)
-
 	// Namespace returns the pre-configured Namespace that is created
 	// when the Runtime is initialized.
 	Namespace() naming.Namespace
