@@ -72,7 +72,7 @@ func (c implLogFileClientStub) c(ctx *__context.T) __ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return __veyron2.RuntimeFromContext(ctx).Client()
+	return __veyron2.GetClient(ctx)
 }
 
 func (c implLogFileClientStub) Size(ctx *__context.T, opts ...__ipc.CallOpt) (o0 int64, err error) {

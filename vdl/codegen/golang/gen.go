@@ -536,7 +536,7 @@ func (c impl{{$iface.Name}}ClientStub) c(ctx *__context.T) __ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return __veyron2.RuntimeFromContext(ctx).Client()
+	return __veyron2.GetClient(ctx)
 }
 
 {{range $method := $iface.Methods}}

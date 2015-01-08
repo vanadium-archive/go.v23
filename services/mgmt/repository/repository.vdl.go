@@ -90,7 +90,7 @@ func (c implApplicationClientStub) c(ctx *__context.T) __ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return __veyron2.RuntimeFromContext(ctx).Client()
+	return __veyron2.GetClient(ctx)
 }
 
 func (c implApplicationClientStub) Match(ctx *__context.T, i0 []string, opts ...__ipc.CallOpt) (o0 application.Envelope, err error) {
@@ -322,7 +322,7 @@ func (c implBinaryClientStub) c(ctx *__context.T) __ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return __veyron2.RuntimeFromContext(ctx).Client()
+	return __veyron2.GetClient(ctx)
 }
 
 func (c implBinaryClientStub) Create(ctx *__context.T, i0 int32, i1 MediaInfo, opts ...__ipc.CallOpt) (err error) {
@@ -989,7 +989,7 @@ func (c implProfileClientStub) c(ctx *__context.T) __ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return __veyron2.RuntimeFromContext(ctx).Client()
+	return __veyron2.GetClient(ctx)
 }
 
 func (c implProfileClientStub) Label(ctx *__context.T, opts ...__ipc.CallOpt) (o0 string, err error) {

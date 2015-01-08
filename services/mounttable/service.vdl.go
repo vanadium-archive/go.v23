@@ -161,7 +161,7 @@ func (c implMountTableClientStub) c(ctx *__context.T) __ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return __veyron2.RuntimeFromContext(ctx).Client()
+	return __veyron2.GetClient(ctx)
 }
 
 func (c implMountTableClientStub) Mount(ctx *__context.T, i0 string, i1 uint32, i2 naming.MountFlag, opts ...__ipc.CallOpt) (err error) {

@@ -437,7 +437,7 @@ func (c implServiceAClientStub) c(ctx *__context.T) __ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return __veyron2.RuntimeFromContext(ctx).Client()
+	return __veyron2.GetClient(ctx)
 }
 
 func (c implServiceAClientStub) MethodA1(ctx *__context.T, opts ...__ipc.CallOpt) (err error) {
@@ -1031,7 +1031,7 @@ func (c implServiceBClientStub) c(ctx *__context.T) __ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return __veyron2.RuntimeFromContext(ctx).Client()
+	return __veyron2.GetClient(ctx)
 }
 
 func (c implServiceBClientStub) MethodB1(ctx *__context.T, i0 Scalars, i1 Composites, opts ...__ipc.CallOpt) (o0 CompComp, err error) {

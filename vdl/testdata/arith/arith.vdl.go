@@ -121,7 +121,7 @@ func (c implArithClientStub) c(ctx *__context.T) __ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return __veyron2.RuntimeFromContext(ctx).Client()
+	return __veyron2.GetClient(ctx)
 }
 
 func (c implArithClientStub) Add(ctx *__context.T, i0 int32, i1 int32, opts ...__ipc.CallOpt) (o0 int32, err error) {
@@ -882,7 +882,7 @@ func (c implCalculatorClientStub) c(ctx *__context.T) __ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return __veyron2.RuntimeFromContext(ctx).Client()
+	return __veyron2.GetClient(ctx)
 }
 
 func (c implCalculatorClientStub) On(ctx *__context.T, opts ...__ipc.CallOpt) (err error) {
