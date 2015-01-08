@@ -221,9 +221,6 @@ type Runtime interface {
 	// Profile returns the current processes' Profile.
 	Profile() Profile
 
-	// AppCycle returns the current processes' AppCycle interface.
-	AppCycle() AppCycle
-
 	// Publisher returns a configuration Publisher that
 	// can be used to access configuration information.
 	Publisher() *config.Publisher
@@ -432,8 +429,6 @@ type RuntimeX interface {
 	GetProfile(ctx *context.T) Profile
 
 	// GetAppCycle gets the current AppCycle.
-	// TODO(suharshs, mattr): Determine if this is needed or not based on the use cases
-	// of runtime.AppCycle().
 	GetAppCycle(ctx *context.T) AppCycle
 
 	// GetListenSpec gets the ListenSpec.
