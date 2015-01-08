@@ -419,7 +419,7 @@ func dataFromContext(ctx *context.T) (langID i18n.LangID, componentName string, 
 		langID = i18n.LangIDFromContext(ctx)
 		value := ctx.Value(componentKey{})
 		componentName, _ = value.(string)
-		opName = vtrace.FromContext(ctx).Name()
+		opName = vtrace.GetSpan(ctx).Name()
 	}
 	if componentName == "" {
 		componentName = filepath.Base(os.Args[0])

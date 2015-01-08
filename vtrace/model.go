@@ -26,18 +26,18 @@
 // Here we have a single trace with four Spans.  Note that some Spans
 // are children of other Spans.  This structure falls directly out of
 // our building off of the context.T tree.  When you derive a new
-// context using WithNewSpan(), you create a Span thats a child of
+// context using SetNewSpan(), you create a Span thats a child of
 // the currently active span in the context.  Note that spans that
 // share a parent may overlap in time.
 //
 // In this case the tree would have been created with code like this:
 //
 //    function MakeBlogPost(ctx *context.T) {
-//        authCtx, _ := vtrace.WithNewSpan(ctx, "Authenticate")
+//        authCtx, _ := vtrace.SetNewSpan(ctx, "Authenticate")
 //        Authenticate(authCtx)
-//        writeCtx, _ := vtrace.WithNewSpan(ctx, "Write To DB")
+//        writeCtx, _ := vtrace.SetNewSpan(ctx, "Write To DB")
 //        Write(writeCtx)
-//        notifyCtx, _ := vtrace.WithNewSpan(ctx, "Notify")
+//        notifyCtx, _ := vtrace.SetNewSpan(ctx, "Notify")
 //        Notify(notifyCtx)
 //    }
 //
@@ -74,21 +74,6 @@ import (
 	"v.io/core/veyron2/uniqueid"
 )
 
-// Trace represents an entire computation which is composed of a number
-// of Spans arranged in a tree.
-// Traces are safe to use from multiple goroutines simultaneously.
-type Trace interface {
-	// uniqueid.ID returns the trace's uniqueid.ID.
-	ID() uniqueid.ID
-
-	// ForceCollect forces the collection of the trace.
-	ForceCollect()
-
-	// Record produces all data that has been collected in memory so far for
-	// the current trace.
-	Record() TraceRecord
-}
-
 // Spans represent a named time period.  You can create new spans
 // to represent new parts of your computation.
 // Spans are safe to use from multiple goroutines simultaneously.
@@ -117,32 +102,81 @@ type Span interface {
 	// not be used after Finish is called.
 	Finish()
 
-	// Trace returns the Trace this Span is a member of.
-	Trace() Trace
+	// Trace returns the id of the trace this Span is a member of.
+	Trace() uniqueid.ID
 }
 
-// spanManager is implemented by veyron2.Runtime, but we can't
-// depend on that here.
-type spanManager interface {
-	WithNewSpan(ctx *context.T, name string) (*context.T, Span)
-	SpanFromContext(ctx *context.T) Span
-}
-
-// Derive a new context from ctx that has a new Span attached.
-func WithNewSpan(ctx *context.T, name string) (*context.T, Span) {
-	return ctx.Runtime().(spanManager).WithNewSpan(ctx, name)
-}
-
-// Get the currently active span.
-func FromContext(ctx *context.T) Span {
-	return ctx.Runtime().(spanManager).SpanFromContext(ctx)
-}
-
+// Store selectively collects information about traces in the system.
 type Store interface {
 	// TraceRecords returns TraceRecords for all traces saved in the store.
 	TraceRecords() []TraceRecord
 
 	// TraceRecord returns a TraceRecord for a given ID.  Returns
 	// nil if the given id is not present.
-	TraceRecord(id uniqueid.ID) *TraceRecord
+	TraceRecord(traceid uniqueid.ID) *TraceRecord
+
+	// ForceCollect forces the store to collect all information about a given trace.
+	ForceCollect(traceid uniqueid.ID)
+}
+
+type Manager interface {
+	// SetNewTrace creates a new vtrace context that is not the child of any
+	// other span.  This is useful when starting operations that are
+	// disconnected from the activity ctx is performing.  For example
+	// this might be used to start background tasks.
+	SetNewTrace(ctx *context.T) (*context.T, Span)
+
+	// SetNewSpan derives a context with a new Span that can be used to
+	// trace and annotate operations across process boundaries.
+	SetNewSpan(ctx *context.T, name string) (*context.T, Span)
+
+	// Span finds the currently active span.
+	GetSpan(ctx *context.T) Span
+
+	// Store returns the current Store.
+	GetStore(ctx *context.T) Store
+}
+
+// managerKey is used to store a Manger in the context.
+type managerKey struct{}
+
+// WithManager returns a new context with a Vtrace manager attached.
+func WithManager(ctx *context.T, manager Manager) *context.T {
+	return context.WithValue(ctx, managerKey{}, manager)
+}
+
+func manager(ctx *context.T) Manager {
+	manager, _ := ctx.Value(managerKey{}).(Manager)
+	return manager
+}
+
+// SetNewTrace creates a new vtrace context that is not the child of any
+// other span.  This is useful when starting operations that are
+// disconnected from the activity ctx is performing.  For example
+// this might be used to start background tasks.
+func SetNewTrace(ctx *context.T) (*context.T, Span) {
+	return manager(ctx).SetNewTrace(ctx)
+}
+
+// SetNewSpan derives a context with a new Span that can be used to
+// trace and annotate operations across process boundaries.
+func SetNewSpan(ctx *context.T, name string) (*context.T, Span) {
+	return manager(ctx).SetNewSpan(ctx, name)
+}
+
+// Span finds the currently active span.
+func GetSpan(ctx *context.T) Span {
+	return manager(ctx).GetSpan(ctx)
+}
+
+// VtraceStore returns the current Store.
+func GetStore(ctx *context.T) Store {
+	return manager(ctx).GetStore(ctx)
+}
+
+// ForceCollect forces the store to collect all information about the
+// current trace.
+func ForceCollect(ctx *context.T) {
+	m := manager(ctx)
+	m.GetStore(ctx).ForceCollect(m.GetSpan(ctx).Trace())
 }

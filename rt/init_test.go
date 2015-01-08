@@ -97,14 +97,14 @@ type mockRuntime struct{}
 func (*mockRuntime) Profile() veyron2.Profile   { return nil }
 func (*mockRuntime) AppCycle() veyron2.AppCycle { return nil }
 
-func (*mockRuntime) Publisher() *config.Publisher                             { return nil }
-func (*mockRuntime) Principal() security.Principal                            { return nil }
-func (*mockRuntime) NewClient(opts ...ipc.ClientOpt) (ipc.Client, error)      { return nil, nil }
-func (*mockRuntime) NewServer(opts ...ipc.ServerOpt) (ipc.Server, error)      { return nil, nil }
-func (*mockRuntime) Client() ipc.Client                                       { return nil }
-func (*mockRuntime) NewContext() *context.T                                   { return nil }
-func (*mockRuntime) WithNewSpan(*context.T, string) (*context.T, vtrace.Span) { return nil, nil }
-func (*mockRuntime) SpanFromContext(*context.T) vtrace.Span                   { return nil }
+func (*mockRuntime) Publisher() *config.Publisher                            { return nil }
+func (*mockRuntime) Principal() security.Principal                           { return nil }
+func (*mockRuntime) NewClient(opts ...ipc.ClientOpt) (ipc.Client, error)     { return nil, nil }
+func (*mockRuntime) NewServer(opts ...ipc.ServerOpt) (ipc.Server, error)     { return nil, nil }
+func (*mockRuntime) Client() ipc.Client                                      { return nil }
+func (*mockRuntime) NewContext() *context.T                                  { return nil }
+func (*mockRuntime) SetNewSpan(*context.T, string) (*context.T, vtrace.Span) { return nil, nil }
+func (*mockRuntime) SpanFromContext(*context.T) vtrace.Span                  { return nil }
 func (*mockRuntime) NewStreamManager(opts ...stream.ManagerOpt) (stream.Manager, error) {
 	return nil, nil
 }

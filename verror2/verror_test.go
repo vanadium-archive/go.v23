@@ -111,7 +111,7 @@ func init() {
 	ctx := globalRT.NewContext()
 	ctx = i18n.ContextWithLangID(ctx, fr)
 	ctx = verror2.ContextWithComponentName(ctx, "FooServer")
-	ctx, _ = vtrace.WithNewSpan(ctx, "aFR1")
+	ctx, _ = vtrace.SetNewSpan(ctx, "aFR1")
 
 	// A first IDAction in various languages.
 	aEN0 = verror2.ExplicitMake(idActionA, en, "server", "aEN0", 0)

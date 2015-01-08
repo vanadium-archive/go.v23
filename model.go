@@ -21,7 +21,6 @@ import (
 	"v.io/core/veyron2/naming"
 	"v.io/core/veyron2/security"
 	"v.io/core/veyron2/vlog"
-	"v.io/core/veyron2/vtrace"
 )
 
 const (
@@ -245,13 +244,6 @@ type Runtime interface {
 	// to ongoing RPCs.
 	NewContext() *context.T
 
-	// WithNewSpan derives a context with a new Span that can be used to
-	// trace and annotate operations across process boundaries.
-	WithNewSpan(ctx *context.T, name string) (*context.T, vtrace.Span)
-
-	// SpanFromContext finds the currently active span.
-	SpanFromContext(ctx *context.T) vtrace.Span
-
 	// NewStreamManager creates a new stream manager.  The returned stream
 	// manager will be shutdown by the runtime on Cleanup.
 	NewStreamManager(opts ...stream.ManagerOpt) (stream.Manager, error)
@@ -282,9 +274,6 @@ type Runtime interface {
 	// Only one dispatcher may be registered, with subsequent calls
 	// overriding previous settings.
 	ConfigureReservedName(server ipc.Dispatcher, opts ...ipc.ServerOpt)
-
-	// VtraceStore gets the vtrace store for this runtime.
-	VtraceStore() vtrace.Store
 }
 
 // RuntimeFromContext returns the runtime used to generate a given context.
@@ -369,13 +358,6 @@ type RuntimeX interface {
 	// GetClient returns the current Client.
 	GetClient(ctx *context.T) ipc.Client
 
-	// SetNewSpan derives a context with a new Span that can be used to
-	// trace and annotate operations across process boundaries.
-	SetNewSpan(ctx *context.T, name string) (*context.T, vtrace.Span)
-
-	// GetSpan finds the currently active span.
-	GetSpan(ctx *context.T) vtrace.Span
-
 	// SetNewNamespace creates a new Namespace and attaches it to the
 	// returned context.
 	SetNewNamespace(ctx *context.T, roots ...string) (*context.T, naming.Namespace, error)
@@ -389,9 +371,6 @@ type RuntimeX interface {
 
 	// GetLogger returns the current logger.
 	GetLogger(ctx *context.T) vlog.Logger
-
-	// GetVtraceStore returns the current vtrace.Store.
-	GetVtraceStore(ctx *context.T) vtrace.Store
 
 	// SetReservedNameDispatcher sets and configures a dispatcher for the
 	// reserved portion of the name space, i.e. any path starting with '__'.
@@ -496,17 +475,6 @@ func GetClient(ctx *context.T) ipc.Client {
 	return runtimeConfig.runtime.GetClient(ctx)
 }
 
-// SetNewSpan derives a context with a new Span that can be used to
-// trace and annotate operations across process boundaries.
-func SetNewSpan(ctx *context.T, name string) (*context.T, vtrace.Span) {
-	return runtimeConfig.runtime.SetNewSpan(ctx, name)
-}
-
-// GetSpan finds the currently active span.
-func GetSpan(ctx *context.T) vtrace.Span {
-	return runtimeConfig.runtime.GetSpan(ctx)
-}
-
 // SetNewNamespace creates a new Namespace and attaches it to the
 // returned context.
 func SetNewNamespace(ctx *context.T, roots ...string) (*context.T, naming.Namespace, error) {
@@ -527,11 +495,6 @@ func SetNewLogger(ctx *context.T, name string, opts ...vlog.LoggingOpts) (*conte
 // GetLogger returns the current logger.
 func GetLogger(ctx *context.T) vlog.Logger {
 	return runtimeConfig.runtime.GetLogger(ctx)
-}
-
-// GetVtraceStore gets the current vtrace.Store.
-func GetVtraceStore(ctx *context.T) vtrace.Store {
-	return runtimeConfig.runtime.GetVtraceStore(ctx)
 }
 
 // GetProfile gets the current Profile.
