@@ -1,6 +1,7 @@
 package vlog
 
 import (
+	"fmt"
 	"os"
 	"runtime"
 
@@ -100,8 +101,8 @@ func (l *logger) Info(args ...interface{}) {
 	l.maybeFlush()
 }
 
-// Infoln logs to the INFO log.
-// Arguments are handled in the manner of fmt.Println; a newline is appended if missing.
+// Infof logs to the INFO log.
+// Arguments are handled in the manner of fmt.Printf; a newline is appended if missing.
 func (l *logger) Infof(format string, args ...interface{}) {
 	l.log.Printf(llog.InfoLog, format, args...)
 	l.maybeFlush()
@@ -177,4 +178,16 @@ func (l *logger) Fatal(args ...interface{}) {
 // Arguments are handled in the manner of fmt.Printf; a newline is appended if missing.
 func (l *logger) Fatalf(format string, args ...interface{}) {
 	l.log.Printf(llog.FatalLog, format, args...)
+}
+
+// Panic is equivalent to Error() followed by a call to panic().
+func (l *logger) Panic(args ...interface{}) {
+	l.Error(args...)
+	panic(fmt.Sprint(args...))
+}
+
+// Panicf is equivalent to Errorf() followed by a call to panic().
+func (l *logger) Panicf(format string, args ...interface{}) {
+	l.Errorf(format, args...)
+	panic(fmt.Sprintf(format, args...))
 }
