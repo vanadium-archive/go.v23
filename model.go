@@ -252,13 +252,6 @@ type Runtime interface {
 	// when the Runtime is initialized.
 	Namespace() naming.Namespace
 
-	// Logger returns the current logger in use by the Runtime.
-	Logger() vlog.Logger
-
-	// NewLogger creates a new instance of the logging interface that is
-	// separate from the one provided by Runtime.
-	NewLogger(name string, opts ...vlog.LoggingOpts) (vlog.Logger, error)
-
 	// Cleanup cleanly shuts down any internal state, logging, goroutines
 	// etc spawned and managed by the runtime. It is useful for cases where
 	// an application or library wants to be sure that it cleans up after
