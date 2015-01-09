@@ -19,6 +19,9 @@ import (
 //   and executing the "search" application, version "v1", runnable
 //   on either the "base" or "media" profile.
 type Application interface {
+	// Object provides GetACL/SetACL methods to read/modify ACLs for the
+	// Application methods.
+	access.Object
 	// Match checks if any of the given profiles contains an application
 	// envelope for the given application version (specified through the
 	// object name suffix) and if so, returns this envelope. If multiple

@@ -56,6 +56,49 @@ func init() {
 //   and executing the "search" application, version "v1", runnable
 //   on either the "base" or "media" profile.
 type ApplicationClientMethods interface {
+	// Object provides access control for Veyron objects.
+	//
+	// Veyron services implementing dynamic access control would typically
+	// embed this interface and tag additional methods defined by the service
+	// with one of Admin, Read, Write, Resolve etc. For example,
+	// the VDL definition of the object would be:
+	//
+	//   package mypackage
+	//
+	//   import "v.io/core/veyron2/security/access"
+	//
+	//   type MyObject interface {
+	//     access.Object
+	//     MyRead()  (string, error) {access.Read}
+	//     MyWrite(string) error     {access.Write}
+	//   }
+	//
+	// If the set of pre-defined tags is insufficient, services may define their
+	// own tag type and annotate all methods with this new type.
+	// Instead of embedding this Object interface, define SetACL and GetACL in
+	// their own interface. Authorization policies will typically respect
+	// annotations of a single type. For example, the VDL definition of an object
+	// would be:
+	//
+	//  package mypackage
+	//
+	//  import "v.io/core/veyron2/security/access"
+	//
+	//  type MyTag string
+	//
+	//  const (
+	//    Blue = MyTag("Blue")
+	//    Red  = MyTag("Red")
+	//  )
+	//
+	//  type MyObject interface {
+	//    MyMethod() (string, error) {Blue}
+	//
+	//    // Allow clients to change access via the access.Object interface:
+	//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}
+	//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}
+	//  }
+	access.ObjectClientMethods
 	// Match checks if any of the given profiles contains an application
 	// envelope for the given application version (specified through the
 	// object name suffix) and if so, returns this envelope. If multiple
@@ -78,12 +121,14 @@ func ApplicationClient(name string, opts ...__ipc.BindOpt) ApplicationClientStub
 			client = clientOpt
 		}
 	}
-	return implApplicationClientStub{name, client}
+	return implApplicationClientStub{name, client, access.ObjectClient(name, client)}
 }
 
 type implApplicationClientStub struct {
 	name   string
 	client __ipc.Client
+
+	access.ObjectClientStub
 }
 
 func (c implApplicationClientStub) c(ctx *__context.T) __ipc.Client {
@@ -129,6 +174,49 @@ func (c implApplicationClientStub) Signature(ctx *__context.T, opts ...__ipc.Cal
 //   and executing the "search" application, version "v1", runnable
 //   on either the "base" or "media" profile.
 type ApplicationServerMethods interface {
+	// Object provides access control for Veyron objects.
+	//
+	// Veyron services implementing dynamic access control would typically
+	// embed this interface and tag additional methods defined by the service
+	// with one of Admin, Read, Write, Resolve etc. For example,
+	// the VDL definition of the object would be:
+	//
+	//   package mypackage
+	//
+	//   import "v.io/core/veyron2/security/access"
+	//
+	//   type MyObject interface {
+	//     access.Object
+	//     MyRead()  (string, error) {access.Read}
+	//     MyWrite(string) error     {access.Write}
+	//   }
+	//
+	// If the set of pre-defined tags is insufficient, services may define their
+	// own tag type and annotate all methods with this new type.
+	// Instead of embedding this Object interface, define SetACL and GetACL in
+	// their own interface. Authorization policies will typically respect
+	// annotations of a single type. For example, the VDL definition of an object
+	// would be:
+	//
+	//  package mypackage
+	//
+	//  import "v.io/core/veyron2/security/access"
+	//
+	//  type MyTag string
+	//
+	//  const (
+	//    Blue = MyTag("Blue")
+	//    Red  = MyTag("Red")
+	//  )
+	//
+	//  type MyObject interface {
+	//    MyMethod() (string, error) {Blue}
+	//
+	//    // Allow clients to change access via the access.Object interface:
+	//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}
+	//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}
+	//  }
+	access.ObjectServerMethods
 	// Match checks if any of the given profiles contains an application
 	// envelope for the given application version (specified through the
 	// object name suffix) and if so, returns this envelope. If multiple
@@ -157,7 +245,8 @@ type ApplicationServerStub interface {
 // an object that may be used by ipc.Server.
 func ApplicationServer(impl ApplicationServerMethods) ApplicationServerStub {
 	stub := implApplicationServerStub{
-		impl: impl,
+		impl:             impl,
+		ObjectServerStub: access.ObjectServer(impl),
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
@@ -171,7 +260,8 @@ func ApplicationServer(impl ApplicationServerMethods) ApplicationServerStub {
 
 type implApplicationServerStub struct {
 	impl ApplicationServerMethods
-	gs   *__ipc.GlobState
+	access.ObjectServerStub
+	gs *__ipc.GlobState
 }
 
 func (s implApplicationServerStub) Match(ctx __ipc.ServerContext, i0 []string) (application.Envelope, error) {
@@ -183,7 +273,7 @@ func (s implApplicationServerStub) Globber() *__ipc.GlobState {
 }
 
 func (s implApplicationServerStub) Describe__() []__ipc.InterfaceDesc {
-	return []__ipc.InterfaceDesc{ApplicationDesc}
+	return []__ipc.InterfaceDesc{ApplicationDesc, access.ObjectDesc}
 }
 
 // ApplicationDesc describes the Application interface.
@@ -194,6 +284,9 @@ var descApplication = __ipc.InterfaceDesc{
 	Name:    "Application",
 	PkgPath: "v.io/core/veyron2/services/mgmt/repository",
 	Doc:     "// Application provides access to application envelopes. An\n// application envelope is identified by an application name and an\n// application version, which are specified through the object name,\n// and a profile name, which is specified using a method argument.\n//\n// Example:\n// /apps/search/v1.Match([]string{\"base\", \"media\"})\n//   returns an application envelope that can be used for downloading\n//   and executing the \"search\" application, version \"v1\", runnable\n//   on either the \"base\" or \"media\" profile.",
+	Embeds: []__ipc.EmbedDesc{
+		{"Object", "v.io/core/veyron2/services/security/access", "// Object provides access control for Veyron objects.\n//\n// Veyron services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/core/veyron2/security/access\"\n//\n//   type MyObject interface {\n//     access.Object\n//     MyRead()  (string, error) {access.Read}\n//     MyWrite(string) error     {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetACL and GetACL in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/core/veyron2/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}\n//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}\n//  }"},
+	},
 	Methods: []__ipc.MethodDesc{
 		{
 			Name: "Match",
@@ -234,6 +327,61 @@ func (s implApplicationServerStub) Signature(ctx __ipc.ServerContext) (__ipc.Ser
 			},
 			"v.io/core/veyron2/services/mgmt/application.Envelope", []string(nil)},
 		__wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}}
+	var ss __ipc.ServiceSignature
+	var firstAdded int
+	ss, _ = s.ObjectServerStub.Signature(ctx)
+	firstAdded = len(result.TypeDefs)
+	for k, v := range ss.Methods {
+		for i, _ := range v.InArgs {
+			if v.InArgs[i].Type >= __wiretype.TypeIDFirst {
+				v.InArgs[i].Type += __wiretype.TypeID(firstAdded)
+			}
+		}
+		for i, _ := range v.OutArgs {
+			if v.OutArgs[i].Type >= __wiretype.TypeIDFirst {
+				v.OutArgs[i].Type += __wiretype.TypeID(firstAdded)
+			}
+		}
+		if v.InStream >= __wiretype.TypeIDFirst {
+			v.InStream += __wiretype.TypeID(firstAdded)
+		}
+		if v.OutStream >= __wiretype.TypeIDFirst {
+			v.OutStream += __wiretype.TypeID(firstAdded)
+		}
+		result.Methods[k] = v
+	}
+	//TODO(bprosnitz) combine type definitions from embeded interfaces in a way that doesn't cause duplication.
+	for _, d := range ss.TypeDefs {
+		switch wt := d.(type) {
+		case __wiretype.SliceType:
+			if wt.Elem >= __wiretype.TypeIDFirst {
+				wt.Elem += __wiretype.TypeID(firstAdded)
+			}
+			d = wt
+		case __wiretype.ArrayType:
+			if wt.Elem >= __wiretype.TypeIDFirst {
+				wt.Elem += __wiretype.TypeID(firstAdded)
+			}
+			d = wt
+		case __wiretype.MapType:
+			if wt.Key >= __wiretype.TypeIDFirst {
+				wt.Key += __wiretype.TypeID(firstAdded)
+			}
+			if wt.Elem >= __wiretype.TypeIDFirst {
+				wt.Elem += __wiretype.TypeID(firstAdded)
+			}
+			d = wt
+		case __wiretype.StructType:
+			for i, fld := range wt.Fields {
+				if fld.Type >= __wiretype.TypeIDFirst {
+					wt.Fields[i].Type += __wiretype.TypeID(firstAdded)
+				}
+			}
+			d = wt
+			// NOTE: other types are missing, but we are upgrading anyways.
+		}
+		result.TypeDefs = append(result.TypeDefs, d)
+	}
 
 	return result, nil
 }
