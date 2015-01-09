@@ -140,18 +140,25 @@ func (p *principal) PublicKey() PublicKey {
 	return p.signer.PublicKey()
 }
 
-func (p *principal) BlessingsInfo(b Blessings) (blessings []string) {
+func (p *principal) BlessingsInfo(b Blessings) map[string][]Caveat {
 	bImpl, ok := b.(*blessingsImpl)
 	if !ok {
-		return
+		return nil
 	}
+	var bInfo map[string][]Caveat
 	for _, chain := range bImpl.certificateChains() {
 		name := nameForPrincipal(p, chain)
 		if len(name) > 0 {
-			blessings = append(blessings, name)
+			if bInfo == nil {
+				bInfo = make(map[string][]Caveat)
+			}
+			bInfo[name] = nil
+			for _, cert := range chain {
+				bInfo[name] = append(bInfo[name], cert.Caveats...)
+			}
 		}
 	}
-	return
+	return bInfo
 }
 
 func (p *principal) BlessingsByName(name BlessingPattern) []Blessings {

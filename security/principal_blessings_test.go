@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
+	"time"
 
 	"v.io/core/veyron2/vom"
 )
@@ -99,18 +100,30 @@ func TestBless(t *testing.T) {
 }
 
 func TestBlessingsInfo(t *testing.T) {
-	var (
-		p1    = newPrincipal(t)
-		alice = blessSelf(t, p1, "alice")
-		p2    = newPrincipal(t)
-		bob   = blessSelf(t, p2, "bob")
-	)
-	addToRoots(t, p2, alice)
-	alicefriend, err := p1.Bless(p2.PublicKey(), alice, "friend", UnconstrainedUse())
+	expiryCaveat, err := ExpiryCaveat(time.Now().Add(time.Minute))
 	if err != nil {
 		t.Fatal(err)
 	}
-	bobfriend, err := p2.Bless(p2.PublicKey(), bob, "friend", UnconstrainedUse())
+	methodCaveat, err := MethodCaveat("FriendMethod")
+	if err != nil {
+		t.Fatal(err)
+	}
+	noCaveat := UnconstrainedUse()
+
+	var (
+		p1     = newPrincipal(t)
+		alice  = blessSelf(t, p1, "alice", expiryCaveat)
+		p2     = newPrincipal(t)
+		bob    = blessSelf(t, p2, "bob", noCaveat)
+		notBob = blessSelf(t, p2, "bobUnrecognized", noCaveat)
+	)
+	addToRoots(t, p2, bob)
+	addToRoots(t, p2, alice)
+	alicefriend, err := p1.Bless(p2.PublicKey(), alice, "friend", methodCaveat)
+	if err != nil {
+		t.Fatal(err)
+	}
+	bobfriend, err := p2.Bless(p2.PublicKey(), bob, "friend", methodCaveat)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -119,36 +132,44 @@ func TestBlessingsInfo(t *testing.T) {
 		t.Fatal(err)
 	}
 	tests := []struct {
-		blessings Blessings
-		names     []string
+		blessings     Blessings
+		blessingsInfo map[string][]Caveat
 	}{
 		{
 			blessings: bob,
-			names:     nil,
+			blessingsInfo: map[string][]Caveat{
+				"bob": []Caveat{noCaveat},
+			},
 		},
 		{
 			blessings: alicefriend,
-			names:     []string{"alice/friend"},
+			blessingsInfo: map[string][]Caveat{
+				"alice/friend": []Caveat{expiryCaveat, methodCaveat},
+			},
+		},
+		{
+			blessings: bobfriend,
+			blessingsInfo: map[string][]Caveat{
+				"bob/friend": []Caveat{noCaveat, methodCaveat},
+			},
 		},
 		{
 			blessings: aliceAndBobFriend,
-			names:     []string{"alice/friend"},
+			blessingsInfo: map[string][]Caveat{
+				"alice/friend": []Caveat{expiryCaveat, methodCaveat},
+				"bob/friend":   []Caveat{noCaveat, methodCaveat},
+			},
 		},
 		{
 			blessings: alice,
-			names:     nil,
+		},
+		{
+			blessings: notBob,
 		},
 	}
 	for _, test := range tests {
-		b := p2.BlessingsInfo(test.blessings)
-		if len(b) != len(test.names) {
-			t.Errorf("BlessingsInfo(%s) did not return expected number of matches wanted:%d got:%d", test.blessings, len(test.names), len(b))
-		} else {
-			for i, name := range test.names {
-				if name != b[i] {
-					t.Errorf("BlessingsInfo(%s) did not match expected:%s got:%s", name, b[i])
-				}
-			}
+		if !reflect.DeepEqual(p2.BlessingsInfo(test.blessings), test.blessingsInfo) {
+			t.Errorf("BlessingsInfo(%v) did not match expected:%v got:%v", test.blessings, test.blessingsInfo, p2.BlessingsInfo(test.blessings))
 		}
 	}
 }

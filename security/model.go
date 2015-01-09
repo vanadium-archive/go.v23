@@ -187,12 +187,13 @@ type Principal interface {
 	// of the caveats in the returned Blessings.
 	BlessingsByName(name BlessingPattern) []Blessings
 
-	// BlessingsInfo returns human-readable strings for blessings that have
-	// been granted to this Principal from recognized authorites. BlessingInfo
-	// does not validate caveats on 'blessings' and thus may NOT be valid in
-	// certain contexts. Use Blessings.ForContext(ctx) to determine the set
-	// of valid blessing strings in a particular context.
-	BlessingsInfo(blessings Blessings) []string
+	// BlessingsInfo returns a map from human-readable strings for blessings
+	// granted to this Principal from recognized authorites to the Caveats
+	// associated with the blessings. BlessingInfo does not validate caveats
+	// on 'blessings' and thus may NOT be valid in certain contexts. Use
+	// Blessings.ForContext(ctx) to determine the set of valid blessing strings
+	// in a particular context.
+	BlessingsInfo(blessings Blessings) map[string][]Caveat
 
 	// BlessingsStore provides access to the BlessingStore containing blessings
 	// that have been granted to this principal.
