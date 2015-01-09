@@ -138,11 +138,6 @@ type RootBlessingPatternOpt string
 
 func (RootBlessingPatternOpt) NSResolveOpt() {}
 
-// SkipResolveOpt specifies that resolve should skip resolving and only parse patterns.
-type SkipResolveOpt struct{}
-
-func (SkipResolveOpt) NSResolveOpt() {}
-
 // TODO(p): Perhaps add an ACL Opt.
 
 // Namespace provides translation from object names to server object addresses.

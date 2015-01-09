@@ -81,8 +81,8 @@ func (ServerBlessings) IPCStreamListenerOpt() {}
 // and received over a VC.
 type VCSecurityLevel int
 
-func (VCSecurityLevel) IPCClientOpt()         {}
 func (VCSecurityLevel) IPCServerOpt()         {}
+func (VCSecurityLevel) IPCCallOpt()           {}
 func (VCSecurityLevel) IPCStreamVCOpt()       {}
 func (VCSecurityLevel) IPCStreamListenerOpt() {}
 
@@ -110,7 +110,8 @@ func (RetryTimeout) IPCCallOpt() {}
 // NoResolve specifies that the RPC call should not further Resolve the name.
 type NoResolve bool
 
-func (NoResolve) IPCCallOpt() {}
+func (NoResolve) IPCCallOpt()   {}
+func (NoResolve) NSResolveOpt() {}
 
 // StreamManager wraps the stream.Manager interface so that we can add
 // functions representing the option annotations.
