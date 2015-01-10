@@ -108,7 +108,7 @@ type RetryTimeout time.Duration
 func (RetryTimeout) IPCCallOpt() {}
 
 // NoResolve specifies that the RPC call should not further Resolve the name.
-type NoResolve bool
+type NoResolve struct{}
 
 func (NoResolve) IPCCallOpt()   {}
 func (NoResolve) NSResolveOpt() {}
