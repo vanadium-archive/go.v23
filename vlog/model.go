@@ -116,6 +116,12 @@ type Logger interface {
 	// Arguments are handled in the manner of fmt.Printf; a newline is appended if missing.
 	Fatalf(format string, args ...interface{})
 
+	// Panic is equivalent to Error() followed by a call to panic().
+	Panic(args ...interface{})
+
+	// Panicf is equivalent to Errorf() followed by a call to panic().
+	Panicf(format string, args ...interface{})
+
 	// ConfigureLogger configures all future logging. Some options
 	// may not be usable if ConfigureLogger
 	// is called from an init function, in which case an error will
