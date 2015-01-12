@@ -220,24 +220,11 @@ type Runtime interface {
 	// Principal returns the principal that represents this runtime.
 	Principal() security.Principal
 
-	// NewClient creates a new Client instance.
-	//
-	// It accepts at least the following options:
-	// StreamManager, and Namespace
-	//
-	// In particular, if the options include a Client, then NewClient
-	// just returns that.
-	NewClient(opts ...ipc.ClientOpt) (ipc.Client, error)
-
 	// NewServer creates a new Server instance.
 	//
 	// It accepts at least the following options:
 	// ServesMountTable, ServerBlessings, and Namespace
 	NewServer(opts ...ipc.ServerOpt) (ipc.Server, error)
-
-	// Client returns the pre-configured Client that is created when the
-	// Runtime is initialized.
-	Client() ipc.Client
 
 	// NewContext creates a new root context.
 	// This should be used when you are doing a new operation that isn't related

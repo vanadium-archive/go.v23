@@ -26,14 +26,6 @@ import (
 
 var generatedError = errors.New("generated error")
 
-func newClient(r veyron2.Runtime) ipc.Client {
-	c, err := r.NewClient()
-	if err != nil {
-		panic(err)
-	}
-	return c
-}
-
 func newServer(r veyron2.Runtime) ipc.Server {
 	s, err := r.NewServer()
 	if err != nil {
@@ -126,7 +118,6 @@ func TestCalculator(t *testing.T) {
 	}
 	defer r.Cleanup()
 
-	client := newClient(r)
 	server := newServer(r)
 	if err := server.Serve("", arith.CalculatorServer(&serverCalculator{}), nil); err != nil {
 		t.Fatal(err)
@@ -138,7 +129,7 @@ func TestCalculator(t *testing.T) {
 	root := naming.JoinAddressName(eps[0].String(), "")
 	ctx := r.NewContext()
 	// Synchronous calls
-	calculator := arith.CalculatorClient(root, client)
+	calculator := arith.CalculatorClient(root)
 	sine, err := calculator.Sine(ctx, 0)
 	if err != nil {
 		t.Errorf("Sine: got %q but expected no error", err)
@@ -154,7 +145,7 @@ func TestCalculator(t *testing.T) {
 		t.Errorf("Cosine: expected 1 got %f", cosine)
 	}
 
-	ar := arith.ArithClient(root, client)
+	ar := arith.ArithClient(root)
 	sum, err := ar.Add(ctx, 7, 8)
 	if err != nil {
 		t.Errorf("Add: got %q but expected no error", err)
@@ -171,7 +162,7 @@ func TestCalculator(t *testing.T) {
 		t.Errorf("Add: expected 15 got %d", sum)
 	}
 
-	trig := arith.TrigonometryClient(root, client)
+	trig := arith.TrigonometryClient(root)
 	cosine, err = trig.Cosine(ctx, 0)
 	if err != nil {
 		t.Errorf("Cosine: got %q but expected no error", err)
@@ -462,7 +453,6 @@ func TestArith(t *testing.T) {
 		arith.CalculatorServer(&serverCalculator{}),
 	}
 
-	client := newClient(r)
 	ctx := r.NewContext()
 
 	for i, obj := range objects {
@@ -477,7 +467,7 @@ func TestArith(t *testing.T) {
 			t.Fatalf("%d: %v", i, err)
 		}
 		// Synchronous calls
-		ar := arith.ArithClient(root, client)
+		ar := arith.ArithClient(root)
 		/*
 			      // TODO(toddw): Re-enable this when supported by java.
 						oldCalls := numNoArgsCalls
