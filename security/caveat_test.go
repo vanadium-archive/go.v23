@@ -1,11 +1,10 @@
 package security
 
 import (
-	"bytes"
 	"testing"
 	"time"
 
-	"v.io/core/veyron2/vom"
+	"v.io/core/veyron2/vom2"
 )
 
 func TestCaveats(t *testing.T) {
@@ -50,7 +49,7 @@ func TestCaveats(t *testing.T) {
 	self.AddToRoots(ctx.LocalBlessings())
 	for idx, test := range tests {
 		var validator CaveatValidator
-		if err := vom.NewDecoder(bytes.NewReader(test.cav.ValidatorVOM)).Decode(&validator); err != nil {
+		if err := vom2.Decode(test.cav.ValidatorVOM, &validator); err != nil {
 			t.Errorf("Failed to decode validator(%v) for test #%d", err, idx)
 			continue
 		}

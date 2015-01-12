@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"v.io/core/veyron2/vom"
+	"v.io/core/veyron2/vom2"
 )
 
 func TestBlessSelf(t *testing.T) {
@@ -605,12 +605,12 @@ func TestBlessingsOnWire(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	buf := new(bytes.Buffer)
-	if err := vom.NewEncoder(buf).Encode(MarshalBlessings(b)); err != nil {
+	var data []byte
+	if data, err = vom2.Encode(MarshalBlessings(b)); err != nil {
 		t.Fatal(err)
 	}
 	var wire WireBlessings
-	if err := vom.NewDecoder(buf).Decode(&wire); err != nil {
+	if err := vom2.Decode(data, &wire); err != nil {
 		t.Fatal(err)
 	}
 	got, err := NewBlessings(wire)
@@ -658,13 +658,14 @@ func TestBlessingsOnWireWithMissingCertificates(t *testing.T) {
 		middleman  = B(rootP.Bless(middlemanP.PublicKey(), root, "middleman", UnconstrainedUse()))
 		leaf       = B(middlemanP.Bless(leafP.PublicKey(), middleman, "leaf", UnconstrainedUse()))
 
-		buf  = new(bytes.Buffer)
+		data []byte
 		wire WireBlessings
+		err  error
 	)
-	if err := vom.NewEncoder(buf).Encode(MarshalBlessings(leaf)); err != nil {
+	if data, err = vom2.Encode(MarshalBlessings(leaf)); err != nil {
 		t.Fatal(err)
 	}
-	if err := vom.NewDecoder(buf).Decode(&wire); err != nil {
+	if err := vom2.Decode(data, &wire); err != nil {
 		t.Fatal(err)
 	}
 	// Phew! We should have a certificate chain of size 3.
@@ -703,7 +704,7 @@ func TestBlessingsOnWireWithMissingCertificates(t *testing.T) {
 		C{C1, C2},
 		C{C1, C2, C3},
 	}
-	_, err := NewBlessings(wire)
+	_, err = NewBlessings(wire)
 	if merr := matchesError(err, "bind to different public keys"); merr != nil {
 		t.Error(err)
 	}
@@ -731,17 +732,17 @@ func TestBlessingsCannotBeVomEncodedOrDecoded(t *testing.T) {
 	}
 
 	// Test that directly vom encoding security.Blessings fails.
-	buf := new(bytes.Buffer)
-	if err := vom.NewEncoder(buf).Encode(b); err == nil {
+	var data []byte
+	if data, err = vom2.Encode(b); err == nil {
 		t.Fatal("Directly vom encoding security.Blessings unexpectedly succeeded")
 	}
 
 	// Test that directly vom decoding into security.Blessings fails.
-	if err := vom.NewEncoder(buf).Encode(MarshalBlessings(b)); err != nil {
+	if data, err = vom2.Encode(MarshalBlessings(b)); err != nil {
 		t.Fatal(err)
 	}
 	var decoded Blessings
-	if err := vom.NewDecoder(buf).Decode(&decoded); err == nil {
-		t.Fatal("Direct vom dencoding into security.Blessings unexpectedly succeeded")
+	if err := vom2.Decode(data, &decoded); err == nil {
+		t.Fatal("Direct vom decoding into security.Blessings unexpectedly succeeded")
 	}
 }
