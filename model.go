@@ -231,14 +231,6 @@ type Runtime interface {
 	// to ongoing RPCs.
 	NewContext() *context.T
 
-	// NewStreamManager creates a new stream manager.  The returned stream
-	// manager will be shutdown by the runtime on Cleanup.
-	NewStreamManager(opts ...stream.ManagerOpt) (stream.Manager, error)
-
-	// Namespace returns the pre-configured Namespace that is created
-	// when the Runtime is initialized.
-	Namespace() naming.Namespace
-
 	// Cleanup cleanly shuts down any internal state, logging, goroutines
 	// etc spawned and managed by the runtime. It is useful for cases where
 	// an application or library wants to be sure that it cleans up after
