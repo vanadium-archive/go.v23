@@ -217,12 +217,6 @@ type AppCycle interface {
 // Runtime is the interface that concrete Veyron implementations must
 // implement.
 type Runtime interface {
-	// NewServer creates a new Server instance.
-	//
-	// It accepts at least the following options:
-	// ServesMountTable, ServerBlessings, and Namespace
-	NewServer(opts ...ipc.ServerOpt) (ipc.Server, error)
-
 	// NewContext creates a new root context.
 	// This should be used when you are doing a new operation that isn't related
 	// to ongoing RPCs.

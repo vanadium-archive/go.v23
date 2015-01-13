@@ -13,6 +13,7 @@ import (
 	"testing"
 
 	"v.io/core/veyron2"
+	"v.io/core/veyron2/context"
 	"v.io/core/veyron2/ipc"
 	"v.io/core/veyron2/naming"
 	"v.io/core/veyron2/rt"
@@ -26,8 +27,8 @@ import (
 
 var generatedError = errors.New("generated error")
 
-func newServer(r veyron2.Runtime) ipc.Server {
-	s, err := r.NewServer()
+func newServer(ctx *context.T) ipc.Server {
+	s, err := veyron2.NewServer(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -117,8 +118,9 @@ func TestCalculator(t *testing.T) {
 		t.Fatalf("Error initializing runtime: %v", err)
 	}
 	defer r.Cleanup()
+	ctx := r.NewContext()
 
-	server := newServer(r)
+	server := newServer(ctx)
 	if err := server.Serve("", arith.CalculatorServer(&serverCalculator{}), nil); err != nil {
 		t.Fatal(err)
 	}
@@ -127,7 +129,6 @@ func TestCalculator(t *testing.T) {
 		t.Fatal(err)
 	}
 	root := naming.JoinAddressName(eps[0].String(), "")
-	ctx := r.NewContext()
 	// Synchronous calls
 	calculator := arith.CalculatorClient(root)
 	sine, err := calculator.Sine(ctx, 0)
@@ -441,6 +442,7 @@ func TestArith(t *testing.T) {
 		t.Fatalf("Error initializing runtime: %v", err)
 	}
 	defer r.Cleanup()
+	ctx := r.NewContext()
 
 	// TODO(bprosnitz) Split this test up -- it is quite long and hard to debug.
 
@@ -453,10 +455,8 @@ func TestArith(t *testing.T) {
 		arith.CalculatorServer(&serverCalculator{}),
 	}
 
-	ctx := r.NewContext()
-
 	for i, obj := range objects {
-		server := newServer(r)
+		server := newServer(ctx)
 		defer server.Stop()
 		eps, err := server.Listen(profiles.LocalListenSpec)
 		if err != nil {
