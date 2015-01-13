@@ -2,7 +2,6 @@ package access
 
 import (
 	"bytes"
-	"encoding/json"
 	"reflect"
 	"testing"
 
@@ -83,51 +82,5 @@ func TestTaggedACLMapSerialization(t *testing.T) {
 	}
 	if got, err := ReadTaggedACLMap(&buf); err != nil || !reflect.DeepEqual(got, obj) {
 		t.Errorf("Got error %v, TaggedACLMap: %v, want %v", err, got, obj)
-	}
-}
-
-func TestTaggedACLMapConversionFromOldFormat(t *testing.T) {
-	allLabels := security.LabelSet(security.AdminLabel | security.ReadLabel | security.WriteLabel | security.DebugLabel | security.MonitoringLabel | security.ResolveLabel)
-	oldformat := new(bytes.Buffer)
-	if err := json.NewEncoder(oldformat).Encode(security.DeprecatedACL{
-		In: map[security.BlessingPattern]security.LabelSet{
-			"user/...": allLabels,
-			"reader":   security.LabelSet(security.ReadLabel),
-		},
-		NotIn: map[string]security.LabelSet{
-			"user/bad":      allLabels,
-			"user/kindabad": security.LabelSet(security.AdminLabel),
-		},
-	}); err != nil {
-		t.Fatal(err)
-	}
-	got, err := ReadTaggedACLMap(oldformat)
-	if err != nil {
-		t.Fatal(err)
-	}
-	want := TaggedACLMap{
-		"Admin": ACL{
-			In:    []security.BlessingPattern{"user/..."},
-			NotIn: []string{"user/bad", "user/kindabad"},
-		},
-		"Debug": {
-			In:    []security.BlessingPattern{"user/..."},
-			NotIn: []string{"user/bad"},
-		},
-		"Read": {
-			In:    []security.BlessingPattern{"reader", "user/..."},
-			NotIn: []string{"user/bad"},
-		},
-		"Resolve": {
-			In:    []security.BlessingPattern{"user/..."},
-			NotIn: []string{"user/bad"},
-		},
-		"Write": {
-			In:    []security.BlessingPattern{"user/..."},
-			NotIn: []string{"user/bad"},
-		},
-	}
-	if !reflect.DeepEqual(got, want) {
-		t.Errorf("Got  %#v\nWant %#v", got, want)
 	}
 }

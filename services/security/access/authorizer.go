@@ -6,7 +6,6 @@ import (
 	"reflect"
 
 	"v.io/core/veyron2/security"
-	"v.io/core/veyron2/vlog"
 )
 
 // TaggedACLAuthorizer implements an authorization policy where access is
@@ -90,22 +89,6 @@ func TaggedACLAuthorizer(acls TaggedACLMap, tagType reflect.Type) (security.Auth
 func TaggedACLAuthorizerFromFile(filename string, tagType reflect.Type) (security.Authorizer, error) {
 	if tagType.Kind() != reflect.String {
 		return nil, fmt.Errorf("tag type(%v) must be backed by a string not %v", tagType, tagType.Kind())
-	}
-	// TODO(ashankar): Remove this.
-	// If the file was written in the old ACL format, convert to new.
-	if f, err := os.Open(filename); err == nil {
-		m, oldformat, err := readTaggedACLMapSupportingOldFormat(f)
-		if oldformat && err != nil {
-			// Rewrite the file in the new format.
-			f.Close()
-			if f, err := os.OpenFile(filename, os.O_WRONLY, 0600); err != nil {
-				err = m.WriteTo(f)
-				vlog.Infof("ACL in %q is in the old format. Rewriting to new format: %v", filename, err)
-				f.Close()
-			}
-		} else {
-			f.Close()
-		}
 	}
 	return &fileAuthorizer{filename, tagType}, nil
 }

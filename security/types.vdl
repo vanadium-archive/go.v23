@@ -18,21 +18,6 @@ package security
 // invalid.
 type BlessingPattern string
 
-// DEPRECATED: DO NOT USE
-// TODO(ashankar): Remove before release.
-type Label uint32
-
-// DEPRECATED: DO NOT USE
-// TODO(ashankar): Remove before release.
-type LabelSet Label
-
-// DEPRECATED: DO NOT USE: See the veyron2/services/security/access package.
-// TODO(ashankar): Remove before release.
-type DeprecatedACL struct {
-  In map[BlessingPattern]LabelSet
-  NotIn map[string]LabelSet
-}
-
 // Hash identifies a cryptographic hash function approved for use in signature algorithms.
 type Hash string
 
@@ -40,13 +25,6 @@ const (
   AllPrincipals = BlessingPattern("...") // Glob pattern that matches all blessings.
 
   ChainSeparator = "/" // ChainSeparator joins blessing names to form a blessing chain name.
-
-  ResolveLabel = Label(1 << 0)     // ResolveLabel applies to operations involving navigating the namespace.
-  ReadLabel    = Label(1 << 1)     // ReadLabel applies to operations where state of the object is not changed.
-  WriteLabel   = Label(1 << 2)     // WriteLabel applies to operations where the contents of an object are changed.
-  AdminLabel   = Label(1 << 3)     // AdminLabel applies to operations where metadata about the object (such as access control) is changed.
-  DebugLabel   = Label(1 << 4)     // DebugLabel applies to operations that returns metadata about the object.
-  MonitoringLabel = Label(1 << 5)  // MonitoringLabel is like DebugLabel.
 
   SHA1Hash = Hash("SHA1")     // SHA1 cryptographic hash function defined in RFC3174.
   SHA256Hash = Hash("SHA256") // SHA256 cryptographic hash function defined  in FIPS 180-4.
