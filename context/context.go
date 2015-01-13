@@ -68,7 +68,6 @@ type internalKey int
 const (
 	cancelKey = internalKey(iota)
 	deadlineKey
-	runtimeKey
 )
 
 // A CancelFunc is used to cancel a context.  The first call will
@@ -83,8 +82,6 @@ var Canceled = errors.New("context canceled")
 // deadlines and therefore been canceled automatically.
 var DeadlineExceeded = errors.New("context deadline exceeded")
 
-const nilRuntimeMessage = "attempting to create a context with a nil runtime"
-
 // A T object carries deadlines, cancellation and data across API
 // boundaries.  It is safe to use a T from multiple goroutines simultaneously.
 // The zero-type of context is uninitialized and should never be used
@@ -95,30 +92,10 @@ type T struct {
 	key, value interface{}
 }
 
-// NewUninitializedContext returns a new empty context.
-// This function should only be called by runtime implementors.
-// Application builders should get contexts from the veyron2 package only.
-// TODO(mattr): Once we are transitioned to RuntimeX the zero value or nil
-// will be the right thing, and we won't need this constructor.
-func NewUninitializedContext(runtime interface{}) *T {
-	if runtime == nil {
-		panic(nilRuntimeMessage)
-	}
-	return &T{nil, runtimeKey, runtime}
-}
-
 // Initialized returns true if this context has been properly initialized
 // by a runtime.
 func (t *T) Initialized() bool {
-	return t.Value(runtimeKey) != nil
-}
-
-// Runtime returns the runtime that generated this context.
-// The return value will always be a non-nil veyron2.Runtime.
-// Consider using the type-safe wrapper veyron2.RuntimeFromContext instead.
-// TODO(mattr): Remove this after the runtimeX transition.
-func (t *T) Runtime() interface{} {
-	return t.Value(runtimeKey)
+	return t != nil && t.key != nil
 }
 
 // Value is used to carry data across API boundaries.  This should be
@@ -227,9 +204,6 @@ type deadlineState struct {
 func WithValue(parent *T, key interface{}, val interface{}) *T {
 	if key == nil {
 		panic("Attempting to store a context value with an untyped nil key.")
-	}
-	if !parent.Initialized() {
-		panic("Attempting to attach a value to uninitialized context")
 	}
 	return &T{parent, key, val}
 }

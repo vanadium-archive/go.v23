@@ -7,7 +7,9 @@ import (
 )
 
 func testContext() *T {
-	return NewUninitializedContext(new(int))
+	var ctx *T
+	type key struct{}
+	return WithValue(ctx, key{}, nil)
 }
 
 func testCancel(t *testing.T, ctx *T, cancel CancelFunc) {
@@ -38,24 +40,21 @@ func testCancel(t *testing.T, ctx *T, cancel CancelFunc) {
 }
 
 func TestRootContext(t *testing.T) {
-	r := new(int)
-	ctx := NewUninitializedContext(r)
+	var ctx *T
 
-	if got := ctx.Runtime(); got != r {
-		t.Errorf("Expected runtime %p, but found %p", r, got)
+	if ctx.Initialized() {
+		t.Error("Nil context should be uninitialized")
 	}
-
 	if got := ctx.Err(); got != nil {
 		t.Errorf("Expected nil error, got: %v", got)
 	}
-
-	defer func() {
-		r := recover()
-		if r != nilRuntimeMessage {
-			t.Errorf("Unexpected recover value: %s", r)
-		}
-	}()
-	NewUninitializedContext(nil)
+	ctx = &T{}
+	if ctx.Initialized() {
+		t.Error("Zero context should be uninitialized")
+	}
+	if got := ctx.Err(); got != nil {
+		t.Errorf("Expected nil error, got: %v", got)
+	}
 }
 
 func TestCancelContext(t *testing.T) {

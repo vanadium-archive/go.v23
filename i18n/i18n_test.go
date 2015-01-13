@@ -253,9 +253,17 @@ func TestBaseLangID(t *testing.T) {
 	expectBaseLangID(t, "en-US", "en")
 }
 
+func testContext() *context.T {
+	// The nil context is not directly usable, we need to create
+	// a context specially.
+	type key struct{}
+	var ctx *context.T
+	return context.WithValue(ctx, key{}, nil)
+}
+
 // TestBaseLangID tests LangIDFromContext() and ContextWithLangID.
 func TestLangIDFromContext(t *testing.T) {
-	var dcWithoutLangID *context.T = context.NewUninitializedContext(struct{}{})
+	var dcWithoutLangID *context.T = testContext()
 	dcWithEN := ContextWithLangID(dcWithoutLangID, "en")
 	dcWithFR := ContextWithLangID(dcWithEN, "fr")
 	var got LangID
