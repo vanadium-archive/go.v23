@@ -31,9 +31,17 @@ type FakeServerCall struct {
 	security security.Context
 }
 
+func testContext() *context.T {
+	// The nil context is not directly usable, we need to create
+	// a context specially.
+	type key struct{}
+	var ctx *context.T
+	return context.WithValue(ctx, key{}, nil)
+}
+
 func NewFakeServerCall() *FakeServerCall {
 	return &FakeServerCall{
-		context:  context.NewUninitializedContext(struct{}{}),
+		context:  testContext(),
 		security: security.NewContext(&security.ContextParams{}),
 	}
 }
