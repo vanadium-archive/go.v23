@@ -217,9 +217,6 @@ type AppCycle interface {
 // Runtime is the interface that concrete Veyron implementations must
 // implement.
 type Runtime interface {
-	// Principal returns the principal that represents this runtime.
-	Principal() security.Principal
-
 	// NewServer creates a new Server instance.
 	//
 	// It accepts at least the following options:

@@ -85,3 +85,13 @@ func ConfigureLogger(opts ...LoggingOpts) error {
 func Stats() LevelStats {
 	return Log.Stats()
 }
+
+// Panic is equivalent to Error() followed by a call to panic().
+func Panic(args ...interface{}) {
+	Log.Panic(args...)
+}
+
+// Panicf is equivalent to Errorf() followed by a call to panic().
+func Panicf(format string, args ...interface{}) {
+	Log.Panicf(format, args...)
+}
