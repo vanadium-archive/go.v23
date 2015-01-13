@@ -109,14 +109,14 @@ func TestFormatWithMissingSpans(t *testing.T) {
 			{
 				ID:     spanIDs[3],
 				Parent: spanIDs[2],
-				Name:   "Decendant1",
+				Name:   "Decendant2",
 				Start:  trstart.Add(15 * time.Second).UnixNano(),
 				End:    trstart.Add(24 * time.Second).UnixNano(),
 			},
 			{
 				ID:     spanIDs[4],
 				Parent: spanIDs[2],
-				Name:   "Decendant2",
+				Name:   "Decendant1",
 				Start:  trstart.Add(12 * time.Second).UnixNano(),
 				End:    trstart.Add(18 * time.Second).UnixNano(),
 			},
@@ -128,12 +128,12 @@ func TestFormatWithMissingSpans(t *testing.T) {
 				End:    trstart.Add(8 * time.Second).UnixNano(),
 				Annotations: []vtrace.Annotation{
 					{
-						Message: "First Annotation",
-						When:    trstart.Add(4 * time.Second).UnixNano(),
-					},
-					{
 						Message: "Second Annotation",
 						When:    trstart.Add(6 * time.Second).UnixNano(),
+					},
+					{
+						Message: "First Annotation",
+						When:    trstart.Add(4 * time.Second).UnixNano(),
 					},
 				},
 			},
@@ -148,8 +148,8 @@ func TestFormatWithMissingSpans(t *testing.T) {
             @4s First Annotation
             @6s Second Annotation
     Span - Missing Data [id: 00000000 parent 00000000] (??, ??)
-        Span - Decendant1 [id: 0000000a parent 00000009] (15s, 24s)
-        Span - Decendant2 [id: 0000000b parent 00000009] (12s, 18s)
+        Span - Decendant1 [id: 0000000b parent 00000009] (12s, 18s)
+        Span - Decendant2 [id: 0000000a parent 00000009] (15s, 24s)
 `
 
 	if got := buf.String(); got != want {
