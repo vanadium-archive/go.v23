@@ -1,7 +1,6 @@
 package access
 
 import (
-	"bytes"
 	"encoding/json"
 	"io"
 	"sort"
@@ -54,9 +53,7 @@ func (m TaggedACLMap) WriteTo(w io.Writer) error {
 
 // ReadTaggedACLMap reads the JSON-encoded representation of a TaggedACLMap from r.
 func ReadTaggedACLMap(r io.Reader) (m TaggedACLMap, err error) {
-	// TODO(ashankar): Remove the security.ACL type, the readTaggedACLMapSupportingOldFormat function and replace the line below with:
-	// err = json.NewDecoder(r).Decode(&m)
-	m, _, err = readTaggedACLMapSupportingOldFormat(r)
+	err = json.NewDecoder(r).Decode(&m)
 	return
 }
 
@@ -147,59 +144,6 @@ func (m TaggedACLMap) Normalize() TaggedACLMap {
 		}
 	}
 	return m
-}
-
-func readTaggedACLMapSupportingOldFormat(r io.Reader) (m TaggedACLMap, oldformat bool, err error) {
-	var cpy bytes.Buffer
-	if _, err := io.Copy(&cpy, r); err != nil {
-		return nil, false, err
-	}
-	// Decode into both formats (because JSON decoding typically won't fail).
-	var (
-		oldACL     security.DeprecatedACL
-		olderr     = json.NewDecoder(bytes.NewBuffer(cpy.Bytes())).Decode(&oldACL)
-		newerr     = json.NewDecoder(&cpy).Decode(&m)
-		oldhasdata = (len(oldACL.In) + len(oldACL.NotIn)) > 0
-	)
-	if olderr != nil && newerr != nil {
-		return nil, false, newerr
-	}
-	if olderr != nil || !oldhasdata { // newerr == nil
-		return m, false, nil
-	}
-	// At this point, there is data in the old format, so convert.
-	m = make(TaggedACLMap)
-	xlate := func(labels security.LabelSet) []string {
-		var tags []string
-		if (uint32(labels) & uint32(security.ResolveLabel)) != 0 {
-			tags = append(tags, "Resolve")
-		}
-		if (uint32(labels) & uint32(security.ReadLabel)) != 0 {
-			tags = append(tags, "Read")
-		}
-		if (uint32(labels) & uint32(security.WriteLabel)) != 0 {
-			tags = append(tags, "Write")
-		}
-		if (uint32(labels) & 8) != 0 {
-			tags = append(tags, "Admin")
-		}
-		if (uint32(labels) & 16) != 0 {
-			tags = append(tags, "Debug")
-		}
-		// Ignore security.MonitoringLabel
-		return tags
-	}
-	for p, labels := range oldACL.In {
-		for _, tag := range xlate(labels) {
-			m.Add(p, tag)
-		}
-	}
-	for b, labels := range oldACL.NotIn {
-		for _, tag := range xlate(labels) {
-			m.Blacklist(b, tag)
-		}
-	}
-	return m, true, nil
 }
 
 type byPattern []security.BlessingPattern

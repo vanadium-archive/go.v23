@@ -32,36 +32,6 @@ func (BlessingPattern) __VDLReflect(struct {
 }) {
 }
 
-// DEPRECATED: DO NOT USE
-// TODO(ashankar): Remove before release.
-type Label uint32
-
-func (Label) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/security.Label"
-}) {
-}
-
-// DEPRECATED: DO NOT USE
-// TODO(ashankar): Remove before release.
-type LabelSet Label
-
-func (LabelSet) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/security.LabelSet"
-}) {
-}
-
-// DEPRECATED: DO NOT USE: See the veyron2/services/security/access package.
-// TODO(ashankar): Remove before release.
-type DeprecatedACL struct {
-	In    map[BlessingPattern]LabelSet
-	NotIn map[string]LabelSet
-}
-
-func (DeprecatedACL) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/security.DeprecatedACL"
-}) {
-}
-
 // Hash identifies a cryptographic hash function approved for use in signature algorithms.
 type Hash string
 
@@ -190,9 +160,6 @@ func (WireBlessings) __VDLReflect(struct {
 
 func init() {
 	__vdl.Register(BlessingPattern(""))
-	__vdl.Register(Label(0))
-	__vdl.Register(LabelSet(0))
-	__vdl.Register(DeprecatedACL{})
 	__vdl.Register(Hash(""))
 	__vdl.Register(Signature{})
 	__vdl.Register(ThirdPartyRequirements{})
@@ -205,18 +172,6 @@ func init() {
 const AllPrincipals = BlessingPattern("...") // Glob pattern that matches all blessings.
 
 const ChainSeparator = "/" // ChainSeparator joins blessing names to form a blessing chain name.
-
-const ResolveLabel = Label(1) // ResolveLabel applies to operations involving navigating the namespace.
-
-const ReadLabel = Label(2) // ReadLabel applies to operations where state of the object is not changed.
-
-const WriteLabel = Label(4) // WriteLabel applies to operations where the contents of an object are changed.
-
-const AdminLabel = Label(8) // AdminLabel applies to operations where metadata about the object (such as access control) is changed.
-
-const DebugLabel = Label(16) // DebugLabel applies to operations that returns metadata about the object.
-
-const MonitoringLabel = Label(32) // MonitoringLabel is like DebugLabel.
 
 const SHA1Hash = Hash("SHA1") // SHA1 cryptographic hash function defined in RFC3174.
 
