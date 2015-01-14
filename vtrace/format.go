@@ -3,6 +3,7 @@ package vtrace
 import (
 	"fmt"
 	"io"
+	"sort"
 	"time"
 
 	"v.io/core/veyron2/uniqueid"
@@ -10,9 +11,23 @@ import (
 
 const indentStep = "    "
 
+type children []*node
+
+// children implements sort.Interface
+func (c children) Len() int           { return len(c) }
+func (c children) Less(i, j int) bool { return c[i].span.Start < c[j].span.Start }
+func (c children) Swap(i, j int)      { c[i], c[j] = c[j], c[i] }
+
+type annotations []Annotation
+
+// annotations implements sort.Interface
+func (a annotations) Len() int           { return len(a) }
+func (a annotations) Less(i, j int) bool { return a[i].When < a[j].When }
+func (a annotations) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+
 type node struct {
 	span     *SpanRecord
-	children []*node
+	children children
 }
 
 // TODO(mattr): It is useful in general to make a tree of spans
@@ -46,6 +61,15 @@ func buildTree(trace *TraceRecord) *node {
 				nodes[span.Parent] = p
 			}
 			p.children = append(p.children, n)
+		}
+	}
+
+	// Sort the children of each node in start-time order, and the
+	// annotation in time-order.
+	for _, node := range nodes {
+		sort.Sort(node.children)
+		if node.span != nil {
+			sort.Sort(annotations(node.span.Annotations))
 		}
 	}
 
