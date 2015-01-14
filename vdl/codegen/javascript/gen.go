@@ -340,56 +340,40 @@ var Registry = vom.Registry;
 {{if $data.UserImports}}{{range $imp := $data.UserImports}}
 var {{$imp.Local}} = require('{{importPath $data $imp.Path}}');{{end}}{{end}}
 
+module.exports = {};
+
+
 {{/* Define any types introduced by the VDL file. */}}
-var types = {};
+// Types:
 {{makeTypeDefinitionsString $data.TypeNames }}
 
+
 {{/* Define all constants as typed constants. */}}
-var consts = { {{range $file := $pkg.Files}}{{range $const := $file.ConstDefs}}
-  {{$const.Name}}: {{typedConst $data.TypeNames $const.Value}},{{end}}{{end}}
-};
+// Consts:
+{{range $file := $pkg.Files}}{{range $const := $file.ConstDefs}}
+  module.exports.{{$const.Name}} = {{typedConst $data.TypeNames $const.Value}};
+{{end}}{{end}}
+
 
 {{/* TODO(alexfandrianto): Find a common place to put NotImplementedMethod. */}}
 function NotImplementedMethod(name) {
   throw new Error('Method ' + name + ' not implemented');
 }
 
-{{/* TODO(alexfandrianto): Remove this section. It's redundant with serviceDefs */}}
-var services = {
-package: '{{$pkg.Path}}',
-{{range $file := $pkg.Files}}{{range $iface := $file.Interfaces}}  {{$iface.Name}}: {
-{{range $method := $iface.AllMethods}}    {{$method.Name}}: {
-    numInArgs: {{len $method.InArgs}},
-    numOutArgs: {{numOutArgs $method}},
-    inputStreaming: {{if $method.InStream}}true{{else}}false{{end}},
-    outputStreaming: {{if $method.OutStream}}true{{else}}false{{end}},
-    tags: {{genMethodTags $data.TypeNames $method }}
-},
-{{end}}
-},
-{{end}}{{end}}
-};
-
-{{/* Define service exports from the VDL. */}}
-var serviceDefs = {
-  package: '{{$pkg.Path}}',
-{{range $file := $pkg.Files}}
-  {{range $iface := $file.Interfaces}}
-  {{$iface.Name}}: {{$iface.Name}},
-  {{end}}
-{{end}}
-};
-
 {{/* Define each of those service interfaces here, including method stubs and
      service signature. */}}
+// Services:
 {{range $file := $pkg.Files}}
   {{range $iface := $file.Interfaces}}
     {{/* Define the service interface. */}}
 function {{$iface.Name}}(){}
+module.exports.{{$iface.Name}} = {{$iface.Name}}
+
     {{range $method := $iface.AllMethods}}
       {{/* Add each method to the service prototype. */}}
 {{$iface.Name}}.prototype.{{$method.Name}} = NotImplementedMethod;
-    {{end}}
+    {{end}} {{/* end range $iface.AllMethods */}}
+
     {{/* The service signature encodes the same info as signature.Interface.
          TODO(alexfandrianto): We want to associate the signature type here, but
          it's complicated. https://github.com/veyron/release-issues/issues/432
@@ -403,16 +387,12 @@ function {{$iface.Name}}(){}
     {{range $method := $iface.AllMethods}}
       {{/* Each method signature contains the information in ipc.MethodSig. */}}
     {{generateMethodSignature $method $data.TypeNames}},
-    {{end}}
+    {{end}} {{/*end range $iface.AllMethods*/}}
   ]
 };
-  {{end}}
-{{end}}
 
-module.exports = {
-  types: types,
-  serviceDefs: serviceDefs,
-  services: services,
-  consts: consts,
-};
+  {{end}} {{/* end range $files.Interfaces */}}
+{{end}} {{/* end range $pkg.Files */}}
+
+
 {{end}}`
