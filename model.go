@@ -268,7 +268,7 @@ type RuntimeX interface {
 	// primary responsability is to populate the initial context with
 	// all required state.
 	// protocols is a slice of any preferred protocols for this runtime.
-	Init(ctx *context.T, protocols []string) *context.T
+	Init(ctx *context.T, protocols []string) (*context.T, error)
 
 	// NewEndpoint returns an Endpoint by parsing the supplied endpoint
 	// string as per the format described above. It can be used to test
@@ -369,6 +369,33 @@ func RegisterRuntime(name string, r RuntimeX) {
 		runtimeConfig.runtime = r
 	}
 	runtimeConfig.Unlock()
+}
+
+// Init should be called once for each vanadium executable, providing the setup
+// of the initial context.T and a context.CancelFunc that can be used to cancel the context.
+func Init() (ctx *context.T, cancelFunc context.CancelFunc) {
+	// TODO(suharshs,mattr): Panic if we have already been called.
+	var rt RuntimeX
+	var err error
+
+	ctx, cancelFunc = context.WithCancel(ctx)
+
+	profileInitMu.Lock()
+	if profileInitFunc == nil {
+		panic("no profile has been registered.")
+	}
+	rt, ctx, err = profileInitFunc(ctx)
+	profileInitMu.Unlock()
+
+	if err != nil {
+		panic(err)
+	}
+
+	runtimeConfig.Lock()
+	runtimeConfig.runtime = rt
+	runtimeConfig.Unlock()
+
+	return
 }
 
 // NewEndpoint returns an Endpoint by parsing the supplied endpoint
@@ -481,7 +508,7 @@ var (
 	profileInitMu   sync.Mutex
 )
 
-type ProfileInitFunc func(ctx *context.T) (RuntimeX, *context.T)
+type ProfileInitFunc func(ctx *context.T) (RuntimeX, *context.T, error)
 
 func RegisterProfileInit(f ProfileInitFunc) {
 	profileInitMu.Lock()
