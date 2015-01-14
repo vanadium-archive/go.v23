@@ -7,6 +7,9 @@ import (
 	"v.io/core/veyron2/services/security/access"
 )
 
+// TODO(caprita): Merge with veyron2/config and veyron/lib/exec/config.go.
+type Config map[string]string
+
 // Application can be used to manage applications on a device. The
 // idea is that this interace will be invoked using an object name that
 // identifies the application and its installations and instances
@@ -115,7 +118,7 @@ type Application interface {
 	// which can then be used to control all the installations of the given
 	// application.
 	// TODO(rjkroege): Use customized labels.
-	Install(name string) (string | error) {access.Write}
+	Install(name string, config Config) (string | error) {access.Write}
 	// Refresh refreshes the state of application installation(s)
 	// instance(s).
 	Refresh() error {access.Admin}

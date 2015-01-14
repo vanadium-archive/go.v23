@@ -24,6 +24,14 @@ import (
 // bootstrap types are used on interfaces.
 const _ = __wiretype.TypeIDInvalid
 
+// TODO(caprita): Merge with veyron2/config and veyron/lib/exec/config.go.
+type Config map[string]string
+
+func (Config) __VDLReflect(struct {
+	Name string "v.io/core/veyron2/services/mgmt/device.Config"
+}) {
+}
+
 // Description enumerates the profiles that a Device supports.
 type Description struct {
 	// Profiles is a set of names of supported profiles.	Each name can
@@ -55,6 +63,7 @@ func (Association) __VDLReflect(struct {
 }
 
 func init() {
+	__vdl.Register(Config(nil))
 	__vdl.Register(Description{})
 	__vdl.Register(Association{})
 }
@@ -209,7 +218,7 @@ type ApplicationClientMethods interface {
 	// which can then be used to control all the installations of the given
 	// application.
 	// TODO(rjkroege): Use customized labels.
-	Install(ctx *__context.T, name string, opts ...__ipc.CallOpt) (string, error)
+	Install(ctx *__context.T, name string, config Config, opts ...__ipc.CallOpt) (string, error)
 	// Refresh refreshes the state of application installation(s)
 	// instance(s).
 	Refresh(*__context.T, ...__ipc.CallOpt) error
@@ -282,9 +291,9 @@ func (c implApplicationClientStub) c(ctx *__context.T) __ipc.Client {
 	return __veyron2.GetClient(ctx)
 }
 
-func (c implApplicationClientStub) Install(ctx *__context.T, i0 string, opts ...__ipc.CallOpt) (o0 string, err error) {
+func (c implApplicationClientStub) Install(ctx *__context.T, i0 string, i1 Config, opts ...__ipc.CallOpt) (o0 string, err error) {
 	var call __ipc.Call
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Install", []interface{}{i0}, opts...); err != nil {
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "Install", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&o0, &err); ierr != nil {
@@ -564,7 +573,7 @@ type ApplicationServerMethods interface {
 	// which can then be used to control all the installations of the given
 	// application.
 	// TODO(rjkroege): Use customized labels.
-	Install(ctx __ipc.ServerContext, name string) (string, error)
+	Install(ctx __ipc.ServerContext, name string, config Config) (string, error)
 	// Refresh refreshes the state of application installation(s)
 	// instance(s).
 	Refresh(__ipc.ServerContext) error
@@ -645,8 +654,8 @@ type implApplicationServerStub struct {
 	gs *__ipc.GlobState
 }
 
-func (s implApplicationServerStub) Install(ctx __ipc.ServerContext, i0 string) (string, error) {
-	return s.impl.Install(ctx, i0)
+func (s implApplicationServerStub) Install(ctx __ipc.ServerContext, i0 string, i1 Config) (string, error) {
+	return s.impl.Install(ctx, i0, i1)
 }
 
 func (s implApplicationServerStub) Refresh(ctx __ipc.ServerContext) error {
@@ -713,7 +722,8 @@ var descApplication = __ipc.InterfaceDesc{
 			Name: "Install",
 			Doc:  "// Install installs the application identified by the argument and\n// returns an object name suffix that identifies the new installation.\n//\n// The argument should be an object name for an application envelope.\n// The service it identifies must implement repository.Application, and\n// is expected to return either the requested version (if the object name\n// encodes a specific version), or otherwise the latest available version,\n// as appropriate.\n//\n// The returned suffix, when appended to the name used to reach the\n// receiver for Install, can be used to control the installation object.\n// The suffix will contain the title of the application as a prefix,\n// which can then be used to control all the installations of the given\n// application.\n// TODO(rjkroege): Use customized labels.",
 			InArgs: []__ipc.ArgDesc{
-				{"name", ``}, // string
+				{"name", ``},   // string
+				{"config", ``}, // Config
 			},
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // string
@@ -817,41 +827,42 @@ func (s implApplicationServerStub) Signature(ctx __ipc.ServerContext) (__ipc.Ser
 	result.Methods["Install"] = __ipc.MethodSignature{
 		InArgs: []__ipc.MethodArgument{
 			{Name: "name", Type: 3},
+			{Name: "config", Type: 65},
 		},
 		OutArgs: []__ipc.MethodArgument{
 			{Name: "", Type: 3},
-			{Name: "", Type: 65},
+			{Name: "", Type: 66},
 		},
 	}
 	result.Methods["Refresh"] = __ipc.MethodSignature{
 		InArgs: []__ipc.MethodArgument{},
 		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 65},
+			{Name: "", Type: 66},
 		},
 	}
 	result.Methods["Restart"] = __ipc.MethodSignature{
 		InArgs: []__ipc.MethodArgument{},
 		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 65},
+			{Name: "", Type: 66},
 		},
 	}
 	result.Methods["Resume"] = __ipc.MethodSignature{
 		InArgs: []__ipc.MethodArgument{},
 		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 65},
+			{Name: "", Type: 66},
 		},
 	}
 	result.Methods["Revert"] = __ipc.MethodSignature{
 		InArgs: []__ipc.MethodArgument{},
 		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 65},
+			{Name: "", Type: 66},
 		},
 	}
 	result.Methods["Start"] = __ipc.MethodSignature{
 		InArgs: []__ipc.MethodArgument{},
 		OutArgs: []__ipc.MethodArgument{
 			{Name: "", Type: 61},
-			{Name: "", Type: 65},
+			{Name: "", Type: 66},
 		},
 	}
 	result.Methods["Stop"] = __ipc.MethodSignature{
@@ -859,25 +870,25 @@ func (s implApplicationServerStub) Signature(ctx __ipc.ServerContext) (__ipc.Ser
 			{Name: "deadline", Type: 52},
 		},
 		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 65},
+			{Name: "", Type: 66},
 		},
 	}
 	result.Methods["Suspend"] = __ipc.MethodSignature{
 		InArgs: []__ipc.MethodArgument{},
 		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 65},
+			{Name: "", Type: 66},
 		},
 	}
 	result.Methods["Uninstall"] = __ipc.MethodSignature{
 		InArgs: []__ipc.MethodArgument{},
 		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 65},
+			{Name: "", Type: 66},
 		},
 	}
 	result.Methods["Update"] = __ipc.MethodSignature{
 		InArgs: []__ipc.MethodArgument{},
 		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 65},
+			{Name: "", Type: 66},
 		},
 	}
 	result.Methods["UpdateTo"] = __ipc.MethodSignature{
@@ -885,12 +896,12 @@ func (s implApplicationServerStub) Signature(ctx __ipc.ServerContext) (__ipc.Ser
 			{Name: "name", Type: 3},
 		},
 		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 65},
+			{Name: "", Type: 66},
 		},
 	}
 
 	result.TypeDefs = []__vdlutil.Any{
-		__wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}}
+		__wiretype.MapType{Key: 0x3, Elem: 0x3, Name: "v.io/core/veyron2/services/mgmt/device.Config", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}}
 	var ss __ipc.ServiceSignature
 	var firstAdded int
 	ss, _ = s.ObjectServerStub.Signature(ctx)
