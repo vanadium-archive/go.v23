@@ -15,7 +15,6 @@ import (
 	"v.io/core/veyron2"
 	"v.io/core/veyron2/context"
 	"v.io/core/veyron2/ipc"
-	"v.io/core/veyron2/naming"
 	"v.io/core/veyron2/rt"
 	"v.io/core/veyron2/vdl/testdata/arith"
 	"v.io/core/veyron2/vdl/testdata/base"
@@ -128,7 +127,7 @@ func TestCalculator(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	root := naming.JoinAddressName(eps[0].String(), "")
+	root := eps[0].Name()
 	// Synchronous calls
 	calculator := arith.CalculatorClient(root)
 	sine, err := calculator.Sine(ctx, 0)
@@ -462,7 +461,7 @@ func TestArith(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		root := naming.JoinAddressName(eps[0].String(), "")
+		root := eps[0].Name()
 		if err := server.Serve("", obj, nil); err != nil {
 			t.Fatalf("%d: %v", i, err)
 		}
