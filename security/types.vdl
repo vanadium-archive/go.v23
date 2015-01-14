@@ -22,30 +22,30 @@ type BlessingPattern string
 type Hash string
 
 const (
-  AllPrincipals = BlessingPattern("...") // Glob pattern that matches all blessings.
+	AllPrincipals = BlessingPattern("...") // Glob pattern that matches all blessings.
 
-  ChainSeparator = "/" // ChainSeparator joins blessing names to form a blessing chain name.
+	ChainSeparator = "/" // ChainSeparator joins blessing names to form a blessing chain name.
 
-  SHA1Hash = Hash("SHA1")     // SHA1 cryptographic hash function defined in RFC3174.
-  SHA256Hash = Hash("SHA256") // SHA256 cryptographic hash function defined  in FIPS 180-4.
-  SHA384Hash = Hash("SHA384") // SHA384 cryptographic hash function defined in FIPS 180-2.
-  SHA512Hash = Hash("SHA512") // SHA512 cryptographic hash function defined in FIPS 180-2.
+	SHA1Hash   = Hash("SHA1")   // SHA1 cryptographic hash function defined in RFC3174.
+	SHA256Hash = Hash("SHA256") // SHA256 cryptographic hash function defined  in FIPS 180-4.
+	SHA384Hash = Hash("SHA384") // SHA384 cryptographic hash function defined in FIPS 180-2.
+	SHA512Hash = Hash("SHA512") // SHA512 cryptographic hash function defined in FIPS 180-2.
 
-  SignatureForMessageSigning = "S"       // Signature.Purpose used by a Principal to sign arbitrary messages.
-  SignatureForBlessingCertificates = "B" // Signature.Purpose used by a Principal when signing Certificates for creating blessings.
-  SignatureForDischarge = "D"            // Signature.Purpose used by a Principal when signing discharges for public-key based third-party caveats.
+	SignatureForMessageSigning       = "S" // Signature.Purpose used by a Principal to sign arbitrary messages.
+	SignatureForBlessingCertificates = "B" // Signature.Purpose used by a Principal when signing Certificates for creating blessings.
+	SignatureForDischarge            = "D" // Signature.Purpose used by a Principal when signing discharges for public-key based third-party caveats.
 )
 
 // Signature represents a digital signature.
 type Signature struct {
-  // Purpose of the signature. Can be used to prevent type attacks.
-  // (See Section 4.2 of http://www-users.cs.york.ac.uk/~jac/PublishedPapers/reviewV1_1997.pdf for example).
-  // The actual signature (R, S values for ECDSA keys) is produced by signing: Hash(Hash(message), Hash(Purpose)).
-  Purpose []byte
-  // Cryptographic hash function applied to the message before computing the signature.
-  Hash Hash
-  // Pair of integers that make up an ECDSA signature.
-  R, S []byte
+	// Purpose of the signature. Can be used to prevent type attacks.
+	// (See Section 4.2 of http://www-users.cs.york.ac.uk/~jac/PublishedPapers/reviewV1_1997.pdf for example).
+	// The actual signature (R, S values for ECDSA keys) is produced by signing: Hash(Hash(message), Hash(Purpose)).
+	Purpose []byte
+	// Cryptographic hash function applied to the message before computing the signature.
+	Hash Hash
+	// Pair of integers that make up an ECDSA signature.
+	R, S []byte
 }
 
 // ThirdPartyRequirements specifies the information required by the third-party
@@ -54,9 +54,9 @@ type Signature struct {
 // These requirements are typically used to construct a DischargeImpetus, which
 // will be sent to the third-party.
 type ThirdPartyRequirements struct {
-  ReportServer bool     // The blessings presented by the server of an IPC call.
-  ReportMethod bool     // The name of the method being invoked.
-  ReportArguments bool  // Arguments to the method being invoked.
+	ReportServer    bool // The blessings presented by the server of an IPC call.
+	ReportMethod    bool // The name of the method being invoked.
+	ReportArguments bool // Arguments to the method being invoked.
 }
 
 // DischargeImpetus encapsulates the motivation for a discharge being sought.
@@ -70,9 +70,9 @@ type ThirdPartyRequirements struct {
 // caveats to the discharge that bind the discharge to the impetus, thereby
 // rendering the discharge unsuable for any other purpose.
 type DischargeImpetus struct {
-  Server []BlessingPattern  // The client intends to use the discharge to communicate with a server that has a blessing matching one of the patterns in this set.
-  Method string             // Name of the method being invoked by the client.
-  Arguments []any           // Arguments to the method invocation.
+	Server    []BlessingPattern // The client intends to use the discharge to communicate with a server that has a blessing matching one of the patterns in this set.
+	Method    string            // Name of the method being invoked by the client.
+	Arguments []any             // Arguments to the method invocation.
 }
 
 // Certificate represents the cryptographic proof of the binding of
@@ -83,10 +83,10 @@ type DischargeImpetus struct {
 // extend it with a Certificate to generate the blessing "alice/friend" for
 // another principal P2.
 type Certificate struct {
-  Extension string     // Human-readable string extension bound to PublicKey.
-  PublicKey []byte     // DER-encoded PKIX public key.
-  Caveats   []Caveat   // Caveats on the binding of Name to PublicKey.
-  Signature Signature  // Signature by the blessing principal that binds the extension to the public key.
+	Extension string    // Human-readable string extension bound to PublicKey.
+	PublicKey []byte    // DER-encoded PKIX public key.
+	Caveats   []Caveat  // Caveats on the binding of Name to PublicKey.
+	Signature Signature // Signature by the blessing principal that binds the extension to the public key.
 }
 
 // Caveat is a condition on the validity of a blessing/discharge.
@@ -98,16 +98,16 @@ type Certificate struct {
 // Given a Hash, the message digest of a caveat is:
 // Hash(ValidatorVOM).
 type Caveat struct {
-  // ValidatorVOM holds the VOM-encoded bytes of the CaveatValidator
-  // that validates this caveat.
-  ValidatorVOM []byte
+	// ValidatorVOM holds the VOM-encoded bytes of the CaveatValidator
+	// that validates this caveat.
+	ValidatorVOM []byte
 }
 
 // WireBlessings encapsulates wire format of a set of blessings and the
 // corresponding cryptographic proof that binds them to a principal
 // (identified by a public key).
 //
-// This structure is the "wire" format for sending an receiving blessings
+// This structure is the "wire" format for sending and receiving blessings
 // in RPCs or marshaling to persistent storage. Typically, languages will
 // provide a factory function that converts this wire representation to
 // a more usable object to inspect and manipulate these blessings. For
@@ -118,7 +118,7 @@ type Caveat struct {
 // type (Blessings=blessingsImpl) via factory functions that will do the
 // integrity checks.
 type WireBlessings struct {
-  // CertificateChains is an array of chains of certificates that bind
-  // a blessing to the public key in the last certificate of the chain.
-  CertificateChains [][]Certificate
+	// CertificateChains is an array of chains of certificates that bind
+	// a blessing to the public key in the last certificate of the chain.
+	CertificateChains [][]Certificate
 }

@@ -137,7 +137,7 @@ func (Caveat) __VDLReflect(struct {
 // corresponding cryptographic proof that binds them to a principal
 // (identified by a public key).
 //
-// This structure is the "wire" format for sending an receiving blessings
+// This structure is the "wire" format for sending and receiving blessings
 // in RPCs or marshaling to persistent storage. Typically, languages will
 // provide a factory function that converts this wire representation to
 // a more usable object to inspect and manipulate these blessings. For

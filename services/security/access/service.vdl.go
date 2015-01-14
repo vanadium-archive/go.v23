@@ -50,48 +50,47 @@
 // All methods that create an object (e.g. Put, Mount, Link) should take an
 // optional ACL parameter.  If the ACL is not specified, the new object, O,
 // copies its ACL from the parent.  Subsequent changes to the parent ACL are
-// not automatically propagated to O.  Instead, a client library must make
+// not automatically propagated to O.  Instead, a client library must make
 // recursive ACL changes.
 //
-// Resolve access is required on all components of a name, except the last one, in
-// order to access the object referenced by that name.  For example, for
+// Resolve access is required on all components of a name, except the last one,
+// in order to access the object referenced by that name.  For example, for
 // principal P to access the name "a/b/c", P must have resolve access to "a"
 // and "a/b".
 //
-// The Resolve tag means that a principal can traverse that component of the name to
-// access the child.  It does not give the principal permission to list the
-// children via Glob or a similar method.  For example, a server might have an
-// object named "home" with a child for each user of the system.  If these
+// The Resolve tag means that a principal can traverse that component of the
+// name to access the child.  It does not give the principal permission to list
+// the children via Glob or a similar method.  For example, a server might have
+// an object named "home" with a child for each user of the system.  If these
 // users were allowed to list the contents of "home", they could discover the
 // other users of the system.  That could be a privacy violation.  Without
-// Resolve, every user of the system would need read access to "home" to
-// access "home/<user>".  If the user called Glob("home/*"), it would then be
-// up to the server to filter out the names that the user could not access.
-// That could be a very expensive operation if there were a lot of children of
-// "home".  Resolve protects these servers against potential denial of
-// service attacks on these large, shared directories.
+// Resolve, every user of the system would need read access to "home" to access
+// "home/<user>".  If the user called Glob("home/*"), it would then be up to
+// the server to filter out the names that the user could not access.  That
+// could be a very expensive operation if there were a lot of children of
+// "home".  Resolve protects these servers against potential denial of service
+// attacks on these large, shared directories.
 //
-// Groups and blessings allow for sweeping access changes.  A group is
-// suitable for saying that the same set of principals have access to a set of
-// unrelated resources (e.g. docs, VMs, images).  See the Group API for a
-// complete description.  A blessing is useful for controlling access to objects
-// that are always accessed together.  For example, a document may have
-// embedded images and comments, each with a unique name.  When accessing a
-// document, the server would generate a blessing that the client would use to
-// fetch the images and comments; the images and comments would have this
-// blessed identity in their ACLs.  Changes to the document’s ACL are
-// therefore “propagated” to the images and comments.
+// Groups and blessings allow for sweeping access changes.  A group is suitable
+// for saying that the same set of principals have access to a set of unrelated
+// resources (e.g. docs, VMs, images).  See the Group API for a complete
+// description.  A blessing is useful for controlling access to objects that
+// are always accessed together.  For example, a document may have embedded
+// images and comments, each with a unique name.  When accessing a document,
+// the server would generate a blessing that the client would use to fetch the
+// images and comments; the images and comments would have this blessed
+// identity in their ACLs.  Changes to the document’s ACL are therefore
+// “propagated” to the images and comments.
 //
-// Some services will want a concept of implicit access control.  They are
-// free to implement this as is best for their service.  However, GetACL
-// should respond with the correct ACL.  For example, a corporate file server
-// would allow all employees to create their own directory and have full
-// control within that directory.  Employees should not be allowed to modify
-// other employee directories.  In other words, within the directory "home",
-// employee E should be allowed to modify only "home/E".  The file server
-// doesn't know the list of all employees a priori, so it uses an
-// implementation-specific rule to map employee identities to their home
-// directory.
+// Some services will want a concept of implicit access control.  They are free
+// to implement this as is best for their service.  However, GetACL should
+// respond with the correct ACL.  For example, a corporate file server would
+// allow all employees to create their own directory and have full control
+// within that directory.  Employees should not be allowed to modify other
+// employee directories.  In other words, within the directory "home", employee
+// E should be allowed to modify only "home/E".  The file server doesn't know
+// the list of all employees a priori, so it uses an implementation-specific
+// rule to map employee identities to their home directory.
 package access
 
 import (
@@ -205,8 +204,8 @@ const ErrTooBig = __verror.ID("v.io/core/veyron2/services/security/access.ErrToo
 //
 //   type MyObject interface {
 //     access.Object
-//     MyRead()  (string, error) {access.Read}
-//     MyWrite(string) error     {access.Write}
+//     MyRead() (string, error) {access.Read}
+//     MyWrite(string) error    {access.Write}
 //   }
 //
 // If the set of pre-defined tags is insufficient, services may define their
@@ -336,8 +335,8 @@ func (c implObjectClientStub) Signature(ctx *__context.T, opts ...__ipc.CallOpt)
 //
 //   type MyObject interface {
 //     access.Object
-//     MyRead()  (string, error) {access.Read}
-//     MyWrite(string) error     {access.Write}
+//     MyRead() (string, error) {access.Read}
+//     MyWrite(string) error    {access.Write}
 //   }
 //
 // If the set of pre-defined tags is insufficient, services may define their
@@ -449,7 +448,7 @@ var ObjectDesc __ipc.InterfaceDesc = descObject
 var descObject = __ipc.InterfaceDesc{
 	Name:    "Object",
 	PkgPath: "v.io/core/veyron2/services/security/access",
-	Doc:     "// Object provides access control for Veyron objects.\n//\n// Veyron services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/core/veyron2/security/access\"\n//\n//   type MyObject interface {\n//     access.Object\n//     MyRead()  (string, error) {access.Read}\n//     MyWrite(string) error     {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetACL and GetACL in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/core/veyron2/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}\n//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}\n//  }",
+	Doc:     "// Object provides access control for Veyron objects.\n//\n// Veyron services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/core/veyron2/security/access\"\n//\n//   type MyObject interface {\n//     access.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetACL and GetACL in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/core/veyron2/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}\n//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}\n//  }",
 	Methods: []__ipc.MethodDesc{
 		{
 			Name: "SetACL",
