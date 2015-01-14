@@ -1,12 +1,6 @@
 package naming
 
-import (
-	"strings"
-)
-
-// TODO(cnicolaou): consider renaming {Split,Join}AddressName as
-// {Split,Join}EndpointName. For Join, it's not clear that host:port is
-// really an Endpoint. Something to consider.
+import "strings"
 
 // SplitAddressName takes an object name and returns the server address and
 // the name relative to the server.
@@ -39,15 +33,6 @@ func JoinAddressName(address, name string) string {
 		return Clean("/" + address)
 	}
 	return Clean("/" + address + "/" + name)
-}
-
-// ToStringSlice converts a MountEntry to the slice of equivalent names.
-func ToStringSlice(e *MountEntry) []string {
-	var names []string
-	for _, s := range e.Servers {
-		names = append(names, JoinAddressName(s.Server, e.Name))
-	}
-	return names
 }
 
 // Rooted returns true for any name that is considered to be rooted.

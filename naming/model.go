@@ -40,14 +40,18 @@ type Endpoint interface {
 	// and address is the address specific to that protocol (host:port for
 	// tcp, MAC address for bluetooth etc.)
 	//
-	// Version 2 is the current version for RPC:
+	// Version 2 is the previous version for RPC:
 	//   @2@<protocol>@<address>@<routingid>@<rpc version>@<rpc codec>@@
 	//
-	// Version 3 is the new version for RPC:
+	// Version 3 is the current version for RPC:
 	//   @3@<protocol>@<address>@<routingid>@<rpc version>@<rpc codec>@m|s@@
 	//
 	// Along with Network, this method ensures that Endpoint implements net.Addr.
 	String() string
+
+	// Name returns a string reprsentation of this Endpoint that can
+	// be used as a name with ipc.StartCall.
+	Name() string
 
 	// VersionedString returns a string in the specified format. If the version
 	// number is unsupported, the current 'default' version will be used.
@@ -82,7 +86,7 @@ type MountedServer struct {
 type MountEntry struct {
 	// Name is the mounted name.
 	Name string
-	// Servers (if present) specifies the mounted names (Link is empty).
+	// Servers (if present) specifies the mounted names.
 	Servers []MountedServer
 	// mt is true if servers refer to another mount table.
 	mt bool
@@ -99,6 +103,16 @@ func (e *MountEntry) ServesMountTable() bool { return e.mt }
 
 // SetServesMountTable sets whether or not this is a mount table.
 func (e *MountEntry) SetServesMountTable(v bool) { e.mt = v }
+
+// Names returns the servers represented by MountEntry as names, including
+// the MountedName suffix.
+func (e *MountEntry) Names() []string {
+	var names []string
+	for _, s := range e.Servers {
+		names = append(names, JoinAddressName(s.Server, e.Name))
+	}
+	return names
+}
 
 // CacheCtl is a cache control for the resolution cache.
 type CacheCtl interface {

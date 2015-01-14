@@ -13,12 +13,11 @@ type EndpointOpt interface {
 
 // FormatEndpoint creates a string representation of an Endpoint using
 // the supplied parameters. Network and address are always required,
-// RoutingID, IPCVersionRange and ServesMountTableOpt can be used as options.
+// RoutingID, IPCVersionRange and ServesMountTableOpt can be specified
+// as options.
 func FormatEndpoint(network, address string, opts ...EndpointOpt) string {
 	rid := "@"
-
 	versions := "@@"
-
 	servesMountTable := false
 	for _, o := range opts {
 		switch v := o.(type) {
