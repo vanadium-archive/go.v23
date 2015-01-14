@@ -28,8 +28,8 @@ package {{ .PackagePath }};
 
     {{/* Generate the method signature. */}}
     {{ $method.Doc }}
-    {{ $method.AccessModifier }} {{ $method.RetType }} {{ $method.Name }}(final io.v.core.veyron2.context.Context context{{ $method.Args }}) throws io.v.core.veyron2.VeyronException;
-    {{ $method.AccessModifier }} {{ $method.RetType }} {{ $method.Name }}(final io.v.core.veyron2.context.Context context{{ $method.Args }}, final io.v.core.veyron2.Options veyronOpts) throws io.v.core.veyron2.VeyronException;
+    {{ $method.AccessModifier }} {{ $method.RetType }} {{ $method.Name }}(final io.v.core.veyron2.context.VContext context{{ $method.Args }}) throws io.v.core.veyron2.VeyronException;
+    {{ $method.AccessModifier }} {{ $method.RetType }} {{ $method.Name }}(final io.v.core.veyron2.context.VContext context{{ $method.Args }}, final io.v.core.veyron2.Options veyronOpts) throws io.v.core.veyron2.VeyronException;
 {{ end }}
 }
 `

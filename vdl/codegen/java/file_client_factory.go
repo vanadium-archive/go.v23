@@ -14,15 +14,13 @@ package {{ .PackagePath }};
 
 /* Factory for binding to {{ .ServiceName }}Client interfaces. */
 {{.AccessModifier}} final class {{ .ServiceName }}ClientFactory {
-    public static {{ .ServiceName }}Client bind(final java.lang.String name) throws io.v.core.veyron2.VeyronException {
+    public static {{ .ServiceName }}Client bind(final java.lang.String name) {
         return bind(name, null);
     }
-    public static {{ .ServiceName }}Client bind(final java.lang.String name, final io.v.core.veyron2.Options veyronOpts) throws io.v.core.veyron2.VeyronException {
+    public static {{ .ServiceName }}Client bind(final java.lang.String name, final io.v.core.veyron2.Options veyronOpts) {
         io.v.core.veyron2.ipc.Client client = null;
         if (veyronOpts != null && veyronOpts.get(io.v.core.veyron2.OptionDefs.CLIENT) != null) {
             client = veyronOpts.get(io.v.core.veyron2.OptionDefs.CLIENT, io.v.core.veyron2.ipc.Client.class);
-        } else {
-            client = io.v.core.veyron2.VRuntime.getClient();
         }
         return new {{ .StubName }}(client, name);
     }

@@ -33,15 +33,20 @@ package {{ .PackagePath }};
          {{ end }}
     }
 
+    private io.v.core.veyron2.ipc.Client getClient(io.v.core.veyron2.context.VContext context) {
+        return this.client != null ? client : io.v.core.veyron2.V.getClient(context);
+
+    }
+
     // Methods from interface UniversalServiceMethods.
     @Override
-    public io.v.core.veyron2.ipc.ServiceSignature getSignature(io.v.core.veyron2.context.Context context) throws io.v.core.veyron2.VeyronException {
+    public io.v.core.veyron2.ipc.ServiceSignature getSignature(io.v.core.veyron2.context.VContext context) throws io.v.core.veyron2.VeyronException {
         return getSignature(context, null);
     }
     @Override
-    public io.v.core.veyron2.ipc.ServiceSignature getSignature(io.v.core.veyron2.context.Context context, io.v.core.veyron2.Options veyronOpts) throws io.v.core.veyron2.VeyronException {
+    public io.v.core.veyron2.ipc.ServiceSignature getSignature(io.v.core.veyron2.context.VContext context, io.v.core.veyron2.Options veyronOpts) throws io.v.core.veyron2.VeyronException {
         // Start the call.
-        final io.v.core.veyron2.ipc.Client.Call _call = this.client.startCall(context, this.veyronName, "signature", new java.lang.Object[0], new java.lang.reflect.Type[0], veyronOpts);
+        final io.v.core.veyron2.ipc.Client.Call _call = getClient(context).startCall(context, this.veyronName, "signature", new java.lang.Object[0], new java.lang.reflect.Type[0], veyronOpts);
 
         // Finish the call.
         final java.lang.reflect.Type[] _resultTypes = new java.lang.reflect.Type[]{
@@ -56,17 +61,17 @@ package {{ .PackagePath }};
 {{ range $method := .Methods }}
     {{/* The optionless overload simply calls the overload with options */}}
     @Override
-    {{ $method.AccessModifier }} {{ $method.RetType }} {{ $method.Name }}(final io.v.core.veyron2.context.Context context{{ $method.DeclarationArgs }}) throws io.v.core.veyron2.VeyronException {
+    {{ $method.AccessModifier }} {{ $method.RetType }} {{ $method.Name }}(final io.v.core.veyron2.context.VContext context{{ $method.DeclarationArgs }}) throws io.v.core.veyron2.VeyronException {
         {{if $method.Returns }}return{{ end }} {{ $method.Name }}(context{{ $method.CallingArgsLeadingComma }}, null);
     }
     {{/* The main client stub method body */}}
     @Override
-    {{ $method.AccessModifier }} {{ $method.RetType }} {{ $method.Name }}(final io.v.core.veyron2.context.Context context{{ $method.DeclarationArgs }}, io.v.core.veyron2.Options veyronOpts) throws io.v.core.veyron2.VeyronException {
+    {{ $method.AccessModifier }} {{ $method.RetType }} {{ $method.Name }}(final io.v.core.veyron2.context.VContext context{{ $method.DeclarationArgs }}, io.v.core.veyron2.Options veyronOpts) throws io.v.core.veyron2.VeyronException {
         {{/* Start the veyron call */}}
         // Start the call.
         final java.lang.Object[] _args = new java.lang.Object[]{ {{ $method.CallingArgs }} };
         final java.lang.reflect.Type[] _argTypes = new java.lang.reflect.Type[]{ {{ $method.CallingArgTypes }} };
-        final io.v.core.veyron2.ipc.Client.Call _call = this.client.startCall(context, this.veyronName, "{{ $method.Name }}", _args, _argTypes, veyronOpts);
+        final io.v.core.veyron2.ipc.Client.Call _call = getClient(context).startCall(context, this.veyronName, "{{ $method.Name }}", _args, _argTypes, veyronOpts);
 
         // Finish the call.
         {{/* Now handle returning from the function. */}}
@@ -132,12 +137,12 @@ package {{ .PackagePath }};
 {{/* Iterate over methods from embeded services and generate code to delegate the work */}}
 {{ range $eMethod := .EmbedMethods }}
     @Override
-    {{ $eMethod.AccessModifier }} {{ $eMethod.RetType }} {{ $eMethod.Name }}(final io.v.core.veyron2.context.Context context{{ $eMethod.DeclarationArgs }}) throws io.v.core.veyron2.VeyronException {
+    {{ $eMethod.AccessModifier }} {{ $eMethod.RetType }} {{ $eMethod.Name }}(final io.v.core.veyron2.context.VContext context{{ $eMethod.DeclarationArgs }}) throws io.v.core.veyron2.VeyronException {
         {{/* e.g. return this.stubArith.cosine(context, [args]) */}}
         {{ if $eMethod.Returns }}return{{ end }} this.{{ $eMethod.LocalStubVarName }}.{{ $eMethod.Name }}(context{{ $eMethod.CallingArgsLeadingComma }});
     }
     @Override
-    {{ $eMethod.AccessModifier }} {{ $eMethod.RetType }} {{ $eMethod.Name }}(final io.v.core.veyron2.context.Context context{{ $eMethod.DeclarationArgs }}, io.v.core.veyron2.Options veyronOpts) throws io.v.core.veyron2.VeyronException {
+    {{ $eMethod.AccessModifier }} {{ $eMethod.RetType }} {{ $eMethod.Name }}(final io.v.core.veyron2.context.VContext context{{ $eMethod.DeclarationArgs }}, io.v.core.veyron2.Options veyronOpts) throws io.v.core.veyron2.VeyronException {
         {{/* e.g. return this.stubArith.cosine(context, [args], options) */}}
         {{ if $eMethod.Returns }}return{{ end }}  this.{{ $eMethod.LocalStubVarName }}.{{ $eMethod.Name }}(context{{ $eMethod.CallingArgsLeadingComma }}, veyronOpts);
     }
