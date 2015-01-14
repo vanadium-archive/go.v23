@@ -87,9 +87,9 @@ _typeNamedList.elem = _typeNamedStruct;
 _typeNamedStruct.kind = Kind.STRUCT;
 _typeNamedStruct.name = "NamedStruct";
 _typeNamedStruct.fields = [{name: "List", type: _typeNamedList}, {name: "UnnamedTypeField", type: _type1}];
-types.NamedBool = Registry.lookupOrCreateConstructor(_typeNamedBool, "NamedBool");
-types.NamedList = Registry.lookupOrCreateConstructor(_typeNamedList, "NamedList");
-types.NamedStruct = Registry.lookupOrCreateConstructor(_typeNamedStruct, "NamedStruct");
+module.exports.NamedBool = Registry.lookupOrCreateConstructor(_typeNamedBool, "NamedBool");
+module.exports.NamedList = Registry.lookupOrCreateConstructor(_typeNamedList, "NamedList");
+module.exports.NamedStruct = Registry.lookupOrCreateConstructor(_typeNamedStruct, "NamedStruct");
 `
 
 	if result != expectedResult {
