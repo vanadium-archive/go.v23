@@ -135,8 +135,10 @@ func FormatTrace(w io.Writer, record *TraceRecord, loc *time.Location) {
 // the given writer.  Times will be formatted according to the given
 // location, if loc is nil local times will be used.
 func FormatTraces(w io.Writer, records []TraceRecord, loc *time.Location) {
-	fmt.Fprintf(w, "Vtrace traces:\n")
-	for i := range records {
-		FormatTrace(w, &records[i], loc)
+	if len(records) > 0 {
+		fmt.Fprintf(w, "Vtrace traces:\n")
+		for i := range records {
+			FormatTrace(w, &records[i], loc)
+		}
 	}
 }
