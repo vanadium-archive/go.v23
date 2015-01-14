@@ -263,13 +263,6 @@ type ROpt interface {
 // to just use the current namespace in the context that is passed
 // to NewServer.  The same for Profile and StreamManager.
 type RuntimeX interface {
-	// Init initilizes the runtime.  It will be called only once.  It
-	// must be called before any other Runtime methods are called.  Its
-	// primary responsability is to populate the initial context with
-	// all required state.
-	// protocols is a slice of any preferred protocols for this runtime.
-	Init(ctx *context.T, protocols []string) (*context.T, error)
-
 	// NewEndpoint returns an Endpoint by parsing the supplied endpoint
 	// string as per the format described above. It can be used to test
 	// a string to see if it's in valid endpoint format.
@@ -371,20 +364,19 @@ func RegisterRuntime(name string, r RuntimeX) {
 	runtimeConfig.Unlock()
 }
 
+type Shutdown func()
+
 // Init should be called once for each vanadium executable, providing the setup
 // of the initial context.T and a context.CancelFunc that can be used to cancel the context.
-func Init() (ctx *context.T, cancelFunc context.CancelFunc) {
+func Init() (*context.T, Shutdown) {
 	// TODO(suharshs,mattr): Panic if we have already been called.
-	var rt RuntimeX
-	var err error
-
-	ctx, cancelFunc = context.WithCancel(ctx)
+	ctx, cancel := context.WithCancel(nil)
 
 	profileInitMu.Lock()
 	if profileInitFunc == nil {
 		panic("no profile has been registered.")
 	}
-	rt, ctx, err = profileInitFunc(ctx)
+	rt, ctx, shutdown, err := profileInitFunc(ctx)
 	profileInitMu.Unlock()
 
 	if err != nil {
@@ -395,7 +387,13 @@ func Init() (ctx *context.T, cancelFunc context.CancelFunc) {
 	runtimeConfig.runtime = rt
 	runtimeConfig.Unlock()
 
-	return
+	return ctx, func() {
+		// Note we call our own cancel here to ensure that the
+		// runtime/profile implementor has not attached anything to a
+		// non-cancellable context.
+		cancel()
+		shutdown()
+	}
 }
 
 // NewEndpoint returns an Endpoint by parsing the supplied endpoint
@@ -508,7 +506,7 @@ var (
 	profileInitMu   sync.Mutex
 )
 
-type ProfileInitFunc func(ctx *context.T) (RuntimeX, *context.T, error)
+type ProfileInitFunc func(ctx *context.T) (RuntimeX, *context.T, Shutdown, error)
 
 func RegisterProfileInit(f ProfileInitFunc) {
 	profileInitMu.Lock()
