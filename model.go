@@ -372,7 +372,7 @@ func Init() (*context.T, Shutdown) {
 	runtimeConfig.Lock()
 	r := runtimeConfig.runtime
 	runtimeConfig.Unlock()
-	if r != nil {
+	if r != nil && r != runtimeConfig.runtimeHack {
 		panic("runtime has already been initialized")
 	}
 
