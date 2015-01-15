@@ -344,6 +344,14 @@ type RuntimeX interface {
 	// GetPublisher returns a configuration Publisher that can be used to access
 	// configuration information.
 	GetPublisher(ctx *context.T) *config.Publisher
+
+	// SetBackgroundContext creates a new context derived from the given context
+	// with the given context set as the background context.
+	SetBackgroundContext(ctx *context.T) *context.T
+
+	// BackgroundContext retrieves a background context.  This context can
+	// be used for general background activities.
+	GetBackgroundContext(ctx *context.T) *context.T
 }
 
 // NewEndpoint returns an Endpoint by parsing the supplied endpoint
@@ -451,6 +459,18 @@ func GetPublisher(ctx *context.T) *config.Publisher {
 	return initState.runtime.GetPublisher(ctx)
 }
 
+// SetBackgroundContext creates a new context derived from the given context
+// with the given context set as the background context.
+func SetBackgroundContext(ctx *context.T) *context.T {
+	return initState.runtime.SetBackgroundContext(ctx)
+}
+
+// BackgroundContext retrieves a background context.  This context can
+// be used for general background activities.
+func GetBackgroundContext(ctx *context.T) *context.T {
+	return initState.runtime.GetBackgroundContext(ctx)
+}
+
 var (
 	initState struct {
 		mu           sync.Mutex
@@ -513,14 +533,17 @@ func getStack(skip int) string {
 	return buf.String()
 }
 
-// Init should be called once for each vanadium executable, providing the setup
-// of the initial context.T and a context.CancelFunc that can be used to cancel the context.
-func initCommon() (*context.T, Shutdown) {
+// Init should be called once for each vanadium executable, providing
+// the setup of the initial context.T and a Shutdown function that can
+// be used to clean up the runtime.  We allow calling Init multiple
+// times (useful in tests), but only as long as you call the Shutdown
+// returned previously before calling Init the second time.
+func Init() (*context.T, Shutdown) {
 	initState.mu.Lock()
 	defer initState.mu.Unlock()
 
-	// Skip 4 stack frames: runtime.Callers, getStack, initCommon, Init/InitForTest
-	stack := getStack(4)
+	// Skip 3 stack frames: runtime.Callers, getStack, Init
+	stack := getStack(3)
 	if initState.runtime != nil && initState.runtime != initState.runtimeHack {
 		format := `A runtime has already been initialized."
 The previous initialization was from:
@@ -550,20 +573,6 @@ This registration is from:
 		// runtime/profile implementor has not attached anything to a
 		// non-cancellable context.
 		cancel()
-		shutdown()
-	}
-}
-
-func Init() (*context.T, Shutdown) {
-	return initCommon()
-}
-
-// InitForTest should be called in tests instead of veyron2.Init.
-// Unlike Init InitForTest allows you to reinitialize the runtime
-// multiple times, however the initializations must be done serially.
-func InitForTest() (*context.T, Shutdown) {
-	ctx, shutdown := initCommon()
-	return ctx, func() {
 		shutdown()
 
 		initState.mu.Lock()
