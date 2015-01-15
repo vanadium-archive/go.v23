@@ -11,7 +11,9 @@ backwards compatibility we can't guarantee that until we reach the 1.0 milestone
 package veyron2
 
 import (
+	"bytes"
 	"fmt"
+	"runtime"
 	"sync"
 
 	"v.io/core/veyron2/config"
@@ -344,69 +346,6 @@ type RuntimeX interface {
 	GetPublisher(ctx *context.T) *config.Publisher
 }
 
-var (
-	runtimeConfig struct {
-		sync.Mutex
-		runtime     RuntimeX
-		runtimeHack RuntimeX // TODO(suharsh,mattr): This is temporary and should be removed.
-	}
-)
-
-// TODO(mattr): this is a short term hack to put us into a situation
-// where we'll have backward compatibility during the transition from
-// Runtime to RuntimeX.  This will be replaced by a real registration
-// mechanism as in the current rt package.
-// For now, this simply must be called before main begins (in an init).
-func RegisterRuntime(name string, r RuntimeX) {
-	runtimeConfig.Lock()
-	runtimeConfig.runtime = r
-	runtimeConfig.runtimeHack = r
-	runtimeConfig.Unlock()
-}
-
-type Shutdown func()
-
-// Init should be called once for each vanadium executable, providing the setup
-// of the initial context.T and a context.CancelFunc that can be used to cancel the context.
-func Init() (*context.T, Shutdown) {
-	runtimeConfig.Lock()
-	r := runtimeConfig.runtime
-	runtimeConfig.Unlock()
-	if r != nil && r != runtimeConfig.runtimeHack {
-		panic("runtime has already been initialized")
-	}
-
-	return InitForTest()
-}
-
-// InitForTest should be called in tests instead of veyron2.Init.
-func InitForTest() (*context.T, Shutdown) {
-	ctx, cancel := context.WithCancel(nil)
-
-	profileInitMu.Lock()
-	if profileInitFunc == nil {
-		panic("no profile has been registered.")
-	}
-	rt, ctx, shutdown, err := profileInitFunc(ctx)
-	profileInitMu.Unlock()
-
-	if err != nil {
-		panic(err)
-	}
-
-	runtimeConfig.Lock()
-	runtimeConfig.runtime = rt
-	runtimeConfig.Unlock()
-
-	return ctx, func() {
-		// Note we call our own cancel here to ensure that the
-		// runtime/profile implementor has not attached anything to a
-		// non-cancellable context.
-		cancel()
-		shutdown()
-	}
-}
-
 // NewEndpoint returns an Endpoint by parsing the supplied endpoint
 // string as per the format described above. It can be used to test
 // a string to see if it's in valid endpoint format.
@@ -426,7 +365,7 @@ func InitForTest() (*context.T, Shutdown) {
 // - a missing RPC version should default to the highest version
 //   supported by the runtime implementation hosting NewEndpoint
 func NewEndpoint(ep string) (naming.Endpoint, error) {
-	return runtimeConfig.runtime.NewEndpoint(ep)
+	return initState.runtime.NewEndpoint(ep)
 }
 
 // NewServer creates a new Server instance.
@@ -434,96 +373,202 @@ func NewEndpoint(ep string) (naming.Endpoint, error) {
 // It accepts at least the following options:
 // ServesMountTable and ServerBlessings.
 func NewServer(ctx *context.T, opts ...ipc.ServerOpt) (ipc.Server, error) {
-	return runtimeConfig.runtime.NewServer(ctx, opts...)
+	return initState.runtime.NewServer(ctx, opts...)
 }
 
 // SetNewStreamManager creates a new stream manager and context
 // with that StreamManager attached.
 func SetNewStreamManager(ctx *context.T, opts ...stream.ManagerOpt) (*context.T, stream.Manager, error) {
-	return runtimeConfig.runtime.SetNewStreamManager(ctx, opts...)
+	return initState.runtime.SetNewStreamManager(ctx, opts...)
 }
 
 // GetStreamManager returns the current stream manager.
 func GetStreamManager(ctx *context.T) stream.Manager {
-	return runtimeConfig.runtime.GetStreamManager(ctx)
+	return initState.runtime.GetStreamManager(ctx)
 }
 
 // SetPrincipal attaches a principal to the returned context.
 func SetPrincipal(ctx *context.T, principal security.Principal) (*context.T, error) {
-	return runtimeConfig.runtime.SetPrincipal(ctx, principal)
+	return initState.runtime.SetPrincipal(ctx, principal)
 }
 
 // GetPrincipal returns the current Principal.
 func GetPrincipal(ctx *context.T) security.Principal {
-	return runtimeConfig.runtime.GetPrincipal(ctx)
+	return initState.runtime.GetPrincipal(ctx)
 }
 
 // SetNewClient creates a new Client instance and attaches it to a
 // new context.
 func SetNewClient(ctx *context.T, opts ...ipc.ClientOpt) (*context.T, ipc.Client, error) {
-	return runtimeConfig.runtime.SetNewClient(ctx, opts...)
+	return initState.runtime.SetNewClient(ctx, opts...)
 }
 
 // GetClient returns the current Client.
 func GetClient(ctx *context.T) ipc.Client {
-	return runtimeConfig.runtime.GetClient(ctx)
+	return initState.runtime.GetClient(ctx)
 }
 
 // SetNewNamespace creates a new Namespace and attaches it to the
 // returned context.
 func SetNewNamespace(ctx *context.T, roots ...string) (*context.T, naming.Namespace, error) {
-	return runtimeConfig.runtime.SetNewNamespace(ctx, roots...)
+	return initState.runtime.SetNewNamespace(ctx, roots...)
 }
 
 // GetNamespace returns the current namespace.
 func GetNamespace(ctx *context.T) naming.Namespace {
-	return runtimeConfig.runtime.GetNamespace(ctx)
+	return initState.runtime.GetNamespace(ctx)
 }
 
 // SetNewLogger creates a new Logger and attaches it to the
 // returned context.
 func SetNewLogger(ctx *context.T, name string, opts ...vlog.LoggingOpts) (*context.T, vlog.Logger, error) {
-	return runtimeConfig.runtime.SetNewLogger(ctx, name, opts...)
+	return initState.runtime.SetNewLogger(ctx, name, opts...)
 }
 
 // GetLogger returns the current logger.
 func GetLogger(ctx *context.T) vlog.Logger {
-	return runtimeConfig.runtime.GetLogger(ctx)
+	return initState.runtime.GetLogger(ctx)
 }
 
 // GetProfile gets the current Profile.
 func GetProfile(ctx *context.T) Profile {
-	return runtimeConfig.runtime.GetProfile(ctx)
+	return initState.runtime.GetProfile(ctx)
 }
 
 // GetAppCycle gets the current AppCycle.
 func GetAppCycle(ctx *context.T) AppCycle {
-	return runtimeConfig.runtime.GetAppCycle(ctx)
+	return initState.runtime.GetAppCycle(ctx)
 }
 
 // GetListenSpec gets the current ListenSpec.
 func GetListenSpec(ctx *context.T) ipc.ListenSpec {
-	return runtimeConfig.runtime.GetListenSpec(ctx)
+	return initState.runtime.GetListenSpec(ctx)
 }
 
 // GetPublisher returns a configuration Publisher that can be used to access
 // configuration information.
 func GetPublisher(ctx *context.T) *config.Publisher {
-	return runtimeConfig.runtime.GetPublisher(ctx)
+	return initState.runtime.GetPublisher(ctx)
 }
 
 var (
-	profileInitFunc ProfileInitFunc
-	profileInitMu   sync.Mutex
+	initState struct {
+		mu           sync.Mutex
+		runtime      RuntimeX
+		runtimeHack  RuntimeX // TODO(suharsh,mattr): This is temporary and should be removed.
+		runtimeStack string
+		profile      ProfileInitFunc
+		profileStack string
+	}
 )
 
+// TODO(mattr, suharshs): Write thorough documentation for this type.
 type ProfileInitFunc func(ctx *context.T) (RuntimeX, *context.T, Shutdown, error)
 
+// TODO(mattr, suharshs): Write thorough documentation for this type.
 func RegisterProfileInit(f ProfileInitFunc) {
-	profileInitMu.Lock()
-	if profileInitFunc != nil {
-		panic("Profile intialization functions can only be registered one time.")
+	// Skip 3 frames: runtime.Callers, getStack, RegisterProfileInit.
+	stack := getStack(3)
+	initState.mu.Lock()
+	if initState.profile != nil {
+		format := `A profile has already been
+registered.  This is most likely because a library package is
+importing a profile.  Look for imports of the form
+'v.io/core/veyron/profiles/...' and remove them.  Profiles should only be
+imported in your main package.  Previous registration was from:
+%s
+Current registration is from:
+%s
+`
+		panic(fmt.Sprintf(format, initState.profileStack, stack))
 	}
-	profileInitFunc = f
-	profileInitMu.Unlock()
+	initState.profile = f
+	initState.profileStack = stack
+	initState.mu.Unlock()
+}
+
+// TODO(mattr): this is a short term hack to put us into a situation
+// where we'll have backward compatibility during the transition from
+// Runtime to RuntimeX.  This will be replaced by a real registration
+// mechanism as in the current rt package.
+// For now, this simply must be called before main begins (in an init).
+func RegisterRuntime(name string, r RuntimeX) {
+	initState.mu.Lock()
+	initState.runtime = r
+	initState.runtimeHack = r
+	initState.mu.Unlock()
+}
+
+type Shutdown func()
+
+func getStack(skip int) string {
+	var buf bytes.Buffer
+	stack := make([]uintptr, 16)
+	stack = stack[:runtime.Callers(skip, stack)]
+	for _, pc := range stack {
+		fnc := runtime.FuncForPC(pc)
+		file, line := fnc.FileLine(pc)
+		fmt.Fprintf(&buf, "%s:%d: %s\n", file, line, fnc.Name())
+	}
+	return buf.String()
+}
+
+// Init should be called once for each vanadium executable, providing the setup
+// of the initial context.T and a context.CancelFunc that can be used to cancel the context.
+func initCommon() (*context.T, Shutdown) {
+	initState.mu.Lock()
+	defer initState.mu.Unlock()
+
+	// Skip 4 stack frames: runtime.Callers, getStack, initCommon, Init/InitForTest
+	stack := getStack(4)
+	if initState.runtime != nil && initState.runtime != initState.runtimeHack {
+		format := `A runtime has already been initialized."
+The previous initialization was from:
+%s
+This registration is from:
+%s
+`
+		panic(fmt.Sprintf(format, initState.runtimeStack, stack))
+	}
+
+	ctx, cancel := context.WithCancel(nil)
+	if initState.profile == nil {
+		panic("No profile has been registered nor specified. This is most" +
+			" likely because your main package has not imported a profile")
+	}
+	rt, ctx, shutdown, err := initState.profile(ctx)
+
+	if err != nil {
+		panic(err)
+	}
+
+	initState.runtime = rt
+	initState.runtimeStack = stack
+
+	return ctx, func() {
+		// Note we call our own cancel here to ensure that the
+		// runtime/profile implementor has not attached anything to a
+		// non-cancellable context.
+		cancel()
+		shutdown()
+	}
+}
+
+func Init() (*context.T, Shutdown) {
+	return initCommon()
+}
+
+// InitForTest should be called in tests instead of veyron2.Init.
+// Unlike Init InitForTest allows you to reinitialize the runtime
+// multiple times, however the initializations must be done serially.
+func InitForTest() (*context.T, Shutdown) {
+	ctx, shutdown := initCommon()
+	return ctx, func() {
+		shutdown()
+
+		initState.mu.Lock()
+		initState.runtime = nil
+		initState.runtimeStack = ""
+		initState.mu.Unlock()
+	}
 }
