@@ -307,6 +307,49 @@ var descApplication = __ipc.InterfaceDesc{
 //
 // To delete the binary, clients invoke the Delete() method.
 type BinaryClientMethods interface {
+	// Object provides access control for Veyron objects.
+	//
+	// Veyron services implementing dynamic access control would typically
+	// embed this interface and tag additional methods defined by the service
+	// with one of Admin, Read, Write, Resolve etc. For example,
+	// the VDL definition of the object would be:
+	//
+	//   package mypackage
+	//
+	//   import "v.io/core/veyron2/security/access"
+	//
+	//   type MyObject interface {
+	//     access.Object
+	//     MyRead() (string, error) {access.Read}
+	//     MyWrite(string) error    {access.Write}
+	//   }
+	//
+	// If the set of pre-defined tags is insufficient, services may define their
+	// own tag type and annotate all methods with this new type.
+	// Instead of embedding this Object interface, define SetACL and GetACL in
+	// their own interface. Authorization policies will typically respect
+	// annotations of a single type. For example, the VDL definition of an object
+	// would be:
+	//
+	//  package mypackage
+	//
+	//  import "v.io/core/veyron2/security/access"
+	//
+	//  type MyTag string
+	//
+	//  const (
+	//    Blue = MyTag("Blue")
+	//    Red  = MyTag("Red")
+	//  )
+	//
+	//  type MyObject interface {
+	//    MyMethod() (string, error) {Blue}
+	//
+	//    // Allow clients to change access via the access.Object interface:
+	//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}
+	//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}
+	//  }
+	access.ObjectClientMethods
 	// Create expresses the intent to create a binary identified by the
 	// object name suffix consisting of the given number of parts. The
 	// mediaInfo argument contains metadata for the binary. If the suffix
@@ -356,12 +399,14 @@ func BinaryClient(name string, opts ...__ipc.BindOpt) BinaryClientStub {
 			client = clientOpt
 		}
 	}
-	return implBinaryClientStub{name, client}
+	return implBinaryClientStub{name, client, access.ObjectClient(name, client)}
 }
 
 type implBinaryClientStub struct {
 	name   string
 	client __ipc.Client
+
+	access.ObjectClientStub
 }
 
 func (c implBinaryClientStub) c(ctx *__context.T) __ipc.Client {
@@ -591,6 +636,49 @@ func (c *implBinaryUploadCall) Finish() (err error) {
 //
 // To delete the binary, clients invoke the Delete() method.
 type BinaryServerMethods interface {
+	// Object provides access control for Veyron objects.
+	//
+	// Veyron services implementing dynamic access control would typically
+	// embed this interface and tag additional methods defined by the service
+	// with one of Admin, Read, Write, Resolve etc. For example,
+	// the VDL definition of the object would be:
+	//
+	//   package mypackage
+	//
+	//   import "v.io/core/veyron2/security/access"
+	//
+	//   type MyObject interface {
+	//     access.Object
+	//     MyRead() (string, error) {access.Read}
+	//     MyWrite(string) error    {access.Write}
+	//   }
+	//
+	// If the set of pre-defined tags is insufficient, services may define their
+	// own tag type and annotate all methods with this new type.
+	// Instead of embedding this Object interface, define SetACL and GetACL in
+	// their own interface. Authorization policies will typically respect
+	// annotations of a single type. For example, the VDL definition of an object
+	// would be:
+	//
+	//  package mypackage
+	//
+	//  import "v.io/core/veyron2/security/access"
+	//
+	//  type MyTag string
+	//
+	//  const (
+	//    Blue = MyTag("Blue")
+	//    Red  = MyTag("Red")
+	//  )
+	//
+	//  type MyObject interface {
+	//    MyMethod() (string, error) {Blue}
+	//
+	//    // Allow clients to change access via the access.Object interface:
+	//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}
+	//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}
+	//  }
+	access.ObjectServerMethods
 	// Create expresses the intent to create a binary identified by the
 	// object name suffix consisting of the given number of parts. The
 	// mediaInfo argument contains metadata for the binary. If the suffix
@@ -631,6 +719,49 @@ type BinaryServerMethods interface {
 // The only difference between this interface and BinaryServerMethods
 // is the streaming methods.
 type BinaryServerStubMethods interface {
+	// Object provides access control for Veyron objects.
+	//
+	// Veyron services implementing dynamic access control would typically
+	// embed this interface and tag additional methods defined by the service
+	// with one of Admin, Read, Write, Resolve etc. For example,
+	// the VDL definition of the object would be:
+	//
+	//   package mypackage
+	//
+	//   import "v.io/core/veyron2/security/access"
+	//
+	//   type MyObject interface {
+	//     access.Object
+	//     MyRead() (string, error) {access.Read}
+	//     MyWrite(string) error    {access.Write}
+	//   }
+	//
+	// If the set of pre-defined tags is insufficient, services may define their
+	// own tag type and annotate all methods with this new type.
+	// Instead of embedding this Object interface, define SetACL and GetACL in
+	// their own interface. Authorization policies will typically respect
+	// annotations of a single type. For example, the VDL definition of an object
+	// would be:
+	//
+	//  package mypackage
+	//
+	//  import "v.io/core/veyron2/security/access"
+	//
+	//  type MyTag string
+	//
+	//  const (
+	//    Blue = MyTag("Blue")
+	//    Red  = MyTag("Red")
+	//  )
+	//
+	//  type MyObject interface {
+	//    MyMethod() (string, error) {Blue}
+	//
+	//    // Allow clients to change access via the access.Object interface:
+	//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}
+	//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}
+	//  }
+	access.ObjectServerStubMethods
 	// Create expresses the intent to create a binary identified by the
 	// object name suffix consisting of the given number of parts. The
 	// mediaInfo argument contains metadata for the binary. If the suffix
@@ -678,7 +809,8 @@ type BinaryServerStub interface {
 // an object that may be used by ipc.Server.
 func BinaryServer(impl BinaryServerMethods) BinaryServerStub {
 	stub := implBinaryServerStub{
-		impl: impl,
+		impl:             impl,
+		ObjectServerStub: access.ObjectServer(impl),
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
@@ -692,7 +824,8 @@ func BinaryServer(impl BinaryServerMethods) BinaryServerStub {
 
 type implBinaryServerStub struct {
 	impl BinaryServerMethods
-	gs   *__ipc.GlobState
+	access.ObjectServerStub
+	gs *__ipc.GlobState
 }
 
 func (s implBinaryServerStub) Create(ctx __ipc.ServerContext, i0 int32, i1 MediaInfo) error {
@@ -724,7 +857,7 @@ func (s implBinaryServerStub) Globber() *__ipc.GlobState {
 }
 
 func (s implBinaryServerStub) Describe__() []__ipc.InterfaceDesc {
-	return []__ipc.InterfaceDesc{BinaryDesc}
+	return []__ipc.InterfaceDesc{BinaryDesc, access.ObjectDesc}
 }
 
 // BinaryDesc describes the Binary interface.
@@ -735,6 +868,9 @@ var descBinary = __ipc.InterfaceDesc{
 	Name:    "Binary",
 	PkgPath: "v.io/core/veyron2/services/mgmt/repository",
 	Doc:     "// Binary can be used to store and retrieve veyron application\n// binaries.\n//\n// To create a binary, clients first invoke the Create() method that\n// specifies the number of parts the binary consists of. Clients then\n// uploads the individual parts through the Upload() method, which\n// identifies the part being uploaded. To resume an upload after a\n// failure, clients invoke the UploadStatus() method, which returns a\n// slice that identifies which parts are missing.\n//\n// To download a binary, clients first invoke Stat(), which returns\n// information describing the binary, including the number of parts\n// the binary consists of. Clients then download the individual parts\n// through the Download() method, which identifies the part being\n// downloaded. Alternatively, clients can download the binary through\n// HTTP using a transient URL available through the DownloadURL()\n// method.\n//\n// To delete the binary, clients invoke the Delete() method.",
+	Embeds: []__ipc.EmbedDesc{
+		{"Object", "v.io/core/veyron2/services/security/access", "// Object provides access control for Veyron objects.\n//\n// Veyron services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/core/veyron2/security/access\"\n//\n//   type MyObject interface {\n//     access.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetACL and GetACL in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/core/veyron2/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}\n//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}\n//  }"},
+	},
 	Methods: []__ipc.MethodDesc{
 		{
 			Name: "Create",

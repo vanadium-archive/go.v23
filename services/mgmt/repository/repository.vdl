@@ -56,6 +56,9 @@ type MediaInfo struct {
 //
 // To delete the binary, clients invoke the Delete() method.
 type Binary interface {
+	// Object provides GetACL/SetACL methods to read/modify ACLs for the
+	// Binary methods.
+	access.Object
 	// Create expresses the intent to create a binary identified by the
 	// object name suffix consisting of the given number of parts. The
 	// mediaInfo argument contains metadata for the binary. If the suffix
