@@ -147,6 +147,12 @@ func WithManager(ctx *context.T, manager Manager) *context.T {
 
 func manager(ctx *context.T) Manager {
 	manager, _ := ctx.Value(managerKey{}).(Manager)
+	if manager == nil {
+		panic(`Vtrace is uninitialized.
+You are calling a Vtrace function but vtrace has not been initialized.
+This is normally handled by the runtime initialization.  You should call
+veyron2.Init() in your main or test before performing this function.`)
+	}
 	return manager
 }
 
