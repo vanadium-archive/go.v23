@@ -347,7 +347,8 @@ type RuntimeX interface {
 var (
 	runtimeConfig struct {
 		sync.Mutex
-		runtime RuntimeX
+		runtime     RuntimeX
+		runtimeHack RuntimeX // TODO(suharsh,mattr): This is temporary and should be removed.
 	}
 )
 
@@ -358,9 +359,8 @@ var (
 // For now, this simply must be called before main begins (in an init).
 func RegisterRuntime(name string, r RuntimeX) {
 	runtimeConfig.Lock()
-	if runtimeConfig.runtime == nil {
-		runtimeConfig.runtime = r
-	}
+	runtimeConfig.runtime = r
+	runtimeConfig.runtimeHack = r
 	runtimeConfig.Unlock()
 }
 
@@ -369,7 +369,18 @@ type Shutdown func()
 // Init should be called once for each vanadium executable, providing the setup
 // of the initial context.T and a context.CancelFunc that can be used to cancel the context.
 func Init() (*context.T, Shutdown) {
-	// TODO(suharshs,mattr): Panic if we have already been called.
+	runtimeConfig.Lock()
+	r := runtimeConfig.runtime
+	runtimeConfig.Unlock()
+	if r != nil {
+		panic("runtime has already been initialized")
+	}
+
+	return InitForTest()
+}
+
+// InitForTest should be called in tests instead of veyron2.Init.
+func InitForTest() (*context.T, Shutdown) {
 	ctx, cancel := context.WithCancel(nil)
 
 	profileInitMu.Lock()
