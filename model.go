@@ -373,7 +373,7 @@ type RuntimeX interface {
 // - a missing RPC version should default to the highest version
 //   supported by the runtime implementation hosting NewEndpoint
 func NewEndpoint(ep string) (naming.Endpoint, error) {
-	return initState.runtime.NewEndpoint(ep)
+	return initState.currentRuntime().NewEndpoint(ep)
 }
 
 // NewServer creates a new Server instance.
@@ -381,82 +381,82 @@ func NewEndpoint(ep string) (naming.Endpoint, error) {
 // It accepts at least the following options:
 // ServesMountTable and ServerBlessings.
 func NewServer(ctx *context.T, opts ...ipc.ServerOpt) (ipc.Server, error) {
-	return initState.runtime.NewServer(ctx, opts...)
+	return initState.currentRuntime().NewServer(ctx, opts...)
 }
 
 // SetNewStreamManager creates a new stream manager and context
 // with that StreamManager attached.
 func SetNewStreamManager(ctx *context.T, opts ...stream.ManagerOpt) (*context.T, stream.Manager, error) {
-	return initState.runtime.SetNewStreamManager(ctx, opts...)
+	return initState.currentRuntime().SetNewStreamManager(ctx, opts...)
 }
 
 // GetStreamManager returns the current stream manager.
 func GetStreamManager(ctx *context.T) stream.Manager {
-	return initState.runtime.GetStreamManager(ctx)
+	return initState.currentRuntime().GetStreamManager(ctx)
 }
 
 // SetPrincipal attaches a principal to the returned context.
 func SetPrincipal(ctx *context.T, principal security.Principal) (*context.T, error) {
-	return initState.runtime.SetPrincipal(ctx, principal)
+	return initState.currentRuntime().SetPrincipal(ctx, principal)
 }
 
 // GetPrincipal returns the current Principal.
 func GetPrincipal(ctx *context.T) security.Principal {
-	return initState.runtime.GetPrincipal(ctx)
+	return initState.currentRuntime().GetPrincipal(ctx)
 }
 
 // SetNewClient creates a new Client instance and attaches it to a
 // new context.
 func SetNewClient(ctx *context.T, opts ...ipc.ClientOpt) (*context.T, ipc.Client, error) {
-	return initState.runtime.SetNewClient(ctx, opts...)
+	return initState.currentRuntime().SetNewClient(ctx, opts...)
 }
 
 // GetClient returns the current Client.
 func GetClient(ctx *context.T) ipc.Client {
-	return initState.runtime.GetClient(ctx)
+	return initState.currentRuntime().GetClient(ctx)
 }
 
 // SetNewNamespace creates a new Namespace and attaches it to the
 // returned context.
 func SetNewNamespace(ctx *context.T, roots ...string) (*context.T, naming.Namespace, error) {
-	return initState.runtime.SetNewNamespace(ctx, roots...)
+	return initState.currentRuntime().SetNewNamespace(ctx, roots...)
 }
 
 // GetNamespace returns the current namespace.
 func GetNamespace(ctx *context.T) naming.Namespace {
-	return initState.runtime.GetNamespace(ctx)
+	return initState.currentRuntime().GetNamespace(ctx)
 }
 
 // SetNewLogger creates a new Logger and attaches it to the
 // returned context.
 func SetNewLogger(ctx *context.T, name string, opts ...vlog.LoggingOpts) (*context.T, vlog.Logger, error) {
-	return initState.runtime.SetNewLogger(ctx, name, opts...)
+	return initState.currentRuntime().SetNewLogger(ctx, name, opts...)
 }
 
 // GetLogger returns the current logger.
 func GetLogger(ctx *context.T) vlog.Logger {
-	return initState.runtime.GetLogger(ctx)
+	return initState.currentRuntime().GetLogger(ctx)
 }
 
 // GetProfile gets the current Profile.
 func GetProfile(ctx *context.T) Profile {
-	return initState.runtime.GetProfile(ctx)
+	return initState.currentRuntime().GetProfile(ctx)
 }
 
 // GetAppCycle gets the current AppCycle.
 func GetAppCycle(ctx *context.T) AppCycle {
-	return initState.runtime.GetAppCycle(ctx)
+	return initState.currentRuntime().GetAppCycle(ctx)
 }
 
 // GetListenSpec gets the current ListenSpec.
 func GetListenSpec(ctx *context.T) ipc.ListenSpec {
-	return initState.runtime.GetListenSpec(ctx)
+	return initState.currentRuntime().GetListenSpec(ctx)
 }
 
 // GetPublisher returns a configuration Publisher that can be used to access
 // configuration information.
 func GetPublisher(ctx *context.T) *config.Publisher {
-	return initState.runtime.GetPublisher(ctx)
+	return initState.currentRuntime().GetPublisher(ctx)
 }
 
 // SetBackgroundContext creates a new context derived from the given context
@@ -471,16 +471,28 @@ func GetBackgroundContext(ctx *context.T) *context.T {
 	return initState.runtime.GetBackgroundContext(ctx)
 }
 
-var (
-	initState struct {
-		mu           sync.Mutex
-		runtime      RuntimeX
-		runtimeHack  RuntimeX // TODO(suharsh,mattr): This is temporary and should be removed.
-		runtimeStack string
-		profile      ProfileInitFunc
-		profileStack string
+var initState = &initStateData{}
+
+type initStateData struct {
+	mu           sync.RWMutex
+	runtime      RuntimeX
+	runtimeHack  RuntimeX // TODO(suharsh,mattr): This is temporary and should be removed.
+	runtimeStack string
+	profile      ProfileInitFunc
+	profileStack string
+}
+
+func (i *initStateData) currentRuntime() RuntimeX {
+	i.mu.RLock()
+	defer i.mu.RUnlock()
+
+	if i.runtime == nil {
+		panic(`Calling veyron2 method before initializing the runtime with Init().
+You should call Init from your main or test function before calling
+other veyron operations.`)
 	}
-)
+	return i.runtime
+}
 
 // TODO(mattr, suharshs): Write thorough documentation for this type.
 type ProfileInitFunc func(ctx *context.T) (RuntimeX, *context.T, Shutdown, error)
@@ -541,6 +553,10 @@ func getStack(skip int) string {
 func Init() (*context.T, Shutdown) {
 	initState.mu.Lock()
 	defer initState.mu.Unlock()
+
+	if initState.runtime == initState.runtimeHack {
+		initState.runtime = nil
+	}
 
 	// Skip 3 stack frames: runtime.Callers, getStack, Init
 	stack := getStack(3)
