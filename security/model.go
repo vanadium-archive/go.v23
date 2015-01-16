@@ -253,9 +253,9 @@ type BlessingStore interface {
 	// SetDefault sets up the Blessings made available on a subsequent call
 	// to Default.
 	//
-	// It is an error to call SetDefault with Blessings whose public key
-	// does not match the PublicKey of the principal for which this store
-	// hosts blessings.
+	// It is an error to call SetDefault with a non-nil blessings whose
+	// public key does not match the PublicKey of the principal for which
+	// this store hosts blessings.
 	SetDefault(blessings Blessings) error
 
 	// Default returns the blessings to be shared with peers for which
