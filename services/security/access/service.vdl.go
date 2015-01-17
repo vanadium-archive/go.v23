@@ -235,9 +235,10 @@ const ErrTooBig = __verror.ID("v.io/core/veyron2/services/security/access.ErrToo
 //  }
 type ObjectClientMethods interface {
 	// SetACL replaces the current ACL for an object.  etag allows for optional,
-	// optimistic concurrency control.  If non-empty, etag's value must come
-	// from GetACL.  If any client has successfully called SetACL in the
-	// meantime, the etag will be stale and SetACL will fail.
+	// optimistic concurrency control.  If non-empty, etag's value must come from
+	// GetACL.  If any client has successfully called SetACL in the meantime, the
+	// etag will be stale and SetACL will fail.  If empty, SetACL performs an
+	// unconditional update.
 	//
 	// ACL objects are expected to be small.  It is up to the implementation to
 	// define the exact limit, though it should probably be around 100KB.  Large
@@ -366,9 +367,10 @@ func (c implObjectClientStub) Signature(ctx *__context.T, opts ...__ipc.CallOpt)
 //  }
 type ObjectServerMethods interface {
 	// SetACL replaces the current ACL for an object.  etag allows for optional,
-	// optimistic concurrency control.  If non-empty, etag's value must come
-	// from GetACL.  If any client has successfully called SetACL in the
-	// meantime, the etag will be stale and SetACL will fail.
+	// optimistic concurrency control.  If non-empty, etag's value must come from
+	// GetACL.  If any client has successfully called SetACL in the meantime, the
+	// etag will be stale and SetACL will fail.  If empty, SetACL performs an
+	// unconditional update.
 	//
 	// ACL objects are expected to be small.  It is up to the implementation to
 	// define the exact limit, though it should probably be around 100KB.  Large
@@ -452,7 +454,7 @@ var descObject = __ipc.InterfaceDesc{
 	Methods: []__ipc.MethodDesc{
 		{
 			Name: "SetACL",
-			Doc:  "// SetACL replaces the current ACL for an object.  etag allows for optional,\n// optimistic concurrency control.  If non-empty, etag's value must come\n// from GetACL.  If any client has successfully called SetACL in the\n// meantime, the etag will be stale and SetACL will fail.\n//\n// ACL objects are expected to be small.  It is up to the implementation to\n// define the exact limit, though it should probably be around 100KB.  Large\n// lists of principals should use the Group API or blessings.\n//\n// There is some ambiguity when calling SetACL on a mount point.  Does it\n// affect the mount itself or does it affect the service endpoint that the\n// mount points to?  The chosen behavior is that it affects the service\n// endpoint.  To modify the mount point's ACL, use ResolveToMountTable\n// to get an endpoint and call SetACL on that.  This means that clients\n// must know when a name refers to a mount point to change its ACL.",
+			Doc:  "// SetACL replaces the current ACL for an object.  etag allows for optional,\n// optimistic concurrency control.  If non-empty, etag's value must come from\n// GetACL.  If any client has successfully called SetACL in the meantime, the\n// etag will be stale and SetACL will fail.  If empty, SetACL performs an\n// unconditional update.\n//\n// ACL objects are expected to be small.  It is up to the implementation to\n// define the exact limit, though it should probably be around 100KB.  Large\n// lists of principals should use the Group API or blessings.\n//\n// There is some ambiguity when calling SetACL on a mount point.  Does it\n// affect the mount itself or does it affect the service endpoint that the\n// mount points to?  The chosen behavior is that it affects the service\n// endpoint.  To modify the mount point's ACL, use ResolveToMountTable\n// to get an endpoint and call SetACL on that.  This means that clients\n// must know when a name refers to a mount point to change its ACL.",
 			InArgs: []__ipc.ArgDesc{
 				{"acl", ``},  // TaggedACLMap
 				{"etag", ``}, // string

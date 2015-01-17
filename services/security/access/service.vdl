@@ -185,9 +185,10 @@ const (
 //  }
 type Object interface {
   // SetACL replaces the current ACL for an object.  etag allows for optional,
-  // optimistic concurrency control.  If non-empty, etag's value must come
-  // from GetACL.  If any client has successfully called SetACL in the
-  // meantime, the etag will be stale and SetACL will fail.
+  // optimistic concurrency control.  If non-empty, etag's value must come from
+  // GetACL.  If any client has successfully called SetACL in the meantime, the
+  // etag will be stale and SetACL will fail.  If empty, SetACL performs an
+  // unconditional update.
   //
   // ACL objects are expected to be small.  It is up to the implementation to
   // define the exact limit, though it should probably be around 100KB.  Large
