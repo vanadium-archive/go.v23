@@ -502,9 +502,10 @@ func RegisterProfileInit(f ProfileInitFunc) {
 	// Skip 3 frames: runtime.Callers, getStack, RegisterProfileInit.
 	stack := getStack(3)
 	initState.mu.Lock()
+	defer initState.mu.Unlock()
 	if initState.profile != nil {
-		format := `A profile has already been
-registered.  This is most likely because a library package is
+		format := `A profile has already been registered.
+This is most likely because a library package is
 importing a profile.  Look for imports of the form
 'v.io/core/veyron/profiles/...' and remove them.  Profiles should only be
 imported in your main package.  Previous registration was from:
@@ -516,7 +517,6 @@ Current registration is from:
 	}
 	initState.profile = f
 	initState.profileStack = stack
-	initState.mu.Unlock()
 }
 
 // TODO(mattr): this is a short term hack to put us into a situation
