@@ -90,7 +90,7 @@ func (p pkgTypeNames) getNames() typeNames {
 				for _, inarg := range method.InArgs {
 					p.addInnerTypes(inarg.Type)
 				}
-				for _, outarg := range method.OutArgs {
+				for _, outarg := range outArgsWithoutError(method.OutArgs) {
 					p.addInnerTypes(outarg.Type)
 				}
 				if method.InStream != nil {

@@ -225,6 +225,12 @@ func typedConst(names typeNames, v *vdl.Value) string {
 	}
 }
 
+// Remove the error out arg.
+// TODO(bprosnitz) Remove this function when error is removed from the compiler out arg list.
+func outArgsWithoutError(outArgs []*compile.Arg) []*compile.Arg {
+	return outArgs[:len(outArgs)-1]
+}
+
 // Returns the JS version of the method signature.
 func generateMethodSignature(method *compile.Method, names typeNames) string {
 	return fmt.Sprintf(`{
@@ -239,7 +245,7 @@ func generateMethodSignature(method *compile.Method, names typeNames) string {
 		method.Name,
 		quoteStripDoc(method.Doc),
 		generateMethodArguments(method.InArgs, names),
-		generateMethodArguments(method.OutArgs, names), // Note: includes the error argument.
+		generateMethodArguments(outArgsWithoutError(method.OutArgs), names),
 		generateMethodStreaming(method.InStream, names),
 		generateMethodStreaming(method.OutStream, names),
 		genMethodTags(names, method))
