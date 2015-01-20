@@ -4,66 +4,72 @@ package vdlgen
 
 import (
 	"fmt"
-	"strconv"
+	"strings"
 
 	"v.io/core/veyron2/vdl"
 	"v.io/core/veyron2/vdl/codegen"
 )
 
-// Type returns the vdl type corresponding to t, in the given pkgPath, with the
-// given imports.
-func Type(t *vdl.Type, pkgPath string, imports codegen.Imports) (string, error) {
-	// Named types are always referred to by their name.
-	if t.Name() != "" {
-		path, name := vdl.SplitIdent(t.Name())
-		if path == "" || path == pkgPath {
-			return name, nil
-		}
-		if local := imports.LookupLocal(path); local != "" {
-			return local + "." + name, nil
-		}
-		return "", fmt.Errorf("vdl: type %q has unknown pkg path %q in imports %v", t.Name(), path, imports)
+// Type returns t using VDL syntax, returning the qualified name if t is named,
+// otherwise returning the base type of t.  The pkgPath and imports are used to
+// determine the local package qualifier to add to named types; if a local
+// package qualifier cannot be found, a full package path qualifier is added.
+func Type(t *vdl.Type, pkgPath string, imports codegen.Imports) string {
+	if t.Name() == "" {
+		return BaseType(t, pkgPath, imports)
 	}
-	// Otherwise deal with built-in and composite types.
-	switch t.Kind() {
+	path, name := vdl.SplitIdent(t.Name())
+	if path == "" && name == "" {
+		return "<empty>"
+	}
+	if path == "" || path == pkgPath {
+		return name
+	}
+	if local := imports.LookupLocal(path); local != "" {
+		return local + "." + name
+	}
+	return `"` + path + `".` + name
+}
+
+// BaseType returns the base type of t using VDL syntax, where the base type is
+// the type of t disregarding its name.  Subtypes contained in t are output via
+// calls to Type.
+func BaseType(t *vdl.Type, pkgPath string, imports codegen.Imports) string {
+	switch k := t.Kind(); k {
 	case vdl.Any, vdl.Bool, vdl.Byte, vdl.Uint16, vdl.Uint32, vdl.Uint64, vdl.Int16, vdl.Int32, vdl.Int64, vdl.Float32, vdl.Float64, vdl.Complex64, vdl.Complex128, vdl.String, vdl.TypeObject:
 		// Built-in types are named the same as their kind.
-		return t.Kind().String(), nil
+		return k.String()
 	case vdl.Optional:
-		elem, err := Type(t.Elem(), pkgPath, imports)
-		if err != nil {
-			return "", err
+		return "?" + Type(t.Elem(), pkgPath, imports)
+	case vdl.Enum:
+		ret := "enum{"
+		for i := 0; i < t.NumEnumLabel(); i++ {
+			if i > 0 {
+				ret += ";"
+			}
+			ret += t.EnumLabel(i)
 		}
-		return "?" + elem, nil
+		return ret + "}"
 	case vdl.Array:
-		elem, err := Type(t.Elem(), pkgPath, imports)
-		if err != nil {
-			return "", err
-		}
-		return "[" + strconv.Itoa(t.Len()) + "]" + elem, nil
+		return fmt.Sprintf("[%d]%s", t.Len(), Type(t.Elem(), pkgPath, imports))
 	case vdl.List:
-		elem, err := Type(t.Elem(), pkgPath, imports)
-		if err != nil {
-			return "", err
-		}
-		return "[]" + elem, nil
+		return fmt.Sprintf("[]%s", Type(t.Elem(), pkgPath, imports))
 	case vdl.Set:
-		key, err := Type(t.Key(), pkgPath, imports)
-		if err != nil {
-			return "", err
-		}
-		return "set[" + key + "]", nil
+		return fmt.Sprintf("set[%s]", Type(t.Key(), pkgPath, imports))
 	case vdl.Map:
-		key, err := Type(t.Key(), pkgPath, imports)
-		if err != nil {
-			return "", err
+		key := Type(t.Key(), pkgPath, imports)
+		elem := Type(t.Elem(), pkgPath, imports)
+		return fmt.Sprintf("map[%s]%s", key, elem)
+	case vdl.Struct, vdl.Union:
+		ret := k.String() + " {\n"
+		for i := 0; i < t.NumField(); i++ {
+			f := t.Field(i)
+			ftype := Type(f.Type, pkgPath, imports)
+			ftype = strings.Replace(ftype, "\n", "\n\t", -1)
+			ret += fmt.Sprintf("\t%s %s\n", f.Name, ftype)
 		}
-		elem, err := Type(t.Elem(), pkgPath, imports)
-		if err != nil {
-			return "", err
-		}
-		return "map[" + key + "]" + elem, nil
+		return ret + "}"
+	default:
+		panic(fmt.Errorf("vdlgen.BaseType: unhandled type: %v %v", k, t))
 	}
-	// Enum, Union and Struct must be named.
-	return "", fmt.Errorf("vdl: types of kind %q must be named", t.Kind())
 }

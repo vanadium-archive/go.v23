@@ -195,10 +195,7 @@ const Tests = []TestCase {`)
 			// include the "any" type explicitly, so we descend into the elem value.
 			value = value.Elem()
 		}
-		valstr, err := vdlgen.TypedConst(value, testpkg, imports)
-		if err != nil {
-			return nil, fmt.Errorf("couldn't generate const %v: %v", value, err)
-		}
+		valstr := vdlgen.TypedConst(value, testpkg, imports)
 		vomhex, vomdump, err := toVomHex(value)
 		if err != nil {
 			return nil, err
