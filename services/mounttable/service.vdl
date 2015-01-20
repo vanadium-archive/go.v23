@@ -67,11 +67,11 @@ type MountTable interface {
 
 	// ResolveStep takes the next step in resolving a name.  Returns the next
 	// servers to query and the suffix at those servers.
-	ResolveStep() (Servers []naming.VDLMountedServer, Suffix string | error)
+	ResolveStep() (Entry naming.VDLMountEntry | error)
 
-	// ResolveStepX takes the next step in resolving a name.  Returns the next
-	// servers to query and the suffix at those servers.
+	// Obsolete, left for backward compatability until all uses are killed. 
 	ResolveStepX() (Entry naming.VDLMountEntry | error)
+
 
 	access.Object
 }

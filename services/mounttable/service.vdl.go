@@ -127,9 +127,8 @@ type MountTableClientMethods interface {
 	Delete(ctx *__context.T, DeleteSubtree bool, opts ...__ipc.CallOpt) error
 	// ResolveStep takes the next step in resolving a name.  Returns the next
 	// servers to query and the suffix at those servers.
-	ResolveStep(*__context.T, ...__ipc.CallOpt) (Servers []naming.VDLMountedServer, Suffix string, err error)
-	// ResolveStepX takes the next step in resolving a name.  Returns the next
-	// servers to query and the suffix at those servers.
+	ResolveStep(*__context.T, ...__ipc.CallOpt) (Entry naming.VDLMountEntry, err error)
+	// Obsolete, left for backward compatability until all uses are killed.
 	ResolveStepX(*__context.T, ...__ipc.CallOpt) (Entry naming.VDLMountEntry, err error)
 }
 
@@ -197,12 +196,12 @@ func (c implMountTableClientStub) Delete(ctx *__context.T, i0 bool, opts ...__ip
 	return
 }
 
-func (c implMountTableClientStub) ResolveStep(ctx *__context.T, opts ...__ipc.CallOpt) (o0 []naming.VDLMountedServer, o1 string, err error) {
+func (c implMountTableClientStub) ResolveStep(ctx *__context.T, opts ...__ipc.CallOpt) (o0 naming.VDLMountEntry, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "ResolveStep", nil, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&o0, &o1, &err); ierr != nil {
+	if ierr := call.Finish(&o0, &err); ierr != nil {
 		err = ierr
 	}
 	return
@@ -301,9 +300,8 @@ type MountTableServerMethods interface {
 	Delete(ctx __ipc.ServerContext, DeleteSubtree bool) error
 	// ResolveStep takes the next step in resolving a name.  Returns the next
 	// servers to query and the suffix at those servers.
-	ResolveStep(__ipc.ServerContext) (Servers []naming.VDLMountedServer, Suffix string, err error)
-	// ResolveStepX takes the next step in resolving a name.  Returns the next
-	// servers to query and the suffix at those servers.
+	ResolveStep(__ipc.ServerContext) (Entry naming.VDLMountEntry, err error)
+	// Obsolete, left for backward compatability until all uses are killed.
 	ResolveStepX(__ipc.ServerContext) (Entry naming.VDLMountEntry, err error)
 }
 
@@ -358,7 +356,7 @@ func (s implMountTableServerStub) Delete(ctx __ipc.ServerContext, i0 bool) error
 	return s.impl.Delete(ctx, i0)
 }
 
-func (s implMountTableServerStub) ResolveStep(ctx __ipc.ServerContext) ([]naming.VDLMountedServer, string, error) {
+func (s implMountTableServerStub) ResolveStep(ctx __ipc.ServerContext) (naming.VDLMountEntry, error) {
 	return s.impl.ResolveStep(ctx)
 }
 
@@ -422,14 +420,13 @@ var descMountTable = __ipc.InterfaceDesc{
 			Name: "ResolveStep",
 			Doc:  "// ResolveStep takes the next step in resolving a name.  Returns the next\n// servers to query and the suffix at those servers.",
 			OutArgs: []__ipc.ArgDesc{
-				{"Servers", ``}, // []naming.VDLMountedServer
-				{"Suffix", ``},  // string
-				{"err", ``},     // error
+				{"Entry", ``}, // naming.VDLMountEntry
+				{"err", ``},   // error
 			},
 		},
 		{
 			Name: "ResolveStepX",
-			Doc:  "// ResolveStepX takes the next step in resolving a name.  Returns the next\n// servers to query and the suffix at those servers.",
+			Doc:  "// Obsolete, left for backward compatability until all uses are killed. ",
 			OutArgs: []__ipc.ArgDesc{
 				{"Entry", ``}, // naming.VDLMountEntry
 				{"err", ``},   // error
@@ -462,8 +459,7 @@ func (s implMountTableServerStub) Signature(ctx __ipc.ServerContext) (__ipc.Serv
 	result.Methods["ResolveStep"] = __ipc.MethodSignature{
 		InArgs: []__ipc.MethodArgument{},
 		OutArgs: []__ipc.MethodArgument{
-			{Name: "Servers", Type: 68},
-			{Name: "Suffix", Type: 3},
+			{Name: "Entry", Type: 69},
 			{Name: "err", Type: 66},
 		},
 	}
