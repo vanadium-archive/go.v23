@@ -168,18 +168,11 @@ type Namespace interface {
 	Unmount(ctx *context.T, name, server string) error
 
 	// Resolve the object name into its mounted servers.
-	Resolve(ctx *context.T, name string, opts ...ResolveOpt) (names []string, err error)
-
-	// Resolve the object name into its mounted servers.
-	ResolveX(ctx *context.T, name string, opts ...ResolveOpt) (entry *MountEntry, err error)
+	Resolve(ctx *context.T, name string, opts ...ResolveOpt) (entry *MountEntry, err error)
 
 	// ResolveToMountTable resolves the object name into the mounttables
 	// directly responsible for the name.
-	ResolveToMountTable(ctx *context.T, name string, opts ...ResolveOpt) (names []string, err error)
-
-	// ResolveToMountTable resolves the object name into the mounttables
-	// directly responsible for the name.
-	ResolveToMountTableX(ctx *context.T, name string, opts ...ResolveOpt) (entry *MountEntry, err error)
+	ResolveToMountTable(ctx *context.T, name string, opts ...ResolveOpt) (entry *MountEntry, err error)
 
 	// FlushCacheEntry flushes resolution information cached for the name.  If
 	// anything was flushed it returns true.
