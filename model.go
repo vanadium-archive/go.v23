@@ -325,10 +325,6 @@ type RuntimeX interface {
 	// GetLogger returns the current logger.
 	GetLogger(ctx *context.T) vlog.Logger
 
-	// SetReservedNameDispatcher sets and configures a dispatcher for the
-	// reserved portion of the name space, i.e. any path starting with '__'.
-	SetReservedNameDispatcher(ctx *context.T, server ipc.Dispatcher, opts ...ipc.ServerOpt) *context.T
-
 	// GetProfile gets the current profile.
 	// TODO(suharshs, mattr): Again not completely sure yet if we actually need this.
 	GetProfile(ctx *context.T) Profile
@@ -340,10 +336,6 @@ type RuntimeX interface {
 	// TODO(suharshs, mattr): Determine if setting this should also be allowed, or if
 	// only the Profiles should be able to this.
 	GetListenSpec(ctx *context.T) ipc.ListenSpec
-
-	// GetPublisher returns a configuration Publisher that can be used to access
-	// configuration information.
-	GetPublisher(ctx *context.T) *config.Publisher
 
 	// SetBackgroundContext creates a new context derived from the given context
 	// with the given context set as the background context.
@@ -453,12 +445,6 @@ func GetListenSpec(ctx *context.T) ipc.ListenSpec {
 	return initState.currentRuntime().GetListenSpec(ctx)
 }
 
-// GetPublisher returns a configuration Publisher that can be used to access
-// configuration information.
-func GetPublisher(ctx *context.T) *config.Publisher {
-	return initState.currentRuntime().GetPublisher(ctx)
-}
-
 // SetBackgroundContext creates a new context derived from the given context
 // with the given context set as the background context.
 func SetBackgroundContext(ctx *context.T) *context.T {
@@ -491,6 +477,7 @@ func (i *initStateData) currentRuntime() RuntimeX {
 You should call Init from your main or test function before calling
 other veyron operations.`)
 	}
+
 	return i.runtime
 }
 
