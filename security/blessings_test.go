@@ -4,6 +4,7 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
+	"reflect"
 	"testing"
 	"time"
 
@@ -64,6 +65,58 @@ func TestByteSize(t *testing.T) {
 	}
 	logCaveatSize(ExpiryCaveat(time.Now()))
 	logCaveatSize(MethodCaveat("m"))
+}
+
+func TestDefaultCaveatDecoder(t *testing.T) {
+	validator := unixTimeExpiryCaveat(time.Now().Add(time.Hour).Unix())
+	cav, err := NewCaveat(validator)
+	if err != nil {
+		t.Fatal(err)
+	}
+	decodedValidator, err := decodeCaveat(cav)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(validator, decodedValidator) {
+		t.Fatalf("Caveat decoding failed, want %v, got %v", validator, decodedValidator)
+	}
+}
+
+func TestNilCaveatDecoder(t *testing.T) {
+	RegisterCaveatDecoder(nil)
+	validator := unixTimeExpiryCaveat(time.Now().Add(time.Hour).Unix())
+	cav, err := NewCaveat(validator)
+	if err != nil {
+		t.Fatal(err)
+	}
+	decodedValidator, err := decodeCaveat(cav)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(validator, decodedValidator) {
+		t.Fatalf("Caveat decoding failed, want %v, got %v", validator, decodedValidator)
+	}
+}
+func TestRegisteredCaveatDecoder(t *testing.T) {
+	c := make(chan Caveat, 1)
+	RegisterCaveatDecoder(func(cav Caveat) (CaveatValidator, error) {
+		c <- cav
+		return nil, nil
+	})
+	defer RegisterCaveatDecoder(nil)
+	caveat, err := ExpiryCaveat(time.Now().Add(time.Hour))
+	if err != nil {
+		t.Fatal(err)
+	}
+	decodeCaveat(caveat)
+	select {
+	case <-time.Tick(10 * time.Second):
+		t.Fatalf("Registered caveat decoder never invoked.")
+	case decoding := <-c:
+		if !reflect.DeepEqual(caveat, decoding) {
+			t.Fatalf("Decoding wrong caveat, want %v, got %v", caveat, decoding)
+		}
+	}
 }
 
 func BenchmarkBless(b *testing.B) {

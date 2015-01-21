@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"sync"
 
 	"v.io/core/veyron2/vlog"
 	"v.io/core/veyron2/vom2"
@@ -149,18 +150,30 @@ func blessingForCertificateChain(ctx Context, chain []Certificate) string {
 	// Validate all caveats embedded in the chain.
 	for _, cert := range chain {
 		for _, cav := range cert.Caveats {
-			var validator CaveatValidator
-			if err := vom2.Decode(cav.ValidatorVOM, &validator); err != nil {
-				vlog.VI(4).Infof("ignoring blessing %v because CaveatValidator decoding failed: %v", blessing, err)
+			validator, err := decodeCaveat(cav)
+			if err != nil {
+				vlog.VI(4).Infof("ignoring blessing %v because Caveat decoding failed: %v", blessing, err)
 				return ""
 			}
-			if err := validator.Validate(ctx); err != nil {
+			if err = validator.Validate(ctx); err != nil {
 				vlog.VI(4).Infof("ignoring blessing %v because caveat %T failed valdiation: %v", blessing, validator, err)
 				return ""
 			}
 		}
 	}
 	return blessing
+}
+
+func decodeCaveat(cav Caveat) (CaveatValidator, error) {
+	caveatDecoderLock.RLock()
+	defer caveatDecoderLock.RUnlock()
+	if caveatDecoder == nil {
+		// Use the default (i.e., VOM) decoder.
+		var validator CaveatValidator
+		err := vom2.Decode(cav.ValidatorVOM, &validator)
+		return validator, err
+	}
+	return caveatDecoder(cav)
 }
 
 // NewBlessings creates a Blessings object from the provided wire representation.
@@ -241,6 +254,26 @@ func UnionOfBlessings(blessings ...Blessings) (Blessings, error) {
 	// ordering, irrespective of the ordering of arugments to UnionOfBlessings.
 	sort.Stable(certificateChainsSorter(ret.chains))
 	return &ret, nil
+}
+
+var (
+	caveatDecoder     func(Caveat) (CaveatValidator, error)
+	caveatDecoderLock sync.RWMutex
+)
+
+// RegisterCaveatDecoder registers the decoder used for decoding Caveats.
+// If a nil decoder is registered, caveats are decoded using the default
+// Go VOM-decoder.
+//
+// This registration mechanism is useful for supporting caveats defined in
+// native languages (e.g., Java, Javascript), where the default Go VOM-decoder
+// doesn't know how to decode its data.
+//
+// If never invoked, default caveat decoder is used.
+func RegisterCaveatDecoder(decoder func(Caveat) (CaveatValidator, error)) {
+	caveatDecoderLock.Lock()
+	defer caveatDecoderLock.Unlock()
+	caveatDecoder = decoder
 }
 
 type certificateChainsSorter [][]Certificate
