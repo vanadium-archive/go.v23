@@ -14,9 +14,6 @@ import (
 	"v.io/core/veyron2/vdl/compile"
 	"v.io/core/veyron2/vdl/parse"
 	"v.io/core/veyron2/vdl/vdlroot/src/vdltool"
-	"v.io/core/veyron2/vdl/vdlutil"
-	"v.io/core/veyron2/wiretype"
-	"v.io/core/veyron2/wiretype/build"
 )
 
 type goData struct {
@@ -80,12 +77,13 @@ func systemImportsGo(f *compile.File) []string {
 	if len(f.Interfaces) > 0 {
 		// Imports for the generated method: {interface name}Client.
 		set[`__veyron2 "v.io/core/veyron2"`] = true
-		set[`__wiretype "v.io/core/veyron2/wiretype"`] = true
 		set[`__ipc "v.io/core/veyron2/ipc"`] = true
 		set[`__context "v.io/core/veyron2/context"`] = true
-		set[`__vdlutil "v.io/core/veyron2/vdl/vdlutil"`] = true
 		if fileHasStreamingMethods(f) {
 			set[`__io "io"`] = true
+		}
+		if fileHasMethodTags(f) {
+			set[`__vdlutil "v.io/core/veyron2/vdl/vdlutil"`] = true
 		}
 	}
 	// If the user has specified any error IDs, typically we need to import the
@@ -110,6 +108,19 @@ func fileHasStreamingMethods(f *compile.File) bool {
 	for _, i := range f.Interfaces {
 		for _, m := range i.Methods {
 			if isStreamingMethod(m) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// fileHasMethodTags returns true iff f contains an interface with a method with
+// non-empty tags.
+func fileHasMethodTags(f *compile.File) bool {
+	for _, i := range f.Interfaces {
+		for _, m := range i.Methods {
+			if len(m.Tags) > 0 {
 				return true
 			}
 		}
@@ -149,8 +160,6 @@ func init() {
 		"clientStubImpl":        clientStubImpl,
 		"clientFinishImpl":      clientFinishImpl,
 		"serverStubImpl":        serverStubImpl,
-		"signatureMethods":      signatureMethods,
-		"signatureTypeDefs":     signatureTypeDefs,
 		"reInitStreamValue":     reInitStreamValue,
 	}
 	goTemplate = template.Must(template.New("genGo").Funcs(funcMap).Parse(genGo))
@@ -364,87 +373,6 @@ func serverStubImpl(data goData, iface *compile.Interface, method *compile.Metho
 	return buf.String() // the caller writes the trailing newline
 }
 
-type methodArgument struct {
-	Name string // Argument name
-	Type wiretype.TypeID
-}
-
-type methodSignature struct {
-	InArgs    []methodArgument // Positional Argument information.
-	OutArgs   []methodArgument
-	InStream  wiretype.TypeID // Type of streaming arguments (or TypeIDInvalid if none). The type IDs here use the definitions in ServiceSigature.TypeDefs.
-	OutStream wiretype.TypeID
-}
-
-type serviceSignature struct {
-	TypeDefs build.TypeDefs // A slice of wiretype structures form the type definition.
-	Methods  map[string]methodSignature
-}
-
-// signature generates the service signature of the interface.
-func signature(iface *compile.Interface) *serviceSignature {
-	sig := &serviceSignature{Methods: map[string]methodSignature{}}
-	wtc := wireTypeConverter{}
-	for _, method := range iface.Methods {
-		ms := methodSignature{}
-		for _, inarg := range method.InArgs {
-			ms.InArgs = append(ms.InArgs, methodArgument{
-				Name: inarg.Name,
-				Type: wtc.WireTypeID(inarg.Type),
-			})
-		}
-		for _, outarg := range method.OutArgs {
-			ms.OutArgs = append(ms.OutArgs, methodArgument{
-				Name: outarg.Name,
-				Type: wtc.WireTypeID(outarg.Type),
-			})
-		}
-		if method.InStream != nil {
-			ms.InStream = wtc.WireTypeID(method.InStream)
-		}
-		if method.OutStream != nil {
-			ms.OutStream = wtc.WireTypeID(method.OutStream)
-		}
-		sig.Methods[method.Name] = ms
-	}
-	sig.TypeDefs = wtc.Defs
-	return sig
-}
-
-func signatureMethods(iface *compile.Interface) map[string]methodSignature {
-	return signature(iface).Methods
-}
-
-func signatureTypeDefs(iface *compile.Interface) string {
-	return typeDefsCode(signature(iface).TypeDefs)
-}
-
-// generate the go code for type defs
-func typeDefsCode(td []vdlutil.Any) string {
-	var buf bytes.Buffer
-	buf.WriteString("[]__vdlutil.Any{\n")
-	for _, wt := range td {
-		switch t := wt.(type) {
-		case wiretype.StructType:
-			buf.WriteString("__wiretype.StructType{\n")
-			if len(t.Fields) > 0 {
-				buf.WriteString("[]__wiretype.FieldType{\n")
-				for _, f := range t.Fields {
-					buf.WriteString(fmt.Sprintf("__%#v,\n", f))
-				}
-				buf.WriteString("},\n")
-			} else {
-				buf.WriteString("nil,\n")
-			}
-			buf.WriteString(fmt.Sprintf("%q, %#v},\n", t.Name, t.Tags))
-		default:
-			buf.WriteString(fmt.Sprintf("__%#v,", wt))
-		}
-	}
-	buf.WriteString("}")
-	return buf.String()
-}
-
 func reInitStreamValue(data goData, t *vdl.Type, name string) string {
 	switch t.Kind() {
 	case vdl.Struct:
@@ -476,13 +404,6 @@ import ( {{range $imp := $data.UserImports}}
 	// The non-user imports are prefixed with "__" to prevent collisions.
 	{{range $imp := $data.SystemImports}}{{$imp}}
 {{end}}{{end}})
-{{end}}
-
-{{if $file.Interfaces}}
-// TODO(toddw): Remove this line once the new signature support is done.
-// It corrects a bug where __wiretype is unused in VDL pacakges where only
-// bootstrap types are used on interfaces.
-const _ = __wiretype.TypeIDInvalid
 {{end}}
 
 {{if $file.TypeDefs}}{{range $tdef := $file.TypeDefs}}
@@ -544,17 +465,6 @@ func (c impl{{$iface.Name}}ClientStub) {{$method.Name}}({{argNameTypes "i" "ctx 
 {{clientStubImpl $data $iface $method}}
 }
 {{end}}
-
-func (c impl{{$iface.Name}}ClientStub) Signature(ctx *__context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
-	var call __ipc.Call
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
 
 {{range $method := $iface.Methods}}{{if isStreamingMethod $method}}
 {{$clientStream := uniqueName $iface $method "ClientStream"}}
@@ -694,8 +604,6 @@ type {{$iface.Name}}ServerStub interface {
 	{{$iface.Name}}ServerStubMethods
 	// Describe the {{$iface.Name}} interfaces.
 	Describe__() []__ipc.InterfaceDesc
-	// Signature will be replaced with Describe__.
-	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
 // {{$iface.Name}}Server returns a server stub for {{$iface.Name}}.
@@ -760,79 +668,6 @@ var desc{{$iface.Name}} = __ipc.InterfaceDesc{ {{if $iface.Name}}
 			Tags: []__vdlutil.Any{ {{range $tag := $method.Tags}}{{typedConst $data $tag}} ,{{end}} },{{end}}
 		},{{end}}
 	},{{end}}
-}
-
-func (s impl{{$iface.Name}}ServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
-	// TODO(toddw): Replace with new Describe__ implementation.
-	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
-{{range $mname, $method := signatureMethods $iface}}{{printf "\tresult.Methods[%q] = __ipc.MethodSignature{" $mname}}
-		InArgs:[]__ipc.MethodArgument{
-{{range $arg := $method.InArgs}}{{printf "\t\t\t{Name:%q, Type:%d},\n" ($arg.Name) ($arg.Type)}}{{end}}{{printf "\t\t},"}}
-		OutArgs:[]__ipc.MethodArgument{
-{{range $arg := $method.OutArgs}}{{printf "\t\t\t{Name:%q, Type:%d},\n" ($arg.Name) ($arg.Type)}}{{end}}{{printf "\t\t},"}}
-{{if $method.InStream}}{{printf "\t\t"}}InStream: {{$method.InStream}},{{end}}
-{{if $method.OutStream}}{{printf "\t\t"}}OutStream: {{$method.OutStream}},{{end}}
-	}
-{{end}}
-result.TypeDefs = {{signatureTypeDefs $iface}}
-{{if $iface.Embeds}}	var ss __ipc.ServiceSignature
-var firstAdded int
-{{range $embeds := $iface.Embeds}}	ss, _ = s.{{$embeds.Name}}ServerStub.Signature(ctx)
-	firstAdded = len(result.TypeDefs)
-	for k, v := range ss.Methods {
-		for i, _ := range v.InArgs {
-			if v.InArgs[i].Type >= __wiretype.TypeIDFirst {
-				v.InArgs[i].Type += __wiretype.TypeID(firstAdded)
-			}
-		}
-		for i, _ := range v.OutArgs {
-			if v.OutArgs[i].Type >= __wiretype.TypeIDFirst {
-				v.OutArgs[i].Type += __wiretype.TypeID(firstAdded)
-			}
-		}
-		if v.InStream >= __wiretype.TypeIDFirst {
-			v.InStream += __wiretype.TypeID(firstAdded)
-		}
-		if v.OutStream >= __wiretype.TypeIDFirst {
-			v.OutStream += __wiretype.TypeID(firstAdded)
-		}
-		result.Methods[k] = v
-	}
-	//TODO(bprosnitz) combine type definitions from embeded interfaces in a way that doesn't cause duplication.
-	for _, d := range ss.TypeDefs {
-		switch wt := d.(type) {
-		case __wiretype.SliceType:
-			if wt.Elem >= __wiretype.TypeIDFirst {
-				wt.Elem += __wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case __wiretype.ArrayType:
-			if wt.Elem >= __wiretype.TypeIDFirst {
-				wt.Elem += __wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case __wiretype.MapType:
-			if wt.Key >= __wiretype.TypeIDFirst {
-				wt.Key += __wiretype.TypeID(firstAdded)
-			}
-			if wt.Elem >= __wiretype.TypeIDFirst {
-				wt.Elem += __wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case __wiretype.StructType:
-			for i, fld := range wt.Fields {
-				if fld.Type >= __wiretype.TypeIDFirst {
-					wt.Fields[i].Type += __wiretype.TypeID(firstAdded)
-				}
-			}
-			d = wt
-		// NOTE: other types are missing, but we are upgrading anyways.
-		}
-		result.TypeDefs = append(result.TypeDefs, d)
-	}
-{{end}}{{end}}
-
-	return result, nil
 }
 
 {{range $method := $iface.Methods}}

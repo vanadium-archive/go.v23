@@ -13,13 +13,7 @@ import (
 	__vdl "v.io/core/veyron2/vdl"
 	__vdlutil "v.io/core/veyron2/vdl/vdlutil"
 	__verror "v.io/core/veyron2/verror"
-	__wiretype "v.io/core/veyron2/wiretype"
 )
-
-// TODO(toddw): Remove this line once the new signature support is done.
-// It corrects a bug where __wiretype is unused in VDL pacakges where only
-// bootstrap types are used on interfaces.
-const _ = __wiretype.TypeIDInvalid
 
 type NamedBool bool
 
@@ -480,17 +474,6 @@ func (c implServiceAClientStub) MethodA4(ctx *__context.T, i0 int32, opts ...__i
 	return
 }
 
-func (c implServiceAClientStub) Signature(ctx *__context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
-	var call __ipc.Call
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
 // ServiceAMethodA3ClientStream is the client stream for ServiceA.MethodA3.
 type ServiceAMethodA3ClientStream interface {
 	// RecvStream returns the receiver side of the ServiceA.MethodA3 client stream.
@@ -691,8 +674,6 @@ type ServiceAServerStub interface {
 	ServiceAServerStubMethods
 	// Describe the ServiceA interfaces.
 	Describe__() []__ipc.InterfaceDesc
-	// Signature will be replaced with Describe__.
-	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
 // ServiceAServer returns a server stub for ServiceA.
@@ -787,86 +768,6 @@ var descServiceA = __ipc.InterfaceDesc{
 			},
 		},
 	},
-}
-
-func (s implServiceAServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
-	// TODO(toddw): Replace with new Describe__ implementation.
-	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
-	result.Methods["MethodA1"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 65},
-		},
-	}
-	result.Methods["MethodA2"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{
-			{Name: "a", Type: 36},
-			{Name: "b", Type: 3},
-		},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "s", Type: 3},
-			{Name: "err", Type: 65},
-		},
-	}
-	result.Methods["MethodA3"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{
-			{Name: "a", Type: 36},
-		},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "s", Type: 3},
-			{Name: "err", Type: 65},
-		},
-
-		OutStream: 82,
-	}
-	result.Methods["MethodA4"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{
-			{Name: "a", Type: 36},
-		},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 65},
-		},
-		InStream:  36,
-		OutStream: 3,
-	}
-
-	result.TypeDefs = []__vdlutil.Any{
-		__wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x1, Name: "anydata", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x7, Name: "TypeID", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x2, Name: "v.io/core/veyron2/vdl/testdata/base.NamedBool", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x32, Name: "v.io/core/veyron2/vdl/testdata/base.NamedByte", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x33, Name: "v.io/core/veyron2/vdl/testdata/base.NamedUint16", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x34, Name: "v.io/core/veyron2/vdl/testdata/base.NamedUint32", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x35, Name: "v.io/core/veyron2/vdl/testdata/base.NamedUint64", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x23, Name: "v.io/core/veyron2/vdl/testdata/base.NamedInt16", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x24, Name: "v.io/core/veyron2/vdl/testdata/base.NamedInt32", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x25, Name: "v.io/core/veyron2/vdl/testdata/base.NamedInt64", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x19, Name: "v.io/core/veyron2/vdl/testdata/base.NamedFloat32", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x1a, Name: "v.io/core/veyron2/vdl/testdata/base.NamedFloat64", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x38, Name: "v.io/core/veyron2/vdl/testdata/base.NamedComplex64", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x39, Name: "v.io/core/veyron2/vdl/testdata/base.NamedComplex128", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x3, Name: "v.io/core/veyron2/vdl/testdata/base.NamedString", Tags: []string(nil)}, __wiretype.StructType{
-			[]__wiretype.FieldType{
-				__wiretype.FieldType{Type: 0x2, Name: "A0"},
-				__wiretype.FieldType{Type: 0x42, Name: "A1"},
-				__wiretype.FieldType{Type: 0x33, Name: "A2"},
-				__wiretype.FieldType{Type: 0x34, Name: "A3"},
-				__wiretype.FieldType{Type: 0x35, Name: "A4"},
-				__wiretype.FieldType{Type: 0x23, Name: "A5"},
-				__wiretype.FieldType{Type: 0x24, Name: "A6"},
-				__wiretype.FieldType{Type: 0x25, Name: "A7"},
-				__wiretype.FieldType{Type: 0x19, Name: "A8"},
-				__wiretype.FieldType{Type: 0x1a, Name: "A9"},
-				__wiretype.FieldType{Type: 0x38, Name: "A10"},
-				__wiretype.FieldType{Type: 0x39, Name: "A11"},
-				__wiretype.FieldType{Type: 0x3, Name: "A12"},
-				__wiretype.FieldType{Type: 0x41, Name: "A13"},
-				__wiretype.FieldType{Type: 0x43, Name: "A14"},
-				__wiretype.FieldType{Type: 0x44, Name: "A15"},
-				__wiretype.FieldType{Type: 0x45, Name: "B0"},
-				__wiretype.FieldType{Type: 0x46, Name: "B1"},
-				__wiretype.FieldType{Type: 0x47, Name: "B2"},
-				__wiretype.FieldType{Type: 0x48, Name: "B3"},
-				__wiretype.FieldType{Type: 0x49, Name: "B4"},
-				__wiretype.FieldType{Type: 0x4a, Name: "B5"},
-				__wiretype.FieldType{Type: 0x4b, Name: "B6"},
-				__wiretype.FieldType{Type: 0x4c, Name: "B7"},
-				__wiretype.FieldType{Type: 0x4d, Name: "B8"},
-				__wiretype.FieldType{Type: 0x4e, Name: "B9"},
-				__wiretype.FieldType{Type: 0x4f, Name: "B10"},
-				__wiretype.FieldType{Type: 0x50, Name: "B11"},
-				__wiretype.FieldType{Type: 0x51, Name: "B12"},
-			},
-			"v.io/core/veyron2/vdl/testdata/base.Scalars", []string(nil)},
-	}
-
-	return result, nil
 }
 
 // ServiceAMethodA3ServerStream is the server stream for ServiceA.MethodA3.
@@ -1045,17 +946,6 @@ func (c implServiceBClientStub) MethodB1(ctx *__context.T, i0 Scalars, i1 Compos
 	return
 }
 
-func (c implServiceBClientStub) Signature(ctx *__context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
-	var call __ipc.Call
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
 // ServiceBServerMethods is the interface a server writer
 // implements for ServiceB.
 type ServiceBServerMethods interface {
@@ -1077,8 +967,6 @@ type ServiceBServerStub interface {
 	ServiceBServerStubMethods
 	// Describe the ServiceB interfaces.
 	Describe__() []__ipc.InterfaceDesc
-	// Signature will be replaced with Describe__.
-	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
 // ServiceBServer returns a server stub for ServiceB.
@@ -1140,161 +1028,4 @@ var descServiceB = __ipc.InterfaceDesc{
 			},
 		},
 	},
-}
-
-func (s implServiceBServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
-	// TODO(toddw): Replace with new Describe__ implementation.
-	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
-	result.Methods["MethodB1"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{
-			{Name: "a", Type: 82},
-			{Name: "b", Type: 91},
-		},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "c", Type: 97},
-			{Name: "err", Type: 66},
-		},
-	}
-
-	result.TypeDefs = []__vdlutil.Any{
-		__wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x1, Name: "anydata", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x7, Name: "TypeID", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x2, Name: "v.io/core/veyron2/vdl/testdata/base.NamedBool", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x32, Name: "v.io/core/veyron2/vdl/testdata/base.NamedByte", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x33, Name: "v.io/core/veyron2/vdl/testdata/base.NamedUint16", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x34, Name: "v.io/core/veyron2/vdl/testdata/base.NamedUint32", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x35, Name: "v.io/core/veyron2/vdl/testdata/base.NamedUint64", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x23, Name: "v.io/core/veyron2/vdl/testdata/base.NamedInt16", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x24, Name: "v.io/core/veyron2/vdl/testdata/base.NamedInt32", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x25, Name: "v.io/core/veyron2/vdl/testdata/base.NamedInt64", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x19, Name: "v.io/core/veyron2/vdl/testdata/base.NamedFloat32", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x1a, Name: "v.io/core/veyron2/vdl/testdata/base.NamedFloat64", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x38, Name: "v.io/core/veyron2/vdl/testdata/base.NamedComplex64", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x39, Name: "v.io/core/veyron2/vdl/testdata/base.NamedComplex128", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x3, Name: "v.io/core/veyron2/vdl/testdata/base.NamedString", Tags: []string(nil)}, __wiretype.StructType{
-			[]__wiretype.FieldType{
-				__wiretype.FieldType{Type: 0x2, Name: "A0"},
-				__wiretype.FieldType{Type: 0x41, Name: "A1"},
-				__wiretype.FieldType{Type: 0x33, Name: "A2"},
-				__wiretype.FieldType{Type: 0x34, Name: "A3"},
-				__wiretype.FieldType{Type: 0x35, Name: "A4"},
-				__wiretype.FieldType{Type: 0x23, Name: "A5"},
-				__wiretype.FieldType{Type: 0x24, Name: "A6"},
-				__wiretype.FieldType{Type: 0x25, Name: "A7"},
-				__wiretype.FieldType{Type: 0x19, Name: "A8"},
-				__wiretype.FieldType{Type: 0x1a, Name: "A9"},
-				__wiretype.FieldType{Type: 0x38, Name: "A10"},
-				__wiretype.FieldType{Type: 0x39, Name: "A11"},
-				__wiretype.FieldType{Type: 0x3, Name: "A12"},
-				__wiretype.FieldType{Type: 0x42, Name: "A13"},
-				__wiretype.FieldType{Type: 0x43, Name: "A14"},
-				__wiretype.FieldType{Type: 0x44, Name: "A15"},
-				__wiretype.FieldType{Type: 0x45, Name: "B0"},
-				__wiretype.FieldType{Type: 0x46, Name: "B1"},
-				__wiretype.FieldType{Type: 0x47, Name: "B2"},
-				__wiretype.FieldType{Type: 0x48, Name: "B3"},
-				__wiretype.FieldType{Type: 0x49, Name: "B4"},
-				__wiretype.FieldType{Type: 0x4a, Name: "B5"},
-				__wiretype.FieldType{Type: 0x4b, Name: "B6"},
-				__wiretype.FieldType{Type: 0x4c, Name: "B7"},
-				__wiretype.FieldType{Type: 0x4d, Name: "B8"},
-				__wiretype.FieldType{Type: 0x4e, Name: "B9"},
-				__wiretype.FieldType{Type: 0x4f, Name: "B10"},
-				__wiretype.FieldType{Type: 0x50, Name: "B11"},
-				__wiretype.FieldType{Type: 0x51, Name: "B12"},
-			},
-			"v.io/core/veyron2/vdl/testdata/base.Scalars", []string(nil)},
-		__wiretype.ArrayType{Elem: 0x52, Len: 0x2, Name: "", Tags: []string(nil)}, __wiretype.SliceType{Elem: 0x52, Name: "", Tags: []string(nil)}, __wiretype.StructType{
-			[]__wiretype.FieldType{
-				__wiretype.FieldType{Type: 0x2, Name: "A0"},
-				__wiretype.FieldType{Type: 0x41, Name: "A1"},
-				__wiretype.FieldType{Type: 0x33, Name: "A2"},
-				__wiretype.FieldType{Type: 0x34, Name: "A3"},
-				__wiretype.FieldType{Type: 0x35, Name: "A4"},
-				__wiretype.FieldType{Type: 0x23, Name: "A5"},
-				__wiretype.FieldType{Type: 0x24, Name: "A6"},
-				__wiretype.FieldType{Type: 0x25, Name: "A7"},
-				__wiretype.FieldType{Type: 0x19, Name: "A8"},
-				__wiretype.FieldType{Type: 0x1a, Name: "A9"},
-				__wiretype.FieldType{Type: 0x38, Name: "A10"},
-				__wiretype.FieldType{Type: 0x39, Name: "A11"},
-				__wiretype.FieldType{Type: 0x3, Name: "A12"},
-				__wiretype.FieldType{Type: 0x45, Name: "B0"},
-				__wiretype.FieldType{Type: 0x46, Name: "B1"},
-				__wiretype.FieldType{Type: 0x47, Name: "B2"},
-				__wiretype.FieldType{Type: 0x48, Name: "B3"},
-				__wiretype.FieldType{Type: 0x49, Name: "B4"},
-				__wiretype.FieldType{Type: 0x4a, Name: "B5"},
-				__wiretype.FieldType{Type: 0x4b, Name: "B6"},
-				__wiretype.FieldType{Type: 0x4c, Name: "B7"},
-				__wiretype.FieldType{Type: 0x4d, Name: "B8"},
-				__wiretype.FieldType{Type: 0x4e, Name: "B9"},
-				__wiretype.FieldType{Type: 0x4f, Name: "B10"},
-				__wiretype.FieldType{Type: 0x50, Name: "B11"},
-				__wiretype.FieldType{Type: 0x51, Name: "B12"},
-			},
-			"v.io/core/veyron2/vdl/testdata/base.KeyScalars", []string(nil)},
-		__wiretype.MapType{Key: 0x55, Elem: 0x2, Name: "", Tags: []string(nil)}, __wiretype.MapType{Key: 0x3, Elem: 0x52, Name: "", Tags: []string(nil)}, __wiretype.MapType{Key: 0x3, Elem: 0x39, Name: "", Tags: []string(nil)}, __wiretype.SliceType{Elem: 0x58, Name: "", Tags: []string(nil)}, __wiretype.MapType{Key: 0x55, Elem: 0x59, Name: "", Tags: []string(nil)}, __wiretype.StructType{
-			[]__wiretype.FieldType{
-				__wiretype.FieldType{Type: 0x52, Name: "A0"},
-				__wiretype.FieldType{Type: 0x53, Name: "A1"},
-				__wiretype.FieldType{Type: 0x54, Name: "A2"},
-				__wiretype.FieldType{Type: 0x56, Name: "A3"},
-				__wiretype.FieldType{Type: 0x57, Name: "A4"},
-				__wiretype.FieldType{Type: 0x5a, Name: "A5"},
-			},
-			"v.io/core/veyron2/vdl/testdata/base.Composites", []string(nil)},
-		__wiretype.ArrayType{Elem: 0x5b, Len: 0x2, Name: "", Tags: []string(nil)}, __wiretype.SliceType{Elem: 0x5b, Name: "", Tags: []string(nil)}, __wiretype.MapType{Key: 0x3, Elem: 0x5b, Name: "", Tags: []string(nil)}, __wiretype.SliceType{Elem: 0x5e, Name: "", Tags: []string(nil)}, __wiretype.MapType{Key: 0x55, Elem: 0x5f, Name: "", Tags: []string(nil)}, __wiretype.StructType{
-			[]__wiretype.FieldType{
-				__wiretype.FieldType{Type: 0x5b, Name: "A0"},
-				__wiretype.FieldType{Type: 0x5c, Name: "A1"},
-				__wiretype.FieldType{Type: 0x5d, Name: "A2"},
-				__wiretype.FieldType{Type: 0x5e, Name: "A3"},
-				__wiretype.FieldType{Type: 0x60, Name: "A4"},
-			},
-			"v.io/core/veyron2/vdl/testdata/base.CompComp", []string(nil)},
-	}
-	var ss __ipc.ServiceSignature
-	var firstAdded int
-	ss, _ = s.ServiceAServerStub.Signature(ctx)
-	firstAdded = len(result.TypeDefs)
-	for k, v := range ss.Methods {
-		for i, _ := range v.InArgs {
-			if v.InArgs[i].Type >= __wiretype.TypeIDFirst {
-				v.InArgs[i].Type += __wiretype.TypeID(firstAdded)
-			}
-		}
-		for i, _ := range v.OutArgs {
-			if v.OutArgs[i].Type >= __wiretype.TypeIDFirst {
-				v.OutArgs[i].Type += __wiretype.TypeID(firstAdded)
-			}
-		}
-		if v.InStream >= __wiretype.TypeIDFirst {
-			v.InStream += __wiretype.TypeID(firstAdded)
-		}
-		if v.OutStream >= __wiretype.TypeIDFirst {
-			v.OutStream += __wiretype.TypeID(firstAdded)
-		}
-		result.Methods[k] = v
-	}
-	//TODO(bprosnitz) combine type definitions from embeded interfaces in a way that doesn't cause duplication.
-	for _, d := range ss.TypeDefs {
-		switch wt := d.(type) {
-		case __wiretype.SliceType:
-			if wt.Elem >= __wiretype.TypeIDFirst {
-				wt.Elem += __wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case __wiretype.ArrayType:
-			if wt.Elem >= __wiretype.TypeIDFirst {
-				wt.Elem += __wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case __wiretype.MapType:
-			if wt.Key >= __wiretype.TypeIDFirst {
-				wt.Key += __wiretype.TypeID(firstAdded)
-			}
-			if wt.Elem >= __wiretype.TypeIDFirst {
-				wt.Elem += __wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case __wiretype.StructType:
-			for i, fld := range wt.Fields {
-				if fld.Type >= __wiretype.TypeIDFirst {
-					wt.Fields[i].Type += __wiretype.TypeID(firstAdded)
-				}
-			}
-			d = wt
-			// NOTE: other types are missing, but we are upgrading anyways.
-		}
-		result.TypeDefs = append(result.TypeDefs, d)
-	}
-
-	return result, nil
 }

@@ -17,13 +17,7 @@ import (
 	__ipc "v.io/core/veyron2/ipc"
 	__vdl "v.io/core/veyron2/vdl"
 	__vdlutil "v.io/core/veyron2/vdl/vdlutil"
-	__wiretype "v.io/core/veyron2/wiretype"
 )
-
-// TODO(toddw): Remove this line once the new signature support is done.
-// It corrects a bug where __wiretype is unused in VDL pacakges where only
-// bootstrap types are used on interfaces.
-const _ = __wiretype.TypeIDInvalid
 
 // BlessingPatternChunk is a substring of a BlessingPattern. As with
 // BlessingPatterns, BlessingPatternChunks may contain references to
@@ -247,17 +241,6 @@ func (c implGroupClientStub) Rest(ctx *__context.T, i0 RestRequest, i1 string, o
 	return
 }
 
-func (c implGroupClientStub) Signature(ctx *__context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
-	var call __ipc.Call
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
 // GroupServerMethods is the interface a server writer
 // implements for Group.
 //
@@ -342,8 +325,6 @@ type GroupServerStub interface {
 	GroupServerStubMethods
 	// Describe the Group interfaces.
 	Describe__() []__ipc.InterfaceDesc
-	// Signature will be replaced with Describe__.
-	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
 // GroupServer returns a server stub for Group.
@@ -490,144 +471,4 @@ var descGroup = __ipc.InterfaceDesc{
 			Tags: []__vdlutil.Any{access.Tag("Resolve")},
 		},
 	},
-}
-
-func (s implGroupServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
-	// TODO(toddw): Replace with new Describe__ implementation.
-	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
-	result.Methods["Add"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{
-			{Name: "entry", Type: 69},
-			{Name: "etag", Type: 3},
-		},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 71},
-		},
-	}
-	result.Methods["Create"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{
-			{Name: "acl", Type: 68},
-			{Name: "entries", Type: 70},
-		},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 71},
-		},
-	}
-	result.Methods["Delete"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{
-			{Name: "etag", Type: 3},
-		},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 71},
-		},
-	}
-	result.Methods["Get"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{
-			{Name: "req", Type: 72},
-			{Name: "reqEtag", Type: 3},
-		},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "res", Type: 73},
-			{Name: "etag", Type: 3},
-			{Name: "err", Type: 71},
-		},
-	}
-	result.Methods["Remove"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{
-			{Name: "entry", Type: 69},
-			{Name: "etag", Type: 3},
-		},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 71},
-		},
-	}
-	result.Methods["Rest"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{
-			{Name: "req", Type: 74},
-			{Name: "reqEtag", Type: 3},
-		},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "res", Type: 75},
-			{Name: "etag", Type: 3},
-			{Name: "err", Type: 71},
-		},
-	}
-
-	result.TypeDefs = []__vdlutil.Any{
-		__wiretype.NamedPrimitiveType{Type: 0x3, Name: "v.io/core/veyron2/security.BlessingPattern", Tags: []string(nil)}, __wiretype.SliceType{Elem: 0x41, Name: "", Tags: []string(nil)}, __wiretype.StructType{
-			[]__wiretype.FieldType{
-				__wiretype.FieldType{Type: 0x42, Name: "In"},
-				__wiretype.FieldType{Type: 0x3d, Name: "NotIn"},
-			},
-			"v.io/core/veyron2/services/security/access.ACL", []string(nil)},
-		__wiretype.MapType{Key: 0x3, Elem: 0x43, Name: "v.io/core/veyron2/services/security/access.TaggedACLMap", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x3, Name: "v.io/core/veyron2/services/security/groups.BlessingPatternChunk", Tags: []string(nil)}, __wiretype.SliceType{Elem: 0x45, Name: "", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, __wiretype.StructType{
-			nil,
-			"v.io/core/veyron2/services/security/groups.GetRequest", []string(nil)},
-		__wiretype.StructType{
-			nil,
-			"v.io/core/veyron2/services/security/groups.GetResponse", []string(nil)},
-		__wiretype.StructType{
-			nil,
-			"v.io/core/veyron2/services/security/groups.RestRequest", []string(nil)},
-		__wiretype.StructType{
-			nil,
-			"v.io/core/veyron2/services/security/groups.RestResponse", []string(nil)},
-	}
-	var ss __ipc.ServiceSignature
-	var firstAdded int
-	ss, _ = s.ObjectServerStub.Signature(ctx)
-	firstAdded = len(result.TypeDefs)
-	for k, v := range ss.Methods {
-		for i, _ := range v.InArgs {
-			if v.InArgs[i].Type >= __wiretype.TypeIDFirst {
-				v.InArgs[i].Type += __wiretype.TypeID(firstAdded)
-			}
-		}
-		for i, _ := range v.OutArgs {
-			if v.OutArgs[i].Type >= __wiretype.TypeIDFirst {
-				v.OutArgs[i].Type += __wiretype.TypeID(firstAdded)
-			}
-		}
-		if v.InStream >= __wiretype.TypeIDFirst {
-			v.InStream += __wiretype.TypeID(firstAdded)
-		}
-		if v.OutStream >= __wiretype.TypeIDFirst {
-			v.OutStream += __wiretype.TypeID(firstAdded)
-		}
-		result.Methods[k] = v
-	}
-	//TODO(bprosnitz) combine type definitions from embeded interfaces in a way that doesn't cause duplication.
-	for _, d := range ss.TypeDefs {
-		switch wt := d.(type) {
-		case __wiretype.SliceType:
-			if wt.Elem >= __wiretype.TypeIDFirst {
-				wt.Elem += __wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case __wiretype.ArrayType:
-			if wt.Elem >= __wiretype.TypeIDFirst {
-				wt.Elem += __wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case __wiretype.MapType:
-			if wt.Key >= __wiretype.TypeIDFirst {
-				wt.Key += __wiretype.TypeID(firstAdded)
-			}
-			if wt.Elem >= __wiretype.TypeIDFirst {
-				wt.Elem += __wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case __wiretype.StructType:
-			for i, fld := range wt.Fields {
-				if fld.Type >= __wiretype.TypeIDFirst {
-					wt.Fields[i].Type += __wiretype.TypeID(firstAdded)
-				}
-			}
-			d = wt
-			// NOTE: other types are missing, but we are upgrading anyways.
-		}
-		result.TypeDefs = append(result.TypeDefs, d)
-	}
-
-	return result, nil
 }

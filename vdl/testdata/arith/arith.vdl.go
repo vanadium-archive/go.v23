@@ -37,13 +37,7 @@ import (
 	__context "v.io/core/veyron2/context"
 	__ipc "v.io/core/veyron2/ipc"
 	__vdlutil "v.io/core/veyron2/vdl/vdlutil"
-	__wiretype "v.io/core/veyron2/wiretype"
 )
-
-// TODO(toddw): Remove this line once the new signature support is done.
-// It corrects a bug where __wiretype is unused in VDL pacakges where only
-// bootstrap types are used on interfaces.
-const _ = __wiretype.TypeIDInvalid
 
 // Yes shows that bools may be untyped.
 const Yes = true // yes trailing doc
@@ -200,17 +194,6 @@ func (c implArithClientStub) StreamingAdd(ctx *__context.T, opts ...__ipc.CallOp
 func (c implArithClientStub) QuoteAny(ctx *__context.T, i0 __vdlutil.Any, opts ...__ipc.CallOpt) (o0 __vdlutil.Any, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "QuoteAny", []interface{}{i0}, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
-func (c implArithClientStub) Signature(ctx *__context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
-	var call __ipc.Call
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&o0, &err); ierr != nil {
@@ -454,8 +437,6 @@ type ArithServerStub interface {
 	ArithServerStubMethods
 	// Describe the Arith interfaces.
 	Describe__() []__ipc.InterfaceDesc
-	// Signature will be replaced with Describe__.
-	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
 // ArithServer returns a server stub for Arith.
@@ -614,100 +595,6 @@ var descArith = __ipc.InterfaceDesc{
 			},
 		},
 	},
-}
-
-func (s implArithServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
-	// TODO(toddw): Replace with new Describe__ implementation.
-	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
-	result.Methods["Add"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{
-			{Name: "a", Type: 36},
-			{Name: "b", Type: 36},
-		},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 36},
-			{Name: "", Type: 65},
-		},
-	}
-	result.Methods["Count"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{
-			{Name: "start", Type: 36},
-		},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 65},
-		},
-
-		OutStream: 36,
-	}
-	result.Methods["DivMod"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{
-			{Name: "a", Type: 36},
-			{Name: "b", Type: 36},
-		},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "quot", Type: 36},
-			{Name: "rem", Type: 36},
-			{Name: "err", Type: 65},
-		},
-	}
-	result.Methods["GenError"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 65},
-		},
-	}
-	result.Methods["Mul"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{
-			{Name: "nested", Type: 67},
-		},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 36},
-			{Name: "", Type: 65},
-		},
-	}
-	result.Methods["QuoteAny"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{
-			{Name: "a", Type: 68},
-		},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 68},
-			{Name: "", Type: 65},
-		},
-	}
-	result.Methods["StreamingAdd"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "total", Type: 36},
-			{Name: "err", Type: 65},
-		},
-		InStream:  36,
-		OutStream: 36,
-	}
-	result.Methods["Sub"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{
-			{Name: "args", Type: 66},
-		},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 36},
-			{Name: "", Type: 65},
-		},
-	}
-
-	result.TypeDefs = []__vdlutil.Any{
-		__wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, __wiretype.StructType{
-			[]__wiretype.FieldType{
-				__wiretype.FieldType{Type: 0x24, Name: "A"},
-				__wiretype.FieldType{Type: 0x24, Name: "B"},
-			},
-			"v.io/core/veyron2/vdl/testdata/base.Args", []string(nil)},
-		__wiretype.StructType{
-			[]__wiretype.FieldType{
-				__wiretype.FieldType{Type: 0x42, Name: "Args"},
-			},
-			"v.io/core/veyron2/vdl/testdata/base.NestedArgs", []string(nil)},
-		__wiretype.NamedPrimitiveType{Type: 0x1, Name: "anydata", Tags: []string(nil)}}
-
-	return result, nil
 }
 
 // ArithCountServerStream is the server stream for Arith.Count.
@@ -907,17 +794,6 @@ func (c implCalculatorClientStub) Off(ctx *__context.T, opts ...__ipc.CallOpt) (
 	return
 }
 
-func (c implCalculatorClientStub) Signature(ctx *__context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
-	var call __ipc.Call
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
 // CalculatorServerMethods is the interface a server writer
 // implements for Calculator.
 type CalculatorServerMethods interface {
@@ -957,8 +833,6 @@ type CalculatorServerStub interface {
 	CalculatorServerStubMethods
 	// Describe the Calculator interfaces.
 	Describe__() []__ipc.InterfaceDesc
-	// Signature will be replaced with Describe__.
-	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
 // CalculatorServer returns a server stub for Calculator.
@@ -1029,134 +903,4 @@ var descCalculator = __ipc.InterfaceDesc{
 			Tags: []__vdlutil.Any{"offtag"},
 		},
 	},
-}
-
-func (s implCalculatorServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
-	// TODO(toddw): Replace with new Describe__ implementation.
-	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
-	result.Methods["Off"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 65},
-		},
-	}
-	result.Methods["On"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 65},
-		},
-	}
-
-	result.TypeDefs = []__vdlutil.Any{
-		__wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}}
-	var ss __ipc.ServiceSignature
-	var firstAdded int
-	ss, _ = s.ArithServerStub.Signature(ctx)
-	firstAdded = len(result.TypeDefs)
-	for k, v := range ss.Methods {
-		for i, _ := range v.InArgs {
-			if v.InArgs[i].Type >= __wiretype.TypeIDFirst {
-				v.InArgs[i].Type += __wiretype.TypeID(firstAdded)
-			}
-		}
-		for i, _ := range v.OutArgs {
-			if v.OutArgs[i].Type >= __wiretype.TypeIDFirst {
-				v.OutArgs[i].Type += __wiretype.TypeID(firstAdded)
-			}
-		}
-		if v.InStream >= __wiretype.TypeIDFirst {
-			v.InStream += __wiretype.TypeID(firstAdded)
-		}
-		if v.OutStream >= __wiretype.TypeIDFirst {
-			v.OutStream += __wiretype.TypeID(firstAdded)
-		}
-		result.Methods[k] = v
-	}
-	//TODO(bprosnitz) combine type definitions from embeded interfaces in a way that doesn't cause duplication.
-	for _, d := range ss.TypeDefs {
-		switch wt := d.(type) {
-		case __wiretype.SliceType:
-			if wt.Elem >= __wiretype.TypeIDFirst {
-				wt.Elem += __wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case __wiretype.ArrayType:
-			if wt.Elem >= __wiretype.TypeIDFirst {
-				wt.Elem += __wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case __wiretype.MapType:
-			if wt.Key >= __wiretype.TypeIDFirst {
-				wt.Key += __wiretype.TypeID(firstAdded)
-			}
-			if wt.Elem >= __wiretype.TypeIDFirst {
-				wt.Elem += __wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case __wiretype.StructType:
-			for i, fld := range wt.Fields {
-				if fld.Type >= __wiretype.TypeIDFirst {
-					wt.Fields[i].Type += __wiretype.TypeID(firstAdded)
-				}
-			}
-			d = wt
-			// NOTE: other types are missing, but we are upgrading anyways.
-		}
-		result.TypeDefs = append(result.TypeDefs, d)
-	}
-	ss, _ = s.AdvancedMathServerStub.Signature(ctx)
-	firstAdded = len(result.TypeDefs)
-	for k, v := range ss.Methods {
-		for i, _ := range v.InArgs {
-			if v.InArgs[i].Type >= __wiretype.TypeIDFirst {
-				v.InArgs[i].Type += __wiretype.TypeID(firstAdded)
-			}
-		}
-		for i, _ := range v.OutArgs {
-			if v.OutArgs[i].Type >= __wiretype.TypeIDFirst {
-				v.OutArgs[i].Type += __wiretype.TypeID(firstAdded)
-			}
-		}
-		if v.InStream >= __wiretype.TypeIDFirst {
-			v.InStream += __wiretype.TypeID(firstAdded)
-		}
-		if v.OutStream >= __wiretype.TypeIDFirst {
-			v.OutStream += __wiretype.TypeID(firstAdded)
-		}
-		result.Methods[k] = v
-	}
-	//TODO(bprosnitz) combine type definitions from embeded interfaces in a way that doesn't cause duplication.
-	for _, d := range ss.TypeDefs {
-		switch wt := d.(type) {
-		case __wiretype.SliceType:
-			if wt.Elem >= __wiretype.TypeIDFirst {
-				wt.Elem += __wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case __wiretype.ArrayType:
-			if wt.Elem >= __wiretype.TypeIDFirst {
-				wt.Elem += __wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case __wiretype.MapType:
-			if wt.Key >= __wiretype.TypeIDFirst {
-				wt.Key += __wiretype.TypeID(firstAdded)
-			}
-			if wt.Elem >= __wiretype.TypeIDFirst {
-				wt.Elem += __wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case __wiretype.StructType:
-			for i, fld := range wt.Fields {
-				if fld.Type >= __wiretype.TypeIDFirst {
-					wt.Fields[i].Type += __wiretype.TypeID(firstAdded)
-				}
-			}
-			d = wt
-			// NOTE: other types are missing, but we are upgrading anyways.
-		}
-		result.TypeDefs = append(result.TypeDefs, d)
-	}
-
-	return result, nil
 }

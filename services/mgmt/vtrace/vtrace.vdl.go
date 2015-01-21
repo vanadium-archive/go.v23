@@ -18,13 +18,7 @@ import (
 	__context "v.io/core/veyron2/context"
 	__ipc "v.io/core/veyron2/ipc"
 	__vdlutil "v.io/core/veyron2/vdl/vdlutil"
-	__wiretype "v.io/core/veyron2/wiretype"
 )
-
-// TODO(toddw): Remove this line once the new signature support is done.
-// It corrects a bug where __wiretype is unused in VDL pacakges where only
-// bootstrap types are used on interfaces.
-const _ = __wiretype.TypeIDInvalid
 
 // StoreClientMethods is the client interface
 // containing Store methods.
@@ -83,17 +77,6 @@ func (c implStoreClientStub) AllTraces(ctx *__context.T, opts ...__ipc.CallOpt) 
 		return
 	}
 	ocall = &implStoreAllTracesCall{Call: call}
-	return
-}
-
-func (c implStoreClientStub) Signature(ctx *__context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
-	var call __ipc.Call
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
 	return
 }
 
@@ -197,8 +180,6 @@ type StoreServerStub interface {
 	StoreServerStubMethods
 	// Describe the Store interfaces.
 	Describe__() []__ipc.InterfaceDesc
-	// Signature will be replaced with Describe__.
-	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
 // StoreServer returns a server stub for Store.
@@ -268,55 +249,6 @@ var descStore = __ipc.InterfaceDesc{
 			Tags: []__vdlutil.Any{access.Tag("Debug")},
 		},
 	},
-}
-
-func (s implStoreServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
-	// TODO(toddw): Replace with new Describe__ implementation.
-	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
-	result.Methods["AllTraces"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 72},
-		},
-
-		OutStream: 71,
-	}
-	result.Methods["Trace"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 66},
-		},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 71},
-			{Name: "", Type: 72},
-		},
-	}
-
-	result.TypeDefs = []__vdlutil.Any{
-		__wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, __wiretype.ArrayType{Elem: 0x41, Len: 0x10, Name: "v.io/core/veyron2/uniqueid.ID", Tags: []string(nil)}, __wiretype.StructType{
-			[]__wiretype.FieldType{
-				__wiretype.FieldType{Type: 0x25, Name: "When"},
-				__wiretype.FieldType{Type: 0x3, Name: "Message"},
-			},
-			"v.io/core/veyron2/vtrace.Annotation", []string(nil)},
-		__wiretype.SliceType{Elem: 0x43, Name: "", Tags: []string(nil)}, __wiretype.StructType{
-			[]__wiretype.FieldType{
-				__wiretype.FieldType{Type: 0x42, Name: "ID"},
-				__wiretype.FieldType{Type: 0x42, Name: "Parent"},
-				__wiretype.FieldType{Type: 0x3, Name: "Name"},
-				__wiretype.FieldType{Type: 0x25, Name: "Start"},
-				__wiretype.FieldType{Type: 0x25, Name: "End"},
-				__wiretype.FieldType{Type: 0x44, Name: "Annotations"},
-			},
-			"v.io/core/veyron2/vtrace.SpanRecord", []string(nil)},
-		__wiretype.SliceType{Elem: 0x45, Name: "", Tags: []string(nil)}, __wiretype.StructType{
-			[]__wiretype.FieldType{
-				__wiretype.FieldType{Type: 0x42, Name: "ID"},
-				__wiretype.FieldType{Type: 0x46, Name: "Spans"},
-			},
-			"v.io/core/veyron2/vtrace.TraceRecord", []string(nil)},
-		__wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}}
-
-	return result, nil
 }
 
 // StoreAllTracesServerStream is the server stream for Store.AllTraces.

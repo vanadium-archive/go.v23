@@ -14,14 +14,7 @@ import (
 	__context "v.io/core/veyron2/context"
 	__ipc "v.io/core/veyron2/ipc"
 	__vdl "v.io/core/veyron2/vdl"
-	__vdlutil "v.io/core/veyron2/vdl/vdlutil"
-	__wiretype "v.io/core/veyron2/wiretype"
 )
-
-// TODO(toddw): Remove this line once the new signature support is done.
-// It corrects a bug where __wiretype is unused in VDL pacakges where only
-// bootstrap types are used on interfaces.
-const _ = __wiretype.TypeIDInvalid
 
 type Tag string
 
@@ -218,17 +211,6 @@ func (c implMountTableClientStub) ResolveStepX(ctx *__context.T, opts ...__ipc.C
 	return
 }
 
-func (c implMountTableClientStub) Signature(ctx *__context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
-	var call __ipc.Call
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
 // MountTableServerMethods is the interface a server writer
 // implements for MountTable.
 //
@@ -316,8 +298,6 @@ type MountTableServerStub interface {
 	MountTableServerStubMethods
 	// Describe the MountTable interfaces.
 	Describe__() []__ipc.InterfaceDesc
-	// Signature will be replaced with Describe__.
-	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
 // MountTableServer returns a server stub for MountTable.
@@ -433,122 +413,4 @@ var descMountTable = __ipc.InterfaceDesc{
 			},
 		},
 	},
-}
-
-func (s implMountTableServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
-	// TODO(toddw): Replace with new Describe__ implementation.
-	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
-	result.Methods["Delete"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{
-			{Name: "DeleteSubtree", Type: 2},
-		},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 66},
-		},
-	}
-	result.Methods["Mount"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{
-			{Name: "Server", Type: 3},
-			{Name: "TTL", Type: 52},
-			{Name: "Flags", Type: 65},
-		},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 66},
-		},
-	}
-	result.Methods["ResolveStep"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "Entry", Type: 69},
-			{Name: "err", Type: 66},
-		},
-	}
-	result.Methods["ResolveStepX"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "Entry", Type: 69},
-			{Name: "err", Type: 66},
-		},
-	}
-	result.Methods["Unmount"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{
-			{Name: "Server", Type: 3},
-		},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 66},
-		},
-	}
-
-	result.TypeDefs = []__vdlutil.Any{
-		__wiretype.NamedPrimitiveType{Type: 0x34, Name: "v.io/core/veyron2/naming.MountFlag", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, __wiretype.StructType{
-			[]__wiretype.FieldType{
-				__wiretype.FieldType{Type: 0x3, Name: "Server"},
-				__wiretype.FieldType{Type: 0x34, Name: "TTL"},
-			},
-			"v.io/core/veyron2/naming.VDLMountedServer", []string(nil)},
-		__wiretype.SliceType{Elem: 0x43, Name: "", Tags: []string(nil)}, __wiretype.StructType{
-			[]__wiretype.FieldType{
-				__wiretype.FieldType{Type: 0x3, Name: "Name"},
-				__wiretype.FieldType{Type: 0x44, Name: "Servers"},
-				__wiretype.FieldType{Type: 0x2, Name: "MT"},
-			},
-			"v.io/core/veyron2/naming.VDLMountEntry", []string(nil)},
-	}
-	var ss __ipc.ServiceSignature
-	var firstAdded int
-	ss, _ = s.ObjectServerStub.Signature(ctx)
-	firstAdded = len(result.TypeDefs)
-	for k, v := range ss.Methods {
-		for i, _ := range v.InArgs {
-			if v.InArgs[i].Type >= __wiretype.TypeIDFirst {
-				v.InArgs[i].Type += __wiretype.TypeID(firstAdded)
-			}
-		}
-		for i, _ := range v.OutArgs {
-			if v.OutArgs[i].Type >= __wiretype.TypeIDFirst {
-				v.OutArgs[i].Type += __wiretype.TypeID(firstAdded)
-			}
-		}
-		if v.InStream >= __wiretype.TypeIDFirst {
-			v.InStream += __wiretype.TypeID(firstAdded)
-		}
-		if v.OutStream >= __wiretype.TypeIDFirst {
-			v.OutStream += __wiretype.TypeID(firstAdded)
-		}
-		result.Methods[k] = v
-	}
-	//TODO(bprosnitz) combine type definitions from embeded interfaces in a way that doesn't cause duplication.
-	for _, d := range ss.TypeDefs {
-		switch wt := d.(type) {
-		case __wiretype.SliceType:
-			if wt.Elem >= __wiretype.TypeIDFirst {
-				wt.Elem += __wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case __wiretype.ArrayType:
-			if wt.Elem >= __wiretype.TypeIDFirst {
-				wt.Elem += __wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case __wiretype.MapType:
-			if wt.Key >= __wiretype.TypeIDFirst {
-				wt.Key += __wiretype.TypeID(firstAdded)
-			}
-			if wt.Elem >= __wiretype.TypeIDFirst {
-				wt.Elem += __wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case __wiretype.StructType:
-			for i, fld := range wt.Fields {
-				if fld.Type >= __wiretype.TypeIDFirst {
-					wt.Fields[i].Type += __wiretype.TypeID(firstAdded)
-				}
-			}
-			d = wt
-			// NOTE: other types are missing, but we are upgrading anyways.
-		}
-		result.TypeDefs = append(result.TypeDefs, d)
-	}
-
-	return result, nil
 }

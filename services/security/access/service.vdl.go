@@ -103,13 +103,7 @@ import (
 	__vdl "v.io/core/veyron2/vdl"
 	__vdlutil "v.io/core/veyron2/vdl/vdlutil"
 	__verror "v.io/core/veyron2/verror"
-	__wiretype "v.io/core/veyron2/wiretype"
 )
-
-// TODO(toddw): Remove this line once the new signature support is done.
-// It corrects a bug where __wiretype is unused in VDL pacakges where only
-// bootstrap types are used on interfaces.
-const _ = __wiretype.TypeIDInvalid
 
 // ACL represents an Access Control List - a set of blessings that should be
 // granted access.
@@ -309,17 +303,6 @@ func (c implObjectClientStub) GetACL(ctx *__context.T, opts ...__ipc.CallOpt) (o
 	return
 }
 
-func (c implObjectClientStub) Signature(ctx *__context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
-	var call __ipc.Call
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
 // ObjectServerMethods is the interface a server writer
 // implements for Object.
 //
@@ -401,8 +384,6 @@ type ObjectServerStub interface {
 	ObjectServerStubMethods
 	// Describe the Object interfaces.
 	Describe__() []__ipc.InterfaceDesc
-	// Signature will be replaced with Describe__.
-	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
 // ObjectServer returns a server stub for Object.
@@ -475,37 +456,4 @@ var descObject = __ipc.InterfaceDesc{
 			Tags: []__vdlutil.Any{Tag("Admin")},
 		},
 	},
-}
-
-func (s implObjectServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
-	// TODO(toddw): Replace with new Describe__ implementation.
-	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
-	result.Methods["GetACL"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "acl", Type: 68},
-			{Name: "etag", Type: 3},
-			{Name: "err", Type: 69},
-		},
-	}
-	result.Methods["SetACL"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{
-			{Name: "acl", Type: 68},
-			{Name: "etag", Type: 3},
-		},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 69},
-		},
-	}
-
-	result.TypeDefs = []__vdlutil.Any{
-		__wiretype.NamedPrimitiveType{Type: 0x3, Name: "v.io/core/veyron2/security.BlessingPattern", Tags: []string(nil)}, __wiretype.SliceType{Elem: 0x41, Name: "", Tags: []string(nil)}, __wiretype.StructType{
-			[]__wiretype.FieldType{
-				__wiretype.FieldType{Type: 0x42, Name: "In"},
-				__wiretype.FieldType{Type: 0x3d, Name: "NotIn"},
-			},
-			"v.io/core/veyron2/services/security/access.ACL", []string(nil)},
-		__wiretype.MapType{Key: 0x3, Elem: 0x43, Name: "v.io/core/veyron2/services/security/access.TaggedACLMap", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}}
-
-	return result, nil
 }

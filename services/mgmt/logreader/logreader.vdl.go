@@ -15,13 +15,7 @@ import (
 	__context "v.io/core/veyron2/context"
 	__ipc "v.io/core/veyron2/ipc"
 	__vdlutil "v.io/core/veyron2/vdl/vdlutil"
-	__wiretype "v.io/core/veyron2/wiretype"
 )
-
-// TODO(toddw): Remove this line once the new signature support is done.
-// It corrects a bug where __wiretype is unused in VDL pacakges where only
-// bootstrap types are used on interfaces.
-const _ = __wiretype.TypeIDInvalid
 
 // LogFileClientMethods is the client interface
 // containing LogFile methods.
@@ -92,17 +86,6 @@ func (c implLogFileClientStub) ReadLog(ctx *__context.T, i0 int64, i1 int32, i2 
 		return
 	}
 	ocall = &implLogFileReadLogCall{Call: call}
-	return
-}
-
-func (c implLogFileClientStub) Signature(ctx *__context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
-	var call __ipc.Call
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
 	return
 }
 
@@ -228,8 +211,6 @@ type LogFileServerStub interface {
 	LogFileServerStubMethods
 	// Describe the LogFile interfaces.
 	Describe__() []__ipc.InterfaceDesc
-	// Signature will be replaced with Describe__.
-	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
 // LogFileServer returns a server stub for LogFile.
@@ -303,42 +284,6 @@ var descLogFile = __ipc.InterfaceDesc{
 			Tags: []__vdlutil.Any{access.Tag("Debug")},
 		},
 	},
-}
-
-func (s implLogFileServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
-	// TODO(toddw): Replace with new Describe__ implementation.
-	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
-	result.Methods["ReadLog"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{
-			{Name: "StartPos", Type: 37},
-			{Name: "NumEntries", Type: 36},
-			{Name: "Follow", Type: 2},
-		},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 37},
-			{Name: "", Type: 65},
-		},
-
-		OutStream: 66,
-	}
-	result.Methods["Size"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 37},
-			{Name: "", Type: 65},
-		},
-	}
-
-	result.TypeDefs = []__vdlutil.Any{
-		__wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, __wiretype.StructType{
-			[]__wiretype.FieldType{
-				__wiretype.FieldType{Type: 0x25, Name: "Position"},
-				__wiretype.FieldType{Type: 0x3, Name: "Line"},
-			},
-			"v.io/core/veyron2/services/mgmt/logreader/types.LogEntry", []string(nil)},
-	}
-
-	return result, nil
 }
 
 // LogFileReadLogServerStream is the server stream for LogFile.ReadLog.

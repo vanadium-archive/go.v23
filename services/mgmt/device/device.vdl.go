@@ -16,13 +16,7 @@ import (
 	__ipc "v.io/core/veyron2/ipc"
 	__vdl "v.io/core/veyron2/vdl"
 	__vdlutil "v.io/core/veyron2/vdl/vdlutil"
-	__wiretype "v.io/core/veyron2/wiretype"
 )
-
-// TODO(toddw): Remove this line once the new signature support is done.
-// It corrects a bug where __wiretype is unused in VDL pacakges where only
-// bootstrap types are used on interfaces.
-const _ = __wiretype.TypeIDInvalid
 
 // TODO(caprita): Merge with veyron2/config and veyron/lib/exec/config.go.
 type Config map[string]string
@@ -412,17 +406,6 @@ func (c implApplicationClientStub) UpdateTo(ctx *__context.T, i0 string, opts ..
 	return
 }
 
-func (c implApplicationClientStub) Signature(ctx *__context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
-	var call __ipc.Call
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
 // ApplicationServerMethods is the interface a server writer
 // implements for Application.
 //
@@ -626,8 +609,6 @@ type ApplicationServerStub interface {
 	ApplicationServerStubMethods
 	// Describe the Application interfaces.
 	Describe__() []__ipc.InterfaceDesc
-	// Signature will be replaced with Describe__.
-	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
 // ApplicationServer returns a server stub for Application.
@@ -819,146 +800,6 @@ var descApplication = __ipc.InterfaceDesc{
 			Tags: []__vdlutil.Any{access.Tag("Admin")},
 		},
 	},
-}
-
-func (s implApplicationServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
-	// TODO(toddw): Replace with new Describe__ implementation.
-	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
-	result.Methods["Install"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{
-			{Name: "name", Type: 3},
-			{Name: "config", Type: 65},
-		},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 3},
-			{Name: "", Type: 66},
-		},
-	}
-	result.Methods["Refresh"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 66},
-		},
-	}
-	result.Methods["Restart"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 66},
-		},
-	}
-	result.Methods["Resume"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 66},
-		},
-	}
-	result.Methods["Revert"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 66},
-		},
-	}
-	result.Methods["Start"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 61},
-			{Name: "", Type: 66},
-		},
-	}
-	result.Methods["Stop"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{
-			{Name: "deadline", Type: 52},
-		},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 66},
-		},
-	}
-	result.Methods["Suspend"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 66},
-		},
-	}
-	result.Methods["Uninstall"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 66},
-		},
-	}
-	result.Methods["Update"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 66},
-		},
-	}
-	result.Methods["UpdateTo"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{
-			{Name: "name", Type: 3},
-		},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 66},
-		},
-	}
-
-	result.TypeDefs = []__vdlutil.Any{
-		__wiretype.MapType{Key: 0x3, Elem: 0x3, Name: "v.io/core/veyron2/services/mgmt/device.Config", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}}
-	var ss __ipc.ServiceSignature
-	var firstAdded int
-	ss, _ = s.ObjectServerStub.Signature(ctx)
-	firstAdded = len(result.TypeDefs)
-	for k, v := range ss.Methods {
-		for i, _ := range v.InArgs {
-			if v.InArgs[i].Type >= __wiretype.TypeIDFirst {
-				v.InArgs[i].Type += __wiretype.TypeID(firstAdded)
-			}
-		}
-		for i, _ := range v.OutArgs {
-			if v.OutArgs[i].Type >= __wiretype.TypeIDFirst {
-				v.OutArgs[i].Type += __wiretype.TypeID(firstAdded)
-			}
-		}
-		if v.InStream >= __wiretype.TypeIDFirst {
-			v.InStream += __wiretype.TypeID(firstAdded)
-		}
-		if v.OutStream >= __wiretype.TypeIDFirst {
-			v.OutStream += __wiretype.TypeID(firstAdded)
-		}
-		result.Methods[k] = v
-	}
-	//TODO(bprosnitz) combine type definitions from embeded interfaces in a way that doesn't cause duplication.
-	for _, d := range ss.TypeDefs {
-		switch wt := d.(type) {
-		case __wiretype.SliceType:
-			if wt.Elem >= __wiretype.TypeIDFirst {
-				wt.Elem += __wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case __wiretype.ArrayType:
-			if wt.Elem >= __wiretype.TypeIDFirst {
-				wt.Elem += __wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case __wiretype.MapType:
-			if wt.Key >= __wiretype.TypeIDFirst {
-				wt.Key += __wiretype.TypeID(firstAdded)
-			}
-			if wt.Elem >= __wiretype.TypeIDFirst {
-				wt.Elem += __wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case __wiretype.StructType:
-			for i, fld := range wt.Fields {
-				if fld.Type >= __wiretype.TypeIDFirst {
-					wt.Fields[i].Type += __wiretype.TypeID(firstAdded)
-				}
-			}
-			d = wt
-			// NOTE: other types are missing, but we are upgrading anyways.
-		}
-		result.TypeDefs = append(result.TypeDefs, d)
-	}
-
-	return result, nil
 }
 
 // DeviceClientMethods is the client interface
@@ -1178,17 +1019,6 @@ func (c implDeviceClientStub) ListAssociations(ctx *__context.T, opts ...__ipc.C
 	return
 }
 
-func (c implDeviceClientStub) Signature(ctx *__context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
-	var call __ipc.Call
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
 // DeviceServerMethods is the interface a server writer
 // implements for Device.
 //
@@ -1320,8 +1150,6 @@ type DeviceServerStub interface {
 	DeviceServerStubMethods
 	// Describe the Device interfaces.
 	Describe__() []__ipc.InterfaceDesc
-	// Signature will be replaced with Describe__.
-	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
 // DeviceServer returns a server stub for Device.
@@ -1454,132 +1282,4 @@ var descDevice = __ipc.InterfaceDesc{
 			Tags: []__vdlutil.Any{access.Tag("Admin")},
 		},
 	},
-}
-
-func (s implDeviceServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
-	// TODO(toddw): Replace with new Describe__ implementation.
-	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
-	result.Methods["AssociateAccount"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{
-			{Name: "identityNames", Type: 61},
-			{Name: "accountName", Type: 3},
-		},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 65},
-		},
-	}
-	result.Methods["Claim"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 65},
-		},
-	}
-	result.Methods["Describe"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 67},
-			{Name: "", Type: 65},
-		},
-	}
-	result.Methods["IsRunnable"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{
-			{Name: "description", Type: 68},
-		},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 2},
-			{Name: "", Type: 65},
-		},
-	}
-	result.Methods["ListAssociations"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 70},
-			{Name: "", Type: 65},
-		},
-	}
-	result.Methods["Reset"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{
-			{Name: "deadline", Type: 53},
-		},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 65},
-		},
-	}
-
-	result.TypeDefs = []__vdlutil.Any{
-		__wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, __wiretype.MapType{Key: 0x3, Elem: 0x2, Name: "", Tags: []string(nil)}, __wiretype.StructType{
-			[]__wiretype.FieldType{
-				__wiretype.FieldType{Type: 0x42, Name: "Profiles"},
-			},
-			"v.io/core/veyron2/services/mgmt/device.Description", []string(nil)},
-		__wiretype.StructType{
-			[]__wiretype.FieldType{
-				__wiretype.FieldType{Type: 0x3, Name: "Name"},
-				__wiretype.FieldType{Type: 0x42, Name: "Profiles"},
-			},
-			"v.io/core/veyron2/services/mgmt/binary.Description", []string(nil)},
-		__wiretype.StructType{
-			[]__wiretype.FieldType{
-				__wiretype.FieldType{Type: 0x3, Name: "IdentityName"},
-				__wiretype.FieldType{Type: 0x3, Name: "AccountName"},
-			},
-			"v.io/core/veyron2/services/mgmt/device.Association", []string(nil)},
-		__wiretype.SliceType{Elem: 0x45, Name: "", Tags: []string(nil)}}
-	var ss __ipc.ServiceSignature
-	var firstAdded int
-	ss, _ = s.ApplicationServerStub.Signature(ctx)
-	firstAdded = len(result.TypeDefs)
-	for k, v := range ss.Methods {
-		for i, _ := range v.InArgs {
-			if v.InArgs[i].Type >= __wiretype.TypeIDFirst {
-				v.InArgs[i].Type += __wiretype.TypeID(firstAdded)
-			}
-		}
-		for i, _ := range v.OutArgs {
-			if v.OutArgs[i].Type >= __wiretype.TypeIDFirst {
-				v.OutArgs[i].Type += __wiretype.TypeID(firstAdded)
-			}
-		}
-		if v.InStream >= __wiretype.TypeIDFirst {
-			v.InStream += __wiretype.TypeID(firstAdded)
-		}
-		if v.OutStream >= __wiretype.TypeIDFirst {
-			v.OutStream += __wiretype.TypeID(firstAdded)
-		}
-		result.Methods[k] = v
-	}
-	//TODO(bprosnitz) combine type definitions from embeded interfaces in a way that doesn't cause duplication.
-	for _, d := range ss.TypeDefs {
-		switch wt := d.(type) {
-		case __wiretype.SliceType:
-			if wt.Elem >= __wiretype.TypeIDFirst {
-				wt.Elem += __wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case __wiretype.ArrayType:
-			if wt.Elem >= __wiretype.TypeIDFirst {
-				wt.Elem += __wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case __wiretype.MapType:
-			if wt.Key >= __wiretype.TypeIDFirst {
-				wt.Key += __wiretype.TypeID(firstAdded)
-			}
-			if wt.Elem >= __wiretype.TypeIDFirst {
-				wt.Elem += __wiretype.TypeID(firstAdded)
-			}
-			d = wt
-		case __wiretype.StructType:
-			for i, fld := range wt.Fields {
-				if fld.Type >= __wiretype.TypeIDFirst {
-					wt.Fields[i].Type += __wiretype.TypeID(firstAdded)
-				}
-			}
-			d = wt
-			// NOTE: other types are missing, but we are upgrading anyways.
-		}
-		result.TypeDefs = append(result.TypeDefs, d)
-	}
-
-	return result, nil
 }

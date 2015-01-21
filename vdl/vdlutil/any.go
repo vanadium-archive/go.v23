@@ -4,7 +4,6 @@ import (
 	"encoding/gob"
 
 	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/vom"
 )
 
 // TODO(toddw): Move the contents of this file to the vdl package after the vom2
@@ -18,16 +17,10 @@ import (
 // TODO(toddw): Rename to AnyRep
 type Any interface{}
 
-func init() {
-	// TODO(toddw): Remove this call after the vom2 transition.
-	vom.Register((*Any)(nil))
-}
-
 // Register is a convenience that registers the value with gob, vom and vdl.
 // TODO(toddw): Remove after the vom2 transition, and change calls to
 // vdl.Register.
 func Register(value interface{}) {
 	gob.Register(value)
-	vom.Register(value)
 	vdl.Register(value)
 }

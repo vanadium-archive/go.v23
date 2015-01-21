@@ -15,13 +15,7 @@ import (
 	__context "v.io/core/veyron2/context"
 	__ipc "v.io/core/veyron2/ipc"
 	__vdlutil "v.io/core/veyron2/vdl/vdlutil"
-	__wiretype "v.io/core/veyron2/wiretype"
 )
-
-// TODO(toddw): Remove this line once the new signature support is done.
-// It corrects a bug where __wiretype is unused in VDL pacakges where only
-// bootstrap types are used on interfaces.
-const _ = __wiretype.TypeIDInvalid
 
 // PProfClientMethods is the client interface
 // containing PProf methods.
@@ -117,17 +111,6 @@ func (c implPProfClientStub) CPUProfile(ctx *__context.T, i0 int32, opts ...__ip
 func (c implPProfClientStub) Symbol(ctx *__context.T, i0 []uint64, opts ...__ipc.CallOpt) (o0 []string, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Symbol", []interface{}{i0}, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
-func (c implPProfClientStub) Signature(ctx *__context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
-	var call __ipc.Call
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&o0, &err); ierr != nil {
@@ -327,8 +310,6 @@ type PProfServerStub interface {
 	PProfServerStubMethods
 	// Describe the PProf interfaces.
 	Describe__() []__ipc.InterfaceDesc
-	// Signature will be replaced with Describe__.
-	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
 // PProfServer returns a server stub for PProf.
@@ -443,60 +424,6 @@ var descPProf = __ipc.InterfaceDesc{
 			Tags: []__vdlutil.Any{access.Tag("Debug")},
 		},
 	},
-}
-
-func (s implPProfServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
-	// TODO(toddw): Replace with new Describe__ implementation.
-	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
-	result.Methods["CPUProfile"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{
-			{Name: "seconds", Type: 36},
-		},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 65},
-		},
-
-		OutStream: 67,
-	}
-	result.Methods["CmdLine"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 61},
-			{Name: "", Type: 65},
-		},
-	}
-	result.Methods["Profile"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{
-			{Name: "name", Type: 3},
-			{Name: "debug", Type: 36},
-		},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 65},
-		},
-
-		OutStream: 67,
-	}
-	result.Methods["Profiles"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 61},
-			{Name: "", Type: 65},
-		},
-	}
-	result.Methods["Symbol"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{
-			{Name: "programCounters", Type: 68},
-		},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 61},
-			{Name: "", Type: 65},
-		},
-	}
-
-	result.TypeDefs = []__vdlutil.Any{
-		__wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, __wiretype.SliceType{Elem: 0x42, Name: "", Tags: []string(nil)}, __wiretype.SliceType{Elem: 0x35, Name: "", Tags: []string(nil)}}
-
-	return result, nil
 }
 
 // PProfProfileServerStream is the server stream for PProf.Profile.

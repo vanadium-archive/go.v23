@@ -16,14 +16,7 @@ import (
 	__context "v.io/core/veyron2/context"
 	__ipc "v.io/core/veyron2/ipc"
 	__vdl "v.io/core/veyron2/vdl"
-	__vdlutil "v.io/core/veyron2/vdl/vdlutil"
-	__wiretype "v.io/core/veyron2/wiretype"
 )
-
-// TODO(toddw): Remove this line once the new signature support is done.
-// It corrects a bug where __wiretype is unused in VDL pacakges where only
-// bootstrap types are used on interfaces.
-const _ = __wiretype.TypeIDInvalid
 
 // Architecture specifies the hardware architecture of a host.
 type Architecture string
@@ -145,17 +138,6 @@ func (c implBuilderClientStub) Build(ctx *__context.T, i0 Architecture, i1 Opera
 func (c implBuilderClientStub) Describe(ctx *__context.T, i0 string, opts ...__ipc.CallOpt) (o0 binary.Description, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Describe", []interface{}{i0}, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
-func (c implBuilderClientStub) Signature(ctx *__context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
-	var call __ipc.Call
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&o0, &err); ierr != nil {
@@ -300,8 +282,6 @@ type BuilderServerStub interface {
 	BuilderServerStubMethods
 	// Describe the Builder interfaces.
 	Describe__() []__ipc.InterfaceDesc
-	// Signature will be replaced with Describe__.
-	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
 // BuilderServer returns a server stub for Builder.
@@ -375,49 +355,6 @@ var descBuilder = __ipc.InterfaceDesc{
 			},
 		},
 	},
-}
-
-func (s implBuilderServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
-	// TODO(toddw): Replace with new Describe__ implementation.
-	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
-	result.Methods["Build"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{
-			{Name: "Arch", Type: 65},
-			{Name: "OS", Type: 66},
-		},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 68},
-			{Name: "", Type: 69},
-		},
-		InStream:  70,
-		OutStream: 70,
-	}
-	result.Methods["Describe"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{
-			{Name: "name", Type: 3},
-		},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 72},
-			{Name: "", Type: 69},
-		},
-	}
-
-	result.TypeDefs = []__vdlutil.Any{
-		__wiretype.NamedPrimitiveType{Type: 0x3, Name: "v.io/core/veyron2/services/mgmt/build.Architecture", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x3, Name: "v.io/core/veyron2/services/mgmt/build.OperatingSystem", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, __wiretype.SliceType{Elem: 0x43, Name: "", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, __wiretype.StructType{
-			[]__wiretype.FieldType{
-				__wiretype.FieldType{Type: 0x3, Name: "Name"},
-				__wiretype.FieldType{Type: 0x44, Name: "Contents"},
-			},
-			"v.io/core/veyron2/services/mgmt/build.File", []string(nil)},
-		__wiretype.MapType{Key: 0x3, Elem: 0x2, Name: "", Tags: []string(nil)}, __wiretype.StructType{
-			[]__wiretype.FieldType{
-				__wiretype.FieldType{Type: 0x3, Name: "Name"},
-				__wiretype.FieldType{Type: 0x47, Name: "Profiles"},
-			},
-			"v.io/core/veyron2/services/mgmt/binary.Description", []string(nil)},
-	}
-
-	return result, nil
 }
 
 // BuilderBuildServerStream is the server stream for Builder.Build.

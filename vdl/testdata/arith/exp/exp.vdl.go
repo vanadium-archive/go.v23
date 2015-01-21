@@ -10,14 +10,7 @@ import (
 	__veyron2 "v.io/core/veyron2"
 	__context "v.io/core/veyron2/context"
 	__ipc "v.io/core/veyron2/ipc"
-	__vdlutil "v.io/core/veyron2/vdl/vdlutil"
-	__wiretype "v.io/core/veyron2/wiretype"
 )
-
-// TODO(toddw): Remove this line once the new signature support is done.
-// It corrects a bug where __wiretype is unused in VDL pacakges where only
-// bootstrap types are used on interfaces.
-const _ = __wiretype.TypeIDInvalid
 
 // ExpClientMethods is the client interface
 // containing Exp methods.
@@ -65,17 +58,6 @@ func (c implExpClientStub) Exp(ctx *__context.T, i0 float64, opts ...__ipc.CallO
 	return
 }
 
-func (c implExpClientStub) Signature(ctx *__context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
-	var call __ipc.Call
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
 // ExpServerMethods is the interface a server writer
 // implements for Exp.
 type ExpServerMethods interface {
@@ -93,8 +75,6 @@ type ExpServerStub interface {
 	ExpServerStubMethods
 	// Describe the Exp interfaces.
 	Describe__() []__ipc.InterfaceDesc
-	// Signature will be replaced with Describe__.
-	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
 // ExpServer returns a server stub for Exp.
@@ -150,23 +130,4 @@ var descExp = __ipc.InterfaceDesc{
 			},
 		},
 	},
-}
-
-func (s implExpServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
-	// TODO(toddw): Replace with new Describe__ implementation.
-	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
-	result.Methods["Exp"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{
-			{Name: "x", Type: 26},
-		},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 26},
-			{Name: "", Type: 65},
-		},
-	}
-
-	result.TypeDefs = []__vdlutil.Any{
-		__wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}}
-
-	return result, nil
 }

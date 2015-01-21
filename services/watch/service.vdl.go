@@ -114,13 +114,7 @@ import (
 	__context "v.io/core/veyron2/context"
 	__ipc "v.io/core/veyron2/ipc"
 	__vdlutil "v.io/core/veyron2/vdl/vdlutil"
-	__wiretype "v.io/core/veyron2/wiretype"
 )
-
-// TODO(toddw): Remove this line once the new signature support is done.
-// It corrects a bug where __wiretype is unused in VDL pacakges where only
-// bootstrap types are used on interfaces.
-const _ = __wiretype.TypeIDInvalid
 
 // GlobWatcherClientMethods is the client interface
 // containing GlobWatcher methods.
@@ -167,17 +161,6 @@ func (c implGlobWatcherClientStub) WatchGlob(ctx *__context.T, i0 types.GlobRequ
 		return
 	}
 	ocall = &implGlobWatcherWatchGlobCall{Call: call}
-	return
-}
-
-func (c implGlobWatcherClientStub) Signature(ctx *__context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
-	var call __ipc.Call
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
 	return
 }
 
@@ -276,8 +259,6 @@ type GlobWatcherServerStub interface {
 	GlobWatcherServerStubMethods
 	// Describe the GlobWatcher interfaces.
 	Describe__() []__ipc.InterfaceDesc
-	// Signature will be replaced with Describe__.
-	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
 // GlobWatcherServer returns a server stub for GlobWatcher.
@@ -335,41 +316,6 @@ var descGlobWatcher = __ipc.InterfaceDesc{
 			Tags: []__vdlutil.Any{access.Tag("Resolve")},
 		},
 	},
-}
-
-func (s implGlobWatcherServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
-	// TODO(toddw): Replace with new Describe__ implementation.
-	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
-	result.Methods["WatchGlob"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{
-			{Name: "req", Type: 67},
-		},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 68},
-		},
-
-		OutStream: 70,
-	}
-
-	result.TypeDefs = []__vdlutil.Any{
-		__wiretype.NamedPrimitiveType{Type: 0x32, Name: "byte", Tags: []string(nil)}, __wiretype.SliceType{Elem: 0x41, Name: "v.io/core/veyron2/services/watch/types.ResumeMarker", Tags: []string(nil)}, __wiretype.StructType{
-			[]__wiretype.FieldType{
-				__wiretype.FieldType{Type: 0x3, Name: "Pattern"},
-				__wiretype.FieldType{Type: 0x42, Name: "ResumeMarker"},
-			},
-			"v.io/core/veyron2/services/watch/types.GlobRequest", []string(nil)},
-		__wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}, __wiretype.NamedPrimitiveType{Type: 0x1, Name: "anydata", Tags: []string(nil)}, __wiretype.StructType{
-			[]__wiretype.FieldType{
-				__wiretype.FieldType{Type: 0x3, Name: "Name"},
-				__wiretype.FieldType{Type: 0x24, Name: "State"},
-				__wiretype.FieldType{Type: 0x45, Name: "Value"},
-				__wiretype.FieldType{Type: 0x42, Name: "ResumeMarker"},
-				__wiretype.FieldType{Type: 0x2, Name: "Continued"},
-			},
-			"v.io/core/veyron2/services/watch/types.Change", []string(nil)},
-	}
-
-	return result, nil
 }
 
 // GlobWatcherWatchGlobServerStream is the server stream for GlobWatcher.WatchGlob.

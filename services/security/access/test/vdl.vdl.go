@@ -11,13 +11,7 @@ import (
 	__ipc "v.io/core/veyron2/ipc"
 	__vdl "v.io/core/veyron2/vdl"
 	__vdlutil "v.io/core/veyron2/vdl/vdlutil"
-	__wiretype "v.io/core/veyron2/wiretype"
 )
-
-// TODO(toddw): Remove this line once the new signature support is done.
-// It corrects a bug where __wiretype is unused in VDL pacakges where only
-// bootstrap types are used on interfaces.
-const _ = __wiretype.TypeIDInvalid
 
 // Any package can define tags (of arbitrary types) to be attached to methods.
 // This type can be used to index into a TaggedACLMap.
@@ -136,17 +130,6 @@ func (c implMyObjectClientStub) AllTags(ctx *__context.T, opts ...__ipc.CallOpt)
 	return
 }
 
-func (c implMyObjectClientStub) Signature(ctx *__context.T, opts ...__ipc.CallOpt) (o0 __ipc.ServiceSignature, err error) {
-	var call __ipc.Call
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Signature", nil, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
-	return
-}
-
 // MyObjectServerMethods is the interface a server writer
 // implements for MyObject.
 //
@@ -170,8 +153,6 @@ type MyObjectServerStub interface {
 	MyObjectServerStubMethods
 	// Describe the MyObject interfaces.
 	Describe__() []__ipc.InterfaceDesc
-	// Signature will be replaced with Describe__.
-	Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error)
 }
 
 // MyObjectServer returns a server stub for MyObject.
@@ -268,44 +249,4 @@ var descMyObject = __ipc.InterfaceDesc{
 			Tags: []__vdlutil.Any{MyTag("R"), MyTag("W"), MyTag("X")},
 		},
 	},
-}
-
-func (s implMyObjectServerStub) Signature(ctx __ipc.ServerContext) (__ipc.ServiceSignature, error) {
-	// TODO(toddw): Replace with new Describe__ implementation.
-	result := __ipc.ServiceSignature{Methods: make(map[string]__ipc.MethodSignature)}
-	result.Methods["AllTags"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 65},
-		},
-	}
-	result.Methods["Get"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 65},
-		},
-	}
-	result.Methods["NoTags"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 65},
-		},
-	}
-	result.Methods["Put"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 65},
-		},
-	}
-	result.Methods["Resolve"] = __ipc.MethodSignature{
-		InArgs: []__ipc.MethodArgument{},
-		OutArgs: []__ipc.MethodArgument{
-			{Name: "", Type: 65},
-		},
-	}
-
-	result.TypeDefs = []__vdlutil.Any{
-		__wiretype.NamedPrimitiveType{Type: 0x1, Name: "error", Tags: []string(nil)}}
-
-	return result, nil
 }
