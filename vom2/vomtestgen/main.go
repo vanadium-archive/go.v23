@@ -3,6 +3,8 @@
 
 package main
 
+import "os"
+
 func main() {
-	cmdGenerate.Main()
+	os.Exit(cmdGenerate.Main())
 }

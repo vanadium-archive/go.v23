@@ -19,7 +19,7 @@ import (
 )
 
 func main() {
-	cmdVom.Main()
+	os.Exit(cmdVom.Main())
 }
 
 var cmdVom = &cmdline.Command{
