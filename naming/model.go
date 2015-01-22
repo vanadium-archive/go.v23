@@ -10,7 +10,8 @@ import (
 )
 
 const (
-	pkgPath = "v.io/core/veyron2/naming"
+	pkgPath         = "v.io/core/veyron2/naming"
+	UnknownProtocol = ""
 )
 
 var (

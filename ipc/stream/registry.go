@@ -4,6 +4,8 @@ import (
 	"net"
 	"sync"
 	"time"
+
+	"v.io/core/veyron2/naming"
 )
 
 // DialerFunc is the function used to create net.Conn objects given a
@@ -29,6 +31,21 @@ func RegisterProtocol(protocol string, dialer DialerFunc, listener ListenerFunc)
 	_, present := registry[protocol]
 	registry[protocol] = registryEntry{dialer, listener}
 	return present
+}
+
+// RegisterUnknownProtocol registers a Dialer and a Listener for endpoints with
+// no specified protocol.
+//
+// The desired protocol provided in the first argument will be passed to the
+// Dialer and Listener as the actual protocol to use when dialing or listening.
+func RegisterUnknownProtocol(protocol string, dialer DialerFunc, listener ListenerFunc) bool {
+	wrappedDialer := func(_, address string, timeout time.Duration) (net.Conn, error) {
+		return dialer(protocol, address, timeout)
+	}
+	wrappedListener := func(_, address string) (net.Listener, error) {
+		return listener(protocol, address)
+	}
+	return RegisterProtocol(naming.UnknownProtocol, wrappedDialer, wrappedListener)
 }
 
 // RegisteredProtocol returns the Dialer and Listener registered with a
