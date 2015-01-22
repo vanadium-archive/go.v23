@@ -4,6 +4,7 @@ type (
 	NBool       bool
 	NString     string
 	NByteSlice  []byte
+	NByteArray  [4]byte
 	NByte       byte
 	NUint16     uint16
 	NUint32     uint32

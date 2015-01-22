@@ -821,10 +821,39 @@ var Tests = []TestCase{
 		TypeString: "v.io/core/veyron2/vom2/testdata.NByteSlice []byte",
 	},
 	{
-		Name:       "NByteSlice(\"def\")",
-		Value:      NByteSlice("def"),
-		Hex:        "80ff813013012a762e696f2f636f72652f766579726f6e322f766f6d322f74657374646174612e4e42797465536c696365020500ff8203646566",
+		Name:       "NByteSlice(\"\\x00\\x00\\x00\")",
+		Value:      NByteSlice("\x00\x00\x00"),
+		Hex:        "80ff813013012a762e696f2f636f72652f766579726f6e322f766f6d322f74657374646174612e4e42797465536c696365020500ff8203000000",
 		TypeString: "v.io/core/veyron2/vom2/testdata.NByteSlice []byte",
+	},
+	{
+		Name:       "NByteSlice(\"abc\")",
+		Value:      NByteSlice("abc"),
+		Hex:        "80ff813013012a762e696f2f636f72652f766579726f6e322f766f6d322f74657374646174612e4e42797465536c696365020500ff8203616263",
+		TypeString: "v.io/core/veyron2/vom2/testdata.NByteSlice []byte",
+	},
+	{
+		Name:       "NByteArray(\"\\x00\\x00\\x00\\x00\")",
+		Value:      NByteArray{},
+		Hex:        "80ff813212012a762e696f2f636f72652f766579726f6e322f766f6d322f74657374646174612e4e4279746541727261790205030400ff8200000000",
+		TypeString: "v.io/core/veyron2/vom2/testdata.NByteArray [4]byte",
+	},
+	{
+		Name:       "NByteArray(\"\\x00\\x00\\x00\\x00\")",
+		Value:      NByteArray{},
+		Hex:        "80ff813212012a762e696f2f636f72652f766579726f6e322f766f6d322f74657374646174612e4e4279746541727261790205030400ff8200000000",
+		TypeString: "v.io/core/veyron2/vom2/testdata.NByteArray [4]byte",
+	},
+	{
+		Name: "NByteArray(\"abcd\")",
+		Value: NByteArray{
+			97,
+			98,
+			99,
+			100,
+		},
+		Hex:        "80ff813212012a762e696f2f636f72652f766579726f6e322f766f6d322f74657374646174612e4e4279746541727261790205030400ff8261626364",
+		TypeString: "v.io/core/veyron2/vom2/testdata.NByteArray [4]byte",
 	},
 	{
 		Name:       "NByte(0)",

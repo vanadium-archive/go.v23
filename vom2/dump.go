@@ -300,7 +300,11 @@ func (s DumpStatus) String() string {
 }
 
 func (a DumpAtom) String() string {
-	ret := fmt.Sprintf("%-20x %-15v %20v", a.Bytes, a.Kind, a.Data.Interface())
+	dataFmt := "%20v"
+	if _, isString := a.Data.Interface().(string); isString {
+		dataFmt = "%20q"
+	}
+	ret := fmt.Sprintf("%-20x %-15v "+dataFmt, a.Bytes, a.Kind, a.Data.Interface())
 	if a.Debug != "" {
 		ret += fmt.Sprintf(" [%s]", a.Debug)
 	}

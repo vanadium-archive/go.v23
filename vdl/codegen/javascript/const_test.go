@@ -16,16 +16,38 @@ func TestTypedConst(t *testing.T) {
 	structValue.Field(index).AssignLen(1)
 	structValue.Field(index).Index(0).AssignString("AStringVal")
 
-	strVal := typedConst(names, structValue)
-	expected := `new (Registry.lookupOrCreateConstructor(_typeNamedStruct))({
+	tests := []struct {
+		name       string
+		inputValue *vdl.Value
+		expected   string
+	}{
+		{
+			name:       "struct test",
+			inputValue: structValue,
+			expected: `new (Registry.lookupOrCreateConstructor(_typeNamedStruct))({
   'list': [
 ],
   'unnamedTypeField': [
 "AStringVal",
 ],
-})`
-	if strVal != expected {
-		t.Errorf("Expected %q, but got %q", expected, strVal)
+})`,
+		},
+		{
+			name:       "bytes test",
+			inputValue: vdl.BytesValue([]byte{1, 2, 3, 4}),
+			expected: `new (Registry.lookupOrCreateConstructor(.))(new Uint8Array([
+1,
+2,
+3,
+4,
+]))`,
+		},
+	}
+	for _, test := range tests {
+		strVal := typedConst(names, test.inputValue)
+		if strVal != test.expected {
+			t.Errorf("In %q, expected %q, but got %q", test.name, test.expected, strVal)
+		}
 	}
 }
 

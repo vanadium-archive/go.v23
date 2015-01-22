@@ -603,7 +603,7 @@ func evalTypedValue(what string, target *vdl.Type, pexpr parse.ConstExpr, file *
 	// ToValue should always succeed, since the const is now typed.
 	v, err := c.ToValue()
 	if err != nil {
-		env.prefixErrorf(file, pexpr.Pos(), err, "internal error: invalid %v")
+		env.prefixErrorf(file, pexpr.Pos(), err, "internal error: invalid %v", what)
 		return nil
 	}
 	if !target.AssignableFrom(v) {

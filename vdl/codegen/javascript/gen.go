@@ -99,7 +99,7 @@ func formatInt64BigInt(v int64) string {
 	return fmt.Sprintf("new BigInt(%d, %s)", sign, formatByteBuffer(buffer))
 }
 
-// Given a buffer of bytes, create the JS Uint8Array that corresponds to it.
+// Given a buffer of bytes, create the JS Uint8Array that corresponds to it (to be used with BigInt).
 func formatByteBuffer(buffer []byte) string {
 	buf := bytes.TrimLeft(buffer, "\x00") // trim leading zeros
 	str := "new Uint8Array(["
@@ -153,14 +153,12 @@ func untypedConst(names typeNames, v *vdl.Value) string {
 		return fmt.Sprintf("'%s'", v.EnumLabel())
 	case vdl.Array, vdl.List:
 		result := "["
-		isByteArray := v.Type().Elem().Kind() == vdl.Byte
 		for ix := 0; ix < v.Len(); ix++ {
-			var val string
-			val = untypedConst(names, v.Index(ix))
+			val := untypedConst(names, v.Index(ix))
 			result += "\n" + val + ","
 		}
 		result += "\n]"
-		if isByteArray {
+		if v.Type().Elem().Kind() == vdl.Byte {
 			return "new Uint8Array(" + result + ")"
 		}
 		return result

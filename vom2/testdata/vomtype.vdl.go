@@ -31,6 +31,13 @@ func (NByteSlice) __VDLReflect(struct {
 }) {
 }
 
+type NByteArray [4]byte
+
+func (NByteArray) __VDLReflect(struct {
+	Name string "v.io/core/veyron2/vom2/testdata.NByteArray"
+}) {
+}
+
 type NByte byte
 
 func (NByte) __VDLReflect(struct {
@@ -307,6 +314,7 @@ func init() {
 	__vdl.Register(NBool(false))
 	__vdl.Register(NString(""))
 	__vdl.Register(NByteSlice(""))
+	__vdl.Register(NByteArray{})
 	__vdl.Register(NByte(0))
 	__vdl.Register(NUint16(0))
 	__vdl.Register(NUint32(0))
