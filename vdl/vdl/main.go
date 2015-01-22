@@ -3,8 +3,12 @@
 
 package main
 
-import "v.io/core/veyron2/vdl/vdl/cmds"
+import (
+	"os"
+
+	"v.io/core/veyron2/vdl/vdl/cmds"
+)
 
 func main() {
-	cmds.Root().Main()
+	os.Exit(cmds.Root().Main())
 }
