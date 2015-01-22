@@ -1,0 +1,155 @@
+package vom
+
+/* TODO(toddw): Use this as the WireType, instead of any.
+type WireType union{
+	WireNamed
+	WireEnum
+	WireArray
+	WireList
+	WireSet
+	WireMap
+	WireStruct
+	WireUnion
+}
+*/
+
+// WireNamed represents a type definition for named primitives.
+type WireNamed struct {
+	Name string
+	Base TypeID
+}
+
+// WireEnum represents an type definition for enum types.
+type WireEnum struct {
+	Name   string
+	Labels []string
+}
+
+// WireArray represents an type definition for array types.
+type WireArray struct {
+	Name string
+	Elem TypeID
+	Len  uint64
+}
+
+// WireList represents a type definition for list types.
+type WireList struct {
+	Name string
+	Elem TypeID
+}
+
+// WireSet represents a type definition for set types.
+type WireSet struct {
+	Name string
+	Key  TypeID
+}
+
+// WireMap represents a type definition for map types.
+type WireMap struct {
+	Name string
+	Key  TypeID
+	Elem TypeID
+}
+
+// WireField represents a field in a struct or union type.
+type WireField struct {
+	Name string
+	Type TypeID
+}
+
+// WireStruct represents a type definition for struct types.
+type WireStruct struct {
+	Name   string
+	Fields []WireField
+}
+
+// WireUnion represents a type definition for union types.
+type WireUnion struct {
+	Name   string
+	Fields []WireField
+}
+
+// WireOptional represents an type definition for optional types.
+type WireOptional struct {
+	Name string
+	Elem TypeID
+}
+
+// TypeID uniquely identifies a type definition within a vom stream.
+type TypeID uint64
+
+// Built-in TypeIDs
+const (
+	// Primitives
+	WireAnyID        = TypeID(1)
+	WireTypeID       = TypeID(2)
+	WireBoolID       = TypeID(3)
+	WireStringID     = TypeID(4)
+	WireByteID       = TypeID(5)
+	WireUint16ID     = TypeID(6)
+	WireUint32ID     = TypeID(7)
+	WireUint64ID     = TypeID(8)
+	WireInt16ID      = TypeID(9)
+	WireInt32ID      = TypeID(10)
+	WireInt64ID      = TypeID(11)
+	WireFloat32ID    = TypeID(12)
+	WireFloat64ID    = TypeID(13)
+	WireComplex64ID  = TypeID(14)
+	WireComplex128ID = TypeID(15)
+	// Composites only used in type definitions
+	WireNamedID     = TypeID(16)
+	WireEnumID      = TypeID(17)
+	WireArrayID     = TypeID(18)
+	WireListID      = TypeID(19)
+	WireSetID       = TypeID(20)
+	WireMapID       = TypeID(21)
+	WireStructID    = TypeID(22)
+	WireFieldID     = TypeID(23)
+	WireFieldListID = TypeID(24)
+	WireUnionID     = TypeID(25)
+	WireOptionalID  = TypeID(29)
+	// Other commonly used composites
+	WireByteListID   = TypeID(26)
+	WireStringListID = TypeID(27)
+	WireTypeListID   = TypeID(28)
+	// The first user-defined TypeID is 65.  Note that -64 is encoded as 1 byte,
+	// while -65 is encoded as 2 bytes.
+	WireTypeFirstUserID = TypeID(65)
+)
+
+/*
+// TODO(toddw): Here are the TypeIDs for the new scheme.
+const (
+	// Basic primitives, small values encoded into first byte of message.
+	WireIDString = TypeID(1)
+	WireIDUint   = TypeID(2)
+	WireIDInt    = TypeID(3)
+	WireIDBool   = TypeID(4)
+	// Full primitives.
+	WireIDByte       = TypeID(5)
+	WireIDUint16     = TypeID(6)
+	WireIDUint32     = TypeID(7)
+	WireIDUint64     = TypeID(8)
+	WireIDInt16      = TypeID(9)
+	WireIDInt32      = TypeID(10)
+	WireIDInt64      = TypeID(11)
+	WireIDFloat32    = TypeID(12)
+	WireIDFloat64    = TypeID(13)
+	WireIDComplex64  = TypeID(14)
+	WireIDComplex128 = TypeID(15)
+	WireIDAny        = TypeID(16)
+	WireIDTypeObject = TypeID(17)
+	// Composites, used in type definitions and TypeObject.
+	WireIDNameType = TypeID(18)
+	WireIDLabels   = TypeID(19) // enum
+	WireIDKeyElem  = TypeID(20) // array, list, set, map, optional
+	WireIDFields   = TypeID(21) // struct, union
+	// Other commonly used composites
+	WireIDNameTypeList = TypeID(22)
+	WireIDStringList   = TypeID(23)
+	WireIDByteList     = TypeID(24)
+
+	// The first user-defined TypeID is 64.
+	WireIDFirstUserType = TypeID(64)
+)
+*/

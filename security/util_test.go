@@ -12,7 +12,7 @@ import (
 	"testing"
 
 	"v.io/core/veyron2/vdl/vdlutil"
-	"v.io/core/veyron2/vom2"
+	"v.io/core/veyron2/vom"
 )
 
 type markedRoot struct {
@@ -101,12 +101,12 @@ func addToRoots(t *testing.T, p Principal, b Blessings) {
 
 func checkBlessings(b Blessings, c Context, want ...string) error {
 	// Validate the integrity of the bits.
-	buf, err := vom2.Encode(MarshalBlessings(b))
+	buf, err := vom.Encode(MarshalBlessings(b))
 	if err != nil {
 		return err
 	}
 	var wire WireBlessings
-	if err := vom2.Decode(buf, &wire); err != nil {
+	if err := vom.Decode(buf, &wire); err != nil {
 		return err
 	}
 	decoded, err := NewBlessings(wire)

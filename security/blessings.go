@@ -9,7 +9,7 @@ import (
 	"sync"
 
 	"v.io/core/veyron2/vlog"
-	"v.io/core/veyron2/vom2"
+	"v.io/core/veyron2/vom"
 )
 
 var errEmptyChain = errors.New("empty certificate chain found")
@@ -35,7 +35,7 @@ func (b *blessingsImpl) ThirdPartyCaveats() []ThirdPartyCaveat {
 		for _, cert := range chain {
 			for _, cav := range cert.Caveats {
 				var tpc ThirdPartyCaveat
-				if err := vom2.Decode(cav.ValidatorVOM, &tpc); err != nil || tpc == nil {
+				if err := vom.Decode(cav.ValidatorVOM, &tpc); err != nil || tpc == nil {
 					continue
 				}
 				ret = append(ret, tpc)
@@ -170,7 +170,7 @@ func decodeCaveat(cav Caveat) (CaveatValidator, error) {
 	if caveatDecoder == nil {
 		// Use the default (i.e., VOM) decoder.
 		var validator CaveatValidator
-		err := vom2.Decode(cav.ValidatorVOM, &validator)
+		err := vom.Decode(cav.ValidatorVOM, &validator)
 		return validator, err
 	}
 	return caveatDecoder(cav)

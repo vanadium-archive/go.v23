@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"v.io/core/veyron2/vom2"
+	"v.io/core/veyron2/vom"
 )
 
 func newSigner() Signer {
@@ -32,7 +32,7 @@ func newSigner() Signer {
 //   Marshaled caveat                           :   61 bytes (security.methodCaveat([m]))
 func TestByteSize(t *testing.T) {
 	blessingsize := func(b Blessings) int {
-		buf, err := vom2.Encode(MarshalBlessings(b))
+		buf, err := vom.Encode(MarshalBlessings(b))
 		if err != nil {
 			t.Fatal(err)
 		}

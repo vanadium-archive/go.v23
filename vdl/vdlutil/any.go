@@ -6,7 +6,7 @@ import (
 	"v.io/core/veyron2/vdl"
 )
 
-// TODO(toddw): Move the contents of this file to the vdl package after the vom2
+// TODO(toddw): Move the contents of this file to the vdl package after the vom
 // transition.  We can't just move it now since vom has too many bad
 // dependencies that we don't want to pull in to the vdl package.
 
@@ -18,7 +18,7 @@ import (
 type Any interface{}
 
 // Register is a convenience that registers the value with gob, vom and vdl.
-// TODO(toddw): Remove after the vom2 transition, and change calls to
+// TODO(toddw): Remove after the vom transition, and change calls to
 // vdl.Register.
 func Register(value interface{}) {
 	gob.Register(value)

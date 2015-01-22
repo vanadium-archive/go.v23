@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"v.io/core/veyron2/vom2"
+	"v.io/core/veyron2/vom"
 )
 
 func TestCaveats(t *testing.T) {
@@ -49,7 +49,7 @@ func TestCaveats(t *testing.T) {
 	self.AddToRoots(ctx.LocalBlessings())
 	for idx, test := range tests {
 		var validator CaveatValidator
-		if err := vom2.Decode(test.cav.ValidatorVOM, &validator); err != nil {
+		if err := vom.Decode(test.cav.ValidatorVOM, &validator); err != nil {
 			t.Errorf("Failed to decode validator(%v) for test #%d", err, idx)
 			continue
 		}
