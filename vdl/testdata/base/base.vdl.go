@@ -6,6 +6,7 @@ package base
 
 import (
 	// The non-user imports are prefixed with "__" to prevent collisions.
+	__fmt "fmt"
 	__io "io"
 	__veyron2 "v.io/core/veyron2"
 	__context "v.io/core/veyron2/context"
@@ -105,7 +106,59 @@ func (NamedString) __VDLReflect(struct {
 }) {
 }
 
-//NamedEnum       enum{A;B;C}
+type NamedEnum int
+
+const (
+	NamedEnumA NamedEnum = iota
+	NamedEnumB
+	NamedEnumC
+)
+
+// NamedEnumAll holds all labels for NamedEnum.
+var NamedEnumAll = []NamedEnum{NamedEnumA, NamedEnumB, NamedEnumC}
+
+// NamedEnumFromString creates a NamedEnum from a string label.
+func NamedEnumFromString(label string) (x NamedEnum, err error) {
+	err = x.Set(label)
+	return
+}
+
+// Set assigns label to x.
+func (x *NamedEnum) Set(label string) error {
+	switch label {
+	case "A", "a":
+		*x = NamedEnumA
+		return nil
+	case "B", "b":
+		*x = NamedEnumB
+		return nil
+	case "C", "c":
+		*x = NamedEnumC
+		return nil
+	}
+	*x = -1
+	return __fmt.Errorf("unknown label %q in base.NamedEnum", label)
+}
+
+// String returns the string label of x.
+func (x NamedEnum) String() string {
+	switch x {
+	case NamedEnumA:
+		return "A"
+	case NamedEnumB:
+		return "B"
+	case NamedEnumC:
+		return "C"
+	}
+	return ""
+}
+
+func (NamedEnum) __VDLReflect(struct {
+	Name string "v.io/core/veyron2/vdl/testdata/base.NamedEnum"
+	Enum struct{ A, B, C string }
+}) {
+}
+
 type NamedArray [2]bool
 
 func (NamedArray) __VDLReflect(struct {
@@ -145,6 +198,51 @@ func (NamedStruct) __VDLReflect(struct {
 }) {
 }
 
+type (
+	// NamedUnion represents any single field of the NamedUnion union type.
+	NamedUnion interface {
+		// Index returns the field index.
+		Index() int
+		// Interface returns the field value as an interface.
+		Interface() interface{}
+		// Name returns the field name.
+		Name() string
+		// __VDLReflect describes the NamedUnion union type.
+		__VDLReflect(__NamedUnionReflect)
+	}
+	// NamedUnionA represents field A of the NamedUnion union type.
+	NamedUnionA struct{ Value bool }
+	// NamedUnionB represents field B of the NamedUnion union type.
+	NamedUnionB struct{ Value string }
+	// NamedUnionC represents field C of the NamedUnion union type.
+	NamedUnionC struct{ Value int32 }
+	// __NamedUnionReflect describes the NamedUnion union type.
+	__NamedUnionReflect struct {
+		Name  string "v.io/core/veyron2/vdl/testdata/base.NamedUnion"
+		Type  NamedUnion
+		Union struct {
+			A NamedUnionA
+			B NamedUnionB
+			C NamedUnionC
+		}
+	}
+)
+
+func (x NamedUnionA) Index() int                       { return 0 }
+func (x NamedUnionA) Interface() interface{}           { return x.Value }
+func (x NamedUnionA) Name() string                     { return "A" }
+func (x NamedUnionA) __VDLReflect(__NamedUnionReflect) {}
+
+func (x NamedUnionB) Index() int                       { return 1 }
+func (x NamedUnionB) Interface() interface{}           { return x.Value }
+func (x NamedUnionB) Name() string                     { return "B" }
+func (x NamedUnionB) __VDLReflect(__NamedUnionReflect) {}
+
+func (x NamedUnionC) Index() int                       { return 2 }
+func (x NamedUnionC) Interface() interface{}           { return x.Value }
+func (x NamedUnionC) Name() string                     { return "C" }
+func (x NamedUnionC) __VDLReflect(__NamedUnionReflect) {}
+
 type Scalars struct {
 	A0  bool
 	A1  byte
@@ -175,6 +273,8 @@ type Scalars struct {
 	B10 NamedComplex64
 	B11 NamedComplex128
 	B12 NamedString
+	B13 NamedEnum
+	B14 NamedUnion
 }
 
 func (Scalars) __VDLReflect(struct {
@@ -281,25 +381,31 @@ func init() {
 	__vdl.Register(NamedComplex64(0))
 	__vdl.Register(NamedComplex128(0))
 	__vdl.Register(NamedString(""))
+	__vdl.Register(NamedEnumA)
 	__vdl.Register(NamedArray{})
 	__vdl.Register(NamedList(nil))
 	__vdl.Register(NamedSet(nil))
 	__vdl.Register(NamedMap(nil))
 	__vdl.Register(NamedStruct{})
+	__vdl.Register(NamedUnion(NamedUnionA{false}))
 	__vdl.Register(Scalars{
 		A15: __vdl.AnyType,
+		B14: NamedUnionA{false},
 	})
 	__vdl.Register(KeyScalars{})
 	__vdl.Register(Composites{
 		A0: Scalars{
 			A15: __vdl.AnyType,
+			B14: NamedUnionA{false},
 		},
 		A1: [2]Scalars{
 			{
 				A15: __vdl.AnyType,
+				B14: NamedUnionA{false},
 			},
 			{
 				A15: __vdl.AnyType,
+				B14: NamedUnionA{false},
 			},
 		},
 	})
@@ -307,13 +413,16 @@ func init() {
 		A0: Composites{
 			A0: Scalars{
 				A15: __vdl.AnyType,
+				B14: NamedUnionA{false},
 			},
 			A1: [2]Scalars{
 				{
 					A15: __vdl.AnyType,
+					B14: NamedUnionA{false},
 				},
 				{
 					A15: __vdl.AnyType,
+					B14: NamedUnionA{false},
 				},
 			},
 		},
@@ -321,26 +430,32 @@ func init() {
 			{
 				A0: Scalars{
 					A15: __vdl.AnyType,
+					B14: NamedUnionA{false},
 				},
 				A1: [2]Scalars{
 					{
 						A15: __vdl.AnyType,
+						B14: NamedUnionA{false},
 					},
 					{
 						A15: __vdl.AnyType,
+						B14: NamedUnionA{false},
 					},
 				},
 			},
 			{
 				A0: Scalars{
 					A15: __vdl.AnyType,
+					B14: NamedUnionA{false},
 				},
 				A1: [2]Scalars{
 					{
 						A15: __vdl.AnyType,
+						B14: NamedUnionA{false},
 					},
 					{
 						A15: __vdl.AnyType,
+						B14: NamedUnionA{false},
 					},
 				},
 			},
@@ -379,6 +494,39 @@ const Ccomplex128 = complex128(10 + 11i)
 
 const Cstring = "foo"
 
+const Cenum = NamedEnumA
+
+var Cunion = NamedUnion(NamedUnionA{true})
+
+var Carray = [3]int32{
+	1,
+	2,
+	3,
+}
+
+var Clist = []int32{
+	1,
+	2,
+	3,
+}
+
+// TODO(toddw): test multiple items after ordering is fixed.
+//Cset   = set[int32]{1, 2, 3}
+var Cset = map[int32]struct{}{
+	1: struct{}{},
+}
+
+// TODO(toddw): test multiple items after ordering is fixed.
+//cmap   = map[int32]string{1: "A", 2: "B", 3: "C"}
+var Cmap = map[int32]string{
+	1: "A",
+}
+
+var Cargs = Args{
+	A: 1,
+	B: 2,
+}
+
 const True = true
 
 const Foo = "foo"
@@ -390,6 +538,43 @@ const Six = uint64(6)
 const SixSquared = uint64(36)
 
 const FiveSquared = int32(25)
+
+var CTObool = __vdl.TypeOf(false)
+
+var CTOstring = __vdl.TypeOf("")
+
+var CTObytes = __vdl.TypeOf([]byte(""))
+
+var CTObyte = __vdl.TypeOf(byte(0))
+
+var CTOuint16 = __vdl.TypeOf(uint16(0))
+
+var CTOint16 = __vdl.TypeOf(int16(0))
+
+var CTOfloat32 = __vdl.TypeOf(float32(0))
+
+var CTOcomplex64 = __vdl.TypeOf(complex64(0))
+
+var CTOenum = __vdl.TypeOf(NamedEnumA)
+
+var CTOArray = __vdl.TypeOf([3]string{})
+
+var CTOList = __vdl.TypeOf([]string(nil))
+
+var CTOSet = __vdl.TypeOf(map[string]struct{}(nil))
+
+var CTOMap = __vdl.TypeOf(map[string]int64(nil))
+
+var CTOStruct = __vdl.TypeOf(Scalars{
+	A15: __vdl.AnyType,
+	B14: NamedUnionA{false},
+})
+
+var CTOUnion = __vdl.TypeOf(NamedUnion(NamedUnionA{false}))
+
+var CTOTypeObject = __vdl.TypeObjectType
+
+var CTOAny = __vdl.AnyType
 
 const ErrIDFoo = __verror.ID("v.io/core/veyron2/vdl/testdata/base.ErrIDFoo")
 

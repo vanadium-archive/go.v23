@@ -22,13 +22,13 @@ type (
 	NamedComplex64  complex64
 	NamedComplex128 complex128
 	NamedString     string
-	//NamedEnum       enum{A;B;C}
+	NamedEnum       enum{A;B;C}
 	NamedArray      [2]bool
 	NamedList       []uint32
 	NamedSet        set[string]
 	NamedMap        map[string]float32
 	NamedStruct     struct{A bool;B string;C int32}
-	//NamedUnion      union{A bool;B string;C int32}
+	NamedUnion      union{A bool;B string;C int32}
 )
 
 type Scalars struct {
@@ -62,8 +62,8 @@ type Scalars struct {
 	B10 NamedComplex64
 	B11 NamedComplex128
 	B12 NamedString
-	//B13 NamedEnum
-	//B14 NamedUnion
+	B13 NamedEnum
+	B14 NamedUnion
 }
 
 // These are all scalars that may be used as map or set keys.
@@ -81,7 +81,6 @@ type KeyScalars struct {
 	A10 complex64
 	A11 complex128
 	A12 string
-	//A13 error
 
 	B0  NamedBool
 	B1  NamedByte
@@ -142,6 +141,17 @@ const (
 	Ccomplex64 = complex64(8+9i)
 	Ccomplex128 = complex128(10+11i)
 	Cstring = "foo"
+	Cenum  = NamedEnum.A
+	Cunion = NamedUnion{A: true}
+	Carray = [3]int32{1, 2, 3}
+	Clist  = []int32{1, 2, 3}
+	// TODO(toddw): test multiple items after ordering is fixed.
+	//Cset   = set[int32]{1, 2, 3}
+	Cset   = set[int32]{1}
+	// TODO(toddw): test multiple items after ordering is fixed.
+	//cmap   = map[int32]string{1: "A", 2: "B", 3: "C"}
+	Cmap   = map[int32]string{1: "A"}
+	Cargs  = Args{1, 2}
 
 	True = true
 	Foo = "foo"
@@ -149,6 +159,24 @@ const (
 	SixSquared = Six*Six
 	FiveSquared = Five*Five
 	Six = uint64(6)
+
+	CTObool       = typeobject(bool)
+	CTOstring     = typeobject(string)
+	CTObytes      = typeobject([]byte)
+	CTObyte       = typeobject(byte)
+	CTOuint16     = typeobject(uint16)
+	CTOint16      = typeobject(int16)
+	CTOfloat32    = typeobject(float32)
+	CTOcomplex64  = typeobject(complex64)
+	CTOenum       = typeobject(NamedEnum)
+	CTOArray      = typeobject([3]string)
+	CTOList       = typeobject([]string)
+	CTOSet        = typeobject(set[string])
+	CTOMap        = typeobject(map[string]int64)
+	CTOStruct     = typeobject(Scalars)
+	CTOUnion      = typeobject(NamedUnion)
+	CTOTypeObject = typeobject(typeobject)
+	CTOAny        = typeobject(any)
 )
 
 type ServiceA interface {
