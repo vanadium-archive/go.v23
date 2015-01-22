@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"v.io/core/veyron2/vom2"
+	"v.io/core/veyron2/vom"
 )
 
 func TestBlessSelf(t *testing.T) {
@@ -606,11 +606,11 @@ func TestBlessingsOnWire(t *testing.T) {
 		t.Fatal(err)
 	}
 	var data []byte
-	if data, err = vom2.Encode(MarshalBlessings(b)); err != nil {
+	if data, err = vom.Encode(MarshalBlessings(b)); err != nil {
 		t.Fatal(err)
 	}
 	var wire WireBlessings
-	if err := vom2.Decode(data, &wire); err != nil {
+	if err := vom.Decode(data, &wire); err != nil {
 		t.Fatal(err)
 	}
 	got, err := NewBlessings(wire)
@@ -662,10 +662,10 @@ func TestBlessingsOnWireWithMissingCertificates(t *testing.T) {
 		wire WireBlessings
 		err  error
 	)
-	if data, err = vom2.Encode(MarshalBlessings(leaf)); err != nil {
+	if data, err = vom.Encode(MarshalBlessings(leaf)); err != nil {
 		t.Fatal(err)
 	}
-	if err := vom2.Decode(data, &wire); err != nil {
+	if err := vom.Decode(data, &wire); err != nil {
 		t.Fatal(err)
 	}
 	// Phew! We should have a certificate chain of size 3.
@@ -733,16 +733,16 @@ func TestBlessingsCannotBeVomEncodedOrDecoded(t *testing.T) {
 
 	// Test that directly vom encoding security.Blessings fails.
 	var data []byte
-	if data, err = vom2.Encode(b); err == nil {
+	if data, err = vom.Encode(b); err == nil {
 		t.Fatal("Directly vom encoding security.Blessings unexpectedly succeeded")
 	}
 
 	// Test that directly vom decoding into security.Blessings fails.
-	if data, err = vom2.Encode(MarshalBlessings(b)); err != nil {
+	if data, err = vom.Encode(MarshalBlessings(b)); err != nil {
 		t.Fatal(err)
 	}
 	var decoded Blessings
-	if err := vom2.Decode(data, &decoded); err == nil {
+	if err := vom.Decode(data, &decoded); err == nil {
 		t.Fatal("Direct vom decoding into security.Blessings unexpectedly succeeded")
 	}
 }
