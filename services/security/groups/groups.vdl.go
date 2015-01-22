@@ -16,7 +16,6 @@ import (
 	__context "v.io/core/veyron2/context"
 	__ipc "v.io/core/veyron2/ipc"
 	__vdl "v.io/core/veyron2/vdl"
-	__vdlutil "v.io/core/veyron2/vdl/vdlutil"
 )
 
 // BlessingPatternChunk is a substring of a BlessingPattern. As with
@@ -405,7 +404,7 @@ var descGroup = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Write")},
+			Tags: []__vdl.AnyRep{access.Tag("Write")},
 		},
 		{
 			Name: "Delete",
@@ -416,7 +415,7 @@ var descGroup = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Write")},
+			Tags: []__vdl.AnyRep{access.Tag("Write")},
 		},
 		{
 			Name: "Add",
@@ -428,7 +427,7 @@ var descGroup = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Write")},
+			Tags: []__vdl.AnyRep{access.Tag("Write")},
 		},
 		{
 			Name: "Remove",
@@ -440,7 +439,7 @@ var descGroup = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Write")},
+			Tags: []__vdl.AnyRep{access.Tag("Write")},
 		},
 		{
 			Name: "Get",
@@ -454,7 +453,7 @@ var descGroup = __ipc.InterfaceDesc{
 				{"etag", ``}, // string
 				{"err", ``},  // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Read")},
+			Tags: []__vdl.AnyRep{access.Tag("Read")},
 		},
 		{
 			Name: "Rest",
@@ -468,7 +467,7 @@ var descGroup = __ipc.InterfaceDesc{
 				{"etag", ``}, // string
 				{"err", ``},  // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Resolve")},
+			Tags: []__vdl.AnyRep{access.Tag("Resolve")},
 		},
 	},
 }

@@ -16,9 +16,9 @@ import (
 	"v.io/core/veyron2/context"
 	"v.io/core/veyron2/ipc"
 	"v.io/core/veyron2/rt"
+	"v.io/core/veyron2/vdl"
 	"v.io/core/veyron2/vdl/testdata/arith"
 	"v.io/core/veyron2/vdl/testdata/base"
-	"v.io/core/veyron2/vdl/vdlutil"
 
 	"v.io/core/veyron/profiles"
 )
@@ -82,7 +82,7 @@ func (*serverArith) GenError(_ ipc.ServerContext) error {
 	return generatedError
 }
 
-func (*serverArith) QuoteAny(_ ipc.ServerContext, any vdlutil.Any) (vdlutil.Any, error) {
+func (*serverArith) QuoteAny(_ ipc.ServerContext, any vdl.AnyRep) (vdl.AnyRep, error) {
 	return fmt.Sprintf("'%v'", any), nil
 }
 
@@ -188,7 +188,7 @@ func TestCalculator(t *testing.T) {
 			},
 			Methods: []ipc.MethodDesc{
 				{Name: "On", OutArgs: []ipc.ArgDesc{{}}},
-				{Name: "Off", OutArgs: []ipc.ArgDesc{{}}, Tags: []vdlutil.Any{"offtag"}},
+				{Name: "Off", OutArgs: []ipc.ArgDesc{{}}, Tags: []vdl.AnyRep{"offtag"}},
 			},
 		},
 		{
@@ -218,7 +218,7 @@ func TestCalculator(t *testing.T) {
 				{
 					Name:    "GenError",
 					OutArgs: []ipc.ArgDesc{{}},
-					Tags:    []vdlutil.Any{"foo", "barz", "hello", int32(129), uint64(0x24)},
+					Tags:    []vdl.AnyRep{"foo", "barz", "hello", int32(129), uint64(0x24)},
 				},
 				{
 					Name:    "Count",
@@ -464,7 +464,7 @@ func TestArith(t *testing.T) {
 					{
 						Name:    "GenError",
 						OutArgs: []ipc.ArgDesc{{}},
-						Tags:    []vdlutil.Any{"foo", "barz", "hello", int32(129), uint64(0x24)},
+						Tags:    []vdl.AnyRep{"foo", "barz", "hello", int32(129), uint64(0x24)},
 					},
 					{
 						Name:    "Count",

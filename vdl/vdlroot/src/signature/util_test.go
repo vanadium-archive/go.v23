@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/vdl/vdlutil"
 )
 
 var (
@@ -15,14 +14,14 @@ var (
 		OutArgs:   []Arg{{"b1out0", "b1outdoc0", vdl.StringType}},
 		InStream:  &Arg{"b1ins", "b1insdoc", vdl.Int32Type},
 		OutStream: &Arg{"b1outs", "b1outsdoc", vdl.Int64Type},
-		Tags:      []vdlutil.Any{true, "abc", 123},
+		Tags:      []vdl.AnyRep{true, "abc", 123},
 	}
 	methodB2 = Method{Name: "B", Doc: "docB2",
 		InArgs:    []Arg{{"b2in0", "b2indoc0", vdl.AnyType}},
 		OutArgs:   []Arg{{"b2out0", "b2outdoc0", vdl.ErrorType}},
 		InStream:  &Arg{"b2ins", "b2insdoc", vdl.Uint32Type},
 		OutStream: &Arg{"b2outs", "b2outsdoc", vdl.Uint64Type},
-		Tags:      []vdlutil.Any{"def"},
+		Tags:      []vdl.AnyRep{"def"},
 	}
 	methodC1 = Method{Name: "C", Doc: "docC1"}
 	methodC2 = Method{Name: "C", Doc: "docC2"}

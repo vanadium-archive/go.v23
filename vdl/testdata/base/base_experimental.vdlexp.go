@@ -6,8 +6,8 @@ package base
 import (
 	// The non-user imports are prefixed with "__" to prevent collisions.
 	__fmt "fmt"
+
 	__vdl "v.io/core/veyron2/vdl"
-	__vdlutil "v.io/core/veyron2/vdl/vdlutil"
 )
 
 type NamedEnum int
@@ -191,4 +191,4 @@ var CTVStruct = __vdl.TypeOf(ScalarsExp{
 
 var CTVUnion = __vdl.TypeOf(NamedUnion(NamedUnionA{false}))
 
-var CTVAny = __vdl.TypeOf((*__vdlutil.Any)(nil))
+var CTVAny = __vdl.AnyType

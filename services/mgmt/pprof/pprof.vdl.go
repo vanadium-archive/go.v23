@@ -14,7 +14,7 @@ import (
 	__veyron2 "v.io/core/veyron2"
 	__context "v.io/core/veyron2/context"
 	__ipc "v.io/core/veyron2/ipc"
-	__vdlutil "v.io/core/veyron2/vdl/vdlutil"
+	__vdl "v.io/core/veyron2/vdl"
 )
 
 // PProfClientMethods is the client interface
@@ -377,7 +377,7 @@ var descPProf = __ipc.InterfaceDesc{
 				{"", ``}, // []string
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Debug")},
+			Tags: []__vdl.AnyRep{access.Tag("Debug")},
 		},
 		{
 			Name: "Profiles",
@@ -386,7 +386,7 @@ var descPProf = __ipc.InterfaceDesc{
 				{"", ``}, // []string
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Debug")},
+			Tags: []__vdl.AnyRep{access.Tag("Debug")},
 		},
 		{
 			Name: "Profile",
@@ -398,7 +398,7 @@ var descPProf = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Debug")},
+			Tags: []__vdl.AnyRep{access.Tag("Debug")},
 		},
 		{
 			Name: "CPUProfile",
@@ -409,7 +409,7 @@ var descPProf = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Debug")},
+			Tags: []__vdl.AnyRep{access.Tag("Debug")},
 		},
 		{
 			Name: "Symbol",
@@ -421,7 +421,7 @@ var descPProf = __ipc.InterfaceDesc{
 				{"", ``}, // []string
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Debug")},
+			Tags: []__vdl.AnyRep{access.Tag("Debug")},
 		},
 	},
 }

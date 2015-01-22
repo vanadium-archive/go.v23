@@ -17,7 +17,7 @@ import (
 	__veyron2 "v.io/core/veyron2"
 	__context "v.io/core/veyron2/context"
 	__ipc "v.io/core/veyron2/ipc"
-	__vdlutil "v.io/core/veyron2/vdl/vdlutil"
+	__vdl "v.io/core/veyron2/vdl"
 )
 
 // StoreClientMethods is the client interface
@@ -238,7 +238,7 @@ var descStore = __ipc.InterfaceDesc{
 				{"", ``}, // vtrace.TraceRecord
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Debug")},
+			Tags: []__vdl.AnyRep{access.Tag("Debug")},
 		},
 		{
 			Name: "AllTraces",
@@ -246,7 +246,7 @@ var descStore = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Debug")},
+			Tags: []__vdl.AnyRep{access.Tag("Debug")},
 		},
 	},
 }

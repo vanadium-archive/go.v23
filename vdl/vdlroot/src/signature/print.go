@@ -11,7 +11,6 @@ import (
 	"v.io/core/veyron2/vdl"
 	"v.io/core/veyron2/vdl/codegen/vdlgen"
 	"v.io/core/veyron2/vdl/valconv"
-	"v.io/core/veyron2/vdl/vdlutil"
 	"v.io/lib/textutil"
 )
 
@@ -146,7 +145,7 @@ func streamArgStr(arg *Arg, types *NamedTypes) string {
 	return vdlgen.Type(arg.Type, "", nil)
 }
 
-func tagsStr(tags []vdlutil.Any, types *NamedTypes) string {
+func tagsStr(tags []vdl.AnyRep, types *NamedTypes) string {
 	if len(tags) == 0 {
 		return ""
 	}

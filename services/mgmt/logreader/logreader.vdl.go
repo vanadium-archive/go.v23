@@ -14,7 +14,7 @@ import (
 	__veyron2 "v.io/core/veyron2"
 	__context "v.io/core/veyron2/context"
 	__ipc "v.io/core/veyron2/ipc"
-	__vdlutil "v.io/core/veyron2/vdl/vdlutil"
+	__vdl "v.io/core/veyron2/vdl"
 )
 
 // LogFileClientMethods is the client interface
@@ -267,7 +267,7 @@ var descLogFile = __ipc.InterfaceDesc{
 				{"", ``}, // int64
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Debug")},
+			Tags: []__vdl.AnyRep{access.Tag("Debug")},
 		},
 		{
 			Name: "ReadLog",
@@ -281,7 +281,7 @@ var descLogFile = __ipc.InterfaceDesc{
 				{"", ``}, // int64
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Debug")},
+			Tags: []__vdl.AnyRep{access.Tag("Debug")},
 		},
 	},
 }

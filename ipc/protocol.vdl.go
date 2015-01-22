@@ -10,7 +10,6 @@ import (
 
 	// The non-user imports are prefixed with "__" to prevent collisions.
 	__vdl "v.io/core/veyron2/vdl"
-	__vdlutil "v.io/core/veyron2/vdl/vdlutil"
 )
 
 // Request describes the request header sent by the client to the server.  A
@@ -48,7 +47,7 @@ type Request struct {
 	Blessings BlessingsRequest
 	// Discharges are third party caveat discharges that
 	// are sent after the blessing to fulfill its caveats.
-	Discharges []__vdlutil.Any
+	Discharges []__vdl.AnyRep
 	// TraceRequest maintains the vtrace context between clients and servers
 	// and specifies additional parameters that control how tracing behaves.
 	TraceRequest vtrace.Request

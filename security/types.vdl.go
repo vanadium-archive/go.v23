@@ -6,7 +6,6 @@ package security
 import (
 	// The non-user imports are prefixed with "__" to prevent collisions.
 	__vdl "v.io/core/veyron2/vdl"
-	__vdlutil "v.io/core/veyron2/vdl/vdlutil"
 	__verror "v.io/core/veyron2/verror"
 )
 
@@ -89,7 +88,7 @@ func (ThirdPartyRequirements) __VDLReflect(struct {
 type DischargeImpetus struct {
 	Server    []BlessingPattern // The client intends to use the discharge to communicate with a server that has a blessing matching one of the patterns in this set.
 	Method    string            // Name of the method being invoked by the client.
-	Arguments []__vdlutil.Any   // Arguments to the method invocation.
+	Arguments []__vdl.AnyRep    // Arguments to the method invocation.
 }
 
 func (DischargeImpetus) __VDLReflect(struct {
@@ -137,8 +136,8 @@ type Caveat struct {
 	// ValidatorVOM holds the VOM-encoded bytes of the CaveatValidator
 	// that validates this caveat.
 	ValidatorVOM []byte
-	Id           CaveatUuid    // The identifier of the caveat validation function.
-	Data         __vdlutil.Any // Data to be provided to the caveat validation function.
+	Id           CaveatUuid   // The identifier of the caveat validation function.
+	Data         __vdl.AnyRep // Data to be provided to the caveat validation function.
 }
 
 func (Caveat) __VDLReflect(struct {
@@ -194,7 +193,7 @@ func init() {
 	__vdl.Register(CaveatUuid{})
 	__vdl.Register(Caveat{})
 	__vdl.Register(CaveatDescription{
-		DataType: __vdl.TypeOf((*__vdlutil.Any)(nil)),
+		DataType: __vdl.AnyType,
 	})
 	__vdl.Register(WireBlessings{})
 }

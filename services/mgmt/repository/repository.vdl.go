@@ -18,7 +18,6 @@ import (
 	__context "v.io/core/veyron2/context"
 	__ipc "v.io/core/veyron2/ipc"
 	__vdl "v.io/core/veyron2/vdl"
-	__vdlutil "v.io/core/veyron2/vdl/vdlutil"
 )
 
 // MediaInfo contains the metadata information for a binary.
@@ -279,7 +278,7 @@ var descApplication = __ipc.InterfaceDesc{
 				{"", ``}, // application.Envelope
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Read")},
+			Tags: []__vdl.AnyRep{access.Tag("Read")},
 		},
 	},
 }
@@ -882,7 +881,7 @@ var descBinary = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Write")},
+			Tags: []__vdl.AnyRep{access.Tag("Write")},
 		},
 		{
 			Name: "Delete",
@@ -890,7 +889,7 @@ var descBinary = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Write")},
+			Tags: []__vdl.AnyRep{access.Tag("Write")},
 		},
 		{
 			Name: "Download",
@@ -901,7 +900,7 @@ var descBinary = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Read")},
+			Tags: []__vdl.AnyRep{access.Tag("Read")},
 		},
 		{
 			Name: "DownloadURL",
@@ -911,7 +910,7 @@ var descBinary = __ipc.InterfaceDesc{
 				{"TTL", ``}, // int64
 				{"err", ``}, // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Read")},
+			Tags: []__vdl.AnyRep{access.Tag("Read")},
 		},
 		{
 			Name: "Stat",
@@ -921,7 +920,7 @@ var descBinary = __ipc.InterfaceDesc{
 				{"MediaInfo", ``}, // MediaInfo
 				{"err", ``},       // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Read")},
+			Tags: []__vdl.AnyRep{access.Tag("Read")},
 		},
 		{
 			Name: "Upload",
@@ -932,7 +931,7 @@ var descBinary = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Write")},
+			Tags: []__vdl.AnyRep{access.Tag("Write")},
 		},
 	},
 }
@@ -1196,7 +1195,7 @@ var descProfile = __ipc.InterfaceDesc{
 				{"", ``}, // string
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Read")},
+			Tags: []__vdl.AnyRep{access.Tag("Read")},
 		},
 		{
 			Name: "Description",
@@ -1205,7 +1204,7 @@ var descProfile = __ipc.InterfaceDesc{
 				{"", ``}, // string
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Read")},
+			Tags: []__vdl.AnyRep{access.Tag("Read")},
 		},
 	},
 }

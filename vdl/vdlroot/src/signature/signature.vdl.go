@@ -6,7 +6,6 @@ package signature
 import (
 	// The non-user imports are prefixed with "__" to prevent collisions.
 	__vdl "v.io/core/veyron2/vdl"
-	__vdlutil "v.io/core/veyron2/vdl/vdlutil"
 )
 
 // Interface describes the signature of an interface.
@@ -39,11 +38,11 @@ func (Embed) __VDLReflect(struct {
 type Method struct {
 	Name      string
 	Doc       string
-	InArgs    []Arg           // Input arguments
-	OutArgs   []Arg           // Output arguments
-	InStream  *Arg            // Input stream (optional)
-	OutStream *Arg            // Output stream (optional)
-	Tags      []__vdlutil.Any // Method tags
+	InArgs    []Arg          // Input arguments
+	OutArgs   []Arg          // Output arguments
+	InStream  *Arg           // Input stream (optional)
+	OutStream *Arg           // Output stream (optional)
+	Tags      []__vdl.AnyRep // Method tags
 }
 
 func (Method) __VDLReflect(struct {
@@ -68,6 +67,6 @@ func init() {
 	__vdl.Register(Embed{})
 	__vdl.Register(Method{})
 	__vdl.Register(Arg{
-		Type: __vdl.TypeOf((*__vdlutil.Any)(nil)),
+		Type: __vdl.AnyType,
 	})
 }

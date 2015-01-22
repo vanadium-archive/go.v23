@@ -7,7 +7,6 @@ import (
 	// The non-user imports are prefixed with "__" to prevent collisions.
 	__fmt "fmt"
 	__vdl "v.io/core/veyron2/vdl"
-	__vdlutil "v.io/core/veyron2/vdl/vdlutil"
 )
 
 type NBool bool
@@ -266,7 +265,7 @@ type MStruct struct {
 	C MBool
 	D *NStruct
 	E *__vdl.Type
-	F __vdlutil.Any
+	F __vdl.AnyRep
 }
 
 func (MStruct) __VDLReflect(struct {
@@ -335,7 +334,7 @@ func init() {
 	__vdl.Register(NUnion(NUnionA{false}))
 	__vdl.Register(MBool(false))
 	__vdl.Register(MStruct{
-		E: __vdl.TypeOf((*__vdlutil.Any)(nil)),
+		E: __vdl.AnyType,
 	})
 	__vdl.Register(MList(nil))
 	__vdl.Register(MMap(nil))

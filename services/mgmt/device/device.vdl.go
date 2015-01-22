@@ -15,7 +15,6 @@ import (
 	__context "v.io/core/veyron2/context"
 	__ipc "v.io/core/veyron2/ipc"
 	__vdl "v.io/core/veyron2/vdl"
-	__vdlutil "v.io/core/veyron2/vdl/vdlutil"
 )
 
 // TODO(caprita): Merge with veyron2/config and veyron/lib/exec/config.go.
@@ -710,7 +709,7 @@ var descApplication = __ipc.InterfaceDesc{
 				{"", ``}, // string
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Write")},
+			Tags: []__vdl.AnyRep{access.Tag("Write")},
 		},
 		{
 			Name: "Refresh",
@@ -718,7 +717,7 @@ var descApplication = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Admin")},
+			Tags: []__vdl.AnyRep{access.Tag("Admin")},
 		},
 		{
 			Name: "Restart",
@@ -726,7 +725,7 @@ var descApplication = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Write")},
+			Tags: []__vdl.AnyRep{access.Tag("Write")},
 		},
 		{
 			Name: "Resume",
@@ -734,7 +733,7 @@ var descApplication = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Write")},
+			Tags: []__vdl.AnyRep{access.Tag("Write")},
 		},
 		{
 			Name: "Revert",
@@ -742,7 +741,7 @@ var descApplication = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Admin")},
+			Tags: []__vdl.AnyRep{access.Tag("Admin")},
 		},
 		{
 			Name: "Start",
@@ -751,7 +750,7 @@ var descApplication = __ipc.InterfaceDesc{
 				{"", ``}, // []string
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Read")},
+			Tags: []__vdl.AnyRep{access.Tag("Read")},
 		},
 		{
 			Name: "Stop",
@@ -762,7 +761,7 @@ var descApplication = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Admin")},
+			Tags: []__vdl.AnyRep{access.Tag("Admin")},
 		},
 		{
 			Name: "Suspend",
@@ -770,7 +769,7 @@ var descApplication = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Write")},
+			Tags: []__vdl.AnyRep{access.Tag("Write")},
 		},
 		{
 			Name: "Uninstall",
@@ -778,7 +777,7 @@ var descApplication = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Admin")},
+			Tags: []__vdl.AnyRep{access.Tag("Admin")},
 		},
 		{
 			Name: "Update",
@@ -786,7 +785,7 @@ var descApplication = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Admin")},
+			Tags: []__vdl.AnyRep{access.Tag("Admin")},
 		},
 		{
 			Name: "UpdateTo",
@@ -797,7 +796,7 @@ var descApplication = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Admin")},
+			Tags: []__vdl.AnyRep{access.Tag("Admin")},
 		},
 	},
 }
@@ -1226,7 +1225,7 @@ var descDevice = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Admin")},
+			Tags: []__vdl.AnyRep{access.Tag("Admin")},
 		},
 		{
 			Name: "Describe",
@@ -1235,7 +1234,7 @@ var descDevice = __ipc.InterfaceDesc{
 				{"", ``}, // Description
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Admin")},
+			Tags: []__vdl.AnyRep{access.Tag("Admin")},
 		},
 		{
 			Name: "IsRunnable",
@@ -1247,7 +1246,7 @@ var descDevice = __ipc.InterfaceDesc{
 				{"", ``}, // bool
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Admin")},
+			Tags: []__vdl.AnyRep{access.Tag("Admin")},
 		},
 		{
 			Name: "Reset",
@@ -1258,7 +1257,7 @@ var descDevice = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Admin")},
+			Tags: []__vdl.AnyRep{access.Tag("Admin")},
 		},
 		{
 			Name: "AssociateAccount",
@@ -1270,7 +1269,7 @@ var descDevice = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Admin")},
+			Tags: []__vdl.AnyRep{access.Tag("Admin")},
 		},
 		{
 			Name: "ListAssociations",
@@ -1279,7 +1278,7 @@ var descDevice = __ipc.InterfaceDesc{
 				{"", ``}, // []Association
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Admin")},
+			Tags: []__vdl.AnyRep{access.Tag("Admin")},
 		},
 	},
 }

@@ -7,7 +7,6 @@ package types
 import (
 	// The non-user imports are prefixed with "__" to prevent collisions.
 	__vdl "v.io/core/veyron2/vdl"
-	__vdlutil "v.io/core/veyron2/vdl/vdlutil"
 )
 
 // GlobRequest specifies which entities should be watched and, optionally,
@@ -72,7 +71,7 @@ type Change struct {
 	// State must be one of Exists, DoesNotExist, or InitialStateSkipped.
 	State int32
 	// Value contains the service-specific data for the entity.
-	Value __vdlutil.Any
+	Value __vdl.AnyRep
 	// If present, provides a compact representation of all the messages
 	// that have been received by the caller for the given Watch call.
 	// For example, it could be a sequence number or a multi-part

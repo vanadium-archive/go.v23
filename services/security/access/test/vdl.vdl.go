@@ -10,7 +10,6 @@ import (
 	__context "v.io/core/veyron2/context"
 	__ipc "v.io/core/veyron2/ipc"
 	__vdl "v.io/core/veyron2/vdl"
-	__vdlutil "v.io/core/veyron2/vdl/vdlutil"
 )
 
 // Any package can define tags (of arbitrary types) to be attached to methods.
@@ -219,21 +218,21 @@ var descMyObject = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{MyTag("R")},
+			Tags: []__vdl.AnyRep{MyTag("R")},
 		},
 		{
 			Name: "Put",
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{MyTag("W")},
+			Tags: []__vdl.AnyRep{MyTag("W")},
 		},
 		{
 			Name: "Resolve",
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{MyTag("X")},
+			Tags: []__vdl.AnyRep{MyTag("X")},
 		},
 		{
 			Name: "NoTags",
@@ -246,7 +245,7 @@ var descMyObject = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{MyTag("R"), MyTag("W"), MyTag("X")},
+			Tags: []__vdl.AnyRep{MyTag("R"), MyTag("W"), MyTag("X")},
 		},
 	},
 }

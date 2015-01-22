@@ -11,7 +11,6 @@ import (
 	__context "v.io/core/veyron2/context"
 	__ipc "v.io/core/veyron2/ipc"
 	__vdl "v.io/core/veyron2/vdl"
-	__vdlutil "v.io/core/veyron2/vdl/vdlutil"
 	__verror "v.io/core/veyron2/verror"
 )
 
@@ -161,7 +160,7 @@ type Scalars struct {
 	A11 complex128
 	A12 string
 	A13 error
-	A14 __vdlutil.Any
+	A14 __vdl.AnyRep
 	A15 *__vdl.Type
 	B0  NamedBool
 	B1  NamedByte
@@ -288,60 +287,60 @@ func init() {
 	__vdl.Register(NamedMap(nil))
 	__vdl.Register(NamedStruct{})
 	__vdl.Register(Scalars{
-		A15: __vdl.TypeOf((*__vdlutil.Any)(nil)),
+		A15: __vdl.AnyType,
 	})
 	__vdl.Register(KeyScalars{})
 	__vdl.Register(Composites{
 		A0: Scalars{
-			A15: __vdl.TypeOf((*__vdlutil.Any)(nil)),
+			A15: __vdl.AnyType,
 		},
 		A1: [2]Scalars{
 			{
-				A15: __vdl.TypeOf((*__vdlutil.Any)(nil)),
+				A15: __vdl.AnyType,
 			},
 			{
-				A15: __vdl.TypeOf((*__vdlutil.Any)(nil)),
+				A15: __vdl.AnyType,
 			},
 		},
 	})
 	__vdl.Register(CompComp{
 		A0: Composites{
 			A0: Scalars{
-				A15: __vdl.TypeOf((*__vdlutil.Any)(nil)),
+				A15: __vdl.AnyType,
 			},
 			A1: [2]Scalars{
 				{
-					A15: __vdl.TypeOf((*__vdlutil.Any)(nil)),
+					A15: __vdl.AnyType,
 				},
 				{
-					A15: __vdl.TypeOf((*__vdlutil.Any)(nil)),
+					A15: __vdl.AnyType,
 				},
 			},
 		},
 		A1: [2]Composites{
 			{
 				A0: Scalars{
-					A15: __vdl.TypeOf((*__vdlutil.Any)(nil)),
+					A15: __vdl.AnyType,
 				},
 				A1: [2]Scalars{
 					{
-						A15: __vdl.TypeOf((*__vdlutil.Any)(nil)),
+						A15: __vdl.AnyType,
 					},
 					{
-						A15: __vdl.TypeOf((*__vdlutil.Any)(nil)),
+						A15: __vdl.AnyType,
 					},
 				},
 			},
 			{
 				A0: Scalars{
-					A15: __vdl.TypeOf((*__vdlutil.Any)(nil)),
+					A15: __vdl.AnyType,
 				},
 				A1: [2]Scalars{
 					{
-						A15: __vdl.TypeOf((*__vdlutil.Any)(nil)),
+						A15: __vdl.AnyType,
 					},
 					{
-						A15: __vdl.TypeOf((*__vdlutil.Any)(nil)),
+						A15: __vdl.AnyType,
 					},
 				},
 			},
@@ -756,7 +755,7 @@ var descServiceA = __ipc.InterfaceDesc{
 				{"s", ``},   // string
 				{"err", ``}, // error
 			},
-			Tags: []__vdlutil.Any{"tag", uint64(6)},
+			Tags: []__vdl.AnyRep{"tag", uint64(6)},
 		},
 		{
 			Name: "MethodA4",

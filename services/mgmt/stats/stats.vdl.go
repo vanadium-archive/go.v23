@@ -14,7 +14,7 @@ import (
 	__veyron2 "v.io/core/veyron2"
 	__context "v.io/core/veyron2/context"
 	__ipc "v.io/core/veyron2/ipc"
-	__vdlutil "v.io/core/veyron2/vdl/vdlutil"
+	__vdl "v.io/core/veyron2/vdl"
 )
 
 // StatsClientMethods is the client interface
@@ -35,7 +35,7 @@ type StatsClientMethods interface {
 	// of the value is implementation specific.
 	// Some objects may not have a value, in which case, Value() returns
 	// a NoValue error.
-	Value(*__context.T, ...__ipc.CallOpt) (__vdlutil.Any, error)
+	Value(*__context.T, ...__ipc.CallOpt) (__vdl.AnyRep, error)
 }
 
 // StatsClientStub adds universal methods to StatsClientMethods.
@@ -69,7 +69,7 @@ func (c implStatsClientStub) c(ctx *__context.T) __ipc.Client {
 	return __veyron2.GetClient(ctx)
 }
 
-func (c implStatsClientStub) Value(ctx *__context.T, opts ...__ipc.CallOpt) (o0 __vdlutil.Any, err error) {
+func (c implStatsClientStub) Value(ctx *__context.T, opts ...__ipc.CallOpt) (o0 __vdl.AnyRep, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Value", nil, opts...); err != nil {
 		return
@@ -98,7 +98,7 @@ type StatsServerMethods interface {
 	// of the value is implementation specific.
 	// Some objects may not have a value, in which case, Value() returns
 	// a NoValue error.
-	Value(__ipc.ServerContext) (__vdlutil.Any, error)
+	Value(__ipc.ServerContext) (__vdl.AnyRep, error)
 }
 
 // StatsServerStubMethods is the server interface containing
@@ -113,7 +113,7 @@ type StatsServerStubMethods interface {
 	// of the value is implementation specific.
 	// Some objects may not have a value, in which case, Value() returns
 	// a NoValue error.
-	Value(__ipc.ServerContext) (__vdlutil.Any, error)
+	Value(__ipc.ServerContext) (__vdl.AnyRep, error)
 }
 
 // StatsServerStub adds universal methods to StatsServerStubMethods.
@@ -147,7 +147,7 @@ type implStatsServerStub struct {
 	gs *__ipc.GlobState
 }
 
-func (s implStatsServerStub) Value(ctx __ipc.ServerContext) (__vdlutil.Any, error) {
+func (s implStatsServerStub) Value(ctx __ipc.ServerContext) (__vdl.AnyRep, error) {
 	return s.impl.Value(ctx)
 }
 
@@ -175,10 +175,10 @@ var descStats = __ipc.InterfaceDesc{
 			Name: "Value",
 			Doc:  "// Value returns the current value of an object, or an error. The type\n// of the value is implementation specific.\n// Some objects may not have a value, in which case, Value() returns\n// a NoValue error.",
 			OutArgs: []__ipc.ArgDesc{
-				{"", ``}, // __vdlutil.Any
+				{"", ``}, // __vdl.AnyRep
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Debug")},
+			Tags: []__vdl.AnyRep{access.Tag("Debug")},
 		},
 	},
 }

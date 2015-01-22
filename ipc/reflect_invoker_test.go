@@ -17,7 +17,6 @@ import (
 	"v.io/core/veyron2/security"
 	"v.io/core/veyron2/vdl"
 	"v.io/core/veyron2/vdl/vdlroot/src/signature"
-	"v.io/core/veyron2/vdl/vdlutil"
 	"v.io/core/veyron2/verror"
 )
 
@@ -129,11 +128,11 @@ func (o *tags) Error(c ipc.ServerContext) error { o.ctx = c; return errApp }
 func (o *tags) Describe__() []ipc.InterfaceDesc {
 	return []ipc.InterfaceDesc{{
 		Methods: []ipc.MethodDesc{
-			{Name: "Alpha", Tags: []vdlutil.Any{tagAlpha}},
-			{Name: "Beta", Tags: []vdlutil.Any{tagBeta}},
-			{Name: "Gamma", Tags: []vdlutil.Any{tagGamma}},
-			{Name: "Delta", Tags: []vdlutil.Any{tagDelta}},
-			{Name: "Epsilon", Tags: []vdlutil.Any{tagEpsilon}},
+			{Name: "Alpha", Tags: []vdl.AnyRep{tagAlpha}},
+			{Name: "Beta", Tags: []vdl.AnyRep{tagBeta}},
+			{Name: "Gamma", Tags: []vdl.AnyRep{tagGamma}},
+			{Name: "Delta", Tags: []vdl.AnyRep{tagDelta}},
+			{Name: "Epsilon", Tags: []vdl.AnyRep{tagEpsilon}},
 		},
 	}}
 }
@@ -145,7 +144,7 @@ func TestReflectInvoker(t *testing.T) {
 		method string
 		call   ipc.ServerCall
 		// Expected results:
-		tag     vdlutil.Any
+		tag     vdl.AnyRep
 		args    v
 		results v
 		err     error
@@ -176,12 +175,12 @@ func TestReflectInvoker(t *testing.T) {
 		if !equalPtrValTypes(argptrs, test.args) {
 			t.Errorf("%s Prepare got argptrs %v, want args %v", name(test), printTypes(argptrs), printTypes(toPtrs(test.args)))
 		}
-		var tag vdlutil.Any
+		var tag vdl.AnyRep
 		if len(tags) > 0 {
 			tag = tags[0]
 		}
 		if tag != test.tag {
-			t.Errorf("%s Prepare got tags %v, want %v", name(test), tags, []vdlutil.Any{test.tag})
+			t.Errorf("%s Prepare got tags %v, want %v", name(test), tags, []vdl.AnyRep{test.tag})
 		}
 		// Call Invoker.Invoke and check results.
 		results, err := invoker.Invoke(test.method, test.call, toPtrs(test.args))
@@ -287,7 +286,7 @@ func (sigTest) Describe__() []ipc.InterfaceDesc {
 						{Name: "o0_3", Doc: "Doc o0_3"}, {Name: "err_3", Doc: "Doc err_3"}},
 					InStream:  ipc.ArgDesc{Name: "is_3", Doc: "Doc is_3"},
 					OutStream: ipc.ArgDesc{Name: "os_3", Doc: "Doc os_3"},
-					Tags:      []vdlutil.Any{"a", "b", int32(123)},
+					Tags:      []vdl.AnyRep{"a", "b", int32(123)},
 				},
 			},
 		},
@@ -306,7 +305,7 @@ func (sigTest) Describe__() []ipc.InterfaceDesc {
 					InStream:  ipc.ArgDesc{Name: "is_3x", Doc: "Doc is_3x"},
 					OutStream: ipc.ArgDesc{Name: "os_3x", Doc: "Doc os_3x"},
 					// Must have the same tags as every other definition of this method.
-					Tags: []vdlutil.Any{"a", "b", int32(123)},
+					Tags: []vdl.AnyRep{"a", "b", int32(123)},
 				},
 				{
 					Name: "Sig4",
@@ -345,7 +344,7 @@ func TestReflectInvokerSignature(t *testing.T) {
 				Name: "is_3", Doc: "Doc is_3", Type: vdl.StringType},
 			OutStream: &signature.Arg{
 				Name: "os_3", Doc: "Doc os_3", Type: vdl.BoolType},
-			Tags: []vdlutil.Any{"a", "b", int32(123)},
+			Tags: []vdl.AnyRep{"a", "b", int32(123)},
 		}},
 		{"Sig4", signature.Method{
 			Name: "Sig4",
@@ -385,7 +384,7 @@ func TestReflectInvokerSignature(t *testing.T) {
 							Name: "is_3", Doc: "Doc is_3", Type: vdl.StringType},
 						OutStream: &signature.Arg{
 							Name: "os_3", Doc: "Doc os_3", Type: vdl.BoolType},
-						Tags: []vdlutil.Any{"a", "b", int32(123)},
+						Tags: []vdl.AnyRep{"a", "b", int32(123)},
 					},
 				},
 			},
@@ -408,7 +407,7 @@ func TestReflectInvokerSignature(t *testing.T) {
 							Name: "is_3x", Doc: "Doc is_3x", Type: vdl.StringType},
 						OutStream: &signature.Arg{
 							Name: "os_3x", Doc: "Doc os_3x", Type: vdl.BoolType},
-						Tags: []vdlutil.Any{"a", "b", int32(123)},
+						Tags: []vdl.AnyRep{"a", "b", int32(123)},
 					},
 					{
 						Name: "Sig4",

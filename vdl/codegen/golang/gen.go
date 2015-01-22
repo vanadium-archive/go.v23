@@ -57,8 +57,8 @@ func Generate(file *compile.File, env *compile.Env, config vdltool.GoConfig) []b
 func systemImportsGo(f *compile.File) []string {
 	set := make(map[string]bool)
 	if f.TypeDeps[vdl.AnyType] {
-		// Import for vdlutil.Any
-		set[`__vdlutil "v.io/core/veyron2/vdl/vdlutil"`] = true
+		// Import for vdl.AnyRep
+		set[`__vdl "v.io/core/veyron2/vdl"`] = true
 	}
 	if f.TypeDeps[vdl.TypeObjectType] {
 		// Import for vdl.Type
@@ -83,7 +83,8 @@ func systemImportsGo(f *compile.File) []string {
 			set[`__io "io"`] = true
 		}
 		if fileHasMethodTags(f) {
-			set[`__vdlutil "v.io/core/veyron2/vdl/vdlutil"`] = true
+			// Import for vdl.AnyRep
+			set[`__vdl "v.io/core/veyron2/vdl"`] = true
 		}
 	}
 	// If the user has specified any error IDs, typically we need to import the
@@ -665,7 +666,7 @@ var desc{{$iface.Name}} = __ipc.InterfaceDesc{ {{if $iface.Name}}
 			OutArgs: []__ipc.ArgDesc{ {{range $arg := $method.OutArgs}}
 				{ "{{$arg.Name}}", {{quoteStripDoc $arg.Doc}} }, // {{typeGo $data $arg.Type}}{{end}}
 			},{{end}}{{if $method.Tags}}
-			Tags: []__vdlutil.Any{ {{range $tag := $method.Tags}}{{typedConst $data $tag}} ,{{end}} },{{end}}
+			Tags: []__vdl.AnyRep{ {{range $tag := $method.Tags}}{{typedConst $data $tag}} ,{{end}} },{{end}}
 		},{{end}}
 	},{{end}}
 }

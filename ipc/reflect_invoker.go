@@ -10,7 +10,6 @@ import (
 	"v.io/core/veyron2/vdl"
 	"v.io/core/veyron2/vdl/valconv"
 	"v.io/core/veyron2/vdl/vdlroot/src/signature"
-	"v.io/core/veyron2/vdl/vdlutil"
 	"v.io/core/veyron2/verror"
 )
 
@@ -52,11 +51,11 @@ type EmbedDesc struct {
 type MethodDesc struct {
 	Name      string
 	Doc       string
-	InArgs    []ArgDesc     // Input arguments
-	OutArgs   []ArgDesc     // Output arguments
-	InStream  ArgDesc       // Input stream (client to server)
-	OutStream ArgDesc       // Output stream (server to client)
-	Tags      []vdlutil.Any // Method tags
+	InArgs    []ArgDesc    // Input arguments
+	OutArgs   []ArgDesc    // Output arguments
+	InStream  ArgDesc      // Input stream (client to server)
+	OutStream ArgDesc      // Output stream (server to client)
+	Tags      []vdl.AnyRep // Method tags
 }
 
 // ArgDesc describes an argument; it is similar to signature.Arg, without the
@@ -635,7 +634,7 @@ func fillArgSig(sig *signature.Arg, desc ArgDesc) *signature.Arg {
 // convertTags tries to convert each tag into a vdl.Value, to capture any
 // conversion error.  Returns a single vdl.Value containing a slice of the tag
 // values, to make it easy to perform equality-comparison of lists of tags.
-func convertTags(tags []vdlutil.Any) (*vdl.Value, verror.E) {
+func convertTags(tags []vdl.AnyRep) (*vdl.Value, verror.E) {
 	result := vdl.ZeroValue(vdl.ListType(vdl.AnyType)).AssignLen(len(tags))
 	for index, tag := range tags {
 		if err := valconv.Convert(result.Index(index), tag); err != nil {
@@ -648,9 +647,9 @@ func convertTags(tags []vdlutil.Any) (*vdl.Value, verror.E) {
 // extractTagsForMethod returns the tags associated with the given method name.
 // If the desc lists the same method under multiple interfaces, we require all
 // versions to have an identical list of tags.
-func extractTagsForMethod(desc []InterfaceDesc, name string) ([]vdlutil.Any, verror.E) {
+func extractTagsForMethod(desc []InterfaceDesc, name string) ([]vdl.AnyRep, verror.E) {
 	var first *vdl.Value
-	var tags []vdlutil.Any
+	var tags []vdl.AnyRep
 	for _, descIface := range desc {
 		for _, descMethod := range descIface.Methods {
 			if name == descMethod.Name {
@@ -677,7 +676,7 @@ func attachMethodTags(infos map[string]methodInfo, desc []InterfaceDesc) verror.
 		if verr != nil {
 			return verror.Abortedf("method %q: %v", name, verr)
 		}
-		// TODO(toddw): Change tags to []vdlutil.Any and remove this conversion.
+		// TODO(toddw): Change tags to []vdl.AnyRep and remove this conversion.
 		if len(tags) > 0 {
 			info.tags = make([]interface{}, len(tags))
 			for index, tag := range tags {

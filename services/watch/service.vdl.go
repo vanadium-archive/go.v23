@@ -113,7 +113,7 @@ import (
 	__veyron2 "v.io/core/veyron2"
 	__context "v.io/core/veyron2/context"
 	__ipc "v.io/core/veyron2/ipc"
-	__vdlutil "v.io/core/veyron2/vdl/vdlutil"
+	__vdl "v.io/core/veyron2/vdl"
 )
 
 // GlobWatcherClientMethods is the client interface
@@ -313,7 +313,7 @@ var descGlobWatcher = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{access.Tag("Resolve")},
+			Tags: []__vdl.AnyRep{access.Tag("Resolve")},
 		},
 	},
 }

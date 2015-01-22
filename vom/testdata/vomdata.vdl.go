@@ -6,15 +6,14 @@ package testdata
 import (
 	// The non-user imports are prefixed with "__" to prevent collisions.
 	__vdl "v.io/core/veyron2/vdl"
-	__vdlutil "v.io/core/veyron2/vdl/vdlutil"
 )
 
 // TestCase represents an individual testcase for vom encoding and decoding.
 type TestCase struct {
-	Name       string        // Name of the testcase
-	Value      __vdlutil.Any // Value to test
-	Hex        string        // Hex pattern representing vom encoding of Value
-	TypeString string        // The string representation of the Type
+	Name       string       // Name of the testcase
+	Value      __vdl.AnyRep // Value to test
+	Hex        string       // Hex pattern representing vom encoding of Value
+	TypeString string       // The string representation of the Type
 }
 
 func (TestCase) __VDLReflect(struct {
@@ -1172,7 +1171,7 @@ var Tests = []TestCase{
 			A: true,
 			B: true,
 			C: true,
-			E: __vdl.TypeOf((*__vdlutil.Any)(nil)),
+			E: __vdl.AnyType,
 		},
 		Hex:        "80ff832a100124762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e426f6f6c020300ff852a100124762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4d426f6f6c020300ff893e160126762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e5374727563740203010141020300010142020400010143020b0000ff87061d0100024500ff8150160126762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4d537472756374020601014102030001014202420001014302430001014402440001014502020001014602010000ff820d01010201030104000501060000",
 		TypeString: "v.io/core/veyron2/vom/testdata.MStruct struct{A bool;B v.io/core/veyron2/vom/testdata.NBool bool;C v.io/core/veyron2/vom/testdata.MBool bool;D ?v.io/core/veyron2/vom/testdata.NStruct struct{A bool;B string;C int64};E typeobject;F any}",
@@ -1180,7 +1179,7 @@ var Tests = []TestCase{
 	{
 		Name: "MStruct{}",
 		Value: MStruct{
-			E: __vdl.TypeOf((*__vdlutil.Any)(nil)),
+			E: __vdl.AnyType,
 		},
 		Hex:        "80ff832a100124762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e426f6f6c020300ff852a100124762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4d426f6f6c020300ff893e160126762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e5374727563740203010141020300010142020400010143020b0000ff87061d0100024500ff8150160126762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4d537472756374020601014102030001014202420001014302430001014402440001014502020001014602010000ff820d01000200030004000501060000",
 		TypeString: "v.io/core/veyron2/vom/testdata.MStruct struct{A bool;B v.io/core/veyron2/vom/testdata.NBool bool;C v.io/core/veyron2/vom/testdata.MBool bool;D ?v.io/core/veyron2/vom/testdata.NStruct struct{A bool;B string;C int64};E typeobject;F any}",
@@ -1189,7 +1188,7 @@ var Tests = []TestCase{
 		Name: "MStruct{D: {}}",
 		Value: MStruct{
 			D: &NStruct{},
-			E: __vdl.TypeOf((*__vdlutil.Any)(nil)),
+			E: __vdl.AnyType,
 		},
 		Hex:        "80ff832a100124762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e426f6f6c020300ff852a100124762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4d426f6f6c020300ff893e160126762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e5374727563740203010141020300010142020400010143020b0000ff87061d0100024500ff8150160126762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4d537472756374020601014102030001014202420001014302430001014402440001014502020001014602010000ff82140100020003000401010002000300000501060000",
 		TypeString: "v.io/core/veyron2/vom/testdata.MStruct struct{A bool;B v.io/core/veyron2/vom/testdata.NBool bool;C v.io/core/veyron2/vom/testdata.MBool bool;D ?v.io/core/veyron2/vom/testdata.NStruct struct{A bool;B string;C int64};E typeobject;F any}",
@@ -1202,7 +1201,7 @@ var Tests = []TestCase{
 				B: "abc",
 				C: 123,
 			},
-			E: __vdl.TypeOf((*__vdlutil.Any)(nil)),
+			E: __vdl.AnyType,
 		},
 		Hex:        "80ff832a100124762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e426f6f6c020300ff852a100124762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4d426f6f6c020300ff893e160126762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e5374727563740203010141020300010142020400010143020b0000ff87061d0100024500ff8150160126762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4d537472756374020601014102030001014202420001014302430001014402440001014502020001014602010000ff821801000200030004010101020361626303fff6000501060000",
 		TypeString: "v.io/core/veyron2/vom/testdata.MStruct struct{A bool;B v.io/core/veyron2/vom/testdata.NBool bool;C v.io/core/veyron2/vom/testdata.MBool bool;D ?v.io/core/veyron2/vom/testdata.NStruct struct{A bool;B string;C int64};E typeobject;F any}",
@@ -1210,7 +1209,7 @@ var Tests = []TestCase{
 	{
 		Name: "MStruct{F: \"abc\"}",
 		Value: MStruct{
-			E: __vdl.TypeOf((*__vdlutil.Any)(nil)),
+			E: __vdl.AnyType,
 			F: "abc",
 		},
 		Hex:        "80ff832a100124762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e426f6f6c020300ff852a100124762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4d426f6f6c020300ff893e160126762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e5374727563740203010141020300010142020400010143020b0000ff87061d0100024500ff8150160126762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4d537472756374020601014102030001014202420001014302430001014402440001014502020001014602010000ff82110100020003000400050106040361626300",
@@ -1219,7 +1218,7 @@ var Tests = []TestCase{
 	{
 		Name: "MStruct{F: MBool(true)}",
 		Value: MStruct{
-			E: __vdl.TypeOf((*__vdlutil.Any)(nil)),
+			E: __vdl.AnyType,
 			F: MBool(true),
 		},
 		Hex:        "80ff832a100124762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e426f6f6c020300ff852a100124762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4d426f6f6c020300ff893e160126762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e5374727563740203010141020300010142020400010143020b0000ff87061d0100024500ff8150160126762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4d537472756374020601014102030001014202420001014302430001014402440001014502020001014602010000ff820e0100020003000400050106430100",
@@ -1228,7 +1227,7 @@ var Tests = []TestCase{
 	{
 		Name: "MStruct{F: ?NStruct{B: \"abc\"}}",
 		Value: MStruct{
-			E: __vdl.TypeOf((*__vdlutil.Any)(nil)),
+			E: __vdl.AnyType,
 			F: &NStruct{
 				B: "abc",
 			},
@@ -1287,7 +1286,7 @@ var Tests = []TestCase{
 	},
 	{
 		Name:       "typeobject(any)",
-		Value:      __vdl.TypeOf((*__vdlutil.Any)(nil)),
+		Value:      __vdl.AnyType,
 		Hex:        "800401",
 		TypeString: "typeobject",
 	},

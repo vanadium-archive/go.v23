@@ -36,7 +36,7 @@ import (
 	__veyron2 "v.io/core/veyron2"
 	__context "v.io/core/veyron2/context"
 	__ipc "v.io/core/veyron2/ipc"
-	__vdlutil "v.io/core/veyron2/vdl/vdlutil"
+	__vdl "v.io/core/veyron2/vdl"
 )
 
 // Yes shows that bools may be untyped.
@@ -86,7 +86,7 @@ type ArithClientMethods interface {
 	// StreamingAdd shows a bidirectional stream.
 	StreamingAdd(*__context.T, ...__ipc.CallOpt) (ArithStreamingAddCall, error)
 	// QuoteAny shows the any built-in type, representing a value of any type.
-	QuoteAny(ctx *__context.T, a __vdlutil.Any, opts ...__ipc.CallOpt) (__vdlutil.Any, error)
+	QuoteAny(ctx *__context.T, a __vdl.AnyRep, opts ...__ipc.CallOpt) (__vdl.AnyRep, error)
 }
 
 // ArithClientStub adds universal methods to ArithClientMethods.
@@ -191,7 +191,7 @@ func (c implArithClientStub) StreamingAdd(ctx *__context.T, opts ...__ipc.CallOp
 	return
 }
 
-func (c implArithClientStub) QuoteAny(ctx *__context.T, i0 __vdlutil.Any, opts ...__ipc.CallOpt) (o0 __vdlutil.Any, err error) {
+func (c implArithClientStub) QuoteAny(ctx *__context.T, i0 __vdl.AnyRep, opts ...__ipc.CallOpt) (o0 __vdl.AnyRep, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "QuoteAny", []interface{}{i0}, opts...); err != nil {
 		return
@@ -402,7 +402,7 @@ type ArithServerMethods interface {
 	// StreamingAdd shows a bidirectional stream.
 	StreamingAdd(ArithStreamingAddContext) (total int32, err error)
 	// QuoteAny shows the any built-in type, representing a value of any type.
-	QuoteAny(ctx __ipc.ServerContext, a __vdlutil.Any) (__vdlutil.Any, error)
+	QuoteAny(ctx __ipc.ServerContext, a __vdl.AnyRep) (__vdl.AnyRep, error)
 }
 
 // ArithServerStubMethods is the server interface containing
@@ -429,7 +429,7 @@ type ArithServerStubMethods interface {
 	// StreamingAdd shows a bidirectional stream.
 	StreamingAdd(*ArithStreamingAddContextStub) (total int32, err error)
 	// QuoteAny shows the any built-in type, representing a value of any type.
-	QuoteAny(ctx __ipc.ServerContext, a __vdlutil.Any) (__vdlutil.Any, error)
+	QuoteAny(ctx __ipc.ServerContext, a __vdl.AnyRep) (__vdl.AnyRep, error)
 }
 
 // ArithServerStub adds universal methods to ArithServerStubMethods.
@@ -489,7 +489,7 @@ func (s implArithServerStub) StreamingAdd(ctx *ArithStreamingAddContextStub) (in
 	return s.impl.StreamingAdd(ctx)
 }
 
-func (s implArithServerStub) QuoteAny(ctx __ipc.ServerContext, i0 __vdlutil.Any) (__vdlutil.Any, error) {
+func (s implArithServerStub) QuoteAny(ctx __ipc.ServerContext, i0 __vdl.AnyRep) (__vdl.AnyRep, error) {
 	return s.impl.QuoteAny(ctx, i0)
 }
 
@@ -563,7 +563,7 @@ var descArith = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{"foo", "barz", "hello", int32(129), uint64(36)},
+			Tags: []__vdl.AnyRep{"foo", "barz", "hello", int32(129), uint64(36)},
 		},
 		{
 			Name: "Count",
@@ -587,10 +587,10 @@ var descArith = __ipc.InterfaceDesc{
 			Name: "QuoteAny",
 			Doc:  "// QuoteAny shows the any built-in type, representing a value of any type.",
 			InArgs: []__ipc.ArgDesc{
-				{"a", ``}, // __vdlutil.Any
+				{"a", ``}, // __vdl.AnyRep
 			},
 			OutArgs: []__ipc.ArgDesc{
-				{"", ``}, // __vdlutil.Any
+				{"", ``}, // __vdl.AnyRep
 				{"", ``}, // error
 			},
 		},
@@ -900,7 +900,7 @@ var descCalculator = __ipc.InterfaceDesc{
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdlutil.Any{"offtag"},
+			Tags: []__vdl.AnyRep{"offtag"},
 		},
 	},
 }

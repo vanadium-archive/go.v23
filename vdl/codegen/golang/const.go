@@ -86,12 +86,7 @@ func untypedConst(data goData, v *vdl.Value) string {
 		// user, and are simple to return statically.
 		switch v.TypeObject() {
 		case vdl.AnyType:
-			// TODO(toddw): We should just return __vdl.AnyType here, but that makes
-			// our package dependency tracking more complicated for system imports.
-			// Normally every dependency on the Any type requires a Go import for
-			// __vdlutil because of __vdlutil.Any.  Fix this when vdlutil.Any is
-			// renamed to into vdl.AnyRep.
-			return "__vdl.TypeOf((*__vdlutil.Any)(nil))"
+			return "__vdl.AnyType"
 		case vdl.TypeObjectType:
 			return "__vdl.TypeObjectType"
 		}
