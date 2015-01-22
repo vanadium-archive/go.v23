@@ -24,9 +24,6 @@ The vdl additional help topics are:
 Run "vdl help [topic]" for topic details.
 
 The vdl flags are:
- -experimental=false
-   Enable experimental features that may crash the compiler and change without
-   notice.  Intended for VDL compiler developers.
  -exts=.vdl
    Comma-separated list of valid VDL file name extensions.
  -ignore_unknown=false

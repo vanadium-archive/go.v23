@@ -1,4 +1,4 @@
-package cmds
+package main
 
 import (
 	"bytes"
@@ -11,15 +11,14 @@ import (
 )
 
 const (
-	testDir    = "../../testdata/base"
+	testDir    = "../testdata/base"
 	outPkgPath = "v.io/core/veyron2/vdl/testdata/base"
 )
 
 // Compares generated VDL files against the copy in the repo.
 func TestVDLGenerator(t *testing.T) {
 	// Setup the vdl command-line.
-	cmd := Root()
-	cmd.Init(nil, os.Stdout, os.Stderr)
+	cmdVDL.Init(nil, os.Stdout, os.Stderr)
 	// Use vdl to generate Go code from input, into a temporary directory.
 	outDir, err := ioutil.TempDir("", "vdltest")
 	if err != nil {
@@ -28,7 +27,7 @@ func TestVDLGenerator(t *testing.T) {
 	defer os.RemoveAll(outDir)
 	// TODO(toddw): test the generated java and javascript files too.
 	outOpt := fmt.Sprintf("--go_out_dir=%s", outDir)
-	if err := cmd.Execute([]string{"generate", "--lang=go", outOpt, testDir}); err != nil {
+	if err := cmdVDL.Execute([]string{"generate", "--lang=go", outOpt, testDir}); err != nil {
 		t.Fatalf("Execute() failed: %v", err)
 	}
 	// Check that each *.vdl.go file in the testDir matches the generated output.
