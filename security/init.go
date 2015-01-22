@@ -1,15 +1,12 @@
 package security
 
-import "v.io/core/veyron2/vdl/vdlutil"
+import "v.io/core/veyron2/vdl"
 
 func init() {
-	vdlutil.Register(Signature{})
-	vdlutil.Register(Caveat{})
-	vdlutil.Register(unixTimeExpiryCaveat(0))
-	vdlutil.Register(methodCaveat{})
-	vdlutil.Register(peerBlessingsCaveat{})
-	vdlutil.Register(blessingsImpl{})
-	vdlutil.Register(Certificate{})
-	vdlutil.Register(publicKeyThirdPartyCaveat{})
-	vdlutil.Register(publicKeyDischarge{})
+	vdl.Register(unixTimeExpiryCaveat(0))
+	vdl.Register(methodCaveat{})
+	vdl.Register(peerBlessingsCaveat{})
+	vdl.Register(blessingsImpl{})
+	vdl.Register(publicKeyThirdPartyCaveat{})
+	vdl.Register(publicKeyDischarge{})
 }
