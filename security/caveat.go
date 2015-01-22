@@ -17,7 +17,7 @@ func NewCaveat(validator CaveatValidator) (Caveat, error) {
 	if err != nil {
 		return Caveat{}, err
 	}
-	return Caveat{b}, nil
+	return Caveat{ValidatorVOM: b}, nil
 }
 
 // ExpiryCaveat returns a Caveat that validates iff the current time is before t.

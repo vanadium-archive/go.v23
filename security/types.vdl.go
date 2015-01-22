@@ -7,6 +7,7 @@ import (
 	// The non-user imports are prefixed with "__" to prevent collisions.
 	__vdl "v.io/core/veyron2/vdl"
 	__vdlutil "v.io/core/veyron2/vdl/vdlutil"
+	__verror "v.io/core/veyron2/verror"
 )
 
 // BlessingPattern is a pattern that is matched by specific blessings.
@@ -114,6 +115,15 @@ func (Certificate) __VDLReflect(struct {
 }) {
 }
 
+// CaveatUuid is the identifier of a caveat, used to look up its validation function.
+// This identifier should be generated so that it is globally unique and will map to a unique validation function.
+type CaveatUuid [16]byte
+
+func (CaveatUuid) __VDLReflect(struct {
+	Name string "v.io/core/veyron2/security.CaveatUuid"
+}) {
+}
+
 // Caveat is a condition on the validity of a blessing/discharge.
 //
 // These conditions are provided when asking a principal to create
@@ -126,10 +136,25 @@ type Caveat struct {
 	// ValidatorVOM holds the VOM-encoded bytes of the CaveatValidator
 	// that validates this caveat.
 	ValidatorVOM []byte
+	Id           CaveatUuid    // The identifier of the caveat validation function.
+	Data         __vdlutil.Any // Data to be provided to the caveat validation function.
 }
 
 func (Caveat) __VDLReflect(struct {
 	Name string "v.io/core/veyron2/security.Caveat"
+}) {
+}
+
+// CaveatDescription describes a caveat validator.
+// For a validator to be invoked, a validation function must be registered with the validator description in the language that the function is defined in.
+type CaveatDescription struct {
+	Id       CaveatUuid  // The identifier of the caveat validation function.
+	DataType *__vdl.Type // The type of data expected by the validation function.
+	Doc      string      // Description of the caveat.
+}
+
+func (CaveatDescription) __VDLReflect(struct {
+	Name string "v.io/core/veyron2/security.CaveatDescription"
 }) {
 }
 
@@ -165,7 +190,11 @@ func init() {
 	__vdl.Register(ThirdPartyRequirements{})
 	__vdl.Register(DischargeImpetus{})
 	__vdl.Register(Certificate{})
+	__vdl.Register(CaveatUuid{})
 	__vdl.Register(Caveat{})
+	__vdl.Register(CaveatDescription{
+		DataType: __vdl.TypeOf((*__vdlutil.Any)(nil)),
+	})
 	__vdl.Register(WireBlessings{})
 }
 
@@ -186,3 +215,6 @@ const SignatureForMessageSigning = "S" // Signature.Purpose used by a Principal 
 const SignatureForBlessingCertificates = "B" // Signature.Purpose used by a Principal when signing Certificates for creating blessings.
 
 const SignatureForDischarge = "D" // Signature.Purpose used by a Principal when signing discharges for public-key based third-party caveats.
+
+// Error generated after seeing an unknown caveat uuid.
+const UnknownCaveatUuid = __verror.ID("v.io/core/veyron2/security.UnknownCaveatUuid")

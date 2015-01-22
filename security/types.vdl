@@ -89,6 +89,13 @@ type Certificate struct {
 	Signature Signature // Signature by the blessing principal that binds the extension to the public key.
 }
 
+// CaveatUuid is the identifier of a caveat, used to look up its validation function.
+// This identifier should be generated so that it is globally unique and will map to a unique validation function.
+type CaveatUuid [16]byte
+
+// Error generated after seeing an unknown caveat uuid.
+errorid UnknownCaveatUuid
+
 // Caveat is a condition on the validity of a blessing/discharge.
 //
 // These conditions are provided when asking a principal to create
@@ -98,9 +105,24 @@ type Certificate struct {
 // Given a Hash, the message digest of a caveat is:
 // Hash(ValidatorVOM).
 type Caveat struct {
+	// Fields for old caveat format:
+
 	// ValidatorVOM holds the VOM-encoded bytes of the CaveatValidator
 	// that validates this caveat.
 	ValidatorVOM []byte
+
+	// Fields for new caveat format:
+
+	Id CaveatUuid // The identifier of the caveat validation function.
+	Data any // Data to be provided to the caveat validation function.
+}
+
+// CaveatDescription describes a caveat validator.
+// For a validator to be invoked, a validation function must be registered with the validator description in the language that the function is defined in.
+type CaveatDescription struct {
+	Id CaveatUuid // The identifier of the caveat validation function.
+	DataType typeobject // The type of data expected by the validation function.
+	Doc string // Description of the caveat.
 }
 
 // WireBlessings encapsulates wire format of a set of blessings and the
