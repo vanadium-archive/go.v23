@@ -35,7 +35,7 @@ func TestMatchedBy(t *testing.T) {
 			DoesNotMatch: v{"", "bob", "bob/ann"},
 		},
 		{
-			Pattern:      "ann/friend",
+			Pattern:      "ann/friend/$",
 			Matches:      v{"ann", "ann/friend"},
 			DoesNotMatch: v{"", "bob", "bob/friend", "bob/ann", "ann/friend/spouse"},
 		},
@@ -69,10 +69,10 @@ func TestMatchedByCornerCases(t *testing.T) {
 	if !AllPrincipals.MatchedBy("") {
 		t.Errorf("%q.MatchedBy(%q) failed", AllPrincipals, "")
 	}
-	if BlessingPattern("ann").MatchedBy() {
+	if BlessingPattern("ann/$").MatchedBy() {
 		t.Errorf("%q.MatchedBy() returned true", "ann")
 	}
-	if BlessingPattern("ann").MatchedBy("") {
+	if BlessingPattern("ann/$").MatchedBy("") {
 		t.Errorf("%q.MatchedBy(%q) returned true", "ann", "")
 	}
 
@@ -80,8 +80,8 @@ func TestMatchedByCornerCases(t *testing.T) {
 
 func TestIsValid(t *testing.T) {
 	var (
-		valid   = []BlessingPattern{"...", "alice", "alice.jones", "alice@google", "veyron/alice@google", "veyron/alice@google/bob", "alice/...", "alice/bob/..."}
-		invalid = []BlessingPattern{"", "alice...", "...alice", "alice...bob", "/alice", "alice/", "/alice", "...alice/bob", "alice.../bob", "alice/.../bob"}
+		valid   = []BlessingPattern{"...", "alice", "al$ice", "alice/$", "alice.jones/$", "alice@google/$", "veyron/alice@google/$", "veyron/alice@google/bob/$", "alice/...", "alice/bob/..."}
+		invalid = []BlessingPattern{"", "alice...", "...alice", "alice...bob", "/alice", "alice/", "...alice/bob", "alice.../bob", "alice/.../bob", "alice/$/$", "alice/.../$"}
 	)
 	for _, p := range valid {
 		if !p.IsValid() {
@@ -95,16 +95,16 @@ func TestIsValid(t *testing.T) {
 	}
 }
 
-func TestMakeGlob(t *testing.T) {
+func TestMakeNonExtendable(t *testing.T) {
 	tests := []struct{ before, after BlessingPattern }{
-		{"", "..."},
-		{"...", "..."},
-		{"a", "a/..."},
-		{"a/...", "a/..."},
+		{"", "$"},
+		{"$", "$"},
+		{"a", "a/$"},
+		{"a/$", "a/$"},
 	}
 	for _, test := range tests {
-		if got, want := test.before.MakeGlob(), test.after; got != want {
-			t.Errorf("%q.Glob(): Got %q, want %q", test.before, got, want)
+		if got, want := test.before.MakeNonExtendable(), test.after; got != want {
+			t.Errorf("%q.MakeNonExtendable(): Got %q, want %q", test.before, got, want)
 		}
 	}
 }

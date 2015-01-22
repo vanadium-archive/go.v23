@@ -6,6 +6,11 @@ import (
 
 // MatchedBy returns true iff one of the presented blessings matches
 // p as per the rules described in documentation for the BlessingPattern type.
+//
+// TODO(ataly, ashankar): Currently patterns that do not terminate in "/$"
+// or glob ("/...") behave as if they terminated in a "/$", and patterns that
+// terminate in glob ("/...") behave as if the glob was absent. We need to
+// depracate glob-patterns and replace all non-glob-patterns with $-patterns.
 func (p BlessingPattern) MatchedBy(blessings ...string) bool {
 	if len(p) == 0 || !p.IsValid() {
 		return false
@@ -15,9 +20,14 @@ func (p BlessingPattern) MatchedBy(blessings ...string) bool {
 	}
 	parts := strings.Split(string(p), ChainSeparator)
 	var glob bool
-	if parts[len(parts)-1] == string(AllPrincipals) {
+	switch {
+	case parts[len(parts)-1] == string(AllPrincipals):
 		glob = true
 		parts = parts[:len(parts)-1]
+		break
+	case parts[len(parts)-1] == NoExtension:
+		parts = parts[:len(parts)-1]
+		break
 	}
 	for _, b := range blessings {
 		if p.matchedByBlessing(parts, glob, b) {
@@ -27,20 +37,15 @@ func (p BlessingPattern) MatchedBy(blessings ...string) bool {
 	return false
 }
 
-// IsValid returns true iff the BlessingPattern is well formed,
-// i.e., does not contain any character sequences that will cause
-// the BlessingPattern to never match any valid blessings.
+// IsValid returns true iff the BlessingPattern is well formed, as per the
+// rules described in documentation for the BlessingPattern type.
 func (p BlessingPattern) IsValid() bool {
 	parts := strings.Split(string(p), ChainSeparator)
-	for i, e := range parts {
-		if e == "" {
-			return false
-		}
-		isGlob := e == string(AllPrincipals)
-		if isGlob && (i < len(parts)-1) {
-			return false
-		}
-		if !isGlob && validateExtension(e) != nil {
+	if parts[len(parts)-1] == string(AllPrincipals) || parts[len(parts)-1] == NoExtension {
+		parts = parts[:len(parts)-1]
+	}
+	for _, e := range parts {
+		if validateExtension(e) != nil {
 			return false
 		}
 	}
@@ -54,6 +59,8 @@ func (p BlessingPattern) IsValid() bool {
 //   delegates := BlessingPattern("alice").Glob()
 //   delegates.MatchedBy("alice")  // Returns true
 //   delegates.MatchedBy("alice/friend/bob") // Returns true
+//
+// TODO(ataly, ashankar): Remove this method once we get rid of (explicit) glob-patterns.
 func (p BlessingPattern) MakeGlob() BlessingPattern {
 	if len(p) == 0 || p == AllPrincipals {
 		return AllPrincipals
@@ -62,6 +69,24 @@ func (p BlessingPattern) MakeGlob() BlessingPattern {
 		return p
 	}
 	return BlessingPattern(string(p) + ChainSeparator + string(AllPrincipals))
+}
+
+// MakeNonExtendable returns a pattern that are not matched by any extension of the blessing
+// represented by p.
+//
+// For example:
+//   onlyAlice := BlessingPattern("google/alice").MakeNonExtendable()
+//   onlyAlice.MatchedBy("google")  // Returns true
+//   onlyAlice.MatchedBy("google/alice")  // Returns true
+//   onlyAlice.MatchedBy("google/alice/bob")  // Returns false
+func (p BlessingPattern) MakeNonExtendable() BlessingPattern {
+	if len(p) == 0 || p == BlessingPattern(NoExtension) {
+		return BlessingPattern(NoExtension)
+	}
+	if strings.HasSuffix(string(p), ChainSeparator+string(NoExtension)) {
+		return p
+	}
+	return BlessingPattern(string(p) + ChainSeparator + string(NoExtension))
 }
 
 func (BlessingPattern) matchedByBlessing(patternchain []string, glob bool, b string) bool {

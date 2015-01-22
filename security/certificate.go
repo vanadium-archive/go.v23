@@ -6,7 +6,14 @@ import (
 	"strings"
 )
 
-var invalidNames = []string{string(AllPrincipals), ChainSeparator + ChainSeparator /* double slash not allowed */}
+var (
+	// invalidBlessingSubStrings are strings that a blessing extension cannot have as a substring.
+	invalidBlessingSubStrings = []string{string(AllPrincipals), ChainSeparator + ChainSeparator /* double slash not allowed */}
+	// invalidBlessingExtensions are strings that are disallowed as blessing extensions.
+	// TODO(ataly, ashankar): Add more reserved characters/strings to this list. Note that
+	// we need to be careful that none of these invalid strings are valid email addresses.
+	invalidBlessingExtensions = []string{NoExtension}
+)
 
 func newUnsignedCertificate(extension string, key PublicKey, caveats ...Caveat) (*Certificate, error) {
 	err := validateExtension(extension)
@@ -69,7 +76,12 @@ func validateExtension(extension string) error {
 	if strings.HasSuffix(extension, ChainSeparator) {
 		return fmt.Errorf("invalid blessing extension(ends with %q)", ChainSeparator)
 	}
-	for _, n := range invalidNames {
+	for _, n := range invalidBlessingExtensions {
+		if extension == n {
+			return fmt.Errorf("invalid blessing extension(%q)", extension)
+		}
+	}
+	for _, n := range invalidBlessingSubStrings {
 		if strings.Contains(extension, n) {
 			return fmt.Errorf("invalid blessing extension(%q has %q as a substring)", extension, n)
 		}
