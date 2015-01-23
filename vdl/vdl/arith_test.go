@@ -15,12 +15,11 @@ import (
 	"v.io/core/veyron2"
 	"v.io/core/veyron2/context"
 	"v.io/core/veyron2/ipc"
-	"v.io/core/veyron2/rt"
 	"v.io/core/veyron2/vdl"
 	"v.io/core/veyron2/vdl/testdata/arith"
 	"v.io/core/veyron2/vdl/testdata/base"
 
-	"v.io/core/veyron/profiles"
+	_ "v.io/core/veyron/profiles"
 )
 
 var generatedError = errors.New("generated error")
@@ -111,18 +110,14 @@ func (*serverCalculator) Off(_ ipc.ServerContext) error {
 }
 
 func TestCalculator(t *testing.T) {
-	r, err := rt.New()
-	if err != nil {
-		t.Fatalf("Error initializing runtime: %v", err)
-	}
-	defer r.Cleanup()
-	ctx := r.NewContext()
+	ctx, shutdown := veyron2.Init()
+	defer shutdown()
 
 	server := newServer(ctx)
 	if err := server.Serve("", arith.CalculatorServer(&serverCalculator{}), nil); err != nil {
 		t.Fatal(err)
 	}
-	eps, err := server.Listen(profiles.LocalListenSpec)
+	eps, err := server.Listen(veyron2.GetListenSpec(ctx))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -296,12 +291,8 @@ func TestCalculator(t *testing.T) {
 }
 
 func TestArith(t *testing.T) {
-	r, err := rt.New()
-	if err != nil {
-		t.Fatalf("Error initializing runtime: %v", err)
-	}
-	defer r.Cleanup()
-	ctx := r.NewContext()
+	ctx, shutdown := veyron2.Init()
+	defer shutdown()
 
 	// TODO(bprosnitz) Split this test up -- it is quite long and hard to debug.
 
@@ -317,7 +308,7 @@ func TestArith(t *testing.T) {
 	for i, obj := range objects {
 		server := newServer(ctx)
 		defer server.Stop()
-		eps, err := server.Listen(profiles.LocalListenSpec)
+		eps, err := server.Listen(veyron2.GetListenSpec(ctx))
 		if err != nil {
 			t.Fatal(err)
 		}

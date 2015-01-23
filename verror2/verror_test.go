@@ -9,7 +9,6 @@ import (
 
 	"v.io/core/veyron2"
 	"v.io/core/veyron2/i18n"
-	"v.io/core/veyron2/rt"
 	"v.io/core/veyron2/verror"
 	"v.io/core/veyron2/verror2"
 	"v.io/core/veyron2/vtrace"
@@ -72,17 +71,11 @@ var (
 	v2DE  verror2.E
 )
 
-var globalRT veyron2.Runtime
-
 func init() {
-	var err error
-	globalRT, err = rt.New()
-	if err != nil {
-		panic(err)
-	}
+	rootCtx, shutdown := veyron2.Init()
+	defer shutdown()
 
-	def := globalRT.NewContext()
-	def = i18n.ContextWithLangID(def, en)
+	def := i18n.ContextWithLangID(rootCtx, en)
 	def = verror2.ContextWithComponentName(def, "verror2.test")
 	verror2.SetDefaultContext(def)
 
@@ -108,8 +101,7 @@ func init() {
 
 	// Set up a context that advertises French, on a server called FooServer,
 	// running an operation called aFR0.
-	ctx := globalRT.NewContext()
-	ctx = i18n.ContextWithLangID(ctx, fr)
+	ctx := i18n.ContextWithLangID(rootCtx, fr)
 	ctx = verror2.ContextWithComponentName(ctx, "FooServer")
 	ctx, _ = vtrace.SetNewSpan(ctx, "aFR1")
 
@@ -363,7 +355,7 @@ func TestSubordinateErrors(t *testing.T) {
 	if !strings.Contains(p2str, r2) {
 		t.Errorf("debug string missing error message: %q, %q", p2str, r2)
 	}
-	if !(strings.Contains(p2str, "verror_test.go:338") && strings.Contains(p2str, "verror_test.go:354")) {
+	if !(strings.Contains(p2str, "verror_test.go:330") && strings.Contains(p2str, "verror_test.go:346")) {
 		t.Errorf("debug string missing correct line #: %s", p2str)
 	}
 }

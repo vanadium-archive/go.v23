@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"v.io/core/veyron2/naming"
-	"v.io/core/veyron2/rt"
 
 	_ "v.io/core/veyron/profiles"
 )
@@ -57,11 +56,8 @@ func init() {
 }
 
 func main() {
-	runtime, err := rt.New()
-	if err != nil {
-		vlog.Fatalf("Could not initialize runtime: %v", err)
-	}
-	defer runtime.Cleanup()
+	ctx, shutdown := veyron2.Init()
+	defer shutdown()
 
 	for _, a := range hostPortFlags.addrs {
 		ep, err := runtime.NewEndpoint(naming.FormatEndpoint(a.protocol, a.address))
