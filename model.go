@@ -547,7 +547,7 @@ func Init() (*context.T, Shutdown) {
 
 	// Skip 3 stack frames: runtime.Callers, getStack, Init
 	stack := getStack(3)
-	if initState.runtime != nil && initState.runtime != initState.runtimeHack {
+	if initState.runtime != nil {
 		format := `A runtime has already been initialized."
 The previous initialization was from:
 %s
