@@ -76,7 +76,8 @@ func matchTypeRes(t *testing.T, tname string, tpkg typePkg, tdefs []*compile.Typ
 func namedX(base *vdl.Type) *vdl.Type   { return vdl.NamedType("p.kg/a.x", base) }
 func namedRes(base *vdl.Type) *vdl.Type { return vdl.NamedType("p.kg/a.Res", base) }
 
-var bytesType = vdl.ListType(vdl.ByteType)
+var byteListType = vdl.ListType(vdl.ByteType)
+var byteArrayType = vdl.ArrayType(4, vdl.ByteType)
 
 type typePkg struct {
 	Name       string
@@ -107,7 +108,8 @@ var typeTests = []typeTest{
 	{"Complex64", tp{{"a", `type Res complex64`, vdl.Complex64Type, ""}}},
 	{"Complex128", tp{{"a", `type Res complex128`, vdl.Complex128Type, ""}}},
 	{"String", tp{{"a", `type Res string`, vdl.StringType, ""}}},
-	{"Bytes", tp{{"a", `type Res []byte`, bytesType, ""}}},
+	{"ByteList", tp{{"a", `type Res []byte`, byteListType, ""}}},
+	{"ByteArray", tp{{"a", `type Res [4]byte`, byteArrayType, ""}}},
 	{"Typeobject", tp{{"a", `type Res typeobject`, nil, "any and typeobject cannot be renamed"}}},
 	{"Any", tp{{"a", `type Res any`, nil, "any and typeobject cannot be renamed"}}},
 	{"Error", tp{{"a", `type Res error`, nil, "error cannot be renamed"}}},
@@ -136,7 +138,8 @@ var typeTests = []typeTest{
 	{"NComplex64", tp{{"a", `type Res x;type x complex64`, namedX(vdl.Complex64Type), ""}}},
 	{"NComplex128", tp{{"a", `type Res x;type x complex128`, namedX(vdl.Complex128Type), ""}}},
 	{"NString", tp{{"a", `type Res x;type x string`, namedX(vdl.StringType), ""}}},
-	{"NBytes", tp{{"a", `type Res x;type x []byte`, namedX(bytesType), ""}}},
+	{"NByteList", tp{{"a", `type Res x;type x []byte`, namedX(byteListType), ""}}},
+	{"NByteArray", tp{{"a", `type Res x;type x [4]byte`, namedX(byteArrayType), ""}}},
 	{"NEnum", tp{{"a", `type Res x;type x enum{A;B;C}`, namedX(vdl.EnumType("A", "B", "C")), ""}}},
 	{"NArray", tp{{"a", `type Res x;type x [2]bool`, namedX(vdl.ArrayType(2, vdl.BoolType)), ""}}},
 	{"NList", tp{{"a", `type Res x;type x []int32`, namedX(vdl.ListType(vdl.Int32Type)), ""}}},
@@ -184,4 +187,5 @@ var typeTests = []typeTest{
 	{"UnterminatedPath2", tp{
 		{"a", `type Res bool`, vdl.BoolType, ""},
 		{"b", `import "p.kg/a";type Res a".Res`, nil, "syntax error"}}},
+	{"ZeroLengthArray", tp{{"a", `type Res [0]int32`, nil, "negative or zero array length"}}},
 }

@@ -514,8 +514,15 @@ func (v *Value) Assign(x *Value) *Value {
 		// Assign(nil) sets the zero value.
 		v.rep = zeroRep(v.t)
 	case v.t == x.t:
-		// Types are identical, v is assigned a copy of the underlying rep.
-		v.rep = copyRep(x.t, x.rep)
+		if v.t.kind == Byte {
+			// Byte needs to be handled as a special case.
+			// If the byte is backed by a byte array, the value at the byte array index needs to be updated.
+			// Use AssignByte to handle this logic.
+			v.AssignByte(x.Byte())
+		} else {
+			// Types are identical, v is assigned a copy of the underlying rep.
+			v.rep = copyRep(x.t, x.rep)
+		}
 	case v.t.kind == Any:
 		// Assigning into Any, v is assigned a copy of the value.
 		v.rep = CopyValue(x)

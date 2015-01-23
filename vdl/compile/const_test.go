@@ -111,6 +111,22 @@ func makeIntArray(vals ...int64) *vdl.Value {
 	return arrayv
 }
 
+func makeByteList(vals ...byte) *vdl.Value {
+	arrayv := vdl.ZeroValue(vdl.ListType(vdl.ByteType)).AssignLen(len(vals))
+	for index, v := range vals {
+		arrayv.Index(index).AssignByte(v)
+	}
+	return arrayv
+}
+
+func makeByteArray(vals ...byte) *vdl.Value {
+	arrayv := vdl.ZeroValue(vdl.ArrayType(len(vals), vdl.ByteType))
+	for index, v := range vals {
+		arrayv.Index(index).AssignByte(v)
+	}
+	return arrayv
+}
+
 func makeStringSet(keys ...string) *vdl.Value {
 	setv := vdl.ZeroValue(vdl.SetType(vdl.StringType))
 	for _, k := range keys {
@@ -294,6 +310,12 @@ var constTests = []struct {
 		"IntArray",
 		cp{{"a", `const Res = [3]int64{0,1,2}`, makeIntArray(0, 1, 2), ""}}},
 	{
+		"IntArrayShorterInit",
+		cp{{"a", `const Res = [3]int64{0,1}`, makeIntArray(0, 1, 0), ""}}},
+	{
+		"IntArrayLongerInit",
+		cp{{"a", `const Res = [3]int64{0,1,2,3}`, nil, "index 3 out of range"}}},
+	{
 		"IntArrayKeys",
 		cp{{"a", `const Res = [3]int64{1:1, 2:2, 0:0}`, makeIntArray(0, 1, 2), ""}}},
 	{
@@ -326,6 +348,22 @@ var constTests = []struct {
 	{
 		"InvalidIndexType",
 		cp{{"a", `const A = [3]int64{3,4,2}; const Res = A["ok"]`, nil, "error converting"}}},
+
+	// Test byte list literals.
+	{
+		"ByteList",
+		cp{{"a", `const Res = []byte{0,1,2}`, makeByteList(0, 1, 2), ""}}},
+
+	// Test byte array literals.
+	{
+		"ByteArray",
+		cp{{"a", `const Res = [3]byte{0,1,2}`, makeByteArray(0, 1, 2), ""}}},
+	{
+		"ByteArrayShorterInit",
+		cp{{"a", `const Res = [3]byte{0,1}`, makeByteArray(0, 1, 0), ""}}},
+	{
+		"ByteArrayLongerInit",
+		cp{{"a", `const Res = [3]byte{0,1,2,3}`, nil, "index 3 out of range"}}},
 
 	// Test set literals.
 	{

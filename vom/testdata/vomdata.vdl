@@ -75,13 +75,73 @@ const Tests = []TestCase {
 	// 34                   MsgID                             26
 	//                      ValueMsg                          26 [[]byte]
 	// 03                   ByteLen                            3 [bytes len]
-	// 646566               PrimValue                      "def" [bytes]
-	// DumpStatus{MsgID: 26, MsgN: 6, Value: []byte("def")}
+	// 000000               PrimValue             "\x00\x00\x00" [bytes]
+	// DumpStatus{MsgID: 26, MsgN: 6, Value: []byte("\x00\x00\x00")}
 	{
-		`[]byte("def")`,
-		[]byte("def"),
-		"803403646566",
+		`[]byte("\x00\x00\x00")`,
+		[]byte("\x00\x00\x00"),
+		"803403000000",
 		"[]byte",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// 34                   MsgID                             26
+	//                      ValueMsg                          26 [[]byte]
+	// 04                   ByteLen                            4 [bytes len]
+	// 61646566             PrimValue                     "adef" [bytes]
+	// DumpStatus{MsgID: 26, MsgN: 7, Value: []byte("adef")}
+	{
+		`[]byte("adef")`,
+		[]byte("adef"),
+		"80340461646566",
+		"[]byte",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// ff81                 MsgID                            -65
+	//                      TypeMsg                           65
+	// 08                   MsgLen                             8
+	// 12                   TypeID                            18 [v.io/core/veyron2/vom.WireArray struct{Name string;Elem v.io/core/veyron2/vom.TypeID uint64;Len uint64}]
+	// 01                   Index                              1 [v.io/core/veyron2/vom.WireArray.Name]
+	// 00                   ByteLen                            0 [string len]
+	//                      PrimValue                         "" [string]
+	// 02                   Index                              2 [v.io/core/veyron2/vom.WireArray.Elem]
+	// 05                   PrimValue                          5 [uint]
+	// 03                   Index                              3 [v.io/core/veyron2/vom.WireArray.Len]
+	// 04                   PrimValue                          4 [uint]
+	// 00                   End                                0 [v.io/core/veyron2/vom.WireArray END]
+	// ff82                 MsgID                             65
+	//                      ValueMsg                          65 [[4]byte]
+	//                      ByteLen                            4 [bytes len]
+	// 00000000             PrimValue         "\x00\x00\x00\x00" [bytes]
+	// DumpStatus{MsgID: 65, MsgN: 6, Value: [4]byte("\x00\x00\x00\x00")}
+	{
+		`[4]byte("\x00\x00\x00\x00")`,
+		[4]byte("\x00\x00\x00\x00"),
+		"80ff81081201000205030400ff8200000000",
+		"[4]byte",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// ff81                 MsgID                            -65
+	//                      TypeMsg                           65
+	// 08                   MsgLen                             8
+	// 12                   TypeID                            18 [v.io/core/veyron2/vom.WireArray struct{Name string;Elem v.io/core/veyron2/vom.TypeID uint64;Len uint64}]
+	// 01                   Index                              1 [v.io/core/veyron2/vom.WireArray.Name]
+	// 00                   ByteLen                            0 [string len]
+	//                      PrimValue                         "" [string]
+	// 02                   Index                              2 [v.io/core/veyron2/vom.WireArray.Elem]
+	// 05                   PrimValue                          5 [uint]
+	// 03                   Index                              3 [v.io/core/veyron2/vom.WireArray.Len]
+	// 04                   PrimValue                          4 [uint]
+	// 00                   End                                0 [v.io/core/veyron2/vom.WireArray END]
+	// ff82                 MsgID                             65
+	//                      ValueMsg                          65 [[4]byte]
+	//                      ByteLen                            4 [bytes len]
+	// 61626364             PrimValue                     "abcd" [bytes]
+	// DumpStatus{MsgID: 65, MsgN: 6, Value: [4]byte("abcd")}
+	{
+		`[4]byte("abcd")`,
+		[4]byte("abcd"),
+		"80ff81081201000205030400ff8261626364",
+		"[4]byte",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// 0a                   MsgID                              5
@@ -1511,6 +1571,144 @@ const Tests = []TestCase {
 		NString("abc"),
 		"80ff812c100126762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e537472696e67020400ff8203616263",
 		"v.io/core/veyron2/vom/testdata.NString string",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// ff81                 MsgID                            -65
+	//                      TypeMsg                           65
+	// 2f                   MsgLen                            47
+	// 13                   TypeID                            19 [v.io/core/veyron2/vom.WireList struct{Name string;Elem v.io/core/veyron2/vom.TypeID uint64}]
+	// 01                   Index                              1 [v.io/core/veyron2/vom.WireList.Name]
+	// 29                   ByteLen                           41 [string len]
+	// 762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e42797465536c696365 PrimValue       "v.io/core/veyron2/vom/testdata.NByteSlice" [string]
+	// 02                   Index                              2 [v.io/core/veyron2/vom.WireList.Elem]
+	// 05                   PrimValue                          5 [uint]
+	// 00                   End                                0 [v.io/core/veyron2/vom.WireList END]
+	// ff82                 MsgID                             65
+	//                      ValueMsg                          65 [v.io/core/veyron2/vom/testdata.NByteSlice []byte]
+	// 00                   ByteLen                            0 [bytes len]
+	//                      PrimValue                         "" [bytes]
+	// DumpStatus{MsgID: 65, MsgN: 3, Value: v.io/core/veyron2/vom/testdata.NByteSlice []byte("")}
+	{
+		`NByteSlice("")`,
+		NByteSlice(""),
+		"80ff812f130129762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e42797465536c696365020500ff8200",
+		"v.io/core/veyron2/vom/testdata.NByteSlice []byte",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// ff81                 MsgID                            -65
+	//                      TypeMsg                           65
+	// 2f                   MsgLen                            47
+	// 13                   TypeID                            19 [v.io/core/veyron2/vom.WireList struct{Name string;Elem v.io/core/veyron2/vom.TypeID uint64}]
+	// 01                   Index                              1 [v.io/core/veyron2/vom.WireList.Name]
+	// 29                   ByteLen                           41 [string len]
+	// 762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e42797465536c696365 PrimValue       "v.io/core/veyron2/vom/testdata.NByteSlice" [string]
+	// 02                   Index                              2 [v.io/core/veyron2/vom.WireList.Elem]
+	// 05                   PrimValue                          5 [uint]
+	// 00                   End                                0 [v.io/core/veyron2/vom.WireList END]
+	// ff82                 MsgID                             65
+	//                      ValueMsg                          65 [v.io/core/veyron2/vom/testdata.NByteSlice []byte]
+	// 03                   ByteLen                            3 [bytes len]
+	// 000000               PrimValue             "\x00\x00\x00" [bytes]
+	// DumpStatus{MsgID: 65, MsgN: 6, Value: v.io/core/veyron2/vom/testdata.NByteSlice []byte("\x00\x00\x00")}
+	{
+		`NByteSlice("\x00\x00\x00")`,
+		NByteSlice("\x00\x00\x00"),
+		"80ff812f130129762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e42797465536c696365020500ff8203000000",
+		"v.io/core/veyron2/vom/testdata.NByteSlice []byte",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// ff81                 MsgID                            -65
+	//                      TypeMsg                           65
+	// 2f                   MsgLen                            47
+	// 13                   TypeID                            19 [v.io/core/veyron2/vom.WireList struct{Name string;Elem v.io/core/veyron2/vom.TypeID uint64}]
+	// 01                   Index                              1 [v.io/core/veyron2/vom.WireList.Name]
+	// 29                   ByteLen                           41 [string len]
+	// 762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e42797465536c696365 PrimValue       "v.io/core/veyron2/vom/testdata.NByteSlice" [string]
+	// 02                   Index                              2 [v.io/core/veyron2/vom.WireList.Elem]
+	// 05                   PrimValue                          5 [uint]
+	// 00                   End                                0 [v.io/core/veyron2/vom.WireList END]
+	// ff82                 MsgID                             65
+	//                      ValueMsg                          65 [v.io/core/veyron2/vom/testdata.NByteSlice []byte]
+	// 03                   ByteLen                            3 [bytes len]
+	// 616263               PrimValue                      "abc" [bytes]
+	// DumpStatus{MsgID: 65, MsgN: 6, Value: v.io/core/veyron2/vom/testdata.NByteSlice []byte("abc")}
+	{
+		`NByteSlice("abc")`,
+		NByteSlice("abc"),
+		"80ff812f130129762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e42797465536c696365020500ff8203616263",
+		"v.io/core/veyron2/vom/testdata.NByteSlice []byte",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// ff81                 MsgID                            -65
+	//                      TypeMsg                           65
+	// 31                   MsgLen                            49
+	// 12                   TypeID                            18 [v.io/core/veyron2/vom.WireArray struct{Name string;Elem v.io/core/veyron2/vom.TypeID uint64;Len uint64}]
+	// 01                   Index                              1 [v.io/core/veyron2/vom.WireArray.Name]
+	// 29                   ByteLen                           41 [string len]
+	// 762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e427974654172726179 PrimValue       "v.io/core/veyron2/vom/testdata.NByteArray" [string]
+	// 02                   Index                              2 [v.io/core/veyron2/vom.WireArray.Elem]
+	// 05                   PrimValue                          5 [uint]
+	// 03                   Index                              3 [v.io/core/veyron2/vom.WireArray.Len]
+	// 04                   PrimValue                          4 [uint]
+	// 00                   End                                0 [v.io/core/veyron2/vom.WireArray END]
+	// ff82                 MsgID                             65
+	//                      ValueMsg                          65 [v.io/core/veyron2/vom/testdata.NByteArray [4]byte]
+	//                      ByteLen                            4 [bytes len]
+	// 00000000             PrimValue         "\x00\x00\x00\x00" [bytes]
+	// DumpStatus{MsgID: 65, MsgN: 6, Value: v.io/core/veyron2/vom/testdata.NByteArray [4]byte("\x00\x00\x00\x00")}
+	{
+		`NByteArray("\x00\x00\x00\x00")`,
+		NByteArray("\x00\x00\x00\x00"),
+		"80ff8131120129762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e4279746541727261790205030400ff8200000000",
+		"v.io/core/veyron2/vom/testdata.NByteArray [4]byte",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// ff81                 MsgID                            -65
+	//                      TypeMsg                           65
+	// 31                   MsgLen                            49
+	// 12                   TypeID                            18 [v.io/core/veyron2/vom.WireArray struct{Name string;Elem v.io/core/veyron2/vom.TypeID uint64;Len uint64}]
+	// 01                   Index                              1 [v.io/core/veyron2/vom.WireArray.Name]
+	// 29                   ByteLen                           41 [string len]
+	// 762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e427974654172726179 PrimValue       "v.io/core/veyron2/vom/testdata.NByteArray" [string]
+	// 02                   Index                              2 [v.io/core/veyron2/vom.WireArray.Elem]
+	// 05                   PrimValue                          5 [uint]
+	// 03                   Index                              3 [v.io/core/veyron2/vom.WireArray.Len]
+	// 04                   PrimValue                          4 [uint]
+	// 00                   End                                0 [v.io/core/veyron2/vom.WireArray END]
+	// ff82                 MsgID                             65
+	//                      ValueMsg                          65 [v.io/core/veyron2/vom/testdata.NByteArray [4]byte]
+	//                      ByteLen                            4 [bytes len]
+	// 00000000             PrimValue         "\x00\x00\x00\x00" [bytes]
+	// DumpStatus{MsgID: 65, MsgN: 6, Value: v.io/core/veyron2/vom/testdata.NByteArray [4]byte("\x00\x00\x00\x00")}
+	{
+		`NByteArray("\x00\x00\x00\x00")`,
+		NByteArray("\x00\x00\x00\x00"),
+		"80ff8131120129762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e4279746541727261790205030400ff8200000000",
+		"v.io/core/veyron2/vom/testdata.NByteArray [4]byte",
+	},
+	// 80                   Magic                            128 [vom version 0]
+	// ff81                 MsgID                            -65
+	//                      TypeMsg                           65
+	// 31                   MsgLen                            49
+	// 12                   TypeID                            18 [v.io/core/veyron2/vom.WireArray struct{Name string;Elem v.io/core/veyron2/vom.TypeID uint64;Len uint64}]
+	// 01                   Index                              1 [v.io/core/veyron2/vom.WireArray.Name]
+	// 29                   ByteLen                           41 [string len]
+	// 762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e427974654172726179 PrimValue       "v.io/core/veyron2/vom/testdata.NByteArray" [string]
+	// 02                   Index                              2 [v.io/core/veyron2/vom.WireArray.Elem]
+	// 05                   PrimValue                          5 [uint]
+	// 03                   Index                              3 [v.io/core/veyron2/vom.WireArray.Len]
+	// 04                   PrimValue                          4 [uint]
+	// 00                   End                                0 [v.io/core/veyron2/vom.WireArray END]
+	// ff82                 MsgID                             65
+	//                      ValueMsg                          65 [v.io/core/veyron2/vom/testdata.NByteArray [4]byte]
+	//                      ByteLen                            4 [bytes len]
+	// 61626364             PrimValue                     "abcd" [bytes]
+	// DumpStatus{MsgID: 65, MsgN: 6, Value: v.io/core/veyron2/vom/testdata.NByteArray [4]byte("abcd")}
+	{
+		`NByteArray("abcd")`,
+		NByteArray("abcd"),
+		"80ff8131120129762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e4279746541727261790205030400ff8261626364",
+		"v.io/core/veyron2/vom/testdata.NByteArray [4]byte",
 	},
 	// 80                   Magic                            128 [vom version 0]
 	// ff81                 MsgID                            -65
