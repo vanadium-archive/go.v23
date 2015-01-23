@@ -13,26 +13,46 @@ import (
 // typeNames holds a mapping between VDL type and generated type name.
 type typeNames map[*vdl.Type]string
 
-// LookupName looks up the name of a type.
-// If it is already generated (in tn), it looks up the name.
-// If it is an unnamed type with built-in vom.js support (eg. primitives, any)
-// a pointer to the vom type helper (eg. Types.INT32) is produced.
-// Otherwise it produces a name referencing a type in another package of the form
-// "[Package].[Name]".
-func (tn typeNames) LookupName(t *vdl.Type) string {
+// LookupConstructor returns a string representing the constructor of the type.
+// Several cases:
+// - Local package type (and has been added to tn), return
+// Registry.lookupOrCreateConstructor(_typeNameHere)
+// - Builtin
+// This is not supported. Fail.
+// - Type in other package
+// Return pkgName.ConstructorName
+func (tn typeNames) LookupConstructor(t *vdl.Type) string {
+	if builtInName, ok := builtinJSType(t); ok {
+		return tn.constructorFromTypeName(builtInName)
+	}
+
 	if name, ok := tn[t]; ok {
-		return name
+		return tn.constructorFromTypeName(name)
 	}
 
 	pkgPath, name := vdl.SplitIdent(t.Name())
+	pkgParts := strings.Split(pkgPath, "/")
+	pkgName := pkgParts[len(pkgParts)-1]
+	return fmt.Sprintf("%s.%s", pkgName, name)
+}
 
+func (tn typeNames) constructorFromTypeName(name string) string {
+	return "(Registry.lookupOrCreateConstructor(" + name + "))"
+}
+
+// LookupType returns a string representing the type.
+// - If it is a built in type, return the name.
+// - Otherwise get type type from the constructor.
+func (tn typeNames) LookupType(t *vdl.Type) string {
 	if builtInName, ok := builtinJSType(t); ok {
 		return builtInName
 	}
 
-	pkgParts := strings.Split(pkgPath, "/")
-	pkgName := pkgParts[len(pkgParts)-1]
-	return fmt.Sprintf("%s.%s", pkgName, name)
+	if name, ok := tn[t]; ok {
+		return name
+	}
+
+	return "new " + tn.LookupConstructor(t) + "()._type"
 }
 
 // SortedList returns a list of type and name pairs, sorted by name.

@@ -25,7 +25,7 @@ func makeTypeDefinitionsString(jsnames typeNames) string {
 
 	for _, def := range sortedDefs {
 		if def.Type.Name() != "" {
-			str += makeConstructorDefinitionString(def.Name, def.Type)
+			str += makeConstructorDefinitionString(def.Type, jsnames)
 		}
 	}
 
@@ -67,13 +67,13 @@ func makeTypeFieldAssignmentString(jsname string, t *vdl.Type, jsnames typeNames
 	// elem
 	switch t.Kind() {
 	case vdl.Optional, vdl.Array, vdl.List, vdl.Map:
-		str += fmt.Sprintf("%s.elem = %s;\n", jsname, jsnames.LookupName(t.Elem()))
+		str += fmt.Sprintf("%s.elem = %s;\n", jsname, jsnames.LookupType(t.Elem()))
 	}
 
 	// key
 	switch t.Kind() {
 	case vdl.Set, vdl.Map:
-		str += fmt.Sprintf("%s.key = %s;\n", jsname, jsnames.LookupName(t.Key()))
+		str += fmt.Sprintf("%s.key = %s;\n", jsname, jsnames.LookupType(t.Key()))
 	}
 
 	// fields
@@ -85,7 +85,7 @@ func makeTypeFieldAssignmentString(jsname string, t *vdl.Type, jsnames typeNames
 				str += ", "
 			}
 			field := t.Field(i)
-			str += fmt.Sprintf("{name: %q, type: %s}", field.Name, jsnames.LookupName(field.Type))
+			str += fmt.Sprintf("{name: %q, type: %s}", field.Name, jsnames.LookupType(field.Type))
 		}
 		str += "];\n"
 	}
@@ -95,9 +95,10 @@ func makeTypeFieldAssignmentString(jsname string, t *vdl.Type, jsnames typeNames
 
 // makeConstructorDefinitionString creates a string that defines the constructor for the type.
 // e.g. "module.exports.NamedBool = Registry.lookupOrCreateConstructor(_typeNamedBool)"
-func makeConstructorDefinitionString(jsname string, t *vdl.Type) string {
+func makeConstructorDefinitionString(t *vdl.Type, jsnames typeNames) string {
 	_, name := vdl.SplitIdent(t.Name())
-	return fmt.Sprintf("module.exports.%s = Registry.lookupOrCreateConstructor(%s, %q);\n", name, jsname, name)
+	ctorName := jsnames.LookupConstructor(t)
+	return fmt.Sprintf("module.exports.%s = %s;\n", name, ctorName)
 }
 
 func jsKind(k vdl.Kind) string {

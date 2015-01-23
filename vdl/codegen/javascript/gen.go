@@ -197,7 +197,7 @@ func untypedConst(names typeNames, v *vdl.Value) string {
 		ix, innerVal := v.UnionField()
 		return fmt.Sprintf("{ %q: %v }", vdlutil.ToCamelCase(v.Type().Field(ix).Name), untypedConst(names, innerVal))
 	case vdl.TypeObject:
-		return names.LookupName(v.TypeObject())
+		return names.LookupType(v.TypeObject())
 	default:
 		panic(fmt.Errorf("vdl: untypedConst unhandled type %v %v", v.Kind(), v.Type()))
 	}
@@ -217,8 +217,8 @@ func typedConst(names typeNames, v *vdl.Value) string {
 	case vdl.Any, vdl.TypeObject:
 		return untypedConst(names, v)
 	default:
-		return fmt.Sprintf("new (Registry.lookupOrCreateConstructor(%s))(%s)",
-			names.LookupName(v.Type()),
+		return fmt.Sprintf("new %s(%s)",
+			names.LookupConstructor(v.Type()),
 			untypedConst(names, v))
 	}
 }
@@ -259,7 +259,7 @@ func generateMethodArguments(args []*compile.Arg, names typeNames) string {
       doc: %s,
       type: %s
     },
-    `, arg.Name, quoteStripDoc(arg.Doc), names.LookupName(arg.Type))
+    `, arg.Name, quoteStripDoc(arg.Doc), names.LookupType(arg.Type))
 	}
 	ret += "]"
 	return ret
@@ -276,7 +276,7 @@ func generateMethodStreaming(streaming *vdl.Type, names typeNames) string {
       doc: '',
       type: %s
     }`,
-		names.LookupName(streaming))
+		names.LookupType(streaming))
 }
 
 // Returns a slice of embeddings with the proper qualified identifiers.

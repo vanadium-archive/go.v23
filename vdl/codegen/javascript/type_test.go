@@ -12,12 +12,13 @@ const unnamedTypeFieldName = "UnnamedTypeField"
 
 func getTestTypes() (names typeNames, tyStruct, tyList, tyBool *vdl.Type, outErr error) {
 	var builder vdl.TypeBuilder
-	namedBool := builder.Named("NamedBool").AssignBase(vdl.BoolType)
+	namedBool := builder.Named("otherPkg.NamedBool").AssignBase(vdl.BoolType)
 	listType := builder.List()
 	namedList := builder.Named("NamedList").AssignBase(listType)
 	structType := builder.Struct()
 	namedStruct := builder.Named("NamedStruct").AssignBase(structType)
 	structType.AppendField("List", namedList)
+	structType.AppendField("Bool", namedBool)
 	structType.AppendField(unnamedTypeFieldName, builder.List().AssignElem(vdl.StringType))
 	listType.AssignElem(namedStruct)
 	if builder.Build() != true {
@@ -48,13 +49,13 @@ func getTestTypes() (names typeNames, tyStruct, tyList, tyBool *vdl.Type, outErr
 			&compile.File{
 				TypeDefs: []*compile.TypeDef{
 					{
-						Type: builtBool,
-					},
-					{
 						Type: builtList,
 					},
 					{
 						Type: builtStruct,
+					},
+					{
+						Type: vdl.ListType(vdl.ByteType),
 					},
 				},
 			},
@@ -73,23 +74,23 @@ func TestType(t *testing.T) {
 	result := makeTypeDefinitionsString(jsnames)
 
 	expectedResult := `var _type1 = new Type();
-var _typeNamedBool = new Type();
+var _type2 = new Type();
 var _typeNamedList = new Type();
 var _typeNamedStruct = new Type();
 _type1.kind = Kind.LIST;
 _type1.name = "";
 _type1.elem = Types.STRING;
-_typeNamedBool.kind = Kind.BOOL;
-_typeNamedBool.name = "NamedBool";
+_type2.kind = Kind.LIST;
+_type2.name = "";
+_type2.elem = Types.BYTE;
 _typeNamedList.kind = Kind.LIST;
 _typeNamedList.name = "NamedList";
 _typeNamedList.elem = _typeNamedStruct;
 _typeNamedStruct.kind = Kind.STRUCT;
 _typeNamedStruct.name = "NamedStruct";
-_typeNamedStruct.fields = [{name: "List", type: _typeNamedList}, {name: "UnnamedTypeField", type: _type1}];
-module.exports.NamedBool = Registry.lookupOrCreateConstructor(_typeNamedBool, "NamedBool");
-module.exports.NamedList = Registry.lookupOrCreateConstructor(_typeNamedList, "NamedList");
-module.exports.NamedStruct = Registry.lookupOrCreateConstructor(_typeNamedStruct, "NamedStruct");
+_typeNamedStruct.fields = [{name: "List", type: _typeNamedList}, {name: "Bool", type: new otherPkg.NamedBool()._type}, {name: "UnnamedTypeField", type: _type1}];
+module.exports.NamedList = (Registry.lookupOrCreateConstructor(_typeNamedList));
+module.exports.NamedStruct = (Registry.lookupOrCreateConstructor(_typeNamedStruct));
 `
 
 	if result != expectedResult {

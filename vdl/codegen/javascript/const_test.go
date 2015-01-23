@@ -27,6 +27,7 @@ func TestTypedConst(t *testing.T) {
 			expected: `new (Registry.lookupOrCreateConstructor(_typeNamedStruct))({
   'list': [
 ],
+  'bool': false,
   'unnamedTypeField': [
 "AStringVal",
 ],
@@ -35,7 +36,7 @@ func TestTypedConst(t *testing.T) {
 		{
 			name:       "bytes test",
 			inputValue: vdl.BytesValue([]byte{1, 2, 3, 4}),
-			expected: `new (Registry.lookupOrCreateConstructor(.))(new Uint8Array([
+			expected: `new (Registry.lookupOrCreateConstructor(_type2))(new Uint8Array([
 1,
 2,
 3,
