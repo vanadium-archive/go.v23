@@ -117,12 +117,6 @@ type Manager interface {
 	Listen(protocol, address string, opts ...ListenerOpt) (Listener, naming.Endpoint, error)
 
 	// Dial creates a VC to the provided remote endpoint.
-	//
-	// Typical options accepted:
-	// opts.RemoteID - Pattern that the blessings presented by the server must match.
-	//
-	// TODO: Should any of these security related options be made explicit
-	// positional arguments?
 	Dial(remote naming.Endpoint, opts ...VCOpt) (VC, error)
 
 	// ShutdownEndpoint closes all VCs (and Flows and Listeners over it)
