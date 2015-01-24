@@ -7,7 +7,6 @@ import (
 	"reflect"
 
 	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/verror"
 	"v.io/core/veyron2/verror2"
 )
 
@@ -90,8 +89,8 @@ type SetTarget interface {
 	// StartKey prepares conversion of the next set key.  FinishKey must be called
 	// to finish the key.
 	StartKey() (key Target, _ error)
-	// FinishKey finishes a prior StartKey call.  An error with ID verror.NotFound
-	// indicates the field name doesn't exist on the target.
+	// FinishKey finishes a prior StartKey call.  ErrFieldNoExist indicates the
+	// key doesn't exist on the target.
 	FinishKey(key Target) error
 }
 
@@ -101,8 +100,8 @@ type MapTarget interface {
 	// be called to finish the key.
 	StartKey() (key Target, _ error)
 	// FinishKeyStartField finishes a prior StartKey call, and starts the
-	// associated field.  An error with ID verror.NotFound indicates the field
-	// name doesn't exist on the target.
+	// associated field.  ErrFieldNoExist indicates the key doesn't exist on the
+	// target.
 	FinishKeyStartField(key Target) (field Target, _ error)
 	// FinishField finishes a prior FinishKeyStartField call.
 	FinishField(key, field Target) error
@@ -111,8 +110,8 @@ type MapTarget interface {
 // FieldsTarget represents conversion from struct or union fields.
 type FieldsTarget interface {
 	// StartField prepares conversion of the field with the given name.
-	// FinishField must be called to finish the field.  An error with ID
-	// verror.NotFound indicates the field name doesn't exist on the target.
+	// FinishField must be called to finish the field.  ErrFieldNoExist indicates
+	// the field name doesn't exist on the target.
 	StartField(name string) (key, field Target, _ error)
 	// FinishField finishes a prior StartField call.
 	FinishField(key, field Target) error
@@ -221,7 +220,7 @@ func FromReflect(target Target, rv reflect.Value) error {
 		}
 		key, field, err := fieldsTarget.StartField(name)
 		if err != nil {
-			return err // no verror.NoExist special-case; union field is required
+			return err // no ErrFieldNoExist special-case; union field is required
 		}
 		// Grab the "Value" field of the concrete field struct.
 		rvFieldValue := rv.Field(0)
@@ -284,7 +283,7 @@ func FromReflect(target Target, rv reflect.Value) error {
 					return err
 				}
 				switch err := setTarget.FinishKey(key); {
-				case verror.Is(err, verror.NoExist):
+				case err == ErrFieldNoExist:
 					continue // silently drop unknown fields
 				case err != nil:
 					return err
@@ -306,7 +305,7 @@ func FromReflect(target Target, rv reflect.Value) error {
 			}
 			field, err := mapTarget.FinishKeyStartField(key)
 			switch {
-			case verror.Is(err, verror.NoExist):
+			case err == ErrFieldNoExist:
 				continue // silently drop unknown fields
 			case err != nil:
 				return err
@@ -330,7 +329,7 @@ func FromReflect(target Target, rv reflect.Value) error {
 			name := tt.Field(fx).Name
 			key, field, err := fieldsTarget.StartField(name)
 			switch {
-			case verror.Is(err, verror.NoExist):
+			case err == ErrFieldNoExist:
 				continue // silently drop unknown fields
 			case err != nil:
 				return err
@@ -483,7 +482,7 @@ func FromValue(target Target, vv *vdl.Value) error {
 				return err
 			}
 			switch err := setTarget.FinishKey(key); {
-			case verror.Is(err, verror.NoExist):
+			case err == ErrFieldNoExist:
 				continue // silently drop unknown fields
 			case err != nil:
 				return err
@@ -505,7 +504,7 @@ func FromValue(target Target, vv *vdl.Value) error {
 			}
 			field, err := mapTarget.FinishKeyStartField(key)
 			switch {
-			case verror.Is(err, verror.NoExist):
+			case err == ErrFieldNoExist:
 				continue // silently drop unknown fields
 			case err != nil:
 				return err
@@ -526,7 +525,7 @@ func FromValue(target Target, vv *vdl.Value) error {
 		for fx := 0; fx < vv.Type().NumField(); fx++ {
 			key, field, err := fieldsTarget.StartField(vv.Type().Field(fx).Name)
 			switch {
-			case verror.Is(err, verror.NoExist):
+			case err == ErrFieldNoExist:
 				continue // silently drop unknown fields
 			case err != nil:
 				return err
@@ -547,7 +546,7 @@ func FromValue(target Target, vv *vdl.Value) error {
 		fx, vvFieldValue := vv.UnionField()
 		key, field, err := fieldsTarget.StartField(vv.Type().Field(fx).Name)
 		if err != nil {
-			return err // no verror.NoExist special-case; union field is required
+			return err // no ErrFieldNoExist special-case; union field is required
 		}
 		if err := FromValue(field, vvFieldValue); err != nil {
 			return err
