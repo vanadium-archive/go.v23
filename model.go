@@ -462,7 +462,6 @@ var initState = &initStateData{}
 type initStateData struct {
 	mu           sync.RWMutex
 	runtime      RuntimeX
-	runtimeHack  RuntimeX // TODO(suharsh,mattr): This is temporary and should be removed.
 	runtimeStack string
 	profile      ProfileInitFunc
 	profileStack string
@@ -506,18 +505,6 @@ Current registration is from:
 	initState.profileStack = stack
 }
 
-// TODO(mattr): this is a short term hack to put us into a situation
-// where we'll have backward compatibility during the transition from
-// Runtime to RuntimeX.  This will be replaced by a real registration
-// mechanism as in the current rt package.
-// For now, this simply must be called before main begins (in an init).
-func RegisterRuntime(name string, r RuntimeX) {
-	initState.mu.Lock()
-	initState.runtime = r
-	initState.runtimeHack = r
-	initState.mu.Unlock()
-}
-
 type Shutdown func()
 
 func getStack(skip int) string {
@@ -540,10 +527,6 @@ func getStack(skip int) string {
 func Init() (*context.T, Shutdown) {
 	initState.mu.Lock()
 	defer initState.mu.Unlock()
-
-	if initState.runtime == initState.runtimeHack {
-		initState.runtime = nil
-	}
 
 	// Skip 3 stack frames: runtime.Callers, getStack, Init
 	stack := getStack(3)

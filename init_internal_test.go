@@ -128,7 +128,6 @@ func TestSecondInitAfterShutdown(t *testing.T) {
 func clear() {
 	initState.mu.Lock()
 	initState.runtime = nil
-	initState.runtimeHack = nil // TODO(suharsh,mattr): This is temporary and should be removed.
 	initState.runtimeStack = ""
 	initState.profile = nil
 	initState.profileStack = ""
