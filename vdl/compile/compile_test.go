@@ -112,10 +112,6 @@ func TestParseAndCompile(t *testing.T) {
 }
 
 const pkg1file1 = `package test1
-errorid (
-	ErrIDFoo
-	ErrIDBar = "some/path.ErrIdOther"
-)
 
 type Scalars struct {
 	A bool

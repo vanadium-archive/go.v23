@@ -101,7 +101,6 @@ import (
 	__context "v.io/core/veyron2/context"
 	__ipc "v.io/core/veyron2/ipc"
 	__vdl "v.io/core/veyron2/vdl"
-	__verror "v.io/core/veyron2/verror"
 )
 
 // ACL represents an Access Control List - a set of blessings that should be
@@ -172,14 +171,6 @@ const Read = Tag("Read") // Operations that do not mutate the state of the objec
 const Write = Tag("Write") // Operations that mutate the state of the object.
 
 const Resolve = Tag("Resolve") // Operations involving namespace navigation.
-
-// The etag passed to SetACL is invalid.  Likely, another client set
-// the ACL already and invalidated the etag.  Use GetACL to fetch a
-// fresh etag.
-const ErrBadEtag = __verror.ID("v.io/core/veyron2/services/security/access.ErrBadEtag")
-
-// The ACL is too big.  Use groups to represent large sets of principals.
-const ErrTooBig = __verror.ID("v.io/core/veyron2/services/security/access.ErrTooBig")
 
 // ObjectClientMethods is the client interface
 // containing Object methods.

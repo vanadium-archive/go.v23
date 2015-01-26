@@ -23,3 +23,5 @@ type Stats interface {
 	// a NoValue error.
 	Value() (any | error) {access.Debug}
 }
+
+// TODO(toddw): Remove stats.go, and add NoValue here with new error syntax.

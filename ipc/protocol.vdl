@@ -172,12 +172,6 @@ type BlessingsRequest struct {
 // or negative integers (which may indicate a bug).
 const NoTimeout = int64(0x7FFFFFFFFFFFFFFF)
 
-errorid(
-	// TODO(toddw): Add a translator for these error categories!
-	//   Transient
-	//   Terminal
-)
-
 // The reserved method names that we currently understand.
 const (
 	// TODO(toddw): Rename GlobMethod to ReservedGlob.

@@ -6,7 +6,6 @@ package security
 import (
 	// The non-user imports are prefixed with "__" to prevent collisions.
 	__vdl "v.io/core/veyron2/vdl"
-	__verror "v.io/core/veyron2/verror"
 )
 
 // BlessingPattern is a pattern that is matched by specific blessings.
@@ -224,6 +223,3 @@ const SignatureForMessageSigning = "S" // Signature.Purpose used by a Principal 
 const SignatureForBlessingCertificates = "B" // Signature.Purpose used by a Principal when signing Certificates for creating blessings.
 
 const SignatureForDischarge = "D" // Signature.Purpose used by a Principal when signing discharges for public-key based third-party caveats.
-
-// Error generated after seeing an unknown caveat uuid.
-const UnknownCaveatUuid = __verror.ID("v.io/core/veyron2/security.UnknownCaveatUuid")

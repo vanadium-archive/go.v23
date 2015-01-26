@@ -23,9 +23,9 @@ type BlessingPattern string
 type Hash string
 
 const (
-        // NoExtension is an optional terminator for a blessing pattern indicating that the pattern
-        // cannot match any extensions of the blessing from that point onwards.
-        NoExtension = "$"
+	// NoExtension is an optional terminator for a blessing pattern indicating that the pattern
+	// cannot match any extensions of the blessing from that point onwards.
+	NoExtension = "$"
 
 	// TODO(ataly, ashankar): The semantics of AllPrincipals breaks monotonicity in
 	// ACLS with NotIn clauses. For instance, the ACL "In: {AllPrincipals}, NotIn: {"foo"}
@@ -103,8 +103,7 @@ type Certificate struct {
 // This identifier should be generated so that it is globally unique and will map to a unique validation function.
 type CaveatUuid [16]byte
 
-// Error generated after seeing an unknown caveat uuid.
-errorid UnknownCaveatUuid
+// TODO(toddw): Specify UnknownCaveatUuid with new error syntax.
 
 // Caveat is a condition on the validity of a blessing/discharge.
 //
@@ -123,16 +122,16 @@ type Caveat struct {
 
 	// Fields for new caveat format:
 
-	Id CaveatUuid // The identifier of the caveat validation function.
-	Data any // Data to be provided to the caveat validation function.
+	Id   CaveatUuid // The identifier of the caveat validation function.
+	Data any        // Data to be provided to the caveat validation function.
 }
 
 // CaveatDescription describes a caveat validator.
 // For a validator to be invoked, a validation function must be registered with the validator description in the language that the function is defined in.
 type CaveatDescription struct {
-	Id CaveatUuid // The identifier of the caveat validation function.
+	Id       CaveatUuid // The identifier of the caveat validation function.
 	DataType typeobject // The type of data expected by the validation function.
-	Doc string // Description of the caveat.
+	Doc      string     // Description of the caveat.
 }
 
 // WireBlessings encapsulates wire format of a set of blessings and the

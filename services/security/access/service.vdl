@@ -209,11 +209,5 @@ type Object interface {
   GetACL() (acl TaggedACLMap, etag string | error) {Admin}
 }
 
-errorid (
-  // The etag passed to SetACL is invalid.  Likely, another client set
-  // the ACL already and invalidated the etag.  Use GetACL to fetch a
-  // fresh etag.
-  ErrBadEtag
-  // The ACL is too big.  Use groups to represent large sets of principals.
-  ErrTooBig
-)
+// TODO(toddw): Remove errors.go and specify ErrBadEtag and ErrTooBig here using
+// new error syntax.

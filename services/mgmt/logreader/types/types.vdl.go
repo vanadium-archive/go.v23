@@ -7,7 +7,6 @@ package types
 import (
 	// The non-user imports are prefixed with "__" to prevent collisions.
 	__vdl "v.io/core/veyron2/vdl"
-	__verror "v.io/core/veyron2/verror"
 )
 
 // LogLine is a log entry from a log file.
@@ -30,6 +29,3 @@ func init() {
 // A special NumEntries value that indicates that all entries should be
 // returned by ReadLog.
 const AllEntries = int32(-1)
-
-// This error indicates that the end of the file was reached.
-const EOF = __verror.ID("v.io/core/veyron2/services/mgmt/logreader/types.EOF")

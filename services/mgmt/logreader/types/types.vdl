@@ -13,5 +13,4 @@ type LogEntry struct {
 // returned by ReadLog.
 const AllEntries = int32(-1)
 
-// This error indicates that the end of the file was reached.
-errorid EOF
+// TODO(toddw): Remove types.go and specify EOF with new error syntax.

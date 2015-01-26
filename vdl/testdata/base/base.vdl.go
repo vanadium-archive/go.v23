@@ -12,7 +12,6 @@ import (
 	__context "v.io/core/veyron2/context"
 	__ipc "v.io/core/veyron2/ipc"
 	__vdl "v.io/core/veyron2/vdl"
-	__verror "v.io/core/veyron2/verror"
 )
 
 type NamedBool bool
@@ -575,10 +574,6 @@ var CTOUnion = __vdl.TypeOf(NamedUnion(NamedUnionA{false}))
 var CTOTypeObject = __vdl.TypeObjectType
 
 var CTOAny = __vdl.AnyType
-
-const ErrIDFoo = __verror.ID("v.io/core/veyron2/vdl/testdata/base.ErrIDFoo")
-
-const ErrIDBar = __verror.ID("some/path.ErrIdOther")
 
 // ServiceAClientMethods is the client interface
 // containing ServiceA methods.
