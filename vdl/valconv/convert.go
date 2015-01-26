@@ -7,19 +7,20 @@ package valconv
 //   rv - refers to reflect.Value
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 
 	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/verror"
 	"v.io/core/veyron2/verror2"
 )
 
 var (
-	errTargetInvalid    = verror.BadArgf("invalid target")
-	errTargetUnsettable = verror.BadArgf("unsettable target")
-	errArrayIndex       = verror.BadArgf("array index out of range")
-	errFieldNotFound    = verror.NoExistf("struct field not found")
+	ErrFieldNoExist = errors.New("field doesn't exist")
+
+	errTargetInvalid    = errors.New("invalid target")
+	errTargetUnsettable = errors.New("unsettable target")
+	errArrayIndex       = errors.New("array index out of range")
 )
 
 var (
@@ -1097,7 +1098,7 @@ func (c convTarget) finishKeyStartField(key convTarget) (convTarget, error) {
 				// means that we should only return a field if the field name matches.
 				name := c.rv.MethodByName("Name").Call(nil)[0].String()
 				if name != key.rv.String() {
-					return convTarget{}, errFieldNotFound
+					return convTarget{}, ErrFieldNoExist
 				}
 				ttField, _ := tt.FieldByName(name)
 				return reflectConv(c.rv.FieldByName("Value"), ttField.Type)
@@ -1106,7 +1107,7 @@ func (c convTarget) finishKeyStartField(key convTarget) (convTarget, error) {
 			ttField, index := tt.FieldByName(key.rv.String())
 			if !rvField.IsValid() || index < 0 {
 				// TODO(toddw): Add a way to track extra and missing fields.
-				return convTarget{}, errFieldNotFound
+				return convTarget{}, ErrFieldNoExist
 			}
 			if rvField.Kind() == reflect.Bool {
 				rvField.SetBool(true)
@@ -1127,7 +1128,7 @@ func (c convTarget) finishKeyStartField(key convTarget) (convTarget, error) {
 			_, index := c.vv.Type().FieldByName(key.vv.RawString())
 			if index < 0 {
 				// TODO(toddw): Add a way to track extra and missing fields.
-				return convTarget{}, errFieldNotFound
+				return convTarget{}, ErrFieldNoExist
 			}
 			vvField := c.vv.Field(index)
 			if vvField.Kind() == vdl.Bool {
@@ -1137,7 +1138,7 @@ func (c convTarget) finishKeyStartField(key convTarget) (convTarget, error) {
 		case vdl.Union:
 			f, index := c.vv.Type().FieldByName(key.vv.RawString())
 			if index < 0 {
-				return convTarget{}, errFieldNotFound
+				return convTarget{}, ErrFieldNoExist
 			}
 			vvField := vdl.ZeroValue(f.Type)
 			return valueConv(vvField), nil
