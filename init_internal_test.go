@@ -47,7 +47,6 @@ func (*mockRuntime) GetLogger(ctx *context.T) vlog.Logger { return nil }
 func (*mockRuntime) SetReservedNameDispatcher(ctx *context.T, server ipc.Dispatcher, opts ...ipc.ServerOpt) *context.T {
 	return nil
 }
-func (*mockRuntime) GetProfile(ctx *context.T) Profile              { return nil }
 func (*mockRuntime) GetAppCycle(ctx *context.T) AppCycle            { return nil }
 func (*mockRuntime) GetListenSpec(ctx *context.T) ipc.ListenSpec    { return ipc.ListenSpec{} }
 func (*mockRuntime) GetPublisher(ctx *context.T) *config.Publisher  { return nil }

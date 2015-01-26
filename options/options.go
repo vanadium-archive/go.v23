@@ -49,7 +49,6 @@ package options
 import (
 	"time"
 
-	"v.io/core/veyron2"
 	"v.io/core/veyron2/ipc"
 	"v.io/core/veyron2/ipc/stream"
 	"v.io/core/veyron2/naming"
@@ -125,12 +124,6 @@ type Namespace struct{ naming.Namespace }
 
 func (Namespace) IPCClientOpt() {}
 func (Namespace) IPCServerOpt() {}
-
-// Profile wraps the veyron2.Profile interface so that we can add
-// functions representing the option annotations
-type Profile struct{ veyron2.Profile }
-
-func (Profile) ROpt() {}
 
 // PreferredProtocolOrder instructs the Runtime implementation to select
 // endpoints with the specified protocols and to order them in the

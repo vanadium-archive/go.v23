@@ -16,7 +16,6 @@ import (
 	"runtime"
 	"sync"
 
-	"v.io/core/veyron2/config"
 	"v.io/core/veyron2/context"
 	"v.io/core/veyron2/ipc"
 	"v.io/core/veyron2/ipc/stream"
@@ -90,83 +89,6 @@ type Platform struct {
 
 func (p *Platform) String() string {
 	return fmt.Sprintf("%s/%s node %s running %s (%s %s) on machine %s", p.Vendor, p.Model, p.Node, p.System, p.Release, p.Version, p.Machine)
-}
-
-// A Profile represents the combination of hardware, operating system,
-// compiler and libraries available to the application. The Profile
-// interface is the runtime representation of the Profiles used in the
-// Veyron Management and Build System to manage and build applications.
-// The Profile interface is thus intended to abstract out the hardware,
-// operating system and library specific implementation so that they
-// can be integrated with the rest of the Veyron runtime. The implementations
-// of the Profile interface are intended to capture all of the dependencies
-// implied by that Profile. For example, if a Profile requires a particular
-// hardware specific library (say Bluetooth support), then the implementation
-// of the Profile should include that dependency; the package implementing
-// the Profile may should expose the additional APIs needed to use the
-// functionality.
-//
-// The Profile interface provides a description of the Profile and the
-// platform it is running on, an initialization hook into the rest of
-// the Veyron runtime and a means of sharing configuration information with
-// the rest of the application as follows:
-//
-// - the Name methods returns the name of the Profile used to build the binary
-// - the Platform method returns a description of the platform the binary is
-//   running on.
-// - the Init method is called by the Runtime after it has fully
-//   initialized itself. Henceforth, the Profile implementation can safely
-//   use the supplied Runtime. This a convenient hook for initialization.
-// - configuration information can be provided to the rest of the
-//   application via the config.Publisher passed to the Init method.
-//   This allows a common set of configuration information to be made
-//   available to all applications without burdening them with understanding
-//   the implementations of how to obtain that information (e.g. dhcp,
-//   network configuration differs).
-//
-// Profiles range from the generic to the very specific (e.g. "linux" or
-// "my-sprinkler-controller-v2". Applications should, in general, use
-// as generic a Profile as possbile.
-// Profiles are registered using veyron2/rt.RegisterProfile and subsequent
-// registrations override prior ones. Profile implementations will generally
-// call RegisterProfile in their init functions and hence importing a
-// profile will be sufficient to register it. Applications are also free
-// to explicitly register profile directly by calling RegisterProfile themselves
-// prior to calling rt.Init.
-//
-// This scheme allows applications to use a pre-supplied Profile as well
-// as for developers to create their own Profiles (to represent their
-// hardware and software system). The Veyron Build System, once fully
-// developed will likely insert generated that uses one of the above schemes
-// to configure Profiles.
-//
-// See the veyron/profiles package for a complete description of the
-// precanned Profiles and how to use them; see veyron2/rt for the registration
-// function used to register new Profiles.
-type Profile interface {
-	// Name returns the name of the Profile used to build this binary.
-	Name() string
-
-	// Runtime returns the name of the Runtime that this Profile requires,
-	// and options to be passed to the Runtime factory.
-	Runtime() (string, []ROpt)
-
-	// Description returns the Description of the Platform.
-	Platform() *Platform
-
-	// Init is called by the Runtime once it has been initialized and
-	// command line flags have been parsed. It returns an instance of
-	// the AppCycle interface to be used for managing this runtime.
-	// Init will be called once and only once by the Runtime.
-	// TODO(suharshs, mattr): Once we switch to the new profile init func, we can remove this.
-	Init(rt Runtime, p *config.Publisher) (AppCycle, error)
-
-	String() string
-
-	// Cleanup shuts down any internal state maintained by the Profile.
-	// It will be called by the Runtime from its Cleanup method.
-	// TODO(suharshs, mattr): Once we switch to the new profile init func, we can remove this.
-	Cleanup()
 }
 
 // AppCycle is the interface for managing the shutdown of a runtime
@@ -325,10 +247,6 @@ type RuntimeX interface {
 	// GetLogger returns the current logger.
 	GetLogger(ctx *context.T) vlog.Logger
 
-	// GetProfile gets the current profile.
-	// TODO(suharshs, mattr): Again not completely sure yet if we actually need this.
-	GetProfile(ctx *context.T) Profile
-
 	// GetAppCycle gets the current AppCycle.
 	GetAppCycle(ctx *context.T) AppCycle
 
@@ -430,11 +348,6 @@ func GetLogger(ctx *context.T) vlog.Logger {
 	return initState.currentRuntime().GetLogger(ctx)
 }
 
-// GetProfile gets the current Profile.
-func GetProfile(ctx *context.T) Profile {
-	return initState.currentRuntime().GetProfile(ctx)
-}
-
 // GetAppCycle gets the current AppCycle.
 func GetAppCycle(ctx *context.T) AppCycle {
 	return initState.currentRuntime().GetAppCycle(ctx)
@@ -463,7 +376,7 @@ type initStateData struct {
 	mu           sync.RWMutex
 	runtime      RuntimeX
 	runtimeStack string
-	profile      ProfileInitFunc
+	profile      Profile
 	profileStack string
 }
 
@@ -480,11 +393,49 @@ other veyron operations.`)
 	return i.runtime
 }
 
-// TODO(mattr, suharshs): Write thorough documentation for this type.
-type ProfileInitFunc func(ctx *context.T) (RuntimeX, *context.T, Shutdown, error)
+// A profile represents the combination of hardware, operating system,
+// compiler and libraries available to the application. The Profile
+// creates a runtime implementation with the required hardware, operating system
+// and library specific dependencies included.
+//
+// The implementations of the Profile are intended to capture all of
+// the dependencies implied by that profile. For example, if a Profile requires
+// a particular hardware specific library (say Bluetooth support), then the
+// implementation of the Profile should include that dependency and
+// the resulting runtime instance; the package implementing
+// the Profile should expose the additional APIs needed to use the
+// functionality.
+//
+// Profiles range from the generic to the very specific (e.g. "linux" or
+// "my-sprinkler-controller-v2". Applications should, in general, use
+// as generic a Profile as possbile.
+//
+// Profiles are registered using veyron2/RegisterProfileInit and
+// subsequent registrations will panic. Packages that implement profiles will
+// typically call RegisterProfileInit in their init functions so importing a
+// profile will be sufficient to register it. Only one profile can be registered
+// in any program, and subsequent registrations will panic.  Typically a
+// program's main package will be the only place to import a profile.
+//
+// This scheme allows applications to use a pre-supplied Profile as well
+// as for developers to create their own Profiles (to represent their
+// hardware and software system). The Veyron Build System, once fully
+// developed will likely insert generated that uses one of the above schemes
+// to configure profiles.
+//
+// At a minimum a Profile must do the following:
+//   - Parse veyron/lib/flags runtime flags.
+//   - Initialize a Runtime implementation (providing the flags to it)
+//   - Return a Runtime implemenation, initial context, Shutdown func.
+//
+// See the veyron/profiles package for a complete description of the
+// precanned Profiles and how to use them.
+type Profile func(ctx *context.T) (RuntimeX, *context.T, Shutdown, error)
 
-// TODO(mattr, suharshs): Write thorough documentation for this type.
-func RegisterProfileInit(f ProfileInitFunc) {
+// RegisterProfileInit register the specified Profile.
+// It must be called before veyron2.Init; typically it will be called by an init
+// function. It will panic if called more than once.
+func RegisterProfileInit(f Profile) {
 	// Skip 3 frames: runtime.Callers, getStack, RegisterProfileInit.
 	stack := getStack(3)
 	initState.mu.Lock()
