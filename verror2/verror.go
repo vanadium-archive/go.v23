@@ -557,7 +557,7 @@ var (
 	// incorrectly formatted.
 	// BadState is used when an method is called on an object with
 	BadArg   = Register(pkgPath+".BadArg", NoRetry, "{1:}{2:} Bad argument{:_}")
-	BadState = Register(pkgPath+".BadState", NoRetry, "{1:}{2:} Invalid state: {:_}")
+	BadState = Register(pkgPath+".BadState", NoRetry, "{1:}{2:} Invalid state{:_}")
 
 	// Exist and NoExist are intended for use all system components that
 	// have the notion of a 'name' or 'key' that may or may not exist. The

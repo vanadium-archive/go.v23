@@ -114,11 +114,8 @@ func TestCalculator(t *testing.T) {
 	defer shutdown()
 
 	server := newServer(ctx)
-	if err := server.Serve("", arith.CalculatorServer(&serverCalculator{}), nil); err != nil {
-		t.Fatal(err)
-	}
 	eps, err := server.Listen(veyron2.GetListenSpec(ctx))
-	if err != nil {
+	if err := server.Serve("", arith.CalculatorServer(&serverCalculator{}), nil); err != nil {
 		t.Fatal(err)
 	}
 	root := eps[0].Name()
