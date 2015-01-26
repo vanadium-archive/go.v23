@@ -3,7 +3,9 @@ package ipc
 import (
 	"fmt"
 	"net"
+	"sort"
 	"strings"
+	"time"
 
 	"v.io/core/veyron2/config"
 	"v.io/core/veyron2/context"
@@ -182,7 +184,8 @@ type Server interface {
 	// by the New<setting>Functions above. The Publisher is ignored if
 	// all of the addresses are specified.
 	//
-	// Listen may be called multiple times.
+	// Listen may be called multiple times, but it must be called before
+	// Serve or ServeDispatcher.
 	//
 	// Listen returns the set of endpoints that can be used to reach
 	// this server. A single listen address in the ListenSpec can lead
@@ -235,32 +238,152 @@ type Server interface {
 
 	// AddName adds the specified name to the mount table for the object or
 	// Dispatcher served by this server.
+	// AddName may be called multiple times, but only after Serve or
+	// ServeDispatcher have been called.
 	AddName(name string) error
 
-	// RemoveName removes the specified name from the mount table. It is an
-	// error to specify a name that was not previously added using
-	// Serve/ServeDispatcher or AddName.
-	RemoveName(name string) error
+	// RemoveName removes the specified name from the mount table.
+	// RemoveName may be called multiple times, but only after Serve or
+	// ServeDispatcher have been called.
+	RemoveName(name string)
 
-	// Published returns the rooted names that this server's services have
-	// been published as.
-	//
-	// For example, if the mount table's rooted name is mtep/mt, and
-	// Publish("a") and Publish("b") were called on this server, then
-	// Published would return ["mtep/mt/a", "mtep/mt/b"].
-	Published() ([]string, error)
-
-	// ListenStatus returns the current 'listen' status of the server, in
-	// particular, the status of proxy connections and the current set of
-	// exported endpoints.
-	// TODO(cnicolaou): implement this.
-	// ListenStatus() ([]ProxyStatus, ListenEndpoints)
+	// Status returns the current status of the server, see ServerStatus
+	// for details.
+	Status() ServerStatus
 
 	// Stop gracefully stops all services on this Server.  New calls are
 	// rejected, but any in-flight calls are allowed to complete.  All
 	// published mountpoints are unmounted.  This call waits for this
 	// process to complete, and returns once the server has been shut down.
 	Stop() error
+}
+
+type ProxyStatus struct {
+	// Name of the proxy.
+	Proxy string
+	// Endpoint is the Endpoint that this server is using to receive proxied
+	// requests on. The Endpoint of the proxy itself can be obtained by
+	// resolving its name.
+	Endpoint naming.Endpoint
+	// The error status of the connection to the proxy, nil if the connection
+	// is currently correctly established, the most recent error otherwise.
+	Error error
+}
+
+// ServerState represents the 'state' of the Server.
+type ServerState int
+
+const (
+	// ServerInit is the initial state of the server.
+	ServerInit ServerState = iota
+	// ServerActive indicates that the server is 'active' - i.e. its
+	// Listen, Serve, ServeDispatcher, AddName or RemoveName methods
+	// have been called.
+	ServerActive
+	// ServerStopping indicates that the server has been asked to stop and is
+	// in the process of doing so. It may take a while for the server to
+	// complete this process since it will wait for outstanding operations
+	// to complete gracefully.
+	ServerStopping
+	// ServerStopped indicates that the server has stopped. It can no longer be
+	// used.
+	ServerStopped
+)
+
+type MountStatus struct {
+	// The Name and Server 'address' of this mount table request.
+	Name, Server string
+	// LastMount records the time of the last attempted mount request.
+	LastMount time.Time
+	// LastMountErr records any error reported by the last attempted mount.
+	LastMountErr error
+	// TTL is the TTL supplied for the last mount request.
+	TTL time.Duration
+	// LastUnount records the time of the last attempted unmount request.
+	LastUnmount time.Time
+	// LastUnmountErr records any error reported by the last attempted unmount.
+	LastUnmountErr error
+}
+
+func (i ServerState) String() string {
+	switch i {
+	case ServerInit:
+		return "Initialized"
+	case ServerActive:
+		return "Active"
+	case ServerStopping:
+		return "Stopping"
+	case ServerStopped:
+		return "Stopped"
+	default:
+		return fmt.Sprintf("%s(%T=%d)", "%!s", i, i)
+	}
+}
+
+func (ms MountStatus) String() string {
+	r := ""
+	if !ms.LastMount.IsZero() {
+		r += "Mounted @ " + ms.LastMount.String() + " TTL " + ms.TTL.String()
+		if ms.LastMountErr != nil {
+			r += " " + ms.LastMountErr.Error()
+		}
+	}
+	if !ms.LastUnmount.IsZero() {
+		r += "Unmounted @ " + ms.LastUnmount.String()
+		if ms.LastUnmountErr != nil {
+			r += " " + ms.LastUnmountErr.Error()
+		}
+	}
+	return r
+}
+
+type MountState []MountStatus
+
+type ServerStatus struct {
+	// The current state of the server.
+	State ServerState
+
+	// ServesMountTable is true if this server serves a mount table.
+	ServesMountTable bool
+
+	// Mounts returns the status of the last mount or unmount
+	// operation for every combination of name and server address being
+	// published by this Server
+	Mounts MountState
+
+	// Endpoints contains the set of endpoints currently registered with the
+	// mount table for the names published using this server but excluding
+	// those used for serving proxied requests.
+	Endpoints []naming.Endpoint
+
+	// Proxies contains the status of any proxy connections maintained by
+	// this server.
+	Proxies []ProxyStatus
+}
+
+func (st MountState) dedup(str func(MountStatus) string) []string {
+	m := map[string]bool{}
+	var r []string
+	for _, v := range st {
+		if s := str(v); !m[s] {
+			m[s] = true
+			r = append(r, s)
+		}
+	}
+	sort.Strings(r)
+	return r
+}
+
+// Names returns the current set of names being published by the publisher,
+// these names not rooted at the mounttable.
+func (st MountState) Names() []string {
+	return st.dedup(func(v MountStatus) string { return v.Name })
+}
+
+// Servers retyuns the current set of server addresses being published by
+// the publisher.
+func (st MountState) Servers() []string {
+	return st.dedup(func(v MountStatus) string { return v.Server })
 }
 
 // Dispatcher defines the interface that a server must implement to handle
