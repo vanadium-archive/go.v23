@@ -199,7 +199,7 @@ func init() {
 
 // NoExtension is an optional terminator for a blessing pattern indicating that the pattern
 // cannot match any extensions of the blessing from that point onwards.
-const NoExtension = "$"
+const NoExtension = BlessingPattern("$")
 
 // TODO(ataly, ashankar): The semantics of AllPrincipals breaks monotonicity in
 // ACLS with NotIn clauses. For instance, the ACL "In: {AllPrincipals}, NotIn: {"foo"}

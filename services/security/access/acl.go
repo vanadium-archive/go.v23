@@ -26,7 +26,7 @@ func (acl ACL) pruneBlacklisted(blessings []string) []string {
 	}
 	var filtered []string
 	for _, b := range blessings {
-		if !security.BlessingPattern(b).MatchedBy(acl.NotIn...) {
+		if !security.BlessingPattern(b).MakeNonExtendable().MatchedBy(acl.NotIn...) {
 			filtered = append(filtered, b)
 		}
 	}

@@ -11,26 +11,22 @@ func TestMatchedBy(t *testing.T) {
 	}{
 		{
 			Pattern:      "",
-			DoesNotMatch: v{"ann", "bob", "ann/friend", ""},
+			DoesNotMatch: v{"", "ann", "bob", "ann/friend"},
+		},
+		{
+			Pattern:      "$",
+			DoesNotMatch: v{"", "$", "ann", "bob", "ann/friend"},
 		},
 		{
 			Pattern: "...",
 			Matches: v{"", "ann", "bob", "ann/friend"},
 		},
 		{
-			Pattern:      "",
-			DoesNotMatch: v{"", "ann", "bob", "ann/friend"},
-		},
-		{
-			Pattern:      "ann...",
-			DoesNotMatch: v{"", "ann", "bob", "ann/friend"},
-		},
-		{
-			Pattern:      "ann/.../...",
+			Pattern:      "ann/$/$",
 			DoesNotMatch: v{"", "ann", "bob", "ann/friend", "ann/friend/spouse"},
 		},
 		{
-			Pattern:      "ann/...",
+			Pattern:      "ann",
 			Matches:      v{"ann", "ann/friend", "ann/enemy"},
 			DoesNotMatch: v{"", "bob", "bob/ann"},
 		},
@@ -66,22 +62,33 @@ func TestMatchedByCornerCases(t *testing.T) {
 	if !AllPrincipals.MatchedBy() {
 		t.Errorf("%q.MatchedBy() failed", AllPrincipals)
 	}
+	if NoExtension.MatchedBy() {
+		t.Errorf("%q.MatchedBy() returned true", NoExtension)
+	}
+	if BlessingPattern("ann/$").MatchedBy() {
+		t.Errorf("%q.MatchedBy() returned true", "ann/$")
+	}
+	if BlessingPattern("ann").MatchedBy() {
+		t.Errorf("%q.MatchedBy() returned true", "ann")
+	}
 	if !AllPrincipals.MatchedBy("") {
 		t.Errorf("%q.MatchedBy(%q) failed", AllPrincipals, "")
 	}
-	if BlessingPattern("ann/$").MatchedBy() {
-		t.Errorf("%q.MatchedBy() returned true", "ann")
+	if NoExtension.MatchedBy("") {
+		t.Errorf("%q.MatchedBy() returned true", NoExtension)
 	}
 	if BlessingPattern("ann/$").MatchedBy("") {
+		t.Errorf("%q.MatchedBy(%q) returned true", "ann/$", "")
+	}
+	if BlessingPattern("ann").MatchedBy("") {
 		t.Errorf("%q.MatchedBy(%q) returned true", "ann", "")
 	}
-
 }
 
 func TestIsValid(t *testing.T) {
 	var (
-		valid   = []BlessingPattern{"...", "alice", "al$ice", "alice/$", "alice.jones/$", "alice@google/$", "veyron/alice@google/$", "veyron/alice@google/bob/$", "alice/...", "alice/bob/..."}
-		invalid = []BlessingPattern{"", "alice...", "...alice", "alice...bob", "/alice", "alice/", "...alice/bob", "alice.../bob", "alice/.../bob", "alice/$/$", "alice/.../$"}
+		valid   = []BlessingPattern{"...", "alice", "al$ice", "alice/$", "alice.jones/$", "alice@google/$", "veyron/alice@google/$", "veyron/alice@google/bob/$", "alice", "alice/bob"}
+		invalid = []BlessingPattern{"", "alice...", "...alice", "alice...bob", "/alice", "alice/", "...alice/bob", "alice.../bob", "alice/.../bob", "alice/$/bob", "alice/$/$", "alice/.../$"}
 	)
 	for _, p := range valid {
 		if !p.IsValid() {
