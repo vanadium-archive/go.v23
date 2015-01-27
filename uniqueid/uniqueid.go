@@ -35,29 +35,27 @@ func FromHexString(s string) (ID, error) {
 // A RandomGenerator can generate random IDs.
 // The zero value of RandomGenerator is ready to use.
 type RandomGenerator struct {
-	mu     sync.Mutex
-	id     ID
-	count  uint16
-	resets int
+	mu    sync.Mutex
+	id    ID
+	count uint16
 }
 
 // NewID produces a new probably unique identifier.
 func (g *RandomGenerator) NewID() (ID, error) {
 	g.mu.Lock()
 	defer g.mu.Unlock()
-	if g.count == 0 {
+	if g.count > 0x7fff || g.count == uint16(0) {
+		g.count = 0
+
 		// Either the generator is uninitialized or the counter
 		// has wrapped.  We need a new random prefix.
 		if _, err := rand.Read(g.id[:14]); err != nil {
 			return ID{}, err
 		}
-		// We skip the 0 to ensure that the zero value for ID is
-		// never generated.
-		g.count = 1
-		g.resets++
 	}
 	binary.BigEndian.PutUint16(g.id[14:], g.count)
 	g.count++
+	g.id[14] |= 0x80 // Use this bit as a reserved bit (set to 1) to support future format changes.
 	return g.id, nil
 }
 
