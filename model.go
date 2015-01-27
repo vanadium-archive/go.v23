@@ -138,34 +138,6 @@ type AppCycle interface {
 	Remote() interface{}
 }
 
-// Runtime is the interface that concrete Veyron implementations must
-// implement.
-type Runtime interface {
-	// NewContext creates a new root context.
-	// This should be used when you are doing a new operation that isn't related
-	// to ongoing RPCs.
-	NewContext() *context.T
-
-	// Cleanup cleanly shuts down any internal state, logging, goroutines
-	// etc spawned and managed by the runtime. It is useful for cases where
-	// an application or library wants to be sure that it cleans up after
-	// itself, and should typically be the last thing the program does.
-	// Cleanup does not wait for any inflight requests to complete on
-	// existing servers and clients in the runtime -- these need to be shut
-	// down cleanly in advance if desired.  It does, however, drain the
-	// network connections.
-	Cleanup()
-
-	// ConfigureReservedName sets and configures a dispatcher for the
-	// reserved portion of the name space, i.e. any path starting with '__'
-	// Only one dispatcher may be registered, with subsequent calls
-	// overriding previous settings.
-	ConfigureReservedName(server ipc.Dispatcher, opts ...ipc.ServerOpt)
-}
-
-// The name for the google runtime implementation
-const GoogleRuntimeName = "google"
-
 // The runtime must provide two package level functions, R and NewR.
 // R returns the initialized global instance of the Runtime. NewR will
 // create and initialiaze a new instance of the Runtime; it will typically
@@ -178,7 +150,7 @@ type ROpt interface {
 	ROpt()
 }
 
-// RuntimeX is the interface that concrete Veyron implementations must
+// Runtime is the interface that concrete Veyron implementations must
 // implement.  It will not be used directly by application builders.
 // They will instead use the package level functions that mirror these
 // factories.
@@ -186,7 +158,7 @@ type ROpt interface {
 // namespace is currently a ServerOpt, but it probably makes more sense
 // to just use the current namespace in the context that is passed
 // to NewServer.  The same for Profile and StreamManager.
-type RuntimeX interface {
+type Runtime interface {
 	// NewEndpoint returns an Endpoint by parsing the supplied endpoint
 	// string as per the format described above. It can be used to test
 	// a string to see if it's in valid endpoint format.
@@ -374,13 +346,13 @@ var initState = &initStateData{}
 
 type initStateData struct {
 	mu           sync.RWMutex
-	runtime      RuntimeX
+	runtime      Runtime
 	runtimeStack string
 	profile      Profile
 	profileStack string
 }
 
-func (i *initStateData) currentRuntime() RuntimeX {
+func (i *initStateData) currentRuntime() Runtime {
 	i.mu.RLock()
 	defer i.mu.RUnlock()
 
@@ -430,7 +402,7 @@ other veyron operations.`)
 //
 // See the veyron/profiles package for a complete description of the
 // precanned Profiles and how to use them.
-type Profile func(ctx *context.T) (RuntimeX, *context.T, Shutdown, error)
+type Profile func(ctx *context.T) (Runtime, *context.T, Shutdown, error)
 
 // RegisterProfileInit register the specified Profile.
 // It must be called before veyron2.Init; typically it will be called by an init

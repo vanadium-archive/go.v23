@@ -14,7 +14,7 @@ import (
 )
 
 // Create a mock profile initialization function.
-func MockInit(ctx *context.T) (RuntimeX, *context.T, Shutdown, error) {
+func MockInit(ctx *context.T) (Runtime, *context.T, Shutdown, error) {
 	return &mockRuntime{}, nil, func() {}, nil
 }
 
