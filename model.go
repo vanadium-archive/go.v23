@@ -21,7 +21,6 @@ import (
 	"v.io/core/veyron2/ipc/stream"
 	"v.io/core/veyron2/naming"
 	"v.io/core/veyron2/security"
-	"v.io/core/veyron2/vlog"
 )
 
 const (
@@ -219,13 +218,6 @@ type Runtime interface {
 	// GetNamespace returns the current namespace
 	GetNamespace(ctx *context.T) naming.Namespace
 
-	// SetNewLogger creates a new Logger and attaches it to the
-	// returned context.
-	SetNewLogger(ctx *context.T, name string, opts ...vlog.LoggingOpts) (*context.T, vlog.Logger, error)
-
-	// GetLogger returns the current logger.
-	GetLogger(ctx *context.T) vlog.Logger
-
 	// GetAppCycle gets the current AppCycle.
 	GetAppCycle(ctx *context.T) AppCycle
 
@@ -314,17 +306,6 @@ func SetNewNamespace(ctx *context.T, roots ...string) (*context.T, naming.Namesp
 // GetNamespace returns the current namespace.
 func GetNamespace(ctx *context.T) naming.Namespace {
 	return initState.currentRuntime().GetNamespace(ctx)
-}
-
-// SetNewLogger creates a new Logger and attaches it to the
-// returned context.
-func SetNewLogger(ctx *context.T, name string, opts ...vlog.LoggingOpts) (*context.T, vlog.Logger, error) {
-	return initState.currentRuntime().SetNewLogger(ctx, name, opts...)
-}
-
-// GetLogger returns the current logger.
-func GetLogger(ctx *context.T) vlog.Logger {
-	return initState.currentRuntime().GetLogger(ctx)
 }
 
 // GetAppCycle gets the current AppCycle.

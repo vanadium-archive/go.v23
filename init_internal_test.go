@@ -10,7 +10,6 @@ import (
 	"v.io/core/veyron2/ipc/stream"
 	"v.io/core/veyron2/naming"
 	"v.io/core/veyron2/security"
-	"v.io/core/veyron2/vlog"
 )
 
 // Create a mock profile initialization function.
@@ -41,10 +40,6 @@ func (*mockRuntime) SetNewNamespace(ctx *context.T, roots ...string) (*context.T
 	return nil, nil, nil
 }
 func (*mockRuntime) GetNamespace(ctx *context.T) naming.Namespace { return nil }
-func (*mockRuntime) SetNewLogger(ctx *context.T, name string, opts ...vlog.LoggingOpts) (*context.T, vlog.Logger, error) {
-	return nil, nil, nil
-}
-func (*mockRuntime) GetLogger(ctx *context.T) vlog.Logger { return nil }
 func (*mockRuntime) SetReservedNameDispatcher(ctx *context.T, server ipc.Dispatcher, opts ...ipc.ServerOpt) *context.T {
 	return nil
 }
