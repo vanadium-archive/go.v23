@@ -159,6 +159,13 @@ type ROpt interface {
 // to just use the current namespace in the context that is passed
 // to NewServer.  The same for Profile and StreamManager.
 type Runtime interface {
+
+	// Init is a chance to initialize state in the runtime implementation
+	// after the runtime has been registered in the veyron2 package.
+	// Code that runs in this routine, unlike the code in the runtimes
+	// constructor, can use the veryon2.Get/Set methods.
+	Init(ctx *context.T) error
+
 	// NewEndpoint returns an Endpoint by parsing the supplied endpoint
 	// string as per the format described above. It can be used to test
 	// a string to see if it's in valid endpoint format.
@@ -356,10 +363,16 @@ func (i *initStateData) currentRuntime() Runtime {
 	i.mu.RLock()
 	defer i.mu.RUnlock()
 
-	if i.runtime == nil {
+	if i.runtimeStack == "" {
 		panic(`Calling veyron2 method before initializing the runtime with Init().
 You should call Init from your main or test function before calling
 other veyron operations.`)
+	}
+	if i.runtime == nil {
+		panic(`Calling veyron2 method during runtime initialization.  You cannot
+call veyron2 methods until after the runtime has been constructed.  You may
+be able to move the offending caller to the Runtime.Init() method of your
+runtime implementation.`)
 	}
 
 	return i.runtime
@@ -449,11 +462,17 @@ func getStack(skip int) string {
 // returned previously before calling Init the second time.
 func Init() (*context.T, Shutdown) {
 	initState.mu.Lock()
-	defer initState.mu.Unlock()
+	profile := initState.profile
+	if initState.profile == nil {
+		initState.mu.Unlock()
+		panic("No profile has been registered nor specified. This is most" +
+			" likely because your main package has not imported a profile")
+	}
 
 	// Skip 3 stack frames: runtime.Callers, getStack, Init
 	stack := getStack(3)
-	if initState.runtime != nil {
+	if initState.runtimeStack != "" {
+		initState.mu.Unlock()
 		format := `A runtime has already been initialized."
 The previous initialization was from:
 %s
@@ -462,20 +481,22 @@ This registration is from:
 `
 		panic(fmt.Sprintf(format, initState.runtimeStack, stack))
 	}
+	initState.runtimeStack = stack
+	initState.mu.Unlock()
 
 	ctx, cancel := context.WithCancel(nil)
-	if initState.profile == nil {
-		panic("No profile has been registered nor specified. This is most" +
-			" likely because your main package has not imported a profile")
-	}
-	rt, ctx, shutdown, err := initState.profile(ctx)
-
+	rt, ctx, shutdown, err := profile(ctx)
 	if err != nil {
 		panic(err)
 	}
 
+	initState.mu.Lock()
 	initState.runtime = rt
-	initState.runtimeStack = stack
+	initState.mu.Unlock()
+
+	if err := rt.Init(ctx); err != nil {
+		panic(err)
+	}
 
 	return ctx, func() {
 		// Note we call our own cancel here to ensure that the

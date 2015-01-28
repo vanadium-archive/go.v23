@@ -20,6 +20,7 @@ func MockInit(ctx *context.T) (Runtime, *context.T, Shutdown, error) {
 
 type mockRuntime struct{}
 
+func (*mockRuntime) Init(ctx *context.T) error                      { return nil }
 func (*mockRuntime) NewEndpoint(ep string) (naming.Endpoint, error) { return nil, nil }
 func (*mockRuntime) NewServer(ctx *context.T, opts ...ipc.ServerOpt) (ipc.Server, error) {
 	return nil, nil
