@@ -56,16 +56,6 @@ import (
 	"v.io/core/veyron2/security"
 )
 
-// TODO(suharshs, mattr): Remove the ROpts.
-
-// RuntimePrincipal represents the principal to be used by the runtime.
-//
-// It wraps the security.Principal interface so that functions representing
-// option annotations can be added.
-type RuntimePrincipal struct{ security.Principal }
-
-func (RuntimePrincipal) ROpt() {}
-
 // ServerBlessings represents the blessings presented by a process (a "server")
 // accepting network connections from other processes ("clients").
 //
@@ -130,7 +120,6 @@ func (Namespace) IPCServerOpt() {}
 // specified order.
 type PreferredProtocols []string
 
-func (PreferredProtocols) ROpt()         {}
 func (PreferredProtocols) IPCClientOpt() {}
 
 // GoogleRuntime is the name of the Google runtime implementation.

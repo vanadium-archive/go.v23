@@ -137,18 +137,6 @@ type AppCycle interface {
 	Remote() interface{}
 }
 
-// The runtime must provide two package level functions, R and NewR.
-// R returns the initialized global instance of the Runtime. NewR will
-// create and initialiaze a new instance of the Runtime; it will typically
-// be used from within unit tests.
-//
-// Their signatures are:
-// <package>.R(opts ...NewROpt{}) (Runtime, error)
-// <package>.NewR(opts ...NewROpt{}) (Runtime, error)
-type ROpt interface {
-	ROpt()
-}
-
 // Runtime is the interface that concrete Veyron implementations must
 // implement.  It will not be used directly by application builders.
 // They will instead use the package level functions that mirror these
