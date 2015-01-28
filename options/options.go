@@ -49,10 +49,6 @@ package options
 import (
 	"time"
 
-	"v.io/core/veyron2/ipc"
-	"v.io/core/veyron2/ipc/stream"
-	"v.io/core/veyron2/naming"
-
 	"v.io/core/veyron2/security"
 )
 
@@ -84,12 +80,6 @@ const (
 	VCSecurityNone VCSecurityLevel = 1
 )
 
-// Discharge wraps the security.Discharge interface so that we can
-// add functions representing the option annotations.
-type Discharge struct{ security.Discharge }
-
-func (Discharge) IPCCallOpt() {}
-
 // RetryTimeout is the duration during which we will retry starting
 // an RPC call.  Zero means don't retry.
 type RetryTimeout time.Duration
@@ -102,26 +92,6 @@ type NoResolve struct{}
 func (NoResolve) IPCCallOpt()   {}
 func (NoResolve) NSResolveOpt() {}
 
-// StreamManager wraps the stream.Manager interface so that we can add
-// functions representing the option annotations.
-type StreamManager struct{ stream.Manager }
-
-func (StreamManager) IPCClientOpt() {}
-
-// Namespace wraps the naming.Namespace interface so that we can add
-// functions representing the option annotations.
-type Namespace struct{ naming.Namespace }
-
-func (Namespace) IPCClientOpt() {}
-func (Namespace) IPCServerOpt() {}
-
-// PreferredProtocolOrder instructs the Runtime implementation to select
-// endpoints with the specified protocols and to order them in the
-// specified order.
-type PreferredProtocols []string
-
-func (PreferredProtocols) IPCClientOpt() {}
-
 // GoogleRuntime is the name of the Google runtime implementation.
 const GoogleRuntime = "google"
 
@@ -130,11 +100,3 @@ const GoogleRuntime = "google"
 type ServesMountTable bool
 
 func (ServesMountTable) IPCServerOpt() {}
-
-// ReservedNameDispatcher specifies the dispatcher that controls access
-// to framework managed portion of the namespace.
-type ReservedNameDispatcher struct {
-	Dispatcher ipc.Dispatcher
-}
-
-func (ReservedNameDispatcher) IPCServerOpt() {}
