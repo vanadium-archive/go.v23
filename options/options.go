@@ -52,8 +52,8 @@ import (
 	"v.io/core/veyron2/security"
 )
 
-// ServerBlessings represents the blessings presented by a process (a "server")
-// accepting network connections from other processes ("clients").
+// ServerBlessings is the blessings that should be presented by a process (a
+// "server") accepting network connections from other processes ("clients").
 //
 // If none is provided, implementations typically use the "default" blessings
 // from the BlessingStore of the Principal.
@@ -79,6 +79,26 @@ const (
 	// Data is transmitted over the VC in plain text and there is no authentication.
 	VCSecurityNone VCSecurityLevel = 1
 )
+
+// AllowedServersPolicy specifies a policy used by clients to authenticate
+// servers when making an RPC.
+//
+// This policy is specified as a set of patterns. At least one of these
+// patterns must be matched by the blessings presented by the server
+// before the client sends the contents of the RPC request (which
+// include the method name, the arguments etc.).
+//
+// Not providing this option to StartCall is equivalent to providing
+// AllowedServersPolicy{security.AllPrincipals}.
+type AllowedServersPolicy []security.BlessingPattern
+
+func (AllowedServersPolicy) IPCCallOpt() {}
+
+// Discharge wraps the security.Discharge interface so that we can
+// add functions representing the option annotations.
+type Discharge struct{ security.Discharge }
+
+func (Discharge) IPCCallOpt() {}
 
 // RetryTimeout is the duration during which we will retry starting
 // an RPC call.  Zero means don't retry.
