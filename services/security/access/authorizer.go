@@ -110,6 +110,11 @@ func (a *authorizer) Authorize(ctx security.Context) error {
 		blessingsForContext = blessings.ForContext(ctx)
 	}
 	grant := false
+	if len(ctx.MethodTags()) == 0 {
+		// The following error message leaks the fact that the server is likely
+		// misconfigured, but that doesn't seem like a big deal.
+		return fmt.Errorf("TaggedACLAuthorizer.Authorize called with an object (%q, method %q) that has no method tags; this is likely unintentional", ctx.Suffix(), ctx.Method())
+	}
 	for _, tag := range ctx.MethodTags() {
 		if v := reflect.ValueOf(tag); v.Type() == a.tagType {
 			if acl, exists := a.acls[v.String()]; !exists || !acl.Includes(blessingsForContext...) {
@@ -148,5 +153,5 @@ func loadTaggedACLMapFromFile(filename string) (TaggedACLMap, error) {
 }
 
 func errACLMatch(blessings security.Blessings, blessingsForContext []string) error {
-	return fmt.Errorf("all valid blessings for this request: %v (out of %v) are disallowed by the ACL", blessingsForContext, blessings)
+	return fmt.Errorf("all valid blessings for this request, %v (out of %v), are disallowed by the ACL", blessingsForContext, blessings)
 }

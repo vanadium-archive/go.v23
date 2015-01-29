@@ -38,7 +38,7 @@
 //
 // If a substring is of the form {:<number>}, {<number>:}, {:<number>:}, {:_},
 // {_:}, or {:_:}, and the corresponding parameters are not the empty string,
-// the parameter is preceded by ": " or followed by ":"  or both,
+// the parameter is preceded by ": " or followed by ":" or both,
 // respectively.  For example, if the format:
 //      {3:} foo {2} bar{:_} ({3})
 // is used with the cat.Format example above, it yields:

@@ -110,18 +110,18 @@
 // p2 can then add this blessing to its store such that this blessing will be
 // presented to p1 anytime p2 communicates with it in the future:
 //  // (in process B)
-//  p2.BlessingStore().Add(aliceFriend, "alice")
+//  p2.BlessingStore().Set(aliceFriend, "alice")
 //
 // p2 could also mark this blessing so that it is used when communicating with
 // any delegates of "alice":
 //  // (in process B)
-//  p2.BlessingStore().Add(aliceFriend, "alice/...")
+//  p2.BlessingStore().Set(aliceFriend, "alice/...")
 //
 // p2 can also choose to present multiple blessings to some servers:
 //  // (in process B)
 //  charlieFriend := ReceiveBlessingFromSomeWhere()
-//  p2.BlessingStore().Add(aliceFriend, "alice/mom")
-//  p2.BlessingStore().Add(charlieFriend, "alice/mom")
+//  union, _ := UnionOfBlessings(aliceFriend, charlieFriend)
+//  p2.BlessingStore().Set(union, "alice/mom")
 //
 // Thus, when communicating with a "server" that presents the blessing "alice/mom",
 // p2 will declare that he is both "alice's friend" and "charlie's friend" and
@@ -432,15 +432,12 @@ type Context interface {
 	Method() string
 	// Tags attached to the method, typically through the interface specification in VDL.
 	MethodTags() []interface{}
-	// Name returns the object name on which the method is being invoked.
-	// TODO(ashankar,toddw): Remove; same as Suffix.
-	Name() string
 	// Suffix returns the object name suffix for the request.
 	Suffix() string
 	// Discharges maps a ThirdPartyCaveat identifier to the corresponding
 	// discharges.
 	// TODO(ataly, ashankar): Discharges should return map[string][]Discharge,
-	// i.e, it should map a ThirdPartyCaveat identifier to a set of Discharges.
+	// i.e., it should map a ThirdPartyCaveat identifier to a set of Discharges.
 	RemoteDischarges() map[string]Discharge
 	// LocalPrincipal returns the principal used to authenticate to the remote end.
 	LocalPrincipal() Principal

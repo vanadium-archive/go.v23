@@ -55,7 +55,6 @@ func (*FakeServerCall) Recv(itemptr interface{}) error { return nil }
 func (call *FakeServerCall) Timestamp() time.Time      { return call.security.Timestamp() }
 func (call *FakeServerCall) Method() string            { return call.security.Method() }
 func (call *FakeServerCall) MethodTags() []interface{} { return call.security.MethodTags() }
-func (call *FakeServerCall) Name() string              { return call.security.Name() }
 func (call *FakeServerCall) Suffix() string            { return call.security.Suffix() }
 func (call *FakeServerCall) RemoteDischarges() map[string]security.Discharge {
 	return call.security.RemoteDischarges()
