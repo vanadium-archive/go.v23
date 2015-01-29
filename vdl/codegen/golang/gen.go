@@ -87,13 +87,17 @@ func systemImportsGo(f *compile.File) []string {
 			set[`__vdl "v.io/core/veyron2/vdl"`] = true
 		}
 	}
-	// If the user has specified any error IDs, typically we need to import the
-	// "v.io/core/veyron2/verror" package.  However we allow vdl code-generation in the
-	// "v.io/core/veyron2/verror" package itself, to specify common error IDs.  Special-case
-	// this scenario to avoid self-cyclic package dependencies.
-	if len(f.ErrorIDs) > 0 && f.Package.Path != "v.io/core/veyron2/verror" {
-		set[`__verror "v.io/core/veyron2/verror"`] = true
+	/* TODO(toddw): Re-enable when ErrorDef code generation is supported.
+
+	// If the user has specified any errors, typically we need to import the
+	// "v.io/core/veyron2/verror2" package.  However we allow vdl code-generation
+	// in the "v.io/core/veyron2/verror2" package itself, to specify common
+	// errors.  Special-case this scenario to avoid self-cyclic package
+	// dependencies.
+	if len(f.ErrorDefs) > 0 && f.Package.Path != "v.io/core/veyron2/verror2" {
+		set[`__verror2 "v.io/core/veyron2/verror2"`] = true
 	}
+	*/
 	// Convert the set of imports into a sorted list.
 	var ret sort.StringSlice
 	for key := range set {
@@ -167,11 +171,13 @@ func init() {
 }
 
 func genpkg(file *compile.File, pkg string) string {
-	// Special-case code generation for the veyron2/verror package, to avoid
-	// adding the "__verror." package qualifier.
-	if file.Package.Path == "v.io/core/veyron2/verror" && pkg == "verror" {
+	/* TODO(toddw): Re-enable when ErrorDef code generation is supported.
+	// Special-case code generation for the veyron2/verror2 package, to avoid
+	// adding the "__verror2." package qualifier.
+	if file.Package.Path == "v.io/core/veyron2/verror2" && pkg == "verror2" {
 		return ""
 	}
+	*/
 	return "__" + pkg + "."
 }
 
@@ -418,9 +424,11 @@ import ( {{range $imp := $data.UserImports}}
 {{constDefGo $data $cdef}}
 {{end}}
 
-{{range $eid := $file.ErrorIDs}}
-{{$eid.Doc}}const {{$eid.Name}} = {{genpkg $file "verror"}}ID("{{$eid.ID}}"){{$eid.DocSuffix}}
+{{/* TODO(toddw): Re-enable when ErrorDef code generation is supported.
+{{range $eid := $file.ErrorDefs}}
+{{$eid.Doc}}const {{$eid.Name}} = {{genpkg $file "verror2"}}ID("{{$eid.ID}}"){{$eid.DocSuffix}}
 {{end}}
+*/}}
 
 {{range $iface := $file.Interfaces}}{{$ifaceStreaming := hasStreamingMethods $iface.AllMethods}}
 // {{$iface.Name}}ClientMethods is the client interface

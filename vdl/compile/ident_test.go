@@ -13,19 +13,33 @@ func TestIdentConflict(t *testing.T) {
 		Name string
 		Data string
 	}{
-		// Test conflicting identifiers (type, const and interface):
+		// Test conflicting identifiers.
 		{"Type", `type foo int64; type foo int64`},
 		{"TypeMixed", `type FoO int64; type foo int64`},
+
 		{"Const", `const foo = true; const foo = true`},
 		{"ConstMixed", `const FoO = true; const foo = true`},
+
 		{"Interface", `type foo interface{}; type foo interface{}`},
 		{"InterfaceMixed", `type FoO interface{}; type foo interface{}`},
+
+		{"Error", `error foo() {"en":"a"}; error foo() {"en":"a"}`},
+		{"ErrorMixed", `error FoO() {"en":"a"}; error foo() {"en":"a"}`},
+
 		{"TypeAndConst", `type foo int64; const foo = true`},
 		{"TypeAndConstMixed", `type FoO int64; const foo = true`},
 		{"TypeAndInterface", `type foo int64; type foo interface{}`},
 		{"TypeAndInterfaceMixed", `type FoO int64; type foo interface{}`},
+		{"TypeAndError", `type foo int64; error foo() {"en":"a"}`},
+		{"TypeAndErrorMixed", `type foo int64; error FoO() {"en":"a"}`},
+
 		{"ConstAndInterface", `const foo = true; type foo interface{}`},
 		{"ConstAndInterfaceMixed", `const FoO = true; type foo interface{}`},
+		{"ConstAndError", `const foo = true; error foo() {"en":"a"}`},
+		{"ConstAndErrorMixed", `const foo = true; error FoO() {"en":"a"}`},
+
+		{"InterfaceAndError", `type foo interface{}; error foo() {"en":"a"}`},
+		{"InterfaceAndErrorMixed", `type foo interface{}; error FoO() {"en":"a"}`},
 	}
 	for _, test := range tests {
 		env := compile.NewEnv(-1)

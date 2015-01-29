@@ -305,7 +305,7 @@ func (p *Package) resolve(name string, isLocal bool) interface{} {
 type File struct {
 	BaseName   string       // Base name of the vdl file, e.g. "foo.vdl"
 	PackageDef NamePos      // Name, position and docs of the "package" clause
-	ErrorIDs   []*ErrorID   // ErrorIDs defined in this file
+	ErrorDefs  []*ErrorDef  // Errors defined in this file
 	TypeDefs   []*TypeDef   // Types defined in this file
 	ConstDefs  []*ConstDef  // Consts defined in this file
 	Interfaces []*Interface // Interfaces defined in this file
@@ -393,9 +393,6 @@ func (f *File) DeclareIdent(ident, detail string) error {
 	return nil
 }
 
-// ErrorID represents an error id.
-type ErrorID parse.ErrorID
-
 // Interface represents a set of embedded interfaces and methods.
 type Interface struct {
 	NamePos               // interface name, pos and doc
@@ -415,7 +412,9 @@ type Method struct {
 	Tags      []*vdl.Value // list of method tags
 }
 
-// Arg represents method arguments.
+// Arg represents method arguments and error params.
+//
+// TODO(toddw): Rename to Field, to match the parse package.
 type Arg struct {
 	NamePos           // arg name, pos and doc
 	Type    *vdl.Type // arg type, never nil
@@ -424,7 +423,6 @@ type Arg struct {
 // NamePos represents a name, its associated position and documentation.
 type NamePos parse.NamePos
 
-func (x *ErrorID) String() string { return fmt.Sprintf("%+v", *x) }
 func (x *Method) String() string  { return fmt.Sprintf("%+v", *x) }
 func (x *Arg) String() string     { return fmt.Sprintf("%+v", *x) }
 func (x *NamePos) String() string { return fmt.Sprintf("%+v", *x) }

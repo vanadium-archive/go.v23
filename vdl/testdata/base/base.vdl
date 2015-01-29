@@ -183,3 +183,17 @@ type ServiceB interface {
 	ServiceA
 	MethodB1(a Scalars, b Composites) (c CompComp | error)
 }
+
+// Error definitions, which allow stable error-checking across different address
+// spaces.
+error (
+	ErrNoParams1() {"en":"en msg"}
+	ErrNoParams2() {RetryRefetch, "en":"en msg", "fr":"fr msg"}
+
+	ErrWithParams1(x string, y int32) {"en":"en x={x} y={y}"}
+	ErrWithParams2(x string, y int32) {
+		RetryRefetch,
+		"en":"en x={x} y={y}",
+		"fr":"fr y={y} x={x}",
+	}
+)

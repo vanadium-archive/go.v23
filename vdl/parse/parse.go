@@ -57,7 +57,7 @@ func ParseConfig(fileName string, src io.Reader, opts Opts, errs *vdlutil.Errors
 	if file == nil {
 		return nil
 	}
-	if len(file.ErrorIDs) > 0 || len(file.TypeDefs) > 0 || len(file.Interfaces) > 0 {
+	if len(file.ErrorDefs) > 0 || len(file.TypeDefs) > 0 || len(file.Interfaces) > 0 {
 		errs.Errorf("%s: config files may not contain error, type or interface definitions", fileName)
 		return nil
 	}
@@ -196,7 +196,7 @@ func lexStoreExprs(yylex yyLexer, exprs []ConstExpr) {
 var keywords = map[string]int{
 	"const":      tCONST,
 	"enum":       tENUM,
-	"errorid":    tERRORID,
+	"error":      tERROR,
 	"import":     tIMPORT,
 	"interface":  tINTERFACE,
 	"map":        tMAP,
@@ -473,7 +473,7 @@ func (l *lexer) attachComments() {
 	for _, x := range f.Imports {
 		x.DocSuffix = l.comments.getDocSuffix(x.Pos)
 	}
-	for _, x := range f.ErrorIDs {
+	for _, x := range f.ErrorDefs {
 		x.DocSuffix = l.comments.getDocSuffix(x.Pos)
 	}
 	for _, x := range f.TypeDefs {
@@ -497,7 +497,7 @@ func (l *lexer) attachComments() {
 	for _, x := range f.Imports {
 		x.Doc = l.comments.getDoc(x.Pos)
 	}
-	for _, x := range f.ErrorIDs {
+	for _, x := range f.ErrorDefs {
 		x.Doc = l.comments.getDoc(x.Pos)
 	}
 	for _, x := range f.TypeDefs {
@@ -565,8 +565,8 @@ func (l *lexer) translateToken(tok token, lval *yySymType) (id int, done bool) {
 
 	case scanner.String, scanner.RawString:
 		var err error
-		lval.strpos.pos = tok.pos
-		lval.strpos.str, err = strconv.Unquote(tok.text)
+		lval.strpos.Pos = tok.pos
+		lval.strpos.String, err = strconv.Unquote(tok.text)
 		if err != nil {
 			l.posErrorf(tok.pos, "can't convert token [%v] to string literal", tok)
 		}
@@ -600,8 +600,8 @@ func (l *lexer) translateToken(tok token, lval *yySymType) (id int, done bool) {
 			lval.pos = tok.pos
 			return keytok, true
 		}
-		lval.strpos.pos = tok.pos
-		lval.strpos.str = tok.text
+		lval.strpos.Pos = tok.pos
+		lval.strpos.String = tok.text
 		return tIDENT, true
 
 	case scanner.Comment:

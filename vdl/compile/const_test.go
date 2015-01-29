@@ -81,7 +81,7 @@ func TestConfig(t *testing.T) {
 		last := test.Pkgs[len(test.Pkgs)-1]
 		pkg := testConstPackage(t, test.Name, last, env)
 		if pkg == nil ||
-			len(pkg.Files[0].ErrorIDs) > 0 ||
+			len(pkg.Files[0].ErrorDefs) > 0 ||
 			len(pkg.Files[0].TypeDefs) > 0 ||
 			len(pkg.Files[0].Interfaces) > 0 {
 			continue // has non-const stuff, can't be a valid config file

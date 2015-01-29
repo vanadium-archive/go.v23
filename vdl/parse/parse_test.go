@@ -17,6 +17,14 @@ func pos(line, col int) parse.Pos {
 	return parse.Pos{line, col}
 }
 
+func sp(str string, line, col int) parse.StringPos {
+	return parse.StringPos{String: str, Pos: pos(line, col)}
+}
+
+func lf(l, f parse.StringPos) parse.LangFmt {
+	return parse.LangFmt{Lang: l, Fmt: f}
+}
+
 func np(name string, line, col int) parse.NamePos {
 	return parse.NamePos{Name: name, Pos: pos(line, col)}
 }
@@ -74,7 +82,7 @@ func TestParseVDLImports(t *testing.T) {
 			test.expect = &copyFile
 			test.expect.TypeDefs = nil
 			test.expect.ConstDefs = nil
-			test.expect.ErrorIDs = nil
+			test.expect.ErrorDefs = nil
 			test.expect.Interfaces = nil
 			testParseVDL(t, test, parse.Opts{ImportsOnly: true})
 		}
@@ -759,44 +767,150 @@ const foo =`,
 	{
 		"ErrorEmpty",
 		`package testpkg
-errorid()`,
+error()`,
 		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9)},
 		nil},
 	{
-		"ErrorID",
+		"ErrorDefNoParamsNoDetails1",
 		`package testpkg
-errorid ErrIDFoo`,
+error ErrFoo()`,
 		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
-			ErrorIDs: []*parse.ErrorID{{NamePos: np("ErrIDFoo", 2, 9)}}},
+			ErrorDefs: []*parse.ErrorDef{{NamePos: np("ErrFoo", 2, 7)}}},
 		nil},
 	{
-		"ErrorIDOverwrite",
+		"ErrorDefNoParamsNoDetails2",
 		`package testpkg
-errorid ErrIDFoo = "pkg/path.ErrName"`,
+error ErrFoo() {}`,
 		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
-			ErrorIDs: []*parse.ErrorID{
-				{NamePos: np("ErrIDFoo", 2, 9), ID: "pkg/path.ErrName"}}},
+			ErrorDefs: []*parse.ErrorDef{{NamePos: np("ErrFoo", 2, 7)}}},
 		nil},
 	{
-		"ErrorMixed",
+		"ErrorDefNoParamsWithDetails1",
 		`package testpkg
-errorid ErrIDFoo
-errorid (
-  ErrIDBar
-  ErrIDBaz = "pkg/path.ErrIDBaz"
+error ErrFoo() {NoRetry}`,
+		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
+			ErrorDefs: []*parse.ErrorDef{{
+				NamePos: np("ErrFoo", 2, 7),
+				Actions: []parse.StringPos{sp("NoRetry", 2, 17)}}}},
+		nil},
+	{
+		"ErrorDefNoParamsWithDetails2",
+		`package testpkg
+error ErrFoo() {"en":"a"}`,
+		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
+			ErrorDefs: []*parse.ErrorDef{{
+				NamePos: np("ErrFoo", 2, 7),
+				Formats: []parse.LangFmt{lf(sp("en", 2, 17), sp("a", 2, 22))}}}},
+		nil},
+	{
+		"ErrorDefNoParamsWithDetails3",
+		`package testpkg
+error ErrFoo() {NoRetry, "en":"a", "zh":"b"}`,
+		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
+			ErrorDefs: []*parse.ErrorDef{{
+				NamePos: np("ErrFoo", 2, 7),
+				Actions: []parse.StringPos{sp("NoRetry", 2, 17)},
+				Formats: []parse.LangFmt{
+					lf(sp("en", 2, 26), sp("a", 2, 31)),
+					lf(sp("zh", 2, 36), sp("b", 2, 41)),
+				}}}},
+		nil},
+	{
+		"ErrorDefWithParamsNoDetails1",
+		`package testpkg
+error ErrFoo(x int, y bool)`,
+		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
+			ErrorDefs: []*parse.ErrorDef{{
+				NamePos: np("ErrFoo", 2, 7),
+				Params: []*parse.Field{
+					{NamePos: np("x", 2, 14), Type: tn("int", 2, 16)},
+					{NamePos: np("y", 2, 21), Type: tn("bool", 2, 23)}}}}},
+		nil},
+	{
+		"ErrorDefWithParamsNoDetails2",
+		`package testpkg
+error ErrFoo(x int, y bool) {}`,
+		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
+			ErrorDefs: []*parse.ErrorDef{{
+				NamePos: np("ErrFoo", 2, 7),
+				Params: []*parse.Field{
+					{NamePos: np("x", 2, 14), Type: tn("int", 2, 16)},
+					{NamePos: np("y", 2, 21), Type: tn("bool", 2, 23)}}}}},
+		nil},
+	{
+		"ErrorDefWithParamsWithDetails1",
+		`package testpkg
+error ErrFoo(x int, y bool) {NoRetry}`,
+		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
+			ErrorDefs: []*parse.ErrorDef{{
+				NamePos: np("ErrFoo", 2, 7),
+				Params: []*parse.Field{
+					{NamePos: np("x", 2, 14), Type: tn("int", 2, 16)},
+					{NamePos: np("y", 2, 21), Type: tn("bool", 2, 23)}},
+				Actions: []parse.StringPos{sp("NoRetry", 2, 30)}}}},
+		nil},
+	{
+		"ErrorDefWithParamsWithDetails2",
+		`package testpkg
+error ErrFoo(x int, y bool) {"en":"a"}`,
+		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
+			ErrorDefs: []*parse.ErrorDef{{
+				NamePos: np("ErrFoo", 2, 7),
+				Params: []*parse.Field{
+					{NamePos: np("x", 2, 14), Type: tn("int", 2, 16)},
+					{NamePos: np("y", 2, 21), Type: tn("bool", 2, 23)}},
+				Formats: []parse.LangFmt{lf(sp("en", 2, 30), sp("a", 2, 35))}}}},
+		nil},
+	{
+		"ErrorDefWithParamsWithDetails3",
+		`package testpkg
+error ErrFoo(x int, y bool) {NoRetry, "en":"a", "zh":"b"}`,
+		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
+			ErrorDefs: []*parse.ErrorDef{{
+				NamePos: np("ErrFoo", 2, 7),
+				Params: []*parse.Field{
+					{NamePos: np("x", 2, 14), Type: tn("int", 2, 16)},
+					{NamePos: np("y", 2, 21), Type: tn("bool", 2, 23)}},
+				Actions: []parse.StringPos{sp("NoRetry", 2, 30)},
+				Formats: []parse.LangFmt{
+					lf(sp("en", 2, 39), sp("a", 2, 44)),
+					lf(sp("zh", 2, 49), sp("b", 2, 54)),
+				}}}},
+		nil},
+	{
+		"ErrorDefMulti",
+		`package testpkg
+error (
+  ErrFoo()
+  ErrBar() {NoRetry, "en":"a", "zh":"b"}
+  ErrBaz(x int, y bool) {NoRetry, "en":"a", "zh":"b"}
 )`,
 		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
-			ErrorIDs: []*parse.ErrorID{
-				{NamePos: np("ErrIDFoo", 2, 9)},
-				{NamePos: np("ErrIDBar", 4, 3)},
-				{NamePos: np("ErrIDBaz", 5, 3), ID: "pkg/path.ErrIDBaz"}}},
+			ErrorDefs: []*parse.ErrorDef{
+				{
+					NamePos: np("ErrFoo", 3, 3),
+				},
+				{
+					NamePos: np("ErrBar", 4, 3),
+					Actions: []parse.StringPos{sp("NoRetry", 4, 13)},
+					Formats: []parse.LangFmt{
+						lf(sp("en", 4, 22), sp("a", 4, 27)),
+						lf(sp("zh", 4, 32), sp("b", 4, 37)),
+					},
+				},
+				{
+					NamePos: np("ErrBaz", 5, 3),
+					Params: []*parse.Field{
+						{NamePos: np("x", 5, 10), Type: tn("int", 5, 12)},
+						{NamePos: np("y", 5, 17), Type: tn("bool", 5, 19)}},
+					Actions: []parse.StringPos{sp("NoRetry", 5, 26)},
+					Formats: []parse.LangFmt{
+						lf(sp("en", 5, 35), sp("a", 5, 40)),
+						lf(sp("zh", 5, 45), sp("b", 5, 50)),
+					},
+				},
+			}},
 		nil},
-	{
-		"FAILErrorEmptyID",
-		`package testpkg
-errorid ErrIDFoo = ""`,
-		nil,
-		[]string{"testfile:2:20 error id must be non-empty if specified"}},
 
 	// Interface tests.
 	{
@@ -1166,9 +1280,9 @@ const bar = true`,
 
 	// Errors, types and interfaces return error
 	{
-		"FAILErrorID",
+		"FAILError",
 		`config = true
-errorid foo`,
+error foo()`,
 		nil,
 		[]string{"config files may not contain error, type or interface definitions"}},
 	{

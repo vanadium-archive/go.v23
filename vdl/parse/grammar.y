@@ -24,11 +24,6 @@ import (
   "strings"
 )
 
-type strPos struct {
-  str string
-  pos Pos
-}
-
 type intPos struct {
   int *big.Int
   pos Pos
@@ -44,10 +39,10 @@ type imagPos struct {
   pos  Pos
 }
 
-// typeListToStrList converts a slice of Type to a slice of strPos.  Each type
-// must be a TypeNamed with an empty PackageName, otherwise errors are reported,
-// and ok=false is returned.
-func typeListToStrList(yylex yyLexer, typeList []Type) (strList []strPos, ok bool) {
+// typeListToStrList converts a slice of Type to a slice of StringPos.  Each
+// type must be a TypeNamed with an empty PackageName, otherwise errors are
+// reported, and ok=false is returned.
+func typeListToStrList(yylex yyLexer, typeList []Type) (strList []StringPos, ok bool) {
   ok = true
   for _, t := range typeList {
     var tn *TypeNamed
@@ -60,16 +55,9 @@ func typeListToStrList(yylex yyLexer, typeList []Type) (strList []strPos, ok boo
       lexPosErrorf(yylex, t.Pos(), "%s invalid (expected one or more variable names).", tn.Name)
       return
     }
-    strList = append(strList, strPos{tn.Name, tn.P})
+    strList = append(strList, StringPos{tn.Name, tn.P})
   }
   return
-}
-
-// ensureNonEmptyToken reports an error if tok is empty.
-func ensureNonEmptyToken(yylex yyLexer, tok strPos, errMsg string) {
-  if len(tok.str) == 0 {
-    lexPosErrorf(yylex, tok.pos, errMsg)
-  }
 }
 %}
 
@@ -78,7 +66,7 @@ func ensureNonEmptyToken(yylex yyLexer, tok strPos, errMsg string) {
 // passing positional information, so we need to track it ourselves.
 %union {
   pos        Pos
-  strpos     strPos
+  strpos     StringPos
   intpos     intPos
   ratpos     ratPos
   imagpos    imagPos
@@ -93,6 +81,7 @@ func ensureNonEmptyToken(yylex yyLexer, tok strPos, errMsg string) {
   complit    *ConstCompositeLit
   kvlit      KVLit
   kvlits     []KVLit
+  errordef   ErrorDef
 }
 
 // Terminal tokens.  We leave single-char tokens as-is using their ascii code as
@@ -103,7 +92,7 @@ func ensureNonEmptyToken(yylex yyLexer, tok strPos, errMsg string) {
 %token <pos>      ';' ':' ',' '.' '(' ')' '[' ']' '{' '}' '<' '>' '='
 %token <pos>      '!' '+' '-' '*' '/' '%' '|' '&' '^' '?'
 %token <pos>      tOROR tANDAND tLE tGE tNE tEQEQ tLSH tRSH
-%token <pos>      tCONST tENUM tERRORID tIMPORT tINTERFACE tMAP tPACKAGE
+%token <pos>      tCONST tENUM tERROR tIMPORT tINTERFACE tMAP tPACKAGE
 %token <pos>      tSET tSTREAM tSTRUCT tTYPE tTYPEOBJECT tUNION
 %token <strpos>   tIDENT tSTRLIT
 %token <intpos>   tINTLIT
@@ -123,6 +112,7 @@ func ensureNonEmptyToken(yylex yyLexer, tok strPos, errMsg string) {
 %type <complit>    comp_lit
 %type <kvlit>      kv_lit
 %type <kvlits>     kv_lit_list
+%type <errordef>   error_details error_detail_list error_detail
 
 // There are 5 precedence levels for operators, all left-associative, just like
 // Go.  Lines are listed in order of increasing precedence.
@@ -154,7 +144,7 @@ start:
 
 // Dummy rule to terminate the parse after the imports, regardless of whether
 // there are any defs.  Defs always start with either the tTYPE, tCONST or
-// tERRORID tokens, and the rule handles all cases - either there's no trailing
+// tERROR tokens, and the rule handles all cases - either there's no trailing
 // text (the empty case, which would have resulted in EOF anyways), or there's
 // one or more defs, where we need to force an EOF.
 gen_imports_eof:
@@ -164,7 +154,7 @@ gen_imports_eof:
   { lexGenEOF(yylex) }
 | tCONST
   { lexGenEOF(yylex) }
-| tERRORID
+| tERROR
   { lexGenEOF(yylex) }
 
 // PACKAGE
@@ -172,7 +162,7 @@ package:
   %prec notPackage
   { lexPosErrorf(yylex, Pos{}, "vdl file must start with package clause") }
 | tPACKAGE tIDENT ';'
-  { lexVDLFile(yylex).PackageDef = NamePos{Name:$2.str, Pos:$2.pos} }
+  { lexVDLFile(yylex).PackageDef = NamePos{Name:$2.String, Pos:$2.Pos} }
 
 // CONFIG
 config:
@@ -182,12 +172,12 @@ config:
   {
     // We allow "config" as an identifier; it is not a keyword.  So we check
     // manually to make sure the syntax is correct.
-    if $1.str != "config" {
-      lexPosErrorf(yylex, $1.pos, "config file must start with config clause")
+    if $1.String != "config" {
+      lexPosErrorf(yylex, $1.Pos, "config file must start with config clause")
       return 1 // Any non-zero code indicates an error
     }
     file := lexVDLFile(yylex)
-    file.PackageDef = NamePos{Name:"config", Pos:$1.pos}
+    file.PackageDef = NamePos{Name:"config", Pos:$1.Pos}
     file.ConstDefs = []*ConstDef{{Expr:$3}}
   }
 
@@ -209,12 +199,12 @@ import_spec:
   tSTRLIT
   {
     imps := &lexVDLFile(yylex).Imports
-    *imps = append(*imps, &Import{Path:$1.str, NamePos:NamePos{Pos:$1.pos}})
+    *imps = append(*imps, &Import{Path:$1.String, NamePos:NamePos{Pos:$1.Pos}})
   }
 | tIDENT tSTRLIT
   {
     imps := &lexVDLFile(yylex).Imports
-    *imps = append(*imps, &Import{Path:$2.str, NamePos:NamePos{Name:$1.str, Pos:$1.pos}})
+    *imps = append(*imps, &Import{Path:$2.String, NamePos:NamePos{Name:$1.String, Pos:$1.Pos}})
   }
 
 // DEFINITIONS
@@ -236,11 +226,11 @@ const_def:
 | tCONST const_spec
 
 error_def:
-  tERRORID '(' ')'
-| tERRORID '(' errorid_spec_list osemi ')'
-| tERRORID errorid_spec
+  tERROR '(' ')'
+| tERROR '(' error_spec_list osemi ')'
+| tERROR error_spec
 
-// DATA TYPE DEFINITIONS
+// TYPE DEFINITIONS
 type_spec_list:
   type_spec
 | type_spec_list ';' type_spec
@@ -249,7 +239,7 @@ type_spec:
   tIDENT type
   {
     tds := &lexVDLFile(yylex).TypeDefs
-    *tds = append(*tds, &TypeDef{Type:$2, NamePos:NamePos{Name:$1.str, Pos:$1.pos}})
+    *tds = append(*tds, &TypeDef{Type:$2, NamePos:NamePos{Name:$1.String, Pos:$1.Pos}})
   }
 
 // The type_no_typeobject rule is necessary to avoid a shift/reduce conflict
@@ -269,7 +259,9 @@ type_spec:
 // expression for type conversions, but a type expression for typeobject.
 type_no_typeobject:
   nameref
-  { $$ = &TypeNamed{Name:$1.str, P:$1.pos} }
+  { $$ = &TypeNamed{Name:$1.String, P:$1.Pos} }
+| tERROR // Special-case to allow the "error" keyword as a named type.
+  { $$ = &TypeNamed{Name:"error", P:$1} }
 | '[' tINTLIT ']' type
   { $$ = &TypeArray{Len:int($2.int.Int64()), Elem:$4, P:$1} }
 | '[' ']' type
@@ -306,7 +298,7 @@ label_spec_list:
 
 label_spec:
   tIDENT
-  { $$ = NamePos{Name:$1.str, Pos:$1.pos} }
+  { $$ = NamePos{Name:$1.String, Pos:$1.Pos} }
 
 field_spec_list:
   field_spec
@@ -353,7 +345,7 @@ field_spec:
   {
     if names, ok := typeListToStrList(yylex, $1); ok {
       for _, n := range names {
-        $$ = append($$, &Field{Type:$2, NamePos:NamePos{Name:n.str, Pos:n.pos}})
+        $$ = append($$, &Field{Type:$2, NamePos:NamePos{Name:n.String, Pos:n.Pos}})
       }
     } else {
       lexPosErrorf(yylex, $2.Pos(), "perhaps you forgot a comma before %q?.", $2.String())
@@ -371,11 +363,11 @@ interface_spec:
   tIDENT tINTERFACE '{' '}'
   {
     ifs := &lexVDLFile(yylex).Interfaces
-    *ifs = append(*ifs, &Interface{NamePos:NamePos{Name:$1.str, Pos:$1.pos}})
+    *ifs = append(*ifs, &Interface{NamePos:NamePos{Name:$1.String, Pos:$1.Pos}})
   }
 | tIDENT tINTERFACE '{' iface_item_list osemi '}'
   {
-    $4.Name, $4.Pos = $1.str, $1.pos
+    $4.Name, $4.Pos = $1.String, $1.Pos
     ifs := &lexVDLFile(yylex).Interfaces
     *ifs = append(*ifs, $4)
   }
@@ -392,9 +384,9 @@ iface_item_list:
 
 iface_item:
   tIDENT inargs streamargs outargs tags
-  { $$ = &Interface{Methods: []*Method{{InArgs:$2, InStream:$3[0], OutStream:$3[1], OutArgs:$4, Tags:$5, NamePos:NamePos{Name:$1.str, Pos:$1.pos}}}} }
+  { $$ = &Interface{Methods: []*Method{{InArgs:$2, InStream:$3[0], OutStream:$3[1], OutArgs:$4, Tags:$5, NamePos:NamePos{Name:$1.String, Pos:$1.Pos}}}} }
 | nameref
-  { $$ = &Interface{Embeds: []*NamePos{{Name:$1.str, Pos:$1.pos}}} }
+  { $$ = &Interface{Embeds: []*NamePos{{Name:$1.String, Pos:$1.Pos}}} }
 
 inargs:
   '(' ')'
@@ -480,7 +472,7 @@ const_spec:
   tIDENT '=' expr
   {
     cds := &lexVDLFile(yylex).ConstDefs
-    *cds = append(*cds, &ConstDef{Expr:$3, NamePos:NamePos{Name:$1.str, Pos:$1.pos}})
+    *cds = append(*cds, &ConstDef{Expr:$3, NamePos:NamePos{Name:$1.String, Pos:$1.Pos}})
   }
 
 expr:
@@ -542,7 +534,7 @@ unary_expr:
 
 operand:
   tSTRLIT
-  { $$ = &ConstLit{$1.str, $1.pos} }
+  { $$ = &ConstLit{$1.String, $1.Pos} }
 | tINTLIT
   { $$ = &ConstLit{$1.int, $1.pos} }
 | tRATLIT
@@ -550,7 +542,7 @@ operand:
 | tIMAGLIT
   { $$ = &ConstLit{$1.imag, $1.pos} }
 | nameref
-  { $$ = &ConstNamed{$1.str, $1.pos} }
+  { $$ = &ConstNamed{$1.String, $1.Pos} }
 | comp_lit
   { $$ = $1 }
 | comp_lit '.' tIDENT
@@ -558,7 +550,7 @@ operand:
 | comp_lit '[' expr ']'
   { lexPosErrorf(yylex, $2, "cannot apply index operator to unnamed constant")}
 | nameref '[' expr ']'
-  { $$ = &ConstIndexed{&ConstNamed{$1.str, $1.pos}, $3, $1.pos} }
+  { $$ = &ConstIndexed{&ConstNamed{$1.String, $1.Pos}, $3, $1.Pos} }
 | '(' expr ')'
   { $$ = $2 }
 
@@ -580,23 +572,51 @@ kv_lit:
 | expr ':' expr
   { $$ = KVLit{Key:$1, Value:$3} }
 
-// ERROR IDS
-errorid_spec_list:
-  errorid_spec
-| errorid_spec_list ';' errorid_spec
+// ERROR DEFINITIONS
+error_spec_list:
+  error_spec
+| error_spec_list ';' error_spec
 
-errorid_spec:
+error_spec:
+  tIDENT inargs error_details
+  {
+    // Create *ErrorDef starting with a copy of error_details, filling in the
+    // name and params
+    ed := $3
+    ed.NamePos = NamePos{Name:$1.String, Pos:$1.Pos}
+    ed.Params = $2
+    eds := &lexVDLFile(yylex).ErrorDefs
+    *eds = append(*eds, &ed)
+  }
+
+error_details:
+  // Empty.
+  { $$ = ErrorDef{} }
+| '{' '}'
+  { $$ = ErrorDef{} }
+| '{' error_detail_list ocomma '}'
+  { $$ = $2 }
+
+error_detail_list:
+  error_detail
+  { $$ = $1 }
+| error_detail_list ',' error_detail
+  {
+    // Merge each ErrorDef in-order to build the final ErrorDef.
+    $$ = $1
+    switch {
+    case len($3.Actions) > 0:
+      $$.Actions = append($$.Actions, $3.Actions...)
+    case len($3.Formats) > 0:
+      $$.Formats = append($$.Formats, $3.Formats...)
+    }
+  }
+
+error_detail:
   tIDENT
-  {
-    eds := &lexVDLFile(yylex).ErrorIDs
-    *eds = append(*eds, &ErrorID{NamePos:NamePos{Name:$1.str, Pos:$1.pos}})
-  }
-| tIDENT '=' tSTRLIT
-  {
-    ensureNonEmptyToken(yylex, $3, "error id must be non-empty if specified")
-    eds := &lexVDLFile(yylex).ErrorIDs
-    *eds = append(*eds, &ErrorID{ID:$3.str, NamePos:NamePos{Name:$1.str, Pos:$1.pos}})
-  }
+  { $$ = ErrorDef{Actions: []StringPos{$1}} }
+| tSTRLIT ':' tSTRLIT
+  { $$ = ErrorDef{Formats: []LangFmt{{Lang: $1, Fmt: $3}}} }
 
 // MISC TOKENS
 
@@ -610,14 +630,14 @@ nameref:
   dotnameref
   { $$ = $1 }
 | tSTRLIT '.' dotnameref
-  { $$ = strPos{"\""+$1.str+"\"."+$3.str, $1.pos} }
+  { $$ = StringPos{"\""+$1.String+"\"."+$3.String, $1.Pos} }
 
 // dotnameref describes just the dotted portion of nameref.
 dotnameref:
   tIDENT
   { $$ = $1 }
 | dotnameref '.' tIDENT
-  { $$ = strPos{$1.str+"."+$3.str, $1.pos} }
+  { $$ = StringPos{$1.String+"."+$3.String, $1.Pos} }
 
 otype:
   // Empty.

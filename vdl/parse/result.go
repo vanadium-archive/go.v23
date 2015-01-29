@@ -15,6 +15,12 @@ type Pos struct {
 	Col  int // Column number (character count), starting at 1
 }
 
+// StringPos holds a string and a Pos.
+type StringPos struct {
+	String string
+	Pos    Pos
+}
+
 // Returns true iff this Pos has been initialized.  The zero Pos is invalid.
 func (p Pos) IsValid() bool {
 	return p.Line > 0 && p.Col > 0
@@ -51,7 +57,7 @@ type File struct {
 	BaseName   string       // Base name of the vdl file, e.g. "foo.vdl"
 	PackageDef NamePos      // Name, position and docs of the "package" clause
 	Imports    []*Import    // Imports listed in this file.
-	ErrorIDs   []*ErrorID   // ErrorIDs defined in this file
+	ErrorDefs  []*ErrorDef  // Errors defined in this file
 	TypeDefs   []*TypeDef   // Types defined in this file
 	ConstDefs  []*ConstDef  // Consts defined in this file
 	Interfaces []*Interface // Interfaces defined in this file
@@ -103,10 +109,26 @@ func (i *Import) LocalName() string {
 	return path.Base(i.Path)
 }
 
-// ErrorID represents an error id.
-type ErrorID struct {
-	NamePos        // Error name, pos and doc
-	ID      string // Error id; if empty we use PKGPATH.NAME
+// ErrorDef represents an error definition.
+type ErrorDef struct {
+	NamePos             // error name, pos and doc
+	Params  []*Field    // list of positional parameters
+	Actions []StringPos // list of action code identifiers
+	Formats []LangFmt   // list of language / format pairs
+}
+
+// LangFmt represents a language / format string pair.
+type LangFmt struct {
+	Lang StringPos // IETF language tag
+	Fmt  StringPos // i18n format string in the given language
+}
+
+// Pos returns the position of the LangFmt.
+func (x LangFmt) Pos() Pos {
+	if x.Lang.Pos.IsValid() {
+		return x.Lang.Pos
+	}
+	return x.Fmt.Pos
 }
 
 // Interface represents a set of embedded interfaces and methods.
@@ -142,7 +164,7 @@ type NamePos struct {
 
 func (x *File) String() string      { return fmt.Sprintf("%+v", *x) }
 func (x *Import) String() string    { return fmt.Sprintf("%+v", *x) }
-func (x *ErrorID) String() string   { return fmt.Sprintf("%+v", *x) }
+func (x *ErrorDef) String() string  { return fmt.Sprintf("%+v", *x) }
 func (x *Interface) String() string { return fmt.Sprintf("%+v", *x) }
 func (x *Method) String() string    { return fmt.Sprintf("%+v", *x) }
 func (x *Field) String() string     { return fmt.Sprintf("%+v", *x) }

@@ -116,7 +116,7 @@ func compile(pkgpath string, pfiles []*parse.File, env *Env) *Package {
 	if compileImports(pkg, pfiles, env); !env.Errors.IsEmpty() {
 		return nil
 	}
-	if compileErrorIDs(pkg, pfiles, env); !env.Errors.IsEmpty() {
+	if compileErrorDefs(pkg, pfiles, env); !env.Errors.IsEmpty() {
 		return nil
 	}
 	if compileTypeDefs(pkg, pfiles, env); !env.Errors.IsEmpty() {
@@ -144,25 +144,6 @@ func compileImports(pkg *Package, pfiles []*parse.File, env *Env) {
 				continue
 			}
 			file.imports[local] = &importPath{pimp.Path, pimp.Pos, false}
-		}
-	}
-}
-
-func compileErrorIDs(pkg *Package, pfiles []*parse.File, env *Env) {
-	for index := range pkg.Files {
-		file, pfile := pkg.Files[index], pfiles[index]
-		seen := make(map[string]*ErrorID)
-		for _, peid := range pfile.ErrorIDs {
-			eid := (*ErrorID)(peid)
-			if dup := seen[eid.Name]; dup != nil {
-				env.Errorf(file, eid.Pos, "error id %s reused (previous at %s)", eid.Name, dup.Pos)
-				continue
-			}
-			if eid.ID == "" {
-				// The implicit error ID is generated based on the pkg path and name.
-				eid.ID = pkg.Path + "." + eid.Name
-			}
-			file.ErrorIDs = append(file.ErrorIDs, eid)
 		}
 	}
 }

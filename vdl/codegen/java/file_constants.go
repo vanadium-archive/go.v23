@@ -21,7 +21,7 @@ public final class {{ .ClassName }} {
     {{ $const.Doc }}
     {{ $const.AccessModifier }} static final {{ $const.Type }} {{ $const.Name }} = {{ $const.Value }};
     {{ end }}
-    {{/*Error IDs*/}}
+    {{/*Error IDs TODO(rogulenko): Update to new ErrorDef logic.*/}}
     {{ range $errorid := $file.ErrorIDs }}
     {{ $errorid.Doc }}
     {{ $errorid.AccessModifier }} static final java.lang.String {{ $errorid.Name }} = "{{ $errorid.ID }}";
@@ -54,7 +54,7 @@ type constFile struct {
 
 func shouldGenerateConstFile(pkg *compile.Package) bool {
 	for _, file := range pkg.Files {
-		if len(file.ConstDefs) > 0 || len(file.ErrorIDs) > 0 {
+		if len(file.ConstDefs) > 0 || len(file.ErrorDefs) > 0 {
 			return true
 		}
 	}
@@ -80,16 +80,9 @@ func genJavaConstFile(pkg *compile.Package, env *compile.Env) *JavaFileInfo {
 			consts[j].Name = toConstCase(cnst.Name)
 			consts[j].Value = javaConstVal(cnst.Value, env)
 		}
-		errorids := make([]constErrorID, len(file.ErrorIDs))
-		for j, errorid := range file.ErrorIDs {
-			errorids[j].AccessModifier = accessModifierForName(errorid.Name)
-			errorids[j].Doc = javaDoc(errorid.Doc)
-			errorids[j].Name = toConstCase(errorid.Name)
-			errorids[j].ID = errorid.ID
-		}
+		// TODO(rogulenko): Add new ErrorDef based logic.
 		files[i].Name = file.BaseName
 		files[i].Consts = consts
-		files[i].ErrorIDs = errorids
 	}
 
 	data := struct {
