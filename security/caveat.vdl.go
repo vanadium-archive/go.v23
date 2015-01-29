@@ -29,16 +29,6 @@ func (methodCaveat) __VDLReflect(struct {
 }) {
 }
 
-// peerBlessingsCaveat represents a caveat that validates iff the peer being
-// communicated with presents a blessing that matches one of the patterns
-// included in this list.
-type peerBlessingsCaveat []BlessingPattern
-
-func (peerBlessingsCaveat) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/security.peerBlessingsCaveat"
-}) {
-}
-
 // publicKeyThirdPartyCaveat represents a third-party caveat that requires
 // discharges to be issued by a principal identified by a public key.
 //
@@ -94,7 +84,6 @@ func (publicKeyDischarge) __VDLReflect(struct {
 func init() {
 	__vdl.Register(unixTimeExpiryCaveat(0))
 	__vdl.Register(methodCaveat(nil))
-	__vdl.Register(peerBlessingsCaveat(nil))
 	__vdl.Register(publicKeyThirdPartyCaveat{})
 	__vdl.Register(publicKeyDischarge{})
 }

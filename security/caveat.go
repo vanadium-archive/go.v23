@@ -31,24 +31,6 @@ func MethodCaveat(method string, additionalMethods ...string) (Caveat, error) {
 	return NewCaveat(methodCaveat(append(additionalMethods, method)))
 }
 
-/*
-// WARNING: Please do not use this caveat just yet. There is a possible "infinite loop"
-// problem when both security.Context.LocalBlessings and security.Context.RemoteBlessings
-// have a peer-blessings caveat in them.
-//
-// TODO(ashankar,ataly): Fix the infinite loop, or remove this caveat.
-//
-// PeerBlessingsCaveat returns a Caveat that validates iff the peer has a blessing
-// that matches one of the patterns provided as an argument to this function.
-//
-// For example, creating a blessing "alice/friend" with a PeerBlessingsCaveat("bob")
-// will allow the blessing "alice/friend" to be used only when communicating with
-// a principal that has the blessing "bob".
-func PeerBlessingsCaveat(pattern BlessingPattern, additionalPatterns ...BlessingPattern) (Caveat, error) {
-	return NewCaveat(peerBlessingsCaveat(append(additionalPatterns, pattern)))
-}
-*/
-
 // digest returns a hash of the contents of c.
 func (c *Caveat) digest(hash Hash) []byte { return hash.sum(c.ValidatorVOM) }
 
@@ -85,23 +67,6 @@ func (c methodCaveat) Validate(ctx Context) error {
 		}
 	}
 	return fmt.Errorf("%T=%v fails validation for method %q", c, c, ctx.Method())
-}
-
-func (c peerBlessingsCaveat) Validate(ctx Context) error {
-	patterns := []BlessingPattern(c)
-	var self []string
-	switch {
-	case ctx.LocalBlessings() != nil:
-		self = ctx.LocalBlessings().ForContext(ctx)
-	default:
-		return fmt.Errorf("%T=%v failed validation since ctx.LocalBlessings is nil", c, c)
-	}
-	for _, p := range patterns {
-		if p.MatchedBy(self...) {
-			return nil
-		}
-	}
-	return fmt.Errorf("%T=%v fails validation for peer with blessings %v", c, c, self)
 }
 
 // UnconstrainedUse returns a Caveat implementation that never fails to

@@ -32,18 +32,6 @@ func TestCaveats(t *testing.T) {
 			{C(MethodCaveat("Bar")), false},
 			{C(MethodCaveat("Foo", "Bar")), true},
 			{C(MethodCaveat("Bar", "Baz")), false},
-			/*
-				// PeerBlessingCaveat
-				{C(PeerBlessingsCaveat("bob/...")), false},
-				{C(PeerBlessingsCaveat("alice/...")), true},
-				{C(PeerBlessingsCaveat("alice/phone")), false},
-				{C(PeerBlessingsCaveat("alice/phone/...")), true},
-				{C(PeerBlessingsCaveat("alice/phone/friend")), true},
-				{C(PeerBlessingsCaveat("alice/phone/friend/...")), true},
-				{C(PeerBlessingsCaveat("alice/phone/friend/delegate")), true},
-				{C(PeerBlessingsCaveat("alice/desktop/friend")), false},
-				{C(PeerBlessingsCaveat("alice/desktop/friend", "alice/phone/...")), true},
-			*/
 		}
 	)
 	self.AddToRoots(ctx.LocalBlessings())

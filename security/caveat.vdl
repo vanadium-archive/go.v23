@@ -11,11 +11,6 @@ type unixTimeExpiryCaveat int64
 // but cannot act as a client).
 type methodCaveat []string
 
-// peerBlessingsCaveat represents a caveat that validates iff the peer being
-// communicated with presents a blessing that matches one of the patterns
-// included in this list.
-type peerBlessingsCaveat []BlessingPattern
-
 // publicKeyThirdPartyCaveat represents a third-party caveat that requires
 // discharges to be issued by a principal identified by a public key.
 //
