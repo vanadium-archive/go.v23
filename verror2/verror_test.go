@@ -7,12 +7,12 @@ import (
 	"strings"
 	"testing"
 
-	"v.io/core/veyron2"
 	"v.io/core/veyron2/i18n"
 	"v.io/core/veyron2/verror"
 	"v.io/core/veyron2/verror2"
 	"v.io/core/veyron2/vtrace"
 
+	"v.io/core/veyron/lib/testutil"
 	_ "v.io/core/veyron/profiles"
 )
 
@@ -72,7 +72,7 @@ var (
 )
 
 func init() {
-	rootCtx, shutdown := veyron2.Init()
+	rootCtx, shutdown := testutil.InitForTest()
 	defer shutdown()
 
 	def := i18n.ContextWithLangID(rootCtx, en)

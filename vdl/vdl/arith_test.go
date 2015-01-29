@@ -19,6 +19,7 @@ import (
 	"v.io/core/veyron2/vdl/testdata/arith"
 	"v.io/core/veyron2/vdl/testdata/base"
 
+	"v.io/core/veyron/lib/testutil"
 	_ "v.io/core/veyron/profiles"
 )
 
@@ -110,7 +111,7 @@ func (*serverCalculator) Off(_ ipc.ServerContext) error {
 }
 
 func TestCalculator(t *testing.T) {
-	ctx, shutdown := veyron2.Init()
+	ctx, shutdown := testutil.InitForTest()
 	defer shutdown()
 
 	server := newServer(ctx)
@@ -288,7 +289,7 @@ func TestCalculator(t *testing.T) {
 }
 
 func TestArith(t *testing.T) {
-	ctx, shutdown := veyron2.Init()
+	ctx, shutdown := testutil.InitForTest()
 	defer shutdown()
 
 	// TODO(bprosnitz) Split this test up -- it is quite long and hard to debug.
