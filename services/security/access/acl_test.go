@@ -10,7 +10,7 @@ import (
 
 func TestInclude(t *testing.T) {
 	acl := ACL{
-		In:    []security.BlessingPattern{"alice", "alice/friend/...", "bob/family/..."},
+		In:    []security.BlessingPattern{"alice/$", "alice/friend", "bob/family"},
 		NotIn: []string{"alice/friend/carol", "bob/family/mallory"},
 	}
 	type V []string // shorthand
@@ -52,22 +52,22 @@ func TestOpenACL(t *testing.T) {
 func TestTaggedACLMapSerialization(t *testing.T) {
 	obj := TaggedACLMap{
 		"R": ACL{
-			In:    []security.BlessingPattern{"foo/...", "bar/..."},
+			In:    []security.BlessingPattern{"foo", "bar"},
 			NotIn: []string{"bar/baz"},
 		},
 		"W": ACL{
-			In:    []security.BlessingPattern{"foo/...", "bar"},
+			In:    []security.BlessingPattern{"foo", "bar/$"},
 			NotIn: []string{"foo/bar", "foo/baz/boz"},
 		},
 	}
 	txt := `
 {
 	"R": {
-		"In":["foo/...","bar/..."],
+		"In":["foo","bar"],
 		"NotIn":["bar/baz"]
 	},
 	"W": {
-		"In":["foo/...","bar"],
+		"In":["foo","bar/$"],
 		"NotIn":["foo/bar","foo/baz/boz"]
 	}
 }

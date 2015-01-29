@@ -12,7 +12,7 @@ var (
 	// invalidBlessingExtensions are strings that are disallowed as blessing extensions.
 	// TODO(ataly, ashankar): Add more reserved characters/strings to this list. Note that
 	// we need to be careful that none of these invalid strings are valid email addresses.
-	invalidBlessingExtensions = []string{NoExtension}
+	invalidBlessingExtensions = []string{string(NoExtension)}
 )
 
 func newUnsignedCertificate(extension string, key PublicKey, caveats ...Caveat) (*Certificate, error) {

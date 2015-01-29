@@ -25,11 +25,11 @@ func TestTaggedACLAuthorizer(t *testing.T) {
 			In: P{"..."},
 		},
 		"W": {
-			In:    P{"ali/family/...", "bob/...", "che"},
+			In:    P{"ali/family", "bob", "che/$"},
 			NotIn: S{"bob/acquaintances"},
 		},
 		"X": {
-			In: P{"ali/family/boss", "superman"},
+			In: P{"ali/family/boss/$", "superman/$"},
 		},
 	}
 	type testcase struct {
@@ -123,7 +123,7 @@ func TestTaggedACLAuthorizerSelfRPCs(t *testing.T) {
 		// Authorizer with a TaggedACLMap that grants read access to
 		// anyone, write/execute access to noone.
 		typ           test.MyTag
-		authorizer, _ = TaggedACLAuthorizer(TaggedACLMap{"R": {In: []security.BlessingPattern{"nobody"}}}, reflect.TypeOf(typ))
+		authorizer, _ = TaggedACLAuthorizer(TaggedACLMap{"R": {In: []security.BlessingPattern{"nobody/$"}}}, reflect.TypeOf(typ))
 	)
 	for _, test := range []string{"Put", "Get", "Resolve", "NoTags", "AllTags"} {
 		ctx := security.NewContext(&security.ContextParams{
@@ -186,14 +186,14 @@ func TestTaggedACLAuthorizerFromFile(t *testing.T) {
 	)
 	// Since this test is using trustAllRoots{}, do not need
 	// pserver.AddToRoots(server) to make pserver recognize itself as an
-	// authority on "alice/..." blessings.
+	// authority on blessings matching "alice".
 
 	// "alice/friend/bob" should not have access to test.Read methods like Get.
 	if err := authorizer.Authorize(ctx); err == nil {
 		t.Fatalf("Expected authorization error as %v is not on the ACL for Read operations", ctx.RemoteBlessings())
 	}
 	// Rewrite the file giving access
-	if err := ioutil.WriteFile(filename, []byte(`{"R": { "In":["alice/friend/..."] }}`), 0600); err != nil {
+	if err := ioutil.WriteFile(filename, []byte(`{"R": { "In":["alice/friend"] }}`), 0600); err != nil {
 		t.Fatal(err)
 	}
 	// Now should have access

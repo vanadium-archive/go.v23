@@ -7,10 +7,8 @@ import (
 // MatchedBy returns true iff one of the presented blessings matches
 // p as per the rules described in documentation for the BlessingPattern type.
 //
-// TODO(ataly, ashankar): Currently patterns that do not terminate in "/$"
-// or glob ("/...") behave as if they terminated in a "/$", and patterns that
-// terminate in glob ("/...") behave as if the glob was absent. We need to
-// depracate glob-patterns and replace all non-glob-patterns with $-patterns.
+// TODO(ataly, ashankar): Remove support for (explicit) glob-patterns (i.e. patterns
+// ending in /...).
 func (p BlessingPattern) MatchedBy(blessings ...string) bool {
 	if len(p) == 0 || !p.IsValid() {
 		return false
@@ -19,18 +17,18 @@ func (p BlessingPattern) MatchedBy(blessings ...string) bool {
 		return true
 	}
 	parts := strings.Split(string(p), ChainSeparator)
-	var glob bool
+	glob := true
 	switch {
 	case parts[len(parts)-1] == string(AllPrincipals):
-		glob = true
 		parts = parts[:len(parts)-1]
 		break
-	case parts[len(parts)-1] == NoExtension:
+	case parts[len(parts)-1] == string(NoExtension):
+		glob = false
 		parts = parts[:len(parts)-1]
 		break
 	}
 	for _, b := range blessings {
-		if p.matchedByBlessing(parts, glob, b) {
+		if matchedByBlessing(parts, glob, b) {
 			return true
 		}
 	}
@@ -41,7 +39,7 @@ func (p BlessingPattern) MatchedBy(blessings ...string) bool {
 // rules described in documentation for the BlessingPattern type.
 func (p BlessingPattern) IsValid() bool {
 	parts := strings.Split(string(p), ChainSeparator)
-	if parts[len(parts)-1] == string(AllPrincipals) || parts[len(parts)-1] == NoExtension {
+	if parts[len(parts)-1] == string(AllPrincipals) || parts[len(parts)-1] == string(NoExtension) {
 		parts = parts[:len(parts)-1]
 	}
 	for _, e := range parts {
@@ -89,11 +87,11 @@ func (p BlessingPattern) MakeNonExtendable() BlessingPattern {
 	return BlessingPattern(string(p) + ChainSeparator + string(NoExtension))
 }
 
-func (BlessingPattern) matchedByBlessing(patternchain []string, glob bool, b string) bool {
+func matchedByBlessing(patternchain []string, glob bool, b string) bool {
 	// links of the delegation chain in a blessing
 	blessingchain := strings.Split(b, ChainSeparator)
 	if glob && len(blessingchain) > len(patternchain) {
-		// ignore parts of the blessing chain that will match the "/*" component of the pattern.
+		// ignore parts of the blessing chain that will match extensions of the pattern.
 		blessingchain = blessingchain[:len(patternchain)]
 	}
 	if len(blessingchain) > len(patternchain) {
