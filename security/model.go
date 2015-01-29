@@ -444,9 +444,11 @@ type Context interface {
 	RemoteDischarges() map[string]Discharge
 	// LocalPrincipal returns the principal used to authenticate to the remote end.
 	LocalPrincipal() Principal
-	// LocalBlessings returns the blessings sent to the remote end for authentication.
+	// LocalBlessings returns the blessings (bound to the local end)
+	// provided to the remote end for authentication.
 	LocalBlessings() Blessings
-	// RemoteBlessings returns the blessings received from the remote end during authentication.
+	// RemoteBlessings returns the blessings (bound to the remote end)
+	// provided to the local end during authentication.
 	RemoteBlessings() Blessings
 	// LocalEndpoint() returns the Endpoint of the principal at the local
 	// end of communication.

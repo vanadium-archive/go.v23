@@ -511,11 +511,17 @@ type ServerCall interface {
 type ServerContext interface {
 	security.Context
 
-	// Blessings returns blessings bound to the server's private key (technically,
-	// the server principal's private key) provided by the client of the RPC.
+	// Blessings provided by the client to the server (bound to the
+	// server).  Typically provided by a client to delegate to the server,
+	// allowed the server to use the client's authority to pursue some
+	// task.
 	//
-	// Blessings can return nil, which indicates that the client did not
-	// provide any blessings to the server with the request.
+	// Can be nil, indicating that the client did not delegate any
+	// authority to the server for this request.
+	//
+	// This is distinct from the blessings used by the client and
+	// server to authenticate with each other (RemoteBlessings
+	// and LocalBlessings respectively).
 	Blessings() security.Blessings
 	// Server returns the Server that this context is associated with.
 	Server() Server
