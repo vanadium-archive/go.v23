@@ -158,6 +158,12 @@ type Application interface {
 	// envelope contains a different application title, the update does not
 	// occur, and an error is returned.
 	UpdateTo(name string) error {access.Admin}
+	// Debug returns debug information about the application installation or
+	// instance.  This is generally highly implementation-specific, and
+	// presented in an unstructured form.  No guarantees are given about the
+	// stability of the format, and parsing it programmatically is
+	// specifically discouraged.
+	Debug() (string | error) {access.Debug}
 }
 
 // Description enumerates the profiles that a Device supports.

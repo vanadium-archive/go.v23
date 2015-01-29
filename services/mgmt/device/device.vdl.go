@@ -251,6 +251,12 @@ type ApplicationClientMethods interface {
 	// envelope contains a different application title, the update does not
 	// occur, and an error is returned.
 	UpdateTo(ctx *__context.T, name string, opts ...__ipc.CallOpt) error
+	// Debug returns debug information about the application installation or
+	// instance.  This is generally highly implementation-specific, and
+	// presented in an unstructured form.  No guarantees are given about the
+	// stability of the format, and parsing it programmatically is
+	// specifically discouraged.
+	Debug(*__context.T, ...__ipc.CallOpt) (string, error)
 }
 
 // ApplicationClientStub adds universal methods to ApplicationClientMethods.
@@ -400,6 +406,17 @@ func (c implApplicationClientStub) UpdateTo(ctx *__context.T, i0 string, opts ..
 		return
 	}
 	if ierr := call.Finish(&err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+func (c implApplicationClientStub) Debug(ctx *__context.T, opts ...__ipc.CallOpt) (o0 string, err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "Debug", nil, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&o0, &err); ierr != nil {
 		err = ierr
 	}
 	return
@@ -595,6 +612,12 @@ type ApplicationServerMethods interface {
 	// envelope contains a different application title, the update does not
 	// occur, and an error is returned.
 	UpdateTo(ctx __ipc.ServerContext, name string) error
+	// Debug returns debug information about the application installation or
+	// instance.  This is generally highly implementation-specific, and
+	// presented in an unstructured form.  No guarantees are given about the
+	// stability of the format, and parsing it programmatically is
+	// specifically discouraged.
+	Debug(__ipc.ServerContext) (string, error)
 }
 
 // ApplicationServerStubMethods is the server interface containing
@@ -676,6 +699,10 @@ func (s implApplicationServerStub) Update(ctx __ipc.ServerContext) error {
 
 func (s implApplicationServerStub) UpdateTo(ctx __ipc.ServerContext, i0 string) error {
 	return s.impl.UpdateTo(ctx, i0)
+}
+
+func (s implApplicationServerStub) Debug(ctx __ipc.ServerContext) (string, error) {
+	return s.impl.Debug(ctx)
 }
 
 func (s implApplicationServerStub) Globber() *__ipc.GlobState {
@@ -797,6 +824,15 @@ var descApplication = __ipc.InterfaceDesc{
 				{"", ``}, // error
 			},
 			Tags: []__vdl.AnyRep{access.Tag("Admin")},
+		},
+		{
+			Name: "Debug",
+			Doc:  "// Debug returns debug information about the application installation or\n// instance.  This is generally highly implementation-specific, and\n// presented in an unstructured form.  No guarantees are given about the\n// stability of the format, and parsing it programmatically is\n// specifically discouraged.",
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // string
+				{"", ``}, // error
+			},
+			Tags: []__vdl.AnyRep{access.Tag("Debug")},
 		},
 	},
 }
