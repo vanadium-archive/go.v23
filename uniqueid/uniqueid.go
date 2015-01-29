@@ -14,6 +14,10 @@ import (
 
 var random = RandomGenerator{}
 
+func (id ID) String() string {
+	return fmt.Sprintf("0x%x", [16]byte(id))
+}
+
 // Valid returns true if the given ID is valid.
 func Valid(id ID) bool {
 	return id != ID{}
