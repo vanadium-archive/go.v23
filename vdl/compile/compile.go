@@ -167,12 +167,12 @@ func computeDeps(pkg *Package, env *Env) {
 		for _, def := range file.TypeDefs {
 			addSubTypeDeps(def.Type, pkg, env, tdeps, pdeps)
 		}
-		// Consts contribute the packages of their value types.
+		// Consts contribute their value types.
 		for _, def := range file.ConstDefs {
 			addValueTypeDeps(def.Value, pkg, env, tdeps, pdeps)
 		}
-		// Interfaces contribute the packages of their arg types and tag types, as
-		// well as embedded interfaces.
+		// Interfaces contribute their arg types and tag values, as well as embedded
+		// interfaces.
 		for _, iface := range file.Interfaces {
 			for _, embed := range iface.TransitiveEmbeds() {
 				pdeps[embed.File.Package] = true
@@ -193,6 +193,12 @@ func computeDeps(pkg *Package, env *Env) {
 				for _, tag := range method.Tags {
 					addValueTypeDeps(tag, pkg, env, tdeps, pdeps)
 				}
+			}
+		}
+		// Errors contribute their param types.
+		for _, def := range file.ErrorDefs {
+			for _, param := range def.Params {
+				addTypeDeps(param.Type, pkg, env, tdeps, pdeps)
 			}
 		}
 		file.TypeDeps = tdeps

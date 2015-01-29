@@ -41,7 +41,8 @@ func compileErrorDefs(pkg *Package, pfiles []*parse.File, env *Env) {
 				env.prefixErrorf(file, ped.Pos, err, "error %s name conflict", name)
 				continue
 			}
-			ed := &ErrorDef{NamePos: NamePos(ped.NamePos), ID: verror.ID(pkg.Path + "." + name)}
+			id := defineErrorID(pkg, name)
+			ed := &ErrorDef{NamePos: NamePos(ped.NamePos), ID: id}
 			ed.Action = defineErrorAction(name, ped.Actions, file, env)
 			ed.Params = defineErrorParams(name, ped.Params, file, env)
 			ed.Formats = defineErrorFormats(name, ped.Formats, ed.Params, file, env)
@@ -66,13 +67,24 @@ func compileErrorDefs(pkg *Package, pfiles []*parse.File, env *Env) {
 	}
 }
 
+func defineErrorID(pkg *Package, name string) verror.ID {
+	pkgPath := pkg.Path
+	// TODO: This special-case is only required to maintain backwards
+	// compatibility with previously defined errors.  Remove this when the verror2
+	// package is renamed to verror.
+	if pkgPath == "v.io/core/veyron2/verror2" {
+		pkgPath = "v.io/core/veyron2/verror"
+	}
+	return verror.ID(pkgPath + "." + name)
+}
+
 func defineErrorAction(name string, pactions []parse.StringPos, file *File, env *Env) verror2.ActionCode {
 	// We allow multiple actions to be specified in the parser, so that it's easy
 	// to add new actions in the future.
 	var act verror2.ActionCode
 	seenRetry := false
 	for _, pact := range pactions {
-		if code, ok := parseRetryAction(pact.String); ok {
+		if code, err := verror2.RetryActionFromString(pact.String); err == nil {
 			if seenRetry {
 				env.Errorf(file, pact.Pos, "error %s action %s invalid (retry action specified multiple times)", name, pact.String)
 				continue
@@ -84,21 +96,6 @@ func defineErrorAction(name string, pactions []parse.StringPos, file *File, env 
 		env.Errorf(file, pact.Pos, "error %s action %s invalid (unknown action)", name, pact.String)
 	}
 	return act
-}
-
-// TODO(toddw): Define verror2.ActionCode as a VDL enum, and remove this function.
-func parseRetryAction(str string) (verror2.ActionCode, bool) {
-	switch str {
-	case "NoRetry":
-		return verror2.NoRetry, true
-	case "RetryConnection":
-		return verror2.RetryConnection, true
-	case "RetryRefetch":
-		return verror2.RetryRefetch, true
-	case "RetryBackoff":
-		return verror2.RetryBackoff, true
-	}
-	return verror2.ActionCode(0), false
 }
 
 func defineErrorParams(name string, pparams []*parse.Field, file *File, env *Env) []*Arg {

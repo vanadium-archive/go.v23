@@ -94,6 +94,36 @@ const (
 	RetryBackoff    ActionCode = 3 // Backoff and retry a finite number of times.
 )
 
+// String returns the string label of x.
+func (x ActionCode) String() string {
+	switch x {
+	case NoRetry:
+		return "NoRetry"
+	case RetryConnection:
+		return "RetryConnection"
+	case RetryRefetch:
+		return "RetryRefetch"
+	case RetryBackoff:
+		return "RetryBackoff"
+	}
+	return fmt.Sprintf("ActionCode(%d)", x)
+}
+
+// RetryActionFromString creates a retry ActionCode from the string label.
+func RetryActionFromString(label string) (ActionCode, error) {
+	switch label {
+	case "NoRetry":
+		return NoRetry, nil
+	case "RetryConnection":
+		return RetryConnection, nil
+	case "RetryRefetch":
+		return RetryRefetch, nil
+	case "RetryBackoff":
+		return RetryBackoff, nil
+	}
+	return ActionCode(0), Make(BadArg, nil, label)
+}
+
 // An IDAction combines a unique identifier ID for errors with an ActionCode.  The
 // ID allows stable error checking across different error messages and
 // different address spaces.  By convention the format for the identifier is
@@ -541,57 +571,3 @@ func (e Standard) DebugString() string {
 	}
 	return str
 }
-
-const pkgPath = "v.io/core/veyron2/verror"
-
-var (
-	// Unknown or Internal are intended for general use by
-	// all system components. Unknown and Internal should only be used
-	// when a more specific error is not available.
-	// The default value of IDAction is mapped internally to Unknown.
-	Unknown  = Register(pkgPath+".Unknown", NoRetry, "{1:}{2:} Error{:_}") // The unknown error.
-	Internal = Register(pkgPath+".Internal", NoRetry, "{1:}{2:} Internal error{:_}")
-	EOF      = Register(pkgPath+".EOF", NoRetry, "{1:}{2:} EOF{:_}")
-
-	// BadArg is used when the parameters to an operation are invalid or
-	// incorrectly formatted.
-	// BadState is used when an method is called on an object with
-	BadArg   = Register(pkgPath+".BadArg", NoRetry, "{1:}{2:} Bad argument{:_}")
-	BadState = Register(pkgPath+".BadState", NoRetry, "{1:}{2:} Invalid state{:_}")
-
-	// Exist and NoExist are intended for use all system components that
-	// have the notion of a 'name' or 'key' that may or may not exist. The
-	// operation generating these errors should be retried with the same
-	// parameters unless some other remediating action is taken first.
-	// NoExistOrNoAccess is intended for use when the component does not
-	// want to reveal the distinction between an object existing and being
-	// inaccessible and an object existing at all.
-	Exist             = Register(pkgPath+".Exist", NoRetry, "{1:}{2:} Already exists{:_}")
-	NoExist           = Register(pkgPath+".NoExist", NoRetry, "{1:}{2:} Does not exist{:_}")
-	NoExistOrNoAccess = Register(pkgPath+".NoExistOrNoAccess", NoRetry, "{1:}{2:} Does not exist or access denied{:_}")
-
-	// The following errors can occur during the process of establishing
-	// an RPC connection.
-	// NoExist (see above) is returned if the name of the server fails to
-	// resolve any addresses.
-	// NoServers is returned when the servers returned for the supplied name
-	// are somehow unusable or unreachable by the client.
-	// NoAccess is returned when a server does not authorize a client.
-	// NotTrusted is returned when a client does not trust a server.
-	NoServers        = Register(pkgPath+".NoServers", RetryRefetch, "{1:}{2:} No usable servers found{:_}")
-	NoAccess         = Register(pkgPath+".NoAccess", RetryRefetch, "{1:}{2:} Access denied{:_}")
-	NotTrusted       = Register(pkgPath+"NotTrusted", RetryRefetch, "{1:}{2:} Client does not trust server{:_}")
-	NoServersAndAuth = Register(pkgPath+".NoServersAndAuth", RetryRefetch, "{1:}{2:} Has no usable servers and is either not trusted or access was denied{:_}")
-
-	// The following errors can occur for an RPC that is in process.
-	// Aborted is returned when the framework or the server abort the
-	// in process RPC.
-	// BadProtocol is returned when some form of protocol or codec error
-	// is encountered.
-	// Cancelled is returned when the client or server cancel an RPC.
-	// Timeout is returned when the client times out waiting for a response.
-	Aborted     = Register(pkgPath+".Aborted", NoRetry, "{1:}{2:} Aborted{:_}")
-	BadProtocol = Register(pkgPath+".BadProtocol", NoRetry, "{1:}{2:} Bad protocol or type{:_}")
-	Cancelled   = Register(pkgPath+".Cancelled", NoRetry, "{1:}{2:} Cancelled{:_}")
-	Timeout     = Register(pkgPath+".Timeout", NoRetry, "{1:}{2:} Timeout{:_}")
-)

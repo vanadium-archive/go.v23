@@ -216,6 +216,59 @@ var errorTests = []errorTest{
 		"",
 	}}},
 
+	// Test multi-package errors.
+	{"MultiPkgSameErrorName", ep{
+		{
+			"a", `error Res() {"en":"msg1"}`,
+			compile.ErrorDef{
+				Formats: []compile.LangFmt{{en, pre + "msg1"}},
+				English: pre + "msg1",
+			},
+			"",
+		},
+		{
+			"b", `error Res() {"en":"msg2"}`,
+			compile.ErrorDef{
+				Formats: []compile.LangFmt{{en, pre + "msg2"}},
+				English: pre + "msg2",
+			},
+			"",
+		},
+	}},
+	{"MultiPkgTypeDep", ep{
+		{
+			"a", `error Res() {"en":"msg1"};type Bool bool`,
+			compile.ErrorDef{
+				Formats: []compile.LangFmt{{en, pre + "msg1"}},
+				English: pre + "msg1",
+			},
+			"",
+		},
+		{
+			"b", `import "a";error Res(x a.Bool) {"en":"en {x}"}`,
+			compile.ErrorDef{
+				Params:  []*compile.Arg{arg("x", vdl.NamedType("a.Bool", vdl.BoolType))},
+				Formats: []compile.LangFmt{{en, pre + "en {3}"}},
+				English: pre + "en {3}",
+			},
+			"",
+		},
+	}},
+	{"RedefinitionOfImportName", ep{
+		{
+			"a", `error Res() {"en":"msg1"}`,
+			compile.ErrorDef{
+				Formats: []compile.LangFmt{{en, pre + "msg1"}},
+				English: pre + "msg1",
+			},
+			"",
+		},
+		{
+			"b", `import "a";error a() {"en":"en {}"}`, compile.ErrorDef{},
+			"error a name conflict",
+		},
+	}},
+
 	// Test errors.
 	{"NoParamsNoLangFmt1", ep{{"a", `error Res()`, compile.ErrorDef{}, englishFormat}}},
 	{"NoParamsNoLangFmt2", ep{{"a", `error Res() {}`, compile.ErrorDef{}, englishFormat}}},

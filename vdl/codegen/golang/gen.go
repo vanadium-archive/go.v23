@@ -87,8 +87,6 @@ func systemImportsGo(f *compile.File) []string {
 			set[`__vdl "v.io/core/veyron2/vdl"`] = true
 		}
 	}
-	/* TODO(toddw): Re-enable when ErrorDef code generation is supported.
-
 	// If the user has specified any errors, typically we need to import the
 	// "v.io/core/veyron2/verror2" package.  However we allow vdl code-generation
 	// in the "v.io/core/veyron2/verror2" package itself, to specify common
@@ -97,7 +95,10 @@ func systemImportsGo(f *compile.File) []string {
 	if len(f.ErrorDefs) > 0 && f.Package.Path != "v.io/core/veyron2/verror2" {
 		set[`__verror2 "v.io/core/veyron2/verror2"`] = true
 	}
-	*/
+	if len(f.ErrorDefs) > 0 {
+		set[`__context "v.io/core/veyron2/context"`] = true
+		set[`__i18n "v.io/core/veyron2/i18n"`] = true
+	}
 	// Convert the set of imports into a sorted list.
 	var ret sort.StringSlice
 	for key := range set {
@@ -152,6 +153,7 @@ func init() {
 		"hasStreamingMethods":   hasStreamingMethods,
 		"docBreak":              docBreak,
 		"quoteStripDoc":         parse.QuoteStripDoc,
+		"argNames":              argNames,
 		"argTypes":              argTypes,
 		"argNameTypes":          argNameTypes,
 		"argParens":             argParens,
@@ -171,13 +173,11 @@ func init() {
 }
 
 func genpkg(file *compile.File, pkg string) string {
-	/* TODO(toddw): Re-enable when ErrorDef code generation is supported.
 	// Special-case code generation for the veyron2/verror2 package, to avoid
 	// adding the "__verror2." package qualifier.
 	if file.Package.Path == "v.io/core/veyron2/verror2" && pkg == "verror2" {
 		return ""
 	}
-	*/
 	return "__" + pkg + "."
 }
 
@@ -212,20 +212,25 @@ func argTypes(data goData, args []*compile.Arg) string {
 	return strings.Join(result, ", ")
 }
 
-// argNames returns a comma-separated list of each name from args.  The names
-// are of the form prefixD, where D is the position of the argument.
-func argNames(boxPrefix, prefix, first, last string, args []*compile.Arg) string {
+// argNames returns a comma-separated list of each name from args.  If argPrefix
+// is empty, the name specified in args is used; otherwise the name is prefixD,
+// where D is the position of the argument.
+func argNames(boxPrefix, argPrefix, first, last string, args []*compile.Arg) string {
 	var result []string
 	if first != "" {
 		result = append(result, first)
 	}
 	for ix, arg := range args {
-		p := prefix
-		if arg.Type == vdl.ErrorType {
-			// TODO(toddw): Also need to box user-defined external interfaces.
-			p = boxPrefix + prefix
+		name := arg.Name
+		if argPrefix != "" {
+			name = fmt.Sprintf("%s%d", argPrefix, ix)
 		}
-		result = append(result, fmt.Sprintf("%s%d", p, ix))
+		if arg.Type == vdl.ErrorType {
+			// TODO(toddw): Also need to box user-defined external interfaces.  Or can
+			// we remove this special-case now?
+			name = boxPrefix + name
+		}
+		result = append(result, name)
 	}
 	if last != "" {
 		result = append(result, last)
@@ -424,11 +429,20 @@ import ( {{range $imp := $data.UserImports}}
 {{constDefGo $data $cdef}}
 {{end}}
 
-{{/* TODO(toddw): Re-enable when ErrorDef code generation is supported.
-{{range $eid := $file.ErrorDefs}}
-{{$eid.Doc}}const {{$eid.Name}} = {{genpkg $file "verror2"}}ID("{{$eid.ID}}"){{$eid.DocSuffix}}
-{{end}}
-*/}}
+{{if $file.ErrorDefs}}var ( {{range $edef := $file.ErrorDefs}}
+	{{$edef.Doc}}{{$edef.Name}} = {{genpkg $file "verror2"}}Register("{{$edef.ID}}", {{genpkg $file "verror2"}}{{$edef.Action}}, "{{$edef.English}}"){{end}}
+)
+
+{{/* TODO(toddw): Don't set "en-US" or "en" again, since it's already set by Register */}}
+func init() { {{range $edef := $file.ErrorDefs}}{{range $lf := $edef.Formats}}
+	__i18n.Cat().SetWithBase(__i18n.LangID("{{$lf.Lang}}"), __i18n.MsgID({{$edef.Name}}.ID), "{{$lf.Fmt}}"){{end}}{{end}}
+}
+{{range $edef := $file.ErrorDefs}}
+// Make{{$edef.Name}} returns an error with the {{$edef.Name}} ID.
+func Make{{$edef.Name}}(ctx {{argNameTypes "" "*__context.T" "" $data $edef.Params}}) {{genpkg $file "verror2"}}E {
+	return {{genpkg $file "verror2"}}Make({{$edef.Name}}, {{argNames "" "" "ctx" "" $edef.Params}})
+}
+{{end}}{{end}}
 
 {{range $iface := $file.Interfaces}}{{$ifaceStreaming := hasStreamingMethods $iface.AllMethods}}
 // {{$iface.Name}}ClientMethods is the client interface

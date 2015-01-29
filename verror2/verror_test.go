@@ -359,3 +359,26 @@ func TestSubordinateErrors(t *testing.T) {
 		t.Errorf("debug string missing correct line #: %s", p2str)
 	}
 }
+
+func TestRetryActionFromString(t *testing.T) {
+	tests := []struct {
+		Label  string
+		Action verror2.ActionCode
+		ID     verror.ID
+	}{
+		{"NoRetry", verror2.NoRetry, ""},
+		{"RetryConnection", verror2.RetryConnection, ""},
+		{"RetryRefetch", verror2.RetryRefetch, ""},
+		{"RetryBackoff", verror2.RetryBackoff, ""},
+		{"foobar", 0, verror2.BadArg.ID},
+	}
+	for _, test := range tests {
+		action, err := verror2.RetryActionFromString(test.Label)
+		if got, want := action, test.Action; got != want {
+			t.Errorf("got action %d, want %d", got, want)
+		}
+		if got, want := verror2.ErrorID(err), test.ID; got != want {
+			t.Errorf("got error id %v, want %v", got, want)
+		}
+	}
+}

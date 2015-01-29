@@ -10,8 +10,10 @@ import (
 	__io "io"
 	__veyron2 "v.io/core/veyron2"
 	__context "v.io/core/veyron2/context"
+	__i18n "v.io/core/veyron2/i18n"
 	__ipc "v.io/core/veyron2/ipc"
 	__vdl "v.io/core/veyron2/vdl"
+	__verror2 "v.io/core/veyron2/verror2"
 )
 
 type NamedBool bool
@@ -574,6 +576,42 @@ var CTOUnion = __vdl.TypeOf(NamedUnion(NamedUnionA{false}))
 var CTOTypeObject = __vdl.TypeObjectType
 
 var CTOAny = __vdl.AnyType
+
+var (
+	ErrNoParams1   = __verror2.Register("v.io/core/veyron2/vdl/testdata/base.ErrNoParams1", __verror2.NoRetry, "{1:}{2:} en msg")
+	ErrNoParams2   = __verror2.Register("v.io/core/veyron2/vdl/testdata/base.ErrNoParams2", __verror2.RetryRefetch, "{1:}{2:} en msg")
+	ErrWithParams1 = __verror2.Register("v.io/core/veyron2/vdl/testdata/base.ErrWithParams1", __verror2.NoRetry, "{1:}{2:} en x={3} y={4}")
+	ErrWithParams2 = __verror2.Register("v.io/core/veyron2/vdl/testdata/base.ErrWithParams2", __verror2.RetryRefetch, "{1:}{2:} en x={3} y={4}")
+)
+
+func init() {
+	__i18n.Cat().SetWithBase(__i18n.LangID("en"), __i18n.MsgID(ErrNoParams1.ID), "{1:}{2:} en msg")
+	__i18n.Cat().SetWithBase(__i18n.LangID("en"), __i18n.MsgID(ErrNoParams2.ID), "{1:}{2:} en msg")
+	__i18n.Cat().SetWithBase(__i18n.LangID("fr"), __i18n.MsgID(ErrNoParams2.ID), "{1:}{2:} fr msg")
+	__i18n.Cat().SetWithBase(__i18n.LangID("en"), __i18n.MsgID(ErrWithParams1.ID), "{1:}{2:} en x={3} y={4}")
+	__i18n.Cat().SetWithBase(__i18n.LangID("en"), __i18n.MsgID(ErrWithParams2.ID), "{1:}{2:} en x={3} y={4}")
+	__i18n.Cat().SetWithBase(__i18n.LangID("fr"), __i18n.MsgID(ErrWithParams2.ID), "{1:}{2:} fr y={4} x={3}")
+}
+
+// MakeErrNoParams1 returns an error with the ErrNoParams1 ID.
+func MakeErrNoParams1(ctx *__context.T) __verror2.E {
+	return __verror2.Make(ErrNoParams1, ctx)
+}
+
+// MakeErrNoParams2 returns an error with the ErrNoParams2 ID.
+func MakeErrNoParams2(ctx *__context.T) __verror2.E {
+	return __verror2.Make(ErrNoParams2, ctx)
+}
+
+// MakeErrWithParams1 returns an error with the ErrWithParams1 ID.
+func MakeErrWithParams1(ctx *__context.T, x string, y int32) __verror2.E {
+	return __verror2.Make(ErrWithParams1, ctx, x, y)
+}
+
+// MakeErrWithParams2 returns an error with the ErrWithParams2 ID.
+func MakeErrWithParams2(ctx *__context.T, x string, y int32) __verror2.E {
+	return __verror2.Make(ErrWithParams2, ctx, x, y)
+}
 
 // ServiceAClientMethods is the client interface
 // containing ServiceA methods.
