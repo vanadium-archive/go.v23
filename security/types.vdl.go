@@ -4,6 +4,8 @@
 package security
 
 import (
+	"v.io/core/veyron2/uniqueid"
+
 	// The non-user imports are prefixed with "__" to prevent collisions.
 	__vdl "v.io/core/veyron2/vdl"
 )
@@ -114,12 +116,19 @@ func (Certificate) __VDLReflect(struct {
 }) {
 }
 
-// CaveatUuid is the identifier of a caveat, used to look up its validation function.
-// This identifier should be generated so that it is globally unique and will map to a unique validation function.
-type CaveatUuid [16]byte
+// CaveatDescriptor defines an association between a caveat validation function
+// (addressed by globally unique identifier) and the data needed by the
+// validation function.
+//
+// For a validator to be invoked, a validation function must be registered with
+// the validator description in the language that the function is defined in.
+type CaveatDescriptor struct {
+	Id         uniqueid.ID // The identifier of the caveat validation function.
+	ParamsType *__vdl.Type // The type of the parameters expected by the validation function.
+}
 
-func (CaveatUuid) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/security.CaveatUuid"
+func (CaveatDescriptor) __VDLReflect(struct {
+	Name string "v.io/core/veyron2/security.CaveatDescriptor"
 }) {
 }
 
@@ -132,28 +141,14 @@ func (CaveatUuid) __VDLReflect(struct {
 // Given a Hash, the message digest of a caveat is:
 // Hash(ValidatorVOM).
 type Caveat struct {
-	// ValidatorVOM holds the VOM-encoded bytes of the CaveatValidator
-	// that validates this caveat.
+	// TODO(ashankar): DEPRECATED: Remove before release.
 	ValidatorVOM []byte
-	Id           CaveatUuid   // The identifier of the caveat validation function.
-	Data         __vdl.AnyRep // Data to be provided to the caveat validation function.
+	Id           uniqueid.ID // The identifier of the caveat validation function.
+	ParamsVom    []byte      // VOM-encoded bytes of the parameters to be provided to the validation function.
 }
 
 func (Caveat) __VDLReflect(struct {
 	Name string "v.io/core/veyron2/security.Caveat"
-}) {
-}
-
-// CaveatDescription describes a caveat validator.
-// For a validator to be invoked, a validation function must be registered with the validator description in the language that the function is defined in.
-type CaveatDescription struct {
-	Id       CaveatUuid  // The identifier of the caveat validation function.
-	DataType *__vdl.Type // The type of data expected by the validation function.
-	Doc      string      // Description of the caveat.
-}
-
-func (CaveatDescription) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/security.CaveatDescription"
 }) {
 }
 
@@ -189,11 +184,10 @@ func init() {
 	__vdl.Register(ThirdPartyRequirements{})
 	__vdl.Register(DischargeImpetus{})
 	__vdl.Register(Certificate{})
-	__vdl.Register(CaveatUuid{})
-	__vdl.Register(Caveat{})
-	__vdl.Register(CaveatDescription{
-		DataType: __vdl.AnyType,
+	__vdl.Register(CaveatDescriptor{
+		ParamsType: __vdl.AnyType,
 	})
+	__vdl.Register(Caveat{})
 	__vdl.Register(WireBlessings{})
 }
 

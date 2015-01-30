@@ -62,6 +62,11 @@ func TestRoundtrip(t *testing.T) {
 		{[]int64{}, []int64(nil)},
 		{map[string]int64(nil), map[string]int64(nil)},
 		{map[string]int64{}, map[string]int64(nil)},
+		// TODO(toddw): The byte-slice is special cased.  This is
+		// arguably a bug, ideally we'd like Want: []byte(nil) to be
+		// consistent with other types. Keeping this test here more for
+		// documentation of the problem.
+		{[]byte(nil), []byte{}},
 		// Test that encoding nil typeobject leads to AnyType.
 		{(*vdl.Type)(nil), vdl.AnyType},
 		// Test that both encoding and decoding ignore unexported fields.
