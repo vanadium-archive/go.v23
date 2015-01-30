@@ -145,7 +145,7 @@ func formatTime(when int64, loc *time.Location) string {
 // location, if loc is nil local times will be used.
 func FormatTrace(w io.Writer, record *TraceRecord, loc *time.Location) {
 	if root := buildTree(record); root != nil {
-		fmt.Fprintf(w, "Trace - %x (%s, %s)\n",
+		fmt.Fprintf(w, "Trace - %s (%s, %s)\n",
 			record.ID,
 			formatTime(root.span.Start, loc),
 			formatTime(root.span.End, loc))

@@ -9,6 +9,7 @@ import (
 	"crypto/rand"
 	"encoding/binary"
 	"fmt"
+	"strings"
 	"sync"
 )
 
@@ -26,6 +27,9 @@ func Valid(id ID) bool {
 func FromHexString(s string) (ID, error) {
 	var id ID
 	var slice []byte
+	if strings.HasPrefix(s, "0x") {
+		s = s[2:]
+	}
 	if _, err := fmt.Sscanf(s, "%x", &slice); err != nil {
 		return id, err
 	}

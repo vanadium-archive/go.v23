@@ -71,7 +71,7 @@ func TestFormat(t *testing.T) {
 
 	var buf bytes.Buffer
 	vtrace.FormatTrace(&buf, &tr, time.UTC)
-	want := `Trace - 30783030303030303030303030303030303030303030303030303030303030303031 (2014-11-06 13:01:22.400000 UTC, ??)
+	want := `Trace - 0x00000000000000000000000000000001 (2014-11-06 13:01:22.400000 UTC, ??)
     Span - Child1 [id: 00000003 parent 00000002] (1s, 10s)
         Span - GrandChild1 [id: 00000005 parent 00000003] (3s, 8s)
             @4s First Annotation
@@ -142,7 +142,7 @@ func TestFormatWithMissingSpans(t *testing.T) {
 
 	var buf bytes.Buffer
 	vtrace.FormatTrace(&buf, &tr, time.UTC)
-	want := `Trace - 30783030303030303030303030303030303030303030303030303030303030303036 (2014-11-06 13:01:22.400000 UTC, ??)
+	want := `Trace - 0x00000000000000000000000000000006 (2014-11-06 13:01:22.400000 UTC, ??)
     Span - Child1 [id: 00000008 parent 00000007] (1s, 10s)
         Span - GrandChild1 [id: 0000000c parent 00000008] (3s, 8s)
             @4s First Annotation
