@@ -58,9 +58,9 @@ var (
 	// BadProtocol means that an operation was not completed because of a protocol
 	// or codec error.
 	BadProtocol = Register("v.io/core/veyron2/verror.BadProtocol", NoRetry, "{1:}{2:} Bad protocol or type{:_}")
-	// Cancelled means that an operation was not completed because it was
+	// Canceled means that an operation was not completed because it was
 	// explicitly cancelled by the caller.
-	Cancelled = Register("v.io/core/veyron2/verror.Cancelled", NoRetry, "{1:}{2:} Cancelled{:_}")
+	Canceled = Register("v.io/core/veyron2/verror.Canceled", NoRetry, "{1:}{2:} Canceled{:_}")
 	// Timeout means that an operation was not completed before the time deadline
 	// for the operation.
 	Timeout = Register("v.io/core/veyron2/verror.Timeout", NoRetry, "{1:}{2:} Timeout{:_}")
@@ -81,7 +81,7 @@ func init() {
 	__i18n.Cat().SetWithBase(__i18n.LangID("en"), __i18n.MsgID(NoServersAndAuth.ID), "{1:}{2:} Has no usable servers and is either not trusted or access was denied{:_}")
 	__i18n.Cat().SetWithBase(__i18n.LangID("en"), __i18n.MsgID(Aborted.ID), "{1:}{2:} Aborted{:_}")
 	__i18n.Cat().SetWithBase(__i18n.LangID("en"), __i18n.MsgID(BadProtocol.ID), "{1:}{2:} Bad protocol or type{:_}")
-	__i18n.Cat().SetWithBase(__i18n.LangID("en"), __i18n.MsgID(Cancelled.ID), "{1:}{2:} Cancelled{:_}")
+	__i18n.Cat().SetWithBase(__i18n.LangID("en"), __i18n.MsgID(Canceled.ID), "{1:}{2:} Canceled{:_}")
 	__i18n.Cat().SetWithBase(__i18n.LangID("en"), __i18n.MsgID(Timeout.ID), "{1:}{2:} Timeout{:_}")
 }
 
@@ -155,9 +155,9 @@ func MakeBadProtocol(ctx *__context.T) error {
 	return Make(BadProtocol, ctx)
 }
 
-// MakeCancelled returns an error with the Cancelled ID.
-func MakeCancelled(ctx *__context.T) error {
-	return Make(Cancelled, ctx)
+// MakeCanceled returns an error with the Canceled ID.
+func MakeCanceled(ctx *__context.T) error {
+	return Make(Canceled, ctx)
 }
 
 // MakeTimeout returns an error with the Timeout ID.

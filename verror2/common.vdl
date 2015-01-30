@@ -60,9 +60,9 @@ error (
 	// or codec error.
 	BadProtocol() {"en":"Bad protocol or type{:_}"}
 
-	// Cancelled means that an operation was not completed because it was
+	// Canceled means that an operation was not completed because it was
 	// explicitly cancelled by the caller.
-	Cancelled() {"en":"Cancelled{:_}"}
+	Canceled() {"en":"Canceled{:_}"}
 
 	// Timeout means that an operation was not completed before the time deadline
 	// for the operation.
