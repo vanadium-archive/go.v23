@@ -439,7 +439,7 @@ func init() { {{range $edef := $file.ErrorDefs}}{{range $lf := $edef.Formats}}
 }
 {{range $edef := $file.ErrorDefs}}
 // Make{{$edef.Name}} returns an error with the {{$edef.Name}} ID.
-func Make{{$edef.Name}}(ctx {{argNameTypes "" "*__context.T" "" $data $edef.Params}}) {{genpkg $file "verror2"}}E {
+func Make{{$edef.Name}}(ctx {{argNameTypes "" "*__context.T" "" $data $edef.Params}}) error {
 	return {{genpkg $file "verror2"}}Make({{$edef.Name}}, {{argNames "" "" "ctx" "" $edef.Params}})
 }
 {{end}}{{end}}
