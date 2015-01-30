@@ -254,11 +254,8 @@ func TestBaseLangID(t *testing.T) {
 }
 
 func testContext() *context.T {
-	// The nil context is not directly usable, we need to create
-	// a context specially.
-	type key struct{}
-	var ctx *context.T
-	return context.WithValue(ctx, key{}, nil)
+	ctx, _ := context.RootContext()
+	return ctx
 }
 
 // TestBaseLangID tests LangIDFromContext() and ContextWithLangID.

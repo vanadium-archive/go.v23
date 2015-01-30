@@ -453,9 +453,18 @@ This registration is from:
 	initState.runtimeStack = stack
 	initState.mu.Unlock()
 
-	ctx, cancel := context.WithCancel(nil)
+	rootctx, rootcancel := context.RootContext()
+	// Note we derive a second cancelable context here beyond the
+	// rootctx.  This allows us to do shutdown in two steps.  First
+	// we cancel this initial context to trigger cleanup of all
+	// servers, clients, stream managers, etc.  Then after everything
+	// is shut down we invoke rootcancel.  This allows the cleanup
+	// to perform operations that require uncancelled contexts.
+	ctx, cancel := context.WithCancel(rootctx)
 	rt, ctx, shutdown, err := profile(ctx)
 	if err != nil {
+		cancel()
+		rootcancel()
 		panic(err)
 	}
 
@@ -463,20 +472,24 @@ This registration is from:
 	initState.runtime = rt
 	initState.mu.Unlock()
 
-	if err := rt.Init(ctx); err != nil {
-		panic(err)
-	}
-
-	return ctx, func() {
+	vshutdown := func() {
 		// Note we call our own cancel here to ensure that the
 		// runtime/profile implementor has not attached anything to a
 		// non-cancellable context.
 		cancel()
 		shutdown()
+		rootcancel()
 
 		initState.mu.Lock()
 		initState.runtime = nil
 		initState.runtimeStack = ""
 		initState.mu.Unlock()
 	}
+
+	if err := rt.Init(ctx); err != nil {
+		vshutdown()
+		panic(err)
+	}
+
+	return ctx, vshutdown
 }

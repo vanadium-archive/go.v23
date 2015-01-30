@@ -66,7 +66,8 @@ import (
 type internalKey int
 
 const (
-	cancelKey = internalKey(iota)
+	rootKey = internalKey(iota)
+	cancelKey
 	deadlineKey
 )
 
@@ -90,6 +91,14 @@ var DeadlineExceeded = errors.New("context deadline exceeded")
 type T struct {
 	parent     *T
 	key, value interface{}
+}
+
+// RootContext creates a new root context with no data attached.
+// A RootContext is cancelable (see WithCancel).
+// Typically you should not call this function, instead you should derive
+// contexts from other contexts, such as that returned by veyron2.Init().
+func RootContext() (*T, CancelFunc) {
+	return WithCancel(&T{key: rootKey})
 }
 
 // Initialized returns true if this context has been properly initialized
@@ -202,6 +211,9 @@ type deadlineState struct {
 // WithValue returns a child of the current context that will return
 // the given val when Value(key) is called.
 func WithValue(parent *T, key interface{}, val interface{}) *T {
+	if !parent.Initialized() {
+		panic("Trying to derive a context from an uninitialized context.")
+	}
 	if key == nil {
 		panic("Attempting to store a context value with an untyped nil key.")
 	}
@@ -237,6 +249,30 @@ func withDeadlineState(parent *T, deadline time.Time, timeout time.Duration) (*T
 	return WithValue(t, deadlineKey, ds), func() {
 		ds.timer.Stop()
 		cancel(Canceled)
+	}
+}
+
+// WithRootContext returns a context derived from parent, but that is
+// detached from the deadlines and cancellation hierarchy so that this
+// context will only ever be canceled when the returned CancelFunc is
+// called, or the RootContext from which this context is ultimately
+// derived is canceled.
+func WithRootCancel(parent *T) (*T, CancelFunc) {
+	var root *cancelState
+	for ancestor := parent; ancestor != nil; ancestor = ancestor.parent {
+		if cs, ok := ancestor.value.(*cancelState); ok {
+			root = cs
+		}
+	}
+	cs := &cancelState{done: make(chan struct{})}
+	if root != nil {
+		root.addChild(cs)
+	}
+	return WithValue(parent, cancelKey, cs), func() {
+		if root != nil {
+			root.removeChild(cs)
+		}
+		cs.cancel(Canceled)
 	}
 }
 
