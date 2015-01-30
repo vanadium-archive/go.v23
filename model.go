@@ -210,8 +210,6 @@ type Runtime interface {
 	GetAppCycle(ctx *context.T) AppCycle
 
 	// GetListenSpec gets the ListenSpec.
-	// TODO(suharshs, mattr): Determine if setting this should also be allowed, or if
-	// only the Profiles should be able to this.
 	GetListenSpec(ctx *context.T) ipc.ListenSpec
 
 	// SetBackgroundContext creates a new context derived from the given context
