@@ -17,7 +17,11 @@ func NewCaveat(validator CaveatValidator) (Caveat, error) {
 	if err != nil {
 		return Caveat{}, err
 	}
-	return Caveat{ValidatorVOM: b}, nil
+	// TODO(ashankar): ParamsVom is set to an empty slice instead of the zero
+	// value (nil) because of how vom roundtripping works on byte slices.
+	// Fix vom, or anyway, once ValidatorVOM is gone, ParamsVom will always
+	// be filled in.
+	return Caveat{ValidatorVOM: b, ParamsVom: []byte{}}, nil
 }
 
 // ExpiryCaveat returns a Caveat that validates iff the current time is before t.

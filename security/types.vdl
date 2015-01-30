@@ -1,5 +1,7 @@
 package security
 
+import "v.io/core/veyron2/uniqueid"
+
 // BlessingPattern is a pattern that is matched by specific blessings.
 //
 // A pattern can be either a blessing (slash-separated human-readable string)
@@ -99,11 +101,18 @@ type Certificate struct {
 	Signature Signature // Signature by the blessing principal that binds the extension to the public key.
 }
 
-// CaveatUuid is the identifier of a caveat, used to look up its validation function.
-// This identifier should be generated so that it is globally unique and will map to a unique validation function.
-type CaveatUuid [16]byte
-
 // TODO(toddw): Specify UnknownCaveatUuid with new error syntax.
+
+// CaveatDescriptor defines an association between a caveat validation function
+// (addressed by globally unique identifier) and the data needed by the
+// validation function.
+//
+// For a validator to be invoked, a validation function must be registered with
+// the validator description in the language that the function is defined in.
+type CaveatDescriptor struct {
+	Id         uniqueid.ID // The identifier of the caveat validation function.
+	ParamsType typeobject  // The type of the parameters expected by the validation function.
+}
 
 // Caveat is a condition on the validity of a blessing/discharge.
 //
@@ -114,25 +123,13 @@ type CaveatUuid [16]byte
 // Given a Hash, the message digest of a caveat is:
 // Hash(ValidatorVOM).
 type Caveat struct {
-	// Fields for old caveat format:
-
-	// ValidatorVOM holds the VOM-encoded bytes of the CaveatValidator
-	// that validates this caveat.
+	// TODO(ashankar): DEPRECATED: Remove before release.
 	ValidatorVOM []byte
 
-	// Fields for new caveat format:
-
-	Id   CaveatUuid // The identifier of the caveat validation function.
-	Data any        // Data to be provided to the caveat validation function.
+	Id        uniqueid.ID  // The identifier of the caveat validation function.
+	ParamsVom []byte       // VOM-encoded bytes of the parameters to be provided to the validation function.
 }
 
-// CaveatDescription describes a caveat validator.
-// For a validator to be invoked, a validation function must be registered with the validator description in the language that the function is defined in.
-type CaveatDescription struct {
-	Id       CaveatUuid // The identifier of the caveat validation function.
-	DataType typeobject // The type of data expected by the validation function.
-	Doc      string     // Description of the caveat.
-}
 
 // WireBlessings encapsulates wire format of a set of blessings and the
 // corresponding cryptographic proof that binds them to a principal
