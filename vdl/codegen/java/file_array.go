@@ -22,9 +22,23 @@ package {{.Package}};
     public static final io.v.core.veyron2.vdl.VdlType VDL_TYPE =
             io.v.core.veyron2.vdl.Types.getVdlTypeFromReflect({{.Name}}.class);
 
-    public {{.Name}}({{.ElemType}}[] impl) {
-        super(VDL_TYPE, impl);
+    public {{.Name}}({{.ElemType}}[] arr) {
+        super(VDL_TYPE, arr);
     }
+
+    {{ if .ElemIsPrimitive }}
+    public {{.Name}}({{ .ElemPrimitiveType }}[] arr) {
+        super(VDL_TYPE, convert(arr));
+    }
+
+    private static {{ .ElemType }}[] convert({{ .ElemPrimitiveType }}[] arr) {
+        final {{ .ElemType }}[] ret = new {{ .ElemType }}[arr.length];
+        for (int i = 0; i < arr.length; ++i) {
+            ret[i] = arr[i];
+        }
+        return ret;
+    }
+    {{ end }}
 
     @Override
     public void writeToParcel(android.os.Parcel out, int flags) {
@@ -58,25 +72,29 @@ package {{.Package}};
 func genJavaArrayFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo {
 	javaTypeName := toUpperCamelCase(tdef.Name)
 	data := struct {
-		AccessModifier string
-		Doc            string
-		ElemType       string
-		Length         int
-		Name           string
-		Package        string
-		SourceFile     string
-		VdlTypeName    string
-		VdlTypeString  string
+		AccessModifier    string
+		Doc               string
+		ElemType          string
+		ElemIsPrimitive   bool
+		ElemPrimitiveType string
+		Length            int
+		Name              string
+		Package           string
+		SourceFile        string
+		VdlTypeName       string
+		VdlTypeString     string
 	}{
-		AccessModifier: accessModifierForName(tdef.Name),
-		Doc:            javaDocInComment(tdef.Doc),
-		ElemType:       javaType(tdef.Type.Elem(), true, env),
-		Length:         tdef.Type.Len(),
-		Name:           javaTypeName,
-		Package:        javaPath(javaGenPkgPath(tdef.File.Package.Path)),
-		SourceFile:     tdef.File.BaseName,
-		VdlTypeName:    tdef.Type.Name(),
-		VdlTypeString:  tdef.Type.String(),
+		AccessModifier:    accessModifierForName(tdef.Name),
+		Doc:               javaDocInComment(tdef.Doc),
+		ElemType:          javaType(tdef.Type.Elem(), true, env),
+		ElemIsPrimitive:   !isClass(tdef.Type.Elem(), env),
+		ElemPrimitiveType: javaType(tdef.Type.Elem(), false, env),
+		Length:            tdef.Type.Len(),
+		Name:              javaTypeName,
+		Package:           javaPath(javaGenPkgPath(tdef.File.Package.Path)),
+		SourceFile:        tdef.File.BaseName,
+		VdlTypeName:       tdef.Type.Name(),
+		VdlTypeString:     tdef.Type.String(),
 	}
 	var buf bytes.Buffer
 	err := parseTmpl("array", arrayTmpl).Execute(&buf, data)

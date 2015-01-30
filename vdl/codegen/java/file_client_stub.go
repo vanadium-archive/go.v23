@@ -39,22 +39,23 @@ package {{ .PackagePath }};
     }
 
     // Methods from interface UniversalServiceMethods.
-    @Override
-    public io.v.core.veyron2.ipc.ServiceSignature getSignature(io.v.core.veyron2.context.VContext context) throws io.v.core.veyron2.VeyronException {
-        return getSignature(context, null);
-    }
-    @Override
-    public io.v.core.veyron2.ipc.ServiceSignature getSignature(io.v.core.veyron2.context.VContext context, io.v.core.veyron2.Options veyronOpts) throws io.v.core.veyron2.VeyronException {
-        // Start the call.
-        final io.v.core.veyron2.ipc.Client.Call _call = getClient(context).startCall(context, this.veyronName, "signature", new java.lang.Object[0], new java.lang.reflect.Type[0], veyronOpts);
+    // TODO(spetrovic): Re-enable once we can import the new Signature classes.
+    //@Override
+    //public io.v.core.veyron2.ipc.ServiceSignature getSignature(io.v.core.veyron2.context.VContext context) throws io.v.core.veyron2.VeyronException {
+    //    return getSignature(context, null);
+    //}
+    //@Override
+    //public io.v.core.veyron2.ipc.ServiceSignature getSignature(io.v.core.veyron2.context.VContext context, io.v.core.veyron2.Options veyronOpts) throws io.v.core.veyron2.VeyronException {
+    //    // Start the call.
+    //    final io.v.core.veyron2.ipc.Client.Call _call = getClient(context).startCall(context, this.veyronName, "signature", new java.lang.Object[0], new java.lang.reflect.Type[0], veyronOpts);
 
-        // Finish the call.
-        final java.lang.reflect.Type[] _resultTypes = new java.lang.reflect.Type[]{
-            new com.google.common.reflect.TypeToken<io.v.core.veyron2.ipc.ServiceSignature>() {}.getType(),
-        };
-        final java.lang.Object[] _results = _call.finish(_resultTypes);
-        return (io.v.core.veyron2.ipc.ServiceSignature)_results[0];
-    }
+    //    // Finish the call.
+    //    final java.lang.reflect.Type[] _resultTypes = new java.lang.reflect.Type[]{
+    //        new com.google.common.reflect.TypeToken<io.v.core.veyron2.ipc.ServiceSignature>() {}.getType(),
+    //    };
+    //    final java.lang.Object[] _results = _call.finish(_resultTypes);
+    //    return (io.v.core.veyron2.ipc.ServiceSignature)_results[0];
+    //}
 
     // Methods from interface {{ .ServiceName }}Client.
 {{/* Iterate over methods defined directly in the body of this service */}}

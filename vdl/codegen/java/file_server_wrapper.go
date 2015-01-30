@@ -34,10 +34,11 @@ package {{ .PackagePath }};
     /**
      * Returns a description of this server.
      */
-    @SuppressWarnings("unused")
-    public io.v.core.veyron2.ipc.ServiceSignature signature(io.v.core.veyron2.ipc.ServerCall call) throws io.v.core.veyron2.VeyronException {
-        throw new io.v.core.veyron2.VeyronException("Signature method not yet supported for Java servers");
-    }
+    // TODO(spetrovic): Re-enable once we can import the new Signature classes.
+    //@SuppressWarnings("unused")
+    //public io.v.core.veyron2.ipc.ServiceSignature signature(io.v.core.veyron2.ipc.ServerCall call) throws io.v.core.veyron2.VeyronException {
+    //    throw new io.v.core.veyron2.VeyronException("Signature method not yet supported for Java servers");
+    //}
 
     /**
      * Returns all tags associated with the provided method or null if the method isn't implemented
