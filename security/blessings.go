@@ -150,13 +150,8 @@ func blessingForCertificateChain(ctx Context, chain []Certificate) string {
 	// Validate all caveats embedded in the chain.
 	for _, cert := range chain {
 		for _, cav := range cert.Caveats {
-			validator, err := decodeCaveat(cav)
-			if err != nil {
-				vlog.VI(4).Infof("ignoring blessing %v because Caveat decoding failed: %v", blessing, err)
-				return ""
-			}
-			if err = validator.Validate(ctx); err != nil {
-				vlog.VI(4).Infof("ignoring blessing %v because caveat %T failed valdiation: %v", blessing, validator, err)
+			if err := validateCaveat(ctx, cav); err != nil {
+				vlog.VI(4).Infof("Ignoring blessing %v: %v", blessing, err)
 				return ""
 			}
 		}
@@ -164,16 +159,28 @@ func blessingForCertificateChain(ctx Context, chain []Certificate) string {
 	return blessing
 }
 
-func decodeCaveat(cav Caveat) (CaveatValidator, error) {
-	caveatDecoderLock.RLock()
-	defer caveatDecoderLock.RUnlock()
-	if caveatDecoder == nil {
-		// Use the default (i.e., VOM) decoder.
-		var validator CaveatValidator
-		err := vom.Decode(cav.ValidatorVOM, &validator)
-		return validator, err
+func validateCaveat(ctx Context, cav Caveat) error {
+	caveatValidationSetup.mu.RLock()
+	fn := caveatValidationSetup.fn
+	finalized := caveatValidationSetup.finalized
+	caveatValidationSetup.mu.RUnlock()
+	if !finalized {
+		caveatValidationSetup.mu.Lock()
+		caveatValidationSetup.finalized = true
+		fn = caveatValidationSetup.fn
+		caveatValidationSetup.mu.Unlock()
 	}
-	return caveatDecoder(cav)
+	if fn != nil {
+		return fn(ctx, cav)
+	}
+	var validator CaveatValidator
+	if err := vom.Decode(cav.ValidatorVOM, &validator); err != nil {
+		return fmt.Errorf("Caveat decoding failed: %v", err)
+	}
+	if err := validator.Validate(ctx); err != nil {
+		return fmt.Errorf("Caveat %T failed validation: %v", validator, err)
+	}
+	return nil
 }
 
 // NewBlessings creates a Blessings object from the provided wire representation.
@@ -256,24 +263,34 @@ func UnionOfBlessings(blessings ...Blessings) (Blessings, error) {
 	return &ret, nil
 }
 
-var (
-	caveatDecoder     func(Caveat) (CaveatValidator, error)
-	caveatDecoderLock sync.RWMutex
-)
+var caveatValidationSetup struct {
+	mu        sync.RWMutex
+	fn        func(Context, Caveat) error
+	finalized bool
+}
 
-// RegisterCaveatDecoder registers the decoder used for decoding Caveats.
-// If a nil decoder is registered, caveats are decoded using the default
-// Go VOM-decoder.
+// SetGlobalCaveatValidator sets the mechanism used for validating Caveats.
 //
-// This registration mechanism is useful for supporting caveats defined in
-// native languages (e.g., Java, Javascript), where the default Go VOM-decoder
-// doesn't know how to decode its data.
+// This is normally needed only when using this Go library as a library for
+// security privimitives and validating Caveats defined in the native language
+// (e.g., Java, JavaScript). In such cases, the address space of the Go process
+// cannot interpret the caveat data or execute the validation checks, so this
+// function is used as a bridge to defer the validation check to the native
+// language.
 //
-// If never invoked, default caveat decoder is used.
-func RegisterCaveatDecoder(decoder func(Caveat) (CaveatValidator, error)) {
-	caveatDecoderLock.Lock()
-	defer caveatDecoderLock.Unlock()
-	caveatDecoder = decoder
+// This function can be called at most once, before any caveats have ever been
+// validated.
+//
+// If never invoked, the default Go API is used to associate validation
+// functions with caveats.
+func SetCaveatValidator(fn func(Context, Caveat) error) {
+	caveatValidationSetup.mu.Lock()
+	defer caveatValidationSetup.mu.Unlock()
+	if caveatValidationSetup.finalized {
+		panic("SetCaveatValidator cannot be called multiple times or after this process has checked at least some caveats")
+	}
+	caveatValidationSetup.finalized = true
+	caveatValidationSetup.fn = fn
 }
 
 type certificateChainsSorter [][]Certificate
