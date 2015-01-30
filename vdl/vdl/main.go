@@ -346,6 +346,7 @@ var (
 	optGenJavaOutPkg = xlateRules{
 		{"v.io", "io/v"},
 	}
+	optPathToJSCore string
 	// TODO(bjornick): Add javascript to the default gen langs.
 	optGenLangs = genLangs{vdltool.GenLanguageGo, vdltool.GenLanguageJava}
 )
@@ -412,6 +413,9 @@ there are no matching rules, the package remains unchanged.  The special dst
 SKIP indicates matching packages are skipped.`)
 	cmdGenerate.Flags.Var(&optGenJavascriptOutDir, "js_out_dir",
 		"Same semantics as --go_out_dir but applies to js code generation.")
+	cmdGenerate.Flags.StringVar(&optPathToJSCore, "js_relative_path_to_core", "",
+		"If set, this is the relative path from js_out_dir to the root of the JS core")
+
 	// Options for audit are identical to generate.
 	cmdAudit.Flags = cmdGenerate.Flags
 }
@@ -520,7 +524,7 @@ func gen(audit bool, targets []*build.Package, env *compile.Env) bool {
 					}
 					return filepath.Join(cleanPath, path.Base(importPath))
 				}
-				data := javascript.Generate(pkg, env, path, config.Javascript)
+				data := javascript.Generate(pkg, env, path, config.Javascript, optPathToJSCore)
 				name := filepath.Base(target.Dir)
 				if writeFile(audit, data, dir, name+".js", env) {
 					pkgchanged = true
