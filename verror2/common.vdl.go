@@ -86,81 +86,81 @@ func init() {
 }
 
 // MakeUnknown returns an error with the Unknown ID.
-func MakeUnknown(ctx *__context.T) E {
+func MakeUnknown(ctx *__context.T) error {
 	return Make(Unknown, ctx)
 }
 
 // MakeInternal returns an error with the Internal ID.
-func MakeInternal(ctx *__context.T) E {
+func MakeInternal(ctx *__context.T) error {
 	return Make(Internal, ctx)
 }
 
 // MakeEOF returns an error with the EOF ID.
-func MakeEOF(ctx *__context.T) E {
+func MakeEOF(ctx *__context.T) error {
 	return Make(EOF, ctx)
 }
 
 // MakeBadArg returns an error with the BadArg ID.
-func MakeBadArg(ctx *__context.T) E {
+func MakeBadArg(ctx *__context.T) error {
 	return Make(BadArg, ctx)
 }
 
 // MakeBadState returns an error with the BadState ID.
-func MakeBadState(ctx *__context.T) E {
+func MakeBadState(ctx *__context.T) error {
 	return Make(BadState, ctx)
 }
 
 // MakeExist returns an error with the Exist ID.
-func MakeExist(ctx *__context.T) E {
+func MakeExist(ctx *__context.T) error {
 	return Make(Exist, ctx)
 }
 
 // MakeNoExist returns an error with the NoExist ID.
-func MakeNoExist(ctx *__context.T) E {
+func MakeNoExist(ctx *__context.T) error {
 	return Make(NoExist, ctx)
 }
 
 // MakeNoExistOrNoAccess returns an error with the NoExistOrNoAccess ID.
-func MakeNoExistOrNoAccess(ctx *__context.T) E {
+func MakeNoExistOrNoAccess(ctx *__context.T) error {
 	return Make(NoExistOrNoAccess, ctx)
 }
 
 // MakeNoServers returns an error with the NoServers ID.
-func MakeNoServers(ctx *__context.T) E {
+func MakeNoServers(ctx *__context.T) error {
 	return Make(NoServers, ctx)
 }
 
 // MakeNoAccess returns an error with the NoAccess ID.
-func MakeNoAccess(ctx *__context.T) E {
+func MakeNoAccess(ctx *__context.T) error {
 	return Make(NoAccess, ctx)
 }
 
 // MakeNotTrusted returns an error with the NotTrusted ID.
-func MakeNotTrusted(ctx *__context.T) E {
+func MakeNotTrusted(ctx *__context.T) error {
 	return Make(NotTrusted, ctx)
 }
 
 // MakeNoServersAndAuth returns an error with the NoServersAndAuth ID.
-func MakeNoServersAndAuth(ctx *__context.T) E {
+func MakeNoServersAndAuth(ctx *__context.T) error {
 	return Make(NoServersAndAuth, ctx)
 }
 
 // MakeAborted returns an error with the Aborted ID.
-func MakeAborted(ctx *__context.T) E {
+func MakeAborted(ctx *__context.T) error {
 	return Make(Aborted, ctx)
 }
 
 // MakeBadProtocol returns an error with the BadProtocol ID.
-func MakeBadProtocol(ctx *__context.T) E {
+func MakeBadProtocol(ctx *__context.T) error {
 	return Make(BadProtocol, ctx)
 }
 
 // MakeCancelled returns an error with the Cancelled ID.
-func MakeCancelled(ctx *__context.T) E {
+func MakeCancelled(ctx *__context.T) error {
 	return Make(Cancelled, ctx)
 }
 
 // MakeTimeout returns an error with the Timeout ID.
-func MakeTimeout(ctx *__context.T) E {
+func MakeTimeout(ctx *__context.T) error {
 	return Make(Timeout, ctx)
 }

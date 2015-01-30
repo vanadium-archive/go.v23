@@ -594,22 +594,22 @@ func init() {
 }
 
 // MakeErrNoParams1 returns an error with the ErrNoParams1 ID.
-func MakeErrNoParams1(ctx *__context.T) __verror2.E {
+func MakeErrNoParams1(ctx *__context.T) error {
 	return __verror2.Make(ErrNoParams1, ctx)
 }
 
 // MakeErrNoParams2 returns an error with the ErrNoParams2 ID.
-func MakeErrNoParams2(ctx *__context.T) __verror2.E {
+func MakeErrNoParams2(ctx *__context.T) error {
 	return __verror2.Make(ErrNoParams2, ctx)
 }
 
 // MakeErrWithParams1 returns an error with the ErrWithParams1 ID.
-func MakeErrWithParams1(ctx *__context.T, x string, y int32) __verror2.E {
+func MakeErrWithParams1(ctx *__context.T, x string, y int32) error {
 	return __verror2.Make(ErrWithParams1, ctx, x, y)
 }
 
 // MakeErrWithParams2 returns an error with the ErrWithParams2 ID.
-func MakeErrWithParams2(ctx *__context.T, x string, y int32) __verror2.E {
+func MakeErrWithParams2(ctx *__context.T, x string, y int32) error {
 	return __verror2.Make(ErrWithParams2, ctx, x, y)
 }
 
