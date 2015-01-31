@@ -746,3 +746,82 @@ func TestBlessingsCannotBeVomEncodedOrDecoded(t *testing.T) {
 		t.Fatal("Direct vom decoding into security.Blessings unexpectedly succeeded")
 	}
 }
+
+func TestSetCaveatValidator(t *testing.T) {
+	// Clear out state as if the process just started.
+	clear := func() {
+		caveatValidationSetup.mu.Lock()
+		caveatValidationSetup.fn = nil
+		caveatValidationSetup.finalized = false
+		caveatValidationSetup.mu.Unlock()
+	}
+	clear()
+	defer clear() // To undo the SetCaveatValidator call in this test.
+
+	type ctxcav struct {
+		ctx Context
+		cav Caveat
+	}
+	var (
+		p      = newPrincipal(t)
+		c      = make(chan ctxcav, 1)
+		ctx    = NewContext(&ContextParams{LocalPrincipal: p})
+		cav    = newCaveat(MethodCaveat("Method"))
+		b, err = p.BlessSelf("alice", cav)
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	p.AddToRoots(b)
+	SetCaveatValidator(func(ctx Context, cav Caveat) error {
+		c <- ctxcav{ctx, cav}
+		return nil
+	})
+	// The function registered above should be invoked.
+	b.ForContext(ctx)
+	select {
+	case <-time.Tick(10 * time.Second):
+		t.Fatalf("Caveat validation function not invoked")
+	case got := <-c:
+		if !reflect.DeepEqual(ctx, got.ctx) {
+			t.Errorf("Caveat validation function invoked with ctx=%v, want %v", got.ctx, ctx)
+		}
+		if !reflect.DeepEqual(cav, got.cav) {
+			t.Errorf("Caveat validation function invoked with cav=%v, want %v", got.cav, cav)
+		}
+	}
+	// A second call to SetCaveatValidator should panic.
+	func() {
+		defer func() {
+			if err := recover(); err == nil {
+				panic("expected a panic")
+			}
+		}()
+		SetCaveatValidator(nil)
+	}()
+}
+
+func TestSetCaveatValidatorAfterCaveatUse(t *testing.T) {
+	// Validate caveats somehow:
+	var (
+		p      = newPrincipal(t)
+		ctx    = NewContext(&ContextParams{LocalPrincipal: p})
+		cav    = newCaveat(MethodCaveat("Method"))
+		b, err = p.BlessSelf("alice", cav)
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Trigger caveat validation:
+	p.AddToRoots(b)
+	b.ForContext(ctx)
+	// Now SetValidatorCaveat should fail.
+	func() {
+		defer func() {
+			if err := recover(); err == nil {
+				panic("expected a panic")
+			}
+		}()
+		SetCaveatValidator(nil)
+	}()
+}
