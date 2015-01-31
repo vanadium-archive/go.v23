@@ -38,6 +38,16 @@ func MethodCaveat(method string, additionalMethods ...string) (Caveat, error) {
 // digest returns a hash of the contents of c.
 func (c *Caveat) digest(hash Hash) []byte { return hash.sum(c.ValidatorVOM) }
 
+// ThirdPatyDetails returns nil if c is not a third party caveat, or details about
+// the third party otherwise.
+func (c Caveat) ThirdPartyDetails() ThirdPartyCaveat {
+	var tp ThirdPartyCaveat
+	if _ = vom.Decode(c.ValidatorVOM, &tp); tp != nil {
+		return tp
+	}
+	return nil
+}
+
 func (c Caveat) String() string {
 	var validator CaveatValidator
 	if err := vom.Decode(c.ValidatorVOM, &validator); err == nil {

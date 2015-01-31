@@ -378,7 +378,9 @@ type CaveatValidator interface {
 
 // ThirdPartyCaveat is a restriction on the applicability of a blessing that is
 // considered satisfied only when accompanied with a specific "discharge" from
-// the third-party specified in the caveat.
+// the third-party specified in the caveat. (The first two parties are the ones
+// presenting a blessing and the one making authorization decisions based on
+// the blessing presented).
 //
 // Multiple goroutines may invoke methods on a ThirdPartyCaveat simultaneously.
 type ThirdPartyCaveat interface {

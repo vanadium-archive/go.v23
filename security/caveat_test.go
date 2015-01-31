@@ -1,6 +1,7 @@
 package security
 
 import (
+	"reflect"
 	"testing"
 	"time"
 
@@ -100,5 +101,26 @@ func TestPublicKeyThirdPartyCaveat(t *testing.T) {
 	}
 	if merr := matchesError(tpc.Dischargeable(NewContext(&ContextParams{Timestamp: now})), "could not validate embedded restriction security.unixTimeExpiryCaveat"); merr != nil {
 		t.Fatal(merr)
+	}
+}
+
+func TestThirdPartyDetails(t *testing.T) {
+	niltests := []Caveat{
+		newCaveat(ExpiryCaveat(time.Now())),
+		newCaveat(MethodCaveat("Foo", "Bar")),
+	}
+	for _, c := range niltests {
+		if tp := c.ThirdPartyDetails(); tp != nil {
+			t.Errorf("Caveat [%v] recognized as a third-party caveat: %v", c, tp)
+		}
+	}
+	req := ThirdPartyRequirements{ReportMethod: true}
+	tp, err := NewPublicKeyCaveat(newPrincipal(t).PublicKey(), "location", req, newCaveat(ExpiryCaveat(time.Now())))
+	if err != nil {
+		t.Fatal(err)
+	}
+	c := newCaveat(NewCaveat(tp))
+	if got := c.ThirdPartyDetails(); !reflect.DeepEqual(got, tp) {
+		t.Errorf("Got %v, want %v", got, tp)
 	}
 }
