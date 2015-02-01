@@ -58,7 +58,7 @@ type fork struct {
 // the Publisher itself will read from it, however, if the consumers are slow
 // then the publisher may be slow in draining the channel. The publisher
 // should provide additional buffering if this is a concern.
-// In practice, this mechanism will be used for rarely changing Settings,
+// Consequently this mechanism should be used for rarely changing Settings,
 // such as network address changes forced by DHCP and hence no buffering
 // will be required. The channel returned by CreateStream is closed when the
 // publisher is shut down and hence the caller should wait for this to occur
@@ -114,7 +114,7 @@ func (p *Publisher) Latest(name string) *Stream {
 // ForkStream 'forks' the named stream to add a new consumer. The channel
 // provided is to be used to read Settings sent down the stream. This
 // channel will be closed by the Publisher when it is asked to shut down.
-// The reader on this channel must be able to keep up the flow of Settings
+// The reader on this channel must be able to keep up with the flow of Settings
 // through the Stream in order to avoid blocking all other readers and hence
 // should set an appropriate amount of buffering for the channel it passes in.
 // ForkStream returns the most recent values of all Settings previously
@@ -140,7 +140,9 @@ func (p *Publisher) ForkStream(name string, ch chan<- Setting) (*Stream, error) 
 	return &Stream{Name: name, Description: f.desc, Latest: r}, nil
 }
 
-// TODO(cnicolaou): document and add tests for this.
+// CloseFork removes the specified channel from the named stream.
+// The caller must drain the channel before closing it.
+// TODO(cnicolaou): add tests for this.
 func (p *Publisher) CloseFork(name string, ch chan<- Setting) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()

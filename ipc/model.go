@@ -251,6 +251,15 @@ type Server interface {
 	// for details.
 	Status() ServerStatus
 
+	// WatchNetwork registers a channel over which NetworkChange's will
+	// be sent. The Server will not block sending data over this channel
+	// and hence change events may be lost if the caller doesn't ensure
+	// there is sufficient buffering in the channel.
+	WatchNetwork(ch chan<- NetworkChange)
+
+	// UnwatchNetwork unregisters a channek previously registered using Watch.
+	UnwatchNetwork(ch chan<- NetworkChange)
+
 	// Stop gracefully stops all services on this Server.  New calls are
 	// rejected, but any in-flight calls are allowed to complete.  All
 	// published mountpoints are unmounted.  This call waits for this
@@ -290,21 +299,6 @@ const (
 	ServerStopped
 )
 
-type MountStatus struct {
-	// The Name and Server 'address' of this mount table request.
-	Name, Server string
-	// LastMount records the time of the last attempted mount request.
-	LastMount time.Time
-	// LastMountErr records any error reported by the last attempted mount.
-	LastMountErr error
-	// TTL is the TTL supplied for the last mount request.
-	TTL time.Duration
-	// LastUnount records the time of the last attempted unmount request.
-	LastUnmount time.Time
-	// LastUnmountErr records any error reported by the last attempted unmount.
-	LastUnmountErr error
-}
-
 func (i ServerState) String() string {
 	switch i {
 	case ServerInit:
@@ -318,6 +312,22 @@ func (i ServerState) String() string {
 	default:
 		return fmt.Sprintf("%s(%T=%d)", "%!s", i, i)
 	}
+}
+
+// MountStatus contains the status of a given mount operation.
+type MountStatus struct {
+	// The Name and Server 'address' of this mount table request.
+	Name, Server string
+	// LastMount records the time of the last attempted mount request.
+	LastMount time.Time
+	// LastMountErr records any error reported by the last attempted mount.
+	LastMountErr error
+	// TTL is the TTL supplied for the last mount request.
+	TTL time.Duration
+	// LastUnount records the time of the last attempted unmount request.
+	LastUnmount time.Time
+	// LastUnmountErr records any error reported by the last attempted unmount.
+	LastUnmountErr error
 }
 
 func (ms MountStatus) String() string {
@@ -339,6 +349,31 @@ func (ms MountStatus) String() string {
 
 type MountState []MountStatus
 
+// NetworkChange represents the changes made in response to a network
+// Setting change being received.
+type NetworkChange struct {
+	Time    time.Time         // Time of last change.
+	State   ServerState       // The current state of the server.
+	Setting config.Setting    // The Setting sent for the last change.
+	Changed []naming.Endpoint // The set of endpoints added/removed as a result of this change.
+	Error   error             // Any error that encountered.
+}
+
+func (nc NetworkChange) DebugString() string {
+	s := fmt.Sprintf("NetworkChange @ %s\n", nc.Time)
+	s += fmt.Sprintf("  Setting: %s\n", nc.Setting)
+	if nc.Error != nil {
+		s += fmt.Sprintf("  Error: %s", nc.Error)
+	}
+	if len(nc.Changed) > 0 {
+		s += fmt.Sprintf("  Endpoints: %d changes\n", len(nc.Changed))
+		for i, ep := range nc.Changed {
+			s += fmt.Sprintf("  %d:%s\n", i, ep)
+		}
+	}
+	return s
+}
+
 type ServerStatus struct {
 	// The current state of the server.
 	State ServerState
@@ -355,6 +390,10 @@ type ServerStatus struct {
 	// mount table for the names published using this server but excluding
 	// those used for serving proxied requests.
 	Endpoints []naming.Endpoint
+
+	// Errors contains any errors encountered when creating new listeners
+	// or endpoints.
+	Errors []error
 
 	// Proxies contains the status of any proxy connections maintained by
 	// this server.
