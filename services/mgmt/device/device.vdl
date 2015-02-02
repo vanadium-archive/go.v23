@@ -103,14 +103,20 @@ type Application interface {
 	// Application methods. After a device has been claimed, only the
 	// claimant will be able to modify the ACLs for the device.
 	access.Object
-	// Install installs the application identified by the argument and
+	// Install installs the application identified by the first argument and
 	// returns an object name suffix that identifies the new installation.
 	//
-	// The argument should be an object name for an application envelope.
-	// The service it identifies must implement repository.Application, and
-	// is expected to return either the requested version (if the object name
-	// encodes a specific version), or otherwise the latest available version,
-	// as appropriate.
+	// The name argument should be an object name for an application
+	// envelope.  The service it identifies must implement
+	// repository.Application, and is expected to return either the
+	// requested version (if the object name encodes a specific version), or
+	// otherwise the latest available version, as appropriate.  This object
+	// name will be used by default by the Update method, as a source for
+	// updated application envelopes (can be overriden by setting
+	// AppOriginConfigKey in the config).
+	//
+	// The config argument specifies config settings that will take
+	// precedence over those present in the application envelope.
 	//
 	// The returned suffix, when appended to the name used to reach the
 	// receiver for Install, can be used to control the installation object.
@@ -153,6 +159,10 @@ type Application interface {
 	// different application title, the update does not occur, and an error
 	// is returned.
 	Update() error {access.Admin}
+	// TODO(caprita): Decide if we keep this in v0.1.  If we do, we may want
+	// to use it over the origin override mechanism in the config, to
+	// specify a new origin for the app installation.
+
 	// UpdateTo updates the application installation(s) to the application
 	// specified by the object name argument.  If the new application
 	// envelope contains a different application title, the update does not
