@@ -34,11 +34,9 @@ func (b *blessingsImpl) ThirdPartyCaveats() []ThirdPartyCaveat {
 	for _, chain := range b.chains {
 		for _, cert := range chain {
 			for _, cav := range cert.Caveats {
-				var tpc ThirdPartyCaveat
-				if err := vom.Decode(cav.ValidatorVOM, &tpc); err != nil || tpc == nil {
-					continue
+				if tp := cav.ThirdPartyDetails(); tp != nil {
+					ret = append(ret, tp)
 				}
-				ret = append(ret, tpc)
 			}
 		}
 	}
