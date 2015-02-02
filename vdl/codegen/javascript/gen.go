@@ -320,21 +320,24 @@ func hasErrors(pkg *compile.Package) bool {
 }
 
 func generateSystemImports(data data) string {
-	// TODO(bjornick): Once all the vom js code is back in the core repo, have two different
-	// ways to do imports.  The default will just require('veyron') and grab the parts it
-	// needs from the exported namespaces.  The other is for generated files within veyron.js
-	// that will use relative paths to grab the parts it needs.
-	res := `var vom = require('vom');`
+	res := "var vom = require('"
+	packagePrefix := ""
+	if data.PathToCoreJS != "" {
+		packagePrefix = strings.Repeat("../", strings.Count(data.Pkg.Path, "/")+1) + data.PathToCoreJS
+	}
+	if data.PathToCoreJS != "" {
+		res += packagePrefix + "/vom/vom');"
+	} else {
+		res += "veyron').vom;"
+	}
 	if hasErrors(data.Pkg) {
-		packagePrefix := []string{}
-		for _ = range strings.Split(data.Pkg.Path, "/") {
-			packagePrefix = append(packagePrefix, "..")
-		}
 		if data.PathToCoreJS != "" {
-			packagePrefix = append(packagePrefix, data.PathToCoreJS)
+			res += "var makeError = require('" + packagePrefix + "/errors/make-errors');"
+			res += "var actions = require('" + packagePrefix + "/errors/actions');"
+		} else {
+			res += "var makeError = require('veyron').makeError;"
+			res += "var actions = require('veyron').errorActions;"
 		}
-		res += "var makeError = require('" + strings.Join(packagePrefix, "/") + "/errors/make-errors');"
-		res += "var actions = require('" + strings.Join(packagePrefix, "/") + "/errors/actions');"
 	}
 	return res
 }
