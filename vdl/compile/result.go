@@ -243,9 +243,18 @@ func (e *Env) DisallowPathQualifiers() *Env {
 
 // Package represents an vdl package, containing a set of files.
 type Package struct {
-	Name  string  // e.g. "base"
-	Path  string  // e.g. "v.io/core/veyron/rt/base"
-	Files []*File // Files contained in the package
+	// Name is the name of the package, specified in the vdl files.
+	// E.g. "bar"
+	Name string
+	// Path is the package path; the path used in VDL import clauses.
+	// E.g. "foo/bar".
+	Path string
+	// GenPath is the package path to use for code generation.  It is typically
+	// the same as Path, except for vdlroot standard packages.
+	// E.g. "v.io/core/veyron2/vdl/vdlroot/src/time"
+	GenPath string
+	// Files holds the files contained in the package.
+	Files []*File
 
 	// We hold some internal maps to make local name resolution cheap and easy.
 	typeDefs  map[string]*TypeDef
@@ -257,10 +266,11 @@ type Package struct {
 	lowercaseIdents map[string]string
 }
 
-func newPackage(name, path string) *Package {
+func newPackage(name, pkgPath, genPath string) *Package {
 	return &Package{
 		Name:            name,
-		Path:            path,
+		Path:            pkgPath,
+		GenPath:         genPath,
 		typeDefs:        make(map[string]*TypeDef),
 		constDefs:       make(map[string]*ConstDef),
 		ifaceDefs:       make(map[string]*Interface),

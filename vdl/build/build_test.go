@@ -220,40 +220,49 @@ func TestTransitivePackages(t *testing.T) {
 		t.Fatalf("Couldn't setEnvironment")
 	}
 	tests := []struct {
-		InPaths, OutPaths []string
+		InPaths  []string // Input paths to TransitivePackages call
+		OutPaths []string // Wanted paths from build.Package.Path.
+		GenPaths []string // Wanted paths from build.Package.GenPath, same as OutPaths if nil.
 	}{
-		{nil, nil},
-		{[]string{}, nil},
+		{nil, nil, nil},
+		{[]string{}, nil, nil},
 		// Single-package, both import and dir path.
 		{
 			[]string{"v.io/core/veyron2/vdl/testdata/base"},
 			[]string{"v.io/core/veyron2/vdl/testdata/base"},
+			nil,
 		},
 		{
 			[]string{"../testdata/base"},
 			[]string{"v.io/core/veyron2/vdl/testdata/base"},
+			nil,
 		},
 		// Single-package with wildcard, both import and dir path.
 		{
 			[]string{"v.io/core/veyron2/vdl/testdata/base..."},
 			[]string{"v.io/core/veyron2/vdl/testdata/base"},
+			nil,
 		},
 		{
 			[]string{"v.io/core/veyron2/vdl/testdata/base/..."},
 			[]string{"v.io/core/veyron2/vdl/testdata/base"},
+			nil,
 		},
 		{
 			[]string{"../testdata/base..."},
 			[]string{"v.io/core/veyron2/vdl/testdata/base"},
+			nil,
 		},
 		{
 			[]string{"../testdata/base/..."},
 			[]string{"v.io/core/veyron2/vdl/testdata/base"},
+			nil,
 		},
 		// Redundant specification as both import and dir path.
 		{
 			[]string{"v.io/core/veyron2/vdl/testdata/base", "../testdata/base"},
 			[]string{"v.io/core/veyron2/vdl/testdata/base"},
+			nil,
 		},
 		{
 			[]string{"v.io/core/veyron2/vdl/testdata/arith", "../testdata/arith"},
@@ -262,6 +271,7 @@ func TestTransitivePackages(t *testing.T) {
 				"v.io/core/veyron2/vdl/testdata/base",
 				"v.io/core/veyron2/vdl/testdata/arith",
 			},
+			nil,
 		},
 		// Wildcards as both import and dir path.
 		{
@@ -272,6 +282,7 @@ func TestTransitivePackages(t *testing.T) {
 				"v.io/core/veyron2/vdl/testdata/arith",
 				"v.io/core/veyron2/vdl/testdata/testconfig",
 			},
+			nil,
 		},
 		{
 			[]string{"v.io/core/veyron2/vdl/testdata/..."},
@@ -281,6 +292,7 @@ func TestTransitivePackages(t *testing.T) {
 				"v.io/core/veyron2/vdl/testdata/arith",
 				"v.io/core/veyron2/vdl/testdata/testconfig",
 			},
+			nil,
 		},
 		{
 			[]string{"../testdata..."},
@@ -290,6 +302,7 @@ func TestTransitivePackages(t *testing.T) {
 				"v.io/core/veyron2/vdl/testdata/arith",
 				"v.io/core/veyron2/vdl/testdata/testconfig",
 			},
+			nil,
 		},
 		{
 			[]string{"../testdata/..."},
@@ -299,6 +312,7 @@ func TestTransitivePackages(t *testing.T) {
 				"v.io/core/veyron2/vdl/testdata/arith",
 				"v.io/core/veyron2/vdl/testdata/testconfig",
 			},
+			nil,
 		},
 		// Multi-Wildcards as both import and dir path.
 		{
@@ -309,6 +323,7 @@ func TestTransitivePackages(t *testing.T) {
 				"v.io/core/veyron2/vdl/testdata/arith",
 				"v.io/core/veyron2/vdl/testdata/testconfig",
 			},
+			nil,
 		},
 		{
 			[]string{"../../../...vdl/testdata/..."},
@@ -318,24 +333,29 @@ func TestTransitivePackages(t *testing.T) {
 				"v.io/core/veyron2/vdl/testdata/arith",
 				"v.io/core/veyron2/vdl/testdata/testconfig",
 			},
+			nil,
 		},
 		// Multi-Wildcards as both import and dir path.
 		{
 			[]string{"v...vdl/testdata/...exp"},
 			[]string{"v.io/core/veyron2/vdl/testdata/arith/exp"},
+			nil,
 		},
 		{
 			[]string{"../../../...vdl/testdata/...exp"},
 			[]string{"v.io/core/veyron2/vdl/testdata/arith/exp"},
+			nil,
 		},
 		// Standard vdl package, as both import and dir path.
 		{
-			[]string{"v.io/core/veyron2/vdl/vdlroot/src/vdltool"},
 			[]string{"vdltool"},
+			[]string{"vdltool"},
+			[]string{"v.io/core/veyron2/vdl/vdlroot/src/vdltool"},
 		},
 		{
 			[]string{"../vdlroot/src/vdltool"},
 			[]string{"vdltool"},
+			[]string{"v.io/core/veyron2/vdl/vdlroot/src/vdltool"},
 		},
 	}
 	for _, test := range tests {
@@ -345,12 +365,23 @@ func TestTransitivePackages(t *testing.T) {
 			errs := vdlutil.NewErrors(-1)
 			pkgs := build.TransitivePackages(test.InPaths, mode, build.Opts{}, errs)
 			vdltest.ExpectResult(t, errs, name, "")
-			var got []string
+			var paths []string
 			for _, pkg := range pkgs {
-				got = append(got, pkg.Path)
+				paths = append(paths, pkg.Path)
 			}
-			if want := []string(test.OutPaths); !reflect.DeepEqual(got, want) {
-				t.Errorf("%v got %v, want %v", name, got, want)
+			if got, want := paths, test.OutPaths; !reflect.DeepEqual(got, want) {
+				t.Errorf("%v got path %v, want %v", name, got, want)
+			}
+			wantGen := test.GenPaths
+			if wantGen == nil {
+				wantGen = test.OutPaths
+			}
+			paths = nil
+			for _, pkg := range pkgs {
+				paths = append(paths, pkg.GenPath)
+			}
+			if got, want := paths, wantGen; !reflect.DeepEqual(got, want) {
+				t.Errorf("%v got gen path %v, want %v", name, got, want)
 			}
 		}
 	}
@@ -406,6 +437,16 @@ func TestTransitivePackagesUnknownPathError(t *testing.T) {
 		{
 			[]string{"../../../../../foo/_bar"},
 			`package path "foo/_bar" is invalid`,
+		},
+		// Special-case error for packages under vdlroot, which can't be imported
+		// using the vdlroot prefix.
+		{
+			[]string{"v.io/core/veyron2/vdl/vdlroot/src/vdltool"},
+			`packages under vdlroot must be specified without the vdlroot prefix`,
+		},
+		{
+			[]string{"v.io/core/veyron2/vdl/vdlroot/src/..."},
+			`Can't resolve "v.io/core/veyron2/vdl/vdlroot/src/..." to any packages`,
 		},
 	}
 	for _, test := range tests {
