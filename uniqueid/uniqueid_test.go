@@ -39,7 +39,7 @@ func TestNewID(t *testing.T) {
 }
 
 func TestString(t *testing.T) {
-	id := ID{8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7}
+	id := Id{8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7}
 	if got, want := fmt.Sprintf("%v", id), "0x08090a0b0c0d0e0f0001020304050607"; got != want {
 		t.Errorf("Got %q, want %q", got, want)
 	}

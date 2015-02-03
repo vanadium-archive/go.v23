@@ -82,10 +82,10 @@ type Span interface {
 	Name() string
 
 	// ID returns the uniqueid.ID of the span.
-	ID() uniqueid.ID
+	ID() uniqueid.Id
 
 	// Parent returns the uniqueid.ID of this spans parent span.
-	Parent() uniqueid.ID
+	Parent() uniqueid.Id
 
 	// Annotate adds a string annotation to the trace.  Where Spans
 	// represent time periods Annotations represent data thats relevant
@@ -103,7 +103,7 @@ type Span interface {
 	Finish()
 
 	// Trace returns the id of the trace this Span is a member of.
-	Trace() uniqueid.ID
+	Trace() uniqueid.Id
 }
 
 // Store selectively collects information about traces in the system.
@@ -113,10 +113,10 @@ type Store interface {
 
 	// TraceRecord returns a TraceRecord for a given ID.  Returns
 	// nil if the given id is not present.
-	TraceRecord(traceid uniqueid.ID) *TraceRecord
+	TraceRecord(traceid uniqueid.Id) *TraceRecord
 
 	// ForceCollect forces the store to collect all information about a given trace.
-	ForceCollect(traceid uniqueid.ID)
+	ForceCollect(traceid uniqueid.Id)
 }
 
 type Manager interface {

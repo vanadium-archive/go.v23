@@ -25,7 +25,7 @@ import (
 type StoreClientMethods interface {
 	// Trace returns the trace that matches the given ID.
 	// Will return a NoExists error if no matching trace was found.
-	Trace(*__context.T, uniqueid.ID, ...__ipc.CallOpt) (vtrace.TraceRecord, error)
+	Trace(*__context.T, uniqueid.Id, ...__ipc.CallOpt) (vtrace.TraceRecord, error)
 	// AllTraces returns TraceRecords for all traces the server currently
 	// knows about.
 	AllTraces(*__context.T, ...__ipc.CallOpt) (StoreAllTracesCall, error)
@@ -60,7 +60,7 @@ func (c implStoreClientStub) c(ctx *__context.T) __ipc.Client {
 	return __veyron2.GetClient(ctx)
 }
 
-func (c implStoreClientStub) Trace(ctx *__context.T, i0 uniqueid.ID, opts ...__ipc.CallOpt) (o0 vtrace.TraceRecord, err error) {
+func (c implStoreClientStub) Trace(ctx *__context.T, i0 uniqueid.Id, opts ...__ipc.CallOpt) (o0 vtrace.TraceRecord, err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Trace", []interface{}{i0}, opts...); err != nil {
 		return
@@ -156,7 +156,7 @@ func (c *implStoreAllTracesCall) Finish() (err error) {
 type StoreServerMethods interface {
 	// Trace returns the trace that matches the given ID.
 	// Will return a NoExists error if no matching trace was found.
-	Trace(__ipc.ServerContext, uniqueid.ID) (vtrace.TraceRecord, error)
+	Trace(__ipc.ServerContext, uniqueid.Id) (vtrace.TraceRecord, error)
 	// AllTraces returns TraceRecords for all traces the server currently
 	// knows about.
 	AllTraces(StoreAllTracesContext) error
@@ -169,7 +169,7 @@ type StoreServerMethods interface {
 type StoreServerStubMethods interface {
 	// Trace returns the trace that matches the given ID.
 	// Will return a NoExists error if no matching trace was found.
-	Trace(__ipc.ServerContext, uniqueid.ID) (vtrace.TraceRecord, error)
+	Trace(__ipc.ServerContext, uniqueid.Id) (vtrace.TraceRecord, error)
 	// AllTraces returns TraceRecords for all traces the server currently
 	// knows about.
 	AllTraces(*StoreAllTracesContextStub) error
@@ -204,7 +204,7 @@ type implStoreServerStub struct {
 	gs   *__ipc.GlobState
 }
 
-func (s implStoreServerStub) Trace(ctx __ipc.ServerContext, i0 uniqueid.ID) (vtrace.TraceRecord, error) {
+func (s implStoreServerStub) Trace(ctx __ipc.ServerContext, i0 uniqueid.Id) (vtrace.TraceRecord, error) {
 	return s.impl.Trace(ctx, i0)
 }
 
@@ -232,7 +232,7 @@ var descStore = __ipc.InterfaceDesc{
 			Name: "Trace",
 			Doc:  "// Trace returns the trace that matches the given ID.\n// Will return a NoExists error if no matching trace was found.",
 			InArgs: []__ipc.ArgDesc{
-				{"", ``}, // uniqueid.ID
+				{"", ``}, // uniqueid.Id
 			},
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // vtrace.TraceRecord

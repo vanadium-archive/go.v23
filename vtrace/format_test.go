@@ -12,8 +12,8 @@ import (
 
 var nextid = uint64(1)
 
-func id() uniqueid.ID {
-	var out uniqueid.ID
+func id() uniqueid.Id {
+	var out uniqueid.Id
 	binary.BigEndian.PutUint64(out[8:], nextid)
 	nextid++
 	return out
@@ -22,7 +22,7 @@ func id() uniqueid.ID {
 func TestFormat(t *testing.T) {
 	trid := id()
 	trstart := time.Date(2014, 11, 6, 13, 1, 22, 400000000, time.UTC)
-	spanIDs := make([]uniqueid.ID, 4)
+	spanIDs := make([]uniqueid.Id, 4)
 	for i := range spanIDs {
 		spanIDs[i] = id()
 	}
@@ -86,7 +86,7 @@ func TestFormat(t *testing.T) {
 func TestFormatWithMissingSpans(t *testing.T) {
 	trid := id()
 	trstart := time.Date(2014, 11, 6, 13, 1, 22, 400000000, time.UTC)
-	spanIDs := make([]uniqueid.ID, 6)
+	spanIDs := make([]uniqueid.Id, 6)
 	for i := range spanIDs {
 		spanIDs[i] = id()
 	}

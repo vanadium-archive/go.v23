@@ -36,7 +36,7 @@ type node struct {
 func buildTree(trace *TraceRecord) *node {
 	var root *node
 	var earliestTime int64
-	nodes := make(map[uniqueid.ID]*node, len(trace.Spans))
+	nodes := make(map[uniqueid.Id]*node, len(trace.Spans))
 
 	for i := range trace.Spans {
 		span := &trace.Spans[i]

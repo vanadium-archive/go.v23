@@ -8,14 +8,14 @@ import (
 	__vdl "v.io/core/veyron2/vdl"
 )
 
-// An ID is a likely globally unique identifier.
-type ID [16]byte
+// An Id is a likely globally unique identifier.
+type Id [16]byte
 
-func (ID) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/uniqueid.ID"
+func (Id) __VDLReflect(struct {
+	Name string "v.io/core/veyron2/uniqueid.Id"
 }) {
 }
 
 func init() {
-	__vdl.Register(ID{})
+	__vdl.Register(Id{})
 }

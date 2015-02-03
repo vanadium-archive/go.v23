@@ -5,7 +5,7 @@ import (
 )
 
 type TraceRecord struct {
-	ID    uniqueid.ID
+	ID    uniqueid.Id
 	Spans []SpanRecord
 }
 
@@ -23,8 +23,8 @@ type Annotation struct {
 
 // A SpanRecord is the wire format for a Span.
 type SpanRecord struct {
-	ID     uniqueid.ID // The ID of the Span.
-	Parent uniqueid.ID // The ID of this Span's parent.
+	ID     uniqueid.Id // The ID of the Span.
+	Parent uniqueid.Id // The ID of this Span's parent.
 	Name   string      // The Name of this span.
 
 	// TODO(mattr): These should both be time types.
@@ -52,8 +52,8 @@ const (
 
 // Request is the object that carries trace informtion between processes.
 type Request struct {
-	SpanID  uniqueid.ID // The ID of the span that originated the RPC call.
-	TraceID uniqueid.ID // The ID of the trace this call is a part of.
+	SpanID  uniqueid.Id // The ID of the span that originated the RPC call.
+	TraceID uniqueid.Id // The ID of the trace this call is a part of.
 	Method  TraceMethod // The method of collection for the trace.
 }
 

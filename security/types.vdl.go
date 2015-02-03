@@ -123,7 +123,7 @@ func (Certificate) __VDLReflect(struct {
 // For a validator to be invoked, a validation function must be registered with
 // the validator description in the language that the function is defined in.
 type CaveatDescriptor struct {
-	Id         uniqueid.ID // The identifier of the caveat validation function.
+	Id         uniqueid.Id // The identifier of the caveat validation function.
 	ParamsType *__vdl.Type // The type of the parameters expected by the validation function.
 }
 
@@ -143,7 +143,7 @@ func (CaveatDescriptor) __VDLReflect(struct {
 type Caveat struct {
 	// TODO(ashankar): DEPRECATED: Remove before release.
 	ValidatorVOM []byte
-	Id           uniqueid.ID // The identifier of the caveat validation function.
+	Id           uniqueid.Id // The identifier of the caveat validation function.
 	ParamsVom    []byte      // VOM-encoded bytes of the parameters to be provided to the validation function.
 }
 
