@@ -11,6 +11,8 @@ package groups
 import (
 	"v.io/core/veyron2/services/security/access"
 
+	"v.io/core/veyron2/services/security/access/object"
+
 	// The non-user imports are prefixed with "__" to prevent collisions.
 	__veyron2 "v.io/core/veyron2"
 	__context "v.io/core/veyron2/context"
@@ -88,9 +90,10 @@ type GroupClientMethods interface {
 	//   package mypackage
 	//
 	//   import "v.io/core/veyron2/security/access"
+	//   import "v.io/core/veyron2/security/access/object"
 	//
 	//   type MyObject interface {
-	//     access.Object
+	//     object.Object
 	//     MyRead() (string, error) {access.Read}
 	//     MyWrite(string) error    {access.Write}
 	//   }
@@ -120,7 +123,7 @@ type GroupClientMethods interface {
 	//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}
 	//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}
 	//  }
-	access.ObjectClientMethods
+	object.ObjectClientMethods
 	// Create creates a new group if it doesn't already exist.
 	// If acl is nil, a default TaggedACLMap is used, providing Admin access to
 	// the caller.
@@ -157,14 +160,14 @@ func GroupClient(name string, opts ...__ipc.BindOpt) GroupClientStub {
 			client = clientOpt
 		}
 	}
-	return implGroupClientStub{name, client, access.ObjectClient(name, client)}
+	return implGroupClientStub{name, client, object.ObjectClient(name, client)}
 }
 
 type implGroupClientStub struct {
 	name   string
 	client __ipc.Client
 
-	access.ObjectClientStub
+	object.ObjectClientStub
 }
 
 func (c implGroupClientStub) c(ctx *__context.T) __ipc.Client {
@@ -258,9 +261,10 @@ type GroupServerMethods interface {
 	//   package mypackage
 	//
 	//   import "v.io/core/veyron2/security/access"
+	//   import "v.io/core/veyron2/security/access/object"
 	//
 	//   type MyObject interface {
-	//     access.Object
+	//     object.Object
 	//     MyRead() (string, error) {access.Read}
 	//     MyWrite(string) error    {access.Write}
 	//   }
@@ -290,7 +294,7 @@ type GroupServerMethods interface {
 	//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}
 	//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}
 	//  }
-	access.ObjectServerMethods
+	object.ObjectServerMethods
 	// Create creates a new group if it doesn't already exist.
 	// If acl is nil, a default TaggedACLMap is used, providing Admin access to
 	// the caller.
@@ -332,7 +336,7 @@ type GroupServerStub interface {
 func GroupServer(impl GroupServerMethods) GroupServerStub {
 	stub := implGroupServerStub{
 		impl:             impl,
-		ObjectServerStub: access.ObjectServer(impl),
+		ObjectServerStub: object.ObjectServer(impl),
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
@@ -346,7 +350,7 @@ func GroupServer(impl GroupServerMethods) GroupServerStub {
 
 type implGroupServerStub struct {
 	impl GroupServerMethods
-	access.ObjectServerStub
+	object.ObjectServerStub
 	gs *__ipc.GlobState
 }
 
@@ -379,7 +383,7 @@ func (s implGroupServerStub) Globber() *__ipc.GlobState {
 }
 
 func (s implGroupServerStub) Describe__() []__ipc.InterfaceDesc {
-	return []__ipc.InterfaceDesc{GroupDesc, access.ObjectDesc}
+	return []__ipc.InterfaceDesc{GroupDesc, object.ObjectDesc}
 }
 
 // GroupDesc describes the Group interface.
@@ -391,7 +395,7 @@ var descGroup = __ipc.InterfaceDesc{
 	PkgPath: "v.io/core/veyron2/services/security/groups",
 	Doc:     "// A group's etag covers its ACL as well as any other data stored in the group.\n// Clients should treat etags as opaque identifiers. For both Get and Rest, if\n// etag is set and matches the Group's current etag, the response will indicate\n// that fact but will otherwise be empty.",
 	Embeds: []__ipc.EmbedDesc{
-		{"Object", "v.io/core/veyron2/services/security/access", "// Object provides access control for Veyron objects.\n//\n// Veyron services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/core/veyron2/security/access\"\n//\n//   type MyObject interface {\n//     access.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetACL and GetACL in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/core/veyron2/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}\n//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}\n//  }"},
+		{"Object", "v.io/core/veyron2/services/security/access/object", "// Object provides access control for Veyron objects.\n//\n// Veyron services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/core/veyron2/security/access\"\n//   import \"v.io/core/veyron2/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetACL and GetACL in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/core/veyron2/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}\n//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}\n//  }"},
 	},
 	Methods: []__ipc.MethodDesc{
 		{

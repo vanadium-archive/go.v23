@@ -6,6 +6,7 @@ import (
 	"v.io/core/veyron2/services/mgmt/application"
 	"v.io/core/veyron2/services/mgmt/binary"
 	"v.io/core/veyron2/services/security/access"
+	"v.io/core/veyron2/services/security/access/object"
 )
 
 // Application provides access to application envelopes. An
@@ -21,7 +22,7 @@ import (
 type Application interface {
 	// Object provides GetACL/SetACL methods to read/modify ACLs for the
 	// Application methods.
-	access.Object
+	object.Object
 	// Match checks if any of the given profiles contains an application
 	// envelope for the given application version (specified through the
 	// object name suffix) and if so, returns this envelope. If multiple
@@ -58,7 +59,7 @@ type MediaInfo struct {
 type Binary interface {
 	// Object provides GetACL/SetACL methods to read/modify ACLs for the
 	// Binary methods.
-	access.Object
+	object.Object
 	// Create expresses the intent to create a binary identified by the
 	// object name suffix consisting of the given number of parts. The
 	// mediaInfo argument contains metadata for the binary. If the suffix

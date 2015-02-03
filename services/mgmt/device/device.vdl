@@ -5,6 +5,7 @@ package device
 import (
 	"v.io/core/veyron2/services/mgmt/binary"
 	"v.io/core/veyron2/services/security/access"
+	"v.io/core/veyron2/services/security/access/object"
 )
 
 // TODO(caprita): Merge with veyron2/config and veyron/lib/exec/config.go.
@@ -102,7 +103,7 @@ type Application interface {
 	// Object provides GetACL/SetACL methods to read/modify ACLs for the
 	// Application methods. After a device has been claimed, only the
 	// claimant will be able to modify the ACLs for the device.
-	access.Object
+	object.Object
 	// Install installs the application identified by the first argument and
 	// returns an object name suffix that identifies the new installation.
 	//

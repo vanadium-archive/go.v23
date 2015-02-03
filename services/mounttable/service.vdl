@@ -3,7 +3,7 @@ package mounttable
 
 import (
 	"v.io/core/veyron2/naming"
-	"v.io/core/veyron2/services/security/access"
+	"v.io/core/veyron2/services/security/access/object"
 )
 
 // A mount table is a tree of names.  Each name may have something mounted on it,
@@ -72,6 +72,5 @@ type MountTable interface {
 	// Obsolete, left for backward compatability until all uses are killed. 
 	ResolveStepX() (Entry naming.VDLMountEntry | error)
 
-
-	access.Object
+	object.Object
 }

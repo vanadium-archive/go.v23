@@ -7,7 +7,7 @@ package mounttable
 import (
 	"v.io/core/veyron2/naming"
 
-	"v.io/core/veyron2/services/security/access"
+	"v.io/core/veyron2/services/security/access/object"
 
 	// The non-user imports are prefixed with "__" to prevent collisions.
 	__veyron2 "v.io/core/veyron2"
@@ -64,9 +64,10 @@ type MountTableClientMethods interface {
 	//   package mypackage
 	//
 	//   import "v.io/core/veyron2/security/access"
+	//   import "v.io/core/veyron2/security/access/object"
 	//
 	//   type MyObject interface {
-	//     access.Object
+	//     object.Object
 	//     MyRead() (string, error) {access.Read}
 	//     MyWrite(string) error    {access.Write}
 	//   }
@@ -96,7 +97,7 @@ type MountTableClientMethods interface {
 	//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}
 	//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}
 	//  }
-	access.ObjectClientMethods
+	object.ObjectClientMethods
 	// Mount Server (a global name) onto the receiver.
 	// Subsequent mounts add to the servers mounted there.  The multiple
 	// servers are considered equivalent and are meant solely for
@@ -139,14 +140,14 @@ func MountTableClient(name string, opts ...__ipc.BindOpt) MountTableClientStub {
 			client = clientOpt
 		}
 	}
-	return implMountTableClientStub{name, client, access.ObjectClient(name, client)}
+	return implMountTableClientStub{name, client, object.ObjectClient(name, client)}
 }
 
 type implMountTableClientStub struct {
 	name   string
 	client __ipc.Client
 
-	access.ObjectClientStub
+	object.ObjectClientStub
 }
 
 func (c implMountTableClientStub) c(ctx *__context.T) __ipc.Client {
@@ -226,9 +227,10 @@ type MountTableServerMethods interface {
 	//   package mypackage
 	//
 	//   import "v.io/core/veyron2/security/access"
+	//   import "v.io/core/veyron2/security/access/object"
 	//
 	//   type MyObject interface {
-	//     access.Object
+	//     object.Object
 	//     MyRead() (string, error) {access.Read}
 	//     MyWrite(string) error    {access.Write}
 	//   }
@@ -258,7 +260,7 @@ type MountTableServerMethods interface {
 	//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}
 	//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}
 	//  }
-	access.ObjectServerMethods
+	object.ObjectServerMethods
 	// Mount Server (a global name) onto the receiver.
 	// Subsequent mounts add to the servers mounted there.  The multiple
 	// servers are considered equivalent and are meant solely for
@@ -306,7 +308,7 @@ type MountTableServerStub interface {
 func MountTableServer(impl MountTableServerMethods) MountTableServerStub {
 	stub := implMountTableServerStub{
 		impl:             impl,
-		ObjectServerStub: access.ObjectServer(impl),
+		ObjectServerStub: object.ObjectServer(impl),
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
@@ -320,7 +322,7 @@ func MountTableServer(impl MountTableServerMethods) MountTableServerStub {
 
 type implMountTableServerStub struct {
 	impl MountTableServerMethods
-	access.ObjectServerStub
+	object.ObjectServerStub
 	gs *__ipc.GlobState
 }
 
@@ -349,7 +351,7 @@ func (s implMountTableServerStub) Globber() *__ipc.GlobState {
 }
 
 func (s implMountTableServerStub) Describe__() []__ipc.InterfaceDesc {
-	return []__ipc.InterfaceDesc{MountTableDesc, access.ObjectDesc}
+	return []__ipc.InterfaceDesc{MountTableDesc, object.ObjectDesc}
 }
 
 // MountTableDesc describes the MountTable interface.
@@ -361,7 +363,7 @@ var descMountTable = __ipc.InterfaceDesc{
 	PkgPath: "v.io/core/veyron2/services/mounttable",
 	Doc:     "// MountTable defines the interface to talk to a mounttable.",
 	Embeds: []__ipc.EmbedDesc{
-		{"Object", "v.io/core/veyron2/services/security/access", "// Object provides access control for Veyron objects.\n//\n// Veyron services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/core/veyron2/security/access\"\n//\n//   type MyObject interface {\n//     access.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetACL and GetACL in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/core/veyron2/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}\n//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}\n//  }"},
+		{"Object", "v.io/core/veyron2/services/security/access/object", "// Object provides access control for Veyron objects.\n//\n// Veyron services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/core/veyron2/security/access\"\n//   import \"v.io/core/veyron2/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetACL and GetACL in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/core/veyron2/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}\n//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}\n//  }"},
 	},
 	Methods: []__ipc.MethodDesc{
 		{

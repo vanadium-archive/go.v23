@@ -10,6 +10,8 @@ import (
 
 	"v.io/core/veyron2/services/security/access"
 
+	"v.io/core/veyron2/services/security/access/object"
+
 	// The non-user imports are prefixed with "__" to prevent collisions.
 	__veyron2 "v.io/core/veyron2"
 	__context "v.io/core/veyron2/context"
@@ -163,9 +165,10 @@ type ApplicationClientMethods interface {
 	//   package mypackage
 	//
 	//   import "v.io/core/veyron2/security/access"
+	//   import "v.io/core/veyron2/security/access/object"
 	//
 	//   type MyObject interface {
-	//     access.Object
+	//     object.Object
 	//     MyRead() (string, error) {access.Read}
 	//     MyWrite(string) error    {access.Write}
 	//   }
@@ -195,7 +198,7 @@ type ApplicationClientMethods interface {
 	//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}
 	//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}
 	//  }
-	access.ObjectClientMethods
+	object.ObjectClientMethods
 	// Install installs the application identified by the first argument and
 	// returns an object name suffix that identifies the new installation.
 	//
@@ -279,14 +282,14 @@ func ApplicationClient(name string, opts ...__ipc.BindOpt) ApplicationClientStub
 			client = clientOpt
 		}
 	}
-	return implApplicationClientStub{name, client, access.ObjectClient(name, client)}
+	return implApplicationClientStub{name, client, object.ObjectClient(name, client)}
 }
 
 type implApplicationClientStub struct {
 	name   string
 	client __ipc.Client
 
-	access.ObjectClientStub
+	object.ObjectClientStub
 }
 
 func (c implApplicationClientStub) c(ctx *__context.T) __ipc.Client {
@@ -530,9 +533,10 @@ type ApplicationServerMethods interface {
 	//   package mypackage
 	//
 	//   import "v.io/core/veyron2/security/access"
+	//   import "v.io/core/veyron2/security/access/object"
 	//
 	//   type MyObject interface {
-	//     access.Object
+	//     object.Object
 	//     MyRead() (string, error) {access.Read}
 	//     MyWrite(string) error    {access.Write}
 	//   }
@@ -562,7 +566,7 @@ type ApplicationServerMethods interface {
 	//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}
 	//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}
 	//  }
-	access.ObjectServerMethods
+	object.ObjectServerMethods
 	// Install installs the application identified by the first argument and
 	// returns an object name suffix that identifies the new installation.
 	//
@@ -651,7 +655,7 @@ type ApplicationServerStub interface {
 func ApplicationServer(impl ApplicationServerMethods) ApplicationServerStub {
 	stub := implApplicationServerStub{
 		impl:             impl,
-		ObjectServerStub: access.ObjectServer(impl),
+		ObjectServerStub: object.ObjectServer(impl),
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
@@ -665,7 +669,7 @@ func ApplicationServer(impl ApplicationServerMethods) ApplicationServerStub {
 
 type implApplicationServerStub struct {
 	impl ApplicationServerMethods
-	access.ObjectServerStub
+	object.ObjectServerStub
 	gs *__ipc.GlobState
 }
 
@@ -722,7 +726,7 @@ func (s implApplicationServerStub) Globber() *__ipc.GlobState {
 }
 
 func (s implApplicationServerStub) Describe__() []__ipc.InterfaceDesc {
-	return []__ipc.InterfaceDesc{ApplicationDesc, access.ObjectDesc}
+	return []__ipc.InterfaceDesc{ApplicationDesc, object.ObjectDesc}
 }
 
 // ApplicationDesc describes the Application interface.
@@ -734,7 +738,7 @@ var descApplication = __ipc.InterfaceDesc{
 	PkgPath: "v.io/core/veyron2/services/mgmt/device",
 	Doc:     "// Application can be used to manage applications on a device. The\n// idea is that this interace will be invoked using an object name that\n// identifies the application and its installations and instances\n// where applicable.\n//\n// In particular, the interface methods can be divided into three\n// groups based on their intended receiver:\n//\n// 1) Method receiver is an application:\n// -- Install()\n//\n// 2) Method receiver is an application installation:\n// -- Start()\n// -- Uninstall()\n// -- Update()\n//\n// 3) Method receiver is application installation instance:\n// -- Refresh()\n// -- Restart()\n// -- Resume()\n// -- Stop()\n// -- Suspend()\n//\n// For groups 2) and 3), the suffix that specifies the receiver can\n// optionally omit the installation and/or instance, in which case the\n// operation applies to all installations and/or instances in the\n// scope of the suffix.\n//\n// Examples:\n// # Install Google Maps on the device.\n// device/apps.Install(\"/google.com/appstore/maps\") --> \"google maps/0\"\n//\n// # Start an instance of the previously installed maps application installation.\n// device/apps/google maps/0.Start() --> { \"0\" }\n//\n// # Start a second instance of the previously installed maps application installation.\n// device/apps/google maps/0.Start() --> { \"1\" }\n//\n// # Stop the first instance previously started.\n// device/apps/google maps/0/0.Stop()\n//\n// # Install a second Google Maps installation.\n// device/apps.Install(\"/google.com/appstore/maps\") --> \"google maps/1\"\n//\n// # Start an instance for all maps application installations.\n// device/apps/google maps.Start() --> {\"0/2\", \"1/0\"}\n//\n// # Refresh the state of all instances of all maps application installations.\n// device/apps/google maps.Refresh()\n//\n// # Refresh the state of all instances of the maps application installation\n// identified by the given suffix.\n// device/apps/google maps/0.Refresh()\n//\n// # Refresh the state of the maps application installation instance identified by\n// the given suffix.\n// device/apps/google maps/0/2.Refresh()\n//\n// # Update the second maps installation to the latest version available.\n// device/apps/google maps/1.Update()\n//\n// # Update the first maps installation to a specific version.\n// device/apps/google maps/0.UpdateTo(\"/google.com/appstore/beta/maps\")\n//\n// Further, the following methods complement one another:\n// -- Install() and Uninstall()\n// -- Start() and Stop()\n// -- Suspend() and Resume()\n//\n// Finally, an application installation instance can be in one of\n// three abstract states: 1) \"does not exist\", 2) \"running\", or 3)\n// \"suspended\". The interface methods transition between these\n// abstract states using the following state machine:\n//\n// apply(Start(), \"does not exists\") = \"running\"\n// apply(Refresh(), \"running\") = \"running\"\n// apply(Refresh(), \"suspended\") = \"suspended\"\n// apply(Restart(), \"running\") = \"running\"\n// apply(Restart(), \"suspended\") = \"running\"\n// apply(Resume(), \"suspended\") = \"running\"\n// apply(Resume(), \"running\") = \"running\"\n// apply(Stop(), \"running\") = \"does not exist\"\n// apply(Stop(), \"suspended\") = \"does not exist\"\n// apply(Suspend(), \"running\") = \"suspended\"\n// apply(Suspend(), \"suspended\") = \"suspended\"\n//\n// In other words, invoking any method using an existing application\n// installation instance as a receiver is well-defined.",
 	Embeds: []__ipc.EmbedDesc{
-		{"Object", "v.io/core/veyron2/services/security/access", "// Object provides access control for Veyron objects.\n//\n// Veyron services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/core/veyron2/security/access\"\n//\n//   type MyObject interface {\n//     access.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetACL and GetACL in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/core/veyron2/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}\n//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}\n//  }"},
+		{"Object", "v.io/core/veyron2/services/security/access/object", "// Object provides access control for Veyron objects.\n//\n// Veyron services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/core/veyron2/security/access\"\n//   import \"v.io/core/veyron2/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetACL and GetACL in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/core/veyron2/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}\n//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}\n//  }"},
 	},
 	Methods: []__ipc.MethodDesc{
 		{
@@ -1252,7 +1256,7 @@ func (s implDeviceServerStub) Globber() *__ipc.GlobState {
 }
 
 func (s implDeviceServerStub) Describe__() []__ipc.InterfaceDesc {
-	return []__ipc.InterfaceDesc{DeviceDesc, ApplicationDesc, access.ObjectDesc}
+	return []__ipc.InterfaceDesc{DeviceDesc, ApplicationDesc, object.ObjectDesc}
 }
 
 // DeviceDesc describes the Device interface.
