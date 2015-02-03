@@ -70,7 +70,7 @@ The vdl generate flags are:
    before the package path, and dst is the replacement for src.  Use commas to
    separate multiple rules; the first rule matching src is used.  The special
    dst SKIP indicates matching packages are skipped.
- -java_out_dir=go/src->java/src/vdl/java,release/go/src/v.io/core/veyron2/vdl/vdlroot/src->SKIP
+ -java_out_dir=release/go/src/v.io/core/veyron2/vdl/vdlroot/src->SKIP,go/src->java/src/vdl/java
    Same semantics as --go_out_dir but applies to java code generation.
  -java_out_pkg=v.io->io/v
    Java output package translation rules.  Must be of the form:
@@ -81,6 +81,8 @@ The vdl generate flags are:
    dst SKIP indicates matching packages are skipped.
  -js_out_dir=release/go/src->release/javascript/core/src,roadmap/go/src->release/javascript/core/src,third_party/go/src->SKIP,tools/go/src->SKIP,release/go/src/v.io/core/veyron2/vdl/vdlroot/src->SKIP
    Same semantics as --go_out_dir but applies to js code generation.
+ -js_relative_path_to_core=
+   If set, this is the relative path from js_out_dir to the root of the JS core
  -lang=Go,Java
    Comma-separated list of languages to generate, currently supporting
    Go,Java,Javascript
@@ -138,7 +140,7 @@ The vdl audit flags are:
    before the package path, and dst is the replacement for src.  Use commas to
    separate multiple rules; the first rule matching src is used.  The special
    dst SKIP indicates matching packages are skipped.
- -java_out_dir=go/src->java/src/vdl/java,release/go/src/v.io/core/veyron2/vdl/vdlroot/src->SKIP
+ -java_out_dir=release/go/src/v.io/core/veyron2/vdl/vdlroot/src->SKIP,go/src->java/src/vdl/java
    Same semantics as --go_out_dir but applies to java code generation.
  -java_out_pkg=v.io->io/v
    Java output package translation rules.  Must be of the form:
@@ -149,6 +151,8 @@ The vdl audit flags are:
    dst SKIP indicates matching packages are skipped.
  -js_out_dir=release/go/src->release/javascript/core/src,roadmap/go/src->release/javascript/core/src,third_party/go/src->SKIP,tools/go/src->SKIP,release/go/src/v.io/core/veyron2/vdl/vdlroot/src->SKIP
    Same semantics as --go_out_dir but applies to js code generation.
+ -js_relative_path_to_core=
+   If set, this is the relative path from js_out_dir to the root of the JS core
  -lang=Go,Java
    Comma-separated list of languages to generate, currently supporting
    Go,Java,Javascript
