@@ -35,7 +35,7 @@ func makeTypeDefinitionsString(jsnames typeNames) string {
 // makeDefString generates a type definition for the specified type name.
 // e.g. "var _typeNamedBool = new Type();"
 func makeDefString(jsname string) string {
-	return fmt.Sprintf("var %s = new Type();\n", jsname)
+	return fmt.Sprintf("var %s = new vom.Type();\n", jsname)
 }
 
 // makeTypeFieldAssignmentString generates assignments for type fields.
@@ -104,58 +104,58 @@ func makeConstructorDefinitionString(t *vdl.Type, jsnames typeNames) string {
 func jsKind(k vdl.Kind) string {
 	switch k {
 	case vdl.Any:
-		return "Kind.ANY"
+		return "vom.Kind.ANY"
 	case vdl.Union:
-		return "Kind.ONEOF" // TODO(alexfandrianto): change to union
+		return "vom.Kind.ONEOF" // TODO(alexfandrianto): change to union
 	case vdl.Optional:
-		return "Kind.NILABLE" // TODO(alexfandrianto): change to optional
+		return "vom.Kind.NILABLE" // TODO(alexfandrianto): change to optional
 	case vdl.Bool:
-		return "Kind.BOOL"
+		return "vom.Kind.BOOL"
 	case vdl.Byte:
-		return "Kind.BYTE"
+		return "vom.Kind.BYTE"
 	case vdl.Uint16:
-		return "Kind.UINT16"
+		return "vom.Kind.UINT16"
 	case vdl.Uint32:
-		return "Kind.UINT32"
+		return "vom.Kind.UINT32"
 	case vdl.Uint64:
-		return "Kind.UINT64"
+		return "vom.Kind.UINT64"
 	case vdl.Int16:
-		return "Kind.INT16"
+		return "vom.Kind.INT16"
 	case vdl.Int32:
-		return "Kind.INT32"
+		return "vom.Kind.INT32"
 	case vdl.Int64:
-		return "Kind.INT64"
+		return "vom.Kind.INT64"
 	case vdl.Float32:
-		return "Kind.FLOAT32"
+		return "vom.Kind.FLOAT32"
 	case vdl.Float64:
-		return "Kind.FLOAT64"
+		return "vom.Kind.FLOAT64"
 	case vdl.Complex64:
-		return "Kind.COMPLEX64"
+		return "vom.Kind.COMPLEX64"
 	case vdl.Complex128:
-		return "Kind.COMPLEX128"
+		return "vom.Kind.COMPLEX128"
 	case vdl.String:
-		return "Kind.STRING"
+		return "vom.Kind.STRING"
 	case vdl.Enum:
-		return "Kind.ENUM"
+		return "vom.Kind.ENUM"
 	case vdl.TypeObject:
-		return "Kind.TYPEOBJECT"
+		return "vom.Kind.TYPEOBJECT"
 	case vdl.Array:
-		return "Kind.ARRAY"
+		return "vom.Kind.ARRAY"
 	case vdl.List:
-		return "Kind.LIST"
+		return "vom.Kind.LIST"
 	case vdl.Set:
-		return "Kind.SET"
+		return "vom.Kind.SET"
 	case vdl.Map:
-		return "Kind.MAP"
+		return "vom.Kind.MAP"
 	case vdl.Struct:
-		return "Kind.STRUCT"
+		return "vom.Kind.STRUCT"
 	}
 	panic(fmt.Errorf("val: unhandled kind: %d", k))
 }
 
 // builtinJSType indicates whether a vdl.Type has built-in type definition in vom.js
-// If true, then it returns a pointer to the type definition in javascript/vom/types.js
-// It assumes a variable named "Types" is already pointing to vom.Types
+// If true, then it returns a pointer to the type definition in javascript/types.js
+// It assumes a variable named "vom.Types" is already pointing to vom.Types
 func builtinJSType(t *vdl.Type) (string, bool) {
 	_, n := vdl.SplitIdent(t.Name())
 
@@ -167,35 +167,35 @@ func builtinJSType(t *vdl.Type) (string, bool) {
 	// switch on supported types in vom.js
 	switch t.Kind() {
 	case vdl.Any:
-		return "Types.ANY", true
+		return "vom.Types.ANY", true
 	case vdl.Bool:
-		return "Types.BOOL", true
+		return "vom.Types.BOOL", true
 	case vdl.Byte:
-		return "Types.BYTE", true
+		return "vom.Types.BYTE", true
 	case vdl.Uint16:
-		return "Types.UINT16", true
+		return "vom.Types.UINT16", true
 	case vdl.Uint32:
-		return "Types.UINT32", true
+		return "vom.Types.UINT32", true
 	case vdl.Uint64:
-		return "Types.UINT64", true
+		return "vom.Types.UINT64", true
 	case vdl.Int16:
-		return "Types.INT16", true
+		return "vom.Types.INT16", true
 	case vdl.Int32:
-		return "Types.INT32", true
+		return "vom.Types.INT32", true
 	case vdl.Int64:
-		return "Types.INT64", true
+		return "vom.Types.INT64", true
 	case vdl.Float32:
-		return "Types.FLOAT32", true
+		return "vom.Types.FLOAT32", true
 	case vdl.Float64:
-		return "Types.FLOAT64", true
+		return "vom.Types.FLOAT64", true
 	case vdl.Complex64:
-		return "Types.COMPLEX64", true
+		return "vom.Types.COMPLEX64", true
 	case vdl.Complex128:
-		return "Types.COMPLEX128", true
+		return "vom.Types.COMPLEX128", true
 	case vdl.String:
-		return "Types.STRING", true
+		return "vom.Types.STRING", true
 	case vdl.TypeObject:
-		return "Types.TYPEOBJECT", true
+		return "vom.Types.TYPEOBJECT", true
 	}
 
 	return "", false

@@ -47,8 +47,8 @@ func TestError(t *testing.T) {
   'en-US': 'english string',
   'fr': 'french string',
 }, [
-  Types.BOOL,
-  Types.INT32,
+  vom.Types.BOOL,
+  vom.Types.INT32,
 ]);
 `
 	if result != expected {
