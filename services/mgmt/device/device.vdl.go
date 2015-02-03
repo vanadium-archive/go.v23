@@ -196,14 +196,20 @@ type ApplicationClientMethods interface {
 	//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}
 	//  }
 	access.ObjectClientMethods
-	// Install installs the application identified by the argument and
+	// Install installs the application identified by the first argument and
 	// returns an object name suffix that identifies the new installation.
 	//
-	// The argument should be an object name for an application envelope.
-	// The service it identifies must implement repository.Application, and
-	// is expected to return either the requested version (if the object name
-	// encodes a specific version), or otherwise the latest available version,
-	// as appropriate.
+	// The name argument should be an object name for an application
+	// envelope.  The service it identifies must implement
+	// repository.Application, and is expected to return either the
+	// requested version (if the object name encodes a specific version), or
+	// otherwise the latest available version, as appropriate.  This object
+	// name will be used by default by the Update method, as a source for
+	// updated application envelopes (can be overriden by setting
+	// AppOriginConfigKey in the config).
+	//
+	// The config argument specifies config settings that will take
+	// precedence over those present in the application envelope.
 	//
 	// The returned suffix, when appended to the name used to reach the
 	// receiver for Install, can be used to control the installation object.
@@ -557,14 +563,20 @@ type ApplicationServerMethods interface {
 	//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}
 	//  }
 	access.ObjectServerMethods
-	// Install installs the application identified by the argument and
+	// Install installs the application identified by the first argument and
 	// returns an object name suffix that identifies the new installation.
 	//
-	// The argument should be an object name for an application envelope.
-	// The service it identifies must implement repository.Application, and
-	// is expected to return either the requested version (if the object name
-	// encodes a specific version), or otherwise the latest available version,
-	// as appropriate.
+	// The name argument should be an object name for an application
+	// envelope.  The service it identifies must implement
+	// repository.Application, and is expected to return either the
+	// requested version (if the object name encodes a specific version), or
+	// otherwise the latest available version, as appropriate.  This object
+	// name will be used by default by the Update method, as a source for
+	// updated application envelopes (can be overriden by setting
+	// AppOriginConfigKey in the config).
+	//
+	// The config argument specifies config settings that will take
+	// precedence over those present in the application envelope.
 	//
 	// The returned suffix, when appended to the name used to reach the
 	// receiver for Install, can be used to control the installation object.
@@ -727,7 +739,7 @@ var descApplication = __ipc.InterfaceDesc{
 	Methods: []__ipc.MethodDesc{
 		{
 			Name: "Install",
-			Doc:  "// Install installs the application identified by the argument and\n// returns an object name suffix that identifies the new installation.\n//\n// The argument should be an object name for an application envelope.\n// The service it identifies must implement repository.Application, and\n// is expected to return either the requested version (if the object name\n// encodes a specific version), or otherwise the latest available version,\n// as appropriate.\n//\n// The returned suffix, when appended to the name used to reach the\n// receiver for Install, can be used to control the installation object.\n// The suffix will contain the title of the application as a prefix,\n// which can then be used to control all the installations of the given\n// application.\n// TODO(rjkroege): Use customized labels.",
+			Doc:  "// Install installs the application identified by the first argument and\n// returns an object name suffix that identifies the new installation.\n//\n// The name argument should be an object name for an application\n// envelope.  The service it identifies must implement\n// repository.Application, and is expected to return either the\n// requested version (if the object name encodes a specific version), or\n// otherwise the latest available version, as appropriate.  This object\n// name will be used by default by the Update method, as a source for\n// updated application envelopes (can be overriden by setting\n// AppOriginConfigKey in the config).\n//\n// The config argument specifies config settings that will take\n// precedence over those present in the application envelope.\n//\n// The returned suffix, when appended to the name used to reach the\n// receiver for Install, can be used to control the installation object.\n// The suffix will contain the title of the application as a prefix,\n// which can then be used to control all the installations of the given\n// application.\n// TODO(rjkroege): Use customized labels.",
 			InArgs: []__ipc.ArgDesc{
 				{"name", ``},   // string
 				{"config", ``}, // Config
