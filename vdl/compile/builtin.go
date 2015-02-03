@@ -6,7 +6,7 @@ import (
 
 var (
 	// The BuiltInPackage and BuiltInFile are used to hold the built-ins.
-	BuiltInPackage = newPackage("", "builtin")
+	BuiltInPackage = newPackage("", "builtin", "builtin")
 	BuiltInFile    = &File{BaseName: "builtin.vdl"}
 )
 
