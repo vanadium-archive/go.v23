@@ -7,8 +7,8 @@ import (
 )
 
 // Register registers a type, identified by a value for that type.  The type
-// should be a type that will be sent over the wire; types defined in vdl files
-// are automatically registered.  Subtypes are recursively registered.
+// must be a type that will be sent over the wire; types defined in vdl files
+// are automatically registered.
 //
 // There are two reasons types must be registered:
 //   1) To create a type name -> reflect.Type mapping, so that when we decode
@@ -22,59 +22,15 @@ func Register(wire interface{}) {
 	if wire == nil {
 		return
 	}
-	if err := registerRecursive(reflect.TypeOf(wire)); err != nil {
-		panic(err)
-	}
-}
-
-func registerRecursive(rt reflect.Type) error {
-	// 1) Normalize and derive reflect information.
-	rt = normalizeType(rt)
+	rt := normalizeType(reflect.TypeOf(wire))
 	for rt.Kind() == reflect.Ptr {
 		rt = rt.Elem()
 	}
 	ri, err := DeriveReflectInfo(rt)
 	if err != nil {
-		return err
+		panic(err)
 	}
-	// 2) Add reflect information to the registry.
-	first, err := riReg.addReflectInfo(rt, ri)
-	if err != nil {
-		return err
-	}
-	if !first {
-		// Break cycles for recursive types.
-		return nil
-	}
-	// 3) Register subtypes, if this is the first time we've seen the type.
-	//
-	// Special-case to recurse on union fields.
-	if len(ri.UnionFields) > 0 {
-		for _, field := range ri.UnionFields {
-			if err := registerRecursive(field.Type); err != nil {
-				return err
-			}
-		}
-		return nil
-	}
-	// Recurse on subtypes contained in regular composite types.
-	switch wt := ri.WireType; wt.Kind() {
-	case reflect.Array, reflect.Slice, reflect.Ptr:
-		return registerRecursive(wt.Elem())
-	case reflect.Map:
-		if err := registerRecursive(wt.Key()); err != nil {
-			return err
-		}
-		return registerRecursive(wt.Elem())
-	case reflect.Struct:
-		for ix := 0; ix < wt.NumField(); ix++ {
-			if err := registerRecursive(wt.Field(ix).Type); err != nil {
-				return err
-			}
-		}
-		return nil
-	}
-	return nil
+	riReg.addReflectInfo(rt, ri)
 }
 
 // riRegistry holds the ReflectInfo registry.  Unlike rtRegistry (used for the
@@ -93,32 +49,27 @@ var riReg = &riRegistry{
 	fromNative: make(map[reflect.Type]*ReflectInfo),
 }
 
-func (reg *riRegistry) addReflectInfo(rt reflect.Type, ri *ReflectInfo) (bool, error) {
+func (reg *riRegistry) addReflectInfo(rt reflect.Type, ri *ReflectInfo) {
 	reg.Lock()
 	defer reg.Unlock()
 	// Allow duplicates only if they're identical, meaning the same wire type was
 	// registered multiple times.  Otherwise it indicates a non-bijective mapping.
-	if riDup := reg.fromWire[ri.WireType]; riDup != nil {
-		if !equalRI(ri, riDup) {
-			return false, fmt.Errorf("vdl: Register(%v) duplicate wire type %v: %#v and %#v", rt, ri.WireType, ri, riDup)
-		}
-		// We've seen the wire type before.
-		return false, nil
+	if riDup := reg.fromWire[ri.WireType]; riDup != nil && !equalRI(ri, riDup) {
+		panic(fmt.Errorf("vdl: Register(%v) duplicate wire type %v: %#v and %#v", rt, ri.WireType, ri, riDup))
 	}
 	reg.fromWire[ri.WireType] = ri
 	if ri.WireName != "" {
 		if riDup := reg.fromName[ri.WireName]; riDup != nil && !equalRI(ri, riDup) {
-			return false, fmt.Errorf("vdl: Register(%v) duplicate name %q: %#v and %#v", rt, ri.WireName, ri, riDup)
+			panic(fmt.Errorf("vdl: Register(%v) duplicate name %q: %#v and %#v", rt, ri.WireName, ri, riDup))
 		}
 		reg.fromName[ri.WireName] = ri
 	}
 	if ri.NativeType != nil {
 		if riDup := reg.fromNative[ri.NativeType]; riDup != nil && !equalRI(ri, riDup) {
-			return false, fmt.Errorf("vdl: Register(%v) duplicate native type %v: %#v and %#v", rt, ri.NativeType, ri, riDup)
+			panic(fmt.Errorf("vdl: Register(%v) duplicate native type %v: %#v and %#v", rt, ri.NativeType, ri, riDup))
 		}
 		reg.fromNative[ri.NativeType] = ri
 	}
-	return true, nil
 }
 
 // ReflectInfoFromName returns the ReflectInfo for the given vdl type name, or
