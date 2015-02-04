@@ -20,6 +20,13 @@ func (MountFlag) __VDLReflect(struct {
 type VDLMountedServer struct {
 	// Server is the OA that's mounted.
 	Server string
+	// Patterns that match the set of blessings presented by the server
+	// listening on the above object address.
+	//
+	// The type of this field would ideally be security.BlessingPattern,
+	// but the resulting cyclic dependency between the security and naming
+	// packages precludes that.
+	BlessingPatterns []string
 	// TTL is the remaining time (in seconds) before the mount entry expires.
 	TTL uint32
 }
