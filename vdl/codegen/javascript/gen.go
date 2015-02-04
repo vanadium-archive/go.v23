@@ -330,13 +330,14 @@ func generateSystemImports(data data) string {
 	} else {
 		res += "veyron').vom;"
 	}
+	res += "\n"
 	if hasErrors(data.Pkg) {
 		if data.PathToCoreJS != "" {
-			res += "var makeError = require('" + packagePrefix + "/errors/make-errors');"
-			res += "var actions = require('" + packagePrefix + "/errors/actions');"
+			res += "var makeError = require('" + packagePrefix + "/errors/make-errors');\n"
+			res += "var actions = require('" + packagePrefix + "/errors/actions');\n"
 		} else {
-			res += "var makeError = require('veyron').makeError;"
-			res += "var actions = require('veyron').errorActions;"
+			res += "var makeError = require('veyron').makeError;\n"
+			res += "var actions = require('veyron').errorActions;\n"
 		}
 	}
 	return res
