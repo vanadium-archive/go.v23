@@ -20,7 +20,7 @@
 //    // if it takes more than a second to get data from
 //    // memcache we should just skip the cache and perform
 //    // the slow operation.
-//    cacheCtx, cancel := ctx.WithTimeout(time.Second)
+//    cacheCtx, cancel := WithTimeout(ctx, time.Second)
 //    if err := FetchDataFromMemcache(cacheCtx, key); err == DeadlineExceeded {
 //      RecomputeData(ctx, key)
 //    }
