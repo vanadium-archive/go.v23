@@ -37,7 +37,7 @@ func (tn typeNames) LookupConstructor(t *vdl.Type) string {
 }
 
 func (tn typeNames) constructorFromTypeName(name string) string {
-	return "(Registry.lookupOrCreateConstructor(" + name + "))"
+	return "(vom.Registry.lookupOrCreateConstructor(" + name + "))"
 }
 
 // LookupType returns a string representing the type.
