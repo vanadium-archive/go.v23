@@ -157,12 +157,6 @@ func TypeFromReflect(rt reflect.Type) (*Type, error) {
 	if t != nil {
 		return t, nil
 	}
-	// Slowpath - first register rt and all subtypes, to ensure they're known.
-	// This avoids some of the tricky ordering issues between vdl.Register and
-	// vdl.TypeFromReflect, when they are called in init functions.
-	if err := registerRecursive(rt); err != nil {
-		return nil, err
-	}
 	// Slowpath - grab the writer lock.  We hold the lock even while building the
 	// type, since TypeBuilder requires that if two types are identical, they must
 	// be represented by the same Type or PendingType.  Here's an example:

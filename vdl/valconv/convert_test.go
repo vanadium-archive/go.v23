@@ -1018,32 +1018,27 @@ func testConvert(t *testing.T, prefix string, dst, src, want interface{}, deref 
 		rvSrc := reflect.ValueOf(src)
 		for srcptrs := 0; srcptrs < ptrDepth; srcptrs++ {
 			tname := fmt.Sprintf("%s ReflectTarget(%v).From(%v)", prefix, rvDst.Type(), rvSrc.Type())
-			// This is tricky - if optWant is set, we might need to change the want
-			// value to become optional or non-optional.
-			eWant, rvWant, ttWant := want, reflect.ValueOf(want), vdl.TypeOf(want)
-			if optWant {
-				vvWant, wantIsVV := want.(*vdl.Value)
-				if srcptrs > 0 {
-					if wantIsVV {
-						switch {
-						case vvWant.Kind() == vdl.Any && !vvWant.IsNil() && vvWant.Elem().Type().CanBeOptional():
-							// Turn any(struct{...}) into any(?struct{...})
-							eWant = anyValue(vdl.OptionalValue(vvWant.Elem()))
-						case vvWant.Type().CanBeOptional():
-							// Turn struct{...} into ?struct{...}
-							eWant = vdl.OptionalValue(vvWant)
-						}
-					} else if ttWant.Kind() == vdl.Optional || ttWant.CanBeOptional() {
-						// Add a pointer to anything that can be optional.
-						rvPtrWant := reflect.New(rvWant.Type())
-						rvPtrWant.Elem().Set(rvWant)
-						eWant = rvPtrWant.Interface()
+			// This is tricky - if optWant is set and we've added pointers to src, we
+			// might need to change the want value to become optional.
+			eWant := want
+			if optWant && srcptrs > 0 {
+				if vvWant, ok := want.(*vdl.Value); ok {
+					switch {
+					case vvWant.Kind() == vdl.Any && !vvWant.IsNil() && vvWant.Elem().Type().CanBeOptional():
+						// Turn any(struct{...}) into any(?struct{...})
+						eWant = anyValue(vdl.OptionalValue(vvWant.Elem()))
+					case vvWant.Type().CanBeOptional():
+						// Turn struct{...} into ?struct{...}
+						eWant = vdl.OptionalValue(vvWant)
 					}
+				} else if errWant, ok := want.(verror2.Standard); ok {
+					eWant = &errWant
+				} else if nativeWant, ok := want.(nNative); ok {
+					eWant = &nativeWant
 				}
-				if !wantIsVV && ttWant.Kind() != vdl.TypeObject && !ttWant.CanBeOptional() && rvWant.Kind() == reflect.Ptr {
-					// Remove a pointer from  anything that can't be optional.
-					eWant = rvWant.Elem().Interface()
-				}
+				// TODO(toddw): Replace the special-cases for verror2.Standard and
+				// nNative with a general mechanism to change want to be optional, once
+				// optional is allowed for all types.
 			}
 			target, err := ReflectTarget(rvDst)
 			expectErr(t, err, "", tname)
