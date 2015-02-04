@@ -7,7 +7,6 @@ import (
 	"v.io/core/veyron2/config"
 	"v.io/core/veyron2/context"
 	"v.io/core/veyron2/ipc"
-	"v.io/core/veyron2/ipc/stream"
 	"v.io/core/veyron2/naming"
 	"v.io/core/veyron2/security"
 )
@@ -24,10 +23,9 @@ func (*mockRuntime) NewEndpoint(ep string) (naming.Endpoint, error) { return nil
 func (*mockRuntime) NewServer(ctx *context.T, opts ...ipc.ServerOpt) (ipc.Server, error) {
 	return nil, nil
 }
-func (*mockRuntime) SetNewStreamManager(ctx *context.T, opts ...stream.ManagerOpt) (*context.T, stream.Manager, error) {
-	return nil, nil, nil
+func (*mockRuntime) SetNewStreamManager(ctx *context.T) (*context.T, error) {
+	return nil, nil
 }
-func (*mockRuntime) GetStreamManager(ctx *context.T) stream.Manager { return nil }
 func (*mockRuntime) SetPrincipal(ctx *context.T, principal security.Principal) (*context.T, error) {
 	return nil, nil
 }

@@ -18,7 +18,6 @@ import (
 
 	"v.io/core/veyron2/context"
 	"v.io/core/veyron2/ipc"
-	"v.io/core/veyron2/ipc/stream"
 	"v.io/core/veyron2/naming"
 	"v.io/core/veyron2/security"
 )
@@ -181,10 +180,7 @@ type Runtime interface {
 
 	// SetNewStreamManager creates a new stream manager and context
 	// with that StreamManager attached.
-	SetNewStreamManager(ctx *context.T, opts ...stream.ManagerOpt) (*context.T, stream.Manager, error)
-
-	// StreamManager returns the current stream manager.
-	GetStreamManager(ctx *context.T) stream.Manager
+	SetNewStreamManager(ctx *context.T) (*context.T, error)
 
 	// SetPrincipal attaches a principal to the returned context.
 	SetPrincipal(ctx *context.T, principal security.Principal) (*context.T, error)
@@ -253,13 +249,8 @@ func NewServer(ctx *context.T, opts ...ipc.ServerOpt) (ipc.Server, error) {
 
 // SetNewStreamManager creates a new stream manager and context
 // with that StreamManager attached.
-func SetNewStreamManager(ctx *context.T, opts ...stream.ManagerOpt) (*context.T, stream.Manager, error) {
-	return initState.currentRuntime().SetNewStreamManager(ctx, opts...)
-}
-
-// GetStreamManager returns the current stream manager.
-func GetStreamManager(ctx *context.T) stream.Manager {
-	return initState.currentRuntime().GetStreamManager(ctx)
+func SetNewStreamManager(ctx *context.T) (*context.T, error) {
+	return initState.currentRuntime().SetNewStreamManager(ctx)
 }
 
 // SetPrincipal attaches a principal to the returned context.

@@ -20,11 +20,11 @@ import (
 //   err = call.Finish(&result)
 //
 // The communication between the client and the server for this RPC call is
-// based on the bidirectional flows from the veyron2/ipc/stream package.  The
-// client resolves "a/b/c" to an endpoint, dials a VC to the endpoint, and
-// connects a flow on that VC.  Each RPC uses a separate flow, and uses vom to
-// marshal and unmarshal a sequence of typed objects on the flow.  Requests flow
-// from client to server, and responses flow from server to client.
+// based on bidirectional flows.  The client resolves "a/b/c" to an endpoint,
+// dials a VC to the endpoint, and connects a flow on that VC.  Each RPC uses a
+// separate flow, and uses vom to marshal and unmarshal a sequence of typed
+// objects on the flow.  Requests flow from client to server, and responses flow
+// from server to client.
 //
 // The Request and Response types below represent "header" objects sent in each
 // direction on the flow.  Here's some examples of what the sequence of objects
