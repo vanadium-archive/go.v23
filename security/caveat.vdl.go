@@ -4,13 +4,16 @@
 package security
 
 import (
+	"v.io/core/veyron2/uniqueid"
+
 	// The non-user imports are prefixed with "__" to prevent collisions.
+	__context "v.io/core/veyron2/context"
+	__i18n "v.io/core/veyron2/i18n"
 	__vdl "v.io/core/veyron2/vdl"
+	__verror2 "v.io/core/veyron2/verror2"
 )
 
-// unixTimeExpiryCaveat represents a caveat that validates iff the current
-// time is before the time specified in the caveat (in seconds since
-// January 1, 1970 UTC).
+// TODO(ashankar): Remove once ValidatorVOM goes away.
 type unixTimeExpiryCaveat int64
 
 func (unixTimeExpiryCaveat) __VDLReflect(struct {
@@ -18,10 +21,6 @@ func (unixTimeExpiryCaveat) __VDLReflect(struct {
 }) {
 }
 
-// methodCaveat represents a caveat that validates iff the method being invoked
-// is included in this list. An empty list implies that no method can be
-// invoked (i.e., the holder of a blessing with this caveat could be a server
-// but cannot act as a client).
 type methodCaveat []string
 
 func (methodCaveat) __VDLReflect(struct {
@@ -86,4 +85,121 @@ func init() {
 	__vdl.Register(methodCaveat(nil))
 	__vdl.Register(publicKeyThirdPartyCaveat{})
 	__vdl.Register(publicKeyDischarge{})
+}
+
+// UnixTimeExpiryCaveat represents a caveat that validates iff the current
+// time is before the time specified in seconds since January 1, 1970 UTC.
+//
+// TODO(toddw,ashankar): Once VDL support for time.Time is in, create a ExpiryCaveat
+// and use that (and drop UnixTimeExpiryCaveatX).
+var UnixTimeExpiryCaveatX = CaveatDescriptor{
+	Id: uniqueid.Id{
+		84,
+		166,
+		118,
+		57,
+		129,
+		55,
+		24,
+		126,
+		205,
+		178,
+		109,
+		45,
+		105,
+		186,
+		0,
+		4,
+	},
+	ParamType: __vdl.TypeOf(int64(0)),
+}
+
+// MethodCaveat represents a caveat that validates iff the method being
+// invoked is included in this list. An empty list implies that no method can
+// be invoked (i.e., the holder of a blessing with this caveat could be a
+// server but cannot act as a client).
+//
+// TODO(ashankar): Rename to MethodCaveat and drop methodCaveat before release.
+var MethodCaveatX = CaveatDescriptor{
+	Id: uniqueid.Id{
+		84,
+		166,
+		118,
+		57,
+		129,
+		55,
+		24,
+		126,
+		205,
+		178,
+		109,
+		45,
+		105,
+		186,
+		0,
+		3,
+	},
+	ParamType: __vdl.TypeOf([]string(nil)),
+}
+
+// TODO(ashankar): Rename to PublicKeyThirdPartyCaveat (and
+// publicKeyThirdPartyCaveat becomes publicKeyThirdPartyCaveatParam or
+// something?).
+var PublicKeyThirdPartyCaveatX = CaveatDescriptor{
+	Id: uniqueid.Id{
+		121,
+		114,
+		206,
+		23,
+		74,
+		123,
+		169,
+		63,
+		121,
+		84,
+		125,
+		118,
+		156,
+		145,
+		128,
+		0,
+	},
+	ParamType: __vdl.TypeOf(publicKeyThirdPartyCaveat{}),
+}
+
+var (
+	ErrCaveatNotRegistered     = __verror2.Register("v.io/core/veyron2/security.ErrCaveatNotRegistered", __verror2.NoRetry, "{1:}{2:} no validation function registered for caveat id {3}")
+	ErrCaveatParamTypeMismatch = __verror2.Register("v.io/core/veyron2/security.ErrCaveatParamTypeMismatch", __verror2.NoRetry, "{1:}{2:} bad param type: caveat {3} got {4}, want {5}")
+	// TODO(ashankar,toddw,bjornick): The type of "err" here and below
+	// should be error once https://github.com/veyron/release-issues/issues/922
+	// is resolved.
+	ErrCaveatParamCoding = __verror2.Register("v.io/core/veyron2/security.ErrCaveatParamCoding", __verror2.NoRetry, "{1:}{2:} unable to encode/decode caveat param(type={4}) for caveat {3}: {5}")
+	ErrCaveatValidation  = __verror2.Register("v.io/core/veyron2/security.ErrCaveatValidation", __verror2.NoRetry, "{1:}{2:} caveat validation failed: {3}")
+)
+
+func init() {
+	__i18n.Cat().SetWithBase(__i18n.LangID("en"), __i18n.MsgID(ErrCaveatNotRegistered.ID), "{1:}{2:} no validation function registered for caveat id {3}")
+	__i18n.Cat().SetWithBase(__i18n.LangID("en"), __i18n.MsgID(ErrCaveatParamTypeMismatch.ID), "{1:}{2:} bad param type: caveat {3} got {4}, want {5}")
+	__i18n.Cat().SetWithBase(__i18n.LangID("en"), __i18n.MsgID(ErrCaveatParamCoding.ID), "{1:}{2:} unable to encode/decode caveat param(type={4}) for caveat {3}: {5}")
+	__i18n.Cat().SetWithBase(__i18n.LangID("en"), __i18n.MsgID(ErrCaveatValidation.ID), "{1:}{2:} caveat validation failed: {3}")
+}
+
+// MakeErrCaveatNotRegistered returns an error with the ErrCaveatNotRegistered ID.
+func MakeErrCaveatNotRegistered(ctx *__context.T, id uniqueid.Id) error {
+	return __verror2.Make(ErrCaveatNotRegistered, ctx, id)
+}
+
+// MakeErrCaveatParamTypeMismatch returns an error with the ErrCaveatParamTypeMismatch ID.
+func MakeErrCaveatParamTypeMismatch(ctx *__context.T, id uniqueid.Id, got *__vdl.Type, want string) error {
+	return __verror2.Make(ErrCaveatParamTypeMismatch, ctx, id, got, want)
+}
+
+// MakeErrCaveatParamCoding returns an error with the ErrCaveatParamCoding ID.
+func MakeErrCaveatParamCoding(ctx *__context.T, id uniqueid.Id, typ *__vdl.Type, err __vdl.AnyRep) error {
+	return __verror2.Make(ErrCaveatParamCoding, ctx, id, typ, err)
+}
+
+// MakeErrCaveatValidation returns an error with the ErrCaveatValidation ID.
+func MakeErrCaveatValidation(ctx *__context.T, err __vdl.AnyRep) error {
+	return __verror2.Make(ErrCaveatValidation, ctx, err)
 }

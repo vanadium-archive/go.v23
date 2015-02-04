@@ -120,16 +120,26 @@ func (p *principal) Sign(message []byte) (Signature, error) {
 	return p.signer.Sign(signPurpose, message)
 }
 
-func (p *principal) MintDischarge(tp ThirdPartyCaveat, caveat Caveat, additionalCaveats ...Caveat) (Discharge, error) {
-	tpcav, ok := tp.(*publicKeyThirdPartyCaveat)
-	if !ok {
-		return nil, fmt.Errorf("principal implementation cannot create discharges for caveats of type %T", tp)
+func (p *principal) MintDischarge(tp interface{}, caveat Caveat, additionalCaveats ...Caveat) (Discharge, error) {
+	var id string
+	// TODO(ashankar): Once ValidatorVOM is removed, then only the middle
+	// "else if" block will remain.
+	if tpcav, ok := tp.(*publicKeyThirdPartyCaveat); ok {
+		id = tpcav.ID()
+	} else if cav, ok := tp.(Caveat); ok {
+		if tp := cav.ThirdPartyDetails(); tp != nil {
+			id = tp.ID()
+		} else {
+			return nil, fmt.Errorf("%v is not a third-party caveat", cav)
+		}
+	} else {
+		return nil, fmt.Errorf("invalid type(%T) provided to MintDischarge", tp)
 	}
 	caveats := additionalCaveats
 	if !isUnconstrainedUseCaveat(caveat) {
 		caveats = append(additionalCaveats, caveat)
 	}
-	d := &publicKeyDischarge{ThirdPartyCaveatID: tpcav.ID(), Caveats: caveats}
+	d := &publicKeyDischarge{ThirdPartyCaveatID: id, Caveats: caveats}
 	if err := d.sign(p.signer); err != nil {
 		return nil, fmt.Errorf("failed to sign discharge: %v", err)
 	}

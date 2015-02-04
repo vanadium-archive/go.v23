@@ -110,8 +110,8 @@ type Certificate struct {
 // For a validator to be invoked, a validation function must be registered with
 // the validator description in the language that the function is defined in.
 type CaveatDescriptor struct {
-	Id         uniqueid.Id // The identifier of the caveat validation function.
-	ParamsType typeobject  // The type of the parameters expected by the validation function.
+	Id        uniqueid.Id // The identifier of the caveat validation function.
+	ParamType typeobject  // The type of the parameter expected by the validation function.
 }
 
 // Caveat is a condition on the validity of a blessing/discharge.
@@ -121,15 +121,16 @@ type CaveatDescriptor struct {
 // (Blessings.ForName in the Go API).
 //
 // Given a Hash, the message digest of a caveat is:
-// Hash(ValidatorVOM).
+// Hash(Hash(Id), Hash(ParamVom))
 type Caveat struct {
 	// TODO(ashankar): DEPRECATED: Remove before release.
+        // While it exists (and length > 0), it will take precedence over
+        // (Id, ParamVom)
 	ValidatorVOM []byte
 
-	Id        uniqueid.Id  // The identifier of the caveat validation function.
-	ParamsVom []byte       // VOM-encoded bytes of the parameters to be provided to the validation function.
+	Id       uniqueid.Id  // The identifier of the caveat validation function.
+	ParamVom []byte       // VOM-encoded bytes of the parameters to be provided to the validation function.
 }
-
 
 // WireBlessings encapsulates wire format of a set of blessings and the
 // corresponding cryptographic proof that binds them to a principal

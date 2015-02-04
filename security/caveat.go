@@ -5,140 +5,289 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
+	"reflect"
+	"runtime"
+	"sync"
 	"time"
 
+	"v.io/core/veyron2/uniqueid"
+	"v.io/core/veyron2/vdl"
 	"v.io/core/veyron2/vlog"
 	"v.io/core/veyron2/vom"
 )
 
-// NewCaveat returns a Caveat that requires validation by validator.
-func NewCaveat(validator CaveatValidator) (Caveat, error) {
-	b, err := vom.Encode(validator)
-	if err != nil {
-		return Caveat{}, err
+type registryEntry struct {
+	desc        CaveatDescriptor
+	validatorFn reflect.Value
+	paramType   reflect.Type
+	registerer  string
+}
+
+// caveatRegistry is used to implement a singleton global registry that maps
+// the unique id of a caveat to its validation function.
+//
+// It is safe to invoke methods on caveatRegistry concurrently.
+type caveatRegistry struct {
+	mu     sync.RWMutex
+	byUUID map[uniqueid.Id]registryEntry
+}
+
+var registry = &caveatRegistry{byUUID: make(map[uniqueid.Id]registryEntry)}
+
+func (r *caveatRegistry) register(d CaveatDescriptor, validator interface{}) error {
+	_, file, line, _ := runtime.Caller(2) // one for r.register, one for RegisterCaveatValidator
+	registerer := fmt.Sprintf("%s:%d", file, line)
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if e, exists := r.byUUID[d.Id]; exists {
+		return fmt.Errorf("Caveat with UUID %v registered twice. Once with (%v, fn=%p) from %v, once with (%v, fn=%p) from %v", d.Id, e.desc.ParamType, e.validatorFn.Interface(), e.registerer, d.ParamType, validator, registerer)
 	}
-	// TODO(ashankar): ParamsVom is set to an empty slice instead of the zero
-	// value (nil) because of how vom roundtripping works on byte slices.
-	// Fix vom, or anyway, once ValidatorVOM is gone, ParamsVom will always
-	// be filled in.
-	return Caveat{ValidatorVOM: b, ParamsVom: []byte{}}, nil
+	fn := reflect.ValueOf(validator)
+	param := vdl.ReflectFromType(d.ParamType)
+	if param == nil {
+		// If you hit this error, https://github.com/veyron/release-issues/issues/907
+		// might be the problem.
+		return fmt.Errorf("invalid caveat descriptor: vdl.Type(%v) cannot be converted to a Go type", d.ParamType)
+	}
+	var (
+		rtErr     = reflect.TypeOf((*error)(nil)).Elem()
+		rtContext = reflect.TypeOf((*Context)(nil)).Elem()
+	)
+	if got, want := fn.Kind(), reflect.Func; got != want {
+		return fmt.Errorf("invalid caveat validator: must be %v, not %v", want, got)
+	}
+	if got, want := fn.Type().NumOut(), 1; got != want {
+		return fmt.Errorf("invalid caveat validator: expected %d output, not %d", want, got)
+	}
+	if got, want := fn.Type().Out(0), rtErr; got != want {
+		return fmt.Errorf("invalid caveat validator: output must be %v, not %v", want, got)
+	}
+	if got, want := fn.Type().NumIn(), 2; got != want {
+		return fmt.Errorf("invalid caveat validator: expected %d inputs, not %d", want, got)
+	}
+	if got, want := fn.Type().In(0), rtContext; got != want {
+		return fmt.Errorf("invalid caveat validator: first argument must be %v, not %v", want, got)
+	}
+	if got, want := fn.Type().In(1), param; got != want {
+		return fmt.Errorf("invalid caveat validator: second argument must be %v, not %v", want, got)
+	}
+	r.byUUID[d.Id] = registryEntry{d, fn, param, registerer}
+	return nil
+}
+
+func (r *caveatRegistry) lookup(uid uniqueid.Id) (registryEntry, bool) {
+	r.mu.RLock()
+	entry, exists := r.byUUID[uid]
+	r.mu.RUnlock()
+	return entry, exists
+}
+
+func (r *caveatRegistry) validate(uid uniqueid.Id, ctx Context, paramvom []byte) error {
+	entry, exists := r.lookup(uid)
+	// TODO(ashankar): Figure out a way to get the appropriate language
+	// here. Perhaps security.Context should include context.T? Or maybe,
+	// check if ctx happens to include it (for example, if ctx is
+	// ipc.ServerContext)?
+	if !exists {
+		return MakeErrCaveatNotRegistered(nil, uid)
+	}
+	param := reflect.New(entry.paramType).Interface()
+	if err := vom.Decode(paramvom, param); err != nil {
+		t, _ := vdl.TypeFromReflect(entry.paramType)
+		return MakeErrCaveatParamCoding(nil, uid, t, err)
+	}
+	err := entry.validatorFn.Call([]reflect.Value{reflect.ValueOf(ctx), reflect.ValueOf(param).Elem()})[0].Interface()
+	if err == nil {
+		return nil
+	}
+	return MakeErrCaveatValidation(nil, err.(error))
+}
+
+// RegisterCaveatValidator associates a CaveatDescriptor with the
+// implementation of the validation function.
+//
+// It may be called at most once per c.ID, and will panic on duplicate
+// registrations.
+func RegisterCaveatValidator(c CaveatDescriptor, validator interface{}) {
+	if err := registry.register(c, validator); err != nil {
+		panic(err)
+	}
+}
+
+// NewCaveat returns a Caveat that requires validation by the validation
+// function correponding to c and uses the provided parameters.
+func NewCaveat(c CaveatDescriptor, param interface{}) (Caveat, error) {
+	if got, want := vdl.TypeOf(param), c.ParamType; got != want {
+		return Caveat{}, MakeErrCaveatParamTypeMismatch(nil, c.Id, c.ParamType, fmt.Sprintf("%T", param))
+	}
+	bytes, err := vom.Encode(param)
+	if err != nil {
+		return Caveat{}, MakeErrCaveatParamCoding(nil, c.Id, c.ParamType, err)
+	}
+	return Caveat{
+		Id:           c.Id,
+		ParamVom:     bytes,
+		ValidatorVOM: []byte{},
+	}, nil
 }
 
 // ExpiryCaveat returns a Caveat that validates iff the current time is before t.
 func ExpiryCaveat(t time.Time) (Caveat, error) {
-	return NewCaveat(unixTimeExpiryCaveat(t.Unix()))
+	c, err := NewCaveat(UnixTimeExpiryCaveatX, t.Unix())
+	if err != nil {
+		return c, err
+	}
+	// For backwards compatibility, include the old style for now.
+	if c.ValidatorVOM, err = vom.Encode(unixTimeExpiryCaveat(t.Unix())); err != nil {
+		return c, err
+	}
+	return c, nil
 }
 
 // MethodCaveat returns a Caveat that validates iff the method being invoked by
 // the peer is listed in an argument to this function.
 func MethodCaveat(method string, additionalMethods ...string) (Caveat, error) {
-	return NewCaveat(methodCaveat(append(additionalMethods, method)))
+	c, err := NewCaveat(MethodCaveatX, append(additionalMethods, method))
+	if err != nil {
+		return c, err
+	}
+	// For backwards compatibility, include the old style for now.
+	if c.ValidatorVOM, err = vom.Encode(methodCaveat(append(additionalMethods, method))); err != nil {
+		return c, err
+	}
+	return c, nil
 }
 
 // digest returns a hash of the contents of c.
-func (c *Caveat) digest(hash Hash) []byte { return hash.sum(c.ValidatorVOM) }
+func (c *Caveat) digest(hash Hash) []byte {
+	if len(c.ValidatorVOM) > 0 {
+		return hash.sum(c.ValidatorVOM)
+	}
+	return hash.sum(append(hash.sum(c.Id[:]), hash.sum(c.ParamVom)...))
+}
+
+// Validate tests if c is satisfied under ctx, returning nil if it is or an
+// error otherwise.
+func (c *Caveat) Validate(ctx Context) error {
+	if len(c.ValidatorVOM) > 0 {
+		var v caveatValidator
+		if err := vom.Decode(c.ValidatorVOM, &v); err != nil {
+			return MakeErrCaveatValidation(nil, err)
+		}
+		if err := v.Validate(ctx); err != nil {
+			return MakeErrCaveatValidation(nil, err)
+		}
+		return nil
+	}
+	return registry.validate(c.Id, ctx, c.ParamVom)
+}
 
 // ThirdPatyDetails returns nil if c is not a third party caveat, or details about
 // the third party otherwise.
 func (c Caveat) ThirdPartyDetails() ThirdPartyCaveat {
-	var tp ThirdPartyCaveat
-	if _ = vom.Decode(c.ValidatorVOM, &tp); tp != nil {
+	if bytes.Equal(c.Id[:], zeroCaveatID[:]) {
+		// Old format caveats using ValidatorVOM
+		var tp ThirdPartyCaveat
+		vom.Decode(c.ValidatorVOM, &tp)
 		return tp
+	}
+	if bytes.Equal(c.Id[:], PublicKeyThirdPartyCaveatX.Id[:]) {
+		var param publicKeyThirdPartyCaveat
+		if err := vom.Decode(c.ParamVom, &param); err != nil {
+			vlog.Errorf("Error decoding PublicKeyThirdPartyCaveat: %v", err)
+		}
+		return &param
 	}
 	return nil
 }
 
 func (c Caveat) String() string {
-	var validator CaveatValidator
-	if err := vom.Decode(c.ValidatorVOM, &validator); err == nil {
-		return fmt.Sprintf("%T(%v)", validator, validator)
+	if len(c.ValidatorVOM) > 0 {
+		var validator caveatValidator
+		if err := vom.Decode(c.ValidatorVOM, &validator); err == nil {
+			return fmt.Sprintf("%T(%v)", validator, validator)
+		}
 	}
-	// If we could "peek" the type of the encoded object via the VOM-API, that may be a better message?
-	return fmt.Sprintf("{Caveat(%d bytes) with the corresponding CaveatValidator not compiled into this binary}", len(c.ValidatorVOM))
+	var param vdl.AnyRep
+	if err := vom.Decode(c.ParamVom, &param); err == nil {
+		return fmt.Sprintf("%v(%T=%v)", c.Id, param, param)
+	}
+	return fmt.Sprintf("%v(%d bytes of param)", c.Id, len(c.ParamVom))
 }
 
+// TODO(ashankar): Remove with the caveatValidator interface.
 func (c unixTimeExpiryCaveat) Validate(ctx Context) error {
-	now := ctx.Timestamp()
-	expiry := time.Unix(int64(c), 0)
-	if now.After(expiry) {
-		return fmt.Errorf("%T(%v=%v) fails validation at %v", c, c, expiry, now)
+	cav, err := NewCaveat(UnixTimeExpiryCaveatX, int64(c))
+	if err != nil {
+		return err
 	}
-	return nil
+	return cav.Validate(ctx)
 }
 
 func (c unixTimeExpiryCaveat) String() string {
 	return fmt.Sprintf("%v = %v", int64(c), time.Unix(int64(c), 0))
 }
 
+// TODO(ashankar): Remove with the caveatValidator interface.
 func (c methodCaveat) Validate(ctx Context) error {
-	methods := []string(c)
-	if ctx.Method() == "" && len(methods) == 0 {
-		return nil
+	cav, err := NewCaveat(MethodCaveatX, []string(c))
+	if err != nil {
+		return err
 	}
-	for _, m := range methods {
-		if ctx.Method() == m {
-			return nil
-		}
-	}
-	return fmt.Errorf("%T=%v fails validation for method %q", c, c, ctx.Method())
+	return cav.Validate(ctx)
 }
 
 // UnconstrainedUse returns a Caveat implementation that never fails to
-// validate. This is useful only for providing unconstrained blessings/discharges
-// to another principal.
+// validate. This is useful only for providing unconstrained
+// blessings/discharges to another principal.
 func UnconstrainedUse() Caveat { return Caveat{} }
 
-func isUnconstrainedUseCaveat(c Caveat) bool { return len(c.ValidatorVOM) == 0 }
+var zeroCaveatID = [16]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 
-// NewPublicKeyCaveat returns a security.ThirdPartyCaveat which requires a
-// discharge from a principal identified by the public key 'key' and present
-// at the object name 'location'. This discharging principal is expected to
-// validate all provided 'caveats' before issuing a discharge.
-func NewPublicKeyCaveat(discharger PublicKey, location string, requirements ThirdPartyRequirements, caveat Caveat, additionalCaveats ...Caveat) (ThirdPartyCaveat, error) {
-	cav := &publicKeyThirdPartyCaveat{
+func isUnconstrainedUseCaveat(c Caveat) bool {
+	return bytes.Equal(c.Id[:], zeroCaveatID[:])
+}
+
+// NewPublicKeyCaveat returns a third-party caveat, i.e., the returned
+// Caveat will be valid only when a discharge signed by discharger
+// is issued.
+//
+// Location specifies the expected address at which the third-party
+// service is found (and which issues discharges).
+//
+// The discharger will validate all provided caveats (caveat,
+// additionalCaveats) before issuing a discharge.
+func NewPublicKeyCaveat(discharger PublicKey, location string, requirements ThirdPartyRequirements, caveat Caveat, additionalCaveats ...Caveat) (Caveat, error) {
+	param := publicKeyThirdPartyCaveat{
 		Caveats:                append(additionalCaveats, caveat),
 		DischargerLocation:     location,
 		DischargerRequirements: requirements,
 	}
-	if _, err := rand.Read(cav.Nonce[:]); err != nil {
-		return nil, err
-	}
 	var err error
-	if cav.DischargerKey, err = discharger.MarshalBinary(); err != nil {
-		return nil, err
+	if param.DischargerKey, err = discharger.MarshalBinary(); err != nil {
+		return Caveat{}, err
 	}
-	return cav, nil
+	if _, err := rand.Read(param.Nonce[:]); err != nil {
+		return Caveat{}, err
+	}
+	c, err := NewCaveat(PublicKeyThirdPartyCaveatX, param)
+	if err != nil {
+		return c, err
+	}
+	// For backwards compatibility, include the old style for now.
+	if c.ValidatorVOM, err = vom.Encode(&param); err != nil {
+		return c, err
+	}
+	return c, nil
 }
 
+// TODO(ashankar): Remove with the caveatValidator interface.
 func (c *publicKeyThirdPartyCaveat) Validate(ctx Context) error {
-	discharge, ok := ctx.RemoteDischarges()[c.ID()]
-	if !ok {
-		return fmt.Errorf("missing discharge for caveat(id=%v)", c.ID())
-	}
-	// Must be of the valid type.
-	d, ok := discharge.(*publicKeyDischarge)
-	if !ok {
-		return fmt.Errorf("invalid discharge type(%T) for caveat(%T)", d, c)
-	}
-	// Must be signed by the principal designated by c.DischargerKey
-	key, err := c.discharger()
+	cav, err := NewCaveat(PublicKeyThirdPartyCaveatX, *c)
 	if err != nil {
 		return err
 	}
-	if err := d.verify(key); err != nil {
-		return err
-	}
-	// And all caveats on the discharge must be met.
-	for _, cav := range d.Caveats {
-		var validator CaveatValidator
-		if err := vom.Decode(cav.ValidatorVOM, &validator); err != nil {
-			return fmt.Errorf("failed to interpret a caveat on the discharge: %v", err)
-		}
-		if err := validator.Validate(ctx); err != nil {
-			return fmt.Errorf("a caveat(%T) on the discharge failed to validate: %v", validator, err)
-		}
-	}
-	return nil
+	return cav.Validate(ctx)
 }
 
 func (c *publicKeyThirdPartyCaveat) ID() string {
@@ -160,18 +309,14 @@ func (c *publicKeyThirdPartyCaveat) Requirements() ThirdPartyRequirements {
 	return c.DischargerRequirements
 }
 
-func (c *publicKeyThirdPartyCaveat) Dischargeable(context Context) error {
+func (c *publicKeyThirdPartyCaveat) Dischargeable(ctx Context) error {
 	// Validate the caveats embedded within this third-party caveat.
 	for _, cav := range c.Caveats {
 		if isUnconstrainedUseCaveat(cav) {
 			continue
 		}
-		var validator CaveatValidator
-		if err := vom.Decode(cav.ValidatorVOM, &validator); err != nil {
-			return fmt.Errorf("failed to interpret restriction embedded in ThirdPartyCaveat: %v", err)
-		}
-		if err := validator.Validate(context); err != nil {
-			return fmt.Errorf("could not validate embedded restriction %T: %v", validator, err)
+		if err := cav.Validate(ctx); err != nil {
+			return fmt.Errorf("could not validate embedded restriction(%v): %v", cav, err)
 		}
 	}
 	return nil
@@ -193,9 +338,8 @@ func (d *publicKeyDischarge) ID() string { return d.ThirdPartyCaveatID }
 func (d *publicKeyDischarge) ThirdPartyCaveats() []ThirdPartyCaveat {
 	var ret []ThirdPartyCaveat
 	for _, cav := range d.Caveats {
-		var tpcav ThirdPartyCaveat
-		if err := vom.Decode(cav.ValidatorVOM, &tpcav); err == nil {
-			ret = append(ret, tpcav)
+		if tp := cav.ThirdPartyDetails(); tp != nil {
+			ret = append(ret, tp)
 		}
 	}
 	return ret

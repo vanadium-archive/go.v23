@@ -11,6 +11,7 @@ import (
 	"strings"
 	"testing"
 
+	"v.io/core/veyron2/uniqueid"
 	"v.io/core/veyron2/vdl"
 	"v.io/core/veyron2/vom"
 )
@@ -58,16 +59,12 @@ func newCaveat(c Caveat, err error) Caveat {
 // suffixes generally available, this type is implemented in this test file.
 // If there is a general need for such a caveat, it should be defined similar to
 // other caveats (like methodCaveat) in caveat.vdl and removed from this test file.
-type suffixCaveat string
-
-func (c suffixCaveat) Validate(ctx Context) error {
-	if string(c) != ctx.Suffix() {
-		return fmt.Errorf("suffixCaveat not met")
-	}
-	return nil
+var suffixCaveat = CaveatDescriptor{
+	Id:        uniqueid.Id{0xce, 0xc4, 0xd0, 0x98, 0x94, 0x53, 0x90, 0xdb, 0x15, 0x7c, 0xa8, 0x10, 0xae, 0x62, 0x80, 0x0},
+	ParamType: vdl.TypeOf(string("")),
 }
 
-func newSuffixCaveat(suffix string) Caveat { return newCaveat(NewCaveat(suffixCaveat(suffix))) }
+func newSuffixCaveat(suffix string) Caveat { return newCaveat(NewCaveat(suffixCaveat, suffix)) }
 
 func newECDSASigner(t *testing.T, curve elliptic.Curve) Signer {
 	key, err := ecdsa.GenerateKey(curve, rand.Reader)
@@ -138,5 +135,10 @@ func matchesError(got error, want string) error {
 }
 
 func init() {
-	vdl.Register(suffixCaveat(""))
+	RegisterCaveatValidator(suffixCaveat, func(ctx Context, suffix string) error {
+		if suffix != ctx.Suffix() {
+			return fmt.Errorf("suffixCaveat not met")
+		}
+		return nil
+	})
 }

@@ -1,14 +1,59 @@
 package security
 
-// unixTimeExpiryCaveat represents a caveat that validates iff the current
-// time is before the time specified in the caveat (in seconds since
-// January 1, 1970 UTC).
-type unixTimeExpiryCaveat int64
+import "v.io/core/veyron2/uniqueid"
 
-// methodCaveat represents a caveat that validates iff the method being invoked
-// is included in this list. An empty list implies that no method can be
-// invoked (i.e., the holder of a blessing with this caveat could be a server
-// but cannot act as a client).
+const (
+  // UnixTimeExpiryCaveat represents a caveat that validates iff the current
+  // time is before the time specified in seconds since January 1, 1970 UTC.
+  //
+  // TODO(toddw,ashankar): Once VDL support for time.Time is in, create a ExpiryCaveat
+  // and use that (and drop UnixTimeExpiryCaveatX).
+  UnixTimeExpiryCaveatX = CaveatDescriptor{
+    Id:        uniqueid.Id{0x54, 0xa6, 0x76, 0x39, 0x81, 0x37, 0x18, 0x7e, 0xcd, 0xb2, 0x6d, 0x2d, 0x69, 0xba, 0x0, 0x4},
+    ParamType: typeobject(int64),
+  }
+  
+  // MethodCaveat represents a caveat that validates iff the method being
+  // invoked is included in this list. An empty list implies that no method can
+  // be invoked (i.e., the holder of a blessing with this caveat could be a
+  // server but cannot act as a client).
+  //
+  // TODO(ashankar): Rename to MethodCaveat and drop methodCaveat before release.
+  MethodCaveatX = CaveatDescriptor{
+    Id:        uniqueid.Id{0x54, 0xa6, 0x76, 0x39, 0x81, 0x37, 0x18, 0x7e, 0xcd, 0xb2, 0x6d, 0x2d, 0x69, 0xba, 0x0, 0x3},
+    ParamType: typeobject([]string),
+  }
+
+  // TODO(ashankar): Rename to PublicKeyThirdPartyCaveat (and
+  // publicKeyThirdPartyCaveat becomes publicKeyThirdPartyCaveatParam or
+  // something?).
+  PublicKeyThirdPartyCaveatX = CaveatDescriptor{
+    Id:        uniqueid.Id{0x79, 0x72, 0xce, 0x17, 0x4a, 0x7b, 0xa9, 0x3f, 0x79, 0x54, 0x7d, 0x76, 0x9c, 0x91, 0x80, 0x0},
+    ParamType: typeobject(publicKeyThirdPartyCaveat),
+  }
+)
+
+// Error definitions to allow for stable error checking across address spaces.
+error (
+  ErrCaveatNotRegistered(id uniqueid.Id) {
+    "en": "no validation function registered for caveat id {id}",
+  }
+  ErrCaveatParamTypeMismatch(id uniqueid.Id, got typeobject, want string) {
+    "en": "bad param type: caveat {id} got {got}, want {want}",
+  }
+  // TODO(ashankar,toddw,bjornick): The type of "err" here and below
+  // should be error once https://github.com/veyron/release-issues/issues/922
+  // is resolved.
+  ErrCaveatParamCoding(id uniqueid.Id, typ typeobject, err any) {
+    "en": "unable to encode/decode caveat param(type={typ}) for caveat {id}: {err}",
+  }
+  ErrCaveatValidation(err any) {
+    "en": "caveat validation failed: {err}",
+  }
+)
+
+// TODO(ashankar): Remove once ValidatorVOM goes away.
+type unixTimeExpiryCaveat int64
 type methodCaveat []string
 
 // publicKeyThirdPartyCaveat represents a third-party caveat that requires

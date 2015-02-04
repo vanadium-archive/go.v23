@@ -123,8 +123,8 @@ func (Certificate) __VDLReflect(struct {
 // For a validator to be invoked, a validation function must be registered with
 // the validator description in the language that the function is defined in.
 type CaveatDescriptor struct {
-	Id         uniqueid.Id // The identifier of the caveat validation function.
-	ParamsType *__vdl.Type // The type of the parameters expected by the validation function.
+	Id        uniqueid.Id // The identifier of the caveat validation function.
+	ParamType *__vdl.Type // The type of the parameter expected by the validation function.
 }
 
 func (CaveatDescriptor) __VDLReflect(struct {
@@ -139,12 +139,14 @@ func (CaveatDescriptor) __VDLReflect(struct {
 // (Blessings.ForName in the Go API).
 //
 // Given a Hash, the message digest of a caveat is:
-// Hash(ValidatorVOM).
+// Hash(Hash(Id), Hash(ParamVom))
 type Caveat struct {
 	// TODO(ashankar): DEPRECATED: Remove before release.
+	// While it exists (and length > 0), it will take precedence over
+	// (Id, ParamVom)
 	ValidatorVOM []byte
 	Id           uniqueid.Id // The identifier of the caveat validation function.
-	ParamsVom    []byte      // VOM-encoded bytes of the parameters to be provided to the validation function.
+	ParamVom     []byte      // VOM-encoded bytes of the parameters to be provided to the validation function.
 }
 
 func (Caveat) __VDLReflect(struct {
@@ -185,7 +187,7 @@ func init() {
 	__vdl.Register(DischargeImpetus{})
 	__vdl.Register(Certificate{})
 	__vdl.Register(CaveatDescriptor{
-		ParamsType: __vdl.AnyType,
+		ParamType: __vdl.AnyType,
 	})
 	__vdl.Register(Caveat{})
 	__vdl.Register(WireBlessings{})

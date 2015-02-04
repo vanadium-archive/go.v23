@@ -9,7 +9,6 @@ import (
 	"sync"
 
 	"v.io/core/veyron2/vlog"
-	"v.io/core/veyron2/vom"
 )
 
 var errEmptyChain = errors.New("empty certificate chain found")
@@ -157,6 +156,8 @@ func blessingForCertificateChain(ctx Context, chain []Certificate) string {
 	return blessing
 }
 
+// validateCaveat is pretty much the same as cav.Validate(ctx), but it defers
+// to any validation scheme overrides via SetCaveatValidator.
 func validateCaveat(ctx Context, cav Caveat) error {
 	caveatValidationSetup.mu.RLock()
 	fn := caveatValidationSetup.fn
@@ -171,14 +172,7 @@ func validateCaveat(ctx Context, cav Caveat) error {
 	if fn != nil {
 		return fn(ctx, cav)
 	}
-	var validator CaveatValidator
-	if err := vom.Decode(cav.ValidatorVOM, &validator); err != nil {
-		return fmt.Errorf("Caveat decoding failed: %v", err)
-	}
-	if err := validator.Validate(ctx); err != nil {
-		return fmt.Errorf("Caveat %T failed validation: %v", validator, err)
-	}
-	return nil
+	return cav.Validate(ctx)
 }
 
 // NewBlessings creates a Blessings object from the provided wire representation.

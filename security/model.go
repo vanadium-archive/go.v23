@@ -59,7 +59,7 @@
 // satisfied to be issued by the third party. The representation of a "proof"
 // is referred to as a "discharge" (borrowing the term from proof theory,
 // https://proofwiki.org/wiki/Definition:Discharged_Assumption).
-// NewPublicKeyThirdPartyCaveat provides a means to offload validation of a
+// NewPublicKeyCaveat provides a means to offload validation of a
 // restriction to a third party.
 //
 // Navigating the interfaces
@@ -74,7 +74,7 @@
 //   * BlessingRoots
 //   * NewCaveat
 //   * ThirdPartyCaveat
-//   * NewPublicKeyThirdPartyCaveat
+//   * NewPublicKeyCaveat
 //
 // Examples
 //
@@ -175,7 +175,10 @@ type Principal interface {
 	//
 	// The returned discharge will be usable only if the provided caveats
 	// are met when using the discharge.
-	MintDischarge(tp ThirdPartyCaveat, caveat Caveat, additionalCaveats ...Caveat) (Discharge, error)
+	//
+	// TODO(ashankar): Change the type of "tp" to Caveat when removing
+	// ValidatorVOM.
+	MintDischarge(tp interface{}, caveat Caveat, additionalCaveats ...Caveat) (Discharge, error)
 
 	// PublicKey returns the public key counterpart of the private key held
 	// by the Principal.
@@ -342,6 +345,7 @@ type Blessings interface {
 
 	// ThirdPartyCaveats returns the set of third-party restrictions on the
 	// scope of the blessings.
+	// TODO(ashankar): The return type should become []Caveat?
 	ThirdPartyCaveats() []ThirdPartyCaveat
 
 	// unexported methods that prevent implementations of this interface
@@ -366,11 +370,8 @@ type Signer interface {
 	PublicKey() PublicKey
 }
 
-// CaveatValidator is the interface for validating the restrictions specified
-// in a caveat.
-//
-// Multiple goroutines may invoke methods on a CaveatValidator simultaneously.
-type CaveatValidator interface {
+// TODO(ashankar): Remove along with ValidatorVOM before release.
+type caveatValidator interface {
 	// Validate returns nil iff the restriction encapsulated in the
 	// corresponding caveat has been satisfied by the provided context.
 	Validate(context Context) error
@@ -383,10 +384,11 @@ type CaveatValidator interface {
 // the blessing presented).
 //
 // Multiple goroutines may invoke methods on a ThirdPartyCaveat simultaneously.
+// TODO(ashankar): This type should become ThirdPartyCaveatDetails?
 type ThirdPartyCaveat interface {
 	// ThidPartyCaveat implements CaveatValidator, where Validate
 	// succeeds iff a discharge for the caveat is available in the Context.
-	CaveatValidator
+	caveatValidator
 
 	// ID returns a cryptographically unique identifier for the third-party
 	// caveat.
