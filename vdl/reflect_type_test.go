@@ -408,6 +408,12 @@ func testTypeFromReflect(t *testing.T, prefix string) {
 		if want := test.t; got != want {
 			t.Errorf("%s TypeFromReflect(%v) got type %v, want %v", prefix, test.rt, got, want)
 		}
+		// Make sure that the type is automatically registered, if it is named.
+		if test.rt != nil && test.t.Name() != "" {
+			if rt := ReflectFromType(test.t); rt == nil {
+				t.Errorf("%s TypeFromReflect(%v) got ReflectFromType nil, want non-nil", prefix, test.rt)
+			}
+		}
 	}
 }
 

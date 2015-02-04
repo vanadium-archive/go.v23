@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-var nUnionWant = &ReflectInfo{
+var nUnionWant = []*ReflectInfo{{
 	WireType: reflect.TypeOf((*nUnion)(nil)).Elem(),
 	WireName: "v.io/core/veyron2/vdl.nUnion",
 	UnionFields: []ReflectField{
@@ -14,22 +14,22 @@ var nUnionWant = &ReflectInfo{
 		{"B", reflect.TypeOf(string("")), reflect.TypeOf(nUnionB{})},
 		{"C", reflect.TypeOf(int32(0)), reflect.TypeOf(nUnionC{})},
 	},
-}
+}}
 
 var reflectInfoTests = []struct {
 	rt reflect.Type
-	ri *ReflectInfo
+	ri []*ReflectInfo
 }{
-	{reflect.TypeOf(int64(0)), &ReflectInfo{WireType: reflect.TypeOf(int64(0))}},
-	{reflect.TypeOf(string("")), &ReflectInfo{WireType: reflect.TypeOf(string(""))}},
-	{reflect.TypeOf([]byte{}), &ReflectInfo{WireType: reflect.TypeOf([]byte{})}},
+	{reflect.TypeOf(int64(0)), []*ReflectInfo{{WireType: reflect.TypeOf(int64(0))}}},
+	{reflect.TypeOf(string("")), []*ReflectInfo{{WireType: reflect.TypeOf(string(""))}}},
+	{reflect.TypeOf([]byte{}), []*ReflectInfo{{WireType: reflect.TypeOf([]byte{})}}},
 	{
 		reflect.TypeOf(nEnumA),
-		&ReflectInfo{
+		[]*ReflectInfo{{
 			WireType:   reflect.TypeOf(nEnumA),
 			WireName:   "v.io/core/veyron2/vdl.nEnum",
 			EnumLabels: []string{"A", "B", "C"},
-		},
+		}},
 	},
 	{reflect.TypeOf((*nUnion)(nil)).Elem(), nUnionWant},
 	{reflect.TypeOf(nUnionA{}), nUnionWant},
@@ -37,10 +37,43 @@ var reflectInfoTests = []struct {
 	{reflect.TypeOf(nUnionC{}), nUnionWant},
 	{
 		reflect.TypeOf(nWire{}),
-		&ReflectInfo{
+		[]*ReflectInfo{{
 			WireType:   reflect.TypeOf(nWire{}),
 			WireName:   "v.io/core/veyron2/vdl.nWire",
 			NativeType: reflect.TypeOf(nNative(0)),
+		}},
+	},
+	{
+		reflect.TypeOf(nRecurseSelf{}),
+		[]*ReflectInfo{{
+			WireType: reflect.TypeOf(nRecurseSelf{}),
+			WireName: "v.io/core/veyron2/vdl.nRecurseSelf",
+		}},
+	},
+	{
+		reflect.TypeOf(nRecurseA{}),
+		[]*ReflectInfo{
+			{
+				WireType: reflect.TypeOf(nRecurseA{}),
+				WireName: "v.io/core/veyron2/vdl.nRecurseA",
+			},
+			{
+				WireType: reflect.TypeOf(nRecurseB{}),
+				WireName: "v.io/core/veyron2/vdl.nRecurseB",
+			},
+		},
+	},
+	{
+		reflect.TypeOf(nRecurseB{}),
+		[]*ReflectInfo{
+			{
+				WireType: reflect.TypeOf(nRecurseB{}),
+				WireName: "v.io/core/veyron2/vdl.nRecurseB",
+			},
+			{
+				WireType: reflect.TypeOf(nRecurseA{}),
+				WireName: "v.io/core/veyron2/vdl.nRecurseA",
+			},
 		},
 	},
 }
@@ -62,7 +95,7 @@ func TestDeriveReflectInfo(t *testing.T) {
 			t.Errorf("%s DeriveReflectInfo failed: (%v, %v)", test.rt, ri, err)
 			continue
 		}
-		if got, want := riNorm(ri), test.ri; !reflect.DeepEqual(got, want) {
+		if got, want := riNorm(ri), test.ri[0]; !reflect.DeepEqual(got, want) {
 			t.Errorf("%s got %v, want %v", test.rt, got, want)
 		}
 	}
@@ -85,20 +118,22 @@ func TestRegister(t *testing.T) {
 func testRegister(t *testing.T) {
 	for _, test := range reflectInfoTests {
 		Register(reflect.New(test.rt).Interface())
-		ri := ReflectInfoFromWire(test.ri.WireType)
-		if got, want := riNorm(ri), test.ri; !reflect.DeepEqual(got, want) {
-			t.Errorf("%s ReflectInfoFromWire got %v, want %v", test.rt, got, want)
-		}
-		if test.ri.WireName != "" {
-			ri := ReflectInfoFromName(test.ri.WireName)
-			if got, want := riNorm(ri), test.ri; !reflect.DeepEqual(got, want) {
-				t.Errorf("%s ReflectInfoFromName got %v, want %v", test.rt, got, want)
+		for _, testri := range test.ri {
+			ri := ReflectInfoFromWire(testri.WireType)
+			if got, want := riNorm(ri), testri; !reflect.DeepEqual(got, want) {
+				t.Errorf("%s ReflectInfoFromWire got %v, want %v", test.rt, got, want)
 			}
-		}
-		if test.ri.NativeType != nil {
-			ri := ReflectInfoFromNative(test.ri.NativeType)
-			if got, want := riNorm(ri), test.ri; !reflect.DeepEqual(got, want) {
-				t.Errorf("%s ReflectInfoFromNative got %v, want %v", test.rt, got, want)
+			if testri.WireName != "" {
+				ri := ReflectInfoFromName(testri.WireName)
+				if got, want := riNorm(ri), testri; !reflect.DeepEqual(got, want) {
+					t.Errorf("%s ReflectInfoFromName got %v, want %v", test.rt, got, want)
+				}
+			}
+			if testri.NativeType != nil {
+				ri := ReflectInfoFromNative(testri.NativeType)
+				if got, want := riNorm(ri), testri; !reflect.DeepEqual(got, want) {
+					t.Errorf("%s ReflectInfoFromNative got %v, want %v", test.rt, got, want)
+				}
 			}
 		}
 	}
