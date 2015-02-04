@@ -77,8 +77,9 @@ type Endpoint interface {
 //
 // TODO(toddw): Consolidate with VDLMountedServer once vdl supports time.
 type MountedServer struct {
-	Server  string    // Server is an object address (OA): endpoint + suffix
-	Expires time.Time // Absolute time after which the mount expires.
+	Server           string    // Server is an object address (OA): endpoint + suffix
+	Expires          time.Time // Absolute time after which the mount expires.
+	BlessingPatterns []string  // Patterns matching blessings presented by Server.
 }
 
 // MountEntry represents a name mounted in the mounttable.

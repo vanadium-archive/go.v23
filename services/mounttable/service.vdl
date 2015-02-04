@@ -3,6 +3,7 @@ package mounttable
 
 import (
 	"v.io/core/veyron2/naming"
+	"v.io/core/veyron2/security"
 	"v.io/core/veyron2/services/security/access/object"
 )
 
@@ -38,13 +39,23 @@ const (
 )
 
 // MountTable defines the interface to talk to a mounttable.
+//
+// In all methods of MountTable, the receiver is the name bound to.
 type MountTable interface {
-	// In all methods of MountTable, the receiver is the name bound to.
+	// DEPRECATED: TODO(ashankar): Rename MountX to Mount and remove
+        // MountX before the release.
+	Mount(Server string, TTL uint32, Flags naming.MountFlag) error
 
 	// Mount Server (a global name) onto the receiver.
 	// Subsequent mounts add to the servers mounted there.  The multiple
 	// servers are considered equivalent and are meant solely for
 	// availability, i.e., no load balancing is guaranteed.
+	//
+	// BlessingPatterns is a set of patterns that match the blessings
+	// presented by Server to clients that initiate connections with it.
+	// If empty, the mounttable makes the conservative assumption that the
+	// blessings presented by the client invoking Mount will be the
+	// blessings presented by Server.
 	//
 	// TTL is the number of seconds the mount is to last unless refreshed by
 	// another mount of the same server.  A TTL of 0 represents an infinite
@@ -53,7 +64,7 @@ type MountTable interface {
 	// act as if it was never present as far as the interface is concerned.
 	//
 	// Opts represents a bit mask of options.
-	Mount(Server string, TTL uint32, Flags naming.MountFlag) error
+	MountX(Server string, BlessingPatterns []security.BlessingPattern, TTL uint32, Flags naming.MountFlag) error
 
 	// Unmount removes Server from the receiver.  If Server is empty, remove
 	// all servers mounted there.

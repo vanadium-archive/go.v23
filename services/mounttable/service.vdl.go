@@ -7,6 +7,8 @@ package mounttable
 import (
 	"v.io/core/veyron2/naming"
 
+	"v.io/core/veyron2/security"
+
 	"v.io/core/veyron2/services/security/access/object"
 
 	// The non-user imports are prefixed with "__" to prevent collisions.
@@ -53,6 +55,8 @@ const Resolve = Tag("Resolve")
 // containing MountTable methods.
 //
 // MountTable defines the interface to talk to a mounttable.
+//
+// In all methods of MountTable, the receiver is the name bound to.
 type MountTableClientMethods interface {
 	// Object provides access control for Veyron objects.
 	//
@@ -98,10 +102,19 @@ type MountTableClientMethods interface {
 	//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}
 	//  }
 	object.ObjectClientMethods
+	// DEPRECATED: TODO(ashankar): Rename MountX to Mount and remove
+	// MountX before the release.
+	Mount(ctx *__context.T, Server string, TTL uint32, Flags naming.MountFlag, opts ...__ipc.CallOpt) error
 	// Mount Server (a global name) onto the receiver.
 	// Subsequent mounts add to the servers mounted there.  The multiple
 	// servers are considered equivalent and are meant solely for
 	// availability, i.e., no load balancing is guaranteed.
+	//
+	// BlessingPatterns is a set of patterns that match the blessings
+	// presented by Server to clients that initiate connections with it.
+	// If empty, the mounttable makes the conservative assumption that the
+	// blessings presented by the client invoking Mount will be the
+	// blessings presented by Server.
 	//
 	// TTL is the number of seconds the mount is to last unless refreshed by
 	// another mount of the same server.  A TTL of 0 represents an infinite
@@ -110,7 +123,7 @@ type MountTableClientMethods interface {
 	// act as if it was never present as far as the interface is concerned.
 	//
 	// Opts represents a bit mask of options.
-	Mount(ctx *__context.T, Server string, TTL uint32, Flags naming.MountFlag, opts ...__ipc.CallOpt) error
+	MountX(ctx *__context.T, Server string, BlessingPatterns []security.BlessingPattern, TTL uint32, Flags naming.MountFlag, opts ...__ipc.CallOpt) error
 	// Unmount removes Server from the receiver.  If Server is empty, remove
 	// all servers mounted there.
 	// Returns a non-nil error iff Server remains mounted at the mount point.
@@ -168,6 +181,17 @@ func (c implMountTableClientStub) Mount(ctx *__context.T, i0 string, i1 uint32, 
 	return
 }
 
+func (c implMountTableClientStub) MountX(ctx *__context.T, i0 string, i1 []security.BlessingPattern, i2 uint32, i3 naming.MountFlag, opts ...__ipc.CallOpt) (err error) {
+	var call __ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "MountX", []interface{}{i0, i1, i2, i3}, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
 func (c implMountTableClientStub) Unmount(ctx *__context.T, i0 string, opts ...__ipc.CallOpt) (err error) {
 	var call __ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Unmount", []interface{}{i0}, opts...); err != nil {
@@ -216,6 +240,8 @@ func (c implMountTableClientStub) ResolveStepX(ctx *__context.T, opts ...__ipc.C
 // implements for MountTable.
 //
 // MountTable defines the interface to talk to a mounttable.
+//
+// In all methods of MountTable, the receiver is the name bound to.
 type MountTableServerMethods interface {
 	// Object provides access control for Veyron objects.
 	//
@@ -261,10 +287,19 @@ type MountTableServerMethods interface {
 	//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}
 	//  }
 	object.ObjectServerMethods
+	// DEPRECATED: TODO(ashankar): Rename MountX to Mount and remove
+	// MountX before the release.
+	Mount(ctx __ipc.ServerContext, Server string, TTL uint32, Flags naming.MountFlag) error
 	// Mount Server (a global name) onto the receiver.
 	// Subsequent mounts add to the servers mounted there.  The multiple
 	// servers are considered equivalent and are meant solely for
 	// availability, i.e., no load balancing is guaranteed.
+	//
+	// BlessingPatterns is a set of patterns that match the blessings
+	// presented by Server to clients that initiate connections with it.
+	// If empty, the mounttable makes the conservative assumption that the
+	// blessings presented by the client invoking Mount will be the
+	// blessings presented by Server.
 	//
 	// TTL is the number of seconds the mount is to last unless refreshed by
 	// another mount of the same server.  A TTL of 0 represents an infinite
@@ -273,7 +308,7 @@ type MountTableServerMethods interface {
 	// act as if it was never present as far as the interface is concerned.
 	//
 	// Opts represents a bit mask of options.
-	Mount(ctx __ipc.ServerContext, Server string, TTL uint32, Flags naming.MountFlag) error
+	MountX(ctx __ipc.ServerContext, Server string, BlessingPatterns []security.BlessingPattern, TTL uint32, Flags naming.MountFlag) error
 	// Unmount removes Server from the receiver.  If Server is empty, remove
 	// all servers mounted there.
 	// Returns a non-nil error iff Server remains mounted at the mount point.
@@ -330,6 +365,10 @@ func (s implMountTableServerStub) Mount(ctx __ipc.ServerContext, i0 string, i1 u
 	return s.impl.Mount(ctx, i0, i1, i2)
 }
 
+func (s implMountTableServerStub) MountX(ctx __ipc.ServerContext, i0 string, i1 []security.BlessingPattern, i2 uint32, i3 naming.MountFlag) error {
+	return s.impl.MountX(ctx, i0, i1, i2, i3)
+}
+
 func (s implMountTableServerStub) Unmount(ctx __ipc.ServerContext, i0 string) error {
 	return s.impl.Unmount(ctx, i0)
 }
@@ -361,18 +400,31 @@ var MountTableDesc __ipc.InterfaceDesc = descMountTable
 var descMountTable = __ipc.InterfaceDesc{
 	Name:    "MountTable",
 	PkgPath: "v.io/core/veyron2/services/mounttable",
-	Doc:     "// MountTable defines the interface to talk to a mounttable.",
+	Doc:     "// MountTable defines the interface to talk to a mounttable.\n//\n// In all methods of MountTable, the receiver is the name bound to.",
 	Embeds: []__ipc.EmbedDesc{
 		{"Object", "v.io/core/veyron2/services/security/access/object", "// Object provides access control for Veyron objects.\n//\n// Veyron services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/core/veyron2/security/access\"\n//   import \"v.io/core/veyron2/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetACL and GetACL in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/core/veyron2/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}\n//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}\n//  }"},
 	},
 	Methods: []__ipc.MethodDesc{
 		{
 			Name: "Mount",
-			Doc:  "// Mount Server (a global name) onto the receiver.\n// Subsequent mounts add to the servers mounted there.  The multiple\n// servers are considered equivalent and are meant solely for\n// availability, i.e., no load balancing is guaranteed.\n//\n// TTL is the number of seconds the mount is to last unless refreshed by\n// another mount of the same server.  A TTL of 0 represents an infinite\n// duration.  A server with an expired TTL should never appear in the\n// results nor affect the operation of any MountTable method, and should\n// act as if it was never present as far as the interface is concerned.\n//\n// Opts represents a bit mask of options.",
+			Doc:  "// DEPRECATED: TODO(ashankar): Rename MountX to Mount and remove\n// MountX before the release.",
 			InArgs: []__ipc.ArgDesc{
 				{"Server", ``}, // string
 				{"TTL", ``},    // uint32
 				{"Flags", ``},  // naming.MountFlag
+			},
+			OutArgs: []__ipc.ArgDesc{
+				{"", ``}, // error
+			},
+		},
+		{
+			Name: "MountX",
+			Doc:  "// Mount Server (a global name) onto the receiver.\n// Subsequent mounts add to the servers mounted there.  The multiple\n// servers are considered equivalent and are meant solely for\n// availability, i.e., no load balancing is guaranteed.\n//\n// BlessingPatterns is a set of patterns that match the blessings\n// presented by Server to clients that initiate connections with it.\n// If empty, the mounttable makes the conservative assumption that the\n// blessings presented by the client invoking Mount will be the\n// blessings presented by Server.\n//\n// TTL is the number of seconds the mount is to last unless refreshed by\n// another mount of the same server.  A TTL of 0 represents an infinite\n// duration.  A server with an expired TTL should never appear in the\n// results nor affect the operation of any MountTable method, and should\n// act as if it was never present as far as the interface is concerned.\n//\n// Opts represents a bit mask of options.",
+			InArgs: []__ipc.ArgDesc{
+				{"Server", ``},           // string
+				{"BlessingPatterns", ``}, // []security.BlessingPattern
+				{"TTL", ``},              // uint32
+				{"Flags", ``},            // naming.MountFlag
 			},
 			OutArgs: []__ipc.ArgDesc{
 				{"", ``}, // error
