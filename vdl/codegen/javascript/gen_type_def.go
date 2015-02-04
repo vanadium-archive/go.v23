@@ -106,9 +106,9 @@ func jsKind(k vdl.Kind) string {
 	case vdl.Any:
 		return "vom.Kind.ANY"
 	case vdl.Union:
-		return "vom.Kind.ONEOF" // TODO(alexfandrianto): change to union
+		return "vom.Kind.UNION"
 	case vdl.Optional:
-		return "vom.Kind.NILABLE" // TODO(alexfandrianto): change to optional
+		return "vom.Kind.OPTIONAL"
 	case vdl.Bool:
 		return "vom.Kind.BOOL"
 	case vdl.Byte:
