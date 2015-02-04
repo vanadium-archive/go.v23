@@ -19,9 +19,6 @@ import (
 // outstanding Calls associated with a single Client, and a Client may be
 // used by multiple goroutines concurrently.
 type Client interface {
-	// Client can be provided to Bind<Service> calls.
-	BindOpt
-
 	// StartCall starts an asynchronous call of the method on the server instance
 	// identified by name, with the given input args (of any arity).  The returned
 	// Call object manages streaming args and results, and finishes the call.
@@ -568,10 +565,12 @@ type ServerContext interface {
 	Context() *context.T
 }
 
+// TODO(caprita): Remove this.  It's currently referenced in all VDL-generated
+// files, so do it in a separate CL.
+
 // BindOpt is the interface for options provided to Bind<Service> calls in IPC
 // clients.
 type BindOpt interface {
-	IPCBindOpt()
 }
 
 // CallOpt is the interface for all Call options.
