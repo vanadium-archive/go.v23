@@ -57,8 +57,8 @@ import (
 //   type dispatcher struct{}
 //   func (d dispatcher) Lookup(suffix, method) (ipc.Invoker, security.Authorizer, error) {
 //      acl := acl.TaggedACLMap{
-//        "R": acl.ACL{In: []security.BlessingPattern{"alice/friends/...", "alice/family/..."} },
-//        "W": acl.ACL{In: []security.BlessingPattern{"alice/family/...", "alice/colleagues/..." } },
+//        "R": acl.ACL{In: []security.BlessingPattern{"alice/friends", "alice/family"} },
+//        "W": acl.ACL{In: []security.BlessingPattern{"alice/family", "alice/colleagues" } },
 //      }
 //      typ := reflect.TypeOf(ReadAccess)  // equivalently, reflect.TypeOf(WriteAccess)
 //      return newInvoker(), acl.TaggedACLAuthorizer(acl, typ), nil

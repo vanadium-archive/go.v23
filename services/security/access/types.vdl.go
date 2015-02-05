@@ -107,16 +107,17 @@ type ACL struct {
 	// should be granted access, unless blacklisted by an entry in NotIn.
 	//
 	// For example:
-	//   In: {"alice/family/..."}
-	// grants access to a principal that presents at least one of "alice",
-	// "alice/family", "alice/family/friend" etc. as a blessing.
+	//   In: {"alice/family"}
+	// grants access to a principal that presents at least one of
+	// "alice/family", "alice/family/friend", "alice/family/friend/spouse" etc.
+	// as a blessing.
 	In []security.BlessingPattern
 	// NotIn denotes the set of blessings (and their delegates) that
 	// have been explicitly blacklisted from the In set.
 	//
 	// For example:
-	//   In: {"alice/friend/..."}, NotIn: {"alice/friend/bob"}
-	// grants access to principals that present "alice", "alice/friend",
+	//   In: {"alice/friend"}, NotIn: {"alice/friend/bob"}
+	// grants access to principals that present "alice/friend",
 	// "alice/friend/carol" etc. but NOT to a principal that presents
 	// "alice/friend/bob" or "alice/friend/bob/spouse" etc.
 	NotIn []string

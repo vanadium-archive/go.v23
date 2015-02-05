@@ -92,9 +92,8 @@
 //  alice := ctx.RemoteBlessings()
 //  fmt.Println(len(alice.ForContext(ctx))) // Will print 0
 //
-// However, p2 can decide to trust p1 as an authority on the blessings of
-// the form "alice/..." and will then be able to recognize "alice" and
-// her delegates:
+// However, p2 can decide to trust the roots of the "alice" blessing and then it
+// will be able to recognize her delegates as well:
 //  // (in process B)
 //  p2.AddToRoots(alice)
 //  fmt.Printf("%v", alice.ForContext(ctx))  // Will print ["alice"]
@@ -113,9 +112,9 @@
 //  p2.BlessingStore().Set(aliceFriend, "alice")
 //
 // p2 could also mark this blessing so that it is used when communicating with
-// any delegates of "alice":
+// "alice" and any of her delegates:
 //  // (in process B)
-//  p2.BlessingStore().Set(aliceFriend, "alice/...")
+//  p2.BlessingStore().Set(aliceFriend, "alice")
 //
 // p2 can also choose to present multiple blessings to some servers:
 //  // (in process B)
@@ -214,9 +213,9 @@ type Principal interface {
 	// ["alice/friend/spouse", "charlie/family/daughter"] then
 	// AddToRoots(blessing) will mark the root public key of the chain
 	// "alice/friend/bob" as the as authority on all blessings that
-	// match the pattern "alice/...", and root public key of the chain
+	// match the pattern "alice", and root public key of the chain
 	// "charlie/family/daughter" as an authority on all blessings that
-	// match the pattern "charlie/...".
+	// match the pattern "charlie".
 	AddToRoots(blessings Blessings) error
 }
 

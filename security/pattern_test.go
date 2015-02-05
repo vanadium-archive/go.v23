@@ -18,7 +18,7 @@ func TestMatchedBy(t *testing.T) {
 			DoesNotMatch: v{"", "$", "ann", "bob", "ann/friend"},
 		},
 		{
-			Pattern: "...",
+			Pattern: AllPrincipals,
 			Matches: v{"", "ann", "bob", "ann/friend"},
 		},
 		{
@@ -87,7 +87,7 @@ func TestMatchedByCornerCases(t *testing.T) {
 
 func TestIsValid(t *testing.T) {
 	var (
-		valid   = []BlessingPattern{"...", "alice", "al$ice", "alice/$", "alice.jones/$", "alice@google/$", "veyron/alice@google/$", "veyron/alice@google/bob/$", "alice", "alice/bob"}
+		valid   = []BlessingPattern{AllPrincipals, "alice", "al$ice", "alice/$", "alice.jones/$", "alice@google/$", "veyron/alice@google/$", "veyron/alice@google/bob/$", "alice", "alice/bob"}
 		invalid = []BlessingPattern{"", "alice...", "...alice", "alice...bob", "/alice", "alice/", "...alice/bob", "alice.../bob", "alice/.../bob", "alice/$/bob", "alice/$/$", "alice/.../$"}
 	)
 	for _, p := range valid {

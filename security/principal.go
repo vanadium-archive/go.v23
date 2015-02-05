@@ -198,13 +198,12 @@ func (p *principal) AddToRoots(blessings Blessings) error {
 		return errors.New("principal does not have any BlessingRoots")
 	}
 	chains := blessings.certificateChains()
-	glob := ChainSeparator + AllPrincipals
 	for _, chain := range chains {
 		root, err := UnmarshalPublicKey(chain[0].PublicKey)
 		if err != nil {
 			return fmt.Errorf("failed to unmarshal public key in root certificate with Extension: %q: %v", chain[0].Extension, err)
 		}
-		pattern := BlessingPattern(chain[0].Extension) + glob
+		pattern := BlessingPattern(chain[0].Extension)
 		if err := p.roots.Add(root, pattern); err != nil {
 			return fmt.Errorf("failed to Add root: %v for pattern: %v to this principal's roots: %v", root, pattern, err)
 		}
