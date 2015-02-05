@@ -405,6 +405,7 @@ var (
 	structInt64TypeN = vdl.NamedType("v.io/core/veyron2/vdl/valconv.nStructInt64", vdl.StructType(vdl.Field{"X", vdl.Int64Type}))
 	unionABCTypeN    = vdl.NamedType("v.io/core/veyron2/vdl/valconv.nUnionABC", vdl.UnionType([]vdl.Field{{"A", vdl.BoolType}, {"B", vdl.StringType}, {"C", structInt64TypeN}}...))
 	unionBCDTypeN    = vdl.NamedType("v.io/core/veyron2/vdl/valconv.nUnionBCD", vdl.UnionType([]vdl.Field{{"B", vdl.StringType}, {"C", structInt64TypeN}, {"D", vdl.Int64Type}}...))
+	unionXYTypeN     = vdl.NamedType("v.io/core/veyron2/vdl/valconv.nUnionXY", vdl.UnionType([]vdl.Field{{"X", vdl.StringType}, {"Y", structInt64TypeN}}...))
 )
 
 // Define a bunch of *Type types used in tests.

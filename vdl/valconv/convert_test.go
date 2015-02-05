@@ -323,13 +323,13 @@ var (
 	}
 	ttFloat32s    = []*vdl.Type{vdl.Float32Type, float32TypeN}
 	ttFloat64s    = []*vdl.Type{vdl.Float64Type, float64TypeN}
-	ttFloats      = ttUnion(ttFloat32s, ttFloat64s)
+	ttFloats      = ttJoin(ttFloat32s, ttFloat64s)
 	ttComplex64s  = []*vdl.Type{vdl.Complex64Type, complex64TypeN}
 	ttComplex128s = []*vdl.Type{vdl.Complex128Type, complex128TypeN}
-	ttComplexes   = ttUnion(ttComplex64s, ttComplex128s)
-	ttIntegers    = ttUnion(ttUints, ttInts)
-	ttNumbers     = ttUnion(ttIntegers, ttFloats, ttComplexes)
-	ttAllTypes    = ttUnion(ttBools, ttStrs, ttTypeObjects, ttNumbers, ttSeq123, ttSetMap123, ttSetMapStructXYZ, ttMapStructVWXNum)
+	ttComplexes   = ttJoin(ttComplex64s, ttComplex128s)
+	ttIntegers    = ttJoin(ttUints, ttInts)
+	ttNumbers     = ttJoin(ttIntegers, ttFloats, ttComplexes)
+	ttAllTypes    = ttJoin(ttBools, ttStrs, ttTypeObjects, ttNumbers, ttSeq123, ttSetMap123, ttSetMapStructXYZ, ttMapStructVWXNum)
 
 	rtBools           = rtTypes(rvBoolTrue)
 	rtStrs            = rtTypes(rvStrABC)
@@ -364,17 +364,17 @@ var (
 	rtFloat64s = []reflect.Type{
 		reflect.TypeOf(float64(0)), reflect.TypeOf(nFloat64(0)),
 	}
-	rtFloats     = rtUnion(rtFloat32s, rtFloat64s)
+	rtFloats     = rtJoin(rtFloat32s, rtFloat64s)
 	rtComplex64s = []reflect.Type{
 		reflect.TypeOf(complex64(0)), reflect.TypeOf(nComplex64(0)),
 	}
 	rtComplex128s = []reflect.Type{
 		reflect.TypeOf(complex128(0)), reflect.TypeOf(nComplex128(0)),
 	}
-	rtComplexes = rtUnion(rtComplex64s, rtComplex128s)
-	rtIntegers  = rtUnion(rtUints, rtInts)
-	rtNumbers   = rtUnion(rtIntegers, rtFloats, rtComplexes)
-	rtAllTypes  = rtUnion(rtBools, rtStrs, rtTypeObjects, rtNumbers, rtSeq123, rtSetMap123, rtSetMapStructXYZ, rtMapStructVWXNum)
+	rtComplexes = rtJoin(rtComplex64s, rtComplex128s)
+	rtIntegers  = rtJoin(rtUints, rtInts)
+	rtNumbers   = rtJoin(rtIntegers, rtFloats, rtComplexes)
+	rtAllTypes  = rtJoin(rtBools, rtStrs, rtTypeObjects, rtNumbers, rtSeq123, rtSetMap123, rtSetMapStructXYZ, rtMapStructVWXNum)
 
 	rtInterface = reflect.TypeOf((*interface{})(nil)).Elem()
 )
@@ -393,7 +393,7 @@ func ttTypes(values []*vdl.Value) []*vdl.Type {
 	}
 	return ttSetToSlice(uniq)
 }
-func ttUnion(types ...[]*vdl.Type) []*vdl.Type {
+func ttJoin(types ...[]*vdl.Type) []*vdl.Type {
 	uniq := make(map[*vdl.Type]bool)
 	for _, ttSlice := range types {
 		for _, tt := range ttSlice {
@@ -433,7 +433,7 @@ func rtTypes(values []interface{}) []reflect.Type {
 	}
 	return rtSetToSlice(uniq)
 }
-func rtUnion(types ...[]reflect.Type) (result []reflect.Type) {
+func rtJoin(types ...[]reflect.Type) (result []reflect.Type) {
 	uniq := make(map[reflect.Type]bool)
 	for _, rtSlice := range types {
 		for _, rt := range rtSlice {
@@ -780,6 +780,9 @@ func TestConverterUnion(t *testing.T) {
 	rvAbcBCDi := nUnionBCD(rvAbcBCD)
 	rvStruct123BCDi := nUnionBCD(rvStruct123BCD)
 	rv123BCDi := nUnionBCD(rv123BCD)
+	// values for union{X string;Y struct}, which has no Go equivalent.
+	vvAbcXY := vdl.ZeroValue(unionXYTypeN).AssignUnionField(0, vvAbc)
+	vvStruct123XY := vdl.ZeroValue(unionXYTypeN).AssignUnionField(1, vvStruct123)
 
 	tests := []struct {
 		vvWant *vdl.Value
@@ -812,12 +815,30 @@ func TestConverterUnion(t *testing.T) {
 		{vvAbcBCD, &rvAbcBCDi, vvAbcABC, &rvAbcABCi},
 		{vvStruct123ABC, &rvStruct123ABCi, vvStruct123BCD, &rvStruct123BCDi},
 		{vvStruct123BCD, &rvStruct123BCDi, vvStruct123ABC, &rvStruct123ABCi},
+
+		// Test unions that have no Go equivalent.
+		{vvAbcXY, nil, vvAbcXY, nil},
+		{vvStruct123XY, nil, vvStruct123XY, nil},
 	}
 	for _, test := range tests {
 		testConverterWantSrc(t,
-			vvrv{[]*vdl.Value{test.vvWant}, []interface{}{test.rvWant}},
-			vvrv{[]*vdl.Value{test.vvSrc}, []interface{}{test.rvSrc}})
+			vvrv{vvSlice(test.vvWant), rvSlice(test.rvWant)},
+			vvrv{vvSlice(test.vvSrc), rvSlice(test.rvSrc)})
 	}
+}
+
+func vvSlice(v *vdl.Value) []*vdl.Value {
+	if v != nil {
+		return []*vdl.Value{v}
+	}
+	return nil
+}
+
+func rvSlice(v interface{}) []interface{} {
+	if v != nil {
+		return []interface{}{v}
+	}
+	return nil
 }
 
 // Test successful conversions to and from nil values.
@@ -1018,27 +1039,32 @@ func testConvert(t *testing.T, prefix string, dst, src, want interface{}, deref 
 		rvSrc := reflect.ValueOf(src)
 		for srcptrs := 0; srcptrs < ptrDepth; srcptrs++ {
 			tname := fmt.Sprintf("%s ReflectTarget(%v).From(%v)", prefix, rvDst.Type(), rvSrc.Type())
-			// This is tricky - if optWant is set and we've added pointers to src, we
-			// might need to change the want value to become optional.
-			eWant := want
-			if optWant && srcptrs > 0 {
-				if vvWant, ok := want.(*vdl.Value); ok {
-					switch {
-					case vvWant.Kind() == vdl.Any && !vvWant.IsNil() && vvWant.Elem().Type().CanBeOptional():
-						// Turn any(struct{...}) into any(?struct{...})
-						eWant = anyValue(vdl.OptionalValue(vvWant.Elem()))
-					case vvWant.Type().CanBeOptional():
-						// Turn struct{...} into ?struct{...}
-						eWant = vdl.OptionalValue(vvWant)
+			// This is tricky - if optWant is set, we might need to change the want
+			// value to become optional or non-optional.
+			eWant, rvWant, ttWant := want, reflect.ValueOf(want), vdl.TypeOf(want)
+			if optWant {
+				vvWant, wantIsVV := want.(*vdl.Value)
+				if srcptrs > 0 {
+					if wantIsVV {
+						switch {
+						case vvWant.Kind() == vdl.Any && !vvWant.IsNil() && vvWant.Elem().Type().CanBeOptional():
+							// Turn any(struct{...}) into any(?struct{...})
+							eWant = anyValue(vdl.OptionalValue(vvWant.Elem()))
+						case vvWant.Type().CanBeOptional():
+							// Turn struct{...} into ?struct{...}
+							eWant = vdl.OptionalValue(vvWant)
+						}
+					} else if ttWant.Kind() == vdl.Optional || ttWant.CanBeOptional() {
+						// Add a pointer to anything that can be optional.
+						rvPtrWant := reflect.New(rvWant.Type())
+						rvPtrWant.Elem().Set(rvWant)
+						eWant = rvPtrWant.Interface()
 					}
-				} else if errWant, ok := want.(verror2.Standard); ok {
-					eWant = &errWant
-				} else if nativeWant, ok := want.(nNative); ok {
-					eWant = &nativeWant
 				}
-				// TODO(toddw): Replace the special-cases for verror2.Standard and
-				// nNative with a general mechanism to change want to be optional, once
-				// optional is allowed for all types.
+				if !wantIsVV && ttWant.Kind() != vdl.TypeObject && !ttWant.CanBeOptional() && rvWant.Kind() == reflect.Ptr {
+					// Remove a pointer from  anything that can't be optional.
+					eWant = rvWant.Elem().Interface()
+				}
 			}
 			target, err := ReflectTarget(rvDst)
 			expectErr(t, err, "", tname)
@@ -1156,17 +1182,17 @@ func TestConverterError(t *testing.T) {
 			vvFromInt(math.MinInt32 - 1),
 			rvFromInt(math.MinInt32 - 1)},
 		// Test int to float max bound.
-		{ttUnion(ttFloat32s, ttComplex64s), rtUnion(rtFloat32s, rtComplex64s),
+		{ttJoin(ttFloat32s, ttComplex64s), rtJoin(rtFloat32s, rtComplex64s),
 			vvOnlyFrom(vvFromInt(float32MaxInt+1), ttIntegers),
 			rvOnlyFrom(rvFromInt(float32MaxInt+1), rtIntegers)},
-		{ttUnion(ttFloat64s, ttComplex128s), rtUnion(rtFloat64s, rtComplex128s),
+		{ttJoin(ttFloat64s, ttComplex128s), rtJoin(rtFloat64s, rtComplex128s),
 			vvOnlyFrom(vvFromInt(float64MaxInt+1), ttIntegers),
 			rvOnlyFrom(rvFromInt(float64MaxInt+1), rtIntegers)},
 		// Test int to float min bound.
-		{ttUnion(ttFloat32s, ttComplex64s), rtUnion(rtFloat32s, rtComplex64s),
+		{ttJoin(ttFloat32s, ttComplex64s), rtJoin(rtFloat32s, rtComplex64s),
 			vvOnlyFrom(vvFromInt(float32MinInt-1), ttIntegers),
 			rvOnlyFrom(rvFromInt(float32MinInt-1), rtIntegers)},
-		{ttUnion(ttFloat64s, ttComplex128s), rtUnion(rtFloat64s, rtComplex128s),
+		{ttJoin(ttFloat64s, ttComplex128s), rtJoin(rtFloat64s, rtComplex128s),
 			vvOnlyFrom(vvFromInt(float64MinInt-1), ttIntegers),
 			rvOnlyFrom(rvFromInt(float64MinInt-1), rtIntegers)},
 		// Test negative uints, fractional integers, imaginary non-complex numbers.

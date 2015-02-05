@@ -236,16 +236,17 @@ func createFillTarget(fin convTarget, ttFrom *vdl.Type) (convTarget, error) {
 			// Try to create a reflect.Type out of ttFrom, and if it exists, create a real
 			// object to fill in.
 			if rt := vdl.ReflectFromType(ttFrom); rt != nil {
-				tt, err := vdl.TypeFromReflect(rt)
-				if err != nil {
-					return convTarget{}, err
+				if rt.Kind() == reflect.Interface && ttFrom.Kind() == vdl.Union {
+					// Here rt is a union interface, so we apply the same strategy of
+					// converting into a *vdl.Value first.
+					return valueConv(vdl.ZeroValue(ttFrom)), nil
 				}
 				rv := reflect.New(rt).Elem()
 				for rv.Kind() == reflect.Ptr {
 					rv.Set(reflect.New(rv.Type().Elem()))
 					rv = rv.Elem()
 				}
-				return reflectConv(rv, tt)
+				return reflectConv(rv, ttFrom)
 			}
 			// We don't have the type name in our registry, so create a concrete
 			// *vdl.Value to fill in, based on ttFrom.
@@ -306,21 +307,16 @@ func finishConvert(fin, fill convTarget) error {
 					rvFill = rvFill.Addr()
 				}
 			} else {
-				switch fin.tt.Kind() {
-				case vdl.Union:
-					// Special-case: the fin target is a union interface.  This is a bit
-					// weird; since we didn't know the union field name yet, we created a
-					// *vdl.Value as the fill target in createFillTarget above.  But now
-					// that it's filled in, we convert it back into the appropriate
-					// concrete field struct, so that it can be used normally.
-					var err error
-					if rvFill, err = makeReflectUnion(fin.rv, fill.vv); err != nil {
-						return err
-					}
-				default:
-					if fill.tt.Kind() == vdl.Optional {
+				if fill.tt.Kind() == vdl.Union {
+					// Special-case: the fill target is a union type.  We try to convert
+					// it into a concrete field struct.
+					rvFill, _ = makeReflectUnion(fin.rv.Type(), fill.vv)
+				}
+				if !rvFill.IsValid() {
+					switch fill.tt.Kind() {
+					case vdl.Optional:
 						rvFill = reflect.ValueOf(vdl.OptionalValue(fill.vv))
-					} else {
+					default:
 						rvFill = reflect.ValueOf(fill.vv)
 					}
 				}
@@ -406,22 +402,30 @@ func rvSettableZeroValue(rt reflect.Type, tt *vdl.Type) reflect.Value {
 }
 
 // makeReflectUnion returns the union concrete struct based on the union
-// interface struct rv, corresponding to the field that is set in vv.  The point
+// interface type rt, corresponding to the field that is set in vv.  The point
 // of this machinery is to ensure union can always be created, without any type
 // registration.
-func makeReflectUnion(rv reflect.Value, vv *vdl.Value) (reflect.Value, error) {
+func makeReflectUnion(rt reflect.Type, vv *vdl.Value) (reflect.Value, error) {
 	// TODO(toddw): Cache the field types for faster access, after merging this
 	// into the vdl package.
-	ri, err := vdl.DeriveReflectInfo(rv.Type())
+	ri, err := vdl.DeriveReflectInfo(rt)
+	if err != nil || len(ri.UnionFields) == 0 {
+		// If rt isn't a union interface type, it still might be registered, so we
+		// can get the reflect type from vv.
+		if rt2 := vdl.ReflectFromType(vv.Type()); rt2 != nil {
+			rt = rt2
+			ri, err = vdl.DeriveReflectInfo(rt)
+		}
+	}
 	switch {
 	case err != nil:
 		return reflect.Value{}, err
 	case len(ri.UnionFields) == 0 || vv.Kind() != vdl.Union:
-		return reflect.Value{}, fmt.Errorf("vdl: makeReflectUnion(%v, %v) must only be called on Union", rv.Type(), vv.Type())
+		return reflect.Value{}, fmt.Errorf("vdl: makeReflectUnion(%v, %v) must only be called on Union", rt, vv.Type())
 	}
 	index, vvField := vv.UnionField()
 	if index >= len(ri.UnionFields) {
-		return reflect.Value{}, fmt.Errorf("vdl: makeReflectUnion(%v, %v) field index %d out of range, len=%d", rv.Type(), vv.Type(), index, len(ri.UnionFields))
+		return reflect.Value{}, fmt.Errorf("vdl: makeReflectUnion(%v, %v) field index %d out of range, len=%d", rt, vv.Type(), index, len(ri.UnionFields))
 	}
 	// Run our regular conversion from vvField to rvField.  Keep in mind that
 	// rvField is the concrete union struct, so we convert into Field(0), which
