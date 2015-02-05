@@ -88,7 +88,7 @@ func TestMatchedByCornerCases(t *testing.T) {
 func TestIsValid(t *testing.T) {
 	var (
 		valid   = []BlessingPattern{AllPrincipals, "alice", "al$ice", "alice/$", "alice.jones/$", "alice@google/$", "veyron/alice@google/$", "veyron/alice@google/bob/$", "alice", "alice/bob"}
-		invalid = []BlessingPattern{"", "alice...", "...alice", "alice...bob", "/alice", "alice/", "...alice/bob", "alice.../bob", "alice/.../bob", "alice/$/bob", "alice/$/$", "alice/.../$"}
+		invalid = []BlessingPattern{"", "alice...", "...alice", "alice...bob", "/alice", "alice/", "...alice/bob", "alice.../bob", "alice/.../bob", "alice/$/bob", "alice/$/$", "alice/.../$", "alice/..."}
 	)
 	for _, p := range valid {
 		if !p.IsValid() {
