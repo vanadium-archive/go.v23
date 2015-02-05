@@ -22,7 +22,7 @@ func TestTaggedACLAuthorizer(t *testing.T) {
 	// TaggedACLMap to test against.
 	acl := TaggedACLMap{
 		"R": {
-			In: P{"..."},
+			In: P{security.AllPrincipals},
 		},
 		"W": {
 			In:    P{"ali/family", "bob", "che/$"},
