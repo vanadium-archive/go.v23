@@ -24,36 +24,36 @@ type E interface {
 }
 
 // ErrorID returns the ID of the given err, or Unknown if the err has no ID.
-func ErrorID(err error) ID {
-	if e, ok := err.(E); ok {
-		return e.ErrorID()
-	}
-	return Unknown
-}
+// func ErrorID(err error) ID {
+// 	if e, ok := err.(E); ok {
+// 		return e.ErrorID()
+// 	}
+// 	return Unknown
+// }
 
 // Is returns true iff the given err has the given id.
-func Is(err error, id ID) bool {
-	return ErrorID(err) == id
-}
+// func Is(err error, id ID) bool {
+// 	return ErrorID(err) == id
+// }
 
 // IsUnknown is a helper that calls Is(err, Unknown).
-func IsUnknown(err error) bool {
-	return Is(err, Unknown)
-}
+// func IsUnknown(err error) bool {
+// 	return Is(err, Unknown)
+// }
 
 // Equal returns true iff a and b have the same error id and message.
-func Equal(a, b error) bool {
-	if a == nil || b == nil {
-		return a == b
-	}
-	if ErrorID(a) != ErrorID(b) {
-		return false
-	}
-	if a.Error() != b.Error() {
-		return false
-	}
-	return true
-}
+// func Equal(a, b error) bool {
+// 	if a == nil || b == nil {
+// 		return a == b
+// 	}
+// 	if ErrorID(a) != ErrorID(b) {
+// 		return false
+// 	}
+// 	if a.Error() != b.Error() {
+// 		return false
+// 	}
+// 	return true
+// }
 
 // Make returns an error implementing E with the given id and msg.
 func Make(id ID, msg string) E {

@@ -8,97 +8,9 @@ import (
 )
 
 var (
-	a1 = Make(ID("A"), "msg 1")
-	a2 = Makef(ID("A"), "msg %d", 2)
-	b1 = Make(ID("B"), "msg 1")
-	b2 = Makef(ID("B"), "msg %d", 2)
-	u1 = Make(Unknown, "msg 1")
-	u2 = Makef(Unknown, "msg %d", 2)
 	e1 = errors.New("msg 1")
 	e2 = errors.New("msg 2")
 )
-
-func TestBasic(t *testing.T) {
-	var tests = []struct {
-		err    error
-		id     ID
-		expect bool
-	}{
-		{a1, ID("A"), true},
-		{a2, ID("A"), true},
-		{b1, ID("A"), false},
-		{b2, ID("A"), false},
-		{u1, ID("A"), false},
-		{u2, ID("A"), false},
-		{e1, ID("A"), false},
-		{e2, ID("A"), false},
-
-		{a1, ID("B"), false},
-		{a2, ID("B"), false},
-		{b1, ID("B"), true},
-		{b2, ID("B"), true},
-		{u1, ID("B"), false},
-		{u2, ID("B"), false},
-		{e1, ID("B"), false},
-		{e2, ID("B"), false},
-
-		{a1, ID("C"), false},
-		{a2, ID("C"), false},
-		{b1, ID("C"), false},
-		{b2, ID("C"), false},
-		{u1, ID("C"), false},
-		{u2, ID("C"), false},
-		{e1, ID("C"), false},
-		{e2, ID("C"), false},
-
-		{a1, Unknown, false},
-		{a2, Unknown, false},
-		{b1, Unknown, false},
-		{b2, Unknown, false},
-		{u1, Unknown, true},
-		{u2, Unknown, true},
-		{e1, Unknown, true},
-		{e2, Unknown, true},
-	}
-	for _, test := range tests {
-		if (ErrorID(test.err) == test.id) != test.expect {
-			t.Errorf("(ErrorID(%#v) == %s) != %v", test.err, test.id, test.expect)
-		}
-		if Is(test.err, test.id) != test.expect {
-			t.Errorf("Is(%#v, %s) != %v", test.err, test.id, test.expect)
-		}
-	}
-}
-
-func TestEqual(t *testing.T) {
-	var tests = []struct {
-		a, b   error
-		expect bool
-	}{
-		{a1, a1, true},
-		{u1, u1, true},
-		{e1, e1, true},
-		{e1, u1, true},
-		{nil, nil, true},
-
-		{a1, a2, false},
-		{a1, b1, false},
-		{a1, b2, false},
-		{a1, u1, false},
-		{a1, u2, false},
-		{a1, e1, false},
-		{a1, e2, false},
-		{a1, nil, false},
-	}
-	for _, test := range tests {
-		if Equal(test.a, test.b) != test.expect {
-			t.Errorf("Equal(%#v, %#v) != %v", test.a, test.b, test.expect)
-		}
-		if Equal(test.b, test.a) != test.expect {
-			t.Errorf("Equal(%#v, %#v) != %v", test.b, test.a, test.expect)
-		}
-	}
-}
 
 type special struct{}
 

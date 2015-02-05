@@ -29,46 +29,46 @@ var (
 )
 
 var (
-	aEN0 verror2.E
-	aEN1 verror2.E
-	aFR0 verror2.E
-	aFR1 verror2.E
-	aDE0 verror2.E
-	aDE1 verror2.E
+	aEN0 error
+	aEN1 error
+	aFR0 error
+	aFR1 error
+	aDE0 error
+	aDE1 error
 
-	bEN0 verror2.E
-	bEN1 verror2.E
-	bFR0 verror2.E
-	bFR1 verror2.E
-	bDE0 verror2.E
-	bDE1 verror2.E
+	bEN0 error
+	bEN1 error
+	bFR0 error
+	bFR1 error
+	bDE0 error
+	bDE1 error
 
-	uEN0 verror2.E
-	uEN1 verror2.E
-	uFR0 verror2.E
-	uFR1 verror2.E
-	uDE0 verror2.E
-	uDE1 verror2.E
+	uEN0 error
+	uEN1 error
+	uFR0 error
+	uFR1 error
+	uDE0 error
+	uDE1 error
 
-	nEN0 verror2.E
-	nEN1 verror2.E
-	nFR0 verror2.E
-	nFR1 verror2.E
-	nDE0 verror2.E
-	nDE1 verror2.E
+	nEN0 error
+	nEN1 error
+	nFR0 error
+	nFR1 error
+	nDE0 error
+	nDE1 error
 
-	vEN verror2.E
-	vFR verror2.E
-	vDE verror2.E
+	vEN error
+	vFR error
+	vDE error
 
-	gEN verror2.E
-	gFR verror2.E
-	gDE verror2.E
+	gEN error
+	gFR error
+	gDE error
 
-	v2EN  verror2.E
-	v2FR0 verror2.E
-	v2FR1 verror2.E
-	v2DE  verror2.E
+	v2EN  error
+	v2FR0 error
+	v2FR1 error
+	v2DE  error
 )
 
 func init() {
@@ -282,15 +282,15 @@ func TestBasic(t *testing.T) {
 	}
 }
 
-func tester() (verror2.E, verror2.E) {
+func tester() (error, error) {
 	l1 := verror2.ExplicitMake(idActionA, en, "server", "aEN0", 0)
 	return l1, verror2.ExplicitMake(idActionA, en, "server", "aEN0", 1)
 }
 
 func TestStack(t *testing.T) {
 	l1, l2 := tester()
-	stack1 := l1.Stack().String()
-	stack2 := l2.Stack().String()
+	stack1 := verror2.Stack(l1).String()
+	stack2 := verror2.Stack(l2).String()
 	if stack1 == stack2 {
 		t.Errorf("expected %q and %q to differ", stack1, stack2)
 	}
@@ -305,7 +305,7 @@ func TestStack(t *testing.T) {
 }
 
 func TestEqual(t *testing.T) {
-	var equivalanceClasses = [][]verror2.E{
+	var equivalanceClasses = [][]error{
 		{aEN0, aEN1, aDE0, aDE1, aDE0, aDE1, v2EN, v2FR0, v2FR1, v2DE},
 		{bEN0, bEN1, bDE0, bDE1, bDE0, bDE1},
 		{nEN0, nEN1, nDE0, nDE1, nDE0, nDE1},
@@ -328,7 +328,7 @@ func TestEqual(t *testing.T) {
 
 func TestSubordinateErrors(t *testing.T) {
 	p := verror2.ExplicitMake(idActionA, en, "server", "aEN0", 0)
-	if p.SubErrors() != nil {
+	if verror2.SubErrors(p) != nil {
 		t.Errorf("expected nil")
 	}
 	p1 := verror2.Append(p, aEN1, aFR0)
@@ -336,22 +336,22 @@ func TestSubordinateErrors(t *testing.T) {
 	if got, want := p1.Error(), r1; got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}
-	if got, want := len(p1.SubErrors()), 2; got != want {
+	if got, want := len(verror2.SubErrors(p1)), 2; got != want {
 		t.Errorf("got %d, want %d", got, want)
 	}
 	p2 := verror2.Append(p, nil, nil, aEN1)
-	if got, want := len(p2.SubErrors()), 1; got != want {
+	if got, want := len(verror2.SubErrors(p2)), 1; got != want {
 		t.Errorf("got %d, want %d", got, want)
 	}
 	p2 = verror2.Append(p, fmt.Errorf("Oh"))
-	if got, want := len(p2.SubErrors()), 1; got != want {
+	if got, want := len(verror2.SubErrors(p2)), 1; got != want {
 		t.Errorf("got %d, want %d", got, want)
 	}
 	r2 := "server aEN0 error A 0 [verror2.test  unknown error Oh]"
 	if got, want := p2.Error(), r2; got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}
-	p2str := p2.DebugString()
+	p2str := verror2.DebugString(p2)
 	if !strings.Contains(p2str, r2) {
 		t.Errorf("debug string missing error message: %q, %q", p2str, r2)
 	}

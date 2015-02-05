@@ -11,6 +11,7 @@ import (
 	"v.io/core/veyron2/vdl/valconv"
 	"v.io/core/veyron2/vdl/vdlroot/src/signature"
 	"v.io/core/veyron2/verror"
+	"v.io/core/veyron2/verror2"
 )
 
 // Describer may be implemented by an underlying object served by the
@@ -293,7 +294,7 @@ func newReflectInfo(obj interface{}) (*reflectInfo, error) {
 	// provided by the user, there's no guarantee it's "correct", but if the same
 	// method is described by multiple interfaces, we check the tags are the same.
 	desc := describe(obj)
-	if verr := attachMethodTags(methodInfos, desc); verror.Is(verr, verror.Aborted) {
+	if verr := attachMethodTags(methodInfos, desc); verror2.Is(verr, verror.Aborted) {
 		return nil, fmt.Errorf("ipc: type %v tag error: %v", rt, verr)
 	}
 	// Finally create the signature.  This combines the desc provided by the user
@@ -329,7 +330,7 @@ func makeMethods(rt reflect.Type) (map[string]methodInfo, map[string]signature.M
 		// Silently skip incompatible methods, except for Aborted errors.
 		var sig signature.Method
 		if verr := typeCheckMethod(method, &sig); verr != nil {
-			if verror.Is(verr, verror.Aborted) {
+			if verror2.Is(verr, verror.Aborted) {
 				return nil, nil, fmt.Errorf("ipc: %s.%s: %v", rt.String(), method.Name, verr)
 			}
 			continue

@@ -12,7 +12,6 @@ import (
 	"v.io/core/veyron2/naming"
 	"v.io/core/veyron2/security"
 	"v.io/core/veyron2/vdl/vdlroot/src/signature"
-	verror "v.io/core/veyron2/verror2"
 )
 
 // Client represents the interface for making RPC calls.  There may be multiple
@@ -118,20 +117,6 @@ type ListenSpec struct {
 	AddressChooser AddressChooser
 }
 
-// ListenError is the error type returned by Listen. It implements Error
-// and verror.E. The signature for Listen uses the built-in error type
-// for better compatibility with surrounding code, any returned non-nil
-// value can be converted to ListenError. ErrorDetails is useful in the case
-// where multiple addresses are included in the ListenSpec and the caller
-// needs to determine which of those encountered errors. In general, it
-// is sufficient to act on the ListenError itself.
-type ListenError interface {
-	// TODO(cnicolaou, m3b): consider moving this kind of 'multi-error' into
-	// verror2.
-	ErrorDetail() map[struct{ Protocol, Address string }]error
-	verror.E
-}
-
 // NetworkInterface represents a network interface.
 type NetworkInterface interface {
 	// Networks returns the set of networks accessible over this interface.
@@ -192,7 +177,7 @@ type Server interface {
 	// Endpoint. If there is need to associate endpoints with specific
 	// listen addresses then Listen should be called separately for each one.
 	//
-	// Any non-nil value of error can be converted to a ListenError. If
+	// Any non-nil value of error can be converted to a verror2.E.  If
 	// error is nil and at least one address was supplied in the ListenSpec
 	// then ListenEndpoints will include at least one Endpoint.
 	Listen(spec ListenSpec) ([]naming.Endpoint, error)

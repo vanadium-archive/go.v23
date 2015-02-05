@@ -143,45 +143,41 @@ func Register(id verror.ID, action ActionCode, englishText string) IDAction {
 	return IDAction{id, action}
 }
 
-// E extends the regular error interface with an error ID,
-// some parameters, a call stack for local debugging and the ability
-// to aggregate mutliple 'subordinate', errors. The Error method returns
-// a string containing the subordinate errors as well as the main one.
+// An E is an error interface, but with an extra method that nother but a
+// Standard implements.  It exists solely to aid in conversion, because the E
+// interface existed before.
 type E interface {
 	error
+	UniqueMethodName()
+}
 
-	// ErrorID returns the ID.
-	ErrorID() verror.ID
+// A Standard is the representation of a verror2 error.
+//
+// This must be kept in sync with the vdl.ErrorType defined in
+// v.io/core/veyron2/vdl.
+//
+// TODO(toddw): Move this definition to a common vdl file, and change it to be a
+// better wire format (e.g. no nested structs).
+type Standard struct {
+	IDAction  IDAction
+	Msg       string        // Error message; empty if no language known.
+	ParamList []interface{} // The variadic parameters given to ExplicitMake().
+	stackPCs  []uintptr     // PCs of callers of *Make() and *Convert().
+	subErrs   []error       // Subordinate errors
+}
 
-	// Action indicates whether a client should retry.
-	Action() ActionCode
+// UniqueMethodName exists so that Standard will be the lone implementer of E.
+func (x Standard) UniqueMethodName() {
+}
 
-	// Params returns the list of parameters given to ExplicitMake().  The
-	// expectation is that the first parameter will be a string that
-	// identify the component (typically the server or binary) where the
-	// error was generated, the second will be a string that identifies the
-	// operation that encountered the error.  The remaining parameters
-	// typically identify the object(s) on which the operation was acting.
-	// A component passsing on an error from another may prefix the first
-	// parameter with its name, a colon and a space.
-	Params() []interface{}
-
-	// HasMessage() returns whether a language-specific error string has
-	// been created.
-	HasMessage() bool
-
-	// Stack returns list of PC values where ExplicitMake/Make/Context/ContextCtx
-	// were invoked on the error.  StackToStr() converts this to a string.
-	// This information is not incorporated into the error string;
-	// it is intended to help debugging by developers.
-	Stack() PCs
-
-	// SubErrors returns all of the subordinate errors in the order that
-	// they were added to E.
-	SubErrors() []E
-
-	// Returns a string containing the error message, stack traces etcs.
-	DebugString() string
+func assertStandard(err error) (Standard, bool) {
+	if e, ok := err.(Standard); ok {
+		return e, true
+	}
+	if e, ok := err.(*Standard); ok && e != nil {
+		return *e, true
+	}
+	return Standard{}, false
 }
 
 // ErrorID returns the ID of the given err, or Unknown if the err has no ID.
@@ -190,8 +186,8 @@ func ErrorID(err error) verror.ID {
 	if err == nil {
 		return ""
 	}
-	if e, ok := err.(E); ok {
-		return e.ErrorID()
+	if e, ok := assertStandard(err); ok {
+		return e.IDAction.ID
 	}
 
 	// The following is to aid conversion from verror to verror2
@@ -208,8 +204,8 @@ func Action(err error) ActionCode {
 	if err == nil {
 		return NoRetry
 	}
-	if e, ok := err.(E); ok {
-		return e.Action()
+	if e, ok := assertStandard(err); ok {
+		return e.IDAction.Action
 	}
 	return NoRetry
 }
@@ -228,11 +224,13 @@ func Equal(a, b error) bool {
 type PCs []uintptr
 
 // Stack returns the list of PC locations where the error was created and transferred
-// within this address space, or an empty list if err does not implement E.
+// within this address space, or an empty list if err is not a Standard.
 func Stack(err error) PCs {
 	if err != nil {
-		if e, ok := err.(E); ok {
-			return e.Stack()
+		if e, ok := assertStandard(err); ok {
+			stackIntPtr := make([]uintptr, len(e.stackPCs))
+			copy(stackIntPtr, e.stackPCs)
+			return stackIntPtr
 		}
 	}
 	return nil
@@ -271,7 +269,7 @@ func isDefaultIDAction(idAction IDAction) bool {
 
 // makeInternal is like ExplicitMake(), but takes a slice of PC values as an argument,
 // rather than constructing one from the caller's PC.
-func makeInternal(idAction IDAction, langID i18n.LangID, componentName string, opName string, stack []uintptr, v ...interface{}) E {
+func makeInternal(idAction IDAction, langID i18n.LangID, componentName string, opName string, stack []uintptr, v ...interface{}) Standard {
 	msg := ""
 	params := append([]interface{}{componentName, opName}, v...)
 	if langID != i18n.NoLangID {
@@ -289,7 +287,7 @@ func makeInternal(idAction IDAction, langID i18n.LangID, componentName string, o
 // parameters of the error.  Other parameters are taken from v[].  The
 // parameters are formatted into the message according to i18n.Cat().Format.
 // The caller's PC is added to the error's stack.
-func ExplicitMake(idAction IDAction, langID i18n.LangID, componentName string, opName string, v ...interface{}) E {
+func ExplicitMake(idAction IDAction, langID i18n.LangID, componentName string, opName string, v ...interface{}) error {
 	stack := make([]uintptr, 1)
 	runtime.Callers(2, stack)
 	return makeInternal(idAction, langID, componentName, opName, stack, v...)
@@ -306,7 +304,7 @@ func ContextWithComponentName(ctx *context.T, componentName string) *context.T {
 
 // Make is like ExplicitMake(), but obtains the language, component name, and operation
 // name from the specified context.T.   ctx may be nil.
-func Make(idAction IDAction, ctx *context.T, v ...interface{}) E {
+func Make(idAction IDAction, ctx *context.T, v ...interface{}) error {
 	langID, componentName, opName := dataFromContext(ctx)
 	stack := make([]uintptr, 1)
 	runtime.Callers(2, stack)
@@ -321,12 +319,8 @@ func isEmptyString(v interface{}) bool {
 
 // convertInternal is like ExplicitConvert(), but takes a slice of PC values as an argument,
 // rather than constructing one from the caller's PC.
-func convertInternal(idAction IDAction, langID i18n.LangID, componentName string, opName string, stack []uintptr, err error) E {
-	if err == nil {
-		return nil
-	}
-
-	// If err is already a verror2.E, we wish to:
+func convertInternal(idAction IDAction, langID i18n.LangID, componentName string, opName string, stack []uintptr, err error) Standard {
+	// If err is already a verror2.Standard, we wish to:
 	//  - retain all set parameters.
 	//  - if not yet set, set parameters 0 and 1 from componentName and
 	//    opName.
@@ -334,13 +328,13 @@ func convertInternal(idAction IDAction, langID i18n.LangID, componentName string
 	//    in our catalogue, use it.  Otheriwse, retain a message (assuming
 	//    additional parameters were not set) even if the language is not
 	//    correct.
-	if e, _ := err.(E); e != nil {
-		oldParams := e.Params()
+	if e, ok := assertStandard(err); ok {
+		oldParams := e.ParamList
 
 		// Create a non-empty format string if we have the language in the catalogue.
 		var formatStr string
 		if langID != i18n.NoLangID {
-			id := e.ErrorID()
+			id := e.IDAction.ID
 			if id == "" {
 				id = Unknown.ID
 			}
@@ -361,7 +355,7 @@ func convertInternal(idAction IDAction, langID i18n.LangID, componentName string
 			if formatStr == "" {
 				return e // Nothing to change.
 			} else { // Parameter list does not change.
-				newParams = e.Params()
+				newParams = e.ParamList
 				msg = i18n.FormatParams(formatStr, newParams...)
 			}
 		} else { // Replace at least one of the first two parameters.
@@ -381,10 +375,9 @@ func convertInternal(idAction IDAction, langID i18n.LangID, componentName string
 				msg = i18n.FormatParams(formatStr, newParams...)
 			}
 		}
-		eStack := e.Stack()
-		newStack := append(make([]uintptr, 0, len(eStack)+len(stack)), eStack...)
+		newStack := append(make([]uintptr, 0, len(e.stackPCs)+len(stack)), e.stackPCs...)
 		newStack = append(newStack, stack...)
-		return Standard{IDAction{e.ErrorID(), e.Action()}, msg, newParams, newStack, nil}
+		return Standard{e.IDAction, msg, newParams, newStack, nil}
 	}
 
 	// The following is to aid conversion from verror to verror2
@@ -396,15 +389,19 @@ func convertInternal(idAction IDAction, langID i18n.LangID, componentName string
 	return makeInternal(idAction, langID, componentName, opName, stack, err.Error())
 }
 
-// ExplicitConvert converts a regular err into an E error, setting its id to id.  If
-// err is already an E, it returns err without changing its type, but
+// ExplicitConvert converts a regular err into a Standard error, setting its id to id.  If
+// err is already a Standard, it returns err without changing its type, but
 // potentially changing the language, component or operation if langID!=i18n.NoLangID,
 // componentName!="" or opName!="" respectively.  The caller's PC is added to the
 // error's stack.
-func ExplicitConvert(idAction IDAction, langID i18n.LangID, componentName string, opName string, err error) E {
-	stack := make([]uintptr, 1)
-	runtime.Callers(2, stack)
-	return convertInternal(idAction, langID, componentName, opName, stack, err)
+func ExplicitConvert(idAction IDAction, langID i18n.LangID, componentName string, opName string, err error) error {
+	if err == nil {
+		return nil
+	} else {
+		stack := make([]uintptr, 1)
+		runtime.Callers(2, stack)
+		return convertInternal(idAction, langID, componentName, opName, stack, err)
+	}
 }
 
 // defaultCtx is the context used when a nil context.T is passed to Make() or Convert().
@@ -425,7 +422,7 @@ func SetDefaultContext(ctx *context.T) {
 
 // Convert is like ExplicitConvert(), but obtains the language, component and operation names
 // from the specified context.T.   ctx may be nil.
-func Convert(idAction IDAction, ctx *context.T, err error) E {
+func Convert(idAction IDAction, ctx *context.T, err error) error {
 	if err == nil {
 		return nil
 	}
@@ -457,34 +454,9 @@ func dataFromContext(ctx *context.T) (langID i18n.LangID, componentName string, 
 	return defaultLangID(langID), componentName, opName
 }
 
-// Standard is a standard implementation of E.
-//
-// This must be kept in sync with the vdl.ErrorType defined in
-// v.io/core/veyron2/vdl.
-//
-// TODO(toddw): Move this definition to a common vdl file, and change it to be a
-// better wire format (e.g. no nested structs).
-type Standard struct {
-	IDAction  IDAction
-	Msg       string        // Error message; empty if no language known.
-	ParamList []interface{} // The variadic parameters given to ExplicitMake().
-	stackPCs  []uintptr     // PCs of callers of *Make() and *Convert().
-	subErrs   []E           // Subordinate errors
-}
-
-// ErrorID returns the error id.
-func (e Standard) ErrorID() verror.ID {
-	return e.IDAction.ID
-}
-
-// Action returns the Action.
-func (e Standard) Action() ActionCode {
-	return e.IDAction.Action
-}
-
 // Error returns the error message; if it has not been formatted for a specific
 // language, a default message containing the error ID and parameters is
-// generated.
+// generated.  This method is required to fulfil the error interface.
 func (e Standard) Error() string {
 	msg := e.Msg
 	if isDefaultIDAction(e.IDAction) && msg == "" {
@@ -503,39 +475,28 @@ func (e Standard) Error() string {
 	return msg
 }
 
-// Params returns the variadic arguments to E.ExplicitMake().
-func (e Standard) Params() []interface{} {
-	return e.ParamList
-}
-
-// HasMessage returns whether the error message has been formatted for a
-// specific language.
-func (e Standard) HasMessage() bool {
-	return e.Msg != ""
-}
-
-// Stack returns the set of PCs of callers of *Make() and *Convert().
-func (e Standard) Stack() PCs {
-	stackIntPtr := make([]uintptr, len(e.stackPCs))
-	copy(stackIntPtr, e.stackPCs)
-	return stackIntPtr
-}
-
-// SubErrors returns the subordinate errors accumulated into E, or nil
-// if there are no such errors.
-func (e Standard) SubErrors() []E {
-	if len(e.subErrs) == 0 {
-		return nil
+// Params returns the variadic arguments to ExplicitMake().
+func Params(err error) []interface{} {
+	if e, ok := assertStandard(err); ok {
+		return e.ParamList
 	}
-	r := make([]E, len(e.subErrs))
-	copy(r, e.subErrs)
+	return nil
+}
+
+// SubErrors returns the subordinate errors accumulated into err, or nil
+// if there are no such errors.
+func SubErrors(err error) (r []error) {
+	if e, ok := assertStandard(err); ok && len(e.subErrs) != 0 {
+		r = make([]error, len(e.subErrs))
+		copy(r, e.subErrs)
+	}
 	return r
 }
 
 // Append returns a copy of err with the supplied errors appended
 // as subordinate errors.
-func Append(err E, errors ...error) E {
-	e, ok := err.(Standard)
+func Append(err error, errors ...error) error {
+	e, ok := assertStandard(err)
 	if !ok {
 		return err
 	}
@@ -544,13 +505,13 @@ func Append(err E, errors ...error) E {
 		Msg:       e.Msg,
 		ParamList: e.ParamList,
 		stackPCs:  e.stackPCs,
-		subErrs:   make([]E, len(e.subErrs), len(e.subErrs)+len(errors)),
+		subErrs:   make([]error, len(e.subErrs), len(e.subErrs)+len(errors)),
 	}
 	copy(n.subErrs, e.subErrs)
 	for _, err := range errors {
 		if err == nil {
 			// nothing
-		} else if s, ok := err.(E); ok {
+		} else if s, ok := assertStandard(err); ok {
 			n.subErrs = append(n.subErrs, s)
 		} else {
 			langID, componentName, opName := dataFromContext(nil)
@@ -563,11 +524,14 @@ func Append(err E, errors ...error) E {
 	return n
 }
 
-func (e Standard) DebugString() string {
-	str := e.Error()
-	str += "\n" + e.Stack().String()
-	for _, s := range e.SubErrors() {
-		str += s.Error() + "\n" + s.Stack().String()
+// DebugString returns a more full string representation of an error, perhaps
+// more thorough than one might present to an end user, but useful for
+// debugging by a developer.
+func DebugString(err error) string {
+	str := err.Error()
+	str += "\n" + Stack(err).String()
+	for _, s := range SubErrors(err) {
+		str += s.Error() + "\n" + Stack(s).String()
 	}
 	return str
 }

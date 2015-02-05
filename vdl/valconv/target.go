@@ -394,11 +394,11 @@ func vdlValueFromError(err error) (*vdl.Value, error) {
 	// }
 	verr := vdl.NonNilZeroValue(vdl.ErrorType)
 	vv := verr.Elem()
-	vv.Field(0).Field(0).AssignString(string(e.ErrorID()))
-	vv.Field(0).Field(1).AssignUint(uint64(e.Action()))
+	vv.Field(0).Field(0).AssignString(string(verror2.ErrorID(e)))
+	vv.Field(0).Field(1).AssignUint(uint64(verror2.Action(e)))
 	vv.Field(1).AssignString(e.Error())
-	vv.Field(2).AssignLen(len(e.Params()))
-	for ix, p := range e.Params() {
+	vv.Field(2).AssignLen(len(verror2.Params(e)))
+	for ix, p := range verror2.Params(e) {
 		var pVDL *vdl.Value
 		if err := Convert(&pVDL, p); err != nil {
 			return nil, err
