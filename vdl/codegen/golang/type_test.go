@@ -13,8 +13,8 @@ func TestType(t *testing.T) {
 		T    *vdl.Type
 		Want string
 	}{
-		{vdl.AnyType, `__vdl.AnyRep`},
-		{vdl.TypeObjectType, `*__vdl.Type`},
+		{vdl.AnyType, `vdl.AnyRep`},
+		{vdl.TypeObjectType, `*vdl.Type`},
 		{vdl.BoolType, `bool`},
 		{vdl.StringType, `string`},
 		{vdl.ListType(vdl.ByteType), `[]byte`},
@@ -78,7 +78,7 @@ func (x *TestEnum) Set(label string) error {
 		return nil
 	}
 	*x = -1
-	return __fmt.Errorf("unknown label %q in TestEnum", label)
+	return fmt.Errorf("unknown label %q in TestEnum", label)
 }
 
 // String returns the string label of x.

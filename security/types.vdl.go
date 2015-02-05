@@ -4,10 +4,11 @@
 package security
 
 import (
-	"v.io/core/veyron2/uniqueid"
+	// VDL system imports
+	"v.io/core/veyron2/vdl"
 
-	// The non-user imports are prefixed with "__" to prevent collisions.
-	__vdl "v.io/core/veyron2/vdl"
+	// VDL user imports
+	"v.io/core/veyron2/uniqueid"
 )
 
 // BlessingPattern is a pattern that is matched by specific blessings.
@@ -89,7 +90,7 @@ func (ThirdPartyRequirements) __VDLReflect(struct {
 type DischargeImpetus struct {
 	Server    []BlessingPattern // The client intends to use the discharge to communicate with a server that has a blessing matching one of the patterns in this set.
 	Method    string            // Name of the method being invoked by the client.
-	Arguments []__vdl.AnyRep    // Arguments to the method invocation.
+	Arguments []vdl.AnyRep      // Arguments to the method invocation.
 }
 
 func (DischargeImpetus) __VDLReflect(struct {
@@ -124,7 +125,7 @@ func (Certificate) __VDLReflect(struct {
 // the validator description in the language that the function is defined in.
 type CaveatDescriptor struct {
 	Id        uniqueid.Id // The identifier of the caveat validation function.
-	ParamType *__vdl.Type // The type of the parameter expected by the validation function.
+	ParamType *vdl.Type   // The type of the parameter expected by the validation function.
 }
 
 func (CaveatDescriptor) __VDLReflect(struct {
@@ -180,17 +181,17 @@ func (WireBlessings) __VDLReflect(struct {
 }
 
 func init() {
-	__vdl.Register(BlessingPattern(""))
-	__vdl.Register(Hash(""))
-	__vdl.Register(Signature{})
-	__vdl.Register(ThirdPartyRequirements{})
-	__vdl.Register(DischargeImpetus{})
-	__vdl.Register(Certificate{})
-	__vdl.Register(CaveatDescriptor{
-		ParamType: __vdl.AnyType,
+	vdl.Register(BlessingPattern(""))
+	vdl.Register(Hash(""))
+	vdl.Register(Signature{})
+	vdl.Register(ThirdPartyRequirements{})
+	vdl.Register(DischargeImpetus{})
+	vdl.Register(Certificate{})
+	vdl.Register(CaveatDescriptor{
+		ParamType: vdl.AnyType,
 	})
-	__vdl.Register(Caveat{})
-	__vdl.Register(WireBlessings{})
+	vdl.Register(Caveat{})
+	vdl.Register(WireBlessings{})
 }
 
 // NoExtension is an optional terminator for a blessing pattern indicating that the pattern

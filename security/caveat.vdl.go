@@ -4,13 +4,14 @@
 package security
 
 import (
-	"v.io/core/veyron2/uniqueid"
+	// VDL system imports
+	"v.io/core/veyron2/context"
+	"v.io/core/veyron2/i18n"
+	"v.io/core/veyron2/vdl"
+	"v.io/core/veyron2/verror2"
 
-	// The non-user imports are prefixed with "__" to prevent collisions.
-	__context "v.io/core/veyron2/context"
-	__i18n "v.io/core/veyron2/i18n"
-	__vdl "v.io/core/veyron2/vdl"
-	__verror2 "v.io/core/veyron2/verror2"
+	// VDL user imports
+	"v.io/core/veyron2/uniqueid"
 )
 
 // TODO(ashankar): Remove once ValidatorVOM goes away.
@@ -88,11 +89,11 @@ func (publicKeyDischarge) __VDLReflect(struct {
 }
 
 func init() {
-	__vdl.Register(unixTimeExpiryCaveat(0))
-	__vdl.Register(methodCaveat(nil))
-	__vdl.Register(nonce{})
-	__vdl.Register(publicKeyThirdPartyCaveat{})
-	__vdl.Register(publicKeyDischarge{})
+	vdl.Register(unixTimeExpiryCaveat(0))
+	vdl.Register(methodCaveat(nil))
+	vdl.Register(nonce{})
+	vdl.Register(publicKeyThirdPartyCaveat{})
+	vdl.Register(publicKeyDischarge{})
 }
 
 // UnixTimeExpiryCaveat represents a caveat that validates iff the current
@@ -119,7 +120,7 @@ var UnixTimeExpiryCaveatX = CaveatDescriptor{
 		0,
 		4,
 	},
-	ParamType: __vdl.TypeOf(int64(0)),
+	ParamType: vdl.TypeOf(int64(0)),
 }
 
 // MethodCaveat represents a caveat that validates iff the method being
@@ -147,7 +148,7 @@ var MethodCaveatX = CaveatDescriptor{
 		0,
 		3,
 	},
-	ParamType: __vdl.TypeOf([]string(nil)),
+	ParamType: vdl.TypeOf([]string(nil)),
 }
 
 // TODO(ashankar): Rename to PublicKeyThirdPartyCaveat (and
@@ -172,42 +173,42 @@ var PublicKeyThirdPartyCaveatX = CaveatDescriptor{
 		128,
 		0,
 	},
-	ParamType: __vdl.TypeOf(publicKeyThirdPartyCaveat{}),
+	ParamType: vdl.TypeOf(publicKeyThirdPartyCaveat{}),
 }
 
 var (
-	ErrCaveatNotRegistered     = __verror2.Register("v.io/core/veyron2/security.ErrCaveatNotRegistered", __verror2.NoRetry, "{1:}{2:} no validation function registered for caveat id {3}")
-	ErrCaveatParamTypeMismatch = __verror2.Register("v.io/core/veyron2/security.ErrCaveatParamTypeMismatch", __verror2.NoRetry, "{1:}{2:} bad param type: caveat {3} got {4}, want {5}")
+	ErrCaveatNotRegistered     = verror2.Register("v.io/core/veyron2/security.ErrCaveatNotRegistered", verror2.NoRetry, "{1:}{2:} no validation function registered for caveat id {3}")
+	ErrCaveatParamTypeMismatch = verror2.Register("v.io/core/veyron2/security.ErrCaveatParamTypeMismatch", verror2.NoRetry, "{1:}{2:} bad param type: caveat {3} got {4}, want {5}")
 	// TODO(ashankar,toddw,bjornick): The type of "err" here and below
 	// should be error once https://github.com/veyron/release-issues/issues/922
 	// is resolved.
-	ErrCaveatParamCoding = __verror2.Register("v.io/core/veyron2/security.ErrCaveatParamCoding", __verror2.NoRetry, "{1:}{2:} unable to encode/decode caveat param(type={4}) for caveat {3}: {5}")
-	ErrCaveatValidation  = __verror2.Register("v.io/core/veyron2/security.ErrCaveatValidation", __verror2.NoRetry, "{1:}{2:} caveat validation failed: {3}")
+	ErrCaveatParamCoding = verror2.Register("v.io/core/veyron2/security.ErrCaveatParamCoding", verror2.NoRetry, "{1:}{2:} unable to encode/decode caveat param(type={4}) for caveat {3}: {5}")
+	ErrCaveatValidation  = verror2.Register("v.io/core/veyron2/security.ErrCaveatValidation", verror2.NoRetry, "{1:}{2:} caveat validation failed: {3}")
 )
 
 func init() {
-	__i18n.Cat().SetWithBase(__i18n.LangID("en"), __i18n.MsgID(ErrCaveatNotRegistered.ID), "{1:}{2:} no validation function registered for caveat id {3}")
-	__i18n.Cat().SetWithBase(__i18n.LangID("en"), __i18n.MsgID(ErrCaveatParamTypeMismatch.ID), "{1:}{2:} bad param type: caveat {3} got {4}, want {5}")
-	__i18n.Cat().SetWithBase(__i18n.LangID("en"), __i18n.MsgID(ErrCaveatParamCoding.ID), "{1:}{2:} unable to encode/decode caveat param(type={4}) for caveat {3}: {5}")
-	__i18n.Cat().SetWithBase(__i18n.LangID("en"), __i18n.MsgID(ErrCaveatValidation.ID), "{1:}{2:} caveat validation failed: {3}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrCaveatNotRegistered.ID), "{1:}{2:} no validation function registered for caveat id {3}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrCaveatParamTypeMismatch.ID), "{1:}{2:} bad param type: caveat {3} got {4}, want {5}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrCaveatParamCoding.ID), "{1:}{2:} unable to encode/decode caveat param(type={4}) for caveat {3}: {5}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrCaveatValidation.ID), "{1:}{2:} caveat validation failed: {3}")
 }
 
 // MakeErrCaveatNotRegistered returns an error with the ErrCaveatNotRegistered ID.
-func MakeErrCaveatNotRegistered(ctx *__context.T, id uniqueid.Id) error {
-	return __verror2.Make(ErrCaveatNotRegistered, ctx, id)
+func MakeErrCaveatNotRegistered(ctx *context.T, id uniqueid.Id) error {
+	return verror2.Make(ErrCaveatNotRegistered, ctx, id)
 }
 
 // MakeErrCaveatParamTypeMismatch returns an error with the ErrCaveatParamTypeMismatch ID.
-func MakeErrCaveatParamTypeMismatch(ctx *__context.T, id uniqueid.Id, got *__vdl.Type, want string) error {
-	return __verror2.Make(ErrCaveatParamTypeMismatch, ctx, id, got, want)
+func MakeErrCaveatParamTypeMismatch(ctx *context.T, id uniqueid.Id, got *vdl.Type, want string) error {
+	return verror2.Make(ErrCaveatParamTypeMismatch, ctx, id, got, want)
 }
 
 // MakeErrCaveatParamCoding returns an error with the ErrCaveatParamCoding ID.
-func MakeErrCaveatParamCoding(ctx *__context.T, id uniqueid.Id, typ *__vdl.Type, err __vdl.AnyRep) error {
-	return __verror2.Make(ErrCaveatParamCoding, ctx, id, typ, err)
+func MakeErrCaveatParamCoding(ctx *context.T, id uniqueid.Id, typ *vdl.Type, err vdl.AnyRep) error {
+	return verror2.Make(ErrCaveatParamCoding, ctx, id, typ, err)
 }
 
 // MakeErrCaveatValidation returns an error with the ErrCaveatValidation ID.
-func MakeErrCaveatValidation(ctx *__context.T, err __vdl.AnyRep) error {
-	return __verror2.Make(ErrCaveatValidation, ctx, err)
+func MakeErrCaveatValidation(ctx *context.T, err vdl.AnyRep) error {
+	return verror2.Make(ErrCaveatValidation, ctx, err)
 }

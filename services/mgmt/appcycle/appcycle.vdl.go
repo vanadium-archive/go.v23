@@ -5,12 +5,12 @@
 package appcycle
 
 import (
-	// The non-user imports are prefixed with "__" to prevent collisions.
-	__io "io"
-	__veyron2 "v.io/core/veyron2"
-	__context "v.io/core/veyron2/context"
-	__ipc "v.io/core/veyron2/ipc"
-	__vdl "v.io/core/veyron2/vdl"
+	// VDL system imports
+	"io"
+	"v.io/core/veyron2"
+	"v.io/core/veyron2/context"
+	"v.io/core/veyron2/ipc"
+	"v.io/core/veyron2/vdl"
 )
 
 // Task is streamed by Stop to provide the client with a sense of the progress
@@ -34,7 +34,7 @@ func (Task) __VDLReflect(struct {
 }
 
 func init() {
-	__vdl.Register(Task{})
+	vdl.Register(Task{})
 }
 
 // AppCycleClientMethods is the client interface
@@ -45,24 +45,24 @@ type AppCycleClientMethods interface {
 	// Stop initiates shutdown of the server.  It streams back periodic
 	// updates to give the client an idea of how the shutdown is
 	// progressing.
-	Stop(*__context.T, ...__ipc.CallOpt) (AppCycleStopCall, error)
+	Stop(*context.T, ...ipc.CallOpt) (AppCycleStopCall, error)
 	// ForceStop tells the server to shut down right away.  It can be issued
 	// while a Stop is outstanding if for example the client does not want
 	// to wait any longer.
-	ForceStop(*__context.T, ...__ipc.CallOpt) error
+	ForceStop(*context.T, ...ipc.CallOpt) error
 }
 
 // AppCycleClientStub adds universal methods to AppCycleClientMethods.
 type AppCycleClientStub interface {
 	AppCycleClientMethods
-	__ipc.UniversalServiceMethods
+	ipc.UniversalServiceMethods
 }
 
 // AppCycleClient returns a client stub for AppCycle.
-func AppCycleClient(name string, opts ...__ipc.BindOpt) AppCycleClientStub {
-	var client __ipc.Client
+func AppCycleClient(name string, opts ...ipc.BindOpt) AppCycleClientStub {
+	var client ipc.Client
 	for _, opt := range opts {
-		if clientOpt, ok := opt.(__ipc.Client); ok {
+		if clientOpt, ok := opt.(ipc.Client); ok {
 			client = clientOpt
 		}
 	}
@@ -71,18 +71,18 @@ func AppCycleClient(name string, opts ...__ipc.BindOpt) AppCycleClientStub {
 
 type implAppCycleClientStub struct {
 	name   string
-	client __ipc.Client
+	client ipc.Client
 }
 
-func (c implAppCycleClientStub) c(ctx *__context.T) __ipc.Client {
+func (c implAppCycleClientStub) c(ctx *context.T) ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return __veyron2.GetClient(ctx)
+	return veyron2.GetClient(ctx)
 }
 
-func (c implAppCycleClientStub) Stop(ctx *__context.T, opts ...__ipc.CallOpt) (ocall AppCycleStopCall, err error) {
-	var call __ipc.Call
+func (c implAppCycleClientStub) Stop(ctx *context.T, opts ...ipc.CallOpt) (ocall AppCycleStopCall, err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Stop", nil, opts...); err != nil {
 		return
 	}
@@ -90,8 +90,8 @@ func (c implAppCycleClientStub) Stop(ctx *__context.T, opts ...__ipc.CallOpt) (o
 	return
 }
 
-func (c implAppCycleClientStub) ForceStop(ctx *__context.T, opts ...__ipc.CallOpt) (err error) {
-	var call __ipc.Call
+func (c implAppCycleClientStub) ForceStop(ctx *context.T, opts ...ipc.CallOpt) (err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "ForceStop", nil, opts...); err != nil {
 		return
 	}
@@ -134,7 +134,7 @@ type AppCycleStopCall interface {
 }
 
 type implAppCycleStopCall struct {
-	__ipc.Call
+	ipc.Call
 	valRecv Task
 	errRecv error
 }
@@ -160,7 +160,7 @@ func (c implAppCycleStopCallRecv) Value() Task {
 	return c.c.valRecv
 }
 func (c implAppCycleStopCallRecv) Err() error {
-	if c.c.errRecv == __io.EOF {
+	if c.c.errRecv == io.EOF {
 		return nil
 	}
 	return c.c.errRecv
@@ -184,7 +184,7 @@ type AppCycleServerMethods interface {
 	// ForceStop tells the server to shut down right away.  It can be issued
 	// while a Stop is outstanding if for example the client does not want
 	// to wait any longer.
-	ForceStop(__ipc.ServerContext) error
+	ForceStop(ipc.ServerContext) error
 }
 
 // AppCycleServerStubMethods is the server interface containing
@@ -199,14 +199,14 @@ type AppCycleServerStubMethods interface {
 	// ForceStop tells the server to shut down right away.  It can be issued
 	// while a Stop is outstanding if for example the client does not want
 	// to wait any longer.
-	ForceStop(__ipc.ServerContext) error
+	ForceStop(ipc.ServerContext) error
 }
 
 // AppCycleServerStub adds universal methods to AppCycleServerStubMethods.
 type AppCycleServerStub interface {
 	AppCycleServerStubMethods
 	// Describe the AppCycle interfaces.
-	Describe__() []__ipc.InterfaceDesc
+	Describe__() []ipc.InterfaceDesc
 }
 
 // AppCycleServer returns a server stub for AppCycle.
@@ -218,9 +218,9 @@ func AppCycleServer(impl AppCycleServerMethods) AppCycleServerStub {
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
-	if gs := __ipc.NewGlobState(stub); gs != nil {
+	if gs := ipc.NewGlobState(stub); gs != nil {
 		stub.gs = gs
-	} else if gs := __ipc.NewGlobState(impl); gs != nil {
+	} else if gs := ipc.NewGlobState(impl); gs != nil {
 		stub.gs = gs
 	}
 	return stub
@@ -228,45 +228,45 @@ func AppCycleServer(impl AppCycleServerMethods) AppCycleServerStub {
 
 type implAppCycleServerStub struct {
 	impl AppCycleServerMethods
-	gs   *__ipc.GlobState
+	gs   *ipc.GlobState
 }
 
 func (s implAppCycleServerStub) Stop(ctx *AppCycleStopContextStub) error {
 	return s.impl.Stop(ctx)
 }
 
-func (s implAppCycleServerStub) ForceStop(ctx __ipc.ServerContext) error {
+func (s implAppCycleServerStub) ForceStop(ctx ipc.ServerContext) error {
 	return s.impl.ForceStop(ctx)
 }
 
-func (s implAppCycleServerStub) Globber() *__ipc.GlobState {
+func (s implAppCycleServerStub) Globber() *ipc.GlobState {
 	return s.gs
 }
 
-func (s implAppCycleServerStub) Describe__() []__ipc.InterfaceDesc {
-	return []__ipc.InterfaceDesc{AppCycleDesc}
+func (s implAppCycleServerStub) Describe__() []ipc.InterfaceDesc {
+	return []ipc.InterfaceDesc{AppCycleDesc}
 }
 
 // AppCycleDesc describes the AppCycle interface.
-var AppCycleDesc __ipc.InterfaceDesc = descAppCycle
+var AppCycleDesc ipc.InterfaceDesc = descAppCycle
 
 // descAppCycle hides the desc to keep godoc clean.
-var descAppCycle = __ipc.InterfaceDesc{
+var descAppCycle = ipc.InterfaceDesc{
 	Name:    "AppCycle",
 	PkgPath: "v.io/core/veyron2/services/mgmt/appcycle",
 	Doc:     "// AppCycle interfaces with the process running a veyron runtime.",
-	Methods: []__ipc.MethodDesc{
+	Methods: []ipc.MethodDesc{
 		{
 			Name: "Stop",
 			Doc:  "// Stop initiates shutdown of the server.  It streams back periodic\n// updates to give the client an idea of how the shutdown is\n// progressing.",
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // error
 			},
 		},
 		{
 			Name: "ForceStop",
 			Doc:  "// ForceStop tells the server to shut down right away.  It can be issued\n// while a Stop is outstanding if for example the client does not want\n// to wait any longer.",
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // error
 			},
 		},
@@ -286,18 +286,18 @@ type AppCycleStopServerStream interface {
 
 // AppCycleStopContext represents the context passed to AppCycle.Stop.
 type AppCycleStopContext interface {
-	__ipc.ServerContext
+	ipc.ServerContext
 	AppCycleStopServerStream
 }
 
 // AppCycleStopContextStub is a wrapper that converts ipc.ServerCall into
 // a typesafe stub that implements AppCycleStopContext.
 type AppCycleStopContextStub struct {
-	__ipc.ServerCall
+	ipc.ServerCall
 }
 
 // Init initializes AppCycleStopContextStub from ipc.ServerCall.
-func (s *AppCycleStopContextStub) Init(call __ipc.ServerCall) {
+func (s *AppCycleStopContextStub) Init(call ipc.ServerCall) {
 	s.ServerCall = call
 }
 

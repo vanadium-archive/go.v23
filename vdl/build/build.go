@@ -773,7 +773,7 @@ func (b byBaseName) Swap(i, j int)      { b[i], b[j] = b[j], b[i] }
 // into env.
 func BuildPackage(pkg *Package, env *compile.Env) *compile.Package {
 	pfiles := ParsePackage(pkg, parse.Opts{}, env.Errors)
-	return compile.Compile(pkg.Path, pkg.GenPath, pfiles, env)
+	return compile.Compile(pkg.Path, pkg.GenPath, pfiles, pkg.Config, env)
 }
 
 // BuildConfig parses and compiles the given config src and returns it.  Errors

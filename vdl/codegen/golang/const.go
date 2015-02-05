@@ -86,9 +86,9 @@ func untypedConst(data goData, v *vdl.Value) string {
 		// user, and are simple to return statically.
 		switch v.TypeObject() {
 		case vdl.AnyType:
-			return "__vdl.AnyType"
+			return data.Pkg("v.io/core/veyron2/vdl") + "AnyType"
 		case vdl.TypeObjectType:
-			return "__vdl.TypeObjectType"
+			return data.Pkg("v.io/core/veyron2/vdl") + "TypeObjectType"
 		}
 		// The strategy is either brilliant or a huge hack.  The "proper" way to do
 		// this would be to generate the Go code that builds a *vdl.Type directly
@@ -101,7 +101,7 @@ func untypedConst(data goData, v *vdl.Value) string {
 		// *vdl.Type in the generated code via vdl.TypeOf.  This results in less
 		// generator and generated code.
 		zero := vdl.ZeroValue(v.TypeObject())
-		return "__vdl.TypeOf(" + typedConst(data, zero) + ")"
+		return data.Pkg("v.io/core/veyron2/vdl") + "TypeOf(" + typedConst(data, zero) + ")"
 	case vdl.Bool:
 		return strconv.FormatBool(v.Bool())
 	case vdl.Byte:

@@ -4,8 +4,8 @@
 package naming
 
 import (
-	// The non-user imports are prefixed with "__" to prevent collisions.
-	__vdl "v.io/core/veyron2/vdl"
+	// VDL system imports
+	"v.io/core/veyron2/vdl"
 )
 
 // MountFlag is a bit mask of options to the mount call.
@@ -52,9 +52,9 @@ func (VDLMountEntry) __VDLReflect(struct {
 }
 
 func init() {
-	__vdl.Register(MountFlag(0))
-	__vdl.Register(VDLMountedServer{})
-	__vdl.Register(VDLMountEntry{})
+	vdl.Register(MountFlag(0))
+	vdl.Register(VDLMountedServer{})
+	vdl.Register(VDLMountEntry{})
 }
 
 const Replace = MountFlag(1) // Replace means the mount should replace what is currently at the mount point

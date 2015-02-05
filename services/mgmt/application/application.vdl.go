@@ -5,8 +5,8 @@
 package application
 
 import (
-	// The non-user imports are prefixed with "__" to prevent collisions.
-	__vdl "v.io/core/veyron2/vdl"
+	// VDL system imports
+	"v.io/core/veyron2/vdl"
 )
 
 // Envelope is a collection of metadata that describes an application.
@@ -45,7 +45,7 @@ func (Envelope) __VDLReflect(struct {
 }
 
 func init() {
-	__vdl.Register(Envelope{})
+	vdl.Register(Envelope{})
 }
 
 // Device manager application envelopes must present this title.

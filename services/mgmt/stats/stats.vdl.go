@@ -6,15 +6,15 @@
 package stats
 
 import (
+	// VDL system imports
+	"v.io/core/veyron2"
+	"v.io/core/veyron2/context"
+	"v.io/core/veyron2/ipc"
+	"v.io/core/veyron2/vdl"
+
+	// VDL user imports
 	"v.io/core/veyron2/services/security/access"
-
 	"v.io/core/veyron2/services/watch"
-
-	// The non-user imports are prefixed with "__" to prevent collisions.
-	__veyron2 "v.io/core/veyron2"
-	__context "v.io/core/veyron2/context"
-	__ipc "v.io/core/veyron2/ipc"
-	__vdl "v.io/core/veyron2/vdl"
 )
 
 // StatsClientMethods is the client interface
@@ -35,20 +35,20 @@ type StatsClientMethods interface {
 	// of the value is implementation specific.
 	// Some objects may not have a value, in which case, Value() returns
 	// a NoValue error.
-	Value(*__context.T, ...__ipc.CallOpt) (__vdl.AnyRep, error)
+	Value(*context.T, ...ipc.CallOpt) (vdl.AnyRep, error)
 }
 
 // StatsClientStub adds universal methods to StatsClientMethods.
 type StatsClientStub interface {
 	StatsClientMethods
-	__ipc.UniversalServiceMethods
+	ipc.UniversalServiceMethods
 }
 
 // StatsClient returns a client stub for Stats.
-func StatsClient(name string, opts ...__ipc.BindOpt) StatsClientStub {
-	var client __ipc.Client
+func StatsClient(name string, opts ...ipc.BindOpt) StatsClientStub {
+	var client ipc.Client
 	for _, opt := range opts {
-		if clientOpt, ok := opt.(__ipc.Client); ok {
+		if clientOpt, ok := opt.(ipc.Client); ok {
 			client = clientOpt
 		}
 	}
@@ -57,20 +57,20 @@ func StatsClient(name string, opts ...__ipc.BindOpt) StatsClientStub {
 
 type implStatsClientStub struct {
 	name   string
-	client __ipc.Client
+	client ipc.Client
 
 	watch.GlobWatcherClientStub
 }
 
-func (c implStatsClientStub) c(ctx *__context.T) __ipc.Client {
+func (c implStatsClientStub) c(ctx *context.T) ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return __veyron2.GetClient(ctx)
+	return veyron2.GetClient(ctx)
 }
 
-func (c implStatsClientStub) Value(ctx *__context.T, opts ...__ipc.CallOpt) (o0 __vdl.AnyRep, err error) {
-	var call __ipc.Call
+func (c implStatsClientStub) Value(ctx *context.T, opts ...ipc.CallOpt) (o0 vdl.AnyRep, err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Value", nil, opts...); err != nil {
 		return
 	}
@@ -98,7 +98,7 @@ type StatsServerMethods interface {
 	// of the value is implementation specific.
 	// Some objects may not have a value, in which case, Value() returns
 	// a NoValue error.
-	Value(__ipc.ServerContext) (__vdl.AnyRep, error)
+	Value(ipc.ServerContext) (vdl.AnyRep, error)
 }
 
 // StatsServerStubMethods is the server interface containing
@@ -113,14 +113,14 @@ type StatsServerStubMethods interface {
 	// of the value is implementation specific.
 	// Some objects may not have a value, in which case, Value() returns
 	// a NoValue error.
-	Value(__ipc.ServerContext) (__vdl.AnyRep, error)
+	Value(ipc.ServerContext) (vdl.AnyRep, error)
 }
 
 // StatsServerStub adds universal methods to StatsServerStubMethods.
 type StatsServerStub interface {
 	StatsServerStubMethods
 	// Describe the Stats interfaces.
-	Describe__() []__ipc.InterfaceDesc
+	Describe__() []ipc.InterfaceDesc
 }
 
 // StatsServer returns a server stub for Stats.
@@ -133,9 +133,9 @@ func StatsServer(impl StatsServerMethods) StatsServerStub {
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
-	if gs := __ipc.NewGlobState(stub); gs != nil {
+	if gs := ipc.NewGlobState(stub); gs != nil {
 		stub.gs = gs
-	} else if gs := __ipc.NewGlobState(impl); gs != nil {
+	} else if gs := ipc.NewGlobState(impl); gs != nil {
 		stub.gs = gs
 	}
 	return stub
@@ -144,41 +144,41 @@ func StatsServer(impl StatsServerMethods) StatsServerStub {
 type implStatsServerStub struct {
 	impl StatsServerMethods
 	watch.GlobWatcherServerStub
-	gs *__ipc.GlobState
+	gs *ipc.GlobState
 }
 
-func (s implStatsServerStub) Value(ctx __ipc.ServerContext) (__vdl.AnyRep, error) {
+func (s implStatsServerStub) Value(ctx ipc.ServerContext) (vdl.AnyRep, error) {
 	return s.impl.Value(ctx)
 }
 
-func (s implStatsServerStub) Globber() *__ipc.GlobState {
+func (s implStatsServerStub) Globber() *ipc.GlobState {
 	return s.gs
 }
 
-func (s implStatsServerStub) Describe__() []__ipc.InterfaceDesc {
-	return []__ipc.InterfaceDesc{StatsDesc, watch.GlobWatcherDesc}
+func (s implStatsServerStub) Describe__() []ipc.InterfaceDesc {
+	return []ipc.InterfaceDesc{StatsDesc, watch.GlobWatcherDesc}
 }
 
 // StatsDesc describes the Stats interface.
-var StatsDesc __ipc.InterfaceDesc = descStats
+var StatsDesc ipc.InterfaceDesc = descStats
 
 // descStats hides the desc to keep godoc clean.
-var descStats = __ipc.InterfaceDesc{
+var descStats = ipc.InterfaceDesc{
 	Name:    "Stats",
 	PkgPath: "v.io/core/veyron2/services/mgmt/stats",
 	Doc:     "// The Stats interface is used to access stats for troubleshooting and\n// monitoring purposes. The stats objects are discoverable via the Globbable\n// interface and watchable via the GlobWatcher interface.\n//\n// The types of the object values are implementation specific, but should be\n// primarily numeric in nature, e.g. counters, memory usage, latency metrics,\n// etc.",
-	Embeds: []__ipc.EmbedDesc{
+	Embeds: []ipc.EmbedDesc{
 		{"GlobWatcher", "v.io/core/veyron2/services/watch", "// GlobWatcher allows a client to receive updates for changes to objects\n// that match a pattern.  See the package comments for details."},
 	},
-	Methods: []__ipc.MethodDesc{
+	Methods: []ipc.MethodDesc{
 		{
 			Name: "Value",
 			Doc:  "// Value returns the current value of an object, or an error. The type\n// of the value is implementation specific.\n// Some objects may not have a value, in which case, Value() returns\n// a NoValue error.",
-			OutArgs: []__ipc.ArgDesc{
-				{"", ``}, // __vdl.AnyRep
+			OutArgs: []ipc.ArgDesc{
+				{"", ``}, // vdl.AnyRep
 				{"", ``}, // error
 			},
-			Tags: []__vdl.AnyRep{access.Tag("Debug")},
+			Tags: []vdl.AnyRep{access.Tag("Debug")},
 		},
 	},
 }

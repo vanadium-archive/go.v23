@@ -4,9 +4,9 @@
 package vom
 
 import (
-	// The non-user imports are prefixed with "__" to prevent collisions.
-	__fmt "fmt"
-	__vdl "v.io/core/veyron2/vdl"
+	// VDL system imports
+	"fmt"
+	"v.io/core/veyron2/vdl"
 )
 
 type (
@@ -167,7 +167,7 @@ func (x *DumpKind) Set(label string) error {
 		return nil
 	}
 	*x = -1
-	return __fmt.Errorf("unknown label %q in vom.DumpKind", label)
+	return fmt.Errorf("unknown label %q in vom.DumpKind", label)
 }
 
 // String returns the string label of x.
@@ -210,9 +210,9 @@ func (DumpKind) __VDLReflect(struct {
 }
 
 func init() {
-	__vdl.Register(Primitive(PrimitivePBool{false}))
-	__vdl.Register(DumpAtom{
+	vdl.Register(Primitive(PrimitivePBool{false}))
+	vdl.Register(DumpAtom{
 		Data: PrimitivePBool{false},
 	})
-	__vdl.Register(DumpKindMagic)
+	vdl.Register(DumpKindMagic)
 }

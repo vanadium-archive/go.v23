@@ -5,32 +5,48 @@ import (
 	"bytes"
 	"fmt"
 	"go/format"
-	"sort"
+	"path"
 	"strings"
 	"text/template"
 
 	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/vdl/codegen"
 	"v.io/core/veyron2/vdl/compile"
 	"v.io/core/veyron2/vdl/parse"
 	"v.io/core/veyron2/vdl/vdlroot/src/vdltool"
 )
 
 type goData struct {
-	File          *compile.File
-	Env           *compile.Env
-	UserImports   codegen.Imports
-	SystemImports []string
+	File    *compile.File
+	Env     *compile.Env
+	Imports *goImports
+}
+
+// testingMode is only set to true in tests, to make testing simpler.
+var testingMode = false
+
+func (data goData) Pkg(pkgPath string) string {
+	if testingMode {
+		return path.Base(pkgPath) + "."
+	}
+	// Special-case to avoid adding package qualifiers if we're generating code
+	// for that package.
+	if data.File.Package.GenPath == pkgPath {
+		return ""
+	}
+	if local := data.Imports.LookupLocal(pkgPath); local != "" {
+		return local + "."
+	}
+	data.Env.Errorf(data.File, parse.Pos{}, "missing package %q", pkgPath)
+	return ""
 }
 
 // Generate takes a populated compile.File and returns a byte slice containing
 // the generated Go source code.
-func Generate(file *compile.File, env *compile.Env, config vdltool.GoConfig) []byte {
+func Generate(file *compile.File, env *compile.Env, config vdltool.Config) []byte {
 	data := goData{
-		File:          file,
-		Env:           env,
-		UserImports:   codegen.ImportsForFiles(file),
-		SystemImports: systemImportsGo(file),
+		File:    file,
+		Env:     env,
+		Imports: newImports(file, env),
 	}
 	// The implementation uses the template mechanism from text/template and
 	// executes the template against the goData instance.
@@ -49,91 +65,6 @@ func Generate(file *compile.File, env *compile.Env, config vdltool.GoConfig) []b
 	return pretty
 }
 
-// systemImportsGo returns a list of required veyron system imports.
-//
-// TODO(toddw): Now that we have the userImports mechanism for de-duping local
-// package names, we could consider using that instead of our "__" prefix.
-// That'll make the template code a bit messier though.
-func systemImportsGo(f *compile.File) []string {
-	set := make(map[string]bool)
-	if f.TypeDeps[vdl.AnyType] {
-		// Import for vdl.AnyRep
-		set[`__vdl "v.io/core/veyron2/vdl"`] = true
-	}
-	if f.TypeDeps[vdl.TypeObjectType] {
-		// Import for vdl.Type
-		set[`__vdl "v.io/core/veyron2/vdl"`] = true
-	}
-	if len(f.TypeDefs) > 0 {
-		// Import for vdl.Register to register all defined types.
-		set[`__vdl "v.io/core/veyron2/vdl"`] = true
-	}
-	for _, td := range f.TypeDefs {
-		if td.Type.Kind() == vdl.Enum {
-			// Import for fmt.Errorf to define Enum types.
-			set[`__fmt "fmt"`] = true
-		}
-	}
-	if len(f.Interfaces) > 0 {
-		// Imports for the generated method: {interface name}Client.
-		set[`__veyron2 "v.io/core/veyron2"`] = true
-		set[`__ipc "v.io/core/veyron2/ipc"`] = true
-		set[`__context "v.io/core/veyron2/context"`] = true
-		if fileHasStreamingMethods(f) {
-			set[`__io "io"`] = true
-		}
-		if fileHasMethodTags(f) {
-			// Import for vdl.AnyRep
-			set[`__vdl "v.io/core/veyron2/vdl"`] = true
-		}
-	}
-	// If the user has specified any errors, typically we need to import the
-	// "v.io/core/veyron2/verror2" package.  However we allow vdl code-generation
-	// in the "v.io/core/veyron2/verror2" package itself, to specify common
-	// errors.  Special-case this scenario to avoid self-cyclic package
-	// dependencies.
-	if len(f.ErrorDefs) > 0 && f.Package.Path != "v.io/core/veyron2/verror2" {
-		set[`__verror2 "v.io/core/veyron2/verror2"`] = true
-	}
-	if len(f.ErrorDefs) > 0 {
-		set[`__context "v.io/core/veyron2/context"`] = true
-		set[`__i18n "v.io/core/veyron2/i18n"`] = true
-	}
-	// Convert the set of imports into a sorted list.
-	var ret sort.StringSlice
-	for key := range set {
-		ret = append(ret, key)
-	}
-	ret.Sort()
-	return ret
-}
-
-// fileHasStreamingMethods returns true iff f contains an interface with a
-// streaming method, disregarding embedded interfaces.
-func fileHasStreamingMethods(f *compile.File) bool {
-	for _, i := range f.Interfaces {
-		for _, m := range i.Methods {
-			if isStreamingMethod(m) {
-				return true
-			}
-		}
-	}
-	return false
-}
-
-// fileHasMethodTags returns true iff f contains an interface with a method with
-// non-empty tags.
-func fileHasMethodTags(f *compile.File) bool {
-	for _, i := range f.Interfaces {
-		for _, m := range i.Methods {
-			if len(m.Tags) > 0 {
-				return true
-			}
-		}
-	}
-	return false
-}
-
 var goTemplate *template.Template
 
 // The template mechanism is great at high-level formatting and simple
@@ -142,7 +73,6 @@ var goTemplate *template.Template
 // off to a regular function.
 func init() {
 	funcMap := template.FuncMap{
-		"genpkg":                genpkg,
 		"typeGo":                typeGo,
 		"typeDefGo":             typeDefGo,
 		"constDefGo":            constDefGo,
@@ -170,15 +100,6 @@ func init() {
 		"reInitStreamValue":     reInitStreamValue,
 	}
 	goTemplate = template.Must(template.New("genGo").Funcs(funcMap).Parse(genGo))
-}
-
-func genpkg(file *compile.File, pkg string) string {
-	// Special-case code generation for the veyron2/verror2 package, to avoid
-	// adding the "__verror2." package qualifier.
-	if file.Package.Path == "v.io/core/veyron2/verror2" && pkg == "verror2" {
-		return ""
-	}
-	return "__" + pkg + "."
 }
 
 func isStreamingMethod(method *compile.Method) bool {
@@ -314,20 +235,20 @@ func stripFinalError(args []*compile.Arg) []*compile.Arg {
 
 // The first arg of every server method is a context; the type is either a typed
 // context for streams, or ipc.ServerContext for non-streams.
-func serverContextType(prefix string, iface *compile.Interface, method *compile.Method) string {
+func serverContextType(prefix string, data goData, iface *compile.Interface, method *compile.Method) string {
 	if isStreamingMethod(method) {
 		return prefix + uniqueName(iface, method, "Context")
 	}
-	return prefix + "__ipc.ServerContext"
+	return prefix + data.Pkg("v.io/core/veyron2/ipc") + "ServerContext"
 }
 
 // The first arg of every server stub method is a context; the type is either a
 // typed context stub for streams, or ipc.ServerContext for non-streams.
-func serverContextStubType(prefix string, iface *compile.Interface, method *compile.Method) string {
+func serverContextStubType(prefix string, data goData, iface *compile.Interface, method *compile.Method) string {
 	if isStreamingMethod(method) {
 		return prefix + "*" + uniqueName(iface, method, "ContextStub")
 	}
-	return prefix + "__ipc.ServerContext"
+	return prefix + data.Pkg("v.io/core/veyron2/ipc") + "ServerContext"
 }
 
 // outArgsClient returns the out args of an interface method on the client,
@@ -348,7 +269,7 @@ func clientStubImpl(data goData, iface *compile.Interface, method *compile.Metho
 	if len(method.InArgs) > 0 {
 		inargs = "[]interface{}{" + argNames("&", "i", "", "", method.InArgs) + "}"
 	}
-	fmt.Fprint(&buf, "\tvar call __ipc.Call\n")
+	fmt.Fprint(&buf, "\tvar call "+data.Pkg("v.io/core/veyron2/ipc")+"Call\n")
 	fmt.Fprintf(&buf, "\tif call, err = c.c(ctx).StartCall(ctx, c.name, %q, %s, opts...); err != nil {\n\t\treturn\n\t}\n", method.Name, inargs)
 	switch {
 	case isStreamingMethod(method):
@@ -403,26 +324,27 @@ func reInitStreamValue(data goData, t *vdl.Type, name string) string {
 // the fine-tuning to the go/format package.  Note that go/format won't fix
 // some instances of spurious newlines, so we try to keep it reasonable.
 const genGo = `
-{{with $data := .}}{{$file := $data.File}}
+{{$data := .}}
+{{$file := $data.File}}
 // This file was auto-generated by the veyron vdl tool.
 // Source: {{$file.BaseName}}
 
 {{$file.PackageDef.Doc}}package {{$file.PackageDef.Name}}{{$file.PackageDef.DocSuffix}}
 
-{{if or $data.UserImports $data.SystemImports}}
-import ( {{range $imp := $data.UserImports}}
-{{if $imp.Name}}{{$imp.Name}} {{end}}"{{$imp.Path}}"
-{{end}}{{if $data.SystemImports}}
-	// The non-user imports are prefixed with "__" to prevent collisions.
-	{{range $imp := $data.SystemImports}}{{$imp}}
-{{end}}{{end}})
-{{end}}
+{{if or $data.Imports.System $data.Imports.User}}
+import ( {{if $data.Imports.System}}
+	// VDL system imports{{range $imp := $data.Imports.System}}
+	{{if $imp.Name}}{{$imp.Name}} {{end}}"{{$imp.Path}}"{{end}}{{end}}
+{{if $data.Imports.User}}
+	// VDL user imports{{range $imp := $data.Imports.User}}
+	{{if $imp.Name}}{{$imp.Name}} {{end}}"{{$imp.Path}}"{{end}}{{end}}
+){{end}}
 
 {{if $file.TypeDefs}}{{range $tdef := $file.TypeDefs}}
 {{typeDefGo $data $tdef}}
 {{end}}{{end}}
 {{if $file.TypeDefs}}func init() { {{range $tdef := $file.TypeDefs}}
-	__vdl.Register({{typedZeroValue $data $tdef}}){{end}}
+	{{$data.Pkg "v.io/core/veyron2/vdl"}}Register({{typedZeroValue $data $tdef}}){{end}}
 }{{end}}
 
 {{range $cdef := $file.ConstDefs}}
@@ -430,39 +352,43 @@ import ( {{range $imp := $data.UserImports}}
 {{end}}
 
 {{if $file.ErrorDefs}}var ( {{range $edef := $file.ErrorDefs}}
-	{{$edef.Doc}}{{$edef.Name}} = {{genpkg $file "verror2"}}Register("{{$edef.ID}}", {{genpkg $file "verror2"}}{{$edef.Action}}, "{{$edef.English}}"){{end}}
+	{{$edef.Doc}}{{$edef.Name}} = {{$data.Pkg "v.io/core/veyron2/verror2"}}Register("{{$edef.ID}}", {{$data.Pkg "v.io/core/veyron2/verror2"}}{{$edef.Action}}, "{{$edef.English}}"){{end}}
 )
 
 {{/* TODO(toddw): Don't set "en-US" or "en" again, since it's already set by Register */}}
 func init() { {{range $edef := $file.ErrorDefs}}{{range $lf := $edef.Formats}}
-	__i18n.Cat().SetWithBase(__i18n.LangID("{{$lf.Lang}}"), __i18n.MsgID({{$edef.Name}}.ID), "{{$lf.Fmt}}"){{end}}{{end}}
+	{{$data.Pkg "v.io/core/veyron2/i18n"}}Cat().SetWithBase({{$data.Pkg "v.io/core/veyron2/i18n"}}LangID("{{$lf.Lang}}"), {{$data.Pkg "v.io/core/veyron2/i18n"}}MsgID({{$edef.Name}}.ID), "{{$lf.Fmt}}"){{end}}{{end}}
 }
 {{range $edef := $file.ErrorDefs}}
 // Make{{$edef.Name}} returns an error with the {{$edef.Name}} ID.
-func Make{{$edef.Name}}(ctx {{argNameTypes "" "*__context.T" "" $data $edef.Params}}) error {
-	return {{genpkg $file "verror2"}}Make({{$edef.Name}}, {{argNames "" "" "ctx" "" $edef.Params}})
+func Make{{$edef.Name}}(ctx {{argNameTypes "" (print "*" ($data.Pkg "v.io/core/veyron2/context") "T") "" $data $edef.Params}}) error {
+	return {{$data.Pkg "v.io/core/veyron2/verror2"}}Make({{$edef.Name}}, {{argNames "" "" "ctx" "" $edef.Params}})
 }
 {{end}}{{end}}
 
-{{range $iface := $file.Interfaces}}{{$ifaceStreaming := hasStreamingMethods $iface.AllMethods}}
+{{range $iface := $file.Interfaces}}
+{{$ifaceStreaming := hasStreamingMethods $iface.AllMethods}}
+{{$ipc_ := $data.Pkg "v.io/core/veyron2/ipc"}}
+{{$ctxArg := print "ctx *" ($data.Pkg "v.io/core/veyron2/context") "T"}}
+{{$optsArg := print "opts ..." $ipc_ "CallOpt"}}
 // {{$iface.Name}}ClientMethods is the client interface
 // containing {{$iface.Name}} methods.
 {{docBreak $iface.Doc}}type {{$iface.Name}}ClientMethods interface { {{range $embed := $iface.Embeds}}
 	{{$embed.Doc}}{{embedGo $data $embed}}ClientMethods{{$embed.DocSuffix}}{{end}}{{range $method := $iface.Methods}}
-	{{$method.Doc}}{{$method.Name}}({{argNameTypes "" "ctx *__context.T" "opts ...__ipc.CallOpt" $data $method.InArgs}}) {{outArgsClient "" $data $iface $method}}{{$method.DocSuffix}}{{end}}
+	{{$method.Doc}}{{$method.Name}}({{argNameTypes "" $ctxArg $optsArg $data $method.InArgs}}) {{outArgsClient "" $data $iface $method}}{{$method.DocSuffix}}{{end}}
 }
 
 // {{$iface.Name}}ClientStub adds universal methods to {{$iface.Name}}ClientMethods.
 type {{$iface.Name}}ClientStub interface {
 	{{$iface.Name}}ClientMethods
-	__ipc.UniversalServiceMethods
+	{{$ipc_}}UniversalServiceMethods
 }
 
 // {{$iface.Name}}Client returns a client stub for {{$iface.Name}}.
-func {{$iface.Name}}Client(name string, opts ...__ipc.BindOpt) {{$iface.Name}}ClientStub {
-	var client __ipc.Client
+func {{$iface.Name}}Client(name string, opts ...{{$ipc_}}BindOpt) {{$iface.Name}}ClientStub {
+	var client {{$ipc_}}Client
 	for _, opt := range opts {
-		if clientOpt, ok := opt.(__ipc.Client); ok {
+		if clientOpt, ok := opt.({{$ipc_}}Client); ok {
 			client = clientOpt
 		}
 	}
@@ -471,20 +397,20 @@ func {{$iface.Name}}Client(name string, opts ...__ipc.BindOpt) {{$iface.Name}}Cl
 
 type impl{{$iface.Name}}ClientStub struct {
 	name   string
-	client __ipc.Client
+	client {{$ipc_}}Client
 {{range $embed := $iface.Embeds}}
 	{{embedGo $data $embed}}ClientStub{{end}}
 }
 
-func (c impl{{$iface.Name}}ClientStub) c(ctx *__context.T) __ipc.Client {
+func (c impl{{$iface.Name}}ClientStub) c({{$ctxArg}}) {{$ipc_}}Client {
 	if c.client != nil {
 		return c.client
 	}
-	return __veyron2.GetClient(ctx)
+	return {{$data.Pkg "v.io/core/veyron2"}}GetClient(ctx)
 }
 
 {{range $method := $iface.Methods}}
-func (c impl{{$iface.Name}}ClientStub) {{$method.Name}}({{argNameTypes "i" "ctx *__context.T" "opts ...__ipc.CallOpt" $data $method.InArgs}}) {{outArgsClient "o" $data $iface $method}} {
+func (c impl{{$iface.Name}}ClientStub) {{$method.Name}}({{argNameTypes "i" $ctxArg $optsArg $data $method.InArgs}}) {{outArgsClient "o" $data $iface $method}} {
 {{clientStubImpl $data $iface $method}}
 }
 {{end}}
@@ -548,7 +474,7 @@ type {{$clientCall}} interface {
 }
 
 type {{$clientCallImpl}} struct {
-	__ipc.Call{{if $method.OutStream}}
+	{{$ipc_}}Call{{if $method.OutStream}}
 	valRecv {{typeGo $data $method.OutStream}}
 	errRecv error{{end}}
 }
@@ -573,7 +499,7 @@ func (c {{$clientRecvImpl}}) Value() {{typeGo $data $method.OutStream}} {
 	return c.c.valRecv
 }
 func (c {{$clientRecvImpl}}) Err() error {
-	if c.c.errRecv == __io.EOF {
+	if c.c.errRecv == {{$data.Pkg "io"}}EOF {
 		return nil
 	}
 	return c.c.errRecv
@@ -606,7 +532,7 @@ func (c {{$clientSendImpl}}) Close() error {
 // implements for {{$iface.Name}}.
 {{docBreak $iface.Doc}}type {{$iface.Name}}ServerMethods interface { {{range $embed := $iface.Embeds}}
 	{{$embed.Doc}}{{embedGo $data $embed}}ServerMethods{{$embed.DocSuffix}}{{end}}{{range $method := $iface.Methods}}
-	{{$method.Doc}}{{$method.Name}}({{argNameTypes "" (serverContextType "ctx " $iface $method) "" $data $method.InArgs}}) {{argParens (argNameTypes "" "" "" $data $method.OutArgs)}}{{$method.DocSuffix}}{{end}}
+	{{$method.Doc}}{{$method.Name}}({{argNameTypes "" (serverContextType "ctx " $data $iface $method) "" $data $method.InArgs}}) {{argParens (argNameTypes "" "" "" $data $method.OutArgs)}}{{$method.DocSuffix}}{{end}}
 }
 
 // {{$iface.Name}}ServerStubMethods is the server interface containing
@@ -617,7 +543,7 @@ func (c {{$clientSendImpl}}) Close() error {
 // since there are no streaming methods.{{end}}
 type {{$iface.Name}}ServerStubMethods {{if $ifaceStreaming}}interface { {{range $embed := $iface.Embeds}}
 	{{$embed.Doc}}{{embedGo $data $embed}}ServerStubMethods{{$embed.DocSuffix}}{{end}}{{range $method := $iface.Methods}}
-	{{$method.Doc}}{{$method.Name}}({{argNameTypes "" (serverContextStubType "ctx " $iface $method) "" $data $method.InArgs}}) {{argParens (argNameTypes "" "" "" $data $method.OutArgs)}}{{$method.DocSuffix}}{{end}}
+	{{$method.Doc}}{{$method.Name}}({{argNameTypes "" (serverContextStubType "ctx " $data $iface $method) "" $data $method.InArgs}}) {{argParens (argNameTypes "" "" "" $data $method.OutArgs)}}{{$method.DocSuffix}}{{end}}
 }
 {{else}}{{$iface.Name}}ServerMethods
 {{end}}
@@ -626,7 +552,7 @@ type {{$iface.Name}}ServerStubMethods {{if $ifaceStreaming}}interface { {{range 
 type {{$iface.Name}}ServerStub interface {
 	{{$iface.Name}}ServerStubMethods
 	// Describe the {{$iface.Name}} interfaces.
-	Describe__() []__ipc.InterfaceDesc
+	Describe__() []{{$ipc_}}InterfaceDesc
 }
 
 // {{$iface.Name}}Server returns a server stub for {{$iface.Name}}.
@@ -639,9 +565,9 @@ func {{$iface.Name}}Server(impl {{$iface.Name}}ServerMethods) {{$iface.Name}}Ser
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
-	if gs := __ipc.NewGlobState(stub); gs != nil {
+	if gs := {{$ipc_}}NewGlobState(stub); gs != nil {
 		stub.gs = gs
-	} else if gs := __ipc.NewGlobState(impl); gs != nil {
+	} else if gs := {{$ipc_}}NewGlobState(impl); gs != nil {
 		stub.gs = gs
 	}
 	return stub
@@ -650,45 +576,45 @@ func {{$iface.Name}}Server(impl {{$iface.Name}}ServerMethods) {{$iface.Name}}Ser
 type impl{{$iface.Name}}ServerStub struct {
 	impl {{$iface.Name}}ServerMethods{{range $embed := $iface.Embeds}}
 	{{embedGo $data $embed}}ServerStub{{end}}
-	gs *__ipc.GlobState
+	gs *{{$ipc_}}GlobState
 }
 
 {{range $method := $iface.Methods}}
-func (s impl{{$iface.Name}}ServerStub) {{$method.Name}}({{argNameTypes "i" (serverContextStubType "ctx " $iface $method) "" $data $method.InArgs}}) {{argParens (argTypes $data $method.OutArgs)}} {
+func (s impl{{$iface.Name}}ServerStub) {{$method.Name}}({{argNameTypes "i" (serverContextStubType "ctx " $data $iface $method) "" $data $method.InArgs}}) {{argParens (argTypes $data $method.OutArgs)}} {
 {{serverStubImpl $data $iface $method}}
 }
 {{end}}
 
-func (s impl{{$iface.Name}}ServerStub) Globber() *__ipc.GlobState {
+func (s impl{{$iface.Name}}ServerStub) Globber() *{{$ipc_}}GlobState {
 	return s.gs
 }
 
-func (s impl{{$iface.Name}}ServerStub) Describe__() []__ipc.InterfaceDesc {
-	return []__ipc.InterfaceDesc{ {{$iface.Name}}Desc{{range $embed := $iface.TransitiveEmbeds}}, {{embedGo $data $embed}}Desc{{end}} }
+func (s impl{{$iface.Name}}ServerStub) Describe__() []{{$ipc_}}InterfaceDesc {
+	return []{{$ipc_}}InterfaceDesc{ {{$iface.Name}}Desc{{range $embed := $iface.TransitiveEmbeds}}, {{embedGo $data $embed}}Desc{{end}} }
 }
 
 // {{$iface.Name}}Desc describes the {{$iface.Name}} interface.
-var {{$iface.Name}}Desc __ipc.InterfaceDesc = desc{{$iface.Name}}
+var {{$iface.Name}}Desc {{$ipc_}}InterfaceDesc = desc{{$iface.Name}}
 
 // desc{{$iface.Name}} hides the desc to keep godoc clean.
-var desc{{$iface.Name}} = __ipc.InterfaceDesc{ {{if $iface.Name}}
+var desc{{$iface.Name}} = {{$ipc_}}InterfaceDesc{ {{if $iface.Name}}
 	Name: "{{$iface.Name}}",{{end}}{{if $iface.File.Package.Path}}
 	PkgPath: "{{$iface.File.Package.Path}}",{{end}}{{if $iface.Doc}}
 	Doc: {{quoteStripDoc $iface.Doc}},{{end}}{{if $iface.Embeds}}
-	Embeds: []__ipc.EmbedDesc{ {{range $embed := $iface.Embeds}}
+	Embeds: []{{$ipc_}}EmbedDesc{ {{range $embed := $iface.Embeds}}
 		{ "{{$embed.Name}}", "{{$embed.File.Package.Path}}", {{quoteStripDoc $embed.Doc}} },{{end}}
 	},{{end}}{{if $iface.Methods}}
-	Methods: []__ipc.MethodDesc{ {{range $method := $iface.Methods}}
+	Methods: []{{$ipc_}}MethodDesc{ {{range $method := $iface.Methods}}
 		{ {{if $method.Name}}
 			Name: "{{$method.Name}}",{{end}}{{if $method.Doc}}
 			Doc: {{quoteStripDoc $method.Doc}},{{end}}{{if $method.InArgs}}
-			InArgs: []__ipc.ArgDesc{ {{range $arg := $method.InArgs}}
+			InArgs: []{{$ipc_}}ArgDesc{ {{range $arg := $method.InArgs}}
 				{ "{{$arg.Name}}", {{quoteStripDoc $arg.Doc}} }, // {{typeGo $data $arg.Type}}{{end}}
 			},{{end}}{{if $method.OutArgs}}
-			OutArgs: []__ipc.ArgDesc{ {{range $arg := $method.OutArgs}}
+			OutArgs: []{{$ipc_}}ArgDesc{ {{range $arg := $method.OutArgs}}
 				{ "{{$arg.Name}}", {{quoteStripDoc $arg.Doc}} }, // {{typeGo $data $arg.Type}}{{end}}
 			},{{end}}{{if $method.Tags}}
-			Tags: []__vdl.AnyRep{ {{range $tag := $method.Tags}}{{typedConst $data $tag}} ,{{end}} },{{end}}
+			Tags: []{{$data.Pkg "v.io/core/veyron2/vdl"}}AnyRep{ {{range $tag := $method.Tags}}{{typedConst $data $tag}} ,{{end}} },{{end}}
 		},{{end}}
 	},{{end}}
 }
@@ -726,20 +652,20 @@ type {{$serverStream}} interface { {{if $method.InStream}}
 
 // {{$serverContext}} represents the context passed to {{$iface.Name}}.{{$method.Name}}.
 type {{$serverContext}} interface {
-	__ipc.ServerContext
+	{{$ipc_}}ServerContext
 	{{$serverStream}}
 }
 
 // {{$serverContextStub}} is a wrapper that converts ipc.ServerCall into
 // a typesafe stub that implements {{$serverContext}}.
 type {{$serverContextStub}} struct {
-	__ipc.ServerCall{{if $method.InStream}}
+	{{$ipc_}}ServerCall{{if $method.InStream}}
 	valRecv {{typeGo $data $method.InStream}}
 	errRecv error{{end}}
 }
 
 // Init initializes {{$serverContextStub}} from ipc.ServerCall.
-func (s *{{$serverContextStub}}) Init(call __ipc.ServerCall) {
+func (s *{{$serverContextStub}}) Init(call {{$ipc_}}ServerCall) {
 	s.ServerCall = call
 }
 
@@ -764,7 +690,7 @@ func (s {{$serverRecvImpl}}) Value() {{typeGo $data $method.InStream}} {
 	return s.s.valRecv
 }
 func (s {{$serverRecvImpl}}) Err() error {
-	if s.s.errRecv == __io.EOF {
+	if s.s.errRecv == {{$data.Pkg "io"}}EOF {
 		return nil
 	}
 	return s.s.errRecv
@@ -785,5 +711,5 @@ func (s {{$serverSendImpl}}) Send(item {{typeGo $data $method.OutStream}}) error
 }
 {{end}}{{end}}{{end}}
 
-{{end}}{{end}}
+{{end}}
 `

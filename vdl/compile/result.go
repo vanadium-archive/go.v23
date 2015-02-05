@@ -9,6 +9,7 @@ import (
 	"v.io/core/veyron2/vdl"
 	"v.io/core/veyron2/vdl/opconst"
 	"v.io/core/veyron2/vdl/parse"
+	"v.io/core/veyron2/vdl/vdlroot/src/vdltool"
 	"v.io/core/veyron2/vdl/vdlutil"
 )
 
@@ -255,6 +256,9 @@ type Package struct {
 	GenPath string
 	// Files holds the files contained in the package.
 	Files []*File
+	// Config holds the configuration for this package, specifying options used
+	// during compilation and code generation.
+	Config vdltool.Config
 
 	// We hold some internal maps to make local name resolution cheap and easy.
 	typeDefs  map[string]*TypeDef
@@ -266,11 +270,12 @@ type Package struct {
 	lowercaseIdents map[string]string
 }
 
-func newPackage(name, pkgPath, genPath string) *Package {
+func newPackage(name, pkgPath, genPath string, config vdltool.Config) *Package {
 	return &Package{
 		Name:            name,
 		Path:            pkgPath,
 		GenPath:         genPath,
+		Config:          config,
 		typeDefs:        make(map[string]*TypeDef),
 		constDefs:       make(map[string]*ConstDef),
 		ifaceDefs:       make(map[string]*Interface),

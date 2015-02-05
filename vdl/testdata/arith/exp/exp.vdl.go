@@ -6,29 +6,29 @@
 package exp
 
 import (
-	// The non-user imports are prefixed with "__" to prevent collisions.
-	__veyron2 "v.io/core/veyron2"
-	__context "v.io/core/veyron2/context"
-	__ipc "v.io/core/veyron2/ipc"
+	// VDL system imports
+	"v.io/core/veyron2"
+	"v.io/core/veyron2/context"
+	"v.io/core/veyron2/ipc"
 )
 
 // ExpClientMethods is the client interface
 // containing Exp methods.
 type ExpClientMethods interface {
-	Exp(ctx *__context.T, x float64, opts ...__ipc.CallOpt) (float64, error)
+	Exp(ctx *context.T, x float64, opts ...ipc.CallOpt) (float64, error)
 }
 
 // ExpClientStub adds universal methods to ExpClientMethods.
 type ExpClientStub interface {
 	ExpClientMethods
-	__ipc.UniversalServiceMethods
+	ipc.UniversalServiceMethods
 }
 
 // ExpClient returns a client stub for Exp.
-func ExpClient(name string, opts ...__ipc.BindOpt) ExpClientStub {
-	var client __ipc.Client
+func ExpClient(name string, opts ...ipc.BindOpt) ExpClientStub {
+	var client ipc.Client
 	for _, opt := range opts {
-		if clientOpt, ok := opt.(__ipc.Client); ok {
+		if clientOpt, ok := opt.(ipc.Client); ok {
 			client = clientOpt
 		}
 	}
@@ -37,18 +37,18 @@ func ExpClient(name string, opts ...__ipc.BindOpt) ExpClientStub {
 
 type implExpClientStub struct {
 	name   string
-	client __ipc.Client
+	client ipc.Client
 }
 
-func (c implExpClientStub) c(ctx *__context.T) __ipc.Client {
+func (c implExpClientStub) c(ctx *context.T) ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return __veyron2.GetClient(ctx)
+	return veyron2.GetClient(ctx)
 }
 
-func (c implExpClientStub) Exp(ctx *__context.T, i0 float64, opts ...__ipc.CallOpt) (o0 float64, err error) {
-	var call __ipc.Call
+func (c implExpClientStub) Exp(ctx *context.T, i0 float64, opts ...ipc.CallOpt) (o0 float64, err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Exp", []interface{}{i0}, opts...); err != nil {
 		return
 	}
@@ -61,7 +61,7 @@ func (c implExpClientStub) Exp(ctx *__context.T, i0 float64, opts ...__ipc.CallO
 // ExpServerMethods is the interface a server writer
 // implements for Exp.
 type ExpServerMethods interface {
-	Exp(ctx __ipc.ServerContext, x float64) (float64, error)
+	Exp(ctx ipc.ServerContext, x float64) (float64, error)
 }
 
 // ExpServerStubMethods is the server interface containing
@@ -74,7 +74,7 @@ type ExpServerStubMethods ExpServerMethods
 type ExpServerStub interface {
 	ExpServerStubMethods
 	// Describe the Exp interfaces.
-	Describe__() []__ipc.InterfaceDesc
+	Describe__() []ipc.InterfaceDesc
 }
 
 // ExpServer returns a server stub for Exp.
@@ -86,9 +86,9 @@ func ExpServer(impl ExpServerMethods) ExpServerStub {
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
-	if gs := __ipc.NewGlobState(stub); gs != nil {
+	if gs := ipc.NewGlobState(stub); gs != nil {
 		stub.gs = gs
-	} else if gs := __ipc.NewGlobState(impl); gs != nil {
+	} else if gs := ipc.NewGlobState(impl); gs != nil {
 		stub.gs = gs
 	}
 	return stub
@@ -96,35 +96,35 @@ func ExpServer(impl ExpServerMethods) ExpServerStub {
 
 type implExpServerStub struct {
 	impl ExpServerMethods
-	gs   *__ipc.GlobState
+	gs   *ipc.GlobState
 }
 
-func (s implExpServerStub) Exp(ctx __ipc.ServerContext, i0 float64) (float64, error) {
+func (s implExpServerStub) Exp(ctx ipc.ServerContext, i0 float64) (float64, error) {
 	return s.impl.Exp(ctx, i0)
 }
 
-func (s implExpServerStub) Globber() *__ipc.GlobState {
+func (s implExpServerStub) Globber() *ipc.GlobState {
 	return s.gs
 }
 
-func (s implExpServerStub) Describe__() []__ipc.InterfaceDesc {
-	return []__ipc.InterfaceDesc{ExpDesc}
+func (s implExpServerStub) Describe__() []ipc.InterfaceDesc {
+	return []ipc.InterfaceDesc{ExpDesc}
 }
 
 // ExpDesc describes the Exp interface.
-var ExpDesc __ipc.InterfaceDesc = descExp
+var ExpDesc ipc.InterfaceDesc = descExp
 
 // descExp hides the desc to keep godoc clean.
-var descExp = __ipc.InterfaceDesc{
+var descExp = ipc.InterfaceDesc{
 	Name:    "Exp",
 	PkgPath: "v.io/core/veyron2/vdl/testdata/arith/exp",
-	Methods: []__ipc.MethodDesc{
+	Methods: []ipc.MethodDesc{
 		{
 			Name: "Exp",
-			InArgs: []__ipc.ArgDesc{
+			InArgs: []ipc.ArgDesc{
 				{"x", ``}, // float64
 			},
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // float64
 				{"", ``}, // error
 			},

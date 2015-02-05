@@ -27,16 +27,16 @@
 package arith
 
 import (
+	// VDL system imports
+	"io"
+	"v.io/core/veyron2"
+	"v.io/core/veyron2/context"
+	"v.io/core/veyron2/ipc"
+	"v.io/core/veyron2/vdl"
+
+	// VDL user imports
 	"v.io/core/veyron2/vdl/testdata/arith/exp"
-
 	"v.io/core/veyron2/vdl/testdata/base"
-
-	// The non-user imports are prefixed with "__" to prevent collisions.
-	__io "io"
-	__veyron2 "v.io/core/veyron2"
-	__context "v.io/core/veyron2/context"
-	__ipc "v.io/core/veyron2/ipc"
-	__vdl "v.io/core/veyron2/vdl"
 )
 
 // Yes shows that bools may be untyped.
@@ -68,38 +68,38 @@ const Mask = uint64(256)
 //   * There must be at least 1 out-arg, and the last out-arg must be error.
 type ArithClientMethods interface {
 	// Add is a typical method with multiple input and output arguments.
-	Add(ctx *__context.T, a int32, b int32, opts ...__ipc.CallOpt) (int32, error)
+	Add(ctx *context.T, a int32, b int32, opts ...ipc.CallOpt) (int32, error)
 	// DivMod shows that runs of args with the same type can use the short form,
 	// just like Go.
-	DivMod(ctx *__context.T, a int32, b int32, opts ...__ipc.CallOpt) (quot int32, rem int32, err error)
+	DivMod(ctx *context.T, a int32, b int32, opts ...ipc.CallOpt) (quot int32, rem int32, err error)
 	// Sub shows that you can use data types defined in other packages.
-	Sub(ctx *__context.T, args base.Args, opts ...__ipc.CallOpt) (int32, error)
+	Sub(ctx *context.T, args base.Args, opts ...ipc.CallOpt) (int32, error)
 	// Mul tries another data type defined in another package.
-	Mul(ctx *__context.T, nested base.NestedArgs, opts ...__ipc.CallOpt) (int32, error)
+	Mul(ctx *context.T, nested base.NestedArgs, opts ...ipc.CallOpt) (int32, error)
 	// GenError shows that it's fine to have no in args, and no out args other
 	// than "error".  In addition GenError shows the usage of tags.  Tags are a
 	// sequence of constants.  There's no requirement on uniqueness of types or
 	// values, and regular const expressions may also be used.
-	GenError(*__context.T, ...__ipc.CallOpt) error
+	GenError(*context.T, ...ipc.CallOpt) error
 	// Count shows using only an int32 out-stream type, with no in-stream type.
-	Count(ctx *__context.T, start int32, opts ...__ipc.CallOpt) (ArithCountCall, error)
+	Count(ctx *context.T, start int32, opts ...ipc.CallOpt) (ArithCountCall, error)
 	// StreamingAdd shows a bidirectional stream.
-	StreamingAdd(*__context.T, ...__ipc.CallOpt) (ArithStreamingAddCall, error)
+	StreamingAdd(*context.T, ...ipc.CallOpt) (ArithStreamingAddCall, error)
 	// QuoteAny shows the any built-in type, representing a value of any type.
-	QuoteAny(ctx *__context.T, a __vdl.AnyRep, opts ...__ipc.CallOpt) (__vdl.AnyRep, error)
+	QuoteAny(ctx *context.T, a vdl.AnyRep, opts ...ipc.CallOpt) (vdl.AnyRep, error)
 }
 
 // ArithClientStub adds universal methods to ArithClientMethods.
 type ArithClientStub interface {
 	ArithClientMethods
-	__ipc.UniversalServiceMethods
+	ipc.UniversalServiceMethods
 }
 
 // ArithClient returns a client stub for Arith.
-func ArithClient(name string, opts ...__ipc.BindOpt) ArithClientStub {
-	var client __ipc.Client
+func ArithClient(name string, opts ...ipc.BindOpt) ArithClientStub {
+	var client ipc.Client
 	for _, opt := range opts {
-		if clientOpt, ok := opt.(__ipc.Client); ok {
+		if clientOpt, ok := opt.(ipc.Client); ok {
 			client = clientOpt
 		}
 	}
@@ -108,18 +108,18 @@ func ArithClient(name string, opts ...__ipc.BindOpt) ArithClientStub {
 
 type implArithClientStub struct {
 	name   string
-	client __ipc.Client
+	client ipc.Client
 }
 
-func (c implArithClientStub) c(ctx *__context.T) __ipc.Client {
+func (c implArithClientStub) c(ctx *context.T) ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return __veyron2.GetClient(ctx)
+	return veyron2.GetClient(ctx)
 }
 
-func (c implArithClientStub) Add(ctx *__context.T, i0 int32, i1 int32, opts ...__ipc.CallOpt) (o0 int32, err error) {
-	var call __ipc.Call
+func (c implArithClientStub) Add(ctx *context.T, i0 int32, i1 int32, opts ...ipc.CallOpt) (o0 int32, err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Add", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
@@ -129,8 +129,8 @@ func (c implArithClientStub) Add(ctx *__context.T, i0 int32, i1 int32, opts ..._
 	return
 }
 
-func (c implArithClientStub) DivMod(ctx *__context.T, i0 int32, i1 int32, opts ...__ipc.CallOpt) (o0 int32, o1 int32, err error) {
-	var call __ipc.Call
+func (c implArithClientStub) DivMod(ctx *context.T, i0 int32, i1 int32, opts ...ipc.CallOpt) (o0 int32, o1 int32, err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "DivMod", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
@@ -140,8 +140,8 @@ func (c implArithClientStub) DivMod(ctx *__context.T, i0 int32, i1 int32, opts .
 	return
 }
 
-func (c implArithClientStub) Sub(ctx *__context.T, i0 base.Args, opts ...__ipc.CallOpt) (o0 int32, err error) {
-	var call __ipc.Call
+func (c implArithClientStub) Sub(ctx *context.T, i0 base.Args, opts ...ipc.CallOpt) (o0 int32, err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Sub", []interface{}{i0}, opts...); err != nil {
 		return
 	}
@@ -151,8 +151,8 @@ func (c implArithClientStub) Sub(ctx *__context.T, i0 base.Args, opts ...__ipc.C
 	return
 }
 
-func (c implArithClientStub) Mul(ctx *__context.T, i0 base.NestedArgs, opts ...__ipc.CallOpt) (o0 int32, err error) {
-	var call __ipc.Call
+func (c implArithClientStub) Mul(ctx *context.T, i0 base.NestedArgs, opts ...ipc.CallOpt) (o0 int32, err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Mul", []interface{}{i0}, opts...); err != nil {
 		return
 	}
@@ -162,8 +162,8 @@ func (c implArithClientStub) Mul(ctx *__context.T, i0 base.NestedArgs, opts ..._
 	return
 }
 
-func (c implArithClientStub) GenError(ctx *__context.T, opts ...__ipc.CallOpt) (err error) {
-	var call __ipc.Call
+func (c implArithClientStub) GenError(ctx *context.T, opts ...ipc.CallOpt) (err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "GenError", nil, opts...); err != nil {
 		return
 	}
@@ -173,8 +173,8 @@ func (c implArithClientStub) GenError(ctx *__context.T, opts ...__ipc.CallOpt) (
 	return
 }
 
-func (c implArithClientStub) Count(ctx *__context.T, i0 int32, opts ...__ipc.CallOpt) (ocall ArithCountCall, err error) {
-	var call __ipc.Call
+func (c implArithClientStub) Count(ctx *context.T, i0 int32, opts ...ipc.CallOpt) (ocall ArithCountCall, err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Count", []interface{}{i0}, opts...); err != nil {
 		return
 	}
@@ -182,8 +182,8 @@ func (c implArithClientStub) Count(ctx *__context.T, i0 int32, opts ...__ipc.Cal
 	return
 }
 
-func (c implArithClientStub) StreamingAdd(ctx *__context.T, opts ...__ipc.CallOpt) (ocall ArithStreamingAddCall, err error) {
-	var call __ipc.Call
+func (c implArithClientStub) StreamingAdd(ctx *context.T, opts ...ipc.CallOpt) (ocall ArithStreamingAddCall, err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "StreamingAdd", nil, opts...); err != nil {
 		return
 	}
@@ -191,8 +191,8 @@ func (c implArithClientStub) StreamingAdd(ctx *__context.T, opts ...__ipc.CallOp
 	return
 }
 
-func (c implArithClientStub) QuoteAny(ctx *__context.T, i0 __vdl.AnyRep, opts ...__ipc.CallOpt) (o0 __vdl.AnyRep, err error) {
-	var call __ipc.Call
+func (c implArithClientStub) QuoteAny(ctx *context.T, i0 vdl.AnyRep, opts ...ipc.CallOpt) (o0 vdl.AnyRep, err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "QuoteAny", []interface{}{i0}, opts...); err != nil {
 		return
 	}
@@ -235,7 +235,7 @@ type ArithCountCall interface {
 }
 
 type implArithCountCall struct {
-	__ipc.Call
+	ipc.Call
 	valRecv int32
 	errRecv error
 }
@@ -260,7 +260,7 @@ func (c implArithCountCallRecv) Value() int32 {
 	return c.c.valRecv
 }
 func (c implArithCountCallRecv) Err() error {
-	if c.c.errRecv == __io.EOF {
+	if c.c.errRecv == io.EOF {
 		return nil
 	}
 	return c.c.errRecv
@@ -322,7 +322,7 @@ type ArithStreamingAddCall interface {
 }
 
 type implArithStreamingAddCall struct {
-	__ipc.Call
+	ipc.Call
 	valRecv int32
 	errRecv error
 }
@@ -347,7 +347,7 @@ func (c implArithStreamingAddCallRecv) Value() int32 {
 	return c.c.valRecv
 }
 func (c implArithStreamingAddCallRecv) Err() error {
-	if c.c.errRecv == __io.EOF {
+	if c.c.errRecv == io.EOF {
 		return nil
 	}
 	return c.c.errRecv
@@ -384,25 +384,25 @@ func (c *implArithStreamingAddCall) Finish() (o0 int32, err error) {
 //   * There must be at least 1 out-arg, and the last out-arg must be error.
 type ArithServerMethods interface {
 	// Add is a typical method with multiple input and output arguments.
-	Add(ctx __ipc.ServerContext, a int32, b int32) (int32, error)
+	Add(ctx ipc.ServerContext, a int32, b int32) (int32, error)
 	// DivMod shows that runs of args with the same type can use the short form,
 	// just like Go.
-	DivMod(ctx __ipc.ServerContext, a int32, b int32) (quot int32, rem int32, err error)
+	DivMod(ctx ipc.ServerContext, a int32, b int32) (quot int32, rem int32, err error)
 	// Sub shows that you can use data types defined in other packages.
-	Sub(ctx __ipc.ServerContext, args base.Args) (int32, error)
+	Sub(ctx ipc.ServerContext, args base.Args) (int32, error)
 	// Mul tries another data type defined in another package.
-	Mul(ctx __ipc.ServerContext, nested base.NestedArgs) (int32, error)
+	Mul(ctx ipc.ServerContext, nested base.NestedArgs) (int32, error)
 	// GenError shows that it's fine to have no in args, and no out args other
 	// than "error".  In addition GenError shows the usage of tags.  Tags are a
 	// sequence of constants.  There's no requirement on uniqueness of types or
 	// values, and regular const expressions may also be used.
-	GenError(__ipc.ServerContext) error
+	GenError(ipc.ServerContext) error
 	// Count shows using only an int32 out-stream type, with no in-stream type.
 	Count(ctx ArithCountContext, start int32) error
 	// StreamingAdd shows a bidirectional stream.
 	StreamingAdd(ArithStreamingAddContext) (total int32, err error)
 	// QuoteAny shows the any built-in type, representing a value of any type.
-	QuoteAny(ctx __ipc.ServerContext, a __vdl.AnyRep) (__vdl.AnyRep, error)
+	QuoteAny(ctx ipc.ServerContext, a vdl.AnyRep) (vdl.AnyRep, error)
 }
 
 // ArithServerStubMethods is the server interface containing
@@ -411,32 +411,32 @@ type ArithServerMethods interface {
 // is the streaming methods.
 type ArithServerStubMethods interface {
 	// Add is a typical method with multiple input and output arguments.
-	Add(ctx __ipc.ServerContext, a int32, b int32) (int32, error)
+	Add(ctx ipc.ServerContext, a int32, b int32) (int32, error)
 	// DivMod shows that runs of args with the same type can use the short form,
 	// just like Go.
-	DivMod(ctx __ipc.ServerContext, a int32, b int32) (quot int32, rem int32, err error)
+	DivMod(ctx ipc.ServerContext, a int32, b int32) (quot int32, rem int32, err error)
 	// Sub shows that you can use data types defined in other packages.
-	Sub(ctx __ipc.ServerContext, args base.Args) (int32, error)
+	Sub(ctx ipc.ServerContext, args base.Args) (int32, error)
 	// Mul tries another data type defined in another package.
-	Mul(ctx __ipc.ServerContext, nested base.NestedArgs) (int32, error)
+	Mul(ctx ipc.ServerContext, nested base.NestedArgs) (int32, error)
 	// GenError shows that it's fine to have no in args, and no out args other
 	// than "error".  In addition GenError shows the usage of tags.  Tags are a
 	// sequence of constants.  There's no requirement on uniqueness of types or
 	// values, and regular const expressions may also be used.
-	GenError(__ipc.ServerContext) error
+	GenError(ipc.ServerContext) error
 	// Count shows using only an int32 out-stream type, with no in-stream type.
 	Count(ctx *ArithCountContextStub, start int32) error
 	// StreamingAdd shows a bidirectional stream.
 	StreamingAdd(*ArithStreamingAddContextStub) (total int32, err error)
 	// QuoteAny shows the any built-in type, representing a value of any type.
-	QuoteAny(ctx __ipc.ServerContext, a __vdl.AnyRep) (__vdl.AnyRep, error)
+	QuoteAny(ctx ipc.ServerContext, a vdl.AnyRep) (vdl.AnyRep, error)
 }
 
 // ArithServerStub adds universal methods to ArithServerStubMethods.
 type ArithServerStub interface {
 	ArithServerStubMethods
 	// Describe the Arith interfaces.
-	Describe__() []__ipc.InterfaceDesc
+	Describe__() []ipc.InterfaceDesc
 }
 
 // ArithServer returns a server stub for Arith.
@@ -448,9 +448,9 @@ func ArithServer(impl ArithServerMethods) ArithServerStub {
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
-	if gs := __ipc.NewGlobState(stub); gs != nil {
+	if gs := ipc.NewGlobState(stub); gs != nil {
 		stub.gs = gs
-	} else if gs := __ipc.NewGlobState(impl); gs != nil {
+	} else if gs := ipc.NewGlobState(impl); gs != nil {
 		stub.gs = gs
 	}
 	return stub
@@ -458,26 +458,26 @@ func ArithServer(impl ArithServerMethods) ArithServerStub {
 
 type implArithServerStub struct {
 	impl ArithServerMethods
-	gs   *__ipc.GlobState
+	gs   *ipc.GlobState
 }
 
-func (s implArithServerStub) Add(ctx __ipc.ServerContext, i0 int32, i1 int32) (int32, error) {
+func (s implArithServerStub) Add(ctx ipc.ServerContext, i0 int32, i1 int32) (int32, error) {
 	return s.impl.Add(ctx, i0, i1)
 }
 
-func (s implArithServerStub) DivMod(ctx __ipc.ServerContext, i0 int32, i1 int32) (int32, int32, error) {
+func (s implArithServerStub) DivMod(ctx ipc.ServerContext, i0 int32, i1 int32) (int32, int32, error) {
 	return s.impl.DivMod(ctx, i0, i1)
 }
 
-func (s implArithServerStub) Sub(ctx __ipc.ServerContext, i0 base.Args) (int32, error) {
+func (s implArithServerStub) Sub(ctx ipc.ServerContext, i0 base.Args) (int32, error) {
 	return s.impl.Sub(ctx, i0)
 }
 
-func (s implArithServerStub) Mul(ctx __ipc.ServerContext, i0 base.NestedArgs) (int32, error) {
+func (s implArithServerStub) Mul(ctx ipc.ServerContext, i0 base.NestedArgs) (int32, error) {
 	return s.impl.Mul(ctx, i0)
 }
 
-func (s implArithServerStub) GenError(ctx __ipc.ServerContext) error {
+func (s implArithServerStub) GenError(ctx ipc.ServerContext) error {
 	return s.impl.GenError(ctx)
 }
 
@@ -489,35 +489,35 @@ func (s implArithServerStub) StreamingAdd(ctx *ArithStreamingAddContextStub) (in
 	return s.impl.StreamingAdd(ctx)
 }
 
-func (s implArithServerStub) QuoteAny(ctx __ipc.ServerContext, i0 __vdl.AnyRep) (__vdl.AnyRep, error) {
+func (s implArithServerStub) QuoteAny(ctx ipc.ServerContext, i0 vdl.AnyRep) (vdl.AnyRep, error) {
 	return s.impl.QuoteAny(ctx, i0)
 }
 
-func (s implArithServerStub) Globber() *__ipc.GlobState {
+func (s implArithServerStub) Globber() *ipc.GlobState {
 	return s.gs
 }
 
-func (s implArithServerStub) Describe__() []__ipc.InterfaceDesc {
-	return []__ipc.InterfaceDesc{ArithDesc}
+func (s implArithServerStub) Describe__() []ipc.InterfaceDesc {
+	return []ipc.InterfaceDesc{ArithDesc}
 }
 
 // ArithDesc describes the Arith interface.
-var ArithDesc __ipc.InterfaceDesc = descArith
+var ArithDesc ipc.InterfaceDesc = descArith
 
 // descArith hides the desc to keep godoc clean.
-var descArith = __ipc.InterfaceDesc{
+var descArith = ipc.InterfaceDesc{
 	Name:    "Arith",
 	PkgPath: "v.io/core/veyron2/vdl/testdata/arith",
 	Doc:     "// Arith is an example of an interface definition for an arithmetic service.\n// Things to note:\n//   * There must be at least 1 out-arg, and the last out-arg must be error.",
-	Methods: []__ipc.MethodDesc{
+	Methods: []ipc.MethodDesc{
 		{
 			Name: "Add",
 			Doc:  "// Add is a typical method with multiple input and output arguments.",
-			InArgs: []__ipc.ArgDesc{
+			InArgs: []ipc.ArgDesc{
 				{"a", ``}, // int32
 				{"b", ``}, // int32
 			},
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // int32
 				{"", ``}, // error
 			},
@@ -525,11 +525,11 @@ var descArith = __ipc.InterfaceDesc{
 		{
 			Name: "DivMod",
 			Doc:  "// DivMod shows that runs of args with the same type can use the short form,\n// just like Go.",
-			InArgs: []__ipc.ArgDesc{
+			InArgs: []ipc.ArgDesc{
 				{"a", ``}, // int32
 				{"b", ``}, // int32
 			},
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"quot", ``}, // int32
 				{"rem", ``},  // int32
 				{"err", ``},  // error
@@ -538,10 +538,10 @@ var descArith = __ipc.InterfaceDesc{
 		{
 			Name: "Sub",
 			Doc:  "// Sub shows that you can use data types defined in other packages.",
-			InArgs: []__ipc.ArgDesc{
+			InArgs: []ipc.ArgDesc{
 				{"args", ``}, // base.Args
 			},
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // int32
 				{"", ``}, // error
 			},
@@ -549,10 +549,10 @@ var descArith = __ipc.InterfaceDesc{
 		{
 			Name: "Mul",
 			Doc:  "// Mul tries another data type defined in another package.",
-			InArgs: []__ipc.ArgDesc{
+			InArgs: []ipc.ArgDesc{
 				{"nested", ``}, // base.NestedArgs
 			},
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // int32
 				{"", ``}, // error
 			},
@@ -560,25 +560,25 @@ var descArith = __ipc.InterfaceDesc{
 		{
 			Name: "GenError",
 			Doc:  "// GenError shows that it's fine to have no in args, and no out args other\n// than \"error\".  In addition GenError shows the usage of tags.  Tags are a\n// sequence of constants.  There's no requirement on uniqueness of types or\n// values, and regular const expressions may also be used.",
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdl.AnyRep{"foo", "barz", "hello", int32(129), uint64(36)},
+			Tags: []vdl.AnyRep{"foo", "barz", "hello", int32(129), uint64(36)},
 		},
 		{
 			Name: "Count",
 			Doc:  "// Count shows using only an int32 out-stream type, with no in-stream type.",
-			InArgs: []__ipc.ArgDesc{
+			InArgs: []ipc.ArgDesc{
 				{"start", ``}, // int32
 			},
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // error
 			},
 		},
 		{
 			Name: "StreamingAdd",
 			Doc:  "// StreamingAdd shows a bidirectional stream.",
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"total", ``}, // int32
 				{"err", ``},   // error
 			},
@@ -586,11 +586,11 @@ var descArith = __ipc.InterfaceDesc{
 		{
 			Name: "QuoteAny",
 			Doc:  "// QuoteAny shows the any built-in type, representing a value of any type.",
-			InArgs: []__ipc.ArgDesc{
-				{"a", ``}, // __vdl.AnyRep
+			InArgs: []ipc.ArgDesc{
+				{"a", ``}, // vdl.AnyRep
 			},
-			OutArgs: []__ipc.ArgDesc{
-				{"", ``}, // __vdl.AnyRep
+			OutArgs: []ipc.ArgDesc{
+				{"", ``}, // vdl.AnyRep
 				{"", ``}, // error
 			},
 		},
@@ -610,18 +610,18 @@ type ArithCountServerStream interface {
 
 // ArithCountContext represents the context passed to Arith.Count.
 type ArithCountContext interface {
-	__ipc.ServerContext
+	ipc.ServerContext
 	ArithCountServerStream
 }
 
 // ArithCountContextStub is a wrapper that converts ipc.ServerCall into
 // a typesafe stub that implements ArithCountContext.
 type ArithCountContextStub struct {
-	__ipc.ServerCall
+	ipc.ServerCall
 }
 
 // Init initializes ArithCountContextStub from ipc.ServerCall.
-func (s *ArithCountContextStub) Init(call __ipc.ServerCall) {
+func (s *ArithCountContextStub) Init(call ipc.ServerCall) {
 	s.ServerCall = call
 }
 
@@ -665,20 +665,20 @@ type ArithStreamingAddServerStream interface {
 
 // ArithStreamingAddContext represents the context passed to Arith.StreamingAdd.
 type ArithStreamingAddContext interface {
-	__ipc.ServerContext
+	ipc.ServerContext
 	ArithStreamingAddServerStream
 }
 
 // ArithStreamingAddContextStub is a wrapper that converts ipc.ServerCall into
 // a typesafe stub that implements ArithStreamingAddContext.
 type ArithStreamingAddContextStub struct {
-	__ipc.ServerCall
+	ipc.ServerCall
 	valRecv int32
 	errRecv error
 }
 
 // Init initializes ArithStreamingAddContextStub from ipc.ServerCall.
-func (s *ArithStreamingAddContextStub) Init(call __ipc.ServerCall) {
+func (s *ArithStreamingAddContextStub) Init(call ipc.ServerCall) {
 	s.ServerCall = call
 }
 
@@ -703,7 +703,7 @@ func (s implArithStreamingAddContextRecv) Value() int32 {
 	return s.s.valRecv
 }
 func (s implArithStreamingAddContextRecv) Err() error {
-	if s.s.errRecv == __io.EOF {
+	if s.s.errRecv == io.EOF {
 		return nil
 	}
 	return s.s.errRecv
@@ -736,21 +736,21 @@ type CalculatorClientMethods interface {
 	// turn it is embedded by arith.Calculator (which is in the same package but
 	// different file) to verify that embedding works in all these scenarios.
 	AdvancedMathClientMethods
-	On(*__context.T, ...__ipc.CallOpt) error  // On turns the calculator on.
-	Off(*__context.T, ...__ipc.CallOpt) error // Off turns the calculator off.
+	On(*context.T, ...ipc.CallOpt) error  // On turns the calculator on.
+	Off(*context.T, ...ipc.CallOpt) error // Off turns the calculator off.
 }
 
 // CalculatorClientStub adds universal methods to CalculatorClientMethods.
 type CalculatorClientStub interface {
 	CalculatorClientMethods
-	__ipc.UniversalServiceMethods
+	ipc.UniversalServiceMethods
 }
 
 // CalculatorClient returns a client stub for Calculator.
-func CalculatorClient(name string, opts ...__ipc.BindOpt) CalculatorClientStub {
-	var client __ipc.Client
+func CalculatorClient(name string, opts ...ipc.BindOpt) CalculatorClientStub {
+	var client ipc.Client
 	for _, opt := range opts {
-		if clientOpt, ok := opt.(__ipc.Client); ok {
+		if clientOpt, ok := opt.(ipc.Client); ok {
 			client = clientOpt
 		}
 	}
@@ -759,21 +759,21 @@ func CalculatorClient(name string, opts ...__ipc.BindOpt) CalculatorClientStub {
 
 type implCalculatorClientStub struct {
 	name   string
-	client __ipc.Client
+	client ipc.Client
 
 	ArithClientStub
 	AdvancedMathClientStub
 }
 
-func (c implCalculatorClientStub) c(ctx *__context.T) __ipc.Client {
+func (c implCalculatorClientStub) c(ctx *context.T) ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return __veyron2.GetClient(ctx)
+	return veyron2.GetClient(ctx)
 }
 
-func (c implCalculatorClientStub) On(ctx *__context.T, opts ...__ipc.CallOpt) (err error) {
-	var call __ipc.Call
+func (c implCalculatorClientStub) On(ctx *context.T, opts ...ipc.CallOpt) (err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "On", nil, opts...); err != nil {
 		return
 	}
@@ -783,8 +783,8 @@ func (c implCalculatorClientStub) On(ctx *__context.T, opts ...__ipc.CallOpt) (e
 	return
 }
 
-func (c implCalculatorClientStub) Off(ctx *__context.T, opts ...__ipc.CallOpt) (err error) {
-	var call __ipc.Call
+func (c implCalculatorClientStub) Off(ctx *context.T, opts ...ipc.CallOpt) (err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Off", nil, opts...); err != nil {
 		return
 	}
@@ -806,8 +806,8 @@ type CalculatorServerMethods interface {
 	// turn it is embedded by arith.Calculator (which is in the same package but
 	// different file) to verify that embedding works in all these scenarios.
 	AdvancedMathServerMethods
-	On(__ipc.ServerContext) error  // On turns the calculator on.
-	Off(__ipc.ServerContext) error // Off turns the calculator off.
+	On(ipc.ServerContext) error  // On turns the calculator on.
+	Off(ipc.ServerContext) error // Off turns the calculator off.
 }
 
 // CalculatorServerStubMethods is the server interface containing
@@ -824,15 +824,15 @@ type CalculatorServerStubMethods interface {
 	// turn it is embedded by arith.Calculator (which is in the same package but
 	// different file) to verify that embedding works in all these scenarios.
 	AdvancedMathServerStubMethods
-	On(__ipc.ServerContext) error  // On turns the calculator on.
-	Off(__ipc.ServerContext) error // Off turns the calculator off.
+	On(ipc.ServerContext) error  // On turns the calculator on.
+	Off(ipc.ServerContext) error // Off turns the calculator off.
 }
 
 // CalculatorServerStub adds universal methods to CalculatorServerStubMethods.
 type CalculatorServerStub interface {
 	CalculatorServerStubMethods
 	// Describe the Calculator interfaces.
-	Describe__() []__ipc.InterfaceDesc
+	Describe__() []ipc.InterfaceDesc
 }
 
 // CalculatorServer returns a server stub for Calculator.
@@ -846,9 +846,9 @@ func CalculatorServer(impl CalculatorServerMethods) CalculatorServerStub {
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
-	if gs := __ipc.NewGlobState(stub); gs != nil {
+	if gs := ipc.NewGlobState(stub); gs != nil {
 		stub.gs = gs
-	} else if gs := __ipc.NewGlobState(impl); gs != nil {
+	} else if gs := ipc.NewGlobState(impl); gs != nil {
 		stub.gs = gs
 	}
 	return stub
@@ -858,49 +858,49 @@ type implCalculatorServerStub struct {
 	impl CalculatorServerMethods
 	ArithServerStub
 	AdvancedMathServerStub
-	gs *__ipc.GlobState
+	gs *ipc.GlobState
 }
 
-func (s implCalculatorServerStub) On(ctx __ipc.ServerContext) error {
+func (s implCalculatorServerStub) On(ctx ipc.ServerContext) error {
 	return s.impl.On(ctx)
 }
 
-func (s implCalculatorServerStub) Off(ctx __ipc.ServerContext) error {
+func (s implCalculatorServerStub) Off(ctx ipc.ServerContext) error {
 	return s.impl.Off(ctx)
 }
 
-func (s implCalculatorServerStub) Globber() *__ipc.GlobState {
+func (s implCalculatorServerStub) Globber() *ipc.GlobState {
 	return s.gs
 }
 
-func (s implCalculatorServerStub) Describe__() []__ipc.InterfaceDesc {
-	return []__ipc.InterfaceDesc{CalculatorDesc, ArithDesc, AdvancedMathDesc, TrigonometryDesc, exp.ExpDesc}
+func (s implCalculatorServerStub) Describe__() []ipc.InterfaceDesc {
+	return []ipc.InterfaceDesc{CalculatorDesc, ArithDesc, AdvancedMathDesc, TrigonometryDesc, exp.ExpDesc}
 }
 
 // CalculatorDesc describes the Calculator interface.
-var CalculatorDesc __ipc.InterfaceDesc = descCalculator
+var CalculatorDesc ipc.InterfaceDesc = descCalculator
 
 // descCalculator hides the desc to keep godoc clean.
-var descCalculator = __ipc.InterfaceDesc{
+var descCalculator = ipc.InterfaceDesc{
 	Name:    "Calculator",
 	PkgPath: "v.io/core/veyron2/vdl/testdata/arith",
-	Embeds: []__ipc.EmbedDesc{
+	Embeds: []ipc.EmbedDesc{
 		{"Arith", "v.io/core/veyron2/vdl/testdata/arith", "// Arith is an example of an interface definition for an arithmetic service.\n// Things to note:\n//   * There must be at least 1 out-arg, and the last out-arg must be error."},
 		{"AdvancedMath", "v.io/core/veyron2/vdl/testdata/arith", "// AdvancedMath is an interface for more advanced math than arith.  It embeds\n// interfaces defined both in the same file and in an external package; and in\n// turn it is embedded by arith.Calculator (which is in the same package but\n// different file) to verify that embedding works in all these scenarios."},
 	},
-	Methods: []__ipc.MethodDesc{
+	Methods: []ipc.MethodDesc{
 		{
 			Name: "On",
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // error
 			},
 		},
 		{
 			Name: "Off",
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdl.AnyRep{"offtag"},
+			Tags: []vdl.AnyRep{"offtag"},
 		},
 	},
 }

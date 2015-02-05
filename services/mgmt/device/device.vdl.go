@@ -6,17 +6,16 @@
 package device
 
 import (
+	// VDL system imports
+	"v.io/core/veyron2"
+	"v.io/core/veyron2/context"
+	"v.io/core/veyron2/ipc"
+	"v.io/core/veyron2/vdl"
+
+	// VDL user imports
 	"v.io/core/veyron2/services/mgmt/binary"
-
 	"v.io/core/veyron2/services/security/access"
-
 	"v.io/core/veyron2/services/security/access/object"
-
-	// The non-user imports are prefixed with "__" to prevent collisions.
-	__veyron2 "v.io/core/veyron2"
-	__context "v.io/core/veyron2/context"
-	__ipc "v.io/core/veyron2/ipc"
-	__vdl "v.io/core/veyron2/vdl"
 )
 
 // TODO(caprita): Merge with veyron2/config and veyron/lib/exec/config.go.
@@ -58,9 +57,9 @@ func (Association) __VDLReflect(struct {
 }
 
 func init() {
-	__vdl.Register(Config(nil))
-	__vdl.Register(Description{})
-	__vdl.Register(Association{})
+	vdl.Register(Config(nil))
+	vdl.Register(Description{})
+	vdl.Register(Association{})
 }
 
 // ApplicationClientMethods is the client interface
@@ -220,23 +219,23 @@ type ApplicationClientMethods interface {
 	// which can then be used to control all the installations of the given
 	// application.
 	// TODO(rjkroege): Use customized labels.
-	Install(ctx *__context.T, name string, config Config, opts ...__ipc.CallOpt) (string, error)
+	Install(ctx *context.T, name string, config Config, opts ...ipc.CallOpt) (string, error)
 	// Refresh refreshes the state of application installation(s)
 	// instance(s).
-	Refresh(*__context.T, ...__ipc.CallOpt) error
+	Refresh(*context.T, ...ipc.CallOpt) error
 	// Restart restarts execution of application installation(s)
 	// instance(s).
-	Restart(*__context.T, ...__ipc.CallOpt) error
+	Restart(*context.T, ...ipc.CallOpt) error
 	// Resume resumes execution of application installation(s)
 	// instance(s).
-	Resume(*__context.T, ...__ipc.CallOpt) error
+	Resume(*context.T, ...ipc.CallOpt) error
 	// Revert reverts application installation(s) to the most recent
 	// previous installation.
-	Revert(*__context.T, ...__ipc.CallOpt) error
+	Revert(*context.T, ...ipc.CallOpt) error
 	// Start starts an instance of application installation(s) and
 	// returns the object name(s) that identifies/identify the new
 	// instance(s).
-	Start(*__context.T, ...__ipc.CallOpt) ([]string, error)
+	Start(*context.T, ...ipc.CallOpt) ([]string, error)
 	// Stop attempts a clean shutdown of application installation(s)
 	// instance(s). If the deadline (in seconds) is non-zero and the
 	// instance(s) in questions are still running after the given deadline,
@@ -244,41 +243,41 @@ type ApplicationClientMethods interface {
 	//
 	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
 	// are implemented.
-	Stop(ctx *__context.T, deadline uint32, opts ...__ipc.CallOpt) error
+	Stop(ctx *context.T, deadline uint32, opts ...ipc.CallOpt) error
 	// Suspend suspends execution of application installation(s)
 	// instance(s).
-	Suspend(*__context.T, ...__ipc.CallOpt) error
+	Suspend(*context.T, ...ipc.CallOpt) error
 	// Uninstall uninstalls application installation(s).
-	Uninstall(*__context.T, ...__ipc.CallOpt) error
+	Uninstall(*context.T, ...ipc.CallOpt) error
 	// Update updates the application installation(s) from the object name
 	// provided during Install.  If the new application envelope contains a
 	// different application title, the update does not occur, and an error
 	// is returned.
-	Update(*__context.T, ...__ipc.CallOpt) error
+	Update(*context.T, ...ipc.CallOpt) error
 	// UpdateTo updates the application installation(s) to the application
 	// specified by the object name argument.  If the new application
 	// envelope contains a different application title, the update does not
 	// occur, and an error is returned.
-	UpdateTo(ctx *__context.T, name string, opts ...__ipc.CallOpt) error
+	UpdateTo(ctx *context.T, name string, opts ...ipc.CallOpt) error
 	// Debug returns debug information about the application installation or
 	// instance.  This is generally highly implementation-specific, and
 	// presented in an unstructured form.  No guarantees are given about the
 	// stability of the format, and parsing it programmatically is
 	// specifically discouraged.
-	Debug(*__context.T, ...__ipc.CallOpt) (string, error)
+	Debug(*context.T, ...ipc.CallOpt) (string, error)
 }
 
 // ApplicationClientStub adds universal methods to ApplicationClientMethods.
 type ApplicationClientStub interface {
 	ApplicationClientMethods
-	__ipc.UniversalServiceMethods
+	ipc.UniversalServiceMethods
 }
 
 // ApplicationClient returns a client stub for Application.
-func ApplicationClient(name string, opts ...__ipc.BindOpt) ApplicationClientStub {
-	var client __ipc.Client
+func ApplicationClient(name string, opts ...ipc.BindOpt) ApplicationClientStub {
+	var client ipc.Client
 	for _, opt := range opts {
-		if clientOpt, ok := opt.(__ipc.Client); ok {
+		if clientOpt, ok := opt.(ipc.Client); ok {
 			client = clientOpt
 		}
 	}
@@ -287,20 +286,20 @@ func ApplicationClient(name string, opts ...__ipc.BindOpt) ApplicationClientStub
 
 type implApplicationClientStub struct {
 	name   string
-	client __ipc.Client
+	client ipc.Client
 
 	object.ObjectClientStub
 }
 
-func (c implApplicationClientStub) c(ctx *__context.T) __ipc.Client {
+func (c implApplicationClientStub) c(ctx *context.T) ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return __veyron2.GetClient(ctx)
+	return veyron2.GetClient(ctx)
 }
 
-func (c implApplicationClientStub) Install(ctx *__context.T, i0 string, i1 Config, opts ...__ipc.CallOpt) (o0 string, err error) {
-	var call __ipc.Call
+func (c implApplicationClientStub) Install(ctx *context.T, i0 string, i1 Config, opts ...ipc.CallOpt) (o0 string, err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Install", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
@@ -310,8 +309,8 @@ func (c implApplicationClientStub) Install(ctx *__context.T, i0 string, i1 Confi
 	return
 }
 
-func (c implApplicationClientStub) Refresh(ctx *__context.T, opts ...__ipc.CallOpt) (err error) {
-	var call __ipc.Call
+func (c implApplicationClientStub) Refresh(ctx *context.T, opts ...ipc.CallOpt) (err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Refresh", nil, opts...); err != nil {
 		return
 	}
@@ -321,8 +320,8 @@ func (c implApplicationClientStub) Refresh(ctx *__context.T, opts ...__ipc.CallO
 	return
 }
 
-func (c implApplicationClientStub) Restart(ctx *__context.T, opts ...__ipc.CallOpt) (err error) {
-	var call __ipc.Call
+func (c implApplicationClientStub) Restart(ctx *context.T, opts ...ipc.CallOpt) (err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Restart", nil, opts...); err != nil {
 		return
 	}
@@ -332,8 +331,8 @@ func (c implApplicationClientStub) Restart(ctx *__context.T, opts ...__ipc.CallO
 	return
 }
 
-func (c implApplicationClientStub) Resume(ctx *__context.T, opts ...__ipc.CallOpt) (err error) {
-	var call __ipc.Call
+func (c implApplicationClientStub) Resume(ctx *context.T, opts ...ipc.CallOpt) (err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Resume", nil, opts...); err != nil {
 		return
 	}
@@ -343,8 +342,8 @@ func (c implApplicationClientStub) Resume(ctx *__context.T, opts ...__ipc.CallOp
 	return
 }
 
-func (c implApplicationClientStub) Revert(ctx *__context.T, opts ...__ipc.CallOpt) (err error) {
-	var call __ipc.Call
+func (c implApplicationClientStub) Revert(ctx *context.T, opts ...ipc.CallOpt) (err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Revert", nil, opts...); err != nil {
 		return
 	}
@@ -354,8 +353,8 @@ func (c implApplicationClientStub) Revert(ctx *__context.T, opts ...__ipc.CallOp
 	return
 }
 
-func (c implApplicationClientStub) Start(ctx *__context.T, opts ...__ipc.CallOpt) (o0 []string, err error) {
-	var call __ipc.Call
+func (c implApplicationClientStub) Start(ctx *context.T, opts ...ipc.CallOpt) (o0 []string, err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Start", nil, opts...); err != nil {
 		return
 	}
@@ -365,8 +364,8 @@ func (c implApplicationClientStub) Start(ctx *__context.T, opts ...__ipc.CallOpt
 	return
 }
 
-func (c implApplicationClientStub) Stop(ctx *__context.T, i0 uint32, opts ...__ipc.CallOpt) (err error) {
-	var call __ipc.Call
+func (c implApplicationClientStub) Stop(ctx *context.T, i0 uint32, opts ...ipc.CallOpt) (err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Stop", []interface{}{i0}, opts...); err != nil {
 		return
 	}
@@ -376,8 +375,8 @@ func (c implApplicationClientStub) Stop(ctx *__context.T, i0 uint32, opts ...__i
 	return
 }
 
-func (c implApplicationClientStub) Suspend(ctx *__context.T, opts ...__ipc.CallOpt) (err error) {
-	var call __ipc.Call
+func (c implApplicationClientStub) Suspend(ctx *context.T, opts ...ipc.CallOpt) (err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Suspend", nil, opts...); err != nil {
 		return
 	}
@@ -387,8 +386,8 @@ func (c implApplicationClientStub) Suspend(ctx *__context.T, opts ...__ipc.CallO
 	return
 }
 
-func (c implApplicationClientStub) Uninstall(ctx *__context.T, opts ...__ipc.CallOpt) (err error) {
-	var call __ipc.Call
+func (c implApplicationClientStub) Uninstall(ctx *context.T, opts ...ipc.CallOpt) (err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Uninstall", nil, opts...); err != nil {
 		return
 	}
@@ -398,8 +397,8 @@ func (c implApplicationClientStub) Uninstall(ctx *__context.T, opts ...__ipc.Cal
 	return
 }
 
-func (c implApplicationClientStub) Update(ctx *__context.T, opts ...__ipc.CallOpt) (err error) {
-	var call __ipc.Call
+func (c implApplicationClientStub) Update(ctx *context.T, opts ...ipc.CallOpt) (err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Update", nil, opts...); err != nil {
 		return
 	}
@@ -409,8 +408,8 @@ func (c implApplicationClientStub) Update(ctx *__context.T, opts ...__ipc.CallOp
 	return
 }
 
-func (c implApplicationClientStub) UpdateTo(ctx *__context.T, i0 string, opts ...__ipc.CallOpt) (err error) {
-	var call __ipc.Call
+func (c implApplicationClientStub) UpdateTo(ctx *context.T, i0 string, opts ...ipc.CallOpt) (err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "UpdateTo", []interface{}{i0}, opts...); err != nil {
 		return
 	}
@@ -420,8 +419,8 @@ func (c implApplicationClientStub) UpdateTo(ctx *__context.T, i0 string, opts ..
 	return
 }
 
-func (c implApplicationClientStub) Debug(ctx *__context.T, opts ...__ipc.CallOpt) (o0 string, err error) {
-	var call __ipc.Call
+func (c implApplicationClientStub) Debug(ctx *context.T, opts ...ipc.CallOpt) (o0 string, err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Debug", nil, opts...); err != nil {
 		return
 	}
@@ -588,23 +587,23 @@ type ApplicationServerMethods interface {
 	// which can then be used to control all the installations of the given
 	// application.
 	// TODO(rjkroege): Use customized labels.
-	Install(ctx __ipc.ServerContext, name string, config Config) (string, error)
+	Install(ctx ipc.ServerContext, name string, config Config) (string, error)
 	// Refresh refreshes the state of application installation(s)
 	// instance(s).
-	Refresh(__ipc.ServerContext) error
+	Refresh(ipc.ServerContext) error
 	// Restart restarts execution of application installation(s)
 	// instance(s).
-	Restart(__ipc.ServerContext) error
+	Restart(ipc.ServerContext) error
 	// Resume resumes execution of application installation(s)
 	// instance(s).
-	Resume(__ipc.ServerContext) error
+	Resume(ipc.ServerContext) error
 	// Revert reverts application installation(s) to the most recent
 	// previous installation.
-	Revert(__ipc.ServerContext) error
+	Revert(ipc.ServerContext) error
 	// Start starts an instance of application installation(s) and
 	// returns the object name(s) that identifies/identify the new
 	// instance(s).
-	Start(__ipc.ServerContext) ([]string, error)
+	Start(ipc.ServerContext) ([]string, error)
 	// Stop attempts a clean shutdown of application installation(s)
 	// instance(s). If the deadline (in seconds) is non-zero and the
 	// instance(s) in questions are still running after the given deadline,
@@ -612,28 +611,28 @@ type ApplicationServerMethods interface {
 	//
 	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
 	// are implemented.
-	Stop(ctx __ipc.ServerContext, deadline uint32) error
+	Stop(ctx ipc.ServerContext, deadline uint32) error
 	// Suspend suspends execution of application installation(s)
 	// instance(s).
-	Suspend(__ipc.ServerContext) error
+	Suspend(ipc.ServerContext) error
 	// Uninstall uninstalls application installation(s).
-	Uninstall(__ipc.ServerContext) error
+	Uninstall(ipc.ServerContext) error
 	// Update updates the application installation(s) from the object name
 	// provided during Install.  If the new application envelope contains a
 	// different application title, the update does not occur, and an error
 	// is returned.
-	Update(__ipc.ServerContext) error
+	Update(ipc.ServerContext) error
 	// UpdateTo updates the application installation(s) to the application
 	// specified by the object name argument.  If the new application
 	// envelope contains a different application title, the update does not
 	// occur, and an error is returned.
-	UpdateTo(ctx __ipc.ServerContext, name string) error
+	UpdateTo(ctx ipc.ServerContext, name string) error
 	// Debug returns debug information about the application installation or
 	// instance.  This is generally highly implementation-specific, and
 	// presented in an unstructured form.  No guarantees are given about the
 	// stability of the format, and parsing it programmatically is
 	// specifically discouraged.
-	Debug(__ipc.ServerContext) (string, error)
+	Debug(ipc.ServerContext) (string, error)
 }
 
 // ApplicationServerStubMethods is the server interface containing
@@ -646,7 +645,7 @@ type ApplicationServerStubMethods ApplicationServerMethods
 type ApplicationServerStub interface {
 	ApplicationServerStubMethods
 	// Describe the Application interfaces.
-	Describe__() []__ipc.InterfaceDesc
+	Describe__() []ipc.InterfaceDesc
 }
 
 // ApplicationServer returns a server stub for Application.
@@ -659,9 +658,9 @@ func ApplicationServer(impl ApplicationServerMethods) ApplicationServerStub {
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
-	if gs := __ipc.NewGlobState(stub); gs != nil {
+	if gs := ipc.NewGlobState(stub); gs != nil {
 		stub.gs = gs
-	} else if gs := __ipc.NewGlobState(impl); gs != nil {
+	} else if gs := ipc.NewGlobState(impl); gs != nil {
 		stub.gs = gs
 	}
 	return stub
@@ -670,185 +669,185 @@ func ApplicationServer(impl ApplicationServerMethods) ApplicationServerStub {
 type implApplicationServerStub struct {
 	impl ApplicationServerMethods
 	object.ObjectServerStub
-	gs *__ipc.GlobState
+	gs *ipc.GlobState
 }
 
-func (s implApplicationServerStub) Install(ctx __ipc.ServerContext, i0 string, i1 Config) (string, error) {
+func (s implApplicationServerStub) Install(ctx ipc.ServerContext, i0 string, i1 Config) (string, error) {
 	return s.impl.Install(ctx, i0, i1)
 }
 
-func (s implApplicationServerStub) Refresh(ctx __ipc.ServerContext) error {
+func (s implApplicationServerStub) Refresh(ctx ipc.ServerContext) error {
 	return s.impl.Refresh(ctx)
 }
 
-func (s implApplicationServerStub) Restart(ctx __ipc.ServerContext) error {
+func (s implApplicationServerStub) Restart(ctx ipc.ServerContext) error {
 	return s.impl.Restart(ctx)
 }
 
-func (s implApplicationServerStub) Resume(ctx __ipc.ServerContext) error {
+func (s implApplicationServerStub) Resume(ctx ipc.ServerContext) error {
 	return s.impl.Resume(ctx)
 }
 
-func (s implApplicationServerStub) Revert(ctx __ipc.ServerContext) error {
+func (s implApplicationServerStub) Revert(ctx ipc.ServerContext) error {
 	return s.impl.Revert(ctx)
 }
 
-func (s implApplicationServerStub) Start(ctx __ipc.ServerContext) ([]string, error) {
+func (s implApplicationServerStub) Start(ctx ipc.ServerContext) ([]string, error) {
 	return s.impl.Start(ctx)
 }
 
-func (s implApplicationServerStub) Stop(ctx __ipc.ServerContext, i0 uint32) error {
+func (s implApplicationServerStub) Stop(ctx ipc.ServerContext, i0 uint32) error {
 	return s.impl.Stop(ctx, i0)
 }
 
-func (s implApplicationServerStub) Suspend(ctx __ipc.ServerContext) error {
+func (s implApplicationServerStub) Suspend(ctx ipc.ServerContext) error {
 	return s.impl.Suspend(ctx)
 }
 
-func (s implApplicationServerStub) Uninstall(ctx __ipc.ServerContext) error {
+func (s implApplicationServerStub) Uninstall(ctx ipc.ServerContext) error {
 	return s.impl.Uninstall(ctx)
 }
 
-func (s implApplicationServerStub) Update(ctx __ipc.ServerContext) error {
+func (s implApplicationServerStub) Update(ctx ipc.ServerContext) error {
 	return s.impl.Update(ctx)
 }
 
-func (s implApplicationServerStub) UpdateTo(ctx __ipc.ServerContext, i0 string) error {
+func (s implApplicationServerStub) UpdateTo(ctx ipc.ServerContext, i0 string) error {
 	return s.impl.UpdateTo(ctx, i0)
 }
 
-func (s implApplicationServerStub) Debug(ctx __ipc.ServerContext) (string, error) {
+func (s implApplicationServerStub) Debug(ctx ipc.ServerContext) (string, error) {
 	return s.impl.Debug(ctx)
 }
 
-func (s implApplicationServerStub) Globber() *__ipc.GlobState {
+func (s implApplicationServerStub) Globber() *ipc.GlobState {
 	return s.gs
 }
 
-func (s implApplicationServerStub) Describe__() []__ipc.InterfaceDesc {
-	return []__ipc.InterfaceDesc{ApplicationDesc, object.ObjectDesc}
+func (s implApplicationServerStub) Describe__() []ipc.InterfaceDesc {
+	return []ipc.InterfaceDesc{ApplicationDesc, object.ObjectDesc}
 }
 
 // ApplicationDesc describes the Application interface.
-var ApplicationDesc __ipc.InterfaceDesc = descApplication
+var ApplicationDesc ipc.InterfaceDesc = descApplication
 
 // descApplication hides the desc to keep godoc clean.
-var descApplication = __ipc.InterfaceDesc{
+var descApplication = ipc.InterfaceDesc{
 	Name:    "Application",
 	PkgPath: "v.io/core/veyron2/services/mgmt/device",
 	Doc:     "// Application can be used to manage applications on a device. The\n// idea is that this interace will be invoked using an object name that\n// identifies the application and its installations and instances\n// where applicable.\n//\n// In particular, the interface methods can be divided into three\n// groups based on their intended receiver:\n//\n// 1) Method receiver is an application:\n// -- Install()\n//\n// 2) Method receiver is an application installation:\n// -- Start()\n// -- Uninstall()\n// -- Update()\n//\n// 3) Method receiver is application installation instance:\n// -- Refresh()\n// -- Restart()\n// -- Resume()\n// -- Stop()\n// -- Suspend()\n//\n// For groups 2) and 3), the suffix that specifies the receiver can\n// optionally omit the installation and/or instance, in which case the\n// operation applies to all installations and/or instances in the\n// scope of the suffix.\n//\n// Examples:\n// # Install Google Maps on the device.\n// device/apps.Install(\"/google.com/appstore/maps\") --> \"google maps/0\"\n//\n// # Start an instance of the previously installed maps application installation.\n// device/apps/google maps/0.Start() --> { \"0\" }\n//\n// # Start a second instance of the previously installed maps application installation.\n// device/apps/google maps/0.Start() --> { \"1\" }\n//\n// # Stop the first instance previously started.\n// device/apps/google maps/0/0.Stop()\n//\n// # Install a second Google Maps installation.\n// device/apps.Install(\"/google.com/appstore/maps\") --> \"google maps/1\"\n//\n// # Start an instance for all maps application installations.\n// device/apps/google maps.Start() --> {\"0/2\", \"1/0\"}\n//\n// # Refresh the state of all instances of all maps application installations.\n// device/apps/google maps.Refresh()\n//\n// # Refresh the state of all instances of the maps application installation\n// identified by the given suffix.\n// device/apps/google maps/0.Refresh()\n//\n// # Refresh the state of the maps application installation instance identified by\n// the given suffix.\n// device/apps/google maps/0/2.Refresh()\n//\n// # Update the second maps installation to the latest version available.\n// device/apps/google maps/1.Update()\n//\n// # Update the first maps installation to a specific version.\n// device/apps/google maps/0.UpdateTo(\"/google.com/appstore/beta/maps\")\n//\n// Further, the following methods complement one another:\n// -- Install() and Uninstall()\n// -- Start() and Stop()\n// -- Suspend() and Resume()\n//\n// Finally, an application installation instance can be in one of\n// three abstract states: 1) \"does not exist\", 2) \"running\", or 3)\n// \"suspended\". The interface methods transition between these\n// abstract states using the following state machine:\n//\n// apply(Start(), \"does not exists\") = \"running\"\n// apply(Refresh(), \"running\") = \"running\"\n// apply(Refresh(), \"suspended\") = \"suspended\"\n// apply(Restart(), \"running\") = \"running\"\n// apply(Restart(), \"suspended\") = \"running\"\n// apply(Resume(), \"suspended\") = \"running\"\n// apply(Resume(), \"running\") = \"running\"\n// apply(Stop(), \"running\") = \"does not exist\"\n// apply(Stop(), \"suspended\") = \"does not exist\"\n// apply(Suspend(), \"running\") = \"suspended\"\n// apply(Suspend(), \"suspended\") = \"suspended\"\n//\n// In other words, invoking any method using an existing application\n// installation instance as a receiver is well-defined.",
-	Embeds: []__ipc.EmbedDesc{
+	Embeds: []ipc.EmbedDesc{
 		{"Object", "v.io/core/veyron2/services/security/access/object", "// Object provides access control for Veyron objects.\n//\n// Veyron services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/core/veyron2/security/access\"\n//   import \"v.io/core/veyron2/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetACL and GetACL in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/core/veyron2/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}\n//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}\n//  }"},
 	},
-	Methods: []__ipc.MethodDesc{
+	Methods: []ipc.MethodDesc{
 		{
 			Name: "Install",
 			Doc:  "// Install installs the application identified by the first argument and\n// returns an object name suffix that identifies the new installation.\n//\n// The name argument should be an object name for an application\n// envelope.  The service it identifies must implement\n// repository.Application, and is expected to return either the\n// requested version (if the object name encodes a specific version), or\n// otherwise the latest available version, as appropriate.  This object\n// name will be used by default by the Update method, as a source for\n// updated application envelopes (can be overriden by setting\n// AppOriginConfigKey in the config).\n//\n// The config argument specifies config settings that will take\n// precedence over those present in the application envelope.\n//\n// The returned suffix, when appended to the name used to reach the\n// receiver for Install, can be used to control the installation object.\n// The suffix will contain the title of the application as a prefix,\n// which can then be used to control all the installations of the given\n// application.\n// TODO(rjkroege): Use customized labels.",
-			InArgs: []__ipc.ArgDesc{
+			InArgs: []ipc.ArgDesc{
 				{"name", ``},   // string
 				{"config", ``}, // Config
 			},
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // string
 				{"", ``}, // error
 			},
-			Tags: []__vdl.AnyRep{access.Tag("Write")},
+			Tags: []vdl.AnyRep{access.Tag("Write")},
 		},
 		{
 			Name: "Refresh",
 			Doc:  "// Refresh refreshes the state of application installation(s)\n// instance(s).",
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdl.AnyRep{access.Tag("Admin")},
+			Tags: []vdl.AnyRep{access.Tag("Admin")},
 		},
 		{
 			Name: "Restart",
 			Doc:  "// Restart restarts execution of application installation(s)\n// instance(s).",
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdl.AnyRep{access.Tag("Write")},
+			Tags: []vdl.AnyRep{access.Tag("Write")},
 		},
 		{
 			Name: "Resume",
 			Doc:  "// Resume resumes execution of application installation(s)\n// instance(s).",
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdl.AnyRep{access.Tag("Write")},
+			Tags: []vdl.AnyRep{access.Tag("Write")},
 		},
 		{
 			Name: "Revert",
 			Doc:  "// Revert reverts application installation(s) to the most recent\n// previous installation.",
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdl.AnyRep{access.Tag("Admin")},
+			Tags: []vdl.AnyRep{access.Tag("Admin")},
 		},
 		{
 			Name: "Start",
 			Doc:  "// Start starts an instance of application installation(s) and\n// returns the object name(s) that identifies/identify the new\n// instance(s).",
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // []string
 				{"", ``}, // error
 			},
-			Tags: []__vdl.AnyRep{access.Tag("Read")},
+			Tags: []vdl.AnyRep{access.Tag("Read")},
 		},
 		{
 			Name: "Stop",
 			Doc:  "// Stop attempts a clean shutdown of application installation(s)\n// instance(s). If the deadline (in seconds) is non-zero and the\n// instance(s) in questions are still running after the given deadline,\n// shutdown of the instance(s) is enforced.\n//\n// TODO(jsimsa): Switch deadline to time.Duration when built-in types\n// are implemented.",
-			InArgs: []__ipc.ArgDesc{
+			InArgs: []ipc.ArgDesc{
 				{"deadline", ``}, // uint32
 			},
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdl.AnyRep{access.Tag("Admin")},
+			Tags: []vdl.AnyRep{access.Tag("Admin")},
 		},
 		{
 			Name: "Suspend",
 			Doc:  "// Suspend suspends execution of application installation(s)\n// instance(s).",
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdl.AnyRep{access.Tag("Write")},
+			Tags: []vdl.AnyRep{access.Tag("Write")},
 		},
 		{
 			Name: "Uninstall",
 			Doc:  "// Uninstall uninstalls application installation(s).",
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdl.AnyRep{access.Tag("Admin")},
+			Tags: []vdl.AnyRep{access.Tag("Admin")},
 		},
 		{
 			Name: "Update",
 			Doc:  "// Update updates the application installation(s) from the object name\n// provided during Install.  If the new application envelope contains a\n// different application title, the update does not occur, and an error\n// is returned.",
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdl.AnyRep{access.Tag("Admin")},
+			Tags: []vdl.AnyRep{access.Tag("Admin")},
 		},
 		{
 			Name: "UpdateTo",
 			Doc:  "// UpdateTo updates the application installation(s) to the application\n// specified by the object name argument.  If the new application\n// envelope contains a different application title, the update does not\n// occur, and an error is returned.",
-			InArgs: []__ipc.ArgDesc{
+			InArgs: []ipc.ArgDesc{
 				{"name", ``}, // string
 			},
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdl.AnyRep{access.Tag("Admin")},
+			Tags: []vdl.AnyRep{access.Tag("Admin")},
 		},
 		{
 			Name: "Debug",
 			Doc:  "// Debug returns debug information about the application installation or\n// instance.  This is generally highly implementation-specific, and\n// presented in an unstructured form.  No guarantees are given about the\n// stability of the format, and parsing it programmatically is\n// specifically discouraged.",
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // string
 				{"", ``}, // error
 			},
-			Tags: []__vdl.AnyRep{access.Tag("Debug")},
+			Tags: []vdl.AnyRep{access.Tag("Debug")},
 		},
 	},
 }
@@ -951,39 +950,39 @@ type DeviceClientMethods interface {
 	// Claim is used to claim ownership of a device by blessing its
 	// identity. By default, after this call, all device methods will be
 	// access protected to the identity of the claimer.
-	Claim(*__context.T, ...__ipc.CallOpt) error
+	Claim(*context.T, ...ipc.CallOpt) error
 	// Describe generates a description of the device.
-	Describe(*__context.T, ...__ipc.CallOpt) (Description, error)
+	Describe(*context.T, ...ipc.CallOpt) (Description, error)
 	// IsRunnable checks if the device can execute the given binary.
-	IsRunnable(ctx *__context.T, description binary.Description, opts ...__ipc.CallOpt) (bool, error)
+	IsRunnable(ctx *context.T, description binary.Description, opts ...ipc.CallOpt) (bool, error)
 	// Reset resets the device. If the deadline is non-zero and the device
 	// in question is still running after the given deadline expired,
 	// reset of the device is enforced.
 	//
 	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
 	// are implemented.
-	Reset(ctx *__context.T, deadline uint64, opts ...__ipc.CallOpt) error
+	Reset(ctx *context.T, deadline uint64, opts ...ipc.CallOpt) error
 	// AssociateAccount associates a local  system account name with the provided
 	// Veyron identities. It replaces the existing association if one already exists for that
 	// identity. Setting an AccountName to "" removes the association for each
 	// listed identity.
-	AssociateAccount(ctx *__context.T, identityNames []string, accountName string, opts ...__ipc.CallOpt) error
+	AssociateAccount(ctx *context.T, identityNames []string, accountName string, opts ...ipc.CallOpt) error
 	// ListAssociations returns all of the associations between Veyron identities
 	// and system names.
-	ListAssociations(*__context.T, ...__ipc.CallOpt) ([]Association, error)
+	ListAssociations(*context.T, ...ipc.CallOpt) ([]Association, error)
 }
 
 // DeviceClientStub adds universal methods to DeviceClientMethods.
 type DeviceClientStub interface {
 	DeviceClientMethods
-	__ipc.UniversalServiceMethods
+	ipc.UniversalServiceMethods
 }
 
 // DeviceClient returns a client stub for Device.
-func DeviceClient(name string, opts ...__ipc.BindOpt) DeviceClientStub {
-	var client __ipc.Client
+func DeviceClient(name string, opts ...ipc.BindOpt) DeviceClientStub {
+	var client ipc.Client
 	for _, opt := range opts {
-		if clientOpt, ok := opt.(__ipc.Client); ok {
+		if clientOpt, ok := opt.(ipc.Client); ok {
 			client = clientOpt
 		}
 	}
@@ -992,20 +991,20 @@ func DeviceClient(name string, opts ...__ipc.BindOpt) DeviceClientStub {
 
 type implDeviceClientStub struct {
 	name   string
-	client __ipc.Client
+	client ipc.Client
 
 	ApplicationClientStub
 }
 
-func (c implDeviceClientStub) c(ctx *__context.T) __ipc.Client {
+func (c implDeviceClientStub) c(ctx *context.T) ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return __veyron2.GetClient(ctx)
+	return veyron2.GetClient(ctx)
 }
 
-func (c implDeviceClientStub) Claim(ctx *__context.T, opts ...__ipc.CallOpt) (err error) {
-	var call __ipc.Call
+func (c implDeviceClientStub) Claim(ctx *context.T, opts ...ipc.CallOpt) (err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Claim", nil, opts...); err != nil {
 		return
 	}
@@ -1015,8 +1014,8 @@ func (c implDeviceClientStub) Claim(ctx *__context.T, opts ...__ipc.CallOpt) (er
 	return
 }
 
-func (c implDeviceClientStub) Describe(ctx *__context.T, opts ...__ipc.CallOpt) (o0 Description, err error) {
-	var call __ipc.Call
+func (c implDeviceClientStub) Describe(ctx *context.T, opts ...ipc.CallOpt) (o0 Description, err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Describe", nil, opts...); err != nil {
 		return
 	}
@@ -1026,8 +1025,8 @@ func (c implDeviceClientStub) Describe(ctx *__context.T, opts ...__ipc.CallOpt) 
 	return
 }
 
-func (c implDeviceClientStub) IsRunnable(ctx *__context.T, i0 binary.Description, opts ...__ipc.CallOpt) (o0 bool, err error) {
-	var call __ipc.Call
+func (c implDeviceClientStub) IsRunnable(ctx *context.T, i0 binary.Description, opts ...ipc.CallOpt) (o0 bool, err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "IsRunnable", []interface{}{i0}, opts...); err != nil {
 		return
 	}
@@ -1037,8 +1036,8 @@ func (c implDeviceClientStub) IsRunnable(ctx *__context.T, i0 binary.Description
 	return
 }
 
-func (c implDeviceClientStub) Reset(ctx *__context.T, i0 uint64, opts ...__ipc.CallOpt) (err error) {
-	var call __ipc.Call
+func (c implDeviceClientStub) Reset(ctx *context.T, i0 uint64, opts ...ipc.CallOpt) (err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Reset", []interface{}{i0}, opts...); err != nil {
 		return
 	}
@@ -1048,8 +1047,8 @@ func (c implDeviceClientStub) Reset(ctx *__context.T, i0 uint64, opts ...__ipc.C
 	return
 }
 
-func (c implDeviceClientStub) AssociateAccount(ctx *__context.T, i0 []string, i1 string, opts ...__ipc.CallOpt) (err error) {
-	var call __ipc.Call
+func (c implDeviceClientStub) AssociateAccount(ctx *context.T, i0 []string, i1 string, opts ...ipc.CallOpt) (err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "AssociateAccount", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
@@ -1059,8 +1058,8 @@ func (c implDeviceClientStub) AssociateAccount(ctx *__context.T, i0 []string, i1
 	return
 }
 
-func (c implDeviceClientStub) ListAssociations(ctx *__context.T, opts ...__ipc.CallOpt) (o0 []Association, err error) {
-	var call __ipc.Call
+func (c implDeviceClientStub) ListAssociations(ctx *context.T, opts ...ipc.CallOpt) (o0 []Association, err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "ListAssociations", nil, opts...); err != nil {
 		return
 	}
@@ -1168,26 +1167,26 @@ type DeviceServerMethods interface {
 	// Claim is used to claim ownership of a device by blessing its
 	// identity. By default, after this call, all device methods will be
 	// access protected to the identity of the claimer.
-	Claim(__ipc.ServerContext) error
+	Claim(ipc.ServerContext) error
 	// Describe generates a description of the device.
-	Describe(__ipc.ServerContext) (Description, error)
+	Describe(ipc.ServerContext) (Description, error)
 	// IsRunnable checks if the device can execute the given binary.
-	IsRunnable(ctx __ipc.ServerContext, description binary.Description) (bool, error)
+	IsRunnable(ctx ipc.ServerContext, description binary.Description) (bool, error)
 	// Reset resets the device. If the deadline is non-zero and the device
 	// in question is still running after the given deadline expired,
 	// reset of the device is enforced.
 	//
 	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
 	// are implemented.
-	Reset(ctx __ipc.ServerContext, deadline uint64) error
+	Reset(ctx ipc.ServerContext, deadline uint64) error
 	// AssociateAccount associates a local  system account name with the provided
 	// Veyron identities. It replaces the existing association if one already exists for that
 	// identity. Setting an AccountName to "" removes the association for each
 	// listed identity.
-	AssociateAccount(ctx __ipc.ServerContext, identityNames []string, accountName string) error
+	AssociateAccount(ctx ipc.ServerContext, identityNames []string, accountName string) error
 	// ListAssociations returns all of the associations between Veyron identities
 	// and system names.
-	ListAssociations(__ipc.ServerContext) ([]Association, error)
+	ListAssociations(ipc.ServerContext) ([]Association, error)
 }
 
 // DeviceServerStubMethods is the server interface containing
@@ -1200,7 +1199,7 @@ type DeviceServerStubMethods DeviceServerMethods
 type DeviceServerStub interface {
 	DeviceServerStubMethods
 	// Describe the Device interfaces.
-	Describe__() []__ipc.InterfaceDesc
+	Describe__() []ipc.InterfaceDesc
 }
 
 // DeviceServer returns a server stub for Device.
@@ -1213,9 +1212,9 @@ func DeviceServer(impl DeviceServerMethods) DeviceServerStub {
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
-	if gs := __ipc.NewGlobState(stub); gs != nil {
+	if gs := ipc.NewGlobState(stub); gs != nil {
 		stub.gs = gs
-	} else if gs := __ipc.NewGlobState(impl); gs != nil {
+	} else if gs := ipc.NewGlobState(impl); gs != nil {
 		stub.gs = gs
 	}
 	return stub
@@ -1224,113 +1223,113 @@ func DeviceServer(impl DeviceServerMethods) DeviceServerStub {
 type implDeviceServerStub struct {
 	impl DeviceServerMethods
 	ApplicationServerStub
-	gs *__ipc.GlobState
+	gs *ipc.GlobState
 }
 
-func (s implDeviceServerStub) Claim(ctx __ipc.ServerContext) error {
+func (s implDeviceServerStub) Claim(ctx ipc.ServerContext) error {
 	return s.impl.Claim(ctx)
 }
 
-func (s implDeviceServerStub) Describe(ctx __ipc.ServerContext) (Description, error) {
+func (s implDeviceServerStub) Describe(ctx ipc.ServerContext) (Description, error) {
 	return s.impl.Describe(ctx)
 }
 
-func (s implDeviceServerStub) IsRunnable(ctx __ipc.ServerContext, i0 binary.Description) (bool, error) {
+func (s implDeviceServerStub) IsRunnable(ctx ipc.ServerContext, i0 binary.Description) (bool, error) {
 	return s.impl.IsRunnable(ctx, i0)
 }
 
-func (s implDeviceServerStub) Reset(ctx __ipc.ServerContext, i0 uint64) error {
+func (s implDeviceServerStub) Reset(ctx ipc.ServerContext, i0 uint64) error {
 	return s.impl.Reset(ctx, i0)
 }
 
-func (s implDeviceServerStub) AssociateAccount(ctx __ipc.ServerContext, i0 []string, i1 string) error {
+func (s implDeviceServerStub) AssociateAccount(ctx ipc.ServerContext, i0 []string, i1 string) error {
 	return s.impl.AssociateAccount(ctx, i0, i1)
 }
 
-func (s implDeviceServerStub) ListAssociations(ctx __ipc.ServerContext) ([]Association, error) {
+func (s implDeviceServerStub) ListAssociations(ctx ipc.ServerContext) ([]Association, error) {
 	return s.impl.ListAssociations(ctx)
 }
 
-func (s implDeviceServerStub) Globber() *__ipc.GlobState {
+func (s implDeviceServerStub) Globber() *ipc.GlobState {
 	return s.gs
 }
 
-func (s implDeviceServerStub) Describe__() []__ipc.InterfaceDesc {
-	return []__ipc.InterfaceDesc{DeviceDesc, ApplicationDesc, object.ObjectDesc}
+func (s implDeviceServerStub) Describe__() []ipc.InterfaceDesc {
+	return []ipc.InterfaceDesc{DeviceDesc, ApplicationDesc, object.ObjectDesc}
 }
 
 // DeviceDesc describes the Device interface.
-var DeviceDesc __ipc.InterfaceDesc = descDevice
+var DeviceDesc ipc.InterfaceDesc = descDevice
 
 // descDevice hides the desc to keep godoc clean.
-var descDevice = __ipc.InterfaceDesc{
+var descDevice = ipc.InterfaceDesc{
 	Name:    "Device",
 	PkgPath: "v.io/core/veyron2/services/mgmt/device",
 	Doc:     "// Device can be used to manage a device remotely using an object name that\n// identifies it.",
-	Embeds: []__ipc.EmbedDesc{
+	Embeds: []ipc.EmbedDesc{
 		{"Application", "v.io/core/veyron2/services/mgmt/device", "// Application can be used to manage applications on a device. The\n// idea is that this interace will be invoked using an object name that\n// identifies the application and its installations and instances\n// where applicable.\n//\n// In particular, the interface methods can be divided into three\n// groups based on their intended receiver:\n//\n// 1) Method receiver is an application:\n// -- Install()\n//\n// 2) Method receiver is an application installation:\n// -- Start()\n// -- Uninstall()\n// -- Update()\n//\n// 3) Method receiver is application installation instance:\n// -- Refresh()\n// -- Restart()\n// -- Resume()\n// -- Stop()\n// -- Suspend()\n//\n// For groups 2) and 3), the suffix that specifies the receiver can\n// optionally omit the installation and/or instance, in which case the\n// operation applies to all installations and/or instances in the\n// scope of the suffix.\n//\n// Examples:\n// # Install Google Maps on the device.\n// device/apps.Install(\"/google.com/appstore/maps\") --> \"google maps/0\"\n//\n// # Start an instance of the previously installed maps application installation.\n// device/apps/google maps/0.Start() --> { \"0\" }\n//\n// # Start a second instance of the previously installed maps application installation.\n// device/apps/google maps/0.Start() --> { \"1\" }\n//\n// # Stop the first instance previously started.\n// device/apps/google maps/0/0.Stop()\n//\n// # Install a second Google Maps installation.\n// device/apps.Install(\"/google.com/appstore/maps\") --> \"google maps/1\"\n//\n// # Start an instance for all maps application installations.\n// device/apps/google maps.Start() --> {\"0/2\", \"1/0\"}\n//\n// # Refresh the state of all instances of all maps application installations.\n// device/apps/google maps.Refresh()\n//\n// # Refresh the state of all instances of the maps application installation\n// identified by the given suffix.\n// device/apps/google maps/0.Refresh()\n//\n// # Refresh the state of the maps application installation instance identified by\n// the given suffix.\n// device/apps/google maps/0/2.Refresh()\n//\n// # Update the second maps installation to the latest version available.\n// device/apps/google maps/1.Update()\n//\n// # Update the first maps installation to a specific version.\n// device/apps/google maps/0.UpdateTo(\"/google.com/appstore/beta/maps\")\n//\n// Further, the following methods complement one another:\n// -- Install() and Uninstall()\n// -- Start() and Stop()\n// -- Suspend() and Resume()\n//\n// Finally, an application installation instance can be in one of\n// three abstract states: 1) \"does not exist\", 2) \"running\", or 3)\n// \"suspended\". The interface methods transition between these\n// abstract states using the following state machine:\n//\n// apply(Start(), \"does not exists\") = \"running\"\n// apply(Refresh(), \"running\") = \"running\"\n// apply(Refresh(), \"suspended\") = \"suspended\"\n// apply(Restart(), \"running\") = \"running\"\n// apply(Restart(), \"suspended\") = \"running\"\n// apply(Resume(), \"suspended\") = \"running\"\n// apply(Resume(), \"running\") = \"running\"\n// apply(Stop(), \"running\") = \"does not exist\"\n// apply(Stop(), \"suspended\") = \"does not exist\"\n// apply(Suspend(), \"running\") = \"suspended\"\n// apply(Suspend(), \"suspended\") = \"suspended\"\n//\n// In other words, invoking any method using an existing application\n// installation instance as a receiver is well-defined."},
 	},
-	Methods: []__ipc.MethodDesc{
+	Methods: []ipc.MethodDesc{
 		{
 			Name: "Claim",
 			Doc:  "// Claim is used to claim ownership of a device by blessing its\n// identity. By default, after this call, all device methods will be\n// access protected to the identity of the claimer.",
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdl.AnyRep{access.Tag("Admin")},
+			Tags: []vdl.AnyRep{access.Tag("Admin")},
 		},
 		{
 			Name: "Describe",
 			Doc:  "// Describe generates a description of the device.",
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // Description
 				{"", ``}, // error
 			},
-			Tags: []__vdl.AnyRep{access.Tag("Admin")},
+			Tags: []vdl.AnyRep{access.Tag("Admin")},
 		},
 		{
 			Name: "IsRunnable",
 			Doc:  "// IsRunnable checks if the device can execute the given binary.",
-			InArgs: []__ipc.ArgDesc{
+			InArgs: []ipc.ArgDesc{
 				{"description", ``}, // binary.Description
 			},
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // bool
 				{"", ``}, // error
 			},
-			Tags: []__vdl.AnyRep{access.Tag("Admin")},
+			Tags: []vdl.AnyRep{access.Tag("Admin")},
 		},
 		{
 			Name: "Reset",
 			Doc:  "// Reset resets the device. If the deadline is non-zero and the device\n// in question is still running after the given deadline expired,\n// reset of the device is enforced.\n//\n// TODO(jsimsa): Switch deadline to time.Duration when built-in types\n// are implemented.",
-			InArgs: []__ipc.ArgDesc{
+			InArgs: []ipc.ArgDesc{
 				{"deadline", ``}, // uint64
 			},
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdl.AnyRep{access.Tag("Admin")},
+			Tags: []vdl.AnyRep{access.Tag("Admin")},
 		},
 		{
 			Name: "AssociateAccount",
 			Doc:  "// AssociateAccount associates a local  system account name with the provided\n// Veyron identities. It replaces the existing association if one already exists for that\n// identity. Setting an AccountName to \"\" removes the association for each\n// listed identity.",
-			InArgs: []__ipc.ArgDesc{
+			InArgs: []ipc.ArgDesc{
 				{"identityNames", ``}, // []string
 				{"accountName", ``},   // string
 			},
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdl.AnyRep{access.Tag("Admin")},
+			Tags: []vdl.AnyRep{access.Tag("Admin")},
 		},
 		{
 			Name: "ListAssociations",
 			Doc:  "// ListAssociations returns all of the associations between Veyron identities\n// and system names.",
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // []Association
 				{"", ``}, // error
 			},
-			Tags: []__vdl.AnyRep{access.Tag("Admin")},
+			Tags: []vdl.AnyRep{access.Tag("Admin")},
 		},
 	},
 }

@@ -4,8 +4,8 @@
 package vom
 
 import (
-	// The non-user imports are prefixed with "__" to prevent collisions.
-	__vdl "v.io/core/veyron2/vdl"
+	// VDL system imports
+	"v.io/core/veyron2/vdl"
 )
 
 // WireNamed represents a type definition for named primitives.
@@ -129,17 +129,17 @@ func (TypeID) __VDLReflect(struct {
 }
 
 func init() {
-	__vdl.Register(WireNamed{})
-	__vdl.Register(WireEnum{})
-	__vdl.Register(WireArray{})
-	__vdl.Register(WireList{})
-	__vdl.Register(WireSet{})
-	__vdl.Register(WireMap{})
-	__vdl.Register(WireField{})
-	__vdl.Register(WireStruct{})
-	__vdl.Register(WireUnion{})
-	__vdl.Register(WireOptional{})
-	__vdl.Register(TypeID(0))
+	vdl.Register(WireNamed{})
+	vdl.Register(WireEnum{})
+	vdl.Register(WireArray{})
+	vdl.Register(WireList{})
+	vdl.Register(WireSet{})
+	vdl.Register(WireMap{})
+	vdl.Register(WireField{})
+	vdl.Register(WireStruct{})
+	vdl.Register(WireUnion{})
+	vdl.Register(WireOptional{})
+	vdl.Register(TypeID(0))
 }
 
 // Primitives

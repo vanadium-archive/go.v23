@@ -8,14 +8,15 @@
 package build
 
 import (
-	"v.io/core/veyron2/services/mgmt/binary"
+	// VDL system imports
+	"io"
+	"v.io/core/veyron2"
+	"v.io/core/veyron2/context"
+	"v.io/core/veyron2/ipc"
+	"v.io/core/veyron2/vdl"
 
-	// The non-user imports are prefixed with "__" to prevent collisions.
-	__io "io"
-	__veyron2 "v.io/core/veyron2"
-	__context "v.io/core/veyron2/context"
-	__ipc "v.io/core/veyron2/ipc"
-	__vdl "v.io/core/veyron2/vdl"
+	// VDL user imports
+	"v.io/core/veyron2/services/mgmt/binary"
 )
 
 // Architecture specifies the hardware architecture of a host.
@@ -54,10 +55,10 @@ func (File) __VDLReflect(struct {
 }
 
 func init() {
-	__vdl.Register(Architecture(""))
-	__vdl.Register(Format(""))
-	__vdl.Register(OperatingSystem(""))
-	__vdl.Register(File{})
+	vdl.Register(Architecture(""))
+	vdl.Register(Format(""))
+	vdl.Register(OperatingSystem(""))
+	vdl.Register(File{})
 }
 
 const X86 = Architecture("386")
@@ -91,23 +92,23 @@ const UnsupportedOS = OperatingSystem("unsupported")
 type BuilderClientMethods interface {
 	// Build streams sources to the build server, which then attempts to
 	// build the sources and streams back the compiled binaries.
-	Build(ctx *__context.T, Arch Architecture, OS OperatingSystem, opts ...__ipc.CallOpt) (BuilderBuildCall, error)
+	Build(ctx *context.T, Arch Architecture, OS OperatingSystem, opts ...ipc.CallOpt) (BuilderBuildCall, error)
 	// Describe generates a description for a binary identified by
 	// the given Object name.
-	Describe(ctx *__context.T, name string, opts ...__ipc.CallOpt) (binary.Description, error)
+	Describe(ctx *context.T, name string, opts ...ipc.CallOpt) (binary.Description, error)
 }
 
 // BuilderClientStub adds universal methods to BuilderClientMethods.
 type BuilderClientStub interface {
 	BuilderClientMethods
-	__ipc.UniversalServiceMethods
+	ipc.UniversalServiceMethods
 }
 
 // BuilderClient returns a client stub for Builder.
-func BuilderClient(name string, opts ...__ipc.BindOpt) BuilderClientStub {
-	var client __ipc.Client
+func BuilderClient(name string, opts ...ipc.BindOpt) BuilderClientStub {
+	var client ipc.Client
 	for _, opt := range opts {
-		if clientOpt, ok := opt.(__ipc.Client); ok {
+		if clientOpt, ok := opt.(ipc.Client); ok {
 			client = clientOpt
 		}
 	}
@@ -116,18 +117,18 @@ func BuilderClient(name string, opts ...__ipc.BindOpt) BuilderClientStub {
 
 type implBuilderClientStub struct {
 	name   string
-	client __ipc.Client
+	client ipc.Client
 }
 
-func (c implBuilderClientStub) c(ctx *__context.T) __ipc.Client {
+func (c implBuilderClientStub) c(ctx *context.T) ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return __veyron2.GetClient(ctx)
+	return veyron2.GetClient(ctx)
 }
 
-func (c implBuilderClientStub) Build(ctx *__context.T, i0 Architecture, i1 OperatingSystem, opts ...__ipc.CallOpt) (ocall BuilderBuildCall, err error) {
-	var call __ipc.Call
+func (c implBuilderClientStub) Build(ctx *context.T, i0 Architecture, i1 OperatingSystem, opts ...ipc.CallOpt) (ocall BuilderBuildCall, err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Build", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
@@ -135,8 +136,8 @@ func (c implBuilderClientStub) Build(ctx *__context.T, i0 Architecture, i1 Opera
 	return
 }
 
-func (c implBuilderClientStub) Describe(ctx *__context.T, i0 string, opts ...__ipc.CallOpt) (o0 binary.Description, err error) {
-	var call __ipc.Call
+func (c implBuilderClientStub) Describe(ctx *context.T, i0 string, opts ...ipc.CallOpt) (o0 binary.Description, err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Describe", []interface{}{i0}, opts...); err != nil {
 		return
 	}
@@ -196,7 +197,7 @@ type BuilderBuildCall interface {
 }
 
 type implBuilderBuildCall struct {
-	__ipc.Call
+	ipc.Call
 	valRecv File
 	errRecv error
 }
@@ -222,7 +223,7 @@ func (c implBuilderBuildCallRecv) Value() File {
 	return c.c.valRecv
 }
 func (c implBuilderBuildCallRecv) Err() error {
-	if c.c.errRecv == __io.EOF {
+	if c.c.errRecv == io.EOF {
 		return nil
 	}
 	return c.c.errRecv
@@ -261,7 +262,7 @@ type BuilderServerMethods interface {
 	Build(ctx BuilderBuildContext, Arch Architecture, OS OperatingSystem) ([]byte, error)
 	// Describe generates a description for a binary identified by
 	// the given Object name.
-	Describe(ctx __ipc.ServerContext, name string) (binary.Description, error)
+	Describe(ctx ipc.ServerContext, name string) (binary.Description, error)
 }
 
 // BuilderServerStubMethods is the server interface containing
@@ -274,14 +275,14 @@ type BuilderServerStubMethods interface {
 	Build(ctx *BuilderBuildContextStub, Arch Architecture, OS OperatingSystem) ([]byte, error)
 	// Describe generates a description for a binary identified by
 	// the given Object name.
-	Describe(ctx __ipc.ServerContext, name string) (binary.Description, error)
+	Describe(ctx ipc.ServerContext, name string) (binary.Description, error)
 }
 
 // BuilderServerStub adds universal methods to BuilderServerStubMethods.
 type BuilderServerStub interface {
 	BuilderServerStubMethods
 	// Describe the Builder interfaces.
-	Describe__() []__ipc.InterfaceDesc
+	Describe__() []ipc.InterfaceDesc
 }
 
 // BuilderServer returns a server stub for Builder.
@@ -293,9 +294,9 @@ func BuilderServer(impl BuilderServerMethods) BuilderServerStub {
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
-	if gs := __ipc.NewGlobState(stub); gs != nil {
+	if gs := ipc.NewGlobState(stub); gs != nil {
 		stub.gs = gs
-	} else if gs := __ipc.NewGlobState(impl); gs != nil {
+	} else if gs := ipc.NewGlobState(impl); gs != nil {
 		stub.gs = gs
 	}
 	return stub
@@ -303,42 +304,42 @@ func BuilderServer(impl BuilderServerMethods) BuilderServerStub {
 
 type implBuilderServerStub struct {
 	impl BuilderServerMethods
-	gs   *__ipc.GlobState
+	gs   *ipc.GlobState
 }
 
 func (s implBuilderServerStub) Build(ctx *BuilderBuildContextStub, i0 Architecture, i1 OperatingSystem) ([]byte, error) {
 	return s.impl.Build(ctx, i0, i1)
 }
 
-func (s implBuilderServerStub) Describe(ctx __ipc.ServerContext, i0 string) (binary.Description, error) {
+func (s implBuilderServerStub) Describe(ctx ipc.ServerContext, i0 string) (binary.Description, error) {
 	return s.impl.Describe(ctx, i0)
 }
 
-func (s implBuilderServerStub) Globber() *__ipc.GlobState {
+func (s implBuilderServerStub) Globber() *ipc.GlobState {
 	return s.gs
 }
 
-func (s implBuilderServerStub) Describe__() []__ipc.InterfaceDesc {
-	return []__ipc.InterfaceDesc{BuilderDesc}
+func (s implBuilderServerStub) Describe__() []ipc.InterfaceDesc {
+	return []ipc.InterfaceDesc{BuilderDesc}
 }
 
 // BuilderDesc describes the Builder interface.
-var BuilderDesc __ipc.InterfaceDesc = descBuilder
+var BuilderDesc ipc.InterfaceDesc = descBuilder
 
 // descBuilder hides the desc to keep godoc clean.
-var descBuilder = __ipc.InterfaceDesc{
+var descBuilder = ipc.InterfaceDesc{
 	Name:    "Builder",
 	PkgPath: "v.io/core/veyron2/services/mgmt/build",
 	Doc:     "// Builder describes an interface for building binaries from source.",
-	Methods: []__ipc.MethodDesc{
+	Methods: []ipc.MethodDesc{
 		{
 			Name: "Build",
 			Doc:  "// Build streams sources to the build server, which then attempts to\n// build the sources and streams back the compiled binaries.",
-			InArgs: []__ipc.ArgDesc{
+			InArgs: []ipc.ArgDesc{
 				{"Arch", ``}, // Architecture
 				{"OS", ``},   // OperatingSystem
 			},
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // []byte
 				{"", ``}, // error
 			},
@@ -346,10 +347,10 @@ var descBuilder = __ipc.InterfaceDesc{
 		{
 			Name: "Describe",
 			Doc:  "// Describe generates a description for a binary identified by\n// the given Object name.",
-			InArgs: []__ipc.ArgDesc{
+			InArgs: []ipc.ArgDesc{
 				{"name", ``}, // string
 			},
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // binary.Description
 				{"", ``}, // error
 			},
@@ -382,20 +383,20 @@ type BuilderBuildServerStream interface {
 
 // BuilderBuildContext represents the context passed to Builder.Build.
 type BuilderBuildContext interface {
-	__ipc.ServerContext
+	ipc.ServerContext
 	BuilderBuildServerStream
 }
 
 // BuilderBuildContextStub is a wrapper that converts ipc.ServerCall into
 // a typesafe stub that implements BuilderBuildContext.
 type BuilderBuildContextStub struct {
-	__ipc.ServerCall
+	ipc.ServerCall
 	valRecv File
 	errRecv error
 }
 
 // Init initializes BuilderBuildContextStub from ipc.ServerCall.
-func (s *BuilderBuildContextStub) Init(call __ipc.ServerCall) {
+func (s *BuilderBuildContextStub) Init(call ipc.ServerCall) {
 	s.ServerCall = call
 }
 
@@ -421,7 +422,7 @@ func (s implBuilderBuildContextRecv) Value() File {
 	return s.s.valRecv
 }
 func (s implBuilderBuildContextRecv) Err() error {
-	if s.s.errRecv == __io.EOF {
+	if s.s.errRecv == io.EOF {
 		return nil
 	}
 	return s.s.errRecv

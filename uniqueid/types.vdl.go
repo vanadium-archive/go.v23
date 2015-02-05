@@ -4,8 +4,8 @@
 package uniqueid
 
 import (
-	// The non-user imports are prefixed with "__" to prevent collisions.
-	__vdl "v.io/core/veyron2/vdl"
+	// VDL system imports
+	"v.io/core/veyron2/vdl"
 )
 
 // An Id is a likely globally unique identifier.
@@ -17,5 +17,5 @@ func (Id) __VDLReflect(struct {
 }
 
 func init() {
-	__vdl.Register(Id{})
+	vdl.Register(Id{})
 }

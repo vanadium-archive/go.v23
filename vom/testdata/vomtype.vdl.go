@@ -4,9 +4,9 @@
 package testdata
 
 import (
-	// The non-user imports are prefixed with "__" to prevent collisions.
-	__fmt "fmt"
-	__vdl "v.io/core/veyron2/vdl"
+	// VDL system imports
+	"fmt"
+	"v.io/core/veyron2/vdl"
 )
 
 type NBool bool
@@ -184,7 +184,7 @@ func (x *NEnum) Set(label string) error {
 		return nil
 	}
 	*x = -1
-	return __fmt.Errorf("unknown label %q in testdata.NEnum", label)
+	return fmt.Errorf("unknown label %q in testdata.NEnum", label)
 }
 
 // String returns the string label of x.
@@ -264,8 +264,8 @@ type MStruct struct {
 	B NBool
 	C MBool
 	D *NStruct
-	E *__vdl.Type
-	F __vdl.AnyRep
+	E *vdl.Type
+	F vdl.AnyRep
 }
 
 func (MStruct) __VDLReflect(struct {
@@ -310,35 +310,35 @@ func (RecY) __VDLReflect(struct {
 }
 
 func init() {
-	__vdl.Register(NBool(false))
-	__vdl.Register(NString(""))
-	__vdl.Register(NByteSlice(""))
-	__vdl.Register(NByteArray{})
-	__vdl.Register(NByte(0))
-	__vdl.Register(NUint16(0))
-	__vdl.Register(NUint32(0))
-	__vdl.Register(NUint64(0))
-	__vdl.Register(NInt16(0))
-	__vdl.Register(NInt32(0))
-	__vdl.Register(NInt64(0))
-	__vdl.Register(NFloat32(0))
-	__vdl.Register(NFloat64(0))
-	__vdl.Register(NComplex64(0))
-	__vdl.Register(NComplex128(0))
-	__vdl.Register(NArray2Uint64{})
-	__vdl.Register(NListUint64(nil))
-	__vdl.Register(NSetUint64(nil))
-	__vdl.Register(NMapUint64String(nil))
-	__vdl.Register(NStruct{})
-	__vdl.Register(NEnumA)
-	__vdl.Register(NUnion(NUnionA{false}))
-	__vdl.Register(MBool(false))
-	__vdl.Register(MStruct{
-		E: __vdl.AnyType,
+	vdl.Register(NBool(false))
+	vdl.Register(NString(""))
+	vdl.Register(NByteSlice(""))
+	vdl.Register(NByteArray{})
+	vdl.Register(NByte(0))
+	vdl.Register(NUint16(0))
+	vdl.Register(NUint32(0))
+	vdl.Register(NUint64(0))
+	vdl.Register(NInt16(0))
+	vdl.Register(NInt32(0))
+	vdl.Register(NInt64(0))
+	vdl.Register(NFloat32(0))
+	vdl.Register(NFloat64(0))
+	vdl.Register(NComplex64(0))
+	vdl.Register(NComplex128(0))
+	vdl.Register(NArray2Uint64{})
+	vdl.Register(NListUint64(nil))
+	vdl.Register(NSetUint64(nil))
+	vdl.Register(NMapUint64String(nil))
+	vdl.Register(NStruct{})
+	vdl.Register(NEnumA)
+	vdl.Register(NUnion(NUnionA{false}))
+	vdl.Register(MBool(false))
+	vdl.Register(MStruct{
+		E: vdl.AnyType,
 	})
-	__vdl.Register(MList(nil))
-	__vdl.Register(MMap(nil))
-	__vdl.Register(RecA(nil))
-	__vdl.Register(RecX(nil))
-	__vdl.Register(RecY(nil))
+	vdl.Register(MList(nil))
+	vdl.Register(MMap(nil))
+	vdl.Register(RecA(nil))
+	vdl.Register(RecX(nil))
+	vdl.Register(RecY(nil))
 }

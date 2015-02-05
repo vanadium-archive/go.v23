@@ -4,9 +4,9 @@
 package main
 
 import (
-	// The non-user imports are prefixed with "__" to prevent collisions.
-	__fmt "fmt"
-	__vdl "v.io/core/veyron2/vdl"
+	// VDL system imports
+	"fmt"
+	"v.io/core/veyron2/vdl"
 )
 
 type dataRep int
@@ -36,7 +36,7 @@ func (x *dataRep) Set(label string) error {
 		return nil
 	}
 	*x = -1
-	return __fmt.Errorf("unknown label %q in main.dataRep", label)
+	return fmt.Errorf("unknown label %q in main.dataRep", label)
 }
 
 // String returns the string label of x.
@@ -57,5 +57,5 @@ func (dataRep) __VDLReflect(struct {
 }
 
 func init() {
-	__vdl.Register(dataRepHex)
+	vdl.Register(dataRepHex)
 }

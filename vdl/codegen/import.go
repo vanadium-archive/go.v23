@@ -9,6 +9,9 @@ import (
 	"v.io/core/veyron2/vdl/compile"
 )
 
+// TODO(toddw): Remove this file, after all code generators have been updated to
+// compute their own import dependencies.
+
 // Import represents a single package import.
 type Import struct {
 	Name string // Name of the import; may be empty.

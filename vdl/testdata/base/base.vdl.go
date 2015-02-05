@@ -5,15 +5,15 @@
 package base
 
 import (
-	// The non-user imports are prefixed with "__" to prevent collisions.
-	__fmt "fmt"
-	__io "io"
-	__veyron2 "v.io/core/veyron2"
-	__context "v.io/core/veyron2/context"
-	__i18n "v.io/core/veyron2/i18n"
-	__ipc "v.io/core/veyron2/ipc"
-	__vdl "v.io/core/veyron2/vdl"
-	__verror2 "v.io/core/veyron2/verror2"
+	// VDL system imports
+	"fmt"
+	"io"
+	"v.io/core/veyron2"
+	"v.io/core/veyron2/context"
+	"v.io/core/veyron2/i18n"
+	"v.io/core/veyron2/ipc"
+	"v.io/core/veyron2/vdl"
+	"v.io/core/veyron2/verror2"
 )
 
 type NamedBool bool
@@ -138,7 +138,7 @@ func (x *NamedEnum) Set(label string) error {
 		return nil
 	}
 	*x = -1
-	return __fmt.Errorf("unknown label %q in base.NamedEnum", label)
+	return fmt.Errorf("unknown label %q in base.NamedEnum", label)
 }
 
 // String returns the string label of x.
@@ -259,8 +259,8 @@ type Scalars struct {
 	A11 complex128
 	A12 string
 	A13 error
-	A14 __vdl.AnyRep
-	A15 *__vdl.Type
+	A14 vdl.AnyRep
+	A15 *vdl.Type
 	B0  NamedBool
 	B1  NamedByte
 	B2  NamedUint16
@@ -383,104 +383,104 @@ func (Args) __VDLReflect(struct {
 }
 
 func init() {
-	__vdl.Register(NamedBool(false))
-	__vdl.Register(NamedByte(0))
-	__vdl.Register(NamedUint16(0))
-	__vdl.Register(NamedUint32(0))
-	__vdl.Register(NamedUint64(0))
-	__vdl.Register(NamedInt16(0))
-	__vdl.Register(NamedInt32(0))
-	__vdl.Register(NamedInt64(0))
-	__vdl.Register(NamedFloat32(0))
-	__vdl.Register(NamedFloat64(0))
-	__vdl.Register(NamedComplex64(0))
-	__vdl.Register(NamedComplex128(0))
-	__vdl.Register(NamedString(""))
-	__vdl.Register(NamedEnumA)
-	__vdl.Register(NamedArray{})
-	__vdl.Register(NamedList(nil))
-	__vdl.Register(NamedSet(nil))
-	__vdl.Register(NamedMap(nil))
-	__vdl.Register(NamedStruct{})
-	__vdl.Register(NamedUnion(NamedUnionA{false}))
-	__vdl.Register(Scalars{
-		A15: __vdl.AnyType,
+	vdl.Register(NamedBool(false))
+	vdl.Register(NamedByte(0))
+	vdl.Register(NamedUint16(0))
+	vdl.Register(NamedUint32(0))
+	vdl.Register(NamedUint64(0))
+	vdl.Register(NamedInt16(0))
+	vdl.Register(NamedInt32(0))
+	vdl.Register(NamedInt64(0))
+	vdl.Register(NamedFloat32(0))
+	vdl.Register(NamedFloat64(0))
+	vdl.Register(NamedComplex64(0))
+	vdl.Register(NamedComplex128(0))
+	vdl.Register(NamedString(""))
+	vdl.Register(NamedEnumA)
+	vdl.Register(NamedArray{})
+	vdl.Register(NamedList(nil))
+	vdl.Register(NamedSet(nil))
+	vdl.Register(NamedMap(nil))
+	vdl.Register(NamedStruct{})
+	vdl.Register(NamedUnion(NamedUnionA{false}))
+	vdl.Register(Scalars{
+		A15: vdl.AnyType,
 		B14: NamedUnionA{false},
 	})
-	__vdl.Register(KeyScalars{})
-	__vdl.Register(ScalarsArray{
+	vdl.Register(KeyScalars{})
+	vdl.Register(ScalarsArray{
 		{
-			A15: __vdl.AnyType,
+			A15: vdl.AnyType,
 			B14: NamedUnionA{false},
 		},
 		{
-			A15: __vdl.AnyType,
+			A15: vdl.AnyType,
 			B14: NamedUnionA{false},
 		},
 	})
-	__vdl.Register(Composites{
+	vdl.Register(Composites{
 		A0: Scalars{
-			A15: __vdl.AnyType,
+			A15: vdl.AnyType,
 			B14: NamedUnionA{false},
 		},
 		A1: ScalarsArray{
 			{
-				A15: __vdl.AnyType,
+				A15: vdl.AnyType,
 				B14: NamedUnionA{false},
 			},
 			{
-				A15: __vdl.AnyType,
+				A15: vdl.AnyType,
 				B14: NamedUnionA{false},
 			},
 		},
 	})
-	__vdl.Register(CompositesArray{
+	vdl.Register(CompositesArray{
 		{
 			A0: Scalars{
-				A15: __vdl.AnyType,
+				A15: vdl.AnyType,
 				B14: NamedUnionA{false},
 			},
 			A1: ScalarsArray{
 				{
-					A15: __vdl.AnyType,
+					A15: vdl.AnyType,
 					B14: NamedUnionA{false},
 				},
 				{
-					A15: __vdl.AnyType,
+					A15: vdl.AnyType,
 					B14: NamedUnionA{false},
 				},
 			},
 		},
 		{
 			A0: Scalars{
-				A15: __vdl.AnyType,
+				A15: vdl.AnyType,
 				B14: NamedUnionA{false},
 			},
 			A1: ScalarsArray{
 				{
-					A15: __vdl.AnyType,
+					A15: vdl.AnyType,
 					B14: NamedUnionA{false},
 				},
 				{
-					A15: __vdl.AnyType,
+					A15: vdl.AnyType,
 					B14: NamedUnionA{false},
 				},
 			},
 		},
 	})
-	__vdl.Register(CompComp{
+	vdl.Register(CompComp{
 		A0: Composites{
 			A0: Scalars{
-				A15: __vdl.AnyType,
+				A15: vdl.AnyType,
 				B14: NamedUnionA{false},
 			},
 			A1: ScalarsArray{
 				{
-					A15: __vdl.AnyType,
+					A15: vdl.AnyType,
 					B14: NamedUnionA{false},
 				},
 				{
-					A15: __vdl.AnyType,
+					A15: vdl.AnyType,
 					B14: NamedUnionA{false},
 				},
 			},
@@ -488,40 +488,40 @@ func init() {
 		A1: CompositesArray{
 			{
 				A0: Scalars{
-					A15: __vdl.AnyType,
+					A15: vdl.AnyType,
 					B14: NamedUnionA{false},
 				},
 				A1: ScalarsArray{
 					{
-						A15: __vdl.AnyType,
+						A15: vdl.AnyType,
 						B14: NamedUnionA{false},
 					},
 					{
-						A15: __vdl.AnyType,
+						A15: vdl.AnyType,
 						B14: NamedUnionA{false},
 					},
 				},
 			},
 			{
 				A0: Scalars{
-					A15: __vdl.AnyType,
+					A15: vdl.AnyType,
 					B14: NamedUnionA{false},
 				},
 				A1: ScalarsArray{
 					{
-						A15: __vdl.AnyType,
+						A15: vdl.AnyType,
 						B14: NamedUnionA{false},
 					},
 					{
-						A15: __vdl.AnyType,
+						A15: vdl.AnyType,
 						B14: NamedUnionA{false},
 					},
 				},
 			},
 		},
 	})
-	__vdl.Register(NestedArgs{})
-	__vdl.Register(Args{})
+	vdl.Register(NestedArgs{})
+	vdl.Register(Args{})
 }
 
 const Cbool = true
@@ -597,99 +597,99 @@ const SixSquared = uint64(36)
 
 const FiveSquared = int32(25)
 
-var CTObool = __vdl.TypeOf(false)
+var CTObool = vdl.TypeOf(false)
 
-var CTOstring = __vdl.TypeOf("")
+var CTOstring = vdl.TypeOf("")
 
-var CTObytes = __vdl.TypeOf([]byte(""))
+var CTObytes = vdl.TypeOf([]byte(""))
 
-var CTObyte = __vdl.TypeOf(byte(0))
+var CTObyte = vdl.TypeOf(byte(0))
 
-var CTOuint16 = __vdl.TypeOf(uint16(0))
+var CTOuint16 = vdl.TypeOf(uint16(0))
 
-var CTOint16 = __vdl.TypeOf(int16(0))
+var CTOint16 = vdl.TypeOf(int16(0))
 
-var CTOfloat32 = __vdl.TypeOf(float32(0))
+var CTOfloat32 = vdl.TypeOf(float32(0))
 
-var CTOcomplex64 = __vdl.TypeOf(complex64(0))
+var CTOcomplex64 = vdl.TypeOf(complex64(0))
 
-var CTOenum = __vdl.TypeOf(NamedEnumA)
+var CTOenum = vdl.TypeOf(NamedEnumA)
 
-var CTOArray = __vdl.TypeOf(NamedArray{})
+var CTOArray = vdl.TypeOf(NamedArray{})
 
-var CTOList = __vdl.TypeOf([]string(nil))
+var CTOList = vdl.TypeOf([]string(nil))
 
-var CTOSet = __vdl.TypeOf(map[string]struct{}(nil))
+var CTOSet = vdl.TypeOf(map[string]struct{}(nil))
 
-var CTOMap = __vdl.TypeOf(map[string]int64(nil))
+var CTOMap = vdl.TypeOf(map[string]int64(nil))
 
-var CTOStruct = __vdl.TypeOf(Scalars{
-	A15: __vdl.AnyType,
+var CTOStruct = vdl.TypeOf(Scalars{
+	A15: vdl.AnyType,
 	B14: NamedUnionA{false},
 })
 
-var CTOUnion = __vdl.TypeOf(NamedUnion(NamedUnionA{false}))
+var CTOUnion = vdl.TypeOf(NamedUnion(NamedUnionA{false}))
 
-var CTOTypeObject = __vdl.TypeObjectType
+var CTOTypeObject = vdl.TypeObjectType
 
-var CTOAny = __vdl.AnyType
+var CTOAny = vdl.AnyType
 
 var (
-	ErrNoParams1   = __verror2.Register("v.io/core/veyron2/vdl/testdata/base.ErrNoParams1", __verror2.NoRetry, "{1:}{2:} en msg")
-	ErrNoParams2   = __verror2.Register("v.io/core/veyron2/vdl/testdata/base.ErrNoParams2", __verror2.RetryRefetch, "{1:}{2:} en msg")
-	ErrWithParams1 = __verror2.Register("v.io/core/veyron2/vdl/testdata/base.ErrWithParams1", __verror2.NoRetry, "{1:}{2:} en x={3} y={4}")
-	ErrWithParams2 = __verror2.Register("v.io/core/veyron2/vdl/testdata/base.ErrWithParams2", __verror2.RetryRefetch, "{1:}{2:} en x={3} y={4}")
+	ErrNoParams1   = verror2.Register("v.io/core/veyron2/vdl/testdata/base.ErrNoParams1", verror2.NoRetry, "{1:}{2:} en msg")
+	ErrNoParams2   = verror2.Register("v.io/core/veyron2/vdl/testdata/base.ErrNoParams2", verror2.RetryRefetch, "{1:}{2:} en msg")
+	ErrWithParams1 = verror2.Register("v.io/core/veyron2/vdl/testdata/base.ErrWithParams1", verror2.NoRetry, "{1:}{2:} en x={3} y={4}")
+	ErrWithParams2 = verror2.Register("v.io/core/veyron2/vdl/testdata/base.ErrWithParams2", verror2.RetryRefetch, "{1:}{2:} en x={3} y={4}")
 )
 
 func init() {
-	__i18n.Cat().SetWithBase(__i18n.LangID("en"), __i18n.MsgID(ErrNoParams1.ID), "{1:}{2:} en msg")
-	__i18n.Cat().SetWithBase(__i18n.LangID("en"), __i18n.MsgID(ErrNoParams2.ID), "{1:}{2:} en msg")
-	__i18n.Cat().SetWithBase(__i18n.LangID("fr"), __i18n.MsgID(ErrNoParams2.ID), "{1:}{2:} fr msg")
-	__i18n.Cat().SetWithBase(__i18n.LangID("en"), __i18n.MsgID(ErrWithParams1.ID), "{1:}{2:} en x={3} y={4}")
-	__i18n.Cat().SetWithBase(__i18n.LangID("en"), __i18n.MsgID(ErrWithParams2.ID), "{1:}{2:} en x={3} y={4}")
-	__i18n.Cat().SetWithBase(__i18n.LangID("fr"), __i18n.MsgID(ErrWithParams2.ID), "{1:}{2:} fr y={4} x={3}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoParams1.ID), "{1:}{2:} en msg")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoParams2.ID), "{1:}{2:} en msg")
+	i18n.Cat().SetWithBase(i18n.LangID("fr"), i18n.MsgID(ErrNoParams2.ID), "{1:}{2:} fr msg")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrWithParams1.ID), "{1:}{2:} en x={3} y={4}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrWithParams2.ID), "{1:}{2:} en x={3} y={4}")
+	i18n.Cat().SetWithBase(i18n.LangID("fr"), i18n.MsgID(ErrWithParams2.ID), "{1:}{2:} fr y={4} x={3}")
 }
 
 // MakeErrNoParams1 returns an error with the ErrNoParams1 ID.
-func MakeErrNoParams1(ctx *__context.T) error {
-	return __verror2.Make(ErrNoParams1, ctx)
+func MakeErrNoParams1(ctx *context.T) error {
+	return verror2.Make(ErrNoParams1, ctx)
 }
 
 // MakeErrNoParams2 returns an error with the ErrNoParams2 ID.
-func MakeErrNoParams2(ctx *__context.T) error {
-	return __verror2.Make(ErrNoParams2, ctx)
+func MakeErrNoParams2(ctx *context.T) error {
+	return verror2.Make(ErrNoParams2, ctx)
 }
 
 // MakeErrWithParams1 returns an error with the ErrWithParams1 ID.
-func MakeErrWithParams1(ctx *__context.T, x string, y int32) error {
-	return __verror2.Make(ErrWithParams1, ctx, x, y)
+func MakeErrWithParams1(ctx *context.T, x string, y int32) error {
+	return verror2.Make(ErrWithParams1, ctx, x, y)
 }
 
 // MakeErrWithParams2 returns an error with the ErrWithParams2 ID.
-func MakeErrWithParams2(ctx *__context.T, x string, y int32) error {
-	return __verror2.Make(ErrWithParams2, ctx, x, y)
+func MakeErrWithParams2(ctx *context.T, x string, y int32) error {
+	return verror2.Make(ErrWithParams2, ctx, x, y)
 }
 
 // ServiceAClientMethods is the client interface
 // containing ServiceA methods.
 type ServiceAClientMethods interface {
-	MethodA1(*__context.T, ...__ipc.CallOpt) error
-	MethodA2(ctx *__context.T, a int32, b string, opts ...__ipc.CallOpt) (s string, err error)
-	MethodA3(ctx *__context.T, a int32, opts ...__ipc.CallOpt) (ServiceAMethodA3Call, error)
-	MethodA4(ctx *__context.T, a int32, opts ...__ipc.CallOpt) (ServiceAMethodA4Call, error)
+	MethodA1(*context.T, ...ipc.CallOpt) error
+	MethodA2(ctx *context.T, a int32, b string, opts ...ipc.CallOpt) (s string, err error)
+	MethodA3(ctx *context.T, a int32, opts ...ipc.CallOpt) (ServiceAMethodA3Call, error)
+	MethodA4(ctx *context.T, a int32, opts ...ipc.CallOpt) (ServiceAMethodA4Call, error)
 }
 
 // ServiceAClientStub adds universal methods to ServiceAClientMethods.
 type ServiceAClientStub interface {
 	ServiceAClientMethods
-	__ipc.UniversalServiceMethods
+	ipc.UniversalServiceMethods
 }
 
 // ServiceAClient returns a client stub for ServiceA.
-func ServiceAClient(name string, opts ...__ipc.BindOpt) ServiceAClientStub {
-	var client __ipc.Client
+func ServiceAClient(name string, opts ...ipc.BindOpt) ServiceAClientStub {
+	var client ipc.Client
 	for _, opt := range opts {
-		if clientOpt, ok := opt.(__ipc.Client); ok {
+		if clientOpt, ok := opt.(ipc.Client); ok {
 			client = clientOpt
 		}
 	}
@@ -698,18 +698,18 @@ func ServiceAClient(name string, opts ...__ipc.BindOpt) ServiceAClientStub {
 
 type implServiceAClientStub struct {
 	name   string
-	client __ipc.Client
+	client ipc.Client
 }
 
-func (c implServiceAClientStub) c(ctx *__context.T) __ipc.Client {
+func (c implServiceAClientStub) c(ctx *context.T) ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return __veyron2.GetClient(ctx)
+	return veyron2.GetClient(ctx)
 }
 
-func (c implServiceAClientStub) MethodA1(ctx *__context.T, opts ...__ipc.CallOpt) (err error) {
-	var call __ipc.Call
+func (c implServiceAClientStub) MethodA1(ctx *context.T, opts ...ipc.CallOpt) (err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "MethodA1", nil, opts...); err != nil {
 		return
 	}
@@ -719,8 +719,8 @@ func (c implServiceAClientStub) MethodA1(ctx *__context.T, opts ...__ipc.CallOpt
 	return
 }
 
-func (c implServiceAClientStub) MethodA2(ctx *__context.T, i0 int32, i1 string, opts ...__ipc.CallOpt) (o0 string, err error) {
-	var call __ipc.Call
+func (c implServiceAClientStub) MethodA2(ctx *context.T, i0 int32, i1 string, opts ...ipc.CallOpt) (o0 string, err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "MethodA2", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
@@ -730,8 +730,8 @@ func (c implServiceAClientStub) MethodA2(ctx *__context.T, i0 int32, i1 string, 
 	return
 }
 
-func (c implServiceAClientStub) MethodA3(ctx *__context.T, i0 int32, opts ...__ipc.CallOpt) (ocall ServiceAMethodA3Call, err error) {
-	var call __ipc.Call
+func (c implServiceAClientStub) MethodA3(ctx *context.T, i0 int32, opts ...ipc.CallOpt) (ocall ServiceAMethodA3Call, err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "MethodA3", []interface{}{i0}, opts...); err != nil {
 		return
 	}
@@ -739,8 +739,8 @@ func (c implServiceAClientStub) MethodA3(ctx *__context.T, i0 int32, opts ...__i
 	return
 }
 
-func (c implServiceAClientStub) MethodA4(ctx *__context.T, i0 int32, opts ...__ipc.CallOpt) (ocall ServiceAMethodA4Call, err error) {
-	var call __ipc.Call
+func (c implServiceAClientStub) MethodA4(ctx *context.T, i0 int32, opts ...ipc.CallOpt) (ocall ServiceAMethodA4Call, err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "MethodA4", []interface{}{i0}, opts...); err != nil {
 		return
 	}
@@ -781,7 +781,7 @@ type ServiceAMethodA3Call interface {
 }
 
 type implServiceAMethodA3Call struct {
-	__ipc.Call
+	ipc.Call
 	valRecv Scalars
 	errRecv error
 }
@@ -807,7 +807,7 @@ func (c implServiceAMethodA3CallRecv) Value() Scalars {
 	return c.c.valRecv
 }
 func (c implServiceAMethodA3CallRecv) Err() error {
-	if c.c.errRecv == __io.EOF {
+	if c.c.errRecv == io.EOF {
 		return nil
 	}
 	return c.c.errRecv
@@ -869,7 +869,7 @@ type ServiceAMethodA4Call interface {
 }
 
 type implServiceAMethodA4Call struct {
-	__ipc.Call
+	ipc.Call
 	valRecv string
 	errRecv error
 }
@@ -894,7 +894,7 @@ func (c implServiceAMethodA4CallRecv) Value() string {
 	return c.c.valRecv
 }
 func (c implServiceAMethodA4CallRecv) Err() error {
-	if c.c.errRecv == __io.EOF {
+	if c.c.errRecv == io.EOF {
 		return nil
 	}
 	return c.c.errRecv
@@ -926,8 +926,8 @@ func (c *implServiceAMethodA4Call) Finish() (err error) {
 // ServiceAServerMethods is the interface a server writer
 // implements for ServiceA.
 type ServiceAServerMethods interface {
-	MethodA1(__ipc.ServerContext) error
-	MethodA2(ctx __ipc.ServerContext, a int32, b string) (s string, err error)
+	MethodA1(ipc.ServerContext) error
+	MethodA2(ctx ipc.ServerContext, a int32, b string) (s string, err error)
 	MethodA3(ctx ServiceAMethodA3Context, a int32) (s string, err error)
 	MethodA4(ctx ServiceAMethodA4Context, a int32) error
 }
@@ -937,8 +937,8 @@ type ServiceAServerMethods interface {
 // The only difference between this interface and ServiceAServerMethods
 // is the streaming methods.
 type ServiceAServerStubMethods interface {
-	MethodA1(__ipc.ServerContext) error
-	MethodA2(ctx __ipc.ServerContext, a int32, b string) (s string, err error)
+	MethodA1(ipc.ServerContext) error
+	MethodA2(ctx ipc.ServerContext, a int32, b string) (s string, err error)
 	MethodA3(ctx *ServiceAMethodA3ContextStub, a int32) (s string, err error)
 	MethodA4(ctx *ServiceAMethodA4ContextStub, a int32) error
 }
@@ -947,7 +947,7 @@ type ServiceAServerStubMethods interface {
 type ServiceAServerStub interface {
 	ServiceAServerStubMethods
 	// Describe the ServiceA interfaces.
-	Describe__() []__ipc.InterfaceDesc
+	Describe__() []ipc.InterfaceDesc
 }
 
 // ServiceAServer returns a server stub for ServiceA.
@@ -959,9 +959,9 @@ func ServiceAServer(impl ServiceAServerMethods) ServiceAServerStub {
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
-	if gs := __ipc.NewGlobState(stub); gs != nil {
+	if gs := ipc.NewGlobState(stub); gs != nil {
 		stub.gs = gs
-	} else if gs := __ipc.NewGlobState(impl); gs != nil {
+	} else if gs := ipc.NewGlobState(impl); gs != nil {
 		stub.gs = gs
 	}
 	return stub
@@ -969,14 +969,14 @@ func ServiceAServer(impl ServiceAServerMethods) ServiceAServerStub {
 
 type implServiceAServerStub struct {
 	impl ServiceAServerMethods
-	gs   *__ipc.GlobState
+	gs   *ipc.GlobState
 }
 
-func (s implServiceAServerStub) MethodA1(ctx __ipc.ServerContext) error {
+func (s implServiceAServerStub) MethodA1(ctx ipc.ServerContext) error {
 	return s.impl.MethodA1(ctx)
 }
 
-func (s implServiceAServerStub) MethodA2(ctx __ipc.ServerContext, i0 int32, i1 string) (string, error) {
+func (s implServiceAServerStub) MethodA2(ctx ipc.ServerContext, i0 int32, i1 string) (string, error) {
 	return s.impl.MethodA2(ctx, i0, i1)
 }
 
@@ -988,56 +988,56 @@ func (s implServiceAServerStub) MethodA4(ctx *ServiceAMethodA4ContextStub, i0 in
 	return s.impl.MethodA4(ctx, i0)
 }
 
-func (s implServiceAServerStub) Globber() *__ipc.GlobState {
+func (s implServiceAServerStub) Globber() *ipc.GlobState {
 	return s.gs
 }
 
-func (s implServiceAServerStub) Describe__() []__ipc.InterfaceDesc {
-	return []__ipc.InterfaceDesc{ServiceADesc}
+func (s implServiceAServerStub) Describe__() []ipc.InterfaceDesc {
+	return []ipc.InterfaceDesc{ServiceADesc}
 }
 
 // ServiceADesc describes the ServiceA interface.
-var ServiceADesc __ipc.InterfaceDesc = descServiceA
+var ServiceADesc ipc.InterfaceDesc = descServiceA
 
 // descServiceA hides the desc to keep godoc clean.
-var descServiceA = __ipc.InterfaceDesc{
+var descServiceA = ipc.InterfaceDesc{
 	Name:    "ServiceA",
 	PkgPath: "v.io/core/veyron2/vdl/testdata/base",
-	Methods: []__ipc.MethodDesc{
+	Methods: []ipc.MethodDesc{
 		{
 			Name: "MethodA1",
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // error
 			},
 		},
 		{
 			Name: "MethodA2",
-			InArgs: []__ipc.ArgDesc{
+			InArgs: []ipc.ArgDesc{
 				{"a", ``}, // int32
 				{"b", ``}, // string
 			},
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"s", ``},   // string
 				{"err", ``}, // error
 			},
 		},
 		{
 			Name: "MethodA3",
-			InArgs: []__ipc.ArgDesc{
+			InArgs: []ipc.ArgDesc{
 				{"a", ``}, // int32
 			},
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"s", ``},   // string
 				{"err", ``}, // error
 			},
-			Tags: []__vdl.AnyRep{"tag", uint64(6)},
+			Tags: []vdl.AnyRep{"tag", uint64(6)},
 		},
 		{
 			Name: "MethodA4",
-			InArgs: []__ipc.ArgDesc{
+			InArgs: []ipc.ArgDesc{
 				{"a", ``}, // int32
 			},
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // error
 			},
 		},
@@ -1057,18 +1057,18 @@ type ServiceAMethodA3ServerStream interface {
 
 // ServiceAMethodA3Context represents the context passed to ServiceA.MethodA3.
 type ServiceAMethodA3Context interface {
-	__ipc.ServerContext
+	ipc.ServerContext
 	ServiceAMethodA3ServerStream
 }
 
 // ServiceAMethodA3ContextStub is a wrapper that converts ipc.ServerCall into
 // a typesafe stub that implements ServiceAMethodA3Context.
 type ServiceAMethodA3ContextStub struct {
-	__ipc.ServerCall
+	ipc.ServerCall
 }
 
 // Init initializes ServiceAMethodA3ContextStub from ipc.ServerCall.
-func (s *ServiceAMethodA3ContextStub) Init(call __ipc.ServerCall) {
+func (s *ServiceAMethodA3ContextStub) Init(call ipc.ServerCall) {
 	s.ServerCall = call
 }
 
@@ -1112,20 +1112,20 @@ type ServiceAMethodA4ServerStream interface {
 
 // ServiceAMethodA4Context represents the context passed to ServiceA.MethodA4.
 type ServiceAMethodA4Context interface {
-	__ipc.ServerContext
+	ipc.ServerContext
 	ServiceAMethodA4ServerStream
 }
 
 // ServiceAMethodA4ContextStub is a wrapper that converts ipc.ServerCall into
 // a typesafe stub that implements ServiceAMethodA4Context.
 type ServiceAMethodA4ContextStub struct {
-	__ipc.ServerCall
+	ipc.ServerCall
 	valRecv int32
 	errRecv error
 }
 
 // Init initializes ServiceAMethodA4ContextStub from ipc.ServerCall.
-func (s *ServiceAMethodA4ContextStub) Init(call __ipc.ServerCall) {
+func (s *ServiceAMethodA4ContextStub) Init(call ipc.ServerCall) {
 	s.ServerCall = call
 }
 
@@ -1150,7 +1150,7 @@ func (s implServiceAMethodA4ContextRecv) Value() int32 {
 	return s.s.valRecv
 }
 func (s implServiceAMethodA4ContextRecv) Err() error {
-	if s.s.errRecv == __io.EOF {
+	if s.s.errRecv == io.EOF {
 		return nil
 	}
 	return s.s.errRecv
@@ -1175,20 +1175,20 @@ func (s implServiceAMethodA4ContextSend) Send(item string) error {
 // containing ServiceB methods.
 type ServiceBClientMethods interface {
 	ServiceAClientMethods
-	MethodB1(ctx *__context.T, a Scalars, b Composites, opts ...__ipc.CallOpt) (c CompComp, err error)
+	MethodB1(ctx *context.T, a Scalars, b Composites, opts ...ipc.CallOpt) (c CompComp, err error)
 }
 
 // ServiceBClientStub adds universal methods to ServiceBClientMethods.
 type ServiceBClientStub interface {
 	ServiceBClientMethods
-	__ipc.UniversalServiceMethods
+	ipc.UniversalServiceMethods
 }
 
 // ServiceBClient returns a client stub for ServiceB.
-func ServiceBClient(name string, opts ...__ipc.BindOpt) ServiceBClientStub {
-	var client __ipc.Client
+func ServiceBClient(name string, opts ...ipc.BindOpt) ServiceBClientStub {
+	var client ipc.Client
 	for _, opt := range opts {
-		if clientOpt, ok := opt.(__ipc.Client); ok {
+		if clientOpt, ok := opt.(ipc.Client); ok {
 			client = clientOpt
 		}
 	}
@@ -1197,20 +1197,20 @@ func ServiceBClient(name string, opts ...__ipc.BindOpt) ServiceBClientStub {
 
 type implServiceBClientStub struct {
 	name   string
-	client __ipc.Client
+	client ipc.Client
 
 	ServiceAClientStub
 }
 
-func (c implServiceBClientStub) c(ctx *__context.T) __ipc.Client {
+func (c implServiceBClientStub) c(ctx *context.T) ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return __veyron2.GetClient(ctx)
+	return veyron2.GetClient(ctx)
 }
 
-func (c implServiceBClientStub) MethodB1(ctx *__context.T, i0 Scalars, i1 Composites, opts ...__ipc.CallOpt) (o0 CompComp, err error) {
-	var call __ipc.Call
+func (c implServiceBClientStub) MethodB1(ctx *context.T, i0 Scalars, i1 Composites, opts ...ipc.CallOpt) (o0 CompComp, err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "MethodB1", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
@@ -1224,7 +1224,7 @@ func (c implServiceBClientStub) MethodB1(ctx *__context.T, i0 Scalars, i1 Compos
 // implements for ServiceB.
 type ServiceBServerMethods interface {
 	ServiceAServerMethods
-	MethodB1(ctx __ipc.ServerContext, a Scalars, b Composites) (c CompComp, err error)
+	MethodB1(ctx ipc.ServerContext, a Scalars, b Composites) (c CompComp, err error)
 }
 
 // ServiceBServerStubMethods is the server interface containing
@@ -1233,14 +1233,14 @@ type ServiceBServerMethods interface {
 // is the streaming methods.
 type ServiceBServerStubMethods interface {
 	ServiceAServerStubMethods
-	MethodB1(ctx __ipc.ServerContext, a Scalars, b Composites) (c CompComp, err error)
+	MethodB1(ctx ipc.ServerContext, a Scalars, b Composites) (c CompComp, err error)
 }
 
 // ServiceBServerStub adds universal methods to ServiceBServerStubMethods.
 type ServiceBServerStub interface {
 	ServiceBServerStubMethods
 	// Describe the ServiceB interfaces.
-	Describe__() []__ipc.InterfaceDesc
+	Describe__() []ipc.InterfaceDesc
 }
 
 // ServiceBServer returns a server stub for ServiceB.
@@ -1253,9 +1253,9 @@ func ServiceBServer(impl ServiceBServerMethods) ServiceBServerStub {
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
-	if gs := __ipc.NewGlobState(stub); gs != nil {
+	if gs := ipc.NewGlobState(stub); gs != nil {
 		stub.gs = gs
-	} else if gs := __ipc.NewGlobState(impl); gs != nil {
+	} else if gs := ipc.NewGlobState(impl); gs != nil {
 		stub.gs = gs
 	}
 	return stub
@@ -1264,39 +1264,39 @@ func ServiceBServer(impl ServiceBServerMethods) ServiceBServerStub {
 type implServiceBServerStub struct {
 	impl ServiceBServerMethods
 	ServiceAServerStub
-	gs *__ipc.GlobState
+	gs *ipc.GlobState
 }
 
-func (s implServiceBServerStub) MethodB1(ctx __ipc.ServerContext, i0 Scalars, i1 Composites) (CompComp, error) {
+func (s implServiceBServerStub) MethodB1(ctx ipc.ServerContext, i0 Scalars, i1 Composites) (CompComp, error) {
 	return s.impl.MethodB1(ctx, i0, i1)
 }
 
-func (s implServiceBServerStub) Globber() *__ipc.GlobState {
+func (s implServiceBServerStub) Globber() *ipc.GlobState {
 	return s.gs
 }
 
-func (s implServiceBServerStub) Describe__() []__ipc.InterfaceDesc {
-	return []__ipc.InterfaceDesc{ServiceBDesc, ServiceADesc}
+func (s implServiceBServerStub) Describe__() []ipc.InterfaceDesc {
+	return []ipc.InterfaceDesc{ServiceBDesc, ServiceADesc}
 }
 
 // ServiceBDesc describes the ServiceB interface.
-var ServiceBDesc __ipc.InterfaceDesc = descServiceB
+var ServiceBDesc ipc.InterfaceDesc = descServiceB
 
 // descServiceB hides the desc to keep godoc clean.
-var descServiceB = __ipc.InterfaceDesc{
+var descServiceB = ipc.InterfaceDesc{
 	Name:    "ServiceB",
 	PkgPath: "v.io/core/veyron2/vdl/testdata/base",
-	Embeds: []__ipc.EmbedDesc{
+	Embeds: []ipc.EmbedDesc{
 		{"ServiceA", "v.io/core/veyron2/vdl/testdata/base", ``},
 	},
-	Methods: []__ipc.MethodDesc{
+	Methods: []ipc.MethodDesc{
 		{
 			Name: "MethodB1",
-			InArgs: []__ipc.ArgDesc{
+			InArgs: []ipc.ArgDesc{
 				{"a", ``}, // Scalars
 				{"b", ``}, // Composites
 			},
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"c", ``},   // CompComp
 				{"err", ``}, // error
 			},

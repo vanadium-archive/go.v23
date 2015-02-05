@@ -10,8 +10,8 @@
 package time
 
 import (
-	// The non-user imports are prefixed with "__" to prevent collisions.
-	__vdl "v.io/core/veyron2/vdl"
+	// VDL system imports
+	"v.io/core/veyron2/vdl"
 )
 
 // Time represents an absolute point in time with nanosecond precision.
@@ -60,6 +60,6 @@ func (Duration) __VDLReflect(struct {
 }
 
 func init() {
-	__vdl.Register(Time{})
-	__vdl.Register(Duration{})
+	vdl.Register(Time{})
+	vdl.Register(Duration{})
 }

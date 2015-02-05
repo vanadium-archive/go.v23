@@ -2,12 +2,13 @@ package compile
 
 import (
 	"v.io/core/veyron2/vdl"
+	"v.io/core/veyron2/vdl/vdlroot/src/vdltool"
 )
 
 var (
 	// The BuiltInPackage and BuiltInFile are used to hold the built-ins.
-	BuiltInPackage = newPackage("", "builtin", "builtin")
-	BuiltInFile    = &File{BaseName: "builtin.vdl"}
+	BuiltInPackage = newPackage("", "_builtin", "_builtin", vdltool.Config{})
+	BuiltInFile    = &File{BaseName: "_builtin.vdl"}
 )
 
 func init() {

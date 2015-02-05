@@ -4,10 +4,11 @@
 package vtrace
 
 import (
-	"v.io/core/veyron2/uniqueid"
+	// VDL system imports
+	"v.io/core/veyron2/vdl"
 
-	// The non-user imports are prefixed with "__" to prevent collisions.
-	__vdl "v.io/core/veyron2/vdl"
+	// VDL user imports
+	"v.io/core/veyron2/uniqueid"
 )
 
 type TraceRecord struct {
@@ -92,12 +93,12 @@ func (Response) __VDLReflect(struct {
 }
 
 func init() {
-	__vdl.Register(TraceRecord{})
-	__vdl.Register(Annotation{})
-	__vdl.Register(SpanRecord{})
-	__vdl.Register(TraceMethod(0))
-	__vdl.Register(Request{})
-	__vdl.Register(Response{})
+	vdl.Register(TraceRecord{})
+	vdl.Register(Annotation{})
+	vdl.Register(SpanRecord{})
+	vdl.Register(TraceMethod(0))
+	vdl.Register(Request{})
+	vdl.Register(Response{})
 }
 
 // None means that the trace should not be collected.

@@ -104,16 +104,16 @@
 package watch
 
 import (
+	// VDL system imports
+	"io"
+	"v.io/core/veyron2"
+	"v.io/core/veyron2/context"
+	"v.io/core/veyron2/ipc"
+	"v.io/core/veyron2/vdl"
+
+	// VDL user imports
 	"v.io/core/veyron2/services/security/access"
-
 	"v.io/core/veyron2/services/watch/types"
-
-	// The non-user imports are prefixed with "__" to prevent collisions.
-	__io "io"
-	__veyron2 "v.io/core/veyron2"
-	__context "v.io/core/veyron2/context"
-	__ipc "v.io/core/veyron2/ipc"
-	__vdl "v.io/core/veyron2/vdl"
 )
 
 // GlobWatcherClientMethods is the client interface
@@ -123,20 +123,20 @@ import (
 // that match a pattern.  See the package comments for details.
 type GlobWatcherClientMethods interface {
 	// WatchGlob returns a stream of changes that match a pattern.
-	WatchGlob(ctx *__context.T, req types.GlobRequest, opts ...__ipc.CallOpt) (GlobWatcherWatchGlobCall, error)
+	WatchGlob(ctx *context.T, req types.GlobRequest, opts ...ipc.CallOpt) (GlobWatcherWatchGlobCall, error)
 }
 
 // GlobWatcherClientStub adds universal methods to GlobWatcherClientMethods.
 type GlobWatcherClientStub interface {
 	GlobWatcherClientMethods
-	__ipc.UniversalServiceMethods
+	ipc.UniversalServiceMethods
 }
 
 // GlobWatcherClient returns a client stub for GlobWatcher.
-func GlobWatcherClient(name string, opts ...__ipc.BindOpt) GlobWatcherClientStub {
-	var client __ipc.Client
+func GlobWatcherClient(name string, opts ...ipc.BindOpt) GlobWatcherClientStub {
+	var client ipc.Client
 	for _, opt := range opts {
-		if clientOpt, ok := opt.(__ipc.Client); ok {
+		if clientOpt, ok := opt.(ipc.Client); ok {
 			client = clientOpt
 		}
 	}
@@ -145,18 +145,18 @@ func GlobWatcherClient(name string, opts ...__ipc.BindOpt) GlobWatcherClientStub
 
 type implGlobWatcherClientStub struct {
 	name   string
-	client __ipc.Client
+	client ipc.Client
 }
 
-func (c implGlobWatcherClientStub) c(ctx *__context.T) __ipc.Client {
+func (c implGlobWatcherClientStub) c(ctx *context.T) ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return __veyron2.GetClient(ctx)
+	return veyron2.GetClient(ctx)
 }
 
-func (c implGlobWatcherClientStub) WatchGlob(ctx *__context.T, i0 types.GlobRequest, opts ...__ipc.CallOpt) (ocall GlobWatcherWatchGlobCall, err error) {
-	var call __ipc.Call
+func (c implGlobWatcherClientStub) WatchGlob(ctx *context.T, i0 types.GlobRequest, opts ...ipc.CallOpt) (ocall GlobWatcherWatchGlobCall, err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "WatchGlob", []interface{}{i0}, opts...); err != nil {
 		return
 	}
@@ -197,7 +197,7 @@ type GlobWatcherWatchGlobCall interface {
 }
 
 type implGlobWatcherWatchGlobCall struct {
-	__ipc.Call
+	ipc.Call
 	valRecv types.Change
 	errRecv error
 }
@@ -223,7 +223,7 @@ func (c implGlobWatcherWatchGlobCallRecv) Value() types.Change {
 	return c.c.valRecv
 }
 func (c implGlobWatcherWatchGlobCallRecv) Err() error {
-	if c.c.errRecv == __io.EOF {
+	if c.c.errRecv == io.EOF {
 		return nil
 	}
 	return c.c.errRecv
@@ -258,7 +258,7 @@ type GlobWatcherServerStubMethods interface {
 type GlobWatcherServerStub interface {
 	GlobWatcherServerStubMethods
 	// Describe the GlobWatcher interfaces.
-	Describe__() []__ipc.InterfaceDesc
+	Describe__() []ipc.InterfaceDesc
 }
 
 // GlobWatcherServer returns a server stub for GlobWatcher.
@@ -270,9 +270,9 @@ func GlobWatcherServer(impl GlobWatcherServerMethods) GlobWatcherServerStub {
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
-	if gs := __ipc.NewGlobState(stub); gs != nil {
+	if gs := ipc.NewGlobState(stub); gs != nil {
 		stub.gs = gs
-	} else if gs := __ipc.NewGlobState(impl); gs != nil {
+	} else if gs := ipc.NewGlobState(impl); gs != nil {
 		stub.gs = gs
 	}
 	return stub
@@ -280,40 +280,40 @@ func GlobWatcherServer(impl GlobWatcherServerMethods) GlobWatcherServerStub {
 
 type implGlobWatcherServerStub struct {
 	impl GlobWatcherServerMethods
-	gs   *__ipc.GlobState
+	gs   *ipc.GlobState
 }
 
 func (s implGlobWatcherServerStub) WatchGlob(ctx *GlobWatcherWatchGlobContextStub, i0 types.GlobRequest) error {
 	return s.impl.WatchGlob(ctx, i0)
 }
 
-func (s implGlobWatcherServerStub) Globber() *__ipc.GlobState {
+func (s implGlobWatcherServerStub) Globber() *ipc.GlobState {
 	return s.gs
 }
 
-func (s implGlobWatcherServerStub) Describe__() []__ipc.InterfaceDesc {
-	return []__ipc.InterfaceDesc{GlobWatcherDesc}
+func (s implGlobWatcherServerStub) Describe__() []ipc.InterfaceDesc {
+	return []ipc.InterfaceDesc{GlobWatcherDesc}
 }
 
 // GlobWatcherDesc describes the GlobWatcher interface.
-var GlobWatcherDesc __ipc.InterfaceDesc = descGlobWatcher
+var GlobWatcherDesc ipc.InterfaceDesc = descGlobWatcher
 
 // descGlobWatcher hides the desc to keep godoc clean.
-var descGlobWatcher = __ipc.InterfaceDesc{
+var descGlobWatcher = ipc.InterfaceDesc{
 	Name:    "GlobWatcher",
 	PkgPath: "v.io/core/veyron2/services/watch",
 	Doc:     "// GlobWatcher allows a client to receive updates for changes to objects\n// that match a pattern.  See the package comments for details.",
-	Methods: []__ipc.MethodDesc{
+	Methods: []ipc.MethodDesc{
 		{
 			Name: "WatchGlob",
 			Doc:  "// WatchGlob returns a stream of changes that match a pattern.",
-			InArgs: []__ipc.ArgDesc{
+			InArgs: []ipc.ArgDesc{
 				{"req", ``}, // types.GlobRequest
 			},
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdl.AnyRep{access.Tag("Resolve")},
+			Tags: []vdl.AnyRep{access.Tag("Resolve")},
 		},
 	},
 }
@@ -331,18 +331,18 @@ type GlobWatcherWatchGlobServerStream interface {
 
 // GlobWatcherWatchGlobContext represents the context passed to GlobWatcher.WatchGlob.
 type GlobWatcherWatchGlobContext interface {
-	__ipc.ServerContext
+	ipc.ServerContext
 	GlobWatcherWatchGlobServerStream
 }
 
 // GlobWatcherWatchGlobContextStub is a wrapper that converts ipc.ServerCall into
 // a typesafe stub that implements GlobWatcherWatchGlobContext.
 type GlobWatcherWatchGlobContextStub struct {
-	__ipc.ServerCall
+	ipc.ServerCall
 }
 
 // Init initializes GlobWatcherWatchGlobContextStub from ipc.ServerCall.
-func (s *GlobWatcherWatchGlobContextStub) Init(call __ipc.ServerCall) {
+func (s *GlobWatcherWatchGlobContextStub) Init(call ipc.ServerCall) {
 	s.ServerCall = call
 }
 

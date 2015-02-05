@@ -4,16 +4,16 @@
 package testdata
 
 import (
-	// The non-user imports are prefixed with "__" to prevent collisions.
-	__vdl "v.io/core/veyron2/vdl"
+	// VDL system imports
+	"v.io/core/veyron2/vdl"
 )
 
 // TestCase represents an individual testcase for vom encoding and decoding.
 type TestCase struct {
-	Name       string       // Name of the testcase
-	Value      __vdl.AnyRep // Value to test
-	Hex        string       // Hex pattern representing vom encoding of Value
-	TypeString string       // The string representation of the Type
+	Name       string     // Name of the testcase
+	Value      vdl.AnyRep // Value to test
+	Hex        string     // Hex pattern representing vom encoding of Value
+	TypeString string     // The string representation of the Type
 }
 
 func (TestCase) __VDLReflect(struct {
@@ -22,7 +22,7 @@ func (TestCase) __VDLReflect(struct {
 }
 
 func init() {
-	__vdl.Register(TestCase{})
+	vdl.Register(TestCase{})
 }
 
 // Tests contains the testcases to use to test vom encoding and decoding.
@@ -1214,7 +1214,7 @@ var Tests = []TestCase{
 			A: true,
 			B: true,
 			C: true,
-			E: __vdl.AnyType,
+			E: vdl.AnyType,
 		},
 		Hex:        "80ff832a100124762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e426f6f6c020300ff852a100124762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4d426f6f6c020300ff893e160126762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e5374727563740203010141020300010142020400010143020b0000ff87061d0100024500ff8150160126762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4d537472756374020601014102030001014202420001014302430001014402440001014502020001014602010000ff820d01010201030104000501060000",
 		TypeString: "v.io/core/veyron2/vom/testdata.MStruct struct{A bool;B v.io/core/veyron2/vom/testdata.NBool bool;C v.io/core/veyron2/vom/testdata.MBool bool;D ?v.io/core/veyron2/vom/testdata.NStruct struct{A bool;B string;C int64};E typeobject;F any}",
@@ -1222,7 +1222,7 @@ var Tests = []TestCase{
 	{
 		Name: "MStruct{}",
 		Value: MStruct{
-			E: __vdl.AnyType,
+			E: vdl.AnyType,
 		},
 		Hex:        "80ff832a100124762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e426f6f6c020300ff852a100124762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4d426f6f6c020300ff893e160126762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e5374727563740203010141020300010142020400010143020b0000ff87061d0100024500ff8150160126762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4d537472756374020601014102030001014202420001014302430001014402440001014502020001014602010000ff820d01000200030004000501060000",
 		TypeString: "v.io/core/veyron2/vom/testdata.MStruct struct{A bool;B v.io/core/veyron2/vom/testdata.NBool bool;C v.io/core/veyron2/vom/testdata.MBool bool;D ?v.io/core/veyron2/vom/testdata.NStruct struct{A bool;B string;C int64};E typeobject;F any}",
@@ -1231,7 +1231,7 @@ var Tests = []TestCase{
 		Name: "MStruct{D: {}}",
 		Value: MStruct{
 			D: &NStruct{},
-			E: __vdl.AnyType,
+			E: vdl.AnyType,
 		},
 		Hex:        "80ff832a100124762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e426f6f6c020300ff852a100124762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4d426f6f6c020300ff893e160126762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e5374727563740203010141020300010142020400010143020b0000ff87061d0100024500ff8150160126762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4d537472756374020601014102030001014202420001014302430001014402440001014502020001014602010000ff82140100020003000401010002000300000501060000",
 		TypeString: "v.io/core/veyron2/vom/testdata.MStruct struct{A bool;B v.io/core/veyron2/vom/testdata.NBool bool;C v.io/core/veyron2/vom/testdata.MBool bool;D ?v.io/core/veyron2/vom/testdata.NStruct struct{A bool;B string;C int64};E typeobject;F any}",
@@ -1244,7 +1244,7 @@ var Tests = []TestCase{
 				B: "abc",
 				C: 123,
 			},
-			E: __vdl.AnyType,
+			E: vdl.AnyType,
 		},
 		Hex:        "80ff832a100124762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e426f6f6c020300ff852a100124762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4d426f6f6c020300ff893e160126762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e5374727563740203010141020300010142020400010143020b0000ff87061d0100024500ff8150160126762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4d537472756374020601014102030001014202420001014302430001014402440001014502020001014602010000ff821801000200030004010101020361626303fff6000501060000",
 		TypeString: "v.io/core/veyron2/vom/testdata.MStruct struct{A bool;B v.io/core/veyron2/vom/testdata.NBool bool;C v.io/core/veyron2/vom/testdata.MBool bool;D ?v.io/core/veyron2/vom/testdata.NStruct struct{A bool;B string;C int64};E typeobject;F any}",
@@ -1252,7 +1252,7 @@ var Tests = []TestCase{
 	{
 		Name: "MStruct{F: \"abc\"}",
 		Value: MStruct{
-			E: __vdl.AnyType,
+			E: vdl.AnyType,
 			F: "abc",
 		},
 		Hex:        "80ff832a100124762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e426f6f6c020300ff852a100124762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4d426f6f6c020300ff893e160126762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e5374727563740203010141020300010142020400010143020b0000ff87061d0100024500ff8150160126762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4d537472756374020601014102030001014202420001014302430001014402440001014502020001014602010000ff82110100020003000400050106040361626300",
@@ -1261,7 +1261,7 @@ var Tests = []TestCase{
 	{
 		Name: "MStruct{F: MBool(true)}",
 		Value: MStruct{
-			E: __vdl.AnyType,
+			E: vdl.AnyType,
 			F: MBool(true),
 		},
 		Hex:        "80ff832a100124762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e426f6f6c020300ff852a100124762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4d426f6f6c020300ff893e160126762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e5374727563740203010141020300010142020400010143020b0000ff87061d0100024500ff8150160126762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4d537472756374020601014102030001014202420001014302430001014402440001014502020001014602010000ff820e0100020003000400050106430100",
@@ -1270,7 +1270,7 @@ var Tests = []TestCase{
 	{
 		Name: "MStruct{F: ?NStruct{B: \"abc\"}}",
 		Value: MStruct{
-			E: __vdl.AnyType,
+			E: vdl.AnyType,
 			F: &NStruct{
 				B: "abc",
 			},
@@ -1329,217 +1329,217 @@ var Tests = []TestCase{
 	},
 	{
 		Name:       "typeobject(any)",
-		Value:      __vdl.AnyType,
+		Value:      vdl.AnyType,
 		Hex:        "800401",
 		TypeString: "typeobject",
 	},
 	{
 		Name:       "typeobject(bool)",
-		Value:      __vdl.TypeOf(false),
+		Value:      vdl.TypeOf(false),
 		Hex:        "800403",
 		TypeString: "typeobject",
 	},
 	{
 		Name:       "typeobject(uint16)",
-		Value:      __vdl.TypeOf(uint16(0)),
+		Value:      vdl.TypeOf(uint16(0)),
 		Hex:        "800406",
 		TypeString: "typeobject",
 	},
 	{
 		Name:       "typeobject(uint32)",
-		Value:      __vdl.TypeOf(uint32(0)),
+		Value:      vdl.TypeOf(uint32(0)),
 		Hex:        "800407",
 		TypeString: "typeobject",
 	},
 	{
 		Name:       "typeobject(uint64)",
-		Value:      __vdl.TypeOf(uint64(0)),
+		Value:      vdl.TypeOf(uint64(0)),
 		Hex:        "800408",
 		TypeString: "typeobject",
 	},
 	{
 		Name:       "typeobject(int16)",
-		Value:      __vdl.TypeOf(int16(0)),
+		Value:      vdl.TypeOf(int16(0)),
 		Hex:        "800409",
 		TypeString: "typeobject",
 	},
 	{
 		Name:       "typeobject(int32)",
-		Value:      __vdl.TypeOf(int32(0)),
+		Value:      vdl.TypeOf(int32(0)),
 		Hex:        "80040a",
 		TypeString: "typeobject",
 	},
 	{
 		Name:       "typeobject(int64)",
-		Value:      __vdl.TypeOf(int64(0)),
+		Value:      vdl.TypeOf(int64(0)),
 		Hex:        "80040b",
 		TypeString: "typeobject",
 	},
 	{
 		Name:       "typeobject(int16)",
-		Value:      __vdl.TypeOf(int16(0)),
+		Value:      vdl.TypeOf(int16(0)),
 		Hex:        "800409",
 		TypeString: "typeobject",
 	},
 	{
 		Name:       "typeobject(int32)",
-		Value:      __vdl.TypeOf(int32(0)),
+		Value:      vdl.TypeOf(int32(0)),
 		Hex:        "80040a",
 		TypeString: "typeobject",
 	},
 	{
 		Name:       "typeobject(int64)",
-		Value:      __vdl.TypeOf(int64(0)),
+		Value:      vdl.TypeOf(int64(0)),
 		Hex:        "80040b",
 		TypeString: "typeobject",
 	},
 	{
 		Name:       "typeobject(float32)",
-		Value:      __vdl.TypeOf(float32(0)),
+		Value:      vdl.TypeOf(float32(0)),
 		Hex:        "80040c",
 		TypeString: "typeobject",
 	},
 	{
 		Name:       "typeobject(float64)",
-		Value:      __vdl.TypeOf(float64(0)),
+		Value:      vdl.TypeOf(float64(0)),
 		Hex:        "80040d",
 		TypeString: "typeobject",
 	},
 	{
 		Name:       "typeobject(complex64)",
-		Value:      __vdl.TypeOf(complex64(0)),
+		Value:      vdl.TypeOf(complex64(0)),
 		Hex:        "80040e",
 		TypeString: "typeobject",
 	},
 	{
 		Name:       "typeobject(complex128)",
-		Value:      __vdl.TypeOf(complex128(0)),
+		Value:      vdl.TypeOf(complex128(0)),
 		Hex:        "80040f",
 		TypeString: "typeobject",
 	},
 	{
 		Name:       "typeobject(NBool)",
-		Value:      __vdl.TypeOf(NBool(false)),
+		Value:      vdl.TypeOf(NBool(false)),
 		Hex:        "80ff812a100124762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e426f6f6c0203000441",
 		TypeString: "typeobject",
 	},
 	{
 		Name:       "typeobject(NUint16)",
-		Value:      __vdl.TypeOf(NUint16(0)),
+		Value:      vdl.TypeOf(NUint16(0)),
 		Hex:        "80ff812c100126762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e55696e7431360206000441",
 		TypeString: "typeobject",
 	},
 	{
 		Name:       "typeobject(NUint32)",
-		Value:      __vdl.TypeOf(NUint32(0)),
+		Value:      vdl.TypeOf(NUint32(0)),
 		Hex:        "80ff812c100126762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e55696e7433320207000441",
 		TypeString: "typeobject",
 	},
 	{
 		Name:       "typeobject(NUint64)",
-		Value:      __vdl.TypeOf(NUint64(0)),
+		Value:      vdl.TypeOf(NUint64(0)),
 		Hex:        "80ff812c100126762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e55696e7436340208000441",
 		TypeString: "typeobject",
 	},
 	{
 		Name:       "typeobject(NInt16)",
-		Value:      __vdl.TypeOf(NInt16(0)),
+		Value:      vdl.TypeOf(NInt16(0)),
 		Hex:        "80ff812b100125762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e496e7431360209000441",
 		TypeString: "typeobject",
 	},
 	{
 		Name:       "typeobject(NInt32)",
-		Value:      __vdl.TypeOf(NInt32(0)),
+		Value:      vdl.TypeOf(NInt32(0)),
 		Hex:        "80ff812b100125762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e496e743332020a000441",
 		TypeString: "typeobject",
 	},
 	{
 		Name:       "typeobject(NInt64)",
-		Value:      __vdl.TypeOf(NInt64(0)),
+		Value:      vdl.TypeOf(NInt64(0)),
 		Hex:        "80ff812b100125762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e496e743634020b000441",
 		TypeString: "typeobject",
 	},
 	{
 		Name:       "typeobject(NFloat32)",
-		Value:      __vdl.TypeOf(NFloat32(0)),
+		Value:      vdl.TypeOf(NFloat32(0)),
 		Hex:        "80ff812d100127762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e466c6f61743332020c000441",
 		TypeString: "typeobject",
 	},
 	{
 		Name:       "typeobject(NFloat64)",
-		Value:      __vdl.TypeOf(NFloat64(0)),
+		Value:      vdl.TypeOf(NFloat64(0)),
 		Hex:        "80ff812d100127762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e466c6f61743634020d000441",
 		TypeString: "typeobject",
 	},
 	{
 		Name:       "typeobject(NComplex64)",
-		Value:      __vdl.TypeOf(NComplex64(0)),
+		Value:      vdl.TypeOf(NComplex64(0)),
 		Hex:        "80ff812f100129762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e436f6d706c65783634020e000441",
 		TypeString: "typeobject",
 	},
 	{
 		Name:       "typeobject(NComplex128)",
-		Value:      __vdl.TypeOf(NComplex128(0)),
+		Value:      vdl.TypeOf(NComplex128(0)),
 		Hex:        "80ff813010012a762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e436f6d706c6578313238020f000441",
 		TypeString: "typeobject",
 	},
 	{
 		Name:       "typeobject(NArray2Uint64)",
-		Value:      __vdl.TypeOf(NArray2Uint64{}),
+		Value:      vdl.TypeOf(NArray2Uint64{}),
 		Hex:        "80ff813412012c762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e41727261793255696e74363402080302000441",
 		TypeString: "typeobject",
 	},
 	{
 		Name:       "typeobject([]uint64)",
-		Value:      __vdl.TypeOf([]uint64(nil)),
+		Value:      vdl.TypeOf([]uint64(nil)),
 		Hex:        "80ff81061301000208000441",
 		TypeString: "typeobject",
 	},
 	{
 		Name:       "typeobject(NListUint64)",
-		Value:      __vdl.TypeOf(NListUint64(nil)),
+		Value:      vdl.TypeOf(NListUint64(nil)),
 		Hex:        "80ff813013012a762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e4c69737455696e7436340208000441",
 		TypeString: "typeobject",
 	},
 	{
 		Name:       "typeobject(set[uint64])",
-		Value:      __vdl.TypeOf(map[uint64]struct{}(nil)),
+		Value:      vdl.TypeOf(map[uint64]struct{}(nil)),
 		Hex:        "80ff81061401000208000441",
 		TypeString: "typeobject",
 	},
 	{
 		Name:       "typeobject(NSetUint64)",
-		Value:      __vdl.TypeOf(NSetUint64(nil)),
+		Value:      vdl.TypeOf(NSetUint64(nil)),
 		Hex:        "80ff812f140129762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e53657455696e7436340208000441",
 		TypeString: "typeobject",
 	},
 	{
 		Name:       "typeobject(map[uint64]string)",
-		Value:      __vdl.TypeOf(map[uint64]string(nil)),
+		Value:      vdl.TypeOf(map[uint64]string(nil)),
 		Hex:        "80ff810815010002080304000441",
 		TypeString: "typeobject",
 	},
 	{
 		Name:       "typeobject(NMapUint64String)",
-		Value:      __vdl.TypeOf(NMapUint64String(nil)),
+		Value:      vdl.TypeOf(NMapUint64String(nil)),
 		Hex:        "80ff813715012f762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e4d617055696e743634537472696e6702080304000441",
 		TypeString: "typeobject",
 	},
 	{
 		Name:       "typeobject(NStruct)",
-		Value:      __vdl.TypeOf(NStruct{}),
+		Value:      vdl.TypeOf(NStruct{}),
 		Hex:        "80ff813e160126762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e5374727563740203010141020300010142020400010143020b00000441",
 		TypeString: "typeobject",
 	},
 	{
 		Name:       "typeobject(NEnum)",
-		Value:      __vdl.TypeOf(NEnumA),
+		Value:      vdl.TypeOf(NEnumA),
 		Hex:        "80ff8130110124762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e456e756d0203014101420143000441",
 		TypeString: "typeobject",
 	},
 	{
 		Name:       "typeobject(NUnion)",
-		Value:      __vdl.TypeOf(NUnion(NUnionA{false})),
+		Value:      vdl.TypeOf(NUnion(NUnionA{false})),
 		Hex:        "80ff813d190125762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e556e696f6e0203010141020300010142020400010143020b00000441",
 		TypeString: "typeobject",
 	},

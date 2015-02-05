@@ -5,8 +5,8 @@
 package types
 
 import (
-	// The non-user imports are prefixed with "__" to prevent collisions.
-	__vdl "v.io/core/veyron2/vdl"
+	// VDL system imports
+	"v.io/core/veyron2/vdl"
 )
 
 // LogLine is a log entry from a log file.
@@ -23,7 +23,7 @@ func (LogEntry) __VDLReflect(struct {
 }
 
 func init() {
-	__vdl.Register(LogEntry{})
+	vdl.Register(LogEntry{})
 }
 
 // A special NumEntries value that indicates that all entries should be

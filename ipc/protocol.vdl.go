@@ -4,12 +4,12 @@
 package ipc
 
 import (
+	// VDL system imports
+	"v.io/core/veyron2/vdl"
+
+	// VDL user imports
 	"v.io/core/veyron2/security"
-
 	"v.io/core/veyron2/vtrace"
-
-	// The non-user imports are prefixed with "__" to prevent collisions.
-	__vdl "v.io/core/veyron2/vdl"
 )
 
 // Request describes the request header sent by the client to the server.  A
@@ -47,7 +47,7 @@ type Request struct {
 	Blessings BlessingsRequest
 	// Discharges are third party caveat discharges that
 	// are sent after the blessing to fulfill its caveats.
-	Discharges []__vdl.AnyRep
+	Discharges []vdl.AnyRep
 	// TraceRequest maintains the vtrace context between clients and servers
 	// and specifies additional parameters that control how tracing behaves.
 	TraceRequest vtrace.Request
@@ -105,9 +105,9 @@ func (BlessingsRequest) __VDLReflect(struct {
 }
 
 func init() {
-	__vdl.Register(Request{})
-	__vdl.Register(Response{})
-	__vdl.Register(BlessingsRequest{})
+	vdl.Register(Request{})
+	vdl.Register(Response{})
+	vdl.Register(BlessingsRequest{})
 }
 
 // NoTimeout specifies that no timeout is desired.

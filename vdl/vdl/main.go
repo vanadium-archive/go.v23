@@ -476,7 +476,7 @@ func gen(audit bool, targets []*build.Package, env *compile.Env) bool {
 					continue
 				}
 				for _, file := range pkg.Files {
-					data := golang.Generate(file, env, config.Go)
+					data := golang.Generate(file, env, config)
 					if writeFile(audit, data, dir, file.BaseName+".go", env) {
 						pkgchanged = true
 					}
@@ -497,7 +497,7 @@ func gen(audit bool, targets []*build.Package, env *compile.Env) bool {
 					result, _ := xlatePkgPath(pkgPath, optGenJavaOutPkg)
 					return result
 				})
-				for _, file := range java.Generate(pkg, env, config.Java) {
+				for _, file := range java.Generate(pkg, env, config) {
 					fileDir := filepath.Join(dir, file.Dir)
 					if writeFile(audit, file.Data, fileDir, file.Name, env) {
 						pkgchanged = true
@@ -524,7 +524,7 @@ func gen(audit bool, targets []*build.Package, env *compile.Env) bool {
 					}
 					return filepath.Join(cleanPath, path.Base(importPath))
 				}
-				data := javascript.Generate(pkg, env, path, config.Javascript, optPathToJSCore)
+				data := javascript.Generate(pkg, env, path, config, optPathToJSCore)
 				name := filepath.Base(target.Dir)
 				if writeFile(audit, data, dir, name+".js", env) {
 					pkgchanged = true

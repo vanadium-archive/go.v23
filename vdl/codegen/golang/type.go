@@ -9,33 +9,25 @@ import (
 	"v.io/core/veyron2/vdl/compile"
 )
 
-// testingMode is set to true to simplify tests.
-var testingMode = false
-
-func fileLocalIdent(data goData, ident string, file *compile.File) string {
-	if file.Package == data.File.Package {
-		// The identifier is from the same package - just use it.
+func localIdent(data goData, file *compile.File, ident string) string {
+	if testingMode {
 		return ident
 	}
-	// The identifier is defined in a different package - qualify with the local
-	// import package name.
-	//
-	// TODO(toddw): handle error if LookupLocal returns "".
-	return data.UserImports.LookupLocal(file.Package.Path) + "." + ident
+	return data.Pkg(file.Package.GenPath) + ident
 }
 
 func packageIdent(file *compile.File, ident string) string {
-	if file != nil && file.Package != nil {
-		return file.Package.Name + "." + ident
+	if testingMode {
+		return ident
 	}
-	return ident
+	return file.Package.Name + "." + ident
 }
 
 func qualifiedIdent(file *compile.File, ident string) string {
-	if file != nil && file.Package != nil {
-		return file.Package.QualifiedName(ident)
+	if testingMode {
+		return ident
 	}
-	return ident
+	return file.Package.QualifiedName(ident)
 }
 
 // typeGo translates vdl.Type into a Go type.
@@ -50,14 +42,14 @@ func typeGo(data goData, t *vdl.Type) string {
 	if def := data.Env.FindTypeDef(t); def != nil {
 		switch {
 		case t == vdl.AnyType:
-			return "__vdl.AnyRep"
+			return data.Pkg("v.io/core/veyron2/vdl") + "AnyRep"
 		case t == vdl.TypeObjectType:
-			return "*__vdl.Type"
+			return "*" + data.Pkg("v.io/core/veyron2/vdl") + "Type"
 		case def.File == compile.BuiltInFile:
 			// Built-in primitives just use their name.
 			return def.Name
 		}
-		return fileLocalIdent(data, def.Name, def.File)
+		return localIdent(data, def.File, def.Name)
 	}
 	// Otherwise recurse through the type.
 	switch t.Kind() {
@@ -109,7 +101,7 @@ func typeDefGo(data goData, def *compile.TypeDef) string {
 		}
 		s += fmt.Sprintf("\n\t}"+
 			"\n\t*x = -1"+
-			"\n\treturn __fmt.Errorf(\"unknown label %%q in %[2]s\", label)"+
+			"\n\treturn "+data.Pkg("fmt")+"Errorf(\"unknown label %%q in %[2]s\", label)"+
 			"\n}"+
 			"\n\n// String returns the string label of x."+
 			"\nfunc (x %[1]s) String() string {"+
@@ -204,5 +196,5 @@ func commaEnumLabels(prefix string, t *vdl.Type) (s string) {
 }
 
 func embedGo(data goData, embed *compile.Interface) string {
-	return fileLocalIdent(data, embed.Name, embed.File)
+	return localIdent(data, embed.File, embed.Name)
 }

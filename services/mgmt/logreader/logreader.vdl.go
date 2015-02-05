@@ -5,16 +5,16 @@
 package logreader
 
 import (
+	// VDL system imports
+	"io"
+	"v.io/core/veyron2"
+	"v.io/core/veyron2/context"
+	"v.io/core/veyron2/ipc"
+	"v.io/core/veyron2/vdl"
+
+	// VDL user imports
 	"v.io/core/veyron2/services/mgmt/logreader/types"
-
 	"v.io/core/veyron2/services/security/access"
-
-	// The non-user imports are prefixed with "__" to prevent collisions.
-	__io "io"
-	__veyron2 "v.io/core/veyron2"
-	__context "v.io/core/veyron2/context"
-	__ipc "v.io/core/veyron2/ipc"
-	__vdl "v.io/core/veyron2/vdl"
 )
 
 // LogFileClientMethods is the client interface
@@ -23,7 +23,7 @@ import (
 // LogFile can be used to access log files remotely.
 type LogFileClientMethods interface {
 	// Size returns the number of bytes in the receiving object.
-	Size(*__context.T, ...__ipc.CallOpt) (int64, error)
+	Size(*context.T, ...ipc.CallOpt) (int64, error)
 	// ReadLog receives up to NumEntries log entries starting at the
 	// StartPos offset (in bytes) in the receiving object. Each stream chunk
 	// contains one log entry.
@@ -37,20 +37,20 @@ type LogFileClientMethods interface {
 	//
 	// The returned error will be EOF if and only if ReadLog reached the
 	// end of the file and no log entries were returned.
-	ReadLog(ctx *__context.T, StartPos int64, NumEntries int32, Follow bool, opts ...__ipc.CallOpt) (LogFileReadLogCall, error)
+	ReadLog(ctx *context.T, StartPos int64, NumEntries int32, Follow bool, opts ...ipc.CallOpt) (LogFileReadLogCall, error)
 }
 
 // LogFileClientStub adds universal methods to LogFileClientMethods.
 type LogFileClientStub interface {
 	LogFileClientMethods
-	__ipc.UniversalServiceMethods
+	ipc.UniversalServiceMethods
 }
 
 // LogFileClient returns a client stub for LogFile.
-func LogFileClient(name string, opts ...__ipc.BindOpt) LogFileClientStub {
-	var client __ipc.Client
+func LogFileClient(name string, opts ...ipc.BindOpt) LogFileClientStub {
+	var client ipc.Client
 	for _, opt := range opts {
-		if clientOpt, ok := opt.(__ipc.Client); ok {
+		if clientOpt, ok := opt.(ipc.Client); ok {
 			client = clientOpt
 		}
 	}
@@ -59,18 +59,18 @@ func LogFileClient(name string, opts ...__ipc.BindOpt) LogFileClientStub {
 
 type implLogFileClientStub struct {
 	name   string
-	client __ipc.Client
+	client ipc.Client
 }
 
-func (c implLogFileClientStub) c(ctx *__context.T) __ipc.Client {
+func (c implLogFileClientStub) c(ctx *context.T) ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return __veyron2.GetClient(ctx)
+	return veyron2.GetClient(ctx)
 }
 
-func (c implLogFileClientStub) Size(ctx *__context.T, opts ...__ipc.CallOpt) (o0 int64, err error) {
-	var call __ipc.Call
+func (c implLogFileClientStub) Size(ctx *context.T, opts ...ipc.CallOpt) (o0 int64, err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Size", nil, opts...); err != nil {
 		return
 	}
@@ -80,8 +80,8 @@ func (c implLogFileClientStub) Size(ctx *__context.T, opts ...__ipc.CallOpt) (o0
 	return
 }
 
-func (c implLogFileClientStub) ReadLog(ctx *__context.T, i0 int64, i1 int32, i2 bool, opts ...__ipc.CallOpt) (ocall LogFileReadLogCall, err error) {
-	var call __ipc.Call
+func (c implLogFileClientStub) ReadLog(ctx *context.T, i0 int64, i1 int32, i2 bool, opts ...ipc.CallOpt) (ocall LogFileReadLogCall, err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "ReadLog", []interface{}{i0, i1, i2}, opts...); err != nil {
 		return
 	}
@@ -122,7 +122,7 @@ type LogFileReadLogCall interface {
 }
 
 type implLogFileReadLogCall struct {
-	__ipc.Call
+	ipc.Call
 	valRecv types.LogEntry
 	errRecv error
 }
@@ -148,7 +148,7 @@ func (c implLogFileReadLogCallRecv) Value() types.LogEntry {
 	return c.c.valRecv
 }
 func (c implLogFileReadLogCallRecv) Err() error {
-	if c.c.errRecv == __io.EOF {
+	if c.c.errRecv == io.EOF {
 		return nil
 	}
 	return c.c.errRecv
@@ -166,7 +166,7 @@ func (c *implLogFileReadLogCall) Finish() (o0 int64, err error) {
 // LogFile can be used to access log files remotely.
 type LogFileServerMethods interface {
 	// Size returns the number of bytes in the receiving object.
-	Size(__ipc.ServerContext) (int64, error)
+	Size(ipc.ServerContext) (int64, error)
 	// ReadLog receives up to NumEntries log entries starting at the
 	// StartPos offset (in bytes) in the receiving object. Each stream chunk
 	// contains one log entry.
@@ -189,7 +189,7 @@ type LogFileServerMethods interface {
 // is the streaming methods.
 type LogFileServerStubMethods interface {
 	// Size returns the number of bytes in the receiving object.
-	Size(__ipc.ServerContext) (int64, error)
+	Size(ipc.ServerContext) (int64, error)
 	// ReadLog receives up to NumEntries log entries starting at the
 	// StartPos offset (in bytes) in the receiving object. Each stream chunk
 	// contains one log entry.
@@ -210,7 +210,7 @@ type LogFileServerStubMethods interface {
 type LogFileServerStub interface {
 	LogFileServerStubMethods
 	// Describe the LogFile interfaces.
-	Describe__() []__ipc.InterfaceDesc
+	Describe__() []ipc.InterfaceDesc
 }
 
 // LogFileServer returns a server stub for LogFile.
@@ -222,9 +222,9 @@ func LogFileServer(impl LogFileServerMethods) LogFileServerStub {
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
-	if gs := __ipc.NewGlobState(stub); gs != nil {
+	if gs := ipc.NewGlobState(stub); gs != nil {
 		stub.gs = gs
-	} else if gs := __ipc.NewGlobState(impl); gs != nil {
+	} else if gs := ipc.NewGlobState(impl); gs != nil {
 		stub.gs = gs
 	}
 	return stub
@@ -232,10 +232,10 @@ func LogFileServer(impl LogFileServerMethods) LogFileServerStub {
 
 type implLogFileServerStub struct {
 	impl LogFileServerMethods
-	gs   *__ipc.GlobState
+	gs   *ipc.GlobState
 }
 
-func (s implLogFileServerStub) Size(ctx __ipc.ServerContext) (int64, error) {
+func (s implLogFileServerStub) Size(ctx ipc.ServerContext) (int64, error) {
 	return s.impl.Size(ctx)
 }
 
@@ -243,45 +243,45 @@ func (s implLogFileServerStub) ReadLog(ctx *LogFileReadLogContextStub, i0 int64,
 	return s.impl.ReadLog(ctx, i0, i1, i2)
 }
 
-func (s implLogFileServerStub) Globber() *__ipc.GlobState {
+func (s implLogFileServerStub) Globber() *ipc.GlobState {
 	return s.gs
 }
 
-func (s implLogFileServerStub) Describe__() []__ipc.InterfaceDesc {
-	return []__ipc.InterfaceDesc{LogFileDesc}
+func (s implLogFileServerStub) Describe__() []ipc.InterfaceDesc {
+	return []ipc.InterfaceDesc{LogFileDesc}
 }
 
 // LogFileDesc describes the LogFile interface.
-var LogFileDesc __ipc.InterfaceDesc = descLogFile
+var LogFileDesc ipc.InterfaceDesc = descLogFile
 
 // descLogFile hides the desc to keep godoc clean.
-var descLogFile = __ipc.InterfaceDesc{
+var descLogFile = ipc.InterfaceDesc{
 	Name:    "LogFile",
 	PkgPath: "v.io/core/veyron2/services/mgmt/logreader",
 	Doc:     "// LogFile can be used to access log files remotely.",
-	Methods: []__ipc.MethodDesc{
+	Methods: []ipc.MethodDesc{
 		{
 			Name: "Size",
 			Doc:  "// Size returns the number of bytes in the receiving object.",
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // int64
 				{"", ``}, // error
 			},
-			Tags: []__vdl.AnyRep{access.Tag("Debug")},
+			Tags: []vdl.AnyRep{access.Tag("Debug")},
 		},
 		{
 			Name: "ReadLog",
 			Doc:  "// ReadLog receives up to NumEntries log entries starting at the\n// StartPos offset (in bytes) in the receiving object. Each stream chunk\n// contains one log entry.\n//\n// If Follow is true, ReadLog will block and wait for more entries to\n// arrive when it reaches the end of the file.\n//\n// ReadLog returns the position where it stopped reading, i.e. the\n// position where the next entry starts. This value can be used as\n// StartPos for successive calls to ReadLog.\n//\n// The returned error will be EOF if and only if ReadLog reached the\n// end of the file and no log entries were returned.",
-			InArgs: []__ipc.ArgDesc{
+			InArgs: []ipc.ArgDesc{
 				{"StartPos", ``},   // int64
 				{"NumEntries", ``}, // int32
 				{"Follow", ``},     // bool
 			},
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // int64
 				{"", ``}, // error
 			},
-			Tags: []__vdl.AnyRep{access.Tag("Debug")},
+			Tags: []vdl.AnyRep{access.Tag("Debug")},
 		},
 	},
 }
@@ -299,18 +299,18 @@ type LogFileReadLogServerStream interface {
 
 // LogFileReadLogContext represents the context passed to LogFile.ReadLog.
 type LogFileReadLogContext interface {
-	__ipc.ServerContext
+	ipc.ServerContext
 	LogFileReadLogServerStream
 }
 
 // LogFileReadLogContextStub is a wrapper that converts ipc.ServerCall into
 // a typesafe stub that implements LogFileReadLogContext.
 type LogFileReadLogContextStub struct {
-	__ipc.ServerCall
+	ipc.ServerCall
 }
 
 // Init initializes LogFileReadLogContextStub from ipc.ServerCall.
-func (s *LogFileReadLogContextStub) Init(call __ipc.ServerCall) {
+func (s *LogFileReadLogContextStub) Init(call ipc.ServerCall) {
 	s.ServerCall = call
 }
 

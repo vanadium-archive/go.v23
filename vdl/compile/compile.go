@@ -23,13 +23,14 @@ import (
 
 	"v.io/core/veyron2/vdl"
 	"v.io/core/veyron2/vdl/parse"
+	"v.io/core/veyron2/vdl/vdlroot/src/vdltool"
 )
 
 // Compile compiles a list of parse.Files into a Package.  Updates env with the
 // compiled package and returns it on success, or returns nil and guarantees
 // !env.Errors.IsEmpty().  All imports that the parsed package depend on must
 // already have been compiled and populated into env.
-func Compile(pkgpath, genpath string, pfiles []*parse.File, env *Env) *Package {
+func Compile(pkgpath, genpath string, pfiles []*parse.File, config vdltool.Config, env *Env) *Package {
 	if pkgpath == "" {
 		env.Errors.Errorf("Compile called with empty pkgpath")
 		return nil
@@ -38,7 +39,7 @@ func Compile(pkgpath, genpath string, pfiles []*parse.File, env *Env) *Package {
 		env.Errors.Errorf("%q invalid recompile (already exists in env)", pkgpath)
 		return nil
 	}
-	pkg := compile(pkgpath, genpath, pfiles, env)
+	pkg := compile(pkgpath, genpath, pfiles, config, env)
 	if pkg == nil {
 		return nil
 	}
@@ -69,7 +70,7 @@ func CompileConfig(t *vdl.Type, pconfig *parse.Config, env *Env) *vdl.Value {
 		ConstDefs:  pconfig.ConstDefs,
 	}
 	pkgpath := filepath.ToSlash(filepath.Dir(pconfig.FileName))
-	pkg := compile(pkgpath, pkgpath, []*parse.File{pfile}, env)
+	pkg := compile(pkgpath, pkgpath, []*parse.File{pfile}, vdltool.Config{}, env)
 	if pkg == nil {
 		return nil
 	}
@@ -89,19 +90,19 @@ func CompileConfig(t *vdl.Type, pconfig *parse.Config, env *Env) *vdl.Value {
 func CompileExpr(t *vdl.Type, expr parse.ConstExpr, env *Env) *vdl.Value {
 	// Set up a dummy file and compile expr into a value.
 	file := &File{
-		BaseName: "expr",
-		Package:  newPackage("expr", "expr", "expr"),
+		BaseName: "_expr.vdl",
+		Package:  newPackage("_expr", "_expr", "_expr", vdltool.Config{}),
 	}
 	return compileConst(t, expr, file, env)
 }
 
-func compile(pkgpath, genpath string, pfiles []*parse.File, env *Env) *Package {
+func compile(pkgpath, genpath string, pfiles []*parse.File, config vdltool.Config, env *Env) *Package {
 	if len(pfiles) == 0 {
 		env.Errors.Errorf("%q compile called with no files", pkgpath)
 		return nil
 	}
 	// Initialize each file and put it in pkg.
-	pkg := newPackage(parse.InferPackageName(pfiles, env.Errors), pkgpath, genpath)
+	pkg := newPackage(parse.InferPackageName(pfiles, env.Errors), pkgpath, genpath, config)
 	for _, pfile := range pfiles {
 		pkg.Files = append(pkg.Files, &File{
 			BaseName:   pfile.BaseName,
@@ -148,6 +149,9 @@ func compileImports(pkg *Package, pfiles []*parse.File, env *Env) {
 	}
 }
 
+// TODO(toddw): Remove this function and all helpers, after all code generators
+// have been updated to compute their own dependencies.  The only code that will
+// remain below this point is the loop checking for unused imports.
 func computeDeps(pkg *Package, env *Env) {
 	// Check for unused user-supplied imports.
 	for _, file := range pkg.Files {

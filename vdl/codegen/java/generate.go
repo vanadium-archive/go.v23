@@ -47,7 +47,7 @@ type JavaFileInfo struct {
 // particular, we don't yet support error ids and types Complex64 and Complex128.
 //
 // TODO(spetrovic): Run Java formatters on the generated files.
-func Generate(pkg *compile.Package, env *compile.Env, config vdltool.JavaConfig) (ret []JavaFileInfo) {
+func Generate(pkg *compile.Package, env *compile.Env, config vdltool.Config) (ret []JavaFileInfo) {
 	// One file for package documentation (if any).
 	if g := genJavaPackageFile(pkg, env); g != nil {
 		ret = append(ret, *g)

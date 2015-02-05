@@ -33,7 +33,7 @@ type data struct {
 
 // Generate takes a populated compile.Package and produces a byte slice
 // containing the generated Javascript code.
-func Generate(pkg *compile.Package, env *compile.Env, genImport func(string) string, config vdltool.JavascriptConfig, pathToCoreJS string) []byte {
+func Generate(pkg *compile.Package, env *compile.Env, genImport func(string) string, config vdltool.Config, pathToCoreJS string) []byte {
 	data := data{
 		Pkg:            pkg,
 		Env:            env,

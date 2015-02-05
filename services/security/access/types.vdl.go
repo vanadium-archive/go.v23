@@ -94,10 +94,11 @@
 package access
 
 import (
-	"v.io/core/veyron2/security"
+	// VDL system imports
+	"v.io/core/veyron2/vdl"
 
-	// The non-user imports are prefixed with "__" to prevent collisions.
-	__vdl "v.io/core/veyron2/vdl"
+	// VDL user imports
+	"v.io/core/veyron2/security"
 )
 
 // ACL represents an Access Control List - a set of blessings that should be
@@ -155,9 +156,9 @@ func (Tag) __VDLReflect(struct {
 }
 
 func init() {
-	__vdl.Register(ACL{})
-	__vdl.Register(TaggedACLMap(nil))
-	__vdl.Register(Tag(""))
+	vdl.Register(ACL{})
+	vdl.Register(TaggedACLMap(nil))
+	vdl.Register(Tag(""))
 }
 
 const Admin = Tag("Admin") // Operations that require privileged access for object administration.

@@ -5,9 +5,9 @@
 package vdltool
 
 import (
-	// The non-user imports are prefixed with "__" to prevent collisions.
-	__fmt "fmt"
-	__vdl "v.io/core/veyron2/vdl"
+	// VDL system imports
+	"fmt"
+	"v.io/core/veyron2/vdl"
 )
 
 // Config specifies the configuration for the vdl tool.  This is typically
@@ -61,7 +61,7 @@ func (x *GenLanguage) Set(label string) error {
 		return nil
 	}
 	*x = -1
-	return __fmt.Errorf("unknown label %q in vdltool.GenLanguage", label)
+	return fmt.Errorf("unknown label %q in vdltool.GenLanguage", label)
 }
 
 // String returns the string label of x.
@@ -144,10 +144,10 @@ func (JavascriptConfig) __VDLReflect(struct {
 }
 
 func init() {
-	__vdl.Register(Config{})
-	__vdl.Register(GenLanguageGo)
-	__vdl.Register(GoConfig{})
-	__vdl.Register(GoNativeType{})
-	__vdl.Register(JavaConfig{})
-	__vdl.Register(JavascriptConfig{})
+	vdl.Register(Config{})
+	vdl.Register(GenLanguageGo)
+	vdl.Register(GoConfig{})
+	vdl.Register(GoNativeType{})
+	vdl.Register(JavaConfig{})
+	vdl.Register(JavascriptConfig{})
 }

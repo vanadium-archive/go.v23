@@ -9,7 +9,7 @@ import (
 
 // NewContext creates a Context.
 func NewContext(params *ContextParams) Context {
-	ctx := &context{*params}
+	ctx := &ctxImpl{*params}
 	if params.Timestamp.IsZero() {
 		ctx.params.Timestamp = time.Now()
 	}
@@ -53,17 +53,17 @@ func (p *ContextParams) Copy(c Context) {
 	p.RemoteEndpoint = c.RemoteEndpoint()
 }
 
-type context struct{ params ContextParams }
+type ctxImpl struct{ params ContextParams }
 
-func (c *context) Timestamp() time.Time                   { return c.params.Timestamp }
-func (c *context) Method() string                         { return c.params.Method }
-func (c *context) MethodTags() []interface{}              { return c.params.MethodTags }
-func (c *context) Name() string                           { return c.params.Suffix }
-func (c *context) Suffix() string                         { return c.params.Suffix }
-func (c *context) LocalPrincipal() Principal              { return c.params.LocalPrincipal }
-func (c *context) LocalBlessings() Blessings              { return c.params.LocalBlessings }
-func (c *context) RemoteBlessings() Blessings             { return c.params.RemoteBlessings }
-func (c *context) LocalEndpoint() naming.Endpoint         { return c.params.LocalEndpoint }
-func (c *context) RemoteEndpoint() naming.Endpoint        { return c.params.RemoteEndpoint }
-func (c *context) RemoteDischarges() map[string]Discharge { return c.params.RemoteDischarges }
-func (c *context) String() string                         { return fmt.Sprintf("%+v", c.params) }
+func (c *ctxImpl) Timestamp() time.Time                   { return c.params.Timestamp }
+func (c *ctxImpl) Method() string                         { return c.params.Method }
+func (c *ctxImpl) MethodTags() []interface{}              { return c.params.MethodTags }
+func (c *ctxImpl) Name() string                           { return c.params.Suffix }
+func (c *ctxImpl) Suffix() string                         { return c.params.Suffix }
+func (c *ctxImpl) LocalPrincipal() Principal              { return c.params.LocalPrincipal }
+func (c *ctxImpl) LocalBlessings() Blessings              { return c.params.LocalBlessings }
+func (c *ctxImpl) RemoteBlessings() Blessings             { return c.params.RemoteBlessings }
+func (c *ctxImpl) LocalEndpoint() naming.Endpoint         { return c.params.LocalEndpoint }
+func (c *ctxImpl) RemoteEndpoint() naming.Endpoint        { return c.params.RemoteEndpoint }
+func (c *ctxImpl) RemoteDischarges() map[string]Discharge { return c.params.RemoteDischarges }
+func (c *ctxImpl) String() string                         { return fmt.Sprintf("%+v", c.params) }

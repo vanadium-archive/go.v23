@@ -9,15 +9,15 @@
 package groups
 
 import (
+	// VDL system imports
+	"v.io/core/veyron2"
+	"v.io/core/veyron2/context"
+	"v.io/core/veyron2/ipc"
+	"v.io/core/veyron2/vdl"
+
+	// VDL user imports
 	"v.io/core/veyron2/services/security/access"
-
 	"v.io/core/veyron2/services/security/access/object"
-
-	// The non-user imports are prefixed with "__" to prevent collisions.
-	__veyron2 "v.io/core/veyron2"
-	__context "v.io/core/veyron2/context"
-	__ipc "v.io/core/veyron2/ipc"
-	__vdl "v.io/core/veyron2/vdl"
 )
 
 // BlessingPatternChunk is a substring of a BlessingPattern. As with
@@ -65,11 +65,11 @@ func (RestResponse) __VDLReflect(struct {
 }
 
 func init() {
-	__vdl.Register(BlessingPatternChunk(""))
-	__vdl.Register(GetRequest{})
-	__vdl.Register(GetResponse{})
-	__vdl.Register(RestRequest{})
-	__vdl.Register(RestResponse{})
+	vdl.Register(BlessingPatternChunk(""))
+	vdl.Register(GetRequest{})
+	vdl.Register(GetResponse{})
+	vdl.Register(RestRequest{})
+	vdl.Register(RestResponse{})
 }
 
 // GroupClientMethods is the client interface
@@ -128,35 +128,35 @@ type GroupClientMethods interface {
 	// If acl is nil, a default TaggedACLMap is used, providing Admin access to
 	// the caller.
 	// Create requires the caller to have Write permission at the GroupServer.
-	Create(ctx *__context.T, acl access.TaggedACLMap, entries []BlessingPatternChunk, opts ...__ipc.CallOpt) error
+	Create(ctx *context.T, acl access.TaggedACLMap, entries []BlessingPatternChunk, opts ...ipc.CallOpt) error
 	// Delete deletes the group.
 	// Permissions for all group-related methods except Create() are checked
 	// against the Group object.
-	Delete(ctx *__context.T, etag string, opts ...__ipc.CallOpt) error
+	Delete(ctx *context.T, etag string, opts ...ipc.CallOpt) error
 	// Add adds an entry to the group.
-	Add(ctx *__context.T, entry BlessingPatternChunk, etag string, opts ...__ipc.CallOpt) error
+	Add(ctx *context.T, entry BlessingPatternChunk, etag string, opts ...ipc.CallOpt) error
 	// Remove removes an entry from the group.
-	Remove(ctx *__context.T, entry BlessingPatternChunk, etag string, opts ...__ipc.CallOpt) error
+	Remove(ctx *context.T, entry BlessingPatternChunk, etag string, opts ...ipc.CallOpt) error
 	// Get returns all entries in the group.
 	// TODO(sadovsky): Flesh out this API.
-	Get(ctx *__context.T, req GetRequest, reqEtag string, opts ...__ipc.CallOpt) (res GetResponse, etag string, err error)
+	Get(ctx *context.T, req GetRequest, reqEtag string, opts ...ipc.CallOpt) (res GetResponse, etag string, err error)
 	// Rest returns information sufficient for the client to perform its ACL
 	// checks.
 	// TODO(sadovsky): Flesh out this API.
-	Rest(ctx *__context.T, req RestRequest, reqEtag string, opts ...__ipc.CallOpt) (res RestResponse, etag string, err error)
+	Rest(ctx *context.T, req RestRequest, reqEtag string, opts ...ipc.CallOpt) (res RestResponse, etag string, err error)
 }
 
 // GroupClientStub adds universal methods to GroupClientMethods.
 type GroupClientStub interface {
 	GroupClientMethods
-	__ipc.UniversalServiceMethods
+	ipc.UniversalServiceMethods
 }
 
 // GroupClient returns a client stub for Group.
-func GroupClient(name string, opts ...__ipc.BindOpt) GroupClientStub {
-	var client __ipc.Client
+func GroupClient(name string, opts ...ipc.BindOpt) GroupClientStub {
+	var client ipc.Client
 	for _, opt := range opts {
-		if clientOpt, ok := opt.(__ipc.Client); ok {
+		if clientOpt, ok := opt.(ipc.Client); ok {
 			client = clientOpt
 		}
 	}
@@ -165,20 +165,20 @@ func GroupClient(name string, opts ...__ipc.BindOpt) GroupClientStub {
 
 type implGroupClientStub struct {
 	name   string
-	client __ipc.Client
+	client ipc.Client
 
 	object.ObjectClientStub
 }
 
-func (c implGroupClientStub) c(ctx *__context.T) __ipc.Client {
+func (c implGroupClientStub) c(ctx *context.T) ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return __veyron2.GetClient(ctx)
+	return veyron2.GetClient(ctx)
 }
 
-func (c implGroupClientStub) Create(ctx *__context.T, i0 access.TaggedACLMap, i1 []BlessingPatternChunk, opts ...__ipc.CallOpt) (err error) {
-	var call __ipc.Call
+func (c implGroupClientStub) Create(ctx *context.T, i0 access.TaggedACLMap, i1 []BlessingPatternChunk, opts ...ipc.CallOpt) (err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Create", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
@@ -188,8 +188,8 @@ func (c implGroupClientStub) Create(ctx *__context.T, i0 access.TaggedACLMap, i1
 	return
 }
 
-func (c implGroupClientStub) Delete(ctx *__context.T, i0 string, opts ...__ipc.CallOpt) (err error) {
-	var call __ipc.Call
+func (c implGroupClientStub) Delete(ctx *context.T, i0 string, opts ...ipc.CallOpt) (err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Delete", []interface{}{i0}, opts...); err != nil {
 		return
 	}
@@ -199,8 +199,8 @@ func (c implGroupClientStub) Delete(ctx *__context.T, i0 string, opts ...__ipc.C
 	return
 }
 
-func (c implGroupClientStub) Add(ctx *__context.T, i0 BlessingPatternChunk, i1 string, opts ...__ipc.CallOpt) (err error) {
-	var call __ipc.Call
+func (c implGroupClientStub) Add(ctx *context.T, i0 BlessingPatternChunk, i1 string, opts ...ipc.CallOpt) (err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Add", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
@@ -210,8 +210,8 @@ func (c implGroupClientStub) Add(ctx *__context.T, i0 BlessingPatternChunk, i1 s
 	return
 }
 
-func (c implGroupClientStub) Remove(ctx *__context.T, i0 BlessingPatternChunk, i1 string, opts ...__ipc.CallOpt) (err error) {
-	var call __ipc.Call
+func (c implGroupClientStub) Remove(ctx *context.T, i0 BlessingPatternChunk, i1 string, opts ...ipc.CallOpt) (err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Remove", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
@@ -221,8 +221,8 @@ func (c implGroupClientStub) Remove(ctx *__context.T, i0 BlessingPatternChunk, i
 	return
 }
 
-func (c implGroupClientStub) Get(ctx *__context.T, i0 GetRequest, i1 string, opts ...__ipc.CallOpt) (o0 GetResponse, o1 string, err error) {
-	var call __ipc.Call
+func (c implGroupClientStub) Get(ctx *context.T, i0 GetRequest, i1 string, opts ...ipc.CallOpt) (o0 GetResponse, o1 string, err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Get", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
@@ -232,8 +232,8 @@ func (c implGroupClientStub) Get(ctx *__context.T, i0 GetRequest, i1 string, opt
 	return
 }
 
-func (c implGroupClientStub) Rest(ctx *__context.T, i0 RestRequest, i1 string, opts ...__ipc.CallOpt) (o0 RestResponse, o1 string, err error) {
-	var call __ipc.Call
+func (c implGroupClientStub) Rest(ctx *context.T, i0 RestRequest, i1 string, opts ...ipc.CallOpt) (o0 RestResponse, o1 string, err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Rest", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
@@ -299,22 +299,22 @@ type GroupServerMethods interface {
 	// If acl is nil, a default TaggedACLMap is used, providing Admin access to
 	// the caller.
 	// Create requires the caller to have Write permission at the GroupServer.
-	Create(ctx __ipc.ServerContext, acl access.TaggedACLMap, entries []BlessingPatternChunk) error
+	Create(ctx ipc.ServerContext, acl access.TaggedACLMap, entries []BlessingPatternChunk) error
 	// Delete deletes the group.
 	// Permissions for all group-related methods except Create() are checked
 	// against the Group object.
-	Delete(ctx __ipc.ServerContext, etag string) error
+	Delete(ctx ipc.ServerContext, etag string) error
 	// Add adds an entry to the group.
-	Add(ctx __ipc.ServerContext, entry BlessingPatternChunk, etag string) error
+	Add(ctx ipc.ServerContext, entry BlessingPatternChunk, etag string) error
 	// Remove removes an entry from the group.
-	Remove(ctx __ipc.ServerContext, entry BlessingPatternChunk, etag string) error
+	Remove(ctx ipc.ServerContext, entry BlessingPatternChunk, etag string) error
 	// Get returns all entries in the group.
 	// TODO(sadovsky): Flesh out this API.
-	Get(ctx __ipc.ServerContext, req GetRequest, reqEtag string) (res GetResponse, etag string, err error)
+	Get(ctx ipc.ServerContext, req GetRequest, reqEtag string) (res GetResponse, etag string, err error)
 	// Rest returns information sufficient for the client to perform its ACL
 	// checks.
 	// TODO(sadovsky): Flesh out this API.
-	Rest(ctx __ipc.ServerContext, req RestRequest, reqEtag string) (res RestResponse, etag string, err error)
+	Rest(ctx ipc.ServerContext, req RestRequest, reqEtag string) (res RestResponse, etag string, err error)
 }
 
 // GroupServerStubMethods is the server interface containing
@@ -327,7 +327,7 @@ type GroupServerStubMethods GroupServerMethods
 type GroupServerStub interface {
 	GroupServerStubMethods
 	// Describe the Group interfaces.
-	Describe__() []__ipc.InterfaceDesc
+	Describe__() []ipc.InterfaceDesc
 }
 
 // GroupServer returns a server stub for Group.
@@ -340,9 +340,9 @@ func GroupServer(impl GroupServerMethods) GroupServerStub {
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
-	if gs := __ipc.NewGlobState(stub); gs != nil {
+	if gs := ipc.NewGlobState(stub); gs != nil {
 		stub.gs = gs
-	} else if gs := __ipc.NewGlobState(impl); gs != nil {
+	} else if gs := ipc.NewGlobState(impl); gs != nil {
 		stub.gs = gs
 	}
 	return stub
@@ -351,127 +351,127 @@ func GroupServer(impl GroupServerMethods) GroupServerStub {
 type implGroupServerStub struct {
 	impl GroupServerMethods
 	object.ObjectServerStub
-	gs *__ipc.GlobState
+	gs *ipc.GlobState
 }
 
-func (s implGroupServerStub) Create(ctx __ipc.ServerContext, i0 access.TaggedACLMap, i1 []BlessingPatternChunk) error {
+func (s implGroupServerStub) Create(ctx ipc.ServerContext, i0 access.TaggedACLMap, i1 []BlessingPatternChunk) error {
 	return s.impl.Create(ctx, i0, i1)
 }
 
-func (s implGroupServerStub) Delete(ctx __ipc.ServerContext, i0 string) error {
+func (s implGroupServerStub) Delete(ctx ipc.ServerContext, i0 string) error {
 	return s.impl.Delete(ctx, i0)
 }
 
-func (s implGroupServerStub) Add(ctx __ipc.ServerContext, i0 BlessingPatternChunk, i1 string) error {
+func (s implGroupServerStub) Add(ctx ipc.ServerContext, i0 BlessingPatternChunk, i1 string) error {
 	return s.impl.Add(ctx, i0, i1)
 }
 
-func (s implGroupServerStub) Remove(ctx __ipc.ServerContext, i0 BlessingPatternChunk, i1 string) error {
+func (s implGroupServerStub) Remove(ctx ipc.ServerContext, i0 BlessingPatternChunk, i1 string) error {
 	return s.impl.Remove(ctx, i0, i1)
 }
 
-func (s implGroupServerStub) Get(ctx __ipc.ServerContext, i0 GetRequest, i1 string) (GetResponse, string, error) {
+func (s implGroupServerStub) Get(ctx ipc.ServerContext, i0 GetRequest, i1 string) (GetResponse, string, error) {
 	return s.impl.Get(ctx, i0, i1)
 }
 
-func (s implGroupServerStub) Rest(ctx __ipc.ServerContext, i0 RestRequest, i1 string) (RestResponse, string, error) {
+func (s implGroupServerStub) Rest(ctx ipc.ServerContext, i0 RestRequest, i1 string) (RestResponse, string, error) {
 	return s.impl.Rest(ctx, i0, i1)
 }
 
-func (s implGroupServerStub) Globber() *__ipc.GlobState {
+func (s implGroupServerStub) Globber() *ipc.GlobState {
 	return s.gs
 }
 
-func (s implGroupServerStub) Describe__() []__ipc.InterfaceDesc {
-	return []__ipc.InterfaceDesc{GroupDesc, object.ObjectDesc}
+func (s implGroupServerStub) Describe__() []ipc.InterfaceDesc {
+	return []ipc.InterfaceDesc{GroupDesc, object.ObjectDesc}
 }
 
 // GroupDesc describes the Group interface.
-var GroupDesc __ipc.InterfaceDesc = descGroup
+var GroupDesc ipc.InterfaceDesc = descGroup
 
 // descGroup hides the desc to keep godoc clean.
-var descGroup = __ipc.InterfaceDesc{
+var descGroup = ipc.InterfaceDesc{
 	Name:    "Group",
 	PkgPath: "v.io/core/veyron2/services/security/groups",
 	Doc:     "// A group's etag covers its ACL as well as any other data stored in the group.\n// Clients should treat etags as opaque identifiers. For both Get and Rest, if\n// etag is set and matches the Group's current etag, the response will indicate\n// that fact but will otherwise be empty.",
-	Embeds: []__ipc.EmbedDesc{
+	Embeds: []ipc.EmbedDesc{
 		{"Object", "v.io/core/veyron2/services/security/access/object", "// Object provides access control for Veyron objects.\n//\n// Veyron services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/core/veyron2/security/access\"\n//   import \"v.io/core/veyron2/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetACL and GetACL in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/core/veyron2/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}\n//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}\n//  }"},
 	},
-	Methods: []__ipc.MethodDesc{
+	Methods: []ipc.MethodDesc{
 		{
 			Name: "Create",
 			Doc:  "// Create creates a new group if it doesn't already exist.\n// If acl is nil, a default TaggedACLMap is used, providing Admin access to\n// the caller.\n// Create requires the caller to have Write permission at the GroupServer.",
-			InArgs: []__ipc.ArgDesc{
+			InArgs: []ipc.ArgDesc{
 				{"acl", ``},     // access.TaggedACLMap
 				{"entries", ``}, // []BlessingPatternChunk
 			},
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdl.AnyRep{access.Tag("Write")},
+			Tags: []vdl.AnyRep{access.Tag("Write")},
 		},
 		{
 			Name: "Delete",
 			Doc:  "// Delete deletes the group.\n// Permissions for all group-related methods except Create() are checked\n// against the Group object.",
-			InArgs: []__ipc.ArgDesc{
+			InArgs: []ipc.ArgDesc{
 				{"etag", ``}, // string
 			},
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdl.AnyRep{access.Tag("Write")},
+			Tags: []vdl.AnyRep{access.Tag("Write")},
 		},
 		{
 			Name: "Add",
 			Doc:  "// Add adds an entry to the group.",
-			InArgs: []__ipc.ArgDesc{
+			InArgs: []ipc.ArgDesc{
 				{"entry", ``}, // BlessingPatternChunk
 				{"etag", ``},  // string
 			},
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdl.AnyRep{access.Tag("Write")},
+			Tags: []vdl.AnyRep{access.Tag("Write")},
 		},
 		{
 			Name: "Remove",
 			Doc:  "// Remove removes an entry from the group.",
-			InArgs: []__ipc.ArgDesc{
+			InArgs: []ipc.ArgDesc{
 				{"entry", ``}, // BlessingPatternChunk
 				{"etag", ``},  // string
 			},
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdl.AnyRep{access.Tag("Write")},
+			Tags: []vdl.AnyRep{access.Tag("Write")},
 		},
 		{
 			Name: "Get",
 			Doc:  "// Get returns all entries in the group.\n// TODO(sadovsky): Flesh out this API.",
-			InArgs: []__ipc.ArgDesc{
+			InArgs: []ipc.ArgDesc{
 				{"req", ``},     // GetRequest
 				{"reqEtag", ``}, // string
 			},
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"res", ``},  // GetResponse
 				{"etag", ``}, // string
 				{"err", ``},  // error
 			},
-			Tags: []__vdl.AnyRep{access.Tag("Read")},
+			Tags: []vdl.AnyRep{access.Tag("Read")},
 		},
 		{
 			Name: "Rest",
 			Doc:  "// Rest returns information sufficient for the client to perform its ACL\n// checks.\n// TODO(sadovsky): Flesh out this API.",
-			InArgs: []__ipc.ArgDesc{
+			InArgs: []ipc.ArgDesc{
 				{"req", ``},     // RestRequest
 				{"reqEtag", ``}, // string
 			},
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"res", ``},  // RestResponse
 				{"etag", ``}, // string
 				{"err", ``},  // error
 			},
-			Tags: []__vdl.AnyRep{access.Tag("Resolve")},
+			Tags: []vdl.AnyRep{access.Tag("Resolve")},
 		},
 	},
 }

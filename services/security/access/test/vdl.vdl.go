@@ -5,11 +5,11 @@
 package test
 
 import (
-	// The non-user imports are prefixed with "__" to prevent collisions.
-	__veyron2 "v.io/core/veyron2"
-	__context "v.io/core/veyron2/context"
-	__ipc "v.io/core/veyron2/ipc"
-	__vdl "v.io/core/veyron2/vdl"
+	// VDL system imports
+	"v.io/core/veyron2"
+	"v.io/core/veyron2/context"
+	"v.io/core/veyron2/ipc"
+	"v.io/core/veyron2/vdl"
 )
 
 // Any package can define tags (of arbitrary types) to be attached to methods.
@@ -22,7 +22,7 @@ func (MyTag) __VDLReflect(struct {
 }
 
 func init() {
-	__vdl.Register(MyTag(""))
+	vdl.Register(MyTag(""))
 }
 
 // For this example/unittest, there are three possible values of MyTag,
@@ -38,24 +38,24 @@ const Execute = MyTag("X")
 //
 // MyObject demonstrates how tags are attached to methods.
 type MyObjectClientMethods interface {
-	Get(*__context.T, ...__ipc.CallOpt) error
-	Put(*__context.T, ...__ipc.CallOpt) error
-	Resolve(*__context.T, ...__ipc.CallOpt) error
-	NoTags(*__context.T, ...__ipc.CallOpt) error // No tags attached to this.
-	AllTags(*__context.T, ...__ipc.CallOpt) error
+	Get(*context.T, ...ipc.CallOpt) error
+	Put(*context.T, ...ipc.CallOpt) error
+	Resolve(*context.T, ...ipc.CallOpt) error
+	NoTags(*context.T, ...ipc.CallOpt) error // No tags attached to this.
+	AllTags(*context.T, ...ipc.CallOpt) error
 }
 
 // MyObjectClientStub adds universal methods to MyObjectClientMethods.
 type MyObjectClientStub interface {
 	MyObjectClientMethods
-	__ipc.UniversalServiceMethods
+	ipc.UniversalServiceMethods
 }
 
 // MyObjectClient returns a client stub for MyObject.
-func MyObjectClient(name string, opts ...__ipc.BindOpt) MyObjectClientStub {
-	var client __ipc.Client
+func MyObjectClient(name string, opts ...ipc.BindOpt) MyObjectClientStub {
+	var client ipc.Client
 	for _, opt := range opts {
-		if clientOpt, ok := opt.(__ipc.Client); ok {
+		if clientOpt, ok := opt.(ipc.Client); ok {
 			client = clientOpt
 		}
 	}
@@ -64,18 +64,18 @@ func MyObjectClient(name string, opts ...__ipc.BindOpt) MyObjectClientStub {
 
 type implMyObjectClientStub struct {
 	name   string
-	client __ipc.Client
+	client ipc.Client
 }
 
-func (c implMyObjectClientStub) c(ctx *__context.T) __ipc.Client {
+func (c implMyObjectClientStub) c(ctx *context.T) ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return __veyron2.GetClient(ctx)
+	return veyron2.GetClient(ctx)
 }
 
-func (c implMyObjectClientStub) Get(ctx *__context.T, opts ...__ipc.CallOpt) (err error) {
-	var call __ipc.Call
+func (c implMyObjectClientStub) Get(ctx *context.T, opts ...ipc.CallOpt) (err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Get", nil, opts...); err != nil {
 		return
 	}
@@ -85,8 +85,8 @@ func (c implMyObjectClientStub) Get(ctx *__context.T, opts ...__ipc.CallOpt) (er
 	return
 }
 
-func (c implMyObjectClientStub) Put(ctx *__context.T, opts ...__ipc.CallOpt) (err error) {
-	var call __ipc.Call
+func (c implMyObjectClientStub) Put(ctx *context.T, opts ...ipc.CallOpt) (err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Put", nil, opts...); err != nil {
 		return
 	}
@@ -96,8 +96,8 @@ func (c implMyObjectClientStub) Put(ctx *__context.T, opts ...__ipc.CallOpt) (er
 	return
 }
 
-func (c implMyObjectClientStub) Resolve(ctx *__context.T, opts ...__ipc.CallOpt) (err error) {
-	var call __ipc.Call
+func (c implMyObjectClientStub) Resolve(ctx *context.T, opts ...ipc.CallOpt) (err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Resolve", nil, opts...); err != nil {
 		return
 	}
@@ -107,8 +107,8 @@ func (c implMyObjectClientStub) Resolve(ctx *__context.T, opts ...__ipc.CallOpt)
 	return
 }
 
-func (c implMyObjectClientStub) NoTags(ctx *__context.T, opts ...__ipc.CallOpt) (err error) {
-	var call __ipc.Call
+func (c implMyObjectClientStub) NoTags(ctx *context.T, opts ...ipc.CallOpt) (err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "NoTags", nil, opts...); err != nil {
 		return
 	}
@@ -118,8 +118,8 @@ func (c implMyObjectClientStub) NoTags(ctx *__context.T, opts ...__ipc.CallOpt) 
 	return
 }
 
-func (c implMyObjectClientStub) AllTags(ctx *__context.T, opts ...__ipc.CallOpt) (err error) {
-	var call __ipc.Call
+func (c implMyObjectClientStub) AllTags(ctx *context.T, opts ...ipc.CallOpt) (err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "AllTags", nil, opts...); err != nil {
 		return
 	}
@@ -134,11 +134,11 @@ func (c implMyObjectClientStub) AllTags(ctx *__context.T, opts ...__ipc.CallOpt)
 //
 // MyObject demonstrates how tags are attached to methods.
 type MyObjectServerMethods interface {
-	Get(__ipc.ServerContext) error
-	Put(__ipc.ServerContext) error
-	Resolve(__ipc.ServerContext) error
-	NoTags(__ipc.ServerContext) error // No tags attached to this.
-	AllTags(__ipc.ServerContext) error
+	Get(ipc.ServerContext) error
+	Put(ipc.ServerContext) error
+	Resolve(ipc.ServerContext) error
+	NoTags(ipc.ServerContext) error // No tags attached to this.
+	AllTags(ipc.ServerContext) error
 }
 
 // MyObjectServerStubMethods is the server interface containing
@@ -151,7 +151,7 @@ type MyObjectServerStubMethods MyObjectServerMethods
 type MyObjectServerStub interface {
 	MyObjectServerStubMethods
 	// Describe the MyObject interfaces.
-	Describe__() []__ipc.InterfaceDesc
+	Describe__() []ipc.InterfaceDesc
 }
 
 // MyObjectServer returns a server stub for MyObject.
@@ -163,9 +163,9 @@ func MyObjectServer(impl MyObjectServerMethods) MyObjectServerStub {
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
-	if gs := __ipc.NewGlobState(stub); gs != nil {
+	if gs := ipc.NewGlobState(stub); gs != nil {
 		stub.gs = gs
-	} else if gs := __ipc.NewGlobState(impl); gs != nil {
+	} else if gs := ipc.NewGlobState(impl); gs != nil {
 		stub.gs = gs
 	}
 	return stub
@@ -173,79 +173,79 @@ func MyObjectServer(impl MyObjectServerMethods) MyObjectServerStub {
 
 type implMyObjectServerStub struct {
 	impl MyObjectServerMethods
-	gs   *__ipc.GlobState
+	gs   *ipc.GlobState
 }
 
-func (s implMyObjectServerStub) Get(ctx __ipc.ServerContext) error {
+func (s implMyObjectServerStub) Get(ctx ipc.ServerContext) error {
 	return s.impl.Get(ctx)
 }
 
-func (s implMyObjectServerStub) Put(ctx __ipc.ServerContext) error {
+func (s implMyObjectServerStub) Put(ctx ipc.ServerContext) error {
 	return s.impl.Put(ctx)
 }
 
-func (s implMyObjectServerStub) Resolve(ctx __ipc.ServerContext) error {
+func (s implMyObjectServerStub) Resolve(ctx ipc.ServerContext) error {
 	return s.impl.Resolve(ctx)
 }
 
-func (s implMyObjectServerStub) NoTags(ctx __ipc.ServerContext) error {
+func (s implMyObjectServerStub) NoTags(ctx ipc.ServerContext) error {
 	return s.impl.NoTags(ctx)
 }
 
-func (s implMyObjectServerStub) AllTags(ctx __ipc.ServerContext) error {
+func (s implMyObjectServerStub) AllTags(ctx ipc.ServerContext) error {
 	return s.impl.AllTags(ctx)
 }
 
-func (s implMyObjectServerStub) Globber() *__ipc.GlobState {
+func (s implMyObjectServerStub) Globber() *ipc.GlobState {
 	return s.gs
 }
 
-func (s implMyObjectServerStub) Describe__() []__ipc.InterfaceDesc {
-	return []__ipc.InterfaceDesc{MyObjectDesc}
+func (s implMyObjectServerStub) Describe__() []ipc.InterfaceDesc {
+	return []ipc.InterfaceDesc{MyObjectDesc}
 }
 
 // MyObjectDesc describes the MyObject interface.
-var MyObjectDesc __ipc.InterfaceDesc = descMyObject
+var MyObjectDesc ipc.InterfaceDesc = descMyObject
 
 // descMyObject hides the desc to keep godoc clean.
-var descMyObject = __ipc.InterfaceDesc{
+var descMyObject = ipc.InterfaceDesc{
 	Name:    "MyObject",
 	PkgPath: "v.io/core/veyron2/services/security/access/test",
 	Doc:     "// MyObject demonstrates how tags are attached to methods.",
-	Methods: []__ipc.MethodDesc{
+	Methods: []ipc.MethodDesc{
 		{
 			Name: "Get",
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdl.AnyRep{MyTag("R")},
+			Tags: []vdl.AnyRep{MyTag("R")},
 		},
 		{
 			Name: "Put",
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdl.AnyRep{MyTag("W")},
+			Tags: []vdl.AnyRep{MyTag("W")},
 		},
 		{
 			Name: "Resolve",
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdl.AnyRep{MyTag("X")},
+			Tags: []vdl.AnyRep{MyTag("X")},
 		},
 		{
 			Name: "NoTags",
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // error
 			},
 		},
 		{
 			Name: "AllTags",
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdl.AnyRep{MyTag("R"), MyTag("W"), MyTag("X")},
+			Tags: []vdl.AnyRep{MyTag("R"), MyTag("W"), MyTag("X")},
 		},
 	},
 }

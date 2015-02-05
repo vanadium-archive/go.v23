@@ -4,13 +4,14 @@
 package object
 
 import (
-	"v.io/core/veyron2/services/security/access"
+	// VDL system imports
+	"v.io/core/veyron2"
+	"v.io/core/veyron2/context"
+	"v.io/core/veyron2/ipc"
+	"v.io/core/veyron2/vdl"
 
-	// The non-user imports are prefixed with "__" to prevent collisions.
-	__veyron2 "v.io/core/veyron2"
-	__context "v.io/core/veyron2/context"
-	__ipc "v.io/core/veyron2/ipc"
-	__vdl "v.io/core/veyron2/vdl"
+	// VDL user imports
+	"v.io/core/veyron2/services/security/access"
 )
 
 // ObjectClientMethods is the client interface
@@ -76,25 +77,25 @@ type ObjectClientMethods interface {
 	// endpoint.  To modify the mount point's ACL, use ResolveToMountTable
 	// to get an endpoint and call SetACL on that.  This means that clients
 	// must know when a name refers to a mount point to change its ACL.
-	SetACL(ctx *__context.T, acl access.TaggedACLMap, etag string, opts ...__ipc.CallOpt) error
+	SetACL(ctx *context.T, acl access.TaggedACLMap, etag string, opts ...ipc.CallOpt) error
 	// GetACL returns the complete, current ACL for an object.  The returned etag
 	// can be passed to a subsequent call to SetACL for optimistic concurrency
 	// control. A successful call to SetACL will invalidate etag, and the client
 	// must call GetACL again to get the current etag.
-	GetACL(*__context.T, ...__ipc.CallOpt) (acl access.TaggedACLMap, etag string, err error)
+	GetACL(*context.T, ...ipc.CallOpt) (acl access.TaggedACLMap, etag string, err error)
 }
 
 // ObjectClientStub adds universal methods to ObjectClientMethods.
 type ObjectClientStub interface {
 	ObjectClientMethods
-	__ipc.UniversalServiceMethods
+	ipc.UniversalServiceMethods
 }
 
 // ObjectClient returns a client stub for Object.
-func ObjectClient(name string, opts ...__ipc.BindOpt) ObjectClientStub {
-	var client __ipc.Client
+func ObjectClient(name string, opts ...ipc.BindOpt) ObjectClientStub {
+	var client ipc.Client
 	for _, opt := range opts {
-		if clientOpt, ok := opt.(__ipc.Client); ok {
+		if clientOpt, ok := opt.(ipc.Client); ok {
 			client = clientOpt
 		}
 	}
@@ -103,18 +104,18 @@ func ObjectClient(name string, opts ...__ipc.BindOpt) ObjectClientStub {
 
 type implObjectClientStub struct {
 	name   string
-	client __ipc.Client
+	client ipc.Client
 }
 
-func (c implObjectClientStub) c(ctx *__context.T) __ipc.Client {
+func (c implObjectClientStub) c(ctx *context.T) ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return __veyron2.GetClient(ctx)
+	return veyron2.GetClient(ctx)
 }
 
-func (c implObjectClientStub) SetACL(ctx *__context.T, i0 access.TaggedACLMap, i1 string, opts ...__ipc.CallOpt) (err error) {
-	var call __ipc.Call
+func (c implObjectClientStub) SetACL(ctx *context.T, i0 access.TaggedACLMap, i1 string, opts ...ipc.CallOpt) (err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "SetACL", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
@@ -124,8 +125,8 @@ func (c implObjectClientStub) SetACL(ctx *__context.T, i0 access.TaggedACLMap, i
 	return
 }
 
-func (c implObjectClientStub) GetACL(ctx *__context.T, opts ...__ipc.CallOpt) (o0 access.TaggedACLMap, o1 string, err error) {
-	var call __ipc.Call
+func (c implObjectClientStub) GetACL(ctx *context.T, opts ...ipc.CallOpt) (o0 access.TaggedACLMap, o1 string, err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "GetACL", nil, opts...); err != nil {
 		return
 	}
@@ -198,12 +199,12 @@ type ObjectServerMethods interface {
 	// endpoint.  To modify the mount point's ACL, use ResolveToMountTable
 	// to get an endpoint and call SetACL on that.  This means that clients
 	// must know when a name refers to a mount point to change its ACL.
-	SetACL(ctx __ipc.ServerContext, acl access.TaggedACLMap, etag string) error
+	SetACL(ctx ipc.ServerContext, acl access.TaggedACLMap, etag string) error
 	// GetACL returns the complete, current ACL for an object.  The returned etag
 	// can be passed to a subsequent call to SetACL for optimistic concurrency
 	// control. A successful call to SetACL will invalidate etag, and the client
 	// must call GetACL again to get the current etag.
-	GetACL(__ipc.ServerContext) (acl access.TaggedACLMap, etag string, err error)
+	GetACL(ipc.ServerContext) (acl access.TaggedACLMap, etag string, err error)
 }
 
 // ObjectServerStubMethods is the server interface containing
@@ -216,7 +217,7 @@ type ObjectServerStubMethods ObjectServerMethods
 type ObjectServerStub interface {
 	ObjectServerStubMethods
 	// Describe the Object interfaces.
-	Describe__() []__ipc.InterfaceDesc
+	Describe__() []ipc.InterfaceDesc
 }
 
 // ObjectServer returns a server stub for Object.
@@ -228,9 +229,9 @@ func ObjectServer(impl ObjectServerMethods) ObjectServerStub {
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
-	if gs := __ipc.NewGlobState(stub); gs != nil {
+	if gs := ipc.NewGlobState(stub); gs != nil {
 		stub.gs = gs
-	} else if gs := __ipc.NewGlobState(impl); gs != nil {
+	} else if gs := ipc.NewGlobState(impl); gs != nil {
 		stub.gs = gs
 	}
 	return stub
@@ -238,55 +239,55 @@ func ObjectServer(impl ObjectServerMethods) ObjectServerStub {
 
 type implObjectServerStub struct {
 	impl ObjectServerMethods
-	gs   *__ipc.GlobState
+	gs   *ipc.GlobState
 }
 
-func (s implObjectServerStub) SetACL(ctx __ipc.ServerContext, i0 access.TaggedACLMap, i1 string) error {
+func (s implObjectServerStub) SetACL(ctx ipc.ServerContext, i0 access.TaggedACLMap, i1 string) error {
 	return s.impl.SetACL(ctx, i0, i1)
 }
 
-func (s implObjectServerStub) GetACL(ctx __ipc.ServerContext) (access.TaggedACLMap, string, error) {
+func (s implObjectServerStub) GetACL(ctx ipc.ServerContext) (access.TaggedACLMap, string, error) {
 	return s.impl.GetACL(ctx)
 }
 
-func (s implObjectServerStub) Globber() *__ipc.GlobState {
+func (s implObjectServerStub) Globber() *ipc.GlobState {
 	return s.gs
 }
 
-func (s implObjectServerStub) Describe__() []__ipc.InterfaceDesc {
-	return []__ipc.InterfaceDesc{ObjectDesc}
+func (s implObjectServerStub) Describe__() []ipc.InterfaceDesc {
+	return []ipc.InterfaceDesc{ObjectDesc}
 }
 
 // ObjectDesc describes the Object interface.
-var ObjectDesc __ipc.InterfaceDesc = descObject
+var ObjectDesc ipc.InterfaceDesc = descObject
 
 // descObject hides the desc to keep godoc clean.
-var descObject = __ipc.InterfaceDesc{
+var descObject = ipc.InterfaceDesc{
 	Name:    "Object",
 	PkgPath: "v.io/core/veyron2/services/security/access/object",
 	Doc:     "// Object provides access control for Veyron objects.\n//\n// Veyron services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/core/veyron2/security/access\"\n//   import \"v.io/core/veyron2/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetACL and GetACL in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/core/veyron2/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}\n//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}\n//  }",
-	Methods: []__ipc.MethodDesc{
+	Methods: []ipc.MethodDesc{
 		{
 			Name: "SetACL",
 			Doc:  "// SetACL replaces the current ACL for an object.  etag allows for optional,\n// optimistic concurrency control.  If non-empty, etag's value must come from\n// GetACL.  If any client has successfully called SetACL in the meantime, the\n// etag will be stale and SetACL will fail.  If empty, SetACL performs an\n// unconditional update.\n//\n// ACL objects are expected to be small.  It is up to the implementation to\n// define the exact limit, though it should probably be around 100KB.  Large\n// lists of principals should use the Group API or blessings.\n//\n// There is some ambiguity when calling SetACL on a mount point.  Does it\n// affect the mount itself or does it affect the service endpoint that the\n// mount points to?  The chosen behavior is that it affects the service\n// endpoint.  To modify the mount point's ACL, use ResolveToMountTable\n// to get an endpoint and call SetACL on that.  This means that clients\n// must know when a name refers to a mount point to change its ACL.",
-			InArgs: []__ipc.ArgDesc{
+			InArgs: []ipc.ArgDesc{
 				{"acl", ``},  // access.TaggedACLMap
 				{"etag", ``}, // string
 			},
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdl.AnyRep{access.Tag("Admin")},
+			Tags: []vdl.AnyRep{access.Tag("Admin")},
 		},
 		{
 			Name: "GetACL",
 			Doc:  "// GetACL returns the complete, current ACL for an object.  The returned etag\n// can be passed to a subsequent call to SetACL for optimistic concurrency\n// control. A successful call to SetACL will invalidate etag, and the client\n// must call GetACL again to get the current etag.",
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"acl", ``},  // access.TaggedACLMap
 				{"etag", ``}, // string
 				{"err", ``},  // error
 			},
-			Tags: []__vdl.AnyRep{access.Tag("Admin")},
+			Tags: []vdl.AnyRep{access.Tag("Admin")},
 		},
 	},
 }

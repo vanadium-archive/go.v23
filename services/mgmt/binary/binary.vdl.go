@@ -6,8 +6,8 @@
 package binary
 
 import (
-	// The non-user imports are prefixed with "__" to prevent collisions.
-	__vdl "v.io/core/veyron2/vdl"
+	// VDL system imports
+	"v.io/core/veyron2/vdl"
 )
 
 // Description describes a binary. Binaries are named and have been
@@ -51,8 +51,8 @@ func (PartInfo) __VDLReflect(struct {
 }
 
 func init() {
-	__vdl.Register(Description{})
-	__vdl.Register(PartInfo{})
+	vdl.Register(Description{})
+	vdl.Register(PartInfo{})
 }
 
 const MissingChecksum = ""

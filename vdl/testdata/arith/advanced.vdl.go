@@ -4,12 +4,13 @@
 package arith
 
 import (
-	"v.io/core/veyron2/vdl/testdata/arith/exp"
+	// VDL system imports
+	"v.io/core/veyron2"
+	"v.io/core/veyron2/context"
+	"v.io/core/veyron2/ipc"
 
-	// The non-user imports are prefixed with "__" to prevent collisions.
-	__veyron2 "v.io/core/veyron2"
-	__context "v.io/core/veyron2/context"
-	__ipc "v.io/core/veyron2/ipc"
+	// VDL user imports
+	"v.io/core/veyron2/vdl/testdata/arith/exp"
 )
 
 // TrigonometryClientMethods is the client interface
@@ -17,21 +18,21 @@ import (
 //
 // Trigonometry is an interface that specifies a couple trigonometric functions.
 type TrigonometryClientMethods interface {
-	Sine(ctx *__context.T, angle float64, opts ...__ipc.CallOpt) (float64, error)
-	Cosine(ctx *__context.T, angle float64, opts ...__ipc.CallOpt) (float64, error)
+	Sine(ctx *context.T, angle float64, opts ...ipc.CallOpt) (float64, error)
+	Cosine(ctx *context.T, angle float64, opts ...ipc.CallOpt) (float64, error)
 }
 
 // TrigonometryClientStub adds universal methods to TrigonometryClientMethods.
 type TrigonometryClientStub interface {
 	TrigonometryClientMethods
-	__ipc.UniversalServiceMethods
+	ipc.UniversalServiceMethods
 }
 
 // TrigonometryClient returns a client stub for Trigonometry.
-func TrigonometryClient(name string, opts ...__ipc.BindOpt) TrigonometryClientStub {
-	var client __ipc.Client
+func TrigonometryClient(name string, opts ...ipc.BindOpt) TrigonometryClientStub {
+	var client ipc.Client
 	for _, opt := range opts {
-		if clientOpt, ok := opt.(__ipc.Client); ok {
+		if clientOpt, ok := opt.(ipc.Client); ok {
 			client = clientOpt
 		}
 	}
@@ -40,18 +41,18 @@ func TrigonometryClient(name string, opts ...__ipc.BindOpt) TrigonometryClientSt
 
 type implTrigonometryClientStub struct {
 	name   string
-	client __ipc.Client
+	client ipc.Client
 }
 
-func (c implTrigonometryClientStub) c(ctx *__context.T) __ipc.Client {
+func (c implTrigonometryClientStub) c(ctx *context.T) ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return __veyron2.GetClient(ctx)
+	return veyron2.GetClient(ctx)
 }
 
-func (c implTrigonometryClientStub) Sine(ctx *__context.T, i0 float64, opts ...__ipc.CallOpt) (o0 float64, err error) {
-	var call __ipc.Call
+func (c implTrigonometryClientStub) Sine(ctx *context.T, i0 float64, opts ...ipc.CallOpt) (o0 float64, err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Sine", []interface{}{i0}, opts...); err != nil {
 		return
 	}
@@ -61,8 +62,8 @@ func (c implTrigonometryClientStub) Sine(ctx *__context.T, i0 float64, opts ..._
 	return
 }
 
-func (c implTrigonometryClientStub) Cosine(ctx *__context.T, i0 float64, opts ...__ipc.CallOpt) (o0 float64, err error) {
-	var call __ipc.Call
+func (c implTrigonometryClientStub) Cosine(ctx *context.T, i0 float64, opts ...ipc.CallOpt) (o0 float64, err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Cosine", []interface{}{i0}, opts...); err != nil {
 		return
 	}
@@ -77,8 +78,8 @@ func (c implTrigonometryClientStub) Cosine(ctx *__context.T, i0 float64, opts ..
 //
 // Trigonometry is an interface that specifies a couple trigonometric functions.
 type TrigonometryServerMethods interface {
-	Sine(ctx __ipc.ServerContext, angle float64) (float64, error)
-	Cosine(ctx __ipc.ServerContext, angle float64) (float64, error)
+	Sine(ctx ipc.ServerContext, angle float64) (float64, error)
+	Cosine(ctx ipc.ServerContext, angle float64) (float64, error)
 }
 
 // TrigonometryServerStubMethods is the server interface containing
@@ -91,7 +92,7 @@ type TrigonometryServerStubMethods TrigonometryServerMethods
 type TrigonometryServerStub interface {
 	TrigonometryServerStubMethods
 	// Describe the Trigonometry interfaces.
-	Describe__() []__ipc.InterfaceDesc
+	Describe__() []ipc.InterfaceDesc
 }
 
 // TrigonometryServer returns a server stub for Trigonometry.
@@ -103,9 +104,9 @@ func TrigonometryServer(impl TrigonometryServerMethods) TrigonometryServerStub {
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
-	if gs := __ipc.NewGlobState(stub); gs != nil {
+	if gs := ipc.NewGlobState(stub); gs != nil {
 		stub.gs = gs
-	} else if gs := __ipc.NewGlobState(impl); gs != nil {
+	} else if gs := ipc.NewGlobState(impl); gs != nil {
 		stub.gs = gs
 	}
 	return stub
@@ -113,50 +114,50 @@ func TrigonometryServer(impl TrigonometryServerMethods) TrigonometryServerStub {
 
 type implTrigonometryServerStub struct {
 	impl TrigonometryServerMethods
-	gs   *__ipc.GlobState
+	gs   *ipc.GlobState
 }
 
-func (s implTrigonometryServerStub) Sine(ctx __ipc.ServerContext, i0 float64) (float64, error) {
+func (s implTrigonometryServerStub) Sine(ctx ipc.ServerContext, i0 float64) (float64, error) {
 	return s.impl.Sine(ctx, i0)
 }
 
-func (s implTrigonometryServerStub) Cosine(ctx __ipc.ServerContext, i0 float64) (float64, error) {
+func (s implTrigonometryServerStub) Cosine(ctx ipc.ServerContext, i0 float64) (float64, error) {
 	return s.impl.Cosine(ctx, i0)
 }
 
-func (s implTrigonometryServerStub) Globber() *__ipc.GlobState {
+func (s implTrigonometryServerStub) Globber() *ipc.GlobState {
 	return s.gs
 }
 
-func (s implTrigonometryServerStub) Describe__() []__ipc.InterfaceDesc {
-	return []__ipc.InterfaceDesc{TrigonometryDesc}
+func (s implTrigonometryServerStub) Describe__() []ipc.InterfaceDesc {
+	return []ipc.InterfaceDesc{TrigonometryDesc}
 }
 
 // TrigonometryDesc describes the Trigonometry interface.
-var TrigonometryDesc __ipc.InterfaceDesc = descTrigonometry
+var TrigonometryDesc ipc.InterfaceDesc = descTrigonometry
 
 // descTrigonometry hides the desc to keep godoc clean.
-var descTrigonometry = __ipc.InterfaceDesc{
+var descTrigonometry = ipc.InterfaceDesc{
 	Name:    "Trigonometry",
 	PkgPath: "v.io/core/veyron2/vdl/testdata/arith",
 	Doc:     "// Trigonometry is an interface that specifies a couple trigonometric functions.",
-	Methods: []__ipc.MethodDesc{
+	Methods: []ipc.MethodDesc{
 		{
 			Name: "Sine",
-			InArgs: []__ipc.ArgDesc{
+			InArgs: []ipc.ArgDesc{
 				{"angle", ``}, // float64
 			},
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // float64
 				{"", ``}, // error
 			},
 		},
 		{
 			Name: "Cosine",
-			InArgs: []__ipc.ArgDesc{
+			InArgs: []ipc.ArgDesc{
 				{"angle", ``}, // float64
 			},
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // float64
 				{"", ``}, // error
 			},
@@ -180,14 +181,14 @@ type AdvancedMathClientMethods interface {
 // AdvancedMathClientStub adds universal methods to AdvancedMathClientMethods.
 type AdvancedMathClientStub interface {
 	AdvancedMathClientMethods
-	__ipc.UniversalServiceMethods
+	ipc.UniversalServiceMethods
 }
 
 // AdvancedMathClient returns a client stub for AdvancedMath.
-func AdvancedMathClient(name string, opts ...__ipc.BindOpt) AdvancedMathClientStub {
-	var client __ipc.Client
+func AdvancedMathClient(name string, opts ...ipc.BindOpt) AdvancedMathClientStub {
+	var client ipc.Client
 	for _, opt := range opts {
-		if clientOpt, ok := opt.(__ipc.Client); ok {
+		if clientOpt, ok := opt.(ipc.Client); ok {
 			client = clientOpt
 		}
 	}
@@ -196,17 +197,17 @@ func AdvancedMathClient(name string, opts ...__ipc.BindOpt) AdvancedMathClientSt
 
 type implAdvancedMathClientStub struct {
 	name   string
-	client __ipc.Client
+	client ipc.Client
 
 	TrigonometryClientStub
 	exp.ExpClientStub
 }
 
-func (c implAdvancedMathClientStub) c(ctx *__context.T) __ipc.Client {
+func (c implAdvancedMathClientStub) c(ctx *context.T) ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return __veyron2.GetClient(ctx)
+	return veyron2.GetClient(ctx)
 }
 
 // AdvancedMathServerMethods is the interface a server writer
@@ -232,7 +233,7 @@ type AdvancedMathServerStubMethods AdvancedMathServerMethods
 type AdvancedMathServerStub interface {
 	AdvancedMathServerStubMethods
 	// Describe the AdvancedMath interfaces.
-	Describe__() []__ipc.InterfaceDesc
+	Describe__() []ipc.InterfaceDesc
 }
 
 // AdvancedMathServer returns a server stub for AdvancedMath.
@@ -246,9 +247,9 @@ func AdvancedMathServer(impl AdvancedMathServerMethods) AdvancedMathServerStub {
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
-	if gs := __ipc.NewGlobState(stub); gs != nil {
+	if gs := ipc.NewGlobState(stub); gs != nil {
 		stub.gs = gs
-	} else if gs := __ipc.NewGlobState(impl); gs != nil {
+	} else if gs := ipc.NewGlobState(impl); gs != nil {
 		stub.gs = gs
 	}
 	return stub
@@ -258,26 +259,26 @@ type implAdvancedMathServerStub struct {
 	impl AdvancedMathServerMethods
 	TrigonometryServerStub
 	exp.ExpServerStub
-	gs *__ipc.GlobState
+	gs *ipc.GlobState
 }
 
-func (s implAdvancedMathServerStub) Globber() *__ipc.GlobState {
+func (s implAdvancedMathServerStub) Globber() *ipc.GlobState {
 	return s.gs
 }
 
-func (s implAdvancedMathServerStub) Describe__() []__ipc.InterfaceDesc {
-	return []__ipc.InterfaceDesc{AdvancedMathDesc, TrigonometryDesc, exp.ExpDesc}
+func (s implAdvancedMathServerStub) Describe__() []ipc.InterfaceDesc {
+	return []ipc.InterfaceDesc{AdvancedMathDesc, TrigonometryDesc, exp.ExpDesc}
 }
 
 // AdvancedMathDesc describes the AdvancedMath interface.
-var AdvancedMathDesc __ipc.InterfaceDesc = descAdvancedMath
+var AdvancedMathDesc ipc.InterfaceDesc = descAdvancedMath
 
 // descAdvancedMath hides the desc to keep godoc clean.
-var descAdvancedMath = __ipc.InterfaceDesc{
+var descAdvancedMath = ipc.InterfaceDesc{
 	Name:    "AdvancedMath",
 	PkgPath: "v.io/core/veyron2/vdl/testdata/arith",
 	Doc:     "// AdvancedMath is an interface for more advanced math than arith.  It embeds\n// interfaces defined both in the same file and in an external package; and in\n// turn it is embedded by arith.Calculator (which is in the same package but\n// different file) to verify that embedding works in all these scenarios.",
-	Embeds: []__ipc.EmbedDesc{
+	Embeds: []ipc.EmbedDesc{
 		{"Trigonometry", "v.io/core/veyron2/vdl/testdata/arith", "// Trigonometry is an interface that specifies a couple trigonometric functions."},
 		{"Exp", "v.io/core/veyron2/vdl/testdata/arith/exp", ``},
 	},

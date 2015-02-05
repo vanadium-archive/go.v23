@@ -6,18 +6,17 @@
 package vtrace
 
 import (
+	// VDL system imports
+	"io"
+	"v.io/core/veyron2"
+	"v.io/core/veyron2/context"
+	"v.io/core/veyron2/ipc"
+	"v.io/core/veyron2/vdl"
+
+	// VDL user imports
 	"v.io/core/veyron2/services/security/access"
-
 	"v.io/core/veyron2/uniqueid"
-
 	"v.io/core/veyron2/vtrace"
-
-	// The non-user imports are prefixed with "__" to prevent collisions.
-	__io "io"
-	__veyron2 "v.io/core/veyron2"
-	__context "v.io/core/veyron2/context"
-	__ipc "v.io/core/veyron2/ipc"
-	__vdl "v.io/core/veyron2/vdl"
 )
 
 // StoreClientMethods is the client interface
@@ -25,23 +24,23 @@ import (
 type StoreClientMethods interface {
 	// Trace returns the trace that matches the given ID.
 	// Will return a NoExists error if no matching trace was found.
-	Trace(*__context.T, uniqueid.Id, ...__ipc.CallOpt) (vtrace.TraceRecord, error)
+	Trace(*context.T, uniqueid.Id, ...ipc.CallOpt) (vtrace.TraceRecord, error)
 	// AllTraces returns TraceRecords for all traces the server currently
 	// knows about.
-	AllTraces(*__context.T, ...__ipc.CallOpt) (StoreAllTracesCall, error)
+	AllTraces(*context.T, ...ipc.CallOpt) (StoreAllTracesCall, error)
 }
 
 // StoreClientStub adds universal methods to StoreClientMethods.
 type StoreClientStub interface {
 	StoreClientMethods
-	__ipc.UniversalServiceMethods
+	ipc.UniversalServiceMethods
 }
 
 // StoreClient returns a client stub for Store.
-func StoreClient(name string, opts ...__ipc.BindOpt) StoreClientStub {
-	var client __ipc.Client
+func StoreClient(name string, opts ...ipc.BindOpt) StoreClientStub {
+	var client ipc.Client
 	for _, opt := range opts {
-		if clientOpt, ok := opt.(__ipc.Client); ok {
+		if clientOpt, ok := opt.(ipc.Client); ok {
 			client = clientOpt
 		}
 	}
@@ -50,18 +49,18 @@ func StoreClient(name string, opts ...__ipc.BindOpt) StoreClientStub {
 
 type implStoreClientStub struct {
 	name   string
-	client __ipc.Client
+	client ipc.Client
 }
 
-func (c implStoreClientStub) c(ctx *__context.T) __ipc.Client {
+func (c implStoreClientStub) c(ctx *context.T) ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return __veyron2.GetClient(ctx)
+	return veyron2.GetClient(ctx)
 }
 
-func (c implStoreClientStub) Trace(ctx *__context.T, i0 uniqueid.Id, opts ...__ipc.CallOpt) (o0 vtrace.TraceRecord, err error) {
-	var call __ipc.Call
+func (c implStoreClientStub) Trace(ctx *context.T, i0 uniqueid.Id, opts ...ipc.CallOpt) (o0 vtrace.TraceRecord, err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Trace", []interface{}{i0}, opts...); err != nil {
 		return
 	}
@@ -71,8 +70,8 @@ func (c implStoreClientStub) Trace(ctx *__context.T, i0 uniqueid.Id, opts ...__i
 	return
 }
 
-func (c implStoreClientStub) AllTraces(ctx *__context.T, opts ...__ipc.CallOpt) (ocall StoreAllTracesCall, err error) {
-	var call __ipc.Call
+func (c implStoreClientStub) AllTraces(ctx *context.T, opts ...ipc.CallOpt) (ocall StoreAllTracesCall, err error) {
+	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "AllTraces", nil, opts...); err != nil {
 		return
 	}
@@ -113,7 +112,7 @@ type StoreAllTracesCall interface {
 }
 
 type implStoreAllTracesCall struct {
-	__ipc.Call
+	ipc.Call
 	valRecv vtrace.TraceRecord
 	errRecv error
 }
@@ -139,7 +138,7 @@ func (c implStoreAllTracesCallRecv) Value() vtrace.TraceRecord {
 	return c.c.valRecv
 }
 func (c implStoreAllTracesCallRecv) Err() error {
-	if c.c.errRecv == __io.EOF {
+	if c.c.errRecv == io.EOF {
 		return nil
 	}
 	return c.c.errRecv
@@ -156,7 +155,7 @@ func (c *implStoreAllTracesCall) Finish() (err error) {
 type StoreServerMethods interface {
 	// Trace returns the trace that matches the given ID.
 	// Will return a NoExists error if no matching trace was found.
-	Trace(__ipc.ServerContext, uniqueid.Id) (vtrace.TraceRecord, error)
+	Trace(ipc.ServerContext, uniqueid.Id) (vtrace.TraceRecord, error)
 	// AllTraces returns TraceRecords for all traces the server currently
 	// knows about.
 	AllTraces(StoreAllTracesContext) error
@@ -169,7 +168,7 @@ type StoreServerMethods interface {
 type StoreServerStubMethods interface {
 	// Trace returns the trace that matches the given ID.
 	// Will return a NoExists error if no matching trace was found.
-	Trace(__ipc.ServerContext, uniqueid.Id) (vtrace.TraceRecord, error)
+	Trace(ipc.ServerContext, uniqueid.Id) (vtrace.TraceRecord, error)
 	// AllTraces returns TraceRecords for all traces the server currently
 	// knows about.
 	AllTraces(*StoreAllTracesContextStub) error
@@ -179,7 +178,7 @@ type StoreServerStubMethods interface {
 type StoreServerStub interface {
 	StoreServerStubMethods
 	// Describe the Store interfaces.
-	Describe__() []__ipc.InterfaceDesc
+	Describe__() []ipc.InterfaceDesc
 }
 
 // StoreServer returns a server stub for Store.
@@ -191,9 +190,9 @@ func StoreServer(impl StoreServerMethods) StoreServerStub {
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
-	if gs := __ipc.NewGlobState(stub); gs != nil {
+	if gs := ipc.NewGlobState(stub); gs != nil {
 		stub.gs = gs
-	} else if gs := __ipc.NewGlobState(impl); gs != nil {
+	} else if gs := ipc.NewGlobState(impl); gs != nil {
 		stub.gs = gs
 	}
 	return stub
@@ -201,10 +200,10 @@ func StoreServer(impl StoreServerMethods) StoreServerStub {
 
 type implStoreServerStub struct {
 	impl StoreServerMethods
-	gs   *__ipc.GlobState
+	gs   *ipc.GlobState
 }
 
-func (s implStoreServerStub) Trace(ctx __ipc.ServerContext, i0 uniqueid.Id) (vtrace.TraceRecord, error) {
+func (s implStoreServerStub) Trace(ctx ipc.ServerContext, i0 uniqueid.Id) (vtrace.TraceRecord, error) {
 	return s.impl.Trace(ctx, i0)
 }
 
@@ -212,41 +211,41 @@ func (s implStoreServerStub) AllTraces(ctx *StoreAllTracesContextStub) error {
 	return s.impl.AllTraces(ctx)
 }
 
-func (s implStoreServerStub) Globber() *__ipc.GlobState {
+func (s implStoreServerStub) Globber() *ipc.GlobState {
 	return s.gs
 }
 
-func (s implStoreServerStub) Describe__() []__ipc.InterfaceDesc {
-	return []__ipc.InterfaceDesc{StoreDesc}
+func (s implStoreServerStub) Describe__() []ipc.InterfaceDesc {
+	return []ipc.InterfaceDesc{StoreDesc}
 }
 
 // StoreDesc describes the Store interface.
-var StoreDesc __ipc.InterfaceDesc = descStore
+var StoreDesc ipc.InterfaceDesc = descStore
 
 // descStore hides the desc to keep godoc clean.
-var descStore = __ipc.InterfaceDesc{
+var descStore = ipc.InterfaceDesc{
 	Name:    "Store",
 	PkgPath: "v.io/core/veyron2/services/mgmt/vtrace",
-	Methods: []__ipc.MethodDesc{
+	Methods: []ipc.MethodDesc{
 		{
 			Name: "Trace",
 			Doc:  "// Trace returns the trace that matches the given ID.\n// Will return a NoExists error if no matching trace was found.",
-			InArgs: []__ipc.ArgDesc{
+			InArgs: []ipc.ArgDesc{
 				{"", ``}, // uniqueid.Id
 			},
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // vtrace.TraceRecord
 				{"", ``}, // error
 			},
-			Tags: []__vdl.AnyRep{access.Tag("Debug")},
+			Tags: []vdl.AnyRep{access.Tag("Debug")},
 		},
 		{
 			Name: "AllTraces",
 			Doc:  "// AllTraces returns TraceRecords for all traces the server currently\n// knows about.",
-			OutArgs: []__ipc.ArgDesc{
+			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // error
 			},
-			Tags: []__vdl.AnyRep{access.Tag("Debug")},
+			Tags: []vdl.AnyRep{access.Tag("Debug")},
 		},
 	},
 }
@@ -264,18 +263,18 @@ type StoreAllTracesServerStream interface {
 
 // StoreAllTracesContext represents the context passed to Store.AllTraces.
 type StoreAllTracesContext interface {
-	__ipc.ServerContext
+	ipc.ServerContext
 	StoreAllTracesServerStream
 }
 
 // StoreAllTracesContextStub is a wrapper that converts ipc.ServerCall into
 // a typesafe stub that implements StoreAllTracesContext.
 type StoreAllTracesContextStub struct {
-	__ipc.ServerCall
+	ipc.ServerCall
 }
 
 // Init initializes StoreAllTracesContextStub from ipc.ServerCall.
-func (s *StoreAllTracesContextStub) Init(call __ipc.ServerCall) {
+func (s *StoreAllTracesContextStub) Init(call ipc.ServerCall) {
 	s.ServerCall = call
 }
 
