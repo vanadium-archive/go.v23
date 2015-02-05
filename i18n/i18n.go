@@ -331,7 +331,7 @@ func NormalizeLangID(langID string) LangID {
 }
 
 // BaseLangID returns a base language identifier.  It is the first hyphen-separated
-// segment of an IETF Languyage ID.
+// segment of an IETF Language ID.
 func BaseLangID(langID LangID) LangID {
 	return langID[:skipNotIn(string(langID), 0, "-")]
 }
