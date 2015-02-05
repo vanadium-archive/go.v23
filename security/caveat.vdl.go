@@ -28,6 +28,13 @@ func (methodCaveat) __VDLReflect(struct {
 }) {
 }
 
+type nonce [16]byte
+
+func (nonce) __VDLReflect(struct {
+	Name string "v.io/core/veyron2/security.nonce"
+}) {
+}
+
 // publicKeyThirdPartyCaveat represents a third-party caveat that requires
 // discharges to be issued by a principal identified by a public key.
 //
@@ -46,7 +53,7 @@ type publicKeyThirdPartyCaveat struct {
 	// Whether discharge re-use is a desired or un-desired property is
 	// still under debate. Till the debate is settled, we err on the side
 	// of discouraging re-use.
-	Nonce [16]byte
+	Nonce nonce
 	// Caveats specifies the caveats that have to be validated
 	// before minting a discharge for a publicKeyCaveat.
 	Caveats []Caveat
@@ -83,6 +90,7 @@ func (publicKeyDischarge) __VDLReflect(struct {
 func init() {
 	__vdl.Register(unixTimeExpiryCaveat(0))
 	__vdl.Register(methodCaveat(nil))
+	__vdl.Register(nonce{})
 	__vdl.Register(publicKeyThirdPartyCaveat{})
 	__vdl.Register(publicKeyDischarge{})
 }

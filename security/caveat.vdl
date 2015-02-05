@@ -12,7 +12,7 @@ const (
     Id:        uniqueid.Id{0x54, 0xa6, 0x76, 0x39, 0x81, 0x37, 0x18, 0x7e, 0xcd, 0xb2, 0x6d, 0x2d, 0x69, 0xba, 0x0, 0x4},
     ParamType: typeobject(int64),
   }
-  
+
   // MethodCaveat represents a caveat that validates iff the method being
   // invoked is included in this list. An empty list implies that no method can
   // be invoked (i.e., the holder of a blessing with this caveat could be a
@@ -56,6 +56,8 @@ error (
 type unixTimeExpiryCaveat int64
 type methodCaveat []string
 
+type nonce [16]byte
+
 // publicKeyThirdPartyCaveat represents a third-party caveat that requires
 // discharges to be issued by a principal identified by a public key.
 //
@@ -74,7 +76,7 @@ type publicKeyThirdPartyCaveat struct {
   // Whether discharge re-use is a desired or un-desired property is
   // still under debate. Till the debate is settled, we err on the side
   // of discouraging re-use.
-  Nonce [16]byte
+  Nonce nonce
   // Caveats specifies the caveats that have to be validated
   // before minting a discharge for a publicKeyCaveat.
   Caveats []Caveat
