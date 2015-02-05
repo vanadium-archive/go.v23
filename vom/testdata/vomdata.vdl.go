@@ -58,9 +58,9 @@ var Tests = []TestCase{
 		TypeString: "[]byte",
 	},
 	{
-		Name:       "[]byte(\"\\x00\\x00\\x00\")",
-		Value:      []byte("\x00\x00\x00"),
-		Hex:        "803403000000",
+		Name:       "[]byte(\"\\x01\\x02\\x03\")",
+		Value:      []byte("\x01\x02\x03"),
+		Hex:        "803403010203",
 		TypeString: "[]byte",
 	},
 	{
@@ -68,23 +68,6 @@ var Tests = []TestCase{
 		Value:      []byte("adef"),
 		Hex:        "80340461646566",
 		TypeString: "[]byte",
-	},
-	{
-		Name:       "[4]byte(\"\\x00\\x00\\x00\\x00\")",
-		Value:      [4]byte{},
-		Hex:        "80ff81081201000205030400ff8200000000",
-		TypeString: "[4]byte",
-	},
-	{
-		Name: "[4]byte(\"abcd\")",
-		Value: [4]byte{
-			97,
-			98,
-			99,
-			100,
-		},
-		Hex:        "80ff81081201000205030400ff8261626364",
-		TypeString: "[4]byte",
 	},
 	{
 		Name:       "byte(0)",
@@ -843,9 +826,9 @@ var Tests = []TestCase{
 		TypeString: "v.io/core/veyron2/vom/testdata.NByteSlice []byte",
 	},
 	{
-		Name:       "NByteSlice(\"\\x00\\x00\\x00\")",
-		Value:      NByteSlice("\x00\x00\x00"),
-		Hex:        "80ff812f130129762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e42797465536c696365020500ff8203000000",
+		Name:       "NByteSlice(\"\\x01\\x02\\x03\")",
+		Value:      NByteSlice("\x01\x02\x03"),
+		Hex:        "80ff812f130129762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e42797465536c696365020500ff8203010203",
 		TypeString: "v.io/core/veyron2/vom/testdata.NByteSlice []byte",
 	},
 	{
@@ -861,9 +844,14 @@ var Tests = []TestCase{
 		TypeString: "v.io/core/veyron2/vom/testdata.NByteArray [4]byte",
 	},
 	{
-		Name:       "NByteArray(\"\\x00\\x00\\x00\\x00\")",
-		Value:      NByteArray{},
-		Hex:        "80ff8131120129762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e4279746541727261790205030400ff8200000000",
+		Name: "NByteArray(\"\\x01\\x02\\x03\\x00\")",
+		Value: NByteArray{
+			1,
+			2,
+			3,
+			0,
+		},
+		Hex:        "80ff8131120129762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e4279746541727261790205030400ff8201020300",
 		TypeString: "v.io/core/veyron2/vom/testdata.NByteArray [4]byte",
 	},
 	{
@@ -1056,15 +1044,6 @@ var Tests = []TestCase{
 		Value:      NComplex128(128.5 - 128.5i),
 		Hex:        "80ff813010012a762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e436f6d706c6578313238020f00ff8208fd106040fd1060c0",
 		TypeString: "v.io/core/veyron2/vom/testdata.NComplex128 complex128",
-	},
-	{
-		Name: "[2]uint64{1, 2}",
-		Value: [2]uint64{
-			1,
-			2,
-		},
-		Hex:        "80ff81081201000208030200ff82020102",
-		TypeString: "[2]uint64",
 	},
 	{
 		Name: "NArray2Uint64{1, 2}",
@@ -1502,12 +1481,6 @@ var Tests = []TestCase{
 		Name:       "typeobject(NComplex128)",
 		Value:      __vdl.TypeOf(NComplex128(0)),
 		Hex:        "80ff813010012a762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e436f6d706c6578313238020f000441",
-		TypeString: "typeobject",
-	},
-	{
-		Name:       "typeobject([2]uint64)",
-		Value:      __vdl.TypeOf([2]uint64{}),
-		Hex:        "80ff810812010002080302000441",
 		TypeString: "typeobject",
 	},
 	{

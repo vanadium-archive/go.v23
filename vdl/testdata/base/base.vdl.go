@@ -318,9 +318,16 @@ func (KeyScalars) __VDLReflect(struct {
 }) {
 }
 
+type ScalarsArray [2]Scalars
+
+func (ScalarsArray) __VDLReflect(struct {
+	Name string "v.io/core/veyron2/vdl/testdata/base.ScalarsArray"
+}) {
+}
+
 type Composites struct {
 	A0 Scalars
-	A1 [2]Scalars
+	A1 ScalarsArray
 	A2 []Scalars
 	A3 map[KeyScalars]struct{}
 	A4 map[string]Scalars
@@ -332,9 +339,16 @@ func (Composites) __VDLReflect(struct {
 }) {
 }
 
+type CompositesArray [2]Composites
+
+func (CompositesArray) __VDLReflect(struct {
+	Name string "v.io/core/veyron2/vdl/testdata/base.CompositesArray"
+}) {
+}
+
 type CompComp struct {
 	A0 Composites
-	A1 [2]Composites
+	A1 CompositesArray
 	A2 []Composites
 	A3 map[string]Composites
 	A4 map[KeyScalars][]map[string]Composites
@@ -394,12 +408,22 @@ func init() {
 		B14: NamedUnionA{false},
 	})
 	__vdl.Register(KeyScalars{})
+	__vdl.Register(ScalarsArray{
+		{
+			A15: __vdl.AnyType,
+			B14: NamedUnionA{false},
+		},
+		{
+			A15: __vdl.AnyType,
+			B14: NamedUnionA{false},
+		},
+	})
 	__vdl.Register(Composites{
 		A0: Scalars{
 			A15: __vdl.AnyType,
 			B14: NamedUnionA{false},
 		},
-		A1: [2]Scalars{
+		A1: ScalarsArray{
 			{
 				A15: __vdl.AnyType,
 				B14: NamedUnionA{false},
@@ -410,13 +434,13 @@ func init() {
 			},
 		},
 	})
-	__vdl.Register(CompComp{
-		A0: Composites{
+	__vdl.Register(CompositesArray{
+		{
 			A0: Scalars{
 				A15: __vdl.AnyType,
 				B14: NamedUnionA{false},
 			},
-			A1: [2]Scalars{
+			A1: ScalarsArray{
 				{
 					A15: __vdl.AnyType,
 					B14: NamedUnionA{false},
@@ -427,13 +451,47 @@ func init() {
 				},
 			},
 		},
-		A1: [2]Composites{
+		{
+			A0: Scalars{
+				A15: __vdl.AnyType,
+				B14: NamedUnionA{false},
+			},
+			A1: ScalarsArray{
+				{
+					A15: __vdl.AnyType,
+					B14: NamedUnionA{false},
+				},
+				{
+					A15: __vdl.AnyType,
+					B14: NamedUnionA{false},
+				},
+			},
+		},
+	})
+	__vdl.Register(CompComp{
+		A0: Composites{
+			A0: Scalars{
+				A15: __vdl.AnyType,
+				B14: NamedUnionA{false},
+			},
+			A1: ScalarsArray{
+				{
+					A15: __vdl.AnyType,
+					B14: NamedUnionA{false},
+				},
+				{
+					A15: __vdl.AnyType,
+					B14: NamedUnionA{false},
+				},
+			},
+		},
+		A1: CompositesArray{
 			{
 				A0: Scalars{
 					A15: __vdl.AnyType,
 					B14: NamedUnionA{false},
 				},
-				A1: [2]Scalars{
+				A1: ScalarsArray{
 					{
 						A15: __vdl.AnyType,
 						B14: NamedUnionA{false},
@@ -449,7 +507,7 @@ func init() {
 					A15: __vdl.AnyType,
 					B14: NamedUnionA{false},
 				},
-				A1: [2]Scalars{
+				A1: ScalarsArray{
 					{
 						A15: __vdl.AnyType,
 						B14: NamedUnionA{false},
@@ -499,10 +557,9 @@ const Cenum = NamedEnumA
 
 var Cunion = NamedUnion(NamedUnionA{true})
 
-var Carray = [3]int32{
-	1,
-	2,
-	3,
+var Carray = NamedArray{
+	true,
+	false,
 }
 
 var Clist = []int32{
@@ -558,7 +615,7 @@ var CTOcomplex64 = __vdl.TypeOf(complex64(0))
 
 var CTOenum = __vdl.TypeOf(NamedEnumA)
 
-var CTOArray = __vdl.TypeOf([3]string{})
+var CTOArray = __vdl.TypeOf(NamedArray{})
 
 var CTOList = __vdl.TypeOf([]string(nil))
 

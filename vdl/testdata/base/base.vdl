@@ -90,18 +90,22 @@ type KeyScalars struct {
 	B12 NamedString
 }
 
+type ScalarsArray [2]Scalars
+
 type Composites struct {
 	A0 Scalars
-	A1 [2]Scalars
+	A1 ScalarsArray
 	A2 []Scalars
 	A3 set[KeyScalars]
 	A4 map[string]Scalars
 	A5 map[KeyScalars][]map[string]complex128
 }
 
+type CompositesArray [2]Composites
+
 type CompComp struct {
 	A0 Composites
-	A1 [2]Composites
+	A1 CompositesArray
 	A2 []Composites
 	A3 map[string]Composites
 	A4 map[KeyScalars][]map[string]Composites
@@ -136,7 +140,7 @@ const (
 	Cstring = "foo"
 	Cenum  = NamedEnum.A
 	Cunion = NamedUnion{A: true}
-	Carray = [3]int32{1, 2, 3}
+	Carray = NamedArray{true, false}
 	Clist  = []int32{1, 2, 3}
 	// TODO(toddw): test multiple items after ordering is fixed.
 	//Cset   = set[int32]{1, 2, 3}
@@ -162,7 +166,7 @@ const (
 	CTOfloat32    = typeobject(float32)
 	CTOcomplex64  = typeobject(complex64)
 	CTOenum       = typeobject(NamedEnum)
-	CTOArray      = typeobject([3]string)
+	CTOArray      = typeobject(NamedArray)
 	CTOList       = typeobject([]string)
 	CTOSet        = typeobject(set[string])
 	CTOMap        = typeobject(map[string]int64)

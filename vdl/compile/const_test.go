@@ -103,8 +103,8 @@ func makeIntList(vals ...int64) *vdl.Value {
 	return listv
 }
 
-func makeIntArray(vals ...int64) *vdl.Value {
-	arrayv := vdl.ZeroValue(vdl.ArrayType(len(vals), vdl.Int64Type))
+func makeIntArray(name string, vals ...int64) *vdl.Value {
+	arrayv := vdl.ZeroValue(vdl.NamedType(name, vdl.ArrayType(len(vals), vdl.Int64Type)))
 	for index, v := range vals {
 		arrayv.Index(index).AssignInt(v)
 	}
@@ -119,8 +119,8 @@ func makeByteList(vals ...byte) *vdl.Value {
 	return arrayv
 }
 
-func makeByteArray(vals ...byte) *vdl.Value {
-	arrayv := vdl.ZeroValue(vdl.ArrayType(len(vals), vdl.ByteType))
+func makeByteArray(name string, vals ...byte) *vdl.Value {
+	arrayv := vdl.ZeroValue(vdl.NamedType(name, vdl.ArrayType(len(vals), vdl.ByteType)))
 	for index, v := range vals {
 		arrayv.Index(index).AssignByte(v)
 	}
@@ -308,46 +308,46 @@ var constTests = []struct {
 	// Test array literals.
 	{
 		"IntArray",
-		cp{{"a", `const Res = [3]int64{0,1,2}`, makeIntArray(0, 1, 2), ""}}},
+		cp{{"a", `type T [3]int64; const Res = T{0,1,2}`, makeIntArray("p.kg/a.T", 0, 1, 2), ""}}},
 	{
 		"IntArrayShorterInit",
-		cp{{"a", `const Res = [3]int64{0,1}`, makeIntArray(0, 1, 0), ""}}},
+		cp{{"a", `type T [3]int64; const Res = T{0,1}`, makeIntArray("p.kg/a.T", 0, 1, 0), ""}}},
 	{
 		"IntArrayLongerInit",
-		cp{{"a", `const Res = [3]int64{0,1,2,3}`, nil, "index 3 out of range"}}},
+		cp{{"a", `type T [3]int64; const Res = T{0,1,2,3}`, nil, "index 3 out of range"}}},
 	{
 		"IntArrayKeys",
-		cp{{"a", `const Res = [3]int64{1:1, 2:2, 0:0}`, makeIntArray(0, 1, 2), ""}}},
+		cp{{"a", `type T [3]int64; const Res = T{1:1, 2:2, 0:0}`, makeIntArray("p.kg/a.T", 0, 1, 2), ""}}},
 	{
 		"IntArrayMixedKey",
-		cp{{"a", `const Res = [3]int64{1:1, 2, 0:0}`, makeIntArray(0, 1, 2), ""}}},
+		cp{{"a", `type T [3]int64; const Res = T{1:1, 2, 0:0}`, makeIntArray("p.kg/a.T", 0, 1, 2), ""}}},
 	{
 		"IntArrayDupKey",
-		cp{{"a", `const Res = [3]int64{2:2, 1:1, 0}`, nil, "duplicate index 2"}}},
+		cp{{"a", `type T [3]int64; const Res = T{2:2, 1:1, 0}`, nil, "duplicate index 2"}}},
 	{
 		"IntArrayInvalidIndex",
-		cp{{"a", `const Res = [3]int64{"a":2, 1:1, 2:2}`, nil, `can't convert "a" to uint64`}}},
+		cp{{"a", `type T [3]int64; const Res = T{"a":2, 1:1, 2:2}`, nil, `can't convert "a" to uint64`}}},
 	{
 		"IntArrayInvalidValue",
-		cp{{"a", `const Res = [3]int64{0,1,"c"}`, nil, "invalid array value"}}},
+		cp{{"a", `type T [3]int64; const Res = T{0,1,"c"}`, nil, "invalid array value"}}},
 	{
 		"IndexingNamedList",
-		cp{{"a", `const A = [3]int64{3,4,2}; const Res=A[1]`, vdl.Int64Value(4), ""}}},
+		cp{{"a", `type T [3]int64; const A = T{3,4,2}; const Res=A[1]`, vdl.Int64Value(4), ""}}},
 	{
 		"IndexingUnnamedArray",
-		cp{{"a", `const Res = [3]int64{3,4,2}[1]`, nil, "cannot apply index operator to unnamed constant"}}},
+		cp{{"a", `type T [3]int64; const Res = T{3,4,2}[1]`, nil, "cannot apply index operator to unnamed constant"}}},
 	{
 		"TypedArrayIndexing",
-		cp{{"a", `const A = [3]int64{3,4,2};  const Res = A[int16(1)]`, vdl.Int64Value(4), ""}}},
+		cp{{"a", `type T [3]int64; const A = T{3,4,2};  const Res = A[int16(1)]`, vdl.Int64Value(4), ""}}},
 	{
 		"NegativeArrayIndexing",
-		cp{{"a", `const A = [3]int64{3,4,2}; const Res = A[-1]`, nil, `\(const -1 overflows uint64\)`}}},
+		cp{{"a", `type T [3]int64; const A = T{3,4,2}; const Res = A[-1]`, nil, `\(const -1 overflows uint64\)`}}},
 	{
 		"OutOfBoundsArrayIndexing",
-		cp{{"a", `const A = [3]int64{3,4,2}; const Res = A[10]`, nil, "index out of bounds"}}},
+		cp{{"a", `type T [3]int64; const A = T{3,4,2}; const Res = A[10]`, nil, "index out of bounds"}}},
 	{
 		"InvalidIndexType",
-		cp{{"a", `const A = [3]int64{3,4,2}; const Res = A["ok"]`, nil, "error converting"}}},
+		cp{{"a", `type T [3]int64; const A = T{3,4,2}; const Res = A["ok"]`, nil, "error converting"}}},
 
 	// Test byte list literals.
 	{
@@ -357,13 +357,13 @@ var constTests = []struct {
 	// Test byte array literals.
 	{
 		"ByteArray",
-		cp{{"a", `const Res = [3]byte{0,1,2}`, makeByteArray(0, 1, 2), ""}}},
+		cp{{"a", `type T [3]byte; const Res = T{0,1,2}`, makeByteArray("p.kg/a.T", 0, 1, 2), ""}}},
 	{
 		"ByteArrayShorterInit",
-		cp{{"a", `const Res = [3]byte{0,1}`, makeByteArray(0, 1, 0), ""}}},
+		cp{{"a", `type T [3]byte; const Res = T{0,1}`, makeByteArray("p.kg/a.T", 0, 1, 0), ""}}},
 	{
 		"ByteArrayLongerInit",
-		cp{{"a", `const Res = [3]byte{0,1,2,3}`, nil, "index 3 out of range"}}},
+		cp{{"a", `type T [3]byte; const Res = T{0,1,2,3}`, nil, "index 3 out of range"}}},
 
 	// Test set literals.
 	{
@@ -612,7 +612,7 @@ var constTests = []struct {
 		cp{{"a", `const Res = typeobject([]string)`, vdl.TypeObjectValue(vdl.ListType(vdl.StringType)), ""}}},
 	{
 		"TypeObjectArray",
-		cp{{"a", `const Res = typeobject([3]int64)`, vdl.TypeObjectValue(vdl.ArrayType(3, vdl.Int64Type)), ""}}},
+		cp{{"a", `type T [3]int64; const Res = typeobject(T)`, vdl.TypeObjectValue(vdl.NamedType("p.kg/a.T", vdl.ArrayType(3, vdl.Int64Type))), ""}}},
 	{
 		"TypeObjectSet",
 		cp{{"a", `const Res = typeobject(set[string])`, vdl.TypeObjectValue(vdl.SetType(vdl.StringType)), ""}}},
