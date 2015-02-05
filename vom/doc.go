@@ -134,32 +134,33 @@ either a type or a value.  All values are typed.  Here's the protocol grammar:
 
 TODO(toddw): We need the message lengths for fast binary->binary transcoding.
 
-The basis for the encoding is a variable-length unsigned integer (var256), with
+The basis for the encoding is a variable-length unsigned integer (var128), with
 a max size of 256 bits (32 bytes).  This is a byte-based encoding.  The first
 byte encodes values 0x00...0x7F verbatim.  Otherwise it encodes the length of
 the value, and the value is encoded in the subsequent bytes in big-endian order.
 In addition we have space for 32 flags and 64 reserved entries.
 
-The var256 encoding tries to strike a balance between the coding size and
+The var128 encoding tries to strike a balance between the coding size and
 performance; we try to not be overtly wasteful of space, but still keep the
 format simple to encode and decode.
 
-  First byte of var256:
+  First byte of var128:
   |7|6|5|4|3|2|1|0|
   |---------------|
   |0| Single value| 0x00...0x7F Single-byte value (0...127)
   -----------------
-  |1|0|x|x|x|x|x|x| 0x80...0xBF Reserved (64 entries)
-  |1|1|0| Flags   | 0xC0...0xDF Flags    (32 entries)
-  |1|1|1| Len     | 0xE0...0xFF Multi-byte length (FF=1 byte, FE=2 bytes, ...)
+  |1|0|x|x|x|x|x|x| 0x80...0xBF Control1 (64 entries)
+  |1|1|0|x|x|x|x|x| 0xC0...0xDF Control2 (32 entries)
+  |1|1|1|0|x|x|x|x| 0xE0...0xEF Control3 (16 entries)
+  |1|1|1|1| Len   | 0xF0...0xFF Multi-byte length (FF=1 byte, FE=2 bytes, ...)
   -----------------             (i.e. the length is -Len)
 
-The encoding of the value, flags and reserved entries are all disjoint from each
-other; each var256 can hold either a single 256 bit value, or 5 flag bits, or 6
-reserved bits.  The encoding favors small values; values less than 0x7F, flags
-and reserved entries are all encoded in one byte.
+The encoding of the value and control entries are all disjoint from each other;
+each var128 can hold either a single 256 bit value, or 4 to 6 control bits. The
+encoding favors small values; values less than 0x7F and control entries are all
+encoded in one byte.
 
-The primitives are all encoded using var256:
+The primitives are all encoded using var128:
   o Unsigned: Verbatim.
   o Signed :  Low bit 0 for positive and 1 for negative, and indicates whether
               to complement the other bits to recover the signed value.
@@ -173,7 +174,7 @@ Flags are used to represent special properties and values:
   ...
 TODO(toddw): Add a flag indicating there is a local TypeID table for Any types.
 
-The first byte of each message takes advantage of the var256 flags and reserved
+The first byte of each message takes advantage of the var128 flags and reserved
 entries, to make common encodings smaller, but still easy to decode.  The
 assumption is that values will be encoded more frequently than types; we expect
 values of the same type to be encoded repeatedly.  Conceptually the first byte
@@ -194,8 +195,9 @@ First byte of each message:
   |0| TypeID    |1| ValueMsg (6-bit built-in TypeID)
   -----------------
   |1|0|   TypeID  | ValueMsg (6-bit user TypeID)
-  |1|1|0| Flags   | Flags    (32 entries 0xC0...0xDF)
-  |1|1|1| Len     | Multi-byte length (FF=1 byte, FE=2 bytes, ..., F8=8 bytes)
+  |1|1|0|  Resv   | Reserved (32 entries 0xC0...0xDF)
+  |1|1|1|0| Flag  | Flag     (16 entries 0xE0...0xEF)
+  |1|1|1|1| Len   | Multi-byte length (FF=1 byte, FE=2 bytes, ..., F8=8 bytes)
   -----------------                   (i.e. the length is -Len)
 
 If the first byte is 0x10, this is a TypeMsg, and we encode the TypeID next,
@@ -209,7 +211,7 @@ by the bytes of the string value; empty strings are a single byte 0x02.
 
 The first byte of the ValueMsg also contains TypeIDs [0...127], where the
 built-in TypeIDs occupy [0...63], and user-defined TypeIDs start at 64.
-User-defined TypeIDs larger than 127 are encoded as regular multi-byte var256.
+User-defined TypeIDs larger than 127 are encoded as regular multi-byte var128.
 
 TODO(toddw): For small value encoding to be useful, we'll want to use it for all
 values that can fit, but we'll be dropping the sizes of int and uint, and the

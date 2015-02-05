@@ -1,6 +1,7 @@
 package vom
 
 import (
+	"fmt"
 	"math"
 
 	"v.io/core/veyron2/vdl"
@@ -20,11 +21,18 @@ const (
 	// start with an ASCII character, or the BOM U+FEFF, and this magic byte is
 	// unambiguous regardless of the endianness of the JSON encoding.
 	binaryMagicByte byte = 0x80
+
+	// Control codes:
+	//   region 1: 0x80...0xBF (64 entries)
+	//   region 2: 0xC0...0xDF (32 entries)
+	//   region 3: 0xE0...0xEF (16 entries)
+	ctrlEOF = 0xef
 )
 
 var (
-	errUintOverflow = verror.BadProtocolf("vom: scalar larger than 8 bytes")
+	errInvalid      = verror.BadProtocolf("vom: invalid encoding")
 	errMsgLen       = verror.BadProtocolf("vom: message larger than %d bytes", maxBinaryMsgLen)
+	errUintOverflow = verror.BadProtocolf("vom: scalar larger than 8 bytes")
 )
 
 // hasBinaryMsgLen returns true iff the type t is encoded with a top-level
@@ -40,6 +48,32 @@ func hasBinaryMsgLen(t *vdl.Type) bool {
 	return false
 }
 
+func binaryEncodeControl(buf *encbuf, v byte) {
+	if v < 0x80 || v > 0xef {
+		panic(fmt.Errorf("invalid control code: %d", v))
+	}
+	buf.WriteByte(v)
+}
+
+func binaryDecodeControl(buf *decbuf) (byte, error) {
+	v, err := binaryPeekControl(buf)
+	if err != nil {
+		return 0, err
+	}
+	return v, buf.Skip(1)
+}
+
+func binaryPeekControl(buf *decbuf) (byte, error) {
+	v, err := buf.PeekByte()
+	if err != nil {
+		return 0, err
+	}
+	if v < 0x80 || v > 0xef {
+		return 0, errInvalid
+	}
+	return v, nil
+}
+
 // Bools are encoded as a byte where 0 = false and anything else is true.
 func binaryEncodeBool(buf *encbuf, v bool) {
 	if v {
@@ -50,11 +84,14 @@ func binaryEncodeBool(buf *encbuf, v bool) {
 }
 
 func binaryDecodeBool(buf *decbuf) (bool, error) {
-	bval, err := buf.ReadByte()
+	v, err := buf.ReadByte()
 	if err != nil {
 		return false, err
 	}
-	return bval != 0, nil
+	if v > 0x7f {
+		return false, errInvalid
+	}
+	return v != 0, nil
 }
 
 // Unsigned integers are the basis for all other primitive values.  This is a
@@ -218,6 +255,10 @@ func binaryPeekUint(buf *decbuf) (uint64, int, error) {
 	if firstByte <= 0x7f {
 		return uint64(firstByte), 1, nil
 	}
+	// Verify not a control code.
+	if firstByte <= 0xdf {
+		return 0, 0, errInvalid
+	}
 	// Handle multi-byte encoding.
 	byteLen := int(-int8(firstByte))
 	if byteLen < 1 || byteLen > uint64Size {
@@ -235,12 +276,50 @@ func binaryPeekUint(buf *decbuf) (uint64, int, error) {
 	return v, byteLen, nil
 }
 
+func binaryDecodeUintWithControl(buf *decbuf) (uint64, byte, error) {
+	v, c, bytelen, err := binaryPeekUintWithControl(buf)
+	if err != nil {
+		return 0, 0, err
+	}
+	return v, c, buf.Skip(bytelen)
+}
+
+func binaryPeekUintWithControl(buf *decbuf) (uint64, byte, int, error) {
+	firstByte, err := buf.PeekByte()
+	if err != nil {
+		return 0, 0, 0, err
+	}
+	// Handle single-byte encoding.
+	if firstByte <= 0x7f {
+		return uint64(firstByte), 0, 1, nil
+	}
+	// Handle control code.
+	if firstByte <= 0xef {
+		return 0, byte(firstByte), 1, nil
+	}
+	// Handle multi-byte encoding.
+	byteLen := int(-int8(firstByte))
+	if byteLen < 1 || byteLen > uint64Size {
+		return 0, 0, 0, errUintOverflow
+	}
+	byteLen++ // account for initial len byte
+	bytes, err := buf.PeekAtLeast(byteLen)
+	if err != nil {
+		return 0, 0, 0, err
+	}
+	var v uint64
+	for _, b := range bytes[1:byteLen] {
+		v = v<<8 | uint64(b)
+	}
+	return v, 0, byteLen, nil
+}
+
 func binaryPeekUintByteLen(buf *decbuf) (int, error) {
 	firstByte, err := buf.PeekByte()
 	if err != nil {
 		return 0, err
 	}
-	if firstByte <= 0x7f {
+	if firstByte <= 0xef {
 		return 1, nil
 	}
 	byteLen := int(-int8(firstByte))

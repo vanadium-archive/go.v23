@@ -17,6 +17,13 @@ func TestBinaryEncodeDecode(t *testing.T) {
 		{false, "00"},
 		{true, "01"},
 
+		{byte(0x80), "80"},
+		{byte(0xbf), "bf"},
+		{byte(0xc0), "c0"},
+		{byte(0xdf), "df"},
+		{byte(0xe0), "e0"},
+		{byte(0xef), "ef"},
+
 		{uint64(0), "00"},
 		{uint64(1), "01"},
 		{uint64(2), "02"},
@@ -72,6 +79,8 @@ func TestBinaryEncodeDecode(t *testing.T) {
 		encbuf := newEncbuf()
 		var buf []byte
 		switch val := test.v.(type) {
+		case byte:
+			binaryEncodeControl(encbuf, val)
 		case bool:
 			binaryEncodeBool(encbuf, val)
 		case uint64:
@@ -103,15 +112,21 @@ func TestBinaryEncodeDecode(t *testing.T) {
 		}
 		decbuf := newDecbuf(strings.NewReader(bin))
 		decbuf2 := newDecbuf(strings.NewReader(bin))
-		var v interface{}
-		var err, err2 error
+		decbuf3 := newDecbuf(strings.NewReader(bin))
+		var v, v2 interface{}
+		var err, err2, err3 error
 		switch test.v.(type) {
+		case byte:
+			v, err = binaryDecodeControl(decbuf)
+			_, v2, err2 = binaryDecodeUintWithControl(decbuf2)
+			err3 = binaryIgnoreUint(decbuf3)
 		case bool:
 			v, err = binaryDecodeBool(decbuf)
 			err2 = binaryIgnoreUint(decbuf2)
 		case uint64:
 			v, err = binaryDecodeUint(decbuf)
-			err2 = binaryIgnoreUint(decbuf2)
+			v2, _, err2 = binaryDecodeUintWithControl(decbuf2)
+			err3 = binaryIgnoreUint(decbuf3)
 		case int64:
 			v, err = binaryDecodeInt(decbuf)
 			err2 = binaryIgnoreUint(decbuf2)
@@ -122,8 +137,12 @@ func TestBinaryEncodeDecode(t *testing.T) {
 			v, err = binaryDecodeString(decbuf)
 			err2 = binaryIgnoreString(decbuf2)
 		}
-		if err != nil || err2 != nil {
-			t.Errorf("binary decode %T(0x%v): %v %v", test.v, test.hex, err, err2)
+		if v2 != nil && v != v2 {
+			t.Errorf("binary decode %T(0x%v) differently: %v %v", test.v, test.hex, v, v2)
+			continue
+		}
+		if err != nil || err2 != nil || err3 != nil {
+			t.Errorf("binary decode %T(0x%v): %v %v %v", test.v, test.hex, err, err2, err3)
 			continue
 		}
 		if b, err := decbuf.ReadByte(); err != io.EOF {
