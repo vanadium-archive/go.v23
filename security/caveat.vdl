@@ -34,6 +34,9 @@ const (
 )
 
 // Error definitions to allow for stable error checking across address spaces.
+// TODO(bjornick,toddw): We should remove Err from the front of these ids and then have the go generator
+// add them back in on the generated go side.  The conventions for error names differ in different languages
+// (i.e. ErrFoo in go, FooError in js, FooExpection in java).
 error (
   ErrCaveatNotRegistered(id uniqueid.Id) {
     "en": "no validation function registered for caveat id {id}",
