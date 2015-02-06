@@ -12,9 +12,9 @@ import (
 func TestError(t *testing.T) {
 	e := &compile.ErrorDef{
 		NamePos: compile.NamePos{
-			Name: "TestError",
+			Name: "Test",
 		},
-		ID:     verror.ID("v.io/core/veyron2/vdl/codegen/javascript.TestError"),
+		ID:     verror.ID("v.io/core/veyron2/vdl/codegen/javascript.Test"),
 		Action: verror2.NoRetry,
 		Params: []*compile.Arg{
 			&compile.Arg{
@@ -43,7 +43,7 @@ func TestError(t *testing.T) {
 	}
 	var names typeNames
 	result := generateErrorConstructor(names, e)
-	expected := `module.exports.TestError = makeError('v.io/core/veyron2/vdl/codegen/javascript.TestError', actions.NO_RETRY, {
+	expected := `module.exports.TestError = makeError('v.io/core/veyron2/vdl/codegen/javascript.Test', actions.NO_RETRY, {
   'en-US': 'english string',
   'fr': 'french string',
 }, [

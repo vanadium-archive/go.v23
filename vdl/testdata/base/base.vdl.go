@@ -635,39 +635,39 @@ var CTOTypeObject = vdl.TypeObjectType
 var CTOAny = vdl.AnyType
 
 var (
-	ErrNoParams1   = verror2.Register("v.io/core/veyron2/vdl/testdata/base.ErrNoParams1", verror2.NoRetry, "{1:}{2:} en msg")
-	ErrNoParams2   = verror2.Register("v.io/core/veyron2/vdl/testdata/base.ErrNoParams2", verror2.RetryRefetch, "{1:}{2:} en msg")
-	ErrWithParams1 = verror2.Register("v.io/core/veyron2/vdl/testdata/base.ErrWithParams1", verror2.NoRetry, "{1:}{2:} en x={3} y={4}")
-	ErrWithParams2 = verror2.Register("v.io/core/veyron2/vdl/testdata/base.ErrWithParams2", verror2.RetryRefetch, "{1:}{2:} en x={3} y={4}")
+	NoParams1   = verror2.Register("v.io/core/veyron2/vdl/testdata/base.NoParams1", verror2.NoRetry, "{1:}{2:} en msg")
+	NoParams2   = verror2.Register("v.io/core/veyron2/vdl/testdata/base.NoParams2", verror2.RetryRefetch, "{1:}{2:} en msg")
+	WithParams1 = verror2.Register("v.io/core/veyron2/vdl/testdata/base.WithParams1", verror2.NoRetry, "{1:}{2:} en x={3} y={4}")
+	WithParams2 = verror2.Register("v.io/core/veyron2/vdl/testdata/base.WithParams2", verror2.RetryRefetch, "{1:}{2:} en x={3} y={4}")
 )
 
 func init() {
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoParams1.ID), "{1:}{2:} en msg")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoParams2.ID), "{1:}{2:} en msg")
-	i18n.Cat().SetWithBase(i18n.LangID("fr"), i18n.MsgID(ErrNoParams2.ID), "{1:}{2:} fr msg")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrWithParams1.ID), "{1:}{2:} en x={3} y={4}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrWithParams2.ID), "{1:}{2:} en x={3} y={4}")
-	i18n.Cat().SetWithBase(i18n.LangID("fr"), i18n.MsgID(ErrWithParams2.ID), "{1:}{2:} fr y={4} x={3}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(NoParams1.ID), "{1:}{2:} en msg")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(NoParams2.ID), "{1:}{2:} en msg")
+	i18n.Cat().SetWithBase(i18n.LangID("fr"), i18n.MsgID(NoParams2.ID), "{1:}{2:} fr msg")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(WithParams1.ID), "{1:}{2:} en x={3} y={4}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(WithParams2.ID), "{1:}{2:} en x={3} y={4}")
+	i18n.Cat().SetWithBase(i18n.LangID("fr"), i18n.MsgID(WithParams2.ID), "{1:}{2:} fr y={4} x={3}")
 }
 
-// MakeErrNoParams1 returns an error with the ErrNoParams1 ID.
-func MakeErrNoParams1(ctx *context.T) error {
-	return verror2.Make(ErrNoParams1, ctx)
+// MakeNoParams1 returns an error with the NoParams1 ID.
+func MakeNoParams1(ctx *context.T) error {
+	return verror2.Make(NoParams1, ctx)
 }
 
-// MakeErrNoParams2 returns an error with the ErrNoParams2 ID.
-func MakeErrNoParams2(ctx *context.T) error {
-	return verror2.Make(ErrNoParams2, ctx)
+// MakeNoParams2 returns an error with the NoParams2 ID.
+func MakeNoParams2(ctx *context.T) error {
+	return verror2.Make(NoParams2, ctx)
 }
 
-// MakeErrWithParams1 returns an error with the ErrWithParams1 ID.
-func MakeErrWithParams1(ctx *context.T, x string, y int32) error {
-	return verror2.Make(ErrWithParams1, ctx, x, y)
+// MakeWithParams1 returns an error with the WithParams1 ID.
+func MakeWithParams1(ctx *context.T, x string, y int32) error {
+	return verror2.Make(WithParams1, ctx, x, y)
 }
 
-// MakeErrWithParams2 returns an error with the ErrWithParams2 ID.
-func MakeErrWithParams2(ctx *context.T, x string, y int32) error {
-	return verror2.Make(ErrWithParams2, ctx, x, y)
+// MakeWithParams2 returns an error with the WithParams2 ID.
+func MakeWithParams2(ctx *context.T, x string, y int32) error {
+	return verror2.Make(WithParams2, ctx, x, y)
 }
 
 // ServiceAClientMethods is the client interface
