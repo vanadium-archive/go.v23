@@ -7,6 +7,9 @@ package application
 import (
 	// VDL system imports
 	"v.io/core/veyron2/vdl"
+
+	// VDL user imports
+	"v.io/core/veyron2/security"
 )
 
 // Envelope is a collection of metadata that describes an application.
@@ -22,6 +25,12 @@ type Envelope struct {
 	Args []string
 	// Binary is an object name that identifies the application binary.
 	Binary string
+	// Signature represents a signature on the sha256 hash of the application
+	// binary by the publisher principal.
+	Signature security.Signature
+	// Publisher represents the set of blessings that have been bound to
+	// the principal who published this binary.
+	Publisher security.WireBlessings
 	// Env is an array that stores the environment variable values to be
 	// used when executing the binary.
 	Env []string
