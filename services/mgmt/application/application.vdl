@@ -31,14 +31,20 @@ type Envelope struct {
 	// used when executing the binary.
 	Env []string
 	// Packages is a map of packages to install on the local filesystem
-	// before executing the binary. The map key is the local directory
-	// name, relative to the instance's initial work directory, where the
-	// package should be installed. The map value is the object name of the
-	// package, e.g. With key=pkg1,value=binaryrepo/configfiles, the
-	// "configfiles" package will be installed under the "pkg1" directory.
+	// before executing the binary. The map key is the local file/directory
+	// name, relative to the instance's packages directory, where the
+	// package should be installed. For archives, this name represents a
+	// directory into which the archive is to be extracted, and for regular
+	// files it represents the name for the file.
+	// The map value is the object name of the package.
 	// Each object's media type determines how to install it.
 	//
-	// The keys must be valid directory names, without path separators.
+	// For example, with key=pkg1,value=binaryrepo/configfiles (an archive),
+	// the "configfiles" package will be installed under the "pkg1"
+	// directory. With key=pkg2,value=binaryrepo/binfile (a binary), the
+	// "binfile" file will be installed as the "pkg2" file.
+	//
+	// The keys must be valid file/directory names, without path separators.
 	//
 	// Any number of packages may be specified.
 	Packages map[string]string
