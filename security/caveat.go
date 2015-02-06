@@ -125,8 +125,13 @@ func NewCaveat(c CaveatDescriptor, param interface{}) (Caveat, error) {
 		return Caveat{}, MakeErrCaveatParamCoding(nil, c.Id, c.ParamType, err)
 	}
 	return Caveat{
-		Id:           c.Id,
-		ParamVom:     bytes,
+		Id:       c.Id,
+		ParamVom: bytes,
+		// For unittests, set ValidatorVOM to []byte{} since vom-roundtripping of
+		// []byte(nil) results in []byte{}.
+		// See TestRoundtrip in veyron2/vom/decoder_test.go.
+		// TODO(ashankar): This field will be removed before release,
+		// so the comment doesn't matter.
 		ValidatorVOM: []byte{},
 	}, nil
 }
@@ -137,10 +142,6 @@ func ExpiryCaveat(t time.Time) (Caveat, error) {
 	if err != nil {
 		return c, err
 	}
-	// For backwards compatibility, include the old style for now.
-	if c.ValidatorVOM, err = vom.Encode(unixTimeExpiryCaveat(t.Unix())); err != nil {
-		return c, err
-	}
 	return c, nil
 }
 
@@ -149,10 +150,6 @@ func ExpiryCaveat(t time.Time) (Caveat, error) {
 func MethodCaveat(method string, additionalMethods ...string) (Caveat, error) {
 	c, err := NewCaveat(MethodCaveatX, append(additionalMethods, method))
 	if err != nil {
-		return c, err
-	}
-	// For backwards compatibility, include the old style for now.
-	if c.ValidatorVOM, err = vom.Encode(methodCaveat(append(additionalMethods, method))); err != nil {
 		return c, err
 	}
 	return c, nil
@@ -182,16 +179,16 @@ func (c *Caveat) Validate(ctx Context) error {
 	return registry.validate(c.Id, ctx, c.ParamVom)
 }
 
-// ThirdPatyDetails returns nil if c is not a third party caveat, or details about
+// ThirdPartyDetails returns nil if c is not a third party caveat, or details about
 // the third party otherwise.
-func (c Caveat) ThirdPartyDetails() ThirdPartyCaveat {
-	if bytes.Equal(c.Id[:], zeroCaveatID[:]) {
+func (c *Caveat) ThirdPartyDetails() ThirdPartyCaveat {
+	if len(c.ValidatorVOM) > 0 {
 		// Old format caveats using ValidatorVOM
 		var tp ThirdPartyCaveat
 		vom.Decode(c.ValidatorVOM, &tp)
 		return tp
 	}
-	if bytes.Equal(c.Id[:], PublicKeyThirdPartyCaveatX.Id[:]) {
+	if c.Id == PublicKeyThirdPartyCaveatX.Id {
 		var param publicKeyThirdPartyCaveat
 		if err := vom.Decode(c.ParamVom, &param); err != nil {
 			vlog.Errorf("Error decoding PublicKeyThirdPartyCaveat: %v", err)
@@ -242,10 +239,8 @@ func (c methodCaveat) Validate(ctx Context) error {
 // blessings/discharges to another principal.
 func UnconstrainedUse() Caveat { return Caveat{} }
 
-var zeroCaveatID = [16]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-
 func isUnconstrainedUseCaveat(c Caveat) bool {
-	return bytes.Equal(c.Id[:], zeroCaveatID[:])
+	return c.Id == UnconstrainedUse().Id
 }
 
 // NewPublicKeyCaveat returns a third-party caveat, i.e., the returned
@@ -272,10 +267,6 @@ func NewPublicKeyCaveat(discharger PublicKey, location string, requirements Thir
 	}
 	c, err := NewCaveat(PublicKeyThirdPartyCaveatX, param)
 	if err != nil {
-		return c, err
-	}
-	// For backwards compatibility, include the old style for now.
-	if c.ValidatorVOM, err = vom.Encode(&param); err != nil {
 		return c, err
 	}
 	return c, nil

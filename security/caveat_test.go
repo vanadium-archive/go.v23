@@ -98,7 +98,7 @@ func TestPublicKeyThirdPartyCaveat(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if merr := matchesError(tpc.ThirdPartyDetails().Dischargeable(NewContext(&ContextParams{Timestamp: now})), "could not validate embedded restriction(security.unixTimeExpiryCaveat"); merr != nil {
+	if merr := matchesError(tpc.ThirdPartyDetails().Dischargeable(NewContext(&ContextParams{Timestamp: now})), "could not validate embedded restriction"); merr != nil {
 		t.Fatal(merr)
 	}
 }

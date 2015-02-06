@@ -20,15 +20,15 @@ func newSigner() Signer {
 
 // Log the "on-the-wire" sizes for blessings (which are shipped during the
 // authentication protocol).
-// As of October 26, 2014, the numbers were:
+// As of February 4, 2015, the numbers were:
 //   Marshaled P256 ECDSA key                   :   91 bytes
 //   VOM type information overhead for blessings:  409 bytes
 //   Blessing with 1 certificates               :  591 bytes (a)
 //   Blessing with 2 certificates               :  770 bytes (a/a)
 //   Blessing with 3 certificates               :  948 bytes (a/a/a)
 //   Blessing with 4 certificates               : 1126 bytes (a/a/a/a)
-//   Marshaled caveat                           :   71 bytes (security.unixTimeExpiryCaveat(1414312924 = 2014-10-26 01:42:04 -0700 PDT))
-//   Marshaled caveat                           :   61 bytes (security.methodCaveat([m]))
+//   Marshaled caveat                           :    7 bytes (0x54a676398137187ecdb26d2d69ba0004(int64=1423080470))
+//   Marshaled caveat                           :    6 bytes (0x54a676398137187ecdb26d2d69ba0003([]string=[m]))
 func TestByteSize(t *testing.T) {
 	blessingsize := func(b Blessings) int {
 		buf, err := vom.Encode(MarshalBlessings(b))
@@ -60,7 +60,7 @@ func TestByteSize(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		t.Logf("Marshaled caveat                           : %4d bytes (%v)", len(c.ValidatorVOM), &c)
+		t.Logf("Marshaled caveat                           : %4d bytes (%v)", len(c.ParamVom), &c)
 	}
 	logCaveatSize(ExpiryCaveat(time.Now()))
 	logCaveatSize(MethodCaveat("m"))

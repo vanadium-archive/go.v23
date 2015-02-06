@@ -174,10 +174,7 @@ type Principal interface {
 	//
 	// The returned discharge will be usable only if the provided caveats
 	// are met when using the discharge.
-	//
-	// TODO(ashankar): Change the type of "tp" to Caveat when removing
-	// ValidatorVOM.
-	MintDischarge(tp interface{}, caveat Caveat, additionalCaveats ...Caveat) (Discharge, error)
+	MintDischarge(forThirdPartyCaveat, caveatOnDischarge Caveat, additionalCaveatsOnDischarge ...Caveat) (Discharge, error)
 
 	// PublicKey returns the public key counterpart of the private key held
 	// by the Principal.
@@ -343,9 +340,9 @@ type Blessings interface {
 	PublicKey() PublicKey
 
 	// ThirdPartyCaveats returns the set of third-party restrictions on the
-	// scope of the blessings.
-	// TODO(ashankar): The return type should become []Caveat?
-	ThirdPartyCaveats() []ThirdPartyCaveat
+	// scope of the blessings (i.e., the subset of Caveats for which
+	// ThirdPartyDetails will be non-nil).
+	ThirdPartyCaveats() []Caveat
 
 	// unexported methods that prevent implementations of this interface
 	// outside this package.

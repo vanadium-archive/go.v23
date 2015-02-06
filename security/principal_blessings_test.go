@@ -99,6 +99,32 @@ func TestBless(t *testing.T) {
 	}
 }
 
+func TestThirdPartyCaveats(t *testing.T) {
+	var (
+		p1  = newPrincipal(t)
+		p2  = newPrincipal(t)
+		tp1 = newCaveat(NewPublicKeyCaveat(p1.PublicKey(), "peoria", ThirdPartyRequirements{}, UnconstrainedUse()))
+		tp2 = newCaveat(NewPublicKeyCaveat(p1.PublicKey(), "london", ThirdPartyRequirements{}, UnconstrainedUse()))
+		tp3 = newCaveat(NewPublicKeyCaveat(p1.PublicKey(), "delhi", ThirdPartyRequirements{}, UnconstrainedUse()))
+		c1  = newCaveat(MethodCaveat("method"))
+		c2  = newCaveat(ExpiryCaveat(time.Now()))
+	)
+
+	b, err := p1.BlessSelf("alice", tp1, c1, tp2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, want := b.ThirdPartyCaveats(), []Caveat{tp1, tp2}; !reflect.DeepEqual(got, want) {
+		t.Errorf("Got %v, want %v", got, want)
+	}
+	if b, err = p1.Bless(p2.PublicKey(), b, "friend", tp3, c2); err != nil {
+		t.Fatal(err)
+	}
+	if got, want := b.ThirdPartyCaveats(), []Caveat{tp1, tp2, tp3}; !reflect.DeepEqual(got, want) {
+		t.Errorf("Got %v, want %v", got, want)
+	}
+}
+
 func TestBlessingsInfo(t *testing.T) {
 	expiryCaveat, err := ExpiryCaveat(time.Now().Add(time.Minute))
 	if err != nil {

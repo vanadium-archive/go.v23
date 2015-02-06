@@ -28,13 +28,13 @@ func (b *blessingsImpl) ForContext(ctx Context) []string {
 	return ret
 }
 func (b *blessingsImpl) PublicKey() PublicKey { return b.publicKey }
-func (b *blessingsImpl) ThirdPartyCaveats() []ThirdPartyCaveat {
-	var ret []ThirdPartyCaveat
+func (b *blessingsImpl) ThirdPartyCaveats() []Caveat {
+	var ret []Caveat
 	for _, chain := range b.chains {
 		for _, cert := range chain {
 			for _, cav := range cert.Caveats {
 				if tp := cav.ThirdPartyDetails(); tp != nil {
-					ret = append(ret, tp)
+					ret = append(ret, cav)
 				}
 			}
 		}
