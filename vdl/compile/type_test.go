@@ -174,6 +174,7 @@ var typeTests = []typeTest{
 	// Test errors.
 	{"InvalidName", tp{{"a", `type _Res bool`, nil, "type _Res invalid name"}}},
 	{"Undefined", tp{{"a", `type Res foo`, nil, "type foo undefined"}}},
+	{"UnnamedArray", tp{{"a", `type Res [][3]int64`, nil, "unnamed array type invalid"}}},
 	{"UnnamedEnum", tp{{"a", `type Res []enum{A;B;C}`, nil, "unnamed enum type invalid"}}},
 	{"UnnamedStruct", tp{{"a", `type Res []struct{A int32}`, nil, "unnamed struct type invalid"}}},
 	{"UnnamedUnion", tp{{"a", `type Res []union{A bool;B int32;C string}`, nil, "unnamed union type invalid"}}},
