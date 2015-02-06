@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"sort"
 	"strconv"
 )
 
@@ -460,7 +461,8 @@ func (v *Value) Index(index int) *Value {
 	panic(v.t.errKind("Index", Array, List))
 }
 
-// Keys returns all keys present in the underlying Set or Map.
+// Keys returns all keys present in the underlying Set or Map.  The returned
+// keys are in an arbitrary order; do not rely on the ordering.
 func (v *Value) Keys() []*Value {
 	v.t.checkKind("Keys", Set, Map)
 	return v.rep.(repMap).Keys()
@@ -743,3 +745,22 @@ func (v *Value) AssignUnionField(index int, value *Value) *Value {
 	v.rep = repUnion{index, typedCopy(v.t.fields[index].Type, value)}
 	return v
 }
+
+// SortValuesAsString sorts values by their String representation.  The order of
+// elements in values may be changed, and values is returned; no copy is made.
+//
+// The ordering is guaranteed to be deterministic within a single executable,
+// but may change across different versions of the code.
+//
+// Typically used to get a deterministic ordering of set and map keys in tests.
+// Do not depend on the ordering across versions of the code; it will change.
+func SortValuesAsString(values []*Value) []*Value {
+	sort.Sort(orderValuesAsString(values))
+	return values
+}
+
+type orderValuesAsString []*Value
+
+func (x orderValuesAsString) Len() int           { return len(x) }
+func (x orderValuesAsString) Less(i, j int) bool { return x[i].String() < x[j].String() }
+func (x orderValuesAsString) Swap(i, j int)      { x[i], x[j] = x[j], x[i] }

@@ -102,7 +102,7 @@ func javaVal(v *vdl.Value, env *compile.Env) string {
 		keyTypeStr := javaType(v.Type().Key(), true, env)
 		elemTypeStr := javaType(v.Type().Elem(), true, env)
 		ret := fmt.Sprintf("new com.google.common.collect.ImmutableMap.Builder<%s, %s>()", keyTypeStr, elemTypeStr)
-		for _, key := range v.Keys() {
+		for _, key := range vdl.SortValuesAsString(v.Keys()) {
 			keyStr := javaConstVal(key, env)
 			elemStr := javaConstVal(v.MapIndex(key), env)
 			ret = fmt.Sprintf("%s.put(%s, %s)", ret, keyStr, elemStr)
@@ -116,7 +116,7 @@ func javaVal(v *vdl.Value, env *compile.Env) string {
 	case vdl.Set:
 		keyTypeStr := javaType(v.Type().Key(), true, env)
 		ret := fmt.Sprintf("new com.google.common.collect.ImmutableSet.Builder<%s>()", keyTypeStr)
-		for _, key := range v.Keys() {
+		for _, key := range vdl.SortValuesAsString(v.Keys()) {
 			ret = fmt.Sprintf("%s.add(%s)", ret, javaConstVal(key, env))
 		}
 		return ret + ".build()"

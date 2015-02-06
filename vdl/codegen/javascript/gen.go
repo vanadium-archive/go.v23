@@ -166,14 +166,14 @@ func untypedConst(names typeNames, v *vdl.Value) string {
 		return result
 	case vdl.Set:
 		result := "new Set(["
-		for _, key := range v.Keys() {
+		for _, key := range vdl.SortValuesAsString(v.Keys()) {
 			result += "\n  " + untypedConst(names, key) + ", "
 		}
 		result += "])"
 		return result
 	case vdl.Map:
 		result := "new Map(["
-		for i, key := range v.Keys() {
+		for i, key := range vdl.SortValuesAsString(v.Keys()) {
 			if i > 0 {
 				result += ","
 			}

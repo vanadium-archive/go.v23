@@ -93,9 +93,8 @@ func UntypedConst(v *vdl.Value, pkgPath string, imports codegen.Imports) string 
 		}
 		return s + "}"
 	case vdl.Set, vdl.Map:
-		// TODO(toddw): Sort keys to get a deterministic ordering.
 		s := "{"
-		for ix, key := range v.Keys() {
+		for ix, key := range vdl.SortValuesAsString(v.Keys()) {
 			if ix > 0 {
 				s += ", "
 			}
