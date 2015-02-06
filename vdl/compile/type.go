@@ -191,10 +191,16 @@ func compileType(ptype parse.Type, file *File, env *Env) *vdl.Type {
 	}
 }
 
-// compileDefinedType compiles ptype.  It can handle definitions based on enum,
-// struct and union, as well as definitions based on any literal type.
+// compileDefinedType compiles ptype.  It can handle definitions based on array,
+// enum, struct and union, as well as definitions based on any literal type.
 func compileDefinedType(ptype parse.Type, file *File, env *Env, tbuilder *vdl.TypeBuilder, builders map[string]*typeDefBuilder) vdl.TypeOrPending {
 	switch pt := ptype.(type) {
+	case *parse.TypeArray:
+		elem := compileLiteralType(pt.Elem, file, env, tbuilder, builders)
+		if elem == nil {
+			return nil
+		}
+		return tbuilder.Array().AssignLen(pt.Len).AssignElem(elem)
 	case *parse.TypeEnum:
 		enum := tbuilder.Enum()
 		for _, plabel := range pt.Labels {
@@ -243,8 +249,8 @@ func compileDefinedType(ptype parse.Type, file *File, env *Env, tbuilder *vdl.Ty
 }
 
 // compileLiteralType compiles ptype.  It can handle any literal type.  Note
-// that enum, struct and union are required to be defined and named, and aren't
-// allowed as regular literal types.
+// that array, enum, struct and union are required to be defined and named,
+// and aren't allowed as regular literal types.
 func compileLiteralType(ptype parse.Type, file *File, env *Env, tbuilder *vdl.TypeBuilder, builders map[string]*typeDefBuilder) vdl.TypeOrPending {
 	switch pt := ptype.(type) {
 	case *parse.TypeNamed:
@@ -259,36 +265,36 @@ func compileLiteralType(ptype parse.Type, file *File, env *Env, tbuilder *vdl.Ty
 			return b.pending
 		}
 		env.Errorf(file, pt.Pos(), "type %s undefined", pt.Name)
-	case *parse.TypeArray:
-		elem := compileLiteralType(pt.Elem, file, env, tbuilder, builders)
-		if elem != nil {
-			return tbuilder.Array().AssignLen(pt.Len).AssignElem(elem)
-		}
+		return nil
 	case *parse.TypeList:
 		elem := compileLiteralType(pt.Elem, file, env, tbuilder, builders)
-		if elem != nil {
-			return tbuilder.List().AssignElem(elem)
+		if elem == nil {
+			return nil
 		}
+		return tbuilder.List().AssignElem(elem)
 	case *parse.TypeSet:
 		key := compileLiteralType(pt.Key, file, env, tbuilder, builders)
-		if key != nil {
-			return tbuilder.Set().AssignKey(key)
+		if key == nil {
+			return nil
 		}
+		return tbuilder.Set().AssignKey(key)
 	case *parse.TypeMap:
 		key := compileLiteralType(pt.Key, file, env, tbuilder, builders)
 		elem := compileLiteralType(pt.Elem, file, env, tbuilder, builders)
-		if key != nil && elem != nil {
-			return tbuilder.Map().AssignKey(key).AssignElem(elem)
+		if key == nil || elem == nil {
+			return nil
 		}
+		return tbuilder.Map().AssignKey(key).AssignElem(elem)
 	case *parse.TypeOptional:
 		elem := compileLiteralType(pt.Base, file, env, tbuilder, builders)
-		if elem != nil {
-			return tbuilder.Optional().AssignElem(elem)
+		if elem == nil {
+			return nil
 		}
+		return tbuilder.Optional().AssignElem(elem)
 	default:
 		env.Errorf(file, pt.Pos(), "unnamed %s type invalid (type must be defined)", ptype.Kind())
+		return nil
 	}
-	return nil
 }
 
 // Build actually builds each type and updates the package with the typedefs.
