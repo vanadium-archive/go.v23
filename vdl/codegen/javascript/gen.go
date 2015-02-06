@@ -231,6 +231,18 @@ func outArgsWithoutError(outArgs []*compile.Arg) []*compile.Arg {
 	return outArgs[:len(outArgs)-1]
 }
 
+// Returns a Not Implemented stub for the method
+func generateMethodStub(method *compile.Method) string {
+	args := "ctx"
+	for _, arg := range method.InArgs {
+		args += fmt.Sprintf(", %s", arg.Name)
+	}
+
+	return fmt.Sprintf(`function(%s) {
+  throw new Error('Method %s not implemented');
+}`, args, method.Name)
+}
+
 // Returns the JS version of the method signature.
 func generateMethodSignature(method *compile.Method, names typeNames) string {
 	return fmt.Sprintf(`{
@@ -351,6 +363,7 @@ func init() {
 		"makeTypeDefinitionsString": makeTypeDefinitionsString,
 		"typedConst":                typedConst,
 		"generateEmbeds":            generateEmbeds,
+		"generateMethodStub":        generateMethodStub,
 		"generateMethodSignature":   generateMethodSignature,
 		"importPath":                importPath,
 		"quoteStripDoc":             quoteStripDoc,
@@ -393,11 +406,6 @@ module.exports = {};
 {{generateErrorConstructor $data.TypeNames $error}}
 {{end}}{{end}}
 
-{{/* TODO(alexfandrianto): Find a common place to put NotImplementedMethod. */}}
-function NotImplementedMethod(name) {
-  throw new Error('Method ' + name + ' not implemented');
-}
-
 {{/* Define each of those service interfaces here, including method stubs and
      service signature. */}}
 // Services:
@@ -409,7 +417,7 @@ module.exports.{{$iface.Name}} = {{$iface.Name}}
 
     {{range $method := $iface.AllMethods}}
       {{/* Add each method to the service prototype. */}}
-{{$iface.Name}}.prototype.{{$method.Name}} = NotImplementedMethod;
+{{$iface.Name}}.prototype.{{$method.Name}} = {{generateMethodStub $method}};
     {{end}} {{/* end range $iface.AllMethods */}}
 
     {{/* The service signature encodes the same info as signature.Interface.
