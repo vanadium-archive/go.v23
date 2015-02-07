@@ -568,16 +568,16 @@ var Clist = []int32{
 	3,
 }
 
-// TODO(toddw): test multiple items after ordering is fixed.
-//Cset   = set[int32]{1, 2, 3}
 var Cset = map[int32]struct{}{
 	1: struct{}{},
+	2: struct{}{},
+	3: struct{}{},
 }
 
-// TODO(toddw): test multiple items after ordering is fixed.
-//cmap   = map[int32]string{1: "A", 2: "B", 3: "C"}
-var Cmap = map[int32]string{
+var cmap = map[int32]string{
 	1: "A",
+	2: "B",
+	3: "C",
 }
 
 var Cargs = Args{

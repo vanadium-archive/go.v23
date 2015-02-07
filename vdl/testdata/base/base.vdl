@@ -142,12 +142,8 @@ const (
 	Cunion = NamedUnion{A: true}
 	Carray = NamedArray{true, false}
 	Clist  = []int32{1, 2, 3}
-	// TODO(toddw): test multiple items after ordering is fixed.
-	//Cset   = set[int32]{1, 2, 3}
-	Cset   = set[int32]{1}
-	// TODO(toddw): test multiple items after ordering is fixed.
-	//cmap   = map[int32]string{1: "A", 2: "B", 3: "C"}
-	Cmap   = map[int32]string{1: "A"}
+	Cset   = set[int32]{1, 2, 3}
+	cmap   = map[int32]string{1: "A", 2: "B", 3: "C"}
 	Cargs  = Args{1, 2}
 
 	True = true

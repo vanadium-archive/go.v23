@@ -147,12 +147,11 @@ func untypedConst(data goData, v *vdl.Value) string {
 		}
 		return s + "\n}"
 	case vdl.Set, vdl.Map:
-		// TODO(toddw): Sort keys to get a deterministic ordering.
 		if v.IsZero() {
 			return "nil"
 		}
 		s := "{"
-		for _, key := range v.Keys() {
+		for _, key := range vdl.SortValuesAsString(v.Keys()) {
 			s += "\n" + subConst(data, key)
 			if k == vdl.Set {
 				s += ": struct{}{},"

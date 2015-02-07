@@ -203,11 +203,11 @@ func (p *pkgTypeNames) addTypesInConst(v *vdl.Value) {
 			p.addTypesInConst(v.Index(i))
 		}
 	case vdl.Set:
-		for _, key := range v.Keys() {
+		for _, key := range vdl.SortValuesAsString(v.Keys()) {
 			p.addTypesInConst(key)
 		}
 	case vdl.Map:
-		for _, key := range v.Keys() {
+		for _, key := range vdl.SortValuesAsString(v.Keys()) {
 			p.addTypesInConst(key)
 			p.addTypesInConst(v.MapIndex(key))
 
