@@ -57,10 +57,6 @@ var (
 	nDE0 error
 	nDE1 error
 
-	vEN error
-	vFR error
-	vDE error
-
 	gEN error
 	gFR error
 	gDE error
@@ -70,6 +66,42 @@ var (
 	v2FR1 error
 	v2DE  error
 )
+
+// This function comes first because it has line numbers embedded in it, and putting it first
+// reduces the chances that its line numbers will change.
+func TestSubordinateErrors(t *testing.T) {
+	p := verror2.ExplicitMake(idActionA, en, "server", "aEN0", 0)
+	if verror2.SubErrors(p) != nil {
+		t.Errorf("expected nil")
+	}
+	p1 := verror2.Append(p, aEN1, aFR0)
+	r1 := "server aEN0 error A 0 [server aEN1 error A 1 2], [server aFR0 erreur A 0]"
+	if got, want := p1.Error(), r1; got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+	if got, want := len(verror2.SubErrors(p1)), 2; got != want {
+		t.Errorf("got %d, want %d", got, want)
+	}
+	p2 := verror2.Append(p, nil, nil, aEN1)
+	if got, want := len(verror2.SubErrors(p2)), 1; got != want {
+		t.Errorf("got %d, want %d", got, want)
+	}
+	p2 = verror2.Append(p, fmt.Errorf("Oh"))
+	if got, want := len(verror2.SubErrors(p2)), 1; got != want {
+		t.Errorf("got %d, want %d", got, want)
+	}
+	r2 := "server aEN0 error A 0 [verror2.test  unknown error Oh]"
+	if got, want := p2.Error(), r2; got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+	p2str := verror2.DebugString(p2)
+	if !strings.Contains(p2str, r2) {
+		t.Errorf("debug string missing error message: %q, %q", p2str, r2)
+	}
+	if !(strings.Contains(p2str, "verror_test.go:73") && strings.Contains(p2str, "verror_test.go:89")) {
+		t.Errorf("debug string missing correct line #: %s", p2str)
+	}
+}
 
 func init() {
 	rootCtx, shutdown := testutil.InitForTest()
@@ -136,14 +168,6 @@ func init() {
 	nFR1 = verror2.ExplicitMake(verror2.NoExist, fr, "server", "nFR1", 1, 2)
 	nDE0 = verror2.ExplicitMake(verror2.NoExist, de, "server", "nDE0", 0)
 	nDE1 = verror2.ExplicitMake(verror2.NoExist, de, "server", "nDE1", 1, 2)
-
-	// Errors derived from verror (as opposed to verror2)
-	verr := verror.NoExistOrNoAccessf("verror %s", "NoExistOrNoAccess")
-	// Set the French for verror.NoExist.
-	cat.Set(fr, i18n.MsgID(verror.NoExistOrNoAccess), "{1} {2} n'existe pas ou accès refusé {_}")
-	vEN = verror2.ExplicitConvert(verror2.Unknown, en, "server", "op", verr)
-	vFR = verror2.ExplicitConvert(verror2.Unknown, fr, "server", "op", verr)
-	vDE = verror2.ExplicitConvert(verror2.Unknown, de, "server", "op", verr)
 
 	// Errors derived from Go errors.
 	gerr := errors.New("Go error")
@@ -236,10 +260,6 @@ func TestBasic(t *testing.T) {
 		{nDE0, verror2.NoExist, "v.io/core/veyron2/verror.NoExist: server nDE0 0"},
 		{nDE1, verror2.NoExist, "v.io/core/veyron2/verror.NoExist: server nDE1 1 2"},
 
-		{vEN, verror2.NoExistOrNoAccess, "server:op: Does not exist or access denied: verror NoExistOrNoAccess"},
-		{vFR, verror2.NoExistOrNoAccess, "server op n'existe pas ou accès refusé verror NoExistOrNoAccess"},
-		{vDE, verror2.NoExistOrNoAccess, "v.io/core/veyron2/verror.NoExistOrNoAccess: server op verror NoExistOrNoAccess"},
-
 		{gEN, verror2.Unknown, "server op unknown error Go error"},
 		{gFR, verror2.Unknown, "server op erreur inconnu Go error"},
 		{gDE, verror2.Unknown, "v.io/core/veyron2/verror.Unknown: server op Go error"},
@@ -309,7 +329,6 @@ func TestEqual(t *testing.T) {
 		{aEN0, aEN1, aDE0, aDE1, aDE0, aDE1, v2EN, v2FR0, v2FR1, v2DE},
 		{bEN0, bEN1, bDE0, bDE1, bDE0, bDE1},
 		{nEN0, nEN1, nDE0, nDE1, nDE0, nDE1},
-		{vEN, vFR, vDE},
 		{gEN, gFR, gDE},
 	}
 
@@ -323,40 +342,6 @@ func TestEqual(t *testing.T) {
 				}
 			}
 		}
-	}
-}
-
-func TestSubordinateErrors(t *testing.T) {
-	p := verror2.ExplicitMake(idActionA, en, "server", "aEN0", 0)
-	if verror2.SubErrors(p) != nil {
-		t.Errorf("expected nil")
-	}
-	p1 := verror2.Append(p, aEN1, aFR0)
-	r1 := "server aEN0 error A 0 [server aEN1 error A 1 2], [server aFR0 erreur A 0]"
-	if got, want := p1.Error(), r1; got != want {
-		t.Errorf("got %q, want %q", got, want)
-	}
-	if got, want := len(verror2.SubErrors(p1)), 2; got != want {
-		t.Errorf("got %d, want %d", got, want)
-	}
-	p2 := verror2.Append(p, nil, nil, aEN1)
-	if got, want := len(verror2.SubErrors(p2)), 1; got != want {
-		t.Errorf("got %d, want %d", got, want)
-	}
-	p2 = verror2.Append(p, fmt.Errorf("Oh"))
-	if got, want := len(verror2.SubErrors(p2)), 1; got != want {
-		t.Errorf("got %d, want %d", got, want)
-	}
-	r2 := "server aEN0 error A 0 [verror2.test  unknown error Oh]"
-	if got, want := p2.Error(), r2; got != want {
-		t.Errorf("got %q, want %q", got, want)
-	}
-	p2str := verror2.DebugString(p2)
-	if !strings.Contains(p2str, r2) {
-		t.Errorf("debug string missing error message: %q, %q", p2str, r2)
-	}
-	if !(strings.Contains(p2str, "verror_test.go:330") && strings.Contains(p2str, "verror_test.go:346")) {
-		t.Errorf("debug string missing correct line #: %s", p2str)
 	}
 }
 
