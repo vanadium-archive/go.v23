@@ -41,11 +41,11 @@ package {{ .PackagePath }};
     // Methods from interface UniversalServiceMethods.
     // TODO(spetrovic): Re-enable once we can import the new Signature classes.
     //@Override
-    //public io.v.core.veyron2.ipc.ServiceSignature getSignature(io.v.core.veyron2.context.VContext context) throws io.v.core.veyron2.VeyronException {
+    //public io.v.core.veyron2.ipc.ServiceSignature getSignature(io.v.core.veyron2.context.VContext context) throws io.v.core.veyron2.verror2.VException {
     //    return getSignature(context, null);
     //}
     //@Override
-    //public io.v.core.veyron2.ipc.ServiceSignature getSignature(io.v.core.veyron2.context.VContext context, io.v.core.veyron2.Options veyronOpts) throws io.v.core.veyron2.VeyronException {
+    //public io.v.core.veyron2.ipc.ServiceSignature getSignature(io.v.core.veyron2.context.VContext context, io.v.core.veyron2.Options veyronOpts) throws io.v.core.veyron2.verror2.VException {
     //    // Start the call.
     //    final io.v.core.veyron2.ipc.Client.Call _call = getClient(context).startCall(context, this.veyronName, "signature", new java.lang.Object[0], new java.lang.reflect.Type[0], veyronOpts);
 
@@ -62,12 +62,12 @@ package {{ .PackagePath }};
 {{ range $method := .Methods }}
     {{/* The optionless overload simply calls the overload with options */}}
     @Override
-    {{ $method.AccessModifier }} {{ $method.RetType }} {{ $method.Name }}(final io.v.core.veyron2.context.VContext context{{ $method.DeclarationArgs }}) throws io.v.core.veyron2.VeyronException {
+    {{ $method.AccessModifier }} {{ $method.RetType }} {{ $method.Name }}(final io.v.core.veyron2.context.VContext context{{ $method.DeclarationArgs }}) throws io.v.core.veyron2.verror2.VException {
         {{if $method.Returns }}return{{ end }} {{ $method.Name }}(context{{ $method.CallingArgsLeadingComma }}, null);
     }
     {{/* The main client stub method body */}}
     @Override
-    {{ $method.AccessModifier }} {{ $method.RetType }} {{ $method.Name }}(final io.v.core.veyron2.context.VContext context{{ $method.DeclarationArgs }}, io.v.core.veyron2.Options veyronOpts) throws io.v.core.veyron2.VeyronException {
+    {{ $method.AccessModifier }} {{ $method.RetType }} {{ $method.Name }}(final io.v.core.veyron2.context.VContext context{{ $method.DeclarationArgs }}, io.v.core.veyron2.Options veyronOpts) throws io.v.core.veyron2.verror2.VException {
         {{/* Start the veyron call */}}
         // Start the call.
         final java.lang.Object[] _args = new java.lang.Object[]{ {{ $method.CallingArgs }} };
@@ -103,22 +103,22 @@ package {{ .PackagePath }};
         {{else }} {{/* else $method.NotStreaming */}}
         return new io.v.core.veyron2.vdl.ClientStream<{{ $method.SendType }}, {{ $method.RecvType }}, {{ $method.DeclaredObjectRetType }}>() {
             @Override
-            public void send(final {{ $method.SendType }} item) throws io.v.core.veyron2.VeyronException {
+            public void send(final {{ $method.SendType }} item) throws io.v.core.veyron2.verror2.VException {
                 final java.lang.reflect.Type type = new com.google.common.reflect.TypeToken<{{ $method.SendType }}>() {}.getType();
                 _call.send(item, type);
             }
             @Override
-            public {{ $method.RecvType }} recv() throws java.io.EOFException, io.v.core.veyron2.VeyronException {
+            public {{ $method.RecvType }} recv() throws java.io.EOFException, io.v.core.veyron2.verror2.VException {
                 final java.lang.reflect.Type type = new com.google.common.reflect.TypeToken<{{ $method.RecvType }}>() {}.getType();
                 final java.lang.Object result = _call.recv(type);
                 try {
                     return ({{ $method.RecvType }})result;
                 } catch (java.lang.ClassCastException e) {
-                    throw new io.v.core.veyron2.VeyronException("Unexpected result type: " + result.getClass().getCanonicalName());
+                    throw new io.v.core.veyron2.verror2.VException("Unexpected result type: " + result.getClass().getCanonicalName());
                 }
             }
             @Override
-            public {{ $method.DeclaredObjectRetType }} finish() throws io.v.core.veyron2.VeyronException {
+            public {{ $method.DeclaredObjectRetType }} finish() throws io.v.core.veyron2.verror2.VException {
                 {{ if $method.IsVoid }}
                 final java.lang.reflect.Type[] resultTypes = new java.lang.reflect.Type[]{};
                 _call.finish(resultTypes);
@@ -138,12 +138,12 @@ package {{ .PackagePath }};
 {{/* Iterate over methods from embeded services and generate code to delegate the work */}}
 {{ range $eMethod := .EmbedMethods }}
     @Override
-    {{ $eMethod.AccessModifier }} {{ $eMethod.RetType }} {{ $eMethod.Name }}(final io.v.core.veyron2.context.VContext context{{ $eMethod.DeclarationArgs }}) throws io.v.core.veyron2.VeyronException {
+    {{ $eMethod.AccessModifier }} {{ $eMethod.RetType }} {{ $eMethod.Name }}(final io.v.core.veyron2.context.VContext context{{ $eMethod.DeclarationArgs }}) throws io.v.core.veyron2.verror2.VException {
         {{/* e.g. return this.stubArith.cosine(context, [args]) */}}
         {{ if $eMethod.Returns }}return{{ end }} this.{{ $eMethod.LocalStubVarName }}.{{ $eMethod.Name }}(context{{ $eMethod.CallingArgsLeadingComma }});
     }
     @Override
-    {{ $eMethod.AccessModifier }} {{ $eMethod.RetType }} {{ $eMethod.Name }}(final io.v.core.veyron2.context.VContext context{{ $eMethod.DeclarationArgs }}, io.v.core.veyron2.Options veyronOpts) throws io.v.core.veyron2.VeyronException {
+    {{ $eMethod.AccessModifier }} {{ $eMethod.RetType }} {{ $eMethod.Name }}(final io.v.core.veyron2.context.VContext context{{ $eMethod.DeclarationArgs }}, io.v.core.veyron2.Options veyronOpts) throws io.v.core.veyron2.verror2.VException {
         {{/* e.g. return this.stubArith.cosine(context, [args], options) */}}
         {{ if $eMethod.Returns }}return{{ end }}  this.{{ $eMethod.LocalStubVarName }}.{{ $eMethod.Name }}(context{{ $eMethod.CallingArgsLeadingComma }}, veyronOpts);
     }

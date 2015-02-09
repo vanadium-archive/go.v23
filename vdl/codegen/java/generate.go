@@ -56,6 +56,10 @@ func Generate(pkg *compile.Package, env *compile.Env, config vdltool.Config) (re
 	if g := genJavaConstFile(pkg, env); g != nil {
 		ret = append(ret, *g)
 	}
+	// Single file for all errors' definitions.
+	if g := genJavaErrorFile(pkg, env); g != nil {
+		ret = append(ret, *g)
+	}
 	for _, file := range pkg.Files {
 		// Separate file for all typedefs.
 		for _, tdef := range file.TypeDefs {
