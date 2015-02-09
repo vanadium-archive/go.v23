@@ -381,7 +381,7 @@ var (
 	ErrBadGlobChildren   = verror.Abortedf("GlobChildren__ must have signature GlobChildren__(ipc.ServerContext) (<-chan string, error)")
 )
 
-func typeCheckMethod(method reflect.Method, sig *signature.Method) verror.E {
+func typeCheckMethod(method reflect.Method, sig *signature.Method) error {
 	if verr := typeCheckReservedMethod(method); verr != nil {
 		return verr
 	}
@@ -421,7 +421,7 @@ func typeCheckMethod(method reflect.Method, sig *signature.Method) verror.E {
 	return typeCheckMethodArgs(mtype, sig)
 }
 
-func typeCheckReservedMethod(method reflect.Method) verror.E {
+func typeCheckReservedMethod(method reflect.Method) error {
 	switch method.Name {
 	case "Describe__":
 		// Describe__() []InterfaceDesc
@@ -457,7 +457,7 @@ func typeCheckReservedMethod(method reflect.Method) verror.E {
 	return nil
 }
 
-func typeCheckStreamingContext(ctx reflect.Type, sig *signature.Method) verror.E {
+func typeCheckStreamingContext(ctx reflect.Type, sig *signature.Method) error {
 	// The context must be a pointer to a struct.
 	if ctx.Kind() != reflect.Ptr || ctx.Elem().Kind() != reflect.Struct {
 		return verror.Abortedf("Context arg %s is invalid streaming context; must be pointer to a struct representing the typesafe streaming context."+forgotWrap, ctx)
@@ -527,15 +527,15 @@ const (
 	forgotWrap = useContext + "  Perhaps you forgot to wrap your server with the VDL-generated server stub."
 )
 
-func errRecvStream(rt reflect.Type) verror.E {
+func errRecvStream(rt reflect.Type) error {
 	return verror.Abortedf("Context arg %s is invalid streaming context; RecvStream must have signature func (*) RecvStream() interface{ Advance() bool; Value() _; Err() error }."+forgotWrap, rt)
 }
 
-func errSendStream(rt reflect.Type) verror.E {
+func errSendStream(rt reflect.Type) error {
 	return verror.Abortedf("Context arg %s is invalid streaming context; SendStream must have signature func (*) SendStream() interface{ Send(_) error }."+forgotWrap, rt)
 }
 
-func typeCheckMethodArgs(mtype reflect.Type, sig *signature.Method) verror.E {
+func typeCheckMethodArgs(mtype reflect.Type, sig *signature.Method) error {
 	// Start in-args from 2 to skip receiver and context arguments.
 	for index := 2; index < mtype.NumIn(); index++ {
 		vdlType, err := vdl.TypeFromReflect(mtype.In(index))
@@ -635,7 +635,7 @@ func fillArgSig(sig *signature.Arg, desc ArgDesc) *signature.Arg {
 // convertTags tries to convert each tag into a vdl.Value, to capture any
 // conversion error.  Returns a single vdl.Value containing a slice of the tag
 // values, to make it easy to perform equality-comparison of lists of tags.
-func convertTags(tags []vdl.AnyRep) (*vdl.Value, verror.E) {
+func convertTags(tags []vdl.AnyRep) (*vdl.Value, error) {
 	result := vdl.ZeroValue(vdl.ListType(vdl.AnyType)).AssignLen(len(tags))
 	for index, tag := range tags {
 		if err := valconv.Convert(result.Index(index), tag); err != nil {
@@ -648,7 +648,7 @@ func convertTags(tags []vdl.AnyRep) (*vdl.Value, verror.E) {
 // extractTagsForMethod returns the tags associated with the given method name.
 // If the desc lists the same method under multiple interfaces, we require all
 // versions to have an identical list of tags.
-func extractTagsForMethod(desc []InterfaceDesc, name string) ([]vdl.AnyRep, verror.E) {
+func extractTagsForMethod(desc []InterfaceDesc, name string) ([]vdl.AnyRep, error) {
 	var first *vdl.Value
 	var tags []vdl.AnyRep
 	for _, descIface := range desc {
@@ -671,7 +671,7 @@ func extractTagsForMethod(desc []InterfaceDesc, name string) ([]vdl.AnyRep, verr
 
 // attachMethodTags sets methodInfo.tags to the tags that will be returned in
 // Prepare.  This also performs type checking on the tags.
-func attachMethodTags(infos map[string]methodInfo, desc []InterfaceDesc) verror.E {
+func attachMethodTags(infos map[string]methodInfo, desc []InterfaceDesc) error {
 	for name, info := range infos {
 		tags, verr := extractTagsForMethod(desc, name)
 		if verr != nil {
