@@ -25,34 +25,48 @@ type GenLanguage enum {
 
 // GoConfig specifies go specific configuration.
 type GoConfig struct {
-	NativeTypes []GoNativeType
+	// WireToNativeTypes specifies the mapping from a VDL wire type to its Go
+	// native type representation.  This is rarely used and easy to configure
+	// incorrectly; usage is currently restricted to packages that are explicitly
+	// whitelisted.
+	//
+	// WireToNativeTypes are meant for scenarios where there is an idiomatic Go
+	// type used in your code, but you need a standard VDL representation for wire
+	// compatibility.  E.g. the VDL time package defines Duration and Time for
+	// wire compatibility, but we want the generated code to use the standard Go
+	// time package.
+	//
+	// The key of the map is the name of the VDL type (aka WireType), which must
+	// be defined in the vdl package associated with the vdl.config file.
+	//
+	// The code generator assumes the existence of a pair of conversion functions
+	// converting between the wire and native types:
+	//   type WireType ...
+	//   func (x WireType) VDLToNative(n *Native) error
+	//   func (x *WireType) VDLFromNative(n Native) error
+	WireToNativeTypes map[string]GoType
 }
 
-// GoNativeType describes the mapping from a VDL wire type to a Go native type.
-// This is typically used when the Go native type is an idiomatic type
-// convenient for the user, but you still need a standard VDL representation for
-// wire compatibility.  E.g. the VDL time package is necessary for wire
-// compatibility across languages, while generated Go code uses the standard Go
-// time package.
-//
-// The code generator assumes the existence of a pair of conversion functions
-// converting between the wire and native types:
-//   type WireType ...
-//   func (x WireType) VDLToNative(n *Native) error
-//   func (x *WireType) VDLFromNative(n Native) error
-//
-// TODO(toddw): VDL compiler support for native types isn't implemented yet.
-type GoNativeType struct {
-	// WireType is the name of the vdl type that describes the format on the wire.
-	// The wire type must be defined in the vdl package associated with the
-	// vdl.config file; i.e. in the same directory.
-	WireType string
-	// NativeType is the name of the Go native type.  Include the package
-	// qualifier if the Go native type isn't defined in the same package as the
-	// wire type, and add import(s) for the necessary Go packages.
-	NativeType string
-	// Imports lists the Go imports required by NativeType.
-	Imports []string
+// GoType describes the Go type information associated with a VDL type.
+// See v.io/core/veyron2/vdl/testdata/native for examples.
+type GoType struct {
+	// Type is the Go type to use in generated code, instead of the VDL type.  If
+	// the Go type requires additional imports, specify the type using the
+	// standard local package name here, and also specify the import package in
+	// Imports.
+	Type string
+	// Imports are the Go imports to use in generated code, required by the Type.
+	Imports []GoImport
+}
+
+// GoImport describes Go import information.
+type GoImport struct {
+	// Path is the package path that uniquely identifies the imported package.
+	Path string
+	// Name is the name of the package identified by Path.  Due to Go conventions,
+	// it is typically just the basename of Path, but may be set to something
+	// different if the imported package doesn't follow Go conventions.
+	Name string
 }
 
 // JavaConfig specifies java specific configuration.

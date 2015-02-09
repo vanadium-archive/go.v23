@@ -26,17 +26,17 @@ func isByteList(t *vdl.Type) bool {
 	return t.Kind() == vdl.List && t.Elem().Kind() == vdl.Byte
 }
 
-// typedZeroValue returns the zero value of the type defined by def.
-func typedZeroValue(data goData, def *compile.TypeDef) string {
-	return typedConst(data, vdl.ZeroValue(def.Type))
-}
-
 // TODO(bprosnitz): Generate the full tag name e.g. security.Read instead of
 // security.Label(1)
+//
+// TODO(toddw): This doesn't work at all if v.Type() is a native type, or has
+// subtypes that are native types.  It's also broken for optional types that
+// can't be represented using a composite literal (e.g. optional primitives).
+//
+// https://github.com/veyron/release-issues/issues/1017
 func typedConst(data goData, v *vdl.Value) string {
 	k, t := v.Kind(), v.Type()
 	if k == vdl.Optional {
-		// TODO(toddw): This only works if the optional elem is a composite literal.
 		if elem := v.Elem(); elem != nil {
 			return "&" + typedConst(data, elem)
 		}

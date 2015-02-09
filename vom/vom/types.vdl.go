@@ -57,5 +57,5 @@ func (dataRep) __VDLReflect(struct {
 }
 
 func init() {
-	vdl.Register(dataRepHex)
+	vdl.Register((*dataRep)(nil))
 }

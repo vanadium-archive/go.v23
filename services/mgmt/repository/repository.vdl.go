@@ -32,7 +32,7 @@ func (MediaInfo) __VDLReflect(struct {
 }
 
 func init() {
-	vdl.Register(MediaInfo{})
+	vdl.Register((*MediaInfo)(nil))
 }
 
 // ApplicationClientMethods is the client interface

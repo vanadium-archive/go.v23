@@ -51,8 +51,8 @@ func (PartInfo) __VDLReflect(struct {
 }
 
 func init() {
-	vdl.Register(Description{})
-	vdl.Register(PartInfo{})
+	vdl.Register((*Description)(nil))
+	vdl.Register((*PartInfo)(nil))
 }
 
 const MissingChecksum = ""

@@ -105,9 +105,9 @@ func (BlessingsRequest) __VDLReflect(struct {
 }
 
 func init() {
-	vdl.Register(Request{})
-	vdl.Register(Response{})
-	vdl.Register(BlessingsRequest{})
+	vdl.Register((*Request)(nil))
+	vdl.Register((*Response)(nil))
+	vdl.Register((*BlessingsRequest)(nil))
 }
 
 // NoTimeout specifies that no timeout is desired.

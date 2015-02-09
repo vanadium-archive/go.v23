@@ -463,12 +463,11 @@ func gen(audit bool, targets []*build.Package, env *compile.Env) bool {
 		}
 		// TODO(toddw): Skip code generation if the semantic contents of the
 		// generated file haven't changed.
-		config := target.Config
 		pkgchanged := false
 		for _, gl := range optGenLangs {
 			switch gl {
 			case vdltool.GenLanguageGo:
-				if !shouldGenerate(config, vdltool.GenLanguageGo) {
+				if !shouldGenerate(pkg.Config, vdltool.GenLanguageGo) {
 					continue
 				}
 				dir, err := xlateOutDir(target.Dir, target.Path, optGenGoOutDir, pkg.Path)
@@ -476,13 +475,13 @@ func gen(audit bool, targets []*build.Package, env *compile.Env) bool {
 					continue
 				}
 				for _, file := range pkg.Files {
-					data := golang.Generate(file, env, config)
+					data := golang.Generate(file, env)
 					if writeFile(audit, data, dir, file.BaseName+".go", env) {
 						pkgchanged = true
 					}
 				}
 			case vdltool.GenLanguageJava:
-				if !shouldGenerate(config, vdltool.GenLanguageJava) {
+				if !shouldGenerate(pkg.Config, vdltool.GenLanguageJava) {
 					continue
 				}
 				pkgPath, err := xlatePkgPath(pkg.Path, optGenJavaOutPkg)
@@ -497,14 +496,14 @@ func gen(audit bool, targets []*build.Package, env *compile.Env) bool {
 					result, _ := xlatePkgPath(pkgPath, optGenJavaOutPkg)
 					return result
 				})
-				for _, file := range java.Generate(pkg, env, config) {
+				for _, file := range java.Generate(pkg, env) {
 					fileDir := filepath.Join(dir, file.Dir)
 					if writeFile(audit, file.Data, fileDir, file.Name, env) {
 						pkgchanged = true
 					}
 				}
 			case vdltool.GenLanguageJavascript:
-				if !shouldGenerate(config, vdltool.GenLanguageJavascript) {
+				if !shouldGenerate(pkg.Config, vdltool.GenLanguageJavascript) {
 					continue
 				}
 				dir, err := xlateOutDir(target.Dir, target.Path, optGenJavascriptOutDir, pkg.Path)
@@ -524,7 +523,7 @@ func gen(audit bool, targets []*build.Package, env *compile.Env) bool {
 					}
 					return filepath.Join(cleanPath, path.Base(importPath))
 				}
-				data := javascript.Generate(pkg, env, path, config, optPathToJSCore)
+				data := javascript.Generate(pkg, env, path, optPathToJSCore)
 				name := filepath.Base(target.Dir)
 				if writeFile(audit, data, dir, name+".js", env) {
 					pkgchanged = true

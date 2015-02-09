@@ -63,10 +63,8 @@ func (Arg) __VDLReflect(struct {
 }
 
 func init() {
-	vdl.Register(Interface{})
-	vdl.Register(Embed{})
-	vdl.Register(Method{})
-	vdl.Register(Arg{
-		Type: vdl.AnyType,
-	})
+	vdl.Register((*Interface)(nil))
+	vdl.Register((*Embed)(nil))
+	vdl.Register((*Method)(nil))
+	vdl.Register((*Arg)(nil))
 }

@@ -93,12 +93,12 @@ func (Response) __VDLReflect(struct {
 }
 
 func init() {
-	vdl.Register(TraceRecord{})
-	vdl.Register(Annotation{})
-	vdl.Register(SpanRecord{})
-	vdl.Register(TraceMethod(0))
-	vdl.Register(Request{})
-	vdl.Register(Response{})
+	vdl.Register((*TraceRecord)(nil))
+	vdl.Register((*Annotation)(nil))
+	vdl.Register((*SpanRecord)(nil))
+	vdl.Register((*TraceMethod)(nil))
+	vdl.Register((*Request)(nil))
+	vdl.Register((*Response)(nil))
 }
 
 // None means that the trace should not be collected.

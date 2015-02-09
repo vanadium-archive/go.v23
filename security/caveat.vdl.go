@@ -89,11 +89,11 @@ func (publicKeyDischarge) __VDLReflect(struct {
 }
 
 func init() {
-	vdl.Register(unixTimeExpiryCaveat(0))
-	vdl.Register(methodCaveat(nil))
-	vdl.Register(nonce{})
-	vdl.Register(publicKeyThirdPartyCaveat{})
-	vdl.Register(publicKeyDischarge{})
+	vdl.Register((*unixTimeExpiryCaveat)(nil))
+	vdl.Register((*methodCaveat)(nil))
+	vdl.Register((*nonce)(nil))
+	vdl.Register((*publicKeyThirdPartyCaveat)(nil))
+	vdl.Register((*publicKeyDischarge)(nil))
 }
 
 // UnixTimeExpiryCaveat represents a caveat that validates iff the current

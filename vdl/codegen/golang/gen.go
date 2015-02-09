@@ -12,7 +12,6 @@ import (
 	"v.io/core/veyron2/vdl"
 	"v.io/core/veyron2/vdl/compile"
 	"v.io/core/veyron2/vdl/parse"
-	"v.io/core/veyron2/vdl/vdlroot/src/vdltool"
 )
 
 type goData struct {
@@ -42,7 +41,8 @@ func (data goData) Pkg(pkgPath string) string {
 
 // Generate takes a populated compile.File and returns a byte slice containing
 // the generated Go source code.
-func Generate(file *compile.File, env *compile.Env, config vdltool.Config) []byte {
+func Generate(file *compile.File, env *compile.Env) []byte {
+	validateGoConfig(file, env)
 	data := goData{
 		File:    file,
 		Env:     env,
@@ -65,6 +65,68 @@ func Generate(file *compile.File, env *compile.Env, config vdltool.Config) []byt
 	return pretty
 }
 
+// The native types feature is hard to use correctly.  E.g. the package
+// containing the wire type must be imported into your Go binary in order for
+// the wire<->native registration to work, which is hard to ensure.  E.g.
+//
+//   package base    // VDL package
+//   type Wire int   // has native type native.Int
+//
+//   package dep     // VDL package
+//   import "base"
+//   type Foo struct {
+//     X base.Wire
+//   }
+//
+// The Go code for package "dep" imports "native", rather than "base":
+//
+//   package dep     // Go package generated from VDL package
+//   import "native"
+//   type Foo struct {
+//     X native.Int
+//   }
+//
+// Note that when you import the "dep" package in your own code, you always use
+// native.Int, rather than base.Wire; the base.Wire representation is only used
+// as the wire format, but doesn't appear in generated code.  But in order for
+// this to work correctly, the "base" package must imported.  This is tricky.
+//
+// Restrict the feature to these whitelisted VDL packages for now.
+var nativeTypePackageWhitelist = map[string]bool{
+	"time": true,
+	"v.io/core/veyron2/vdl/testdata/native": true,
+}
+
+func validateGoConfig(file *compile.File, env *compile.Env) {
+	pkg := file.Package
+	vdlconfig := path.Join(pkg.GenPath, "vdl.config")
+	// Validate native type configuration.  Since native types are hard to use, we
+	// restrict them to a built-in whitelist of packages for now.
+	if len(pkg.Config.Go.WireToNativeTypes) > 0 && !nativeTypePackageWhitelist[pkg.Path] {
+		env.Errors.Errorf("%s: Go.WireToNativeTypes is restricted to whitelisted VDL packages", vdlconfig)
+	}
+	// Make sure each wire type is actually defined in the package, and required
+	// fields are all filled in.
+	for wire, native := range pkg.Config.Go.WireToNativeTypes {
+		if def := pkg.ResolveType(wire); def == nil {
+			env.Errors.Errorf("%s: type %s specified in Go.WireToNativeTypes undefined", vdlconfig, wire)
+		}
+		if native.Type == "" {
+			env.Errors.Errorf("%s: type %s specified in Go.WireToNativeTypes invalid (empty GoType.Type)", vdlconfig, wire)
+		}
+		for _, imp := range native.Imports {
+			if imp.Path == "" || imp.Name == "" {
+				env.Errors.Errorf("%s: type %s specified in Go.WireToNativeTypes invalid (empty GoImport.Path or Name)", vdlconfig, wire)
+				continue
+			}
+			importPrefix := imp.Name + "."
+			if !strings.Contains(native.Type, importPrefix) {
+				env.Errors.Errorf("%s: type %s specified in Go.WireToNativeTypes invalid (native type %q doesn't contain import prefix %q)", vdlconfig, wire, native.Type, importPrefix)
+			}
+		}
+	}
+}
+
 var goTemplate *template.Template
 
 // The template mechanism is great at high-level formatting and simple
@@ -73,11 +135,11 @@ var goTemplate *template.Template
 // off to a regular function.
 func init() {
 	funcMap := template.FuncMap{
+		"nativeIdent":           nativeIdent,
 		"typeGo":                typeGo,
 		"typeDefGo":             typeDefGo,
 		"constDefGo":            constDefGo,
 		"typedConst":            typedConst,
-		"typedZeroValue":        typedZeroValue,
 		"embedGo":               embedGo,
 		"isStreamingMethod":     isStreamingMethod,
 		"hasStreamingMethods":   hasStreamingMethods,
@@ -340,12 +402,21 @@ import ( {{if $data.Imports.System}}
 	{{if $imp.Name}}{{$imp.Name}} {{end}}"{{$imp.Path}}"{{end}}{{end}}
 ){{end}}
 
-{{if $file.TypeDefs}}{{range $tdef := $file.TypeDefs}}
+{{if $file.TypeDefs}}
+{{range $tdef := $file.TypeDefs}}
 {{typeDefGo $data $tdef}}
-{{end}}{{end}}
-{{if $file.TypeDefs}}func init() { {{range $tdef := $file.TypeDefs}}
-	{{$data.Pkg "v.io/core/veyron2/vdl"}}Register({{typedZeroValue $data $tdef}}){{end}}
-}{{end}}
+{{end}}
+{{range $wire, $native := $file.Package.Config.Go.WireToNativeTypes}}
+// {{$wire}} must implement native type conversions.
+var _ interface {
+	VDLToNative(*{{nativeIdent $data $native}}) error
+	VDLFromNative({{nativeIdent $data $native}}) error
+} = (*{{$wire}})(nil)
+{{end}}
+func init() { {{range $tdef := $file.TypeDefs}}
+	{{$data.Pkg "v.io/core/veyron2/vdl"}}Register((*{{$tdef.Name}})(nil)){{end}}
+}
+{{end}}
 
 {{range $cdef := $file.ConstDefs}}
 {{constDefGo $data $cdef}}

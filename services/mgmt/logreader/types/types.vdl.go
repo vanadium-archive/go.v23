@@ -23,7 +23,7 @@ func (LogEntry) __VDLReflect(struct {
 }
 
 func init() {
-	vdl.Register(LogEntry{})
+	vdl.Register((*LogEntry)(nil))
 }
 
 // A special NumEntries value that indicates that all entries should be

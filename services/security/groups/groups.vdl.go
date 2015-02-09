@@ -65,11 +65,11 @@ func (RestResponse) __VDLReflect(struct {
 }
 
 func init() {
-	vdl.Register(BlessingPatternChunk(""))
-	vdl.Register(GetRequest{})
-	vdl.Register(GetResponse{})
-	vdl.Register(RestRequest{})
-	vdl.Register(RestResponse{})
+	vdl.Register((*BlessingPatternChunk)(nil))
+	vdl.Register((*GetRequest)(nil))
+	vdl.Register((*GetResponse)(nil))
+	vdl.Register((*RestRequest)(nil))
+	vdl.Register((*RestResponse)(nil))
 }
 
 // GroupClientMethods is the client interface

@@ -169,6 +169,13 @@ func computeDeps(file *compile.File, env *compile.Env) (deps, importMap) {
 			addTypeDeps(param.Type, env, deps, user)
 		}
 	}
+	// Native types contribute their imports, for the auto-generated interface
+	// assertion.
+	for _, native := range file.Package.Config.Go.WireToNativeTypes {
+		for _, imp := range native.Imports {
+			user[imp.Path] = imp.Name
+		}
+	}
 	// Now remove self and built-in package dependencies.  Every package can use
 	// itself and the built-in package, so we don't need to record this.
 	user.DeletePackage(file.Package)
@@ -176,8 +183,8 @@ func computeDeps(file *compile.File, env *compile.Env) (deps, importMap) {
 	return *deps, user
 }
 
-// Add immediate package deps for t and subtypes of t.
-func addTypeDeps(t *vdl.Type, env *compile.Env, deps *deps, user importMap) {
+// Add package deps iff t is a defined (named) type.
+func addTypeDepIfDefined(t *vdl.Type, env *compile.Env, deps *deps, user importMap) bool {
 	if t == vdl.AnyType {
 		deps.any = true
 	}
@@ -185,8 +192,27 @@ func addTypeDeps(t *vdl.Type, env *compile.Env, deps *deps, user importMap) {
 		deps.typeObject = true
 	}
 	if def := env.FindTypeDef(t); def != nil {
+		pkg := def.File.Package
+		if native, ok := pkg.Config.Go.WireToNativeTypes[def.Name]; ok {
+			// There is a native type configured for this defined type.  Add the
+			// imports corresponding to the native type.
+			for _, imp := range native.Imports {
+				user[imp.Path] = imp.Name
+			}
+		} else {
+			// There's no native type configured for this defined type.  Add the
+			// imports corresponding to the VDL package.
+			user.AddPackage(pkg)
+		}
+		return true
+	}
+	return false
+}
+
+// Add immediate package deps for t and subtypes of t.
+func addTypeDeps(t *vdl.Type, env *compile.Env, deps *deps, user importMap) {
+	if addTypeDepIfDefined(t, env, deps, user) {
 		// We don't track transitive dependencies, only immediate dependencies.
-		user.AddPackage(def.File.Package)
 		return
 	}
 	// Not all types have TypeDefs; e.g. unnamed lists have no corresponding
@@ -219,17 +245,8 @@ func addSubTypeDeps(t *vdl.Type, env *compile.Env, deps *deps, user importMap) {
 // for const or tag values.
 func addValueTypeDeps(v *vdl.Value, env *compile.Env, deps *deps, user importMap) {
 	t := v.Type()
-	if t == vdl.AnyType {
-		deps.any = true
-	}
-	if t == vdl.TypeObjectType {
-		deps.typeObject = true
-	}
-	if def := env.FindTypeDef(t); def != nil {
-		user.AddPackage(def.File.Package)
-		// Fall through to track transitive dependencies, based on the subvalues.
-	}
-	// Traverse subvalues recursively.
+	addTypeDepIfDefined(t, env, deps, user)
+	// Track transitive dependencies, by traversing subvalues recursively.
 	switch t.Kind() {
 	case vdl.Array, vdl.List:
 		for ix := 0; ix < v.Len(); ix++ {

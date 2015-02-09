@@ -90,9 +90,9 @@ func (Change) __VDLReflect(struct {
 }
 
 func init() {
-	vdl.Register(GlobRequest{})
-	vdl.Register(ResumeMarker(""))
-	vdl.Register(Change{})
+	vdl.Register((*GlobRequest)(nil))
+	vdl.Register((*ResumeMarker)(nil))
+	vdl.Register((*Change)(nil))
 }
 
 // The entity exists and its full value is included in Value.

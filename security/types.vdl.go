@@ -181,17 +181,15 @@ func (WireBlessings) __VDLReflect(struct {
 }
 
 func init() {
-	vdl.Register(BlessingPattern(""))
-	vdl.Register(Hash(""))
-	vdl.Register(Signature{})
-	vdl.Register(ThirdPartyRequirements{})
-	vdl.Register(DischargeImpetus{})
-	vdl.Register(Certificate{})
-	vdl.Register(CaveatDescriptor{
-		ParamType: vdl.AnyType,
-	})
-	vdl.Register(Caveat{})
-	vdl.Register(WireBlessings{})
+	vdl.Register((*BlessingPattern)(nil))
+	vdl.Register((*Hash)(nil))
+	vdl.Register((*Signature)(nil))
+	vdl.Register((*ThirdPartyRequirements)(nil))
+	vdl.Register((*DischargeImpetus)(nil))
+	vdl.Register((*Certificate)(nil))
+	vdl.Register((*CaveatDescriptor)(nil))
+	vdl.Register((*Caveat)(nil))
+	vdl.Register((*WireBlessings)(nil))
 }
 
 // NoExtension is an optional terminator for a blessing pattern indicating that the pattern

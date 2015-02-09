@@ -156,9 +156,9 @@ func (Tag) __VDLReflect(struct {
 }
 
 func init() {
-	vdl.Register(ACL{})
-	vdl.Register(TaggedACLMap(nil))
-	vdl.Register(Tag(""))
+	vdl.Register((*ACL)(nil))
+	vdl.Register((*TaggedACLMap)(nil))
+	vdl.Register((*Tag)(nil))
 }
 
 const Admin = Tag("Admin") // Operations that require privileged access for object administration.

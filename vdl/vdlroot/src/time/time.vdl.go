@@ -12,6 +12,9 @@ package time
 import (
 	// VDL system imports
 	"v.io/core/veyron2/vdl"
+
+	// VDL user imports
+	"time"
 )
 
 // Time represents an absolute point in time with nanosecond precision.
@@ -59,7 +62,19 @@ func (Duration) __VDLReflect(struct {
 }) {
 }
 
+// Duration must implement native type conversions.
+var _ interface {
+	VDLToNative(*time.Duration) error
+	VDLFromNative(time.Duration) error
+} = (*Duration)(nil)
+
+// Time must implement native type conversions.
+var _ interface {
+	VDLToNative(*time.Time) error
+	VDLFromNative(time.Time) error
+} = (*Time)(nil)
+
 func init() {
-	vdl.Register(Time{})
-	vdl.Register(Duration{})
+	vdl.Register((*Time)(nil))
+	vdl.Register((*Duration)(nil))
 }

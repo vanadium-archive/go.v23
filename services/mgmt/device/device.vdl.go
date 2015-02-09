@@ -57,9 +57,9 @@ func (Association) __VDLReflect(struct {
 }
 
 func init() {
-	vdl.Register(Config(nil))
-	vdl.Register(Description{})
-	vdl.Register(Association{})
+	vdl.Register((*Config)(nil))
+	vdl.Register((*Description)(nil))
+	vdl.Register((*Association)(nil))
 }
 
 // ApplicationClientMethods is the client interface

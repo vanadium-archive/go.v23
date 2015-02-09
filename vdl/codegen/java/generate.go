@@ -4,7 +4,6 @@ package java
 import (
 	"v.io/core/veyron2/vdl"
 	"v.io/core/veyron2/vdl/compile"
-	"v.io/core/veyron2/vdl/vdlroot/src/vdltool"
 )
 
 // pkgPathXlator is the function used to translate a VDL package path
@@ -47,7 +46,7 @@ type JavaFileInfo struct {
 // particular, we don't yet support error ids and types Complex64 and Complex128.
 //
 // TODO(spetrovic): Run Java formatters on the generated files.
-func Generate(pkg *compile.Package, env *compile.Env, config vdltool.Config) (ret []JavaFileInfo) {
+func Generate(pkg *compile.Package, env *compile.Env) (ret []JavaFileInfo) {
 	// One file for package documentation (if any).
 	if g := genJavaPackageFile(pkg, env); g != nil {
 		ret = append(ret, *g)

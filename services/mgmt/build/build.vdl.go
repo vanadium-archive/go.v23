@@ -55,10 +55,10 @@ func (File) __VDLReflect(struct {
 }
 
 func init() {
-	vdl.Register(Architecture(""))
-	vdl.Register(Format(""))
-	vdl.Register(OperatingSystem(""))
-	vdl.Register(File{})
+	vdl.Register((*Architecture)(nil))
+	vdl.Register((*Format)(nil))
+	vdl.Register((*OperatingSystem)(nil))
+	vdl.Register((*File)(nil))
 }
 
 const X86 = Architecture("386")

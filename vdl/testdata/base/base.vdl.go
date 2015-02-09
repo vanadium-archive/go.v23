@@ -383,145 +383,34 @@ func (Args) __VDLReflect(struct {
 }
 
 func init() {
-	vdl.Register(NamedBool(false))
-	vdl.Register(NamedByte(0))
-	vdl.Register(NamedUint16(0))
-	vdl.Register(NamedUint32(0))
-	vdl.Register(NamedUint64(0))
-	vdl.Register(NamedInt16(0))
-	vdl.Register(NamedInt32(0))
-	vdl.Register(NamedInt64(0))
-	vdl.Register(NamedFloat32(0))
-	vdl.Register(NamedFloat64(0))
-	vdl.Register(NamedComplex64(0))
-	vdl.Register(NamedComplex128(0))
-	vdl.Register(NamedString(""))
-	vdl.Register(NamedEnumA)
-	vdl.Register(NamedArray{})
-	vdl.Register(NamedList(nil))
-	vdl.Register(NamedSet(nil))
-	vdl.Register(NamedMap(nil))
-	vdl.Register(NamedStruct{})
-	vdl.Register(NamedUnion(NamedUnionA{false}))
-	vdl.Register(Scalars{
-		A15: vdl.AnyType,
-		B14: NamedUnionA{false},
-	})
-	vdl.Register(KeyScalars{})
-	vdl.Register(ScalarsArray{
-		{
-			A15: vdl.AnyType,
-			B14: NamedUnionA{false},
-		},
-		{
-			A15: vdl.AnyType,
-			B14: NamedUnionA{false},
-		},
-	})
-	vdl.Register(Composites{
-		A0: Scalars{
-			A15: vdl.AnyType,
-			B14: NamedUnionA{false},
-		},
-		A1: ScalarsArray{
-			{
-				A15: vdl.AnyType,
-				B14: NamedUnionA{false},
-			},
-			{
-				A15: vdl.AnyType,
-				B14: NamedUnionA{false},
-			},
-		},
-	})
-	vdl.Register(CompositesArray{
-		{
-			A0: Scalars{
-				A15: vdl.AnyType,
-				B14: NamedUnionA{false},
-			},
-			A1: ScalarsArray{
-				{
-					A15: vdl.AnyType,
-					B14: NamedUnionA{false},
-				},
-				{
-					A15: vdl.AnyType,
-					B14: NamedUnionA{false},
-				},
-			},
-		},
-		{
-			A0: Scalars{
-				A15: vdl.AnyType,
-				B14: NamedUnionA{false},
-			},
-			A1: ScalarsArray{
-				{
-					A15: vdl.AnyType,
-					B14: NamedUnionA{false},
-				},
-				{
-					A15: vdl.AnyType,
-					B14: NamedUnionA{false},
-				},
-			},
-		},
-	})
-	vdl.Register(CompComp{
-		A0: Composites{
-			A0: Scalars{
-				A15: vdl.AnyType,
-				B14: NamedUnionA{false},
-			},
-			A1: ScalarsArray{
-				{
-					A15: vdl.AnyType,
-					B14: NamedUnionA{false},
-				},
-				{
-					A15: vdl.AnyType,
-					B14: NamedUnionA{false},
-				},
-			},
-		},
-		A1: CompositesArray{
-			{
-				A0: Scalars{
-					A15: vdl.AnyType,
-					B14: NamedUnionA{false},
-				},
-				A1: ScalarsArray{
-					{
-						A15: vdl.AnyType,
-						B14: NamedUnionA{false},
-					},
-					{
-						A15: vdl.AnyType,
-						B14: NamedUnionA{false},
-					},
-				},
-			},
-			{
-				A0: Scalars{
-					A15: vdl.AnyType,
-					B14: NamedUnionA{false},
-				},
-				A1: ScalarsArray{
-					{
-						A15: vdl.AnyType,
-						B14: NamedUnionA{false},
-					},
-					{
-						A15: vdl.AnyType,
-						B14: NamedUnionA{false},
-					},
-				},
-			},
-		},
-	})
-	vdl.Register(NestedArgs{})
-	vdl.Register(Args{})
+	vdl.Register((*NamedBool)(nil))
+	vdl.Register((*NamedByte)(nil))
+	vdl.Register((*NamedUint16)(nil))
+	vdl.Register((*NamedUint32)(nil))
+	vdl.Register((*NamedUint64)(nil))
+	vdl.Register((*NamedInt16)(nil))
+	vdl.Register((*NamedInt32)(nil))
+	vdl.Register((*NamedInt64)(nil))
+	vdl.Register((*NamedFloat32)(nil))
+	vdl.Register((*NamedFloat64)(nil))
+	vdl.Register((*NamedComplex64)(nil))
+	vdl.Register((*NamedComplex128)(nil))
+	vdl.Register((*NamedString)(nil))
+	vdl.Register((*NamedEnum)(nil))
+	vdl.Register((*NamedArray)(nil))
+	vdl.Register((*NamedList)(nil))
+	vdl.Register((*NamedSet)(nil))
+	vdl.Register((*NamedMap)(nil))
+	vdl.Register((*NamedStruct)(nil))
+	vdl.Register((*NamedUnion)(nil))
+	vdl.Register((*Scalars)(nil))
+	vdl.Register((*KeyScalars)(nil))
+	vdl.Register((*ScalarsArray)(nil))
+	vdl.Register((*Composites)(nil))
+	vdl.Register((*CompositesArray)(nil))
+	vdl.Register((*CompComp)(nil))
+	vdl.Register((*NestedArgs)(nil))
+	vdl.Register((*Args)(nil))
 }
 
 const Cbool = true

@@ -25,7 +25,7 @@ func (Tag) __VDLReflect(struct {
 }
 
 func init() {
-	vdl.Register(Tag(""))
+	vdl.Register((*Tag)(nil))
 }
 
 // Admin allow the client to SetACL or Delete the receiver.  It also subsumes

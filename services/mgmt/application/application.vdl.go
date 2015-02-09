@@ -60,7 +60,7 @@ func (Envelope) __VDLReflect(struct {
 }
 
 func init() {
-	vdl.Register(Envelope{})
+	vdl.Register((*Envelope)(nil))
 }
 
 // Device manager application envelopes must present this title.

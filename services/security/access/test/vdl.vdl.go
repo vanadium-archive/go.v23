@@ -22,7 +22,7 @@ func (MyTag) __VDLReflect(struct {
 }
 
 func init() {
-	vdl.Register(MyTag(""))
+	vdl.Register((*MyTag)(nil))
 }
 
 // For this example/unittest, there are three possible values of MyTag,

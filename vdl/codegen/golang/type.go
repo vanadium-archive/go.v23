@@ -7,6 +7,7 @@ import (
 
 	"v.io/core/veyron2/vdl"
 	"v.io/core/veyron2/vdl/compile"
+	"v.io/core/veyron2/vdl/vdlroot/src/vdltool"
 )
 
 func localIdent(data goData, file *compile.File, ident string) string {
@@ -14,6 +15,19 @@ func localIdent(data goData, file *compile.File, ident string) string {
 		return ident
 	}
 	return data.Pkg(file.Package.GenPath) + ident
+}
+
+func nativeIdent(data goData, native vdltool.GoType) string {
+	ident := native.Type
+	for _, imp := range native.Imports {
+		// Translate the packages specified in the native type into local package
+		// identifiers.  E.g. if the native type is "foo.Type" with import
+		// "path/foo", we need replace "foo." in the native type with the local
+		// package identifier for "path/foo".
+		pkg := data.Pkg(imp.Path)
+		ident = strings.Replace(ident, imp.Name+".", pkg, -1)
+	}
+	return ident
 }
 
 func packageIdent(file *compile.File, ident string) string {
@@ -48,6 +62,11 @@ func typeGo(data goData, t *vdl.Type) string {
 		case def.File == compile.BuiltInFile:
 			// Built-in primitives just use their name.
 			return def.Name
+		}
+		pkg := def.File.Package
+		if native, ok := pkg.Config.Go.WireToNativeTypes[def.Name]; ok {
+			// There is a Go native type configured for this defined type.
+			return nativeIdent(data, native)
 		}
 		return localIdent(data, def.File, def.Name)
 	}

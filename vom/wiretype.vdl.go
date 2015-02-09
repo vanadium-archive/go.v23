@@ -129,17 +129,17 @@ func (TypeID) __VDLReflect(struct {
 }
 
 func init() {
-	vdl.Register(WireNamed{})
-	vdl.Register(WireEnum{})
-	vdl.Register(WireArray{})
-	vdl.Register(WireList{})
-	vdl.Register(WireSet{})
-	vdl.Register(WireMap{})
-	vdl.Register(WireField{})
-	vdl.Register(WireStruct{})
-	vdl.Register(WireUnion{})
-	vdl.Register(WireOptional{})
-	vdl.Register(TypeID(0))
+	vdl.Register((*WireNamed)(nil))
+	vdl.Register((*WireEnum)(nil))
+	vdl.Register((*WireArray)(nil))
+	vdl.Register((*WireList)(nil))
+	vdl.Register((*WireSet)(nil))
+	vdl.Register((*WireMap)(nil))
+	vdl.Register((*WireField)(nil))
+	vdl.Register((*WireStruct)(nil))
+	vdl.Register((*WireUnion)(nil))
+	vdl.Register((*WireOptional)(nil))
+	vdl.Register((*TypeID)(nil))
 }
 
 // Primitives

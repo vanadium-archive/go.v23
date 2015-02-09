@@ -34,7 +34,7 @@ func (Task) __VDLReflect(struct {
 }
 
 func init() {
-	vdl.Register(Task{})
+	vdl.Register((*Task)(nil))
 }
 
 // AppCycleClientMethods is the client interface

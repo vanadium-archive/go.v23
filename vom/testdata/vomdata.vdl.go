@@ -22,7 +22,7 @@ func (TestCase) __VDLReflect(struct {
 }
 
 func init() {
-	vdl.Register(TestCase{})
+	vdl.Register((*TestCase)(nil))
 }
 
 // Tests contains the testcases to use to test vom encoding and decoding.

@@ -52,9 +52,9 @@ func (VDLMountEntry) __VDLReflect(struct {
 }
 
 func init() {
-	vdl.Register(MountFlag(0))
-	vdl.Register(VDLMountedServer{})
-	vdl.Register(VDLMountEntry{})
+	vdl.Register((*MountFlag)(nil))
+	vdl.Register((*VDLMountedServer)(nil))
+	vdl.Register((*VDLMountEntry)(nil))
 }
 
 const Replace = MountFlag(1) // Replace means the mount should replace what is currently at the mount point

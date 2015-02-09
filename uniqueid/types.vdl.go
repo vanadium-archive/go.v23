@@ -17,5 +17,5 @@ func (Id) __VDLReflect(struct {
 }
 
 func init() {
-	vdl.Register(Id{})
+	vdl.Register((*Id)(nil))
 }
