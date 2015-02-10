@@ -528,6 +528,7 @@ var (
 	NoParams2   = verror2.Register("v.io/core/veyron2/vdl/testdata/base.NoParams2", verror2.RetryRefetch, "{1:}{2:} en msg")
 	WithParams1 = verror2.Register("v.io/core/veyron2/vdl/testdata/base.WithParams1", verror2.NoRetry, "{1:}{2:} en x={3} y={4}")
 	WithParams2 = verror2.Register("v.io/core/veyron2/vdl/testdata/base.WithParams2", verror2.RetryRefetch, "{1:}{2:} en x={3} y={4}")
+	notExported = verror2.Register("v.io/core/veyron2/vdl/testdata/base.notExported", verror2.NoRetry, "{1:}{2:} en x={3} y={4}")
 )
 
 func init() {
@@ -537,6 +538,7 @@ func init() {
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(WithParams1.ID), "{1:}{2:} en x={3} y={4}")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(WithParams2.ID), "{1:}{2:} en x={3} y={4}")
 	i18n.Cat().SetWithBase(i18n.LangID("fr"), i18n.MsgID(WithParams2.ID), "{1:}{2:} fr y={4} x={3}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(notExported.ID), "{1:}{2:} en x={3} y={4}")
 }
 
 // MakeNoParams1 returns an error with the NoParams1 ID.
@@ -557,6 +559,11 @@ func MakeWithParams1(ctx *context.T, x string, y int32) error {
 // MakeWithParams2 returns an error with the WithParams2 ID.
 func MakeWithParams2(ctx *context.T, x string, y int32) error {
 	return verror2.Make(WithParams2, ctx, x, y)
+}
+
+// makeNotExported returns an error with the notExported ID.
+func makeNotExported(ctx *context.T, x string, y int32) error {
+	return verror2.Make(notExported, ctx, x, y)
 }
 
 // ServiceAClientMethods is the client interface

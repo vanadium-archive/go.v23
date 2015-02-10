@@ -196,4 +196,6 @@ error (
 		"en":"en x={x} y={y}",
 		"fr":"fr y={y} x={x}",
 	}
+
+	notExported(x string, y int32) {"en":"en x={x} y={y}"}
 )

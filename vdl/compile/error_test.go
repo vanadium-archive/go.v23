@@ -55,6 +55,7 @@ func matchErrorRes(t *testing.T, tname string, epkg errorPkg, edefs []*compile.E
 // cleanErrorDef resets fields that we don't care about testing.
 func cleanErrorDef(ed compile.ErrorDef) compile.ErrorDef {
 	ed.NamePos = compile.NamePos{}
+	ed.Exported = false
 	ed.ID = ""
 	for _, param := range ed.Params {
 		param.Pos = parse.Pos{}

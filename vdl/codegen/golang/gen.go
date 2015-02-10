@@ -12,6 +12,7 @@ import (
 	"v.io/core/veyron2/vdl"
 	"v.io/core/veyron2/vdl/compile"
 	"v.io/core/veyron2/vdl/parse"
+	"v.io/core/veyron2/vdl/vdlutil"
 )
 
 type goData struct {
@@ -135,6 +136,8 @@ var goTemplate *template.Template
 // off to a regular function.
 func init() {
 	funcMap := template.FuncMap{
+		"firstRuneToExport":     vdlutil.FirstRuneToExportCase,
+		"firstRuneToUpper":      vdlutil.FirstRuneToUpper,
 		"nativeIdent":           nativeIdent,
 		"typeGo":                typeGo,
 		"typeDefGo":             typeDefGo,
@@ -431,8 +434,9 @@ func init() { {{range $edef := $file.ErrorDefs}}{{range $lf := $edef.Formats}}
 	{{$data.Pkg "v.io/core/veyron2/i18n"}}Cat().SetWithBase({{$data.Pkg "v.io/core/veyron2/i18n"}}LangID("{{$lf.Lang}}"), {{$data.Pkg "v.io/core/veyron2/i18n"}}MsgID({{$edef.Name}}.ID), "{{$lf.Fmt}}"){{end}}{{end}}
 }
 {{range $edef := $file.ErrorDefs}}
-// Make{{$edef.Name}} returns an error with the {{$edef.Name}} ID.
-func Make{{$edef.Name}}(ctx {{argNameTypes "" (print "*" ($data.Pkg "v.io/core/veyron2/context") "T") "" $data $edef.Params}}) error {
+{{$make := print (firstRuneToExport "Make" $edef.Exported) (firstRuneToUpper $edef.Name)}}
+// {{$make}} returns an error with the {{$edef.Name}} ID.
+func {{$make}}(ctx {{argNameTypes "" (print "*" ($data.Pkg "v.io/core/veyron2/context") "T") "" $data $edef.Params}}) error {
 	return {{$data.Pkg "v.io/core/veyron2/verror2"}}Make({{$edef.Name}}, {{argNames "" "" "ctx" "" $edef.Params}})
 }
 {{end}}{{end}}

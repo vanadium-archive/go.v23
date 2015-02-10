@@ -13,12 +13,13 @@ import (
 
 // ErrorDef represents a user-defined error definition in the compiled results.
 type ErrorDef struct {
-	NamePos                    // name, parse position and docs
-	ID      verror.ID          // error ID
-	Action  verror2.ActionCode // action to be performed by client
-	Params  []*Arg             // list of positional parameter names and types
-	Formats []LangFmt          // list of language / format pairs
-	English string             // English format text from Formats
+	NamePos                     // name, parse position and docs
+	Exported bool               // is this error definition exported?
+	ID       verror.ID          // error ID
+	Action   verror2.ActionCode // action to be performed by client
+	Params   []*Arg             // list of positional parameter names and types
+	Formats  []LangFmt          // list of language / format pairs
+	English  string             // English format text from Formats
 }
 
 // LangFmt represents a language / format string pair.
@@ -37,12 +38,17 @@ func compileErrorDefs(pkg *Package, pfiles []*parse.File, env *Env) {
 		file, pfile := pkg.Files[index], pfiles[index]
 		for _, ped := range pfile.ErrorDefs {
 			name, detail := ped.Name, identDetail("error", file, ped.Pos)
+			export, err := ValidIdent(name, ReservedNormal)
+			if err != nil {
+				env.prefixErrorf(file, ped.Pos, err, "error %s invalid name", name)
+				continue
+			}
 			if err := file.DeclareIdent(name, detail); err != nil {
 				env.prefixErrorf(file, ped.Pos, err, "error %s name conflict", name)
 				continue
 			}
 			id := defineErrorID(pkg, name)
-			ed := &ErrorDef{NamePos: NamePos(ped.NamePos), ID: id}
+			ed := &ErrorDef{NamePos: NamePos(ped.NamePos), Exported: export, ID: id}
 			ed.Action = defineErrorAction(name, ped.Actions, file, env)
 			ed.Params = defineErrorParams(name, ped.Params, file, env)
 			ed.Formats = defineErrorFormats(name, ped.Formats, ed.Params, file, env)
