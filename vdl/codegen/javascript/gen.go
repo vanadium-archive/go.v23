@@ -416,7 +416,7 @@ module.exports.{{$iface.Name}} = {{$iface.Name}}
 
     {{range $method := $iface.AllMethods}}
       {{/* Add each method to the service prototype. */}}
-{{$iface.Name}}.prototype.{{$method.Name}} = {{generateMethodStub $method}};
+{{$iface.Name}}.prototype.{{toCamelCase $method.Name}} = {{generateMethodStub $method}};
     {{end}} {{/* end range $iface.AllMethods */}}
 
     {{/* The service signature encodes the same info as signature.Interface.
