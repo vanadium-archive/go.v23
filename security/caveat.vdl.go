@@ -14,21 +14,6 @@ import (
 	"v.io/core/veyron2/uniqueid"
 )
 
-// TODO(ashankar): Remove once ValidatorVOM goes away.
-type unixTimeExpiryCaveat int64
-
-func (unixTimeExpiryCaveat) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/security.unixTimeExpiryCaveat"
-}) {
-}
-
-type methodCaveat []string
-
-func (methodCaveat) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/security.methodCaveat"
-}) {
-}
-
 type nonce [16]byte
 
 func (nonce) __VDLReflect(struct {
@@ -89,8 +74,6 @@ func (publicKeyDischarge) __VDLReflect(struct {
 }
 
 func init() {
-	vdl.Register((*unixTimeExpiryCaveat)(nil))
-	vdl.Register((*methodCaveat)(nil))
 	vdl.Register((*nonce)(nil))
 	vdl.Register((*publicKeyThirdPartyCaveat)(nil))
 	vdl.Register((*publicKeyDischarge)(nil))
@@ -128,7 +111,7 @@ var UnixTimeExpiryCaveatX = CaveatDescriptor{
 // be invoked (i.e., the holder of a blessing with this caveat could be a
 // server but cannot act as a client).
 //
-// TODO(ashankar): Rename to MethodCaveat and drop methodCaveat before release.
+// TODO(ashankar): Rename to MethodCaveat and drop the MethodCaveat helper function?
 var MethodCaveatX = CaveatDescriptor{
 	Id: uniqueid.Id{
 		84,

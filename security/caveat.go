@@ -124,16 +124,7 @@ func NewCaveat(c CaveatDescriptor, param interface{}) (Caveat, error) {
 	if err != nil {
 		return Caveat{}, MakeErrCaveatParamCoding(nil, c.Id, c.ParamType, err)
 	}
-	return Caveat{
-		Id:       c.Id,
-		ParamVom: bytes,
-		// For unittests, set ValidatorVOM to []byte{} since vom-roundtripping of
-		// []byte(nil) results in []byte{}.
-		// See TestRoundtrip in veyron2/vom/decoder_test.go.
-		// TODO(ashankar): This field will be removed before release,
-		// so the comment doesn't matter.
-		ValidatorVOM: []byte{},
-	}, nil
+	return Caveat{c.Id, bytes}, nil
 }
 
 // ExpiryCaveat returns a Caveat that validates iff the current time is before t.
@@ -157,37 +148,18 @@ func MethodCaveat(method string, additionalMethods ...string) (Caveat, error) {
 
 // digest returns a hash of the contents of c.
 func (c *Caveat) digest(hash Hash) []byte {
-	if len(c.ValidatorVOM) > 0 {
-		return hash.sum(c.ValidatorVOM)
-	}
 	return hash.sum(append(hash.sum(c.Id[:]), hash.sum(c.ParamVom)...))
 }
 
 // Validate tests if c is satisfied under ctx, returning nil if it is or an
 // error otherwise.
 func (c *Caveat) Validate(ctx Context) error {
-	if len(c.ValidatorVOM) > 0 {
-		var v caveatValidator
-		if err := vom.Decode(c.ValidatorVOM, &v); err != nil {
-			return MakeErrCaveatValidation(nil, err)
-		}
-		if err := v.Validate(ctx); err != nil {
-			return MakeErrCaveatValidation(nil, err)
-		}
-		return nil
-	}
 	return registry.validate(c.Id, ctx, c.ParamVom)
 }
 
 // ThirdPartyDetails returns nil if c is not a third party caveat, or details about
 // the third party otherwise.
 func (c *Caveat) ThirdPartyDetails() ThirdPartyCaveat {
-	if len(c.ValidatorVOM) > 0 {
-		// Old format caveats using ValidatorVOM
-		var tp ThirdPartyCaveat
-		vom.Decode(c.ValidatorVOM, &tp)
-		return tp
-	}
 	if c.Id == PublicKeyThirdPartyCaveatX.Id {
 		var param publicKeyThirdPartyCaveat
 		if err := vom.Decode(c.ParamVom, &param); err != nil {
@@ -199,39 +171,11 @@ func (c *Caveat) ThirdPartyDetails() ThirdPartyCaveat {
 }
 
 func (c Caveat) String() string {
-	if len(c.ValidatorVOM) > 0 {
-		var validator caveatValidator
-		if err := vom.Decode(c.ValidatorVOM, &validator); err == nil {
-			return fmt.Sprintf("%T(%v)", validator, validator)
-		}
-	}
 	var param vdl.AnyRep
 	if err := vom.Decode(c.ParamVom, &param); err == nil {
 		return fmt.Sprintf("%v(%T=%v)", c.Id, param, param)
 	}
 	return fmt.Sprintf("%v(%d bytes of param)", c.Id, len(c.ParamVom))
-}
-
-// TODO(ashankar): Remove with the caveatValidator interface.
-func (c unixTimeExpiryCaveat) Validate(ctx Context) error {
-	cav, err := NewCaveat(UnixTimeExpiryCaveatX, int64(c))
-	if err != nil {
-		return err
-	}
-	return cav.Validate(ctx)
-}
-
-func (c unixTimeExpiryCaveat) String() string {
-	return fmt.Sprintf("%v = %v", int64(c), time.Unix(int64(c), 0))
-}
-
-// TODO(ashankar): Remove with the caveatValidator interface.
-func (c methodCaveat) Validate(ctx Context) error {
-	cav, err := NewCaveat(MethodCaveatX, []string(c))
-	if err != nil {
-		return err
-	}
-	return cav.Validate(ctx)
 }
 
 // UnconstrainedUse returns a Caveat implementation that never fails to
@@ -270,15 +214,6 @@ func NewPublicKeyCaveat(discharger PublicKey, location string, requirements Thir
 		return c, err
 	}
 	return c, nil
-}
-
-// TODO(ashankar): Remove with the caveatValidator interface.
-func (c *publicKeyThirdPartyCaveat) Validate(ctx Context) error {
-	cav, err := NewCaveat(PublicKeyThirdPartyCaveatX, *c)
-	if err != nil {
-		return err
-	}
-	return cav.Validate(ctx)
 }
 
 func (c *publicKeyThirdPartyCaveat) ID() string {

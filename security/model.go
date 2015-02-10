@@ -366,13 +366,6 @@ type Signer interface {
 	PublicKey() PublicKey
 }
 
-// TODO(ashankar): Remove along with ValidatorVOM before release.
-type caveatValidator interface {
-	// Validate returns nil iff the restriction encapsulated in the
-	// corresponding caveat has been satisfied by the provided context.
-	Validate(context Context) error
-}
-
 // ThirdPartyCaveat is a restriction on the applicability of a blessing that is
 // considered satisfied only when accompanied with a specific "discharge" from
 // the third-party specified in the caveat. (The first two parties are the ones
@@ -382,10 +375,6 @@ type caveatValidator interface {
 // Multiple goroutines may invoke methods on a ThirdPartyCaveat simultaneously.
 // TODO(ashankar): This type should become ThirdPartyCaveatDetails?
 type ThirdPartyCaveat interface {
-	// ThidPartyCaveat implements CaveatValidator, where Validate
-	// succeeds iff a discharge for the caveat is available in the Context.
-	caveatValidator
-
 	// ID returns a cryptographically unique identifier for the third-party
 	// caveat.
 	ID() string

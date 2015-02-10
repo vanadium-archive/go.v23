@@ -18,7 +18,7 @@ const (
   // be invoked (i.e., the holder of a blessing with this caveat could be a
   // server but cannot act as a client).
   //
-  // TODO(ashankar): Rename to MethodCaveat and drop methodCaveat before release.
+  // TODO(ashankar): Rename to MethodCaveat and drop the MethodCaveat helper function?
   MethodCaveatX = CaveatDescriptor{
     Id:        uniqueid.Id{0x54, 0xa6, 0x76, 0x39, 0x81, 0x37, 0x18, 0x7e, 0xcd, 0xb2, 0x6d, 0x2d, 0x69, 0xba, 0x0, 0x3},
     ParamType: typeobject([]string),
@@ -36,7 +36,7 @@ const (
 // Error definitions to allow for stable error checking across address spaces.
 // TODO(bjornick,toddw): We should remove Err from the front of these ids and then have the go generator
 // add them back in on the generated go side.  The conventions for error names differ in different languages
-// (i.e. ErrFoo in go, FooError in js, FooExpection in java).
+// (i.e. ErrFoo in go, FooError in js, FooException in java).
 error (
   ErrCaveatNotRegistered(id uniqueid.Id) {
     "en": "no validation function registered for caveat id {id}",
@@ -55,9 +55,6 @@ error (
   }
 )
 
-// TODO(ashankar): Remove once ValidatorVOM goes away.
-type unixTimeExpiryCaveat int64
-type methodCaveat []string
 
 type nonce [16]byte
 

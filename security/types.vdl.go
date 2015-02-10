@@ -142,12 +142,8 @@ func (CaveatDescriptor) __VDLReflect(struct {
 // Given a Hash, the message digest of a caveat is:
 // Hash(Hash(Id), Hash(ParamVom))
 type Caveat struct {
-	// TODO(ashankar): DEPRECATED: Remove before release.
-	// While it exists (and length > 0), it will take precedence over
-	// (Id, ParamVom)
-	ValidatorVOM []byte
-	Id           uniqueid.Id // The identifier of the caveat validation function.
-	ParamVom     []byte      // VOM-encoded bytes of the parameters to be provided to the validation function.
+	Id       uniqueid.Id // The identifier of the caveat validation function.
+	ParamVom []byte      // VOM-encoded bytes of the parameters to be provided to the validation function.
 }
 
 func (Caveat) __VDLReflect(struct {

@@ -3,17 +3,9 @@ package security
 import (
 	"fmt"
 	"time"
-
-	"v.io/core/veyron2/vdl"
 )
 
 func init() {
-	vdl.Register(unixTimeExpiryCaveat(0))
-	vdl.Register(methodCaveat{})
-	vdl.Register(blessingsImpl{})
-	vdl.Register(publicKeyThirdPartyCaveat{})
-	vdl.Register(publicKeyDischarge{})
-
 	RegisterCaveatValidator(UnixTimeExpiryCaveatX, func(ctx Context, unixTime int64) error {
 		now := ctx.Timestamp()
 		expiry := time.Unix(int64(unixTime), 0)
