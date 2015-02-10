@@ -36,16 +36,26 @@ type Envelope struct {
 	// package should be installed. For archives, this name represents a
 	// directory into which the archive is to be extracted, and for regular
 	// files it represents the name for the file.
-	// The map value is the object name of the package.
+	// The map value is the package specification.
 	// Each object's media type determines how to install it.
 	//
-	// For example, with key=pkg1,value=binaryrepo/configfiles (an archive),
-	// the "configfiles" package will be installed under the "pkg1"
-	// directory. With key=pkg2,value=binaryrepo/binfile (a binary), the
-	// "binfile" file will be installed as the "pkg2" file.
+	// For example, with key=pkg1,value=PackageSpec{File:binaryrepo/configfiles}
+	// (an archive), the "configfiles" package will be installed under the "pkg1"
+	// directory. With key=pkg2,value=PackageSpec{File:binaryrepo/binfile}
+	// (a binary), the "binfile" file will be installed as the "pkg2" file.
 	//
 	// The keys must be valid file/directory names, without path separators.
 	//
 	// Any number of packages may be specified.
-	Packages map[string]string
+	Packages map[string]PackageSpec
 }
+
+// PackageSpec represents a package that needs to be installed for an application.
+type PackageSpec struct {
+	//  File is the object name of the package.
+	File string
+	// Signature represents a signature on the sha256 hash of the package file
+	// contents by the publisher principal.
+	Signature security.Signature
+}
+
