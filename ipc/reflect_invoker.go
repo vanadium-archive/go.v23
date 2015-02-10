@@ -10,7 +10,6 @@ import (
 	"v.io/core/veyron2/vdl"
 	"v.io/core/veyron2/vdl/valconv"
 	"v.io/core/veyron2/vdl/vdlroot/src/signature"
-	"v.io/core/veyron2/verror"
 	"v.io/core/veyron2/verror2"
 )
 
@@ -166,7 +165,7 @@ func ReflectInvokerOrDie(obj interface{}) Invoker {
 func (ri reflectInvoker) Prepare(method string, _ int) ([]interface{}, []interface{}, error) {
 	info, ok := ri.methods[method]
 	if !ok {
-		return nil, nil, verror.NoExistf("ipc: unknown method %q", method)
+		return nil, nil, MakeUnknownMethod(nil, method)
 	}
 	// Return the tags and new in-arg objects.
 	var argptrs []interface{}
@@ -184,7 +183,7 @@ func (ri reflectInvoker) Prepare(method string, _ int) ([]interface{}, []interfa
 func (ri reflectInvoker) Invoke(method string, call ServerCall, argptrs []interface{}) ([]interface{}, error) {
 	info, ok := ri.methods[method]
 	if !ok {
-		return nil, verror.NoExistf("ipc: unknown method %q", method)
+		return nil, MakeUnknownMethod(nil, method)
 	}
 	// Create the reflect.Value args for the invocation.  The receiver of the
 	// method is always first, followed by the required context arg.
@@ -231,7 +230,7 @@ func (ri reflectInvoker) MethodSignature(ctx ServerContext, method string) (sign
 			return signature.CopyMethod(msig), nil
 		}
 	}
-	return signature.Method{}, verror.NoExistf("ipc: unknown method %q", method)
+	return signature.Method{}, MakeUnknownMethod(nil, method)
 }
 
 // Globber implements the ipc.Globber interface.
@@ -294,7 +293,7 @@ func newReflectInfo(obj interface{}) (*reflectInfo, error) {
 	// provided by the user, there's no guarantee it's "correct", but if the same
 	// method is described by multiple interfaces, we check the tags are the same.
 	desc := describe(obj)
-	if verr := attachMethodTags(methodInfos, desc); verror2.Is(verr, verror.Aborted) {
+	if verr := attachMethodTags(methodInfos, desc); verror2.Is(verr, verror2.Aborted.ID) {
 		return nil, fmt.Errorf("ipc: type %v tag error: %v", rt, verr)
 	}
 	// Finally create the signature.  This combines the desc provided by the user
@@ -330,7 +329,7 @@ func makeMethods(rt reflect.Type) (map[string]methodInfo, map[string]signature.M
 		// Silently skip incompatible methods, except for Aborted errors.
 		var sig signature.Method
 		if verr := typeCheckMethod(method, &sig); verr != nil {
-			if verror2.Is(verr, verror.Aborted) {
+			if verror2.Is(verr, verror2.Aborted.ID) {
 				return nil, nil, fmt.Errorf("ipc: %s.%s: %v", rt.String(), method.Name, verr)
 			}
 			continue
@@ -358,6 +357,10 @@ func makeMethodInfo(method reflect.Method) methodInfo {
 	return info
 }
 
+func abortedf(format string, v ...interface{}) error {
+	return verror2.Make(verror2.Aborted, nil, fmt.Sprintf(format, v...))
+}
+
 var (
 	rtServerCall           = reflect.TypeOf((*ServerCall)(nil)).Elem()
 	rtServerContext        = reflect.TypeOf((*ServerContext)(nil)).Elem()
@@ -371,14 +374,14 @@ var (
 
 	// ReflectInvoker will panic iff the error is Aborted, otherwise it will
 	// silently ignore the error.
-	ErrReservedMethod    = verror.Internalf("Reserved method")
-	ErrMethodNotExported = verror.BadArgf("Method not exported")
-	ErrNonRPCMethod      = verror.BadArgf("Non-rpc method.  We require at least 1 in-arg." + useContext)
-	ErrInServerCall      = verror.Abortedf("Context arg ipc.ServerCall is invalid; cannot determine streaming types." + forgotWrap)
-	ErrBadDescribe       = verror.Abortedf("Describe__ must have signature Describe__() []ipc.InterfaceDesc")
-	ErrBadGlobber        = verror.Abortedf("Globber must have signature Globber() *ipc.GlobState")
-	ErrBadGlob           = verror.Abortedf("Glob__ must have signature Glob__(ipc.ServerContext, pattern string) (<-chan naming.VDLMountEntry, error)")
-	ErrBadGlobChildren   = verror.Abortedf("GlobChildren__ must have signature GlobChildren__(ipc.ServerContext) (<-chan string, error)")
+	ErrReservedMethod    = verror2.Make(verror2.Internal, nil, "Reserved method")
+	ErrMethodNotExported = verror2.Make(verror2.BadArg, nil, "Method not exported")
+	ErrNonRPCMethod      = verror2.Make(verror2.BadArg, nil, "Non-rpc method.  We require at least 1 in-arg."+useContext)
+	ErrInServerCall      = abortedf("Context arg ipc.ServerCall is invalid; cannot determine streaming types." + forgotWrap)
+	ErrBadDescribe       = abortedf("Describe__ must have signature Describe__() []ipc.InterfaceDesc")
+	ErrBadGlobber        = abortedf("Globber must have signature Globber() *ipc.GlobState")
+	ErrBadGlob           = abortedf("Glob__ must have signature Glob__(ipc.ServerContext, pattern string) (<-chan naming.VDLMountEntry, error)")
+	ErrBadGlobChildren   = abortedf("GlobChildren__ must have signature GlobChildren__(ipc.ServerContext) (<-chan string, error)")
 )
 
 func typeCheckMethod(method reflect.Method, sig *signature.Method) error {
@@ -460,21 +463,21 @@ func typeCheckReservedMethod(method reflect.Method) error {
 func typeCheckStreamingContext(ctx reflect.Type, sig *signature.Method) error {
 	// The context must be a pointer to a struct.
 	if ctx.Kind() != reflect.Ptr || ctx.Elem().Kind() != reflect.Struct {
-		return verror.Abortedf("Context arg %s is invalid streaming context; must be pointer to a struct representing the typesafe streaming context."+forgotWrap, ctx)
+		return abortedf("Context arg %s is invalid streaming context; must be pointer to a struct representing the typesafe streaming context."+forgotWrap, ctx)
 	}
 	// Must have Init(ipc.ServerCall) method.
 	mInit, hasInit := ctx.MethodByName("Init")
 	if !hasInit {
-		return verror.Abortedf("Context arg %s is invalid streaming context; must have Init method."+forgotWrap, ctx)
+		return abortedf("Context arg %s is invalid streaming context; must have Init method."+forgotWrap, ctx)
 	}
 	if t := mInit.Type; t.NumIn() != 2 || t.In(0).Kind() != reflect.Ptr || t.In(1) != rtServerCall || t.NumOut() != 0 {
-		return verror.Abortedf("Context arg %s is invalid streaming context; Init must have signature func (*) Init(ipc.ServerCall)."+forgotWrap, ctx)
+		return abortedf("Context arg %s is invalid streaming context; Init must have signature func (*) Init(ipc.ServerCall)."+forgotWrap, ctx)
 	}
 	// Must have either RecvStream or SendStream method, or both.
 	mRecvStream, hasRecvStream := ctx.MethodByName("RecvStream")
 	mSendStream, hasSendStream := ctx.MethodByName("SendStream")
 	if !hasRecvStream && !hasSendStream {
-		return verror.Abortedf("Context arg %s is invalid streaming context; must have at least one of RecvStream or SendStream methods."+forgotWrap, ctx)
+		return abortedf("Context arg %s is invalid streaming context; must have at least one of RecvStream or SendStream methods."+forgotWrap, ctx)
 	}
 	if hasRecvStream {
 		// func (*) RecvStream() interface{ Advance() bool; Value() _; Err() error }
@@ -495,7 +498,7 @@ func typeCheckStreamingContext(ctx reflect.Type, sig *signature.Method) error {
 		}
 		inType, err := vdl.TypeFromReflect(tV.Out(0))
 		if err != nil {
-			return verror.Abortedf("Invalid in-stream type: %v", err)
+			return abortedf("Invalid in-stream type: %v", err)
 		}
 		sig.InStream = &signature.Arg{Type: inType}
 	}
@@ -515,7 +518,7 @@ func typeCheckStreamingContext(ctx reflect.Type, sig *signature.Method) error {
 		}
 		outType, err := vdl.TypeFromReflect(tS.In(0))
 		if err != nil {
-			return verror.Abortedf("Invalid out-stream type: %v", err)
+			return abortedf("Invalid out-stream type: %v", err)
 		}
 		sig.OutStream = &signature.Arg{Type: outType}
 	}
@@ -528,11 +531,11 @@ const (
 )
 
 func errRecvStream(rt reflect.Type) error {
-	return verror.Abortedf("Context arg %s is invalid streaming context; RecvStream must have signature func (*) RecvStream() interface{ Advance() bool; Value() _; Err() error }."+forgotWrap, rt)
+	return abortedf("Context arg %s is invalid streaming context; RecvStream must have signature func (*) RecvStream() interface{ Advance() bool; Value() _; Err() error }."+forgotWrap, rt)
 }
 
 func errSendStream(rt reflect.Type) error {
-	return verror.Abortedf("Context arg %s is invalid streaming context; SendStream must have signature func (*) SendStream() interface{ Send(_) error }."+forgotWrap, rt)
+	return abortedf("Context arg %s is invalid streaming context; SendStream must have signature func (*) SendStream() interface{ Send(_) error }."+forgotWrap, rt)
 }
 
 func typeCheckMethodArgs(mtype reflect.Type, sig *signature.Method) error {
@@ -540,14 +543,14 @@ func typeCheckMethodArgs(mtype reflect.Type, sig *signature.Method) error {
 	for index := 2; index < mtype.NumIn(); index++ {
 		vdlType, err := vdl.TypeFromReflect(mtype.In(index))
 		if err != nil {
-			return verror.Abortedf("Invalid in-arg %d type: %v", index-2, err)
+			return abortedf("Invalid in-arg %d type: %v", index-2, err)
 		}
 		(*sig).InArgs = append((*sig).InArgs, signature.Arg{Type: vdlType})
 	}
 	for index := 0; index < mtype.NumOut(); index++ {
 		vdlType, err := vdl.TypeFromReflect(mtype.Out(index))
 		if err != nil {
-			return verror.Abortedf("Invalid out-arg %d type: %v", index, err)
+			return abortedf("Invalid out-arg %d type: %v", index, err)
 		}
 		(*sig).OutArgs = append((*sig).OutArgs, signature.Arg{Type: vdlType})
 	}
@@ -639,7 +642,7 @@ func convertTags(tags []vdl.AnyRep) (*vdl.Value, error) {
 	result := vdl.ZeroValue(vdl.ListType(vdl.AnyType)).AssignLen(len(tags))
 	for index, tag := range tags {
 		if err := valconv.Convert(result.Index(index), tag); err != nil {
-			return nil, verror.Abortedf("invalid tag %d: %v", index, err)
+			return nil, abortedf("invalid tag %d: %v", index, err)
 		}
 	}
 	return result, nil
@@ -661,7 +664,7 @@ func extractTagsForMethod(desc []InterfaceDesc, name string) ([]vdl.AnyRep, erro
 					first = vdlTags
 					tags = descMethod.Tags
 				case !vdl.EqualValue(first, vdlTags):
-					return nil, verror.Abortedf("different tags %q and %q", first, vdlTags)
+					return nil, abortedf("different tags %q and %q", first, vdlTags)
 				}
 			}
 		}
@@ -675,7 +678,7 @@ func attachMethodTags(infos map[string]methodInfo, desc []InterfaceDesc) error {
 	for name, info := range infos {
 		tags, verr := extractTagsForMethod(desc, name)
 		if verr != nil {
-			return verror.Abortedf("method %q: %v", name, verr)
+			return abortedf("method %q: %v", name, verr)
 		}
 		// TODO(toddw): Change tags to []vdl.AnyRep and remove this conversion.
 		if len(tags) > 0 {

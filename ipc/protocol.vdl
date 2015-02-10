@@ -180,3 +180,9 @@ const (
 	ReservedSignature = "__Signature"
 	ReservedMethodSignature = "__MethodSignature"
 )
+
+error (
+	UnknownMethod(method string) {"en": "unknown method {method}"}
+	UnknownSuffix(suffix string) {"en": "unknown object with suffix: {suffix}"}
+	GlobNotImplemented(suffix string) {"en": "Glob not implemented by suffix: {suffix}"}
+)

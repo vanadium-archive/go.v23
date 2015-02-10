@@ -18,6 +18,7 @@ import (
 	"v.io/core/veyron2/vdl"
 	"v.io/core/veyron2/vdl/vdlroot/src/signature"
 	"v.io/core/veyron2/verror"
+	"v.io/core/veyron2/verror2"
 )
 
 // TODO(toddw): Add multi-goroutine tests of reflectCache locking.
@@ -566,13 +567,12 @@ func TestReflectInvokerErrors(t *testing.T) {
 		obj        interface{}
 		method     string
 		args       v
-		prepareErr error
-		invokeErr  error
+		prepareErr verror.ID
+		invokeErr  verror.ID
 	}
-	expectedError := verror.NoExistf(`ipc: unknown method "UnknownMethod"`)
 	tests := []testcase{
-		{&notags{}, "UnknownMethod", v{}, expectedError, expectedError},
-		{&tags{}, "UnknownMethod", v{}, expectedError, expectedError},
+		{&notags{}, "UnknownMethod", v{}, ipc.UnknownMethod.ID, ipc.UnknownMethod.ID},
+		{&tags{}, "UnknownMethod", v{}, ipc.UnknownMethod.ID, ipc.UnknownMethod.ID},
 	}
 	name := func(test testcase) string {
 		return fmt.Sprintf("%T.%s()", test.obj, test.method)
@@ -580,13 +580,13 @@ func TestReflectInvokerErrors(t *testing.T) {
 	testInvoker := func(test testcase, invoker ipc.Invoker) {
 		// Call Invoker.Prepare and check error.
 		_, _, err := invoker.Prepare(test.method, len(test.args))
-		if err != test.prepareErr {
-			t.Errorf(`%s Prepare got error "%v", want "%v"`, name(test), err, test.prepareErr)
+		if !verror2.Is(err, test.prepareErr) {
+			t.Errorf(`%s Prepare got error "%v", want id %v`, name(test), err, test.prepareErr)
 		}
 		// Call Invoker.Invoke and check error.
 		_, err = invoker.Invoke(test.method, call1, test.args)
-		if err != test.invokeErr {
-			t.Errorf(`%s Invoke got error "%v", want "%v"`, name(test), err, test.invokeErr)
+		if !verror2.Is(err, test.invokeErr) {
+			t.Errorf(`%s Invoke got error "%v", want id %v`, name(test), err, test.invokeErr)
 		}
 	}
 	for _, test := range tests {
