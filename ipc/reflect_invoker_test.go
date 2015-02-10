@@ -571,8 +571,8 @@ func TestReflectInvokerErrors(t *testing.T) {
 		invokeErr  verror.ID
 	}
 	tests := []testcase{
-		{&notags{}, "UnknownMethod", v{}, ipc.UnknownMethod.ID, ipc.UnknownMethod.ID},
-		{&tags{}, "UnknownMethod", v{}, ipc.UnknownMethod.ID, ipc.UnknownMethod.ID},
+		{&notags{}, "UnknownMethod", v{}, verror2.NoExist.ID, verror2.NoExist.ID},
+		{&tags{}, "UnknownMethod", v{}, verror2.NoExist.ID, verror2.NoExist.ID},
 	}
 	name := func(test testcase) string {
 		return fmt.Sprintf("%T.%s()", test.obj, test.method)

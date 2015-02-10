@@ -5,10 +5,7 @@ package ipc
 
 import (
 	// VDL system imports
-	"v.io/core/veyron2/context"
-	"v.io/core/veyron2/i18n"
 	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/verror2"
 
 	// VDL user imports
 	"v.io/core/veyron2/security"
@@ -126,30 +123,3 @@ const GlobMethod = "__Glob"
 const ReservedSignature = "__Signature"
 
 const ReservedMethodSignature = "__MethodSignature"
-
-var (
-	UnknownMethod      = verror2.Register("v.io/core/veyron2/ipc.UnknownMethod", verror2.NoRetry, "{1:}{2:} unknown method {3}")
-	UnknownSuffix      = verror2.Register("v.io/core/veyron2/ipc.UnknownSuffix", verror2.NoRetry, "{1:}{2:} unknown object with suffix: {3}")
-	GlobNotImplemented = verror2.Register("v.io/core/veyron2/ipc.GlobNotImplemented", verror2.NoRetry, "{1:}{2:} Glob not implemented by suffix: {3}")
-)
-
-func init() {
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(UnknownMethod.ID), "{1:}{2:} unknown method {3}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(UnknownSuffix.ID), "{1:}{2:} unknown object with suffix: {3}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(GlobNotImplemented.ID), "{1:}{2:} Glob not implemented by suffix: {3}")
-}
-
-// MakeUnknownMethod returns an error with the UnknownMethod ID.
-func MakeUnknownMethod(ctx *context.T, method string) error {
-	return verror2.Make(UnknownMethod, ctx, method)
-}
-
-// MakeUnknownSuffix returns an error with the UnknownSuffix ID.
-func MakeUnknownSuffix(ctx *context.T, suffix string) error {
-	return verror2.Make(UnknownSuffix, ctx, suffix)
-}
-
-// MakeGlobNotImplemented returns an error with the GlobNotImplemented ID.
-func MakeGlobNotImplemented(ctx *context.T, suffix string) error {
-	return verror2.Make(GlobNotImplemented, ctx, suffix)
-}

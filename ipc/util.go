@@ -1,5 +1,10 @@
 package ipc
 
+import (
+	"v.io/core/veyron2/context"
+	"v.io/core/veyron2/verror2"
+)
+
 // NewGlobState returns the GlobState corresponding to obj.  Returns nil if obj
 // doesn't implement AllGlobber or ChildrenGlobber.
 func NewGlobState(obj interface{}) *GlobState {
@@ -28,4 +33,25 @@ func (o obj) GlobChildren__(ServerContext) (<-chan string, error) {
 	}
 	close(ch)
 	return ch, nil
+}
+
+var (
+	unknownMethod      = verror2.Register("v.io/core/veyron2/ipc.unknownMethod", verror2.NoRetry, "{1:}{2:} unknown method {3}")
+	unknownSuffix      = verror2.Register("v.io/core/veyron2/ipc.unknownSuffix", verror2.NoRetry, "{1:}{2:} unknown object with suffix: {3}")
+	globNotImplemented = verror2.Register("v.io/core/veyron2/ipc.globNotImplemented", verror2.NoRetry, "{1:}{2:} Glob not implemented by suffix: {3}")
+)
+
+// MakeUnknownMethod returns an unknown method error.
+func MakeUnknownMethod(ctx *context.T, method string) error {
+	return verror2.Make(verror2.NoExist, ctx, verror2.Make(unknownMethod, ctx, method))
+}
+
+// MakeUnknownSuffix returns an unknown suffix error.
+func MakeUnknownSuffix(ctx *context.T, suffix string) error {
+	return verror2.Make(verror2.NoExist, ctx, verror2.Make(unknownSuffix, ctx, suffix))
+}
+
+// MakeGlobNotImplemented returns a glob not implemented error.
+func MakeGlobNotImplemented(ctx *context.T, suffix string) error {
+	return verror2.Make(verror2.NoExist, ctx, verror2.Make(globNotImplemented, ctx, suffix))
 }
