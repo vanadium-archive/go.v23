@@ -1,11 +1,11 @@
 package vom
 
 import (
+	"errors"
 	"fmt"
 	"math"
 
 	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/verror"
 )
 
 // Binary encoding and decoding routines.  The binary format is identical to the
@@ -30,9 +30,9 @@ const (
 )
 
 var (
-	errInvalid      = verror.BadProtocolf("vom: invalid encoding")
-	errMsgLen       = verror.BadProtocolf("vom: message larger than %d bytes", maxBinaryMsgLen)
-	errUintOverflow = verror.BadProtocolf("vom: scalar larger than 8 bytes")
+	errInvalid      = errors.New("vom: invalid encoding")
+	errMsgLen       = fmt.Errorf("vom: message larger than %d bytes", maxBinaryMsgLen)
+	errUintOverflow = errors.New("vom: scalar larger than 8 bytes")
 )
 
 // hasBinaryMsgLen returns true iff the type t is encoded with a top-level

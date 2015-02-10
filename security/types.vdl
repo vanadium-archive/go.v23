@@ -25,9 +25,9 @@ type BlessingPattern string
 type Hash string
 
 const (
-        // NoExtension is an optional terminator for a blessing pattern indicating that the pattern
-        // cannot match any extensions of the blessing from that point onwards.
-        NoExtension = BlessingPattern("$")
+	// NoExtension is an optional terminator for a blessing pattern indicating that the pattern
+	// cannot match any extensions of the blessing from that point onwards.
+	NoExtension = BlessingPattern("$")
 
 	// TODO(ataly, ashankar): The semantics of AllPrincipals breaks monotonicity in
 	// ACLS with NotIn clauses. For instance, the ACL "In: {AllPrincipals}, NotIn: {"foo"}
@@ -101,8 +101,6 @@ type Certificate struct {
 	Signature Signature // Signature by the blessing principal that binds the extension to the public key.
 }
 
-// TODO(toddw): Specify UnknownCaveatUuid with new error syntax.
-
 // CaveatDescriptor defines an association between a caveat validation function
 // (addressed by globally unique identifier) and the data needed by the
 // validation function.
@@ -124,12 +122,12 @@ type CaveatDescriptor struct {
 // Hash(Hash(Id), Hash(ParamVom))
 type Caveat struct {
 	// TODO(ashankar): DEPRECATED: Remove before release.
-        // While it exists (and length > 0), it will take precedence over
-        // (Id, ParamVom)
+	// While it exists (and length > 0), it will take precedence over
+	// (Id, ParamVom)
 	ValidatorVOM []byte
 
-	Id       uniqueid.Id  // The identifier of the caveat validation function.
-	ParamVom []byte       // VOM-encoded bytes of the parameters to be provided to the validation function.
+	Id       uniqueid.Id // The identifier of the caveat validation function.
+	ParamVom []byte      // VOM-encoded bytes of the parameters to be provided to the validation function.
 }
 
 // WireBlessings encapsulates wire format of a set of blessings and the

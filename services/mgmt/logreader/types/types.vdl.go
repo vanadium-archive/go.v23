@@ -6,7 +6,10 @@ package types
 
 import (
 	// VDL system imports
+	"v.io/core/veyron2/context"
+	"v.io/core/veyron2/i18n"
 	"v.io/core/veyron2/vdl"
+	"v.io/core/veyron2/verror2"
 )
 
 // LogLine is a log entry from a log file.
@@ -29,3 +32,16 @@ func init() {
 // A special NumEntries value that indicates that all entries should be
 // returned by ReadLog.
 const AllEntries = int32(-1)
+
+var (
+	EOF = verror2.Register("v.io/core/veyron2/services/mgmt/logreader/types.EOF", verror2.NoRetry, "{1:}{2:} EOF")
+)
+
+func init() {
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(EOF.ID), "{1:}{2:} EOF")
+}
+
+// MakeEOF returns an error with the EOF ID.
+func MakeEOF(ctx *context.T) error {
+	return verror2.Make(EOF, ctx)
+}

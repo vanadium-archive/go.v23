@@ -13,4 +13,6 @@ type LogEntry struct {
 // returned by ReadLog.
 const AllEntries = int32(-1)
 
-// TODO(toddw): Remove types.go and specify EOF with new error syntax.
+error (
+	EOF() {"en": "EOF"}
+)

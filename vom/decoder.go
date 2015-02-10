@@ -1,17 +1,18 @@
 package vom
 
 import (
+	"errors"
+	"fmt"
 	"io"
 	"os"
 	"reflect"
 
 	"v.io/core/veyron2/vdl/valconv"
-	"v.io/core/veyron2/verror"
 )
 
 var (
-	errDecodeNil         = verror.BadArgf("invalid decode into nil interface{}")
-	errDecodeNilRawValue = verror.BadArgf("invalid decode into nil *RawValue")
+	errDecodeNil         = errors.New("invalid decode into nil interface{}")
+	errDecodeNilRawValue = errors.New("invalid decode into nil *RawValue")
 )
 
 // Decoder manages the receipt and unmarshaling of typed values from the other
@@ -39,10 +40,10 @@ func NewDecoder(r io.Reader) (*Decoder, error) {
 	buf, types := newDecbuf(r), newDecoderTypes()
 	magic, err := buf.PeekByte()
 	if err != nil {
-		return nil, verror.BadProtocolf("error reading magic byte %v", err)
+		return nil, fmt.Errorf("error reading magic byte %v", err)
 	}
 	if magic != binaryMagicByte {
-		return nil, verror.BadProtocolf("bad magic byte, got %x, want %x", magic, binaryMagicByte)
+		return nil, fmt.Errorf("bad magic byte, got %x, want %x", magic, binaryMagicByte)
 	}
 	buf.Skip(1)
 	return &Decoder{newBinaryDecoder(buf, types)}, nil

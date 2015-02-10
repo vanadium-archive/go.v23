@@ -1,14 +1,16 @@
 package vom
 
 import (
+	"errors"
+	"fmt"
+
 	"v.io/core/veyron2/vdl"
 	"v.io/core/veyron2/vdl/valconv"
-	"v.io/core/veyron2/verror"
 )
 
 var (
-	errDecodeZeroTypeID = verror.BadProtocolf("vom: type ID 0")
-	errIndexOutOfRange  = verror.BadProtocolf("vom: index out of range")
+	errDecodeZeroTypeID = errors.New("vom: type ID 0")
+	errIndexOutOfRange  = errors.New("vom: index out of range")
 )
 
 type binaryDecoder struct {
@@ -148,7 +150,7 @@ func (d *binaryDecoder) decodeValueMsg(t *vdl.Type, target valconv.Target) error
 	case err != nil:
 		return err
 	case leftover > 0:
-		return verror.BadProtocolf("vom: %d leftover bytes", leftover)
+		return fmt.Errorf("vom: %d leftover bytes", leftover)
 	}
 	return nil
 }
@@ -163,7 +165,7 @@ func (d *binaryDecoder) decodeValue(tt *vdl.Type, target valconv.Target) error {
 		case exists == 0:
 			return target.FromNil(ttFrom)
 		case exists != 1:
-			return verror.BadProtocolf("vom: optional exists tag got %d, want 0 or 1", exists)
+			return fmt.Errorf("vom: optional exists tag got %d, want 0 or 1", exists)
 		}
 		tt = tt.Elem()
 	}
@@ -396,7 +398,7 @@ func (d *binaryDecoder) decodeValue(tt *vdl.Type, target valconv.Target) error {
 			return d.decodeValue(elemType, target)
 		}
 	default:
-		panic(verror.Internalf("vom: decodeValue unhandled type %v", tt))
+		panic(fmt.Errorf("vom: decodeValue unhandled type %v", tt))
 	}
 }
 
@@ -473,6 +475,6 @@ func (d *binaryDecoder) ignoreValue(t *vdl.Type) error {
 			return d.ignoreValue(elemType)
 		}
 	default:
-		panic(verror.Internalf("vom: ignoreValue unhandled type %v", t))
+		panic(fmt.Errorf("vom: ignoreValue unhandled type %v", t))
 	}
 }

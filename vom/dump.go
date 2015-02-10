@@ -8,7 +8,6 @@ import (
 
 	"v.io/core/veyron2/vdl"
 	"v.io/core/veyron2/vdl/valconv"
-	"v.io/core/veyron2/verror"
 )
 
 // Dump returns a human-readable dump of the given vom data, in the default
@@ -458,7 +457,7 @@ func (d *dumpWorker) decodeValueMsg(t *vdl.Type, target valconv.Target) error {
 	case err != nil:
 		return err
 	case leftover > 0:
-		return verror.BadProtocolf("vom: %d leftover bytes", leftover)
+		return fmt.Errorf("vom: %d leftover bytes", leftover)
 	}
 	return nil
 }
@@ -477,7 +476,7 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target valconv.Target) error {
 			d.writeAtom(DumpKindNilValue, PrimitivePByte{exists}, "%v is nil", ttFrom)
 			return target.FromNil(ttFrom)
 		case exists != 1:
-			return verror.BadProtocolf("vom: optional exists tag got %d, want 0 or 1", exists)
+			return fmt.Errorf("vom: optional exists tag got %d, want 0 or 1", exists)
 		}
 		d.writeAtom(DumpKindExists, PrimitivePByte{exists}, "%v exists", ttFrom)
 		tt = tt.Elem()
@@ -750,6 +749,6 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target valconv.Target) error {
 			return d.decodeValue(elemType, target)
 		}
 	default:
-		panic(verror.Internalf("vom: decodeValue unhandled type %v", tt))
+		panic(fmt.Errorf("vom: decodeValue unhandled type %v", tt))
 	}
 }

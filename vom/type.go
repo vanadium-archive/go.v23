@@ -3,8 +3,9 @@ package vom
 // TODO(toddw): Add tests.
 
 import (
+	"fmt"
+
 	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/verror"
 )
 
 // TODO: Replace this with vdl union!
@@ -87,7 +88,7 @@ func (dt *decoderTypes) lookupType(id TypeID) *vdl.Type {
 func (dt *decoderTypes) makeType(id TypeID, builder *vdl.TypeBuilder, pending map[TypeID]vdl.PendingType) (vdl.PendingType, error) {
 	wt := dt.idToWire[id]
 	if wt == nil {
-		return nil, verror.BadProtocolf("vom: unknown type ID %d", id)
+		return nil, fmt.Errorf("vom: unknown type ID %d", id)
 	}
 	// Make the type from its WireType representation.  First remove it from
 	// dt.idToWire, and add it to pending, so that subsequent lookups will get the
@@ -132,7 +133,7 @@ func (dt *decoderTypes) makeBaseType(wt *vdl.Value, builder *vdl.TypeBuilder, pe
 	// TODO(toddw): Consider changing wt to WireType after union is implemented.
 	switch wt.Type() {
 	case wireNamedType:
-		return nil, verror.BadProtocolf("vom: NamedType has empty name: %v", wt)
+		return nil, fmt.Errorf("vom: NamedType has empty name: %v", wt)
 	case wireEnumType:
 		vLabels := wt.Field(1)
 		base := builder.Enum()
@@ -206,7 +207,7 @@ func (dt *decoderTypes) makeBaseType(wt *vdl.Value, builder *vdl.TypeBuilder, pe
 		}
 		return builder.Optional().AssignElem(elem), nil
 	default:
-		return nil, verror.BadProtocolf("vom: unknown wire type definition %v", wt)
+		return nil, fmt.Errorf("vom: unknown wire type definition %v", wt)
 	}
 }
 
@@ -223,15 +224,15 @@ func (dt *decoderTypes) lookupOrMakeType(id TypeID, builder *vdl.TypeBuilder, pe
 func (dt *decoderTypes) AddWireType(id TypeID, wt *vdl.Value) error {
 	// TODO(toddw): check that wireType is one of our known structs!
 	if id < WireTypeFirstUserID {
-		return verror.BadProtocolf("vom: type %q id %d invalid, the min user id is %d", wt, id, WireTypeFirstUserID)
+		return fmt.Errorf("vom: type %q id %d invalid, the min user id is %d", wt, id, WireTypeFirstUserID)
 	}
 	// TODO(toddw): Allow duplicates according to some heuristic (e.g. only
 	// identical, or only if the later one is a "superset", etc).
 	if dup := dt.idToWire[id]; dup != nil {
-		return verror.BadProtocolf("vom: type %q id %d already defined as %q", wt, id, dup)
+		return fmt.Errorf("vom: type %q id %d already defined as %q", wt, id, dup)
 	}
 	if dup := dt.idToType[id]; dup != nil {
-		return verror.BadProtocolf("vom: type %q id %d already defined as %q", wt, id, dup)
+		return fmt.Errorf("vom: type %q id %d already defined as %q", wt, id, dup)
 	}
 	dt.idToWire[id] = wt
 	return nil

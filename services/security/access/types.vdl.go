@@ -95,7 +95,10 @@ package access
 
 import (
 	// VDL system imports
+	"v.io/core/veyron2/context"
+	"v.io/core/veyron2/i18n"
 	"v.io/core/veyron2/vdl"
+	"v.io/core/veyron2/verror2"
 
 	// VDL user imports
 	"v.io/core/veyron2/security"
@@ -170,3 +173,26 @@ const Read = Tag("Read") // Operations that do not mutate the state of the objec
 const Write = Tag("Write") // Operations that mutate the state of the object.
 
 const Resolve = Tag("Resolve") // Operations involving namespace navigation.
+
+var (
+	// The etag passed to SetACL is invalid.  Likely, another client set the ACL
+	// already and invalidated the etag.  Use GetACL to fetch a fresh etag.
+	BadEtag = verror2.Register("v.io/core/veyron2/services/security/access.BadEtag", verror2.NoRetry, "{1:}{2:} invalid etag {3} passed to SetACL, want {4}")
+	// The ACL is too big.  Use groups to represent large sets of principals.
+	TooBig = verror2.Register("v.io/core/veyron2/services/security/access.TooBig", verror2.NoRetry, "{1:}{2:} ACL is too big")
+)
+
+func init() {
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(BadEtag.ID), "{1:}{2:} invalid etag {3} passed to SetACL, want {4}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(TooBig.ID), "{1:}{2:} ACL is too big")
+}
+
+// MakeBadEtag returns an error with the BadEtag ID.
+func MakeBadEtag(ctx *context.T, etag string, old string) error {
+	return verror2.Make(BadEtag, ctx, etag, old)
+}
+
+// MakeTooBig returns an error with the TooBig ID.
+func MakeTooBig(ctx *context.T) error {
+	return verror2.Make(TooBig, ctx)
+}

@@ -1,18 +1,18 @@
 package vom
 
 import (
+	"errors"
 	"fmt"
 	"io"
 
 	"v.io/core/veyron2/vdl"
 	"v.io/core/veyron2/vdl/valconv"
-	"v.io/core/veyron2/verror"
 )
 
 var (
-	errEncodeNilType      = verror.BadProtocolf("no value encoded (encoder finished with nil type)")
-	errEncodeZeroTypeID   = verror.Internalf("encoder finished with type ID 0")
-	errEncodeBadTypeStack = verror.Internalf("encoder has bad type stack")
+	errEncodeNilType      = errors.New("no value encoded (encoder finished with nil type)")
+	errEncodeZeroTypeID   = errors.New("encoder finished with type ID 0")
+	errEncodeBadTypeStack = errors.New("encoder has bad type stack")
 
 	// Make sure binaryEncoder implements the valconv *Target interfaces.
 	_ valconv.Target       = (*binaryEncoder)(nil)
@@ -230,7 +230,7 @@ func (e *binaryEncoder) encodeUnsentTypes(t *vdl.Type) (TypeID, error) {
 }
 
 func errTypeMismatch(t *vdl.Type, kinds ...vdl.Kind) error {
-	return verror.BadArgf("encoder type mismatch, got %q, want %v", t, kinds)
+	return fmt.Errorf("encoder type mismatch, got %q, want %v", t, kinds)
 }
 
 // prepareType prepares to encode a non-nil value of type tt, checking to make
@@ -342,7 +342,7 @@ func (e *binaryEncoder) FromComplex(src complex128, tt *vdl.Type) error {
 
 func (e *binaryEncoder) FromBytes(src []byte, tt *vdl.Type) error {
 	if !tt.IsBytes() {
-		return verror.BadArgf("encoder type mismatch, got %q, want bytes", tt)
+		return fmt.Errorf("encoder type mismatch, got %q, want bytes", tt)
 	}
 	if err := e.prepareTypeHelper(tt, false); err != nil {
 		return err
@@ -368,7 +368,7 @@ func (e *binaryEncoder) FromEnumLabel(src string, tt *vdl.Type) error {
 	}
 	index := tt.EnumIndex(src)
 	if index < 0 {
-		return verror.BadArgf("enum label %q doesn't exist in type %q", src, tt)
+		return fmt.Errorf("enum label %q doesn't exist in type %q", src, tt)
 	}
 	binaryEncodeUint(e.bufV, uint64(index))
 	return nil
@@ -501,7 +501,7 @@ func (e *binaryEncoder) StartField(name string) (_, _ valconv.Target, _ error) {
 		binaryEncodeUint(e.bufV, uint64(index)+1)
 		return nil, e, nil
 	}
-	return nil, nil, verror.BadArgf("field name %q doesn't exist in top type %q", name, top)
+	return nil, nil, fmt.Errorf("field name %q doesn't exist in top type %q", name, top)
 }
 
 func (e *binaryEncoder) FinishKey(key valconv.Target) error {
