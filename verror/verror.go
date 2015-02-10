@@ -13,7 +13,7 @@ import (
 // "v.io/core/veyron2/verror.ErrIDFoo".
 type ID string
 
-const Unknown = ID("")
+const unknown = ID("")
 
 // E extends the regular error interface with an error id.
 type E interface {
@@ -24,12 +24,12 @@ type E interface {
 
 // Make returns an error implementing E with the given id and msg.
 func Make(id ID, msg string) E {
-	return Standard{id, msg}
+	return standard{id, msg}
 }
 
 // Makef is similar to Make, but constructs the msg via printf-style arguments.
 func Makef(id ID, format string, v ...interface{}) E {
-	return Standard{id, fmt.Sprintf(format, v...)}
+	return standard{id, fmt.Sprintf(format, v...)}
 }
 
 // Helper functions to easily make errors with a particular ID.
@@ -37,20 +37,19 @@ func Makef(id ID, format string, v ...interface{}) E {
 func Abortedf(fmt string, v ...interface{}) E     { return Makef(Aborted, fmt, v...) }
 func BadArgf(fmt string, v ...interface{}) E      { return Makef(BadArg, fmt, v...) }
 func BadProtocolf(fmt string, v ...interface{}) E { return Makef(BadProtocol, fmt, v...) }
-func Existsf(fmt string, v ...interface{}) E      { return Makef(Exists, fmt, v...) }
 func Internalf(fmt string, v ...interface{}) E    { return Makef(Internal, fmt, v...) }
 func NoAccessf(fmt string, v ...interface{}) E    { return Makef(NoAccess, fmt, v...) }
 func NoExistf(fmt string, v ...interface{}) E     { return Makef(NoExist, fmt, v...) }
 
 // Converts a regular err into an E error.  Returns the err unchanged if it's
-// already an E error or nil, otherwise returns a new E error with Unknown id.
+// already an E error or nil, otherwise returns a new E error with unknown id.
 func Convert(err error) E {
-	return ConvertWithDefault(Unknown, err)
+	return convertWithDefault(unknown, err)
 }
 
-// ConvertWithDefault converts a regular err into an E error, setting its id to id.
+// convertWithDefault converts a regular err into an E error, setting its id to id.
 // If err is already an E, it returns err without changing its type.
-func ConvertWithDefault(id ID, err error) E {
+func convertWithDefault(id ID, err error) E {
 	if err == nil {
 		return nil
 	}
@@ -60,8 +59,8 @@ func ConvertWithDefault(id ID, err error) E {
 	return Make(id, err.Error())
 }
 
-// Standard is the standard implementation of E.
-type Standard struct {
+// standard is the standard implementation of E.
+type standard struct {
 	// The field names and order must be kept in sync with vdl.ErrorType defined
 	// in v.io/core/veyron2/vdl/type_builder.go.
 	ID  ID
@@ -69,11 +68,11 @@ type Standard struct {
 }
 
 // ErrorID returns the error id.
-func (e Standard) ErrorID() ID {
+func (e standard) ErrorID() ID {
 	return e.ID
 }
 
 // Error returns the error message.
-func (e Standard) Error() string {
+func (e standard) Error() string {
 	return e.Msg
 }
