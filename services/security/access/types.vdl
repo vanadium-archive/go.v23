@@ -149,4 +149,6 @@ error (
 
 	// The ACL is too big.  Use groups to represent large sets of principals.
 	TooBig() {"en": "ACL is too big"}
+
+	ACLMatch(validBlessings []string, rejectedBlessings []security.RejectedBlessing){"en":"none of the valid blessings ({validBlessings}) are allowed by the ACL (rejected blessings: {rejectedBlessings})"}
 )

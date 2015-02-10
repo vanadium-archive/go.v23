@@ -151,4 +151,13 @@ type WireDischarge union {
 	PublicKey  publicKeyDischarge // Discharge for PublicKeyThirdPartyCaveat
 }
 
+// RejectedBlessing describes why a blessing failed validation.
+type RejectedBlessing struct {
+	Blessing string
+	Err error
+}
+
+error (
+	UntrustedRoot(blessing string) {"en":"{blessing}: root not trusted"}
+)
 

@@ -179,12 +179,14 @@ var (
 	// already and invalidated the etag.  Use GetACL to fetch a fresh etag.
 	BadEtag = verror2.Register("v.io/core/veyron2/services/security/access.BadEtag", verror2.NoRetry, "{1:}{2:} invalid etag {3} passed to SetACL, want {4}")
 	// The ACL is too big.  Use groups to represent large sets of principals.
-	TooBig = verror2.Register("v.io/core/veyron2/services/security/access.TooBig", verror2.NoRetry, "{1:}{2:} ACL is too big")
+	TooBig   = verror2.Register("v.io/core/veyron2/services/security/access.TooBig", verror2.NoRetry, "{1:}{2:} ACL is too big")
+	ACLMatch = verror2.Register("v.io/core/veyron2/services/security/access.ACLMatch", verror2.NoRetry, "{1:}{2:} none of the valid blessings ({3}) are allowed by the ACL (rejected blessings: {4})")
 )
 
 func init() {
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(BadEtag.ID), "{1:}{2:} invalid etag {3} passed to SetACL, want {4}")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(TooBig.ID), "{1:}{2:} ACL is too big")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ACLMatch.ID), "{1:}{2:} none of the valid blessings ({3}) are allowed by the ACL (rejected blessings: {4})")
 }
 
 // MakeBadEtag returns an error with the BadEtag ID.
@@ -195,4 +197,9 @@ func MakeBadEtag(ctx *context.T, etag string, old string) error {
 // MakeTooBig returns an error with the TooBig ID.
 func MakeTooBig(ctx *context.T) error {
 	return verror2.Make(TooBig, ctx)
+}
+
+// MakeACLMatch returns an error with the ACLMatch ID.
+func MakeACLMatch(ctx *context.T, validBlessings []string, rejectedBlessings []security.RejectedBlessing) error {
+	return verror2.Make(ACLMatch, ctx, validBlessings, rejectedBlessings)
 }

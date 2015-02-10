@@ -39,11 +39,11 @@ func (acl ACL) pruneBlacklisted(blessings []string) []string {
 // TODO(ashankar): Add tests for this
 func (acl *ACL) Authorize(ctx security.Context) error {
 	blessings := ctx.RemoteBlessings()
-	blessingsForContext := blessings.ForContext(ctx)
+	blessingsForContext, invalid := blessings.ForContext(ctx)
 	if acl.Includes(blessingsForContext...) {
 		return nil
 	}
-	return errACLMatch(blessings, blessingsForContext)
+	return MakeACLMatch(nil, blessingsForContext, invalid)
 }
 
 // WriteTo writes the JSON-encoded representation of a TaggedACLMap to w.

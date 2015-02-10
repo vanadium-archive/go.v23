@@ -18,15 +18,17 @@ type blessingsImpl struct {
 	publicKey PublicKey
 }
 
-func (b *blessingsImpl) ForContext(ctx Context) []string {
-	var ret []string
+func (b *blessingsImpl) ForContext(ctx Context) (ret []string, info []RejectedBlessing) {
 	for _, chain := range b.chains {
-		if blessing := blessingForCertificateChain(ctx, chain); blessing != "" {
+		if blessing, err := blessingForCertificateChain(ctx, chain); err == nil {
 			ret = append(ret, blessing)
+		} else {
+			info = append(info, RejectedBlessing{blessing, err})
 		}
 	}
-	return ret
+	return
 }
+
 func (b *blessingsImpl) PublicKey() PublicKey { return b.publicKey }
 func (b *blessingsImpl) ThirdPartyCaveats() []Caveat {
 	var ret []Caveat
@@ -116,7 +118,7 @@ func validateCertificateChain(chain []Certificate) (PublicKey, error) {
 	return key, nil
 }
 
-func blessingForCertificateChain(ctx Context, chain []Certificate) string {
+func blessingForCertificateChain(ctx Context, chain []Certificate) (string, error) {
 	blessing := chain[0].Extension
 	for i := 1; i < len(chain); i++ {
 		blessing += ChainSeparator
@@ -128,20 +130,20 @@ func blessingForCertificateChain(ctx Context, chain []Certificate) string {
 	root, err := UnmarshalPublicKey(chain[0].PublicKey)
 	if err != nil {
 		vlog.VI(2).Infof("could not extract blessing as PublicKey from root certificate with Extension: %v could not be unmarshaled: %v", chain[0].Extension, err)
-		return ""
+		return "", err
 	}
 	local := ctx.LocalPrincipal()
 	if local == nil {
 		vlog.VI(2).Infof("could not extract blessing as provided Context %v has LocalPrincipal nil", ctx)
-		return ""
+		return "", MakeUntrustedRoot(nil, blessing)
 	}
 	if local.Roots() == nil {
 		vlog.VI(4).Info("could not extract blessing as no keys are recgonized as valid roots")
-		return ""
+		return "", MakeUntrustedRoot(nil, blessing)
 	}
 	if err := local.Roots().Recognized(root, blessing); err != nil {
 		vlog.VI(4).Infof("ignoring blessing %v because %v", blessing, err)
-		return ""
+		return "", err
 	}
 
 	// Validate all caveats embedded in the chain.
@@ -149,11 +151,11 @@ func blessingForCertificateChain(ctx Context, chain []Certificate) string {
 		for _, cav := range cert.Caveats {
 			if err := validateCaveat(ctx, cav); err != nil {
 				vlog.VI(4).Infof("Ignoring blessing %v: %v", blessing, err)
-				return ""
+				return "", err
 			}
 		}
 	}
-	return blessing
+	return blessing, nil
 }
 
 // validateCaveat is pretty much the same as cav.Validate(ctx), but it defers
@@ -311,4 +313,8 @@ func (c certificateChainsSorter) Less(i, j int) bool {
 		}
 	}
 	return false
+}
+
+func (i RejectedBlessing) String() string {
+	return fmt.Sprintf("[%q: %v]", i.Blessing, i.Err)
 }

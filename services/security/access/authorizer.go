@@ -105,9 +105,10 @@ func (a *authorizer) Authorize(ctx security.Context) error {
 	}
 
 	var blessingsForContext []string
+	var invalid []security.RejectedBlessing
 	blessings := ctx.RemoteBlessings()
 	if blessings != nil {
-		blessingsForContext = blessings.ForContext(ctx)
+		blessingsForContext, invalid = blessings.ForContext(ctx)
 	}
 	grant := false
 	if len(ctx.MethodTags()) == 0 {
@@ -118,7 +119,7 @@ func (a *authorizer) Authorize(ctx security.Context) error {
 	for _, tag := range ctx.MethodTags() {
 		if v := reflect.ValueOf(tag); v.Type() == a.tagType {
 			if acl, exists := a.acls[v.String()]; !exists || !acl.Includes(blessingsForContext...) {
-				return errACLMatch(blessings, blessingsForContext)
+				return MakeACLMatch(nil, blessingsForContext, invalid)
 			}
 			grant = true
 		}
@@ -126,7 +127,7 @@ func (a *authorizer) Authorize(ctx security.Context) error {
 	if grant {
 		return nil
 	}
-	return errACLMatch(blessings, blessingsForContext)
+	return MakeACLMatch(nil, blessingsForContext, invalid)
 }
 
 type fileAuthorizer struct {
@@ -150,8 +151,4 @@ func loadTaggedACLMapFromFile(filename string) (TaggedACLMap, error) {
 	}
 	defer file.Close()
 	return ReadTaggedACLMap(file)
-}
-
-func errACLMatch(blessings security.Blessings, blessingsForContext []string) error {
-	return fmt.Errorf("all valid blessings for this request, %v (out of %v), are disallowed by the ACL", blessingsForContext, blessings)
 }

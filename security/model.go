@@ -333,7 +333,9 @@ type Blessings interface {
 	// Caveats are considered satisfied in the given context if the CaveatValidator
 	// implementation can be found in the address space of the caller and
 	// Validate returns nil.
-	ForContext(context Context) []string
+	// ForContext also returns the RejectedBlessings for each blessing that
+	// cannot be validated.
+	ForContext(context Context) ([]string, []RejectedBlessing)
 
 	// PublicKey returns the public key of the principal to which
 	// blessings obtained from this object are bound.

@@ -114,7 +114,7 @@ func checkBlessings(b Blessings, c Context, want ...string) error {
 		return fmt.Errorf("reflect.DeepEqual(%#v, %#v) failed after roundtripping", decoded, b)
 	}
 	// And now check them under the right context
-	got := b.ForContext(c)
+	got, _ := b.ForContext(c)
 	if !reflect.DeepEqual(got, want) {
 		return fmt.Errorf("Got blessings %v, want %v", got, want)
 	}
