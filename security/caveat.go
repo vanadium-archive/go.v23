@@ -270,7 +270,6 @@ func (d *publicKeyDischarge) ThirdPartyCaveats() []ThirdPartyCaveat {
 	}
 	return ret
 }
-
 func (d *publicKeyDischarge) digest(hash Hash) []byte {
 	msg := hash.sum([]byte(d.ThirdPartyCaveatID))
 	for _, cav := range d.Caveats {
@@ -278,7 +277,6 @@ func (d *publicKeyDischarge) digest(hash Hash) []byte {
 	}
 	return hash.sum(msg)
 }
-
 func (d *publicKeyDischarge) verify(key PublicKey) error {
 	if !bytes.Equal(d.Signature.Purpose, dischargePurpose) {
 		return fmt.Errorf("signature on discharge for caveat %v was not intended for discharges(purpose=%q)", d.ThirdPartyCaveatID, d.Signature.Purpose)
@@ -288,9 +286,9 @@ func (d *publicKeyDischarge) verify(key PublicKey) error {
 	}
 	return nil
 }
-
 func (d *publicKeyDischarge) sign(signer Signer) error {
 	var err error
 	d.Signature, err = signer.Sign(dischargePurpose, d.digest(signer.PublicKey().hash()))
 	return err
 }
+func (d *publicKeyDischarge) toWire() WireDischarge { return WireDischargePublicKey{*d} }

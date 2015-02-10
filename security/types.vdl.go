@@ -176,6 +176,38 @@ func (WireBlessings) __VDLReflect(struct {
 }) {
 }
 
+type (
+	// WireDischarge represents any single field of the WireDischarge union type.
+	//
+	// WireDischarge encapsulates the wire format of a third-party caveat
+	// Discharge.
+	WireDischarge interface {
+		// Index returns the field index.
+		Index() int
+		// Interface returns the field value as an interface.
+		Interface() interface{}
+		// Name returns the field name.
+		Name() string
+		// __VDLReflect describes the WireDischarge union type.
+		__VDLReflect(__WireDischargeReflect)
+	}
+	// WireDischargePublicKey represents field PublicKey of the WireDischarge union type.
+	WireDischargePublicKey struct{ Value publicKeyDischarge } // Discharge for PublicKeyThirdPartyCaveat
+	// __WireDischargeReflect describes the WireDischarge union type.
+	__WireDischargeReflect struct {
+		Name  string "v.io/core/veyron2/security.WireDischarge"
+		Type  WireDischarge
+		Union struct {
+			PublicKey WireDischargePublicKey
+		}
+	}
+)
+
+func (x WireDischargePublicKey) Index() int                          { return 0 }
+func (x WireDischargePublicKey) Interface() interface{}              { return x.Value }
+func (x WireDischargePublicKey) Name() string                        { return "PublicKey" }
+func (x WireDischargePublicKey) __VDLReflect(__WireDischargeReflect) {}
+
 func init() {
 	vdl.Register((*BlessingPattern)(nil))
 	vdl.Register((*Hash)(nil))
@@ -186,6 +218,7 @@ func init() {
 	vdl.Register((*CaveatDescriptor)(nil))
 	vdl.Register((*Caveat)(nil))
 	vdl.Register((*WireBlessings)(nil))
+	vdl.Register((*WireDischarge)(nil))
 }
 
 // NoExtension is an optional terminator for a blessing pattern indicating that the pattern

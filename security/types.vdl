@@ -144,3 +144,11 @@ type WireBlessings struct {
 	// a blessing to the public key in the last certificate of the chain.
 	CertificateChains [][]Certificate
 }
+
+// WireDischarge encapsulates the wire format of a third-party caveat
+// Discharge.
+type WireDischarge union {
+	PublicKey  publicKeyDischarge // Discharge for PublicKeyThirdPartyCaveat
+}
+
+

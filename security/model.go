@@ -411,6 +411,10 @@ type Discharge interface {
 	// ThirdPartyCaveats returns the set of third-party restrictions on the
 	// scope of the discharge.
 	ThirdPartyCaveats() []ThirdPartyCaveat
+
+	// unexported method to disallow implementations of this interface
+	// outside this package.
+	toWire() WireDischarge
 }
 
 // Context defines the state available for authorizing a principal.

@@ -87,6 +87,12 @@ func TestPublicKeyThirdPartyCaveat(t *testing.T) {
 	if err := matchesError(tpc.Validate(ctx("Method2", d)), "discharge failed to validate"); err != nil {
 		t.Fatal(err)
 	}
+	// Discharge can be converted to and from wire format:
+	if d2, err := NewDischarge(MarshalDischarge(d)); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(d, d2) {
+		t.Errorf("Got %#v, want %#v", d2, d)
+	}
 	// A discharge minted by another principal should not be respected.
 	if d, err = randomserver.MintDischarge(tpc, UnconstrainedUse()); d != nil {
 		if err := matchesError(tpc.Validate(ctx("Method1", d)), "signature verification on discharge"); err != nil {
