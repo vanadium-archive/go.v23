@@ -94,6 +94,13 @@ type MountEntry struct {
 	mt bool
 	// Pattern is a security.BlessingPattern that should match the servers.
 	Pattern string
+}
+
+// GlobError is returned by namespace.Glob to indicate a piece of the namespace
+// that could not be traversed.
+type GlobError struct {
+	// Name is the mounted name.
+	Name string
 	// An error occurred fulfilling the request.
 	Error error
 }
@@ -183,9 +190,27 @@ type Namespace interface {
 	// CacheCtl sets controls and returns the current control values.
 	CacheCtl(ctls ...CacheCtl) []CacheCtl
 
-	// Glob returns all names matching pattern.  If recursive is true, it also
-	// returns all names below the matching ones.
-	Glob(ctx *context.T, pattern string) (chan MountEntry, error)
+	// Glob returns MountEntry's whose name matches the pattern and GlobError's
+	// for any piece of the space that can't be traversed.
+	//
+	// Two special patterns:
+	//   prefix/... means all names below prefix.
+	//   prefix/*** is like prefix/... but doesn't traverse into non-mounttable servers.
+	//
+	// Example:
+	//	rc, err := ns.Glob(ctx, pattern)
+	//	if err != nil {
+	//		boom(t, "Glob(%s): %s", pattern, err)
+	//	}
+	//	for s := range rc {
+	//		switch v := s.(type) {
+	//		case *naming.MountEntry:
+	//			fmt.Printf("%s: %v\n", v.Name, v.Servers)
+	//		case *naming.GlobError:
+	//			fmt.Fprintf(stderr, "%s can't be traversed: %s\n", v.Name, v.Error)
+	//		}
+	//	}
+	Glob(ctx *context.T, pattern string) (chan interface{}, error)
 
 	// SetRoots sets the roots that the local Namespace is
 	// relative to. All relative names passed to the methods above
