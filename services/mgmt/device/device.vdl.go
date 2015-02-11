@@ -13,12 +13,13 @@ import (
 	"v.io/core/veyron2/vdl"
 
 	// VDL user imports
+	"v.io/core/veyron2/services/mgmt/application"
 	"v.io/core/veyron2/services/mgmt/binary"
 	"v.io/core/veyron2/services/security/access"
 	"v.io/core/veyron2/services/security/access/object"
 )
 
-// TODO(caprita): Merge with veyron2/config and veyron/lib/exec/config.go.
+// Config specifies app configuration that overrides what's in the envelope.
 type Config map[string]string
 
 func (Config) __VDLReflect(struct {
@@ -95,7 +96,7 @@ func init() {
 //
 // Examples:
 // # Install Google Maps on the device.
-// device/apps.Install("/google.com/appstore/maps") --> "google maps/0"
+// device/apps.Install("/google.com/appstore/maps", nil, nil) --> "google maps/0"
 //
 // # Start an instance of the previously installed maps application installation.
 // device/apps/google maps/0.Start() --> { "0" }
@@ -107,7 +108,7 @@ func init() {
 // device/apps/google maps/0/0.Stop()
 //
 // # Install a second Google Maps installation.
-// device/apps.Install("/google.com/appstore/maps") --> "google maps/1"
+// device/apps.Install("/google.com/appstore/maps", nil, nil) --> "google maps/1"
 //
 // # Start an instance for all maps application installations.
 // device/apps/google maps.Start() --> {"0/2", "1/0"}
@@ -213,13 +214,17 @@ type ApplicationClientMethods interface {
 	// The config argument specifies config settings that will take
 	// precedence over those present in the application envelope.
 	//
+	// The packages argument specifies packages to be installed in addition
+	// to those specified in the envelope.  If a package in the envelope has
+	// the same key, the package in the packages argument takes precedence.
+	//
 	// The returned suffix, when appended to the name used to reach the
 	// receiver for Install, can be used to control the installation object.
 	// The suffix will contain the title of the application as a prefix,
 	// which can then be used to control all the installations of the given
 	// application.
 	// TODO(rjkroege): Use customized labels.
-	Install(ctx *context.T, name string, config Config, opts ...ipc.CallOpt) (string, error)
+	Install(ctx *context.T, name string, config Config, packages application.Packages, opts ...ipc.CallOpt) (string, error)
 	// Refresh refreshes the state of application installation(s)
 	// instance(s).
 	Refresh(*context.T, ...ipc.CallOpt) error
@@ -298,9 +303,9 @@ func (c implApplicationClientStub) c(ctx *context.T) ipc.Client {
 	return veyron2.GetClient(ctx)
 }
 
-func (c implApplicationClientStub) Install(ctx *context.T, i0 string, i1 Config, opts ...ipc.CallOpt) (o0 string, err error) {
+func (c implApplicationClientStub) Install(ctx *context.T, i0 string, i1 Config, i2 application.Packages, opts ...ipc.CallOpt) (o0 string, err error) {
 	var call ipc.Call
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Install", []interface{}{i0, i1}, opts...); err != nil {
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "Install", []interface{}{i0, i1, i2}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&o0, &err); ierr != nil {
@@ -463,7 +468,7 @@ func (c implApplicationClientStub) Debug(ctx *context.T, opts ...ipc.CallOpt) (o
 //
 // Examples:
 // # Install Google Maps on the device.
-// device/apps.Install("/google.com/appstore/maps") --> "google maps/0"
+// device/apps.Install("/google.com/appstore/maps", nil, nil) --> "google maps/0"
 //
 // # Start an instance of the previously installed maps application installation.
 // device/apps/google maps/0.Start() --> { "0" }
@@ -475,7 +480,7 @@ func (c implApplicationClientStub) Debug(ctx *context.T, opts ...ipc.CallOpt) (o
 // device/apps/google maps/0/0.Stop()
 //
 // # Install a second Google Maps installation.
-// device/apps.Install("/google.com/appstore/maps") --> "google maps/1"
+// device/apps.Install("/google.com/appstore/maps", nil, nil) --> "google maps/1"
 //
 // # Start an instance for all maps application installations.
 // device/apps/google maps.Start() --> {"0/2", "1/0"}
@@ -581,13 +586,17 @@ type ApplicationServerMethods interface {
 	// The config argument specifies config settings that will take
 	// precedence over those present in the application envelope.
 	//
+	// The packages argument specifies packages to be installed in addition
+	// to those specified in the envelope.  If a package in the envelope has
+	// the same key, the package in the packages argument takes precedence.
+	//
 	// The returned suffix, when appended to the name used to reach the
 	// receiver for Install, can be used to control the installation object.
 	// The suffix will contain the title of the application as a prefix,
 	// which can then be used to control all the installations of the given
 	// application.
 	// TODO(rjkroege): Use customized labels.
-	Install(ctx ipc.ServerContext, name string, config Config) (string, error)
+	Install(ctx ipc.ServerContext, name string, config Config, packages application.Packages) (string, error)
 	// Refresh refreshes the state of application installation(s)
 	// instance(s).
 	Refresh(ipc.ServerContext) error
@@ -672,8 +681,8 @@ type implApplicationServerStub struct {
 	gs *ipc.GlobState
 }
 
-func (s implApplicationServerStub) Install(ctx ipc.ServerContext, i0 string, i1 Config) (string, error) {
-	return s.impl.Install(ctx, i0, i1)
+func (s implApplicationServerStub) Install(ctx ipc.ServerContext, i0 string, i1 Config, i2 application.Packages) (string, error) {
+	return s.impl.Install(ctx, i0, i1, i2)
 }
 
 func (s implApplicationServerStub) Refresh(ctx ipc.ServerContext) error {
@@ -735,17 +744,18 @@ var ApplicationDesc ipc.InterfaceDesc = descApplication
 var descApplication = ipc.InterfaceDesc{
 	Name:    "Application",
 	PkgPath: "v.io/core/veyron2/services/mgmt/device",
-	Doc:     "// Application can be used to manage applications on a device. The\n// idea is that this interace will be invoked using an object name that\n// identifies the application and its installations and instances\n// where applicable.\n//\n// In particular, the interface methods can be divided into three\n// groups based on their intended receiver:\n//\n// 1) Method receiver is an application:\n// -- Install()\n//\n// 2) Method receiver is an application installation:\n// -- Start()\n// -- Uninstall()\n// -- Update()\n//\n// 3) Method receiver is application installation instance:\n// -- Refresh()\n// -- Restart()\n// -- Resume()\n// -- Stop()\n// -- Suspend()\n//\n// For groups 2) and 3), the suffix that specifies the receiver can\n// optionally omit the installation and/or instance, in which case the\n// operation applies to all installations and/or instances in the\n// scope of the suffix.\n//\n// Examples:\n// # Install Google Maps on the device.\n// device/apps.Install(\"/google.com/appstore/maps\") --> \"google maps/0\"\n//\n// # Start an instance of the previously installed maps application installation.\n// device/apps/google maps/0.Start() --> { \"0\" }\n//\n// # Start a second instance of the previously installed maps application installation.\n// device/apps/google maps/0.Start() --> { \"1\" }\n//\n// # Stop the first instance previously started.\n// device/apps/google maps/0/0.Stop()\n//\n// # Install a second Google Maps installation.\n// device/apps.Install(\"/google.com/appstore/maps\") --> \"google maps/1\"\n//\n// # Start an instance for all maps application installations.\n// device/apps/google maps.Start() --> {\"0/2\", \"1/0\"}\n//\n// # Refresh the state of all instances of all maps application installations.\n// device/apps/google maps.Refresh()\n//\n// # Refresh the state of all instances of the maps application installation\n// identified by the given suffix.\n// device/apps/google maps/0.Refresh()\n//\n// # Refresh the state of the maps application installation instance identified by\n// the given suffix.\n// device/apps/google maps/0/2.Refresh()\n//\n// # Update the second maps installation to the latest version available.\n// device/apps/google maps/1.Update()\n//\n// # Update the first maps installation to a specific version.\n// device/apps/google maps/0.UpdateTo(\"/google.com/appstore/beta/maps\")\n//\n// Further, the following methods complement one another:\n// -- Install() and Uninstall()\n// -- Start() and Stop()\n// -- Suspend() and Resume()\n//\n// Finally, an application installation instance can be in one of\n// three abstract states: 1) \"does not exist\", 2) \"running\", or 3)\n// \"suspended\". The interface methods transition between these\n// abstract states using the following state machine:\n//\n// apply(Start(), \"does not exists\") = \"running\"\n// apply(Refresh(), \"running\") = \"running\"\n// apply(Refresh(), \"suspended\") = \"suspended\"\n// apply(Restart(), \"running\") = \"running\"\n// apply(Restart(), \"suspended\") = \"running\"\n// apply(Resume(), \"suspended\") = \"running\"\n// apply(Resume(), \"running\") = \"running\"\n// apply(Stop(), \"running\") = \"does not exist\"\n// apply(Stop(), \"suspended\") = \"does not exist\"\n// apply(Suspend(), \"running\") = \"suspended\"\n// apply(Suspend(), \"suspended\") = \"suspended\"\n//\n// In other words, invoking any method using an existing application\n// installation instance as a receiver is well-defined.",
+	Doc:     "// Application can be used to manage applications on a device. The\n// idea is that this interace will be invoked using an object name that\n// identifies the application and its installations and instances\n// where applicable.\n//\n// In particular, the interface methods can be divided into three\n// groups based on their intended receiver:\n//\n// 1) Method receiver is an application:\n// -- Install()\n//\n// 2) Method receiver is an application installation:\n// -- Start()\n// -- Uninstall()\n// -- Update()\n//\n// 3) Method receiver is application installation instance:\n// -- Refresh()\n// -- Restart()\n// -- Resume()\n// -- Stop()\n// -- Suspend()\n//\n// For groups 2) and 3), the suffix that specifies the receiver can\n// optionally omit the installation and/or instance, in which case the\n// operation applies to all installations and/or instances in the\n// scope of the suffix.\n//\n// Examples:\n// # Install Google Maps on the device.\n// device/apps.Install(\"/google.com/appstore/maps\", nil, nil) --> \"google maps/0\"\n//\n// # Start an instance of the previously installed maps application installation.\n// device/apps/google maps/0.Start() --> { \"0\" }\n//\n// # Start a second instance of the previously installed maps application installation.\n// device/apps/google maps/0.Start() --> { \"1\" }\n//\n// # Stop the first instance previously started.\n// device/apps/google maps/0/0.Stop()\n//\n// # Install a second Google Maps installation.\n// device/apps.Install(\"/google.com/appstore/maps\", nil, nil) --> \"google maps/1\"\n//\n// # Start an instance for all maps application installations.\n// device/apps/google maps.Start() --> {\"0/2\", \"1/0\"}\n//\n// # Refresh the state of all instances of all maps application installations.\n// device/apps/google maps.Refresh()\n//\n// # Refresh the state of all instances of the maps application installation\n// identified by the given suffix.\n// device/apps/google maps/0.Refresh()\n//\n// # Refresh the state of the maps application installation instance identified by\n// the given suffix.\n// device/apps/google maps/0/2.Refresh()\n//\n// # Update the second maps installation to the latest version available.\n// device/apps/google maps/1.Update()\n//\n// # Update the first maps installation to a specific version.\n// device/apps/google maps/0.UpdateTo(\"/google.com/appstore/beta/maps\")\n//\n// Further, the following methods complement one another:\n// -- Install() and Uninstall()\n// -- Start() and Stop()\n// -- Suspend() and Resume()\n//\n// Finally, an application installation instance can be in one of\n// three abstract states: 1) \"does not exist\", 2) \"running\", or 3)\n// \"suspended\". The interface methods transition between these\n// abstract states using the following state machine:\n//\n// apply(Start(), \"does not exists\") = \"running\"\n// apply(Refresh(), \"running\") = \"running\"\n// apply(Refresh(), \"suspended\") = \"suspended\"\n// apply(Restart(), \"running\") = \"running\"\n// apply(Restart(), \"suspended\") = \"running\"\n// apply(Resume(), \"suspended\") = \"running\"\n// apply(Resume(), \"running\") = \"running\"\n// apply(Stop(), \"running\") = \"does not exist\"\n// apply(Stop(), \"suspended\") = \"does not exist\"\n// apply(Suspend(), \"running\") = \"suspended\"\n// apply(Suspend(), \"suspended\") = \"suspended\"\n//\n// In other words, invoking any method using an existing application\n// installation instance as a receiver is well-defined.",
 	Embeds: []ipc.EmbedDesc{
 		{"Object", "v.io/core/veyron2/services/security/access/object", "// Object provides access control for Veyron objects.\n//\n// Veyron services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/core/veyron2/security/access\"\n//   import \"v.io/core/veyron2/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetACL and GetACL in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/core/veyron2/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}\n//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}\n//  }"},
 	},
 	Methods: []ipc.MethodDesc{
 		{
 			Name: "Install",
-			Doc:  "// Install installs the application identified by the first argument and\n// returns an object name suffix that identifies the new installation.\n//\n// The name argument should be an object name for an application\n// envelope.  The service it identifies must implement\n// repository.Application, and is expected to return either the\n// requested version (if the object name encodes a specific version), or\n// otherwise the latest available version, as appropriate.  This object\n// name will be used by default by the Update method, as a source for\n// updated application envelopes (can be overriden by setting\n// AppOriginConfigKey in the config).\n//\n// The config argument specifies config settings that will take\n// precedence over those present in the application envelope.\n//\n// The returned suffix, when appended to the name used to reach the\n// receiver for Install, can be used to control the installation object.\n// The suffix will contain the title of the application as a prefix,\n// which can then be used to control all the installations of the given\n// application.\n// TODO(rjkroege): Use customized labels.",
+			Doc:  "// Install installs the application identified by the first argument and\n// returns an object name suffix that identifies the new installation.\n//\n// The name argument should be an object name for an application\n// envelope.  The service it identifies must implement\n// repository.Application, and is expected to return either the\n// requested version (if the object name encodes a specific version), or\n// otherwise the latest available version, as appropriate.  This object\n// name will be used by default by the Update method, as a source for\n// updated application envelopes (can be overriden by setting\n// AppOriginConfigKey in the config).\n//\n// The config argument specifies config settings that will take\n// precedence over those present in the application envelope.\n//\n// The packages argument specifies packages to be installed in addition\n// to those specified in the envelope.  If a package in the envelope has\n// the same key, the package in the packages argument takes precedence.\n//\n// The returned suffix, when appended to the name used to reach the\n// receiver for Install, can be used to control the installation object.\n// The suffix will contain the title of the application as a prefix,\n// which can then be used to control all the installations of the given\n// application.\n// TODO(rjkroege): Use customized labels.",
 			InArgs: []ipc.ArgDesc{
-				{"name", ``},   // string
-				{"config", ``}, // Config
+				{"name", ``},     // string
+				{"config", ``},   // Config
+				{"packages", ``}, // application.Packages
 			},
 			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // string
@@ -888,7 +898,7 @@ type DeviceClientMethods interface {
 	//
 	// Examples:
 	// # Install Google Maps on the device.
-	// device/apps.Install("/google.com/appstore/maps") --> "google maps/0"
+	// device/apps.Install("/google.com/appstore/maps", nil, nil) --> "google maps/0"
 	//
 	// # Start an instance of the previously installed maps application installation.
 	// device/apps/google maps/0.Start() --> { "0" }
@@ -900,7 +910,7 @@ type DeviceClientMethods interface {
 	// device/apps/google maps/0/0.Stop()
 	//
 	// # Install a second Google Maps installation.
-	// device/apps.Install("/google.com/appstore/maps") --> "google maps/1"
+	// device/apps.Install("/google.com/appstore/maps", nil, nil) --> "google maps/1"
 	//
 	// # Start an instance for all maps application installations.
 	// device/apps/google maps.Start() --> {"0/2", "1/0"}
@@ -1105,7 +1115,7 @@ type DeviceServerMethods interface {
 	//
 	// Examples:
 	// # Install Google Maps on the device.
-	// device/apps.Install("/google.com/appstore/maps") --> "google maps/0"
+	// device/apps.Install("/google.com/appstore/maps", nil, nil) --> "google maps/0"
 	//
 	// # Start an instance of the previously installed maps application installation.
 	// device/apps/google maps/0.Start() --> { "0" }
@@ -1117,7 +1127,7 @@ type DeviceServerMethods interface {
 	// device/apps/google maps/0/0.Stop()
 	//
 	// # Install a second Google Maps installation.
-	// device/apps.Install("/google.com/appstore/maps") --> "google maps/1"
+	// device/apps.Install("/google.com/appstore/maps", nil, nil) --> "google maps/1"
 	//
 	// # Start an instance for all maps application installations.
 	// device/apps/google maps.Start() --> {"0/2", "1/0"}
@@ -1267,7 +1277,7 @@ var descDevice = ipc.InterfaceDesc{
 	PkgPath: "v.io/core/veyron2/services/mgmt/device",
 	Doc:     "// Device can be used to manage a device remotely using an object name that\n// identifies it.",
 	Embeds: []ipc.EmbedDesc{
-		{"Application", "v.io/core/veyron2/services/mgmt/device", "// Application can be used to manage applications on a device. The\n// idea is that this interace will be invoked using an object name that\n// identifies the application and its installations and instances\n// where applicable.\n//\n// In particular, the interface methods can be divided into three\n// groups based on their intended receiver:\n//\n// 1) Method receiver is an application:\n// -- Install()\n//\n// 2) Method receiver is an application installation:\n// -- Start()\n// -- Uninstall()\n// -- Update()\n//\n// 3) Method receiver is application installation instance:\n// -- Refresh()\n// -- Restart()\n// -- Resume()\n// -- Stop()\n// -- Suspend()\n//\n// For groups 2) and 3), the suffix that specifies the receiver can\n// optionally omit the installation and/or instance, in which case the\n// operation applies to all installations and/or instances in the\n// scope of the suffix.\n//\n// Examples:\n// # Install Google Maps on the device.\n// device/apps.Install(\"/google.com/appstore/maps\") --> \"google maps/0\"\n//\n// # Start an instance of the previously installed maps application installation.\n// device/apps/google maps/0.Start() --> { \"0\" }\n//\n// # Start a second instance of the previously installed maps application installation.\n// device/apps/google maps/0.Start() --> { \"1\" }\n//\n// # Stop the first instance previously started.\n// device/apps/google maps/0/0.Stop()\n//\n// # Install a second Google Maps installation.\n// device/apps.Install(\"/google.com/appstore/maps\") --> \"google maps/1\"\n//\n// # Start an instance for all maps application installations.\n// device/apps/google maps.Start() --> {\"0/2\", \"1/0\"}\n//\n// # Refresh the state of all instances of all maps application installations.\n// device/apps/google maps.Refresh()\n//\n// # Refresh the state of all instances of the maps application installation\n// identified by the given suffix.\n// device/apps/google maps/0.Refresh()\n//\n// # Refresh the state of the maps application installation instance identified by\n// the given suffix.\n// device/apps/google maps/0/2.Refresh()\n//\n// # Update the second maps installation to the latest version available.\n// device/apps/google maps/1.Update()\n//\n// # Update the first maps installation to a specific version.\n// device/apps/google maps/0.UpdateTo(\"/google.com/appstore/beta/maps\")\n//\n// Further, the following methods complement one another:\n// -- Install() and Uninstall()\n// -- Start() and Stop()\n// -- Suspend() and Resume()\n//\n// Finally, an application installation instance can be in one of\n// three abstract states: 1) \"does not exist\", 2) \"running\", or 3)\n// \"suspended\". The interface methods transition between these\n// abstract states using the following state machine:\n//\n// apply(Start(), \"does not exists\") = \"running\"\n// apply(Refresh(), \"running\") = \"running\"\n// apply(Refresh(), \"suspended\") = \"suspended\"\n// apply(Restart(), \"running\") = \"running\"\n// apply(Restart(), \"suspended\") = \"running\"\n// apply(Resume(), \"suspended\") = \"running\"\n// apply(Resume(), \"running\") = \"running\"\n// apply(Stop(), \"running\") = \"does not exist\"\n// apply(Stop(), \"suspended\") = \"does not exist\"\n// apply(Suspend(), \"running\") = \"suspended\"\n// apply(Suspend(), \"suspended\") = \"suspended\"\n//\n// In other words, invoking any method using an existing application\n// installation instance as a receiver is well-defined."},
+		{"Application", "v.io/core/veyron2/services/mgmt/device", "// Application can be used to manage applications on a device. The\n// idea is that this interace will be invoked using an object name that\n// identifies the application and its installations and instances\n// where applicable.\n//\n// In particular, the interface methods can be divided into three\n// groups based on their intended receiver:\n//\n// 1) Method receiver is an application:\n// -- Install()\n//\n// 2) Method receiver is an application installation:\n// -- Start()\n// -- Uninstall()\n// -- Update()\n//\n// 3) Method receiver is application installation instance:\n// -- Refresh()\n// -- Restart()\n// -- Resume()\n// -- Stop()\n// -- Suspend()\n//\n// For groups 2) and 3), the suffix that specifies the receiver can\n// optionally omit the installation and/or instance, in which case the\n// operation applies to all installations and/or instances in the\n// scope of the suffix.\n//\n// Examples:\n// # Install Google Maps on the device.\n// device/apps.Install(\"/google.com/appstore/maps\", nil, nil) --> \"google maps/0\"\n//\n// # Start an instance of the previously installed maps application installation.\n// device/apps/google maps/0.Start() --> { \"0\" }\n//\n// # Start a second instance of the previously installed maps application installation.\n// device/apps/google maps/0.Start() --> { \"1\" }\n//\n// # Stop the first instance previously started.\n// device/apps/google maps/0/0.Stop()\n//\n// # Install a second Google Maps installation.\n// device/apps.Install(\"/google.com/appstore/maps\", nil, nil) --> \"google maps/1\"\n//\n// # Start an instance for all maps application installations.\n// device/apps/google maps.Start() --> {\"0/2\", \"1/0\"}\n//\n// # Refresh the state of all instances of all maps application installations.\n// device/apps/google maps.Refresh()\n//\n// # Refresh the state of all instances of the maps application installation\n// identified by the given suffix.\n// device/apps/google maps/0.Refresh()\n//\n// # Refresh the state of the maps application installation instance identified by\n// the given suffix.\n// device/apps/google maps/0/2.Refresh()\n//\n// # Update the second maps installation to the latest version available.\n// device/apps/google maps/1.Update()\n//\n// # Update the first maps installation to a specific version.\n// device/apps/google maps/0.UpdateTo(\"/google.com/appstore/beta/maps\")\n//\n// Further, the following methods complement one another:\n// -- Install() and Uninstall()\n// -- Start() and Stop()\n// -- Suspend() and Resume()\n//\n// Finally, an application installation instance can be in one of\n// three abstract states: 1) \"does not exist\", 2) \"running\", or 3)\n// \"suspended\". The interface methods transition between these\n// abstract states using the following state machine:\n//\n// apply(Start(), \"does not exists\") = \"running\"\n// apply(Refresh(), \"running\") = \"running\"\n// apply(Refresh(), \"suspended\") = \"suspended\"\n// apply(Restart(), \"running\") = \"running\"\n// apply(Restart(), \"suspended\") = \"running\"\n// apply(Resume(), \"suspended\") = \"running\"\n// apply(Resume(), \"running\") = \"running\"\n// apply(Stop(), \"running\") = \"does not exist\"\n// apply(Stop(), \"suspended\") = \"does not exist\"\n// apply(Suspend(), \"running\") = \"suspended\"\n// apply(Suspend(), \"suspended\") = \"suspended\"\n//\n// In other words, invoking any method using an existing application\n// installation instance as a receiver is well-defined."},
 	},
 	Methods: []ipc.MethodDesc{
 		{

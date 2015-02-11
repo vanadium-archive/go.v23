@@ -34,28 +34,37 @@ type Envelope struct {
 	// Env is an array that stores the environment variable values to be
 	// used when executing the binary.
 	Env []string
-	// Packages is a map of packages to install on the local filesystem
-	// before executing the binary. The map key is the local file/directory
-	// name, relative to the instance's packages directory, where the
-	// package should be installed. For archives, this name represents a
-	// directory into which the archive is to be extracted, and for regular
-	// files it represents the name for the file.
-	// The map value is the package specification.
-	// Each object's media type determines how to install it.
-	//
-	// For example, with key=pkg1,value=PackageSpec{File:binaryrepo/configfiles}
-	// (an archive), the "configfiles" package will be installed under the "pkg1"
-	// directory. With key=pkg2,value=PackageSpec{File:binaryrepo/binfile}
-	// (a binary), the "binfile" file will be installed as the "pkg2" file.
-	//
-	// The keys must be valid file/directory names, without path separators.
-	//
-	// Any number of packages may be specified.
-	Packages map[string]PackageSpec
+	// Packages is the set of packages to install on the local filesystem
+	// before executing the binary
+	Packages Packages
 }
 
 func (Envelope) __VDLReflect(struct {
 	Name string "v.io/core/veyron2/services/mgmt/application.Envelope"
+}) {
+}
+
+// Packages represents a set of packages. The map key is the local
+// file/directory name, relative to the instance's packages directory, where the
+// package should be installed. For archives, this name represents a directory
+// into which the archive is to be extracted, and for regular files it
+// represents the name for the file.  The map value is the package
+// specification.
+//
+// Each object's media type determines how to install it.
+//
+// For example, with key=pkg1,value=PackageSpec{File:binaryrepo/configfiles} (an
+// archive), the "configfiles" package will be installed under the "pkg1"
+// directory. With key=pkg2,value=PackageSpec{File:binaryrepo/binfile} (a
+// binary), the "binfile" file will be installed as the "pkg2" file.
+//
+// The keys must be valid file/directory names, without path separators.
+//
+// Any number of packages may be specified.
+type Packages map[string]PackageSpec
+
+func (Packages) __VDLReflect(struct {
+	Name string "v.io/core/veyron2/services/mgmt/application.Packages"
 }) {
 }
 
@@ -75,6 +84,7 @@ func (PackageSpec) __VDLReflect(struct {
 
 func init() {
 	vdl.Register((*Envelope)(nil))
+	vdl.Register((*Packages)(nil))
 	vdl.Register((*PackageSpec)(nil))
 }
 

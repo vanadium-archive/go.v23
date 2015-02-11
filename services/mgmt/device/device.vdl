@@ -3,12 +3,15 @@
 package device
 
 import (
+	"v.io/core/veyron2/services/mgmt/application"
 	"v.io/core/veyron2/services/mgmt/binary"
 	"v.io/core/veyron2/services/security/access"
 	"v.io/core/veyron2/services/security/access/object"
 )
 
 // TODO(caprita): Merge with veyron2/config and veyron/lib/exec/config.go.
+
+// Config specifies app configuration that overrides what's in the envelope.
 type Config map[string]string
 
 // Application can be used to manage applications on a device. The
@@ -41,7 +44,7 @@ type Config map[string]string
 //
 // Examples:
 // # Install Google Maps on the device.
-// device/apps.Install("/google.com/appstore/maps") --> "google maps/0"
+// device/apps.Install("/google.com/appstore/maps", nil, nil) --> "google maps/0"
 //
 // # Start an instance of the previously installed maps application installation.
 // device/apps/google maps/0.Start() --> { "0" }
@@ -53,7 +56,7 @@ type Config map[string]string
 // device/apps/google maps/0/0.Stop()
 //
 // # Install a second Google Maps installation.
-// device/apps.Install("/google.com/appstore/maps") --> "google maps/1"
+// device/apps.Install("/google.com/appstore/maps", nil, nil) --> "google maps/1"
 //
 // # Start an instance for all maps application installations.
 // device/apps/google maps.Start() --> {"0/2", "1/0"}
@@ -104,6 +107,9 @@ type Application interface {
 	// Application methods. After a device has been claimed, only the
 	// claimant will be able to modify the ACLs for the device.
 	object.Object
+	// TODO(caprita): Rather than overriding config and package piecemeal,
+	// consider providing an envelope override during install.
+
 	// Install installs the application identified by the first argument and
 	// returns an object name suffix that identifies the new installation.
 	//
@@ -119,13 +125,17 @@ type Application interface {
 	// The config argument specifies config settings that will take
 	// precedence over those present in the application envelope.
 	//
+	// The packages argument specifies packages to be installed in addition
+	// to those specified in the envelope.  If a package in the envelope has
+	// the same key, the package in the packages argument takes precedence.
+	//
 	// The returned suffix, when appended to the name used to reach the
 	// receiver for Install, can be used to control the installation object.
 	// The suffix will contain the title of the application as a prefix,
 	// which can then be used to control all the installations of the given
 	// application.
 	// TODO(rjkroege): Use customized labels.
-	Install(name string, config Config) (string | error) {access.Write}
+	Install(name string, config Config, packages application.Packages) (string | error) {access.Write}
 	// Refresh refreshes the state of application installation(s)
 	// instance(s).
 	Refresh() error {access.Admin}
