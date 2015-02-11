@@ -578,8 +578,8 @@ func handleErrorOrSkip(prefix string, err error, env *compile.Env) bool {
 var errSkip = fmt.Errorf("SKIP")
 
 func xlateOutDir(dir, path string, outdir genOutDir, outPkgPath string) (string, error) {
-	path = filepath.FromSlash(canonicalPath(path))
-	outPkgPath = filepath.FromSlash(canonicalPath(outPkgPath))
+	path = filepath.FromSlash(path)
+	outPkgPath = filepath.FromSlash(outPkgPath)
 	// Strip package path from the directory.
 	if !strings.HasSuffix(dir, path) {
 		return "", fmt.Errorf("package dir %q doesn't end with package path %q", dir, path)
@@ -605,19 +605,6 @@ func xlateOutDir(dir, path string, outdir genOutDir, outPkgPath string) (string,
 		return filepath.Join(d, xlate.dst, outPkgPath), nil
 	}
 	return "", fmt.Errorf("package prefix %q doesn't match translation rules %q", dir, outdir)
-}
-
-func canonicalPath(path string) string {
-	// Detect the special standard packages, and put in their canonical location.
-	// TODO(toddw): This is a hack; we need all vdlroot standard packages to show
-	// up in the canonical location, rather than just vdltool and signature.
-	switch path {
-	case "vdltool":
-		return "v.io/core/veyron2/vdl/vdlroot/src/vdltool"
-	case "signature":
-		return "v.io/core/veyron2/vdl/vdlroot/src/signature"
-	}
-	return path
 }
 
 func xlatePkgPath(pkgPath string, rules xlateRules) (string, error) {
