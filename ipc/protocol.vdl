@@ -118,8 +118,7 @@ type Request struct {
 
 	// Discharges are third party caveat discharges that
 	// are sent after the blessing to fulfill its caveats.
-	// TODO(ashankar):DISCHARGEVDL:Change the type to []security.WireDischarge.
-	Discharges []any
+	Discharges []security.WireDischarge
 
 	// TraceRequest maintains the vtrace context between clients and servers
 	// and specifies additional parameters that control how tracing behaves.
