@@ -215,6 +215,14 @@ var errorTests = []errorTest{
 		},
 		"",
 	}}},
+	{"WithSamePackageParam", ep{{"a", `error Res(x Bool) {"en":"en {x}"};type Bool bool`,
+		compile.ErrorDef{
+			Params:  []*compile.Arg{arg("x", vdl.NamedType("a.Bool", vdl.BoolType))},
+			Formats: []compile.LangFmt{{en, pre + "en {3}"}},
+			English: pre + "en {3}",
+		},
+		"",
+	}}},
 
 	// Test multi-package errors.
 	{"MultiPkgSameErrorName", ep{

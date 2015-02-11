@@ -117,10 +117,10 @@ func compile(pkgpath, genpath string, pfiles []*parse.File, config vdltool.Confi
 	if compileImports(pkg, pfiles, env); !env.Errors.IsEmpty() {
 		return nil
 	}
-	if compileErrorDefs(pkg, pfiles, env); !env.Errors.IsEmpty() {
+	if compileTypeDefs(pkg, pfiles, env); !env.Errors.IsEmpty() {
 		return nil
 	}
-	if compileTypeDefs(pkg, pfiles, env); !env.Errors.IsEmpty() {
+	if compileErrorDefs(pkg, pfiles, env); !env.Errors.IsEmpty() {
 		return nil
 	}
 	if compileConstDefs(pkg, pfiles, env); !env.Errors.IsEmpty() {
