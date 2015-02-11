@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"v.io/core/veyron2/verror"
 	"v.io/core/veyron2/vom"
 )
 
@@ -850,4 +851,42 @@ func TestSetCaveatValidatorAfterCaveatUse(t *testing.T) {
 		}()
 		SetCaveatValidator(nil)
 	}()
+}
+
+func TestBlessingsForContext(t *testing.T) {
+	var (
+		p          = newPrincipal(t)
+		mkBlessing = func(name string, cav ...Caveat) Blessings {
+			ret, err := p.BlessSelf(name, cav...)
+			if err != nil {
+				t.Fatalf("%q: %v", name, err)
+			}
+			return ret
+		}
+
+		b1 = mkBlessing("alice", newCaveat(MethodCaveat("Method")))
+		b2 = mkBlessing("bob")
+	)
+	if err := p.AddToRoots(b1); err != nil {
+		t.Fatal(err)
+	}
+
+	// b1's alice is recognized in the right context.
+	if accepted, rejected := b1.ForContext(NewContext(&ContextParams{LocalPrincipal: p, Method: "Method"})); !reflect.DeepEqual(accepted, []string{"alice"}) || len(rejected) > 0 {
+		t.Errorf("Got (%v, %v), want ([alice], nil)", accepted, rejected)
+	}
+	// b1's alice is rejected when caveats are not met.
+	if accepted, rejected := b1.ForContext(NewContext(&ContextParams{LocalPrincipal: p, Method: "Blah"})); len(accepted) > 0 ||
+		len(rejected) != 1 ||
+		rejected[0].Blessing != "alice" ||
+		!verror.Is(rejected[0].Err, ErrCaveatValidation.ID) {
+		t.Errorf("Got (%v, %v), want ([], [alice: <caveat validation error>])", accepted, rejected)
+	}
+	// b2 is not recognized because the roots aren't recognized.
+	if accepted, rejected := b2.ForContext(NewContext(&ContextParams{LocalPrincipal: p, Method: "Method"})); len(accepted) > 0 ||
+		len(rejected) != 1 ||
+		rejected[0].Blessing != "bob" ||
+		!verror.Is(rejected[0].Err, ErrUntrustedRoot.ID) {
+		t.Errorf("Got (%v, %v), want ([], [bob: <untrusted root>])", accepted, rejected)
+	}
 }

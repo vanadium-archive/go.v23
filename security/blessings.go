@@ -130,20 +130,20 @@ func blessingForCertificateChain(ctx Context, chain []Certificate) (string, erro
 	root, err := UnmarshalPublicKey(chain[0].PublicKey)
 	if err != nil {
 		vlog.VI(2).Infof("could not extract blessing as PublicKey from root certificate with Extension: %v could not be unmarshaled: %v", chain[0].Extension, err)
-		return "", err
+		return blessing, err
 	}
 	local := ctx.LocalPrincipal()
 	if local == nil {
 		vlog.VI(2).Infof("could not extract blessing as provided Context %v has LocalPrincipal nil", ctx)
-		return "", NewErrUntrustedRoot(nil, blessing)
+		return blessing, NewErrUntrustedRoot(nil, blessing)
 	}
 	if local.Roots() == nil {
 		vlog.VI(4).Info("could not extract blessing as no keys are recgonized as valid roots")
-		return "", NewErrUntrustedRoot(nil, blessing)
+		return blessing, NewErrUntrustedRoot(nil, blessing)
 	}
 	if err := local.Roots().Recognized(root, blessing); err != nil {
 		vlog.VI(4).Infof("ignoring blessing %v because %v", blessing, err)
-		return "", err
+		return blessing, NewErrUntrustedRoot(nil, blessing)
 	}
 
 	// Validate all caveats embedded in the chain.
@@ -151,7 +151,7 @@ func blessingForCertificateChain(ctx Context, chain []Certificate) (string, erro
 		for _, cav := range cert.Caveats {
 			if err := validateCaveat(ctx, cav); err != nil {
 				vlog.VI(4).Infof("Ignoring blessing %v: %v", blessing, err)
-				return "", err
+				return blessing, err
 			}
 		}
 	}
@@ -316,5 +316,5 @@ func (c certificateChainsSorter) Less(i, j int) bool {
 }
 
 func (i RejectedBlessing) String() string {
-	return fmt.Sprintf("[%q: %v]", i.Blessing, i.Err)
+	return fmt.Sprintf("{%q: %v}", i.Blessing, i.Err)
 }
