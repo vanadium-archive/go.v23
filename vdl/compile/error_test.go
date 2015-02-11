@@ -10,8 +10,7 @@ import (
 	"v.io/core/veyron2/vdl/compile"
 	"v.io/core/veyron2/vdl/parse"
 	"v.io/core/veyron2/vdl/vdltest"
-	"v.io/core/veyron2/verror"
-	"v.io/core/veyron2/verror2"
+	verror "v.io/core/veyron2/verror2"
 )
 
 func TestError(t *testing.T) {
@@ -108,7 +107,7 @@ var errorTests = []errorTest{
 	}}},
 	{"NoParamsNoRetry", ep{{"a", `error Res() {NoRetry,"en":"msg1"}`,
 		compile.ErrorDef{
-			Action:  verror2.NoRetry,
+			Action:  verror.NoRetry,
 			Formats: []compile.LangFmt{{en, pre + "msg1"}},
 			English: pre + "msg1",
 		},
@@ -116,7 +115,7 @@ var errorTests = []errorTest{
 	}}},
 	{"NoParamsRetryConnection", ep{{"a", `error Res() {RetryConnection,"en":"msg1"}`,
 		compile.ErrorDef{
-			Action:  verror2.RetryConnection,
+			Action:  verror.RetryConnection,
 			Formats: []compile.LangFmt{{en, pre + "msg1"}},
 			English: pre + "msg1",
 		},
@@ -124,7 +123,7 @@ var errorTests = []errorTest{
 	}}},
 	{"NoParamsRetryRefetch", ep{{"a", `error Res() {RetryRefetch,"en":"msg1"}`,
 		compile.ErrorDef{
-			Action:  verror2.RetryRefetch,
+			Action:  verror.RetryRefetch,
 			Formats: []compile.LangFmt{{en, pre + "msg1"}},
 			English: pre + "msg1",
 		},
@@ -132,7 +131,7 @@ var errorTests = []errorTest{
 	}}},
 	{"NoParamsRetryBackoff", ep{{"a", `error Res() {RetryBackoff,"en":"msg1"}`,
 		compile.ErrorDef{
-			Action:  verror2.RetryBackoff,
+			Action:  verror.RetryBackoff,
 			Formats: []compile.LangFmt{{en, pre + "msg1"}},
 			English: pre + "msg1",
 		},
@@ -140,7 +139,7 @@ var errorTests = []errorTest{
 	}}},
 	{"NoParamsMulti", ep{{"a", `error Res() {RetryRefetch,"en":"msg1","zh":"msg2"}`,
 		compile.ErrorDef{
-			Action:  verror2.RetryRefetch,
+			Action:  verror.RetryRefetch,
 			Formats: []compile.LangFmt{{en, pre + "msg1"}, {zh, pre + "msg2"}},
 			English: pre + "msg1",
 		},
@@ -166,7 +165,7 @@ var errorTests = []errorTest{
 	{"WithParamsNoRetry", ep{{"a", `error Res(x string, y int32) {NoRetry,"en":"msg1"}`,
 		compile.ErrorDef{
 			Params:  []*compile.Arg{arg("x", vdl.StringType), arg("y", vdl.Int32Type)},
-			Action:  verror2.NoRetry,
+			Action:  verror.NoRetry,
 			Formats: []compile.LangFmt{{en, pre + "msg1"}},
 			English: pre + "msg1",
 		},
@@ -175,7 +174,7 @@ var errorTests = []errorTest{
 	{"WithParamsRetryConnection", ep{{"a", `error Res(x string, y int32) {RetryConnection,"en":"msg1"}`,
 		compile.ErrorDef{
 			Params:  []*compile.Arg{arg("x", vdl.StringType), arg("y", vdl.Int32Type)},
-			Action:  verror2.RetryConnection,
+			Action:  verror.RetryConnection,
 			Formats: []compile.LangFmt{{en, pre + "msg1"}},
 			English: pre + "msg1",
 		},
@@ -184,7 +183,7 @@ var errorTests = []errorTest{
 	{"WithParamsRetryRefetch", ep{{"a", `error Res(x string, y int32) {RetryRefetch,"en":"msg1"}`,
 		compile.ErrorDef{
 			Params:  []*compile.Arg{arg("x", vdl.StringType), arg("y", vdl.Int32Type)},
-			Action:  verror2.RetryRefetch,
+			Action:  verror.RetryRefetch,
 			Formats: []compile.LangFmt{{en, pre + "msg1"}},
 			English: pre + "msg1",
 		},
@@ -193,7 +192,7 @@ var errorTests = []errorTest{
 	{"WithParamsRetryBackoff", ep{{"a", `error Res(x string, y int32) {RetryBackoff,"en":"msg1"}`,
 		compile.ErrorDef{
 			Params:  []*compile.Arg{arg("x", vdl.StringType), arg("y", vdl.Int32Type)},
-			Action:  verror2.RetryBackoff,
+			Action:  verror.RetryBackoff,
 			Formats: []compile.LangFmt{{en, pre + "msg1"}},
 			English: pre + "msg1",
 		},
@@ -202,7 +201,7 @@ var errorTests = []errorTest{
 	{"WithParamsMulti", ep{{"a", `error Res(x string, y int32) {RetryRefetch,"en":"msg1","zh":"msg2"}`,
 		compile.ErrorDef{
 			Params:  []*compile.Arg{arg("x", vdl.StringType), arg("y", vdl.Int32Type)},
-			Action:  verror2.RetryRefetch,
+			Action:  verror.RetryRefetch,
 			Formats: []compile.LangFmt{{en, pre + "msg1"}, {zh, pre + "msg2"}},
 			English: pre + "msg1",
 		},

@@ -7,19 +7,18 @@ import (
 
 	"v.io/core/veyron2/i18n"
 	"v.io/core/veyron2/vdl/parse"
-	"v.io/core/veyron2/verror"
-	"v.io/core/veyron2/verror2"
+	verror "v.io/core/veyron2/verror2"
 )
 
 // ErrorDef represents a user-defined error definition in the compiled results.
 type ErrorDef struct {
-	NamePos                     // name, parse position and docs
-	Exported bool               // is this error definition exported?
-	ID       verror.ID          // error ID
-	Action   verror2.ActionCode // action to be performed by client
-	Params   []*Arg             // list of positional parameter names and types
-	Formats  []LangFmt          // list of language / format pairs
-	English  string             // English format text from Formats
+	NamePos                    // name, parse position and docs
+	Exported bool              // is this error definition exported?
+	ID       verror.ID         // error ID
+	Action   verror.ActionCode // action to be performed by client
+	Params   []*Arg            // list of positional parameter names and types
+	Formats  []LangFmt         // list of language / format pairs
+	English  string            // English format text from Formats
 }
 
 // LangFmt represents a language / format string pair.
@@ -84,13 +83,13 @@ func defineErrorID(pkg *Package, name string) verror.ID {
 	return verror.ID(pkgPath + "." + name)
 }
 
-func defineErrorAction(name string, pactions []parse.StringPos, file *File, env *Env) verror2.ActionCode {
+func defineErrorAction(name string, pactions []parse.StringPos, file *File, env *Env) verror.ActionCode {
 	// We allow multiple actions to be specified in the parser, so that it's easy
 	// to add new actions in the future.
-	var act verror2.ActionCode
+	var act verror.ActionCode
 	seenRetry := false
 	for _, pact := range pactions {
-		if code, err := verror2.RetryActionFromString(pact.String); err == nil {
+		if code, err := verror.RetryActionFromString(pact.String); err == nil {
 			if seenRetry {
 				env.Errorf(file, pact.Pos, "error %s action %s invalid (retry action specified multiple times)", name, pact.String)
 				continue

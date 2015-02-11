@@ -2,11 +2,11 @@ package javascript
 
 import (
 	"testing"
+
 	"v.io/core/veyron2/i18n"
 	"v.io/core/veyron2/vdl"
 	"v.io/core/veyron2/vdl/compile"
-	"v.io/core/veyron2/verror"
-	"v.io/core/veyron2/verror2"
+	verror "v.io/core/veyron2/verror2"
 )
 
 func TestError(t *testing.T) {
@@ -15,7 +15,7 @@ func TestError(t *testing.T) {
 			Name: "Test",
 		},
 		ID:     verror.ID("v.io/core/veyron2/vdl/codegen/javascript.Test"),
-		Action: verror2.NoRetry,
+		Action: verror.NoRetry,
 		Params: []*compile.Arg{
 			&compile.Arg{
 				NamePos: compile.NamePos{

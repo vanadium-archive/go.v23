@@ -9,26 +9,25 @@ import (
 	"testing"
 
 	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/verror"
-	"v.io/core/veyron2/verror2"
+	verror "v.io/core/veyron2/verror2"
 )
 
 type nValue *vdl.Value
 
 // Each group of values in vvNAME and rvNAME are all mutually convertible.
 var (
-	rvError1 = verror2.Standard{
-		IDAction:  verror2.IDAction{verror.ID("id1"), verror2.NoRetry},
+	rvError1 = verror.Standard{
+		IDAction:  verror.IDAction{verror.ID("id1"), verror.NoRetry},
 		Msg:       "msg1",
 		ParamList: nil,
 	}
-	rvError2 = verror2.Standard{
-		IDAction:  verror2.IDAction{verror.ID("id2"), verror2.RetryConnection},
+	rvError2 = verror.Standard{
+		IDAction:  verror.IDAction{verror.ID("id2"), verror.RetryConnection},
 		Msg:       "msg2",
 		ParamList: []interface{}{"abc", int32(123)},
 	}
-	rvError3 = verror2.Standard{
-		IDAction:  verror2.IDAction{verror.ID("id3"), verror2.RetryBackoff},
+	rvError3 = verror.Standard{
+		IDAction:  verror.IDAction{verror.ID("id3"), verror.RetryBackoff},
 		Msg:       "msg3",
 		ParamList: []interface{}{rvError1, &rvError2},
 	}
