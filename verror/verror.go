@@ -145,14 +145,6 @@ func Register(id ID, action ActionCode, englishText string) IDAction {
 	return IDAction{id, action}
 }
 
-// An E is an error interface, but with an extra method that nother but a
-// Standard implements.  It exists solely to aid in conversion, because the E
-// interface existed before.
-type E interface {
-	error
-	UniqueMethodName()
-}
-
 // A Standard is the representation of a verror error.
 //
 // This must be kept in sync with the vdl.ErrorType defined in
@@ -166,10 +158,6 @@ type Standard struct {
 	ParamList []interface{} // The variadic parameters given to ExplicitNew().
 	stackPCs  []uintptr     // PCs of callers of *New() and *Convert().
 	subErrs   []error       // Subordinate errors
-}
-
-// UniqueMethodName exists so that Standard will be the lone implementer of E.
-func (x Standard) UniqueMethodName() {
 }
 
 func assertStandard(err error) (Standard, bool) {
