@@ -76,8 +76,10 @@ import "sync"
 
 import "v.io/core/veyron2/context"
 import "v.io/core/veyron2/i18n"
-import "v.io/core/veyron2/verror" // While converting from verror to verror2
 import "v.io/core/veyron2/vtrace"
+
+// ID is a unique identifier for errors.
+type ID string
 
 // An ActionCode represents the action expected to be performed by a typical client
 // receiving an error that perhaps it does not understand.
@@ -124,21 +126,21 @@ func RetryActionFromString(label string) (ActionCode, error) {
 	return ActionCode(0), Make(BadArg, nil, label)
 }
 
-// An IDAction combines a unique identifier ID for errors with an ActionCode.  The
-// ID allows stable error checking across different error messages and
+// An IDAction combines a unique identifier ID for errors with an ActionCode.
+// The ID allows stable error checking across different error messages and
 // different address spaces.  By convention the format for the identifier is
-// "PKGPATH.NAME" - e.g. ErrIDFoo defined in the "veyron2/verror" package has
-// id "veyron2/verror.ErrIDFoo".  It is unwise ever to create two IDActions that
+// "PKGPATH.NAME" - e.g. ErrIDFoo defined in the "veyron2/verror" package has id
+// "veyron2/verror.ErrIDFoo".  It is unwise ever to create two IDActions that
 // associate different ActionCodes with the same ID.
 type IDAction struct {
-	ID     verror.ID
+	ID     ID
 	Action ActionCode
 }
 
 // Register returns a IDAction with the given ID and Action fields, and
 // inserts a message into the default i18n Catalogue in US English.
 // Other languages can be added by adding to the Catalogue.
-func Register(id verror.ID, action ActionCode, englishText string) IDAction {
+func Register(id ID, action ActionCode, englishText string) IDAction {
 	i18n.Cat().SetWithBase(defaultLangID(i18n.NoLangID), i18n.MsgID(id), englishText)
 	return IDAction{id, action}
 }
@@ -182,20 +184,13 @@ func assertStandard(err error) (Standard, bool) {
 
 // ErrorID returns the ID of the given err, or Unknown if the err has no ID.
 // If err is nil then ErrorID returns "".
-func ErrorID(err error) verror.ID {
+func ErrorID(err error) ID {
 	if err == nil {
 		return ""
 	}
 	if e, ok := assertStandard(err); ok {
 		return e.IDAction.ID
 	}
-
-	// The following is to aid conversion from verror to verror2
-	if e, _ := err.(verror.E); e != nil {
-		return e.ErrorID()
-	}
-	// End conversion aid.
-
 	return Unknown.ID
 }
 
@@ -211,7 +206,7 @@ func Action(err error) ActionCode {
 }
 
 // Is returns true iff the given err has the given ID.
-func Is(err error, id verror.ID) bool {
+func Is(err error, id ID) bool {
 	return ErrorID(err) == id
 }
 
@@ -379,13 +374,6 @@ func convertInternal(idAction IDAction, langID i18n.LangID, componentName string
 		newStack = append(newStack, stack...)
 		return Standard{e.IDAction, msg, newParams, newStack, nil}
 	}
-
-	// The following is to aid conversion from verror to verror2
-	if _, ok := err.(verror.E); ok {
-		return makeInternal(IDAction{ErrorID(err), NoRetry}, langID, componentName, opName, stack, err.Error())
-	}
-	// End conversion aid.
-
 	return makeInternal(idAction, langID, componentName, opName, stack, err.Error())
 }
 
