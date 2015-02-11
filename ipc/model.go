@@ -177,7 +177,7 @@ type Server interface {
 	// Endpoint. If there is need to associate endpoints with specific
 	// listen addresses then Listen should be called separately for each one.
 	//
-	// Any non-nil value of error can be converted to a verror2.E.  If
+	// Any non-nil value of error can be converted to a verror.E.  If
 	// error is nil and at least one address was supplied in the ListenSpec
 	// then ListenEndpoints will include at least one Endpoint.
 	Listen(spec ListenSpec) ([]naming.Endpoint, error)

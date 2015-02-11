@@ -13,7 +13,7 @@ import (
 	"v.io/core/veyron2/i18n"
 	"v.io/core/veyron2/ipc"
 	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/verror2"
+	"v.io/core/veyron2/verror"
 )
 
 type NamedBool bool
@@ -524,46 +524,46 @@ var CTOTypeObject = vdl.TypeObjectType
 var CTOAny = vdl.AnyType
 
 var (
-	NoParams1   = verror2.Register("v.io/core/veyron2/vdl/testdata/base.NoParams1", verror2.NoRetry, "{1:}{2:} en msg")
-	NoParams2   = verror2.Register("v.io/core/veyron2/vdl/testdata/base.NoParams2", verror2.RetryRefetch, "{1:}{2:} en msg")
-	WithParams1 = verror2.Register("v.io/core/veyron2/vdl/testdata/base.WithParams1", verror2.NoRetry, "{1:}{2:} en x={3} y={4}")
-	WithParams2 = verror2.Register("v.io/core/veyron2/vdl/testdata/base.WithParams2", verror2.RetryRefetch, "{1:}{2:} en x={3} y={4}")
-	notExported = verror2.Register("v.io/core/veyron2/vdl/testdata/base.notExported", verror2.NoRetry, "{1:}{2:} en x={3} y={4}")
+	ErrNoParams1   = verror.Register("v.io/core/veyron2/vdl/testdata/base.NoParams1", verror.NoRetry, "{1:}{2:} en msg")
+	ErrNoParams2   = verror.Register("v.io/core/veyron2/vdl/testdata/base.NoParams2", verror.RetryRefetch, "{1:}{2:} en msg")
+	ErrWithParams1 = verror.Register("v.io/core/veyron2/vdl/testdata/base.WithParams1", verror.NoRetry, "{1:}{2:} en x={3} y={4}")
+	ErrWithParams2 = verror.Register("v.io/core/veyron2/vdl/testdata/base.WithParams2", verror.RetryRefetch, "{1:}{2:} en x={3} y={4}")
+	errNotExported = verror.Register("v.io/core/veyron2/vdl/testdata/base.notExported", verror.NoRetry, "{1:}{2:} en x={3} y={4}")
 )
 
 func init() {
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(NoParams1.ID), "{1:}{2:} en msg")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(NoParams2.ID), "{1:}{2:} en msg")
-	i18n.Cat().SetWithBase(i18n.LangID("fr"), i18n.MsgID(NoParams2.ID), "{1:}{2:} fr msg")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(WithParams1.ID), "{1:}{2:} en x={3} y={4}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(WithParams2.ID), "{1:}{2:} en x={3} y={4}")
-	i18n.Cat().SetWithBase(i18n.LangID("fr"), i18n.MsgID(WithParams2.ID), "{1:}{2:} fr y={4} x={3}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(notExported.ID), "{1:}{2:} en x={3} y={4}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoParams1.ID), "{1:}{2:} en msg")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoParams2.ID), "{1:}{2:} en msg")
+	i18n.Cat().SetWithBase(i18n.LangID("fr"), i18n.MsgID(ErrNoParams2.ID), "{1:}{2:} fr msg")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrWithParams1.ID), "{1:}{2:} en x={3} y={4}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrWithParams2.ID), "{1:}{2:} en x={3} y={4}")
+	i18n.Cat().SetWithBase(i18n.LangID("fr"), i18n.MsgID(ErrWithParams2.ID), "{1:}{2:} fr y={4} x={3}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(errNotExported.ID), "{1:}{2:} en x={3} y={4}")
 }
 
-// MakeNoParams1 returns an error with the NoParams1 ID.
-func MakeNoParams1(ctx *context.T) error {
-	return verror2.Make(NoParams1, ctx)
+// NewErrNoParams1 returns an error with the ErrNoParams1 ID.
+func NewErrNoParams1(ctx *context.T) error {
+	return verror.New(ErrNoParams1, ctx)
 }
 
-// MakeNoParams2 returns an error with the NoParams2 ID.
-func MakeNoParams2(ctx *context.T) error {
-	return verror2.Make(NoParams2, ctx)
+// NewErrNoParams2 returns an error with the ErrNoParams2 ID.
+func NewErrNoParams2(ctx *context.T) error {
+	return verror.New(ErrNoParams2, ctx)
 }
 
-// MakeWithParams1 returns an error with the WithParams1 ID.
-func MakeWithParams1(ctx *context.T, x string, y int32) error {
-	return verror2.Make(WithParams1, ctx, x, y)
+// NewErrWithParams1 returns an error with the ErrWithParams1 ID.
+func NewErrWithParams1(ctx *context.T, x string, y int32) error {
+	return verror.New(ErrWithParams1, ctx, x, y)
 }
 
-// MakeWithParams2 returns an error with the WithParams2 ID.
-func MakeWithParams2(ctx *context.T, x string, y int32) error {
-	return verror2.Make(WithParams2, ctx, x, y)
+// NewErrWithParams2 returns an error with the ErrWithParams2 ID.
+func NewErrWithParams2(ctx *context.T, x string, y int32) error {
+	return verror.New(ErrWithParams2, ctx, x, y)
 }
 
-// makeNotExported returns an error with the notExported ID.
-func makeNotExported(ctx *context.T, x string, y int32) error {
-	return verror2.Make(notExported, ctx, x, y)
+// newErrNotExported returns an error with the errNotExported ID.
+func newErrNotExported(ctx *context.T, x string, y int32) error {
+	return verror.New(errNotExported, ctx, x, y)
 }
 
 // ServiceAClientMethods is the client interface

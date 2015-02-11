@@ -1,4 +1,4 @@
-package verror2
+package verror
 
 error (
 	// Unknown means the error has no known ID.  A more specific error should

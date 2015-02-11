@@ -12,7 +12,7 @@ import (
 	"reflect"
 
 	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/verror2"
+	"v.io/core/veyron2/verror"
 )
 
 var (
@@ -32,7 +32,7 @@ var (
 	rtPtrToType       = reflect.PtrTo(rtType)
 	rtPtrToValue      = reflect.PtrTo(rtValue)
 	rtError           = reflect.TypeOf((*error)(nil)).Elem()
-	rtVError2Standard = reflect.TypeOf(verror2.Standard{})
+	rtVError2Standard = reflect.TypeOf(verror.Standard{})
 )
 
 // convTarget represents the state and logic for value conversion.

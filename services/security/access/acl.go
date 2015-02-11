@@ -43,7 +43,7 @@ func (acl *ACL) Authorize(ctx security.Context) error {
 	if acl.Includes(blessingsForContext...) {
 		return nil
 	}
-	return MakeACLMatch(nil, blessingsForContext, invalid)
+	return NewErrACLMatch(nil, blessingsForContext, invalid)
 }
 
 // WriteTo writes the JSON-encoded representation of a TaggedACLMap to w.

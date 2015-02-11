@@ -7,7 +7,7 @@ import (
 
 	"v.io/core/veyron2/i18n"
 	"v.io/core/veyron2/vdl/parse"
-	verror "v.io/core/veyron2/verror2"
+	"v.io/core/veyron2/verror"
 )
 
 // ErrorDef represents a user-defined error definition in the compiled results.
@@ -46,7 +46,7 @@ func compileErrorDefs(pkg *Package, pfiles []*parse.File, env *Env) {
 				env.prefixErrorf(file, ped.Pos, err, "error %s name conflict", name)
 				continue
 			}
-			id := defineErrorID(pkg, name)
+			id := verror.ID(pkg.Path + "." + name)
 			ed := &ErrorDef{NamePos: NamePos(ped.NamePos), Exported: export, ID: id}
 			ed.Action = defineErrorAction(name, ped.Actions, file, env)
 			ed.Params = defineErrorParams(name, ped.Params, file, env)
@@ -70,17 +70,6 @@ func compileErrorDefs(pkg *Package, pfiles []*parse.File, env *Env) {
 			file.ErrorDefs = append(file.ErrorDefs, ed)
 		}
 	}
-}
-
-func defineErrorID(pkg *Package, name string) verror.ID {
-	pkgPath := pkg.Path
-	// TODO: This special-case is only required to maintain backwards
-	// compatibility with previously defined errors.  Remove this when the verror2
-	// package is renamed to verror.
-	if pkgPath == "v.io/core/veyron2/verror2" {
-		pkgPath = "v.io/core/veyron2/verror"
-	}
-	return verror.ID(pkgPath + "." + name)
 }
 
 func defineErrorAction(name string, pactions []parse.StringPos, file *File, env *Env) verror.ActionCode {

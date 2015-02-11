@@ -10,7 +10,7 @@ import (
 	"v.io/core/veyron2/vdl"
 	"v.io/core/veyron2/vdl/valconv"
 	"v.io/core/veyron2/vdl/vdlroot/src/signature"
-	"v.io/core/veyron2/verror2"
+	"v.io/core/veyron2/verror"
 )
 
 // Describer may be implemented by an underlying object served by the
@@ -165,7 +165,7 @@ func ReflectInvokerOrDie(obj interface{}) Invoker {
 func (ri reflectInvoker) Prepare(method string, _ int) ([]interface{}, []interface{}, error) {
 	info, ok := ri.methods[method]
 	if !ok {
-		return nil, nil, MakeUnknownMethod(nil, method)
+		return nil, nil, NewErrUnknownMethod(nil, method)
 	}
 	// Return the tags and new in-arg objects.
 	var argptrs []interface{}
@@ -183,7 +183,7 @@ func (ri reflectInvoker) Prepare(method string, _ int) ([]interface{}, []interfa
 func (ri reflectInvoker) Invoke(method string, call ServerCall, argptrs []interface{}) ([]interface{}, error) {
 	info, ok := ri.methods[method]
 	if !ok {
-		return nil, MakeUnknownMethod(nil, method)
+		return nil, NewErrUnknownMethod(nil, method)
 	}
 	// Create the reflect.Value args for the invocation.  The receiver of the
 	// method is always first, followed by the required context arg.
@@ -230,7 +230,7 @@ func (ri reflectInvoker) MethodSignature(ctx ServerContext, method string) (sign
 			return signature.CopyMethod(msig), nil
 		}
 	}
-	return signature.Method{}, MakeUnknownMethod(nil, method)
+	return signature.Method{}, NewErrUnknownMethod(nil, method)
 }
 
 // Globber implements the ipc.Globber interface.
@@ -293,7 +293,7 @@ func newReflectInfo(obj interface{}) (*reflectInfo, error) {
 	// provided by the user, there's no guarantee it's "correct", but if the same
 	// method is described by multiple interfaces, we check the tags are the same.
 	desc := describe(obj)
-	if verr := attachMethodTags(methodInfos, desc); verror2.Is(verr, verror2.Aborted.ID) {
+	if verr := attachMethodTags(methodInfos, desc); verror.Is(verr, verror.Aborted.ID) {
 		return nil, fmt.Errorf("ipc: type %v tag error: %v", rt, verr)
 	}
 	// Finally create the signature.  This combines the desc provided by the user
@@ -329,7 +329,7 @@ func makeMethods(rt reflect.Type) (map[string]methodInfo, map[string]signature.M
 		// Silently skip incompatible methods, except for Aborted errors.
 		var sig signature.Method
 		if verr := typeCheckMethod(method, &sig); verr != nil {
-			if verror2.Is(verr, verror2.Aborted.ID) {
+			if verror.Is(verr, verror.Aborted.ID) {
 				return nil, nil, fmt.Errorf("ipc: %s.%s: %v", rt.String(), method.Name, verr)
 			}
 			continue
@@ -358,7 +358,7 @@ func makeMethodInfo(method reflect.Method) methodInfo {
 }
 
 func abortedf(format string, v ...interface{}) error {
-	return verror2.Make(verror2.Aborted, nil, fmt.Sprintf(format, v...))
+	return verror.New(verror.Aborted, nil, fmt.Sprintf(format, v...))
 }
 
 var (
@@ -374,9 +374,9 @@ var (
 
 	// ReflectInvoker will panic iff the error is Aborted, otherwise it will
 	// silently ignore the error.
-	ErrReservedMethod    = verror2.Make(verror2.Internal, nil, "Reserved method")
-	ErrMethodNotExported = verror2.Make(verror2.BadArg, nil, "Method not exported")
-	ErrNonRPCMethod      = verror2.Make(verror2.BadArg, nil, "Non-rpc method.  We require at least 1 in-arg."+useContext)
+	ErrReservedMethod    = verror.New(verror.Internal, nil, "Reserved method")
+	ErrMethodNotExported = verror.New(verror.BadArg, nil, "Method not exported")
+	ErrNonRPCMethod      = verror.New(verror.BadArg, nil, "Non-rpc method.  We require at least 1 in-arg."+useContext)
 	ErrInServerCall      = abortedf("Context arg ipc.ServerCall is invalid; cannot determine streaming types." + forgotWrap)
 	ErrBadDescribe       = abortedf("Describe__ must have signature Describe__() []ipc.InterfaceDesc")
 	ErrBadGlobber        = abortedf("Globber must have signature Globber() *ipc.GlobState")

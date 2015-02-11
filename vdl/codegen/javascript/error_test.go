@@ -6,7 +6,7 @@ import (
 	"v.io/core/veyron2/i18n"
 	"v.io/core/veyron2/vdl"
 	"v.io/core/veyron2/vdl/compile"
-	verror "v.io/core/veyron2/verror2"
+	"v.io/core/veyron2/verror"
 )
 
 func TestError(t *testing.T) {

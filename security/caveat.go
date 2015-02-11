@@ -89,18 +89,18 @@ func (r *caveatRegistry) validate(uid uniqueid.Id, ctx Context, paramvom []byte)
 	// check if ctx happens to include it (for example, if ctx is
 	// ipc.ServerContext)?
 	if !exists {
-		return MakeErrCaveatNotRegistered(nil, uid)
+		return NewErrCaveatNotRegistered(nil, uid)
 	}
 	param := reflect.New(entry.paramType).Interface()
 	if err := vom.Decode(paramvom, param); err != nil {
 		t, _ := vdl.TypeFromReflect(entry.paramType)
-		return MakeErrCaveatParamCoding(nil, uid, t, err)
+		return NewErrCaveatParamCoding(nil, uid, t, err)
 	}
 	err := entry.validatorFn.Call([]reflect.Value{reflect.ValueOf(ctx), reflect.ValueOf(param).Elem()})[0].Interface()
 	if err == nil {
 		return nil
 	}
-	return MakeErrCaveatValidation(nil, err.(error))
+	return NewErrCaveatValidation(nil, err.(error))
 }
 
 // RegisterCaveatValidator associates a CaveatDescriptor with the
@@ -118,11 +118,11 @@ func RegisterCaveatValidator(c CaveatDescriptor, validator interface{}) {
 // function correponding to c and uses the provided parameters.
 func NewCaveat(c CaveatDescriptor, param interface{}) (Caveat, error) {
 	if got, want := vdl.TypeOf(param), c.ParamType; got != want {
-		return Caveat{}, MakeErrCaveatParamTypeMismatch(nil, c.Id, c.ParamType, fmt.Sprintf("%T", param))
+		return Caveat{}, NewErrCaveatParamTypeMismatch(nil, c.Id, c.ParamType, fmt.Sprintf("%T", param))
 	}
 	bytes, err := vom.Encode(param)
 	if err != nil {
-		return Caveat{}, MakeErrCaveatParamCoding(nil, c.Id, c.ParamType, err)
+		return Caveat{}, NewErrCaveatParamCoding(nil, c.Id, c.ParamType, err)
 	}
 	return Caveat{c.Id, bytes}, nil
 }

@@ -119,7 +119,7 @@ func (a *authorizer) Authorize(ctx security.Context) error {
 	for _, tag := range ctx.MethodTags() {
 		if v := reflect.ValueOf(tag); v.Type() == a.tagType {
 			if acl, exists := a.acls[v.String()]; !exists || !acl.Includes(blessingsForContext...) {
-				return MakeACLMatch(nil, blessingsForContext, invalid)
+				return NewErrACLMatch(nil, blessingsForContext, invalid)
 			}
 			grant = true
 		}
@@ -127,7 +127,7 @@ func (a *authorizer) Authorize(ctx security.Context) error {
 	if grant {
 		return nil
 	}
-	return MakeACLMatch(nil, blessingsForContext, invalid)
+	return NewErrACLMatch(nil, blessingsForContext, invalid)
 }
 
 type fileAuthorizer struct {

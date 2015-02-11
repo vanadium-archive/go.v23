@@ -10,7 +10,7 @@ import (
 	"v.io/core/veyron2/vdl/compile"
 	"v.io/core/veyron2/vdl/parse"
 	"v.io/core/veyron2/vdl/vdltest"
-	verror "v.io/core/veyron2/verror2"
+	"v.io/core/veyron2/verror"
 )
 
 func TestError(t *testing.T) {

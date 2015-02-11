@@ -7,7 +7,7 @@ import (
 	"reflect"
 
 	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/verror2"
+	"v.io/core/veyron2/verror"
 )
 
 // Target represents a generic conversion target; objects that implement this
@@ -358,7 +358,7 @@ func FromReflect(target Target, rv reflect.Value) error {
 // fromError handles all rv values that implement the error interface.
 // TODO(toddw): box our interface values to constrain this?
 func fromError(target Target, err error, rt reflect.Type) error {
-	// Convert from err into verror2, and then into the vdl.Value representation,
+	// Convert from err into verror, and then into the vdl.Value representation,
 	// and then fill the target.  We can't just call FromReflect since that'll
 	// cause a recursive loop.
 	v, err := vdlValueFromError(err)
@@ -368,7 +368,7 @@ func fromError(target Target, err error, rt reflect.Type) error {
 	// The rt arg is the original type of err, and we know that rt is convertible
 	// to error.  If rt is a non-pointer type, or if only the pointer type is
 	// convertible to error, we convert from the non-pointer error struct.  This
-	// ensures that if target is interface{}, we'll create a verror2.Standard with
+	// ensures that if target is interface{}, we'll create a verror.Standard with
 	// the right optionality.
 	if rt.Kind() != reflect.Ptr ||
 		(rt.Kind() == reflect.Ptr && !rt.Elem().ConvertibleTo(rtError)) {
@@ -378,7 +378,7 @@ func fromError(target Target, err error, rt reflect.Type) error {
 }
 
 func vdlValueFromError(err error) (*vdl.Value, error) {
-	e := verror2.ExplicitConvert(verror2.Unknown, "", "", "", err)
+	e := verror.ExplicitConvert(verror.Unknown, "", "", "", err)
 	// The verror types are defined like this:
 	//
 	// type ID         string
@@ -394,11 +394,11 @@ func vdlValueFromError(err error) (*vdl.Value, error) {
 	// }
 	verr := vdl.NonNilZeroValue(vdl.ErrorType)
 	vv := verr.Elem()
-	vv.Field(0).Field(0).AssignString(string(verror2.ErrorID(e)))
-	vv.Field(0).Field(1).AssignUint(uint64(verror2.Action(e)))
+	vv.Field(0).Field(0).AssignString(string(verror.ErrorID(e)))
+	vv.Field(0).Field(1).AssignUint(uint64(verror.Action(e)))
 	vv.Field(1).AssignString(e.Error())
-	vv.Field(2).AssignLen(len(verror2.Params(e)))
-	for ix, p := range verror2.Params(e) {
+	vv.Field(2).AssignLen(len(verror.Params(e)))
+	for ix, p := range verror.Params(e) {
 		var pVDL *vdl.Value
 		if err := Convert(&pVDL, p); err != nil {
 			return nil, err

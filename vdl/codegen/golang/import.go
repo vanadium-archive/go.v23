@@ -323,12 +323,12 @@ func systemImports(deps deps, file *compile.File) importMap {
 		system["v.io/core/veyron2/context"] = "context"
 		system["v.io/core/veyron2/i18n"] = "i18n"
 		// If the user has specified any errors, typically we need to import the
-		// "v.io/core/veyron2/verror2" package.  However we allow vdl
-		// code-generation in the "v.io/core/veyron2/verror2" package itself, to
-		// specify common errors.  Special-case this scenario to avoid self-cyclic
-		// package dependencies.
-		if file.Package.Path != "v.io/core/veyron2/verror2" {
-			system["v.io/core/veyron2/verror2"] = "verror2"
+		// "v.io/core/veyron2/verror" package.  However we allow vdl code-generation
+		// in the "v.io/core/veyron2/verror" package itself, to specify common
+		// errors.  Special-case this scenario to avoid self-cyclic package
+		// dependencies.
+		if file.Package.Path != "v.io/core/veyron2/verror" {
+			system["v.io/core/veyron2/verror"] = "verror"
 		}
 	}
 	return system
