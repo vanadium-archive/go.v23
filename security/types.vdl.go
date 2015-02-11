@@ -8,7 +8,7 @@ import (
 	"v.io/core/veyron2/context"
 	"v.io/core/veyron2/i18n"
 	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/verror2"
+	"v.io/core/veyron2/verror"
 
 	// VDL user imports
 	"v.io/core/veyron2/uniqueid"
@@ -264,14 +264,14 @@ const SignatureForBlessingCertificates = "B" // Signature.Purpose used by a Prin
 const SignatureForDischarge = "D" // Signature.Purpose used by a Principal when signing discharges for public-key based third-party caveats.
 
 var (
-	UntrustedRoot = verror2.Register("v.io/core/veyron2/security.UntrustedRoot", verror2.NoRetry, "{1:}{2:} {3}: root not trusted")
+	ErrUntrustedRoot = verror.Register("v.io/core/veyron2/security.UntrustedRoot", verror.NoRetry, "{1:}{2:} {3}: root not trusted")
 )
 
 func init() {
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(UntrustedRoot.ID), "{1:}{2:} {3}: root not trusted")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUntrustedRoot.ID), "{1:}{2:} {3}: root not trusted")
 }
 
-// MakeUntrustedRoot returns an error with the UntrustedRoot ID.
-func MakeUntrustedRoot(ctx *context.T, blessing string) error {
-	return verror2.Make(UntrustedRoot, ctx, blessing)
+// NewErrUntrustedRoot returns an error with the ErrUntrustedRoot ID.
+func NewErrUntrustedRoot(ctx *context.T, blessing string) error {
+	return verror.New(ErrUntrustedRoot, ctx, blessing)
 }

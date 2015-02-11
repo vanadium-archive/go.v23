@@ -9,7 +9,7 @@ import (
 	"v.io/core/veyron2/context"
 	"v.io/core/veyron2/i18n"
 	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/verror2"
+	"v.io/core/veyron2/verror"
 )
 
 // LogLine is a log entry from a log file.
@@ -34,14 +34,14 @@ func init() {
 const AllEntries = int32(-1)
 
 var (
-	EOF = verror2.Register("v.io/core/veyron2/services/mgmt/logreader/types.EOF", verror2.NoRetry, "{1:}{2:} EOF")
+	ErrEOF = verror.Register("v.io/core/veyron2/services/mgmt/logreader/types.EOF", verror.NoRetry, "{1:}{2:} EOF")
 )
 
 func init() {
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(EOF.ID), "{1:}{2:} EOF")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrEOF.ID), "{1:}{2:} EOF")
 }
 
-// MakeEOF returns an error with the EOF ID.
-func MakeEOF(ctx *context.T) error {
-	return verror2.Make(EOF, ctx)
+// NewErrEOF returns an error with the ErrEOF ID.
+func NewErrEOF(ctx *context.T) error {
+	return verror.New(ErrEOF, ctx)
 }

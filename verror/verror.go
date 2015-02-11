@@ -1,4 +1,4 @@
-// Package verror2 extends the regular error mechanism to work across different
+// Package verror extends the regular error mechanism to work across different
 // address spaces.
 //
 // To define a new error identifier, for example "someNewError", client code is
@@ -16,13 +16,13 @@
 // is the name of the component (typically server or binary name), and the
 // second is the name of the operation (such as an RPC or subcommand) that
 // encountered the error.  Other parameters typically identify the object(s) on
-// which the error occurred.  This convention is normally applied by Make(),
+// which the error occurred.  This convention is normally applied by New(),
 // which fetches the language, component name and operation name from the
 // context.T:
-//      err = verror2.Make(someNewError, ctx, "object_on_which_error_occurred")
+//      err = verror.New(someNewError, ctx, "object_on_which_error_occurred")
 //
-// The ExplicitMake() call can be used to specify these things explicitly:
-//      err = verror2.ExplicitMake(someNewError, i18n.LangIDFromContext(ctx),
+// The ExplicitNew() call can be used to specify these things explicitly:
+//      err = verror.ExplicitNew(someNewError, i18n.LangIDFromContext(ctx),
 //              "my_component", "op_name", "procedure_name", "object_name")
 // If the language, component and/or operation name are unknown, use i18n.NoLangID
 // or the empty string, respectively.
@@ -44,26 +44,26 @@
 // is used with the cat.Format example above, it yields:
 //      3rd: foo 2nd bar: 1st 4th (3rd)
 //
-// The Convert() and ExplicitConvert() calls are like Make() and ExplicitMake(),
+// The Convert() and ExplicitConvert() calls are like New() and ExplicitNew(),
 // but convert existing errors (with their parameters, if applicable)
-// to verror2 errors with given language, component name, and operation name,
+// to verror errors with given language, component name, and operation name,
 // if non-empty values for these are provided.  They also add a PC to a
 // list of PC values to assist developers hunting for the error.
 //
-// If the context.T specified with Make() or Convert() is nil, a default
+// If the context.T specified with New() or Convert() is nil, a default
 // context is used, set by SetDefaultContext().  This can be used in standalone
 // programmes, or in anciliary threads not associated with an RPC.  The user
 // might do the following to get the language from the environment, and the
 // programme name from Args[0]:
 //     ctx := runtime.NewContext()
 //     ctx = i18n.ContextWithLangID(ctx, i18n.LangIDFromEnv())
-//     ctx = verror2.ContextWithComponentName(ctx, os.Args[0])
-//     verror2.SetDefaultContext(ctx)
+//     ctx = verror.ContextWithComponentName(ctx, os.Args[0])
+//     verror.SetDefaultContext(ctx)
 // A standalone tool might set the operation name to be a subcommand name, if
 // any.  If the default context has not been set, the error generated has no
 // language, component and operation values; they will be filled in by the
 // first Convert() call that does have these values.
-package verror2
+package verror
 
 import "bytes"
 import "fmt"
@@ -123,7 +123,7 @@ func RetryActionFromString(label string) (ActionCode, error) {
 	case "RetryBackoff":
 		return RetryBackoff, nil
 	}
-	return ActionCode(0), Make(BadArg, nil, label)
+	return ActionCode(0), New(BadArg, nil, label)
 }
 
 // An IDAction combines a unique identifier ID for errors with an ActionCode.
@@ -153,7 +153,7 @@ type E interface {
 	UniqueMethodName()
 }
 
-// A Standard is the representation of a verror2 error.
+// A Standard is the representation of a verror error.
 //
 // This must be kept in sync with the vdl.ErrorType defined in
 // v.io/core/veyron2/vdl.
@@ -163,8 +163,8 @@ type E interface {
 type Standard struct {
 	IDAction  IDAction
 	Msg       string        // Error message; empty if no language known.
-	ParamList []interface{} // The variadic parameters given to ExplicitMake().
-	stackPCs  []uintptr     // PCs of callers of *Make() and *Convert().
+	ParamList []interface{} // The variadic parameters given to ExplicitNew().
+	stackPCs  []uintptr     // PCs of callers of *New() and *Convert().
 	subErrs   []error       // Subordinate errors
 }
 
@@ -262,7 +262,7 @@ func isDefaultIDAction(idAction IDAction) bool {
 	return idAction.ID == "" && idAction.Action == 0
 }
 
-// makeInternal is like ExplicitMake(), but takes a slice of PC values as an argument,
+// makeInternal is like ExplicitNew(), but takes a slice of PC values as an argument,
 // rather than constructing one from the caller's PC.
 func makeInternal(idAction IDAction, langID i18n.LangID, componentName string, opName string, stack []uintptr, v ...interface{}) Standard {
 	msg := ""
@@ -277,12 +277,12 @@ func makeInternal(idAction IDAction, langID i18n.LangID, componentName string, o
 	return Standard{idAction, msg, params, stack, nil}
 }
 
-// ExplicitMake returns an error with the given ID, with an error string in the chosen
+// ExplicitNew returns an error with the given ID, with an error string in the chosen
 // language.  The component and operation name are included the first and second
 // parameters of the error.  Other parameters are taken from v[].  The
 // parameters are formatted into the message according to i18n.Cat().Format.
 // The caller's PC is added to the error's stack.
-func ExplicitMake(idAction IDAction, langID i18n.LangID, componentName string, opName string, v ...interface{}) error {
+func ExplicitNew(idAction IDAction, langID i18n.LangID, componentName string, opName string, v ...interface{}) error {
 	stack := make([]uintptr, 1)
 	runtime.Callers(2, stack)
 	return makeInternal(idAction, langID, componentName, opName, stack, v...)
@@ -292,14 +292,14 @@ func ExplicitMake(idAction IDAction, langID i18n.LangID, componentName string, o
 type componentKey struct{}
 
 // ContextWithComponentName returns a context based on ctx that has the
-// componentName that Make() and Convert() can use.
+// componentName that New() and Convert() can use.
 func ContextWithComponentName(ctx *context.T, componentName string) *context.T {
 	return context.WithValue(ctx, componentKey{}, componentName)
 }
 
-// Make is like ExplicitMake(), but obtains the language, component name, and operation
+// New is like ExplicitNew(), but obtains the language, component name, and operation
 // name from the specified context.T.   ctx may be nil.
-func Make(idAction IDAction, ctx *context.T, v ...interface{}) error {
+func New(idAction IDAction, ctx *context.T, v ...interface{}) error {
 	langID, componentName, opName := dataFromContext(ctx)
 	stack := make([]uintptr, 1)
 	runtime.Callers(2, stack)
@@ -315,7 +315,7 @@ func isEmptyString(v interface{}) bool {
 // convertInternal is like ExplicitConvert(), but takes a slice of PC values as an argument,
 // rather than constructing one from the caller's PC.
 func convertInternal(idAction IDAction, langID i18n.LangID, componentName string, opName string, stack []uintptr, err error) Standard {
-	// If err is already a verror2.Standard, we wish to:
+	// If err is already a verror.Standard, we wish to:
 	//  - retain all set parameters.
 	//  - if not yet set, set parameters 0 and 1 from componentName and
 	//    opName.
@@ -392,14 +392,14 @@ func ExplicitConvert(idAction IDAction, langID i18n.LangID, componentName string
 	}
 }
 
-// defaultCtx is the context used when a nil context.T is passed to Make() or Convert().
+// defaultCtx is the context used when a nil context.T is passed to New() or Convert().
 var (
 	defaultCtx     *context.T
 	defaultCtxLock sync.RWMutex // Protects defaultCtx.
 )
 
 // SetDefaultContext sets the default context used when a nil context.T is
-// passed to Make() or Convert().  It is typically used in standalone
+// passed to New() or Convert().  It is typically used in standalone
 // programmes that have no RPC context, or in servers for the context of
 // ancillary threads not associated with any particular RPC.
 func SetDefaultContext(ctx *context.T) {
@@ -463,7 +463,7 @@ func (e Standard) Error() string {
 	return msg
 }
 
-// Params returns the variadic arguments to ExplicitMake().
+// Params returns the variadic arguments to ExplicitNew().
 func Params(err error) []interface{} {
 	if e, ok := assertStandard(err); ok {
 		return e.ParamList

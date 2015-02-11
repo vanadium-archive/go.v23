@@ -1,4 +1,4 @@
-package verror2_test
+package verror_test
 
 import (
 	"errors"
@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"v.io/core/veyron2/i18n"
-	verror "v.io/core/veyron2/verror2"
+	"v.io/core/veyron2/verror"
 	"v.io/core/veyron2/vtrace"
 
 	"v.io/core/veyron/lib/testutil"
@@ -69,7 +69,7 @@ var (
 // This function comes first because it has line numbers embedded in it, and putting it first
 // reduces the chances that its line numbers will change.
 func TestSubordinateErrors(t *testing.T) {
-	p := verror.ExplicitMake(idActionA, en, "server", "aEN0", 0)
+	p := verror.ExplicitNew(idActionA, en, "server", "aEN0", 0)
 	if verror.SubErrors(p) != nil {
 		t.Errorf("expected nil")
 	}
@@ -137,36 +137,36 @@ func init() {
 	ctx, _ = vtrace.SetNewSpan(ctx, "aFR1")
 
 	// A first IDAction in various languages.
-	aEN0 = verror.ExplicitMake(idActionA, en, "server", "aEN0", 0)
-	aEN1 = verror.ExplicitMake(idActionA, en, "server", "aEN1", 1, 2)
-	aFR0 = verror.ExplicitMake(idActionA, fr, "server", "aFR0", 0)
-	aFR1 = verror.Make(idActionA, ctx, 1, 2)
-	aDE0 = verror.ExplicitMake(idActionA, de, "server", "aDE0", 0)
-	aDE1 = verror.ExplicitMake(idActionA, de, "server", "aDE1", 1, 2)
+	aEN0 = verror.ExplicitNew(idActionA, en, "server", "aEN0", 0)
+	aEN1 = verror.ExplicitNew(idActionA, en, "server", "aEN1", 1, 2)
+	aFR0 = verror.ExplicitNew(idActionA, fr, "server", "aFR0", 0)
+	aFR1 = verror.New(idActionA, ctx, 1, 2)
+	aDE0 = verror.ExplicitNew(idActionA, de, "server", "aDE0", 0)
+	aDE1 = verror.ExplicitNew(idActionA, de, "server", "aDE1", 1, 2)
 
 	// A second IDAction in various languages.
-	bEN0 = verror.ExplicitMake(idActionB, en, "server", "bEN0", 0)
-	bEN1 = verror.ExplicitMake(idActionB, en, "server", "bEN1", 1, 2)
-	bFR0 = verror.ExplicitMake(idActionB, fr, "server", "bFR0", 0)
-	bFR1 = verror.ExplicitMake(idActionB, fr, "server", "bFR1", 1, 2)
-	bDE0 = verror.ExplicitMake(idActionB, de, "server", "bDE0", 0)
-	bDE1 = verror.ExplicitMake(idActionB, de, "server", "bDE1", 1, 2)
+	bEN0 = verror.ExplicitNew(idActionB, en, "server", "bEN0", 0)
+	bEN1 = verror.ExplicitNew(idActionB, en, "server", "bEN1", 1, 2)
+	bFR0 = verror.ExplicitNew(idActionB, fr, "server", "bFR0", 0)
+	bFR1 = verror.ExplicitNew(idActionB, fr, "server", "bFR1", 1, 2)
+	bDE0 = verror.ExplicitNew(idActionB, de, "server", "bDE0", 0)
+	bDE1 = verror.ExplicitNew(idActionB, de, "server", "bDE1", 1, 2)
 
 	// The Unknown error in various languages.
-	uEN0 = verror.ExplicitMake(verror.Unknown, en, "server", "uEN0", 0)
-	uEN1 = verror.ExplicitMake(verror.Unknown, en, "server", "uEN1", 1, 2)
-	uFR0 = verror.ExplicitMake(verror.Unknown, fr, "server", "uFR0", 0)
-	uFR1 = verror.ExplicitMake(verror.Unknown, fr, "server", "uFR1", 1, 2)
-	uDE0 = verror.ExplicitMake(verror.Unknown, de, "server", "uDE0", 0)
-	uDE1 = verror.ExplicitMake(verror.Unknown, de, "server", "uDE1", 1, 2)
+	uEN0 = verror.ExplicitNew(verror.Unknown, en, "server", "uEN0", 0)
+	uEN1 = verror.ExplicitNew(verror.Unknown, en, "server", "uEN1", 1, 2)
+	uFR0 = verror.ExplicitNew(verror.Unknown, fr, "server", "uFR0", 0)
+	uFR1 = verror.ExplicitNew(verror.Unknown, fr, "server", "uFR1", 1, 2)
+	uDE0 = verror.ExplicitNew(verror.Unknown, de, "server", "uDE0", 0)
+	uDE1 = verror.ExplicitNew(verror.Unknown, de, "server", "uDE1", 1, 2)
 
 	// The NoExist error in various languages.
-	nEN0 = verror.ExplicitMake(verror.NoExist, en, "server", "nEN0", 0)
-	nEN1 = verror.ExplicitMake(verror.NoExist, en, "server", "nEN1", 1, 2)
-	nFR0 = verror.ExplicitMake(verror.NoExist, fr, "server", "nFR0", 0)
-	nFR1 = verror.ExplicitMake(verror.NoExist, fr, "server", "nFR1", 1, 2)
-	nDE0 = verror.ExplicitMake(verror.NoExist, de, "server", "nDE0", 0)
-	nDE1 = verror.ExplicitMake(verror.NoExist, de, "server", "nDE1", 1, 2)
+	nEN0 = verror.ExplicitNew(verror.NoExist, en, "server", "nEN0", 0)
+	nEN1 = verror.ExplicitNew(verror.NoExist, en, "server", "nEN1", 1, 2)
+	nFR0 = verror.ExplicitNew(verror.NoExist, fr, "server", "nFR0", 0)
+	nFR1 = verror.ExplicitNew(verror.NoExist, fr, "server", "nFR1", 1, 2)
+	nDE0 = verror.ExplicitNew(verror.NoExist, de, "server", "nDE0", 0)
+	nDE1 = verror.ExplicitNew(verror.NoExist, de, "server", "nDE1", 1, 2)
 
 	// Errors derived from Go errors.
 	gerr := errors.New("Go error")
@@ -174,7 +174,7 @@ func init() {
 	gFR = verror.ExplicitConvert(verror.Unknown, fr, "server", "op", gerr)
 	gDE = verror.ExplicitConvert(verror.Unknown, de, "server", "op", gerr)
 
-	// Errors derived from other verror2 errors.
+	// Errors derived from other verror errors.
 	// eEN1 has an English message.
 	v2EN = verror.ExplicitConvert(verror.Unknown, en, "", "", aEN1)        // still in English.
 	v2FR0 = verror.ExplicitConvert(verror.Unknown, fr, "", "", aEN1)       // converted to French, with original server and op.
@@ -207,7 +207,7 @@ func TestDefaultValues(t *testing.T) {
 		t.Errorf("is test succeeded")
 	}
 
-	if verror.Is(verror.ExplicitMake(verror.Unknown, i18n.NoLangID, "", ""), verror.IDAction{}.ID) {
+	if verror.Is(verror.ExplicitNew(verror.Unknown, i18n.NoLangID, "", ""), verror.IDAction{}.ID) {
 		t.Errorf("is test succeeded")
 	}
 
@@ -216,13 +216,13 @@ func TestDefaultValues(t *testing.T) {
 	}
 
 	// nil and default IDAction get mapped to Unknown.
-	if !verror.Equal(nil, verror.ExplicitMake(verror.IDAction{}, i18n.NoLangID, "", "")) {
+	if !verror.Equal(nil, verror.ExplicitNew(verror.IDAction{}, i18n.NoLangID, "", "")) {
 		t.Errorf("equality test failed")
 	}
-	if verror.Equal(nil, verror.ExplicitMake(verror.Unknown, i18n.NoLangID, "", "")) {
+	if verror.Equal(nil, verror.ExplicitNew(verror.Unknown, i18n.NoLangID, "", "")) {
 		t.Errorf("equality test succeeded")
 	}
-	if verror.Equal(nil, verror.ExplicitMake(verror.BadArg, i18n.NoLangID, "", "")) {
+	if verror.Equal(nil, verror.ExplicitNew(verror.BadArg, i18n.NoLangID, "", "")) {
 		t.Errorf("equality test succeeded")
 	}
 
@@ -293,7 +293,7 @@ func TestBasic(t *testing.T) {
 			t.Errorf("len(Stack(%q)) got %d, want 1 or 2", verror.ErrorID(test.err), len(stack))
 		} else {
 			fnc := runtime.FuncForPC(stack[0])
-			if !strings.Contains(fnc.Name(), "verror2_test.init") {
+			if !strings.Contains(fnc.Name(), "verror_test.init") {
 				t.Errorf("Func.Name(Stack(%q)[0]) got %q, want \"verror.init\"",
 					verror.ErrorID(test.err), fnc.Name())
 			}
@@ -302,8 +302,8 @@ func TestBasic(t *testing.T) {
 }
 
 func tester() (error, error) {
-	l1 := verror.ExplicitMake(idActionA, en, "server", "aEN0", 0)
-	return l1, verror.ExplicitMake(idActionA, en, "server", "aEN0", 1)
+	l1 := verror.ExplicitNew(idActionA, en, "server", "aEN0", 0)
+	return l1, verror.ExplicitNew(idActionA, en, "server", "aEN0", 1)
 }
 
 func TestStack(t *testing.T) {
@@ -317,8 +317,8 @@ func TestStack(t *testing.T) {
 		if got, want := strings.Count(stack, "\n"), 1; got != want {
 			t.Errorf("got %d, want %d", got, want)
 		}
-		if !strings.Contains(stack, "verror2_test.tester") {
-			t.Errorf("got %q, doesn't contain 'verror2_test.tester", stack)
+		if !strings.Contains(stack, "verror_test.tester") {
+			t.Errorf("got %q, doesn't contain 'verror_test.tester", stack)
 		}
 	}
 }

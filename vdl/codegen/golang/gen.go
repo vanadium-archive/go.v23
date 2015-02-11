@@ -138,6 +138,7 @@ func init() {
 	funcMap := template.FuncMap{
 		"firstRuneToExport":     vdlutil.FirstRuneToExportCase,
 		"firstRuneToUpper":      vdlutil.FirstRuneToUpper,
+		"errorName":             errorName,
 		"nativeIdent":           nativeIdent,
 		"typeGo":                typeGo,
 		"typeDefGo":             typeDefGo,
@@ -165,6 +166,17 @@ func init() {
 		"reInitStreamValue":     reInitStreamValue,
 	}
 	goTemplate = template.Must(template.New("genGo").Funcs(funcMap).Parse(genGo))
+}
+
+func errorName(def *compile.ErrorDef, file *compile.File) string {
+	switch {
+	case file.Package.Path == "v.io/core/veyron2/verror":
+		return def.Name
+	case def.Exported:
+		return "Err" + def.Name
+	default:
+		return "err" + vdlutil.FirstRuneToUpper(def.Name)
+	}
 }
 
 func isStreamingMethod(method *compile.Method) bool {
@@ -426,18 +438,19 @@ func init() { {{range $tdef := $file.TypeDefs}}
 {{end}}
 
 {{if $file.ErrorDefs}}var ( {{range $edef := $file.ErrorDefs}}
-	{{$edef.Doc}}{{$edef.Name}} = {{$data.Pkg "v.io/core/veyron2/verror2"}}Register("{{$edef.ID}}", {{$data.Pkg "v.io/core/veyron2/verror2"}}{{$edef.Action}}, "{{$edef.English}}"){{end}}
+	{{$edef.Doc}}{{errorName $edef $file}} = {{$data.Pkg "v.io/core/veyron2/verror"}}Register("{{$edef.ID}}", {{$data.Pkg "v.io/core/veyron2/verror"}}{{$edef.Action}}, "{{$edef.English}}"){{end}}
 )
 
 {{/* TODO(toddw): Don't set "en-US" or "en" again, since it's already set by Register */}}
 func init() { {{range $edef := $file.ErrorDefs}}{{range $lf := $edef.Formats}}
-	{{$data.Pkg "v.io/core/veyron2/i18n"}}Cat().SetWithBase({{$data.Pkg "v.io/core/veyron2/i18n"}}LangID("{{$lf.Lang}}"), {{$data.Pkg "v.io/core/veyron2/i18n"}}MsgID({{$edef.Name}}.ID), "{{$lf.Fmt}}"){{end}}{{end}}
+	{{$data.Pkg "v.io/core/veyron2/i18n"}}Cat().SetWithBase({{$data.Pkg "v.io/core/veyron2/i18n"}}LangID("{{$lf.Lang}}"), {{$data.Pkg "v.io/core/veyron2/i18n"}}MsgID({{errorName $edef $file}}.ID), "{{$lf.Fmt}}"){{end}}{{end}}
 }
 {{range $edef := $file.ErrorDefs}}
-{{$make := print (firstRuneToExport "Make" $edef.Exported) (firstRuneToUpper $edef.Name)}}
-// {{$make}} returns an error with the {{$edef.Name}} ID.
-func {{$make}}(ctx {{argNameTypes "" (print "*" ($data.Pkg "v.io/core/veyron2/context") "T") "" $data $edef.Params}}) error {
-	return {{$data.Pkg "v.io/core/veyron2/verror2"}}Make({{$edef.Name}}, {{argNames "" "" "ctx" "" $edef.Params}})
+{{$errName := errorName $edef $file}}
+{{$newErr := print (firstRuneToExport "New" $edef.Exported) (firstRuneToUpper $errName)}}
+// {{$newErr}} returns an error with the {{$errName}} ID.
+func {{$newErr}}(ctx {{argNameTypes "" (print "*" ($data.Pkg "v.io/core/veyron2/context") "T") "" $data $edef.Params}}) error {
+	return {{$data.Pkg "v.io/core/veyron2/verror"}}New({{$errName}}, {{argNames "" "" "ctx" "" $edef.Params}})
 }
 {{end}}{{end}}
 

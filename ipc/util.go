@@ -2,7 +2,7 @@ package ipc
 
 import (
 	"v.io/core/veyron2/context"
-	"v.io/core/veyron2/verror2"
+	"v.io/core/veyron2/verror"
 )
 
 // NewGlobState returns the GlobState corresponding to obj.  Returns nil if obj
@@ -36,22 +36,22 @@ func (o obj) GlobChildren__(ServerContext) (<-chan string, error) {
 }
 
 var (
-	unknownMethod      = verror2.Register("v.io/core/veyron2/ipc.unknownMethod", verror2.NoRetry, "{1:}{2:} unknown method {3}")
-	unknownSuffix      = verror2.Register("v.io/core/veyron2/ipc.unknownSuffix", verror2.NoRetry, "{1:}{2:} unknown object with suffix: {3}")
-	globNotImplemented = verror2.Register("v.io/core/veyron2/ipc.globNotImplemented", verror2.NoRetry, "{1:}{2:} Glob not implemented by suffix: {3}")
+	unknownMethod      = verror.Register("v.io/core/veyron2/ipc.unknownMethod", verror.NoRetry, "{1:}{2:} unknown method {3}")
+	unknownSuffix      = verror.Register("v.io/core/veyron2/ipc.unknownSuffix", verror.NoRetry, "{1:}{2:} unknown object with suffix: {3}")
+	globNotImplemented = verror.Register("v.io/core/veyron2/ipc.globNotImplemented", verror.NoRetry, "{1:}{2:} Glob not implemented by suffix: {3}")
 )
 
-// MakeUnknownMethod returns an unknown method error.
-func MakeUnknownMethod(ctx *context.T, method string) error {
-	return verror2.Make(verror2.NoExist, ctx, verror2.Make(unknownMethod, ctx, method))
+// NewErrUnknownMethod returns an unknown method error.
+func NewErrUnknownMethod(ctx *context.T, method string) error {
+	return verror.New(verror.NoExist, ctx, verror.New(unknownMethod, ctx, method))
 }
 
-// MakeUnknownSuffix returns an unknown suffix error.
-func MakeUnknownSuffix(ctx *context.T, suffix string) error {
-	return verror2.Make(verror2.NoExist, ctx, verror2.Make(unknownSuffix, ctx, suffix))
+// NewErrUnknownSuffix returns an unknown suffix error.
+func NewErrUnknownSuffix(ctx *context.T, suffix string) error {
+	return verror.New(verror.NoExist, ctx, verror.New(unknownSuffix, ctx, suffix))
 }
 
-// MakeGlobNotImplemented returns a glob not implemented error.
-func MakeGlobNotImplemented(ctx *context.T, suffix string) error {
-	return verror2.Make(verror2.NoExist, ctx, verror2.Make(globNotImplemented, ctx, suffix))
+// NewErrGlobNotImplemented returns a glob not implemented error.
+func NewErrGlobNotImplemented(ctx *context.T, suffix string) error {
+	return verror.New(verror.NoExist, ctx, verror.New(globNotImplemented, ctx, suffix))
 }

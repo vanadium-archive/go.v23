@@ -8,7 +8,7 @@ import (
 	"v.io/core/veyron2/context"
 	"v.io/core/veyron2/i18n"
 	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/verror2"
+	"v.io/core/veyron2/verror"
 
 	// VDL user imports
 	"v.io/core/veyron2/uniqueid"
@@ -160,13 +160,13 @@ var PublicKeyThirdPartyCaveatX = CaveatDescriptor{
 }
 
 var (
-	ErrCaveatNotRegistered     = verror2.Register("v.io/core/veyron2/security.ErrCaveatNotRegistered", verror2.NoRetry, "{1:}{2:} no validation function registered for caveat id {3}")
-	ErrCaveatParamTypeMismatch = verror2.Register("v.io/core/veyron2/security.ErrCaveatParamTypeMismatch", verror2.NoRetry, "{1:}{2:} bad param type: caveat {3} got {4}, want {5}")
+	ErrCaveatNotRegistered     = verror.Register("v.io/core/veyron2/security.CaveatNotRegistered", verror.NoRetry, "{1:}{2:} no validation function registered for caveat id {3}")
+	ErrCaveatParamTypeMismatch = verror.Register("v.io/core/veyron2/security.CaveatParamTypeMismatch", verror.NoRetry, "{1:}{2:} bad param type: caveat {3} got {4}, want {5}")
 	// TODO(ashankar,toddw,bjornick): The type of "err" here and below
 	// should be error once https://github.com/veyron/release-issues/issues/922
 	// is resolved.
-	ErrCaveatParamCoding = verror2.Register("v.io/core/veyron2/security.ErrCaveatParamCoding", verror2.NoRetry, "{1:}{2:} unable to encode/decode caveat param(type={4}) for caveat {3}: {5}")
-	ErrCaveatValidation  = verror2.Register("v.io/core/veyron2/security.ErrCaveatValidation", verror2.NoRetry, "{1:}{2:} caveat validation failed: {3}")
+	ErrCaveatParamCoding = verror.Register("v.io/core/veyron2/security.CaveatParamCoding", verror.NoRetry, "{1:}{2:} unable to encode/decode caveat param(type={4}) for caveat {3}: {5}")
+	ErrCaveatValidation  = verror.Register("v.io/core/veyron2/security.CaveatValidation", verror.NoRetry, "{1:}{2:} caveat validation failed: {3}")
 )
 
 func init() {
@@ -176,22 +176,22 @@ func init() {
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrCaveatValidation.ID), "{1:}{2:} caveat validation failed: {3}")
 }
 
-// MakeErrCaveatNotRegistered returns an error with the ErrCaveatNotRegistered ID.
-func MakeErrCaveatNotRegistered(ctx *context.T, id uniqueid.Id) error {
-	return verror2.Make(ErrCaveatNotRegistered, ctx, id)
+// NewErrCaveatNotRegistered returns an error with the ErrCaveatNotRegistered ID.
+func NewErrCaveatNotRegistered(ctx *context.T, id uniqueid.Id) error {
+	return verror.New(ErrCaveatNotRegistered, ctx, id)
 }
 
-// MakeErrCaveatParamTypeMismatch returns an error with the ErrCaveatParamTypeMismatch ID.
-func MakeErrCaveatParamTypeMismatch(ctx *context.T, id uniqueid.Id, got *vdl.Type, want string) error {
-	return verror2.Make(ErrCaveatParamTypeMismatch, ctx, id, got, want)
+// NewErrCaveatParamTypeMismatch returns an error with the ErrCaveatParamTypeMismatch ID.
+func NewErrCaveatParamTypeMismatch(ctx *context.T, id uniqueid.Id, got *vdl.Type, want string) error {
+	return verror.New(ErrCaveatParamTypeMismatch, ctx, id, got, want)
 }
 
-// MakeErrCaveatParamCoding returns an error with the ErrCaveatParamCoding ID.
-func MakeErrCaveatParamCoding(ctx *context.T, id uniqueid.Id, typ *vdl.Type, err vdl.AnyRep) error {
-	return verror2.Make(ErrCaveatParamCoding, ctx, id, typ, err)
+// NewErrCaveatParamCoding returns an error with the ErrCaveatParamCoding ID.
+func NewErrCaveatParamCoding(ctx *context.T, id uniqueid.Id, typ *vdl.Type, err vdl.AnyRep) error {
+	return verror.New(ErrCaveatParamCoding, ctx, id, typ, err)
 }
 
-// MakeErrCaveatValidation returns an error with the ErrCaveatValidation ID.
-func MakeErrCaveatValidation(ctx *context.T, err vdl.AnyRep) error {
-	return verror2.Make(ErrCaveatValidation, ctx, err)
+// NewErrCaveatValidation returns an error with the ErrCaveatValidation ID.
+func NewErrCaveatValidation(ctx *context.T, err vdl.AnyRep) error {
+	return verror.New(ErrCaveatValidation, ctx, err)
 }

@@ -12,7 +12,7 @@ import (
 	"v.io/core/veyron2/i18n"
 	"v.io/core/veyron2/ipc"
 	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/verror2"
+	"v.io/core/veyron2/verror"
 
 	// VDL user imports
 	"v.io/core/veyron2/services/security/access"
@@ -20,16 +20,16 @@ import (
 )
 
 var (
-	NoValue = verror2.Register("v.io/core/veyron2/services/mgmt/stats.NoValue", verror2.NoRetry, "{1:}{2:} object has no value, suffix: {3}")
+	ErrNoValue = verror.Register("v.io/core/veyron2/services/mgmt/stats.NoValue", verror.NoRetry, "{1:}{2:} object has no value, suffix: {3}")
 )
 
 func init() {
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(NoValue.ID), "{1:}{2:} object has no value, suffix: {3}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoValue.ID), "{1:}{2:} object has no value, suffix: {3}")
 }
 
-// MakeNoValue returns an error with the NoValue ID.
-func MakeNoValue(ctx *context.T, suffix string) error {
-	return verror2.Make(NoValue, ctx, suffix)
+// NewErrNoValue returns an error with the ErrNoValue ID.
+func NewErrNoValue(ctx *context.T, suffix string) error {
+	return verror.New(ErrNoValue, ctx, suffix)
 }
 
 // StatsClientMethods is the client interface

@@ -6,7 +6,7 @@ import (
 
 	"v.io/core/veyron2/context"
 
-	verror "v.io/core/veyron2/verror2"
+	"v.io/core/veyron2/verror"
 )
 
 const (

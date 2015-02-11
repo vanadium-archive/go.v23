@@ -8,7 +8,7 @@ import (
 
 	"v.io/core/veyron2/uniqueid"
 	"v.io/core/veyron2/vdl"
-	verror "v.io/core/veyron2/verror2"
+	"v.io/core/veyron2/verror"
 )
 
 func TestStandardCaveatFactories(t *testing.T) {

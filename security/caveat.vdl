@@ -34,23 +34,20 @@ const (
 )
 
 // Error definitions to allow for stable error checking across address spaces.
-// TODO(bjornick,toddw): We should remove Err from the front of these ids and then have the go generator
-// add them back in on the generated go side.  The conventions for error names differ in different languages
-// (i.e. ErrFoo in go, FooError in js, FooException in java).
 error (
-  ErrCaveatNotRegistered(id uniqueid.Id) {
+  CaveatNotRegistered(id uniqueid.Id) {
     "en": "no validation function registered for caveat id {id}",
   }
-  ErrCaveatParamTypeMismatch(id uniqueid.Id, got typeobject, want string) {
+  CaveatParamTypeMismatch(id uniqueid.Id, got typeobject, want string) {
     "en": "bad param type: caveat {id} got {got}, want {want}",
   }
   // TODO(ashankar,toddw,bjornick): The type of "err" here and below
   // should be error once https://github.com/veyron/release-issues/issues/922
   // is resolved.
-  ErrCaveatParamCoding(id uniqueid.Id, typ typeobject, err any) {
+  CaveatParamCoding(id uniqueid.Id, typ typeobject, err any) {
     "en": "unable to encode/decode caveat param(type={typ}) for caveat {id}: {err}",
   }
-  ErrCaveatValidation(err any) {
+  CaveatValidation(err any) {
     "en": "caveat validation failed: {err}",
   }
 )

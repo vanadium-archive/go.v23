@@ -49,8 +49,8 @@ var (
 
 // ErrorType describes the built-in error type.
 //
-// TODO(toddw): Describe error in a built-in VDL file based on verror2.  At the
-// moment this definition must be kept in sync with verror2.Standard.
+// TODO(toddw): Describe error in a built-in VDL file based on verror.  At the
+// moment this definition must be kept in sync with verror.Standard.
 // NOTE(bprosnitz) We should also do this with the other built in primitives.
 // NOTE(bprosnitz) If we define this in vdl, "error" gets redefined for the whole package.
 var ErrorType = OptionalType(NamedType("error", StructType(

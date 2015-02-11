@@ -1,7 +1,7 @@
 package types
 
 import (
-	verror "v.io/core/veyron2/verror2"
+	"v.io/core/veyron2/verror"
 )
 
 // pkgPath is the prefix of errors in this package.
