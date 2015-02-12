@@ -51,8 +51,18 @@ func newImports(file *compile.File, env *compile.Env) *goImports {
 // package import information.
 type importMap map[string]string
 
+// AddPackage adds a regular dependency on pkg; some block of generated code
+// will reference the pkg.
 func (im importMap) AddPackage(pkg *compile.Package) {
 	im[pkg.GenPath] = pkg.Name
+}
+
+// AddForcedPackage adds a "forced" dependency on pkg.  This means that we need
+// to import pkg even if no other block of generated code references the pkg.
+func (im importMap) AddForcedPackage(pkg *compile.Package) {
+	if im[pkg.GenPath] == "" {
+		im[pkg.GenPath] = "_"
+	}
 }
 
 func (im importMap) DeletePackage(pkg *compile.Package) {
@@ -77,7 +87,13 @@ func (im importMap) Sort(seen map[string]bool) []goImport {
 //   uniqueImport("z", "v.io/a", {})           -> goImport{"", "v.io/a", "z"}
 //   uniqueImport("a", "v.io/a", {"a"})        -> goImport{"a_2", "v.io/a", "a_2"}
 //   uniqueImport("a", "v.io/a", {"a", "a_2"}) -> goImport{"a_3", "v.io/a", "a_3"}
+//   uniqueImport("_", "v.io/a", {})           -> goImport{"_", "v.io/a", ""}
+//   uniqueImport("_", "v.io/a", {"a"})        -> goImport{"_", "v.io/a", ""}
+//   uniqueImport("_", "v.io/a", {"a", "a_2"}) -> goImport{"_", "v.io/a", ""}
 func uniqueImport(pkgName, pkgPath string, seen map[string]bool) goImport {
+	if pkgName == "_" {
+		return goImport{"_", pkgPath, ""}
+	}
 	name := ""
 	iter := 1
 	for {
@@ -125,9 +141,9 @@ type deps struct {
 
 func computeDeps(file *compile.File, env *compile.Env) (deps, importMap) {
 	deps, user := &deps{}, make(importMap)
-	// TypeDef.Type is always defined in our package; start with sub types.
+	// TypeDef.Type is always defined in our package; add deps on the base type.
 	for _, def := range file.TypeDefs {
-		addSubTypeDeps(def.Type, env, deps, user)
+		addTypeDeps(def.BaseType, env, deps, user)
 		if def.Type.Kind() == vdl.Enum {
 			deps.enumTypeDef = true
 		}
@@ -199,6 +215,9 @@ func addTypeDepIfDefined(t *vdl.Type, env *compile.Env, deps *deps, user importM
 			for _, imp := range native.Imports {
 				user[imp.Path] = imp.Name
 			}
+			// Also add a "forced" import on the regular VDL package, to ensure the
+			// wire type is registered, to establish the wire<->native mapping.
+			user.AddForcedPackage(pkg)
 		} else {
 			// There's no native type configured for this defined type.  Add the
 			// imports corresponding to the VDL package.
