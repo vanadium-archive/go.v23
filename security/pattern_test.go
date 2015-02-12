@@ -1,6 +1,9 @@
 package security
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
 
 func TestMatchedBy(t *testing.T) {
 	type v []string
@@ -31,9 +34,14 @@ func TestMatchedBy(t *testing.T) {
 			DoesNotMatch: v{"", "bob", "bob/ann"},
 		},
 		{
+			Pattern:      "ann/friend",
+			Matches:      v{"ann/friend", "ann/friend/spouse"},
+			DoesNotMatch: v{"", "ann", "ann/enemy", "bob", "bob/ann"},
+		},
+		{
 			Pattern:      "ann/friend/$",
-			Matches:      v{"ann", "ann/friend"},
-			DoesNotMatch: v{"", "bob", "bob/friend", "bob/ann", "ann/friend/spouse"},
+			Matches:      v{"ann/friend"},
+			DoesNotMatch: v{"", "ann", "ann/enemy", "ann/friend/spouse", "bob", "bob/friend", "bob/ann"},
 		},
 	}
 	for _, test := range tests {
@@ -112,6 +120,24 @@ func TestMakeNonExtendable(t *testing.T) {
 	for _, test := range tests {
 		if got, want := test.before.MakeNonExtendable(), test.after; got != want {
 			t.Errorf("%q.MakeNonExtendable(): Got %q, want %q", test.before, got, want)
+		}
+	}
+}
+
+func TestPrefixPatterns(t *testing.T) {
+	tests := []struct {
+		pattern  BlessingPattern
+		prefixes []BlessingPattern
+	}{
+		{"$", []BlessingPattern{"$"}},
+		{"ann", []BlessingPattern{"ann"}},
+		{"ann/$", []BlessingPattern{"ann/$"}},
+		{"ann/friend", []BlessingPattern{"ann/$", "ann/friend"}},
+		{"ann/friend/$", []BlessingPattern{"ann/$", "ann/friend/$"}},
+	}
+	for _, test := range tests {
+		if got, want := test.pattern.PrefixPatterns(), test.prefixes; !reflect.DeepEqual(got, want) {
+			t.Fatalf("%q.PrefixPatterns(): got %q, want %q", test.pattern, got, want)
 		}
 	}
 }

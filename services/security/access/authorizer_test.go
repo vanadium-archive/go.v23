@@ -81,12 +81,11 @@ func TestTaggedACLAuthorizer(t *testing.T) {
 		{"Get", B("ali")},
 		{"Get", B("bob/friend", "che/enemy")},
 
-		{"Put", B("ali")},
 		{"Put", B("ali/family/mom")},
 		{"Put", B("bob/friends")},
 		{"Put", B("bob/acquantainces/carol", "che")}, // Access granted because of "che"
 
-		{"Resolve", B("ali")},
+		{"Resolve", B("superman")},
 		{"Resolve", B("ali/family/boss")},
 
 		{"AllTags", B("ali/family/boss")},
@@ -98,14 +97,14 @@ func TestTaggedACLAuthorizer(t *testing.T) {
 	// Test cases where access should be denied.
 	for _, test := range []testcase{
 		// Nobody is denied access to "Get"
-		{"Put", B("bob/acquaintances/dave", "che/friend", "dave")},
-		{"Resolve", B("ali/family/friend")},
+		{"Put", B("ali", "bob/acquaintances", "bob/acquaintances/dave", "che/friend", "dave")},
+		{"Resolve", B("ali", "ali/friend", "ali/family", "ali/family/friend", "alice/family/boss/friend", "superman/friend")},
 		// Since there are no tags on the NoTags method, it has an
 		// empty ACL.  No client will have access.
-		{"NoTags", B("ali", "ali/family/boss", "bob")},
+		{"NoTags", B("ali", "ali/family/boss", "bob", "che", "superman")},
 		// On a method with multiple tags on it, all must be satisfied.
-		{"AllTags", B("superman")},          // Only in the X ACL, not in R or W
-		{"AllTags", B("superman", "clark")}, // In X and in R, but not W
+		{"AllTags", B("che")},               // In R and W, but not in X
+		{"AllTags", B("superman", "clark")}, // In R and X, but not W
 	} {
 		if err := run(test); err == nil {
 			t.Errorf("Access to %q granted to %v", test.Method, test.Client)
