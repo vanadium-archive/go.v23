@@ -120,3 +120,9 @@ const GoogleRuntime = "google"
 type ServesMountTable bool
 
 func (ServesMountTable) IPCServerOpt() {}
+
+// When NoRetry is specified, the client will not retry calls that fail but would
+// normally be retried.
+type NoRetry struct{}
+
+func (NoRetry) IPCCallOpt() {}
