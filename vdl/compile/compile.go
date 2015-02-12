@@ -102,7 +102,12 @@ func compile(pkgpath, genpath string, pfiles []*parse.File, config vdltool.Confi
 		return nil
 	}
 	// Initialize each file and put it in pkg.
-	pkg := newPackage(parse.InferPackageName(pfiles, env.Errors), pkgpath, genpath, config)
+	pkgName := parse.InferPackageName(pfiles, env.Errors)
+	if _, err := ValidIdent(pkgName, ReservedNormal); err != nil {
+		env.Errors.Errorf("package %s is invalid: %s", pkgName, err.Error())
+		return nil
+	}
+	pkg := newPackage(pkgName, pkgpath, genpath, config)
 	for _, pfile := range pfiles {
 		pkg.Files = append(pkg.Files, &File{
 			BaseName:   pfile.BaseName,
