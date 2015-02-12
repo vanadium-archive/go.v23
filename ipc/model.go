@@ -239,7 +239,8 @@ type Server interface {
 	// there is sufficient buffering in the channel.
 	WatchNetwork(ch chan<- NetworkChange)
 
-	// UnwatchNetwork unregisters a channek previously registered using Watch.
+	// UnwatchNetwork unregisters a channel previously registered using
+	// WatchNetwork.
 	UnwatchNetwork(ch chan<- NetworkChange)
 
 	// Stop gracefully stops all services on this Server.  New calls are
