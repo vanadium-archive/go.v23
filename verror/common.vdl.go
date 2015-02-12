@@ -17,6 +17,9 @@ var (
 	// Internal means an internal error has occurred.  A more specific error
 	// should always be used, if possible.
 	Internal = Register("v.io/core/veyron2/verror.Internal", NoRetry, "{1:}{2:} Internal error{:_}")
+	// NotImplemented means that the request type is valid but that the method to
+	// handle the request has not been implemented.
+	NotImplemented = Register("v.io/core/veyron2/verror.NotImplemented", NoRetry, "{1:}{2:} Not implemented{:_}")
 	// EOF means the end-of-file has been reached; more generally, no more input
 	// data is available.
 	EOF = Register("v.io/core/veyron2/verror.EOF", NoRetry, "{1:}{2:} EOF{:_}")
@@ -69,6 +72,7 @@ var (
 func init() {
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(Unknown.ID), "{1:}{2:} Error{:_}")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(Internal.ID), "{1:}{2:} Internal error{:_}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(NotImplemented.ID), "{1:}{2:} Not implemented{:_}")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(EOF.ID), "{1:}{2:} EOF{:_}")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(BadArg.ID), "{1:}{2:} Bad argument{:_}")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(BadState.ID), "{1:}{2:} Invalid state{:_}")
@@ -93,6 +97,11 @@ func NewUnknown(ctx *context.T) error {
 // NewInternal returns an error with the Internal ID.
 func NewInternal(ctx *context.T) error {
 	return New(Internal, ctx)
+}
+
+// NewNotImplemented returns an error with the NotImplemented ID.
+func NewNotImplemented(ctx *context.T) error {
+	return New(NotImplemented, ctx)
 }
 
 // NewEOF returns an error with the EOF ID.

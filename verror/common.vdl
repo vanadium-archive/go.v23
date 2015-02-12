@@ -10,6 +10,10 @@ error (
 	// should always be used, if possible.
 	Internal() {"en":"Internal error{:_}"}
 
+	// NotImplemented means that the request type is valid but that the method to
+	// handle the request has not been implemented.
+	NotImplemented() {"en":"Not implemented{:_}"}
+
 	// EOF means the end-of-file has been reached; more generally, no more input
 	// data is available.
 	EOF() {"en":"EOF{:_}"}
