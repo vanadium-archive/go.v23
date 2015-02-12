@@ -37,7 +37,7 @@ func javaBuiltInType(typ *vdl.Type, forceClass bool) (string, bool) {
 		}
 	}
 	if typ == vdl.ErrorType {
-		return "io.v.core.veyron2.verror2.VException", true
+		return "io.v.core.veyron2.verror.VException", true
 	}
 	switch typ.Kind() {
 	case vdl.Bool:

@@ -22,7 +22,7 @@ package {{ .PackagePath }};
 {{ range $method := .Methods }}
     {{/* Generate the method signature. */}}
     {{ $method.Doc }}
-    {{ $method.AccessModifier }} {{ $method.RetType }} {{ $method.Name }}(final io.v.core.veyron2.ipc.ServerContext context{{ $method.Args }}) throws io.v.core.veyron2.verror2.VException;
+    {{ $method.AccessModifier }} {{ $method.RetType }} {{ $method.Name }}(final io.v.core.veyron2.ipc.ServerContext context{{ $method.Args }}) throws io.v.core.veyron2.verror.VException;
 {{ end }}
 }
 `

@@ -20,7 +20,7 @@ public final class {{ .ClassName }} {
     {{/*Error Defs*/}}
     {{ range $error := $file.Errors }}
     {{ $error.Doc }}
-    {{ $error.AccessModifier }} static final io.v.core.veyron2.verror2.VException.IDAction {{ $error.Name }} = io.v.core.veyron2.verror2.VException.register("{{ $error.ID }}", io.v.core.veyron2.verror2.VException.ActionCode.{{ $error.ActionName }}, "{{ $error.EnglishFmt }}");
+    {{ $error.AccessModifier }} static final io.v.core.veyron2.verror.VException.IDAction {{ $error.Name }} = io.v.core.veyron2.verror.VException.register("{{ $error.ID }}", io.v.core.veyron2.verror.VException.ActionCode.{{ $error.ActionName }}, "{{ $error.EnglishFmt }}");
     {{ end }} {{/* range $file.Errors */}}
 
     {{ end }} {{/* range .Files */}}
@@ -42,10 +42,10 @@ public final class {{ .ClassName }} {
     /**
      * Creates an error with {@code {{ $error.Name }}} identifier.
      */
-    public static io.v.core.veyron2.verror2.VException {{ $error.MethodName }}(io.v.core.veyron2.context.VContext _ctx{{ $error.MethodArgs}}) {
+    public static io.v.core.veyron2.verror.VException {{ $error.MethodName }}(io.v.core.veyron2.context.VContext _ctx{{ $error.MethodArgs}}) {
     	final java.lang.Object[] _params = new java.lang.Object[] { {{ $error.Params }} };
     	final java.lang.reflect.Type[] _paramTypes = new java.lang.reflect.Type[]{ {{ $error.ParamTypes }} };
-    	return io.v.core.veyron2.verror2.VException.make({{ $error.Name }}, _ctx, _paramTypes, _params);
+    	return io.v.core.veyron2.verror.VException.make({{ $error.Name }}, _ctx, _paramTypes, _params);
     }
     {{ end }} {{/* range $file.Errors */}}
     {{ end }} {{/* range .Files */}}

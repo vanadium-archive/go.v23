@@ -36,8 +36,8 @@ package {{ .PackagePath }};
      */
     // TODO(spetrovic): Re-enable once we can import the new Signature classes.
     //@SuppressWarnings("unused")
-    //public io.v.core.veyron2.ipc.ServiceSignature signature(io.v.core.veyron2.ipc.ServerCall call) throws io.v.core.veyron2.verror2.VException {
-    //    throw new io.v.core.veyron2.verror2.VException("Signature method not yet supported for Java servers");
+    //public io.v.core.veyron2.ipc.ServiceSignature signature(io.v.core.veyron2.ipc.ServerCall call) throws io.v.core.veyron2.verror.VException {
+    //    throw new io.v.core.veyron2.verror.VException("Signature method not yet supported for Java servers");
     //}
 
     /**
@@ -66,22 +66,22 @@ package {{ .PackagePath }};
 
      {{/* Iterate over methods defined directly in the body of this server */}}
     {{ range $method := .Methods }}
-    {{ $method.AccessModifier }} {{ $method.RetType }} {{ $method.Name }}(final io.v.core.veyron2.ipc.ServerCall call{{ $method.DeclarationArgs }}) throws io.v.core.veyron2.verror2.VException {
+    {{ $method.AccessModifier }} {{ $method.RetType }} {{ $method.Name }}(final io.v.core.veyron2.ipc.ServerCall call{{ $method.DeclarationArgs }}) throws io.v.core.veyron2.verror.VException {
         {{ if $method.IsStreaming }}
         final io.v.core.veyron2.vdl.Stream<{{ $method.SendType }}, {{ $method.RecvType }}> _stream = new io.v.core.veyron2.vdl.Stream<{{ $method.SendType }}, {{ $method.RecvType }}>() {
             @Override
-            public void send({{ $method.SendType }} item) throws io.v.core.veyron2.verror2.VException {
+            public void send({{ $method.SendType }} item) throws io.v.core.veyron2.verror.VException {
                 final java.lang.reflect.Type type = new com.google.common.reflect.TypeToken< {{ $method.SendType }} >() {}.getType();
                 call.send(item, type);
             }
             @Override
-            public {{ $method.RecvType }} recv() throws java.io.EOFException, io.v.core.veyron2.verror2.VException {
+            public {{ $method.RecvType }} recv() throws java.io.EOFException, io.v.core.veyron2.verror.VException {
                 final java.lang.reflect.Type type = new com.google.common.reflect.TypeToken< {{ $method.RecvType }} >() {}.getType();
                 final java.lang.Object result = call.recv(type);
                 try {
                     return ({{ $method.RecvType }})result;
                 } catch (java.lang.ClassCastException e) {
-                    throw new io.v.core.veyron2.verror2.VException("Unexpected result type: " + result.getClass().getCanonicalName());
+                    throw new io.v.core.veyron2.verror.VException("Unexpected result type: " + result.getClass().getCanonicalName());
                 }
             }
         };
@@ -92,7 +92,7 @@ package {{ .PackagePath }};
 
 {{/* Iterate over methods from embeded servers and generate code to delegate the work */}}
 {{ range $eMethod := .EmbedMethods }}
-    {{ $eMethod.AccessModifier }} {{ $eMethod.RetType }} {{ $eMethod.Name }}(final io.v.core.veyron2.ipc.ServerCall call{{ $eMethod.DeclarationArgs }}) throws io.v.core.veyron2.verror2.VException {
+    {{ $eMethod.AccessModifier }} {{ $eMethod.RetType }} {{ $eMethod.Name }}(final io.v.core.veyron2.ipc.ServerCall call{{ $eMethod.DeclarationArgs }}) throws io.v.core.veyron2.verror.VException {
         {{/* e.g. return this.stubArith.cosine(call, [args], options) */}}
         {{ if $eMethod.Returns }}return{{ end }}  this.{{ $eMethod.LocalWrapperVarName }}.{{ $eMethod.Name }}(call{{ $eMethod.CallingArgs }});
     }
