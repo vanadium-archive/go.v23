@@ -18,13 +18,14 @@ type rtRegistry struct {
 }
 
 var (
-	rtCache        = &rtRegistry{rtmap: make(map[reflect.Type]*Type)}
+	rtCache = &rtRegistry{
+		rtmap: map[reflect.Type]*Type{
+			// Ensure TypeOf(WireError{}) returns the built-in VDL error type.
+			reflect.TypeOf(WireError{}): ErrorType.Elem(),
+		},
+	}
 	rtCacheEnabled = true
 )
-
-func (reg *rtRegistry) reset() {
-	reg.rtmap = make(map[reflect.Type]*Type)
-}
 
 func (reg *rtRegistry) lookup(rt reflect.Type) *Type {
 	if !rtCacheEnabled {

@@ -12,7 +12,6 @@ import (
 	"reflect"
 
 	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/verror"
 )
 
 var (
@@ -24,15 +23,15 @@ var (
 )
 
 var (
-	rtByte            = reflect.TypeOf(byte(0))
-	rtBool            = reflect.TypeOf(bool(false))
-	rtString          = reflect.TypeOf(string(""))
-	rtType            = reflect.TypeOf(vdl.Type{})
-	rtValue           = reflect.TypeOf(vdl.Value{})
-	rtPtrToType       = reflect.PtrTo(rtType)
-	rtPtrToValue      = reflect.PtrTo(rtValue)
-	rtError           = reflect.TypeOf((*error)(nil)).Elem()
-	rtVError2Standard = reflect.TypeOf(verror.Standard{})
+	rtByte       = reflect.TypeOf(byte(0))
+	rtBool       = reflect.TypeOf(bool(false))
+	rtString     = reflect.TypeOf(string(""))
+	rtType       = reflect.TypeOf(vdl.Type{})
+	rtValue      = reflect.TypeOf(vdl.Value{})
+	rtPtrToType  = reflect.PtrTo(rtType)
+	rtPtrToValue = reflect.PtrTo(rtValue)
+	rtError      = reflect.TypeOf((*error)(nil)).Elem()
+	rtWireError  = reflect.TypeOf(vdl.WireError{})
 )
 
 // convTarget represents the state and logic for value conversion.
@@ -212,11 +211,11 @@ func createFillTarget(fin convTarget, ttFrom *vdl.Type) (convTarget, error) {
 			// target directly.  Return the appropriate fill value.
 			switch {
 			case fin.rv.Type() == rtError || ttFrom == vdl.ErrorType:
-				// Create the standard verror struct to fill in, with the pointer.
-				return reflectConv(reflect.New(rtVError2Standard).Elem(), vdl.ErrorType)
+				// Create the standard WireError struct to fill in, with the pointer.
+				return reflectConv(reflect.New(rtWireError).Elem(), vdl.ErrorType)
 			case ttFrom == vdl.ErrorType.Elem():
-				// Create the standard verror struct to fill in, without the pointer.
-				return reflectConv(reflect.New(rtVError2Standard).Elem(), vdl.ErrorType.Elem())
+				// Create the standard WireError struct to fill in, without the pointer.
+				return reflectConv(reflect.New(rtWireError).Elem(), vdl.ErrorType.Elem())
 			case fin.tt.Kind() == vdl.Union:
 				// The fin target is a union interface.  Since we don't know the union
 				// field name yet, we don't know which concrete type to use.  So we
@@ -293,7 +292,18 @@ func finishConvert(fin, fill convTarget) error {
 			var rvFill reflect.Value
 			if fill.vv == nil {
 				rvFill = fill.rv
-				if ri := vdl.ReflectInfoFromWire(fill.rv.Type()); ri != nil && ri.NativeType != nil {
+				if fill.rv.Type() == rtWireError {
+					// Handle case where fill.rv has type vdl.WireError; if error
+					// conversions have been registered with the vdl package, we need to
+					// convert to the standard error interface.
+					if conv, err := vdl.ErrorConv(); err == nil {
+						native, err := conv.FromWire(fill.rv.Interface().(vdl.WireError))
+						if err != nil {
+							return err
+						}
+						rvFill = reflect.ValueOf(native)
+					}
+				} else if ri := vdl.ReflectInfoFromWire(fill.rv.Type()); ri != nil && ri.NativeType != nil {
 					// Handle case where fill.rv is a wire type with a native type; set
 					// rvFill to a new native type and call ToNative to fill it in.
 					newNative := reflect.New(ri.NativeType)
@@ -304,7 +314,14 @@ func finishConvert(fin, fill convTarget) error {
 					rvFill = newNative.Elem()
 				}
 				if fill.tt.Kind() == vdl.Optional {
-					rvFill = rvFill.Addr()
+					// Convert rvFill into a pointer if it should be optional.
+					if rvFill.CanAddr() {
+						rvFill = rvFill.Addr()
+					} else {
+						rvNew := reflect.New(rvFill.Type())
+						rvNew.Elem().Set(rvFill)
+						rvFill = rvNew
+					}
 				}
 			} else {
 				if fill.tt.Kind() == vdl.Union {

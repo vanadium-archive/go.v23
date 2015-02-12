@@ -303,7 +303,7 @@ func addValueTypeDeps(v *vdl.Value, env *compile.Env, deps *deps, user importMap
 // identifier to use.  But we only know what local identifier to use after we've
 // collected all imports and resolved collisions.
 func systemImports(deps deps, file *compile.File) importMap {
-	system := make(map[string]string)
+	system := make(importMap)
 	if deps.any || deps.typeObject || deps.methodTags || len(file.TypeDefs) > 0 {
 		// System import for vdl.AnyRep, vdl.Type and vdl.Register.
 		system["v.io/core/veyron2/vdl"] = "vdl"
@@ -331,5 +331,7 @@ func systemImports(deps deps, file *compile.File) importMap {
 			system["v.io/core/veyron2/verror"] = "verror"
 		}
 	}
+	// Now remove self package dependencies.
+	system.DeletePackage(file.Package)
 	return system
 }

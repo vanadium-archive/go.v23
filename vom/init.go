@@ -1,4 +1,4 @@
-package ipc
+package vom
 
 import (
 	// Ensure all standard vdl types are registered.

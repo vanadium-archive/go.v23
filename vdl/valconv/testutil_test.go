@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"v.io/core/veyron2/vdl"
+	"v.io/core/veyron2/verror"
 )
 
 // CallAndRecover calls the function f and returns the result of recover().
@@ -523,12 +524,22 @@ func complexValue(t *vdl.Type, x complex128) *vdl.Value { return vdl.ZeroValue(t
 func stringValue(t *vdl.Type, x string) *vdl.Value      { return vdl.ZeroValue(t).AssignString(x) }
 func bytesValue(t *vdl.Type, x string) *vdl.Value       { return vdl.ZeroValue(t).AssignBytes([]byte(x)) }
 func bytes3Value(t *vdl.Type, x string) *vdl.Value      { return vdl.ZeroValue(t).CopyBytes([]byte(x)) }
-func errorValue(e error) *vdl.Value {
-	v, err := vdlValueFromError(e)
-	if err != nil {
-		panic(err)
+func errorValue(e verror.Standard) *vdl.Value {
+	verr := vdl.NonNilZeroValue(vdl.ErrorType)
+	vv := verr.Elem()
+	vv.Field(0).Field(0).AssignString(string(e.IDAction.ID))
+	vv.Field(0).Field(1).AssignUint(uint64(e.IDAction.Action))
+	vv.Field(1).AssignString(e.Msg)
+	vv.Field(2).AssignLen(len(e.ParamList))
+	for ix, p := range e.ParamList {
+		var pVDL *vdl.Value
+		if err := Convert(&pVDL, p); err != nil {
+			panic(err)
+		}
+		vv.Field(2).Index(ix).Assign(pVDL)
 	}
-	return v
+	// TODO(toddw): Add SubErrs.
+	return verr
 }
 
 func setStringValue(t *vdl.Type, x ...string) *vdl.Value {
