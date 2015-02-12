@@ -91,6 +91,7 @@ func TestParseAndCompile(t *testing.T) {
 		expect func(t *testing.T, name string, pkg *compile.Package)
 	}{
 		{"test1", f{"1.vdl": pkg1file1, "2.vdl": pkg1file2}, "", expectPkg1},
+		{"test2", f{"1.vdl": "package native"}, `"native" invalid identifier`, nil},
 	}
 	for _, test := range tests {
 		path := path.Join("a/b", test.name)

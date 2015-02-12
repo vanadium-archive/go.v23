@@ -95,7 +95,7 @@ func Generate(file *compile.File, env *compile.Env) []byte {
 // Restrict the feature to these whitelisted VDL packages for now.
 var nativeTypePackageWhitelist = map[string]bool{
 	"time": true,
-	"v.io/core/veyron2/vdl/testdata/native": true,
+	"v.io/core/veyron2/vdl/testdata/nativetest": true,
 }
 
 func validateGoConfig(file *compile.File, env *compile.Env) {

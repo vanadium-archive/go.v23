@@ -1,5 +1,5 @@
-// Package native tests a package with native type conversions.
-package native
+// Package nativetest tests a package with native type conversions.
+package nativetest
 
 type WireString int32
 type WireMapStringInt int32

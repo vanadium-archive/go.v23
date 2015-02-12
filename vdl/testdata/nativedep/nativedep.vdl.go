@@ -9,15 +9,15 @@ import (
 
 	// VDL user imports
 	"time"
-	"v.io/core/veyron2/vdl/testdata/native"
+	"v.io/core/veyron2/vdl/testdata/nativetest"
 )
 
 type All struct {
 	A string
 	B map[string]int
 	C time.Time
-	D native.NativeSamePkg
-	E map[native.NativeSamePkg]time.Time
+	D nativetest.NativeSamePkg
+	E map[nativetest.NativeSamePkg]time.Time
 }
 
 func (All) __VDLReflect(struct {
