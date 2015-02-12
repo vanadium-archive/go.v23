@@ -16,20 +16,16 @@ import (
 
 // BlessingPattern is a pattern that is matched by specific blessings.
 //
-// A pattern can be either a blessing (slash-separated human-readable string)
-// or a blessing ending in "/$". A pattern not ending in "/$" is matched by
-// blessings that can be extended to produce the same string as the pattern or
-// blessings that are extensions of the pattern. For example, the pattern
-// "a/b/c" is matched by all the patterns that match "a/b/c" ("a", "a/b",
-// "a/b/c") and all delegates of "a/b/c" (like "a/b/c/d", "a/b/c/d/e" etc.).
+// A pattern can either be a blessing (slash-separated human-readable string)
+// or a blessing ending in "/$". A pattern ending in "/$" is matched exactly
+// by the blessing specified by the pattern string with the "/$" suffix stripped
+// out. For example, the pattern "a/b/c/$" is matched by exactly by the blessing
+// "a/b/c".
 //
-// A pattern ending in "/$" is more restrive, and is only matched by blessings that
-// can be extended to produce the same string as the pattern. For example, the
-// pattern "a/b/c/$" is matched by the blessings "a", "a/b" and "a/b/c" but not
-// "x", not "a/x", not "a/b/x" and not "a/b/c/x".
+// A pattern not ending in "/$" is more permissive, and is also matched by blessings
+// that are extensions of the pattern (including the pattern itself). For example, the
+// pattern "a/b/c" is matched by the blessings "a/b/c", "a/b/c/x", "a/b/c/x/y", etc.
 //
-// A pattern string not having one of the above described structures is considered
-// invalid.
 // TODO(ataly, ashankar): Define a formal BNF grammar for blessings and blessing patterns.
 type BlessingPattern string
 

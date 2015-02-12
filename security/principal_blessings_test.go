@@ -345,7 +345,7 @@ func TestAddToRoots(t *testing.T) {
 		{
 			add:           aliceFriendSpouse,
 			root:          p1.PublicKey(),
-			recognized:    s{"alice", "alice/friend", "alice/friend/device", "alice/friend/device/app", "alice/friend/spouse", "alice/friend/spouse/friend"},
+			recognized:    s{"alice/friend", "alice/friend/device", "alice/friend/device/app", "alice/friend/spouse", "alice/friend/spouse/friend"},
 			notRecognized: s{"alice/device", "bob", "bob/friend", "bob/friend/spouse"},
 		},
 		{

@@ -48,13 +48,13 @@ func (p BlessingPattern) IsValid() bool {
 	return true
 }
 
-// MakeNonExtendable returns a pattern that are not matched by any extension of the blessing
-// represented by p.
+// MakeNonExtendable returns a pattern that is matched exactly
+// by the blessing specified by the given pattern string.
 //
 // For example:
 //   onlyAlice := BlessingPattern("google/alice").MakeNonExtendable()
-//   onlyAlice.MatchedBy("google")  // Returns true
 //   onlyAlice.MatchedBy("google/alice")  // Returns true
+//   onlyAlice.MatchedBy("google")  // Returns false
 //   onlyAlice.MatchedBy("google/alice/bob")  // Returns false
 func (p BlessingPattern) MakeNonExtendable() BlessingPattern {
 	if len(p) == 0 || p == BlessingPattern(NoExtension) {
@@ -66,17 +66,49 @@ func (p BlessingPattern) MakeNonExtendable() BlessingPattern {
 	return BlessingPattern(string(p) + ChainSeparator + string(NoExtension))
 }
 
+// PrefixPatterns returns a set of BlessingPatterns that are matched by
+// blessings that either directly match the provided pattern or can be
+// extended to match the provided pattern.
+//
+// For example:
+// BlessingPattern("google/alice/friend").PrefixPatterns() returns
+//   ["google/$", "google/alice/$", "google/alice/friend"]
+// BlessingPattern("google/alice/friend/$").PrefixPatterns() returns
+//   ["google/$", "google/alice/$", "google/alice/friend/$"]
+//
+// The returned set of BlessingPatterns are ordered by the number of
+// "/"-separated components in the pattern.
+func (p BlessingPattern) PrefixPatterns() []BlessingPattern {
+	if p == NoExtension {
+		return []BlessingPattern{p}
+	}
+	parts := strings.Split(string(p), ChainSeparator)
+	if parts[len(parts)-1] == string(NoExtension) {
+		parts = parts[:len(parts)-2]
+	} else {
+		parts = parts[:len(parts)-1]
+	}
+	var ret []BlessingPattern
+	for i := 0; i < len(parts); i++ {
+		ret = append(ret, BlessingPattern(strings.Join(parts[:i+1], ChainSeparator)).MakeNonExtendable())
+	}
+	return append(ret, p)
+}
+
 func matchedByBlessing(patternchain []string, glob bool, b string) bool {
 	// links of the delegation chain in a blessing
 	blessingchain := strings.Split(b, ChainSeparator)
+	if len(blessingchain) < len(patternchain) {
+		return false
+	}
 	if glob && len(blessingchain) > len(patternchain) {
-		// ignore parts of the blessing chain that will match extensions of the pattern.
+		// Ignore parts of the blessing chain that will match extensions of the pattern.
 		blessingchain = blessingchain[:len(patternchain)]
 	}
 	if len(blessingchain) > len(patternchain) {
 		return false
 	}
-	// At this point, len(blessingchain) <= len(patternchain)
+	// At this point, len(blessingchain) == len(patternchain)
 	for i, part := range blessingchain {
 		if patternchain[i] != part {
 			return false

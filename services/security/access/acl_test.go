@@ -21,7 +21,7 @@ func TestInclude(t *testing.T) {
 		{nil, false}, // No blessings presented, cannot access
 		{V{}, false},
 		{V{"alice"}, true},
-		{V{"bob"}, true},
+		{V{"bob"}, false},
 		{V{"carol"}, false},
 		{V{"alice/colleague"}, false},
 		{V{"alice", "carol/friend"}, true}, // Presenting one blessing that grants access is sufficient
