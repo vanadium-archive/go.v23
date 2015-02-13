@@ -957,10 +957,12 @@ type DeviceClientMethods interface {
 	// In other words, invoking any method using an existing application
 	// installation instance as a receiver is well-defined.
 	ApplicationClientMethods
-	// Claim is used to claim ownership of a device by blessing its
-	// identity. By default, after this call, all device methods will be
-	// access protected to the identity of the claimer.
-	Claim(*context.T, ...ipc.CallOpt) error
+	// Claim is used to claim ownership of a device by blessing its identity.
+	// Devices that have provided a pairingToken to the claimer through an
+	// out-of-band communication channel (eg: display/email) would expect
+	// this pairingToken to be replayed by the claimer. Once claimed, only
+	// the claimer identity will have access to the device methods.
+	Claim(ctx *context.T, pairingToken string, opts ...ipc.CallOpt) error
 	// Describe generates a description of the device.
 	Describe(*context.T, ...ipc.CallOpt) (Description, error)
 	// IsRunnable checks if the device can execute the given binary.
@@ -1013,9 +1015,9 @@ func (c implDeviceClientStub) c(ctx *context.T) ipc.Client {
 	return veyron2.GetClient(ctx)
 }
 
-func (c implDeviceClientStub) Claim(ctx *context.T, opts ...ipc.CallOpt) (err error) {
+func (c implDeviceClientStub) Claim(ctx *context.T, i0 string, opts ...ipc.CallOpt) (err error) {
 	var call ipc.Call
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Claim", nil, opts...); err != nil {
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "Claim", []interface{}{i0}, opts...); err != nil {
 		return
 	}
 	if ierr := call.Finish(&err); ierr != nil {
@@ -1174,10 +1176,12 @@ type DeviceServerMethods interface {
 	// In other words, invoking any method using an existing application
 	// installation instance as a receiver is well-defined.
 	ApplicationServerMethods
-	// Claim is used to claim ownership of a device by blessing its
-	// identity. By default, after this call, all device methods will be
-	// access protected to the identity of the claimer.
-	Claim(ipc.ServerContext) error
+	// Claim is used to claim ownership of a device by blessing its identity.
+	// Devices that have provided a pairingToken to the claimer through an
+	// out-of-band communication channel (eg: display/email) would expect
+	// this pairingToken to be replayed by the claimer. Once claimed, only
+	// the claimer identity will have access to the device methods.
+	Claim(ctx ipc.ServerContext, pairingToken string) error
 	// Describe generates a description of the device.
 	Describe(ipc.ServerContext) (Description, error)
 	// IsRunnable checks if the device can execute the given binary.
@@ -1236,8 +1240,8 @@ type implDeviceServerStub struct {
 	gs *ipc.GlobState
 }
 
-func (s implDeviceServerStub) Claim(ctx ipc.ServerContext) error {
-	return s.impl.Claim(ctx)
+func (s implDeviceServerStub) Claim(ctx ipc.ServerContext, i0 string) error {
+	return s.impl.Claim(ctx, i0)
 }
 
 func (s implDeviceServerStub) Describe(ctx ipc.ServerContext) (Description, error) {
@@ -1282,7 +1286,10 @@ var descDevice = ipc.InterfaceDesc{
 	Methods: []ipc.MethodDesc{
 		{
 			Name: "Claim",
-			Doc:  "// Claim is used to claim ownership of a device by blessing its\n// identity. By default, after this call, all device methods will be\n// access protected to the identity of the claimer.",
+			Doc:  "// Claim is used to claim ownership of a device by blessing its identity.\n// Devices that have provided a pairingToken to the claimer through an\n// out-of-band communication channel (eg: display/email) would expect\n// this pairingToken to be replayed by the claimer. Once claimed, only\n// the claimer identity will have access to the device methods.",
+			InArgs: []ipc.ArgDesc{
+				{"pairingToken", ``}, // string
+			},
 			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // error
 			},
