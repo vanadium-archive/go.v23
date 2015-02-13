@@ -126,6 +126,12 @@ type Manager interface {
 	// this might be used to start background tasks.
 	SetNewTrace(ctx *context.T) (*context.T, Span)
 
+	// SetContinuedTrace creates a span that represents a continuation of
+	// a trace from a remote server.  name is the name of the new span and
+	// req contains the parameters needed to connect this span with it's
+	// trace.
+	SetContinuedTrace(ctx *context.T, name string, req Request) (*context.T, Span)
+
 	// SetNewSpan derives a context with a new Span that can be used to
 	// trace and annotate operations across process boundaries.
 	SetNewSpan(ctx *context.T, name string) (*context.T, Span)
@@ -162,6 +168,14 @@ veyron2.Init() in your main or test before performing this function.`)
 // this might be used to start background tasks.
 func SetNewTrace(ctx *context.T) (*context.T, Span) {
 	return manager(ctx).SetNewTrace(ctx)
+}
+
+// SetContinuedTrace creates a span that represents a continuation of
+// a trace from a remote server.  name is the name of the new span and
+// req contains the parameters needed to connect this span with it's
+// trace.
+func SetContinuedTrace(ctx *context.T, name string, req Request) (*context.T, Span) {
+	return manager(ctx).SetContinuedTrace(ctx, name, req)
 }
 
 // SetNewSpan derives a context with a new Span that can be used to
