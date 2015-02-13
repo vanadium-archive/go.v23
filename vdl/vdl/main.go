@@ -470,7 +470,7 @@ func gen(audit bool, targets []*build.Package, env *compile.Env) bool {
 				if !shouldGenerate(pkg.Config, vdltool.GenLanguageGo) {
 					continue
 				}
-				dir, err := xlateOutDir(target.Dir, target.Path, optGenGoOutDir, pkg.Path)
+				dir, err := xlateOutDir(target.Dir, target.GenPath, optGenGoOutDir, pkg.GenPath)
 				if handleErrorOrSkip("--go_out_dir", err, env) {
 					continue
 				}
@@ -484,11 +484,11 @@ func gen(audit bool, targets []*build.Package, env *compile.Env) bool {
 				if !shouldGenerate(pkg.Config, vdltool.GenLanguageJava) {
 					continue
 				}
-				pkgPath, err := xlatePkgPath(pkg.Path, optGenJavaOutPkg)
+				pkgPath, err := xlatePkgPath(pkg.GenPath, optGenJavaOutPkg)
 				if handleErrorOrSkip("--java_out_pkg", err, env) {
 					continue
 				}
-				dir, err := xlateOutDir(target.Dir, target.Path, optGenJavaOutDir, pkgPath)
+				dir, err := xlateOutDir(target.Dir, target.GenPath, optGenJavaOutDir, pkgPath)
 				if handleErrorOrSkip("--java_out_dir", err, env) {
 					continue
 				}
@@ -506,12 +506,12 @@ func gen(audit bool, targets []*build.Package, env *compile.Env) bool {
 				if !shouldGenerate(pkg.Config, vdltool.GenLanguageJavascript) {
 					continue
 				}
-				dir, err := xlateOutDir(target.Dir, target.Path, optGenJavascriptOutDir, pkg.Path)
+				dir, err := xlateOutDir(target.Dir, target.GenPath, optGenJavascriptOutDir, pkg.GenPath)
 				if handleErrorOrSkip("--js_out_dir", err, env) {
 					continue
 				}
 				path := func(importPath string) string {
-					prefix := filepath.Clean(target.Dir[0 : len(target.Dir)-len(target.Path)])
+					prefix := filepath.Clean(target.Dir[0 : len(target.Dir)-len(target.GenPath)])
 					pkgDir := filepath.Join(prefix, filepath.FromSlash(importPath))
 					fullDir, err := xlateOutDir(pkgDir, importPath, optGenJavascriptOutDir, importPath)
 					if err != nil {
@@ -624,10 +624,11 @@ func runList(targets []*build.Package, env *compile.Env) {
 	for tx, target := range targets {
 		num := fmt.Sprintf("%d", tx)
 		fmt.Printf("%s %s\n", num, strings.Repeat("=", termWidth()-len(num)-1))
-		fmt.Printf("Name:   %v\n", target.Name)
-		fmt.Printf("Config: %+v\n", target.Config)
-		fmt.Printf("Path:   %v\n", target.Path)
-		fmt.Printf("Dir:    %v\n", target.Dir)
+		fmt.Printf("Name:    %v\n", target.Name)
+		fmt.Printf("Config:  %+v\n", target.Config)
+		fmt.Printf("Path:    %v\n", target.Path)
+		fmt.Printf("GenPath: %v\n", target.GenPath)
+		fmt.Printf("Dir:     %v\n", target.Dir)
 		if len(target.BaseFileNames) > 0 {
 			fmt.Print("Files:\n")
 			for _, file := range target.BaseFileNames {
