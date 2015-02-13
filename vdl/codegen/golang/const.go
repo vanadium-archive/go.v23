@@ -68,6 +68,9 @@ func typedConst(data goData, v *vdl.Value) string {
 func untypedConst(data goData, v *vdl.Value) string {
 	k, t := v.Kind(), v.Type()
 	if isByteList(t) {
+		if v.IsZero() {
+			return "nil"
+		}
 		return strconv.Quote(string(v.Bytes()))
 	}
 	switch k {

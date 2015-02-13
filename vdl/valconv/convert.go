@@ -856,9 +856,13 @@ func (c convTarget) fromBytes(src []byte) error {
 			}
 		case c.rv.Kind() == reflect.Slice:
 			if c.rv.Type().Elem() == rtByte {
-				cp := make([]byte, len(src))
-				copy(cp, src)
-				c.rv.SetBytes(cp)
+				if len(src) == 0 {
+					c.rv.SetBytes(nil)
+				} else {
+					cp := make([]byte, len(src))
+					copy(cp, src)
+					c.rv.SetBytes(cp)
+				}
 				return nil
 			}
 		}

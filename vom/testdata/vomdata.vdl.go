@@ -53,7 +53,7 @@ var Tests = []TestCase{
 	},
 	{
 		Name:       "[]byte(\"\")",
-		Value:      []byte(""),
+		Value:      []byte(nil),
 		Hex:        "803400",
 		TypeString: "[]byte",
 	},
@@ -821,7 +821,7 @@ var Tests = []TestCase{
 	},
 	{
 		Name:       "NByteSlice(\"\")",
-		Value:      NByteSlice(""),
+		Value:      NByteSlice(nil),
 		Hex:        "80ff812f130129762e696f2f636f72652f766579726f6e322f766f6d2f74657374646174612e4e42797465536c696365020500ff8200",
 		TypeString: "v.io/core/veyron2/vom/testdata.NByteSlice []byte",
 	},

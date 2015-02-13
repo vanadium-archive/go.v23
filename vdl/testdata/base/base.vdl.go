@@ -490,7 +490,7 @@ var CTObool = vdl.TypeOf(false)
 
 var CTOstring = vdl.TypeOf("")
 
-var CTObytes = vdl.TypeOf([]byte(""))
+var CTObytes = vdl.TypeOf([]byte(nil))
 
 var CTObyte = vdl.TypeOf(byte(0))
 
