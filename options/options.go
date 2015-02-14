@@ -126,3 +126,9 @@ func (ServesMountTable) IPCServerOpt() {}
 type NoRetry struct{}
 
 func (NoRetry) IPCCallOpt() {}
+
+// When ServerPublicKey is specified, the client will refuse to connect to server's
+// with a different PublicKey.
+type ServerPublicKey struct{ security.PublicKey }
+
+func (ServerPublicKey) IPCCallOpt() {}
