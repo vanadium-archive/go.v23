@@ -8,7 +8,6 @@ import (
 
 	"v.io/core/veyron2/naming"
 	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/vdl/valconv"
 	"v.io/core/veyron2/vdl/vdlroot/src/signature"
 	"v.io/core/veyron2/verror"
 )
@@ -641,7 +640,7 @@ func fillArgSig(sig *signature.Arg, desc ArgDesc) *signature.Arg {
 func convertTags(tags []vdl.AnyRep) (*vdl.Value, error) {
 	result := vdl.ZeroValue(vdl.ListType(vdl.AnyType)).AssignLen(len(tags))
 	for index, tag := range tags {
-		if err := valconv.Convert(result.Index(index), tag); err != nil {
+		if err := vdl.Convert(result.Index(index), tag); err != nil {
 			return nil, abortedf("invalid tag %d: %v", index, err)
 		}
 	}

@@ -148,12 +148,12 @@ func ReflectInfoFromNative(native reflect.Type) *ReflectInfo {
 	return ri
 }
 
-// WireValueFromNative converts rv into its native type representation.  There
-// are three return cases:
-//   (!IsValid(),  nil): rv doesn't have a native representation.
-//   (!IsValid(), !nil): conversion of rv to native representation failed.
-//   ( IsValid(),  nil): conversion of rv to native representation succeeded.
-func WireValueFromNative(rv reflect.Value) (reflect.Value, error) {
+// wireValueFromNative converts rv from its native to wire type representation.
+// There are three return cases:
+//   (!IsValid(),  nil): rv doesn't have a wire representation.
+//   (!IsValid(), !nil): conversion of rv to wire representation failed.
+//   ( IsValid(),  nil): conversion of rv to wire representation succeeded.
+func wireValueFromNative(rv reflect.Value) (reflect.Value, error) {
 	ri := ReflectInfoFromNative(rv.Type())
 	if ri == nil {
 		return reflect.Value{}, nil
@@ -474,10 +474,10 @@ func describeUnion(unionReflect, rt reflect.Type, ri *ReflectInfo) error {
 	return nil
 }
 
-// ReflectFromType returns the reflect.Type corresponding to t.  We look up
+// TypeToReflect returns the reflect.Type corresponding to t.  We look up
 // named types in our registry, and build the unnamed types that we can via the
 // Go reflect package.
-func ReflectFromType(t *Type) reflect.Type {
+func TypeToReflect(t *Type) reflect.Type {
 	if t.Name() != "" {
 		// Named types cannot be manufactured via Go reflect, so we lookup in our
 		// registry instead.
@@ -492,20 +492,20 @@ func ReflectFromType(t *Type) reflect.Type {
 	case Any, Array, Enum, Union:
 		// We can't make unnamed versions of any of these types.
 	case Optional:
-		if elem := ReflectFromType(t.Elem()); elem != nil {
+		if elem := TypeToReflect(t.Elem()); elem != nil {
 			return reflect.PtrTo(elem)
 		}
 	case List:
-		if elem := ReflectFromType(t.Elem()); elem != nil {
+		if elem := TypeToReflect(t.Elem()); elem != nil {
 			return reflect.SliceOf(elem)
 		}
 	case Set:
-		if key := ReflectFromType(t.Key()); key != nil {
+		if key := TypeToReflect(t.Key()); key != nil {
 			return reflect.MapOf(key, rtUnnamedEmptyStruct)
 		}
 	case Map:
-		if key := ReflectFromType(t.Key()); key != nil {
-			if elem := ReflectFromType(t.Elem()); elem != nil {
+		if key := TypeToReflect(t.Key()); key != nil {
+			if elem := TypeToReflect(t.Elem()); elem != nil {
 				return reflect.MapOf(key, elem)
 			}
 		}

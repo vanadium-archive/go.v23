@@ -4,7 +4,7 @@ import (
 	"io"
 	"reflect"
 
-	"v.io/core/veyron2/vdl/valconv"
+	"v.io/core/veyron2/vdl"
 )
 
 // Encoder manages the transmission and marshaling of typed values to the other
@@ -14,7 +14,7 @@ type Encoder struct {
 }
 
 type encoder interface {
-	valconv.Target
+	vdl.Target
 	StartEncode() error
 	FinishEncode() error
 }
@@ -54,7 +54,7 @@ func (e *Encoder) Encode(v interface{}) error {
 	if err := e.enc.StartEncode(); err != nil {
 		return err
 	}
-	if err := valconv.FromReflect(e.enc, reflect.ValueOf(v)); err != nil {
+	if err := vdl.FromReflect(e.enc, reflect.ValueOf(v)); err != nil {
 		return err
 	}
 	return e.enc.FinishEncode()

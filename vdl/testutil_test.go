@@ -1,12 +1,25 @@
 package vdl
 
-// TODO(toddw): Merge with vdl/{opconst,valconv}/testutil_test.go
+// This file contains a collection of types, constants and functions used for
+// testing.  All identifiers are exported, so they may be accessed via tests in
+// the vdl_test package.  Note that since this is a *_test.go file, these
+// identifiers are still only visible in tests.
+//
+// TODO(toddw): Merge with vdl/opconst/testutil_test.go
 
 import (
 	"fmt"
 	"strconv"
 	"strings"
 	"testing"
+)
+
+const (
+	// These constants are the same as the ones defined in overflow.go.
+	Float64MaxInt = (1 << 53)
+	Float64MinInt = -(1 << 53)
+	Float32MaxInt = (1 << 24)
+	Float32MinInt = -(1 << 24)
 )
 
 // CallAndRecover calls the function f and returns the result of recover().
@@ -20,7 +33,7 @@ func CallAndRecover(f func()) (result interface{}) {
 	return
 }
 
-func expectErr(t *testing.T, err error, wantstr string, format string, args ...interface{}) bool {
+func ExpectErr(t *testing.T, err error, wantstr string, format string, args ...interface{}) bool {
 	gotstr := fmt.Sprint(err)
 	msg := fmt.Sprintf(format, args...)
 	if wantstr != "" && !strings.Contains(gotstr, wantstr) {
@@ -34,7 +47,7 @@ func expectErr(t *testing.T, err error, wantstr string, format string, args ...i
 	return true
 }
 
-func expectPanic(t *testing.T, f func(), wantstr string, format string, args ...interface{}) {
+func ExpectPanic(t *testing.T, f func(), wantstr string, format string, args ...interface{}) {
 	got := CallAndRecover(f)
 	gotstr := fmt.Sprint(got)
 	msg := fmt.Sprintf(format, args...)
@@ -46,175 +59,196 @@ func expectPanic(t *testing.T, f func(), wantstr string, format string, args ...
 	}
 }
 
-func expectMismatchedKind(t *testing.T, f func()) {
-	expectPanic(t, f, "mismatched kind", "")
+func ExpectMismatchedKind(t *testing.T, f func()) {
+	ExpectPanic(t, f, "mismatched kind", "")
 }
 
 // Define a bunch of regular Go types used in tests.
 type (
 	// Scalars
-	nInterface  interface{}
-	nType       *Type
-	nBool       bool
-	nUint8      uint8
-	nUint16     uint16
-	nUint32     uint32
-	nUint64     uint64
-	nUint       uint
-	nUintptr    uintptr
-	nInt8       int8
-	nInt16      int16
-	nInt32      int32
-	nInt64      int64
-	nInt        int
-	nFloat32    float32
-	nFloat64    float64
-	nComplex64  complex64
-	nComplex128 complex128
-	nString     string
+	NInterface  interface{}
+	NType       *Type
+	NBool       bool
+	NUint8      uint8
+	NUint16     uint16
+	NUint32     uint32
+	NUint64     uint64
+	NUint       uint
+	NUintptr    uintptr
+	NInt8       int8
+	NInt16      int16
+	NInt32      int32
+	NInt64      int64
+	NInt        int
+	NFloat32    float32
+	NFloat64    float64
+	NComplex64  complex64
+	NComplex128 complex128
+	NString     string
 	// Arrays
-	nArray3Interface  [3]nInterface
-	nArray3TypeObject [3]*Type
-	nArray3Bool       [3]bool
-	nArray3Uint8      [3]uint8
-	nArray3Uint16     [3]uint16
-	nArray3Uint32     [3]uint32
-	nArray3Uint64     [3]uint64
-	nArray3Uint       [3]uint
-	nArray3Uintptr    [3]uintptr
-	nArray3Int8       [3]int8
-	nArray3Int16      [3]int16
-	nArray3Int32      [3]int32
-	nArray3Int64      [3]int64
-	nArray3Int        [3]int
-	nArray3Float32    [3]float32
-	nArray3Float64    [3]float64
-	nArray3Complex64  [3]complex64
-	nArray3Complex128 [3]complex128
-	nArray3String     [3]string
+	NArray3Interface  [3]NInterface
+	NArray3TypeObject [3]*Type
+	NArray3Bool       [3]bool
+	NArray3Uint8      [3]uint8
+	NArray3Uint16     [3]uint16
+	NArray3Uint32     [3]uint32
+	NArray3Uint64     [3]uint64
+	NArray3Uint       [3]uint
+	NArray3Uintptr    [3]uintptr
+	NArray3Int8       [3]int8
+	NArray3Int16      [3]int16
+	NArray3Int32      [3]int32
+	NArray3Int64      [3]int64
+	NArray3Int        [3]int
+	NArray3Float32    [3]float32
+	NArray3Float64    [3]float64
+	NArray3Complex64  [3]complex64
+	NArray3Complex128 [3]complex128
+	NArray3String     [3]string
 	// Structs
-	nStructInterface  struct{ X nInterface }
-	nStructTypeObject struct{ X *Type }
-	nStructBool       struct{ X bool }
-	nStructUint8      struct{ X uint8 }
-	nStructUint16     struct{ X uint16 }
-	nStructUint32     struct{ X uint32 }
-	nStructUint64     struct{ X uint64 }
-	nStructUint       struct{ X uint }
-	nStructUintptr    struct{ X uintptr }
-	nStructInt8       struct{ X int8 }
-	nStructInt16      struct{ X int16 }
-	nStructInt32      struct{ X int32 }
-	nStructInt64      struct{ X int64 }
-	nStructInt        struct{ X int }
-	nStructFloat32    struct{ X float32 }
-	nStructFloat64    struct{ X float64 }
-	nStructComplex64  struct{ X complex64 }
-	nStructComplex128 struct{ X complex128 }
-	nStructString     struct{ X string }
+	NStructInterface      struct{ X NInterface }
+	NStructTypeObject     struct{ X *Type }
+	NStructBool           struct{ X bool }
+	NStructUint8          struct{ X uint8 }
+	NStructUint16         struct{ X uint16 }
+	NStructUint32         struct{ X uint32 }
+	NStructUint64         struct{ X uint64 }
+	NStructUint           struct{ X uint }
+	NStructUintptr        struct{ X uintptr }
+	NStructInt8           struct{ X int8 }
+	NStructInt16          struct{ X int16 }
+	NStructInt32          struct{ X int32 }
+	NStructInt64          struct{ X int64 }
+	NStructInt            struct{ X int }
+	NStructFloat32        struct{ X float32 }
+	NStructFloat64        struct{ X float64 }
+	NStructComplex64      struct{ X complex64 }
+	NStructComplex128     struct{ X complex128 }
+	NStructString         struct{ X string }
+	NStructOptionalStruct struct{ X *NStructInt }
+	NStructOptionalAny    struct{ X interface{} }
 	// Slices
-	nSliceInterface  []nInterface
-	nSliceTypeObject []*Type
-	nSliceBool       []bool
-	nSliceUint8      []uint8
-	nSliceUint16     []uint16
-	nSliceUint32     []uint32
-	nSliceUint64     []uint64
-	nSliceUint       []uint
-	nSliceUintptr    []uintptr
-	nSliceInt8       []int8
-	nSliceInt16      []int16
-	nSliceInt32      []int32
-	nSliceInt64      []int64
-	nSliceInt        []int
-	nSliceFloat32    []float32
-	nSliceFloat64    []float64
-	nSliceComplex64  []complex64
-	nSliceComplex128 []complex128
-	nSliceString     []string
+	NSliceInterface  []NInterface
+	NSliceTypeObject []*Type
+	NSliceBool       []bool
+	NSliceUint8      []uint8
+	NSliceUint16     []uint16
+	NSliceUint32     []uint32
+	NSliceUint64     []uint64
+	NSliceUint       []uint
+	NSliceUintptr    []uintptr
+	NSliceInt8       []int8
+	NSliceInt16      []int16
+	NSliceInt32      []int32
+	NSliceInt64      []int64
+	NSliceInt        []int
+	NSliceFloat32    []float32
+	NSliceFloat64    []float64
+	NSliceComplex64  []complex64
+	NSliceComplex128 []complex128
+	NSliceString     []string
 	// Sets
-	nSetInterface  map[nInterface]struct{}
-	nSetTypeObject map[*Type]struct{}
-	nSetBool       map[bool]struct{}
-	nSetUint8      map[uint8]struct{}
-	nSetUint16     map[uint16]struct{}
-	nSetUint32     map[uint32]struct{}
-	nSetUint64     map[uint64]struct{}
-	nSetUint       map[uint]struct{}
-	nSetUintptr    map[uintptr]struct{}
-	nSetInt8       map[int8]struct{}
-	nSetInt16      map[int16]struct{}
-	nSetInt32      map[int32]struct{}
-	nSetInt64      map[int64]struct{}
-	nSetInt        map[int]struct{}
-	nSetFloat32    map[float32]struct{}
-	nSetFloat64    map[float64]struct{}
-	nSetComplex64  map[complex64]struct{}
-	nSetComplex128 map[complex128]struct{}
-	nSetString     map[string]struct{}
+	NSetInterface  map[NInterface]struct{}
+	NSetTypeObject map[*Type]struct{}
+	NSetBool       map[bool]struct{}
+	NSetUint8      map[uint8]struct{}
+	NSetUint16     map[uint16]struct{}
+	NSetUint32     map[uint32]struct{}
+	NSetUint64     map[uint64]struct{}
+	NSetUint       map[uint]struct{}
+	NSetUintptr    map[uintptr]struct{}
+	NSetInt8       map[int8]struct{}
+	NSetInt16      map[int16]struct{}
+	NSetInt32      map[int32]struct{}
+	NSetInt64      map[int64]struct{}
+	NSetInt        map[int]struct{}
+	NSetFloat32    map[float32]struct{}
+	NSetFloat64    map[float64]struct{}
+	NSetComplex64  map[complex64]struct{}
+	NSetComplex128 map[complex128]struct{}
+	NSetString     map[string]struct{}
 	// Maps
-	nMapInterface  map[nInterface]nInterface
-	nMapTypeObject map[*Type]*Type
-	nMapBool       map[bool]bool
-	nMapUint8      map[uint8]uint8
-	nMapUint16     map[uint16]uint16
-	nMapUint32     map[uint32]uint32
-	nMapUint64     map[uint64]uint64
-	nMapUint       map[uint]uint
-	nMapUintptr    map[uintptr]uintptr
-	nMapInt8       map[int8]int8
-	nMapInt16      map[int16]int16
-	nMapInt32      map[int32]int32
-	nMapInt64      map[int64]int64
-	nMapInt        map[int]int
-	nMapFloat32    map[float32]float32
-	nMapFloat64    map[float64]float64
-	nMapComplex64  map[complex64]complex64
-	nMapComplex128 map[complex128]complex128
-	nMapString     map[string]string
+	NMapInterface  map[NInterface]NInterface
+	NMapTypeObject map[*Type]*Type
+	NMapBool       map[bool]bool
+	NMapUint8      map[uint8]uint8
+	NMapUint16     map[uint16]uint16
+	NMapUint32     map[uint32]uint32
+	NMapUint64     map[uint64]uint64
+	NMapUint       map[uint]uint
+	NMapUintptr    map[uintptr]uintptr
+	NMapInt8       map[int8]int8
+	NMapInt16      map[int16]int16
+	NMapInt32      map[int32]int32
+	NMapInt64      map[int64]int64
+	NMapInt        map[int]int
+	NMapFloat32    map[float32]float32
+	NMapFloat64    map[float64]float64
+	NMapComplex64  map[complex64]complex64
+	NMapComplex128 map[complex128]complex128
+	NMapString     map[string]string
 	// Recursive types
-	nRecurseSelf struct{ X []nRecurseSelf }
-	nRecurseA    struct{ B []nRecurseB }
-	nRecurseB    struct{ A []nRecurseA }
+	NRecurseSelf struct{ X []NRecurseSelf }
+	NRecurseA    struct{ B []NRecurseB }
+	NRecurseB    struct{ A []NRecurseA }
 
 	// Composite types representing sets of numbers.
-	nMapUint64Empty    map[nUint64]struct{}
-	nMapInt64Empty     map[nUint64]struct{}
-	nMapFloat64Empty   map[nUint64]struct{}
-	nMapComplex64Empty map[nUint64]struct{}
-	nMapUint64Bool     map[nUint64]nBool
-	nMapInt64Bool      map[nInt64]nBool
-	nMapFloat64Bool    map[nFloat64]nBool
-	nMapComplex64Bool  map[nComplex64]nBool
+	NMapUint64Empty    map[NUint64]struct{}
+	NMapInt64Empty     map[NUint64]struct{}
+	NMapFloat64Empty   map[NUint64]struct{}
+	NMapComplex64Empty map[NUint64]struct{}
+	NMapUint64Bool     map[NUint64]NBool
+	NMapInt64Bool      map[NInt64]NBool
+	NMapFloat64Bool    map[NFloat64]NBool
+	NMapComplex64Bool  map[NComplex64]NBool
 	// Composite types representing sets of strings.
-	nMapStringEmpty map[nString]struct{}
-	nMapStringBool  map[nString]nBool
-	nStructXYZBool  struct{ X, Y, Z nBool }
-	nStructWXBool   struct{ W, X nBool }
+	NMapStringEmpty          map[NString]struct{}
+	NMapStringBool           map[NString]NBool
+	NStructXYZBool           struct{ X, Y, Z NBool }
+	NStructXYZBoolUnexported struct{ a, X, b, Y, c, Z, d NBool }
+	NStructWXBool            struct{ W, X NBool }
 	// Composite types representing maps of strings to numbers.
-	nMapStringUint64    map[nString]nUint64
-	nMapStringInt64     map[nString]nInt64
-	nMapStringFloat64   map[nString]nFloat64
-	nMapStringComplex64 map[nString]nComplex64
-	nStructVWXUint64    struct{ V, W, X nUint64 }
-	nStructVWXInt64     struct{ V, W, X nInt64 }
-	nStructVWXFloat64   struct{ V, W, X nFloat64 }
-	nStructVWXComplex64 struct{ V, W, X nComplex64 }
-	nStructUVUint64     struct{ U, V nUint64 }
-	nStructUVInt64      struct{ U, V nInt64 }
-	nStructUVFloat64    struct{ U, V nFloat64 }
-	nStructUVComplex64  struct{ U, V nComplex64 }
+	NMapStringUint64    map[NString]NUint64
+	NMapStringInt64     map[NString]NInt64
+	NMapStringFloat64   map[NString]NFloat64
+	NMapStringComplex64 map[NString]NComplex64
+	NStructVWXUint64    struct{ V, W, X NUint64 }
+	NStructVWXInt64     struct{ V, W, X NInt64 }
+	NStructVWXFloat64   struct{ V, W, X NFloat64 }
+	NStructVWXComplex64 struct{ V, W, X NComplex64 }
+	NStructVWXMixed     struct {
+		// Interleave unexported fields, which are ignored.
+		a bool
+		V int64
+		b string
+		W float64
+		c []byte
+		X complex64
+		d interface{}
+	}
+	NStructUVUint64    struct{ U, V NUint64 }
+	NStructUVInt64     struct{ U, V NInt64 }
+	NStructUVFloat64   struct{ U, V NFloat64 }
+	NStructUVComplex64 struct{ U, V NComplex64 }
+	NStructUVMixed     struct {
+		// Interleave unexported fields, which are ignored.
+		a bool
+		U int64
+		b string
+		V float64
+		c []byte
+	}
 	// Types that cannot be converted to sets.  We represent sets as
-	// map[key]struct{} on the Go side, but don't allow map[key]nEmpty.
-	nEmpty           struct{}
-	nMapStringnEmpty map[nString]nEmpty
-	nStructXYZEmpty  struct{ X, Y, Z struct{} }
-	nStructXYZnEmpty struct{ X, Y, Z nEmpty }
+	// map[key]struct{} on the Go side, but don't allow map[key]NEmpty.
+	NEmpty           struct{}
+	NMapStringNEmpty map[NString]NEmpty
+	NStructXYZEmpty  struct{ X, Y, Z struct{} }
+	NStructXYZNEmpty struct{ X, Y, Z NEmpty }
 )
 
-func recurseSelfType() *Type {
+func RecurseSelfType() *Type {
 	var builder TypeBuilder
-	n := builder.Named("v.io/core/veyron2/vdl.nRecurseSelf")
+	n := builder.Named("v.io/core/veyron2/vdl.NRecurseSelf")
 	n.AssignBase(builder.Struct().AppendField("X", builder.List().AssignElem(n)))
 	builder.Build()
 	t, err := n.Built()
@@ -224,10 +258,10 @@ func recurseSelfType() *Type {
 	return t
 }
 
-func recurseABTypes() [2]*Type {
+func RecurseABTypes() [2]*Type {
 	var builder TypeBuilder
-	a := builder.Named("v.io/core/veyron2/vdl.nRecurseA")
-	b := builder.Named("v.io/core/veyron2/vdl.nRecurseB")
+	a := builder.Named("v.io/core/veyron2/vdl.NRecurseA")
+	b := builder.Named("v.io/core/veyron2/vdl.NRecurseB")
 	a.AssignBase(builder.Struct().AppendField("B", builder.List().AssignElem(b)))
 	b.AssignBase(builder.Struct().AppendField("A", builder.List().AssignElem(a)))
 	builder.Build()
@@ -242,250 +276,315 @@ func recurseABTypes() [2]*Type {
 	return [2]*Type{aT, bT}
 }
 
-func recurseAType() *Type { return recurseABTypes()[0] }
-func recurseBType() *Type { return recurseABTypes()[1] }
+func RecurseAType() *Type { return RecurseABTypes()[0] }
+func RecurseBType() *Type { return RecurseABTypes()[1] }
 
-// Special case enum doesn't have built-in language support in Go.
-//   type nEnum enum{A;B;C}
-type nEnum int
+// Special case enum isn't regularly expressible in Go.
+type NEnum int
 
 const (
-	nEnumA nEnum = iota
-	nEnumB
-	nEnumC
+	NEnumA NEnum = iota
+	NEnumB
+	NEnumC
+	NEnumABC
 )
 
-func (x *nEnum) Set(label string) error {
+func (x *NEnum) Set(label string) error {
 	switch label {
 	case "A":
-		*x = nEnumA
+		*x = NEnumA
 		return nil
 	case "B":
-		*x = nEnumB
+		*x = NEnumB
 		return nil
 	case "C":
-		*x = nEnumC
+		*x = NEnumC
+		return nil
+	case "ABC":
+		*x = NEnumABC
 		return nil
 	}
 	*x = -1
-	return fmt.Errorf("unknown label %q in nEnum", label)
+	return fmt.Errorf("unknown label %q in NEnum", label)
 }
 
-func (x nEnum) String() string {
+func (x NEnum) String() string {
 	switch x {
-	case nEnumA:
+	case NEnumA:
 		return "A"
-	case nEnumB:
+	case NEnumB:
 		return "B"
-	case nEnumC:
+	case NEnumC:
 		return "C"
+	case NEnumABC:
+		return "ABC"
 	}
 	return ""
 }
 
-func (nEnum) __VDLReflect(struct{ Enum struct{ A, B, C string } }) {}
+func (NEnum) __VDLReflect(struct{ Enum struct{ A, B, C, ABC string } }) {}
 
-// Special case union doesn't have built-in language support in Go.
-//   type nUnion union{A bool;B string;C int32}
+var EnumTypeN = NamedType("NEnum", EnumType("A", "B", "C", "ABC"))
+
+// union{A bool;B string;C NStructInt64}
 type (
-	nUnion interface {
+	NUnionABC interface {
 		Index() int
 		Name() string
-		__VDLReflect(__nUnionReflect)
+		__VDLReflect(__NUnionABCReflect)
 	}
-	nUnionA struct{ Value bool }
-	nUnionB struct{ Value string }
-	nUnionC struct{ Value int32 }
+	NUnionABCA struct{ Value bool }
+	NUnionABCB struct{ Value string }
+	NUnionABCC struct{ Value NStructInt64 }
 
-	__nUnionReflect struct {
-		Type  nUnion
+	__NUnionABCReflect struct {
+		Type  NUnionABC
 		Union struct {
-			A nUnionA
-			B nUnionB
-			C nUnionC
+			A NUnionABCA
+			B NUnionABCB
+			C NUnionABCC
 		}
 	}
 )
 
-func (nUnionA) Name() string                 { return "A" }
-func (nUnionA) Index() int                   { return 0 }
-func (nUnionA) __VDLReflect(__nUnionReflect) {}
-func (nUnionB) Name() string                 { return "B" }
-func (nUnionB) Index() int                   { return 1 }
-func (nUnionB) __VDLReflect(__nUnionReflect) {}
-func (nUnionC) Name() string                 { return "C" }
-func (nUnionC) Index() int                   { return 2 }
-func (nUnionC) __VDLReflect(__nUnionReflect) {}
+func (NUnionABCA) Name() string                    { return "A" }
+func (NUnionABCA) Index() int                      { return 0 }
+func (NUnionABCA) __VDLReflect(__NUnionABCReflect) {}
+func (NUnionABCB) Name() string                    { return "B" }
+func (NUnionABCB) Index() int                      { return 1 }
+func (NUnionABCB) __VDLReflect(__NUnionABCReflect) {}
+func (NUnionABCC) Name() string                    { return "C" }
+func (NUnionABCC) Index() int                      { return 2 }
+func (NUnionABCC) __VDLReflect(__NUnionABCReflect) {}
+
+// union{B string;C NStructInt64;D int64}
+type (
+	NUnionBCD interface {
+		Index() int
+		Name() string
+		__VDLReflect(__NUnionBCDDesc)
+	}
+	NUnionBCDB struct{ Value string }
+	NUnionBCDC struct{ Value NStructInt64 }
+	NUnionBCDD struct{ Value int64 }
+
+	__NUnionBCDDesc struct {
+		Type  NUnionBCD
+		Union struct {
+			B NUnionBCDB
+			C NUnionBCDC
+			D NUnionBCDD
+		}
+	}
+)
+
+func (NUnionBCDB) Name() string                 { return "B" }
+func (NUnionBCDB) Index() int                   { return 0 }
+func (NUnionBCDB) __VDLReflect(__NUnionBCDDesc) {}
+func (NUnionBCDC) Name() string                 { return "C" }
+func (NUnionBCDC) Index() int                   { return 1 }
+func (NUnionBCDC) __VDLReflect(__NUnionBCDDesc) {}
+func (NUnionBCDD) Name() string                 { return "D" }
+func (NUnionBCDD) Index() int                   { return 2 }
+func (NUnionBCDD) __VDLReflect(__NUnionBCDDesc) {}
 
 // Special-case error types
-type nonPtrError struct{}
-type ptrError struct{}
+type NonPtrError struct{}
+type PtrError struct{}
 
-func (nonPtrError) Error() string { return "" }
-func (*ptrError) Error() string   { return "" }
+func (NonPtrError) Error() string { return "" }
+func (*PtrError) Error() string   { return "" }
 
-// nWire and nNative are used to test native type support.
-type nWire struct{ Str string }
-type nNative int64
+// NWire and NNative are used to test native type support.
+type NWire struct{ Str string }
+type NNative int64
 
-func (x nWire) VDLToNative(n *nNative) error {
+func (x NWire) VDLToNative(n *NNative) error {
 	*n = 0
 	i, err := strconv.Atoi(x.Str)
 	if err != nil {
 		return err
 	}
-	*n = nNative(i)
+	*n = NNative(i)
 	return nil
 }
 
-func (x *nWire) VDLFromNative(n nNative) error {
+func (x *NWire) VDLFromNative(n NNative) error {
 	x.Str = strconv.Itoa(int(n))
 	return nil
 }
 
-// nWireReg and nNativeReg are used to test pre-registered native types.
-type nWireReg struct{ Str string }
-type nNativeReg int64
+// NWireReg and NNativeReg are used to test pre-registered native types.
+type NWireReg struct{ Str string }
+type NNativeReg int64
 
-func (x nWireReg) VDLToNative(n *nNativeReg) error {
+func (x NWireReg) VDLToNative(n *NNativeReg) error {
 	*n = 0
 	i, err := strconv.Atoi(x.Str)
 	if err != nil {
 		return err
 	}
-	*n = nNativeReg(i)
+	*n = NNativeReg(i)
 	return nil
 }
 
-func (x *nWireReg) VDLFromNative(n nNativeReg) error {
+func (x *NWireReg) VDLFromNative(n NNativeReg) error {
 	x.Str = strconv.Itoa(int(n))
 	return nil
 }
 
 func init() {
-	Register(nWireReg{})
+	Register(NWireReg{})
 }
+
+var (
+	StructInt64TypeN = NamedType("v.io/core/veyron2/vdl.NStructInt64", StructType(Field{"X", Int64Type}))
+	UnionABCTypeN    = NamedType("v.io/core/veyron2/vdl.NUnionABC", UnionType([]Field{{"A", BoolType}, {"B", StringType}, {"C", StructInt64TypeN}}...))
+	UnionBCDTypeN    = NamedType("v.io/core/veyron2/vdl.NUnionBCD", UnionType([]Field{{"B", StringType}, {"C", StructInt64TypeN}, {"D", Int64Type}}...))
+	UnionXYTypeN     = NamedType("v.io/core/veyron2/vdl.NUnionXY", UnionType([]Field{{"X", StringType}, {"Y", StructInt64TypeN}}...))
+)
 
 // Define a bunch of *Type types used in tests.
 var (
 	// Named scalar types
-	boolTypeN       = NamedType("nBool", BoolType)
-	nByteType       = NamedType("nByte", ByteType)
-	uint16TypeN     = NamedType("nUint16", Uint16Type)
-	uint32TypeN     = NamedType("nUint32", Uint32Type)
-	uint64TypeN     = NamedType("nUint64", Uint64Type)
-	int16TypeN      = NamedType("nInt16", Int16Type)
-	int32TypeN      = NamedType("nInt32", Int32Type)
-	int64TypeN      = NamedType("nInt64", Int64Type)
-	float32TypeN    = NamedType("nFloat32", Float32Type)
-	float64TypeN    = NamedType("nFloat64", Float64Type)
-	complex64TypeN  = NamedType("nComplex64", Complex64Type)
-	complex128TypeN = NamedType("nComplex128", Complex128Type)
-	stringTypeN     = NamedType("nString", StringType)
+	BoolTypeN       = NamedType("NBool", BoolType)
+	ByteTypeN       = NamedType("NByte", ByteType)
+	Uint16TypeN     = NamedType("NUint16", Uint16Type)
+	Uint32TypeN     = NamedType("NUint32", Uint32Type)
+	Uint64TypeN     = NamedType("NUint64", Uint64Type)
+	Int16TypeN      = NamedType("NInt16", Int16Type)
+	Int32TypeN      = NamedType("NInt32", Int32Type)
+	Int64TypeN      = NamedType("NInt64", Int64Type)
+	Float32TypeN    = NamedType("NFloat32", Float32Type)
+	Float64TypeN    = NamedType("NFloat64", Float64Type)
+	Complex64TypeN  = NamedType("NComplex64", Complex64Type)
+	Complex128TypeN = NamedType("NComplex128", Complex128Type)
+	StringTypeN     = NamedType("NString", StringType)
 
 	// Composite types representing strings and bytes.
-	bytesType   = ListType(ByteType)
-	bytesTypeN  = NamedType("nBytes", bytesType)
-	bytes3Type  = ArrayType(3, ByteType)
-	bytes3TypeN = NamedType("nBytes3", bytes3Type)
+	BytesType   = ListType(ByteType)
+	BytesTypeN  = NamedType("NBytes", BytesType)
+	Bytes3Type  = ArrayType(3, ByteType)
+	Bytes3TypeN = NamedType("NBytes3", Bytes3Type)
 	// Composite types representing sequences of numbers.
-	array3Uint64Type     = ArrayType(3, Uint64Type)
-	array3Uint64TypeN    = NamedType("nArray3Uint64", ArrayType(3, uint64TypeN))
-	array3Int64Type      = ArrayType(3, Int64Type)
-	array3Int64TypeN     = NamedType("nArray3Int64", ArrayType(3, int64TypeN))
-	array3Float64Type    = ArrayType(3, Float64Type)
-	array3Float64TypeN   = NamedType("nArray3Float64", ArrayType(3, float64TypeN))
-	array3Complex64Type  = ArrayType(3, Complex64Type)
-	array3Complex64TypeN = NamedType("nArray3Complex64", ArrayType(3, complex64TypeN))
-	listUint64Type       = ListType(Uint64Type)
-	listUint64TypeN      = NamedType("nListUint64", ListType(uint64TypeN))
-	listInt64Type        = ListType(Int64Type)
-	listInt64TypeN       = NamedType("nListInt64", ListType(int64TypeN))
-	listFloat64Type      = ListType(Float64Type)
-	listFloat64TypeN     = NamedType("nListFloat64", ListType(float64TypeN))
-	listComplex64Type    = ListType(Complex64Type)
-	listComplex64TypeN   = NamedType("nListComplex64", ListType(complex64TypeN))
+	Array3Uint64Type     = ArrayType(3, Uint64Type)
+	Array3Uint64TypeN    = NamedType("NArray3Uint64", ArrayType(3, Uint64TypeN))
+	Array3Int64Type      = ArrayType(3, Int64Type)
+	Array3Int64TypeN     = NamedType("NArray3Int64", ArrayType(3, Int64TypeN))
+	Array3Float64Type    = ArrayType(3, Float64Type)
+	Array3Float64TypeN   = NamedType("NArray3Float64", ArrayType(3, Float64TypeN))
+	Array3Complex64Type  = ArrayType(3, Complex64Type)
+	Array3Complex64TypeN = NamedType("NArray3Complex64", ArrayType(3, Complex64TypeN))
+	ListUint64Type       = ListType(Uint64Type)
+	ListUint64TypeN      = NamedType("NListUint64", ListType(Uint64TypeN))
+	ListInt64Type        = ListType(Int64Type)
+	ListInt64TypeN       = NamedType("NListInt64", ListType(Int64TypeN))
+	ListFloat64Type      = ListType(Float64Type)
+	ListFloat64TypeN     = NamedType("NListFloat64", ListType(Float64TypeN))
+	ListComplex64Type    = ListType(Complex64Type)
+	ListComplex64TypeN   = NamedType("NListComplex64", ListType(Complex64TypeN))
 	// Composite types representing sets of numbers.
-	setUint64Type         = SetType(Uint64Type)
-	setUint64TypeN        = NamedType("nSetUint64", SetType(uint64TypeN))
-	setInt64Type          = SetType(Int64Type)
-	setInt64TypeN         = NamedType("nSetInt64", SetType(int64TypeN))
-	setFloat64Type        = SetType(Float64Type)
-	setFloat64TypeN       = NamedType("nSetFloat64", SetType(float64TypeN))
-	setComplex64Type      = SetType(Complex64Type)
-	setComplex64TypeN     = NamedType("nSetComplex64", SetType(complex64TypeN))
-	mapUint64BoolType     = MapType(Uint64Type, BoolType)
-	mapUint64BoolTypeN    = NamedType("nMapUint64Bool", MapType(uint64TypeN, boolTypeN))
-	mapInt64BoolType      = MapType(Int64Type, BoolType)
-	mapInt64BoolTypeN     = NamedType("nMapInt64Bool", MapType(int64TypeN, boolTypeN))
-	mapFloat64BoolType    = MapType(Float64Type, BoolType)
-	mapFloat64BoolTypeN   = NamedType("nMapFloat64Bool", MapType(float64TypeN, boolTypeN))
-	mapComplex64BoolType  = MapType(Complex64Type, BoolType)
-	mapComplex64BoolTypeN = NamedType("nMapComplex64Bool", MapType(complex64TypeN, boolTypeN))
+	SetUint64Type         = SetType(Uint64Type)
+	SetUint64TypeN        = NamedType("NSetUint64", SetType(Uint64TypeN))
+	SetInt64Type          = SetType(Int64Type)
+	SetInt64TypeN         = NamedType("NSetInt64", SetType(Int64TypeN))
+	SetFloat64Type        = SetType(Float64Type)
+	SetFloat64TypeN       = NamedType("NSetFloat64", SetType(Float64TypeN))
+	SetComplex64Type      = SetType(Complex64Type)
+	SetComplex64TypeN     = NamedType("NSetComplex64", SetType(Complex64TypeN))
+	MapUint64BoolType     = MapType(Uint64Type, BoolType)
+	MapUint64BoolTypeN    = NamedType("NMapUint64Bool", MapType(Uint64TypeN, BoolTypeN))
+	MapInt64BoolType      = MapType(Int64Type, BoolType)
+	MapInt64BoolTypeN     = NamedType("NMapInt64Bool", MapType(Int64TypeN, BoolTypeN))
+	MapFloat64BoolType    = MapType(Float64Type, BoolType)
+	MapFloat64BoolTypeN   = NamedType("NMapFloat64Bool", MapType(Float64TypeN, BoolTypeN))
+	MapComplex64BoolType  = MapType(Complex64Type, BoolType)
+	MapComplex64BoolTypeN = NamedType("NMapComplex64Bool", MapType(Complex64TypeN, BoolTypeN))
 	// Composite types representing sets of strings.
-	setStringType      = SetType(StringType)
-	setStringTypeN     = NamedType("nSetString", SetType(stringTypeN))
-	mapStringBoolType  = MapType(StringType, BoolType)
-	mapStringBoolTypeN = NamedType("nMapStringBool", MapType(stringTypeN, boolTypeN))
-	structXYZBoolType  = StructType(Field{"X", BoolType}, Field{"Y", BoolType}, Field{"Z", BoolType})
-	structXYZBoolTypeN = NamedType("nStructXYZBool", StructType(Field{"X", boolTypeN}, Field{"Y", boolTypeN}, Field{"Z", boolTypeN}))
-	structWXBoolType   = StructType(Field{"W", BoolType}, Field{"X", BoolType})
-	structWXBoolTypeN  = NamedType("nStructWXBool", StructType(Field{"W", boolTypeN}, Field{"X", boolTypeN}))
+	SetStringType      = SetType(StringType)
+	SetStringTypeN     = NamedType("NSetString", SetType(StringTypeN))
+	MapStringBoolType  = MapType(StringType, BoolType)
+	MapStringBoolTypeN = NamedType("NMapStringBool", MapType(StringTypeN, BoolTypeN))
+	StructXYZBoolType  = StructType(Field{"X", BoolType}, Field{"Y", BoolType}, Field{"Z", BoolType})
+	StructXYZBoolTypeN = NamedType("NStructXYZBool", StructType(Field{"X", BoolTypeN}, Field{"Y", BoolTypeN}, Field{"Z", BoolTypeN}))
+	StructWXBoolType   = StructType(Field{"W", BoolType}, Field{"X", BoolType})
+	StructWXBoolTypeN  = NamedType("NStructWXBool", StructType(Field{"W", BoolTypeN}, Field{"X", BoolTypeN}))
 	// Composite types representing maps of strings to numbers.
-	mapStringUint64Type     = MapType(StringType, Uint64Type)
-	mapStringUint64TypeN    = NamedType("nMapStringUint64", MapType(stringTypeN, uint64TypeN))
-	mapStringInt64Type      = MapType(StringType, Int64Type)
-	mapStringInt64TypeN     = NamedType("nMapStringInt64", MapType(stringTypeN, int64TypeN))
-	mapStringFloat64Type    = MapType(StringType, Float64Type)
-	mapStringFloat64TypeN   = NamedType("nMapStringFloat64", MapType(stringTypeN, float64TypeN))
-	mapStringComplex64Type  = MapType(StringType, Complex64Type)
-	mapStringComplex64TypeN = NamedType("nMapStringComplex64", MapType(stringTypeN, complex64TypeN))
-	structVWXUint64Type     = StructType(Field{"V", Uint64Type}, Field{"W", Uint64Type}, Field{"X", Uint64Type})
-	structVWXUint64TypeN    = NamedType("nStructVWXUint64", StructType(Field{"V", uint64TypeN}, Field{"W", uint64TypeN}, Field{"X", uint64TypeN}))
-	structVWXInt64Type      = StructType(Field{"V", Int64Type}, Field{"W", Int64Type}, Field{"X", Int64Type})
-	structVWXInt64TypeN     = NamedType("nStructVWXInt64", StructType(Field{"V", int64TypeN}, Field{"W", int64TypeN}, Field{"X", int64TypeN}))
-	structVWXFloat64Type    = StructType(Field{"V", Float64Type}, Field{"W", Float64Type}, Field{"X", Float64Type})
-	structVWXFloat64TypeN   = NamedType("nStructVWXFloat64", StructType(Field{"V", float64TypeN}, Field{"W", float64TypeN}, Field{"X", float64TypeN}))
-	structVWXComplex64Type  = StructType(Field{"V", Complex64Type}, Field{"W", Complex64Type}, Field{"X", Complex64Type})
-	structVWXComplex64TypeN = NamedType("nStructVWXComplex64", StructType(Field{"V", complex64TypeN}, Field{"W", complex64TypeN}, Field{"X", complex64TypeN}))
-	structUVUint64Type      = StructType(Field{"U", Uint64Type}, Field{"V", Uint64Type})
-	structUVUint64TypeN     = NamedType("nStructUVUint64", StructType(Field{"U", uint64TypeN}, Field{"V", uint64TypeN}))
-	structUVInt64Type       = StructType(Field{"U", Int64Type}, Field{"V", Int64Type})
-	structUVInt64TypeN      = NamedType("nStructUVInt64", StructType(Field{"U", int64TypeN}, Field{"V", int64TypeN}))
-	structUVFloat64Type     = StructType(Field{"U", Float64Type}, Field{"V", Float64Type})
-	structUVFloat64TypeN    = NamedType("nStructUVFloat64", StructType(Field{"U", float64TypeN}, Field{"V", float64TypeN}))
-	structUVComplex64Type   = StructType(Field{"U", Complex64Type}, Field{"V", Complex64Type})
-	structUVComplex64TypeN  = NamedType("nStructUVComplex64", StructType(Field{"U", complex64TypeN}, Field{"V", complex64TypeN}))
+	MapStringUint64Type     = MapType(StringType, Uint64Type)
+	MapStringUint64TypeN    = NamedType("NMapStringUint64", MapType(StringTypeN, Uint64TypeN))
+	MapStringInt64Type      = MapType(StringType, Int64Type)
+	MapStringInt64TypeN     = NamedType("NMapStringInt64", MapType(StringTypeN, Int64TypeN))
+	MapStringFloat64Type    = MapType(StringType, Float64Type)
+	MapStringFloat64TypeN   = NamedType("NMapStringFloat64", MapType(StringTypeN, Float64TypeN))
+	MapStringComplex64Type  = MapType(StringType, Complex64Type)
+	MapStringComplex64TypeN = NamedType("NMapStringComplex64", MapType(StringTypeN, Complex64TypeN))
+	StructVWXUint64Type     = StructType(Field{"V", Uint64Type}, Field{"W", Uint64Type}, Field{"X", Uint64Type})
+	StructVWXUint64TypeN    = NamedType("NStructVWXUint64", StructType(Field{"V", Uint64TypeN}, Field{"W", Uint64TypeN}, Field{"X", Uint64TypeN}))
+	StructVWXInt64Type      = StructType(Field{"V", Int64Type}, Field{"W", Int64Type}, Field{"X", Int64Type})
+	StructVWXInt64TypeN     = NamedType("NStructVWXInt64", StructType(Field{"V", Int64TypeN}, Field{"W", Int64TypeN}, Field{"X", Int64TypeN}))
+	StructVWXFloat64Type    = StructType(Field{"V", Float64Type}, Field{"W", Float64Type}, Field{"X", Float64Type})
+	StructVWXFloat64TypeN   = NamedType("NStructVWXFloat64", StructType(Field{"V", Float64TypeN}, Field{"W", Float64TypeN}, Field{"X", Float64TypeN}))
+	StructVWXComplex64Type  = StructType(Field{"V", Complex64Type}, Field{"W", Complex64Type}, Field{"X", Complex64Type})
+	StructVWXComplex64TypeN = NamedType("NStructVWXComplex64", StructType(Field{"V", Complex64TypeN}, Field{"W", Complex64TypeN}, Field{"X", Complex64TypeN}))
+	StructUVUint64Type      = StructType(Field{"U", Uint64Type}, Field{"V", Uint64Type})
+	StructUVUint64TypeN     = NamedType("NStructUVUint64", StructType(Field{"U", Uint64TypeN}, Field{"V", Uint64TypeN}))
+	StructUVInt64Type       = StructType(Field{"U", Int64Type}, Field{"V", Int64Type})
+	StructUVInt64TypeN      = NamedType("NStructUVInt64", StructType(Field{"U", Int64TypeN}, Field{"V", Int64TypeN}))
+	StructUVFloat64Type     = StructType(Field{"U", Float64Type}, Field{"V", Float64Type})
+	StructUVFloat64TypeN    = NamedType("NStructUVFloat64", StructType(Field{"U", Float64TypeN}, Field{"V", Float64TypeN}))
+	StructUVComplex64Type   = StructType(Field{"U", Complex64Type}, Field{"V", Complex64Type})
+	StructUVComplex64TypeN  = NamedType("NStructUVComplex64", StructType(Field{"U", Complex64TypeN}, Field{"V", Complex64TypeN}))
 
-	structAIntType  = StructType(Field{"A", Int64Type})
-	structAIntTypeN = NamedType("nStructA", structAIntType)
+	StructAIntType  = StructType(Field{"A", Int64Type})
+	StructAIntTypeN = NamedType("NStructA", StructAIntType)
 
-	unionTypeN   = rtN("Union", UnionType([]Field{{"A", BoolType}, {"B", StringType}, {"C", Int32Type}}...))
-	wireRegTypeN = rtN("WireReg", StructType(Field{"Str", StringType}))
+	UnionTypeN   = NameN("Union", UnionType([]Field{{"A", BoolType}, {"B", StringType}, {"C", Int32Type}}...))
+	WireRegTypeN = NameN("WireReg", StructType(Field{"Str", StringType}))
 
 	// Types that cannot be converted to sets.  Although we represent sets as
 	// map[key]struct{} on the Go side, we don't allow these as general
 	// conversions for val.Value.
-	emptyType           = StructType()
-	emptyTypeN          = NamedType("nEmpty", StructType())
-	mapStringEmptyType  = MapType(StringType, emptyType)
-	mapStringEmptyTypeN = NamedType("nMapStringEmpty", MapType(stringTypeN, emptyTypeN))
-	structXYZEmptyType  = StructType(Field{"X", emptyType}, Field{"Y", emptyType}, Field{"Z", emptyType})
-	structXYZEmptyTypeN = NamedType("nStructXYZEmpty", StructType(Field{"X", emptyTypeN}, Field{"Y", emptyTypeN}, Field{"Z", emptyTypeN}))
+	EmptyType           = StructType()
+	EmptyTypeN          = NamedType("NEmpty", StructType())
+	MapStringEmptyType  = MapType(StringType, EmptyType)
+	MapStringEmptyTypeN = NamedType("NMapStringEmpty", MapType(StringTypeN, EmptyTypeN))
+	StructXYZEmptyType  = StructType(Field{"X", EmptyType}, Field{"Y", EmptyType}, Field{"Z", EmptyType})
+	StructXYZEmptyTypeN = NamedType("NStructXYZEmpty", StructType(Field{"X", EmptyTypeN}, Field{"Y", EmptyTypeN}, Field{"Z", EmptyTypeN}))
 )
 
-func anyValue(x *Value) *Value                  { return ZeroValue(AnyType).Assign(x) }
-func boolValue(t *Type, x bool) *Value          { return ZeroValue(t).AssignBool(x) }
-func byteValue(t *Type, x byte) *Value          { return ZeroValue(t).AssignByte(x) }
-func uintValue(t *Type, x uint64) *Value        { return ZeroValue(t).AssignUint(x) }
-func intValue(t *Type, x int64) *Value          { return ZeroValue(t).AssignInt(x) }
-func floatValue(t *Type, x float64) *Value      { return ZeroValue(t).AssignFloat(x) }
-func complexValue(t *Type, x complex128) *Value { return ZeroValue(t).AssignComplex(x) }
-func stringValue(t *Type, x string) *Value      { return ZeroValue(t).AssignString(x) }
-func bytesValue(t *Type, x string) *Value       { return ZeroValue(t).AssignBytes([]byte(x)) }
-func bytes3Value(t *Type, x string) *Value      { return ZeroValue(t).CopyBytes([]byte(x)) }
+func NameN(suffix string, base *Type) *Type {
+	return NamedType("v.io/core/veyron2/vdl.N"+suffix, base)
+}
 
-func setStringValue(t *Type, x ...string) *Value {
+func NameNArray(suffix string, base *Type) *Type {
+	return NamedType("v.io/core/veyron2/vdl.NArray3"+suffix, ArrayType(3, base))
+}
+
+func NameNStruct(suffix string, base *Type) *Type {
+	return NamedType("v.io/core/veyron2/vdl.NStruct"+suffix, StructType(Field{"X", base}))
+}
+
+func NameNSlice(suffix string, base *Type) *Type {
+	return NamedType("v.io/core/veyron2/vdl.NSlice"+suffix, ListType(base))
+}
+
+func rtSet(base *Type) *Type {
+	return SetType(base)
+}
+
+func NameNSet(suffix string, base *Type) *Type {
+	return NamedType("v.io/core/veyron2/vdl.NSet"+suffix, rtSet(base))
+}
+
+func rtMap(base *Type) *Type {
+	return MapType(base, base)
+}
+
+func NameNMap(suffix string, base *Type) *Type {
+	return NamedType("v.io/core/veyron2/vdl.NMap"+suffix, rtMap(base))
+}
+
+func SetStringValue(t *Type, x ...string) *Value {
 	res := ZeroValue(t)
 	for _, vx := range x {
 		key := ZeroValue(t.Key()).AssignString(vx)
@@ -494,22 +593,22 @@ func setStringValue(t *Type, x ...string) *Value {
 	return res
 }
 
-type sb struct {
-	s string
-	b bool
+type SB struct {
+	S string
+	B bool
 }
 
-func mapStringBoolValue(t *Type, x ...sb) *Value {
+func MapStringBoolValue(t *Type, x ...SB) *Value {
 	res := ZeroValue(t)
 	for _, sb := range x {
-		key := ZeroValue(t.Key()).AssignString(sb.s)
-		val := ZeroValue(t.Elem()).AssignBool(sb.b)
+		key := ZeroValue(t.Key()).AssignString(sb.S)
+		val := ZeroValue(t.Elem()).AssignBool(sb.B)
 		res.AssignMapIndex(key, val)
 	}
 	return res
 }
 
-func mapStringEmptyValue(t *Type, x ...string) *Value {
+func MapStringEmptyValue(t *Type, x ...string) *Value {
 	res := ZeroValue(t)
 	for _, vx := range x {
 		key := ZeroValue(t.Key()).AssignString(vx)
@@ -519,16 +618,16 @@ func mapStringEmptyValue(t *Type, x ...string) *Value {
 	return res
 }
 
-func structBoolValue(t *Type, x ...sb) *Value {
+func StructBoolValue(t *Type, x ...SB) *Value {
 	res := ZeroValue(t)
 	for _, sb := range x {
-		_, index := t.FieldByName(sb.s)
-		res.Field(index).AssignBool(sb.b)
+		_, index := t.FieldByName(sb.S)
+		res.Field(index).AssignBool(sb.B)
 	}
 	return res
 }
 
-func assignNum(v *Value, num float64) *Value {
+func AssignNum(v *Value, num float64) *Value {
 	switch v.Kind() {
 	case Byte:
 		v.AssignByte(byte(num))
@@ -541,65 +640,65 @@ func assignNum(v *Value, num float64) *Value {
 	case Complex64, Complex128:
 		v.AssignComplex(complex(num, 0))
 	default:
-		panic(fmt.Errorf("val: assignNum unhandled %v", v.Type()))
+		panic(fmt.Errorf("val: AssignNum unhandled %v", v.Type()))
 	}
 	return v
 }
 
-func seqNumValue(t *Type, x ...float64) *Value {
+func SeqNumValue(t *Type, x ...float64) *Value {
 	res := ZeroValue(t)
 	if t.Kind() == List {
 		res.AssignLen(len(x))
 	}
 	for index, n := range x {
-		assignNum(res.Index(index), n)
+		AssignNum(res.Index(index), n)
 	}
 	return res
 }
 
-func setNumValue(t *Type, x ...float64) *Value {
+func SetNumValue(t *Type, x ...float64) *Value {
 	res := ZeroValue(t)
 	for _, n := range x {
-		res.AssignSetKey(assignNum(ZeroValue(t.Key()), n))
+		res.AssignSetKey(AssignNum(ZeroValue(t.Key()), n))
 	}
 	return res
 }
 
-type nb struct {
-	n float64
-	b bool
+type NB struct {
+	N float64
+	B bool
 }
 
-func mapNumBoolValue(t *Type, x ...nb) *Value {
+func MapNumBoolValue(t *Type, x ...NB) *Value {
 	res := ZeroValue(t)
 	for _, nb := range x {
-		key := assignNum(ZeroValue(t.Key()), nb.n)
-		val := ZeroValue(t.Elem()).AssignBool(nb.b)
+		key := AssignNum(ZeroValue(t.Key()), nb.N)
+		val := ZeroValue(t.Elem()).AssignBool(nb.B)
 		res.AssignMapIndex(key, val)
 	}
 	return res
 }
 
-type sn struct {
-	s string
-	n float64
+type SN struct {
+	S string
+	N float64
 }
 
-func mapStringNumValue(t *Type, x ...sn) *Value {
+func MapStringNumValue(t *Type, x ...SN) *Value {
 	res := ZeroValue(t)
 	for _, sn := range x {
-		key := ZeroValue(t.Key()).AssignString(sn.s)
-		val := assignNum(ZeroValue(t.Elem()), sn.n)
+		key := ZeroValue(t.Key()).AssignString(sn.S)
+		val := AssignNum(ZeroValue(t.Elem()), sn.N)
 		res.AssignMapIndex(key, val)
 	}
 	return res
 }
 
-func structNumValue(t *Type, x ...sn) *Value {
+func StructNumValue(t *Type, x ...SN) *Value {
 	res := ZeroValue(t)
 	for _, sn := range x {
-		_, index := t.FieldByName(sn.s)
-		assignNum(res.Field(index), sn.n)
+		_, index := t.FieldByName(sn.S)
+		AssignNum(res.Field(index), sn.N)
 	}
 	return res
 }

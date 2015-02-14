@@ -6,13 +6,13 @@ import (
 	"testing"
 )
 
-var nUnionWant = []*ReflectInfo{{
-	WireType: reflect.TypeOf((*nUnion)(nil)).Elem(),
-	WireName: "v.io/core/veyron2/vdl.nUnion",
+var NUnionWant = []*ReflectInfo{{
+	WireType: reflect.TypeOf((*NUnionABC)(nil)).Elem(),
+	WireName: "v.io/core/veyron2/vdl.NUnionABC",
 	UnionFields: []ReflectField{
-		{"A", reflect.TypeOf(false), reflect.TypeOf(nUnionA{})},
-		{"B", reflect.TypeOf(string("")), reflect.TypeOf(nUnionB{})},
-		{"C", reflect.TypeOf(int32(0)), reflect.TypeOf(nUnionC{})},
+		{"A", reflect.TypeOf(false), reflect.TypeOf(NUnionABCA{})},
+		{"B", reflect.TypeOf(string("")), reflect.TypeOf(NUnionABCB{})},
+		{"C", reflect.TypeOf(NStructInt64{}), reflect.TypeOf(NUnionABCC{})},
 	},
 }}
 
@@ -24,67 +24,70 @@ var reflectInfoTests = []struct {
 	{reflect.TypeOf(string("")), []*ReflectInfo{{WireType: reflect.TypeOf(string(""))}}},
 	{reflect.TypeOf([]byte{}), []*ReflectInfo{{WireType: reflect.TypeOf([]byte{})}}},
 	{
-		reflect.TypeOf(nEnumA),
+		reflect.TypeOf(NEnumA),
 		[]*ReflectInfo{{
-			WireType:   reflect.TypeOf(nEnumA),
-			WireName:   "v.io/core/veyron2/vdl.nEnum",
-			EnumLabels: []string{"A", "B", "C"},
+			WireType:   reflect.TypeOf(NEnumA),
+			WireName:   "v.io/core/veyron2/vdl.NEnum",
+			EnumLabels: []string{"A", "B", "C", "ABC"},
 		}},
 	},
-	{reflect.TypeOf((*nUnion)(nil)).Elem(), nUnionWant},
-	{reflect.TypeOf(nUnionA{}), nUnionWant},
-	{reflect.TypeOf(nUnionB{}), nUnionWant},
-	{reflect.TypeOf(nUnionC{}), nUnionWant},
+	{reflect.TypeOf((*NUnionABC)(nil)).Elem(), NUnionWant},
+	{reflect.TypeOf(NUnionABCA{}), NUnionWant},
+	{reflect.TypeOf(NUnionABCB{}), NUnionWant},
+	{reflect.TypeOf(NUnionABCC{}), NUnionWant},
 	{
-		reflect.TypeOf(nWire{}),
+		reflect.TypeOf(NWire{}),
 		[]*ReflectInfo{{
-			WireType:   reflect.TypeOf(nWire{}),
-			WireName:   "v.io/core/veyron2/vdl.nWire",
-			NativeType: reflect.TypeOf(nNative(0)),
-		}},
-	},
-	{
-		reflect.TypeOf(nRecurseSelf{}),
-		[]*ReflectInfo{{
-			WireType: reflect.TypeOf(nRecurseSelf{}),
-			WireName: "v.io/core/veyron2/vdl.nRecurseSelf",
+			WireType:   reflect.TypeOf(NWire{}),
+			WireName:   "v.io/core/veyron2/vdl.NWire",
+			NativeType: reflect.TypeOf(NNative(0)),
 		}},
 	},
 	{
-		reflect.TypeOf(nRecurseA{}),
+		reflect.TypeOf(NRecurseSelf{}),
+		[]*ReflectInfo{{
+			WireType: reflect.TypeOf(NRecurseSelf{}),
+			WireName: "v.io/core/veyron2/vdl.NRecurseSelf",
+		}},
+	},
+	{
+		reflect.TypeOf(NRecurseA{}),
 		[]*ReflectInfo{
 			{
-				WireType: reflect.TypeOf(nRecurseA{}),
-				WireName: "v.io/core/veyron2/vdl.nRecurseA",
+				WireType: reflect.TypeOf(NRecurseA{}),
+				WireName: "v.io/core/veyron2/vdl.NRecurseA",
 			},
 			{
-				WireType: reflect.TypeOf(nRecurseB{}),
-				WireName: "v.io/core/veyron2/vdl.nRecurseB",
+				WireType: reflect.TypeOf(NRecurseB{}),
+				WireName: "v.io/core/veyron2/vdl.NRecurseB",
 			},
 		},
 	},
 	{
-		reflect.TypeOf(nRecurseB{}),
+		reflect.TypeOf(NRecurseB{}),
 		[]*ReflectInfo{
 			{
-				WireType: reflect.TypeOf(nRecurseB{}),
-				WireName: "v.io/core/veyron2/vdl.nRecurseB",
+				WireType: reflect.TypeOf(NRecurseB{}),
+				WireName: "v.io/core/veyron2/vdl.NRecurseB",
 			},
 			{
-				WireType: reflect.TypeOf(nRecurseA{}),
-				WireName: "v.io/core/veyron2/vdl.nRecurseA",
+				WireType: reflect.TypeOf(NRecurseA{}),
+				WireName: "v.io/core/veyron2/vdl.NRecurseA",
 			},
 		},
 	},
 }
 
 func riNorm(ri *ReflectInfo) *ReflectInfo {
-	if ri != nil {
-		// Clear out the funcs, since they're not guaranteed to be the same.
-		ri.ToNativeFunc = reflect.Value{}
-		ri.FromNativeFunc = reflect.Value{}
+	if ri == nil {
+		return nil
 	}
-	return ri
+	// Clear out the funcs, since they're not guaranteed to be the same.
+	cp := new(ReflectInfo)
+	*cp = *ri
+	cp.ToNativeFunc = reflect.Value{}
+	cp.FromNativeFunc = reflect.Value{}
+	return cp
 }
 
 // Test DeriveReflectInfo success.
@@ -223,7 +226,7 @@ func (nBadEnumSet4) Set(string) error                               { panic("X")
 
 // No union fields
 func (nBadUnionNoFields) __VDLReflect(struct {
-	Type  nUnion
+	Type  NUnionABC
 	Union struct{}
 }) {
 	panic("X")
@@ -231,15 +234,15 @@ func (nBadUnionNoFields) __VDLReflect(struct {
 
 // Field name isn't exported
 func (nBadUnionUnexp) __VDLReflect(struct {
-	Type  nUnion
-	Union struct{ a nUnionA }
+	Type  NUnionABC
+	Union struct{ a NUnionABCA }
 }) {
 	panic("X")
 }
 
 // Field type isn't struct
 func (nBadUnionField1) __VDLReflect(struct {
-	Type  nUnion
+	Type  NUnionABC
 	Union struct{ A bool }
 }) {
 	panic("X")
@@ -247,7 +250,7 @@ func (nBadUnionField1) __VDLReflect(struct {
 
 // Field type has no field
 func (nBadUnionField2) __VDLReflect(struct {
-	Type  nUnion
+	Type  NUnionABC
 	Union struct{ A struct{} }
 }) {
 	panic("X")
@@ -255,7 +258,7 @@ func (nBadUnionField2) __VDLReflect(struct {
 
 // Field type name isn't "Value"
 func (nBadUnionField3) __VDLReflect(struct {
-	Type  nUnion
+	Type  NUnionABC
 	Union struct{ A struct{ value bool } }
 }) {
 	panic("X")
@@ -264,7 +267,7 @@ func (nBadUnionField3) __VDLReflect(struct {
 // Name method isn't Name() string
 func (nBadUnionName1) Name() { panic("X") }
 func (nBadUnionName1) __VDLReflect(struct {
-	Type  nUnion
+	Type  NUnionABC
 	Union struct{ A nBadUnionName1 }
 }) {
 	panic("X")
@@ -273,7 +276,7 @@ func (nBadUnionName1) __VDLReflect(struct {
 // Name method isn't Name() string
 func (nBadUnionName2) Name() bool { panic("X") }
 func (nBadUnionName2) __VDLReflect(struct {
-	Type  nUnion
+	Type  NUnionABC
 	Union struct{ A nBadUnionName2 }
 }) {
 	panic("X")
@@ -281,31 +284,31 @@ func (nBadUnionName2) __VDLReflect(struct {
 
 // VDLToNative method isn't VDLToNative(*Native) error
 func (nBadWireToNative1) VDLToNative() error        { panic("X") }
-func (nBadWireToNative2) VDLToNative(nNative) error { panic("X") }
-func (nBadWireToNative3) VDLToNative(*nNative)      { panic("X") }
-func (nBadWireToNative4) VDLToNative(*nNative) bool { panic("X") }
+func (nBadWireToNative2) VDLToNative(NNative) error { panic("X") }
+func (nBadWireToNative3) VDLToNative(*NNative)      { panic("X") }
+func (nBadWireToNative4) VDLToNative(*NNative) bool { panic("X") }
 
 // VDLFromNative method isn't (*) VDLFromNative(Native) error
-func (nBadWireFromNative1) VDLToNative(*nNative) error  { panic("X") }
-func (nBadWireFromNative2) VDLToNative(*nNative) error  { panic("X") }
-func (nBadWireFromNative3) VDLToNative(*nNative) error  { panic("X") }
-func (nBadWireFromNative4) VDLToNative(*nNative) error  { panic("X") }
-func (nBadWireFromNative5) VDLToNative(*nNative) error  { panic("X") }
+func (nBadWireFromNative1) VDLToNative(*NNative) error  { panic("X") }
+func (nBadWireFromNative2) VDLToNative(*NNative) error  { panic("X") }
+func (nBadWireFromNative3) VDLToNative(*NNative) error  { panic("X") }
+func (nBadWireFromNative4) VDLToNative(*NNative) error  { panic("X") }
+func (nBadWireFromNative5) VDLToNative(*NNative) error  { panic("X") }
 func (nBadWireFromNative1) VDLFromNative() error        { panic("X") }
-func (nBadWireFromNative2) VDLFromNative(nNative) error { panic("X") }
+func (nBadWireFromNative2) VDLFromNative(NNative) error { panic("X") }
 func (*nBadWireFromNative3) VDLFromNative()             { panic("X") }
-func (*nBadWireFromNative4) VDLFromNative(nNative)      { panic("X") }
-func (*nBadWireFromNative5) VDLFromNative(nNative) bool { panic("X") }
+func (*nBadWireFromNative4) VDLFromNative(NNative)      { panic("X") }
+func (*nBadWireFromNative5) VDLFromNative(NNative) bool { panic("X") }
 
 // VDL{To,From}Native are mismatched.
-func (nBadWireToFromNative1) VDLToNative(*nNative) error    { panic("X") }
-func (*nBadWireToFromNative2) VDLFromNative(nNative) error  { panic("X") }
-func (nBadWireToFromNative3) VDLToNative(*nNative) error    { panic("X") }
+func (nBadWireToFromNative1) VDLToNative(*NNative) error    { panic("X") }
+func (*nBadWireToFromNative2) VDLFromNative(NNative) error  { panic("X") }
+func (nBadWireToFromNative3) VDLToNative(*NNative) error    { panic("X") }
 func (*nBadWireToFromNative3) VDLFromNative(int64) error    { panic("X") }
 func (nBadWireToFromNative4) VDLToNative(*int64) error      { panic("X") }
-func (*nBadWireToFromNative4) VDLFromNative(nNative) error  { panic("X") }
-func (nBadWireToFromNative5) VDLToNative(*nNative) error    { panic("X") }
-func (*nBadWireToFromNative5) VDLFromNative(*nNative) error { panic("X") }
+func (*nBadWireToFromNative4) VDLFromNative(NNative) error  { panic("X") }
+func (nBadWireToFromNative5) VDLToNative(*NNative) error    { panic("X") }
+func (*nBadWireToFromNative5) VDLFromNative(*NNative) error { panic("X") }
 
 // rtErrorTest describes a test case with rt as input, and errstr as output.
 type rtErrorTest struct {
@@ -363,7 +366,7 @@ var reflectInfoErrorTests = []rtErrorTest{
 func TestDeriveReflectInfoError(t *testing.T) {
 	for _, test := range reflectInfoErrorTests {
 		got, err := DeriveReflectInfo(test.rt)
-		expectErr(t, err, test.errstr, "DeriveReflectInfo(%v)", test.rt)
+		ExpectErr(t, err, test.errstr, "DeriveReflectInfo(%v)", test.rt)
 		if got != nil {
 			t.Errorf("DeriveReflectInfo(%v) got %v, want nil", test.rt, got)
 		}

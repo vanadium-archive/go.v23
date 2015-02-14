@@ -7,7 +7,7 @@ import (
 	"os"
 	"reflect"
 
-	"v.io/core/veyron2/vdl/valconv"
+	"v.io/core/veyron2/vdl"
 )
 
 var (
@@ -22,7 +22,7 @@ type Decoder struct {
 }
 
 type decoder interface {
-	Decode(target valconv.Target) error
+	Decode(target vdl.Target) error
 	DecodeRaw(raw *RawValue) error
 	Ignore() error
 }
@@ -74,7 +74,7 @@ func (d *Decoder) Decode(v interface{}) error {
 		}
 		return d.dec.DecodeRaw(tv)
 	}
-	target, err := valconv.ReflectTarget(reflect.ValueOf(v))
+	target, err := vdl.ReflectTarget(reflect.ValueOf(v))
 	if err != nil {
 		return err
 	}

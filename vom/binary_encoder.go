@@ -6,7 +6,6 @@ import (
 	"io"
 
 	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/vdl/valconv"
 )
 
 var (
@@ -14,12 +13,12 @@ var (
 	errEncodeZeroTypeID   = errors.New("encoder finished with type ID 0")
 	errEncodeBadTypeStack = errors.New("encoder has bad type stack")
 
-	// Make sure binaryEncoder implements the valconv *Target interfaces.
-	_ valconv.Target       = (*binaryEncoder)(nil)
-	_ valconv.ListTarget   = (*binaryEncoder)(nil)
-	_ valconv.SetTarget    = (*binaryEncoder)(nil)
-	_ valconv.MapTarget    = (*binaryEncoder)(nil)
-	_ valconv.FieldsTarget = (*binaryEncoder)(nil)
+	// Make sure binaryEncoder implements the vdl *Target interfaces.
+	_ vdl.Target       = (*binaryEncoder)(nil)
+	_ vdl.ListTarget   = (*binaryEncoder)(nil)
+	_ vdl.SetTarget    = (*binaryEncoder)(nil)
+	_ vdl.MapTarget    = (*binaryEncoder)(nil)
+	_ vdl.FieldsTarget = (*binaryEncoder)(nil)
 )
 
 type binaryEncoder struct {
@@ -398,7 +397,7 @@ func (e *binaryEncoder) FromNil(tt *vdl.Type) error {
 	return nil
 }
 
-func (e *binaryEncoder) StartList(tt *vdl.Type, len int) (valconv.ListTarget, error) {
+func (e *binaryEncoder) StartList(tt *vdl.Type, len int) (vdl.ListTarget, error) {
 	if err := e.prepareType(tt, vdl.Array, vdl.List); err != nil {
 		return nil, err
 	}
@@ -409,7 +408,7 @@ func (e *binaryEncoder) StartList(tt *vdl.Type, len int) (valconv.ListTarget, er
 	return e, nil
 }
 
-func (e *binaryEncoder) StartSet(tt *vdl.Type, len int) (valconv.SetTarget, error) {
+func (e *binaryEncoder) StartSet(tt *vdl.Type, len int) (vdl.SetTarget, error) {
 	if err := e.prepareType(tt, vdl.Set); err != nil {
 		return nil, err
 	}
@@ -418,7 +417,7 @@ func (e *binaryEncoder) StartSet(tt *vdl.Type, len int) (valconv.SetTarget, erro
 	return e, nil
 }
 
-func (e *binaryEncoder) StartMap(tt *vdl.Type, len int) (valconv.MapTarget, error) {
+func (e *binaryEncoder) StartMap(tt *vdl.Type, len int) (vdl.MapTarget, error) {
 	if err := e.prepareType(tt, vdl.Map); err != nil {
 		return nil, err
 	}
@@ -427,7 +426,7 @@ func (e *binaryEncoder) StartMap(tt *vdl.Type, len int) (valconv.MapTarget, erro
 	return e, nil
 }
 
-func (e *binaryEncoder) StartFields(tt *vdl.Type) (valconv.FieldsTarget, error) {
+func (e *binaryEncoder) StartFields(tt *vdl.Type) (vdl.FieldsTarget, error) {
 	if err := e.prepareType(tt, vdl.Struct, vdl.Union); err != nil {
 		return nil, err
 	}
@@ -435,19 +434,19 @@ func (e *binaryEncoder) StartFields(tt *vdl.Type) (valconv.FieldsTarget, error) 
 	return e, nil
 }
 
-func (e *binaryEncoder) FinishList(valconv.ListTarget) error {
+func (e *binaryEncoder) FinishList(vdl.ListTarget) error {
 	return e.popType()
 }
 
-func (e *binaryEncoder) FinishSet(valconv.SetTarget) error {
+func (e *binaryEncoder) FinishSet(vdl.SetTarget) error {
 	return e.popType()
 }
 
-func (e *binaryEncoder) FinishMap(valconv.MapTarget) error {
+func (e *binaryEncoder) FinishMap(vdl.MapTarget) error {
 	return e.popType()
 }
 
-func (e *binaryEncoder) FinishFields(valconv.FieldsTarget) error {
+func (e *binaryEncoder) FinishFields(vdl.FieldsTarget) error {
 	if top := e.topType(); top != nil && top.Kind() == vdl.Struct || top.Kind() == vdl.Optional && top.Elem().Kind() == vdl.Struct {
 		// Write the struct terminator; don't write for union.
 		binaryEncodeUint(e.bufV, 0)
@@ -455,21 +454,21 @@ func (e *binaryEncoder) FinishFields(valconv.FieldsTarget) error {
 	return e.popType()
 }
 
-func (e *binaryEncoder) StartElem(index int) (valconv.Target, error) {
+func (e *binaryEncoder) StartElem(index int) (vdl.Target, error) {
 	e.pushType(e.topType().Elem())
 	return e, nil
 }
 
-func (e *binaryEncoder) FinishElem(elem valconv.Target) error {
+func (e *binaryEncoder) FinishElem(elem vdl.Target) error {
 	return e.popType()
 }
 
-func (e *binaryEncoder) StartKey() (valconv.Target, error) {
+func (e *binaryEncoder) StartKey() (vdl.Target, error) {
 	e.pushType(e.topType().Key())
 	return e, nil
 }
 
-func (e *binaryEncoder) FinishKeyStartField(key valconv.Target) (valconv.Target, error) {
+func (e *binaryEncoder) FinishKeyStartField(key vdl.Target) (vdl.Target, error) {
 	if err := e.popType(); err != nil {
 		return nil, err
 	}
@@ -477,11 +476,11 @@ func (e *binaryEncoder) FinishKeyStartField(key valconv.Target) (valconv.Target,
 	return e, nil
 }
 
-func (e *binaryEncoder) FinishField(key, field valconv.Target) error {
+func (e *binaryEncoder) FinishField(key, field vdl.Target) error {
 	return e.popType()
 }
 
-func (e *binaryEncoder) StartField(name string) (_, _ valconv.Target, _ error) {
+func (e *binaryEncoder) StartField(name string) (_, _ vdl.Target, _ error) {
 	// TODO(toddw): Change the encoding to the new scheme described in doc.go.
 	top := e.topType()
 	if top == nil {
@@ -504,6 +503,6 @@ func (e *binaryEncoder) StartField(name string) (_, _ valconv.Target, _ error) {
 	return nil, nil, fmt.Errorf("field name %q doesn't exist in top type %q", name, top)
 }
 
-func (e *binaryEncoder) FinishKey(key valconv.Target) error {
+func (e *binaryEncoder) FinishKey(key vdl.Target) error {
 	return e.popType()
 }

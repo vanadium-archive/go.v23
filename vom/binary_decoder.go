@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/vdl/valconv"
 )
 
 var (
@@ -22,7 +21,7 @@ func newBinaryDecoder(buf *decbuf, types *decoderTypes) *binaryDecoder {
 	return &binaryDecoder{buf, types}
 }
 
-func (d *binaryDecoder) Decode(target valconv.Target) error {
+func (d *binaryDecoder) Decode(target vdl.Target) error {
 	valType, err := d.decodeValueType()
 	if err != nil {
 		return err
@@ -87,7 +86,7 @@ func (d *binaryDecoder) decodeValueType() (*vdl.Type, error) {
 		// Decode the WireType like a regular value, and store it in recvTypes.  The
 		// type will actually be built when a value message arrives using this tid.
 		wireType := vdl.ZeroValue(vdl.AnyType)
-		target, err := valconv.ValueTarget(wireType)
+		target, err := vdl.ValueTarget(wireType)
 		if err != nil {
 			return nil, err
 		}
@@ -136,7 +135,7 @@ func (d *binaryDecoder) decodeValueByteLen(t *vdl.Type) (int, error) {
 
 // decodeValueMsg decodes the rest of the message assuming type t, handling the
 // optional message length.
-func (d *binaryDecoder) decodeValueMsg(t *vdl.Type, target valconv.Target) error {
+func (d *binaryDecoder) decodeValueMsg(t *vdl.Type, target vdl.Target) error {
 	if hasBinaryMsgLen(t) {
 		msgLen, err := binaryDecodeLen(d.buf)
 		if err != nil {
@@ -156,7 +155,7 @@ func (d *binaryDecoder) decodeValueMsg(t *vdl.Type, target valconv.Target) error
 }
 
 // decodeValue decodes the rest of the message assuming type tt.
-func (d *binaryDecoder) decodeValue(tt *vdl.Type, target valconv.Target) error {
+func (d *binaryDecoder) decodeValue(tt *vdl.Type, target vdl.Target) error {
 	ttFrom := tt
 	if tt.Kind() == vdl.Optional {
 		switch exists, err := d.buf.ReadByte(); {
@@ -286,7 +285,7 @@ func (d *binaryDecoder) decodeValue(tt *vdl.Type, target valconv.Target) error {
 				return err
 			}
 			switch err := setTarget.FinishKey(key); {
-			case err == valconv.ErrFieldNoExist:
+			case err == vdl.ErrFieldNoExist:
 				continue
 			case err != nil:
 				return err
@@ -311,7 +310,7 @@ func (d *binaryDecoder) decodeValue(tt *vdl.Type, target valconv.Target) error {
 				return err
 			}
 			switch field, err := mapTarget.FinishKeyStartField(key); {
-			case err == valconv.ErrFieldNoExist:
+			case err == vdl.ErrFieldNoExist:
 				if err := d.ignoreValue(tt.Elem()); err != nil {
 					return err
 				}
@@ -345,7 +344,7 @@ func (d *binaryDecoder) decodeValue(tt *vdl.Type, target valconv.Target) error {
 			}
 			ttfield := tt.Field(int(index - 1))
 			switch key, field, err := fieldsTarget.StartField(ttfield.Name); {
-			case err == valconv.ErrFieldNoExist:
+			case err == vdl.ErrFieldNoExist:
 				if err := d.ignoreValue(ttfield.Type); err != nil {
 					return err
 				}

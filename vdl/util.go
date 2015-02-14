@@ -1,10 +1,8 @@
-package valconv
+package vdl
 
 import (
 	"reflect"
 	"unsafe"
-
-	"v.io/core/veyron2/vdl"
 )
 
 var (
@@ -27,23 +25,23 @@ var (
 	}
 
 	bitlenVDL = [...]uintptr{
-		vdl.Byte:       8,
-		vdl.Uint16:     16,
-		vdl.Uint32:     32,
-		vdl.Uint64:     64,
-		vdl.Int16:      16,
-		vdl.Int32:      32,
-		vdl.Int64:      64,
-		vdl.Float32:    32,
-		vdl.Float64:    64,
-		vdl.Complex64:  32, // bitlen of each float
-		vdl.Complex128: 64, // bitlen of each float
+		Byte:       8,
+		Uint16:     16,
+		Uint32:     32,
+		Uint64:     64,
+		Int16:      16,
+		Int32:      32,
+		Int64:      64,
+		Float32:    32,
+		Float64:    64,
+		Complex64:  32, // bitlen of each float
+		Complex128: 64, // bitlen of each float
 	}
 )
 
 // bitlen{R,V} enforce static type safety on kind.
 func bitlenR(kind reflect.Kind) uintptr { return bitlenReflect[kind] }
-func bitlenV(kind vdl.Kind) uintptr     { return bitlenVDL[kind] }
+func bitlenV(kind Kind) uintptr         { return bitlenVDL[kind] }
 
 // isRTBytes returns true iff rt is an array or slice of bytes.
 func isRTBytes(rt reflect.Type) bool {

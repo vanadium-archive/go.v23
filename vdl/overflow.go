@@ -1,4 +1,4 @@
-package valconv
+package vdl
 
 import (
 	"math"

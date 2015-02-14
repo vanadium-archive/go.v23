@@ -43,7 +43,7 @@ func (r *caveatRegistry) register(d CaveatDescriptor, validator interface{}) err
 		return fmt.Errorf("Caveat with UUID %v registered twice. Once with (%v, fn=%p) from %v, once with (%v, fn=%p) from %v", d.Id, e.desc.ParamType, e.validatorFn.Interface(), e.registerer, d.ParamType, validator, registerer)
 	}
 	fn := reflect.ValueOf(validator)
-	param := vdl.ReflectFromType(d.ParamType)
+	param := vdl.TypeToReflect(d.ParamType)
 	if param == nil {
 		// If you hit this error, https://github.com/veyron/release-issues/issues/907
 		// might be the problem.

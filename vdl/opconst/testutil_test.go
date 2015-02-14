@@ -1,6 +1,6 @@
 package opconst
 
-// TODO(toddw): Merge with vdl/testutil_test.go and vdl/valconv/testutil_test.go
+// TODO(toddw): Merge with vdl/testutil_test.go.
 
 import (
 	"fmt"

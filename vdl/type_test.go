@@ -148,23 +148,23 @@ func TestTypeMismatch(t *testing.T) {
 	for _, ty := range allTypes() {
 		k := ty.Kind()
 		if k != Enum {
-			expectMismatchedKind(t, func() { ty.EnumLabel(0) })
-			expectMismatchedKind(t, func() { ty.EnumIndex("") })
-			expectMismatchedKind(t, func() { ty.NumEnumLabel() })
+			ExpectMismatchedKind(t, func() { ty.EnumLabel(0) })
+			ExpectMismatchedKind(t, func() { ty.EnumIndex("") })
+			ExpectMismatchedKind(t, func() { ty.NumEnumLabel() })
 		}
 		if k != Array {
-			expectMismatchedKind(t, func() { ty.Len() })
+			ExpectMismatchedKind(t, func() { ty.Len() })
 		}
 		if k != Optional && k != Array && k != List && k != Map {
-			expectMismatchedKind(t, func() { ty.Elem() })
+			ExpectMismatchedKind(t, func() { ty.Elem() })
 		}
 		if k != Set && k != Map {
-			expectMismatchedKind(t, func() { ty.Key() })
+			ExpectMismatchedKind(t, func() { ty.Key() })
 		}
 		if k != Struct && k != Union {
-			expectMismatchedKind(t, func() { ty.Field(0) })
-			expectMismatchedKind(t, func() { ty.FieldByName("") })
-			expectMismatchedKind(t, func() { ty.NumField() })
+			ExpectMismatchedKind(t, func() { ty.Field(0) })
+			ExpectMismatchedKind(t, func() { ty.FieldByName("") })
+			ExpectMismatchedKind(t, func() { ty.NumField() })
 		}
 	}
 }
@@ -226,7 +226,7 @@ func TestEnumTypes(t *testing.T) {
 				x = NamedType(test.name, x)
 			}
 		}
-		expectPanic(t, create, test.errstr, "%s EnumType", test.name)
+		ExpectPanic(t, create, test.errstr, "%s EnumType", test.name)
 		if x == nil {
 			continue
 		}
@@ -328,7 +328,7 @@ func TestSetTypes(t *testing.T) {
 			builder.Build()
 			_, err := x.Built()
 			want := `invalid key "` + test.s + `" in "set[` + test.s + `]"`
-			expectErr(t, err, want, "Unexpected error building Set[%s]:", test.k)
+			ExpectErr(t, err, want, "UnExpected error building Set[%s]:", test.k)
 			continue
 		}
 		x := SetType(test.t)
@@ -364,7 +364,7 @@ func TestMapTypes(t *testing.T) {
 			builder.Build()
 			_, err := x.Built()
 			want := `invalid key "` + key.s + `" in "map[` + key.s + `]` + key.s + `"`
-			expectErr(t, err, want, "Unexpected error building Map[%s]%s", key.k, key.k)
+			ExpectErr(t, err, want, "UnExpected error building Map[%s]%s", key.k, key.k)
 			continue
 		}
 		for _, elem := range singletons {
@@ -437,8 +437,8 @@ func TestInvalidMapTypes(t *testing.T) {
 		builder.Build()
 		_, errM := m.Built()
 		_, errS := s.Built()
-		expectErr(t, errM, `invalid key`, "Unexpected error building Map[%q]bool", x)
-		expectErr(t, errS, `invalid key`, "Unexpected error building Set[%q]bool", x)
+		ExpectErr(t, errM, `invalid key`, "UnExpected error building Map[%q]bool", x)
+		ExpectErr(t, errS, `invalid key`, "UnExpected error building Set[%q]bool", x)
 	}
 }
 
@@ -451,7 +451,7 @@ func TestStructTypes(t *testing.T) {
 				x = NamedType(test.name, x)
 			}
 		}
-		expectPanic(t, create, test.errstr, "%s StructType", test.name)
+		ExpectPanic(t, create, test.errstr, "%s StructType", test.name)
 		if x == nil {
 			continue
 		}
@@ -525,7 +525,7 @@ func TestUnionTypes(t *testing.T) {
 				x = NamedType(test.name, x)
 			}
 		}
-		expectPanic(t, create, test.errstr, "%s UnionType", test.name)
+		ExpectPanic(t, create, test.errstr, "%s UnionType", test.name)
 		if x == nil {
 			continue
 		}
@@ -600,7 +600,7 @@ func TestNamedTypes(t *testing.T) {
 		name := "Named" + test.s
 		var x *Type
 		create := func() { x = NamedType(name, test.t) }
-		expectPanic(t, create, errstr, name)
+		ExpectPanic(t, create, errstr, name)
 		if x == nil {
 			continue
 		}
@@ -766,9 +766,9 @@ func TestAssignableFrom(t *testing.T) {
 	optType := OptionalType(NamedType("X", StructType(Field{"A", BoolType})))
 	optValue := ZeroValue(optType)
 	tests := []struct {
-		to     *Type
-		from   *Value
-		expect bool
+		to   *Type
+		from *Value
+		want bool
 	}{
 		{BoolType, BoolValue(false), true},
 		{optType, optValue, true},
@@ -784,8 +784,8 @@ func TestAssignableFrom(t *testing.T) {
 		{optType, AnyValue(optValue), false},
 	}
 	for _, test := range tests {
-		if test.to.AssignableFrom(test.from) != test.expect {
-			t.Errorf(`%v.AssignableFrom(%v) expect %v`, test.to, test.from, test.expect)
+		if test.to.AssignableFrom(test.from) != test.want {
+			t.Errorf(`%v.AssignableFrom(%v) want %v`, test.to, test.from, test.want)
 		}
 	}
 }

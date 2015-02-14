@@ -232,8 +232,8 @@ func assignBool(t *testing.T, x *Value) {
 			t.Errorf(`Bool string got %v, want %v`, got, want)
 		}
 	} else {
-		expectMismatchedKind(t, func() { x.Bool() })
-		expectMismatchedKind(t, func() { x.AssignBool(newval) })
+		ExpectMismatchedKind(t, func() { x.Bool() })
+		ExpectMismatchedKind(t, func() { x.AssignBool(newval) })
 	}
 }
 
@@ -252,8 +252,8 @@ func assignByte(t *testing.T, x *Value) {
 			t.Errorf(`Byte string got %v, want %v`, got, want)
 		}
 	default:
-		expectMismatchedKind(t, func() { x.Byte() })
-		expectMismatchedKind(t, func() { x.AssignByte(newval) })
+		ExpectMismatchedKind(t, func() { x.Byte() })
+		ExpectMismatchedKind(t, func() { x.AssignByte(newval) })
 	}
 }
 
@@ -272,8 +272,8 @@ func assignUint(t *testing.T, x *Value) {
 			t.Errorf(`Uint string got %v, want %v`, got, want)
 		}
 	default:
-		expectMismatchedKind(t, func() { x.Uint() })
-		expectMismatchedKind(t, func() { x.AssignUint(newval) })
+		ExpectMismatchedKind(t, func() { x.Uint() })
+		ExpectMismatchedKind(t, func() { x.AssignUint(newval) })
 	}
 }
 
@@ -292,8 +292,8 @@ func assignInt(t *testing.T, x *Value) {
 			t.Errorf(`Int string got %v, want %v`, got, want)
 		}
 	default:
-		expectMismatchedKind(t, func() { x.Int() })
-		expectMismatchedKind(t, func() { x.AssignInt(newval) })
+		ExpectMismatchedKind(t, func() { x.Int() })
+		ExpectMismatchedKind(t, func() { x.AssignInt(newval) })
 	}
 }
 
@@ -312,8 +312,8 @@ func assignFloat(t *testing.T, x *Value) {
 			t.Errorf(`Float string got %v, want %v`, got, want)
 		}
 	default:
-		expectMismatchedKind(t, func() { x.Float() })
-		expectMismatchedKind(t, func() { x.AssignFloat(newval) })
+		ExpectMismatchedKind(t, func() { x.Float() })
+		ExpectMismatchedKind(t, func() { x.AssignFloat(newval) })
 	}
 }
 
@@ -332,8 +332,8 @@ func assignComplex(t *testing.T, x *Value) {
 			t.Errorf(`Complex string got %v, want %v`, got, want)
 		}
 	default:
-		expectMismatchedKind(t, func() { x.Complex() })
-		expectMismatchedKind(t, func() { x.AssignComplex(newval) })
+		ExpectMismatchedKind(t, func() { x.Complex() })
+		ExpectMismatchedKind(t, func() { x.AssignComplex(newval) })
 	}
 }
 
@@ -351,8 +351,8 @@ func assignString(t *testing.T, x *Value) {
 			t.Errorf(`String assign string rep got %v, want %v`, got, want)
 		}
 	} else {
-		expectMismatchedKind(t, func() { x.RawString() })
-		expectMismatchedKind(t, func() { x.AssignString(newval) })
+		ExpectMismatchedKind(t, func() { x.RawString() })
+		ExpectMismatchedKind(t, func() { x.AssignString(newval) })
 	}
 }
 
@@ -376,10 +376,10 @@ func assignEnum(t *testing.T, x *Value) {
 			t.Errorf(`Enum string got %v, want %v`, got, want)
 		}
 	} else {
-		expectMismatchedKind(t, func() { x.EnumIndex() })
-		expectMismatchedKind(t, func() { x.EnumLabel() })
-		expectMismatchedKind(t, func() { x.AssignEnumIndex(0) })
-		expectMismatchedKind(t, func() { x.AssignEnumLabel("A") })
+		ExpectMismatchedKind(t, func() { x.EnumIndex() })
+		ExpectMismatchedKind(t, func() { x.EnumLabel() })
+		ExpectMismatchedKind(t, func() { x.AssignEnumIndex(0) })
+		ExpectMismatchedKind(t, func() { x.AssignEnumLabel("A") })
 	}
 }
 
@@ -402,8 +402,8 @@ func assignTypeObject(t *testing.T, x *Value) {
 		}
 		x.AssignTypeObject(newval)
 	} else {
-		expectMismatchedKind(t, func() { x.TypeObject() })
-		expectMismatchedKind(t, func() { x.AssignTypeObject(newval) })
+		ExpectMismatchedKind(t, func() { x.TypeObject() })
+		ExpectMismatchedKind(t, func() { x.AssignTypeObject(newval) })
 	}
 }
 
@@ -430,11 +430,11 @@ func assignArray(t *testing.T, x *Value) {
 	} else {
 		if x.Kind() != List {
 			// Index is allowed for Array and List
-			expectMismatchedKind(t, func() { x.Index(0) })
+			ExpectMismatchedKind(t, func() { x.Index(0) })
 		}
 		if x.Kind() != List && x.Kind() != Set && x.Kind() != Map {
 			// Len is allowed for Array, List, Set and Map
-			expectMismatchedKind(t, func() { x.Len() })
+			ExpectMismatchedKind(t, func() { x.Len() })
 		}
 	}
 }
@@ -487,14 +487,14 @@ func assignList(t *testing.T, x *Value) {
 			t.Errorf(`List string got %v, want %v`, got, want)
 		}
 	} else {
-		expectMismatchedKind(t, func() { x.AssignLen(0) })
+		ExpectMismatchedKind(t, func() { x.AssignLen(0) })
 		if x.Kind() != Array {
 			// Index is allowed for Array and List
-			expectMismatchedKind(t, func() { x.Index(0) })
+			ExpectMismatchedKind(t, func() { x.Index(0) })
 		}
 		if x.Kind() != Array && x.Kind() != Set && x.Kind() != Map {
 			// Len is allowed for Array, List, Set and Map
-			expectMismatchedKind(t, func() { x.Len() })
+			ExpectMismatchedKind(t, func() { x.Len() })
 		}
 	}
 }
@@ -529,8 +529,8 @@ func assignBytes(t *testing.T, x *Value) {
 	// AssignBytes panics for arrays if the array len is not equal to the bytes
 	// len, and automatically assigns the len for lists.
 	if x.Kind() == Array {
-		expectPanic(t, func() { x.AssignBytes(abval) }, "AssignBytes", "[3]byte AssignBytes(%v)", abval)
-		expectPanic(t, func() { x.AssignBytes(abcdval) }, "AssignBytes", "[3]byte AssignBytes(%v)", abcdval)
+		ExpectPanic(t, func() { x.AssignBytes(abval) }, "AssignBytes", "[3]byte AssignBytes(%v)", abval)
+		ExpectPanic(t, func() { x.AssignBytes(abcdval) }, "AssignBytes", "[3]byte AssignBytes(%v)", abcdval)
 	} else {
 		x.AssignBytes(abval)
 		if got, want := x.Bytes(), abval; !bytes.Equal(got, want) {
@@ -699,16 +699,16 @@ func assignSet(t *testing.T, x *Value) {
 			t.Errorf(`Set String got %v, want %v`, got, want)
 		}
 	} else {
-		expectMismatchedKind(t, func() { x.AssignSetKey(nil) })
-		expectMismatchedKind(t, func() { x.DeleteSetKey(nil) })
+		ExpectMismatchedKind(t, func() { x.AssignSetKey(nil) })
+		ExpectMismatchedKind(t, func() { x.DeleteSetKey(nil) })
 		if x.Kind() != Map {
 			// Keys and ContainsKey are allowed for Set and Map
-			expectMismatchedKind(t, func() { x.Keys() })
-			expectMismatchedKind(t, func() { x.ContainsKey(nil) })
+			ExpectMismatchedKind(t, func() { x.Keys() })
+			ExpectMismatchedKind(t, func() { x.ContainsKey(nil) })
 		}
 		if x.Kind() != Array && x.Kind() != List && x.Kind() != Map {
 			// Len is allowed for Array, List, Set and Map
-			expectMismatchedKind(t, func() { x.Len() })
+			ExpectMismatchedKind(t, func() { x.Len() })
 		}
 	}
 }
@@ -798,16 +798,16 @@ func assignMap(t *testing.T, x *Value) {
 			t.Errorf(`Map string got %v, want %v`, got, want)
 		}
 	} else {
-		expectMismatchedKind(t, func() { x.MapIndex(nil) })
-		expectMismatchedKind(t, func() { x.AssignMapIndex(nil, nil) })
+		ExpectMismatchedKind(t, func() { x.MapIndex(nil) })
+		ExpectMismatchedKind(t, func() { x.AssignMapIndex(nil, nil) })
 		if x.Kind() != Set {
 			// Keys and ContainsKey are allowed for Set and Map
-			expectMismatchedKind(t, func() { x.Keys() })
-			expectMismatchedKind(t, func() { x.ContainsKey(nil) })
+			ExpectMismatchedKind(t, func() { x.Keys() })
+			ExpectMismatchedKind(t, func() { x.ContainsKey(nil) })
 		}
 		if x.Kind() != Array && x.Kind() != List && x.Kind() != Set {
 			// Len is allowed for Array, List, Set and Map
-			expectMismatchedKind(t, func() { x.Len() })
+			ExpectMismatchedKind(t, func() { x.Len() })
 		}
 	}
 }
@@ -834,7 +834,7 @@ func assignStruct(t *testing.T, x *Value) {
 			t.Errorf(`Struct !equal %v and %v`, x, y)
 		}
 	} else {
-		expectMismatchedKind(t, func() { x.Field(0) })
+		ExpectMismatchedKind(t, func() { x.Field(0) })
 	}
 }
 
@@ -862,8 +862,8 @@ func assignUnion(t *testing.T, x *Value) {
 			t.Errorf(`Union assign B value got %v, want %v`, got, want)
 		}
 	} else {
-		expectMismatchedKind(t, func() { x.UnionField() })
-		expectMismatchedKind(t, func() { x.AssignUnionField(0, nil) })
+		ExpectMismatchedKind(t, func() { x.UnionField() })
+		ExpectMismatchedKind(t, func() { x.AssignUnionField(0, nil) })
 	}
 }
 
@@ -887,6 +887,6 @@ func assignAny(t *testing.T, x *Value) {
 			t.Errorf(`Any assign string got %v, want %v`, got, want)
 		}
 	} else if x.Kind() != Optional {
-		expectMismatchedKind(t, func() { x.Elem() })
+		ExpectMismatchedKind(t, func() { x.Elem() })
 	}
 }

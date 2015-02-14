@@ -7,7 +7,6 @@ import (
 	"io"
 
 	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/vdl/valconv"
 )
 
 // Dump returns a human-readable dump of the given vom data, in the default
@@ -376,7 +375,7 @@ func (d *dumpWorker) decodeNextValue() error {
 	}
 	// Decode value message.
 	d.status.Value = vdl.ZeroValue(valType)
-	target, err := valconv.ValueTarget(d.status.Value)
+	target, err := vdl.ValueTarget(d.status.Value)
 	if err != nil {
 		return err
 	}
@@ -424,7 +423,7 @@ func (d *dumpWorker) decodeValueType() (*vdl.Type, error) {
 		// Decode the WireType like a regular value, and store it in recvTypes.  The
 		// type will actually be built when a value message arrives using this tid.
 		d.status.Value = vdl.ZeroValue(vdl.AnyType)
-		target, err := valconv.ValueTarget(d.status.Value)
+		target, err := vdl.ValueTarget(d.status.Value)
 		if err != nil {
 			return nil, err
 		}
@@ -439,7 +438,7 @@ func (d *dumpWorker) decodeValueType() (*vdl.Type, error) {
 
 // decodeValueMsg decodes the rest of the message assuming type t, handling the
 // optional message length.
-func (d *dumpWorker) decodeValueMsg(t *vdl.Type, target valconv.Target) error {
+func (d *dumpWorker) decodeValueMsg(t *vdl.Type, target vdl.Target) error {
 	if hasBinaryMsgLen(t) {
 		d.prepareAtom("waiting for message len")
 		msgLen, err := binaryDecodeLen(d.buf)
@@ -463,7 +462,7 @@ func (d *dumpWorker) decodeValueMsg(t *vdl.Type, target valconv.Target) error {
 }
 
 // decodeValue decodes the rest of the message assuming type tt.
-func (d *dumpWorker) decodeValue(tt *vdl.Type, target valconv.Target) error {
+func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 	ttFrom := tt
 	if tt.Kind() == vdl.Optional {
 		d.prepareAtom("waiting for optional exists byte")

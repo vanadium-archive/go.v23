@@ -52,7 +52,6 @@ import (
 	"v.io/core/veyron2/vdl"
 	"v.io/core/veyron2/vdl/compile"
 	"v.io/core/veyron2/vdl/parse"
-	"v.io/core/veyron2/vdl/valconv"
 	"v.io/core/veyron2/vdl/vdlroot/src/vdltool"
 	"v.io/core/veyron2/vdl/vdlutil"
 )
@@ -810,11 +809,11 @@ func BuildConfigValueImplicitImports(fileName string, src io.Reader, imports []s
 	if vconfig == nil {
 		return
 	}
-	target, err := valconv.ReflectTarget(reflect.ValueOf(value))
+	target, err := vdl.ReflectTarget(reflect.ValueOf(value))
 	if err != nil {
 		env.Errors.Errorf("Can't create reflect target for %T (%v)", value, err)
 	}
-	if err := valconv.FromValue(target, vconfig); err != nil {
+	if err := vdl.FromValue(target, vconfig); err != nil {
 		env.Errors.Errorf("Can't convert to %T from %v (%v)", value, vconfig, err)
 	}
 }

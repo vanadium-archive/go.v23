@@ -10,7 +10,6 @@ import (
 
 	"v.io/core/veyron2/vdl"
 	"v.io/core/veyron2/vdl/codegen/vdlgen"
-	"v.io/core/veyron2/vdl/valconv"
 	"v.io/lib/textutil"
 )
 
@@ -152,7 +151,7 @@ func tagsStr(tags []vdl.AnyRep, types *NamedTypes) string {
 	var ret []string
 	for _, tag := range tags {
 		var tagval *vdl.Value
-		if err := valconv.Convert(&tagval, tag); err != nil {
+		if err := vdl.Convert(&tagval, tag); err != nil {
 			// We shouldn't get an error in conversion, but if we do, do our best and
 			// print the tag as a Go value.
 			ret = append(ret, fmt.Sprintf("%T(%v)", tag, tag))

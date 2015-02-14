@@ -9,7 +9,6 @@ import (
 	"strconv"
 
 	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/vdl/valconv"
 )
 
 var (
@@ -138,7 +137,7 @@ func (c Const) Convert(t *vdl.Type) (Const, error) {
 		return Const{}, errConvertNil
 	}
 	// If we're trying to convert to Any or Union, or if c is already a vdl.Value,
-	// use valconv.Convert to convert as a vdl.Value.
+	// use vdl.Convert to convert as a vdl.Value.
 	_, isValue := c.rep.(*vdl.Value)
 	if isValue || t.Kind() == vdl.Any || t.Kind() == vdl.Union {
 		src, err := c.ToValue()
@@ -146,7 +145,7 @@ func (c Const) Convert(t *vdl.Type) (Const, error) {
 			return Const{}, err
 		}
 		dst := vdl.ZeroValue(t)
-		if err := valconv.Convert(dst, src); err != nil {
+		if err := vdl.Convert(dst, src); err != nil {
 			return Const{}, err
 		}
 		return FromValue(dst), nil

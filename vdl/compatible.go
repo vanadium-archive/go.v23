@@ -1,10 +1,8 @@
-package valconv
+package vdl
 
 import (
 	"fmt"
 	"sync"
-
-	"v.io/core/veyron2/vdl"
 )
 
 // compatible returns true if types a and b are compatible with each other.
@@ -61,11 +59,11 @@ import (
 // otherwise we'd end up with nonsensical conversions:
 //
 //   union{A string} <-> string <-> union{B string}
-func compatible(a, b *vdl.Type) bool {
-	if a.Kind() == vdl.Optional {
+func compatible(a, b *Type) bool {
+	if a.Kind() == Optional {
 		a = a.Elem()
 	}
-	if b.Kind() == vdl.Optional {
+	if b.Kind() == Optional {
 		b = b.Elem()
 	}
 	key := compatKey(a, b)
@@ -74,7 +72,7 @@ func compatible(a, b *vdl.Type) bool {
 	}
 	// Concurrent updates may cause compatCache to be updated multiple times.
 	// This race is benign; we always end up with the same result.
-	compat := compat(a, b, make(map[*vdl.Type]bool), make(map[*vdl.Type]bool))
+	compat := compat(a, b, make(map[*Type]bool), make(map[*Type]bool))
 	compatCache.update(key, compat)
 	return compat
 }
@@ -84,45 +82,45 @@ func compatible(a, b *vdl.Type) bool {
 // is the compatCache global cache.
 type compatRegistry struct {
 	sync.Mutex
-	compat map[[2]*vdl.Type]bool
+	compat map[[2]*Type]bool
 }
 
 // TODO(toddw): Change this to a fixed-size LRU cache, otherwise it can grow
 // without bounds and exhaust our memory.
-var compatCache = &compatRegistry{compat: make(map[[2]*vdl.Type]bool)}
+var compatCache = &compatRegistry{compat: make(map[[2]*Type]bool)}
 
 // The compat cache key is just the two types, which are already hash-consed.
 // We make a minor attempt to normalize the order.
-func compatKey(a, b *vdl.Type) [2]*vdl.Type {
+func compatKey(a, b *Type) [2]*Type {
 	if a.Kind() > b.Kind() ||
-		(a.Kind() == vdl.Enum && b.Kind() == vdl.Enum && a.NumEnumLabel() > b.NumEnumLabel()) ||
-		(a.Kind() == vdl.Struct && b.Kind() == vdl.Struct && a.NumField() > b.NumField()) ||
-		(a.Kind() == vdl.Union && b.Kind() == vdl.Union && a.NumField() > b.NumField()) {
+		(a.Kind() == Enum && b.Kind() == Enum && a.NumEnumLabel() > b.NumEnumLabel()) ||
+		(a.Kind() == Struct && b.Kind() == Struct && a.NumField() > b.NumField()) ||
+		(a.Kind() == Union && b.Kind() == Union && a.NumField() > b.NumField()) {
 		a, b = b, a
 	}
-	return [2]*vdl.Type{a, b}
+	return [2]*Type{a, b}
 }
 
-func (reg *compatRegistry) lookup(key [2]*vdl.Type) (bool, bool) {
+func (reg *compatRegistry) lookup(key [2]*Type) (bool, bool) {
 	reg.Lock()
 	compat, ok := reg.compat[key]
 	reg.Unlock()
 	return compat, ok
 }
 
-func (reg *compatRegistry) update(key [2]*vdl.Type, compat bool) {
+func (reg *compatRegistry) update(key [2]*Type, compat bool) {
 	reg.Lock()
 	reg.compat[key] = compat
 	reg.Unlock()
 }
 
 // compat is a recursive helper that implements compatible.
-func compat(a, b *vdl.Type, seenA, seenB map[*vdl.Type]bool) bool {
+func compat(a, b *Type, seenA, seenB map[*Type]bool) bool {
 	// Normalize and break cycles from recursive types.
-	if a.Kind() == vdl.Optional {
+	if a.Kind() == Optional {
 		a = a.Elem()
 	}
-	if b.Kind() == vdl.Optional {
+	if b.Kind() == Optional {
 		b = b.Elem()
 	}
 	if a == b || seenA[a] || seenB[b] {
@@ -130,17 +128,17 @@ func compat(a, b *vdl.Type, seenA, seenB map[*vdl.Type]bool) bool {
 	}
 	seenA[a], seenB[b] = true, true
 	// Handle Any
-	if a.Kind() == vdl.Any || b.Kind() == vdl.Any {
+	if a.Kind() == Any || b.Kind() == Any {
 		return true
 	}
-	// Handle simple scalar vdl.
+	// Handle simple scalar
 	if ax, bx := ttIsNumber(a), ttIsNumber(b); ax || bx {
 		return ax && bx
 	}
-	if ax, bx := a.Kind() == vdl.Bool, b.Kind() == vdl.Bool; ax || bx {
+	if ax, bx := a.Kind() == Bool, b.Kind() == Bool; ax || bx {
 		return ax && bx
 	}
-	if ax, bx := a.Kind() == vdl.TypeObject, b.Kind() == vdl.TypeObject; ax || bx {
+	if ax, bx := a.Kind() == TypeObject, b.Kind() == TypeObject; ax || bx {
 		return ax && bx
 	}
 	// We must check if either a or b is []byte and handle it here first, to
@@ -150,50 +148,50 @@ func compat(a, b *vdl.Type, seenA, seenB map[*vdl.Type]bool) bool {
 	if ax, bx := ttIsStringEnumBytes(a), ttIsStringEnumBytes(b); ax || bx {
 		return ax && bx
 	}
-	// Handle composite vdl.
+	// Handle composite
 	switch a.Kind() {
-	case vdl.Array, vdl.List:
+	case Array, List:
 		switch b.Kind() {
-		case vdl.Array, vdl.List:
+		case Array, List:
 			return compat(a.Elem(), b.Elem(), seenA, seenB)
 		}
 		return false
-	case vdl.Set:
+	case Set:
 		switch b.Kind() {
-		case vdl.Set:
+		case Set:
 			return compat(a.Key(), b.Key(), seenA, seenB)
-		case vdl.Map:
-			return compatMapKeyElem(b, a.Key(), vdl.BoolType, seenB, seenA)
-		case vdl.Struct:
-			return compatStructKeyElem(b, a.Key(), vdl.BoolType, seenB, seenA)
+		case Map:
+			return compatMapKeyElem(b, a.Key(), BoolType, seenB, seenA)
+		case Struct:
+			return compatStructKeyElem(b, a.Key(), BoolType, seenB, seenA)
 		}
 		return false
-	case vdl.Map:
+	case Map:
 		switch b.Kind() {
-		case vdl.Set:
-			return compatMapKeyElem(a, b.Key(), vdl.BoolType, seenA, seenB)
-		case vdl.Map:
+		case Set:
+			return compatMapKeyElem(a, b.Key(), BoolType, seenA, seenB)
+		case Map:
 			return compatMapKeyElem(a, b.Key(), b.Elem(), seenA, seenB)
-		case vdl.Struct:
+		case Struct:
 			return compatStructKeyElem(b, a.Key(), a.Elem(), seenB, seenA)
 		}
 		return false
-	case vdl.Struct:
+	case Struct:
 		switch b.Kind() {
-		case vdl.Set:
-			return compatStructKeyElem(a, b.Key(), vdl.BoolType, seenA, seenB)
-		case vdl.Map:
+		case Set:
+			return compatStructKeyElem(a, b.Key(), BoolType, seenA, seenB)
+		case Map:
 			return compatStructKeyElem(a, b.Key(), b.Elem(), seenA, seenB)
-		case vdl.Struct:
+		case Struct:
 			if ttIsEmptyStruct(a) || ttIsEmptyStruct(b) {
 				return true // empty struct is compatible with all other structs
 			}
 			return compatFields(a, b, seenA, seenB)
 		}
 		return false
-	case vdl.Union:
+	case Union:
 		switch b.Kind() {
-		case vdl.Union:
+		case Union:
 			return compatFields(a, b, seenA, seenB)
 		}
 		return false
@@ -202,34 +200,34 @@ func compat(a, b *vdl.Type, seenA, seenB map[*vdl.Type]bool) bool {
 	}
 }
 
-func ttIsNumber(tt *vdl.Type) bool {
+func ttIsNumber(tt *Type) bool {
 	switch tt.Kind() {
-	case vdl.Byte, vdl.Uint16, vdl.Uint32, vdl.Uint64, vdl.Int16, vdl.Int32, vdl.Int64, vdl.Float32, vdl.Float64, vdl.Complex64, vdl.Complex128:
+	case Byte, Uint16, Uint32, Uint64, Int16, Int32, Int64, Float32, Float64, Complex64, Complex128:
 		return true
 	}
 	return false
 }
 
-func ttIsStringEnumBytes(tt *vdl.Type) bool {
-	return tt.Kind() == vdl.String || tt.Kind() == vdl.Enum || tt.IsBytes()
+func ttIsStringEnumBytes(tt *Type) bool {
+	return tt.Kind() == String || tt.Kind() == Enum || tt.IsBytes()
 }
 
-func ttIsEmptyStruct(tt *vdl.Type) bool {
-	return tt.Kind() == vdl.Struct && tt.NumField() == 0
+func ttIsEmptyStruct(tt *Type) bool {
+	return tt.Kind() == Struct && tt.NumField() == 0
 }
 
 // REQUIRED: a is Map
-func compatMapKeyElem(a, bKey, bElem *vdl.Type, seenA, seenB map[*vdl.Type]bool) bool {
+func compatMapKeyElem(a, bKey, bElem *Type, seenA, seenB map[*Type]bool) bool {
 	return compat(a.Key(), bKey, seenA, seenB) && compat(a.Elem(), bElem, seenA, seenB)
 }
 
 // REQUIRED: a is Struct
-func compatStructKeyElem(a, bKey, bElem *vdl.Type, seenA, seenB map[*vdl.Type]bool) bool {
+func compatStructKeyElem(a, bKey, bElem *Type, seenA, seenB map[*Type]bool) bool {
 	// All struct fields must be compatible.
 	if ttIsEmptyStruct(a) {
 		return false // empty struct isn't compatible with set or map
 	}
-	if !compat(vdl.StringType, bKey, seenA, seenB) {
+	if !compat(StringType, bKey, seenA, seenB) {
 		return false
 	}
 	for ax := 0; ax < a.NumField(); ax++ {
@@ -241,7 +239,7 @@ func compatStructKeyElem(a, bKey, bElem *vdl.Type, seenA, seenB map[*vdl.Type]bo
 }
 
 // REQUIRED: a and b are either Struct or Union
-func compatFields(a, b *vdl.Type, seenA, seenB map[*vdl.Type]bool) bool {
+func compatFields(a, b *Type, seenA, seenB map[*Type]bool) bool {
 	// All fields with the same name must be compatible, and at least one field
 	// must match.
 	if a.NumField() > b.NumField() {

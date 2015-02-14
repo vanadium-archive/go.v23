@@ -405,9 +405,11 @@ var (
 	rtComplex128         = reflect.TypeOf(complex128(0))
 	rtString             = reflect.TypeOf("")
 	rtError              = reflect.TypeOf((*error)(nil)).Elem()
+	rtWireError          = reflect.TypeOf(WireError{})
 	rtType               = reflect.TypeOf(Type{})
-	rtPtrToType          = reflect.TypeOf((*Type)(nil))
 	rtValue              = reflect.TypeOf(Value{})
+	rtPtrToType          = reflect.TypeOf((*Type)(nil))
+	rtPtrToValue         = reflect.TypeOf((*Value)(nil))
 	rtReflectValue       = reflect.TypeOf(reflect.Value{})
 	rtUnnamedEmptyStruct = reflect.TypeOf(struct{}{})
 

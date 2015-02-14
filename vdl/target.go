@@ -1,72 +1,68 @@
-// Package valconv provides conversion routines between vdl.Value and
-// reflect.Value, as well as a generic conversion target interface.
-package valconv
+package vdl
 
 import (
 	"fmt"
 	"reflect"
-
-	"v.io/core/veyron2/vdl"
 )
 
 // Target represents a generic conversion target; objects that implement this
 // interface may be used as the target of a value conversion.  E.g.
 // ReflectTarget and ValueTarget create targets based on an underlying
-// reflect.Value or vdl.Value respectively.  Other implementations of this
+// reflect.Value or Value respectively.  Other implementations of this
 // interface include vom encoding targets, that produce binary and JSON vom
 // encodings.
 type Target interface {
 	// FromBool converts from the src bool to the target, where tt represents the
 	// concrete type of bool.
-	FromBool(src bool, tt *vdl.Type) error
+	FromBool(src bool, tt *Type) error
 	// FromUint converts from the src uint to the target, where tt represents the
 	// concrete type of uint.
-	FromUint(src uint64, tt *vdl.Type) error
+	FromUint(src uint64, tt *Type) error
 	// FromInt converts from the src int to the target, where tt represents the
 	// concrete type of int.
-	FromInt(src int64, tt *vdl.Type) error
+	FromInt(src int64, tt *Type) error
 	// FromFloat converts from the src float to the target, where tt represents
 	// the concrete type of float.
-	FromFloat(src float64, tt *vdl.Type) error
+	FromFloat(src float64, tt *Type) error
 	// FromComplex converts from the src complex to the target, where tt
 	// represents the concrete type of complex.
-	FromComplex(src complex128, tt *vdl.Type) error
+	FromComplex(src complex128, tt *Type) error
 	// FromBytes converts from the src bytes to the target, where tt represents
 	// the concrete type of bytes.
-	FromBytes(src []byte, tt *vdl.Type) error
+	FromBytes(src []byte, tt *Type) error
 	// FromString converts from the src string to the target, where tt represents
 	// the concrete type of string.
-	FromString(src string, tt *vdl.Type) error
+	FromString(src string, tt *Type) error
 	// FromEnumLabel converts from the src enum label to the target, where tt
 	// represents the concrete type of enum.
-	FromEnumLabel(src string, tt *vdl.Type) error
+	FromEnumLabel(src string, tt *Type) error
 	// FromTypeObject converts from the src type to the target.
-	FromTypeObject(src *vdl.Type) error
+	FromTypeObject(src *Type) error
 	// FromNil converts from a nil (nonexistent) value of type tt, where tt must
 	// be of kind Optional or Any.
-	FromNil(tt *vdl.Type) error
+	FromNil(tt *Type) error
 
 	// StartList prepares conversion from a list or array of type tt, with the
 	// given len.  FinishList must be called to finish the list.
-	StartList(tt *vdl.Type, len int) (ListTarget, error)
+	StartList(tt *Type, len int) (ListTarget, error)
 	// FinishList finishes a prior StartList call.
 	FinishList(x ListTarget) error
 
 	// StartSet prepares conversion from a set of type tt, with the given len.
 	// FinishSet must be called to finish the set.
-	StartSet(tt *vdl.Type, len int) (SetTarget, error)
+	StartSet(tt *Type, len int) (SetTarget, error)
 	// FinishSet finishes a prior StartSet call.
 	FinishSet(x SetTarget) error
 
 	// StartMap prepares conversion from a map of type tt, with the given len.
 	// FinishMap must be called to finish the map.
-	StartMap(tt *vdl.Type, len int) (MapTarget, error)
+	StartMap(tt *Type, len int) (MapTarget, error)
 	// FinishMap finishes a prior StartMap call.
 	FinishMap(x MapTarget) error
 
 	// StartFields prepares conversion from a struct or union of type tt.
 	// FinishFields must be called to finish the fields.
-	StartFields(tt *vdl.Type) (FieldsTarget, error)
+	StartFields(tt *Type) (FieldsTarget, error)
 	// FinishFields finishes a prior StartFields call.
 	FinishFields(x FieldsTarget) error
 }
@@ -126,12 +122,22 @@ func Convert(target, src interface{}) error {
 	return FromReflect(rtarget, reflect.ValueOf(src))
 }
 
+// ValueOf returns the value corresponding to v.  It's a helper for calling
+// Convert, and panics on any errors.
+func ValueOf(v interface{}) *Value {
+	var target *Value
+	if err := Convert(&target, v); err != nil {
+		panic(err)
+	}
+	return target
+}
+
 // FromReflect converts from rv to the target, by walking through rv and calling
 // the appropriate methods on the target.
 func FromReflect(target Target, rv reflect.Value) error {
 	// Special-case to treat interface{}(nil) as any(nil).
 	if !rv.IsValid() {
-		return target.FromNil(vdl.AnyType)
+		return target.FromNil(AnyType)
 	}
 	// Flatten pointers and interfaces in rv, and handle special-cases.  We track
 	// whether the final flattened value had any pointers via hasPtr, in order to
@@ -139,7 +145,7 @@ func FromReflect(target Target, rv reflect.Value) error {
 	hasPtr := false
 	for rv.Kind() == reflect.Ptr || rv.Kind() == reflect.Interface {
 		// Handle marshaling from native type to wire type.
-		switch rvWire, err := vdl.WireValueFromNative(rv); {
+		switch rvWire, err := wireValueFromNative(rv); {
 		case err != nil:
 			return err
 		case rvWire.IsValid():
@@ -151,32 +157,32 @@ func FromReflect(target Target, rv reflect.Value) error {
 		hasPtr = rv.Kind() == reflect.Ptr
 		switch rt := rv.Type(); {
 		case rv.IsNil():
-			tt, err := vdl.TypeFromReflect(rv.Type())
+			tt, err := TypeFromReflect(rv.Type())
 			if err != nil {
 				return err
 			}
 			switch {
-			case tt.Kind() == vdl.TypeObject:
-				// Treat nil *vdl.Type as vdl.AnyType.
-				return target.FromTypeObject(vdl.AnyType)
-			case tt.Kind() == vdl.Union && rt.Kind() == reflect.Interface:
+			case tt.Kind() == TypeObject:
+				// Treat nil *Type as AnyType.
+				return target.FromTypeObject(AnyType)
+			case tt.Kind() == Union && rt.Kind() == reflect.Interface:
 				// Treat nil Union interface as the value of the type at index 0.
-				return FromValue(target, vdl.ZeroValue(tt))
+				return FromValue(target, ZeroValue(tt))
 			}
 			return target.FromNil(tt)
 		case rt.ConvertibleTo(rtPtrToType):
-			// If rv is convertible to *vdl.Type, fill from it directly.
-			return target.FromTypeObject(rv.Convert(rtPtrToType).Interface().(*vdl.Type))
+			// If rv is convertible to *Type, fill from it directly.
+			return target.FromTypeObject(rv.Convert(rtPtrToType).Interface().(*Type))
 		case rt.ConvertibleTo(rtPtrToValue):
-			// If rv is convertible to *vdl.Value, fill from it directly.
-			return FromValue(target, rv.Convert(rtPtrToValue).Interface().(*vdl.Value))
+			// If rv is convertible to *Value, fill from it directly.
+			return FromValue(target, rv.Convert(rtPtrToValue).Interface().(*Value))
 		case rt.ConvertibleTo(rtError):
 			return fromError(target, rv.Interface().(error), rt)
 		}
 		rv = rv.Elem()
 	}
 	// Handle marshaling from native type to wire type.
-	switch rvWire, err := vdl.WireValueFromNative(rv); {
+	switch rvWire, err := wireValueFromNative(rv); {
 	case err != nil:
 		return err
 	case rvWire.IsValid():
@@ -194,23 +200,23 @@ func FromReflect(target Target, rv reflect.Value) error {
 	if rt.ConvertibleTo(rtError) {
 		return fromError(target, rv.Interface().(error), rt)
 	}
-	tt, err := vdl.TypeFromReflect(rv.Type())
+	tt, err := TypeFromReflect(rv.Type())
 	if err != nil {
 		return err
 	}
 	ttFrom := tt
 	if tt.CanBeOptional() && hasPtr {
-		ttFrom = vdl.OptionalType(tt)
+		ttFrom = OptionalType(tt)
 	}
 	// Recursive walk through the reflect value to fill in target.
 	//
-	// First handle special-cases enum and union.  Note that vdl.TypeFromReflect
+	// First handle special-cases enum and union.  Note that TypeFromReflect
 	// has already validated the methods, so we can call without error checking.
 	switch tt.Kind() {
-	case vdl.Enum:
+	case Enum:
 		label := rv.MethodByName("String").Call(nil)[0].String()
 		return target.FromEnumLabel(label, ttFrom)
-	case vdl.Union:
+	case Union:
 		// We're guaranteed rv is the concrete field struct.
 		name := rv.MethodByName("Name").Call(nil)[0].String()
 		fieldsTarget, err := target.StartFields(ttFrom)
@@ -268,7 +274,7 @@ func FromReflect(target Target, rv reflect.Value) error {
 		}
 		return target.FinishList(listTarget)
 	case reflect.Map:
-		if tt.Kind() == vdl.Set {
+		if tt.Kind() == Set {
 			setTarget, err := target.StartSet(ttFrom, rv.Len())
 			if err != nil {
 				return err
@@ -337,7 +343,7 @@ func FromReflect(target Target, rv reflect.Value) error {
 			if !rvField.IsValid() {
 				// This case occurs if the VDL type tt has a field name that doesn't
 				// eixst in the Go reflect.Type rt.  This should never occur; it
-				// indicates a bug in the vdl.TypeOf logic.  Panic here to give us a
+				// indicates a bug in the TypeOf logic.  Panic here to give us a
 				// stack trace to make it easier to debug.
 				panic(fmt.Errorf("missing struct field %q, tt: %v, rt: %v", name, tt, rt))
 			}
@@ -357,7 +363,7 @@ func FromReflect(target Target, rv reflect.Value) error {
 // fromError handles all rv values that implement the error interface.
 func fromError(target Target, e error, rt reflect.Type) error {
 	// Fill the target from the wire representation of e.
-	conv, err := vdl.ErrorConv()
+	conv, err := ErrorConv()
 	if err != nil {
 		return err
 	}
@@ -378,9 +384,9 @@ func fromError(target Target, e error, rt reflect.Type) error {
 
 // FromValue converts from vv to the target, by walking through vv and calling
 // the appropriate methods on the target.
-func FromValue(target Target, vv *vdl.Value) error {
+func FromValue(target Target, vv *Value) error {
 	tt := vv.Type()
-	if tt.Kind() == vdl.Any {
+	if tt.Kind() == Any {
 		if vv.IsNil() {
 			return target.FromNil(tt)
 		}
@@ -388,7 +394,7 @@ func FromValue(target Target, vv *vdl.Value) error {
 		vv = vv.Elem()
 		tt = vv.Type()
 	}
-	if tt.Kind() == vdl.Optional {
+	if tt.Kind() == Optional {
 		if vv.IsNil() {
 			return target.FromNil(tt)
 		}
@@ -400,25 +406,25 @@ func FromValue(target Target, vv *vdl.Value) error {
 		return target.FromBytes(vv.Bytes(), tt)
 	}
 	switch vv.Kind() {
-	case vdl.Bool:
+	case Bool:
 		return target.FromBool(vv.Bool(), tt)
-	case vdl.Byte:
+	case Byte:
 		return target.FromUint(uint64(vv.Byte()), tt)
-	case vdl.Uint16, vdl.Uint32, vdl.Uint64:
+	case Uint16, Uint32, Uint64:
 		return target.FromUint(vv.Uint(), tt)
-	case vdl.Int16, vdl.Int32, vdl.Int64:
+	case Int16, Int32, Int64:
 		return target.FromInt(vv.Int(), tt)
-	case vdl.Float32, vdl.Float64:
+	case Float32, Float64:
 		return target.FromFloat(vv.Float(), tt)
-	case vdl.Complex64, vdl.Complex128:
+	case Complex64, Complex128:
 		return target.FromComplex(vv.Complex(), tt)
-	case vdl.String:
+	case String:
 		return target.FromString(vv.RawString(), tt)
-	case vdl.Enum:
+	case Enum:
 		return target.FromEnumLabel(vv.EnumLabel(), tt)
-	case vdl.TypeObject:
+	case TypeObject:
 		return target.FromTypeObject(vv.TypeObject())
-	case vdl.Array, vdl.List:
+	case Array, List:
 		listTarget, err := target.StartList(tt, vv.Len())
 		if err != nil {
 			return err
@@ -436,7 +442,7 @@ func FromValue(target Target, vv *vdl.Value) error {
 			}
 		}
 		return target.FinishList(listTarget)
-	case vdl.Set:
+	case Set:
 		setTarget, err := target.StartSet(tt, vv.Len())
 		if err != nil {
 			return err
@@ -457,7 +463,7 @@ func FromValue(target Target, vv *vdl.Value) error {
 			}
 		}
 		return target.FinishSet(setTarget)
-	case vdl.Map:
+	case Map:
 		mapTarget, err := target.StartMap(tt, vv.Len())
 		if err != nil {
 			return err
@@ -485,7 +491,7 @@ func FromValue(target Target, vv *vdl.Value) error {
 			}
 		}
 		return target.FinishMap(mapTarget)
-	case vdl.Struct:
+	case Struct:
 		fieldsTarget, err := target.StartFields(tt)
 		if err != nil {
 			return err
@@ -506,7 +512,7 @@ func FromValue(target Target, vv *vdl.Value) error {
 			}
 		}
 		return target.FinishFields(fieldsTarget)
-	case vdl.Union:
+	case Union:
 		fieldsTarget, err := target.StartFields(tt)
 		if err != nil {
 			return err

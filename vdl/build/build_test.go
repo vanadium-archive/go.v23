@@ -13,7 +13,6 @@ import (
 	"v.io/core/veyron2/vdl/build"
 	"v.io/core/veyron2/vdl/compile"
 	"v.io/core/veyron2/vdl/testdata/base"
-	"v.io/core/veyron2/vdl/valconv"
 	"v.io/core/veyron2/vdl/vdlroot/src/vdltool"
 	"v.io/core/veyron2/vdl/vdltest"
 	"v.io/core/veyron2/vdl/vdlutil"
@@ -554,7 +553,7 @@ func TestBuildConfig(t *testing.T) {
 		vdltest.ExpectResult(t, env.Errors, test.Src, "")
 		// Test BuildConfig
 		wantV := vdl.ZeroValue(vdl.TypeOf(test.Value))
-		if err := valconv.Convert(wantV, test.Value); err != nil {
+		if err := vdl.Convert(wantV, test.Value); err != nil {
 			t.Errorf("Convert(%v) got error %v, want nil", test.Value, err)
 		}
 		gotV := build.BuildConfig("file", strings.NewReader(test.Src), nil, env)
