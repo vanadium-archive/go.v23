@@ -73,23 +73,19 @@ func TestSubordinateErrors(t *testing.T) {
 	if verror.SubErrors(p) != nil {
 		t.Errorf("expected nil")
 	}
-	p1 := verror.Append(p, aEN1, aFR0)
-	r1 := "server aEN0 error A 0 [server aEN1 error A 1 2], [server aFR0 erreur A 0]"
+	p1 := verror.AddSubErrs(p, nil, verror.SubErr{"a=1", aEN1, verror.Print}, verror.SubErr{"a=2", aFR0, verror.Print})
+	r1 := "server aEN0 error A 0 [a=1: server aEN1 error A 1 2], [a=2: server aFR0 erreur A 0]"
 	if got, want := p1.Error(), r1; got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}
 	if got, want := len(verror.SubErrors(p1)), 2; got != want {
 		t.Errorf("got %d, want %d", got, want)
 	}
-	p2 := verror.Append(p, nil, nil, aEN1)
+	p2 := verror.AddSubErrs(p, nil, verror.SubErr{"go_err=1", fmt.Errorf("Oh"), verror.Print})
 	if got, want := len(verror.SubErrors(p2)), 1; got != want {
 		t.Errorf("got %d, want %d", got, want)
 	}
-	p2 = verror.Append(p, fmt.Errorf("Oh"))
-	if got, want := len(verror.SubErrors(p2)), 1; got != want {
-		t.Errorf("got %d, want %d", got, want)
-	}
-	r2 := "server aEN0 error A 0 [verror.test  unknown error Oh]"
+	r2 := "server aEN0 error A 0 [go_err=1: verror.test  unknown error Oh]"
 	if got, want := p2.Error(), r2; got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}
@@ -97,8 +93,16 @@ func TestSubordinateErrors(t *testing.T) {
 	if !strings.Contains(p2str, r2) {
 		t.Errorf("debug string missing error message: %q, %q", p2str, r2)
 	}
-	if !(strings.Contains(p2str, "verror_test.go:72") && strings.Contains(p2str, "verror_test.go:88")) {
+	if !(strings.Contains(p2str, "verror_test.go:72") && strings.Contains(p2str, "verror_test.go:84")) {
 		t.Errorf("debug string missing correct line #: %s", p2str)
+	}
+	p3 := verror.AddSubErrs(p, nil, verror.SubErr{"go_err=2", fmt.Errorf("Oh"), 0})
+	if got, want := len(verror.SubErrors(p3)), 1; got != want {
+		t.Errorf("got %d, want %d", got, want)
+	}
+	r3 := "server aEN0 error A 0 "
+	if got, want := p3.Error(), r3; got != want {
+		t.Errorf("got %q, want %q", got, want)
 	}
 }
 
@@ -289,8 +293,8 @@ func TestBasic(t *testing.T) {
 		stack := verror.Stack(test.err)
 		if stack == nil {
 			t.Errorf("Stack(%q) got nil, want non-nil", verror.ErrorID(test.err))
-		} else if len(stack) < 1 || 2 < len(stack) {
-			t.Errorf("len(Stack(%q)) got %d, want 1 or 2", verror.ErrorID(test.err), len(stack))
+		} else if len(stack) < 1 || 10 < len(stack) {
+			t.Errorf("len(Stack(%q)) got %d, want between 1 and 10", verror.ErrorID(test.err), len(stack))
 		} else {
 			fnc := runtime.FuncForPC(stack[0])
 			if !strings.Contains(fnc.Name(), "verror_test.init") {
@@ -314,8 +318,8 @@ func TestStack(t *testing.T) {
 		t.Errorf("expected %q and %q to differ", stack1, stack2)
 	}
 	for _, stack := range []string{stack1, stack2} {
-		if got, want := strings.Count(stack, "\n"), 1; got != want {
-			t.Errorf("got %d, want %d", got, want)
+		if got := strings.Count(stack, "\n"); got < 1 || 10 < got {
+			t.Errorf("got %d, want between 1 and 10", got)
 		}
 		if !strings.Contains(stack, "verror_test.tester") {
 			t.Errorf("got %q, doesn't contain 'verror_test.tester", stack)
