@@ -96,6 +96,11 @@ const (
 	RetryBackoff    ActionCode = 3 // Backoff and retry a finite number of times.
 )
 
+// RetryAction returns the part of the ActionCode that indicates retry behaviour.
+func (ac ActionCode) RetryAction() ActionCode {
+	return ac & RetryActionMask
+}
+
 // String returns the string label of x.
 func (x ActionCode) String() string {
 	switch x {
@@ -156,9 +161,35 @@ type Standard struct {
 	IDAction  IDAction
 	Msg       string        // Error message; empty if no language known.
 	ParamList []interface{} // The variadic parameters given to ExplicitNew().
-	stackPCs  []uintptr     // PCs of callers of *New() and *Convert().
-	subErrs   []error       // Subordinate errors
+	stackPCs  []uintptr     // PCs of creators of Standard
 }
+
+const maxPCs = 40 // Maximum number of PC values we'll include in a stack trace.
+
+// A SubErrs is a special type that allows clients to include a list of
+// subordinate errors to an error's parameter list.  Clients can add a SubErrs
+// to the parameter list directly, via New() of include one in an existing
+// error using AddSubErrs().  Each element of the slice has a name, an error,
+// and an integer that encodes options such as verror.Print as bits set within
+// it.  By convention, clients are expected to use name of the form "X=Y" to
+// distinguish their subordinate errors from those of other abstraction layers.
+// For example, a layer reporting on errors in individual blessings in an RPC
+// might use strings like "blessing=<bessing_name>".
+type SubErrs []SubErr
+
+type SubErrOpts uint32
+
+// A SubErr represents a (string, error, int32) triple,  It is the element type for SubErrs.
+type SubErr struct {
+	Name    string
+	Err     error
+	Options SubErrOpts
+}
+
+const (
+	// Print, when set in SubErr.Options, tells Error() to print this SubErr.
+	Print SubErrOpts = 0x1
+)
 
 func assertStandard(err error) (Standard, bool) {
 	if e, ok := err.(Standard); ok {
@@ -206,8 +237,9 @@ func Equal(a, b error) bool {
 // PCs represents a list of PC locations
 type PCs []uintptr
 
-// Stack returns the list of PC locations where the error was created and transferred
-// within this address space, or an empty list if err is not a Standard.
+// Stack returns the list of PC locations on the stack when this error was
+// first generated within this address space, or an empty list if err is not a
+// Standard.
 func Stack(err error) PCs {
 	if err != nil {
 		if e, ok := assertStandard(err); ok {
@@ -225,16 +257,24 @@ func (st PCs) String() string {
 	return buf.String()
 }
 
+// stackToTextIndent emits on w a text representation of stack, which is typically
+// obtained from Stack() and represents the source location(s) where an
+// error was generated or passed through in the local address space.
+// indent is added to a prefix of each line printed.
+func stackToTextIndent(w io.Writer, stack []uintptr, indent string) (err error) {
+	for i := 0; i != len(stack) && err == nil; i++ {
+		fnc := runtime.FuncForPC(stack[i])
+		file, line := fnc.FileLine(stack[i])
+		_, err = fmt.Fprintf(w, "%s%s:%d: %s\n", indent, file, line, fnc.Name())
+	}
+	return err
+}
+
 // StackToText emits on w a text representation of stack, which is typically
 // obtained from Stack() and represents the source location(s) where an
 // error was generated or passed through in the local address space.
-func StackToText(w io.Writer, stack []uintptr) (err error) {
-	for _, pc := range stack {
-		fnc := runtime.FuncForPC(pc)
-		file, line := fnc.FileLine(pc)
-		_, err = fmt.Fprintf(w, "%s:%d: %s\n", file, line, fnc.Name())
-	}
-	return err
+func StackToText(w io.Writer, stack []uintptr) error {
+	return stackToTextIndent(w, stack, "")
 }
 
 // defaultLangID returns langID is it is not i18n.NoLangID, and the default
@@ -262,7 +302,7 @@ func makeInternal(idAction IDAction, langID i18n.LangID, componentName string, o
 		}
 		msg = i18n.Cat().Format(langID, i18n.MsgID(id), params...)
 	}
-	return Standard{idAction, msg, params, stack, nil}
+	return Standard{idAction, msg, params, stack}
 }
 
 // ExplicitNew returns an error with the given ID, with an error string in the chosen
@@ -271,8 +311,8 @@ func makeInternal(idAction IDAction, langID i18n.LangID, componentName string, o
 // parameters are formatted into the message according to i18n.Cat().Format.
 // The caller's PC is added to the error's stack.
 func ExplicitNew(idAction IDAction, langID i18n.LangID, componentName string, opName string, v ...interface{}) error {
-	stack := make([]uintptr, 1)
-	runtime.Callers(2, stack)
+	stack := make([]uintptr, maxPCs)
+	stack = stack[:runtime.Callers(2, stack)]
 	return makeInternal(idAction, langID, componentName, opName, stack, v...)
 }
 
@@ -289,8 +329,8 @@ func ContextWithComponentName(ctx *context.T, componentName string) *context.T {
 // name from the specified context.T.   ctx may be nil.
 func New(idAction IDAction, ctx *context.T, v ...interface{}) error {
 	langID, componentName, opName := dataFromContext(ctx)
-	stack := make([]uintptr, 1)
-	runtime.Callers(2, stack)
+	stack := make([]uintptr, maxPCs)
+	stack = stack[:runtime.Callers(2, stack)]
 	return makeInternal(idAction, langID, componentName, opName, stack, v...)
 }
 
@@ -313,6 +353,20 @@ func convertInternal(idAction IDAction, langID i18n.LangID, componentName string
 	//    correct.
 	if e, ok := assertStandard(err); ok {
 		oldParams := e.ParamList
+
+		// Convert all embedded Standard erors, recursively.
+		for i := range oldParams {
+			if subErr, isStandard := oldParams[i].(Standard); isStandard {
+				oldParams[i] = convertInternal(idAction, langID, componentName, opName, stack, subErr)
+			} else if subErrs, isSubErrs := oldParams[i].(SubErrs); isSubErrs {
+				for j := range subErrs {
+					if subErr, isStandard := subErrs[j].Err.(Standard); isStandard {
+						subErrs[j].Err = convertInternal(idAction, langID, componentName, opName, stack, subErr)
+					}
+				}
+				oldParams[i] = subErrs
+			}
+		}
 
 		// Create a non-empty format string if we have the language in the catalogue.
 		var formatStr string
@@ -358,15 +412,13 @@ func convertInternal(idAction IDAction, langID i18n.LangID, componentName string
 				msg = i18n.FormatParams(formatStr, newParams...)
 			}
 		}
-		newStack := append(make([]uintptr, 0, len(e.stackPCs)+len(stack)), e.stackPCs...)
-		newStack = append(newStack, stack...)
-		return Standard{e.IDAction, msg, newParams, newStack, nil}
+		return Standard{e.IDAction, msg, newParams, e.stackPCs}
 	}
 	return makeInternal(idAction, langID, componentName, opName, stack, err.Error())
 }
 
 // ExplicitConvert converts a regular err into a Standard error, setting its id to id.  If
-// err is already a Standard, it returns err without changing its type, but
+// err is already a Standard, it returns err or an equivalent value without changing its type, but
 // potentially changing the language, component or operation if langID!=i18n.NoLangID,
 // componentName!="" or opName!="" respectively.  The caller's PC is added to the
 // error's stack.
@@ -374,8 +426,11 @@ func ExplicitConvert(idAction IDAction, langID i18n.LangID, componentName string
 	if err == nil {
 		return nil
 	} else {
-		stack := make([]uintptr, 1)
-		runtime.Callers(2, stack)
+		var stack []uintptr
+		if _, isStandard := assertStandard(err); !isStandard { // Walk the stack only if convertInternal will allocate a Standard.
+			stack = make([]uintptr, maxPCs)
+			stack = stack[:runtime.Callers(2, stack)]
+		}
 		return convertInternal(idAction, langID, componentName, opName, stack, err)
 	}
 }
@@ -403,8 +458,11 @@ func Convert(idAction IDAction, ctx *context.T, err error) error {
 		return nil
 	}
 	langID, componentName, opName := dataFromContext(ctx)
-	stack := make([]uintptr, 1)
-	runtime.Callers(2, stack)
+	var stack []uintptr
+	if _, isStandard := assertStandard(err); !isStandard { // Walk the stack only if convertInternal will allocate a Standard.
+		stack = make([]uintptr, maxPCs)
+		stack = stack[:runtime.Callers(2, stack)]
+	}
 	return convertInternal(idAction, langID, componentName, opName, stack, err)
 }
 
@@ -436,19 +494,25 @@ func dataFromContext(ctx *context.T) (langID i18n.LangID, componentName string, 
 func (e Standard) Error() string {
 	msg := e.Msg
 	if isDefaultIDAction(e.IDAction) && msg == "" {
-		return i18n.Cat().Format(i18n.NoLangID, i18n.MsgID(Unknown.ID), e.ParamList...)
-	}
-	if msg == "" {
+		msg = i18n.Cat().Format(i18n.NoLangID, i18n.MsgID(Unknown.ID), e.ParamList...)
+	} else if msg == "" {
 		msg = i18n.Cat().Format(i18n.NoLangID, i18n.MsgID(e.IDAction.ID), e.ParamList...)
 	}
-	if len(e.subErrs) > 0 {
-		str := fmt.Sprintf(" [%s]", e.subErrs[0].Error())
-		for _, s := range e.subErrs[1:] {
-			str += fmt.Sprintf(", [%s]", s.Error())
-		}
-		msg += str
-	}
 	return msg
+}
+
+// String is the default printing function for SubErrs
+func (subErrs SubErrs) String() (result string) {
+	if len(subErrs) > 0 {
+		sep := ""
+		for _, s := range subErrs {
+			if (s.Options & Print) != 0 {
+				result += fmt.Sprintf("%s[%s: %s]", sep, s.Name, s.Err.Error())
+				sep = ", "
+			}
+		}
+	}
+	return result
 }
 
 // Params returns the variadic arguments to ExplicitNew().
@@ -459,55 +523,119 @@ func Params(err error) []interface{} {
 	return nil
 }
 
-// SubErrors returns the subordinate errors accumulated into err, or nil
-// if there are no such errors.
-func SubErrors(err error) (r []error) {
-	if e, ok := assertStandard(err); ok && len(e.subErrs) != 0 {
-		r = make([]error, len(e.subErrs))
-		copy(r, e.subErrs)
+// subErrorIndex returns index of the first SubErrs in e.ParamList
+// or len(e.ParamList) if there is no such parameter.
+func (e Standard) subErrorIndex() (i int) {
+	for i = range e.ParamList {
+		if _, isSubErrs := e.ParamList[i].(SubErrs); isSubErrs {
+			return i
+		}
+	}
+	return len(e.ParamList)
+}
+
+// SubErrors returns a copy of the subordinate errors accumulated into err, or
+// nil if there are no such errors.
+func SubErrors(err error) (r SubErrs) {
+	if e, ok := assertStandard(err); ok {
+		size := 0
+		for i := range e.ParamList {
+			if subErrsParam, isSubErrs := e.ParamList[i].(SubErrs); isSubErrs {
+				size += len(subErrsParam)
+			}
+		}
+		if size != 0 {
+			r = make(SubErrs, 0, size)
+			for i := range e.ParamList {
+				if subErrsParam, isSubErrs := e.ParamList[i].(SubErrs); isSubErrs {
+					r = append(r, subErrsParam...)
+				}
+			}
+		}
 	}
 	return r
 }
 
-// Append returns a copy of err with the supplied errors appended
-// as subordinate errors.
-func Append(err error, errors ...error) error {
-	e, ok := assertStandard(err)
-	if !ok {
-		return err
+// addSubErrsInternal returns a copy of err with supplied errors appended as
+// subordinate errors.  Requires that errors[i].Err!=nil for 0<=i<len(errors).
+func addSubErrsInternal(err error, langID i18n.LangID, componentName string, opName string, stack []uintptr, errors SubErrs) error {
+	var pe *Standard
+	var e Standard
+	var ok bool
+	if pe, ok = err.(*Standard); ok {
+		e = *pe
+	} else if e, ok = err.(Standard); !ok {
+		panic("non-verror.Standard passed to verror.AddSubErrs")
 	}
-	n := Standard{
-		IDAction:  e.IDAction,
-		Msg:       e.Msg,
-		ParamList: e.ParamList,
-		stackPCs:  e.stackPCs,
-		subErrs:   make([]error, len(e.subErrs), len(e.subErrs)+len(errors)),
+	var subErrs SubErrs
+	index := e.subErrorIndex()
+	copy(e.ParamList, e.ParamList)
+	if index == len(e.ParamList) {
+		e.ParamList = append(e.ParamList, subErrs)
+	} else {
+		copy(subErrs, e.ParamList[index].(SubErrs))
 	}
-	copy(n.subErrs, e.subErrs)
-	for _, err := range errors {
-		if err == nil {
-			// nothing
-		} else if s, ok := assertStandard(err); ok {
-			n.subErrs = append(n.subErrs, s)
+	for _, subErr := range errors {
+		if _, ok := assertStandard(subErr.Err); ok {
+			subErrs = append(subErrs, subErr)
 		} else {
-			langID, componentName, opName := dataFromContext(nil)
-			stack := make([]uintptr, 1)
-			runtime.Callers(2, stack)
-			s := convertInternal(IDAction{}, langID, componentName, opName, stack, err)
-			n.subErrs = append(n.subErrs, s)
+			subErr.Err = convertInternal(IDAction{}, langID, componentName, opName, stack, subErr.Err)
+			subErrs = append(subErrs, subErr)
 		}
 	}
-	return n
+	e.ParamList[index] = subErrs
+	if langID != i18n.NoLangID {
+		e.Msg = i18n.Cat().Format(langID, i18n.MsgID(e.IDAction.ID), e.ParamList...)
+	}
+	return e
 }
 
-// DebugString returns a more full string representation of an error, perhaps
-// more thorough than one might present to an end user, but useful for
-// debugging by a developer.
-func DebugString(err error) string {
-	str := err.Error()
-	str += "\n" + Stack(err).String()
-	for _, s := range SubErrors(err) {
-		str += s.Error() + "\n" + Stack(s).String()
+// ExplicitAddSubErrs returns a copy of err with supplied errors appended as
+// subordinate errors.  Requires that errors[i].Err!=nil for 0<=i<len(errors).
+func ExplicitAddSubErrs(err error, langID i18n.LangID, componentName string, opName string, errors ...SubErr) error {
+	stack := make([]uintptr, maxPCs)
+	stack = stack[:runtime.Callers(2, stack)]
+	return addSubErrsInternal(err, langID, componentName, opName, stack, errors)
+}
+
+// AddSubErrs is like ExplicitAddSubErrs, but uses the provided context
+// to obtain the langID, componentName, and opName values.
+func AddSubErrs(err error, ctx *context.T, errors ...SubErr) error {
+	stack := make([]uintptr, maxPCs)
+	stack = stack[:runtime.Callers(2, stack)]
+	langID, componentName, opName := dataFromContext(ctx)
+	return addSubErrsInternal(err, langID, componentName, opName, stack, errors)
+}
+
+// debugStringInternal returns a more verbose string representation of an
+// error, perhaps more thorough than one might present to an end user, but
+// useful for debugging by a developer.  It prefixes all lines output with
+// "prefix" and "name" (if non-empty) and adds intent to prefix wen recursing.
+func debugStringInternal(err error, prefix string, name string) string {
+	str := prefix
+	if len(name) > 0 {
+		str += name + " "
+	}
+	str += err.Error()
+	// Append err's stack, indented a little.
+	prefix += "  "
+	buf := bytes.NewBufferString("")
+	stackToTextIndent(buf, Stack(err), prefix)
+	str += "\n" + buf.String()
+	// Print all the subordinate errors, even the ones that were not
+	// printed by Error(), indented a bit further.
+	prefix += "  "
+	if subErrs := SubErrors(err); len(subErrs) > 0 {
+		for _, s := range subErrs {
+			str += debugStringInternal(s.Err, prefix, s.Name)
+		}
 	}
 	return str
+}
+
+// DebugString returns a more verbose string representation of an error,
+// perhaps more thorough than one might present to an end user, but useful for
+// debugging by a developer.
+func DebugString(err error) string {
+	return debugStringInternal(err, "", "")
 }
