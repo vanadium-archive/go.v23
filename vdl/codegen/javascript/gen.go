@@ -16,7 +16,6 @@ import (
 	"text/template"
 
 	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/vdl/codegen"
 	"v.io/core/veyron2/vdl/compile"
 	"v.io/core/veyron2/vdl/vdlutil"
 )
@@ -25,7 +24,7 @@ type data struct {
 	Pkg            *compile.Package
 	Env            *compile.Env
 	GenerateImport func(string) string
-	UserImports    codegen.Imports
+	UserImports    jsImports
 	PathToCoreJS   string
 	TypeNames      typeNames
 }
@@ -37,7 +36,7 @@ func Generate(pkg *compile.Package, env *compile.Env, genImport func(string) str
 		Pkg:            pkg,
 		Env:            env,
 		GenerateImport: genImport,
-		UserImports:    codegen.ImportsForFiles(pkg.Files...),
+		UserImports:    jsImportsForFiles(pkg.Files...),
 		TypeNames:      newTypeNames(pkg),
 		PathToCoreJS:   pathToCoreJS,
 	}
