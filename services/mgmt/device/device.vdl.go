@@ -862,6 +862,155 @@ var descApplication = ipc.InterfaceDesc{
 	},
 }
 
+// ClaimableClientMethods is the client interface
+// containing Claimable methods.
+//
+// Claimable represents an uninitialized device with no owner
+// (i.e., a device that has no blessings).
+//
+// Claim is used to claim ownership by blessing the device's private key.
+// Devices that have provided a pairing token to the claimer through an
+// out-of-band communication channel (eg: display/email) would expect this
+// pairing token to be replayed by the claimer.
+//
+// Once claimed, the device will export the "Device" interface and all methods
+// will be restricted to the claimer.
+//
+// The blessings that the device is to be claimed with is provided
+// via the ipc.Granter option in Go.
+type ClaimableClientMethods interface {
+	Claim(ctx *context.T, pairingToken string, opts ...ipc.CallOpt) error
+}
+
+// ClaimableClientStub adds universal methods to ClaimableClientMethods.
+type ClaimableClientStub interface {
+	ClaimableClientMethods
+	ipc.UniversalServiceMethods
+}
+
+// ClaimableClient returns a client stub for Claimable.
+func ClaimableClient(name string, opts ...ipc.BindOpt) ClaimableClientStub {
+	var client ipc.Client
+	for _, opt := range opts {
+		if clientOpt, ok := opt.(ipc.Client); ok {
+			client = clientOpt
+		}
+	}
+	return implClaimableClientStub{name, client}
+}
+
+type implClaimableClientStub struct {
+	name   string
+	client ipc.Client
+}
+
+func (c implClaimableClientStub) c(ctx *context.T) ipc.Client {
+	if c.client != nil {
+		return c.client
+	}
+	return veyron2.GetClient(ctx)
+}
+
+func (c implClaimableClientStub) Claim(ctx *context.T, i0 string, opts ...ipc.CallOpt) (err error) {
+	var call ipc.Call
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "Claim", []interface{}{i0}, opts...); err != nil {
+		return
+	}
+	if ierr := call.Finish(&err); ierr != nil {
+		err = ierr
+	}
+	return
+}
+
+// ClaimableServerMethods is the interface a server writer
+// implements for Claimable.
+//
+// Claimable represents an uninitialized device with no owner
+// (i.e., a device that has no blessings).
+//
+// Claim is used to claim ownership by blessing the device's private key.
+// Devices that have provided a pairing token to the claimer through an
+// out-of-band communication channel (eg: display/email) would expect this
+// pairing token to be replayed by the claimer.
+//
+// Once claimed, the device will export the "Device" interface and all methods
+// will be restricted to the claimer.
+//
+// The blessings that the device is to be claimed with is provided
+// via the ipc.Granter option in Go.
+type ClaimableServerMethods interface {
+	Claim(ctx ipc.ServerContext, pairingToken string) error
+}
+
+// ClaimableServerStubMethods is the server interface containing
+// Claimable methods, as expected by ipc.Server.
+// There is no difference between this interface and ClaimableServerMethods
+// since there are no streaming methods.
+type ClaimableServerStubMethods ClaimableServerMethods
+
+// ClaimableServerStub adds universal methods to ClaimableServerStubMethods.
+type ClaimableServerStub interface {
+	ClaimableServerStubMethods
+	// Describe the Claimable interfaces.
+	Describe__() []ipc.InterfaceDesc
+}
+
+// ClaimableServer returns a server stub for Claimable.
+// It converts an implementation of ClaimableServerMethods into
+// an object that may be used by ipc.Server.
+func ClaimableServer(impl ClaimableServerMethods) ClaimableServerStub {
+	stub := implClaimableServerStub{
+		impl: impl,
+	}
+	// Initialize GlobState; always check the stub itself first, to handle the
+	// case where the user has the Glob method defined in their VDL source.
+	if gs := ipc.NewGlobState(stub); gs != nil {
+		stub.gs = gs
+	} else if gs := ipc.NewGlobState(impl); gs != nil {
+		stub.gs = gs
+	}
+	return stub
+}
+
+type implClaimableServerStub struct {
+	impl ClaimableServerMethods
+	gs   *ipc.GlobState
+}
+
+func (s implClaimableServerStub) Claim(ctx ipc.ServerContext, i0 string) error {
+	return s.impl.Claim(ctx, i0)
+}
+
+func (s implClaimableServerStub) Globber() *ipc.GlobState {
+	return s.gs
+}
+
+func (s implClaimableServerStub) Describe__() []ipc.InterfaceDesc {
+	return []ipc.InterfaceDesc{ClaimableDesc}
+}
+
+// ClaimableDesc describes the Claimable interface.
+var ClaimableDesc ipc.InterfaceDesc = descClaimable
+
+// descClaimable hides the desc to keep godoc clean.
+var descClaimable = ipc.InterfaceDesc{
+	Name:    "Claimable",
+	PkgPath: "v.io/core/veyron2/services/mgmt/device",
+	Doc:     "// Claimable represents an uninitialized device with no owner\n// (i.e., a device that has no blessings).\n//\n// Claim is used to claim ownership by blessing the device's private key.\n// Devices that have provided a pairing token to the claimer through an\n// out-of-band communication channel (eg: display/email) would expect this\n// pairing token to be replayed by the claimer.\n//\n// Once claimed, the device will export the \"Device\" interface and all methods\n// will be restricted to the claimer.\n//\n// The blessings that the device is to be claimed with is provided\n// via the ipc.Granter option in Go.",
+	Methods: []ipc.MethodDesc{
+		{
+			Name: "Claim",
+			InArgs: []ipc.ArgDesc{
+				{"pairingToken", ``}, // string
+			},
+			OutArgs: []ipc.ArgDesc{
+				{"", ``}, // error
+			},
+			Tags: []vdl.AnyRep{access.Tag("Admin")},
+		},
+	},
+}
+
 // DeviceClientMethods is the client interface
 // containing Device methods.
 //
@@ -957,12 +1106,6 @@ type DeviceClientMethods interface {
 	// In other words, invoking any method using an existing application
 	// installation instance as a receiver is well-defined.
 	ApplicationClientMethods
-	// Claim is used to claim ownership of a device by blessing its identity.
-	// Devices that have provided a pairingToken to the claimer through an
-	// out-of-band communication channel (eg: display/email) would expect
-	// this pairingToken to be replayed by the claimer. Once claimed, only
-	// the claimer identity will have access to the device methods.
-	Claim(ctx *context.T, pairingToken string, opts ...ipc.CallOpt) error
 	// Describe generates a description of the device.
 	Describe(*context.T, ...ipc.CallOpt) (Description, error)
 	// IsRunnable checks if the device can execute the given binary.
@@ -1013,17 +1156,6 @@ func (c implDeviceClientStub) c(ctx *context.T) ipc.Client {
 		return c.client
 	}
 	return veyron2.GetClient(ctx)
-}
-
-func (c implDeviceClientStub) Claim(ctx *context.T, i0 string, opts ...ipc.CallOpt) (err error) {
-	var call ipc.Call
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Claim", []interface{}{i0}, opts...); err != nil {
-		return
-	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
-	return
 }
 
 func (c implDeviceClientStub) Describe(ctx *context.T, opts ...ipc.CallOpt) (o0 Description, err error) {
@@ -1176,12 +1308,6 @@ type DeviceServerMethods interface {
 	// In other words, invoking any method using an existing application
 	// installation instance as a receiver is well-defined.
 	ApplicationServerMethods
-	// Claim is used to claim ownership of a device by blessing its identity.
-	// Devices that have provided a pairingToken to the claimer through an
-	// out-of-band communication channel (eg: display/email) would expect
-	// this pairingToken to be replayed by the claimer. Once claimed, only
-	// the claimer identity will have access to the device methods.
-	Claim(ctx ipc.ServerContext, pairingToken string) error
 	// Describe generates a description of the device.
 	Describe(ipc.ServerContext) (Description, error)
 	// IsRunnable checks if the device can execute the given binary.
@@ -1240,10 +1366,6 @@ type implDeviceServerStub struct {
 	gs *ipc.GlobState
 }
 
-func (s implDeviceServerStub) Claim(ctx ipc.ServerContext, i0 string) error {
-	return s.impl.Claim(ctx, i0)
-}
-
 func (s implDeviceServerStub) Describe(ctx ipc.ServerContext) (Description, error) {
 	return s.impl.Describe(ctx)
 }
@@ -1284,17 +1406,6 @@ var descDevice = ipc.InterfaceDesc{
 		{"Application", "v.io/core/veyron2/services/mgmt/device", "// Application can be used to manage applications on a device. The\n// idea is that this interace will be invoked using an object name that\n// identifies the application and its installations and instances\n// where applicable.\n//\n// In particular, the interface methods can be divided into three\n// groups based on their intended receiver:\n//\n// 1) Method receiver is an application:\n// -- Install()\n//\n// 2) Method receiver is an application installation:\n// -- Start()\n// -- Uninstall()\n// -- Update()\n//\n// 3) Method receiver is application installation instance:\n// -- Refresh()\n// -- Restart()\n// -- Resume()\n// -- Stop()\n// -- Suspend()\n//\n// For groups 2) and 3), the suffix that specifies the receiver can\n// optionally omit the installation and/or instance, in which case the\n// operation applies to all installations and/or instances in the\n// scope of the suffix.\n//\n// Examples:\n// # Install Google Maps on the device.\n// device/apps.Install(\"/google.com/appstore/maps\", nil, nil) --> \"google maps/0\"\n//\n// # Start an instance of the previously installed maps application installation.\n// device/apps/google maps/0.Start() --> { \"0\" }\n//\n// # Start a second instance of the previously installed maps application installation.\n// device/apps/google maps/0.Start() --> { \"1\" }\n//\n// # Stop the first instance previously started.\n// device/apps/google maps/0/0.Stop()\n//\n// # Install a second Google Maps installation.\n// device/apps.Install(\"/google.com/appstore/maps\", nil, nil) --> \"google maps/1\"\n//\n// # Start an instance for all maps application installations.\n// device/apps/google maps.Start() --> {\"0/2\", \"1/0\"}\n//\n// # Refresh the state of all instances of all maps application installations.\n// device/apps/google maps.Refresh()\n//\n// # Refresh the state of all instances of the maps application installation\n// identified by the given suffix.\n// device/apps/google maps/0.Refresh()\n//\n// # Refresh the state of the maps application installation instance identified by\n// the given suffix.\n// device/apps/google maps/0/2.Refresh()\n//\n// # Update the second maps installation to the latest version available.\n// device/apps/google maps/1.Update()\n//\n// # Update the first maps installation to a specific version.\n// device/apps/google maps/0.UpdateTo(\"/google.com/appstore/beta/maps\")\n//\n// Further, the following methods complement one another:\n// -- Install() and Uninstall()\n// -- Start() and Stop()\n// -- Suspend() and Resume()\n//\n// Finally, an application installation instance can be in one of\n// three abstract states: 1) \"does not exist\", 2) \"running\", or 3)\n// \"suspended\". The interface methods transition between these\n// abstract states using the following state machine:\n//\n// apply(Start(), \"does not exists\") = \"running\"\n// apply(Refresh(), \"running\") = \"running\"\n// apply(Refresh(), \"suspended\") = \"suspended\"\n// apply(Restart(), \"running\") = \"running\"\n// apply(Restart(), \"suspended\") = \"running\"\n// apply(Resume(), \"suspended\") = \"running\"\n// apply(Resume(), \"running\") = \"running\"\n// apply(Stop(), \"running\") = \"does not exist\"\n// apply(Stop(), \"suspended\") = \"does not exist\"\n// apply(Suspend(), \"running\") = \"suspended\"\n// apply(Suspend(), \"suspended\") = \"suspended\"\n//\n// In other words, invoking any method using an existing application\n// installation instance as a receiver is well-defined."},
 	},
 	Methods: []ipc.MethodDesc{
-		{
-			Name: "Claim",
-			Doc:  "// Claim is used to claim ownership of a device by blessing its identity.\n// Devices that have provided a pairingToken to the claimer through an\n// out-of-band communication channel (eg: display/email) would expect\n// this pairingToken to be replayed by the claimer. Once claimed, only\n// the claimer identity will have access to the device methods.",
-			InArgs: []ipc.ArgDesc{
-				{"pairingToken", ``}, // string
-			},
-			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // error
-			},
-			Tags: []vdl.AnyRep{access.Tag("Admin")},
-		},
 		{
 			Name: "Describe",
 			Doc:  "// Describe generates a description of the device.",
