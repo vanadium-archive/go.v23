@@ -1,6 +1,7 @@
 package vtrace
 
 import (
+	"time"
 	"v.io/core/veyron2/uniqueid"
 )
 
@@ -12,9 +13,8 @@ type TraceRecord struct {
 // An Annotation represents data that is relevant at a specific moment.
 // They can be attached to spans to add useful debugging information.
 type Annotation struct {
-	// When the annotation was added in nanoseconds since the epoch.
-	// TODO(mattr): This should be a time type.
-	When int64
+	// When the annotation was added.
+	When time.Time
 
 	// The annotation message.
 	// TODO(mattr): Allow richer annotations.
@@ -27,43 +27,33 @@ type SpanRecord struct {
 	Parent uniqueid.Id // The ID of this Span's parent.
 	Name   string      // The Name of this span.
 
-	// TODO(mattr): These should both be time types.
-	Start int64 // The start time of this span in ns since the epoch.
-	End   int64 // The end time of this span in ns since the epoch.
+	Start time.Time // The start time of this span.
+	End   time.Time // The end time of this span.
 
 	// A series of annotations.
-	// TODO(mattr): Allow richer annotations.
 	Annotations []Annotation
 }
 
-// TraceMethod specifies the mechanism by which this trace's data should
-// be collected (if it is to be collected at all).
-// TODO(mattr): This should be an enum or perhaps flags.
-type TraceMethod int32
+type TraceFlags int32
 
 const (
-	// None means that the trace should not be collected.
-	None = TraceMethod(0)
-	// InMemory means that the trace data should be collected
-	// in memory and shipped back with the RPC Response.
-	InMemory = TraceMethod(1)
-	// TODO(mattr): Add log based collection.
+	Empty           = TraceFlags(0)
+	CollectInMemory = TraceFlags(1)
 )
 
 // Request is the object that carries trace informtion between processes.
 type Request struct {
 	SpanID  uniqueid.Id // The ID of the span that originated the RPC call.
 	TraceID uniqueid.Id // The ID of the trace this call is a part of.
-	Method  TraceMethod // The method of collection for the trace.
+	Flags   TraceFlags
 }
 
 type Response struct {
-	// Method is method of collection for the trace.
-	// Note that a client will start collecting trace data if the server
-	// responds with a non-None trace method, even if it was not previously collecting.
-	Method TraceMethod
+	// Flags give options for trace collection, the client should alter its
+	// collection for this trace according to the flags sent back from the
+	// server.
+	Flags TraceFlags
 
 	// Trace is collected trace data.  This may be empty.
-	// TODO(mattr): This should be optional if we support that feature.
 	Trace TraceRecord
 }

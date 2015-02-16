@@ -15,14 +15,14 @@ type children []*node
 
 // children implements sort.Interface
 func (c children) Len() int           { return len(c) }
-func (c children) Less(i, j int) bool { return c[i].span.Start < c[j].span.Start }
+func (c children) Less(i, j int) bool { return c[i].span.Start.Before(c[j].span.Start) }
 func (c children) Swap(i, j int)      { c[i], c[j] = c[j], c[i] }
 
 type annotations []Annotation
 
 // annotations implements sort.Interface
 func (a annotations) Len() int           { return len(a) }
-func (a annotations) Less(i, j int) bool { return a[i].When < a[j].When }
+func (a annotations) Less(i, j int) bool { return a[i].When.Before(a[j].When) }
 func (a annotations) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 
 type node struct {
@@ -35,12 +35,12 @@ type node struct {
 // be cleaned up and exported.
 func buildTree(trace *TraceRecord) *node {
 	var root *node
-	var earliestTime int64
+	var earliestTime time.Time
 	nodes := make(map[uniqueid.Id]*node, len(trace.Spans))
 
 	for i := range trace.Spans {
 		span := &trace.Spans[i]
-		if earliestTime == 0 || span.Start < earliestTime {
+		if earliestTime.IsZero() || span.Start.Before(earliestTime) {
 			earliestTime = span.Start
 		}
 
@@ -105,14 +105,14 @@ func buildTree(trace *TraceRecord) *node {
 	return root
 }
 
-func formatDelta(when, start int64) string {
-	if when == 0 {
+func formatDelta(when, start time.Time) string {
+	if when.IsZero() {
 		return "??"
 	}
-	return time.Duration(when - start).String()
+	return when.Sub(start).String()
 }
 
-func formatNode(w io.Writer, n *node, traceStart int64, indent string) {
+func formatNode(w io.Writer, n *node, traceStart time.Time, indent string) {
 	fmt.Fprintf(w, "%sSpan - %s [id: %x parent %x] (%s, %s)\n",
 		indent,
 		n.span.Name,
@@ -129,15 +129,14 @@ func formatNode(w io.Writer, n *node, traceStart int64, indent string) {
 	}
 }
 
-func formatTime(when int64, loc *time.Location) string {
-	if when == 0 {
+func formatTime(when time.Time, loc *time.Location) string {
+	if when.IsZero() {
 		return "??"
 	}
-	t := time.Unix(0, when)
 	if loc != nil {
-		t = t.In(loc)
+		when = when.In(loc)
 	}
-	return t.Format("2006-01-02 15:04:05.000000 MST")
+	return when.Format("2006-01-02 15:04:05.000000 MST")
 }
 
 // FormatTrace writes a text description of the given trace to the

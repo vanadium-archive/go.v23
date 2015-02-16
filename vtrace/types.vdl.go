@@ -8,7 +8,9 @@ import (
 	"v.io/core/veyron2/vdl"
 
 	// VDL user imports
+	"time"
 	"v.io/core/veyron2/uniqueid"
+	_ "v.io/core/veyron2/vdl/vdlroot/src/time"
 )
 
 type TraceRecord struct {
@@ -24,9 +26,8 @@ func (TraceRecord) __VDLReflect(struct {
 // An Annotation represents data that is relevant at a specific moment.
 // They can be attached to spans to add useful debugging information.
 type Annotation struct {
-	// When the annotation was added in nanoseconds since the epoch.
-	// TODO(mattr): This should be a time type.
-	When int64
+	// When the annotation was added.
+	When time.Time
 	// The annotation message.
 	// TODO(mattr): Allow richer annotations.
 	Message string
@@ -42,11 +43,9 @@ type SpanRecord struct {
 	ID     uniqueid.Id // The ID of the Span.
 	Parent uniqueid.Id // The ID of this Span's parent.
 	Name   string      // The Name of this span.
-	// TODO(mattr): These should both be time types.
-	Start int64 // The start time of this span in ns since the epoch.
-	End   int64 // The end time of this span in ns since the epoch.
+	Start  time.Time   // The start time of this span.
+	End    time.Time   // The end time of this span.
 	// A series of annotations.
-	// TODO(mattr): Allow richer annotations.
 	Annotations []Annotation
 }
 
@@ -55,13 +54,10 @@ func (SpanRecord) __VDLReflect(struct {
 }) {
 }
 
-// TraceMethod specifies the mechanism by which this trace's data should
-// be collected (if it is to be collected at all).
-// TODO(mattr): This should be an enum or perhaps flags.
-type TraceMethod int32
+type TraceFlags int32
 
-func (TraceMethod) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vtrace.TraceMethod"
+func (TraceFlags) __VDLReflect(struct {
+	Name string "v.io/core/veyron2/vtrace.TraceFlags"
 }) {
 }
 
@@ -69,7 +65,7 @@ func (TraceMethod) __VDLReflect(struct {
 type Request struct {
 	SpanID  uniqueid.Id // The ID of the span that originated the RPC call.
 	TraceID uniqueid.Id // The ID of the trace this call is a part of.
-	Method  TraceMethod // The method of collection for the trace.
+	Flags   TraceFlags
 }
 
 func (Request) __VDLReflect(struct {
@@ -78,12 +74,11 @@ func (Request) __VDLReflect(struct {
 }
 
 type Response struct {
-	// Method is method of collection for the trace.
-	// Note that a client will start collecting trace data if the server
-	// responds with a non-None trace method, even if it was not previously collecting.
-	Method TraceMethod
+	// Flags give options for trace collection, the client should alter its
+	// collection for this trace according to the flags sent back from the
+	// server.
+	Flags TraceFlags
 	// Trace is collected trace data.  This may be empty.
-	// TODO(mattr): This should be optional if we support that feature.
 	Trace TraceRecord
 }
 
@@ -96,14 +91,11 @@ func init() {
 	vdl.Register((*TraceRecord)(nil))
 	vdl.Register((*Annotation)(nil))
 	vdl.Register((*SpanRecord)(nil))
-	vdl.Register((*TraceMethod)(nil))
+	vdl.Register((*TraceFlags)(nil))
 	vdl.Register((*Request)(nil))
 	vdl.Register((*Response)(nil))
 }
 
-// None means that the trace should not be collected.
-const None = TraceMethod(0)
+const Empty = TraceFlags(0)
 
-// InMemory means that the trace data should be collected
-// in memory and shipped back with the RPC Response.
-const InMemory = TraceMethod(1)
+const CollectInMemory = TraceFlags(1)
