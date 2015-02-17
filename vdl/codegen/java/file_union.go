@@ -42,7 +42,7 @@ package {{.PackagePath}};
     public static final io.v.core.veyron2.vdl.VdlType VDL_TYPE =
             io.v.core.veyron2.vdl.Types.getVdlTypeFromReflect({{.Name}}.class);
 
-    public {{.Name}}(int index, java.io.Serializable value) {
+    public {{.Name}}(int index, Object value) {
         super(VDL_TYPE, index, value);
     }
 }
