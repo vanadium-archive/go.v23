@@ -211,7 +211,7 @@ func genJavaStructFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo {
 		Fields:         fields,
 		FieldsAsArgs:   javaFieldArgStr(tdef.Type, env),
 		Name:           javaTypeName,
-		PackagePath:    javaPath(javaGenPkgPath(tdef.File.Package.Path)),
+		PackagePath:    javaPath(javaGenPkgPath(tdef.File.Package.GenPath)),
 		Source:         tdef.File.BaseName,
 		VdlTypeName:    tdef.Type.Name(),
 		VdlTypeString:  tdef.Type.String(),

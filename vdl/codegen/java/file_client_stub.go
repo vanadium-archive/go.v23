@@ -235,7 +235,7 @@ func genJavaClientStubFile(iface *compile.Interface, env *compile.Env) JavaFileI
 	for _, embed := range allEmbeddedIfaces(iface) {
 		embeds = append(embeds, clientStubEmbed{
 			LocalStubVarName: vdlutil.ToCamelCase(embed.Name) + "ClientStub",
-			StubClassName:    javaPath(javaGenPkgPath(path.Join(embed.File.Package.Path, toUpperCamelCase(embed.Name)+"ClientStub"))),
+			StubClassName:    javaPath(javaGenPkgPath(path.Join(embed.File.Package.GenPath, toUpperCamelCase(embed.Name)+"ClientStub"))),
 		})
 	}
 	embedMethods := []clientStubEmbedMethod{}
@@ -263,10 +263,10 @@ func genJavaClientStubFile(iface *compile.Interface, env *compile.Env) JavaFileI
 		Embeds:           embeds,
 		FullServiceName:  javaPath(interfaceFullyQualifiedName(iface)),
 		Methods:          methods,
-		PackagePath:      javaPath(javaGenPkgPath(iface.File.Package.Path)),
+		PackagePath:      javaPath(javaGenPkgPath(iface.File.Package.GenPath)),
 		ServiceName:      javaServiceName,
 		Source:           iface.File.BaseName,
-		VDLIfacePathName: path.Join(iface.File.Package.Path, iface.Name+"ClientMethods"),
+		VDLIfacePathName: path.Join(iface.File.Package.GenPath, iface.Name+"ClientMethods"),
 	}
 	var buf bytes.Buffer
 	err := parseTmpl("client stub", clientStubTmpl).Execute(&buf, data)

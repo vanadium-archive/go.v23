@@ -77,7 +77,7 @@ func (b bySignature) Less(i, j int) bool {
 func (b bySignature) signature(i int) string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintf("%s|%s|%s",
-		b[i].Origin.File.Package.Path,
+		b[i].Origin.File.Package.GenPath,
 		b[i].Origin.Name,
 		b[i].Method.Name,
 	))

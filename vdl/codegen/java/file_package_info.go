@@ -32,7 +32,7 @@ func genJavaPackageFile(pkg *compile.Package, env *compile.Env) *JavaFileInfo {
 				Doc         string
 			}{
 				Source:      javaFileNames(pkg.Files),
-				PackagePath: javaPath(javaGenPkgPath(pkg.Path)),
+				PackagePath: javaPath(javaGenPkgPath(pkg.GenPath)),
 				Doc:         javaDoc(file.PackageDef.Doc),
 			}
 			var buf bytes.Buffer

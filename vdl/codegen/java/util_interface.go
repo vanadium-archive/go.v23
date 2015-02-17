@@ -13,7 +13,7 @@ func allEmbeddedIfaces(iface *compile.Interface) (ret []*compile.Interface) {
 	added := make(map[string]bool)
 	for _, eIface := range iface.Embeds {
 		for _, eIface = range append(allEmbeddedIfaces(eIface), eIface) {
-			path := path.Join(eIface.File.Package.Path, toUpperCamelCase(eIface.Name))
+			path := path.Join(eIface.File.Package.GenPath, toUpperCamelCase(eIface.Name))
 			if _, ok := added[path]; ok { // already added iface
 				continue
 			}
@@ -27,7 +27,7 @@ func allEmbeddedIfaces(iface *compile.Interface) (ret []*compile.Interface) {
 // interfaceFullyQualifiedName outputs the fully qualified name of an interface
 // e.g. "com.a.B"
 func interfaceFullyQualifiedName(iface *compile.Interface) string {
-	return path.Join(javaGenPkgPath(iface.File.Package.Path), toUpperCamelCase(iface.Name))
+	return path.Join(javaGenPkgPath(iface.File.Package.GenPath), toUpperCamelCase(iface.Name))
 }
 
 // javaClientExtendsStr creates an extends clause for a client interface

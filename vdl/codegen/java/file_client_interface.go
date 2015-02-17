@@ -114,7 +114,7 @@ func genJavaClientInterfaceFile(iface *compile.Interface, env *compile.Env) Java
 		AccessModifier: accessModifierForName(iface.Name),
 		Extends:        javaClientExtendsStr(iface.Embeds),
 		Methods:        methods,
-		PackagePath:    javaPath(javaGenPkgPath(iface.File.Package.Path)),
+		PackagePath:    javaPath(javaGenPkgPath(iface.File.Package.GenPath)),
 		ServiceDoc:     javaDoc(iface.Doc),
 		ServiceName:    javaServiceName,
 		Source:         iface.File.BaseName,

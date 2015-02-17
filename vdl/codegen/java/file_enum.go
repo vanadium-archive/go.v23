@@ -87,7 +87,7 @@ func genJavaEnumFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo {
 		EnumLabels:     labels,
 		Doc:            javaDocInComment(tdef.Doc),
 		Name:           javaTypeName,
-		PackagePath:    javaPath(javaGenPkgPath(tdef.File.Package.Path)),
+		PackagePath:    javaPath(javaGenPkgPath(tdef.File.Package.GenPath)),
 		Source:         tdef.File.BaseName,
 		VdlTypeName:    tdef.Type.Name(),
 		VdlTypeString:  tdef.Type.String(),

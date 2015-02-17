@@ -75,7 +75,7 @@ func genJavaMapFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo {
 		ElemType:       javaType(tdef.Type.Elem(), true, env),
 		KeyType:        javaType(tdef.Type.Key(), true, env),
 		Name:           javaTypeName,
-		Package:        javaPath(javaGenPkgPath(tdef.File.Package.Path)),
+		Package:        javaPath(javaGenPkgPath(tdef.File.Package.GenPath)),
 		SourceFile:     tdef.File.BaseName,
 		VdlTypeName:    tdef.Type.Name(),
 		VdlTypeString:  tdef.BaseType.String(),

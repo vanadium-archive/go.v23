@@ -127,7 +127,7 @@ func genJavaErrorFile(pkg *compile.Package, env *compile.Env) *JavaFileInfo {
 	}{
 		ClassName:   className,
 		Source:      javaFileNames(pkg.Files),
-		PackagePath: javaPath(javaGenPkgPath(pkg.Path)),
+		PackagePath: javaPath(javaGenPkgPath(pkg.GenPath)),
 		Files:       files,
 	}
 	var buf bytes.Buffer
