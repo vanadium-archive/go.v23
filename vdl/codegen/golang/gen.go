@@ -170,8 +170,6 @@ func init() {
 
 func errorName(def *compile.ErrorDef, file *compile.File) string {
 	switch {
-	case file.Package.Path == "v.io/core/veyron2/verror":
-		return def.Name
 	case def.Exported:
 		return "Err" + def.Name
 	default:

@@ -13,32 +13,32 @@ var (
 	// Unknown means the error has no known ID.  A more specific error should
 	// always be used, if possible.  Unknown is typically only used when
 	// automatically converting errors that do not contain an ID.
-	Unknown = Register("v.io/core/veyron2/verror.Unknown", NoRetry, "{1:}{2:} Error{:_}")
+	ErrUnknown = Register("v.io/core/veyron2/verror.Unknown", NoRetry, "{1:}{2:} Error{:_}")
 	// Internal means an internal error has occurred.  A more specific error
 	// should always be used, if possible.
-	Internal = Register("v.io/core/veyron2/verror.Internal", NoRetry, "{1:}{2:} Internal error{:_}")
+	ErrInternal = Register("v.io/core/veyron2/verror.Internal", NoRetry, "{1:}{2:} Internal error{:_}")
 	// NotImplemented means that the request type is valid but that the method to
 	// handle the request has not been implemented.
-	NotImplemented = Register("v.io/core/veyron2/verror.NotImplemented", NoRetry, "{1:}{2:} Not implemented{:_}")
+	ErrNotImplemented = Register("v.io/core/veyron2/verror.NotImplemented", NoRetry, "{1:}{2:} Not implemented{:_}")
 	// EOF means the end-of-file has been reached; more generally, no more input
 	// data is available.
-	EOF = Register("v.io/core/veyron2/verror.EOF", NoRetry, "{1:}{2:} EOF{:_}")
+	ErrEOF = Register("v.io/core/veyron2/verror.EOF", NoRetry, "{1:}{2:} EOF{:_}")
 	// BadArg means the arguments to an operation are invalid or incorrectly
 	// formatted.
-	BadArg = Register("v.io/core/veyron2/verror.BadArg", NoRetry, "{1:}{2:} Bad argument{:_}")
+	ErrBadArg = Register("v.io/core/veyron2/verror.BadArg", NoRetry, "{1:}{2:} Bad argument{:_}")
 	// BadState means an operation was attempted on an object while the object was
 	// in an incompatible state.
-	BadState = Register("v.io/core/veyron2/verror.BadState", NoRetry, "{1:}{2:} Invalid state{:_}")
+	ErrBadState = Register("v.io/core/veyron2/verror.BadState", NoRetry, "{1:}{2:} Invalid state{:_}")
 	// Exist means that the requested item already exists; typically returned when
 	// an attempt to create an item fails because it already exists.
-	Exist = Register("v.io/core/veyron2/verror.Exist", NoRetry, "{1:}{2:} Already exists{:_}")
+	ErrExist = Register("v.io/core/veyron2/verror.Exist", NoRetry, "{1:}{2:} Already exists{:_}")
 	// NoExist means that the requested item does not exist; typically returned
 	// when an attempt to lookup an item fails because it does not exist.
-	NoExist = Register("v.io/core/veyron2/verror.NoExist", NoRetry, "{1:}{2:} Does not exist{:_}")
+	ErrNoExist = Register("v.io/core/veyron2/verror.NoExist", NoRetry, "{1:}{2:} Does not exist{:_}")
 	// NoExistOrNoAccess means that either the requested item does not exist, or
 	// is inaccessible.  Typically returned when the distinction between existence
 	// and inaccessiblity needs to remain hidden, as a privacy feature.
-	NoExistOrNoAccess = Register("v.io/core/veyron2/verror.NoExistOrNoAccess", NoRetry, "{1:}{2:} Does not exist or access denied{:_}")
+	ErrNoExistOrNoAccess = Register("v.io/core/veyron2/verror.NoExistOrNoAccess", NoRetry, "{1:}{2:} Does not exist or access denied{:_}")
 	// The following errors can occur during the process of establishing
 	// an RPC connection.
 	// NoExist (see above) is returned if the name of the server fails to
@@ -50,126 +50,126 @@ var (
 	//
 	// TODO(toddw): These errors and descriptions were added by Cos; consider
 	// moving the IPC-related ones into the ipc package.
-	NoServers        = Register("v.io/core/veyron2/verror.NoServers", RetryRefetch, "{1:}{2:} No usable servers found{:_}")
-	NoAccess         = Register("v.io/core/veyron2/verror.NoAccess", RetryRefetch, "{1:}{2:} Access denied{:_}")
-	NotTrusted       = Register("v.io/core/veyron2/verror.NotTrusted", RetryRefetch, "{1:}{2:} Client does not trust server{:_}")
-	NoServersAndAuth = Register("v.io/core/veyron2/verror.NoServersAndAuth", RetryRefetch, "{1:}{2:} Has no usable servers and is either not trusted or access was denied{:_}")
+	ErrNoServers        = Register("v.io/core/veyron2/verror.NoServers", RetryRefetch, "{1:}{2:} No usable servers found{:_}")
+	ErrNoAccess         = Register("v.io/core/veyron2/verror.NoAccess", RetryRefetch, "{1:}{2:} Access denied{:_}")
+	ErrNotTrusted       = Register("v.io/core/veyron2/verror.NotTrusted", RetryRefetch, "{1:}{2:} Client does not trust server{:_}")
+	ErrNoServersAndAuth = Register("v.io/core/veyron2/verror.NoServersAndAuth", RetryRefetch, "{1:}{2:} Has no usable servers and is either not trusted or access was denied{:_}")
 	// Aborted means that an operation was not completed because it was aborted by
 	// the receiver.  A more specific error should be used if it would help the
 	// caller decide how to proceed.
-	Aborted = Register("v.io/core/veyron2/verror.Aborted", NoRetry, "{1:}{2:} Aborted{:_}")
+	ErrAborted = Register("v.io/core/veyron2/verror.Aborted", NoRetry, "{1:}{2:} Aborted{:_}")
 	// BadProtocol means that an operation was not completed because of a protocol
 	// or codec error.
-	BadProtocol = Register("v.io/core/veyron2/verror.BadProtocol", NoRetry, "{1:}{2:} Bad protocol or type{:_}")
+	ErrBadProtocol = Register("v.io/core/veyron2/verror.BadProtocol", NoRetry, "{1:}{2:} Bad protocol or type{:_}")
 	// Canceled means that an operation was not completed because it was
 	// explicitly cancelled by the caller.
-	Canceled = Register("v.io/core/veyron2/verror.Canceled", NoRetry, "{1:}{2:} Canceled{:_}")
+	ErrCanceled = Register("v.io/core/veyron2/verror.Canceled", NoRetry, "{1:}{2:} Canceled{:_}")
 	// Timeout means that an operation was not completed before the time deadline
 	// for the operation.
-	Timeout = Register("v.io/core/veyron2/verror.Timeout", NoRetry, "{1:}{2:} Timeout{:_}")
+	ErrTimeout = Register("v.io/core/veyron2/verror.Timeout", NoRetry, "{1:}{2:} Timeout{:_}")
 )
 
 func init() {
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(Unknown.ID), "{1:}{2:} Error{:_}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(Internal.ID), "{1:}{2:} Internal error{:_}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(NotImplemented.ID), "{1:}{2:} Not implemented{:_}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(EOF.ID), "{1:}{2:} EOF{:_}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(BadArg.ID), "{1:}{2:} Bad argument{:_}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(BadState.ID), "{1:}{2:} Invalid state{:_}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(Exist.ID), "{1:}{2:} Already exists{:_}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(NoExist.ID), "{1:}{2:} Does not exist{:_}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(NoExistOrNoAccess.ID), "{1:}{2:} Does not exist or access denied{:_}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(NoServers.ID), "{1:}{2:} No usable servers found{:_}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(NoAccess.ID), "{1:}{2:} Access denied{:_}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(NotTrusted.ID), "{1:}{2:} Client does not trust server{:_}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(NoServersAndAuth.ID), "{1:}{2:} Has no usable servers and is either not trusted or access was denied{:_}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(Aborted.ID), "{1:}{2:} Aborted{:_}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(BadProtocol.ID), "{1:}{2:} Bad protocol or type{:_}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(Canceled.ID), "{1:}{2:} Canceled{:_}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(Timeout.ID), "{1:}{2:} Timeout{:_}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnknown.ID), "{1:}{2:} Error{:_}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrInternal.ID), "{1:}{2:} Internal error{:_}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNotImplemented.ID), "{1:}{2:} Not implemented{:_}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrEOF.ID), "{1:}{2:} EOF{:_}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBadArg.ID), "{1:}{2:} Bad argument{:_}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBadState.ID), "{1:}{2:} Invalid state{:_}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrExist.ID), "{1:}{2:} Already exists{:_}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoExist.ID), "{1:}{2:} Does not exist{:_}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoExistOrNoAccess.ID), "{1:}{2:} Does not exist or access denied{:_}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoServers.ID), "{1:}{2:} No usable servers found{:_}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoAccess.ID), "{1:}{2:} Access denied{:_}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNotTrusted.ID), "{1:}{2:} Client does not trust server{:_}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoServersAndAuth.ID), "{1:}{2:} Has no usable servers and is either not trusted or access was denied{:_}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrAborted.ID), "{1:}{2:} Aborted{:_}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBadProtocol.ID), "{1:}{2:} Bad protocol or type{:_}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrCanceled.ID), "{1:}{2:} Canceled{:_}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrTimeout.ID), "{1:}{2:} Timeout{:_}")
 }
 
-// NewUnknown returns an error with the Unknown ID.
-func NewUnknown(ctx *context.T) error {
-	return New(Unknown, ctx)
+// NewErrUnknown returns an error with the ErrUnknown ID.
+func NewErrUnknown(ctx *context.T) error {
+	return New(ErrUnknown, ctx)
 }
 
-// NewInternal returns an error with the Internal ID.
-func NewInternal(ctx *context.T) error {
-	return New(Internal, ctx)
+// NewErrInternal returns an error with the ErrInternal ID.
+func NewErrInternal(ctx *context.T) error {
+	return New(ErrInternal, ctx)
 }
 
-// NewNotImplemented returns an error with the NotImplemented ID.
-func NewNotImplemented(ctx *context.T) error {
-	return New(NotImplemented, ctx)
+// NewErrNotImplemented returns an error with the ErrNotImplemented ID.
+func NewErrNotImplemented(ctx *context.T) error {
+	return New(ErrNotImplemented, ctx)
 }
 
-// NewEOF returns an error with the EOF ID.
-func NewEOF(ctx *context.T) error {
-	return New(EOF, ctx)
+// NewErrEOF returns an error with the ErrEOF ID.
+func NewErrEOF(ctx *context.T) error {
+	return New(ErrEOF, ctx)
 }
 
-// NewBadArg returns an error with the BadArg ID.
-func NewBadArg(ctx *context.T) error {
-	return New(BadArg, ctx)
+// NewErrBadArg returns an error with the ErrBadArg ID.
+func NewErrBadArg(ctx *context.T) error {
+	return New(ErrBadArg, ctx)
 }
 
-// NewBadState returns an error with the BadState ID.
-func NewBadState(ctx *context.T) error {
-	return New(BadState, ctx)
+// NewErrBadState returns an error with the ErrBadState ID.
+func NewErrBadState(ctx *context.T) error {
+	return New(ErrBadState, ctx)
 }
 
-// NewExist returns an error with the Exist ID.
-func NewExist(ctx *context.T) error {
-	return New(Exist, ctx)
+// NewErrExist returns an error with the ErrExist ID.
+func NewErrExist(ctx *context.T) error {
+	return New(ErrExist, ctx)
 }
 
-// NewNoExist returns an error with the NoExist ID.
-func NewNoExist(ctx *context.T) error {
-	return New(NoExist, ctx)
+// NewErrNoExist returns an error with the ErrNoExist ID.
+func NewErrNoExist(ctx *context.T) error {
+	return New(ErrNoExist, ctx)
 }
 
-// NewNoExistOrNoAccess returns an error with the NoExistOrNoAccess ID.
-func NewNoExistOrNoAccess(ctx *context.T) error {
-	return New(NoExistOrNoAccess, ctx)
+// NewErrNoExistOrNoAccess returns an error with the ErrNoExistOrNoAccess ID.
+func NewErrNoExistOrNoAccess(ctx *context.T) error {
+	return New(ErrNoExistOrNoAccess, ctx)
 }
 
-// NewNoServers returns an error with the NoServers ID.
-func NewNoServers(ctx *context.T) error {
-	return New(NoServers, ctx)
+// NewErrNoServers returns an error with the ErrNoServers ID.
+func NewErrNoServers(ctx *context.T) error {
+	return New(ErrNoServers, ctx)
 }
 
-// NewNoAccess returns an error with the NoAccess ID.
-func NewNoAccess(ctx *context.T) error {
-	return New(NoAccess, ctx)
+// NewErrNoAccess returns an error with the ErrNoAccess ID.
+func NewErrNoAccess(ctx *context.T) error {
+	return New(ErrNoAccess, ctx)
 }
 
-// NewNotTrusted returns an error with the NotTrusted ID.
-func NewNotTrusted(ctx *context.T) error {
-	return New(NotTrusted, ctx)
+// NewErrNotTrusted returns an error with the ErrNotTrusted ID.
+func NewErrNotTrusted(ctx *context.T) error {
+	return New(ErrNotTrusted, ctx)
 }
 
-// NewNoServersAndAuth returns an error with the NoServersAndAuth ID.
-func NewNoServersAndAuth(ctx *context.T) error {
-	return New(NoServersAndAuth, ctx)
+// NewErrNoServersAndAuth returns an error with the ErrNoServersAndAuth ID.
+func NewErrNoServersAndAuth(ctx *context.T) error {
+	return New(ErrNoServersAndAuth, ctx)
 }
 
-// NewAborted returns an error with the Aborted ID.
-func NewAborted(ctx *context.T) error {
-	return New(Aborted, ctx)
+// NewErrAborted returns an error with the ErrAborted ID.
+func NewErrAborted(ctx *context.T) error {
+	return New(ErrAborted, ctx)
 }
 
-// NewBadProtocol returns an error with the BadProtocol ID.
-func NewBadProtocol(ctx *context.T) error {
-	return New(BadProtocol, ctx)
+// NewErrBadProtocol returns an error with the ErrBadProtocol ID.
+func NewErrBadProtocol(ctx *context.T) error {
+	return New(ErrBadProtocol, ctx)
 }
 
-// NewCanceled returns an error with the Canceled ID.
-func NewCanceled(ctx *context.T) error {
-	return New(Canceled, ctx)
+// NewErrCanceled returns an error with the ErrCanceled ID.
+func NewErrCanceled(ctx *context.T) error {
+	return New(ErrCanceled, ctx)
 }
 
-// NewTimeout returns an error with the Timeout ID.
-func NewTimeout(ctx *context.T) error {
-	return New(Timeout, ctx)
+// NewErrTimeout returns an error with the ErrTimeout ID.
+func NewErrTimeout(ctx *context.T) error {
+	return New(ErrTimeout, ctx)
 }

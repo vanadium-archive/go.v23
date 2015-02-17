@@ -292,7 +292,7 @@ func newReflectInfo(obj interface{}) (*reflectInfo, error) {
 	// provided by the user, there's no guarantee it's "correct", but if the same
 	// method is described by multiple interfaces, we check the tags are the same.
 	desc := describe(obj)
-	if verr := attachMethodTags(methodInfos, desc); verror.Is(verr, verror.Aborted.ID) {
+	if verr := attachMethodTags(methodInfos, desc); verror.Is(verr, verror.ErrAborted.ID) {
 		return nil, fmt.Errorf("ipc: type %v tag error: %v", rt, verr)
 	}
 	// Finally create the signature.  This combines the desc provided by the user
@@ -328,7 +328,7 @@ func makeMethods(rt reflect.Type) (map[string]methodInfo, map[string]signature.M
 		// Silently skip incompatible methods, except for Aborted errors.
 		var sig signature.Method
 		if verr := typeCheckMethod(method, &sig); verr != nil {
-			if verror.Is(verr, verror.Aborted.ID) {
+			if verror.Is(verr, verror.ErrAborted.ID) {
 				return nil, nil, fmt.Errorf("ipc: %s.%s: %v", rt.String(), method.Name, verr)
 			}
 			continue
@@ -357,7 +357,7 @@ func makeMethodInfo(method reflect.Method) methodInfo {
 }
 
 func abortedf(format string, v ...interface{}) error {
-	return verror.New(verror.Aborted, nil, fmt.Sprintf(format, v...))
+	return verror.New(verror.ErrAborted, nil, fmt.Sprintf(format, v...))
 }
 
 var (
@@ -373,9 +373,9 @@ var (
 
 	// ReflectInvoker will panic iff the error is Aborted, otherwise it will
 	// silently ignore the error.
-	ErrReservedMethod    = verror.New(verror.Internal, nil, "Reserved method")
-	ErrMethodNotExported = verror.New(verror.BadArg, nil, "Method not exported")
-	ErrNonRPCMethod      = verror.New(verror.BadArg, nil, "Non-rpc method.  We require at least 1 in-arg."+useContext)
+	ErrReservedMethod    = verror.New(verror.ErrInternal, nil, "Reserved method")
+	ErrMethodNotExported = verror.New(verror.ErrBadArg, nil, "Method not exported")
+	ErrNonRPCMethod      = verror.New(verror.ErrBadArg, nil, "Non-rpc method.  We require at least 1 in-arg."+useContext)
 	ErrInServerCall      = abortedf("Context arg ipc.ServerCall is invalid; cannot determine streaming types." + forgotWrap)
 	ErrBadDescribe       = abortedf("Describe__ must have signature Describe__() []ipc.InterfaceDesc")
 	ErrBadGlobber        = abortedf("Globber must have signature Globber() *ipc.GlobState")

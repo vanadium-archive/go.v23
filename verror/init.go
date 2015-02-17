@@ -30,7 +30,7 @@ func errorFromWire(wire vdl.WireError) (error, error) {
 // errorToWire converts from the standard go error interface to verror.Standard,
 // and then to vdl.WireError.
 func errorToWire(native error) (vdl.WireError, error) {
-	e := ExplicitConvert(Unknown, "", "", "", native)
+	e := ExplicitConvert(ErrUnknown, "", "", "", native)
 	wire := vdl.WireError{
 		IDAction: vdl.IDAction{
 			ID:     string(ErrorID(e)),

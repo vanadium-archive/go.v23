@@ -126,13 +126,13 @@ func init() {
 	// Set English and French messages for Unknown and NoExist
 	// to ones the test can predict.
 	// Delete any German messages that may be present.
-	cat.Set(en, i18n.MsgID(verror.Unknown.ID), "{1} {2} unknown error {_}")
-	cat.Set(fr, i18n.MsgID(verror.Unknown.ID), "{1} {2} erreur inconnu {_}")
-	cat.Set(de, i18n.MsgID(verror.Unknown.ID), "")
+	cat.Set(en, i18n.MsgID(verror.ErrUnknown.ID), "{1} {2} unknown error {_}")
+	cat.Set(fr, i18n.MsgID(verror.ErrUnknown.ID), "{1} {2} erreur inconnu {_}")
+	cat.Set(de, i18n.MsgID(verror.ErrUnknown.ID), "")
 
-	cat.Set(en, i18n.MsgID(verror.NoExist.ID), "{1} {2} not found {_}")
-	cat.Set(fr, i18n.MsgID(verror.NoExist.ID), "{1} {2} pas trouvé {_}")
-	cat.Set(de, i18n.MsgID(verror.NoExist.ID), "")
+	cat.Set(en, i18n.MsgID(verror.ErrNoExist.ID), "{1} {2} not found {_}")
+	cat.Set(fr, i18n.MsgID(verror.ErrNoExist.ID), "{1} {2} pas trouvé {_}")
+	cat.Set(de, i18n.MsgID(verror.ErrNoExist.ID), "")
 
 	// Set up a context that advertises French, on a server called FooServer,
 	// running an operation called aFR0.
@@ -157,33 +157,33 @@ func init() {
 	bDE1 = verror.ExplicitNew(idActionB, de, "server", "bDE1", 1, 2)
 
 	// The Unknown error in various languages.
-	uEN0 = verror.ExplicitNew(verror.Unknown, en, "server", "uEN0", 0)
-	uEN1 = verror.ExplicitNew(verror.Unknown, en, "server", "uEN1", 1, 2)
-	uFR0 = verror.ExplicitNew(verror.Unknown, fr, "server", "uFR0", 0)
-	uFR1 = verror.ExplicitNew(verror.Unknown, fr, "server", "uFR1", 1, 2)
-	uDE0 = verror.ExplicitNew(verror.Unknown, de, "server", "uDE0", 0)
-	uDE1 = verror.ExplicitNew(verror.Unknown, de, "server", "uDE1", 1, 2)
+	uEN0 = verror.ExplicitNew(verror.ErrUnknown, en, "server", "uEN0", 0)
+	uEN1 = verror.ExplicitNew(verror.ErrUnknown, en, "server", "uEN1", 1, 2)
+	uFR0 = verror.ExplicitNew(verror.ErrUnknown, fr, "server", "uFR0", 0)
+	uFR1 = verror.ExplicitNew(verror.ErrUnknown, fr, "server", "uFR1", 1, 2)
+	uDE0 = verror.ExplicitNew(verror.ErrUnknown, de, "server", "uDE0", 0)
+	uDE1 = verror.ExplicitNew(verror.ErrUnknown, de, "server", "uDE1", 1, 2)
 
 	// The NoExist error in various languages.
-	nEN0 = verror.ExplicitNew(verror.NoExist, en, "server", "nEN0", 0)
-	nEN1 = verror.ExplicitNew(verror.NoExist, en, "server", "nEN1", 1, 2)
-	nFR0 = verror.ExplicitNew(verror.NoExist, fr, "server", "nFR0", 0)
-	nFR1 = verror.ExplicitNew(verror.NoExist, fr, "server", "nFR1", 1, 2)
-	nDE0 = verror.ExplicitNew(verror.NoExist, de, "server", "nDE0", 0)
-	nDE1 = verror.ExplicitNew(verror.NoExist, de, "server", "nDE1", 1, 2)
+	nEN0 = verror.ExplicitNew(verror.ErrNoExist, en, "server", "nEN0", 0)
+	nEN1 = verror.ExplicitNew(verror.ErrNoExist, en, "server", "nEN1", 1, 2)
+	nFR0 = verror.ExplicitNew(verror.ErrNoExist, fr, "server", "nFR0", 0)
+	nFR1 = verror.ExplicitNew(verror.ErrNoExist, fr, "server", "nFR1", 1, 2)
+	nDE0 = verror.ExplicitNew(verror.ErrNoExist, de, "server", "nDE0", 0)
+	nDE1 = verror.ExplicitNew(verror.ErrNoExist, de, "server", "nDE1", 1, 2)
 
 	// Errors derived from Go errors.
 	gerr := errors.New("Go error")
-	gEN = verror.ExplicitConvert(verror.Unknown, en, "server", "op", gerr)
-	gFR = verror.ExplicitConvert(verror.Unknown, fr, "server", "op", gerr)
-	gDE = verror.ExplicitConvert(verror.Unknown, de, "server", "op", gerr)
+	gEN = verror.ExplicitConvert(verror.ErrUnknown, en, "server", "op", gerr)
+	gFR = verror.ExplicitConvert(verror.ErrUnknown, fr, "server", "op", gerr)
+	gDE = verror.ExplicitConvert(verror.ErrUnknown, de, "server", "op", gerr)
 
 	// Errors derived from other verror errors.
 	// eEN1 has an English message.
-	v2EN = verror.ExplicitConvert(verror.Unknown, en, "", "", aEN1)        // still in English.
-	v2FR0 = verror.ExplicitConvert(verror.Unknown, fr, "", "", aEN1)       // converted to French, with original server and op.
-	v2FR1 = verror.Convert(verror.Unknown, ctx, aEN1)                      // converted to French, but still with param[1]==aEN1.
-	v2DE = verror.ExplicitConvert(verror.Unknown, de, "other", "op", aEN1) // left as English, since we lack German.
+	v2EN = verror.ExplicitConvert(verror.ErrUnknown, en, "", "", aEN1)        // still in English.
+	v2FR0 = verror.ExplicitConvert(verror.ErrUnknown, fr, "", "", aEN1)       // converted to French, with original server and op.
+	v2FR1 = verror.Convert(verror.ErrUnknown, ctx, aEN1)                      // converted to French, but still with param[1]==aEN1.
+	v2DE = verror.ExplicitConvert(verror.ErrUnknown, de, "other", "op", aEN1) // left as English, since we lack German.
 }
 
 func TestDefaultValues(t *testing.T) {
@@ -204,14 +204,14 @@ func TestDefaultValues(t *testing.T) {
 	if !verror.Is(nil, verror.IDAction{}.ID) {
 		t.Errorf("is test failed")
 	}
-	if verror.Is(nil, verror.BadArg.ID) {
+	if verror.Is(nil, verror.ErrBadArg.ID) {
 		t.Errorf("is test succeeded")
 	}
-	if verror.Is(nil, verror.Unknown.ID) {
+	if verror.Is(nil, verror.ErrUnknown.ID) {
 		t.Errorf("is test succeeded")
 	}
 
-	if verror.Is(verror.ExplicitNew(verror.Unknown, i18n.NoLangID, "", ""), verror.IDAction{}.ID) {
+	if verror.Is(verror.ExplicitNew(verror.ErrUnknown, i18n.NoLangID, "", ""), verror.IDAction{}.ID) {
 		t.Errorf("is test succeeded")
 	}
 
@@ -223,10 +223,10 @@ func TestDefaultValues(t *testing.T) {
 	if !verror.Equal(nil, verror.ExplicitNew(verror.IDAction{}, i18n.NoLangID, "", "")) {
 		t.Errorf("equality test failed")
 	}
-	if verror.Equal(nil, verror.ExplicitNew(verror.Unknown, i18n.NoLangID, "", "")) {
+	if verror.Equal(nil, verror.ExplicitNew(verror.ErrUnknown, i18n.NoLangID, "", "")) {
 		t.Errorf("equality test succeeded")
 	}
-	if verror.Equal(nil, verror.ExplicitNew(verror.BadArg, i18n.NoLangID, "", "")) {
+	if verror.Equal(nil, verror.ExplicitNew(verror.ErrBadArg, i18n.NoLangID, "", "")) {
 		t.Errorf("equality test succeeded")
 	}
 
@@ -256,16 +256,16 @@ func TestBasic(t *testing.T) {
 		{bDE0, idActionB, "B: server bDE0 0"},
 		{bDE1, idActionB, "B: server bDE1 1 2"},
 
-		{nEN0, verror.NoExist, "server nEN0 not found 0"},
-		{nEN1, verror.NoExist, "server nEN1 not found 1 2"},
-		{nFR0, verror.NoExist, "server nFR0 pas trouvé 0"},
-		{nFR1, verror.NoExist, "server nFR1 pas trouvé 1 2"},
-		{nDE0, verror.NoExist, "v.io/core/veyron2/verror.NoExist: server nDE0 0"},
-		{nDE1, verror.NoExist, "v.io/core/veyron2/verror.NoExist: server nDE1 1 2"},
+		{nEN0, verror.ErrNoExist, "server nEN0 not found 0"},
+		{nEN1, verror.ErrNoExist, "server nEN1 not found 1 2"},
+		{nFR0, verror.ErrNoExist, "server nFR0 pas trouvé 0"},
+		{nFR1, verror.ErrNoExist, "server nFR1 pas trouvé 1 2"},
+		{nDE0, verror.ErrNoExist, "v.io/core/veyron2/verror.NoExist: server nDE0 0"},
+		{nDE1, verror.ErrNoExist, "v.io/core/veyron2/verror.NoExist: server nDE1 1 2"},
 
-		{gEN, verror.Unknown, "server op unknown error Go error"},
-		{gFR, verror.Unknown, "server op erreur inconnu Go error"},
-		{gDE, verror.Unknown, "v.io/core/veyron2/verror.Unknown: server op Go error"},
+		{gEN, verror.ErrUnknown, "server op unknown error Go error"},
+		{gFR, verror.ErrUnknown, "server op erreur inconnu Go error"},
+		{gDE, verror.ErrUnknown, "v.io/core/veyron2/verror.Unknown: server op Go error"},
 
 		{v2EN, idActionA, "server aEN1 error A 1 2"},
 		{v2FR0, idActionA, "server aEN1 erreur A 1 2"},
@@ -358,7 +358,7 @@ func TestRetryActionFromString(t *testing.T) {
 		{"RetryConnection", verror.RetryConnection, ""},
 		{"RetryRefetch", verror.RetryRefetch, ""},
 		{"RetryBackoff", verror.RetryBackoff, ""},
-		{"foobar", 0, verror.BadArg.ID},
+		{"foobar", 0, verror.ErrBadArg.ID},
 	}
 	for _, test := range tests {
 		action, err := verror.RetryActionFromString(test.Label)

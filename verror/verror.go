@@ -128,7 +128,7 @@ func RetryActionFromString(label string) (ActionCode, error) {
 	case "RetryBackoff":
 		return RetryBackoff, nil
 	}
-	return ActionCode(0), New(BadArg, nil, label)
+	return ActionCode(0), New(ErrBadArg, nil, label)
 }
 
 // An IDAction combines a unique identifier ID for errors with an ActionCode.
@@ -210,7 +210,7 @@ func ErrorID(err error) ID {
 	if e, ok := assertStandard(err); ok {
 		return e.IDAction.ID
 	}
-	return Unknown.ID
+	return ErrUnknown.ID
 }
 
 // Action returns the action of the given err, or NoRetry if the err has no Action.
@@ -298,7 +298,7 @@ func makeInternal(idAction IDAction, langID i18n.LangID, componentName string, o
 	if langID != i18n.NoLangID {
 		id := idAction.ID
 		if id == "" {
-			id = Unknown.ID
+			id = ErrUnknown.ID
 		}
 		msg = i18n.Cat().Format(langID, i18n.MsgID(id), params...)
 	}
@@ -373,7 +373,7 @@ func convertInternal(idAction IDAction, langID i18n.LangID, componentName string
 		if langID != i18n.NoLangID {
 			id := e.IDAction.ID
 			if id == "" {
-				id = Unknown.ID
+				id = ErrUnknown.ID
 			}
 			formatStr = i18n.Cat().Lookup(langID, i18n.MsgID(id))
 		}
@@ -494,7 +494,7 @@ func dataFromContext(ctx *context.T) (langID i18n.LangID, componentName string, 
 func (e Standard) Error() string {
 	msg := e.Msg
 	if isDefaultIDAction(e.IDAction) && msg == "" {
-		msg = i18n.Cat().Format(i18n.NoLangID, i18n.MsgID(Unknown.ID), e.ParamList...)
+		msg = i18n.Cat().Format(i18n.NoLangID, i18n.MsgID(ErrUnknown.ID), e.ParamList...)
 	} else if msg == "" {
 		msg = i18n.Cat().Format(i18n.NoLangID, i18n.MsgID(e.IDAction.ID), e.ParamList...)
 	}

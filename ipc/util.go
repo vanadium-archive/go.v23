@@ -43,15 +43,15 @@ var (
 
 // NewErrUnknownMethod returns an unknown method error.
 func NewErrUnknownMethod(ctx *context.T, method string) error {
-	return verror.New(verror.NoExist, ctx, verror.New(unknownMethod, ctx, method))
+	return verror.New(verror.ErrNoExist, ctx, verror.New(unknownMethod, ctx, method))
 }
 
 // NewErrUnknownSuffix returns an unknown suffix error.
 func NewErrUnknownSuffix(ctx *context.T, suffix string) error {
-	return verror.New(verror.NoExist, ctx, verror.New(unknownSuffix, ctx, suffix))
+	return verror.New(verror.ErrNoExist, ctx, verror.New(unknownSuffix, ctx, suffix))
 }
 
 // NewErrGlobNotImplemented returns a glob not implemented error.
 func NewErrGlobNotImplemented(ctx *context.T, suffix string) error {
-	return verror.New(verror.NoExist, ctx, verror.New(globNotImplemented, ctx, suffix))
+	return verror.New(verror.ErrNoExist, ctx, verror.New(globNotImplemented, ctx, suffix))
 }
