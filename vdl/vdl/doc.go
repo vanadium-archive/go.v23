@@ -70,7 +70,7 @@ The vdl generate flags are:
    before the package path, and dst is the replacement for src.  Use commas to
    separate multiple rules; the first rule matching src is used.  The special
    dst SKIP indicates matching packages are skipped.
- -java_out_dir=release/go/src/v.io/core/veyron2/vdl/vdlroot/src->SKIP,go/src->java/src/vdl/java
+ -java_out_dir=go/src->java/src/vdl/java
    Same semantics as --go_out_dir but applies to java code generation.
  -java_out_pkg=v.io->io/v
    Java output package translation rules.  Must be of the form:
@@ -140,7 +140,7 @@ The vdl audit flags are:
    before the package path, and dst is the replacement for src.  Use commas to
    separate multiple rules; the first rule matching src is used.  The special
    dst SKIP indicates matching packages are skipped.
- -java_out_dir=release/go/src/v.io/core/veyron2/vdl/vdlroot/src->SKIP,go/src->java/src/vdl/java
+ -java_out_dir=go/src->java/src/vdl/java
    Same semantics as --go_out_dir but applies to java code generation.
  -java_out_pkg=v.io->io/v
    Java output package translation rules.  Must be of the form:

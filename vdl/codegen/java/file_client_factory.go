@@ -41,8 +41,8 @@ func genJavaClientFactoryFile(iface *compile.Interface, env *compile.Env) JavaFi
 		AccessModifier: accessModifierForName(iface.Name),
 		Sources:        iface.File.BaseName,
 		ServiceName:    javaServiceName,
-		PackagePath:    javaPath(javaGenPkgPath(iface.File.Package.Path)),
-		StubName:       javaPath(javaGenPkgPath(path.Join(iface.File.Package.Path, iface.Name+"ClientStub"))),
+		PackagePath:    javaPath(javaGenPkgPath(iface.File.Package.GenPath)),
+		StubName:       javaPath(javaGenPkgPath(path.Join(iface.File.Package.GenPath, iface.Name+"ClientStub"))),
 	}
 	var buf bytes.Buffer
 	err := parseTmpl("client factory", clientFactoryTmpl).Execute(&buf, data)

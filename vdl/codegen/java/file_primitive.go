@@ -94,7 +94,7 @@ func genJavaPrimitiveFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo 
 		AccessModifier:           accessModifierForName(tdef.Name),
 		Doc:                      javaDocInComment(tdef.Doc),
 		Name:                     javaTypeName,
-		PackagePath:              javaPath(javaGenPkgPath(tdef.File.Package.Path)),
+		PackagePath:              javaPath(javaGenPkgPath(tdef.File.Package.GenPath)),
 		Source:                   tdef.File.BaseName,
 		ConstructorType:          javaConstructorType(tdef.Type),
 		TypeAdapterDelegateClass: javaTypeAdapterDelegateClass(tdef.Type),

@@ -82,7 +82,7 @@ func genJavaUnionFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo {
 		Doc:            javaDocInComment(tdef.Doc),
 		Fields:         fields,
 		Name:           javaTypeName,
-		PackagePath:    javaPath(javaGenPkgPath(tdef.File.Package.Path)),
+		PackagePath:    javaPath(javaGenPkgPath(tdef.File.Package.GenPath)),
 		Source:         tdef.File.BaseName,
 		VdlTypeName:    tdef.Type.Name(),
 		VdlTypeString:  tdef.Type.String(),

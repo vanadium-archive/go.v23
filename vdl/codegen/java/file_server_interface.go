@@ -84,11 +84,11 @@ func genJavaServerInterfaceFile(iface *compile.Interface, env *compile.Env) Java
 		AccessModifier:    accessModifierForName(iface.Name),
 		Extends:           javaServerExtendsStr(iface.Embeds),
 		Methods:           methods,
-		PackagePath:       javaPath(javaGenPkgPath(iface.File.Package.Path)),
+		PackagePath:       javaPath(javaGenPkgPath(iface.File.Package.GenPath)),
 		ServerDoc:         javaDoc(iface.Doc),
 		ServiceName:       javaServiceName,
-		ServerVDLPath:     path.Join(iface.File.Package.Path, iface.Name+"ServerMethods"),
-		ServerWrapperPath: javaPath(javaGenPkgPath(path.Join(iface.File.Package.Path, javaServiceName+"ServerWrapper"))),
+		ServerVDLPath:     path.Join(iface.File.Package.GenPath, iface.Name+"ServerMethods"),
+		ServerWrapperPath: javaPath(javaGenPkgPath(path.Join(iface.File.Package.GenPath, javaServiceName+"ServerWrapper"))),
 		Source:            iface.File.BaseName,
 	}
 	var buf bytes.Buffer

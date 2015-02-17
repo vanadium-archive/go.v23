@@ -16,7 +16,7 @@ func javaFullyQualifiedNamedType(def *compile.TypeDef, forceClass bool, env *com
 		name, _ := javaBuiltInType(def.Type, forceClass)
 		return name
 	}
-	return javaPath(path.Join(javaGenPkgPath(def.File.Package.Path), toUpperCamelCase(def.Name)))
+	return javaPath(path.Join(javaGenPkgPath(def.File.Package.GenPath), toUpperCamelCase(def.Name)))
 }
 
 // javaReflectType returns java.reflect.Type string for provided VDL type.

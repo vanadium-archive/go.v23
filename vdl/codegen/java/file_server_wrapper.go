@@ -160,7 +160,7 @@ func genJavaServerWrapperFile(iface *compile.Interface, env *compile.Env) JavaFi
 	embeds := []serverWrapperEmbed{}
 	for _, embed := range allEmbeddedIfaces(iface) {
 		embeds = append(embeds, serverWrapperEmbed{
-			WrapperClassName:    javaPath(javaGenPkgPath(path.Join(embed.File.Package.Path, toUpperCamelCase(embed.Name+"ServerWrapper")))),
+			WrapperClassName:    javaPath(javaGenPkgPath(path.Join(embed.File.Package.GenPath, toUpperCamelCase(embed.Name+"ServerWrapper")))),
 			LocalWrapperVarName: vdlutil.ToCamelCase(embed.Name) + "Wrapper",
 		})
 	}
@@ -202,7 +202,7 @@ func genJavaServerWrapperFile(iface *compile.Interface, env *compile.Env) JavaFi
 		FullServiceName: javaPath(interfaceFullyQualifiedName(iface)),
 		Methods:         methods,
 		MethodTags:      methodTags,
-		PackagePath:     javaPath(javaGenPkgPath(iface.File.Package.Path)),
+		PackagePath:     javaPath(javaGenPkgPath(iface.File.Package.GenPath)),
 		ServiceName:     javaServiceName,
 		Source:          iface.File.BaseName,
 	}
