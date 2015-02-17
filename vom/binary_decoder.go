@@ -3,6 +3,7 @@ package vom
 import (
 	"errors"
 	"fmt"
+	"reflect"
 
 	"v.io/core/veyron2/vdl"
 )
@@ -73,35 +74,35 @@ func (d *binaryDecoder) decodeValueType() (*vdl.Type, error) {
 		case id == 0:
 			return nil, errDecodeZeroTypeID
 		case id > 0:
-			// This is a value message, the TypeID is +id.
-			tid := TypeID(+id)
+			// This is a value message, the typeID is +id.
+			tid := typeID(+id)
 			tt, err := d.recvTypes.LookupOrBuildType(tid)
 			if err != nil {
 				return nil, err
 			}
 			return tt, nil
 		}
-		// This is a type message, the TypeID is -id.
-		tid := TypeID(-id)
-		// Decode the WireType like a regular value, and store it in recvTypes.  The
+		// This is a type message, the typeID is -id.
+		tid := typeID(-id)
+		// Decode the wireType like a regular value, and store it in recvTypes.  The
 		// type will actually be built when a value message arrives using this tid.
-		wireType := vdl.ZeroValue(vdl.AnyType)
-		target, err := vdl.ValueTarget(wireType)
+		var wt wireType
+		target, err := vdl.ReflectTarget(reflect.ValueOf(&wt))
 		if err != nil {
 			return nil, err
 		}
-		if err := d.decodeValueMsg(vdl.AnyType, target); err != nil {
+		if err := d.decodeValueMsg(wireTypeType, target); err != nil {
 			return nil, err
 		}
-		if err := d.recvTypes.AddWireType(tid, wireType.Elem()); err != nil {
+		if err := d.recvTypes.AddWireType(tid, wt); err != nil {
 			return nil, err
 		}
 	}
 }
 
 // decodeValueByteLen returns the byte length of the next value.
-func (d *binaryDecoder) decodeValueByteLen(t *vdl.Type) (int, error) {
-	if hasBinaryMsgLen(t) {
+func (d *binaryDecoder) decodeValueByteLen(tt *vdl.Type) (int, error) {
+	if hasBinaryMsgLen(tt) {
 		// Use the explicit message length.
 		msgLen, err := binaryDecodeLen(d.buf)
 		if err != nil {
@@ -111,13 +112,13 @@ func (d *binaryDecoder) decodeValueByteLen(t *vdl.Type) (int, error) {
 	}
 	// No explicit message length, but the length can be computed.
 	switch {
-	case t.Kind() == vdl.Byte:
+	case tt.Kind() == vdl.Byte:
 		// Single byte is always encoded as 1 byte.
 		return 1, nil
-	case t.Kind() == vdl.Array && t.IsBytes():
-		// Byte arrays are exactly their length.
-		return t.Len(), nil
-	case t.Kind() == vdl.String || t.IsBytes():
+	case tt.Kind() == vdl.Array && tt.IsBytes():
+		// Byte arrays are exactly their length and encoded with 1-byte header.
+		return tt.Len() + 1, nil
+	case tt.Kind() == vdl.String || tt.IsBytes():
 		// Strings and byte lists are encoded with a length header.
 		strlen, bytelen, err := binaryPeekUint(d.buf)
 		switch {
@@ -135,15 +136,15 @@ func (d *binaryDecoder) decodeValueByteLen(t *vdl.Type) (int, error) {
 
 // decodeValueMsg decodes the rest of the message assuming type t, handling the
 // optional message length.
-func (d *binaryDecoder) decodeValueMsg(t *vdl.Type, target vdl.Target) error {
-	if hasBinaryMsgLen(t) {
+func (d *binaryDecoder) decodeValueMsg(tt *vdl.Type, target vdl.Target) error {
+	if hasBinaryMsgLen(tt) {
 		msgLen, err := binaryDecodeLen(d.buf)
 		if err != nil {
 			return err
 		}
 		d.buf.SetLimit(msgLen)
 	}
-	err := d.decodeValue(t, target)
+	err := d.decodeValue(tt, target)
 	leftover := d.buf.RemoveLimit()
 	switch {
 	case err != nil:
@@ -158,13 +159,14 @@ func (d *binaryDecoder) decodeValueMsg(t *vdl.Type, target vdl.Target) error {
 func (d *binaryDecoder) decodeValue(tt *vdl.Type, target vdl.Target) error {
 	ttFrom := tt
 	if tt.Kind() == vdl.Optional {
-		switch exists, err := d.buf.ReadByte(); {
+		// If the type is optional, we expect to see either WireCtrlNil or the actual
+		// value, but not both.  And thus, we can just peek for the WireCtrlNil here.
+		switch ctrl, err := binaryPeekControl(d.buf); {
 		case err != nil:
 			return err
-		case exists == 0:
+		case ctrl == WireCtrlNil:
+			d.buf.Skip(1)
 			return target.FromNil(ttFrom)
-		case exists != 1:
-			return fmt.Errorf("vom: optional exists tag got %d, want 0 or 1", exists)
 		}
 		tt = tt.Elem()
 	}
@@ -240,7 +242,7 @@ func (d *binaryDecoder) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		if err != nil {
 			return err
 		}
-		typeobj, err := d.recvTypes.LookupOrBuildType(TypeID(id))
+		typeobj, err := d.recvTypes.LookupOrBuildType(typeID(id))
 		if err != nil {
 			return err
 		}
@@ -331,18 +333,41 @@ func (d *binaryDecoder) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		if err != nil {
 			return err
 		}
-		// Loop through decoding the 1-based field index and corresponding field.
+		// Loop through decoding the 0-based field index and corresponding field.
+		decodedFields := make([]bool, tt.NumField())
 		for {
-			index, err := binaryDecodeUint(d.buf)
+			index, ctrl, err := binaryDecodeUintWithControl(d.buf)
 			switch {
 			case err != nil:
 				return err
-			case index > uint64(tt.NumField()):
-				return errIndexOutOfRange
-			case index == 0:
+			case ctrl == WireCtrlEOF:
+				// Fill not-yet-decoded fields with their zero values.
+				for index, decoded := range decodedFields {
+					if decoded {
+						continue
+					}
+					ttfield := tt.Field(index)
+					switch key, field, err := fieldsTarget.StartField(ttfield.Name); {
+					case err == vdl.ErrFieldNoExist:
+						// Ignore it.
+					case err != nil:
+						return err
+					default:
+						if err := vdl.FromValue(field, vdl.ZeroValue(ttfield.Type)); err != nil {
+							return err
+						}
+						if err := fieldsTarget.FinishField(key, field); err != nil {
+							return err
+						}
+					}
+				}
 				return target.FinishFields(fieldsTarget)
+			case ctrl != 0:
+				return fmt.Errorf("vom: unexpected control byte 0x%x", ctrl)
+			case index >= uint64(tt.NumField()):
+				return errIndexOutOfRange
 			}
-			ttfield := tt.Field(int(index - 1))
+			ttfield := tt.Field(int(index))
 			switch key, field, err := fieldsTarget.StartField(ttfield.Name); {
 			case err == vdl.ErrFieldNoExist:
 				if err := d.ignoreValue(ttfield.Type); err != nil {
@@ -358,6 +383,7 @@ func (d *binaryDecoder) decodeValue(tt *vdl.Type, target vdl.Target) error {
 					return err
 				}
 			}
+			decodedFields[index] = true
 		}
 	case vdl.Union:
 		fieldsTarget, err := target.StartFields(ttFrom)
@@ -368,10 +394,10 @@ func (d *binaryDecoder) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		switch {
 		case err != nil:
 			return err
-		case index == 0 || index > uint64(tt.NumField()):
+		case index >= uint64(tt.NumField()):
 			return errIndexOutOfRange
 		}
-		ttfield := tt.Field(int(index - 1))
+		ttfield := tt.Field(int(index))
 		key, field, err := fieldsTarget.StartField(ttfield.Name)
 		if err != nil {
 			return err
@@ -384,13 +410,15 @@ func (d *binaryDecoder) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		}
 		return target.FinishFields(fieldsTarget)
 	case vdl.Any:
-		switch id, err := binaryDecodeUint(d.buf); {
+		switch id, ctrl, err := binaryDecodeUintWithControl(d.buf); {
 		case err != nil:
 			return err
-		case id == 0:
+		case ctrl == WireCtrlNil:
 			return target.FromNil(vdl.AnyType)
+		case ctrl != 0:
+			return fmt.Errorf("vom: unexpected control byte 0x%x", ctrl)
 		default:
-			elemType, err := d.recvTypes.LookupOrBuildType(TypeID(id))
+			elemType, err := d.recvTypes.LookupOrBuildType(typeID(id))
 			if err != nil {
 				return err
 			}
@@ -403,15 +431,15 @@ func (d *binaryDecoder) decodeValue(tt *vdl.Type, target vdl.Target) error {
 
 // ignoreValue ignores the rest of the value of type t.  This is used to ignore
 // unknown struct fields.
-func (d *binaryDecoder) ignoreValue(t *vdl.Type) error {
-	if t.IsBytes() {
-		len, err := binaryDecodeLenOrArrayLen(d.buf, t)
+func (d *binaryDecoder) ignoreValue(tt *vdl.Type) error {
+	if tt.IsBytes() {
+		len, err := binaryDecodeLenOrArrayLen(d.buf, tt)
 		if err != nil {
 			return err
 		}
 		return d.buf.Skip(len)
 	}
-	switch kind := t.Kind(); kind {
+	switch kind := tt.Kind(); kind {
 	case vdl.Bool, vdl.Byte:
 		return d.buf.Skip(1)
 	case vdl.Uint16, vdl.Uint32, vdl.Uint64, vdl.Int16, vdl.Int32, vdl.Int64, vdl.Float32, vdl.Float64, vdl.Enum, vdl.TypeObject:
@@ -426,54 +454,68 @@ func (d *binaryDecoder) ignoreValue(t *vdl.Type) error {
 	case vdl.String:
 		return binaryIgnoreString(d.buf)
 	case vdl.Array, vdl.List, vdl.Set, vdl.Map:
-		len, err := binaryDecodeLenOrArrayLen(d.buf, t)
+		len, err := binaryDecodeLenOrArrayLen(d.buf, tt)
 		if err != nil {
 			return err
 		}
 		for ix := 0; ix < len; ix++ {
 			if kind == vdl.Set || kind == vdl.Map {
-				if err := d.ignoreValue(t.Key()); err != nil {
+				if err := d.ignoreValue(tt.Key()); err != nil {
 					return err
 				}
 			}
 			if kind == vdl.Array || kind == vdl.List || kind == vdl.Map {
-				if err := d.ignoreValue(t.Elem()); err != nil {
+				if err := d.ignoreValue(tt.Elem()); err != nil {
 					return err
 				}
 			}
 		}
 		return nil
 	case vdl.Struct:
-		// Loop through decoding the 1-based field index and corresponding field.
+		// Loop through decoding the 0-based field index and corresponding field.
 		for {
-			switch index, err := binaryDecodeUint(d.buf); {
+			switch index, ctrl, err := binaryDecodeUintWithControl(d.buf); {
 			case err != nil:
 				return err
-			case index > uint64(t.NumField()):
-				return errIndexOutOfRange
-			case index == 0:
+			case ctrl == WireCtrlEOF:
 				return nil
+			case ctrl != 0:
+				return fmt.Errorf("vom: unexpected control byte 0x%x", ctrl)
+			case index >= uint64(tt.NumField()):
+				return errIndexOutOfRange
 			default:
-				ttfield := t.Field(int(index - 1))
+				ttfield := tt.Field(int(index))
 				if err := d.ignoreValue(ttfield.Type); err != nil {
 					return err
 				}
 			}
 		}
-	case vdl.Any, vdl.Union:
-		switch id, err := binaryDecodeUint(d.buf); {
+	case vdl.Union:
+		switch index, err := binaryDecodeUint(d.buf); {
 		case err != nil:
 			return err
-		case id == 0:
-			return nil
+		case index >= uint64(tt.NumField()):
+			return errIndexOutOfRange
 		default:
-			elemType, err := d.recvTypes.LookupOrBuildType(TypeID(id))
+			ttfield := tt.Field(int(index))
+			return d.ignoreValue(ttfield.Type)
+		}
+	case vdl.Any:
+		switch id, ctrl, err := binaryDecodeUintWithControl(d.buf); {
+		case err != nil:
+			return err
+		case ctrl == WireCtrlNil:
+			return nil
+		case ctrl != 0:
+			return fmt.Errorf("vom: unexpected control byte 0x%x", ctrl)
+		default:
+			elemType, err := d.recvTypes.LookupOrBuildType(typeID(id))
 			if err != nil {
 				return err
 			}
 			return d.ignoreValue(elemType)
 		}
 	default:
-		panic(fmt.Errorf("vom: ignoreValue unhandled type %v", t))
+		panic(fmt.Errorf("vom: ignoreValue unhandled type %v", tt))
 	}
 }

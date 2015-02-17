@@ -21,12 +21,6 @@ const (
 	// start with an ASCII character, or the BOM U+FEFF, and this magic byte is
 	// unambiguous regardless of the endianness of the JSON encoding.
 	binaryMagicByte byte = 0x80
-
-	// Control codes:
-	//   region 1: 0x80...0xBF (64 entries)
-	//   region 2: 0xC0...0xDF (32 entries)
-	//   region 3: 0xE0...0xEF (16 entries)
-	ctrlEOF = 0xef
 )
 
 var (
@@ -55,21 +49,14 @@ func binaryEncodeControl(buf *encbuf, v byte) {
 	buf.WriteByte(v)
 }
 
-func binaryDecodeControl(buf *decbuf) (byte, error) {
-	v, err := binaryPeekControl(buf)
-	if err != nil {
-		return 0, err
-	}
-	return v, buf.Skip(1)
-}
-
+// If the byte is not a control, this will return 0.
 func binaryPeekControl(buf *decbuf) (byte, error) {
 	v, err := buf.PeekByte()
 	if err != nil {
 		return 0, err
 	}
 	if v < 0x80 || v > 0xef {
-		return 0, errInvalid
+		return 0, nil
 	}
 	return v, nil
 }
@@ -349,10 +336,17 @@ func binaryDecodeLen(buf *decbuf) (int, error) {
 }
 
 func binaryDecodeLenOrArrayLen(buf *decbuf, t *vdl.Type) (int, error) {
+	len, err := binaryDecodeLen(buf)
+	if err != nil {
+		return 0, err
+	}
 	if t.Kind() == vdl.Array {
+		if len != 0 {
+			return 0, errInvalid
+		}
 		return t.Len(), nil
 	}
-	return binaryDecodeLen(buf)
+	return len, nil
 }
 
 // Signed integers are encoded as unsigned integers, where the low bit says

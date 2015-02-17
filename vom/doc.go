@@ -67,7 +67,7 @@ either a type or a value.  All values are typed.  Here's the protocol grammar:
   VOM:
     (TypeMsg | ValueMsg)*
   TypeMsg:
-    -typeID len(TypeMsg) encoded_WireType
+    -typeID len(WireType) WireType
   ValueMsg:
     +typeID primitive
   | +typeID len(ValueMsg) CompositeV
@@ -76,7 +76,9 @@ either a type or a value.  All values are typed.  Here's the protocol grammar:
   CompositeV:
     ArrayV | ListV | SetV | MapV | StructV | UnionV | OptionalV | AnyV
   ArrayV:
-    Value*len
+    len Value*len
+    // len is always 0 for array since we know the exact size of the array. This
+    // prefix is to ensure the decoder can distinguish NIL from the array value.
   ListV:
     len Value*len
   SetV:
@@ -84,18 +86,15 @@ either a type or a value.  All values are typed.  Here's the protocol grammar:
   MapV:
     len (Value Value)*len
   StructV:
-    (index Value)* 0  // index is the 1-based field index
+    (index Value)* EOF  // index is the 0-based field index and
+                        // zero value fields can be skipped.
   UnionV:
-    index Value       // index is the 1-based field index
+    index Value         // index is the 0-based field index.
   OptionalV:
-    0 // nil
-  | 1 Value
-    // The 1 prefix before the value is to ensure the decoder can work
-    // correctly; otherwise it wouldn't know what type to decode into.  This
-    // will will be fixed with the new protocol below, which has a special
-    // NIL_VALUE flag that's disjoint from all valid values.
+    NIL
+  | Value
   AnyV:
-    0 // nil
+    NIL
   | +typeID Value
 
 
@@ -118,7 +117,7 @@ either a type or a value.  All values are typed.  Here's the protocol grammar:
   CompositeV:
     ArrayV | ListV | SetV | MapV | StructV | UnionV | AnyV
   ArrayV:
-    len Value*len // TODO(toddw): len only used to distinguish NIL_VALUE
+    len Value*len
   ListV:
     len Value*len
   SetV:
@@ -126,19 +125,19 @@ either a type or a value.  All values are typed.  Here's the protocol grammar:
   MapV:
     len (Value Value)*len
   StructV:
-    (index Value)* END  // index is the 0-based field index
+    (index Value)* END  // index is the 0-based field index.
   UnionV:
-    index Value         // index is the 0-based field index
+    index Value         // index is the 0-based field index.
   AnyV:
     typeID Value
 
 TODO(toddw): We need the message lengths for fast binary->binary transcoding.
 
 The basis for the encoding is a variable-length unsigned integer (var128), with
-a max size of 256 bits (32 bytes).  This is a byte-based encoding.  The first
+a max size of 128 bits (16 bytes).  This is a byte-based encoding.  The first
 byte encodes values 0x00...0x7F verbatim.  Otherwise it encodes the length of
 the value, and the value is encoded in the subsequent bytes in big-endian order.
-In addition we have space for 32 flags and 64 reserved entries.
+In addition we have space for 112 control entries.
 
 The var128 encoding tries to strike a balance between the coding size and
 performance; we try to not be overtly wasteful of space, but still keep the
@@ -156,7 +155,7 @@ format simple to encode and decode.
   -----------------             (i.e. the length is -Len)
 
 The encoding of the value and control entries are all disjoint from each other;
-each var128 can hold either a single 256 bit value, or 4 to 6 control bits. The
+each var128 can hold either a single 128 bit value, or 4 to 6 control bits. The
 encoding favors small values; values less than 0x7F and control entries are all
 encoded in one byte.
 
@@ -168,9 +167,9 @@ The primitives are all encoded using var128:
   o Complex:  Two floats, real and imaginary.
   o String:   Byte count followed by uninterpreted bytes.
 
-Flags are used to represent special properties and values:
-  0xC0  // NIL_VALUE - represents any(nil), a non-exitent value.
-  0xC1  // END       - end sentry, e.g. used for structs
+Controls are used to represent special properties and values:
+  0xE0  // NIL       - represents any(nil), a non-existent value.
+  0xEF  // EOF       - end of fields, e.g. used for structs
   ...
 TODO(toddw): Add a flag indicating there is a local TypeID table for Any types.
 

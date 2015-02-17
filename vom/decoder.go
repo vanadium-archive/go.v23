@@ -57,7 +57,7 @@ func NewDecoder(r io.Reader) (*Decoder, error) {
 //     *RawValue  - Store raw (uninterpreted) bytes in v.
 //
 //   Types that are special-cased, recursively throughout v:
-//     *val.Value    - Decode into v.
+//     *vdl.Value    - Decode into v.
 //     reflect.Value - Decode into v, which must be settable.
 //
 // Decoding into a RawValue captures the value in a raw form, which may be

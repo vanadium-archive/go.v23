@@ -36,17 +36,20 @@ type (
 	PrimitivePFloat struct{ Value float64 }
 	// PrimitivePString represents field PString of the Primitive union type.
 	PrimitivePString struct{ Value string }
+	// PrimitivePControl represents field PControl of the Primitive union type.
+	PrimitivePControl struct{ Value ControlKind }
 	// __PrimitiveReflect describes the Primitive union type.
 	__PrimitiveReflect struct {
 		Name  string "v.io/core/veyron2/vom.Primitive"
 		Type  Primitive
 		Union struct {
-			PBool   PrimitivePBool
-			PByte   PrimitivePByte
-			PUint   PrimitivePUint
-			PInt    PrimitivePInt
-			PFloat  PrimitivePFloat
-			PString PrimitivePString
+			PBool    PrimitivePBool
+			PByte    PrimitivePByte
+			PUint    PrimitivePUint
+			PInt     PrimitivePInt
+			PFloat   PrimitivePFloat
+			PString  PrimitivePString
+			PControl PrimitivePControl
 		}
 	}
 )
@@ -81,6 +84,11 @@ func (x PrimitivePString) Interface() interface{}          { return x.Value }
 func (x PrimitivePString) Name() string                    { return "PString" }
 func (x PrimitivePString) __VDLReflect(__PrimitiveReflect) {}
 
+func (x PrimitivePControl) Index() int                      { return 6 }
+func (x PrimitivePControl) Interface() interface{}          { return x.Value }
+func (x PrimitivePControl) Name() string                    { return "PControl" }
+func (x PrimitivePControl) __VDLReflect(__PrimitiveReflect) {}
+
 // DumpAtom describes a single indivisible piece of the vom encoding.  The vom
 // encoding is composed of a stream of these atoms.
 type DumpAtom struct {
@@ -100,6 +108,7 @@ type DumpKind int
 
 const (
 	DumpKindMagic DumpKind = iota
+	DumpKindControl
 	DumpKindMsgID
 	DumpKindTypeMsg
 	DumpKindValueMsg
@@ -109,13 +118,11 @@ const (
 	DumpKindByteLen
 	DumpKindValueLen
 	DumpKindIndex
-	DumpKindEnd
-	DumpKindNilValue
-	DumpKindExists
+	DumpKindWireTypeIndex
 )
 
 // DumpKindAll holds all labels for DumpKind.
-var DumpKindAll = []DumpKind{DumpKindMagic, DumpKindMsgID, DumpKindTypeMsg, DumpKindValueMsg, DumpKindMsgLen, DumpKindTypeID, DumpKindPrimValue, DumpKindByteLen, DumpKindValueLen, DumpKindIndex, DumpKindEnd, DumpKindNilValue, DumpKindExists}
+var DumpKindAll = []DumpKind{DumpKindMagic, DumpKindControl, DumpKindMsgID, DumpKindTypeMsg, DumpKindValueMsg, DumpKindMsgLen, DumpKindTypeID, DumpKindPrimValue, DumpKindByteLen, DumpKindValueLen, DumpKindIndex, DumpKindWireTypeIndex}
 
 // DumpKindFromString creates a DumpKind from a string label.
 func DumpKindFromString(label string) (x DumpKind, err error) {
@@ -128,6 +135,9 @@ func (x *DumpKind) Set(label string) error {
 	switch label {
 	case "Magic", "magic":
 		*x = DumpKindMagic
+		return nil
+	case "Control", "control":
+		*x = DumpKindControl
 		return nil
 	case "MsgID", "msgid":
 		*x = DumpKindMsgID
@@ -156,14 +166,8 @@ func (x *DumpKind) Set(label string) error {
 	case "Index", "index":
 		*x = DumpKindIndex
 		return nil
-	case "End", "end":
-		*x = DumpKindEnd
-		return nil
-	case "NilValue", "nilvalue":
-		*x = DumpKindNilValue
-		return nil
-	case "Exists", "exists":
-		*x = DumpKindExists
+	case "WireTypeIndex", "wiretypeindex":
+		*x = DumpKindWireTypeIndex
 		return nil
 	}
 	*x = -1
@@ -175,6 +179,8 @@ func (x DumpKind) String() string {
 	switch x {
 	case DumpKindMagic:
 		return "Magic"
+	case DumpKindControl:
+		return "Control"
 	case DumpKindMsgID:
 		return "MsgID"
 	case DumpKindTypeMsg:
@@ -193,19 +199,63 @@ func (x DumpKind) String() string {
 		return "ValueLen"
 	case DumpKindIndex:
 		return "Index"
-	case DumpKindEnd:
-		return "End"
-	case DumpKindNilValue:
-		return "NilValue"
-	case DumpKindExists:
-		return "Exists"
+	case DumpKindWireTypeIndex:
+		return "WireTypeIndex"
 	}
 	return ""
 }
 
 func (DumpKind) __VDLReflect(struct {
 	Name string "v.io/core/veyron2/vom.DumpKind"
-	Enum struct{ Magic, MsgID, TypeMsg, ValueMsg, MsgLen, TypeID, PrimValue, ByteLen, ValueLen, Index, End, NilValue, Exists string }
+	Enum struct{ Magic, Control, MsgID, TypeMsg, ValueMsg, MsgLen, TypeID, PrimValue, ByteLen, ValueLen, Index, WireTypeIndex string }
+}) {
+}
+
+// ControlKind enumerates the different kinds of control bytes.
+type ControlKind int
+
+const (
+	ControlKindNIL ControlKind = iota
+	ControlKindEOF
+)
+
+// ControlKindAll holds all labels for ControlKind.
+var ControlKindAll = []ControlKind{ControlKindNIL, ControlKindEOF}
+
+// ControlKindFromString creates a ControlKind from a string label.
+func ControlKindFromString(label string) (x ControlKind, err error) {
+	err = x.Set(label)
+	return
+}
+
+// Set assigns label to x.
+func (x *ControlKind) Set(label string) error {
+	switch label {
+	case "NIL", "nil":
+		*x = ControlKindNIL
+		return nil
+	case "EOF", "eof":
+		*x = ControlKindEOF
+		return nil
+	}
+	*x = -1
+	return fmt.Errorf("unknown label %q in vom.ControlKind", label)
+}
+
+// String returns the string label of x.
+func (x ControlKind) String() string {
+	switch x {
+	case ControlKindNIL:
+		return "NIL"
+	case ControlKindEOF:
+		return "EOF"
+	}
+	return ""
+}
+
+func (ControlKind) __VDLReflect(struct {
+	Name string "v.io/core/veyron2/vom.ControlKind"
+	Enum struct{ NIL, EOF string }
 }) {
 }
 
@@ -213,4 +263,5 @@ func init() {
 	vdl.Register((*Primitive)(nil))
 	vdl.Register((*DumpAtom)(nil))
 	vdl.Register((*DumpKind)(nil))
+	vdl.Register((*ControlKind)(nil))
 }

@@ -117,7 +117,8 @@ func TestBinaryEncodeDecode(t *testing.T) {
 		var err, err2, err3 error
 		switch test.v.(type) {
 		case byte:
-			v, err = binaryDecodeControl(decbuf)
+			v, err = binaryPeekControl(decbuf)
+			decbuf.Skip(1)
 			_, v2, err2 = binaryDecodeUintWithControl(decbuf2)
 			err3 = binaryIgnoreUint(decbuf3)
 		case bool:

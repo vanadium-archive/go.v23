@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"reflect"
 
 	"v.io/core/veyron2/vdl"
 )
@@ -407,8 +408,8 @@ func (d *dumpWorker) decodeValueType() (*vdl.Type, error) {
 		case id == 0:
 			return nil, errDecodeZeroTypeID
 		case id > 0:
-			// This is a value message, the TypeID is +id.
-			tid := TypeID(+id)
+			// This is a value message, the typeID is +id.
+			tid := typeID(+id)
 			tt, err := d.recvTypes.LookupOrBuildType(tid)
 			if err != nil {
 				d.writeAtom(DumpKindValueMsg, PrimitivePUint{uint64(tid)}, "%v", err)
@@ -417,20 +418,20 @@ func (d *dumpWorker) decodeValueType() (*vdl.Type, error) {
 			d.writeAtom(DumpKindValueMsg, PrimitivePUint{uint64(tid)}, "%v", tt)
 			return tt, nil
 		}
-		// This is a type message, the TypeID is -id.
-		tid := TypeID(-id)
+		// This is a type message, the typeID is -id.
+		tid := typeID(-id)
 		d.writeAtom(DumpKindTypeMsg, PrimitivePUint{uint64(tid)}, "")
-		// Decode the WireType like a regular value, and store it in recvTypes.  The
+		// Decode the wireType like a regular value, and store it in recvTypes.  The
 		// type will actually be built when a value message arrives using this tid.
-		d.status.Value = vdl.ZeroValue(vdl.AnyType)
-		target, err := vdl.ValueTarget(d.status.Value)
+		var wt wireType
+		target, err := vdl.ReflectTarget(reflect.ValueOf(&wt))
 		if err != nil {
 			return nil, err
 		}
-		if err := d.decodeValueMsg(vdl.AnyType, target); err != nil {
+		if err := d.decodeValueMsg(wireTypeType, target); err != nil {
 			return nil, err
 		}
-		if err := d.recvTypes.AddWireType(tid, d.status.Value.Elem()); err != nil {
+		if err := d.recvTypes.AddWireType(tid, wt); err != nil {
 			return nil, err
 		}
 	}
@@ -438,8 +439,8 @@ func (d *dumpWorker) decodeValueType() (*vdl.Type, error) {
 
 // decodeValueMsg decodes the rest of the message assuming type t, handling the
 // optional message length.
-func (d *dumpWorker) decodeValueMsg(t *vdl.Type, target vdl.Target) error {
-	if hasBinaryMsgLen(t) {
+func (d *dumpWorker) decodeValueMsg(tt *vdl.Type, target vdl.Target) error {
+	if hasBinaryMsgLen(tt) {
 		d.prepareAtom("waiting for message len")
 		msgLen, err := binaryDecodeLen(d.buf)
 		if err != nil {
@@ -450,7 +451,7 @@ func (d *dumpWorker) decodeValueMsg(t *vdl.Type, target vdl.Target) error {
 		d.status.MsgN = 0 // Make MsgN match up with MsgLen when successful.
 		d.buf.SetLimit(msgLen)
 	}
-	err := d.decodeValue(t, target)
+	err := d.decodeValue(tt, target)
 	leftover := d.buf.RemoveLimit()
 	switch {
 	case err != nil:
@@ -465,19 +466,17 @@ func (d *dumpWorker) decodeValueMsg(t *vdl.Type, target vdl.Target) error {
 func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 	ttFrom := tt
 	if tt.Kind() == vdl.Optional {
-		d.prepareAtom("waiting for optional exists byte")
-		exists, err := d.buf.ReadByte()
-		if err != nil {
+		d.prepareAtom("waiting for optional control byte")
+		// If the type is optional, we expect to see either WireCtrlNil or the actual
+		// value, but not both.  And thus, we can just peek for the WireCtrlNil here.
+		switch ctrl, err := binaryPeekControl(d.buf); {
+		case err != nil:
 			return err
-		}
-		switch {
-		case exists == 0:
-			d.writeAtom(DumpKindNilValue, PrimitivePByte{exists}, "%v is nil", ttFrom)
+		case ctrl == WireCtrlNil:
+			d.buf.Skip(1)
+			d.writeAtom(DumpKindControl, PrimitivePControl{ControlKindNIL}, "%v is nil", ttFrom)
 			return target.FromNil(ttFrom)
-		case exists != 1:
-			return fmt.Errorf("vom: optional exists tag got %d, want 0 or 1", exists)
 		}
-		d.writeAtom(DumpKindExists, PrimitivePByte{exists}, "%v exists", ttFrom)
 		tt = tt.Elem()
 	}
 	if tt.IsBytes() {
@@ -585,7 +584,7 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		if err != nil {
 			return err
 		}
-		typeobj, err := d.recvTypes.LookupOrBuildType(TypeID(id))
+		typeobj, err := d.recvTypes.LookupOrBuildType(typeID(id))
 		if err != nil {
 			d.writeAtom(DumpKindTypeID, PrimitivePUint{id}, "%v", err)
 			return err
@@ -676,21 +675,23 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		if err != nil {
 			return err
 		}
-		// Loop through decoding the 1-based field index and corresponding field.
+		// Loop through decoding the 0-based field index and corresponding field.
 		for {
 			d.prepareAtom("waiting for struct field index")
-			index, err := binaryDecodeUint(d.buf)
+			index, ctrl, err := binaryDecodeUintWithControl(d.buf)
 			switch {
 			case err != nil:
 				return err
-			case index > uint64(tt.NumField()):
+			case ctrl == WireCtrlEOF:
+				d.writeAtom(DumpKindControl, PrimitivePControl{ControlKindEOF}, "%v END", tt.Name())
+				return target.FinishFields(fieldsTarget)
+			case ctrl != 0:
+				return fmt.Errorf("vom: unexpected control byte 0x%x", ctrl)
+			case index >= uint64(tt.NumField()):
 				d.writeAtom(DumpKindIndex, PrimitivePUint{index}, "out of range for %v", tt)
 				return errIndexOutOfRange
-			case index == 0:
-				d.writeAtom(DumpKindEnd, PrimitivePUint{index}, "%v END", tt.Name())
-				return target.FinishFields(fieldsTarget)
 			}
-			ttfield := tt.Field(int(index - 1))
+			ttfield := tt.Field(int(index))
 			d.writeAtom(DumpKindIndex, PrimitivePUint{index}, "%v.%v", tt.Name(), ttfield.Name)
 			key, field, err := fieldsTarget.StartField(ttfield.Name)
 			if err != nil {
@@ -713,12 +714,17 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		switch {
 		case err != nil:
 			return err
-		case index == 0 || index > uint64(tt.NumField()):
+		case index >= uint64(tt.NumField()):
 			d.writeAtom(DumpKindIndex, PrimitivePUint{index}, "out of range for %v", tt)
 			return errIndexOutOfRange
 		}
-		ttfield := tt.Field(int(index - 1))
-		d.writeAtom(DumpKindIndex, PrimitivePUint{index}, "%v.%v", tt.Name(), ttfield.Name)
+		ttfield := tt.Field(int(index))
+		if tt == wireTypeType {
+			// Pretty-print for wire type definition messages.
+			d.writeAtom(DumpKindWireTypeIndex, PrimitivePUint{index}, "%v", ttfield.Type.Name())
+		} else {
+			d.writeAtom(DumpKindIndex, PrimitivePUint{index}, "%v.%v", tt.Name(), ttfield.Name)
+		}
 		key, field, err := fieldsTarget.StartField(ttfield.Name)
 		if err != nil {
 			return err
@@ -731,15 +737,17 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		}
 		return target.FinishFields(fieldsTarget)
 	case vdl.Any:
-		d.prepareAtom("waiting for any TypeID")
-		switch id, err := binaryDecodeUint(d.buf); {
+		d.prepareAtom("waiting for any typeID")
+		switch id, ctrl, err := binaryDecodeUintWithControl(d.buf); {
 		case err != nil:
 			return err
-		case id == 0:
-			d.writeAtom(DumpKindNilValue, PrimitivePByte{0}, "any(nil)")
+		case ctrl == WireCtrlNil:
+			d.writeAtom(DumpKindControl, PrimitivePControl{ControlKindNIL}, "any(nil)")
 			return target.FromNil(vdl.AnyType)
+		case ctrl != 0:
+			return fmt.Errorf("vom: unexpected control byte 0x%x", ctrl)
 		default:
-			elemType, err := d.recvTypes.LookupOrBuildType(TypeID(id))
+			elemType, err := d.recvTypes.LookupOrBuildType(typeID(id))
 			if err != nil {
 				d.writeAtom(DumpKindTypeID, PrimitivePUint{id}, "%v", err)
 				return err

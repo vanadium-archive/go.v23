@@ -40,7 +40,7 @@ func NewBinaryEncoder(w io.Writer) (*Encoder, error) {
 //     *RawValue     - Transcode v into the appropriate output format.
 //
 //   Types that are special-cased, recursively throughout v:
-//     *val.Value    - Encode the semantic value represented by v.
+//     *vdl.Value    - Encode the semantic value represented by v.
 //     reflect.Value - Encode the semantic value represented by v.
 //
 // Encode(nil) is a special case that encodes the zero value of the any type.

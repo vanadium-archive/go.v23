@@ -64,6 +64,7 @@ func TestRoundtrip(t *testing.T) {
 		{[]int64{}, []int64(nil)},
 		{map[string]int64(nil), map[string]int64(nil)},
 		{map[string]int64{}, map[string]int64(nil)},
+		{struct{}{}, struct{}{}},
 		{struct{ A []byte }{nil}, struct{ A []byte }{}},
 		{struct{ A []byte }{[]byte{}}, struct{ A []byte }{}},
 		{struct{ A []int64 }{nil}, struct{ A []int64 }{}},
@@ -84,6 +85,18 @@ func TestRoundtrip(t *testing.T) {
 				b []byte
 			}{X: "XYZ"},
 		},
+		// Test for array encoding/decoding.
+		{[3]byte{1, 2, 3}, [3]byte{1, 2, 3}},
+		{[3]int64{1, 2, 3}, [3]int64{1, 2, 3}},
+		// Test for zero value struct/union field encoding/decoding.
+		{struct{ A int64 }{0}, struct{ A int64 }{}},
+		{struct{ T *vdl.Type }{nil}, struct{ T *vdl.Type }{vdl.AnyType}},
+		{struct{ M map[uint64]struct{} }{make(map[uint64]struct{})}, struct{ M map[uint64]struct{} }{}},
+		{struct{ M map[uint64]string }{make(map[uint64]string)}, struct{ M map[uint64]string }{}},
+		{struct{ N struct{ A int64 } }{struct{ A int64 }{0}}, struct{ N struct{ A int64 } }{}},
+		{struct{ N *testdata.NStruct }{&testdata.NStruct{false, "", 0}}, struct{ N *testdata.NStruct }{&testdata.NStruct{}}},
+		{struct{ N *testdata.NStruct }{nil}, struct{ N *testdata.NStruct }{}},
+		{testdata.NUnion(testdata.NUnionA{false}), testdata.NUnion(testdata.NUnionA{})},
 	}
 	for _, test := range tests {
 		name := fmt.Sprintf("(%#v,%#v)", test.In, test.Want)

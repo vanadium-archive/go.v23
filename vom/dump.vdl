@@ -3,12 +3,13 @@ package vom
 // Primitive represents one of the primitive vom values.  All vom values are
 // composed of combinations of these primitives.
 type Primitive union {
-	PBool   bool
-	PByte   byte
-	PUint   uint64
-	PInt    int64
-	PFloat  float64
-	PString string
+	PBool    bool
+	PByte    byte
+	PUint    uint64
+	PInt     int64
+	PFloat   float64
+	PString  string
+	PControl ControlKind
 }
 
 // DumpAtom describes a single indivisible piece of the vom encoding.  The vom
@@ -22,17 +23,22 @@ type DumpAtom struct {
 
 // DumpKind enumerates the different kinds of dump atoms.
 type DumpKind enum {
-	Magic     // [byte] Magic number, the first byte of a vom stream.
-	MsgID     // [int]  Message ID, distinguishing type and value messages.
-	TypeMsg   // [uint] Type message, describes the type identified by -MsgID.
-	ValueMsg  // [uint] Value message, describes a value of type +MsgID.
-	MsgLen    // [uint] Message length in bytes.
-	TypeID    // [uint] Type ID.
-	PrimValue // [*]    Primitive value.
-	ByteLen   // [uint] Length in bytes.
-	ValueLen  // [uint] Number of values in a composite type.
-	Index     // [uint] Index in a dense array.
-	End       // [uint] End terminator.
-	NilValue  // [byte] Nil value, representing non-existence.
-	Exists    // [byte] Exists byte, where 0 means nil and 1 means exist.
+	Magic         // [byte] Magic number, the first byte of a vom stream.
+	Control       // [byte] Control byte.
+	MsgID         // [int]  Message ID, distinguishing type and value messages.
+	TypeMsg       // [uint] Type message, describes the type identified by -MsgID.
+	ValueMsg      // [uint] Value message, describes a value of type +MsgID.
+	MsgLen        // [uint] Message length in bytes.
+	TypeID        // [uint] Type ID.
+	PrimValue     // [*]    Primitive value.
+	ByteLen       // [uint] Length in bytes.
+	ValueLen      // [uint] Number of values in a composite type.
+	Index         // [uint] Index in a dense array.
+	WireTypeIndex // [uint] WireType index.
+}
+
+// ControlKind enumerates the different kinds of control bytes.
+type ControlKind enum {
+	NIL // [byte] Nil.
+	EOF // [byte] End of field.
 }

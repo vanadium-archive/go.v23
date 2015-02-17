@@ -8,201 +8,281 @@ import (
 	"v.io/core/veyron2/vdl"
 )
 
-// WireNamed represents a type definition for named primitives.
-type WireNamed struct {
-	Name string
-	Base TypeID
-}
+// typeID uniquely identifies a type definition within a vom stream.
+type typeID uint64
 
-func (WireNamed) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vom.WireNamed"
+func (typeID) __VDLReflect(struct {
+	Name string "v.io/core/veyron2/vom.typeID"
 }) {
 }
 
-// WireEnum represents an type definition for enum types.
-type WireEnum struct {
+type (
+	// wireType represents any single field of the wireType union type.
+	//
+	// The wireType union is used to encode the payload part of each type message,
+	// using the regular rules for encoding union values.  But unlike our regular
+	// encoding, the type message for wireType itself (and its fields) are never
+	// encoded; we need to bootstrap the system.  Thus unlike regular values, the
+	// ordering of fields within the wire* types cannot be changed.
+	wireType interface {
+		// Index returns the field index.
+		Index() int
+		// Interface returns the field value as an interface.
+		Interface() interface{}
+		// Name returns the field name.
+		Name() string
+		// __VDLReflect describes the wireType union type.
+		__VDLReflect(__wireTypeReflect)
+	}
+	// wireTypeNamedT represents field NamedT of the wireType union type.
+	//
+	// FIELD INDICES MUST NOT BE CHANGED.
+	wireTypeNamedT struct{ Value wireNamed } // INDEX = 0
+	// wireTypeEnumT represents field EnumT of the wireType union type.
+	wireTypeEnumT struct{ Value wireEnum } // INDEX = 1
+	// wireTypeArrayT represents field ArrayT of the wireType union type.
+	wireTypeArrayT struct{ Value wireArray } // INDEX = 2
+	// wireTypeListT represents field ListT of the wireType union type.
+	wireTypeListT struct{ Value wireList } // INDEX = 3
+	// wireTypeSetT represents field SetT of the wireType union type.
+	wireTypeSetT struct{ Value wireSet } // INDEX = 4
+	// wireTypeMapT represents field MapT of the wireType union type.
+	wireTypeMapT struct{ Value wireMap } // INDEX = 5
+	// wireTypeStructT represents field StructT of the wireType union type.
+	wireTypeStructT struct{ Value wireStruct } // INDEX = 6
+	// wireTypeUnionT represents field UnionT of the wireType union type.
+	wireTypeUnionT struct{ Value wireUnion } // INDEX = 7
+	// wireTypeOptionalT represents field OptionalT of the wireType union type.
+	wireTypeOptionalT struct{ Value wireOptional } // INDEX = 8
+	// __wireTypeReflect describes the wireType union type.
+	__wireTypeReflect struct {
+		Name  string "v.io/core/veyron2/vom.wireType"
+		Type  wireType
+		Union struct {
+			NamedT    wireTypeNamedT
+			EnumT     wireTypeEnumT
+			ArrayT    wireTypeArrayT
+			ListT     wireTypeListT
+			SetT      wireTypeSetT
+			MapT      wireTypeMapT
+			StructT   wireTypeStructT
+			UnionT    wireTypeUnionT
+			OptionalT wireTypeOptionalT
+		}
+	}
+)
+
+func (x wireTypeNamedT) Index() int                     { return 0 }
+func (x wireTypeNamedT) Interface() interface{}         { return x.Value }
+func (x wireTypeNamedT) Name() string                   { return "NamedT" }
+func (x wireTypeNamedT) __VDLReflect(__wireTypeReflect) {}
+
+func (x wireTypeEnumT) Index() int                     { return 1 }
+func (x wireTypeEnumT) Interface() interface{}         { return x.Value }
+func (x wireTypeEnumT) Name() string                   { return "EnumT" }
+func (x wireTypeEnumT) __VDLReflect(__wireTypeReflect) {}
+
+func (x wireTypeArrayT) Index() int                     { return 2 }
+func (x wireTypeArrayT) Interface() interface{}         { return x.Value }
+func (x wireTypeArrayT) Name() string                   { return "ArrayT" }
+func (x wireTypeArrayT) __VDLReflect(__wireTypeReflect) {}
+
+func (x wireTypeListT) Index() int                     { return 3 }
+func (x wireTypeListT) Interface() interface{}         { return x.Value }
+func (x wireTypeListT) Name() string                   { return "ListT" }
+func (x wireTypeListT) __VDLReflect(__wireTypeReflect) {}
+
+func (x wireTypeSetT) Index() int                     { return 4 }
+func (x wireTypeSetT) Interface() interface{}         { return x.Value }
+func (x wireTypeSetT) Name() string                   { return "SetT" }
+func (x wireTypeSetT) __VDLReflect(__wireTypeReflect) {}
+
+func (x wireTypeMapT) Index() int                     { return 5 }
+func (x wireTypeMapT) Interface() interface{}         { return x.Value }
+func (x wireTypeMapT) Name() string                   { return "MapT" }
+func (x wireTypeMapT) __VDLReflect(__wireTypeReflect) {}
+
+func (x wireTypeStructT) Index() int                     { return 6 }
+func (x wireTypeStructT) Interface() interface{}         { return x.Value }
+func (x wireTypeStructT) Name() string                   { return "StructT" }
+func (x wireTypeStructT) __VDLReflect(__wireTypeReflect) {}
+
+func (x wireTypeUnionT) Index() int                     { return 7 }
+func (x wireTypeUnionT) Interface() interface{}         { return x.Value }
+func (x wireTypeUnionT) Name() string                   { return "UnionT" }
+func (x wireTypeUnionT) __VDLReflect(__wireTypeReflect) {}
+
+func (x wireTypeOptionalT) Index() int                     { return 8 }
+func (x wireTypeOptionalT) Interface() interface{}         { return x.Value }
+func (x wireTypeOptionalT) Name() string                   { return "OptionalT" }
+func (x wireTypeOptionalT) __VDLReflect(__wireTypeReflect) {}
+
+// wireNamed represents a type definition for named primitives.
+type wireNamed struct {
+	Name string
+	Base typeID
+}
+
+func (wireNamed) __VDLReflect(struct {
+	Name string "v.io/core/veyron2/vom.wireNamed"
+}) {
+}
+
+// wireEnum represents an type definition for enum types.
+type wireEnum struct {
 	Name   string
 	Labels []string
 }
 
-func (WireEnum) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vom.WireEnum"
+func (wireEnum) __VDLReflect(struct {
+	Name string "v.io/core/veyron2/vom.wireEnum"
 }) {
 }
 
-// WireArray represents an type definition for array types.
-type WireArray struct {
+// wireArray represents an type definition for array types.
+type wireArray struct {
 	Name string
-	Elem TypeID
+	Elem typeID
 	Len  uint64
 }
 
-func (WireArray) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vom.WireArray"
+func (wireArray) __VDLReflect(struct {
+	Name string "v.io/core/veyron2/vom.wireArray"
 }) {
 }
 
-// WireList represents a type definition for list types.
-type WireList struct {
+// wireList represents a type definition for list types.
+type wireList struct {
 	Name string
-	Elem TypeID
+	Elem typeID
 }
 
-func (WireList) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vom.WireList"
+func (wireList) __VDLReflect(struct {
+	Name string "v.io/core/veyron2/vom.wireList"
 }) {
 }
 
-// WireSet represents a type definition for set types.
-type WireSet struct {
+// wireSet represents a type definition for set types.
+type wireSet struct {
 	Name string
-	Key  TypeID
+	Key  typeID
 }
 
-func (WireSet) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vom.WireSet"
+func (wireSet) __VDLReflect(struct {
+	Name string "v.io/core/veyron2/vom.wireSet"
 }) {
 }
 
-// WireMap represents a type definition for map types.
-type WireMap struct {
+// wireMap represents a type definition for map types.
+type wireMap struct {
 	Name string
-	Key  TypeID
-	Elem TypeID
+	Key  typeID
+	Elem typeID
 }
 
-func (WireMap) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vom.WireMap"
+func (wireMap) __VDLReflect(struct {
+	Name string "v.io/core/veyron2/vom.wireMap"
 }) {
 }
 
-// WireField represents a field in a struct or union type.
-type WireField struct {
+// wireField represents a field in a struct or union type.
+type wireField struct {
 	Name string
-	Type TypeID
+	Type typeID
 }
 
-func (WireField) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vom.WireField"
+func (wireField) __VDLReflect(struct {
+	Name string "v.io/core/veyron2/vom.wireField"
 }) {
 }
 
-// WireStruct represents a type definition for struct types.
-type WireStruct struct {
+// wireStruct represents a type definition for struct types.
+type wireStruct struct {
 	Name   string
-	Fields []WireField
+	Fields []wireField
 }
 
-func (WireStruct) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vom.WireStruct"
+func (wireStruct) __VDLReflect(struct {
+	Name string "v.io/core/veyron2/vom.wireStruct"
 }) {
 }
 
-// WireUnion represents a type definition for union types.
-type WireUnion struct {
+// wireUnion represents a type definition for union types.
+type wireUnion struct {
 	Name   string
-	Fields []WireField
+	Fields []wireField
 }
 
-func (WireUnion) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vom.WireUnion"
+func (wireUnion) __VDLReflect(struct {
+	Name string "v.io/core/veyron2/vom.wireUnion"
 }) {
 }
 
-// WireOptional represents an type definition for optional types.
-type WireOptional struct {
+// wireOptional represents an type definition for optional types.
+type wireOptional struct {
 	Name string
-	Elem TypeID
+	Elem typeID
 }
 
-func (WireOptional) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vom.WireOptional"
-}) {
-}
-
-// TypeID uniquely identifies a type definition within a vom stream.
-type TypeID uint64
-
-func (TypeID) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vom.TypeID"
+func (wireOptional) __VDLReflect(struct {
+	Name string "v.io/core/veyron2/vom.wireOptional"
 }) {
 }
 
 func init() {
-	vdl.Register((*WireNamed)(nil))
-	vdl.Register((*WireEnum)(nil))
-	vdl.Register((*WireArray)(nil))
-	vdl.Register((*WireList)(nil))
-	vdl.Register((*WireSet)(nil))
-	vdl.Register((*WireMap)(nil))
-	vdl.Register((*WireField)(nil))
-	vdl.Register((*WireStruct)(nil))
-	vdl.Register((*WireUnion)(nil))
-	vdl.Register((*WireOptional)(nil))
-	vdl.Register((*TypeID)(nil))
+	vdl.Register((*typeID)(nil))
+	vdl.Register((*wireType)(nil))
+	vdl.Register((*wireNamed)(nil))
+	vdl.Register((*wireEnum)(nil))
+	vdl.Register((*wireArray)(nil))
+	vdl.Register((*wireList)(nil))
+	vdl.Register((*wireSet)(nil))
+	vdl.Register((*wireMap)(nil))
+	vdl.Register((*wireField)(nil))
+	vdl.Register((*wireStruct)(nil))
+	vdl.Register((*wireUnion)(nil))
+	vdl.Register((*wireOptional)(nil))
 }
 
-// Primitives
-const WireAnyID = TypeID(1)
+// Primitive types.
+const WireIDBool = typeID(1)
 
-const WireTypeID = TypeID(2)
+const WireIDByte = typeID(2)
 
-const WireBoolID = TypeID(3)
+const WireIDString = typeID(3)
 
-const WireStringID = TypeID(4)
+const WireIDUint16 = typeID(4)
 
-const WireByteID = TypeID(5)
+const WireIDUint32 = typeID(5)
 
-const WireUint16ID = TypeID(6)
+const WireIDUint64 = typeID(6)
 
-const WireUint32ID = TypeID(7)
+const WireIDInt16 = typeID(7)
 
-const WireUint64ID = TypeID(8)
+const WireIDInt32 = typeID(8)
 
-const WireInt16ID = TypeID(9)
+const WireIDInt64 = typeID(9)
 
-const WireInt32ID = TypeID(10)
+const WireIDFloat32 = typeID(10)
 
-const WireInt64ID = TypeID(11)
+const WireIDFloat64 = typeID(11)
 
-const WireFloat32ID = TypeID(12)
+const WireIDComplex64 = typeID(12)
 
-const WireFloat64ID = TypeID(13)
+const WireIDComplex128 = typeID(13)
 
-const WireComplex64ID = TypeID(14)
+const WireIDTypeObject = typeID(14)
 
-const WireComplex128ID = TypeID(15)
+const WireIDAny = typeID(15)
 
-// Composites only used in type definitions
-const WireNamedID = TypeID(16)
+// Other commonly used composites.
+const WireIDByteList = typeID(39)
 
-const WireEnumID = TypeID(17)
+const WireIDStringList = typeID(40)
 
-const WireArrayID = TypeID(18)
+// The first user-defined typeID is 41.
+const WireIDFirstUserType = typeID(41)
 
-const WireListID = TypeID(19)
+const WireCtrlNil = byte(224)
 
-const WireSetID = TypeID(20)
-
-const WireMapID = TypeID(21)
-
-const WireStructID = TypeID(22)
-
-const WireFieldID = TypeID(23)
-
-const WireFieldListID = TypeID(24)
-
-const WireUnionID = TypeID(25)
-
-const WireOptionalID = TypeID(29)
-
-// Other commonly used composites
-const WireByteListID = TypeID(26)
-
-const WireStringListID = TypeID(27)
-
-const WireTypeListID = TypeID(28)
-
-// The first user-defined TypeID is 65.  Note that -64 is encoded as 1 byte,
-// while -65 is encoded as 2 bytes.
-const WireTypeFirstUserID = TypeID(65)
+const WireCtrlEOF = byte(225)
