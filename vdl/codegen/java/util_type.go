@@ -36,9 +36,6 @@ func javaBuiltInType(typ *vdl.Type, forceClass bool) (string, bool) {
 			return "void", false
 		}
 	}
-	if typ == vdl.ErrorType {
-		return "io.v.core.veyron2.verror.VException", true
-	}
 	switch typ.Kind() {
 	case vdl.Bool:
 		if forceClass {
@@ -103,10 +100,27 @@ func javaBuiltInType(typ *vdl.Type, forceClass bool) (string, bool) {
 	}
 }
 
+func javaNativeType(t *vdl.Type, env *compile.Env) (string, bool) {
+	if t == vdl.ErrorType {
+		return "io.v.core.veyron2.verror.VException", true
+	}
+	if def := env.FindTypeDef(t); def != nil {
+		pkg := def.File.Package
+		if native, ok := pkg.Config.Java.WireToNativeTypes[def.Name]; ok {
+			// There is a Java native type configured for this defined type.
+			return native, true
+		}
+	}
+	return "", false
+}
+
 func javaType(t *vdl.Type, forceClass bool, env *compile.Env) string {
 	if t == nil {
 		name, _ := javaBuiltInType(nil, forceClass)
 		return name
+	}
+	if native, ok := javaNativeType(t, env); ok {
+		return native
 	}
 	if def := env.FindTypeDef(t); def != nil {
 		return javaFullyQualifiedNamedType(def, forceClass, env)

@@ -146,6 +146,23 @@ func (GoImport) __VDLReflect(struct {
 
 // JavaConfig specifies java specific configuration.
 type JavaConfig struct {
+	// WireToNativeTypes specifies the mapping from a VDL wire type to its Java
+	// native type representation.  This is rarely used and easy to configure
+	// incorrectly; usage is currently restricted to packages that are explicitly
+	// whitelisted.
+	//
+	// WireToNativeTypes are meant for scenarios where there is an idiomatic Java
+	// type used in your code, but you need a standard VDL representation for wire
+	// compatibility.  E.g. the VDL time package defines Duration and Time for
+	// wire compatibility, but we want the generated code to use the org.joda.time
+	// package.
+	//
+	// The key of the map is the name of the VDL type (aka WireType), which must
+	// be defined in the vdl package associated with the vdl.config file.
+	//
+	// The code generator assumes that the conversion functions will be registered
+	// in java vdl package.
+	WireToNativeTypes map[string]string
 }
 
 func (JavaConfig) __VDLReflect(struct {

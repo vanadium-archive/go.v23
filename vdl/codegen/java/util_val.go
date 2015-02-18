@@ -144,8 +144,7 @@ func javaVal(v *vdl.Value, env *compile.Env) string {
 // javaZeroValue returns the zero value string for the provided VDL value.
 // We assume that default constructor of user-defined types returns a zero value.
 func javaZeroValue(t *vdl.Type, env *compile.Env) string {
-	// TODO(rogulenko): replace with a proper zero value
-	if t == vdl.ErrorType {
+	if _, ok := javaNativeType(t, env); ok {
 		return "null"
 	}
 
