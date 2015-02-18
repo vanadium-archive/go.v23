@@ -63,14 +63,8 @@ type Group interface {
 	object.Object
 }
 
-// TODO(sadovsky): We should probably use access.BadEtag for all etag errors,
-// but currently its error message says "invalid etag passed to SetACL", which
-// is too specific since we share etags between Group methods and access.Object
-// methods. For now we use ErrBadEtag for all etag errors, but that's also
-// wrong: clients will expect SetACL to return access.BadEtag.
 error (
 	NoBlessings() {"en": "no blessings recognized; cannot create group ACL"}
 	GroupAlreadyExists(groupName string) {"en": "group already exists: {groupName}"}
-	BadEtag(oldEtag, newEtag string) {"en": "etag is out of date: {oldEtag} != {newEtag}"}
 	ExcessiveContention() {RetryBackoff, "en": "gave up after encountering excessive contention; try again later"}
 )

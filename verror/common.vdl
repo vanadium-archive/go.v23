@@ -26,6 +26,15 @@ error (
 	// in an incompatible state.
 	BadState() {"en":"Invalid state{:_}"}
 
+	// BadEtag means the etag presented by the client was out of date or otherwise
+	// invalid, likely because some other request caused the etag at the server to
+	// change. The client should get a fresh etag and try again.
+	// TODO(sadovsky): Rename "etag" to something else. HTTP etags are content
+	// hashes, used to implement client-side response caching. We use etags for
+	// for atomicity in read-modify-write operations, and generally recommend for
+	// them to be implemented as (possibly lightly obfuscated) sequence numbers.
+	BadEtag() {"en":"Etag is out of date"}
+
 	// Exist means that the requested item already exists; typically returned when
 	// an attempt to create an item fails because it already exists.
 	Exist() {"en":"Already exists{:_}"}

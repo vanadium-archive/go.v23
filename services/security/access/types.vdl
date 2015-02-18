@@ -30,7 +30,7 @@
 //     // Use the same etag with the modified acl to ensure that no other client
 //     // has modified the acl since GetACL returned.
 //     if err := client.SetACL(acl, etag); err != nil {
-//       if verror.Is(err, access.ErrBadEtag) {
+//       if verror.Is(err, verror.ErrBadEtag.ID) {
 //         // Another client replaced the ACL after our GetACL returned.
 //         // Try again.
 //         continue
@@ -142,11 +142,8 @@ const (
   Resolve = Tag("Resolve")  // Operations involving namespace navigation.
 )
 
+// Note: For "bad etag" errors, use verror.ErrBadEtag.
 error (
-	// The etag passed to SetACL is invalid.  Likely, another client set the ACL
-	// already and invalidated the etag.  Use GetACL to fetch a fresh etag.
-	BadEtag(etag, old string) {"en": "invalid etag {etag} passed to SetACL, want {old}"}
-
 	// The ACL is too big.  Use groups to represent large sets of principals.
 	TooBig() {"en": "ACL is too big"}
 

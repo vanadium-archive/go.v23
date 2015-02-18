@@ -33,7 +33,7 @@
 //     // Use the same etag with the modified acl to ensure that no other client
 //     // has modified the acl since GetACL returned.
 //     if err := client.SetACL(acl, etag); err != nil {
-//       if verror.Is(err, access.ErrBadEtag) {
+//       if verror.Is(err, verror.ErrBadEtag.ID) {
 //         // Another client replaced the ACL after our GetACL returned.
 //         // Try again.
 //         continue
@@ -175,23 +175,14 @@ const Write = Tag("Write") // Operations that mutate the state of the object.
 const Resolve = Tag("Resolve") // Operations involving namespace navigation.
 
 var (
-	// The etag passed to SetACL is invalid.  Likely, another client set the ACL
-	// already and invalidated the etag.  Use GetACL to fetch a fresh etag.
-	ErrBadEtag = verror.Register("v.io/core/veyron2/services/security/access.BadEtag", verror.NoRetry, "{1:}{2:} invalid etag {3} passed to SetACL, want {4}")
 	// The ACL is too big.  Use groups to represent large sets of principals.
 	ErrTooBig   = verror.Register("v.io/core/veyron2/services/security/access.TooBig", verror.NoRetry, "{1:}{2:} ACL is too big")
 	ErrACLMatch = verror.Register("v.io/core/veyron2/services/security/access.ACLMatch", verror.NoRetry, "{1:}{2:} none of the valid blessings ({3}) are allowed by the ACL (rejected blessings: {4})")
 )
 
 func init() {
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBadEtag.ID), "{1:}{2:} invalid etag {3} passed to SetACL, want {4}")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrTooBig.ID), "{1:}{2:} ACL is too big")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrACLMatch.ID), "{1:}{2:} none of the valid blessings ({3}) are allowed by the ACL (rejected blessings: {4})")
-}
-
-// NewErrBadEtag returns an error with the ErrBadEtag ID.
-func NewErrBadEtag(ctx *context.T, etag string, old string) error {
-	return verror.New(ErrBadEtag, ctx, etag, old)
 }
 
 // NewErrTooBig returns an error with the ErrTooBig ID.

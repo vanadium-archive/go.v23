@@ -78,14 +78,12 @@ func init() {
 var (
 	ErrNoBlessings         = verror.Register("v.io/core/veyron2/services/security/groups.NoBlessings", verror.NoRetry, "{1:}{2:} no blessings recognized; cannot create group ACL")
 	ErrGroupAlreadyExists  = verror.Register("v.io/core/veyron2/services/security/groups.GroupAlreadyExists", verror.NoRetry, "{1:}{2:} group already exists: {3}")
-	ErrBadEtag             = verror.Register("v.io/core/veyron2/services/security/groups.BadEtag", verror.NoRetry, "{1:}{2:} etag is out of date: {3} != {4}")
 	ErrExcessiveContention = verror.Register("v.io/core/veyron2/services/security/groups.ExcessiveContention", verror.RetryBackoff, "{1:}{2:} gave up after encountering excessive contention; try again later")
 )
 
 func init() {
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoBlessings.ID), "{1:}{2:} no blessings recognized; cannot create group ACL")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrGroupAlreadyExists.ID), "{1:}{2:} group already exists: {3}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBadEtag.ID), "{1:}{2:} etag is out of date: {3} != {4}")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrExcessiveContention.ID), "{1:}{2:} gave up after encountering excessive contention; try again later")
 }
 
@@ -97,11 +95,6 @@ func NewErrNoBlessings(ctx *context.T) error {
 // NewErrGroupAlreadyExists returns an error with the ErrGroupAlreadyExists ID.
 func NewErrGroupAlreadyExists(ctx *context.T, groupName string) error {
 	return verror.New(ErrGroupAlreadyExists, ctx, groupName)
-}
-
-// NewErrBadEtag returns an error with the ErrBadEtag ID.
-func NewErrBadEtag(ctx *context.T, oldEtag string, newEtag string) error {
-	return verror.New(ErrBadEtag, ctx, oldEtag, newEtag)
 }
 
 // NewErrExcessiveContention returns an error with the ErrExcessiveContention ID.

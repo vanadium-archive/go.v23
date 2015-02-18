@@ -29,6 +29,14 @@ var (
 	// BadState means an operation was attempted on an object while the object was
 	// in an incompatible state.
 	ErrBadState = Register("v.io/core/veyron2/verror.BadState", NoRetry, "{1:}{2:} Invalid state{:_}")
+	// BadEtag means the etag presented by the client was out of date or otherwise
+	// invalid, likely because some other request caused the etag at the server to
+	// change. The client should get a fresh etag and try again.
+	// TODO(sadovsky): Rename "etag" to something else. HTTP etags are content
+	// hashes, used to implement client-side response caching. We use etags for
+	// for atomicity in read-modify-write operations, and generally recommend for
+	// them to be implemented as (possibly lightly obfuscated) sequence numbers.
+	ErrBadEtag = Register("v.io/core/veyron2/verror.BadEtag", NoRetry, "{1:}{2:} Etag is out of date")
 	// Exist means that the requested item already exists; typically returned when
 	// an attempt to create an item fails because it already exists.
 	ErrExist = Register("v.io/core/veyron2/verror.Exist", NoRetry, "{1:}{2:} Already exists{:_}")
@@ -76,6 +84,7 @@ func init() {
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrEOF.ID), "{1:}{2:} EOF{:_}")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBadArg.ID), "{1:}{2:} Bad argument{:_}")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBadState.ID), "{1:}{2:} Invalid state{:_}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBadEtag.ID), "{1:}{2:} Etag is out of date")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrExist.ID), "{1:}{2:} Already exists{:_}")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoExist.ID), "{1:}{2:} Does not exist{:_}")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoExistOrNoAccess.ID), "{1:}{2:} Does not exist or access denied{:_}")
@@ -117,6 +126,11 @@ func NewErrBadArg(ctx *context.T) error {
 // NewErrBadState returns an error with the ErrBadState ID.
 func NewErrBadState(ctx *context.T) error {
 	return New(ErrBadState, ctx)
+}
+
+// NewErrBadEtag returns an error with the ErrBadEtag ID.
+func NewErrBadEtag(ctx *context.T) error {
+	return New(ErrBadEtag, ctx)
 }
 
 // NewErrExist returns an error with the ErrExist ID.
