@@ -19,7 +19,6 @@ var (
 // connections, for proxying (though global uniqueness is not strictly
 // required) and determining if different names resolve to the same endpoint.
 type RoutingID struct {
-	// TODO(toddw): This can't be encoded via vom, since no fields are exported.
 	value [routingIDLength]byte
 }
 
@@ -94,28 +93,6 @@ func ReadRoutingID(reader io.Reader) (RoutingID, error) {
 func (rid RoutingID) Write(writer io.Writer) error {
 	_, err := writer.Write(rid.value[:])
 	return err
-}
-
-// Since the type is opaque, we provide a custom Gob encoder.
-func (rid *RoutingID) GobEncode() ([]byte, error) {
-	return rid.value[:], nil
-}
-
-func (rid *RoutingID) GobDecode(buf []byte) error {
-	if len(buf) != routingIDLength {
-		return errNotARoutingID
-	}
-	copy(rid.value[:], buf)
-	return nil
-}
-
-func (rid *RoutingID) VomEncode() ([routingIDLength]byte, error) {
-	return rid.value, nil
-}
-
-func (rid *RoutingID) VomDecode(value [routingIDLength]byte) error {
-	rid.value = value
-	return nil
 }
 
 func NewRoutingID() (RoutingID, error) {
