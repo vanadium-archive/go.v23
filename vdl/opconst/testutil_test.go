@@ -400,7 +400,7 @@ func structBoolValue(t *vdl.Type, x ...sb) *vdl.Value {
 	res := vdl.ZeroValue(t)
 	for _, sb := range x {
 		_, index := t.FieldByName(sb.s)
-		res.Field(index).AssignBool(sb.b)
+		res.StructField(index).AssignBool(sb.b)
 	}
 	return res
 }
@@ -476,7 +476,7 @@ func structNumValue(t *vdl.Type, x ...sn) *vdl.Value {
 	res := vdl.ZeroValue(t)
 	for _, sn := range x {
 		_, index := t.FieldByName(sn.s)
-		assignNum(res.Field(index), sn.n)
+		assignNum(res.StructField(index), sn.n)
 	}
 	return res
 }

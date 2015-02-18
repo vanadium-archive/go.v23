@@ -189,7 +189,7 @@ func untypedConst(names typeNames, v *vdl.Value) string {
 			result += "\n  '" +
 				vdlutil.ToCamelCase(t.Field(ix).Name) +
 				"': " +
-				untypedConst(names, v.Field(ix)) +
+				untypedConst(names, v.StructField(ix)) +
 				","
 		}
 		return result + "\n}"

@@ -151,9 +151,9 @@ func makeStructType(name string) *vdl.Type {
 
 func makeStruct(name string, x int64, y string, z bool) *vdl.Value {
 	structv := vdl.ZeroValue(makeStructType(name))
-	structv.Field(0).AssignInt(x)
-	structv.Field(1).AssignString(y)
-	structv.Field(2).AssignBool(z)
+	structv.StructField(0).AssignInt(x)
+	structv.StructField(1).AssignString(y)
+	structv.StructField(2).AssignBool(z)
 	return structv
 }
 
@@ -184,7 +184,7 @@ func makeStructTypeObjectType(name string) *vdl.Type {
 
 func makeStructTypeObject(name string, t *vdl.Type) *vdl.Value {
 	structv := vdl.ZeroValue(makeStructTypeObjectType(name))
-	structv.Field(0).AssignTypeObject(t)
+	structv.StructField(0).AssignTypeObject(t)
 	return structv
 }
 
@@ -194,11 +194,11 @@ func makeABStruct() *vdl.Value {
 	}...))
 	tB := vdl.NamedType("p.kg/a.B", vdl.StructType(vdl.Field{"Z", vdl.ListType(tA)}))
 	res := vdl.ZeroValue(tB)
-	listv := res.Field(0).AssignLen(2)
-	listv.Index(0).Field(0).AssignInt(1)
-	listv.Index(0).Field(1).AssignString("a")
-	listv.Index(1).Field(0).AssignInt(2)
-	listv.Index(1).Field(1).AssignString("b")
+	listv := res.StructField(0).AssignLen(2)
+	listv.Index(0).StructField(0).AssignInt(1)
+	listv.Index(0).StructField(1).AssignString("a")
+	listv.Index(1).StructField(0).AssignInt(2)
+	listv.Index(1).StructField(1).AssignString("b")
 	return res
 }
 
@@ -224,9 +224,9 @@ func makeCyclicStructType() *vdl.Type {
 func makeCyclicStruct(x string, z *vdl.Value) *vdl.Value {
 	ty := makeCyclicStructType()
 	ret := vdl.ZeroValue(ty)
-	ret.Field(0).AssignString(x)
+	ret.StructField(0).AssignString(x)
 	if z != nil {
-		ret.Field(1).Assign(vdl.OptionalValue(z))
+		ret.StructField(1).Assign(vdl.OptionalValue(z))
 	}
 	return ret
 }

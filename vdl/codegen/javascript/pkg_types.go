@@ -214,7 +214,7 @@ func (p *pkgTypeNames) addTypesInConst(v *vdl.Value) {
 		}
 	case vdl.Struct:
 		for i := 0; i < v.Type().NumField(); i++ {
-			p.addTypesInConst(v.Field(i))
+			p.addTypesInConst(v.StructField(i))
 		}
 	case vdl.Union:
 		_, innerVal := v.UnionField()

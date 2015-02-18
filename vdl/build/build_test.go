@@ -581,8 +581,8 @@ func TestBuildExprs(t *testing.T) {
 	vvArray.Index(0).AssignInt(1)
 	vvArray.Index(1).AssignInt(-2)
 	vvStruct := vdl.ZeroValue(ttStruct)
-	vvStruct.Field(0).AssignInt(1)
-	vvStruct.Field(1).AssignString("abc")
+	vvStruct.StructField(0).AssignInt(1)
+	vvStruct.StructField(1).AssignString("abc")
 	tests := []struct {
 		Data  string
 		Types ts

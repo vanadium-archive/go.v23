@@ -504,7 +504,7 @@ func FromValue(target Target, vv *Value) error {
 			case err != nil:
 				return err
 			}
-			if err := FromValue(field, vv.Field(fx)); err != nil {
+			if err := FromValue(field, vv.StructField(fx)); err != nil {
 				return err
 			}
 			if err := fieldsTarget.FinishField(key, field); err != nil {

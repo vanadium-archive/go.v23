@@ -622,7 +622,7 @@ func StructBoolValue(t *Type, x ...SB) *Value {
 	res := ZeroValue(t)
 	for _, sb := range x {
 		_, index := t.FieldByName(sb.S)
-		res.Field(index).AssignBool(sb.B)
+		res.StructField(index).AssignBool(sb.B)
 	}
 	return res
 }
@@ -698,7 +698,7 @@ func StructNumValue(t *Type, x ...SN) *Value {
 	res := ZeroValue(t)
 	for _, sn := range x {
 		_, index := t.FieldByName(sn.S)
-		AssignNum(res.Field(index), sn.N)
+		AssignNum(res.StructField(index), sn.N)
 	}
 	return res
 }

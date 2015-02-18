@@ -116,8 +116,8 @@ func init() {
 	vSet.AssignSetKey(vdl.StringValue("A"))
 	vMap.AssignMapIndex(vdl.StringValue("A"), vdl.Int64Value(1))
 
-	vStruct.Field(0).AssignString("foo")
-	vStruct.Field(1).AssignInt(123)
+	vStruct.StructField(0).AssignString("foo")
+	vStruct.StructField(1).AssignInt(123)
 
 	vUnionABC.AssignUnionField(0, vdl.StringValue("abc"))
 	vUnion123.AssignUnionField(1, vdl.Int64Value(123))

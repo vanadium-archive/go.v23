@@ -126,7 +126,7 @@ func javaVal(v *vdl.Value, env *compile.Env) string {
 			if i > 0 {
 				ret = ret + ", "
 			}
-			ret = ret + javaConstVal(v.Field(i), env)
+			ret = ret + javaConstVal(v.StructField(i), env)
 		}
 		return ret
 	case vdl.TypeObject:

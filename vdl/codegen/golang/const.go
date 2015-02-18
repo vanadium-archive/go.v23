@@ -167,7 +167,7 @@ func untypedConst(data goData, v *vdl.Value) string {
 		s := "{"
 		hasFields := false
 		for ix := 0; ix < t.NumField(); ix++ {
-			vf := v.Field(ix)
+			vf := v.StructField(ix)
 			if !vf.IsZero() || vf.Type().ContainsKind(vdl.WalkInline, vdl.TypeObject, vdl.Union) {
 				// We can't rely on the golang zero-value for this field, even if it's a
 				// vdl zero value, if the field contains inline typeobject or union,

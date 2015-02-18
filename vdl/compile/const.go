@@ -541,7 +541,7 @@ func evalStructLit(t *vdl.Type, lit *parse.ConstCompositeLit, file *File, env *E
 		if value == nil {
 			return nil
 		}
-		structv.Field(index).Assign(value)
+		structv.StructField(index).Assign(value)
 	}
 	if !haskeys && 0 < len(assigned) && len(assigned) < t.NumField() {
 		env.Errorf(file, lit.Pos(), "too few fields in %s", desc)

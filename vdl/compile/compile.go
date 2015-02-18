@@ -291,7 +291,7 @@ func addValueTypeDeps(v *vdl.Value, pkg *Package, env *Env, tdeps map[*vdl.Type]
 			return
 		}
 		for ix := 0; ix < t.NumField(); ix++ {
-			addValueTypeDeps(v.Field(ix), pkg, env, tdeps, pdeps)
+			addValueTypeDeps(v.StructField(ix), pkg, env, tdeps, pdeps)
 		}
 	case vdl.Union:
 		_, field := v.UnionField()

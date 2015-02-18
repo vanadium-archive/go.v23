@@ -190,7 +190,7 @@ type TestCase struct {
 // Tests contains the testcases to use to test vom encoding and decoding.
 const Tests = []TestCase {`)
 	// The vom encode-decode test cases need to be of type []any.
-	encodeDecodeTests := config.Field(0)
+	encodeDecodeTests := config.StructField(0)
 	if got, want := encodeDecodeTests.Type(), vdl.ListType(vdl.AnyType); got != want {
 		return nil, fmt.Errorf("got encodeDecodeTests type %v, want %v", got, want)
 	}
@@ -224,7 +224,7 @@ const Tests = []TestCase {`)
 	// Each of the []typeobject are a slice of inter-compatible typeobjects.
 	// However, the typeobjects are not compatible with any other []typeobject.
 	// Note: any and optional should be tested separately.
-	compatTests := config.Field(1)
+	compatTests := config.StructField(1)
 	if got, want := compatTests.Type(), vdl.MapType(vdl.StringType, vdl.ListType(vdl.TypeObjectType)); got != want {
 		return nil, fmt.Errorf("got compatTests type %v, want %v", got, want)
 	}
@@ -247,7 +247,7 @@ const CompatTests = map[string][]typeobject{`)
 
 	// The vom conversion tests need to be a map[string][]ConvertGroup
 	// See vom/testdata/vomtype.vdl
-	convertTests := config.Field(2)
+	convertTests := config.StructField(2)
 	fmt.Fprintf(buf, `
 // ConvertTests contains the testcases to check vom value convertibility.
 // ConvertTests maps TestName (string) to ConvertGroups ([]ConvertGroup)
@@ -268,9 +268,9 @@ const ConvertTests = map[string][]ConvertGroup{`)
 		{
 			%[1]q,
 			%[2]s,
-			{ `, convertGroup.Field(0).RawString(), vdlgen.TypedConst(convertGroup.Field(1), testpkg, imports))
+			{ `, convertGroup.StructField(0).RawString(), vdlgen.TypedConst(convertGroup.StructField(1), testpkg, imports))
 
-			values := convertGroup.Field(2)
+			values := convertGroup.StructField(2)
 			for iy := 0; iy < values.Len(); iy++ {
 				value := values.Index(iy)
 				if !value.IsNil() {

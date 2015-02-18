@@ -1141,7 +1141,7 @@ func (c convTarget) finishKeyStartField(key convTarget) (convTarget, error) {
 				// TODO(toddw): Add a way to track extra and missing fields.
 				return convTarget{}, ErrFieldNoExist
 			}
-			vvField := c.vv.Field(index)
+			vvField := c.vv.StructField(index)
 			if vvField.Kind() == Bool {
 				vvField.AssignBool(true)
 			}

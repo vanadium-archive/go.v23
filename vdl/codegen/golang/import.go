@@ -286,7 +286,7 @@ func addValueTypeDeps(v *vdl.Value, env *compile.Env, deps *deps, user importMap
 			return
 		}
 		for ix := 0; ix < t.NumField(); ix++ {
-			addValueTypeDeps(v.Field(ix), env, deps, user)
+			addValueTypeDeps(v.StructField(ix), env, deps, user)
 		}
 	case vdl.Union:
 		_, field := v.UnionField()

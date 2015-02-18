@@ -486,10 +486,8 @@ func (v *Value) MapIndex(key *Value) *Value {
 
 // Field returns the Struct field at the given index.  Panics if the index is
 // out of range.
-//
-// TODO(toddw): Rename to StructField.
-func (v *Value) Field(index int) *Value {
-	v.t.checkKind("Field", Struct)
+func (v *Value) StructField(index int) *Value {
+	v.t.checkKind("StructField", Struct)
 	return v.rep.(repSequence).Index(v.t.fields[index].Type, index)
 }
 

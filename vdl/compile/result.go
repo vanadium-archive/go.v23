@@ -168,7 +168,7 @@ func (e *Env) evalSelectorOnConst(def *ConstDef, selector string) (opconst.Const
 		if i < 0 {
 			return opconst.Const{}, fmt.Errorf("invalid field name on struct %s: %s", v, fieldName)
 		}
-		v = v.Field(i)
+		v = v.StructField(i)
 	}
 	return opconst.FromValue(v), nil
 }

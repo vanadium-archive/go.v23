@@ -108,7 +108,7 @@ func UntypedConst(v *vdl.Value, pkgPath string, imports codegen.Imports) string 
 		s := "{"
 		hasFields := false
 		for ix := 0; ix < t.NumField(); ix++ {
-			vf := v.Field(ix)
+			vf := v.StructField(ix)
 			if vf.IsZero() {
 				continue
 			}

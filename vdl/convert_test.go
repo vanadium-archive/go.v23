@@ -19,12 +19,12 @@ import (
 func errorValue(e verror.Standard) *vdl.Value {
 	verr := vdl.NonNilZeroValue(vdl.ErrorType)
 	vv := verr.Elem()
-	vv.Field(0).Field(0).AssignString(string(e.IDAction.ID))
-	vv.Field(0).Field(1).AssignUint(uint64(e.IDAction.Action))
-	vv.Field(1).AssignString(e.Msg)
-	vv.Field(2).AssignLen(len(e.ParamList))
+	vv.StructField(0).StructField(0).AssignString(string(e.IDAction.ID))
+	vv.StructField(0).StructField(1).AssignUint(uint64(e.IDAction.Action))
+	vv.StructField(1).AssignString(e.Msg)
+	vv.StructField(2).AssignLen(len(e.ParamList))
 	for ix, p := range e.ParamList {
-		vv.Field(2).Index(ix).Assign(vdl.ValueOf(p))
+		vv.StructField(2).Index(ix).Assign(vdl.ValueOf(p))
 	}
 	return verr
 }
@@ -820,7 +820,7 @@ func TestConverterUnion(t *testing.T) {
 	vv123 := vdl.Int64Value(123)
 	vvAbc := vdl.StringValue("Abc")
 	vvStruct123 := vdl.ZeroValue(vdl.StructInt64TypeN)
-	vvStruct123.Field(0).Assign(vv123)
+	vvStruct123.StructField(0).Assign(vv123)
 	rvTrue := bool(true)
 	rv123 := int64(123)
 	rvAbc := string("Abc")

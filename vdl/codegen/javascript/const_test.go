@@ -13,8 +13,8 @@ func TestTypedConst(t *testing.T) {
 	}
 	structValue := vdl.ZeroValue(structType)
 	_, index := structValue.Type().FieldByName(unnamedTypeFieldName)
-	structValue.Field(index).AssignLen(1)
-	structValue.Field(index).Index(0).AssignString("AStringVal")
+	structValue.StructField(index).AssignLen(1)
+	structValue.StructField(index).Index(0).AssignString("AStringVal")
 
 	tests := []struct {
 		name       string

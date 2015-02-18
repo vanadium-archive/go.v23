@@ -18,8 +18,8 @@ var (
 
 func makeKey(a int64, b string) *Value {
 	key := ZeroValue(keyType)
-	key.Field(0).AssignInt(a)
-	key.Field(1).AssignString(b)
+	key.StructField(0).AssignInt(a)
+	key.StructField(1).AssignString(b)
 	return key
 }
 
@@ -814,21 +814,21 @@ func assignMap(t *testing.T, x *Value) {
 
 func assignStruct(t *testing.T, x *Value) {
 	if x.Kind() == Struct {
-		x.Field(0).AssignInt(1)
+		x.StructField(0).AssignInt(1)
 		if x.IsZero() {
 			t.Errorf(`Struct assign index 0 is zero`)
 		}
-		if x.Field(0) != x.StructFieldByName("A") {
+		if x.StructField(0) != x.StructFieldByName("A") {
 			t.Errorf(`struct{A int64;B string;C bool} does not have matching values at index 0 and field name A`)
 		}
 		if got, want := x.String(), `struct{A int64;B string;C bool}{A: 1, B: "", C: false}`; got != want {
 			t.Errorf(`Struct assign index 0 got %v, want %v`, got, want)
 		}
-		x.Field(1).AssignString("a")
+		x.StructField(1).AssignString("a")
 		if x.IsZero() {
 			t.Errorf(`Struct assign index 1 is zero`)
 		}
-		if x.Field(1) != x.StructFieldByName("B") {
+		if x.StructField(1) != x.StructFieldByName("B") {
 			t.Errorf(`struct{A int64;B string;C bool} does not have matching values at index 1 and field name B`)
 		}
 		if got, want := x.String(), `struct{A int64;B string;C bool}{A: 1, B: "a", C: false}`; got != want {
@@ -838,12 +838,12 @@ func assignStruct(t *testing.T, x *Value) {
 			t.Errorf(`struct{A int64;B string;C bool} had value %v for field name NotAStructField`, value)
 		}
 		y := CopyValue(x)
-		y.Field(2).AssignBool(false)
+		y.StructField(2).AssignBool(false)
 		if !EqualValue(x, y) {
 			t.Errorf(`Struct !equal %v and %v`, x, y)
 		}
 	} else {
-		ExpectMismatchedKind(t, func() { x.Field(0) })
+		ExpectMismatchedKind(t, func() { x.StructField(0) })
 		ExpectMismatchedKind(t, func() { x.StructFieldByName("A") })
 	}
 }
