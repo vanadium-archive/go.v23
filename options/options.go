@@ -94,6 +94,25 @@ type AllowedServersPolicy []security.BlessingPattern
 
 func (AllowedServersPolicy) IPCCallOpt() {}
 
+// When ServerPublicKey is specified, the client will refuse to connect to
+// servers with a different PublicKey.
+type ServerPublicKey struct{ security.PublicKey }
+
+func (ServerPublicKey) IPCCallOpt() {}
+
+// SkipResolveAuthorization causes clients to ignore the expected server
+// blessings provided during namespace resolution. In other words, it causes
+// clients to skip authorization of servers when resolving names to addresses
+// (endpoints).
+//
+// When providing this option, secure clients will typically specify an
+// authorization policy via other options like AllowedServersPolicy or
+// ServerPublicKey.
+type SkipResolveAuthorization struct{}
+
+func (SkipResolveAuthorization) IPCCallOpt()   {}
+func (SkipResolveAuthorization) NSResolveOpt() {}
+
 // Discharge wraps the security.Discharge interface so that we can
 // add functions representing the option annotations.
 type Discharge struct{ security.Discharge }
@@ -126,9 +145,3 @@ func (ServesMountTable) IPCServerOpt() {}
 type NoRetry struct{}
 
 func (NoRetry) IPCCallOpt() {}
-
-// When ServerPublicKey is specified, the client will refuse to connect to server's
-// with a different PublicKey.
-type ServerPublicKey struct{ security.PublicKey }
-
-func (ServerPublicKey) IPCCallOpt() {}

@@ -47,6 +47,7 @@ type MountTable interface {
 	Mount(Server string, TTL uint32, Flags naming.MountFlag) error
 
 	// Mount Server (a global name) onto the receiver.
+	//
 	// Subsequent mounts add to the servers mounted there.  The multiple
 	// servers are considered equivalent and are meant solely for
 	// availability, i.e., no load balancing is guaranteed.
@@ -80,7 +81,7 @@ type MountTable interface {
 	// servers to query and the suffix at those servers.
 	ResolveStep() (Entry naming.VDLMountEntry | error)
 
-	// Obsolete, left for backward compatability until all uses are killed. 
+	// Obsolete, left for backward compatability until all uses are killed.
 	ResolveStepX() (Entry naming.VDLMountEntry | error)
 
 	object.Object

@@ -92,8 +92,6 @@ type MountEntry struct {
 	Servers []MountedServer
 	// mt is true if servers refer to another mount table.
 	mt bool
-	// Pattern is a security.BlessingPattern that should match the servers.
-	Pattern string
 }
 
 // GlobError is returned by namespace.Glob to indicate a piece of the namespace
@@ -143,6 +141,15 @@ type MountOpt interface {
 type ReplaceMountOpt bool
 
 func (ReplaceMountOpt) NSMountOpt() {}
+
+// MountedServerBlessingsOpt specifies blessing patterns that match the set of
+// blessings presented by the server being mounted.
+//
+// Ideally, the type of this would be []security.BlessingPattern, but it can't
+// be because of a cyclic dependency between the naming and security packages.
+type MountedServerBlessingsOpt []string
+
+func (MountedServerBlessingsOpt) NSMountOpt() {}
 
 // ServesMountTableOpt means the target is a mount table.
 type ServesMountTableOpt bool

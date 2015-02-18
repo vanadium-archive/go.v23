@@ -105,6 +105,7 @@ type MountTableClientMethods interface {
 	// MountX before the release.
 	Mount(ctx *context.T, Server string, TTL uint32, Flags naming.MountFlag, opts ...ipc.CallOpt) error
 	// Mount Server (a global name) onto the receiver.
+	//
 	// Subsequent mounts add to the servers mounted there.  The multiple
 	// servers are considered equivalent and are meant solely for
 	// availability, i.e., no load balancing is guaranteed.
@@ -290,6 +291,7 @@ type MountTableServerMethods interface {
 	// MountX before the release.
 	Mount(ctx ipc.ServerContext, Server string, TTL uint32, Flags naming.MountFlag) error
 	// Mount Server (a global name) onto the receiver.
+	//
 	// Subsequent mounts add to the servers mounted there.  The multiple
 	// servers are considered equivalent and are meant solely for
 	// availability, i.e., no load balancing is guaranteed.
@@ -418,7 +420,7 @@ var descMountTable = ipc.InterfaceDesc{
 		},
 		{
 			Name: "MountX",
-			Doc:  "// Mount Server (a global name) onto the receiver.\n// Subsequent mounts add to the servers mounted there.  The multiple\n// servers are considered equivalent and are meant solely for\n// availability, i.e., no load balancing is guaranteed.\n//\n// BlessingPatterns is a set of patterns that match the blessings\n// presented by Server to clients that initiate connections with it.\n// If empty, the mounttable makes the conservative assumption that the\n// blessings presented by the client invoking Mount will be the\n// blessings presented by Server.\n//\n// TTL is the number of seconds the mount is to last unless refreshed by\n// another mount of the same server.  A TTL of 0 represents an infinite\n// duration.  A server with an expired TTL should never appear in the\n// results nor affect the operation of any MountTable method, and should\n// act as if it was never present as far as the interface is concerned.\n//\n// Opts represents a bit mask of options.",
+			Doc:  "// Mount Server (a global name) onto the receiver.\n//\n// Subsequent mounts add to the servers mounted there.  The multiple\n// servers are considered equivalent and are meant solely for\n// availability, i.e., no load balancing is guaranteed.\n//\n// BlessingPatterns is a set of patterns that match the blessings\n// presented by Server to clients that initiate connections with it.\n// If empty, the mounttable makes the conservative assumption that the\n// blessings presented by the client invoking Mount will be the\n// blessings presented by Server.\n//\n// TTL is the number of seconds the mount is to last unless refreshed by\n// another mount of the same server.  A TTL of 0 represents an infinite\n// duration.  A server with an expired TTL should never appear in the\n// results nor affect the operation of any MountTable method, and should\n// act as if it was never present as far as the interface is concerned.\n//\n// Opts represents a bit mask of options.",
 			InArgs: []ipc.ArgDesc{
 				{"Server", ``},           // string
 				{"BlessingPatterns", ``}, // []security.BlessingPattern
@@ -459,7 +461,7 @@ var descMountTable = ipc.InterfaceDesc{
 		},
 		{
 			Name: "ResolveStepX",
-			Doc:  "// Obsolete, left for backward compatability until all uses are killed. ",
+			Doc:  "// Obsolete, left for backward compatability until all uses are killed.",
 			OutArgs: []ipc.ArgDesc{
 				{"Entry", ``}, // naming.VDLMountEntry
 				{"err", ``},   // error
