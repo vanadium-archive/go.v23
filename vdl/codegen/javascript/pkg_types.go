@@ -37,7 +37,7 @@ func (tn typeNames) LookupConstructor(t *vdl.Type) string {
 }
 
 func (tn typeNames) constructorFromTypeName(name string) string {
-	return "(vom.Registry.lookupOrCreateConstructor(" + name + "))"
+	return "(vdl.Registry.lookupOrCreateConstructor(" + name + "))"
 }
 
 // LookupType returns a string representing the type.
@@ -129,7 +129,7 @@ func (p pkgTypeNames) getNames() typeNames {
 // addNameIfNeeded produces a new typeName if:
 // -it is not already generated
 // -it is not from another package
-// -it is not an already a built-in type in vom.js (primitives, any, etc..)
+// -it is not an already a built-in type in vdl.js (primitives, any, etc..)
 func (p *pkgTypeNames) addNameIfNeeded(t *vdl.Type) {
 	if _, ok := p.names[t]; ok {
 		return

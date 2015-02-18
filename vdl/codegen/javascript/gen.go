@@ -82,7 +82,7 @@ func formatUint64BigInt(v uint64) string {
 	if v > 0 {
 		sign = "1"
 	}
-	return fmt.Sprintf("new vom.BigInt(%s, %s)", sign, formatByteBuffer(buffer))
+	return fmt.Sprintf("new vdl.BigInt(%s, %s)", sign, formatByteBuffer(buffer))
 }
 
 // Format the given int64 into a JS BigInt.
@@ -96,7 +96,7 @@ func formatInt64BigInt(v int64) string {
 	}
 	binary.BigEndian.PutUint64(buffer, uint64(v*sign)) // Adjust value by sign.
 
-	return fmt.Sprintf("new vom.BigInt(%d, %s)", sign, formatByteBuffer(buffer))
+	return fmt.Sprintf("new vdl.BigInt(%d, %s)", sign, formatByteBuffer(buffer))
 }
 
 // Given a buffer of bytes, create the JS Uint8Array that corresponds to it (to be used with BigInt).
@@ -148,7 +148,7 @@ func untypedConst(names typeNames, v *vdl.Value) string {
 		}
 		return "null"
 	case vdl.Complex64, vdl.Complex128:
-		return fmt.Sprintf("new vom.Complex(%f, %f)", real(v.Complex()), imag(v.Complex()))
+		return fmt.Sprintf("new vdl.Complex(%f, %f)", real(v.Complex()), imag(v.Complex()))
 	case vdl.Enum:
 		return fmt.Sprintf("'%s'", v.EnumLabel())
 	case vdl.Array, vdl.List:
@@ -207,7 +207,7 @@ func primitiveWithOptionalName(primitive, name string) string {
 	if name == "" {
 		return "Types." + primitive
 	}
-	return "new vom.Type({kind: Kind." + primitive + ", name: '" + name + "'})"
+	return "new vdl.Type({kind: Kind." + primitive + ", name: '" + name + "'})"
 }
 
 // typedConst returns a javascript string representing a const that is always
@@ -330,15 +330,15 @@ func hasErrors(pkg *compile.Package) bool {
 }
 
 func generateSystemImports(data data) string {
-	res := "var vom = require('"
+	res := "var vdl = require('"
 	packagePrefix := ""
 	if data.PathToCoreJS != "" {
 		packagePrefix = strings.Repeat("../", strings.Count(data.Pkg.Path, "/")+1) + data.PathToCoreJS
 	}
 	if data.PathToCoreJS != "" {
-		res += packagePrefix + "/vom/vom');"
+		res += packagePrefix + "/vdl/vdl');"
 	} else {
-		res += "veyron').vom;"
+		res += "veyron').vdl;"
 	}
 	res += "\n"
 	if hasErrors(data.Pkg) {
