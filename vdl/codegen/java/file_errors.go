@@ -26,14 +26,14 @@ public final class {{ .ClassName }} {
     {{ end }} {{/* range .Files */}}
 
     static {
-    	{{ range $file := .Files }}
-    	/* The following errors originate in file: {{ $file.Name }} */
-    	{{ range $error := $file.Errors }}
-    	{{ range $format := $error.Formats}}
-    	io.v.core.veyron2.i18n.Language.getDefaultCatalog().setWithBase("{{ $format.Lang }}", {{ $error.Name }}.getID(), "{{ $format.Fmt }}");
-    	{{ end }} {{/* range $error.Formats */}}
-    	{{ end }} {{/* range $file.Errors */}}
-    	{{ end }} {{/* range .Files */}}
+        {{ range $file := .Files }}
+        /* The following errors originate in file: {{ $file.Name }} */
+        {{ range $error := $file.Errors }}
+        {{ range $format := $error.Formats}}
+        io.v.core.veyron2.i18n.Language.getDefaultCatalog().setWithBase("{{ $format.Lang }}", {{ $error.Name }}.getID(), "{{ $format.Fmt }}");
+        {{ end }} {{/* range $error.Formats */}}
+        {{ end }} {{/* range $file.Errors */}}
+        {{ end }} {{/* range .Files */}}
     }
 
     {{ range $file := .Files }}
@@ -43,9 +43,9 @@ public final class {{ .ClassName }} {
      * Creates an error with {@code {{ $error.Name }}} identifier.
      */
     public static io.v.core.veyron2.verror.VException {{ $error.MethodName }}(io.v.core.veyron2.context.VContext _ctx{{ $error.MethodArgs}}) {
-    	final java.lang.Object[] _params = new java.lang.Object[] { {{ $error.Params }} };
-    	final java.lang.reflect.Type[] _paramTypes = new java.lang.reflect.Type[]{ {{ $error.ParamTypes }} };
-    	return io.v.core.veyron2.verror.VException.make({{ $error.Name }}, _ctx, _paramTypes, _params);
+        final java.lang.Object[] _params = new java.lang.Object[] { {{ $error.Params }} };
+        final java.lang.reflect.Type[] _paramTypes = new java.lang.reflect.Type[]{ {{ $error.ParamTypes }} };
+        return io.v.core.veyron2.verror.VException.make({{ $error.Name }}, _ctx, _paramTypes, _params);
     }
     {{ end }} {{/* range $file.Errors */}}
     {{ end }} {{/* range .Files */}}
