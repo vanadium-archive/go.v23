@@ -11,9 +11,9 @@ import (
 func TestBinaryEncoder(t *testing.T) {
 	for _, test := range testdata.Tests {
 		var buf bytes.Buffer
-		encoder, err := NewBinaryEncoder(&buf)
+		encoder, err := NewEncoder(&buf)
 		if err != nil {
-			t.Errorf("%s: NewBinaryEncoder failed: %v", test.Name, err)
+			t.Errorf("%s: NewEncoder failed: %v", test.Name, err)
 			continue
 		}
 		if err := encoder.Encode(test.Value); err != nil {

@@ -5,7 +5,7 @@ import "bytes"
 // Encode encodes the provided value using a new instance of a VOM encoder.
 func Encode(value interface{}) ([]byte, error) {
 	var buf bytes.Buffer
-	encoder, err := NewBinaryEncoder(&buf)
+	encoder, err := NewEncoder(&buf)
 	if err != nil {
 		return nil, err
 	}
