@@ -19,11 +19,9 @@ type encoder interface {
 	FinishEncode() error
 }
 
-// NewBinaryEncoder returns a new Encoder that writes to the given writer in the
+// NewEncoder returns a new Encoder that writes to the given writer in the
 // binary format.  The binary format is compact and fast.
-//
-// TODO(toddw): Rename to NewEncoder.
-func NewBinaryEncoder(w io.Writer) (*Encoder, error) {
+func NewEncoder(w io.Writer) (*Encoder, error) {
 	// The binary format always starts with a magic byte.
 	_, err := w.Write([]byte{binaryMagicByte})
 	if err != nil {

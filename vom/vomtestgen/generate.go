@@ -217,9 +217,9 @@ const Tests = []TestCase {`)
 
 func toVomHex(value *vdl.Value) (string, string, error) {
 	buf := new(bytes.Buffer)
-	enc, err := vom.NewBinaryEncoder(buf)
+	enc, err := vom.NewEncoder(buf)
 	if err != nil {
-		return "", "", fmt.Errorf("vom.NewBinaryEncoder failed: %v", err)
+		return "", "", fmt.Errorf("vom.NewEncoder failed: %v", err)
 	}
 	if err := enc.Encode(value); err != nil {
 		return "", "", fmt.Errorf("vom.Encode(%v) failed: %v", value, err)

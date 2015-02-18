@@ -101,9 +101,9 @@ func TestRoundtrip(t *testing.T) {
 	for _, test := range tests {
 		name := fmt.Sprintf("(%#v,%#v)", test.In, test.Want)
 		var buf bytes.Buffer
-		encoder, err := NewBinaryEncoder(&buf)
+		encoder, err := NewEncoder(&buf)
 		if err != nil {
-			t.Errorf("%s: NewBinaryEncoder failed: %v", name, err)
+			t.Errorf("%s: NewEncoder failed: %v", name, err)
 			continue
 		}
 		if err := encoder.Encode(test.In); err != nil {
