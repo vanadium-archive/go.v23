@@ -818,6 +818,9 @@ func assignStruct(t *testing.T, x *Value) {
 		if x.IsZero() {
 			t.Errorf(`Struct assign index 0 is zero`)
 		}
+		if x.Field(0) != x.StructFieldByName("A") {
+			t.Errorf(`struct{A int64;B string;C bool} does not have matching values at index 0 and field name A`)
+		}
 		if got, want := x.String(), `struct{A int64;B string;C bool}{A: 1, B: "", C: false}`; got != want {
 			t.Errorf(`Struct assign index 0 got %v, want %v`, got, want)
 		}
@@ -825,8 +828,14 @@ func assignStruct(t *testing.T, x *Value) {
 		if x.IsZero() {
 			t.Errorf(`Struct assign index 1 is zero`)
 		}
+		if x.Field(1) != x.StructFieldByName("B") {
+			t.Errorf(`struct{A int64;B string;C bool} does not have matching values at index 1 and field name B`)
+		}
 		if got, want := x.String(), `struct{A int64;B string;C bool}{A: 1, B: "a", C: false}`; got != want {
 			t.Errorf(`Struct assign index 1 got %v, want %v`, got, want)
+		}
+		if value := x.StructFieldByName("NotAStructField"); value != nil {
+			t.Errorf(`struct{A int64;B string;C bool} had value %v for field name NotAStructField`, value)
 		}
 		y := CopyValue(x)
 		y.Field(2).AssignBool(false)
@@ -835,6 +844,7 @@ func assignStruct(t *testing.T, x *Value) {
 		}
 	} else {
 		ExpectMismatchedKind(t, func() { x.Field(0) })
+		ExpectMismatchedKind(t, func() { x.StructFieldByName("A") })
 	}
 }
 

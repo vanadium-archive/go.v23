@@ -493,6 +493,17 @@ func (v *Value) Field(index int) *Value {
 	return v.rep.(repSequence).Index(v.t.fields[index].Type, index)
 }
 
+// StructFieldByName returns the Struct field for the given name.  Returns nil
+// if the name given is not one of the struct's fields.
+func (v *Value) StructFieldByName(name string) *Value {
+	v.t.checkKind("StructFieldByName", Struct)
+	_, index := v.t.FieldByName(name)
+	if index == -1 {
+		return nil
+	}
+	return v.rep.(repSequence).Index(v.t.fields[index].Type, index)
+}
+
 // UnionIndex returns the field index and value from the underlying Union.
 func (v *Value) UnionField() (int, *Value) {
 	v.t.checkKind("UnionField", Union)
