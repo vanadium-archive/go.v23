@@ -137,7 +137,7 @@ func processServerWrapperMethod(iface *compile.Interface, method *compile.Method
 		Name:            vdlutil.ToCamelCase(method.Name),
 		RecvType:        javaType(method.InStream, true, env),
 		RetType:         clientInterfaceOutArg(iface, method, true, env),
-		Returns:         len(method.OutArgs) >= 2,
+		Returns:         len(method.OutArgs) >= 1,
 		SendType:        javaType(method.OutStream, true, env),
 	}
 }
@@ -150,7 +150,7 @@ func processServerWrapperEmbedMethod(iface *compile.Interface, embedMethod *comp
 		LocalWrapperVarName: vdlutil.ToCamelCase(iface.Name) + "Wrapper",
 		Name:                vdlutil.ToCamelCase(embedMethod.Name),
 		RetType:             clientInterfaceOutArg(iface, embedMethod, true, env),
-		Returns:             len(embedMethod.OutArgs) >= 2,
+		Returns:             len(embedMethod.OutArgs) >= 1,
 	}
 }
 

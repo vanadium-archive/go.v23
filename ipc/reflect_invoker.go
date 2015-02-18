@@ -204,8 +204,20 @@ func (ri reflectInvoker) Invoke(method string, call ServerCall, argptrs []interf
 	for ix, argptr := range argptrs {
 		rvArgs[ix+2] = reflect.ValueOf(argptr).Elem()
 	}
-	// Invoke the method, and convert results into interface{}.
+	// Invoke the method, and handle the final error out-arg.
 	rvResults := info.rvFunc.Call(rvArgs)
+	if len(rvResults) == 0 {
+		return nil, ErrNoFinalErrorOutArg
+	}
+	rvErr := rvResults[len(rvResults)-1]
+	rvResults = rvResults[:len(rvResults)-1]
+	if rvErr.Type() != rtError {
+		return nil, ErrNoFinalErrorOutArg
+	}
+	if iErr := rvErr.Interface(); iErr != nil {
+		return nil, iErr.(error)
+	}
+	// Convert the rest of the results into interface{}.
 	if len(rvResults) == 0 {
 		return nil, nil
 	}
@@ -373,14 +385,15 @@ var (
 
 	// ReflectInvoker will panic iff the error is Aborted, otherwise it will
 	// silently ignore the error.
-	ErrReservedMethod    = verror.New(verror.ErrInternal, nil, "Reserved method")
-	ErrMethodNotExported = verror.New(verror.ErrBadArg, nil, "Method not exported")
-	ErrNonRPCMethod      = verror.New(verror.ErrBadArg, nil, "Non-rpc method.  We require at least 1 in-arg."+useContext)
-	ErrInServerCall      = abortedf("Context arg ipc.ServerCall is invalid; cannot determine streaming types." + forgotWrap)
-	ErrBadDescribe       = abortedf("Describe__ must have signature Describe__() []ipc.InterfaceDesc")
-	ErrBadGlobber        = abortedf("Globber must have signature Globber() *ipc.GlobState")
-	ErrBadGlob           = abortedf("Glob__ must have signature Glob__(ipc.ServerContext, pattern string) (<-chan naming.VDLMountEntry, error)")
-	ErrBadGlobChildren   = abortedf("GlobChildren__ must have signature GlobChildren__(ipc.ServerContext) (<-chan string, error)")
+	ErrReservedMethod     = verror.New(verror.ErrInternal, nil, "Reserved method")
+	ErrMethodNotExported  = verror.New(verror.ErrBadArg, nil, "Method not exported")
+	ErrNonRPCMethod       = verror.New(verror.ErrBadArg, nil, "Non-rpc method.  We require at least 1 in-arg."+useContext)
+	ErrInServerCall       = abortedf("Context arg ipc.ServerCall is invalid; cannot determine streaming types." + forgotWrap)
+	ErrNoFinalErrorOutArg = abortedf("Invalid out-args (final out-arg must be error)")
+	ErrBadDescribe        = abortedf("Describe__ must have signature Describe__() []ipc.InterfaceDesc")
+	ErrBadGlobber         = abortedf("Globber must have signature Globber() *ipc.GlobState")
+	ErrBadGlob            = abortedf("Glob__ must have signature Glob__(ipc.ServerContext, pattern string) (<-chan naming.VDLMountEntry, error)")
+	ErrBadGlobChildren    = abortedf("GlobChildren__ must have signature GlobChildren__(ipc.ServerContext) (<-chan string, error)")
 )
 
 func typeCheckMethod(method reflect.Method, sig *signature.Method) error {
@@ -546,7 +559,12 @@ func typeCheckMethodArgs(mtype reflect.Type, sig *signature.Method) error {
 		}
 		(*sig).InArgs = append((*sig).InArgs, signature.Arg{Type: vdlType})
 	}
-	for index := 0; index < mtype.NumOut(); index++ {
+	// The out-args must contain a final error argument, which is handled
+	// specially by the framework.
+	if mtype.NumOut() == 0 || mtype.Out(mtype.NumOut()-1) != rtError {
+		return ErrNoFinalErrorOutArg
+	}
+	for index := 0; index < mtype.NumOut()-1; index++ {
 		vdlType, err := vdl.TypeFromReflect(mtype.Out(index))
 		if err != nil {
 			return abortedf("Invalid out-arg %d type: %v", index, err)

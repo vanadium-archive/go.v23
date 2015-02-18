@@ -52,9 +52,7 @@ func (c implExpClientStub) Exp(ctx *context.T, i0 float64, opts ...ipc.CallOpt) 
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Exp", []interface{}{i0}, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish(&o0)
 	return
 }
 
@@ -126,7 +124,6 @@ var descExp = ipc.InterfaceDesc{
 			},
 			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // float64
-				{"", ``}, // error
 			},
 		},
 	},

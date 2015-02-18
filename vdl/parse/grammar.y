@@ -416,27 +416,19 @@ named_arg_list:
 //  (string | error)
 //  (a, b string, c bool | error)
 //
-// Everywhere "error" appears above, we actually let the parser accept any type.
-// This is because parser syntax errors are hard to understand; instead we check
-// that the last return-arg must be "error" in the compiler.
-//
-// TODO(toddw): For now we leave the error in the list of out-args, so that the
-// rest of our code works the same way.  As the next step of this change, we
-// need to remove the error from the list of out-args, and remove associated
-// special-cases throughout our codebase.
+// TODO(toddw): Improve parser syntax errors.
 outargs:
-  type
-  { $$ = []*Field{{Type:$1, NamePos:NamePos{Pos:$1.Pos()}}} }
-| '(' named_arg_list ocomma '|' type ')'
-  { $$ = append($2, &Field{Type:$5, NamePos:NamePos{Name: "err", Pos:$5.Pos()}}) }
-| '(' type_comma_list ocomma '|' type ')'
+  tERROR
+  { $$ = nil }
+| '(' named_arg_list ocomma '|' tERROR ')'
+  { $$ = $2 }
+| '(' type_comma_list ocomma '|' tERROR ')'
   // Just like Go, we allow a list of types without variable names.  See the
   // field_spec rule for a workaround to avoid a reduce/reduce conflict.
   {
     for _, t := range $2 {
       $$ = append($$, &Field{Type:t, NamePos:NamePos{Pos:t.Pos()}})
     }
-    $$ = append($$, &Field{Type:$5, NamePos:NamePos{Pos:$5.Pos()}})
   }
 
 streamargs:

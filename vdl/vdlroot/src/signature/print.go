@@ -102,20 +102,14 @@ func inArgsStr(args []Arg, types *NamedTypes) string {
 }
 
 func outArgsStr(args []Arg, types *NamedTypes) string {
-	var ret []string
-	for i, arg := range args {
-		if i == len(args)-1 && arg.Type == vdl.ErrorType {
-			// TODO(toddw): At the moment we don't have a consistent error-handling
-			// strategy for out-args, so we have this hack.  Make the error-handling
-			// strategy consistent, and remove this hack.
-			continue
-		}
-		ret = append(ret, argStr(arg, types))
-	}
-	if len(ret) == 0 {
+	if len(args) == 0 {
 		return " error"
 	}
-	return fmt.Sprintf(" (%s | error)", strings.Join(ret, ", "))
+	out := make([]string, len(args))
+	for i, arg := range args {
+		out[i] = argStr(arg, types)
+	}
+	return fmt.Sprintf(" (%s | error)", strings.Join(out, ", "))
 }
 
 func argStr(arg Arg, types *NamedTypes) string {

@@ -64,9 +64,7 @@ func (c implStoreClientStub) Trace(ctx *context.T, i0 uniqueid.Id, opts ...ipc.C
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Trace", []interface{}{i0}, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish(&o0)
 	return
 }
 
@@ -144,9 +142,7 @@ func (c implStoreAllTracesCallRecv) Err() error {
 	return c.c.errRecv
 }
 func (c *implStoreAllTracesCall) Finish() (err error) {
-	if ierr := c.Call.Finish(&err); ierr != nil {
-		err = ierr
-	}
+	err = c.Call.Finish()
 	return
 }
 
@@ -235,16 +231,12 @@ var descStore = ipc.InterfaceDesc{
 			},
 			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // vtrace.TraceRecord
-				{"", ``}, // error
 			},
 			Tags: []vdl.AnyRep{access.Tag("Debug")},
 		},
 		{
 			Name: "AllTraces",
 			Doc:  "// AllTraces returns TraceRecords for all traces the server currently\n// knows about.",
-			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // error
-			},
 			Tags: []vdl.AnyRep{access.Tag("Debug")},
 		},
 	},

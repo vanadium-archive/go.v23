@@ -106,7 +106,6 @@ func (o *notags) Method1(c ipc.ServerContext) error               { o.ctx = c; r
 func (o *notags) Method2(c ipc.ServerContext) (int, error)        { o.ctx = c; return 0, nil }
 func (o *notags) Method3(c ipc.ServerContext, _ int) error        { o.ctx = c; return nil }
 func (o *notags) Method4(c ipc.ServerContext, i int) (int, error) { o.ctx = c; return i, nil }
-func (o *notags) Method5(c ipc.ServerContext) int                 { o.ctx = c; return 1 }
 func (o *notags) Error(c ipc.ServerContext) error                 { o.ctx = c; return errApp }
 
 type tags struct{ testObj }
@@ -146,18 +145,17 @@ func TestReflectInvoker(t *testing.T) {
 		err     error
 	}
 	tests := []testcase{
-		{&notags{}, "Method1", call1, nil, nil, v{nil}, nil},
-		{&notags{}, "Method2", call2, nil, nil, v{0, nil}, nil},
-		{&notags{}, "Method3", call3, nil, v{0}, v{nil}, nil},
-		{&notags{}, "Method4", call4, nil, v{11}, v{11, nil}, nil},
-		{&notags{}, "Method5", call5, nil, nil, v{1}, nil},
-		{&notags{}, "Error", call6, nil, nil, v{errApp}, nil},
-		{&tags{}, "Alpha", call1, tagAlpha, nil, v{nil}, nil},
-		{&tags{}, "Beta", call2, tagBeta, nil, v{0, nil}, nil},
-		{&tags{}, "Gamma", call3, tagGamma, v{0}, v{nil}, nil},
-		{&tags{}, "Delta", call4, tagDelta, v{11}, v{11, nil}, nil},
-		{&tags{}, "Epsilon", call5, tagEpsilon, v{11, "b"}, v{11, "b", nil}, nil},
-		{&tags{}, "Error", call1, nil, nil, v{errApp}, nil},
+		{&notags{}, "Method1", call1, nil, nil, nil, nil},
+		{&notags{}, "Method2", call2, nil, nil, v{0}, nil},
+		{&notags{}, "Method3", call3, nil, v{0}, nil, nil},
+		{&notags{}, "Method4", call4, nil, v{11}, v{11}, nil},
+		{&notags{}, "Error", call6, nil, nil, nil, errApp},
+		{&tags{}, "Alpha", call1, tagAlpha, nil, nil, nil},
+		{&tags{}, "Beta", call2, tagBeta, nil, v{0}, nil},
+		{&tags{}, "Gamma", call3, tagGamma, v{0}, nil, nil},
+		{&tags{}, "Delta", call4, tagDelta, v{11}, v{11}, nil},
+		{&tags{}, "Epsilon", call5, tagEpsilon, v{11, "b"}, v{11, "b"}, nil},
+		{&tags{}, "Error", call1, nil, nil, nil, errApp},
 	}
 	name := func(test testcase) string {
 		return fmt.Sprintf("%T.%s()", test.obj, test.method)
@@ -260,10 +258,10 @@ func (*stringBoolContext) SendStream() interface {
 	return nil
 }
 
-func (sigTest) Sig1(ipc.ServerContext)                             {}
-func (sigTest) Sig2(ipc.ServerContext, int32, string) error        { return nil }
-func (sigTest) Sig3(*stringBoolContext, float64) ([]uint32, error) { return nil, nil }
-func (sigTest) Sig4(ipc.ServerCall, int32, string) (int32, string) { return 0, "" }
+func (sigTest) Sig1(ipc.ServerContext) error                              { return nil }
+func (sigTest) Sig2(ipc.ServerContext, int32, string) error               { return nil }
+func (sigTest) Sig3(*stringBoolContext, float64) ([]uint32, error)        { return nil, nil }
+func (sigTest) Sig4(ipc.ServerCall, int32, string) (int32, string, error) { return 0, "", nil }
 func (sigTest) Describe__() []ipc.InterfaceDesc {
 	return []ipc.InterfaceDesc{
 		{
@@ -275,11 +273,10 @@ func (sigTest) Describe__() []ipc.InterfaceDesc {
 			},
 			Methods: []ipc.MethodDesc{
 				{
-					Name:   "Sig3",
-					Doc:    "Doc Sig3",
-					InArgs: []ipc.ArgDesc{{Name: "i0_3", Doc: "Doc i0_3"}},
-					OutArgs: []ipc.ArgDesc{
-						{Name: "o0_3", Doc: "Doc o0_3"}, {Name: "err_3", Doc: "Doc err_3"}},
+					Name:      "Sig3",
+					Doc:       "Doc Sig3",
+					InArgs:    []ipc.ArgDesc{{Name: "i0_3", Doc: "Doc i0_3"}},
+					OutArgs:   []ipc.ArgDesc{{Name: "o0_3", Doc: "Doc o0_3"}},
 					InStream:  ipc.ArgDesc{Name: "is_3", Doc: "Doc is_3"},
 					OutStream: ipc.ArgDesc{Name: "os_3", Doc: "Doc os_3"},
 					Tags:      []vdl.AnyRep{"a", "b", int32(123)},
@@ -293,11 +290,10 @@ func (sigTest) Describe__() []ipc.InterfaceDesc {
 			Methods: []ipc.MethodDesc{
 				{
 					// The same Sig3 method is described here in a different interface.
-					Name:   "Sig3",
-					Doc:    "Doc Sig3x",
-					InArgs: []ipc.ArgDesc{{Name: "i0_3x", Doc: "Doc i0_3x"}},
-					OutArgs: []ipc.ArgDesc{
-						{Name: "o0_3x", Doc: "Doc o0_3x"}, {Name: "err_3x", Doc: "Doc err_3x"}},
+					Name:      "Sig3",
+					Doc:       "Doc Sig3x",
+					InArgs:    []ipc.ArgDesc{{Name: "i0_3x", Doc: "Doc i0_3x"}},
+					OutArgs:   []ipc.ArgDesc{{Name: "o0_3x", Doc: "Doc o0_3x"}},
 					InStream:  ipc.ArgDesc{Name: "is_3x", Doc: "Doc is_3x"},
 					OutStream: ipc.ArgDesc{Name: "os_3x", Doc: "Doc os_3x"},
 					// Must have the same tags as every other definition of this method.
@@ -324,9 +320,8 @@ func TestReflectInvokerSignature(t *testing.T) {
 		// Tests of MethodSignature.
 		{"Sig1", signature.Method{Name: "Sig1"}},
 		{"Sig2", signature.Method{
-			Name:    "Sig2",
-			InArgs:  []signature.Arg{{Type: vdl.Int32Type}, {Type: vdl.StringType}},
-			OutArgs: []signature.Arg{{Type: vdl.ErrorType}},
+			Name:   "Sig2",
+			InArgs: []signature.Arg{{Type: vdl.Int32Type}, {Type: vdl.StringType}},
 		}},
 		{"Sig3", signature.Method{
 			Name: "Sig3",
@@ -334,8 +329,7 @@ func TestReflectInvokerSignature(t *testing.T) {
 			InArgs: []signature.Arg{
 				{Name: "i0_3", Doc: "Doc i0_3", Type: vdl.Float64Type}},
 			OutArgs: []signature.Arg{
-				{Name: "o0_3", Doc: "Doc o0_3", Type: vdl.ListType(vdl.Uint32Type)},
-				{Name: "err_3", Doc: "Doc err_3", Type: vdl.ErrorType}},
+				{Name: "o0_3", Doc: "Doc o0_3", Type: vdl.ListType(vdl.Uint32Type)}},
 			InStream: &signature.Arg{
 				Name: "is_3", Doc: "Doc is_3", Type: vdl.StringType},
 			OutStream: &signature.Arg{
@@ -374,7 +368,6 @@ func TestReflectInvokerSignature(t *testing.T) {
 						},
 						OutArgs: []signature.Arg{
 							{Name: "o0_3", Doc: "Doc o0_3", Type: vdl.ListType(vdl.Uint32Type)},
-							{Name: "err_3", Doc: "Doc err_3", Type: vdl.ErrorType},
 						},
 						InStream: &signature.Arg{
 							Name: "is_3", Doc: "Doc is_3", Type: vdl.StringType},
@@ -397,7 +390,6 @@ func TestReflectInvokerSignature(t *testing.T) {
 						},
 						OutArgs: []signature.Arg{
 							{Name: "o0_3x", Doc: "Doc o0_3x", Type: vdl.ListType(vdl.Uint32Type)},
-							{Name: "err_3x", Doc: "Doc err_3x", Type: vdl.ErrorType},
 						},
 						InStream: &signature.Arg{
 							Name: "is_3x", Doc: "Doc is_3x", Type: vdl.StringType},
@@ -426,9 +418,8 @@ func TestReflectInvokerSignature(t *testing.T) {
 				Methods: []signature.Method{
 					{Name: "Sig1"},
 					{
-						Name:    "Sig2",
-						InArgs:  []signature.Arg{{Type: vdl.Int32Type}, {Type: vdl.StringType}},
-						OutArgs: []signature.Arg{{Type: vdl.ErrorType}},
+						Name:   "Sig2",
+						InArgs: []signature.Arg{{Type: vdl.Int32Type}, {Type: vdl.StringType}},
 					},
 				},
 			},
@@ -465,6 +456,8 @@ type (
 	badRecv1Context   struct{ ipc.ServerContext }
 	badRecv2Context   struct{ ipc.ServerContext }
 	badRecv3Context   struct{ ipc.ServerContext }
+
+	badoutargs struct{}
 
 	badGlobber       struct{}
 	badGlob          struct{}
@@ -525,6 +518,11 @@ func (*badRecv3Context) RecvStream() interface {
 	return nil
 }
 
+func (badoutargs) NoFinalError1(ipc.ServerContext)                 {}
+func (badoutargs) NoFinalError2(ipc.ServerContext) string          { return "" }
+func (badoutargs) NoFinalError3(ipc.ServerContext) (bool, string)  { return false, "" }
+func (badoutargs) NoFinalError4(ipc.ServerContext) (error, string) { return nil, "" }
+
 func (badGlobber) Globber()                                     {}
 func (badGlob) Glob__()                                         {}
 func (badGlobChildren) GlobChildren__(ipc.ServerContext)        {}
@@ -539,6 +537,7 @@ func TestReflectInvokerPanic(t *testing.T) {
 		{nil, `ReflectInvoker\(nil\) is invalid`},
 		{struct{}{}, "no compatible methods"},
 		{badcontext{}, "invalid streaming context"},
+		{badoutargs{}, "final out-arg must be error"},
 		{badGlobber{}, "Globber must have signature"},
 		{badGlob{}, "Glob__ must have signature"},
 		{badGlobChildren{}, "GlobChildren__ must have signature"},
@@ -617,7 +616,6 @@ func TestTypeCheckMethods(t *testing.T) {
 			"Method2":     "",
 			"Method3":     "",
 			"Method4":     "",
-			"Method5":     "",
 			"Error":       "",
 			"LastContext": ipc.ErrNonRPCMethod.Error(),
 		}},
@@ -648,6 +646,12 @@ func TestTypeCheckMethods(t *testing.T) {
 			"BadRecv1":    badRecv,
 			"BadRecv2":    badRecv,
 			"BadRecv3":    badRecv,
+		}},
+		{badoutargs{}, map[string]string{
+			"NoFinalError1": ipc.ErrNoFinalErrorOutArg.Error(),
+			"NoFinalError2": ipc.ErrNoFinalErrorOutArg.Error(),
+			"NoFinalError3": ipc.ErrNoFinalErrorOutArg.Error(),
+			"NoFinalError4": ipc.ErrNoFinalErrorOutArg.Error(),
 		}},
 		{&badGlobber{}, map[string]string{
 			"Globber": ipc.ErrBadGlobber.Error(),

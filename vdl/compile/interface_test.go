@@ -111,9 +111,7 @@ var ifaceTests = []ifaceTest{
 	{"NoArgs", ip{{"a", `type Res interface{NoArgs() error}`,
 		&compile.Interface{
 			NamePos: np("Res"),
-			Methods: []*compile.Method{
-				{NamePos: np("NoArgs"), OutArgs: []*compile.Arg{{Type: vdl.ErrorType}}},
-			},
+			Methods: []*compile.Method{{NamePos: np("NoArgs")}},
 		},
 		"",
 	}}},
@@ -123,7 +121,7 @@ var ifaceTests = []ifaceTest{
 			Methods: []*compile.Method{{
 				NamePos: np("HasArgs"),
 				InArgs:  []*compile.Arg{{NamePos: np("x"), Type: vdl.BoolType}},
-				OutArgs: []*compile.Arg{{Type: vdl.StringType}, {Type: vdl.ErrorType}},
+				OutArgs: []*compile.Arg{{Type: vdl.StringType}},
 			}},
 		},
 		"",

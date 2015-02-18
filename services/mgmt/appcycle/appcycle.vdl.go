@@ -95,9 +95,7 @@ func (c implAppCycleClientStub) ForceStop(ctx *context.T, opts ...ipc.CallOpt) (
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "ForceStop", nil, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish()
 	return
 }
 
@@ -166,9 +164,7 @@ func (c implAppCycleStopCallRecv) Err() error {
 	return c.c.errRecv
 }
 func (c *implAppCycleStopCall) Finish() (err error) {
-	if ierr := c.Call.Finish(&err); ierr != nil {
-		err = ierr
-	}
+	err = c.Call.Finish()
 	return
 }
 
@@ -259,16 +255,10 @@ var descAppCycle = ipc.InterfaceDesc{
 		{
 			Name: "Stop",
 			Doc:  "// Stop initiates shutdown of the server.  It streams back periodic\n// updates to give the client an idea of how the shutdown is\n// progressing.",
-			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // error
-			},
 		},
 		{
 			Name: "ForceStop",
 			Doc:  "// ForceStop tells the server to shut down right away.  It can be issued\n// while a Stop is outstanding if for example the client does not want\n// to wait any longer.",
-			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // error
-			},
 		},
 	},
 }

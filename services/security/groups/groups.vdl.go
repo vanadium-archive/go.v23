@@ -219,9 +219,7 @@ func (c implGroupClientStub) Create(ctx *context.T, i0 access.TaggedACLMap, i1 [
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Create", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish()
 	return
 }
 
@@ -230,9 +228,7 @@ func (c implGroupClientStub) Delete(ctx *context.T, i0 string, opts ...ipc.CallO
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Delete", []interface{}{i0}, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish()
 	return
 }
 
@@ -241,9 +237,7 @@ func (c implGroupClientStub) Add(ctx *context.T, i0 BlessingPatternChunk, i1 str
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Add", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish()
 	return
 }
 
@@ -252,9 +246,7 @@ func (c implGroupClientStub) Remove(ctx *context.T, i0 BlessingPatternChunk, i1 
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Remove", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish()
 	return
 }
 
@@ -263,9 +255,7 @@ func (c implGroupClientStub) Get(ctx *context.T, i0 GetRequest, i1 string, opts 
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Get", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&o0, &o1, &err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish(&o0, &o1)
 	return
 }
 
@@ -274,9 +264,7 @@ func (c implGroupClientStub) Rest(ctx *context.T, i0 RestRequest, i1 string, opt
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Rest", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&o0, &o1, &err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish(&o0, &o1)
 	return
 }
 
@@ -442,9 +430,6 @@ var descGroup = ipc.InterfaceDesc{
 				{"acl", ``},     // access.TaggedACLMap
 				{"entries", ``}, // []BlessingPatternChunk
 			},
-			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // error
-			},
 			Tags: []vdl.AnyRep{access.Tag("Write")},
 		},
 		{
@@ -452,9 +437,6 @@ var descGroup = ipc.InterfaceDesc{
 			Doc:  "// Delete deletes the group.\n// Permissions for all group-related methods except Create() are checked\n// against the Group object.",
 			InArgs: []ipc.ArgDesc{
 				{"etag", ``}, // string
-			},
-			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // error
 			},
 			Tags: []vdl.AnyRep{access.Tag("Write")},
 		},
@@ -465,9 +447,6 @@ var descGroup = ipc.InterfaceDesc{
 				{"entry", ``}, // BlessingPatternChunk
 				{"etag", ``},  // string
 			},
-			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // error
-			},
 			Tags: []vdl.AnyRep{access.Tag("Write")},
 		},
 		{
@@ -476,9 +455,6 @@ var descGroup = ipc.InterfaceDesc{
 			InArgs: []ipc.ArgDesc{
 				{"entry", ``}, // BlessingPatternChunk
 				{"etag", ``},  // string
-			},
-			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // error
 			},
 			Tags: []vdl.AnyRep{access.Tag("Write")},
 		},
@@ -492,7 +468,6 @@ var descGroup = ipc.InterfaceDesc{
 			OutArgs: []ipc.ArgDesc{
 				{"res", ``},  // GetResponse
 				{"etag", ``}, // string
-				{"err", ``},  // error
 			},
 			Tags: []vdl.AnyRep{access.Tag("Read")},
 		},
@@ -506,7 +481,6 @@ var descGroup = ipc.InterfaceDesc{
 			OutArgs: []ipc.ArgDesc{
 				{"res", ``},  // RestResponse
 				{"etag", ``}, // string
-				{"err", ``},  // error
 			},
 			Tags: []vdl.AnyRep{access.Tag("Resolve")},
 		},

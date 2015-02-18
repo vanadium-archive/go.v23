@@ -123,9 +123,7 @@ func (c implArithClientStub) Add(ctx *context.T, i0 int32, i1 int32, opts ...ipc
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Add", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish(&o0)
 	return
 }
 
@@ -134,9 +132,7 @@ func (c implArithClientStub) DivMod(ctx *context.T, i0 int32, i1 int32, opts ...
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "DivMod", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&o0, &o1, &err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish(&o0, &o1)
 	return
 }
 
@@ -145,9 +141,7 @@ func (c implArithClientStub) Sub(ctx *context.T, i0 base.Args, opts ...ipc.CallO
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Sub", []interface{}{i0}, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish(&o0)
 	return
 }
 
@@ -156,9 +150,7 @@ func (c implArithClientStub) Mul(ctx *context.T, i0 base.NestedArgs, opts ...ipc
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Mul", []interface{}{i0}, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish(&o0)
 	return
 }
 
@@ -167,9 +159,7 @@ func (c implArithClientStub) GenError(ctx *context.T, opts ...ipc.CallOpt) (err 
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "GenError", nil, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish()
 	return
 }
 
@@ -196,9 +186,7 @@ func (c implArithClientStub) QuoteAny(ctx *context.T, i0 vdl.AnyRep, opts ...ipc
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "QuoteAny", []interface{}{i0}, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish(&o0)
 	return
 }
 
@@ -266,9 +254,7 @@ func (c implArithCountCallRecv) Err() error {
 	return c.c.errRecv
 }
 func (c *implArithCountCall) Finish() (err error) {
-	if ierr := c.Call.Finish(&err); ierr != nil {
-		err = ierr
-	}
+	err = c.Call.Finish()
 	return
 }
 
@@ -370,9 +356,7 @@ func (c implArithStreamingAddCallSend) Close() error {
 	return c.c.CloseSend()
 }
 func (c *implArithStreamingAddCall) Finish() (o0 int32, err error) {
-	if ierr := c.Call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
+	err = c.Call.Finish(&o0)
 	return
 }
 
@@ -519,7 +503,6 @@ var descArith = ipc.InterfaceDesc{
 			},
 			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // int32
-				{"", ``}, // error
 			},
 		},
 		{
@@ -532,7 +515,6 @@ var descArith = ipc.InterfaceDesc{
 			OutArgs: []ipc.ArgDesc{
 				{"quot", ``}, // int32
 				{"rem", ``},  // int32
-				{"err", ``},  // error
 			},
 		},
 		{
@@ -543,7 +525,6 @@ var descArith = ipc.InterfaceDesc{
 			},
 			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // int32
-				{"", ``}, // error
 			},
 		},
 		{
@@ -554,15 +535,11 @@ var descArith = ipc.InterfaceDesc{
 			},
 			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // int32
-				{"", ``}, // error
 			},
 		},
 		{
 			Name: "GenError",
 			Doc:  "// GenError shows that it's fine to have no in args, and no out args other\n// than \"error\".  In addition GenError shows the usage of tags.  Tags are a\n// sequence of constants.  There's no requirement on uniqueness of types or\n// values, and regular const expressions may also be used.",
-			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // error
-			},
 			Tags: []vdl.AnyRep{"foo", "barz", "hello", int32(129), uint64(36)},
 		},
 		{
@@ -571,16 +548,12 @@ var descArith = ipc.InterfaceDesc{
 			InArgs: []ipc.ArgDesc{
 				{"start", ``}, // int32
 			},
-			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // error
-			},
 		},
 		{
 			Name: "StreamingAdd",
 			Doc:  "// StreamingAdd shows a bidirectional stream.",
 			OutArgs: []ipc.ArgDesc{
 				{"total", ``}, // int32
-				{"err", ``},   // error
 			},
 		},
 		{
@@ -591,7 +564,6 @@ var descArith = ipc.InterfaceDesc{
 			},
 			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // vdl.AnyRep
-				{"", ``}, // error
 			},
 		},
 	},
@@ -777,9 +749,7 @@ func (c implCalculatorClientStub) On(ctx *context.T, opts ...ipc.CallOpt) (err e
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "On", nil, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish()
 	return
 }
 
@@ -788,9 +758,7 @@ func (c implCalculatorClientStub) Off(ctx *context.T, opts ...ipc.CallOpt) (err 
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Off", nil, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish()
 	return
 }
 
@@ -891,15 +859,9 @@ var descCalculator = ipc.InterfaceDesc{
 	Methods: []ipc.MethodDesc{
 		{
 			Name: "On",
-			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // error
-			},
 		},
 		{
 			Name: "Off",
-			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // error
-			},
 			Tags: []vdl.AnyRep{"offtag"},
 		},
 	},

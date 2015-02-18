@@ -141,9 +141,7 @@ func (c implBuilderClientStub) Describe(ctx *context.T, i0 string, opts ...ipc.C
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Describe", []interface{}{i0}, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish(&o0)
 	return
 }
 
@@ -246,9 +244,7 @@ func (c implBuilderBuildCallSend) Close() error {
 	return c.c.CloseSend()
 }
 func (c *implBuilderBuildCall) Finish() (o0 []byte, err error) {
-	if ierr := c.Call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
+	err = c.Call.Finish(&o0)
 	return
 }
 
@@ -341,7 +337,6 @@ var descBuilder = ipc.InterfaceDesc{
 			},
 			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // []byte
-				{"", ``}, // error
 			},
 		},
 		{
@@ -352,7 +347,6 @@ var descBuilder = ipc.InterfaceDesc{
 			},
 			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // binary.Description
-				{"", ``}, // error
 			},
 		},
 	},

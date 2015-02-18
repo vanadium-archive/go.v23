@@ -30,10 +30,8 @@ package {{ .PackagePath }};
 func serverInterfaceOutArg(method *compile.Method, iface *compile.Interface, env *compile.Env) string {
 	switch len(method.OutArgs) {
 	case 0:
-		panic("Unexpected to have 0 out args in an interface method")
-	case 1:
 		return "void"
-	case 2:
+	case 1:
 		return javaType(method.OutArgs[0].Type, false, env)
 	default:
 		return javaPath(path.Join(interfaceFullyQualifiedName(iface)+"Client", method.Name+"Out"))

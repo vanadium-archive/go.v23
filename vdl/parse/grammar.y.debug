@@ -89,7 +89,7 @@ state 6
 	tINTLIT  shift 24
 	tRATLIT  shift 25
 	tIMAGLIT  shift 26
-	.  reduce 144 (src line 642)
+	.  reduce 144 (src line 634)
 
 	nameref  goto 27
 	dotnameref  goto 38
@@ -196,19 +196,19 @@ state 14
 	tEQEQ  shift 57
 	tLSH  shift 66
 	tRSH  shift 67
-	.  reduce 83 (src line 460)
+	.  reduce 83 (src line 452)
 
 
 state 15
 	expr:  unary_expr.    (88)
 
-	.  reduce 88 (src line 478)
+	.  reduce 88 (src line 470)
 
 
 state 16
 	unary_expr:  operand.    (107)
 
-	.  reduce 107 (src line 518)
+	.  reduce 107 (src line 510)
 
 
 state 17
@@ -234,7 +234,7 @@ state 17
 	tINTLIT  shift 24
 	tRATLIT  shift 25
 	tIMAGLIT  shift 26
-	.  reduce 144 (src line 642)
+	.  reduce 144 (src line 634)
 
 	nameref  goto 27
 	dotnameref  goto 38
@@ -268,7 +268,7 @@ state 18
 	tINTLIT  shift 24
 	tRATLIT  shift 25
 	tIMAGLIT  shift 26
-	.  reduce 144 (src line 642)
+	.  reduce 144 (src line 634)
 
 	nameref  goto 27
 	dotnameref  goto 38
@@ -302,7 +302,7 @@ state 19
 	tINTLIT  shift 24
 	tRATLIT  shift 25
 	tIMAGLIT  shift 26
-	.  reduce 144 (src line 642)
+	.  reduce 144 (src line 634)
 
 	nameref  goto 27
 	dotnameref  goto 38
@@ -336,7 +336,7 @@ state 20
 	tINTLIT  shift 24
 	tRATLIT  shift 25
 	tIMAGLIT  shift 26
-	.  reduce 144 (src line 642)
+	.  reduce 144 (src line 634)
 
 	nameref  goto 27
 	dotnameref  goto 38
@@ -368,25 +368,25 @@ state 23
 	nameref:  tSTRLIT.'.' dotnameref 
 
 	'.'  shift 74
-	.  reduce 114 (src line 535)
+	.  reduce 114 (src line 527)
 
 
 state 24
 	operand:  tINTLIT.    (115)
 
-	.  reduce 115 (src line 538)
+	.  reduce 115 (src line 530)
 
 
 state 25
 	operand:  tRATLIT.    (116)
 
-	.  reduce 116 (src line 540)
+	.  reduce 116 (src line 532)
 
 
 state 26
 	operand:  tIMAGLIT.    (117)
 
-	.  reduce 117 (src line 542)
+	.  reduce 117 (src line 534)
 
 
 state 27
@@ -397,7 +397,7 @@ state 27
 	'('  reduce 40 (src line 260)
 	'['  shift 75
 	'{'  reduce 40 (src line 260)
-	.  reduce 118 (src line 544)
+	.  reduce 118 (src line 536)
 
 
 state 28
@@ -407,7 +407,7 @@ state 28
 
 	'.'  shift 76
 	'['  shift 77
-	.  reduce 119 (src line 546)
+	.  reduce 119 (src line 538)
 
 
 state 29
@@ -433,7 +433,7 @@ state 29
 	tINTLIT  shift 24
 	tRATLIT  shift 25
 	tIMAGLIT  shift 26
-	.  reduce 144 (src line 642)
+	.  reduce 144 (src line 634)
 
 	nameref  goto 27
 	dotnameref  goto 38
@@ -523,7 +523,7 @@ state 38
 	dotnameref:  dotnameref.'.' tIDENT 
 
 	'.'  shift 91
-	.  reduce 140 (src line 629)
+	.  reduce 140 (src line 621)
 
 
 state 39
@@ -537,13 +537,13 @@ state 39
 state 40
 	dotnameref:  tIDENT.    (142)
 
-	.  reduce 142 (src line 636)
+	.  reduce 142 (src line 628)
 
 
 state 41
 	otype:  type.    (145)
 
-	.  reduce 145 (src line 645)
+	.  reduce 145 (src line 637)
 
 
 state 42
@@ -615,7 +615,7 @@ state 46
 	tINTLIT  shift 24
 	tRATLIT  shift 25
 	tIMAGLIT  shift 26
-	.  reduce 144 (src line 642)
+	.  reduce 144 (src line 634)
 
 	nameref  goto 27
 	dotnameref  goto 38
@@ -667,7 +667,7 @@ state 49
 	tINTLIT  shift 24
 	tRATLIT  shift 25
 	tIMAGLIT  shift 26
-	.  reduce 144 (src line 642)
+	.  reduce 144 (src line 634)
 
 	nameref  goto 27
 	dotnameref  goto 38
@@ -702,7 +702,7 @@ state 50
 	tINTLIT  shift 24
 	tRATLIT  shift 25
 	tIMAGLIT  shift 26
-	.  reduce 144 (src line 642)
+	.  reduce 144 (src line 634)
 
 	nameref  goto 27
 	dotnameref  goto 38
@@ -737,7 +737,7 @@ state 51
 	tINTLIT  shift 24
 	tRATLIT  shift 25
 	tIMAGLIT  shift 26
-	.  reduce 144 (src line 642)
+	.  reduce 144 (src line 634)
 
 	nameref  goto 27
 	dotnameref  goto 38
@@ -772,7 +772,7 @@ state 52
 	tINTLIT  shift 24
 	tRATLIT  shift 25
 	tIMAGLIT  shift 26
-	.  reduce 144 (src line 642)
+	.  reduce 144 (src line 634)
 
 	nameref  goto 27
 	dotnameref  goto 38
@@ -807,7 +807,7 @@ state 53
 	tINTLIT  shift 24
 	tRATLIT  shift 25
 	tIMAGLIT  shift 26
-	.  reduce 144 (src line 642)
+	.  reduce 144 (src line 634)
 
 	nameref  goto 27
 	dotnameref  goto 38
@@ -842,7 +842,7 @@ state 54
 	tINTLIT  shift 24
 	tRATLIT  shift 25
 	tIMAGLIT  shift 26
-	.  reduce 144 (src line 642)
+	.  reduce 144 (src line 634)
 
 	nameref  goto 27
 	dotnameref  goto 38
@@ -877,7 +877,7 @@ state 55
 	tINTLIT  shift 24
 	tRATLIT  shift 25
 	tIMAGLIT  shift 26
-	.  reduce 144 (src line 642)
+	.  reduce 144 (src line 634)
 
 	nameref  goto 27
 	dotnameref  goto 38
@@ -912,7 +912,7 @@ state 56
 	tINTLIT  shift 24
 	tRATLIT  shift 25
 	tIMAGLIT  shift 26
-	.  reduce 144 (src line 642)
+	.  reduce 144 (src line 634)
 
 	nameref  goto 27
 	dotnameref  goto 38
@@ -947,7 +947,7 @@ state 57
 	tINTLIT  shift 24
 	tRATLIT  shift 25
 	tIMAGLIT  shift 26
-	.  reduce 144 (src line 642)
+	.  reduce 144 (src line 634)
 
 	nameref  goto 27
 	dotnameref  goto 38
@@ -982,7 +982,7 @@ state 58
 	tINTLIT  shift 24
 	tRATLIT  shift 25
 	tIMAGLIT  shift 26
-	.  reduce 144 (src line 642)
+	.  reduce 144 (src line 634)
 
 	nameref  goto 27
 	dotnameref  goto 38
@@ -1017,7 +1017,7 @@ state 59
 	tINTLIT  shift 24
 	tRATLIT  shift 25
 	tIMAGLIT  shift 26
-	.  reduce 144 (src line 642)
+	.  reduce 144 (src line 634)
 
 	nameref  goto 27
 	dotnameref  goto 38
@@ -1052,7 +1052,7 @@ state 60
 	tINTLIT  shift 24
 	tRATLIT  shift 25
 	tIMAGLIT  shift 26
-	.  reduce 144 (src line 642)
+	.  reduce 144 (src line 634)
 
 	nameref  goto 27
 	dotnameref  goto 38
@@ -1087,7 +1087,7 @@ state 61
 	tINTLIT  shift 24
 	tRATLIT  shift 25
 	tIMAGLIT  shift 26
-	.  reduce 144 (src line 642)
+	.  reduce 144 (src line 634)
 
 	nameref  goto 27
 	dotnameref  goto 38
@@ -1122,7 +1122,7 @@ state 62
 	tINTLIT  shift 24
 	tRATLIT  shift 25
 	tIMAGLIT  shift 26
-	.  reduce 144 (src line 642)
+	.  reduce 144 (src line 634)
 
 	nameref  goto 27
 	dotnameref  goto 38
@@ -1157,7 +1157,7 @@ state 63
 	tINTLIT  shift 24
 	tRATLIT  shift 25
 	tIMAGLIT  shift 26
-	.  reduce 144 (src line 642)
+	.  reduce 144 (src line 634)
 
 	nameref  goto 27
 	dotnameref  goto 38
@@ -1192,7 +1192,7 @@ state 64
 	tINTLIT  shift 24
 	tRATLIT  shift 25
 	tIMAGLIT  shift 26
-	.  reduce 144 (src line 642)
+	.  reduce 144 (src line 634)
 
 	nameref  goto 27
 	dotnameref  goto 38
@@ -1227,7 +1227,7 @@ state 65
 	tINTLIT  shift 24
 	tRATLIT  shift 25
 	tIMAGLIT  shift 26
-	.  reduce 144 (src line 642)
+	.  reduce 144 (src line 634)
 
 	nameref  goto 27
 	dotnameref  goto 38
@@ -1262,7 +1262,7 @@ state 66
 	tINTLIT  shift 24
 	tRATLIT  shift 25
 	tIMAGLIT  shift 26
-	.  reduce 144 (src line 642)
+	.  reduce 144 (src line 634)
 
 	nameref  goto 27
 	dotnameref  goto 38
@@ -1297,7 +1297,7 @@ state 67
 	tINTLIT  shift 24
 	tRATLIT  shift 25
 	tIMAGLIT  shift 26
-	.  reduce 144 (src line 642)
+	.  reduce 144 (src line 634)
 
 	nameref  goto 27
 	dotnameref  goto 38
@@ -1312,25 +1312,25 @@ state 67
 state 68
 	unary_expr:  '!' unary_expr.    (108)
 
-	.  reduce 108 (src line 521)
+	.  reduce 108 (src line 513)
 
 
 state 69
 	unary_expr:  '+' unary_expr.    (109)
 
-	.  reduce 109 (src line 523)
+	.  reduce 109 (src line 515)
 
 
 state 70
 	unary_expr:  '-' unary_expr.    (110)
 
-	.  reduce 110 (src line 525)
+	.  reduce 110 (src line 517)
 
 
 state 71
 	unary_expr:  '^' unary_expr.    (111)
 
-	.  reduce 111 (src line 527)
+	.  reduce 111 (src line 519)
 
 
 state 72
@@ -1356,7 +1356,7 @@ state 72
 	tINTLIT  shift 24
 	tRATLIT  shift 25
 	tIMAGLIT  shift 26
-	.  reduce 144 (src line 642)
+	.  reduce 144 (src line 634)
 
 	nameref  goto 27
 	dotnameref  goto 38
@@ -1420,7 +1420,7 @@ state 75
 	tINTLIT  shift 24
 	tRATLIT  shift 25
 	tIMAGLIT  shift 26
-	.  reduce 144 (src line 642)
+	.  reduce 144 (src line 634)
 
 	nameref  goto 27
 	dotnameref  goto 38
@@ -1462,7 +1462,7 @@ state 77
 	tINTLIT  shift 24
 	tRATLIT  shift 25
 	tIMAGLIT  shift 26
-	.  reduce 144 (src line 642)
+	.  reduce 144 (src line 634)
 
 	nameref  goto 27
 	dotnameref  goto 38
@@ -1711,7 +1711,7 @@ state 92
 	tINTLIT  shift 24
 	tRATLIT  shift 25
 	tIMAGLIT  shift 26
-	.  reduce 144 (src line 642)
+	.  reduce 144 (src line 634)
 
 	nameref  goto 27
 	dotnameref  goto 38
@@ -1892,7 +1892,7 @@ state 104
 	tEQEQ  shift 57
 	tLSH  shift 66
 	tRSH  shift 67
-	.  reduce 84 (src line 463)
+	.  reduce 84 (src line 455)
 
 
 state 105
@@ -1933,7 +1933,7 @@ state 105
 	tEQEQ  shift 57
 	tLSH  shift 66
 	tRSH  shift 67
-	.  reduce 89 (src line 481)
+	.  reduce 89 (src line 473)
 
 
 state 106
@@ -1973,7 +1973,7 @@ state 106
 	tEQEQ  shift 57
 	tLSH  shift 66
 	tRSH  shift 67
-	.  reduce 90 (src line 483)
+	.  reduce 90 (src line 475)
 
 
 state 107
@@ -2007,7 +2007,7 @@ state 107
 	'^'  shift 65
 	tLSH  shift 66
 	tRSH  shift 67
-	.  reduce 91 (src line 485)
+	.  reduce 91 (src line 477)
 
 
 state 108
@@ -2041,7 +2041,7 @@ state 108
 	'^'  shift 65
 	tLSH  shift 66
 	tRSH  shift 67
-	.  reduce 92 (src line 487)
+	.  reduce 92 (src line 479)
 
 
 state 109
@@ -2075,7 +2075,7 @@ state 109
 	'^'  shift 65
 	tLSH  shift 66
 	tRSH  shift 67
-	.  reduce 93 (src line 489)
+	.  reduce 93 (src line 481)
 
 
 state 110
@@ -2109,7 +2109,7 @@ state 110
 	'^'  shift 65
 	tLSH  shift 66
 	tRSH  shift 67
-	.  reduce 94 (src line 491)
+	.  reduce 94 (src line 483)
 
 
 state 111
@@ -2143,7 +2143,7 @@ state 111
 	'^'  shift 65
 	tLSH  shift 66
 	tRSH  shift 67
-	.  reduce 95 (src line 493)
+	.  reduce 95 (src line 485)
 
 
 state 112
@@ -2177,7 +2177,7 @@ state 112
 	'^'  shift 65
 	tLSH  shift 66
 	tRSH  shift 67
-	.  reduce 96 (src line 495)
+	.  reduce 96 (src line 487)
 
 
 state 113
@@ -2207,7 +2207,7 @@ state 113
 	'&'  shift 64
 	tLSH  shift 66
 	tRSH  shift 67
-	.  reduce 97 (src line 497)
+	.  reduce 97 (src line 489)
 
 
 state 114
@@ -2237,7 +2237,7 @@ state 114
 	'&'  shift 64
 	tLSH  shift 66
 	tRSH  shift 67
-	.  reduce 98 (src line 499)
+	.  reduce 98 (src line 491)
 
 
 state 115
@@ -2261,7 +2261,7 @@ state 115
 	expr:  expr.tLSH expr 
 	expr:  expr.tRSH expr 
 
-	.  reduce 99 (src line 501)
+	.  reduce 99 (src line 493)
 
 
 state 116
@@ -2285,7 +2285,7 @@ state 116
 	expr:  expr.tLSH expr 
 	expr:  expr.tRSH expr 
 
-	.  reduce 100 (src line 503)
+	.  reduce 100 (src line 495)
 
 
 state 117
@@ -2309,7 +2309,7 @@ state 117
 	expr:  expr.tLSH expr 
 	expr:  expr.tRSH expr 
 
-	.  reduce 101 (src line 505)
+	.  reduce 101 (src line 497)
 
 
 state 118
@@ -2339,7 +2339,7 @@ state 118
 	'&'  shift 64
 	tLSH  shift 66
 	tRSH  shift 67
-	.  reduce 102 (src line 507)
+	.  reduce 102 (src line 499)
 
 
 state 119
@@ -2363,7 +2363,7 @@ state 119
 	expr:  expr.tLSH expr 
 	expr:  expr.tRSH expr 
 
-	.  reduce 103 (src line 509)
+	.  reduce 103 (src line 501)
 
 
 state 120
@@ -2393,7 +2393,7 @@ state 120
 	'&'  shift 64
 	tLSH  shift 66
 	tRSH  shift 67
-	.  reduce 104 (src line 511)
+	.  reduce 104 (src line 503)
 
 
 state 121
@@ -2417,7 +2417,7 @@ state 121
 	expr:  expr tLSH expr.    (105)
 	expr:  expr.tRSH expr 
 
-	.  reduce 105 (src line 513)
+	.  reduce 105 (src line 505)
 
 
 state 122
@@ -2441,7 +2441,7 @@ state 122
 	expr:  expr.tRSH expr 
 	expr:  expr tRSH expr.    (106)
 
-	.  reduce 106 (src line 515)
+	.  reduce 106 (src line 507)
 
 
 state 123
@@ -2499,7 +2499,7 @@ state 125
 	dotnameref:  dotnameref.'.' tIDENT 
 
 	'.'  shift 91
-	.  reduce 141 (src line 632)
+	.  reduce 141 (src line 624)
 
 
 state 126
@@ -2548,7 +2548,7 @@ state 126
 state 127
 	operand:  comp_lit '.' tIDENT.    (120)
 
-	.  reduce 120 (src line 548)
+	.  reduce 120 (src line 540)
 
 
 state 128
@@ -2597,7 +2597,7 @@ state 128
 state 129
 	operand:  '(' expr ')'.    (123)
 
-	.  reduce 123 (src line 554)
+	.  reduce 123 (src line 546)
 
 
 state 130
@@ -2633,7 +2633,7 @@ state 132
 	osemi: .    (146)
 
 	';'  shift 167
-	.  reduce 146 (src line 648)
+	.  reduce 146 (src line 640)
 
 	osemi  goto 166
 
@@ -2669,7 +2669,7 @@ state 137
 	osemi: .    (146)
 
 	';'  shift 171
-	.  reduce 146 (src line 648)
+	.  reduce 146 (src line 640)
 
 	osemi  goto 170
 
@@ -2720,7 +2720,7 @@ state 142
 	osemi: .    (146)
 
 	';'  shift 171
-	.  reduce 146 (src line 648)
+	.  reduce 146 (src line 640)
 
 	osemi  goto 174
 
@@ -2733,13 +2733,13 @@ state 143
 state 144
 	dotnameref:  dotnameref '.' tIDENT.    (143)
 
-	.  reduce 143 (src line 639)
+	.  reduce 143 (src line 631)
 
 
 state 145
 	comp_lit:  otype '{' '}'.    (124)
 
-	.  reduce 124 (src line 557)
+	.  reduce 124 (src line 549)
 
 
 state 146
@@ -2748,14 +2748,14 @@ state 146
 	ocomma: .    (148)
 
 	','  shift 176
-	.  reduce 148 (src line 652)
+	.  reduce 148 (src line 644)
 
 	ocomma  goto 175
 
 state 147
 	kv_lit_list:  kv_lit.    (126)
 
-	.  reduce 126 (src line 563)
+	.  reduce 126 (src line 555)
 
 
 state 148
@@ -2799,7 +2799,7 @@ state 148
 	tEQEQ  shift 57
 	tLSH  shift 66
 	tRSH  shift 67
-	.  reduce 128 (src line 569)
+	.  reduce 128 (src line 561)
 
 
 state 149
@@ -2904,25 +2904,25 @@ state 160
 state 161
 	unary_expr:  type_no_typeobject '(' expr ')'.    (112)
 
-	.  reduce 112 (src line 529)
+	.  reduce 112 (src line 521)
 
 
 state 162
 	unary_expr:  tTYPEOBJECT '(' type ')'.    (113)
 
-	.  reduce 113 (src line 531)
+	.  reduce 113 (src line 523)
 
 
 state 163
 	operand:  nameref '[' expr ']'.    (122)
 
-	.  reduce 122 (src line 552)
+	.  reduce 122 (src line 544)
 
 
 state 164
 	operand:  comp_lit '[' expr ']'.    (121)
 
-	.  reduce 121 (src line 550)
+	.  reduce 121 (src line 542)
 
 
 state 165
@@ -2943,7 +2943,7 @@ state 167
 	osemi:  ';'.    (147)
 
 	tIDENT  shift 134
-	.  reduce 147 (src line 650)
+	.  reduce 147 (src line 642)
 
 	label_spec  goto 196
 
@@ -2996,7 +2996,7 @@ state 171
 	tUNION  shift 36
 	tIDENT  shift 40
 	tSTRLIT  shift 90
-	.  reduce 147 (src line 650)
+	.  reduce 147 (src line 642)
 
 	nameref  goto 89
 	dotnameref  goto 38
@@ -3053,7 +3053,7 @@ state 176
 
 	'('  shift 29
 	'['  shift 31
-	'}'  reduce 149 (src line 654)
+	'}'  reduce 149 (src line 646)
 	'!'  shift 17
 	'+'  shift 18
 	'-'  shift 19
@@ -3071,7 +3071,7 @@ state 176
 	tINTLIT  shift 24
 	tRATLIT  shift 25
 	tIMAGLIT  shift 26
-	.  reduce 144 (src line 642)
+	.  reduce 144 (src line 634)
 
 	nameref  goto 27
 	dotnameref  goto 38
@@ -3107,7 +3107,7 @@ state 177
 	tINTLIT  shift 24
 	tRATLIT  shift 25
 	tIMAGLIT  shift 26
-	.  reduce 144 (src line 642)
+	.  reduce 144 (src line 634)
 
 	nameref  goto 27
 	dotnameref  goto 38
@@ -3131,7 +3131,7 @@ state 179
 	osemi: .    (146)
 
 	';'  shift 206
-	.  reduce 146 (src line 648)
+	.  reduce 146 (src line 640)
 
 	osemi  goto 205
 
@@ -3306,13 +3306,13 @@ state 201
 state 202
 	comp_lit:  otype '{' kv_lit_list ocomma '}'.    (125)
 
-	.  reduce 125 (src line 560)
+	.  reduce 125 (src line 552)
 
 
 state 203
 	kv_lit_list:  kv_lit_list ',' kv_lit.    (127)
 
-	.  reduce 127 (src line 566)
+	.  reduce 127 (src line 558)
 
 
 state 204
@@ -3354,7 +3354,7 @@ state 204
 	tEQEQ  shift 57
 	tLSH  shift 66
 	tRSH  shift 67
-	.  reduce 129 (src line 572)
+	.  reduce 129 (src line 564)
 
 
 state 205
@@ -3370,7 +3370,7 @@ state 206
 
 	tIDENT  shift 153
 	tSTRLIT  shift 152
-	.  reduce 147 (src line 650)
+	.  reduce 147 (src line 642)
 
 	import_spec  goto 223
 
@@ -3386,7 +3386,7 @@ state 208
 	osemi: .    (146)
 
 	';'  shift 225
-	.  reduce 146 (src line 648)
+	.  reduce 146 (src line 640)
 
 	osemi  goto 224
 
@@ -3443,14 +3443,14 @@ state 214
 	osemi: .    (146)
 
 	';'  shift 228
-	.  reduce 146 (src line 648)
+	.  reduce 146 (src line 640)
 
 	osemi  goto 227
 
 state 215
 	const_spec_list:  const_spec.    (85)
 
-	.  reduce 85 (src line 467)
+	.  reduce 85 (src line 459)
 
 
 state 216
@@ -3476,7 +3476,7 @@ state 216
 	tINTLIT  shift 24
 	tRATLIT  shift 25
 	tIMAGLIT  shift 26
-	.  reduce 144 (src line 642)
+	.  reduce 144 (src line 634)
 
 	nameref  goto 27
 	dotnameref  goto 38
@@ -3500,14 +3500,14 @@ state 218
 	osemi: .    (146)
 
 	';'  shift 231
-	.  reduce 146 (src line 648)
+	.  reduce 146 (src line 640)
 
 	osemi  goto 230
 
 state 219
 	error_spec_list:  error_spec.    (130)
 
-	.  reduce 130 (src line 576)
+	.  reduce 130 (src line 568)
 
 
 state 220
@@ -3515,7 +3515,7 @@ state 220
 	error_details: .    (133)
 
 	'{'  shift 233
-	.  reduce 133 (src line 592)
+	.  reduce 133 (src line 584)
 
 	error_details  goto 232
 
@@ -3570,7 +3570,7 @@ state 225
 	osemi:  ';'.    (147)
 
 	tIDENT  shift 210
-	.  reduce 147 (src line 650)
+	.  reduce 147 (src line 642)
 
 	type_spec  goto 239
 
@@ -3600,7 +3600,7 @@ state 228
 	osemi:  ';'.    (147)
 
 	tIDENT  shift 191
-	.  reduce 147 (src line 650)
+	.  reduce 147 (src line 642)
 
 	const_spec  goto 246
 
@@ -3643,7 +3643,7 @@ state 229
 	tEQEQ  shift 57
 	tLSH  shift 66
 	tRSH  shift 67
-	.  reduce 87 (src line 471)
+	.  reduce 87 (src line 463)
 
 
 state 230
@@ -3658,14 +3658,14 @@ state 231
 	osemi:  ';'.    (147)
 
 	tIDENT  shift 194
-	.  reduce 147 (src line 650)
+	.  reduce 147 (src line 642)
 
 	error_spec  goto 248
 
 state 232
 	error_spec:  tIDENT inargs error_details.    (132)
 
-	.  reduce 132 (src line 580)
+	.  reduce 132 (src line 572)
 
 
 state 233
@@ -3692,7 +3692,7 @@ state 235
 	ocomma: .    (148)
 
 	','  shift 255
-	.  reduce 148 (src line 652)
+	.  reduce 148 (src line 644)
 
 	ocomma  goto 254
 
@@ -3714,7 +3714,7 @@ state 236
 	tUNION  shift 36
 	tIDENT  shift 40
 	tSTRLIT  shift 90
-	.  reduce 148 (src line 652)
+	.  reduce 148 (src line 644)
 
 	nameref  goto 89
 	dotnameref  goto 38
@@ -3752,7 +3752,7 @@ state 241
 	osemi: .    (146)
 
 	';'  shift 259
-	.  reduce 146 (src line 648)
+	.  reduce 146 (src line 640)
 
 	osemi  goto 258
 
@@ -3767,7 +3767,7 @@ state 243
 	dotnameref:  tIDENT.    (142)
 
 	'('  shift 221
-	.  reduce 142 (src line 636)
+	.  reduce 142 (src line 628)
 
 	inargs  goto 260
 
@@ -3786,7 +3786,7 @@ state 245
 state 246
 	const_spec_list:  const_spec_list ';' const_spec.    (86)
 
-	.  reduce 86 (src line 469)
+	.  reduce 86 (src line 461)
 
 
 state 247
@@ -3798,13 +3798,13 @@ state 247
 state 248
 	error_spec_list:  error_spec_list ';' error_spec.    (131)
 
-	.  reduce 131 (src line 578)
+	.  reduce 131 (src line 570)
 
 
 state 249
 	error_details:  '{' '}'.    (134)
 
-	.  reduce 134 (src line 595)
+	.  reduce 134 (src line 587)
 
 
 state 250
@@ -3813,20 +3813,20 @@ state 250
 	ocomma: .    (148)
 
 	','  shift 262
-	.  reduce 148 (src line 652)
+	.  reduce 148 (src line 644)
 
 	ocomma  goto 261
 
 state 251
 	error_detail_list:  error_detail.    (136)
 
-	.  reduce 136 (src line 600)
+	.  reduce 136 (src line 592)
 
 
 state 252
 	error_detail:  tIDENT.    (138)
 
-	.  reduce 138 (src line 615)
+	.  reduce 138 (src line 607)
 
 
 state 253
@@ -3858,7 +3858,7 @@ state 255
 	tUNION  shift 36
 	tIDENT  shift 40
 	tSTRLIT  shift 90
-	.  reduce 149 (src line 654)
+	.  reduce 149 (src line 646)
 
 	nameref  goto 89
 	dotnameref  goto 38
@@ -3882,7 +3882,7 @@ state 256
 	tUNION  shift 36
 	tIDENT  shift 40
 	tSTRLIT  shift 90
-	.  reduce 149 (src line 654)
+	.  reduce 149 (src line 646)
 
 	nameref  goto 89
 	dotnameref  goto 38
@@ -3909,7 +3909,7 @@ state 259
 
 	tIDENT  shift 243
 	tSTRLIT  shift 90
-	.  reduce 147 (src line 650)
+	.  reduce 147 (src line 642)
 
 	nameref  goto 244
 	dotnameref  goto 38
@@ -3920,7 +3920,7 @@ state 260
 	streamargs: .    (76)
 
 	tSTREAM  shift 270
-	.  reduce 76 (src line 442)
+	.  reduce 76 (src line 434)
 
 	streamargs  goto 269
 
@@ -3937,7 +3937,7 @@ state 262
 
 	tIDENT  shift 252
 	tSTRLIT  shift 253
-	.  reduce 149 (src line 654)
+	.  reduce 149 (src line 646)
 
 	error_detail  goto 272
 
@@ -3982,23 +3982,9 @@ state 269
 	iface_item:  tIDENT inargs streamargs.outargs tags 
 
 	'('  shift 276
-	'['  shift 31
-	'?'  shift 37
-	tENUM  shift 32
-	tERROR  shift 30
-	tMAP  shift 34
-	tSET  shift 33
-	tSTRUCT  shift 35
-	tTYPEOBJECT  shift 88
-	tUNION  shift 36
-	tIDENT  shift 40
-	tSTRLIT  shift 90
+	tERROR  shift 275
 	.  error
 
-	nameref  goto 89
-	dotnameref  goto 38
-	type  goto 275
-	type_no_typeobject  goto 87
 	outargs  goto 274
 
 state 270
@@ -4013,19 +3999,19 @@ state 270
 state 271
 	error_details:  '{' error_detail_list ocomma '}'.    (135)
 
-	.  reduce 135 (src line 597)
+	.  reduce 135 (src line 589)
 
 
 state 272
 	error_detail_list:  error_detail_list ',' error_detail.    (137)
 
-	.  reduce 137 (src line 603)
+	.  reduce 137 (src line 595)
 
 
 state 273
 	error_detail:  tSTRLIT ':' tSTRLIT.    (139)
 
-	.  reduce 139 (src line 618)
+	.  reduce 139 (src line 610)
 
 
 state 274
@@ -4033,19 +4019,19 @@ state 274
 	tags: .    (80)
 
 	'{'  shift 279
-	.  reduce 80 (src line 452)
+	.  reduce 80 (src line 444)
 
 	tags  goto 278
 
 state 275
-	outargs:  type.    (73)
+	outargs:  tERROR.    (73)
 
-	.  reduce 73 (src line 427)
+	.  reduce 73 (src line 420)
 
 
 state 276
-	outargs:  '('.named_arg_list ocomma '|' type ')' 
-	outargs:  '('.type_comma_list ocomma '|' type ')' 
+	outargs:  '('.named_arg_list ocomma '|' tERROR ')' 
+	outargs:  '('.type_comma_list ocomma '|' tERROR ')' 
 
 	'['  shift 31
 	'?'  shift 37
@@ -4123,7 +4109,7 @@ state 279
 	tINTLIT  shift 24
 	tRATLIT  shift 25
 	tIMAGLIT  shift 26
-	.  reduce 144 (src line 642)
+	.  reduce 144 (src line 634)
 
 	nameref  goto 27
 	dotnameref  goto 38
@@ -4138,18 +4124,18 @@ state 279
 
 state 280
 	named_arg_list:  named_arg_list.',' field_spec 
-	outargs:  '(' named_arg_list.ocomma '|' type ')' 
+	outargs:  '(' named_arg_list.ocomma '|' tERROR ')' 
 	ocomma: .    (148)
 
 	','  shift 255
-	.  reduce 148 (src line 652)
+	.  reduce 148 (src line 644)
 
 	ocomma  goto 286
 
 state 281
 	field_spec:  type_comma_list.type 
 	type_comma_list:  type_comma_list.',' type 
-	outargs:  '(' type_comma_list.ocomma '|' type ')' 
+	outargs:  '(' type_comma_list.ocomma '|' tERROR ')' 
 	ocomma: .    (148)
 
 	','  shift 256
@@ -4164,7 +4150,7 @@ state 281
 	tUNION  shift 36
 	tIDENT  shift 40
 	tSTRLIT  shift 90
-	.  reduce 148 (src line 652)
+	.  reduce 148 (src line 644)
 
 	nameref  goto 89
 	dotnameref  goto 38
@@ -4175,7 +4161,7 @@ state 281
 state 282
 	streamargs:  tSTREAM '<' '>'.    (77)
 
-	.  reduce 77 (src line 445)
+	.  reduce 77 (src line 437)
 
 
 state 283
@@ -4190,7 +4176,7 @@ state 283
 state 284
 	tags:  '{' '}'.    (81)
 
-	.  reduce 81 (src line 455)
+	.  reduce 81 (src line 447)
 
 
 state 285
@@ -4199,19 +4185,19 @@ state 285
 	ocomma: .    (148)
 
 	','  shift 291
-	.  reduce 148 (src line 652)
+	.  reduce 148 (src line 644)
 
 	ocomma  goto 290
 
 state 286
-	outargs:  '(' named_arg_list ocomma.'|' type ')' 
+	outargs:  '(' named_arg_list ocomma.'|' tERROR ')' 
 
 	'|'  shift 292
 	.  error
 
 
 state 287
-	outargs:  '(' type_comma_list ocomma.'|' type ')' 
+	outargs:  '(' type_comma_list ocomma.'|' tERROR ')' 
 
 	'|'  shift 293
 	.  error
@@ -4220,7 +4206,7 @@ state 287
 state 288
 	streamargs:  tSTREAM '<' type '>'.    (78)
 
-	.  reduce 78 (src line 447)
+	.  reduce 78 (src line 439)
 
 
 state 289
@@ -4258,7 +4244,7 @@ state 291
 
 	'('  shift 29
 	'['  shift 31
-	'}'  reduce 149 (src line 654)
+	'}'  reduce 149 (src line 646)
 	'!'  shift 17
 	'+'  shift 18
 	'-'  shift 19
@@ -4276,7 +4262,7 @@ state 291
 	tINTLIT  shift 24
 	tRATLIT  shift 25
 	tIMAGLIT  shift 26
-	.  reduce 144 (src line 642)
+	.  reduce 144 (src line 634)
 
 	nameref  goto 27
 	dotnameref  goto 38
@@ -4289,46 +4275,18 @@ state 291
 	comp_lit  goto 28
 
 state 292
-	outargs:  '(' named_arg_list ocomma '|'.type ')' 
+	outargs:  '(' named_arg_list ocomma '|'.tERROR ')' 
 
-	'['  shift 31
-	'?'  shift 37
-	tENUM  shift 32
-	tERROR  shift 30
-	tMAP  shift 34
-	tSET  shift 33
-	tSTRUCT  shift 35
-	tTYPEOBJECT  shift 88
-	tUNION  shift 36
-	tIDENT  shift 40
-	tSTRLIT  shift 90
+	tERROR  shift 296
 	.  error
 
-	nameref  goto 89
-	dotnameref  goto 38
-	type  goto 296
-	type_no_typeobject  goto 87
 
 state 293
-	outargs:  '(' type_comma_list ocomma '|'.type ')' 
+	outargs:  '(' type_comma_list ocomma '|'.tERROR ')' 
 
-	'['  shift 31
-	'?'  shift 37
-	tENUM  shift 32
-	tERROR  shift 30
-	tMAP  shift 34
-	tSET  shift 33
-	tSTRUCT  shift 35
-	tTYPEOBJECT  shift 88
-	tUNION  shift 36
-	tIDENT  shift 40
-	tSTRLIT  shift 90
+	tERROR  shift 297
 	.  error
 
-	nameref  goto 89
-	dotnameref  goto 38
-	type  goto 297
-	type_no_typeobject  goto 87
 
 state 294
 	streamargs:  tSTREAM '<' type ',' type.'>' 
@@ -4340,18 +4298,18 @@ state 294
 state 295
 	tags:  '{' expr_comma_list ocomma '}'.    (82)
 
-	.  reduce 82 (src line 457)
+	.  reduce 82 (src line 449)
 
 
 state 296
-	outargs:  '(' named_arg_list ocomma '|' type.')' 
+	outargs:  '(' named_arg_list ocomma '|' tERROR.')' 
 
 	')'  shift 299
 	.  error
 
 
 state 297
-	outargs:  '(' type_comma_list ocomma '|' type.')' 
+	outargs:  '(' type_comma_list ocomma '|' tERROR.')' 
 
 	')'  shift 300
 	.  error
@@ -4360,30 +4318,30 @@ state 297
 state 298
 	streamargs:  tSTREAM '<' type ',' type '>'.    (79)
 
-	.  reduce 79 (src line 449)
+	.  reduce 79 (src line 441)
 
 
 state 299
-	outargs:  '(' named_arg_list ocomma '|' type ')'.    (74)
+	outargs:  '(' named_arg_list ocomma '|' tERROR ')'.    (74)
 
-	.  reduce 74 (src line 430)
+	.  reduce 74 (src line 423)
 
 
 state 300
-	outargs:  '(' type_comma_list ocomma '|' type ')'.    (75)
+	outargs:  '(' type_comma_list ocomma '|' tERROR ')'.    (75)
 
-	.  reduce 75 (src line 432)
+	.  reduce 75 (src line 425)
 
 
 59 terminals, 49 nonterminals
 150 grammar rules, 301/2000 states
 0 shift/reduce, 0 reduce/reduce conflicts reported
 98 working sets used
-memory: parser 597/30000
+memory: parser 590/30000
 142 extra closures
-1391 shift entries, 5 exceptions
-201 goto entries
-306 entries saved by goto default
-Optimizer space used: output 828/30000
-828 table entries, 159 zero
-maximum spread: 57, maximum offset: 293
+1361 shift entries, 5 exceptions
+192 goto entries
+303 entries saved by goto default
+Optimizer space used: output 800/30000
+800 table entries, 148 zero
+maximum spread: 57, maximum offset: 291

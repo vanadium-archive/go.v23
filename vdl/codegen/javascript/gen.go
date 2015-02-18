@@ -50,10 +50,6 @@ func Generate(pkg *compile.Package, env *compile.Env, genImport func(string) str
 
 var javascriptTemplate *template.Template
 
-func numOutArgs(method *compile.Method) int {
-	return len(method.OutArgs) - 1
-}
-
 func bitlen(kind vdl.Kind) int {
 	switch kind {
 	case vdl.Float32, vdl.Complex64:
@@ -223,12 +219,6 @@ func typedConst(names typeNames, v *vdl.Value) string {
 	}
 }
 
-// Remove the error out arg.
-// TODO(bprosnitz) Remove this function when error is removed from the compiler out arg list.
-func outArgsWithoutError(outArgs []*compile.Arg) []*compile.Arg {
-	return outArgs[:len(outArgs)-1]
-}
-
 // Returns a Not Implemented stub for the method
 func generateMethodStub(method *compile.Method) string {
 	args := "ctx"
@@ -255,7 +245,7 @@ func generateMethodSignature(method *compile.Method, names typeNames) string {
 		method.Name,
 		quoteStripDoc(method.Doc),
 		generateMethodArguments(method.InArgs, names),
-		generateMethodArguments(outArgsWithoutError(method.OutArgs), names),
+		generateMethodArguments(method.OutArgs, names),
 		generateMethodStreaming(method.InStream, names),
 		generateMethodStreaming(method.OutStream, names),
 		genMethodTags(names, method))
@@ -356,7 +346,6 @@ func generateSystemImports(data data) string {
 func init() {
 	funcMap := template.FuncMap{
 		"toCamelCase":               vdlutil.ToCamelCase,
-		"numOutArgs":                numOutArgs,
 		"genMethodTags":             genMethodTags,
 		"makeTypeDefinitionsString": makeTypeDefinitionsString,
 		"typedConst":                typedConst,

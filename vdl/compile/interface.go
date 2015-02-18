@@ -174,9 +174,7 @@ const (
 
 func (id ifaceDefiner) defineArgs(io inout, method NamePos, pargs []*parse.Field, file *File) (args []*Arg) {
 	seen := make(map[string]*parse.Field)
-	lastpos := method.Pos
 	for _, parg := range pargs {
-		lastpos = parg.Pos
 		if dup := seen[parg.Name]; dup != nil && parg.Name != "" {
 			id.env.Errorf(file, parg.Pos, "method %s arg %s duplicate name (previous at %s)", method.Name, parg.Name, dup.Pos)
 			continue // keep going to catch more errors
@@ -194,13 +192,6 @@ func (id ifaceDefiner) defineArgs(io inout, method NamePos, pargs []*parse.Field
 		}
 		arg := &Arg{NamePos(parg.NamePos), compileType(parg.Type, file, id.env)}
 		args = append(args, arg)
-	}
-	// Make sure the last out-arg has type error.
-	//
-	// TODO(toddw): Change this logic so that the parser doesn't include the error
-	// in the out-args, and remove associated special-cases in our codebase.
-	if io == out && (len(args) == 0 || args[len(args)-1].Type != vdl.ErrorType) {
-		id.env.Errorf(file, lastpos, "method %s doesn't specify error clause", method.Name)
 	}
 	return
 }

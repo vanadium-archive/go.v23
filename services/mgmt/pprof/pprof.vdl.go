@@ -74,9 +74,7 @@ func (c implPProfClientStub) CmdLine(ctx *context.T, opts ...ipc.CallOpt) (o0 []
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "CmdLine", nil, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish(&o0)
 	return
 }
 
@@ -85,9 +83,7 @@ func (c implPProfClientStub) Profiles(ctx *context.T, opts ...ipc.CallOpt) (o0 [
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Profiles", nil, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish(&o0)
 	return
 }
 
@@ -114,9 +110,7 @@ func (c implPProfClientStub) Symbol(ctx *context.T, i0 []uint64, opts ...ipc.Cal
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Symbol", []interface{}{i0}, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish(&o0)
 	return
 }
 
@@ -184,9 +178,7 @@ func (c implPProfProfileCallRecv) Err() error {
 	return c.c.errRecv
 }
 func (c *implPProfProfileCall) Finish() (err error) {
-	if ierr := c.Call.Finish(&err); ierr != nil {
-		err = ierr
-	}
+	err = c.Call.Finish()
 	return
 }
 
@@ -254,9 +246,7 @@ func (c implPProfCPUProfileCallRecv) Err() error {
 	return c.c.errRecv
 }
 func (c *implPProfCPUProfileCall) Finish() (err error) {
-	if ierr := c.Call.Finish(&err); ierr != nil {
-		err = ierr
-	}
+	err = c.Call.Finish()
 	return
 }
 
@@ -376,7 +366,6 @@ var descPProf = ipc.InterfaceDesc{
 			Doc:  "// CmdLine returns the command-line arguments of the server, including\n// the name of the executable.",
 			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // []string
-				{"", ``}, // error
 			},
 			Tags: []vdl.AnyRep{access.Tag("Debug")},
 		},
@@ -385,7 +374,6 @@ var descPProf = ipc.InterfaceDesc{
 			Doc:  "// Profiles returns the list of available profiles.",
 			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // []string
-				{"", ``}, // error
 			},
 			Tags: []vdl.AnyRep{access.Tag("Debug")},
 		},
@@ -396,9 +384,6 @@ var descPProf = ipc.InterfaceDesc{
 				{"name", ``},  // string
 				{"debug", ``}, // int32
 			},
-			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // error
-			},
 			Tags: []vdl.AnyRep{access.Tag("Debug")},
 		},
 		{
@@ -406,9 +391,6 @@ var descPProf = ipc.InterfaceDesc{
 			Doc:  "// CPUProfile enables CPU profiling for the requested duration and\n// streams the profile data.",
 			InArgs: []ipc.ArgDesc{
 				{"seconds", ``}, // int32
-			},
-			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // error
 			},
 			Tags: []vdl.AnyRep{access.Tag("Debug")},
 		},
@@ -420,7 +402,6 @@ var descPProf = ipc.InterfaceDesc{
 			},
 			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // []string
-				{"", ``}, // error
 			},
 			Tags: []vdl.AnyRep{access.Tag("Debug")},
 		},

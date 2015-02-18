@@ -175,9 +175,7 @@ func (c implMountTableClientStub) Mount(ctx *context.T, i0 string, i1 uint32, i2
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Mount", []interface{}{i0, i1, i2}, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish()
 	return
 }
 
@@ -186,9 +184,7 @@ func (c implMountTableClientStub) MountX(ctx *context.T, i0 string, i1 []securit
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "MountX", []interface{}{i0, i1, i2, i3}, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish()
 	return
 }
 
@@ -197,9 +193,7 @@ func (c implMountTableClientStub) Unmount(ctx *context.T, i0 string, opts ...ipc
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Unmount", []interface{}{i0}, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish()
 	return
 }
 
@@ -208,9 +202,7 @@ func (c implMountTableClientStub) Delete(ctx *context.T, i0 bool, opts ...ipc.Ca
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Delete", []interface{}{i0}, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish()
 	return
 }
 
@@ -219,9 +211,7 @@ func (c implMountTableClientStub) ResolveStep(ctx *context.T, opts ...ipc.CallOp
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "ResolveStep", nil, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish(&o0)
 	return
 }
 
@@ -230,9 +220,7 @@ func (c implMountTableClientStub) ResolveStepX(ctx *context.T, opts ...ipc.CallO
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "ResolveStepX", nil, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish(&o0)
 	return
 }
 
@@ -414,9 +402,6 @@ var descMountTable = ipc.InterfaceDesc{
 				{"TTL", ``},    // uint32
 				{"Flags", ``},  // naming.MountFlag
 			},
-			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // error
-			},
 		},
 		{
 			Name: "MountX",
@@ -427,18 +412,12 @@ var descMountTable = ipc.InterfaceDesc{
 				{"TTL", ``},              // uint32
 				{"Flags", ``},            // naming.MountFlag
 			},
-			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // error
-			},
 		},
 		{
 			Name: "Unmount",
 			Doc:  "// Unmount removes Server from the receiver.  If Server is empty, remove\n// all servers mounted there.\n// Returns a non-nil error iff Server remains mounted at the mount point.",
 			InArgs: []ipc.ArgDesc{
 				{"Server", ``}, // string
-			},
-			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // error
 			},
 		},
 		{
@@ -447,16 +426,12 @@ var descMountTable = ipc.InterfaceDesc{
 			InArgs: []ipc.ArgDesc{
 				{"DeleteSubtree", ``}, // bool
 			},
-			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // error
-			},
 		},
 		{
 			Name: "ResolveStep",
 			Doc:  "// ResolveStep takes the next step in resolving a name.  Returns the next\n// servers to query and the suffix at those servers.",
 			OutArgs: []ipc.ArgDesc{
 				{"Entry", ``}, // naming.VDLMountEntry
-				{"err", ``},   // error
 			},
 		},
 		{
@@ -464,7 +439,6 @@ var descMountTable = ipc.InterfaceDesc{
 			Doc:  "// Obsolete, left for backward compatability until all uses are killed.",
 			OutArgs: []ipc.ArgDesc{
 				{"Entry", ``}, // naming.VDLMountEntry
-				{"err", ``},   // error
 			},
 		},
 	},

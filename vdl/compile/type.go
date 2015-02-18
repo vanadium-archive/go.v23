@@ -240,8 +240,8 @@ func compileDefinedType(ptype parse.Type, file *File, env *Env, tbuilder *vdl.Ty
 		//   type A string            // ok
 		//   type B []?string         // ok
 		//   type C struct{X ?string} // ok
-		//   type C ?string           // bad
-		//   type D ?struct{X string} // bad
+		//   type D ?string           // bad
+		//   type E ?struct{X string} // bad
 		env.Errorf(file, ptype.Pos(), "can't define type based on top-level optional")
 		return nil
 	}

@@ -16,6 +16,4 @@ type WireError struct {
 	IDAction  IDAction
 	Msg       string // Error message, may be empty.
 	ParamList []any  // Variadic parameters contained in the error.
-
-	// TODO(toddw): Add SubErrs when they become available.
 }

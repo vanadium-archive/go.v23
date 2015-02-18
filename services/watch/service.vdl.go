@@ -229,9 +229,7 @@ func (c implGlobWatcherWatchGlobCallRecv) Err() error {
 	return c.c.errRecv
 }
 func (c *implGlobWatcherWatchGlobCall) Finish() (err error) {
-	if ierr := c.Call.Finish(&err); ierr != nil {
-		err = ierr
-	}
+	err = c.Call.Finish()
 	return
 }
 
@@ -309,9 +307,6 @@ var descGlobWatcher = ipc.InterfaceDesc{
 			Doc:  "// WatchGlob returns a stream of changes that match a pattern.",
 			InArgs: []ipc.ArgDesc{
 				{"req", ``}, // types.GlobRequest
-			},
-			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // error
 			},
 			Tags: []vdl.AnyRep{access.Tag("Resolve")},
 		},

@@ -56,9 +56,7 @@ func (c implTrigonometryClientStub) Sine(ctx *context.T, i0 float64, opts ...ipc
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Sine", []interface{}{i0}, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish(&o0)
 	return
 }
 
@@ -67,9 +65,7 @@ func (c implTrigonometryClientStub) Cosine(ctx *context.T, i0 float64, opts ...i
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Cosine", []interface{}{i0}, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish(&o0)
 	return
 }
 
@@ -149,7 +145,6 @@ var descTrigonometry = ipc.InterfaceDesc{
 			},
 			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // float64
-				{"", ``}, // error
 			},
 		},
 		{
@@ -159,7 +154,6 @@ var descTrigonometry = ipc.InterfaceDesc{
 			},
 			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // float64
-				{"", ``}, // error
 			},
 		},
 	},

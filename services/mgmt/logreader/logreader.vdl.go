@@ -74,9 +74,7 @@ func (c implLogFileClientStub) Size(ctx *context.T, opts ...ipc.CallOpt) (o0 int
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Size", nil, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish(&o0)
 	return
 }
 
@@ -154,9 +152,7 @@ func (c implLogFileReadLogCallRecv) Err() error {
 	return c.c.errRecv
 }
 func (c *implLogFileReadLogCall) Finish() (o0 int64, err error) {
-	if ierr := c.Call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
+	err = c.Call.Finish(&o0)
 	return
 }
 
@@ -265,7 +261,6 @@ var descLogFile = ipc.InterfaceDesc{
 			Doc:  "// Size returns the number of bytes in the receiving object.",
 			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // int64
-				{"", ``}, // error
 			},
 			Tags: []vdl.AnyRep{access.Tag("Debug")},
 		},
@@ -279,7 +274,6 @@ var descLogFile = ipc.InterfaceDesc{
 			},
 			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // int64
-				{"", ``}, // error
 			},
 			Tags: []vdl.AnyRep{access.Tag("Debug")},
 		},

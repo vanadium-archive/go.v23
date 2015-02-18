@@ -192,8 +192,8 @@ type clientStubEmbed struct {
 }
 
 func processClientStubMethod(iface *compile.Interface, method *compile.Method, env *compile.Env) clientStubMethod {
-	outArgs := make([]clientStubMethodOutArg, len(method.OutArgs)-1)
-	for i := 0; i < len(method.OutArgs)-1; i++ {
+	outArgs := make([]clientStubMethodOutArg, len(method.OutArgs))
+	for i := 0; i < len(method.OutArgs); i++ {
 		outArgs[i].FieldName = vdlutil.ToCamelCase(method.OutArgs[i].Name)
 		outArgs[i].Type = javaType(method.OutArgs[i].Type, true, env)
 	}
@@ -204,14 +204,14 @@ func processClientStubMethod(iface *compile.Interface, method *compile.Method, e
 		CallingArgsLeadingComma: javaCallingArgStr(method.InArgs, true),
 		DeclarationArgs:         javaDeclarationArgStr(method.InArgs, env, true),
 		DeclaredObjectRetType:   clientInterfaceNonStreamingOutArg(iface, method, true, env),
-		IsVoid:                  len(method.OutArgs) < 2,
-		MultipleReturn:          len(method.OutArgs) > 2,
+		IsVoid:                  len(method.OutArgs) < 1,
+		MultipleReturn:          len(method.OutArgs) > 1,
 		Name:                    vdlutil.ToCamelCase(method.Name),
 		NotStreaming:            !isStreamingMethod(method),
 		OutArgs:                 outArgs,
 		RecvType:                javaType(method.OutStream, true, env),
 		RetType:                 clientInterfaceOutArg(iface, method, false, env),
-		Returns:                 len(method.OutArgs) >= 2 || isStreamingMethod(method),
+		Returns:                 len(method.OutArgs) >= 1 || isStreamingMethod(method),
 		SendType:                javaType(method.InStream, true, env),
 		ServiceName:             toUpperCamelCase(iface.Name),
 	}
@@ -225,7 +225,7 @@ func processClientStubEmbedMethod(iface *compile.Interface, embedMethod *compile
 		LocalStubVarName:        vdlutil.ToCamelCase(iface.Name) + "ClientStub",
 		Name:                    vdlutil.ToCamelCase(embedMethod.Name),
 		RetType:                 clientInterfaceOutArg(iface, embedMethod, false, env),
-		Returns:                 len(embedMethod.OutArgs) >= 2 || isStreamingMethod(embedMethod),
+		Returns:                 len(embedMethod.OutArgs) >= 1 || isStreamingMethod(embedMethod),
 	}
 }
 

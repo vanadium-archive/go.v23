@@ -150,13 +150,10 @@ func Register(id ID, action ActionCode, englishText string) IDAction {
 	return IDAction{id, action}
 }
 
-// A Standard is the representation of a verror error.
+// Standard is the in-memory representation of a verror error.
 //
-// This must be kept in sync with the vdl.ErrorType defined in
-// v.io/core/veyron2/vdl.
-//
-// TODO(toddw): Move this definition to a common vdl file, and change it to be a
-// better wire format (e.g. no nested structs).
+// The wire representation is defined as vdl.WireError; values of the Standard
+// type are automatically converted to/from vdl.WireError by VDL and VOM.
 type Standard struct {
 	IDAction  IDAction
 	Msg       string        // Error message; empty if no language known.

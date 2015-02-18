@@ -609,9 +609,7 @@ func (c implServiceAClientStub) MethodA1(ctx *context.T, opts ...ipc.CallOpt) (e
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "MethodA1", nil, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish()
 	return
 }
 
@@ -620,9 +618,7 @@ func (c implServiceAClientStub) MethodA2(ctx *context.T, i0 int32, i1 string, op
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "MethodA2", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish(&o0)
 	return
 }
 
@@ -709,9 +705,7 @@ func (c implServiceAMethodA3CallRecv) Err() error {
 	return c.c.errRecv
 }
 func (c *implServiceAMethodA3Call) Finish() (o0 string, err error) {
-	if ierr := c.Call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
+	err = c.Call.Finish(&o0)
 	return
 }
 
@@ -813,9 +807,7 @@ func (c implServiceAMethodA4CallSend) Close() error {
 	return c.c.CloseSend()
 }
 func (c *implServiceAMethodA4Call) Finish() (err error) {
-	if ierr := c.Call.Finish(&err); ierr != nil {
-		err = ierr
-	}
+	err = c.Call.Finish()
 	return
 }
 
@@ -902,9 +894,6 @@ var descServiceA = ipc.InterfaceDesc{
 	Methods: []ipc.MethodDesc{
 		{
 			Name: "MethodA1",
-			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // error
-			},
 		},
 		{
 			Name: "MethodA2",
@@ -913,8 +902,7 @@ var descServiceA = ipc.InterfaceDesc{
 				{"b", ``}, // string
 			},
 			OutArgs: []ipc.ArgDesc{
-				{"s", ``},   // string
-				{"err", ``}, // error
+				{"s", ``}, // string
 			},
 		},
 		{
@@ -923,8 +911,7 @@ var descServiceA = ipc.InterfaceDesc{
 				{"a", ``}, // int32
 			},
 			OutArgs: []ipc.ArgDesc{
-				{"s", ``},   // string
-				{"err", ``}, // error
+				{"s", ``}, // string
 			},
 			Tags: []vdl.AnyRep{"tag", uint64(6)},
 		},
@@ -932,9 +919,6 @@ var descServiceA = ipc.InterfaceDesc{
 			Name: "MethodA4",
 			InArgs: []ipc.ArgDesc{
 				{"a", ``}, // int32
-			},
-			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // error
 			},
 		},
 	},
@@ -1110,9 +1094,7 @@ func (c implServiceBClientStub) MethodB1(ctx *context.T, i0 Scalars, i1 Composit
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "MethodB1", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish(&o0)
 	return
 }
 
@@ -1193,8 +1175,7 @@ var descServiceB = ipc.InterfaceDesc{
 				{"b", ``}, // Composites
 			},
 			OutArgs: []ipc.ArgDesc{
-				{"c", ``},   // CompComp
-				{"err", ``}, // error
+				{"c", ``}, // CompComp
 			},
 		},
 	},

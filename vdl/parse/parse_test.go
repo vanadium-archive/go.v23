@@ -923,12 +923,12 @@ type foo interface{}`,
 	{
 		"InterfaceOneMethodOneInUnnamedOut",
 		`package testpkg
-type foo interface{meth1(a b) c}`,
+type foo interface{meth1(a b) (c | error)}`,
 		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
 			Interfaces: []*parse.Interface{{NamePos: np("foo", 2, 6),
 				Methods: []*parse.Method{{NamePos: np("meth1", 2, 20),
 					InArgs:  []*parse.Field{{NamePos: np("a", 2, 26), Type: tn("b", 2, 28)}},
-					OutArgs: []*parse.Field{{NamePos: np("", 2, 31), Type: tn("c", 2, 31)}}}}}}},
+					OutArgs: []*parse.Field{{NamePos: np("", 2, 32), Type: tn("c", 2, 32)}}}}}}},
 		nil},
 	{
 		"InterfaceErrors",
@@ -937,24 +937,22 @@ type foo interface{meth1(err error) error}`,
 		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
 			Interfaces: []*parse.Interface{{NamePos: np("foo", 2, 6),
 				Methods: []*parse.Method{{NamePos: np("meth1", 2, 20),
-					InArgs:  []*parse.Field{{NamePos: np("err", 2, 26), Type: tn("error", 2, 30)}},
-					OutArgs: []*parse.Field{{NamePos: np("", 2, 37), Type: tn("error", 2, 37)}}}}}}},
+					InArgs: []*parse.Field{{NamePos: np("err", 2, 26), Type: tn("error", 2, 30)}}}}}}},
 		nil},
 	{
 		"InterfaceMixedMethods",
 		`package testpkg
 type foo interface{
-  meth1(a b) c;meth2() d
-  meth3(e f, g, h i) (j k, l, m n | X)
+  meth1(a b) (c | error);meth2() error
+  meth3(e f, g, h i) (j k, l, m n | error)
 }`,
 		&parse.File{BaseName: "testfile", PackageDef: np("testpkg", 1, 9),
 			Interfaces: []*parse.Interface{{NamePos: np("foo", 2, 6),
 				Methods: []*parse.Method{
 					{NamePos: np("meth1", 3, 3),
 						InArgs:  []*parse.Field{{NamePos: np("a", 3, 9), Type: tn("b", 3, 11)}},
-						OutArgs: []*parse.Field{{NamePos: np("", 3, 14), Type: tn("c", 3, 14)}}},
-					{NamePos: np("meth2", 3, 16),
-						OutArgs: []*parse.Field{{NamePos: np("", 3, 24), Type: tn("d", 3, 24)}}},
+						OutArgs: []*parse.Field{{NamePos: np("", 3, 15), Type: tn("c", 3, 15)}}},
+					{NamePos: np("meth2", 3, 26)},
 					{NamePos: np("meth3", 4, 3),
 						InArgs: []*parse.Field{
 							{NamePos: np("e", 4, 9), Type: tn("f", 4, 11)},
@@ -963,8 +961,7 @@ type foo interface{
 						OutArgs: []*parse.Field{
 							{NamePos: np("j", 4, 23), Type: tn("k", 4, 25)},
 							{NamePos: np("l", 4, 28), Type: tn("n", 4, 33)},
-							{NamePos: np("m", 4, 31), Type: tn("n", 4, 33)},
-							{NamePos: np("err", 4, 37), Type: tn("X", 4, 37)}}}}}}},
+							{NamePos: np("m", 4, 31), Type: tn("n", 4, 33)}}}}}}},
 		nil},
 	{
 		"InterfaceEmbed",

@@ -119,9 +119,7 @@ func (c implObjectClientStub) SetACL(ctx *context.T, i0 access.TaggedACLMap, i1 
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "SetACL", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish()
 	return
 }
 
@@ -130,9 +128,7 @@ func (c implObjectClientStub) GetACL(ctx *context.T, opts ...ipc.CallOpt) (o0 ac
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "GetACL", nil, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&o0, &o1, &err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish(&o0, &o1)
 	return
 }
 
@@ -274,9 +270,6 @@ var descObject = ipc.InterfaceDesc{
 				{"acl", ``},  // access.TaggedACLMap
 				{"etag", ``}, // string
 			},
-			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // error
-			},
 			Tags: []vdl.AnyRep{access.Tag("Admin")},
 		},
 		{
@@ -285,7 +278,6 @@ var descObject = ipc.InterfaceDesc{
 			OutArgs: []ipc.ArgDesc{
 				{"acl", ``},  // access.TaggedACLMap
 				{"etag", ``}, // string
-				{"err", ``},  // error
 			},
 			Tags: []vdl.AnyRep{access.Tag("Admin")},
 		},

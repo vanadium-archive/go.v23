@@ -16,10 +16,10 @@ func Signature(ctx *context.T, name string, opts ...ipc.CallOpt) ([]signature.In
 		return nil, err
 	}
 	var sig []signature.Interface
-	if ierr := call.Finish(&sig, &err); ierr != nil {
-		err = ierr
+	if err := call.Finish(&sig); err != nil {
+		return nil, err
 	}
-	return sig, err
+	return sig, nil
 }
 
 // MethodSignature invokes the reserved method signature RPC on the given name,
@@ -32,8 +32,8 @@ func MethodSignature(ctx *context.T, name, method string, opts ...ipc.CallOpt) (
 		return signature.Method{}, err
 	}
 	var sig signature.Method
-	if ferr := call.Finish(&sig, &err); ferr != nil {
-		err = ferr
+	if err := call.Finish(&sig); err != nil {
+		return signature.Method{}, err
 	}
-	return sig, err
+	return sig, nil
 }

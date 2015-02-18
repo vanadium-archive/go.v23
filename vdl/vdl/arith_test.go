@@ -180,8 +180,8 @@ func TestCalculator(t *testing.T) {
 				},
 			},
 			Methods: []ipc.MethodDesc{
-				{Name: "On", OutArgs: []ipc.ArgDesc{{}}},
-				{Name: "Off", OutArgs: []ipc.ArgDesc{{}}, Tags: []vdl.AnyRep{"offtag"}},
+				{Name: "On"},
+				{Name: "Off", Tags: []vdl.AnyRep{"offtag"}},
 			},
 		},
 		{
@@ -191,41 +191,39 @@ func TestCalculator(t *testing.T) {
 				{
 					Name:    "Add",
 					InArgs:  []ipc.ArgDesc{{Name: "a"}, {Name: "b"}},
-					OutArgs: []ipc.ArgDesc{{}, {}},
+					OutArgs: []ipc.ArgDesc{{}},
 				},
 				{
 					Name:    "DivMod",
 					InArgs:  []ipc.ArgDesc{{Name: "a"}, {Name: "b"}},
-					OutArgs: []ipc.ArgDesc{{Name: "quot"}, {Name: "rem"}, {Name: "err"}},
+					OutArgs: []ipc.ArgDesc{{Name: "quot"}, {Name: "rem"}},
 				},
 				{
 					Name:    "Sub",
 					InArgs:  []ipc.ArgDesc{{Name: "args"}},
-					OutArgs: []ipc.ArgDesc{{}, {}},
+					OutArgs: []ipc.ArgDesc{{}},
 				},
 				{
 					Name:    "Mul",
 					InArgs:  []ipc.ArgDesc{{Name: "nested"}},
-					OutArgs: []ipc.ArgDesc{{}, {}},
+					OutArgs: []ipc.ArgDesc{{}},
 				},
 				{
-					Name:    "GenError",
-					OutArgs: []ipc.ArgDesc{{}},
-					Tags:    []vdl.AnyRep{"foo", "barz", "hello", int32(129), uint64(0x24)},
+					Name: "GenError",
+					Tags: []vdl.AnyRep{"foo", "barz", "hello", int32(129), uint64(0x24)},
 				},
 				{
-					Name:    "Count",
-					InArgs:  []ipc.ArgDesc{{Name: "start"}},
-					OutArgs: []ipc.ArgDesc{{}},
+					Name:   "Count",
+					InArgs: []ipc.ArgDesc{{Name: "start"}},
 				},
 				{
 					Name:    "StreamingAdd",
-					OutArgs: []ipc.ArgDesc{{Name: "total"}, {Name: "err"}},
+					OutArgs: []ipc.ArgDesc{{Name: "total"}},
 				},
 				{
 					Name:    "QuoteAny",
 					InArgs:  []ipc.ArgDesc{{Name: "a"}},
-					OutArgs: []ipc.ArgDesc{{}, {}},
+					OutArgs: []ipc.ArgDesc{{}},
 				},
 			},
 		},
@@ -254,7 +252,6 @@ func TestCalculator(t *testing.T) {
 					},
 					OutArgs: []ipc.ArgDesc{
 						{"", ``}, // float64
-						{"", ``}, // error
 					},
 				},
 				{
@@ -264,7 +261,6 @@ func TestCalculator(t *testing.T) {
 					},
 					OutArgs: []ipc.ArgDesc{
 						{"", ``}, // float64
-						{"", ``}, // error
 					},
 				},
 			},
@@ -280,7 +276,6 @@ func TestCalculator(t *testing.T) {
 					},
 					OutArgs: []ipc.ArgDesc{
 						{"", ``}, // float64
-						{"", ``}, // error
 					},
 				},
 			},
@@ -433,41 +428,39 @@ func TestArith(t *testing.T) {
 					{
 						Name:    "Add",
 						InArgs:  []ipc.ArgDesc{{Name: "a"}, {Name: "b"}},
-						OutArgs: []ipc.ArgDesc{{}, {}},
+						OutArgs: []ipc.ArgDesc{{}},
 					},
 					{
 						Name:    "DivMod",
 						InArgs:  []ipc.ArgDesc{{Name: "a"}, {Name: "b"}},
-						OutArgs: []ipc.ArgDesc{{Name: "quot"}, {Name: "rem"}, {Name: "err"}},
+						OutArgs: []ipc.ArgDesc{{Name: "quot"}, {Name: "rem"}},
 					},
 					{
 						Name:    "Sub",
 						InArgs:  []ipc.ArgDesc{{Name: "args"}},
-						OutArgs: []ipc.ArgDesc{{}, {}},
+						OutArgs: []ipc.ArgDesc{{}},
 					},
 					{
 						Name:    "Mul",
 						InArgs:  []ipc.ArgDesc{{Name: "nested"}},
-						OutArgs: []ipc.ArgDesc{{}, {}},
+						OutArgs: []ipc.ArgDesc{{}},
 					},
 					{
-						Name:    "GenError",
-						OutArgs: []ipc.ArgDesc{{}},
-						Tags:    []vdl.AnyRep{"foo", "barz", "hello", int32(129), uint64(0x24)},
+						Name: "GenError",
+						Tags: []vdl.AnyRep{"foo", "barz", "hello", int32(129), uint64(0x24)},
 					},
 					{
-						Name:    "Count",
-						InArgs:  []ipc.ArgDesc{{Name: "start"}},
-						OutArgs: []ipc.ArgDesc{{}},
+						Name:   "Count",
+						InArgs: []ipc.ArgDesc{{Name: "start"}},
 					},
 					{
 						Name:    "StreamingAdd",
-						OutArgs: []ipc.ArgDesc{{Name: "total"}, {Name: "err"}},
+						OutArgs: []ipc.ArgDesc{{Name: "total"}},
 					},
 					{
 						Name:    "QuoteAny",
 						InArgs:  []ipc.ArgDesc{{Name: "a"}},
-						OutArgs: []ipc.ArgDesc{{}, {}},
+						OutArgs: []ipc.ArgDesc{{}},
 					},
 				},
 			},

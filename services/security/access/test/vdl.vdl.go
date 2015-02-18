@@ -79,9 +79,7 @@ func (c implMyObjectClientStub) Get(ctx *context.T, opts ...ipc.CallOpt) (err er
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Get", nil, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish()
 	return
 }
 
@@ -90,9 +88,7 @@ func (c implMyObjectClientStub) Put(ctx *context.T, opts ...ipc.CallOpt) (err er
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Put", nil, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish()
 	return
 }
 
@@ -101,9 +97,7 @@ func (c implMyObjectClientStub) Resolve(ctx *context.T, opts ...ipc.CallOpt) (er
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Resolve", nil, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish()
 	return
 }
 
@@ -112,9 +106,7 @@ func (c implMyObjectClientStub) NoTags(ctx *context.T, opts ...ipc.CallOpt) (err
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "NoTags", nil, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish()
 	return
 }
 
@@ -123,9 +115,7 @@ func (c implMyObjectClientStub) AllTags(ctx *context.T, opts ...ipc.CallOpt) (er
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "AllTags", nil, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish()
 	return
 }
 
@@ -215,36 +205,21 @@ var descMyObject = ipc.InterfaceDesc{
 	Methods: []ipc.MethodDesc{
 		{
 			Name: "Get",
-			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // error
-			},
 			Tags: []vdl.AnyRep{MyTag("R")},
 		},
 		{
 			Name: "Put",
-			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // error
-			},
 			Tags: []vdl.AnyRep{MyTag("W")},
 		},
 		{
 			Name: "Resolve",
-			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // error
-			},
 			Tags: []vdl.AnyRep{MyTag("X")},
 		},
 		{
 			Name: "NoTags",
-			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // error
-			},
 		},
 		{
 			Name: "AllTags",
-			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // error
-			},
 			Tags: []vdl.AnyRep{MyTag("R"), MyTag("W"), MyTag("X")},
 		},
 	},

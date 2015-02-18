@@ -89,9 +89,7 @@ func (c implStatsClientStub) Value(ctx *context.T, opts ...ipc.CallOpt) (o0 vdl.
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Value", nil, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish(&o0)
 	return
 }
 
@@ -191,7 +189,6 @@ var descStats = ipc.InterfaceDesc{
 			Doc:  "// Value returns the current value of an object, or an error. The type\n// of the value is implementation specific.\n// Some objects may not have a value, in which case, Value() returns\n// a NoValue error.",
 			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // vdl.AnyRep
-				{"", ``}, // error
 			},
 			Tags: []vdl.AnyRep{access.Tag("Debug")},
 		},

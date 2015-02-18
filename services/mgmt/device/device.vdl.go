@@ -308,9 +308,7 @@ func (c implApplicationClientStub) Install(ctx *context.T, i0 string, i1 Config,
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Install", []interface{}{i0, i1, i2}, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish(&o0)
 	return
 }
 
@@ -319,9 +317,7 @@ func (c implApplicationClientStub) Refresh(ctx *context.T, opts ...ipc.CallOpt) 
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Refresh", nil, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish()
 	return
 }
 
@@ -330,9 +326,7 @@ func (c implApplicationClientStub) Restart(ctx *context.T, opts ...ipc.CallOpt) 
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Restart", nil, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish()
 	return
 }
 
@@ -341,9 +335,7 @@ func (c implApplicationClientStub) Resume(ctx *context.T, opts ...ipc.CallOpt) (
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Resume", nil, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish()
 	return
 }
 
@@ -352,9 +344,7 @@ func (c implApplicationClientStub) Revert(ctx *context.T, opts ...ipc.CallOpt) (
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Revert", nil, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish()
 	return
 }
 
@@ -363,9 +353,7 @@ func (c implApplicationClientStub) Start(ctx *context.T, opts ...ipc.CallOpt) (o
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Start", nil, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish(&o0)
 	return
 }
 
@@ -374,9 +362,7 @@ func (c implApplicationClientStub) Stop(ctx *context.T, i0 uint32, opts ...ipc.C
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Stop", []interface{}{i0}, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish()
 	return
 }
 
@@ -385,9 +371,7 @@ func (c implApplicationClientStub) Suspend(ctx *context.T, opts ...ipc.CallOpt) 
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Suspend", nil, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish()
 	return
 }
 
@@ -396,9 +380,7 @@ func (c implApplicationClientStub) Uninstall(ctx *context.T, opts ...ipc.CallOpt
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Uninstall", nil, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish()
 	return
 }
 
@@ -407,9 +389,7 @@ func (c implApplicationClientStub) Update(ctx *context.T, opts ...ipc.CallOpt) (
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Update", nil, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish()
 	return
 }
 
@@ -418,9 +398,7 @@ func (c implApplicationClientStub) UpdateTo(ctx *context.T, i0 string, opts ...i
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "UpdateTo", []interface{}{i0}, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish()
 	return
 }
 
@@ -429,9 +407,7 @@ func (c implApplicationClientStub) Debug(ctx *context.T, opts ...ipc.CallOpt) (o
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Debug", nil, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish(&o0)
 	return
 }
 
@@ -759,40 +735,27 @@ var descApplication = ipc.InterfaceDesc{
 			},
 			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // string
-				{"", ``}, // error
 			},
 			Tags: []vdl.AnyRep{access.Tag("Write")},
 		},
 		{
 			Name: "Refresh",
 			Doc:  "// Refresh refreshes the state of application installation(s)\n// instance(s).",
-			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // error
-			},
 			Tags: []vdl.AnyRep{access.Tag("Admin")},
 		},
 		{
 			Name: "Restart",
 			Doc:  "// Restart restarts execution of application installation(s)\n// instance(s).",
-			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // error
-			},
 			Tags: []vdl.AnyRep{access.Tag("Write")},
 		},
 		{
 			Name: "Resume",
 			Doc:  "// Resume resumes execution of application installation(s)\n// instance(s).",
-			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // error
-			},
 			Tags: []vdl.AnyRep{access.Tag("Write")},
 		},
 		{
 			Name: "Revert",
 			Doc:  "// Revert reverts application installation(s) to the most recent\n// previous installation.",
-			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // error
-			},
 			Tags: []vdl.AnyRep{access.Tag("Admin")},
 		},
 		{
@@ -800,7 +763,6 @@ var descApplication = ipc.InterfaceDesc{
 			Doc:  "// Start starts an instance of application installation(s) and\n// returns the object name(s) that identifies/identify the new\n// instance(s).",
 			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // []string
-				{"", ``}, // error
 			},
 			Tags: []vdl.AnyRep{access.Tag("Read")},
 		},
@@ -810,33 +772,21 @@ var descApplication = ipc.InterfaceDesc{
 			InArgs: []ipc.ArgDesc{
 				{"deadline", ``}, // uint32
 			},
-			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // error
-			},
 			Tags: []vdl.AnyRep{access.Tag("Admin")},
 		},
 		{
 			Name: "Suspend",
 			Doc:  "// Suspend suspends execution of application installation(s)\n// instance(s).",
-			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // error
-			},
 			Tags: []vdl.AnyRep{access.Tag("Write")},
 		},
 		{
 			Name: "Uninstall",
 			Doc:  "// Uninstall uninstalls application installation(s).",
-			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // error
-			},
 			Tags: []vdl.AnyRep{access.Tag("Admin")},
 		},
 		{
 			Name: "Update",
 			Doc:  "// Update updates the application installation(s) from the object name\n// provided during Install.  If the new application envelope contains a\n// different application title, the update does not occur, and an error\n// is returned.",
-			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // error
-			},
 			Tags: []vdl.AnyRep{access.Tag("Admin")},
 		},
 		{
@@ -845,9 +795,6 @@ var descApplication = ipc.InterfaceDesc{
 			InArgs: []ipc.ArgDesc{
 				{"name", ``}, // string
 			},
-			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // error
-			},
 			Tags: []vdl.AnyRep{access.Tag("Admin")},
 		},
 		{
@@ -855,7 +802,6 @@ var descApplication = ipc.InterfaceDesc{
 			Doc:  "// Debug returns debug information about the application installation or\n// instance.  This is generally highly implementation-specific, and\n// presented in an unstructured form.  No guarantees are given about the\n// stability of the format, and parsing it programmatically is\n// specifically discouraged.",
 			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // string
-				{"", ``}, // error
 			},
 			Tags: []vdl.AnyRep{access.Tag("Debug")},
 		},
@@ -916,9 +862,7 @@ func (c implClaimableClientStub) Claim(ctx *context.T, i0 string, opts ...ipc.Ca
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Claim", []interface{}{i0}, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish()
 	return
 }
 
@@ -1002,9 +946,6 @@ var descClaimable = ipc.InterfaceDesc{
 			Name: "Claim",
 			InArgs: []ipc.ArgDesc{
 				{"pairingToken", ``}, // string
-			},
-			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // error
 			},
 			Tags: []vdl.AnyRep{access.Tag("Admin")},
 		},
@@ -1163,9 +1104,7 @@ func (c implDeviceClientStub) Describe(ctx *context.T, opts ...ipc.CallOpt) (o0 
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Describe", nil, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish(&o0)
 	return
 }
 
@@ -1174,9 +1113,7 @@ func (c implDeviceClientStub) IsRunnable(ctx *context.T, i0 binary.Description, 
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "IsRunnable", []interface{}{i0}, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish(&o0)
 	return
 }
 
@@ -1185,9 +1122,7 @@ func (c implDeviceClientStub) Reset(ctx *context.T, i0 uint64, opts ...ipc.CallO
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Reset", []interface{}{i0}, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish()
 	return
 }
 
@@ -1196,9 +1131,7 @@ func (c implDeviceClientStub) AssociateAccount(ctx *context.T, i0 []string, i1 s
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "AssociateAccount", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish()
 	return
 }
 
@@ -1207,9 +1140,7 @@ func (c implDeviceClientStub) ListAssociations(ctx *context.T, opts ...ipc.CallO
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "ListAssociations", nil, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish(&o0)
 	return
 }
 
@@ -1411,7 +1342,6 @@ var descDevice = ipc.InterfaceDesc{
 			Doc:  "// Describe generates a description of the device.",
 			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // Description
-				{"", ``}, // error
 			},
 			Tags: []vdl.AnyRep{access.Tag("Admin")},
 		},
@@ -1423,7 +1353,6 @@ var descDevice = ipc.InterfaceDesc{
 			},
 			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // bool
-				{"", ``}, // error
 			},
 			Tags: []vdl.AnyRep{access.Tag("Admin")},
 		},
@@ -1432,9 +1361,6 @@ var descDevice = ipc.InterfaceDesc{
 			Doc:  "// Reset resets the device. If the deadline is non-zero and the device\n// in question is still running after the given deadline expired,\n// reset of the device is enforced.\n//\n// TODO(jsimsa): Switch deadline to time.Duration when built-in types\n// are implemented.",
 			InArgs: []ipc.ArgDesc{
 				{"deadline", ``}, // uint64
-			},
-			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // error
 			},
 			Tags: []vdl.AnyRep{access.Tag("Admin")},
 		},
@@ -1445,9 +1371,6 @@ var descDevice = ipc.InterfaceDesc{
 				{"identityNames", ``}, // []string
 				{"accountName", ``},   // string
 			},
-			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // error
-			},
 			Tags: []vdl.AnyRep{access.Tag("Admin")},
 		},
 		{
@@ -1455,7 +1378,6 @@ var descDevice = ipc.InterfaceDesc{
 			Doc:  "// ListAssociations returns all of the associations between Veyron identities\n// and system names.",
 			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // []Association
-				{"", ``}, // error
 			},
 			Tags: []vdl.AnyRep{access.Tag("Admin")},
 		},

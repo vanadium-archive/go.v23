@@ -137,9 +137,7 @@ func (c implApplicationClientStub) Match(ctx *context.T, i0 []string, opts ...ip
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Match", []interface{}{i0}, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish(&o0)
 	return
 }
 
@@ -278,7 +276,6 @@ var descApplication = ipc.InterfaceDesc{
 			},
 			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // application.Envelope
-				{"", ``}, // error
 			},
 			Tags: []vdl.AnyRep{access.Tag("Read")},
 		},
@@ -423,9 +420,7 @@ func (c implBinaryClientStub) Create(ctx *context.T, i0 int32, i1 MediaInfo, opt
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Create", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish()
 	return
 }
 
@@ -434,9 +429,7 @@ func (c implBinaryClientStub) Delete(ctx *context.T, opts ...ipc.CallOpt) (err e
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Delete", nil, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish()
 	return
 }
 
@@ -454,9 +447,7 @@ func (c implBinaryClientStub) DownloadURL(ctx *context.T, opts ...ipc.CallOpt) (
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "DownloadURL", nil, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&o0, &o1, &err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish(&o0, &o1)
 	return
 }
 
@@ -465,9 +456,7 @@ func (c implBinaryClientStub) Stat(ctx *context.T, opts ...ipc.CallOpt) (o0 []bi
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Stat", nil, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&o0, &o1, &err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish(&o0, &o1)
 	return
 }
 
@@ -544,9 +533,7 @@ func (c implBinaryDownloadCallRecv) Err() error {
 	return c.c.errRecv
 }
 func (c *implBinaryDownloadCall) Finish() (err error) {
-	if ierr := c.Call.Finish(&err); ierr != nil {
-		err = ierr
-	}
+	err = c.Call.Finish()
 	return
 }
 
@@ -609,9 +596,7 @@ func (c implBinaryUploadCallSend) Close() error {
 	return c.c.CloseSend()
 }
 func (c *implBinaryUploadCall) Finish() (err error) {
-	if ierr := c.Call.Finish(&err); ierr != nil {
-		err = ierr
-	}
+	err = c.Call.Finish()
 	return
 }
 
@@ -883,17 +868,11 @@ var descBinary = ipc.InterfaceDesc{
 				{"nparts", ``},    // int32
 				{"mediaInfo", ``}, // MediaInfo
 			},
-			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // error
-			},
 			Tags: []vdl.AnyRep{access.Tag("Write")},
 		},
 		{
 			Name: "Delete",
 			Doc:  "// Delete deletes the binary identified by the object name\n// suffix. If the binary that has not been created, the method\n// returns an error.",
-			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // error
-			},
 			Tags: []vdl.AnyRep{access.Tag("Write")},
 		},
 		{
@@ -901,9 +880,6 @@ var descBinary = ipc.InterfaceDesc{
 			Doc:  "// Download opens a stream that can used for downloading the given\n// part of the binary identified by the object name suffix. If the\n// binary part has not been uploaded, the method returns an\n// error. If the Delete() method is invoked when the Download()\n// method is in progress, the outcome the Download() method is\n// undefined.",
 			InArgs: []ipc.ArgDesc{
 				{"part", ``}, // int32
-			},
-			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // error
 			},
 			Tags: []vdl.AnyRep{access.Tag("Read")},
 		},
@@ -913,7 +889,6 @@ var descBinary = ipc.InterfaceDesc{
 			OutArgs: []ipc.ArgDesc{
 				{"URL", ``}, // string
 				{"TTL", ``}, // int64
-				{"err", ``}, // error
 			},
 			Tags: []vdl.AnyRep{access.Tag("Read")},
 		},
@@ -923,7 +898,6 @@ var descBinary = ipc.InterfaceDesc{
 			OutArgs: []ipc.ArgDesc{
 				{"Parts", ``},     // []binary.PartInfo
 				{"MediaInfo", ``}, // MediaInfo
-				{"err", ``},       // error
 			},
 			Tags: []vdl.AnyRep{access.Tag("Read")},
 		},
@@ -932,9 +906,6 @@ var descBinary = ipc.InterfaceDesc{
 			Doc:  "// Upload opens a stream that can be used for uploading the given\n// part of the binary identified by the object name suffix. If the\n// binary has not been created, the method returns an error. If the\n// binary part has been uploaded, the method returns an error. If\n// the same binary part is being uploaded by another caller, the\n// method returns an error.",
 			InArgs: []ipc.ArgDesc{
 				{"part", ``}, // int32
-			},
-			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // error
 			},
 			Tags: []vdl.AnyRep{access.Tag("Write")},
 		},
@@ -1098,9 +1069,7 @@ func (c implProfileClientStub) Label(ctx *context.T, opts ...ipc.CallOpt) (o0 st
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Label", nil, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish(&o0)
 	return
 }
 
@@ -1109,9 +1078,7 @@ func (c implProfileClientStub) Description(ctx *context.T, opts ...ipc.CallOpt) 
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Description", nil, opts...); err != nil {
 		return
 	}
-	if ierr := call.Finish(&o0, &err); ierr != nil {
-		err = ierr
-	}
+	err = call.Finish(&o0)
 	return
 }
 
@@ -1198,7 +1165,6 @@ var descProfile = ipc.InterfaceDesc{
 			Doc:  "// Label is the human-readable profile key for the profile,\n// e.g. \"linux-media\". The label can be used to uniquely identify\n// the profile (for the purpose of matching application binaries and\n// devices).",
 			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // string
-				{"", ``}, // error
 			},
 			Tags: []vdl.AnyRep{access.Tag("Read")},
 		},
@@ -1207,7 +1173,6 @@ var descProfile = ipc.InterfaceDesc{
 			Doc:  "// Description is a free-text description of the profile, meant for\n// human consumption.",
 			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // string
-				{"", ``}, // error
 			},
 			Tags: []vdl.AnyRep{access.Tag("Read")},
 		},
