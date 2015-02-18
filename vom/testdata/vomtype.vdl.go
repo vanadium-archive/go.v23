@@ -9,6 +9,30 @@ import (
 	"v.io/core/veyron2/vdl"
 )
 
+// vomdata config types
+type ConvertGroup struct {
+	Name        string
+	PrimaryType *vdl.Type
+	Values      []vdl.AnyRep
+}
+
+func (ConvertGroup) __VDLReflect(struct {
+	Name string "v.io/core/veyron2/vom/testdata.ConvertGroup"
+}) {
+}
+
+type VomdataStruct struct {
+	EncodeDecodeData []vdl.AnyRep
+	CompatData       map[string][]*vdl.Type
+	ConvertData      map[string][]ConvertGroup
+}
+
+func (VomdataStruct) __VDLReflect(struct {
+	Name string "v.io/core/veyron2/vom/testdata.VomdataStruct"
+}) {
+}
+
+// Named Types
 type NBool bool
 
 func (NBool) __VDLReflect(struct {
@@ -309,7 +333,176 @@ func (RecY) __VDLReflect(struct {
 }) {
 }
 
+// Additional types for compatibility and conversion checks
+type ListString []string
+
+func (ListString) __VDLReflect(struct {
+	Name string "v.io/core/veyron2/vom/testdata.ListString"
+}) {
+}
+
+type Array3String [3]string
+
+func (Array3String) __VDLReflect(struct {
+	Name string "v.io/core/veyron2/vom/testdata.Array3String"
+}) {
+}
+
+type ABCStruct struct {
+	A bool
+	B string
+	C int64
+}
+
+func (ABCStruct) __VDLReflect(struct {
+	Name string "v.io/core/veyron2/vom/testdata.ABCStruct"
+}) {
+}
+
+type ADEStruct struct {
+	A bool
+	D vdl.AnyRep
+	E *vdl.Type
+}
+
+func (ADEStruct) __VDLReflect(struct {
+	Name string "v.io/core/veyron2/vom/testdata.ADEStruct"
+}) {
+}
+
+type XYZStruct struct {
+	X bool
+	Y vdl.AnyRep
+	Z string
+}
+
+func (XYZStruct) __VDLReflect(struct {
+	Name string "v.io/core/veyron2/vom/testdata.XYZStruct"
+}) {
+}
+
+type YZStruct struct {
+	Y NBool
+	Z NString
+}
+
+func (YZStruct) __VDLReflect(struct {
+	Name string "v.io/core/veyron2/vom/testdata.YZStruct"
+}) {
+}
+
+type ZStruct struct {
+	Z string
+}
+
+func (ZStruct) __VDLReflect(struct {
+	Name string "v.io/core/veyron2/vom/testdata.ZStruct"
+}) {
+}
+
+type MapOnlyStruct struct {
+	Key1 int64
+	Key2 uint32
+	Key3 complex128
+}
+
+func (MapOnlyStruct) __VDLReflect(struct {
+	Name string "v.io/core/veyron2/vom/testdata.MapOnlyStruct"
+}) {
+}
+
+type StructOnlyMap map[string]uint64
+
+func (StructOnlyMap) __VDLReflect(struct {
+	Name string "v.io/core/veyron2/vom/testdata.StructOnlyMap"
+}) {
+}
+
+type MapSetStruct struct {
+	Key bool
+}
+
+func (MapSetStruct) __VDLReflect(struct {
+	Name string "v.io/core/veyron2/vom/testdata.MapSetStruct"
+}) {
+}
+
+type SetStructMap map[string]bool
+
+func (SetStructMap) __VDLReflect(struct {
+	Name string "v.io/core/veyron2/vom/testdata.SetStructMap"
+}) {
+}
+
+type MapStructSet map[string]struct{}
+
+func (MapStructSet) __VDLReflect(struct {
+	Name string "v.io/core/veyron2/vom/testdata.MapStructSet"
+}) {
+}
+
+type SetOnlyMap map[int64]bool
+
+func (SetOnlyMap) __VDLReflect(struct {
+	Name string "v.io/core/veyron2/vom/testdata.SetOnlyMap"
+}) {
+}
+
+type MapOnlySet map[uint16]struct{}
+
+func (MapOnlySet) __VDLReflect(struct {
+	Name string "v.io/core/veyron2/vom/testdata.MapOnlySet"
+}) {
+}
+
+type (
+	// BDEunion represents any single field of the BDEunion union type.
+	BDEunion interface {
+		// Index returns the field index.
+		Index() int
+		// Interface returns the field value as an interface.
+		Interface() interface{}
+		// Name returns the field name.
+		Name() string
+		// __VDLReflect describes the BDEunion union type.
+		__VDLReflect(__BDEunionReflect)
+	}
+	// BDEunionB represents field B of the BDEunion union type.
+	BDEunionB struct{ Value string }
+	// BDEunionD represents field D of the BDEunion union type.
+	BDEunionD struct{ Value vdl.AnyRep }
+	// BDEunionE represents field E of the BDEunion union type.
+	BDEunionE struct{ Value *vdl.Type }
+	// __BDEunionReflect describes the BDEunion union type.
+	__BDEunionReflect struct {
+		Name  string "v.io/core/veyron2/vom/testdata.BDEunion"
+		Type  BDEunion
+		Union struct {
+			B BDEunionB
+			D BDEunionD
+			E BDEunionE
+		}
+	}
+)
+
+func (x BDEunionB) Index() int                     { return 0 }
+func (x BDEunionB) Interface() interface{}         { return x.Value }
+func (x BDEunionB) Name() string                   { return "B" }
+func (x BDEunionB) __VDLReflect(__BDEunionReflect) {}
+
+func (x BDEunionD) Index() int                     { return 1 }
+func (x BDEunionD) Interface() interface{}         { return x.Value }
+func (x BDEunionD) Name() string                   { return "D" }
+func (x BDEunionD) __VDLReflect(__BDEunionReflect) {}
+
+func (x BDEunionE) Index() int                     { return 2 }
+func (x BDEunionE) Interface() interface{}         { return x.Value }
+func (x BDEunionE) Name() string                   { return "E" }
+func (x BDEunionE) __VDLReflect(__BDEunionReflect) {}
+
 func init() {
+	vdl.Register((*ConvertGroup)(nil))
+	vdl.Register((*VomdataStruct)(nil))
 	vdl.Register((*NBool)(nil))
 	vdl.Register((*NString)(nil))
 	vdl.Register((*NByteSlice)(nil))
@@ -339,4 +532,19 @@ func init() {
 	vdl.Register((*RecA)(nil))
 	vdl.Register((*RecX)(nil))
 	vdl.Register((*RecY)(nil))
+	vdl.Register((*ListString)(nil))
+	vdl.Register((*Array3String)(nil))
+	vdl.Register((*ABCStruct)(nil))
+	vdl.Register((*ADEStruct)(nil))
+	vdl.Register((*XYZStruct)(nil))
+	vdl.Register((*YZStruct)(nil))
+	vdl.Register((*ZStruct)(nil))
+	vdl.Register((*MapOnlyStruct)(nil))
+	vdl.Register((*StructOnlyMap)(nil))
+	vdl.Register((*MapSetStruct)(nil))
+	vdl.Register((*SetStructMap)(nil))
+	vdl.Register((*MapStructSet)(nil))
+	vdl.Register((*SetOnlyMap)(nil))
+	vdl.Register((*MapOnlySet)(nil))
+	vdl.Register((*BDEunion)(nil))
 }

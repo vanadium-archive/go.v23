@@ -164,9 +164,10 @@ func compileConfig(debug io.Writer, inName string, env *compile.Env) (*vdl.Value
 }
 
 func generate(config *vdl.Value) ([]byte, error) {
-	if got, want := config.Type(), vdl.ListType(vdl.AnyType); got != want {
-		return nil, fmt.Errorf("got config type %v, want %v", got, want)
-	}
+	// This config needs to have a specific struct format. See @testdata/vomtype.vdl.
+	// TODO(alexfandrianto): Instead of this, we should have separate generator
+	// functions that switch off of the vomdata config filename. That way, we can
+	// have 1 config each for encode/decode, compatibility, and convertibility.
 	buf := new(bytes.Buffer)
 	fmt.Fprintf(buf, `// This file was auto-generated via "vomtest generate".
 // DO NOT UPDATE MANUALLY; read the comments in `+vomdataConfig+`.
@@ -188,10 +189,16 @@ type TestCase struct {
 
 // Tests contains the testcases to use to test vom encoding and decoding.
 const Tests = []TestCase {`)
-	for ix := 0; ix < config.Len(); ix++ {
-		value := config.Index(ix)
+	// The vom encode-decode test cases need to be of type []any.
+	encodeDecodeTests := config.Field(0)
+	if got, want := encodeDecodeTests.Type(), vdl.ListType(vdl.AnyType); got != want {
+		return nil, fmt.Errorf("got encodeDecodeTests type %v, want %v", got, want)
+	}
+
+	for ix := 0; ix < encodeDecodeTests.Len(); ix++ {
+		value := encodeDecodeTests.Index(ix)
 		if !value.IsNil() {
-			// The config has type []any, and there's no need for our values to
+			// The encodeDecodeTests has type []any, and there's no need for our values to
 			// include the "any" type explicitly, so we descend into the elem value.
 			value = value.Elem()
 		}
@@ -212,6 +219,80 @@ const Tests = []TestCase {`)
 	fmt.Fprintf(buf, `
 }
 `)
+
+	// The vom compatibility tests need to be of type map[string][]typeobject
+	// Each of the []typeobject are a slice of inter-compatible typeobjects.
+	// However, the typeobjects are not compatible with any other []typeobject.
+	// Note: any and optional should be tested separately.
+	compatTests := config.Field(1)
+	if got, want := compatTests.Type(), vdl.MapType(vdl.StringType, vdl.ListType(vdl.TypeObjectType)); got != want {
+		return nil, fmt.Errorf("got compatTests type %v, want %v", got, want)
+	}
+	fmt.Fprintf(buf, `
+// CompatTests contains the testcases to use to test vom type compatibility.
+// CompatTests maps TestName (string) to CompatibleTypeSet ([]typeobject)
+// Each CompatibleTypeSet contains types compatible with each other. However,
+// types from different CompatibleTypeSets are incompatible.
+const CompatTests = map[string][]typeobject{`)
+
+	for _, testName := range vdl.SortValuesAsString(compatTests.Keys()) {
+		compatibleTypeSet := compatTests.MapIndex(testName)
+		valstr := vdlgen.TypedConst(compatibleTypeSet, testpkg, imports)
+		fmt.Fprintf(buf, `
+	%[1]q: %[2]s,`, testName.RawString(), valstr)
+	}
+	fmt.Fprintf(buf, `
+}
+`)
+
+	// The vom conversion tests need to be a map[string][]ConvertGroup
+	// See vom/testdata/vomtype.vdl
+	convertTests := config.Field(2)
+	fmt.Fprintf(buf, `
+// ConvertTests contains the testcases to check vom value convertibility.
+// ConvertTests maps TestName (string) to ConvertGroups ([]ConvertGroup)
+// Each ConvertGroup is a struct with 'Name', 'PrimaryType', and 'Values'.
+// The values within a ConvertGroup can convert between themselves w/o error.
+// However, values in higher-indexed ConvertGroups will error when converting up
+// to the primary type of the lower-indexed ConvertGroups.
+const ConvertTests = map[string][]ConvertGroup{`)
+	for _, testName := range vdl.SortValuesAsString(convertTests.Keys()) {
+		fmt.Fprintf(buf, `
+	%[1]q: {`, testName.RawString())
+
+		convertTest := convertTests.MapIndex(testName)
+		for ix := 0; ix < convertTest.Len(); ix++ {
+			convertGroup := convertTest.Index(ix)
+
+			fmt.Fprintf(buf, `
+		{
+			%[1]q,
+			%[2]s,
+			{ `, convertGroup.Field(0).RawString(), vdlgen.TypedConst(convertGroup.Field(1), testpkg, imports))
+
+			values := convertGroup.Field(2)
+			for iy := 0; iy < values.Len(); iy++ {
+				value := values.Index(iy)
+				if !value.IsNil() {
+					// The value is any, and there's no need for our values to include
+					// the "any" type explicitly, so we descend into the elem value.
+					value = value.Elem()
+				}
+				valstr := vdlgen.TypedConst(value, testpkg, imports)
+				fmt.Fprintf(buf, `%[1]s, `, valstr)
+			}
+
+			fmt.Fprintf(buf, `},
+		},`)
+		}
+
+		fmt.Fprintf(buf, `
+	},`)
+	}
+	fmt.Fprintf(buf, `
+}
+`)
+
 	return buf.Bytes(), nil
 }
 

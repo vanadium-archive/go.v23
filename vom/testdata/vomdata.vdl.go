@@ -1544,3 +1544,153 @@ var Tests = []TestCase{
 		TypeString: "typeobject",
 	},
 }
+
+// CompatTests contains the testcases to use to test vom type compatibility.
+// CompatTests maps TestName (string) to CompatibleTypeSet ([]typeobject)
+// Each CompatibleTypeSet contains types compatible with each other. However,
+// types from different CompatibleTypeSets are incompatible.
+var CompatTests = map[string][]*vdl.Type{
+	"bool": {
+		vdl.TypeOf(false),
+		vdl.TypeOf(NBool(false)),
+		vdl.TypeOf(MBool(false)),
+	},
+	"map[X]bool/set[X]": {
+		vdl.TypeOf(SetOnlyMap(nil)),
+		vdl.TypeOf(MapOnlySet(nil)),
+	},
+	"map[string]X/struct": {
+		vdl.TypeOf(MapOnlyStruct{}),
+		vdl.TypeOf(StructOnlyMap(nil)),
+	},
+	"map[string]bool/set[string]/struct": {
+		vdl.TypeOf(MapSetStruct{}),
+		vdl.TypeOf(SetStructMap(nil)),
+		vdl.TypeOf(MapStructSet(nil)),
+	},
+	"number list/array": {
+		vdl.TypeOf([]int32(nil)),
+		vdl.TypeOf(NArray2Uint64{}),
+		vdl.TypeOf(NListUint64(nil)),
+	},
+	"number": {
+		vdl.TypeOf(uint16(0)),
+		vdl.TypeOf(uint32(0)),
+		vdl.TypeOf(uint64(0)),
+		vdl.TypeOf(int16(0)),
+		vdl.TypeOf(int32(0)),
+		vdl.TypeOf(int64(0)),
+		vdl.TypeOf(float32(0)),
+		vdl.TypeOf(float64(0)),
+		vdl.TypeOf(complex64(0)),
+		vdl.TypeOf(complex128(0)),
+		vdl.TypeOf(NUint16(0)),
+		vdl.TypeOf(NUint32(0)),
+		vdl.TypeOf(NUint64(0)),
+		vdl.TypeOf(NInt16(0)),
+		vdl.TypeOf(NInt32(0)),
+		vdl.TypeOf(NInt64(0)),
+		vdl.TypeOf(NFloat32(0)),
+		vdl.TypeOf(NFloat64(0)),
+		vdl.TypeOf(NComplex64(0)),
+		vdl.TypeOf(NComplex128(0)),
+	},
+	"string list/array": {
+		vdl.TypeOf([]string(nil)),
+		vdl.TypeOf(ListString(nil)),
+		vdl.TypeOf(Array3String{}),
+	},
+	"string/[]byte/enum": {
+		vdl.TypeOf(""),
+		vdl.TypeOf(NString("")),
+		vdl.TypeOf([]byte(nil)),
+		vdl.TypeOf(NByteSlice(nil)),
+		vdl.TypeOf(NByteArray{}),
+		vdl.TypeOf(NEnumA),
+	},
+	"struct A": {
+		vdl.TypeOf(NStruct{}),
+		vdl.TypeOf(ABCStruct{}),
+		vdl.TypeOf(ADEStruct{
+			E: vdl.AnyType,
+		}),
+	},
+	"struct Z": {
+		vdl.TypeOf(XYZStruct{}),
+		vdl.TypeOf(YZStruct{}),
+		vdl.TypeOf(ZStruct{}),
+	},
+	"typeobject": {
+		vdl.TypeObjectType,
+	},
+	"union B": {
+		vdl.TypeOf(NUnion(NUnionA{false})),
+		vdl.TypeOf(BDEunion(BDEunionB{""})),
+	},
+}
+
+// ConvertTests contains the testcases to check vom value convertibility.
+// ConvertTests maps TestName (string) to ConvertGroups ([]ConvertGroup)
+// Each ConvertGroup is a struct with 'Name', 'PrimaryType', and 'Values'.
+// The values within a ConvertGroup can convert between themselves w/o error.
+// However, values in higher-indexed ConvertGroups will error when converting up
+// to the primary type of the lower-indexed ConvertGroups.
+var ConvertTests = map[string][]ConvertGroup{
+	"number": {
+		{
+			Name:        "byte",
+			PrimaryType: vdl.TypeOf(byte(0)),
+			Values: []vdl.AnyRep{
+				byte(3),
+				uint16(3),
+				int32(3),
+				float64(3),
+				int64(3),
+				complex128(3),
+			},
+		},
+		{
+			Name:        "uint16",
+			PrimaryType: vdl.TypeOf(uint16(0)),
+			Values: []vdl.AnyRep{
+				uint16(256),
+				int32(256),
+				float64(256),
+				int64(256),
+				complex128(256),
+			},
+		},
+		{
+			Name:        "int32",
+			PrimaryType: vdl.TypeOf(int32(0)),
+			Values: []vdl.AnyRep{
+				int32(-5),
+				float64(-5),
+				int64(-5),
+				complex128(-5),
+			},
+		},
+		{
+			Name:        "float64",
+			PrimaryType: vdl.TypeOf(float64(0)),
+			Values: []vdl.AnyRep{
+				float64(3.3),
+				complex128(3.3),
+			},
+		},
+		{
+			Name:        "int64",
+			PrimaryType: vdl.TypeOf(int64(0)),
+			Values: []vdl.AnyRep{
+				int64(-9223372036854775808),
+			},
+		},
+		{
+			Name:        "complex128",
+			PrimaryType: vdl.TypeOf(complex128(0)),
+			Values: []vdl.AnyRep{
+				complex128(1.5 - 1i),
+			},
+		},
+	},
+}

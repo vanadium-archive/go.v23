@@ -4690,3 +4690,63 @@ const Tests = []TestCase {
 		"typeobject",
 	},
 }
+
+// CompatTests contains the testcases to use to test vom type compatibility.
+// CompatTests maps TestName (string) to CompatibleTypeSet ([]typeobject)
+// Each CompatibleTypeSet contains types compatible with each other. However,
+// types from different CompatibleTypeSets are incompatible.
+const CompatTests = map[string][]typeobject{
+	"bool": []typeobject{typeobject(bool), typeobject(NBool), typeobject(MBool)},
+	"map[X]bool/set[X]": []typeobject{typeobject(SetOnlyMap), typeobject(MapOnlySet)},
+	"map[string]X/struct": []typeobject{typeobject(MapOnlyStruct), typeobject(StructOnlyMap)},
+	"map[string]bool/set[string]/struct": []typeobject{typeobject(MapSetStruct), typeobject(SetStructMap), typeobject(MapStructSet)},
+	"number list/array": []typeobject{typeobject([]int32), typeobject(NArray2Uint64), typeobject(NListUint64)},
+	"number": []typeobject{typeobject(uint16), typeobject(uint32), typeobject(uint64), typeobject(int16), typeobject(int32), typeobject(int64), typeobject(float32), typeobject(float64), typeobject(complex64), typeobject(complex128), typeobject(NUint16), typeobject(NUint32), typeobject(NUint64), typeobject(NInt16), typeobject(NInt32), typeobject(NInt64), typeobject(NFloat32), typeobject(NFloat64), typeobject(NComplex64), typeobject(NComplex128)},
+	"string list/array": []typeobject{typeobject([]string), typeobject(ListString), typeobject(Array3String)},
+	"string/[]byte/enum": []typeobject{typeobject(string), typeobject(NString), typeobject([]byte), typeobject(NByteSlice), typeobject(NByteArray), typeobject(NEnum)},
+	"struct A": []typeobject{typeobject(NStruct), typeobject(ABCStruct), typeobject(ADEStruct)},
+	"struct Z": []typeobject{typeobject(XYZStruct), typeobject(YZStruct), typeobject(ZStruct)},
+	"typeobject": []typeobject{typeobject(typeobject)},
+	"union B": []typeobject{typeobject(NUnion), typeobject(BDEunion)},
+}
+
+// ConvertTests contains the testcases to check vom value convertibility.
+// ConvertTests maps TestName (string) to ConvertGroups ([]ConvertGroup)
+// Each ConvertGroup is a struct with 'Name', 'PrimaryType', and 'Values'.
+// The values within a ConvertGroup can convert between themselves w/o error.
+// However, values in higher-indexed ConvertGroups will error when converting up
+// to the primary type of the lower-indexed ConvertGroups.
+const ConvertTests = map[string][]ConvertGroup{
+	"number": {
+		{
+			"byte",
+			typeobject(byte),
+			{ byte(3), uint16(3), int32(3), float64(3), int64(3), complex128(3), },
+		},
+		{
+			"uint16",
+			typeobject(uint16),
+			{ uint16(256), int32(256), float64(256), int64(256), complex128(256), },
+		},
+		{
+			"int32",
+			typeobject(int32),
+			{ int32(-5), float64(-5), int64(-5), complex128(-5), },
+		},
+		{
+			"float64",
+			typeobject(float64),
+			{ float64(3.3), complex128(3.3), },
+		},
+		{
+			"int64",
+			typeobject(int64),
+			{ int64(-9223372036854775808), },
+		},
+		{
+			"complex128",
+			typeobject(complex128),
+			{ complex128(1.5-1i), },
+		},
+	},
+}
