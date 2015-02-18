@@ -117,8 +117,13 @@ func RegisterCaveatValidator(c CaveatDescriptor, validator interface{}) {
 // NewCaveat returns a Caveat that requires validation by the validation
 // function correponding to c and uses the provided parameters.
 func NewCaveat(c CaveatDescriptor, param interface{}) (Caveat, error) {
-	if got, want := vdl.TypeOf(param), c.ParamType; got != want {
-		return Caveat{}, NewErrCaveatParamTypeMismatch(nil, c.Id, c.ParamType, fmt.Sprintf("%T", param))
+	got := vdl.TypeOf(param)
+	// If the user inputs a vdl.Value, use the type of the vdl.Value instead.
+	if vv, ok := param.(*vdl.Value); ok {
+		got = vv.Type()
+	}
+	if want := c.ParamType; got != want {
+		return Caveat{}, NewErrCaveatParamTypeMismatch(nil, c.Id, got, want)
 	}
 	bytes, err := vom.Encode(param)
 	if err != nil {
