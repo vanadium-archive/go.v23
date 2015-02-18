@@ -73,24 +73,24 @@ func TestType(t *testing.T) {
 	}
 	result := makeTypeDefinitionsString(jsnames)
 
-	expectedResult := `var _type1 = new vom.Type();
-var _type2 = new vom.Type();
-var _typeNamedList = new vom.Type();
-var _typeNamedStruct = new vom.Type();
-_type1.kind = vom.Kind.LIST;
+	expectedResult := `var _type1 = new vdl.Type();
+var _type2 = new vdl.Type();
+var _typeNamedList = new vdl.Type();
+var _typeNamedStruct = new vdl.Type();
+_type1.kind = vdl.Kind.LIST;
 _type1.name = "";
-_type1.elem = vom.Types.STRING;
-_type2.kind = vom.Kind.LIST;
+_type1.elem = vdl.Types.STRING;
+_type2.kind = vdl.Kind.LIST;
 _type2.name = "";
-_type2.elem = vom.Types.BYTE;
-_typeNamedList.kind = vom.Kind.LIST;
+_type2.elem = vdl.Types.BYTE;
+_typeNamedList.kind = vdl.Kind.LIST;
 _typeNamedList.name = "NamedList";
 _typeNamedList.elem = _typeNamedStruct;
-_typeNamedStruct.kind = vom.Kind.STRUCT;
+_typeNamedStruct.kind = vdl.Kind.STRUCT;
 _typeNamedStruct.name = "NamedStruct";
 _typeNamedStruct.fields = [{name: "List", type: _typeNamedList}, {name: "Bool", type: new otherPkg.NamedBool()._type}, {name: "UnnamedTypeField", type: _type1}];
-module.exports.NamedList = (vom.Registry.lookupOrCreateConstructor(_typeNamedList));
-module.exports.NamedStruct = (vom.Registry.lookupOrCreateConstructor(_typeNamedStruct));
+module.exports.NamedList = (vdl.Registry.lookupOrCreateConstructor(_typeNamedList));
+module.exports.NamedStruct = (vdl.Registry.lookupOrCreateConstructor(_typeNamedStruct));
 `
 
 	if result != expectedResult {

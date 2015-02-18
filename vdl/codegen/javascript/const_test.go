@@ -24,7 +24,7 @@ func TestTypedConst(t *testing.T) {
 		{
 			name:       "struct test",
 			inputValue: structValue,
-			expected: `new (vom.Registry.lookupOrCreateConstructor(_typeNamedStruct))({
+			expected: `new (vdl.Registry.lookupOrCreateConstructor(_typeNamedStruct))({
   'list': [
 ],
   'bool': false,
@@ -36,7 +36,7 @@ func TestTypedConst(t *testing.T) {
 		{
 			name:       "bytes test",
 			inputValue: vdl.BytesValue([]byte{1, 2, 3, 4}),
-			expected: `new (vom.Registry.lookupOrCreateConstructor(_type2))(new Uint8Array([
+			expected: `new (vdl.Registry.lookupOrCreateConstructor(_type2))(new Uint8Array([
 1,
 2,
 3,
