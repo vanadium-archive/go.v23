@@ -27,6 +27,10 @@ package {{.PackagePath}};
             this.elem = elem;
         }
 
+        public {{$field.Name}}() {
+            this({{$field.ZeroValue}});
+        }
+
         @Override
         public {{$field.Class}} getElem() {
             return elem;
@@ -53,6 +57,7 @@ type unionDefinitionField struct {
 	HashcodeComputation string
 	Name                string
 	Type                string
+	ZeroValue           string
 }
 
 // genJavaUnionFile generates the Java class file for the provided user-defined union type.
@@ -65,6 +70,7 @@ func genJavaUnionFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo {
 			HashcodeComputation: javaHashCode("elem", fld.Type, env),
 			Name:                fld.Name,
 			Type:                javaType(fld.Type, false, env),
+			ZeroValue:           javaZeroValue(fld.Type, env),
 		}
 	}
 	javaTypeName := toUpperCamelCase(tdef.Name)

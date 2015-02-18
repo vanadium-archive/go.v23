@@ -140,3 +140,51 @@ func javaVal(v *vdl.Value, env *compile.Env) string {
 	}
 	panic(fmt.Errorf("vdl: javaVal unhandled type %v %v", v.Kind(), v.Type()))
 }
+
+// javaZeroValue returns the zero value string for the provided VDL value.
+// We assume that default constructor of user-defined types returns a zero value.
+func javaZeroValue(t *vdl.Type, env *compile.Env) string {
+	// TODO(rogulenko): replace with a proper zero value
+	if t == vdl.ErrorType {
+		return "null"
+	}
+
+	// First process user-defined types.
+	switch t.Kind() {
+	case vdl.Enum:
+		return fmt.Sprintf("%s.%s", javaType(t, false, env), t.EnumLabel(0))
+	case vdl.Union:
+		return fmt.Sprintf("new %s.%s()", javaType(t, false, env), t.Field(0).Name)
+	}
+	if def := env.FindTypeDef(t); def != nil && def.File != compile.BuiltInFile {
+		return fmt.Sprintf("new %s()", javaType(t, false, env))
+	}
+
+	// Arrays, enums, structs and unions can be user-defined only.
+	if t.Kind() == vdl.List && t.Elem().Kind() == vdl.Byte {
+		return fmt.Sprintf("new %s[]{}", javaType(t.Elem(), false, env))
+	}
+	switch t.Kind() {
+	case vdl.Bool:
+		return "false"
+	case vdl.Byte:
+		return "(byte) 0"
+	case vdl.Int16, vdl.Int32, vdl.Int64, vdl.Float32, vdl.Float64:
+		return "0"
+	case vdl.Any, vdl.Complex64, vdl.Complex128, vdl.TypeObject, vdl.Uint16, vdl.Uint32, vdl.Uint64:
+		return fmt.Sprintf("new %s()", javaType(t, false, env))
+	case vdl.String:
+		return "\"\""
+	case vdl.List:
+		return fmt.Sprintf("new java.util.ArrayList<%s>()", javaType(t.Elem(), true, env))
+	case vdl.Map:
+		keyTypeStr := javaType(t.Key(), true, env)
+		elemTypeStr := javaType(t.Elem(), true, env)
+		return fmt.Sprintf("new java.util.HashMap<%s, %s>()", keyTypeStr, elemTypeStr)
+	case vdl.Set:
+		return fmt.Sprintf("new java.util.HashSet<%s>()", javaType(t.Key(), true, env))
+	case vdl.Optional:
+		return fmt.Sprintf("new %s(%s)", javaType(t, false, env), javaReflectType(t, env))
+	}
+	panic(fmt.Errorf("vdl: javaZeroValue unhandled type %v", t))
+}

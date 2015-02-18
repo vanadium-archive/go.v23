@@ -31,11 +31,14 @@ package {{.PackagePath}};
     {{/* Constructors */}}
     public {{.Name}}() {
         super(VDL_TYPE);
+        {{ range $field := .Fields }}
+            this.{{$field.LowercaseName}} = {{$field.ZeroValue}};
+        {{ end }}
     }
 
     {{ if .FieldsAsArgs }}
     public {{.Name}}({{ .FieldsAsArgs }}) {
-        this();
+        super(VDL_TYPE);
         {{ range $field := .Fields }}
             this.{{$field.LowercaseName}} = {{$field.LowercaseName}};
         {{ end }}
@@ -160,6 +163,7 @@ type structDefinitionField struct {
 	LowercaseName       string
 	Name                string
 	Type                string
+	ZeroValue           string
 }
 
 func javaFieldArgStr(structType *vdl.Type, env *compile.Env) string {
@@ -191,6 +195,7 @@ func genJavaStructFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo {
 			LowercaseName:       vdlutil.ToCamelCase(fld.Name),
 			Name:                fld.Name,
 			Type:                javaType(fld.Type, false, env),
+			ZeroValue:           javaZeroValue(fld.Type, env),
 		}
 	}
 

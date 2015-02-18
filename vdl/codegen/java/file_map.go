@@ -24,6 +24,10 @@ package {{.Package}};
         super(VDL_TYPE, impl);
     }
 
+    public {{.Name}}() {
+        this(new java.util.HashMap<{{.KeyType}}, {{.ElemType}}>());
+    }
+
     @Override
     public void writeToParcel(android.os.Parcel out, int flags) {
         java.lang.reflect.Type keyType =

@@ -30,6 +30,10 @@ package {{.PackagePath}};
         this(real, 0);
     }
 
+    public {{.Name}}() {
+        this(0, 0);
+    }
+
     @SuppressWarnings("hiding")
     public static final android.os.Parcelable.Creator<{{.Name}}> CREATOR
         = new android.os.Parcelable.Creator<{{.Name}}>() {

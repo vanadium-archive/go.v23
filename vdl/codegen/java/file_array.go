@@ -2,7 +2,9 @@ package java
 
 import (
 	"bytes"
+	"fmt"
 	"log"
+	"strings"
 
 	"v.io/core/veyron2/vdl/compile"
 )
@@ -24,6 +26,10 @@ package {{.Package}};
 
     public {{.Name}}({{.ElemType}}[] arr) {
         super(VDL_TYPE, arr);
+    }
+
+    public {{.Name}}() {
+        this({{.ZeroValue}});
     }
 
     {{ if .ElemIsPrimitive }}
@@ -71,6 +77,9 @@ package {{.Package}};
 // genJavaArrayFile generates the Java class file for the provided named array type.
 func genJavaArrayFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo {
 	javaTypeName := toUpperCamelCase(tdef.Name)
+	elemType := javaType(tdef.Type.Elem(), true, env)
+	elems := strings.TrimSuffix(strings.Repeat(javaZeroValue(tdef.Type.Elem(), env)+", ", tdef.Type.Len()), ", ")
+	zeroValue := fmt.Sprintf("new %s[] {%s}", elemType, elems)
 	data := struct {
 		AccessModifier    string
 		Doc               string
@@ -83,10 +92,11 @@ func genJavaArrayFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo {
 		SourceFile        string
 		VdlTypeName       string
 		VdlTypeString     string
+		ZeroValue         string
 	}{
 		AccessModifier:    accessModifierForName(tdef.Name),
 		Doc:               javaDocInComment(tdef.Doc),
-		ElemType:          javaType(tdef.Type.Elem(), true, env),
+		ElemType:          elemType,
 		ElemIsPrimitive:   !isClass(tdef.Type.Elem(), env),
 		ElemPrimitiveType: javaType(tdef.Type.Elem(), false, env),
 		Length:            tdef.Type.Len(),
@@ -95,6 +105,7 @@ func genJavaArrayFile(tdef *compile.TypeDef, env *compile.Env) JavaFileInfo {
 		SourceFile:        tdef.File.BaseName,
 		VdlTypeName:       tdef.Type.Name(),
 		VdlTypeString:     tdef.Type.String(),
+		ZeroValue:         zeroValue,
 	}
 	var buf bytes.Buffer
 	err := parseTmpl("array", arrayTmpl).Execute(&buf, data)
