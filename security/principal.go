@@ -80,10 +80,7 @@ func (p *principal) Bless(key PublicKey, with Blessings, extension string, cavea
 	if !reflect.DeepEqual(with.PublicKey(), p.PublicKey()) {
 		return nil, fmt.Errorf("Principal with public key %v cannot extend blessing with public key %v", p.PublicKey(), with.PublicKey())
 	}
-	caveats := additionalCaveats
-	if !isUnconstrainedUseCaveat(caveat) {
-		caveats = append(caveats, caveat)
-	}
+	caveats := append(additionalCaveats, caveat)
 	cert, err := newUnsignedCertificate(extension, key, caveats...)
 	if err != nil {
 		return nil, err
@@ -125,10 +122,7 @@ func (p *principal) MintDischarge(forCaveat, caveatOnDischarge Caveat, additiona
 		return nil, fmt.Errorf("cannot mint discharges for %v", forCaveat)
 	}
 	id := forCaveat.ThirdPartyDetails().ID()
-	dischargeCaveats := additionalCaveatsOnDischarge
-	if !isUnconstrainedUseCaveat(caveatOnDischarge) {
-		dischargeCaveats = append(dischargeCaveats, caveatOnDischarge)
-	}
+	dischargeCaveats := append(additionalCaveatsOnDischarge, caveatOnDischarge)
 	d := &publicKeyDischarge{ThirdPartyCaveatID: id, Caveats: dischargeCaveats}
 	if err := d.sign(p.signer); err != nil {
 		return nil, fmt.Errorf("failed to sign discharge: %v", err)

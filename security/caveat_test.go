@@ -114,6 +114,13 @@ func TestCaveat(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	anyCd := CaveatDescriptor{
+		Id:        uid,
+		ParamType: vdl.AnyType,
+	}
+	if _, err := NewCaveat(anyCd, 9); !verror.Is(err, ErrCaveatParamAny.ID) {
+		t.Errorf("Got '%v' (errorid=%v), want errorid=%v", err, verror.ErrorID(err), ErrCaveatParamAny.ID)
+	}
 	cd := CaveatDescriptor{
 		Id:        uid,
 		ParamType: vdl.TypeOf(string("")),

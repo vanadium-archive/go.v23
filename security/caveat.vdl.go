@@ -79,6 +79,11 @@ func init() {
 	vdl.Register((*publicKeyDischarge)(nil))
 }
 
+// ConstCaveat represents a caveat that either always validates or never validates.
+var ConstCaveat = CaveatDescriptor{
+	ParamType: vdl.TypeOf(false),
+}
+
 // UnixTimeExpiryCaveat represents a caveat that validates iff the current
 // time is before the time specified in seconds since January 1, 1970 UTC.
 //
@@ -161,6 +166,7 @@ var PublicKeyThirdPartyCaveatX = CaveatDescriptor{
 
 var (
 	ErrCaveatNotRegistered     = verror.Register("v.io/core/veyron2/security.CaveatNotRegistered", verror.NoRetry, "{1:}{2:} no validation function registered for caveat id {3}")
+	ErrCaveatParamAny          = verror.Register("v.io/core/veyron2/security.CaveatParamAny", verror.NoRetry, "{1:}{2:} caveat {3} uses illegal param type any")
 	ErrCaveatParamTypeMismatch = verror.Register("v.io/core/veyron2/security.CaveatParamTypeMismatch", verror.NoRetry, "{1:}{2:} bad param type: caveat {3} got {4}, want {5}")
 	// TODO(ashankar,toddw,bjornick): The type of "err" here and below
 	// should be error once https://github.com/veyron/release-issues/issues/922
@@ -171,6 +177,7 @@ var (
 
 func init() {
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrCaveatNotRegistered.ID), "{1:}{2:} no validation function registered for caveat id {3}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrCaveatParamAny.ID), "{1:}{2:} caveat {3} uses illegal param type any")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrCaveatParamTypeMismatch.ID), "{1:}{2:} bad param type: caveat {3} got {4}, want {5}")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrCaveatParamCoding.ID), "{1:}{2:} unable to encode/decode caveat param(type={4}) for caveat {3}: {5}")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrCaveatValidation.ID), "{1:}{2:} caveat validation failed: {3}")
@@ -179,6 +186,11 @@ func init() {
 // NewErrCaveatNotRegistered returns an error with the ErrCaveatNotRegistered ID.
 func NewErrCaveatNotRegistered(ctx *context.T, id uniqueid.Id) error {
 	return verror.New(ErrCaveatNotRegistered, ctx, id)
+}
+
+// NewErrCaveatParamAny returns an error with the ErrCaveatParamAny ID.
+func NewErrCaveatParamAny(ctx *context.T, id uniqueid.Id) error {
+	return verror.New(ErrCaveatParamAny, ctx, id)
 }
 
 // NewErrCaveatParamTypeMismatch returns an error with the ErrCaveatParamTypeMismatch ID.

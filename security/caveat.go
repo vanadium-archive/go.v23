@@ -23,6 +23,17 @@ type registryEntry struct {
 	registerer  string
 }
 
+// Instance of unconstrained use caveat, to be used by UnconstrainedCaveat().
+var unconstrainedUseCaveat Caveat
+
+func init() {
+	var err error
+	unconstrainedUseCaveat, err = NewCaveat(ConstCaveat, true)
+	if err != nil {
+		panic(fmt.Sprintf("Error in NewCaveat: %v", err))
+	}
+}
+
 // caveatRegistry is used to implement a singleton global registry that maps
 // the unique id of a caveat to its validation function.
 //
@@ -122,6 +133,12 @@ func NewCaveat(c CaveatDescriptor, param interface{}) (Caveat, error) {
 	if vv, ok := param.(*vdl.Value); ok {
 		got = vv.Type()
 	}
+	noAnyInParam := c.ParamType.Walk(vdl.WalkAll, func(t *vdl.Type) bool {
+		return t.Kind() != vdl.Any
+	})
+	if !noAnyInParam {
+		return Caveat{}, NewErrCaveatParamAny(nil, c.Id)
+	}
 	if want := c.ParamType; got != want {
 		return Caveat{}, NewErrCaveatParamTypeMismatch(nil, c.Id, got, want)
 	}
@@ -186,10 +203,8 @@ func (c Caveat) String() string {
 // UnconstrainedUse returns a Caveat implementation that never fails to
 // validate. This is useful only for providing unconstrained
 // blessings/discharges to another principal.
-func UnconstrainedUse() Caveat { return Caveat{} }
-
-func isUnconstrainedUseCaveat(c Caveat) bool {
-	return c.Id == UnconstrainedUse().Id
+func UnconstrainedUse() Caveat {
+	return unconstrainedUseCaveat
 }
 
 // NewPublicKeyCaveat returns a third-party caveat, i.e., the returned
@@ -243,9 +258,6 @@ func (c *publicKeyThirdPartyCaveat) Requirements() ThirdPartyRequirements {
 func (c *publicKeyThirdPartyCaveat) Dischargeable(ctx Context) error {
 	// Validate the caveats embedded within this third-party caveat.
 	for _, cav := range c.Caveats {
-		if isUnconstrainedUseCaveat(cav) {
-			continue
-		}
 		if err := cav.Validate(ctx); err != nil {
 			return fmt.Errorf("could not validate embedded restriction(%v): %v", cav, err)
 		}
@@ -275,6 +287,7 @@ func (d *publicKeyDischarge) ThirdPartyCaveats() []ThirdPartyCaveat {
 	}
 	return ret
 }
+
 func (d *publicKeyDischarge) digest(hash Hash) []byte {
 	msg := hash.sum([]byte(d.ThirdPartyCaveatID))
 	for _, cav := range d.Caveats {
@@ -282,6 +295,7 @@ func (d *publicKeyDischarge) digest(hash Hash) []byte {
 	}
 	return hash.sum(msg)
 }
+
 func (d *publicKeyDischarge) verify(key PublicKey) error {
 	if !bytes.Equal(d.Signature.Purpose, dischargePurpose) {
 		return fmt.Errorf("signature on discharge for caveat %v was not intended for discharges(purpose=%q)", d.ThirdPartyCaveatID, d.Signature.Purpose)
@@ -291,6 +305,7 @@ func (d *publicKeyDischarge) verify(key PublicKey) error {
 	}
 	return nil
 }
+
 func (d *publicKeyDischarge) sign(signer Signer) error {
 	var err error
 	d.Signature, err = signer.Sign(dischargePurpose, d.digest(signer.PublicKey().hash()))

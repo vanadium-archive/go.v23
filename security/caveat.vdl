@@ -3,6 +3,11 @@ package security
 import "v.io/core/veyron2/uniqueid"
 
 const (
+  // ConstCaveat represents a caveat that either always validates or never validates.
+  ConstCaveat = CaveatDescriptor{
+    ParamType: typeobject(bool), // If true, validation will always succeed. If false, will always fail.
+   }
+
   // UnixTimeExpiryCaveat represents a caveat that validates iff the current
   // time is before the time specified in seconds since January 1, 1970 UTC.
   //
@@ -37,6 +42,9 @@ const (
 error (
   CaveatNotRegistered(id uniqueid.Id) {
     "en": "no validation function registered for caveat id {id}",
+  }
+  CaveatParamAny(id uniqueid.Id) {
+    "en": "caveat {id} uses illegal param type any",
   }
   CaveatParamTypeMismatch(id uniqueid.Id, got, want typeobject) {
     "en": "bad param type: caveat {id} got {got}, want {want}",

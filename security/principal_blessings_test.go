@@ -562,7 +562,7 @@ func TestCertificateCompositionAttack(t *testing.T) {
 	// and replacing the "spouse" certificate from "bob/family/spouse".
 	spousecert := alicefriendspouse.(*blessingsImpl).chains[0][2]
 	// sanity check
-	if spousecert.Extension != "spouse" || len(spousecert.Caveats) != 0 {
+	if spousecert.Extension != "spouse" || len(spousecert.Caveats) != 1 || spousecert.Caveats[0].Id != ConstCaveat.Id {
 		t.Fatalf("Invalid test data. Certificate: %+v", spousecert)
 	}
 	// Replace the certificate in bobfamilyspouse

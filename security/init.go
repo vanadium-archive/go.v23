@@ -6,6 +6,13 @@ import (
 )
 
 func init() {
+	RegisterCaveatValidator(ConstCaveat, func(ctx Context, isValid bool) error {
+		if isValid {
+			return nil
+		}
+		return fmt.Errorf("failing validation in false const caveat")
+	})
+
 	RegisterCaveatValidator(UnixTimeExpiryCaveatX, func(ctx Context, unixTime int64) error {
 		now := ctx.Timestamp()
 		expiry := time.Unix(int64(unixTime), 0)
