@@ -3,6 +3,7 @@ package ipc_test
 import (
 	"errors"
 	"fmt"
+	"os"
 	"reflect"
 	"regexp"
 	"strings"
@@ -22,7 +23,12 @@ import (
 
 // TODO(toddw): Add multi-goroutine tests of reflectCache locking.
 
-func init() { testutil.Init() }
+// We call our own TestMain here because v23 test generate causes an import cycle
+// with this package.
+func TestMain(m *testing.M) {
+	testutil.Init()
+	os.Exit(m.Run())
+}
 
 // FakeServerCall implements ipc.ServerContext.
 type FakeServerCall struct {
