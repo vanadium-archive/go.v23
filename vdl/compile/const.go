@@ -115,7 +115,7 @@ func (cd constDefiner) SortAndDefine() {
 	for _, ibuilder := range sorted {
 		b := ibuilder.(*constBuilder)
 		def, file := b.def, b.def.File
-		if value := compileConst(nil, b.pexpr, file, cd.env); value != nil {
+		if value := compileConst("const", nil, b.pexpr, file, cd.env); value != nil {
 			def.Value = value
 			addConstDef(def, cd.env)
 		}
@@ -181,34 +181,65 @@ func mergeConstBuilderSets(a, b constBuilderSet) constBuilderSet {
 }
 
 // compileConst compiles pexpr into a *vdl.Value.  All named types and consts
-// referenced by pexpr must already be defined.  If t is non-nil, the returned
-// value will be of that type.
-func compileConst(t *vdl.Type, pexpr parse.ConstExpr, file *File, env *Env) *vdl.Value {
-	vc := evalConstExpr(t, pexpr, file, env)
-	if !vc.IsValid() {
+// referenced by pexpr must already be defined.
+//
+// The implicit type is applied to pexpr; untyped consts and composite literals
+// with no explicit type assume the implicit type.  Errors are reported if the
+// implicit type isn't assignable from the final value.  If the implicit type is
+// nil, the exported config const must be explicitly typed.
+func compileConst(what string, implicit *vdl.Type, pexpr parse.ConstExpr, file *File, env *Env) *vdl.Value {
+	c := evalConstExpr(implicit, pexpr, file, env)
+	if !c.IsValid() {
 		return nil
 	}
-	if t != nil {
-		conv, err := vc.Convert(t)
+	if implicit != nil && c.Type() == nil {
+		// Convert untyped const into the implicit type.
+		conv, err := c.Convert(implicit)
 		if err != nil {
-			env.prefixErrorf(file, pexpr.Pos(), err, "error converting to type %v", t)
+			env.prefixErrorf(file, pexpr.Pos(), err, "invalid %v", what)
 			return nil
 		}
-		vc = conv
+		c = conv
 	}
-	vv, err := vc.ToValue()
+	v, err := c.ToValue()
 	if err != nil {
-		env.prefixErrorf(file, pexpr.Pos(), err, "invalid value")
+		env.prefixErrorf(file, pexpr.Pos(), err, "invalid %s", what)
 		return nil
 	}
-	return vv
+	if implicit != nil && !implicit.AssignableFrom(v) {
+		env.Errorf(file, pexpr.Pos(), "invalid %v (%v not assignable from %v)", what, implicit, v)
+		return nil
+	}
+	return v
+}
+
+// compileConstExplicit is similar to compileConst, but instead of an optional
+// implicit type, requires a non-nil explicit type.  The compiled const is
+// explicitly converted to the explicit type.
+func compileConstExplicit(what string, explicit *vdl.Type, pexpr parse.ConstExpr, file *File, env *Env) *vdl.Value {
+	c := evalConstExpr(explicit, pexpr, file, env)
+	if !c.IsValid() {
+		return nil
+	}
+	conv, err := c.Convert(explicit)
+	if err != nil {
+		env.prefixErrorf(file, pexpr.Pos(), err, "invalid %v", what)
+		return nil
+	}
+	v, err := conv.ToValue()
+	if err != nil {
+		env.prefixErrorf(file, pexpr.Pos(), err, "invalid %s", what)
+		return nil
+	}
+	return v
 }
 
 var bigRatZero = new(big.Rat)
 
 // evalConstExpr returns the result of evaluating pexpr into a opconst.Const.
-// If implicit is non-nil, untyped composite literals are assumed to be of that
-// type.
+// If implicit is non-nil, we apply it to pexpr if it doesn't have an explicit
+// type specified.  E.g. composite literals and enum labels with no explicit
+// type assume the implicit type.
 func evalConstExpr(implicit *vdl.Type, pexpr parse.ConstExpr, file *File, env *Env) opconst.Const {
 	switch pe := pexpr.(type) {
 	case *parse.ConstLit:
@@ -243,12 +274,20 @@ func evalConstExpr(implicit *vdl.Type, pexpr parse.ConstExpr, file *File, env *E
 	case *parse.ConstNamed:
 		c, err := env.EvalConst(pe.Name, file)
 		if err != nil {
+			if implicit != nil {
+				// Try applying the name as a selector against the implicit type.  This
+				// allows a shortened form for enum labels, without redundantly
+				// specifying the enum type.
+				if c, err2 := env.evalSelectorOnType(implicit, pe.Name); err2 == nil {
+					return c
+				}
+			}
 			env.prefixErrorf(file, pe.Pos(), err, "const %s invalid", pe.Name)
 			break
 		}
 		return c
 	case *parse.ConstIndexed:
-		value := compileConst(nil, pe.Expr, file, env)
+		value := compileConst("const", nil, pe.Expr, file, env)
 		if value == nil {
 			break
 		}
@@ -324,36 +363,34 @@ func evalConstExpr(implicit *vdl.Type, pexpr parse.ConstExpr, file *File, env *E
 	return opconst.Const{}
 }
 
-// Evaluate an indexed list or array to a constant.
-// Inputs are representative of expr[index].
-func evalListIndex(exprVal *vdl.Value, indexExpr parse.ConstExpr, file *File, env *Env) *vdl.Value {
-	index := compileConst(vdl.Uint64Type, indexExpr, file, env)
+// evalListIndex evalutes base[index], where base is a list or array.
+func evalListIndex(base *vdl.Value, indexExpr parse.ConstExpr, file *File, env *Env) *vdl.Value {
+	index := compileConstExplicit(base.Kind().String()+" index", vdl.Uint64Type, indexExpr, file, env)
 	if index == nil {
 		return nil
 	}
-	if index.Uint() >= uint64(exprVal.Len()) {
-		env.Errorf(file, indexExpr.Pos(), "index out of bounds of array")
+	ix := int(index.Uint())
+	if ix >= base.Len() {
+		env.Errorf(file, indexExpr.Pos(), "index %d out of range", ix)
 		return nil
 	}
-	return exprVal.Index(int(index.Uint()))
+	return base.Index(ix)
 }
 
-// Evaluate an indexed map to a constant.
-// Inputs are representative of expr[index].
-func evalMapIndex(exprVal *vdl.Value, indexExpr parse.ConstExpr, file *File, env *Env) *vdl.Value {
-	indexVal := evalTypedValue("map index", exprVal.Type().Key(), indexExpr, file, env)
-	if indexVal == nil {
+// evalMapIndex evaluates base[index], where base is a map.
+func evalMapIndex(base *vdl.Value, indexExpr parse.ConstExpr, file *File, env *Env) *vdl.Value {
+	key := compileConst("map key", base.Type().Key(), indexExpr, file, env)
+	if key == nil {
 		return nil
 	}
-
-	mapItemVal := exprVal.MapIndex(indexVal)
-	if mapItemVal == nil {
-		// Unlike normal go code, it is probably undesirable to return nil here.
-		// It is very likely this is an error.
-		env.Errorf(file, indexExpr.Pos(), "map key not in map")
+	item := base.MapIndex(key)
+	if item == nil {
+		// Unlike normal go code, it is probably undesirable to return the zero
+		// value here.  It is very likely this is an error.
+		env.Errorf(file, indexExpr.Pos(), "map key %v not found in map", key)
 		return nil
 	}
-	return mapItemVal
+	return item
 }
 
 // evalCompLit evaluates a composite literal, returning it as a vdl.Value.  The
@@ -405,7 +442,7 @@ func evalListLit(t *vdl.Type, lit *parse.ConstCompositeLit, file *File, env *Env
 		// values; we allow any key that's convertible to uint64, even if the key is
 		// already typed.
 		if kv.Key != nil {
-			key := compileConst(vdl.Uint64Type, kv.Key, file, env)
+			key := compileConstExplicit("list index", vdl.Uint64Type, kv.Key, file, env)
 			if key == nil {
 				return nil
 			}
@@ -426,7 +463,7 @@ func evalListLit(t *vdl.Type, lit *parse.ConstCompositeLit, file *File, env *Env
 			listv.AssignLen(index + 1)
 		}
 		// Evaluate the value and perform the assignment.
-		value := evalTypedValue(t.Kind().String()+" value", t.Elem(), kv.Value, file, env)
+		value := compileConst(t.Kind().String()+" value", t.Elem(), kv.Value, file, env)
 		if value == nil {
 			return nil
 		}
@@ -449,7 +486,7 @@ func evalSetLit(t *vdl.Type, lit *parse.ConstCompositeLit, file *File, env *Env)
 			return nil
 		}
 		// Evaluate the key and make sure it hasn't been assigned already.
-		key := evalTypedValue("set key", t.Key(), kv.Value, file, env)
+		key := compileConst("set key", t.Key(), kv.Value, file, env)
 		if key == nil {
 			return nil
 		}
@@ -475,7 +512,7 @@ func evalMapLit(t *vdl.Type, lit *parse.ConstCompositeLit, file *File, env *Env)
 			return nil
 		}
 		// Evaluate the key and make sure it hasn't been assigned already.
-		key := evalTypedValue("map key", t.Key(), kv.Key, file, env)
+		key := compileConst("map key", t.Key(), kv.Key, file, env)
 		if key == nil {
 			return nil
 		}
@@ -484,7 +521,7 @@ func evalMapLit(t *vdl.Type, lit *parse.ConstCompositeLit, file *File, env *Env)
 			return nil
 		}
 		// Evaluate the value and perform the assignment.
-		value := evalTypedValue("map value", t.Elem(), kv.Value, file, env)
+		value := compileConst("map value", t.Elem(), kv.Value, file, env)
 		if value == nil {
 			return nil
 		}
@@ -537,7 +574,7 @@ func evalStructLit(t *vdl.Type, lit *parse.ConstCompositeLit, file *File, env *E
 		}
 		assigned[index] = true
 		// Evaluate the value and perform the assignment.
-		value := evalTypedValue("struct field", field.Type, kv.Value, file, env)
+		value := compileConst("struct field", field.Type, kv.Value, file, env)
 		if value == nil {
 			return nil
 		}
@@ -575,42 +612,12 @@ func evalUnionLit(t *vdl.Type, lit *parse.ConstCompositeLit, file *File, env *En
 		return nil
 	}
 	// Evaluate the value and perform the assignment.
-	value := evalTypedValue("union field", field.Type, kv.Value, file, env)
+	value := compileConst("union field", field.Type, kv.Value, file, env)
 	if value == nil {
 		return nil
 	}
 	unionv.AssignUnionField(index, value)
 	return unionv
-}
-
-// evalTypedValue evaluates pexpr into a vdl.Value.  If a non-nil value is
-// returned, it's guaranteed that the type of the returned value is assignable
-// to the given target type.
-func evalTypedValue(what string, target *vdl.Type, pexpr parse.ConstExpr, file *File, env *Env) *vdl.Value {
-	c := evalConstExpr(target, pexpr, file, env)
-	if !c.IsValid() {
-		return nil
-	}
-	if c.Type() == nil {
-		// Untyped const - make it typed by converting to the target type.
-		convert, err := c.Convert(target)
-		if err != nil {
-			env.prefixErrorf(file, pexpr.Pos(), err, "invalid %v", what)
-			return nil
-		}
-		c = convert
-	}
-	// ToValue should always succeed, since the const is now typed.
-	v, err := c.ToValue()
-	if err != nil {
-		env.prefixErrorf(file, pexpr.Pos(), err, "internal error: invalid %v", what)
-		return nil
-	}
-	if !target.AssignableFrom(v) {
-		env.Errorf(file, pexpr.Pos(), "invalid %v (%v not assignable from %v)", what, target, v)
-		return nil
-	}
-	return v
 }
 
 var (

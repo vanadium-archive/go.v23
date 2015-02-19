@@ -74,7 +74,7 @@ func CompileConfig(t *vdl.Type, pconfig *parse.Config, env *Env) *vdl.Value {
 	if pkg == nil {
 		return nil
 	}
-	config := compileConst(t, pconfig.Config, pkg.Files[0], env)
+	config := compileConst("config", t, pconfig.Config, pkg.Files[0], env)
 	// Wait to compute deps after we've compiled the config const expression,
 	// since it might include the only usage of some of the imports.
 	if computeDeps(pkg, env); !env.Errors.IsEmpty() {
@@ -93,7 +93,7 @@ func CompileExpr(t *vdl.Type, expr parse.ConstExpr, env *Env) *vdl.Value {
 		BaseName: "_expr.vdl",
 		Package:  newPackage("_expr", "_expr", "_expr", vdltool.Config{}),
 	}
-	return compileConst(t, expr, file, env)
+	return compileConst("expression", t, expr, file, env)
 }
 
 func compile(pkgpath, genpath string, pfiles []*parse.File, config vdltool.Config, env *Env) *Package {

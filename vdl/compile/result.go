@@ -156,36 +156,32 @@ func (e *Env) ResolveInterface(name string, file *File) (i *Interface, matched s
 	return i, matched
 }
 
-// evalSelectorOnConst evaluates a selector on a const to a constant.
-// This returns an empty const if a selector is applied on a non-struct value.
-func (e *Env) evalSelectorOnConst(def *ConstDef, selector string) (opconst.Const, error) {
-	v := def.Value
+// evalSelectorOnValue evaluates the selector on v.
+func (e *Env) evalSelectorOnValue(v *vdl.Value, selector string) (opconst.Const, error) {
 	for _, fieldName := range strings.Split(selector, ".") {
 		if v.Kind() != vdl.Struct {
 			return opconst.Const{}, fmt.Errorf("invalid selector on const of kind: %v", v.Type().Kind())
 		}
-		_, i := v.Type().FieldByName(fieldName)
-		if i < 0 {
+		next := v.StructFieldByName(fieldName)
+		if next == nil {
 			return opconst.Const{}, fmt.Errorf("invalid field name on struct %s: %s", v, fieldName)
 		}
-		v = v.StructField(i)
+		v = next
 	}
 	return opconst.FromValue(v), nil
 }
 
-// evalSelectorOnType evaluates a selector on a type to a constant.
-// This returns an empty const if a selector is applied on a non-enum type.
-func (e *Env) evalSelectorOnType(def *TypeDef, selector string) (opconst.Const, error) {
-	t := def.Type
+// evalSelectorOnType evaluates the selector on t.
+func (e *Env) evalSelectorOnType(t *vdl.Type, selector string) (opconst.Const, error) {
 	if t.Kind() != vdl.Enum {
 		return opconst.Const{}, fmt.Errorf("invalid selector on type of kind: %v", t.Kind())
 	}
-	if t.EnumIndex(selector) < 0 {
+	index := t.EnumIndex(selector)
+	if index < 0 {
 		return opconst.Const{}, fmt.Errorf("invalid label on enum %s: %s", t.Name(), selector)
 	}
-	enumVal := vdl.ZeroValue(t)
-	enumVal.AssignEnumLabel(selector)
-	return opconst.FromValue(enumVal), nil
+	enum := vdl.ZeroValue(t).AssignEnumIndex(index)
+	return opconst.FromValue(enum), nil
 }
 
 // EvalConst resolves and evaluates a name to a const.
@@ -195,7 +191,7 @@ func (e *Env) EvalConst(name string, file *File) (opconst.Const, error) {
 			return opconst.FromValue(cd.Value), nil
 		}
 		remainder := name[len(matched)+1:]
-		c, err := e.evalSelectorOnConst(cd, remainder)
+		c, err := e.evalSelectorOnValue(cd.Value, remainder)
 		if err != nil {
 			return opconst.Const{}, err
 		}
@@ -206,7 +202,7 @@ func (e *Env) EvalConst(name string, file *File) (opconst.Const, error) {
 			return opconst.Const{}, fmt.Errorf("%s is a type", name)
 		}
 		remainder := name[len(matched)+1:]
-		c, err := e.evalSelectorOnType(td, remainder)
+		c, err := e.evalSelectorOnType(td.Type, remainder)
 		if err != nil {
 			return opconst.Const{}, err
 		}

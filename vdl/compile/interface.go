@@ -209,7 +209,7 @@ func (id ifaceDefiner) defineStreamType(ptype parse.Type, file *File) *vdl.Type 
 
 func (id ifaceDefiner) defineTags(ptags []parse.ConstExpr, file *File) (tags []*vdl.Value) {
 	for _, ptag := range ptags {
-		if tag := compileConst(nil, ptag, file, id.env); tag != nil {
+		if tag := compileConst("tag", nil, ptag, file, id.env); tag != nil {
 			tags = append(tags, tag)
 		}
 	}

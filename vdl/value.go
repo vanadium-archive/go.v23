@@ -484,8 +484,8 @@ func (v *Value) MapIndex(key *Value) *Value {
 	return val
 }
 
-// Field returns the Struct field at the given index.  Panics if the index is
-// out of range.
+// StructField returns the Struct field at the given index.  Panics if the index
+// is out of range.
 func (v *Value) StructField(index int) *Value {
 	v.t.checkKind("StructField", Struct)
 	return v.rep.(repSequence).Index(v.t.fields[index].Type, index)
@@ -502,7 +502,7 @@ func (v *Value) StructFieldByName(name string) *Value {
 	return v.rep.(repSequence).Index(v.t.fields[index].Type, index)
 }
 
-// UnionIndex returns the field index and value from the underlying Union.
+// UnionField returns the field index and value from the underlying Union.
 func (v *Value) UnionField() (int, *Value) {
 	v.t.checkKind("UnionField", Union)
 	union := v.rep.(repUnion)

@@ -556,14 +556,14 @@ func TestBuildConfig(t *testing.T) {
 		if err := vdl.Convert(wantV, test.Value); err != nil {
 			t.Errorf("Convert(%v) got error %v, want nil", test.Value, err)
 		}
-		gotV := build.BuildConfig("file", strings.NewReader(test.Src), nil, env)
+		gotV := build.BuildConfig("file", strings.NewReader(test.Src), nil, nil, env)
 		if !vdl.EqualValue(gotV, wantV) {
 			t.Errorf("BuildConfig(%v) got %v, want %v", test.Src, gotV, wantV)
 		}
 		vdltest.ExpectResult(t, env.Errors, test.Src, "")
 		// TestBuildConfigValue
 		gotRV := reflect.New(reflect.TypeOf(test.Value))
-		build.BuildConfigValue("file", strings.NewReader(test.Src), env, gotRV.Interface())
+		build.BuildConfigValue("file", strings.NewReader(test.Src), nil, env, gotRV.Interface())
 		if got, want := gotRV.Elem().Interface(), test.Value; !reflect.DeepEqual(got, want) {
 			t.Errorf("BuildConfigValue(%v) got %v, want %v", test.Src, got, want)
 		}

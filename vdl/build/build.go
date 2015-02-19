@@ -192,7 +192,7 @@ func (p *Package) initVDLConfig(opts Opts, vdlenv *compile.Env) {
 	}
 	// Build the vdl.config file with an implicit "vdltool" import.  Note that the
 	// actual "vdltool" package has already been populated into vdlenv.
-	BuildConfigValueImplicitImports(name, configData, []string{"vdltool"}, vdlenv, &p.Config)
+	BuildConfigValue(name, configData, []string{"vdltool"}, vdlenv, &p.Config)
 	if err := configData.Close(); err != nil {
 		vdlenv.Errors.Errorf("%s: couldn't close (%v)", name, err)
 	}
@@ -776,19 +776,17 @@ func BuildPackage(pkg *Package, env *compile.Env) *compile.Package {
 }
 
 // BuildConfig parses and compiles the given config src and returns it.  Errors
-// are reported in env; fileName is only used for error reporting.  If implicit
-// is non-nil and the exported config const is an untyped const literal, it is
-// assumed to be of that type.
+// are reported in env; fileName is only used for error reporting.
 //
-// All imports that the config src depend on must have already been compiled and
-// populated into env.
-func BuildConfig(fileName string, src io.Reader, implicit *vdl.Type, env *compile.Env) *vdl.Value {
-	return BuildConfigImplicitImports(fileName, src, implicit, []string{}, env)
-}
-
-// BuildConfigImplicitImports is like BuildConfig, and allows additional fake
-// imports to be injected into the config file represented in src.
-func BuildConfigImplicitImports(fileName string, src io.Reader, implicit *vdl.Type, imports []string, env *compile.Env) *vdl.Value {
+// The implicit type is applied to the exported config const; untyped consts and
+// composite literals with no explicit type assume the implicit type.  Errors
+// are reported if the implicit type isn't assignable from the final value.  If
+// the implicit type is nil, the exported config const must be explicitly typed.
+//
+// All packages that the config src depends on must have already been compiled
+// and populated into env.  The imports are injected into the parsed src,
+// behaving as if the src had listed the imports explicitly.
+func BuildConfig(fileName string, src io.Reader, implicit *vdl.Type, imports []string, env *compile.Env) *vdl.Value {
 	pconfig := parse.ParseConfig(fileName, src, parse.Opts{}, env.Errors)
 	if pconfig != nil {
 		pconfig.AddImports(imports...)
@@ -797,24 +795,32 @@ func BuildConfigImplicitImports(fileName string, src io.Reader, implicit *vdl.Ty
 }
 
 // BuildConfigValue is a convenience function that runs BuildConfig, and then
-// converts the result into value.
-func BuildConfigValue(fileName string, src io.Reader, env *compile.Env, value interface{}) {
-	BuildConfigValueImplicitImports(fileName, src, []string{}, env, value)
-}
-
-// BuildConfigValueImplicitImports is a convenience function that runs
-// BuildConfigImplicitImports, and then converts the result into value.
-func BuildConfigValueImplicitImports(fileName string, src io.Reader, imports []string, env *compile.Env, value interface{}) {
-	vconfig := BuildConfigImplicitImports(fileName, src, vdl.TypeOf(value), imports, env)
+// converts the result into value.  The implicit type used by BuildConfig is
+// inferred from the value.
+func BuildConfigValue(fileName string, src io.Reader, imports []string, env *compile.Env, value interface{}) {
+	rv := reflect.ValueOf(value)
+	tt, err := vdl.TypeFromReflect(rv.Type())
+	if err != nil {
+		env.Errors.Errorf(err.Error())
+		return
+	}
+	if tt.Kind() == vdl.Optional {
+		// The value is typically a Go pointer, which translates into VDL optional.
+		// Remove the optional when determining the implicit type for BuildConfig.
+		tt = tt.Elem()
+	}
+	vconfig := BuildConfig(fileName, src, tt, imports, env)
 	if vconfig == nil {
 		return
 	}
-	target, err := vdl.ReflectTarget(reflect.ValueOf(value))
+	target, err := vdl.ReflectTarget(rv)
 	if err != nil {
 		env.Errors.Errorf("Can't create reflect target for %T (%v)", value, err)
+		return
 	}
 	if err := vdl.FromValue(target, vconfig); err != nil {
 		env.Errors.Errorf("Can't convert to %T from %v (%v)", value, vconfig, err)
+		return
 	}
 }
 
