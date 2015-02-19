@@ -9,7 +9,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -519,11 +518,10 @@ func gen(audit bool, targets []*build.Package, env *compile.Env) bool {
 					if err != nil {
 						panic(err)
 					}
-					return filepath.Join(cleanPath, path.Base(importPath))
+					return cleanPath
 				}
 				data := javascript.Generate(pkg, env, path, optPathToJSCore)
-				name := filepath.Base(target.Dir)
-				if writeFile(audit, data, dir, name+".js", env) {
+				if writeFile(audit, data, dir, "index.js", env) {
 					pkgchanged = true
 				}
 			default:

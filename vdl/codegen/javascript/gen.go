@@ -326,7 +326,7 @@ func generateSystemImports(data data) string {
 		packagePrefix = strings.Repeat("../", strings.Count(data.Pkg.Path, "/")+1) + data.PathToCoreJS
 	}
 	if data.PathToCoreJS != "" {
-		res += packagePrefix + "/vdl/vdl');"
+		res += packagePrefix + "/vdl');"
 	} else {
 		res += "veyron').vdl;"
 	}
