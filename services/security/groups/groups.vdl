@@ -64,7 +64,6 @@ type Group interface {
 }
 
 error (
-	NoBlessings() {"en": "no blessings recognized; cannot create group ACL"}
-	GroupAlreadyExists(groupName string) {"en": "group already exists: {groupName}"}
-	ExcessiveContention() {RetryBackoff, "en": "gave up after encountering excessive contention; try again later"}
+	NoBlessings() {"en":"No blessings recognized; cannot create group ACL"}
+	ExcessiveContention() {RetryBackoff, "en":"Gave up after encountering excessive contention; try again later"}
 )
