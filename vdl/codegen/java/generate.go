@@ -101,6 +101,7 @@ func Generate(pkg *compile.Package, env *compile.Env) (ret []JavaFileInfo) {
 //
 // Restrict the feature to these whitelisted VDL packages for now.
 var nativeTypePackageWhitelist = map[string]bool{
+	"time": true,
 	"v.io/core/veyron2/vdl/testdata/nativetest": true,
 }
 
