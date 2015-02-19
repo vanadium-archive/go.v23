@@ -94,15 +94,6 @@ type MountEntry struct {
 	mt bool
 }
 
-// GlobError is returned by namespace.Glob to indicate a piece of the namespace
-// that could not be traversed.
-type GlobError struct {
-	// Name is the mounted name.
-	Name string
-	// An error occurred fulfilling the request.
-	Error error
-}
-
 // ServesMountTable returns true if the mount entry represents servers that are
 // mount tables.
 // TODO(p): When the endpoint actually has this fact encoded in, use that.

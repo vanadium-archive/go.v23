@@ -35,3 +35,18 @@ type VDLMountEntry struct {
 	// MT is true if the servers represent mount tables.
 	MT bool
 }
+
+// GlobError is returned by namespace.Glob to indicate a subtree of the namespace
+// that could not be traversed.
+type GlobError struct {
+	// Root of the subtree.
+	Name string
+	// The error that occurred fulfilling the request.
+	Error error
+}
+
+// GlobReply is the data type of the chan returned by Glob__.
+type VDLGlobReply union {
+	Entry VDLMountEntry
+	Error GlobError
+}

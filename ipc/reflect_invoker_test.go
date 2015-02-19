@@ -699,7 +699,7 @@ func (o *vGlobberObject) Globber() *ipc.GlobState {
 
 type allGlobberObject struct{}
 
-func (allGlobberObject) Glob__(ctx ipc.ServerContext, pattern string) (<-chan naming.VDLMountEntry, error) {
+func (allGlobberObject) Glob__(ctx ipc.ServerContext, pattern string) (<-chan naming.VDLGlobReply, error) {
 	return nil, nil
 }
 

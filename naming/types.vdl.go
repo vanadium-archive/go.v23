@@ -51,10 +51,65 @@ func (VDLMountEntry) __VDLReflect(struct {
 }) {
 }
 
+// GlobError is returned by namespace.Glob to indicate a subtree of the namespace
+// that could not be traversed.
+type GlobError struct {
+	// Root of the subtree.
+	Name string
+	// The error that occurred fulfilling the request.
+	Error error
+}
+
+func (GlobError) __VDLReflect(struct {
+	Name string "v.io/core/veyron2/naming.GlobError"
+}) {
+}
+
+type (
+	// VDLGlobReply represents any single field of the VDLGlobReply union type.
+	//
+	// GlobReply is the data type of the chan returned by Glob__.
+	VDLGlobReply interface {
+		// Index returns the field index.
+		Index() int
+		// Interface returns the field value as an interface.
+		Interface() interface{}
+		// Name returns the field name.
+		Name() string
+		// __VDLReflect describes the VDLGlobReply union type.
+		__VDLReflect(__VDLGlobReplyReflect)
+	}
+	// VDLGlobReplyEntry represents field Entry of the VDLGlobReply union type.
+	VDLGlobReplyEntry struct{ Value VDLMountEntry }
+	// VDLGlobReplyError represents field Error of the VDLGlobReply union type.
+	VDLGlobReplyError struct{ Value GlobError }
+	// __VDLGlobReplyReflect describes the VDLGlobReply union type.
+	__VDLGlobReplyReflect struct {
+		Name  string "v.io/core/veyron2/naming.VDLGlobReply"
+		Type  VDLGlobReply
+		Union struct {
+			Entry VDLGlobReplyEntry
+			Error VDLGlobReplyError
+		}
+	}
+)
+
+func (x VDLGlobReplyEntry) Index() int                         { return 0 }
+func (x VDLGlobReplyEntry) Interface() interface{}             { return x.Value }
+func (x VDLGlobReplyEntry) Name() string                       { return "Entry" }
+func (x VDLGlobReplyEntry) __VDLReflect(__VDLGlobReplyReflect) {}
+
+func (x VDLGlobReplyError) Index() int                         { return 1 }
+func (x VDLGlobReplyError) Interface() interface{}             { return x.Value }
+func (x VDLGlobReplyError) Name() string                       { return "Error" }
+func (x VDLGlobReplyError) __VDLReflect(__VDLGlobReplyReflect) {}
+
 func init() {
 	vdl.Register((*MountFlag)(nil))
 	vdl.Register((*VDLMountedServer)(nil))
 	vdl.Register((*VDLMountEntry)(nil))
+	vdl.Register((*GlobError)(nil))
+	vdl.Register((*VDLGlobReply)(nil))
 }
 
 const Replace = MountFlag(1) // Replace means the mount should replace what is currently at the mount point

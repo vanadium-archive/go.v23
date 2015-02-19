@@ -379,7 +379,7 @@ var (
 	rtError                = reflect.TypeOf((*error)(nil)).Elem()
 	rtString               = reflect.TypeOf("")
 	rtStringChan           = reflect.TypeOf((<-chan string)(nil))
-	rtMountEntryChan       = reflect.TypeOf((<-chan naming.VDLMountEntry)(nil))
+	rtGlobReplyChan        = reflect.TypeOf((<-chan naming.VDLGlobReply)(nil))
 	rtPtrToGlobState       = reflect.TypeOf((*GlobState)(nil))
 	rtSliceOfInterfaceDesc = reflect.TypeOf([]InterfaceDesc{})
 
@@ -456,7 +456,7 @@ func typeCheckReservedMethod(method reflect.Method) error {
 		// Glob__(ipc.ServerContext, string) (<-chan naming.VDLMountEntry, error)
 		if t := method.Type; t.NumIn() != 3 || t.NumOut() != 2 ||
 			t.In(1) != rtServerContext || t.In(2) != rtString ||
-			t.Out(0) != rtMountEntryChan || t.Out(1) != rtError {
+			t.Out(0) != rtGlobReplyChan || t.Out(1) != rtError {
 			return ErrBadGlob
 		}
 		return ErrReservedMethod
