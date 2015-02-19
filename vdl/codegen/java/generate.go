@@ -2,6 +2,8 @@
 package java
 
 import (
+	"path"
+
 	"v.io/core/veyron2/vdl"
 	"v.io/core/veyron2/vdl/compile"
 )
@@ -42,11 +44,9 @@ type JavaFileInfo struct {
 // separate Client.java file. Finally, package documentation (if any) is stored
 // in a "package-info.java" file.
 //
-// The current generator doesn't yet support the full set of VDL features.  In
-// particular, we don't yet support error ids and types Complex64 and Complex128.
-//
 // TODO(spetrovic): Run Java formatters on the generated files.
 func Generate(pkg *compile.Package, env *compile.Env) (ret []JavaFileInfo) {
+	validateJavaConfig(pkg, env)
 	// One file for package documentation (if any).
 	if g := genJavaPackageFile(pkg, env); g != nil {
 		ret = append(ret, *g)
@@ -93,4 +93,28 @@ func Generate(pkg *compile.Package, env *compile.Env) (ret []JavaFileInfo) {
 		}
 	}
 	return
+}
+
+// The native types feature is hard to use correctly.  E.g. the wire type
+// must be statically registered in Java vdl package in order for the
+// wire<->native conversion to work, which is hard to ensure.
+//
+// Restrict the feature to these whitelisted VDL packages for now.
+var nativeTypePackageWhitelist = map[string]bool{
+	"v.io/core/veyron2/vdl/testdata/nativetest": true,
+}
+
+func validateJavaConfig(pkg *compile.Package, env *compile.Env) {
+	vdlconfig := path.Join(pkg.GenPath, "vdl.config")
+	// Validate native type configuration.  Since native types are hard to use, we
+	// restrict them to a built-in whitelist of packages for now.
+	if len(pkg.Config.Java.WireToNativeTypes) > 0 && !nativeTypePackageWhitelist[pkg.Path] {
+		env.Errors.Errorf("%s: Java.WireToNativeTypes is restricted to whitelisted VDL packages", vdlconfig)
+	}
+	// Make sure each wire type is actually defined in the package.
+	for wire, _ := range pkg.Config.Java.WireToNativeTypes {
+		if def := pkg.ResolveType(wire); def == nil {
+			env.Errors.Errorf("%s: type %s specified in Java.WireToNativeTypes undefined", vdlconfig, wire)
+		}
+	}
 }
