@@ -159,6 +159,10 @@ func jsKind(k vdl.Kind) string {
 func builtinJSType(t *vdl.Type) (string, bool) {
 	_, n := vdl.SplitIdent(t.Name())
 
+	if t == vdl.ErrorType {
+		return "vdl.Types.ERROR", true
+	}
+
 	// named types are not built-in.
 	if n != "" {
 		return "", false
