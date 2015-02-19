@@ -182,7 +182,7 @@ func NewErrCaveatNotRegistered(ctx *context.T, id uniqueid.Id) error {
 }
 
 // NewErrCaveatParamTypeMismatch returns an error with the ErrCaveatParamTypeMismatch ID.
-func NewErrCaveatParamTypeMismatch(ctx *context.T, id uniqueid.Id, got *vdl.Type, want string) error {
+func NewErrCaveatParamTypeMismatch(ctx *context.T, id uniqueid.Id, got *vdl.Type, want *vdl.Type) error {
 	return verror.New(ErrCaveatParamTypeMismatch, ctx, id, got, want)
 }
 

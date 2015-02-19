@@ -38,7 +38,7 @@ error (
   CaveatNotRegistered(id uniqueid.Id) {
     "en": "no validation function registered for caveat id {id}",
   }
-  CaveatParamTypeMismatch(id uniqueid.Id, got typeobject, want string) {
+  CaveatParamTypeMismatch(id uniqueid.Id, got, want typeobject) {
     "en": "bad param type: caveat {id} got {got}, want {want}",
   }
   // TODO(ashankar,toddw,bjornick): The type of "err" here and below
