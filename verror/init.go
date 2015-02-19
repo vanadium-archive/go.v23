@@ -38,7 +38,7 @@ func errorToWire(native error) (vdl.WireError, error) {
 		},
 		Msg: e.Error(),
 	}
-	for _, p := range Params(e) {
+	for _, p := range params(e) {
 		// TODO(toddw): Check to make sure each param is convertible to *vdl.Value?
 		wire.ParamList = append(wire.ParamList, p)
 	}

@@ -512,8 +512,10 @@ func (subErrs SubErrs) String() (result string) {
 	return result
 }
 
-// Params returns the variadic arguments to ExplicitNew().
-func Params(err error) []interface{} {
+// params returns the variadic arguments to ExplicitNew().  We do not export it
+// to discourage its abuse as a general-purpose way to pass alternate return
+// values.
+func params(err error) []interface{} {
 	if e, ok := assertStandard(err); ok {
 		return e.ParamList
 	}
@@ -531,9 +533,10 @@ func (e Standard) subErrorIndex() (i int) {
 	return len(e.ParamList)
 }
 
-// SubErrors returns a copy of the subordinate errors accumulated into err, or
-// nil if there are no such errors.
-func SubErrors(err error) (r SubErrs) {
+// subErrors returns a copy of the subordinate errors accumulated into err, or
+// nil if there are no such errors.  We do not export it to discourage its
+// abuse as a general-purpose way to pass alternate return values.
+func subErrors(err error) (r SubErrs) {
 	if e, ok := assertStandard(err); ok {
 		size := 0
 		for i := range e.ParamList {
@@ -622,7 +625,7 @@ func debugStringInternal(err error, prefix string, name string) string {
 	// Print all the subordinate errors, even the ones that were not
 	// printed by Error(), indented a bit further.
 	prefix += "  "
-	if subErrs := SubErrors(err); len(subErrs) > 0 {
+	if subErrs := subErrors(err); len(subErrs) > 0 {
 		for _, s := range subErrs {
 			str += debugStringInternal(s.Err, prefix, s.Name)
 		}

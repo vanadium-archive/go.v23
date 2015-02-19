@@ -70,21 +70,12 @@ var (
 // reduces the chances that its line numbers will change.
 func TestSubordinateErrors(t *testing.T) {
 	p := verror.ExplicitNew(idActionA, en, "server", "aEN0", 0)
-	if verror.SubErrors(p) != nil {
-		t.Errorf("expected nil")
-	}
 	p1 := verror.AddSubErrs(p, nil, verror.SubErr{"a=1", aEN1, verror.Print}, verror.SubErr{"a=2", aFR0, verror.Print})
 	r1 := "server aEN0 error A 0 [a=1: server aEN1 error A 1 2], [a=2: server aFR0 erreur A 0]"
 	if got, want := p1.Error(), r1; got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}
-	if got, want := len(verror.SubErrors(p1)), 2; got != want {
-		t.Errorf("got %d, want %d", got, want)
-	}
 	p2 := verror.AddSubErrs(p, nil, verror.SubErr{"go_err=1", fmt.Errorf("Oh"), verror.Print})
-	if got, want := len(verror.SubErrors(p2)), 1; got != want {
-		t.Errorf("got %d, want %d", got, want)
-	}
 	r2 := "server aEN0 error A 0 [go_err=1: verror.test  unknown error Oh]"
 	if got, want := p2.Error(), r2; got != want {
 		t.Errorf("got %q, want %q", got, want)
@@ -93,13 +84,10 @@ func TestSubordinateErrors(t *testing.T) {
 	if !strings.Contains(p2str, r2) {
 		t.Errorf("debug string missing error message: %q, %q", p2str, r2)
 	}
-	if !(strings.Contains(p2str, "verror_test.go:72") && strings.Contains(p2str, "verror_test.go:84")) {
+	if !(strings.Contains(p2str, "verror_test.go:72") && strings.Contains(p2str, "verror_test.go:78")) {
 		t.Errorf("debug string missing correct line #: %s", p2str)
 	}
 	p3 := verror.AddSubErrs(p, nil, verror.SubErr{"go_err=2", fmt.Errorf("Oh"), 0})
-	if got, want := len(verror.SubErrors(p3)), 1; got != want {
-		t.Errorf("got %d, want %d", got, want)
-	}
 	r3 := "server aEN0 error A 0 "
 	if got, want := p3.Error(), r3; got != want {
 		t.Errorf("got %q, want %q", got, want)
