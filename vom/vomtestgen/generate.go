@@ -155,7 +155,7 @@ func compileConfig(debug io.Writer, inName string, env *compile.Env) (*vdl.Value
 		}
 	}
 	// Compile config into our test values.
-	config := build.BuildConfig(basename, data, nil, env)
+	config := build.BuildConfig(basename, data, nil, nil, env)
 	if err := env.Errors.ToError(); err != nil {
 		return nil, err
 	}

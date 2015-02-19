@@ -50,7 +50,7 @@ func testConfigFile(t *testing.T, name string, tpkg constPkg, env *compile.Env) 
 	// "package a\n" and we have a valid config file.
 	fname := tpkg.Name + ".config"
 	data := "config = Res\n" + tpkg.Data
-	config := build.BuildConfig(fname, strings.NewReader(data), nil, env)
+	config := build.BuildConfig(fname, strings.NewReader(data), nil, nil, env)
 	vdltest.ExpectResult(t, env.Errors, name, tpkg.ErrRE)
 	if config == nil || tpkg.ErrRE != "" {
 		return
@@ -207,6 +207,14 @@ func makeEnumXYZ(name, label string) *vdl.Value {
 	return vdl.ZeroValue(t).AssignEnumLabel(label)
 }
 
+func makeInnerEnum(label string) *vdl.Value {
+	tA := vdl.NamedType("p.kg/a.A", vdl.EnumType("X", "Y", "Z"))
+	tB := vdl.NamedType("p.kg/a.B", vdl.StructType(vdl.Field{"A", tA}))
+	res := vdl.ZeroValue(tB)
+	res.StructField(0).AssignEnumLabel(label)
+	return res
+}
+
 func makeCyclicStructType() *vdl.Type {
 	// type A struct {X string;Z ?A}
 	var builder vdl.TypeBuilder
@@ -254,15 +262,15 @@ var constTests = []struct {
 	{
 		"UntypedInteger",
 		cp{{"a", `const Res = 123`, nil,
-			`invalid value \(123 must be assigned a type\)`}}},
+			`invalid const \(123 must be assigned a type\)`}}},
 	{
 		"UntypedFloat",
 		cp{{"a", `const Res = 1.5`, nil,
-			`invalid value \(1\.5 must be assigned a type\)`}}},
+			`invalid const \(1\.5 must be assigned a type\)`}}},
 	{
 		"UntypedComplex",
 		cp{{"a", `const Res = 3.4+9.8i`, nil,
-			`invalid value \(3\.4\+9\.8i must be assigned a type\)`}}},
+			`invalid const \(3\.4\+9\.8i must be assigned a type\)`}}},
 
 	// Test list literals.
 	{
@@ -296,11 +304,11 @@ var constTests = []struct {
 		"NegativeListIndexing",
 		cp{{"a", `const A = []int64{3,4,2}; const Res = A[-1]`, nil, `\(const -1 overflows uint64\)`}}},
 	{
-		"OutOfBoundsListIndexing",
-		cp{{"a", `const A = []int64{3,4,2}; const Res = A[10]`, nil, "index out of bounds"}}},
+		"OutOfRangeListIndexing",
+		cp{{"a", `const A = []int64{3,4,2}; const Res = A[10]`, nil, "index 10 out of range"}}},
 	{
 		"InvalidIndexType",
-		cp{{"a", `const A = []int64{3,4,2}; const Res = A["ok"]`, nil, "error converting"}}},
+		cp{{"a", `const A = []int64{3,4,2}; const Res = A["ok"]`, nil, "invalid list index"}}},
 	{
 		"InvalidIndexBaseType",
 		cp{{"a", `type A struct{}; const B = A{}; const Res = B["ok"]`, nil, "illegal use of index operator with unsupported type"}}},
@@ -343,11 +351,11 @@ var constTests = []struct {
 		"NegativeArrayIndexing",
 		cp{{"a", `type T [3]int64; const A = T{3,4,2}; const Res = A[-1]`, nil, `\(const -1 overflows uint64\)`}}},
 	{
-		"OutOfBoundsArrayIndexing",
-		cp{{"a", `type T [3]int64; const A = T{3,4,2}; const Res = A[10]`, nil, "index out of bounds"}}},
+		"OutOfRangeArrayIndexing",
+		cp{{"a", `type T [3]int64; const A = T{3,4,2}; const Res = A[10]`, nil, "index 10 out of range"}}},
 	{
 		"InvalidIndexType",
-		cp{{"a", `type T [3]int64; const A = T{3,4,2}; const Res = A["ok"]`, nil, "error converting"}}},
+		cp{{"a", `type T [3]int64; const A = T{3,4,2}; const Res = A["ok"]`, nil, "invalid array index"}}},
 
 	// Test byte list literals.
 	{
@@ -406,10 +414,10 @@ var constTests = []struct {
 		cp{{"a", `const A = map[int64]int64{1:4}; const Res = A[int64(1)]`, vdl.Int64Value(4), ""}}},
 	{
 		"MapIncorrectlyTypedIndexing",
-		cp{{"a", `const A = map[int64]int64{1:4};const Res = A[int16(1)]`, nil, "invalid map index [(]int64 not assignable from int16[(]1[)][)]"}}},
+		cp{{"a", `const A = map[int64]int64{1:4};const Res = A[int16(1)]`, nil, `invalid map key \(int64 not assignable from int16\(1\)\)`}}},
 	{
 		"MapIndexingMissingValue",
-		cp{{"a", `const A = map[int64]int64{1:4}; const Res = A[0]`, nil, "map key not in map"}}},
+		cp{{"a", `const A = map[int64]int64{1:4}; const Res = A[0]`, nil, `map key int64\(0\) not found in map`}}},
 
 	// Test struct literals.
 	{
@@ -521,6 +529,12 @@ var constTests = []struct {
 	{
 		"EnumNoLabel",
 		cp{{"a", `type A enum{X;Y;Z}; const Res = A`, nil, "A is a type"}}},
+	{
+		"InnerEnumExplicit",
+		cp{{"a", `type A enum{X;Y;Z}; type B struct{A A}; const Res = B{A: A.Y}`, makeInnerEnum("Y"), ""}}},
+	{
+		"InnerEnumImplicit",
+		cp{{"a", `type A enum{X;Y;Z}; type B struct{A A}; const Res = B{A: Z}`, makeInnerEnum("Z"), ""}}},
 
 	// Test explicit primitive type conversions.
 	{

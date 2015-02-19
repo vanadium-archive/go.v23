@@ -474,6 +474,39 @@ var Cargs = Args{
 	B: 2,
 }
 
+var CScalars = Scalars{
+	A0:  true,
+	A1:  1,
+	A2:  2,
+	A3:  3,
+	A4:  4,
+	A5:  5,
+	A6:  6,
+	A7:  7,
+	A8:  8,
+	A9:  9,
+	A10: 10,
+	A11: 11,
+	A12: "abc",
+	A14: false,
+	A15: vdl.TypeOf(false),
+	B0:  true,
+	B1:  1,
+	B2:  2,
+	B3:  3,
+	B4:  4,
+	B5:  5,
+	B6:  6,
+	B7:  7,
+	B8:  8,
+	B9:  9,
+	B10: 10,
+	B11: 11,
+	B12: "abc",
+	B13: NamedEnumB,
+	B14: NamedUnionC{int32(123)},
+}
+
 const True = true
 
 const Foo = "foo"
