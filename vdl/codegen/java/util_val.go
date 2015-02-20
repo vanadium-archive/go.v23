@@ -14,6 +14,9 @@ func javaConstVal(v *vdl.Value, env *compile.Env) (ret string) {
 	if v == nil {
 		return "null"
 	}
+	if v.IsZero() {
+		return javaZeroValue(v.Type(), env)
+	}
 
 	ret = javaVal(v, env)
 	switch v.Type().Kind() {
@@ -168,8 +171,16 @@ func javaZeroValue(t *vdl.Type, env *compile.Env) string {
 		return "false"
 	case vdl.Byte:
 		return "(byte) 0"
-	case vdl.Int16, vdl.Int32, vdl.Int64, vdl.Float32, vdl.Float64:
+	case vdl.Int16:
+		return "(short) 0"
+	case vdl.Int32:
 		return "0"
+	case vdl.Int64:
+		return "0L"
+	case vdl.Float32:
+		return "0.0f"
+	case vdl.Float64:
+		return "0.0"
 	case vdl.Any, vdl.Complex64, vdl.Complex128, vdl.TypeObject, vdl.Uint16, vdl.Uint32, vdl.Uint64:
 		return fmt.Sprintf("new %s()", javaType(t, false, env))
 	case vdl.String:
