@@ -9,19 +9,11 @@ import (
 	"testing"
 
 	"v.io/core/veyron/lib/modules"
-	"v.io/core/veyron/lib/testutil"
 
 	"v.io/core/veyron2/vlog"
 )
 
-func TestHelperProcess(t *testing.T) {
-	modules.DispatchInTest()
-}
-
-func init() {
-	testutil.Init()
-	modules.RegisterChild("child", "", child)
-}
+//go:generate v23 test generate
 
 func child(stdin io.Reader, stdout, stderr io.Writer, env map[string]string, args ...string) error {
 	tmp := filepath.Join(os.TempDir(), "foo")
