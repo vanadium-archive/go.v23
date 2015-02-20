@@ -123,13 +123,26 @@ func Convert(target, src interface{}) error {
 }
 
 // ValueOf returns the value corresponding to v.  It's a helper for calling
-// Convert, and panics on any errors.
+// ValueFromReflect, and panics on any errors.
 func ValueOf(v interface{}) *Value {
-	var target *Value
-	if err := Convert(&target, v); err != nil {
+	vv, err := ValueFromReflect(reflect.ValueOf(v))
+	if err != nil {
 		panic(err)
 	}
-	return target
+	return vv
+}
+
+// ValueFromReflect returns the value corresponding to rv.
+func ValueFromReflect(rv reflect.Value) (*Value, error) {
+	var result *Value
+	target, err := ReflectTarget(reflect.ValueOf(&result))
+	if err != nil {
+		return nil, err
+	}
+	if err := FromReflect(target, rv); err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 // FromReflect converts from rv to the target, by walking through rv and calling

@@ -56,7 +56,7 @@ func typeGo(data goData, t *vdl.Type) string {
 	if def := data.Env.FindTypeDef(t); def != nil {
 		switch {
 		case t == vdl.AnyType:
-			return data.Pkg("v.io/core/veyron2/vdl") + "AnyRep"
+			return "*" + data.Pkg("v.io/core/veyron2/vdl") + "Value"
 		case t == vdl.TypeObjectType:
 			return "*" + data.Pkg("v.io/core/veyron2/vdl") + "Type"
 		case def.File == compile.BuiltInFile:

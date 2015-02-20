@@ -393,6 +393,11 @@ func (v *Value) String() string {
 		// This occurs if the user calls new(Value).String().
 		return "INVALID"
 	}
+	switch v.t {
+	case BoolType, StringType:
+		// Unnamed bool and string don't need the type to be printed.
+		return stringRep(v.t, v.rep)
+	}
 	switch v.t.Kind() {
 	case Array, List, Set, Map, Struct, Union:
 		// { } are used instead of ( ) for composites, except for []byte and [N]byte

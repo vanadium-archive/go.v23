@@ -308,7 +308,7 @@ var descGlobWatcher = ipc.InterfaceDesc{
 			InArgs: []ipc.ArgDesc{
 				{"req", ``}, // types.GlobRequest
 			},
-			Tags: []vdl.AnyRep{access.Tag("Resolve")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Resolve"))},
 		},
 	},
 }

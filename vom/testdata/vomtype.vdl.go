@@ -13,7 +13,7 @@ import (
 type ConvertGroup struct {
 	Name        string
 	PrimaryType *vdl.Type
-	Values      []vdl.AnyRep
+	Values      []*vdl.Value
 }
 
 func (ConvertGroup) __VDLReflect(struct {
@@ -22,7 +22,7 @@ func (ConvertGroup) __VDLReflect(struct {
 }
 
 type VomdataStruct struct {
-	EncodeDecodeData []vdl.AnyRep
+	EncodeDecodeData []*vdl.Value
 	CompatData       map[string][]*vdl.Type
 	ConvertData      map[string][]ConvertGroup
 }
@@ -289,7 +289,7 @@ type MStruct struct {
 	C MBool
 	D *NStruct
 	E *vdl.Type
-	F vdl.AnyRep
+	F *vdl.Value
 }
 
 func (MStruct) __VDLReflect(struct {
@@ -361,7 +361,7 @@ func (ABCStruct) __VDLReflect(struct {
 
 type ADEStruct struct {
 	A bool
-	D vdl.AnyRep
+	D *vdl.Value
 	E *vdl.Type
 }
 
@@ -372,7 +372,7 @@ func (ADEStruct) __VDLReflect(struct {
 
 type XYZStruct struct {
 	X bool
-	Y vdl.AnyRep
+	Y *vdl.Value
 	Z string
 }
 
@@ -470,7 +470,7 @@ type (
 	// BDEunionB represents field B of the BDEunion union type.
 	BDEunionB struct{ Value string }
 	// BDEunionD represents field D of the BDEunion union type.
-	BDEunionD struct{ Value vdl.AnyRep }
+	BDEunionD struct{ Value *vdl.Value }
 	// BDEunionE represents field E of the BDEunion union type.
 	BDEunionE struct{ Value *vdl.Type }
 	// __BDEunionReflect describes the BDEunion union type.

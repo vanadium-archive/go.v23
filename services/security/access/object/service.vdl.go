@@ -270,7 +270,7 @@ var descObject = ipc.InterfaceDesc{
 				{"acl", ``},  // access.TaggedACLMap
 				{"etag", ``}, // string
 			},
-			Tags: []vdl.AnyRep{access.Tag("Admin")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
 		},
 		{
 			Name: "GetACL",
@@ -279,7 +279,7 @@ var descObject = ipc.InterfaceDesc{
 				{"acl", ``},  // access.TaggedACLMap
 				{"etag", ``}, // string
 			},
-			Tags: []vdl.AnyRep{access.Tag("Admin")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
 		},
 	},
 }

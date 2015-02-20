@@ -416,7 +416,7 @@ var descGroup = ipc.InterfaceDesc{
 				{"acl", ``},     // access.TaggedACLMap
 				{"entries", ``}, // []BlessingPatternChunk
 			},
-			Tags: []vdl.AnyRep{access.Tag("Write")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
 		},
 		{
 			Name: "Delete",
@@ -424,7 +424,7 @@ var descGroup = ipc.InterfaceDesc{
 			InArgs: []ipc.ArgDesc{
 				{"etag", ``}, // string
 			},
-			Tags: []vdl.AnyRep{access.Tag("Write")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
 		},
 		{
 			Name: "Add",
@@ -433,7 +433,7 @@ var descGroup = ipc.InterfaceDesc{
 				{"entry", ``}, // BlessingPatternChunk
 				{"etag", ``},  // string
 			},
-			Tags: []vdl.AnyRep{access.Tag("Write")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
 		},
 		{
 			Name: "Remove",
@@ -442,7 +442,7 @@ var descGroup = ipc.InterfaceDesc{
 				{"entry", ``}, // BlessingPatternChunk
 				{"etag", ``},  // string
 			},
-			Tags: []vdl.AnyRep{access.Tag("Write")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
 		},
 		{
 			Name: "Get",
@@ -455,7 +455,7 @@ var descGroup = ipc.InterfaceDesc{
 				{"res", ``},  // GetResponse
 				{"etag", ``}, // string
 			},
-			Tags: []vdl.AnyRep{access.Tag("Read")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
 			Name: "Rest",
@@ -468,7 +468,7 @@ var descGroup = ipc.InterfaceDesc{
 				{"res", ``},  // RestResponse
 				{"etag", ``}, // string
 			},
-			Tags: []vdl.AnyRep{access.Tag("Resolve")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Resolve"))},
 		},
 	},
 }

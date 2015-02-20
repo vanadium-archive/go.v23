@@ -277,7 +277,7 @@ var descApplication = ipc.InterfaceDesc{
 			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // application.Envelope
 			},
-			Tags: []vdl.AnyRep{access.Tag("Read")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 	},
 }
@@ -868,12 +868,12 @@ var descBinary = ipc.InterfaceDesc{
 				{"nparts", ``},    // int32
 				{"mediaInfo", ``}, // MediaInfo
 			},
-			Tags: []vdl.AnyRep{access.Tag("Write")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
 		},
 		{
 			Name: "Delete",
 			Doc:  "// Delete deletes the binary identified by the object name\n// suffix. If the binary that has not been created, the method\n// returns an error.",
-			Tags: []vdl.AnyRep{access.Tag("Write")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
 		},
 		{
 			Name: "Download",
@@ -881,7 +881,7 @@ var descBinary = ipc.InterfaceDesc{
 			InArgs: []ipc.ArgDesc{
 				{"part", ``}, // int32
 			},
-			Tags: []vdl.AnyRep{access.Tag("Read")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
 			Name: "DownloadURL",
@@ -890,7 +890,7 @@ var descBinary = ipc.InterfaceDesc{
 				{"URL", ``}, // string
 				{"TTL", ``}, // int64
 			},
-			Tags: []vdl.AnyRep{access.Tag("Read")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
 			Name: "Stat",
@@ -899,7 +899,7 @@ var descBinary = ipc.InterfaceDesc{
 				{"Parts", ``},     // []binary.PartInfo
 				{"MediaInfo", ``}, // MediaInfo
 			},
-			Tags: []vdl.AnyRep{access.Tag("Read")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
 			Name: "Upload",
@@ -907,7 +907,7 @@ var descBinary = ipc.InterfaceDesc{
 			InArgs: []ipc.ArgDesc{
 				{"part", ``}, // int32
 			},
-			Tags: []vdl.AnyRep{access.Tag("Write")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
 		},
 	},
 }
@@ -1166,7 +1166,7 @@ var descProfile = ipc.InterfaceDesc{
 			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // string
 			},
-			Tags: []vdl.AnyRep{access.Tag("Read")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
 			Name: "Description",
@@ -1174,7 +1174,7 @@ var descProfile = ipc.InterfaceDesc{
 			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // string
 			},
-			Tags: []vdl.AnyRep{access.Tag("Read")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 	},
 }

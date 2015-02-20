@@ -143,7 +143,7 @@ func init() {
 		"typeGo":                typeGo,
 		"typeDefGo":             typeDefGo,
 		"constDefGo":            constDefGo,
-		"typedConst":            typedConst,
+		"tagValue":              tagValue,
 		"embedGo":               embedGo,
 		"isStreamingMethod":     isStreamingMethod,
 		"hasStreamingMethods":   hasStreamingMethods,
@@ -679,7 +679,7 @@ var desc{{$iface.Name}} = {{$ipc_}}InterfaceDesc{ {{if $iface.Name}}
 			OutArgs: []{{$ipc_}}ArgDesc{ {{range $arg := $method.OutArgs}}
 				{ "{{$arg.Name}}", {{quoteStripDoc $arg.Doc}} }, // {{typeGo $data $arg.Type}}{{end}}
 			},{{end}}{{if $method.Tags}}
-			Tags: []{{$data.Pkg "v.io/core/veyron2/vdl"}}AnyRep{ {{range $tag := $method.Tags}}{{typedConst $data $tag}} ,{{end}} },{{end}}
+			Tags: []*{{$data.Pkg "v.io/core/veyron2/vdl"}}Value{ {{range $tag := $method.Tags}}{{tagValue $data $tag}} ,{{end}} },{{end}}
 		},{{end}}
 	},{{end}}
 }

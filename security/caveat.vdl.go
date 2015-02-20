@@ -199,11 +199,11 @@ func NewErrCaveatParamTypeMismatch(ctx *context.T, id uniqueid.Id, got *vdl.Type
 }
 
 // NewErrCaveatParamCoding returns an error with the ErrCaveatParamCoding ID.
-func NewErrCaveatParamCoding(ctx *context.T, id uniqueid.Id, typ *vdl.Type, err vdl.AnyRep) error {
+func NewErrCaveatParamCoding(ctx *context.T, id uniqueid.Id, typ *vdl.Type, err string) error {
 	return verror.New(ErrCaveatParamCoding, ctx, id, typ, err)
 }
 
 // NewErrCaveatValidation returns an error with the ErrCaveatValidation ID.
-func NewErrCaveatValidation(ctx *context.T, err vdl.AnyRep) error {
+func NewErrCaveatValidation(ctx *context.T, err string) error {
 	return verror.New(ErrCaveatValidation, ctx, err)
 }

@@ -736,27 +736,27 @@ var descApplication = ipc.InterfaceDesc{
 			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // string
 			},
-			Tags: []vdl.AnyRep{access.Tag("Write")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
 		},
 		{
 			Name: "Refresh",
 			Doc:  "// Refresh refreshes the state of application installation(s)\n// instance(s).",
-			Tags: []vdl.AnyRep{access.Tag("Admin")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
 		},
 		{
 			Name: "Restart",
 			Doc:  "// Restart restarts execution of application installation(s)\n// instance(s).",
-			Tags: []vdl.AnyRep{access.Tag("Write")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
 		},
 		{
 			Name: "Resume",
 			Doc:  "// Resume resumes execution of application installation(s)\n// instance(s).",
-			Tags: []vdl.AnyRep{access.Tag("Write")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
 		},
 		{
 			Name: "Revert",
 			Doc:  "// Revert reverts application installation(s) to the most recent\n// previous installation.",
-			Tags: []vdl.AnyRep{access.Tag("Admin")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
 		},
 		{
 			Name: "Start",
@@ -764,7 +764,7 @@ var descApplication = ipc.InterfaceDesc{
 			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // []string
 			},
-			Tags: []vdl.AnyRep{access.Tag("Read")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
 			Name: "Stop",
@@ -772,22 +772,22 @@ var descApplication = ipc.InterfaceDesc{
 			InArgs: []ipc.ArgDesc{
 				{"deadline", ``}, // uint32
 			},
-			Tags: []vdl.AnyRep{access.Tag("Admin")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
 		},
 		{
 			Name: "Suspend",
 			Doc:  "// Suspend suspends execution of application installation(s)\n// instance(s).",
-			Tags: []vdl.AnyRep{access.Tag("Write")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
 		},
 		{
 			Name: "Uninstall",
 			Doc:  "// Uninstall uninstalls application installation(s).",
-			Tags: []vdl.AnyRep{access.Tag("Admin")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
 		},
 		{
 			Name: "Update",
 			Doc:  "// Update updates the application installation(s) from the object name\n// provided during Install.  If the new application envelope contains a\n// different application title, the update does not occur, and an error\n// is returned.",
-			Tags: []vdl.AnyRep{access.Tag("Admin")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
 		},
 		{
 			Name: "UpdateTo",
@@ -795,7 +795,7 @@ var descApplication = ipc.InterfaceDesc{
 			InArgs: []ipc.ArgDesc{
 				{"name", ``}, // string
 			},
-			Tags: []vdl.AnyRep{access.Tag("Admin")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
 		},
 		{
 			Name: "Debug",
@@ -803,7 +803,7 @@ var descApplication = ipc.InterfaceDesc{
 			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // string
 			},
-			Tags: []vdl.AnyRep{access.Tag("Debug")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Debug"))},
 		},
 	},
 }
@@ -947,7 +947,7 @@ var descClaimable = ipc.InterfaceDesc{
 			InArgs: []ipc.ArgDesc{
 				{"pairingToken", ``}, // string
 			},
-			Tags: []vdl.AnyRep{access.Tag("Admin")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
 		},
 	},
 }
@@ -1343,7 +1343,7 @@ var descDevice = ipc.InterfaceDesc{
 			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // Description
 			},
-			Tags: []vdl.AnyRep{access.Tag("Admin")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
 		},
 		{
 			Name: "IsRunnable",
@@ -1354,7 +1354,7 @@ var descDevice = ipc.InterfaceDesc{
 			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // bool
 			},
-			Tags: []vdl.AnyRep{access.Tag("Admin")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
 		},
 		{
 			Name: "Reset",
@@ -1362,7 +1362,7 @@ var descDevice = ipc.InterfaceDesc{
 			InArgs: []ipc.ArgDesc{
 				{"deadline", ``}, // uint64
 			},
-			Tags: []vdl.AnyRep{access.Tag("Admin")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
 		},
 		{
 			Name: "AssociateAccount",
@@ -1371,7 +1371,7 @@ var descDevice = ipc.InterfaceDesc{
 				{"identityNames", ``}, // []string
 				{"accountName", ``},   // string
 			},
-			Tags: []vdl.AnyRep{access.Tag("Admin")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
 		},
 		{
 			Name: "ListAssociations",
@@ -1379,7 +1379,7 @@ var descDevice = ipc.InterfaceDesc{
 			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // []Association
 			},
-			Tags: []vdl.AnyRep{access.Tag("Admin")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
 		},
 	},
 }

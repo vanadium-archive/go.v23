@@ -21,7 +21,7 @@ func (IDAction) __VDLReflect(struct {
 type WireError struct {
 	IDAction  IDAction
 	Msg       string   // Error message, may be empty.
-	ParamList []AnyRep // Variadic parameters contained in the error.
+	ParamList []*Value // Variadic parameters contained in the error.
 }
 
 func (WireError) __VDLReflect(struct {

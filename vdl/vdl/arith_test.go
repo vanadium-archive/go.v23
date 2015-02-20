@@ -7,7 +7,6 @@ package main_test
 
 import (
 	"errors"
-	"fmt"
 	"math"
 	"reflect"
 	"testing"
@@ -82,8 +81,8 @@ func (*serverArith) GenError(_ ipc.ServerContext) error {
 	return generatedError
 }
 
-func (*serverArith) QuoteAny(_ ipc.ServerContext, any vdl.AnyRep) (vdl.AnyRep, error) {
-	return fmt.Sprintf("'%v'", any), nil
+func (*serverArith) QuoteAny(_ ipc.ServerContext, any *vdl.Value) (*vdl.Value, error) {
+	return vdl.StringValue(any.String()), nil
 }
 
 type serverCalculator struct {
@@ -181,7 +180,7 @@ func TestCalculator(t *testing.T) {
 			},
 			Methods: []ipc.MethodDesc{
 				{Name: "On"},
-				{Name: "Off", Tags: []vdl.AnyRep{"offtag"}},
+				{Name: "Off", Tags: []*vdl.Value{vdl.StringValue("offtag")}},
 			},
 		},
 		{
@@ -210,7 +209,7 @@ func TestCalculator(t *testing.T) {
 				},
 				{
 					Name: "GenError",
-					Tags: []vdl.AnyRep{"foo", "barz", "hello", int32(129), uint64(0x24)},
+					Tags: []*vdl.Value{vdl.StringValue("foo"), vdl.StringValue("barz"), vdl.StringValue("hello"), vdl.Int32Value(129), vdl.Uint64Value(0x24)},
 				},
 				{
 					Name:   "Count",
@@ -447,7 +446,7 @@ func TestArith(t *testing.T) {
 					},
 					{
 						Name: "GenError",
-						Tags: []vdl.AnyRep{"foo", "barz", "hello", int32(129), uint64(0x24)},
+						Tags: []*vdl.Value{vdl.StringValue("foo"), vdl.StringValue("barz"), vdl.StringValue("hello"), vdl.Int32Value(129), vdl.Uint64Value(0x24)},
 					},
 					{
 						Name:   "Count",

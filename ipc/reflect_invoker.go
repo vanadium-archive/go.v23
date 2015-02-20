@@ -54,7 +54,7 @@ type MethodDesc struct {
 	OutArgs   []ArgDesc    // Output arguments
 	InStream  ArgDesc      // Input stream (client to server)
 	OutStream ArgDesc      // Output stream (server to client)
-	Tags      []vdl.AnyRep // Method tags
+	Tags      []*vdl.Value // Method tags
 }
 
 // ArgDesc describes an argument; it is similar to signature.Arg, without the
@@ -82,7 +82,7 @@ type methodInfo struct {
 	rtStreamCtx     reflect.Type
 	rvStreamCtxInit reflect.Value
 
-	tags []interface{} // Tags from the signature.
+	tags []*vdl.Value // Tags from the signature.
 }
 
 // ReflectInvoker returns an Invoker implementation that uses reflection to make
@@ -161,7 +161,7 @@ func ReflectInvokerOrDie(obj interface{}) Invoker {
 }
 
 // Prepare implements the Invoker.Prepare method.
-func (ri reflectInvoker) Prepare(method string, _ int) ([]interface{}, []interface{}, error) {
+func (ri reflectInvoker) Prepare(method string, _ int) ([]interface{}, []*vdl.Value, error) {
 	info, ok := ri.methods[method]
 	if !ok {
 		return nil, nil, NewErrUnknownMethod(nil, method)
@@ -304,8 +304,8 @@ func newReflectInfo(obj interface{}) (*reflectInfo, error) {
 	// provided by the user, there's no guarantee it's "correct", but if the same
 	// method is described by multiple interfaces, we check the tags are the same.
 	desc := describe(obj)
-	if verr := attachMethodTags(methodInfos, desc); verror.Is(verr, verror.ErrAborted.ID) {
-		return nil, fmt.Errorf("ipc: type %v tag error: %v", rt, verr)
+	if err := attachMethodTags(methodInfos, desc); verror.Is(err, verror.ErrAborted.ID) {
+		return nil, fmt.Errorf("ipc: type %v tag error: %v", rt, err)
 	}
 	// Finally create the signature.  This combines the desc provided by the user
 	// with the methodSigs computed via reflection.  We ensure that the method
@@ -339,9 +339,9 @@ func makeMethods(rt reflect.Type) (map[string]methodInfo, map[string]signature.M
 		method := rt.Method(mx)
 		// Silently skip incompatible methods, except for Aborted errors.
 		var sig signature.Method
-		if verr := typeCheckMethod(method, &sig); verr != nil {
-			if verror.Is(verr, verror.ErrAborted.ID) {
-				return nil, nil, fmt.Errorf("ipc: %s.%s: %v", rt.String(), method.Name, verr)
+		if err := typeCheckMethod(method, &sig); err != nil {
+			if verror.Is(err, verror.ErrAborted.ID) {
+				return nil, nil, fmt.Errorf("ipc: %s.%s: %v", rt.String(), method.Name, err)
 			}
 			continue
 		}
@@ -397,8 +397,8 @@ var (
 )
 
 func typeCheckMethod(method reflect.Method, sig *signature.Method) error {
-	if verr := typeCheckReservedMethod(method); verr != nil {
-		return verr
+	if err := typeCheckReservedMethod(method); err != nil {
+		return err
 	}
 	// Unexported methods always have a non-empty pkg path.
 	if method.PkgPath != "" {
@@ -427,8 +427,8 @@ func typeCheckMethod(method reflect.Method, sig *signature.Method) error {
 		// Non-streaming method.
 	case in1.Implements(rtServerContext):
 		// Streaming method, validate context argument.
-		if verr := typeCheckStreamingContext(in1, sig); verr != nil {
-			return verr
+		if err := typeCheckStreamingContext(in1, sig); err != nil {
+			return err
 		}
 	default:
 		return ErrNonRPCMethod
@@ -652,59 +652,50 @@ func fillArgSig(sig *signature.Arg, desc ArgDesc) *signature.Arg {
 	return &ret
 }
 
-// convertTags tries to convert each tag into a vdl.Value, to capture any
-// conversion error.  Returns a single vdl.Value containing a slice of the tag
-// values, to make it easy to perform equality-comparison of lists of tags.
-func convertTags(tags []vdl.AnyRep) (*vdl.Value, error) {
-	result := vdl.ZeroValue(vdl.ListType(vdl.AnyType)).AssignLen(len(tags))
-	for index, tag := range tags {
-		if err := vdl.Convert(result.Index(index), tag); err != nil {
-			return nil, abortedf("invalid tag %d: %v", index, err)
-		}
-	}
-	return result, nil
-}
-
 // extractTagsForMethod returns the tags associated with the given method name.
 // If the desc lists the same method under multiple interfaces, we require all
 // versions to have an identical list of tags.
-func extractTagsForMethod(desc []InterfaceDesc, name string) ([]vdl.AnyRep, error) {
-	var first *vdl.Value
-	var tags []vdl.AnyRep
+func extractTagsForMethod(desc []InterfaceDesc, name string) ([]*vdl.Value, error) {
+	seenFirst := false
+	var first []*vdl.Value
 	for _, descIface := range desc {
 		for _, descMethod := range descIface.Methods {
 			if name == descMethod.Name {
-				switch vdlTags, verr := convertTags(descMethod.Tags); {
-				case verr != nil:
-					return nil, verr
-				case first == nil:
-					first = vdlTags
-					tags = descMethod.Tags
-				case !vdl.EqualValue(first, vdlTags):
-					return nil, abortedf("different tags %q and %q", first, vdlTags)
+				switch tags := descMethod.Tags; {
+				case !seenFirst:
+					seenFirst = true
+					first = tags
+				case !equalTags(first, tags):
+					return nil, abortedf("different tags %q and %q", first, tags)
 				}
 			}
 		}
 	}
-	return tags, nil
+	return first, nil
+}
+
+func equalTags(a, b []*vdl.Value) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := 0; i < len(a); i++ {
+		if !vdl.EqualValue(a[i], b[i]) {
+			return false
+		}
+	}
+	return true
 }
 
 // attachMethodTags sets methodInfo.tags to the tags that will be returned in
 // Prepare.  This also performs type checking on the tags.
 func attachMethodTags(infos map[string]methodInfo, desc []InterfaceDesc) error {
 	for name, info := range infos {
-		tags, verr := extractTagsForMethod(desc, name)
-		if verr != nil {
-			return abortedf("method %q: %v", name, verr)
+		tags, err := extractTagsForMethod(desc, name)
+		if err != nil {
+			return abortedf("method %q: %v", name, err)
 		}
-		// TODO(toddw): Change tags to []vdl.AnyRep and remove this conversion.
-		if len(tags) > 0 {
-			info.tags = make([]interface{}, len(tags))
-			for index, tag := range tags {
-				info.tags[index] = tag
-			}
-			infos[name] = info
-		}
+		info.tags = tags
+		infos[name] = info
 	}
 	return nil
 }
@@ -725,11 +716,11 @@ func TypeCheckMethods(obj interface{}) map[string]error {
 		for mx := 0; mx < rt.NumMethod(); mx++ {
 			method := rt.Method(mx)
 			var sig signature.Method
-			verr := typeCheckMethod(method, &sig)
-			if verr == nil {
-				_, verr = extractTagsForMethod(desc, method.Name)
+			err := typeCheckMethod(method, &sig)
+			if err == nil {
+				_, err = extractTagsForMethod(desc, method.Name)
 			}
-			check[method.Name] = verr
+			check[method.Name] = err
 		}
 	}
 	return check

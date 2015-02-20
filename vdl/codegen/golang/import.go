@@ -324,7 +324,7 @@ func addValueTypeDeps(v *vdl.Value, env *compile.Env, deps *deps, user importMap
 func systemImports(deps deps, file *compile.File) importMap {
 	system := make(importMap)
 	if deps.any || deps.typeObject || deps.methodTags || len(file.TypeDefs) > 0 {
-		// System import for vdl.AnyRep, vdl.Type and vdl.Register.
+		// System import for vdl.Value, vdl.Type and vdl.Register.
 		system["v.io/core/veyron2/vdl"] = "vdl"
 	}
 	if deps.enumTypeDef {

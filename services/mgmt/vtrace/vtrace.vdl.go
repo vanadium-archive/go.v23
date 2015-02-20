@@ -232,12 +232,12 @@ var descStore = ipc.InterfaceDesc{
 			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // vtrace.TraceRecord
 			},
-			Tags: []vdl.AnyRep{access.Tag("Debug")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Debug"))},
 		},
 		{
 			Name: "AllTraces",
 			Doc:  "// AllTraces returns TraceRecords for all traces the server currently\n// knows about.",
-			Tags: []vdl.AnyRep{access.Tag("Debug")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Debug"))},
 		},
 	},
 }

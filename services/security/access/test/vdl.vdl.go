@@ -205,22 +205,22 @@ var descMyObject = ipc.InterfaceDesc{
 	Methods: []ipc.MethodDesc{
 		{
 			Name: "Get",
-			Tags: []vdl.AnyRep{MyTag("R")},
+			Tags: []*vdl.Value{vdl.ValueOf(MyTag("R"))},
 		},
 		{
 			Name: "Put",
-			Tags: []vdl.AnyRep{MyTag("W")},
+			Tags: []*vdl.Value{vdl.ValueOf(MyTag("W"))},
 		},
 		{
 			Name: "Resolve",
-			Tags: []vdl.AnyRep{MyTag("X")},
+			Tags: []*vdl.Value{vdl.ValueOf(MyTag("X"))},
 		},
 		{
 			Name: "NoTags",
 		},
 		{
 			Name: "AllTags",
-			Tags: []vdl.AnyRep{MyTag("R"), MyTag("W"), MyTag("X")},
+			Tags: []*vdl.Value{vdl.ValueOf(MyTag("R")), vdl.ValueOf(MyTag("W")), vdl.ValueOf(MyTag("X"))},
 		},
 	},
 }

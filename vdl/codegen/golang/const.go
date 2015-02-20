@@ -26,6 +26,10 @@ func isByteList(t *vdl.Type) bool {
 	return t.Kind() == vdl.List && t.Elem().Kind() == vdl.Byte
 }
 
+func tagValue(data goData, v *vdl.Value) string {
+	return typedConst(data, vdl.AnyValue(v))
+}
+
 // TODO(bprosnitz): Generate the full tag name e.g. security.Read instead of
 // security.Label(1)
 //
@@ -43,9 +47,9 @@ func typedConst(data goData, v *vdl.Value) string {
 		return "(" + typeGo(data, t) + ")(nil)" // results in (*Foo)(nil)
 	}
 	valstr := untypedConst(data, v)
-	// Enum and TypeObject already include the type in their values.
+	// Enum, TypeObject and Any already include the type in their values.
 	// Built-in bool and string are implicitly convertible from literals.
-	if k == vdl.Enum || k == vdl.TypeObject || t == vdl.BoolType || t == vdl.StringType {
+	if k == vdl.Enum || k == vdl.TypeObject || k == vdl.Any || t == vdl.BoolType || t == vdl.StringType {
 		return valstr
 	}
 	// Everything else requires an explicit type.
@@ -76,9 +80,15 @@ func untypedConst(data goData, v *vdl.Value) string {
 	switch k {
 	case vdl.Any:
 		if elem := v.Elem(); elem != nil {
-			return typedConst(data, elem)
+			// We need to generate a Go expression of type *vdl.Value that represents
+			// elem.  Since the rest of our logic can already generate the Go code for
+			// any value, we just wrap it in vdl.ValueOf to produce the final result.
+			//
+			// This may seem like a strange roundtrip, but results in less generator
+			// and generated code.
+			return data.Pkg("v.io/core/veyron2/vdl") + "ValueOf(" + typedConst(data, elem) + ")"
 		}
-		return "nil"
+		return "(*" + data.Pkg("v.io/core/veyron2/vdl") + "Value)(nil)"
 	case vdl.Optional:
 		if elem := v.Elem(); elem != nil {
 			return untypedConst(data, elem)
@@ -87,22 +97,18 @@ func untypedConst(data goData, v *vdl.Value) string {
 	case vdl.TypeObject:
 		// We special-case Any and TypeObject, since they cannot be named by the
 		// user, and are simple to return statically.
-		switch v.TypeObject() {
-		case vdl.AnyType:
+		switch v.TypeObject().Kind() {
+		case vdl.Any:
 			return data.Pkg("v.io/core/veyron2/vdl") + "AnyType"
-		case vdl.TypeObjectType:
+		case vdl.TypeObject:
 			return data.Pkg("v.io/core/veyron2/vdl") + "TypeObjectType"
 		}
-		// The strategy is either brilliant or a huge hack.  The "proper" way to do
-		// this would be to generate the Go code that builds a *vdl.Type directly
-		// using vdl.TypeBuilder, But the rest of this file can already generate the
-		// Go code to construct a value of any other type, and vdl.TypeOf converts
-		// from a Go value back into *vdl.Type.
+		// We need to generate a Go expression of type *vdl.Type that represents the
+		// type.  Since the rest of our logic can already generate the Go code for
+		// any value, we just wrap it in vdl.TypeOf to produce the final result.
 		//
-		// So we perform a roundtrip, converting from an in-memory *vdl.Type into
-		// the Go code that represents the zero value for the type, back into a
-		// *vdl.Type in the generated code via vdl.TypeOf.  This results in less
-		// generator and generated code.
+		// This may seem like a strange roundtrip, but results in less generator
+		// and generated code.
 		zero := vdl.ZeroValue(v.TypeObject())
 		return data.Pkg("v.io/core/veyron2/vdl") + "TypeOf(" + typedConst(data, zero) + ")"
 	case vdl.Bool:
