@@ -9,7 +9,8 @@ import (
 // makeTypeDefinitionsString generates a string that defines the specified types.
 // It consists of the following sections:
 // - Definitions. e.g. "var _typeNamedBool = new Type();"
-// - Field assignments. e.g. "_typeNamedBool.name = \"NamedBool\""
+// - Field assignments. e.g. "_typeNamedBool.name = \"NamedBool\";"
+// - Type Freezes, e.g. "_typedNamedBool.freeze();"
 // - Constructor definitions. e.g. "types.NamedBool = Registry.lookupOrCreateConstructor(_typeNamedBool)"
 func makeTypeDefinitionsString(jsnames typeNames) string {
 	str := ""
@@ -21,6 +22,10 @@ func makeTypeDefinitionsString(jsnames typeNames) string {
 
 	for _, def := range sortedDefs {
 		str += makeTypeFieldAssignmentString(def.Name, def.Type, jsnames)
+	}
+
+	for _, def := range sortedDefs {
+		str += makeTypeFreezeString(def.Name)
 	}
 
 	for _, def := range sortedDefs {
@@ -38,8 +43,14 @@ func makeDefString(jsname string) string {
 	return fmt.Sprintf("var %s = new vdl.Type();\n", jsname)
 }
 
+// makeTypeFreezeString calls the type's freeze function to finalize it.
+// e.g. "typeNamedBool.freeze();"
+func makeTypeFreezeString(jsname string) string {
+	return fmt.Sprintf("%s.freeze();\n", jsname)
+}
+
 // makeTypeFieldAssignmentString generates assignments for type fields.
-// e.g. "_typeNamedBool.name = \"NamedBool\""
+// e.g. "_typeNamedBool.name = \"NamedBool\";"
 func makeTypeFieldAssignmentString(jsname string, t *vdl.Type, jsnames typeNames) string {
 	// kind
 	str := fmt.Sprintf("%s.kind = %s;\n", jsname, jsKind(t.Kind()))
