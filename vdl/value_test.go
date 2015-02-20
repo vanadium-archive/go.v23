@@ -41,7 +41,7 @@ func TestValue(t *testing.T) {
 		t *Type
 		s string
 	}{
-		{Bool, BoolType, "bool(false)"},
+		{Bool, BoolType, "false"},
 		{Byte, ByteType, "byte(0)"},
 		{Uint16, Uint16Type, "uint16(0)"},
 		{Uint32, Uint32Type, "uint32(0)"},
@@ -53,7 +53,7 @@ func TestValue(t *testing.T) {
 		{Float64, Float64Type, "float64(0)"},
 		{Complex64, Complex64Type, "complex64(0+0i)"},
 		{Complex128, Complex128Type, "complex128(0+0i)"},
-		{String, StringType, `string("")`},
+		{String, StringType, `""`},
 		{List, ListType(ByteType), `[]byte("")`},
 		{Array, ArrayType(3, ByteType), `[3]byte("\x00\x00\x00")`},
 		{Enum, EnumType("A", "B", "C"), "enum{A;B;C}(A)"},
@@ -219,7 +219,7 @@ func TestValue(t *testing.T) {
 // of kinds and methods.
 
 func assignBool(t *testing.T, x *Value) {
-	newval, newstr := true, "bool(true)"
+	newval, newstr := true, "true"
 	if x.Kind() == Bool {
 		if got, want := x.Bool(), false; got != want {
 			t.Errorf(`Bool zero value got %v, want %v`, got, want)
@@ -338,7 +338,7 @@ func assignComplex(t *testing.T, x *Value) {
 }
 
 func assignString(t *testing.T, x *Value) {
-	zerostr, newval, newstr := `string("")`, "abc", `string("abc")`
+	zerostr, newval, newstr := `""`, "abc", `"abc"`
 	if x.Kind() == String {
 		if got, want := x.String(), zerostr; got != want {
 			t.Errorf(`String zero value got %v, want %v`, got, want)
@@ -416,12 +416,12 @@ func assignArray(t *testing.T, x *Value) {
 		if got, want := x.Len(), 2; got != want {
 			t.Errorf(`Array zero len got %v, want %v`, got, want)
 		}
-		if g0, g1, w0, w1 := x.Index(0).String(), x.Index(1).String(), `string("")`, `string("")`; g0 != w0 || g1 != w1 {
+		if g0, g1, w0, w1 := x.Index(0).String(), x.Index(1).String(), `""`, `""`; g0 != w0 || g1 != w1 {
 			t.Errorf(`Array assign values got %v %v, want %v %v`, g0, g1, w0, w1)
 		}
 		x.Index(0).AssignString("A")
 		x.Index(1).AssignString("B")
-		if g0, g1, w0, w1 := x.Index(0).String(), x.Index(1).String(), `string("A")`, `string("B")`; g0 != w0 || g1 != w1 {
+		if g0, g1, w0, w1 := x.Index(0).String(), x.Index(1).String(), `"A"`, `"B"`; g0 != w0 || g1 != w1 {
 			t.Errorf(`Array assign values got %v %v, want %v %v`, g0, g1, w0, w1)
 		}
 		if got, want := x.String(), `[2]string{"A", "B"}`; got != want {
@@ -452,7 +452,7 @@ func assignList(t *testing.T, x *Value) {
 		if got, want := x.Len(), 2; got != want {
 			t.Errorf(`List assign len got %v, want %v`, got, want)
 		}
-		if g0, g1, w0, w1 := x.Index(0).String(), x.Index(1).String(), `string("")`, `string("")`; g0 != w0 || g1 != w1 {
+		if g0, g1, w0, w1 := x.Index(0).String(), x.Index(1).String(), `""`, `""`; g0 != w0 || g1 != w1 {
 			t.Errorf(`List assign values got %v %v, want %v %v`, g0, g1, w0, w1)
 		}
 		if got, want := x.String(), `[]string{"", ""}`; got != want {
@@ -460,7 +460,7 @@ func assignList(t *testing.T, x *Value) {
 		}
 		x.Index(0).AssignString("A")
 		x.Index(1).AssignString("B")
-		if g0, g1, w0, w1 := x.Index(0).String(), x.Index(1).String(), `string("A")`, `string("B")`; g0 != w0 || g1 != w1 {
+		if g0, g1, w0, w1 := x.Index(0).String(), x.Index(1).String(), `"A"`, `"B"`; g0 != w0 || g1 != w1 {
 			t.Errorf(`List assign values got %v %v, want %v %v`, g0, g1, w0, w1)
 		}
 		if got, want := x.String(), `[]string{"A", "B"}`; got != want {
@@ -470,7 +470,7 @@ func assignList(t *testing.T, x *Value) {
 		if got, want := x.Len(), 1; got != want {
 			t.Errorf(`List assign len got %v, want %v`, got, want)
 		}
-		if g0, w0 := x.Index(0).String(), `string("A")`; g0 != w0 {
+		if g0, w0 := x.Index(0).String(), `"A"`; g0 != w0 {
 			t.Errorf(`List assign values got %v, want %v`, g0, w0)
 		}
 		if got, want := x.String(), `[]string{"A"}`; got != want {
@@ -480,7 +480,7 @@ func assignList(t *testing.T, x *Value) {
 		if got, want := x.Len(), 3; got != want {
 			t.Errorf(`List assign len got %v, want %v`, got, want)
 		}
-		if g0, g1, g2, w0, w1, w2 := x.Index(0).String(), x.Index(1).String(), x.Index(2).String(), `string("A")`, `string("")`, `string("")`; g0 != w0 || g1 != w1 || g2 != w2 {
+		if g0, g1, g2, w0, w1, w2 := x.Index(0).String(), x.Index(1).String(), x.Index(2).String(), `"A"`, `""`, `""`; g0 != w0 || g1 != w1 || g2 != w2 {
 			t.Errorf(`List assign values got %v %v %v, want %v %v %v`, g0, g1, g2, w0, w1, w2)
 		}
 		if got, want := x.String(), `[]string{"A", "", ""}`; got != want {
@@ -893,7 +893,7 @@ func assignAny(t *testing.T, x *Value) {
 		if got, want := x.Elem(), strA; !EqualValue(got, want) {
 			t.Errorf(`Any assign value got %v, want %v`, got, want)
 		}
-		if got, want := x.String(), `any(string("A"))`; got != want {
+		if got, want := x.String(), `any("A")`; got != want {
 			t.Errorf(`Any assign string got %v, want %v`, got, want)
 		}
 	} else if x.Kind() != Optional {

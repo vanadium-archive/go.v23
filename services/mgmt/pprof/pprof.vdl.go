@@ -367,7 +367,7 @@ var descPProf = ipc.InterfaceDesc{
 			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // []string
 			},
-			Tags: []vdl.AnyRep{access.Tag("Debug")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Debug"))},
 		},
 		{
 			Name: "Profiles",
@@ -375,7 +375,7 @@ var descPProf = ipc.InterfaceDesc{
 			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // []string
 			},
-			Tags: []vdl.AnyRep{access.Tag("Debug")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Debug"))},
 		},
 		{
 			Name: "Profile",
@@ -384,7 +384,7 @@ var descPProf = ipc.InterfaceDesc{
 				{"name", ``},  // string
 				{"debug", ``}, // int32
 			},
-			Tags: []vdl.AnyRep{access.Tag("Debug")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Debug"))},
 		},
 		{
 			Name: "CPUProfile",
@@ -392,7 +392,7 @@ var descPProf = ipc.InterfaceDesc{
 			InArgs: []ipc.ArgDesc{
 				{"seconds", ``}, // int32
 			},
-			Tags: []vdl.AnyRep{access.Tag("Debug")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Debug"))},
 		},
 		{
 			Name: "Symbol",
@@ -403,7 +403,7 @@ var descPProf = ipc.InterfaceDesc{
 			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // []string
 			},
-			Tags: []vdl.AnyRep{access.Tag("Debug")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Debug"))},
 		},
 	},
 }

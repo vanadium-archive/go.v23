@@ -50,7 +50,7 @@ type StatsClientMethods interface {
 	// of the value is implementation specific.
 	// Some objects may not have a value, in which case, Value() returns
 	// a NoValue error.
-	Value(*context.T, ...ipc.CallOpt) (vdl.AnyRep, error)
+	Value(*context.T, ...ipc.CallOpt) (*vdl.Value, error)
 }
 
 // StatsClientStub adds universal methods to StatsClientMethods.
@@ -84,7 +84,7 @@ func (c implStatsClientStub) c(ctx *context.T) ipc.Client {
 	return veyron2.GetClient(ctx)
 }
 
-func (c implStatsClientStub) Value(ctx *context.T, opts ...ipc.CallOpt) (o0 vdl.AnyRep, err error) {
+func (c implStatsClientStub) Value(ctx *context.T, opts ...ipc.CallOpt) (o0 *vdl.Value, err error) {
 	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Value", nil, opts...); err != nil {
 		return
@@ -111,7 +111,7 @@ type StatsServerMethods interface {
 	// of the value is implementation specific.
 	// Some objects may not have a value, in which case, Value() returns
 	// a NoValue error.
-	Value(ipc.ServerContext) (vdl.AnyRep, error)
+	Value(ipc.ServerContext) (*vdl.Value, error)
 }
 
 // StatsServerStubMethods is the server interface containing
@@ -126,7 +126,7 @@ type StatsServerStubMethods interface {
 	// of the value is implementation specific.
 	// Some objects may not have a value, in which case, Value() returns
 	// a NoValue error.
-	Value(ipc.ServerContext) (vdl.AnyRep, error)
+	Value(ipc.ServerContext) (*vdl.Value, error)
 }
 
 // StatsServerStub adds universal methods to StatsServerStubMethods.
@@ -160,7 +160,7 @@ type implStatsServerStub struct {
 	gs *ipc.GlobState
 }
 
-func (s implStatsServerStub) Value(ctx ipc.ServerContext) (vdl.AnyRep, error) {
+func (s implStatsServerStub) Value(ctx ipc.ServerContext) (*vdl.Value, error) {
 	return s.impl.Value(ctx)
 }
 
@@ -188,9 +188,9 @@ var descStats = ipc.InterfaceDesc{
 			Name: "Value",
 			Doc:  "// Value returns the current value of an object, or an error. The type\n// of the value is implementation specific.\n// Some objects may not have a value, in which case, Value() returns\n// a NoValue error.",
 			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // vdl.AnyRep
+				{"", ``}, // *vdl.Value
 			},
-			Tags: []vdl.AnyRep{access.Tag("Debug")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Debug"))},
 		},
 	},
 }

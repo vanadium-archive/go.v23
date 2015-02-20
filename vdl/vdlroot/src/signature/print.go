@@ -138,21 +138,14 @@ func streamArgStr(arg *Arg, types *NamedTypes) string {
 	return vdlgen.Type(arg.Type, "", nil)
 }
 
-func tagsStr(tags []vdl.AnyRep, types *NamedTypes) string {
+func tagsStr(tags []*vdl.Value, types *NamedTypes) string {
 	if len(tags) == 0 {
 		return ""
 	}
 	var ret []string
 	for _, tag := range tags {
-		var tagval *vdl.Value
-		if err := vdl.Convert(&tagval, tag); err != nil {
-			// We shouldn't get an error in conversion, but if we do, do our best and
-			// print the tag as a Go value.
-			ret = append(ret, fmt.Sprintf("%T(%v)", tag, tag))
-		} else {
-			types.Add(tagval.Type())
-			ret = append(ret, vdlgen.TypedConst(tagval, "", nil))
-		}
+		types.Add(tag.Type())
+		ret = append(ret, vdlgen.TypedConst(tag, "", nil))
 	}
 	return fmt.Sprintf(" {%s}", strings.Join(ret, ", "))
 }

@@ -70,12 +70,6 @@ func primitiveType(k Kind) *Type {
 	return prim
 }
 
-// AnyRep represents a value of the Any type in generated Go code.
-//
-// A distinct type is defined rather than just using interface{} in generated
-// code, to make it easier to identify these uses.
-type AnyRep interface{}
-
 // TypeOrPending only allows *Type or Pending values; other values cause a
 // compile-time error.  It's used as the argument type for TypeBuilder methods,
 // to allow either fully built *Type values or Pending values as subtypes.

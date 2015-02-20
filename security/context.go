@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"v.io/core/veyron2/naming"
+	"v.io/core/veyron2/vdl"
 )
 
 // NewContext creates a Context.
@@ -19,10 +20,10 @@ func NewContext(params *ContextParams) Context {
 // ContextParams is used to create Context objects using the NewContext
 // function.
 type ContextParams struct {
-	Timestamp  time.Time     // Time at which the authorization is to be checked.
-	Method     string        // Method being invoked.
-	MethodTags []interface{} // Tags attached to the method, typically through interface specification in VDL
-	Suffix     string        // Object suffix on which the method is being invoked.
+	Timestamp  time.Time    // Time at which the authorization is to be checked.
+	Method     string       // Method being invoked.
+	MethodTags []*vdl.Value // Method tags, typically specified in VDL.
+	Suffix     string       // Object suffix on which the method is being invoked.
 
 	LocalPrincipal Principal       // Principal at the local end of a request.
 	LocalBlessings Blessings       // Blessings presented to the remote end.
@@ -37,9 +38,13 @@ type ContextParams struct {
 func (p *ContextParams) Copy(c Context) {
 	p.Timestamp = c.Timestamp()
 	p.Method = c.Method()
-	p.MethodTags = make([]interface{}, len(c.MethodTags()))
-	for ix, tag := range c.MethodTags() {
-		p.MethodTags[ix] = tag
+	if tagslen := len(c.MethodTags()); tagslen == 0 {
+		p.MethodTags = nil
+	} else {
+		p.MethodTags = make([]*vdl.Value, tagslen)
+		for ix, tag := range c.MethodTags() {
+			p.MethodTags[ix] = vdl.CopyValue(tag)
+		}
 	}
 	p.Suffix = c.Suffix()
 	p.LocalPrincipal = c.LocalPrincipal()
@@ -57,7 +62,7 @@ type ctxImpl struct{ params ContextParams }
 
 func (c *ctxImpl) Timestamp() time.Time                   { return c.params.Timestamp }
 func (c *ctxImpl) Method() string                         { return c.params.Method }
-func (c *ctxImpl) MethodTags() []interface{}              { return c.params.MethodTags }
+func (c *ctxImpl) MethodTags() []*vdl.Value               { return c.params.MethodTags }
 func (c *ctxImpl) Name() string                           { return c.params.Suffix }
 func (c *ctxImpl) Suffix() string                         { return c.params.Suffix }
 func (c *ctxImpl) LocalPrincipal() Principal              { return c.params.LocalPrincipal }

@@ -86,7 +86,7 @@ type ArithClientMethods interface {
 	// StreamingAdd shows a bidirectional stream.
 	StreamingAdd(*context.T, ...ipc.CallOpt) (ArithStreamingAddCall, error)
 	// QuoteAny shows the any built-in type, representing a value of any type.
-	QuoteAny(ctx *context.T, a vdl.AnyRep, opts ...ipc.CallOpt) (vdl.AnyRep, error)
+	QuoteAny(ctx *context.T, a *vdl.Value, opts ...ipc.CallOpt) (*vdl.Value, error)
 }
 
 // ArithClientStub adds universal methods to ArithClientMethods.
@@ -181,7 +181,7 @@ func (c implArithClientStub) StreamingAdd(ctx *context.T, opts ...ipc.CallOpt) (
 	return
 }
 
-func (c implArithClientStub) QuoteAny(ctx *context.T, i0 vdl.AnyRep, opts ...ipc.CallOpt) (o0 vdl.AnyRep, err error) {
+func (c implArithClientStub) QuoteAny(ctx *context.T, i0 *vdl.Value, opts ...ipc.CallOpt) (o0 *vdl.Value, err error) {
 	var call ipc.Call
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "QuoteAny", []interface{}{i0}, opts...); err != nil {
 		return
@@ -386,7 +386,7 @@ type ArithServerMethods interface {
 	// StreamingAdd shows a bidirectional stream.
 	StreamingAdd(ArithStreamingAddContext) (total int32, err error)
 	// QuoteAny shows the any built-in type, representing a value of any type.
-	QuoteAny(ctx ipc.ServerContext, a vdl.AnyRep) (vdl.AnyRep, error)
+	QuoteAny(ctx ipc.ServerContext, a *vdl.Value) (*vdl.Value, error)
 }
 
 // ArithServerStubMethods is the server interface containing
@@ -413,7 +413,7 @@ type ArithServerStubMethods interface {
 	// StreamingAdd shows a bidirectional stream.
 	StreamingAdd(*ArithStreamingAddContextStub) (total int32, err error)
 	// QuoteAny shows the any built-in type, representing a value of any type.
-	QuoteAny(ctx ipc.ServerContext, a vdl.AnyRep) (vdl.AnyRep, error)
+	QuoteAny(ctx ipc.ServerContext, a *vdl.Value) (*vdl.Value, error)
 }
 
 // ArithServerStub adds universal methods to ArithServerStubMethods.
@@ -473,7 +473,7 @@ func (s implArithServerStub) StreamingAdd(ctx *ArithStreamingAddContextStub) (in
 	return s.impl.StreamingAdd(ctx)
 }
 
-func (s implArithServerStub) QuoteAny(ctx ipc.ServerContext, i0 vdl.AnyRep) (vdl.AnyRep, error) {
+func (s implArithServerStub) QuoteAny(ctx ipc.ServerContext, i0 *vdl.Value) (*vdl.Value, error) {
 	return s.impl.QuoteAny(ctx, i0)
 }
 
@@ -540,7 +540,7 @@ var descArith = ipc.InterfaceDesc{
 		{
 			Name: "GenError",
 			Doc:  "// GenError shows that it's fine to have no in args, and no out args other\n// than \"error\".  In addition GenError shows the usage of tags.  Tags are a\n// sequence of constants.  There's no requirement on uniqueness of types or\n// values, and regular const expressions may also be used.",
-			Tags: []vdl.AnyRep{"foo", "barz", "hello", int32(129), uint64(36)},
+			Tags: []*vdl.Value{vdl.ValueOf("foo"), vdl.ValueOf("barz"), vdl.ValueOf("hello"), vdl.ValueOf(int32(129)), vdl.ValueOf(uint64(36))},
 		},
 		{
 			Name: "Count",
@@ -560,10 +560,10 @@ var descArith = ipc.InterfaceDesc{
 			Name: "QuoteAny",
 			Doc:  "// QuoteAny shows the any built-in type, representing a value of any type.",
 			InArgs: []ipc.ArgDesc{
-				{"a", ``}, // vdl.AnyRep
+				{"a", ``}, // *vdl.Value
 			},
 			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // vdl.AnyRep
+				{"", ``}, // *vdl.Value
 			},
 		},
 	},
@@ -862,7 +862,7 @@ var descCalculator = ipc.InterfaceDesc{
 		},
 		{
 			Name: "Off",
-			Tags: []vdl.AnyRep{"offtag"},
+			Tags: []*vdl.Value{vdl.ValueOf("offtag")},
 		},
 	},
 }

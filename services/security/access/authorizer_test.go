@@ -12,6 +12,7 @@ import (
 
 	"v.io/core/veyron2/security"
 	"v.io/core/veyron2/services/security/access/test"
+	"v.io/core/veyron2/vdl"
 )
 
 // TestTaggedACLAuthorizer is both a test and a demonstration of the use of the
@@ -211,16 +212,12 @@ func TestTagTypeMustBeString(t *testing.T) {
 	}
 }
 
-func methodTags(name string) []interface{} {
+func methodTags(name string) []*vdl.Value {
 	server := test.MyObjectServer(nil)
 	for _, iface := range server.Describe__() {
 		for _, method := range iface.Methods {
 			if method.Name == name {
-				tags := make([]interface{}, len(method.Tags))
-				for index, tag := range method.Tags {
-					tags[index] = tag
-				}
-				return tags
+				return method.Tags
 			}
 		}
 	}

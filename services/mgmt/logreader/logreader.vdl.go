@@ -262,7 +262,7 @@ var descLogFile = ipc.InterfaceDesc{
 			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // int64
 			},
-			Tags: []vdl.AnyRep{access.Tag("Debug")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Debug"))},
 		},
 		{
 			Name: "ReadLog",
@@ -275,7 +275,7 @@ var descLogFile = ipc.InterfaceDesc{
 			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // int64
 			},
-			Tags: []vdl.AnyRep{access.Tag("Debug")},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Debug"))},
 		},
 	},
 }

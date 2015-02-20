@@ -57,7 +57,7 @@ func (*FakeServerCall) Send(item interface{}) error    { return nil }
 func (*FakeServerCall) Recv(itemptr interface{}) error { return nil }
 func (call *FakeServerCall) Timestamp() time.Time      { return call.security.Timestamp() }
 func (call *FakeServerCall) Method() string            { return call.security.Method() }
-func (call *FakeServerCall) MethodTags() []interface{} { return call.security.MethodTags() }
+func (call *FakeServerCall) MethodTags() []*vdl.Value  { return call.security.MethodTags() }
 func (call *FakeServerCall) Suffix() string            { return call.security.Suffix() }
 func (call *FakeServerCall) RemoteDischarges() map[string]security.Discharge {
 	return call.security.RemoteDischarges()
@@ -84,12 +84,12 @@ var (
 )
 
 // test tags.
-const (
-	tagAlpha   = "alpha"
-	tagBeta    = "beta"
-	tagGamma   = "gamma"
-	tagDelta   = "gamma"
-	tagEpsilon = "epsilon"
+var (
+	tagAlpha   = vdl.StringValue("alpha")
+	tagBeta    = vdl.StringValue("beta")
+	tagGamma   = vdl.StringValue("gamma")
+	tagDelta   = vdl.StringValue("gamma")
+	tagEpsilon = vdl.StringValue("epsilon")
 )
 
 // All objects used for success testing are based on testObj, which captures the
@@ -129,11 +129,11 @@ func (o *tags) Error(c ipc.ServerContext) error { o.ctx = c; return errApp }
 func (o *tags) Describe__() []ipc.InterfaceDesc {
 	return []ipc.InterfaceDesc{{
 		Methods: []ipc.MethodDesc{
-			{Name: "Alpha", Tags: []vdl.AnyRep{tagAlpha}},
-			{Name: "Beta", Tags: []vdl.AnyRep{tagBeta}},
-			{Name: "Gamma", Tags: []vdl.AnyRep{tagGamma}},
-			{Name: "Delta", Tags: []vdl.AnyRep{tagDelta}},
-			{Name: "Epsilon", Tags: []vdl.AnyRep{tagEpsilon}},
+			{Name: "Alpha", Tags: []*vdl.Value{tagAlpha}},
+			{Name: "Beta", Tags: []*vdl.Value{tagBeta}},
+			{Name: "Gamma", Tags: []*vdl.Value{tagGamma}},
+			{Name: "Delta", Tags: []*vdl.Value{tagDelta}},
+			{Name: "Epsilon", Tags: []*vdl.Value{tagEpsilon}},
 		},
 	}}
 }
@@ -145,7 +145,7 @@ func TestReflectInvoker(t *testing.T) {
 		method string
 		call   ipc.ServerCall
 		// Expected results:
-		tag     vdl.AnyRep
+		tag     *vdl.Value
 		args    v
 		results v
 		err     error
@@ -175,12 +175,12 @@ func TestReflectInvoker(t *testing.T) {
 		if !equalPtrValTypes(argptrs, test.args) {
 			t.Errorf("%s Prepare got argptrs %v, want args %v", name(test), printTypes(argptrs), printTypes(toPtrs(test.args)))
 		}
-		var tag vdl.AnyRep
+		var tag *vdl.Value
 		if len(tags) > 0 {
 			tag = tags[0]
 		}
 		if tag != test.tag {
-			t.Errorf("%s Prepare got tags %v, want %v", name(test), tags, []vdl.AnyRep{test.tag})
+			t.Errorf("%s Prepare got tags %v, want %v", name(test), tags, []*vdl.Value{test.tag})
 		}
 		// Call Invoker.Invoke and check results.
 		results, err := invoker.Invoke(test.method, test.call, toPtrs(test.args))
@@ -285,7 +285,7 @@ func (sigTest) Describe__() []ipc.InterfaceDesc {
 					OutArgs:   []ipc.ArgDesc{{Name: "o0_3", Doc: "Doc o0_3"}},
 					InStream:  ipc.ArgDesc{Name: "is_3", Doc: "Doc is_3"},
 					OutStream: ipc.ArgDesc{Name: "os_3", Doc: "Doc os_3"},
-					Tags:      []vdl.AnyRep{"a", "b", int32(123)},
+					Tags:      []*vdl.Value{tagAlpha, tagBeta},
 				},
 			},
 		},
@@ -303,7 +303,7 @@ func (sigTest) Describe__() []ipc.InterfaceDesc {
 					InStream:  ipc.ArgDesc{Name: "is_3x", Doc: "Doc is_3x"},
 					OutStream: ipc.ArgDesc{Name: "os_3x", Doc: "Doc os_3x"},
 					// Must have the same tags as every other definition of this method.
-					Tags: []vdl.AnyRep{"a", "b", int32(123)},
+					Tags: []*vdl.Value{tagAlpha, tagBeta},
 				},
 				{
 					Name: "Sig4",
@@ -340,7 +340,7 @@ func TestReflectInvokerSignature(t *testing.T) {
 				Name: "is_3", Doc: "Doc is_3", Type: vdl.StringType},
 			OutStream: &signature.Arg{
 				Name: "os_3", Doc: "Doc os_3", Type: vdl.BoolType},
-			Tags: []vdl.AnyRep{"a", "b", int32(123)},
+			Tags: []*vdl.Value{tagAlpha, tagBeta},
 		}},
 		{"Sig4", signature.Method{
 			Name: "Sig4",
@@ -379,7 +379,7 @@ func TestReflectInvokerSignature(t *testing.T) {
 							Name: "is_3", Doc: "Doc is_3", Type: vdl.StringType},
 						OutStream: &signature.Arg{
 							Name: "os_3", Doc: "Doc os_3", Type: vdl.BoolType},
-						Tags: []vdl.AnyRep{"a", "b", int32(123)},
+						Tags: []*vdl.Value{tagAlpha, tagBeta},
 					},
 				},
 			},
@@ -401,7 +401,7 @@ func TestReflectInvokerSignature(t *testing.T) {
 							Name: "is_3x", Doc: "Doc is_3x", Type: vdl.StringType},
 						OutStream: &signature.Arg{
 							Name: "os_3x", Doc: "Doc os_3x", Type: vdl.BoolType},
-						Tags: []vdl.AnyRep{"a", "b", int32(123)},
+						Tags: []*vdl.Value{tagAlpha, tagBeta},
 					},
 					{
 						Name: "Sig4",

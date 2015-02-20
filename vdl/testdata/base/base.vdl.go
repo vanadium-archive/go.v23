@@ -259,7 +259,7 @@ type Scalars struct {
 	A11 complex128
 	A12 string
 	A13 error
-	A14 vdl.AnyRep
+	A14 *vdl.Value
 	A15 *vdl.Type
 	B0  NamedBool
 	B1  NamedByte
@@ -488,7 +488,7 @@ var CScalars = Scalars{
 	A10: 10,
 	A11: 11,
 	A12: "abc",
-	A14: false,
+	A14: vdl.ValueOf(false),
 	A15: vdl.TypeOf(false),
 	B0:  true,
 	B1:  1,
@@ -946,7 +946,7 @@ var descServiceA = ipc.InterfaceDesc{
 			OutArgs: []ipc.ArgDesc{
 				{"s", ``}, // string
 			},
-			Tags: []vdl.AnyRep{"tag", uint64(6)},
+			Tags: []*vdl.Value{vdl.ValueOf("tag"), vdl.ValueOf(uint64(6))},
 		},
 		{
 			Name: "MethodA4",

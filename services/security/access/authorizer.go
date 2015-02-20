@@ -6,6 +6,7 @@ import (
 	"reflect"
 
 	"v.io/core/veyron2/security"
+	"v.io/core/veyron2/vdl"
 )
 
 // TaggedACLAuthorizer implements an authorization policy where access is
@@ -71,10 +72,12 @@ import (
 // GetAndSet - which requires that the blessing appear in the ACLs for both the
 // ReadAccess and WriteAccess tags.
 func TaggedACLAuthorizer(acls TaggedACLMap, tagType reflect.Type) (security.Authorizer, error) {
-	if tagType.Kind() != reflect.String {
-		return nil, fmt.Errorf("tag type(%v) must be backed by a string not %v", tagType, tagType.Kind())
+	// TODO(toddw): Change tagType to be *vdl.Type.
+	tagT, err := vdlTagType(tagType)
+	if err != nil {
+		return nil, err
 	}
-	return &authorizer{acls, tagType}, nil
+	return &authorizer{acls, tagT}, nil
 }
 
 // TaggedACLAuthorizerFromFile applies the same authorization policy as
@@ -87,15 +90,29 @@ func TaggedACLAuthorizer(acls TaggedACLMap, tagType reflect.Type) (security.Auth
 // TODO(ashankar,ataly): Use inotify or a similar mechanism to watch for
 // changes.
 func TaggedACLAuthorizerFromFile(filename string, tagType reflect.Type) (security.Authorizer, error) {
-	if tagType.Kind() != reflect.String {
-		return nil, fmt.Errorf("tag type(%v) must be backed by a string not %v", tagType, tagType.Kind())
+	// TODO(toddw): Change tagType to be *vdl.Type.
+	tagT, err := vdlTagType(tagType)
+	if err != nil {
+		return nil, err
 	}
-	return &fileAuthorizer{filename, tagType}, nil
+	return &fileAuthorizer{filename, tagT}, nil
+}
+
+func vdlTagType(rt reflect.Type) (*vdl.Type, error) {
+	// TODO(toddw): Remove this helper once the tagType passed in is *vdl.Type
+	tt, err := vdl.TypeFromReflect(rt)
+	if err != nil {
+		return nil, err
+	}
+	if tt.Kind() != vdl.String {
+		return nil, fmt.Errorf("tag type(%v) must be backed by a string not %v", rt, tt.Kind())
+	}
+	return tt, nil
 }
 
 type authorizer struct {
 	acls    TaggedACLMap
-	tagType reflect.Type
+	tagType *vdl.Type
 }
 
 func (a *authorizer) Authorize(ctx security.Context) error {
@@ -117,8 +134,8 @@ func (a *authorizer) Authorize(ctx security.Context) error {
 		return fmt.Errorf("TaggedACLAuthorizer.Authorize called with an object (%q, method %q) that has no method tags; this is likely unintentional", ctx.Suffix(), ctx.Method())
 	}
 	for _, tag := range ctx.MethodTags() {
-		if v := reflect.ValueOf(tag); v.Type() == a.tagType {
-			if acl, exists := a.acls[v.String()]; !exists || !acl.Includes(blessingsForContext...) {
+		if tag.Type() == a.tagType {
+			if acl, exists := a.acls[tag.RawString()]; !exists || !acl.Includes(blessingsForContext...) {
 				return NewErrACLMatch(nil, blessingsForContext, invalid)
 			}
 			grant = true
@@ -132,7 +149,7 @@ func (a *authorizer) Authorize(ctx security.Context) error {
 
 type fileAuthorizer struct {
 	filename string
-	tagType  reflect.Type
+	tagType  *vdl.Type
 }
 
 func (a *fileAuthorizer) Authorize(ctx security.Context) error {

@@ -11,6 +11,7 @@ import (
 	"v.io/core/veyron2/context"
 	"v.io/core/veyron2/naming"
 	"v.io/core/veyron2/security"
+	"v.io/core/veyron2/vdl"
 	"v.io/core/veyron2/vdl/vdlroot/src/signature"
 )
 
@@ -443,17 +444,28 @@ type Dispatcher interface {
 // javascript) may use this interface to support serving methods without an
 // explicit intermediate object.
 type Invoker interface {
-	// Prepare is the first stage of method invocation.  It returns a slice of
-	// pointers to argument objects, which will be used by the framework to decode
-	// the arguments sent by the client.  If the arg types are known, argptrs
-	// should contain pointers to args of the appropriate type.  Otherwise argptrs
-	// may contain *vdl.Value objects to support generic arg decoding.
+	// Prepare is the first stage of method invocation, based on the given method
+	// name.  The given numArgs specifies the number of input arguments sent by
+	// the client, which may be used to support method overloading or generic
+	// processing.
 	//
-	// numArgs specifies the number of input arguments sent by the client - it may
-	// be used to support method overloading, e.g. for different versions of a
-	// method with the same name.  The returned "tags" are arbitary objects used
-	// as method tags, typically in the VDL specification of a Veyron service.
-	Prepare(method string, numArgs int) (argptrs, tags []interface{}, _ error)
+	// Returns argptrs which will be filled in by the caller; e.g. the server
+	// framework calls Prepare, and decodes the input arguments sent by the client
+	// into argptrs.
+	//
+	// If the Invoker has access to the underlying Go values, it should return
+	// argptrs containing pointers to the Go values that will receive the
+	// arguments.  This is the typical case, e.g. the ReflectInvoker.
+	//
+	// If the Invoker doesn't have access to the underlying Go values, but knows
+	// the expected types, it should return argptrs containing *vdl.Value objects
+	// initialized to each expected type.  For purely generic decoding each
+	// *vdl.Value may be initialized to vdl.AnyType.
+	//
+	// The returned method tags provide additional information associated with the
+	// method.  E.g. the security system uses tags to configure ACLs.  The tags
+	// are typically configured in the VDL specification of the method.
+	Prepare(method string, numArgs int) (argptrs []interface{}, tags []*vdl.Value, _ error)
 
 	// Invoke is the second stage of method invocation.  It is passed the method
 	// name, the in-flight call context, and the argptrs returned by Prepare,

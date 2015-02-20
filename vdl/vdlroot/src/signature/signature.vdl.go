@@ -42,7 +42,7 @@ type Method struct {
 	OutArgs   []Arg        // Output arguments
 	InStream  *Arg         // Input stream (optional)
 	OutStream *Arg         // Output stream (optional)
-	Tags      []vdl.AnyRep // Method tags
+	Tags      []*vdl.Value // Method tags
 }
 
 func (Method) __VDLReflect(struct {

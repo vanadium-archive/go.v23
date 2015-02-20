@@ -137,6 +137,7 @@ import (
 	"time"
 
 	"v.io/core/veyron2/naming"
+	"v.io/core/veyron2/vdl"
 )
 
 // Principal represents an entity capable of making or receiving RPCs.
@@ -426,7 +427,7 @@ type Context interface {
 	// Method returns the method being invoked.
 	Method() string
 	// Tags attached to the method, typically through the interface specification in VDL.
-	MethodTags() []interface{}
+	MethodTags() []*vdl.Value
 	// Suffix returns the object name suffix for the request.
 	Suffix() string
 	// Discharges maps a ThirdPartyCaveat identifier to the corresponding

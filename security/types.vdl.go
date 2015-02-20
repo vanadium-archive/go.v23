@@ -89,7 +89,7 @@ func (ThirdPartyRequirements) __VDLReflect(struct {
 type DischargeImpetus struct {
 	Server    []BlessingPattern // The client intends to use the discharge to communicate with a server that has a blessing matching one of the patterns in this set.
 	Method    string            // Name of the method being invoked by the client.
-	Arguments []vdl.AnyRep      // Arguments to the method invocation.
+	Arguments []*vdl.Value      // Arguments to the method invocation.
 }
 
 func (DischargeImpetus) __VDLReflect(struct {
