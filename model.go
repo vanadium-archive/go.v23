@@ -243,6 +243,9 @@ func NewEndpoint(ep string) (naming.Endpoint, error) {
 //
 // It accepts at least the following options:
 // ServesMountTable and ServerBlessings.
+//
+// ServerBlessings defaults to veyron2.GetPrincipal(ctx).BlessingStore().Default().
+// These Blessings are the server's Blessings for its lifetime.
 func NewServer(ctx *context.T, opts ...ipc.ServerOpt) (ipc.Server, error) {
 	return initState.currentRuntime().NewServer(ctx, opts...)
 }
