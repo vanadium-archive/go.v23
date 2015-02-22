@@ -244,6 +244,48 @@ func TestThirdPartyDetails(t *testing.T) {
 	}
 }
 
+func TestPublicKeyDischargeExpiry(t *testing.T) {
+	var (
+		discharger = newPrincipal(t)
+		now        = time.Now()
+		oneh       = newCaveat(ExpiryCaveat(now.Add(time.Hour)))
+		twoh       = newCaveat(ExpiryCaveat(now.Add(2 * time.Hour)))
+		threeh     = newCaveat(ExpiryCaveat(now.Add(3 * time.Hour)))
+	)
+
+	tpc, err := NewPublicKeyCaveat(discharger.PublicKey(), "location", ThirdPartyRequirements{}, oneh)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Mint three discharges; one with no ExpiryCaveat...
+	noExpiry, err := discharger.MintDischarge(tpc, newCaveat(MethodCaveat("Method1")))
+	if err != nil {
+		t.Fatal(err)
+	}
+	// another with an ExpiryCaveat one hour from now...
+	oneCav, err := discharger.MintDischarge(tpc, oneh)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// and finally, one with an ExpiryCaveat of one, two, and three hours from now.
+	// Use a random order to help test that Expiry always returns the earliest time.
+	threeCav, err := discharger.MintDischarge(tpc, threeh, oneh, twoh)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if exp := noExpiry.Expiry(); !exp.IsZero() {
+		t.Errorf("got %v, want %v", exp, time.Time{})
+	}
+	if got, want := oneCav.Expiry().Unix(), now.Add(time.Hour).Unix(); got != want {
+		t.Errorf("got %v, want %v", got, want)
+	}
+	if got, want := threeCav.Expiry().Unix(), now.Add(time.Hour).Unix(); got != want {
+		t.Errorf("got %v, want %v", got, want)
+	}
+}
+
 // Benchmark creation of a new caveat using one of the simplest caveats
 // (expiry)
 func BenchmarkNewCaveat(b *testing.B) {

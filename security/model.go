@@ -415,6 +415,10 @@ type Discharge interface {
 	// scope of the discharge.
 	ThirdPartyCaveats() []ThirdPartyCaveat
 
+	// Expiry returns the time.Time at which this Discharge expires, or the zero value
+	// of time.Time if the discharge doesn't expire.
+	Expiry() time.Time
+
 	// unexported method to disallow implementations of this interface
 	// outside this package.
 	toWire() WireDischarge

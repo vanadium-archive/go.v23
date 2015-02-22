@@ -288,6 +288,26 @@ func (d *publicKeyDischarge) ThirdPartyCaveats() []ThirdPartyCaveat {
 	return ret
 }
 
+func (d *publicKeyDischarge) Expiry() time.Time {
+	var expiry int64
+	for _, cav := range d.Caveats {
+		if cav.Id == UnixTimeExpiryCaveatX.Id {
+			var unix int64
+			if err := vom.Decode(cav.ParamVom, &unix); err != nil {
+				vlog.Errorf("Failed to decode ParamVOM for cav(%v): %v", cav, err)
+				return time.Time{}
+			}
+			if expiry == 0 || unix < expiry {
+				expiry = unix
+			}
+		}
+	}
+	if expiry == 0 {
+		return time.Time{}
+	}
+	return time.Unix(expiry, 0)
+}
+
 func (d *publicKeyDischarge) digest(hash Hash) []byte {
 	msg := hash.sum([]byte(d.ThirdPartyCaveatID))
 	for _, cav := range d.Caveats {
