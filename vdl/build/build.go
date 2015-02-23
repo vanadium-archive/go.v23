@@ -48,12 +48,12 @@ import (
 	"sort"
 	"strings"
 
-	"v.io/core/veyron/lib/toposort"
 	"v.io/core/veyron2/vdl"
 	"v.io/core/veyron2/vdl/compile"
 	"v.io/core/veyron2/vdl/parse"
 	"v.io/core/veyron2/vdl/vdlroot/src/vdltool"
 	"v.io/core/veyron2/vdl/vdlutil"
+	"v.io/lib/toposort"
 )
 
 const vdlrootImportPrefix = "v.io/core/veyron2/vdl/vdlroot/src"
