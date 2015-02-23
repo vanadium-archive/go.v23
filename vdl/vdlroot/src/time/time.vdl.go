@@ -62,19 +62,17 @@ func (Duration) __VDLReflect(struct {
 }) {
 }
 
-// Duration must implement native type conversions.
-var _ interface {
-	VDLToNative(*time.Duration) error
-	VDLFromNative(time.Duration) error
-} = (*Duration)(nil)
-
-// Time must implement native type conversions.
-var _ interface {
-	VDLToNative(*time.Time) error
-	VDLFromNative(time.Time) error
-} = (*Time)(nil)
-
 func init() {
+	vdl.RegisterNative(durationToNative, durationFromNative)
+	vdl.RegisterNative(timeToNative, timeFromNative)
 	vdl.Register((*Time)(nil))
 	vdl.Register((*Duration)(nil))
 }
+
+// Type-check Duration conversion functions.
+var _ func(Duration, *time.Duration) error = durationToNative
+var _ func(*Duration, time.Duration) error = durationFromNative
+
+// Type-check Time conversion functions.
+var _ func(Time, *time.Time) error = timeToNative
+var _ func(*Time, time.Time) error = timeFromNative

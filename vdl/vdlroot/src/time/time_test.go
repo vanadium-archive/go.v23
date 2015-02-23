@@ -40,18 +40,18 @@ func TestTimeToFromNative(t *testing.T) {
 	}
 	for _, test := range tests {
 		native := gotime.Now() // Start with an arbitrary value.
-		if err := test.Wire.VDLToNative(&native); err != nil {
-			t.Errorf("%v VDLToNative failed: %v", test.Wire, err)
+		if err := timeToNative(test.Wire, &native); err != nil {
+			t.Errorf("%v timeToNative failed: %v", test.Wire, err)
 		}
 		if got, want := native, test.Native; got != want {
-			t.Errorf("%v VDLToNative got %v, want %v", test.Wire, got, want)
+			t.Errorf("%v timeFromNative got %v, want %v", test.Wire, got, want)
 		}
 		wire := Now() // Start with an arbitrary value.
-		if err := wire.VDLFromNative(test.Native); err != nil {
-			t.Errorf("%v VDLFromNative failed: %v", test.Wire, err)
+		if err := timeFromNative(&wire, test.Native); err != nil {
+			t.Errorf("%v timeFromNative failed: %v", test.Wire, err)
 		}
 		if got, want := wire, test.Wire.Normalize(); got != want {
-			t.Errorf("%v VDLFromNative got %v, want %v", test.Wire, got, want)
+			t.Errorf("%v timeFromNative got %v, want %v", test.Wire, got, want)
 		}
 	}
 }
@@ -88,18 +88,18 @@ func TestDurationToFromNative(t *testing.T) {
 	}
 	for _, test := range tests {
 		native := randGoDuration() // Start with an arbitrary value.
-		if err := test.Wire.VDLToNative(&native); err != nil {
-			t.Errorf("%v VDLToNative failed: %v", test.Wire, err)
+		if err := durationToNative(test.Wire, &native); err != nil {
+			t.Errorf("%v durationToNative failed: %v", test.Wire, err)
 		}
 		if got, want := native, test.Native; got != want {
-			t.Errorf("%v VDLToNative got %v, want %v", test.Wire, got, want)
+			t.Errorf("%v durationToNative got %v, want %v", test.Wire, got, want)
 		}
 		wire := randomDuration() // Start with an arbitrary value.
-		if err := wire.VDLFromNative(test.Native); err != nil {
-			t.Errorf("%v VDLFromNative failed: %v", test.Wire, err)
+		if err := durationFromNative(&wire, test.Native); err != nil {
+			t.Errorf("%v durationFromNative failed: %v", test.Wire, err)
 		}
 		if got, want := wire, test.Wire.Normalize(); got != want {
-			t.Errorf("%v VDLFromNative got %v, want %v", test.Wire, got, want)
+			t.Errorf("%v durationFromNative got %v, want %v", test.Wire, got, want)
 		}
 	}
 }
@@ -124,12 +124,12 @@ func TestDurationToNativeError(t *testing.T) {
 	}
 	for _, test := range tests {
 		native := randGoDuration() // Start with an arbitrary value.
-		err := test.Wire.VDLToNative(&native)
+		err := durationToNative(test.Wire, &native)
 		if got, want := fmt.Sprint(err), test.Err; !strings.Contains(got, want) {
-			t.Errorf("%v VDLToNative got error %q, want substr %q", got, want)
+			t.Errorf("%v durationToNative got error %q, want substr %q", got, want)
 		}
 		if got, want := native, gotime.Duration(0); got != want {
-			t.Errorf("%v VDLToNative got %v, want %v", test.Wire, got, want)
+			t.Errorf("%v durationToNative got %v, want %v", test.Wire, got, want)
 		}
 	}
 }

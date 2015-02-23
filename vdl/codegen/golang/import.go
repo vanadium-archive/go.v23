@@ -185,8 +185,8 @@ func computeDeps(file *compile.File, env *compile.Env) (deps, importMap) {
 			addTypeDeps(param.Type, env, deps, user)
 		}
 	}
-	// Native types contribute their imports, for the auto-generated interface
-	// assertion.
+	// Native types contribute their imports, for the auto-generated native
+	// conversion function type assertion.
 	for _, native := range file.Package.Config.Go.WireToNativeTypes {
 		for _, imp := range native.Imports {
 			user[imp.Path] = imp.Name

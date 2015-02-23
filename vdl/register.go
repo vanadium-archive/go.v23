@@ -7,17 +7,19 @@ import (
 )
 
 // Register registers a type, identified by a value for that type.  The type
-// should be a type that will be sent over the wire; types defined in vdl files
-// are automatically registered.  Subtypes are recursively registered.
+// should be a type that will be sent over the wire.  Subtypes are recursively
+// registered.  This creates a type name <-> reflect.Type bijective mapping.
 //
-// There are two reasons types must be registered:
-//   1) To create a type name -> reflect.Type mapping, so that when we decode
-//      into interface{}, we can generate values of the correct type.
-//   2) To create a wire type <-> native type mapping, so that we can
-//      auto-marshal native types.
+// Type registration is only required for VDL conversion into interface{}
+// values, so that values of the correct type may be generated.  Conversion into
+// interface{} values for types that are not registered will fill in *vdl.Value
+// into the interface{} value.
 //
-// Panics if wire is not a valid wire type, or if any mappings are not
-// bijective.  See ReflectInfo for details.
+// Panics if wire is not a valid wire type, or if the name<->type mapping is not
+// bijective.
+//
+// Register is not intended to be called by end users; calls are auto-generated
+// for all types defined in *.vdl files.
 func Register(wire interface{}) {
 	if wire == nil {
 		return
@@ -33,7 +35,7 @@ func registerRecursive(rt reflect.Type) error {
 	for rt.Kind() == reflect.Ptr {
 		rt = rt.Elem()
 	}
-	ri, err := DeriveReflectInfo(rt)
+	ri, err := deriveReflectInfo(rt)
 	if err != nil {
 		return err
 	}
@@ -58,7 +60,7 @@ func registerRecursive(rt reflect.Type) error {
 		return nil
 	}
 	// Recurse on subtypes contained in regular composite types.
-	switch wt := ri.WireType; wt.Kind() {
+	switch wt := ri.Type; wt.Kind() {
 	case reflect.Array, reflect.Slice, reflect.Ptr:
 		return registerRecursive(wt.Elem())
 	case reflect.Map:
@@ -77,96 +79,53 @@ func registerRecursive(rt reflect.Type) error {
 	return nil
 }
 
-// riRegistry holds the ReflectInfo registry.  Unlike rtRegistry (used for the
+// riRegistry holds the reflectInfo registry.  Unlike rtRegistry (used for the
 // rtCache), this information cannot be regenerated at will.  We expect a
 // limited number of types to be used within a single address space.
 type riRegistry struct {
 	sync.RWMutex
-	fromName   map[string]*ReflectInfo
-	fromWire   map[reflect.Type]*ReflectInfo
-	fromNative map[reflect.Type]*ReflectInfo
+	fromName map[string]*reflectInfo
+	fromType map[reflect.Type]*reflectInfo
 }
 
 var riReg = &riRegistry{
-	fromName:   make(map[string]*ReflectInfo),
-	fromWire:   make(map[reflect.Type]*ReflectInfo),
-	fromNative: make(map[reflect.Type]*ReflectInfo),
+	fromName: make(map[string]*reflectInfo),
+	fromType: make(map[reflect.Type]*reflectInfo),
 }
 
-func (reg *riRegistry) addReflectInfo(rt reflect.Type, ri *ReflectInfo) (bool, error) {
+func (reg *riRegistry) addReflectInfo(rt reflect.Type, ri *reflectInfo) (bool, error) {
 	reg.Lock()
 	defer reg.Unlock()
-	// Allow duplicates only if they're identical, meaning the same wire type was
+	// Allow duplicates only if they're identical, meaning the same type was
 	// registered multiple times.  Otherwise it indicates a non-bijective mapping.
-	if riDup := reg.fromWire[ri.WireType]; riDup != nil {
+	if riDup := reg.fromType[ri.Type]; riDup != nil {
 		if !equalRI(ri, riDup) {
-			return false, fmt.Errorf("vdl: Register(%v) duplicate wire type %v: %#v and %#v", rt, ri.WireType, ri, riDup)
+			return false, fmt.Errorf("vdl: Register(%v) duplicate type %v: %#v and %#v", rt, ri.Type, ri, riDup)
 		}
 		// We've seen the wire type before.
 		return false, nil
 	}
-	reg.fromWire[ri.WireType] = ri
-	if ri.WireName != "" {
-		if riDup := reg.fromName[ri.WireName]; riDup != nil && !equalRI(ri, riDup) {
-			return false, fmt.Errorf("vdl: Register(%v) duplicate name %q: %#v and %#v", rt, ri.WireName, ri, riDup)
+	reg.fromType[ri.Type] = ri
+	if ri.Name != "" {
+		if riDup := reg.fromName[ri.Name]; riDup != nil && !equalRI(ri, riDup) {
+			return false, fmt.Errorf("vdl: Register(%v) duplicate name %q: %#v and %#v", rt, ri.Name, ri, riDup)
 		}
-		reg.fromName[ri.WireName] = ri
-	}
-	if ri.NativeType != nil {
-		if riDup := reg.fromNative[ri.NativeType]; riDup != nil && !equalRI(ri, riDup) {
-			return false, fmt.Errorf("vdl: Register(%v) duplicate native type %v: %#v and %#v", rt, ri.NativeType, ri, riDup)
-		}
-		reg.fromNative[ri.NativeType] = ri
+		reg.fromName[ri.Name] = ri
 	}
 	return true, nil
 }
 
-// ReflectInfoFromName returns the ReflectInfo for the given vdl type name, or
+// reflectInfoFromName returns the reflectInfo for the given vdl type name, or
 // nil if Register has not been called for a type with the given name.
-func ReflectInfoFromName(name string) *ReflectInfo {
+func reflectInfoFromName(name string) *reflectInfo {
 	riReg.RLock()
 	ri := riReg.fromName[name]
 	riReg.RUnlock()
 	return ri
 }
 
-// ReflectInfoFromWire returns the ReflectInfo for the given wire type, or nil
-// if Register has not been called for the given wire type.
-func ReflectInfoFromWire(wire reflect.Type) *ReflectInfo {
-	riReg.RLock()
-	ri := riReg.fromWire[wire]
-	riReg.RUnlock()
-	return ri
-}
-
-// ReflectInfoFromNative returns the ReflectInfo for the given native type, or
-// nil if Register has not been called for the given native type.
-func ReflectInfoFromNative(native reflect.Type) *ReflectInfo {
-	riReg.RLock()
-	ri := riReg.fromNative[native]
-	riReg.RUnlock()
-	return ri
-}
-
-// wireValueFromNative converts rv from its native to wire type representation.
-// There are three return cases:
-//   (!IsValid(),  nil): rv doesn't have a wire representation.
-//   (!IsValid(), !nil): conversion of rv to wire representation failed.
-//   ( IsValid(),  nil): conversion of rv to wire representation succeeded.
-func wireValueFromNative(rv reflect.Value) (reflect.Value, error) {
-	ri := ReflectInfoFromNative(rv.Type())
-	if ri == nil {
-		return reflect.Value{}, nil
-	}
-	newWire := reflect.New(ri.WireType)
-	if ierr := ri.FromNativeFunc.Call([]reflect.Value{newWire, rv})[0].Interface(); ierr != nil {
-		return reflect.Value{}, ierr.(error)
-	}
-	return newWire.Elem(), nil
-}
-
-// ReflectInfo holds the reflection information for a type.  All fields are
-// populated via reflection over the WireType.
+// reflectInfo holds the reflection information for a type.  All fields are
+// populated via reflection over the Type.
 //
 // The type may include a special __VDLReflect function to describe metadata.
 // This is only required for enum and union vdl types, which don't have a
@@ -194,48 +153,25 @@ func wireValueFromNative(rv reflect.Value) (reflect.Value, error) {
 //       B FieldB
 //     }
 //   }
-type ReflectInfo struct {
-	// WireType is the type sent over the wire (e.g. types generated by the vdl
-	// compiler), and is the basis for all other information in this struct.
-	WireType reflect.Type
+type reflectInfo struct {
+	// Type is the basis for all other information in this struct.
+	Type reflect.Type
 
-	// WireName is the vdl type name for the wire type.  Type names include the
-	// vdl package path, e.g. "v.io/core/veyron2/vdl.Foo".
-	WireName string
+	// Name is the vdl type name including the vdl package path,
+	// e.g. "v.io/core/veyron2/vdl.Foo".
+	Name string
 
-	// NativeType is the native Go type for the wire type.  Users specify the
-	// native type by adding a pair of conversion functions to the wire type:
-	//
-	//   type Wire ...
-	//   func (x Wire) VDLToNative(n *Native) error
-	//   func (x *Wire) VDLFromNative(n Native) error
-	NativeType reflect.Type
-	// ToNativeFunc holds the VDLToNative function above.
-	ToNativeFunc reflect.Value
-	// ToNativeFunc holds the VDLFromNative function above.
-	FromNativeFunc reflect.Value
-
-	// EnumLabels holds the labels of an enum; it is non-empty iff the WireType
+	// EnumLabels holds the labels of an enum; it is non-empty iff the Type
 	// represents a vdl enum.
 	EnumLabels []string
 
-	// UnionFields holds the fields of a union; it is non-empty iff the WireType
+	// UnionFields holds the fields of a union; it is non-empty iff the Type
 	// represents a vdl union.
-	UnionFields []ReflectField
+	UnionFields []reflectField
 }
 
-// TODO(toddw): Currently all wire types must be registered before TypeOf is
-// called.  There's a chicken-and-egg problem; if the user has a package-level
-// "var x = vdl.TypeOf(Native{})" in the same package that the Wire type is
-// defined, where Wire has the Native type, the init order gets screwed up,
-// since the vdl.Register(Wire{}) will occur after the TypeOf.  Perhaps this is
-// rare enough to not worry?  But how about typeobject in the vdl?
-//
-// Also note that we must disallow mutually cyclic types that have native types,
-// otherwise we can never get the register order correct.
-
-// ReflectField describes the reflection info for a Union field.
-type ReflectField struct {
+// reflectField describes the reflection info for a Union field.
+type reflectField struct {
 	// Given a vdl type Foo union{A bool;B string}, we generate:
 	//   type Foo interface{...}
 	//   type FooA struct{ Value bool }
@@ -245,13 +181,13 @@ type ReflectField struct {
 	RepType reflect.Type // Concrete type representing the field, e.g. FooA, FooB
 }
 
-func equalRI(a, b *ReflectInfo) bool {
-	// Since all information is derived from the WireType, that's all we compare.
-	return a.WireType == b.WireType
+func equalRI(a, b *reflectInfo) bool {
+	// Since all information is derived from the Type, that's all we compare.
+	return a.Type == b.Type
 }
 
 // isUnion returns true iff rt is a union vdl type; it runs a quicker form of
-// DeriveReflectInfo, only to check for union.  It's used while normalizing types,
+// deriveReflectInfo, only to check for union.  It's used while normalizing types,
 // and is necessary since the generated union type is an interface, and must be
 // distinguished from the any type.
 func isUnion(rt reflect.Type) bool {
@@ -271,22 +207,14 @@ func isUnion(rt reflect.Type) bool {
 	return false
 }
 
-// DeriveReflectInfo returns the ReflectInfo corresponding to rt.
+// deriveReflectInfo returns the reflectInfo corresponding to rt.
 // REQUIRES: rt has been normalized, and pointers have been flattened.
-//
-// TODO(toddw): Unexport this function when valconv has been merged into this
-// package; it's only used in makeReflectUnion.
-func DeriveReflectInfo(rt reflect.Type) (*ReflectInfo, error) {
-	// Set reasonable defaults for types that don't have the __VDLReflect method
-	// or native types.
-	ri := new(ReflectInfo)
-	ri.WireType = rt
+func deriveReflectInfo(rt reflect.Type) (*reflectInfo, error) {
+	// Set reasonable defaults for types that don't have the __VDLReflect method.
+	ri := new(reflectInfo)
+	ri.Type = rt
 	if rt.PkgPath() != "" {
-		ri.WireName = rt.PkgPath() + "." + rt.Name()
-	}
-	// Fill in native type info, if it exists.
-	if err := describeNative(rt, ri); err != nil {
-		return nil, err
+		ri.Name = rt.PkgPath() + "." + rt.Name()
 	}
 	// If rt is an non-interface type, methods include the receiver as the first
 	// in-arg, otherwise they don't.
@@ -303,15 +231,15 @@ func DeriveReflectInfo(rt reflect.Type) (*ReflectInfo, error) {
 		// rtReflect corresponds to the argument to __VDLReflect.
 		rtReflect := mtype.In(offsetIn)
 		if field, ok := rtReflect.FieldByName("Type"); ok {
-			ri.WireType = field.Type
-			if wt := ri.WireType; wt.PkgPath() != "" {
-				ri.WireName = wt.PkgPath() + "." + wt.Name()
+			ri.Type = field.Type
+			if wt := ri.Type; wt.PkgPath() != "" {
+				ri.Name = wt.PkgPath() + "." + wt.Name()
 			} else {
-				ri.WireName = ""
+				ri.Name = ""
 			}
 		}
 		if field, ok := rtReflect.FieldByName("Name"); ok {
-			ri.WireName = string(field.Tag)
+			ri.Name = string(field.Tag)
 		}
 		if field, ok := rtReflect.FieldByName("Enum"); ok {
 			if err := describeEnum(field.Type, rt, ri); err != nil {
@@ -330,49 +258,6 @@ func DeriveReflectInfo(rt reflect.Type) (*ReflectInfo, error) {
 	return ri, nil
 }
 
-// describeNative fills in ri with native type information from rt.  Users
-// specify native type information through a pair of conversion functions on the
-// wire type:
-//
-//   type Wire struct{...}
-//   func (x Wire) VDLToNative(n *Native) error
-//   func (x *Wire) VDLFromNative(n Native) error
-func describeNative(rt reflect.Type, ri *ReflectInfo) error {
-	if rt.Kind() == reflect.Interface {
-		return nil
-	}
-	// Reminder: methods include the receiver as in-arg 0.
-	var to, from reflect.Type
-	if method, ok := rt.MethodByName("VDLToNative"); ok {
-		mtype := method.Type
-		if mtype.NumIn() != 2 || mtype.In(1).Kind() != reflect.Ptr || mtype.NumOut() != 1 || mtype.Out(0) != rtError {
-			return fmt.Errorf("type %q invalid VDLToNative (want method VDLToNative(*Native) error)", rt)
-		}
-		to = mtype.In(1).Elem()
-		ri.ToNativeFunc = method.Func
-	}
-	if method, ok := reflect.PtrTo(rt).MethodByName("VDLFromNative"); ok {
-		mtype := method.Type
-		if _, nonptr := rt.MethodByName("VDLFromNative"); nonptr ||
-			mtype.NumIn() != 2 || mtype.NumOut() != 1 || mtype.Out(0) != rtError {
-			return fmt.Errorf("type %q invalid VDLFromNative (want pointer method VDLFromNative(Native) error)", rt)
-		}
-		from = mtype.In(1)
-		ri.FromNativeFunc = method.Func
-	}
-	switch {
-	case to == nil && from == nil:
-		// Neither VDLToNative nor VDLFromNative is specified.
-		return nil
-	case to != from:
-		// Only one of VDLToNative or VDLFromNative is specified, or the native type
-		// isn't identical for the two functions.
-		return fmt.Errorf("type %q invalid native type (must specify both VDLToNative and VDLFromNative with the same Native type)", rt)
-	}
-	ri.NativeType = to
-	return nil
-}
-
 // describeEnum fills in ri; we expect enumReflect has this format:
 //   struct {A, B, C Foo}
 //
@@ -388,9 +273,9 @@ func describeNative(rt reflect.Type, ri *ReflectInfo) error {
 //   }) {}
 //   func (Foo) String() string {}
 //   func (*Foo) Set(string) error {}
-func describeEnum(enumReflect, rt reflect.Type, ri *ReflectInfo) error {
-	if rt != ri.WireType || rt.Kind() == reflect.Interface {
-		return fmt.Errorf("enum type %q invalid (mismatched type %q)", rt, ri.WireType)
+func describeEnum(enumReflect, rt reflect.Type, ri *reflectInfo) error {
+	if rt != ri.Type || rt.Kind() == reflect.Interface {
+		return fmt.Errorf("enum type %q invalid (mismatched type %q)", rt, ri.Type)
 	}
 	if enumReflect.Kind() != reflect.Struct || enumReflect.NumField() == 0 {
 		return fmt.Errorf("enum type %q invalid (no labels)", rt)
@@ -438,9 +323,9 @@ func describeEnum(enumReflect, rt reflect.Type, ri *ReflectInfo) error {
 //       }
 //     }
 //   )
-func describeUnion(unionReflect, rt reflect.Type, ri *ReflectInfo) error {
-	if ri.WireType.Kind() != reflect.Interface {
-		return fmt.Errorf("union type %q has non-interface type %q", rt, ri.WireType)
+func describeUnion(unionReflect, rt reflect.Type, ri *reflectInfo) error {
+	if ri.Type.Kind() != reflect.Interface {
+		return fmt.Errorf("union type %q has non-interface type %q", rt, ri.Type)
 	}
 	if unionReflect.Kind() != reflect.Struct || unionReflect.NumField() == 0 {
 		return fmt.Errorf("union type %q invalid (no fields)", rt)
@@ -454,16 +339,16 @@ func describeUnion(unionReflect, rt reflect.Type, ri *ReflectInfo) error {
 		if f.Type.Kind() != reflect.Struct || f.Type.NumField() != 1 || f.Type.Field(0).Name != "Value" {
 			return fmt.Errorf("union type %q field %q has bad concrete field type %q", rt, f.Name, f.Type)
 		}
-		ri.UnionFields = append(ri.UnionFields, ReflectField{
+		ri.UnionFields = append(ri.UnionFields, reflectField{
 			Name:    f.Name,
 			Type:    f.Type.Field(0).Type,
 			RepType: f.Type,
 		})
 	}
 	// Check for Name method on interface and all concrete field structs.
-	if n, ok := ri.WireType.MethodByName("Name"); !ok || n.Type.NumIn() != 0 ||
+	if n, ok := ri.Type.MethodByName("Name"); !ok || n.Type.NumIn() != 0 ||
 		n.Type.NumOut() != 1 || n.Type.Out(0) != rtString {
-		return fmt.Errorf("union interface type %q must have method Name() string", ri.WireType)
+		return fmt.Errorf("union interface type %q must have method Name() string", ri.Type)
 	}
 	for _, f := range ri.UnionFields {
 		if n, ok := f.RepType.MethodByName("Name"); !ok || n.Type.NumIn() != 1 ||
@@ -481,8 +366,11 @@ func TypeToReflect(t *Type) reflect.Type {
 	if t.Name() != "" {
 		// Named types cannot be manufactured via Go reflect, so we lookup in our
 		// registry instead.
-		if ri := ReflectInfoFromName(t.Name()); ri != nil {
-			return ri.WireType
+		if ri := reflectInfoFromName(t.Name()); ri != nil {
+			if ni := nativeInfoFromWire(ri.Type); ni != nil {
+				return ni.NativeType
+			}
+			return ri.Type
 		}
 		return nil
 	}
@@ -491,32 +379,35 @@ func TypeToReflect(t *Type) reflect.Type {
 	switch t.Kind() {
 	case Any, Array, Enum, Union:
 		// We can't make unnamed versions of any of these types.
+		return nil
 	case Optional:
 		if elem := TypeToReflect(t.Elem()); elem != nil {
 			return reflect.PtrTo(elem)
 		}
+		return nil
 	case List:
 		if elem := TypeToReflect(t.Elem()); elem != nil {
 			return reflect.SliceOf(elem)
 		}
+		return nil
 	case Set:
 		if key := TypeToReflect(t.Key()); key != nil {
 			return reflect.MapOf(key, rtUnnamedEmptyStruct)
 		}
+		return nil
 	case Map:
-		if key := TypeToReflect(t.Key()); key != nil {
-			if elem := TypeToReflect(t.Elem()); elem != nil {
-				return reflect.MapOf(key, elem)
-			}
+		if key, elem := TypeToReflect(t.Key()), TypeToReflect(t.Elem()); key != nil && elem != nil {
+			return reflect.MapOf(key, elem)
 		}
+		return nil
 	case Struct:
 		if t.NumField() == 0 {
 			return rtUnnamedEmptyStruct
 		}
+		return nil
 	default:
 		return rtFromKind[t.Kind()]
 	}
-	return nil
 }
 
 var rtFromKind = [...]reflect.Type{

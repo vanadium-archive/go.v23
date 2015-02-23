@@ -157,15 +157,20 @@ func FromReflect(target Target, rv reflect.Value) error {
 	// track optional types correctly.
 	hasPtr := false
 	for rv.Kind() == reflect.Ptr || rv.Kind() == reflect.Interface {
+		// Handle special-case for errors.
+		if rv.Type().ConvertibleTo(rtError) && !rv.IsNil() {
+			return fromError(target, rv)
+		}
 		// Handle marshaling from native type to wire type.
-		switch rvWire, err := wireValueFromNative(rv); {
-		case err != nil:
-			return err
-		case rvWire.IsValid():
-			if hasPtr {
-				return FromReflect(target, rvWire.Addr())
+		if ni := nativeInfoFromNative(rv.Type()); ni != nil {
+			newWire := reflect.New(ni.WireType)
+			if err := ni.FromNative(newWire, rv); err != nil {
+				return err
 			}
-			return FromReflect(target, rvWire)
+			if hasPtr {
+				return FromReflect(target, newWire)
+			}
+			return FromReflect(target, newWire.Elem())
 		}
 		hasPtr = rv.Kind() == reflect.Ptr
 		switch rt := rv.Type(); {
@@ -189,20 +194,23 @@ func FromReflect(target Target, rv reflect.Value) error {
 		case rt.ConvertibleTo(rtPtrToValue):
 			// If rv is convertible to *Value, fill from it directly.
 			return FromValue(target, rv.Convert(rtPtrToValue).Interface().(*Value))
-		case rt.ConvertibleTo(rtError):
-			return fromError(target, rv.Interface().(error), rt)
 		}
 		rv = rv.Elem()
 	}
+	// Handle special-case for errors.
+	if rv.Type().ConvertibleTo(rtError) {
+		return fromError(target, rv)
+	}
 	// Handle marshaling from native type to wire type.
-	switch rvWire, err := wireValueFromNative(rv); {
-	case err != nil:
-		return err
-	case rvWire.IsValid():
-		if hasPtr {
-			return FromReflect(target, rvWire.Addr())
+	if ni := nativeInfoFromNative(rv.Type()); ni != nil {
+		newWire := reflect.New(ni.WireType)
+		if err := ni.FromNative(newWire, rv); err != nil {
+			return err
 		}
-		return FromReflect(target, rvWire)
+		if hasPtr {
+			return FromReflect(target, newWire)
+		}
+		return FromReflect(target, newWire.Elem())
 	}
 	// Initialize type information.  The optionality is a bit tricky.  Both rt and
 	// rv refer to the flattened value, with no pointers or interfaces.  But tt
@@ -210,9 +218,6 @@ func FromReflect(target Target, rv reflect.Value) error {
 	// required so that each of the Target.From* methods can get full type
 	// information, including optionality.
 	rt := rv.Type()
-	if rt.ConvertibleTo(rtError) {
-		return fromError(target, rv.Interface().(error), rt)
-	}
 	tt, err := TypeFromReflect(rv.Type())
 	if err != nil {
 		return err
@@ -374,25 +379,22 @@ func FromReflect(target Target, rv reflect.Value) error {
 }
 
 // fromError handles all rv values that implement the error interface.
-func fromError(target Target, e error, rt reflect.Type) error {
-	// Fill the target from the wire representation of e.
-	conv, err := ErrorConv()
+func fromError(target Target, rv reflect.Value) error {
+	// Convert to the WireError representation of rv.
+	ni, err := nativeInfoForError()
 	if err != nil {
 		return err
 	}
-	wire, err := conv.ToWire(e)
-	if err != nil {
+	newWire := reflect.New(ni.WireType)
+	if err := ni.FromNative(newWire, rv); err != nil {
 		return err
 	}
-	// The rt arg is the original type of e, and we know that rt is convertible to
-	// error.  We must ensure we end up with the right optionality, in case target
-	// is an interface.
-	rvWire := reflect.ValueOf(&wire)
-	if rt.Kind() != reflect.Ptr ||
-		(rt.Kind() == reflect.Ptr && !rt.Elem().ConvertibleTo(rtError)) {
-		rvWire = rvWire.Elem()
+	// We know that rv is convertible to error; ensure we end up with the right
+	// optionality, in case target is an interface.
+	if rt := rv.Type(); rt.Kind() == reflect.Ptr && rt.Elem().ConvertibleTo(rtError) {
+		return FromReflect(target, newWire)
 	}
-	return FromReflect(target, rvWire)
+	return FromReflect(target, newWire.Elem())
 }
 
 // FromValue converts from vv to the target, by walking through vv and calling

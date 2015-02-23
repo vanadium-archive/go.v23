@@ -185,12 +185,12 @@ func createFillTarget(fin convTarget, ttFrom *Type) (convTarget, error) {
 		// converting from the wire type to the native type.
 		//
 		// TODO(toddw): This doesn't handle pointer native types.
-		if ri := ReflectInfoFromNative(fin.rv.Type()); ri != nil {
-			tt, err := TypeFromReflect(ri.WireType)
+		if ni := nativeInfoFromNative(fin.rv.Type()); ni != nil {
+			tt, err := TypeFromReflect(ni.WireType)
 			if err != nil {
 				return convTarget{}, err
 			}
-			return reflectConv(reflect.New(ri.WireType).Elem(), tt)
+			return reflectConv(reflect.New(ni.WireType).Elem(), tt)
 		}
 		if fin.rv.Kind() == reflect.Interface {
 			// We're converting into an interface, so we can't just fill into the fin
@@ -265,12 +265,8 @@ func finishConvert(fin, fill convTarget) error {
 	if fin.vv == nil {
 		// Handle mirrored case in createFillTarget where fin.rv is a native type;
 		// fill.rv is the wire type that has been filled in.
-		if ri := ReflectInfoFromNative(fin.rv.Type()); ri != nil {
-			ierr := ri.ToNativeFunc.Call([]reflect.Value{fill.rv, fin.rv.Addr()})[0].Interface()
-			if ierr != nil {
-				return ierr.(error)
-			}
-			return nil
+		if ni := nativeInfoFromNative(fin.rv.Type()); ni != nil {
+			return ni.ToNative(fill.rv, fin.rv.Addr())
 		}
 		switch fin.rv.Kind() {
 		case reflect.Interface:
@@ -279,23 +275,24 @@ func finishConvert(fin, fill convTarget) error {
 			if fill.vv == nil {
 				rvFill = fill.rv
 				if fill.rv.Type() == rtWireError {
-					// Handle case where fill.rv has type WireError; if error
-					// conversions have been registered with the vdl package, we need to
-					// convert to the standard error interface.
-					if conv, err := ErrorConv(); err == nil {
-						native, err := conv.FromWire(fill.rv.Interface().(WireError))
-						if err != nil {
+					// Handle case where fill.rv has type WireError; if error conversions
+					// have been registered with the vdl package, we need to convert to
+					// the standard error interface.
+					if ni, err := nativeInfoForError(); err == nil {
+						newNative := reflect.New(ni.NativeType)
+						if err := ni.ToNative(fill.rv, newNative); err != nil {
 							return err
 						}
-						rvFill = reflect.ValueOf(native)
+						// The type of newNative is *error, so call Elem() twice to get to
+						// the underlying concrete value.
+						rvFill = newNative.Elem().Elem()
 					}
-				} else if ri := ReflectInfoFromWire(fill.rv.Type()); ri != nil && ri.NativeType != nil {
+				} else if ni := nativeInfoFromWire(fill.rv.Type()); ni != nil {
 					// Handle case where fill.rv is a wire type with a native type; set
 					// rvFill to a new native type and call ToNative to fill it in.
-					newNative := reflect.New(ri.NativeType)
-					ierr := ri.ToNativeFunc.Call([]reflect.Value{fill.rv, newNative})[0].Interface()
-					if ierr != nil {
-						return ierr.(error)
+					newNative := reflect.New(ni.NativeType)
+					if err := ni.ToNative(fill.rv, newNative); err != nil {
+						return err
 					}
 					rvFill = newNative.Elem()
 				}
@@ -378,7 +375,7 @@ func rvSettableZeroValue(rt reflect.Type, tt *Type) reflect.Value {
 		}
 		// Union interface, which represents one of the fields.  Initialize with the
 		// zero value of the type at index 0.
-		ri, err := DeriveReflectInfo(rt)
+		ri, err := deriveReflectInfo(rt)
 		if err != nil {
 			panic(fmt.Errorf("vdl: invalid union type rt: %v tt: %v err: %v", rt, tt, err))
 		}
@@ -409,15 +406,14 @@ func rvSettableZeroValue(rt reflect.Type, tt *Type) reflect.Value {
 // of this machinery is to ensure union can always be created, without any type
 // registration.
 func makeReflectUnion(rt reflect.Type, vv *Value) (reflect.Value, error) {
-	// TODO(toddw): Cache the field types for faster access, after merging this
-	// into the vdl package.
-	ri, err := DeriveReflectInfo(rt)
+	// TODO(toddw): Cache the field types for faster access.
+	ri, err := deriveReflectInfo(rt)
 	if err != nil || len(ri.UnionFields) == 0 {
 		// If rt isn't a union interface type, it still might be registered, so we
 		// can get the reflect type from vv.
 		if rt2 := TypeToReflect(vv.Type()); rt2 != nil {
 			rt = rt2
-			ri, err = DeriveReflectInfo(rt)
+			ri, err = deriveReflectInfo(rt)
 		}
 	}
 	switch {
@@ -464,22 +460,31 @@ func (c convTarget) FromNil(tt *Type) error {
 		// or the final interface, and set that to nil.  We create all the pointers
 		// to be consistent with our behavior in the non-nil case, where we
 		// similarly create all the pointers.  It also makes the tests simpler.
-		for c.rv.Kind() == reflect.Ptr {
-			if vv := setZeroVDLValue(c.rv, tt); vv.IsValid() {
+		rv := c.rv
+		for rv.Kind() == reflect.Ptr {
+			if vv := setZeroVDLValue(rv, tt); vv.IsValid() {
 				return nil
 			}
-			if k := c.rv.Type().Elem().Kind(); k != reflect.Ptr && k != reflect.Interface {
+			if k := rv.Type().Elem().Kind(); k != reflect.Ptr && k != reflect.Interface {
 				break
 			}
 			// Next elem is a pointer or interface, keep looping.
-			if c.rv.IsNil() {
-				c.rv.Set(reflect.New(c.rv.Type().Elem()))
+			if rv.IsNil() {
+				rv.Set(reflect.New(rv.Type().Elem()))
 			}
-			c.rv = c.rv.Elem()
+			rv = rv.Elem()
 		}
-		// Now rv.Type() is either a single pointer or an interface; either way
-		// setting its zero value will give us nil.
-		c.rv.Set(reflect.Zero(c.rv.Type()))
+		// Now rv.Type is either a single pointer or an interface.  If it is an
+		// interface, check to see whether we can create a Go object from tt.
+		rt := rv.Type()
+		if rv.Kind() == reflect.Interface {
+			if rtFromTT := TypeToReflect(tt); rtFromTT != nil {
+				rt = rtFromTT
+			}
+		}
+		// Set the zero value of the pointer or interface, which will give us nil of
+		// the correct type.
+		rv.Set(reflect.Zero(rt))
 	} else {
 		vvNil := ZeroValue(tt)
 		if to, from := c.vv.Type(), vvNil; !to.AssignableFrom(from) {

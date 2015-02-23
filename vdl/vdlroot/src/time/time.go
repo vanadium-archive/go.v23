@@ -21,17 +21,17 @@ const (
 	maxGoDurationSec = maxInt64 / nanosPerSecond
 )
 
-// VDLToNative converts from VDL time.Time to Go time.Time.
-func (x Time) VDLToNative(native *gotime.Time) error {
-	*native = gotime.Unix(x.Seconds-unixEpoch, int64(x.Nano)).UTC()
+// timeToNative converts from VDL time.Time to Go time.Time.
+func timeToNative(wire Time, native *gotime.Time) error {
+	*native = gotime.Unix(wire.Seconds-unixEpoch, int64(wire.Nano)).UTC()
 	return nil
 }
 
-// VDLFromNative converts from Go time.Time to VDL time.Time.
-func (x *Time) VDLFromNative(native gotime.Time) error {
-	x.Seconds = native.Unix() + unixEpoch
-	x.Nano = int32(native.Nanosecond())
-	*x = x.Normalize()
+// timeFromNative converts from Go time.Time to VDL time.Time.
+func timeFromNative(wire *Time, native gotime.Time) error {
+	wire.Seconds = native.Unix() + unixEpoch
+	wire.Nano = int32(native.Nanosecond())
+	*wire = wire.Normalize()
 	return nil
 }
 
@@ -43,26 +43,26 @@ func (x Time) Normalize() Time {
 	return Time(Duration(x).Normalize())
 }
 
-// VDLToNative converts from VDL time.Duration to Go time.Duration.
-func (x Duration) VDLToNative(native *gotime.Duration) error {
+// durationToNative converts from VDL time.Duration to Go time.Duration.
+func durationToNative(wire Duration, native *gotime.Duration) error {
 	*native = 0
 	// Go represents duration as int64 nanoseconds, which has a much smaller range
 	// than VDL duration, so we catch these cases and return an error.
-	x = x.Normalize()
-	if x.Seconds < minGoDurationSec ||
-		(x.Seconds == minGoDurationSec && x.Nano < minInt64-minGoDurationSec*nanosPerSecond) ||
-		x.Seconds > maxGoDurationSec ||
-		(x.Seconds == maxGoDurationSec && x.Nano > maxInt64-maxGoDurationSec*nanosPerSecond) {
-		return fmt.Errorf("vdl duration %+v out of range of go duration", x)
+	wire = wire.Normalize()
+	if wire.Seconds < minGoDurationSec ||
+		(wire.Seconds == minGoDurationSec && wire.Nano < minInt64-minGoDurationSec*nanosPerSecond) ||
+		wire.Seconds > maxGoDurationSec ||
+		(wire.Seconds == maxGoDurationSec && wire.Nano > maxInt64-maxGoDurationSec*nanosPerSecond) {
+		return fmt.Errorf("vdl duration %+v out of range of go duration", wire)
 	}
-	*native = gotime.Duration(x.Seconds*nanosPerSecond + int64(x.Nano))
+	*native = gotime.Duration(wire.Seconds*nanosPerSecond + int64(wire.Nano))
 	return nil
 }
 
-// VDLFromNative converts from Go time.Duration to VDL time.Duration.
-func (x *Duration) VDLFromNative(g gotime.Duration) error {
-	x.Seconds = int64(g / nanosPerSecond)
-	x.Nano = int32(g % nanosPerSecond)
+// durationFromNative converts from Go time.Duration to VDL time.Duration.
+func durationFromNative(wire *Duration, native gotime.Duration) error {
+	wire.Seconds = int64(native / nanosPerSecond)
+	wire.Nano = int32(native % nanosPerSecond)
 	return nil
 }
 
@@ -87,6 +87,6 @@ func (x Duration) Normalize() Duration {
 // Now returns the current time.
 func Now() Time {
 	var t Time
-	t.VDLFromNative(gotime.Now())
+	timeFromNative(&t, gotime.Now())
 	return t
 }

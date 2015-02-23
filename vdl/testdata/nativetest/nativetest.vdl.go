@@ -60,37 +60,12 @@ func (WireAll) __VDLReflect(struct {
 }) {
 }
 
-// WireMapStringInt must implement native type conversions.
-var _ interface {
-	VDLToNative(*map[string]int) error
-	VDLFromNative(map[string]int) error
-} = (*WireMapStringInt)(nil)
-
-// WireMultiImport must implement native type conversions.
-var _ interface {
-	VDLToNative(*map[NativeSamePkg]time.Time) error
-	VDLFromNative(map[NativeSamePkg]time.Time) error
-} = (*WireMultiImport)(nil)
-
-// WireSamePkg must implement native type conversions.
-var _ interface {
-	VDLToNative(*NativeSamePkg) error
-	VDLFromNative(NativeSamePkg) error
-} = (*WireSamePkg)(nil)
-
-// WireString must implement native type conversions.
-var _ interface {
-	VDLToNative(*string) error
-	VDLFromNative(string) error
-} = (*WireString)(nil)
-
-// WireTime must implement native type conversions.
-var _ interface {
-	VDLToNative(*time.Time) error
-	VDLFromNative(time.Time) error
-} = (*WireTime)(nil)
-
 func init() {
+	vdl.RegisterNative(wireMapStringIntToNative, wireMapStringIntFromNative)
+	vdl.RegisterNative(wireMultiImportToNative, wireMultiImportFromNative)
+	vdl.RegisterNative(wireSamePkgToNative, wireSamePkgFromNative)
+	vdl.RegisterNative(wireStringToNative, wireStringFromNative)
+	vdl.RegisterNative(wireTimeToNative, wireTimeFromNative)
 	vdl.Register((*WireString)(nil))
 	vdl.Register((*WireMapStringInt)(nil))
 	vdl.Register((*WireTime)(nil))
@@ -98,3 +73,23 @@ func init() {
 	vdl.Register((*WireMultiImport)(nil))
 	vdl.Register((*WireAll)(nil))
 }
+
+// Type-check WireMapStringInt conversion functions.
+var _ func(WireMapStringInt, *map[string]int) error = wireMapStringIntToNative
+var _ func(*WireMapStringInt, map[string]int) error = wireMapStringIntFromNative
+
+// Type-check WireMultiImport conversion functions.
+var _ func(WireMultiImport, *map[NativeSamePkg]time.Time) error = wireMultiImportToNative
+var _ func(*WireMultiImport, map[NativeSamePkg]time.Time) error = wireMultiImportFromNative
+
+// Type-check WireSamePkg conversion functions.
+var _ func(WireSamePkg, *NativeSamePkg) error = wireSamePkgToNative
+var _ func(*WireSamePkg, NativeSamePkg) error = wireSamePkgFromNative
+
+// Type-check WireString conversion functions.
+var _ func(WireString, *string) error = wireStringToNative
+var _ func(*WireString, string) error = wireStringFromNative
+
+// Type-check WireTime conversion functions.
+var _ func(WireTime, *time.Time) error = wireTimeToNative
+var _ func(*WireTime, time.Time) error = wireTimeFromNative

@@ -3,9 +3,12 @@ package vom
 import (
 	"fmt"
 	"io"
+	"reflect"
 	"strings"
 	"testing"
 	"testing/iotest"
+
+	"v.io/core/veyron2/vdl"
 )
 
 // readMode ensures the decoder handles short reads and different EOF semantics.
@@ -234,4 +237,16 @@ func TestMatchHexPat(t *testing.T) {
 			t.Errorf("matchHexPat(%q, %q) != %v", test.target, test.pat, test.expect)
 		}
 	}
+}
+
+func toGoValue(value *vdl.Value) (interface{}, error) {
+	rt := vdl.TypeToReflect(value.Type())
+	if rt == nil {
+		return reflect.Value{}, fmt.Errorf("TypeToReflect(%v) failed", value.Type())
+	}
+	rv := reflect.New(rt)
+	if err := vdl.Convert(rv.Interface(), value); err != nil {
+		return reflect.Value{}, fmt.Errorf("vdl.Convert(%T, %v) failed: %v", rt, value, err)
+	}
+	return rv.Elem().Interface(), nil
 }

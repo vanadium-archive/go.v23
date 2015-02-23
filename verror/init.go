@@ -6,13 +6,16 @@ func init() {
 	// We must register the error conversion functions between vdl.WireError and
 	// the standard error interface with the vdl package.  This allows the vdl
 	// package to have minimal dependencies.
-	vdl.RegisterErrorConv(vdl.ErrorConvInfo{errorFromWire, errorToWire})
+	vdl.RegisterNative(wireErrorToNative, wireErrorFromNative)
 }
 
-// errorFromWire converts from vdl.WireError to verror.Standard, which
+// wireErrorToNative converts from vdl.WireError to verror.Standard, which
 // implements the standard go error interface.
-func errorFromWire(wire vdl.WireError) (error, error) {
-	native := Standard{
+//
+// REQUIRES: native is an allocated zero value of error.  Note that this is
+// guaranteed by vdl.RegisterNative for calls to this this function.
+func wireErrorToNative(wire vdl.WireError, native *error) error {
+	std := Standard{
 		IDAction: IDAction{
 			ID:     ID(wire.IDAction.ID),
 			Action: ActionCode(wire.IDAction.Action),
@@ -33,22 +36,23 @@ func errorFromWire(wire vdl.WireError) (error, error) {
 			// TODO(toddw): Consider whether there is a better strategy.
 			pNative = err
 		}
-		native.ParamList = append(native.ParamList, pNative)
+		std.ParamList = append(std.ParamList, pNative)
 	}
-	return native, nil
+	*native = std
+	return nil
 }
 
-// errorToWire converts from the standard go error interface to verror.Standard,
-// and then to vdl.WireError.
-func errorToWire(native error) (vdl.WireError, error) {
+// wireErrorFromNative converts from the standard go error interface to
+// verror.Standard, and then to vdl.WireError.
+//
+// REQUIRES: wire is an allocated zero value of vdl.WireError.  Note that this
+// is guaranteed by vdl.RegisterNative for calls to this this function.
+func wireErrorFromNative(wire *vdl.WireError, native error) error {
 	e := ExplicitConvert(ErrUnknown, "", "", "", native)
-	wire := vdl.WireError{
-		IDAction: vdl.IDAction{
-			ID:     string(ErrorID(e)),
-			Action: uint32(Action(e)),
-		},
-		Msg: e.Error(),
-	}
+	wire.IDAction.ID = string(ErrorID(e))
+	wire.IDAction.Action = uint32(Action(e))
+	wire.Msg = e.Error()
+	wire.ParamList = nil
 	for _, p := range params(e) {
 		var pWire *vdl.Value
 		if err := vdl.Convert(&pWire, p); err != nil {
@@ -60,5 +64,5 @@ func errorToWire(native error) (vdl.WireError, error) {
 		}
 		wire.ParamList = append(wire.ParamList, pWire)
 	}
-	return wire, nil
+	return nil
 }

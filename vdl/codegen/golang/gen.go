@@ -138,6 +138,7 @@ func init() {
 	funcMap := template.FuncMap{
 		"firstRuneToExport":     vdlutil.FirstRuneToExportCase,
 		"firstRuneToUpper":      vdlutil.FirstRuneToUpper,
+		"firstRuneToLower":      vdlutil.FirstRuneToLower,
 		"errorName":             errorName,
 		"nativeIdent":           nativeIdent,
 		"typeGo":                typeGo,
@@ -399,16 +400,15 @@ import ( {{if $data.Imports.System}}
 {{range $tdef := $file.TypeDefs}}
 {{typeDefGo $data $tdef}}
 {{end}}
-{{range $wire, $native := $file.Package.Config.Go.WireToNativeTypes}}
-// {{$wire}} must implement native type conversions.
-var _ interface {
-	VDLToNative(*{{nativeIdent $data $native}}) error
-	VDLFromNative({{nativeIdent $data $native}}) error
-} = (*{{$wire}})(nil)
-{{end}}
-func init() { {{range $tdef := $file.TypeDefs}}
+func init() { {{range $wire, $native := $file.Package.Config.Go.WireToNativeTypes}}{{$lwire := firstRuneToLower $wire}}
+	{{$data.Pkg "v.io/core/veyron2/vdl"}}RegisterNative({{$lwire}}ToNative, {{$lwire}}FromNative){{end}}{{range $tdef := $file.TypeDefs}}
 	{{$data.Pkg "v.io/core/veyron2/vdl"}}Register((*{{$tdef.Name}})(nil)){{end}}
 }
+{{range $wire, $native := $file.Package.Config.Go.WireToNativeTypes}}{{$lwire := firstRuneToLower $wire}}{{$nat := nativeIdent $data $native}}
+// Type-check {{$wire}} conversion functions.
+var _ func({{$wire}}, *{{$nat}}) error = {{$lwire}}ToNative
+var _ func(*{{$wire}}, {{$nat}}) error = {{$lwire}}FromNative
+{{end}}
 {{end}}
 
 {{range $cdef := $file.ConstDefs}}

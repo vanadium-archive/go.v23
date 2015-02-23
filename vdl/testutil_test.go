@@ -399,7 +399,7 @@ func (*PtrError) Error() string   { return "" }
 type NWire struct{ Str string }
 type NNative int64
 
-func (x NWire) VDLToNative(n *NNative) error {
+func nWireToNative(x NWire, n *NNative) error {
 	*n = 0
 	i, err := strconv.Atoi(x.Str)
 	if err != nil {
@@ -409,7 +409,7 @@ func (x NWire) VDLToNative(n *NNative) error {
 	return nil
 }
 
-func (x *NWire) VDLFromNative(n NNative) error {
+func nWireFromNative(x *NWire, n NNative) error {
 	x.Str = strconv.Itoa(int(n))
 	return nil
 }
@@ -418,7 +418,7 @@ func (x *NWire) VDLFromNative(n NNative) error {
 type NWireReg struct{ Str string }
 type NNativeReg int64
 
-func (x NWireReg) VDLToNative(n *NNativeReg) error {
+func nWireRegToNative(x NWireReg, n *NNativeReg) error {
 	*n = 0
 	i, err := strconv.Atoi(x.Str)
 	if err != nil {
@@ -428,12 +428,13 @@ func (x NWireReg) VDLToNative(n *NNativeReg) error {
 	return nil
 }
 
-func (x *NWireReg) VDLFromNative(n NNativeReg) error {
+func nWireRegFromNative(x *NWireReg, n NNativeReg) error {
 	x.Str = strconv.Itoa(int(n))
 	return nil
 }
 
 func init() {
+	RegisterNative(nWireRegToNative, nWireRegFromNative)
 	Register(NWireReg{})
 }
 

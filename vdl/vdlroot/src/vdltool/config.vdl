@@ -40,10 +40,12 @@ type GoConfig struct {
 	// be defined in the vdl package associated with the vdl.config file.
 	//
 	// The code generator assumes the existence of a pair of conversion functions
-	// converting between the wire and native types:
-	//   type WireType ...
-	//   func (x WireType) VDLToNative(n *Native) error
-	//   func (x *WireType) VDLFromNative(n Native) error
+	// converting between the wire and native types, and will automatically call
+	// vdl.RegisterNative with these function names.
+	//
+	// Assuming the name of the WireType is Foo:
+	//   func fooToNative(x Foo, n *Native) error
+	//   func fooFromNative(x *Foo, n Native) error
 	WireToNativeTypes map[string]GoType
 }
 

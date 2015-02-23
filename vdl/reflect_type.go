@@ -85,20 +85,20 @@ func normalizeType(rt reflect.Type) reflect.Type {
 	// Flatten rt to no pointers, and rtAtMostOnePtr to at most one pointer.
 	hasPtr := false
 	for rt.Kind() == reflect.Ptr {
-		if ri := ReflectInfoFromNative(rt); ri != nil {
+		if ni := nativeInfoFromNative(rt); ni != nil {
 			if hasPtr {
-				return normalizeType(reflect.PtrTo(ri.WireType))
+				return normalizeType(reflect.PtrTo(ni.WireType))
 			}
-			return normalizeType(ri.WireType)
+			return normalizeType(ni.WireType)
 		}
 		hasPtr = true
 		rt = rt.Elem()
 	}
-	if ri := ReflectInfoFromNative(rt); ri != nil {
+	if ni := nativeInfoFromNative(rt); ni != nil {
 		if hasPtr {
-			return normalizeType(reflect.PtrTo(ri.WireType))
+			return normalizeType(reflect.PtrTo(ni.WireType))
 		}
-		return normalizeType(ri.WireType)
+		return normalizeType(ni.WireType)
 	}
 	rtAtMostOnePtr := rt
 	if hasPtr {
@@ -270,11 +270,11 @@ func makeTypeFromReflectLocked(rt reflect.Type, builder *TypeBuilder, pending ma
 		opt.AssignElem(elem)
 		return opt, nil
 	}
-	ri, err := DeriveReflectInfo(rt)
+	ri, err := deriveReflectInfo(rt)
 	if err != nil {
 		return nil, err
 	}
-	if ri.WireName == "" {
+	if ri.Name == "" {
 		// Unnamed types are made directly.  There's no way to create a recursive
 		// type based solely on unnamed types, so it's ok to to update pending
 		// *after* making the unnamed type.
@@ -282,15 +282,15 @@ func makeTypeFromReflectLocked(rt reflect.Type, builder *TypeBuilder, pending ma
 		if err != nil {
 			return nil, err
 		}
-		pending[ri.WireType] = unnamed
+		pending[ri.Type] = unnamed
 		return unnamed, nil
 	}
 	// Named types are trickier, since they may be recursive.  First create the
 	// named type and add it to pending.  We must special-case union types; the
 	// interface type and all field types are keyed in the pending map to point to
 	// the created vdl type.
-	named := builder.Named(ri.WireName)
-	pending[ri.WireType] = named
+	named := builder.Named(ri.Name)
+	pending[ri.Type] = named
 	for _, unionField := range ri.UnionFields {
 		pending[unionField.RepType] = named
 	}
@@ -309,7 +309,7 @@ func makeTypeFromReflectLocked(rt reflect.Type, builder *TypeBuilder, pending ma
 // corresponding to ri.
 //
 // REQUIRES: rtCache is locked
-func makeUnnamedFromReflectLocked(ri *ReflectInfo, builder *TypeBuilder, pending map[reflect.Type]TypeOrPending) (TypeOrPending, error) {
+func makeUnnamedFromReflectLocked(ri *reflectInfo, builder *TypeBuilder, pending map[reflect.Type]TypeOrPending) (TypeOrPending, error) {
 	// Handle enum types
 	if len(ri.EnumLabels) > 0 {
 		enum := builder.Enum()
@@ -331,7 +331,7 @@ func makeUnnamedFromReflectLocked(ri *ReflectInfo, builder *TypeBuilder, pending
 		return union, nil
 	}
 	// Handle composite types
-	rt := ri.WireType
+	rt := ri.Type
 	switch rt.Kind() {
 	case reflect.Array:
 		elem, err := typeFromReflectLocked(rt.Elem(), builder, pending)

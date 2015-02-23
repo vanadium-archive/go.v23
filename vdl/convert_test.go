@@ -1054,7 +1054,7 @@ func testConverterWantSrc(t *testing.T, vvrvWant, vvrvSrc vvrv) {
 			// VDL doesn't represent named TypeObject, so our converter automatically
 			// creates *vdl.Type.
 			want = reflect.ValueOf(src).Convert(rtPtrToType).Interface().(*vdl.Type)
-		case vvWant.Type().CanBeNil() && vvWant.IsNil():
+		case vvWant.Kind() == vdl.Any && vvWant.IsNil():
 			want = nil // filling interface{} from any(nil) yields nil.
 		case !canCreateGoObject(vvWant.Type()):
 			// We can't create an actual Go object for this type; e.g. perhaps it's
@@ -1115,14 +1115,14 @@ func testConvert(t *testing.T, prefix string, dst, src, want interface{}, deref 
 							// Turn struct{...} into ?struct{...}
 							eWant = vdl.OptionalValue(vvWant)
 						}
-					} else if ttWant.Kind() == vdl.Optional || ttWant.CanBeOptional() {
-						// Add a pointer to anything that can be optional.
+					} else if (ttWant.Kind() == vdl.Optional || ttWant.CanBeOptional()) && rvWant.Kind() != reflect.Ptr {
+						// Add a pointer to non-pointers that can be optional.
 						rvPtrWant := reflect.New(rvWant.Type())
 						rvPtrWant.Elem().Set(rvWant)
 						eWant = rvPtrWant.Interface()
 					}
 				}
-				if !wantIsVV && ttWant.Kind() != vdl.TypeObject && !ttWant.CanBeOptional() && rvWant.Kind() == reflect.Ptr {
+				if !wantIsVV && ttWant.Kind() != vdl.TypeObject && !ttWant.CanBeOptional() && rvWant.Kind() == reflect.Ptr && !rvWant.IsNil() {
 					// Remove a pointer from  anything that can't be optional.
 					eWant = rvWant.Elem().Interface()
 				}
