@@ -89,10 +89,6 @@ _typeNamedList.elem = _typeNamedStruct;
 _typeNamedStruct.kind = vdl.Kind.STRUCT;
 _typeNamedStruct.name = "NamedStruct";
 _typeNamedStruct.fields = [{name: "List", type: _typeNamedList}, {name: "Bool", type: new otherPkg.NamedBool()._type}, {name: "UnnamedTypeField", type: _type1}];
-_type1.freeze();
-_type2.freeze();
-_typeNamedList.freeze();
-_typeNamedStruct.freeze();
 module.exports.NamedList = (vdl.Registry.lookupOrCreateConstructor(_typeNamedList));
 module.exports.NamedStruct = (vdl.Registry.lookupOrCreateConstructor(_typeNamedStruct));
 `
