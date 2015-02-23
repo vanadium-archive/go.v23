@@ -12,8 +12,8 @@ const (
 	ipcVersion2
 	ipcVersion3
 	ipcDummyVersion3 // So that the numeric value of IPCVersion4 is 4
-	IPCVersion4
-
+	ipcVersion4
+	// TODO(ashankar): Unexport all versions except the last before release
 	// IPCVersion5 uses the new security model (Principal and Blessings objects),
 	// and sends discharges for third-party caveats on the server's blessings
 	// during authentication.
@@ -21,6 +21,10 @@ const (
 
 	// IPCVersion6 adds control channel encryption to IPCVersion5.
 	IPCVersion6
+
+	// IPCVersion7 uses concrete types for security.Discharge during VC
+	// authentication.
+	IPCVersion7
 )
 
 // IPCVersionRange allows you to optionally specify a range of versions to
