@@ -1,0 +1,19 @@
+// Package vtrace defines an interface to access Vtrace traces to
+// anylize and debug distributed systems.
+package vtrace
+
+import (
+	"v.io/core/veyron2/services/security/access"
+	"v.io/core/veyron2/uniqueid"
+	"v.io/core/veyron2/vtrace"
+)
+
+type Store interface {
+	// Trace returns the trace that matches the given ID.
+	// Will return a NoExists error if no matching trace was found.
+	Trace(uniqueid.Id) (vtrace.TraceRecord | error) {access.Debug}
+
+	// AllTraces returns TraceRecords for all traces the server currently
+	// knows about.
+	AllTraces() stream<_, vtrace.TraceRecord> error {access.Debug}
+}

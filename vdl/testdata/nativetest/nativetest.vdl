@@ -1,0 +1,16 @@
+// Package nativetest tests a package with native type conversions.
+package nativetest
+
+type WireString int32
+type WireMapStringInt int32
+type WireTime int32
+type WireSamePkg int32
+type WireMultiImport int32
+
+type WireAll struct {
+	A WireString
+	B WireMapStringInt
+	C WireTime
+	D WireSamePkg
+	E WireMultiImport
+}

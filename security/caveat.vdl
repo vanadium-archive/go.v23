@@ -1,0 +1,106 @@
+package security
+
+import "v.io/core/veyron2/uniqueid"
+
+const (
+  // ConstCaveat represents a caveat that either always validates or never validates.
+  ConstCaveat = CaveatDescriptor{
+    ParamType: typeobject(bool), // If true, validation will always succeed. If false, will always fail.
+   }
+
+  // UnixTimeExpiryCaveat represents a caveat that validates iff the current
+  // time is before the time specified in seconds since January 1, 1970 UTC.
+  //
+  // TODO(toddw,ashankar): Once VDL support for time.Time is in, create a ExpiryCaveat
+  // and use that (and drop UnixTimeExpiryCaveatX).
+  UnixTimeExpiryCaveatX = CaveatDescriptor{
+    Id:        uniqueid.Id{0x54, 0xa6, 0x76, 0x39, 0x81, 0x37, 0x18, 0x7e, 0xcd, 0xb2, 0x6d, 0x2d, 0x69, 0xba, 0x0, 0x4},
+    ParamType: typeobject(int64),
+  }
+
+  // MethodCaveat represents a caveat that validates iff the method being
+  // invoked is included in this list. An empty list implies that no method can
+  // be invoked (i.e., the holder of a blessing with this caveat could be a
+  // server but cannot act as a client).
+  //
+  // TODO(ashankar): Rename to MethodCaveat and drop the MethodCaveat helper function?
+  MethodCaveatX = CaveatDescriptor{
+    Id:        uniqueid.Id{0x54, 0xa6, 0x76, 0x39, 0x81, 0x37, 0x18, 0x7e, 0xcd, 0xb2, 0x6d, 0x2d, 0x69, 0xba, 0x0, 0x3},
+    ParamType: typeobject([]string),
+  }
+
+  // TODO(ashankar): Rename to PublicKeyThirdPartyCaveat (and
+  // publicKeyThirdPartyCaveat becomes publicKeyThirdPartyCaveatParam or
+  // something?).
+  PublicKeyThirdPartyCaveatX = CaveatDescriptor{
+    Id:        uniqueid.Id{0x79, 0x72, 0xce, 0x17, 0x4a, 0x7b, 0xa9, 0x3f, 0x79, 0x54, 0x7d, 0x76, 0x9c, 0x91, 0x80, 0x0},
+    ParamType: typeobject(publicKeyThirdPartyCaveat),
+  }
+)
+
+// Error definitions to allow for stable error checking across address spaces.
+error (
+  CaveatNotRegistered(id uniqueid.Id) {
+    "en": "no validation function registered for caveat id {id}",
+  }
+  CaveatParamAny(id uniqueid.Id) {
+    "en": "caveat {id} uses illegal param type any",
+  }
+  CaveatParamTypeMismatch(id uniqueid.Id, got, want typeobject) {
+    "en": "bad param type: caveat {id} got {got}, want {want}",
+  }
+  // TODO(ashankar,toddw,bjornick): The type of "err" here and below
+  // should be error once https://github.com/veyron/release-issues/issues/922
+  // is resolved.
+  CaveatParamCoding(id uniqueid.Id, typ typeobject, err string) {
+    "en": "unable to encode/decode caveat param(type={typ}) for caveat {id}: {err}",
+  }
+  CaveatValidation(err string) {
+    "en": "caveat validation failed: {err}",
+  }
+)
+
+
+type nonce [16]byte
+
+// publicKeyThirdPartyCaveat represents a third-party caveat that requires
+// discharges to be issued by a principal identified by a public key.
+//
+// The ID of the caveat is base64-encoded:
+// hash(hash(Nonce), hash(DischargerKey), hash(Caveats[0]), hash(Caveats[1]), ...)
+// where hash is a cryptographic hash function with a security strength
+// equivalent to that of the DischargerKey. For example, if DischargerKey
+// represents an ECDSA public key with the P384 curve, then hash should be
+// SHA384.
+type publicKeyThirdPartyCaveat struct {
+  // Nonce specifies a cryptographically random nonce associated with an
+  // instance of the caveat. This prevents discharge replays, where
+  // discharges for ThirdPartyCaveats embedded in the certificates for
+  // one blessing can be used for another blessing.
+  //
+  // Whether discharge re-use is a desired or un-desired property is
+  // still under debate. Till the debate is settled, we err on the side
+  // of discouraging re-use.
+  Nonce nonce
+  // Caveats specifies the caveats that have to be validated
+  // before minting a discharge for a publicKeyCaveat.
+  Caveats []Caveat
+  // DER-encoded PKIX public key of the principal that can issue discharges.
+  DischargerKey []byte
+  // Object name where the third-party that can issue discharges can be found.
+  DischargerLocation string
+  // Information required by the third-party in order to issue a discharge.
+  DischargerRequirements ThirdPartyRequirements
+}
+
+// publicKeyDischarge represents the discharge issued for publicKeyThirdPartyCaveats.
+//
+// The message digest of this structure is computed as follows:
+// hash(hash(ThirdPartyCaveatID), hash(Caveats[0]), hash(Caveats[1]), ...),
+// where hash is a cryptographic hash function with a security strength equivalent to the
+// strength of the public key of the principal issuing the discharge.
+type publicKeyDischarge struct {
+  ThirdPartyCaveatID string  // ID of the third party caveat for which this discharge was issued.
+  Caveats []Caveat           // Caveats on the use of this discharge.
+  Signature Signature        // Signature of the content hash of this discharge by the discharger.
+}

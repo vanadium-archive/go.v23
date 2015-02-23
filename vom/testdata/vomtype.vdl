@@ -1,0 +1,106 @@
+package testdata
+
+type (
+  // vomdata config types
+  ConvertGroup  struct{ Name string; PrimaryType typeobject; Values []any }
+  VomdataStruct struct{
+  	EncodeDecodeData []any
+  	CompatData       map[string][]typeobject
+  	ConvertData      map[string][]ConvertGroup
+  }
+
+	// Named Types
+	NBool       bool
+	NString     string
+	NByteSlice  []byte
+	NByteArray  [4]byte
+	NByte       byte
+	NUint16     uint16
+	NUint32     uint32
+	NUint64     uint64
+	NInt16      int16
+	NInt32      int32
+	NInt64      int64
+	NFloat32    float32
+	NFloat64    float64
+	NComplex64  complex64
+	NComplex128 complex128
+
+	NArray2Uint64    [2]uint64
+	NListUint64      []uint64
+	NSetUint64       set[uint64]
+	NMapUint64String map[uint64]string
+
+	NStruct struct {
+		A bool
+		B string
+		C int64
+	}
+
+	NEnum  enum{ A; B; C }
+	NUnion union{ A  bool; B string; C int64 }
+
+	// Nested Custom Types
+	MBool   NBool
+	MStruct struct {
+		A bool
+		B NBool
+		C MBool
+		D ?NStruct
+		E typeobject
+		F any
+	}
+	MList []NListUint64
+	MMap  map[NFloat32]NListUint64
+
+	// Recursive Type Definitions
+	RecA []RecA
+	RecX []RecY
+	RecY []RecX
+
+	// Additional types for compatibility and conversion checks
+	ListString []string
+	Array3String [3]string
+
+	ABCStruct struct {
+		A bool
+		B string
+		C int64
+	}
+	ADEStruct struct {
+		A bool
+		D any
+		E typeobject
+	}
+
+	XYZStruct struct {
+		X bool
+		Y any
+		Z string
+	}
+	YZStruct struct {
+		Y NBool
+		Z NString
+	}
+	ZStruct struct {
+		Z string
+	}
+
+	MapOnlyStruct struct {
+		Key1 int64
+		Key2 uint32
+		Key3 complex128
+	}
+	StructOnlyMap map[string]uint64
+
+	MapSetStruct struct {
+		Key bool
+	}
+	SetStructMap map[string]bool
+	MapStructSet set[string]
+
+	SetOnlyMap map[int64]bool
+	MapOnlySet set[uint16]
+
+	BDEunion union{ B string; D any; E typeobject }
+)

@@ -1,0 +1,27 @@
+// Package logreader contains the interface for reading log files remotely.
+package logreader
+
+import (
+	"v.io/core/veyron2/services/mgmt/logreader/types"
+	"v.io/core/veyron2/services/security/access"
+)
+
+// LogFile can be used to access log files remotely.
+type LogFile interface {
+	// Size returns the number of bytes in the receiving object.
+	Size() (int64 | error) {access.Debug}
+	// ReadLog receives up to NumEntries log entries starting at the
+	// StartPos offset (in bytes) in the receiving object. Each stream chunk
+	// contains one log entry.
+	//
+	// If Follow is true, ReadLog will block and wait for more entries to
+	// arrive when it reaches the end of the file.
+	//
+	// ReadLog returns the position where it stopped reading, i.e. the
+	// position where the next entry starts. This value can be used as
+	// StartPos for successive calls to ReadLog.
+	//
+	// The returned error will be EOF if and only if ReadLog reached the
+	// end of the file and no log entries were returned.
+	ReadLog(StartPos int64, NumEntries int32, Follow bool) stream<_, types.LogEntry> (int64 | error) {access.Debug}
+}

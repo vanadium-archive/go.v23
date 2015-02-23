@@ -1,0 +1,23 @@
+// Package test provides a VDL specification for a service used in the unittest of the acl package.
+package test
+
+// Any package can define tags (of arbitrary types) to be attached to methods.
+// This type can be used to index into a TaggedACLMap.
+type MyTag string
+
+const (
+	// For this example/unittest, there are three possible values of MyTag,
+        // each represented by a single-character string.
+	Read    = MyTag("R")
+	Write   = MyTag("W")
+	Execute = MyTag("X")
+)
+
+// MyObject demonstrates how tags are attached to methods.
+type MyObject interface {
+  Get() error     {Read}
+  Put() error     {Write}
+  Resolve() error {Execute}
+  NoTags() error  // No tags attached to this.
+  AllTags() error {Read, Write, Execute}
+}

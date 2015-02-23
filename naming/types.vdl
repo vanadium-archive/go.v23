@@ -1,0 +1,52 @@
+package naming
+
+// TODO(toddw): Consolidate the VDL* types with types in model.go, once vdl
+// supports a standard time package.
+
+// MountFlag is a bit mask of options to the mount call.
+type MountFlag uint32
+
+const (
+	Replace = MountFlag(1 << 0) // Replace means the mount should replace what is currently at the mount point
+	MT      = MountFlag(1 << 1) // MT means that the target server is a mount table.
+)
+
+// VDLMountedServer represents a server mounted on a specific name.
+type VDLMountedServer struct {
+	// Server is the OA that's mounted.
+	Server string
+	// Patterns that match the set of blessings presented by the server
+	// listening on the above object address.
+	//
+	// The type of this field would ideally be security.BlessingPattern,
+	// but the resulting cyclic dependency between the security and naming
+	// packages precludes that.
+	BlessingPatterns []string
+	// TTL is the remaining time (in seconds) before the mount entry expires.
+	TTL uint32
+}
+
+// MountEntry represents a given name mounted in the mounttable.
+type VDLMountEntry struct {
+	// Name is the mounted name.
+	Name string
+	// Servers (if present) specifies the mounted names.
+	Servers []VDLMountedServer
+	// MT is true if the servers represent mount tables.
+	MT bool
+}
+
+// GlobError is returned by namespace.Glob to indicate a subtree of the namespace
+// that could not be traversed.
+type GlobError struct {
+	// Root of the subtree.
+	Name string
+	// The error that occurred fulfilling the request.
+	Error error
+}
+
+// GlobReply is the data type of the chan returned by Glob__.
+type VDLGlobReply union {
+	Entry VDLMountEntry
+	Error GlobError
+}

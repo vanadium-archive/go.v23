@@ -1,0 +1,55 @@
+// Package build supports building and describing Veyron binaries.
+//
+// TODO(jsimsa): Switch Architecture, Format, and OperatingSystem type
+// to enum when supported.
+package build
+
+import (
+	"v.io/core/veyron2/services/mgmt/binary"
+)
+
+// Architecture specifies the hardware architecture of a host.
+type Architecture string
+
+const (
+	X86 = Architecture("386")
+	AMD64 = Architecture("amd64")
+	ARM = Architecture("arm")
+	UnsupportedArchitecture = Architecture("unsupported")
+)
+
+// Format specifies the file format of a host.
+type Format string
+
+const (
+	ELF = Format("ELF")
+	MACH = Format("MACH")
+	PE = Format("PE")
+	UnsupportedFormat = Format("unsupported")
+)
+
+// OperatingSystem specifies the operating system of a host.
+type OperatingSystem string
+
+const (
+	Darwin = OperatingSystem("darwin")
+	Linux = OperatingSystem("linux")
+	Windows = OperatingSystem("windows")
+	UnsupportedOS = OperatingSystem("unsupported")
+)
+
+// File records the name and contents of a file.
+type File struct {
+	Name     string
+	Contents []byte
+}
+
+// Builder describes an interface for building binaries from source.
+type Builder interface {
+	// Build streams sources to the build server, which then attempts to
+	// build the sources and streams back the compiled binaries.
+	Build(Arch Architecture, OS OperatingSystem) stream<File,File> ([]byte | error)
+	// Describe generates a description for a binary identified by
+	// the given Object name.
+	Describe(name string) (binary.Description | error)
+}

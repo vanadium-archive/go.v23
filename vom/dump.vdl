@@ -1,0 +1,44 @@
+package vom
+
+// Primitive represents one of the primitive vom values.  All vom values are
+// composed of combinations of these primitives.
+type Primitive union {
+	PBool    bool
+	PByte    byte
+	PUint    uint64
+	PInt     int64
+	PFloat   float64
+	PString  string
+	PControl ControlKind
+}
+
+// DumpAtom describes a single indivisible piece of the vom encoding.  The vom
+// encoding is composed of a stream of these atoms.
+type DumpAtom struct {
+	Kind  DumpKind  // The kind of this atom.
+	Bytes []byte    // Raw bytes in the vom encoding representing this atom.
+	Data  Primitive // Primitive data corresponding to the raw bytes.
+	Debug string    // Free-form debug string with more information.
+}
+
+// DumpKind enumerates the different kinds of dump atoms.
+type DumpKind enum {
+	Magic         // [byte] Magic number, the first byte of a vom stream.
+	Control       // [byte] Control byte.
+	MsgID         // [int]  Message ID, distinguishing type and value messages.
+	TypeMsg       // [uint] Type message, describes the type identified by -MsgID.
+	ValueMsg      // [uint] Value message, describes a value of type +MsgID.
+	MsgLen        // [uint] Message length in bytes.
+	TypeID        // [uint] Type ID.
+	PrimValue     // [*]    Primitive value.
+	ByteLen       // [uint] Length in bytes.
+	ValueLen      // [uint] Number of values in a composite type.
+	Index         // [uint] Index in a dense array.
+	WireTypeIndex // [uint] WireType index.
+}
+
+// ControlKind enumerates the different kinds of control bytes.
+type ControlKind enum {
+	NIL // [byte] Nil.
+	EOF // [byte] End of field.
+}

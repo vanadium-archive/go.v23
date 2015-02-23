@@ -1,0 +1,11 @@
+package nativedep
+
+import "v.io/core/veyron2/vdl/testdata/nativetest"
+
+type All struct {
+	A nativetest.WireString
+	B nativetest.WireMapStringInt
+	C nativetest.WireTime
+	D nativetest.WireSamePkg
+	E nativetest.WireMultiImport
+}

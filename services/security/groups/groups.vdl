@@ -1,0 +1,69 @@
+// Package groups defines types and interfaces pertaining to groups, which can
+// be referenced by BlessingPatterns (e.g. in ACLs).
+//
+// TODO(sadovsky): Write a detailed description of this package and add a
+// reference to the (forthcoming) design doc.
+package groups
+
+import (
+	"v.io/core/veyron2/services/security/access"
+	"v.io/core/veyron2/services/security/access/object"
+)
+
+// BlessingPatternChunk is a substring of a BlessingPattern. As with
+// BlessingPatterns, BlessingPatternChunks may contain references to
+// groups. However, they may be restricted in other ways. For example, in the
+// future BlessingPatterns may support "$" terminators, but these may be
+// disallowed for BlessingPatternChunks.
+type BlessingPatternChunk string
+
+type GetRequest struct {
+}
+type GetResponse struct {
+	Entries set[BlessingPatternChunk]
+}
+
+type RestRequest struct {
+}
+type RestResponse struct {
+}
+
+// A group's etag covers its ACL as well as any other data stored in the group.
+// Clients should treat etags as opaque identifiers. For both Get and Rest, if
+// etag is set and matches the Group's current etag, the response will indicate
+// that fact but will otherwise be empty.
+type Group interface {
+	// Create creates a new group if it doesn't already exist.
+	// If acl is nil, a default TaggedACLMap is used, providing Admin access to
+	// the caller.
+	// Create requires the caller to have Write permission at the GroupServer.
+	Create(acl access.TaggedACLMap, entries []BlessingPatternChunk) error {access.Write}
+
+	// Delete deletes the group.
+	// Permissions for all group-related methods except Create() are checked
+	// against the Group object.
+	Delete(etag string) error {access.Write}
+
+	// Add adds an entry to the group.
+	Add(entry BlessingPatternChunk, etag string) error {access.Write}
+
+	// Remove removes an entry from the group.
+	Remove(entry BlessingPatternChunk, etag string) error {access.Write}
+
+	// Get returns all entries in the group.
+	// TODO(sadovsky): Flesh out this API.
+	Get(req GetRequest, reqEtag string) (res GetResponse, etag string | error) {access.Read}
+
+	// Rest returns information sufficient for the client to perform its ACL
+	// checks.
+	// TODO(sadovsky): Flesh out this API.
+	Rest(req RestRequest, reqEtag string) (res RestResponse, etag string | error) {access.Resolve}
+
+	// SetACL and GetACL are included from the Object interface.
+	object.Object
+}
+
+error (
+	NoBlessings() {"en":"No blessings recognized; cannot create group ACL"}
+	ExcessiveContention() {RetryBackoff, "en":"Gave up after encountering excessive contention; try again later"}
+)

@@ -1,0 +1,4 @@
+package uniqueid
+
+// An Id is a likely globally unique identifier.
+type Id [16]byte

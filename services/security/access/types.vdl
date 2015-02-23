@@ -1,0 +1,151 @@
+// Package access defines types and services for dynamic access control
+// in Veyron.  Examples: "allow app to read this photo", "prevent user
+// from modifying this file".
+//
+// Target Developers
+//
+// Developers creating functionality to share data or services between
+// multiple users/devices/apps.
+//
+// Overview
+//
+// Veyron objects provide GetACL and SetACL methods.  An ACL (Access Control
+// List) contains the set of blessings that grant principals access to the
+// object. All methods on objects can have "tags" on them and the access
+// control list used for the method is selected based on that tag (from a
+// TaggedACLMap).
+//
+// An object can have multiple names, so GetACL and SetACL can be invoked on
+// any of these names, but the object itself has a single ACL.
+//
+// SetACL completely replaces the TaggedACLMap. To perform an atomic
+// read-modify-write of the ACL, use the etag parameter.
+//   client := access.ObjectClient(name)
+//   for {
+//     acl, etag, err := client.GetACL()
+//     if err != nil {
+//       return err
+//     }
+//     acl[newTag] = ACL{In: []security.BlessingPattern{newPattern}}
+//     // Use the same etag with the modified acl to ensure that no other client
+//     // has modified the acl since GetACL returned.
+//     if err := client.SetACL(acl, etag); err != nil {
+//       if verror.Is(err, verror.ErrBadEtag.ID) {
+//         // Another client replaced the ACL after our GetACL returned.
+//         // Try again.
+//         continue
+//       }
+//       return err
+//     }
+//   }
+//
+// Conventions
+//
+// Service implementors should follow the conventions below to be consistent
+// with other parts of Veyron and with each other.
+//
+// All methods that create an object (e.g. Put, Mount, Link) should take an
+// optional ACL parameter.  If the ACL is not specified, the new object, O,
+// copies its ACL from the parent.  Subsequent changes to the parent ACL are
+// not automatically propagated to O.  Instead, a client library must make
+// recursive ACL changes.
+//
+// Resolve access is required on all components of a name, except the last one,
+// in order to access the object referenced by that name.  For example, for
+// principal P to access the name "a/b/c", P must have resolve access to "a"
+// and "a/b".
+//
+// The Resolve tag means that a principal can traverse that component of the
+// name to access the child.  It does not give the principal permission to list
+// the children via Glob or a similar method.  For example, a server might have
+// an object named "home" with a child for each user of the system.  If these
+// users were allowed to list the contents of "home", they could discover the
+// other users of the system.  That could be a privacy violation.  Without
+// Resolve, every user of the system would need read access to "home" to access
+// "home/<user>".  If the user called Glob("home/*"), it would then be up to
+// the server to filter out the names that the user could not access.  That
+// could be a very expensive operation if there were a lot of children of
+// "home".  Resolve protects these servers against potential denial of service
+// attacks on these large, shared directories.
+//
+// Groups and blessings allow for sweeping access changes.  A group is suitable
+// for saying that the same set of principals have access to a set of unrelated
+// resources (e.g. docs, VMs, images).  See the Group API for a complete
+// description.  A blessing is useful for controlling access to objects that
+// are always accessed together.  For example, a document may have embedded
+// images and comments, each with a unique name.  When accessing a document,
+// the server would generate a blessing that the client would use to fetch the
+// images and comments; the images and comments would have this blessed
+// identity in their ACLs.  Changes to the document’s ACL are therefore
+// “propagated” to the images and comments.
+//
+// Some services will want a concept of implicit access control.  They are free
+// to implement this as is best for their service.  However, GetACL should
+// respond with the correct ACL.  For example, a corporate file server would
+// allow all employees to create their own directory and have full control
+// within that directory.  Employees should not be allowed to modify other
+// employee directories.  In other words, within the directory "home", employee
+// E should be allowed to modify only "home/E".  The file server doesn't know
+// the list of all employees a priori, so it uses an implementation-specific
+// rule to map employee identities to their home directory.
+package access
+
+import "v.io/core/veyron2/security"
+
+// ACL represents an Access Control List - a set of blessings that should be
+// granted access.
+type ACL struct {
+  // In denotes the set of blessings (represented as BlessingPatterns) that
+  // should be granted access, unless blacklisted by an entry in NotIn.
+  //
+  // For example:
+  //   In: {"alice/family"}
+  // grants access to a principal that presents at least one of
+  // "alice/family", "alice/family/friend", "alice/family/friend/spouse" etc.
+  // as a blessing.
+  In []security.BlessingPattern
+
+  // NotIn denotes the set of blessings (and their delegates) that
+  // have been explicitly blacklisted from the In set.
+  //
+  // For example:
+  //   In: {"alice/friend"}, NotIn: {"alice/friend/bob"}
+  // grants access to principals that present "alice/friend",
+  // "alice/friend/carol" etc. but NOT to a principal that presents
+  // "alice/friend/bob" or "alice/friend/bob/spouse" etc.
+  NotIn []string
+
+  // TODO(ashankar,ataly): Groups API and group identifiers here.
+}
+
+// TaggedACLMap maps string tags to access control lists specifying the
+// blessings required to invoke methods with that tag.
+//
+// These tags are meant to add a layer of interposition between the set of
+// users (blessings, specifically) and the set of methods, much like "Roles" do
+// in Role Based Access Control.
+// (http://en.wikipedia.org/wiki/Role-based_access_control)
+type TaggedACLMap map[string]ACL
+
+// Tag is used to associate methods with an ACL in a TaggedACLMap.
+//
+// While services can define their own tag type and values, many
+// services should be able to use the type and values defined in
+// this package.
+type Tag string
+
+const (
+  Admin   = Tag("Admin")    // Operations that require privileged access for object administration.
+  Debug   = Tag("Debug")    // Operations that return debugging information (e.g., logs, statistics etc.) about the object.
+  Read    = Tag("Read")     // Operations that do not mutate the state of the object.
+  Write   = Tag("Write")    // Operations that mutate the state of the object.
+  Resolve = Tag("Resolve")  // Operations involving namespace navigation.
+)
+
+// Note: For "bad etag" errors, use verror.ErrBadEtag.
+error (
+	// The ACL is too big.  Use groups to represent large sets of principals.
+	TooBig() {"en": "ACL is too big"}
+
+	ACLMatch(validBlessings []string, rejectedBlessings []security.RejectedBlessing){"en":"none of the valid blessings ({validBlessings}) are allowed by the ACL (rejected blessings: {rejectedBlessings})"}
+)
