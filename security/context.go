@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"v.io/core/veyron2/context"
 	"v.io/core/veyron2/naming"
 	"v.io/core/veyron2/vdl"
 )
@@ -32,6 +33,8 @@ type ContextParams struct {
 	RemoteBlessings  Blessings            // Blessings presented by the remote end.
 	RemoteDischarges map[string]Discharge // Map a ThirdPartyCaveat identifier to corresponding discharges shared by the remote end.
 	RemoteEndpoint   naming.Endpoint      // Endpoint of the remote end of communication
+
+	VanadiumContext *context.T // The vanadium context
 }
 
 // Copy fills in p with a copy of the values in c.
@@ -72,3 +75,4 @@ func (c *ctxImpl) LocalEndpoint() naming.Endpoint         { return c.params.Loca
 func (c *ctxImpl) RemoteEndpoint() naming.Endpoint        { return c.params.RemoteEndpoint }
 func (c *ctxImpl) RemoteDischarges() map[string]Discharge { return c.params.RemoteDischarges }
 func (c *ctxImpl) String() string                         { return fmt.Sprintf("%+v", c.params) }
+func (c *ctxImpl) VanadiumContext() *context.T            { return c.params.VanadiumContext }

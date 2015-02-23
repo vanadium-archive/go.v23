@@ -11,6 +11,7 @@ import (
 	"strings"
 	"testing"
 
+	"v.io/core/veyron/runtimes/google/lib/reflectutil"
 	"v.io/core/veyron2/uniqueid"
 	"v.io/core/veyron2/vdl"
 	"v.io/core/veyron2/vom"
@@ -115,7 +116,7 @@ func checkBlessings(b Blessings, c Context, want ...string) error {
 	}
 	// And now check them under the right context
 	got, _ := b.ForContext(c)
-	if !reflect.DeepEqual(got, want) {
+	if !reflectutil.DeepEqual(got, want, &reflectutil.DeepEqualOpts{SliceEqNilEmpty: true}) {
 		return fmt.Errorf("Got blessings %v, want %v", got, want)
 	}
 	return nil

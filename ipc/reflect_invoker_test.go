@@ -73,6 +73,7 @@ func (call *FakeServerCall) RemoteBlessings() security.Blessings {
 }
 func (call *FakeServerCall) LocalEndpoint() naming.Endpoint  { return call.security.LocalEndpoint() }
 func (call *FakeServerCall) RemoteEndpoint() naming.Endpoint { return call.security.RemoteEndpoint() }
+func (call *FakeServerCall) VanadiumContext() *context.T     { return call.security.VanadiumContext() }
 
 var (
 	call1 = NewFakeServerCall()

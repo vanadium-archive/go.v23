@@ -183,7 +183,7 @@ func untypedConst(names typeNames, v *vdl.Value) string {
 		t := v.Type()
 		for ix := 0; ix < t.NumField(); ix++ {
 			result += "\n  '" +
-				vdlutil.ToCamelCase(t.Field(ix).Name) +
+				vdlutil.FirstRuneToLower(t.Field(ix).Name) +
 				"': " +
 				untypedConst(names, v.StructField(ix)) +
 				","
@@ -191,7 +191,7 @@ func untypedConst(names typeNames, v *vdl.Value) string {
 		return result + "\n}"
 	case vdl.Union:
 		ix, innerVal := v.UnionField()
-		return fmt.Sprintf("{ %q: %v }", vdlutil.ToCamelCase(v.Type().Field(ix).Name), untypedConst(names, innerVal))
+		return fmt.Sprintf("{ %q: %v }", vdlutil.FirstRuneToLower(v.Type().Field(ix).Name), untypedConst(names, innerVal))
 	case vdl.TypeObject:
 		return names.LookupType(v.TypeObject())
 	default:
@@ -345,7 +345,7 @@ func generateSystemImports(data data) string {
 
 func init() {
 	funcMap := template.FuncMap{
-		"toCamelCase":               vdlutil.ToCamelCase,
+		"firstRuneToLower":          vdlutil.FirstRuneToLower,
 		"genMethodTags":             genMethodTags,
 		"makeTypeDefinitionsString": makeTypeDefinitionsString,
 		"typedConst":                typedConst,
@@ -404,7 +404,7 @@ module.exports.{{$iface.Name}} = {{$iface.Name}}
 
     {{range $method := $iface.AllMethods}}
       {{/* Add each method to the service prototype. */}}
-{{$iface.Name}}.prototype.{{toCamelCase $method.Name}} = {{generateMethodStub $method}};
+{{$iface.Name}}.prototype.{{firstRuneToLower $method.Name}} = {{generateMethodStub $method}};
     {{end}} {{/* end range $iface.AllMethods */}}
 
     {{/* The service signature encodes the same info as signature.Interface.

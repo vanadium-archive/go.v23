@@ -5,9 +5,12 @@ import (
 	"crypto/elliptic"
 	"fmt"
 	"reflect"
+	"sort"
 	"testing"
 	"time"
 
+	"v.io/core/veyron2/context"
+	"v.io/core/veyron2/uniqueid"
 	"v.io/core/veyron2/verror"
 	"v.io/core/veyron2/vom"
 )
@@ -771,6 +774,98 @@ func TestBlessingsCannotBeVomEncodedOrDecoded(t *testing.T) {
 	var decoded Blessings
 	if err := vom.Decode(data, &decoded); err == nil {
 		t.Fatal("Direct vom decoding into security.Blessings unexpectedly succeeded")
+	}
+}
+
+func TestCustomChainValidator(t *testing.T) {
+	falseReturningCav := Caveat{
+		Id: uniqueid.Id{0x99, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
+	}
+	trueReturningCav := Caveat{
+		Id: uniqueid.Id{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
+	}
+	falseResultErr := fmt.Errorf("False caveat result")
+
+	validator := func(ctx Context, cavs [][]Caveat) []error {
+		results := make([]error, len(cavs))
+		for i, chain := range cavs {
+			for _, cav := range chain {
+				switch cav.Id {
+				case falseReturningCav.Id:
+					results[i] = falseResultErr
+				case trueReturningCav.Id:
+				case ConstCaveat.Id:
+					if !reflect.DeepEqual(cav, UnconstrainedUse()) {
+						t.Fatalf("Unexpected const caveat")
+					}
+				default:
+					t.Fatalf("Unexpected caveat: %#v", cav)
+				}
+			}
+		}
+		return results
+	}
+
+	p := newPrincipal(t)
+	vctx, cf := context.RootContext()
+	defer cf()
+
+	chainCtx := context.WithValue(vctx, "customChainValidator", validator)
+
+	ctx := NewContext(&ContextParams{
+		LocalPrincipal:  p,
+		VanadiumContext: chainCtx,
+	})
+
+	bu, err := p.BlessSelf("unrestricted", UnconstrainedUse())
+	if err != nil {
+		t.Fatal(err)
+	}
+	bft, err := p.BlessSelf("falsetrue", falseReturningCav, trueReturningCav)
+	if err != nil {
+		t.Fatal(err)
+	}
+	btt, err := p.BlessSelf("truetrue", trueReturningCav, trueReturningCav)
+	if err != nil {
+		t.Fatal(err)
+	}
+	bt, err := p.BlessSelf("true", trueReturningCav)
+	if err != nil {
+		t.Fatal(err)
+	}
+	bsepft, err := p.Bless(p.PublicKey(), bt, "false", falseReturningCav)
+	if err != nil {
+		t.Fatal(err)
+	}
+	bseptt, err := p.Bless(p.PublicKey(), bt, "true", trueReturningCav)
+	if err != nil {
+		t.Fatal(err)
+	}
+	bunion, err := UnionOfBlessings(bu, bft, btt, bsepft, bseptt)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := p.AddToRoots(bunion); err != nil {
+		t.Fatal(err)
+	}
+
+	results, infos := bunion.ForContext(ctx)
+	expectedFailInfos := map[string]error{
+		"falsetrue":  falseResultErr,
+		"true/false": falseResultErr,
+	}
+	failInfos := map[string]error{}
+	for _, info := range infos {
+		failInfos[info.Blessing] = info.Err
+	}
+	if !reflect.DeepEqual(failInfos, expectedFailInfos) {
+		t.Fatalf("Unexpected failinfos from ForContext. Got %v, want %v", failInfos, expectedFailInfos)
+	}
+	expectedResults := []string{"unrestricted", "truetrue", "true/true"}
+	sort.Strings(results)
+	sort.Strings(expectedResults)
+	if !reflect.DeepEqual(results, expectedResults) {
+		t.Fatalf("Unexpected results from ForContext. Got %v, want %v", results, expectedResults)
 	}
 }
 

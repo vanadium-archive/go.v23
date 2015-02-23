@@ -136,6 +136,7 @@ package security
 import (
 	"time"
 
+	"v.io/core/veyron2/context"
 	"v.io/core/veyron2/naming"
 	"v.io/core/veyron2/vdl"
 )
@@ -453,6 +454,9 @@ type Context interface {
 	// RemoteEndpoint() returns the Endpoint of the principal at the remote end
 	// of communication.
 	RemoteEndpoint() naming.Endpoint
+	// VanadiumContext() returns the associated context.T.
+	// NOTE: This will be renamed. Do not use.
+	VanadiumContext() *context.T
 
 	// TODO(ashankar,ataly): Disallow Context interface implementations
 	// in other packages for now?

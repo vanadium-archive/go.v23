@@ -18,12 +18,50 @@ type blessingsImpl struct {
 	publicKey PublicKey
 }
 
+const chainValidatorKey = "customChainValidator"
+
 func (b *blessingsImpl) ForContext(ctx Context) (ret []string, info []RejectedBlessing) {
+	validator := defaultChainCaveatValidator
+	if customValidator := ctx.VanadiumContext().Value(chainValidatorKey); customValidator != nil {
+		validator = customValidator.(func(ctx Context, chains [][]Caveat) []error)
+	}
+
+	blessings := []string{}
+	chainCaveats := [][]Caveat{}
 	for _, chain := range b.chains {
-		if blessing, err := blessingForCertificateChain(ctx, chain); err == nil {
-			ret = append(ret, blessing)
-		} else {
+		blessing, err := verifyChainSignature(ctx, chain)
+		if err != nil {
 			info = append(info, RejectedBlessing{blessing, err})
+			continue
+		}
+
+		cavs := []Caveat{}
+		for _, cert := range chain {
+			cavs = append(cavs, cert.Caveats...)
+		}
+
+		if len(cavs) == 0 {
+			ret = append(ret, blessing) // No caveats to validate, add it to blessing list.
+		} else {
+			chainCaveats = append(chainCaveats, cavs)
+			blessings = append(blessings, blessing)
+		}
+	}
+
+	if len(chainCaveats) == 0 {
+		return // Skip the validation call (is high-overhead for javascript).
+	}
+
+	validationResult := validator(ctx, chainCaveats)
+	if len(validationResult) != len(blessings) {
+		panic(fmt.Sprintf("Got wrong number of validation results. Got %d, expected %d.", len(validationResult), len(blessings)))
+	}
+
+	for i, resultErr := range validationResult {
+		if resultErr == nil {
+			ret = append(ret, blessings[i])
+		} else {
+			info = append(info, RejectedBlessing{blessings[i], resultErr})
 		}
 	}
 	return
@@ -118,7 +156,8 @@ func validateCertificateChain(chain []Certificate) (PublicKey, error) {
 	return key, nil
 }
 
-func blessingForCertificateChain(ctx Context, chain []Certificate) (string, error) {
+// Verifies that the chain signatures are correct, without handling caveat validation
+func verifyChainSignature(ctx Context, chain []Certificate) (string, error) {
 	blessing := chain[0].Extension
 	for i := 1; i < len(chain); i++ {
 		blessing += ChainSeparator
@@ -146,16 +185,22 @@ func blessingForCertificateChain(ctx Context, chain []Certificate) (string, erro
 		return blessing, NewErrUntrustedRoot(nil, blessing)
 	}
 
-	// Validate all caveats embedded in the chain.
-	for _, cert := range chain {
-		for _, cav := range cert.Caveats {
+	return blessing, nil
+}
+
+func defaultChainCaveatValidator(ctx Context, chains [][]Caveat) []error {
+	results := make([]error, len(chains))
+	for i, chain := range chains {
+		for _, cav := range chain {
 			if err := validateCaveat(ctx, cav); err != nil {
-				vlog.VI(4).Infof("Ignoring blessing %v: %v", blessing, err)
-				return blessing, err
+				vlog.VI(4).Infof("Ignoring chain %v: %v", chain, err)
+				results[i] = err
+				break
 			}
 		}
 	}
-	return blessing, nil
+
+	return results
 }
 
 // validateCaveat is pretty much the same as cav.Validate(ctx), but it defers
