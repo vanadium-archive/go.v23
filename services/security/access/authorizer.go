@@ -71,13 +71,11 @@ import (
 // methods. A peer presenting "alice/family/mom" will get access to all methods, even
 // GetAndSet - which requires that the blessing appear in the ACLs for both the
 // ReadAccess and WriteAccess tags.
-func TaggedACLAuthorizer(acls TaggedACLMap, tagType reflect.Type) (security.Authorizer, error) {
-	// TODO(toddw): Change tagType to be *vdl.Type.
-	tagT, err := vdlTagType(tagType)
-	if err != nil {
-		return nil, err
+func TaggedACLAuthorizer(acls TaggedACLMap, tagType *vdl.Type) (security.Authorizer, error) {
+	if tagType.Kind() != vdl.String {
+		return nil, errTagType(tagType)
 	}
-	return &authorizer{acls, tagT}, nil
+	return &authorizer{acls, tagType}, nil
 }
 
 // TaggedACLAuthorizerFromFile applies the same authorization policy as
@@ -89,25 +87,15 @@ func TaggedACLAuthorizer(acls TaggedACLMap, tagType reflect.Type) (security.Auth
 // Authorize.
 // TODO(ashankar,ataly): Use inotify or a similar mechanism to watch for
 // changes.
-func TaggedACLAuthorizerFromFile(filename string, tagType reflect.Type) (security.Authorizer, error) {
-	// TODO(toddw): Change tagType to be *vdl.Type.
-	tagT, err := vdlTagType(tagType)
-	if err != nil {
-		return nil, err
+func TaggedACLAuthorizerFromFile(filename string, tagType *vdl.Type) (security.Authorizer, error) {
+	if tagType.Kind() != vdl.String {
+		return nil, errTagType(tagType)
 	}
-	return &fileAuthorizer{filename, tagT}, nil
+	return &fileAuthorizer{filename, tagType}, nil
 }
 
-func vdlTagType(rt reflect.Type) (*vdl.Type, error) {
-	// TODO(toddw): Remove this helper once the tagType passed in is *vdl.Type
-	tt, err := vdl.TypeFromReflect(rt)
-	if err != nil {
-		return nil, err
-	}
-	if tt.Kind() != vdl.String {
-		return nil, fmt.Errorf("tag type(%v) must be backed by a string not %v", rt, tt.Kind())
-	}
-	return tt, nil
+func errTagType(tt *vdl.Type) error {
+	return fmt.Errorf("tag type(%v) must be backed by a string not %v", tt, tt.Kind())
 }
 
 type authorizer struct {

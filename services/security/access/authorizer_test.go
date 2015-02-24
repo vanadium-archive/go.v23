@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"reflect"
 	"testing"
 
 	"v.io/v23/security"
@@ -38,7 +37,7 @@ func TestTaggedACLAuthorizer(t *testing.T) {
 		Client security.Blessings
 	}
 	var (
-		authorizer, _ = TaggedACLAuthorizer(acl, reflect.TypeOf(test.Read))
+		authorizer, _ = TaggedACLAuthorizer(acl, vdl.TypeOf(test.Read))
 		// Two principals: The "server" and the "client"
 		pserver   = newPrincipal(t)
 		pclient   = newPrincipal(t)
@@ -123,7 +122,7 @@ func TestTaggedACLAuthorizerSelfRPCs(t *testing.T) {
 		// Authorizer with a TaggedACLMap that grants read access to
 		// anyone, write/execute access to noone.
 		typ           test.MyTag
-		authorizer, _ = TaggedACLAuthorizer(TaggedACLMap{"R": {In: []security.BlessingPattern{"nobody/$"}}}, reflect.TypeOf(typ))
+		authorizer, _ = TaggedACLAuthorizer(TaggedACLMap{"R": {In: []security.BlessingPattern{"nobody/$"}}}, vdl.TypeOf(typ))
 	)
 	for _, test := range []string{"Put", "Get", "Resolve", "NoTags", "AllTags"} {
 		ctx := security.NewContext(&security.ContextParams{
@@ -141,7 +140,7 @@ func TestTaggedACLAuthorizerSelfRPCs(t *testing.T) {
 
 func TestTaggedACLAuthorizerWithNilACL(t *testing.T) {
 	var (
-		authorizer, _ = TaggedACLAuthorizer(nil, reflect.TypeOf(test.Read))
+		authorizer, _ = TaggedACLAuthorizer(nil, vdl.TypeOf(test.Read))
 		pserver       = newPrincipal(t)
 		pclient       = newPrincipal(t)
 		server, _     = pserver.BlessSelf("server")
@@ -171,7 +170,7 @@ func TestTaggedACLAuthorizerFromFile(t *testing.T) {
 	defer os.Remove(filename)
 
 	var (
-		authorizer, _  = TaggedACLAuthorizerFromFile(filename, reflect.TypeOf(test.Read))
+		authorizer, _  = TaggedACLAuthorizerFromFile(filename, vdl.TypeOf(test.Read))
 		pserver        = newPrincipal(t)
 		pclient        = newPrincipal(t)
 		server, _      = pserver.BlessSelf("alice")
@@ -204,10 +203,10 @@ func TestTaggedACLAuthorizerFromFile(t *testing.T) {
 
 func TestTagTypeMustBeString(t *testing.T) {
 	type I int
-	if auth, err := TaggedACLAuthorizer(TaggedACLMap{}, reflect.TypeOf(I(0))); err == nil || auth != nil {
+	if auth, err := TaggedACLAuthorizer(TaggedACLMap{}, vdl.TypeOf(I(0))); err == nil || auth != nil {
 		t.Errorf("Got (%v, %v), wanted error since tag type is not a string", auth, err)
 	}
-	if auth, err := TaggedACLAuthorizerFromFile("does_not_matter", reflect.TypeOf(I(0))); err == nil || auth != nil {
+	if auth, err := TaggedACLAuthorizerFromFile("does_not_matter", vdl.TypeOf(I(0))); err == nil || auth != nil {
 		t.Errorf("Got (%v, %v), wanted error since tag type is not a string", auth, err)
 	}
 }
