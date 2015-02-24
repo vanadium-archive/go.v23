@@ -36,8 +36,8 @@ package {{ .PackagePath }};
      */
     // TODO(spetrovic): Re-enable once we can import the new Signature classes.
     //@SuppressWarnings("unused")
-    //public io.v.core.v23.ipc.ServiceSignature signature(io.v.core.v23.ipc.ServerCall call) throws io.v.core.v23.verror.VException {
-    //    throw new io.v.core.v23.verror.VException("Signature method not yet supported for Java servers");
+    //public io.v.core.veyron2.ipc.ServiceSignature signature(io.v.core.veyron2.ipc.ServerCall call) throws io.v.core.veyron2.verror.VException {
+    //    throw new io.v.core.veyron2.verror.VException("Signature method not yet supported for Java servers");
     //}
 
     /**
@@ -45,17 +45,21 @@ package {{ .PackagePath }};
      * by this server.
      */
     @SuppressWarnings("unused")
-    public java.lang.Object[] getMethodTags(final io.v.core.v23.ipc.ServerCall call, final java.lang.String method) {
+    public io.v.core.veyron2.vdl.VdlValue[] getMethodTags(final io.v.core.veyron2.ipc.ServerCall call, final java.lang.String method) throws io.v.core.veyron2.verror.VException {
         {{ range $methodName, $tags := .MethodTags }}
         if ("{{ $methodName }}".equals(method)) {
-            return new java.lang.Object[] {
-                {{ range $tag := $tags }} {{ $tag }}, {{ end }}
-            };
+            try {
+                return new io.v.core.veyron2.vdl.VdlValue[] {
+                    {{ range $tag := $tags }} io.v.core.veyron2.vdl.VdlValue.valueOf({{ $tag.Value }}, {{ $tag.Type }}), {{ end }}
+                };
+            } catch (IllegalArgumentException e) {
+                throw new io.v.core.veyron2.verror.VException(String.format("Couldn't get tags for method \"{{ $methodName }}\": %s", e.getMessage()));
+            }
         }
         {{ end }}
         {{ range $embed := .Embeds }}
         {
-            final java.lang.Object[] tags = this.{{ $embed.LocalWrapperVarName }}.getMethodTags(call, method);
+            final io.v.core.veyron2.vdl.VdlValue[] tags = this.{{ $embed.LocalWrapperVarName }}.getMethodTags(call, method);
             if (tags != null) {
                 return tags;
             }
@@ -66,22 +70,22 @@ package {{ .PackagePath }};
 
      {{/* Iterate over methods defined directly in the body of this server */}}
     {{ range $method := .Methods }}
-    {{ $method.AccessModifier }} {{ $method.RetType }} {{ $method.Name }}(final io.v.core.v23.ipc.ServerCall call{{ $method.DeclarationArgs }}) throws io.v.core.v23.verror.VException {
+    {{ $method.AccessModifier }} {{ $method.RetType }} {{ $method.Name }}(final io.v.core.veyron2.ipc.ServerCall call{{ $method.DeclarationArgs }}) throws io.v.core.veyron2.verror.VException {
         {{ if $method.IsStreaming }}
-        final io.v.core.v23.vdl.Stream<{{ $method.SendType }}, {{ $method.RecvType }}> _stream = new io.v.core.v23.vdl.Stream<{{ $method.SendType }}, {{ $method.RecvType }}>() {
+        final io.v.core.veyron2.vdl.Stream<{{ $method.SendType }}, {{ $method.RecvType }}> _stream = new io.v.core.veyron2.vdl.Stream<{{ $method.SendType }}, {{ $method.RecvType }}>() {
             @Override
-            public void send({{ $method.SendType }} item) throws io.v.core.v23.verror.VException {
+            public void send({{ $method.SendType }} item) throws io.v.core.veyron2.verror.VException {
                 final java.lang.reflect.Type type = new com.google.common.reflect.TypeToken< {{ $method.SendType }} >() {}.getType();
                 call.send(item, type);
             }
             @Override
-            public {{ $method.RecvType }} recv() throws java.io.EOFException, io.v.core.v23.verror.VException {
+            public {{ $method.RecvType }} recv() throws java.io.EOFException, io.v.core.veyron2.verror.VException {
                 final java.lang.reflect.Type type = new com.google.common.reflect.TypeToken< {{ $method.RecvType }} >() {}.getType();
                 final java.lang.Object result = call.recv(type);
                 try {
                     return ({{ $method.RecvType }})result;
                 } catch (java.lang.ClassCastException e) {
-                    throw new io.v.core.v23.verror.VException("Unexpected result type: " + result.getClass().getCanonicalName());
+                    throw new io.v.core.veyron2.verror.VException("Unexpected result type: " + result.getClass().getCanonicalName());
                 }
             }
         };
@@ -92,7 +96,7 @@ package {{ .PackagePath }};
 
 {{/* Iterate over methods from embeded servers and generate code to delegate the work */}}
 {{ range $eMethod := .EmbedMethods }}
-    {{ $eMethod.AccessModifier }} {{ $eMethod.RetType }} {{ $eMethod.Name }}(final io.v.core.v23.ipc.ServerCall call{{ $eMethod.DeclarationArgs }}) throws io.v.core.v23.verror.VException {
+    {{ $eMethod.AccessModifier }} {{ $eMethod.RetType }} {{ $eMethod.Name }}(final io.v.core.veyron2.ipc.ServerCall call{{ $eMethod.DeclarationArgs }}) throws io.v.core.veyron2.verror.VException {
         {{/* e.g. return this.stubArith.cosine(call, [args], options) */}}
         {{ if $eMethod.Returns }}return{{ end }}  this.{{ $eMethod.LocalWrapperVarName }}.{{ $eMethod.Name }}(call{{ $eMethod.CallingArgs }});
     }
@@ -126,6 +130,11 @@ type serverWrapperEmbedMethod struct {
 type serverWrapperEmbed struct {
 	LocalWrapperVarName string
 	WrapperClassName    string
+}
+
+type methodTag struct {
+	Value string
+	Type  string
 }
 
 func processServerWrapperMethod(iface *compile.Interface, method *compile.Method, env *compile.Env) serverWrapperMethod {
@@ -164,15 +173,16 @@ func genJavaServerWrapperFile(iface *compile.Interface, env *compile.Env) JavaFi
 			LocalWrapperVarName: vdlutil.ToCamelCase(embed.Name) + "Wrapper",
 		})
 	}
-	methodTags := make(map[string][]string)
+	methodTags := make(map[string][]methodTag)
 	// Add generated methods to the tag map:
-	methodTags["signature"] = []string{}
-	methodTags["getMethodTags"] = []string{}
+	methodTags["signature"] = []methodTag{}
+	methodTags["getMethodTags"] = []methodTag{}
 	// Copy method tags off of the interface.
 	for _, method := range iface.Methods {
-		tags := make([]string, len(method.Tags))
-		for i, tagVal := range method.Tags {
-			tags[i] = javaConstVal(tagVal, env)
+		tags := make([]methodTag, len(method.Tags))
+		for i, tag := range method.Tags {
+			tags[i].Value = javaConstVal(tag, env)
+			tags[i].Type = javaReflectType(tag.Type(), env)
 		}
 		methodTags[vdlutil.ToCamelCase(method.Name)] = tags
 	}
@@ -191,7 +201,7 @@ func genJavaServerWrapperFile(iface *compile.Interface, env *compile.Env) JavaFi
 		Embeds          []serverWrapperEmbed
 		FullServiceName string
 		Methods         []serverWrapperMethod
-		MethodTags      map[string][]string
+		MethodTags      map[string][]methodTag
 		PackagePath     string
 		ServiceName     string
 		Source          string
