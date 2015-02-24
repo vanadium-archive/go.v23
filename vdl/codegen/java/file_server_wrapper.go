@@ -36,8 +36,8 @@ package {{ .PackagePath }};
      */
     // TODO(spetrovic): Re-enable once we can import the new Signature classes.
     //@SuppressWarnings("unused")
-    //public io.v.core.veyron2.ipc.ServiceSignature signature(io.v.core.veyron2.ipc.ServerCall call) throws io.v.core.veyron2.verror.VException {
-    //    throw new io.v.core.veyron2.verror.VException("Signature method not yet supported for Java servers");
+    //public io.v.v23.ipc.ServiceSignature signature(io.v.v23.ipc.ServerCall call) throws io.v.v23.verror.VException {
+    //    throw new io.v.v23.verror.VException("Signature method not yet supported for Java servers");
     //}
 
     /**
@@ -45,21 +45,21 @@ package {{ .PackagePath }};
      * by this server.
      */
     @SuppressWarnings("unused")
-    public io.v.core.veyron2.vdl.VdlValue[] getMethodTags(final io.v.core.veyron2.ipc.ServerCall call, final java.lang.String method) throws io.v.core.veyron2.verror.VException {
+    public io.v.v23.vdl.VdlValue[] getMethodTags(final io.v.v23.ipc.ServerCall call, final java.lang.String method) throws io.v.v23.verror.VException {
         {{ range $methodName, $tags := .MethodTags }}
         if ("{{ $methodName }}".equals(method)) {
             try {
-                return new io.v.core.veyron2.vdl.VdlValue[] {
-                    {{ range $tag := $tags }} io.v.core.veyron2.vdl.VdlValue.valueOf({{ $tag.Value }}, {{ $tag.Type }}), {{ end }}
+                return new io.v.v23.vdl.VdlValue[] {
+                    {{ range $tag := $tags }} io.v.v23.vdl.VdlValue.valueOf({{ $tag.Value }}, {{ $tag.Type }}), {{ end }}
                 };
             } catch (IllegalArgumentException e) {
-                throw new io.v.core.veyron2.verror.VException(String.format("Couldn't get tags for method \"{{ $methodName }}\": %s", e.getMessage()));
+                throw new io.v.v23.verror.VException(String.format("Couldn't get tags for method \"{{ $methodName }}\": %s", e.getMessage()));
             }
         }
         {{ end }}
         {{ range $embed := .Embeds }}
         {
-            final io.v.core.veyron2.vdl.VdlValue[] tags = this.{{ $embed.LocalWrapperVarName }}.getMethodTags(call, method);
+            final io.v.v23.vdl.VdlValue[] tags = this.{{ $embed.LocalWrapperVarName }}.getMethodTags(call, method);
             if (tags != null) {
                 return tags;
             }
@@ -70,22 +70,22 @@ package {{ .PackagePath }};
 
      {{/* Iterate over methods defined directly in the body of this server */}}
     {{ range $method := .Methods }}
-    {{ $method.AccessModifier }} {{ $method.RetType }} {{ $method.Name }}(final io.v.core.veyron2.ipc.ServerCall call{{ $method.DeclarationArgs }}) throws io.v.core.veyron2.verror.VException {
+    {{ $method.AccessModifier }} {{ $method.RetType }} {{ $method.Name }}(final io.v.v23.ipc.ServerCall call{{ $method.DeclarationArgs }}) throws io.v.v23.verror.VException {
         {{ if $method.IsStreaming }}
-        final io.v.core.veyron2.vdl.Stream<{{ $method.SendType }}, {{ $method.RecvType }}> _stream = new io.v.core.veyron2.vdl.Stream<{{ $method.SendType }}, {{ $method.RecvType }}>() {
+        final io.v.v23.vdl.Stream<{{ $method.SendType }}, {{ $method.RecvType }}> _stream = new io.v.v23.vdl.Stream<{{ $method.SendType }}, {{ $method.RecvType }}>() {
             @Override
-            public void send({{ $method.SendType }} item) throws io.v.core.veyron2.verror.VException {
+            public void send({{ $method.SendType }} item) throws io.v.v23.verror.VException {
                 final java.lang.reflect.Type type = new com.google.common.reflect.TypeToken< {{ $method.SendType }} >() {}.getType();
                 call.send(item, type);
             }
             @Override
-            public {{ $method.RecvType }} recv() throws java.io.EOFException, io.v.core.veyron2.verror.VException {
+            public {{ $method.RecvType }} recv() throws java.io.EOFException, io.v.v23.verror.VException {
                 final java.lang.reflect.Type type = new com.google.common.reflect.TypeToken< {{ $method.RecvType }} >() {}.getType();
                 final java.lang.Object result = call.recv(type);
                 try {
                     return ({{ $method.RecvType }})result;
                 } catch (java.lang.ClassCastException e) {
-                    throw new io.v.core.veyron2.verror.VException("Unexpected result type: " + result.getClass().getCanonicalName());
+                    throw new io.v.v23.verror.VException("Unexpected result type: " + result.getClass().getCanonicalName());
                 }
             }
         };
@@ -96,7 +96,7 @@ package {{ .PackagePath }};
 
 {{/* Iterate over methods from embeded servers and generate code to delegate the work */}}
 {{ range $eMethod := .EmbedMethods }}
-    {{ $eMethod.AccessModifier }} {{ $eMethod.RetType }} {{ $eMethod.Name }}(final io.v.core.veyron2.ipc.ServerCall call{{ $eMethod.DeclarationArgs }}) throws io.v.core.veyron2.verror.VException {
+    {{ $eMethod.AccessModifier }} {{ $eMethod.RetType }} {{ $eMethod.Name }}(final io.v.v23.ipc.ServerCall call{{ $eMethod.DeclarationArgs }}) throws io.v.v23.verror.VException {
         {{/* e.g. return this.stubArith.cosine(call, [args], options) */}}
         {{ if $eMethod.Returns }}return{{ end }}  this.{{ $eMethod.LocalWrapperVarName }}.{{ $eMethod.Name }}(call{{ $eMethod.CallingArgs }});
     }

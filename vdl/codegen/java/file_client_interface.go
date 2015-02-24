@@ -28,8 +28,8 @@ package {{ .PackagePath }};
 
     {{/* Generate the method signature. */}}
     {{ $method.Doc }}
-    {{ $method.AccessModifier }} {{ $method.RetType }} {{ $method.Name }}(final io.v.core.v23.context.VContext context{{ $method.Args }}) throws io.v.core.v23.verror.VException;
-    {{ $method.AccessModifier }} {{ $method.RetType }} {{ $method.Name }}(final io.v.core.v23.context.VContext context{{ $method.Args }}, final io.v.core.v23.Options veyronOpts) throws io.v.core.v23.verror.VException;
+    {{ $method.AccessModifier }} {{ $method.RetType }} {{ $method.Name }}(final io.v.v23.context.VContext context{{ $method.Args }}) throws io.v.v23.verror.VException;
+    {{ $method.AccessModifier }} {{ $method.RetType }} {{ $method.Name }}(final io.v.v23.context.VContext context{{ $method.Args }}, final io.v.v23.Options veyronOpts) throws io.v.v23.verror.VException;
 {{ end }}
 }
 `
@@ -64,7 +64,7 @@ func clientInterfaceNonStreamingOutArg(iface *compile.Interface, method *compile
 
 func clientInterfaceOutArg(iface *compile.Interface, method *compile.Method, isService bool, env *compile.Env) string {
 	if isStreamingMethod(method) && !isService {
-		return fmt.Sprintf("io.v.core.v23.vdl.ClientStream<%s, %s, %s>", javaType(method.InStream, true, env), javaType(method.OutStream, true, env), clientInterfaceNonStreamingOutArg(iface, method, true, env))
+		return fmt.Sprintf("io.v.v23.vdl.ClientStream<%s, %s, %s>", javaType(method.InStream, true, env), javaType(method.OutStream, true, env), clientInterfaceNonStreamingOutArg(iface, method, true, env))
 	}
 	return clientInterfaceNonStreamingOutArg(iface, method, false, env)
 }

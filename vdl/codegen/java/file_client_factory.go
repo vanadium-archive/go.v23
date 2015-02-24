@@ -17,10 +17,10 @@ package {{ .PackagePath }};
     public static {{ .ServiceName }}Client bind(final java.lang.String name) {
         return bind(name, null);
     }
-    public static {{ .ServiceName }}Client bind(final java.lang.String name, final io.v.core.v23.Options veyronOpts) {
-        io.v.core.v23.ipc.Client client = null;
-        if (veyronOpts != null && veyronOpts.get(io.v.core.v23.OptionDefs.CLIENT) != null) {
-            client = veyronOpts.get(io.v.core.v23.OptionDefs.CLIENT, io.v.core.v23.ipc.Client.class);
+    public static {{ .ServiceName }}Client bind(final java.lang.String name, final io.v.v23.Options veyronOpts) {
+        io.v.v23.ipc.Client client = null;
+        if (veyronOpts != null && veyronOpts.get(io.v.v23.OptionDefs.CLIENT) != null) {
+            client = veyronOpts.get(io.v.v23.OptionDefs.CLIENT, io.v.v23.ipc.Client.class);
         }
         return new {{ .StubName }}(client, name);
     }

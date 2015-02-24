@@ -20,7 +20,7 @@ public final class {{ .ClassName }} {
     {{/*Error Defs*/}}
     {{ range $error := $file.Errors }}
     {{ $error.Doc }}
-    {{ $error.AccessModifier }} static final io.v.core.v23.verror.VException.IDAction {{ $error.Name }} = io.v.core.v23.verror.VException.register("{{ $error.ID }}", io.v.core.v23.verror.VException.ActionCode.{{ $error.ActionName }}, "{{ $error.EnglishFmt }}");
+    {{ $error.AccessModifier }} static final io.v.v23.verror.VException.IDAction {{ $error.Name }} = io.v.v23.verror.VException.register("{{ $error.ID }}", io.v.v23.verror.VException.ActionCode.{{ $error.ActionName }}, "{{ $error.EnglishFmt }}");
     {{ end }} {{/* range $file.Errors */}}
 
     {{ end }} {{/* range .Files */}}
@@ -30,7 +30,7 @@ public final class {{ .ClassName }} {
         /* The following errors originate in file: {{ $file.Name }} */
         {{ range $error := $file.Errors }}
         {{ range $format := $error.Formats}}
-        io.v.core.v23.i18n.Language.getDefaultCatalog().setWithBase("{{ $format.Lang }}", {{ $error.Name }}.getID(), "{{ $format.Fmt }}");
+        io.v.v23.i18n.Language.getDefaultCatalog().setWithBase("{{ $format.Lang }}", {{ $error.Name }}.getID(), "{{ $format.Fmt }}");
         {{ end }} {{/* range $error.Formats */}}
         {{ end }} {{/* range $file.Errors */}}
         {{ end }} {{/* range .Files */}}
@@ -42,10 +42,10 @@ public final class {{ .ClassName }} {
     /**
      * Creates an error with {@code {{ $error.Name }}} identifier.
      */
-    public static io.v.core.v23.verror.VException {{ $error.MethodName }}(io.v.core.v23.context.VContext _ctx{{ $error.MethodArgs}}) {
+    public static io.v.v23.verror.VException {{ $error.MethodName }}(io.v.v23.context.VContext _ctx{{ $error.MethodArgs}}) {
         final java.lang.Object[] _params = new java.lang.Object[] { {{ $error.Params }} };
         final java.lang.reflect.Type[] _paramTypes = new java.lang.reflect.Type[]{ {{ $error.ParamTypes }} };
-        return io.v.core.v23.verror.VException.make({{ $error.Name }}, _ctx, _paramTypes, _params);
+        return io.v.v23.verror.VException.make({{ $error.Name }}, _ctx, _paramTypes, _params);
     }
     {{ end }} {{/* range $file.Errors */}}
     {{ end }} {{/* range .Files */}}

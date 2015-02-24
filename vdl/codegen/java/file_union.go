@@ -15,10 +15,10 @@ package {{.PackagePath}};
 /**
  * type {{.Name}} {{.VdlTypeString}} {{.Doc}}
  **/
-@io.v.core.v23.vdl.GeneratedFromVdl(name = "{{.VdlTypeName}}")
-{{ .AccessModifier }} class {{.Name}} extends io.v.core.v23.vdl.VdlUnion {
+@io.v.v23.vdl.GeneratedFromVdl(name = "{{.VdlTypeName}}")
+{{ .AccessModifier }} class {{.Name}} extends io.v.v23.vdl.VdlUnion {
     {{ range $index, $field := .Fields }}
-    @io.v.core.v23.vdl.GeneratedFromVdl(name = "{{$field.Name}}", index = {{$index}})
+    @io.v.v23.vdl.GeneratedFromVdl(name = "{{$field.Name}}", index = {{$index}})
     public static class {{$field.Name}} extends {{$.Name}} {
         private {{$field.Type}} elem;
 
@@ -43,8 +43,8 @@ package {{.PackagePath}};
     }
     {{ end }}
 
-    public static final io.v.core.v23.vdl.VdlType VDL_TYPE =
-            io.v.core.v23.vdl.Types.getVdlTypeFromReflect({{.Name}}.class);
+    public static final io.v.v23.vdl.VdlType VDL_TYPE =
+            io.v.v23.vdl.Types.getVdlTypeFromReflect({{.Name}}.class);
 
     public {{.Name}}(int index, Object value) {
         super(VDL_TYPE, index, value);

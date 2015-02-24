@@ -50,7 +50,7 @@ func javaBuiltInType(typ *vdl.Type, forceClass bool) (string, bool) {
 			return "byte", false
 		}
 	case vdl.Uint16:
-		return "io.v.core.v23.vdl.VdlUint16", true
+		return "io.v.v23.vdl.VdlUint16", true
 	case vdl.Int16:
 		if forceClass {
 			return "java.lang.Short", true
@@ -58,7 +58,7 @@ func javaBuiltInType(typ *vdl.Type, forceClass bool) (string, bool) {
 			return "short", false
 		}
 	case vdl.Uint32:
-		return "io.v.core.v23.vdl.VdlUint32", true
+		return "io.v.v23.vdl.VdlUint32", true
 	case vdl.Int32:
 		if forceClass {
 			return "java.lang.Integer", true
@@ -66,7 +66,7 @@ func javaBuiltInType(typ *vdl.Type, forceClass bool) (string, bool) {
 			return "int", false
 		}
 	case vdl.Uint64:
-		return "io.v.core.v23.vdl.VdlUint64", true
+		return "io.v.v23.vdl.VdlUint64", true
 	case vdl.Int64:
 		if forceClass {
 			return "java.lang.Long", true
@@ -86,15 +86,15 @@ func javaBuiltInType(typ *vdl.Type, forceClass bool) (string, bool) {
 			return "double", false
 		}
 	case vdl.Complex64:
-		return "io.v.core.v23.vdl.VdlComplex64", true
+		return "io.v.v23.vdl.VdlComplex64", true
 	case vdl.Complex128:
-		return "io.v.core.v23.vdl.VdlComplex128", true
+		return "io.v.v23.vdl.VdlComplex128", true
 	case vdl.String:
 		return "java.lang.String", true
 	case vdl.TypeObject:
-		return "io.v.core.v23.vdl.VdlTypeObject", true
+		return "io.v.v23.vdl.VdlTypeObject", true
 	case vdl.Any:
-		return "io.v.core.v23.vdl.VdlAny", true
+		return "io.v.v23.vdl.VdlAny", true
 	default:
 		return "", false
 	}
@@ -102,7 +102,7 @@ func javaBuiltInType(typ *vdl.Type, forceClass bool) (string, bool) {
 
 func javaNativeType(t *vdl.Type, env *compile.Env) (string, bool) {
 	if t == vdl.ErrorType {
-		return "io.v.core.v23.verror.VException", true
+		return "io.v.v23.verror.VException", true
 	}
 	if def := env.FindTypeDef(t); def != nil {
 		pkg := def.File.Package
@@ -140,7 +140,7 @@ func javaType(t *vdl.Type, forceClass bool, env *compile.Env) string {
 	case vdl.Map:
 		return fmt.Sprintf("%s<%s, %s>", "java.util.Map", javaType(t.Key(), true, env), javaType(t.Elem(), true, env))
 	case vdl.Optional:
-		return fmt.Sprintf("io.v.core.v23.vdl.VdlOptional<%s>", javaType(t.Elem(), true, env))
+		return fmt.Sprintf("io.v.v23.vdl.VdlOptional<%s>", javaType(t.Elem(), true, env))
 	default:
 		log.Fatalf("vdl: javaType unhandled type %v %v", t.Kind(), t)
 		return ""
@@ -150,7 +150,7 @@ func javaType(t *vdl.Type, forceClass bool, env *compile.Env) string {
 func javaVdlPrimitiveType(kind vdl.Kind) string {
 	switch kind {
 	case vdl.Bool, vdl.Byte, vdl.Uint16, vdl.Uint32, vdl.Uint64, vdl.Int16, vdl.Int32, vdl.Int64, vdl.Float32, vdl.Float64, vdl.Complex128, vdl.Complex64, vdl.String:
-		return "io.v.core.v23.vdl.Vdl" + vdlutil.FirstRuneToUpper(kind.String())
+		return "io.v.v23.vdl.Vdl" + vdlutil.FirstRuneToUpper(kind.String())
 	}
 	log.Fatalf("val: unhandled kind: %v", kind)
 	return ""

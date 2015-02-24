@@ -16,17 +16,17 @@ package {{.PackagePath}};
 /**
  * type {{.Name}} {{.VdlTypeString}} {{.Doc}}
  **/
-@io.v.core.v23.vdl.GeneratedFromVdl(name = "{{.VdlTypeName}}")
-{{ .AccessModifier }} final class {{.Name}} extends io.v.core.v23.vdl.AbstractVdlStruct
+@io.v.v23.vdl.GeneratedFromVdl(name = "{{.VdlTypeName}}")
+{{ .AccessModifier }} final class {{.Name}} extends io.v.v23.vdl.AbstractVdlStruct
         implements android.os.Parcelable {
     {{/* Field declarations */}}
     {{ range $index, $field := .Fields }}
-      @io.v.core.v23.vdl.GeneratedFromVdl(name = "{{$field.Name}}", index = {{$index}})
+      @io.v.v23.vdl.GeneratedFromVdl(name = "{{$field.Name}}", index = {{$index}})
       private {{$field.Type}} {{$field.LowercaseName}};
     {{ end }}
 
-    public static final io.v.core.v23.vdl.VdlType VDL_TYPE =
-            io.v.core.v23.vdl.Types.getVdlTypeFromReflect({{.Name}}.class);
+    public static final io.v.v23.vdl.VdlType VDL_TYPE =
+            io.v.v23.vdl.Types.getVdlTypeFromReflect({{.Name}}.class);
 
     {{/* Constructors */}}
     public {{.Name}}() {
@@ -122,7 +122,7 @@ package {{.PackagePath}};
     public void writeToParcel(android.os.Parcel out, int flags) {
         {{ range $field := .Fields }}
         try {
-            io.v.core.v23.vdl.ParcelUtil.writeValue(out, {{$field.LowercaseName}},
+            io.v.v23.vdl.ParcelUtil.writeValue(out, {{$field.LowercaseName}},
                 getClass().getDeclaredField("{{$field.LowercaseName}}").getGenericType());
         } catch (NoSuchFieldException e) {
             // do nothing
@@ -138,7 +138,7 @@ package {{.PackagePath}};
             {{.Name}} value = new {{.Name}}();
             {{ range $field := .Fields }}
             try {
-                value.set{{$field.Name}}(({{$field.Class}}) io.v.core.v23.vdl.ParcelUtil.readValue(
+                value.set{{$field.Name}}(({{$field.Class}}) io.v.v23.vdl.ParcelUtil.readValue(
                 in, value.getClass().getClassLoader(), value.getClass().getDeclaredField("{{$field.LowercaseName}}").getGenericType()));
             } catch (NoSuchFieldException e) {
                 // do nothing

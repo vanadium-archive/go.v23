@@ -15,10 +15,10 @@ package {{.Package}};
 /**
  * type {{.Name}} {{.VdlTypeString}} {{.Doc}}
  **/
-@io.v.core.v23.vdl.GeneratedFromVdl(name = "{{.VdlTypeName}}")
-{{ .AccessModifier }} final class {{.Name}} extends io.v.core.v23.vdl.VdlMap<{{.KeyType}}, {{.ElemType}}> {
-    public static final io.v.core.v23.vdl.VdlType VDL_TYPE =
-            io.v.core.v23.vdl.Types.getVdlTypeFromReflect({{.Name}}.class);
+@io.v.v23.vdl.GeneratedFromVdl(name = "{{.VdlTypeName}}")
+{{ .AccessModifier }} final class {{.Name}} extends io.v.v23.vdl.VdlMap<{{.KeyType}}, {{.ElemType}}> {
+    public static final io.v.v23.vdl.VdlType VDL_TYPE =
+            io.v.v23.vdl.Types.getVdlTypeFromReflect({{.Name}}.class);
 
     public {{.Name}}(java.util.Map<{{.KeyType}}, {{.ElemType}}> impl) {
         super(VDL_TYPE, impl);
@@ -34,7 +34,7 @@ package {{.Package}};
                 new com.google.common.reflect.TypeToken<{{.KeyType}}>(){}.getType();
         java.lang.reflect.Type elemType =
                 new com.google.common.reflect.TypeToken<{{.ElemType}}>(){}.getType();
-        io.v.core.v23.vdl.ParcelUtil.writeMap(out, this, keyType, elemType);
+        io.v.v23.vdl.ParcelUtil.writeMap(out, this, keyType, elemType);
     }
 
     @SuppressWarnings("hiding")
@@ -47,7 +47,7 @@ package {{.Package}};
                     new com.google.common.reflect.TypeToken<{{.KeyType}}>(){}.getType();
             java.lang.reflect.Type elemType =
                     new com.google.common.reflect.TypeToken<{{.ElemType}}>(){}.getType();
-            java.util.Map<?, ?> map = io.v.core.v23.vdl.ParcelUtil.readMap(
+            java.util.Map<?, ?> map = io.v.v23.vdl.ParcelUtil.readMap(
                     in, {{.Name}}.class.getClassLoader(), keyType, elemType);
             return new {{.Name}}((java.util.Map<{{.KeyType}}, {{.ElemType}}>) map);
         }

@@ -40,7 +40,7 @@ func javaClientExtendsStr(embeds []*compile.Interface) string {
 		buf.WriteString("Client")
 		buf.WriteString(", ")
 	}
-	buf.WriteString("io.v.core.v23.ipc.UniversalServiceMethods")
+	buf.WriteString("io.v.v23.ipc.UniversalServiceMethods")
 	return buf.String()
 }
 

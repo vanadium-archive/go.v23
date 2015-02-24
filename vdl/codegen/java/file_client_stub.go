@@ -15,7 +15,7 @@ package {{ .PackagePath }};
 
 /* Client stub for interface: {{ .ServiceName }}Client. */
 {{ .AccessModifier }} final class {{ .ServiceName }}ClientStub implements {{ .FullServiceName }}Client {
-    private final io.v.core.v23.ipc.Client client;
+    private final io.v.v23.ipc.Client client;
     private final java.lang.String veyronName;
 
     {{/* Define fields to hold each of the embedded object stubs*/}}
@@ -24,7 +24,7 @@ package {{ .PackagePath }};
     private final {{ $embed.StubClassName }} {{ $embed.LocalStubVarName }};
     {{ end }}
 
-    public {{ .ServiceName }}ClientStub(final io.v.core.v23.ipc.Client client, final java.lang.String veyronName) {
+    public {{ .ServiceName }}ClientStub(final io.v.v23.ipc.Client client, final java.lang.String veyronName) {
         this.client = client;
         this.veyronName = veyronName;
         {{/* Initialize the embeded stubs */}}
@@ -33,28 +33,28 @@ package {{ .PackagePath }};
          {{ end }}
     }
 
-    private io.v.core.v23.ipc.Client getClient(io.v.core.v23.context.VContext context) {
-        return this.client != null ? client : io.v.core.v23.V.getClient(context);
+    private io.v.v23.ipc.Client getClient(io.v.v23.context.VContext context) {
+        return this.client != null ? client : io.v.v23.V.getClient(context);
 
     }
 
     // Methods from interface UniversalServiceMethods.
     // TODO(spetrovic): Re-enable once we can import the new Signature classes.
     //@Override
-    //public io.v.core.v23.ipc.ServiceSignature getSignature(io.v.core.v23.context.VContext context) throws io.v.core.v23.verror.VException {
+    //public io.v.v23.ipc.ServiceSignature getSignature(io.v.v23.context.VContext context) throws io.v.v23.verror.VException {
     //    return getSignature(context, null);
     //}
     //@Override
-    //public io.v.core.v23.ipc.ServiceSignature getSignature(io.v.core.v23.context.VContext context, io.v.core.v23.Options veyronOpts) throws io.v.core.v23.verror.VException {
+    //public io.v.v23.ipc.ServiceSignature getSignature(io.v.v23.context.VContext context, io.v.v23.Options veyronOpts) throws io.v.v23.verror.VException {
     //    // Start the call.
-    //    final io.v.core.v23.ipc.Client.Call _call = getClient(context).startCall(context, this.veyronName, "signature", new java.lang.Object[0], new java.lang.reflect.Type[0], veyronOpts);
+    //    final io.v.v23.ipc.Client.Call _call = getClient(context).startCall(context, this.veyronName, "signature", new java.lang.Object[0], new java.lang.reflect.Type[0], veyronOpts);
 
     //    // Finish the call.
     //    final java.lang.reflect.Type[] _resultTypes = new java.lang.reflect.Type[]{
-    //        new com.google.common.reflect.TypeToken<io.v.core.v23.ipc.ServiceSignature>() {}.getType(),
+    //        new com.google.common.reflect.TypeToken<io.v.v23.ipc.ServiceSignature>() {}.getType(),
     //    };
     //    final java.lang.Object[] _results = _call.finish(_resultTypes);
-    //    return (io.v.core.v23.ipc.ServiceSignature)_results[0];
+    //    return (io.v.v23.ipc.ServiceSignature)_results[0];
     //}
 
     // Methods from interface {{ .ServiceName }}Client.
@@ -62,17 +62,17 @@ package {{ .PackagePath }};
 {{ range $method := .Methods }}
     {{/* The optionless overload simply calls the overload with options */}}
     @Override
-    {{ $method.AccessModifier }} {{ $method.RetType }} {{ $method.Name }}(final io.v.core.v23.context.VContext context{{ $method.DeclarationArgs }}) throws io.v.core.v23.verror.VException {
+    {{ $method.AccessModifier }} {{ $method.RetType }} {{ $method.Name }}(final io.v.v23.context.VContext context{{ $method.DeclarationArgs }}) throws io.v.v23.verror.VException {
         {{if $method.Returns }}return{{ end }} {{ $method.Name }}(context{{ $method.CallingArgsLeadingComma }}, null);
     }
     {{/* The main client stub method body */}}
     @Override
-    {{ $method.AccessModifier }} {{ $method.RetType }} {{ $method.Name }}(final io.v.core.v23.context.VContext context{{ $method.DeclarationArgs }}, io.v.core.v23.Options veyronOpts) throws io.v.core.v23.verror.VException {
+    {{ $method.AccessModifier }} {{ $method.RetType }} {{ $method.Name }}(final io.v.v23.context.VContext context{{ $method.DeclarationArgs }}, io.v.v23.Options veyronOpts) throws io.v.v23.verror.VException {
         {{/* Start the veyron call */}}
         // Start the call.
         final java.lang.Object[] _args = new java.lang.Object[]{ {{ $method.CallingArgs }} };
         final java.lang.reflect.Type[] _argTypes = new java.lang.reflect.Type[]{ {{ $method.CallingArgTypes }} };
-        final io.v.core.v23.ipc.Client.Call _call = getClient(context).startCall(context, this.veyronName, "{{ $method.Name }}", _args, _argTypes, veyronOpts);
+        final io.v.v23.ipc.Client.Call _call = getClient(context).startCall(context, this.veyronName, "{{ $method.Name }}", _args, _argTypes, veyronOpts);
 
         // Finish the call.
         {{/* Now handle returning from the function. */}}
@@ -101,24 +101,24 @@ package {{ .PackagePath }};
         {{ end }} {{/* end if $method.IsVoid */}}
 
         {{else }} {{/* else $method.NotStreaming */}}
-        return new io.v.core.v23.vdl.ClientStream<{{ $method.SendType }}, {{ $method.RecvType }}, {{ $method.DeclaredObjectRetType }}>() {
+        return new io.v.v23.vdl.ClientStream<{{ $method.SendType }}, {{ $method.RecvType }}, {{ $method.DeclaredObjectRetType }}>() {
             @Override
-            public void send(final {{ $method.SendType }} item) throws io.v.core.v23.verror.VException {
+            public void send(final {{ $method.SendType }} item) throws io.v.v23.verror.VException {
                 final java.lang.reflect.Type type = new com.google.common.reflect.TypeToken<{{ $method.SendType }}>() {}.getType();
                 _call.send(item, type);
             }
             @Override
-            public {{ $method.RecvType }} recv() throws java.io.EOFException, io.v.core.v23.verror.VException {
+            public {{ $method.RecvType }} recv() throws java.io.EOFException, io.v.v23.verror.VException {
                 final java.lang.reflect.Type type = new com.google.common.reflect.TypeToken<{{ $method.RecvType }}>() {}.getType();
                 final java.lang.Object result = _call.recv(type);
                 try {
                     return ({{ $method.RecvType }})result;
                 } catch (java.lang.ClassCastException e) {
-                    throw new io.v.core.v23.verror.VException("Unexpected result type: " + result.getClass().getCanonicalName());
+                    throw new io.v.v23.verror.VException("Unexpected result type: " + result.getClass().getCanonicalName());
                 }
             }
             @Override
-            public {{ $method.DeclaredObjectRetType }} finish() throws io.v.core.v23.verror.VException {
+            public {{ $method.DeclaredObjectRetType }} finish() throws io.v.v23.verror.VException {
                 {{ if $method.IsVoid }}
                 final java.lang.reflect.Type[] resultTypes = new java.lang.reflect.Type[]{};
                 _call.finish(resultTypes);
@@ -138,12 +138,12 @@ package {{ .PackagePath }};
 {{/* Iterate over methods from embeded services and generate code to delegate the work */}}
 {{ range $eMethod := .EmbedMethods }}
     @Override
-    {{ $eMethod.AccessModifier }} {{ $eMethod.RetType }} {{ $eMethod.Name }}(final io.v.core.v23.context.VContext context{{ $eMethod.DeclarationArgs }}) throws io.v.core.v23.verror.VException {
+    {{ $eMethod.AccessModifier }} {{ $eMethod.RetType }} {{ $eMethod.Name }}(final io.v.v23.context.VContext context{{ $eMethod.DeclarationArgs }}) throws io.v.v23.verror.VException {
         {{/* e.g. return this.stubArith.cosine(context, [args]) */}}
         {{ if $eMethod.Returns }}return{{ end }} this.{{ $eMethod.LocalStubVarName }}.{{ $eMethod.Name }}(context{{ $eMethod.CallingArgsLeadingComma }});
     }
     @Override
-    {{ $eMethod.AccessModifier }} {{ $eMethod.RetType }} {{ $eMethod.Name }}(final io.v.core.v23.context.VContext context{{ $eMethod.DeclarationArgs }}, io.v.core.v23.Options veyronOpts) throws io.v.core.v23.verror.VException {
+    {{ $eMethod.AccessModifier }} {{ $eMethod.RetType }} {{ $eMethod.Name }}(final io.v.v23.context.VContext context{{ $eMethod.DeclarationArgs }}, io.v.v23.Options veyronOpts) throws io.v.v23.verror.VException {
         {{/* e.g. return this.stubArith.cosine(context, [args], options) */}}
         {{ if $eMethod.Returns }}return{{ end }}  this.{{ $eMethod.LocalStubVarName }}.{{ $eMethod.Name }}(context{{ $eMethod.CallingArgsLeadingComma }}, veyronOpts);
     }

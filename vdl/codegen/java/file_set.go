@@ -15,10 +15,10 @@ package {{.Package}};
 /**
  * {{.Name}} {{.VdlTypeString}} {{.Doc}}
  **/
-@io.v.core.v23.vdl.GeneratedFromVdl(name = "{{.VdlTypeName}}")
-{{ .AccessModifier }} final class {{.Name}} extends io.v.core.v23.vdl.VdlSet<{{.KeyType}}> {
-    public static final io.v.core.v23.vdl.VdlType VDL_TYPE =
-            io.v.core.v23.vdl.Types.getVdlTypeFromReflect({{.Name}}.class);
+@io.v.v23.vdl.GeneratedFromVdl(name = "{{.VdlTypeName}}")
+{{ .AccessModifier }} final class {{.Name}} extends io.v.v23.vdl.VdlSet<{{.KeyType}}> {
+    public static final io.v.v23.vdl.VdlType VDL_TYPE =
+            io.v.v23.vdl.Types.getVdlTypeFromReflect({{.Name}}.class);
 
     public {{.Name}}(java.util.Set<{{.KeyType}}> impl) {
         super(VDL_TYPE, impl);
@@ -32,7 +32,7 @@ package {{.Package}};
     public void writeToParcel(android.os.Parcel out, int flags) {
         java.lang.reflect.Type keyType =
                 new com.google.common.reflect.TypeToken<{{.KeyType}}>(){}.getType();
-        io.v.core.v23.vdl.ParcelUtil.writeSet(out, this, keyType);
+        io.v.v23.vdl.ParcelUtil.writeSet(out, this, keyType);
     }
 
     @SuppressWarnings("hiding")
@@ -43,7 +43,7 @@ package {{.Package}};
         public {{.Name}} createFromParcel(android.os.Parcel in) {
             java.lang.reflect.Type keyType =
                     new com.google.common.reflect.TypeToken<{{.KeyType}}>(){}.getType();
-            java.util.Set<?> set = io.v.core.v23.vdl.ParcelUtil.readSet(
+            java.util.Set<?> set = io.v.v23.vdl.ParcelUtil.readSet(
                     in, {{.Name}}.class.getClassLoader(), keyType);
             return new {{.Name}}((java.util.Set<{{.KeyType}}>) set);
         }

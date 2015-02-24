@@ -17,10 +17,10 @@ package {{.PackagePath}};
 /**
  * type {{.Name}} {{.VdlTypeString}} {{.Doc}}
  **/
-@io.v.core.v23.vdl.GeneratedFromVdl(name = "{{.VdlTypeName}}")
+@io.v.v23.vdl.GeneratedFromVdl(name = "{{.VdlTypeName}}")
 {{ .AccessModifier }} final class {{.Name}} extends {{.VdlComplex}} {
-    public static final io.v.core.v23.vdl.VdlType VDL_TYPE =
-            io.v.core.v23.vdl.Types.getVdlTypeFromReflect({{.Name}}.class);
+    public static final io.v.v23.vdl.VdlType VDL_TYPE =
+            io.v.v23.vdl.Types.getVdlTypeFromReflect({{.Name}}.class);
 
     public {{.Name}}({{.ValueType}} real, {{.ValueType}} imag) {
         super(VDL_TYPE, real, imag);
