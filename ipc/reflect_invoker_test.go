@@ -43,12 +43,12 @@ func testContext() *context.T {
 
 func NewFakeServerCall() *FakeServerCall {
 	return &FakeServerCall{
-		context:  testContext(),
-		security: security.NewContext(&security.ContextParams{}),
+		security: security.NewContext(&security.ContextParams{
+			Context: testContext(),
+		}),
 	}
 }
 
-func (call *FakeServerCall) Context() *context.T       { return call.context }
 func (*FakeServerCall) Server() ipc.Server             { return nil }
 func (*FakeServerCall) Blessings() security.Blessings  { return nil }
 func (*FakeServerCall) Closed() <-chan struct{}        { return nil }
@@ -73,7 +73,7 @@ func (call *FakeServerCall) RemoteBlessings() security.Blessings {
 }
 func (call *FakeServerCall) LocalEndpoint() naming.Endpoint  { return call.security.LocalEndpoint() }
 func (call *FakeServerCall) RemoteEndpoint() naming.Endpoint { return call.security.RemoteEndpoint() }
-func (call *FakeServerCall) VanadiumContext() *context.T     { return call.security.VanadiumContext() }
+func (call *FakeServerCall) Context() *context.T             { return call.security.Context() }
 
 var (
 	call1 = NewFakeServerCall()

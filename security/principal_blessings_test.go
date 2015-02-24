@@ -813,8 +813,8 @@ func TestCustomChainValidator(t *testing.T) {
 	chainCtx := context.WithValue(vctx, "customChainValidator", validator)
 
 	ctx := NewContext(&ContextParams{
-		LocalPrincipal:  p,
-		VanadiumContext: chainCtx,
+		LocalPrincipal: p,
+		Context:        chainCtx,
 	})
 
 	bu, err := p.BlessSelf("unrestricted", UnconstrainedUse())

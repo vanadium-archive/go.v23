@@ -22,7 +22,7 @@ const chainValidatorKey = "customChainValidator"
 
 func (b *blessingsImpl) ForContext(ctx Context) (ret []string, info []RejectedBlessing) {
 	validator := defaultChainCaveatValidator
-	if customValidator := ctx.VanadiumContext().Value(chainValidatorKey); customValidator != nil {
+	if customValidator := ctx.Context().Value(chainValidatorKey); customValidator != nil {
 		validator = customValidator.(func(ctx Context, chains [][]Caveat) []error)
 	}
 

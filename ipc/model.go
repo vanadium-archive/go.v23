@@ -559,8 +559,6 @@ type ServerContext interface {
 	Blessings() security.Blessings
 	// Server returns the Server that this context is associated with.
 	Server() Server
-
-	Context() *context.T
 }
 
 // TODO(caprita): Remove this.  It's currently referenced in all VDL-generated

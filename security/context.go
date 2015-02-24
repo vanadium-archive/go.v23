@@ -34,7 +34,7 @@ type ContextParams struct {
 	RemoteDischarges map[string]Discharge // Map a ThirdPartyCaveat identifier to corresponding discharges shared by the remote end.
 	RemoteEndpoint   naming.Endpoint      // Endpoint of the remote end of communication
 
-	VanadiumContext *context.T // The vanadium context
+	Context *context.T // The context.T.
 }
 
 // Copy fills in p with a copy of the values in c.
@@ -59,6 +59,7 @@ func (p *ContextParams) Copy(c Context) {
 		p.RemoteDischarges[id] = dis
 	}
 	p.RemoteEndpoint = c.RemoteEndpoint()
+	p.Context = c.Context()
 }
 
 type ctxImpl struct{ params ContextParams }
@@ -75,4 +76,4 @@ func (c *ctxImpl) LocalEndpoint() naming.Endpoint         { return c.params.Loca
 func (c *ctxImpl) RemoteEndpoint() naming.Endpoint        { return c.params.RemoteEndpoint }
 func (c *ctxImpl) RemoteDischarges() map[string]Discharge { return c.params.RemoteDischarges }
 func (c *ctxImpl) String() string                         { return fmt.Sprintf("%+v", c.params) }
-func (c *ctxImpl) VanadiumContext() *context.T            { return c.params.VanadiumContext }
+func (c *ctxImpl) Context() *context.T                    { return c.params.Context }
