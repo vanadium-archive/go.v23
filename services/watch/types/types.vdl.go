@@ -6,7 +6,7 @@ package types
 
 import (
 	// VDL system imports
-	"v.io/core/veyron2/vdl"
+	"v.io/v23/vdl"
 )
 
 // GlobRequest specifies which entities should be watched and, optionally,
@@ -21,7 +21,7 @@ type GlobRequest struct {
 }
 
 func (GlobRequest) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/services/watch/types.GlobRequest"
+	Name string "v.io/v23/services/watch/types.GlobRequest"
 }) {
 }
 
@@ -59,7 +59,7 @@ func (GlobRequest) __VDLReflect(struct {
 type ResumeMarker []byte
 
 func (ResumeMarker) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/services/watch/types.ResumeMarker"
+	Name string "v.io/v23/services/watch/types.ResumeMarker"
 }) {
 }
 
@@ -85,7 +85,7 @@ type Change struct {
 }
 
 func (Change) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/services/watch/types.Change"
+	Name string "v.io/v23/services/watch/types.Change"
 }) {
 }
 

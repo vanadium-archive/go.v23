@@ -3,7 +3,7 @@
 // http://code.google.com/p/google-perftools/.
 package pprof
 
-import "v.io/core/veyron2/services/security/access"
+import "v.io/v23/services/security/access"
 
 type PProf interface {
 	// CmdLine returns the command-line arguments of the server, including

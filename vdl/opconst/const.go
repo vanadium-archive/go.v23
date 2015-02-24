@@ -8,7 +8,7 @@ import (
 	"math/big"
 	"strconv"
 
-	"v.io/core/veyron2/vdl"
+	"v.io/v23/vdl"
 )
 
 var (

@@ -5,8 +5,8 @@ import (
 	"os"
 	"reflect"
 
-	"v.io/core/veyron2/security"
-	"v.io/core/veyron2/vdl"
+	"v.io/v23/security"
+	"v.io/v23/vdl"
 )
 
 // TaggedACLAuthorizer implements an authorization policy where access is
@@ -51,8 +51,8 @@ import (
 //     "reflect"
 //     "v.io/core/veyron/security/acl"
 //
-//     "v.io/core/veyron2/ipc"
-//     "v.io/core/veyron2/security"
+//     "v.io/v23/ipc"
+//     "v.io/v23/security"
 //   )
 //
 //   type dispatcher struct{}

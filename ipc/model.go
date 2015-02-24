@@ -7,12 +7,12 @@ import (
 	"strings"
 	"time"
 
-	"v.io/core/veyron2/config"
-	"v.io/core/veyron2/context"
-	"v.io/core/veyron2/naming"
-	"v.io/core/veyron2/security"
-	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/vdl/vdlroot/src/signature"
+	"v.io/v23/config"
+	"v.io/v23/context"
+	"v.io/v23/naming"
+	"v.io/v23/security"
+	"v.io/v23/vdl"
+	"v.io/v23/vdl/vdlroot/src/signature"
 )
 
 // Client represents the interface for making RPC calls.  There may be multiple
@@ -24,7 +24,7 @@ type Client interface {
 	// Call object manages streaming args and results, and finishes the call.
 	//
 	// StartCall accepts at least the following options:
-	// veyron2.CallTimeout.
+	// v23.CallTimeout.
 	StartCall(ctx *context.T, name, method string, args []interface{}, opts ...CallOpt) (Call, error)
 
 	// Close discards all state associated with this Client.  In-flight calls may

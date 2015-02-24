@@ -7,7 +7,7 @@ import (
 	"io"
 	"reflect"
 
-	"v.io/core/veyron2/vdl"
+	"v.io/v23/vdl"
 )
 
 // Dump returns a human-readable dump of the given vom data, in the default

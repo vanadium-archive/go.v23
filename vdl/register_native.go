@@ -133,7 +133,7 @@ func nativeInfoForError() (*nativeInfo, error) {
 	return ni, nil
 }
 
-var errNoRegisterNativeError = errors.New(`vdl: RegisterNative must be called to register error<->WireError conversions.  Import the "v.io/core/veyron2/verror" package in your program.`)
+var errNoRegisterNativeError = errors.New(`vdl: RegisterNative must be called to register error<->WireError conversions.  Import the "v.io/v23/verror" package in your program.`)
 
 // deriveNativeInfo returns the nativeInfo corresponding to toFn and fromFn,
 // which are expected to have the following signatures:

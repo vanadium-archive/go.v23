@@ -8,7 +8,7 @@ import (
 	"testing"
 	"testing/iotest"
 
-	"v.io/core/veyron2/vdl"
+	"v.io/v23/vdl"
 )
 
 // readMode ensures the decoder handles short reads and different EOF semantics.

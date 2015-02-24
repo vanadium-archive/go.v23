@@ -5,9 +5,9 @@ import (
 	"strconv"
 	"strings"
 
-	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/vdl/compile"
-	"v.io/core/veyron2/vdl/vdlroot/src/vdltool"
+	"v.io/v23/vdl"
+	"v.io/v23/vdl/compile"
+	"v.io/v23/vdl/vdlroot/src/vdltool"
 )
 
 func localIdent(data goData, file *compile.File, ident string) string {
@@ -56,9 +56,9 @@ func typeGo(data goData, t *vdl.Type) string {
 	if def := data.Env.FindTypeDef(t); def != nil {
 		switch {
 		case t == vdl.AnyType:
-			return "*" + data.Pkg("v.io/core/veyron2/vdl") + "Value"
+			return "*" + data.Pkg("v.io/v23/vdl") + "Value"
 		case t == vdl.TypeObjectType:
-			return "*" + data.Pkg("v.io/core/veyron2/vdl") + "Type"
+			return "*" + data.Pkg("v.io/v23/vdl") + "Type"
 		case def.File == compile.BuiltInFile:
 			// Built-in primitives just use their name.
 			return def.Name

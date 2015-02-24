@@ -8,102 +8,102 @@ import (
 	// VDL system imports
 	"fmt"
 	"io"
-	"v.io/core/veyron2"
-	"v.io/core/veyron2/context"
-	"v.io/core/veyron2/i18n"
-	"v.io/core/veyron2/ipc"
-	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/verror"
+	"v.io/v23"
+	"v.io/v23/context"
+	"v.io/v23/i18n"
+	"v.io/v23/ipc"
+	"v.io/v23/vdl"
+	"v.io/v23/verror"
 )
 
 type NamedBool bool
 
 func (NamedBool) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vdl/testdata/base.NamedBool"
+	Name string "v.io/v23/vdl/testdata/base.NamedBool"
 }) {
 }
 
 type NamedByte byte
 
 func (NamedByte) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vdl/testdata/base.NamedByte"
+	Name string "v.io/v23/vdl/testdata/base.NamedByte"
 }) {
 }
 
 type NamedUint16 uint16
 
 func (NamedUint16) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vdl/testdata/base.NamedUint16"
+	Name string "v.io/v23/vdl/testdata/base.NamedUint16"
 }) {
 }
 
 type NamedUint32 uint32
 
 func (NamedUint32) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vdl/testdata/base.NamedUint32"
+	Name string "v.io/v23/vdl/testdata/base.NamedUint32"
 }) {
 }
 
 type NamedUint64 uint64
 
 func (NamedUint64) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vdl/testdata/base.NamedUint64"
+	Name string "v.io/v23/vdl/testdata/base.NamedUint64"
 }) {
 }
 
 type NamedInt16 int16
 
 func (NamedInt16) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vdl/testdata/base.NamedInt16"
+	Name string "v.io/v23/vdl/testdata/base.NamedInt16"
 }) {
 }
 
 type NamedInt32 int32
 
 func (NamedInt32) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vdl/testdata/base.NamedInt32"
+	Name string "v.io/v23/vdl/testdata/base.NamedInt32"
 }) {
 }
 
 type NamedInt64 int64
 
 func (NamedInt64) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vdl/testdata/base.NamedInt64"
+	Name string "v.io/v23/vdl/testdata/base.NamedInt64"
 }) {
 }
 
 type NamedFloat32 float32
 
 func (NamedFloat32) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vdl/testdata/base.NamedFloat32"
+	Name string "v.io/v23/vdl/testdata/base.NamedFloat32"
 }) {
 }
 
 type NamedFloat64 float64
 
 func (NamedFloat64) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vdl/testdata/base.NamedFloat64"
+	Name string "v.io/v23/vdl/testdata/base.NamedFloat64"
 }) {
 }
 
 type NamedComplex64 complex64
 
 func (NamedComplex64) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vdl/testdata/base.NamedComplex64"
+	Name string "v.io/v23/vdl/testdata/base.NamedComplex64"
 }) {
 }
 
 type NamedComplex128 complex128
 
 func (NamedComplex128) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vdl/testdata/base.NamedComplex128"
+	Name string "v.io/v23/vdl/testdata/base.NamedComplex128"
 }) {
 }
 
 type NamedString string
 
 func (NamedString) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vdl/testdata/base.NamedString"
+	Name string "v.io/v23/vdl/testdata/base.NamedString"
 }) {
 }
 
@@ -155,7 +155,7 @@ func (x NamedEnum) String() string {
 }
 
 func (NamedEnum) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vdl/testdata/base.NamedEnum"
+	Name string "v.io/v23/vdl/testdata/base.NamedEnum"
 	Enum struct{ A, B, C string }
 }) {
 }
@@ -163,28 +163,28 @@ func (NamedEnum) __VDLReflect(struct {
 type NamedArray [2]bool
 
 func (NamedArray) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vdl/testdata/base.NamedArray"
+	Name string "v.io/v23/vdl/testdata/base.NamedArray"
 }) {
 }
 
 type NamedList []uint32
 
 func (NamedList) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vdl/testdata/base.NamedList"
+	Name string "v.io/v23/vdl/testdata/base.NamedList"
 }) {
 }
 
 type NamedSet map[string]struct{}
 
 func (NamedSet) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vdl/testdata/base.NamedSet"
+	Name string "v.io/v23/vdl/testdata/base.NamedSet"
 }) {
 }
 
 type NamedMap map[string]float32
 
 func (NamedMap) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vdl/testdata/base.NamedMap"
+	Name string "v.io/v23/vdl/testdata/base.NamedMap"
 }) {
 }
 
@@ -195,7 +195,7 @@ type NamedStruct struct {
 }
 
 func (NamedStruct) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vdl/testdata/base.NamedStruct"
+	Name string "v.io/v23/vdl/testdata/base.NamedStruct"
 }) {
 }
 
@@ -219,7 +219,7 @@ type (
 	NamedUnionC struct{ Value int32 }
 	// __NamedUnionReflect describes the NamedUnion union type.
 	__NamedUnionReflect struct {
-		Name  string "v.io/core/veyron2/vdl/testdata/base.NamedUnion"
+		Name  string "v.io/v23/vdl/testdata/base.NamedUnion"
 		Type  NamedUnion
 		Union struct {
 			A NamedUnionA
@@ -279,7 +279,7 @@ type Scalars struct {
 }
 
 func (Scalars) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vdl/testdata/base.Scalars"
+	Name string "v.io/v23/vdl/testdata/base.Scalars"
 }) {
 }
 
@@ -314,14 +314,14 @@ type KeyScalars struct {
 }
 
 func (KeyScalars) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vdl/testdata/base.KeyScalars"
+	Name string "v.io/v23/vdl/testdata/base.KeyScalars"
 }) {
 }
 
 type ScalarsArray [2]Scalars
 
 func (ScalarsArray) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vdl/testdata/base.ScalarsArray"
+	Name string "v.io/v23/vdl/testdata/base.ScalarsArray"
 }) {
 }
 
@@ -335,14 +335,14 @@ type Composites struct {
 }
 
 func (Composites) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vdl/testdata/base.Composites"
+	Name string "v.io/v23/vdl/testdata/base.Composites"
 }) {
 }
 
 type CompositesArray [2]Composites
 
 func (CompositesArray) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vdl/testdata/base.CompositesArray"
+	Name string "v.io/v23/vdl/testdata/base.CompositesArray"
 }) {
 }
 
@@ -355,7 +355,7 @@ type CompComp struct {
 }
 
 func (CompComp) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vdl/testdata/base.CompComp"
+	Name string "v.io/v23/vdl/testdata/base.CompComp"
 }) {
 }
 
@@ -367,7 +367,7 @@ type NestedArgs struct {
 }
 
 func (NestedArgs) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vdl/testdata/base.NestedArgs"
+	Name string "v.io/v23/vdl/testdata/base.NestedArgs"
 }) {
 }
 
@@ -378,7 +378,7 @@ type Args struct {
 }
 
 func (Args) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vdl/testdata/base.Args"
+	Name string "v.io/v23/vdl/testdata/base.Args"
 }) {
 }
 
@@ -557,11 +557,11 @@ var CTOTypeObject = vdl.TypeObjectType
 var CTOAny = vdl.AnyType
 
 var (
-	ErrNoParams1   = verror.Register("v.io/core/veyron2/vdl/testdata/base.NoParams1", verror.NoRetry, "{1:}{2:} en msg")
-	ErrNoParams2   = verror.Register("v.io/core/veyron2/vdl/testdata/base.NoParams2", verror.RetryRefetch, "{1:}{2:} en msg")
-	ErrWithParams1 = verror.Register("v.io/core/veyron2/vdl/testdata/base.WithParams1", verror.NoRetry, "{1:}{2:} en x={3} y={4}")
-	ErrWithParams2 = verror.Register("v.io/core/veyron2/vdl/testdata/base.WithParams2", verror.RetryRefetch, "{1:}{2:} en x={3} y={4}")
-	errNotExported = verror.Register("v.io/core/veyron2/vdl/testdata/base.notExported", verror.NoRetry, "{1:}{2:} en x={3} y={4}")
+	ErrNoParams1   = verror.Register("v.io/v23/vdl/testdata/base.NoParams1", verror.NoRetry, "{1:}{2:} en msg")
+	ErrNoParams2   = verror.Register("v.io/v23/vdl/testdata/base.NoParams2", verror.RetryRefetch, "{1:}{2:} en msg")
+	ErrWithParams1 = verror.Register("v.io/v23/vdl/testdata/base.WithParams1", verror.NoRetry, "{1:}{2:} en x={3} y={4}")
+	ErrWithParams2 = verror.Register("v.io/v23/vdl/testdata/base.WithParams2", verror.RetryRefetch, "{1:}{2:} en x={3} y={4}")
+	errNotExported = verror.Register("v.io/v23/vdl/testdata/base.notExported", verror.NoRetry, "{1:}{2:} en x={3} y={4}")
 )
 
 func init() {
@@ -634,7 +634,7 @@ func (c implServiceAClientStub) c(ctx *context.T) ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return veyron2.GetClient(ctx)
+	return v23.GetClient(ctx)
 }
 
 func (c implServiceAClientStub) MethodA1(ctx *context.T, opts ...ipc.CallOpt) (err error) {
@@ -923,7 +923,7 @@ var ServiceADesc ipc.InterfaceDesc = descServiceA
 // descServiceA hides the desc to keep godoc clean.
 var descServiceA = ipc.InterfaceDesc{
 	Name:    "ServiceA",
-	PkgPath: "v.io/core/veyron2/vdl/testdata/base",
+	PkgPath: "v.io/v23/vdl/testdata/base",
 	Methods: []ipc.MethodDesc{
 		{
 			Name: "MethodA1",
@@ -1119,7 +1119,7 @@ func (c implServiceBClientStub) c(ctx *context.T) ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return veyron2.GetClient(ctx)
+	return v23.GetClient(ctx)
 }
 
 func (c implServiceBClientStub) MethodB1(ctx *context.T, i0 Scalars, i1 Composites, opts ...ipc.CallOpt) (o0 CompComp, err error) {
@@ -1196,9 +1196,9 @@ var ServiceBDesc ipc.InterfaceDesc = descServiceB
 // descServiceB hides the desc to keep godoc clean.
 var descServiceB = ipc.InterfaceDesc{
 	Name:    "ServiceB",
-	PkgPath: "v.io/core/veyron2/vdl/testdata/base",
+	PkgPath: "v.io/v23/vdl/testdata/base",
 	Embeds: []ipc.EmbedDesc{
-		{"ServiceA", "v.io/core/veyron2/vdl/testdata/base", ``},
+		{"ServiceA", "v.io/v23/vdl/testdata/base", ``},
 	},
 	Methods: []ipc.MethodDesc{
 		{

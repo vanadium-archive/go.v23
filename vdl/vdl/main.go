@@ -12,15 +12,15 @@ import (
 	"path/filepath"
 	"strings"
 
-	"v.io/core/veyron2/vdl/build"
-	"v.io/core/veyron2/vdl/codegen/golang"
-	"v.io/core/veyron2/vdl/codegen/java"
-	"v.io/core/veyron2/vdl/codegen/javascript"
-	"v.io/core/veyron2/vdl/compile"
-	"v.io/core/veyron2/vdl/vdlroot/src/vdltool"
-	"v.io/core/veyron2/vdl/vdlutil"
 	"v.io/lib/cmdline"
 	"v.io/lib/textutil"
+	"v.io/v23/vdl/build"
+	"v.io/v23/vdl/codegen/golang"
+	"v.io/v23/vdl/codegen/java"
+	"v.io/v23/vdl/codegen/javascript"
+	"v.io/v23/vdl/compile"
+	"v.io/v23/vdl/vdlroot/src/vdltool"
+	"v.io/v23/vdl/vdlutil"
 )
 
 func init() {
@@ -337,7 +337,7 @@ var (
 			{"third_party/go/src", "SKIP"},
 			{"tools/go/src", "SKIP"},
 			// TODO(toddw): Skip vdlroot javascript generation for now.
-			{"release/go/src/v.io/core/veyron2/vdl/vdlroot/src", "SKIP"},
+			{"release/go/src/v.io/v23/vdl/vdlroot/src", "SKIP"},
 		},
 	}
 	optGenJavaOutPkg = xlateRules{

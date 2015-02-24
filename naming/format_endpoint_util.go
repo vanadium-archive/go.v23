@@ -8,7 +8,7 @@ import (
 	"os"
 	"strings"
 
-	"v.io/core/veyron2/naming"
+	"v.io/v23/naming"
 
 	_ "v.io/core/veyron/profiles"
 )
@@ -56,7 +56,7 @@ func init() {
 }
 
 func main() {
-	ctx, shutdown := veyron2.Init()
+	ctx, shutdown := v23.Init()
 	defer shutdown()
 
 	for _, a := range hostPortFlags.addrs {

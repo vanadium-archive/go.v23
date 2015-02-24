@@ -7,23 +7,23 @@ package device
 
 import (
 	// VDL system imports
-	"v.io/core/veyron2"
-	"v.io/core/veyron2/context"
-	"v.io/core/veyron2/ipc"
-	"v.io/core/veyron2/vdl"
+	"v.io/v23"
+	"v.io/v23/context"
+	"v.io/v23/ipc"
+	"v.io/v23/vdl"
 
 	// VDL user imports
-	"v.io/core/veyron2/services/mgmt/application"
-	"v.io/core/veyron2/services/mgmt/binary"
-	"v.io/core/veyron2/services/security/access"
-	"v.io/core/veyron2/services/security/access/object"
+	"v.io/v23/services/mgmt/application"
+	"v.io/v23/services/mgmt/binary"
+	"v.io/v23/services/security/access"
+	"v.io/v23/services/security/access/object"
 )
 
 // Config specifies app configuration that overrides what's in the envelope.
 type Config map[string]string
 
 func (Config) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/services/mgmt/device.Config"
+	Name string "v.io/v23/services/mgmt/device.Config"
 }) {
 }
 
@@ -41,7 +41,7 @@ type Description struct {
 }
 
 func (Description) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/services/mgmt/device.Description"
+	Name string "v.io/v23/services/mgmt/device.Description"
 }) {
 }
 
@@ -53,7 +53,7 @@ type Association struct {
 }
 
 func (Association) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/services/mgmt/device.Association"
+	Name string "v.io/v23/services/mgmt/device.Association"
 }) {
 }
 
@@ -164,8 +164,8 @@ type ApplicationClientMethods interface {
 	//
 	//   package mypackage
 	//
-	//   import "v.io/core/veyron2/security/access"
-	//   import "v.io/core/veyron2/security/access/object"
+	//   import "v.io/v23/security/access"
+	//   import "v.io/v23/security/access/object"
 	//
 	//   type MyObject interface {
 	//     object.Object
@@ -182,7 +182,7 @@ type ApplicationClientMethods interface {
 	//
 	//  package mypackage
 	//
-	//  import "v.io/core/veyron2/security/access"
+	//  import "v.io/v23/security/access"
 	//
 	//  type MyTag string
 	//
@@ -300,7 +300,7 @@ func (c implApplicationClientStub) c(ctx *context.T) ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return veyron2.GetClient(ctx)
+	return v23.GetClient(ctx)
 }
 
 func (c implApplicationClientStub) Install(ctx *context.T, i0 string, i1 Config, i2 application.Packages, opts ...ipc.CallOpt) (o0 string, err error) {
@@ -512,8 +512,8 @@ type ApplicationServerMethods interface {
 	//
 	//   package mypackage
 	//
-	//   import "v.io/core/veyron2/security/access"
-	//   import "v.io/core/veyron2/security/access/object"
+	//   import "v.io/v23/security/access"
+	//   import "v.io/v23/security/access/object"
 	//
 	//   type MyObject interface {
 	//     object.Object
@@ -530,7 +530,7 @@ type ApplicationServerMethods interface {
 	//
 	//  package mypackage
 	//
-	//  import "v.io/core/veyron2/security/access"
+	//  import "v.io/v23/security/access"
 	//
 	//  type MyTag string
 	//
@@ -719,10 +719,10 @@ var ApplicationDesc ipc.InterfaceDesc = descApplication
 // descApplication hides the desc to keep godoc clean.
 var descApplication = ipc.InterfaceDesc{
 	Name:    "Application",
-	PkgPath: "v.io/core/veyron2/services/mgmt/device",
+	PkgPath: "v.io/v23/services/mgmt/device",
 	Doc:     "// Application can be used to manage applications on a device. The\n// idea is that this interace will be invoked using an object name that\n// identifies the application and its installations and instances\n// where applicable.\n//\n// In particular, the interface methods can be divided into three\n// groups based on their intended receiver:\n//\n// 1) Method receiver is an application:\n// -- Install()\n//\n// 2) Method receiver is an application installation:\n// -- Start()\n// -- Uninstall()\n// -- Update()\n//\n// 3) Method receiver is application installation instance:\n// -- Refresh()\n// -- Restart()\n// -- Resume()\n// -- Stop()\n// -- Suspend()\n//\n// For groups 2) and 3), the suffix that specifies the receiver can\n// optionally omit the installation and/or instance, in which case the\n// operation applies to all installations and/or instances in the\n// scope of the suffix.\n//\n// Examples:\n// # Install Google Maps on the device.\n// device/apps.Install(\"/google.com/appstore/maps\", nil, nil) --> \"google maps/0\"\n//\n// # Start an instance of the previously installed maps application installation.\n// device/apps/google maps/0.Start() --> { \"0\" }\n//\n// # Start a second instance of the previously installed maps application installation.\n// device/apps/google maps/0.Start() --> { \"1\" }\n//\n// # Stop the first instance previously started.\n// device/apps/google maps/0/0.Stop()\n//\n// # Install a second Google Maps installation.\n// device/apps.Install(\"/google.com/appstore/maps\", nil, nil) --> \"google maps/1\"\n//\n// # Start an instance for all maps application installations.\n// device/apps/google maps.Start() --> {\"0/2\", \"1/0\"}\n//\n// # Refresh the state of all instances of all maps application installations.\n// device/apps/google maps.Refresh()\n//\n// # Refresh the state of all instances of the maps application installation\n// identified by the given suffix.\n// device/apps/google maps/0.Refresh()\n//\n// # Refresh the state of the maps application installation instance identified by\n// the given suffix.\n// device/apps/google maps/0/2.Refresh()\n//\n// # Update the second maps installation to the latest version available.\n// device/apps/google maps/1.Update()\n//\n// # Update the first maps installation to a specific version.\n// device/apps/google maps/0.UpdateTo(\"/google.com/appstore/beta/maps\")\n//\n// Further, the following methods complement one another:\n// -- Install() and Uninstall()\n// -- Start() and Stop()\n// -- Suspend() and Resume()\n//\n// Finally, an application installation instance can be in one of\n// three abstract states: 1) \"does not exist\", 2) \"running\", or 3)\n// \"suspended\". The interface methods transition between these\n// abstract states using the following state machine:\n//\n// apply(Start(), \"does not exists\") = \"running\"\n// apply(Refresh(), \"running\") = \"running\"\n// apply(Refresh(), \"suspended\") = \"suspended\"\n// apply(Restart(), \"running\") = \"running\"\n// apply(Restart(), \"suspended\") = \"running\"\n// apply(Resume(), \"suspended\") = \"running\"\n// apply(Resume(), \"running\") = \"running\"\n// apply(Stop(), \"running\") = \"does not exist\"\n// apply(Stop(), \"suspended\") = \"does not exist\"\n// apply(Suspend(), \"running\") = \"suspended\"\n// apply(Suspend(), \"suspended\") = \"suspended\"\n//\n// In other words, invoking any method using an existing application\n// installation instance as a receiver is well-defined.",
 	Embeds: []ipc.EmbedDesc{
-		{"Object", "v.io/core/veyron2/services/security/access/object", "// Object provides access control for Veyron objects.\n//\n// Veyron services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/core/veyron2/security/access\"\n//   import \"v.io/core/veyron2/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetACL and GetACL in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/core/veyron2/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}\n//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}\n//  }"},
+		{"Object", "v.io/v23/services/security/access/object", "// Object provides access control for Veyron objects.\n//\n// Veyron services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetACL and GetACL in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}\n//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}\n//  }"},
 	},
 	Methods: []ipc.MethodDesc{
 		{
@@ -854,7 +854,7 @@ func (c implClaimableClientStub) c(ctx *context.T) ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return veyron2.GetClient(ctx)
+	return v23.GetClient(ctx)
 }
 
 func (c implClaimableClientStub) Claim(ctx *context.T, i0 string, opts ...ipc.CallOpt) (err error) {
@@ -939,7 +939,7 @@ var ClaimableDesc ipc.InterfaceDesc = descClaimable
 // descClaimable hides the desc to keep godoc clean.
 var descClaimable = ipc.InterfaceDesc{
 	Name:    "Claimable",
-	PkgPath: "v.io/core/veyron2/services/mgmt/device",
+	PkgPath: "v.io/v23/services/mgmt/device",
 	Doc:     "// Claimable represents an uninitialized device with no owner\n// (i.e., a device that has no blessings).\n//\n// Claim is used to claim ownership by blessing the device's private key.\n// Devices that have provided a pairing token to the claimer through an\n// out-of-band communication channel (eg: display/email) would expect this\n// pairing token to be replayed by the claimer.\n//\n// Once claimed, the device will export the \"Device\" interface and all methods\n// will be restricted to the claimer.\n//\n// The blessings that the device is to be claimed with is provided\n// via the ipc.Granter option in Go.",
 	Methods: []ipc.MethodDesc{
 		{
@@ -1096,7 +1096,7 @@ func (c implDeviceClientStub) c(ctx *context.T) ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return veyron2.GetClient(ctx)
+	return v23.GetClient(ctx)
 }
 
 func (c implDeviceClientStub) Describe(ctx *context.T, opts ...ipc.CallOpt) (o0 Description, err error) {
@@ -1331,10 +1331,10 @@ var DeviceDesc ipc.InterfaceDesc = descDevice
 // descDevice hides the desc to keep godoc clean.
 var descDevice = ipc.InterfaceDesc{
 	Name:    "Device",
-	PkgPath: "v.io/core/veyron2/services/mgmt/device",
+	PkgPath: "v.io/v23/services/mgmt/device",
 	Doc:     "// Device can be used to manage a device remotely using an object name that\n// identifies it.",
 	Embeds: []ipc.EmbedDesc{
-		{"Application", "v.io/core/veyron2/services/mgmt/device", "// Application can be used to manage applications on a device. The\n// idea is that this interace will be invoked using an object name that\n// identifies the application and its installations and instances\n// where applicable.\n//\n// In particular, the interface methods can be divided into three\n// groups based on their intended receiver:\n//\n// 1) Method receiver is an application:\n// -- Install()\n//\n// 2) Method receiver is an application installation:\n// -- Start()\n// -- Uninstall()\n// -- Update()\n//\n// 3) Method receiver is application installation instance:\n// -- Refresh()\n// -- Restart()\n// -- Resume()\n// -- Stop()\n// -- Suspend()\n//\n// For groups 2) and 3), the suffix that specifies the receiver can\n// optionally omit the installation and/or instance, in which case the\n// operation applies to all installations and/or instances in the\n// scope of the suffix.\n//\n// Examples:\n// # Install Google Maps on the device.\n// device/apps.Install(\"/google.com/appstore/maps\", nil, nil) --> \"google maps/0\"\n//\n// # Start an instance of the previously installed maps application installation.\n// device/apps/google maps/0.Start() --> { \"0\" }\n//\n// # Start a second instance of the previously installed maps application installation.\n// device/apps/google maps/0.Start() --> { \"1\" }\n//\n// # Stop the first instance previously started.\n// device/apps/google maps/0/0.Stop()\n//\n// # Install a second Google Maps installation.\n// device/apps.Install(\"/google.com/appstore/maps\", nil, nil) --> \"google maps/1\"\n//\n// # Start an instance for all maps application installations.\n// device/apps/google maps.Start() --> {\"0/2\", \"1/0\"}\n//\n// # Refresh the state of all instances of all maps application installations.\n// device/apps/google maps.Refresh()\n//\n// # Refresh the state of all instances of the maps application installation\n// identified by the given suffix.\n// device/apps/google maps/0.Refresh()\n//\n// # Refresh the state of the maps application installation instance identified by\n// the given suffix.\n// device/apps/google maps/0/2.Refresh()\n//\n// # Update the second maps installation to the latest version available.\n// device/apps/google maps/1.Update()\n//\n// # Update the first maps installation to a specific version.\n// device/apps/google maps/0.UpdateTo(\"/google.com/appstore/beta/maps\")\n//\n// Further, the following methods complement one another:\n// -- Install() and Uninstall()\n// -- Start() and Stop()\n// -- Suspend() and Resume()\n//\n// Finally, an application installation instance can be in one of\n// three abstract states: 1) \"does not exist\", 2) \"running\", or 3)\n// \"suspended\". The interface methods transition between these\n// abstract states using the following state machine:\n//\n// apply(Start(), \"does not exists\") = \"running\"\n// apply(Refresh(), \"running\") = \"running\"\n// apply(Refresh(), \"suspended\") = \"suspended\"\n// apply(Restart(), \"running\") = \"running\"\n// apply(Restart(), \"suspended\") = \"running\"\n// apply(Resume(), \"suspended\") = \"running\"\n// apply(Resume(), \"running\") = \"running\"\n// apply(Stop(), \"running\") = \"does not exist\"\n// apply(Stop(), \"suspended\") = \"does not exist\"\n// apply(Suspend(), \"running\") = \"suspended\"\n// apply(Suspend(), \"suspended\") = \"suspended\"\n//\n// In other words, invoking any method using an existing application\n// installation instance as a receiver is well-defined."},
+		{"Application", "v.io/v23/services/mgmt/device", "// Application can be used to manage applications on a device. The\n// idea is that this interace will be invoked using an object name that\n// identifies the application and its installations and instances\n// where applicable.\n//\n// In particular, the interface methods can be divided into three\n// groups based on their intended receiver:\n//\n// 1) Method receiver is an application:\n// -- Install()\n//\n// 2) Method receiver is an application installation:\n// -- Start()\n// -- Uninstall()\n// -- Update()\n//\n// 3) Method receiver is application installation instance:\n// -- Refresh()\n// -- Restart()\n// -- Resume()\n// -- Stop()\n// -- Suspend()\n//\n// For groups 2) and 3), the suffix that specifies the receiver can\n// optionally omit the installation and/or instance, in which case the\n// operation applies to all installations and/or instances in the\n// scope of the suffix.\n//\n// Examples:\n// # Install Google Maps on the device.\n// device/apps.Install(\"/google.com/appstore/maps\", nil, nil) --> \"google maps/0\"\n//\n// # Start an instance of the previously installed maps application installation.\n// device/apps/google maps/0.Start() --> { \"0\" }\n//\n// # Start a second instance of the previously installed maps application installation.\n// device/apps/google maps/0.Start() --> { \"1\" }\n//\n// # Stop the first instance previously started.\n// device/apps/google maps/0/0.Stop()\n//\n// # Install a second Google Maps installation.\n// device/apps.Install(\"/google.com/appstore/maps\", nil, nil) --> \"google maps/1\"\n//\n// # Start an instance for all maps application installations.\n// device/apps/google maps.Start() --> {\"0/2\", \"1/0\"}\n//\n// # Refresh the state of all instances of all maps application installations.\n// device/apps/google maps.Refresh()\n//\n// # Refresh the state of all instances of the maps application installation\n// identified by the given suffix.\n// device/apps/google maps/0.Refresh()\n//\n// # Refresh the state of the maps application installation instance identified by\n// the given suffix.\n// device/apps/google maps/0/2.Refresh()\n//\n// # Update the second maps installation to the latest version available.\n// device/apps/google maps/1.Update()\n//\n// # Update the first maps installation to a specific version.\n// device/apps/google maps/0.UpdateTo(\"/google.com/appstore/beta/maps\")\n//\n// Further, the following methods complement one another:\n// -- Install() and Uninstall()\n// -- Start() and Stop()\n// -- Suspend() and Resume()\n//\n// Finally, an application installation instance can be in one of\n// three abstract states: 1) \"does not exist\", 2) \"running\", or 3)\n// \"suspended\". The interface methods transition between these\n// abstract states using the following state machine:\n//\n// apply(Start(), \"does not exists\") = \"running\"\n// apply(Refresh(), \"running\") = \"running\"\n// apply(Refresh(), \"suspended\") = \"suspended\"\n// apply(Restart(), \"running\") = \"running\"\n// apply(Restart(), \"suspended\") = \"running\"\n// apply(Resume(), \"suspended\") = \"running\"\n// apply(Resume(), \"running\") = \"running\"\n// apply(Stop(), \"running\") = \"does not exist\"\n// apply(Stop(), \"suspended\") = \"does not exist\"\n// apply(Suspend(), \"running\") = \"suspended\"\n// apply(Suspend(), \"suspended\") = \"suspended\"\n//\n// In other words, invoking any method using an existing application\n// installation instance as a receiver is well-defined."},
 	},
 	Methods: []ipc.MethodDesc{
 		{

@@ -106,14 +106,14 @@ package watch
 import (
 	// VDL system imports
 	"io"
-	"v.io/core/veyron2"
-	"v.io/core/veyron2/context"
-	"v.io/core/veyron2/ipc"
-	"v.io/core/veyron2/vdl"
+	"v.io/v23"
+	"v.io/v23/context"
+	"v.io/v23/ipc"
+	"v.io/v23/vdl"
 
 	// VDL user imports
-	"v.io/core/veyron2/services/security/access"
-	"v.io/core/veyron2/services/watch/types"
+	"v.io/v23/services/security/access"
+	"v.io/v23/services/watch/types"
 )
 
 // GlobWatcherClientMethods is the client interface
@@ -152,7 +152,7 @@ func (c implGlobWatcherClientStub) c(ctx *context.T) ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return veyron2.GetClient(ctx)
+	return v23.GetClient(ctx)
 }
 
 func (c implGlobWatcherClientStub) WatchGlob(ctx *context.T, i0 types.GlobRequest, opts ...ipc.CallOpt) (ocall GlobWatcherWatchGlobCall, err error) {
@@ -299,7 +299,7 @@ var GlobWatcherDesc ipc.InterfaceDesc = descGlobWatcher
 // descGlobWatcher hides the desc to keep godoc clean.
 var descGlobWatcher = ipc.InterfaceDesc{
 	Name:    "GlobWatcher",
-	PkgPath: "v.io/core/veyron2/services/watch",
+	PkgPath: "v.io/v23/services/watch",
 	Doc:     "// GlobWatcher allows a client to receive updates for changes to objects\n// that match a pattern.  See the package comments for details.",
 	Methods: []ipc.MethodDesc{
 		{

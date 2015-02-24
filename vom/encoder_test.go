@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"v.io/core/veyron2/vom/testdata"
+	"v.io/v23/vom/testdata"
 )
 
 func TestBinaryEncoder(t *testing.T) {

@@ -7,14 +7,14 @@ package logreader
 import (
 	// VDL system imports
 	"io"
-	"v.io/core/veyron2"
-	"v.io/core/veyron2/context"
-	"v.io/core/veyron2/ipc"
-	"v.io/core/veyron2/vdl"
+	"v.io/v23"
+	"v.io/v23/context"
+	"v.io/v23/ipc"
+	"v.io/v23/vdl"
 
 	// VDL user imports
-	"v.io/core/veyron2/services/mgmt/logreader/types"
-	"v.io/core/veyron2/services/security/access"
+	"v.io/v23/services/mgmt/logreader/types"
+	"v.io/v23/services/security/access"
 )
 
 // LogFileClientMethods is the client interface
@@ -66,7 +66,7 @@ func (c implLogFileClientStub) c(ctx *context.T) ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return veyron2.GetClient(ctx)
+	return v23.GetClient(ctx)
 }
 
 func (c implLogFileClientStub) Size(ctx *context.T, opts ...ipc.CallOpt) (o0 int64, err error) {
@@ -253,7 +253,7 @@ var LogFileDesc ipc.InterfaceDesc = descLogFile
 // descLogFile hides the desc to keep godoc clean.
 var descLogFile = ipc.InterfaceDesc{
 	Name:    "LogFile",
-	PkgPath: "v.io/core/veyron2/services/mgmt/logreader",
+	PkgPath: "v.io/v23/services/mgmt/logreader",
 	Doc:     "// LogFile can be used to access log files remotely.",
 	Methods: []ipc.MethodDesc{
 		{

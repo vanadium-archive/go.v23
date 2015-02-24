@@ -1,17 +1,17 @@
 package reserved
 
 import (
-	"v.io/core/veyron2"
-	"v.io/core/veyron2/context"
-	"v.io/core/veyron2/ipc"
-	"v.io/core/veyron2/vdl/vdlroot/src/signature"
+	"v.io/v23"
+	"v.io/v23/context"
+	"v.io/v23/ipc"
+	"v.io/v23/vdl/vdlroot/src/signature"
 )
 
 // Signature invokes the reserved signature RPC on the given name, and returns
 // the results.  The client will be used to invoke the RPC - if it is nil, the
 // default client from the runtime is used.
 func Signature(ctx *context.T, name string, opts ...ipc.CallOpt) ([]signature.Interface, error) {
-	call, err := veyron2.GetClient(ctx).StartCall(ctx, name, ipc.ReservedSignature, nil, opts...)
+	call, err := v23.GetClient(ctx).StartCall(ctx, name, ipc.ReservedSignature, nil, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -27,7 +27,7 @@ func Signature(ctx *context.T, name string, opts ...ipc.CallOpt) ([]signature.In
 // is nil, the default client from the runtime is used.
 func MethodSignature(ctx *context.T, name, method string, opts ...ipc.CallOpt) (signature.Method, error) {
 	args := []interface{}{method}
-	call, err := veyron2.GetClient(ctx).StartCall(ctx, name, ipc.ReservedMethodSignature, args, opts...)
+	call, err := v23.GetClient(ctx).StartCall(ctx, name, ipc.ReservedMethodSignature, args, opts...)
 	if err != nil {
 		return signature.Method{}, err
 	}

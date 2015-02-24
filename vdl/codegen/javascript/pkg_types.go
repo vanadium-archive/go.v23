@@ -5,9 +5,9 @@ import (
 	"sort"
 	"strings"
 
-	"v.io/core/veyron2/vdl/compile"
+	"v.io/v23/vdl/compile"
 
-	"v.io/core/veyron2/vdl"
+	"v.io/v23/vdl"
 )
 
 // typeNames holds a mapping between VDL type and generated type name.

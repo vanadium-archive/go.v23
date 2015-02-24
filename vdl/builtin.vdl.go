@@ -10,7 +10,7 @@ type IDAction struct {
 }
 
 func (IDAction) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vdl.IDAction"
+	Name string "v.io/v23/vdl.IDAction"
 }) {
 }
 
@@ -25,7 +25,7 @@ type WireError struct {
 }
 
 func (WireError) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vdl.WireError"
+	Name string "v.io/v23/vdl.WireError"
 }) {
 }
 

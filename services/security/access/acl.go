@@ -5,7 +5,7 @@ import (
 	"io"
 	"sort"
 
-	"v.io/core/veyron2/security"
+	"v.io/v23/security"
 )
 
 // Includes returns true iff the ACL grants access to a principal that presents

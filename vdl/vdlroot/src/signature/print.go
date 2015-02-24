@@ -8,9 +8,9 @@ import (
 	"sort"
 	"strings"
 
-	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/vdl/codegen/vdlgen"
 	"v.io/lib/textutil"
+	"v.io/v23/vdl"
+	"v.io/v23/vdl/codegen/vdlgen"
 )
 
 // NamedTypes represents a set of unique named types.  The main usage is to

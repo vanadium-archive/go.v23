@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"strconv"
 
-	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/vdl/codegen"
+	"v.io/v23/vdl"
+	"v.io/v23/vdl/codegen"
 )
 
 // TypedConst returns the explicitly-typed vdl const corresponding to v, in the

@@ -60,7 +60,7 @@ const (
   InitialStateSkipped = int32(2)
 
   // XXX: The google3 version has the following field, but I'm not sure how
-  // to represent it in veyron2.
+  // to represent it in v23.
   // The element may exist, but some error has occurred. More information is
   // available in the value field - the value is a serialized util.Status
   // proto (from util/task/status.proto).

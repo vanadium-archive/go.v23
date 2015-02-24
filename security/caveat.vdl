@@ -1,6 +1,6 @@
 package security
 
-import "v.io/core/veyron2/uniqueid"
+import "v.io/v23/uniqueid"
 
 const (
   // ConstCaveat represents a caveat that either always validates or never validates.

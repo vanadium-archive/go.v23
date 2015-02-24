@@ -1,14 +1,14 @@
-package veyron2
+package v23
 
 import (
 	"strings"
 	"testing"
 
-	"v.io/core/veyron2/config"
-	"v.io/core/veyron2/context"
-	"v.io/core/veyron2/ipc"
-	"v.io/core/veyron2/naming"
-	"v.io/core/veyron2/security"
+	"v.io/v23/config"
+	"v.io/v23/context"
+	"v.io/v23/ipc"
+	"v.io/v23/naming"
+	"v.io/v23/security"
 )
 
 // Create a mock profile initialization function.
@@ -66,7 +66,7 @@ func TestPanicOnInitWithNoProfile(t *testing.T) {
 
 func TestInitWithRegisteredProfile(t *testing.T) {
 	clear()
-	// Calling veyron2.Init with a profile should succeed.
+	// Calling v23.Init with a profile should succeed.
 	RegisterProfileInit(MockInit)
 	Init()
 }

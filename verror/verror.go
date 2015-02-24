@@ -74,9 +74,9 @@ import "runtime"
 
 import "sync"
 
-import "v.io/core/veyron2/context"
-import "v.io/core/veyron2/i18n"
-import "v.io/core/veyron2/vtrace"
+import "v.io/v23/context"
+import "v.io/v23/i18n"
+import "v.io/v23/vtrace"
 
 // ID is a unique identifier for errors.
 type ID string

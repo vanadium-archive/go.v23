@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"v.io/core/veyron2/uniqueid"
-	"v.io/core/veyron2/vtrace"
+	"v.io/v23/uniqueid"
+	"v.io/v23/vtrace"
 )
 
 var nextid = uint64(1)

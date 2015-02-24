@@ -2,9 +2,9 @@
 package mounttable
 
 import (
-	"v.io/core/veyron2/naming"
-	"v.io/core/veyron2/security"
-	"v.io/core/veyron2/services/security/access/object"
+	"v.io/v23/naming"
+	"v.io/v23/security"
+	"v.io/v23/services/security/access/object"
 )
 
 // A mount table is a tree of names.  Each name may have something mounted on it,

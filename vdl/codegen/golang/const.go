@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strconv"
 
-	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/vdl/compile"
-	"v.io/core/veyron2/vdl/parse"
+	"v.io/v23/vdl"
+	"v.io/v23/vdl/compile"
+	"v.io/v23/vdl/parse"
 )
 
 func constDefGo(data goData, def *compile.ConstDef) string {
@@ -86,9 +86,9 @@ func untypedConst(data goData, v *vdl.Value) string {
 			//
 			// This may seem like a strange roundtrip, but results in less generator
 			// and generated code.
-			return data.Pkg("v.io/core/veyron2/vdl") + "ValueOf(" + typedConst(data, elem) + ")"
+			return data.Pkg("v.io/v23/vdl") + "ValueOf(" + typedConst(data, elem) + ")"
 		}
-		return "(*" + data.Pkg("v.io/core/veyron2/vdl") + "Value)(nil)"
+		return "(*" + data.Pkg("v.io/v23/vdl") + "Value)(nil)"
 	case vdl.Optional:
 		if elem := v.Elem(); elem != nil {
 			return untypedConst(data, elem)
@@ -99,9 +99,9 @@ func untypedConst(data goData, v *vdl.Value) string {
 		// user, and are simple to return statically.
 		switch v.TypeObject().Kind() {
 		case vdl.Any:
-			return data.Pkg("v.io/core/veyron2/vdl") + "AnyType"
+			return data.Pkg("v.io/v23/vdl") + "AnyType"
 		case vdl.TypeObject:
-			return data.Pkg("v.io/core/veyron2/vdl") + "TypeObjectType"
+			return data.Pkg("v.io/v23/vdl") + "TypeObjectType"
 		}
 		// We need to generate a Go expression of type *vdl.Type that represents the
 		// type.  Since the rest of our logic can already generate the Go code for
@@ -110,7 +110,7 @@ func untypedConst(data goData, v *vdl.Value) string {
 		// This may seem like a strange roundtrip, but results in less generator
 		// and generated code.
 		zero := vdl.ZeroValue(v.TypeObject())
-		return data.Pkg("v.io/core/veyron2/vdl") + "TypeOf(" + typedConst(data, zero) + ")"
+		return data.Pkg("v.io/v23/vdl") + "TypeOf(" + typedConst(data, zero) + ")"
 	case vdl.Bool:
 		return strconv.FormatBool(v.Bool())
 	case vdl.Byte:

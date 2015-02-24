@@ -7,20 +7,20 @@ package stats
 
 import (
 	// VDL system imports
-	"v.io/core/veyron2"
-	"v.io/core/veyron2/context"
-	"v.io/core/veyron2/i18n"
-	"v.io/core/veyron2/ipc"
-	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/verror"
+	"v.io/v23"
+	"v.io/v23/context"
+	"v.io/v23/i18n"
+	"v.io/v23/ipc"
+	"v.io/v23/vdl"
+	"v.io/v23/verror"
 
 	// VDL user imports
-	"v.io/core/veyron2/services/security/access"
-	"v.io/core/veyron2/services/watch"
+	"v.io/v23/services/security/access"
+	"v.io/v23/services/watch"
 )
 
 var (
-	ErrNoValue = verror.Register("v.io/core/veyron2/services/mgmt/stats.NoValue", verror.NoRetry, "{1:}{2:} object has no value, suffix: {3}")
+	ErrNoValue = verror.Register("v.io/v23/services/mgmt/stats.NoValue", verror.NoRetry, "{1:}{2:} object has no value, suffix: {3}")
 )
 
 func init() {
@@ -81,7 +81,7 @@ func (c implStatsClientStub) c(ctx *context.T) ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return veyron2.GetClient(ctx)
+	return v23.GetClient(ctx)
 }
 
 func (c implStatsClientStub) Value(ctx *context.T, opts ...ipc.CallOpt) (o0 *vdl.Value, err error) {
@@ -178,10 +178,10 @@ var StatsDesc ipc.InterfaceDesc = descStats
 // descStats hides the desc to keep godoc clean.
 var descStats = ipc.InterfaceDesc{
 	Name:    "Stats",
-	PkgPath: "v.io/core/veyron2/services/mgmt/stats",
+	PkgPath: "v.io/v23/services/mgmt/stats",
 	Doc:     "// The Stats interface is used to access stats for troubleshooting and\n// monitoring purposes. The stats objects are discoverable via the Globbable\n// interface and watchable via the GlobWatcher interface.\n//\n// The types of the object values are implementation specific, but should be\n// primarily numeric in nature, e.g. counters, memory usage, latency metrics,\n// etc.",
 	Embeds: []ipc.EmbedDesc{
-		{"GlobWatcher", "v.io/core/veyron2/services/watch", "// GlobWatcher allows a client to receive updates for changes to objects\n// that match a pattern.  See the package comments for details."},
+		{"GlobWatcher", "v.io/v23/services/watch", "// GlobWatcher allows a client to receive updates for changes to objects\n// that match a pattern.  See the package comments for details."},
 	},
 	Methods: []ipc.MethodDesc{
 		{

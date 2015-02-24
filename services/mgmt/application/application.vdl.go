@@ -6,10 +6,10 @@ package application
 
 import (
 	// VDL system imports
-	"v.io/core/veyron2/vdl"
+	"v.io/v23/vdl"
 
 	// VDL user imports
-	"v.io/core/veyron2/security"
+	"v.io/v23/security"
 )
 
 // Envelope is a collection of metadata that describes an application.
@@ -37,7 +37,7 @@ type Envelope struct {
 }
 
 func (Envelope) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/services/mgmt/application.Envelope"
+	Name string "v.io/v23/services/mgmt/application.Envelope"
 }) {
 }
 
@@ -61,7 +61,7 @@ func (Envelope) __VDLReflect(struct {
 type Packages map[string]SignedFile
 
 func (Packages) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/services/mgmt/application.Packages"
+	Name string "v.io/v23/services/mgmt/application.Packages"
 }) {
 }
 
@@ -75,7 +75,7 @@ type SignedFile struct {
 }
 
 func (SignedFile) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/services/mgmt/application.SignedFile"
+	Name string "v.io/v23/services/mgmt/application.SignedFile"
 }) {
 }
 

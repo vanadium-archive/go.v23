@@ -10,20 +10,20 @@ package build
 import (
 	// VDL system imports
 	"io"
-	"v.io/core/veyron2"
-	"v.io/core/veyron2/context"
-	"v.io/core/veyron2/ipc"
-	"v.io/core/veyron2/vdl"
+	"v.io/v23"
+	"v.io/v23/context"
+	"v.io/v23/ipc"
+	"v.io/v23/vdl"
 
 	// VDL user imports
-	"v.io/core/veyron2/services/mgmt/binary"
+	"v.io/v23/services/mgmt/binary"
 )
 
 // Architecture specifies the hardware architecture of a host.
 type Architecture string
 
 func (Architecture) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/services/mgmt/build.Architecture"
+	Name string "v.io/v23/services/mgmt/build.Architecture"
 }) {
 }
 
@@ -31,7 +31,7 @@ func (Architecture) __VDLReflect(struct {
 type Format string
 
 func (Format) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/services/mgmt/build.Format"
+	Name string "v.io/v23/services/mgmt/build.Format"
 }) {
 }
 
@@ -39,7 +39,7 @@ func (Format) __VDLReflect(struct {
 type OperatingSystem string
 
 func (OperatingSystem) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/services/mgmt/build.OperatingSystem"
+	Name string "v.io/v23/services/mgmt/build.OperatingSystem"
 }) {
 }
 
@@ -50,7 +50,7 @@ type File struct {
 }
 
 func (File) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/services/mgmt/build.File"
+	Name string "v.io/v23/services/mgmt/build.File"
 }) {
 }
 
@@ -124,7 +124,7 @@ func (c implBuilderClientStub) c(ctx *context.T) ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return veyron2.GetClient(ctx)
+	return v23.GetClient(ctx)
 }
 
 func (c implBuilderClientStub) Build(ctx *context.T, i0 Architecture, i1 OperatingSystem, opts ...ipc.CallOpt) (ocall BuilderBuildCall, err error) {
@@ -325,7 +325,7 @@ var BuilderDesc ipc.InterfaceDesc = descBuilder
 // descBuilder hides the desc to keep godoc clean.
 var descBuilder = ipc.InterfaceDesc{
 	Name:    "Builder",
-	PkgPath: "v.io/core/veyron2/services/mgmt/build",
+	PkgPath: "v.io/v23/services/mgmt/build",
 	Doc:     "// Builder describes an interface for building binaries from source.",
 	Methods: []ipc.MethodDesc{
 		{

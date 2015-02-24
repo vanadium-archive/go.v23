@@ -5,14 +5,14 @@ package vom
 
 import (
 	// VDL system imports
-	"v.io/core/veyron2/vdl"
+	"v.io/v23/vdl"
 )
 
 // typeID uniquely identifies a type definition within a vom stream.
 type typeID uint64
 
 func (typeID) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vom.typeID"
+	Name string "v.io/v23/vom.typeID"
 }) {
 }
 
@@ -56,7 +56,7 @@ type (
 	wireTypeOptionalT struct{ Value wireOptional } // INDEX = 8
 	// __wireTypeReflect describes the wireType union type.
 	__wireTypeReflect struct {
-		Name  string "v.io/core/veyron2/vom.wireType"
+		Name  string "v.io/v23/vom.wireType"
 		Type  wireType
 		Union struct {
 			NamedT    wireTypeNamedT
@@ -124,7 +124,7 @@ type wireNamed struct {
 }
 
 func (wireNamed) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vom.wireNamed"
+	Name string "v.io/v23/vom.wireNamed"
 }) {
 }
 
@@ -135,7 +135,7 @@ type wireEnum struct {
 }
 
 func (wireEnum) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vom.wireEnum"
+	Name string "v.io/v23/vom.wireEnum"
 }) {
 }
 
@@ -147,7 +147,7 @@ type wireArray struct {
 }
 
 func (wireArray) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vom.wireArray"
+	Name string "v.io/v23/vom.wireArray"
 }) {
 }
 
@@ -158,7 +158,7 @@ type wireList struct {
 }
 
 func (wireList) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vom.wireList"
+	Name string "v.io/v23/vom.wireList"
 }) {
 }
 
@@ -169,7 +169,7 @@ type wireSet struct {
 }
 
 func (wireSet) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vom.wireSet"
+	Name string "v.io/v23/vom.wireSet"
 }) {
 }
 
@@ -181,7 +181,7 @@ type wireMap struct {
 }
 
 func (wireMap) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vom.wireMap"
+	Name string "v.io/v23/vom.wireMap"
 }) {
 }
 
@@ -192,7 +192,7 @@ type wireField struct {
 }
 
 func (wireField) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vom.wireField"
+	Name string "v.io/v23/vom.wireField"
 }) {
 }
 
@@ -203,7 +203,7 @@ type wireStruct struct {
 }
 
 func (wireStruct) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vom.wireStruct"
+	Name string "v.io/v23/vom.wireStruct"
 }) {
 }
 
@@ -214,7 +214,7 @@ type wireUnion struct {
 }
 
 func (wireUnion) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vom.wireUnion"
+	Name string "v.io/v23/vom.wireUnion"
 }) {
 }
 
@@ -225,7 +225,7 @@ type wireOptional struct {
 }
 
 func (wireOptional) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vom.wireOptional"
+	Name string "v.io/v23/vom.wireOptional"
 }) {
 }
 

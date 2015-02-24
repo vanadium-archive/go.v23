@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"v.io/core/veyron2/naming"
+	"v.io/v23/naming"
 )
 
 // DialerFunc is the function used to create net.Conn objects given a

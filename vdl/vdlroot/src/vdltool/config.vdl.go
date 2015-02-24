@@ -7,7 +7,7 @@ package vdltool
 import (
 	// VDL system imports
 	"fmt"
-	"v.io/core/veyron2/vdl"
+	"v.io/v23/vdl"
 )
 
 // Config specifies the configuration for the vdl tool.  This is typically
@@ -115,7 +115,7 @@ func (GoConfig) __VDLReflect(struct {
 }
 
 // GoType describes the Go type information associated with a VDL type.
-// See v.io/core/veyron2/vdl/testdata/native for examples.
+// See v.io/v23/vdl/testdata/native for examples.
 type GoType struct {
 	// Type is the Go type to use in generated code, instead of the VDL type.  If
 	// the Go type requires additional imports, specify the type using the

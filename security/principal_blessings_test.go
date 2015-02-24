@@ -9,10 +9,10 @@ import (
 	"testing"
 	"time"
 
-	"v.io/core/veyron2/context"
-	"v.io/core/veyron2/uniqueid"
-	"v.io/core/veyron2/verror"
-	"v.io/core/veyron2/vom"
+	"v.io/v23/context"
+	"v.io/v23/uniqueid"
+	"v.io/v23/verror"
+	"v.io/v23/vom"
 )
 
 func TestBlessSelf(t *testing.T) {

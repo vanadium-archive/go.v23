@@ -9,17 +9,17 @@ import (
 	"path/filepath"
 	"strings"
 
-	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/vdl/build"
-	"v.io/core/veyron2/vdl/codegen"
-	"v.io/core/veyron2/vdl/codegen/vdlgen"
-	"v.io/core/veyron2/vdl/compile"
-	"v.io/core/veyron2/vom"
 	"v.io/lib/cmdline"
+	"v.io/v23/vdl"
+	"v.io/v23/vdl/build"
+	"v.io/v23/vdl/codegen"
+	"v.io/v23/vdl/codegen/vdlgen"
+	"v.io/v23/vdl/compile"
+	"v.io/v23/vom"
 )
 
 const (
-	testpkg          = "v.io/core/veyron2/vom/testdata"
+	testpkg          = "v.io/v23/vom/testdata"
 	vomdataCanonical = testpkg + "/" + vomdataConfig
 	vomdataConfig    = "vomdata.vdl.config"
 )

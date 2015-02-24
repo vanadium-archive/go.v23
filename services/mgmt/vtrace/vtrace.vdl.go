@@ -8,15 +8,15 @@ package vtrace
 import (
 	// VDL system imports
 	"io"
-	"v.io/core/veyron2"
-	"v.io/core/veyron2/context"
-	"v.io/core/veyron2/ipc"
-	"v.io/core/veyron2/vdl"
+	"v.io/v23"
+	"v.io/v23/context"
+	"v.io/v23/ipc"
+	"v.io/v23/vdl"
 
 	// VDL user imports
-	"v.io/core/veyron2/services/security/access"
-	"v.io/core/veyron2/uniqueid"
-	"v.io/core/veyron2/vtrace"
+	"v.io/v23/services/security/access"
+	"v.io/v23/uniqueid"
+	"v.io/v23/vtrace"
 )
 
 // StoreClientMethods is the client interface
@@ -56,7 +56,7 @@ func (c implStoreClientStub) c(ctx *context.T) ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return veyron2.GetClient(ctx)
+	return v23.GetClient(ctx)
 }
 
 func (c implStoreClientStub) Trace(ctx *context.T, i0 uniqueid.Id, opts ...ipc.CallOpt) (o0 vtrace.TraceRecord, err error) {
@@ -221,7 +221,7 @@ var StoreDesc ipc.InterfaceDesc = descStore
 // descStore hides the desc to keep godoc clean.
 var descStore = ipc.InterfaceDesc{
 	Name:    "Store",
-	PkgPath: "v.io/core/veyron2/services/mgmt/vtrace",
+	PkgPath: "v.io/v23/services/mgmt/vtrace",
 	Methods: []ipc.MethodDesc{
 		{
 			Name: "Trace",

@@ -37,7 +37,7 @@
 //
 //    package auth
 //
-//    import "v.io/core/veyron2/context"
+//    import "v.io/v23/context"
 //
 //    type Auth struct{...}
 //
@@ -96,7 +96,7 @@ type T struct {
 // RootContext creates a new root context with no data attached.
 // A RootContext is cancelable (see WithCancel).
 // Typically you should not call this function, instead you should derive
-// contexts from other contexts, such as that returned by veyron2.Init().
+// contexts from other contexts, such as that returned by v23.Init().
 func RootContext() (*T, CancelFunc) {
 	return WithCancel(&T{key: rootKey})
 }

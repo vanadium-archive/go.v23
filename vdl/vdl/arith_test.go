@@ -11,12 +11,12 @@ import (
 	"reflect"
 	"testing"
 
-	"v.io/core/veyron2"
-	"v.io/core/veyron2/context"
-	"v.io/core/veyron2/ipc"
-	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/vdl/testdata/arith"
-	"v.io/core/veyron2/vdl/testdata/base"
+	"v.io/v23"
+	"v.io/v23/context"
+	"v.io/v23/ipc"
+	"v.io/v23/vdl"
+	"v.io/v23/vdl/testdata/arith"
+	"v.io/v23/vdl/testdata/base"
 
 	"v.io/core/veyron/lib/testutil"
 	_ "v.io/core/veyron/profiles"
@@ -25,7 +25,7 @@ import (
 var generatedError = errors.New("generated error")
 
 func newServer(ctx *context.T) ipc.Server {
-	s, err := veyron2.NewServer(ctx)
+	s, err := v23.NewServer(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -114,7 +114,7 @@ func TestCalculator(t *testing.T) {
 	defer shutdown()
 
 	server := newServer(ctx)
-	eps, err := server.Listen(veyron2.GetListenSpec(ctx))
+	eps, err := server.Listen(v23.GetListenSpec(ctx))
 	if err := server.Serve("", arith.CalculatorServer(&serverCalculator{}), nil); err != nil {
 		t.Fatal(err)
 	}
@@ -167,15 +167,15 @@ func TestCalculator(t *testing.T) {
 	expectDesc(t, serverStub.Describe__(), []ipc.InterfaceDesc{
 		{
 			Name:    "Calculator",
-			PkgPath: "v.io/core/veyron2/vdl/testdata/arith",
+			PkgPath: "v.io/v23/vdl/testdata/arith",
 			Embeds: []ipc.EmbedDesc{
 				{
 					Name:    "Arith",
-					PkgPath: "v.io/core/veyron2/vdl/testdata/arith",
+					PkgPath: "v.io/v23/vdl/testdata/arith",
 				},
 				{
 					Name:    "AdvancedMath",
-					PkgPath: "v.io/core/veyron2/vdl/testdata/arith",
+					PkgPath: "v.io/v23/vdl/testdata/arith",
 				},
 			},
 			Methods: []ipc.MethodDesc{
@@ -185,7 +185,7 @@ func TestCalculator(t *testing.T) {
 		},
 		{
 			Name:    "Arith",
-			PkgPath: "v.io/core/veyron2/vdl/testdata/arith",
+			PkgPath: "v.io/v23/vdl/testdata/arith",
 			Methods: []ipc.MethodDesc{
 				{
 					Name:    "Add",
@@ -228,20 +228,20 @@ func TestCalculator(t *testing.T) {
 		},
 		{
 			Name:    "AdvancedMath",
-			PkgPath: "v.io/core/veyron2/vdl/testdata/arith",
+			PkgPath: "v.io/v23/vdl/testdata/arith",
 			Embeds: []ipc.EmbedDesc{
 				{
 					Name:    "Trigonometry",
-					PkgPath: "v.io/core/veyron2/vdl/testdata/arith",
+					PkgPath: "v.io/v23/vdl/testdata/arith",
 				},
 				{
 					Name:    "Exp",
-					PkgPath: "v.io/core/veyron2/vdl/testdata/arith/exp",
+					PkgPath: "v.io/v23/vdl/testdata/arith/exp",
 				}},
 		},
 		{
 			Name:    "Trigonometry",
-			PkgPath: "v.io/core/veyron2/vdl/testdata/arith",
+			PkgPath: "v.io/v23/vdl/testdata/arith",
 			Doc:     "// Trigonometry is an interface that specifies a couple trigonometric functions.",
 			Methods: []ipc.MethodDesc{
 				{
@@ -266,7 +266,7 @@ func TestCalculator(t *testing.T) {
 		},
 		{
 			Name:    "Exp",
-			PkgPath: "v.io/core/veyron2/vdl/testdata/arith/exp",
+			PkgPath: "v.io/v23/vdl/testdata/arith/exp",
 			Methods: []ipc.MethodDesc{
 				{
 					Name: "Exp",
@@ -300,7 +300,7 @@ func TestArith(t *testing.T) {
 	for i, obj := range objects {
 		server := newServer(ctx)
 		defer server.Stop()
-		eps, err := server.Listen(veyron2.GetListenSpec(ctx))
+		eps, err := server.Listen(v23.GetListenSpec(ctx))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -422,7 +422,7 @@ func TestArith(t *testing.T) {
 		expectDesc(t, serverStub.Describe__(), []ipc.InterfaceDesc{
 			{
 				Name:    "Arith",
-				PkgPath: "v.io/core/veyron2/vdl/testdata/arith",
+				PkgPath: "v.io/v23/vdl/testdata/arith",
 				Methods: []ipc.MethodDesc{
 					{
 						Name:    "Add",

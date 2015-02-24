@@ -95,13 +95,13 @@ package access
 
 import (
 	// VDL system imports
-	"v.io/core/veyron2/context"
-	"v.io/core/veyron2/i18n"
-	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/verror"
+	"v.io/v23/context"
+	"v.io/v23/i18n"
+	"v.io/v23/vdl"
+	"v.io/v23/verror"
 
 	// VDL user imports
-	"v.io/core/veyron2/security"
+	"v.io/v23/security"
 )
 
 // ACL represents an Access Control List - a set of blessings that should be
@@ -128,7 +128,7 @@ type ACL struct {
 }
 
 func (ACL) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/services/security/access.ACL"
+	Name string "v.io/v23/services/security/access.ACL"
 }) {
 }
 
@@ -142,7 +142,7 @@ func (ACL) __VDLReflect(struct {
 type TaggedACLMap map[string]ACL
 
 func (TaggedACLMap) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/services/security/access.TaggedACLMap"
+	Name string "v.io/v23/services/security/access.TaggedACLMap"
 }) {
 }
 
@@ -154,7 +154,7 @@ func (TaggedACLMap) __VDLReflect(struct {
 type Tag string
 
 func (Tag) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/services/security/access.Tag"
+	Name string "v.io/v23/services/security/access.Tag"
 }) {
 }
 
@@ -176,8 +176,8 @@ const Resolve = Tag("Resolve") // Operations involving namespace navigation.
 
 var (
 	// The ACL is too big.  Use groups to represent large sets of principals.
-	ErrTooBig   = verror.Register("v.io/core/veyron2/services/security/access.TooBig", verror.NoRetry, "{1:}{2:} ACL is too big")
-	ErrACLMatch = verror.Register("v.io/core/veyron2/services/security/access.ACLMatch", verror.NoRetry, "{1:}{2:} none of the valid blessings ({3}) are allowed by the ACL (rejected blessings: {4})")
+	ErrTooBig   = verror.Register("v.io/v23/services/security/access.TooBig", verror.NoRetry, "{1:}{2:} ACL is too big")
+	ErrACLMatch = verror.Register("v.io/v23/services/security/access.ACLMatch", verror.NoRetry, "{1:}{2:} none of the valid blessings ({3}) are allowed by the ACL (rejected blessings: {4})")
 )
 
 func init() {

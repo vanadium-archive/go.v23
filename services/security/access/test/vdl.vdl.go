@@ -6,10 +6,10 @@ package test
 
 import (
 	// VDL system imports
-	"v.io/core/veyron2"
-	"v.io/core/veyron2/context"
-	"v.io/core/veyron2/ipc"
-	"v.io/core/veyron2/vdl"
+	"v.io/v23"
+	"v.io/v23/context"
+	"v.io/v23/ipc"
+	"v.io/v23/vdl"
 )
 
 // Any package can define tags (of arbitrary types) to be attached to methods.
@@ -17,7 +17,7 @@ import (
 type MyTag string
 
 func (MyTag) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/services/security/access/test.MyTag"
+	Name string "v.io/v23/services/security/access/test.MyTag"
 }) {
 }
 
@@ -71,7 +71,7 @@ func (c implMyObjectClientStub) c(ctx *context.T) ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return veyron2.GetClient(ctx)
+	return v23.GetClient(ctx)
 }
 
 func (c implMyObjectClientStub) Get(ctx *context.T, opts ...ipc.CallOpt) (err error) {
@@ -200,7 +200,7 @@ var MyObjectDesc ipc.InterfaceDesc = descMyObject
 // descMyObject hides the desc to keep godoc clean.
 var descMyObject = ipc.InterfaceDesc{
 	Name:    "MyObject",
-	PkgPath: "v.io/core/veyron2/services/security/access/test",
+	PkgPath: "v.io/v23/services/security/access/test",
 	Doc:     "// MyObject demonstrates how tags are attached to methods.",
 	Methods: []ipc.MethodDesc{
 		{

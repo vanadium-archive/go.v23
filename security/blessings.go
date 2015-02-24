@@ -8,7 +8,7 @@ import (
 	"strings"
 	"sync"
 
-	"v.io/core/veyron2/vlog"
+	"v.io/v23/vlog"
 )
 
 var errEmptyChain = errors.New("empty certificate chain found")

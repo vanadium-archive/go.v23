@@ -136,9 +136,9 @@ package security
 import (
 	"time"
 
-	"v.io/core/veyron2/context"
-	"v.io/core/veyron2/naming"
-	"v.io/core/veyron2/vdl"
+	"v.io/v23/context"
+	"v.io/v23/naming"
+	"v.io/v23/vdl"
 )
 
 // Principal represents an entity capable of making or receiving RPCs.

@@ -1,6 +1,6 @@
 package nativedep
 
-import "v.io/core/veyron2/vdl/testdata/nativetest"
+import "v.io/v23/vdl/testdata/nativetest"
 
 type All struct {
 	A nativetest.WireString

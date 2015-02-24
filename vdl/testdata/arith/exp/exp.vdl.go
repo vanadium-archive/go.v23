@@ -7,9 +7,9 @@ package exp
 
 import (
 	// VDL system imports
-	"v.io/core/veyron2"
-	"v.io/core/veyron2/context"
-	"v.io/core/veyron2/ipc"
+	"v.io/v23"
+	"v.io/v23/context"
+	"v.io/v23/ipc"
 )
 
 // ExpClientMethods is the client interface
@@ -44,7 +44,7 @@ func (c implExpClientStub) c(ctx *context.T) ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return veyron2.GetClient(ctx)
+	return v23.GetClient(ctx)
 }
 
 func (c implExpClientStub) Exp(ctx *context.T, i0 float64, opts ...ipc.CallOpt) (o0 float64, err error) {
@@ -115,7 +115,7 @@ var ExpDesc ipc.InterfaceDesc = descExp
 // descExp hides the desc to keep godoc clean.
 var descExp = ipc.InterfaceDesc{
 	Name:    "Exp",
-	PkgPath: "v.io/core/veyron2/vdl/testdata/arith/exp",
+	PkgPath: "v.io/v23/vdl/testdata/arith/exp",
 	Methods: []ipc.MethodDesc{
 		{
 			Name: "Exp",

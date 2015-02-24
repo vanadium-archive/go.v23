@@ -7,9 +7,9 @@ import (
 	"strings"
 	"testing"
 
-	"v.io/core/veyron2/i18n"
-	"v.io/core/veyron2/verror"
-	"v.io/core/veyron2/vtrace"
+	"v.io/v23/i18n"
+	"v.io/v23/verror"
+	"v.io/v23/vtrace"
 
 	"v.io/core/veyron/lib/testutil"
 	_ "v.io/core/veyron/profiles"
@@ -219,7 +219,7 @@ func TestDefaultValues(t *testing.T) {
 	}
 
 	unknown := verror.Standard{}
-	if got, want := unknown.Error(), "v.io/core/veyron2/verror.Unknown"; got != want {
+	if got, want := unknown.Error(), "v.io/v23/verror.Unknown"; got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}
 }
@@ -248,12 +248,12 @@ func TestBasic(t *testing.T) {
 		{nEN1, verror.ErrNoExist, "server nEN1 not found 1 2"},
 		{nFR0, verror.ErrNoExist, "server nFR0 pas trouvé 0"},
 		{nFR1, verror.ErrNoExist, "server nFR1 pas trouvé 1 2"},
-		{nDE0, verror.ErrNoExist, "v.io/core/veyron2/verror.NoExist: server nDE0 0"},
-		{nDE1, verror.ErrNoExist, "v.io/core/veyron2/verror.NoExist: server nDE1 1 2"},
+		{nDE0, verror.ErrNoExist, "v.io/v23/verror.NoExist: server nDE0 0"},
+		{nDE1, verror.ErrNoExist, "v.io/v23/verror.NoExist: server nDE1 1 2"},
 
 		{gEN, verror.ErrUnknown, "server op unknown error Go error"},
 		{gFR, verror.ErrUnknown, "server op erreur inconnu Go error"},
-		{gDE, verror.ErrUnknown, "v.io/core/veyron2/verror.Unknown: server op Go error"},
+		{gDE, verror.ErrUnknown, "v.io/v23/verror.Unknown: server op Go error"},
 
 		{v2EN, idActionA, "server aEN1 error A 1 2"},
 		{v2FR0, idActionA, "server aEN1 erreur A 1 2"},

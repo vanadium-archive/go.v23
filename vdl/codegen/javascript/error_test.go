@@ -3,10 +3,10 @@ package javascript
 import (
 	"testing"
 
-	"v.io/core/veyron2/i18n"
-	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/vdl/compile"
-	"v.io/core/veyron2/verror"
+	"v.io/v23/i18n"
+	"v.io/v23/vdl"
+	"v.io/v23/vdl/compile"
+	"v.io/v23/verror"
 )
 
 func TestError(t *testing.T) {
@@ -14,7 +14,7 @@ func TestError(t *testing.T) {
 		NamePos: compile.NamePos{
 			Name: "Test",
 		},
-		ID:     verror.ID("v.io/core/veyron2/vdl/codegen/javascript.Test"),
+		ID:     verror.ID("v.io/v23/vdl/codegen/javascript.Test"),
 		Action: verror.NoRetry,
 		Params: []*compile.Arg{
 			&compile.Arg{
@@ -43,7 +43,7 @@ func TestError(t *testing.T) {
 	}
 	var names typeNames
 	result := generateErrorConstructor(names, e)
-	expected := `module.exports.TestError = makeError('v.io/core/veyron2/vdl/codegen/javascript.Test', actions.NO_RETRY, {
+	expected := `module.exports.TestError = makeError('v.io/v23/vdl/codegen/javascript.Test', actions.NO_RETRY, {
   'en-US': 'english string',
   'fr': 'french string',
 }, [

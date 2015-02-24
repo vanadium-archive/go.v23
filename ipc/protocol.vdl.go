@@ -5,11 +5,11 @@ package ipc
 
 import (
 	// VDL system imports
-	"v.io/core/veyron2/vdl"
+	"v.io/v23/vdl"
 
 	// VDL user imports
-	"v.io/core/veyron2/security"
-	"v.io/core/veyron2/vtrace"
+	"v.io/v23/security"
+	"v.io/v23/vtrace"
 )
 
 // Request describes the request header sent by the client to the server.  A
@@ -54,7 +54,7 @@ type Request struct {
 }
 
 func (Request) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/ipc.Request"
+	Name string "v.io/v23/ipc.Request"
 }) {
 }
 
@@ -81,7 +81,7 @@ type Response struct {
 }
 
 func (Response) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/ipc.Response"
+	Name string "v.io/v23/ipc.Response"
 }) {
 }
 
@@ -100,7 +100,7 @@ type BlessingsRequest struct {
 }
 
 func (BlessingsRequest) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/ipc.BlessingsRequest"
+	Name string "v.io/v23/ipc.BlessingsRequest"
 }) {
 }
 

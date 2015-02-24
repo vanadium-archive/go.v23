@@ -4,8 +4,8 @@ package java
 import (
 	"path"
 
-	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/vdl/compile"
+	"v.io/v23/vdl"
+	"v.io/v23/vdl/compile"
 )
 
 // pkgPathXlator is the function used to translate a VDL package path
@@ -102,7 +102,7 @@ func Generate(pkg *compile.Package, env *compile.Env) (ret []JavaFileInfo) {
 // Restrict the feature to these whitelisted VDL packages for now.
 var nativeTypePackageWhitelist = map[string]bool{
 	"time": true,
-	"v.io/core/veyron2/vdl/testdata/nativetest": true,
+	"v.io/v23/vdl/testdata/nativetest": true,
 }
 
 func validateJavaConfig(pkg *compile.Package, env *compile.Env) {

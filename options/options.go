@@ -49,7 +49,7 @@ package options
 import (
 	"time"
 
-	"v.io/core/veyron2/security"
+	"v.io/v23/security"
 )
 
 // ServerBlessings is the blessings that should be presented by a process (a

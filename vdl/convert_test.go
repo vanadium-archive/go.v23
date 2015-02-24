@@ -1,7 +1,7 @@
 package vdl_test
 
 // This test is in the vdl_test package to avoid a cyclic dependency with the
-// "v.io/core/veyron2/verror" package.  We need to import the verror package in
+// "v.io/v23/verror" package.  We need to import the verror package in
 // order to test error conversions.
 //
 // TODO(toddw): test values of recursive types.
@@ -12,8 +12,8 @@ import (
 	"reflect"
 	"testing"
 
-	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/verror"
+	"v.io/v23/vdl"
+	"v.io/v23/verror"
 )
 
 func errorValue(e verror.Standard) *vdl.Value {

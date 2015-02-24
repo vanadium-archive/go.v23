@@ -4,13 +4,13 @@ import (
 	"net"
 	"time"
 
-	"v.io/core/veyron2/context"
+	"v.io/v23/context"
 
-	"v.io/core/veyron2/verror"
+	"v.io/v23/verror"
 )
 
 const (
-	pkgPath         = "v.io/core/veyron2/naming"
+	pkgPath         = "v.io/v23/naming"
 	UnknownProtocol = ""
 )
 

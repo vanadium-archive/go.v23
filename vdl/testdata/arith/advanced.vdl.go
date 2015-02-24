@@ -5,12 +5,12 @@ package arith
 
 import (
 	// VDL system imports
-	"v.io/core/veyron2"
-	"v.io/core/veyron2/context"
-	"v.io/core/veyron2/ipc"
+	"v.io/v23"
+	"v.io/v23/context"
+	"v.io/v23/ipc"
 
 	// VDL user imports
-	"v.io/core/veyron2/vdl/testdata/arith/exp"
+	"v.io/v23/vdl/testdata/arith/exp"
 )
 
 // TrigonometryClientMethods is the client interface
@@ -48,7 +48,7 @@ func (c implTrigonometryClientStub) c(ctx *context.T) ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return veyron2.GetClient(ctx)
+	return v23.GetClient(ctx)
 }
 
 func (c implTrigonometryClientStub) Sine(ctx *context.T, i0 float64, opts ...ipc.CallOpt) (o0 float64, err error) {
@@ -135,7 +135,7 @@ var TrigonometryDesc ipc.InterfaceDesc = descTrigonometry
 // descTrigonometry hides the desc to keep godoc clean.
 var descTrigonometry = ipc.InterfaceDesc{
 	Name:    "Trigonometry",
-	PkgPath: "v.io/core/veyron2/vdl/testdata/arith",
+	PkgPath: "v.io/v23/vdl/testdata/arith",
 	Doc:     "// Trigonometry is an interface that specifies a couple trigonometric functions.",
 	Methods: []ipc.MethodDesc{
 		{
@@ -201,7 +201,7 @@ func (c implAdvancedMathClientStub) c(ctx *context.T) ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return veyron2.GetClient(ctx)
+	return v23.GetClient(ctx)
 }
 
 // AdvancedMathServerMethods is the interface a server writer
@@ -270,10 +270,10 @@ var AdvancedMathDesc ipc.InterfaceDesc = descAdvancedMath
 // descAdvancedMath hides the desc to keep godoc clean.
 var descAdvancedMath = ipc.InterfaceDesc{
 	Name:    "AdvancedMath",
-	PkgPath: "v.io/core/veyron2/vdl/testdata/arith",
+	PkgPath: "v.io/v23/vdl/testdata/arith",
 	Doc:     "// AdvancedMath is an interface for more advanced math than arith.  It embeds\n// interfaces defined both in the same file and in an external package; and in\n// turn it is embedded by arith.Calculator (which is in the same package but\n// different file) to verify that embedding works in all these scenarios.",
 	Embeds: []ipc.EmbedDesc{
-		{"Trigonometry", "v.io/core/veyron2/vdl/testdata/arith", "// Trigonometry is an interface that specifies a couple trigonometric functions."},
-		{"Exp", "v.io/core/veyron2/vdl/testdata/arith/exp", ``},
+		{"Trigonometry", "v.io/v23/vdl/testdata/arith", "// Trigonometry is an interface that specifies a couple trigonometric functions."},
+		{"Exp", "v.io/v23/vdl/testdata/arith/exp", ``},
 	},
 }

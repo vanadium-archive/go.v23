@@ -5,17 +5,17 @@ package nativedep2
 
 import (
 	// VDL system imports
-	"v.io/core/veyron2/vdl"
+	"v.io/v23/vdl"
 
 	// VDL user imports
 	"time"
-	_ "v.io/core/veyron2/vdl/testdata/nativetest"
+	_ "v.io/v23/vdl/testdata/nativetest"
 )
 
 type MyTime time.Time
 
 func (MyTime) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vdl/testdata/nativedep2.MyTime"
+	Name string "v.io/v23/vdl/testdata/nativedep2.MyTime"
 }) {
 }
 

@@ -1,7 +1,7 @@
 package vom
 
 import (
-	"v.io/core/veyron2/vdl"
+	"v.io/v23/vdl"
 )
 
 // TODO(toddw): Flesh out the RawValue strategy.

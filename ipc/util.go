@@ -1,8 +1,8 @@
 package ipc
 
 import (
-	"v.io/core/veyron2/context"
-	"v.io/core/veyron2/verror"
+	"v.io/v23/context"
+	"v.io/v23/verror"
 )
 
 // NewGlobState returns the GlobState corresponding to obj.  Returns nil if obj
@@ -36,9 +36,9 @@ func (o obj) GlobChildren__(ServerContext) (<-chan string, error) {
 }
 
 var (
-	unknownMethod      = verror.Register("v.io/core/veyron2/ipc.unknownMethod", verror.NoRetry, "{1:}{2:} unknown method {3}")
-	unknownSuffix      = verror.Register("v.io/core/veyron2/ipc.unknownSuffix", verror.NoRetry, "{1:}{2:} unknown object with suffix: {3}")
-	globNotImplemented = verror.Register("v.io/core/veyron2/ipc.globNotImplemented", verror.NoRetry, "{1:}{2:} Glob not implemented by suffix: {3}")
+	unknownMethod      = verror.Register("v.io/v23/ipc.unknownMethod", verror.NoRetry, "{1:}{2:} unknown method {3}")
+	unknownSuffix      = verror.Register("v.io/v23/ipc.unknownSuffix", verror.NoRetry, "{1:}{2:} unknown object with suffix: {3}")
+	globNotImplemented = verror.Register("v.io/v23/ipc.globNotImplemented", verror.NoRetry, "{1:}{2:} Glob not implemented by suffix: {3}")
 )
 
 // NewErrUnknownMethod returns an unknown method error.

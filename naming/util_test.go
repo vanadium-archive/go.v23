@@ -3,8 +3,8 @@ package naming_test
 import (
 	"testing"
 
-	"v.io/core/veyron2/ipc/version"
-	"v.io/core/veyron2/naming"
+	"v.io/v23/ipc/version"
+	"v.io/v23/naming"
 )
 
 func TestFormat(t *testing.T) {

@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"log"
 
-	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/vdl/compile"
+	"v.io/v23/vdl"
+	"v.io/v23/vdl/compile"
 )
 
 const primitiveTmpl = `
@@ -16,10 +16,10 @@ package {{.PackagePath}};
 /**
  * type {{.Name}} {{.VdlTypeString}} {{.Doc}}
  **/
-@io.v.core.veyron2.vdl.GeneratedFromVdl(name = "{{.VdlTypeName}}")
+@io.v.core.v23.vdl.GeneratedFromVdl(name = "{{.VdlTypeName}}")
 {{ .AccessModifier }} final class {{.Name}} extends {{.VdlType}} {
-    public static final io.v.core.veyron2.vdl.VdlType VDL_TYPE =
-            io.v.core.veyron2.vdl.Types.getVdlTypeFromReflect({{.Name}}.class);
+    public static final io.v.core.v23.vdl.VdlType VDL_TYPE =
+            io.v.core.v23.vdl.Types.getVdlTypeFromReflect({{.Name}}.class);
 
     public {{.Name}}({{.ConstructorType}} value) {
         super(VDL_TYPE, value);

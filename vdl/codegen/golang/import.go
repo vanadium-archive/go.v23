@@ -6,8 +6,8 @@ import (
 	"sort"
 	"strconv"
 
-	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/vdl/compile"
+	"v.io/v23/vdl"
+	"v.io/v23/vdl/compile"
 )
 
 // goImport represents a single import in the generated Go file.
@@ -325,29 +325,29 @@ func systemImports(deps deps, file *compile.File) importMap {
 	system := make(importMap)
 	if deps.any || deps.typeObject || deps.methodTags || len(file.TypeDefs) > 0 {
 		// System import for vdl.Value, vdl.Type and vdl.Register.
-		system["v.io/core/veyron2/vdl"] = "vdl"
+		system["v.io/v23/vdl"] = "vdl"
 	}
 	if deps.enumTypeDef {
 		system["fmt"] = "fmt"
 	}
 	if len(file.Interfaces) > 0 {
-		system["v.io/core/veyron2"] = "veyron2"
-		system["v.io/core/veyron2/context"] = "context"
-		system["v.io/core/veyron2/ipc"] = "ipc"
+		system["v.io/v23"] = "v23"
+		system["v.io/v23/context"] = "context"
+		system["v.io/v23/ipc"] = "ipc"
 	}
 	if deps.streamingMethods {
 		system["io"] = "io"
 	}
 	if len(file.ErrorDefs) > 0 {
-		system["v.io/core/veyron2/context"] = "context"
-		system["v.io/core/veyron2/i18n"] = "i18n"
+		system["v.io/v23/context"] = "context"
+		system["v.io/v23/i18n"] = "i18n"
 		// If the user has specified any errors, typically we need to import the
-		// "v.io/core/veyron2/verror" package.  However we allow vdl code-generation
-		// in the "v.io/core/veyron2/verror" package itself, to specify common
+		// "v.io/v23/verror" package.  However we allow vdl code-generation
+		// in the "v.io/v23/verror" package itself, to specify common
 		// errors.  Special-case this scenario to avoid self-cyclic package
 		// dependencies.
-		if file.Package.Path != "v.io/core/veyron2/verror" {
-			system["v.io/core/veyron2/verror"] = "verror"
+		if file.Package.Path != "v.io/v23/verror" {
+			system["v.io/v23/verror"] = "verror"
 		}
 	}
 	// Now remove self package dependencies.

@@ -2,6 +2,6 @@ package ipc
 
 import (
 	// Ensure all standard vdl types are registered.
-	_ "v.io/core/veyron2/vdl/vdlroot"
-	_ "v.io/core/veyron2/verror"
+	_ "v.io/v23/vdl/vdlroot"
+	_ "v.io/v23/verror"
 )

@@ -48,15 +48,15 @@ import (
 	"sort"
 	"strings"
 
-	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/vdl/compile"
-	"v.io/core/veyron2/vdl/parse"
-	"v.io/core/veyron2/vdl/vdlroot/src/vdltool"
-	"v.io/core/veyron2/vdl/vdlutil"
 	"v.io/lib/toposort"
+	"v.io/v23/vdl"
+	"v.io/v23/vdl/compile"
+	"v.io/v23/vdl/parse"
+	"v.io/v23/vdl/vdlroot/src/vdltool"
+	"v.io/v23/vdl/vdlutil"
 )
 
-const vdlrootImportPrefix = "v.io/core/veyron2/vdl/vdlroot/src"
+const vdlrootImportPrefix = "v.io/v23/vdl/vdlroot/src"
 
 // Package represents the build information for a vdl package.
 type Package struct {
@@ -68,7 +68,7 @@ type Package struct {
 	Path string
 	// GenPath is the package path to use for code generation.  It is typically
 	// the same as Path, except for vdlroot standard packages.
-	// E.g. "v.io/core/veyron2/vdl/vdlroot/src/time"
+	// E.g. "v.io/v23/vdl/vdlroot/src/time"
 	GenPath string
 	// Dir is the absolute directory containing the package files.
 	// E.g. "/home/user/veyron/vdl/src/foo/bar"
@@ -280,7 +280,7 @@ func vdlRootSrcDir(errs *vdlutil.Errors) string {
 			errs.Error("Either VDLROOT or VANADIUM_ROOT must be set")
 			return ""
 		}
-		vdlroot = filepath.Join(vroot, "release", "go", "src", "v.io", "core", "veyron2", "vdl", "vdlroot")
+		vdlroot = filepath.Join(vroot, "release", "go", "src", "v.io", "v23", "vdl", "vdlroot")
 	}
 	src := filepath.Join(vdlroot, "src")
 	abs, err := filepath.Abs(src)
@@ -525,7 +525,7 @@ func (ds *depSorter) resolveDirPath(dir string, mode UnknownPathMode) *Package {
 	// We always deduce the package path from the package directory, even if we
 	// originally resolved from an import path, and thus already "know" the
 	// package path.  This is to ensure we correctly handle vdl standard packages.
-	// E.g. if we're given "v.io/core/veyron2/vdl/vdlroot/src/vdltool" as
+	// E.g. if we're given "v.io/v23/vdl/vdlroot/src/vdltool" as
 	// an import path, the resulting package path must be "vdltool".
 	pkgPath, genPath, err := ds.deducePackagePath(absDir)
 	if err != nil {

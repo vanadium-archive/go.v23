@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"strings"
 
-	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/vdl/codegen"
+	"v.io/v23/vdl"
+	"v.io/v23/vdl/codegen"
 )
 
 // Type returns t using VDL syntax, returning the qualified name if t is named,

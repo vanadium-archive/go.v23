@@ -8,7 +8,7 @@ import (
 
 var NUnionWant = []*reflectInfo{{
 	Type: reflect.TypeOf((*NUnionABC)(nil)).Elem(),
-	Name: "v.io/core/veyron2/vdl.NUnionABC",
+	Name: "v.io/v23/vdl.NUnionABC",
 	UnionFields: []reflectField{
 		{"A", reflect.TypeOf(false), reflect.TypeOf(NUnionABCA{})},
 		{"B", reflect.TypeOf(string("")), reflect.TypeOf(NUnionABCB{})},
@@ -27,7 +27,7 @@ var reflectInfoTests = []struct {
 		reflect.TypeOf(NEnumA),
 		[]*reflectInfo{{
 			Type:       reflect.TypeOf(NEnumA),
-			Name:       "v.io/core/veyron2/vdl.NEnum",
+			Name:       "v.io/v23/vdl.NEnum",
 			EnumLabels: []string{"A", "B", "C", "ABC"},
 		}},
 	},
@@ -39,7 +39,7 @@ var reflectInfoTests = []struct {
 		reflect.TypeOf(NRecurseSelf{}),
 		[]*reflectInfo{{
 			Type: reflect.TypeOf(NRecurseSelf{}),
-			Name: "v.io/core/veyron2/vdl.NRecurseSelf",
+			Name: "v.io/v23/vdl.NRecurseSelf",
 		}},
 	},
 	{
@@ -47,11 +47,11 @@ var reflectInfoTests = []struct {
 		[]*reflectInfo{
 			{
 				Type: reflect.TypeOf(NRecurseA{}),
-				Name: "v.io/core/veyron2/vdl.NRecurseA",
+				Name: "v.io/v23/vdl.NRecurseA",
 			},
 			{
 				Type: reflect.TypeOf(NRecurseB{}),
-				Name: "v.io/core/veyron2/vdl.NRecurseB",
+				Name: "v.io/v23/vdl.NRecurseB",
 			},
 		},
 	},
@@ -60,11 +60,11 @@ var reflectInfoTests = []struct {
 		[]*reflectInfo{
 			{
 				Type: reflect.TypeOf(NRecurseB{}),
-				Name: "v.io/core/veyron2/vdl.NRecurseB",
+				Name: "v.io/v23/vdl.NRecurseB",
 			},
 			{
 				Type: reflect.TypeOf(NRecurseA{}),
-				Name: "v.io/core/veyron2/vdl.NRecurseA",
+				Name: "v.io/v23/vdl.NRecurseA",
 			},
 		},
 	},

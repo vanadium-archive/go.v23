@@ -6,10 +6,10 @@ package types
 
 import (
 	// VDL system imports
-	"v.io/core/veyron2/context"
-	"v.io/core/veyron2/i18n"
-	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/verror"
+	"v.io/v23/context"
+	"v.io/v23/i18n"
+	"v.io/v23/vdl"
+	"v.io/v23/verror"
 )
 
 // LogLine is a log entry from a log file.
@@ -21,7 +21,7 @@ type LogEntry struct {
 }
 
 func (LogEntry) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/services/mgmt/logreader/types.LogEntry"
+	Name string "v.io/v23/services/mgmt/logreader/types.LogEntry"
 }) {
 }
 
@@ -34,7 +34,7 @@ func init() {
 const AllEntries = int32(-1)
 
 var (
-	ErrEOF = verror.Register("v.io/core/veyron2/services/mgmt/logreader/types.EOF", verror.NoRetry, "{1:}{2:} EOF")
+	ErrEOF = verror.Register("v.io/v23/services/mgmt/logreader/types.EOF", verror.NoRetry, "{1:}{2:} EOF")
 )
 
 func init() {

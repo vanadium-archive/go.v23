@@ -1,7 +1,7 @@
 package compile
 
 import (
-	"v.io/core/veyron2/vdl/vdlutil"
+	"v.io/v23/vdl/vdlutil"
 )
 
 // ReservedMode indicates which mode to perform reserved-word checking:

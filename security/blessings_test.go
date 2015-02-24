@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"v.io/core/veyron2/vom"
+	"v.io/v23/vom"
 )
 
 func newSigner() Signer {

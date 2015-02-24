@@ -9,13 +9,13 @@ package pprof
 import (
 	// VDL system imports
 	"io"
-	"v.io/core/veyron2"
-	"v.io/core/veyron2/context"
-	"v.io/core/veyron2/ipc"
-	"v.io/core/veyron2/vdl"
+	"v.io/v23"
+	"v.io/v23/context"
+	"v.io/v23/ipc"
+	"v.io/v23/vdl"
 
 	// VDL user imports
-	"v.io/core/veyron2/services/security/access"
+	"v.io/v23/services/security/access"
 )
 
 // PProfClientMethods is the client interface
@@ -66,7 +66,7 @@ func (c implPProfClientStub) c(ctx *context.T) ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return veyron2.GetClient(ctx)
+	return v23.GetClient(ctx)
 }
 
 func (c implPProfClientStub) CmdLine(ctx *context.T, opts ...ipc.CallOpt) (o0 []string, err error) {
@@ -359,7 +359,7 @@ var PProfDesc ipc.InterfaceDesc = descPProf
 // descPProf hides the desc to keep godoc clean.
 var descPProf = ipc.InterfaceDesc{
 	Name:    "PProf",
-	PkgPath: "v.io/core/veyron2/services/mgmt/pprof",
+	PkgPath: "v.io/v23/services/mgmt/pprof",
 	Methods: []ipc.MethodDesc{
 		{
 			Name: "CmdLine",

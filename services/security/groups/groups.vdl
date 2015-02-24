@@ -6,8 +6,8 @@
 package groups
 
 import (
-	"v.io/core/veyron2/services/security/access"
-	"v.io/core/veyron2/services/security/access/object"
+	"v.io/v23/services/security/access"
+	"v.io/v23/services/security/access/object"
 )
 
 // BlessingPatternChunk is a substring of a BlessingPattern. As with

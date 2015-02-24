@@ -10,10 +10,10 @@ import (
 	"sync"
 	"time"
 
-	"v.io/core/veyron2/uniqueid"
-	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/vlog"
-	"v.io/core/veyron2/vom"
+	"v.io/v23/uniqueid"
+	"v.io/v23/vdl"
+	"v.io/v23/vlog"
+	"v.io/v23/vom"
 )
 
 type registryEntry struct {

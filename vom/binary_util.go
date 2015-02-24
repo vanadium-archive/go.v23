@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"math"
 
-	"v.io/core/veyron2/vdl"
+	"v.io/v23/vdl"
 )
 
 // Binary encoding and decoding routines.  The binary format is identical to the

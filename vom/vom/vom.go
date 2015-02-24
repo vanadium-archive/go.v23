@@ -13,9 +13,9 @@ import (
 	"strings"
 	"unicode"
 
-	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/vom"
 	"v.io/lib/cmdline"
+	"v.io/v23/vdl"
+	"v.io/v23/vom"
 )
 
 func main() {
@@ -70,7 +70,7 @@ characters may be input to represent commands:
 This lets you cut-and-paste hex strings into your terminal, and use the commands
 to trigger status or flush calls; i.e. a rudimentary debugging UI.
 
-See v.io/core/veyron2/vom.Dumper for details on the dump output.
+See v.io/v23/vom.Dumper for details on the dump output.
 `,
 	ArgsName: "[data]",
 	ArgsLong: "[data] is the data to dump; if not specified, reads from stdin",

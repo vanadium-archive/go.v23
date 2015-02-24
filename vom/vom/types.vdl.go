@@ -6,7 +6,7 @@ package main
 import (
 	// VDL system imports
 	"fmt"
-	"v.io/core/veyron2/vdl"
+	"v.io/v23/vdl"
 )
 
 type dataRep int
@@ -51,7 +51,7 @@ func (x dataRep) String() string {
 }
 
 func (dataRep) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vom/vom.dataRep"
+	Name string "v.io/v23/vom/vom.dataRep"
 	Enum struct{ Hex, Binary string }
 }) {
 }

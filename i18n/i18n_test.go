@@ -4,7 +4,7 @@ package i18n
 
 import "strings"
 import "testing"
-import "v.io/core/veyron2/context"
+import "v.io/v23/context"
 
 // testLookupSetAndRemove tests Lookup, Set, and Set-to-empty on *cat.
 func testLookupSetAndRemove(t *testing.T, cat *Catalogue, catName string) {

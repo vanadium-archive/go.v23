@@ -6,7 +6,7 @@ import (
 	"sort"
 	"time"
 
-	"v.io/core/veyron2/uniqueid"
+	"v.io/v23/uniqueid"
 )
 
 const indentStep = "    "

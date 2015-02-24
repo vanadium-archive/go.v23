@@ -248,7 +248,7 @@ type (
 
 func RecurseSelfType() *Type {
 	var builder TypeBuilder
-	n := builder.Named("v.io/core/veyron2/vdl.NRecurseSelf")
+	n := builder.Named("v.io/v23/vdl.NRecurseSelf")
 	n.AssignBase(builder.Struct().AppendField("X", builder.List().AssignElem(n)))
 	builder.Build()
 	t, err := n.Built()
@@ -260,8 +260,8 @@ func RecurseSelfType() *Type {
 
 func RecurseABTypes() [2]*Type {
 	var builder TypeBuilder
-	a := builder.Named("v.io/core/veyron2/vdl.NRecurseA")
-	b := builder.Named("v.io/core/veyron2/vdl.NRecurseB")
+	a := builder.Named("v.io/v23/vdl.NRecurseA")
+	b := builder.Named("v.io/v23/vdl.NRecurseB")
 	a.AssignBase(builder.Struct().AppendField("B", builder.List().AssignElem(b)))
 	b.AssignBase(builder.Struct().AppendField("A", builder.List().AssignElem(a)))
 	builder.Build()
@@ -439,10 +439,10 @@ func init() {
 }
 
 var (
-	StructInt64TypeN = NamedType("v.io/core/veyron2/vdl.NStructInt64", StructType(Field{"X", Int64Type}))
-	UnionABCTypeN    = NamedType("v.io/core/veyron2/vdl.NUnionABC", UnionType([]Field{{"A", BoolType}, {"B", StringType}, {"C", StructInt64TypeN}}...))
-	UnionBCDTypeN    = NamedType("v.io/core/veyron2/vdl.NUnionBCD", UnionType([]Field{{"B", StringType}, {"C", StructInt64TypeN}, {"D", Int64Type}}...))
-	UnionXYTypeN     = NamedType("v.io/core/veyron2/vdl.NUnionXY", UnionType([]Field{{"X", StringType}, {"Y", StructInt64TypeN}}...))
+	StructInt64TypeN = NamedType("v.io/v23/vdl.NStructInt64", StructType(Field{"X", Int64Type}))
+	UnionABCTypeN    = NamedType("v.io/v23/vdl.NUnionABC", UnionType([]Field{{"A", BoolType}, {"B", StringType}, {"C", StructInt64TypeN}}...))
+	UnionBCDTypeN    = NamedType("v.io/v23/vdl.NUnionBCD", UnionType([]Field{{"B", StringType}, {"C", StructInt64TypeN}, {"D", Int64Type}}...))
+	UnionXYTypeN     = NamedType("v.io/v23/vdl.NUnionXY", UnionType([]Field{{"X", StringType}, {"Y", StructInt64TypeN}}...))
 )
 
 // Define a bunch of *Type types used in tests.
@@ -554,19 +554,19 @@ var (
 )
 
 func NameN(suffix string, base *Type) *Type {
-	return NamedType("v.io/core/veyron2/vdl.N"+suffix, base)
+	return NamedType("v.io/v23/vdl.N"+suffix, base)
 }
 
 func NameNArray(suffix string, base *Type) *Type {
-	return NamedType("v.io/core/veyron2/vdl.NArray3"+suffix, ArrayType(3, base))
+	return NamedType("v.io/v23/vdl.NArray3"+suffix, ArrayType(3, base))
 }
 
 func NameNStruct(suffix string, base *Type) *Type {
-	return NamedType("v.io/core/veyron2/vdl.NStruct"+suffix, StructType(Field{"X", base}))
+	return NamedType("v.io/v23/vdl.NStruct"+suffix, StructType(Field{"X", base}))
 }
 
 func NameNSlice(suffix string, base *Type) *Type {
-	return NamedType("v.io/core/veyron2/vdl.NSlice"+suffix, ListType(base))
+	return NamedType("v.io/v23/vdl.NSlice"+suffix, ListType(base))
 }
 
 func rtSet(base *Type) *Type {
@@ -574,7 +574,7 @@ func rtSet(base *Type) *Type {
 }
 
 func NameNSet(suffix string, base *Type) *Type {
-	return NamedType("v.io/core/veyron2/vdl.NSet"+suffix, rtSet(base))
+	return NamedType("v.io/v23/vdl.NSet"+suffix, rtSet(base))
 }
 
 func rtMap(base *Type) *Type {
@@ -582,7 +582,7 @@ func rtMap(base *Type) *Type {
 }
 
 func NameNMap(suffix string, base *Type) *Type {
-	return NamedType("v.io/core/veyron2/vdl.NMap"+suffix, rtMap(base))
+	return NamedType("v.io/v23/vdl.NMap"+suffix, rtMap(base))
 }
 
 func SetStringValue(t *Type, x ...string) *Value {

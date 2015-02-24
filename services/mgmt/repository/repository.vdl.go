@@ -8,16 +8,16 @@ package repository
 import (
 	// VDL system imports
 	"io"
-	"v.io/core/veyron2"
-	"v.io/core/veyron2/context"
-	"v.io/core/veyron2/ipc"
-	"v.io/core/veyron2/vdl"
+	"v.io/v23"
+	"v.io/v23/context"
+	"v.io/v23/ipc"
+	"v.io/v23/vdl"
 
 	// VDL user imports
-	"v.io/core/veyron2/services/mgmt/application"
-	"v.io/core/veyron2/services/mgmt/binary"
-	"v.io/core/veyron2/services/security/access"
-	"v.io/core/veyron2/services/security/access/object"
+	"v.io/v23/services/mgmt/application"
+	"v.io/v23/services/mgmt/binary"
+	"v.io/v23/services/security/access"
+	"v.io/v23/services/security/access/object"
 )
 
 // MediaInfo contains the metadata information for a binary.
@@ -27,7 +27,7 @@ type MediaInfo struct {
 }
 
 func (MediaInfo) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/services/mgmt/repository.MediaInfo"
+	Name string "v.io/v23/services/mgmt/repository.MediaInfo"
 }) {
 }
 
@@ -58,8 +58,8 @@ type ApplicationClientMethods interface {
 	//
 	//   package mypackage
 	//
-	//   import "v.io/core/veyron2/security/access"
-	//   import "v.io/core/veyron2/security/access/object"
+	//   import "v.io/v23/security/access"
+	//   import "v.io/v23/security/access/object"
 	//
 	//   type MyObject interface {
 	//     object.Object
@@ -76,7 +76,7 @@ type ApplicationClientMethods interface {
 	//
 	//  package mypackage
 	//
-	//  import "v.io/core/veyron2/security/access"
+	//  import "v.io/v23/security/access"
 	//
 	//  type MyTag string
 	//
@@ -129,7 +129,7 @@ func (c implApplicationClientStub) c(ctx *context.T) ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return veyron2.GetClient(ctx)
+	return v23.GetClient(ctx)
 }
 
 func (c implApplicationClientStub) Match(ctx *context.T, i0 []string, opts ...ipc.CallOpt) (o0 application.Envelope, err error) {
@@ -164,8 +164,8 @@ type ApplicationServerMethods interface {
 	//
 	//   package mypackage
 	//
-	//   import "v.io/core/veyron2/security/access"
-	//   import "v.io/core/veyron2/security/access/object"
+	//   import "v.io/v23/security/access"
+	//   import "v.io/v23/security/access/object"
 	//
 	//   type MyObject interface {
 	//     object.Object
@@ -182,7 +182,7 @@ type ApplicationServerMethods interface {
 	//
 	//  package mypackage
 	//
-	//  import "v.io/core/veyron2/security/access"
+	//  import "v.io/v23/security/access"
 	//
 	//  type MyTag string
 	//
@@ -262,10 +262,10 @@ var ApplicationDesc ipc.InterfaceDesc = descApplication
 // descApplication hides the desc to keep godoc clean.
 var descApplication = ipc.InterfaceDesc{
 	Name:    "Application",
-	PkgPath: "v.io/core/veyron2/services/mgmt/repository",
+	PkgPath: "v.io/v23/services/mgmt/repository",
 	Doc:     "// Application provides access to application envelopes. An\n// application envelope is identified by an application name and an\n// application version, which are specified through the object name,\n// and a profile name, which is specified using a method argument.\n//\n// Example:\n// /apps/search/v1.Match([]string{\"base\", \"media\"})\n//   returns an application envelope that can be used for downloading\n//   and executing the \"search\" application, version \"v1\", runnable\n//   on either the \"base\" or \"media\" profile.",
 	Embeds: []ipc.EmbedDesc{
-		{"Object", "v.io/core/veyron2/services/security/access/object", "// Object provides access control for Veyron objects.\n//\n// Veyron services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/core/veyron2/security/access\"\n//   import \"v.io/core/veyron2/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetACL and GetACL in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/core/veyron2/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}\n//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}\n//  }"},
+		{"Object", "v.io/v23/services/security/access/object", "// Object provides access control for Veyron objects.\n//\n// Veyron services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetACL and GetACL in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}\n//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}\n//  }"},
 	},
 	Methods: []ipc.MethodDesc{
 		{
@@ -314,8 +314,8 @@ type BinaryClientMethods interface {
 	//
 	//   package mypackage
 	//
-	//   import "v.io/core/veyron2/security/access"
-	//   import "v.io/core/veyron2/security/access/object"
+	//   import "v.io/v23/security/access"
+	//   import "v.io/v23/security/access/object"
 	//
 	//   type MyObject interface {
 	//     object.Object
@@ -332,7 +332,7 @@ type BinaryClientMethods interface {
 	//
 	//  package mypackage
 	//
-	//  import "v.io/core/veyron2/security/access"
+	//  import "v.io/v23/security/access"
 	//
 	//  type MyTag string
 	//
@@ -412,7 +412,7 @@ func (c implBinaryClientStub) c(ctx *context.T) ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return veyron2.GetClient(ctx)
+	return v23.GetClient(ctx)
 }
 
 func (c implBinaryClientStub) Create(ctx *context.T, i0 int32, i1 MediaInfo, opts ...ipc.CallOpt) (err error) {
@@ -632,8 +632,8 @@ type BinaryServerMethods interface {
 	//
 	//   package mypackage
 	//
-	//   import "v.io/core/veyron2/security/access"
-	//   import "v.io/core/veyron2/security/access/object"
+	//   import "v.io/v23/security/access"
+	//   import "v.io/v23/security/access/object"
 	//
 	//   type MyObject interface {
 	//     object.Object
@@ -650,7 +650,7 @@ type BinaryServerMethods interface {
 	//
 	//  package mypackage
 	//
-	//  import "v.io/core/veyron2/security/access"
+	//  import "v.io/v23/security/access"
 	//
 	//  type MyTag string
 	//
@@ -716,8 +716,8 @@ type BinaryServerStubMethods interface {
 	//
 	//   package mypackage
 	//
-	//   import "v.io/core/veyron2/security/access"
-	//   import "v.io/core/veyron2/security/access/object"
+	//   import "v.io/v23/security/access"
+	//   import "v.io/v23/security/access/object"
 	//
 	//   type MyObject interface {
 	//     object.Object
@@ -734,7 +734,7 @@ type BinaryServerStubMethods interface {
 	//
 	//  package mypackage
 	//
-	//  import "v.io/core/veyron2/security/access"
+	//  import "v.io/v23/security/access"
 	//
 	//  type MyTag string
 	//
@@ -855,10 +855,10 @@ var BinaryDesc ipc.InterfaceDesc = descBinary
 // descBinary hides the desc to keep godoc clean.
 var descBinary = ipc.InterfaceDesc{
 	Name:    "Binary",
-	PkgPath: "v.io/core/veyron2/services/mgmt/repository",
+	PkgPath: "v.io/v23/services/mgmt/repository",
 	Doc:     "// Binary can be used to store and retrieve veyron application\n// binaries.\n//\n// To create a binary, clients first invoke the Create() method that\n// specifies the number of parts the binary consists of. Clients then\n// uploads the individual parts through the Upload() method, which\n// identifies the part being uploaded. To resume an upload after a\n// failure, clients invoke the UploadStatus() method, which returns a\n// slice that identifies which parts are missing.\n//\n// To download a binary, clients first invoke Stat(), which returns\n// information describing the binary, including the number of parts\n// the binary consists of. Clients then download the individual parts\n// through the Download() method, which identifies the part being\n// downloaded. Alternatively, clients can download the binary through\n// HTTP using a transient URL available through the DownloadURL()\n// method.\n//\n// To delete the binary, clients invoke the Delete() method.",
 	Embeds: []ipc.EmbedDesc{
-		{"Object", "v.io/core/veyron2/services/security/access/object", "// Object provides access control for Veyron objects.\n//\n// Veyron services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/core/veyron2/security/access\"\n//   import \"v.io/core/veyron2/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetACL and GetACL in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/core/veyron2/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}\n//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}\n//  }"},
+		{"Object", "v.io/v23/services/security/access/object", "// Object provides access control for Veyron objects.\n//\n// Veyron services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetACL and GetACL in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}\n//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}\n//  }"},
 	},
 	Methods: []ipc.MethodDesc{
 		{
@@ -1061,7 +1061,7 @@ func (c implProfileClientStub) c(ctx *context.T) ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return veyron2.GetClient(ctx)
+	return v23.GetClient(ctx)
 }
 
 func (c implProfileClientStub) Label(ctx *context.T, opts ...ipc.CallOpt) (o0 string, err error) {
@@ -1157,7 +1157,7 @@ var ProfileDesc ipc.InterfaceDesc = descProfile
 // descProfile hides the desc to keep godoc clean.
 var descProfile = ipc.InterfaceDesc{
 	Name:    "Profile",
-	PkgPath: "v.io/core/veyron2/services/mgmt/repository",
+	PkgPath: "v.io/v23/services/mgmt/repository",
 	Doc:     "// Profile abstracts a device's ability to run binaries, and hides\n// specifics such as the operating system, hardware architecture, and\n// the set of installed libraries. Profiles describe binaries and\n// devices, and are used to match them.",
 	Methods: []ipc.MethodDesc{
 		{

@@ -1,6 +1,6 @@
 package verror
 
-import "v.io/core/veyron2/vdl"
+import "v.io/v23/vdl"
 
 func init() {
 	// We must register the error conversion functions between vdl.WireError and

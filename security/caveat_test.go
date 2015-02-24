@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"v.io/core/veyron2/uniqueid"
-	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/verror"
+	"v.io/v23/uniqueid"
+	"v.io/v23/vdl"
+	"v.io/v23/verror"
 )
 
 func TestStandardCaveatFactories(t *testing.T) {

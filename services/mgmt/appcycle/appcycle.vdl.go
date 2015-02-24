@@ -7,10 +7,10 @@ package appcycle
 import (
 	// VDL system imports
 	"io"
-	"v.io/core/veyron2"
-	"v.io/core/veyron2/context"
-	"v.io/core/veyron2/ipc"
-	"v.io/core/veyron2/vdl"
+	"v.io/v23"
+	"v.io/v23/context"
+	"v.io/v23/ipc"
+	"v.io/v23/vdl"
 )
 
 // Task is streamed by Stop to provide the client with a sense of the progress
@@ -29,7 +29,7 @@ type Task struct {
 }
 
 func (Task) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/services/mgmt/appcycle.Task"
+	Name string "v.io/v23/services/mgmt/appcycle.Task"
 }) {
 }
 
@@ -78,7 +78,7 @@ func (c implAppCycleClientStub) c(ctx *context.T) ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return veyron2.GetClient(ctx)
+	return v23.GetClient(ctx)
 }
 
 func (c implAppCycleClientStub) Stop(ctx *context.T, opts ...ipc.CallOpt) (ocall AppCycleStopCall, err error) {
@@ -249,7 +249,7 @@ var AppCycleDesc ipc.InterfaceDesc = descAppCycle
 // descAppCycle hides the desc to keep godoc clean.
 var descAppCycle = ipc.InterfaceDesc{
 	Name:    "AppCycle",
-	PkgPath: "v.io/core/veyron2/services/mgmt/appcycle",
+	PkgPath: "v.io/v23/services/mgmt/appcycle",
 	Doc:     "// AppCycle interfaces with the process running a veyron runtime.",
 	Methods: []ipc.MethodDesc{
 		{

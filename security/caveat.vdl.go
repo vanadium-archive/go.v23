@@ -5,19 +5,19 @@ package security
 
 import (
 	// VDL system imports
-	"v.io/core/veyron2/context"
-	"v.io/core/veyron2/i18n"
-	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/verror"
+	"v.io/v23/context"
+	"v.io/v23/i18n"
+	"v.io/v23/vdl"
+	"v.io/v23/verror"
 
 	// VDL user imports
-	"v.io/core/veyron2/uniqueid"
+	"v.io/v23/uniqueid"
 )
 
 type nonce [16]byte
 
 func (nonce) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/security.nonce"
+	Name string "v.io/v23/security.nonce"
 }) {
 }
 
@@ -52,7 +52,7 @@ type publicKeyThirdPartyCaveat struct {
 }
 
 func (publicKeyThirdPartyCaveat) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/security.publicKeyThirdPartyCaveat"
+	Name string "v.io/v23/security.publicKeyThirdPartyCaveat"
 }) {
 }
 
@@ -69,7 +69,7 @@ type publicKeyDischarge struct {
 }
 
 func (publicKeyDischarge) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/security.publicKeyDischarge"
+	Name string "v.io/v23/security.publicKeyDischarge"
 }) {
 }
 
@@ -165,14 +165,14 @@ var PublicKeyThirdPartyCaveatX = CaveatDescriptor{
 }
 
 var (
-	ErrCaveatNotRegistered     = verror.Register("v.io/core/veyron2/security.CaveatNotRegistered", verror.NoRetry, "{1:}{2:} no validation function registered for caveat id {3}")
-	ErrCaveatParamAny          = verror.Register("v.io/core/veyron2/security.CaveatParamAny", verror.NoRetry, "{1:}{2:} caveat {3} uses illegal param type any")
-	ErrCaveatParamTypeMismatch = verror.Register("v.io/core/veyron2/security.CaveatParamTypeMismatch", verror.NoRetry, "{1:}{2:} bad param type: caveat {3} got {4}, want {5}")
+	ErrCaveatNotRegistered     = verror.Register("v.io/v23/security.CaveatNotRegistered", verror.NoRetry, "{1:}{2:} no validation function registered for caveat id {3}")
+	ErrCaveatParamAny          = verror.Register("v.io/v23/security.CaveatParamAny", verror.NoRetry, "{1:}{2:} caveat {3} uses illegal param type any")
+	ErrCaveatParamTypeMismatch = verror.Register("v.io/v23/security.CaveatParamTypeMismatch", verror.NoRetry, "{1:}{2:} bad param type: caveat {3} got {4}, want {5}")
 	// TODO(ashankar,toddw,bjornick): The type of "err" here and below
 	// should be error once https://github.com/veyron/release-issues/issues/922
 	// is resolved.
-	ErrCaveatParamCoding = verror.Register("v.io/core/veyron2/security.CaveatParamCoding", verror.NoRetry, "{1:}{2:} unable to encode/decode caveat param(type={4}) for caveat {3}: {5}")
-	ErrCaveatValidation  = verror.Register("v.io/core/veyron2/security.CaveatValidation", verror.NoRetry, "{1:}{2:} caveat validation failed: {3}")
+	ErrCaveatParamCoding = verror.Register("v.io/v23/security.CaveatParamCoding", verror.NoRetry, "{1:}{2:} unable to encode/decode caveat param(type={4}) for caveat {3}: {5}")
+	ErrCaveatValidation  = verror.Register("v.io/v23/security.CaveatValidation", verror.NoRetry, "{1:}{2:} caveat validation failed: {3}")
 )
 
 func init() {

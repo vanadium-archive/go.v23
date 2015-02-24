@@ -5,7 +5,7 @@ package signature
 
 import (
 	// VDL system imports
-	"v.io/core/veyron2/vdl"
+	"v.io/v23/vdl"
 )
 
 // Interface describes the signature of an interface.

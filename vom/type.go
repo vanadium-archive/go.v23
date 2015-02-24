@@ -5,7 +5,7 @@ package vom
 import (
 	"fmt"
 
-	"v.io/core/veyron2/vdl"
+	"v.io/v23/vdl"
 )
 
 // encoderTypes maintains the mapping from type to type id, used by the encoder.

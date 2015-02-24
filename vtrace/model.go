@@ -4,7 +4,7 @@
 // inspected to help you understand the performance and behavior of
 // your system even across servers and processes.
 //
-// A new root context, as created by veyron2.Runtime.NewContext()
+// A new root context, as created by v23.Runtime.NewContext()
 // represents a new operation unconnected to any other.  Vtrace
 // represents all the debugging information collected about this
 // operation, even across servers and processes, as a single Trace.
@@ -70,8 +70,8 @@
 package vtrace
 
 import (
-	"v.io/core/veyron2/context"
-	"v.io/core/veyron2/uniqueid"
+	"v.io/v23/context"
+	"v.io/v23/uniqueid"
 )
 
 // Spans represent a named time period.  You can create new spans
@@ -157,7 +157,7 @@ func manager(ctx *context.T) Manager {
 		panic(`Vtrace is uninitialized.
 You are calling a Vtrace function but vtrace has not been initialized.
 This is normally handled by the runtime initialization.  You should call
-veyron2.Init() in your main or test before performing this function.`)
+v23.Init() in your main or test before performing this function.`)
 	}
 	return manager
 }

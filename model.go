@@ -8,7 +8,7 @@ The current release is 0.1 and although we will do our best to maintain
 backwards compatibility we can't guarantee that until we reach the 1.0 milestone.
 
 */
-package veyron2
+package v23
 
 import (
 	"bytes"
@@ -16,10 +16,10 @@ import (
 	"runtime"
 	"sync"
 
-	"v.io/core/veyron2/context"
-	"v.io/core/veyron2/ipc"
-	"v.io/core/veyron2/naming"
-	"v.io/core/veyron2/security"
+	"v.io/v23/context"
+	"v.io/v23/ipc"
+	"v.io/v23/naming"
+	"v.io/v23/security"
 )
 
 const (
@@ -244,7 +244,7 @@ func NewEndpoint(ep string) (naming.Endpoint, error) {
 // It accepts at least the following options:
 // ServesMountTable and ServerBlessings.
 //
-// ServerBlessings defaults to veyron2.GetPrincipal(ctx).BlessingStore().Default().
+// ServerBlessings defaults to v23.GetPrincipal(ctx).BlessingStore().Default().
 // These Blessings are the server's Blessings for its lifetime.
 func NewServer(ctx *context.T, opts ...ipc.ServerOpt) (ipc.Server, error) {
 	return initState.currentRuntime().NewServer(ctx, opts...)
@@ -379,7 +379,7 @@ runtime implementation.`)
 type Profile func(ctx *context.T) (Runtime, *context.T, Shutdown, error)
 
 // RegisterProfileInit register the specified Profile.
-// It must be called before veyron2.Init; typically it will be called by an init
+// It must be called before v23.Init; typically it will be called by an init
 // function. It will panic if called more than once.
 func RegisterProfileInit(f Profile) {
 	// Skip 3 frames: runtime.Callers, getStack, RegisterProfileInit.

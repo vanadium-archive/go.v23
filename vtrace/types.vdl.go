@@ -5,12 +5,12 @@ package vtrace
 
 import (
 	// VDL system imports
-	"v.io/core/veyron2/vdl"
+	"v.io/v23/vdl"
 
 	// VDL user imports
 	"time"
-	"v.io/core/veyron2/uniqueid"
-	_ "v.io/core/veyron2/vdl/vdlroot/src/time"
+	"v.io/v23/uniqueid"
+	_ "v.io/v23/vdl/vdlroot/src/time"
 )
 
 type TraceRecord struct {
@@ -19,7 +19,7 @@ type TraceRecord struct {
 }
 
 func (TraceRecord) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vtrace.TraceRecord"
+	Name string "v.io/v23/vtrace.TraceRecord"
 }) {
 }
 
@@ -34,7 +34,7 @@ type Annotation struct {
 }
 
 func (Annotation) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vtrace.Annotation"
+	Name string "v.io/v23/vtrace.Annotation"
 }) {
 }
 
@@ -50,14 +50,14 @@ type SpanRecord struct {
 }
 
 func (SpanRecord) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vtrace.SpanRecord"
+	Name string "v.io/v23/vtrace.SpanRecord"
 }) {
 }
 
 type TraceFlags int32
 
 func (TraceFlags) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vtrace.TraceFlags"
+	Name string "v.io/v23/vtrace.TraceFlags"
 }) {
 }
 
@@ -69,7 +69,7 @@ type Request struct {
 }
 
 func (Request) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vtrace.Request"
+	Name string "v.io/v23/vtrace.Request"
 }) {
 }
 
@@ -83,7 +83,7 @@ type Response struct {
 }
 
 func (Response) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vtrace.Response"
+	Name string "v.io/v23/vtrace.Response"
 }) {
 }
 

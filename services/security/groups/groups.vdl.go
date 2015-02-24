@@ -10,16 +10,16 @@ package groups
 
 import (
 	// VDL system imports
-	"v.io/core/veyron2"
-	"v.io/core/veyron2/context"
-	"v.io/core/veyron2/i18n"
-	"v.io/core/veyron2/ipc"
-	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/verror"
+	"v.io/v23"
+	"v.io/v23/context"
+	"v.io/v23/i18n"
+	"v.io/v23/ipc"
+	"v.io/v23/vdl"
+	"v.io/v23/verror"
 
 	// VDL user imports
-	"v.io/core/veyron2/services/security/access"
-	"v.io/core/veyron2/services/security/access/object"
+	"v.io/v23/services/security/access"
+	"v.io/v23/services/security/access/object"
 )
 
 // BlessingPatternChunk is a substring of a BlessingPattern. As with
@@ -30,7 +30,7 @@ import (
 type BlessingPatternChunk string
 
 func (BlessingPatternChunk) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/services/security/groups.BlessingPatternChunk"
+	Name string "v.io/v23/services/security/groups.BlessingPatternChunk"
 }) {
 }
 
@@ -38,7 +38,7 @@ type GetRequest struct {
 }
 
 func (GetRequest) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/services/security/groups.GetRequest"
+	Name string "v.io/v23/services/security/groups.GetRequest"
 }) {
 }
 
@@ -47,7 +47,7 @@ type GetResponse struct {
 }
 
 func (GetResponse) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/services/security/groups.GetResponse"
+	Name string "v.io/v23/services/security/groups.GetResponse"
 }) {
 }
 
@@ -55,7 +55,7 @@ type RestRequest struct {
 }
 
 func (RestRequest) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/services/security/groups.RestRequest"
+	Name string "v.io/v23/services/security/groups.RestRequest"
 }) {
 }
 
@@ -63,7 +63,7 @@ type RestResponse struct {
 }
 
 func (RestResponse) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/services/security/groups.RestResponse"
+	Name string "v.io/v23/services/security/groups.RestResponse"
 }) {
 }
 
@@ -76,8 +76,8 @@ func init() {
 }
 
 var (
-	ErrNoBlessings         = verror.Register("v.io/core/veyron2/services/security/groups.NoBlessings", verror.NoRetry, "{1:}{2:} No blessings recognized; cannot create group ACL")
-	ErrExcessiveContention = verror.Register("v.io/core/veyron2/services/security/groups.ExcessiveContention", verror.RetryBackoff, "{1:}{2:} Gave up after encountering excessive contention; try again later")
+	ErrNoBlessings         = verror.Register("v.io/v23/services/security/groups.NoBlessings", verror.NoRetry, "{1:}{2:} No blessings recognized; cannot create group ACL")
+	ErrExcessiveContention = verror.Register("v.io/v23/services/security/groups.ExcessiveContention", verror.RetryBackoff, "{1:}{2:} Gave up after encountering excessive contention; try again later")
 )
 
 func init() {
@@ -112,8 +112,8 @@ type GroupClientMethods interface {
 	//
 	//   package mypackage
 	//
-	//   import "v.io/core/veyron2/security/access"
-	//   import "v.io/core/veyron2/security/access/object"
+	//   import "v.io/v23/security/access"
+	//   import "v.io/v23/security/access/object"
 	//
 	//   type MyObject interface {
 	//     object.Object
@@ -130,7 +130,7 @@ type GroupClientMethods interface {
 	//
 	//  package mypackage
 	//
-	//  import "v.io/core/veyron2/security/access"
+	//  import "v.io/v23/security/access"
 	//
 	//  type MyTag string
 	//
@@ -197,7 +197,7 @@ func (c implGroupClientStub) c(ctx *context.T) ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return veyron2.GetClient(ctx)
+	return v23.GetClient(ctx)
 }
 
 func (c implGroupClientStub) Create(ctx *context.T, i0 access.TaggedACLMap, i1 []BlessingPatternChunk, opts ...ipc.CallOpt) (err error) {
@@ -271,8 +271,8 @@ type GroupServerMethods interface {
 	//
 	//   package mypackage
 	//
-	//   import "v.io/core/veyron2/security/access"
-	//   import "v.io/core/veyron2/security/access/object"
+	//   import "v.io/v23/security/access"
+	//   import "v.io/v23/security/access/object"
 	//
 	//   type MyObject interface {
 	//     object.Object
@@ -289,7 +289,7 @@ type GroupServerMethods interface {
 	//
 	//  package mypackage
 	//
-	//  import "v.io/core/veyron2/security/access"
+	//  import "v.io/v23/security/access"
 	//
 	//  type MyTag string
 	//
@@ -403,10 +403,10 @@ var GroupDesc ipc.InterfaceDesc = descGroup
 // descGroup hides the desc to keep godoc clean.
 var descGroup = ipc.InterfaceDesc{
 	Name:    "Group",
-	PkgPath: "v.io/core/veyron2/services/security/groups",
+	PkgPath: "v.io/v23/services/security/groups",
 	Doc:     "// A group's etag covers its ACL as well as any other data stored in the group.\n// Clients should treat etags as opaque identifiers. For both Get and Rest, if\n// etag is set and matches the Group's current etag, the response will indicate\n// that fact but will otherwise be empty.",
 	Embeds: []ipc.EmbedDesc{
-		{"Object", "v.io/core/veyron2/services/security/access/object", "// Object provides access control for Veyron objects.\n//\n// Veyron services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/core/veyron2/security/access\"\n//   import \"v.io/core/veyron2/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetACL and GetACL in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/core/veyron2/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}\n//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}\n//  }"},
+		{"Object", "v.io/v23/services/security/access/object", "// Object provides access control for Veyron objects.\n//\n// Veyron services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetACL and GetACL in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}\n//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}\n//  }"},
 	},
 	Methods: []ipc.MethodDesc{
 		{

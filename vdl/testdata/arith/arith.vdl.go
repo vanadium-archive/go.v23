@@ -29,14 +29,14 @@ package arith
 import (
 	// VDL system imports
 	"io"
-	"v.io/core/veyron2"
-	"v.io/core/veyron2/context"
-	"v.io/core/veyron2/ipc"
-	"v.io/core/veyron2/vdl"
+	"v.io/v23"
+	"v.io/v23/context"
+	"v.io/v23/ipc"
+	"v.io/v23/vdl"
 
 	// VDL user imports
-	"v.io/core/veyron2/vdl/testdata/arith/exp"
-	"v.io/core/veyron2/vdl/testdata/base"
+	"v.io/v23/vdl/testdata/arith/exp"
+	"v.io/v23/vdl/testdata/base"
 )
 
 // Yes shows that bools may be untyped.
@@ -115,7 +115,7 @@ func (c implArithClientStub) c(ctx *context.T) ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return veyron2.GetClient(ctx)
+	return v23.GetClient(ctx)
 }
 
 func (c implArithClientStub) Add(ctx *context.T, i0 int32, i1 int32, opts ...ipc.CallOpt) (o0 int32, err error) {
@@ -491,7 +491,7 @@ var ArithDesc ipc.InterfaceDesc = descArith
 // descArith hides the desc to keep godoc clean.
 var descArith = ipc.InterfaceDesc{
 	Name:    "Arith",
-	PkgPath: "v.io/core/veyron2/vdl/testdata/arith",
+	PkgPath: "v.io/v23/vdl/testdata/arith",
 	Doc:     "// Arith is an example of an interface definition for an arithmetic service.\n// Things to note:\n//   * There must be at least 1 out-arg, and the last out-arg must be error.",
 	Methods: []ipc.MethodDesc{
 		{
@@ -741,7 +741,7 @@ func (c implCalculatorClientStub) c(ctx *context.T) ipc.Client {
 	if c.client != nil {
 		return c.client
 	}
-	return veyron2.GetClient(ctx)
+	return v23.GetClient(ctx)
 }
 
 func (c implCalculatorClientStub) On(ctx *context.T, opts ...ipc.CallOpt) (err error) {
@@ -851,10 +851,10 @@ var CalculatorDesc ipc.InterfaceDesc = descCalculator
 // descCalculator hides the desc to keep godoc clean.
 var descCalculator = ipc.InterfaceDesc{
 	Name:    "Calculator",
-	PkgPath: "v.io/core/veyron2/vdl/testdata/arith",
+	PkgPath: "v.io/v23/vdl/testdata/arith",
 	Embeds: []ipc.EmbedDesc{
-		{"Arith", "v.io/core/veyron2/vdl/testdata/arith", "// Arith is an example of an interface definition for an arithmetic service.\n// Things to note:\n//   * There must be at least 1 out-arg, and the last out-arg must be error."},
-		{"AdvancedMath", "v.io/core/veyron2/vdl/testdata/arith", "// AdvancedMath is an interface for more advanced math than arith.  It embeds\n// interfaces defined both in the same file and in an external package; and in\n// turn it is embedded by arith.Calculator (which is in the same package but\n// different file) to verify that embedding works in all these scenarios."},
+		{"Arith", "v.io/v23/vdl/testdata/arith", "// Arith is an example of an interface definition for an arithmetic service.\n// Things to note:\n//   * There must be at least 1 out-arg, and the last out-arg must be error."},
+		{"AdvancedMath", "v.io/v23/vdl/testdata/arith", "// AdvancedMath is an interface for more advanced math than arith.  It embeds\n// interfaces defined both in the same file and in an external package; and in\n// turn it is embedded by arith.Calculator (which is in the same package but\n// different file) to verify that embedding works in all these scenarios."},
 	},
 	Methods: []ipc.MethodDesc{
 		{

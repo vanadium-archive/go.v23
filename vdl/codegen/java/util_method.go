@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sort"
 
-	"v.io/core/veyron2/vdl/compile"
+	"v.io/v23/vdl/compile"
 )
 
 func isStreamingMethod(method *compile.Method) bool {

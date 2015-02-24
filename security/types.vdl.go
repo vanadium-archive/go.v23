@@ -5,13 +5,13 @@ package security
 
 import (
 	// VDL system imports
-	"v.io/core/veyron2/context"
-	"v.io/core/veyron2/i18n"
-	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/verror"
+	"v.io/v23/context"
+	"v.io/v23/i18n"
+	"v.io/v23/vdl"
+	"v.io/v23/verror"
 
 	// VDL user imports
-	"v.io/core/veyron2/uniqueid"
+	"v.io/v23/uniqueid"
 )
 
 // BlessingPattern is a pattern that is matched by specific blessings.
@@ -30,7 +30,7 @@ import (
 type BlessingPattern string
 
 func (BlessingPattern) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/security.BlessingPattern"
+	Name string "v.io/v23/security.BlessingPattern"
 }) {
 }
 
@@ -38,7 +38,7 @@ func (BlessingPattern) __VDLReflect(struct {
 type Hash string
 
 func (Hash) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/security.Hash"
+	Name string "v.io/v23/security.Hash"
 }) {
 }
 
@@ -56,7 +56,7 @@ type Signature struct {
 }
 
 func (Signature) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/security.Signature"
+	Name string "v.io/v23/security.Signature"
 }) {
 }
 
@@ -72,7 +72,7 @@ type ThirdPartyRequirements struct {
 }
 
 func (ThirdPartyRequirements) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/security.ThirdPartyRequirements"
+	Name string "v.io/v23/security.ThirdPartyRequirements"
 }) {
 }
 
@@ -93,7 +93,7 @@ type DischargeImpetus struct {
 }
 
 func (DischargeImpetus) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/security.DischargeImpetus"
+	Name string "v.io/v23/security.DischargeImpetus"
 }) {
 }
 
@@ -112,7 +112,7 @@ type Certificate struct {
 }
 
 func (Certificate) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/security.Certificate"
+	Name string "v.io/v23/security.Certificate"
 }) {
 }
 
@@ -128,7 +128,7 @@ type CaveatDescriptor struct {
 }
 
 func (CaveatDescriptor) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/security.CaveatDescriptor"
+	Name string "v.io/v23/security.CaveatDescriptor"
 }) {
 }
 
@@ -146,7 +146,7 @@ type Caveat struct {
 }
 
 func (Caveat) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/security.Caveat"
+	Name string "v.io/v23/security.Caveat"
 }) {
 }
 
@@ -171,7 +171,7 @@ type WireBlessings struct {
 }
 
 func (WireBlessings) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/security.WireBlessings"
+	Name string "v.io/v23/security.WireBlessings"
 }) {
 }
 
@@ -194,7 +194,7 @@ type (
 	WireDischargePublicKey struct{ Value publicKeyDischarge } // Discharge for PublicKeyThirdPartyCaveat
 	// __WireDischargeReflect describes the WireDischarge union type.
 	__WireDischargeReflect struct {
-		Name  string "v.io/core/veyron2/security.WireDischarge"
+		Name  string "v.io/v23/security.WireDischarge"
 		Type  WireDischarge
 		Union struct {
 			PublicKey WireDischargePublicKey
@@ -214,7 +214,7 @@ type RejectedBlessing struct {
 }
 
 func (RejectedBlessing) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/security.RejectedBlessing"
+	Name string "v.io/v23/security.RejectedBlessing"
 }) {
 }
 
@@ -260,7 +260,7 @@ const SignatureForBlessingCertificates = "B" // Signature.Purpose used by a Prin
 const SignatureForDischarge = "D" // Signature.Purpose used by a Principal when signing discharges for public-key based third-party caveats.
 
 var (
-	ErrUntrustedRoot = verror.Register("v.io/core/veyron2/security.UntrustedRoot", verror.NoRetry, "{1:}{2:} {3}: root not trusted")
+	ErrUntrustedRoot = verror.Register("v.io/v23/security.UntrustedRoot", verror.NoRetry, "{1:}{2:} {3}: root not trusted")
 )
 
 func init() {

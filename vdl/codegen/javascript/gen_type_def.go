@@ -3,7 +3,7 @@ package javascript
 import (
 	"fmt"
 
-	"v.io/core/veyron2/vdl"
+	"v.io/v23/vdl"
 )
 
 // makeTypeDefinitionsString generates a string that defines the specified types.

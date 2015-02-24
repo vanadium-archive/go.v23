@@ -5,11 +5,11 @@ package nativedep
 
 import (
 	// VDL system imports
-	"v.io/core/veyron2/vdl"
+	"v.io/v23/vdl"
 
 	// VDL user imports
 	"time"
-	"v.io/core/veyron2/vdl/testdata/nativetest"
+	"v.io/v23/vdl/testdata/nativetest"
 )
 
 type All struct {
@@ -21,7 +21,7 @@ type All struct {
 }
 
 func (All) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vdl/testdata/nativedep.All"
+	Name string "v.io/v23/vdl/testdata/nativedep.All"
 }) {
 }
 

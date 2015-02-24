@@ -9,10 +9,10 @@ import (
 	"strings"
 	"text/template"
 
-	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/vdl/compile"
-	"v.io/core/veyron2/vdl/parse"
-	"v.io/core/veyron2/vdl/vdlutil"
+	"v.io/v23/vdl"
+	"v.io/v23/vdl/compile"
+	"v.io/v23/vdl/parse"
+	"v.io/v23/vdl/vdlutil"
 )
 
 type goData struct {
@@ -95,7 +95,7 @@ func Generate(file *compile.File, env *compile.Env) []byte {
 // Restrict the feature to these whitelisted VDL packages for now.
 var nativeTypePackageWhitelist = map[string]bool{
 	"time": true,
-	"v.io/core/veyron2/vdl/testdata/nativetest": true,
+	"v.io/v23/vdl/testdata/nativetest": true,
 }
 
 func validateGoConfig(file *compile.File, env *compile.Env) {
@@ -306,7 +306,7 @@ func serverContextType(prefix string, data goData, iface *compile.Interface, met
 	if isStreamingMethod(method) {
 		return prefix + uniqueName(iface, method, "Context")
 	}
-	return prefix + data.Pkg("v.io/core/veyron2/ipc") + "ServerContext"
+	return prefix + data.Pkg("v.io/v23/ipc") + "ServerContext"
 }
 
 // The first arg of every server stub method is a context; the type is either a
@@ -315,7 +315,7 @@ func serverContextStubType(prefix string, data goData, iface *compile.Interface,
 	if isStreamingMethod(method) {
 		return prefix + "*" + uniqueName(iface, method, "ContextStub")
 	}
-	return prefix + data.Pkg("v.io/core/veyron2/ipc") + "ServerContext"
+	return prefix + data.Pkg("v.io/v23/ipc") + "ServerContext"
 }
 
 // outArgsClient returns the out args of an interface method on the client,
@@ -336,7 +336,7 @@ func clientStubImpl(data goData, iface *compile.Interface, method *compile.Metho
 	if len(method.InArgs) > 0 {
 		inargs = "[]interface{}{" + argNames("&", "i", "", "", method.InArgs) + "}"
 	}
-	fmt.Fprint(&buf, "\tvar call "+data.Pkg("v.io/core/veyron2/ipc")+"Call\n")
+	fmt.Fprint(&buf, "\tvar call "+data.Pkg("v.io/v23/ipc")+"Call\n")
 	fmt.Fprintf(&buf, "\tif call, err = c.c(ctx).StartCall(ctx, c.name, %q, %s, opts...); err != nil {\n\t\treturn\n\t}\n", method.Name, inargs)
 	switch {
 	case isStreamingMethod(method):
@@ -401,8 +401,8 @@ import ( {{if $data.Imports.System}}
 {{typeDefGo $data $tdef}}
 {{end}}
 func init() { {{range $wire, $native := $file.Package.Config.Go.WireToNativeTypes}}{{$lwire := firstRuneToLower $wire}}
-	{{$data.Pkg "v.io/core/veyron2/vdl"}}RegisterNative({{$lwire}}ToNative, {{$lwire}}FromNative){{end}}{{range $tdef := $file.TypeDefs}}
-	{{$data.Pkg "v.io/core/veyron2/vdl"}}Register((*{{$tdef.Name}})(nil)){{end}}
+	{{$data.Pkg "v.io/v23/vdl"}}RegisterNative({{$lwire}}ToNative, {{$lwire}}FromNative){{end}}{{range $tdef := $file.TypeDefs}}
+	{{$data.Pkg "v.io/v23/vdl"}}Register((*{{$tdef.Name}})(nil)){{end}}
 }
 {{range $wire, $native := $file.Package.Config.Go.WireToNativeTypes}}{{$lwire := firstRuneToLower $wire}}{{$nat := nativeIdent $data $native}}
 // Type-check {{$wire}} conversion functions.
@@ -416,26 +416,26 @@ var _ func(*{{$wire}}, {{$nat}}) error = {{$lwire}}FromNative
 {{end}}
 
 {{if $file.ErrorDefs}}var ( {{range $edef := $file.ErrorDefs}}
-	{{$edef.Doc}}{{errorName $edef $file}} = {{$data.Pkg "v.io/core/veyron2/verror"}}Register("{{$edef.ID}}", {{$data.Pkg "v.io/core/veyron2/verror"}}{{$edef.Action}}, "{{$edef.English}}"){{end}}
+	{{$edef.Doc}}{{errorName $edef $file}} = {{$data.Pkg "v.io/v23/verror"}}Register("{{$edef.ID}}", {{$data.Pkg "v.io/v23/verror"}}{{$edef.Action}}, "{{$edef.English}}"){{end}}
 )
 
 {{/* TODO(toddw): Don't set "en-US" or "en" again, since it's already set by Register */}}
 func init() { {{range $edef := $file.ErrorDefs}}{{range $lf := $edef.Formats}}
-	{{$data.Pkg "v.io/core/veyron2/i18n"}}Cat().SetWithBase({{$data.Pkg "v.io/core/veyron2/i18n"}}LangID("{{$lf.Lang}}"), {{$data.Pkg "v.io/core/veyron2/i18n"}}MsgID({{errorName $edef $file}}.ID), "{{$lf.Fmt}}"){{end}}{{end}}
+	{{$data.Pkg "v.io/v23/i18n"}}Cat().SetWithBase({{$data.Pkg "v.io/v23/i18n"}}LangID("{{$lf.Lang}}"), {{$data.Pkg "v.io/v23/i18n"}}MsgID({{errorName $edef $file}}.ID), "{{$lf.Fmt}}"){{end}}{{end}}
 }
 {{range $edef := $file.ErrorDefs}}
 {{$errName := errorName $edef $file}}
 {{$newErr := print (firstRuneToExport "New" $edef.Exported) (firstRuneToUpper $errName)}}
 // {{$newErr}} returns an error with the {{$errName}} ID.
-func {{$newErr}}(ctx {{argNameTypes "" (print "*" ($data.Pkg "v.io/core/veyron2/context") "T") "" $data $edef.Params}}) error {
-	return {{$data.Pkg "v.io/core/veyron2/verror"}}New({{$errName}}, {{argNames "" "" "ctx" "" $edef.Params}})
+func {{$newErr}}(ctx {{argNameTypes "" (print "*" ($data.Pkg "v.io/v23/context") "T") "" $data $edef.Params}}) error {
+	return {{$data.Pkg "v.io/v23/verror"}}New({{$errName}}, {{argNames "" "" "ctx" "" $edef.Params}})
 }
 {{end}}{{end}}
 
 {{range $iface := $file.Interfaces}}
 {{$ifaceStreaming := hasStreamingMethods $iface.AllMethods}}
-{{$ipc_ := $data.Pkg "v.io/core/veyron2/ipc"}}
-{{$ctxArg := print "ctx *" ($data.Pkg "v.io/core/veyron2/context") "T"}}
+{{$ipc_ := $data.Pkg "v.io/v23/ipc"}}
+{{$ctxArg := print "ctx *" ($data.Pkg "v.io/v23/context") "T"}}
 {{$optsArg := print "opts ..." $ipc_ "CallOpt"}}
 // {{$iface.Name}}ClientMethods is the client interface
 // containing {{$iface.Name}} methods.
@@ -472,7 +472,7 @@ func (c impl{{$iface.Name}}ClientStub) c({{$ctxArg}}) {{$ipc_}}Client {
 	if c.client != nil {
 		return c.client
 	}
-	return {{$data.Pkg "v.io/core/veyron2"}}GetClient(ctx)
+	return {{$data.Pkg "v.io/v23"}}GetClient(ctx)
 }
 
 {{range $method := $iface.Methods}}
@@ -679,7 +679,7 @@ var desc{{$iface.Name}} = {{$ipc_}}InterfaceDesc{ {{if $iface.Name}}
 			OutArgs: []{{$ipc_}}ArgDesc{ {{range $arg := $method.OutArgs}}
 				{ "{{$arg.Name}}", {{quoteStripDoc $arg.Doc}} }, // {{typeGo $data $arg.Type}}{{end}}
 			},{{end}}{{if $method.Tags}}
-			Tags: []*{{$data.Pkg "v.io/core/veyron2/vdl"}}Value{ {{range $tag := $method.Tags}}{{tagValue $data $tag}} ,{{end}} },{{end}}
+			Tags: []*{{$data.Pkg "v.io/v23/vdl"}}Value{ {{range $tag := $method.Tags}}{{tagValue $data $tag}} ,{{end}} },{{end}}
 		},{{end}}
 	},{{end}}
 }

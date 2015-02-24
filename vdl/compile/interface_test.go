@@ -4,11 +4,11 @@ import (
 	"reflect"
 	"testing"
 
-	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/vdl/build"
-	"v.io/core/veyron2/vdl/compile"
-	"v.io/core/veyron2/vdl/parse"
-	"v.io/core/veyron2/vdl/vdltest"
+	"v.io/v23/vdl"
+	"v.io/v23/vdl/build"
+	"v.io/v23/vdl/compile"
+	"v.io/v23/vdl/parse"
+	"v.io/v23/vdl/vdltest"
 )
 
 func TestInterface(t *testing.T) {

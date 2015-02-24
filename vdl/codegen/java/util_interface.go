@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"path"
 
-	"v.io/core/veyron2/vdl/compile"
+	"v.io/v23/vdl/compile"
 )
 
 // allEmbeddedIfaces returns all unique interfaces in the embed tree
@@ -40,7 +40,7 @@ func javaClientExtendsStr(embeds []*compile.Interface) string {
 		buf.WriteString("Client")
 		buf.WriteString(", ")
 	}
-	buf.WriteString("io.v.core.veyron2.ipc.UniversalServiceMethods")
+	buf.WriteString("io.v.core.v23.ipc.UniversalServiceMethods")
 	return buf.String()
 }
 

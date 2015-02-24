@@ -1,8 +1,8 @@
 package compile
 
 import (
-	"v.io/core/veyron2/vdl"
-	"v.io/core/veyron2/vdl/vdlroot/src/vdltool"
+	"v.io/v23/vdl"
+	"v.io/v23/vdl/vdlroot/src/vdltool"
 )
 
 var (

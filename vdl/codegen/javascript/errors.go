@@ -2,8 +2,8 @@ package javascript
 
 import (
 	"fmt"
-	"v.io/core/veyron2/vdl/compile"
-	"v.io/core/veyron2/vdl/vdlutil"
+	"v.io/v23/vdl/compile"
+	"v.io/v23/vdl/vdlutil"
 )
 
 func generateErrorConstructor(names typeNames, e *compile.ErrorDef) string {

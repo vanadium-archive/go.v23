@@ -1,6 +1,6 @@
 package security
 
-import "v.io/core/veyron2/uniqueid"
+import "v.io/v23/uniqueid"
 
 // BlessingPattern is a pattern that is matched by specific blessings.
 //

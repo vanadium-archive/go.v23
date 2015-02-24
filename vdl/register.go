@@ -158,7 +158,7 @@ type reflectInfo struct {
 	Type reflect.Type
 
 	// Name is the vdl type name including the vdl package path,
-	// e.g. "v.io/core/veyron2/vdl.Foo".
+	// e.g. "v.io/v23/vdl.Foo".
 	Name string
 
 	// EnumLabels holds the labels of an enum; it is non-empty iff the Type

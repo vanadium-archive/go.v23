@@ -6,7 +6,7 @@ package vom
 import (
 	// VDL system imports
 	"fmt"
-	"v.io/core/veyron2/vdl"
+	"v.io/v23/vdl"
 )
 
 type (
@@ -40,7 +40,7 @@ type (
 	PrimitivePControl struct{ Value ControlKind }
 	// __PrimitiveReflect describes the Primitive union type.
 	__PrimitiveReflect struct {
-		Name  string "v.io/core/veyron2/vom.Primitive"
+		Name  string "v.io/v23/vom.Primitive"
 		Type  Primitive
 		Union struct {
 			PBool    PrimitivePBool
@@ -99,7 +99,7 @@ type DumpAtom struct {
 }
 
 func (DumpAtom) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vom.DumpAtom"
+	Name string "v.io/v23/vom.DumpAtom"
 }) {
 }
 
@@ -206,7 +206,7 @@ func (x DumpKind) String() string {
 }
 
 func (DumpKind) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vom.DumpKind"
+	Name string "v.io/v23/vom.DumpKind"
 	Enum struct{ Magic, Control, MsgID, TypeMsg, ValueMsg, MsgLen, TypeID, PrimValue, ByteLen, ValueLen, Index, WireTypeIndex string }
 }) {
 }
@@ -254,7 +254,7 @@ func (x ControlKind) String() string {
 }
 
 func (ControlKind) __VDLReflect(struct {
-	Name string "v.io/core/veyron2/vom.ControlKind"
+	Name string "v.io/v23/vom.ControlKind"
 	Enum struct{ NIL, EOF string }
 }) {
 }

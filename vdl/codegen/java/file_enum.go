@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"log"
 
-	"v.io/core/veyron2/vdl/compile"
+	"v.io/v23/vdl/compile"
 )
 
 const enumTmpl = `
@@ -15,15 +15,15 @@ package {{.PackagePath}};
 /**
  * type {{.Name}} {{.VdlTypeString}} {{.Doc}}
  **/
-@io.v.core.veyron2.vdl.GeneratedFromVdl(name = "{{.VdlTypeName}}")
-{{ .AccessModifier }} final class {{.Name}} extends io.v.core.veyron2.vdl.VdlEnum {
+@io.v.core.v23.vdl.GeneratedFromVdl(name = "{{.VdlTypeName}}")
+{{ .AccessModifier }} final class {{.Name}} extends io.v.core.v23.vdl.VdlEnum {
     {{ range $index, $label := .EnumLabels }}
-        @io.v.core.veyron2.vdl.GeneratedFromVdl(name = "{{$label}}", index = {{$index}})
+        @io.v.core.v23.vdl.GeneratedFromVdl(name = "{{$label}}", index = {{$index}})
         public static final {{$.Name}} {{$label}};
     {{ end }}
 
-    public static final io.v.core.veyron2.vdl.VdlType VDL_TYPE =
-            io.v.core.veyron2.vdl.Types.getVdlTypeFromReflect({{.Name}}.class);
+    public static final io.v.core.v23.vdl.VdlType VDL_TYPE =
+            io.v.core.v23.vdl.Types.getVdlTypeFromReflect({{.Name}}.class);
 
     static {
         {{ range $label := .EnumLabels }}
