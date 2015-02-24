@@ -199,7 +199,7 @@ func docBreak(doc string) string {
 }
 
 // argTypes returns a comma-separated list of each type from args.
-func argTypes(first, last string, data goData, args []*compile.Arg) string {
+func argTypes(first, last string, data goData, args []*compile.Field) string {
 	var result []string
 	if first != "" {
 		result = append(result, first)
@@ -216,7 +216,7 @@ func argTypes(first, last string, data goData, args []*compile.Arg) string {
 // argNames returns a comma-separated list of each name from args.  If argPrefix
 // is empty, the name specified in args is used; otherwise the name is prefixD,
 // where D is the position of the argument.
-func argNames(boxPrefix, argPrefix, first, last string, args []*compile.Arg) string {
+func argNames(boxPrefix, argPrefix, first, last string, args []*compile.Field) string {
 	var result []string
 	if first != "" {
 		result = append(result, first)
@@ -243,7 +243,7 @@ func argNames(boxPrefix, argPrefix, first, last string, args []*compile.Arg) str
 // argPrefix is empty, the name specified in args is used; otherwise the name is
 // prefixD, where D is the position of the argument.  If argPrefix is empty and
 // no names are specified in args, no names will be output.
-func argNameTypes(argPrefix, first, last string, data goData, args []*compile.Arg) string {
+func argNameTypes(argPrefix, first, last string, data goData, args []*compile.Field) string {
 	noNames := argPrefix == "" && !hasArgNames(args)
 	var result []string
 	if first != "" {
@@ -267,7 +267,7 @@ func argNameTypes(argPrefix, first, last string, data goData, args []*compile.Ar
 	return strings.Join(result, ", ")
 }
 
-func hasArgNames(args []*compile.Arg) bool {
+func hasArgNames(args []*compile.Field) bool {
 	// VDL guarantees that either all args are named, or none of them are.
 	return len(args) > 0 && args[0].Name != ""
 }

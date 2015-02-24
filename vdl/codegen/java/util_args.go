@@ -9,7 +9,7 @@ import (
 
 // javaDeclarationArgStr creates a comma separated string of args to be used in a function declaration
 // e.g. "final int x, final Object o"
-func javaDeclarationArgStr(args []*compile.Arg, env *compile.Env, leadingComma bool) string {
+func javaDeclarationArgStr(args []*compile.Field, env *compile.Env, leadingComma bool) string {
 	var buf bytes.Buffer
 	for i, arg := range args {
 		if leadingComma || i > 0 {
@@ -29,7 +29,7 @@ func javaDeclarationArgStr(args []*compile.Arg, env *compile.Env, leadingComma b
 
 // javaCallingArgStr creates a comma separated string of arg to be used in calling a function
 // e.g. "x, o"
-func javaCallingArgStr(args []*compile.Arg, leadingComma bool) string {
+func javaCallingArgStr(args []*compile.Field, leadingComma bool) string {
 	var buf bytes.Buffer
 	for i, arg := range args {
 		if leadingComma || i > 0 {
@@ -45,7 +45,7 @@ func javaCallingArgStr(args []*compile.Arg, leadingComma bool) string {
 }
 
 // javaCallingArgTypeStr creates a comma separated string of arg types.
-func javaCallingArgTypeStr(args []*compile.Arg, env *compile.Env) string {
+func javaCallingArgTypeStr(args []*compile.Field, env *compile.Env) string {
 	var buf bytes.Buffer
 	for i, arg := range args {
 		if i > 0 {

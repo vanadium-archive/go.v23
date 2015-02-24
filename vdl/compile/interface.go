@@ -172,7 +172,7 @@ const (
 	out inout = "out"
 )
 
-func (id ifaceDefiner) defineArgs(io inout, method NamePos, pargs []*parse.Field, file *File) (args []*Arg) {
+func (id ifaceDefiner) defineArgs(io inout, method NamePos, pargs []*parse.Field, file *File) (args []*Field) {
 	seen := make(map[string]*parse.Field)
 	for _, parg := range pargs {
 		if dup := seen[parg.Name]; dup != nil && parg.Name != "" {
@@ -190,7 +190,7 @@ func (id ifaceDefiner) defineArgs(io inout, method NamePos, pargs []*parse.Field
 				continue // keep going to catch more errors
 			}
 		}
-		arg := &Arg{NamePos(parg.NamePos), compileType(parg.Type, file, id.env)}
+		arg := &Field{NamePos(parg.NamePos), compileType(parg.Type, file, id.env)}
 		args = append(args, arg)
 	}
 	return

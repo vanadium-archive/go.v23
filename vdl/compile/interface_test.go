@@ -75,7 +75,7 @@ func normalizeMethod(x compile.Method) compile.Method {
 	return x
 }
 
-func normalizeArgs(x []*compile.Arg) (ret []*compile.Arg) {
+func normalizeArgs(x []*compile.Field) (ret []*compile.Field) {
 	for _, arg := range x {
 		norm := normalizeArg(*arg)
 		ret = append(ret, &norm)
@@ -83,7 +83,7 @@ func normalizeArgs(x []*compile.Arg) (ret []*compile.Arg) {
 	return
 }
 
-func normalizeArg(x compile.Arg) compile.Arg {
+func normalizeArg(x compile.Field) compile.Field {
 	x.Pos = parse.Pos{}
 	return x
 }
@@ -120,8 +120,8 @@ var ifaceTests = []ifaceTest{
 			NamePos: np("Res"),
 			Methods: []*compile.Method{{
 				NamePos: np("HasArgs"),
-				InArgs:  []*compile.Arg{{NamePos: np("x"), Type: vdl.BoolType}},
-				OutArgs: []*compile.Arg{{Type: vdl.StringType}},
+				InArgs:  []*compile.Field{{NamePos: np("x"), Type: vdl.BoolType}},
+				OutArgs: []*compile.Field{{Type: vdl.StringType}},
 			}},
 		},
 		"",
