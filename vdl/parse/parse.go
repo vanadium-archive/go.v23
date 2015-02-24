@@ -28,13 +28,11 @@ type Opts struct {
 	ImportsOnly bool // Only parse imports; skip everything else.
 }
 
-// Parse takes a file name, the contents of the vdl file src, and the
+// ParseFile takes a file name, the contents of the vdl file src, and the
 // accumulated errors, and parses the vdl into a parse.File containing the parse
 // tree.  Returns nil if any errors are encountered, with errs containing more
 // information.  Otherwise returns the parsed File.
-//
-// TODO(toddw): Rename to ParseFile.
-func Parse(fileName string, src io.Reader, opts Opts, errs *vdlutil.Errors) *File {
+func ParseFile(fileName string, src io.Reader, opts Opts, errs *vdlutil.Errors) *File {
 	start := startFile
 	if opts.ImportsOnly {
 		start = startFileImports
