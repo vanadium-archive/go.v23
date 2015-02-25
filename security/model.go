@@ -401,30 +401,6 @@ type ThirdPartyCaveat interface {
 	// anybody who can accept an ipc call.
 }
 
-// Discharge represents a "proof" required for satisfying a ThirdPartyCaveat.
-//
-// A discharge may have caveats of its own (including ThirdPartyCaveats) that
-// restrict the context in which the discharge is usable.
-//
-// Multiple goroutines may invoke methods on a Discharge simultaneously.
-type Discharge interface {
-	// ID returns the identifier for the ThirdPartyCaveat this discharge is
-	// associated with.
-	ID() string
-
-	// ThirdPartyCaveats returns the set of third-party restrictions on the
-	// scope of the discharge.
-	ThirdPartyCaveats() []ThirdPartyCaveat
-
-	// Expiry returns the time.Time at which this Discharge expires, or the zero value
-	// of time.Time if the discharge doesn't expire.
-	Expiry() time.Time
-
-	// unexported method to disallow implementations of this interface
-	// outside this package.
-	toWire() WireDischarge
-}
-
 // Context defines the state available for authorizing a principal.
 type Context interface {
 	// Timestamp at which the authorization state is to be checked.

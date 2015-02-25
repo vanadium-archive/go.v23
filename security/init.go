@@ -40,9 +40,12 @@ func init() {
 			return fmt.Errorf("missing discharge for third party caveat(id=%v)", params.ID())
 		}
 		// Must be of the valid type.
-		d, ok := discharge.(*publicKeyDischarge)
-		if !ok {
-			return fmt.Errorf("invalid discharge type(%T) for caveat(%T)", d, params)
+		var d *publicKeyDischarge
+		switch v := discharge.wire.(type) {
+		case WireDischargePublicKey:
+			d = &v.Value
+		default:
+			return fmt.Errorf("invalid discharge(%T) for caveat(%T)", v, params)
 		}
 		// Must be signed by the principal designated by c.DischargerKey
 		key, err := params.discharger()
