@@ -49,13 +49,10 @@ error (
   CaveatParamTypeMismatch(id uniqueid.Id, got, want typeobject) {
     "en": "bad param type: caveat {id} got {got}, want {want}",
   }
-  // TODO(ashankar,toddw,bjornick): The type of "err" here and below
-  // should be error once https://github.com/veyron/release-issues/issues/922
-  // is resolved.
-  CaveatParamCoding(id uniqueid.Id, typ typeobject, err string) {
+  CaveatParamCoding(id uniqueid.Id, typ typeobject, err error) {
     "en": "unable to encode/decode caveat param(type={typ}) for caveat {id}: {err}",
   }
-  CaveatValidation(err string) {
+  CaveatValidation(err error) {
     "en": "caveat validation failed: {err}",
   }
 )
