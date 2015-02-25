@@ -119,15 +119,15 @@ func (p *principal) Sign(message []byte) (Signature, error) {
 
 func (p *principal) MintDischarge(forCaveat, caveatOnDischarge Caveat, additionalCaveatsOnDischarge ...Caveat) (Discharge, error) {
 	if forCaveat.Id != PublicKeyThirdPartyCaveatX.Id {
-		return nil, fmt.Errorf("cannot mint discharges for %v", forCaveat)
+		return Discharge{}, fmt.Errorf("cannot mint discharges for %v", forCaveat)
 	}
 	id := forCaveat.ThirdPartyDetails().ID()
 	dischargeCaveats := append(additionalCaveatsOnDischarge, caveatOnDischarge)
-	d := &publicKeyDischarge{ThirdPartyCaveatID: id, Caveats: dischargeCaveats}
+	d := publicKeyDischarge{ThirdPartyCaveatID: id, Caveats: dischargeCaveats}
 	if err := d.sign(p.signer); err != nil {
-		return nil, fmt.Errorf("failed to sign discharge: %v", err)
+		return Discharge{}, fmt.Errorf("failed to sign discharge: %v", err)
 	}
-	return d, nil
+	return Discharge{WireDischargePublicKey{d}}, nil
 }
 
 func (p *principal) PublicKey() PublicKey {

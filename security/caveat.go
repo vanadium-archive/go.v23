@@ -277,37 +277,6 @@ func (c publicKeyThirdPartyCaveat) String() string {
 	return fmt.Sprintf("%v@%v [%+v]", c.ID(), c.Location(), c.Requirements())
 }
 
-func (d *publicKeyDischarge) ID() string { return d.ThirdPartyCaveatID }
-func (d *publicKeyDischarge) ThirdPartyCaveats() []ThirdPartyCaveat {
-	var ret []ThirdPartyCaveat
-	for _, cav := range d.Caveats {
-		if tp := cav.ThirdPartyDetails(); tp != nil {
-			ret = append(ret, tp)
-		}
-	}
-	return ret
-}
-
-func (d *publicKeyDischarge) Expiry() time.Time {
-	var expiry int64
-	for _, cav := range d.Caveats {
-		if cav.Id == UnixTimeExpiryCaveatX.Id {
-			var unix int64
-			if err := vom.Decode(cav.ParamVom, &unix); err != nil {
-				vlog.Errorf("Failed to decode ParamVOM for cav(%v): %v", cav, err)
-				return time.Time{}
-			}
-			if expiry == 0 || unix < expiry {
-				expiry = unix
-			}
-		}
-	}
-	if expiry == 0 {
-		return time.Time{}
-	}
-	return time.Unix(expiry, 0)
-}
-
 func (d *publicKeyDischarge) digest(hash Hash) []byte {
 	msg := hash.sum([]byte(d.ThirdPartyCaveatID))
 	for _, cav := range d.Caveats {
@@ -331,4 +300,7 @@ func (d *publicKeyDischarge) sign(signer Signer) error {
 	d.Signature, err = signer.Sign(dischargePurpose, d.digest(signer.PublicKey().hash()))
 	return err
 }
-func (d *publicKeyDischarge) toWire() WireDischarge { return WireDischargePublicKey{*d} }
+
+func (d *publicKeyDischarge) String() string {
+	return fmt.Sprint(*d)
+}
