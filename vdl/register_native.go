@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"runtime"
 	"sync"
 )
 
@@ -44,6 +45,7 @@ type nativeInfo struct {
 	NativeType     reflect.Type  // Native type from the conversion funcs.
 	toNativeFunc   reflect.Value // ToNative conversion func.
 	fromNativeFunc reflect.Value // FromNative conversion func.
+	stack          []byte
 }
 
 func (ni *nativeInfo) ToNative(wire, native reflect.Value) error {
@@ -85,20 +87,29 @@ func (reg *niRegistry) addNativeInfo(ni *nativeInfo) error {
 	dup3 := reg.fromNative[ni.WireType]
 	dup4 := reg.fromNative[ni.NativeType]
 	if dup1 != nil || dup2 != nil || dup3 != nil || dup4 != nil {
-		return fmt.Errorf("non-bijective mapping, or chaining, %#v duplicates: %#v %#v %#v %#v", ni, dup1, dup2, dup3, dup4)
+		return fmt.Errorf("non-bijective mapping, or chaining: %#v, stack: %s", ni, nonNilStack(dup1, dup2, dup3, dup4))
 	}
-	if ni.WireType == rtWireError && ni.NativeType == rtError {
+	if ni.WireType == rtWireError {
 		// Special-case the WireError<->error conversions.  These need to be tracked
 		// separately, since the native type is an interface, and needs special
 		// handling in our conversion routines.
 		if reg.forError != nil {
-			return fmt.Errorf("WireError<->error conversion already registered")
+			return fmt.Errorf("WireError<->error conversion already registered, stack: %s", reg.forError.stack)
 		}
 		reg.forError = ni
 		return nil
 	}
 	reg.fromWire[ni.WireType] = ni
 	reg.fromNative[ni.NativeType] = ni
+	return nil
+}
+
+func nonNilStack(infos ...*nativeInfo) []byte {
+	for _, ni := range infos {
+		if ni != nil {
+			return ni.stack
+		}
+	}
 	return nil
 }
 
@@ -154,12 +165,24 @@ func deriveNativeInfo(toFn, fromFn interface{}) (*nativeInfo, error) {
 	if rtF.NumIn() != 2 || rtF.In(0).Kind() != reflect.Ptr || rtF.NumOut() != 1 || rtF.Out(0) != rtError {
 		return nil, fmt.Errorf("fromFn must have signature FromNative(wire *W, native N) error")
 	}
-	rtWire, rtNative := rtT.In(0), rtF.In(1)
-	if rtWire != rtF.In(0).Elem() || rtNative != rtT.In(1).Elem() {
+	// Make sure the wire and native types match up between the two functions.
+	rtWire, rtNative := rtT.In(0), rtT.In(1).Elem()
+	if rtWire == rtWireError {
+		// The wire<->native conversions for errors is special, since we need to
+		// perform error interface checks.  The functions are expected to look like:
+		//   func ToNative(wire vdl.WireError, native *Native) error
+		//   func FromNative(wire *vdl.WireError, native error) error
+		if rtNative == rtError || rtF.In(0).Elem() != rtWireError || rtF.In(1) != rtError {
+			return nil, fmt.Errorf("mismatched error conversion, want signatures ToNative(wire vdl.WireError, native *N) error, FromNative(wire *vdl.WireError, native error) error")
+		}
+	} else if rtWire != rtF.In(0).Elem() || rtNative != rtF.In(1) {
 		return nil, fmt.Errorf("mismatched wire/native types, want signatures ToNative(wire W, native *N) error, FromNative(wire *W, native N) error")
 	}
 	if rtWire == rtNative {
 		return nil, fmt.Errorf("wire type == native type: %v", rtWire)
 	}
-	return &nativeInfo{rtWire, rtNative, rvT, rvF}, nil
+	// Attach a stacktrace to the info, up to 1KB.
+	stack := make([]byte, 1024)
+	stack = stack[:runtime.Stack(stack, false)]
+	return &nativeInfo{rtWire, rtNative, rvT, rvF, stack}, nil
 }

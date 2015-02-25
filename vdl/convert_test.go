@@ -19,14 +19,29 @@ import (
 func errorValue(e verror.Standard) *vdl.Value {
 	verr := vdl.NonNilZeroValue(vdl.ErrorType)
 	vv := verr.Elem()
-	vv.StructField(0).StructField(0).AssignString(string(e.IDAction.ID))
-	vv.StructField(0).StructField(1).AssignUint(uint64(e.IDAction.Action))
-	vv.StructField(1).AssignString(e.Msg)
-	vv.StructField(2).AssignLen(len(e.ParamList))
+	vv.StructField(0).AssignString(string(e.IDAction.ID))
+	vv.StructField(1).AssignEnumLabel(retryFromAction(e.IDAction.Action))
+	vv.StructField(2).AssignString(e.Msg)
+	vv.StructField(3).AssignLen(len(e.ParamList))
 	for ix, p := range e.ParamList {
-		vv.StructField(2).Index(ix).Assign(vdl.ValueOf(p))
+		vv.StructField(3).Index(ix).Assign(vdl.ValueOf(p))
 	}
 	return verr
+}
+
+func retryFromAction(action verror.ActionCode) string {
+	switch action.RetryAction() {
+	case verror.NoRetry:
+		return vdl.WireRetryCodeNoRetry.String()
+	case verror.RetryConnection:
+		return vdl.WireRetryCodeRetryConnection.String()
+	case verror.RetryRefetch:
+		return vdl.WireRetryCodeRetryRefetch.String()
+	case verror.RetryBackoff:
+		return vdl.WireRetryCodeRetryBackoff.String()
+	}
+	// Default to NoRetry.
+	return vdl.WireRetryCodeNoRetry.String()
 }
 
 // Each group of values in vvNAME and rvNAME are all mutually convertible.

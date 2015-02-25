@@ -49,10 +49,8 @@ var (
 
 // ErrorType describes the built-in error type.
 var ErrorType = OptionalType(NamedType("error", StructType(
-	Field{"IDAction", StructType(
-		Field{"ID", StringType},
-		Field{"Action", Uint32Type},
-	)},
+	Field{"Id", StringType},
+	Field{"RetryCode", EnumType("NoRetry", "RetryConnection", "RetryRefetch", "RetryBackoff")},
 	Field{"Msg", StringType},
 	Field{"ParamList", ListType(AnyType)},
 )))

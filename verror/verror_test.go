@@ -335,26 +335,3 @@ func TestEqual(t *testing.T) {
 		}
 	}
 }
-
-func TestRetryActionFromString(t *testing.T) {
-	tests := []struct {
-		Label  string
-		Action verror.ActionCode
-		ID     verror.ID
-	}{
-		{"NoRetry", verror.NoRetry, ""},
-		{"RetryConnection", verror.RetryConnection, ""},
-		{"RetryRefetch", verror.RetryRefetch, ""},
-		{"RetryBackoff", verror.RetryBackoff, ""},
-		{"foobar", 0, verror.ErrBadArg.ID},
-	}
-	for _, test := range tests {
-		action, err := verror.RetryActionFromString(test.Label)
-		if got, want := action, test.Action; got != want {
-			t.Errorf("got action %d, want %d", got, want)
-		}
-		if got, want := verror.ErrorID(err), test.ID; got != want {
-			t.Errorf("got error id %v, want %v", got, want)
-		}
-	}
-}

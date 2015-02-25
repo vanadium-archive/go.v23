@@ -11,14 +11,11 @@ func init() {
 
 // wireErrorToNative converts from vdl.WireError to verror.Standard, which
 // implements the standard go error interface.
-//
-// REQUIRES: native is an allocated zero value of error.  Note that this is
-// guaranteed by vdl.RegisterNative for calls to this this function.
-func wireErrorToNative(wire vdl.WireError, native *error) error {
-	std := Standard{
+func wireErrorToNative(wire vdl.WireError, native *Standard) error {
+	*native = Standard{
 		IDAction: IDAction{
-			ID:     ID(wire.IDAction.ID),
-			Action: ActionCode(wire.IDAction.Action),
+			ID:     ID(wire.Id),
+			Action: retryToAction(wire.RetryCode),
 		},
 		Msg: wire.Msg,
 	}
@@ -36,23 +33,20 @@ func wireErrorToNative(wire vdl.WireError, native *error) error {
 			// TODO(toddw): Consider whether there is a better strategy.
 			pNative = err
 		}
-		std.ParamList = append(std.ParamList, pNative)
+		native.ParamList = append(native.ParamList, pNative)
 	}
-	*native = std
 	return nil
 }
 
 // wireErrorFromNative converts from the standard go error interface to
 // verror.Standard, and then to vdl.WireError.
-//
-// REQUIRES: wire is an allocated zero value of vdl.WireError.  Note that this
-// is guaranteed by vdl.RegisterNative for calls to this this function.
 func wireErrorFromNative(wire *vdl.WireError, native error) error {
 	e := ExplicitConvert(ErrUnknown, "", "", "", native)
-	wire.IDAction.ID = string(ErrorID(e))
-	wire.IDAction.Action = uint32(Action(e))
-	wire.Msg = e.Error()
-	wire.ParamList = nil
+	*wire = vdl.WireError{
+		Id:        string(ErrorID(e)),
+		RetryCode: retryFromAction(Action(e)),
+		Msg:       e.Error(),
+	}
 	for _, p := range params(e) {
 		var pWire *vdl.Value
 		if err := vdl.Convert(&pWire, p); err != nil {
@@ -65,4 +59,34 @@ func wireErrorFromNative(wire *vdl.WireError, native error) error {
 		wire.ParamList = append(wire.ParamList, pWire)
 	}
 	return nil
+}
+
+func retryToAction(retry vdl.WireRetryCode) ActionCode {
+	switch retry {
+	case vdl.WireRetryCodeNoRetry:
+		return NoRetry
+	case vdl.WireRetryCodeRetryConnection:
+		return RetryConnection
+	case vdl.WireRetryCodeRetryRefetch:
+		return RetryRefetch
+	case vdl.WireRetryCodeRetryBackoff:
+		return RetryBackoff
+	}
+	// Backoff to no retry by default.
+	return NoRetry
+}
+
+func retryFromAction(action ActionCode) vdl.WireRetryCode {
+	switch action.RetryAction() {
+	case NoRetry:
+		return vdl.WireRetryCodeNoRetry
+	case RetryConnection:
+		return vdl.WireRetryCodeRetryConnection
+	case RetryRefetch:
+		return vdl.WireRetryCodeRetryRefetch
+	case RetryBackoff:
+		return vdl.WireRetryCodeRetryBackoff
+	}
+	// Backoff to no retry by default.
+	return vdl.WireRetryCodeNoRetry
 }

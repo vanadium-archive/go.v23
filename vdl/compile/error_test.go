@@ -10,7 +10,6 @@ import (
 	"v.io/v23/vdl/compile"
 	"v.io/v23/vdl/parse"
 	"v.io/v23/vdl/vdltest"
-	"v.io/v23/verror"
 )
 
 func TestError(t *testing.T) {
@@ -40,7 +39,7 @@ func testError(t *testing.T, test errorTest) {
 func matchErrorRes(t *testing.T, tname string, epkg errorPkg, edefs []*compile.ErrorDef) {
 	// Look for an ErrorDef called "Res" to compare our expected results.
 	for _, edef := range edefs {
-		if edef.ID == verror.ID(epkg.Name+".Res") {
+		if edef.ID == epkg.Name+".Res" {
 			got, want := cleanErrorDef(*edef), cleanErrorDef(epkg.Want)
 			if !reflect.DeepEqual(got, want) {
 				t.Errorf("%s got %+v, want %+v", tname, got, want)
@@ -107,41 +106,41 @@ var errorTests = []errorTest{
 	}}},
 	{"NoParamsNoRetry", ep{{"a", `error Res() {NoRetry,"en":"msg1"}`,
 		compile.ErrorDef{
-			Action:  verror.NoRetry,
-			Formats: []compile.LangFmt{{en, pre + "msg1"}},
-			English: pre + "msg1",
+			RetryCode: vdl.WireRetryCodeNoRetry,
+			Formats:   []compile.LangFmt{{en, pre + "msg1"}},
+			English:   pre + "msg1",
 		},
 		"",
 	}}},
 	{"NoParamsRetryConnection", ep{{"a", `error Res() {RetryConnection,"en":"msg1"}`,
 		compile.ErrorDef{
-			Action:  verror.RetryConnection,
-			Formats: []compile.LangFmt{{en, pre + "msg1"}},
-			English: pre + "msg1",
+			RetryCode: vdl.WireRetryCodeRetryConnection,
+			Formats:   []compile.LangFmt{{en, pre + "msg1"}},
+			English:   pre + "msg1",
 		},
 		"",
 	}}},
 	{"NoParamsRetryRefetch", ep{{"a", `error Res() {RetryRefetch,"en":"msg1"}`,
 		compile.ErrorDef{
-			Action:  verror.RetryRefetch,
-			Formats: []compile.LangFmt{{en, pre + "msg1"}},
-			English: pre + "msg1",
+			RetryCode: vdl.WireRetryCodeRetryRefetch,
+			Formats:   []compile.LangFmt{{en, pre + "msg1"}},
+			English:   pre + "msg1",
 		},
 		"",
 	}}},
 	{"NoParamsRetryBackoff", ep{{"a", `error Res() {RetryBackoff,"en":"msg1"}`,
 		compile.ErrorDef{
-			Action:  verror.RetryBackoff,
-			Formats: []compile.LangFmt{{en, pre + "msg1"}},
-			English: pre + "msg1",
+			RetryCode: vdl.WireRetryCodeRetryBackoff,
+			Formats:   []compile.LangFmt{{en, pre + "msg1"}},
+			English:   pre + "msg1",
 		},
 		"",
 	}}},
 	{"NoParamsMulti", ep{{"a", `error Res() {RetryRefetch,"en":"msg1","zh":"msg2"}`,
 		compile.ErrorDef{
-			Action:  verror.RetryRefetch,
-			Formats: []compile.LangFmt{{en, pre + "msg1"}, {zh, pre + "msg2"}},
-			English: pre + "msg1",
+			RetryCode: vdl.WireRetryCodeRetryRefetch,
+			Formats:   []compile.LangFmt{{en, pre + "msg1"}, {zh, pre + "msg2"}},
+			English:   pre + "msg1",
 		},
 		"",
 	}}},
@@ -164,46 +163,46 @@ var errorTests = []errorTest{
 	}}},
 	{"WithParamsNoRetry", ep{{"a", `error Res(x string, y int32) {NoRetry,"en":"msg1"}`,
 		compile.ErrorDef{
-			Params:  []*compile.Field{arg("x", vdl.StringType), arg("y", vdl.Int32Type)},
-			Action:  verror.NoRetry,
-			Formats: []compile.LangFmt{{en, pre + "msg1"}},
-			English: pre + "msg1",
+			Params:    []*compile.Field{arg("x", vdl.StringType), arg("y", vdl.Int32Type)},
+			RetryCode: vdl.WireRetryCodeNoRetry,
+			Formats:   []compile.LangFmt{{en, pre + "msg1"}},
+			English:   pre + "msg1",
 		},
 		"",
 	}}},
 	{"WithParamsRetryConnection", ep{{"a", `error Res(x string, y int32) {RetryConnection,"en":"msg1"}`,
 		compile.ErrorDef{
-			Params:  []*compile.Field{arg("x", vdl.StringType), arg("y", vdl.Int32Type)},
-			Action:  verror.RetryConnection,
-			Formats: []compile.LangFmt{{en, pre + "msg1"}},
-			English: pre + "msg1",
+			Params:    []*compile.Field{arg("x", vdl.StringType), arg("y", vdl.Int32Type)},
+			RetryCode: vdl.WireRetryCodeRetryConnection,
+			Formats:   []compile.LangFmt{{en, pre + "msg1"}},
+			English:   pre + "msg1",
 		},
 		"",
 	}}},
 	{"WithParamsRetryRefetch", ep{{"a", `error Res(x string, y int32) {RetryRefetch,"en":"msg1"}`,
 		compile.ErrorDef{
-			Params:  []*compile.Field{arg("x", vdl.StringType), arg("y", vdl.Int32Type)},
-			Action:  verror.RetryRefetch,
-			Formats: []compile.LangFmt{{en, pre + "msg1"}},
-			English: pre + "msg1",
+			Params:    []*compile.Field{arg("x", vdl.StringType), arg("y", vdl.Int32Type)},
+			RetryCode: vdl.WireRetryCodeRetryRefetch,
+			Formats:   []compile.LangFmt{{en, pre + "msg1"}},
+			English:   pre + "msg1",
 		},
 		"",
 	}}},
 	{"WithParamsRetryBackoff", ep{{"a", `error Res(x string, y int32) {RetryBackoff,"en":"msg1"}`,
 		compile.ErrorDef{
-			Params:  []*compile.Field{arg("x", vdl.StringType), arg("y", vdl.Int32Type)},
-			Action:  verror.RetryBackoff,
-			Formats: []compile.LangFmt{{en, pre + "msg1"}},
-			English: pre + "msg1",
+			Params:    []*compile.Field{arg("x", vdl.StringType), arg("y", vdl.Int32Type)},
+			RetryCode: vdl.WireRetryCodeRetryBackoff,
+			Formats:   []compile.LangFmt{{en, pre + "msg1"}},
+			English:   pre + "msg1",
 		},
 		"",
 	}}},
 	{"WithParamsMulti", ep{{"a", `error Res(x string, y int32) {RetryRefetch,"en":"msg1","zh":"msg2"}`,
 		compile.ErrorDef{
-			Params:  []*compile.Field{arg("x", vdl.StringType), arg("y", vdl.Int32Type)},
-			Action:  verror.RetryRefetch,
-			Formats: []compile.LangFmt{{en, pre + "msg1"}, {zh, pre + "msg2"}},
-			English: pre + "msg1",
+			Params:    []*compile.Field{arg("x", vdl.StringType), arg("y", vdl.Int32Type)},
+			RetryCode: vdl.WireRetryCodeRetryRefetch,
+			Formats:   []compile.LangFmt{{en, pre + "msg1"}, {zh, pre + "msg2"}},
+			English:   pre + "msg1",
 		},
 		"",
 	}}},
@@ -292,7 +291,7 @@ var errorTests = []errorTest{
 	{"UnknownType", ep{{"a", `error Res(x foo) {"en":"msg1"}`, compile.ErrorDef{}, "type foo undefined"}}},
 	{"InvalidParam", ep{{"a", `error Res(_x foo) {"en":"msg1"}`, compile.ErrorDef{}, "param _x invalid"}}},
 	{"DupParam", ep{{"a", `error Res(x bool, x int32) {"en":"msg1"}`, compile.ErrorDef{}, "param x duplicate name"}}},
-	{"UnknownAction", ep{{"a", `error Res() {Retry,"en":"msg1"}`, compile.ErrorDef{}, "unknown action"}}},
+	{"UnknownAction", ep{{"a", `error Res() {Foo,"en":"msg1"}`, compile.ErrorDef{}, "unknown action"}}},
 	{"EmptyLanguage", ep{{"a", `error Res() {"":"msg"}`, compile.ErrorDef{}, "empty language"}}},
 	{"DupLanguage", ep{{"a", `error Res() {"en":"msg1","en":"msg2"}`, compile.ErrorDef{}, "duplicate language en"}}},
 	{"UnknownParam", ep{{"a", `error Res() {"en":"{foo}"}`, compile.ErrorDef{}, `unknown param "foo"`}}},

@@ -435,7 +435,7 @@ var _ func(*{{$wire}}, {{$nat}}) error = {{$lwire}}FromNative
 {{end}}
 
 {{if $file.ErrorDefs}}var ( {{range $edef := $file.ErrorDefs}}
-	{{$edef.Doc}}{{errorName $edef $file}} = {{$data.Pkg "v.io/v23/verror"}}Register("{{$edef.ID}}", {{$data.Pkg "v.io/v23/verror"}}{{$edef.Action}}, "{{$edef.English}}"){{end}}
+	{{$edef.Doc}}{{errorName $edef $file}} = {{$data.Pkg "v.io/v23/verror"}}Register("{{$edef.ID}}", {{$data.Pkg "v.io/v23/verror"}}{{$edef.RetryCode}}, "{{$edef.English}}"){{end}}
 )
 
 {{/* TODO(toddw): Don't set "en-US" or "en" again, since it's already set by Register */}}

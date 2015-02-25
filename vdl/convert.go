@@ -180,6 +180,11 @@ func createFinTarget(c convTarget, ttFrom *Type) convTarget {
 // If fin is already a concrete type it's used directly as the fill target.
 func createFillTarget(fin convTarget, ttFrom *Type) (convTarget, error) {
 	if fin.vv == nil {
+		// Handle case where fin.rv is the native error type; create the standard
+		// WireError struct to fill in.
+		if ni, err := nativeInfoForError(); err == nil && fin.rv.Type() == ni.NativeType {
+			return reflectConv(reflect.New(rtWireError).Elem(), ErrorType.Elem())
+		}
 		// Handle case where fin.rv is a native type; return the wire type as the
 		// fill target, and rely on finishConvert to perform the final step of
 		// converting from the wire type to the native type.
@@ -263,6 +268,11 @@ func createFillTarget(fin convTarget, ttFrom *Type) (convTarget, error) {
 func finishConvert(fin, fill convTarget) error {
 	// The logic here mirrors the logic in createFillTarget.
 	if fin.vv == nil {
+		// Handle mirrored case in createFillTarget where fin.rv is the native error
+		// type; fill.rv is WireError.
+		if ni, err := nativeInfoForError(); err == nil && fin.rv.Type() == ni.NativeType {
+			return ni.ToNative(fill.rv, fin.rv.Addr())
+		}
 		// Handle mirrored case in createFillTarget where fin.rv is a native type;
 		// fill.rv is the wire type that has been filled in.
 		if ni := nativeInfoFromNative(fin.rv.Type()); ni != nil {
@@ -283,9 +293,7 @@ func finishConvert(fin, fill convTarget) error {
 						if err := ni.ToNative(fill.rv, newNative); err != nil {
 							return err
 						}
-						// The type of newNative is *error, so call Elem() twice to get to
-						// the underlying concrete value.
-						rvFill = newNative.Elem().Elem()
+						rvFill = newNative.Elem()
 					}
 				} else if ni := nativeInfoFromWire(fill.rv.Type()); ni != nil {
 					// Handle case where fill.rv is a wire type with a native type; set

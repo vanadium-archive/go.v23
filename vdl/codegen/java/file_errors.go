@@ -106,8 +106,8 @@ func genJavaErrorFile(pkg *compile.Package, env *compile.Env) *JavaFileInfo {
 			errors[j].AccessModifier = accessModifierForName(err.Name)
 			errors[j].Doc = javaDoc(err.Doc)
 			errors[j].Name = vdlutil.ToConstCase(err.Name)
-			errors[j].ID = string(err.ID)
-			errors[j].ActionName = vdlutil.ToConstCase(err.Action.String())
+			errors[j].ID = err.ID
+			errors[j].ActionName = vdlutil.ToConstCase(err.RetryCode.String())
 			errors[j].EnglishFmt = err.English
 			errors[j].Formats = formats
 			errors[j].MethodName = "make" + toUpperCamelCase(err.Name)
