@@ -35,12 +35,6 @@ func newServer(ctx *context.T) ipc.Server {
 // serverArith implements the arith.Arith interface.
 type serverArith struct{}
 
-var numNoArgsCalls int
-
-func (*serverArith) NoArgs(ipc.ServerContext) {
-	numNoArgsCalls++
-}
-
 func (*serverArith) Add(_ ipc.ServerContext, A, B int32) (int32, error) {
 	return A + B, nil
 }
@@ -310,16 +304,6 @@ func TestArith(t *testing.T) {
 		}
 		// Synchronous calls
 		ar := arith.ArithClient(root)
-		/*
-			      // TODO(toddw): Re-enable this when supported by java.
-						oldCalls := numNoArgsCalls
-						if err := ar.NoArgs(ctx); err != nil {
-							t.Errorf("NoArgs: got %q but expected no error", err)
-						}
-						if got, want := numNoArgsCalls - oldCalls, 1; got != want {
-							t.Errorf("NoArgs calls: got %d, want %d", got, want)
-						}
-		*/
 		sum, err := ar.Add(ctx, 7, 8)
 		if err != nil {
 			t.Errorf("Add: got %q but expected no error", err)

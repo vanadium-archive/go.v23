@@ -50,10 +50,6 @@ const (
 // Things to note:
 //   * There must be at least 1 out-arg, and the last out-arg must be error.
 type Arith interface {
-	// NoArgs demonstrates that it's fine to have no arguments.
-	// TODO(toddw): Re-enable this when supported by java.
-	//NoArgs()
-
 	// Add is a typical method with multiple input and output arguments.
 	Add(a int32, b int32) (int32 | error)
 
