@@ -11,7 +11,9 @@ import (
 	"v.io/v23/verror"
 
 	// VDL user imports
+	"time"
 	"v.io/v23/uniqueid"
+	_ "v.io/v23/vdlroot/time"
 )
 
 type nonce [16]byte
@@ -87,8 +89,7 @@ var ConstCaveat = CaveatDescriptor{
 // UnixTimeExpiryCaveat represents a caveat that validates iff the current
 // time is before the time specified in seconds since January 1, 1970 UTC.
 //
-// TODO(toddw,ashankar): Once VDL support for time.Time is in, create a ExpiryCaveat
-// and use that (and drop UnixTimeExpiryCaveatX).
+// TODO(suharshs,ashankar,ataly): Remove this once everything is using ExpiryCaveatX.
 var UnixTimeExpiryCaveatX = CaveatDescriptor{
 	Id: uniqueid.Id{
 		84,
@@ -109,6 +110,32 @@ var UnixTimeExpiryCaveatX = CaveatDescriptor{
 		4,
 	},
 	ParamType: vdl.TypeOf(int64(0)),
+}
+
+// ExpiryCaveat represents a caveat that validates iff the current time is before
+// the specified time.Time.
+//
+// TODO(suharshs,ashankar): Rename to ExpiryCaveat and drop the ExpiryCaveat helper function.
+var ExpiryCaveatX = CaveatDescriptor{
+	Id: uniqueid.Id{
+		166,
+		76,
+		45,
+		1,
+		25,
+		251,
+		163,
+		52,
+		128,
+		113,
+		254,
+		235,
+		47,
+		48,
+		128,
+		0,
+	},
+	ParamType: vdl.TypeOf(time.Time{}),
 }
 
 // MethodCaveat represents a caveat that validates iff the method being

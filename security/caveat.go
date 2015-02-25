@@ -151,7 +151,7 @@ func NewCaveat(c CaveatDescriptor, param interface{}) (Caveat, error) {
 
 // ExpiryCaveat returns a Caveat that validates iff the current time is before t.
 func ExpiryCaveat(t time.Time) (Caveat, error) {
-	c, err := NewCaveat(UnixTimeExpiryCaveatX, t.Unix())
+	c, err := NewCaveat(ExpiryCaveatX, t)
 	if err != nil {
 		return c, err
 	}

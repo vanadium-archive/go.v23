@@ -22,6 +22,14 @@ func init() {
 		return nil
 	})
 
+	RegisterCaveatValidator(ExpiryCaveatX, func(ctx Context, expiry time.Time) error {
+		now := ctx.Timestamp()
+		if now.After(expiry) {
+			return fmt.Errorf("now(%v) is after expiry(%v)", now, expiry)
+		}
+		return nil
+	})
+
 	RegisterCaveatValidator(MethodCaveatX, func(ctx Context, methods []string) error {
 		if ctx.Method() == "" && len(methods) == 0 {
 			return nil

@@ -1,6 +1,7 @@
 package security
 
 import "v.io/v23/uniqueid"
+import "time"
 
 const (
   // ConstCaveat represents a caveat that either always validates or never validates.
@@ -11,11 +12,19 @@ const (
   // UnixTimeExpiryCaveat represents a caveat that validates iff the current
   // time is before the time specified in seconds since January 1, 1970 UTC.
   //
-  // TODO(toddw,ashankar): Once VDL support for time.Time is in, create a ExpiryCaveat
-  // and use that (and drop UnixTimeExpiryCaveatX).
+  // TODO(suharshs,ashankar,ataly): Remove this once everything is using ExpiryCaveatX.
   UnixTimeExpiryCaveatX = CaveatDescriptor{
     Id:        uniqueid.Id{0x54, 0xa6, 0x76, 0x39, 0x81, 0x37, 0x18, 0x7e, 0xcd, 0xb2, 0x6d, 0x2d, 0x69, 0xba, 0x0, 0x4},
     ParamType: typeobject(int64),
+  }
+
+  // ExpiryCaveat represents a caveat that validates iff the current time is before
+  // the specified time.Time.
+  //
+  // TODO(suharshs,ashankar): Rename to ExpiryCaveat and drop the ExpiryCaveat helper function.
+  ExpiryCaveatX = CaveatDescriptor{
+    Id:        uniqueid.Id{0xa6, 0x4c, 0x2d, 0x1, 0x19, 0xfb, 0xa3, 0x34, 0x80, 0x71, 0xfe, 0xeb, 0x2f, 0x30, 0x80, 0x0},
+    ParamType: typeobject(time.Time),
   }
 
   // MethodCaveat represents a caveat that validates iff the method being

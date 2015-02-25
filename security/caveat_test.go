@@ -249,6 +249,7 @@ func TestPublicKeyDischargeExpiry(t *testing.T) {
 		oneh       = newCaveat(ExpiryCaveat(now.Add(time.Hour)))
 		twoh       = newCaveat(ExpiryCaveat(now.Add(2 * time.Hour)))
 		threeh     = newCaveat(ExpiryCaveat(now.Add(3 * time.Hour)))
+		unix       = newCaveat(NewCaveat(UnixTimeExpiryCaveatX, now.Add(time.Hour).Unix()))
 	)
 
 	tpc, err := NewPublicKeyCaveat(discharger.PublicKey(), "location", ThirdPartyRequirements{}, oneh)
@@ -273,13 +274,22 @@ func TestPublicKeyDischargeExpiry(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	// Check that UnixTimeExpiryCaveatX also works.
+	unixCav, err := discharger.MintDischarge(tpc, unix)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, want := unixCav.Expiry().Unix(), now.Add(time.Hour).Unix(); got != want {
+		t.Errorf("got %v, want %v", got, want)
+	}
+
 	if exp := noExpiry.Expiry(); !exp.IsZero() {
 		t.Errorf("got %v, want %v", exp, time.Time{})
 	}
-	if got, want := oneCav.Expiry().Unix(), now.Add(time.Hour).Unix(); got != want {
+	if got, want := oneCav.Expiry().UTC(), now.Add(time.Hour).UTC(); got != want {
 		t.Errorf("got %v, want %v", got, want)
 	}
-	if got, want := threeCav.Expiry().Unix(), now.Add(time.Hour).Unix(); got != want {
+	if got, want := threeCav.Expiry().UTC(), now.Add(time.Hour).UTC(); got != want {
 		t.Errorf("got %v, want %v", got, want)
 	}
 }
@@ -288,7 +298,7 @@ func TestPublicKeyDischargeExpiry(t *testing.T) {
 // (expiry)
 func BenchmarkNewCaveat(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		if _, err := NewCaveat(UnixTimeExpiryCaveatX, 0); err != nil {
+		if _, err := NewCaveat(ExpiryCaveatX, time.Time{}); err != nil {
 			b.Fatal(err)
 		}
 	}
@@ -296,7 +306,7 @@ func BenchmarkNewCaveat(b *testing.B) {
 
 // Benchmark caveat valdation using one of the simplest caveats (expiry).
 func BenchmarkValidateCaveat(b *testing.B) {
-	cav, err := NewCaveat(UnixTimeExpiryCaveatX, time.Now().Unix())
+	cav, err := NewCaveat(ExpiryCaveatX, time.Now())
 	if err != nil {
 		b.Fatal(err)
 	}

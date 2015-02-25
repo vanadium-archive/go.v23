@@ -60,11 +60,20 @@ func (d Discharge) Expiry() time.Time {
 	return min
 }
 
-func expiryTime(c Caveat) time.Time {
-	if c.Id == UnixTimeExpiryCaveatX.Id {
+func expiryTime(cav Caveat) time.Time {
+	switch cav.Id {
+	case ExpiryCaveatX.Id:
+		var t time.Time
+		if err := vom.Decode(cav.ParamVom, &t); err != nil {
+			vlog.Errorf("Failed to decode ParamVOM for cav(%v): %v", cav, err)
+			return time.Time{}
+		}
+		return t
+	case UnixTimeExpiryCaveatX.Id:
+		// TODO(suharshs): Remove this after we only use ExpiryCaveatX.
 		var unix int64
-		if err := vom.Decode(c.ParamVom, &unix); err != nil {
-			vlog.Errorf("Failed to decode ParamVOM for caveat(%v): %v", c, err)
+		if err := vom.Decode(cav.ParamVom, &unix); err != nil {
+			vlog.Errorf("Failed to decode ParamVOM for cav(%v): %v", cav, err)
 			return time.Time{}
 		}
 		return time.Unix(unix, 0)
