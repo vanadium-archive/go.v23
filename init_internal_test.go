@@ -8,6 +8,7 @@ import (
 	"v.io/v23/context"
 	"v.io/v23/ipc"
 	"v.io/v23/naming"
+	"v.io/v23/naming/ns"
 	"v.io/v23/security"
 )
 
@@ -34,10 +35,10 @@ func (*mockRuntime) SetNewClient(ctx *context.T, opts ...ipc.ClientOpt) (*contex
 	return nil, nil, nil
 }
 func (*mockRuntime) GetClient(ctx *context.T) ipc.Client { return nil }
-func (*mockRuntime) SetNewNamespace(ctx *context.T, roots ...string) (*context.T, naming.Namespace, error) {
+func (*mockRuntime) SetNewNamespace(ctx *context.T, roots ...string) (*context.T, ns.Namespace, error) {
 	return nil, nil, nil
 }
-func (*mockRuntime) GetNamespace(ctx *context.T) naming.Namespace { return nil }
+func (*mockRuntime) GetNamespace(ctx *context.T) ns.Namespace { return nil }
 func (*mockRuntime) SetReservedNameDispatcher(ctx *context.T, server ipc.Dispatcher, opts ...ipc.ServerOpt) *context.T {
 	return nil
 }

@@ -19,6 +19,7 @@ import (
 	"v.io/v23/context"
 	"v.io/v23/ipc"
 	"v.io/v23/naming"
+	"v.io/v23/naming/ns"
 	"v.io/v23/security"
 )
 
@@ -197,10 +198,10 @@ type Runtime interface {
 
 	// SetNewNamespace creates a new Namespace and attaches it to the
 	// returned context.
-	SetNewNamespace(ctx *context.T, roots ...string) (*context.T, naming.Namespace, error)
+	SetNewNamespace(ctx *context.T, roots ...string) (*context.T, ns.Namespace, error)
 
 	// GetNamespace returns the current namespace
-	GetNamespace(ctx *context.T) naming.Namespace
+	GetNamespace(ctx *context.T) ns.Namespace
 
 	// GetAppCycle gets the current AppCycle.
 	GetAppCycle(ctx *context.T) AppCycle
@@ -279,12 +280,12 @@ func GetClient(ctx *context.T) ipc.Client {
 
 // SetNewNamespace creates a new Namespace and attaches it to the
 // returned context.
-func SetNewNamespace(ctx *context.T, roots ...string) (*context.T, naming.Namespace, error) {
+func SetNewNamespace(ctx *context.T, roots ...string) (*context.T, ns.Namespace, error) {
 	return initState.currentRuntime().SetNewNamespace(ctx, roots...)
 }
 
 // GetNamespace returns the current namespace.
-func GetNamespace(ctx *context.T) naming.Namespace {
+func GetNamespace(ctx *context.T) ns.Namespace {
 	return initState.currentRuntime().GetNamespace(ctx)
 }
 
