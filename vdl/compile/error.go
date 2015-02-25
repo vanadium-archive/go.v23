@@ -6,19 +6,19 @@ import (
 	"strconv"
 
 	"v.io/v23/i18n"
+	"v.io/v23/vdl"
 	"v.io/v23/vdl/parse"
-	"v.io/v23/verror"
 )
 
 // ErrorDef represents a user-defined error definition in the compiled results.
 type ErrorDef struct {
-	NamePos                    // name, parse position and docs
-	Exported bool              // is this error definition exported?
-	ID       verror.ID         // error ID
-	Action   verror.ActionCode // action to be performed by client
-	Params   []*Field          // list of positional parameter names and types
-	Formats  []LangFmt         // list of language / format pairs
-	English  string            // English format text from Formats
+	NamePos                     // name, parse position and docs
+	Exported  bool              // is this error definition exported?
+	ID        string            // error ID
+	RetryCode vdl.WireRetryCode // retry action to be performed by client
+	Params    []*Field          // list of positional parameter names and types
+	Formats   []LangFmt         // list of language / format pairs
+	English   string            // English format text from Formats
 }
 
 // LangFmt represents a language / format string pair.
@@ -46,9 +46,9 @@ func compileErrorDefs(pkg *Package, pfiles []*parse.File, env *Env) {
 				env.prefixErrorf(file, ped.Pos, err, "error %s name conflict", name)
 				continue
 			}
-			id := verror.ID(pkg.Path + "." + name)
+			id := pkg.Path + "." + name
 			ed := &ErrorDef{NamePos: NamePos(ped.NamePos), Exported: export, ID: id}
-			ed.Action = defineErrorAction(name, ped.Actions, file, env)
+			defineErrorActions(ed, name, ped.Actions, file, env)
 			ed.Params = defineErrorParams(name, ped.Params, file, env)
 			ed.Formats = defineErrorFormats(name, ped.Formats, ed.Params, file, env)
 			// We require the "en" base language for at least one of the Formats, and
@@ -72,24 +72,22 @@ func compileErrorDefs(pkg *Package, pfiles []*parse.File, env *Env) {
 	}
 }
 
-func defineErrorAction(name string, pactions []parse.StringPos, file *File, env *Env) verror.ActionCode {
+func defineErrorActions(ed *ErrorDef, name string, pactions []parse.StringPos, file *File, env *Env) {
 	// We allow multiple actions to be specified in the parser, so that it's easy
 	// to add new actions in the future.
-	var act verror.ActionCode
 	seenRetry := false
 	for _, pact := range pactions {
-		if code, err := verror.RetryActionFromString(pact.String); err == nil {
+		if retry, err := vdl.WireRetryCodeFromString(pact.String); err == nil {
 			if seenRetry {
 				env.Errorf(file, pact.Pos, "error %s action %s invalid (retry action specified multiple times)", name, pact.String)
 				continue
 			}
 			seenRetry = true
-			act |= code
+			ed.RetryCode = retry
 			continue
 		}
 		env.Errorf(file, pact.Pos, "error %s action %s invalid (unknown action)", name, pact.String)
 	}
-	return act
 }
 
 func defineErrorParams(name string, pparams []*parse.Field, file *File, env *Env) []*Field {

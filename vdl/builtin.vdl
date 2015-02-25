@@ -1,19 +1,22 @@
 package vdl
 
-// TODO(toddw): Remove IDAction and put fields directly into Error.
-type IDAction struct {
-	ID     string // Error ID, used to uniquely identify each error.
-	Action uint32 // Action code expected to be performed by the receiver.
-}
-
-// TODO(toddw): Provide constants for ActionCode, or make it an enum.
-
 // WireError is the wire representation for the built-in error type.  Errors and
 // exceptions in each programming environment are converted to this type to
 // ensure wire compatibility.  Generated code for each environment provides
 // automatic conversions into idiomatic native representations.
 type WireError struct {
-	IDAction  IDAction
-	Msg       string // Error message, may be empty.
-	ParamList []any  // Variadic parameters contained in the error.
+	Id        string        // Error ID, used to uniquely identify each error.
+	RetryCode WireRetryCode // Retry behavior suggested for the receiver.
+	Msg       string        // Error message, may be empty.
+	ParamList []any         // Variadic parameters contained in the error.
+}
+
+// WireRetryCode is the suggested retry behavior for the receiver of an error.
+// If the receiver doesn't know how to handle the specific error, it should
+// attempt the suggested retry behavior.
+type WireRetryCode enum {
+	NoRetry         // Do not retry.
+	RetryConnection // Renew high-level connection/context.
+	RetryRefetch    // Refetch and retry (e.g., out of date HTTP ETag)
+	RetryBackoff    // Backoff and retry a finite number of times.
 }

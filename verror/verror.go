@@ -101,36 +101,6 @@ func (ac ActionCode) RetryAction() ActionCode {
 	return ac & RetryActionMask
 }
 
-// String returns the string label of x.
-func (x ActionCode) String() string {
-	switch x {
-	case NoRetry:
-		return "NoRetry"
-	case RetryConnection:
-		return "RetryConnection"
-	case RetryRefetch:
-		return "RetryRefetch"
-	case RetryBackoff:
-		return "RetryBackoff"
-	}
-	return fmt.Sprintf("ActionCode(%d)", x)
-}
-
-// RetryActionFromString creates a retry ActionCode from the string label.
-func RetryActionFromString(label string) (ActionCode, error) {
-	switch label {
-	case "NoRetry":
-		return NoRetry, nil
-	case "RetryConnection":
-		return RetryConnection, nil
-	case "RetryRefetch":
-		return RetryRefetch, nil
-	case "RetryBackoff":
-		return RetryBackoff, nil
-	}
-	return ActionCode(0), New(ErrBadArg, nil, label)
-}
-
 // An IDAction combines a unique identifier ID for errors with an ActionCode.
 // The ID allows stable error checking across different error messages and
 // different address spaces.  By convention the format for the identifier is

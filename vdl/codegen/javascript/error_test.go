@@ -6,7 +6,6 @@ import (
 	"v.io/v23/i18n"
 	"v.io/v23/vdl"
 	"v.io/v23/vdl/compile"
-	"v.io/v23/verror"
 )
 
 func TestError(t *testing.T) {
@@ -14,8 +13,8 @@ func TestError(t *testing.T) {
 		NamePos: compile.NamePos{
 			Name: "Test",
 		},
-		ID:     verror.ID("v.io/v23/vdl/codegen/javascript.Test"),
-		Action: verror.NoRetry,
+		ID:        "v.io/v23/vdl/codegen/javascript.Test",
+		RetryCode: vdl.WireRetryCodeNoRetry,
 		Params: []*compile.Field{
 			&compile.Field{
 				NamePos: compile.NamePos{
