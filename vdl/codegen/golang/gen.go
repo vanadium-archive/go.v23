@@ -12,6 +12,7 @@ import (
 	"v.io/v23/vdl"
 	"v.io/v23/vdl/compile"
 	"v.io/v23/vdl/parse"
+	"v.io/v23/vdl/vdlroot/src/vdltool"
 	"v.io/v23/vdl/vdlutil"
 )
 
@@ -136,33 +137,34 @@ var goTemplate *template.Template
 // off to a regular function.
 func init() {
 	funcMap := template.FuncMap{
-		"firstRuneToExport":     vdlutil.FirstRuneToExportCase,
-		"firstRuneToUpper":      vdlutil.FirstRuneToUpper,
-		"firstRuneToLower":      vdlutil.FirstRuneToLower,
-		"errorName":             errorName,
-		"nativeIdent":           nativeIdent,
-		"typeGo":                typeGo,
-		"typeDefGo":             typeDefGo,
-		"constDefGo":            constDefGo,
-		"tagValue":              tagValue,
-		"embedGo":               embedGo,
-		"isStreamingMethod":     isStreamingMethod,
-		"hasStreamingMethods":   hasStreamingMethods,
-		"docBreak":              docBreak,
-		"quoteStripDoc":         parse.QuoteStripDoc,
-		"argNames":              argNames,
-		"argTypes":              argTypes,
-		"argNameTypes":          argNameTypes,
-		"argParens":             argParens,
-		"uniqueName":            uniqueName,
-		"uniqueNameImpl":        uniqueNameImpl,
-		"serverContextType":     serverContextType,
-		"serverContextStubType": serverContextStubType,
-		"outArgsClient":         outArgsClient,
-		"clientStubImpl":        clientStubImpl,
-		"clientFinishImpl":      clientFinishImpl,
-		"serverStubImpl":        serverStubImpl,
-		"reInitStreamValue":     reInitStreamValue,
+		"firstRuneToExport":       vdlutil.FirstRuneToExportCase,
+		"firstRuneToUpper":        vdlutil.FirstRuneToUpper,
+		"firstRuneToLower":        vdlutil.FirstRuneToLower,
+		"errorName":               errorName,
+		"nativeIdent":             nativeIdent,
+		"typeGo":                  typeGo,
+		"typeDefGo":               typeDefGo,
+		"constDefGo":              constDefGo,
+		"tagValue":                tagValue,
+		"embedGo":                 embedGo,
+		"isStreamingMethod":       isStreamingMethod,
+		"hasStreamingMethods":     hasStreamingMethods,
+		"docBreak":                docBreak,
+		"quoteStripDoc":           parse.QuoteStripDoc,
+		"argNames":                argNames,
+		"argTypes":                argTypes,
+		"argNameTypes":            argNameTypes,
+		"argParens":               argParens,
+		"uniqueName":              uniqueName,
+		"uniqueNameImpl":          uniqueNameImpl,
+		"serverContextType":       serverContextType,
+		"serverContextStubType":   serverContextStubType,
+		"outArgsClient":           outArgsClient,
+		"clientStubImpl":          clientStubImpl,
+		"clientFinishImpl":        clientFinishImpl,
+		"serverStubImpl":          serverStubImpl,
+		"reInitStreamValue":       reInitStreamValue,
+		"nativeConversionsInFile": nativeConversionsInFile,
 	}
 	goTemplate = template.Must(template.New("genGo").Funcs(funcMap).Parse(genGo))
 }
@@ -372,6 +374,22 @@ func reInitStreamValue(data goData, t *vdl.Type, name string) string {
 	return ""
 }
 
+// nativeConversionsInFile returns the map between wire and native types for
+// wire types defined in file.
+func nativeConversionsInFile(file *compile.File) map[string]vdltool.GoType {
+	all := file.Package.Config.Go.WireToNativeTypes
+	infile := make(map[string]vdltool.GoType)
+	for wire, gotype := range all {
+		for _, tdef := range file.TypeDefs {
+			if tdef.Name == wire {
+				infile[wire] = gotype
+				break
+			}
+		}
+	}
+	return infile
+}
+
 // The template that we execute against a goData instance to generate our
 // code.  Most of this is fairly straightforward substitution and ranges; more
 // complicated logic is delegated to the helper functions above.
@@ -400,11 +418,12 @@ import ( {{if $data.Imports.System}}
 {{range $tdef := $file.TypeDefs}}
 {{typeDefGo $data $tdef}}
 {{end}}
-func init() { {{range $wire, $native := $file.Package.Config.Go.WireToNativeTypes}}{{$lwire := firstRuneToLower $wire}}
+{{$nativeConversions := nativeConversionsInFile $file}}
+func init() { {{range $wire, $native := $nativeConversions}}{{$lwire := firstRuneToLower $wire}}
 	{{$data.Pkg "v.io/v23/vdl"}}RegisterNative({{$lwire}}ToNative, {{$lwire}}FromNative){{end}}{{range $tdef := $file.TypeDefs}}
 	{{$data.Pkg "v.io/v23/vdl"}}Register((*{{$tdef.Name}})(nil)){{end}}
 }
-{{range $wire, $native := $file.Package.Config.Go.WireToNativeTypes}}{{$lwire := firstRuneToLower $wire}}{{$nat := nativeIdent $data $native}}
+{{range $wire, $native := $nativeConversions}}{{$lwire := firstRuneToLower $wire}}{{$nat := nativeIdent $data $native}}
 // Type-check {{$wire}} conversion functions.
 var _ func({{$wire}}, *{{$nat}}) error = {{$lwire}}ToNative
 var _ func(*{{$wire}}, {{$nat}}) error = {{$lwire}}FromNative

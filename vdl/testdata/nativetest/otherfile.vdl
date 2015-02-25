@@ -1,0 +1,6 @@
+package nativetest
+
+// The only purpose of this file is to help ensure that the vdl tool works well
+// with multiple .vdl files in a package.
+
+type ignoreme string
