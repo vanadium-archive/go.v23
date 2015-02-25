@@ -12,7 +12,7 @@ import (
 	"v.io/v23/naming"
 	"v.io/v23/security"
 	"v.io/v23/vdl"
-	"v.io/v23/vdl/vdlroot/src/signature"
+	"v.io/v23/vdlroot/signature"
 )
 
 // Client represents the interface for making RPC calls.  There may be multiple

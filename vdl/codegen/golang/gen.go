@@ -12,8 +12,8 @@ import (
 	"v.io/v23/vdl"
 	"v.io/v23/vdl/compile"
 	"v.io/v23/vdl/parse"
-	"v.io/v23/vdl/vdlroot/src/vdltool"
 	"v.io/v23/vdl/vdlutil"
+	"v.io/v23/vdlroot/vdltool"
 )
 
 type goData struct {

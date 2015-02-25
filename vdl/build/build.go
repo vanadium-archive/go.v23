@@ -52,11 +52,11 @@ import (
 	"v.io/v23/vdl"
 	"v.io/v23/vdl/compile"
 	"v.io/v23/vdl/parse"
-	"v.io/v23/vdl/vdlroot/src/vdltool"
 	"v.io/v23/vdl/vdlutil"
+	"v.io/v23/vdlroot/vdltool"
 )
 
-const vdlrootImportPrefix = "v.io/v23/vdl/vdlroot/src"
+const vdlrootImportPrefix = "v.io/v23/vdlroot"
 
 // Package represents the build information for a vdl package.
 type Package struct {
@@ -68,7 +68,7 @@ type Package struct {
 	Path string
 	// GenPath is the package path to use for code generation.  It is typically
 	// the same as Path, except for vdlroot standard packages.
-	// E.g. "v.io/v23/vdl/vdlroot/src/time"
+	// E.g. "v.io/v23/vdlroot/time"
 	GenPath string
 	// Dir is the absolute directory containing the package files.
 	// E.g. "/home/user/veyron/vdl/src/foo/bar"
@@ -265,13 +265,13 @@ func (p *Package) CloseFiles() error {
 // neither VDLROOT nor VANADIUM_ROOT is specified.
 func SrcDirs(errs *vdlutil.Errors) []string {
 	var srcDirs []string
-	if root := vdlRootSrcDir(errs); root != "" {
+	if root := vdlRootDir(errs); root != "" {
 		srcDirs = append(srcDirs, root)
 	}
 	return append(srcDirs, vdlPathSrcDirs(errs)...)
 }
 
-func vdlRootSrcDir(errs *vdlutil.Errors) string {
+func vdlRootDir(errs *vdlutil.Errors) string {
 	vdlroot := os.Getenv("VDLROOT")
 	if vdlroot == "" {
 		// Try to construct VDLROOT out of VANADIUM_ROOT.
@@ -280,12 +280,11 @@ func vdlRootSrcDir(errs *vdlutil.Errors) string {
 			errs.Error("Either VDLROOT or VANADIUM_ROOT must be set")
 			return ""
 		}
-		vdlroot = filepath.Join(vroot, "release", "go", "src", "v.io", "v23", "vdl", "vdlroot")
+		vdlroot = filepath.Join(vroot, "release", "go", "src", "v.io", "v23", "vdlroot")
 	}
-	src := filepath.Join(vdlroot, "src")
-	abs, err := filepath.Abs(src)
+	abs, err := filepath.Abs(vdlroot)
 	if err != nil {
-		errs.Errorf("VDLROOT src dir %q can't be made absolute (%v)", src, err)
+		errs.Errorf("VDLROOT %q can't be made absolute (%v)", vdlroot, err)
 		return ""
 	}
 	return abs
@@ -525,8 +524,8 @@ func (ds *depSorter) resolveDirPath(dir string, mode UnknownPathMode) *Package {
 	// We always deduce the package path from the package directory, even if we
 	// originally resolved from an import path, and thus already "know" the
 	// package path.  This is to ensure we correctly handle vdl standard packages.
-	// E.g. if we're given "v.io/v23/vdl/vdlroot/src/vdltool" as
-	// an import path, the resulting package path must be "vdltool".
+	// E.g. if we're given "v.io/v23/vdlroot/vdltool" as an import path, the
+	// resulting package path must be "vdltool".
 	pkgPath, genPath, err := ds.deducePackagePath(absDir)
 	if err != nil {
 		ds.errorf("%s: can't deduce package path (%v)", absDir, err)

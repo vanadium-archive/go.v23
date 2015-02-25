@@ -19,8 +19,8 @@ import (
 	"v.io/v23/vdl/codegen/java"
 	"v.io/v23/vdl/codegen/javascript"
 	"v.io/v23/vdl/compile"
-	"v.io/v23/vdl/vdlroot/src/vdltool"
 	"v.io/v23/vdl/vdlutil"
+	"v.io/v23/vdlroot/vdltool"
 )
 
 func init() {
@@ -153,8 +153,8 @@ var topicVdlConfig = cmdline.Topic{
 Each vdl source package P may contain an optional file "vdl.config" within the P
 directory.  This file specifies additional configuration for the vdl tool.
 
-The format of this file is described by the vdl.Config type in the "vdl"
-standard package, located at VDLROOT/src/vdl/config.go.
+The format of this file is described by the vdltool.Config type in the "vdltool"
+standard package, located at VDLROOT/vdltool/config.vdl.
 
 If the file does not exist, we use the zero value of vdl.Config.
 `,
@@ -337,7 +337,7 @@ var (
 			{"third_party/go/src", "SKIP"},
 			{"tools/go/src", "SKIP"},
 			// TODO(toddw): Skip vdlroot javascript generation for now.
-			{"release/go/src/v.io/v23/vdl/vdlroot/src", "SKIP"},
+			{"release/go/src/v.io/v23/vdlroot", "SKIP"},
 		},
 	}
 	optGenJavaOutPkg = xlateRules{

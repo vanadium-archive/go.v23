@@ -4,7 +4,7 @@ import (
 	"v.io/v23"
 	"v.io/v23/context"
 	"v.io/v23/ipc"
-	"v.io/v23/vdl/vdlroot/src/signature"
+	"v.io/v23/vdlroot/signature"
 )
 
 // Signature invokes the reserved signature RPC on the given name, and returns

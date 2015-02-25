@@ -13,9 +13,9 @@ import (
 	"v.io/v23/vdl/build"
 	"v.io/v23/vdl/compile"
 	"v.io/v23/vdl/testdata/base"
-	"v.io/v23/vdl/vdlroot/src/vdltool"
 	"v.io/v23/vdl/vdltest"
 	"v.io/v23/vdl/vdlutil"
+	"v.io/v23/vdlroot/vdltool"
 )
 
 func init() {
@@ -27,12 +27,12 @@ func init() {
 // following directory structure:
 //   .../release/go/src/v.io/v23/vdl/build/build_test.go
 // We want to end up with the following:
-//   VDLROOT = .../release/go/src/v.io/v23/vdl/vdlroot
+//   VDLROOT = .../release/go/src/v.io/v23/vdlroot
 //   VDLPATH = .../release/go
 //
 // TODO(toddw): Put a full VDLPATH tree under ../testdata and only use that.
 const (
-	defaultVDLRoot = "../vdlroot"
+	defaultVDLRoot = "../../vdlroot"
 	defaultVDLPath = "../../../../.."
 )
 
@@ -72,13 +72,13 @@ func TestSrcDirsVdlRoot(t *testing.T) {
 		ErrRE        string
 	}{
 		{"", "", nil, "Either VDLROOT or VANADIUM_ROOT must be set"},
-		{"/a", "", []string{"/a/src"}, ""},
-		{"/a/b/c", "", []string{"/a/b/c/src"}, ""},
-		{"", "/veyron", []string{"/veyron/release/go/src/v.io/v23/vdl/vdlroot/src"}, ""},
-		{"", "/a/b/c", []string{"/a/b/c/release/go/src/v.io/v23/vdl/vdlroot/src"}, ""},
+		{"/a", "", []string{"/a"}, ""},
+		{"/a/b/c", "", []string{"/a/b/c"}, ""},
+		{"", "/veyron", []string{"/veyron/release/go/src/v.io/v23/vdlroot"}, ""},
+		{"", "/a/b/c", []string{"/a/b/c/release/go/src/v.io/v23/vdlroot"}, ""},
 		// If both VDLROOT and VANADIUM_ROOT are specified, VDLROOT takes precedence.
-		{"/a", "/veyron", []string{"/a/src"}, ""},
-		{"/a/b/c", "/x/y/z", []string{"/a/b/c/src"}, ""},
+		{"/a", "/veyron", []string{"/a"}, ""},
+		{"/a/b/c", "/x/y/z", []string{"/a/b/c"}, ""},
 	}
 	for _, test := range tests {
 		if !setEnvironment(t, test.VDLRoot, defaultVDLPath) || !setVanadiumRoot(t, test.VanadiumRoot) {
@@ -144,8 +144,7 @@ func TestSrcDirsVdlPath(t *testing.T) {
 		}
 		vdltest.ExpectResult(t, errs, name, errRE)
 		// Every result will have our valid VDLROOT srcdir.
-		vdlrootsrc := filepath.Join(abs(defaultVDLRoot), "src")
-		want := append([]string{vdlrootsrc}, test.Want...)
+		want := append([]string{abs(defaultVDLRoot)}, test.Want...)
 		if !reflect.DeepEqual(got, want) {
 			t.Errorf("%s got %v, want %v", name, got, want)
 		}
@@ -367,12 +366,12 @@ func TestTransitivePackages(t *testing.T) {
 		{
 			[]string{"vdltool"},
 			[]string{"vdltool"},
-			[]string{"v.io/v23/vdl/vdlroot/src/vdltool"},
+			[]string{"v.io/v23/vdlroot/vdltool"},
 		},
 		{
-			[]string{"../vdlroot/src/vdltool"},
+			[]string{"../../vdlroot/vdltool"},
 			[]string{"vdltool"},
-			[]string{"v.io/v23/vdl/vdlroot/src/vdltool"},
+			[]string{"v.io/v23/vdlroot/vdltool"},
 		},
 	}
 	for _, test := range tests {
@@ -458,12 +457,12 @@ func TestTransitivePackagesUnknownPathError(t *testing.T) {
 		// Special-case error for packages under vdlroot, which can't be imported
 		// using the vdlroot prefix.
 		{
-			[]string{"v.io/v23/vdl/vdlroot/src/vdltool"},
+			[]string{"v.io/v23/vdlroot/vdltool"},
 			`packages under vdlroot must be specified without the vdlroot prefix`,
 		},
 		{
-			[]string{"v.io/v23/vdl/vdlroot/src/..."},
-			`Can't resolve "v.io/v23/vdl/vdlroot/src/..." to any packages`,
+			[]string{"v.io/v23/vdlroot/..."},
+			`Can't resolve "v.io/v23/vdlroot/..." to any packages`,
 		},
 	}
 	for _, test := range tests {

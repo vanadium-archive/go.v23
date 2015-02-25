@@ -10,7 +10,7 @@ import (
 	// VDL user imports
 	"time"
 	"v.io/v23/uniqueid"
-	_ "v.io/v23/vdl/vdlroot/src/time"
+	_ "v.io/v23/vdlroot/time"
 )
 
 type TraceRecord struct {

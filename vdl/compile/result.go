@@ -9,8 +9,8 @@ import (
 	"v.io/v23/vdl"
 	"v.io/v23/vdl/opconst"
 	"v.io/v23/vdl/parse"
-	"v.io/v23/vdl/vdlroot/src/vdltool"
 	"v.io/v23/vdl/vdlutil"
+	"v.io/v23/vdlroot/vdltool"
 )
 
 // Env is the environment for compilation.  It contains all errors that were
@@ -248,7 +248,7 @@ type Package struct {
 	Path string
 	// GenPath is the package path to use for code generation.  It is typically
 	// the same as Path, except for vdlroot standard packages.
-	// E.g. "v.io/v23/vdl/vdlroot/src/time"
+	// E.g. "v.io/v23/vdlroot/time"
 	GenPath string
 	// Files holds the files contained in the package.
 	Files []*File

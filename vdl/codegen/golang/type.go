@@ -7,7 +7,7 @@ import (
 
 	"v.io/v23/vdl"
 	"v.io/v23/vdl/compile"
-	"v.io/v23/vdl/vdlroot/src/vdltool"
+	"v.io/v23/vdlroot/vdltool"
 )
 
 func localIdent(data goData, file *compile.File, ident string) string {

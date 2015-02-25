@@ -2,7 +2,7 @@ package compile
 
 import (
 	"v.io/v23/vdl"
-	"v.io/v23/vdl/vdlroot/src/vdltool"
+	"v.io/v23/vdlroot/vdltool"
 )
 
 var (

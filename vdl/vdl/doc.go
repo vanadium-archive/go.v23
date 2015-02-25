@@ -79,7 +79,7 @@ The vdl generate flags are:
    commas to separate multiple rules; the first rule matching src is used, and
    if there are no matching rules, the package remains unchanged.  The special
    dst SKIP indicates matching packages are skipped.
- -js_out_dir=release/go/src->release/javascript/core/src,roadmap/go/src->release/javascript/core/src,third_party/go/src->SKIP,tools/go/src->SKIP,release/go/src/v.io/v23/vdl/vdlroot/src->SKIP
+ -js_out_dir=release/go/src->release/javascript/core/src,roadmap/go/src->release/javascript/core/src,third_party/go/src->SKIP,tools/go/src->SKIP,release/go/src/v.io/v23/vdlroot->SKIP
    Same semantics as --go_out_dir but applies to js code generation.
  -js_relative_path_to_core=
    If set, this is the relative path from js_out_dir to the root of the JS core
@@ -149,7 +149,7 @@ The vdl audit flags are:
    commas to separate multiple rules; the first rule matching src is used, and
    if there are no matching rules, the package remains unchanged.  The special
    dst SKIP indicates matching packages are skipped.
- -js_out_dir=release/go/src->release/javascript/core/src,roadmap/go/src->release/javascript/core/src,third_party/go/src->SKIP,tools/go/src->SKIP,release/go/src/v.io/v23/vdl/vdlroot/src->SKIP
+ -js_out_dir=release/go/src->release/javascript/core/src,roadmap/go/src->release/javascript/core/src,third_party/go/src->SKIP,tools/go/src->SKIP,release/go/src/v.io/v23/vdlroot->SKIP
    Same semantics as --go_out_dir but applies to js code generation.
  -js_relative_path_to_core=
    If set, this is the relative path from js_out_dir to the root of the JS core
@@ -271,8 +271,8 @@ Vdl Vdl.Config - help topic
 Each vdl source package P may contain an optional file "vdl.config" within the P
 directory.  This file specifies additional configuration for the vdl tool.
 
-The format of this file is described by the vdl.Config type in the "vdl"
-standard package, located at VDLROOT/src/vdl/config.go.
+The format of this file is described by the vdltool.Config type in the "vdltool"
+standard package, located at VDLROOT/vdltool/config.vdl.
 
 If the file does not exist, we use the zero value of vdl.Config.
 */
