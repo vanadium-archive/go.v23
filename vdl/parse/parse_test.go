@@ -56,7 +56,7 @@ type vdlTest struct {
 
 func testParseVDL(t *testing.T, test vdlTest, opts parse.Opts) {
 	errs := vdlutil.NewErrors(-1)
-	actual := parse.Parse("testfile", strings.NewReader(test.src), opts, errs)
+	actual := parse.ParseFile("testfile", strings.NewReader(test.src), opts, errs)
 	vdltest.ExpectResult(t, errs, test.name, test.errors...)
 	if !reflect.DeepEqual(test.expect, actual) {
 		t.Errorf("%v\nEXPECT %+v\nACTUAL %+v", test.name, test.expect, actual)

@@ -26,11 +26,11 @@ import (
 	"v.io/v23/vdl/vdlroot/src/vdltool"
 )
 
-// Compile compiles a list of parse.Files into a Package.  Updates env with the
-// compiled package and returns it on success, or returns nil and guarantees
-// !env.Errors.IsEmpty().  All imports that the parsed package depend on must
-// already have been compiled and populated into env.
-func Compile(pkgpath, genpath string, pfiles []*parse.File, config vdltool.Config, env *Env) *Package {
+// CompilePackage compiles a list of parse.Files into a Package.  Updates env
+// with the compiled package and returns it on success, or returns nil and
+// guarantees !env.Errors.IsEmpty().  All imports that the parsed package depend
+// on must already have been compiled and populated into env.
+func CompilePackage(pkgpath, genpath string, pfiles []*parse.File, config vdltool.Config, env *Env) *Package {
 	if pkgpath == "" {
 		env.Errors.Errorf("Compile called with empty pkgpath")
 		return nil
