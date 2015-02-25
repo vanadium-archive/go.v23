@@ -252,7 +252,7 @@ func generateMethodSignature(method *compile.Method, names typeNames) string {
 }
 
 // Returns a slice describing the method's arguments.
-func generateMethodArguments(args []*compile.Arg, names typeNames) string {
+func generateMethodArguments(args []*compile.Field, names typeNames) string {
 	ret := "["
 	for _, arg := range args {
 		ret += fmt.Sprintf(

@@ -16,14 +16,14 @@ func TestError(t *testing.T) {
 		},
 		ID:     verror.ID("v.io/v23/vdl/codegen/javascript.Test"),
 		Action: verror.NoRetry,
-		Params: []*compile.Arg{
-			&compile.Arg{
+		Params: []*compile.Field{
+			&compile.Field{
 				NamePos: compile.NamePos{
 					Name: "x",
 				},
 				Type: vdl.BoolType,
 			},
-			&compile.Arg{
+			&compile.Field{
 				NamePos: compile.NamePos{
 					Name: "y",
 				},

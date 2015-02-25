@@ -40,7 +40,7 @@ func TestXlateErrorFormat(t *testing.T) {
 
 		{`{foo}`, ``, `unknown param "foo"`},
 	}
-	params := []*Arg{
+	params := []*Field{
 		{NamePos: NamePos{Name: "a"}},
 		{NamePos: NamePos{Name: "b"}},
 		{NamePos: NamePos{Name: "c"}},

@@ -81,8 +81,8 @@ const (
 	zh             = "zh"
 )
 
-func arg(name string, t *vdl.Type) *compile.Arg {
-	arg := new(compile.Arg)
+func arg(name string, t *vdl.Type) *compile.Field {
+	arg := new(compile.Field)
 	arg.Name = name
 	arg.Type = t
 	return arg
@@ -148,7 +148,7 @@ var errorTests = []errorTest{
 
 	{"WithParams1", ep{{"a", `error Res(x string, y int32) {"en":"msg1"}`,
 		compile.ErrorDef{
-			Params:  []*compile.Arg{arg("x", vdl.StringType), arg("y", vdl.Int32Type)},
+			Params:  []*compile.Field{arg("x", vdl.StringType), arg("y", vdl.Int32Type)},
 			Formats: []compile.LangFmt{{en, pre + "msg1"}},
 			English: pre + "msg1",
 		},
@@ -156,7 +156,7 @@ var errorTests = []errorTest{
 	}}},
 	{"WithParams2", ep{{"a", `error Res(x string, y int32) {"en":"msg1","zh":"msg2"}`,
 		compile.ErrorDef{
-			Params:  []*compile.Arg{arg("x", vdl.StringType), arg("y", vdl.Int32Type)},
+			Params:  []*compile.Field{arg("x", vdl.StringType), arg("y", vdl.Int32Type)},
 			Formats: []compile.LangFmt{{en, pre + "msg1"}, {zh, pre + "msg2"}},
 			English: pre + "msg1",
 		},
@@ -164,7 +164,7 @@ var errorTests = []errorTest{
 	}}},
 	{"WithParamsNoRetry", ep{{"a", `error Res(x string, y int32) {NoRetry,"en":"msg1"}`,
 		compile.ErrorDef{
-			Params:  []*compile.Arg{arg("x", vdl.StringType), arg("y", vdl.Int32Type)},
+			Params:  []*compile.Field{arg("x", vdl.StringType), arg("y", vdl.Int32Type)},
 			Action:  verror.NoRetry,
 			Formats: []compile.LangFmt{{en, pre + "msg1"}},
 			English: pre + "msg1",
@@ -173,7 +173,7 @@ var errorTests = []errorTest{
 	}}},
 	{"WithParamsRetryConnection", ep{{"a", `error Res(x string, y int32) {RetryConnection,"en":"msg1"}`,
 		compile.ErrorDef{
-			Params:  []*compile.Arg{arg("x", vdl.StringType), arg("y", vdl.Int32Type)},
+			Params:  []*compile.Field{arg("x", vdl.StringType), arg("y", vdl.Int32Type)},
 			Action:  verror.RetryConnection,
 			Formats: []compile.LangFmt{{en, pre + "msg1"}},
 			English: pre + "msg1",
@@ -182,7 +182,7 @@ var errorTests = []errorTest{
 	}}},
 	{"WithParamsRetryRefetch", ep{{"a", `error Res(x string, y int32) {RetryRefetch,"en":"msg1"}`,
 		compile.ErrorDef{
-			Params:  []*compile.Arg{arg("x", vdl.StringType), arg("y", vdl.Int32Type)},
+			Params:  []*compile.Field{arg("x", vdl.StringType), arg("y", vdl.Int32Type)},
 			Action:  verror.RetryRefetch,
 			Formats: []compile.LangFmt{{en, pre + "msg1"}},
 			English: pre + "msg1",
@@ -191,7 +191,7 @@ var errorTests = []errorTest{
 	}}},
 	{"WithParamsRetryBackoff", ep{{"a", `error Res(x string, y int32) {RetryBackoff,"en":"msg1"}`,
 		compile.ErrorDef{
-			Params:  []*compile.Arg{arg("x", vdl.StringType), arg("y", vdl.Int32Type)},
+			Params:  []*compile.Field{arg("x", vdl.StringType), arg("y", vdl.Int32Type)},
 			Action:  verror.RetryBackoff,
 			Formats: []compile.LangFmt{{en, pre + "msg1"}},
 			English: pre + "msg1",
@@ -200,7 +200,7 @@ var errorTests = []errorTest{
 	}}},
 	{"WithParamsMulti", ep{{"a", `error Res(x string, y int32) {RetryRefetch,"en":"msg1","zh":"msg2"}`,
 		compile.ErrorDef{
-			Params:  []*compile.Arg{arg("x", vdl.StringType), arg("y", vdl.Int32Type)},
+			Params:  []*compile.Field{arg("x", vdl.StringType), arg("y", vdl.Int32Type)},
 			Action:  verror.RetryRefetch,
 			Formats: []compile.LangFmt{{en, pre + "msg1"}, {zh, pre + "msg2"}},
 			English: pre + "msg1",
@@ -209,7 +209,7 @@ var errorTests = []errorTest{
 	}}},
 	{"WithParamsFormat", ep{{"a", `error Res(x string, y int32) {"en":"en {x} {y}","zh":"zh {y} {x}"}`,
 		compile.ErrorDef{
-			Params:  []*compile.Arg{arg("x", vdl.StringType), arg("y", vdl.Int32Type)},
+			Params:  []*compile.Field{arg("x", vdl.StringType), arg("y", vdl.Int32Type)},
 			Formats: []compile.LangFmt{{en, pre + "en {3} {4}"}, {zh, pre + "zh {4} {3}"}},
 			English: pre + "en {3} {4}",
 		},
@@ -217,7 +217,7 @@ var errorTests = []errorTest{
 	}}},
 	{"WithSamePackageParam", ep{{"a", `error Res(x Bool) {"en":"en {x}"};type Bool bool`,
 		compile.ErrorDef{
-			Params:  []*compile.Arg{arg("x", vdl.NamedType("a.Bool", vdl.BoolType))},
+			Params:  []*compile.Field{arg("x", vdl.NamedType("a.Bool", vdl.BoolType))},
 			Formats: []compile.LangFmt{{en, pre + "en {3}"}},
 			English: pre + "en {3}",
 		},
@@ -255,7 +255,7 @@ var errorTests = []errorTest{
 		{
 			"b", `import "a";error Res(x a.Bool) {"en":"en {x}"}`,
 			compile.ErrorDef{
-				Params:  []*compile.Arg{arg("x", vdl.NamedType("a.Bool", vdl.BoolType))},
+				Params:  []*compile.Field{arg("x", vdl.NamedType("a.Bool", vdl.BoolType))},
 				Formats: []compile.LangFmt{{en, pre + "en {3}"}},
 				English: pre + "en {3}",
 			},

@@ -416,17 +416,15 @@ type Interface struct {
 // Method represents a method in an interface.
 type Method struct {
 	NamePos                // method name, pos and doc
-	InArgs    []*Arg       // list of positional in-args
-	OutArgs   []*Arg       // list of positional out-args
+	InArgs    []*Field     // list of positional in-args
+	OutArgs   []*Field     // list of positional out-args
 	InStream  *vdl.Type    // in-stream type, may be nil
 	OutStream *vdl.Type    // out-stream type, may be nil
 	Tags      []*vdl.Value // list of method tags
 }
 
-// Arg represents method arguments and error params.
-//
-// TODO(toddw): Rename to Field, to match the parse package.
-type Arg struct {
+// Field represents method arguments and error params.
+type Field struct {
 	NamePos           // arg name, pos and doc
 	Type    *vdl.Type // arg type, never nil
 }
@@ -435,7 +433,7 @@ type Arg struct {
 type NamePos parse.NamePos
 
 func (x *Method) String() string  { return fmt.Sprintf("%+v", *x) }
-func (x *Arg) String() string     { return fmt.Sprintf("%+v", *x) }
+func (x *Field) String() string   { return fmt.Sprintf("%+v", *x) }
 func (x *NamePos) String() string { return fmt.Sprintf("%+v", *x) }
 func (x *Package) String() string {
 	c := *x

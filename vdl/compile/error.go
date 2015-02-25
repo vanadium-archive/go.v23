@@ -16,7 +16,7 @@ type ErrorDef struct {
 	Exported bool              // is this error definition exported?
 	ID       verror.ID         // error ID
 	Action   verror.ActionCode // action to be performed by client
-	Params   []*Arg            // list of positional parameter names and types
+	Params   []*Field          // list of positional parameter names and types
 	Formats  []LangFmt         // list of language / format pairs
 	English  string            // English format text from Formats
 }
@@ -92,8 +92,8 @@ func defineErrorAction(name string, pactions []parse.StringPos, file *File, env 
 	return act
 }
 
-func defineErrorParams(name string, pparams []*parse.Field, file *File, env *Env) []*Arg {
-	var params []*Arg
+func defineErrorParams(name string, pparams []*parse.Field, file *File, env *Env) []*Field {
+	var params []*Field
 	seen := make(map[string]*parse.Field)
 	for _, pparam := range pparams {
 		pname, pos := pparam.Name, pparam.Pos
@@ -110,13 +110,13 @@ func defineErrorParams(name string, pparams []*parse.Field, file *File, env *Env
 			env.prefixErrorf(file, pos, err, "error %s param %s invalid", name, pname)
 			continue
 		}
-		param := &Arg{NamePos(pparam.NamePos), compileType(pparam.Type, file, env)}
+		param := &Field{NamePos(pparam.NamePos), compileType(pparam.Type, file, env)}
 		params = append(params, param)
 	}
 	return params
 }
 
-func defineErrorFormats(name string, plfs []parse.LangFmt, params []*Arg, file *File, env *Env) []LangFmt {
+func defineErrorFormats(name string, plfs []parse.LangFmt, params []*Field, file *File, env *Env) []LangFmt {
 	var lfs []LangFmt
 	seen := make(map[i18n.LangID]parse.LangFmt)
 	for _, plf := range plfs {
@@ -142,7 +142,7 @@ func defineErrorFormats(name string, plfs []parse.LangFmt, params []*Arg, file *
 
 // xlateErrorFormat translates the user-supplied format into the format
 // expected by i18n, mainly translating parameter names into numeric indexes.
-func xlateErrorFormat(format string, params []*Arg) (string, error) {
+func xlateErrorFormat(format string, params []*Field) (string, error) {
 	const prefix = "{1:}{2:}"
 	if format == "" {
 		return prefix, nil
