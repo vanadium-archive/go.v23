@@ -19,6 +19,8 @@ package {{.PackagePath}};
  **/
 @io.v.v23.vdl.GeneratedFromVdl(name = "{{.VdlTypeName}}")
 {{ .AccessModifier }} final class {{.Name}} extends {{.VdlComplex}} {
+    private static final long serialVersionUID = 1L;
+
     public static final io.v.v23.vdl.VdlType VDL_TYPE =
             io.v.v23.vdl.Types.getVdlTypeFromReflect({{.Name}}.class);
 
@@ -33,21 +35,6 @@ package {{.PackagePath}};
     public {{.Name}}() {
         this(0, 0);
     }
-
-    @SuppressWarnings("hiding")
-    public static final android.os.Parcelable.Creator<{{.Name}}> CREATOR
-        = new android.os.Parcelable.Creator<{{.Name}}>() {
-        @Override
-        public {{.Name}} createFromParcel(android.os.Parcel in) {
-            {{.VdlComplex}} value = {{.VdlComplex}}.CREATOR.createFromParcel(in);
-            return new {{.Name}}(value.getReal(), value.getImag());
-        }
-
-        @Override
-        public {{.Name}}[] newArray(int size) {
-            return new {{.Name}}[size];
-        }
-    };
 }
 `
 

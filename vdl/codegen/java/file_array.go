@@ -19,6 +19,8 @@ package {{.Package}};
  **/
 @io.v.v23.vdl.GeneratedFromVdl(name = "{{.VdlTypeName}}")
 {{ .AccessModifier }} final class {{.Name}} extends io.v.v23.vdl.VdlArray<{{.ElemType}}> {
+    private static final long serialVersionUID = 1L;
+
     public static final int LENGTH = {{.Length}};
 
     public static final io.v.v23.vdl.VdlType VDL_TYPE =
@@ -45,32 +47,6 @@ package {{.Package}};
         return ret;
     }
     {{ end }}
-
-    @Override
-    public void writeToParcel(android.os.Parcel out, int flags) {
-        java.lang.reflect.Type elemType =
-                new com.google.common.reflect.TypeToken<{{.ElemType}}>(){}.getType();
-        io.v.v23.vdl.ParcelUtil.writeList(out, this, elemType);
-    }
-
-    @SuppressWarnings("hiding")
-    public static final android.os.Parcelable.Creator<{{.Name}}> CREATOR =
-            new android.os.Parcelable.Creator<{{.Name}}>() {
-        @SuppressWarnings("unchecked")
-        @Override
-        public {{.Name}} createFromParcel(android.os.Parcel in) {
-            java.lang.reflect.Type elemType =
-                    new com.google.common.reflect.TypeToken<{{.ElemType}}>(){}.getType();
-            final {{.ElemType}}[] array = io.v.v23.vdl.ParcelUtil.readList(
-                    in, {{.Name}}.class.getClassLoader(), elemType).toArray(new {{.ElemType}}[0]);
-            return new {{.Name}}(array);
-        }
-
-        @Override
-        public {{.Name}}[] newArray(int size) {
-            return new {{.Name}}[size];
-        }
-    };
 }
 `
 

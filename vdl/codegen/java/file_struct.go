@@ -17,8 +17,9 @@ package {{.PackagePath}};
  * type {{.Name}} {{.VdlTypeString}} {{.Doc}}
  **/
 @io.v.v23.vdl.GeneratedFromVdl(name = "{{.VdlTypeName}}")
-{{ .AccessModifier }} final class {{.Name}} extends io.v.v23.vdl.AbstractVdlStruct
-        implements android.os.Parcelable {
+{{ .AccessModifier }} final class {{.Name}} extends io.v.v23.vdl.AbstractVdlStruct {
+    private static final long serialVersionUID = 1L;
+
     {{/* Field declarations */}}
     {{ range $index, $field := .Fields }}
       @io.v.v23.vdl.GeneratedFromVdl(name = "{{$field.Name}}", index = {{$index}})
@@ -112,46 +113,6 @@ package {{.PackagePath}};
         {{ end }} {{/* range over fields */}}
         return result + "}";
     }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(android.os.Parcel out, int flags) {
-        {{ range $field := .Fields }}
-        try {
-            io.v.v23.vdl.ParcelUtil.writeValue(out, {{$field.LowercaseName}},
-                getClass().getDeclaredField("{{$field.LowercaseName}}").getGenericType());
-        } catch (NoSuchFieldException e) {
-            // do nothing
-        }
-        {{ end }}
-    }
-
-    public static final android.os.Parcelable.Creator<{{.Name}}> CREATOR
-        = new android.os.Parcelable.Creator<{{.Name}}>() {
-        @SuppressWarnings("unchecked")
-        @Override
-        public {{.Name}} createFromParcel(android.os.Parcel in) {
-            {{.Name}} value = new {{.Name}}();
-            {{ range $field := .Fields }}
-            try {
-                value.set{{$field.Name}}(({{$field.Class}}) io.v.v23.vdl.ParcelUtil.readValue(
-                in, value.getClass().getClassLoader(), value.getClass().getDeclaredField("{{$field.LowercaseName}}").getGenericType()));
-            } catch (NoSuchFieldException e) {
-                // do nothing
-            }
-            {{ end }}
-            return value;
-        }
-
-        @Override
-        public {{.Name}}[] newArray(int size) {
-            return new {{.Name}}[size];
-        }
-    };
 }`
 
 type structDefinitionField struct {

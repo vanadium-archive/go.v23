@@ -17,9 +17,12 @@ package {{.PackagePath}};
  **/
 @io.v.v23.vdl.GeneratedFromVdl(name = "{{.VdlTypeName}}")
 {{ .AccessModifier }} class {{.Name}} extends io.v.v23.vdl.VdlUnion {
+	private static final long serialVersionUID = 1L;
+
     {{ range $index, $field := .Fields }}
     @io.v.v23.vdl.GeneratedFromVdl(name = "{{$field.Name}}", index = {{$index}})
     public static class {{$field.Name}} extends {{$.Name}} {
+    	private static final long serialVersionUID = 1L;
         private {{$field.Type}} elem;
 
         public {{$field.Name}}({{$field.Type}} elem) {

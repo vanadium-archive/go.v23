@@ -43,26 +43,6 @@ package {{.PackagePath}};
         {{ end }}
         throw new java.lang.IllegalArgumentException();
     }
-
-    @Override
-    public void writeToParcel(android.os.Parcel out, int flags) {
-        out.writeString(name());
-    }
-
-    @SuppressWarnings("hiding")
-    public static final android.os.Parcelable.Creator<{{.Name}}> CREATOR =
-            new android.os.Parcelable.Creator<{{.Name}}>() {
-        @SuppressWarnings("unchecked")
-        @Override
-        public {{.Name}} createFromParcel(android.os.Parcel in) {
-            return {{.Name}}.valueOf(in.readString());
-        }
-
-        @Override
-        public {{.Name}}[] newArray(int size) {
-            return new {{.Name}}[size];
-        }
-    };
 }
 `
 
