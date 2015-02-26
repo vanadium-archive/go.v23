@@ -16,11 +16,11 @@ import (
 	"v.io/v23/verror"
 )
 
-func errorValue(e verror.Standard) *vdl.Value {
+func errorValue(e verror.E) *vdl.Value {
 	verr := vdl.NonNilZeroValue(vdl.ErrorType)
 	vv := verr.Elem()
-	vv.StructField(0).AssignString(string(e.IDAction.ID))
-	vv.StructField(1).AssignEnumLabel(retryFromAction(e.IDAction.Action))
+	vv.StructField(0).AssignString(string(e.ID))
+	vv.StructField(1).AssignEnumLabel(retryFromAction(e.Action))
 	vv.StructField(2).AssignString(e.Msg)
 	vv.StructField(3).AssignLen(len(e.ParamList))
 	for ix, p := range e.ParamList {
@@ -46,18 +46,21 @@ func retryFromAction(action verror.ActionCode) string {
 
 // Each group of values in vvNAME and rvNAME are all mutually convertible.
 var (
-	rvError1 = verror.Standard{
-		IDAction:  verror.IDAction{verror.ID("id1"), verror.NoRetry},
+	rvError1 = verror.E{
+		ID:        verror.ID("id1"),
+		Action:    verror.NoRetry,
 		Msg:       "msg1",
 		ParamList: nil,
 	}
-	rvError2 = verror.Standard{
-		IDAction:  verror.IDAction{verror.ID("id2"), verror.RetryConnection},
+	rvError2 = verror.E{
+		ID:        verror.ID("id2"),
+		Action:    verror.RetryConnection,
 		Msg:       "msg2",
 		ParamList: []interface{}{"abc", int32(123)},
 	}
-	rvError3 = verror.Standard{
-		IDAction:  verror.IDAction{verror.ID("id3"), verror.RetryBackoff},
+	rvError3 = verror.E{
+		ID:        verror.ID("id3"),
+		Action:    verror.RetryBackoff,
 		Msg:       "msg3",
 		ParamList: []interface{}{rvError1, &rvError2},
 	}

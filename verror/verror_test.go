@@ -182,10 +182,10 @@ func TestDefaultValues(t *testing.T) {
 		t.Errorf("got: %d, want: %d", got, want)
 	}
 
-	if got, want := verror.ErrorID(verror.Standard{}), verror.ID(""); got != want {
+	if got, want := verror.ErrorID(verror.E{}), verror.ID(""); got != want {
 		t.Errorf("got: %d, want: %d", got, want)
 	}
-	if got, want := verror.Action(verror.Standard{}), verror.NoRetry; got != want {
+	if got, want := verror.Action(verror.E{}), verror.NoRetry; got != want {
 		t.Errorf("got: %d, want: %d", got, want)
 	}
 
@@ -218,7 +218,7 @@ func TestDefaultValues(t *testing.T) {
 		t.Errorf("equality test succeeded")
 	}
 
-	unknown := verror.Standard{}
+	unknown := verror.E{}
 	if got, want := unknown.Error(), "v.io/v23/verror.Unknown"; got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}

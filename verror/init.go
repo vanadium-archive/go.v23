@@ -9,15 +9,13 @@ func init() {
 	vdl.RegisterNative(wireErrorToNative, wireErrorFromNative)
 }
 
-// wireErrorToNative converts from vdl.WireError to verror.Standard, which
+// wireErrorToNative converts from vdl.WireError to verror.E, which
 // implements the standard go error interface.
-func wireErrorToNative(wire vdl.WireError, native *Standard) error {
-	*native = Standard{
-		IDAction: IDAction{
-			ID:     ID(wire.Id),
-			Action: retryToAction(wire.RetryCode),
-		},
-		Msg: wire.Msg,
+func wireErrorToNative(wire vdl.WireError, native *E) error {
+	*native = E{
+		ID:     ID(wire.Id),
+		Action: retryToAction(wire.RetryCode),
+		Msg:    wire.Msg,
 	}
 	for _, p := range wire.ParamList {
 		var pNative interface{}
@@ -28,7 +26,7 @@ func wireErrorToNative(wire vdl.WireError, native *Standard) error {
 			//
 			// At the moment, for both cases we plug the *vdl.Value or conversion
 			// error into the native params.  The idea is that this will still be more
-			// useful to the user, since they'll still have the error ID and Action.
+			// useful to the user, since they'll still have the error Id and Action.
 			//
 			// TODO(toddw): Consider whether there is a better strategy.
 			pNative = err
@@ -39,7 +37,7 @@ func wireErrorToNative(wire vdl.WireError, native *Standard) error {
 }
 
 // wireErrorFromNative converts from the standard go error interface to
-// verror.Standard, and then to vdl.WireError.
+// verror.E, and then to vdl.WireError.
 func wireErrorFromNative(wire *vdl.WireError, native error) error {
 	e := ExplicitConvert(ErrUnknown, "", "", "", native)
 	*wire = vdl.WireError{
