@@ -105,6 +105,11 @@ func (p pkgTypeNames) getNames() typeNames {
 			p.addInnerTypes(constdef.Value.Type())
 			p.addTypesInConst(constdef.Value)
 		}
+		for _, errordef := range file.ErrorDefs {
+			for _, field := range errordef.Params {
+				p.addInnerTypes(field.Type)
+			}
+		}
 		for _, interfacedef := range file.Interfaces {
 			for _, method := range interfacedef.AllMethods() {
 				for _, inarg := range method.InArgs {
