@@ -1,3 +1,4 @@
+// Package signature defines types representing interface and method signatures.
 package signature
 
 // Interface describes the signature of an interface.

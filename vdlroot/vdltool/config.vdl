@@ -1,4 +1,5 @@
-// Package vdltool describes types used by the vdl tool itself.
+// Package vdltool defines types used by the vdl tool itself, including the
+// format of vdl.config files.
 package vdltool
 
 // Config specifies the configuration for the vdl tool.  This is typically

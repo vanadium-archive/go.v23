@@ -1,4 +1,4 @@
-// Package time provides a standard representation of time.
+// Package time defines a standard representation of time.
 //
 // The representations described below are required to provide wire
 // compatibility between different programming environments.  Generated code for
