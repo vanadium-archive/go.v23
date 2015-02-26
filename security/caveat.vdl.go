@@ -195,11 +195,8 @@ var (
 	ErrCaveatNotRegistered     = verror.Register("v.io/v23/security.CaveatNotRegistered", verror.NoRetry, "{1:}{2:} no validation function registered for caveat id {3}")
 	ErrCaveatParamAny          = verror.Register("v.io/v23/security.CaveatParamAny", verror.NoRetry, "{1:}{2:} caveat {3} uses illegal param type any")
 	ErrCaveatParamTypeMismatch = verror.Register("v.io/v23/security.CaveatParamTypeMismatch", verror.NoRetry, "{1:}{2:} bad param type: caveat {3} got {4}, want {5}")
-	// TODO(ashankar,toddw,bjornick): The type of "err" here and below
-	// should be error once https://github.com/veyron/release-issues/issues/922
-	// is resolved.
-	ErrCaveatParamCoding = verror.Register("v.io/v23/security.CaveatParamCoding", verror.NoRetry, "{1:}{2:} unable to encode/decode caveat param(type={4}) for caveat {3}: {5}")
-	ErrCaveatValidation  = verror.Register("v.io/v23/security.CaveatValidation", verror.NoRetry, "{1:}{2:} caveat validation failed: {3}")
+	ErrCaveatParamCoding       = verror.Register("v.io/v23/security.CaveatParamCoding", verror.NoRetry, "{1:}{2:} unable to encode/decode caveat param(type={4}) for caveat {3}: {5}")
+	ErrCaveatValidation        = verror.Register("v.io/v23/security.CaveatValidation", verror.NoRetry, "{1:}{2:} caveat validation failed: {3}")
 )
 
 func init() {
@@ -226,11 +223,11 @@ func NewErrCaveatParamTypeMismatch(ctx *context.T, id uniqueid.Id, got *vdl.Type
 }
 
 // NewErrCaveatParamCoding returns an error with the ErrCaveatParamCoding ID.
-func NewErrCaveatParamCoding(ctx *context.T, id uniqueid.Id, typ *vdl.Type, err string) error {
+func NewErrCaveatParamCoding(ctx *context.T, id uniqueid.Id, typ *vdl.Type, err error) error {
 	return verror.New(ErrCaveatParamCoding, ctx, id, typ, err)
 }
 
 // NewErrCaveatValidation returns an error with the ErrCaveatValidation ID.
-func NewErrCaveatValidation(ctx *context.T, err string) error {
+func NewErrCaveatValidation(ctx *context.T, err error) error {
 	return verror.New(ErrCaveatValidation, ctx, err)
 }

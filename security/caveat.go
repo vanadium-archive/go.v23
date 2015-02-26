@@ -105,13 +105,13 @@ func (r *caveatRegistry) validate(uid uniqueid.Id, ctx Context, paramvom []byte)
 	param := reflect.New(entry.paramType).Interface()
 	if err := vom.Decode(paramvom, param); err != nil {
 		t, _ := vdl.TypeFromReflect(entry.paramType)
-		return NewErrCaveatParamCoding(nil, uid, t, err.Error())
+		return NewErrCaveatParamCoding(nil, uid, t, err)
 	}
 	err := entry.validatorFn.Call([]reflect.Value{reflect.ValueOf(ctx), reflect.ValueOf(param).Elem()})[0].Interface()
 	if err == nil {
 		return nil
 	}
-	return NewErrCaveatValidation(nil, err.(error).Error())
+	return NewErrCaveatValidation(nil, err.(error))
 }
 
 // RegisterCaveatValidator associates a CaveatDescriptor with the
@@ -144,7 +144,7 @@ func NewCaveat(c CaveatDescriptor, param interface{}) (Caveat, error) {
 	}
 	bytes, err := vom.Encode(param)
 	if err != nil {
-		return Caveat{}, NewErrCaveatParamCoding(nil, c.Id, c.ParamType, err.Error())
+		return Caveat{}, NewErrCaveatParamCoding(nil, c.Id, c.ParamType, err)
 	}
 	return Caveat{c.Id, bytes}, nil
 }
