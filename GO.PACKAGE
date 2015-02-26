@@ -3,6 +3,7 @@
 		"outgoing": [
 			{"allow": "v.io/lib/..."},
 			{"allow": "v.io/v23/..."},
+			{"allow": "v.io/core/veyron/lib/..."},
 			{"deny": "..."}
 		],
 		"incoming": [
