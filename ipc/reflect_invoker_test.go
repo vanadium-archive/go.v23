@@ -30,8 +30,8 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-// FakeServerCall implements ipc.ServerContext.
-type FakeServerCall struct {
+// FakeStreamServerCall implements ipc.ServerContext.
+type FakeStreamServerCall struct {
 	context  *context.T
 	security security.Context
 }
@@ -41,47 +41,51 @@ func testContext() *context.T {
 	return ctx
 }
 
-func NewFakeServerCall() *FakeServerCall {
-	return &FakeServerCall{
+func NewFakeStreamServerCall() *FakeStreamServerCall {
+	return &FakeStreamServerCall{
 		security: security.NewContext(&security.ContextParams{
 			Context: testContext(),
 		}),
 	}
 }
 
-func (*FakeServerCall) Server() ipc.Server             { return nil }
-func (*FakeServerCall) Blessings() security.Blessings  { return security.Blessings{} }
-func (*FakeServerCall) Closed() <-chan struct{}        { return nil }
-func (*FakeServerCall) IsClosed() bool                 { return false }
-func (*FakeServerCall) Send(item interface{}) error    { return nil }
-func (*FakeServerCall) Recv(itemptr interface{}) error { return nil }
-func (call *FakeServerCall) Timestamp() time.Time      { return call.security.Timestamp() }
-func (call *FakeServerCall) Method() string            { return call.security.Method() }
-func (call *FakeServerCall) MethodTags() []*vdl.Value  { return call.security.MethodTags() }
-func (call *FakeServerCall) Suffix() string            { return call.security.Suffix() }
-func (call *FakeServerCall) RemoteDischarges() map[string]security.Discharge {
+func (*FakeStreamServerCall) Server() ipc.Server             { return nil }
+func (*FakeStreamServerCall) Blessings() security.Blessings  { return security.Blessings{} }
+func (*FakeStreamServerCall) Closed() <-chan struct{}        { return nil }
+func (*FakeStreamServerCall) IsClosed() bool                 { return false }
+func (*FakeStreamServerCall) Send(item interface{}) error    { return nil }
+func (*FakeStreamServerCall) Recv(itemptr interface{}) error { return nil }
+func (call *FakeStreamServerCall) Timestamp() time.Time      { return call.security.Timestamp() }
+func (call *FakeStreamServerCall) Method() string            { return call.security.Method() }
+func (call *FakeStreamServerCall) MethodTags() []*vdl.Value  { return call.security.MethodTags() }
+func (call *FakeStreamServerCall) Suffix() string            { return call.security.Suffix() }
+func (call *FakeStreamServerCall) RemoteDischarges() map[string]security.Discharge {
 	return call.security.RemoteDischarges()
 }
-func (call *FakeServerCall) LocalPrincipal() security.Principal {
+func (call *FakeStreamServerCall) LocalPrincipal() security.Principal {
 	return call.security.LocalPrincipal()
 }
-func (call *FakeServerCall) LocalBlessings() security.Blessings {
+func (call *FakeStreamServerCall) LocalBlessings() security.Blessings {
 	return call.security.LocalBlessings()
 }
-func (call *FakeServerCall) RemoteBlessings() security.Blessings {
+func (call *FakeStreamServerCall) RemoteBlessings() security.Blessings {
 	return call.security.RemoteBlessings()
 }
-func (call *FakeServerCall) LocalEndpoint() naming.Endpoint  { return call.security.LocalEndpoint() }
-func (call *FakeServerCall) RemoteEndpoint() naming.Endpoint { return call.security.RemoteEndpoint() }
-func (call *FakeServerCall) Context() *context.T             { return call.security.Context() }
+func (call *FakeStreamServerCall) LocalEndpoint() naming.Endpoint {
+	return call.security.LocalEndpoint()
+}
+func (call *FakeStreamServerCall) RemoteEndpoint() naming.Endpoint {
+	return call.security.RemoteEndpoint()
+}
+func (call *FakeStreamServerCall) Context() *context.T { return call.security.Context() }
 
 var (
-	call1 = NewFakeServerCall()
-	call2 = NewFakeServerCall()
-	call3 = NewFakeServerCall()
-	call4 = NewFakeServerCall()
-	call5 = NewFakeServerCall()
-	call6 = NewFakeServerCall()
+	call1 = NewFakeStreamServerCall()
+	call2 = NewFakeStreamServerCall()
+	call3 = NewFakeStreamServerCall()
+	call4 = NewFakeStreamServerCall()
+	call5 = NewFakeStreamServerCall()
+	call6 = NewFakeStreamServerCall()
 )
 
 // test tags.
@@ -144,7 +148,7 @@ func TestReflectInvoker(t *testing.T) {
 	type testcase struct {
 		obj    testObjIface
 		method string
-		call   ipc.ServerCall
+		call   ipc.StreamServerCall
 		// Expected results:
 		tag     *vdl.Value
 		args    v
@@ -251,7 +255,7 @@ type (
 	stringBoolContext struct{ ipc.ServerContext }
 )
 
-func (*stringBoolContext) Init(ipc.ServerCall) {}
+func (*stringBoolContext) Init(ipc.StreamServerCall) {}
 func (*stringBoolContext) RecvStream() interface {
 	Advance() bool
 	Value() string
@@ -265,10 +269,10 @@ func (*stringBoolContext) SendStream() interface {
 	return nil
 }
 
-func (sigTest) Sig1(ipc.ServerContext) error                              { return nil }
-func (sigTest) Sig2(ipc.ServerContext, int32, string) error               { return nil }
-func (sigTest) Sig3(*stringBoolContext, float64) ([]uint32, error)        { return nil, nil }
-func (sigTest) Sig4(ipc.ServerCall, int32, string) (int32, string, error) { return 0, "", nil }
+func (sigTest) Sig1(ipc.ServerContext) error                                    { return nil }
+func (sigTest) Sig2(ipc.ServerContext, int32, string) error                     { return nil }
+func (sigTest) Sig3(*stringBoolContext, float64) ([]uint32, error)              { return nil, nil }
+func (sigTest) Sig4(ipc.StreamServerCall, int32, string) (int32, string, error) { return 0, "", nil }
 func (sigTest) Describe__() []ipc.InterfaceDesc {
 	return []ipc.InterfaceDesc{
 		{
@@ -352,7 +356,7 @@ func TestReflectInvokerSignature(t *testing.T) {
 			OutArgs: []signature.Arg{
 				{Name: "o0_4", Doc: "Doc o0_4", Type: vdl.Int32Type},
 				{Name: "o1_4", Doc: "Doc o1_4", Type: vdl.StringType}},
-			// Since ipc.ServerCall is used, we must assume streaming with any.
+			// Since ipc.StreamServerCall is used, we must assume streaming with any.
 			InStream:  &signature.Arg{Type: vdl.AnyType},
 			OutStream: &signature.Arg{Type: vdl.AnyType},
 		}},
@@ -489,34 +493,34 @@ func (badcontext) BadRecv1(*badRecv1Context) error     { return nil }
 func (badcontext) BadRecv2(*badRecv2Context) error     { return nil }
 func (badcontext) BadRecv3(*badRecv3Context) error     { return nil }
 
-func (*badInit1Context) Init()                    {}
-func (*badInit2Context) Init(int)                 {}
-func (*badInit3Context) Init(ipc.ServerCall, int) {}
-func (*noSendRecvContext) Init(ipc.ServerCall)    {}
-func (*badSend1Context) Init(ipc.ServerCall)      {}
-func (*badSend1Context) SendStream()              {}
-func (*badSend2Context) Init(ipc.ServerCall)      {}
+func (*badInit1Context) Init()                          {}
+func (*badInit2Context) Init(int)                       {}
+func (*badInit3Context) Init(ipc.StreamServerCall, int) {}
+func (*noSendRecvContext) Init(ipc.StreamServerCall)    {}
+func (*badSend1Context) Init(ipc.StreamServerCall)      {}
+func (*badSend1Context) SendStream()                    {}
+func (*badSend2Context) Init(ipc.StreamServerCall)      {}
 func (*badSend2Context) SendStream() interface {
 	Send() error
 } {
 	return nil
 }
-func (*badSend3Context) Init(ipc.ServerCall) {}
+func (*badSend3Context) Init(ipc.StreamServerCall) {}
 func (*badSend3Context) SendStream() interface {
 	Send(int)
 } {
 	return nil
 }
-func (*badRecv1Context) Init(ipc.ServerCall) {}
-func (*badRecv1Context) RecvStream()         {}
-func (*badRecv2Context) Init(ipc.ServerCall) {}
+func (*badRecv1Context) Init(ipc.StreamServerCall) {}
+func (*badRecv1Context) RecvStream()               {}
+func (*badRecv2Context) Init(ipc.StreamServerCall) {}
 func (*badRecv2Context) RecvStream() interface {
 	Advance() bool
 	Value() int
 } {
 	return nil
 }
-func (*badRecv3Context) Init(ipc.ServerCall) {}
+func (*badRecv3Context) Init(ipc.StreamServerCall) {}
 func (*badRecv3Context) RecvStream() interface {
 	Advance()
 	Value() int

@@ -474,7 +474,7 @@ type Invoker interface {
 	//
 	// Note that argptrs is a slice of pointers to the argument objects; each
 	// pointer must be dereferenced to obtain the actual arg value.
-	Invoke(method string, call ServerCall, argptrs []interface{}) (results []interface{}, _ error)
+	Invoke(method string, call StreamServerCall, argptrs []interface{}) (results []interface{}, _ error)
 
 	// Signature corresponds to the reserved __Signature method; it returns the
 	// signatures of the interfaces the underlying object implements.
@@ -531,11 +531,9 @@ type ChildrenGlobber interface {
 	GlobChildren__(ctx ServerContext) (<-chan string, error)
 }
 
-// ServerCall defines the in-flight context for a server method call, including
-// methods to stream args and results.
-//
-// TODO(toddw): Rename to ServerStreamContext.
-type ServerCall interface {
+// StreamServerCall defines the in-flight context for a server method
+// call, including methods to stream args and results.
+type StreamServerCall interface {
 	Stream
 	ServerContext
 }

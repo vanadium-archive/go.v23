@@ -929,15 +929,15 @@ type BinaryDownloadContext interface {
 	BinaryDownloadServerStream
 }
 
-// BinaryDownloadContextStub is a wrapper that converts ipc.ServerCall into
+// BinaryDownloadContextStub is a wrapper that converts ipc.StreamServerCall into
 // a typesafe stub that implements BinaryDownloadContext.
 type BinaryDownloadContextStub struct {
-	ipc.ServerCall
+	ipc.StreamServerCall
 }
 
-// Init initializes BinaryDownloadContextStub from ipc.ServerCall.
-func (s *BinaryDownloadContextStub) Init(call ipc.ServerCall) {
-	s.ServerCall = call
+// Init initializes BinaryDownloadContextStub from ipc.StreamServerCall.
+func (s *BinaryDownloadContextStub) Init(call ipc.StreamServerCall) {
+	s.StreamServerCall = call
 }
 
 // SendStream returns the send side of the Binary.Download server stream.
@@ -977,17 +977,17 @@ type BinaryUploadContext interface {
 	BinaryUploadServerStream
 }
 
-// BinaryUploadContextStub is a wrapper that converts ipc.ServerCall into
+// BinaryUploadContextStub is a wrapper that converts ipc.StreamServerCall into
 // a typesafe stub that implements BinaryUploadContext.
 type BinaryUploadContextStub struct {
-	ipc.ServerCall
+	ipc.StreamServerCall
 	valRecv []byte
 	errRecv error
 }
 
-// Init initializes BinaryUploadContextStub from ipc.ServerCall.
-func (s *BinaryUploadContextStub) Init(call ipc.ServerCall) {
-	s.ServerCall = call
+// Init initializes BinaryUploadContextStub from ipc.StreamServerCall.
+func (s *BinaryUploadContextStub) Init(call ipc.StreamServerCall) {
+	s.StreamServerCall = call
 }
 
 // RecvStream returns the receiver side of the Binary.Upload server stream.

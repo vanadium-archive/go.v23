@@ -381,17 +381,17 @@ type BuilderBuildContext interface {
 	BuilderBuildServerStream
 }
 
-// BuilderBuildContextStub is a wrapper that converts ipc.ServerCall into
+// BuilderBuildContextStub is a wrapper that converts ipc.StreamServerCall into
 // a typesafe stub that implements BuilderBuildContext.
 type BuilderBuildContextStub struct {
-	ipc.ServerCall
+	ipc.StreamServerCall
 	valRecv File
 	errRecv error
 }
 
-// Init initializes BuilderBuildContextStub from ipc.ServerCall.
-func (s *BuilderBuildContextStub) Init(call ipc.ServerCall) {
-	s.ServerCall = call
+// Init initializes BuilderBuildContextStub from ipc.StreamServerCall.
+func (s *BuilderBuildContextStub) Init(call ipc.StreamServerCall) {
+	s.StreamServerCall = call
 }
 
 // RecvStream returns the receiver side of the Builder.Build server stream.

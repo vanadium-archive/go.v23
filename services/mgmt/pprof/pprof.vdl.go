@@ -425,15 +425,15 @@ type PProfProfileContext interface {
 	PProfProfileServerStream
 }
 
-// PProfProfileContextStub is a wrapper that converts ipc.ServerCall into
+// PProfProfileContextStub is a wrapper that converts ipc.StreamServerCall into
 // a typesafe stub that implements PProfProfileContext.
 type PProfProfileContextStub struct {
-	ipc.ServerCall
+	ipc.StreamServerCall
 }
 
-// Init initializes PProfProfileContextStub from ipc.ServerCall.
-func (s *PProfProfileContextStub) Init(call ipc.ServerCall) {
-	s.ServerCall = call
+// Init initializes PProfProfileContextStub from ipc.StreamServerCall.
+func (s *PProfProfileContextStub) Init(call ipc.StreamServerCall) {
+	s.StreamServerCall = call
 }
 
 // SendStream returns the send side of the PProf.Profile server stream.
@@ -468,15 +468,15 @@ type PProfCPUProfileContext interface {
 	PProfCPUProfileServerStream
 }
 
-// PProfCPUProfileContextStub is a wrapper that converts ipc.ServerCall into
+// PProfCPUProfileContextStub is a wrapper that converts ipc.StreamServerCall into
 // a typesafe stub that implements PProfCPUProfileContext.
 type PProfCPUProfileContextStub struct {
-	ipc.ServerCall
+	ipc.StreamServerCall
 }
 
-// Init initializes PProfCPUProfileContextStub from ipc.ServerCall.
-func (s *PProfCPUProfileContextStub) Init(call ipc.ServerCall) {
-	s.ServerCall = call
+// Init initializes PProfCPUProfileContextStub from ipc.StreamServerCall.
+func (s *PProfCPUProfileContextStub) Init(call ipc.StreamServerCall) {
+	s.StreamServerCall = call
 }
 
 // SendStream returns the send side of the PProf.CPUProfile server stream.
