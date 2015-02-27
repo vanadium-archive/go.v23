@@ -50,7 +50,7 @@ func NewFakeServerCall() *FakeServerCall {
 }
 
 func (*FakeServerCall) Server() ipc.Server             { return nil }
-func (*FakeServerCall) Blessings() security.Blessings  { return nil }
+func (*FakeServerCall) Blessings() security.Blessings  { return security.Blessings{} }
 func (*FakeServerCall) Closed() <-chan struct{}        { return nil }
 func (*FakeServerCall) IsClosed() bool                 { return false }
 func (*FakeServerCall) Send(item interface{}) error    { return nil }

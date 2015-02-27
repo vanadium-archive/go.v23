@@ -67,8 +67,8 @@ func TestBless(t *testing.T) {
 		}
 	)
 	addToRoots(t, tp, alice)
-	// p1 blessing p2 'with' nil Blessings should fail.
-	if b, err := p1.Bless(p2.PublicKey(), nil, "friend", UnconstrainedUse()); err == nil {
+	// p1 blessing p2 'with' empty Blessings should fail.
+	if b, err := p1.Bless(p2.PublicKey(), Blessings{}, "friend", UnconstrainedUse()); err == nil {
 		t.Errorf("p1 was able to extend a nil blessing to produce: %v", b)
 	}
 	// p1 blessing p2 as "alice/friend" for "Suffix.Method"
@@ -94,11 +94,10 @@ func TestBless(t *testing.T) {
 	}
 
 	// p2 should not be able to bless p3 as "alice/friend"
-	blessing, err := p2.Bless(p3.PublicKey(), alice, "friend", UnconstrainedUse())
-	if blessing != nil {
-		t.Errorf("p2 was able to extend a blessing bound to p1 to produce: %v", blessing)
-	}
-	if err := matchesError(err, "cannot extend blessing with public key"); err != nil {
+	blessings, err := p2.Bless(p3.PublicKey(), alice, "friend", UnconstrainedUse())
+	if !blessings.IsZero() {
+		t.Errorf("p2 was able to extend a blessing bound to p1 to produce: %v", blessings)
+	} else if err = matchesError(err, "cannot extend blessing with public key"); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -257,13 +256,13 @@ func TestBlessings(t *testing.T) {
 		self, err := p.BlessSelf(test)
 		if merr := matchesError(err, "invalid blessing extension"); merr != nil {
 			t.Errorf("BlessSelf(%q): %v", test, merr)
-		} else if self != nil {
+		} else if !self.IsZero() {
 			t.Errorf("BlessSelf(%q) returned %q", test, self)
 		}
 		other, err := p.Bless(p2, alice, test, UnconstrainedUse())
 		if merr := matchesError(err, "invalid blessing extension"); merr != nil {
 			t.Errorf("Bless(%q): %v", test, merr)
-		} else if other != nil {
+		} else if !other.IsZero() {
 			t.Errorf("Bless(%q) returned %q", test, other)
 		}
 	}
@@ -293,20 +292,21 @@ func TestCreatePrincipalWithNilStoreAndRoots(t *testing.T) {
 
 	// Test Store.
 	s := p.BlessingStore()
+	var empty Blessings
 	if s == nil {
 		t.Fatal("BlessingStore() returned nil")
 	}
-	if _, err := s.Set(nil, ""); matchesError(err, noStoreErr) != nil {
+	if _, err := s.Set(empty, ""); matchesError(err, noStoreErr) != nil {
 		t.Error(matchesError(err, noStoreErr))
 	}
-	if err := matchesError(s.SetDefault(nil), noStoreErr); err != nil {
+	if err := matchesError(s.SetDefault(empty), noStoreErr); err != nil {
 		t.Error(err)
 	}
-	if got := s.ForPeer(); got != nil {
-		t.Errorf("BlessingStore.ForPeer: got %v want nil", got)
+	if got := s.ForPeer(); !got.IsZero() {
+		t.Errorf("BlessingStore.ForPeer: got %v want empty", got)
 	}
-	if got := s.Default(); got != nil {
-		t.Errorf("BlessingStore.Default: got %v want nil", got)
+	if got := s.Default(); !got.IsZero() {
+		t.Errorf("BlessingStore.Default: got %v want empty", got)
 	}
 	if got, want := s.PublicKey(), p.PublicKey(); !reflect.DeepEqual(got, want) {
 		t.Errorf("BlessingStore.PublicKey: got %v want %v", got, want)
@@ -405,7 +405,7 @@ func TestPrincipalSignaturePurpose(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if sig := selfBlessing.(*blessingsImpl).chains[0][0].Signature; !bytes.Equal(sig.Purpose, blessPurpose) {
+	if sig := selfBlessing.chains[0][0].Signature; !bytes.Equal(sig.Purpose, blessPurpose) {
 		t.Errorf("BlessSelf used signature with purpose %q, want %q", sig.Purpose, blessPurpose)
 	}
 	otherBlessing, err := p.Bless(newPrincipal(t).PublicKey(), selfBlessing, "bar", UnconstrainedUse())
@@ -413,7 +413,7 @@ func TestPrincipalSignaturePurpose(t *testing.T) {
 		t.Fatal(err)
 	}
 	for i := 0; i < 2; i++ { // Should be precisely 2 certificates in "otherBlessing"
-		cert := otherBlessing.(*blessingsImpl).chains[0][i]
+		cert := otherBlessing.chains[0][i]
 		if !bytes.Equal(cert.Signature.Purpose, blessPurpose) {
 			t.Errorf("Certificate with purpose %q, want %q", cert.Signature.Purpose, blessPurpose)
 		}
@@ -429,6 +429,7 @@ func TestUnionOfBlessings(t *testing.T) {
 		bob   = blessSelf(t, p2, "bob")
 		p     = newPrincipal(t)
 		carol = blessSelf(t, p, "carol")
+		empty Blessings
 
 		// ctx returns a Context where the LocalPrincipal recognizes
 		// all the blessings presented in 'recognized'.
@@ -453,7 +454,7 @@ func TestUnionOfBlessings(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	friend, err := UnionOfBlessings(nil, alicefriend, nil, bobfriend, nil, carol, nil)
+	friend, err := UnionOfBlessings(empty, alicefriend, empty, bobfriend, empty, carol, empty)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -513,7 +514,7 @@ func TestUnionOfBlessings(t *testing.T) {
 
 	// However, UnionOfBlessings must not mix up public keys
 	mixed, err := UnionOfBlessings(alice, bob)
-	if berr := matchesError(err, "mismatched public keys"); berr != nil || mixed != nil {
+	if berr := matchesError(err, "mismatched public keys"); berr != nil || !mixed.IsZero() {
 		t.Errorf("%v(%v)", berr, mixed)
 	}
 }
@@ -563,13 +564,13 @@ func TestCertificateCompositionAttack(t *testing.T) {
 	// p4 should be not to construct a valid "bob/family/spouse" blessing by
 	// using the "spouse" certificate from "alice/friend/spouse" (that has no caveats)
 	// and replacing the "spouse" certificate from "bob/family/spouse".
-	spousecert := alicefriendspouse.(*blessingsImpl).chains[0][2]
+	spousecert := alicefriendspouse.chains[0][2]
 	// sanity check
 	if spousecert.Extension != "spouse" || len(spousecert.Caveats) != 1 || spousecert.Caveats[0].Id != ConstCaveat.Id {
 		t.Fatalf("Invalid test data. Certificate: %+v", spousecert)
 	}
 	// Replace the certificate in bobfamilyspouse
-	bobfamilyspouse.(*blessingsImpl).chains[0][2] = spousecert
+	bobfamilyspouse.chains[0][2] = spousecert
 	if err := matchesError(checkBlessings(bobfamilyspouse, ctx), "invalid Signature in certificate(for \"spouse\")"); err != nil {
 		t.Fatal(err)
 	}
@@ -596,7 +597,7 @@ func TestCertificateTamperingAttack(t *testing.T) {
 		t.Fatal(err)
 	}
 	// p3 attempts to "steal" the blessing by constructing his own certificate.
-	cert := &alicefriend.(*blessingsImpl).chains[0][1]
+	cert := &alicefriend.chains[0][1]
 	if cert.PublicKey, err = p3.PublicKey().MarshalBinary(); err != nil {
 		t.Fatal(err)
 	}
@@ -623,7 +624,7 @@ func TestCertificateChainsTamperingAttack(t *testing.T) {
 		t.Fatal(err)
 	}
 	// Act as if alice tried to package bob's chain with her existing chains and ship it over the network.
-	alice.(*blessingsImpl).chains = append(alice.(*blessingsImpl).chains, bob.(*blessingsImpl).chains...)
+	alice.chains = append(alice.chains, bob.chains...)
 	if err := matchesError(checkBlessings(alice, ctx, "alice", "bob"), "two certificate chains that bind to different public keys"); err != nil {
 		t.Error(err)
 	}
@@ -657,15 +658,15 @@ func TestBlessingsOnWire(t *testing.T) {
 	}
 	wire.CertificateChains[0][len(wire.CertificateChains[0])-1].PublicKey = otherkey
 	got, err = NewBlessings(wire)
-	if merr := matchesError(err, "invalid Signature in certificate"); merr != nil || got != nil {
+	if merr := matchesError(err, "invalid Signature in certificate"); merr != nil || !got.IsZero() {
 		t.Errorf("Got (%v, %v): %v", got, err, merr)
 	}
 	// Empty wire representation should yield (nil, nil)
-	if got, err := NewBlessings(WireBlessings{}); got != nil || err != nil {
+	if got, err := NewBlessings(WireBlessings{}); err != nil || !got.IsZero() {
 		t.Errorf("Got (%v, %v) want (nil, nil)", got, err)
 	}
-	// And Marshaling a nil blessing is fine.
-	if got, want := MarshalBlessings(nil), (WireBlessings{}); !reflect.DeepEqual(got, want) {
+	// And Marshaling an empty set of certificates is fine.
+	if got, want := MarshalBlessings(Blessings{}), (WireBlessings{}); !reflect.DeepEqual(got, want) {
 		t.Errorf("Got %#v, want %#v", got, want)
 	}
 }

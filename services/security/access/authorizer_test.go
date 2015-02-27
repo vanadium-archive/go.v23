@@ -78,7 +78,7 @@ func TestTaggedACLAuthorizer(t *testing.T) {
 	// Test cases where access should be granted to methods with tags on
 	// them.
 	for _, test := range []testcase{
-		{"Get", nil},
+		{"Get", security.Blessings{}},
 		{"Get", B("ali")},
 		{"Get", B("bob/friend", "che/enemy")},
 

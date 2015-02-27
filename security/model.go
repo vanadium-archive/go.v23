@@ -36,7 +36,7 @@
 // "a/b/c" by P2. This allows authorizations for actions to be based on the
 // blessings held by the principal attempting the action.  Cryptographic proof
 // of the validity of blessings is done through chains of certificates
-// encapsulated in the Blessings interface defined in this package. The set of
+// encapsulated in the Blessings type defined in this package. The set of
 // authoritative "root" blessers recognized by a principal is encapsulated in
 // the BlessingRoots interface.
 //
@@ -230,8 +230,8 @@ type BlessingStore interface {
 	// If multiple calls to Set are made with the same pattern, the
 	// last call prevails.
 	//
-	// Set(nil, pattern) can be used to remove the blessings previously
-	// associated with the pattern (by a prior call to Set).
+	// Set(Blessings{}, pattern) can be used to remove the blessings
+	// previously associated with the pattern (by a prior call to Set).
 	//
 	// It is an error to call Set with "blessings" whose public key does
 	// not match the PublicKey of the principal for which this store hosts
@@ -248,15 +248,15 @@ type BlessingStore interface {
 	// If no peerBlessings are provided then blessings marked for all peers
 	// (i.e., Add-ed with the AllPrincipals pattern) is returned.
 	//
-	// Returns nil if there are no matching blessings in the store.
+	// Returns the zero value if there are no matching blessings in the store.
 	ForPeer(peerBlessings ...string) Blessings
 
 	// SetDefault sets up the Blessings made available on a subsequent call
 	// to Default.
 	//
-	// It is an error to call SetDefault with a non-nil blessings whose
-	// public key does not match the PublicKey of the principal for which
-	// this store hosts blessings.
+	// It is an error to call SetDefault with a blessings whose public key
+	// does not match the PublicKey of the principal for which this store
+	// hosts blessings.
 	SetDefault(blessings Blessings) error
 
 	// Default returns the blessings to be shared with peers for which
@@ -270,7 +270,7 @@ type BlessingStore interface {
 	// SetDefault, or if no such call was made it is equivalent to ForPeer
 	// with no arguments.
 	//
-	// Returns nil if there is no usable blessing.
+	// Returns the zero value if there is no usable blessings.
 	Default() Blessings
 
 	// PublicKey returns the public key of the Principal for which
@@ -315,43 +315,6 @@ type BlessingRoots interface {
 	// This description is detailed and lists out all the roots. Use
 	// fmt.Sprintf("%v", ...) for a more succinct description.
 	DebugString() string
-}
-
-// Blessings encapsulates all the cryptographic operations required to
-// prove that a set of blessings (human-readable strings) have been bound
-// to a principal in a specific context.
-//
-// Blessings objects are meant to be presented to other principals to authenticate
-// and authorize actions.
-//
-// Multiple goroutines may invoke methods on Blessings simultaneously.
-type Blessings interface {
-	// ForContext returns a validated set of (human-readable string) blessings
-	// presented by the principal. These returned blessings (strings) are guaranteed to:
-	//
-	// (1) Satisfy all the caveats given context
-	// (2) Rooted in context.LocalPrincipal.Roots.
-	//
-	// Caveats are considered satisfied in the given context if the CaveatValidator
-	// implementation can be found in the address space of the caller and
-	// Validate returns nil.
-	// ForContext also returns the RejectedBlessings for each blessing that
-	// cannot be validated.
-	ForContext(context Context) ([]string, []RejectedBlessing)
-
-	// PublicKey returns the public key of the principal to which
-	// blessings obtained from this object are bound.
-	PublicKey() PublicKey
-
-	// ThirdPartyCaveats returns the set of third-party restrictions on the
-	// scope of the blessings (i.e., the subset of Caveats for which
-	// ThirdPartyDetails will be non-nil).
-	ThirdPartyCaveats() []Caveat
-
-	// unexported methods that prevent implementations of this interface
-	// outside this package.
-	certificateChains() [][]Certificate
-	publicKeyDER() []byte
 }
 
 // Signer is the interface for signing arbitrary length messages using private keys.
