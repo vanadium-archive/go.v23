@@ -33,17 +33,22 @@ type Endpoint interface {
 	//   @<version>@<version specific fields>@@
 	// Where version is an unsigned integer.
 	//
+	// TODO(ashankar,cnicolaou): Remove versions 2 & 3 before release?
+	//
 	// Version 1 is the current version for network address information:
 	//   @1@<protocol>@<address>@<routingid>@@
 	// Where protocol is the underlying network protocol (tcp, bluetooth etc.)
 	// and address is the address specific to that protocol (host:port for
 	// tcp, MAC address for bluetooth etc.)
 	//
-	// Version 2 is the previous version for RPC:
+	// Version 2 is an old version for RPC:
 	//   @2@<protocol>@<address>@<routingid>@<rpc version>@<rpc codec>@@
 	//
-	// Version 3 is the current version for RPC:
+	// Version 3 is the previous version for RPC:
 	//   @3@<protocol>@<address>@<routingid>@<rpc version>@<rpc codec>@m|s@@
+	//
+	// Version 4 is the current version for RPC:
+	//   @4@<protocol>@<address>@<routingid>@<min RPC version>@<max RPC version>@m|s@[<blessing>[,<blessing>]...]@@
 	//
 	// Along with Network, this method ensures that Endpoint implements net.Addr.
 	String() string
@@ -69,6 +74,10 @@ type Endpoint interface {
 
 	// ServesMountTable returns true if this endpoint serves a mount table.
 	ServesMountTable() bool
+
+	// BlessingNames returns the blessings that the process associated with
+	// this Endpoint will present.
+	BlessingNames() []string
 }
 
 // MountedServer represents a server mounted under an object name.
@@ -145,6 +154,11 @@ type ServesMountTableOpt bool
 
 func (ServesMountTableOpt) NSMountOpt()  {}
 func (ServesMountTableOpt) EndpointOpt() {}
+
+// BlessingOpt is used to add a blessing name to the endpoint.
+type BlessingOpt string
+
+func (BlessingOpt) EndpointOpt() {}
 
 // ResolveOpt is the interface for all Mount options.
 type ResolveOpt interface {

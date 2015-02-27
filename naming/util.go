@@ -2,6 +2,7 @@ package naming
 
 import (
 	"strconv"
+	"strings"
 
 	"v.io/v23/ipc/version"
 )
@@ -18,6 +19,7 @@ type EndpointOpt interface {
 func FormatEndpoint(network, address string, opts ...EndpointOpt) string {
 	rid := "@"
 	versions := "@@"
+	var blessings []string
 	servesMountTable := false
 	for _, o := range opts {
 		switch v := o.(type) {
@@ -28,7 +30,18 @@ func FormatEndpoint(network, address string, opts ...EndpointOpt) string {
 				"@" + strconv.FormatUint(uint64(v.Max), 10)
 		case ServesMountTableOpt:
 			servesMountTable = bool(v)
+		case BlessingOpt:
+			blessings = append(blessings, string(v))
 		}
+	}
+	if len(blessings) > 0 {
+		mORs := "s"
+		if servesMountTable {
+			mORs = "m"
+		}
+		// "," is chosen as the separator for blessings
+		// because it is an invalid substring in blessings.
+		return "@4@" + network + "@" + address + rid + versions + "@" + mORs + "@" + strings.Join(blessings, ",") + "@@"
 	}
 	if servesMountTable {
 		return "@3@" + network + "@" + address + rid + versions + "@" + "m" + "@@"
