@@ -53,10 +53,10 @@ type errStore struct {
 	key PublicKey
 }
 
-func (errStore) Set(Blessings, BlessingPattern) (Blessings, error) { return nil, errNilStore }
-func (errStore) ForPeer(peerBlessings ...string) Blessings         { return nil }
+func (errStore) Set(Blessings, BlessingPattern) (Blessings, error) { return Blessings{}, errNilStore }
+func (errStore) ForPeer(peerBlessings ...string) Blessings         { return Blessings{} }
 func (errStore) SetDefault(blessings Blessings) error              { return errNilStore }
-func (errStore) Default() Blessings                                { return nil }
+func (errStore) Default() Blessings                                { return Blessings{} }
 func (errStore) PeerBlessings() map[BlessingPattern]Blessings      { return nil }
 func (errStore) DebugString() string                               { return errNilStore.Error() }
 func (s errStore) PublicKey() PublicKey                            { return s.key }
@@ -74,26 +74,26 @@ type principal struct {
 }
 
 func (p *principal) Bless(key PublicKey, with Blessings, extension string, caveat Caveat, additionalCaveats ...Caveat) (Blessings, error) {
-	if with == nil {
-		return nil, errors.New("the Blessings to bless 'with' must be non-nil")
+	if with.IsZero() {
+		return Blessings{}, errors.New("the Blessings to bless 'with' must have at least one certificate")
 	}
 	if !reflect.DeepEqual(with.PublicKey(), p.PublicKey()) {
-		return nil, fmt.Errorf("Principal with public key %v cannot extend blessing with public key %v", p.PublicKey(), with.PublicKey())
+		return Blessings{}, fmt.Errorf("Principal with public key %v cannot extend blessing with public key %v", p.PublicKey(), with.PublicKey())
 	}
 	caveats := append(additionalCaveats, caveat)
 	cert, err := newUnsignedCertificate(extension, key, caveats...)
 	if err != nil {
-		return nil, err
+		return Blessings{}, err
 	}
 	chains := with.certificateChains()
 	newchains := make([][]Certificate, len(chains))
 	for idx, chain := range chains {
 		if err := cert.sign(p.signer, chain[len(chain)-1].Signature); err != nil {
-			return nil, err
+			return Blessings{}, err
 		}
 		newchains[idx] = append(chains[idx], *cert)
 	}
-	return &blessingsImpl{
+	return Blessings{
 		chains:    newchains,
 		publicKey: key,
 	}, nil
@@ -102,12 +102,12 @@ func (p *principal) Bless(key PublicKey, with Blessings, extension string, cavea
 func (p *principal) BlessSelf(name string, caveats ...Caveat) (Blessings, error) {
 	cert, err := newUnsignedCertificate(name, p.PublicKey(), caveats...)
 	if err != nil {
-		return nil, err
+		return Blessings{}, err
 	}
 	if err := cert.sign(p.signer, Signature{}); err != nil {
-		return nil, err
+		return Blessings{}, err
 	}
-	return &blessingsImpl{
+	return Blessings{
 		chains:    [][]Certificate{[]Certificate{*cert}},
 		publicKey: p.PublicKey(),
 	}, nil
@@ -135,12 +135,8 @@ func (p *principal) PublicKey() PublicKey {
 }
 
 func (p *principal) BlessingsInfo(b Blessings) map[string][]Caveat {
-	bImpl, ok := b.(*blessingsImpl)
-	if !ok {
-		return nil
-	}
 	var bInfo map[string][]Caveat
-	for _, chain := range bImpl.certificateChains() {
+	for _, chain := range b.chains {
 		name := nameForPrincipal(p, chain)
 		if len(name) > 0 {
 			if bInfo == nil {
@@ -158,11 +154,7 @@ func (p *principal) BlessingsInfo(b Blessings) map[string][]Caveat {
 func (p *principal) BlessingsByName(name BlessingPattern) []Blessings {
 	var matched []Blessings
 	for _, b := range p.store.PeerBlessings() {
-		bImpl, ok := b.(*blessingsImpl)
-		if !ok {
-			return nil
-		}
-		if b := bImpl.blessingsByNameForPrincipal(p, name); b != nil {
+		if m := b.blessingsByNameForPrincipal(p, name); !m.IsZero() {
 			matched = append(matched, b)
 		}
 	}

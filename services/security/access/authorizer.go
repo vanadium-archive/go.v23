@@ -105,16 +105,11 @@ type authorizer struct {
 
 func (a *authorizer) Authorize(ctx security.Context) error {
 	// "Self-RPCs" are always authorized.
-	if l, r := ctx.LocalBlessings(), ctx.RemoteBlessings(); l != nil && r != nil && reflect.DeepEqual(l.PublicKey(), r.PublicKey()) {
+	if l, r := ctx.LocalBlessings().PublicKey(), ctx.RemoteBlessings().PublicKey(); l != nil && r != nil && reflect.DeepEqual(l, r) {
 		return nil
 	}
 
-	var blessingsForContext []string
-	var invalid []security.RejectedBlessing
-	blessings := ctx.RemoteBlessings()
-	if blessings != nil {
-		blessingsForContext, invalid = blessings.ForContext(ctx)
-	}
+	blessings, invalid := ctx.RemoteBlessings().ForContext(ctx)
 	grant := false
 	if len(ctx.MethodTags()) == 0 {
 		// The following error message leaks the fact that the server is likely
@@ -123,8 +118,8 @@ func (a *authorizer) Authorize(ctx security.Context) error {
 	}
 	for _, tag := range ctx.MethodTags() {
 		if tag.Type() == a.tagType {
-			if acl, exists := a.acls[tag.RawString()]; !exists || !acl.Includes(blessingsForContext...) {
-				return NewErrACLMatch(nil, blessingsForContext, invalid)
+			if acl, exists := a.acls[tag.RawString()]; !exists || !acl.Includes(blessings...) {
+				return NewErrACLMatch(nil, blessings, invalid)
 			}
 			grant = true
 		}
@@ -132,7 +127,7 @@ func (a *authorizer) Authorize(ctx security.Context) error {
 	if grant {
 		return nil
 	}
-	return NewErrACLMatch(nil, blessingsForContext, invalid)
+	return NewErrACLMatch(nil, blessings, invalid)
 }
 
 type fileAuthorizer struct {

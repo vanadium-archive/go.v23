@@ -50,7 +50,7 @@ func TestByteSize(t *testing.T) {
 	t.Logf("Marshaled P256 ECDSA key                   : %4d bytes", len(key))
 	t.Logf("Major components of an ECDSA signature     : %4d bytes", sigbytes)
 	// Byte sizes of blessings (with no caveats in any certificates).
-	t.Logf("VOM type information overhead for blessings: %4d bytes", blessingsize(nil))
+	t.Logf("VOM type information overhead for blessings: %4d bytes", blessingsize(Blessings{}))
 	for ncerts := 1; ncerts < 5; ncerts++ {
 		b := makeBlessings(t, ncerts)
 		t.Logf("Blessing with %d certificates               : %4d bytes (%v)", ncerts, blessingsize(b), b)

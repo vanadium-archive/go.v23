@@ -13,14 +13,39 @@ import (
 
 var errEmptyChain = errors.New("empty certificate chain found")
 
-type blessingsImpl struct {
+// Blessings encapsulates all the cryptographic operations required to
+// prove that a set of blessings (human-readable strings) have been bound
+// to a principal in a specific context.
+//
+// Blessings objects are meant to be presented to other principals to authenticate
+// and authorize actions.
+//
+// Blessings objects are immutable and multiple goroutines may invoke methods
+// on them simultaneously.
+type Blessings struct {
 	chains    [][]Certificate
 	publicKey PublicKey
 }
 
 const chainValidatorKey = "customChainValidator"
 
-func (b *blessingsImpl) ForContext(ctx Context) (ret []string, info []RejectedBlessing) {
+// ForContext returns a validated set of (human-readable string) blessings
+// presented by the principal. These returned blessings (strings) are
+// guaranteed to:
+//
+// (1) Satisfy all the caveats given context
+// (2) Be rooted in context.LocalPrincipal.Roots.
+//
+// Caveats are considered satisfied in the given context if the CaveatValidator
+// implementation can be found in the address space of the caller and Validate
+// returns nil.
+//
+// ForContext also returns the RejectedBlessings for each blessing that cannot
+// be validated.
+func (b Blessings) ForContext(ctx Context) (ret []string, info []RejectedBlessing) {
+	if b.IsZero() {
+		return nil, nil
+	}
 	validator := defaultChainCaveatValidator
 	if customValidator := ctx.Context().Value(chainValidatorKey); customValidator != nil {
 		validator = customValidator.(func(ctx Context, chains [][]Caveat) []error)
@@ -67,8 +92,16 @@ func (b *blessingsImpl) ForContext(ctx Context) (ret []string, info []RejectedBl
 	return
 }
 
-func (b *blessingsImpl) PublicKey() PublicKey { return b.publicKey }
-func (b *blessingsImpl) ThirdPartyCaveats() []Caveat {
+// PublicKey returns the public key of the principal to which
+// blessings obtained from this object are bound.
+//
+// Can return nil if b is the zero value.
+func (b Blessings) PublicKey() PublicKey { return b.publicKey }
+
+// ThirdPartyCaveats returns the set of third-party restrictions on the
+// scope of the blessings (i.e., the subset of Caveats for which
+// ThirdPartyDetails will be non-nil).
+func (b Blessings) ThirdPartyCaveats() []Caveat {
 	var ret []Caveat
 	for _, chain := range b.chains {
 		for _, cert := range chain {
@@ -81,26 +114,33 @@ func (b *blessingsImpl) ThirdPartyCaveats() []Caveat {
 	}
 	return ret
 }
-func (b *blessingsImpl) publicKeyDER() []byte {
+
+// IsZero returns true if b represents the zero value of blessings (an empty
+// set).
+func (b Blessings) IsZero() bool {
+	// b.publicKey == nil <=> len(b.chains) == 0
+	return b.publicKey == nil
+}
+
+func (b Blessings) publicKeyDER() []byte {
 	chain := b.chains[0]
 	return chain[len(chain)-1].PublicKey
 }
-func (b *blessingsImpl) certificateChains() [][]Certificate { return b.chains }
-func (b *blessingsImpl) blessingsByNameForPrincipal(p Principal, pattern BlessingPattern) Blessings {
-	var ret blessingsImpl
+func (b Blessings) certificateChains() [][]Certificate { return b.chains }
+func (b Blessings) blessingsByNameForPrincipal(p Principal, pattern BlessingPattern) Blessings {
+	ret := Blessings{publicKey: b.publicKey}
 	for _, chain := range b.chains {
 		blessing := nameForPrincipal(p, chain)
 		if len(blessing) > 0 && pattern.MatchedBy(blessing) {
 			ret.chains = append(ret.chains, chain)
 		}
 	}
-	if len(ret.chains) > 0 {
-		ret.publicKey = b.publicKey
-		return &ret
+	if len(ret.chains) == 0 {
+		return Blessings{}
 	}
-	return nil
+	return ret
 }
-func (b *blessingsImpl) String() string {
+func (b Blessings) String() string {
 	blessings := make([]string, len(b.chains))
 	for chainidx, chain := range b.chains {
 		onechain := make([]string, len(chain))
@@ -223,45 +263,45 @@ func validateCaveat(ctx Context, cav Caveat) error {
 }
 
 // NewBlessings creates a Blessings object from the provided wire representation.
+//
+// TODO(ashankar): Remove NewBlessings and MarshalBlessings and instead use the
+// VOM/VDL native<->wire conversion mechanism.
 func NewBlessings(wire WireBlessings) (Blessings, error) {
+	var b Blessings
 	if len(wire.CertificateChains) == 0 {
-		return nil, nil
+		return b, nil
 	}
-	var b blessingsImpl
 	certchains := wire.CertificateChains
 	if len(certchains) == 0 || len(certchains[0]) == 0 {
-		return nil, errEmptyChain
+		return b, errEmptyChain
 	}
 	// Public keys should match for all chains.
 	marshaledkey := certchains[0][len(certchains[0])-1].PublicKey
 	key, err := validateCertificateChain(certchains[0])
 	if err != nil {
-		return nil, err
+		return b, err
 	}
 	for i := 1; i < len(certchains); i++ {
 		chain := certchains[i]
 		if len(chain) == 0 {
-			return nil, errEmptyChain
+			return b, errEmptyChain
 		}
 		cert := chain[len(chain)-1]
 		if !bytes.Equal(marshaledkey, cert.PublicKey) {
-			return nil, errors.New("invalid blessings: two certificate chains that bind to different public keys")
+			return b, errors.New("invalid blessings: two certificate chains that bind to different public keys")
 		}
 		if _, err := validateCertificateChain(chain); err != nil {
-			return nil, err
+			return b, err
 		}
 	}
 	b.chains = certchains
 	b.publicKey = key
-	return &b, nil
+	return b, nil
 }
 
 // MarshalBlessings is the inverse of NewBlessings, converting an in-memory
 // representation of Blessings to the wire format.
 func MarshalBlessings(b Blessings) WireBlessings {
-	if b == nil {
-		return WireBlessings{}
-	}
 	return WireBlessings{CertificateChains: b.certificateChains()}
 }
 
@@ -272,34 +312,34 @@ func MarshalBlessings(b Blessings) WireBlessings {
 //
 // UnionOfBlessings with no arguments returns (nil, nil).
 func UnionOfBlessings(blessings ...Blessings) (Blessings, error) {
-	for len(blessings) > 0 && blessings[0] == nil {
+	for len(blessings) > 0 && blessings[0].IsZero() {
 		blessings = blessings[1:]
 	}
 	switch len(blessings) {
 	case 0:
-		return nil, nil
+		return Blessings{}, nil
 	case 1:
 		return blessings[0], nil
 	}
 	key0 := blessings[0].publicKeyDER()
-	var ret blessingsImpl
+	var ret Blessings
 	for idx, b := range blessings {
-		if b == nil {
+		if b.IsZero() {
 			continue
 		}
 		if idx > 0 && !bytes.Equal(key0, b.publicKeyDER()) {
-			return nil, errors.New("mismatched public keys")
+			return Blessings{}, errors.New("mismatched public keys")
 		}
 		ret.chains = append(ret.chains, b.certificateChains()...)
 	}
 	var err error
 	if ret.publicKey, err = UnmarshalPublicKey(key0); err != nil {
-		return nil, err
+		return Blessings{}, err
 	}
 	// For pretty printing, sort the certificate chains so that there is a consistent
 	// ordering, irrespective of the ordering of arugments to UnionOfBlessings.
 	sort.Stable(certificateChainsSorter(ret.chains))
-	return &ret, nil
+	return ret, nil
 }
 
 var caveatValidationSetup struct {
