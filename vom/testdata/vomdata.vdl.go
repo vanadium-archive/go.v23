@@ -1558,6 +1558,7 @@ var CompatTests = map[string][]*vdl.Type{
 	"map[X]bool/set[X]": {
 		vdl.TypeOf(SetOnlyMap(nil)),
 		vdl.TypeOf(MapOnlySet(nil)),
+		vdl.TypeOf(SometimesSetMap(nil)),
 	},
 	"map[string]X/struct": {
 		vdl.TypeOf(MapOnlyStruct{}),
@@ -1599,6 +1600,7 @@ var CompatTests = map[string][]*vdl.Type{
 		vdl.TypeOf([]string(nil)),
 		vdl.TypeOf(ListString(nil)),
 		vdl.TypeOf(Array3String{}),
+		vdl.TypeOf(Array4String{}),
 	},
 	"string/[]byte/enum": {
 		vdl.TypeOf(""),
@@ -1625,7 +1627,7 @@ var CompatTests = map[string][]*vdl.Type{
 	},
 	"union B": {
 		vdl.TypeOf(NUnion(NUnionA{false})),
-		vdl.TypeOf(BDEunion(BDEunionB{""})),
+		vdl.TypeOf(BDEUnion(BDEUnionB{""})),
 	},
 }
 
@@ -1636,6 +1638,60 @@ var CompatTests = map[string][]*vdl.Type{
 // However, values in higher-indexed ConvertGroups will error when converting up
 // to the primary type of the lower-indexed ConvertGroups.
 var ConvertTests = map[string][]ConvertGroup{
+	"array/list": {
+		{
+			Name:        "[3]string",
+			PrimaryType: vdl.TypeOf(Array3String{}),
+			Values: []*vdl.Value{
+				vdl.ValueOf(Array3String{
+					"A",
+					"B",
+					"C",
+				}),
+				vdl.ValueOf([]string{
+					"A",
+					"B",
+					"C",
+				}),
+			},
+		},
+		{
+			Name:        "[4]string",
+			PrimaryType: vdl.TypeOf(Array4String{}),
+			Values: []*vdl.Value{
+				vdl.ValueOf(Array4String{
+					"D",
+					"E",
+					"F",
+					"G",
+				}),
+			},
+		},
+		{
+			Name:        "ByteArray",
+			PrimaryType: vdl.TypeOf(NByteArray{}),
+			Values: []*vdl.Value{
+				vdl.ValueOf(NByteArray{
+					5,
+					2,
+					0,
+					4,
+				}),
+				vdl.ValueOf([]byte("\x05\x02\x00\x04")),
+			},
+		},
+	},
+	"bool": {
+		{
+			Name:        "bool",
+			PrimaryType: vdl.TypeOf(false),
+			Values: []*vdl.Value{
+				vdl.ValueOf(true),
+				vdl.ValueOf(NBool(true)),
+				vdl.ValueOf(MBool(true)),
+			},
+		},
+	},
 	"number": {
 		{
 			Name:        "byte",
@@ -1690,6 +1746,246 @@ var ConvertTests = map[string][]ConvertGroup{
 			PrimaryType: vdl.TypeOf(complex128(0)),
 			Values: []*vdl.Value{
 				vdl.ValueOf(complex128(1.5 - 1i)),
+			},
+		},
+	},
+	"string, []byte, [n]byte, and enum": {
+		{
+			Name:        "enum (A)",
+			PrimaryType: vdl.TypeOf(NEnumA),
+			Values: []*vdl.Value{
+				vdl.ValueOf("A"),
+				vdl.ValueOf(NString("A")),
+				vdl.ValueOf(NEnumA),
+				vdl.ValueOf([]byte("A")),
+			},
+		},
+		{
+			Name:        "enum (brie)",
+			PrimaryType: vdl.TypeOf(BRIENumGlee),
+			Values: []*vdl.Value{
+				vdl.ValueOf("Brie"),
+				vdl.ValueOf(NString("Brie")),
+				vdl.ValueOf(BRIENumBrie),
+				vdl.ValueOf(FOODYNumBrie),
+				vdl.ValueOf([]byte("Brie")),
+				vdl.ValueOf(NByteArray{
+					66,
+					114,
+					105,
+					101,
+				}),
+			},
+		},
+		{
+			Name:        "[4]byte",
+			PrimaryType: vdl.TypeOf(NByteArray{}),
+			Values: []*vdl.Value{
+				vdl.ValueOf("Bean"),
+				vdl.ValueOf(NString("Bean")),
+				vdl.ValueOf(BEANumBean),
+				vdl.ValueOf(FOODYNumBean),
+				vdl.ValueOf([]byte("Bean")),
+				vdl.ValueOf(NByteArray{
+					66,
+					101,
+					97,
+					110,
+				}),
+			},
+		},
+		{
+			Name:        "string",
+			PrimaryType: vdl.TypeOf(NString("")),
+			Values: []*vdl.Value{
+				vdl.ValueOf("Cherry"),
+				vdl.ValueOf(NString("Cherry")),
+				vdl.ValueOf(FOODYNumCherry),
+				vdl.ValueOf([]byte("Cherry")),
+				vdl.ValueOf(NByteSlice("Cherry")),
+			},
+		},
+	},
+	"struct, map, and set": {
+		{
+			Name:        "map[uint32]uint32",
+			PrimaryType: vdl.TypeOf(MapOnlyA(nil)),
+			Values: []*vdl.Value{
+				vdl.ValueOf(MapOnlyA{
+					4: 0,
+					6: 7,
+				}),
+				vdl.ValueOf(MapOnlyA2{
+					4: 0,
+					6: 7,
+				}),
+			},
+		},
+		{
+			Name:        "map[bool]string",
+			PrimaryType: vdl.TypeOf(MapOnlyB(nil)),
+			Values: []*vdl.Value{
+				vdl.ValueOf(MapOnlyB{
+					true: "hello",
+				}),
+				vdl.ValueOf(MapOnlyB2{
+					true: "hello",
+				}),
+			},
+		},
+		{
+			Name:        "set[bool]",
+			PrimaryType: vdl.TypeOf(SetOnlyA(nil)),
+			Values: []*vdl.Value{
+				vdl.ValueOf(SetOnlyA{
+					false: struct{}{},
+					true:  struct{}{},
+				}),
+				vdl.ValueOf(SetOnlyA2{
+					false: struct{}{},
+					true:  struct{}{},
+				}),
+			},
+		},
+		{
+			Name:        "set[int16]",
+			PrimaryType: vdl.TypeOf(SetOnlyB(nil)),
+			Values: []*vdl.Value{
+				vdl.ValueOf(SetOnlyB{
+					4: struct{}{},
+					6: struct{}{},
+				}),
+				vdl.ValueOf(SetOnlyB2{
+					4: struct{}{},
+					6: struct{}{},
+				}),
+			},
+		},
+		{
+			Name:        "structABC",
+			PrimaryType: vdl.TypeOf(ABCStruct{}),
+			Values: []*vdl.Value{
+				vdl.ValueOf(ABCStruct{
+					A: true,
+				}),
+				vdl.ValueOf(ADEStruct{
+					A: true,
+					E: vdl.AnyType,
+				}),
+				vdl.ValueOf(NStruct{
+					A: true,
+				}),
+			},
+		},
+		{
+			Name:        "structYZ",
+			PrimaryType: vdl.TypeOf(YZStruct{}),
+			Values: []*vdl.Value{
+				vdl.ValueOf(XYZStruct{
+					Z: "ahoy",
+				}),
+				vdl.ValueOf(YZStruct{
+					Z: "ahoy",
+				}),
+				vdl.ValueOf(ZStruct{
+					Z: "ahoy",
+				}),
+			},
+		},
+		{
+			Name:        "struct+map",
+			PrimaryType: vdl.TypeOf(MapOnlyStruct{}),
+			Values: []*vdl.Value{
+				vdl.ValueOf(StructOnlyMap{
+					"Key1": 4,
+					"Key2": 5,
+					"Key3": 0,
+				}),
+				vdl.ValueOf(StructOnlyMap{
+					"AlsoNotAKey": 7,
+					"Key1":        4,
+					"Key2":        5,
+					"NotAKey":     6,
+				}),
+				vdl.ValueOf(MapOnlyStruct{
+					Key1: 4,
+					Key2: 5,
+				}),
+			},
+		},
+		{
+			Name:        "map+set",
+			PrimaryType: vdl.TypeOf(MapOnlySet(nil)),
+			Values: []*vdl.Value{
+				vdl.ValueOf(MapOnlySet{
+					3.14: struct{}{},
+					8:    struct{}{},
+				}),
+				vdl.ValueOf(SometimesSetMap{
+					3.14: vdl.ValueOf(true),
+					8:    vdl.ValueOf(true),
+				}),
+				vdl.ValueOf(SetOnlyMap{
+					3.14: true,
+					8:    true,
+				}),
+			},
+		},
+		{
+			Name:        "map-set",
+			PrimaryType: vdl.TypeOf(SetOnlyMap(nil)),
+			Values: []*vdl.Value{
+				vdl.ValueOf(SometimesSetMap{
+					3.14: vdl.ValueOf("cannot be a set anymore"),
+					8:    vdl.ValueOf(true),
+				}),
+			},
+		},
+		{
+			Name:        "struct+map+set",
+			PrimaryType: vdl.TypeOf(MapStructSet(nil)),
+			Values: []*vdl.Value{
+				vdl.ValueOf(MapStructSet{
+					"Eel":  struct{}{},
+					"Feat": struct{}{},
+					"Tire": struct{}{},
+				}),
+				vdl.ValueOf(SetStructMap{
+					"Eel":  true,
+					"Feat": true,
+					"Tire": true,
+				}),
+				vdl.ValueOf(MapSetStruct{
+					Feat: true,
+					Tire: true,
+					Eel:  true,
+				}),
+			},
+		},
+	},
+	"typeobject": {
+		{
+			Name:        "typeobject(any)",
+			PrimaryType: vdl.TypeObjectType,
+			Values: []*vdl.Value{
+				vdl.ValueOf(vdl.AnyType),
+			},
+		},
+	},
+	"union": {
+		{
+			Name:        "BDEUnion",
+			PrimaryType: vdl.TypeOf(BDEUnion(BDEUnionB{""})),
+			Values: []*vdl.Value{
+				vdl.ValueOf(BDEUnion(BDEUnionB{"bde"})),
+				vdl.ValueOf(NUnion(NUnionB{"bde"})),
+			},
+		},
+		{
+			Name:        "BDEUnion fail",
+			PrimaryType: vdl.TypeOf(NUnion(NUnionA{false})),
+			Values: []*vdl.Value{
+				vdl.ValueOf(NUnion(NUnionA{true})),
 			},
 		},
 	},

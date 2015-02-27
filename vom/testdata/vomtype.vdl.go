@@ -348,6 +348,13 @@ func (Array3String) __VDLReflect(struct {
 }) {
 }
 
+type Array4String [4]string
+
+func (Array4String) __VDLReflect(struct {
+	Name string "v.io/v23/vom/testdata.Array4String"
+}) {
+}
+
 type ABCStruct struct {
 	A bool
 	B string
@@ -372,7 +379,7 @@ func (ADEStruct) __VDLReflect(struct {
 
 type XYZStruct struct {
 	X bool
-	Y *vdl.Value
+	Y MBool
 	Z string
 }
 
@@ -419,7 +426,9 @@ func (StructOnlyMap) __VDLReflect(struct {
 }
 
 type MapSetStruct struct {
-	Key bool
+	Feat bool
+	Tire bool
+	Eel  bool
 }
 
 func (MapSetStruct) __VDLReflect(struct {
@@ -441,64 +450,274 @@ func (MapStructSet) __VDLReflect(struct {
 }) {
 }
 
-type SetOnlyMap map[int64]bool
+type SetOnlyMap map[float64]bool
 
 func (SetOnlyMap) __VDLReflect(struct {
 	Name string "v.io/v23/vom/testdata.SetOnlyMap"
 }) {
 }
 
-type MapOnlySet map[uint16]struct{}
+type SometimesSetMap map[float64]*vdl.Value
+
+func (SometimesSetMap) __VDLReflect(struct {
+	Name string "v.io/v23/vom/testdata.SometimesSetMap"
+}) {
+}
+
+type MapOnlySet map[float64]struct{}
 
 func (MapOnlySet) __VDLReflect(struct {
 	Name string "v.io/v23/vom/testdata.MapOnlySet"
 }) {
 }
 
+type SetOnlyA map[bool]struct{}
+
+func (SetOnlyA) __VDLReflect(struct {
+	Name string "v.io/v23/vom/testdata.SetOnlyA"
+}) {
+}
+
+type SetOnlyA2 map[NBool]struct{}
+
+func (SetOnlyA2) __VDLReflect(struct {
+	Name string "v.io/v23/vom/testdata.SetOnlyA2"
+}) {
+}
+
+type SetOnlyB map[int16]struct{}
+
+func (SetOnlyB) __VDLReflect(struct {
+	Name string "v.io/v23/vom/testdata.SetOnlyB"
+}) {
+}
+
+type SetOnlyB2 map[NInt16]struct{}
+
+func (SetOnlyB2) __VDLReflect(struct {
+	Name string "v.io/v23/vom/testdata.SetOnlyB2"
+}) {
+}
+
+type MapOnlyA map[uint32]uint32
+
+func (MapOnlyA) __VDLReflect(struct {
+	Name string "v.io/v23/vom/testdata.MapOnlyA"
+}) {
+}
+
+type MapOnlyA2 map[int64]float64
+
+func (MapOnlyA2) __VDLReflect(struct {
+	Name string "v.io/v23/vom/testdata.MapOnlyA2"
+}) {
+}
+
+type MapOnlyB map[bool]string
+
+func (MapOnlyB) __VDLReflect(struct {
+	Name string "v.io/v23/vom/testdata.MapOnlyB"
+}) {
+}
+
+type MapOnlyB2 map[NBool]NString
+
+func (MapOnlyB2) __VDLReflect(struct {
+	Name string "v.io/v23/vom/testdata.MapOnlyB2"
+}) {
+}
+
 type (
-	// BDEunion represents any single field of the BDEunion union type.
-	BDEunion interface {
+	// BDEUnion represents any single field of the BDEUnion union type.
+	BDEUnion interface {
 		// Index returns the field index.
 		Index() int
 		// Interface returns the field value as an interface.
 		Interface() interface{}
 		// Name returns the field name.
 		Name() string
-		// __VDLReflect describes the BDEunion union type.
-		__VDLReflect(__BDEunionReflect)
+		// __VDLReflect describes the BDEUnion union type.
+		__VDLReflect(__BDEUnionReflect)
 	}
-	// BDEunionB represents field B of the BDEunion union type.
-	BDEunionB struct{ Value string }
-	// BDEunionD represents field D of the BDEunion union type.
-	BDEunionD struct{ Value *vdl.Value }
-	// BDEunionE represents field E of the BDEunion union type.
-	BDEunionE struct{ Value *vdl.Type }
-	// __BDEunionReflect describes the BDEunion union type.
-	__BDEunionReflect struct {
-		Name  string "v.io/v23/vom/testdata.BDEunion"
-		Type  BDEunion
+	// BDEUnionB represents field B of the BDEUnion union type.
+	BDEUnionB struct{ Value string }
+	// BDEUnionD represents field D of the BDEUnion union type.
+	BDEUnionD struct{ Value *vdl.Value }
+	// BDEUnionE represents field E of the BDEUnion union type.
+	BDEUnionE struct{ Value *vdl.Type }
+	// __BDEUnionReflect describes the BDEUnion union type.
+	__BDEUnionReflect struct {
+		Name  string "v.io/v23/vom/testdata.BDEUnion"
+		Type  BDEUnion
 		Union struct {
-			B BDEunionB
-			D BDEunionD
-			E BDEunionE
+			B BDEUnionB
+			D BDEUnionD
+			E BDEUnionE
 		}
 	}
 )
 
-func (x BDEunionB) Index() int                     { return 0 }
-func (x BDEunionB) Interface() interface{}         { return x.Value }
-func (x BDEunionB) Name() string                   { return "B" }
-func (x BDEunionB) __VDLReflect(__BDEunionReflect) {}
+func (x BDEUnionB) Index() int                     { return 0 }
+func (x BDEUnionB) Interface() interface{}         { return x.Value }
+func (x BDEUnionB) Name() string                   { return "B" }
+func (x BDEUnionB) __VDLReflect(__BDEUnionReflect) {}
 
-func (x BDEunionD) Index() int                     { return 1 }
-func (x BDEunionD) Interface() interface{}         { return x.Value }
-func (x BDEunionD) Name() string                   { return "D" }
-func (x BDEunionD) __VDLReflect(__BDEunionReflect) {}
+func (x BDEUnionD) Index() int                     { return 1 }
+func (x BDEUnionD) Interface() interface{}         { return x.Value }
+func (x BDEUnionD) Name() string                   { return "D" }
+func (x BDEUnionD) __VDLReflect(__BDEUnionReflect) {}
 
-func (x BDEunionE) Index() int                     { return 2 }
-func (x BDEunionE) Interface() interface{}         { return x.Value }
-func (x BDEunionE) Name() string                   { return "E" }
-func (x BDEunionE) __VDLReflect(__BDEunionReflect) {}
+func (x BDEUnionE) Index() int                     { return 2 }
+func (x BDEUnionE) Interface() interface{}         { return x.Value }
+func (x BDEUnionE) Name() string                   { return "E" }
+func (x BDEUnionE) __VDLReflect(__BDEUnionReflect) {}
+
+type BRIENum int
+
+const (
+	BRIENumGlee BRIENum = iota
+	BRIENumBrie
+	BRIENumThree
+)
+
+// BRIENumAll holds all labels for BRIENum.
+var BRIENumAll = []BRIENum{BRIENumGlee, BRIENumBrie, BRIENumThree}
+
+// BRIENumFromString creates a BRIENum from a string label.
+func BRIENumFromString(label string) (x BRIENum, err error) {
+	err = x.Set(label)
+	return
+}
+
+// Set assigns label to x.
+func (x *BRIENum) Set(label string) error {
+	switch label {
+	case "Glee", "glee":
+		*x = BRIENumGlee
+		return nil
+	case "Brie", "brie":
+		*x = BRIENumBrie
+		return nil
+	case "Three", "three":
+		*x = BRIENumThree
+		return nil
+	}
+	*x = -1
+	return fmt.Errorf("unknown label %q in testdata.BRIENum", label)
+}
+
+// String returns the string label of x.
+func (x BRIENum) String() string {
+	switch x {
+	case BRIENumGlee:
+		return "Glee"
+	case BRIENumBrie:
+		return "Brie"
+	case BRIENumThree:
+		return "Three"
+	}
+	return ""
+}
+
+func (BRIENum) __VDLReflect(struct {
+	Name string "v.io/v23/vom/testdata.BRIENum"
+	Enum struct{ Glee, Brie, Three string }
+}) {
+}
+
+type BEANum int
+
+const (
+	BEANumBean BEANum = iota
+)
+
+// BEANumAll holds all labels for BEANum.
+var BEANumAll = []BEANum{BEANumBean}
+
+// BEANumFromString creates a BEANum from a string label.
+func BEANumFromString(label string) (x BEANum, err error) {
+	err = x.Set(label)
+	return
+}
+
+// Set assigns label to x.
+func (x *BEANum) Set(label string) error {
+	switch label {
+	case "Bean", "bean":
+		*x = BEANumBean
+		return nil
+	}
+	*x = -1
+	return fmt.Errorf("unknown label %q in testdata.BEANum", label)
+}
+
+// String returns the string label of x.
+func (x BEANum) String() string {
+	switch x {
+	case BEANumBean:
+		return "Bean"
+	}
+	return ""
+}
+
+func (BEANum) __VDLReflect(struct {
+	Name string "v.io/v23/vom/testdata.BEANum"
+	Enum struct{ Bean string }
+}) {
+}
+
+type FOODYNum int
+
+const (
+	FOODYNumBean FOODYNum = iota
+	FOODYNumBrie
+	FOODYNumCherry
+)
+
+// FOODYNumAll holds all labels for FOODYNum.
+var FOODYNumAll = []FOODYNum{FOODYNumBean, FOODYNumBrie, FOODYNumCherry}
+
+// FOODYNumFromString creates a FOODYNum from a string label.
+func FOODYNumFromString(label string) (x FOODYNum, err error) {
+	err = x.Set(label)
+	return
+}
+
+// Set assigns label to x.
+func (x *FOODYNum) Set(label string) error {
+	switch label {
+	case "Bean", "bean":
+		*x = FOODYNumBean
+		return nil
+	case "Brie", "brie":
+		*x = FOODYNumBrie
+		return nil
+	case "Cherry", "cherry":
+		*x = FOODYNumCherry
+		return nil
+	}
+	*x = -1
+	return fmt.Errorf("unknown label %q in testdata.FOODYNum", label)
+}
+
+// String returns the string label of x.
+func (x FOODYNum) String() string {
+	switch x {
+	case FOODYNumBean:
+		return "Bean"
+	case FOODYNumBrie:
+		return "Brie"
+	case FOODYNumCherry:
+		return "Cherry"
+	}
+	return ""
+}
+
+func (FOODYNum) __VDLReflect(struct {
+	Name string "v.io/v23/vom/testdata.FOODYNum"
+	Enum struct{ Bean, Brie, Cherry string }
+}) {
+}
 
 func init() {
 	vdl.Register((*ConvertGroup)(nil))
@@ -534,6 +753,7 @@ func init() {
 	vdl.Register((*RecY)(nil))
 	vdl.Register((*ListString)(nil))
 	vdl.Register((*Array3String)(nil))
+	vdl.Register((*Array4String)(nil))
 	vdl.Register((*ABCStruct)(nil))
 	vdl.Register((*ADEStruct)(nil))
 	vdl.Register((*XYZStruct)(nil))
@@ -545,6 +765,18 @@ func init() {
 	vdl.Register((*SetStructMap)(nil))
 	vdl.Register((*MapStructSet)(nil))
 	vdl.Register((*SetOnlyMap)(nil))
+	vdl.Register((*SometimesSetMap)(nil))
 	vdl.Register((*MapOnlySet)(nil))
-	vdl.Register((*BDEunion)(nil))
+	vdl.Register((*SetOnlyA)(nil))
+	vdl.Register((*SetOnlyA2)(nil))
+	vdl.Register((*SetOnlyB)(nil))
+	vdl.Register((*SetOnlyB2)(nil))
+	vdl.Register((*MapOnlyA)(nil))
+	vdl.Register((*MapOnlyA2)(nil))
+	vdl.Register((*MapOnlyB)(nil))
+	vdl.Register((*MapOnlyB2)(nil))
+	vdl.Register((*BDEUnion)(nil))
+	vdl.Register((*BRIENum)(nil))
+	vdl.Register((*BEANum)(nil))
+	vdl.Register((*FOODYNum)(nil))
 }

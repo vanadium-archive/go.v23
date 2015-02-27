@@ -4697,17 +4697,17 @@ const Tests = []TestCase {
 // types from different CompatibleTypeSets are incompatible.
 const CompatTests = map[string][]typeobject{
 	"bool": []typeobject{typeobject(bool), typeobject(NBool), typeobject(MBool)},
-	"map[X]bool/set[X]": []typeobject{typeobject(SetOnlyMap), typeobject(MapOnlySet)},
+	"map[X]bool/set[X]": []typeobject{typeobject(SetOnlyMap), typeobject(MapOnlySet), typeobject(SometimesSetMap)},
 	"map[string]X/struct": []typeobject{typeobject(MapOnlyStruct), typeobject(StructOnlyMap)},
 	"map[string]bool/set[string]/struct": []typeobject{typeobject(MapSetStruct), typeobject(SetStructMap), typeobject(MapStructSet)},
 	"number list/array": []typeobject{typeobject([]int32), typeobject(NArray2Uint64), typeobject(NListUint64)},
 	"number": []typeobject{typeobject(uint16), typeobject(uint32), typeobject(uint64), typeobject(int16), typeobject(int32), typeobject(int64), typeobject(float32), typeobject(float64), typeobject(complex64), typeobject(complex128), typeobject(NUint16), typeobject(NUint32), typeobject(NUint64), typeobject(NInt16), typeobject(NInt32), typeobject(NInt64), typeobject(NFloat32), typeobject(NFloat64), typeobject(NComplex64), typeobject(NComplex128)},
-	"string list/array": []typeobject{typeobject([]string), typeobject(ListString), typeobject(Array3String)},
+	"string list/array": []typeobject{typeobject([]string), typeobject(ListString), typeobject(Array3String), typeobject(Array4String)},
 	"string/[]byte/enum": []typeobject{typeobject(string), typeobject(NString), typeobject([]byte), typeobject(NByteSlice), typeobject(NByteArray), typeobject(NEnum)},
 	"struct A": []typeobject{typeobject(NStruct), typeobject(ABCStruct), typeobject(ADEStruct)},
 	"struct Z": []typeobject{typeobject(XYZStruct), typeobject(YZStruct), typeobject(ZStruct)},
 	"typeobject": []typeobject{typeobject(typeobject)},
-	"union B": []typeobject{typeobject(NUnion), typeobject(BDEunion)},
+	"union B": []typeobject{typeobject(NUnion), typeobject(BDEUnion)},
 }
 
 // ConvertTests contains the testcases to check vom value convertibility.
@@ -4717,6 +4717,30 @@ const CompatTests = map[string][]typeobject{
 // However, values in higher-indexed ConvertGroups will error when converting up
 // to the primary type of the lower-indexed ConvertGroups.
 const ConvertTests = map[string][]ConvertGroup{
+	"array/list": {
+		{
+			"[3]string",
+			typeobject(Array3String),
+			{ Array3String{"A", "B", "C"}, []string{"A", "B", "C"}, },
+		},
+		{
+			"[4]string",
+			typeobject(Array4String),
+			{ Array4String{"D", "E", "F", "G"}, },
+		},
+		{
+			"ByteArray",
+			typeobject(NByteArray),
+			{ NByteArray("\x05\x02\x00\x04"), []byte("\x05\x02\x00\x04"), },
+		},
+	},
+	"bool": {
+		{
+			"bool",
+			typeobject(bool),
+			{ true, NBool(true), MBool(true), },
+		},
+	},
 	"number": {
 		{
 			"byte",
@@ -4747,6 +4771,99 @@ const ConvertTests = map[string][]ConvertGroup{
 			"complex128",
 			typeobject(complex128),
 			{ complex128(1.5-1i), },
+		},
+	},
+	"string, []byte, [n]byte, and enum": {
+		{
+			"enum (A)",
+			typeobject(NEnum),
+			{ "A", NString("A"), NEnum.A, []byte("A"), },
+		},
+		{
+			"enum (brie)",
+			typeobject(BRIENum),
+			{ "Brie", NString("Brie"), BRIENum.Brie, FOODYNum.Brie, []byte("Brie"), NByteArray("Brie"), },
+		},
+		{
+			"[4]byte",
+			typeobject(NByteArray),
+			{ "Bean", NString("Bean"), BEANum.Bean, FOODYNum.Bean, []byte("Bean"), NByteArray("Bean"), },
+		},
+		{
+			"string",
+			typeobject(NString),
+			{ "Cherry", NString("Cherry"), FOODYNum.Cherry, []byte("Cherry"), NByteSlice("Cherry"), },
+		},
+	},
+	"struct, map, and set": {
+		{
+			"map[uint32]uint32",
+			typeobject(MapOnlyA),
+			{ MapOnlyA{4: 0, 6: 7}, MapOnlyA2{4: 0, 6: 7}, },
+		},
+		{
+			"map[bool]string",
+			typeobject(MapOnlyB),
+			{ MapOnlyB{true: "hello"}, MapOnlyB2{true: "hello"}, },
+		},
+		{
+			"set[bool]",
+			typeobject(SetOnlyA),
+			{ SetOnlyA{false, true}, SetOnlyA2{false, true}, },
+		},
+		{
+			"set[int16]",
+			typeobject(SetOnlyB),
+			{ SetOnlyB{4, 6}, SetOnlyB2{4, 6}, },
+		},
+		{
+			"structABC",
+			typeobject(ABCStruct),
+			{ ABCStruct{A: true}, ADEStruct{A: true}, NStruct{A: true}, },
+		},
+		{
+			"structYZ",
+			typeobject(YZStruct),
+			{ XYZStruct{Z: "ahoy"}, YZStruct{Z: "ahoy"}, ZStruct{Z: "ahoy"}, },
+		},
+		{
+			"struct+map",
+			typeobject(MapOnlyStruct),
+			{ StructOnlyMap{"Key1": 4, "Key2": 5, "Key3": 0}, StructOnlyMap{"AlsoNotAKey": 7, "Key1": 4, "Key2": 5, "NotAKey": 6}, MapOnlyStruct{Key1: 4, Key2: 5}, },
+		},
+		{
+			"map+set",
+			typeobject(MapOnlySet),
+			{ MapOnlySet{3.14, 8}, SometimesSetMap{3.14: true, 8: true}, SetOnlyMap{3.14: true, 8: true}, },
+		},
+		{
+			"map-set",
+			typeobject(SetOnlyMap),
+			{ SometimesSetMap{3.14: "cannot be a set anymore", 8: true}, },
+		},
+		{
+			"struct+map+set",
+			typeobject(MapStructSet),
+			{ MapStructSet{"Eel", "Feat", "Tire"}, SetStructMap{"Eel": true, "Feat": true, "Tire": true}, MapSetStruct{Feat: true, Tire: true, Eel: true}, },
+		},
+	},
+	"typeobject": {
+		{
+			"typeobject(any)",
+			typeobject(typeobject),
+			{ typeobject(any), },
+		},
+	},
+	"union": {
+		{
+			"BDEUnion",
+			typeobject(BDEUnion),
+			{ BDEUnion{B: "bde"}, NUnion{B: "bde"}, },
+		},
+		{
+			"BDEUnion fail",
+			typeobject(NUnion),
+			{ NUnion{A: true}, },
 		},
 	},
 }

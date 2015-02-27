@@ -1,13 +1,13 @@
 package testdata
 
 type (
-  // vomdata config types
-  ConvertGroup  struct{ Name string; PrimaryType typeobject; Values []any }
-  VomdataStruct struct{
-  	EncodeDecodeData []any
-  	CompatData       map[string][]typeobject
-  	ConvertData      map[string][]ConvertGroup
-  }
+	// vomdata config types
+	ConvertGroup	struct{ Name string; PrimaryType typeobject; Values []any }
+	VomdataStruct struct{
+		EncodeDecodeData []any
+		CompatData			 map[string][]typeobject
+		ConvertData			map[string][]ConvertGroup
+	}
 
 	// Named Types
 	NBool       bool
@@ -38,7 +38,7 @@ type (
 	}
 
 	NEnum  enum{ A; B; C }
-	NUnion union{ A  bool; B string; C int64 }
+	NUnion union{ A	bool; B string; C int64 }
 
 	// Nested Custom Types
 	MBool   NBool
@@ -61,6 +61,7 @@ type (
 	// Additional types for compatibility and conversion checks
 	ListString []string
 	Array3String [3]string
+	Array4String [4]string
 
 	ABCStruct struct {
 		A bool
@@ -75,7 +76,7 @@ type (
 
 	XYZStruct struct {
 		X bool
-		Y any
+		Y MBool
 		Z string
 	}
 	YZStruct struct {
@@ -94,13 +95,30 @@ type (
 	StructOnlyMap map[string]uint64
 
 	MapSetStruct struct {
-		Key bool
+		Feat bool
+		Tire bool
+		Eel  bool
 	}
 	SetStructMap map[string]bool
 	MapStructSet set[string]
 
-	SetOnlyMap map[int64]bool
-	MapOnlySet set[uint16]
+	SetOnlyMap      map[float64]bool
+	SometimesSetMap map[float64]any
+	MapOnlySet      set[float64]
 
-	BDEunion union{ B string; D any; E typeobject }
+	SetOnlyA  set[bool]
+	SetOnlyA2 set[NBool]
+	SetOnlyB  set[int16]
+	SetOnlyB2 set[NInt16]
+
+	MapOnlyA  map[uint32]uint32
+	MapOnlyA2 map[int64]float64
+	MapOnlyB  map[bool]string
+	MapOnlyB2 map[NBool]NString
+
+	BDEUnion union{ B string; D any; E typeobject }
+
+	BRIENum  enum{ Glee; Brie; Three }
+	BEANum   enum{ Bean }
+	FOODYNum enum{ Bean; Brie; Cherry }
 )
