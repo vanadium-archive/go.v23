@@ -3,7 +3,6 @@ package security
 import (
 	"time"
 
-	"v.io/v23/vlog"
 	"v.io/v23/vom"
 )
 
@@ -65,7 +64,8 @@ func expiryTime(cav Caveat) time.Time {
 	case ExpiryCaveatX.Id:
 		var t time.Time
 		if err := vom.Decode(cav.ParamVom, &t); err != nil {
-			vlog.Errorf("Failed to decode ParamVOM for cav(%v): %v", cav, err)
+			// TODO(jsimsa): Decide what (if any) logging mechanism to use.
+			// vlog.Errorf("Failed to decode ParamVOM for cav(%v): %v", cav, err)
 			return time.Time{}
 		}
 		return t
@@ -73,7 +73,8 @@ func expiryTime(cav Caveat) time.Time {
 		// TODO(suharshs): Remove this after we only use ExpiryCaveatX.
 		var unix int64
 		if err := vom.Decode(cav.ParamVom, &unix); err != nil {
-			vlog.Errorf("Failed to decode ParamVOM for cav(%v): %v", cav, err)
+			// TODO(jsimsa): Decide what (if any) logging mechanism to use.
+			// vlog.Errorf("Failed to decode ParamVOM for cav(%v): %v", cav, err)
 			return time.Time{}
 		}
 		return time.Unix(unix, 0)

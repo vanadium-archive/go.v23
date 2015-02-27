@@ -12,7 +12,6 @@ import (
 
 	"v.io/v23/uniqueid"
 	"v.io/v23/vdl"
-	"v.io/v23/vlog"
 	"v.io/v23/vom"
 )
 
@@ -185,7 +184,8 @@ func (c *Caveat) ThirdPartyDetails() ThirdPartyCaveat {
 	if c.Id == PublicKeyThirdPartyCaveatX.Id {
 		var param publicKeyThirdPartyCaveat
 		if err := vom.Decode(c.ParamVom, &param); err != nil {
-			vlog.Errorf("Error decoding PublicKeyThirdPartyCaveat: %v", err)
+			// TODO(jsimsa): Decide what (if any) logging mechanism to use.
+			// vlog.Errorf("Error decoding PublicKeyThirdPartyCaveat: %v", err)
 		}
 		return &param
 	}
@@ -239,7 +239,8 @@ func NewPublicKeyCaveat(discharger PublicKey, location string, requirements Thir
 func (c *publicKeyThirdPartyCaveat) ID() string {
 	key, err := c.discharger()
 	if err != nil {
-		vlog.Error(err)
+		// TODO(jsimsa): Decide what (if any) logging mechanism to use.
+		// vlog.Error(err)
 		return ""
 	}
 	hash := key.hash()

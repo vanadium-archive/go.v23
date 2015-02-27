@@ -7,8 +7,6 @@ import (
 	"sort"
 	"strings"
 	"sync"
-
-	"v.io/v23/vlog"
 )
 
 var errEmptyChain = errors.New("empty certificate chain found")
@@ -208,20 +206,24 @@ func verifyChainSignature(ctx Context, chain []Certificate) (string, error) {
 	// on blessing.
 	root, err := UnmarshalPublicKey(chain[0].PublicKey)
 	if err != nil {
-		vlog.VI(2).Infof("could not extract blessing as PublicKey from root certificate with Extension: %v could not be unmarshaled: %v", chain[0].Extension, err)
+		// TODO(jsimsa): Decide what (if any) logging mechanism to use.
+		// vlog.VI(2).Infof("could not extract blessing as PublicKey from root certificate with Extension: %v could not be unmarshaled: %v", chain[0].Extension, err)
 		return blessing, err
 	}
 	local := ctx.LocalPrincipal()
 	if local == nil {
-		vlog.VI(2).Infof("could not extract blessing as provided Context %v has LocalPrincipal nil", ctx)
+		// TODO(jsimsa): Decide what (if any) logging mechanism to use.
+		// vlog.VI(2).Infof("could not extract blessing as provided Context %v has LocalPrincipal nil", ctx)
 		return blessing, NewErrUntrustedRoot(nil, blessing)
 	}
 	if local.Roots() == nil {
-		vlog.VI(4).Info("could not extract blessing as no keys are recgonized as valid roots")
+		// TODO(jsimsa): Decide what (if any) logging mechanism to use.
+		// vlog.VI(4).Info("could not extract blessing as no keys are recgonized as valid roots")
 		return blessing, NewErrUntrustedRoot(nil, blessing)
 	}
 	if err := local.Roots().Recognized(root, blessing); err != nil {
-		vlog.VI(4).Infof("ignoring blessing %v because %v", blessing, err)
+		// TODO(jsimsa): Decide what (if any) logging mechanism to use.
+		// vlog.VI(4).Infof("ignoring blessing %v because %v", blessing, err)
 		return blessing, NewErrUntrustedRoot(nil, blessing)
 	}
 
@@ -233,7 +235,8 @@ func defaultChainCaveatValidator(ctx Context, chains [][]Caveat) []error {
 	for i, chain := range chains {
 		for _, cav := range chain {
 			if err := validateCaveat(ctx, cav); err != nil {
-				vlog.VI(4).Infof("Ignoring chain %v: %v", chain, err)
+				// TODO(jsimsa): Decide what (if any) logging mechanism to use.
+				// vlog.VI(4).Infof("Ignoring chain %v: %v", chain, err)
 				results[i] = err
 				break
 			}
