@@ -280,15 +280,15 @@ type AppCycleStopContext interface {
 	AppCycleStopServerStream
 }
 
-// AppCycleStopContextStub is a wrapper that converts ipc.ServerCall into
+// AppCycleStopContextStub is a wrapper that converts ipc.StreamServerCall into
 // a typesafe stub that implements AppCycleStopContext.
 type AppCycleStopContextStub struct {
-	ipc.ServerCall
+	ipc.StreamServerCall
 }
 
-// Init initializes AppCycleStopContextStub from ipc.ServerCall.
-func (s *AppCycleStopContextStub) Init(call ipc.ServerCall) {
-	s.ServerCall = call
+// Init initializes AppCycleStopContextStub from ipc.StreamServerCall.
+func (s *AppCycleStopContextStub) Init(call ipc.StreamServerCall) {
+	s.StreamServerCall = call
 }
 
 // SendStream returns the send side of the AppCycle.Stop server stream.

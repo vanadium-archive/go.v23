@@ -330,15 +330,15 @@ type GlobWatcherWatchGlobContext interface {
 	GlobWatcherWatchGlobServerStream
 }
 
-// GlobWatcherWatchGlobContextStub is a wrapper that converts ipc.ServerCall into
+// GlobWatcherWatchGlobContextStub is a wrapper that converts ipc.StreamServerCall into
 // a typesafe stub that implements GlobWatcherWatchGlobContext.
 type GlobWatcherWatchGlobContextStub struct {
-	ipc.ServerCall
+	ipc.StreamServerCall
 }
 
-// Init initializes GlobWatcherWatchGlobContextStub from ipc.ServerCall.
-func (s *GlobWatcherWatchGlobContextStub) Init(call ipc.ServerCall) {
-	s.ServerCall = call
+// Init initializes GlobWatcherWatchGlobContextStub from ipc.StreamServerCall.
+func (s *GlobWatcherWatchGlobContextStub) Init(call ipc.StreamServerCall) {
+	s.StreamServerCall = call
 }
 
 // SendStream returns the send side of the GlobWatcher.WatchGlob server stream.

@@ -259,15 +259,15 @@ type StoreAllTracesContext interface {
 	StoreAllTracesServerStream
 }
 
-// StoreAllTracesContextStub is a wrapper that converts ipc.ServerCall into
+// StoreAllTracesContextStub is a wrapper that converts ipc.StreamServerCall into
 // a typesafe stub that implements StoreAllTracesContext.
 type StoreAllTracesContextStub struct {
-	ipc.ServerCall
+	ipc.StreamServerCall
 }
 
-// Init initializes StoreAllTracesContextStub from ipc.ServerCall.
-func (s *StoreAllTracesContextStub) Init(call ipc.ServerCall) {
-	s.ServerCall = call
+// Init initializes StoreAllTracesContextStub from ipc.StreamServerCall.
+func (s *StoreAllTracesContextStub) Init(call ipc.StreamServerCall) {
+	s.StreamServerCall = call
 }
 
 // SendStream returns the send side of the Store.AllTraces server stream.

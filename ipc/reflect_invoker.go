@@ -94,14 +94,14 @@ type methodInfo struct {
 //
 // The first in-arg must be a context.  For non-streaming methods it must be
 // ipc.ServerContext.  For streaming methods, it must be a pointer to a struct
-// that implements ipc.ServerCall, and also adds typesafe streaming wrappers.
+// that implements ipc.StreamServerCall, and also adds typesafe streaming wrappers.
 // Here's an example that streams int32 from client to server, and string from
 // server to client:
 //
-//   type MyContext struct { ipc.ServerCall }
+//   type MyContext struct { ipc.StreamServerCall }
 //
-//   // Init initializes MyContext via ipc.ServerCall.
-//   func (*MyContext) Init(ipc.ServerCall) {...}
+//   // Init initializes MyContext via ipc.StreamServerCall.
+//   func (*MyContext) Init(ipc.StreamServerCall) {...}
 //
 //   // RecvStream returns the receiver side of the server stream.
 //   func (*MyContext) RecvStream() interface {
@@ -122,7 +122,7 @@ type methodInfo struct {
 //
 // As a temporary special-case, we also allow generic streaming methods:
 //
-//   func (impl) Generic(call ipc.ServerCall, ...) (...)
+//   func (impl) Generic(call ipc.StreamServerCall, ...) (...)
 //
 // The problem with allowing this form is that via reflection we can no longer
 // determine whether the server performs streaming, or what the streaming in and
@@ -179,7 +179,7 @@ func (ri reflectInvoker) Prepare(method string, _ int) ([]interface{}, []*vdl.Va
 }
 
 // Invoke implements the Invoker.Invoke method.
-func (ri reflectInvoker) Invoke(method string, call ServerCall, argptrs []interface{}) ([]interface{}, error) {
+func (ri reflectInvoker) Invoke(method string, call StreamServerCall, argptrs []interface{}) ([]interface{}, error) {
 	info, ok := ri.methods[method]
 	if !ok {
 		return nil, NewErrUnknownMethod(nil, method)
@@ -360,7 +360,7 @@ func makeMethodInfo(method reflect.Method) methodInfo {
 	// Initialize info for typesafe streaming contexts.  Note that we've already
 	// type-checked the method.  We memoize the stream type and Init function, so
 	// that we can create and initialize the stream type in Invoke.
-	if in1 := mtype.In(1); in1 != rtServerCall && in1 != rtServerContext && in1.Kind() == reflect.Ptr {
+	if in1 := mtype.In(1); in1 != rtStreamServerCall && in1 != rtServerContext && in1.Kind() == reflect.Ptr {
 		info.rtStreamCtx = in1.Elem()
 		mInit, _ := in1.MethodByName("Init")
 		info.rvStreamCtxInit = mInit.Func
@@ -373,7 +373,7 @@ func abortedf(format string, v ...interface{}) error {
 }
 
 var (
-	rtServerCall           = reflect.TypeOf((*ServerCall)(nil)).Elem()
+	rtStreamServerCall     = reflect.TypeOf((*StreamServerCall)(nil)).Elem()
 	rtServerContext        = reflect.TypeOf((*ServerContext)(nil)).Elem()
 	rtBool                 = reflect.TypeOf(bool(false))
 	rtError                = reflect.TypeOf((*error)(nil)).Elem()
@@ -388,7 +388,7 @@ var (
 	ErrReservedMethod     = verror.New(verror.ErrInternal, nil, "Reserved method")
 	ErrMethodNotExported  = verror.New(verror.ErrBadArg, nil, "Method not exported")
 	ErrNonRPCMethod       = verror.New(verror.ErrBadArg, nil, "Non-rpc method.  We require at least 1 in-arg."+useContext)
-	ErrInServerCall       = abortedf("Context arg ipc.ServerCall is invalid; cannot determine streaming types." + forgotWrap)
+	ErrInStreamServerCall = abortedf("Context arg ipc.StreamServerCall is invalid; cannot determine streaming types." + forgotWrap)
 	ErrNoFinalErrorOutArg = abortedf("Invalid out-args (final out-arg must be error)")
 	ErrBadDescribe        = abortedf("Describe__ must have signature Describe__() []ipc.InterfaceDesc")
 	ErrBadGlobber         = abortedf("Globber must have signature Globber() *ipc.GlobState")
@@ -411,18 +411,18 @@ func typeCheckMethod(method reflect.Method, sig *signature.Method) error {
 		return ErrNonRPCMethod
 	}
 	switch in1 := mtype.In(1); {
-	case in1 == rtServerCall:
-		// If the first context arg is ipc.ServerCall, we do not know whether the
+	case in1 == rtStreamServerCall:
+		// If the first context arg is ipc.StreamServerCall, we do not know whether the
 		// method performs streaming, or what the stream types are.
 		sig.InStream = &signature.Arg{Type: vdl.AnyType}
 		sig.OutStream = &signature.Arg{Type: vdl.AnyType}
-		// We can either disallow ipc.ServerCall, at the expense of more boilerplate
+		// We can either disallow ipc.StreamServerCall, at the expense of more boilerplate
 		// for users that don't use the VDL but want to perform streaming.  Or we
 		// can allow it, but won't be able to determine whether the server uses the
 		// stream, or what the streaming types are.
 		//
 		// At the moment we allow it; we can easily disallow by enabling this error.
-		//   return ErrInServerCall
+		//   return ErrInStreamServerCall
 	case in1 == rtServerContext:
 		// Non-streaming method.
 	case in1.Implements(rtServerContext):
@@ -477,13 +477,13 @@ func typeCheckStreamingContext(ctx reflect.Type, sig *signature.Method) error {
 	if ctx.Kind() != reflect.Ptr || ctx.Elem().Kind() != reflect.Struct {
 		return abortedf("Context arg %s is invalid streaming context; must be pointer to a struct representing the typesafe streaming context."+forgotWrap, ctx)
 	}
-	// Must have Init(ipc.ServerCall) method.
+	// Must have Init(ipc.StreamServerCall) method.
 	mInit, hasInit := ctx.MethodByName("Init")
 	if !hasInit {
 		return abortedf("Context arg %s is invalid streaming context; must have Init method."+forgotWrap, ctx)
 	}
-	if t := mInit.Type; t.NumIn() != 2 || t.In(0).Kind() != reflect.Ptr || t.In(1) != rtServerCall || t.NumOut() != 0 {
-		return abortedf("Context arg %s is invalid streaming context; Init must have signature func (*) Init(ipc.ServerCall)."+forgotWrap, ctx)
+	if t := mInit.Type; t.NumIn() != 2 || t.In(0).Kind() != reflect.Ptr || t.In(1) != rtStreamServerCall || t.NumOut() != 0 {
+		return abortedf("Context arg %s is invalid streaming context; Init must have signature func (*) Init(ipc.StreamServerCall)."+forgotWrap, ctx)
 	}
 	// Must have either RecvStream or SendStream method, or both.
 	mRecvStream, hasRecvStream := ctx.MethodByName("RecvStream")

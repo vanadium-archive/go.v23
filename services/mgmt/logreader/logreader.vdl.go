@@ -297,15 +297,15 @@ type LogFileReadLogContext interface {
 	LogFileReadLogServerStream
 }
 
-// LogFileReadLogContextStub is a wrapper that converts ipc.ServerCall into
+// LogFileReadLogContextStub is a wrapper that converts ipc.StreamServerCall into
 // a typesafe stub that implements LogFileReadLogContext.
 type LogFileReadLogContextStub struct {
-	ipc.ServerCall
+	ipc.StreamServerCall
 }
 
-// Init initializes LogFileReadLogContextStub from ipc.ServerCall.
-func (s *LogFileReadLogContextStub) Init(call ipc.ServerCall) {
-	s.ServerCall = call
+// Init initializes LogFileReadLogContextStub from ipc.StreamServerCall.
+func (s *LogFileReadLogContextStub) Init(call ipc.StreamServerCall) {
+	s.StreamServerCall = call
 }
 
 // SendStream returns the send side of the LogFile.ReadLog server stream.
