@@ -38,7 +38,7 @@ type Request struct {
 	// Timeout is the duration after which the request should be cancelled.  This
 	// is a hint to the server, to avoid wasted work.
 	//
-	// TODO(toddw): Change to time.Time when a built-in idl time package is added.
+	// TODO(toddw): Change to time.WireDeadline.
 	Timeout int64
 	// GrantedBlessings are blessings bound to the principal running the server,
 	// provided by the client.

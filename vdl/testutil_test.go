@@ -414,28 +414,74 @@ func nWireFromNative(x *NWire, n NNative) error {
 	return nil
 }
 
-// NWireReg and NNativeReg are used to test pre-registered native types.
-type NWireReg struct{ Str string }
-type NNativeReg int64
+func init() {
+	RegisterNative(nWireToNative, nWireFromNative)
+	Register(NWire{})
+}
 
-func nWireRegToNative(x NWireReg, n *NNativeReg) error {
-	*n = 0
-	i, err := strconv.Atoi(x.Str)
-	if err != nil {
-		return err
+// NUnionWire and NUnionNative are used to test native type support for unions.
+type (
+	NUnionWire interface {
+		Index() int
+		Interface() interface{}
+		Name() string
+		__VDLReflect(__NUnionWireReflect)
 	}
-	*n = NNativeReg(i)
+	NUnionWireA struct{ Value bool }
+	NUnionWireB struct{ Value int64 }
+
+	__NUnionWireReflect struct {
+		Type  NUnionWire
+		Union struct {
+			A NUnionWireA
+			B NUnionWireB
+		}
+	}
+
+	NUnionNative string
+)
+
+func (x NUnionWireA) Name() string                     { return "A" }
+func (x NUnionWireA) Interface() interface{}           { return x.Value }
+func (x NUnionWireA) Index() int                       { return 0 }
+func (x NUnionWireA) __VDLReflect(__NUnionWireReflect) {}
+func (x NUnionWireB) Name() string                     { return "B" }
+func (x NUnionWireB) Interface() interface{}           { return x.Value }
+func (x NUnionWireB) Index() int                       { return 1 }
+func (x NUnionWireB) __VDLReflect(__NUnionWireReflect) {}
+
+func nUnionWireToNative(w NUnionWire, n *NUnionNative) error {
+	*n = NUnionNative(fmt.Sprintf("%s=%v", w.Name(), w.Interface()))
 	return nil
 }
 
-func nWireRegFromNative(x *NWireReg, n NNativeReg) error {
-	x.Str = strconv.Itoa(int(n))
-	return nil
+func nUnionWireFromNative(w *NUnionWire, n NUnionNative) error {
+	kv := strings.Split(string(n), "=")
+	if len(kv) != 2 {
+		return fmt.Errorf("invalid NUnionNative, no '=': %v", n)
+	}
+	switch kv[0] {
+	case "A":
+		var value bool
+		if _, err := fmt.Sscan(kv[1], &value); err != nil {
+			return err
+		}
+		*w = NUnionWireA{value}
+		return nil
+	case "B":
+		var value int64
+		if _, err := fmt.Sscan(kv[1], &value); err != nil {
+			return err
+		}
+		*w = NUnionWireB{value}
+		return nil
+	}
+	return fmt.Errorf("invalid NUnionNative, unknown key: %v", n)
 }
 
 func init() {
-	RegisterNative(nWireRegToNative, nWireRegFromNative)
-	Register(NWireReg{})
+	RegisterNative(nUnionWireToNative, nUnionWireFromNative)
+	Register((*NUnionWire)(nil))
 }
 
 var (
@@ -539,8 +585,8 @@ var (
 	StructAIntType  = StructType(Field{"A", Int64Type})
 	StructAIntTypeN = NamedType("NStructA", StructAIntType)
 
-	UnionTypeN   = NameN("Union", UnionType([]Field{{"A", BoolType}, {"B", StringType}, {"C", Int32Type}}...))
-	WireRegTypeN = NameN("WireReg", StructType(Field{"Str", StringType}))
+	UnionTypeN = NameN("Union", UnionType([]Field{{"A", BoolType}, {"B", StringType}, {"C", Int32Type}}...))
+	WireTypeN  = NameN("Wire", StructType(Field{"Str", StringType}))
 
 	// Types that cannot be converted to sets.  Although we represent sets as
 	// map[key]struct{} on the Go side, we don't allow these as general

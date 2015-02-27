@@ -322,10 +322,6 @@ var (
 		vdl.NStructUVMixed{U: 0, V: 1},
 	}
 	rvEmptyStruct = []interface{}{struct{}{}, vdl.NEmpty{}}
-	rvNative0     = vdl.NNative(0)
-	rvNative1     = vdl.NNative(1)
-	rvNativeMin   = vdl.NNative(-(1 << 63))
-	rvNativeMax   = vdl.NNative((1 << 63) - 1)
 
 	ttBools           = ttTypes(vvBoolTrue)
 	ttStrs            = ttTypes(vvStrABC)
@@ -805,10 +801,14 @@ func TestConverter(t *testing.T) {
 		{vvStructWXFalseTrue, rvStructWXFalseTrue},
 		{vvMapStructVWX123, rvMapStructVWX123},
 		{vvStructUV01, rvStructUV01},
-		{nil, []interface{}{rvNative0}},
-		{nil, []interface{}{rvNative1}},
-		{nil, []interface{}{rvNativeMin}},
-		{nil, []interface{}{rvNativeMax}},
+		{nil, []interface{}{vdl.NNative(0)}},
+		{nil, []interface{}{vdl.NNative(1)}},
+		{nil, []interface{}{vdl.NNative(-(1 << 63))}},
+		{nil, []interface{}{vdl.NNative((1 << 63) - 1)}},
+		{nil, []interface{}{vdl.NUnionNative("A=false")}},
+		{nil, []interface{}{vdl.NUnionNative("A=true")}},
+		{nil, []interface{}{vdl.NUnionNative("B=123")}},
+		{nil, []interface{}{vdl.NUnionNative("B=-123")}},
 	}
 	for _, test := range tests {
 		testConverterWantSrc(t, vvrv{test.vv, test.rv}, vvrv{test.vv, test.rv})

@@ -130,8 +130,8 @@ var rtKeyTests = []rtTest{
 	{reflect.TypeOf(NUnionABCA{}), UnionABCTypeN},
 	{reflect.TypeOf(NUnionABCB{}), UnionABCTypeN},
 	{reflect.TypeOf(NUnionABCC{}), UnionABCTypeN},
-	{reflect.TypeOf(NNativeReg(0)), WireRegTypeN},
-	{reflect.TypeOf(NWireReg{}), WireRegTypeN},
+	{reflect.TypeOf(NNative(0)), WireTypeN},
+	{reflect.TypeOf(NWire{}), WireTypeN},
 }
 
 // rtNonKeyTests contains types that may not be used as map keys.

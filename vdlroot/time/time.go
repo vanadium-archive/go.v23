@@ -2,7 +2,7 @@ package time
 
 import (
 	"fmt"
-	gotime "time"
+	"time"
 )
 
 const (
@@ -21,14 +21,14 @@ const (
 	maxGoDurationSec = maxInt64 / nanosPerSecond
 )
 
-// timeToNative converts from VDL time.Time to Go time.Time.
-func timeToNative(wire Time, native *gotime.Time) error {
-	*native = gotime.Unix(wire.Seconds-unixEpoch, int64(wire.Nano)).UTC()
+// timeToNative is called by VDL for conversions from wire to native times.
+func timeToNative(wire Time, native *time.Time) error {
+	*native = time.Unix(wire.Seconds-unixEpoch, int64(wire.Nano)).UTC()
 	return nil
 }
 
-// timeFromNative converts from Go time.Time to VDL time.Time.
-func timeFromNative(wire *Time, native gotime.Time) error {
+// timeFromNative is called by VDL for conversions from native to wire times.
+func timeFromNative(wire *Time, native time.Time) error {
 	wire.Seconds = native.Unix() + unixEpoch
 	wire.Nano = int32(native.Nanosecond())
 	*wire = wire.Normalize()
@@ -43,8 +43,16 @@ func (x Time) Normalize() Time {
 	return Time(Duration(x).Normalize())
 }
 
-// durationToNative converts from VDL time.Duration to Go time.Duration.
-func durationToNative(wire Duration, native *gotime.Duration) error {
+// Now returns the current time.
+func Now() Time {
+	var t Time
+	timeFromNative(&t, time.Now())
+	return t
+}
+
+// durationToNative is called by VDL for conversions from wire to native
+// durations.
+func durationToNative(wire Duration, native *time.Duration) error {
 	*native = 0
 	// Go represents duration as int64 nanoseconds, which has a much smaller range
 	// than VDL duration, so we catch these cases and return an error.
@@ -55,12 +63,13 @@ func durationToNative(wire Duration, native *gotime.Duration) error {
 		(wire.Seconds == maxGoDurationSec && wire.Nano > maxInt64-maxGoDurationSec*nanosPerSecond) {
 		return fmt.Errorf("vdl duration %+v out of range of go duration", wire)
 	}
-	*native = gotime.Duration(wire.Seconds*nanosPerSecond + int64(wire.Nano))
+	*native = time.Duration(wire.Seconds*nanosPerSecond + int64(wire.Nano))
 	return nil
 }
 
-// durationFromNative converts from Go time.Duration to VDL time.Duration.
-func durationFromNative(wire *Duration, native gotime.Duration) error {
+// durationFromNative is called by VDL for conversions from native to wire
+// durations.
+func durationFromNative(wire *Duration, native time.Duration) error {
 	wire.Seconds = int64(native / nanosPerSecond)
 	wire.Nano = int32(native % nanosPerSecond)
 	return nil
@@ -84,9 +93,27 @@ func (x Duration) Normalize() Duration {
 	return x
 }
 
-// Now returns the current time.
-func Now() Time {
-	var t Time
-	timeFromNative(&t, gotime.Now())
-	return t
+// Deadline represents the deadline for an operation; it is the native
+// representation for WireDeadline, and is automatically converted to/from
+// WireDeadline during marshaling.
+//
+// Deadline represents the deadline as an absolute time, while WireDeadline
+// represents the deadline as a relative duration from "now".
+type Deadline struct {
+	// Time represents the deadline as an absolute point in time.
+	time.Time
+}
+
+// wireDeadlineToNative is called by VDL for conversions from wire to native
+// deadlines.
+func wireDeadlineToNative(wire WireDeadline, native *Deadline) error {
+	native.Time = time.Now().Add(wire.FromNow)
+	return nil
+}
+
+// wireDeadlineFromNative is called by VDL for conversions from native to wire
+// deadlines.
+func wireDeadlineFromNative(wire *WireDeadline, native Deadline) error {
+	wire.FromNow = native.Sub(time.Now())
+	return nil
 }
