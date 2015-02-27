@@ -1,0 +1,111 @@
+package syncbase
+
+import (
+  "v.io/v23/services/security/access"
+  "v.io/v23/services/security/access/object"
+)
+
+// NOTE(sadovsky): Various methods below may end up needing additional options.
+// One can add options to a VDL method in a backwards-compatible way by adding
+// an options struct argument to the end of the method's argument list.
+//
+// TODO(sadovsky): It turns out the above statement is not true. We should
+// reconsider these interfaces after we've fleshed things out further.
+//
+// TODO(sadovsky): Revisit the ACL-checking semantics. E.g. should we consult
+// the Universe ACL on Item.Get?
+//
+// TODO(sadovsky): Revisit the ACL model more generally. It's not clear that we
+// need every layer of the hierarchy to implement SetACL and GetACL. In fact, we
+// may be able to drop SetACL and GetACL from all of these interfaces, and also
+// drop the acl argument from Database.Create.
+
+// Service represents a Vanadium syncbase service.
+// Service.Glob operates over Universe names.
+type Service interface {
+	// SetACL and GetACL are included from the Object interface.
+	object.Object
+}
+
+// TODO(sadovsky): We may want to allow clients to rename their Universes and
+// Databases (and Tables, via schema updates). Internally, this means we'd need
+// to add a layer of indirection, where client-supplied names get translated
+// into opaque internal identifiers.
+
+// Universe represents a collection of Databases.
+// Universe.Glob operates over Database names.
+// We expect there to be one Universe per app, likely created by the node
+// manager as part of the app installation procedure.
+type Universe interface {
+	// Create creates this Universe.
+	// If acl is nil, the TaggedACLMap is inherited (copied) from the Service.
+	// Create requires the caller to have Write permission at the Service.
+	Create(acl access.TaggedACLMap) error {access.Write}
+
+	// Delete deletes this Universe.
+	Delete() error {access.Write}
+
+	// SetACL and GetACL are included from the Object interface.
+	object.Object
+}
+
+// Schema is a Database schema. Currently it's just a set of Table names, and
+// Item types are not enforced anywhere.
+// TODO(sadovsky): Iterate on schema representation and enforcement.
+type Schema set[string]
+
+// Database represents a collection of Tables. Batch operations, queries, sync,
+// watch, etc. all currently operate at the Database level. A Database's etag
+// covers both its ACL and its schema.
+// Database.Glob operates over Table names.
+//
+// TODO(sadovsky): Add Watch method.
+// TODO(sadovsky): Support batch operations.
+// TODO(sadovsky): Iterate on the schema management API as we figure out how to
+// deal with schema versioning and sync.
+type Database interface {
+	// Create creates this Database.
+	// If acl is nil, the TaggedACLMap is inherited (copied) from the Universe.
+	// Create requires the caller to have Write permission at the Universe.
+	Create(acl access.TaggedACLMap) error {access.Write}
+
+	// Delete deletes this Database.
+	Delete() error {access.Write}
+
+	// UpdateSchema updates the schema for this Database, creating and deleting
+	// Tables under the hood as needed.
+	UpdateSchema(schema Schema, etag string) error {access.Write}
+
+	// GetSchema returns the schema for this Database.
+	GetSchema() (schema Schema, etag string | error) {access.Read}
+
+	// SetACL and GetACL are included from the Object interface.
+	object.Object
+}
+
+// Table represents a collection of Items (rows). Table implements built-in
+// methods such as Glob but currently does not provide any custom methods.
+// Table.Glob operates over the primary keys of Items in the Table.
+// All ACL checks are performed against the Database ACL.
+type Table interface {
+}
+
+// Item represents a single row in a Table. The type of data stored in an Item
+// is dictated by the Database schema. The relative name of this Item must be
+// its encoded primary key.
+// All ACL checks are performed against the Database ACL.
+type Item interface {
+	// Get returns the value for this Item.
+	Get() (any | error) {access.Read}
+
+	// Put writes the given value for this Item. The value's primary key field
+	// must match Item.Key().
+	Put(value any) error {access.Write}
+
+	// Delete deletes this Item.
+	Delete() error {access.Write}
+}
+
+error (
+	InvalidName(name string) {"en": "invalid name: {name}"}
+)
