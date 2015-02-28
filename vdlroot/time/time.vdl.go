@@ -34,7 +34,7 @@ import (
 // http://en.wikipedia.org/wiki/Unix_time
 type Time struct {
 	Seconds int64
-	Nano    int32
+	Nanos   int32
 }
 
 func (Time) __VDLReflect(struct {
@@ -48,13 +48,13 @@ type Duration struct {
 	// Seconds represents the seconds in the duration.  The range is roughly
 	// +/-290 billion years, larger than the estimated age of the universe.
 	Seconds int64
-	// Nano represents the fractions of a second at nanosecond resolution.  Must
+	// Nanos represents the fractions of a second at nanosecond resolution.  Must
 	// be in the inclusive range between +/-999,999,999.
 	//
 	// In normalized form, durations less than one second are represented with 0
 	// Seconds and +/-Nanos.  For durations one second or more, the sign of Nanos
 	// must match Seconds, or be 0.
-	Nano int32
+	Nanos int32
 }
 
 func (Duration) __VDLReflect(struct {
@@ -87,6 +87,9 @@ func (Duration) __VDLReflect(struct {
 type WireDeadline struct {
 	// FromNow represents the deadline as a duration from "now".
 	FromNow time.Duration
+	// NoDeadline indicates there is no deadline; the analogous sentry for the
+	// native Deadline is the zero Time.
+	NoDeadline bool
 }
 
 func (WireDeadline) __VDLReflect(struct {

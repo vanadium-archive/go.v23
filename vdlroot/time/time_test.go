@@ -197,7 +197,7 @@ func TestDeadline(t *testing.T) {
 		loT, hiT := now.Add(loD), now.Add(hiD)
 		// Test conversion from wire to native.
 		var native Deadline
-		if err := wireDeadlineToNative(WireDeadline{test}, &native); err != nil {
+		if err := wireDeadlineToNative(WireDeadline{FromNow: test}, &native); err != nil {
 			t.Errorf("%v wireDeadlineToNative failed: %v", test, err)
 		}
 		if got := native; got.Before(loT) || got.After(hiT) {
@@ -229,11 +229,36 @@ func TestDeadline(t *testing.T) {
 		// Test vdl.Convert from wire to interface type.  This ensures that the
 		// conversion routines are really registered, and automatically applied.
 		any = nil
-		if err := vdl.Convert(&any, WireDeadline{test}); err != nil {
+		if err := vdl.Convert(&any, WireDeadline{FromNow: test}); err != nil {
 			t.Errorf("%v Convert(interface) failed: %v", test, err)
 		}
 		if got, ok := any.(Deadline); !ok || got.Before(loT) || got.After(hiT) {
 			t.Errorf("%v Convert(interface) got %T %v, want range [%v, %v]", test, any, any, loT, hiT)
 		}
+	}
+}
+
+func TestNoDeadline(t *testing.T) {
+	// Make sure conversions between the wire and native formats respect the
+	// special sentries for "no deadline".
+
+	// Test conversion from wire to native.
+	var native Deadline
+	if err := wireDeadlineToNative(WireDeadline{NoDeadline: true}, &native); err != nil {
+		t.Errorf("wireDeadlineToNative failed: %v", err)
+	}
+	if got := native; !got.IsZero() {
+		t.Errorf("wireDeadlineToNative got %v, want zero", got)
+	}
+	// Test conversion from native to wire.
+	var wire WireDeadline
+	if err := wireDeadlineFromNative(&wire, Deadline{}); err != nil {
+		t.Errorf("wireDeadlineFromNative failed: %v", err)
+	}
+	if !wire.NoDeadline {
+		t.Errorf("wireDeadlineFromNative got %v, expected NoDeadline", wire)
+	}
+	if got, want := wire.FromNow, gotime.Duration(0); got != want {
+		t.Errorf("wireDeadlineFromNative got FromNow %v, want %v", got, want)
 	}
 }

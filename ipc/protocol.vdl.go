@@ -9,6 +9,7 @@ import (
 
 	// VDL user imports
 	"v.io/v23/security"
+	"v.io/v23/vdlroot/time"
 	"v.io/v23/vtrace"
 )
 
@@ -35,11 +36,9 @@ type Request struct {
 	// this is only likely necessary for frequently streaming small values.
 	// See implementation in CL: 3913
 	EndStreamArgs bool
-	// Timeout is the duration after which the request should be cancelled.  This
-	// is a hint to the server, to avoid wasted work.
-	//
-	// TODO(toddw): Change to time.WireDeadline.
-	Timeout int64
+	// Deadline after which the request should be cancelled.  This is a hint to
+	// the server, to avoid wasted work.
+	Deadline time.Deadline
 	// GrantedBlessings are blessings bound to the principal running the server,
 	// provided by the client.
 	GrantedBlessings security.WireBlessings
@@ -109,12 +108,6 @@ func init() {
 	vdl.Register((*Response)(nil))
 	vdl.Register((*BlessingsRequest)(nil))
 }
-
-// NoTimeout specifies that no timeout is desired.
-// NoTimeout is set to the maximum value for int64 (i.e. 2^63-1),
-// as opposed to 0 (which may be intended as as instant timeout),
-// or negative integers (which may indicate a bug).
-const NoTimeout = int64(9223372036854775807)
 
 // TODO(toddw): Rename GlobMethod to ReservedGlob.
 const GlobMethod = "__Glob"

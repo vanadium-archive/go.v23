@@ -1,6 +1,7 @@
 package ipc
 
 import (
+	"time"
   "v.io/v23/security"
   "v.io/v23/vtrace"
 )
@@ -103,11 +104,9 @@ type Request struct {
 	// See implementation in CL: 3913
 	EndStreamArgs bool
 
-	// Timeout is the duration after which the request should be cancelled.  This
-	// is a hint to the server, to avoid wasted work.
-	//
-	// TODO(toddw): Change to time.WireDeadline.
-	Timeout int64
+	// Deadline after which the request should be cancelled.  This is a hint to
+	// the server, to avoid wasted work.
+	Deadline time.WireDeadline
 
 	// GrantedBlessings are blessings bound to the principal running the server,
 	// provided by the client.
@@ -165,12 +164,6 @@ type BlessingsRequest struct {
 	// Blessings is optional if the Server has already been notified of Key.
 	Blessings ?security.WireBlessings
 }
-
-// NoTimeout specifies that no timeout is desired.
-// NoTimeout is set to the maximum value for int64 (i.e. 2^63-1),
-// as opposed to 0 (which may be intended as as instant timeout),
-// or negative integers (which may indicate a bug).
-const NoTimeout = int64(0x7FFFFFFFFFFFFFFF)
 
 // The reserved method names that we currently understand.
 const (
