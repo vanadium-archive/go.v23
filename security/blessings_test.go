@@ -20,18 +20,19 @@ func newSigner() Signer {
 
 // Log the "on-the-wire" sizes for blessings (which are shipped during the
 // authentication protocol).
-// As of February 4, 2015, the numbers were:
+// As of February 27, 2015, the numbers were:
 //   Marshaled P256 ECDSA key                   :   91 bytes
-//   VOM type information overhead for blessings:  409 bytes
-//   Blessing with 1 certificates               :  591 bytes (a)
-//   Blessing with 2 certificates               :  770 bytes (a/a)
-//   Blessing with 3 certificates               :  948 bytes (a/a/a)
-//   Blessing with 4 certificates               : 1126 bytes (a/a/a/a)
-//   Marshaled caveat                           :    7 bytes (0x54a676398137187ecdb26d2d69ba0004(int64=1423080470))
+//   Major components of an ECDSA signature     :   64 bytes
+//   VOM type information overhead for blessings:  354 bytes
+//   Blessing with 1 certificates               :  536 bytes (a)
+//   Blessing with 2 certificates               :  741 bytes (a/a)
+//   Blessing with 3 certificates               :  945 bytes (a/a/a)
+//   Blessing with 4 certificates               : 1149 bytes (a/a/a/a)
+//   Marshaled caveat                           :   55 bytes (0xa64c2d0119fba3348071feeb2f308000(time.Time=0001-01-01 00:00:00 +0000 UTC))
 //   Marshaled caveat                           :    6 bytes (0x54a676398137187ecdb26d2d69ba0003([]string=[m]))
 func TestByteSize(t *testing.T) {
 	blessingsize := func(b Blessings) int {
-		buf, err := vom.Encode(MarshalBlessings(b))
+		buf, err := vom.Encode(b)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -90,10 +91,14 @@ func BenchmarkBless(b *testing.B) {
 }
 
 func BenchmarkVerifyCertificateIntegrity(b *testing.B) {
-	wire := MarshalBlessings(makeBlessings(b, 1))
+	native := makeBlessings(b, 1)
+	var wire WireBlessings
+	if err := wireBlessingsFromNative(&wire, native); err != nil {
+		b.Fatal(err)
+	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		if _, err := NewBlessings(wire); err != nil {
+		if err := wireBlessingsToNative(wire, &native); err != nil {
 			b.Fatal(err)
 		}
 	}

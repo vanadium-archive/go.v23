@@ -12,7 +12,6 @@ import (
 	"v.io/v23/context"
 	"v.io/v23/uniqueid"
 	"v.io/v23/verror"
-	"v.io/v23/vom"
 )
 
 func TestBlessSelf(t *testing.T) {
@@ -630,44 +629,55 @@ func TestCertificateChainsTamperingAttack(t *testing.T) {
 	}
 }
 
-func TestBlessingsOnWire(t *testing.T) {
+func TestBlessingToAndFromWire(t *testing.T) {
+	// WireBlessings and Blessings should be basically interchangeable.
+	native, err := newPrincipal(t).BlessSelf("self")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var wire WireBlessings
+	var dup Blessings
+	// native -> wire
+	if err := roundTrip(native, &wire); err != nil {
+		t.Fatal(err)
+	}
+	// wire -> native
+	if err := roundTrip(wire, &dup); err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(dup, native) {
+		t.Errorf("native->wire->native changed value from %#v to %#v", native, dup)
+	}
+}
+
+func TestBlessingsRoundTrip(t *testing.T) {
 	// Test that the blessing obtained after roundtripping is identical to the original.
 	b, err := newPrincipal(t).BlessSelf("self")
 	if err != nil {
 		t.Fatal(err)
 	}
-	var data []byte
-	if data, err = vom.Encode(MarshalBlessings(b)); err != nil {
-		t.Fatal(err)
+	var got Blessings
+	if err := roundTrip(b, &got); err != nil || !reflect.DeepEqual(got, b) {
+		t.Fatalf("Got (%#v, %v), want (%#v, nil)", got, err, b)
 	}
-	var wire WireBlessings
-	if err := vom.Decode(data, &wire); err != nil {
-		t.Fatal(err)
-	}
-	got, err := NewBlessings(wire)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !reflect.DeepEqual(b, got) {
-		t.Fatalf("Got %#v, want %#v", got, b)
-	}
-	// Putzing around with the wire representation should break the factory function.
+	// Putzing around with the wire representation should break the decoding.
 	otherkey, err := newPrincipal(t).PublicKey().MarshalBinary()
 	if err != nil {
 		t.Fatal(err)
 	}
+	var wire WireBlessings
+	if err := roundTrip(b, &wire); err != nil {
+		t.Fatal(err)
+	}
 	wire.CertificateChains[0][len(wire.CertificateChains[0])-1].PublicKey = otherkey
-	got, err = NewBlessings(wire)
-	if merr := matchesError(err, "invalid Signature in certificate"); merr != nil || !got.IsZero() {
-		t.Errorf("Got (%v, %v): %v", got, err, merr)
+	err = roundTrip(wire, &got)
+	if merr := matchesError(err, "invalid Signature in certificate"); merr != nil {
+		t.Error(merr)
 	}
-	// Empty wire representation should yield (nil, nil)
-	if got, err := NewBlessings(WireBlessings{}); err != nil || !got.IsZero() {
-		t.Errorf("Got (%v, %v) want (nil, nil)", got, err)
-	}
-	// And Marshaling an empty set of certificates is fine.
-	if got, want := MarshalBlessings(Blessings{}), (WireBlessings{}); !reflect.DeepEqual(got, want) {
-		t.Errorf("Got %#v, want %#v", got, want)
+	// It should be fine to send/recv empty blessings
+	got = Blessings{}
+	if err := roundTrip(Blessings{}, &got); err != nil || !got.IsZero() {
+		t.Errorf("Got (%#v, %v) want (<zero value>, nil)", got, err)
 	}
 }
 
@@ -689,17 +699,14 @@ func TestBlessingsOnWireWithMissingCertificates(t *testing.T) {
 		middleman  = B(rootP.Bless(middlemanP.PublicKey(), root, "middleman", UnconstrainedUse()))
 		leaf       = B(middlemanP.Bless(leafP.PublicKey(), middleman, "leaf", UnconstrainedUse()))
 
-		data []byte
 		wire WireBlessings
+		tmp  Blessings
 		err  error
 	)
-	if data, err = vom.Encode(MarshalBlessings(leaf)); err != nil {
+	if err := roundTrip(leaf, &wire); err != nil {
 		t.Fatal(err)
 	}
-	if err := vom.Decode(data, &wire); err != nil {
-		t.Fatal(err)
-	}
-	// Phew! We should have a certificate chain of size 3.
+	// We should have a certificate chain of size 3.
 	chain := wire.CertificateChains[0]
 	if len(chain) != 3 {
 		t.Fatalf("Got a chain of %d certificates, want 3", len(chain))
@@ -723,7 +730,7 @@ func TestBlessingsOnWireWithMissingCertificates(t *testing.T) {
 	}
 	for idx, test := range tests {
 		wire.CertificateChains[0] = test.Chain
-		_, err := NewBlessings(wire)
+		err := roundTrip(wire, &tmp)
 		if merr := matchesError(err, test.Err); merr != nil {
 			t.Errorf("(%d) %v [%v]", idx, merr, test.Chain)
 		}
@@ -735,46 +742,24 @@ func TestBlessingsOnWireWithMissingCertificates(t *testing.T) {
 		C{C1, C2},
 		C{C1, C2, C3},
 	}
-	_, err = NewBlessings(wire)
+	err = roundTrip(wire, &tmp)
 	if merr := matchesError(err, "bind to different public keys"); merr != nil {
 		t.Error(err)
 	}
 
 	// Multiple chains certifying the same key are okay
 	wire.CertificateChains = [][]Certificate{chain, chain, chain}
-	if _, err := NewBlessings(wire); err != nil {
+	if err := roundTrip(wire, &tmp); err != nil {
 		t.Error(err)
 	}
 	// But leaving any empty chains is not okay
 	for idx := 0; idx < len(wire.CertificateChains); idx++ {
 		wire.CertificateChains[idx] = []Certificate{}
-		_, err := NewBlessings(wire)
+		err := roundTrip(wire, &tmp)
 		if merr := matchesError(err, "empty certificate chain"); merr != nil {
 			t.Errorf("%d: %v", idx, merr)
 		}
 		wire.CertificateChains[idx] = chain
-	}
-}
-
-func TestBlessingsCannotBeVomEncodedOrDecoded(t *testing.T) {
-	b, err := newPrincipal(t).BlessSelf("self")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// Test that directly vom encoding security.Blessings fails.
-	var data []byte
-	if data, err = vom.Encode(b); err == nil {
-		t.Fatal("Directly vom encoding security.Blessings unexpectedly succeeded")
-	}
-
-	// Test that directly vom decoding into security.Blessings fails.
-	if data, err = vom.Encode(MarshalBlessings(b)); err != nil {
-		t.Fatal(err)
-	}
-	var decoded Blessings
-	if err := vom.Decode(data, &decoded); err == nil {
-		t.Fatal("Direct vom decoding into security.Blessings unexpectedly succeeded")
 	}
 }
 

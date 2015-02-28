@@ -85,7 +85,7 @@ func (p *principal) Bless(key PublicKey, with Blessings, extension string, cavea
 	if err != nil {
 		return Blessings{}, err
 	}
-	chains := with.certificateChains()
+	chains := with.chains
 	newchains := make([][]Certificate, len(chains))
 	for idx, chain := range chains {
 		if err := cert.sign(p.signer, chain[len(chain)-1].Signature); err != nil {
@@ -173,7 +173,7 @@ func (p *principal) AddToRoots(blessings Blessings) error {
 	if p.roots == nil {
 		return errors.New("principal does not have any BlessingRoots")
 	}
-	chains := blessings.certificateChains()
+	chains := blessings.chains
 	for _, chain := range chains {
 		root, err := UnmarshalPublicKey(chain[0].PublicKey)
 		if err != nil {

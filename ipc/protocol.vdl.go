@@ -41,7 +41,7 @@ type Request struct {
 	Deadline time.Deadline
 	// GrantedBlessings are blessings bound to the principal running the server,
 	// provided by the client.
-	GrantedBlessings security.WireBlessings
+	GrantedBlessings security.Blessings
 	// Blessings is the blessings of the Client used for the current RPC.
 	Blessings BlessingsRequest
 	// Discharges are third party caveat discharges that
@@ -95,7 +95,7 @@ type BlessingsRequest struct {
 	// Key is the required key that the Client has cached Blessings with.
 	Key uint64
 	// Blessings is optional if the Server has already been notified of Key.
-	Blessings *security.WireBlessings
+	Blessings *security.Blessings
 }
 
 func (BlessingsRequest) __VDLReflect(struct {

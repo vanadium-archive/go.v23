@@ -99,16 +99,8 @@ func addToRoots(t *testing.T, p Principal, b Blessings) {
 
 func checkBlessings(b Blessings, c Call, want ...string) error {
 	// Validate the integrity of the bits.
-	buf, err := vom.Encode(MarshalBlessings(b))
-	if err != nil {
-		return err
-	}
-	var wire WireBlessings
-	if err := vom.Decode(buf, &wire); err != nil {
-		return err
-	}
-	decoded, err := NewBlessings(wire)
-	if err != nil {
+	var decoded Blessings
+	if err := roundTrip(b, &decoded); err != nil {
 		return err
 	}
 	if !reflect.DeepEqual(decoded, b) {
@@ -133,6 +125,14 @@ func matchesError(got error, want string) error {
 		return fmt.Errorf("Got error %q, wanted to match %q", got, want)
 	}
 	return nil
+}
+
+func roundTrip(in, out interface{}) error {
+	data, err := vom.Encode(in)
+	if err != nil {
+		return err
+	}
+	return vom.Decode(data, out)
 }
 
 func init() {

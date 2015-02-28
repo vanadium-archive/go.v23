@@ -124,7 +124,6 @@ func (b Blessings) publicKeyDER() []byte {
 	chain := b.chains[0]
 	return chain[len(chain)-1].PublicKey
 }
-func (b Blessings) certificateChains() [][]Certificate { return b.chains }
 func (b Blessings) blessingsByNameForPrincipal(p Principal, pattern BlessingPattern) Blessings {
 	ret := Blessings{publicKey: b.publicKey}
 	for _, chain := range b.chains {
@@ -265,47 +264,47 @@ func validateCaveat(ctx Call, cav Caveat) error {
 	return cav.Validate(ctx)
 }
 
-// NewBlessings creates a Blessings object from the provided wire representation.
-//
-// TODO(ashankar): Remove NewBlessings and MarshalBlessings and instead use the
-// VOM/VDL native<->wire conversion mechanism.
-func NewBlessings(wire WireBlessings) (Blessings, error) {
-	var b Blessings
+// TODO(ashankar): Get rid of this function? It allows users to mess
+// with the integrity of 'b'.
+func MarshalBlessings(b Blessings) WireBlessings {
+	return WireBlessings{b.chains}
+}
+
+func wireBlessingsToNative(wire WireBlessings, native *Blessings) error {
 	if len(wire.CertificateChains) == 0 {
-		return b, nil
+		return nil
 	}
 	certchains := wire.CertificateChains
 	if len(certchains) == 0 || len(certchains[0]) == 0 {
-		return b, errEmptyChain
+		return errEmptyChain
 	}
 	// Public keys should match for all chains.
 	marshaledkey := certchains[0][len(certchains[0])-1].PublicKey
 	key, err := validateCertificateChain(certchains[0])
 	if err != nil {
-		return b, err
+		return err
 	}
 	for i := 1; i < len(certchains); i++ {
 		chain := certchains[i]
 		if len(chain) == 0 {
-			return b, errEmptyChain
+			return errEmptyChain
 		}
 		cert := chain[len(chain)-1]
 		if !bytes.Equal(marshaledkey, cert.PublicKey) {
-			return b, errors.New("invalid blessings: two certificate chains that bind to different public keys")
+			return errors.New("invalid blessings: two certificate chains that bind to different public keys")
 		}
 		if _, err := validateCertificateChain(chain); err != nil {
-			return b, err
+			return err
 		}
 	}
-	b.chains = certchains
-	b.publicKey = key
-	return b, nil
+	native.chains = certchains
+	native.publicKey = key
+	return nil
 }
 
-// MarshalBlessings is the inverse of NewBlessings, converting an in-memory
-// representation of Blessings to the wire format.
-func MarshalBlessings(b Blessings) WireBlessings {
-	return WireBlessings{CertificateChains: b.certificateChains()}
+func wireBlessingsFromNative(wire *WireBlessings, native Blessings) error {
+	wire.CertificateChains = native.chains
+	return nil
 }
 
 // UnionOfBlessings returns a Blessings object that carries the union of the
@@ -333,7 +332,7 @@ func UnionOfBlessings(blessings ...Blessings) (Blessings, error) {
 		if idx > 0 && !bytes.Equal(key0, b.publicKeyDER()) {
 			return Blessings{}, errors.New("mismatched public keys")
 		}
-		ret.chains = append(ret.chains, b.certificateChains()...)
+		ret.chains = append(ret.chains, b.chains...)
 	}
 	var err error
 	if ret.publicKey, err = UnmarshalPublicKey(key0); err != nil {

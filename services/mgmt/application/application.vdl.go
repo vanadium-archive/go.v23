@@ -27,7 +27,7 @@ type Envelope struct {
 	Binary SignedFile
 	// Publisher represents the set of blessings that have been bound to
 	// the principal who published this binary.
-	Publisher security.WireBlessings
+	Publisher security.Blessings
 	// Env is an array that stores the environment variable values to be
 	// used when executing the binary.
 	Env []string
