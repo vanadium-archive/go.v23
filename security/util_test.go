@@ -11,7 +11,6 @@ import (
 	"strings"
 	"testing"
 
-	"v.io/core/veyron/runtimes/google/lib/reflectutil"
 	"v.io/v23/uniqueid"
 	"v.io/v23/vdl"
 	"v.io/v23/vom"
@@ -97,6 +96,18 @@ func addToRoots(t *testing.T, p Principal, b Blessings) {
 	}
 }
 
+func equalBlessings(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
+}
+
 func checkBlessings(b Blessings, c Call, want ...string) error {
 	// Validate the integrity of the bits.
 	var decoded Blessings
@@ -108,7 +119,7 @@ func checkBlessings(b Blessings, c Call, want ...string) error {
 	}
 	// And now check them under the right context
 	got, _ := b.ForCall(c)
-	if !reflectutil.DeepEqual(got, want, &reflectutil.DeepEqualOpts{SliceEqNilEmpty: true}) {
+	if !equalBlessings(got, want) {
 		return fmt.Errorf("Got blessings %v, want %v", got, want)
 	}
 	return nil
