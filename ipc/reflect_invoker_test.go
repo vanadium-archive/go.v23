@@ -49,16 +49,16 @@ func NewFakeStreamServerCall() *FakeStreamServerCall {
 	}
 }
 
-func (*FakeStreamServerCall) Server() ipc.Server             { return nil }
-func (*FakeStreamServerCall) Blessings() security.Blessings  { return security.Blessings{} }
-func (*FakeStreamServerCall) Closed() <-chan struct{}        { return nil }
-func (*FakeStreamServerCall) IsClosed() bool                 { return false }
-func (*FakeStreamServerCall) Send(item interface{}) error    { return nil }
-func (*FakeStreamServerCall) Recv(itemptr interface{}) error { return nil }
-func (call *FakeStreamServerCall) Timestamp() time.Time      { return call.security.Timestamp() }
-func (call *FakeStreamServerCall) Method() string            { return call.security.Method() }
-func (call *FakeStreamServerCall) MethodTags() []*vdl.Value  { return call.security.MethodTags() }
-func (call *FakeStreamServerCall) Suffix() string            { return call.security.Suffix() }
+func (*FakeStreamServerCall) Server() ipc.Server                   { return nil }
+func (*FakeStreamServerCall) GrantedBlessings() security.Blessings { return security.Blessings{} }
+func (*FakeStreamServerCall) Closed() <-chan struct{}              { return nil }
+func (*FakeStreamServerCall) IsClosed() bool                       { return false }
+func (*FakeStreamServerCall) Send(item interface{}) error          { return nil }
+func (*FakeStreamServerCall) Recv(itemptr interface{}) error       { return nil }
+func (call *FakeStreamServerCall) Timestamp() time.Time            { return call.security.Timestamp() }
+func (call *FakeStreamServerCall) Method() string                  { return call.security.Method() }
+func (call *FakeStreamServerCall) MethodTags() []*vdl.Value        { return call.security.MethodTags() }
+func (call *FakeStreamServerCall) Suffix() string                  { return call.security.Suffix() }
 func (call *FakeStreamServerCall) RemoteDischarges() map[string]security.Discharge {
 	return call.security.RemoteDischarges()
 }

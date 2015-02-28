@@ -543,10 +543,10 @@ type StreamServerCall interface {
 type ServerContext interface {
 	security.Context
 
-	// Blessings provided by the client to the server (bound to the
-	// server).  Typically provided by a client to delegate to the server,
-	// allowed the server to use the client's authority to pursue some
-	// task.
+	// GrantedBlessings are blessings granted by the client to the server
+	// (bound to the server).  Typically provided by a client to delegate
+	// to the server, allowed the server to use the client's authority to
+	// pursue some task.
 	//
 	// Can be nil, indicating that the client did not delegate any
 	// authority to the server for this request.
@@ -554,7 +554,7 @@ type ServerContext interface {
 	// This is distinct from the blessings used by the client and
 	// server to authenticate with each other (RemoteBlessings
 	// and LocalBlessings respectively).
-	Blessings() security.Blessings
+	GrantedBlessings() security.Blessings
 	// Server returns the Server that this context is associated with.
 	Server() Server
 }
