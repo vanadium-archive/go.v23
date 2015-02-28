@@ -329,7 +329,7 @@ func (c implUniverseClientStub) c(ctx *context.T) ipc.Client {
 }
 
 func (c implUniverseClientStub) Create(ctx *context.T, i0 access.TaggedACLMap, opts ...ipc.CallOpt) (err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Create", []interface{}{i0}, opts...); err != nil {
 		return
 	}
@@ -338,7 +338,7 @@ func (c implUniverseClientStub) Create(ctx *context.T, i0 access.TaggedACLMap, o
 }
 
 func (c implUniverseClientStub) Delete(ctx *context.T, opts ...ipc.CallOpt) (err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Delete", nil, opts...); err != nil {
 		return
 	}
@@ -401,9 +401,9 @@ type UniverseServerMethods interface {
 	// Create creates this Universe.
 	// If acl is nil, the TaggedACLMap is inherited (copied) from the Service.
 	// Create requires the caller to have Write permission at the Service.
-	Create(ctx ipc.ServerContext, acl access.TaggedACLMap) error
+	Create(ctx ipc.ServerCall, acl access.TaggedACLMap) error
 	// Delete deletes this Universe.
-	Delete(ipc.ServerContext) error
+	Delete(ipc.ServerCall) error
 }
 
 // UniverseServerStubMethods is the server interface containing
@@ -443,11 +443,11 @@ type implUniverseServerStub struct {
 	gs *ipc.GlobState
 }
 
-func (s implUniverseServerStub) Create(ctx ipc.ServerContext, i0 access.TaggedACLMap) error {
+func (s implUniverseServerStub) Create(ctx ipc.ServerCall, i0 access.TaggedACLMap) error {
 	return s.impl.Create(ctx, i0)
 }
 
-func (s implUniverseServerStub) Delete(ctx ipc.ServerContext) error {
+func (s implUniverseServerStub) Delete(ctx ipc.ServerCall) error {
 	return s.impl.Delete(ctx)
 }
 
@@ -589,7 +589,7 @@ func (c implDatabaseClientStub) c(ctx *context.T) ipc.Client {
 }
 
 func (c implDatabaseClientStub) Create(ctx *context.T, i0 access.TaggedACLMap, opts ...ipc.CallOpt) (err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Create", []interface{}{i0}, opts...); err != nil {
 		return
 	}
@@ -598,7 +598,7 @@ func (c implDatabaseClientStub) Create(ctx *context.T, i0 access.TaggedACLMap, o
 }
 
 func (c implDatabaseClientStub) Delete(ctx *context.T, opts ...ipc.CallOpt) (err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Delete", nil, opts...); err != nil {
 		return
 	}
@@ -607,7 +607,7 @@ func (c implDatabaseClientStub) Delete(ctx *context.T, opts ...ipc.CallOpt) (err
 }
 
 func (c implDatabaseClientStub) UpdateSchema(ctx *context.T, i0 Schema, i1 string, opts ...ipc.CallOpt) (err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "UpdateSchema", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
@@ -616,7 +616,7 @@ func (c implDatabaseClientStub) UpdateSchema(ctx *context.T, i0 Schema, i1 strin
 }
 
 func (c implDatabaseClientStub) GetSchema(ctx *context.T, opts ...ipc.CallOpt) (o0 Schema, o1 string, err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "GetSchema", nil, opts...); err != nil {
 		return
 	}
@@ -684,14 +684,14 @@ type DatabaseServerMethods interface {
 	// Create creates this Database.
 	// If acl is nil, the TaggedACLMap is inherited (copied) from the Universe.
 	// Create requires the caller to have Write permission at the Universe.
-	Create(ctx ipc.ServerContext, acl access.TaggedACLMap) error
+	Create(ctx ipc.ServerCall, acl access.TaggedACLMap) error
 	// Delete deletes this Database.
-	Delete(ipc.ServerContext) error
+	Delete(ipc.ServerCall) error
 	// UpdateSchema updates the schema for this Database, creating and deleting
 	// Tables under the hood as needed.
-	UpdateSchema(ctx ipc.ServerContext, schema Schema, etag string) error
+	UpdateSchema(ctx ipc.ServerCall, schema Schema, etag string) error
 	// GetSchema returns the schema for this Database.
-	GetSchema(ipc.ServerContext) (schema Schema, etag string, err error)
+	GetSchema(ipc.ServerCall) (schema Schema, etag string, err error)
 }
 
 // DatabaseServerStubMethods is the server interface containing
@@ -731,19 +731,19 @@ type implDatabaseServerStub struct {
 	gs *ipc.GlobState
 }
 
-func (s implDatabaseServerStub) Create(ctx ipc.ServerContext, i0 access.TaggedACLMap) error {
+func (s implDatabaseServerStub) Create(ctx ipc.ServerCall, i0 access.TaggedACLMap) error {
 	return s.impl.Create(ctx, i0)
 }
 
-func (s implDatabaseServerStub) Delete(ctx ipc.ServerContext) error {
+func (s implDatabaseServerStub) Delete(ctx ipc.ServerCall) error {
 	return s.impl.Delete(ctx)
 }
 
-func (s implDatabaseServerStub) UpdateSchema(ctx ipc.ServerContext, i0 Schema, i1 string) error {
+func (s implDatabaseServerStub) UpdateSchema(ctx ipc.ServerCall, i0 Schema, i1 string) error {
 	return s.impl.UpdateSchema(ctx, i0, i1)
 }
 
-func (s implDatabaseServerStub) GetSchema(ctx ipc.ServerContext) (Schema, string, error) {
+func (s implDatabaseServerStub) GetSchema(ctx ipc.ServerCall) (Schema, string, error) {
 	return s.impl.GetSchema(ctx)
 }
 
@@ -950,7 +950,7 @@ func (c implItemClientStub) c(ctx *context.T) ipc.Client {
 }
 
 func (c implItemClientStub) Get(ctx *context.T, opts ...ipc.CallOpt) (o0 *vdl.Value, err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Get", nil, opts...); err != nil {
 		return
 	}
@@ -959,7 +959,7 @@ func (c implItemClientStub) Get(ctx *context.T, opts ...ipc.CallOpt) (o0 *vdl.Va
 }
 
 func (c implItemClientStub) Put(ctx *context.T, i0 *vdl.Value, opts ...ipc.CallOpt) (err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Put", []interface{}{i0}, opts...); err != nil {
 		return
 	}
@@ -968,7 +968,7 @@ func (c implItemClientStub) Put(ctx *context.T, i0 *vdl.Value, opts ...ipc.CallO
 }
 
 func (c implItemClientStub) Delete(ctx *context.T, opts ...ipc.CallOpt) (err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Delete", nil, opts...); err != nil {
 		return
 	}
@@ -985,12 +985,12 @@ func (c implItemClientStub) Delete(ctx *context.T, opts ...ipc.CallOpt) (err err
 // All ACL checks are performed against the Database ACL.
 type ItemServerMethods interface {
 	// Get returns the value for this Item.
-	Get(ipc.ServerContext) (*vdl.Value, error)
+	Get(ipc.ServerCall) (*vdl.Value, error)
 	// Put writes the given value for this Item. The value's primary key field
 	// must match Item.Key().
-	Put(ctx ipc.ServerContext, value *vdl.Value) error
+	Put(ctx ipc.ServerCall, value *vdl.Value) error
 	// Delete deletes this Item.
-	Delete(ipc.ServerContext) error
+	Delete(ipc.ServerCall) error
 }
 
 // ItemServerStubMethods is the server interface containing
@@ -1028,15 +1028,15 @@ type implItemServerStub struct {
 	gs   *ipc.GlobState
 }
 
-func (s implItemServerStub) Get(ctx ipc.ServerContext) (*vdl.Value, error) {
+func (s implItemServerStub) Get(ctx ipc.ServerCall) (*vdl.Value, error) {
 	return s.impl.Get(ctx)
 }
 
-func (s implItemServerStub) Put(ctx ipc.ServerContext, i0 *vdl.Value) error {
+func (s implItemServerStub) Put(ctx ipc.ServerCall, i0 *vdl.Value) error {
 	return s.impl.Put(ctx, i0)
 }
 
-func (s implItemServerStub) Delete(ctx ipc.ServerContext) error {
+func (s implItemServerStub) Delete(ctx ipc.ServerCall) error {
 	return s.impl.Delete(ctx)
 }
 
