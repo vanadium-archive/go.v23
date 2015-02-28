@@ -18,10 +18,10 @@ import (
 	"v.io/v23/vdl"
 	"v.io/x/lib/vlog"
 
-	tsecurity "v.io/core/veyron/lib/testutil/security"
-	_ "v.io/core/veyron/profiles"
 	"v.io/syncbase/veyron/services/syncbase/server"
 	"v.io/syncbase/veyron/services/syncbase/store/memstore"
+	tsecurity "v.io/x/ref/lib/testutil/security"
+	_ "v.io/x/ref/profiles"
 )
 
 func defaultACL() access.TaggedACLMap {
