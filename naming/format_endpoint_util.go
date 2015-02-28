@@ -10,7 +10,7 @@ import (
 
 	"v.io/v23/naming"
 
-	_ "v.io/core/veyron/profiles"
+	_ "v.io/x/ref/profiles"
 )
 
 var protocolFlag = protocolFlagVar{"tcp"}

@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"v.io/core/veyron/lib/testutil"
+	"v.io/x/ref/lib/testutil"
 
 	"v.io/v23/context"
 	"v.io/v23/ipc"

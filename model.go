@@ -343,7 +343,7 @@ func RegisterProfileInit(f Profile) {
 		format := `A profile has already been registered.
 This is most likely because a library package is
 importing a profile.  Look for imports of the form
-'v.io/core/veyron/profiles/...' and remove them.  Profiles should only be
+'v.io/x/ref/profiles/...' and remove them.  Profiles should only be
 imported in your main package.  Previous registration was from:
 %s
 Current registration is from:

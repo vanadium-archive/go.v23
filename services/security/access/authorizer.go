@@ -49,7 +49,7 @@ import (
 // (2) Setup the ipc.Dispatcher to use the TaggedACLAuthorizer
 //   import (
 //     "reflect"
-//     "v.io/core/veyron/security/acl"
+//     "v.io/x/ref/security/acl"
 //
 //     "v.io/v23/ipc"
 //     "v.io/v23/security"
