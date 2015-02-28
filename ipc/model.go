@@ -25,7 +25,7 @@ type Client interface {
 	//
 	// StartCall accepts at least the following options:
 	// v23.CallTimeout.
-	StartCall(ctx *context.T, name, method string, args []interface{}, opts ...CallOpt) (Call, error)
+	StartCall(ctx *context.T, name, method string, args []interface{}, opts ...CallOpt) (ClientCall, error)
 
 	// Close discards all state associated with this Client.  In-flight calls may
 	// be terminated with an error.
@@ -34,7 +34,7 @@ type Client interface {
 
 // Call defines the interface for each in-flight call on the client.
 // Finish must be called to finish the call; all other methods are optional.
-type Call interface {
+type ClientCall interface {
 	Stream
 
 	// CloseSend indicates to the server that no more items will be sent; server
@@ -478,11 +478,11 @@ type Invoker interface {
 
 	// Signature corresponds to the reserved __Signature method; it returns the
 	// signatures of the interfaces the underlying object implements.
-	Signature(ctx ServerContext) ([]signature.Interface, error)
+	Signature(ctx ServerCall) ([]signature.Interface, error)
 
 	// MethodSignature corresponds to the reserved __MethodSignature method; it
 	// returns the signature of the given method.
-	MethodSignature(ctx ServerContext, method string) (signature.Method, error)
+	MethodSignature(ctx ServerCall, method string) (signature.Method, error)
 
 	// Globber allows objects to take part in the namespace.
 	Globber
@@ -519,7 +519,7 @@ type AllGlobber interface {
 	// Glob__ returns a MountEntry for the objects that match the given
 	// pattern in the namespace below the receiver object. All the names
 	// returned are relative to the receiver.
-	Glob__(ctx ServerContext, pattern string) (<-chan naming.VDLGlobReply, error)
+	Glob__(ctx ServerCall, pattern string) (<-chan naming.VDLGlobReply, error)
 }
 
 // ChildrenGlobber is a simple interface to publish the relationship between
@@ -528,20 +528,20 @@ type ChildrenGlobber interface {
 	// GlobChildren__ returns the names of the receiver's immediate children
 	// on a channel.  It should return an error if the receiver doesn't
 	// exist.
-	GlobChildren__(ctx ServerContext) (<-chan string, error)
+	GlobChildren__(ctx ServerCall) (<-chan string, error)
 }
 
 // StreamServerCall defines the in-flight context for a server method
 // call, including methods to stream args and results.
 type StreamServerCall interface {
 	Stream
-	ServerContext
+	ServerCall
 }
 
-// ServerContext defines the in-flight context for a server method call, not
+// ServerCall defines the in-flight context for a server method call, not
 // including methods to stream args and results.
-type ServerContext interface {
-	security.Context
+type ServerCall interface {
+	security.Call
 
 	// GrantedBlessings are blessings granted by the client to the server
 	// (bound to the server).  Typically provided by a client to delegate

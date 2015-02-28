@@ -30,10 +30,10 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-// FakeStreamServerCall implements ipc.ServerContext.
+// FakeStreamServerCall implements ipc.ServerCall.
 type FakeStreamServerCall struct {
 	context  *context.T
-	security security.Context
+	security security.Call
 }
 
 func testContext() *context.T {
@@ -43,7 +43,7 @@ func testContext() *context.T {
 
 func NewFakeStreamServerCall() *FakeStreamServerCall {
 	return &FakeStreamServerCall{
-		security: security.NewContext(&security.ContextParams{
+		security: security.NewCall(&security.CallParams{
 			Context: testContext(),
 		}),
 	}
@@ -100,36 +100,36 @@ var (
 // All objects used for success testing are based on testObj, which captures the
 // state from each invocation, so that we may test it against our expectations.
 type testObj struct {
-	ctx ipc.ServerContext
+	ctx ipc.ServerCall
 }
 
-func (o testObj) LastContext() ipc.ServerContext { return o.ctx }
+func (o testObj) LastContext() ipc.ServerCall { return o.ctx }
 
 type testObjIface interface {
-	LastContext() ipc.ServerContext
+	LastContext() ipc.ServerCall
 }
 
 var errApp = errors.New("app error")
 
 type notags struct{ testObj }
 
-func (o *notags) Method1(c ipc.ServerContext) error               { o.ctx = c; return nil }
-func (o *notags) Method2(c ipc.ServerContext) (int, error)        { o.ctx = c; return 0, nil }
-func (o *notags) Method3(c ipc.ServerContext, _ int) error        { o.ctx = c; return nil }
-func (o *notags) Method4(c ipc.ServerContext, i int) (int, error) { o.ctx = c; return i, nil }
-func (o *notags) Error(c ipc.ServerContext) error                 { o.ctx = c; return errApp }
+func (o *notags) Method1(c ipc.ServerCall) error               { o.ctx = c; return nil }
+func (o *notags) Method2(c ipc.ServerCall) (int, error)        { o.ctx = c; return 0, nil }
+func (o *notags) Method3(c ipc.ServerCall, _ int) error        { o.ctx = c; return nil }
+func (o *notags) Method4(c ipc.ServerCall, i int) (int, error) { o.ctx = c; return i, nil }
+func (o *notags) Error(c ipc.ServerCall) error                 { o.ctx = c; return errApp }
 
 type tags struct{ testObj }
 
-func (o *tags) Alpha(c ipc.ServerContext) error               { o.ctx = c; return nil }
-func (o *tags) Beta(c ipc.ServerContext) (int, error)         { o.ctx = c; return 0, nil }
-func (o *tags) Gamma(c ipc.ServerContext, _ int) error        { o.ctx = c; return nil }
-func (o *tags) Delta(c ipc.ServerContext, i int) (int, error) { o.ctx = c; return i, nil }
-func (o *tags) Epsilon(c ipc.ServerContext, i int, s string) (int, string, error) {
+func (o *tags) Alpha(c ipc.ServerCall) error               { o.ctx = c; return nil }
+func (o *tags) Beta(c ipc.ServerCall) (int, error)         { o.ctx = c; return 0, nil }
+func (o *tags) Gamma(c ipc.ServerCall, _ int) error        { o.ctx = c; return nil }
+func (o *tags) Delta(c ipc.ServerCall, i int) (int, error) { o.ctx = c; return i, nil }
+func (o *tags) Epsilon(c ipc.ServerCall, i int, s string) (int, string, error) {
 	o.ctx = c
 	return i, s, nil
 }
-func (o *tags) Error(c ipc.ServerContext) error { o.ctx = c; return errApp }
+func (o *tags) Error(c ipc.ServerCall) error { o.ctx = c; return errApp }
 
 func (o *tags) Describe__() []ipc.InterfaceDesc {
 	return []ipc.InterfaceDesc{{
@@ -252,7 +252,7 @@ func toPtrs(vals []interface{}) []interface{} {
 
 type (
 	sigTest           struct{}
-	stringBoolContext struct{ ipc.ServerContext }
+	stringBoolContext struct{ ipc.ServerCall }
 )
 
 func (*stringBoolContext) Init(ipc.StreamServerCall) {}
@@ -269,8 +269,8 @@ func (*stringBoolContext) SendStream() interface {
 	return nil
 }
 
-func (sigTest) Sig1(ipc.ServerContext) error                                    { return nil }
-func (sigTest) Sig2(ipc.ServerContext, int32, string) error                     { return nil }
+func (sigTest) Sig1(ipc.ServerCall) error                                       { return nil }
+func (sigTest) Sig2(ipc.ServerCall, int32, string) error                        { return nil }
 func (sigTest) Sig3(*stringBoolContext, float64) ([]uint32, error)              { return nil, nil }
 func (sigTest) Sig4(ipc.StreamServerCall, int32, string) (int32, string, error) { return 0, "", nil }
 func (sigTest) Describe__() []ipc.InterfaceDesc {
@@ -456,17 +456,17 @@ func TestReflectInvokerSignature(t *testing.T) {
 
 type (
 	badcontext        struct{}
-	noInitContext     struct{ ipc.ServerContext }
-	badInit1Context   struct{ ipc.ServerContext }
-	badInit2Context   struct{ ipc.ServerContext }
-	badInit3Context   struct{ ipc.ServerContext }
-	noSendRecvContext struct{ ipc.ServerContext }
-	badSend1Context   struct{ ipc.ServerContext }
-	badSend2Context   struct{ ipc.ServerContext }
-	badSend3Context   struct{ ipc.ServerContext }
-	badRecv1Context   struct{ ipc.ServerContext }
-	badRecv2Context   struct{ ipc.ServerContext }
-	badRecv3Context   struct{ ipc.ServerContext }
+	noInitContext     struct{ ipc.ServerCall }
+	badInit1Context   struct{ ipc.ServerCall }
+	badInit2Context   struct{ ipc.ServerCall }
+	badInit3Context   struct{ ipc.ServerCall }
+	noSendRecvContext struct{ ipc.ServerCall }
+	badSend1Context   struct{ ipc.ServerCall }
+	badSend2Context   struct{ ipc.ServerCall }
+	badSend3Context   struct{ ipc.ServerCall }
+	badRecv1Context   struct{ ipc.ServerCall }
+	badRecv2Context   struct{ ipc.ServerCall }
+	badRecv3Context   struct{ ipc.ServerCall }
 
 	badoutargs struct{}
 
@@ -476,7 +476,7 @@ type (
 	badGlobChildren2 struct{}
 )
 
-func (badcontext) notExported(ipc.ServerContext) error { return nil }
+func (badcontext) notExported(ipc.ServerCall) error    { return nil }
 func (badcontext) NonRPC1() error                      { return nil }
 func (badcontext) NonRPC2(int) error                   { return nil }
 func (badcontext) NonRPC3(int, string) error           { return nil }
@@ -529,14 +529,14 @@ func (*badRecv3Context) RecvStream() interface {
 	return nil
 }
 
-func (badoutargs) NoFinalError1(ipc.ServerContext)                 {}
-func (badoutargs) NoFinalError2(ipc.ServerContext) string          { return "" }
-func (badoutargs) NoFinalError3(ipc.ServerContext) (bool, string)  { return false, "" }
-func (badoutargs) NoFinalError4(ipc.ServerContext) (error, string) { return nil, "" }
+func (badoutargs) NoFinalError1(ipc.ServerCall)                 {}
+func (badoutargs) NoFinalError2(ipc.ServerCall) string          { return "" }
+func (badoutargs) NoFinalError3(ipc.ServerCall) (bool, string)  { return false, "" }
+func (badoutargs) NoFinalError4(ipc.ServerCall) (error, string) { return nil, "" }
 
 func (badGlobber) Globber()                                     {}
 func (badGlob) Glob__()                                         {}
-func (badGlobChildren) GlobChildren__(ipc.ServerContext)        {}
+func (badGlobChildren) GlobChildren__(ipc.ServerCall)           {}
 func (badGlobChildren2) GlobChildren__() (<-chan string, error) { return nil, nil }
 
 func TestReflectInvokerPanic(t *testing.T) {
@@ -710,13 +710,13 @@ func (o *vGlobberObject) Globber() *ipc.GlobState {
 
 type allGlobberObject struct{}
 
-func (allGlobberObject) Glob__(ctx ipc.ServerContext, pattern string) (<-chan naming.VDLGlobReply, error) {
+func (allGlobberObject) Glob__(ctx ipc.ServerCall, pattern string) (<-chan naming.VDLGlobReply, error) {
 	return nil, nil
 }
 
 type childrenGlobberObject struct{}
 
-func (childrenGlobberObject) GlobChildren__(ipc.ServerContext) (<-chan string, error) {
+func (childrenGlobberObject) GlobChildren__(ipc.ServerCall) (<-chan string, error) {
 	return nil, nil
 }
 

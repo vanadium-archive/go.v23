@@ -44,13 +44,13 @@ func (acl ACL) pruneBlacklisted(blessings []string) []string {
 // only if the remote blessings are included in the ACL.
 //
 // TODO(ashankar): Add tests for this
-func (acl *ACL) Authorize(ctx security.Context) error {
+func (acl *ACL) Authorize(ctx security.Call) error {
 	blessings := ctx.RemoteBlessings()
-	blessingsForContext, invalid := blessings.ForContext(ctx)
-	if acl.Includes(blessingsForContext...) {
+	blessingsForCall, invalid := blessings.ForCall(ctx)
+	if acl.Includes(blessingsForCall...) {
 		return nil
 	}
-	return NewErrACLMatch(nil, blessingsForContext, invalid)
+	return NewErrACLMatch(nil, blessingsForCall, invalid)
 }
 
 // WriteTo writes the JSON-encoded representation of a TaggedACLMap to w.

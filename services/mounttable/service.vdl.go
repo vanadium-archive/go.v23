@@ -171,7 +171,7 @@ func (c implMountTableClientStub) c(ctx *context.T) ipc.Client {
 }
 
 func (c implMountTableClientStub) Mount(ctx *context.T, i0 string, i1 uint32, i2 naming.MountFlag, opts ...ipc.CallOpt) (err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Mount", []interface{}{i0, i1, i2}, opts...); err != nil {
 		return
 	}
@@ -180,7 +180,7 @@ func (c implMountTableClientStub) Mount(ctx *context.T, i0 string, i1 uint32, i2
 }
 
 func (c implMountTableClientStub) MountX(ctx *context.T, i0 string, i1 []security.BlessingPattern, i2 uint32, i3 naming.MountFlag, opts ...ipc.CallOpt) (err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "MountX", []interface{}{i0, i1, i2, i3}, opts...); err != nil {
 		return
 	}
@@ -189,7 +189,7 @@ func (c implMountTableClientStub) MountX(ctx *context.T, i0 string, i1 []securit
 }
 
 func (c implMountTableClientStub) Unmount(ctx *context.T, i0 string, opts ...ipc.CallOpt) (err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Unmount", []interface{}{i0}, opts...); err != nil {
 		return
 	}
@@ -198,7 +198,7 @@ func (c implMountTableClientStub) Unmount(ctx *context.T, i0 string, opts ...ipc
 }
 
 func (c implMountTableClientStub) Delete(ctx *context.T, i0 bool, opts ...ipc.CallOpt) (err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Delete", []interface{}{i0}, opts...); err != nil {
 		return
 	}
@@ -207,7 +207,7 @@ func (c implMountTableClientStub) Delete(ctx *context.T, i0 bool, opts ...ipc.Ca
 }
 
 func (c implMountTableClientStub) ResolveStep(ctx *context.T, opts ...ipc.CallOpt) (o0 naming.VDLMountEntry, err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "ResolveStep", nil, opts...); err != nil {
 		return
 	}
@@ -216,7 +216,7 @@ func (c implMountTableClientStub) ResolveStep(ctx *context.T, opts ...ipc.CallOp
 }
 
 func (c implMountTableClientStub) ResolveStepX(ctx *context.T, opts ...ipc.CallOpt) (o0 naming.VDLMountEntry, err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "ResolveStepX", nil, opts...); err != nil {
 		return
 	}
@@ -277,7 +277,7 @@ type MountTableServerMethods interface {
 	object.ObjectServerMethods
 	// DEPRECATED: TODO(ashankar): Rename MountX to Mount and remove
 	// MountX before the release.
-	Mount(ctx ipc.ServerContext, Server string, TTL uint32, Flags naming.MountFlag) error
+	Mount(ctx ipc.ServerCall, Server string, TTL uint32, Flags naming.MountFlag) error
 	// Mount Server (a global name) onto the receiver.
 	//
 	// Subsequent mounts add to the servers mounted there.  The multiple
@@ -297,20 +297,20 @@ type MountTableServerMethods interface {
 	// act as if it was never present as far as the interface is concerned.
 	//
 	// Opts represents a bit mask of options.
-	MountX(ctx ipc.ServerContext, Server string, BlessingPatterns []security.BlessingPattern, TTL uint32, Flags naming.MountFlag) error
+	MountX(ctx ipc.ServerCall, Server string, BlessingPatterns []security.BlessingPattern, TTL uint32, Flags naming.MountFlag) error
 	// Unmount removes Server from the receiver.  If Server is empty, remove
 	// all servers mounted there.
 	// Returns a non-nil error iff Server remains mounted at the mount point.
-	Unmount(ctx ipc.ServerContext, Server string) error
+	Unmount(ctx ipc.ServerCall, Server string) error
 	// Delete removes the receiver.  If the receiver has children, it will not
 	// be removed unless DeleteSubtree is true in which case the whole subtree is
 	// removed.
-	Delete(ctx ipc.ServerContext, DeleteSubtree bool) error
+	Delete(ctx ipc.ServerCall, DeleteSubtree bool) error
 	// ResolveStep takes the next step in resolving a name.  Returns the next
 	// servers to query and the suffix at those servers.
-	ResolveStep(ipc.ServerContext) (Entry naming.VDLMountEntry, err error)
+	ResolveStep(ipc.ServerCall) (Entry naming.VDLMountEntry, err error)
 	// Obsolete, left for backward compatability until all uses are killed.
-	ResolveStepX(ipc.ServerContext) (Entry naming.VDLMountEntry, err error)
+	ResolveStepX(ipc.ServerCall) (Entry naming.VDLMountEntry, err error)
 }
 
 // MountTableServerStubMethods is the server interface containing
@@ -350,27 +350,27 @@ type implMountTableServerStub struct {
 	gs *ipc.GlobState
 }
 
-func (s implMountTableServerStub) Mount(ctx ipc.ServerContext, i0 string, i1 uint32, i2 naming.MountFlag) error {
+func (s implMountTableServerStub) Mount(ctx ipc.ServerCall, i0 string, i1 uint32, i2 naming.MountFlag) error {
 	return s.impl.Mount(ctx, i0, i1, i2)
 }
 
-func (s implMountTableServerStub) MountX(ctx ipc.ServerContext, i0 string, i1 []security.BlessingPattern, i2 uint32, i3 naming.MountFlag) error {
+func (s implMountTableServerStub) MountX(ctx ipc.ServerCall, i0 string, i1 []security.BlessingPattern, i2 uint32, i3 naming.MountFlag) error {
 	return s.impl.MountX(ctx, i0, i1, i2, i3)
 }
 
-func (s implMountTableServerStub) Unmount(ctx ipc.ServerContext, i0 string) error {
+func (s implMountTableServerStub) Unmount(ctx ipc.ServerCall, i0 string) error {
 	return s.impl.Unmount(ctx, i0)
 }
 
-func (s implMountTableServerStub) Delete(ctx ipc.ServerContext, i0 bool) error {
+func (s implMountTableServerStub) Delete(ctx ipc.ServerCall, i0 bool) error {
 	return s.impl.Delete(ctx, i0)
 }
 
-func (s implMountTableServerStub) ResolveStep(ctx ipc.ServerContext) (naming.VDLMountEntry, error) {
+func (s implMountTableServerStub) ResolveStep(ctx ipc.ServerCall) (naming.VDLMountEntry, error) {
 	return s.impl.ResolveStep(ctx)
 }
 
-func (s implMountTableServerStub) ResolveStepX(ctx ipc.ServerContext) (naming.VDLMountEntry, error) {
+func (s implMountTableServerStub) ResolveStepX(ctx ipc.ServerCall) (naming.VDLMountEntry, error) {
 	return s.impl.ResolveStepX(ctx)
 }
 

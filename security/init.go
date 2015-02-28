@@ -6,14 +6,14 @@ import (
 )
 
 func init() {
-	RegisterCaveatValidator(ConstCaveat, func(ctx Context, isValid bool) error {
+	RegisterCaveatValidator(ConstCaveat, func(ctx Call, isValid bool) error {
 		if isValid {
 			return nil
 		}
 		return fmt.Errorf("failing validation in false const caveat")
 	})
 
-	RegisterCaveatValidator(UnixTimeExpiryCaveatX, func(ctx Context, unixTime int64) error {
+	RegisterCaveatValidator(UnixTimeExpiryCaveatX, func(ctx Call, unixTime int64) error {
 		now := ctx.Timestamp()
 		expiry := time.Unix(int64(unixTime), 0)
 		if now.After(expiry) {
@@ -22,7 +22,7 @@ func init() {
 		return nil
 	})
 
-	RegisterCaveatValidator(ExpiryCaveatX, func(ctx Context, expiry time.Time) error {
+	RegisterCaveatValidator(ExpiryCaveatX, func(ctx Call, expiry time.Time) error {
 		now := ctx.Timestamp()
 		if now.After(expiry) {
 			return fmt.Errorf("now(%v) is after expiry(%v)", now, expiry)
@@ -30,7 +30,7 @@ func init() {
 		return nil
 	})
 
-	RegisterCaveatValidator(MethodCaveatX, func(ctx Context, methods []string) error {
+	RegisterCaveatValidator(MethodCaveatX, func(ctx Call, methods []string) error {
 		if ctx.Method() == "" && len(methods) == 0 {
 			return nil
 		}
@@ -42,7 +42,7 @@ func init() {
 		return fmt.Errorf("method %q is not in list %v", ctx.Method(), methods)
 	})
 
-	RegisterCaveatValidator(PublicKeyThirdPartyCaveatX, func(ctx Context, params publicKeyThirdPartyCaveat) error {
+	RegisterCaveatValidator(PublicKeyThirdPartyCaveatX, func(ctx Call, params publicKeyThirdPartyCaveat) error {
 		discharge, ok := ctx.RemoteDischarges()[params.ID()]
 		if !ok {
 			return fmt.Errorf("missing discharge for third party caveat(id=%v)", params.ID())

@@ -304,7 +304,7 @@ func (c implApplicationClientStub) c(ctx *context.T) ipc.Client {
 }
 
 func (c implApplicationClientStub) Install(ctx *context.T, i0 string, i1 Config, i2 application.Packages, opts ...ipc.CallOpt) (o0 string, err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Install", []interface{}{i0, i1, i2}, opts...); err != nil {
 		return
 	}
@@ -313,7 +313,7 @@ func (c implApplicationClientStub) Install(ctx *context.T, i0 string, i1 Config,
 }
 
 func (c implApplicationClientStub) Refresh(ctx *context.T, opts ...ipc.CallOpt) (err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Refresh", nil, opts...); err != nil {
 		return
 	}
@@ -322,7 +322,7 @@ func (c implApplicationClientStub) Refresh(ctx *context.T, opts ...ipc.CallOpt) 
 }
 
 func (c implApplicationClientStub) Restart(ctx *context.T, opts ...ipc.CallOpt) (err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Restart", nil, opts...); err != nil {
 		return
 	}
@@ -331,7 +331,7 @@ func (c implApplicationClientStub) Restart(ctx *context.T, opts ...ipc.CallOpt) 
 }
 
 func (c implApplicationClientStub) Resume(ctx *context.T, opts ...ipc.CallOpt) (err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Resume", nil, opts...); err != nil {
 		return
 	}
@@ -340,7 +340,7 @@ func (c implApplicationClientStub) Resume(ctx *context.T, opts ...ipc.CallOpt) (
 }
 
 func (c implApplicationClientStub) Revert(ctx *context.T, opts ...ipc.CallOpt) (err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Revert", nil, opts...); err != nil {
 		return
 	}
@@ -349,7 +349,7 @@ func (c implApplicationClientStub) Revert(ctx *context.T, opts ...ipc.CallOpt) (
 }
 
 func (c implApplicationClientStub) Start(ctx *context.T, opts ...ipc.CallOpt) (o0 []string, err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Start", nil, opts...); err != nil {
 		return
 	}
@@ -358,7 +358,7 @@ func (c implApplicationClientStub) Start(ctx *context.T, opts ...ipc.CallOpt) (o
 }
 
 func (c implApplicationClientStub) Stop(ctx *context.T, i0 uint32, opts ...ipc.CallOpt) (err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Stop", []interface{}{i0}, opts...); err != nil {
 		return
 	}
@@ -367,7 +367,7 @@ func (c implApplicationClientStub) Stop(ctx *context.T, i0 uint32, opts ...ipc.C
 }
 
 func (c implApplicationClientStub) Suspend(ctx *context.T, opts ...ipc.CallOpt) (err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Suspend", nil, opts...); err != nil {
 		return
 	}
@@ -376,7 +376,7 @@ func (c implApplicationClientStub) Suspend(ctx *context.T, opts ...ipc.CallOpt) 
 }
 
 func (c implApplicationClientStub) Uninstall(ctx *context.T, opts ...ipc.CallOpt) (err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Uninstall", nil, opts...); err != nil {
 		return
 	}
@@ -385,7 +385,7 @@ func (c implApplicationClientStub) Uninstall(ctx *context.T, opts ...ipc.CallOpt
 }
 
 func (c implApplicationClientStub) Update(ctx *context.T, opts ...ipc.CallOpt) (err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Update", nil, opts...); err != nil {
 		return
 	}
@@ -394,7 +394,7 @@ func (c implApplicationClientStub) Update(ctx *context.T, opts ...ipc.CallOpt) (
 }
 
 func (c implApplicationClientStub) UpdateTo(ctx *context.T, i0 string, opts ...ipc.CallOpt) (err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "UpdateTo", []interface{}{i0}, opts...); err != nil {
 		return
 	}
@@ -403,7 +403,7 @@ func (c implApplicationClientStub) UpdateTo(ctx *context.T, i0 string, opts ...i
 }
 
 func (c implApplicationClientStub) Debug(ctx *context.T, opts ...ipc.CallOpt) (o0 string, err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Debug", nil, opts...); err != nil {
 		return
 	}
@@ -572,23 +572,23 @@ type ApplicationServerMethods interface {
 	// which can then be used to control all the installations of the given
 	// application.
 	// TODO(rjkroege): Use customized labels.
-	Install(ctx ipc.ServerContext, name string, config Config, packages application.Packages) (string, error)
+	Install(ctx ipc.ServerCall, name string, config Config, packages application.Packages) (string, error)
 	// Refresh refreshes the state of application installation(s)
 	// instance(s).
-	Refresh(ipc.ServerContext) error
+	Refresh(ipc.ServerCall) error
 	// Restart restarts execution of application installation(s)
 	// instance(s).
-	Restart(ipc.ServerContext) error
+	Restart(ipc.ServerCall) error
 	// Resume resumes execution of application installation(s)
 	// instance(s).
-	Resume(ipc.ServerContext) error
+	Resume(ipc.ServerCall) error
 	// Revert reverts application installation(s) to the most recent
 	// previous installation.
-	Revert(ipc.ServerContext) error
+	Revert(ipc.ServerCall) error
 	// Start starts an instance of application installation(s) and
 	// returns the object name(s) that identifies/identify the new
 	// instance(s).
-	Start(ipc.ServerContext) ([]string, error)
+	Start(ipc.ServerCall) ([]string, error)
 	// Stop attempts a clean shutdown of application installation(s)
 	// instance(s). If the deadline (in seconds) is non-zero and the
 	// instance(s) in questions are still running after the given deadline,
@@ -596,28 +596,28 @@ type ApplicationServerMethods interface {
 	//
 	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
 	// are implemented.
-	Stop(ctx ipc.ServerContext, deadline uint32) error
+	Stop(ctx ipc.ServerCall, deadline uint32) error
 	// Suspend suspends execution of application installation(s)
 	// instance(s).
-	Suspend(ipc.ServerContext) error
+	Suspend(ipc.ServerCall) error
 	// Uninstall uninstalls application installation(s).
-	Uninstall(ipc.ServerContext) error
+	Uninstall(ipc.ServerCall) error
 	// Update updates the application installation(s) from the object name
 	// provided during Install.  If the new application envelope contains a
 	// different application title, the update does not occur, and an error
 	// is returned.
-	Update(ipc.ServerContext) error
+	Update(ipc.ServerCall) error
 	// UpdateTo updates the application installation(s) to the application
 	// specified by the object name argument.  If the new application
 	// envelope contains a different application title, the update does not
 	// occur, and an error is returned.
-	UpdateTo(ctx ipc.ServerContext, name string) error
+	UpdateTo(ctx ipc.ServerCall, name string) error
 	// Debug returns debug information about the application installation or
 	// instance.  This is generally highly implementation-specific, and
 	// presented in an unstructured form.  No guarantees are given about the
 	// stability of the format, and parsing it programmatically is
 	// specifically discouraged.
-	Debug(ipc.ServerContext) (string, error)
+	Debug(ipc.ServerCall) (string, error)
 }
 
 // ApplicationServerStubMethods is the server interface containing
@@ -657,51 +657,51 @@ type implApplicationServerStub struct {
 	gs *ipc.GlobState
 }
 
-func (s implApplicationServerStub) Install(ctx ipc.ServerContext, i0 string, i1 Config, i2 application.Packages) (string, error) {
+func (s implApplicationServerStub) Install(ctx ipc.ServerCall, i0 string, i1 Config, i2 application.Packages) (string, error) {
 	return s.impl.Install(ctx, i0, i1, i2)
 }
 
-func (s implApplicationServerStub) Refresh(ctx ipc.ServerContext) error {
+func (s implApplicationServerStub) Refresh(ctx ipc.ServerCall) error {
 	return s.impl.Refresh(ctx)
 }
 
-func (s implApplicationServerStub) Restart(ctx ipc.ServerContext) error {
+func (s implApplicationServerStub) Restart(ctx ipc.ServerCall) error {
 	return s.impl.Restart(ctx)
 }
 
-func (s implApplicationServerStub) Resume(ctx ipc.ServerContext) error {
+func (s implApplicationServerStub) Resume(ctx ipc.ServerCall) error {
 	return s.impl.Resume(ctx)
 }
 
-func (s implApplicationServerStub) Revert(ctx ipc.ServerContext) error {
+func (s implApplicationServerStub) Revert(ctx ipc.ServerCall) error {
 	return s.impl.Revert(ctx)
 }
 
-func (s implApplicationServerStub) Start(ctx ipc.ServerContext) ([]string, error) {
+func (s implApplicationServerStub) Start(ctx ipc.ServerCall) ([]string, error) {
 	return s.impl.Start(ctx)
 }
 
-func (s implApplicationServerStub) Stop(ctx ipc.ServerContext, i0 uint32) error {
+func (s implApplicationServerStub) Stop(ctx ipc.ServerCall, i0 uint32) error {
 	return s.impl.Stop(ctx, i0)
 }
 
-func (s implApplicationServerStub) Suspend(ctx ipc.ServerContext) error {
+func (s implApplicationServerStub) Suspend(ctx ipc.ServerCall) error {
 	return s.impl.Suspend(ctx)
 }
 
-func (s implApplicationServerStub) Uninstall(ctx ipc.ServerContext) error {
+func (s implApplicationServerStub) Uninstall(ctx ipc.ServerCall) error {
 	return s.impl.Uninstall(ctx)
 }
 
-func (s implApplicationServerStub) Update(ctx ipc.ServerContext) error {
+func (s implApplicationServerStub) Update(ctx ipc.ServerCall) error {
 	return s.impl.Update(ctx)
 }
 
-func (s implApplicationServerStub) UpdateTo(ctx ipc.ServerContext, i0 string) error {
+func (s implApplicationServerStub) UpdateTo(ctx ipc.ServerCall, i0 string) error {
 	return s.impl.UpdateTo(ctx, i0)
 }
 
-func (s implApplicationServerStub) Debug(ctx ipc.ServerContext) (string, error) {
+func (s implApplicationServerStub) Debug(ctx ipc.ServerCall) (string, error) {
 	return s.impl.Debug(ctx)
 }
 
@@ -858,7 +858,7 @@ func (c implClaimableClientStub) c(ctx *context.T) ipc.Client {
 }
 
 func (c implClaimableClientStub) Claim(ctx *context.T, i0 string, opts ...ipc.CallOpt) (err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Claim", []interface{}{i0}, opts...); err != nil {
 		return
 	}
@@ -883,7 +883,7 @@ func (c implClaimableClientStub) Claim(ctx *context.T, i0 string, opts ...ipc.Ca
 // The blessings that the device is to be claimed with is provided
 // via the ipc.Granter option in Go.
 type ClaimableServerMethods interface {
-	Claim(ctx ipc.ServerContext, pairingToken string) error
+	Claim(ctx ipc.ServerCall, pairingToken string) error
 }
 
 // ClaimableServerStubMethods is the server interface containing
@@ -921,7 +921,7 @@ type implClaimableServerStub struct {
 	gs   *ipc.GlobState
 }
 
-func (s implClaimableServerStub) Claim(ctx ipc.ServerContext, i0 string) error {
+func (s implClaimableServerStub) Claim(ctx ipc.ServerCall, i0 string) error {
 	return s.impl.Claim(ctx, i0)
 }
 
@@ -1100,7 +1100,7 @@ func (c implDeviceClientStub) c(ctx *context.T) ipc.Client {
 }
 
 func (c implDeviceClientStub) Describe(ctx *context.T, opts ...ipc.CallOpt) (o0 Description, err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Describe", nil, opts...); err != nil {
 		return
 	}
@@ -1109,7 +1109,7 @@ func (c implDeviceClientStub) Describe(ctx *context.T, opts ...ipc.CallOpt) (o0 
 }
 
 func (c implDeviceClientStub) IsRunnable(ctx *context.T, i0 binary.Description, opts ...ipc.CallOpt) (o0 bool, err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "IsRunnable", []interface{}{i0}, opts...); err != nil {
 		return
 	}
@@ -1118,7 +1118,7 @@ func (c implDeviceClientStub) IsRunnable(ctx *context.T, i0 binary.Description, 
 }
 
 func (c implDeviceClientStub) Reset(ctx *context.T, i0 uint64, opts ...ipc.CallOpt) (err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Reset", []interface{}{i0}, opts...); err != nil {
 		return
 	}
@@ -1127,7 +1127,7 @@ func (c implDeviceClientStub) Reset(ctx *context.T, i0 uint64, opts ...ipc.CallO
 }
 
 func (c implDeviceClientStub) AssociateAccount(ctx *context.T, i0 []string, i1 string, opts ...ipc.CallOpt) (err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "AssociateAccount", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
@@ -1136,7 +1136,7 @@ func (c implDeviceClientStub) AssociateAccount(ctx *context.T, i0 []string, i1 s
 }
 
 func (c implDeviceClientStub) ListAssociations(ctx *context.T, opts ...ipc.CallOpt) (o0 []Association, err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "ListAssociations", nil, opts...); err != nil {
 		return
 	}
@@ -1240,24 +1240,24 @@ type DeviceServerMethods interface {
 	// installation instance as a receiver is well-defined.
 	ApplicationServerMethods
 	// Describe generates a description of the device.
-	Describe(ipc.ServerContext) (Description, error)
+	Describe(ipc.ServerCall) (Description, error)
 	// IsRunnable checks if the device can execute the given binary.
-	IsRunnable(ctx ipc.ServerContext, description binary.Description) (bool, error)
+	IsRunnable(ctx ipc.ServerCall, description binary.Description) (bool, error)
 	// Reset resets the device. If the deadline is non-zero and the device
 	// in question is still running after the given deadline expired,
 	// reset of the device is enforced.
 	//
 	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
 	// are implemented.
-	Reset(ctx ipc.ServerContext, deadline uint64) error
+	Reset(ctx ipc.ServerCall, deadline uint64) error
 	// AssociateAccount associates a local  system account name with the provided
 	// Veyron identities. It replaces the existing association if one already exists for that
 	// identity. Setting an AccountName to "" removes the association for each
 	// listed identity.
-	AssociateAccount(ctx ipc.ServerContext, identityNames []string, accountName string) error
+	AssociateAccount(ctx ipc.ServerCall, identityNames []string, accountName string) error
 	// ListAssociations returns all of the associations between Veyron identities
 	// and system names.
-	ListAssociations(ipc.ServerContext) ([]Association, error)
+	ListAssociations(ipc.ServerCall) ([]Association, error)
 }
 
 // DeviceServerStubMethods is the server interface containing
@@ -1297,23 +1297,23 @@ type implDeviceServerStub struct {
 	gs *ipc.GlobState
 }
 
-func (s implDeviceServerStub) Describe(ctx ipc.ServerContext) (Description, error) {
+func (s implDeviceServerStub) Describe(ctx ipc.ServerCall) (Description, error) {
 	return s.impl.Describe(ctx)
 }
 
-func (s implDeviceServerStub) IsRunnable(ctx ipc.ServerContext, i0 binary.Description) (bool, error) {
+func (s implDeviceServerStub) IsRunnable(ctx ipc.ServerCall, i0 binary.Description) (bool, error) {
 	return s.impl.IsRunnable(ctx, i0)
 }
 
-func (s implDeviceServerStub) Reset(ctx ipc.ServerContext, i0 uint64) error {
+func (s implDeviceServerStub) Reset(ctx ipc.ServerCall, i0 uint64) error {
 	return s.impl.Reset(ctx, i0)
 }
 
-func (s implDeviceServerStub) AssociateAccount(ctx ipc.ServerContext, i0 []string, i1 string) error {
+func (s implDeviceServerStub) AssociateAccount(ctx ipc.ServerCall, i0 []string, i1 string) error {
 	return s.impl.AssociateAccount(ctx, i0, i1)
 }
 
-func (s implDeviceServerStub) ListAssociations(ctx ipc.ServerContext) ([]Association, error) {
+func (s implDeviceServerStub) ListAssociations(ctx ipc.ServerCall) ([]Association, error) {
 	return s.impl.ListAssociations(ctx)
 }
 

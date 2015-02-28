@@ -27,7 +27,7 @@ type StoreClientMethods interface {
 	Trace(*context.T, uniqueid.Id, ...ipc.CallOpt) (vtrace.TraceRecord, error)
 	// AllTraces returns TraceRecords for all traces the server currently
 	// knows about.
-	AllTraces(*context.T, ...ipc.CallOpt) (StoreAllTracesCall, error)
+	AllTraces(*context.T, ...ipc.CallOpt) (StoreAllTracesClientCall, error)
 }
 
 // StoreClientStub adds universal methods to StoreClientMethods.
@@ -60,7 +60,7 @@ func (c implStoreClientStub) c(ctx *context.T) ipc.Client {
 }
 
 func (c implStoreClientStub) Trace(ctx *context.T, i0 uniqueid.Id, opts ...ipc.CallOpt) (o0 vtrace.TraceRecord, err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Trace", []interface{}{i0}, opts...); err != nil {
 		return
 	}
@@ -68,12 +68,12 @@ func (c implStoreClientStub) Trace(ctx *context.T, i0 uniqueid.Id, opts ...ipc.C
 	return
 }
 
-func (c implStoreClientStub) AllTraces(ctx *context.T, opts ...ipc.CallOpt) (ocall StoreAllTracesCall, err error) {
-	var call ipc.Call
+func (c implStoreClientStub) AllTraces(ctx *context.T, opts ...ipc.CallOpt) (ocall StoreAllTracesClientCall, err error) {
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "AllTraces", nil, opts...); err != nil {
 		return
 	}
-	ocall = &implStoreAllTracesCall{Call: call}
+	ocall = &implStoreAllTracesClientCall{ClientCall: call}
 	return
 }
 
@@ -93,8 +93,8 @@ type StoreAllTracesClientStream interface {
 	}
 }
 
-// StoreAllTracesCall represents the call returned from Store.AllTraces.
-type StoreAllTracesCall interface {
+// StoreAllTracesClientCall represents the call returned from Store.AllTraces.
+type StoreAllTracesClientCall interface {
 	StoreAllTracesClientStream
 	// Finish blocks until the server is done, and returns the positional return
 	// values for call.
@@ -109,13 +109,13 @@ type StoreAllTracesCall interface {
 	Finish() error
 }
 
-type implStoreAllTracesCall struct {
-	ipc.Call
+type implStoreAllTracesClientCall struct {
+	ipc.ClientCall
 	valRecv vtrace.TraceRecord
 	errRecv error
 }
 
-func (c *implStoreAllTracesCall) RecvStream() interface {
+func (c *implStoreAllTracesClientCall) RecvStream() interface {
 	Advance() bool
 	Value() vtrace.TraceRecord
 	Err() error
@@ -124,7 +124,7 @@ func (c *implStoreAllTracesCall) RecvStream() interface {
 }
 
 type implStoreAllTracesCallRecv struct {
-	c *implStoreAllTracesCall
+	c *implStoreAllTracesClientCall
 }
 
 func (c implStoreAllTracesCallRecv) Advance() bool {
@@ -141,8 +141,8 @@ func (c implStoreAllTracesCallRecv) Err() error {
 	}
 	return c.c.errRecv
 }
-func (c *implStoreAllTracesCall) Finish() (err error) {
-	err = c.Call.Finish()
+func (c *implStoreAllTracesClientCall) Finish() (err error) {
+	err = c.ClientCall.Finish()
 	return
 }
 
@@ -151,7 +151,7 @@ func (c *implStoreAllTracesCall) Finish() (err error) {
 type StoreServerMethods interface {
 	// Trace returns the trace that matches the given ID.
 	// Will return a NoExists error if no matching trace was found.
-	Trace(ipc.ServerContext, uniqueid.Id) (vtrace.TraceRecord, error)
+	Trace(ipc.ServerCall, uniqueid.Id) (vtrace.TraceRecord, error)
 	// AllTraces returns TraceRecords for all traces the server currently
 	// knows about.
 	AllTraces(StoreAllTracesContext) error
@@ -164,7 +164,7 @@ type StoreServerMethods interface {
 type StoreServerStubMethods interface {
 	// Trace returns the trace that matches the given ID.
 	// Will return a NoExists error if no matching trace was found.
-	Trace(ipc.ServerContext, uniqueid.Id) (vtrace.TraceRecord, error)
+	Trace(ipc.ServerCall, uniqueid.Id) (vtrace.TraceRecord, error)
 	// AllTraces returns TraceRecords for all traces the server currently
 	// knows about.
 	AllTraces(*StoreAllTracesContextStub) error
@@ -199,7 +199,7 @@ type implStoreServerStub struct {
 	gs   *ipc.GlobState
 }
 
-func (s implStoreServerStub) Trace(ctx ipc.ServerContext, i0 uniqueid.Id) (vtrace.TraceRecord, error) {
+func (s implStoreServerStub) Trace(ctx ipc.ServerCall, i0 uniqueid.Id) (vtrace.TraceRecord, error) {
 	return s.impl.Trace(ctx, i0)
 }
 
@@ -255,7 +255,7 @@ type StoreAllTracesServerStream interface {
 
 // StoreAllTracesContext represents the context passed to Store.AllTraces.
 type StoreAllTracesContext interface {
-	ipc.ServerContext
+	ipc.ServerCall
 	StoreAllTracesServerStream
 }
 

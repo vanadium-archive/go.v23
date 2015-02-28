@@ -75,7 +75,7 @@ func (c implMyObjectClientStub) c(ctx *context.T) ipc.Client {
 }
 
 func (c implMyObjectClientStub) Get(ctx *context.T, opts ...ipc.CallOpt) (err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Get", nil, opts...); err != nil {
 		return
 	}
@@ -84,7 +84,7 @@ func (c implMyObjectClientStub) Get(ctx *context.T, opts ...ipc.CallOpt) (err er
 }
 
 func (c implMyObjectClientStub) Put(ctx *context.T, opts ...ipc.CallOpt) (err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Put", nil, opts...); err != nil {
 		return
 	}
@@ -93,7 +93,7 @@ func (c implMyObjectClientStub) Put(ctx *context.T, opts ...ipc.CallOpt) (err er
 }
 
 func (c implMyObjectClientStub) Resolve(ctx *context.T, opts ...ipc.CallOpt) (err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Resolve", nil, opts...); err != nil {
 		return
 	}
@@ -102,7 +102,7 @@ func (c implMyObjectClientStub) Resolve(ctx *context.T, opts ...ipc.CallOpt) (er
 }
 
 func (c implMyObjectClientStub) NoTags(ctx *context.T, opts ...ipc.CallOpt) (err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "NoTags", nil, opts...); err != nil {
 		return
 	}
@@ -111,7 +111,7 @@ func (c implMyObjectClientStub) NoTags(ctx *context.T, opts ...ipc.CallOpt) (err
 }
 
 func (c implMyObjectClientStub) AllTags(ctx *context.T, opts ...ipc.CallOpt) (err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "AllTags", nil, opts...); err != nil {
 		return
 	}
@@ -124,11 +124,11 @@ func (c implMyObjectClientStub) AllTags(ctx *context.T, opts ...ipc.CallOpt) (er
 //
 // MyObject demonstrates how tags are attached to methods.
 type MyObjectServerMethods interface {
-	Get(ipc.ServerContext) error
-	Put(ipc.ServerContext) error
-	Resolve(ipc.ServerContext) error
-	NoTags(ipc.ServerContext) error // No tags attached to this.
-	AllTags(ipc.ServerContext) error
+	Get(ipc.ServerCall) error
+	Put(ipc.ServerCall) error
+	Resolve(ipc.ServerCall) error
+	NoTags(ipc.ServerCall) error // No tags attached to this.
+	AllTags(ipc.ServerCall) error
 }
 
 // MyObjectServerStubMethods is the server interface containing
@@ -166,23 +166,23 @@ type implMyObjectServerStub struct {
 	gs   *ipc.GlobState
 }
 
-func (s implMyObjectServerStub) Get(ctx ipc.ServerContext) error {
+func (s implMyObjectServerStub) Get(ctx ipc.ServerCall) error {
 	return s.impl.Get(ctx)
 }
 
-func (s implMyObjectServerStub) Put(ctx ipc.ServerContext) error {
+func (s implMyObjectServerStub) Put(ctx ipc.ServerCall) error {
 	return s.impl.Put(ctx)
 }
 
-func (s implMyObjectServerStub) Resolve(ctx ipc.ServerContext) error {
+func (s implMyObjectServerStub) Resolve(ctx ipc.ServerCall) error {
 	return s.impl.Resolve(ctx)
 }
 
-func (s implMyObjectServerStub) NoTags(ctx ipc.ServerContext) error {
+func (s implMyObjectServerStub) NoTags(ctx ipc.ServerCall) error {
 	return s.impl.NoTags(ctx)
 }
 
-func (s implMyObjectServerStub) AllTags(ctx ipc.ServerContext) error {
+func (s implMyObjectServerStub) AllTags(ctx ipc.ServerCall) error {
 	return s.impl.AllTags(ctx)
 }
 

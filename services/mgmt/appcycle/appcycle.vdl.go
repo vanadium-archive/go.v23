@@ -45,7 +45,7 @@ type AppCycleClientMethods interface {
 	// Stop initiates shutdown of the server.  It streams back periodic
 	// updates to give the client an idea of how the shutdown is
 	// progressing.
-	Stop(*context.T, ...ipc.CallOpt) (AppCycleStopCall, error)
+	Stop(*context.T, ...ipc.CallOpt) (AppCycleStopClientCall, error)
 	// ForceStop tells the server to shut down right away.  It can be issued
 	// while a Stop is outstanding if for example the client does not want
 	// to wait any longer.
@@ -81,17 +81,17 @@ func (c implAppCycleClientStub) c(ctx *context.T) ipc.Client {
 	return v23.GetClient(ctx)
 }
 
-func (c implAppCycleClientStub) Stop(ctx *context.T, opts ...ipc.CallOpt) (ocall AppCycleStopCall, err error) {
-	var call ipc.Call
+func (c implAppCycleClientStub) Stop(ctx *context.T, opts ...ipc.CallOpt) (ocall AppCycleStopClientCall, err error) {
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Stop", nil, opts...); err != nil {
 		return
 	}
-	ocall = &implAppCycleStopCall{Call: call}
+	ocall = &implAppCycleStopClientCall{ClientCall: call}
 	return
 }
 
 func (c implAppCycleClientStub) ForceStop(ctx *context.T, opts ...ipc.CallOpt) (err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "ForceStop", nil, opts...); err != nil {
 		return
 	}
@@ -115,8 +115,8 @@ type AppCycleStopClientStream interface {
 	}
 }
 
-// AppCycleStopCall represents the call returned from AppCycle.Stop.
-type AppCycleStopCall interface {
+// AppCycleStopClientCall represents the call returned from AppCycle.Stop.
+type AppCycleStopClientCall interface {
 	AppCycleStopClientStream
 	// Finish blocks until the server is done, and returns the positional return
 	// values for call.
@@ -131,13 +131,13 @@ type AppCycleStopCall interface {
 	Finish() error
 }
 
-type implAppCycleStopCall struct {
-	ipc.Call
+type implAppCycleStopClientCall struct {
+	ipc.ClientCall
 	valRecv Task
 	errRecv error
 }
 
-func (c *implAppCycleStopCall) RecvStream() interface {
+func (c *implAppCycleStopClientCall) RecvStream() interface {
 	Advance() bool
 	Value() Task
 	Err() error
@@ -146,7 +146,7 @@ func (c *implAppCycleStopCall) RecvStream() interface {
 }
 
 type implAppCycleStopCallRecv struct {
-	c *implAppCycleStopCall
+	c *implAppCycleStopClientCall
 }
 
 func (c implAppCycleStopCallRecv) Advance() bool {
@@ -163,8 +163,8 @@ func (c implAppCycleStopCallRecv) Err() error {
 	}
 	return c.c.errRecv
 }
-func (c *implAppCycleStopCall) Finish() (err error) {
-	err = c.Call.Finish()
+func (c *implAppCycleStopClientCall) Finish() (err error) {
+	err = c.ClientCall.Finish()
 	return
 }
 
@@ -180,7 +180,7 @@ type AppCycleServerMethods interface {
 	// ForceStop tells the server to shut down right away.  It can be issued
 	// while a Stop is outstanding if for example the client does not want
 	// to wait any longer.
-	ForceStop(ipc.ServerContext) error
+	ForceStop(ipc.ServerCall) error
 }
 
 // AppCycleServerStubMethods is the server interface containing
@@ -195,7 +195,7 @@ type AppCycleServerStubMethods interface {
 	// ForceStop tells the server to shut down right away.  It can be issued
 	// while a Stop is outstanding if for example the client does not want
 	// to wait any longer.
-	ForceStop(ipc.ServerContext) error
+	ForceStop(ipc.ServerCall) error
 }
 
 // AppCycleServerStub adds universal methods to AppCycleServerStubMethods.
@@ -231,7 +231,7 @@ func (s implAppCycleServerStub) Stop(ctx *AppCycleStopContextStub) error {
 	return s.impl.Stop(ctx)
 }
 
-func (s implAppCycleServerStub) ForceStop(ctx ipc.ServerContext) error {
+func (s implAppCycleServerStub) ForceStop(ctx ipc.ServerCall) error {
 	return s.impl.ForceStop(ctx)
 }
 
@@ -276,7 +276,7 @@ type AppCycleStopServerStream interface {
 
 // AppCycleStopContext represents the context passed to AppCycle.Stop.
 type AppCycleStopContext interface {
-	ipc.ServerContext
+	ipc.ServerCall
 	AppCycleStopServerStream
 }
 

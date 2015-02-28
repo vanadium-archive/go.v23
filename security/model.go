@@ -88,19 +88,19 @@
 // "self-proclaimed" authority:
 //  // (in process B)
 //  var p2 Principal
-//  ctx :=  GetRPCContext()  // Context under which p1 is communicating with p2, ctx.LocalPrincipal == p2
+//  ctx :=  GetRPCCall()  // Call under which p1 is communicating with p2, ctx.LocalPrincipal == p2
 //  alice := ctx.RemoteBlessings()
-//  fmt.Println(len(alice.ForContext(ctx))) // Will print 0
+//  fmt.Println(len(alice.ForCall(ctx))) // Will print 0
 //
 // However, p2 can decide to trust the roots of the "alice" blessing and then it
 // will be able to recognize her delegates as well:
 //  // (in process B)
 //  p2.AddToRoots(alice)
-//  fmt.Printf("%v", alice.ForContext(ctx))  // Will print ["alice"]
+//  fmt.Printf("%v", alice.ForCall(ctx))  // Will print ["alice"]
 //
 // Furthermore, p2 can seek a blessing from "alice":
 //  // (in process A)
-//  ctx := GetRPCContext()  // Context under which p2 is seeking a blessing from alice, ctx.LocalPrincipal = p1
+//  ctx := GetRPCCall()  // Call under which p2 is seeking a blessing from alice, ctx.LocalPrincipal = p1
 //  key2 := ctx.RemoteBlessings().PublicKey()
 //  onlyFor10Minutes := ExpiryCaveat(time.Now().Add(10*time.Minute))
 //  aliceFriend, _ := p1.Bless(key2, alice, "friend", onlyFor10Minutes)
@@ -192,7 +192,7 @@ type Principal interface {
 	// granted to this Principal from recognized authorites to the Caveats
 	// associated with the blessings. BlessingInfo does not validate caveats
 	// on 'blessings' and thus may NOT be valid in certain contexts. Use
-	// Blessings.ForContext(ctx) to determine the set of valid blessing strings
+	// Blessings.ForCall(ctx) to determine the set of valid blessing strings
 	// in a particular context.
 	BlessingsInfo(blessings Blessings) map[string][]Caveat
 
@@ -357,15 +357,15 @@ type ThirdPartyCaveat interface {
 	// caveat under 'context' and returns nil iff they have been satisfied, and
 	// thus ensures that it is okay to generate a discharge for this third-party
 	// caveat.
-	Dischargeable(context Context) error
+	Dischargeable(context Call) error
 
 	// TODO(andreser, ashankar): require the discharger to have a specific
 	// identity so that the private information below is not exposed to
 	// anybody who can accept an ipc call.
 }
 
-// Context defines the state available for authorizing a principal.
-type Context interface {
+// Call defines the state available for authorizing a principal.
+type Call interface {
 	// Timestamp at which the authorization state is to be checked.
 	Timestamp() time.Time
 	// Method returns the method being invoked.
@@ -396,9 +396,9 @@ type Context interface {
 	// Context returns the current context.T.
 	Context() *context.T
 
-	// TODO(ashankar,ataly): Disallow Context interface implementations
+	// TODO(ashankar,ataly): Disallow Call interface implementations
 	// in other packages for now?
-	// For now, the only way to create a Context is to use the factory function
+	// For now, the only way to create a Call is to use the factory function
 	// defined in this package. May revisit this, but till the API stabilizes,
 	// better to avoid multiple implementations.
 	// canOnlyBeImplementedInThisPackageForNow()
@@ -406,5 +406,5 @@ type Context interface {
 
 // Authorizer is the interface for performing authorization checks.
 type Authorizer interface {
-	Authorize(context Context) error
+	Authorize(context Call) error
 }

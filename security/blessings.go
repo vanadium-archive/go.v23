@@ -27,7 +27,7 @@ type Blessings struct {
 
 const chainValidatorKey = "customChainValidator"
 
-// ForContext returns a validated set of (human-readable string) blessings
+// ForCall returns a validated set of (human-readable string) blessings
 // presented by the principal. These returned blessings (strings) are
 // guaranteed to:
 //
@@ -38,15 +38,15 @@ const chainValidatorKey = "customChainValidator"
 // implementation can be found in the address space of the caller and Validate
 // returns nil.
 //
-// ForContext also returns the RejectedBlessings for each blessing that cannot
+// ForCall also returns the RejectedBlessings for each blessing that cannot
 // be validated.
-func (b Blessings) ForContext(ctx Context) (ret []string, info []RejectedBlessing) {
+func (b Blessings) ForCall(ctx Call) (ret []string, info []RejectedBlessing) {
 	if b.IsZero() {
 		return nil, nil
 	}
 	validator := defaultChainCaveatValidator
 	if customValidator := ctx.Context().Value(chainValidatorKey); customValidator != nil {
-		validator = customValidator.(func(ctx Context, chains [][]Caveat) []error)
+		validator = customValidator.(func(ctx Call, chains [][]Caveat) []error)
 	}
 
 	blessings := []string{}
@@ -195,7 +195,7 @@ func validateCertificateChain(chain []Certificate) (PublicKey, error) {
 }
 
 // Verifies that the chain signatures are correct, without handling caveat validation
-func verifyChainSignature(ctx Context, chain []Certificate) (string, error) {
+func verifyChainSignature(ctx Call, chain []Certificate) (string, error) {
 	blessing := chain[0].Extension
 	for i := 1; i < len(chain); i++ {
 		blessing += ChainSeparator
@@ -230,7 +230,7 @@ func verifyChainSignature(ctx Context, chain []Certificate) (string, error) {
 	return blessing, nil
 }
 
-func defaultChainCaveatValidator(ctx Context, chains [][]Caveat) []error {
+func defaultChainCaveatValidator(ctx Call, chains [][]Caveat) []error {
 	results := make([]error, len(chains))
 	for i, chain := range chains {
 		for _, cav := range chain {
@@ -248,7 +248,7 @@ func defaultChainCaveatValidator(ctx Context, chains [][]Caveat) []error {
 
 // validateCaveat is pretty much the same as cav.Validate(ctx), but it defers
 // to any validation scheme overrides via SetCaveatValidator.
-func validateCaveat(ctx Context, cav Caveat) error {
+func validateCaveat(ctx Call, cav Caveat) error {
 	caveatValidationSetup.mu.RLock()
 	fn := caveatValidationSetup.fn
 	finalized := caveatValidationSetup.finalized
@@ -347,7 +347,7 @@ func UnionOfBlessings(blessings ...Blessings) (Blessings, error) {
 
 var caveatValidationSetup struct {
 	mu        sync.RWMutex
-	fn        func(Context, Caveat) error
+	fn        func(Call, Caveat) error
 	finalized bool
 }
 
@@ -365,7 +365,7 @@ var caveatValidationSetup struct {
 //
 // If never invoked, the default Go API is used to associate validation
 // functions with caveats.
-func SetCaveatValidator(fn func(Context, Caveat) error) {
+func SetCaveatValidator(fn func(Call, Caveat) error) {
 	caveatValidationSetup.mu.Lock()
 	defer caveatValidationSetup.mu.Unlock()
 	if caveatValidationSetup.finalized {

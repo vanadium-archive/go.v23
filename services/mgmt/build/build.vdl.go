@@ -92,7 +92,7 @@ const UnsupportedOS = OperatingSystem("unsupported")
 type BuilderClientMethods interface {
 	// Build streams sources to the build server, which then attempts to
 	// build the sources and streams back the compiled binaries.
-	Build(ctx *context.T, Arch Architecture, OS OperatingSystem, opts ...ipc.CallOpt) (BuilderBuildCall, error)
+	Build(ctx *context.T, Arch Architecture, OS OperatingSystem, opts ...ipc.CallOpt) (BuilderBuildClientCall, error)
 	// Describe generates a description for a binary identified by
 	// the given Object name.
 	Describe(ctx *context.T, name string, opts ...ipc.CallOpt) (binary.Description, error)
@@ -127,17 +127,17 @@ func (c implBuilderClientStub) c(ctx *context.T) ipc.Client {
 	return v23.GetClient(ctx)
 }
 
-func (c implBuilderClientStub) Build(ctx *context.T, i0 Architecture, i1 OperatingSystem, opts ...ipc.CallOpt) (ocall BuilderBuildCall, err error) {
-	var call ipc.Call
+func (c implBuilderClientStub) Build(ctx *context.T, i0 Architecture, i1 OperatingSystem, opts ...ipc.CallOpt) (ocall BuilderBuildClientCall, err error) {
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Build", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
-	ocall = &implBuilderBuildCall{Call: call}
+	ocall = &implBuilderBuildClientCall{ClientCall: call}
 	return
 }
 
 func (c implBuilderClientStub) Describe(ctx *context.T, i0 string, opts ...ipc.CallOpt) (o0 binary.Description, err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Describe", []interface{}{i0}, opts...); err != nil {
 		return
 	}
@@ -178,8 +178,8 @@ type BuilderBuildClientStream interface {
 	}
 }
 
-// BuilderBuildCall represents the call returned from Builder.Build.
-type BuilderBuildCall interface {
+// BuilderBuildClientCall represents the call returned from Builder.Build.
+type BuilderBuildClientCall interface {
 	BuilderBuildClientStream
 	// Finish performs the equivalent of SendStream().Close, then blocks until
 	// the server is done, and returns the positional return values for the call.
@@ -194,13 +194,13 @@ type BuilderBuildCall interface {
 	Finish() ([]byte, error)
 }
 
-type implBuilderBuildCall struct {
-	ipc.Call
+type implBuilderBuildClientCall struct {
+	ipc.ClientCall
 	valRecv File
 	errRecv error
 }
 
-func (c *implBuilderBuildCall) RecvStream() interface {
+func (c *implBuilderBuildClientCall) RecvStream() interface {
 	Advance() bool
 	Value() File
 	Err() error
@@ -209,7 +209,7 @@ func (c *implBuilderBuildCall) RecvStream() interface {
 }
 
 type implBuilderBuildCallRecv struct {
-	c *implBuilderBuildCall
+	c *implBuilderBuildClientCall
 }
 
 func (c implBuilderBuildCallRecv) Advance() bool {
@@ -226,7 +226,7 @@ func (c implBuilderBuildCallRecv) Err() error {
 	}
 	return c.c.errRecv
 }
-func (c *implBuilderBuildCall) SendStream() interface {
+func (c *implBuilderBuildClientCall) SendStream() interface {
 	Send(item File) error
 	Close() error
 } {
@@ -234,7 +234,7 @@ func (c *implBuilderBuildCall) SendStream() interface {
 }
 
 type implBuilderBuildCallSend struct {
-	c *implBuilderBuildCall
+	c *implBuilderBuildClientCall
 }
 
 func (c implBuilderBuildCallSend) Send(item File) error {
@@ -243,8 +243,8 @@ func (c implBuilderBuildCallSend) Send(item File) error {
 func (c implBuilderBuildCallSend) Close() error {
 	return c.c.CloseSend()
 }
-func (c *implBuilderBuildCall) Finish() (o0 []byte, err error) {
-	err = c.Call.Finish(&o0)
+func (c *implBuilderBuildClientCall) Finish() (o0 []byte, err error) {
+	err = c.ClientCall.Finish(&o0)
 	return
 }
 
@@ -258,7 +258,7 @@ type BuilderServerMethods interface {
 	Build(ctx BuilderBuildContext, Arch Architecture, OS OperatingSystem) ([]byte, error)
 	// Describe generates a description for a binary identified by
 	// the given Object name.
-	Describe(ctx ipc.ServerContext, name string) (binary.Description, error)
+	Describe(ctx ipc.ServerCall, name string) (binary.Description, error)
 }
 
 // BuilderServerStubMethods is the server interface containing
@@ -271,7 +271,7 @@ type BuilderServerStubMethods interface {
 	Build(ctx *BuilderBuildContextStub, Arch Architecture, OS OperatingSystem) ([]byte, error)
 	// Describe generates a description for a binary identified by
 	// the given Object name.
-	Describe(ctx ipc.ServerContext, name string) (binary.Description, error)
+	Describe(ctx ipc.ServerCall, name string) (binary.Description, error)
 }
 
 // BuilderServerStub adds universal methods to BuilderServerStubMethods.
@@ -307,7 +307,7 @@ func (s implBuilderServerStub) Build(ctx *BuilderBuildContextStub, i0 Architectu
 	return s.impl.Build(ctx, i0, i1)
 }
 
-func (s implBuilderServerStub) Describe(ctx ipc.ServerContext, i0 string) (binary.Description, error) {
+func (s implBuilderServerStub) Describe(ctx ipc.ServerCall, i0 string) (binary.Description, error) {
 	return s.impl.Describe(ctx, i0)
 }
 
@@ -377,7 +377,7 @@ type BuilderBuildServerStream interface {
 
 // BuilderBuildContext represents the context passed to Builder.Build.
 type BuilderBuildContext interface {
-	ipc.ServerContext
+	ipc.ServerCall
 	BuilderBuildServerStream
 }
 

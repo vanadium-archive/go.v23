@@ -123,7 +123,7 @@ import (
 // that match a pattern.  See the package comments for details.
 type GlobWatcherClientMethods interface {
 	// WatchGlob returns a stream of changes that match a pattern.
-	WatchGlob(ctx *context.T, req types.GlobRequest, opts ...ipc.CallOpt) (GlobWatcherWatchGlobCall, error)
+	WatchGlob(ctx *context.T, req types.GlobRequest, opts ...ipc.CallOpt) (GlobWatcherWatchGlobClientCall, error)
 }
 
 // GlobWatcherClientStub adds universal methods to GlobWatcherClientMethods.
@@ -155,12 +155,12 @@ func (c implGlobWatcherClientStub) c(ctx *context.T) ipc.Client {
 	return v23.GetClient(ctx)
 }
 
-func (c implGlobWatcherClientStub) WatchGlob(ctx *context.T, i0 types.GlobRequest, opts ...ipc.CallOpt) (ocall GlobWatcherWatchGlobCall, err error) {
-	var call ipc.Call
+func (c implGlobWatcherClientStub) WatchGlob(ctx *context.T, i0 types.GlobRequest, opts ...ipc.CallOpt) (ocall GlobWatcherWatchGlobClientCall, err error) {
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "WatchGlob", []interface{}{i0}, opts...); err != nil {
 		return
 	}
-	ocall = &implGlobWatcherWatchGlobCall{Call: call}
+	ocall = &implGlobWatcherWatchGlobClientCall{ClientCall: call}
 	return
 }
 
@@ -180,8 +180,8 @@ type GlobWatcherWatchGlobClientStream interface {
 	}
 }
 
-// GlobWatcherWatchGlobCall represents the call returned from GlobWatcher.WatchGlob.
-type GlobWatcherWatchGlobCall interface {
+// GlobWatcherWatchGlobClientCall represents the call returned from GlobWatcher.WatchGlob.
+type GlobWatcherWatchGlobClientCall interface {
 	GlobWatcherWatchGlobClientStream
 	// Finish blocks until the server is done, and returns the positional return
 	// values for call.
@@ -196,13 +196,13 @@ type GlobWatcherWatchGlobCall interface {
 	Finish() error
 }
 
-type implGlobWatcherWatchGlobCall struct {
-	ipc.Call
+type implGlobWatcherWatchGlobClientCall struct {
+	ipc.ClientCall
 	valRecv types.Change
 	errRecv error
 }
 
-func (c *implGlobWatcherWatchGlobCall) RecvStream() interface {
+func (c *implGlobWatcherWatchGlobClientCall) RecvStream() interface {
 	Advance() bool
 	Value() types.Change
 	Err() error
@@ -211,7 +211,7 @@ func (c *implGlobWatcherWatchGlobCall) RecvStream() interface {
 }
 
 type implGlobWatcherWatchGlobCallRecv struct {
-	c *implGlobWatcherWatchGlobCall
+	c *implGlobWatcherWatchGlobClientCall
 }
 
 func (c implGlobWatcherWatchGlobCallRecv) Advance() bool {
@@ -228,8 +228,8 @@ func (c implGlobWatcherWatchGlobCallRecv) Err() error {
 	}
 	return c.c.errRecv
 }
-func (c *implGlobWatcherWatchGlobCall) Finish() (err error) {
-	err = c.Call.Finish()
+func (c *implGlobWatcherWatchGlobClientCall) Finish() (err error) {
+	err = c.ClientCall.Finish()
 	return
 }
 
@@ -326,7 +326,7 @@ type GlobWatcherWatchGlobServerStream interface {
 
 // GlobWatcherWatchGlobContext represents the context passed to GlobWatcher.WatchGlob.
 type GlobWatcherWatchGlobContext interface {
-	ipc.ServerContext
+	ipc.ServerCall
 	GlobWatcherWatchGlobServerStream
 }
 

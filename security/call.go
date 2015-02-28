@@ -9,8 +9,8 @@ import (
 	"v.io/v23/vdl"
 )
 
-// NewContext creates a Context.
-func NewContext(params *ContextParams) Context {
+// NewCall creates a Call.
+func NewCall(params *CallParams) Call {
 	ctx := &ctxImpl{*params}
 	if params.Timestamp.IsZero() {
 		ctx.params.Timestamp = time.Now()
@@ -18,9 +18,9 @@ func NewContext(params *ContextParams) Context {
 	return ctx
 }
 
-// ContextParams is used to create Context objects using the NewContext
+// CallParams is used to create Call objects using the NewCall
 // function.
-type ContextParams struct {
+type CallParams struct {
 	Timestamp  time.Time    // Time at which the authorization is to be checked.
 	Method     string       // Method being invoked.
 	MethodTags []*vdl.Value // Method tags, typically specified in VDL.
@@ -38,7 +38,7 @@ type ContextParams struct {
 }
 
 // Copy fills in p with a copy of the values in c.
-func (p *ContextParams) Copy(c Context) {
+func (p *CallParams) Copy(c Call) {
 	p.Timestamp = c.Timestamp()
 	p.Method = c.Method()
 	if tagslen := len(c.MethodTags()); tagslen == 0 {
@@ -62,7 +62,7 @@ func (p *ContextParams) Copy(c Context) {
 	p.Context = c.Context()
 }
 
-type ctxImpl struct{ params ContextParams }
+type ctxImpl struct{ params CallParams }
 
 func (c *ctxImpl) Timestamp() time.Time                   { return c.params.Timestamp }
 func (c *ctxImpl) Method() string                         { return c.params.Method }

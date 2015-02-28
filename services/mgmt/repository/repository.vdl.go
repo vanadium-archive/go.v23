@@ -133,7 +133,7 @@ func (c implApplicationClientStub) c(ctx *context.T) ipc.Client {
 }
 
 func (c implApplicationClientStub) Match(ctx *context.T, i0 []string, opts ...ipc.CallOpt) (o0 application.Envelope, err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Match", []interface{}{i0}, opts...); err != nil {
 		return
 	}
@@ -204,7 +204,7 @@ type ApplicationServerMethods interface {
 	// object name suffix) and if so, returns this envelope. If multiple
 	// profile matches are possible, the method returns the first
 	// matching profile, respecting the order of the input argument.
-	Match(ctx ipc.ServerContext, profiles []string) (application.Envelope, error)
+	Match(ctx ipc.ServerCall, profiles []string) (application.Envelope, error)
 }
 
 // ApplicationServerStubMethods is the server interface containing
@@ -244,7 +244,7 @@ type implApplicationServerStub struct {
 	gs *ipc.GlobState
 }
 
-func (s implApplicationServerStub) Match(ctx ipc.ServerContext, i0 []string) (application.Envelope, error) {
+func (s implApplicationServerStub) Match(ctx ipc.ServerCall, i0 []string) (application.Envelope, error) {
 	return s.impl.Match(ctx, i0)
 }
 
@@ -365,7 +365,7 @@ type BinaryClientMethods interface {
 	// error. If the Delete() method is invoked when the Download()
 	// method is in progress, the outcome the Download() method is
 	// undefined.
-	Download(ctx *context.T, part int32, opts ...ipc.CallOpt) (BinaryDownloadCall, error)
+	Download(ctx *context.T, part int32, opts ...ipc.CallOpt) (BinaryDownloadClientCall, error)
 	// DownloadURL returns a transient URL from which the binary
 	// identified by the object name suffix can be downloaded using the
 	// HTTP protocol. If not all parts of the binary have been uploaded,
@@ -381,7 +381,7 @@ type BinaryClientMethods interface {
 	// binary part has been uploaded, the method returns an error. If
 	// the same binary part is being uploaded by another caller, the
 	// method returns an error.
-	Upload(ctx *context.T, part int32, opts ...ipc.CallOpt) (BinaryUploadCall, error)
+	Upload(ctx *context.T, part int32, opts ...ipc.CallOpt) (BinaryUploadClientCall, error)
 }
 
 // BinaryClientStub adds universal methods to BinaryClientMethods.
@@ -416,7 +416,7 @@ func (c implBinaryClientStub) c(ctx *context.T) ipc.Client {
 }
 
 func (c implBinaryClientStub) Create(ctx *context.T, i0 int32, i1 MediaInfo, opts ...ipc.CallOpt) (err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Create", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
@@ -425,7 +425,7 @@ func (c implBinaryClientStub) Create(ctx *context.T, i0 int32, i1 MediaInfo, opt
 }
 
 func (c implBinaryClientStub) Delete(ctx *context.T, opts ...ipc.CallOpt) (err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Delete", nil, opts...); err != nil {
 		return
 	}
@@ -433,17 +433,17 @@ func (c implBinaryClientStub) Delete(ctx *context.T, opts ...ipc.CallOpt) (err e
 	return
 }
 
-func (c implBinaryClientStub) Download(ctx *context.T, i0 int32, opts ...ipc.CallOpt) (ocall BinaryDownloadCall, err error) {
-	var call ipc.Call
+func (c implBinaryClientStub) Download(ctx *context.T, i0 int32, opts ...ipc.CallOpt) (ocall BinaryDownloadClientCall, err error) {
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Download", []interface{}{i0}, opts...); err != nil {
 		return
 	}
-	ocall = &implBinaryDownloadCall{Call: call}
+	ocall = &implBinaryDownloadClientCall{ClientCall: call}
 	return
 }
 
 func (c implBinaryClientStub) DownloadURL(ctx *context.T, opts ...ipc.CallOpt) (o0 string, o1 int64, err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "DownloadURL", nil, opts...); err != nil {
 		return
 	}
@@ -452,7 +452,7 @@ func (c implBinaryClientStub) DownloadURL(ctx *context.T, opts ...ipc.CallOpt) (
 }
 
 func (c implBinaryClientStub) Stat(ctx *context.T, opts ...ipc.CallOpt) (o0 []binary.PartInfo, o1 MediaInfo, err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Stat", nil, opts...); err != nil {
 		return
 	}
@@ -460,12 +460,12 @@ func (c implBinaryClientStub) Stat(ctx *context.T, opts ...ipc.CallOpt) (o0 []bi
 	return
 }
 
-func (c implBinaryClientStub) Upload(ctx *context.T, i0 int32, opts ...ipc.CallOpt) (ocall BinaryUploadCall, err error) {
-	var call ipc.Call
+func (c implBinaryClientStub) Upload(ctx *context.T, i0 int32, opts ...ipc.CallOpt) (ocall BinaryUploadClientCall, err error) {
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Upload", []interface{}{i0}, opts...); err != nil {
 		return
 	}
-	ocall = &implBinaryUploadCall{Call: call}
+	ocall = &implBinaryUploadClientCall{ClientCall: call}
 	return
 }
 
@@ -485,8 +485,8 @@ type BinaryDownloadClientStream interface {
 	}
 }
 
-// BinaryDownloadCall represents the call returned from Binary.Download.
-type BinaryDownloadCall interface {
+// BinaryDownloadClientCall represents the call returned from Binary.Download.
+type BinaryDownloadClientCall interface {
 	BinaryDownloadClientStream
 	// Finish blocks until the server is done, and returns the positional return
 	// values for call.
@@ -501,13 +501,13 @@ type BinaryDownloadCall interface {
 	Finish() error
 }
 
-type implBinaryDownloadCall struct {
-	ipc.Call
+type implBinaryDownloadClientCall struct {
+	ipc.ClientCall
 	valRecv []byte
 	errRecv error
 }
 
-func (c *implBinaryDownloadCall) RecvStream() interface {
+func (c *implBinaryDownloadClientCall) RecvStream() interface {
 	Advance() bool
 	Value() []byte
 	Err() error
@@ -516,7 +516,7 @@ func (c *implBinaryDownloadCall) RecvStream() interface {
 }
 
 type implBinaryDownloadCallRecv struct {
-	c *implBinaryDownloadCall
+	c *implBinaryDownloadClientCall
 }
 
 func (c implBinaryDownloadCallRecv) Advance() bool {
@@ -532,8 +532,8 @@ func (c implBinaryDownloadCallRecv) Err() error {
 	}
 	return c.c.errRecv
 }
-func (c *implBinaryDownloadCall) Finish() (err error) {
-	err = c.Call.Finish()
+func (c *implBinaryDownloadClientCall) Finish() (err error) {
+	err = c.ClientCall.Finish()
 	return
 }
 
@@ -558,8 +558,8 @@ type BinaryUploadClientStream interface {
 	}
 }
 
-// BinaryUploadCall represents the call returned from Binary.Upload.
-type BinaryUploadCall interface {
+// BinaryUploadClientCall represents the call returned from Binary.Upload.
+type BinaryUploadClientCall interface {
 	BinaryUploadClientStream
 	// Finish performs the equivalent of SendStream().Close, then blocks until
 	// the server is done, and returns the positional return values for the call.
@@ -574,11 +574,11 @@ type BinaryUploadCall interface {
 	Finish() error
 }
 
-type implBinaryUploadCall struct {
-	ipc.Call
+type implBinaryUploadClientCall struct {
+	ipc.ClientCall
 }
 
-func (c *implBinaryUploadCall) SendStream() interface {
+func (c *implBinaryUploadClientCall) SendStream() interface {
 	Send(item []byte) error
 	Close() error
 } {
@@ -586,7 +586,7 @@ func (c *implBinaryUploadCall) SendStream() interface {
 }
 
 type implBinaryUploadCallSend struct {
-	c *implBinaryUploadCall
+	c *implBinaryUploadClientCall
 }
 
 func (c implBinaryUploadCallSend) Send(item []byte) error {
@@ -595,8 +595,8 @@ func (c implBinaryUploadCallSend) Send(item []byte) error {
 func (c implBinaryUploadCallSend) Close() error {
 	return c.c.CloseSend()
 }
-func (c *implBinaryUploadCall) Finish() (err error) {
-	err = c.Call.Finish()
+func (c *implBinaryUploadClientCall) Finish() (err error) {
+	err = c.ClientCall.Finish()
 	return
 }
 
@@ -672,11 +672,11 @@ type BinaryServerMethods interface {
 	// mediaInfo argument contains metadata for the binary. If the suffix
 	// identifies a binary that has already been created, the method
 	// returns an error.
-	Create(ctx ipc.ServerContext, nparts int32, mediaInfo MediaInfo) error
+	Create(ctx ipc.ServerCall, nparts int32, mediaInfo MediaInfo) error
 	// Delete deletes the binary identified by the object name
 	// suffix. If the binary that has not been created, the method
 	// returns an error.
-	Delete(ipc.ServerContext) error
+	Delete(ipc.ServerCall) error
 	// Download opens a stream that can used for downloading the given
 	// part of the binary identified by the object name suffix. If the
 	// binary part has not been uploaded, the method returns an
@@ -688,11 +688,11 @@ type BinaryServerMethods interface {
 	// identified by the object name suffix can be downloaded using the
 	// HTTP protocol. If not all parts of the binary have been uploaded,
 	// the method returns an error.
-	DownloadURL(ipc.ServerContext) (URL string, TTL int64, err error)
+	DownloadURL(ipc.ServerCall) (URL string, TTL int64, err error)
 	// Stat returns information describing the parts of the binary
 	// identified by the object name suffix, and its RFC 2046 media type.
 	// If the binary has not been created, the method returns an error.
-	Stat(ipc.ServerContext) (Parts []binary.PartInfo, MediaInfo MediaInfo, err error)
+	Stat(ipc.ServerCall) (Parts []binary.PartInfo, MediaInfo MediaInfo, err error)
 	// Upload opens a stream that can be used for uploading the given
 	// part of the binary identified by the object name suffix. If the
 	// binary has not been created, the method returns an error. If the
@@ -756,11 +756,11 @@ type BinaryServerStubMethods interface {
 	// mediaInfo argument contains metadata for the binary. If the suffix
 	// identifies a binary that has already been created, the method
 	// returns an error.
-	Create(ctx ipc.ServerContext, nparts int32, mediaInfo MediaInfo) error
+	Create(ctx ipc.ServerCall, nparts int32, mediaInfo MediaInfo) error
 	// Delete deletes the binary identified by the object name
 	// suffix. If the binary that has not been created, the method
 	// returns an error.
-	Delete(ipc.ServerContext) error
+	Delete(ipc.ServerCall) error
 	// Download opens a stream that can used for downloading the given
 	// part of the binary identified by the object name suffix. If the
 	// binary part has not been uploaded, the method returns an
@@ -772,11 +772,11 @@ type BinaryServerStubMethods interface {
 	// identified by the object name suffix can be downloaded using the
 	// HTTP protocol. If not all parts of the binary have been uploaded,
 	// the method returns an error.
-	DownloadURL(ipc.ServerContext) (URL string, TTL int64, err error)
+	DownloadURL(ipc.ServerCall) (URL string, TTL int64, err error)
 	// Stat returns information describing the parts of the binary
 	// identified by the object name suffix, and its RFC 2046 media type.
 	// If the binary has not been created, the method returns an error.
-	Stat(ipc.ServerContext) (Parts []binary.PartInfo, MediaInfo MediaInfo, err error)
+	Stat(ipc.ServerCall) (Parts []binary.PartInfo, MediaInfo MediaInfo, err error)
 	// Upload opens a stream that can be used for uploading the given
 	// part of the binary identified by the object name suffix. If the
 	// binary has not been created, the method returns an error. If the
@@ -817,11 +817,11 @@ type implBinaryServerStub struct {
 	gs *ipc.GlobState
 }
 
-func (s implBinaryServerStub) Create(ctx ipc.ServerContext, i0 int32, i1 MediaInfo) error {
+func (s implBinaryServerStub) Create(ctx ipc.ServerCall, i0 int32, i1 MediaInfo) error {
 	return s.impl.Create(ctx, i0, i1)
 }
 
-func (s implBinaryServerStub) Delete(ctx ipc.ServerContext) error {
+func (s implBinaryServerStub) Delete(ctx ipc.ServerCall) error {
 	return s.impl.Delete(ctx)
 }
 
@@ -829,11 +829,11 @@ func (s implBinaryServerStub) Download(ctx *BinaryDownloadContextStub, i0 int32)
 	return s.impl.Download(ctx, i0)
 }
 
-func (s implBinaryServerStub) DownloadURL(ctx ipc.ServerContext) (string, int64, error) {
+func (s implBinaryServerStub) DownloadURL(ctx ipc.ServerCall) (string, int64, error) {
 	return s.impl.DownloadURL(ctx)
 }
 
-func (s implBinaryServerStub) Stat(ctx ipc.ServerContext) ([]binary.PartInfo, MediaInfo, error) {
+func (s implBinaryServerStub) Stat(ctx ipc.ServerCall) ([]binary.PartInfo, MediaInfo, error) {
 	return s.impl.Stat(ctx)
 }
 
@@ -925,7 +925,7 @@ type BinaryDownloadServerStream interface {
 
 // BinaryDownloadContext represents the context passed to Binary.Download.
 type BinaryDownloadContext interface {
-	ipc.ServerContext
+	ipc.ServerCall
 	BinaryDownloadServerStream
 }
 
@@ -973,7 +973,7 @@ type BinaryUploadServerStream interface {
 
 // BinaryUploadContext represents the context passed to Binary.Upload.
 type BinaryUploadContext interface {
-	ipc.ServerContext
+	ipc.ServerCall
 	BinaryUploadServerStream
 }
 
@@ -1065,7 +1065,7 @@ func (c implProfileClientStub) c(ctx *context.T) ipc.Client {
 }
 
 func (c implProfileClientStub) Label(ctx *context.T, opts ...ipc.CallOpt) (o0 string, err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Label", nil, opts...); err != nil {
 		return
 	}
@@ -1074,7 +1074,7 @@ func (c implProfileClientStub) Label(ctx *context.T, opts ...ipc.CallOpt) (o0 st
 }
 
 func (c implProfileClientStub) Description(ctx *context.T, opts ...ipc.CallOpt) (o0 string, err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Description", nil, opts...); err != nil {
 		return
 	}
@@ -1094,10 +1094,10 @@ type ProfileServerMethods interface {
 	// e.g. "linux-media". The label can be used to uniquely identify
 	// the profile (for the purpose of matching application binaries and
 	// devices).
-	Label(ipc.ServerContext) (string, error)
+	Label(ipc.ServerCall) (string, error)
 	// Description is a free-text description of the profile, meant for
 	// human consumption.
-	Description(ipc.ServerContext) (string, error)
+	Description(ipc.ServerCall) (string, error)
 }
 
 // ProfileServerStubMethods is the server interface containing
@@ -1135,11 +1135,11 @@ type implProfileServerStub struct {
 	gs   *ipc.GlobState
 }
 
-func (s implProfileServerStub) Label(ctx ipc.ServerContext) (string, error) {
+func (s implProfileServerStub) Label(ctx ipc.ServerCall) (string, error) {
 	return s.impl.Label(ctx)
 }
 
-func (s implProfileServerStub) Description(ctx ipc.ServerContext) (string, error) {
+func (s implProfileServerStub) Description(ctx ipc.ServerCall) (string, error) {
 	return s.impl.Description(ctx)
 }
 

@@ -54,7 +54,7 @@ func newCaveat(c Caveat, err error) Caveat {
 	return c
 }
 
-// Caveat that validates iff Context.Suffix matches the string.
+// Caveat that validates iff Call.Suffix matches the string.
 //
 // Since at the time of this writing, it was not clear that we want to make caveats on
 // suffixes generally available, this type is implemented in this test file.
@@ -97,7 +97,7 @@ func addToRoots(t *testing.T, p Principal, b Blessings) {
 	}
 }
 
-func checkBlessings(b Blessings, c Context, want ...string) error {
+func checkBlessings(b Blessings, c Call, want ...string) error {
 	// Validate the integrity of the bits.
 	buf, err := vom.Encode(MarshalBlessings(b))
 	if err != nil {
@@ -115,7 +115,7 @@ func checkBlessings(b Blessings, c Context, want ...string) error {
 		return fmt.Errorf("reflect.DeepEqual of %#v and %#v failed after roundtripping", decoded, b)
 	}
 	// And now check them under the right context
-	got, _ := b.ForContext(c)
+	got, _ := b.ForCall(c)
 	if !reflectutil.DeepEqual(got, want, &reflectutil.DeepEqualOpts{SliceEqNilEmpty: true}) {
 		return fmt.Errorf("Got blessings %v, want %v", got, want)
 	}
@@ -136,7 +136,7 @@ func matchesError(got error, want string) error {
 }
 
 func init() {
-	RegisterCaveatValidator(suffixCaveat, func(ctx Context, suffix string) error {
+	RegisterCaveatValidator(suffixCaveat, func(ctx Call, suffix string) error {
 		if suffix != ctx.Suffix() {
 			return fmt.Errorf("suffixCaveat not met")
 		}

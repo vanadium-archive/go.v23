@@ -20,8 +20,8 @@ func TestBlessSelf(t *testing.T) {
 		tp = newPrincipal(t) // principal where blessings are tested
 		p  = newPrincipal(t)
 
-		ctx = func(method string) Context {
-			return NewContext(&ContextParams{
+		ctx = func(method string) Call {
+			return NewCall(&CallParams{
 				LocalPrincipal: tp,
 				Method:         method,
 			})
@@ -58,8 +58,8 @@ func TestBless(t *testing.T) {
 		p2    = newPrincipal(t)
 		p3    = newPrincipal(t)
 		alice = blessSelf(t, p1, "alice")
-		ctx   = func(method, suffix string) Context {
-			return NewContext(&ContextParams{
+		ctx   = func(method, suffix string) Call {
+			return NewCall(&CallParams{
 				LocalPrincipal: tp,
 				Method:         method,
 				Suffix:         suffix,
@@ -208,7 +208,7 @@ func TestBlessings(t *testing.T) {
 
 	var (
 		tp  = newPrincipal(t) // principal where blessings are tested
-		ctx = NewContext(&ContextParams{LocalPrincipal: tp})
+		ctx = NewCall(&CallParams{LocalPrincipal: tp})
 
 		p     = newPrincipal(t)
 		p2    = newPrincipal(t).PublicKey()
@@ -313,7 +313,7 @@ func TestCreatePrincipalWithNilStoreAndRoots(t *testing.T) {
 	}
 
 	// Test that no blessings are trusted by the principal.
-	ctx := NewContext(&ContextParams{LocalPrincipal: p})
+	ctx := NewCall(&CallParams{LocalPrincipal: p})
 	if err := checkBlessings(blessSelf(t, p, "alice"), ctx); err != nil {
 		t.Error(err)
 	}
@@ -431,10 +431,10 @@ func TestUnionOfBlessings(t *testing.T) {
 		carol = blessSelf(t, p, "carol")
 		empty Blessings
 
-		// ctx returns a Context where the LocalPrincipal recognizes
+		// ctx returns a Call where the LocalPrincipal recognizes
 		// all the blessings presented in 'recognized'.
-		ctx = func(method, suffix string, recognized ...Blessings) Context {
-			params := &ContextParams{
+		ctx = func(method, suffix string, recognized ...Blessings) Call {
+			params := &CallParams{
 				Method:         method,
 				Suffix:         suffix,
 				LocalPrincipal: newPrincipal(t),
@@ -442,7 +442,7 @@ func TestUnionOfBlessings(t *testing.T) {
 			for _, r := range recognized {
 				addToRoots(t, params.LocalPrincipal, r)
 			}
-			return NewContext(params)
+			return NewCall(params)
 		}
 	)
 	alicefriend, err := p1.Bless(p.PublicKey(), alice, "friend", newCaveat(MethodCaveat("Method", "AliceMethod")))
@@ -529,7 +529,7 @@ func TestCertificateCompositionAttack(t *testing.T) {
 		bob   = blessSelf(t, p2, "bob")
 		p3    = newPrincipal(t)
 		p4    = newPrincipal(t)
-		ctx   = NewContext(&ContextParams{Method: "Foo", LocalPrincipal: tp})
+		ctx   = NewCall(&CallParams{Method: "Foo", LocalPrincipal: tp})
 	)
 	addToRoots(t, tp, alice)
 	addToRoots(t, tp, bob)
@@ -585,7 +585,7 @@ func TestCertificateTamperingAttack(t *testing.T) {
 		p3 = newPrincipal(t)
 
 		alice = blessSelf(t, p1, "alice")
-		ctx   = NewContext(&ContextParams{LocalPrincipal: tp})
+		ctx   = NewCall(&CallParams{LocalPrincipal: tp})
 	)
 	addToRoots(t, tp, alice)
 
@@ -615,7 +615,7 @@ func TestCertificateChainsTamperingAttack(t *testing.T) {
 		alice = blessSelf(t, p1, "alice")
 		bob   = blessSelf(t, p2, "bob")
 
-		ctx = NewContext(&ContextParams{LocalPrincipal: tp})
+		ctx = NewCall(&CallParams{LocalPrincipal: tp})
 	)
 	addToRoots(t, tp, alice)
 	addToRoots(t, tp, bob)
@@ -787,7 +787,7 @@ func TestCustomChainValidator(t *testing.T) {
 	}
 	falseResultErr := fmt.Errorf("False caveat result")
 
-	validator := func(ctx Context, cavs [][]Caveat) []error {
+	validator := func(ctx Call, cavs [][]Caveat) []error {
 		results := make([]error, len(cavs))
 		for i, chain := range cavs {
 			for _, cav := range chain {
@@ -813,7 +813,7 @@ func TestCustomChainValidator(t *testing.T) {
 
 	chainCtx := context.WithValue(vctx, "customChainValidator", validator)
 
-	ctx := NewContext(&ContextParams{
+	ctx := NewCall(&CallParams{
 		LocalPrincipal: p,
 		Context:        chainCtx,
 	})
@@ -850,7 +850,7 @@ func TestCustomChainValidator(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	results, infos := bunion.ForContext(ctx)
+	results, infos := bunion.ForCall(ctx)
 	expectedFailInfos := map[string]error{
 		"falsetrue":  falseResultErr,
 		"true/false": falseResultErr,
@@ -860,13 +860,13 @@ func TestCustomChainValidator(t *testing.T) {
 		failInfos[info.Blessing] = info.Err
 	}
 	if !reflect.DeepEqual(failInfos, expectedFailInfos) {
-		t.Fatalf("Unexpected failinfos from ForContext. Got %v, want %v", failInfos, expectedFailInfos)
+		t.Fatalf("Unexpected failinfos from ForCall. Got %v, want %v", failInfos, expectedFailInfos)
 	}
 	expectedResults := []string{"unrestricted", "truetrue", "true/true"}
 	sort.Strings(results)
 	sort.Strings(expectedResults)
 	if !reflect.DeepEqual(results, expectedResults) {
-		t.Fatalf("Unexpected results from ForContext. Got %v, want %v", results, expectedResults)
+		t.Fatalf("Unexpected results from ForCall. Got %v, want %v", results, expectedResults)
 	}
 }
 
@@ -882,13 +882,13 @@ func TestSetCaveatValidator(t *testing.T) {
 	defer clear() // To undo the SetCaveatValidator call in this test.
 
 	type ctxcav struct {
-		ctx Context
+		ctx Call
 		cav Caveat
 	}
 	var (
 		p      = newPrincipal(t)
 		c      = make(chan ctxcav, 1)
-		ctx    = NewContext(&ContextParams{LocalPrincipal: p})
+		ctx    = NewCall(&CallParams{LocalPrincipal: p})
 		cav    = newCaveat(MethodCaveat("Method"))
 		b, err = p.BlessSelf("alice", cav)
 	)
@@ -896,12 +896,12 @@ func TestSetCaveatValidator(t *testing.T) {
 		t.Fatal(err)
 	}
 	p.AddToRoots(b)
-	SetCaveatValidator(func(ctx Context, cav Caveat) error {
+	SetCaveatValidator(func(ctx Call, cav Caveat) error {
 		c <- ctxcav{ctx, cav}
 		return nil
 	})
 	// The function registered above should be invoked.
-	b.ForContext(ctx)
+	b.ForCall(ctx)
 	select {
 	case <-time.Tick(10 * time.Second):
 		t.Fatalf("Caveat validation function not invoked")
@@ -928,7 +928,7 @@ func TestSetCaveatValidatorAfterCaveatUse(t *testing.T) {
 	// Validate caveats somehow:
 	var (
 		p      = newPrincipal(t)
-		ctx    = NewContext(&ContextParams{LocalPrincipal: p})
+		ctx    = NewCall(&CallParams{LocalPrincipal: p})
 		cav    = newCaveat(MethodCaveat("Method"))
 		b, err = p.BlessSelf("alice", cav)
 	)
@@ -937,7 +937,7 @@ func TestSetCaveatValidatorAfterCaveatUse(t *testing.T) {
 	}
 	// Trigger caveat validation:
 	p.AddToRoots(b)
-	b.ForContext(ctx)
+	b.ForCall(ctx)
 	// Now SetValidatorCaveat should fail.
 	func() {
 		defer func() {
@@ -949,7 +949,7 @@ func TestSetCaveatValidatorAfterCaveatUse(t *testing.T) {
 	}()
 }
 
-func TestBlessingsForContext(t *testing.T) {
+func TestBlessingsForCall(t *testing.T) {
 	var (
 		p          = newPrincipal(t)
 		mkBlessing = func(name string, cav ...Caveat) Blessings {
@@ -968,18 +968,18 @@ func TestBlessingsForContext(t *testing.T) {
 	}
 
 	// b1's alice is recognized in the right context.
-	if accepted, rejected := b1.ForContext(NewContext(&ContextParams{LocalPrincipal: p, Method: "Method"})); !reflect.DeepEqual(accepted, []string{"alice"}) || len(rejected) > 0 {
+	if accepted, rejected := b1.ForCall(NewCall(&CallParams{LocalPrincipal: p, Method: "Method"})); !reflect.DeepEqual(accepted, []string{"alice"}) || len(rejected) > 0 {
 		t.Errorf("Got (%v, %v), want ([alice], nil)", accepted, rejected)
 	}
 	// b1's alice is rejected when caveats are not met.
-	if accepted, rejected := b1.ForContext(NewContext(&ContextParams{LocalPrincipal: p, Method: "Blah"})); len(accepted) > 0 ||
+	if accepted, rejected := b1.ForCall(NewCall(&CallParams{LocalPrincipal: p, Method: "Blah"})); len(accepted) > 0 ||
 		len(rejected) != 1 ||
 		rejected[0].Blessing != "alice" ||
 		!verror.Is(rejected[0].Err, ErrCaveatValidation.ID) {
 		t.Errorf("Got (%v, %v), want ([], [alice: <caveat validation error>])", accepted, rejected)
 	}
 	// b2 is not recognized because the roots aren't recognized.
-	if accepted, rejected := b2.ForContext(NewContext(&ContextParams{LocalPrincipal: p, Method: "Method"})); len(accepted) > 0 ||
+	if accepted, rejected := b2.ForCall(NewCall(&CallParams{LocalPrincipal: p, Method: "Method"})); len(accepted) > 0 ||
 		len(rejected) != 1 ||
 		rejected[0].Blessing != "bob" ||
 		!verror.Is(rejected[0].Err, ErrUntrustedRoot.ID) {

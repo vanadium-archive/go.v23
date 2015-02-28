@@ -60,8 +60,8 @@ func (r *caveatRegistry) register(d CaveatDescriptor, validator interface{}) err
 		return fmt.Errorf("invalid caveat descriptor: vdl.Type(%v) cannot be converted to a Go type", d.ParamType)
 	}
 	var (
-		rtErr     = reflect.TypeOf((*error)(nil)).Elem()
-		rtContext = reflect.TypeOf((*Context)(nil)).Elem()
+		rtErr  = reflect.TypeOf((*error)(nil)).Elem()
+		rtCall = reflect.TypeOf((*Call)(nil)).Elem()
 	)
 	if got, want := fn.Kind(), reflect.Func; got != want {
 		return fmt.Errorf("invalid caveat validator: must be %v, not %v", want, got)
@@ -75,7 +75,7 @@ func (r *caveatRegistry) register(d CaveatDescriptor, validator interface{}) err
 	if got, want := fn.Type().NumIn(), 2; got != want {
 		return fmt.Errorf("invalid caveat validator: expected %d inputs, not %d", want, got)
 	}
-	if got, want := fn.Type().In(0), rtContext; got != want {
+	if got, want := fn.Type().In(0), rtCall; got != want {
 		return fmt.Errorf("invalid caveat validator: first argument must be %v, not %v", want, got)
 	}
 	if got, want := fn.Type().In(1), param; got != want {
@@ -92,12 +92,12 @@ func (r *caveatRegistry) lookup(uid uniqueid.Id) (registryEntry, bool) {
 	return entry, exists
 }
 
-func (r *caveatRegistry) validate(uid uniqueid.Id, ctx Context, paramvom []byte) error {
+func (r *caveatRegistry) validate(uid uniqueid.Id, ctx Call, paramvom []byte) error {
 	entry, exists := r.lookup(uid)
 	// TODO(ashankar): Figure out a way to get the appropriate language
-	// here. Perhaps security.Context should include context.T? Or maybe,
+	// here. Perhaps security.Call should include context.T? Or maybe,
 	// check if ctx happens to include it (for example, if ctx is
-	// ipc.ServerContext)?
+	// ipc.ServerCall)?
 	if !exists {
 		return NewErrCaveatNotRegistered(nil, uid)
 	}
@@ -174,7 +174,7 @@ func (c *Caveat) digest(hash Hash) []byte {
 
 // Validate tests if c is satisfied under ctx, returning nil if it is or an
 // error otherwise.
-func (c *Caveat) Validate(ctx Context) error {
+func (c *Caveat) Validate(ctx Call) error {
 	return registry.validate(c.Id, ctx, c.ParamVom)
 }
 
@@ -256,7 +256,7 @@ func (c *publicKeyThirdPartyCaveat) Requirements() ThirdPartyRequirements {
 	return c.DischargerRequirements
 }
 
-func (c *publicKeyThirdPartyCaveat) Dischargeable(ctx Context) error {
+func (c *publicKeyThirdPartyCaveat) Dischargeable(ctx Call) error {
 	// Validate the caveats embedded within this third-party caveat.
 	for _, cav := range c.Caveats {
 		if err := cav.Validate(ctx); err != nil {

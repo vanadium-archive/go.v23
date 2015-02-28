@@ -26,7 +26,7 @@ type obj struct {
 	children []string
 }
 
-func (o obj) GlobChildren__(ServerContext) (<-chan string, error) {
+func (o obj) GlobChildren__(ServerCall) (<-chan string, error) {
 	ch := make(chan string, len(o.children))
 	for _, v := range o.children {
 		ch <- v

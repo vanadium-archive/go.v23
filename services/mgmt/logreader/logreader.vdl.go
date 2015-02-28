@@ -37,7 +37,7 @@ type LogFileClientMethods interface {
 	//
 	// The returned error will be EOF if and only if ReadLog reached the
 	// end of the file and no log entries were returned.
-	ReadLog(ctx *context.T, StartPos int64, NumEntries int32, Follow bool, opts ...ipc.CallOpt) (LogFileReadLogCall, error)
+	ReadLog(ctx *context.T, StartPos int64, NumEntries int32, Follow bool, opts ...ipc.CallOpt) (LogFileReadLogClientCall, error)
 }
 
 // LogFileClientStub adds universal methods to LogFileClientMethods.
@@ -70,7 +70,7 @@ func (c implLogFileClientStub) c(ctx *context.T) ipc.Client {
 }
 
 func (c implLogFileClientStub) Size(ctx *context.T, opts ...ipc.CallOpt) (o0 int64, err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Size", nil, opts...); err != nil {
 		return
 	}
@@ -78,12 +78,12 @@ func (c implLogFileClientStub) Size(ctx *context.T, opts ...ipc.CallOpt) (o0 int
 	return
 }
 
-func (c implLogFileClientStub) ReadLog(ctx *context.T, i0 int64, i1 int32, i2 bool, opts ...ipc.CallOpt) (ocall LogFileReadLogCall, err error) {
-	var call ipc.Call
+func (c implLogFileClientStub) ReadLog(ctx *context.T, i0 int64, i1 int32, i2 bool, opts ...ipc.CallOpt) (ocall LogFileReadLogClientCall, err error) {
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "ReadLog", []interface{}{i0, i1, i2}, opts...); err != nil {
 		return
 	}
-	ocall = &implLogFileReadLogCall{Call: call}
+	ocall = &implLogFileReadLogClientCall{ClientCall: call}
 	return
 }
 
@@ -103,8 +103,8 @@ type LogFileReadLogClientStream interface {
 	}
 }
 
-// LogFileReadLogCall represents the call returned from LogFile.ReadLog.
-type LogFileReadLogCall interface {
+// LogFileReadLogClientCall represents the call returned from LogFile.ReadLog.
+type LogFileReadLogClientCall interface {
 	LogFileReadLogClientStream
 	// Finish blocks until the server is done, and returns the positional return
 	// values for call.
@@ -119,13 +119,13 @@ type LogFileReadLogCall interface {
 	Finish() (int64, error)
 }
 
-type implLogFileReadLogCall struct {
-	ipc.Call
+type implLogFileReadLogClientCall struct {
+	ipc.ClientCall
 	valRecv types.LogEntry
 	errRecv error
 }
 
-func (c *implLogFileReadLogCall) RecvStream() interface {
+func (c *implLogFileReadLogClientCall) RecvStream() interface {
 	Advance() bool
 	Value() types.LogEntry
 	Err() error
@@ -134,7 +134,7 @@ func (c *implLogFileReadLogCall) RecvStream() interface {
 }
 
 type implLogFileReadLogCallRecv struct {
-	c *implLogFileReadLogCall
+	c *implLogFileReadLogClientCall
 }
 
 func (c implLogFileReadLogCallRecv) Advance() bool {
@@ -151,8 +151,8 @@ func (c implLogFileReadLogCallRecv) Err() error {
 	}
 	return c.c.errRecv
 }
-func (c *implLogFileReadLogCall) Finish() (o0 int64, err error) {
-	err = c.Call.Finish(&o0)
+func (c *implLogFileReadLogClientCall) Finish() (o0 int64, err error) {
+	err = c.ClientCall.Finish(&o0)
 	return
 }
 
@@ -162,7 +162,7 @@ func (c *implLogFileReadLogCall) Finish() (o0 int64, err error) {
 // LogFile can be used to access log files remotely.
 type LogFileServerMethods interface {
 	// Size returns the number of bytes in the receiving object.
-	Size(ipc.ServerContext) (int64, error)
+	Size(ipc.ServerCall) (int64, error)
 	// ReadLog receives up to NumEntries log entries starting at the
 	// StartPos offset (in bytes) in the receiving object. Each stream chunk
 	// contains one log entry.
@@ -185,7 +185,7 @@ type LogFileServerMethods interface {
 // is the streaming methods.
 type LogFileServerStubMethods interface {
 	// Size returns the number of bytes in the receiving object.
-	Size(ipc.ServerContext) (int64, error)
+	Size(ipc.ServerCall) (int64, error)
 	// ReadLog receives up to NumEntries log entries starting at the
 	// StartPos offset (in bytes) in the receiving object. Each stream chunk
 	// contains one log entry.
@@ -231,7 +231,7 @@ type implLogFileServerStub struct {
 	gs   *ipc.GlobState
 }
 
-func (s implLogFileServerStub) Size(ctx ipc.ServerContext) (int64, error) {
+func (s implLogFileServerStub) Size(ctx ipc.ServerCall) (int64, error) {
 	return s.impl.Size(ctx)
 }
 
@@ -293,7 +293,7 @@ type LogFileReadLogServerStream interface {
 
 // LogFileReadLogContext represents the context passed to LogFile.ReadLog.
 type LogFileReadLogContext interface {
-	ipc.ServerContext
+	ipc.ServerCall
 	LogFileReadLogServerStream
 }
 

@@ -14,7 +14,7 @@ import (
 // Lists (ACLs) associated with the set of relevant tags.
 //
 // The set of relevant tags is the subset of tags associated with the
-// method (security.Context.MethodTags) that have the same type as tagType.
+// method (security.Call.MethodTags) that have the same type as tagType.
 // Currently, tagType.Kind must be reflect.String, i.e., only tags that are
 // named string types are supported.
 //
@@ -103,13 +103,13 @@ type authorizer struct {
 	tagType *vdl.Type
 }
 
-func (a *authorizer) Authorize(ctx security.Context) error {
+func (a *authorizer) Authorize(ctx security.Call) error {
 	// "Self-RPCs" are always authorized.
 	if l, r := ctx.LocalBlessings().PublicKey(), ctx.RemoteBlessings().PublicKey(); l != nil && r != nil && reflect.DeepEqual(l, r) {
 		return nil
 	}
 
-	blessings, invalid := ctx.RemoteBlessings().ForContext(ctx)
+	blessings, invalid := ctx.RemoteBlessings().ForCall(ctx)
 	grant := false
 	if len(ctx.MethodTags()) == 0 {
 		// The following error message leaks the fact that the server is likely
@@ -135,7 +135,7 @@ type fileAuthorizer struct {
 	tagType  *vdl.Type
 }
 
-func (a *fileAuthorizer) Authorize(ctx security.Context) error {
+func (a *fileAuthorizer) Authorize(ctx security.Call) error {
 	acl, err := loadTaggedACLMapFromFile(a.filename)
 	if err != nil {
 		// TODO(ashankar): Information leak?

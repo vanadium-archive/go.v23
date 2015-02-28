@@ -31,10 +31,10 @@ type PProfClientMethods interface {
 	// addresses that pprof needs. Passing debug=1 adds comments translating
 	// addresses to function names and line numbers, so that a programmer
 	// can read the profile without tools.
-	Profile(ctx *context.T, name string, debug int32, opts ...ipc.CallOpt) (PProfProfileCall, error)
+	Profile(ctx *context.T, name string, debug int32, opts ...ipc.CallOpt) (PProfProfileClientCall, error)
 	// CPUProfile enables CPU profiling for the requested duration and
 	// streams the profile data.
-	CPUProfile(ctx *context.T, seconds int32, opts ...ipc.CallOpt) (PProfCPUProfileCall, error)
+	CPUProfile(ctx *context.T, seconds int32, opts ...ipc.CallOpt) (PProfCPUProfileClientCall, error)
 	// Symbol looks up the program counters and returns their respective
 	// function names.
 	Symbol(ctx *context.T, programCounters []uint64, opts ...ipc.CallOpt) ([]string, error)
@@ -70,7 +70,7 @@ func (c implPProfClientStub) c(ctx *context.T) ipc.Client {
 }
 
 func (c implPProfClientStub) CmdLine(ctx *context.T, opts ...ipc.CallOpt) (o0 []string, err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "CmdLine", nil, opts...); err != nil {
 		return
 	}
@@ -79,7 +79,7 @@ func (c implPProfClientStub) CmdLine(ctx *context.T, opts ...ipc.CallOpt) (o0 []
 }
 
 func (c implPProfClientStub) Profiles(ctx *context.T, opts ...ipc.CallOpt) (o0 []string, err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Profiles", nil, opts...); err != nil {
 		return
 	}
@@ -87,26 +87,26 @@ func (c implPProfClientStub) Profiles(ctx *context.T, opts ...ipc.CallOpt) (o0 [
 	return
 }
 
-func (c implPProfClientStub) Profile(ctx *context.T, i0 string, i1 int32, opts ...ipc.CallOpt) (ocall PProfProfileCall, err error) {
-	var call ipc.Call
+func (c implPProfClientStub) Profile(ctx *context.T, i0 string, i1 int32, opts ...ipc.CallOpt) (ocall PProfProfileClientCall, err error) {
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Profile", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
-	ocall = &implPProfProfileCall{Call: call}
+	ocall = &implPProfProfileClientCall{ClientCall: call}
 	return
 }
 
-func (c implPProfClientStub) CPUProfile(ctx *context.T, i0 int32, opts ...ipc.CallOpt) (ocall PProfCPUProfileCall, err error) {
-	var call ipc.Call
+func (c implPProfClientStub) CPUProfile(ctx *context.T, i0 int32, opts ...ipc.CallOpt) (ocall PProfCPUProfileClientCall, err error) {
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "CPUProfile", []interface{}{i0}, opts...); err != nil {
 		return
 	}
-	ocall = &implPProfCPUProfileCall{Call: call}
+	ocall = &implPProfCPUProfileClientCall{ClientCall: call}
 	return
 }
 
 func (c implPProfClientStub) Symbol(ctx *context.T, i0 []uint64, opts ...ipc.CallOpt) (o0 []string, err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Symbol", []interface{}{i0}, opts...); err != nil {
 		return
 	}
@@ -130,8 +130,8 @@ type PProfProfileClientStream interface {
 	}
 }
 
-// PProfProfileCall represents the call returned from PProf.Profile.
-type PProfProfileCall interface {
+// PProfProfileClientCall represents the call returned from PProf.Profile.
+type PProfProfileClientCall interface {
 	PProfProfileClientStream
 	// Finish blocks until the server is done, and returns the positional return
 	// values for call.
@@ -146,13 +146,13 @@ type PProfProfileCall interface {
 	Finish() error
 }
 
-type implPProfProfileCall struct {
-	ipc.Call
+type implPProfProfileClientCall struct {
+	ipc.ClientCall
 	valRecv []byte
 	errRecv error
 }
 
-func (c *implPProfProfileCall) RecvStream() interface {
+func (c *implPProfProfileClientCall) RecvStream() interface {
 	Advance() bool
 	Value() []byte
 	Err() error
@@ -161,7 +161,7 @@ func (c *implPProfProfileCall) RecvStream() interface {
 }
 
 type implPProfProfileCallRecv struct {
-	c *implPProfProfileCall
+	c *implPProfProfileClientCall
 }
 
 func (c implPProfProfileCallRecv) Advance() bool {
@@ -177,8 +177,8 @@ func (c implPProfProfileCallRecv) Err() error {
 	}
 	return c.c.errRecv
 }
-func (c *implPProfProfileCall) Finish() (err error) {
-	err = c.Call.Finish()
+func (c *implPProfProfileClientCall) Finish() (err error) {
+	err = c.ClientCall.Finish()
 	return
 }
 
@@ -198,8 +198,8 @@ type PProfCPUProfileClientStream interface {
 	}
 }
 
-// PProfCPUProfileCall represents the call returned from PProf.CPUProfile.
-type PProfCPUProfileCall interface {
+// PProfCPUProfileClientCall represents the call returned from PProf.CPUProfile.
+type PProfCPUProfileClientCall interface {
 	PProfCPUProfileClientStream
 	// Finish blocks until the server is done, and returns the positional return
 	// values for call.
@@ -214,13 +214,13 @@ type PProfCPUProfileCall interface {
 	Finish() error
 }
 
-type implPProfCPUProfileCall struct {
-	ipc.Call
+type implPProfCPUProfileClientCall struct {
+	ipc.ClientCall
 	valRecv []byte
 	errRecv error
 }
 
-func (c *implPProfCPUProfileCall) RecvStream() interface {
+func (c *implPProfCPUProfileClientCall) RecvStream() interface {
 	Advance() bool
 	Value() []byte
 	Err() error
@@ -229,7 +229,7 @@ func (c *implPProfCPUProfileCall) RecvStream() interface {
 }
 
 type implPProfCPUProfileCallRecv struct {
-	c *implPProfCPUProfileCall
+	c *implPProfCPUProfileClientCall
 }
 
 func (c implPProfCPUProfileCallRecv) Advance() bool {
@@ -245,8 +245,8 @@ func (c implPProfCPUProfileCallRecv) Err() error {
 	}
 	return c.c.errRecv
 }
-func (c *implPProfCPUProfileCall) Finish() (err error) {
-	err = c.Call.Finish()
+func (c *implPProfCPUProfileClientCall) Finish() (err error) {
+	err = c.ClientCall.Finish()
 	return
 }
 
@@ -255,9 +255,9 @@ func (c *implPProfCPUProfileCall) Finish() (err error) {
 type PProfServerMethods interface {
 	// CmdLine returns the command-line arguments of the server, including
 	// the name of the executable.
-	CmdLine(ipc.ServerContext) ([]string, error)
+	CmdLine(ipc.ServerCall) ([]string, error)
 	// Profiles returns the list of available profiles.
-	Profiles(ipc.ServerContext) ([]string, error)
+	Profiles(ipc.ServerCall) ([]string, error)
 	// Profile streams the requested profile. The debug parameter enables
 	// additional output. Passing debug=0 includes only the hexadecimal
 	// addresses that pprof needs. Passing debug=1 adds comments translating
@@ -269,7 +269,7 @@ type PProfServerMethods interface {
 	CPUProfile(ctx PProfCPUProfileContext, seconds int32) error
 	// Symbol looks up the program counters and returns their respective
 	// function names.
-	Symbol(ctx ipc.ServerContext, programCounters []uint64) ([]string, error)
+	Symbol(ctx ipc.ServerCall, programCounters []uint64) ([]string, error)
 }
 
 // PProfServerStubMethods is the server interface containing
@@ -279,9 +279,9 @@ type PProfServerMethods interface {
 type PProfServerStubMethods interface {
 	// CmdLine returns the command-line arguments of the server, including
 	// the name of the executable.
-	CmdLine(ipc.ServerContext) ([]string, error)
+	CmdLine(ipc.ServerCall) ([]string, error)
 	// Profiles returns the list of available profiles.
-	Profiles(ipc.ServerContext) ([]string, error)
+	Profiles(ipc.ServerCall) ([]string, error)
 	// Profile streams the requested profile. The debug parameter enables
 	// additional output. Passing debug=0 includes only the hexadecimal
 	// addresses that pprof needs. Passing debug=1 adds comments translating
@@ -293,7 +293,7 @@ type PProfServerStubMethods interface {
 	CPUProfile(ctx *PProfCPUProfileContextStub, seconds int32) error
 	// Symbol looks up the program counters and returns their respective
 	// function names.
-	Symbol(ctx ipc.ServerContext, programCounters []uint64) ([]string, error)
+	Symbol(ctx ipc.ServerCall, programCounters []uint64) ([]string, error)
 }
 
 // PProfServerStub adds universal methods to PProfServerStubMethods.
@@ -325,11 +325,11 @@ type implPProfServerStub struct {
 	gs   *ipc.GlobState
 }
 
-func (s implPProfServerStub) CmdLine(ctx ipc.ServerContext) ([]string, error) {
+func (s implPProfServerStub) CmdLine(ctx ipc.ServerCall) ([]string, error) {
 	return s.impl.CmdLine(ctx)
 }
 
-func (s implPProfServerStub) Profiles(ctx ipc.ServerContext) ([]string, error) {
+func (s implPProfServerStub) Profiles(ctx ipc.ServerCall) ([]string, error) {
 	return s.impl.Profiles(ctx)
 }
 
@@ -341,7 +341,7 @@ func (s implPProfServerStub) CPUProfile(ctx *PProfCPUProfileContextStub, i0 int3
 	return s.impl.CPUProfile(ctx, i0)
 }
 
-func (s implPProfServerStub) Symbol(ctx ipc.ServerContext, i0 []uint64) ([]string, error) {
+func (s implPProfServerStub) Symbol(ctx ipc.ServerCall, i0 []uint64) ([]string, error) {
 	return s.impl.Symbol(ctx, i0)
 }
 
@@ -421,7 +421,7 @@ type PProfProfileServerStream interface {
 
 // PProfProfileContext represents the context passed to PProf.Profile.
 type PProfProfileContext interface {
-	ipc.ServerContext
+	ipc.ServerCall
 	PProfProfileServerStream
 }
 
@@ -464,7 +464,7 @@ type PProfCPUProfileServerStream interface {
 
 // PProfCPUProfileContext represents the context passed to PProf.CPUProfile.
 type PProfCPUProfileContext interface {
-	ipc.ServerContext
+	ipc.ServerCall
 	PProfCPUProfileServerStream
 }
 

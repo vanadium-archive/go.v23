@@ -85,7 +85,7 @@ func (c implStatsClientStub) c(ctx *context.T) ipc.Client {
 }
 
 func (c implStatsClientStub) Value(ctx *context.T, opts ...ipc.CallOpt) (o0 *vdl.Value, err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Value", nil, opts...); err != nil {
 		return
 	}
@@ -111,7 +111,7 @@ type StatsServerMethods interface {
 	// of the value is implementation specific.
 	// Some objects may not have a value, in which case, Value() returns
 	// a NoValue error.
-	Value(ipc.ServerContext) (*vdl.Value, error)
+	Value(ipc.ServerCall) (*vdl.Value, error)
 }
 
 // StatsServerStubMethods is the server interface containing
@@ -126,7 +126,7 @@ type StatsServerStubMethods interface {
 	// of the value is implementation specific.
 	// Some objects may not have a value, in which case, Value() returns
 	// a NoValue error.
-	Value(ipc.ServerContext) (*vdl.Value, error)
+	Value(ipc.ServerCall) (*vdl.Value, error)
 }
 
 // StatsServerStub adds universal methods to StatsServerStubMethods.
@@ -160,7 +160,7 @@ type implStatsServerStub struct {
 	gs *ipc.GlobState
 }
 
-func (s implStatsServerStub) Value(ctx ipc.ServerContext) (*vdl.Value, error) {
+func (s implStatsServerStub) Value(ctx ipc.ServerCall) (*vdl.Value, error) {
 	return s.impl.Value(ctx)
 }
 

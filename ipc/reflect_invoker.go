@@ -89,11 +89,11 @@ type methodInfo struct {
 // each compatible exported method in obj available.  E.g.:
 //
 //   type impl struct{}
-//   func (impl) NonStreaming(ctx ipc.ServerContext, ...) (...)
+//   func (impl) NonStreaming(ctx ipc.ServerCall, ...) (...)
 //   func (impl) Streaming(ctx *MyContext, ...) (...)
 //
 // The first in-arg must be a context.  For non-streaming methods it must be
-// ipc.ServerContext.  For streaming methods, it must be a pointer to a struct
+// ipc.ServerCall.  For streaming methods, it must be a pointer to a struct
 // that implements ipc.StreamServerCall, and also adds typesafe streaming wrappers.
 // Here's an example that streams int32 from client to server, and string from
 // server to client:
@@ -130,7 +130,7 @@ type methodInfo struct {
 // TODO(toddw): Remove this special-case.
 //
 // The ReflectInvoker silently ignores unexported methods, and exported methods
-// whose first argument doesn't implement ipc.ServerContext.  All other methods
+// whose first argument doesn't implement ipc.ServerCall.  All other methods
 // must follow the above rules; bad method types cause an error to be returned.
 //
 // If obj implements the Describer interface, we'll use it to describe portions
@@ -229,12 +229,12 @@ func (ri reflectInvoker) Invoke(method string, call StreamServerCall, argptrs []
 }
 
 // Signature implements the Invoker.Signature method.
-func (ri reflectInvoker) Signature(ctx ServerContext) ([]signature.Interface, error) {
+func (ri reflectInvoker) Signature(ctx ServerCall) ([]signature.Interface, error) {
 	return signature.CopyInterfaces(ri.sig), nil
 }
 
 // MethodSignature implements the Invoker.MethodSignature method.
-func (ri reflectInvoker) MethodSignature(ctx ServerContext, method string) (signature.Method, error) {
+func (ri reflectInvoker) MethodSignature(ctx ServerCall, method string) (signature.Method, error) {
 	// Return the first method in any interface with the given method name.
 	for _, iface := range ri.sig {
 		if msig, ok := iface.FindMethod(method); ok {
@@ -360,7 +360,7 @@ func makeMethodInfo(method reflect.Method) methodInfo {
 	// Initialize info for typesafe streaming contexts.  Note that we've already
 	// type-checked the method.  We memoize the stream type and Init function, so
 	// that we can create and initialize the stream type in Invoke.
-	if in1 := mtype.In(1); in1 != rtStreamServerCall && in1 != rtServerContext && in1.Kind() == reflect.Ptr {
+	if in1 := mtype.In(1); in1 != rtStreamServerCall && in1 != rtServerCall && in1.Kind() == reflect.Ptr {
 		info.rtStreamCtx = in1.Elem()
 		mInit, _ := in1.MethodByName("Init")
 		info.rvStreamCtxInit = mInit.Func
@@ -374,7 +374,7 @@ func abortedf(format string, v ...interface{}) error {
 
 var (
 	rtStreamServerCall     = reflect.TypeOf((*StreamServerCall)(nil)).Elem()
-	rtServerContext        = reflect.TypeOf((*ServerContext)(nil)).Elem()
+	rtServerCall           = reflect.TypeOf((*ServerCall)(nil)).Elem()
 	rtBool                 = reflect.TypeOf(bool(false))
 	rtError                = reflect.TypeOf((*error)(nil)).Elem()
 	rtString               = reflect.TypeOf("")
@@ -392,8 +392,8 @@ var (
 	ErrNoFinalErrorOutArg = abortedf("Invalid out-args (final out-arg must be error)")
 	ErrBadDescribe        = abortedf("Describe__ must have signature Describe__() []ipc.InterfaceDesc")
 	ErrBadGlobber         = abortedf("Globber must have signature Globber() *ipc.GlobState")
-	ErrBadGlob            = abortedf("Glob__ must have signature Glob__(ipc.ServerContext, pattern string) (<-chan naming.VDLMountEntry, error)")
-	ErrBadGlobChildren    = abortedf("GlobChildren__ must have signature GlobChildren__(ipc.ServerContext) (<-chan string, error)")
+	ErrBadGlob            = abortedf("Glob__ must have signature Glob__(ipc.ServerCall, pattern string) (<-chan naming.VDLMountEntry, error)")
+	ErrBadGlobChildren    = abortedf("GlobChildren__ must have signature GlobChildren__(ipc.ServerCall) (<-chan string, error)")
 )
 
 func typeCheckMethod(method reflect.Method, sig *signature.Method) error {
@@ -423,9 +423,9 @@ func typeCheckMethod(method reflect.Method, sig *signature.Method) error {
 		//
 		// At the moment we allow it; we can easily disallow by enabling this error.
 		//   return ErrInStreamServerCall
-	case in1 == rtServerContext:
+	case in1 == rtServerCall:
 		// Non-streaming method.
-	case in1.Implements(rtServerContext):
+	case in1.Implements(rtServerCall):
 		// Streaming method, validate context argument.
 		if err := typeCheckStreamingContext(in1, sig); err != nil {
 			return err
@@ -453,17 +453,17 @@ func typeCheckReservedMethod(method reflect.Method) error {
 		}
 		return ErrReservedMethod
 	case "Glob__":
-		// Glob__(ipc.ServerContext, string) (<-chan naming.VDLMountEntry, error)
+		// Glob__(ipc.ServerCall, string) (<-chan naming.VDLMountEntry, error)
 		if t := method.Type; t.NumIn() != 3 || t.NumOut() != 2 ||
-			t.In(1) != rtServerContext || t.In(2) != rtString ||
+			t.In(1) != rtServerCall || t.In(2) != rtString ||
 			t.Out(0) != rtGlobReplyChan || t.Out(1) != rtError {
 			return ErrBadGlob
 		}
 		return ErrReservedMethod
 	case "GlobChildren__":
-		// GlobChildren__(ipc.ServerContext) (<-chan string, error)
+		// GlobChildren__(ipc.ServerCall) (<-chan string, error)
 		if t := method.Type; t.NumIn() != 2 || t.NumOut() != 2 ||
-			t.In(1) != rtServerContext ||
+			t.In(1) != rtServerCall ||
 			t.Out(0) != rtStringChan || t.Out(1) != rtError {
 			return ErrBadGlobChildren
 		}
@@ -538,7 +538,7 @@ func typeCheckStreamingContext(ctx reflect.Type, sig *signature.Method) error {
 }
 
 const (
-	useContext = "  Use either ipc.ServerContext for non-streaming methods, or use a non-interface typesafe context for streaming methods."
+	useContext = "  Use either ipc.ServerCall for non-streaming methods, or use a non-interface typesafe context for streaming methods."
 	forgotWrap = useContext + "  Perhaps you forgot to wrap your server with the VDL-generated server stub."
 )
 

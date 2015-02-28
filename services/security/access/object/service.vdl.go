@@ -115,7 +115,7 @@ func (c implObjectClientStub) c(ctx *context.T) ipc.Client {
 }
 
 func (c implObjectClientStub) SetACL(ctx *context.T, i0 access.TaggedACLMap, i1 string, opts ...ipc.CallOpt) (err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "SetACL", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
@@ -124,7 +124,7 @@ func (c implObjectClientStub) SetACL(ctx *context.T, i0 access.TaggedACLMap, i1 
 }
 
 func (c implObjectClientStub) GetACL(ctx *context.T, opts ...ipc.CallOpt) (o0 access.TaggedACLMap, o1 string, err error) {
-	var call ipc.Call
+	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "GetACL", nil, opts...); err != nil {
 		return
 	}
@@ -195,12 +195,12 @@ type ObjectServerMethods interface {
 	// endpoint.  To modify the mount point's ACL, use ResolveToMountTable
 	// to get an endpoint and call SetACL on that.  This means that clients
 	// must know when a name refers to a mount point to change its ACL.
-	SetACL(ctx ipc.ServerContext, acl access.TaggedACLMap, etag string) error
+	SetACL(ctx ipc.ServerCall, acl access.TaggedACLMap, etag string) error
 	// GetACL returns the complete, current ACL for an object.  The returned etag
 	// can be passed to a subsequent call to SetACL for optimistic concurrency
 	// control. A successful call to SetACL will invalidate etag, and the client
 	// must call GetACL again to get the current etag.
-	GetACL(ipc.ServerContext) (acl access.TaggedACLMap, etag string, err error)
+	GetACL(ipc.ServerCall) (acl access.TaggedACLMap, etag string, err error)
 }
 
 // ObjectServerStubMethods is the server interface containing
@@ -238,11 +238,11 @@ type implObjectServerStub struct {
 	gs   *ipc.GlobState
 }
 
-func (s implObjectServerStub) SetACL(ctx ipc.ServerContext, i0 access.TaggedACLMap, i1 string) error {
+func (s implObjectServerStub) SetACL(ctx ipc.ServerCall, i0 access.TaggedACLMap, i1 string) error {
 	return s.impl.SetACL(ctx, i0, i1)
 }
 
-func (s implObjectServerStub) GetACL(ctx ipc.ServerContext) (access.TaggedACLMap, string, error) {
+func (s implObjectServerStub) GetACL(ctx ipc.ServerCall) (access.TaggedACLMap, string, error) {
 	return s.impl.GetACL(ctx)
 }
 

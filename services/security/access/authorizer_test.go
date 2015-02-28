@@ -64,7 +64,7 @@ func TestTaggedACLAuthorizer(t *testing.T) {
 		}
 
 		run = func(test testcase) error {
-			ctx := security.NewContext(&security.ContextParams{
+			ctx := security.NewCall(&security.CallParams{
 				LocalPrincipal:  pserver,
 				LocalBlessings:  server,
 				RemoteBlessings: test.Client,
@@ -126,7 +126,7 @@ func TestTaggedACLAuthorizerSelfRPCs(t *testing.T) {
 		authorizer, _ = access.TaggedACLAuthorizer(access.TaggedACLMap{"R": {In: []security.BlessingPattern{"nobody/$"}}}, vdl.TypeOf(typ))
 	)
 	for _, test := range []string{"Put", "Get", "Resolve", "NoTags", "AllTags"} {
-		ctx := security.NewContext(&security.ContextParams{
+		ctx := security.NewCall(&security.CallParams{
 			LocalPrincipal:  p,
 			LocalBlessings:  server,
 			RemoteBlessings: client,
@@ -148,7 +148,7 @@ func TestTaggedACLAuthorizerWithNilACL(t *testing.T) {
 		client, _     = pclient.BlessSelf("client")
 	)
 	for _, test := range []string{"Put", "Get", "Resolve", "NoTags", "AllTags"} {
-		ctx := security.NewContext(&security.ContextParams{
+		ctx := security.NewCall(&security.CallParams{
 			LocalPrincipal:  pserver,
 			LocalBlessings:  server,
 			RemoteBlessings: client,
@@ -176,7 +176,7 @@ func TestTaggedACLAuthorizerFromFile(t *testing.T) {
 		pclient        = newPrincipal(t)
 		server, _      = pserver.BlessSelf("alice")
 		alicefriend, _ = pserver.Bless(pclient.PublicKey(), server, "friend/bob", security.UnconstrainedUse())
-		ctx            = security.NewContext(&security.ContextParams{
+		ctx            = security.NewCall(&security.CallParams{
 			LocalPrincipal:  pserver,
 			LocalBlessings:  server,
 			RemoteBlessings: alicefriend,
