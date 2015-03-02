@@ -103,20 +103,20 @@ type authorizer struct {
 	tagType *vdl.Type
 }
 
-func (a *authorizer) Authorize(ctx security.Call) error {
+func (a *authorizer) Authorize(call security.Call) error {
 	// "Self-RPCs" are always authorized.
-	if l, r := ctx.LocalBlessings().PublicKey(), ctx.RemoteBlessings().PublicKey(); l != nil && r != nil && reflect.DeepEqual(l, r) {
+	if l, r := call.LocalBlessings().PublicKey(), call.RemoteBlessings().PublicKey(); l != nil && r != nil && reflect.DeepEqual(l, r) {
 		return nil
 	}
 
-	blessings, invalid := ctx.RemoteBlessings().ForCall(ctx)
+	blessings, invalid := call.RemoteBlessings().ForCall(call)
 	grant := false
-	if len(ctx.MethodTags()) == 0 {
+	if len(call.MethodTags()) == 0 {
 		// The following error message leaks the fact that the server is likely
 		// misconfigured, but that doesn't seem like a big deal.
-		return fmt.Errorf("TaggedACLAuthorizer.Authorize called with an object (%q, method %q) that has no method tags; this is likely unintentional", ctx.Suffix(), ctx.Method())
+		return fmt.Errorf("TaggedACLAuthorizer.Authorize called with an object (%q, method %q) that has no method tags; this is likely unintentional", call.Suffix(), call.Method())
 	}
-	for _, tag := range ctx.MethodTags() {
+	for _, tag := range call.MethodTags() {
 		if tag.Type() == a.tagType {
 			if acl, exists := a.acls[tag.RawString()]; !exists || !acl.Includes(blessings...) {
 				return NewErrACLMatch(nil, blessings, invalid)
@@ -135,13 +135,13 @@ type fileAuthorizer struct {
 	tagType  *vdl.Type
 }
 
-func (a *fileAuthorizer) Authorize(ctx security.Call) error {
+func (a *fileAuthorizer) Authorize(call security.Call) error {
 	acl, err := loadTaggedACLMapFromFile(a.filename)
 	if err != nil {
 		// TODO(ashankar): Information leak?
 		return fmt.Errorf("failed to read ACL from file: %v", err)
 	}
-	return (&authorizer{acl, a.tagType}).Authorize(ctx)
+	return (&authorizer{acl, a.tagType}).Authorize(call)
 }
 
 func loadTaggedACLMapFromFile(filename string) (TaggedACLMap, error) {

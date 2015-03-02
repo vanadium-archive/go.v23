@@ -44,9 +44,9 @@ func (acl ACL) pruneBlacklisted(blessings []string) []string {
 // only if the remote blessings are included in the ACL.
 //
 // TODO(ashankar): Add tests for this
-func (acl *ACL) Authorize(ctx security.Call) error {
-	blessings := ctx.RemoteBlessings()
-	blessingsForCall, invalid := blessings.ForCall(ctx)
+func (acl *ACL) Authorize(call security.Call) error {
+	blessings := call.RemoteBlessings()
+	blessingsForCall, invalid := blessings.ForCall(call)
 	if acl.Includes(blessingsForCall...) {
 		return nil
 	}

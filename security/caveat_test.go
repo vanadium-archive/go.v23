@@ -146,7 +146,7 @@ func TestCaveat(t *testing.T) {
 		t.Errorf("Got '%v' (errorid=%v), want errorid=%v", err, verror.ErrorID(err), ErrCaveatNotRegistered.ID)
 	}
 	// Once registered, then it should be invoked
-	RegisterCaveatValidator(cd, func(ctx Call, param string) error {
+	RegisterCaveatValidator(cd, func(call Call, param string) error {
 		if ctx.Method() == param {
 			return nil
 		}

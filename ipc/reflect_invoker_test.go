@@ -100,36 +100,36 @@ var (
 // All objects used for success testing are based on testObj, which captures the
 // state from each invocation, so that we may test it against our expectations.
 type testObj struct {
-	ctx ipc.ServerCall
+	call ipc.ServerCall
 }
 
-func (o testObj) LastContext() ipc.ServerCall { return o.ctx }
+func (o testObj) LastCall() ipc.ServerCall { return o.call }
 
 type testObjIface interface {
-	LastContext() ipc.ServerCall
+	LastCall() ipc.ServerCall
 }
 
 var errApp = errors.New("app error")
 
 type notags struct{ testObj }
 
-func (o *notags) Method1(c ipc.ServerCall) error               { o.ctx = c; return nil }
-func (o *notags) Method2(c ipc.ServerCall) (int, error)        { o.ctx = c; return 0, nil }
-func (o *notags) Method3(c ipc.ServerCall, _ int) error        { o.ctx = c; return nil }
-func (o *notags) Method4(c ipc.ServerCall, i int) (int, error) { o.ctx = c; return i, nil }
-func (o *notags) Error(c ipc.ServerCall) error                 { o.ctx = c; return errApp }
+func (o *notags) Method1(c ipc.ServerCall) error               { o.call = c; return nil }
+func (o *notags) Method2(c ipc.ServerCall) (int, error)        { o.call = c; return 0, nil }
+func (o *notags) Method3(c ipc.ServerCall, _ int) error        { o.call = c; return nil }
+func (o *notags) Method4(c ipc.ServerCall, i int) (int, error) { o.call = c; return i, nil }
+func (o *notags) Error(c ipc.ServerCall) error                 { o.call = c; return errApp }
 
 type tags struct{ testObj }
 
-func (o *tags) Alpha(c ipc.ServerCall) error               { o.ctx = c; return nil }
-func (o *tags) Beta(c ipc.ServerCall) (int, error)         { o.ctx = c; return 0, nil }
-func (o *tags) Gamma(c ipc.ServerCall, _ int) error        { o.ctx = c; return nil }
-func (o *tags) Delta(c ipc.ServerCall, i int) (int, error) { o.ctx = c; return i, nil }
+func (o *tags) Alpha(c ipc.ServerCall) error               { o.call = c; return nil }
+func (o *tags) Beta(c ipc.ServerCall) (int, error)         { o.call = c; return 0, nil }
+func (o *tags) Gamma(c ipc.ServerCall, _ int) error        { o.call = c; return nil }
+func (o *tags) Delta(c ipc.ServerCall, i int) (int, error) { o.call = c; return i, nil }
 func (o *tags) Epsilon(c ipc.ServerCall, i int, s string) (int, string, error) {
-	o.ctx = c
+	o.call = c
 	return i, s, nil
 }
-func (o *tags) Error(c ipc.ServerCall) error { o.ctx = c; return errApp }
+func (o *tags) Error(c ipc.ServerCall) error { o.call = c; return errApp }
 
 func (o *tags) Describe__() []ipc.InterfaceDesc {
 	return []ipc.InterfaceDesc{{
@@ -195,8 +195,8 @@ func TestReflectInvoker(t *testing.T) {
 		if !reflect.DeepEqual(v(results), test.results) {
 			t.Errorf("%s Invoke got results %v, want %v", name(test), results, test.results)
 		}
-		if ctx := test.obj.LastContext(); ctx != test.call {
-			t.Errorf("%s Invoke got ctx %v, want %v", name(test), ctx, test.call)
+		if call := test.obj.LastCall(); call != test.call {
+			t.Errorf("%s Invoke got call %v, want %v", name(test), call, test.call)
 		}
 	}
 	for _, test := range tests {
@@ -251,19 +251,19 @@ func toPtrs(vals []interface{}) []interface{} {
 }
 
 type (
-	sigTest           struct{}
-	stringBoolContext struct{ ipc.ServerCall }
+	sigTest        struct{}
+	stringBoolCall struct{ ipc.ServerCall }
 )
 
-func (*stringBoolContext) Init(ipc.StreamServerCall) {}
-func (*stringBoolContext) RecvStream() interface {
+func (*stringBoolCall) Init(ipc.StreamServerCall) {}
+func (*stringBoolCall) RecvStream() interface {
 	Advance() bool
 	Value() string
 	Err() error
 } {
 	return nil
 }
-func (*stringBoolContext) SendStream() interface {
+func (*stringBoolCall) SendStream() interface {
 	Send(item bool) error
 } {
 	return nil
@@ -271,7 +271,7 @@ func (*stringBoolContext) SendStream() interface {
 
 func (sigTest) Sig1(ipc.ServerCall) error                                       { return nil }
 func (sigTest) Sig2(ipc.ServerCall, int32, string) error                        { return nil }
-func (sigTest) Sig3(*stringBoolContext, float64) ([]uint32, error)              { return nil, nil }
+func (sigTest) Sig3(*stringBoolCall, float64) ([]uint32, error)                 { return nil, nil }
 func (sigTest) Sig4(ipc.StreamServerCall, int32, string) (int32, string, error) { return 0, "", nil }
 func (sigTest) Describe__() []ipc.InterfaceDesc {
 	return []ipc.InterfaceDesc{
@@ -455,18 +455,18 @@ func TestReflectInvokerSignature(t *testing.T) {
 }
 
 type (
-	badcontext        struct{}
-	noInitContext     struct{ ipc.ServerCall }
-	badInit1Context   struct{ ipc.ServerCall }
-	badInit2Context   struct{ ipc.ServerCall }
-	badInit3Context   struct{ ipc.ServerCall }
-	noSendRecvContext struct{ ipc.ServerCall }
-	badSend1Context   struct{ ipc.ServerCall }
-	badSend2Context   struct{ ipc.ServerCall }
-	badSend3Context   struct{ ipc.ServerCall }
-	badRecv1Context   struct{ ipc.ServerCall }
-	badRecv2Context   struct{ ipc.ServerCall }
-	badRecv3Context   struct{ ipc.ServerCall }
+	badcall        struct{}
+	noInitCall     struct{ ipc.ServerCall }
+	badInit1Call   struct{ ipc.ServerCall }
+	badInit2Call   struct{ ipc.ServerCall }
+	badInit3Call   struct{ ipc.ServerCall }
+	noSendRecvCall struct{ ipc.ServerCall }
+	badSend1Call   struct{ ipc.ServerCall }
+	badSend2Call   struct{ ipc.ServerCall }
+	badSend3Call   struct{ ipc.ServerCall }
+	badRecv1Call   struct{ ipc.ServerCall }
+	badRecv2Call   struct{ ipc.ServerCall }
+	badRecv3Call   struct{ ipc.ServerCall }
 
 	badoutargs struct{}
 
@@ -476,52 +476,52 @@ type (
 	badGlobChildren2 struct{}
 )
 
-func (badcontext) notExported(ipc.ServerCall) error    { return nil }
-func (badcontext) NonRPC1() error                      { return nil }
-func (badcontext) NonRPC2(int) error                   { return nil }
-func (badcontext) NonRPC3(int, string) error           { return nil }
-func (badcontext) NonRPC4(*badcontext) error           { return nil }
-func (badcontext) NoInit(*noInitContext) error         { return nil }
-func (badcontext) BadInit1(*badInit1Context) error     { return nil }
-func (badcontext) BadInit2(*badInit2Context) error     { return nil }
-func (badcontext) BadInit3(*badInit3Context) error     { return nil }
-func (badcontext) NoSendRecv(*noSendRecvContext) error { return nil }
-func (badcontext) BadSend1(*badSend1Context) error     { return nil }
-func (badcontext) BadSend2(*badSend2Context) error     { return nil }
-func (badcontext) BadSend3(*badSend3Context) error     { return nil }
-func (badcontext) BadRecv1(*badRecv1Context) error     { return nil }
-func (badcontext) BadRecv2(*badRecv2Context) error     { return nil }
-func (badcontext) BadRecv3(*badRecv3Context) error     { return nil }
+func (badcall) notExported(ipc.ServerCall) error { return nil }
+func (badcall) NonRPC1() error                   { return nil }
+func (badcall) NonRPC2(int) error                { return nil }
+func (badcall) NonRPC3(int, string) error        { return nil }
+func (badcall) NonRPC4(*badcall) error           { return nil }
+func (badcall) NoInit(*noInitCall) error         { return nil }
+func (badcall) BadInit1(*badInit1Call) error     { return nil }
+func (badcall) BadInit2(*badInit2Call) error     { return nil }
+func (badcall) BadInit3(*badInit3Call) error     { return nil }
+func (badcall) NoSendRecv(*noSendRecvCall) error { return nil }
+func (badcall) BadSend1(*badSend1Call) error     { return nil }
+func (badcall) BadSend2(*badSend2Call) error     { return nil }
+func (badcall) BadSend3(*badSend3Call) error     { return nil }
+func (badcall) BadRecv1(*badRecv1Call) error     { return nil }
+func (badcall) BadRecv2(*badRecv2Call) error     { return nil }
+func (badcall) BadRecv3(*badRecv3Call) error     { return nil }
 
-func (*badInit1Context) Init()                          {}
-func (*badInit2Context) Init(int)                       {}
-func (*badInit3Context) Init(ipc.StreamServerCall, int) {}
-func (*noSendRecvContext) Init(ipc.StreamServerCall)    {}
-func (*badSend1Context) Init(ipc.StreamServerCall)      {}
-func (*badSend1Context) SendStream()                    {}
-func (*badSend2Context) Init(ipc.StreamServerCall)      {}
-func (*badSend2Context) SendStream() interface {
+func (*badInit1Call) Init()                          {}
+func (*badInit2Call) Init(int)                       {}
+func (*badInit3Call) Init(ipc.StreamServerCall, int) {}
+func (*noSendRecvCall) Init(ipc.StreamServerCall)    {}
+func (*badSend1Call) Init(ipc.StreamServerCall)      {}
+func (*badSend1Call) SendStream()                    {}
+func (*badSend2Call) Init(ipc.StreamServerCall)      {}
+func (*badSend2Call) SendStream() interface {
 	Send() error
 } {
 	return nil
 }
-func (*badSend3Context) Init(ipc.StreamServerCall) {}
-func (*badSend3Context) SendStream() interface {
+func (*badSend3Call) Init(ipc.StreamServerCall) {}
+func (*badSend3Call) SendStream() interface {
 	Send(int)
 } {
 	return nil
 }
-func (*badRecv1Context) Init(ipc.StreamServerCall) {}
-func (*badRecv1Context) RecvStream()               {}
-func (*badRecv2Context) Init(ipc.StreamServerCall) {}
-func (*badRecv2Context) RecvStream() interface {
+func (*badRecv1Call) Init(ipc.StreamServerCall) {}
+func (*badRecv1Call) RecvStream()               {}
+func (*badRecv2Call) Init(ipc.StreamServerCall) {}
+func (*badRecv2Call) RecvStream() interface {
 	Advance() bool
 	Value() int
 } {
 	return nil
 }
-func (*badRecv3Context) Init(ipc.StreamServerCall) {}
-func (*badRecv3Context) RecvStream() interface {
+func (*badRecv3Call) Init(ipc.StreamServerCall) {}
+func (*badRecv3Call) RecvStream() interface {
 	Advance()
 	Value() int
 	Error() error
@@ -547,7 +547,7 @@ func TestReflectInvokerPanic(t *testing.T) {
 	tests := []testcase{
 		{nil, `ReflectInvoker\(nil\) is invalid`},
 		{struct{}{}, "no compatible methods"},
-		{badcontext{}, "invalid streaming context"},
+		{badcall{}, "invalid streaming call"},
 		{badoutargs{}, "final out-arg must be error"},
 		{badGlobber{}, "Globber must have signature"},
 		{badGlob{}, "Glob__ must have signature"},
@@ -623,24 +623,24 @@ func TestTypeCheckMethods(t *testing.T) {
 	tests := []testcase{
 		{struct{}{}, nil},
 		{&notags{}, map[string]string{
-			"Method1":     "",
-			"Method2":     "",
-			"Method3":     "",
-			"Method4":     "",
-			"Error":       "",
-			"LastContext": ipc.ErrNonRPCMethod.Error(),
+			"Method1":  "",
+			"Method2":  "",
+			"Method3":  "",
+			"Method4":  "",
+			"Error":    "",
+			"LastCall": ipc.ErrNonRPCMethod.Error(),
 		}},
 		{&tags{}, map[string]string{
-			"Alpha":       "",
-			"Beta":        "",
-			"Gamma":       "",
-			"Delta":       "",
-			"Epsilon":     "",
-			"Error":       "",
-			"LastContext": ipc.ErrNonRPCMethod.Error(),
-			"Describe__":  ipc.ErrReservedMethod.Error(),
+			"Alpha":      "",
+			"Beta":       "",
+			"Gamma":      "",
+			"Delta":      "",
+			"Epsilon":    "",
+			"Error":      "",
+			"LastCall":   ipc.ErrNonRPCMethod.Error(),
+			"Describe__": ipc.ErrReservedMethod.Error(),
 		}},
-		{badcontext{}, map[string]string{
+		{badcall{}, map[string]string{
 			"notExported": ipc.ErrMethodNotExported.Error(),
 			"NonRPC1":     ipc.ErrNonRPCMethod.Error(),
 			"NonRPC2":     ipc.ErrNonRPCMethod.Error(),
@@ -710,7 +710,7 @@ func (o *vGlobberObject) Globber() *ipc.GlobState {
 
 type allGlobberObject struct{}
 
-func (allGlobberObject) Glob__(ctx ipc.ServerCall, pattern string) (<-chan naming.VDLGlobReply, error) {
+func (allGlobberObject) Glob__(call ipc.ServerCall, pattern string) (<-chan naming.VDLGlobReply, error) {
 	return nil, nil
 }
 

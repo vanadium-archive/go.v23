@@ -354,10 +354,10 @@ type ThirdPartyCaveat interface {
 	Requirements() ThirdPartyRequirements
 
 	// Dischargeable validates all restrictions encoded within the third-party
-	// caveat under 'context' and returns nil iff they have been satisfied, and
+	// caveat under 'call' and returns nil iff they have been satisfied, and
 	// thus ensures that it is okay to generate a discharge for this third-party
 	// caveat.
-	Dischargeable(context Call) error
+	Dischargeable(call Call) error
 
 	// TODO(andreser, ashankar): require the discharger to have a specific
 	// identity so that the private information below is not exposed to
@@ -406,5 +406,5 @@ type Call interface {
 
 // Authorizer is the interface for performing authorization checks.
 type Authorizer interface {
-	Authorize(context Call) error
+	Authorize(call Call) error
 }

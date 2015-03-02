@@ -32,7 +32,7 @@ const chainValidatorKey = "customChainValidator"
 // guaranteed to:
 //
 // (1) Satisfy all the caveats given context
-// (2) Be rooted in context.LocalPrincipal.Roots.
+// (2) Be rooted in call.LocalPrincipal.Roots.
 //
 // Caveats are considered satisfied in the given context if the CaveatValidator
 // implementation can be found in the address space of the caller and Validate
@@ -40,19 +40,19 @@ const chainValidatorKey = "customChainValidator"
 //
 // ForCall also returns the RejectedBlessings for each blessing that cannot
 // be validated.
-func (b Blessings) ForCall(ctx Call) (ret []string, info []RejectedBlessing) {
+func (b Blessings) ForCall(call Call) (ret []string, info []RejectedBlessing) {
 	if b.IsZero() {
 		return nil, nil
 	}
 	validator := defaultChainCaveatValidator
-	if customValidator := ctx.Context().Value(chainValidatorKey); customValidator != nil {
-		validator = customValidator.(func(ctx Call, chains [][]Caveat) []error)
+	if customValidator := call.Context().Value(chainValidatorKey); customValidator != nil {
+		validator = customValidator.(func(call Call, chains [][]Caveat) []error)
 	}
 
 	blessings := []string{}
 	chainCaveats := [][]Caveat{}
 	for _, chain := range b.chains {
-		blessing, err := verifyChainSignature(ctx, chain)
+		blessing, err := verifyChainSignature(call, chain)
 		if err != nil {
 			info = append(info, RejectedBlessing{blessing, err})
 			continue
@@ -75,7 +75,7 @@ func (b Blessings) ForCall(ctx Call) (ret []string, info []RejectedBlessing) {
 		return // Skip the validation call (is high-overhead for javascript).
 	}
 
-	validationResult := validator(ctx, chainCaveats)
+	validationResult := validator(call, chainCaveats)
 	if len(validationResult) != len(blessings) {
 		panic(fmt.Sprintf("Got wrong number of validation results. Got %d, expected %d.", len(validationResult), len(blessings)))
 	}
@@ -194,7 +194,7 @@ func validateCertificateChain(chain []Certificate) (PublicKey, error) {
 }
 
 // Verifies that the chain signatures are correct, without handling caveat validation
-func verifyChainSignature(ctx Call, chain []Certificate) (string, error) {
+func verifyChainSignature(call Call, chain []Certificate) (string, error) {
 	blessing := chain[0].Extension
 	for i := 1; i < len(chain); i++ {
 		blessing += ChainSeparator
@@ -209,10 +209,10 @@ func verifyChainSignature(ctx Call, chain []Certificate) (string, error) {
 		// vlog.VI(2).Infof("could not extract blessing as PublicKey from root certificate with Extension: %v could not be unmarshaled: %v", chain[0].Extension, err)
 		return blessing, err
 	}
-	local := ctx.LocalPrincipal()
+	local := call.LocalPrincipal()
 	if local == nil {
 		// TODO(jsimsa): Decide what (if any) logging mechanism to use.
-		// vlog.VI(2).Infof("could not extract blessing as provided Context %v has LocalPrincipal nil", ctx)
+		// vlog.VI(2).Infof("could not extract blessing as provided Context %v has LocalPrincipal nil", call)
 		return blessing, NewErrUntrustedRoot(nil, blessing)
 	}
 	if local.Roots() == nil {
@@ -229,11 +229,11 @@ func verifyChainSignature(ctx Call, chain []Certificate) (string, error) {
 	return blessing, nil
 }
 
-func defaultChainCaveatValidator(ctx Call, chains [][]Caveat) []error {
+func defaultChainCaveatValidator(call Call, chains [][]Caveat) []error {
 	results := make([]error, len(chains))
 	for i, chain := range chains {
 		for _, cav := range chain {
-			if err := validateCaveat(ctx, cav); err != nil {
+			if err := validateCaveat(call, cav); err != nil {
 				// TODO(jsimsa): Decide what (if any) logging mechanism to use.
 				// vlog.VI(4).Infof("Ignoring chain %v: %v", chain, err)
 				results[i] = err
@@ -245,9 +245,9 @@ func defaultChainCaveatValidator(ctx Call, chains [][]Caveat) []error {
 	return results
 }
 
-// validateCaveat is pretty much the same as cav.Validate(ctx), but it defers
+// validateCaveat is pretty much the same as cav.Validate(call), but it defers
 // to any validation scheme overrides via SetCaveatValidator.
-func validateCaveat(ctx Call, cav Caveat) error {
+func validateCaveat(call Call, cav Caveat) error {
 	caveatValidationSetup.mu.RLock()
 	fn := caveatValidationSetup.fn
 	finalized := caveatValidationSetup.finalized
@@ -259,9 +259,9 @@ func validateCaveat(ctx Call, cav Caveat) error {
 		caveatValidationSetup.mu.Unlock()
 	}
 	if fn != nil {
-		return fn(ctx, cav)
+		return fn(call, cav)
 	}
-	return cav.Validate(ctx)
+	return cav.Validate(call)
 }
 
 // TODO(ashankar): Get rid of this function? It allows users to mess

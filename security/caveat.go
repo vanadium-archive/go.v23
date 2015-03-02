@@ -92,25 +92,22 @@ func (r *caveatRegistry) lookup(uid uniqueid.Id) (registryEntry, bool) {
 	return entry, exists
 }
 
-func (r *caveatRegistry) validate(uid uniqueid.Id, ctx Call, paramvom []byte) error {
+func (r *caveatRegistry) validate(uid uniqueid.Id, call Call, paramvom []byte) error {
+	ctx := call.Context()
 	entry, exists := r.lookup(uid)
-	// TODO(ashankar): Figure out a way to get the appropriate language
-	// here. Perhaps security.Call should include context.T? Or maybe,
-	// check if ctx happens to include it (for example, if ctx is
-	// ipc.ServerCall)?
 	if !exists {
-		return NewErrCaveatNotRegistered(nil, uid)
+		return NewErrCaveatNotRegistered(ctx, uid)
 	}
 	param := reflect.New(entry.paramType).Interface()
 	if err := vom.Decode(paramvom, param); err != nil {
 		t, _ := vdl.TypeFromReflect(entry.paramType)
-		return NewErrCaveatParamCoding(nil, uid, t, err)
+		return NewErrCaveatParamCoding(ctx, uid, t, err)
 	}
-	err := entry.validatorFn.Call([]reflect.Value{reflect.ValueOf(ctx), reflect.ValueOf(param).Elem()})[0].Interface()
+	err := entry.validatorFn.Call([]reflect.Value{reflect.ValueOf(call), reflect.ValueOf(param).Elem()})[0].Interface()
 	if err == nil {
 		return nil
 	}
-	return NewErrCaveatValidation(nil, err.(error))
+	return NewErrCaveatValidation(ctx, err.(error))
 }
 
 // RegisterCaveatValidator associates a CaveatDescriptor with the
@@ -172,10 +169,10 @@ func (c *Caveat) digest(hash Hash) []byte {
 	return hash.sum(append(hash.sum(c.Id[:]), hash.sum(c.ParamVom)...))
 }
 
-// Validate tests if c is satisfied under ctx, returning nil if it is or an
+// Validate tests if c is satisfied under call, returning nil if it is or an
 // error otherwise.
-func (c *Caveat) Validate(ctx Call) error {
-	return registry.validate(c.Id, ctx, c.ParamVom)
+func (c *Caveat) Validate(call Call) error {
+	return registry.validate(c.Id, call, c.ParamVom)
 }
 
 // ThirdPartyDetails returns nil if c is not a third party caveat, or details about
@@ -256,10 +253,10 @@ func (c *publicKeyThirdPartyCaveat) Requirements() ThirdPartyRequirements {
 	return c.DischargerRequirements
 }
 
-func (c *publicKeyThirdPartyCaveat) Dischargeable(ctx Call) error {
+func (c *publicKeyThirdPartyCaveat) Dischargeable(call Call) error {
 	// Validate the caveats embedded within this third-party caveat.
 	for _, cav := range c.Caveats {
-		if err := cav.Validate(ctx); err != nil {
+		if err := cav.Validate(call); err != nil {
 			return fmt.Errorf("could not validate embedded restriction(%v): %v", cav, err)
 		}
 	}

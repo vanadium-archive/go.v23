@@ -478,11 +478,11 @@ type Invoker interface {
 
 	// Signature corresponds to the reserved __Signature method; it returns the
 	// signatures of the interfaces the underlying object implements.
-	Signature(ctx ServerCall) ([]signature.Interface, error)
+	Signature(call ServerCall) ([]signature.Interface, error)
 
 	// MethodSignature corresponds to the reserved __MethodSignature method; it
 	// returns the signature of the given method.
-	MethodSignature(ctx ServerCall, method string) (signature.Method, error)
+	MethodSignature(call ServerCall, method string) (signature.Method, error)
 
 	// Globber allows objects to take part in the namespace.
 	Globber
@@ -519,7 +519,7 @@ type AllGlobber interface {
 	// Glob__ returns a MountEntry for the objects that match the given
 	// pattern in the namespace below the receiver object. All the names
 	// returned are relative to the receiver.
-	Glob__(ctx ServerCall, pattern string) (<-chan naming.VDLGlobReply, error)
+	Glob__(call ServerCall, pattern string) (<-chan naming.VDLGlobReply, error)
 }
 
 // ChildrenGlobber is a simple interface to publish the relationship between
@@ -528,7 +528,7 @@ type ChildrenGlobber interface {
 	// GlobChildren__ returns the names of the receiver's immediate children
 	// on a channel.  It should return an error if the receiver doesn't
 	// exist.
-	GlobChildren__(ctx ServerCall) (<-chan string, error)
+	GlobChildren__(call ServerCall) (<-chan string, error)
 }
 
 // StreamServerCall defines the in-flight context for a server method

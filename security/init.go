@@ -6,15 +6,15 @@ import (
 )
 
 func init() {
-	RegisterCaveatValidator(ConstCaveat, func(ctx Call, isValid bool) error {
+	RegisterCaveatValidator(ConstCaveat, func(call Call, isValid bool) error {
 		if isValid {
 			return nil
 		}
 		return fmt.Errorf("failing validation in false const caveat")
 	})
 
-	RegisterCaveatValidator(UnixTimeExpiryCaveatX, func(ctx Call, unixTime int64) error {
-		now := ctx.Timestamp()
+	RegisterCaveatValidator(UnixTimeExpiryCaveatX, func(call Call, unixTime int64) error {
+		now := call.Timestamp()
 		expiry := time.Unix(int64(unixTime), 0)
 		if now.After(expiry) {
 			return fmt.Errorf("now(%v) is after expiry(%v)", now, expiry)
@@ -22,28 +22,28 @@ func init() {
 		return nil
 	})
 
-	RegisterCaveatValidator(ExpiryCaveatX, func(ctx Call, expiry time.Time) error {
-		now := ctx.Timestamp()
+	RegisterCaveatValidator(ExpiryCaveatX, func(call Call, expiry time.Time) error {
+		now := call.Timestamp()
 		if now.After(expiry) {
 			return fmt.Errorf("now(%v) is after expiry(%v)", now, expiry)
 		}
 		return nil
 	})
 
-	RegisterCaveatValidator(MethodCaveatX, func(ctx Call, methods []string) error {
-		if ctx.Method() == "" && len(methods) == 0 {
+	RegisterCaveatValidator(MethodCaveatX, func(call Call, methods []string) error {
+		if call.Method() == "" && len(methods) == 0 {
 			return nil
 		}
 		for _, m := range methods {
-			if ctx.Method() == m {
+			if call.Method() == m {
 				return nil
 			}
 		}
-		return fmt.Errorf("method %q is not in list %v", ctx.Method(), methods)
+		return fmt.Errorf("method %q is not in list %v", call.Method(), methods)
 	})
 
-	RegisterCaveatValidator(PublicKeyThirdPartyCaveatX, func(ctx Call, params publicKeyThirdPartyCaveat) error {
-		discharge, ok := ctx.RemoteDischarges()[params.ID()]
+	RegisterCaveatValidator(PublicKeyThirdPartyCaveatX, func(call Call, params publicKeyThirdPartyCaveat) error {
+		discharge, ok := call.RemoteDischarges()[params.ID()]
 		if !ok {
 			return fmt.Errorf("missing discharge for third party caveat(id=%v)", params.ID())
 		}
@@ -65,7 +65,7 @@ func init() {
 		}
 		// And all caveats on the discharge must be met.
 		for _, cav := range d.Caveats {
-			if err := cav.Validate(ctx); err != nil {
+			if err := cav.Validate(call); err != nil {
 				return fmt.Errorf("a caveat(%v) on the discharge failed to validate: %v", cav, err)
 			}
 		}
