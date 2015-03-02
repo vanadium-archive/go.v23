@@ -21,6 +21,9 @@ type Namespace interface {
 	// is empty, unmount all server OAs from the object name.
 	Unmount(ctx *context.T, name, server string) error
 
+	// Remove the name from the mount table and, if requested, any subtree.
+	Remove(ctx *context.T, name string, removeSubtree bool) error
+
 	// Resolve the object name into its mounted servers.
 	Resolve(ctx *context.T, name string, opts ...naming.ResolveOpt) (entry *naming.MountEntry, err error)
 
