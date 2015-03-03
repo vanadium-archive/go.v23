@@ -18,7 +18,7 @@ const (
     ParamType: typeobject(int64),
   }
 
-  // ExpiryCaveat represents a caveat that validates iff the current time is before
+  // ExpiryCaveat represents a caveat that validates iff the current time is no later
   // the specified time.Time.
   //
   // TODO(suharshs,ashankar): Rename to ExpiryCaveat and drop the ExpiryCaveat helper function.
@@ -63,6 +63,15 @@ error (
   }
   CaveatValidation(err error) {
     "en": "caveat validation failed: {err}",
+  }
+  ConstCaveatValidation() {
+    "en": "false const caveat always fails validation",
+  }
+  ExpiryCaveatValidation(expiryTime, currentTime time.Time) {
+    "en": "now({currentTime}) is after expiry({expiryTime})",
+  }
+  MethodCaveatValidation(invokedMethod string, permittedMethods []string) {
+    "en": "method {invokedMethod} not in list {permittedMethods}",
   }
 )
 

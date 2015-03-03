@@ -112,7 +112,7 @@ var UnixTimeExpiryCaveatX = CaveatDescriptor{
 	ParamType: vdl.TypeOf(int64(0)),
 }
 
-// ExpiryCaveat represents a caveat that validates iff the current time is before
+// ExpiryCaveat represents a caveat that validates iff the current time is no later
 // the specified time.Time.
 //
 // TODO(suharshs,ashankar): Rename to ExpiryCaveat and drop the ExpiryCaveat helper function.
@@ -197,6 +197,9 @@ var (
 	ErrCaveatParamTypeMismatch = verror.Register("v.io/v23/security.CaveatParamTypeMismatch", verror.NoRetry, "{1:}{2:} bad param type: caveat {3} got {4}, want {5}")
 	ErrCaveatParamCoding       = verror.Register("v.io/v23/security.CaveatParamCoding", verror.NoRetry, "{1:}{2:} unable to encode/decode caveat param(type={4}) for caveat {3}: {5}")
 	ErrCaveatValidation        = verror.Register("v.io/v23/security.CaveatValidation", verror.NoRetry, "{1:}{2:} caveat validation failed: {3}")
+	ErrConstCaveatValidation   = verror.Register("v.io/v23/security.ConstCaveatValidation", verror.NoRetry, "{1:}{2:} false const caveat always fails validation")
+	ErrExpiryCaveatValidation  = verror.Register("v.io/v23/security.ExpiryCaveatValidation", verror.NoRetry, "{1:}{2:} now({4}) is after expiry({3})")
+	ErrMethodCaveatValidation  = verror.Register("v.io/v23/security.MethodCaveatValidation", verror.NoRetry, "{1:}{2:} method {3} not in list {4}")
 )
 
 func init() {
@@ -205,6 +208,9 @@ func init() {
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrCaveatParamTypeMismatch.ID), "{1:}{2:} bad param type: caveat {3} got {4}, want {5}")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrCaveatParamCoding.ID), "{1:}{2:} unable to encode/decode caveat param(type={4}) for caveat {3}: {5}")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrCaveatValidation.ID), "{1:}{2:} caveat validation failed: {3}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrConstCaveatValidation.ID), "{1:}{2:} false const caveat always fails validation")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrExpiryCaveatValidation.ID), "{1:}{2:} now({4}) is after expiry({3})")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrMethodCaveatValidation.ID), "{1:}{2:} method {3} not in list {4}")
 }
 
 // NewErrCaveatNotRegistered returns an error with the ErrCaveatNotRegistered ID.
@@ -230,4 +236,19 @@ func NewErrCaveatParamCoding(ctx *context.T, id uniqueid.Id, typ *vdl.Type, err 
 // NewErrCaveatValidation returns an error with the ErrCaveatValidation ID.
 func NewErrCaveatValidation(ctx *context.T, err error) error {
 	return verror.New(ErrCaveatValidation, ctx, err)
+}
+
+// NewErrConstCaveatValidation returns an error with the ErrConstCaveatValidation ID.
+func NewErrConstCaveatValidation(ctx *context.T) error {
+	return verror.New(ErrConstCaveatValidation, ctx)
+}
+
+// NewErrExpiryCaveatValidation returns an error with the ErrExpiryCaveatValidation ID.
+func NewErrExpiryCaveatValidation(ctx *context.T, expiryTime time.Time, currentTime time.Time) error {
+	return verror.New(ErrExpiryCaveatValidation, ctx, expiryTime, currentTime)
+}
+
+// NewErrMethodCaveatValidation returns an error with the ErrMethodCaveatValidation ID.
+func NewErrMethodCaveatValidation(ctx *context.T, invokedMethod string, permittedMethods []string) error {
+	return verror.New(ErrMethodCaveatValidation, ctx, invokedMethod, permittedMethods)
 }

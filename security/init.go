@@ -10,7 +10,7 @@ func init() {
 		if isValid {
 			return nil
 		}
-		return fmt.Errorf("failing validation in false const caveat")
+		return NewErrConstCaveatValidation(call.Context())
 	})
 
 	RegisterCaveatValidator(UnixTimeExpiryCaveatX, func(call Call, unixTime int64) error {
@@ -25,7 +25,7 @@ func init() {
 	RegisterCaveatValidator(ExpiryCaveatX, func(call Call, expiry time.Time) error {
 		now := call.Timestamp()
 		if now.After(expiry) {
-			return fmt.Errorf("now(%v) is after expiry(%v)", now, expiry)
+			return NewErrExpiryCaveatValidation(call.Context(), now, expiry)
 		}
 		return nil
 	})
@@ -39,7 +39,7 @@ func init() {
 				return nil
 			}
 		}
-		return fmt.Errorf("method %q is not in list %v", call.Method(), methods)
+		return NewErrMethodCaveatValidation(call.Context(), call.Method(), methods)
 	})
 
 	RegisterCaveatValidator(PublicKeyThirdPartyCaveatX, func(call Call, params publicKeyThirdPartyCaveat) error {
