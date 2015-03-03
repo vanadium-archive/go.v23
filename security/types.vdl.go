@@ -220,6 +220,7 @@ func (RejectedBlessing) __VDLReflect(struct {
 
 func init() {
 	vdl.RegisterNative(wireBlessingsToNative, wireBlessingsFromNative)
+	vdl.RegisterNative(wireDischargeToNative, wireDischargeFromNative)
 	vdl.Register((*BlessingPattern)(nil))
 	vdl.Register((*Hash)(nil))
 	vdl.Register((*Signature)(nil))
@@ -236,6 +237,10 @@ func init() {
 // Type-check WireBlessings conversion functions.
 var _ func(WireBlessings, *Blessings) error = wireBlessingsToNative
 var _ func(*WireBlessings, Blessings) error = wireBlessingsFromNative
+
+// Type-check WireDischarge conversion functions.
+var _ func(WireDischarge, *Discharge) error = wireDischargeToNative
+var _ func(*WireDischarge, Discharge) error = wireDischargeFromNative
 
 // NoExtension is an optional terminator for a blessing pattern indicating that the pattern
 // cannot match any extensions of the blessing from that point onwards.

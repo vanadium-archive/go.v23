@@ -59,6 +59,16 @@ func (d Discharge) Expiry() time.Time {
 	return min
 }
 
+func wireDischargeToNative(wire WireDischarge, native *Discharge) error {
+	native.wire = wire
+	return nil
+}
+
+func wireDischargeFromNative(wire *WireDischarge, native Discharge) error {
+	*wire = native.wire
+	return nil
+}
+
 func expiryTime(cav Caveat) time.Time {
 	switch cav.Id {
 	case ExpiryCaveatX.Id:
@@ -81,20 +91,3 @@ func expiryTime(cav Caveat) time.Time {
 	}
 	return time.Time{}
 }
-
-// NewDischarge creates a Discharge object from the provided wire representation.
-//
-// TODO(ashankar,toddw): Once native-to-wire conversion support is ready for
-// union types, then remove this and instead use VDL support for wire/native
-// type conversions.
-func NewDischarge(wire WireDischarge) Discharge {
-	return Discharge{wire}
-}
-
-// MarshalDischarge is the inverse of NewDischarge, converting an in-memory
-// representation of d to the VDL-defined wire format.
-//
-// TODO(ashankar,toddw): Once native-to-wire conversion support is ready for
-// union types, then remove this and instead use VDL support for wire/native
-// type conversions.
-func MarshalDischarge(d Discharge) WireDischarge { return d.wire }

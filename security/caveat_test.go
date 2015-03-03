@@ -88,8 +88,9 @@ func TestPublicKeyThirdPartyCaveat(t *testing.T) {
 		t.Fatal(err)
 	}
 	// Discharge can be converted to and from wire format:
-	if d2 := NewDischarge(MarshalDischarge(d)); !reflect.DeepEqual(d, d2) {
-		t.Errorf("Got %#v, want %#v", d2, d)
+	var d2 Discharge
+	if err := roundTrip(d, &d2); err != nil || !reflect.DeepEqual(d, d2) {
+		t.Errorf("Got (%#v, %v), want (%#v, nil)", d2, err, d)
 	}
 	// A discharge minted by another principal should not be respected.
 	if d, err = randomserver.MintDischarge(tpc, UnconstrainedUse()); err == nil {

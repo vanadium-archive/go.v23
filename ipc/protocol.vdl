@@ -115,8 +115,8 @@ type Request struct {
 	// Blessings is the blessings of the Client used for the current RPC.
 	Blessings BlessingsRequest
 
-	// Discharges are third party caveat discharges that
-	// are sent after the blessing to fulfill its caveats.
+	// Discharges are third party caveat discharges that may be required
+	// to make Blessings valid.
 	Discharges []security.WireDischarge
 
 	// TraceRequest maintains the vtrace context between clients and servers
