@@ -405,3 +405,12 @@ func (c certificateChainsSorter) Less(i, j int) bool {
 func (i RejectedBlessing) String() string {
 	return fmt.Sprintf("{%q: %v}", i.Blessing, i.Err)
 }
+
+// DefaultBlessingPatterns returns the BlessingsPatterns of the Default Blessings
+// of the provided Principal.
+func DefaultBlessingPatterns(p Principal) (patterns []BlessingPattern) {
+	for b, _ := range p.BlessingsInfo(p.BlessingStore().Default()) {
+		patterns = append(patterns, BlessingPattern(b))
+	}
+	return
+}
