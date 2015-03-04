@@ -572,7 +572,7 @@ type ApplicationServerMethods interface {
 	// which can then be used to control all the installations of the given
 	// application.
 	// TODO(rjkroege): Use customized labels.
-	Install(ctx ipc.ServerCall, name string, config Config, packages application.Packages) (string, error)
+	Install(call ipc.ServerCall, name string, config Config, packages application.Packages) (string, error)
 	// Refresh refreshes the state of application installation(s)
 	// instance(s).
 	Refresh(ipc.ServerCall) error
@@ -596,7 +596,7 @@ type ApplicationServerMethods interface {
 	//
 	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
 	// are implemented.
-	Stop(ctx ipc.ServerCall, deadline uint32) error
+	Stop(call ipc.ServerCall, deadline uint32) error
 	// Suspend suspends execution of application installation(s)
 	// instance(s).
 	Suspend(ipc.ServerCall) error
@@ -611,7 +611,7 @@ type ApplicationServerMethods interface {
 	// specified by the object name argument.  If the new application
 	// envelope contains a different application title, the update does not
 	// occur, and an error is returned.
-	UpdateTo(ctx ipc.ServerCall, name string) error
+	UpdateTo(call ipc.ServerCall, name string) error
 	// Debug returns debug information about the application installation or
 	// instance.  This is generally highly implementation-specific, and
 	// presented in an unstructured form.  No guarantees are given about the
@@ -657,52 +657,52 @@ type implApplicationServerStub struct {
 	gs *ipc.GlobState
 }
 
-func (s implApplicationServerStub) Install(ctx ipc.ServerCall, i0 string, i1 Config, i2 application.Packages) (string, error) {
-	return s.impl.Install(ctx, i0, i1, i2)
+func (s implApplicationServerStub) Install(call ipc.ServerCall, i0 string, i1 Config, i2 application.Packages) (string, error) {
+	return s.impl.Install(call, i0, i1, i2)
 }
 
-func (s implApplicationServerStub) Refresh(ctx ipc.ServerCall) error {
-	return s.impl.Refresh(ctx)
+func (s implApplicationServerStub) Refresh(call ipc.ServerCall) error {
+	return s.impl.Refresh(call)
 }
 
-func (s implApplicationServerStub) Restart(ctx ipc.ServerCall) error {
-	return s.impl.Restart(ctx)
+func (s implApplicationServerStub) Restart(call ipc.ServerCall) error {
+	return s.impl.Restart(call)
 }
 
-func (s implApplicationServerStub) Resume(ctx ipc.ServerCall) error {
-	return s.impl.Resume(ctx)
+func (s implApplicationServerStub) Resume(call ipc.ServerCall) error {
+	return s.impl.Resume(call)
 }
 
-func (s implApplicationServerStub) Revert(ctx ipc.ServerCall) error {
-	return s.impl.Revert(ctx)
+func (s implApplicationServerStub) Revert(call ipc.ServerCall) error {
+	return s.impl.Revert(call)
 }
 
-func (s implApplicationServerStub) Start(ctx ipc.ServerCall) ([]string, error) {
-	return s.impl.Start(ctx)
+func (s implApplicationServerStub) Start(call ipc.ServerCall) ([]string, error) {
+	return s.impl.Start(call)
 }
 
-func (s implApplicationServerStub) Stop(ctx ipc.ServerCall, i0 uint32) error {
-	return s.impl.Stop(ctx, i0)
+func (s implApplicationServerStub) Stop(call ipc.ServerCall, i0 uint32) error {
+	return s.impl.Stop(call, i0)
 }
 
-func (s implApplicationServerStub) Suspend(ctx ipc.ServerCall) error {
-	return s.impl.Suspend(ctx)
+func (s implApplicationServerStub) Suspend(call ipc.ServerCall) error {
+	return s.impl.Suspend(call)
 }
 
-func (s implApplicationServerStub) Uninstall(ctx ipc.ServerCall) error {
-	return s.impl.Uninstall(ctx)
+func (s implApplicationServerStub) Uninstall(call ipc.ServerCall) error {
+	return s.impl.Uninstall(call)
 }
 
-func (s implApplicationServerStub) Update(ctx ipc.ServerCall) error {
-	return s.impl.Update(ctx)
+func (s implApplicationServerStub) Update(call ipc.ServerCall) error {
+	return s.impl.Update(call)
 }
 
-func (s implApplicationServerStub) UpdateTo(ctx ipc.ServerCall, i0 string) error {
-	return s.impl.UpdateTo(ctx, i0)
+func (s implApplicationServerStub) UpdateTo(call ipc.ServerCall, i0 string) error {
+	return s.impl.UpdateTo(call, i0)
 }
 
-func (s implApplicationServerStub) Debug(ctx ipc.ServerCall) (string, error) {
-	return s.impl.Debug(ctx)
+func (s implApplicationServerStub) Debug(call ipc.ServerCall) (string, error) {
+	return s.impl.Debug(call)
 }
 
 func (s implApplicationServerStub) Globber() *ipc.GlobState {
@@ -883,7 +883,7 @@ func (c implClaimableClientStub) Claim(ctx *context.T, i0 string, opts ...ipc.Ca
 // The blessings that the device is to be claimed with is provided
 // via the ipc.Granter option in Go.
 type ClaimableServerMethods interface {
-	Claim(ctx ipc.ServerCall, pairingToken string) error
+	Claim(call ipc.ServerCall, pairingToken string) error
 }
 
 // ClaimableServerStubMethods is the server interface containing
@@ -921,8 +921,8 @@ type implClaimableServerStub struct {
 	gs   *ipc.GlobState
 }
 
-func (s implClaimableServerStub) Claim(ctx ipc.ServerCall, i0 string) error {
-	return s.impl.Claim(ctx, i0)
+func (s implClaimableServerStub) Claim(call ipc.ServerCall, i0 string) error {
+	return s.impl.Claim(call, i0)
 }
 
 func (s implClaimableServerStub) Globber() *ipc.GlobState {
@@ -1242,19 +1242,19 @@ type DeviceServerMethods interface {
 	// Describe generates a description of the device.
 	Describe(ipc.ServerCall) (Description, error)
 	// IsRunnable checks if the device can execute the given binary.
-	IsRunnable(ctx ipc.ServerCall, description binary.Description) (bool, error)
+	IsRunnable(call ipc.ServerCall, description binary.Description) (bool, error)
 	// Reset resets the device. If the deadline is non-zero and the device
 	// in question is still running after the given deadline expired,
 	// reset of the device is enforced.
 	//
 	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
 	// are implemented.
-	Reset(ctx ipc.ServerCall, deadline uint64) error
+	Reset(call ipc.ServerCall, deadline uint64) error
 	// AssociateAccount associates a local  system account name with the provided
 	// Veyron identities. It replaces the existing association if one already exists for that
 	// identity. Setting an AccountName to "" removes the association for each
 	// listed identity.
-	AssociateAccount(ctx ipc.ServerCall, identityNames []string, accountName string) error
+	AssociateAccount(call ipc.ServerCall, identityNames []string, accountName string) error
 	// ListAssociations returns all of the associations between Veyron identities
 	// and system names.
 	ListAssociations(ipc.ServerCall) ([]Association, error)
@@ -1297,24 +1297,24 @@ type implDeviceServerStub struct {
 	gs *ipc.GlobState
 }
 
-func (s implDeviceServerStub) Describe(ctx ipc.ServerCall) (Description, error) {
-	return s.impl.Describe(ctx)
+func (s implDeviceServerStub) Describe(call ipc.ServerCall) (Description, error) {
+	return s.impl.Describe(call)
 }
 
-func (s implDeviceServerStub) IsRunnable(ctx ipc.ServerCall, i0 binary.Description) (bool, error) {
-	return s.impl.IsRunnable(ctx, i0)
+func (s implDeviceServerStub) IsRunnable(call ipc.ServerCall, i0 binary.Description) (bool, error) {
+	return s.impl.IsRunnable(call, i0)
 }
 
-func (s implDeviceServerStub) Reset(ctx ipc.ServerCall, i0 uint64) error {
-	return s.impl.Reset(ctx, i0)
+func (s implDeviceServerStub) Reset(call ipc.ServerCall, i0 uint64) error {
+	return s.impl.Reset(call, i0)
 }
 
-func (s implDeviceServerStub) AssociateAccount(ctx ipc.ServerCall, i0 []string, i1 string) error {
-	return s.impl.AssociateAccount(ctx, i0, i1)
+func (s implDeviceServerStub) AssociateAccount(call ipc.ServerCall, i0 []string, i1 string) error {
+	return s.impl.AssociateAccount(call, i0, i1)
 }
 
-func (s implDeviceServerStub) ListAssociations(ctx ipc.ServerCall) ([]Association, error) {
-	return s.impl.ListAssociations(ctx)
+func (s implDeviceServerStub) ListAssociations(call ipc.ServerCall) ([]Association, error) {
+	return s.impl.ListAssociations(call)
 }
 
 func (s implDeviceServerStub) Globber() *ipc.GlobState {
