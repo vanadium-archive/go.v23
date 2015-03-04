@@ -401,7 +401,7 @@ type UniverseServerMethods interface {
 	// Create creates this Universe.
 	// If acl is nil, the TaggedACLMap is inherited (copied) from the Service.
 	// Create requires the caller to have Write permission at the Service.
-	Create(ctx ipc.ServerCall, acl access.TaggedACLMap) error
+	Create(call ipc.ServerCall, acl access.TaggedACLMap) error
 	// Delete deletes this Universe.
 	Delete(ipc.ServerCall) error
 }
@@ -443,12 +443,12 @@ type implUniverseServerStub struct {
 	gs *ipc.GlobState
 }
 
-func (s implUniverseServerStub) Create(ctx ipc.ServerCall, i0 access.TaggedACLMap) error {
-	return s.impl.Create(ctx, i0)
+func (s implUniverseServerStub) Create(call ipc.ServerCall, i0 access.TaggedACLMap) error {
+	return s.impl.Create(call, i0)
 }
 
-func (s implUniverseServerStub) Delete(ctx ipc.ServerCall) error {
-	return s.impl.Delete(ctx)
+func (s implUniverseServerStub) Delete(call ipc.ServerCall) error {
+	return s.impl.Delete(call)
 }
 
 func (s implUniverseServerStub) Globber() *ipc.GlobState {
@@ -684,12 +684,12 @@ type DatabaseServerMethods interface {
 	// Create creates this Database.
 	// If acl is nil, the TaggedACLMap is inherited (copied) from the Universe.
 	// Create requires the caller to have Write permission at the Universe.
-	Create(ctx ipc.ServerCall, acl access.TaggedACLMap) error
+	Create(call ipc.ServerCall, acl access.TaggedACLMap) error
 	// Delete deletes this Database.
 	Delete(ipc.ServerCall) error
 	// UpdateSchema updates the schema for this Database, creating and deleting
 	// Tables under the hood as needed.
-	UpdateSchema(ctx ipc.ServerCall, schema Schema, etag string) error
+	UpdateSchema(call ipc.ServerCall, schema Schema, etag string) error
 	// GetSchema returns the schema for this Database.
 	GetSchema(ipc.ServerCall) (schema Schema, etag string, err error)
 }
@@ -731,20 +731,20 @@ type implDatabaseServerStub struct {
 	gs *ipc.GlobState
 }
 
-func (s implDatabaseServerStub) Create(ctx ipc.ServerCall, i0 access.TaggedACLMap) error {
-	return s.impl.Create(ctx, i0)
+func (s implDatabaseServerStub) Create(call ipc.ServerCall, i0 access.TaggedACLMap) error {
+	return s.impl.Create(call, i0)
 }
 
-func (s implDatabaseServerStub) Delete(ctx ipc.ServerCall) error {
-	return s.impl.Delete(ctx)
+func (s implDatabaseServerStub) Delete(call ipc.ServerCall) error {
+	return s.impl.Delete(call)
 }
 
-func (s implDatabaseServerStub) UpdateSchema(ctx ipc.ServerCall, i0 Schema, i1 string) error {
-	return s.impl.UpdateSchema(ctx, i0, i1)
+func (s implDatabaseServerStub) UpdateSchema(call ipc.ServerCall, i0 Schema, i1 string) error {
+	return s.impl.UpdateSchema(call, i0, i1)
 }
 
-func (s implDatabaseServerStub) GetSchema(ctx ipc.ServerCall) (Schema, string, error) {
-	return s.impl.GetSchema(ctx)
+func (s implDatabaseServerStub) GetSchema(call ipc.ServerCall) (Schema, string, error) {
+	return s.impl.GetSchema(call)
 }
 
 func (s implDatabaseServerStub) Globber() *ipc.GlobState {
@@ -988,7 +988,7 @@ type ItemServerMethods interface {
 	Get(ipc.ServerCall) (*vdl.Value, error)
 	// Put writes the given value for this Item. The value's primary key field
 	// must match Item.Key().
-	Put(ctx ipc.ServerCall, value *vdl.Value) error
+	Put(call ipc.ServerCall, value *vdl.Value) error
 	// Delete deletes this Item.
 	Delete(ipc.ServerCall) error
 }
@@ -1028,16 +1028,16 @@ type implItemServerStub struct {
 	gs   *ipc.GlobState
 }
 
-func (s implItemServerStub) Get(ctx ipc.ServerCall) (*vdl.Value, error) {
-	return s.impl.Get(ctx)
+func (s implItemServerStub) Get(call ipc.ServerCall) (*vdl.Value, error) {
+	return s.impl.Get(call)
 }
 
-func (s implItemServerStub) Put(ctx ipc.ServerCall, i0 *vdl.Value) error {
-	return s.impl.Put(ctx, i0)
+func (s implItemServerStub) Put(call ipc.ServerCall, i0 *vdl.Value) error {
+	return s.impl.Put(call, i0)
 }
 
-func (s implItemServerStub) Delete(ctx ipc.ServerCall) error {
-	return s.impl.Delete(ctx)
+func (s implItemServerStub) Delete(call ipc.ServerCall) error {
+	return s.impl.Delete(call)
 }
 
 func (s implItemServerStub) Globber() *ipc.GlobState {
