@@ -204,7 +204,7 @@ type ApplicationServerMethods interface {
 	// object name suffix) and if so, returns this envelope. If multiple
 	// profile matches are possible, the method returns the first
 	// matching profile, respecting the order of the input argument.
-	Match(ctx ipc.ServerCall, profiles []string) (application.Envelope, error)
+	Match(call ipc.ServerCall, profiles []string) (application.Envelope, error)
 }
 
 // ApplicationServerStubMethods is the server interface containing
@@ -244,8 +244,8 @@ type implApplicationServerStub struct {
 	gs *ipc.GlobState
 }
 
-func (s implApplicationServerStub) Match(ctx ipc.ServerCall, i0 []string) (application.Envelope, error) {
-	return s.impl.Match(ctx, i0)
+func (s implApplicationServerStub) Match(call ipc.ServerCall, i0 []string) (application.Envelope, error) {
+	return s.impl.Match(call, i0)
 }
 
 func (s implApplicationServerStub) Globber() *ipc.GlobState {
@@ -512,21 +512,21 @@ func (c *implBinaryDownloadClientCall) RecvStream() interface {
 	Value() []byte
 	Err() error
 } {
-	return implBinaryDownloadCallRecv{c}
+	return implBinaryDownloadClientCallRecv{c}
 }
 
-type implBinaryDownloadCallRecv struct {
+type implBinaryDownloadClientCallRecv struct {
 	c *implBinaryDownloadClientCall
 }
 
-func (c implBinaryDownloadCallRecv) Advance() bool {
+func (c implBinaryDownloadClientCallRecv) Advance() bool {
 	c.c.errRecv = c.c.Recv(&c.c.valRecv)
 	return c.c.errRecv == nil
 }
-func (c implBinaryDownloadCallRecv) Value() []byte {
+func (c implBinaryDownloadClientCallRecv) Value() []byte {
 	return c.c.valRecv
 }
-func (c implBinaryDownloadCallRecv) Err() error {
+func (c implBinaryDownloadClientCallRecv) Err() error {
 	if c.c.errRecv == io.EOF {
 		return nil
 	}
@@ -582,17 +582,17 @@ func (c *implBinaryUploadClientCall) SendStream() interface {
 	Send(item []byte) error
 	Close() error
 } {
-	return implBinaryUploadCallSend{c}
+	return implBinaryUploadClientCallSend{c}
 }
 
-type implBinaryUploadCallSend struct {
+type implBinaryUploadClientCallSend struct {
 	c *implBinaryUploadClientCall
 }
 
-func (c implBinaryUploadCallSend) Send(item []byte) error {
+func (c implBinaryUploadClientCallSend) Send(item []byte) error {
 	return c.c.Send(item)
 }
-func (c implBinaryUploadCallSend) Close() error {
+func (c implBinaryUploadClientCallSend) Close() error {
 	return c.c.CloseSend()
 }
 func (c *implBinaryUploadClientCall) Finish() (err error) {
@@ -672,7 +672,7 @@ type BinaryServerMethods interface {
 	// mediaInfo argument contains metadata for the binary. If the suffix
 	// identifies a binary that has already been created, the method
 	// returns an error.
-	Create(ctx ipc.ServerCall, nparts int32, mediaInfo MediaInfo) error
+	Create(call ipc.ServerCall, nparts int32, mediaInfo MediaInfo) error
 	// Delete deletes the binary identified by the object name
 	// suffix. If the binary that has not been created, the method
 	// returns an error.
@@ -683,7 +683,7 @@ type BinaryServerMethods interface {
 	// error. If the Delete() method is invoked when the Download()
 	// method is in progress, the outcome the Download() method is
 	// undefined.
-	Download(ctx BinaryDownloadContext, part int32) error
+	Download(call BinaryDownloadServerCall, part int32) error
 	// DownloadURL returns a transient URL from which the binary
 	// identified by the object name suffix can be downloaded using the
 	// HTTP protocol. If not all parts of the binary have been uploaded,
@@ -699,7 +699,7 @@ type BinaryServerMethods interface {
 	// binary part has been uploaded, the method returns an error. If
 	// the same binary part is being uploaded by another caller, the
 	// method returns an error.
-	Upload(ctx BinaryUploadContext, part int32) error
+	Upload(call BinaryUploadServerCall, part int32) error
 }
 
 // BinaryServerStubMethods is the server interface containing
@@ -756,7 +756,7 @@ type BinaryServerStubMethods interface {
 	// mediaInfo argument contains metadata for the binary. If the suffix
 	// identifies a binary that has already been created, the method
 	// returns an error.
-	Create(ctx ipc.ServerCall, nparts int32, mediaInfo MediaInfo) error
+	Create(call ipc.ServerCall, nparts int32, mediaInfo MediaInfo) error
 	// Delete deletes the binary identified by the object name
 	// suffix. If the binary that has not been created, the method
 	// returns an error.
@@ -767,7 +767,7 @@ type BinaryServerStubMethods interface {
 	// error. If the Delete() method is invoked when the Download()
 	// method is in progress, the outcome the Download() method is
 	// undefined.
-	Download(ctx *BinaryDownloadContextStub, part int32) error
+	Download(call *BinaryDownloadServerCallStub, part int32) error
 	// DownloadURL returns a transient URL from which the binary
 	// identified by the object name suffix can be downloaded using the
 	// HTTP protocol. If not all parts of the binary have been uploaded,
@@ -783,7 +783,7 @@ type BinaryServerStubMethods interface {
 	// binary part has been uploaded, the method returns an error. If
 	// the same binary part is being uploaded by another caller, the
 	// method returns an error.
-	Upload(ctx *BinaryUploadContextStub, part int32) error
+	Upload(call *BinaryUploadServerCallStub, part int32) error
 }
 
 // BinaryServerStub adds universal methods to BinaryServerStubMethods.
@@ -817,28 +817,28 @@ type implBinaryServerStub struct {
 	gs *ipc.GlobState
 }
 
-func (s implBinaryServerStub) Create(ctx ipc.ServerCall, i0 int32, i1 MediaInfo) error {
-	return s.impl.Create(ctx, i0, i1)
+func (s implBinaryServerStub) Create(call ipc.ServerCall, i0 int32, i1 MediaInfo) error {
+	return s.impl.Create(call, i0, i1)
 }
 
-func (s implBinaryServerStub) Delete(ctx ipc.ServerCall) error {
-	return s.impl.Delete(ctx)
+func (s implBinaryServerStub) Delete(call ipc.ServerCall) error {
+	return s.impl.Delete(call)
 }
 
-func (s implBinaryServerStub) Download(ctx *BinaryDownloadContextStub, i0 int32) error {
-	return s.impl.Download(ctx, i0)
+func (s implBinaryServerStub) Download(call *BinaryDownloadServerCallStub, i0 int32) error {
+	return s.impl.Download(call, i0)
 }
 
-func (s implBinaryServerStub) DownloadURL(ctx ipc.ServerCall) (string, int64, error) {
-	return s.impl.DownloadURL(ctx)
+func (s implBinaryServerStub) DownloadURL(call ipc.ServerCall) (string, int64, error) {
+	return s.impl.DownloadURL(call)
 }
 
-func (s implBinaryServerStub) Stat(ctx ipc.ServerCall) ([]binary.PartInfo, MediaInfo, error) {
-	return s.impl.Stat(ctx)
+func (s implBinaryServerStub) Stat(call ipc.ServerCall) ([]binary.PartInfo, MediaInfo, error) {
+	return s.impl.Stat(call)
 }
 
-func (s implBinaryServerStub) Upload(ctx *BinaryUploadContextStub, i0 int32) error {
-	return s.impl.Upload(ctx, i0)
+func (s implBinaryServerStub) Upload(call *BinaryUploadServerCallStub, i0 int32) error {
+	return s.impl.Upload(call, i0)
 }
 
 func (s implBinaryServerStub) Globber() *ipc.GlobState {
@@ -923,35 +923,35 @@ type BinaryDownloadServerStream interface {
 	}
 }
 
-// BinaryDownloadContext represents the context passed to Binary.Download.
-type BinaryDownloadContext interface {
+// BinaryDownloadServerCall represents the context passed to Binary.Download.
+type BinaryDownloadServerCall interface {
 	ipc.ServerCall
 	BinaryDownloadServerStream
 }
 
-// BinaryDownloadContextStub is a wrapper that converts ipc.StreamServerCall into
-// a typesafe stub that implements BinaryDownloadContext.
-type BinaryDownloadContextStub struct {
+// BinaryDownloadServerCallStub is a wrapper that converts ipc.StreamServerCall into
+// a typesafe stub that implements BinaryDownloadServerCall.
+type BinaryDownloadServerCallStub struct {
 	ipc.StreamServerCall
 }
 
-// Init initializes BinaryDownloadContextStub from ipc.StreamServerCall.
-func (s *BinaryDownloadContextStub) Init(call ipc.StreamServerCall) {
+// Init initializes BinaryDownloadServerCallStub from ipc.StreamServerCall.
+func (s *BinaryDownloadServerCallStub) Init(call ipc.StreamServerCall) {
 	s.StreamServerCall = call
 }
 
 // SendStream returns the send side of the Binary.Download server stream.
-func (s *BinaryDownloadContextStub) SendStream() interface {
+func (s *BinaryDownloadServerCallStub) SendStream() interface {
 	Send(item []byte) error
 } {
-	return implBinaryDownloadContextSend{s}
+	return implBinaryDownloadServerCallSend{s}
 }
 
-type implBinaryDownloadContextSend struct {
-	s *BinaryDownloadContextStub
+type implBinaryDownloadServerCallSend struct {
+	s *BinaryDownloadServerCallStub
 }
 
-func (s implBinaryDownloadContextSend) Send(item []byte) error {
+func (s implBinaryDownloadServerCallSend) Send(item []byte) error {
 	return s.s.Send(item)
 }
 
@@ -971,46 +971,46 @@ type BinaryUploadServerStream interface {
 	}
 }
 
-// BinaryUploadContext represents the context passed to Binary.Upload.
-type BinaryUploadContext interface {
+// BinaryUploadServerCall represents the context passed to Binary.Upload.
+type BinaryUploadServerCall interface {
 	ipc.ServerCall
 	BinaryUploadServerStream
 }
 
-// BinaryUploadContextStub is a wrapper that converts ipc.StreamServerCall into
-// a typesafe stub that implements BinaryUploadContext.
-type BinaryUploadContextStub struct {
+// BinaryUploadServerCallStub is a wrapper that converts ipc.StreamServerCall into
+// a typesafe stub that implements BinaryUploadServerCall.
+type BinaryUploadServerCallStub struct {
 	ipc.StreamServerCall
 	valRecv []byte
 	errRecv error
 }
 
-// Init initializes BinaryUploadContextStub from ipc.StreamServerCall.
-func (s *BinaryUploadContextStub) Init(call ipc.StreamServerCall) {
+// Init initializes BinaryUploadServerCallStub from ipc.StreamServerCall.
+func (s *BinaryUploadServerCallStub) Init(call ipc.StreamServerCall) {
 	s.StreamServerCall = call
 }
 
 // RecvStream returns the receiver side of the Binary.Upload server stream.
-func (s *BinaryUploadContextStub) RecvStream() interface {
+func (s *BinaryUploadServerCallStub) RecvStream() interface {
 	Advance() bool
 	Value() []byte
 	Err() error
 } {
-	return implBinaryUploadContextRecv{s}
+	return implBinaryUploadServerCallRecv{s}
 }
 
-type implBinaryUploadContextRecv struct {
-	s *BinaryUploadContextStub
+type implBinaryUploadServerCallRecv struct {
+	s *BinaryUploadServerCallStub
 }
 
-func (s implBinaryUploadContextRecv) Advance() bool {
+func (s implBinaryUploadServerCallRecv) Advance() bool {
 	s.s.errRecv = s.s.Recv(&s.s.valRecv)
 	return s.s.errRecv == nil
 }
-func (s implBinaryUploadContextRecv) Value() []byte {
+func (s implBinaryUploadServerCallRecv) Value() []byte {
 	return s.s.valRecv
 }
-func (s implBinaryUploadContextRecv) Err() error {
+func (s implBinaryUploadServerCallRecv) Err() error {
 	if s.s.errRecv == io.EOF {
 		return nil
 	}
@@ -1135,12 +1135,12 @@ type implProfileServerStub struct {
 	gs   *ipc.GlobState
 }
 
-func (s implProfileServerStub) Label(ctx ipc.ServerCall) (string, error) {
-	return s.impl.Label(ctx)
+func (s implProfileServerStub) Label(call ipc.ServerCall) (string, error) {
+	return s.impl.Label(call)
 }
 
-func (s implProfileServerStub) Description(ctx ipc.ServerCall) (string, error) {
-	return s.impl.Description(ctx)
+func (s implProfileServerStub) Description(call ipc.ServerCall) (string, error) {
+	return s.impl.Description(call)
 }
 
 func (s implProfileServerStub) Globber() *ipc.GlobState {

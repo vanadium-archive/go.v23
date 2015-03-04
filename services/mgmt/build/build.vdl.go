@@ -205,22 +205,22 @@ func (c *implBuilderBuildClientCall) RecvStream() interface {
 	Value() File
 	Err() error
 } {
-	return implBuilderBuildCallRecv{c}
+	return implBuilderBuildClientCallRecv{c}
 }
 
-type implBuilderBuildCallRecv struct {
+type implBuilderBuildClientCallRecv struct {
 	c *implBuilderBuildClientCall
 }
 
-func (c implBuilderBuildCallRecv) Advance() bool {
+func (c implBuilderBuildClientCallRecv) Advance() bool {
 	c.c.valRecv = File{}
 	c.c.errRecv = c.c.Recv(&c.c.valRecv)
 	return c.c.errRecv == nil
 }
-func (c implBuilderBuildCallRecv) Value() File {
+func (c implBuilderBuildClientCallRecv) Value() File {
 	return c.c.valRecv
 }
-func (c implBuilderBuildCallRecv) Err() error {
+func (c implBuilderBuildClientCallRecv) Err() error {
 	if c.c.errRecv == io.EOF {
 		return nil
 	}
@@ -230,17 +230,17 @@ func (c *implBuilderBuildClientCall) SendStream() interface {
 	Send(item File) error
 	Close() error
 } {
-	return implBuilderBuildCallSend{c}
+	return implBuilderBuildClientCallSend{c}
 }
 
-type implBuilderBuildCallSend struct {
+type implBuilderBuildClientCallSend struct {
 	c *implBuilderBuildClientCall
 }
 
-func (c implBuilderBuildCallSend) Send(item File) error {
+func (c implBuilderBuildClientCallSend) Send(item File) error {
 	return c.c.Send(item)
 }
-func (c implBuilderBuildCallSend) Close() error {
+func (c implBuilderBuildClientCallSend) Close() error {
 	return c.c.CloseSend()
 }
 func (c *implBuilderBuildClientCall) Finish() (o0 []byte, err error) {
@@ -255,10 +255,10 @@ func (c *implBuilderBuildClientCall) Finish() (o0 []byte, err error) {
 type BuilderServerMethods interface {
 	// Build streams sources to the build server, which then attempts to
 	// build the sources and streams back the compiled binaries.
-	Build(ctx BuilderBuildContext, Arch Architecture, OS OperatingSystem) ([]byte, error)
+	Build(call BuilderBuildServerCall, Arch Architecture, OS OperatingSystem) ([]byte, error)
 	// Describe generates a description for a binary identified by
 	// the given Object name.
-	Describe(ctx ipc.ServerCall, name string) (binary.Description, error)
+	Describe(call ipc.ServerCall, name string) (binary.Description, error)
 }
 
 // BuilderServerStubMethods is the server interface containing
@@ -268,10 +268,10 @@ type BuilderServerMethods interface {
 type BuilderServerStubMethods interface {
 	// Build streams sources to the build server, which then attempts to
 	// build the sources and streams back the compiled binaries.
-	Build(ctx *BuilderBuildContextStub, Arch Architecture, OS OperatingSystem) ([]byte, error)
+	Build(call *BuilderBuildServerCallStub, Arch Architecture, OS OperatingSystem) ([]byte, error)
 	// Describe generates a description for a binary identified by
 	// the given Object name.
-	Describe(ctx ipc.ServerCall, name string) (binary.Description, error)
+	Describe(call ipc.ServerCall, name string) (binary.Description, error)
 }
 
 // BuilderServerStub adds universal methods to BuilderServerStubMethods.
@@ -303,12 +303,12 @@ type implBuilderServerStub struct {
 	gs   *ipc.GlobState
 }
 
-func (s implBuilderServerStub) Build(ctx *BuilderBuildContextStub, i0 Architecture, i1 OperatingSystem) ([]byte, error) {
-	return s.impl.Build(ctx, i0, i1)
+func (s implBuilderServerStub) Build(call *BuilderBuildServerCallStub, i0 Architecture, i1 OperatingSystem) ([]byte, error) {
+	return s.impl.Build(call, i0, i1)
 }
 
-func (s implBuilderServerStub) Describe(ctx ipc.ServerCall, i0 string) (binary.Description, error) {
-	return s.impl.Describe(ctx, i0)
+func (s implBuilderServerStub) Describe(call ipc.ServerCall, i0 string) (binary.Description, error) {
+	return s.impl.Describe(call, i0)
 }
 
 func (s implBuilderServerStub) Globber() *ipc.GlobState {
@@ -375,47 +375,47 @@ type BuilderBuildServerStream interface {
 	}
 }
 
-// BuilderBuildContext represents the context passed to Builder.Build.
-type BuilderBuildContext interface {
+// BuilderBuildServerCall represents the context passed to Builder.Build.
+type BuilderBuildServerCall interface {
 	ipc.ServerCall
 	BuilderBuildServerStream
 }
 
-// BuilderBuildContextStub is a wrapper that converts ipc.StreamServerCall into
-// a typesafe stub that implements BuilderBuildContext.
-type BuilderBuildContextStub struct {
+// BuilderBuildServerCallStub is a wrapper that converts ipc.StreamServerCall into
+// a typesafe stub that implements BuilderBuildServerCall.
+type BuilderBuildServerCallStub struct {
 	ipc.StreamServerCall
 	valRecv File
 	errRecv error
 }
 
-// Init initializes BuilderBuildContextStub from ipc.StreamServerCall.
-func (s *BuilderBuildContextStub) Init(call ipc.StreamServerCall) {
+// Init initializes BuilderBuildServerCallStub from ipc.StreamServerCall.
+func (s *BuilderBuildServerCallStub) Init(call ipc.StreamServerCall) {
 	s.StreamServerCall = call
 }
 
 // RecvStream returns the receiver side of the Builder.Build server stream.
-func (s *BuilderBuildContextStub) RecvStream() interface {
+func (s *BuilderBuildServerCallStub) RecvStream() interface {
 	Advance() bool
 	Value() File
 	Err() error
 } {
-	return implBuilderBuildContextRecv{s}
+	return implBuilderBuildServerCallRecv{s}
 }
 
-type implBuilderBuildContextRecv struct {
-	s *BuilderBuildContextStub
+type implBuilderBuildServerCallRecv struct {
+	s *BuilderBuildServerCallStub
 }
 
-func (s implBuilderBuildContextRecv) Advance() bool {
+func (s implBuilderBuildServerCallRecv) Advance() bool {
 	s.s.valRecv = File{}
 	s.s.errRecv = s.s.Recv(&s.s.valRecv)
 	return s.s.errRecv == nil
 }
-func (s implBuilderBuildContextRecv) Value() File {
+func (s implBuilderBuildServerCallRecv) Value() File {
 	return s.s.valRecv
 }
-func (s implBuilderBuildContextRecv) Err() error {
+func (s implBuilderBuildServerCallRecv) Err() error {
 	if s.s.errRecv == io.EOF {
 		return nil
 	}
@@ -423,16 +423,16 @@ func (s implBuilderBuildContextRecv) Err() error {
 }
 
 // SendStream returns the send side of the Builder.Build server stream.
-func (s *BuilderBuildContextStub) SendStream() interface {
+func (s *BuilderBuildServerCallStub) SendStream() interface {
 	Send(item File) error
 } {
-	return implBuilderBuildContextSend{s}
+	return implBuilderBuildServerCallSend{s}
 }
 
-type implBuilderBuildContextSend struct {
-	s *BuilderBuildContextStub
+type implBuilderBuildServerCallSend struct {
+	s *BuilderBuildServerCallStub
 }
 
-func (s implBuilderBuildContextSend) Send(item File) error {
+func (s implBuilderBuildServerCallSend) Send(item File) error {
 	return s.s.Send(item)
 }

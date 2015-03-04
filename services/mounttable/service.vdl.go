@@ -277,7 +277,7 @@ type MountTableServerMethods interface {
 	object.ObjectServerMethods
 	// DEPRECATED: TODO(ashankar): Rename MountX to Mount and remove
 	// MountX before the release.
-	Mount(ctx ipc.ServerCall, Server string, TTL uint32, Flags naming.MountFlag) error
+	Mount(call ipc.ServerCall, Server string, TTL uint32, Flags naming.MountFlag) error
 	// Mount Server (a global name) onto the receiver.
 	//
 	// Subsequent mounts add to the servers mounted there.  The multiple
@@ -297,15 +297,15 @@ type MountTableServerMethods interface {
 	// act as if it was never present as far as the interface is concerned.
 	//
 	// Opts represents a bit mask of options.
-	MountX(ctx ipc.ServerCall, Server string, BlessingPatterns []security.BlessingPattern, TTL uint32, Flags naming.MountFlag) error
+	MountX(call ipc.ServerCall, Server string, BlessingPatterns []security.BlessingPattern, TTL uint32, Flags naming.MountFlag) error
 	// Unmount removes Server from the receiver.  If Server is empty, remove
 	// all servers mounted there.
 	// Returns a non-nil error iff Server remains mounted at the mount point.
-	Unmount(ctx ipc.ServerCall, Server string) error
+	Unmount(call ipc.ServerCall, Server string) error
 	// Delete removes the receiver.  If the receiver has children, it will not
 	// be removed unless DeleteSubtree is true in which case the whole subtree is
 	// removed.
-	Delete(ctx ipc.ServerCall, DeleteSubtree bool) error
+	Delete(call ipc.ServerCall, DeleteSubtree bool) error
 	// ResolveStep takes the next step in resolving a name.  Returns the next
 	// servers to query and the suffix at those servers.
 	ResolveStep(ipc.ServerCall) (Entry naming.VDLMountEntry, err error)
@@ -350,28 +350,28 @@ type implMountTableServerStub struct {
 	gs *ipc.GlobState
 }
 
-func (s implMountTableServerStub) Mount(ctx ipc.ServerCall, i0 string, i1 uint32, i2 naming.MountFlag) error {
-	return s.impl.Mount(ctx, i0, i1, i2)
+func (s implMountTableServerStub) Mount(call ipc.ServerCall, i0 string, i1 uint32, i2 naming.MountFlag) error {
+	return s.impl.Mount(call, i0, i1, i2)
 }
 
-func (s implMountTableServerStub) MountX(ctx ipc.ServerCall, i0 string, i1 []security.BlessingPattern, i2 uint32, i3 naming.MountFlag) error {
-	return s.impl.MountX(ctx, i0, i1, i2, i3)
+func (s implMountTableServerStub) MountX(call ipc.ServerCall, i0 string, i1 []security.BlessingPattern, i2 uint32, i3 naming.MountFlag) error {
+	return s.impl.MountX(call, i0, i1, i2, i3)
 }
 
-func (s implMountTableServerStub) Unmount(ctx ipc.ServerCall, i0 string) error {
-	return s.impl.Unmount(ctx, i0)
+func (s implMountTableServerStub) Unmount(call ipc.ServerCall, i0 string) error {
+	return s.impl.Unmount(call, i0)
 }
 
-func (s implMountTableServerStub) Delete(ctx ipc.ServerCall, i0 bool) error {
-	return s.impl.Delete(ctx, i0)
+func (s implMountTableServerStub) Delete(call ipc.ServerCall, i0 bool) error {
+	return s.impl.Delete(call, i0)
 }
 
-func (s implMountTableServerStub) ResolveStep(ctx ipc.ServerCall) (naming.VDLMountEntry, error) {
-	return s.impl.ResolveStep(ctx)
+func (s implMountTableServerStub) ResolveStep(call ipc.ServerCall) (naming.VDLMountEntry, error) {
+	return s.impl.ResolveStep(call)
 }
 
-func (s implMountTableServerStub) ResolveStepX(ctx ipc.ServerCall) (naming.VDLMountEntry, error) {
-	return s.impl.ResolveStepX(ctx)
+func (s implMountTableServerStub) ResolveStepX(call ipc.ServerCall) (naming.VDLMountEntry, error) {
+	return s.impl.ResolveStepX(call)
 }
 
 func (s implMountTableServerStub) Globber() *ipc.GlobState {

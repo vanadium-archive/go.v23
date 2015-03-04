@@ -195,7 +195,7 @@ type ObjectServerMethods interface {
 	// endpoint.  To modify the mount point's ACL, use ResolveToMountTable
 	// to get an endpoint and call SetACL on that.  This means that clients
 	// must know when a name refers to a mount point to change its ACL.
-	SetACL(ctx ipc.ServerCall, acl access.TaggedACLMap, etag string) error
+	SetACL(call ipc.ServerCall, acl access.TaggedACLMap, etag string) error
 	// GetACL returns the complete, current ACL for an object.  The returned etag
 	// can be passed to a subsequent call to SetACL for optimistic concurrency
 	// control. A successful call to SetACL will invalidate etag, and the client
@@ -238,12 +238,12 @@ type implObjectServerStub struct {
 	gs   *ipc.GlobState
 }
 
-func (s implObjectServerStub) SetACL(ctx ipc.ServerCall, i0 access.TaggedACLMap, i1 string) error {
-	return s.impl.SetACL(ctx, i0, i1)
+func (s implObjectServerStub) SetACL(call ipc.ServerCall, i0 access.TaggedACLMap, i1 string) error {
+	return s.impl.SetACL(call, i0, i1)
 }
 
-func (s implObjectServerStub) GetACL(ctx ipc.ServerCall) (access.TaggedACLMap, string, error) {
-	return s.impl.GetACL(ctx)
+func (s implObjectServerStub) GetACL(call ipc.ServerCall) (access.TaggedACLMap, string, error) {
+	return s.impl.GetACL(call)
 }
 
 func (s implObjectServerStub) Globber() *ipc.GlobState {

@@ -130,22 +130,22 @@ func (c *implLogFileReadLogClientCall) RecvStream() interface {
 	Value() types.LogEntry
 	Err() error
 } {
-	return implLogFileReadLogCallRecv{c}
+	return implLogFileReadLogClientCallRecv{c}
 }
 
-type implLogFileReadLogCallRecv struct {
+type implLogFileReadLogClientCallRecv struct {
 	c *implLogFileReadLogClientCall
 }
 
-func (c implLogFileReadLogCallRecv) Advance() bool {
+func (c implLogFileReadLogClientCallRecv) Advance() bool {
 	c.c.valRecv = types.LogEntry{}
 	c.c.errRecv = c.c.Recv(&c.c.valRecv)
 	return c.c.errRecv == nil
 }
-func (c implLogFileReadLogCallRecv) Value() types.LogEntry {
+func (c implLogFileReadLogClientCallRecv) Value() types.LogEntry {
 	return c.c.valRecv
 }
-func (c implLogFileReadLogCallRecv) Err() error {
+func (c implLogFileReadLogClientCallRecv) Err() error {
 	if c.c.errRecv == io.EOF {
 		return nil
 	}
@@ -176,7 +176,7 @@ type LogFileServerMethods interface {
 	//
 	// The returned error will be EOF if and only if ReadLog reached the
 	// end of the file and no log entries were returned.
-	ReadLog(ctx LogFileReadLogContext, StartPos int64, NumEntries int32, Follow bool) (int64, error)
+	ReadLog(call LogFileReadLogServerCall, StartPos int64, NumEntries int32, Follow bool) (int64, error)
 }
 
 // LogFileServerStubMethods is the server interface containing
@@ -199,7 +199,7 @@ type LogFileServerStubMethods interface {
 	//
 	// The returned error will be EOF if and only if ReadLog reached the
 	// end of the file and no log entries were returned.
-	ReadLog(ctx *LogFileReadLogContextStub, StartPos int64, NumEntries int32, Follow bool) (int64, error)
+	ReadLog(call *LogFileReadLogServerCallStub, StartPos int64, NumEntries int32, Follow bool) (int64, error)
 }
 
 // LogFileServerStub adds universal methods to LogFileServerStubMethods.
@@ -231,12 +231,12 @@ type implLogFileServerStub struct {
 	gs   *ipc.GlobState
 }
 
-func (s implLogFileServerStub) Size(ctx ipc.ServerCall) (int64, error) {
-	return s.impl.Size(ctx)
+func (s implLogFileServerStub) Size(call ipc.ServerCall) (int64, error) {
+	return s.impl.Size(call)
 }
 
-func (s implLogFileServerStub) ReadLog(ctx *LogFileReadLogContextStub, i0 int64, i1 int32, i2 bool) (int64, error) {
-	return s.impl.ReadLog(ctx, i0, i1, i2)
+func (s implLogFileServerStub) ReadLog(call *LogFileReadLogServerCallStub, i0 int64, i1 int32, i2 bool) (int64, error) {
+	return s.impl.ReadLog(call, i0, i1, i2)
 }
 
 func (s implLogFileServerStub) Globber() *ipc.GlobState {
@@ -291,34 +291,34 @@ type LogFileReadLogServerStream interface {
 	}
 }
 
-// LogFileReadLogContext represents the context passed to LogFile.ReadLog.
-type LogFileReadLogContext interface {
+// LogFileReadLogServerCall represents the context passed to LogFile.ReadLog.
+type LogFileReadLogServerCall interface {
 	ipc.ServerCall
 	LogFileReadLogServerStream
 }
 
-// LogFileReadLogContextStub is a wrapper that converts ipc.StreamServerCall into
-// a typesafe stub that implements LogFileReadLogContext.
-type LogFileReadLogContextStub struct {
+// LogFileReadLogServerCallStub is a wrapper that converts ipc.StreamServerCall into
+// a typesafe stub that implements LogFileReadLogServerCall.
+type LogFileReadLogServerCallStub struct {
 	ipc.StreamServerCall
 }
 
-// Init initializes LogFileReadLogContextStub from ipc.StreamServerCall.
-func (s *LogFileReadLogContextStub) Init(call ipc.StreamServerCall) {
+// Init initializes LogFileReadLogServerCallStub from ipc.StreamServerCall.
+func (s *LogFileReadLogServerCallStub) Init(call ipc.StreamServerCall) {
 	s.StreamServerCall = call
 }
 
 // SendStream returns the send side of the LogFile.ReadLog server stream.
-func (s *LogFileReadLogContextStub) SendStream() interface {
+func (s *LogFileReadLogServerCallStub) SendStream() interface {
 	Send(item types.LogEntry) error
 } {
-	return implLogFileReadLogContextSend{s}
+	return implLogFileReadLogServerCallSend{s}
 }
 
-type implLogFileReadLogContextSend struct {
-	s *LogFileReadLogContextStub
+type implLogFileReadLogServerCallSend struct {
+	s *LogFileReadLogServerCallStub
 }
 
-func (s implLogFileReadLogContextSend) Send(item types.LogEntry) error {
+func (s implLogFileReadLogServerCallSend) Send(item types.LogEntry) error {
 	return s.s.Send(item)
 }

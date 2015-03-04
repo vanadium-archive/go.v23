@@ -207,22 +207,22 @@ func (c *implGlobWatcherWatchGlobClientCall) RecvStream() interface {
 	Value() types.Change
 	Err() error
 } {
-	return implGlobWatcherWatchGlobCallRecv{c}
+	return implGlobWatcherWatchGlobClientCallRecv{c}
 }
 
-type implGlobWatcherWatchGlobCallRecv struct {
+type implGlobWatcherWatchGlobClientCallRecv struct {
 	c *implGlobWatcherWatchGlobClientCall
 }
 
-func (c implGlobWatcherWatchGlobCallRecv) Advance() bool {
+func (c implGlobWatcherWatchGlobClientCallRecv) Advance() bool {
 	c.c.valRecv = types.Change{}
 	c.c.errRecv = c.c.Recv(&c.c.valRecv)
 	return c.c.errRecv == nil
 }
-func (c implGlobWatcherWatchGlobCallRecv) Value() types.Change {
+func (c implGlobWatcherWatchGlobClientCallRecv) Value() types.Change {
 	return c.c.valRecv
 }
-func (c implGlobWatcherWatchGlobCallRecv) Err() error {
+func (c implGlobWatcherWatchGlobClientCallRecv) Err() error {
 	if c.c.errRecv == io.EOF {
 		return nil
 	}
@@ -240,7 +240,7 @@ func (c *implGlobWatcherWatchGlobClientCall) Finish() (err error) {
 // that match a pattern.  See the package comments for details.
 type GlobWatcherServerMethods interface {
 	// WatchGlob returns a stream of changes that match a pattern.
-	WatchGlob(ctx GlobWatcherWatchGlobContext, req types.GlobRequest) error
+	WatchGlob(call GlobWatcherWatchGlobServerCall, req types.GlobRequest) error
 }
 
 // GlobWatcherServerStubMethods is the server interface containing
@@ -249,7 +249,7 @@ type GlobWatcherServerMethods interface {
 // is the streaming methods.
 type GlobWatcherServerStubMethods interface {
 	// WatchGlob returns a stream of changes that match a pattern.
-	WatchGlob(ctx *GlobWatcherWatchGlobContextStub, req types.GlobRequest) error
+	WatchGlob(call *GlobWatcherWatchGlobServerCallStub, req types.GlobRequest) error
 }
 
 // GlobWatcherServerStub adds universal methods to GlobWatcherServerStubMethods.
@@ -281,8 +281,8 @@ type implGlobWatcherServerStub struct {
 	gs   *ipc.GlobState
 }
 
-func (s implGlobWatcherServerStub) WatchGlob(ctx *GlobWatcherWatchGlobContextStub, i0 types.GlobRequest) error {
-	return s.impl.WatchGlob(ctx, i0)
+func (s implGlobWatcherServerStub) WatchGlob(call *GlobWatcherWatchGlobServerCallStub, i0 types.GlobRequest) error {
+	return s.impl.WatchGlob(call, i0)
 }
 
 func (s implGlobWatcherServerStub) Globber() *ipc.GlobState {
@@ -324,34 +324,34 @@ type GlobWatcherWatchGlobServerStream interface {
 	}
 }
 
-// GlobWatcherWatchGlobContext represents the context passed to GlobWatcher.WatchGlob.
-type GlobWatcherWatchGlobContext interface {
+// GlobWatcherWatchGlobServerCall represents the context passed to GlobWatcher.WatchGlob.
+type GlobWatcherWatchGlobServerCall interface {
 	ipc.ServerCall
 	GlobWatcherWatchGlobServerStream
 }
 
-// GlobWatcherWatchGlobContextStub is a wrapper that converts ipc.StreamServerCall into
-// a typesafe stub that implements GlobWatcherWatchGlobContext.
-type GlobWatcherWatchGlobContextStub struct {
+// GlobWatcherWatchGlobServerCallStub is a wrapper that converts ipc.StreamServerCall into
+// a typesafe stub that implements GlobWatcherWatchGlobServerCall.
+type GlobWatcherWatchGlobServerCallStub struct {
 	ipc.StreamServerCall
 }
 
-// Init initializes GlobWatcherWatchGlobContextStub from ipc.StreamServerCall.
-func (s *GlobWatcherWatchGlobContextStub) Init(call ipc.StreamServerCall) {
+// Init initializes GlobWatcherWatchGlobServerCallStub from ipc.StreamServerCall.
+func (s *GlobWatcherWatchGlobServerCallStub) Init(call ipc.StreamServerCall) {
 	s.StreamServerCall = call
 }
 
 // SendStream returns the send side of the GlobWatcher.WatchGlob server stream.
-func (s *GlobWatcherWatchGlobContextStub) SendStream() interface {
+func (s *GlobWatcherWatchGlobServerCallStub) SendStream() interface {
 	Send(item types.Change) error
 } {
-	return implGlobWatcherWatchGlobContextSend{s}
+	return implGlobWatcherWatchGlobServerCallSend{s}
 }
 
-type implGlobWatcherWatchGlobContextSend struct {
-	s *GlobWatcherWatchGlobContextStub
+type implGlobWatcherWatchGlobServerCallSend struct {
+	s *GlobWatcherWatchGlobServerCallStub
 }
 
-func (s implGlobWatcherWatchGlobContextSend) Send(item types.Change) error {
+func (s implGlobWatcherWatchGlobServerCallSend) Send(item types.Change) error {
 	return s.s.Send(item)
 }

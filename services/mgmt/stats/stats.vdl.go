@@ -160,8 +160,8 @@ type implStatsServerStub struct {
 	gs *ipc.GlobState
 }
 
-func (s implStatsServerStub) Value(ctx ipc.ServerCall) (*vdl.Value, error) {
-	return s.impl.Value(ctx)
+func (s implStatsServerStub) Value(call ipc.ServerCall) (*vdl.Value, error) {
+	return s.impl.Value(call)
 }
 
 func (s implStatsServerStub) Globber() *ipc.GlobState {

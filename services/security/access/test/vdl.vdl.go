@@ -166,24 +166,24 @@ type implMyObjectServerStub struct {
 	gs   *ipc.GlobState
 }
 
-func (s implMyObjectServerStub) Get(ctx ipc.ServerCall) error {
-	return s.impl.Get(ctx)
+func (s implMyObjectServerStub) Get(call ipc.ServerCall) error {
+	return s.impl.Get(call)
 }
 
-func (s implMyObjectServerStub) Put(ctx ipc.ServerCall) error {
-	return s.impl.Put(ctx)
+func (s implMyObjectServerStub) Put(call ipc.ServerCall) error {
+	return s.impl.Put(call)
 }
 
-func (s implMyObjectServerStub) Resolve(ctx ipc.ServerCall) error {
-	return s.impl.Resolve(ctx)
+func (s implMyObjectServerStub) Resolve(call ipc.ServerCall) error {
+	return s.impl.Resolve(call)
 }
 
-func (s implMyObjectServerStub) NoTags(ctx ipc.ServerCall) error {
-	return s.impl.NoTags(ctx)
+func (s implMyObjectServerStub) NoTags(call ipc.ServerCall) error {
+	return s.impl.NoTags(call)
 }
 
-func (s implMyObjectServerStub) AllTags(ctx ipc.ServerCall) error {
-	return s.impl.AllTags(ctx)
+func (s implMyObjectServerStub) AllTags(call ipc.ServerCall) error {
+	return s.impl.AllTags(call)
 }
 
 func (s implMyObjectServerStub) Globber() *ipc.GlobState {

@@ -120,22 +120,22 @@ func (c *implStoreAllTracesClientCall) RecvStream() interface {
 	Value() vtrace.TraceRecord
 	Err() error
 } {
-	return implStoreAllTracesCallRecv{c}
+	return implStoreAllTracesClientCallRecv{c}
 }
 
-type implStoreAllTracesCallRecv struct {
+type implStoreAllTracesClientCallRecv struct {
 	c *implStoreAllTracesClientCall
 }
 
-func (c implStoreAllTracesCallRecv) Advance() bool {
+func (c implStoreAllTracesClientCallRecv) Advance() bool {
 	c.c.valRecv = vtrace.TraceRecord{}
 	c.c.errRecv = c.c.Recv(&c.c.valRecv)
 	return c.c.errRecv == nil
 }
-func (c implStoreAllTracesCallRecv) Value() vtrace.TraceRecord {
+func (c implStoreAllTracesClientCallRecv) Value() vtrace.TraceRecord {
 	return c.c.valRecv
 }
-func (c implStoreAllTracesCallRecv) Err() error {
+func (c implStoreAllTracesClientCallRecv) Err() error {
 	if c.c.errRecv == io.EOF {
 		return nil
 	}
@@ -154,7 +154,7 @@ type StoreServerMethods interface {
 	Trace(ipc.ServerCall, uniqueid.Id) (vtrace.TraceRecord, error)
 	// AllTraces returns TraceRecords for all traces the server currently
 	// knows about.
-	AllTraces(StoreAllTracesContext) error
+	AllTraces(StoreAllTracesServerCall) error
 }
 
 // StoreServerStubMethods is the server interface containing
@@ -167,7 +167,7 @@ type StoreServerStubMethods interface {
 	Trace(ipc.ServerCall, uniqueid.Id) (vtrace.TraceRecord, error)
 	// AllTraces returns TraceRecords for all traces the server currently
 	// knows about.
-	AllTraces(*StoreAllTracesContextStub) error
+	AllTraces(*StoreAllTracesServerCallStub) error
 }
 
 // StoreServerStub adds universal methods to StoreServerStubMethods.
@@ -199,12 +199,12 @@ type implStoreServerStub struct {
 	gs   *ipc.GlobState
 }
 
-func (s implStoreServerStub) Trace(ctx ipc.ServerCall, i0 uniqueid.Id) (vtrace.TraceRecord, error) {
-	return s.impl.Trace(ctx, i0)
+func (s implStoreServerStub) Trace(call ipc.ServerCall, i0 uniqueid.Id) (vtrace.TraceRecord, error) {
+	return s.impl.Trace(call, i0)
 }
 
-func (s implStoreServerStub) AllTraces(ctx *StoreAllTracesContextStub) error {
-	return s.impl.AllTraces(ctx)
+func (s implStoreServerStub) AllTraces(call *StoreAllTracesServerCallStub) error {
+	return s.impl.AllTraces(call)
 }
 
 func (s implStoreServerStub) Globber() *ipc.GlobState {
@@ -253,34 +253,34 @@ type StoreAllTracesServerStream interface {
 	}
 }
 
-// StoreAllTracesContext represents the context passed to Store.AllTraces.
-type StoreAllTracesContext interface {
+// StoreAllTracesServerCall represents the context passed to Store.AllTraces.
+type StoreAllTracesServerCall interface {
 	ipc.ServerCall
 	StoreAllTracesServerStream
 }
 
-// StoreAllTracesContextStub is a wrapper that converts ipc.StreamServerCall into
-// a typesafe stub that implements StoreAllTracesContext.
-type StoreAllTracesContextStub struct {
+// StoreAllTracesServerCallStub is a wrapper that converts ipc.StreamServerCall into
+// a typesafe stub that implements StoreAllTracesServerCall.
+type StoreAllTracesServerCallStub struct {
 	ipc.StreamServerCall
 }
 
-// Init initializes StoreAllTracesContextStub from ipc.StreamServerCall.
-func (s *StoreAllTracesContextStub) Init(call ipc.StreamServerCall) {
+// Init initializes StoreAllTracesServerCallStub from ipc.StreamServerCall.
+func (s *StoreAllTracesServerCallStub) Init(call ipc.StreamServerCall) {
 	s.StreamServerCall = call
 }
 
 // SendStream returns the send side of the Store.AllTraces server stream.
-func (s *StoreAllTracesContextStub) SendStream() interface {
+func (s *StoreAllTracesServerCallStub) SendStream() interface {
 	Send(item vtrace.TraceRecord) error
 } {
-	return implStoreAllTracesContextSend{s}
+	return implStoreAllTracesServerCallSend{s}
 }
 
-type implStoreAllTracesContextSend struct {
-	s *StoreAllTracesContextStub
+type implStoreAllTracesServerCallSend struct {
+	s *StoreAllTracesServerCallStub
 }
 
-func (s implStoreAllTracesContextSend) Send(item vtrace.TraceRecord) error {
+func (s implStoreAllTracesServerCallSend) Send(item vtrace.TraceRecord) error {
 	return s.s.Send(item)
 }
