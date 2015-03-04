@@ -1,8 +1,13 @@
 package security
 
 import (
+	"regexp"
 	"strings"
+	"v.io/v23/naming"
 )
+
+// Syntax is {name}/__({pattern})
+var namePatternRegexp = regexp.MustCompile(`(.*(?:/|^))__\(([^]]*)\)$`)
 
 // MatchedBy returns true iff one of the presented blessings matches
 // p as per the rules described in documentation for the BlessingPattern type.
@@ -115,4 +120,17 @@ func matchedByBlessing(patternchain []string, glob bool, b string) bool {
 		}
 	}
 	return true
+}
+
+// SplitPatternName takes an object name and parses out the server blessing pattern.
+// It returns the pattern specified, and the name with the pattern removed.
+func SplitPatternName(name string) (pattern BlessingPattern, objectName string) {
+	match := namePatternRegexp.FindStringSubmatch(name)
+	if len(match) == 0 || len(match[2]) == 0 {
+		objectName = name
+		return
+	}
+	pattern = BlessingPattern(match[2])
+	objectName = naming.Clean(match[1])
+	return
 }
