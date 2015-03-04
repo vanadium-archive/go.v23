@@ -1,6 +1,8 @@
 package naming
 
-import "strings"
+import (
+	"strings"
+)
 
 // SplitAddressName takes an object name and returns the server address and
 // the name relative to the server.
@@ -12,11 +14,26 @@ func SplitAddressName(name string) (string, string) {
 	if !Rooted(name) {
 		return "", name
 	}
-	elems := strings.SplitN(name[1:], "/", 2)
-	if len(elems) == 1 {
-		return elems[0], ""
+	name = name[1:]
+	if len(name) == 0 {
+		return "", ""
 	}
-	return elems[0], strings.TrimLeft(elems[1], "/")
+	// Could have used regular expressions, but that makes this function
+	// 10x slower as per the benchmark.
+	if strings.HasPrefix(name, "@") { // /<endpoint>/<suffix>
+		addr, suffix := splitIntoTwo(name, "@@/")
+		if len(suffix) > 0 { // The trailing "@@" was stripped, restore it
+			addr = addr + "@@"
+		}
+		return addr, suffix
+	}
+	if strings.HasPrefix(name, "(") { // /(blessing)@host:[port]/suffix
+		_, tmp := splitIntoTwo(name, ")@")
+		_, suffix := splitIntoTwo(tmp, "/")
+		return strings.TrimSuffix(name, "/"+suffix), suffix
+	}
+	// /host:[port]/suffix
+	return splitIntoTwo(name, "/")
 }
 
 // JoinAddressName takes an address and a relative name and returns a rooted
@@ -108,4 +125,12 @@ func Clean(name string) string {
 		return name
 	}
 	return strings.TrimSuffix(name, "/")
+}
+
+func splitIntoTwo(str, separator string) (string, string) {
+	elems := strings.SplitN(str, separator, 2)
+	if len(elems) == 1 {
+		return elems[0], ""
+	}
+	return elems[0], elems[1]
 }

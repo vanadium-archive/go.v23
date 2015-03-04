@@ -11,14 +11,14 @@ func TestSplitAddressName(t *testing.T) {
 		{"", "", ""},
 		{"/", "", ""},
 		{"//", "", ""},
-		{"//abc@@/foo", "abc@@", "foo"},
+		{"//abc@@host/foo", "abc@@host", "foo"},
 		{"a", "", "a"},
 		{"/a", "a", ""},
 		{"/a/", "a", ""},
 		{"a/b", "", "a/b"},
 		{"/a/b", "a", "b"},
 		{"abc@@/foo", "", "abc@@/foo"},
-		{"/abc@@/foo", "abc@@", "foo"},
+		{"/abc@@host/foo", "abc@@host", "foo"},
 		{"/abc/foo", "abc", "foo"},
 		{"/abc/foo//x", "abc", "foo/x"},
 		{"/abc:20/foo", "abc:20", "foo"},
@@ -36,12 +36,35 @@ func TestSplitAddressName(t *testing.T) {
 		{"/12.3.4.5/foo", "12.3.4.5", "foo"},
 		{"/12.3.4.5//foo", "12.3.4.5", "foo"},
 		{"/12.3.4.5/foo//bar", "12.3.4.5", "foo/bar"},
+		{"/user@domain.com@host:1234/foo/bar", "user@domain.com@host:1234", "foo/bar"},
+		{"/(dev.v.io/services/mounttabled)@host:1234/foo/bar", "(dev.v.io/services/mounttabled)@host:1234", "foo/bar"},
+		{"/(dev.v.io/services/mounttabled)@host:1234/", "(dev.v.io/services/mounttabled)@host:1234", ""},
+		{"/(dev.v.io/services/mounttabled)@host:1234", "(dev.v.io/services/mounttabled)@host:1234", ""},
+		{"/@4@tcp@127.0.0.1:22@@@@s@dev.v.io/", "@4@tcp@127.0.0.1:22@@@@s@dev.v.io", ""}, // malformed endpoint, doesn't end in a @@
+		{"/@4@tcp@127.0.0.1:22@@@@s@dev.v.io", "@4@tcp@127.0.0.1:22@@@@s@dev.v.io", ""},  // malformed endpoint, doesn't end in a @@
+		{"/@4@tcp@127.0.0.1:22@@@@s@dev.v.io/services/mounttabled@@/foo/bar", "@4@tcp@127.0.0.1:22@@@@s@dev.v.io/services/mounttabled@@", "foo/bar"},
+		{"/@4@tcp@127.0.0.1:22@@@@s@dev.v.io/services/mounttabled,staging.v.io/services/nsroot@@/foo/bar", "@4@tcp@127.0.0.1:22@@@@s@dev.v.io/services/mounttabled,staging.v.io/services/nsroot@@", "foo/bar"},
+		{"/@@@127.0.0.1:22@@@@/foo/bar", "@@@127.0.0.1:22@@@@", "foo/bar"},
+		{"/@4@tcp@127.0.0.1:22@@@@s@dev.v.io/services/mounttabled,staging.v.io/services/nsroot@@", "@4@tcp@127.0.0.1:22@@@@s@dev.v.io/services/mounttabled,staging.v.io/services/nsroot@@", ""},
 	}
+
 	for _, c := range cases {
 		addr, name := SplitAddressName(c.input)
 		if addr != c.address || name != c.name {
 			t.Errorf("SplitAddressName(%q): got %q,%q want %q,%q", c.input, addr, name, c.address, c.name)
 		}
+	}
+}
+
+func BenchmarkSplitAddressName(b *testing.B) {
+	tests := []string{
+		"/user@domain.com@host:1234/foo/bar",
+		"/(dev.v.io/services/mounttabled)@host:1234/foo/bar",
+		"/@4@tcp@127.0.0.1:22@@@@s@dev.v.io/services/mounttabled@@/foo/bar",
+		"/@4@tcp@127.0.0.1:22@@@@s@dev.v.io/services/mounttabled,staging.v.io/services/nsroot@@/foo/bar",
+	}
+	for i := 0; i < b.N; i++ {
+		SplitAddressName(tests[i%len(tests)])
 	}
 }
 

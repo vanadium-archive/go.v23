@@ -22,6 +22,7 @@ func TestFormat(t *testing.T) {
 		{"tcp", "127.0.0.1:22", []naming.EndpointOpt{naming.BlessingOpt("batman@dccomics.com"), naming.BlessingOpt("bugs@bunny.com"), naming.ServesMountTableOpt(true)}, "@4@tcp@127.0.0.1:22@@@@m@batman@dccomics.com,bugs@bunny.com@@"},
 		{"tcp", "127.0.0.1:22", []naming.EndpointOpt{naming.BlessingOpt("batman@dccomics.com"), naming.BlessingOpt("bugs@bunny.com"), version.IPCVersionRange{5, 7}}, "@4@tcp@127.0.0.1:22@@5@7@s@batman@dccomics.com,bugs@bunny.com@@"},
 		{"tcp", "127.0.0.1:22", []naming.EndpointOpt{naming.BlessingOpt("@s@@")}, "@4@tcp@127.0.0.1:22@@@@s@@s@@@@"},
+		{"tcp", "127.0.0.1:22", []naming.EndpointOpt{naming.BlessingOpt("dev.v.io/services/mounttabled")}, "@4@tcp@127.0.0.1:22@@@@s@dev.v.io/services/mounttabled@@"},
 	}
 	for i, test := range testcases {
 		str := naming.FormatEndpoint(test.network, test.address, test.opts...)
