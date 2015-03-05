@@ -14,25 +14,25 @@ func SplitAddressName(name string) (string, string) {
 	if !Rooted(name) {
 		return "", name
 	}
-	name = name[1:]
+	name = name[1:] // trim the beginning "/"
 	if len(name) == 0 {
 		return "", ""
 	}
 	// Could have used regular expressions, but that makes this function
 	// 10x slower as per the benchmark.
-	if strings.HasPrefix(name, "@") { // /<endpoint>/<suffix>
+	if strings.HasPrefix(name, "@") { // <endpoint>/<suffix>
 		addr, suffix := splitIntoTwo(name, "@@/")
 		if len(suffix) > 0 { // The trailing "@@" was stripped, restore it
 			addr = addr + "@@"
 		}
 		return addr, suffix
 	}
-	if strings.HasPrefix(name, "(") { // /(blessing)@host:[port]/suffix
+	if strings.HasPrefix(name, "(") { // (blessing)@host:[port]/suffix
 		_, tmp := splitIntoTwo(name, ")@")
 		_, suffix := splitIntoTwo(tmp, "/")
 		return strings.TrimSuffix(name, "/"+suffix), suffix
 	}
-	// /host:[port]/suffix
+	// host:[port]/suffix
 	return splitIntoTwo(name, "/")
 }
 
