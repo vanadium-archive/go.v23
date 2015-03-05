@@ -54,7 +54,7 @@ func NewErrUnknownSuffix(ctx *context.T, suffix string) error {
 
 // NewErrGlobNotImplemented returns a glob not implemented error.
 func NewErrGlobNotImplemented(ctx *context.T, suffix string) error {
-	return verror.New(verror.ErrNoExist, ctx, verror.New(globNotImplemented, ctx, suffix))
+	return verror.New(verror.ErrNotImplemented, ctx, verror.New(globNotImplemented, ctx, suffix))
 }
 
 // NewErrGlobMatchesOmitted returns a glob matches ommitted error.
