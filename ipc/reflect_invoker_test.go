@@ -61,6 +61,9 @@ func (call *FakeStreamServerCall) Timestamp() time.Time            { return call
 func (call *FakeStreamServerCall) Method() string                  { return call.security.Method() }
 func (call *FakeStreamServerCall) MethodTags() []*vdl.Value        { return call.security.MethodTags() }
 func (call *FakeStreamServerCall) Suffix() string                  { return call.security.Suffix() }
+func (call *FakeStreamServerCall) LocalDischarges() map[string]security.Discharge {
+	return call.security.LocalDischarges()
+}
 func (call *FakeStreamServerCall) RemoteDischarges() map[string]security.Discharge {
 	return call.security.RemoteDischarges()
 }
