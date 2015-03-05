@@ -374,10 +374,13 @@ type Call interface {
 	MethodTags() []*vdl.Value
 	// Suffix returns the object name suffix for the request.
 	Suffix() string
-	// Discharges maps a ThirdPartyCaveat identifier to the corresponding
-	// discharges.
-	// TODO(ataly, ashankar): Discharges should return map[string][]Discharge,
-	// i.e., it should map a ThirdPartyCaveat identifier to a set of Discharges.
+	// LocalDischarges specify discharges for third-party caveats presented by
+	// the local end of the call. It maps a third-party caveat identifier to the
+	// corresponding discharge.
+	LocalDischarges() map[string]Discharge
+	// RemoteDischarges specify discharges for third-party caveats presented by
+	// the remote end of the call. It maps a third-party caveat identifier to the
+	// corresponding discharge.
 	RemoteDischarges() map[string]Discharge
 	// LocalPrincipal returns the principal used to authenticate to the remote end.
 	LocalPrincipal() Principal

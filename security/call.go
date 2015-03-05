@@ -31,7 +31,8 @@ type CallParams struct {
 	LocalEndpoint  naming.Endpoint // Endpoint of local end of communication.
 
 	RemoteBlessings  Blessings            // Blessings presented by the remote end.
-	RemoteDischarges map[string]Discharge // Map a ThirdPartyCaveat identifier to corresponding discharges shared by the remote end.
+	RemoteDischarges map[string]Discharge // Map of third-party caveat identifiers to corresponding discharges shared by the remote end.
+	LocalDischarges  map[string]Discharge // Map of third-party caveat identifiers to corresponding discharges shared by the local end.
 	RemoteEndpoint   naming.Endpoint      // Endpoint of the remote end of communication
 
 	Context *context.T // The context.T.
@@ -54,12 +55,20 @@ func (p *CallParams) Copy(c Call) {
 	p.LocalBlessings = c.LocalBlessings()
 	p.LocalEndpoint = c.LocalEndpoint()
 	p.RemoteBlessings = c.RemoteBlessings()
-	p.RemoteDischarges = make(map[string]Discharge, len(c.RemoteDischarges()))
-	for id, dis := range c.RemoteDischarges() {
-		p.RemoteDischarges[id] = dis
-	}
+	// TODO(ataly, suharshs): Is the copying of discharge maps
+	// really needed?
+	p.LocalDischarges = copyDischargeMap(c.LocalDischarges())
+	p.RemoteDischarges = copyDischargeMap(c.RemoteDischarges())
 	p.RemoteEndpoint = c.RemoteEndpoint()
 	p.Context = c.Context()
+}
+
+func copyDischargeMap(discharges map[string]Discharge) map[string]Discharge {
+	ret := make(map[string]Discharge, len(discharges))
+	for id, d := range discharges {
+		ret[id] = d
+	}
+	return ret
 }
 
 type ctxImpl struct{ params CallParams }
@@ -74,6 +83,7 @@ func (c *ctxImpl) LocalBlessings() Blessings              { return c.params.Loca
 func (c *ctxImpl) RemoteBlessings() Blessings             { return c.params.RemoteBlessings }
 func (c *ctxImpl) LocalEndpoint() naming.Endpoint         { return c.params.LocalEndpoint }
 func (c *ctxImpl) RemoteEndpoint() naming.Endpoint        { return c.params.RemoteEndpoint }
+func (c *ctxImpl) LocalDischarges() map[string]Discharge  { return c.params.LocalDischarges }
 func (c *ctxImpl) RemoteDischarges() map[string]Discharge { return c.params.RemoteDischarges }
 func (c *ctxImpl) String() string                         { return fmt.Sprintf("%+v", c.params) }
 func (c *ctxImpl) Context() *context.T                    { return c.params.Context }
