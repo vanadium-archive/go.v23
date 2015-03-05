@@ -13,15 +13,6 @@ func init() {
 		return NewErrConstCaveatValidation(call.Context())
 	})
 
-	RegisterCaveatValidator(UnixTimeExpiryCaveatX, func(call Call, unixTime int64) error {
-		now := call.Timestamp()
-		expiry := time.Unix(int64(unixTime), 0)
-		if now.After(expiry) {
-			return fmt.Errorf("now(%v) is after expiry(%v)", now, expiry)
-		}
-		return nil
-	})
-
 	RegisterCaveatValidator(ExpiryCaveatX, func(call Call, expiry time.Time) error {
 		now := call.Timestamp()
 		if now.After(expiry) {

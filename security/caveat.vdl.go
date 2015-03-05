@@ -86,32 +86,6 @@ var ConstCaveat = CaveatDescriptor{
 	ParamType: vdl.TypeOf(false),
 }
 
-// UnixTimeExpiryCaveat represents a caveat that validates iff the current
-// time is before the time specified in seconds since January 1, 1970 UTC.
-//
-// TODO(suharshs,ashankar,ataly): Remove this once everything is using ExpiryCaveatX.
-var UnixTimeExpiryCaveatX = CaveatDescriptor{
-	Id: uniqueid.Id{
-		84,
-		166,
-		118,
-		57,
-		129,
-		55,
-		24,
-		126,
-		205,
-		178,
-		109,
-		45,
-		105,
-		186,
-		0,
-		4,
-	},
-	ParamType: vdl.TypeOf(int64(0)),
-}
-
 // ExpiryCaveat represents a caveat that validates iff the current time is no later
 // the specified time.Time.
 //

@@ -250,7 +250,6 @@ func TestPublicKeyDischargeExpiry(t *testing.T) {
 		oneh       = newCaveat(ExpiryCaveat(now.Add(time.Hour)))
 		twoh       = newCaveat(ExpiryCaveat(now.Add(2 * time.Hour)))
 		threeh     = newCaveat(ExpiryCaveat(now.Add(3 * time.Hour)))
-		unix       = newCaveat(NewCaveat(UnixTimeExpiryCaveatX, now.Add(time.Hour).Unix()))
 	)
 
 	tpc, err := NewPublicKeyCaveat(discharger.PublicKey(), "location", ThirdPartyRequirements{}, oneh)
@@ -273,15 +272,6 @@ func TestPublicKeyDischargeExpiry(t *testing.T) {
 	threeCav, err := discharger.MintDischarge(tpc, threeh, oneh, twoh)
 	if err != nil {
 		t.Fatal(err)
-	}
-
-	// Check that UnixTimeExpiryCaveatX also works.
-	unixCav, err := discharger.MintDischarge(tpc, unix)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if got, want := unixCav.Expiry().Unix(), now.Add(time.Hour).Unix(); got != want {
-		t.Errorf("got %v, want %v", got, want)
 	}
 
 	if exp := noExpiry.Expiry(); !exp.IsZero() {

@@ -79,15 +79,6 @@ func expiryTime(cav Caveat) time.Time {
 			return time.Time{}
 		}
 		return t
-	case UnixTimeExpiryCaveatX.Id:
-		// TODO(suharshs): Remove this after we only use ExpiryCaveatX.
-		var unix int64
-		if err := vom.Decode(cav.ParamVom, &unix); err != nil {
-			// TODO(jsimsa): Decide what (if any) logging mechanism to use.
-			// vlog.Errorf("Failed to decode ParamVOM for cav(%v): %v", cav, err)
-			return time.Time{}
-		}
-		return time.Unix(unix, 0)
 	}
 	return time.Time{}
 }

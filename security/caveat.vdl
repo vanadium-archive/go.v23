@@ -9,15 +9,6 @@ const (
     ParamType: typeobject(bool), // If true, validation will always succeed. If false, will always fail.
    }
 
-  // UnixTimeExpiryCaveat represents a caveat that validates iff the current
-  // time is before the time specified in seconds since January 1, 1970 UTC.
-  //
-  // TODO(suharshs,ashankar,ataly): Remove this once everything is using ExpiryCaveatX.
-  UnixTimeExpiryCaveatX = CaveatDescriptor{
-    Id:        uniqueid.Id{0x54, 0xa6, 0x76, 0x39, 0x81, 0x37, 0x18, 0x7e, 0xcd, 0xb2, 0x6d, 0x2d, 0x69, 0xba, 0x0, 0x4},
-    ParamType: typeobject(int64),
-  }
-
   // ExpiryCaveat represents a caveat that validates iff the current time is no later
   // the specified time.Time.
   //
