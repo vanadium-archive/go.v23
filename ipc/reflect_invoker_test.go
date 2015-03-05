@@ -1,3 +1,6 @@
+// reflect_invoker_test is the main unit test for relfelct_invoker.go, but see also
+// reflect_invoker_internal_test, which tests some things internal to the module.
+
 package ipc_test
 
 import (
@@ -6,7 +9,6 @@ import (
 	"os"
 	"reflect"
 	"regexp"
-	"strings"
 	"testing"
 	"time"
 
@@ -606,97 +608,6 @@ func TestReflectInvokerErrors(t *testing.T) {
 			t.Errorf(`%s ReflectInvoker got error %v`, name(test), err)
 		}
 		testInvoker(test, invoker)
-	}
-}
-
-const (
-	badInit = `Init must have signature`
-	badSend = `SendStream must have signature`
-	badRecv = `RecvStream must have signature`
-)
-
-func TestTypeCheckMethods(t *testing.T) {
-	type testcase struct {
-		obj  interface{}
-		want map[string]string
-	}
-	tests := []testcase{
-		{struct{}{}, nil},
-		{&notags{}, map[string]string{
-			"Method1":  "",
-			"Method2":  "",
-			"Method3":  "",
-			"Method4":  "",
-			"Error":    "",
-			"LastCall": ipc.ErrNonRPCMethod.Error(),
-		}},
-		{&tags{}, map[string]string{
-			"Alpha":      "",
-			"Beta":       "",
-			"Gamma":      "",
-			"Delta":      "",
-			"Epsilon":    "",
-			"Error":      "",
-			"LastCall":   ipc.ErrNonRPCMethod.Error(),
-			"Describe__": ipc.ErrReservedMethod.Error(),
-		}},
-		{badcall{}, map[string]string{
-			"notExported": ipc.ErrMethodNotExported.Error(),
-			"NonRPC1":     ipc.ErrNonRPCMethod.Error(),
-			"NonRPC2":     ipc.ErrNonRPCMethod.Error(),
-			"NonRPC3":     ipc.ErrNonRPCMethod.Error(),
-			"NonRPC4":     ipc.ErrNonRPCMethod.Error(),
-			"NoInit":      "must have Init method",
-			"BadInit1":    badInit,
-			"BadInit2":    badInit,
-			"BadInit3":    badInit,
-			"NoSendRecv":  "must have at least one of RecvStream or SendStream",
-			"BadSend1":    badSend,
-			"BadSend2":    badSend,
-			"BadSend3":    badSend,
-			"BadRecv1":    badRecv,
-			"BadRecv2":    badRecv,
-			"BadRecv3":    badRecv,
-		}},
-		{badoutargs{}, map[string]string{
-			"NoFinalError1": ipc.ErrNoFinalErrorOutArg.Error(),
-			"NoFinalError2": ipc.ErrNoFinalErrorOutArg.Error(),
-			"NoFinalError3": ipc.ErrNoFinalErrorOutArg.Error(),
-			"NoFinalError4": ipc.ErrNoFinalErrorOutArg.Error(),
-		}},
-		{&badGlobber{}, map[string]string{
-			"Globber": ipc.ErrBadGlobber.Error(),
-		}},
-		{&badGlob{}, map[string]string{
-			"Glob__": ipc.ErrBadGlob.Error(),
-		}},
-		{&badGlobChildren{}, map[string]string{
-			"GlobChildren__": ipc.ErrBadGlobChildren.Error(),
-		}},
-		{&badGlobChildren2{}, map[string]string{
-			"GlobChildren__": ipc.ErrBadGlobChildren.Error(),
-		}},
-	}
-	for _, test := range tests {
-		typecheck := ipc.TypeCheckMethods(test.obj)
-		if got, want := typecheck, test.want; (got == nil) != (want == nil) {
-			t.Errorf("TypeCheckMethods(%T) got %v, want %v", test.obj, got, want)
-		}
-		if got, want := len(typecheck), len(test.want); got != want {
-			t.Errorf("TypeCheckMethods(%T) got len %d, want %d (got %q, want %q)", test.obj, got, want, typecheck, test.want)
-		}
-		for wantKey, wantVal := range test.want {
-			gotVal, ok := typecheck[wantKey]
-			if !ok {
-				t.Errorf("TypeCheckMethods(%T) got %v, want key %q", test.obj, typecheck, wantKey)
-			}
-			if wantVal == "" && gotVal != nil {
-				t.Errorf("TypeCheckMethods(%T) got method %q %q, want %q", test.obj, wantKey, gotVal, wantVal)
-			}
-			if got, want := fmt.Sprint(gotVal), wantVal; !strings.Contains(got, want) {
-				t.Errorf("TypeCheckMethods(%T) got method %q %q, want substr %q", test.obj, wantKey, got, want)
-			}
-		}
 	}
 }
 
