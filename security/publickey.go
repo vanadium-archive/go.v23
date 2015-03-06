@@ -6,6 +6,11 @@ import (
 	"crypto/x509"
 	"encoding"
 	"fmt"
+	"v.io/v23/verror"
+)
+
+var (
+	errUnrecognizedKey = verror.Register(pkgPath+".errUnrecognizedKey", verror.NoRetry, "{1:}{2:}unrecognized PublicKey type({3}){:_}")
 )
 
 // PublicKey represents a public key using an unspecified algorithm.
@@ -73,7 +78,7 @@ func UnmarshalPublicKey(bytes []byte) (PublicKey, error) {
 	case *ecdsa.PublicKey:
 		return &ecdsaPublicKey{v}, nil
 	default:
-		return nil, fmt.Errorf("unrecognized PublicKey type(%T)", key)
+		return nil, verror.New(errUnrecognizedKey, nil, fmt.Sprintf("%T", key))
 	}
 }
 

@@ -2,8 +2,20 @@ package security
 
 import (
 	"bytes"
-	"fmt"
 	"strings"
+	"v.io/v23/verror"
+)
+
+var (
+	errCantMarshalKey             = verror.Register(pkgPath+".errCantMarshalKey", verror.NoRetry, "{1:}{2:}failed to marshal PublicKey into a Certificate{:_}")
+	errInapproriateCertSignature  = verror.Register(pkgPath+".errInapproriateCertSignature", verror.NoRetry, "{1:}{2:}signature on certificate(for {3}) was not intended for certification (purpose={4}){:_}")
+	errBadBlessingExtensionInCert = verror.Register(pkgPath+".errBadBlessingExtensionInCert", verror.NoRetry, "{1:}{2:}invalid blessing extension in certificate(for {3}){:_}")
+	errBadCertSignature           = verror.Register(pkgPath+".errBadCertSignature", verror.NoRetry, "{1:}{2:}invalid Signature in certificate(for \"{3}\"), signing key{:_}")
+	errBadBlessingEmptyExtension  = verror.Register(pkgPath+".errBadBlessingEmptyExtension", verror.NoRetry, "{1:}{2:}invalid blessing extension(empty string){:_}")
+	errBadBlessingBadStart        = verror.Register(pkgPath+".errBadBlessingBadStart", verror.NoRetry, "{1:}{2:}invalid blessing extension(starts with {3}){:_}")
+	errBadBlessingBadEnd          = verror.Register(pkgPath+".errBadBlessingBadEnd", verror.NoRetry, "{1:}{2:}invalid blessing extension(ends with {3}){:_}")
+	errBadBlessingExtension       = verror.Register(pkgPath+".errBadBlessingExtension", verror.NoRetry, "{1:}{2:}invalid blessing extension({3}){:_}")
+	errBadBlessingBadSubstring    = verror.Register(pkgPath+".errBadBlessingBadSubstring", verror.NoRetry, "{1:}{2:}invalid blessing extension({3} has {4} as a substring){:_}")
 )
 
 var (
@@ -22,7 +34,7 @@ func newUnsignedCertificate(extension string, key PublicKey, caveats ...Caveat) 
 	}
 	cert := &Certificate{Extension: extension, Caveats: caveats}
 	if cert.PublicKey, err = key.MarshalBinary(); err != nil {
-		return nil, fmt.Errorf("failed to marshal PublicKey into a Certificate: %v", err)
+		return nil, verror.New(errCantMarshalKey, nil, err)
 	}
 	return cert, nil
 }
@@ -49,13 +61,13 @@ func (c *Certificate) digest(hash Hash, parent Signature) []byte {
 
 func (c *Certificate) validate(parentSignature Signature, parentKey PublicKey) error {
 	if !bytes.Equal(c.Signature.Purpose, blessPurpose) {
-		return fmt.Errorf("signature on certificate(for %q) was not intended for certification (purpose=%v)", c.Extension, c.Signature.Purpose)
+		return verror.New(errInapproriateCertSignature, nil, c.Extension, c.Signature.Purpose)
 	}
 	if err := validateExtension(c.Extension); err != nil {
-		return fmt.Errorf("invalid blessing extension in certificate(for %q): %v", c.Extension, err)
+		return verror.New(errBadBlessingExtensionInCert, nil, c.Extension, err)
 	}
 	if !c.Signature.Verify(parentKey, c.digest(c.Signature.Hash, parentSignature)) {
-		return fmt.Errorf("invalid Signature in certificate(for %q), signing key: %v", c.Extension, parentKey)
+		return verror.New(errBadCertSignature, nil, c.Extension, parentKey)
 	}
 	return nil
 }
@@ -68,22 +80,22 @@ func (c *Certificate) sign(signer Signer, parentSignature Signature) error {
 
 func validateExtension(extension string) error {
 	if len(extension) == 0 {
-		return fmt.Errorf("invalid blessing extension(empty string)")
+		return verror.New(errBadBlessingEmptyExtension, nil)
 	}
 	if strings.HasPrefix(extension, ChainSeparator) {
-		return fmt.Errorf("invalid blessing extension(starts with %q)", ChainSeparator)
+		return verror.New(errBadBlessingBadStart, nil, ChainSeparator)
 	}
 	if strings.HasSuffix(extension, ChainSeparator) {
-		return fmt.Errorf("invalid blessing extension(ends with %q)", ChainSeparator)
+		return verror.New(errBadBlessingBadEnd, nil, ChainSeparator)
 	}
 	for _, n := range invalidBlessingExtensions {
 		if extension == n {
-			return fmt.Errorf("invalid blessing extension(%q)", extension)
+			return verror.New(errBadBlessingExtension, nil, extension)
 		}
 	}
 	for _, n := range invalidBlessingSubStrings {
 		if strings.Contains(extension, n) {
-			return fmt.Errorf("invalid blessing extension(%q has %q as a substring)", extension, n)
+			return verror.New(errBadBlessingBadSubstring, nil, extension, n)
 		}
 	}
 	return nil
