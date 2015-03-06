@@ -1,12 +1,20 @@
 package access
 
 import (
-	"fmt"
 	"os"
 	"reflect"
 
 	"v.io/v23/security"
 	"v.io/v23/vdl"
+	"v.io/v23/verror"
+)
+
+const pkgPath = "v.io/v23/services/security/access"
+
+var (
+	errTagNeedsString      = verror.Register(pkgPath+".errTagNeedsString", verror.NoRetry, "{1:}{2:}tag type({3}) must be backed by a string not {4}{:_}")
+	errNoMethodTags        = verror.Register(pkgPath+".errNoMethodTags", verror.NoRetry, "{1:}{2:}TaggedACLAuthorizer.Authorize called with an object ({3}, method {4}) that has no method tags; this is likely unintentional{:_}")
+	errCantReadACLFromFile = verror.Register(pkgPath+".errCantReadACLFromFile", verror.NoRetry, "{1:}{2:}failed to read ACL from file{:_}")
 )
 
 // TaggedACLAuthorizer implements an authorization policy where access is
@@ -95,7 +103,7 @@ func TaggedACLAuthorizerFromFile(filename string, tagType *vdl.Type) (security.A
 }
 
 func errTagType(tt *vdl.Type) error {
-	return fmt.Errorf("tag type(%v) must be backed by a string not %v", tt, tt.Kind())
+	return verror.New(errTagNeedsString, nil, verror.New(errTagNeedsString, nil, tt, tt.Kind()))
 }
 
 type authorizer struct {
@@ -114,7 +122,7 @@ func (a *authorizer) Authorize(call security.Call) error {
 	if len(call.MethodTags()) == 0 {
 		// The following error message leaks the fact that the server is likely
 		// misconfigured, but that doesn't seem like a big deal.
-		return fmt.Errorf("TaggedACLAuthorizer.Authorize called with an object (%q, method %q) that has no method tags; this is likely unintentional", call.Suffix(), call.Method())
+		return verror.New(errNoMethodTags, call.Context(), call.Suffix(), call.Method())
 	}
 	for _, tag := range call.MethodTags() {
 		if tag.Type() == a.tagType {
@@ -139,7 +147,7 @@ func (a *fileAuthorizer) Authorize(call security.Call) error {
 	acl, err := loadTaggedACLMapFromFile(a.filename)
 	if err != nil {
 		// TODO(ashankar): Information leak?
-		return fmt.Errorf("failed to read ACL from file: %v", err)
+		return verror.New(errCantReadACLFromFile, call.Context(), err)
 	}
 	return (&authorizer{acl, a.tagType}).Authorize(call)
 }
