@@ -39,7 +39,6 @@ var (
 	unknownMethod      = verror.Register("v.io/v23/ipc.unknownMethod", verror.NoRetry, "{1:}{2:} unknown method {3}")
 	unknownSuffix      = verror.Register("v.io/v23/ipc.unknownSuffix", verror.NoRetry, "{1:}{2:} unknown object with suffix: {3}")
 	globNotImplemented = verror.Register("v.io/v23/ipc.globNotImplemented", verror.NoRetry, "{1:}{2:} Glob not implemented by suffix: {3}")
-	globMatchesOmitted = verror.Register("v.io/v23/ipc.globMatchesOmitted", verror.NoRetry, "some matches might have been omitted")
 )
 
 // NewErrUnknownMethod returns an unknown method error.
@@ -55,9 +54,4 @@ func NewErrUnknownSuffix(ctx *context.T, suffix string) error {
 // NewErrGlobNotImplemented returns a glob not implemented error.
 func NewErrGlobNotImplemented(ctx *context.T, suffix string) error {
 	return verror.New(verror.ErrNotImplemented, ctx, verror.New(globNotImplemented, ctx, suffix))
-}
-
-// NewErrGlobMatchesOmitted returns a glob matches omitted error.
-func NewErrGlobMatchesOmitted(ctx *context.T) error {
-	return verror.New(verror.ErrNoAccess, ctx, verror.New(globMatchesOmitted, ctx))
 }
