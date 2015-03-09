@@ -34,6 +34,12 @@ func FromHexString(s string) (Id, error) {
 		return id, err
 	}
 	if len(slice) != len(id) {
+		// Ideally we would generate a verror error here, but Go
+		// complains about the import cycle:  verror, vtrace, and
+		// uniqueid.  In most languages the linker would just pull in
+		// all three implementations, but Go conflates implementations
+		// and their interfaces, so cannot be sure that this isn't an
+		// interface definition cycle, and thus gives up.
 		return id, fmt.Errorf("Cannot convert %s to Id, size mismatch.", s)
 	}
 	copy(id[:], slice)
