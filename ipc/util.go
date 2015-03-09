@@ -57,7 +57,7 @@ func NewErrGlobNotImplemented(ctx *context.T, suffix string) error {
 	return verror.New(verror.ErrNotImplemented, ctx, verror.New(globNotImplemented, ctx, suffix))
 }
 
-// NewErrGlobMatchesOmitted returns a glob matches ommitted error.
+// NewErrGlobMatchesOmitted returns a glob matches omitted error.
 func NewErrGlobMatchesOmitted(ctx *context.T) error {
 	return verror.New(verror.ErrNoAccess, ctx, verror.New(globMatchesOmitted, ctx))
 }

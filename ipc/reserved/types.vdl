@@ -1,0 +1,7 @@
+package reserved
+
+error (
+	// GlobMaxRecursionReached indicated that the Glob request exceeded the
+	// max recursion level.
+	GlobMaxRecursionReached() {"en":"max recursion level reached{:_}"}
+)
