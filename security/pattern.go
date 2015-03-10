@@ -1,13 +1,14 @@
 package security
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 	"v.io/v23/naming"
 )
 
-// Syntax is {name}/__({pattern})
-var namePatternRegexp = regexp.MustCompile(`(.*(?:/|^))__\(([^]]*)\)$`)
+// Syntax is /{endpoint}/__({pattern})/{name}
+var namePatternRegexp = regexp.MustCompile(`^__\(([^)]*)\)($|/)(.*)`)
 
 // MatchedBy returns true iff one of the presented blessings matches
 // p as per the rules described in documentation for the BlessingPattern type.
@@ -124,13 +125,27 @@ func matchedByBlessing(patternchain []string, glob bool, b string) bool {
 
 // SplitPatternName takes an object name and parses out the server blessing pattern.
 // It returns the pattern specified, and the name with the pattern removed.
-func SplitPatternName(name string) (pattern BlessingPattern, objectName string) {
+func SplitPatternName(origName string) (BlessingPattern, string) {
+	rooted := naming.Rooted(origName)
+	ep, name := naming.SplitAddressName(origName)
 	match := namePatternRegexp.FindStringSubmatch(name)
-	if len(match) == 0 || len(match[2]) == 0 {
-		objectName = name
-		return
+	if len(match) == 0 {
+		return BlessingPattern(""), origName
 	}
-	pattern = BlessingPattern(match[2])
-	objectName = naming.Clean(match[1])
-	return
+
+	pattern := BlessingPattern(match[1])
+	name = naming.Clean(match[3])
+	if rooted {
+		name = naming.JoinAddressName(ep, name)
+	}
+	return pattern, name
+}
+
+// JoinPatternName embeds the specified pattern into a name.
+func JoinPatternName(pattern BlessingPattern, name string) string {
+	if len(pattern) == 0 {
+		return name
+	}
+	ep, rel := naming.SplitAddressName(name)
+	return naming.JoinAddressName(ep, fmt.Sprintf("__(%s)/%s", pattern, rel))
 }

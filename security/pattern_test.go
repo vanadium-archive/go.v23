@@ -152,26 +152,26 @@ func TestSplitPatternName(t *testing.T) {
 		{"", notset, ""},
 		{"/", notset, "/"},
 		{"__(foo/bar)", "foo/bar", ""},
-		{"/__(foo/bar)", "foo/bar", "/"},
-		{"/__(x/y)", "x/y", "/"},
+		{"/__(foo/bar)", notset, "/__(foo/bar)"}, // Invalid name: no endpoint
+		{"/a/__(x/y)", "x/y", "/a"},
 		{"/__(x/y)/a/b", notset, "/__(x/y)/a/b"},
-		{"a/__(foo)", "foo", "a"},
+		{"__(foo)/a", "foo", "a"},
 		{"/__(foo)a", notset, "/__(foo)a"},
 		{"/__(foo)a/__(bar)", "bar", "/__(foo)a"},
 		{"a/b", notset, "a/b"},
-		{"a/b/__(foo)", "foo", "a/b"},
+		{"__(foo)/a/b", "foo", "a/b"},
 		{"/a/b", notset, "/a/b"},
 		{"/__(foo)a/b", notset, "/__(foo)a/b"},
-		{"/a/b/__(bar)", "bar", "/a/b"},
-		{"/__(foo)a/b/__(bar)", "bar", "/__(foo)a/b"},
-		{"/a/b__(foo)", notset, "/a/b__(foo)"},
+		{"/a/__(bar)/b", "bar", "/a/b"},
+		{"/__(foo)a/__(bar)/b", "bar", "/__(foo)a/b"},
+		{"/a/__(foo)b", notset, "/a/__(foo)b"},
 		{"/a/b/__(foo)c", notset, "/a/b/__(foo)c"},
 		{"/[01:02::]:444", notset, "/[01:02::]:444"},
 		{"/__(foo)[01:02::]:444", notset, "/__(foo)[01:02::]:444"},
 		{"/[01:02::]:444/foo", notset, "/[01:02::]:444/foo"},
 		{"/__(a)[01:02::]:444/foo", notset, "/__(a)[01:02::]:444/foo"},
-		{"/[01:02::]:444/foo/__(b)", "b", "/[01:02::]:444/foo"},
-		{"/__(c)[01:02::]:444/foo/__(d)", "d", "/__(c)[01:02::]:444/foo"},
+		{"/[01:02::]:444/__(b)/foo", "b", "/[01:02::]:444/foo"},
+		{"/__(c)[01:02::]:444/__(d)/foo", "d", "/__(c)[01:02::]:444/foo"},
 	}
 	for _, c := range cases {
 		server, name := SplitPatternName(c.input)
@@ -180,6 +180,9 @@ func TestSplitPatternName(t *testing.T) {
 		}
 		if name != c.name {
 			t.Errorf("%q: unexpected name: %q not %q", c.input, name, c.name)
+		}
+		if got := JoinPatternName(c.server, c.name); got != c.input {
+			t.Errorf("Got %q after join, expected %q", got, c.input)
 		}
 	}
 }
