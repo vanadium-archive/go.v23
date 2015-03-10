@@ -4,6 +4,7 @@ import (
 	"net"
 	"time"
 
+	"v.io/v23/ipc/version"
 	"v.io/v23/verror"
 )
 
@@ -78,6 +79,10 @@ type Endpoint interface {
 	// BlessingNames returns the blessings that the process associated with
 	// this Endpoint will present.
 	BlessingNames() []string
+
+	// IPCVersionRange returns the range of protocol versions supported by
+	// the process at this endpoint.
+	IPCVersionRange() version.IPCVersionRange
 }
 
 // MountedServer represents a server mounted under an object name.
