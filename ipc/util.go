@@ -36,9 +36,8 @@ func (o obj) GlobChildren__(ServerCall) (<-chan string, error) {
 }
 
 var (
-	unknownMethod      = verror.Register("v.io/v23/ipc.unknownMethod", verror.NoRetry, "{1:}{2:} unknown method {3}")
-	unknownSuffix      = verror.Register("v.io/v23/ipc.unknownSuffix", verror.NoRetry, "{1:}{2:} unknown object with suffix: {3}")
-	globNotImplemented = verror.Register("v.io/v23/ipc.globNotImplemented", verror.NoRetry, "{1:}{2:} Glob not implemented by suffix: {3}")
+	unknownMethod = verror.Register("v.io/v23/ipc.unknownMethod", verror.NoRetry, "{1:}{2:} unknown method {3}")
+	unknownSuffix = verror.Register("v.io/v23/ipc.unknownSuffix", verror.NoRetry, "{1:}{2:} unknown object with suffix: {3}")
 )
 
 // NewErrUnknownMethod returns an unknown method error.
@@ -49,9 +48,4 @@ func NewErrUnknownMethod(ctx *context.T, method string) error {
 // NewErrUnknownSuffix returns an unknown suffix error.
 func NewErrUnknownSuffix(ctx *context.T, suffix string) error {
 	return verror.New(verror.ErrNoExist, ctx, verror.New(unknownSuffix, ctx, suffix))
-}
-
-// NewErrGlobNotImplemented returns a glob not implemented error.
-func NewErrGlobNotImplemented(ctx *context.T, suffix string) error {
-	return verror.New(verror.ErrNotImplemented, ctx, verror.New(globNotImplemented, ctx, suffix))
 }
