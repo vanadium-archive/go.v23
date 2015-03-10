@@ -5,6 +5,7 @@ package security
 
 import (
 	// VDL system imports
+	"fmt"
 	"v.io/v23/context"
 	"v.io/v23/i18n"
 	"v.io/v23/vdl"
@@ -218,6 +219,55 @@ func (RejectedBlessing) __VDLReflect(struct {
 }) {
 }
 
+// CallSide specifies a side of the call (local or remote) for the
+// purposes of caveat validation.
+type CallSide int
+
+const (
+	CallSideLocal CallSide = iota
+	CallSideRemote
+)
+
+// CallSideAll holds all labels for CallSide.
+var CallSideAll = []CallSide{CallSideLocal, CallSideRemote}
+
+// CallSideFromString creates a CallSide from a string label.
+func CallSideFromString(label string) (x CallSide, err error) {
+	err = x.Set(label)
+	return
+}
+
+// Set assigns label to x.
+func (x *CallSide) Set(label string) error {
+	switch label {
+	case "Local", "local":
+		*x = CallSideLocal
+		return nil
+	case "Remote", "remote":
+		*x = CallSideRemote
+		return nil
+	}
+	*x = -1
+	return fmt.Errorf("unknown label %q in security.CallSide", label)
+}
+
+// String returns the string label of x.
+func (x CallSide) String() string {
+	switch x {
+	case CallSideLocal:
+		return "Local"
+	case CallSideRemote:
+		return "Remote"
+	}
+	return ""
+}
+
+func (CallSide) __VDLReflect(struct {
+	Name string "v.io/v23/security.CallSide"
+	Enum struct{ Local, Remote string }
+}) {
+}
+
 func init() {
 	vdl.RegisterNative(wireBlessingsToNative, wireBlessingsFromNative)
 	vdl.RegisterNative(wireDischargeToNative, wireDischargeFromNative)
@@ -232,6 +282,7 @@ func init() {
 	vdl.Register((*WireBlessings)(nil))
 	vdl.Register((*WireDischarge)(nil))
 	vdl.Register((*RejectedBlessing)(nil))
+	vdl.Register((*CallSide)(nil))
 }
 
 // Type-check WireBlessings conversion functions.

@@ -12,11 +12,12 @@ import (
 var errEmptyChain = errors.New("empty certificate chain found")
 
 // Blessings encapsulates all the cryptographic operations required to
-// prove that a set of blessings (human-readable strings) have been bound
-// to a principal in a specific context.
+// prove that a set of (human-readable) blessing names have been bound
+// to a principal in a specific call.
 //
 // Blessings objects are meant to be presented to other principals to authenticate
-// and authorize actions.
+// and authorize actions. The 'BlessingNames' function in this package can be
+// used to uncover the blessing names encapsulated in these objects.
 //
 // Blessings objects are immutable and multiple goroutines may invoke methods
 // on them simultaneously.
@@ -27,67 +28,20 @@ type Blessings struct {
 
 const chainValidatorKey = "customChainValidator"
 
-// ForCall returns a validated set of (human-readable string) blessings
-// presented by the principal. These returned blessings (strings) are
-// guaranteed to:
-//
-// (1) Satisfy all the caveats given context
-// (2) Be rooted in call.LocalPrincipal.Roots.
-//
-// Caveats are considered satisfied in the given context if the CaveatValidator
-// implementation can be found in the address space of the caller and Validate
-// returns nil.
-//
-// ForCall also returns the RejectedBlessings for each blessing that cannot
-// be validated.
+// HACK, REMOVE BEFORE LAUNCH
+type hackCall struct {
+	Call
+	b Blessings
+}
+
+func (c hackCall) RemoteBlessings() Blessings {
+	return c.b
+}
+
+// DEPECREATED: Use BlessingNames instead
+// TODO(ataly, ashankar): Get rid of this method.
 func (b Blessings) ForCall(call Call) (ret []string, info []RejectedBlessing) {
-	if b.IsZero() {
-		return nil, nil
-	}
-	validator := defaultChainCaveatValidator
-	if customValidator := call.Context().Value(chainValidatorKey); customValidator != nil {
-		validator = customValidator.(func(call Call, chains [][]Caveat) []error)
-	}
-
-	blessings := []string{}
-	chainCaveats := [][]Caveat{}
-	for _, chain := range b.chains {
-		blessing, err := verifyChainSignature(call, chain)
-		if err != nil {
-			info = append(info, RejectedBlessing{blessing, err})
-			continue
-		}
-
-		cavs := []Caveat{}
-		for _, cert := range chain {
-			cavs = append(cavs, cert.Caveats...)
-		}
-
-		if len(cavs) == 0 {
-			ret = append(ret, blessing) // No caveats to validate, add it to blessing list.
-		} else {
-			chainCaveats = append(chainCaveats, cavs)
-			blessings = append(blessings, blessing)
-		}
-	}
-
-	if len(chainCaveats) == 0 {
-		return // Skip the validation call (is high-overhead for javascript).
-	}
-
-	validationResult := validator(call, chainCaveats)
-	if len(validationResult) != len(blessings) {
-		panic(fmt.Sprintf("Got wrong number of validation results. Got %d, expected %d.", len(validationResult), len(blessings)))
-	}
-
-	for i, resultErr := range validationResult {
-		if resultErr == nil {
-			ret = append(ret, blessings[i])
-		} else {
-			info = append(info, RejectedBlessing{blessings[i], resultErr})
-		}
-	}
-	return
+	return BlessingNames(hackCall{Call: call, b: b}, CallSideRemote)
 }
 
 // PublicKey returns the public key of the principal to which
@@ -194,7 +148,7 @@ func validateCertificateChain(chain []Certificate) (PublicKey, error) {
 }
 
 // Verifies that the chain signatures are correct, without handling caveat validation
-func verifyChainSignature(call Call, chain []Certificate) (string, error) {
+func verifyChainSignature(call Call, side CallSide, chain []Certificate) (string, error) {
 	blessing := chain[0].Extension
 	for i := 1; i < len(chain); i++ {
 		blessing += ChainSeparator
@@ -229,11 +183,11 @@ func verifyChainSignature(call Call, chain []Certificate) (string, error) {
 	return blessing, nil
 }
 
-func defaultChainCaveatValidator(call Call, chains [][]Caveat) []error {
+func defaultChainCaveatValidator(call Call, side CallSide, chains [][]Caveat) []error {
 	results := make([]error, len(chains))
 	for i, chain := range chains {
 		for _, cav := range chain {
-			if err := validateCaveat(call, cav); err != nil {
+			if err := validateCaveat(call, side, cav); err != nil {
 				// TODO(jsimsa): Decide what (if any) logging mechanism to use.
 				// vlog.VI(4).Infof("Ignoring chain %v: %v", chain, err)
 				results[i] = err
@@ -245,9 +199,9 @@ func defaultChainCaveatValidator(call Call, chains [][]Caveat) []error {
 	return results
 }
 
-// validateCaveat is pretty much the same as cav.Validate(call), but it defers
+// validateCaveat is pretty much the same as cav.Validate(call, side), but it defers
 // to any validation scheme overrides via SetCaveatValidator.
-func validateCaveat(call Call, cav Caveat) error {
+func validateCaveat(call Call, side CallSide, cav Caveat) error {
 	caveatValidationSetup.mu.RLock()
 	fn := caveatValidationSetup.fn
 	finalized := caveatValidationSetup.finalized
@@ -259,9 +213,9 @@ func validateCaveat(call Call, cav Caveat) error {
 		caveatValidationSetup.mu.Unlock()
 	}
 	if fn != nil {
-		return fn(call, cav)
+		return fn(call, side, cav)
 	}
-	return cav.Validate(call)
+	return cav.Validate(call, side)
 }
 
 // TODO(ashankar): Get rid of this function? It allows users to mess
@@ -346,7 +300,7 @@ func UnionOfBlessings(blessings ...Blessings) (Blessings, error) {
 
 var caveatValidationSetup struct {
 	mu        sync.RWMutex
-	fn        func(Call, Caveat) error
+	fn        func(Call, CallSide, Caveat) error
 	finalized bool
 }
 
@@ -364,7 +318,7 @@ var caveatValidationSetup struct {
 //
 // If never invoked, the default Go API is used to associate validation
 // functions with caveats.
-func SetCaveatValidator(fn func(Call, Caveat) error) {
+func SetCaveatValidator(fn func(Call, CallSide, Caveat) error) {
 	caveatValidationSetup.mu.Lock()
 	defer caveatValidationSetup.mu.Unlock()
 	if caveatValidationSetup.finalized {
@@ -413,4 +367,83 @@ func DefaultBlessingPatterns(p Principal) (patterns []BlessingPattern) {
 		patterns = append(patterns, BlessingPattern(b))
 	}
 	return
+}
+
+// BlessingNames returns a validated set of human-readable blessing names encapsulated
+// in the blessings object presented by a principal. These blessing names are uncovered
+// from the blessings object presented by the local end of the 'call' if 'side' is
+// CallSideLocal, and from the blessings object presented by the remote end if 'side' is
+// CallSideRemote.
+//
+// The blessing names are guaranteed to:
+//
+// (1) Satisfy all the caveats associated with them, in the context of the call.
+// (2) Be rooted in call.LocalPrincipal.Roots.
+//
+// Caveats are considered satisfied for the 'call' and 'side' if the CaveatValidator
+// implementation can be found in the address space of the caller and Validate
+// returns nil.
+//
+// BlessingNames also returns the RejectedBlessings for each blessing name that cannot
+// be validated.
+func BlessingNames(call Call, side CallSide) ([]string, []RejectedBlessing) {
+	var b Blessings
+	switch side {
+	case CallSideLocal:
+		b = call.LocalBlessings()
+	case CallSideRemote:
+		b = call.RemoteBlessings()
+	}
+
+	if b.IsZero() {
+		return nil, nil
+	}
+	validator := defaultChainCaveatValidator
+	if customValidator := call.Context().Value(chainValidatorKey); customValidator != nil {
+		validator = customValidator.(func(call Call, side CallSide, chains [][]Caveat) []error)
+	}
+
+	var (
+		validatedNames      []string
+		rejected            []RejectedBlessing
+		pendingNames        []string
+		pendingChainCaveats [][]Caveat
+	)
+	for _, chain := range b.chains {
+		name, err := verifyChainSignature(call, side, chain)
+		if err != nil {
+			rejected = append(rejected, RejectedBlessing{name, err})
+			continue
+		}
+
+		cavs := []Caveat{}
+		for _, cert := range chain {
+			cavs = append(cavs, cert.Caveats...)
+		}
+
+		if len(cavs) == 0 {
+			validatedNames = append(validatedNames, name) // No caveats to validate, add it to blessingNames.
+		} else {
+			pendingNames = append(pendingNames, name)
+			pendingChainCaveats = append(pendingChainCaveats, cavs)
+		}
+	}
+
+	if len(pendingChainCaveats) == 0 {
+		return validatedNames, rejected
+	}
+
+	validationResults := validator(call, side, pendingChainCaveats)
+	if g, w := len(validationResults), len(pendingNames); g != w {
+		panic(fmt.Sprintf("Got wrong number of validation results. Got %d, expected %d.", g, w))
+	}
+
+	for i, resultErr := range validationResults {
+		if resultErr == nil {
+			validatedNames = append(validatedNames, pendingNames[i])
+		} else {
+			rejected = append(rejected, RejectedBlessing{pendingNames[i], resultErr})
+		}
+	}
+	return validatedNames, rejected
 }

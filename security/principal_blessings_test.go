@@ -19,11 +19,11 @@ func TestBlessSelf(t *testing.T) {
 		tp = newPrincipal(t) // principal where blessings are tested
 		p  = newPrincipal(t)
 
-		call = func(method string) Call {
-			return NewCall(&CallParams{
+		call = func(method string) CallParams {
+			return CallParams{
 				LocalPrincipal: tp,
 				Method:         method,
-			})
+			}
 		}
 	)
 
@@ -57,12 +57,12 @@ func TestBless(t *testing.T) {
 		p2    = newPrincipal(t)
 		p3    = newPrincipal(t)
 		alice = blessSelf(t, p1, "alice")
-		call  = func(method, suffix string) Call {
-			return NewCall(&CallParams{
+		call  = func(method, suffix string) CallParams {
+			return CallParams{
 				LocalPrincipal: tp,
 				Method:         method,
 				Suffix:         suffix,
-			})
+			}
 		}
 	)
 	addToRoots(t, tp, alice)
@@ -206,8 +206,7 @@ func TestBlessings(t *testing.T) {
 	type s []string
 
 	var (
-		tp   = newPrincipal(t) // principal where blessings are tested
-		call = NewCall(&CallParams{LocalPrincipal: tp})
+		tp = newPrincipal(t) // principal where blessings are tested
 
 		p     = newPrincipal(t)
 		p2    = newPrincipal(t).PublicKey()
@@ -238,7 +237,7 @@ func TestBlessings(t *testing.T) {
 			continue
 		}
 		addToRoots(t, tp, self)
-		if err := checkBlessings(self, call, test); err != nil {
+		if err := checkBlessings(self, CallParams{LocalPrincipal: tp}, test); err != nil {
 			t.Errorf("BlessSelf(%q): %v)", test, err)
 		}
 		other, err := p.Bless(p2, alice, test, UnconstrainedUse())
@@ -246,7 +245,7 @@ func TestBlessings(t *testing.T) {
 			t.Errorf("Bless(%q) failed: %v", test, err)
 			continue
 		}
-		if err := checkBlessings(other, call, fmt.Sprintf("alice%v%v", ChainSeparator, test)); err != nil {
+		if err := checkBlessings(other, CallParams{LocalPrincipal: tp}, fmt.Sprintf("alice%v%v", ChainSeparator, test)); err != nil {
 			t.Errorf("Bless(%q): %v", test, err)
 		}
 	}
@@ -312,8 +311,7 @@ func TestCreatePrincipalWithNilStoreAndRoots(t *testing.T) {
 	}
 
 	// Test that no blessings are trusted by the principal.
-	call := NewCall(&CallParams{LocalPrincipal: p})
-	if err := checkBlessings(blessSelf(t, p, "alice"), call); err != nil {
+	if err := checkBlessings(blessSelf(t, p, "alice"), CallParams{LocalPrincipal: p}); err != nil {
 		t.Error(err)
 	}
 }
@@ -430,10 +428,10 @@ func TestUnionOfBlessings(t *testing.T) {
 		carol = blessSelf(t, p, "carol")
 		empty Blessings
 
-		// call returns a Call where the LocalPrincipal recognizes
+		// call returns CallParams where the LocalPrincipal recognizes
 		// all the blessings presented in 'recognized'.
-		call = func(method, suffix string, recognized ...Blessings) Call {
-			params := &CallParams{
+		call = func(method, suffix string, recognized ...Blessings) CallParams {
+			params := CallParams{
 				Method:         method,
 				Suffix:         suffix,
 				LocalPrincipal: newPrincipal(t),
@@ -441,7 +439,7 @@ func TestUnionOfBlessings(t *testing.T) {
 			for _, r := range recognized {
 				addToRoots(t, params.LocalPrincipal, r)
 			}
-			return NewCall(params)
+			return params
 		}
 	)
 	alicefriend, err := p1.Bless(p.PublicKey(), alice, "friend", newCaveat(MethodCaveat("Method", "AliceMethod")))
@@ -528,7 +526,7 @@ func TestCertificateCompositionAttack(t *testing.T) {
 		bob   = blessSelf(t, p2, "bob")
 		p3    = newPrincipal(t)
 		p4    = newPrincipal(t)
-		call  = NewCall(&CallParams{Method: "Foo", LocalPrincipal: tp})
+		cp    = CallParams{Method: "Foo", LocalPrincipal: tp}
 	)
 	addToRoots(t, tp, alice)
 	addToRoots(t, tp, bob)
@@ -553,10 +551,10 @@ func TestCertificateCompositionAttack(t *testing.T) {
 		t.Fatal(err)
 	}
 	// p4's blessings should be valid.
-	if err := checkBlessings(alicefriendspouse, call, "alice/friend/spouse"); err != nil {
+	if err := checkBlessings(alicefriendspouse, cp, "alice/friend/spouse"); err != nil {
 		t.Fatal(err)
 	}
-	if err := checkBlessings(bobfamilyspouse, call, "bob/family/spouse"); err != nil {
+	if err := checkBlessings(bobfamilyspouse, cp, "bob/family/spouse"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -570,7 +568,7 @@ func TestCertificateCompositionAttack(t *testing.T) {
 	}
 	// Replace the certificate in bobfamilyspouse
 	bobfamilyspouse.chains[0][2] = spousecert
-	if err := matchesError(checkBlessings(bobfamilyspouse, call), "invalid Signature in certificate(for \"spouse\")"); err != nil {
+	if err := matchesError(checkBlessings(bobfamilyspouse, cp), "invalid Signature in certificate(for \"spouse\")"); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -584,7 +582,6 @@ func TestCertificateTamperingAttack(t *testing.T) {
 		p3 = newPrincipal(t)
 
 		alice = blessSelf(t, p1, "alice")
-		call  = NewCall(&CallParams{LocalPrincipal: tp})
 	)
 	addToRoots(t, tp, alice)
 
@@ -592,7 +589,7 @@ func TestCertificateTamperingAttack(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := checkBlessings(alicefriend, call, "alice/friend"); err != nil {
+	if err := checkBlessings(alicefriend, CallParams{LocalPrincipal: tp}, "alice/friend"); err != nil {
 		t.Fatal(err)
 	}
 	// p3 attempts to "steal" the blessing by constructing his own certificate.
@@ -600,7 +597,7 @@ func TestCertificateTamperingAttack(t *testing.T) {
 	if cert.PublicKey, err = p3.PublicKey().MarshalBinary(); err != nil {
 		t.Fatal(err)
 	}
-	if err := matchesError(checkBlessings(alicefriend, call, "alice/friend"), "invalid Signature in certificate(for \"friend\")"); err != nil {
+	if err := matchesError(checkBlessings(alicefriend, CallParams{LocalPrincipal: tp}, "alice/friend"), "invalid Signature in certificate(for \"friend\")"); err != nil {
 		t.Error(err)
 	}
 }
@@ -613,18 +610,16 @@ func TestCertificateChainsTamperingAttack(t *testing.T) {
 		p2    = newPrincipal(t)
 		alice = blessSelf(t, p1, "alice")
 		bob   = blessSelf(t, p2, "bob")
-
-		call = NewCall(&CallParams{LocalPrincipal: tp})
 	)
 	addToRoots(t, tp, alice)
 	addToRoots(t, tp, bob)
 
-	if err := checkBlessings(alice, call, "alice"); err != nil {
+	if err := checkBlessings(alice, CallParams{LocalPrincipal: tp}, "alice"); err != nil {
 		t.Fatal(err)
 	}
 	// Act as if alice tried to package bob's chain with her existing chains and ship it over the network.
 	alice.chains = append(alice.chains, bob.chains...)
-	if err := matchesError(checkBlessings(alice, call, "alice", "bob"), "two certificate chains that bind to different public keys"); err != nil {
+	if err := matchesError(checkBlessings(alice, CallParams{LocalPrincipal: tp}, "alice", "bob"), "two certificate chains that bind to different public keys"); err != nil {
 		t.Error(err)
 	}
 }
@@ -764,22 +759,28 @@ func TestBlessingsOnWireWithMissingCertificates(t *testing.T) {
 }
 
 func TestCustomChainValidator(t *testing.T) {
-	falseReturningCav := Caveat{
-		Id: uniqueid.Id{0x99, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
-	}
-	trueReturningCav := Caveat{
+	localSideOnlyCav := Caveat{
 		Id: uniqueid.Id{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
 	}
-	falseResultErr := fmt.Errorf("False caveat result")
+	remoteSideOnlyCav := Caveat{
+		Id: uniqueid.Id{0x99, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
+	}
+	localSideOnlyCavErr := fmt.Errorf("only valid for local end")
+	remoteSideOnlyCavErr := fmt.Errorf("only valid for remote end")
 
-	validator := func(call Call, cavs [][]Caveat) []error {
+	validator := func(call Call, side CallSide, cavs [][]Caveat) []error {
 		results := make([]error, len(cavs))
 		for i, chain := range cavs {
 			for _, cav := range chain {
 				switch cav.Id {
-				case falseReturningCav.Id:
-					results[i] = falseResultErr
-				case trueReturningCav.Id:
+				case localSideOnlyCav.Id:
+					if side != CallSideLocal {
+						results[i] = localSideOnlyCavErr
+					}
+				case remoteSideOnlyCav.Id:
+					if side != CallSideRemote {
+						results[i] = remoteSideOnlyCavErr
+					}
 				case ConstCaveat.Id:
 					if !reflect.DeepEqual(cav, UnconstrainedUse()) {
 						t.Fatalf("Unexpected const caveat")
@@ -798,32 +799,27 @@ func TestCustomChainValidator(t *testing.T) {
 
 	ctx = context.WithValue(ctx, "customChainValidator", validator)
 
-	call := NewCall(&CallParams{
-		LocalPrincipal: p,
-		Context:        ctx,
-	})
-
 	bu, err := p.BlessSelf("unrestricted", UnconstrainedUse())
 	if err != nil {
 		t.Fatal(err)
 	}
-	bft, err := p.BlessSelf("falsetrue", falseReturningCav, trueReturningCav)
+	bft, err := p.BlessSelf("remotelocal", remoteSideOnlyCav, localSideOnlyCav)
 	if err != nil {
 		t.Fatal(err)
 	}
-	btt, err := p.BlessSelf("truetrue", trueReturningCav, trueReturningCav)
+	btt, err := p.BlessSelf("locallocal", localSideOnlyCav, localSideOnlyCav)
 	if err != nil {
 		t.Fatal(err)
 	}
-	bt, err := p.BlessSelf("true", trueReturningCav)
+	bt, err := p.BlessSelf("local", localSideOnlyCav)
 	if err != nil {
 		t.Fatal(err)
 	}
-	bsepft, err := p.Bless(p.PublicKey(), bt, "false", falseReturningCav)
+	bsepft, err := p.Bless(p.PublicKey(), bt, "remote", remoteSideOnlyCav)
 	if err != nil {
 		t.Fatal(err)
 	}
-	bseptt, err := p.Bless(p.PublicKey(), bt, "true", trueReturningCav)
+	bseptt, err := p.Bless(p.PublicKey(), bt, "local", localSideOnlyCav)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -835,10 +831,15 @@ func TestCustomChainValidator(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	results, infos := bunion.ForCall(call)
+	call := NewCall(&CallParams{
+		LocalPrincipal: p,
+		LocalBlessings: bunion,
+		Context:        ctx,
+	})
+	results, infos := BlessingNames(call, CallSideLocal)
 	expectedFailInfos := map[string]error{
-		"falsetrue":  falseResultErr,
-		"true/false": falseResultErr,
+		"remotelocal":  remoteSideOnlyCavErr,
+		"local/remote": remoteSideOnlyCavErr,
 	}
 	failInfos := map[string]error{}
 	for _, info := range infos {
@@ -847,7 +848,7 @@ func TestCustomChainValidator(t *testing.T) {
 	if !reflect.DeepEqual(failInfos, expectedFailInfos) {
 		t.Fatalf("Unexpected failinfos from ForCall. Got %v, want %v", failInfos, expectedFailInfos)
 	}
-	expectedResults := []string{"unrestricted", "truetrue", "true/true"}
+	expectedResults := []string{"unrestricted", "locallocal", "local/local"}
 	sort.Strings(results)
 	sort.Strings(expectedResults)
 	if !reflect.DeepEqual(results, expectedResults) {
@@ -868,12 +869,13 @@ func TestSetCaveatValidator(t *testing.T) {
 
 	type callcav struct {
 		call Call
+		side CallSide
 		cav  Caveat
 	}
 	var (
 		p      = newPrincipal(t)
 		c      = make(chan callcav, 1)
-		call   = NewCall(&CallParams{LocalPrincipal: p})
+		side   = CallSideRemote
 		cav    = newCaveat(MethodCaveat("Method"))
 		b, err = p.BlessSelf("alice", cav)
 	)
@@ -881,18 +883,22 @@ func TestSetCaveatValidator(t *testing.T) {
 		t.Fatal(err)
 	}
 	p.AddToRoots(b)
-	SetCaveatValidator(func(call Call, cav Caveat) error {
-		c <- callcav{call, cav}
+	SetCaveatValidator(func(call Call, side CallSide, cav Caveat) error {
+		c <- callcav{call, side, cav}
 		return nil
 	})
 	// The function registered above should be invoked.
-	b.ForCall(call)
+	call := NewCall(&CallParams{LocalPrincipal: p, RemoteBlessings: b})
+	BlessingNames(call, side)
 	select {
 	case <-time.Tick(10 * time.Second):
 		t.Fatalf("Caveat validation function not invoked")
 	case got := <-c:
 		if !reflect.DeepEqual(call, got.call) {
 			t.Errorf("Caveat validation function invoked with call=%v, want %v", got.call, call)
+		}
+		if !reflect.DeepEqual(call, got.call) {
+			t.Errorf("Caveat validation function invoked with end=%v, want %v", got.side, side)
 		}
 		if !reflect.DeepEqual(cav, got.cav) {
 			t.Errorf("Caveat validation function invoked with cav=%v, want %v", got.cav, cav)
@@ -913,7 +919,6 @@ func TestSetCaveatValidatorAfterCaveatUse(t *testing.T) {
 	// Validate caveats somehow:
 	var (
 		p      = newPrincipal(t)
-		call   = NewCall(&CallParams{LocalPrincipal: p})
 		cav    = newCaveat(MethodCaveat("Method"))
 		b, err = p.BlessSelf("alice", cav)
 	)
@@ -922,7 +927,7 @@ func TestSetCaveatValidatorAfterCaveatUse(t *testing.T) {
 	}
 	// Trigger caveat validation:
 	p.AddToRoots(b)
-	b.ForCall(call)
+	BlessingNames(NewCall(&CallParams{LocalPrincipal: p, RemoteBlessings: b}), CallSideRemote)
 	// Now SetValidatorCaveat should fail.
 	func() {
 		defer func() {
@@ -947,24 +952,28 @@ func TestBlessingsForCall(t *testing.T) {
 
 		b1 = mkBlessing("alice", newCaveat(MethodCaveat("Method")))
 		b2 = mkBlessing("bob")
+
+		bnames = func(b Blessings, method string) ([]string, []RejectedBlessing) {
+			return BlessingNames(NewCall(&CallParams{LocalPrincipal: p, RemoteBlessings: b, Method: method}), CallSideRemote)
+		}
 	)
 	if err := p.AddToRoots(b1); err != nil {
 		t.Fatal(err)
 	}
 
 	// b1's alice is recognized in the right context.
-	if accepted, rejected := b1.ForCall(NewCall(&CallParams{LocalPrincipal: p, Method: "Method"})); !reflect.DeepEqual(accepted, []string{"alice"}) || len(rejected) > 0 {
+	if accepted, rejected := bnames(b1, "Method"); !reflect.DeepEqual(accepted, []string{"alice"}) || len(rejected) > 0 {
 		t.Errorf("Got (%v, %v), want ([alice], nil)", accepted, rejected)
 	}
 	// b1's alice is rejected when caveats are not met.
-	if accepted, rejected := b1.ForCall(NewCall(&CallParams{LocalPrincipal: p, Method: "Blah"})); len(accepted) > 0 ||
+	if accepted, rejected := bnames(b1, "Blah"); len(accepted) > 0 ||
 		len(rejected) != 1 ||
 		rejected[0].Blessing != "alice" ||
 		!verror.Is(rejected[0].Err, ErrCaveatValidation.ID) {
 		t.Errorf("Got (%v, %v), want ([], [alice: <caveat validation error>])", accepted, rejected)
 	}
 	// b2 is not recognized because the roots aren't recognized.
-	if accepted, rejected := b2.ForCall(NewCall(&CallParams{LocalPrincipal: p, Method: "Method"})); len(accepted) > 0 ||
+	if accepted, rejected := bnames(b2, "Method"); len(accepted) > 0 ||
 		len(rejected) != 1 ||
 		rejected[0].Blessing != "bob" ||
 		!verror.Is(rejected[0].Err, ErrUntrustedRoot.ID) {
