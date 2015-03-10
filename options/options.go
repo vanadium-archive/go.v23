@@ -100,14 +100,22 @@ type ServerPublicKey struct{ security.PublicKey }
 
 func (ServerPublicKey) IPCCallOpt() {}
 
-// SkipResolveAuthorization causes clients to ignore the expected server
-// blessings provided during namespace resolution. In other words, it causes
-// clients to skip authorization of servers when resolving names to addresses
-// (endpoints).
+// SkipServerEndpointAuthorization causes clients to ignore the blessings in
+// remote (server) endpoint during authorization. With this option enabled,
+// clients are susceptible to man-in-the-middle attacks where an imposter
+// server has taken over the network address of a real server.
 //
-// When providing this option, secure clients will typically specify an
-// authorization policy via other options like AllowedServersPolicy or
-// ServerPublicKey.
+// Thus, use of this option should typically be accompanied by an
+// alternative policy for server authorization like AllowedServersPolicy
+// or ServerPublicKey.
+type SkipServerEndpointAuthorization struct{}
+
+func (SkipServerEndpointAuthorization) IPCCallOpt()   {}
+func (SkipServerEndpointAuthorization) NSResolveOpt() {}
+
+// TODO(ashankar): Remove: This will be superceeded by
+// SkipServerEndpointAuthorization by March 12, 2015. So if you're using this
+// option in new code, please check with the security folks.
 type SkipResolveAuthorization struct{}
 
 func (SkipResolveAuthorization) IPCCallOpt()   {}

@@ -165,8 +165,7 @@ type ResolveOpt interface {
 	NSResolveOpt()
 }
 
-// RootBlessingPatternOpt specifies a blessing pattern that the root
-// mount table must match.
+// TODO(ashankar): Remove before release.
 type RootBlessingPatternOpt string
 
 func (RootBlessingPatternOpt) NSResolveOpt() {}
