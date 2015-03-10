@@ -153,6 +153,13 @@ type RejectedBlessing struct {
 	Err error
 }
 
+// CallSide specifies a side of the call (local or remote) for the
+// purposes of caveat validation.
+type CallSide enum{
+	Local // Local indicates the local side of a call
+	Remote // Remote indicates the remote side of a call
+}
+
 error (
 	UntrustedRoot(blessing string) {"en":"{blessing}: root not trusted"}
 )

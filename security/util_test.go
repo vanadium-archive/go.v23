@@ -108,7 +108,7 @@ func equalBlessings(a, b []string) bool {
 	return true
 }
 
-func checkBlessings(b Blessings, c Call, want ...string) error {
+func checkBlessings(b Blessings, c CallParams, want ...string) error {
 	// Validate the integrity of the bits.
 	var decoded Blessings
 	if err := roundTrip(b, &decoded); err != nil {
@@ -117,8 +117,9 @@ func checkBlessings(b Blessings, c Call, want ...string) error {
 	if !reflect.DeepEqual(decoded, b) {
 		return fmt.Errorf("reflect.DeepEqual of %#v and %#v failed after roundtripping", decoded, b)
 	}
-	// And now check them under the right context
-	got, _ := b.ForCall(c)
+	// And now check them under the right call
+	c.RemoteBlessings = b
+	got, _ := BlessingNames(NewCall(&c), CallSideRemote)
 	if !equalBlessings(got, want) {
 		return fmt.Errorf("Got blessings %v, want %v", got, want)
 	}
@@ -147,7 +148,7 @@ func roundTrip(in, out interface{}) error {
 }
 
 func init() {
-	RegisterCaveatValidator(suffixCaveat, func(call Call, suffix string) error {
+	RegisterCaveatValidator(suffixCaveat, func(call Call, _ CallSide, suffix string) error {
 		if suffix != call.Suffix() {
 			return fmt.Errorf("suffixCaveat not met")
 		}

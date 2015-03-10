@@ -16,14 +16,14 @@ var (
 )
 
 func init() {
-	RegisterCaveatValidator(ConstCaveat, func(call Call, isValid bool) error {
+	RegisterCaveatValidator(ConstCaveat, func(call Call, _ CallSide, isValid bool) error {
 		if isValid {
 			return nil
 		}
 		return NewErrConstCaveatValidation(call.Context())
 	})
 
-	RegisterCaveatValidator(ExpiryCaveatX, func(call Call, expiry time.Time) error {
+	RegisterCaveatValidator(ExpiryCaveatX, func(call Call, _ CallSide, expiry time.Time) error {
 		now := call.Timestamp()
 		if now.After(expiry) {
 			return NewErrExpiryCaveatValidation(call.Context(), now, expiry)
@@ -31,7 +31,7 @@ func init() {
 		return nil
 	})
 
-	RegisterCaveatValidator(MethodCaveatX, func(call Call, methods []string) error {
+	RegisterCaveatValidator(MethodCaveatX, func(call Call, _ CallSide, methods []string) error {
 		if call.Method() == "" && len(methods) == 0 {
 			return nil
 		}
@@ -43,8 +43,18 @@ func init() {
 		return NewErrMethodCaveatValidation(call.Context(), call.Method(), methods)
 	})
 
-	RegisterCaveatValidator(PublicKeyThirdPartyCaveatX, func(call Call, params publicKeyThirdPartyCaveat) error {
-		discharge, ok := call.RemoteDischarges()[params.ID()]
+	RegisterCaveatValidator(PublicKeyThirdPartyCaveatX, func(call Call, side CallSide, params publicKeyThirdPartyCaveat) error {
+		var dmap map[string]Discharge
+		switch side {
+		case CallSideLocal:
+			dmap = call.LocalDischarges()
+		case CallSideRemote:
+			dmap = call.RemoteDischarges()
+		default:
+			return fmt.Errorf("invalid end argument %v provided to caveat validator", side)
+		}
+
+		discharge, ok := dmap[params.ID()]
 		if !ok {
 			return verror.New(errMissingDischarge, call.Context(), params.ID())
 		}
@@ -66,7 +76,7 @@ func init() {
 		}
 		// And all caveats on the discharge must be met.
 		for _, cav := range d.Caveats {
-			if err := cav.Validate(call); err != nil {
+			if err := cav.Validate(call, side); err != nil {
 				return verror.New(errFailedDischarge, call.Context(), cav, err)
 			}
 		}
