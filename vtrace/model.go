@@ -117,6 +117,9 @@ type Store interface {
 
 	// ForceCollect forces the store to collect all information about a given trace.
 	ForceCollect(traceid uniqueid.Id)
+
+	// Merge merges a vtrace.Response into the current store.
+	Merge(response Response)
 }
 
 type Manager interface {
@@ -141,6 +144,12 @@ type Manager interface {
 
 	// Store returns the current Store.
 	GetStore(ctx *context.T) Store
+
+	// Generate a Request from the current context.
+	GetRequest(ctx *context.T) Request
+
+	// Generate a Response from the current context.
+	GetResponse(ctx *context.T) Response
 }
 
 // managerKey is used to store a Manger in the context.
@@ -199,4 +208,14 @@ func GetStore(ctx *context.T) Store {
 func ForceCollect(ctx *context.T) {
 	m := manager(ctx)
 	m.GetStore(ctx).ForceCollect(m.GetSpan(ctx).Trace())
+}
+
+// Generate a Request from the current context.
+func GetRequest(ctx *context.T) Request {
+	return manager(ctx).GetRequest(ctx)
+}
+
+// Generate a Response from the current context.
+func GetResponse(ctx *context.T) Response {
+	return manager(ctx).GetResponse(ctx)
 }
