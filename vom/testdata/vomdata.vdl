@@ -4829,7 +4829,7 @@ const ConvertTests = map[string][]ConvertGroup{
 		{
 			"struct+map",
 			typeobject(MapOnlyStruct),
-			{ StructOnlyMap{"Key1": 4, "Key2": 5, "Key3": 0}, StructOnlyMap{"AlsoNotAKey": 7, "Key1": 4, "Key2": 5, "NotAKey": 6}, MapOnlyStruct{Key1: 4, Key2: 5}, },
+			{ StructOnlyMap{"Key1": 4, "Key2": 5, "Key3": 0}, MapOnlyStruct{Key1: 4, Key2: 5}, },
 		},
 		{
 			"map+set",

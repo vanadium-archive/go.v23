@@ -1901,12 +1901,6 @@ var ConvertTests = map[string][]ConvertGroup{
 					"Key2": 5,
 					"Key3": 0,
 				}),
-				vdl.ValueOf(StructOnlyMap{
-					"AlsoNotAKey": 7,
-					"Key1":        4,
-					"Key2":        5,
-					"NotAKey":     6,
-				}),
 				vdl.ValueOf(MapOnlyStruct{
 					Key1: 4,
 					Key2: 5,
