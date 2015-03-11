@@ -10,22 +10,22 @@ import (
 
 // encoderTypes maintains the mapping from type to type id, used by the encoder.
 type encoderTypes struct {
-	typeToID map[*vdl.Type]typeID
-	nextID   typeID
+	typeToID map[*vdl.Type]typeId
+	nextID   typeId
 }
 
 func newEncoderTypes() *encoderTypes {
-	return &encoderTypes{make(map[*vdl.Type]typeID), WireIDFirstUserType}
+	return &encoderTypes{make(map[*vdl.Type]typeId), WireIdFirstUserType}
 }
 
-func (et *encoderTypes) LookupID(tt *vdl.Type) typeID {
+func (et *encoderTypes) LookupID(tt *vdl.Type) typeId {
 	if id := bootstrapTypeToID[tt]; id != 0 {
 		return id
 	}
 	return et.typeToID[tt]
 }
 
-func (et *encoderTypes) LookupOrAssignID(tt *vdl.Type) (typeID, bool) {
+func (et *encoderTypes) LookupOrAssignID(tt *vdl.Type) (typeId, bool) {
 	if id := et.LookupID(tt); id != 0 {
 		return id, false
 	}
@@ -38,20 +38,20 @@ func (et *encoderTypes) LookupOrAssignID(tt *vdl.Type) (typeID, bool) {
 
 // decoderTypes maintains the mapping from type id to type, used by the decoder.
 type decoderTypes struct {
-	idToWire map[typeID]wireType
-	idToType map[typeID]*vdl.Type
+	idToWire map[typeId]wireType
+	idToType map[typeId]*vdl.Type
 }
 
 func newDecoderTypes() *decoderTypes {
-	return &decoderTypes{make(map[typeID]wireType), make(map[typeID]*vdl.Type)}
+	return &decoderTypes{make(map[typeId]wireType), make(map[typeId]*vdl.Type)}
 }
 
-func (dt *decoderTypes) LookupOrBuildType(id typeID) (*vdl.Type, error) {
+func (dt *decoderTypes) LookupOrBuildType(id typeId) (*vdl.Type, error) {
 	if tt := dt.lookupType(id); tt != nil {
 		return tt, nil
 	}
 	builder := new(vdl.TypeBuilder)
-	pending := make(map[typeID]vdl.PendingType)
+	pending := make(map[typeId]vdl.PendingType)
 	result, err := dt.makeType(id, builder, pending)
 	if err != nil {
 		return nil, err
@@ -75,14 +75,14 @@ func (dt *decoderTypes) LookupOrBuildType(id typeID) (*vdl.Type, error) {
 	return built, nil
 }
 
-func (dt *decoderTypes) lookupType(id typeID) *vdl.Type {
+func (dt *decoderTypes) lookupType(id typeId) *vdl.Type {
 	if tt := bootstrapIDToType[id]; tt != nil {
 		return tt
 	}
 	return dt.idToType[id]
 }
 
-func (dt *decoderTypes) makeType(id typeID, builder *vdl.TypeBuilder, pending map[typeID]vdl.PendingType) (vdl.PendingType, error) {
+func (dt *decoderTypes) makeType(id typeId, builder *vdl.TypeBuilder, pending map[typeId]vdl.PendingType) (vdl.PendingType, error) {
 	wt := dt.idToWire[id]
 	if wt == nil {
 		return nil, fmt.Errorf("vom: unknown type ID %d", id)
@@ -125,7 +125,7 @@ func (dt *decoderTypes) makeType(id typeID, builder *vdl.TypeBuilder, pending ma
 	return baseType, nil
 }
 
-func (dt *decoderTypes) makeBaseType(wt wireType, builder *vdl.TypeBuilder, pending map[typeID]vdl.PendingType) (vdl.PendingType, error) {
+func (dt *decoderTypes) makeBaseType(wt wireType, builder *vdl.TypeBuilder, pending map[typeId]vdl.PendingType) (vdl.PendingType, error) {
 	switch wt := wt.(type) {
 	case wireTypeNamedT:
 		return nil, fmt.Errorf("vom: NamedType has empty name: %v", wt)
@@ -194,7 +194,7 @@ func (dt *decoderTypes) makeBaseType(wt wireType, builder *vdl.TypeBuilder, pend
 	}
 }
 
-func (dt *decoderTypes) lookupOrMakeType(id typeID, builder *vdl.TypeBuilder, pending map[typeID]vdl.PendingType) (vdl.TypeOrPending, error) {
+func (dt *decoderTypes) lookupOrMakeType(id typeId, builder *vdl.TypeBuilder, pending map[typeId]vdl.PendingType) (vdl.TypeOrPending, error) {
 	if tt := dt.lookupType(id); tt != nil {
 		return tt, nil
 	}
@@ -204,9 +204,9 @@ func (dt *decoderTypes) lookupOrMakeType(id typeID, builder *vdl.TypeBuilder, pe
 	return dt.makeType(id, builder, pending)
 }
 
-func (dt *decoderTypes) AddWireType(id typeID, wt wireType) error {
-	if id < WireIDFirstUserType {
-		return fmt.Errorf("vom: type %q id %d invalid, the min user id is %d", wt, id, WireIDFirstUserType)
+func (dt *decoderTypes) AddWireType(id typeId, wt wireType) error {
+	if id < WireIdFirstUserType {
+		return fmt.Errorf("vom: type %q id %d invalid, the min user id is %d", wt, id, WireIdFirstUserType)
 	}
 	// TODO(toddw): Allow duplicates according to some heuristic (e.g. only
 	// identical, or only if the later one is a "superset", etc).
@@ -230,11 +230,11 @@ func isWireTypeType(tt *vdl.Type) bool {
 // Bootstrap mappings between type, id and kind.
 var (
 	bootstrapWireTypes map[*vdl.Type]struct{}
-	bootstrapIDToType  map[typeID]*vdl.Type
-	bootstrapTypeToID  map[*vdl.Type]typeID
-	bootstrapKindToID  map[vdl.Kind]typeID
+	bootstrapIDToType  map[typeId]*vdl.Type
+	bootstrapTypeToID  map[*vdl.Type]typeId
+	bootstrapKindToID  map[vdl.Kind]typeId
 
-	typeIDType        = vdl.TypeOf(typeID(0))
+	typeIDType        = vdl.TypeOf(typeId(0))
 	wireTypeType      = vdl.TypeOf((*wireType)(nil))
 	wireNamedType     = vdl.TypeOf(wireNamed{})
 	wireEnumType      = vdl.TypeOf(wireEnum{})
@@ -288,36 +288,36 @@ func init() {
 		bootstrapWireTypes[tt] = struct{}{}
 	}
 
-	bootstrapIDToType = make(map[typeID]*vdl.Type)
-	bootstrapTypeToID = make(map[*vdl.Type]typeID)
-	bootstrapKindToID = make(map[vdl.Kind]typeID)
+	bootstrapIDToType = make(map[typeId]*vdl.Type)
+	bootstrapTypeToID = make(map[*vdl.Type]typeId)
+	bootstrapKindToID = make(map[vdl.Kind]typeId)
 
 	// The basic bootstrap types can be converted between type, id and kind.
-	for id, tt := range map[typeID]*vdl.Type{
-		WireIDBool:       vdl.BoolType,
-		WireIDByte:       vdl.ByteType,
-		WireIDString:     vdl.StringType,
-		WireIDUint16:     vdl.Uint16Type,
-		WireIDUint32:     vdl.Uint32Type,
-		WireIDUint64:     vdl.Uint64Type,
-		WireIDInt16:      vdl.Int16Type,
-		WireIDInt32:      vdl.Int32Type,
-		WireIDInt64:      vdl.Int64Type,
-		WireIDFloat32:    vdl.Float32Type,
-		WireIDFloat64:    vdl.Float64Type,
-		WireIDComplex64:  vdl.Complex64Type,
-		WireIDComplex128: vdl.Complex128Type,
-		WireIDTypeObject: vdl.TypeObjectType,
-		WireIDAny:        vdl.AnyType,
+	for id, tt := range map[typeId]*vdl.Type{
+		WireIdBool:       vdl.BoolType,
+		WireIdByte:       vdl.ByteType,
+		WireIdString:     vdl.StringType,
+		WireIdUint16:     vdl.Uint16Type,
+		WireIdUint32:     vdl.Uint32Type,
+		WireIdUint64:     vdl.Uint64Type,
+		WireIdInt16:      vdl.Int16Type,
+		WireIdInt32:      vdl.Int32Type,
+		WireIdInt64:      vdl.Int64Type,
+		WireIdFloat32:    vdl.Float32Type,
+		WireIdFloat64:    vdl.Float64Type,
+		WireIdComplex64:  vdl.Complex64Type,
+		WireIdComplex128: vdl.Complex128Type,
+		WireIdTypeObject: vdl.TypeObjectType,
+		WireIdAny:        vdl.AnyType,
 	} {
 		bootstrapIDToType[id] = tt
 		bootstrapTypeToID[tt] = id
 		bootstrapKindToID[tt.Kind()] = id
 	}
 	// The extra bootstrap types can be converted between type and id.
-	for id, tt := range map[typeID]*vdl.Type{
-		WireIDByteList:   wireByteListType,
-		WireIDStringList: wireStringListType,
+	for id, tt := range map[typeId]*vdl.Type{
+		WireIdByteList:   wireByteListType,
+		WireIdStringList: wireStringListType,
 	} {
 		bootstrapIDToType[id] = tt
 		bootstrapTypeToID[tt] = id

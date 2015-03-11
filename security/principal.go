@@ -133,7 +133,7 @@ func (p *principal) MintDischarge(forCaveat, caveatOnDischarge Caveat, additiona
 	}
 	id := forCaveat.ThirdPartyDetails().ID()
 	dischargeCaveats := append(additionalCaveatsOnDischarge, caveatOnDischarge)
-	d := publicKeyDischarge{ThirdPartyCaveatID: id, Caveats: dischargeCaveats}
+	d := publicKeyDischarge{ThirdPartyCaveatId: id, Caveats: dischargeCaveats}
 	if err := d.sign(p.signer); err != nil {
 		return Discharge{}, verror.New(errCantSignDischarge, nil, err)
 	}

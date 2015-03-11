@@ -8,11 +8,11 @@ import (
 	"v.io/v23/vdl"
 )
 
-// typeID uniquely identifies a type definition within a vom stream.
-type typeID uint64
+// typeId uniquely identifies a type definition within a vom stream.
+type typeId uint64
 
-func (typeID) __VDLReflect(struct {
-	Name string "v.io/v23/vom.typeID"
+func (typeId) __VDLReflect(struct {
+	Name string "v.io/v23/vom.typeId"
 }) {
 }
 
@@ -120,7 +120,7 @@ func (x wireTypeOptionalT) __VDLReflect(__wireTypeReflect) {}
 // wireNamed represents a type definition for named primitives.
 type wireNamed struct {
 	Name string
-	Base typeID
+	Base typeId
 }
 
 func (wireNamed) __VDLReflect(struct {
@@ -142,7 +142,7 @@ func (wireEnum) __VDLReflect(struct {
 // wireArray represents an type definition for array types.
 type wireArray struct {
 	Name string
-	Elem typeID
+	Elem typeId
 	Len  uint64
 }
 
@@ -154,7 +154,7 @@ func (wireArray) __VDLReflect(struct {
 // wireList represents a type definition for list types.
 type wireList struct {
 	Name string
-	Elem typeID
+	Elem typeId
 }
 
 func (wireList) __VDLReflect(struct {
@@ -165,7 +165,7 @@ func (wireList) __VDLReflect(struct {
 // wireSet represents a type definition for set types.
 type wireSet struct {
 	Name string
-	Key  typeID
+	Key  typeId
 }
 
 func (wireSet) __VDLReflect(struct {
@@ -176,8 +176,8 @@ func (wireSet) __VDLReflect(struct {
 // wireMap represents a type definition for map types.
 type wireMap struct {
 	Name string
-	Key  typeID
-	Elem typeID
+	Key  typeId
+	Elem typeId
 }
 
 func (wireMap) __VDLReflect(struct {
@@ -188,7 +188,7 @@ func (wireMap) __VDLReflect(struct {
 // wireField represents a field in a struct or union type.
 type wireField struct {
 	Name string
-	Type typeID
+	Type typeId
 }
 
 func (wireField) __VDLReflect(struct {
@@ -221,7 +221,7 @@ func (wireUnion) __VDLReflect(struct {
 // wireOptional represents an type definition for optional types.
 type wireOptional struct {
 	Name string
-	Elem typeID
+	Elem typeId
 }
 
 func (wireOptional) __VDLReflect(struct {
@@ -230,7 +230,7 @@ func (wireOptional) __VDLReflect(struct {
 }
 
 func init() {
-	vdl.Register((*typeID)(nil))
+	vdl.Register((*typeId)(nil))
 	vdl.Register((*wireType)(nil))
 	vdl.Register((*wireNamed)(nil))
 	vdl.Register((*wireEnum)(nil))
@@ -245,43 +245,43 @@ func init() {
 }
 
 // Primitive types.
-const WireIDBool = typeID(1)
+const WireIdBool = typeId(1)
 
-const WireIDByte = typeID(2)
+const WireIdByte = typeId(2)
 
-const WireIDString = typeID(3)
+const WireIdString = typeId(3)
 
-const WireIDUint16 = typeID(4)
+const WireIdUint16 = typeId(4)
 
-const WireIDUint32 = typeID(5)
+const WireIdUint32 = typeId(5)
 
-const WireIDUint64 = typeID(6)
+const WireIdUint64 = typeId(6)
 
-const WireIDInt16 = typeID(7)
+const WireIdInt16 = typeId(7)
 
-const WireIDInt32 = typeID(8)
+const WireIdInt32 = typeId(8)
 
-const WireIDInt64 = typeID(9)
+const WireIdInt64 = typeId(9)
 
-const WireIDFloat32 = typeID(10)
+const WireIdFloat32 = typeId(10)
 
-const WireIDFloat64 = typeID(11)
+const WireIdFloat64 = typeId(11)
 
-const WireIDComplex64 = typeID(12)
+const WireIdComplex64 = typeId(12)
 
-const WireIDComplex128 = typeID(13)
+const WireIdComplex128 = typeId(13)
 
-const WireIDTypeObject = typeID(14)
+const WireIdTypeObject = typeId(14)
 
-const WireIDAny = typeID(15)
+const WireIdAny = typeId(15)
 
 // Other commonly used composites.
-const WireIDByteList = typeID(39)
+const WireIdByteList = typeId(39)
 
-const WireIDStringList = typeID(40)
+const WireIdStringList = typeId(40)
 
-// The first user-defined typeID is 41.
-const WireIDFirstUserType = typeID(41)
+// The first user-defined typeId is 41.
+const WireIdFirstUserType = typeId(41)
 
 const WireCtrlNil = byte(224)
 

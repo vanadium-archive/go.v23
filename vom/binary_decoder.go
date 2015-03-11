@@ -75,7 +75,7 @@ func (d *binaryDecoder) decodeValueType() (*vdl.Type, error) {
 			return nil, errDecodeZeroTypeID
 		case id > 0:
 			// This is a value message, the typeID is +id.
-			tid := typeID(+id)
+			tid := typeId(+id)
 			tt, err := d.recvTypes.LookupOrBuildType(tid)
 			if err != nil {
 				return nil, err
@@ -83,7 +83,7 @@ func (d *binaryDecoder) decodeValueType() (*vdl.Type, error) {
 			return tt, nil
 		}
 		// This is a type message, the typeID is -id.
-		tid := typeID(-id)
+		tid := typeId(-id)
 		// Decode the wireType like a regular value, and store it in recvTypes.  The
 		// type will actually be built when a value message arrives using this tid.
 		var wt wireType
@@ -242,7 +242,7 @@ func (d *binaryDecoder) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		if err != nil {
 			return err
 		}
-		typeobj, err := d.recvTypes.LookupOrBuildType(typeID(id))
+		typeobj, err := d.recvTypes.LookupOrBuildType(typeId(id))
 		if err != nil {
 			return err
 		}
@@ -418,7 +418,7 @@ func (d *binaryDecoder) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		case ctrl != 0:
 			return fmt.Errorf("vom: unexpected control byte 0x%x", ctrl)
 		default:
-			elemType, err := d.recvTypes.LookupOrBuildType(typeID(id))
+			elemType, err := d.recvTypes.LookupOrBuildType(typeId(id))
 			if err != nil {
 				return err
 			}
@@ -509,7 +509,7 @@ func (d *binaryDecoder) ignoreValue(tt *vdl.Type) error {
 		case ctrl != 0:
 			return fmt.Errorf("vom: unexpected control byte 0x%x", ctrl)
 		default:
-			elemType, err := d.recvTypes.LookupOrBuildType(typeID(id))
+			elemType, err := d.recvTypes.LookupOrBuildType(typeId(id))
 			if err != nil {
 				return err
 			}

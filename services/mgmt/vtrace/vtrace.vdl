@@ -9,7 +9,7 @@ import (
 )
 
 type Store interface {
-	// Trace returns the trace that matches the given ID.
+	// Trace returns the trace that matches the given Id.
 	// Will return a NoExists error if no matching trace was found.
 	Trace(uniqueid.Id) (vtrace.TraceRecord | error) {access.Debug}
 

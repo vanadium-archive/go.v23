@@ -44,15 +44,15 @@ func buildTree(trace *TraceRecord) *node {
 			earliestTime = span.Start
 		}
 
-		n := nodes[span.ID]
+		n := nodes[span.Id]
 		if n == nil {
 			n = &node{}
-			nodes[span.ID] = n
+			nodes[span.Id] = n
 		}
 
 		n.span = span
 
-		if span.Parent == trace.ID {
+		if span.Parent == trace.Id {
 			root = n
 		} else {
 			p := nodes[span.Parent]
@@ -116,7 +116,7 @@ func formatNode(w io.Writer, n *node, traceStart time.Time, indent string) {
 	fmt.Fprintf(w, "%sSpan - %s [id: %x parent %x] (%s, %s)\n",
 		indent,
 		n.span.Name,
-		n.span.ID[12:],
+		n.span.Id[12:],
 		n.span.Parent[12:],
 		formatDelta(n.span.Start, traceStart),
 		formatDelta(n.span.End, traceStart))
@@ -145,7 +145,7 @@ func formatTime(when time.Time, loc *time.Location) string {
 func FormatTrace(w io.Writer, record *TraceRecord, loc *time.Location) {
 	if root := buildTree(record); root != nil {
 		fmt.Fprintf(w, "Trace - %s (%s, %s)\n",
-			record.ID,
+			record.Id,
 			formatTime(root.span.Start, loc),
 			formatTime(root.span.End, loc))
 		for _, c := range root.children {

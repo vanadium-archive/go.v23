@@ -107,7 +107,7 @@ func (e *binaryEncoder) writeMsg(buf *encbuf, id int64, encodeLen bool) error {
 // children of the type before  the type itself. Type ids are allocated in the
 // order that we recurse and consequentially may be sent out of sequential
 // order if type information for children is sent (before the parent type).
-func (e *binaryEncoder) encodeUnsentTypes(tt *vdl.Type) (typeID, error) {
+func (e *binaryEncoder) encodeUnsentTypes(tt *vdl.Type) (typeId, error) {
 	if isWireTypeType(tt) {
 		// Ignore types for wire type definition.
 		return 0, nil

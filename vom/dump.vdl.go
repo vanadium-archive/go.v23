@@ -109,11 +109,11 @@ type DumpKind int
 const (
 	DumpKindMagic DumpKind = iota
 	DumpKindControl
-	DumpKindMsgID
+	DumpKindMsgId
 	DumpKindTypeMsg
 	DumpKindValueMsg
 	DumpKindMsgLen
-	DumpKindTypeID
+	DumpKindTypeId
 	DumpKindPrimValue
 	DumpKindByteLen
 	DumpKindValueLen
@@ -122,7 +122,7 @@ const (
 )
 
 // DumpKindAll holds all labels for DumpKind.
-var DumpKindAll = []DumpKind{DumpKindMagic, DumpKindControl, DumpKindMsgID, DumpKindTypeMsg, DumpKindValueMsg, DumpKindMsgLen, DumpKindTypeID, DumpKindPrimValue, DumpKindByteLen, DumpKindValueLen, DumpKindIndex, DumpKindWireTypeIndex}
+var DumpKindAll = []DumpKind{DumpKindMagic, DumpKindControl, DumpKindMsgId, DumpKindTypeMsg, DumpKindValueMsg, DumpKindMsgLen, DumpKindTypeId, DumpKindPrimValue, DumpKindByteLen, DumpKindValueLen, DumpKindIndex, DumpKindWireTypeIndex}
 
 // DumpKindFromString creates a DumpKind from a string label.
 func DumpKindFromString(label string) (x DumpKind, err error) {
@@ -139,8 +139,8 @@ func (x *DumpKind) Set(label string) error {
 	case "Control", "control":
 		*x = DumpKindControl
 		return nil
-	case "MsgID", "msgid":
-		*x = DumpKindMsgID
+	case "MsgId", "msgid":
+		*x = DumpKindMsgId
 		return nil
 	case "TypeMsg", "typemsg":
 		*x = DumpKindTypeMsg
@@ -151,8 +151,8 @@ func (x *DumpKind) Set(label string) error {
 	case "MsgLen", "msglen":
 		*x = DumpKindMsgLen
 		return nil
-	case "TypeID", "typeid":
-		*x = DumpKindTypeID
+	case "TypeId", "typeid":
+		*x = DumpKindTypeId
 		return nil
 	case "PrimValue", "primvalue":
 		*x = DumpKindPrimValue
@@ -181,16 +181,16 @@ func (x DumpKind) String() string {
 		return "Magic"
 	case DumpKindControl:
 		return "Control"
-	case DumpKindMsgID:
-		return "MsgID"
+	case DumpKindMsgId:
+		return "MsgId"
 	case DumpKindTypeMsg:
 		return "TypeMsg"
 	case DumpKindValueMsg:
 		return "ValueMsg"
 	case DumpKindMsgLen:
 		return "MsgLen"
-	case DumpKindTypeID:
-		return "TypeID"
+	case DumpKindTypeId:
+		return "TypeId"
 	case DumpKindPrimValue:
 		return "PrimValue"
 	case DumpKindByteLen:
@@ -207,7 +207,7 @@ func (x DumpKind) String() string {
 
 func (DumpKind) __VDLReflect(struct {
 	Name string "v.io/v23/vom.DumpKind"
-	Enum struct{ Magic, Control, MsgID, TypeMsg, ValueMsg, MsgLen, TypeID, PrimValue, ByteLen, ValueLen, Index, WireTypeIndex string }
+	Enum struct{ Magic, Control, MsgId, TypeMsg, ValueMsg, MsgLen, TypeId, PrimValue, ByteLen, ValueLen, Index, WireTypeIndex string }
 }) {
 }
 

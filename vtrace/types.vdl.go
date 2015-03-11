@@ -14,7 +14,7 @@ import (
 )
 
 type TraceRecord struct {
-	ID    uniqueid.Id
+	Id    uniqueid.Id
 	Spans []SpanRecord
 }
 
@@ -40,8 +40,8 @@ func (Annotation) __VDLReflect(struct {
 
 // A SpanRecord is the wire format for a Span.
 type SpanRecord struct {
-	ID     uniqueid.Id // The ID of the Span.
-	Parent uniqueid.Id // The ID of this Span's parent.
+	Id     uniqueid.Id // The Id of the Span.
+	Parent uniqueid.Id // The Id of this Span's parent.
 	Name   string      // The Name of this span.
 	Start  time.Time   // The start time of this span.
 	End    time.Time   // The end time of this span.
@@ -63,8 +63,8 @@ func (TraceFlags) __VDLReflect(struct {
 
 // Request is the object that carries trace informtion between processes.
 type Request struct {
-	SpanID  uniqueid.Id // The ID of the span that originated the RPC call.
-	TraceID uniqueid.Id // The ID of the trace this call is a part of.
+	SpanId  uniqueid.Id // The Id of the span that originated the RPC call.
+	TraceId uniqueid.Id // The Id of the trace this call is a part of.
 	Flags   TraceFlags
 }
 

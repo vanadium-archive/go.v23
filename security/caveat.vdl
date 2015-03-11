@@ -72,7 +72,7 @@ type nonce [16]byte
 // publicKeyThirdPartyCaveat represents a third-party caveat that requires
 // discharges to be issued by a principal identified by a public key.
 //
-// The ID of the caveat is base64-encoded:
+// The Id of the caveat is base64-encoded:
 // hash(hash(Nonce), hash(DischargerKey), hash(Caveats[0]), hash(Caveats[1]), ...)
 // where hash is a cryptographic hash function with a security strength
 // equivalent to that of the DischargerKey. For example, if DischargerKey
@@ -102,11 +102,11 @@ type publicKeyThirdPartyCaveat struct {
 // publicKeyDischarge represents the discharge issued for publicKeyThirdPartyCaveats.
 //
 // The message digest of this structure is computed as follows:
-// hash(hash(ThirdPartyCaveatID), hash(Caveats[0]), hash(Caveats[1]), ...),
+// hash(hash(ThirdPartyCaveatId), hash(Caveats[0]), hash(Caveats[1]), ...),
 // where hash is a cryptographic hash function with a security strength equivalent to the
 // strength of the public key of the principal issuing the discharge.
 type publicKeyDischarge struct {
-  ThirdPartyCaveatID string  // ID of the third party caveat for which this discharge was issued.
+  ThirdPartyCaveatId string  // Id of the third party caveat for which this discharge was issued.
   Caveats []Caveat           // Caveats on the use of this discharge.
   Signature Signature        // Signature of the content hash of this discharge by the discharger.
 }

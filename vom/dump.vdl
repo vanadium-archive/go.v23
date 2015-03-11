@@ -25,11 +25,11 @@ type DumpAtom struct {
 type DumpKind enum {
 	Magic         // [byte] Magic number, the first byte of a vom stream.
 	Control       // [byte] Control byte.
-	MsgID         // [int]  Message ID, distinguishing type and value messages.
-	TypeMsg       // [uint] Type message, describes the type identified by -MsgID.
-	ValueMsg      // [uint] Value message, describes a value of type +MsgID.
+	MsgId         // [int]  Message Id, distinguishing type and value messages.
+	TypeMsg       // [uint] Type message, describes the type identified by -MsgId.
+	ValueMsg      // [uint] Value message, describes a value of type +MsgId.
 	MsgLen        // [uint] Message length in bytes.
-	TypeID        // [uint] Type ID.
+	TypeId        // [uint] Type Id.
 	PrimValue     // [*]    Primitive value.
 	ByteLen       // [uint] Length in bytes.
 	ValueLen      // [uint] Number of values in a composite type.

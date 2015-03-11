@@ -13,7 +13,7 @@ import (
 // ensure wire compatibility.  Generated code for each environment provides
 // automatic conversions into idiomatic native representations.
 type WireError struct {
-	Id        string        // Error ID, used to uniquely identify each error.
+	Id        string        // Error Id, used to uniquely identify each error.
 	RetryCode WireRetryCode // Retry behavior suggested for the receiver.
 	Msg       string        // Error message, may be empty.
 	ParamList []*Value      // Variadic parameters contained in the error.

@@ -402,14 +402,14 @@ func (d *dumpWorker) decodeValueType() (*vdl.Type, error) {
 		if err != nil {
 			return nil, err
 		}
-		d.writeAtom(DumpKindMsgID, PrimitivePInt{id}, "")
+		d.writeAtom(DumpKindMsgId, PrimitivePInt{id}, "")
 		d.status.MsgID = id
 		switch {
 		case id == 0:
 			return nil, errDecodeZeroTypeID
 		case id > 0:
 			// This is a value message, the typeID is +id.
-			tid := typeID(+id)
+			tid := typeId(+id)
 			tt, err := d.recvTypes.LookupOrBuildType(tid)
 			if err != nil {
 				d.writeAtom(DumpKindValueMsg, PrimitivePUint{uint64(tid)}, "%v", err)
@@ -419,7 +419,7 @@ func (d *dumpWorker) decodeValueType() (*vdl.Type, error) {
 			return tt, nil
 		}
 		// This is a type message, the typeID is -id.
-		tid := typeID(-id)
+		tid := typeId(-id)
 		d.writeAtom(DumpKindTypeMsg, PrimitivePUint{uint64(tid)}, "")
 		// Decode the wireType like a regular value, and store it in recvTypes.  The
 		// type will actually be built when a value message arrives using this tid.
@@ -584,12 +584,12 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		if err != nil {
 			return err
 		}
-		typeobj, err := d.recvTypes.LookupOrBuildType(typeID(id))
+		typeobj, err := d.recvTypes.LookupOrBuildType(typeId(id))
 		if err != nil {
-			d.writeAtom(DumpKindTypeID, PrimitivePUint{id}, "%v", err)
+			d.writeAtom(DumpKindTypeId, PrimitivePUint{id}, "%v", err)
 			return err
 		}
-		d.writeAtom(DumpKindTypeID, PrimitivePUint{id}, "%v", typeobj)
+		d.writeAtom(DumpKindTypeId, PrimitivePUint{id}, "%v", typeobj)
 		return target.FromTypeObject(typeobj)
 	case vdl.Array, vdl.List:
 		d.prepareAtom("waiting for list len")
@@ -747,12 +747,12 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		case ctrl != 0:
 			return fmt.Errorf("vom: unexpected control byte 0x%x", ctrl)
 		default:
-			elemType, err := d.recvTypes.LookupOrBuildType(typeID(id))
+			elemType, err := d.recvTypes.LookupOrBuildType(typeId(id))
 			if err != nil {
-				d.writeAtom(DumpKindTypeID, PrimitivePUint{id}, "%v", err)
+				d.writeAtom(DumpKindTypeId, PrimitivePUint{id}, "%v", err)
 				return err
 			}
-			d.writeAtom(DumpKindTypeID, PrimitivePUint{id}, "%v", elemType)
+			d.writeAtom(DumpKindTypeId, PrimitivePUint{id}, "%v", elemType)
 			return d.decodeValue(elemType, target)
 		}
 	default:

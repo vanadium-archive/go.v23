@@ -10,9 +10,9 @@ import (
 )
 
 var (
-	// Unknown means the error has no known ID.  A more specific error should
+	// Unknown means the error has no known Id.  A more specific error should
 	// always be used, if possible.  Unknown is typically only used when
-	// automatically converting errors that do not contain an ID.
+	// automatically converting errors that do not contain an Id.
 	ErrUnknown = Register("v.io/v23/verror.Unknown", NoRetry, "{1:}{2:} Error{:_}")
 	// Internal means an internal error has occurred.  A more specific error
 	// should always be used, if possible.

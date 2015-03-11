@@ -22,7 +22,7 @@ type Discharge struct {
 func (d Discharge) ID() string {
 	switch v := d.wire.(type) {
 	case WireDischargePublicKey:
-		return v.Value.ThirdPartyCaveatID
+		return v.Value.ThirdPartyCaveatId
 	default:
 		return ""
 	}

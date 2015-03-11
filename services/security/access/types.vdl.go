@@ -33,7 +33,7 @@
 //     // Use the same etag with the modified acl to ensure that no other client
 //     // has modified the acl since GetACL returned.
 //     if err := client.SetACL(acl, etag); err != nil {
-//       if verror.Is(err, verror.ErrBadEtag.ID) {
+//       if verror.Is(err, verror.ErrBadEtag.Id) {
 //         // Another client replaced the ACL after our GetACL returned.
 //         // Try again.
 //         continue

@@ -1,34 +1,34 @@
 package vom
 
-// Built-in type IDs
+// Built-in type Ids
 const (
 	// Primitive types.
-	WireIDBool       = typeID(1)
-	WireIDByte       = typeID(2)
-	WireIDString     = typeID(3)
-	WireIDUint16     = typeID(4)
-	WireIDUint32     = typeID(5)
-	WireIDUint64     = typeID(6)
-	WireIDInt16      = typeID(7)
-	WireIDInt32      = typeID(8)
-	WireIDInt64      = typeID(9)
-	WireIDFloat32    = typeID(10)
-	WireIDFloat64    = typeID(11)
-	WireIDComplex64  = typeID(12)
-	WireIDComplex128 = typeID(13)
-	WireIDTypeObject = typeID(14)
-	WireIDAny        = typeID(15)
+	WireIdBool       = typeId(1)
+	WireIdByte       = typeId(2)
+	WireIdString     = typeId(3)
+	WireIdUint16     = typeId(4)
+	WireIdUint32     = typeId(5)
+	WireIdUint64     = typeId(6)
+	WireIdInt16      = typeId(7)
+	WireIdInt32      = typeId(8)
+	WireIdInt64      = typeId(9)
+	WireIdFloat32    = typeId(10)
+	WireIdFloat64    = typeId(11)
+	WireIdComplex64  = typeId(12)
+	WireIdComplex128 = typeId(13)
+	WireIdTypeObject = typeId(14)
+	WireIdAny        = typeId(15)
 
 	// Other commonly used composites.
-	WireIDByteList   = typeID(39)
-	WireIDStringList = typeID(40)
+	WireIdByteList   = typeId(39)
+	WireIdStringList = typeId(40)
 
-	// The first user-defined typeID is 41.
-	WireIDFirstUserType = typeID(41)
+	// The first user-defined typeId is 41.
+	WireIdFirstUserType = typeId(41)
 )
 
-// typeID uniquely identifies a type definition within a vom stream.
-type typeID uint64
+// typeId uniquely identifies a type definition within a vom stream.
+type typeId uint64
 
 // The wireType union is used to encode the payload part of each type message,
 // using the regular rules for encoding union values.  But unlike our regular
@@ -51,7 +51,7 @@ type wireType union {
 // wireNamed represents a type definition for named primitives.
 type wireNamed struct {
 	Name string
-	Base typeID
+	Base typeId
 }
 
 // wireEnum represents an type definition for enum types.
@@ -63,33 +63,33 @@ type wireEnum struct {
 // wireArray represents an type definition for array types.
 type wireArray struct {
 	Name string
-	Elem typeID
+	Elem typeId
 	Len  uint64
 }
 
 // wireList represents a type definition for list types.
 type wireList struct {
 	Name string
-	Elem typeID
+	Elem typeId
 }
 
 // wireSet represents a type definition for set types.
 type wireSet struct {
 	Name string
-	Key  typeID
+	Key  typeId
 }
 
 // wireMap represents a type definition for map types.
 type wireMap struct {
 	Name string
-	Key  typeID
-	Elem typeID
+	Key  typeId
+	Elem typeId
 }
 
 // wireField represents a field in a struct or union type.
 type wireField struct {
 	Name string
-	Type typeID
+	Type typeId
 }
 
 // wireStruct represents a type definition for struct types.
@@ -107,7 +107,7 @@ type wireUnion struct {
 // wireOptional represents an type definition for optional types.
 type wireOptional struct {
 	Name string
-	Elem typeID
+	Elem typeId
 }
 
 // Control codes used in VOM wire format

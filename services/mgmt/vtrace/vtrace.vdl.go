@@ -22,7 +22,7 @@ import (
 // StoreClientMethods is the client interface
 // containing Store methods.
 type StoreClientMethods interface {
-	// Trace returns the trace that matches the given ID.
+	// Trace returns the trace that matches the given Id.
 	// Will return a NoExists error if no matching trace was found.
 	Trace(*context.T, uniqueid.Id, ...ipc.CallOpt) (vtrace.TraceRecord, error)
 	// AllTraces returns TraceRecords for all traces the server currently
@@ -149,7 +149,7 @@ func (c *implStoreAllTracesClientCall) Finish() (err error) {
 // StoreServerMethods is the interface a server writer
 // implements for Store.
 type StoreServerMethods interface {
-	// Trace returns the trace that matches the given ID.
+	// Trace returns the trace that matches the given Id.
 	// Will return a NoExists error if no matching trace was found.
 	Trace(ipc.ServerCall, uniqueid.Id) (vtrace.TraceRecord, error)
 	// AllTraces returns TraceRecords for all traces the server currently
@@ -162,7 +162,7 @@ type StoreServerMethods interface {
 // The only difference between this interface and StoreServerMethods
 // is the streaming methods.
 type StoreServerStubMethods interface {
-	// Trace returns the trace that matches the given ID.
+	// Trace returns the trace that matches the given Id.
 	// Will return a NoExists error if no matching trace was found.
 	Trace(ipc.ServerCall, uniqueid.Id) (vtrace.TraceRecord, error)
 	// AllTraces returns TraceRecords for all traces the server currently
@@ -225,7 +225,7 @@ var descStore = ipc.InterfaceDesc{
 	Methods: []ipc.MethodDesc{
 		{
 			Name: "Trace",
-			Doc:  "// Trace returns the trace that matches the given ID.\n// Will return a NoExists error if no matching trace was found.",
+			Doc:  "// Trace returns the trace that matches the given Id.\n// Will return a NoExists error if no matching trace was found.",
 			InArgs: []ipc.ArgDesc{
 				{"", ``}, // uniqueid.Id
 			},

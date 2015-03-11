@@ -303,7 +303,7 @@ func (c publicKeyThirdPartyCaveat) String() string {
 }
 
 func (d *publicKeyDischarge) digest(hash Hash) []byte {
-	msg := hash.sum([]byte(d.ThirdPartyCaveatID))
+	msg := hash.sum([]byte(d.ThirdPartyCaveatId))
 	for _, cav := range d.Caveats {
 		msg = append(msg, cav.digest(hash)...)
 	}
@@ -312,10 +312,10 @@ func (d *publicKeyDischarge) digest(hash Hash) []byte {
 
 func (d *publicKeyDischarge) verify(cxt *context.T, key PublicKey) error {
 	if !bytes.Equal(d.Signature.Purpose, dischargePurpose) {
-		return verror.New(errInapproriateDischargeSignature, cxt, d.ThirdPartyCaveatID, d.Signature.Purpose)
+		return verror.New(errInapproriateDischargeSignature, cxt, d.ThirdPartyCaveatId, d.Signature.Purpose)
 	}
 	if !d.Signature.Verify(key, d.digest(key.hash())) {
-		return verror.New(errBadDischargeSignature, cxt, d.ThirdPartyCaveatID)
+		return verror.New(errBadDischargeSignature, cxt, d.ThirdPartyCaveatId)
 	}
 	return nil
 }

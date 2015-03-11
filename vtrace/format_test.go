@@ -27,30 +27,30 @@ func TestFormat(t *testing.T) {
 		spanIDs[i] = id()
 	}
 	tr := vtrace.TraceRecord{
-		ID: trid,
+		Id: trid,
 		Spans: []vtrace.SpanRecord{
 			{
-				ID:     spanIDs[0],
+				Id:     spanIDs[0],
 				Parent: trid,
 				Name:   "",
 				Start:  trstart,
 			},
 			{
-				ID:     spanIDs[1],
+				Id:     spanIDs[1],
 				Parent: spanIDs[0],
 				Name:   "Child1",
 				Start:  trstart.Add(time.Second),
 				End:    trstart.Add(10 * time.Second),
 			},
 			{
-				ID:     spanIDs[2],
+				Id:     spanIDs[2],
 				Parent: spanIDs[0],
 				Name:   "Child2",
 				Start:  trstart.Add(20 * time.Second),
 				End:    trstart.Add(30 * time.Second),
 			},
 			{
-				ID:     spanIDs[3],
+				Id:     spanIDs[3],
 				Parent: spanIDs[1],
 				Name:   "GrandChild1",
 				Start:  trstart.Add(3 * time.Second),
@@ -91,37 +91,37 @@ func TestFormatWithMissingSpans(t *testing.T) {
 		spanIDs[i] = id()
 	}
 	tr := vtrace.TraceRecord{
-		ID: trid,
+		Id: trid,
 		Spans: []vtrace.SpanRecord{
 			{
-				ID:     spanIDs[0],
+				Id:     spanIDs[0],
 				Parent: trid,
 				Name:   "",
 				Start:  trstart,
 			},
 			{
-				ID:     spanIDs[1],
+				Id:     spanIDs[1],
 				Parent: spanIDs[0],
 				Name:   "Child1",
 				Start:  trstart.Add(time.Second),
 				End:    trstart.Add(10 * time.Second),
 			},
 			{
-				ID:     spanIDs[3],
+				Id:     spanIDs[3],
 				Parent: spanIDs[2],
 				Name:   "Decendant2",
 				Start:  trstart.Add(15 * time.Second),
 				End:    trstart.Add(24 * time.Second),
 			},
 			{
-				ID:     spanIDs[4],
+				Id:     spanIDs[4],
 				Parent: spanIDs[2],
 				Name:   "Decendant1",
 				Start:  trstart.Add(12 * time.Second),
 				End:    trstart.Add(18 * time.Second),
 			},
 			{
-				ID:     spanIDs[5],
+				Id:     spanIDs[5],
 				Parent: spanIDs[1],
 				Name:   "GrandChild1",
 				Start:  trstart.Add(3 * time.Second),
