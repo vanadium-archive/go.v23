@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"v.io/v23/config"
+	"v.io/v23/verror"
 )
 
 func ExamplePublisher() {
@@ -117,16 +118,16 @@ func ExampleShutdown() {
 func TestSimple(t *testing.T) {
 	ch := make(chan config.Setting, 2)
 	pub := config.NewPublisher()
-	if _, err := pub.ForkStream("stream", nil); err == nil || err.Error() != "stream \"stream\" doesn't exist" {
+	if _, err := pub.ForkStream("stream", nil); err == nil || verror.ErrorID(err) != "v.io/v23/config.errStreamDoesntExist" {
 		t.Errorf("missing or wrong error: %v", err)
 	}
-	if _, err := pub.CreateStream("stream", "example", nil); err == nil || err.Error() != "must provide a non-nil channel" {
+	if _, err := pub.CreateStream("stream", "example", nil); err == nil || verror.ErrorID(err) != "v.io/v23/config.errNeedNonNilChannel" {
 		t.Fatalf("missing or wrong error: %v", err)
 	}
 	if _, err := pub.CreateStream("stream", "example", ch); err != nil {
 		t.Fatalf("unexpected error: %s", err)
 	}
-	if _, err := pub.CreateStream("stream", "example", ch); err == nil || err.Error() != "stream \"stream\" already exists" {
+	if _, err := pub.CreateStream("stream", "example", ch); err == nil || verror.ErrorID(err) != "v.io/v23/config.errStreamExists" {
 		t.Fatalf("missing or wrong error: %v", err)
 	}
 	if got, want := pub.String(), "(stream: example)"; got != want {
@@ -151,7 +152,7 @@ func TestSimple(t *testing.T) {
 	if _, running := <-stop; running {
 		t.Errorf("expected to be shutting down")
 	}
-	if _, err := pub.ForkStream("stream", nil); err == nil || err.Error() != "stream \"stream\" has been shut down" {
+	if _, err := pub.ForkStream("stream", nil); err == nil || verror.ErrorID(err) != "v.io/v23/config.errStreamShutDown" {
 		t.Errorf("missing or wrong error: %v", err)
 	}
 	if got, want := pub.String(), "shutdown"; got != want {

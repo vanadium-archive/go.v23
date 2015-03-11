@@ -4,6 +4,16 @@ import (
 	"fmt"
 	"strings"
 	"sync"
+	"v.io/v23/verror"
+)
+
+const pkgPath = "v.io/v23/config"
+
+var (
+	errNeedNonNilChannel = verror.Register(pkgPath+".errNeedNonNilChannel", verror.NoRetry, "{1:}{2:}must provide a non-nil channel{:_}")
+	errStreamExists      = verror.Register(pkgPath+".errStreamExists", verror.NoRetry, "{1:}{2:}stream {3} already exists{:_}")
+	errStreamShutDown    = verror.Register(pkgPath+".errStreamShutDown", verror.NoRetry, "{1:}{2:}stream {3} has been shut down{:_}")
+	errStreamDoesntExist = verror.Register(pkgPath+".errStreamDoesntExist", verror.NoRetry, "{1:}{2:}stream {3} doesn't exist{:_}")
 )
 
 // A Publisher provides a mechanism for communicating Settings from a set
@@ -65,12 +75,12 @@ type fork struct {
 // and then close the channel it has passed to CreateStream.
 func (p *Publisher) CreateStream(name, description string, ch <-chan Setting) (<-chan struct{}, error) {
 	if ch == nil {
-		return nil, fmt.Errorf("must provide a non-nil channel")
+		return nil, verror.New(errNeedNonNilChannel, nil)
 	}
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	if p.streams[name] != nil {
-		return nil, fmt.Errorf("stream %q already exists", name)
+		return nil, verror.New(errStreamExists, nil, name)
 	}
 	f := &fork{desc: description, in: ch, vals: make(map[string]Setting)}
 	p.streams[name] = f
@@ -124,11 +134,11 @@ func (p *Publisher) ForkStream(name string, ch chan<- Setting) (*Stream, error) 
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	if p.shutdown {
-		return nil, fmt.Errorf("stream %q has been shut down", name)
+		return nil, verror.New(errStreamShutDown, nil, name)
 	}
 	f := p.streams[name]
 	if f == nil {
-		return nil, fmt.Errorf("stream %q doesn't exist", name)
+		return nil, verror.New(errStreamDoesntExist, nil, name)
 	}
 	f.Lock()
 	defer f.Unlock()
@@ -147,11 +157,11 @@ func (p *Publisher) CloseFork(name string, ch chan<- Setting) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	if p.shutdown {
-		return fmt.Errorf("stream %q has been shut down", name)
+		return verror.New(errStreamShutDown, nil, name)
 	}
 	f := p.streams[name]
 	if f == nil {
-		return fmt.Errorf("stream %q doesn't exist", name)
+		return verror.New(errStreamDoesntExist, nil, name)
 	}
 	f.Lock()
 	defer f.Unlock()
