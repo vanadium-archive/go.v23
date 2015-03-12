@@ -16,14 +16,14 @@ import (
 // the Universe ACL on Item.Get?
 //
 // TODO(sadovsky): Revisit the ACL model more generally. It's not clear that we
-// need every layer of the hierarchy to implement SetACL and GetACL. In fact, we
-// may be able to drop SetACL and GetACL from all of these interfaces, and also
+// need every layer of the hierarchy to implement SetPermissions and GetPermissions. In fact, we
+// may be able to drop SetPermissions and GetPermissions from all of these interfaces, and also
 // drop the acl argument from Database.Create.
 
 // Service represents a Vanadium syncbase service.
 // Service.Glob operates over Universe names.
 type Service interface {
-	// SetACL and GetACL are included from the Object interface.
+	// SetPermissions and GetPermissions are included from the Object interface.
 	object.Object
 }
 
@@ -38,14 +38,14 @@ type Service interface {
 // manager as part of the app installation procedure.
 type Universe interface {
 	// Create creates this Universe.
-	// If acl is nil, the TaggedACLMap is inherited (copied) from the Service.
+	// If acl is nil, Permissions is inherited (copied) from the Service.
 	// Create requires the caller to have Write permission at the Service.
-	Create(acl access.TaggedACLMap) error {access.Write}
+	Create(acl access.Permissions) error {access.Write}
 
 	// Delete deletes this Universe.
 	Delete() error {access.Write}
 
-	// SetACL and GetACL are included from the Object interface.
+	// SetPermissions and GetPermissions are included from the Object interface.
 	object.Object
 }
 
@@ -65,9 +65,9 @@ type Schema set[string]
 // deal with schema versioning and sync.
 type Database interface {
 	// Create creates this Database.
-	// If acl is nil, the TaggedACLMap is inherited (copied) from the Universe.
+	// If acl is nil, Permissions is inherited (copied) from the Universe.
 	// Create requires the caller to have Write permission at the Universe.
-	Create(acl access.TaggedACLMap) error {access.Write}
+	Create(acl access.Permissions) error {access.Write}
 
 	// Delete deletes this Database.
 	Delete() error {access.Write}
@@ -79,7 +79,7 @@ type Database interface {
 	// GetSchema returns the schema for this Database.
 	GetSchema() (schema Schema, etag string | error) {access.Read}
 
-	// SetACL and GetACL are included from the Object interface.
+	// SetPermissions and GetPermissions are included from the Object interface.
 	object.Object
 }
 

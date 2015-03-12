@@ -70,7 +70,7 @@ type ServiceClientMethods interface {
 	//
 	// If the set of pre-defined tags is insufficient, services may define their
 	// own tag type and annotate all methods with this new type.
-	// Instead of embedding this Object interface, define SetACL and GetACL in
+	// Instead of embedding this Object interface, define SetPermissions and GetPermissions in
 	// their own interface. Authorization policies will typically respect
 	// annotations of a single type. For example, the VDL definition of an object
 	// would be:
@@ -90,8 +90,8 @@ type ServiceClientMethods interface {
 	//    MyMethod() (string, error) {Blue}
 	//
 	//    // Allow clients to change access via the access.Object interface:
-	//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}
-	//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}
+	//    SetPermissions(acl access.Permissions, etag string) error         {Red}
+	//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}
 	//  }
 	object.ObjectClientMethods
 }
@@ -153,7 +153,7 @@ type ServiceServerMethods interface {
 	//
 	// If the set of pre-defined tags is insufficient, services may define their
 	// own tag type and annotate all methods with this new type.
-	// Instead of embedding this Object interface, define SetACL and GetACL in
+	// Instead of embedding this Object interface, define SetPermissions and GetPermissions in
 	// their own interface. Authorization policies will typically respect
 	// annotations of a single type. For example, the VDL definition of an object
 	// would be:
@@ -173,8 +173,8 @@ type ServiceServerMethods interface {
 	//    MyMethod() (string, error) {Blue}
 	//
 	//    // Allow clients to change access via the access.Object interface:
-	//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}
-	//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}
+	//    SetPermissions(acl access.Permissions, etag string) error         {Red}
+	//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}
 	//  }
 	object.ObjectServerMethods
 }
@@ -233,7 +233,7 @@ var descService = ipc.InterfaceDesc{
 	PkgPath: "v.io/syncbase/v23/services/syncbase",
 	Doc:     "// Service represents a Vanadium syncbase service.\n// Service.Glob operates over Universe names.",
 	Embeds: []ipc.EmbedDesc{
-		{"Object", "v.io/v23/services/security/access/object", "// Object provides access control for Veyron objects.\n//\n// Veyron services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetACL and GetACL in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}\n//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}\n//  }"},
+		{"Object", "v.io/v23/services/security/access/object", "// Object provides access control for Veyron objects.\n//\n// Veyron services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetPermissions and GetPermissions in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(acl access.Permissions, etag string) error         {Red}\n//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}\n//  }"},
 	},
 }
 
@@ -265,7 +265,7 @@ type UniverseClientMethods interface {
 	//
 	// If the set of pre-defined tags is insufficient, services may define their
 	// own tag type and annotate all methods with this new type.
-	// Instead of embedding this Object interface, define SetACL and GetACL in
+	// Instead of embedding this Object interface, define SetPermissions and GetPermissions in
 	// their own interface. Authorization policies will typically respect
 	// annotations of a single type. For example, the VDL definition of an object
 	// would be:
@@ -285,14 +285,14 @@ type UniverseClientMethods interface {
 	//    MyMethod() (string, error) {Blue}
 	//
 	//    // Allow clients to change access via the access.Object interface:
-	//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}
-	//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}
+	//    SetPermissions(acl access.Permissions, etag string) error         {Red}
+	//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}
 	//  }
 	object.ObjectClientMethods
 	// Create creates this Universe.
-	// If acl is nil, the TaggedACLMap is inherited (copied) from the Service.
+	// If acl is nil, Permissions is inherited (copied) from the Service.
 	// Create requires the caller to have Write permission at the Service.
-	Create(ctx *context.T, acl access.TaggedACLMap, opts ...ipc.CallOpt) error
+	Create(ctx *context.T, acl access.Permissions, opts ...ipc.CallOpt) error
 	// Delete deletes this Universe.
 	Delete(*context.T, ...ipc.CallOpt) error
 }
@@ -328,7 +328,7 @@ func (c implUniverseClientStub) c(ctx *context.T) ipc.Client {
 	return v23.GetClient(ctx)
 }
 
-func (c implUniverseClientStub) Create(ctx *context.T, i0 access.TaggedACLMap, opts ...ipc.CallOpt) (err error) {
+func (c implUniverseClientStub) Create(ctx *context.T, i0 access.Permissions, opts ...ipc.CallOpt) (err error) {
 	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Create", []interface{}{i0}, opts...); err != nil {
 		return
@@ -374,7 +374,7 @@ type UniverseServerMethods interface {
 	//
 	// If the set of pre-defined tags is insufficient, services may define their
 	// own tag type and annotate all methods with this new type.
-	// Instead of embedding this Object interface, define SetACL and GetACL in
+	// Instead of embedding this Object interface, define SetPermissions and GetPermissions in
 	// their own interface. Authorization policies will typically respect
 	// annotations of a single type. For example, the VDL definition of an object
 	// would be:
@@ -394,14 +394,14 @@ type UniverseServerMethods interface {
 	//    MyMethod() (string, error) {Blue}
 	//
 	//    // Allow clients to change access via the access.Object interface:
-	//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}
-	//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}
+	//    SetPermissions(acl access.Permissions, etag string) error         {Red}
+	//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}
 	//  }
 	object.ObjectServerMethods
 	// Create creates this Universe.
-	// If acl is nil, the TaggedACLMap is inherited (copied) from the Service.
+	// If acl is nil, Permissions is inherited (copied) from the Service.
 	// Create requires the caller to have Write permission at the Service.
-	Create(call ipc.ServerCall, acl access.TaggedACLMap) error
+	Create(call ipc.ServerCall, acl access.Permissions) error
 	// Delete deletes this Universe.
 	Delete(ipc.ServerCall) error
 }
@@ -443,7 +443,7 @@ type implUniverseServerStub struct {
 	gs *ipc.GlobState
 }
 
-func (s implUniverseServerStub) Create(call ipc.ServerCall, i0 access.TaggedACLMap) error {
+func (s implUniverseServerStub) Create(call ipc.ServerCall, i0 access.Permissions) error {
 	return s.impl.Create(call, i0)
 }
 
@@ -468,14 +468,14 @@ var descUniverse = ipc.InterfaceDesc{
 	PkgPath: "v.io/syncbase/v23/services/syncbase",
 	Doc:     "// Universe represents a collection of Databases.\n// Universe.Glob operates over Database names.\n// We expect there to be one Universe per app, likely created by the node\n// manager as part of the app installation procedure.",
 	Embeds: []ipc.EmbedDesc{
-		{"Object", "v.io/v23/services/security/access/object", "// Object provides access control for Veyron objects.\n//\n// Veyron services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetACL and GetACL in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}\n//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}\n//  }"},
+		{"Object", "v.io/v23/services/security/access/object", "// Object provides access control for Veyron objects.\n//\n// Veyron services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetPermissions and GetPermissions in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(acl access.Permissions, etag string) error         {Red}\n//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}\n//  }"},
 	},
 	Methods: []ipc.MethodDesc{
 		{
 			Name: "Create",
-			Doc:  "// Create creates this Universe.\n// If acl is nil, the TaggedACLMap is inherited (copied) from the Service.\n// Create requires the caller to have Write permission at the Service.",
+			Doc:  "// Create creates this Universe.\n// If acl is nil, Permissions is inherited (copied) from the Service.\n// Create requires the caller to have Write permission at the Service.",
 			InArgs: []ipc.ArgDesc{
-				{"acl", ``}, // access.TaggedACLMap
+				{"acl", ``}, // access.Permissions
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
 		},
@@ -520,7 +520,7 @@ type DatabaseClientMethods interface {
 	//
 	// If the set of pre-defined tags is insufficient, services may define their
 	// own tag type and annotate all methods with this new type.
-	// Instead of embedding this Object interface, define SetACL and GetACL in
+	// Instead of embedding this Object interface, define SetPermissions and GetPermissions in
 	// their own interface. Authorization policies will typically respect
 	// annotations of a single type. For example, the VDL definition of an object
 	// would be:
@@ -540,14 +540,14 @@ type DatabaseClientMethods interface {
 	//    MyMethod() (string, error) {Blue}
 	//
 	//    // Allow clients to change access via the access.Object interface:
-	//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}
-	//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}
+	//    SetPermissions(acl access.Permissions, etag string) error         {Red}
+	//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}
 	//  }
 	object.ObjectClientMethods
 	// Create creates this Database.
-	// If acl is nil, the TaggedACLMap is inherited (copied) from the Universe.
+	// If acl is nil, Permissions is inherited (copied) from the Universe.
 	// Create requires the caller to have Write permission at the Universe.
-	Create(ctx *context.T, acl access.TaggedACLMap, opts ...ipc.CallOpt) error
+	Create(ctx *context.T, acl access.Permissions, opts ...ipc.CallOpt) error
 	// Delete deletes this Database.
 	Delete(*context.T, ...ipc.CallOpt) error
 	// UpdateSchema updates the schema for this Database, creating and deleting
@@ -588,7 +588,7 @@ func (c implDatabaseClientStub) c(ctx *context.T) ipc.Client {
 	return v23.GetClient(ctx)
 }
 
-func (c implDatabaseClientStub) Create(ctx *context.T, i0 access.TaggedACLMap, opts ...ipc.CallOpt) (err error) {
+func (c implDatabaseClientStub) Create(ctx *context.T, i0 access.Permissions, opts ...ipc.CallOpt) (err error) {
 	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Create", []interface{}{i0}, opts...); err != nil {
 		return
@@ -657,7 +657,7 @@ type DatabaseServerMethods interface {
 	//
 	// If the set of pre-defined tags is insufficient, services may define their
 	// own tag type and annotate all methods with this new type.
-	// Instead of embedding this Object interface, define SetACL and GetACL in
+	// Instead of embedding this Object interface, define SetPermissions and GetPermissions in
 	// their own interface. Authorization policies will typically respect
 	// annotations of a single type. For example, the VDL definition of an object
 	// would be:
@@ -677,14 +677,14 @@ type DatabaseServerMethods interface {
 	//    MyMethod() (string, error) {Blue}
 	//
 	//    // Allow clients to change access via the access.Object interface:
-	//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}
-	//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}
+	//    SetPermissions(acl access.Permissions, etag string) error         {Red}
+	//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}
 	//  }
 	object.ObjectServerMethods
 	// Create creates this Database.
-	// If acl is nil, the TaggedACLMap is inherited (copied) from the Universe.
+	// If acl is nil, Permissions is inherited (copied) from the Universe.
 	// Create requires the caller to have Write permission at the Universe.
-	Create(call ipc.ServerCall, acl access.TaggedACLMap) error
+	Create(call ipc.ServerCall, acl access.Permissions) error
 	// Delete deletes this Database.
 	Delete(ipc.ServerCall) error
 	// UpdateSchema updates the schema for this Database, creating and deleting
@@ -731,7 +731,7 @@ type implDatabaseServerStub struct {
 	gs *ipc.GlobState
 }
 
-func (s implDatabaseServerStub) Create(call ipc.ServerCall, i0 access.TaggedACLMap) error {
+func (s implDatabaseServerStub) Create(call ipc.ServerCall, i0 access.Permissions) error {
 	return s.impl.Create(call, i0)
 }
 
@@ -764,14 +764,14 @@ var descDatabase = ipc.InterfaceDesc{
 	PkgPath: "v.io/syncbase/v23/services/syncbase",
 	Doc:     "// Database represents a collection of Tables. Batch operations, queries, sync,\n// watch, etc. all currently operate at the Database level. A Database's etag\n// covers both its ACL and its schema.\n// Database.Glob operates over Table names.\n//\n// TODO(sadovsky): Add Watch method.\n// TODO(sadovsky): Support batch operations.\n// TODO(sadovsky): Iterate on the schema management API as we figure out how to\n// deal with schema versioning and sync.",
 	Embeds: []ipc.EmbedDesc{
-		{"Object", "v.io/v23/services/security/access/object", "// Object provides access control for Veyron objects.\n//\n// Veyron services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetACL and GetACL in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}\n//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}\n//  }"},
+		{"Object", "v.io/v23/services/security/access/object", "// Object provides access control for Veyron objects.\n//\n// Veyron services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetPermissions and GetPermissions in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(acl access.Permissions, etag string) error         {Red}\n//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}\n//  }"},
 	},
 	Methods: []ipc.MethodDesc{
 		{
 			Name: "Create",
-			Doc:  "// Create creates this Database.\n// If acl is nil, the TaggedACLMap is inherited (copied) from the Universe.\n// Create requires the caller to have Write permission at the Universe.",
+			Doc:  "// Create creates this Database.\n// If acl is nil, Permissions is inherited (copied) from the Universe.\n// Create requires the caller to have Write permission at the Universe.",
 			InArgs: []ipc.ArgDesc{
-				{"acl", ``}, // access.TaggedACLMap
+				{"acl", ``}, // access.Permissions
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
 		},

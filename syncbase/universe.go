@@ -33,7 +33,7 @@ func (u *universe) ListDatabases(ctx *context.T) ([]string, error) {
 }
 
 // Create implements Universe.Create.
-func (u *universe) Create(ctx *context.T, acl access.TaggedACLMap) error {
+func (u *universe) Create(ctx *context.T, acl access.Permissions) error {
 	return u.c.Create(ctx, acl)
 }
 
@@ -42,12 +42,12 @@ func (u *universe) Delete(ctx *context.T) error {
 	return u.c.Delete(ctx)
 }
 
-// SetACL implements Universe.SetACL.
-func (u *universe) SetACL(ctx *context.T, acl access.TaggedACLMap, etag string) error {
-	return u.c.SetACL(ctx, acl, etag)
+// SetPermissions implements Universe.SetPermissions.
+func (u *universe) SetPermissions(ctx *context.T, acl access.Permissions, etag string) error {
+	return u.c.SetPermissions(ctx, acl, etag)
 }
 
-// GetACL implements Universe.GetACL.
-func (u *universe) GetACL(ctx *context.T) (acl access.TaggedACLMap, etag string, err error) {
-	return u.c.GetACL(ctx)
+// GetPermissions implements Universe.GetPermissions.
+func (u *universe) GetPermissions(ctx *context.T) (acl access.Permissions, etag string, err error) {
+	return u.c.GetPermissions(ctx)
 }

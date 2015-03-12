@@ -24,15 +24,15 @@ import (
 	_ "v.io/x/ref/profiles"
 )
 
-func defaultACL() access.TaggedACLMap {
-	acl := access.TaggedACLMap{}
+func defaultACL() access.Permissions {
+	acl := access.Permissions{}
 	for _, tag := range access.AllTypicalTags() {
 		acl.Add(security.BlessingPattern("server/client"), string(tag))
 	}
 	return acl
 }
 
-func newServer(ctx *context.T, acl access.TaggedACLMap) (string, func()) {
+func newServer(ctx *context.T, acl access.Permissions) (string, func()) {
 	s, err := v23.NewServer(ctx)
 	if err != nil {
 		vlog.Fatal("v23.NewServer() failed: ", err)
@@ -61,7 +61,7 @@ func newServer(ctx *context.T, acl access.TaggedACLMap) (string, func()) {
 	}
 }
 
-func setupOrDie(acl access.TaggedACLMap) (clientCtx *context.T, serverName string, cleanup func()) {
+func setupOrDie(acl access.Permissions) (clientCtx *context.T, serverName string, cleanup func()) {
 	ctx, shutdown := v23.Init()
 	cp, sp := tsecurity.NewPrincipal("client"), tsecurity.NewPrincipal("server")
 
@@ -97,11 +97,11 @@ func setupOrDie(acl access.TaggedACLMap) (clientCtx *context.T, serverName strin
 	return
 }
 
-func getACLOrDie(ac syncbase.AccessController, ctx *context.T, t *testing.T) access.TaggedACLMap {
-	acl, _, err := ac.GetACL(ctx)
+func getPermissionsOrDie(ac syncbase.AccessController, ctx *context.T, t *testing.T) access.Permissions {
+	acl, _, err := ac.GetPermissions(ctx)
 	if err != nil {
 		debug.PrintStack()
-		t.Fatalf("GetACL failed: %s", err)
+		t.Fatalf("GetPermissions failed: %s", err)
 	}
 	return acl
 }
@@ -110,7 +110,7 @@ func getACLOrDie(ac syncbase.AccessController, ctx *context.T, t *testing.T) acc
 // but since t conflicts with "t *testing.T", we instead use sv,uv,db,tb,it.
 
 // Inputs uvName and dbName are universe and database names respectively.
-func createDatabase(ctx *context.T, s syncbase.Service, uvName, dbName string, acl access.TaggedACLMap, schema wire.Schema) error {
+func createDatabase(ctx *context.T, s syncbase.Service, uvName, dbName string, acl access.Permissions, schema wire.Schema) error {
 	uv := s.BindUniverse(uvName)
 	if err := uv.Create(ctx, acl); err != nil {
 		return err
@@ -167,7 +167,7 @@ func TestCreate(t *testing.T) {
 	if err := uv.Create(ctx, nil); err != nil {
 		t.Fatalf("uv.Create() failed: %s", err)
 	}
-	if wantACL, gotACL := defaultACL(), getACLOrDie(uv, ctx, t); !reflect.DeepEqual(wantACL, gotACL) {
+	if wantACL, gotACL := defaultACL(), getPermissionsOrDie(uv, ctx, t); !reflect.DeepEqual(wantACL, gotACL) {
 		t.Errorf("ACLs do not match: want %v, got %v", wantACL, gotACL)
 	}
 
@@ -181,7 +181,7 @@ func TestCreate(t *testing.T) {
 	if err := db.Create(ctx, nil); err != nil {
 		t.Fatalf("db.Create() failed: %s", err)
 	}
-	if wantACL, gotACL := defaultACL(), getACLOrDie(uv, ctx, t); !reflect.DeepEqual(wantACL, gotACL) {
+	if wantACL, gotACL := defaultACL(), getPermissionsOrDie(uv, ctx, t); !reflect.DeepEqual(wantACL, gotACL) {
 		t.Errorf("ACLs do not match: want %v, got %v", wantACL, gotACL)
 	}
 
@@ -195,23 +195,23 @@ func TestCreate(t *testing.T) {
 
 	// Test Universe.Create with non-default ACL.
 	uv2 := sv.BindUniverse("uv2")
-	acl := access.TaggedACLMap{}
+	acl := access.Permissions{}
 	acl.Add(security.BlessingPattern("server/client"), string(access.Admin))
 	if err := uv2.Create(ctx, acl); err != nil {
 		t.Fatalf("uv2.Create() failed: %s", err)
 	}
-	if wantACL, gotACL := acl, getACLOrDie(uv2, ctx, t); !reflect.DeepEqual(wantACL, gotACL) {
+	if wantACL, gotACL := acl, getPermissionsOrDie(uv2, ctx, t); !reflect.DeepEqual(wantACL, gotACL) {
 		t.Errorf("ACLs do not match: want %v, got %v", wantACL, gotACL)
 	}
 
 	// Test Database.Create with non-default ACL.
 	db2 := uv.BindDatabase("db2")
-	acl = access.TaggedACLMap{}
+	acl = access.Permissions{}
 	acl.Add(security.BlessingPattern("server/client"), string(access.Admin))
 	if err := db2.Create(ctx, acl); err != nil {
 		t.Fatalf("db2.Create() failed: %s", err)
 	}
-	if wantACL, gotACL := acl, getACLOrDie(db2, ctx, t); !reflect.DeepEqual(wantACL, gotACL) {
+	if wantACL, gotACL := acl, getPermissionsOrDie(db2, ctx, t); !reflect.DeepEqual(wantACL, gotACL) {
 		t.Errorf("ACLs do not match: want %v, got %v", wantACL, gotACL)
 	}
 }

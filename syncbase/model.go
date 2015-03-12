@@ -19,13 +19,13 @@ import (
 
 // AccessController provides access control for various syncbase objects.
 type AccessController interface {
-	// SetACL replaces the current ACL for an object.
-	// For detailed documentation, see Object.SetACL.
-	SetACL(ctx *context.T, acl access.TaggedACLMap, etag string) error
+	// SetPermissions replaces the current ACL for an object.
+	// For detailed documentation, see Object.SetPermissions.
+	SetPermissions(ctx *context.T, acl access.Permissions, etag string) error
 
-	// GetACL returns the current ACL for an object.
-	// For detailed documentation, see Object.SetACL.
-	GetACL(ctx *context.T) (acl access.TaggedACLMap, etag string, err error)
+	// GetPermissions returns the current ACL for an object.
+	// For detailed documentation, see Object.GetPermissions.
+	GetPermissions(ctx *context.T) (acl access.Permissions, etag string, err error)
 }
 
 // TODO(sadovsky): Is the terminology still "bind", or has it changed?
@@ -41,7 +41,7 @@ type Service interface {
 	// ListUniverses returns a list of all Universe names.
 	ListUniverses(ctx *context.T) ([]string, error)
 
-	// SetACL and GetACL are included from the AccessController interface.
+	// SetPermissions and GetPermissions are included from the AccessController interface.
 	AccessController
 }
 
@@ -60,14 +60,14 @@ type Universe interface {
 	ListDatabases(ctx *context.T) ([]string, error)
 
 	// Create creates this Universe.
-	// If acl is nil, the TaggedACLMap is inherited (copied) from the Service.
+	// If acl is nil, the Permissions is inherited (copied) from the Service.
 	// Create requires the caller to have Write permission at the Service.
-	Create(ctx *context.T, acl access.TaggedACLMap) error
+	Create(ctx *context.T, acl access.Permissions) error
 
 	// Delete deletes this Universe.
 	Delete(ctx *context.T) error
 
-	// SetACL and GetACL are included from the AccessController interface.
+	// SetPermissions and GetPermissions are included from the AccessController interface.
 	AccessController
 }
 
@@ -88,9 +88,9 @@ type Database interface {
 	BindTable(relativeName string) Table
 
 	// Create creates this Database.
-	// If acl is nil, the TaggedACLMap is inherited (copied) from the Universe.
+	// If acl is nil, the Permissions is inherited (copied) from the Universe.
 	// Create requires the caller to have Write permission at the Universe.
-	Create(ctx *context.T, acl access.TaggedACLMap) error
+	Create(ctx *context.T, acl access.Permissions) error
 
 	// Delete deletes this Database.
 	Delete(ctx *context.T) error
@@ -102,7 +102,7 @@ type Database interface {
 	// GetSchema returns the schema for this Database.
 	GetSchema(ctx *context.T) (schema wire.Schema, etag string, err error)
 
-	// SetACL and GetACL are included from the AccessController interface.
+	// SetPermissions and GetPermissions are included from the AccessController interface.
 	AccessController
 }
 

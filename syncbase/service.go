@@ -31,12 +31,12 @@ func (s *service) ListUniverses(ctx *context.T) ([]string, error) {
 	return nil, nil
 }
 
-// SetACL implements Service.SetACL.
-func (s *service) SetACL(ctx *context.T, acl access.TaggedACLMap, etag string) error {
-	return s.c.SetACL(ctx, acl, etag)
+// SetPermissions implements Service.SetPermissions.
+func (s *service) SetPermissions(ctx *context.T, acl access.Permissions, etag string) error {
+	return s.c.SetPermissions(ctx, acl, etag)
 }
 
-// GetACL implements Service.GetACL.
-func (s *service) GetACL(ctx *context.T) (acl access.TaggedACLMap, etag string, err error) {
-	return s.c.GetACL(ctx)
+// GetPermissions implements Service.GetPermissions.
+func (s *service) GetPermissions(ctx *context.T) (acl access.Permissions, etag string, err error) {
+	return s.c.GetPermissions(ctx)
 }

@@ -27,7 +27,7 @@ func (d *database) BindTable(relativeName string) Table {
 }
 
 // Create implements Database.Create.
-func (d *database) Create(ctx *context.T, acl access.TaggedACLMap) error {
+func (d *database) Create(ctx *context.T, acl access.Permissions) error {
 	return d.c.Create(ctx, acl)
 }
 
@@ -46,12 +46,12 @@ func (d *database) GetSchema(ctx *context.T) (schema wire.Schema, etag string, e
 	return d.c.GetSchema(ctx)
 }
 
-// SetACL implements Database.SetACL.
-func (d *database) SetACL(ctx *context.T, acl access.TaggedACLMap, etag string) error {
-	return d.c.SetACL(ctx, acl, etag)
+// SetPermissions implements Database.SetPermissions.
+func (d *database) SetPermissions(ctx *context.T, acl access.Permissions, etag string) error {
+	return d.c.SetPermissions(ctx, acl, etag)
 }
 
-// GetACL implements Database.GetACL.
-func (d *database) GetACL(ctx *context.T) (acl access.TaggedACLMap, etag string, err error) {
-	return d.c.GetACL(ctx)
+// GetPermissions implements Database.GetPermissions.
+func (d *database) GetPermissions(ctx *context.T) (acl access.Permissions, etag string, err error) {
+	return d.c.GetPermissions(ctx)
 }
