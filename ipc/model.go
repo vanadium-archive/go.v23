@@ -463,7 +463,7 @@ type Invoker interface {
 	// *vdl.Value may be initialized to vdl.AnyType.
 	//
 	// The returned method tags provide additional information associated with the
-	// method.  E.g. the security system uses tags to configure ACLs.  The tags
+	// method.  E.g. the security system uses tags to configure AccessLists.  The tags
 	// are typically configured in the VDL specification of the method.
 	Prepare(method string, numArgs int) (argptrs []interface{}, tags []*vdl.Value, _ error)
 

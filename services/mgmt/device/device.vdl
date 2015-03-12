@@ -103,9 +103,9 @@ type Config map[string]string
 // In other words, invoking any method using an existing application
 // installation instance as a receiver is well-defined.
 type Application interface {
-	// Object provides GetACL/SetACL methods to read/modify ACLs for the
+	// Object provides GetPermissions/SetPermissions methods to read/modify AccessLists for the
 	// Application methods. After a device has been claimed, only the
-	// claimant will be able to modify the ACLs for the device.
+	// claimant will be able to modify the AccessLists for the device.
 	object.Object
 	// TODO(caprita): Rather than overriding config and package piecemeal,
 	// consider providing an envelope override during install.

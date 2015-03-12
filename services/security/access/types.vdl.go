@@ -12,29 +12,29 @@
 //
 // Overview
 //
-// Veyron objects provide GetACL and SetACL methods.  An ACL (Access Control
+// Veyron objects provide GetPermissions and SetPermissions methods.  An AccessList (Access Control
 // List) contains the set of blessings that grant principals access to the
 // object. All methods on objects can have "tags" on them and the access
 // control list used for the method is selected based on that tag (from a
-// TaggedACLMap).
+// Permissions).
 //
-// An object can have multiple names, so GetACL and SetACL can be invoked on
-// any of these names, but the object itself has a single ACL.
+// An object can have multiple names, so GetPermissions and SetPermissions can be invoked on
+// any of these names, but the object itself has a single AccessList.
 //
-// SetACL completely replaces the TaggedACLMap. To perform an atomic
-// read-modify-write of the ACL, use the etag parameter.
+// SetPermissions completely replaces the Permissions. To perform an atomic
+// read-modify-write of the AccessList, use the etag parameter.
 //   client := access.ObjectClient(name)
 //   for {
-//     acl, etag, err := client.GetACL()
+//     acl, etag, err := client.GetPermissions()
 //     if err != nil {
 //       return err
 //     }
-//     acl[newTag] = ACL{In: []security.BlessingPattern{newPattern}}
+//     acl[newTag] = AccessList{In: []security.BlessingPattern{newPattern}}
 //     // Use the same etag with the modified acl to ensure that no other client
-//     // has modified the acl since GetACL returned.
-//     if err := client.SetACL(acl, etag); err != nil {
+//     // has modified the acl since GetPermissions returned.
+//     if err := client.SetPermissions(acl, etag); err != nil {
 //       if verror.Is(err, verror.ErrBadEtag.Id) {
-//         // Another client replaced the ACL after our GetACL returned.
+//         // Another client replaced the AccessList after our GetPermissions returned.
 //         // Try again.
 //         continue
 //       }
@@ -48,10 +48,10 @@
 // with other parts of Veyron and with each other.
 //
 // All methods that create an object (e.g. Put, Mount, Link) should take an
-// optional ACL parameter.  If the ACL is not specified, the new object, O,
-// copies its ACL from the parent.  Subsequent changes to the parent ACL are
+// optional AccessList parameter.  If the AccessList is not specified, the new object, O,
+// copies its AccessList from the parent.  Subsequent changes to the parent AccessList are
 // not automatically propagated to O.  Instead, a client library must make
-// recursive ACL changes.
+// recursive AccessList changes.
 //
 // Resolve access is required on all components of a name, except the last one,
 // in order to access the object referenced by that name.  For example, for
@@ -79,12 +79,12 @@
 // images and comments, each with a unique name.  When accessing a document,
 // the server would generate a blessing that the client would use to fetch the
 // images and comments; the images and comments would have this blessed
-// identity in their ACLs.  Changes to the document’s ACL are therefore
+// identity in their AccessLists.  Changes to the document’s AccessList are therefore
 // “propagated” to the images and comments.
 //
 // Some services will want a concept of implicit access control.  They are free
-// to implement this as is best for their service.  However, GetACL should
-// respond with the correct ACL.  For example, a corporate file server would
+// to implement this as is best for their service.  However, GetPermissions should
+// respond with the correct AccessList.  For example, a corporate file server would
 // allow all employees to create their own directory and have full control
 // within that directory.  Employees should not be allowed to modify other
 // employee directories.  In other words, within the directory "home", employee
@@ -104,9 +104,9 @@ import (
 	"v.io/v23/security"
 )
 
-// ACL represents an Access Control List - a set of blessings that should be
+// AccessList represents an Access Control List - a set of blessings that should be
 // granted access.
-type ACL struct {
+type AccessList struct {
 	// In denotes the set of blessings (represented as BlessingPatterns) that
 	// should be granted access, unless blacklisted by an entry in NotIn.
 	//
@@ -127,26 +127,26 @@ type ACL struct {
 	NotIn []string
 }
 
-func (ACL) __VDLReflect(struct {
-	Name string "v.io/v23/services/security/access.ACL"
+func (AccessList) __VDLReflect(struct {
+	Name string "v.io/v23/services/security/access.AccessList"
 }) {
 }
 
-// TaggedACLMap maps string tags to access control lists specifying the
+// Permissions maps string tags to access control lists specifying the
 // blessings required to invoke methods with that tag.
 //
 // These tags are meant to add a layer of interposition between the set of
 // users (blessings, specifically) and the set of methods, much like "Roles" do
 // in Role Based Access Control.
 // (http://en.wikipedia.org/wiki/Role-based_access_control)
-type TaggedACLMap map[string]ACL
+type Permissions map[string]AccessList
 
-func (TaggedACLMap) __VDLReflect(struct {
-	Name string "v.io/v23/services/security/access.TaggedACLMap"
+func (Permissions) __VDLReflect(struct {
+	Name string "v.io/v23/services/security/access.Permissions"
 }) {
 }
 
-// Tag is used to associate methods with an ACL in a TaggedACLMap.
+// Tag is used to associate methods with an AccessList in a Permissions.
 //
 // While services can define their own tag type and values, many
 // services should be able to use the type and values defined in
@@ -159,8 +159,8 @@ func (Tag) __VDLReflect(struct {
 }
 
 func init() {
-	vdl.Register((*ACL)(nil))
-	vdl.Register((*TaggedACLMap)(nil))
+	vdl.Register((*AccessList)(nil))
+	vdl.Register((*Permissions)(nil))
 	vdl.Register((*Tag)(nil))
 }
 
@@ -175,14 +175,14 @@ const Write = Tag("Write") // Operations that mutate the state of the object.
 const Resolve = Tag("Resolve") // Operations involving namespace navigation.
 
 var (
-	// The ACL is too big.  Use groups to represent large sets of principals.
-	ErrTooBig   = verror.Register("v.io/v23/services/security/access.TooBig", verror.NoRetry, "{1:}{2:} ACL is too big")
-	ErrACLMatch = verror.Register("v.io/v23/services/security/access.ACLMatch", verror.NoRetry, "{1:}{2:} none of the valid blessings ({3}) are allowed by the ACL (rejected blessings: {4})")
+	// The AccessList is too big.  Use groups to represent large sets of principals.
+	ErrTooBig          = verror.Register("v.io/v23/services/security/access.TooBig", verror.NoRetry, "{1:}{2:} AccessList is too big")
+	ErrAccessListMatch = verror.Register("v.io/v23/services/security/access.AccessListMatch", verror.NoRetry, "{1:}{2:} none of the valid blessings ({3}) are allowed by the AccessList (rejected blessings: {4})")
 )
 
 func init() {
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrTooBig.ID), "{1:}{2:} ACL is too big")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrACLMatch.ID), "{1:}{2:} none of the valid blessings ({3}) are allowed by the ACL (rejected blessings: {4})")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrTooBig.ID), "{1:}{2:} AccessList is too big")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrAccessListMatch.ID), "{1:}{2:} none of the valid blessings ({3}) are allowed by the AccessList (rejected blessings: {4})")
 }
 
 // NewErrTooBig returns an error with the ErrTooBig ID.
@@ -190,7 +190,7 @@ func NewErrTooBig(ctx *context.T) error {
 	return verror.New(ErrTooBig, ctx)
 }
 
-// NewErrACLMatch returns an error with the ErrACLMatch ID.
-func NewErrACLMatch(ctx *context.T, validBlessings []string, rejectedBlessings []security.RejectedBlessing) error {
-	return verror.New(ErrACLMatch, ctx, validBlessings, rejectedBlessings)
+// NewErrAccessListMatch returns an error with the ErrAccessListMatch ID.
+func NewErrAccessListMatch(ctx *context.T, validBlessings []string, rejectedBlessings []security.RejectedBlessing) error {
+	return verror.New(ErrAccessListMatch, ctx, validBlessings, rejectedBlessings)
 }

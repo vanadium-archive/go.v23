@@ -5,9 +5,9 @@ import "v.io/v23/vdl"
 // TypicalTagType returns the type of the pre-defined tags in this access
 // package.
 //
-// Typical use of this is to setup an ACL authorizer that uses these pre-defined
+// Typical use of this is to setup an AccessList authorizer that uses these pre-defined
 // tags:
-//   authorizer := TaggedACLAuthorizer(myacl, TypicalTagType())
+//   authorizer := PermissionsAuthorizer(myacl, TypicalTagType())
 func TypicalTagType() *vdl.Type {
 	return vdl.TypeOf(Tag(""))
 }

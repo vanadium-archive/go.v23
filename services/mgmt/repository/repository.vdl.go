@@ -69,7 +69,7 @@ type ApplicationClientMethods interface {
 	//
 	// If the set of pre-defined tags is insufficient, services may define their
 	// own tag type and annotate all methods with this new type.
-	// Instead of embedding this Object interface, define SetACL and GetACL in
+	// Instead of embedding this Object interface, define SetPermissions and GetPermissions in
 	// their own interface. Authorization policies will typically respect
 	// annotations of a single type. For example, the VDL definition of an object
 	// would be:
@@ -89,8 +89,8 @@ type ApplicationClientMethods interface {
 	//    MyMethod() (string, error) {Blue}
 	//
 	//    // Allow clients to change access via the access.Object interface:
-	//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}
-	//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}
+	//    SetPermissions(acl access.Permissions, etag string) error         {Red}
+	//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}
 	//  }
 	object.ObjectClientMethods
 	// Match checks if any of the given profiles contains an application
@@ -175,7 +175,7 @@ type ApplicationServerMethods interface {
 	//
 	// If the set of pre-defined tags is insufficient, services may define their
 	// own tag type and annotate all methods with this new type.
-	// Instead of embedding this Object interface, define SetACL and GetACL in
+	// Instead of embedding this Object interface, define SetPermissions and GetPermissions in
 	// their own interface. Authorization policies will typically respect
 	// annotations of a single type. For example, the VDL definition of an object
 	// would be:
@@ -195,8 +195,8 @@ type ApplicationServerMethods interface {
 	//    MyMethod() (string, error) {Blue}
 	//
 	//    // Allow clients to change access via the access.Object interface:
-	//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}
-	//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}
+	//    SetPermissions(acl access.Permissions, etag string) error         {Red}
+	//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}
 	//  }
 	object.ObjectServerMethods
 	// Match checks if any of the given profiles contains an application
@@ -265,7 +265,7 @@ var descApplication = ipc.InterfaceDesc{
 	PkgPath: "v.io/v23/services/mgmt/repository",
 	Doc:     "// Application provides access to application envelopes. An\n// application envelope is identified by an application name and an\n// application version, which are specified through the object name,\n// and a profile name, which is specified using a method argument.\n//\n// Example:\n// /apps/search/v1.Match([]string{\"base\", \"media\"})\n//   returns an application envelope that can be used for downloading\n//   and executing the \"search\" application, version \"v1\", runnable\n//   on either the \"base\" or \"media\" profile.",
 	Embeds: []ipc.EmbedDesc{
-		{"Object", "v.io/v23/services/security/access/object", "// Object provides access control for Veyron objects.\n//\n// Veyron services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetACL and GetACL in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}\n//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}\n//  }"},
+		{"Object", "v.io/v23/services/security/access/object", "// Object provides access control for Veyron objects.\n//\n// Veyron services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetPermissions and GetPermissions in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(acl access.Permissions, etag string) error         {Red}\n//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}\n//  }"},
 	},
 	Methods: []ipc.MethodDesc{
 		{
@@ -325,7 +325,7 @@ type BinaryClientMethods interface {
 	//
 	// If the set of pre-defined tags is insufficient, services may define their
 	// own tag type and annotate all methods with this new type.
-	// Instead of embedding this Object interface, define SetACL and GetACL in
+	// Instead of embedding this Object interface, define SetPermissions and GetPermissions in
 	// their own interface. Authorization policies will typically respect
 	// annotations of a single type. For example, the VDL definition of an object
 	// would be:
@@ -345,8 +345,8 @@ type BinaryClientMethods interface {
 	//    MyMethod() (string, error) {Blue}
 	//
 	//    // Allow clients to change access via the access.Object interface:
-	//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}
-	//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}
+	//    SetPermissions(acl access.Permissions, etag string) error         {Red}
+	//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}
 	//  }
 	object.ObjectClientMethods
 	// Create expresses the intent to create a binary identified by the
@@ -643,7 +643,7 @@ type BinaryServerMethods interface {
 	//
 	// If the set of pre-defined tags is insufficient, services may define their
 	// own tag type and annotate all methods with this new type.
-	// Instead of embedding this Object interface, define SetACL and GetACL in
+	// Instead of embedding this Object interface, define SetPermissions and GetPermissions in
 	// their own interface. Authorization policies will typically respect
 	// annotations of a single type. For example, the VDL definition of an object
 	// would be:
@@ -663,8 +663,8 @@ type BinaryServerMethods interface {
 	//    MyMethod() (string, error) {Blue}
 	//
 	//    // Allow clients to change access via the access.Object interface:
-	//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}
-	//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}
+	//    SetPermissions(acl access.Permissions, etag string) error         {Red}
+	//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}
 	//  }
 	object.ObjectServerMethods
 	// Create expresses the intent to create a binary identified by the
@@ -727,7 +727,7 @@ type BinaryServerStubMethods interface {
 	//
 	// If the set of pre-defined tags is insufficient, services may define their
 	// own tag type and annotate all methods with this new type.
-	// Instead of embedding this Object interface, define SetACL and GetACL in
+	// Instead of embedding this Object interface, define SetPermissions and GetPermissions in
 	// their own interface. Authorization policies will typically respect
 	// annotations of a single type. For example, the VDL definition of an object
 	// would be:
@@ -747,8 +747,8 @@ type BinaryServerStubMethods interface {
 	//    MyMethod() (string, error) {Blue}
 	//
 	//    // Allow clients to change access via the access.Object interface:
-	//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}
-	//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}
+	//    SetPermissions(acl access.Permissions, etag string) error         {Red}
+	//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}
 	//  }
 	object.ObjectServerStubMethods
 	// Create expresses the intent to create a binary identified by the
@@ -858,7 +858,7 @@ var descBinary = ipc.InterfaceDesc{
 	PkgPath: "v.io/v23/services/mgmt/repository",
 	Doc:     "// Binary can be used to store and retrieve veyron application\n// binaries.\n//\n// To create a binary, clients first invoke the Create() method that\n// specifies the number of parts the binary consists of. Clients then\n// uploads the individual parts through the Upload() method, which\n// identifies the part being uploaded. To resume an upload after a\n// failure, clients invoke the UploadStatus() method, which returns a\n// slice that identifies which parts are missing.\n//\n// To download a binary, clients first invoke Stat(), which returns\n// information describing the binary, including the number of parts\n// the binary consists of. Clients then download the individual parts\n// through the Download() method, which identifies the part being\n// downloaded. Alternatively, clients can download the binary through\n// HTTP using a transient URL available through the DownloadURL()\n// method.\n//\n// To delete the binary, clients invoke the Delete() method.",
 	Embeds: []ipc.EmbedDesc{
-		{"Object", "v.io/v23/services/security/access/object", "// Object provides access control for Veyron objects.\n//\n// Veyron services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetACL and GetACL in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}\n//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}\n//  }"},
+		{"Object", "v.io/v23/services/security/access/object", "// Object provides access control for Veyron objects.\n//\n// Veyron services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetPermissions and GetPermissions in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(acl access.Permissions, etag string) error         {Red}\n//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}\n//  }"},
 	},
 	Methods: []ipc.MethodDesc{
 		{

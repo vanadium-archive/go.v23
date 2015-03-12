@@ -13,7 +13,7 @@ import (
 )
 
 // Any package can define tags (of arbitrary types) to be attached to methods.
-// This type can be used to index into a TaggedACLMap.
+// This type can be used to index into a Permissions.
 type MyTag string
 
 func (MyTag) __VDLReflect(struct {

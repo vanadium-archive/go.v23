@@ -12,14 +12,14 @@ import (
 // mounted onto the same name, they are considered equivalent, i.e., it is semantically
 // irrelevant which is chosen to pass an RPC to.
 //
-// Access is determined by ACLs at each node in the tree.  When resolving a
-// name like a/b/c/d, one must check the client blessings against the ACLs of each
+// Access is determined by AccessLists at each node in the tree.  When resolving a
+// name like a/b/c/d, one must check the client blessings against the AccessLists of each
 // node traversed ("", a, a/b, a/b/c, and a/b/c/d).
 
 type Tag string
 
 const (
-	// Admin allow the client to SetACL or Delete the receiver.  It also subsumes
+	// Admin allow the client to SetPermissions or Delete the receiver.  It also subsumes
 	// all the other tags.
 	Admin   = Tag("Admin")
 	// Mount allows the client to Mount or Unmount at the named receiver.

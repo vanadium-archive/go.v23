@@ -73,9 +73,9 @@ type Namespace interface {
 	// returned if no roots are configured.
 	Roots() []string
 
-	// SetACL sets the ACL in a node in a mount table.
-	SetACL(ctx *context.T, name string, acl access.TaggedACLMap, etag string) error
+	// SetPermissions sets the AccessList in a node in a mount table.
+	SetPermissions(ctx *context.T, name string, acl access.Permissions, etag string) error
 
-	// GetACL returns the ACL in a node in a mount table.
-	GetACL(ctx *context.T, name string) (acl access.TaggedACLMap, etag string, err error)
+	// GetPermissions returns the AccessList in a node in a mount table.
+	GetPermissions(ctx *context.T, name string) (acl access.Permissions, etag string, err error)
 }

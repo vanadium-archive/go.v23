@@ -3,10 +3,10 @@
 //
 // The primitives and APIs defined in this package enable bi-directional,
 // end-to-end authentication between communicating parties; authorization based
-// on that authentication and a database of access rights (ACLs); and secrecy
+// on that authentication and a database of access rights (AccessLists); and secrecy
 // and integrity of all communication.
 //
-// In addition to authorization based on ACLs, veyron supports "blessings"
+// In addition to authorization based on AccessLists, veyron supports "blessings"
 // which are typically used by one principal (e.g. alice/phone/app) to delegate
 // constrained authority (often short-lived) to another principal (e.g.
 // bob/tv).

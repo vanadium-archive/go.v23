@@ -9,7 +9,7 @@ import (
 )
 
 func TestInclude(t *testing.T) {
-	acl := ACL{
+	acl := AccessList{
 		In:    []security.BlessingPattern{"alice/$", "alice/friend", "bob/family"},
 		NotIn: []string{"alice/friend/carol", "bob/family/mallory"},
 	}
@@ -39,23 +39,23 @@ func TestInclude(t *testing.T) {
 	}
 }
 
-func TestOpenACL(t *testing.T) {
-	acl := ACL{In: []security.BlessingPattern{security.AllPrincipals}}
+func TestOpenAccessList(t *testing.T) {
+	acl := AccessList{In: []security.BlessingPattern{security.AllPrincipals}}
 	if !acl.Includes() {
-		t.Errorf("OpenACL should allow principals that present no blessings")
+		t.Errorf("OpenAccessList should allow principals that present no blessings")
 	}
 	if !acl.Includes("frank") {
-		t.Errorf("OpenACL should allow principals that present any blessings")
+		t.Errorf("OpenAccessList should allow principals that present any blessings")
 	}
 }
 
-func TestTaggedACLMapSerialization(t *testing.T) {
-	obj := TaggedACLMap{
-		"R": ACL{
+func TestPermissionsSerialization(t *testing.T) {
+	obj := Permissions{
+		"R": AccessList{
 			In:    []security.BlessingPattern{"foo", "bar"},
 			NotIn: []string{"bar/baz"},
 		},
-		"W": ACL{
+		"W": AccessList{
 			In:    []security.BlessingPattern{"foo", "bar/$"},
 			NotIn: []string{"foo/bar", "foo/baz/boz"},
 		},
@@ -72,15 +72,15 @@ func TestTaggedACLMapSerialization(t *testing.T) {
 	}
 }
 `
-	if got, err := ReadTaggedACLMap(bytes.NewBufferString(txt)); err != nil || !reflect.DeepEqual(got, obj) {
-		t.Errorf("Got error %v, TaggedACLMap: %v, want %v", err, got, obj)
+	if got, err := ReadPermissions(bytes.NewBufferString(txt)); err != nil || !reflect.DeepEqual(got, obj) {
+		t.Errorf("Got error %v, Permissions: %v, want %v", err, got, obj)
 	}
 	// And round-trip (don't compare with 'txt' because indentation/spacing might differ).
 	var buf bytes.Buffer
 	if err := obj.WriteTo(&buf); err != nil {
 		t.Fatal(err)
 	}
-	if got, err := ReadTaggedACLMap(&buf); err != nil || !reflect.DeepEqual(got, obj) {
-		t.Errorf("Got error %v, TaggedACLMap: %v, want %v", err, got, obj)
+	if got, err := ReadPermissions(&buf); err != nil || !reflect.DeepEqual(got, obj) {
+		t.Errorf("Got error %v, Permissions: %v, want %v", err, got, obj)
 	}
 }

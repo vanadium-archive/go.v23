@@ -26,7 +26,7 @@ const (
 	NoExtension = BlessingPattern("$")
 
 	// TODO(ataly, ashankar): The semantics of AllPrincipals breaks monotonicity in
-	// ACLS with NotIn clauses. For instance, the ACL "In: {AllPrincipals}, NotIn: {"foo"}
+	// AccessListS with NotIn clauses. For instance, the AccessList "In: {AllPrincipals}, NotIn: {"foo"}
 	// matches the principal that presents no recognizable blessings ([]) however does not
 	// match the principal that presents "foo" as the only recognizable blessings (["foo"])
 	// We need to sort this out.

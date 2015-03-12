@@ -15,13 +15,13 @@ import (
 	"v.io/v23/vdl"
 )
 
-// TestTaggedACLAuthorizer is both a test and a demonstration of the use of the
-// access.TaggedACLAuthorizer and interaction with interface specification in VDL.
-func TestTaggedACLAuthorizer(t *testing.T) {
+// TestPermissionsAuthorizer is both a test and a demonstration of the use of the
+// access.PermissionsAuthorizer and interaction with interface specification in VDL.
+func TestPermissionsAuthorizer(t *testing.T) {
 	type P []security.BlessingPattern
 	type S []string
-	// access.TaggedACLMap to test against.
-	acl := access.TaggedACLMap{
+	// access.Permissions to test against.
+	acl := access.Permissions{
 		"R": {
 			In: P{security.AllPrincipals},
 		},
@@ -38,7 +38,7 @@ func TestTaggedACLAuthorizer(t *testing.T) {
 		Client security.Blessings
 	}
 	var (
-		authorizer, _ = access.TaggedACLAuthorizer(acl, vdl.TypeOf(test.Read))
+		authorizer, _ = access.PermissionsAuthorizer(acl, vdl.TypeOf(test.Read))
 		// Two principals: The "server" and the "client"
 		pserver   = newPrincipal(t)
 		pclient   = newPrincipal(t)
@@ -101,7 +101,7 @@ func TestTaggedACLAuthorizer(t *testing.T) {
 		{"Put", B("ali", "bob/acquaintances", "bob/acquaintances/dave", "che/friend", "dave")},
 		{"Resolve", B("ali", "ali/friend", "ali/family", "ali/family/friend", "alice/family/boss/friend", "superman/friend")},
 		// Since there are no tags on the NoTags method, it has an
-		// empty ACL.  No client will have access.
+		// empty AccessList.  No client will have access.
 		{"NoTags", B("ali", "ali/family/boss", "bob", "che", "superman")},
 		// On a method with multiple tags on it, all must be satisfied.
 		{"AllTags", B("che")},               // In R and W, but not in X
@@ -113,17 +113,17 @@ func TestTaggedACLAuthorizer(t *testing.T) {
 	}
 }
 
-func TestTaggedACLAuthorizerSelfRPCs(t *testing.T) {
+func TestPermissionsAuthorizerSelfRPCs(t *testing.T) {
 	var (
 		// Client and server are the same principal, though have
 		// different blessings.
 		p         = newPrincipal(t)
 		client, _ = p.BlessSelf("client")
 		server, _ = p.BlessSelf("server")
-		// Authorizer with a access.TaggedACLMap that grants read access to
+		// Authorizer with a access.Permissions that grants read access to
 		// anyone, write/execute access to noone.
 		typ           test.MyTag
-		authorizer, _ = access.TaggedACLAuthorizer(access.TaggedACLMap{"R": {In: []security.BlessingPattern{"nobody/$"}}}, vdl.TypeOf(typ))
+		authorizer, _ = access.PermissionsAuthorizer(access.Permissions{"R": {In: []security.BlessingPattern{"nobody/$"}}}, vdl.TypeOf(typ))
 	)
 	for _, test := range []string{"Put", "Get", "Resolve", "NoTags", "AllTags"} {
 		ctx := security.NewCall(&security.CallParams{
@@ -139,9 +139,9 @@ func TestTaggedACLAuthorizerSelfRPCs(t *testing.T) {
 	}
 }
 
-func TestTaggedACLAuthorizerWithNilACL(t *testing.T) {
+func TestPermissionsAuthorizerWithNilAccessList(t *testing.T) {
 	var (
-		authorizer, _ = access.TaggedACLAuthorizer(nil, vdl.TypeOf(test.Read))
+		authorizer, _ = access.PermissionsAuthorizer(nil, vdl.TypeOf(test.Read))
 		pserver       = newPrincipal(t)
 		pclient       = newPrincipal(t)
 		server, _     = pserver.BlessSelf("server")
@@ -156,13 +156,13 @@ func TestTaggedACLAuthorizerWithNilACL(t *testing.T) {
 			MethodTags:      methodTags(test),
 		})
 		if err := authorizer.Authorize(ctx); err == nil {
-			t.Errorf("nil access.TaggedACLMap authorized method %q", test)
+			t.Errorf("nil access.Permissions authorized method %q", test)
 		}
 	}
 }
 
-func TestTaggedACLAuthorizerFromFile(t *testing.T) {
-	file, err := ioutil.TempFile("", "TestTaggedACLAuthorizerFromFile")
+func TestPermissionsAuthorizerFromFile(t *testing.T) {
+	file, err := ioutil.TempFile("", "TestPermissionsAuthorizerFromFile")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -171,7 +171,7 @@ func TestTaggedACLAuthorizerFromFile(t *testing.T) {
 	defer os.Remove(filename)
 
 	var (
-		authorizer, _  = access.TaggedACLAuthorizerFromFile(filename, vdl.TypeOf(test.Read))
+		authorizer, _  = access.PermissionsAuthorizerFromFile(filename, vdl.TypeOf(test.Read))
 		pserver        = newPrincipal(t)
 		pclient        = newPrincipal(t)
 		server, _      = pserver.BlessSelf("alice")
@@ -190,7 +190,7 @@ func TestTaggedACLAuthorizerFromFile(t *testing.T) {
 
 	// "alice/friend/bob" should not have access to test.Read methods like Get.
 	if err := authorizer.Authorize(ctx); err == nil {
-		t.Fatalf("Expected authorization error as %v is not on the ACL for Read operations", ctx.RemoteBlessings())
+		t.Fatalf("Expected authorization error as %v is not on the AccessList for Read operations", ctx.RemoteBlessings())
 	}
 	// Rewrite the file giving access
 	if err := ioutil.WriteFile(filename, []byte(`{"R": { "In":["alice/friend"] }}`), 0600); err != nil {
@@ -204,10 +204,10 @@ func TestTaggedACLAuthorizerFromFile(t *testing.T) {
 
 func TestTagTypeMustBeString(t *testing.T) {
 	type I int
-	if auth, err := access.TaggedACLAuthorizer(access.TaggedACLMap{}, vdl.TypeOf(I(0))); err == nil || auth != nil {
+	if auth, err := access.PermissionsAuthorizer(access.Permissions{}, vdl.TypeOf(I(0))); err == nil || auth != nil {
 		t.Errorf("Got (%v, %v), wanted error since tag type is not a string", auth, err)
 	}
-	if auth, err := access.TaggedACLAuthorizerFromFile("does_not_matter", vdl.TypeOf(I(0))); err == nil || auth != nil {
+	if auth, err := access.PermissionsAuthorizerFromFile("does_not_matter", vdl.TypeOf(I(0))); err == nil || auth != nil {
 		t.Errorf("Got (%v, %v), wanted error since tag type is not a string", auth, err)
 	}
 }

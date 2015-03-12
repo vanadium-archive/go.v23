@@ -37,7 +37,7 @@ import (
 //
 // If the set of pre-defined tags is insufficient, services may define their
 // own tag type and annotate all methods with this new type.
-// Instead of embedding this Object interface, define SetACL and GetACL in
+// Instead of embedding this Object interface, define SetPermissions and GetPermissions in
 // their own interface. Authorization policies will typically respect
 // annotations of a single type. For example, the VDL definition of an object
 // would be:
@@ -57,32 +57,32 @@ import (
 //    MyMethod() (string, error) {Blue}
 //
 //    // Allow clients to change access via the access.Object interface:
-//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}
-//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}
+//    SetPermissions(acl access.Permissions, etag string) error         {Red}
+//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}
 //  }
 type ObjectClientMethods interface {
-	// SetACL replaces the current ACL for an object.  etag allows for optional,
+	// SetPermissions replaces the current AccessList for an object.  etag allows for optional,
 	// optimistic concurrency control.  If non-empty, etag's value must come from
-	// GetACL.  If any client has successfully called SetACL in the meantime, the
-	// etag will be stale and SetACL will fail.  If empty, SetACL performs an
+	// GetPermissions.  If any client has successfully called SetPermissions in the meantime, the
+	// etag will be stale and SetPermissions will fail.  If empty, SetPermissions performs an
 	// unconditional update.
 	//
-	// ACL objects are expected to be small.  It is up to the implementation to
+	// AccessList objects are expected to be small.  It is up to the implementation to
 	// define the exact limit, though it should probably be around 100KB.  Large
 	// lists of principals should use the Group API or blessings.
 	//
-	// There is some ambiguity when calling SetACL on a mount point.  Does it
+	// There is some ambiguity when calling SetPermissions on a mount point.  Does it
 	// affect the mount itself or does it affect the service endpoint that the
 	// mount points to?  The chosen behavior is that it affects the service
-	// endpoint.  To modify the mount point's ACL, use ResolveToMountTable
-	// to get an endpoint and call SetACL on that.  This means that clients
-	// must know when a name refers to a mount point to change its ACL.
-	SetACL(ctx *context.T, acl access.TaggedACLMap, etag string, opts ...ipc.CallOpt) error
-	// GetACL returns the complete, current ACL for an object.  The returned etag
-	// can be passed to a subsequent call to SetACL for optimistic concurrency
-	// control. A successful call to SetACL will invalidate etag, and the client
-	// must call GetACL again to get the current etag.
-	GetACL(*context.T, ...ipc.CallOpt) (acl access.TaggedACLMap, etag string, err error)
+	// endpoint.  To modify the mount point's AccessList, use ResolveToMountTable
+	// to get an endpoint and call SetPermissions on that.  This means that clients
+	// must know when a name refers to a mount point to change its AccessList.
+	SetPermissions(ctx *context.T, acl access.Permissions, etag string, opts ...ipc.CallOpt) error
+	// GetPermissions returns the complete, current AccessList for an object.  The returned etag
+	// can be passed to a subsequent call to SetPermissions for optimistic concurrency
+	// control. A successful call to SetPermissions will invalidate etag, and the client
+	// must call GetPermissions again to get the current etag.
+	GetPermissions(*context.T, ...ipc.CallOpt) (acl access.Permissions, etag string, err error)
 }
 
 // ObjectClientStub adds universal methods to ObjectClientMethods.
@@ -114,18 +114,18 @@ func (c implObjectClientStub) c(ctx *context.T) ipc.Client {
 	return v23.GetClient(ctx)
 }
 
-func (c implObjectClientStub) SetACL(ctx *context.T, i0 access.TaggedACLMap, i1 string, opts ...ipc.CallOpt) (err error) {
+func (c implObjectClientStub) SetPermissions(ctx *context.T, i0 access.Permissions, i1 string, opts ...ipc.CallOpt) (err error) {
 	var call ipc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "SetACL", []interface{}{i0, i1}, opts...); err != nil {
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "SetPermissions", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
 	err = call.Finish()
 	return
 }
 
-func (c implObjectClientStub) GetACL(ctx *context.T, opts ...ipc.CallOpt) (o0 access.TaggedACLMap, o1 string, err error) {
+func (c implObjectClientStub) GetPermissions(ctx *context.T, opts ...ipc.CallOpt) (o0 access.Permissions, o1 string, err error) {
 	var call ipc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "GetACL", nil, opts...); err != nil {
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "GetPermissions", nil, opts...); err != nil {
 		return
 	}
 	err = call.Finish(&o0, &o1)
@@ -155,7 +155,7 @@ func (c implObjectClientStub) GetACL(ctx *context.T, opts ...ipc.CallOpt) (o0 ac
 //
 // If the set of pre-defined tags is insufficient, services may define their
 // own tag type and annotate all methods with this new type.
-// Instead of embedding this Object interface, define SetACL and GetACL in
+// Instead of embedding this Object interface, define SetPermissions and GetPermissions in
 // their own interface. Authorization policies will typically respect
 // annotations of a single type. For example, the VDL definition of an object
 // would be:
@@ -175,32 +175,32 @@ func (c implObjectClientStub) GetACL(ctx *context.T, opts ...ipc.CallOpt) (o0 ac
 //    MyMethod() (string, error) {Blue}
 //
 //    // Allow clients to change access via the access.Object interface:
-//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}
-//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}
+//    SetPermissions(acl access.Permissions, etag string) error         {Red}
+//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}
 //  }
 type ObjectServerMethods interface {
-	// SetACL replaces the current ACL for an object.  etag allows for optional,
+	// SetPermissions replaces the current AccessList for an object.  etag allows for optional,
 	// optimistic concurrency control.  If non-empty, etag's value must come from
-	// GetACL.  If any client has successfully called SetACL in the meantime, the
-	// etag will be stale and SetACL will fail.  If empty, SetACL performs an
+	// GetPermissions.  If any client has successfully called SetPermissions in the meantime, the
+	// etag will be stale and SetPermissions will fail.  If empty, SetPermissions performs an
 	// unconditional update.
 	//
-	// ACL objects are expected to be small.  It is up to the implementation to
+	// AccessList objects are expected to be small.  It is up to the implementation to
 	// define the exact limit, though it should probably be around 100KB.  Large
 	// lists of principals should use the Group API or blessings.
 	//
-	// There is some ambiguity when calling SetACL on a mount point.  Does it
+	// There is some ambiguity when calling SetPermissions on a mount point.  Does it
 	// affect the mount itself or does it affect the service endpoint that the
 	// mount points to?  The chosen behavior is that it affects the service
-	// endpoint.  To modify the mount point's ACL, use ResolveToMountTable
-	// to get an endpoint and call SetACL on that.  This means that clients
-	// must know when a name refers to a mount point to change its ACL.
-	SetACL(call ipc.ServerCall, acl access.TaggedACLMap, etag string) error
-	// GetACL returns the complete, current ACL for an object.  The returned etag
-	// can be passed to a subsequent call to SetACL for optimistic concurrency
-	// control. A successful call to SetACL will invalidate etag, and the client
-	// must call GetACL again to get the current etag.
-	GetACL(ipc.ServerCall) (acl access.TaggedACLMap, etag string, err error)
+	// endpoint.  To modify the mount point's AccessList, use ResolveToMountTable
+	// to get an endpoint and call SetPermissions on that.  This means that clients
+	// must know when a name refers to a mount point to change its AccessList.
+	SetPermissions(call ipc.ServerCall, acl access.Permissions, etag string) error
+	// GetPermissions returns the complete, current AccessList for an object.  The returned etag
+	// can be passed to a subsequent call to SetPermissions for optimistic concurrency
+	// control. A successful call to SetPermissions will invalidate etag, and the client
+	// must call GetPermissions again to get the current etag.
+	GetPermissions(ipc.ServerCall) (acl access.Permissions, etag string, err error)
 }
 
 // ObjectServerStubMethods is the server interface containing
@@ -238,12 +238,12 @@ type implObjectServerStub struct {
 	gs   *ipc.GlobState
 }
 
-func (s implObjectServerStub) SetACL(call ipc.ServerCall, i0 access.TaggedACLMap, i1 string) error {
-	return s.impl.SetACL(call, i0, i1)
+func (s implObjectServerStub) SetPermissions(call ipc.ServerCall, i0 access.Permissions, i1 string) error {
+	return s.impl.SetPermissions(call, i0, i1)
 }
 
-func (s implObjectServerStub) GetACL(call ipc.ServerCall) (access.TaggedACLMap, string, error) {
-	return s.impl.GetACL(call)
+func (s implObjectServerStub) GetPermissions(call ipc.ServerCall) (access.Permissions, string, error) {
+	return s.impl.GetPermissions(call)
 }
 
 func (s implObjectServerStub) Globber() *ipc.GlobState {
@@ -261,22 +261,22 @@ var ObjectDesc ipc.InterfaceDesc = descObject
 var descObject = ipc.InterfaceDesc{
 	Name:    "Object",
 	PkgPath: "v.io/v23/services/security/access/object",
-	Doc:     "// Object provides access control for Veyron objects.\n//\n// Veyron services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetACL and GetACL in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}\n//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}\n//  }",
+	Doc:     "// Object provides access control for Veyron objects.\n//\n// Veyron services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetPermissions and GetPermissions in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(acl access.Permissions, etag string) error         {Red}\n//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}\n//  }",
 	Methods: []ipc.MethodDesc{
 		{
-			Name: "SetACL",
-			Doc:  "// SetACL replaces the current ACL for an object.  etag allows for optional,\n// optimistic concurrency control.  If non-empty, etag's value must come from\n// GetACL.  If any client has successfully called SetACL in the meantime, the\n// etag will be stale and SetACL will fail.  If empty, SetACL performs an\n// unconditional update.\n//\n// ACL objects are expected to be small.  It is up to the implementation to\n// define the exact limit, though it should probably be around 100KB.  Large\n// lists of principals should use the Group API or blessings.\n//\n// There is some ambiguity when calling SetACL on a mount point.  Does it\n// affect the mount itself or does it affect the service endpoint that the\n// mount points to?  The chosen behavior is that it affects the service\n// endpoint.  To modify the mount point's ACL, use ResolveToMountTable\n// to get an endpoint and call SetACL on that.  This means that clients\n// must know when a name refers to a mount point to change its ACL.",
+			Name: "SetPermissions",
+			Doc:  "// SetPermissions replaces the current AccessList for an object.  etag allows for optional,\n// optimistic concurrency control.  If non-empty, etag's value must come from\n// GetPermissions.  If any client has successfully called SetPermissions in the meantime, the\n// etag will be stale and SetPermissions will fail.  If empty, SetPermissions performs an\n// unconditional update.\n//\n// AccessList objects are expected to be small.  It is up to the implementation to\n// define the exact limit, though it should probably be around 100KB.  Large\n// lists of principals should use the Group API or blessings.\n//\n// There is some ambiguity when calling SetPermissions on a mount point.  Does it\n// affect the mount itself or does it affect the service endpoint that the\n// mount points to?  The chosen behavior is that it affects the service\n// endpoint.  To modify the mount point's AccessList, use ResolveToMountTable\n// to get an endpoint and call SetPermissions on that.  This means that clients\n// must know when a name refers to a mount point to change its AccessList.",
 			InArgs: []ipc.ArgDesc{
-				{"acl", ``},  // access.TaggedACLMap
+				{"acl", ``},  // access.Permissions
 				{"etag", ``}, // string
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
 		},
 		{
-			Name: "GetACL",
-			Doc:  "// GetACL returns the complete, current ACL for an object.  The returned etag\n// can be passed to a subsequent call to SetACL for optimistic concurrency\n// control. A successful call to SetACL will invalidate etag, and the client\n// must call GetACL again to get the current etag.",
+			Name: "GetPermissions",
+			Doc:  "// GetPermissions returns the complete, current AccessList for an object.  The returned etag\n// can be passed to a subsequent call to SetPermissions for optimistic concurrency\n// control. A successful call to SetPermissions will invalidate etag, and the client\n// must call GetPermissions again to get the current etag.",
 			OutArgs: []ipc.ArgDesc{
-				{"acl", ``},  // access.TaggedACLMap
+				{"acl", ``},  // access.Permissions
 				{"etag", ``}, // string
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},

@@ -20,7 +20,7 @@ import (
 //   and executing the "search" application, version "v1", runnable
 //   on either the "base" or "media" profile.
 type Application interface {
-	// Object provides GetACL/SetACL methods to read/modify ACLs for the
+	// Object provides GetPermissions/SetPermissions methods to read/modify AccessLists for the
 	// Application methods.
 	object.Object
 	// Match checks if any of the given profiles contains an application
@@ -57,7 +57,7 @@ type MediaInfo struct {
 //
 // To delete the binary, clients invoke the Delete() method.
 type Binary interface {
-	// Object provides GetACL/SetACL methods to read/modify ACLs for the
+	// Object provides GetPermissions/SetPermissions methods to read/modify AccessLists for the
 	// Binary methods.
 	object.Object
 	// Create expresses the intent to create a binary identified by the

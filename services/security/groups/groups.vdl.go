@@ -2,7 +2,7 @@
 // Source: groups.vdl
 
 // Package groups defines types and interfaces pertaining to groups, which can
-// be referenced by BlessingPatterns (e.g. in ACLs).
+// be referenced by BlessingPatterns (e.g. in AccessLists).
 //
 // TODO(sadovsky): Write a detailed description of this package and add a
 // reference to the (forthcoming) design doc.
@@ -76,12 +76,12 @@ func init() {
 }
 
 var (
-	ErrNoBlessings         = verror.Register("v.io/v23/services/security/groups.NoBlessings", verror.NoRetry, "{1:}{2:} No blessings recognized; cannot create group ACL")
+	ErrNoBlessings         = verror.Register("v.io/v23/services/security/groups.NoBlessings", verror.NoRetry, "{1:}{2:} No blessings recognized; cannot create group AccessList")
 	ErrExcessiveContention = verror.Register("v.io/v23/services/security/groups.ExcessiveContention", verror.RetryBackoff, "{1:}{2:} Gave up after encountering excessive contention; try again later")
 )
 
 func init() {
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoBlessings.ID), "{1:}{2:} No blessings recognized; cannot create group ACL")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoBlessings.ID), "{1:}{2:} No blessings recognized; cannot create group AccessList")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrExcessiveContention.ID), "{1:}{2:} Gave up after encountering excessive contention; try again later")
 }
 
@@ -98,7 +98,7 @@ func NewErrExcessiveContention(ctx *context.T) error {
 // GroupClientMethods is the client interface
 // containing Group methods.
 //
-// A group's etag covers its ACL as well as any other data stored in the group.
+// A group's etag covers its AccessList as well as any other data stored in the group.
 // Clients should treat etags as opaque identifiers. For both Get and Rest, if
 // etag is set and matches the Group's current etag, the response will indicate
 // that fact but will otherwise be empty.
@@ -123,7 +123,7 @@ type GroupClientMethods interface {
 	//
 	// If the set of pre-defined tags is insufficient, services may define their
 	// own tag type and annotate all methods with this new type.
-	// Instead of embedding this Object interface, define SetACL and GetACL in
+	// Instead of embedding this Object interface, define SetPermissions and GetPermissions in
 	// their own interface. Authorization policies will typically respect
 	// annotations of a single type. For example, the VDL definition of an object
 	// would be:
@@ -143,15 +143,15 @@ type GroupClientMethods interface {
 	//    MyMethod() (string, error) {Blue}
 	//
 	//    // Allow clients to change access via the access.Object interface:
-	//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}
-	//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}
+	//    SetPermissions(acl access.Permissions, etag string) error         {Red}
+	//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}
 	//  }
 	object.ObjectClientMethods
 	// Create creates a new group if it doesn't already exist.
-	// If acl is nil, a default TaggedACLMap is used, providing Admin access to
+	// If acl is nil, a default Permissions is used, providing Admin access to
 	// the caller.
 	// Create requires the caller to have Write permission at the GroupServer.
-	Create(ctx *context.T, acl access.TaggedACLMap, entries []BlessingPatternChunk, opts ...ipc.CallOpt) error
+	Create(ctx *context.T, acl access.Permissions, entries []BlessingPatternChunk, opts ...ipc.CallOpt) error
 	// Delete deletes the group.
 	// Permissions for all group-related methods except Create() are checked
 	// against the Group object.
@@ -163,7 +163,7 @@ type GroupClientMethods interface {
 	// Get returns all entries in the group.
 	// TODO(sadovsky): Flesh out this API.
 	Get(ctx *context.T, req GetRequest, reqEtag string, opts ...ipc.CallOpt) (res GetResponse, etag string, err error)
-	// Rest returns information sufficient for the client to perform its ACL
+	// Rest returns information sufficient for the client to perform its AccessList
 	// checks.
 	// TODO(sadovsky): Flesh out this API.
 	Rest(ctx *context.T, req RestRequest, reqEtag string, opts ...ipc.CallOpt) (res RestResponse, etag string, err error)
@@ -200,7 +200,7 @@ func (c implGroupClientStub) c(ctx *context.T) ipc.Client {
 	return v23.GetClient(ctx)
 }
 
-func (c implGroupClientStub) Create(ctx *context.T, i0 access.TaggedACLMap, i1 []BlessingPatternChunk, opts ...ipc.CallOpt) (err error) {
+func (c implGroupClientStub) Create(ctx *context.T, i0 access.Permissions, i1 []BlessingPatternChunk, opts ...ipc.CallOpt) (err error) {
 	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Create", []interface{}{i0, i1}, opts...); err != nil {
 		return
@@ -257,7 +257,7 @@ func (c implGroupClientStub) Rest(ctx *context.T, i0 RestRequest, i1 string, opt
 // GroupServerMethods is the interface a server writer
 // implements for Group.
 //
-// A group's etag covers its ACL as well as any other data stored in the group.
+// A group's etag covers its AccessList as well as any other data stored in the group.
 // Clients should treat etags as opaque identifiers. For both Get and Rest, if
 // etag is set and matches the Group's current etag, the response will indicate
 // that fact but will otherwise be empty.
@@ -282,7 +282,7 @@ type GroupServerMethods interface {
 	//
 	// If the set of pre-defined tags is insufficient, services may define their
 	// own tag type and annotate all methods with this new type.
-	// Instead of embedding this Object interface, define SetACL and GetACL in
+	// Instead of embedding this Object interface, define SetPermissions and GetPermissions in
 	// their own interface. Authorization policies will typically respect
 	// annotations of a single type. For example, the VDL definition of an object
 	// would be:
@@ -302,15 +302,15 @@ type GroupServerMethods interface {
 	//    MyMethod() (string, error) {Blue}
 	//
 	//    // Allow clients to change access via the access.Object interface:
-	//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}
-	//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}
+	//    SetPermissions(acl access.Permissions, etag string) error         {Red}
+	//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}
 	//  }
 	object.ObjectServerMethods
 	// Create creates a new group if it doesn't already exist.
-	// If acl is nil, a default TaggedACLMap is used, providing Admin access to
+	// If acl is nil, a default Permissions is used, providing Admin access to
 	// the caller.
 	// Create requires the caller to have Write permission at the GroupServer.
-	Create(call ipc.ServerCall, acl access.TaggedACLMap, entries []BlessingPatternChunk) error
+	Create(call ipc.ServerCall, acl access.Permissions, entries []BlessingPatternChunk) error
 	// Delete deletes the group.
 	// Permissions for all group-related methods except Create() are checked
 	// against the Group object.
@@ -322,7 +322,7 @@ type GroupServerMethods interface {
 	// Get returns all entries in the group.
 	// TODO(sadovsky): Flesh out this API.
 	Get(call ipc.ServerCall, req GetRequest, reqEtag string) (res GetResponse, etag string, err error)
-	// Rest returns information sufficient for the client to perform its ACL
+	// Rest returns information sufficient for the client to perform its AccessList
 	// checks.
 	// TODO(sadovsky): Flesh out this API.
 	Rest(call ipc.ServerCall, req RestRequest, reqEtag string) (res RestResponse, etag string, err error)
@@ -365,7 +365,7 @@ type implGroupServerStub struct {
 	gs *ipc.GlobState
 }
 
-func (s implGroupServerStub) Create(call ipc.ServerCall, i0 access.TaggedACLMap, i1 []BlessingPatternChunk) error {
+func (s implGroupServerStub) Create(call ipc.ServerCall, i0 access.Permissions, i1 []BlessingPatternChunk) error {
 	return s.impl.Create(call, i0, i1)
 }
 
@@ -404,16 +404,16 @@ var GroupDesc ipc.InterfaceDesc = descGroup
 var descGroup = ipc.InterfaceDesc{
 	Name:    "Group",
 	PkgPath: "v.io/v23/services/security/groups",
-	Doc:     "// A group's etag covers its ACL as well as any other data stored in the group.\n// Clients should treat etags as opaque identifiers. For both Get and Rest, if\n// etag is set and matches the Group's current etag, the response will indicate\n// that fact but will otherwise be empty.",
+	Doc:     "// A group's etag covers its AccessList as well as any other data stored in the group.\n// Clients should treat etags as opaque identifiers. For both Get and Rest, if\n// etag is set and matches the Group's current etag, the response will indicate\n// that fact but will otherwise be empty.",
 	Embeds: []ipc.EmbedDesc{
-		{"Object", "v.io/v23/services/security/access/object", "// Object provides access control for Veyron objects.\n//\n// Veyron services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetACL and GetACL in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetACL(acl access.TaggedACLMap, etag string) error         {Red}\n//    GetACL() (acl access.TaggedACLMap, etag string, err error) {Blue}\n//  }"},
+		{"Object", "v.io/v23/services/security/access/object", "// Object provides access control for Veyron objects.\n//\n// Veyron services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetPermissions and GetPermissions in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(acl access.Permissions, etag string) error         {Red}\n//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}\n//  }"},
 	},
 	Methods: []ipc.MethodDesc{
 		{
 			Name: "Create",
-			Doc:  "// Create creates a new group if it doesn't already exist.\n// If acl is nil, a default TaggedACLMap is used, providing Admin access to\n// the caller.\n// Create requires the caller to have Write permission at the GroupServer.",
+			Doc:  "// Create creates a new group if it doesn't already exist.\n// If acl is nil, a default Permissions is used, providing Admin access to\n// the caller.\n// Create requires the caller to have Write permission at the GroupServer.",
 			InArgs: []ipc.ArgDesc{
-				{"acl", ``},     // access.TaggedACLMap
+				{"acl", ``},     // access.Permissions
 				{"entries", ``}, // []BlessingPatternChunk
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
@@ -459,7 +459,7 @@ var descGroup = ipc.InterfaceDesc{
 		},
 		{
 			Name: "Rest",
-			Doc:  "// Rest returns information sufficient for the client to perform its ACL\n// checks.\n// TODO(sadovsky): Flesh out this API.",
+			Doc:  "// Rest returns information sufficient for the client to perform its AccessList\n// checks.\n// TODO(sadovsky): Flesh out this API.",
 			InArgs: []ipc.ArgDesc{
 				{"req", ``},     // RestRequest
 				{"reqEtag", ``}, // string

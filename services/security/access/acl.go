@@ -8,9 +8,9 @@ import (
 	"v.io/v23/security"
 )
 
-// Includes returns true iff the ACL grants access to a principal that presents
-// blessings (i.e., if at least one of the blessings matches the ACL).
-func (acl ACL) Includes(blessings ...string) bool {
+// Includes returns true iff the AccessList grants access to a principal that presents
+// blessings (i.e., if at least one of the blessings matches the AccessList).
+func (acl AccessList) Includes(blessings ...string) bool {
 	blessings = acl.pruneBlacklisted(blessings)
 	for _, pattern := range acl.In {
 		if pattern.MatchedBy(blessings...) {
@@ -20,7 +20,7 @@ func (acl ACL) Includes(blessings ...string) bool {
 	return false
 }
 
-func (acl ACL) pruneBlacklisted(blessings []string) []string {
+func (acl AccessList) pruneBlacklisted(blessings []string) []string {
 	if len(acl.NotIn) == 0 {
 		return blessings
 	}
@@ -41,25 +41,25 @@ func (acl ACL) pruneBlacklisted(blessings []string) []string {
 }
 
 // Authorize implements security.Authorizer where the request is authorized
-// only if the remote blessings are included in the ACL.
+// only if the remote blessings are included in the AccessList.
 //
 // TODO(ashankar): Add tests for this
-func (acl *ACL) Authorize(call security.Call) error {
+func (acl *AccessList) Authorize(call security.Call) error {
 	blessings := call.RemoteBlessings()
 	blessingsForCall, invalid := blessings.ForCall(call)
 	if acl.Includes(blessingsForCall...) {
 		return nil
 	}
-	return NewErrACLMatch(nil, blessingsForCall, invalid)
+	return NewErrAccessListMatch(nil, blessingsForCall, invalid)
 }
 
-// WriteTo writes the JSON-encoded representation of a TaggedACLMap to w.
-func (m TaggedACLMap) WriteTo(w io.Writer) error {
+// WriteTo writes the JSON-encoded representation of a Permissions to w.
+func (m Permissions) WriteTo(w io.Writer) error {
 	return json.NewEncoder(w).Encode(m.Normalize())
 }
 
-// ReadTaggedACLMap reads the JSON-encoded representation of a TaggedACLMap from r.
-func ReadTaggedACLMap(r io.Reader) (m TaggedACLMap, err error) {
+// ReadPermissions reads the JSON-encoded representation of a Permissions from r.
+func ReadPermissions(r io.Reader) (m Permissions, err error) {
 	err = json.NewDecoder(r).Decode(&m)
 	return
 }
@@ -68,7 +68,7 @@ func ReadTaggedACLMap(r io.Reader) (m TaggedACLMap, err error) {
 // access control lists for the provided tag (by adding to the "In" list).
 //
 // TODO(ashankar): Add tests for Add, Blacklist and Clear.
-func (m TaggedACLMap) Add(pattern security.BlessingPattern, tag string) {
+func (m Permissions) Add(pattern security.BlessingPattern, tag string) {
 	list := m[tag]
 	list.In = append(list.In, pattern)
 	sort.Sort(byPattern(list.In))
@@ -78,7 +78,7 @@ func (m TaggedACLMap) Add(pattern security.BlessingPattern, tag string) {
 
 // Blacklist updates m so that the provided blessing will be excluded from
 // the access control list for the provided tag (via m[tag].NotIn).
-func (m TaggedACLMap) Blacklist(blessing string, tag string) {
+func (m Permissions) Blacklist(blessing string, tag string) {
 	list := m[tag]
 	list.NotIn = append(list.NotIn, blessing)
 	sort.Strings(list.NotIn)
@@ -87,8 +87,8 @@ func (m TaggedACLMap) Blacklist(blessing string, tag string) {
 }
 
 // Clear removes all references to blessingOrPattern from all the provided
-// tags in the ACL, or all tags if len(tags) = 0.
-func (m TaggedACLMap) Clear(blessingOrPattern string, tags ...string) {
+// tags in the AccessList, or all tags if len(tags) = 0.
+func (m Permissions) Clear(blessingOrPattern string, tags ...string) {
 	if len(tags) == 0 {
 		tags = make([]string, 0, len(m))
 		for t, _ := range m {
@@ -97,7 +97,7 @@ func (m TaggedACLMap) Clear(blessingOrPattern string, tags ...string) {
 	}
 	for _, t := range tags {
 		oldList := m[t]
-		var newList ACL
+		var newList AccessList
 		for _, p := range oldList.In {
 			if string(p) != blessingOrPattern {
 				newList.In = append(newList.In, p)
@@ -112,12 +112,12 @@ func (m TaggedACLMap) Clear(blessingOrPattern string, tags ...string) {
 	}
 }
 
-// Copy returns a new TaggedACLMap that is a copy of m.
+// Copy returns a new Permissions that is a copy of m.
 // TODO(ashankar): Unittest for this.
-func (m TaggedACLMap) Copy() TaggedACLMap {
-	ret := make(TaggedACLMap)
+func (m Permissions) Copy() Permissions {
+	ret := make(Permissions)
 	for tag, list := range m {
-		newlist := ACL{
+		newlist := AccessList{
 			In:    make([]security.BlessingPattern, len(list.In)),
 			NotIn: make([]string, len(list.NotIn)),
 		}
@@ -132,11 +132,11 @@ func (m TaggedACLMap) Copy() TaggedACLMap {
 	return ret
 }
 
-// Normalize re-organizes 'm' so that two equivalent TaggedACLMaps are
+// Normalize re-organizes 'm' so that two equivalent Permissionss are
 // comparable via reflection. It returns 'm'.
 //
 // TODO(ashankar): Add a unittest for this.
-func (m TaggedACLMap) Normalize() TaggedACLMap {
+func (m Permissions) Normalize() Permissions {
 	for tag, list := range m {
 		sort.Sort(byPattern(list.In))
 		sort.Strings(list.NotIn)
