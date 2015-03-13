@@ -20,8 +20,8 @@ import (
 
 	"v.io/syncbase/veyron/services/syncbase/server"
 	"v.io/syncbase/veyron/services/syncbase/store/memstore"
-	tsecurity "v.io/x/ref/lib/testutil/security"
 	_ "v.io/x/ref/profiles"
+	tsecurity "v.io/x/ref/test/security"
 )
 
 func defaultACL() access.Permissions {
