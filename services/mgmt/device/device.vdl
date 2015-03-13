@@ -3,6 +3,7 @@
 package device
 
 import (
+	"v.io/v23/security"
 	"v.io/v23/services/mgmt/application"
 	"v.io/v23/services/mgmt/binary"
 	"v.io/v23/services/security/access"
@@ -148,10 +149,17 @@ type Application interface {
 	// Revert reverts application installation(s) to the most recent
 	// previous installation.
 	Revert() error {access.Admin}
-	// Start starts an instance of application installation(s) and
-	// returns the object name(s) that identifies/identify the new
-	// instance(s).
-	Start() ([]string | error) {access.Read}
+	// Start starts an instance of application installation(s). The
+	// server sends the application instance's Public Key on the stream.
+	// When the client receives the Public Key it must send Blessings back
+	// to the server. When the instance is ready to start, the server sends
+	// the instance name to the client.
+	// Client                 Server
+	//  "object".Start() -->
+	//                   <--  InstancePublicKey
+	//  AppBlessings     -->
+	//                   <--  InstanceName
+	Start() stream<StartClientMessage, StartServerMessage> error {access.Read}
 	// Stop attempts a clean shutdown of application installation(s)
 	// instance(s). If the deadline (in seconds) is non-zero and the
 	// instance(s) in questions are still running after the given deadline,
@@ -185,6 +193,23 @@ type Application interface {
 	// stability of the format, and parsing it programmatically is
 	// specifically discouraged.
 	Debug() (string | error) {access.Debug}
+}
+
+// StartServerMessage is the data type that is streamed from the server to the
+// client during a Start method call.
+type StartServerMessage union {
+	// The object name of the instance being started.
+	InstanceName string
+	// The public key of the instance being started. The client must return
+	// blessings for this key.
+	InstancePublicKey []byte
+}
+
+// StartClientMessage is the data type that is streamed from the client to the
+// server during a Start method call.
+type StartClientMessage union {
+	// Blessings for the application instance.
+	AppBlessings security.WireBlessings
 }
 
 // Description enumerates the profiles that a Device supports.

@@ -7,12 +7,14 @@ package device
 
 import (
 	// VDL system imports
+	"io"
 	"v.io/v23"
 	"v.io/v23/context"
 	"v.io/v23/ipc"
 	"v.io/v23/vdl"
 
 	// VDL user imports
+	"v.io/v23/security"
 	"v.io/v23/services/mgmt/application"
 	"v.io/v23/services/mgmt/binary"
 	"v.io/v23/services/security/access"
@@ -26,6 +28,85 @@ func (Config) __VDLReflect(struct {
 	Name string "v.io/v23/services/mgmt/device.Config"
 }) {
 }
+
+type (
+	// StartServerMessage represents any single field of the StartServerMessage union type.
+	//
+	// StartServerMessage is the data type that is streamed from the server to the
+	// client during a Start method call.
+	StartServerMessage interface {
+		// Index returns the field index.
+		Index() int
+		// Interface returns the field value as an interface.
+		Interface() interface{}
+		// Name returns the field name.
+		Name() string
+		// __VDLReflect describes the StartServerMessage union type.
+		__VDLReflect(__StartServerMessageReflect)
+	}
+	// StartServerMessageInstanceName represents field InstanceName of the StartServerMessage union type.
+	//
+	// The object name of the instance being started.
+	StartServerMessageInstanceName struct{ Value string }
+	// StartServerMessageInstancePublicKey represents field InstancePublicKey of the StartServerMessage union type.
+	//
+	// The public key of the instance being started. The client must return
+	// blessings for this key.
+	StartServerMessageInstancePublicKey struct{ Value []byte }
+	// __StartServerMessageReflect describes the StartServerMessage union type.
+	__StartServerMessageReflect struct {
+		Name  string "v.io/v23/services/mgmt/device.StartServerMessage"
+		Type  StartServerMessage
+		Union struct {
+			InstanceName      StartServerMessageInstanceName
+			InstancePublicKey StartServerMessageInstancePublicKey
+		}
+	}
+)
+
+func (x StartServerMessageInstanceName) Index() int                               { return 0 }
+func (x StartServerMessageInstanceName) Interface() interface{}                   { return x.Value }
+func (x StartServerMessageInstanceName) Name() string                             { return "InstanceName" }
+func (x StartServerMessageInstanceName) __VDLReflect(__StartServerMessageReflect) {}
+
+func (x StartServerMessageInstancePublicKey) Index() int                               { return 1 }
+func (x StartServerMessageInstancePublicKey) Interface() interface{}                   { return x.Value }
+func (x StartServerMessageInstancePublicKey) Name() string                             { return "InstancePublicKey" }
+func (x StartServerMessageInstancePublicKey) __VDLReflect(__StartServerMessageReflect) {}
+
+type (
+	// StartClientMessage represents any single field of the StartClientMessage union type.
+	//
+	// StartClientMessage is the data type that is streamed from the client to the
+	// server during a Start method call.
+	StartClientMessage interface {
+		// Index returns the field index.
+		Index() int
+		// Interface returns the field value as an interface.
+		Interface() interface{}
+		// Name returns the field name.
+		Name() string
+		// __VDLReflect describes the StartClientMessage union type.
+		__VDLReflect(__StartClientMessageReflect)
+	}
+	// StartClientMessageAppBlessings represents field AppBlessings of the StartClientMessage union type.
+	//
+	// Blessings for the application instance.
+	StartClientMessageAppBlessings struct{ Value security.Blessings }
+	// __StartClientMessageReflect describes the StartClientMessage union type.
+	__StartClientMessageReflect struct {
+		Name  string "v.io/v23/services/mgmt/device.StartClientMessage"
+		Type  StartClientMessage
+		Union struct {
+			AppBlessings StartClientMessageAppBlessings
+		}
+	}
+)
+
+func (x StartClientMessageAppBlessings) Index() int                               { return 0 }
+func (x StartClientMessageAppBlessings) Interface() interface{}                   { return x.Value }
+func (x StartClientMessageAppBlessings) Name() string                             { return "AppBlessings" }
+func (x StartClientMessageAppBlessings) __VDLReflect(__StartClientMessageReflect) {}
 
 // Description enumerates the profiles that a Device supports.
 type Description struct {
@@ -59,6 +140,8 @@ func (Association) __VDLReflect(struct {
 
 func init() {
 	vdl.Register((*Config)(nil))
+	vdl.Register((*StartServerMessage)(nil))
+	vdl.Register((*StartClientMessage)(nil))
 	vdl.Register((*Description)(nil))
 	vdl.Register((*Association)(nil))
 }
@@ -237,10 +320,17 @@ type ApplicationClientMethods interface {
 	// Revert reverts application installation(s) to the most recent
 	// previous installation.
 	Revert(*context.T, ...ipc.CallOpt) error
-	// Start starts an instance of application installation(s) and
-	// returns the object name(s) that identifies/identify the new
-	// instance(s).
-	Start(*context.T, ...ipc.CallOpt) ([]string, error)
+	// Start starts an instance of application installation(s). The
+	// server sends the application instance's Public Key on the stream.
+	// When the client receives the Public Key it must send Blessings back
+	// to the server. When the instance is ready to start, the server sends
+	// the instance name to the client.
+	// Client                 Server
+	//  "object".Start() -->
+	//                   <--  InstancePublicKey
+	//  AppBlessings     -->
+	//                   <--  InstanceName
+	Start(*context.T, ...ipc.CallOpt) (ApplicationStartClientCall, error)
 	// Stop attempts a clean shutdown of application installation(s)
 	// instance(s). If the deadline (in seconds) is non-zero and the
 	// instance(s) in questions are still running after the given deadline,
@@ -348,12 +438,12 @@ func (c implApplicationClientStub) Revert(ctx *context.T, opts ...ipc.CallOpt) (
 	return
 }
 
-func (c implApplicationClientStub) Start(ctx *context.T, opts ...ipc.CallOpt) (o0 []string, err error) {
+func (c implApplicationClientStub) Start(ctx *context.T, opts ...ipc.CallOpt) (ocall ApplicationStartClientCall, err error) {
 	var call ipc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Start", nil, opts...); err != nil {
 		return
 	}
-	err = call.Finish(&o0)
+	ocall = &implApplicationStartClientCall{ClientCall: call}
 	return
 }
 
@@ -408,6 +498,108 @@ func (c implApplicationClientStub) Debug(ctx *context.T, opts ...ipc.CallOpt) (o
 		return
 	}
 	err = call.Finish(&o0)
+	return
+}
+
+// ApplicationStartClientStream is the client stream for Application.Start.
+type ApplicationStartClientStream interface {
+	// RecvStream returns the receiver side of the Application.Start client stream.
+	RecvStream() interface {
+		// Advance stages an item so that it may be retrieved via Value.  Returns
+		// true iff there is an item to retrieve.  Advance must be called before
+		// Value is called.  May block if an item is not available.
+		Advance() bool
+		// Value returns the item that was staged by Advance.  May panic if Advance
+		// returned false or was not called.  Never blocks.
+		Value() StartServerMessage
+		// Err returns any error encountered by Advance.  Never blocks.
+		Err() error
+	}
+	// SendStream returns the send side of the Application.Start client stream.
+	SendStream() interface {
+		// Send places the item onto the output stream.  Returns errors
+		// encountered while sending, or if Send is called after Close or
+		// the stream has been canceled.  Blocks if there is no buffer
+		// space; will unblock when buffer space is available or after
+		// the stream has been canceled.
+		Send(item StartClientMessage) error
+		// Close indicates to the server that no more items will be sent;
+		// server Recv calls will receive io.EOF after all sent items.
+		// This is an optional call - e.g. a client might call Close if it
+		// needs to continue receiving items from the server after it's
+		// done sending.  Returns errors encountered while closing, or if
+		// Close is called after the stream has been canceled.  Like Send,
+		// blocks if there is no buffer space available.
+		Close() error
+	}
+}
+
+// ApplicationStartClientCall represents the call returned from Application.Start.
+type ApplicationStartClientCall interface {
+	ApplicationStartClientStream
+	// Finish performs the equivalent of SendStream().Close, then blocks until
+	// the server is done, and returns the positional return values for the call.
+	//
+	// Finish returns immediately if the call has been canceled; depending on the
+	// timing the output could either be an error signaling cancelation, or the
+	// valid positional return values from the server.
+	//
+	// Calling Finish is mandatory for releasing stream resources, unless the call
+	// has been canceled or any of the other methods return an error.  Finish should
+	// be called at most once.
+	Finish() error
+}
+
+type implApplicationStartClientCall struct {
+	ipc.ClientCall
+	valRecv StartServerMessage
+	errRecv error
+}
+
+func (c *implApplicationStartClientCall) RecvStream() interface {
+	Advance() bool
+	Value() StartServerMessage
+	Err() error
+} {
+	return implApplicationStartClientCallRecv{c}
+}
+
+type implApplicationStartClientCallRecv struct {
+	c *implApplicationStartClientCall
+}
+
+func (c implApplicationStartClientCallRecv) Advance() bool {
+	c.c.errRecv = c.c.Recv(&c.c.valRecv)
+	return c.c.errRecv == nil
+}
+func (c implApplicationStartClientCallRecv) Value() StartServerMessage {
+	return c.c.valRecv
+}
+func (c implApplicationStartClientCallRecv) Err() error {
+	if c.c.errRecv == io.EOF {
+		return nil
+	}
+	return c.c.errRecv
+}
+func (c *implApplicationStartClientCall) SendStream() interface {
+	Send(item StartClientMessage) error
+	Close() error
+} {
+	return implApplicationStartClientCallSend{c}
+}
+
+type implApplicationStartClientCallSend struct {
+	c *implApplicationStartClientCall
+}
+
+func (c implApplicationStartClientCallSend) Send(item StartClientMessage) error {
+	return c.c.Send(item)
+}
+func (c implApplicationStartClientCallSend) Close() error {
+	return c.c.CloseSend()
+}
+func (c *implApplicationStartClientCall) Finish() (err error) {
+	err = c.ClientCall.Finish()
 	return
 }
 
@@ -585,10 +777,17 @@ type ApplicationServerMethods interface {
 	// Revert reverts application installation(s) to the most recent
 	// previous installation.
 	Revert(ipc.ServerCall) error
-	// Start starts an instance of application installation(s) and
-	// returns the object name(s) that identifies/identify the new
-	// instance(s).
-	Start(ipc.ServerCall) ([]string, error)
+	// Start starts an instance of application installation(s). The
+	// server sends the application instance's Public Key on the stream.
+	// When the client receives the Public Key it must send Blessings back
+	// to the server. When the instance is ready to start, the server sends
+	// the instance name to the client.
+	// Client                 Server
+	//  "object".Start() -->
+	//                   <--  InstancePublicKey
+	//  AppBlessings     -->
+	//                   <--  InstanceName
+	Start(ApplicationStartServerCall) error
 	// Stop attempts a clean shutdown of application installation(s)
 	// instance(s). If the deadline (in seconds) is non-zero and the
 	// instance(s) in questions are still running after the given deadline,
@@ -622,9 +821,132 @@ type ApplicationServerMethods interface {
 
 // ApplicationServerStubMethods is the server interface containing
 // Application methods, as expected by ipc.Server.
-// There is no difference between this interface and ApplicationServerMethods
-// since there are no streaming methods.
-type ApplicationServerStubMethods ApplicationServerMethods
+// The only difference between this interface and ApplicationServerMethods
+// is the streaming methods.
+type ApplicationServerStubMethods interface {
+	// Object provides access control for Veyron objects.
+	//
+	// Veyron services implementing dynamic access control would typically
+	// embed this interface and tag additional methods defined by the service
+	// with one of Admin, Read, Write, Resolve etc. For example,
+	// the VDL definition of the object would be:
+	//
+	//   package mypackage
+	//
+	//   import "v.io/v23/security/access"
+	//   import "v.io/v23/security/access/object"
+	//
+	//   type MyObject interface {
+	//     object.Object
+	//     MyRead() (string, error) {access.Read}
+	//     MyWrite(string) error    {access.Write}
+	//   }
+	//
+	// If the set of pre-defined tags is insufficient, services may define their
+	// own tag type and annotate all methods with this new type.
+	// Instead of embedding this Object interface, define SetPermissions and GetPermissions in
+	// their own interface. Authorization policies will typically respect
+	// annotations of a single type. For example, the VDL definition of an object
+	// would be:
+	//
+	//  package mypackage
+	//
+	//  import "v.io/v23/security/access"
+	//
+	//  type MyTag string
+	//
+	//  const (
+	//    Blue = MyTag("Blue")
+	//    Red  = MyTag("Red")
+	//  )
+	//
+	//  type MyObject interface {
+	//    MyMethod() (string, error) {Blue}
+	//
+	//    // Allow clients to change access via the access.Object interface:
+	//    SetPermissions(acl access.Permissions, etag string) error         {Red}
+	//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}
+	//  }
+	object.ObjectServerStubMethods
+	// Install installs the application identified by the first argument and
+	// returns an object name suffix that identifies the new installation.
+	//
+	// The name argument should be an object name for an application
+	// envelope.  The service it identifies must implement
+	// repository.Application, and is expected to return either the
+	// requested version (if the object name encodes a specific version), or
+	// otherwise the latest available version, as appropriate.  This object
+	// name will be used by default by the Update method, as a source for
+	// updated application envelopes (can be overriden by setting
+	// AppOriginConfigKey in the config).
+	//
+	// The config argument specifies config settings that will take
+	// precedence over those present in the application envelope.
+	//
+	// The packages argument specifies packages to be installed in addition
+	// to those specified in the envelope.  If a package in the envelope has
+	// the same key, the package in the packages argument takes precedence.
+	//
+	// The returned suffix, when appended to the name used to reach the
+	// receiver for Install, can be used to control the installation object.
+	// The suffix will contain the title of the application as a prefix,
+	// which can then be used to control all the installations of the given
+	// application.
+	// TODO(rjkroege): Use customized labels.
+	Install(call ipc.ServerCall, name string, config Config, packages application.Packages) (string, error)
+	// Refresh refreshes the state of application installation(s)
+	// instance(s).
+	Refresh(ipc.ServerCall) error
+	// Restart restarts execution of application installation(s)
+	// instance(s).
+	Restart(ipc.ServerCall) error
+	// Resume resumes execution of application installation(s)
+	// instance(s).
+	Resume(ipc.ServerCall) error
+	// Revert reverts application installation(s) to the most recent
+	// previous installation.
+	Revert(ipc.ServerCall) error
+	// Start starts an instance of application installation(s). The
+	// server sends the application instance's Public Key on the stream.
+	// When the client receives the Public Key it must send Blessings back
+	// to the server. When the instance is ready to start, the server sends
+	// the instance name to the client.
+	// Client                 Server
+	//  "object".Start() -->
+	//                   <--  InstancePublicKey
+	//  AppBlessings     -->
+	//                   <--  InstanceName
+	Start(*ApplicationStartServerCallStub) error
+	// Stop attempts a clean shutdown of application installation(s)
+	// instance(s). If the deadline (in seconds) is non-zero and the
+	// instance(s) in questions are still running after the given deadline,
+	// shutdown of the instance(s) is enforced.
+	//
+	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
+	// are implemented.
+	Stop(call ipc.ServerCall, deadline uint32) error
+	// Suspend suspends execution of application installation(s)
+	// instance(s).
+	Suspend(ipc.ServerCall) error
+	// Uninstall uninstalls application installation(s).
+	Uninstall(ipc.ServerCall) error
+	// Update updates the application installation(s) from the object name
+	// provided during Install.  If the new application envelope contains a
+	// different application title, the update does not occur, and an error
+	// is returned.
+	Update(ipc.ServerCall) error
+	// UpdateTo updates the application installation(s) to the application
+	// specified by the object name argument.  If the new application
+	// envelope contains a different application title, the update does not
+	// occur, and an error is returned.
+	UpdateTo(call ipc.ServerCall, name string) error
+	// Debug returns debug information about the application installation or
+	// instance.  This is generally highly implementation-specific, and
+	// presented in an unstructured form.  No guarantees are given about the
+	// stability of the format, and parsing it programmatically is
+	// specifically discouraged.
+	Debug(ipc.ServerCall) (string, error)
+}
 
 // ApplicationServerStub adds universal methods to ApplicationServerStubMethods.
 type ApplicationServerStub interface {
@@ -677,7 +999,7 @@ func (s implApplicationServerStub) Revert(call ipc.ServerCall) error {
 	return s.impl.Revert(call)
 }
 
-func (s implApplicationServerStub) Start(call ipc.ServerCall) ([]string, error) {
+func (s implApplicationServerStub) Start(call *ApplicationStartServerCallStub) error {
 	return s.impl.Start(call)
 }
 
@@ -760,10 +1082,7 @@ var descApplication = ipc.InterfaceDesc{
 		},
 		{
 			Name: "Start",
-			Doc:  "// Start starts an instance of application installation(s) and\n// returns the object name(s) that identifies/identify the new\n// instance(s).",
-			OutArgs: []ipc.ArgDesc{
-				{"", ``}, // []string
-			},
+			Doc:  "// Start starts an instance of application installation(s). The\n// server sends the application instance's Public Key on the stream.\n// When the client receives the Public Key it must send Blessings back\n// to the server. When the instance is ready to start, the server sends\n// the instance name to the client.\n// Client                 Server\n//  \"object\".Start() -->\n//                   <--  InstancePublicKey\n//  AppBlessings     -->\n//                   <--  InstanceName",
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
@@ -806,6 +1125,90 @@ var descApplication = ipc.InterfaceDesc{
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Debug"))},
 		},
 	},
+}
+
+// ApplicationStartServerStream is the server stream for Application.Start.
+type ApplicationStartServerStream interface {
+	// RecvStream returns the receiver side of the Application.Start server stream.
+	RecvStream() interface {
+		// Advance stages an item so that it may be retrieved via Value.  Returns
+		// true iff there is an item to retrieve.  Advance must be called before
+		// Value is called.  May block if an item is not available.
+		Advance() bool
+		// Value returns the item that was staged by Advance.  May panic if Advance
+		// returned false or was not called.  Never blocks.
+		Value() StartClientMessage
+		// Err returns any error encountered by Advance.  Never blocks.
+		Err() error
+	}
+	// SendStream returns the send side of the Application.Start server stream.
+	SendStream() interface {
+		// Send places the item onto the output stream.  Returns errors encountered
+		// while sending.  Blocks if there is no buffer space; will unblock when
+		// buffer space is available.
+		Send(item StartServerMessage) error
+	}
+}
+
+// ApplicationStartServerCall represents the context passed to Application.Start.
+type ApplicationStartServerCall interface {
+	ipc.ServerCall
+	ApplicationStartServerStream
+}
+
+// ApplicationStartServerCallStub is a wrapper that converts ipc.StreamServerCall into
+// a typesafe stub that implements ApplicationStartServerCall.
+type ApplicationStartServerCallStub struct {
+	ipc.StreamServerCall
+	valRecv StartClientMessage
+	errRecv error
+}
+
+// Init initializes ApplicationStartServerCallStub from ipc.StreamServerCall.
+func (s *ApplicationStartServerCallStub) Init(call ipc.StreamServerCall) {
+	s.StreamServerCall = call
+}
+
+// RecvStream returns the receiver side of the Application.Start server stream.
+func (s *ApplicationStartServerCallStub) RecvStream() interface {
+	Advance() bool
+	Value() StartClientMessage
+	Err() error
+} {
+	return implApplicationStartServerCallRecv{s}
+}
+
+type implApplicationStartServerCallRecv struct {
+	s *ApplicationStartServerCallStub
+}
+
+func (s implApplicationStartServerCallRecv) Advance() bool {
+	s.s.errRecv = s.s.Recv(&s.s.valRecv)
+	return s.s.errRecv == nil
+}
+func (s implApplicationStartServerCallRecv) Value() StartClientMessage {
+	return s.s.valRecv
+}
+func (s implApplicationStartServerCallRecv) Err() error {
+	if s.s.errRecv == io.EOF {
+		return nil
+	}
+	return s.s.errRecv
+}
+
+// SendStream returns the send side of the Application.Start server stream.
+func (s *ApplicationStartServerCallStub) SendStream() interface {
+	Send(item StartServerMessage) error
+} {
+	return implApplicationStartServerCallSend{s}
+}
+
+type implApplicationStartServerCallSend struct {
+	s *ApplicationStartServerCallStub
+}
+
+func (s implApplicationStartServerCallSend) Send(item StartServerMessage) error {
+	return s.s.Send(item)
 }
 
 // ClaimableClientMethods is the client interface
@@ -1262,9 +1665,118 @@ type DeviceServerMethods interface {
 
 // DeviceServerStubMethods is the server interface containing
 // Device methods, as expected by ipc.Server.
-// There is no difference between this interface and DeviceServerMethods
-// since there are no streaming methods.
-type DeviceServerStubMethods DeviceServerMethods
+// The only difference between this interface and DeviceServerMethods
+// is the streaming methods.
+type DeviceServerStubMethods interface {
+	// Application can be used to manage applications on a device. The
+	// idea is that this interace will be invoked using an object name that
+	// identifies the application and its installations and instances
+	// where applicable.
+	//
+	// In particular, the interface methods can be divided into three
+	// groups based on their intended receiver:
+	//
+	// 1) Method receiver is an application:
+	// -- Install()
+	//
+	// 2) Method receiver is an application installation:
+	// -- Start()
+	// -- Uninstall()
+	// -- Update()
+	//
+	// 3) Method receiver is application installation instance:
+	// -- Refresh()
+	// -- Restart()
+	// -- Resume()
+	// -- Stop()
+	// -- Suspend()
+	//
+	// For groups 2) and 3), the suffix that specifies the receiver can
+	// optionally omit the installation and/or instance, in which case the
+	// operation applies to all installations and/or instances in the
+	// scope of the suffix.
+	//
+	// Examples:
+	// # Install Google Maps on the device.
+	// device/apps.Install("/google.com/appstore/maps", nil, nil) --> "google maps/0"
+	//
+	// # Start an instance of the previously installed maps application installation.
+	// device/apps/google maps/0.Start() --> { "0" }
+	//
+	// # Start a second instance of the previously installed maps application installation.
+	// device/apps/google maps/0.Start() --> { "1" }
+	//
+	// # Stop the first instance previously started.
+	// device/apps/google maps/0/0.Stop()
+	//
+	// # Install a second Google Maps installation.
+	// device/apps.Install("/google.com/appstore/maps", nil, nil) --> "google maps/1"
+	//
+	// # Start an instance for all maps application installations.
+	// device/apps/google maps.Start() --> {"0/2", "1/0"}
+	//
+	// # Refresh the state of all instances of all maps application installations.
+	// device/apps/google maps.Refresh()
+	//
+	// # Refresh the state of all instances of the maps application installation
+	// identified by the given suffix.
+	// device/apps/google maps/0.Refresh()
+	//
+	// # Refresh the state of the maps application installation instance identified by
+	// the given suffix.
+	// device/apps/google maps/0/2.Refresh()
+	//
+	// # Update the second maps installation to the latest version available.
+	// device/apps/google maps/1.Update()
+	//
+	// # Update the first maps installation to a specific version.
+	// device/apps/google maps/0.UpdateTo("/google.com/appstore/beta/maps")
+	//
+	// Further, the following methods complement one another:
+	// -- Install() and Uninstall()
+	// -- Start() and Stop()
+	// -- Suspend() and Resume()
+	//
+	// Finally, an application installation instance can be in one of
+	// three abstract states: 1) "does not exist", 2) "running", or 3)
+	// "suspended". The interface methods transition between these
+	// abstract states using the following state machine:
+	//
+	// apply(Start(), "does not exists") = "running"
+	// apply(Refresh(), "running") = "running"
+	// apply(Refresh(), "suspended") = "suspended"
+	// apply(Restart(), "running") = "running"
+	// apply(Restart(), "suspended") = "running"
+	// apply(Resume(), "suspended") = "running"
+	// apply(Resume(), "running") = "running"
+	// apply(Stop(), "running") = "does not exist"
+	// apply(Stop(), "suspended") = "does not exist"
+	// apply(Suspend(), "running") = "suspended"
+	// apply(Suspend(), "suspended") = "suspended"
+	//
+	// In other words, invoking any method using an existing application
+	// installation instance as a receiver is well-defined.
+	ApplicationServerStubMethods
+	// Describe generates a description of the device.
+	Describe(ipc.ServerCall) (Description, error)
+	// IsRunnable checks if the device can execute the given binary.
+	IsRunnable(call ipc.ServerCall, description binary.Description) (bool, error)
+	// Reset resets the device. If the deadline is non-zero and the device
+	// in question is still running after the given deadline expired,
+	// reset of the device is enforced.
+	//
+	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
+	// are implemented.
+	Reset(call ipc.ServerCall, deadline uint64) error
+	// AssociateAccount associates a local  system account name with the provided
+	// Veyron identities. It replaces the existing association if one already exists for that
+	// identity. Setting an AccountName to "" removes the association for each
+	// listed identity.
+	AssociateAccount(call ipc.ServerCall, identityNames []string, accountName string) error
+	// ListAssociations returns all of the associations between Veyron identities
+	// and system names.
+	ListAssociations(ipc.ServerCall) ([]Association, error)
+}
 
 // DeviceServerStub adds universal methods to DeviceServerStubMethods.
 type DeviceServerStub interface {
