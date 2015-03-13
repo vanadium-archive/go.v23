@@ -1,6 +1,6 @@
-// Package options implements common options recognized by veyron implementations.
+// Package options implements common options recognized by vanadium implementations.
 //
-// Below are the common options required of all veyron implementations.  Let's
+// Below are the common options required of all vanadium implementations.  Let's
 // say we have functions MyFuncA and MyFuncB in package demo:
 //
 //   package demo

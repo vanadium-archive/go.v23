@@ -70,7 +70,7 @@ type Endpoint interface {
 	// the endpoint string itself.
 	// For example, for TCP based endpoints it will return a net.Addr
 	// whose network is "tcp" and string representation is <host>:<port>,
-	// than the full Veyron endpoint as per the String method above.
+	// than the full Vanadium endpoint as per the String method above.
 	Addr() net.Addr
 
 	// ServesMountTable returns true if this endpoint serves a mount table.

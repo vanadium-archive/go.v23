@@ -10,7 +10,7 @@ import (
 	"v.io/v23/services/security/access/object"
 )
 
-// TODO(caprita): Merge with veyron2/config and veyron/lib/exec/config.go.
+// TODO(caprita): Merge with v23/config and v.io/x/ref/lib/exec/config.go.
 
 // Config specifies app configuration that overrides what's in the envelope.
 type Config map[string]string
@@ -225,7 +225,7 @@ type Description struct {
 	Profiles set[string]
 }
 
-// Association is a tuple containing an association between a Veyron
+// Association is a tuple containing an association between a Vanadium
 // identity and a system account name.
 type Association struct {
 	IdentityName string
@@ -268,11 +268,11 @@ type Device interface {
 	// are implemented.
 	Reset(deadline uint64) error {access.Admin}
 	// AssociateAccount associates a local  system account name with the provided
-	// Veyron identities. It replaces the existing association if one already exists for that
+	// Vanadium identities. It replaces the existing association if one already exists for that
 	// identity. Setting an AccountName to "" removes the association for each
 	// listed identity.
 	AssociateAccount(identityNames []string, accountName string) error {access.Admin}
-	// ListAssociations returns all of the associations between Veyron identities
+	// ListAssociations returns all of the associations between Vanadium identities
 	// and system names.
 	ListAssociations() ([]Association | error) {access.Admin}
 }

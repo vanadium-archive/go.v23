@@ -1,5 +1,5 @@
 // Package config defines the API for accessing all configuration information
-// required by any Veyron process.
+// required by any Vanadium process.
 //
 // Settings represent configuration parameters and their value. Settings
 // are published to named Streams. Streams are forked to add additional

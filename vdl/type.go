@@ -105,7 +105,7 @@ func SplitIdent(ident string) (pkgpath, name string) {
 	return ident[:dot], ident[dot+1:]
 }
 
-// Type is the representation of a veyron type.  Types are hash-consed; each
+// Type is the representation of a vanadium type.  Types are hash-consed; each
 // unique type is represented by exactly one *Type instance, so to test for type
 // equality you just compare the *Type instances.
 //

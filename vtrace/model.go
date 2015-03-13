@@ -1,4 +1,4 @@
-// Package vtrace extends the veyron2/context to allow you to attach
+// Package vtrace extends the v23/context to allow you to attach
 // various types of debugging information.  This debugging information
 // accumulates along the various parts of the context tree and can be
 // inspected to help you understand the performance and behavior of

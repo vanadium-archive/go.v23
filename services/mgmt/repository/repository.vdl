@@ -1,5 +1,5 @@
 // Package repository can be used for storing and serving various
-// veyron management objects.
+// vanadium management objects.
 package repository
 
 import (
@@ -37,7 +37,7 @@ type MediaInfo struct {
 	Encoding string // The file encoding is optional and can be either "gzip" or "bzip2".
 }
 
-// Binary can be used to store and retrieve veyron application
+// Binary can be used to store and retrieve vanadium application
 // binaries.
 //
 // To create a binary, clients first invoke the Create() method that

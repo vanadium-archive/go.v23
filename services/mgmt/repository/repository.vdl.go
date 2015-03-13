@@ -2,7 +2,7 @@
 // Source: repository.vdl
 
 // Package repository can be used for storing and serving various
-// veyron management objects.
+// vanadium management objects.
 package repository
 
 import (
@@ -49,9 +49,9 @@ func init() {
 //   and executing the "search" application, version "v1", runnable
 //   on either the "base" or "media" profile.
 type ApplicationClientMethods interface {
-	// Object provides access control for Veyron objects.
+	// Object provides access control for Vanadium objects.
 	//
-	// Veyron services implementing dynamic access control would typically
+	// Vanadium services implementing dynamic access control would typically
 	// embed this interface and tag additional methods defined by the service
 	// with one of Admin, Read, Write, Resolve etc. For example,
 	// the VDL definition of the object would be:
@@ -155,9 +155,9 @@ func (c implApplicationClientStub) Match(ctx *context.T, i0 []string, opts ...ip
 //   and executing the "search" application, version "v1", runnable
 //   on either the "base" or "media" profile.
 type ApplicationServerMethods interface {
-	// Object provides access control for Veyron objects.
+	// Object provides access control for Vanadium objects.
 	//
-	// Veyron services implementing dynamic access control would typically
+	// Vanadium services implementing dynamic access control would typically
 	// embed this interface and tag additional methods defined by the service
 	// with one of Admin, Read, Write, Resolve etc. For example,
 	// the VDL definition of the object would be:
@@ -265,7 +265,7 @@ var descApplication = ipc.InterfaceDesc{
 	PkgPath: "v.io/v23/services/mgmt/repository",
 	Doc:     "// Application provides access to application envelopes. An\n// application envelope is identified by an application name and an\n// application version, which are specified through the object name,\n// and a profile name, which is specified using a method argument.\n//\n// Example:\n// /apps/search/v1.Match([]string{\"base\", \"media\"})\n//   returns an application envelope that can be used for downloading\n//   and executing the \"search\" application, version \"v1\", runnable\n//   on either the \"base\" or \"media\" profile.",
 	Embeds: []ipc.EmbedDesc{
-		{"Object", "v.io/v23/services/security/access/object", "// Object provides access control for Veyron objects.\n//\n// Veyron services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetPermissions and GetPermissions in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(acl access.Permissions, etag string) error         {Red}\n//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}\n//  }"},
+		{"Object", "v.io/v23/services/security/access/object", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetPermissions and GetPermissions in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(acl access.Permissions, etag string) error         {Red}\n//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}\n//  }"},
 	},
 	Methods: []ipc.MethodDesc{
 		{
@@ -285,7 +285,7 @@ var descApplication = ipc.InterfaceDesc{
 // BinaryClientMethods is the client interface
 // containing Binary methods.
 //
-// Binary can be used to store and retrieve veyron application
+// Binary can be used to store and retrieve vanadium application
 // binaries.
 //
 // To create a binary, clients first invoke the Create() method that
@@ -305,9 +305,9 @@ var descApplication = ipc.InterfaceDesc{
 //
 // To delete the binary, clients invoke the Delete() method.
 type BinaryClientMethods interface {
-	// Object provides access control for Veyron objects.
+	// Object provides access control for Vanadium objects.
 	//
-	// Veyron services implementing dynamic access control would typically
+	// Vanadium services implementing dynamic access control would typically
 	// embed this interface and tag additional methods defined by the service
 	// with one of Admin, Read, Write, Resolve etc. For example,
 	// the VDL definition of the object would be:
@@ -603,7 +603,7 @@ func (c *implBinaryUploadClientCall) Finish() (err error) {
 // BinaryServerMethods is the interface a server writer
 // implements for Binary.
 //
-// Binary can be used to store and retrieve veyron application
+// Binary can be used to store and retrieve vanadium application
 // binaries.
 //
 // To create a binary, clients first invoke the Create() method that
@@ -623,9 +623,9 @@ func (c *implBinaryUploadClientCall) Finish() (err error) {
 //
 // To delete the binary, clients invoke the Delete() method.
 type BinaryServerMethods interface {
-	// Object provides access control for Veyron objects.
+	// Object provides access control for Vanadium objects.
 	//
-	// Veyron services implementing dynamic access control would typically
+	// Vanadium services implementing dynamic access control would typically
 	// embed this interface and tag additional methods defined by the service
 	// with one of Admin, Read, Write, Resolve etc. For example,
 	// the VDL definition of the object would be:
@@ -707,9 +707,9 @@ type BinaryServerMethods interface {
 // The only difference between this interface and BinaryServerMethods
 // is the streaming methods.
 type BinaryServerStubMethods interface {
-	// Object provides access control for Veyron objects.
+	// Object provides access control for Vanadium objects.
 	//
-	// Veyron services implementing dynamic access control would typically
+	// Vanadium services implementing dynamic access control would typically
 	// embed this interface and tag additional methods defined by the service
 	// with one of Admin, Read, Write, Resolve etc. For example,
 	// the VDL definition of the object would be:
@@ -856,9 +856,9 @@ var BinaryDesc ipc.InterfaceDesc = descBinary
 var descBinary = ipc.InterfaceDesc{
 	Name:    "Binary",
 	PkgPath: "v.io/v23/services/mgmt/repository",
-	Doc:     "// Binary can be used to store and retrieve veyron application\n// binaries.\n//\n// To create a binary, clients first invoke the Create() method that\n// specifies the number of parts the binary consists of. Clients then\n// uploads the individual parts through the Upload() method, which\n// identifies the part being uploaded. To resume an upload after a\n// failure, clients invoke the UploadStatus() method, which returns a\n// slice that identifies which parts are missing.\n//\n// To download a binary, clients first invoke Stat(), which returns\n// information describing the binary, including the number of parts\n// the binary consists of. Clients then download the individual parts\n// through the Download() method, which identifies the part being\n// downloaded. Alternatively, clients can download the binary through\n// HTTP using a transient URL available through the DownloadURL()\n// method.\n//\n// To delete the binary, clients invoke the Delete() method.",
+	Doc:     "// Binary can be used to store and retrieve vanadium application\n// binaries.\n//\n// To create a binary, clients first invoke the Create() method that\n// specifies the number of parts the binary consists of. Clients then\n// uploads the individual parts through the Upload() method, which\n// identifies the part being uploaded. To resume an upload after a\n// failure, clients invoke the UploadStatus() method, which returns a\n// slice that identifies which parts are missing.\n//\n// To download a binary, clients first invoke Stat(), which returns\n// information describing the binary, including the number of parts\n// the binary consists of. Clients then download the individual parts\n// through the Download() method, which identifies the part being\n// downloaded. Alternatively, clients can download the binary through\n// HTTP using a transient URL available through the DownloadURL()\n// method.\n//\n// To delete the binary, clients invoke the Delete() method.",
 	Embeds: []ipc.EmbedDesc{
-		{"Object", "v.io/v23/services/security/access/object", "// Object provides access control for Veyron objects.\n//\n// Veyron services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetPermissions and GetPermissions in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(acl access.Permissions, etag string) error         {Red}\n//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}\n//  }"},
+		{"Object", "v.io/v23/services/security/access/object", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetPermissions and GetPermissions in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(acl access.Permissions, etag string) error         {Red}\n//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}\n//  }"},
 	},
 	Methods: []ipc.MethodDesc{
 		{

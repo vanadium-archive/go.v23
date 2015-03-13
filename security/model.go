@@ -6,14 +6,14 @@
 // on that authentication and a database of access rights (AccessLists); and secrecy
 // and integrity of all communication.
 //
-// In addition to authorization based on AccessLists, veyron supports "blessings"
+// In addition to authorization based on AccessLists, vanadium supports "blessings"
 // which are typically used by one principal (e.g. alice/phone/app) to delegate
 // constrained authority (often short-lived) to another principal (e.g.
 // bob/tv).
 //
 // A "principal" refers to any entity capable of making or receiving RPCs.
 // Each principal has a unique (public, private) key pair and public key
-// cryptography is used to implement the veyron security model.
+// cryptography is used to implement the vanadium security model.
 //
 // Delegation
 //
@@ -151,9 +151,9 @@ type Principal interface {
 	// another principal (represented by its public key).
 	//
 	// For example, a principal with the blessings "google/alice"
-	// and "veyron/alice" can bind the blessings "google/alice/friend"
-	// and "veyron/alice/friend" to another principal using:
-	//   Bless(<other principal>, <google/alice, veyron/alice>, "friend", ...)
+	// and "v23/alice" can bind the blessings "google/alice/friend"
+	// and "v23/alice/friend" to another principal using:
+	//   Bless(<other principal>, <google/alice, v23/alice>, "friend", ...)
 	//
 	// To discourage unconstrained delegation of authority, the interface
 	// requires at least one caveat to be provided. If unconstrained delegation
@@ -346,7 +346,7 @@ type ThirdPartyCaveat interface {
 	// caveat.
 	ID() string
 
-	// Location returns the Veyron object name of the discharging third-party.
+	// Location returns the Vanadium object name of the discharging third-party.
 	Location() string
 
 	// Requirements lists the information that the third-party requires

@@ -1,4 +1,4 @@
-// Package vdl implements the Veyron Definition Language type and value system.
+// Package vdl implements the Vanadium Definition Language type and value system.
 //
 // https://goto.google.com/vdl
 package vdl

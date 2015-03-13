@@ -1,6 +1,6 @@
 /*
-Package vom implements Veyron Object Marshaling, a serialization protocol
-similar to the encoding/gob package.  Vom is used in Veyron to enable
+Package vom implements Vanadium Object Marshaling, a serialization protocol
+similar to the encoding/gob package.  Vom is used in Vanadium to enable
 interchange of user-defined data structures across networks, languages and
 storage systems.
 

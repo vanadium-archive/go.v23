@@ -4,9 +4,9 @@ import (
 	"v.io/v23/services/security/access"
 )
 
-// Object provides access control for Veyron objects.
+// Object provides access control for Vanadium objects.
 //
-// Veyron services implementing dynamic access control would typically
+// Vanadium services implementing dynamic access control would typically
 // embed this interface and tag additional methods defined by the service
 // with one of Admin, Read, Write, Resolve etc. For example,
 // the VDL definition of the object would be:

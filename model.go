@@ -1,8 +1,8 @@
 /*
-Package veyron2 defines the Runtime interface of the public Veyron API and its subdirectories define the entire Veyron public API.
+Package v23 defines the Runtime interface of the public Vanadium API and its subdirectories define the entire Vanadium public API.
 
 Once we reach a '1.0' version these public APIs will be stable over
-an extended period and changes to them will be carefully managed to ensure backward compatibility. The same solicy as used for go (http://golang.org/doc/go1compat) will be used for them.
+an extended period and changes to them will be carefully managed to ensure backward compatibility. The same policy as used for go (http://golang.org/doc/go1compat) will be used for them.
 
 The current release is 0.1 and although we will do our best to maintain
 backwards compatibility we can't guarantee that until we reach the 1.0 milestone.
@@ -36,7 +36,7 @@ const (
 
 // Task is streamed to channels registered using TrackTask to provide a sense of
 // the progress of the application's shutdown sequence.  For a description of
-// the fields, see the Task struct in the veyron2/services/mgmt/appcycle
+// the fields, see the Task struct in the v23/services/mgmt/appcycle
 // package, which it mirrors.
 type Task struct {
 	Progress, Goal int32
@@ -85,11 +85,11 @@ type AppCycle interface {
 	TrackTask(chan<- Task)
 
 	// Remote returns an object to serve the remotely accessible AppCycle
-	// interface (as defined in veyron2/services/mgmt/appcycle)
+	// interface (as defined in v23/services/mgmt/appcycle)
 	Remote() interface{}
 }
 
-// Runtime is the interface that concrete Veyron implementations must
+// Runtime is the interface that concrete Vanadium implementations must
 // implement.  It will not be used directly by application builders.
 // They will instead use the package level functions that mirror these
 // factories.
@@ -100,9 +100,9 @@ type AppCycle interface {
 type Runtime interface {
 
 	// Init is a chance to initialize state in the runtime implementation
-	// after the runtime has been registered in the veyron2 package.
+	// after the runtime has been registered in the v23 package.
 	// Code that runs in this routine, unlike the code in the runtimes
-	// constructor, can use the veryon2.Get/Set methods.
+	// constructor, can use the v23.Get/Set methods.
 	Init(ctx *context.T) error
 
 	// NewEndpoint returns an Endpoint by parsing the supplied endpoint
@@ -278,13 +278,13 @@ func (i *initStateData) currentRuntime() Runtime {
 	defer i.mu.RUnlock()
 
 	if i.runtimeStack == "" {
-		panic(`Calling veyron2 method before initializing the runtime with Init().
+		panic(`Calling v23 method before initializing the runtime with Init().
 You should call Init from your main or test function before calling
-other veyron operations.`)
+other v23 operations.`)
 	}
 	if i.runtime == nil {
-		panic(`Calling veyron2 method during runtime initialization.  You cannot
-call veyron2 methods until after the runtime has been constructed.  You may
+		panic(`Calling v23 method during runtime initialization.  You cannot
+call v23 methods until after the runtime has been constructed.  You may
 be able to move the offending caller to the Runtime.Init() method of your
 runtime implementation.`)
 	}
@@ -309,7 +309,7 @@ runtime implementation.`)
 // "my-sprinkler-controller-v2". Applications should, in general, use
 // as generic a Profile as possbile.
 //
-// Profiles are registered using veyron2/RegisterProfileInit and
+// Profiles are registered using v23.RegisterProfileInit and
 // subsequent registrations will panic. Packages that implement profiles will
 // typically call RegisterProfileInit in their init functions so importing a
 // profile will be sufficient to register it. Only one profile can be registered
@@ -318,16 +318,15 @@ runtime implementation.`)
 //
 // This scheme allows applications to use a pre-supplied Profile as well
 // as for developers to create their own Profiles (to represent their
-// hardware and software system). The Veyron Build System, once fully
+// hardware and software system). The Vanadium Build System, once fully
 // developed will likely insert generated that uses one of the above schemes
 // to configure profiles.
 //
 // At a minimum a Profile must do the following:
-//   - Parse veyron/lib/flags runtime flags.
 //   - Initialize a Runtime implementation (providing the flags to it)
 //   - Return a Runtime implemenation, initial context, Shutdown func.
 //
-// See the veyron/profiles package for a complete description of the
+// See the v.io/x/ref/profiles package for a complete description of the
 // precanned Profiles and how to use them.
 type Profile func(ctx *context.T) (Runtime, *context.T, Shutdown, error)
 

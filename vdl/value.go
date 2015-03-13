@@ -13,7 +13,7 @@ var (
 	errNonNilZeroAny = errors.New("vdl: the any type doesn't have a non-nil zero value")
 )
 
-// Value is the generic representation of any value expressible in veyron.  All
+// Value is the generic representation of any value expressible in vanadium.  All
 // values are typed.
 //
 // Not all methods apply to all kinds of values.  Restrictions are noted in the

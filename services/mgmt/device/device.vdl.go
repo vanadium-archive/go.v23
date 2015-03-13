@@ -126,7 +126,7 @@ func (Description) __VDLReflect(struct {
 }) {
 }
 
-// Association is a tuple containing an association between a Veyron
+// Association is a tuple containing an association between a Vanadium
 // identity and a system account name.
 type Association struct {
 	IdentityName string
@@ -238,9 +238,9 @@ func init() {
 // In other words, invoking any method using an existing application
 // installation instance as a receiver is well-defined.
 type ApplicationClientMethods interface {
-	// Object provides access control for Veyron objects.
+	// Object provides access control for Vanadium objects.
 	//
-	// Veyron services implementing dynamic access control would typically
+	// Vanadium services implementing dynamic access control would typically
 	// embed this interface and tag additional methods defined by the service
 	// with one of Admin, Read, Write, Resolve etc. For example,
 	// the VDL definition of the object would be:
@@ -695,9 +695,9 @@ func (c *implApplicationStartClientCall) Finish() (err error) {
 // In other words, invoking any method using an existing application
 // installation instance as a receiver is well-defined.
 type ApplicationServerMethods interface {
-	// Object provides access control for Veyron objects.
+	// Object provides access control for Vanadium objects.
 	//
-	// Veyron services implementing dynamic access control would typically
+	// Vanadium services implementing dynamic access control would typically
 	// embed this interface and tag additional methods defined by the service
 	// with one of Admin, Read, Write, Resolve etc. For example,
 	// the VDL definition of the object would be:
@@ -824,9 +824,9 @@ type ApplicationServerMethods interface {
 // The only difference between this interface and ApplicationServerMethods
 // is the streaming methods.
 type ApplicationServerStubMethods interface {
-	// Object provides access control for Veyron objects.
+	// Object provides access control for Vanadium objects.
 	//
-	// Veyron services implementing dynamic access control would typically
+	// Vanadium services implementing dynamic access control would typically
 	// embed this interface and tag additional methods defined by the service
 	// with one of Admin, Read, Write, Resolve etc. For example,
 	// the VDL definition of the object would be:
@@ -1044,7 +1044,7 @@ var descApplication = ipc.InterfaceDesc{
 	PkgPath: "v.io/v23/services/mgmt/device",
 	Doc:     "// Application can be used to manage applications on a device. The\n// idea is that this interace will be invoked using an object name that\n// identifies the application and its installations and instances\n// where applicable.\n//\n// In particular, the interface methods can be divided into three\n// groups based on their intended receiver:\n//\n// 1) Method receiver is an application:\n// -- Install()\n//\n// 2) Method receiver is an application installation:\n// -- Start()\n// -- Uninstall()\n// -- Update()\n//\n// 3) Method receiver is application installation instance:\n// -- Refresh()\n// -- Restart()\n// -- Resume()\n// -- Stop()\n// -- Suspend()\n//\n// For groups 2) and 3), the suffix that specifies the receiver can\n// optionally omit the installation and/or instance, in which case the\n// operation applies to all installations and/or instances in the\n// scope of the suffix.\n//\n// Examples:\n// # Install Google Maps on the device.\n// device/apps.Install(\"/google.com/appstore/maps\", nil, nil) --> \"google maps/0\"\n//\n// # Start an instance of the previously installed maps application installation.\n// device/apps/google maps/0.Start() --> { \"0\" }\n//\n// # Start a second instance of the previously installed maps application installation.\n// device/apps/google maps/0.Start() --> { \"1\" }\n//\n// # Stop the first instance previously started.\n// device/apps/google maps/0/0.Stop()\n//\n// # Install a second Google Maps installation.\n// device/apps.Install(\"/google.com/appstore/maps\", nil, nil) --> \"google maps/1\"\n//\n// # Start an instance for all maps application installations.\n// device/apps/google maps.Start() --> {\"0/2\", \"1/0\"}\n//\n// # Refresh the state of all instances of all maps application installations.\n// device/apps/google maps.Refresh()\n//\n// # Refresh the state of all instances of the maps application installation\n// identified by the given suffix.\n// device/apps/google maps/0.Refresh()\n//\n// # Refresh the state of the maps application installation instance identified by\n// the given suffix.\n// device/apps/google maps/0/2.Refresh()\n//\n// # Update the second maps installation to the latest version available.\n// device/apps/google maps/1.Update()\n//\n// # Update the first maps installation to a specific version.\n// device/apps/google maps/0.UpdateTo(\"/google.com/appstore/beta/maps\")\n//\n// Further, the following methods complement one another:\n// -- Install() and Uninstall()\n// -- Start() and Stop()\n// -- Suspend() and Resume()\n//\n// Finally, an application installation instance can be in one of\n// three abstract states: 1) \"does not exist\", 2) \"running\", or 3)\n// \"suspended\". The interface methods transition between these\n// abstract states using the following state machine:\n//\n// apply(Start(), \"does not exists\") = \"running\"\n// apply(Refresh(), \"running\") = \"running\"\n// apply(Refresh(), \"suspended\") = \"suspended\"\n// apply(Restart(), \"running\") = \"running\"\n// apply(Restart(), \"suspended\") = \"running\"\n// apply(Resume(), \"suspended\") = \"running\"\n// apply(Resume(), \"running\") = \"running\"\n// apply(Stop(), \"running\") = \"does not exist\"\n// apply(Stop(), \"suspended\") = \"does not exist\"\n// apply(Suspend(), \"running\") = \"suspended\"\n// apply(Suspend(), \"suspended\") = \"suspended\"\n//\n// In other words, invoking any method using an existing application\n// installation instance as a receiver is well-defined.",
 	Embeds: []ipc.EmbedDesc{
-		{"Object", "v.io/v23/services/security/access/object", "// Object provides access control for Veyron objects.\n//\n// Veyron services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetPermissions and GetPermissions in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(acl access.Permissions, etag string) error         {Red}\n//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}\n//  }"},
+		{"Object", "v.io/v23/services/security/access/object", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetPermissions and GetPermissions in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(acl access.Permissions, etag string) error         {Red}\n//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}\n//  }"},
 	},
 	Methods: []ipc.MethodDesc{
 		{
@@ -1462,11 +1462,11 @@ type DeviceClientMethods interface {
 	// are implemented.
 	Reset(ctx *context.T, deadline uint64, opts ...ipc.CallOpt) error
 	// AssociateAccount associates a local  system account name with the provided
-	// Veyron identities. It replaces the existing association if one already exists for that
+	// Vanadium identities. It replaces the existing association if one already exists for that
 	// identity. Setting an AccountName to "" removes the association for each
 	// listed identity.
 	AssociateAccount(ctx *context.T, identityNames []string, accountName string, opts ...ipc.CallOpt) error
-	// ListAssociations returns all of the associations between Veyron identities
+	// ListAssociations returns all of the associations between Vanadium identities
 	// and system names.
 	ListAssociations(*context.T, ...ipc.CallOpt) ([]Association, error)
 }
@@ -1654,11 +1654,11 @@ type DeviceServerMethods interface {
 	// are implemented.
 	Reset(call ipc.ServerCall, deadline uint64) error
 	// AssociateAccount associates a local  system account name with the provided
-	// Veyron identities. It replaces the existing association if one already exists for that
+	// Vanadium identities. It replaces the existing association if one already exists for that
 	// identity. Setting an AccountName to "" removes the association for each
 	// listed identity.
 	AssociateAccount(call ipc.ServerCall, identityNames []string, accountName string) error
-	// ListAssociations returns all of the associations between Veyron identities
+	// ListAssociations returns all of the associations between Vanadium identities
 	// and system names.
 	ListAssociations(ipc.ServerCall) ([]Association, error)
 }
@@ -1769,11 +1769,11 @@ type DeviceServerStubMethods interface {
 	// are implemented.
 	Reset(call ipc.ServerCall, deadline uint64) error
 	// AssociateAccount associates a local  system account name with the provided
-	// Veyron identities. It replaces the existing association if one already exists for that
+	// Vanadium identities. It replaces the existing association if one already exists for that
 	// identity. Setting an AccountName to "" removes the association for each
 	// listed identity.
 	AssociateAccount(call ipc.ServerCall, identityNames []string, accountName string) error
-	// ListAssociations returns all of the associations between Veyron identities
+	// ListAssociations returns all of the associations between Vanadium identities
 	// and system names.
 	ListAssociations(ipc.ServerCall) ([]Association, error)
 }
@@ -1878,7 +1878,7 @@ var descDevice = ipc.InterfaceDesc{
 		},
 		{
 			Name: "AssociateAccount",
-			Doc:  "// AssociateAccount associates a local  system account name with the provided\n// Veyron identities. It replaces the existing association if one already exists for that\n// identity. Setting an AccountName to \"\" removes the association for each\n// listed identity.",
+			Doc:  "// AssociateAccount associates a local  system account name with the provided\n// Vanadium identities. It replaces the existing association if one already exists for that\n// identity. Setting an AccountName to \"\" removes the association for each\n// listed identity.",
 			InArgs: []ipc.ArgDesc{
 				{"identityNames", ``}, // []string
 				{"accountName", ``},   // string
@@ -1887,7 +1887,7 @@ var descDevice = ipc.InterfaceDesc{
 		},
 		{
 			Name: "ListAssociations",
-			Doc:  "// ListAssociations returns all of the associations between Veyron identities\n// and system names.",
+			Doc:  "// ListAssociations returns all of the associations between Vanadium identities\n// and system names.",
 			OutArgs: []ipc.ArgDesc{
 				{"", ``}, // []Association
 			},

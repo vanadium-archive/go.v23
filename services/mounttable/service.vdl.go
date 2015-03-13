@@ -57,9 +57,9 @@ const Resolve = Tag("Resolve")
 //
 // In all methods of MountTable, the receiver is the name bound to.
 type MountTableClientMethods interface {
-	// Object provides access control for Veyron objects.
+	// Object provides access control for Vanadium objects.
 	//
-	// Veyron services implementing dynamic access control would typically
+	// Vanadium services implementing dynamic access control would typically
 	// embed this interface and tag additional methods defined by the service
 	// with one of Admin, Read, Write, Resolve etc. For example,
 	// the VDL definition of the object would be:
@@ -231,9 +231,9 @@ func (c implMountTableClientStub) ResolveStepX(ctx *context.T, opts ...ipc.CallO
 //
 // In all methods of MountTable, the receiver is the name bound to.
 type MountTableServerMethods interface {
-	// Object provides access control for Veyron objects.
+	// Object provides access control for Vanadium objects.
 	//
-	// Veyron services implementing dynamic access control would typically
+	// Vanadium services implementing dynamic access control would typically
 	// embed this interface and tag additional methods defined by the service
 	// with one of Admin, Read, Write, Resolve etc. For example,
 	// the VDL definition of the object would be:
@@ -391,7 +391,7 @@ var descMountTable = ipc.InterfaceDesc{
 	PkgPath: "v.io/v23/services/mounttable",
 	Doc:     "// MountTable defines the interface to talk to a mounttable.\n//\n// In all methods of MountTable, the receiver is the name bound to.",
 	Embeds: []ipc.EmbedDesc{
-		{"Object", "v.io/v23/services/security/access/object", "// Object provides access control for Veyron objects.\n//\n// Veyron services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetPermissions and GetPermissions in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(acl access.Permissions, etag string) error         {Red}\n//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}\n//  }"},
+		{"Object", "v.io/v23/services/security/access/object", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetPermissions and GetPermissions in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(acl access.Permissions, etag string) error         {Red}\n//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}\n//  }"},
 	},
 	Methods: []ipc.MethodDesc{
 		{

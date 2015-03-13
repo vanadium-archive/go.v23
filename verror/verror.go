@@ -104,8 +104,8 @@ func (ac ActionCode) RetryAction() ActionCode {
 // An IDAction combines a unique identifier ID for errors with an ActionCode.
 // The ID allows stable error checking across different error messages and
 // different address spaces.  By convention the format for the identifier is
-// "PKGPATH.NAME" - e.g. ErrIDFoo defined in the "veyron2/verror" package has id
-// "veyron2/verror.ErrIDFoo".  It is unwise ever to create two IDActions that
+// "PKGPATH.NAME" - e.g. ErrIDFoo defined in the "v23/verror" package has id
+// "v23/verror.ErrIDFoo".  It is unwise ever to create two IDActions that
 // associate different ActionCodes with the same ID.
 type IDAction struct {
 	ID     ID

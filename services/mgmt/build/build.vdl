@@ -1,4 +1,4 @@
-// Package build supports building and describing Veyron binaries.
+// Package build supports building and describing Vanadium binaries.
 //
 // TODO(jsimsa): Switch Architecture, Format, and OperatingSystem type
 // to enum when supported.

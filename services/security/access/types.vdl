@@ -1,5 +1,5 @@
 // Package access defines types and services for dynamic access control
-// in Veyron.  Examples: "allow app to read this photo", "prevent user
+// in Vanadium.  Examples: "allow app to read this photo", "prevent user
 // from modifying this file".
 //
 // Target Developers
@@ -9,7 +9,7 @@
 //
 // Overview
 //
-// Veyron objects provide GetPermissions and SetPermissions methods.  An AccessList (Access Control
+// Vanadium objects provide GetPermissions and SetPermissions methods.  An AccessList (Access Control
 // List) contains the set of blessings that grant principals access to the
 // object. All methods on objects can have "tags" on them and the access
 // control list used for the method is selected based on that tag (from a
@@ -42,7 +42,7 @@
 // Conventions
 //
 // Service implementors should follow the conventions below to be consistent
-// with other parts of Veyron and with each other.
+// with other parts of Vanadium and with each other.
 //
 // All methods that create an object (e.g. Put, Mount, Link) should take an
 // optional AccessList parameter.  If the AccessList is not specified, the new object, O,

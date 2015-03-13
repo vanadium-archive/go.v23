@@ -40,7 +40,7 @@ func init() {
 // AppCycleClientMethods is the client interface
 // containing AppCycle methods.
 //
-// AppCycle interfaces with the process running a veyron runtime.
+// AppCycle interfaces with the process running a vanadium runtime.
 type AppCycleClientMethods interface {
 	// Stop initiates shutdown of the server.  It streams back periodic
 	// updates to give the client an idea of how the shutdown is
@@ -171,7 +171,7 @@ func (c *implAppCycleStopClientCall) Finish() (err error) {
 // AppCycleServerMethods is the interface a server writer
 // implements for AppCycle.
 //
-// AppCycle interfaces with the process running a veyron runtime.
+// AppCycle interfaces with the process running a vanadium runtime.
 type AppCycleServerMethods interface {
 	// Stop initiates shutdown of the server.  It streams back periodic
 	// updates to give the client an idea of how the shutdown is
@@ -250,7 +250,7 @@ var AppCycleDesc ipc.InterfaceDesc = descAppCycle
 var descAppCycle = ipc.InterfaceDesc{
 	Name:    "AppCycle",
 	PkgPath: "v.io/v23/services/mgmt/appcycle",
-	Doc:     "// AppCycle interfaces with the process running a veyron runtime.",
+	Doc:     "// AppCycle interfaces with the process running a vanadium runtime.",
 	Methods: []ipc.MethodDesc{
 		{
 			Name: "Stop",
