@@ -17,9 +17,9 @@ type PProf interface {
 	// addresses to function names and line numbers, so that a programmer
 	// can read the profile without tools.
 	Profile(name string, debug int32) stream<_, []byte> error {access.Debug}
-	// CPUProfile enables CPU profiling for the requested duration and
+	// CpuProfile enables CPU profiling for the requested duration and
 	// streams the profile data.
-	CPUProfile(seconds int32) stream<_, []byte> error {access.Debug}
+	CpuProfile(seconds int32) stream<_, []byte> error {access.Debug}
 	// Symbol looks up the program counters and returns their respective
 	// function names.
 	Symbol(programCounters []uint64) ([]string | error) {access.Debug}
