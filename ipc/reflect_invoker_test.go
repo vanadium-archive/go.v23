@@ -20,8 +20,8 @@ import (
 	"v.io/v23/vdlroot/signature"
 	"v.io/v23/verror"
 
-	"v.io/x/ref/lib/testutil"
-	tutil "v.io/x/ref/lib/testutil/testutil"
+	"v.io/x/ref/test"
+	"v.io/x/ref/test/testutil"
 )
 
 // TODO(toddw): Add multi-goroutine tests of reflectCache locking.
@@ -29,7 +29,7 @@ import (
 // We call our own TestMain here because v23 test generate causes an import cycle
 // with this package.
 func TestMain(m *testing.M) {
-	testutil.Init()
+	test.Init()
 	os.Exit(m.Run())
 }
 
@@ -569,7 +569,7 @@ func TestReflectInvokerPanic(t *testing.T) {
 		if !re.MatchString(fmt.Sprint(err)) {
 			t.Errorf(`ReflectInvoker(%T) got error %v, want regexp "%v"`, test.obj, err, test.regexp)
 		}
-		recov := tutil.CallAndRecover(func() { ipc.ReflectInvokerOrDie(test.obj) })
+		recov := testutil.CallAndRecover(func() { ipc.ReflectInvokerOrDie(test.obj) })
 		if !re.MatchString(fmt.Sprint(recov)) {
 			t.Errorf(`ReflectInvokerOrDie(%T) got panic %v, want regexp "%v"`, test.obj, recov, test.regexp)
 		}

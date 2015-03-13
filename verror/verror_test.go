@@ -11,8 +11,8 @@ import (
 	"v.io/v23/verror"
 	"v.io/v23/vtrace"
 
-	"v.io/x/ref/lib/testutil"
 	_ "v.io/x/ref/profiles"
+	"v.io/x/ref/test"
 )
 
 var (
@@ -95,7 +95,7 @@ func TestSubordinateErrors(t *testing.T) {
 }
 
 func init() {
-	rootCtx, shutdown := testutil.InitForTest()
+	rootCtx, shutdown := test.InitForTest()
 	defer shutdown()
 
 	def := i18n.ContextWithLangID(rootCtx, en)
