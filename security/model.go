@@ -88,20 +88,22 @@
 // "self-proclaimed" authority:
 //  // (in process B)
 //  var p2 Principal
-//  ctx :=  GetRPCCall()  // Call under which p1 is communicating with p2, ctx.LocalPrincipal == p2
-//  alice := ctx.RemoteBlessings()
-//  fmt.Println(len(alice.ForCall(ctx))) // Will print 0
+//  call :=  GetRPCCall()  // Call under which p1 is communicating with p2, call.LocalPrincipal == p2
+//  alice := call.RemoteBlessings()
+//  names, rejected := BlessingNames(call, CallSideRemote)
+//  fmt.Printf("%v %v", names, rejected) // Will print [] ["alice": "..."]
 //
 // However, p2 can decide to trust the roots of the "alice" blessing and then it
 // will be able to recognize her delegates as well:
 //  // (in process B)
-//  p2.AddToRoots(alice)
-//  fmt.Printf("%v", alice.ForCall(ctx))  // Will print ["alice"]
+//  p2.AddToRoots(call.RemoteBlessings())
+//  names, rejected := BlessingNames(call, CallSideRemote)
+//  fmt.Printf("%v %v", names, rejected) // Will print ["alice"] []
 //
 // Furthermore, p2 can seek a blessing from "alice":
 //  // (in process A)
-//  ctx := GetRPCCall()  // Call under which p2 is seeking a blessing from alice, ctx.LocalPrincipal = p1
-//  key2 := ctx.RemoteBlessings().PublicKey()
+//  call := GetRPCCall()  // Call under which p2 is seeking a blessing from alice, call.LocalPrincipal = p1
+//  key2 := call.RemoteBlessings().PublicKey()
 //  onlyFor10Minutes := ExpiryCaveat(time.Now().Add(10*time.Minute))
 //  aliceFriend, _ := p1.Bless(key2, alice, "friend", onlyFor10Minutes)
 //  SendBlessingToProcessB(aliceFriend)
@@ -188,12 +190,12 @@ type Principal interface {
 	// of the caveats in the returned Blessings.
 	BlessingsByName(name BlessingPattern) []Blessings
 
-	// BlessingsInfo returns a map from human-readable strings for blessings
+	// BlessingsInfo returns a map from human-readable blessing names
 	// granted to this Principal from recognized authorites to the Caveats
-	// associated with the blessings. BlessingInfo does not validate caveats
-	// on 'blessings' and thus may NOT be valid in certain contexts. Use
-	// Blessings.ForCall(ctx) to determine the set of valid blessing strings
-	// in a particular context.
+	// associated with the names. BlessingInfo does not validate caveats
+	// on 'blessings' and thus may NOT be valid in the context of certain calls.
+	// Use BlessingNames(call, side) to determine the set of valid blessing names
+	// for a particular call.
 	BlessingsInfo(blessings Blessings) map[string][]Caveat
 
 	// BlessingsStore provides access to the BlessingStore containing blessings

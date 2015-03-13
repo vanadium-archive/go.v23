@@ -117,7 +117,7 @@ func (a *authorizer) Authorize(call security.Call) error {
 		return nil
 	}
 
-	blessings, invalid := call.RemoteBlessings().ForCall(call)
+	blessings, invalid := security.BlessingNames(call, security.CallSideRemote)
 	grant := false
 	if len(call.MethodTags()) == 0 {
 		// The following error message leaks the fact that the server is likely

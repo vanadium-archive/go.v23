@@ -38,12 +38,6 @@ func (c hackCall) RemoteBlessings() Blessings {
 	return c.b
 }
 
-// DEPECREATED: Use BlessingNames instead
-// TODO(ataly, ashankar): Get rid of this method.
-func (b Blessings) ForCall(call Call) (ret []string, info []RejectedBlessing) {
-	return BlessingNames(hackCall{Call: call, b: b}, CallSideRemote)
-}
-
 // PublicKey returns the public key of the principal to which
 // blessings obtained from this object are bound.
 //

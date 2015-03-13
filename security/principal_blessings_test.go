@@ -846,13 +846,13 @@ func TestCustomChainValidator(t *testing.T) {
 		failInfos[info.Blessing] = info.Err
 	}
 	if !reflect.DeepEqual(failInfos, expectedFailInfos) {
-		t.Fatalf("Unexpected failinfos from ForCall. Got %v, want %v", failInfos, expectedFailInfos)
+		t.Fatalf("Unexpected failinfos from BlessingNames. Got %v, want %v", failInfos, expectedFailInfos)
 	}
 	expectedResults := []string{"unrestricted", "locallocal", "local/local"}
 	sort.Strings(results)
 	sort.Strings(expectedResults)
 	if !reflect.DeepEqual(results, expectedResults) {
-		t.Fatalf("Unexpected results from ForCall. Got %v, want %v", results, expectedResults)
+		t.Fatalf("Unexpected results from BlessingNames. Got %v, want %v", results, expectedResults)
 	}
 }
 
@@ -939,7 +939,7 @@ func TestSetCaveatValidatorAfterCaveatUse(t *testing.T) {
 	}()
 }
 
-func TestBlessingsForCall(t *testing.T) {
+func TestBlessingNames(t *testing.T) {
 	var (
 		p          = newPrincipal(t)
 		mkBlessing = func(name string, cav ...Caveat) Blessings {
