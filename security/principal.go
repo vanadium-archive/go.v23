@@ -101,7 +101,10 @@ func (p *principal) Bless(key PublicKey, with Blessings, extension string, cavea
 		if err := cert.sign(p.signer, chain[len(chain)-1].Signature); err != nil {
 			return Blessings{}, err
 		}
-		newchains[idx] = append(chains[idx], *cert)
+		cpy := make([]Certificate, len(chain)+1)
+		copy(cpy, chain)
+		cpy[len(cpy)-1] = *cert
+		newchains[idx] = cpy
 	}
 	return Blessings{
 		chains:    newchains,
