@@ -139,9 +139,6 @@ type NoResolve struct{}
 func (NoResolve) IPCCallOpt()   {}
 func (NoResolve) NSResolveOpt() {}
 
-// GoogleRuntime is the name of the Google runtime implementation.
-const GoogleRuntime = "google"
-
 // Create a server that will be used to serve a MountTable. This server
 // cannot be used for any other purpose.
 type ServesMountTable bool
