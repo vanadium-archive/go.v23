@@ -52,7 +52,7 @@ type MediaInfo struct {
 // the binary consists of. Clients then download the individual parts
 // through the Download() method, which identifies the part being
 // downloaded. Alternatively, clients can download the binary through
-// HTTP using a transient URL available through the DownloadURL()
+// HTTP using a transient URL available through the DownloadUrl()
 // method.
 //
 // To delete the binary, clients invoke the Delete() method.
@@ -77,11 +77,11 @@ type Binary interface {
 	// method is in progress, the outcome the Download() method is
 	// undefined.
 	Download(part int32) stream<_, []byte> error {access.Read}
-	// DownloadURL returns a transient URL from which the binary
+	// DownloadUrl returns a transient URL from which the binary
 	// identified by the object name suffix can be downloaded using the
 	// HTTP protocol. If not all parts of the binary have been uploaded,
 	// the method returns an error.
-	DownloadURL() (URL string, TTL int64 | error) {access.Read}
+	DownloadUrl() (url string, ttl int64 | error) {access.Read}
 	// Stat returns information describing the parts of the binary
 	// identified by the object name suffix, and its RFC 2046 media type.
 	// If the binary has not been created, the method returns an error.

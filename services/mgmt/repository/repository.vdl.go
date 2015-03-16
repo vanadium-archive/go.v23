@@ -300,7 +300,7 @@ var descApplication = ipc.InterfaceDesc{
 // the binary consists of. Clients then download the individual parts
 // through the Download() method, which identifies the part being
 // downloaded. Alternatively, clients can download the binary through
-// HTTP using a transient URL available through the DownloadURL()
+// HTTP using a transient URL available through the DownloadUrl()
 // method.
 //
 // To delete the binary, clients invoke the Delete() method.
@@ -366,11 +366,11 @@ type BinaryClientMethods interface {
 	// method is in progress, the outcome the Download() method is
 	// undefined.
 	Download(ctx *context.T, part int32, opts ...ipc.CallOpt) (BinaryDownloadClientCall, error)
-	// DownloadURL returns a transient URL from which the binary
+	// DownloadUrl returns a transient URL from which the binary
 	// identified by the object name suffix can be downloaded using the
 	// HTTP protocol. If not all parts of the binary have been uploaded,
 	// the method returns an error.
-	DownloadURL(*context.T, ...ipc.CallOpt) (URL string, TTL int64, err error)
+	DownloadUrl(*context.T, ...ipc.CallOpt) (url string, ttl int64, err error)
 	// Stat returns information describing the parts of the binary
 	// identified by the object name suffix, and its RFC 2046 media type.
 	// If the binary has not been created, the method returns an error.
@@ -442,9 +442,9 @@ func (c implBinaryClientStub) Download(ctx *context.T, i0 int32, opts ...ipc.Cal
 	return
 }
 
-func (c implBinaryClientStub) DownloadURL(ctx *context.T, opts ...ipc.CallOpt) (o0 string, o1 int64, err error) {
+func (c implBinaryClientStub) DownloadUrl(ctx *context.T, opts ...ipc.CallOpt) (o0 string, o1 int64, err error) {
 	var call ipc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "DownloadURL", nil, opts...); err != nil {
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "DownloadUrl", nil, opts...); err != nil {
 		return
 	}
 	err = call.Finish(&o0, &o1)
@@ -618,7 +618,7 @@ func (c *implBinaryUploadClientCall) Finish() (err error) {
 // the binary consists of. Clients then download the individual parts
 // through the Download() method, which identifies the part being
 // downloaded. Alternatively, clients can download the binary through
-// HTTP using a transient URL available through the DownloadURL()
+// HTTP using a transient URL available through the DownloadUrl()
 // method.
 //
 // To delete the binary, clients invoke the Delete() method.
@@ -684,11 +684,11 @@ type BinaryServerMethods interface {
 	// method is in progress, the outcome the Download() method is
 	// undefined.
 	Download(call BinaryDownloadServerCall, part int32) error
-	// DownloadURL returns a transient URL from which the binary
+	// DownloadUrl returns a transient URL from which the binary
 	// identified by the object name suffix can be downloaded using the
 	// HTTP protocol. If not all parts of the binary have been uploaded,
 	// the method returns an error.
-	DownloadURL(ipc.ServerCall) (URL string, TTL int64, err error)
+	DownloadUrl(ipc.ServerCall) (url string, ttl int64, err error)
 	// Stat returns information describing the parts of the binary
 	// identified by the object name suffix, and its RFC 2046 media type.
 	// If the binary has not been created, the method returns an error.
@@ -768,11 +768,11 @@ type BinaryServerStubMethods interface {
 	// method is in progress, the outcome the Download() method is
 	// undefined.
 	Download(call *BinaryDownloadServerCallStub, part int32) error
-	// DownloadURL returns a transient URL from which the binary
+	// DownloadUrl returns a transient URL from which the binary
 	// identified by the object name suffix can be downloaded using the
 	// HTTP protocol. If not all parts of the binary have been uploaded,
 	// the method returns an error.
-	DownloadURL(ipc.ServerCall) (URL string, TTL int64, err error)
+	DownloadUrl(ipc.ServerCall) (url string, ttl int64, err error)
 	// Stat returns information describing the parts of the binary
 	// identified by the object name suffix, and its RFC 2046 media type.
 	// If the binary has not been created, the method returns an error.
@@ -829,8 +829,8 @@ func (s implBinaryServerStub) Download(call *BinaryDownloadServerCallStub, i0 in
 	return s.impl.Download(call, i0)
 }
 
-func (s implBinaryServerStub) DownloadURL(call ipc.ServerCall) (string, int64, error) {
-	return s.impl.DownloadURL(call)
+func (s implBinaryServerStub) DownloadUrl(call ipc.ServerCall) (string, int64, error) {
+	return s.impl.DownloadUrl(call)
 }
 
 func (s implBinaryServerStub) Stat(call ipc.ServerCall) ([]binary.PartInfo, MediaInfo, error) {
@@ -856,7 +856,7 @@ var BinaryDesc ipc.InterfaceDesc = descBinary
 var descBinary = ipc.InterfaceDesc{
 	Name:    "Binary",
 	PkgPath: "v.io/v23/services/mgmt/repository",
-	Doc:     "// Binary can be used to store and retrieve vanadium application\n// binaries.\n//\n// To create a binary, clients first invoke the Create() method that\n// specifies the number of parts the binary consists of. Clients then\n// uploads the individual parts through the Upload() method, which\n// identifies the part being uploaded. To resume an upload after a\n// failure, clients invoke the UploadStatus() method, which returns a\n// slice that identifies which parts are missing.\n//\n// To download a binary, clients first invoke Stat(), which returns\n// information describing the binary, including the number of parts\n// the binary consists of. Clients then download the individual parts\n// through the Download() method, which identifies the part being\n// downloaded. Alternatively, clients can download the binary through\n// HTTP using a transient URL available through the DownloadURL()\n// method.\n//\n// To delete the binary, clients invoke the Delete() method.",
+	Doc:     "// Binary can be used to store and retrieve vanadium application\n// binaries.\n//\n// To create a binary, clients first invoke the Create() method that\n// specifies the number of parts the binary consists of. Clients then\n// uploads the individual parts through the Upload() method, which\n// identifies the part being uploaded. To resume an upload after a\n// failure, clients invoke the UploadStatus() method, which returns a\n// slice that identifies which parts are missing.\n//\n// To download a binary, clients first invoke Stat(), which returns\n// information describing the binary, including the number of parts\n// the binary consists of. Clients then download the individual parts\n// through the Download() method, which identifies the part being\n// downloaded. Alternatively, clients can download the binary through\n// HTTP using a transient URL available through the DownloadUrl()\n// method.\n//\n// To delete the binary, clients invoke the Delete() method.",
 	Embeds: []ipc.EmbedDesc{
 		{"Object", "v.io/v23/services/security/access/object", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetPermissions and GetPermissions in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(acl access.Permissions, etag string) error         {Red}\n//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}\n//  }"},
 	},
@@ -884,11 +884,11 @@ var descBinary = ipc.InterfaceDesc{
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
-			Name: "DownloadURL",
-			Doc:  "// DownloadURL returns a transient URL from which the binary\n// identified by the object name suffix can be downloaded using the\n// HTTP protocol. If not all parts of the binary have been uploaded,\n// the method returns an error.",
+			Name: "DownloadUrl",
+			Doc:  "// DownloadUrl returns a transient URL from which the binary\n// identified by the object name suffix can be downloaded using the\n// HTTP protocol. If not all parts of the binary have been uploaded,\n// the method returns an error.",
 			OutArgs: []ipc.ArgDesc{
-				{"URL", ``}, // string
-				{"TTL", ``}, // int64
+				{"url", ``}, // string
+				{"ttl", ``}, // int64
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
