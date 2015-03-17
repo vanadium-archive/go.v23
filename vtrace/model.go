@@ -163,10 +163,9 @@ func WithManager(ctx *context.T, manager Manager) *context.T {
 func manager(ctx *context.T) Manager {
 	manager, _ := ctx.Value(managerKey{}).(Manager)
 	if manager == nil {
-		panic(`Vtrace is uninitialized.
-You are calling a Vtrace function but vtrace has not been initialized.
-This is normally handled by the runtime initialization.  You should call
-v23.Init() in your main or test before performing this function.`)
+		// TODO(mattr): I would log an error, but vlog is not legal to use
+		// from this package.
+		manager = emptyManager{}
 	}
 	return manager
 }
@@ -219,3 +218,34 @@ func GetRequest(ctx *context.T) Request {
 func GetResponse(ctx *context.T) Response {
 	return manager(ctx).GetResponse(ctx)
 }
+
+type emptyManager struct{}
+
+func (emptyManager) SetNewTrace(ctx *context.T) (*context.T, Span) { return ctx, emptySpan{} }
+func (emptyManager) SetContinuedTrace(ctx *context.T, name string, req Request) (*context.T, Span) {
+	return ctx, emptySpan{}
+}
+func (emptyManager) SetNewSpan(ctx *context.T, name string) (*context.T, Span) {
+	return ctx, emptySpan{}
+}
+func (emptyManager) GetSpan(ctx *context.T) Span             { return emptySpan{} }
+func (emptyManager) GetStore(ctx *context.T) Store           { return emptyStore{} }
+func (emptyManager) GetRequest(ctx *context.T) (r Request)   { return }
+func (emptyManager) GetResponse(ctx *context.T) (r Response) { return }
+
+type emptySpan struct{}
+
+func (emptySpan) Name() string                              { return "" }
+func (emptySpan) ID() (id uniqueid.Id)                      { return }
+func (emptySpan) Parent() (id uniqueid.Id)                  { return }
+func (emptySpan) Annotate(s string)                         {}
+func (emptySpan) Annotatef(format string, a ...interface{}) {}
+func (emptySpan) Finish()                                   {}
+func (emptySpan) Trace() (id uniqueid.Id)                   { return }
+
+type emptyStore struct{}
+
+func (emptyStore) TraceRecords() []TraceRecord                  { return nil }
+func (emptyStore) TraceRecord(traceid uniqueid.Id) *TraceRecord { return nil }
+func (emptyStore) ForceCollect(traceid uniqueid.Id)             {}
+func (emptyStore) Merge(response Response)                      {}
