@@ -380,7 +380,7 @@ var (
 	rtError                = reflect.TypeOf((*error)(nil)).Elem()
 	rtString               = reflect.TypeOf("")
 	rtStringChan           = reflect.TypeOf((<-chan string)(nil))
-	rtGlobReplyChan        = reflect.TypeOf((<-chan naming.VDLGlobReply)(nil))
+	rtGlobReplyChan        = reflect.TypeOf((<-chan naming.GlobReply)(nil))
 	rtPtrToGlobState       = reflect.TypeOf((*GlobState)(nil))
 	rtSliceOfInterfaceDesc = reflect.TypeOf([]InterfaceDesc{})
 
@@ -405,7 +405,7 @@ var (
 	errNoFinalErrorOutArg = verror.Register(pkgPath+".errNoFinalErrorOutArg", verror.NoRetry, "{1:}{2:}Invalid out-args (final out-arg must be error){:_}")
 	errBadDescribe        = verror.Register(pkgPath+".errBadDescribe", verror.NoRetry, "{1:}{2:}Describe__ must have signature Describe__() []ipc.InterfaceDesc{:_}")
 	errBadGlobber         = verror.Register(pkgPath+".errBadGlobber", verror.NoRetry, "{1:}{2:}Globber must have signature Globber() *ipc.GlobState{:_}")
-	errBadGlob            = verror.Register(pkgPath+".errBadGlob", verror.NoRetry, "{1:}{2:}Glob__ must have signature Glob__(ipc.ServerCall, pattern string) (<-chan naming.VDLMountEntry, error){:_}")
+	errBadGlob            = verror.Register(pkgPath+".errBadGlob", verror.NoRetry, "{1:}{2:}Glob__ must have signature Glob__(ipc.ServerCall, pattern string) (<-chan naming.GlobReply, error){:_}")
 	errBadGlobChildren    = verror.Register(pkgPath+".errBadGlobChildren", verror.NoRetry, "{1:}{2:}GlobChildren__ must have signature GlobChildren__(ipc.ServerCall) (<-chan string, error){:_}")
 
 	errNeedStreamingCall       = verror.Register(pkgPath+".errNeedStreamingCall", verror.NoRetry, "{1:}{2:}Call arg %s is invalid streaming call; must be pointer to a struct representing the typesafe streaming call."+forgotWrap+"{:_}")
@@ -479,7 +479,7 @@ func typeCheckReservedMethod(method reflect.Method) error {
 		}
 		return verror.New(verror.ErrInternal, nil, verror.New(errReservedMethod, nil))
 	case "Glob__":
-		// Glob__(ipc.ServerCall, string) (<-chan naming.VDLMountEntry, error)
+		// Glob__(ipc.ServerCall, string) (<-chan naming.GlobReply, error)
 		if t := method.Type; t.NumIn() != 3 || t.NumOut() != 2 ||
 			t.In(1) != rtServerCall || t.In(2) != rtString ||
 			t.Out(0) != rtGlobReplyChan || t.Out(1) != rtError {

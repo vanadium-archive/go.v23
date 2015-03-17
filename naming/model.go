@@ -2,7 +2,6 @@ package naming
 
 import (
 	"net"
-	"time"
 
 	"v.io/v23/ipc/version"
 	"v.io/v23/verror"
@@ -84,35 +83,6 @@ type Endpoint interface {
 	// the process at this endpoint.
 	IPCVersionRange() version.IPCVersionRange
 }
-
-// MountedServer represents a server mounted under an object name.
-//
-// TODO(toddw): Consolidate with VDLMountedServer once vdl supports time.
-type MountedServer struct {
-	Server           string    // Server is an object address (OA): endpoint + suffix
-	Expires          time.Time // Absolute time after which the mount expires.
-	BlessingPatterns []string  // Patterns matching blessings presented by Server.
-}
-
-// MountEntry represents a name mounted in the mounttable.
-//
-// TODO(toddw): Consolidate with VDLMountEntry once vdl supports time.
-type MountEntry struct {
-	// Name is the mounted name.
-	Name string
-	// Servers (if present) specifies the mounted names.
-	Servers []MountedServer
-	// mt is true if servers refer to another mount table.
-	mt bool
-}
-
-// ServesMountTable returns true if the mount entry represents servers that are
-// mount tables.
-// TODO(p): When the endpoint actually has this fact encoded in, use that.
-func (e *MountEntry) ServesMountTable() bool { return e.mt }
-
-// SetServesMountTable sets whether or not this is a mount table.
-func (e *MountEntry) SetServesMountTable(v bool) { e.mt = v }
 
 // Names returns the servers represented by MountEntry as names, including
 // the MountedName suffix.

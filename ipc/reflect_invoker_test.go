@@ -625,7 +625,7 @@ func (o *vGlobberObject) Globber() *ipc.GlobState {
 
 type allGlobberObject struct{}
 
-func (allGlobberObject) Glob__(call ipc.ServerCall, pattern string) (<-chan naming.VDLGlobReply, error) {
+func (allGlobberObject) Glob__(call ipc.ServerCall, pattern string) (<-chan naming.GlobReply, error) {
 	return nil, nil
 }
 
