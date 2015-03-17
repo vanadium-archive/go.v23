@@ -11,6 +11,7 @@ import (
 	"strings"
 	"testing"
 
+	"v.io/v23/context"
 	"v.io/v23/uniqueid"
 	"v.io/v23/vdl"
 	"v.io/v23/vom"
@@ -119,7 +120,10 @@ func checkBlessings(b Blessings, c CallParams, want ...string) error {
 	}
 	// And now check them under the right call
 	c.RemoteBlessings = b
-	got, _ := BlessingNames(NewCall(&c), CallSideRemote)
+	ctx, cancel := context.RootContext()
+	defer cancel()
+	ctx = SetCall(ctx, NewCall(&c))
+	got, _ := BlessingNames(ctx, CallSideRemote)
 	if !equalBlessings(got, want) {
 		return fmt.Errorf("Got blessings %v, want %v", got, want)
 	}

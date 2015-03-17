@@ -831,12 +831,12 @@ func TestCustomChainValidator(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	call := NewCall(&CallParams{
+	ctx = SetCall(ctx, NewCall(&CallParams{
 		LocalPrincipal: p,
 		LocalBlessings: bunion,
 		Context:        ctx,
-	})
-	results, infos := BlessingNames(call, CallSideLocal)
+	}))
+	results, infos := BlessingNames(ctx, CallSideLocal)
 	expectedFailInfos := map[string]error{
 		"remotelocal":  remoteSideOnlyCavErr,
 		"local/remote": remoteSideOnlyCavErr,
@@ -889,7 +889,10 @@ func TestSetCaveatValidator(t *testing.T) {
 	})
 	// The function registered above should be invoked.
 	call := NewCall(&CallParams{LocalPrincipal: p, RemoteBlessings: b})
-	BlessingNames(call, side)
+	ctx, cancel := context.RootContext()
+	defer cancel()
+	ctx = SetCall(ctx, call)
+	BlessingNames(ctx, side)
 	select {
 	case <-time.Tick(10 * time.Second):
 		t.Fatalf("Caveat validation function not invoked")
@@ -927,7 +930,10 @@ func TestSetCaveatValidatorAfterCaveatUse(t *testing.T) {
 	}
 	// Trigger caveat validation:
 	p.AddToRoots(b)
-	BlessingNames(NewCall(&CallParams{LocalPrincipal: p, RemoteBlessings: b}), CallSideRemote)
+	ctx, cancel := context.RootContext()
+	defer cancel()
+	ctx = SetCall(ctx, NewCall(&CallParams{LocalPrincipal: p, RemoteBlessings: b}))
+	BlessingNames(ctx, CallSideRemote)
 	// Now SetValidatorCaveat should fail.
 	func() {
 		defer func() {
@@ -954,7 +960,13 @@ func TestBlessingNames(t *testing.T) {
 		b2 = mkBlessing("bob")
 
 		bnames = func(b Blessings, method string) ([]string, []RejectedBlessing) {
-			return BlessingNames(NewCall(&CallParams{LocalPrincipal: p, RemoteBlessings: b, Method: method}), CallSideRemote)
+			ctx, cancel := context.RootContext()
+			defer cancel()
+			ctx = SetCall(ctx, NewCall(&CallParams{
+				LocalPrincipal:  p,
+				RemoteBlessings: b,
+				Method:          method}))
+			return BlessingNames(ctx, CallSideRemote)
 		}
 	)
 	if err := p.AddToRoots(b1); err != nil {

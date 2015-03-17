@@ -4,6 +4,7 @@ import (
 	"os"
 	"reflect"
 
+	"v.io/v23/context"
 	"v.io/v23/security"
 	"v.io/v23/vdl"
 	"v.io/v23/verror"
@@ -111,13 +112,14 @@ type authorizer struct {
 	tagType *vdl.Type
 }
 
-func (a *authorizer) Authorize(call security.Call) error {
+func (a *authorizer) Authorize(ctx *context.T) error {
+	call := security.GetCall(ctx)
 	// "Self-RPCs" are always authorized.
 	if l, r := call.LocalBlessings().PublicKey(), call.RemoteBlessings().PublicKey(); l != nil && r != nil && reflect.DeepEqual(l, r) {
 		return nil
 	}
 
-	blessings, invalid := security.BlessingNames(call, security.CallSideRemote)
+	blessings, invalid := security.BlessingNames(ctx, security.CallSideRemote)
 	grant := false
 	if len(call.MethodTags()) == 0 {
 		// The following error message leaks the fact that the server is likely
@@ -143,13 +145,13 @@ type fileAuthorizer struct {
 	tagType  *vdl.Type
 }
 
-func (a *fileAuthorizer) Authorize(call security.Call) error {
+func (a *fileAuthorizer) Authorize(ctx *context.T) error {
 	acl, err := loadPermissionsFromFile(a.filename)
 	if err != nil {
 		// TODO(ashankar): Information leak?
-		return verror.New(errCantReadAccessListFromFile, call.Context(), err)
+		return verror.New(errCantReadAccessListFromFile, ctx, err)
 	}
-	return (&authorizer{acl, a.tagType}).Authorize(call)
+	return (&authorizer{acl, a.tagType}).Authorize(ctx)
 }
 
 func loadPermissionsFromFile(filename string) (Permissions, error) {

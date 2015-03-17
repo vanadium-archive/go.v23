@@ -5,6 +5,7 @@ import (
 	"io"
 	"sort"
 
+	"v.io/v23/context"
 	"v.io/v23/security"
 )
 
@@ -44,8 +45,8 @@ func (acl AccessList) pruneBlacklisted(blessings []string) []string {
 // only if the remote blessings are included in the AccessList.
 //
 // TODO(ashankar): Add tests for this
-func (acl *AccessList) Authorize(call security.Call) error {
-	blessingsForCall, invalid := security.BlessingNames(call, security.CallSideRemote)
+func (acl *AccessList) Authorize(ctx *context.T) error {
+	blessingsForCall, invalid := security.BlessingNames(ctx, security.CallSideRemote)
 	if acl.Includes(blessingsForCall...) {
 		return nil
 	}

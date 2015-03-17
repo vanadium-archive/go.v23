@@ -9,11 +9,19 @@ import (
 	"os"
 	"testing"
 
+	"v.io/v23/context"
 	"v.io/v23/security"
 	"v.io/v23/services/security/access"
 	"v.io/v23/services/security/access/test"
 	"v.io/v23/vdl"
 )
+
+func authorize(authorizer security.Authorizer, params *security.CallParams) error {
+	ctx, cancel := context.RootContext()
+	defer cancel()
+	ctx = security.SetCall(ctx, security.NewCall(params))
+	return authorizer.Authorize(ctx)
+}
 
 // TestPermissionsAuthorizer is both a test and a demonstration of the use of the
 // access.PermissionsAuthorizer and interaction with interface specification in VDL.
@@ -37,8 +45,13 @@ func TestPermissionsAuthorizer(t *testing.T) {
 		Method string
 		Client security.Blessings
 	}
+
+	authorizer, err := access.PermissionsAuthorizer(acl, vdl.TypeOf(test.Read))
+	if err != nil {
+		t.Fatalf("Could not create authorizer: %v", err)
+	}
+
 	var (
-		authorizer, _ = access.PermissionsAuthorizer(acl, vdl.TypeOf(test.Read))
 		// Two principals: The "server" and the "client"
 		pserver   = newPrincipal(t)
 		pclient   = newPrincipal(t)
@@ -64,14 +77,13 @@ func TestPermissionsAuthorizer(t *testing.T) {
 		}
 
 		run = func(test testcase) error {
-			ctx := security.NewCall(&security.CallParams{
+			return authorize(authorizer, &security.CallParams{
 				LocalPrincipal:  pserver,
 				LocalBlessings:  server,
 				RemoteBlessings: test.Client,
 				Method:          test.Method,
 				MethodTags:      methodTags(test.Method),
 			})
-			return authorizer.Authorize(ctx)
 		}
 	)
 
@@ -126,14 +138,14 @@ func TestPermissionsAuthorizerSelfRPCs(t *testing.T) {
 		authorizer, _ = access.PermissionsAuthorizer(access.Permissions{"R": {In: []security.BlessingPattern{"nobody/$"}}}, vdl.TypeOf(typ))
 	)
 	for _, test := range []string{"Put", "Get", "Resolve", "NoTags", "AllTags"} {
-		ctx := security.NewCall(&security.CallParams{
+		params := &security.CallParams{
 			LocalPrincipal:  p,
 			LocalBlessings:  server,
 			RemoteBlessings: client,
 			Method:          test,
 			MethodTags:      methodTags(test),
-		})
-		if err := authorizer.Authorize(ctx); err != nil {
+		}
+		if err := authorize(authorizer, params); err != nil {
 			t.Errorf("Got error %v for method %q", err, test)
 		}
 	}
@@ -148,15 +160,15 @@ func TestPermissionsAuthorizerWithNilAccessList(t *testing.T) {
 		client, _     = pclient.BlessSelf("client")
 	)
 	for _, test := range []string{"Put", "Get", "Resolve", "NoTags", "AllTags"} {
-		ctx := security.NewCall(&security.CallParams{
+		params := &security.CallParams{
 			LocalPrincipal:  pserver,
 			LocalBlessings:  server,
 			RemoteBlessings: client,
 			Method:          test,
 			MethodTags:      methodTags(test),
-		})
-		if err := authorizer.Authorize(ctx); err == nil {
-			t.Errorf("nil access.Permissions authorized method %q", test)
+		}
+		if err := authorize(authorizer, params); err == nil {
+			t.Errorf("nil access.Permissions authorized method %q, %v", test, err)
 		}
 	}
 }
@@ -176,28 +188,28 @@ func TestPermissionsAuthorizerFromFile(t *testing.T) {
 		pclient        = newPrincipal(t)
 		server, _      = pserver.BlessSelf("alice")
 		alicefriend, _ = pserver.Bless(pclient.PublicKey(), server, "friend/bob", security.UnconstrainedUse())
-		ctx            = security.NewCall(&security.CallParams{
+		params         = &security.CallParams{
 			LocalPrincipal:  pserver,
 			LocalBlessings:  server,
 			RemoteBlessings: alicefriend,
 			Method:          "Get",
 			MethodTags:      methodTags("Get"),
-		})
+		}
 	)
 	// Since this test is using trustAllRoots{}, do not need
 	// pserver.AddToRoots(server) to make pserver recognize itself as an
 	// authority on blessings matching "alice".
 
 	// "alice/friend/bob" should not have access to test.Read methods like Get.
-	if err := authorizer.Authorize(ctx); err == nil {
-		t.Fatalf("Expected authorization error as %v is not on the AccessList for Read operations", ctx.RemoteBlessings())
+	if err := authorize(authorizer, params); err == nil {
+		t.Fatalf("Expected authorization error as %v is not on the AccessList for Read operations", alicefriend)
 	}
 	// Rewrite the file giving access
 	if err := ioutil.WriteFile(filename, []byte(`{"R": { "In":["alice/friend"] }}`), 0600); err != nil {
 		t.Fatal(err)
 	}
 	// Now should have access
-	if err := authorizer.Authorize(ctx); err != nil {
+	if err := authorize(authorizer, params); err != nil {
 		t.Fatal(err)
 	}
 }

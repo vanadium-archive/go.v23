@@ -7,6 +7,8 @@ import (
 	"sort"
 	"strings"
 	"sync"
+
+	"v.io/v23/context"
 )
 
 var errEmptyChain = errors.New("empty certificate chain found")
@@ -27,16 +29,6 @@ type Blessings struct {
 }
 
 const chainValidatorKey = "customChainValidator"
-
-// HACK, REMOVE BEFORE LAUNCH
-type hackCall struct {
-	Call
-	b Blessings
-}
-
-func (c hackCall) RemoteBlessings() Blessings {
-	return c.b
-}
 
 // PublicKey returns the public key of the principal to which
 // blessings obtained from this object are bound.
@@ -380,7 +372,11 @@ func DefaultBlessingPatterns(p Principal) (patterns []BlessingPattern) {
 //
 // BlessingNames also returns the RejectedBlessings for each blessing name that cannot
 // be validated.
-func BlessingNames(call Call, side CallSide) ([]string, []RejectedBlessing) {
+func BlessingNames(ctx *context.T, side CallSide) ([]string, []RejectedBlessing) {
+	call := GetCall(ctx)
+	if call == nil {
+		return nil, nil
+	}
 	var b Blessings
 	switch side {
 	case CallSideLocal:

@@ -88,16 +88,18 @@
 // "self-proclaimed" authority:
 //  // (in process B)
 //  var p2 Principal
-//  call :=  GetRPCCall()  // Call under which p1 is communicating with p2, call.LocalPrincipal == p2
+//  ctx := GetContext() // current *context.T which carries the security state.
+//  call :=  security.GetCall(ctx)  // Call under which p1 is communicating with p2, call.LocalPrincipal() == p2
 //  alice := call.RemoteBlessings()
-//  names, rejected := BlessingNames(call, CallSideRemote)
+//  names, rejected := BlessingNames(ctx, CallSideRemote)
 //  fmt.Printf("%v %v", names, rejected) // Will print [] ["alice": "..."]
 //
 // However, p2 can decide to trust the roots of the "alice" blessing and then it
 // will be able to recognize her delegates as well:
 //  // (in process B)
+//  call := security.GetCall(ctx)
 //  p2.AddToRoots(call.RemoteBlessings())
-//  names, rejected := BlessingNames(call, CallSideRemote)
+//  names, rejected := BlessingNames(ctx, CallSideRemote)
 //  fmt.Printf("%v %v", names, rejected) // Will print ["alice"] []
 //
 // Furthermore, p2 can seek a blessing from "alice":
@@ -416,5 +418,18 @@ type Call interface {
 
 // Authorizer is the interface for performing authorization checks.
 type Authorizer interface {
-	Authorize(call Call) error
+	Authorize(ctx *context.T) error
+}
+
+type callKey struct{}
+
+// SetCall returns a new context with the given Call attached.
+func SetCall(ctx *context.T, call Call) *context.T {
+	return context.WithValue(ctx, callKey{}, call)
+}
+
+// GetCall returns the Call attached to the current context.
+func GetCall(ctx *context.T) Call {
+	call, _ := ctx.Value(callKey{}).(Call)
+	return call
 }
