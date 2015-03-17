@@ -1,10 +1,10 @@
-// Package context defines context.T an interface to carry data that
+// Package context defines context.T, an interface to carry data that
 // crosses API boundaries.  The context carries deadlines and
-// cancellation as well as other arbitraray values.
+// cancellation as well as other arbitrary values.
 //
 // Server method implmentations receive a context as their first
-// argument, you should generally pass this context (or a derivitive)
-// on to dependant opertations.  You should allocate new context.T
+// argument, you should generally pass this context (or a derivative)
+// on to dependent operations.  You should allocate new context.T
 // objects only for operations that are semantically unrelated to any
 // ongoing calls.
 //
@@ -31,7 +31,7 @@
 // (the deadline in the example above).
 //
 // Contexts are extensible.  The Value/WithValue methods allow you to attach
-// new information to the context and extend it's capabilities.
+// new information to the context and extend its capabilities.
 // In the same way we derive new contexts via the 'With' family of functions
 // you can create methods to attach new data:
 //
