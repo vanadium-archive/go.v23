@@ -74,8 +74,8 @@ type Response struct {
 	// TraceResponse maintains the vtrace context between clients and servers.
 	// In some cases trace data will be included in this response as well.
 	TraceResponse vtrace.Response
-	// AckBlessings is true if the server successfully recevied the client's blessings and
-	// stored them in the server's blessings cache.
+	// AckBlessings is true if the server successfully recevied the client's
+	// blessings and stored them in the server's blessings cache.
 	AckBlessings bool
 }
 
@@ -84,13 +84,15 @@ func (Response) __VDLReflect(struct {
 }) {
 }
 
-// BlessingsRequest represents security.Blessings for a particular request. Since multiple
-// requests on the same VC often use the same blessings, we implement a caching scheme, where
-// the client picks an unused key and sends it along with the blessings.  After the client
-// receives confirmation that the server has received the key, subsequent client requests
+// BlessingsRequest represents security.Blessings for a particular request.
+// Since multiple requests on the same authenticated connection often use the
+// same blessings, we implement a caching scheme, where the client picks an
+// unused key and sends it along with the blessings.  After the client receives
+// confirmation that the server has received the key, subsequent client requests
 // only send the key.
-// If BlessingRequest.Key is 0 the Client is running in VCSecurityNone and the Blessings
-// information should ignored.
+//
+// If BlessingRequest.Key is 0 the Client is running in VCSecurityNone and the
+// Blessings information should ignored.
 type BlessingsRequest struct {
 	// Key is the required key that the Client has cached Blessings with.
 	Key uint64

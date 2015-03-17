@@ -20,16 +20,8 @@ import (
 //   var result uint
 //   err = call.Finish(&result)
 //
-// The communication between the client and the server for this RPC call is
-// based on bidirectional flows.  The client resolves "a/b/c" to an endpoint,
-// dials a VC to the endpoint, and connects a flow on that VC.  Each RPC uses a
-// separate flow, and uses vom to marshal and unmarshal a sequence of typed
-// objects on the flow.  Requests flow from client to server, and responses flow
-// from server to client.
-//
-// The Request and Response types below represent "header" objects sent in each
-// direction on the flow.  Here's some examples of what the sequence of objects
-// looks like, where each line is a separate object on the flow.
+// The client resolves "a/b/c" to an endpoint, establishes an authenticated
+// connection with the endpoint and exchanges RPC requests/responses over it.
 //
 //   ##### Non-streaming RPC call #####
 //
@@ -145,18 +137,20 @@ type Response struct {
 	// In some cases trace data will be included in this response as well.
 	TraceResponse vtrace.Response
 
-	// AckBlessings is true if the server successfully recevied the client's blessings and
-	// stored them in the server's blessings cache.
+	// AckBlessings is true if the server successfully recevied the client's
+	// blessings and stored them in the server's blessings cache.
 	AckBlessings bool
 }
 
-// BlessingsRequest represents security.Blessings for a particular request. Since multiple
-// requests on the same VC often use the same blessings, we implement a caching scheme, where
-// the client picks an unused key and sends it along with the blessings.  After the client
-// receives confirmation that the server has received the key, subsequent client requests
+// BlessingsRequest represents security.Blessings for a particular request.
+// Since multiple requests on the same authenticated connection often use the
+// same blessings, we implement a caching scheme, where the client picks an
+// unused key and sends it along with the blessings.  After the client receives
+// confirmation that the server has received the key, subsequent client requests
 // only send the key.
-// If BlessingRequest.Key is 0 the Client is running in VCSecurityNone and the Blessings
-// information should ignored.
+//
+// If BlessingRequest.Key is 0 the Client is running in VCSecurityNone and the
+// Blessings information should ignored.
 type BlessingsRequest struct {
 	// Key is the required key that the Client has cached Blessings with.
 	Key uint64
