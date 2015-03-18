@@ -123,7 +123,7 @@ func checkBlessings(b Blessings, c CallParams, want ...string) error {
 	ctx, cancel := context.RootContext()
 	defer cancel()
 	ctx = SetCall(ctx, NewCall(&c))
-	got, _ := BlessingNames(ctx, CallSideRemote)
+	got, _ := RemoteBlessingNames(ctx)
 	if !equalBlessings(got, want) {
 		return fmt.Errorf("Got blessings %v, want %v", got, want)
 	}

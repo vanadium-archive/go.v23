@@ -355,35 +355,37 @@ func DefaultBlessingPatterns(p Principal) (patterns []BlessingPattern) {
 	return
 }
 
-// BlessingNames returns a validated set of human-readable blessing names encapsulated
-// in the blessings object presented by a principal. These blessing names are uncovered
-// from the blessings object presented by the local end of the 'call' if 'side' is
-// CallSideLocal, and from the blessings object presented by the remote end if 'side' is
-// CallSideRemote.
+// DEPRECATED: Use RemoteBlessingNames and LocalBlessingNames instead.
+// TODO(ataly): Get rid of this function.
+func BlessingNames(ctx *context.T, side CallSide) ([]string, []RejectedBlessing) {
+	switch side {
+	case CallSideLocal:
+		return LocalBlessingNames(ctx), nil
+	case CallSideRemote:
+		return RemoteBlessingNames(ctx)
+	}
+	return nil, nil
+}
+
+// ReturnBlessingNames returns the validated set of human-readable blessing names
+// encapsulated in the blessings object presented by the remote end of a call.
 //
 // The blessing names are guaranteed to:
 //
 // (1) Satisfy all the caveats associated with them, in the context of the call.
 // (2) Be rooted in call.LocalPrincipal.Roots.
 //
-// Caveats are considered satisfied for the 'call' and 'side' if the CaveatValidator
-// implementation can be found in the address space of the caller and Validate
-// returns nil.
+// Caveats are considered satisfied for the 'call' if the CaveatValidator implementation
+// can be found in the address space of the caller and Validate returns nil.
 //
-// BlessingNames also returns the RejectedBlessings for each blessing name that cannot
+// RemoteBlessingNames also returns the RejectedBlessings for each blessing name that cannot
 // be validated.
-func BlessingNames(ctx *context.T, side CallSide) ([]string, []RejectedBlessing) {
+func RemoteBlessingNames(ctx *context.T) ([]string, []RejectedBlessing) {
 	call := GetCall(ctx)
 	if call == nil {
 		return nil, nil
 	}
-	var b Blessings
-	switch side {
-	case CallSideLocal:
-		b = call.LocalBlessings()
-	case CallSideRemote:
-		b = call.RemoteBlessings()
-	}
+	b := call.RemoteBlessings()
 
 	if b.IsZero() {
 		return nil, nil
@@ -400,7 +402,7 @@ func BlessingNames(ctx *context.T, side CallSide) ([]string, []RejectedBlessing)
 		pendingChainCaveats [][]Caveat
 	)
 	for _, chain := range b.chains {
-		name, err := verifyChainSignature(call, side, chain)
+		name, err := verifyChainSignature(call, CallSideRemote, chain)
 		if err != nil {
 			rejected = append(rejected, RejectedBlessing{name, err})
 			continue
@@ -423,7 +425,7 @@ func BlessingNames(ctx *context.T, side CallSide) ([]string, []RejectedBlessing)
 		return validatedNames, rejected
 	}
 
-	validationResults := validator(call, side, pendingChainCaveats)
+	validationResults := validator(call, CallSideRemote, pendingChainCaveats)
 	if g, w := len(validationResults), len(pendingNames); g != w {
 		panic(fmt.Sprintf("Got wrong number of validation results. Got %d, expected %d.", g, w))
 	}
@@ -436,4 +438,22 @@ func BlessingNames(ctx *context.T, side CallSide) ([]string, []RejectedBlessing)
 		}
 	}
 	return validatedNames, rejected
+}
+
+// LocalBlessingNames returns the set of human-readable blessing names encapsulated
+// in the blessings object presented by the local end of the call.
+//
+// The blessing names are guaranteed to be rooted in call.LocalPrincipal.Roots.
+//
+// LocalBlessingNames does not validate caveats on the blessing names.
+func LocalBlessingNames(ctx *context.T) []string {
+	call := GetCall(ctx)
+	if call == nil {
+		return nil
+	}
+	var names []string
+	for n, _ := range call.LocalPrincipal().BlessingsInfo(call.LocalBlessings()) {
+		names = append(names, n)
+	}
+	return names
 }

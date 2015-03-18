@@ -219,6 +219,8 @@ func (RejectedBlessing) __VDLReflect(struct {
 }) {
 }
 
+// DEPRECATED: TODO(ataly): Get rid of this type once we get rid of
+// BlessingNames
 // CallSide specifies a side of the call (local or remote) for the
 // purposes of caveat validation.
 type CallSide int

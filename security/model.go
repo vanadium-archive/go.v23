@@ -91,7 +91,7 @@
 //  ctx := GetContext() // current *context.T which carries the security state.
 //  call :=  security.GetCall(ctx)  // Call under which p1 is communicating with p2, call.LocalPrincipal() == p2
 //  alice := call.RemoteBlessings()
-//  names, rejected := BlessingNames(ctx, CallSideRemote)
+//  names, rejected := RemoteBlessingNames(ctx)
 //  fmt.Printf("%v %v", names, rejected) // Will print [] ["alice": "..."]
 //
 // However, p2 can decide to trust the roots of the "alice" blessing and then it
@@ -99,7 +99,7 @@
 //  // (in process B)
 //  call := security.GetCall(ctx)
 //  p2.AddToRoots(call.RemoteBlessings())
-//  names, rejected := BlessingNames(ctx, CallSideRemote)
+//  names, rejected := RemoteBlessingNames(ctx)
 //  fmt.Printf("%v %v", names, rejected) // Will print ["alice"] []
 //
 // Furthermore, p2 can seek a blessing from "alice":
@@ -196,8 +196,8 @@ type Principal interface {
 	// granted to this Principal from recognized authorites to the Caveats
 	// associated with the names. BlessingInfo does not validate caveats
 	// on 'blessings' and thus may NOT be valid in the context of certain calls.
-	// Use BlessingNames(call, side) to determine the set of valid blessing names
-	// for a particular call.
+	// Use RemoteBlessingNames(call) to determine the set of valid blessing names
+	// presented by the remote end in particular call.
 	BlessingsInfo(blessings Blessings) map[string][]Caveat
 
 	// BlessingsStore provides access to the BlessingStore containing blessings

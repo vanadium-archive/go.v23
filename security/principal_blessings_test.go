@@ -127,7 +127,7 @@ func TestThirdPartyCaveats(t *testing.T) {
 	}
 }
 
-func TestBlessingsInfo(t *testing.T) {
+func TestBlessingsInfoAndLocalBlessingNames(t *testing.T) {
 	expiryCaveat, err := ExpiryCaveat(time.Now().Add(time.Minute))
 	if err != nil {
 		t.Fatal(err)
@@ -159,27 +159,35 @@ func TestBlessingsInfo(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	ctx, cf := context.RootContext()
+	defer cf()
+	// BlessingsInfo and LocalBlessingNames are evaluated with p2 as the LocalPrincipal.
 	tests := []struct {
-		blessings     Blessings
-		blessingsInfo map[string][]Caveat
+		blessings          Blessings
+		blessingsInfo      map[string][]Caveat
+		localBlessingNames []string
 	}{
 		{
 			blessings: bob,
 			blessingsInfo: map[string][]Caveat{
 				"bob": []Caveat{noCaveat},
 			},
+			localBlessingNames: []string{"bob"},
 		},
 		{
 			blessings: alicefriend,
 			blessingsInfo: map[string][]Caveat{
 				"alice/friend": []Caveat{expiryCaveat, methodCaveat},
 			},
+			localBlessingNames: []string{"alice/friend"},
 		},
 		{
 			blessings: bobfriend,
 			blessingsInfo: map[string][]Caveat{
 				"bob/friend": []Caveat{noCaveat, methodCaveat},
 			},
+			localBlessingNames: []string{"bob/friend"},
 		},
 		{
 			blessings: aliceAndBobFriend,
@@ -187,17 +195,25 @@ func TestBlessingsInfo(t *testing.T) {
 				"alice/friend": []Caveat{expiryCaveat, methodCaveat},
 				"bob/friend":   []Caveat{noCaveat, methodCaveat},
 			},
+			localBlessingNames: []string{"alice/friend", "bob/friend"},
 		},
 		{
-			blessings: alice,
+			blessings: alice, // not a blessing for principal p2.
 		},
 		{
-			blessings: notBob,
+			blessings: notBob, // root not trusted.
 		},
 	}
 	for _, test := range tests {
-		if !reflect.DeepEqual(p2.BlessingsInfo(test.blessings), test.blessingsInfo) {
-			t.Errorf("BlessingsInfo(%v) did not match expected:%v got:%v", test.blessings, test.blessingsInfo, p2.BlessingsInfo(test.blessings))
+		if got, want := p2.BlessingsInfo(test.blessings), test.blessingsInfo; !reflect.DeepEqual(got, want) {
+			t.Errorf("BlessingsInfo(%v) got:%v, want:%v", test.blessings, got, want)
+		}
+		ctx := SetCall(ctx, NewCall(&CallParams{LocalPrincipal: p2, LocalBlessings: test.blessings}))
+		got, want := LocalBlessingNames(ctx), test.localBlessingNames
+		sort.Strings(got)
+		sort.Strings(want)
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("LocalBlessingNames(%v) got:%v, want:%v", test.blessings, got, want)
 		}
 	}
 }
@@ -797,29 +813,28 @@ func TestCustomChainValidator(t *testing.T) {
 	ctx, cf := context.RootContext()
 	defer cf()
 
-	ctx = context.WithValue(ctx, "customChainValidator", validator)
-
+	ctx = context.WithValue(ctx, chainValidatorKey, validator)
 	bu, err := p.BlessSelf("unrestricted", UnconstrainedUse())
 	if err != nil {
 		t.Fatal(err)
 	}
-	bft, err := p.BlessSelf("remotelocal", remoteSideOnlyCav, localSideOnlyCav)
+	bft, err := p.BlessSelf("localremote", localSideOnlyCav, remoteSideOnlyCav)
 	if err != nil {
 		t.Fatal(err)
 	}
-	btt, err := p.BlessSelf("locallocal", localSideOnlyCav, localSideOnlyCav)
+	btt, err := p.BlessSelf("remoteremote", remoteSideOnlyCav, remoteSideOnlyCav)
 	if err != nil {
 		t.Fatal(err)
 	}
-	bt, err := p.BlessSelf("local", localSideOnlyCav)
+	bt, err := p.BlessSelf("remote", remoteSideOnlyCav)
 	if err != nil {
 		t.Fatal(err)
 	}
-	bsepft, err := p.Bless(p.PublicKey(), bt, "remote", remoteSideOnlyCav)
+	bsepft, err := p.Bless(p.PublicKey(), bt, "local", localSideOnlyCav)
 	if err != nil {
 		t.Fatal(err)
 	}
-	bseptt, err := p.Bless(p.PublicKey(), bt, "local", localSideOnlyCav)
+	bseptt, err := p.Bless(p.PublicKey(), bt, "remote", remoteSideOnlyCav)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -832,14 +847,14 @@ func TestCustomChainValidator(t *testing.T) {
 	}
 
 	ctx = SetCall(ctx, NewCall(&CallParams{
-		LocalPrincipal: p,
-		LocalBlessings: bunion,
-		Context:        ctx,
+		LocalPrincipal:  p,
+		RemoteBlessings: bunion,
+		Context:         ctx,
 	}))
-	results, infos := BlessingNames(ctx, CallSideLocal)
+	results, infos := RemoteBlessingNames(ctx)
 	expectedFailInfos := map[string]error{
-		"remotelocal":  remoteSideOnlyCavErr,
-		"local/remote": remoteSideOnlyCavErr,
+		"localremote":  localSideOnlyCavErr,
+		"remote/local": localSideOnlyCavErr,
 	}
 	failInfos := map[string]error{}
 	for _, info := range infos {
@@ -848,7 +863,7 @@ func TestCustomChainValidator(t *testing.T) {
 	if !reflect.DeepEqual(failInfos, expectedFailInfos) {
 		t.Fatalf("Unexpected failinfos from BlessingNames. Got %v, want %v", failInfos, expectedFailInfos)
 	}
-	expectedResults := []string{"unrestricted", "locallocal", "local/local"}
+	expectedResults := []string{"unrestricted", "remoteremote", "remote/remote"}
 	sort.Strings(results)
 	sort.Strings(expectedResults)
 	if !reflect.DeepEqual(results, expectedResults) {
@@ -875,7 +890,6 @@ func TestSetCaveatValidator(t *testing.T) {
 	var (
 		p      = newPrincipal(t)
 		c      = make(chan callcav, 1)
-		side   = CallSideRemote
 		cav    = newCaveat(MethodCaveat("Method"))
 		b, err = p.BlessSelf("alice", cav)
 	)
@@ -892,7 +906,7 @@ func TestSetCaveatValidator(t *testing.T) {
 	ctx, cancel := context.RootContext()
 	defer cancel()
 	ctx = SetCall(ctx, call)
-	BlessingNames(ctx, side)
+	RemoteBlessingNames(ctx)
 	select {
 	case <-time.Tick(10 * time.Second):
 		t.Fatalf("Caveat validation function not invoked")
@@ -901,7 +915,7 @@ func TestSetCaveatValidator(t *testing.T) {
 			t.Errorf("Caveat validation function invoked with call=%v, want %v", got.call, call)
 		}
 		if !reflect.DeepEqual(call, got.call) {
-			t.Errorf("Caveat validation function invoked with end=%v, want %v", got.side, side)
+			t.Errorf("Caveat validation function invoked with end=%v, want %v", got.side, CallSideRemote)
 		}
 		if !reflect.DeepEqual(cav, got.cav) {
 			t.Errorf("Caveat validation function invoked with cav=%v, want %v", got.cav, cav)
@@ -933,7 +947,7 @@ func TestSetCaveatValidatorAfterCaveatUse(t *testing.T) {
 	ctx, cancel := context.RootContext()
 	defer cancel()
 	ctx = SetCall(ctx, NewCall(&CallParams{LocalPrincipal: p, RemoteBlessings: b}))
-	BlessingNames(ctx, CallSideRemote)
+	RemoteBlessingNames(ctx)
 	// Now SetValidatorCaveat should fail.
 	func() {
 		defer func() {
@@ -945,7 +959,7 @@ func TestSetCaveatValidatorAfterCaveatUse(t *testing.T) {
 	}()
 }
 
-func TestBlessingNames(t *testing.T) {
+func TestRemoteBlessingNames(t *testing.T) {
 	var (
 		p          = newPrincipal(t)
 		mkBlessing = func(name string, cav ...Caveat) Blessings {
@@ -966,7 +980,7 @@ func TestBlessingNames(t *testing.T) {
 				LocalPrincipal:  p,
 				RemoteBlessings: b,
 				Method:          method}))
-			return BlessingNames(ctx, CallSideRemote)
+			return RemoteBlessingNames(ctx)
 		}
 	)
 	if err := p.AddToRoots(b1); err != nil {
