@@ -24,7 +24,7 @@ var (
 // network.  End users don't use endpoints - they deal solely with object names,
 // with the MountTable providing translation of object names to endpoints.
 type Endpoint interface {
-	// Network returns "veyron" so that Endpoint can implement net.Addr.
+	// Network returns "v23" so that Endpoint can implement net.Addr.
 	Network() string
 
 	// String returns a string representation of the endpoint.
