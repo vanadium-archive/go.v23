@@ -519,7 +519,7 @@ type AllGlobber interface {
 	// Glob__ returns a MountEntry for the objects that match the given
 	// pattern in the namespace below the receiver object. All the names
 	// returned are relative to the receiver.
-	Glob__(call ServerCall, pattern string) (<-chan naming.VDLGlobReply, error)
+	Glob__(call ServerCall, pattern string) (<-chan naming.GlobReply, error)
 }
 
 // ChildrenGlobber is a simple interface to publish the relationship between

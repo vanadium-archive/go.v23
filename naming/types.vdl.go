@@ -6,6 +6,9 @@ package naming
 import (
 	// VDL system imports
 	"v.io/v23/vdl"
+
+	// VDL user imports
+	"v.io/v23/vdlroot/time"
 )
 
 // MountFlag is a bit mask of options to the mount call.
@@ -16,8 +19,8 @@ func (MountFlag) __VDLReflect(struct {
 }) {
 }
 
-// VDLMountedServer represents a server mounted on a specific name.
-type VDLMountedServer struct {
+// MountedServer represents a server mounted on a specific name.
+type MountedServer struct {
 	// Server is the OA that's mounted.
 	Server string
 	// Patterns that match the set of blessings presented by the server
@@ -27,27 +30,27 @@ type VDLMountedServer struct {
 	// but the resulting cyclic dependency between the security and naming
 	// packages precludes that.
 	BlessingPatterns []string
-	// TTL is the remaining time (in seconds) before the mount entry expires.
-	TTL uint32
+	// Deadline before the mount entry expires.
+	Deadline time.Deadline
 }
 
-func (VDLMountedServer) __VDLReflect(struct {
-	Name string "v.io/v23/naming.VDLMountedServer"
+func (MountedServer) __VDLReflect(struct {
+	Name string "v.io/v23/naming.MountedServer"
 }) {
 }
 
 // MountEntry represents a given name mounted in the mounttable.
-type VDLMountEntry struct {
+type MountEntry struct {
 	// Name is the mounted name.
 	Name string
 	// Servers (if present) specifies the mounted names.
-	Servers []VDLMountedServer
-	// MT is true if the servers represent mount tables.
-	MT bool
+	Servers []MountedServer
+	// ServesMountTable is true if the servers represent mount tables.
+	ServesMountTable bool
 }
 
-func (VDLMountEntry) __VDLReflect(struct {
-	Name string "v.io/v23/naming.VDLMountEntry"
+func (MountEntry) __VDLReflect(struct {
+	Name string "v.io/v23/naming.MountEntry"
 }) {
 }
 
@@ -66,50 +69,50 @@ func (GlobError) __VDLReflect(struct {
 }
 
 type (
-	// VDLGlobReply represents any single field of the VDLGlobReply union type.
+	// GlobReply represents any single field of the GlobReply union type.
 	//
 	// GlobReply is the data type of the chan returned by Glob__.
-	VDLGlobReply interface {
+	GlobReply interface {
 		// Index returns the field index.
 		Index() int
 		// Interface returns the field value as an interface.
 		Interface() interface{}
 		// Name returns the field name.
 		Name() string
-		// __VDLReflect describes the VDLGlobReply union type.
-		__VDLReflect(__VDLGlobReplyReflect)
+		// __VDLReflect describes the GlobReply union type.
+		__VDLReflect(__GlobReplyReflect)
 	}
-	// VDLGlobReplyEntry represents field Entry of the VDLGlobReply union type.
-	VDLGlobReplyEntry struct{ Value VDLMountEntry }
-	// VDLGlobReplyError represents field Error of the VDLGlobReply union type.
-	VDLGlobReplyError struct{ Value GlobError }
-	// __VDLGlobReplyReflect describes the VDLGlobReply union type.
-	__VDLGlobReplyReflect struct {
-		Name  string "v.io/v23/naming.VDLGlobReply"
-		Type  VDLGlobReply
+	// GlobReplyEntry represents field Entry of the GlobReply union type.
+	GlobReplyEntry struct{ Value MountEntry }
+	// GlobReplyError represents field Error of the GlobReply union type.
+	GlobReplyError struct{ Value GlobError }
+	// __GlobReplyReflect describes the GlobReply union type.
+	__GlobReplyReflect struct {
+		Name  string "v.io/v23/naming.GlobReply"
+		Type  GlobReply
 		Union struct {
-			Entry VDLGlobReplyEntry
-			Error VDLGlobReplyError
+			Entry GlobReplyEntry
+			Error GlobReplyError
 		}
 	}
 )
 
-func (x VDLGlobReplyEntry) Index() int                         { return 0 }
-func (x VDLGlobReplyEntry) Interface() interface{}             { return x.Value }
-func (x VDLGlobReplyEntry) Name() string                       { return "Entry" }
-func (x VDLGlobReplyEntry) __VDLReflect(__VDLGlobReplyReflect) {}
+func (x GlobReplyEntry) Index() int                      { return 0 }
+func (x GlobReplyEntry) Interface() interface{}          { return x.Value }
+func (x GlobReplyEntry) Name() string                    { return "Entry" }
+func (x GlobReplyEntry) __VDLReflect(__GlobReplyReflect) {}
 
-func (x VDLGlobReplyError) Index() int                         { return 1 }
-func (x VDLGlobReplyError) Interface() interface{}             { return x.Value }
-func (x VDLGlobReplyError) Name() string                       { return "Error" }
-func (x VDLGlobReplyError) __VDLReflect(__VDLGlobReplyReflect) {}
+func (x GlobReplyError) Index() int                      { return 1 }
+func (x GlobReplyError) Interface() interface{}          { return x.Value }
+func (x GlobReplyError) Name() string                    { return "Error" }
+func (x GlobReplyError) __VDLReflect(__GlobReplyReflect) {}
 
 func init() {
 	vdl.Register((*MountFlag)(nil))
-	vdl.Register((*VDLMountedServer)(nil))
-	vdl.Register((*VDLMountEntry)(nil))
+	vdl.Register((*MountedServer)(nil))
+	vdl.Register((*MountEntry)(nil))
 	vdl.Register((*GlobError)(nil))
-	vdl.Register((*VDLGlobReply)(nil))
+	vdl.Register((*GlobReply)(nil))
 }
 
 const Replace = MountFlag(1) // Replace means the mount should replace what is currently at the mount point
