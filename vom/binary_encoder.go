@@ -530,7 +530,7 @@ func (e *binaryEncoder) FinishFields(vdl.FieldsTarget) error {
 			// it means the current struct is empty, but not non-existent.
 			e.ignoreField()
 		} else {
-			binaryEncodeControl(e.buf, WireCtrlEOF)
+			binaryEncodeControl(e.buf, WireCtrlEnd)
 		}
 	}
 	return nil

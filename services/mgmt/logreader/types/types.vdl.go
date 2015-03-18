@@ -6,10 +6,7 @@ package types
 
 import (
 	// VDL system imports
-	"v.io/v23/context"
-	"v.io/v23/i18n"
 	"v.io/v23/vdl"
-	"v.io/v23/verror"
 )
 
 // LogLine is a log entry from a log file.
@@ -32,16 +29,3 @@ func init() {
 // A special NumEntries value that indicates that all entries should be
 // returned by ReadLog.
 const AllEntries = int32(-1)
-
-var (
-	ErrEOF = verror.Register("v.io/v23/services/mgmt/logreader/types.EOF", verror.NoRetry, "{1:}{2:} EOF")
-)
-
-func init() {
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrEOF.ID), "{1:}{2:} EOF")
-}
-
-// NewErrEOF returns an error with the ErrEOF ID.
-func NewErrEOF(ctx *context.T) error {
-	return verror.New(ErrEOF, ctx)
-}

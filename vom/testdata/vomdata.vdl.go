@@ -1612,14 +1612,14 @@ var CompatTests = map[string][]*vdl.Type{
 	},
 	"struct A": {
 		vdl.TypeOf(NStruct{}),
-		vdl.TypeOf(ABCStruct{}),
-		vdl.TypeOf(ADEStruct{
+		vdl.TypeOf(AbcStruct{}),
+		vdl.TypeOf(AdeStruct{
 			E: vdl.AnyType,
 		}),
 	},
 	"struct Z": {
-		vdl.TypeOf(XYZStruct{}),
-		vdl.TypeOf(YZStruct{}),
+		vdl.TypeOf(XyzStruct{}),
+		vdl.TypeOf(YzStruct{}),
 		vdl.TypeOf(ZStruct{}),
 	},
 	"typeobject": {
@@ -1627,7 +1627,7 @@ var CompatTests = map[string][]*vdl.Type{
 	},
 	"union B": {
 		vdl.TypeOf(NUnion(NUnionA{false})),
-		vdl.TypeOf(BDEUnion(BDEUnionB{""})),
+		vdl.TypeOf(BdeUnion(BdeUnionB{""})),
 	},
 }
 
@@ -1762,12 +1762,12 @@ var ConvertTests = map[string][]ConvertGroup{
 		},
 		{
 			Name:        "enum (brie)",
-			PrimaryType: vdl.TypeOf(BRIENumGlee),
+			PrimaryType: vdl.TypeOf(BrieEnumGlee),
 			Values: []*vdl.Value{
 				vdl.ValueOf("Brie"),
 				vdl.ValueOf(NString("Brie")),
-				vdl.ValueOf(BRIENumBrie),
-				vdl.ValueOf(FOODYNumBrie),
+				vdl.ValueOf(BrieEnumBrie),
+				vdl.ValueOf(FoodEnumBrie),
 				vdl.ValueOf([]byte("Brie")),
 				vdl.ValueOf(NByteArray{
 					66,
@@ -1783,8 +1783,8 @@ var ConvertTests = map[string][]ConvertGroup{
 			Values: []*vdl.Value{
 				vdl.ValueOf("Bean"),
 				vdl.ValueOf(NString("Bean")),
-				vdl.ValueOf(BEANumBean),
-				vdl.ValueOf(FOODYNumBean),
+				vdl.ValueOf(BeanEnumBean),
+				vdl.ValueOf(FoodEnumBean),
 				vdl.ValueOf([]byte("Bean")),
 				vdl.ValueOf(NByteArray{
 					66,
@@ -1800,7 +1800,7 @@ var ConvertTests = map[string][]ConvertGroup{
 			Values: []*vdl.Value{
 				vdl.ValueOf("Cherry"),
 				vdl.ValueOf(NString("Cherry")),
-				vdl.ValueOf(FOODYNumCherry),
+				vdl.ValueOf(FoodEnumCherry),
 				vdl.ValueOf([]byte("Cherry")),
 				vdl.ValueOf(NByteSlice("Cherry")),
 			},
@@ -1863,12 +1863,12 @@ var ConvertTests = map[string][]ConvertGroup{
 		},
 		{
 			Name:        "structABC",
-			PrimaryType: vdl.TypeOf(ABCStruct{}),
+			PrimaryType: vdl.TypeOf(AbcStruct{}),
 			Values: []*vdl.Value{
-				vdl.ValueOf(ABCStruct{
+				vdl.ValueOf(AbcStruct{
 					A: true,
 				}),
-				vdl.ValueOf(ADEStruct{
+				vdl.ValueOf(AdeStruct{
 					A: true,
 					E: vdl.AnyType,
 				}),
@@ -1878,13 +1878,13 @@ var ConvertTests = map[string][]ConvertGroup{
 			},
 		},
 		{
-			Name:        "structYZ",
-			PrimaryType: vdl.TypeOf(YZStruct{}),
+			Name:        "structYz",
+			PrimaryType: vdl.TypeOf(YzStruct{}),
 			Values: []*vdl.Value{
-				vdl.ValueOf(XYZStruct{
+				vdl.ValueOf(XyzStruct{
 					Z: "ahoy",
 				}),
-				vdl.ValueOf(YZStruct{
+				vdl.ValueOf(YzStruct{
 					Z: "ahoy",
 				}),
 				vdl.ValueOf(ZStruct{
@@ -1968,15 +1968,15 @@ var ConvertTests = map[string][]ConvertGroup{
 	},
 	"union": {
 		{
-			Name:        "BDEUnion",
-			PrimaryType: vdl.TypeOf(BDEUnion(BDEUnionB{""})),
+			Name:        "BdeUnion",
+			PrimaryType: vdl.TypeOf(BdeUnion(BdeUnionB{""})),
 			Values: []*vdl.Value{
-				vdl.ValueOf(BDEUnion(BDEUnionB{"bde"})),
+				vdl.ValueOf(BdeUnion(BdeUnionB{"bde"})),
 				vdl.ValueOf(NUnion(NUnionB{"bde"})),
 			},
 		},
 		{
-			Name:        "BDEUnion fail",
+			Name:        "BdeUnion fail",
 			PrimaryType: vdl.TypeOf(NUnion(NUnionA{false})),
 			Values: []*vdl.Value{
 				vdl.ValueOf(NUnion(NUnionA{true})),

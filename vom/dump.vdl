@@ -39,6 +39,6 @@ type DumpKind enum {
 
 // ControlKind enumerates the different kinds of control bytes.
 type ControlKind enum {
-	NIL // [byte] Nil.
-	EOF // [byte] End of field.
+	Nil // [byte] Nil, meaning non-existent.
+	End // [byte] End, terminator.
 }

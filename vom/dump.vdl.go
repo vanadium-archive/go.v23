@@ -215,12 +215,12 @@ func (DumpKind) __VDLReflect(struct {
 type ControlKind int
 
 const (
-	ControlKindNIL ControlKind = iota
-	ControlKindEOF
+	ControlKindNil ControlKind = iota
+	ControlKindEnd
 )
 
 // ControlKindAll holds all labels for ControlKind.
-var ControlKindAll = [...]ControlKind{ControlKindNIL, ControlKindEOF}
+var ControlKindAll = [...]ControlKind{ControlKindNil, ControlKindEnd}
 
 // ControlKindFromString creates a ControlKind from a string label.
 func ControlKindFromString(label string) (x ControlKind, err error) {
@@ -231,11 +231,11 @@ func ControlKindFromString(label string) (x ControlKind, err error) {
 // Set assigns label to x.
 func (x *ControlKind) Set(label string) error {
 	switch label {
-	case "NIL", "nil":
-		*x = ControlKindNIL
+	case "Nil", "nil":
+		*x = ControlKindNil
 		return nil
-	case "EOF", "eof":
-		*x = ControlKindEOF
+	case "End", "end":
+		*x = ControlKindEnd
 		return nil
 	}
 	*x = -1
@@ -245,17 +245,17 @@ func (x *ControlKind) Set(label string) error {
 // String returns the string label of x.
 func (x ControlKind) String() string {
 	switch x {
-	case ControlKindNIL:
-		return "NIL"
-	case ControlKindEOF:
-		return "EOF"
+	case ControlKindNil:
+		return "Nil"
+	case ControlKindEnd:
+		return "End"
 	}
 	return ""
 }
 
 func (ControlKind) __VDLReflect(struct {
 	Name string "v.io/v23/vom.ControlKind"
-	Enum struct{ NIL, EOF string }
+	Enum struct{ Nil, End string }
 }) {
 }
 

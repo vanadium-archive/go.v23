@@ -63,23 +63,23 @@ type (
 	Array3String [3]string
 	Array4String [4]string
 
-	ABCStruct struct {
+	AbcStruct struct {
 		A bool
 		B string
 		C int64
 	}
-	ADEStruct struct {
+	AdeStruct struct {
 		A bool
 		D any
 		E typeobject
 	}
 
-	XYZStruct struct {
+	XyzStruct struct {
 		X bool
 		Y MBool
 		Z string
 	}
-	YZStruct struct {
+	YzStruct struct {
 		Y NBool
 		Z NString
 	}
@@ -116,9 +116,9 @@ type (
 	MapOnlyB  map[bool]string
 	MapOnlyB2 map[NBool]NString
 
-	BDEUnion union{ B string; D any; E typeobject }
+	BdeUnion union{ B string; D any; E typeobject }
 
-	BRIENum  enum{ Glee; Brie; Three }
-	BEANum   enum{ Bean }
-	FOODYNum enum{ Bean; Brie; Cherry }
+	BrieEnum enum{ Glee; Brie; Three }
+	BeanEnum enum{ Bean }
+	FoodEnum enum{ Bean; Brie; Cherry }
 )

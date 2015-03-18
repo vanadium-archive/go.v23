@@ -1448,7 +1448,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e426f6f6c PrimValue       "v.io/v23/vom/testdata.NBool" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NBool bool]
 	// 01                   PrimValue                       true [bool]
@@ -1469,7 +1469,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e426f6f6c PrimValue       "v.io/v23/vom/testdata.NBool" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NBool bool]
 	// 00                   PrimValue                      false [bool]
@@ -1490,7 +1490,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e537472696e67 PrimValue       "v.io/v23/vom/testdata.NString" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 03                   PrimValue                          3 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NString string]
 	// 00                   ByteLen                            0 [string len]
@@ -1512,7 +1512,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e537472696e67 PrimValue       "v.io/v23/vom/testdata.NString" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 03                   PrimValue                          3 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NString string]
 	// 03                   ByteLen                            3 [string len]
@@ -1534,7 +1534,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e42797465536c696365 PrimValue       "v.io/v23/vom/testdata.NByteSlice" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireList.Elem]
 	// 02                   PrimValue                          2 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireList END]
+	// e1                   Control                          End [v.io/v23/vom.wireList END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NByteSlice []byte]
 	// 00                   ByteLen                            0 [bytes len]
@@ -1556,7 +1556,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e42797465536c696365 PrimValue       "v.io/v23/vom/testdata.NByteSlice" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireList.Elem]
 	// 02                   PrimValue                          2 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireList END]
+	// e1                   Control                          End [v.io/v23/vom.wireList END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NByteSlice []byte]
 	// 03                   ByteLen                            3 [bytes len]
@@ -1578,7 +1578,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e42797465536c696365 PrimValue       "v.io/v23/vom/testdata.NByteSlice" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireList.Elem]
 	// 02                   PrimValue                          2 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireList END]
+	// e1                   Control                          End [v.io/v23/vom.wireList END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NByteSlice []byte]
 	// 03                   ByteLen                            3 [bytes len]
@@ -1602,7 +1602,7 @@ const Tests = []TestCase {
 	// 02                   PrimValue                          2 [uint]
 	// 02                   Index                              2 [v.io/v23/vom.wireArray.Len]
 	// 04                   PrimValue                          4 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireArray END]
+	// e1                   Control                          End [v.io/v23/vom.wireArray END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NByteArray [4]byte]
 	// 00                   ByteLen                            4 [bytes len]
@@ -1626,7 +1626,7 @@ const Tests = []TestCase {
 	// 02                   PrimValue                          2 [uint]
 	// 02                   Index                              2 [v.io/v23/vom.wireArray.Len]
 	// 04                   PrimValue                          4 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireArray END]
+	// e1                   Control                          End [v.io/v23/vom.wireArray END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NByteArray [4]byte]
 	// 00                   ByteLen                            4 [bytes len]
@@ -1650,7 +1650,7 @@ const Tests = []TestCase {
 	// 02                   PrimValue                          2 [uint]
 	// 02                   Index                              2 [v.io/v23/vom.wireArray.Len]
 	// 04                   PrimValue                          4 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireArray END]
+	// e1                   Control                          End [v.io/v23/vom.wireArray END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NByteArray [4]byte]
 	// 00                   ByteLen                            4 [bytes len]
@@ -1672,7 +1672,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e42797465 PrimValue       "v.io/v23/vom/testdata.NByte" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 02                   PrimValue                          2 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NByte byte]
 	// 00                   PrimValue                          0 [byte]
@@ -1693,7 +1693,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e42797465 PrimValue       "v.io/v23/vom/testdata.NByte" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 02                   PrimValue                          2 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NByte byte]
 	// 7f                   PrimValue                        127 [byte]
@@ -1714,7 +1714,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e42797465 PrimValue       "v.io/v23/vom/testdata.NByte" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 02                   PrimValue                          2 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NByte byte]
 	// ff                   PrimValue                        255 [byte]
@@ -1735,7 +1735,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e55696e743136 PrimValue       "v.io/v23/vom/testdata.NUint16" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 04                   PrimValue                          4 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NUint16 uint16]
 	// 00                   PrimValue                          0 [uint]
@@ -1756,7 +1756,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e55696e743136 PrimValue       "v.io/v23/vom/testdata.NUint16" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 04                   PrimValue                          4 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NUint16 uint16]
 	// feffff               PrimValue                      65535 [uint]
@@ -1777,7 +1777,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e55696e743332 PrimValue       "v.io/v23/vom/testdata.NUint32" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 05                   PrimValue                          5 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NUint32 uint32]
 	// 00                   PrimValue                          0 [uint]
@@ -1798,7 +1798,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e55696e743332 PrimValue       "v.io/v23/vom/testdata.NUint32" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 05                   PrimValue                          5 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NUint32 uint32]
 	// fcffffffff           PrimValue                 4294967295 [uint]
@@ -1819,7 +1819,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e55696e743634 PrimValue       "v.io/v23/vom/testdata.NUint64" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 06                   PrimValue                          6 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NUint64 uint64]
 	// 00                   PrimValue                          0 [uint]
@@ -1840,7 +1840,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e55696e743634 PrimValue       "v.io/v23/vom/testdata.NUint64" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 06                   PrimValue                          6 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NUint64 uint64]
 	// f8ffffffffffffffff   PrimValue       18446744073709551615 [uint]
@@ -1861,7 +1861,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e496e743136 PrimValue       "v.io/v23/vom/testdata.NInt16" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 07                   PrimValue                          7 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NInt16 int16]
 	// 00                   PrimValue                          0 [int]
@@ -1882,7 +1882,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e496e743136 PrimValue       "v.io/v23/vom/testdata.NInt16" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 07                   PrimValue                          7 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NInt16 int16]
 	// fefffe               PrimValue                      32767 [int]
@@ -1903,7 +1903,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e496e743136 PrimValue       "v.io/v23/vom/testdata.NInt16" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 07                   PrimValue                          7 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NInt16 int16]
 	// feffff               PrimValue                     -32768 [int]
@@ -1924,7 +1924,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e496e743332 PrimValue       "v.io/v23/vom/testdata.NInt32" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 08                   PrimValue                          8 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NInt32 int32]
 	// 00                   PrimValue                          0 [int]
@@ -1945,7 +1945,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e496e743332 PrimValue       "v.io/v23/vom/testdata.NInt32" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 08                   PrimValue                          8 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NInt32 int32]
 	// fcfffffffe           PrimValue                 2147483647 [int]
@@ -1966,7 +1966,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e496e743332 PrimValue       "v.io/v23/vom/testdata.NInt32" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 08                   PrimValue                          8 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NInt32 int32]
 	// fcffffffff           PrimValue                -2147483648 [int]
@@ -1987,7 +1987,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e496e743634 PrimValue       "v.io/v23/vom/testdata.NInt64" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 09                   PrimValue                          9 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NInt64 int64]
 	// 00                   PrimValue                          0 [int]
@@ -2008,7 +2008,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e496e743634 PrimValue       "v.io/v23/vom/testdata.NInt64" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 09                   PrimValue                          9 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NInt64 int64]
 	// f8fffffffffffffffe   PrimValue        9223372036854775807 [int]
@@ -2029,7 +2029,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e496e743634 PrimValue       "v.io/v23/vom/testdata.NInt64" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 09                   PrimValue                          9 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NInt64 int64]
 	// f8ffffffffffffffff   PrimValue       -9223372036854775808 [int]
@@ -2050,7 +2050,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e466c6f61743332 PrimValue       "v.io/v23/vom/testdata.NFloat32" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 0a                   PrimValue                         10 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NFloat32 float32]
 	// 00                   PrimValue                          0 [float]
@@ -2071,7 +2071,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e466c6f61743332 PrimValue       "v.io/v23/vom/testdata.NFloat32" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 0a                   PrimValue                         10 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NFloat32 float32]
 	// fd404040             PrimValue                       32.5 [float]
@@ -2092,7 +2092,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e466c6f61743332 PrimValue       "v.io/v23/vom/testdata.NFloat32" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 0a                   PrimValue                         10 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NFloat32 float32]
 	// fd4040c0             PrimValue                      -32.5 [float]
@@ -2113,7 +2113,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e466c6f61743634 PrimValue       "v.io/v23/vom/testdata.NFloat64" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 0b                   PrimValue                         11 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NFloat64 float64]
 	// 00                   PrimValue                          0 [float]
@@ -2134,7 +2134,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e466c6f61743634 PrimValue       "v.io/v23/vom/testdata.NFloat64" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 0b                   PrimValue                         11 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NFloat64 float64]
 	// fd205040             PrimValue                       64.5 [float]
@@ -2155,7 +2155,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e466c6f61743634 PrimValue       "v.io/v23/vom/testdata.NFloat64" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 0b                   PrimValue                         11 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NFloat64 float64]
 	// fd2050c0             PrimValue                      -64.5 [float]
@@ -2176,7 +2176,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e436f6d706c65783634 PrimValue       "v.io/v23/vom/testdata.NComplex64" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 0c                   PrimValue                         12 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NComplex64 complex64]
 	// 02                   MsgLen                             2
@@ -2199,7 +2199,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e436f6d706c65783634 PrimValue       "v.io/v23/vom/testdata.NComplex64" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 0c                   PrimValue                         12 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NComplex64 complex64]
 	// 08                   MsgLen                             8
@@ -2222,7 +2222,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e436f6d706c65783634 PrimValue       "v.io/v23/vom/testdata.NComplex64" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 0c                   PrimValue                         12 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NComplex64 complex64]
 	// 08                   MsgLen                             8
@@ -2245,7 +2245,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e436f6d706c6578313238 PrimValue       "v.io/v23/vom/testdata.NComplex128" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 0d                   PrimValue                         13 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NComplex128 complex128]
 	// 02                   MsgLen                             2
@@ -2268,7 +2268,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e436f6d706c6578313238 PrimValue       "v.io/v23/vom/testdata.NComplex128" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 0d                   PrimValue                         13 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NComplex128 complex128]
 	// 08                   MsgLen                             8
@@ -2291,7 +2291,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e436f6d706c6578313238 PrimValue       "v.io/v23/vom/testdata.NComplex128" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 0d                   PrimValue                         13 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NComplex128 complex128]
 	// 08                   MsgLen                             8
@@ -2316,7 +2316,7 @@ const Tests = []TestCase {
 	// 06                   PrimValue                          6 [uint]
 	// 02                   Index                              2 [v.io/v23/vom.wireArray.Len]
 	// 02                   PrimValue                          2 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireArray END]
+	// e1                   Control                          End [v.io/v23/vom.wireArray END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NArray2Uint64 [2]uint64]
 	// 03                   MsgLen                             3
@@ -2337,7 +2337,7 @@ const Tests = []TestCase {
 	// 03                   WireTypeIndex                      3 [v.io/v23/vom.wireList]
 	// 01                   Index                              1 [v.io/v23/vom.wireList.Elem]
 	// 06                   PrimValue                          6 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireList END]
+	// e1                   Control                          End [v.io/v23/vom.wireList END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [[]uint64]
 	// 03                   MsgLen                             3
@@ -2361,7 +2361,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e4c69737455696e743634 PrimValue       "v.io/v23/vom/testdata.NListUint64" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireList.Elem]
 	// 06                   PrimValue                          6 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireList END]
+	// e1                   Control                          End [v.io/v23/vom.wireList END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NListUint64 []uint64]
 	// 03                   MsgLen                             3
@@ -2382,7 +2382,7 @@ const Tests = []TestCase {
 	// 04                   WireTypeIndex                      4 [v.io/v23/vom.wireSet]
 	// 01                   Index                              1 [v.io/v23/vom.wireSet.Key]
 	// 06                   PrimValue                          6 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireSet END]
+	// e1                   Control                          End [v.io/v23/vom.wireSet END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [set[uint64]]
 	// 02                   MsgLen                             2
@@ -2405,7 +2405,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e53657455696e743634 PrimValue       "v.io/v23/vom/testdata.NSetUint64" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireSet.Key]
 	// 06                   PrimValue                          6 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireSet END]
+	// e1                   Control                          End [v.io/v23/vom.wireSet END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NSetUint64 set[uint64]]
 	// 02                   MsgLen                             2
@@ -2427,7 +2427,7 @@ const Tests = []TestCase {
 	// 06                   PrimValue                          6 [uint]
 	// 02                   Index                              2 [v.io/v23/vom.wireMap.Elem]
 	// 03                   PrimValue                          3 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireMap END]
+	// e1                   Control                          End [v.io/v23/vom.wireMap END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [map[uint64]string]
 	// 06                   MsgLen                             6
@@ -2454,7 +2454,7 @@ const Tests = []TestCase {
 	// 06                   PrimValue                          6 [uint]
 	// 02                   Index                              2 [v.io/v23/vom.wireMap.Elem]
 	// 03                   PrimValue                          3 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireMap END]
+	// e1                   Control                          End [v.io/v23/vom.wireMap END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NMapUint64String map[uint64]string]
 	// 06                   MsgLen                             6
@@ -2484,20 +2484,20 @@ const Tests = []TestCase {
 	// 41                   PrimValue                        "A" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 42                   PrimValue                        "B" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 03                   PrimValue                          3 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 43                   PrimValue                        "C" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 09                   PrimValue                          9 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
-	// e1                   Control                          EOF [v.io/v23/vom.wireStruct END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireStruct END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NStruct struct{A bool;B string;C int64}]
 	// 0b                   MsgLen                            11
@@ -2508,7 +2508,7 @@ const Tests = []TestCase {
 	// 616263               PrimValue                      "abc" [string]
 	// 02                   Index                              2 [v.io/v23/vom/testdata.NStruct.C]
 	// fff6                 PrimValue                        123 [int]
-	// e1                   Control                          EOF [v.io/v23/vom/testdata.NStruct END]
+	// e1                   Control                          End [v.io/v23/vom/testdata.NStruct END]
 	// DumpStatus{MsgId: 41, MsgLen: 11, MsgN: 11, Value: v.io/v23/vom/testdata.NStruct struct{A bool;B string;C int64}{A: true, B: "abc", C: 123}}
 	{
 		`NStruct{A: true, B: "abc", C: 123}`,
@@ -2531,31 +2531,31 @@ const Tests = []TestCase {
 	// 41                   PrimValue                        "A" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 42                   PrimValue                        "B" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 03                   PrimValue                          3 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 43                   PrimValue                        "C" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 09                   PrimValue                          9 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
-	// e1                   Control                          EOF [v.io/v23/vom.wireStruct END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireStruct END]
 	// 51                   MsgId                            -41
 	//                      TypeMsg                           41
 	// 04                   MsgLen                             4
 	// 08                   WireTypeIndex                      8 [v.io/v23/vom.wireOptional]
 	// 01                   Index                              1 [v.io/v23/vom.wireOptional.Elem]
 	// 2a                   PrimValue                         42 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireOptional END]
+	// e1                   Control                          End [v.io/v23/vom.wireOptional END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [?v.io/v23/vom/testdata.NStruct struct{A bool;B string;C int64}]
 	// 01                   MsgLen                             1
-	// e0                   Control                          NIL [?v.io/v23/vom/testdata.NStruct struct{A bool;B string;C int64} is nil]
+	// e0                   Control                          Nil [?v.io/v23/vom/testdata.NStruct struct{A bool;B string;C int64} is nil]
 	// DumpStatus{MsgId: 41, MsgLen: 1, MsgN: 1, Value: ?v.io/v23/vom/testdata.NStruct struct{A bool;B string;C int64}(nil)}
 	{
 		`?NStruct(nil)`,
@@ -2578,31 +2578,31 @@ const Tests = []TestCase {
 	// 41                   PrimValue                        "A" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 42                   PrimValue                        "B" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 03                   PrimValue                          3 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 43                   PrimValue                        "C" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 09                   PrimValue                          9 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
-	// e1                   Control                          EOF [v.io/v23/vom.wireStruct END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireStruct END]
 	// 51                   MsgId                            -41
 	//                      TypeMsg                           41
 	// 04                   MsgLen                             4
 	// 08                   WireTypeIndex                      8 [v.io/v23/vom.wireOptional]
 	// 01                   Index                              1 [v.io/v23/vom.wireOptional.Elem]
 	// 2a                   PrimValue                         42 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireOptional END]
+	// e1                   Control                          End [v.io/v23/vom.wireOptional END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [?v.io/v23/vom/testdata.NStruct struct{A bool;B string;C int64}]
 	// 01                   MsgLen                             1
-	// e1                   Control                          EOF [v.io/v23/vom/testdata.NStruct END]
+	// e1                   Control                          End [v.io/v23/vom/testdata.NStruct END]
 	// DumpStatus{MsgId: 41, MsgLen: 1, MsgN: 1, Value: ?v.io/v23/vom/testdata.NStruct struct{A bool;B string;C int64}({A: false, B: "", C: 0})}
 	{
 		`?NStruct{}`,
@@ -2625,27 +2625,27 @@ const Tests = []TestCase {
 	// 41                   PrimValue                        "A" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 42                   PrimValue                        "B" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 03                   PrimValue                          3 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 43                   PrimValue                        "C" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 09                   PrimValue                          9 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
-	// e1                   Control                          EOF [v.io/v23/vom.wireStruct END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireStruct END]
 	// 51                   MsgId                            -41
 	//                      TypeMsg                           41
 	// 04                   MsgLen                             4
 	// 08                   WireTypeIndex                      8 [v.io/v23/vom.wireOptional]
 	// 01                   Index                              1 [v.io/v23/vom.wireOptional.Elem]
 	// 2a                   PrimValue                         42 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireOptional END]
+	// e1                   Control                          End [v.io/v23/vom.wireOptional END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [?v.io/v23/vom/testdata.NStruct struct{A bool;B string;C int64}]
 	// 0b                   MsgLen                            11
@@ -2656,7 +2656,7 @@ const Tests = []TestCase {
 	// 616263               PrimValue                      "abc" [string]
 	// 02                   Index                              2 [v.io/v23/vom/testdata.NStruct.C]
 	// fff6                 PrimValue                        123 [int]
-	// e1                   Control                          EOF [v.io/v23/vom/testdata.NStruct END]
+	// e1                   Control                          End [v.io/v23/vom/testdata.NStruct END]
 	// DumpStatus{MsgId: 41, MsgLen: 11, MsgN: 11, Value: ?v.io/v23/vom/testdata.NStruct struct{A bool;B string;C int64}({A: true, B: "abc", C: 123})}
 	{
 		`?NStruct{A: true, B: "abc", C: 123}`,
@@ -2680,7 +2680,7 @@ const Tests = []TestCase {
 	// 42                   PrimValue                        "B" [string]
 	// 01                   ByteLen                            1 [string len]
 	// 43                   PrimValue                        "C" [string]
-	// e1                   Control                          EOF [v.io/v23/vom.wireEnum END]
+	// e1                   Control                          End [v.io/v23/vom.wireEnum END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NEnum enum{A;B;C}]
 	// 00                   Index                              0 [v.io/v23/vom/testdata.NEnum.A]
@@ -2707,7 +2707,7 @@ const Tests = []TestCase {
 	// 42                   PrimValue                        "B" [string]
 	// 01                   ByteLen                            1 [string len]
 	// 43                   PrimValue                        "C" [string]
-	// e1                   Control                          EOF [v.io/v23/vom.wireEnum END]
+	// e1                   Control                          End [v.io/v23/vom.wireEnum END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NEnum enum{A;B;C}]
 	// 01                   Index                              1 [v.io/v23/vom/testdata.NEnum.B]
@@ -2734,7 +2734,7 @@ const Tests = []TestCase {
 	// 42                   PrimValue                        "B" [string]
 	// 01                   ByteLen                            1 [string len]
 	// 43                   PrimValue                        "C" [string]
-	// e1                   Control                          EOF [v.io/v23/vom.wireEnum END]
+	// e1                   Control                          End [v.io/v23/vom.wireEnum END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NEnum enum{A;B;C}]
 	// 02                   Index                              2 [v.io/v23/vom/testdata.NEnum.C]
@@ -2760,20 +2760,20 @@ const Tests = []TestCase {
 	// 41                   PrimValue                        "A" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 42                   PrimValue                        "B" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 03                   PrimValue                          3 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 43                   PrimValue                        "C" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 09                   PrimValue                          9 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
-	// e1                   Control                          EOF [v.io/v23/vom.wireUnion END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireUnion END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NUnion union{A bool;B string;C int64}]
 	// 02                   MsgLen                             2
@@ -2801,20 +2801,20 @@ const Tests = []TestCase {
 	// 41                   PrimValue                        "A" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 42                   PrimValue                        "B" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 03                   PrimValue                          3 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 43                   PrimValue                        "C" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 09                   PrimValue                          9 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
-	// e1                   Control                          EOF [v.io/v23/vom.wireUnion END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireUnion END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NUnion union{A bool;B string;C int64}]
 	// 02                   MsgLen                             2
@@ -2842,20 +2842,20 @@ const Tests = []TestCase {
 	// 41                   PrimValue                        "A" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 42                   PrimValue                        "B" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 03                   PrimValue                          3 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 43                   PrimValue                        "C" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 09                   PrimValue                          9 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
-	// e1                   Control                          EOF [v.io/v23/vom.wireUnion END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireUnion END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NUnion union{A bool;B string;C int64}]
 	// 02                   MsgLen                             2
@@ -2884,20 +2884,20 @@ const Tests = []TestCase {
 	// 41                   PrimValue                        "A" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 42                   PrimValue                        "B" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 03                   PrimValue                          3 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 43                   PrimValue                        "C" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 09                   PrimValue                          9 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
-	// e1                   Control                          EOF [v.io/v23/vom.wireUnion END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireUnion END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NUnion union{A bool;B string;C int64}]
 	// 05                   MsgLen                             5
@@ -2926,20 +2926,20 @@ const Tests = []TestCase {
 	// 41                   PrimValue                        "A" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 42                   PrimValue                        "B" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 03                   PrimValue                          3 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 43                   PrimValue                        "C" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 09                   PrimValue                          9 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
-	// e1                   Control                          EOF [v.io/v23/vom.wireUnion END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireUnion END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NUnion union{A bool;B string;C int64}]
 	// 02                   MsgLen                             2
@@ -2967,20 +2967,20 @@ const Tests = []TestCase {
 	// 41                   PrimValue                        "A" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 42                   PrimValue                        "B" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 03                   PrimValue                          3 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 43                   PrimValue                        "C" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 09                   PrimValue                          9 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
-	// e1                   Control                          EOF [v.io/v23/vom.wireUnion END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireUnion END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NUnion union{A bool;B string;C int64}]
 	// 03                   MsgLen                             3
@@ -3008,20 +3008,20 @@ const Tests = []TestCase {
 	// 41                   PrimValue                        "A" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 42                   PrimValue                        "B" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 03                   PrimValue                          3 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 43                   PrimValue                        "C" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 09                   PrimValue                          9 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
-	// e1                   Control                          EOF [v.io/v23/vom.wireUnion END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireUnion END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.NUnion union{A bool;B string;C int64}]
 	// 03                   MsgLen                             3
@@ -3044,7 +3044,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4d426f6f6c PrimValue       "v.io/v23/vom/testdata.MBool" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.MBool bool]
 	// 01                   PrimValue                       true [bool]
@@ -3065,7 +3065,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4d426f6f6c PrimValue       "v.io/v23/vom/testdata.MBool" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.MBool bool]
 	// 00                   PrimValue                      false [bool]
@@ -3086,7 +3086,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e426f6f6c PrimValue       "v.io/v23/vom/testdata.NBool" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 55                   MsgId                            -43
 	//                      TypeMsg                           43
 	// 21                   MsgLen                            33
@@ -3096,7 +3096,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4d426f6f6c PrimValue       "v.io/v23/vom/testdata.MBool" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 59                   MsgId                            -45
 	//                      TypeMsg                           45
 	// 35                   MsgLen                            53
@@ -3111,27 +3111,27 @@ const Tests = []TestCase {
 	// 41                   PrimValue                        "A" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 42                   PrimValue                        "B" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 03                   PrimValue                          3 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 43                   PrimValue                        "C" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 09                   PrimValue                          9 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
-	// e1                   Control                          EOF [v.io/v23/vom.wireStruct END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireStruct END]
 	// 57                   MsgId                            -44
 	//                      TypeMsg                           44
 	// 04                   MsgLen                             4
 	// 08                   WireTypeIndex                      8 [v.io/v23/vom.wireOptional]
 	// 01                   Index                              1 [v.io/v23/vom.wireOptional.Elem]
 	// 2d                   PrimValue                         45 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireOptional END]
+	// e1                   Control                          End [v.io/v23/vom.wireOptional END]
 	// 51                   MsgId                            -41
 	//                      TypeMsg                           41
 	// 47                   MsgLen                            71
@@ -3146,38 +3146,38 @@ const Tests = []TestCase {
 	// 41                   PrimValue                        "A" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 42                   PrimValue                        "B" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 2a                   PrimValue                         42 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 43                   PrimValue                        "C" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 2b                   PrimValue                         43 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 44                   PrimValue                        "D" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 2c                   PrimValue                         44 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 45                   PrimValue                        "E" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 0e                   PrimValue                         14 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 46                   PrimValue                        "F" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 0f                   PrimValue                         15 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
-	// e1                   Control                          EOF [v.io/v23/vom.wireStruct END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireStruct END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.MStruct struct{A bool;B v.io/v23/vom/testdata.NBool bool;C v.io/v23/vom/testdata.MBool bool;D ?v.io/v23/vom/testdata.NStruct struct{A bool;B string;C int64};E typeobject;F any}]
 	// 07                   MsgLen                             7
@@ -3187,7 +3187,7 @@ const Tests = []TestCase {
 	// 01                   PrimValue                       true [bool]
 	// 02                   Index                              2 [v.io/v23/vom/testdata.MStruct.C]
 	// 01                   PrimValue                       true [bool]
-	// e1                   Control                          EOF [v.io/v23/vom/testdata.MStruct END]
+	// e1                   Control                          End [v.io/v23/vom/testdata.MStruct END]
 	// DumpStatus{MsgId: 41, MsgLen: 7, MsgN: 7, Value: v.io/v23/vom/testdata.MStruct struct{A bool;B v.io/v23/vom/testdata.NBool bool;C v.io/v23/vom/testdata.MBool bool;D ?v.io/v23/vom/testdata.NStruct struct{A bool;B string;C int64};E typeobject;F any}{A: true, B: true, C: true, D: nil, E: any, F: nil}}
 	{
 		`MStruct{A: true, B: true, C: true}`,
@@ -3205,7 +3205,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e426f6f6c PrimValue       "v.io/v23/vom/testdata.NBool" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 55                   MsgId                            -43
 	//                      TypeMsg                           43
 	// 21                   MsgLen                            33
@@ -3215,7 +3215,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4d426f6f6c PrimValue       "v.io/v23/vom/testdata.MBool" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 59                   MsgId                            -45
 	//                      TypeMsg                           45
 	// 35                   MsgLen                            53
@@ -3230,27 +3230,27 @@ const Tests = []TestCase {
 	// 41                   PrimValue                        "A" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 42                   PrimValue                        "B" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 03                   PrimValue                          3 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 43                   PrimValue                        "C" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 09                   PrimValue                          9 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
-	// e1                   Control                          EOF [v.io/v23/vom.wireStruct END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireStruct END]
 	// 57                   MsgId                            -44
 	//                      TypeMsg                           44
 	// 04                   MsgLen                             4
 	// 08                   WireTypeIndex                      8 [v.io/v23/vom.wireOptional]
 	// 01                   Index                              1 [v.io/v23/vom.wireOptional.Elem]
 	// 2d                   PrimValue                         45 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireOptional END]
+	// e1                   Control                          End [v.io/v23/vom.wireOptional END]
 	// 51                   MsgId                            -41
 	//                      TypeMsg                           41
 	// 47                   MsgLen                            71
@@ -3265,42 +3265,42 @@ const Tests = []TestCase {
 	// 41                   PrimValue                        "A" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 42                   PrimValue                        "B" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 2a                   PrimValue                         42 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 43                   PrimValue                        "C" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 2b                   PrimValue                         43 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 44                   PrimValue                        "D" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 2c                   PrimValue                         44 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 45                   PrimValue                        "E" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 0e                   PrimValue                         14 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 46                   PrimValue                        "F" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 0f                   PrimValue                         15 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
-	// e1                   Control                          EOF [v.io/v23/vom.wireStruct END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireStruct END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.MStruct struct{A bool;B v.io/v23/vom/testdata.NBool bool;C v.io/v23/vom/testdata.MBool bool;D ?v.io/v23/vom/testdata.NStruct struct{A bool;B string;C int64};E typeobject;F any}]
 	// 01                   MsgLen                             1
-	// e1                   Control                          EOF [v.io/v23/vom/testdata.MStruct END]
+	// e1                   Control                          End [v.io/v23/vom/testdata.MStruct END]
 	// DumpStatus{MsgId: 41, MsgLen: 1, MsgN: 1, Value: v.io/v23/vom/testdata.MStruct struct{A bool;B v.io/v23/vom/testdata.NBool bool;C v.io/v23/vom/testdata.MBool bool;D ?v.io/v23/vom/testdata.NStruct struct{A bool;B string;C int64};E typeobject;F any}{A: false, B: false, C: false, D: nil, E: any, F: nil}}
 	{
 		`MStruct{}`,
@@ -3318,7 +3318,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e426f6f6c PrimValue       "v.io/v23/vom/testdata.NBool" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 55                   MsgId                            -43
 	//                      TypeMsg                           43
 	// 21                   MsgLen                            33
@@ -3328,7 +3328,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4d426f6f6c PrimValue       "v.io/v23/vom/testdata.MBool" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 59                   MsgId                            -45
 	//                      TypeMsg                           45
 	// 35                   MsgLen                            53
@@ -3343,27 +3343,27 @@ const Tests = []TestCase {
 	// 41                   PrimValue                        "A" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 42                   PrimValue                        "B" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 03                   PrimValue                          3 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 43                   PrimValue                        "C" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 09                   PrimValue                          9 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
-	// e1                   Control                          EOF [v.io/v23/vom.wireStruct END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireStruct END]
 	// 57                   MsgId                            -44
 	//                      TypeMsg                           44
 	// 04                   MsgLen                             4
 	// 08                   WireTypeIndex                      8 [v.io/v23/vom.wireOptional]
 	// 01                   Index                              1 [v.io/v23/vom.wireOptional.Elem]
 	// 2d                   PrimValue                         45 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireOptional END]
+	// e1                   Control                          End [v.io/v23/vom.wireOptional END]
 	// 51                   MsgId                            -41
 	//                      TypeMsg                           41
 	// 47                   MsgLen                            71
@@ -3378,44 +3378,44 @@ const Tests = []TestCase {
 	// 41                   PrimValue                        "A" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 42                   PrimValue                        "B" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 2a                   PrimValue                         42 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 43                   PrimValue                        "C" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 2b                   PrimValue                         43 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 44                   PrimValue                        "D" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 2c                   PrimValue                         44 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 45                   PrimValue                        "E" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 0e                   PrimValue                         14 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 46                   PrimValue                        "F" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 0f                   PrimValue                         15 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
-	// e1                   Control                          EOF [v.io/v23/vom.wireStruct END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireStruct END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.MStruct struct{A bool;B v.io/v23/vom/testdata.NBool bool;C v.io/v23/vom/testdata.MBool bool;D ?v.io/v23/vom/testdata.NStruct struct{A bool;B string;C int64};E typeobject;F any}]
 	// 03                   MsgLen                             3
 	// 03                   Index                              3 [v.io/v23/vom/testdata.MStruct.D]
-	// e1                   Control                          EOF [v.io/v23/vom/testdata.NStruct END]
-	// e1                   Control                          EOF [v.io/v23/vom/testdata.MStruct END]
+	// e1                   Control                          End [v.io/v23/vom/testdata.NStruct END]
+	// e1                   Control                          End [v.io/v23/vom/testdata.MStruct END]
 	// DumpStatus{MsgId: 41, MsgLen: 3, MsgN: 3, Value: v.io/v23/vom/testdata.MStruct struct{A bool;B v.io/v23/vom/testdata.NBool bool;C v.io/v23/vom/testdata.MBool bool;D ?v.io/v23/vom/testdata.NStruct struct{A bool;B string;C int64};E typeobject;F any}{A: false, B: false, C: false, D: {A: false, B: "", C: 0}, E: any, F: nil}}
 	{
 		`MStruct{D: {}}`,
@@ -3433,7 +3433,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e426f6f6c PrimValue       "v.io/v23/vom/testdata.NBool" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 55                   MsgId                            -43
 	//                      TypeMsg                           43
 	// 21                   MsgLen                            33
@@ -3443,7 +3443,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4d426f6f6c PrimValue       "v.io/v23/vom/testdata.MBool" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 59                   MsgId                            -45
 	//                      TypeMsg                           45
 	// 35                   MsgLen                            53
@@ -3458,27 +3458,27 @@ const Tests = []TestCase {
 	// 41                   PrimValue                        "A" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 42                   PrimValue                        "B" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 03                   PrimValue                          3 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 43                   PrimValue                        "C" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 09                   PrimValue                          9 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
-	// e1                   Control                          EOF [v.io/v23/vom.wireStruct END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireStruct END]
 	// 57                   MsgId                            -44
 	//                      TypeMsg                           44
 	// 04                   MsgLen                             4
 	// 08                   WireTypeIndex                      8 [v.io/v23/vom.wireOptional]
 	// 01                   Index                              1 [v.io/v23/vom.wireOptional.Elem]
 	// 2d                   PrimValue                         45 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireOptional END]
+	// e1                   Control                          End [v.io/v23/vom.wireOptional END]
 	// 51                   MsgId                            -41
 	//                      TypeMsg                           41
 	// 47                   MsgLen                            71
@@ -3493,38 +3493,38 @@ const Tests = []TestCase {
 	// 41                   PrimValue                        "A" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 42                   PrimValue                        "B" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 2a                   PrimValue                         42 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 43                   PrimValue                        "C" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 2b                   PrimValue                         43 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 44                   PrimValue                        "D" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 2c                   PrimValue                         44 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 45                   PrimValue                        "E" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 0e                   PrimValue                         14 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 46                   PrimValue                        "F" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 0f                   PrimValue                         15 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
-	// e1                   Control                          EOF [v.io/v23/vom.wireStruct END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireStruct END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.MStruct struct{A bool;B v.io/v23/vom/testdata.NBool bool;C v.io/v23/vom/testdata.MBool bool;D ?v.io/v23/vom/testdata.NStruct struct{A bool;B string;C int64};E typeobject;F any}]
 	// 0d                   MsgLen                            13
@@ -3536,8 +3536,8 @@ const Tests = []TestCase {
 	// 616263               PrimValue                      "abc" [string]
 	// 02                   Index                              2 [v.io/v23/vom/testdata.NStruct.C]
 	// fff6                 PrimValue                        123 [int]
-	// e1                   Control                          EOF [v.io/v23/vom/testdata.NStruct END]
-	// e1                   Control                          EOF [v.io/v23/vom/testdata.MStruct END]
+	// e1                   Control                          End [v.io/v23/vom/testdata.NStruct END]
+	// e1                   Control                          End [v.io/v23/vom/testdata.MStruct END]
 	// DumpStatus{MsgId: 41, MsgLen: 13, MsgN: 13, Value: v.io/v23/vom/testdata.MStruct struct{A bool;B v.io/v23/vom/testdata.NBool bool;C v.io/v23/vom/testdata.MBool bool;D ?v.io/v23/vom/testdata.NStruct struct{A bool;B string;C int64};E typeobject;F any}{A: false, B: false, C: false, D: {A: true, B: "abc", C: 123}, E: any, F: nil}}
 	{
 		`MStruct{D: {A: true, B: "abc", C: 123}}`,
@@ -3555,7 +3555,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e426f6f6c PrimValue       "v.io/v23/vom/testdata.NBool" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 55                   MsgId                            -43
 	//                      TypeMsg                           43
 	// 21                   MsgLen                            33
@@ -3565,7 +3565,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4d426f6f6c PrimValue       "v.io/v23/vom/testdata.MBool" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 59                   MsgId                            -45
 	//                      TypeMsg                           45
 	// 35                   MsgLen                            53
@@ -3580,27 +3580,27 @@ const Tests = []TestCase {
 	// 41                   PrimValue                        "A" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 42                   PrimValue                        "B" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 03                   PrimValue                          3 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 43                   PrimValue                        "C" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 09                   PrimValue                          9 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
-	// e1                   Control                          EOF [v.io/v23/vom.wireStruct END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireStruct END]
 	// 57                   MsgId                            -44
 	//                      TypeMsg                           44
 	// 04                   MsgLen                             4
 	// 08                   WireTypeIndex                      8 [v.io/v23/vom.wireOptional]
 	// 01                   Index                              1 [v.io/v23/vom.wireOptional.Elem]
 	// 2d                   PrimValue                         45 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireOptional END]
+	// e1                   Control                          End [v.io/v23/vom.wireOptional END]
 	// 51                   MsgId                            -41
 	//                      TypeMsg                           41
 	// 47                   MsgLen                            71
@@ -3615,38 +3615,38 @@ const Tests = []TestCase {
 	// 41                   PrimValue                        "A" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 42                   PrimValue                        "B" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 2a                   PrimValue                         42 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 43                   PrimValue                        "C" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 2b                   PrimValue                         43 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 44                   PrimValue                        "D" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 2c                   PrimValue                         44 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 45                   PrimValue                        "E" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 0e                   PrimValue                         14 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 46                   PrimValue                        "F" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 0f                   PrimValue                         15 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
-	// e1                   Control                          EOF [v.io/v23/vom.wireStruct END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireStruct END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.MStruct struct{A bool;B v.io/v23/vom/testdata.NBool bool;C v.io/v23/vom/testdata.MBool bool;D ?v.io/v23/vom/testdata.NStruct struct{A bool;B string;C int64};E typeobject;F any}]
 	// 07                   MsgLen                             7
@@ -3654,7 +3654,7 @@ const Tests = []TestCase {
 	// 03                   TypeId                             3 [string]
 	// 03                   ByteLen                            3 [string len]
 	// 616263               PrimValue                      "abc" [string]
-	// e1                   Control                          EOF [v.io/v23/vom/testdata.MStruct END]
+	// e1                   Control                          End [v.io/v23/vom/testdata.MStruct END]
 	// DumpStatus{MsgId: 41, MsgLen: 7, MsgN: 7, Value: v.io/v23/vom/testdata.MStruct struct{A bool;B v.io/v23/vom/testdata.NBool bool;C v.io/v23/vom/testdata.MBool bool;D ?v.io/v23/vom/testdata.NStruct struct{A bool;B string;C int64};E typeobject;F any}{A: false, B: false, C: false, D: nil, E: any, F: "abc"}}
 	{
 		`MStruct{F: "abc"}`,
@@ -3672,7 +3672,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e426f6f6c PrimValue       "v.io/v23/vom/testdata.NBool" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 55                   MsgId                            -43
 	//                      TypeMsg                           43
 	// 21                   MsgLen                            33
@@ -3682,7 +3682,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4d426f6f6c PrimValue       "v.io/v23/vom/testdata.MBool" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 59                   MsgId                            -45
 	//                      TypeMsg                           45
 	// 35                   MsgLen                            53
@@ -3697,27 +3697,27 @@ const Tests = []TestCase {
 	// 41                   PrimValue                        "A" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 42                   PrimValue                        "B" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 03                   PrimValue                          3 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 43                   PrimValue                        "C" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 09                   PrimValue                          9 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
-	// e1                   Control                          EOF [v.io/v23/vom.wireStruct END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireStruct END]
 	// 57                   MsgId                            -44
 	//                      TypeMsg                           44
 	// 04                   MsgLen                             4
 	// 08                   WireTypeIndex                      8 [v.io/v23/vom.wireOptional]
 	// 01                   Index                              1 [v.io/v23/vom.wireOptional.Elem]
 	// 2d                   PrimValue                         45 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireOptional END]
+	// e1                   Control                          End [v.io/v23/vom.wireOptional END]
 	// 51                   MsgId                            -41
 	//                      TypeMsg                           41
 	// 47                   MsgLen                            71
@@ -3732,45 +3732,45 @@ const Tests = []TestCase {
 	// 41                   PrimValue                        "A" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 42                   PrimValue                        "B" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 2a                   PrimValue                         42 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 43                   PrimValue                        "C" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 2b                   PrimValue                         43 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 44                   PrimValue                        "D" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 2c                   PrimValue                         44 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 45                   PrimValue                        "E" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 0e                   PrimValue                         14 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 46                   PrimValue                        "F" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 0f                   PrimValue                         15 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
-	// e1                   Control                          EOF [v.io/v23/vom.wireStruct END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireStruct END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.MStruct struct{A bool;B v.io/v23/vom/testdata.NBool bool;C v.io/v23/vom/testdata.MBool bool;D ?v.io/v23/vom/testdata.NStruct struct{A bool;B string;C int64};E typeobject;F any}]
 	// 04                   MsgLen                             4
 	// 05                   Index                              5 [v.io/v23/vom/testdata.MStruct.F]
 	// 2b                   TypeId                            43 [v.io/v23/vom/testdata.MBool bool]
 	// 01                   PrimValue                       true [bool]
-	// e1                   Control                          EOF [v.io/v23/vom/testdata.MStruct END]
+	// e1                   Control                          End [v.io/v23/vom/testdata.MStruct END]
 	// DumpStatus{MsgId: 41, MsgLen: 4, MsgN: 4, Value: v.io/v23/vom/testdata.MStruct struct{A bool;B v.io/v23/vom/testdata.NBool bool;C v.io/v23/vom/testdata.MBool bool;D ?v.io/v23/vom/testdata.NStruct struct{A bool;B string;C int64};E typeobject;F any}{A: false, B: false, C: false, D: nil, E: any, F: v.io/v23/vom/testdata.MBool bool(true)}}
 	{
 		`MStruct{F: MBool(true)}`,
@@ -3788,7 +3788,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e426f6f6c PrimValue       "v.io/v23/vom/testdata.NBool" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 55                   MsgId                            -43
 	//                      TypeMsg                           43
 	// 21                   MsgLen                            33
@@ -3798,7 +3798,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4d426f6f6c PrimValue       "v.io/v23/vom/testdata.MBool" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 59                   MsgId                            -45
 	//                      TypeMsg                           45
 	// 35                   MsgLen                            53
@@ -3813,27 +3813,27 @@ const Tests = []TestCase {
 	// 41                   PrimValue                        "A" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 42                   PrimValue                        "B" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 03                   PrimValue                          3 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 43                   PrimValue                        "C" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 09                   PrimValue                          9 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
-	// e1                   Control                          EOF [v.io/v23/vom.wireStruct END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireStruct END]
 	// 57                   MsgId                            -44
 	//                      TypeMsg                           44
 	// 04                   MsgLen                             4
 	// 08                   WireTypeIndex                      8 [v.io/v23/vom.wireOptional]
 	// 01                   Index                              1 [v.io/v23/vom.wireOptional.Elem]
 	// 2d                   PrimValue                         45 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireOptional END]
+	// e1                   Control                          End [v.io/v23/vom.wireOptional END]
 	// 51                   MsgId                            -41
 	//                      TypeMsg                           41
 	// 47                   MsgLen                            71
@@ -3848,38 +3848,38 @@ const Tests = []TestCase {
 	// 41                   PrimValue                        "A" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 42                   PrimValue                        "B" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 2a                   PrimValue                         42 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 43                   PrimValue                        "C" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 2b                   PrimValue                         43 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 44                   PrimValue                        "D" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 2c                   PrimValue                         44 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 45                   PrimValue                        "E" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 0e                   PrimValue                         14 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 46                   PrimValue                        "F" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 0f                   PrimValue                         15 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
-	// e1                   Control                          EOF [v.io/v23/vom.wireStruct END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireStruct END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.MStruct struct{A bool;B v.io/v23/vom/testdata.NBool bool;C v.io/v23/vom/testdata.MBool bool;D ?v.io/v23/vom/testdata.NStruct struct{A bool;B string;C int64};E typeobject;F any}]
 	// 09                   MsgLen                             9
@@ -3888,8 +3888,8 @@ const Tests = []TestCase {
 	// 01                   Index                              1 [v.io/v23/vom/testdata.NStruct.B]
 	// 03                   ByteLen                            3 [string len]
 	// 616263               PrimValue                      "abc" [string]
-	// e1                   Control                          EOF [v.io/v23/vom/testdata.NStruct END]
-	// e1                   Control                          EOF [v.io/v23/vom/testdata.MStruct END]
+	// e1                   Control                          End [v.io/v23/vom/testdata.NStruct END]
+	// e1                   Control                          End [v.io/v23/vom/testdata.MStruct END]
 	// DumpStatus{MsgId: 41, MsgLen: 9, MsgN: 9, Value: v.io/v23/vom/testdata.MStruct struct{A bool;B v.io/v23/vom/testdata.NBool bool;C v.io/v23/vom/testdata.MBool bool;D ?v.io/v23/vom/testdata.NStruct struct{A bool;B string;C int64};E typeobject;F any}{A: false, B: false, C: false, D: nil, E: any, F: ?v.io/v23/vom/testdata.NStruct struct{A bool;B string;C int64}({A: false, B: "abc", C: 0})}}
 	{
 		`MStruct{F: ?NStruct{B: "abc"}}`,
@@ -3907,7 +3907,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e4c69737455696e743634 PrimValue       "v.io/v23/vom/testdata.NListUint64" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireList.Elem]
 	// 06                   PrimValue                          6 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireList END]
+	// e1                   Control                          End [v.io/v23/vom.wireList END]
 	// 51                   MsgId                            -41
 	//                      TypeMsg                           41
 	// 21                   MsgLen                            33
@@ -3917,7 +3917,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4d4c697374 PrimValue       "v.io/v23/vom/testdata.MList" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireList.Elem]
 	// 2a                   PrimValue                         42 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireList END]
+	// e1                   Control                          End [v.io/v23/vom.wireList END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.MList []v.io/v23/vom/testdata.NListUint64 []uint64]
 	// 07                   MsgLen                             7
@@ -3945,7 +3945,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e466c6f61743332 PrimValue       "v.io/v23/vom/testdata.NFloat32" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 0a                   PrimValue                         10 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 55                   MsgId                            -43
 	//                      TypeMsg                           43
 	// 27                   MsgLen                            39
@@ -3955,7 +3955,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e4c69737455696e743634 PrimValue       "v.io/v23/vom/testdata.NListUint64" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireList.Elem]
 	// 06                   PrimValue                          6 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireList END]
+	// e1                   Control                          End [v.io/v23/vom.wireList END]
 	// 51                   MsgId                            -41
 	//                      TypeMsg                           41
 	// 22                   MsgLen                            34
@@ -3967,7 +3967,7 @@ const Tests = []TestCase {
 	// 2a                   PrimValue                         42 [uint]
 	// 02                   Index                              2 [v.io/v23/vom.wireMap.Elem]
 	// 2b                   PrimValue                         43 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireMap END]
+	// e1                   Control                          End [v.io/v23/vom.wireMap END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.MMap map[v.io/v23/vom/testdata.NFloat32 float32]v.io/v23/vom/testdata.NListUint64 []uint64]
 	// 07                   MsgLen                             7
@@ -3993,7 +3993,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e52656341 PrimValue       "v.io/v23/vom/testdata.RecA" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireList.Elem]
 	// 29                   PrimValue                         41 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireList END]
+	// e1                   Control                          End [v.io/v23/vom.wireList END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.RecA []v.io/v23/vom/testdata.RecA]
 	// 04                   MsgLen                             4
@@ -4018,7 +4018,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e52656359 PrimValue       "v.io/v23/vom/testdata.RecY" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireList.Elem]
 	// 29                   PrimValue                         41 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireList END]
+	// e1                   Control                          End [v.io/v23/vom.wireList END]
 	// 51                   MsgId                            -41
 	//                      TypeMsg                           41
 	// 20                   MsgLen                            32
@@ -4028,7 +4028,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e52656358 PrimValue       "v.io/v23/vom/testdata.RecX" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireList.Elem]
 	// 2a                   PrimValue                         42 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireList END]
+	// e1                   Control                          End [v.io/v23/vom.wireList END]
 	// 52                   MsgId                             41
 	//                      ValueMsg                          41 [v.io/v23/vom/testdata.RecX []v.io/v23/vom/testdata.RecY []v.io/v23/vom/testdata.RecX]
 	// 05                   MsgLen                             5
@@ -4219,7 +4219,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e426f6f6c PrimValue       "v.io/v23/vom/testdata.NBool" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 1c                   MsgId                             14
 	//                      ValueMsg                          14 [typeobject]
 	// 29                   TypeId                            41 [v.io/v23/vom/testdata.NBool bool]
@@ -4240,7 +4240,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e55696e743136 PrimValue       "v.io/v23/vom/testdata.NUint16" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 04                   PrimValue                          4 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 1c                   MsgId                             14
 	//                      ValueMsg                          14 [typeobject]
 	// 29                   TypeId                            41 [v.io/v23/vom/testdata.NUint16 uint16]
@@ -4261,7 +4261,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e55696e743332 PrimValue       "v.io/v23/vom/testdata.NUint32" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 05                   PrimValue                          5 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 1c                   MsgId                             14
 	//                      ValueMsg                          14 [typeobject]
 	// 29                   TypeId                            41 [v.io/v23/vom/testdata.NUint32 uint32]
@@ -4282,7 +4282,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e55696e743634 PrimValue       "v.io/v23/vom/testdata.NUint64" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 06                   PrimValue                          6 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 1c                   MsgId                             14
 	//                      ValueMsg                          14 [typeobject]
 	// 29                   TypeId                            41 [v.io/v23/vom/testdata.NUint64 uint64]
@@ -4303,7 +4303,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e496e743136 PrimValue       "v.io/v23/vom/testdata.NInt16" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 07                   PrimValue                          7 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 1c                   MsgId                             14
 	//                      ValueMsg                          14 [typeobject]
 	// 29                   TypeId                            41 [v.io/v23/vom/testdata.NInt16 int16]
@@ -4324,7 +4324,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e496e743332 PrimValue       "v.io/v23/vom/testdata.NInt32" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 08                   PrimValue                          8 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 1c                   MsgId                             14
 	//                      ValueMsg                          14 [typeobject]
 	// 29                   TypeId                            41 [v.io/v23/vom/testdata.NInt32 int32]
@@ -4345,7 +4345,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e496e743634 PrimValue       "v.io/v23/vom/testdata.NInt64" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 09                   PrimValue                          9 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 1c                   MsgId                             14
 	//                      ValueMsg                          14 [typeobject]
 	// 29                   TypeId                            41 [v.io/v23/vom/testdata.NInt64 int64]
@@ -4366,7 +4366,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e466c6f61743332 PrimValue       "v.io/v23/vom/testdata.NFloat32" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 0a                   PrimValue                         10 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 1c                   MsgId                             14
 	//                      ValueMsg                          14 [typeobject]
 	// 29                   TypeId                            41 [v.io/v23/vom/testdata.NFloat32 float32]
@@ -4387,7 +4387,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e466c6f61743634 PrimValue       "v.io/v23/vom/testdata.NFloat64" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 0b                   PrimValue                         11 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 1c                   MsgId                             14
 	//                      ValueMsg                          14 [typeobject]
 	// 29                   TypeId                            41 [v.io/v23/vom/testdata.NFloat64 float64]
@@ -4408,7 +4408,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e436f6d706c65783634 PrimValue       "v.io/v23/vom/testdata.NComplex64" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 0c                   PrimValue                         12 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 1c                   MsgId                             14
 	//                      ValueMsg                          14 [typeobject]
 	// 29                   TypeId                            41 [v.io/v23/vom/testdata.NComplex64 complex64]
@@ -4429,7 +4429,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e436f6d706c6578313238 PrimValue       "v.io/v23/vom/testdata.NComplex128" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireNamed.Base]
 	// 0d                   PrimValue                         13 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireNamed END]
+	// e1                   Control                          End [v.io/v23/vom.wireNamed END]
 	// 1c                   MsgId                             14
 	//                      ValueMsg                          14 [typeobject]
 	// 29                   TypeId                            41 [v.io/v23/vom/testdata.NComplex128 complex128]
@@ -4452,7 +4452,7 @@ const Tests = []TestCase {
 	// 06                   PrimValue                          6 [uint]
 	// 02                   Index                              2 [v.io/v23/vom.wireArray.Len]
 	// 02                   PrimValue                          2 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireArray END]
+	// e1                   Control                          End [v.io/v23/vom.wireArray END]
 	// 1c                   MsgId                             14
 	//                      ValueMsg                          14 [typeobject]
 	// 29                   TypeId                            41 [v.io/v23/vom/testdata.NArray2Uint64 [2]uint64]
@@ -4470,7 +4470,7 @@ const Tests = []TestCase {
 	// 03                   WireTypeIndex                      3 [v.io/v23/vom.wireList]
 	// 01                   Index                              1 [v.io/v23/vom.wireList.Elem]
 	// 06                   PrimValue                          6 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireList END]
+	// e1                   Control                          End [v.io/v23/vom.wireList END]
 	// 1c                   MsgId                             14
 	//                      ValueMsg                          14 [typeobject]
 	// 29                   TypeId                            41 [[]uint64]
@@ -4491,7 +4491,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e4c69737455696e743634 PrimValue       "v.io/v23/vom/testdata.NListUint64" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireList.Elem]
 	// 06                   PrimValue                          6 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireList END]
+	// e1                   Control                          End [v.io/v23/vom.wireList END]
 	// 1c                   MsgId                             14
 	//                      ValueMsg                          14 [typeobject]
 	// 29                   TypeId                            41 [v.io/v23/vom/testdata.NListUint64 []uint64]
@@ -4509,7 +4509,7 @@ const Tests = []TestCase {
 	// 04                   WireTypeIndex                      4 [v.io/v23/vom.wireSet]
 	// 01                   Index                              1 [v.io/v23/vom.wireSet.Key]
 	// 06                   PrimValue                          6 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireSet END]
+	// e1                   Control                          End [v.io/v23/vom.wireSet END]
 	// 1c                   MsgId                             14
 	//                      ValueMsg                          14 [typeobject]
 	// 29                   TypeId                            41 [set[uint64]]
@@ -4530,7 +4530,7 @@ const Tests = []TestCase {
 	// 762e696f2f7632332f766f6d2f74657374646174612e4e53657455696e743634 PrimValue       "v.io/v23/vom/testdata.NSetUint64" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireSet.Key]
 	// 06                   PrimValue                          6 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireSet END]
+	// e1                   Control                          End [v.io/v23/vom.wireSet END]
 	// 1c                   MsgId                             14
 	//                      ValueMsg                          14 [typeobject]
 	// 29                   TypeId                            41 [v.io/v23/vom/testdata.NSetUint64 set[uint64]]
@@ -4550,7 +4550,7 @@ const Tests = []TestCase {
 	// 06                   PrimValue                          6 [uint]
 	// 02                   Index                              2 [v.io/v23/vom.wireMap.Elem]
 	// 03                   PrimValue                          3 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireMap END]
+	// e1                   Control                          End [v.io/v23/vom.wireMap END]
 	// 1c                   MsgId                             14
 	//                      ValueMsg                          14 [typeobject]
 	// 29                   TypeId                            41 [map[uint64]string]
@@ -4573,7 +4573,7 @@ const Tests = []TestCase {
 	// 06                   PrimValue                          6 [uint]
 	// 02                   Index                              2 [v.io/v23/vom.wireMap.Elem]
 	// 03                   PrimValue                          3 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireMap END]
+	// e1                   Control                          End [v.io/v23/vom.wireMap END]
 	// 1c                   MsgId                             14
 	//                      ValueMsg                          14 [typeobject]
 	// 29                   TypeId                            41 [v.io/v23/vom/testdata.NMapUint64String map[uint64]string]
@@ -4599,20 +4599,20 @@ const Tests = []TestCase {
 	// 41                   PrimValue                        "A" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 42                   PrimValue                        "B" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 03                   PrimValue                          3 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 43                   PrimValue                        "C" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 09                   PrimValue                          9 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
-	// e1                   Control                          EOF [v.io/v23/vom.wireStruct END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireStruct END]
 	// 1c                   MsgId                             14
 	//                      ValueMsg                          14 [typeobject]
 	// 29                   TypeId                            41 [v.io/v23/vom/testdata.NStruct struct{A bool;B string;C int64}]
@@ -4639,7 +4639,7 @@ const Tests = []TestCase {
 	// 42                   PrimValue                        "B" [string]
 	// 01                   ByteLen                            1 [string len]
 	// 43                   PrimValue                        "C" [string]
-	// e1                   Control                          EOF [v.io/v23/vom.wireEnum END]
+	// e1                   Control                          End [v.io/v23/vom.wireEnum END]
 	// 1c                   MsgId                             14
 	//                      ValueMsg                          14 [typeobject]
 	// 29                   TypeId                            41 [v.io/v23/vom/testdata.NEnum enum{A;B;C}]
@@ -4665,20 +4665,20 @@ const Tests = []TestCase {
 	// 41                   PrimValue                        "A" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 01                   PrimValue                          1 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 42                   PrimValue                        "B" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 03                   PrimValue                          3 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
 	// 00                   Index                              0 [v.io/v23/vom.wireField.Name]
 	// 01                   ByteLen                            1 [string len]
 	// 43                   PrimValue                        "C" [string]
 	// 01                   Index                              1 [v.io/v23/vom.wireField.Type]
 	// 09                   PrimValue                          9 [uint]
-	// e1                   Control                          EOF [v.io/v23/vom.wireField END]
-	// e1                   Control                          EOF [v.io/v23/vom.wireUnion END]
+	// e1                   Control                          End [v.io/v23/vom.wireField END]
+	// e1                   Control                          End [v.io/v23/vom.wireUnion END]
 	// 1c                   MsgId                             14
 	//                      ValueMsg                          14 [typeobject]
 	// 29                   TypeId                            41 [v.io/v23/vom/testdata.NUnion union{A bool;B string;C int64}]
@@ -4704,10 +4704,10 @@ const CompatTests = map[string][]typeobject{
 	"number": []typeobject{typeobject(uint16), typeobject(uint32), typeobject(uint64), typeobject(int16), typeobject(int32), typeobject(int64), typeobject(float32), typeobject(float64), typeobject(complex64), typeobject(complex128), typeobject(NUint16), typeobject(NUint32), typeobject(NUint64), typeobject(NInt16), typeobject(NInt32), typeobject(NInt64), typeobject(NFloat32), typeobject(NFloat64), typeobject(NComplex64), typeobject(NComplex128)},
 	"string list/array": []typeobject{typeobject([]string), typeobject(ListString), typeobject(Array3String), typeobject(Array4String)},
 	"string/[]byte/enum": []typeobject{typeobject(string), typeobject(NString), typeobject([]byte), typeobject(NByteSlice), typeobject(NByteArray), typeobject(NEnum)},
-	"struct A": []typeobject{typeobject(NStruct), typeobject(ABCStruct), typeobject(ADEStruct)},
-	"struct Z": []typeobject{typeobject(XYZStruct), typeobject(YZStruct), typeobject(ZStruct)},
+	"struct A": []typeobject{typeobject(NStruct), typeobject(AbcStruct), typeobject(AdeStruct)},
+	"struct Z": []typeobject{typeobject(XyzStruct), typeobject(YzStruct), typeobject(ZStruct)},
 	"typeobject": []typeobject{typeobject(typeobject)},
-	"union B": []typeobject{typeobject(NUnion), typeobject(BDEUnion)},
+	"union B": []typeobject{typeobject(NUnion), typeobject(BdeUnion)},
 }
 
 // ConvertTests contains the testcases to check vom value convertibility.
@@ -4781,18 +4781,18 @@ const ConvertTests = map[string][]ConvertGroup{
 		},
 		{
 			"enum (brie)",
-			typeobject(BRIENum),
-			{ "Brie", NString("Brie"), BRIENum.Brie, FOODYNum.Brie, []byte("Brie"), NByteArray("Brie"), },
+			typeobject(BrieEnum),
+			{ "Brie", NString("Brie"), BrieEnum.Brie, FoodEnum.Brie, []byte("Brie"), NByteArray("Brie"), },
 		},
 		{
 			"[4]byte",
 			typeobject(NByteArray),
-			{ "Bean", NString("Bean"), BEANum.Bean, FOODYNum.Bean, []byte("Bean"), NByteArray("Bean"), },
+			{ "Bean", NString("Bean"), BeanEnum.Bean, FoodEnum.Bean, []byte("Bean"), NByteArray("Bean"), },
 		},
 		{
 			"string",
 			typeobject(NString),
-			{ "Cherry", NString("Cherry"), FOODYNum.Cherry, []byte("Cherry"), NByteSlice("Cherry"), },
+			{ "Cherry", NString("Cherry"), FoodEnum.Cherry, []byte("Cherry"), NByteSlice("Cherry"), },
 		},
 	},
 	"struct, map, and set": {
@@ -4818,13 +4818,13 @@ const ConvertTests = map[string][]ConvertGroup{
 		},
 		{
 			"structABC",
-			typeobject(ABCStruct),
-			{ ABCStruct{A: true}, ADEStruct{A: true}, NStruct{A: true}, },
+			typeobject(AbcStruct),
+			{ AbcStruct{A: true}, AdeStruct{A: true}, NStruct{A: true}, },
 		},
 		{
-			"structYZ",
-			typeobject(YZStruct),
-			{ XYZStruct{Z: "ahoy"}, YZStruct{Z: "ahoy"}, ZStruct{Z: "ahoy"}, },
+			"structYz",
+			typeobject(YzStruct),
+			{ XyzStruct{Z: "ahoy"}, YzStruct{Z: "ahoy"}, ZStruct{Z: "ahoy"}, },
 		},
 		{
 			"struct+map",
@@ -4856,12 +4856,12 @@ const ConvertTests = map[string][]ConvertGroup{
 	},
 	"union": {
 		{
-			"BDEUnion",
-			typeobject(BDEUnion),
-			{ BDEUnion{B: "bde"}, NUnion{B: "bde"}, },
+			"BdeUnion",
+			typeobject(BdeUnion),
+			{ BdeUnion{B: "bde"}, NUnion{B: "bde"}, },
 		},
 		{
-			"BDEUnion fail",
+			"BdeUnion fail",
 			typeobject(NUnion),
 			{ NUnion{A: true}, },
 		},

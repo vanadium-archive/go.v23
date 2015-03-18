@@ -117,5 +117,5 @@ type wireOptional struct {
 //   region 3: 0xE0...0xEF (16 entries)
 const (
   WireCtrlNil = byte(0xe0)
-  WireCtrlEOF = byte(0xe1)
+  WireCtrlEnd = byte(0xe1)
 )

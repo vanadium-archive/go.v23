@@ -20,9 +20,9 @@ var (
 	// NotImplemented means that the request type is valid but that the method to
 	// handle the request has not been implemented.
 	ErrNotImplemented = Register("v.io/v23/verror.NotImplemented", NoRetry, "{1:}{2:} Not implemented{:_}")
-	// EOF means the end-of-file has been reached; more generally, no more input
-	// data is available.
-	ErrEOF = Register("v.io/v23/verror.EOF", NoRetry, "{1:}{2:} EOF{:_}")
+	// EndOfFile means the end-of-file has been reached; more generally, no more
+	// input data is available.
+	ErrEndOfFile = Register("v.io/v23/verror.EndOfFile", NoRetry, "{1:}{2:} End of file{:_}")
 	// BadArg means the arguments to an operation are invalid or incorrectly
 	// formatted.
 	ErrBadArg = Register("v.io/v23/verror.BadArg", NoRetry, "{1:}{2:} Bad argument{:_}")
@@ -81,7 +81,7 @@ func init() {
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnknown.ID), "{1:}{2:} Error{:_}")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrInternal.ID), "{1:}{2:} Internal error{:_}")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNotImplemented.ID), "{1:}{2:} Not implemented{:_}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrEOF.ID), "{1:}{2:} EOF{:_}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrEndOfFile.ID), "{1:}{2:} End of file{:_}")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBadArg.ID), "{1:}{2:} Bad argument{:_}")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBadState.ID), "{1:}{2:} Invalid state{:_}")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBadEtag.ID), "{1:}{2:} Etag is out of date")
@@ -113,9 +113,9 @@ func NewErrNotImplemented(ctx *context.T) error {
 	return New(ErrNotImplemented, ctx)
 }
 
-// NewErrEOF returns an error with the ErrEOF ID.
-func NewErrEOF(ctx *context.T) error {
-	return New(ErrEOF, ctx)
+// NewErrEndOfFile returns an error with the ErrEndOfFile ID.
+func NewErrEndOfFile(ctx *context.T) error {
+	return New(ErrEndOfFile, ctx)
 }
 
 // NewErrBadArg returns an error with the ErrBadArg ID.

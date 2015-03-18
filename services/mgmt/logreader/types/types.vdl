@@ -12,7 +12,3 @@ type LogEntry struct {
 // A special NumEntries value that indicates that all entries should be
 // returned by ReadLog.
 const AllEntries = int32(-1)
-
-error (
-	EOF() {"en": "EOF"}
-)

@@ -92,7 +92,7 @@ const UnsupportedOS = OperatingSystem("unsupported")
 type BuilderClientMethods interface {
 	// Build streams sources to the build server, which then attempts to
 	// build the sources and streams back the compiled binaries.
-	Build(ctx *context.T, Arch Architecture, OS OperatingSystem, opts ...rpc.CallOpt) (BuilderBuildClientCall, error)
+	Build(ctx *context.T, arch Architecture, os OperatingSystem, opts ...rpc.CallOpt) (BuilderBuildClientCall, error)
 	// Describe generates a description for a binary identified by
 	// the given Object name.
 	Describe(ctx *context.T, name string, opts ...rpc.CallOpt) (binary.Description, error)
@@ -255,7 +255,7 @@ func (c *implBuilderBuildClientCall) Finish() (o0 []byte, err error) {
 type BuilderServerMethods interface {
 	// Build streams sources to the build server, which then attempts to
 	// build the sources and streams back the compiled binaries.
-	Build(call BuilderBuildServerCall, Arch Architecture, OS OperatingSystem) ([]byte, error)
+	Build(call BuilderBuildServerCall, arch Architecture, os OperatingSystem) ([]byte, error)
 	// Describe generates a description for a binary identified by
 	// the given Object name.
 	Describe(call rpc.ServerCall, name string) (binary.Description, error)
@@ -268,7 +268,7 @@ type BuilderServerMethods interface {
 type BuilderServerStubMethods interface {
 	// Build streams sources to the build server, which then attempts to
 	// build the sources and streams back the compiled binaries.
-	Build(call *BuilderBuildServerCallStub, Arch Architecture, OS OperatingSystem) ([]byte, error)
+	Build(call *BuilderBuildServerCallStub, arch Architecture, os OperatingSystem) ([]byte, error)
 	// Describe generates a description for a binary identified by
 	// the given Object name.
 	Describe(call rpc.ServerCall, name string) (binary.Description, error)
@@ -332,8 +332,8 @@ var descBuilder = rpc.InterfaceDesc{
 			Name: "Build",
 			Doc:  "// Build streams sources to the build server, which then attempts to\n// build the sources and streams back the compiled binaries.",
 			InArgs: []rpc.ArgDesc{
-				{"Arch", ``}, // Architecture
-				{"OS", ``},   // OperatingSystem
+				{"arch", ``}, // Architecture
+				{"os", ``},   // OperatingSystem
 			},
 			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // []byte

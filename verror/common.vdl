@@ -14,9 +14,9 @@ error (
 	// handle the request has not been implemented.
 	NotImplemented() {"en":"Not implemented{:_}"}
 
-	// EOF means the end-of-file has been reached; more generally, no more input
-	// data is available.
-	EOF() {"en":"EOF{:_}"}
+	// EndOfFile means the end-of-file has been reached; more generally, no more
+	// input data is available.
+	EndOfFile() {"en":"End of file{:_}"}
 
 	// BadArg means the arguments to an operation are invalid or incorrectly
 	// formatted.

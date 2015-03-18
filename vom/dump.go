@@ -266,7 +266,7 @@ func (d *dumpWorker) lastFlushDone() {
 // DumpWriter at the end of decoding each value, and may also be triggered
 // explicitly via Dumper.Status calls to get information for partial dumps.
 type DumpStatus struct {
-	MsgID  int64
+	MsgId  int64
 	MsgLen int
 	MsgN   int
 	Buf    []byte
@@ -276,7 +276,7 @@ type DumpStatus struct {
 }
 
 func (s DumpStatus) String() string {
-	ret := fmt.Sprintf("DumpStatus{MsgID: %d", s.MsgID)
+	ret := fmt.Sprintf("DumpStatus{MsgId: %d", s.MsgId)
 	if s.MsgLen != 0 {
 		ret += fmt.Sprintf(", MsgLen: %d", s.MsgLen)
 	}
@@ -403,7 +403,7 @@ func (d *dumpWorker) decodeValueType() (*vdl.Type, error) {
 			return nil, err
 		}
 		d.writeAtom(DumpKindMsgId, PrimitivePInt{id}, "")
-		d.status.MsgID = id
+		d.status.MsgId = id
 		switch {
 		case id == 0:
 			return nil, errDecodeZeroTypeID
@@ -474,7 +474,7 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 			return err
 		case ctrl == WireCtrlNil:
 			d.buf.Skip(1)
-			d.writeAtom(DumpKindControl, PrimitivePControl{ControlKindNIL}, "%v is nil", ttFrom)
+			d.writeAtom(DumpKindControl, PrimitivePControl{ControlKindNil}, "%v is nil", ttFrom)
 			return target.FromNil(ttFrom)
 		}
 		tt = tt.Elem()
@@ -682,8 +682,8 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 			switch {
 			case err != nil:
 				return err
-			case ctrl == WireCtrlEOF:
-				d.writeAtom(DumpKindControl, PrimitivePControl{ControlKindEOF}, "%v END", tt.Name())
+			case ctrl == WireCtrlEnd:
+				d.writeAtom(DumpKindControl, PrimitivePControl{ControlKindEnd}, "%v END", tt.Name())
 				return target.FinishFields(fieldsTarget)
 			case ctrl != 0:
 				return fmt.Errorf("vom: unexpected control byte 0x%x", ctrl)
@@ -742,7 +742,7 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		case err != nil:
 			return err
 		case ctrl == WireCtrlNil:
-			d.writeAtom(DumpKindControl, PrimitivePControl{ControlKindNIL}, "any(nil)")
+			d.writeAtom(DumpKindControl, PrimitivePControl{ControlKindNil}, "any(nil)")
 			return target.FromNil(vdl.AnyType)
 		case ctrl != 0:
 			return fmt.Errorf("vom: unexpected control byte 0x%x", ctrl)

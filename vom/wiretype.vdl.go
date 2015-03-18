@@ -285,4 +285,4 @@ const WireIdFirstUserType = typeId(41)
 
 const WireCtrlNil = byte(224)
 
-const WireCtrlEOF = byte(225)
+const WireCtrlEnd = byte(225)

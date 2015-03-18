@@ -24,20 +24,20 @@ import (
 type LogFileClientMethods interface {
 	// Size returns the number of bytes in the receiving object.
 	Size(*context.T, ...rpc.CallOpt) (int64, error)
-	// ReadLog receives up to NumEntries log entries starting at the
-	// StartPos offset (in bytes) in the receiving object. Each stream chunk
+	// ReadLog receives up to numEntries log entries starting at the
+	// startPos offset (in bytes) in the receiving object. Each stream chunk
 	// contains one log entry.
 	//
-	// If Follow is true, ReadLog will block and wait for more entries to
+	// If follow is true, ReadLog will block and wait for more entries to
 	// arrive when it reaches the end of the file.
 	//
 	// ReadLog returns the position where it stopped reading, i.e. the
 	// position where the next entry starts. This value can be used as
-	// StartPos for successive calls to ReadLog.
+	// startPos for successive calls to ReadLog.
 	//
-	// The returned error will be EOF if and only if ReadLog reached the
+	// The returned error will be EndOfFile if and only if ReadLog reached the
 	// end of the file and no log entries were returned.
-	ReadLog(ctx *context.T, StartPos int64, NumEntries int32, Follow bool, opts ...rpc.CallOpt) (LogFileReadLogClientCall, error)
+	ReadLog(ctx *context.T, startPos int64, numEntries int32, follow bool, opts ...rpc.CallOpt) (LogFileReadLogClientCall, error)
 }
 
 // LogFileClientStub adds universal methods to LogFileClientMethods.
@@ -163,20 +163,20 @@ func (c *implLogFileReadLogClientCall) Finish() (o0 int64, err error) {
 type LogFileServerMethods interface {
 	// Size returns the number of bytes in the receiving object.
 	Size(rpc.ServerCall) (int64, error)
-	// ReadLog receives up to NumEntries log entries starting at the
-	// StartPos offset (in bytes) in the receiving object. Each stream chunk
+	// ReadLog receives up to numEntries log entries starting at the
+	// startPos offset (in bytes) in the receiving object. Each stream chunk
 	// contains one log entry.
 	//
-	// If Follow is true, ReadLog will block and wait for more entries to
+	// If follow is true, ReadLog will block and wait for more entries to
 	// arrive when it reaches the end of the file.
 	//
 	// ReadLog returns the position where it stopped reading, i.e. the
 	// position where the next entry starts. This value can be used as
-	// StartPos for successive calls to ReadLog.
+	// startPos for successive calls to ReadLog.
 	//
-	// The returned error will be EOF if and only if ReadLog reached the
+	// The returned error will be EndOfFile if and only if ReadLog reached the
 	// end of the file and no log entries were returned.
-	ReadLog(call LogFileReadLogServerCall, StartPos int64, NumEntries int32, Follow bool) (int64, error)
+	ReadLog(call LogFileReadLogServerCall, startPos int64, numEntries int32, follow bool) (int64, error)
 }
 
 // LogFileServerStubMethods is the server interface containing
@@ -186,20 +186,20 @@ type LogFileServerMethods interface {
 type LogFileServerStubMethods interface {
 	// Size returns the number of bytes in the receiving object.
 	Size(rpc.ServerCall) (int64, error)
-	// ReadLog receives up to NumEntries log entries starting at the
-	// StartPos offset (in bytes) in the receiving object. Each stream chunk
+	// ReadLog receives up to numEntries log entries starting at the
+	// startPos offset (in bytes) in the receiving object. Each stream chunk
 	// contains one log entry.
 	//
-	// If Follow is true, ReadLog will block and wait for more entries to
+	// If follow is true, ReadLog will block and wait for more entries to
 	// arrive when it reaches the end of the file.
 	//
 	// ReadLog returns the position where it stopped reading, i.e. the
 	// position where the next entry starts. This value can be used as
-	// StartPos for successive calls to ReadLog.
+	// startPos for successive calls to ReadLog.
 	//
-	// The returned error will be EOF if and only if ReadLog reached the
+	// The returned error will be EndOfFile if and only if ReadLog reached the
 	// end of the file and no log entries were returned.
-	ReadLog(call *LogFileReadLogServerCallStub, StartPos int64, NumEntries int32, Follow bool) (int64, error)
+	ReadLog(call *LogFileReadLogServerCallStub, startPos int64, numEntries int32, follow bool) (int64, error)
 }
 
 // LogFileServerStub adds universal methods to LogFileServerStubMethods.
@@ -266,11 +266,11 @@ var descLogFile = rpc.InterfaceDesc{
 		},
 		{
 			Name: "ReadLog",
-			Doc:  "// ReadLog receives up to NumEntries log entries starting at the\n// StartPos offset (in bytes) in the receiving object. Each stream chunk\n// contains one log entry.\n//\n// If Follow is true, ReadLog will block and wait for more entries to\n// arrive when it reaches the end of the file.\n//\n// ReadLog returns the position where it stopped reading, i.e. the\n// position where the next entry starts. This value can be used as\n// StartPos for successive calls to ReadLog.\n//\n// The returned error will be EOF if and only if ReadLog reached the\n// end of the file and no log entries were returned.",
+			Doc:  "// ReadLog receives up to numEntries log entries starting at the\n// startPos offset (in bytes) in the receiving object. Each stream chunk\n// contains one log entry.\n//\n// If follow is true, ReadLog will block and wait for more entries to\n// arrive when it reaches the end of the file.\n//\n// ReadLog returns the position where it stopped reading, i.e. the\n// position where the next entry starts. This value can be used as\n// startPos for successive calls to ReadLog.\n//\n// The returned error will be EndOfFile if and only if ReadLog reached the\n// end of the file and no log entries were returned.",
 			InArgs: []rpc.ArgDesc{
-				{"StartPos", ``},   // int64
-				{"NumEntries", ``}, // int32
-				{"Follow", ``},     // bool
+				{"startPos", ``},   // int64
+				{"numEntries", ``}, // int32
+				{"follow", ``},     // bool
 			},
 			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // int64

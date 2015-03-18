@@ -103,40 +103,40 @@ type MountTableClientMethods interface {
 	object.ObjectClientMethods
 	// DEPRECATED: TODO(ashankar): Rename MountX to Mount and remove
 	// MountX before the release.
-	Mount(ctx *context.T, Server string, TTL uint32, Flags naming.MountFlag, opts ...rpc.CallOpt) error
+	Mount(ctx *context.T, server string, ttl uint32, flags naming.MountFlag, opts ...rpc.CallOpt) error
 	// Mount Server (a global name) onto the receiver.
 	//
 	// Subsequent mounts add to the servers mounted there.  The multiple
 	// servers are considered equivalent and are meant solely for
 	// availability, i.e., no load balancing is guaranteed.
 	//
-	// BlessingPatterns is a set of patterns that match the blessings
-	// presented by Server to clients that initiate connections with it.
-	// If empty, the mounttable makes the conservative assumption that the
-	// blessings presented by the client invoking Mount will be the
-	// blessings presented by Server.
+	// The blessingPatterns is a set of patterns that match the blessings
+	// presented by server to clients that initiate connections with it.  If
+	// empty, the mounttable makes the conservative assumption that the blessings
+	// presented by the client invoking Mount will be the blessings presented by
+	// server.
 	//
-	// TTL is the number of seconds the mount is to last unless refreshed by
-	// another mount of the same server.  A TTL of 0 represents an infinite
-	// duration.  A server with an expired TTL should never appear in the
-	// results nor affect the operation of any MountTable method, and should
-	// act as if it was never present as far as the interface is concerned.
+	// The ttl is the number of seconds the mount is to last unless refreshed by
+	// another mount of the same server.  A ttl of 0 represents an infinite
+	// duration.  A server with an expired ttl should never appear in the results
+	// nor affect the operation of any MountTable method, and should act as if it
+	// was never present as far as the interface is concerned.
 	//
-	// Opts represents a bit mask of options.
-	MountX(ctx *context.T, Server string, BlessingPatterns []security.BlessingPattern, TTL uint32, Flags naming.MountFlag, opts ...rpc.CallOpt) error
-	// Unmount removes Server from the receiver.  If Server is empty, remove
-	// all servers mounted there.
-	// Returns a non-nil error iff Server remains mounted at the mount point.
-	Unmount(ctx *context.T, Server string, opts ...rpc.CallOpt) error
+	// The flags represent a bit mask of options.
+	MountX(ctx *context.T, server string, blessingPatterns []security.BlessingPattern, ttl uint32, flags naming.MountFlag, opts ...rpc.CallOpt) error
+	// Unmount removes server from the receiver.  If server is empty, remove all
+	// servers mounted there.  Returns a non-nil error iff server remains mounted
+	// at the mount point.
+	Unmount(ctx *context.T, server string, opts ...rpc.CallOpt) error
 	// Delete removes the receiver.  If the receiver has children, it will not
-	// be removed unless DeleteSubtree is true in which case the whole subtree is
+	// be removed unless deleteSubtree is true in which case the whole subtree is
 	// removed.
-	Delete(ctx *context.T, DeleteSubtree bool, opts ...rpc.CallOpt) error
+	Delete(ctx *context.T, deleteSubtree bool, opts ...rpc.CallOpt) error
 	// ResolveStep takes the next step in resolving a name.  Returns the next
 	// servers to query and the suffix at those servers.
-	ResolveStep(*context.T, ...rpc.CallOpt) (Entry naming.MountEntry, err error)
+	ResolveStep(*context.T, ...rpc.CallOpt) (naming.MountEntry, error)
 	// Obsolete, left for backward compatability until all uses are killed.
-	ResolveStepX(*context.T, ...rpc.CallOpt) (Entry naming.MountEntry, err error)
+	ResolveStepX(*context.T, ...rpc.CallOpt) (naming.MountEntry, error)
 }
 
 // MountTableClientStub adds universal methods to MountTableClientMethods.
@@ -277,40 +277,40 @@ type MountTableServerMethods interface {
 	object.ObjectServerMethods
 	// DEPRECATED: TODO(ashankar): Rename MountX to Mount and remove
 	// MountX before the release.
-	Mount(call rpc.ServerCall, Server string, TTL uint32, Flags naming.MountFlag) error
+	Mount(call rpc.ServerCall, server string, ttl uint32, flags naming.MountFlag) error
 	// Mount Server (a global name) onto the receiver.
 	//
 	// Subsequent mounts add to the servers mounted there.  The multiple
 	// servers are considered equivalent and are meant solely for
 	// availability, i.e., no load balancing is guaranteed.
 	//
-	// BlessingPatterns is a set of patterns that match the blessings
-	// presented by Server to clients that initiate connections with it.
-	// If empty, the mounttable makes the conservative assumption that the
-	// blessings presented by the client invoking Mount will be the
-	// blessings presented by Server.
+	// The blessingPatterns is a set of patterns that match the blessings
+	// presented by server to clients that initiate connections with it.  If
+	// empty, the mounttable makes the conservative assumption that the blessings
+	// presented by the client invoking Mount will be the blessings presented by
+	// server.
 	//
-	// TTL is the number of seconds the mount is to last unless refreshed by
-	// another mount of the same server.  A TTL of 0 represents an infinite
-	// duration.  A server with an expired TTL should never appear in the
-	// results nor affect the operation of any MountTable method, and should
-	// act as if it was never present as far as the interface is concerned.
+	// The ttl is the number of seconds the mount is to last unless refreshed by
+	// another mount of the same server.  A ttl of 0 represents an infinite
+	// duration.  A server with an expired ttl should never appear in the results
+	// nor affect the operation of any MountTable method, and should act as if it
+	// was never present as far as the interface is concerned.
 	//
-	// Opts represents a bit mask of options.
-	MountX(call rpc.ServerCall, Server string, BlessingPatterns []security.BlessingPattern, TTL uint32, Flags naming.MountFlag) error
-	// Unmount removes Server from the receiver.  If Server is empty, remove
-	// all servers mounted there.
-	// Returns a non-nil error iff Server remains mounted at the mount point.
-	Unmount(call rpc.ServerCall, Server string) error
+	// The flags represent a bit mask of options.
+	MountX(call rpc.ServerCall, server string, blessingPatterns []security.BlessingPattern, ttl uint32, flags naming.MountFlag) error
+	// Unmount removes server from the receiver.  If server is empty, remove all
+	// servers mounted there.  Returns a non-nil error iff server remains mounted
+	// at the mount point.
+	Unmount(call rpc.ServerCall, server string) error
 	// Delete removes the receiver.  If the receiver has children, it will not
-	// be removed unless DeleteSubtree is true in which case the whole subtree is
+	// be removed unless deleteSubtree is true in which case the whole subtree is
 	// removed.
-	Delete(call rpc.ServerCall, DeleteSubtree bool) error
+	Delete(call rpc.ServerCall, deleteSubtree bool) error
 	// ResolveStep takes the next step in resolving a name.  Returns the next
 	// servers to query and the suffix at those servers.
-	ResolveStep(rpc.ServerCall) (Entry naming.MountEntry, err error)
+	ResolveStep(rpc.ServerCall) (naming.MountEntry, error)
 	// Obsolete, left for backward compatability until all uses are killed.
-	ResolveStepX(rpc.ServerCall) (Entry naming.MountEntry, err error)
+	ResolveStepX(rpc.ServerCall) (naming.MountEntry, error)
 }
 
 // MountTableServerStubMethods is the server interface containing
@@ -398,47 +398,47 @@ var descMountTable = rpc.InterfaceDesc{
 			Name: "Mount",
 			Doc:  "// DEPRECATED: TODO(ashankar): Rename MountX to Mount and remove\n// MountX before the release.",
 			InArgs: []rpc.ArgDesc{
-				{"Server", ``}, // string
-				{"TTL", ``},    // uint32
-				{"Flags", ``},  // naming.MountFlag
+				{"server", ``}, // string
+				{"ttl", ``},    // uint32
+				{"flags", ``},  // naming.MountFlag
 			},
 		},
 		{
 			Name: "MountX",
-			Doc:  "// Mount Server (a global name) onto the receiver.\n//\n// Subsequent mounts add to the servers mounted there.  The multiple\n// servers are considered equivalent and are meant solely for\n// availability, i.e., no load balancing is guaranteed.\n//\n// BlessingPatterns is a set of patterns that match the blessings\n// presented by Server to clients that initiate connections with it.\n// If empty, the mounttable makes the conservative assumption that the\n// blessings presented by the client invoking Mount will be the\n// blessings presented by Server.\n//\n// TTL is the number of seconds the mount is to last unless refreshed by\n// another mount of the same server.  A TTL of 0 represents an infinite\n// duration.  A server with an expired TTL should never appear in the\n// results nor affect the operation of any MountTable method, and should\n// act as if it was never present as far as the interface is concerned.\n//\n// Opts represents a bit mask of options.",
+			Doc:  "// Mount Server (a global name) onto the receiver.\n//\n// Subsequent mounts add to the servers mounted there.  The multiple\n// servers are considered equivalent and are meant solely for\n// availability, i.e., no load balancing is guaranteed.\n//\n// The blessingPatterns is a set of patterns that match the blessings\n// presented by server to clients that initiate connections with it.  If\n// empty, the mounttable makes the conservative assumption that the blessings\n// presented by the client invoking Mount will be the blessings presented by\n// server.\n//\n// The ttl is the number of seconds the mount is to last unless refreshed by\n// another mount of the same server.  A ttl of 0 represents an infinite\n// duration.  A server with an expired ttl should never appear in the results\n// nor affect the operation of any MountTable method, and should act as if it\n// was never present as far as the interface is concerned.\n//\n// The flags represent a bit mask of options.",
 			InArgs: []rpc.ArgDesc{
-				{"Server", ``},           // string
-				{"BlessingPatterns", ``}, // []security.BlessingPattern
-				{"TTL", ``},              // uint32
-				{"Flags", ``},            // naming.MountFlag
+				{"server", ``},           // string
+				{"blessingPatterns", ``}, // []security.BlessingPattern
+				{"ttl", ``},              // uint32
+				{"flags", ``},            // naming.MountFlag
 			},
 		},
 		{
 			Name: "Unmount",
-			Doc:  "// Unmount removes Server from the receiver.  If Server is empty, remove\n// all servers mounted there.\n// Returns a non-nil error iff Server remains mounted at the mount point.",
+			Doc:  "// Unmount removes server from the receiver.  If server is empty, remove all\n// servers mounted there.  Returns a non-nil error iff server remains mounted\n// at the mount point.",
 			InArgs: []rpc.ArgDesc{
-				{"Server", ``}, // string
+				{"server", ``}, // string
 			},
 		},
 		{
 			Name: "Delete",
-			Doc:  "// Delete removes the receiver.  If the receiver has children, it will not\n// be removed unless DeleteSubtree is true in which case the whole subtree is\n// removed.",
+			Doc:  "// Delete removes the receiver.  If the receiver has children, it will not\n// be removed unless deleteSubtree is true in which case the whole subtree is\n// removed.",
 			InArgs: []rpc.ArgDesc{
-				{"DeleteSubtree", ``}, // bool
+				{"deleteSubtree", ``}, // bool
 			},
 		},
 		{
 			Name: "ResolveStep",
 			Doc:  "// ResolveStep takes the next step in resolving a name.  Returns the next\n// servers to query and the suffix at those servers.",
 			OutArgs: []rpc.ArgDesc{
-				{"Entry", ``}, // naming.MountEntry
+				{"", ``}, // naming.MountEntry
 			},
 		},
 		{
 			Name: "ResolveStepX",
 			Doc:  "// Obsolete, left for backward compatability until all uses are killed.",
 			OutArgs: []rpc.ArgDesc{
-				{"Entry", ``}, // naming.MountEntry
+				{"", ``}, // naming.MountEntry
 			},
 		},
 	},

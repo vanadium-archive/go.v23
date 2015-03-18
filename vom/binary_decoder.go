@@ -340,7 +340,7 @@ func (d *binaryDecoder) decodeValue(tt *vdl.Type, target vdl.Target) error {
 			switch {
 			case err != nil:
 				return err
-			case ctrl == WireCtrlEOF:
+			case ctrl == WireCtrlEnd:
 				// Fill not-yet-decoded fields with their zero values.
 				for index, decoded := range decodedFields {
 					if decoded {
@@ -477,7 +477,7 @@ func (d *binaryDecoder) ignoreValue(tt *vdl.Type) error {
 			switch index, ctrl, err := binaryDecodeUintWithControl(d.buf); {
 			case err != nil:
 				return err
-			case ctrl == WireCtrlEOF:
+			case ctrl == WireCtrlEnd:
 				return nil
 			case ctrl != 0:
 				return fmt.Errorf("vom: unexpected control byte 0x%x", ctrl)
