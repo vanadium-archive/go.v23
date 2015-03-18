@@ -37,7 +37,7 @@ const (
 )
 
 // WireRetryCodeAll holds all labels for WireRetryCode.
-var WireRetryCodeAll = []WireRetryCode{WireRetryCodeNoRetry, WireRetryCodeRetryConnection, WireRetryCodeRetryRefetch, WireRetryCodeRetryBackoff}
+var WireRetryCodeAll = [...]WireRetryCode{WireRetryCodeNoRetry, WireRetryCodeRetryConnection, WireRetryCodeRetryRefetch, WireRetryCodeRetryBackoff}
 
 // WireRetryCodeFromString creates a WireRetryCode from a string label.
 func WireRetryCodeFromString(label string) (x WireRetryCode, err error) {

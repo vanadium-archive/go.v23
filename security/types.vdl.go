@@ -229,7 +229,7 @@ const (
 )
 
 // CallSideAll holds all labels for CallSide.
-var CallSideAll = []CallSide{CallSideLocal, CallSideRemote}
+var CallSideAll = [...]CallSide{CallSideLocal, CallSideRemote}
 
 // CallSideFromString creates a CallSide from a string label.
 func CallSideFromString(label string) (x CallSide, err error) {
