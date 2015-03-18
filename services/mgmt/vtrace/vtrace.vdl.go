@@ -10,7 +10,7 @@ import (
 	"io"
 	"v.io/v23"
 	"v.io/v23/context"
-	"v.io/v23/ipc"
+	"v.io/v23/rpc"
 	"v.io/v23/vdl"
 
 	// VDL user imports
@@ -24,23 +24,23 @@ import (
 type StoreClientMethods interface {
 	// Trace returns the trace that matches the given Id.
 	// Will return a NoExists error if no matching trace was found.
-	Trace(*context.T, uniqueid.Id, ...ipc.CallOpt) (vtrace.TraceRecord, error)
+	Trace(*context.T, uniqueid.Id, ...rpc.CallOpt) (vtrace.TraceRecord, error)
 	// AllTraces returns TraceRecords for all traces the server currently
 	// knows about.
-	AllTraces(*context.T, ...ipc.CallOpt) (StoreAllTracesClientCall, error)
+	AllTraces(*context.T, ...rpc.CallOpt) (StoreAllTracesClientCall, error)
 }
 
 // StoreClientStub adds universal methods to StoreClientMethods.
 type StoreClientStub interface {
 	StoreClientMethods
-	ipc.UniversalServiceMethods
+	rpc.UniversalServiceMethods
 }
 
 // StoreClient returns a client stub for Store.
-func StoreClient(name string, opts ...ipc.BindOpt) StoreClientStub {
-	var client ipc.Client
+func StoreClient(name string, opts ...rpc.BindOpt) StoreClientStub {
+	var client rpc.Client
 	for _, opt := range opts {
-		if clientOpt, ok := opt.(ipc.Client); ok {
+		if clientOpt, ok := opt.(rpc.Client); ok {
 			client = clientOpt
 		}
 	}
@@ -49,18 +49,18 @@ func StoreClient(name string, opts ...ipc.BindOpt) StoreClientStub {
 
 type implStoreClientStub struct {
 	name   string
-	client ipc.Client
+	client rpc.Client
 }
 
-func (c implStoreClientStub) c(ctx *context.T) ipc.Client {
+func (c implStoreClientStub) c(ctx *context.T) rpc.Client {
 	if c.client != nil {
 		return c.client
 	}
 	return v23.GetClient(ctx)
 }
 
-func (c implStoreClientStub) Trace(ctx *context.T, i0 uniqueid.Id, opts ...ipc.CallOpt) (o0 vtrace.TraceRecord, err error) {
-	var call ipc.ClientCall
+func (c implStoreClientStub) Trace(ctx *context.T, i0 uniqueid.Id, opts ...rpc.CallOpt) (o0 vtrace.TraceRecord, err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Trace", []interface{}{i0}, opts...); err != nil {
 		return
 	}
@@ -68,8 +68,8 @@ func (c implStoreClientStub) Trace(ctx *context.T, i0 uniqueid.Id, opts ...ipc.C
 	return
 }
 
-func (c implStoreClientStub) AllTraces(ctx *context.T, opts ...ipc.CallOpt) (ocall StoreAllTracesClientCall, err error) {
-	var call ipc.ClientCall
+func (c implStoreClientStub) AllTraces(ctx *context.T, opts ...rpc.CallOpt) (ocall StoreAllTracesClientCall, err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "AllTraces", nil, opts...); err != nil {
 		return
 	}
@@ -110,7 +110,7 @@ type StoreAllTracesClientCall interface {
 }
 
 type implStoreAllTracesClientCall struct {
-	ipc.ClientCall
+	rpc.ClientCall
 	valRecv vtrace.TraceRecord
 	errRecv error
 }
@@ -151,20 +151,20 @@ func (c *implStoreAllTracesClientCall) Finish() (err error) {
 type StoreServerMethods interface {
 	// Trace returns the trace that matches the given Id.
 	// Will return a NoExists error if no matching trace was found.
-	Trace(ipc.ServerCall, uniqueid.Id) (vtrace.TraceRecord, error)
+	Trace(rpc.ServerCall, uniqueid.Id) (vtrace.TraceRecord, error)
 	// AllTraces returns TraceRecords for all traces the server currently
 	// knows about.
 	AllTraces(StoreAllTracesServerCall) error
 }
 
 // StoreServerStubMethods is the server interface containing
-// Store methods, as expected by ipc.Server.
+// Store methods, as expected by rpc.Server.
 // The only difference between this interface and StoreServerMethods
 // is the streaming methods.
 type StoreServerStubMethods interface {
 	// Trace returns the trace that matches the given Id.
 	// Will return a NoExists error if no matching trace was found.
-	Trace(ipc.ServerCall, uniqueid.Id) (vtrace.TraceRecord, error)
+	Trace(rpc.ServerCall, uniqueid.Id) (vtrace.TraceRecord, error)
 	// AllTraces returns TraceRecords for all traces the server currently
 	// knows about.
 	AllTraces(*StoreAllTracesServerCallStub) error
@@ -174,21 +174,21 @@ type StoreServerStubMethods interface {
 type StoreServerStub interface {
 	StoreServerStubMethods
 	// Describe the Store interfaces.
-	Describe__() []ipc.InterfaceDesc
+	Describe__() []rpc.InterfaceDesc
 }
 
 // StoreServer returns a server stub for Store.
 // It converts an implementation of StoreServerMethods into
-// an object that may be used by ipc.Server.
+// an object that may be used by rpc.Server.
 func StoreServer(impl StoreServerMethods) StoreServerStub {
 	stub := implStoreServerStub{
 		impl: impl,
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
-	if gs := ipc.NewGlobState(stub); gs != nil {
+	if gs := rpc.NewGlobState(stub); gs != nil {
 		stub.gs = gs
-	} else if gs := ipc.NewGlobState(impl); gs != nil {
+	} else if gs := rpc.NewGlobState(impl); gs != nil {
 		stub.gs = gs
 	}
 	return stub
@@ -196,10 +196,10 @@ func StoreServer(impl StoreServerMethods) StoreServerStub {
 
 type implStoreServerStub struct {
 	impl StoreServerMethods
-	gs   *ipc.GlobState
+	gs   *rpc.GlobState
 }
 
-func (s implStoreServerStub) Trace(call ipc.ServerCall, i0 uniqueid.Id) (vtrace.TraceRecord, error) {
+func (s implStoreServerStub) Trace(call rpc.ServerCall, i0 uniqueid.Id) (vtrace.TraceRecord, error) {
 	return s.impl.Trace(call, i0)
 }
 
@@ -207,29 +207,29 @@ func (s implStoreServerStub) AllTraces(call *StoreAllTracesServerCallStub) error
 	return s.impl.AllTraces(call)
 }
 
-func (s implStoreServerStub) Globber() *ipc.GlobState {
+func (s implStoreServerStub) Globber() *rpc.GlobState {
 	return s.gs
 }
 
-func (s implStoreServerStub) Describe__() []ipc.InterfaceDesc {
-	return []ipc.InterfaceDesc{StoreDesc}
+func (s implStoreServerStub) Describe__() []rpc.InterfaceDesc {
+	return []rpc.InterfaceDesc{StoreDesc}
 }
 
 // StoreDesc describes the Store interface.
-var StoreDesc ipc.InterfaceDesc = descStore
+var StoreDesc rpc.InterfaceDesc = descStore
 
 // descStore hides the desc to keep godoc clean.
-var descStore = ipc.InterfaceDesc{
+var descStore = rpc.InterfaceDesc{
 	Name:    "Store",
 	PkgPath: "v.io/v23/services/mgmt/vtrace",
-	Methods: []ipc.MethodDesc{
+	Methods: []rpc.MethodDesc{
 		{
 			Name: "Trace",
 			Doc:  "// Trace returns the trace that matches the given Id.\n// Will return a NoExists error if no matching trace was found.",
-			InArgs: []ipc.ArgDesc{
+			InArgs: []rpc.ArgDesc{
 				{"", ``}, // uniqueid.Id
 			},
-			OutArgs: []ipc.ArgDesc{
+			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // vtrace.TraceRecord
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Debug"))},
@@ -255,18 +255,18 @@ type StoreAllTracesServerStream interface {
 
 // StoreAllTracesServerCall represents the context passed to Store.AllTraces.
 type StoreAllTracesServerCall interface {
-	ipc.ServerCall
+	rpc.ServerCall
 	StoreAllTracesServerStream
 }
 
-// StoreAllTracesServerCallStub is a wrapper that converts ipc.StreamServerCall into
+// StoreAllTracesServerCallStub is a wrapper that converts rpc.StreamServerCall into
 // a typesafe stub that implements StoreAllTracesServerCall.
 type StoreAllTracesServerCallStub struct {
-	ipc.StreamServerCall
+	rpc.StreamServerCall
 }
 
-// Init initializes StoreAllTracesServerCallStub from ipc.StreamServerCall.
-func (s *StoreAllTracesServerCallStub) Init(call ipc.StreamServerCall) {
+// Init initializes StoreAllTracesServerCallStub from rpc.StreamServerCall.
+func (s *StoreAllTracesServerCallStub) Init(call rpc.StreamServerCall) {
 	s.StreamServerCall = call
 }
 

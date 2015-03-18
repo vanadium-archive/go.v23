@@ -1,4 +1,4 @@
-/* Package ipc defines the public interface for all interprocess communication.
+/* Package rpc defines the public interface for all interprocess communication.
 
 There are two actors in the system, clients and servers.  Clients invoke methods
 on Servers, using the StartCall method provided by the Client interface.
@@ -14,4 +14,4 @@ particular, it allows Runtimes hosting Servers to share Endpoints with Clients
 that enables communication between them.  Endpoints encode sufficient addressing
 information to enable communication.
 */
-package ipc
+package rpc

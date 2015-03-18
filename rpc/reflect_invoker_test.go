@@ -1,7 +1,7 @@
 // reflect_invoker_test is the main unit test for relfelct_invoker.go, but see also
 // reflect_invoker_internal_test, which tests some things internal to the module.
 
-package ipc_test
+package rpc_test
 
 import (
 	"errors"
@@ -13,8 +13,8 @@ import (
 	"time"
 
 	"v.io/v23/context"
-	"v.io/v23/ipc"
 	"v.io/v23/naming"
+	"v.io/v23/rpc"
 	"v.io/v23/security"
 	"v.io/v23/vdl"
 	"v.io/v23/vdlroot/signature"
@@ -33,7 +33,7 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-// FakeStreamServerCall implements ipc.ServerCall.
+// FakeStreamServerCall implements rpc.ServerCall.
 type FakeStreamServerCall struct {
 	context  *context.T
 	security security.Call
@@ -52,7 +52,7 @@ func NewFakeStreamServerCall() *FakeStreamServerCall {
 	}
 }
 
-func (*FakeStreamServerCall) Server() ipc.Server                   { return nil }
+func (*FakeStreamServerCall) Server() rpc.Server                   { return nil }
 func (*FakeStreamServerCall) GrantedBlessings() security.Blessings { return security.Blessings{} }
 func (*FakeStreamServerCall) Closed() <-chan struct{}              { return nil }
 func (*FakeStreamServerCall) IsClosed() bool                       { return false }
@@ -106,40 +106,40 @@ var (
 // All objects used for success testing are based on testObj, which captures the
 // state from each invocation, so that we may test it against our expectations.
 type testObj struct {
-	call ipc.ServerCall
+	call rpc.ServerCall
 }
 
-func (o testObj) LastCall() ipc.ServerCall { return o.call }
+func (o testObj) LastCall() rpc.ServerCall { return o.call }
 
 type testObjIface interface {
-	LastCall() ipc.ServerCall
+	LastCall() rpc.ServerCall
 }
 
 var errApp = errors.New("app error")
 
 type notags struct{ testObj }
 
-func (o *notags) Method1(c ipc.ServerCall) error               { o.call = c; return nil }
-func (o *notags) Method2(c ipc.ServerCall) (int, error)        { o.call = c; return 0, nil }
-func (o *notags) Method3(c ipc.ServerCall, _ int) error        { o.call = c; return nil }
-func (o *notags) Method4(c ipc.ServerCall, i int) (int, error) { o.call = c; return i, nil }
-func (o *notags) Error(c ipc.ServerCall) error                 { o.call = c; return errApp }
+func (o *notags) Method1(c rpc.ServerCall) error               { o.call = c; return nil }
+func (o *notags) Method2(c rpc.ServerCall) (int, error)        { o.call = c; return 0, nil }
+func (o *notags) Method3(c rpc.ServerCall, _ int) error        { o.call = c; return nil }
+func (o *notags) Method4(c rpc.ServerCall, i int) (int, error) { o.call = c; return i, nil }
+func (o *notags) Error(c rpc.ServerCall) error                 { o.call = c; return errApp }
 
 type tags struct{ testObj }
 
-func (o *tags) Alpha(c ipc.ServerCall) error               { o.call = c; return nil }
-func (o *tags) Beta(c ipc.ServerCall) (int, error)         { o.call = c; return 0, nil }
-func (o *tags) Gamma(c ipc.ServerCall, _ int) error        { o.call = c; return nil }
-func (o *tags) Delta(c ipc.ServerCall, i int) (int, error) { o.call = c; return i, nil }
-func (o *tags) Epsilon(c ipc.ServerCall, i int, s string) (int, string, error) {
+func (o *tags) Alpha(c rpc.ServerCall) error               { o.call = c; return nil }
+func (o *tags) Beta(c rpc.ServerCall) (int, error)         { o.call = c; return 0, nil }
+func (o *tags) Gamma(c rpc.ServerCall, _ int) error        { o.call = c; return nil }
+func (o *tags) Delta(c rpc.ServerCall, i int) (int, error) { o.call = c; return i, nil }
+func (o *tags) Epsilon(c rpc.ServerCall, i int, s string) (int, string, error) {
 	o.call = c
 	return i, s, nil
 }
-func (o *tags) Error(c ipc.ServerCall) error { o.call = c; return errApp }
+func (o *tags) Error(c rpc.ServerCall) error { o.call = c; return errApp }
 
-func (o *tags) Describe__() []ipc.InterfaceDesc {
-	return []ipc.InterfaceDesc{{
-		Methods: []ipc.MethodDesc{
+func (o *tags) Describe__() []rpc.InterfaceDesc {
+	return []rpc.InterfaceDesc{{
+		Methods: []rpc.MethodDesc{
 			{Name: "Alpha", Tags: []*vdl.Value{tagAlpha}},
 			{Name: "Beta", Tags: []*vdl.Value{tagBeta}},
 			{Name: "Gamma", Tags: []*vdl.Value{tagGamma}},
@@ -154,7 +154,7 @@ func TestReflectInvoker(t *testing.T) {
 	type testcase struct {
 		obj    testObjIface
 		method string
-		call   ipc.StreamServerCall
+		call   rpc.StreamServerCall
 		// Expected results:
 		tag     *vdl.Value
 		args    v
@@ -177,7 +177,7 @@ func TestReflectInvoker(t *testing.T) {
 	name := func(test testcase) string {
 		return fmt.Sprintf("%T.%s()", test.obj, test.method)
 	}
-	testInvoker := func(test testcase, invoker ipc.Invoker) {
+	testInvoker := func(test testcase, invoker rpc.Invoker) {
 		// Call Invoker.Prepare and check results.
 		argptrs, tags, err := invoker.Prepare(test.method, len(test.args))
 		if err != nil {
@@ -206,9 +206,9 @@ func TestReflectInvoker(t *testing.T) {
 		}
 	}
 	for _, test := range tests {
-		invoker := ipc.ReflectInvokerOrDie(test.obj)
+		invoker := rpc.ReflectInvokerOrDie(test.obj)
 		testInvoker(test, invoker)
-		invoker, err := ipc.ReflectInvoker(test.obj)
+		invoker, err := rpc.ReflectInvoker(test.obj)
 		if err != nil {
 			t.Errorf("%s ReflectInvoker got error: %v", name(test), err)
 		}
@@ -258,10 +258,10 @@ func toPtrs(vals []interface{}) []interface{} {
 
 type (
 	sigTest        struct{}
-	stringBoolCall struct{ ipc.ServerCall }
+	stringBoolCall struct{ rpc.ServerCall }
 )
 
-func (*stringBoolCall) Init(ipc.StreamServerCall) {}
+func (*stringBoolCall) Init(rpc.StreamServerCall) {}
 func (*stringBoolCall) RecvStream() interface {
 	Advance() bool
 	Value() string
@@ -275,27 +275,27 @@ func (*stringBoolCall) SendStream() interface {
 	return nil
 }
 
-func (sigTest) Sig1(ipc.ServerCall) error                                       { return nil }
-func (sigTest) Sig2(ipc.ServerCall, int32, string) error                        { return nil }
+func (sigTest) Sig1(rpc.ServerCall) error                                       { return nil }
+func (sigTest) Sig2(rpc.ServerCall, int32, string) error                        { return nil }
 func (sigTest) Sig3(*stringBoolCall, float64) ([]uint32, error)                 { return nil, nil }
-func (sigTest) Sig4(ipc.StreamServerCall, int32, string) (int32, string, error) { return 0, "", nil }
-func (sigTest) Describe__() []ipc.InterfaceDesc {
-	return []ipc.InterfaceDesc{
+func (sigTest) Sig4(rpc.StreamServerCall, int32, string) (int32, string, error) { return 0, "", nil }
+func (sigTest) Describe__() []rpc.InterfaceDesc {
+	return []rpc.InterfaceDesc{
 		{
 			Name:    "Iface1",
 			PkgPath: "a/b/c",
 			Doc:     "Doc Iface1",
-			Embeds: []ipc.EmbedDesc{
+			Embeds: []rpc.EmbedDesc{
 				{Name: "Iface1Embed1", PkgPath: "x/y", Doc: "Doc embed1"},
 			},
-			Methods: []ipc.MethodDesc{
+			Methods: []rpc.MethodDesc{
 				{
 					Name:      "Sig3",
 					Doc:       "Doc Sig3",
-					InArgs:    []ipc.ArgDesc{{Name: "i0_3", Doc: "Doc i0_3"}},
-					OutArgs:   []ipc.ArgDesc{{Name: "o0_3", Doc: "Doc o0_3"}},
-					InStream:  ipc.ArgDesc{Name: "is_3", Doc: "Doc is_3"},
-					OutStream: ipc.ArgDesc{Name: "os_3", Doc: "Doc os_3"},
+					InArgs:    []rpc.ArgDesc{{Name: "i0_3", Doc: "Doc i0_3"}},
+					OutArgs:   []rpc.ArgDesc{{Name: "o0_3", Doc: "Doc o0_3"}},
+					InStream:  rpc.ArgDesc{Name: "is_3", Doc: "Doc is_3"},
+					OutStream: rpc.ArgDesc{Name: "os_3", Doc: "Doc os_3"},
 					Tags:      []*vdl.Value{tagAlpha, tagBeta},
 				},
 			},
@@ -304,24 +304,24 @@ func (sigTest) Describe__() []ipc.InterfaceDesc {
 			Name:    "Iface2",
 			PkgPath: "d/e/f",
 			Doc:     "Doc Iface2",
-			Methods: []ipc.MethodDesc{
+			Methods: []rpc.MethodDesc{
 				{
 					// The same Sig3 method is described here in a different interface.
 					Name:      "Sig3",
 					Doc:       "Doc Sig3x",
-					InArgs:    []ipc.ArgDesc{{Name: "i0_3x", Doc: "Doc i0_3x"}},
-					OutArgs:   []ipc.ArgDesc{{Name: "o0_3x", Doc: "Doc o0_3x"}},
-					InStream:  ipc.ArgDesc{Name: "is_3x", Doc: "Doc is_3x"},
-					OutStream: ipc.ArgDesc{Name: "os_3x", Doc: "Doc os_3x"},
+					InArgs:    []rpc.ArgDesc{{Name: "i0_3x", Doc: "Doc i0_3x"}},
+					OutArgs:   []rpc.ArgDesc{{Name: "o0_3x", Doc: "Doc o0_3x"}},
+					InStream:  rpc.ArgDesc{Name: "is_3x", Doc: "Doc is_3x"},
+					OutStream: rpc.ArgDesc{Name: "os_3x", Doc: "Doc os_3x"},
 					// Must have the same tags as every other definition of this method.
 					Tags: []*vdl.Value{tagAlpha, tagBeta},
 				},
 				{
 					Name: "Sig4",
 					Doc:  "Doc Sig4",
-					InArgs: []ipc.ArgDesc{
+					InArgs: []rpc.ArgDesc{
 						{Name: "i0_4", Doc: "Doc i0_4"}, {Name: "i1_4", Doc: "Doc i1_4"}},
-					OutArgs: []ipc.ArgDesc{
+					OutArgs: []rpc.ArgDesc{
 						{Name: "o0_4", Doc: "Doc o0_4"}, {Name: "o1_4", Doc: "Doc o1_4"}},
 				},
 			},
@@ -362,7 +362,7 @@ func TestReflectInvokerSignature(t *testing.T) {
 			OutArgs: []signature.Arg{
 				{Name: "o0_4", Doc: "Doc o0_4", Type: vdl.Int32Type},
 				{Name: "o1_4", Doc: "Doc o1_4", Type: vdl.StringType}},
-			// Since ipc.StreamServerCall is used, we must assume streaming with any.
+			// Since rpc.StreamServerCall is used, we must assume streaming with any.
 			InStream:  &signature.Arg{Type: vdl.AnyType},
 			OutStream: &signature.Arg{Type: vdl.AnyType},
 		}},
@@ -443,7 +443,7 @@ func TestReflectInvokerSignature(t *testing.T) {
 		}},
 	}
 	for _, test := range tests {
-		invoker := ipc.ReflectInvokerOrDie(sigTest{})
+		invoker := rpc.ReflectInvokerOrDie(sigTest{})
 		var got interface{}
 		var err error
 		if test.Method == "" {
@@ -462,17 +462,17 @@ func TestReflectInvokerSignature(t *testing.T) {
 
 type (
 	badcall        struct{}
-	noInitCall     struct{ ipc.ServerCall }
-	badInit1Call   struct{ ipc.ServerCall }
-	badInit2Call   struct{ ipc.ServerCall }
-	badInit3Call   struct{ ipc.ServerCall }
-	noSendRecvCall struct{ ipc.ServerCall }
-	badSend1Call   struct{ ipc.ServerCall }
-	badSend2Call   struct{ ipc.ServerCall }
-	badSend3Call   struct{ ipc.ServerCall }
-	badRecv1Call   struct{ ipc.ServerCall }
-	badRecv2Call   struct{ ipc.ServerCall }
-	badRecv3Call   struct{ ipc.ServerCall }
+	noInitCall     struct{ rpc.ServerCall }
+	badInit1Call   struct{ rpc.ServerCall }
+	badInit2Call   struct{ rpc.ServerCall }
+	badInit3Call   struct{ rpc.ServerCall }
+	noSendRecvCall struct{ rpc.ServerCall }
+	badSend1Call   struct{ rpc.ServerCall }
+	badSend2Call   struct{ rpc.ServerCall }
+	badSend3Call   struct{ rpc.ServerCall }
+	badRecv1Call   struct{ rpc.ServerCall }
+	badRecv2Call   struct{ rpc.ServerCall }
+	badRecv3Call   struct{ rpc.ServerCall }
 
 	badoutargs struct{}
 
@@ -482,7 +482,7 @@ type (
 	badGlobChildren2 struct{}
 )
 
-func (badcall) notExported(ipc.ServerCall) error { return nil }
+func (badcall) notExported(rpc.ServerCall) error { return nil }
 func (badcall) NonRPC1() error                   { return nil }
 func (badcall) NonRPC2(int) error                { return nil }
 func (badcall) NonRPC3(int, string) error        { return nil }
@@ -501,32 +501,32 @@ func (badcall) BadRecv3(*badRecv3Call) error     { return nil }
 
 func (*badInit1Call) Init()                          {}
 func (*badInit2Call) Init(int)                       {}
-func (*badInit3Call) Init(ipc.StreamServerCall, int) {}
-func (*noSendRecvCall) Init(ipc.StreamServerCall)    {}
-func (*badSend1Call) Init(ipc.StreamServerCall)      {}
+func (*badInit3Call) Init(rpc.StreamServerCall, int) {}
+func (*noSendRecvCall) Init(rpc.StreamServerCall)    {}
+func (*badSend1Call) Init(rpc.StreamServerCall)      {}
 func (*badSend1Call) SendStream()                    {}
-func (*badSend2Call) Init(ipc.StreamServerCall)      {}
+func (*badSend2Call) Init(rpc.StreamServerCall)      {}
 func (*badSend2Call) SendStream() interface {
 	Send() error
 } {
 	return nil
 }
-func (*badSend3Call) Init(ipc.StreamServerCall) {}
+func (*badSend3Call) Init(rpc.StreamServerCall) {}
 func (*badSend3Call) SendStream() interface {
 	Send(int)
 } {
 	return nil
 }
-func (*badRecv1Call) Init(ipc.StreamServerCall) {}
+func (*badRecv1Call) Init(rpc.StreamServerCall) {}
 func (*badRecv1Call) RecvStream()               {}
-func (*badRecv2Call) Init(ipc.StreamServerCall) {}
+func (*badRecv2Call) Init(rpc.StreamServerCall) {}
 func (*badRecv2Call) RecvStream() interface {
 	Advance() bool
 	Value() int
 } {
 	return nil
 }
-func (*badRecv3Call) Init(ipc.StreamServerCall) {}
+func (*badRecv3Call) Init(rpc.StreamServerCall) {}
 func (*badRecv3Call) RecvStream() interface {
 	Advance()
 	Value() int
@@ -535,14 +535,14 @@ func (*badRecv3Call) RecvStream() interface {
 	return nil
 }
 
-func (badoutargs) NoFinalError1(ipc.ServerCall)                 {}
-func (badoutargs) NoFinalError2(ipc.ServerCall) string          { return "" }
-func (badoutargs) NoFinalError3(ipc.ServerCall) (bool, string)  { return false, "" }
-func (badoutargs) NoFinalError4(ipc.ServerCall) (error, string) { return nil, "" }
+func (badoutargs) NoFinalError1(rpc.ServerCall)                 {}
+func (badoutargs) NoFinalError2(rpc.ServerCall) string          { return "" }
+func (badoutargs) NoFinalError3(rpc.ServerCall) (bool, string)  { return false, "" }
+func (badoutargs) NoFinalError4(rpc.ServerCall) (error, string) { return nil, "" }
 
 func (badGlobber) Globber()                                     {}
 func (badGlob) Glob__()                                         {}
-func (badGlobChildren) GlobChildren__(ipc.ServerCall)           {}
+func (badGlobChildren) GlobChildren__(rpc.ServerCall)           {}
 func (badGlobChildren2) GlobChildren__() (<-chan string, error) { return nil, nil }
 
 func TestReflectInvokerPanic(t *testing.T) {
@@ -562,14 +562,14 @@ func TestReflectInvokerPanic(t *testing.T) {
 	}
 	for _, test := range tests {
 		re := regexp.MustCompile(test.regexp)
-		invoker, err := ipc.ReflectInvoker(test.obj)
+		invoker, err := rpc.ReflectInvoker(test.obj)
 		if invoker != nil {
 			t.Errorf(`ReflectInvoker(%T) got non-nil invoker`, test.obj)
 		}
 		if !re.MatchString(fmt.Sprint(err)) {
 			t.Errorf(`ReflectInvoker(%T) got error %v, want regexp "%v"`, test.obj, err, test.regexp)
 		}
-		recov := testutil.CallAndRecover(func() { ipc.ReflectInvokerOrDie(test.obj) })
+		recov := testutil.CallAndRecover(func() { rpc.ReflectInvokerOrDie(test.obj) })
 		if !re.MatchString(fmt.Sprint(recov)) {
 			t.Errorf(`ReflectInvokerOrDie(%T) got panic %v, want regexp "%v"`, test.obj, recov, test.regexp)
 		}
@@ -592,7 +592,7 @@ func TestReflectInvokerErrors(t *testing.T) {
 	name := func(test testcase) string {
 		return fmt.Sprintf("%T.%s()", test.obj, test.method)
 	}
-	testInvoker := func(test testcase, invoker ipc.Invoker) {
+	testInvoker := func(test testcase, invoker rpc.Invoker) {
 		// Call Invoker.Prepare and check error.
 		_, _, err := invoker.Prepare(test.method, len(test.args))
 		if !verror.Is(err, test.prepareErr) {
@@ -605,9 +605,9 @@ func TestReflectInvokerErrors(t *testing.T) {
 		}
 	}
 	for _, test := range tests {
-		invoker := ipc.ReflectInvokerOrDie(test.obj)
+		invoker := rpc.ReflectInvokerOrDie(test.obj)
 		testInvoker(test, invoker)
-		invoker, err := ipc.ReflectInvoker(test.obj)
+		invoker, err := rpc.ReflectInvoker(test.obj)
 		if err != nil {
 			t.Errorf(`%s ReflectInvoker got error %v`, name(test), err)
 		}
@@ -616,42 +616,42 @@ func TestReflectInvokerErrors(t *testing.T) {
 }
 
 type vGlobberObject struct {
-	gs *ipc.GlobState
+	gs *rpc.GlobState
 }
 
-func (o *vGlobberObject) Globber() *ipc.GlobState {
+func (o *vGlobberObject) Globber() *rpc.GlobState {
 	return o.gs
 }
 
 type allGlobberObject struct{}
 
-func (allGlobberObject) Glob__(call ipc.ServerCall, pattern string) (<-chan naming.GlobReply, error) {
+func (allGlobberObject) Glob__(call rpc.ServerCall, pattern string) (<-chan naming.GlobReply, error) {
 	return nil, nil
 }
 
 type childrenGlobberObject struct{}
 
-func (childrenGlobberObject) GlobChildren__(ipc.ServerCall) (<-chan string, error) {
+func (childrenGlobberObject) GlobChildren__(rpc.ServerCall) (<-chan string, error) {
 	return nil, nil
 }
 
 func TestReflectInvokerGlobber(t *testing.T) {
 	allGlobber := allGlobberObject{}
 	childrenGlobber := childrenGlobberObject{}
-	gs := &ipc.GlobState{AllGlobber: allGlobber}
+	gs := &rpc.GlobState{AllGlobber: allGlobber}
 	vGlobber := &vGlobberObject{gs}
 
 	testcases := []struct {
 		obj      interface{}
-		expected *ipc.GlobState
+		expected *rpc.GlobState
 	}{
 		{vGlobber, gs},
-		{allGlobber, &ipc.GlobState{AllGlobber: allGlobber}},
-		{childrenGlobber, &ipc.GlobState{ChildrenGlobber: childrenGlobber}},
+		{allGlobber, &rpc.GlobState{AllGlobber: allGlobber}},
+		{childrenGlobber, &rpc.GlobState{ChildrenGlobber: childrenGlobber}},
 	}
 
 	for _, tc := range testcases {
-		ri := ipc.ReflectInvokerOrDie(tc.obj)
+		ri := rpc.ReflectInvokerOrDie(tc.obj)
 		if got := ri.Globber(); !reflect.DeepEqual(got, tc.expected) {
 			t.Errorf("Unexpected result for %#v. Got %#v, want %#v", tc.obj, got, tc.expected)
 		}

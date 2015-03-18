@@ -13,13 +13,13 @@ import (
 var (
 	// GlobMaxRecursionReached indicates that the Glob request exceeded the
 	// max recursion level.
-	ErrGlobMaxRecursionReached = verror.Register("v.io/v23/ipc/reserved.GlobMaxRecursionReached", verror.NoRetry, "{1:}{2:} max recursion level reached{:_}")
+	ErrGlobMaxRecursionReached = verror.Register("v.io/v23/rpc/reserved.GlobMaxRecursionReached", verror.NoRetry, "{1:}{2:} max recursion level reached{:_}")
 	// GlobMatchesOmitted indicates that some of the Glob results might
 	// have been omitted due to access restrictions.
-	ErrGlobMatchesOmitted = verror.Register("v.io/v23/ipc/reserved.GlobMatchesOmitted", verror.NoRetry, "{1:}{2:} some matches might have been omitted")
+	ErrGlobMatchesOmitted = verror.Register("v.io/v23/rpc/reserved.GlobMatchesOmitted", verror.NoRetry, "{1:}{2:} some matches might have been omitted")
 	// GlobNotImplemented indicates that Glob is not implemented by the
 	// object.
-	ErrGlobNotImplemented = verror.Register("v.io/v23/ipc/reserved.GlobNotImplemented", verror.NoRetry, "{1:}{2:} Glob not implemented")
+	ErrGlobNotImplemented = verror.Register("v.io/v23/rpc/reserved.GlobNotImplemented", verror.NoRetry, "{1:}{2:} Glob not implemented")
 )
 
 func init() {

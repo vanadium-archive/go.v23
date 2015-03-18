@@ -1,4 +1,4 @@
-package ipc
+package rpc
 
 // UniversalServiceMethods defines the set of methods that are implemented on
 // all services.

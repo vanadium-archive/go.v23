@@ -370,7 +370,7 @@ type ThirdPartyCaveat interface {
 
 	// TODO(andreser, ashankar): require the discharger to have a specific
 	// identity so that the private information below is not exposed to
-	// anybody who can accept an ipc call.
+	// anybody who can accept an rpc call.
 }
 
 // Call defines the state available for authorizing a principal.

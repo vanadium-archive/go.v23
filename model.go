@@ -17,9 +17,9 @@ import (
 	"sync"
 
 	"v.io/v23/context"
-	"v.io/v23/ipc"
 	"v.io/v23/naming"
 	"v.io/v23/naming/ns"
+	"v.io/v23/rpc"
 	"v.io/v23/security"
 )
 
@@ -129,7 +129,7 @@ type Runtime interface {
 	//
 	// It accepts at least the following options:
 	// ServesMountTable and ServerBlessings.
-	NewServer(ctx *context.T, opts ...ipc.ServerOpt) (ipc.Server, error)
+	NewServer(ctx *context.T, opts ...rpc.ServerOpt) (rpc.Server, error)
 
 	// SetNewStreamManager creates a new stream manager and context
 	// with that StreamManager attached.
@@ -143,10 +143,10 @@ type Runtime interface {
 
 	// SetNewClient creates a new Client instance and attaches it to a
 	// new context.
-	SetNewClient(ctx *context.T, opts ...ipc.ClientOpt) (*context.T, ipc.Client, error)
+	SetNewClient(ctx *context.T, opts ...rpc.ClientOpt) (*context.T, rpc.Client, error)
 
 	// GetClient returns the current Client.
-	GetClient(ctx *context.T) ipc.Client
+	GetClient(ctx *context.T) rpc.Client
 
 	// SetNewNamespace creates a new Namespace and attaches it to the
 	// returned context.
@@ -159,7 +159,7 @@ type Runtime interface {
 	GetAppCycle(ctx *context.T) AppCycle
 
 	// GetListenSpec gets the ListenSpec.
-	GetListenSpec(ctx *context.T) ipc.ListenSpec
+	GetListenSpec(ctx *context.T) rpc.ListenSpec
 
 	// SetBackgroundContext creates a new context derived from the given context
 	// with the given context set as the background context.
@@ -199,7 +199,7 @@ func NewEndpoint(ep string) (naming.Endpoint, error) {
 //
 // ServerBlessings defaults to v23.GetPrincipal(ctx).BlessingStore().Default().
 // These Blessings are the server's Blessings for its lifetime.
-func NewServer(ctx *context.T, opts ...ipc.ServerOpt) (ipc.Server, error) {
+func NewServer(ctx *context.T, opts ...rpc.ServerOpt) (rpc.Server, error) {
 	return initState.currentRuntime().NewServer(ctx, opts...)
 }
 
@@ -221,12 +221,12 @@ func GetPrincipal(ctx *context.T) security.Principal {
 
 // SetNewClient creates a new Client instance and attaches it to a
 // new context.
-func SetNewClient(ctx *context.T, opts ...ipc.ClientOpt) (*context.T, ipc.Client, error) {
+func SetNewClient(ctx *context.T, opts ...rpc.ClientOpt) (*context.T, rpc.Client, error) {
 	return initState.currentRuntime().SetNewClient(ctx, opts...)
 }
 
 // GetClient returns the current Client.
-func GetClient(ctx *context.T) ipc.Client {
+func GetClient(ctx *context.T) rpc.Client {
 	return initState.currentRuntime().GetClient(ctx)
 }
 
@@ -247,7 +247,7 @@ func GetAppCycle(ctx *context.T) AppCycle {
 }
 
 // GetListenSpec gets the current ListenSpec.
-func GetListenSpec(ctx *context.T) ipc.ListenSpec {
+func GetListenSpec(ctx *context.T) rpc.ListenSpec {
 	return initState.currentRuntime().GetListenSpec(ctx)
 }
 

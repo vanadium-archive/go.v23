@@ -1,7 +1,7 @@
-// reflect_invoker_internal_test uses internals of reflect_invoker (and hence is in the ipc package),
-// whereas reflect_invoker_test is it the ipc_test package.
+// reflect_invoker_internal_test uses internals of reflect_invoker (and hence is in the rpc package),
+// whereas reflect_invoker_test is it the rpc_test package.
 
-package ipc
+package rpc
 
 import (
 	"errors"

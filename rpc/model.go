@@ -1,4 +1,4 @@
-package ipc
+package rpc
 
 import (
 	"fmt"
@@ -562,24 +562,24 @@ type ServerCall interface {
 // TODO(caprita): Remove this.  It's currently referenced in all VDL-generated
 // files, so do it in a separate CL.
 
-// BindOpt is the interface for options provided to Bind<Service> calls in IPC
+// BindOpt is the interface for options provided to Bind<Service> calls in RPC
 // clients.
 type BindOpt interface {
 }
 
 // CallOpt is the interface for all Call options.
 type CallOpt interface {
-	IPCCallOpt()
+	RPCCallOpt()
 }
 
 // ClientOpt is the interface for all Client options.
 type ClientOpt interface {
-	IPCClientOpt()
+	RPCClientOpt()
 }
 
 // ServerOpt is the interface for all Server options.
 type ServerOpt interface {
-	IPCServerOpt()
+	RPCServerOpt()
 }
 
 // Granter is a ClientCallOpt that is used to provide blessings to

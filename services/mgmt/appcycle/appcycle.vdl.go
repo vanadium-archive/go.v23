@@ -9,7 +9,7 @@ import (
 	"io"
 	"v.io/v23"
 	"v.io/v23/context"
-	"v.io/v23/ipc"
+	"v.io/v23/rpc"
 	"v.io/v23/vdl"
 )
 
@@ -45,24 +45,24 @@ type AppCycleClientMethods interface {
 	// Stop initiates shutdown of the server.  It streams back periodic
 	// updates to give the client an idea of how the shutdown is
 	// progressing.
-	Stop(*context.T, ...ipc.CallOpt) (AppCycleStopClientCall, error)
+	Stop(*context.T, ...rpc.CallOpt) (AppCycleStopClientCall, error)
 	// ForceStop tells the server to shut down right away.  It can be issued
 	// while a Stop is outstanding if for example the client does not want
 	// to wait any longer.
-	ForceStop(*context.T, ...ipc.CallOpt) error
+	ForceStop(*context.T, ...rpc.CallOpt) error
 }
 
 // AppCycleClientStub adds universal methods to AppCycleClientMethods.
 type AppCycleClientStub interface {
 	AppCycleClientMethods
-	ipc.UniversalServiceMethods
+	rpc.UniversalServiceMethods
 }
 
 // AppCycleClient returns a client stub for AppCycle.
-func AppCycleClient(name string, opts ...ipc.BindOpt) AppCycleClientStub {
-	var client ipc.Client
+func AppCycleClient(name string, opts ...rpc.BindOpt) AppCycleClientStub {
+	var client rpc.Client
 	for _, opt := range opts {
-		if clientOpt, ok := opt.(ipc.Client); ok {
+		if clientOpt, ok := opt.(rpc.Client); ok {
 			client = clientOpt
 		}
 	}
@@ -71,18 +71,18 @@ func AppCycleClient(name string, opts ...ipc.BindOpt) AppCycleClientStub {
 
 type implAppCycleClientStub struct {
 	name   string
-	client ipc.Client
+	client rpc.Client
 }
 
-func (c implAppCycleClientStub) c(ctx *context.T) ipc.Client {
+func (c implAppCycleClientStub) c(ctx *context.T) rpc.Client {
 	if c.client != nil {
 		return c.client
 	}
 	return v23.GetClient(ctx)
 }
 
-func (c implAppCycleClientStub) Stop(ctx *context.T, opts ...ipc.CallOpt) (ocall AppCycleStopClientCall, err error) {
-	var call ipc.ClientCall
+func (c implAppCycleClientStub) Stop(ctx *context.T, opts ...rpc.CallOpt) (ocall AppCycleStopClientCall, err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Stop", nil, opts...); err != nil {
 		return
 	}
@@ -90,8 +90,8 @@ func (c implAppCycleClientStub) Stop(ctx *context.T, opts ...ipc.CallOpt) (ocall
 	return
 }
 
-func (c implAppCycleClientStub) ForceStop(ctx *context.T, opts ...ipc.CallOpt) (err error) {
-	var call ipc.ClientCall
+func (c implAppCycleClientStub) ForceStop(ctx *context.T, opts ...rpc.CallOpt) (err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "ForceStop", nil, opts...); err != nil {
 		return
 	}
@@ -132,7 +132,7 @@ type AppCycleStopClientCall interface {
 }
 
 type implAppCycleStopClientCall struct {
-	ipc.ClientCall
+	rpc.ClientCall
 	valRecv Task
 	errRecv error
 }
@@ -180,11 +180,11 @@ type AppCycleServerMethods interface {
 	// ForceStop tells the server to shut down right away.  It can be issued
 	// while a Stop is outstanding if for example the client does not want
 	// to wait any longer.
-	ForceStop(ipc.ServerCall) error
+	ForceStop(rpc.ServerCall) error
 }
 
 // AppCycleServerStubMethods is the server interface containing
-// AppCycle methods, as expected by ipc.Server.
+// AppCycle methods, as expected by rpc.Server.
 // The only difference between this interface and AppCycleServerMethods
 // is the streaming methods.
 type AppCycleServerStubMethods interface {
@@ -195,28 +195,28 @@ type AppCycleServerStubMethods interface {
 	// ForceStop tells the server to shut down right away.  It can be issued
 	// while a Stop is outstanding if for example the client does not want
 	// to wait any longer.
-	ForceStop(ipc.ServerCall) error
+	ForceStop(rpc.ServerCall) error
 }
 
 // AppCycleServerStub adds universal methods to AppCycleServerStubMethods.
 type AppCycleServerStub interface {
 	AppCycleServerStubMethods
 	// Describe the AppCycle interfaces.
-	Describe__() []ipc.InterfaceDesc
+	Describe__() []rpc.InterfaceDesc
 }
 
 // AppCycleServer returns a server stub for AppCycle.
 // It converts an implementation of AppCycleServerMethods into
-// an object that may be used by ipc.Server.
+// an object that may be used by rpc.Server.
 func AppCycleServer(impl AppCycleServerMethods) AppCycleServerStub {
 	stub := implAppCycleServerStub{
 		impl: impl,
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
-	if gs := ipc.NewGlobState(stub); gs != nil {
+	if gs := rpc.NewGlobState(stub); gs != nil {
 		stub.gs = gs
-	} else if gs := ipc.NewGlobState(impl); gs != nil {
+	} else if gs := rpc.NewGlobState(impl); gs != nil {
 		stub.gs = gs
 	}
 	return stub
@@ -224,34 +224,34 @@ func AppCycleServer(impl AppCycleServerMethods) AppCycleServerStub {
 
 type implAppCycleServerStub struct {
 	impl AppCycleServerMethods
-	gs   *ipc.GlobState
+	gs   *rpc.GlobState
 }
 
 func (s implAppCycleServerStub) Stop(call *AppCycleStopServerCallStub) error {
 	return s.impl.Stop(call)
 }
 
-func (s implAppCycleServerStub) ForceStop(call ipc.ServerCall) error {
+func (s implAppCycleServerStub) ForceStop(call rpc.ServerCall) error {
 	return s.impl.ForceStop(call)
 }
 
-func (s implAppCycleServerStub) Globber() *ipc.GlobState {
+func (s implAppCycleServerStub) Globber() *rpc.GlobState {
 	return s.gs
 }
 
-func (s implAppCycleServerStub) Describe__() []ipc.InterfaceDesc {
-	return []ipc.InterfaceDesc{AppCycleDesc}
+func (s implAppCycleServerStub) Describe__() []rpc.InterfaceDesc {
+	return []rpc.InterfaceDesc{AppCycleDesc}
 }
 
 // AppCycleDesc describes the AppCycle interface.
-var AppCycleDesc ipc.InterfaceDesc = descAppCycle
+var AppCycleDesc rpc.InterfaceDesc = descAppCycle
 
 // descAppCycle hides the desc to keep godoc clean.
-var descAppCycle = ipc.InterfaceDesc{
+var descAppCycle = rpc.InterfaceDesc{
 	Name:    "AppCycle",
 	PkgPath: "v.io/v23/services/mgmt/appcycle",
 	Doc:     "// AppCycle interfaces with the process running a vanadium runtime.",
-	Methods: []ipc.MethodDesc{
+	Methods: []rpc.MethodDesc{
 		{
 			Name: "Stop",
 			Doc:  "// Stop initiates shutdown of the server.  It streams back periodic\n// updates to give the client an idea of how the shutdown is\n// progressing.",
@@ -276,18 +276,18 @@ type AppCycleStopServerStream interface {
 
 // AppCycleStopServerCall represents the context passed to AppCycle.Stop.
 type AppCycleStopServerCall interface {
-	ipc.ServerCall
+	rpc.ServerCall
 	AppCycleStopServerStream
 }
 
-// AppCycleStopServerCallStub is a wrapper that converts ipc.StreamServerCall into
+// AppCycleStopServerCallStub is a wrapper that converts rpc.StreamServerCall into
 // a typesafe stub that implements AppCycleStopServerCall.
 type AppCycleStopServerCallStub struct {
-	ipc.StreamServerCall
+	rpc.StreamServerCall
 }
 
-// Init initializes AppCycleStopServerCallStub from ipc.StreamServerCall.
-func (s *AppCycleStopServerCallStub) Init(call ipc.StreamServerCall) {
+// Init initializes AppCycleStopServerCallStub from rpc.StreamServerCall.
+func (s *AppCycleStopServerCallStub) Init(call rpc.StreamServerCall) {
 	s.StreamServerCall = call
 }
 

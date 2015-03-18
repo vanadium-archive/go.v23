@@ -10,7 +10,7 @@ import (
 	"io"
 	"v.io/v23"
 	"v.io/v23/context"
-	"v.io/v23/ipc"
+	"v.io/v23/rpc"
 	"v.io/v23/vdl"
 
 	// VDL user imports
@@ -307,19 +307,19 @@ type ApplicationClientMethods interface {
 	// which can then be used to control all the installations of the given
 	// application.
 	// TODO(rjkroege): Use customized labels.
-	Install(ctx *context.T, name string, config Config, packages application.Packages, opts ...ipc.CallOpt) (string, error)
+	Install(ctx *context.T, name string, config Config, packages application.Packages, opts ...rpc.CallOpt) (string, error)
 	// Refresh refreshes the state of application installation(s)
 	// instance(s).
-	Refresh(*context.T, ...ipc.CallOpt) error
+	Refresh(*context.T, ...rpc.CallOpt) error
 	// Restart restarts execution of application installation(s)
 	// instance(s).
-	Restart(*context.T, ...ipc.CallOpt) error
+	Restart(*context.T, ...rpc.CallOpt) error
 	// Resume resumes execution of application installation(s)
 	// instance(s).
-	Resume(*context.T, ...ipc.CallOpt) error
+	Resume(*context.T, ...rpc.CallOpt) error
 	// Revert reverts application installation(s) to the most recent
 	// previous installation.
-	Revert(*context.T, ...ipc.CallOpt) error
+	Revert(*context.T, ...rpc.CallOpt) error
 	// Start starts an instance of application installation(s). The
 	// server sends the application instance's Public Key on the stream.
 	// When the client receives the Public Key it must send Blessings back
@@ -330,7 +330,7 @@ type ApplicationClientMethods interface {
 	//                   <--  InstancePublicKey
 	//  AppBlessings     -->
 	//                   <--  InstanceName
-	Start(*context.T, ...ipc.CallOpt) (ApplicationStartClientCall, error)
+	Start(*context.T, ...rpc.CallOpt) (ApplicationStartClientCall, error)
 	// Stop attempts a clean shutdown of application installation(s)
 	// instance(s). If the deadline (in seconds) is non-zero and the
 	// instance(s) in questions are still running after the given deadline,
@@ -338,41 +338,41 @@ type ApplicationClientMethods interface {
 	//
 	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
 	// are implemented.
-	Stop(ctx *context.T, deadline uint32, opts ...ipc.CallOpt) error
+	Stop(ctx *context.T, deadline uint32, opts ...rpc.CallOpt) error
 	// Suspend suspends execution of application installation(s)
 	// instance(s).
-	Suspend(*context.T, ...ipc.CallOpt) error
+	Suspend(*context.T, ...rpc.CallOpt) error
 	// Uninstall uninstalls application installation(s).
-	Uninstall(*context.T, ...ipc.CallOpt) error
+	Uninstall(*context.T, ...rpc.CallOpt) error
 	// Update updates the application installation(s) from the object name
 	// provided during Install.  If the new application envelope contains a
 	// different application title, the update does not occur, and an error
 	// is returned.
-	Update(*context.T, ...ipc.CallOpt) error
+	Update(*context.T, ...rpc.CallOpt) error
 	// UpdateTo updates the application installation(s) to the application
 	// specified by the object name argument.  If the new application
 	// envelope contains a different application title, the update does not
 	// occur, and an error is returned.
-	UpdateTo(ctx *context.T, name string, opts ...ipc.CallOpt) error
+	UpdateTo(ctx *context.T, name string, opts ...rpc.CallOpt) error
 	// Debug returns debug information about the application installation or
 	// instance.  This is generally highly implementation-specific, and
 	// presented in an unstructured form.  No guarantees are given about the
 	// stability of the format, and parsing it programmatically is
 	// specifically discouraged.
-	Debug(*context.T, ...ipc.CallOpt) (string, error)
+	Debug(*context.T, ...rpc.CallOpt) (string, error)
 }
 
 // ApplicationClientStub adds universal methods to ApplicationClientMethods.
 type ApplicationClientStub interface {
 	ApplicationClientMethods
-	ipc.UniversalServiceMethods
+	rpc.UniversalServiceMethods
 }
 
 // ApplicationClient returns a client stub for Application.
-func ApplicationClient(name string, opts ...ipc.BindOpt) ApplicationClientStub {
-	var client ipc.Client
+func ApplicationClient(name string, opts ...rpc.BindOpt) ApplicationClientStub {
+	var client rpc.Client
 	for _, opt := range opts {
-		if clientOpt, ok := opt.(ipc.Client); ok {
+		if clientOpt, ok := opt.(rpc.Client); ok {
 			client = clientOpt
 		}
 	}
@@ -381,20 +381,20 @@ func ApplicationClient(name string, opts ...ipc.BindOpt) ApplicationClientStub {
 
 type implApplicationClientStub struct {
 	name   string
-	client ipc.Client
+	client rpc.Client
 
 	object.ObjectClientStub
 }
 
-func (c implApplicationClientStub) c(ctx *context.T) ipc.Client {
+func (c implApplicationClientStub) c(ctx *context.T) rpc.Client {
 	if c.client != nil {
 		return c.client
 	}
 	return v23.GetClient(ctx)
 }
 
-func (c implApplicationClientStub) Install(ctx *context.T, i0 string, i1 Config, i2 application.Packages, opts ...ipc.CallOpt) (o0 string, err error) {
-	var call ipc.ClientCall
+func (c implApplicationClientStub) Install(ctx *context.T, i0 string, i1 Config, i2 application.Packages, opts ...rpc.CallOpt) (o0 string, err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Install", []interface{}{i0, i1, i2}, opts...); err != nil {
 		return
 	}
@@ -402,8 +402,8 @@ func (c implApplicationClientStub) Install(ctx *context.T, i0 string, i1 Config,
 	return
 }
 
-func (c implApplicationClientStub) Refresh(ctx *context.T, opts ...ipc.CallOpt) (err error) {
-	var call ipc.ClientCall
+func (c implApplicationClientStub) Refresh(ctx *context.T, opts ...rpc.CallOpt) (err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Refresh", nil, opts...); err != nil {
 		return
 	}
@@ -411,8 +411,8 @@ func (c implApplicationClientStub) Refresh(ctx *context.T, opts ...ipc.CallOpt) 
 	return
 }
 
-func (c implApplicationClientStub) Restart(ctx *context.T, opts ...ipc.CallOpt) (err error) {
-	var call ipc.ClientCall
+func (c implApplicationClientStub) Restart(ctx *context.T, opts ...rpc.CallOpt) (err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Restart", nil, opts...); err != nil {
 		return
 	}
@@ -420,8 +420,8 @@ func (c implApplicationClientStub) Restart(ctx *context.T, opts ...ipc.CallOpt) 
 	return
 }
 
-func (c implApplicationClientStub) Resume(ctx *context.T, opts ...ipc.CallOpt) (err error) {
-	var call ipc.ClientCall
+func (c implApplicationClientStub) Resume(ctx *context.T, opts ...rpc.CallOpt) (err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Resume", nil, opts...); err != nil {
 		return
 	}
@@ -429,8 +429,8 @@ func (c implApplicationClientStub) Resume(ctx *context.T, opts ...ipc.CallOpt) (
 	return
 }
 
-func (c implApplicationClientStub) Revert(ctx *context.T, opts ...ipc.CallOpt) (err error) {
-	var call ipc.ClientCall
+func (c implApplicationClientStub) Revert(ctx *context.T, opts ...rpc.CallOpt) (err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Revert", nil, opts...); err != nil {
 		return
 	}
@@ -438,8 +438,8 @@ func (c implApplicationClientStub) Revert(ctx *context.T, opts ...ipc.CallOpt) (
 	return
 }
 
-func (c implApplicationClientStub) Start(ctx *context.T, opts ...ipc.CallOpt) (ocall ApplicationStartClientCall, err error) {
-	var call ipc.ClientCall
+func (c implApplicationClientStub) Start(ctx *context.T, opts ...rpc.CallOpt) (ocall ApplicationStartClientCall, err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Start", nil, opts...); err != nil {
 		return
 	}
@@ -447,8 +447,8 @@ func (c implApplicationClientStub) Start(ctx *context.T, opts ...ipc.CallOpt) (o
 	return
 }
 
-func (c implApplicationClientStub) Stop(ctx *context.T, i0 uint32, opts ...ipc.CallOpt) (err error) {
-	var call ipc.ClientCall
+func (c implApplicationClientStub) Stop(ctx *context.T, i0 uint32, opts ...rpc.CallOpt) (err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Stop", []interface{}{i0}, opts...); err != nil {
 		return
 	}
@@ -456,8 +456,8 @@ func (c implApplicationClientStub) Stop(ctx *context.T, i0 uint32, opts ...ipc.C
 	return
 }
 
-func (c implApplicationClientStub) Suspend(ctx *context.T, opts ...ipc.CallOpt) (err error) {
-	var call ipc.ClientCall
+func (c implApplicationClientStub) Suspend(ctx *context.T, opts ...rpc.CallOpt) (err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Suspend", nil, opts...); err != nil {
 		return
 	}
@@ -465,8 +465,8 @@ func (c implApplicationClientStub) Suspend(ctx *context.T, opts ...ipc.CallOpt) 
 	return
 }
 
-func (c implApplicationClientStub) Uninstall(ctx *context.T, opts ...ipc.CallOpt) (err error) {
-	var call ipc.ClientCall
+func (c implApplicationClientStub) Uninstall(ctx *context.T, opts ...rpc.CallOpt) (err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Uninstall", nil, opts...); err != nil {
 		return
 	}
@@ -474,8 +474,8 @@ func (c implApplicationClientStub) Uninstall(ctx *context.T, opts ...ipc.CallOpt
 	return
 }
 
-func (c implApplicationClientStub) Update(ctx *context.T, opts ...ipc.CallOpt) (err error) {
-	var call ipc.ClientCall
+func (c implApplicationClientStub) Update(ctx *context.T, opts ...rpc.CallOpt) (err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Update", nil, opts...); err != nil {
 		return
 	}
@@ -483,8 +483,8 @@ func (c implApplicationClientStub) Update(ctx *context.T, opts ...ipc.CallOpt) (
 	return
 }
 
-func (c implApplicationClientStub) UpdateTo(ctx *context.T, i0 string, opts ...ipc.CallOpt) (err error) {
-	var call ipc.ClientCall
+func (c implApplicationClientStub) UpdateTo(ctx *context.T, i0 string, opts ...rpc.CallOpt) (err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "UpdateTo", []interface{}{i0}, opts...); err != nil {
 		return
 	}
@@ -492,8 +492,8 @@ func (c implApplicationClientStub) UpdateTo(ctx *context.T, i0 string, opts ...i
 	return
 }
 
-func (c implApplicationClientStub) Debug(ctx *context.T, opts ...ipc.CallOpt) (o0 string, err error) {
-	var call ipc.ClientCall
+func (c implApplicationClientStub) Debug(ctx *context.T, opts ...rpc.CallOpt) (o0 string, err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Debug", nil, opts...); err != nil {
 		return
 	}
@@ -551,7 +551,7 @@ type ApplicationStartClientCall interface {
 }
 
 type implApplicationStartClientCall struct {
-	ipc.ClientCall
+	rpc.ClientCall
 	valRecv StartServerMessage
 	errRecv error
 }
@@ -764,19 +764,19 @@ type ApplicationServerMethods interface {
 	// which can then be used to control all the installations of the given
 	// application.
 	// TODO(rjkroege): Use customized labels.
-	Install(call ipc.ServerCall, name string, config Config, packages application.Packages) (string, error)
+	Install(call rpc.ServerCall, name string, config Config, packages application.Packages) (string, error)
 	// Refresh refreshes the state of application installation(s)
 	// instance(s).
-	Refresh(ipc.ServerCall) error
+	Refresh(rpc.ServerCall) error
 	// Restart restarts execution of application installation(s)
 	// instance(s).
-	Restart(ipc.ServerCall) error
+	Restart(rpc.ServerCall) error
 	// Resume resumes execution of application installation(s)
 	// instance(s).
-	Resume(ipc.ServerCall) error
+	Resume(rpc.ServerCall) error
 	// Revert reverts application installation(s) to the most recent
 	// previous installation.
-	Revert(ipc.ServerCall) error
+	Revert(rpc.ServerCall) error
 	// Start starts an instance of application installation(s). The
 	// server sends the application instance's Public Key on the stream.
 	// When the client receives the Public Key it must send Blessings back
@@ -795,32 +795,32 @@ type ApplicationServerMethods interface {
 	//
 	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
 	// are implemented.
-	Stop(call ipc.ServerCall, deadline uint32) error
+	Stop(call rpc.ServerCall, deadline uint32) error
 	// Suspend suspends execution of application installation(s)
 	// instance(s).
-	Suspend(ipc.ServerCall) error
+	Suspend(rpc.ServerCall) error
 	// Uninstall uninstalls application installation(s).
-	Uninstall(ipc.ServerCall) error
+	Uninstall(rpc.ServerCall) error
 	// Update updates the application installation(s) from the object name
 	// provided during Install.  If the new application envelope contains a
 	// different application title, the update does not occur, and an error
 	// is returned.
-	Update(ipc.ServerCall) error
+	Update(rpc.ServerCall) error
 	// UpdateTo updates the application installation(s) to the application
 	// specified by the object name argument.  If the new application
 	// envelope contains a different application title, the update does not
 	// occur, and an error is returned.
-	UpdateTo(call ipc.ServerCall, name string) error
+	UpdateTo(call rpc.ServerCall, name string) error
 	// Debug returns debug information about the application installation or
 	// instance.  This is generally highly implementation-specific, and
 	// presented in an unstructured form.  No guarantees are given about the
 	// stability of the format, and parsing it programmatically is
 	// specifically discouraged.
-	Debug(ipc.ServerCall) (string, error)
+	Debug(rpc.ServerCall) (string, error)
 }
 
 // ApplicationServerStubMethods is the server interface containing
-// Application methods, as expected by ipc.Server.
+// Application methods, as expected by rpc.Server.
 // The only difference between this interface and ApplicationServerMethods
 // is the streaming methods.
 type ApplicationServerStubMethods interface {
@@ -893,19 +893,19 @@ type ApplicationServerStubMethods interface {
 	// which can then be used to control all the installations of the given
 	// application.
 	// TODO(rjkroege): Use customized labels.
-	Install(call ipc.ServerCall, name string, config Config, packages application.Packages) (string, error)
+	Install(call rpc.ServerCall, name string, config Config, packages application.Packages) (string, error)
 	// Refresh refreshes the state of application installation(s)
 	// instance(s).
-	Refresh(ipc.ServerCall) error
+	Refresh(rpc.ServerCall) error
 	// Restart restarts execution of application installation(s)
 	// instance(s).
-	Restart(ipc.ServerCall) error
+	Restart(rpc.ServerCall) error
 	// Resume resumes execution of application installation(s)
 	// instance(s).
-	Resume(ipc.ServerCall) error
+	Resume(rpc.ServerCall) error
 	// Revert reverts application installation(s) to the most recent
 	// previous installation.
-	Revert(ipc.ServerCall) error
+	Revert(rpc.ServerCall) error
 	// Start starts an instance of application installation(s). The
 	// server sends the application instance's Public Key on the stream.
 	// When the client receives the Public Key it must send Blessings back
@@ -924,40 +924,40 @@ type ApplicationServerStubMethods interface {
 	//
 	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
 	// are implemented.
-	Stop(call ipc.ServerCall, deadline uint32) error
+	Stop(call rpc.ServerCall, deadline uint32) error
 	// Suspend suspends execution of application installation(s)
 	// instance(s).
-	Suspend(ipc.ServerCall) error
+	Suspend(rpc.ServerCall) error
 	// Uninstall uninstalls application installation(s).
-	Uninstall(ipc.ServerCall) error
+	Uninstall(rpc.ServerCall) error
 	// Update updates the application installation(s) from the object name
 	// provided during Install.  If the new application envelope contains a
 	// different application title, the update does not occur, and an error
 	// is returned.
-	Update(ipc.ServerCall) error
+	Update(rpc.ServerCall) error
 	// UpdateTo updates the application installation(s) to the application
 	// specified by the object name argument.  If the new application
 	// envelope contains a different application title, the update does not
 	// occur, and an error is returned.
-	UpdateTo(call ipc.ServerCall, name string) error
+	UpdateTo(call rpc.ServerCall, name string) error
 	// Debug returns debug information about the application installation or
 	// instance.  This is generally highly implementation-specific, and
 	// presented in an unstructured form.  No guarantees are given about the
 	// stability of the format, and parsing it programmatically is
 	// specifically discouraged.
-	Debug(ipc.ServerCall) (string, error)
+	Debug(rpc.ServerCall) (string, error)
 }
 
 // ApplicationServerStub adds universal methods to ApplicationServerStubMethods.
 type ApplicationServerStub interface {
 	ApplicationServerStubMethods
 	// Describe the Application interfaces.
-	Describe__() []ipc.InterfaceDesc
+	Describe__() []rpc.InterfaceDesc
 }
 
 // ApplicationServer returns a server stub for Application.
 // It converts an implementation of ApplicationServerMethods into
-// an object that may be used by ipc.Server.
+// an object that may be used by rpc.Server.
 func ApplicationServer(impl ApplicationServerMethods) ApplicationServerStub {
 	stub := implApplicationServerStub{
 		impl:             impl,
@@ -965,9 +965,9 @@ func ApplicationServer(impl ApplicationServerMethods) ApplicationServerStub {
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
-	if gs := ipc.NewGlobState(stub); gs != nil {
+	if gs := rpc.NewGlobState(stub); gs != nil {
 		stub.gs = gs
-	} else if gs := ipc.NewGlobState(impl); gs != nil {
+	} else if gs := rpc.NewGlobState(impl); gs != nil {
 		stub.gs = gs
 	}
 	return stub
@@ -976,26 +976,26 @@ func ApplicationServer(impl ApplicationServerMethods) ApplicationServerStub {
 type implApplicationServerStub struct {
 	impl ApplicationServerMethods
 	object.ObjectServerStub
-	gs *ipc.GlobState
+	gs *rpc.GlobState
 }
 
-func (s implApplicationServerStub) Install(call ipc.ServerCall, i0 string, i1 Config, i2 application.Packages) (string, error) {
+func (s implApplicationServerStub) Install(call rpc.ServerCall, i0 string, i1 Config, i2 application.Packages) (string, error) {
 	return s.impl.Install(call, i0, i1, i2)
 }
 
-func (s implApplicationServerStub) Refresh(call ipc.ServerCall) error {
+func (s implApplicationServerStub) Refresh(call rpc.ServerCall) error {
 	return s.impl.Refresh(call)
 }
 
-func (s implApplicationServerStub) Restart(call ipc.ServerCall) error {
+func (s implApplicationServerStub) Restart(call rpc.ServerCall) error {
 	return s.impl.Restart(call)
 }
 
-func (s implApplicationServerStub) Resume(call ipc.ServerCall) error {
+func (s implApplicationServerStub) Resume(call rpc.ServerCall) error {
 	return s.impl.Resume(call)
 }
 
-func (s implApplicationServerStub) Revert(call ipc.ServerCall) error {
+func (s implApplicationServerStub) Revert(call rpc.ServerCall) error {
 	return s.impl.Revert(call)
 }
 
@@ -1003,59 +1003,59 @@ func (s implApplicationServerStub) Start(call *ApplicationStartServerCallStub) e
 	return s.impl.Start(call)
 }
 
-func (s implApplicationServerStub) Stop(call ipc.ServerCall, i0 uint32) error {
+func (s implApplicationServerStub) Stop(call rpc.ServerCall, i0 uint32) error {
 	return s.impl.Stop(call, i0)
 }
 
-func (s implApplicationServerStub) Suspend(call ipc.ServerCall) error {
+func (s implApplicationServerStub) Suspend(call rpc.ServerCall) error {
 	return s.impl.Suspend(call)
 }
 
-func (s implApplicationServerStub) Uninstall(call ipc.ServerCall) error {
+func (s implApplicationServerStub) Uninstall(call rpc.ServerCall) error {
 	return s.impl.Uninstall(call)
 }
 
-func (s implApplicationServerStub) Update(call ipc.ServerCall) error {
+func (s implApplicationServerStub) Update(call rpc.ServerCall) error {
 	return s.impl.Update(call)
 }
 
-func (s implApplicationServerStub) UpdateTo(call ipc.ServerCall, i0 string) error {
+func (s implApplicationServerStub) UpdateTo(call rpc.ServerCall, i0 string) error {
 	return s.impl.UpdateTo(call, i0)
 }
 
-func (s implApplicationServerStub) Debug(call ipc.ServerCall) (string, error) {
+func (s implApplicationServerStub) Debug(call rpc.ServerCall) (string, error) {
 	return s.impl.Debug(call)
 }
 
-func (s implApplicationServerStub) Globber() *ipc.GlobState {
+func (s implApplicationServerStub) Globber() *rpc.GlobState {
 	return s.gs
 }
 
-func (s implApplicationServerStub) Describe__() []ipc.InterfaceDesc {
-	return []ipc.InterfaceDesc{ApplicationDesc, object.ObjectDesc}
+func (s implApplicationServerStub) Describe__() []rpc.InterfaceDesc {
+	return []rpc.InterfaceDesc{ApplicationDesc, object.ObjectDesc}
 }
 
 // ApplicationDesc describes the Application interface.
-var ApplicationDesc ipc.InterfaceDesc = descApplication
+var ApplicationDesc rpc.InterfaceDesc = descApplication
 
 // descApplication hides the desc to keep godoc clean.
-var descApplication = ipc.InterfaceDesc{
+var descApplication = rpc.InterfaceDesc{
 	Name:    "Application",
 	PkgPath: "v.io/v23/services/mgmt/device",
 	Doc:     "// Application can be used to manage applications on a device. The\n// idea is that this interace will be invoked using an object name that\n// identifies the application and its installations and instances\n// where applicable.\n//\n// In particular, the interface methods can be divided into three\n// groups based on their intended receiver:\n//\n// 1) Method receiver is an application:\n// -- Install()\n//\n// 2) Method receiver is an application installation:\n// -- Start()\n// -- Uninstall()\n// -- Update()\n//\n// 3) Method receiver is application installation instance:\n// -- Refresh()\n// -- Restart()\n// -- Resume()\n// -- Stop()\n// -- Suspend()\n//\n// For groups 2) and 3), the suffix that specifies the receiver can\n// optionally omit the installation and/or instance, in which case the\n// operation applies to all installations and/or instances in the\n// scope of the suffix.\n//\n// Examples:\n// # Install Google Maps on the device.\n// device/apps.Install(\"/google.com/appstore/maps\", nil, nil) --> \"google maps/0\"\n//\n// # Start an instance of the previously installed maps application installation.\n// device/apps/google maps/0.Start() --> { \"0\" }\n//\n// # Start a second instance of the previously installed maps application installation.\n// device/apps/google maps/0.Start() --> { \"1\" }\n//\n// # Stop the first instance previously started.\n// device/apps/google maps/0/0.Stop()\n//\n// # Install a second Google Maps installation.\n// device/apps.Install(\"/google.com/appstore/maps\", nil, nil) --> \"google maps/1\"\n//\n// # Start an instance for all maps application installations.\n// device/apps/google maps.Start() --> {\"0/2\", \"1/0\"}\n//\n// # Refresh the state of all instances of all maps application installations.\n// device/apps/google maps.Refresh()\n//\n// # Refresh the state of all instances of the maps application installation\n// identified by the given suffix.\n// device/apps/google maps/0.Refresh()\n//\n// # Refresh the state of the maps application installation instance identified by\n// the given suffix.\n// device/apps/google maps/0/2.Refresh()\n//\n// # Update the second maps installation to the latest version available.\n// device/apps/google maps/1.Update()\n//\n// # Update the first maps installation to a specific version.\n// device/apps/google maps/0.UpdateTo(\"/google.com/appstore/beta/maps\")\n//\n// Further, the following methods complement one another:\n// -- Install() and Uninstall()\n// -- Start() and Stop()\n// -- Suspend() and Resume()\n//\n// Finally, an application installation instance can be in one of\n// three abstract states: 1) \"does not exist\", 2) \"running\", or 3)\n// \"suspended\". The interface methods transition between these\n// abstract states using the following state machine:\n//\n// apply(Start(), \"does not exists\") = \"running\"\n// apply(Refresh(), \"running\") = \"running\"\n// apply(Refresh(), \"suspended\") = \"suspended\"\n// apply(Restart(), \"running\") = \"running\"\n// apply(Restart(), \"suspended\") = \"running\"\n// apply(Resume(), \"suspended\") = \"running\"\n// apply(Resume(), \"running\") = \"running\"\n// apply(Stop(), \"running\") = \"does not exist\"\n// apply(Stop(), \"suspended\") = \"does not exist\"\n// apply(Suspend(), \"running\") = \"suspended\"\n// apply(Suspend(), \"suspended\") = \"suspended\"\n//\n// In other words, invoking any method using an existing application\n// installation instance as a receiver is well-defined.",
-	Embeds: []ipc.EmbedDesc{
+	Embeds: []rpc.EmbedDesc{
 		{"Object", "v.io/v23/services/security/access/object", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetPermissions and GetPermissions in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(acl access.Permissions, etag string) error         {Red}\n//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}\n//  }"},
 	},
-	Methods: []ipc.MethodDesc{
+	Methods: []rpc.MethodDesc{
 		{
 			Name: "Install",
 			Doc:  "// Install installs the application identified by the first argument and\n// returns an object name suffix that identifies the new installation.\n//\n// The name argument should be an object name for an application\n// envelope.  The service it identifies must implement\n// repository.Application, and is expected to return either the\n// requested version (if the object name encodes a specific version), or\n// otherwise the latest available version, as appropriate.  This object\n// name will be used by default by the Update method, as a source for\n// updated application envelopes (can be overriden by setting\n// AppOriginConfigKey in the config).\n//\n// The config argument specifies config settings that will take\n// precedence over those present in the application envelope.\n//\n// The packages argument specifies packages to be installed in addition\n// to those specified in the envelope.  If a package in the envelope has\n// the same key, the package in the packages argument takes precedence.\n//\n// The returned suffix, when appended to the name used to reach the\n// receiver for Install, can be used to control the installation object.\n// The suffix will contain the title of the application as a prefix,\n// which can then be used to control all the installations of the given\n// application.\n// TODO(rjkroege): Use customized labels.",
-			InArgs: []ipc.ArgDesc{
+			InArgs: []rpc.ArgDesc{
 				{"name", ``},     // string
 				{"config", ``},   // Config
 				{"packages", ``}, // application.Packages
 			},
-			OutArgs: []ipc.ArgDesc{
+			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // string
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
@@ -1088,7 +1088,7 @@ var descApplication = ipc.InterfaceDesc{
 		{
 			Name: "Stop",
 			Doc:  "// Stop attempts a clean shutdown of application installation(s)\n// instance(s). If the deadline (in seconds) is non-zero and the\n// instance(s) in questions are still running after the given deadline,\n// shutdown of the instance(s) is enforced.\n//\n// TODO(jsimsa): Switch deadline to time.Duration when built-in types\n// are implemented.",
-			InArgs: []ipc.ArgDesc{
+			InArgs: []rpc.ArgDesc{
 				{"deadline", ``}, // uint32
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
@@ -1111,7 +1111,7 @@ var descApplication = ipc.InterfaceDesc{
 		{
 			Name: "UpdateTo",
 			Doc:  "// UpdateTo updates the application installation(s) to the application\n// specified by the object name argument.  If the new application\n// envelope contains a different application title, the update does not\n// occur, and an error is returned.",
-			InArgs: []ipc.ArgDesc{
+			InArgs: []rpc.ArgDesc{
 				{"name", ``}, // string
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
@@ -1119,7 +1119,7 @@ var descApplication = ipc.InterfaceDesc{
 		{
 			Name: "Debug",
 			Doc:  "// Debug returns debug information about the application installation or\n// instance.  This is generally highly implementation-specific, and\n// presented in an unstructured form.  No guarantees are given about the\n// stability of the format, and parsing it programmatically is\n// specifically discouraged.",
-			OutArgs: []ipc.ArgDesc{
+			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // string
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Debug"))},
@@ -1152,20 +1152,20 @@ type ApplicationStartServerStream interface {
 
 // ApplicationStartServerCall represents the context passed to Application.Start.
 type ApplicationStartServerCall interface {
-	ipc.ServerCall
+	rpc.ServerCall
 	ApplicationStartServerStream
 }
 
-// ApplicationStartServerCallStub is a wrapper that converts ipc.StreamServerCall into
+// ApplicationStartServerCallStub is a wrapper that converts rpc.StreamServerCall into
 // a typesafe stub that implements ApplicationStartServerCall.
 type ApplicationStartServerCallStub struct {
-	ipc.StreamServerCall
+	rpc.StreamServerCall
 	valRecv StartClientMessage
 	errRecv error
 }
 
-// Init initializes ApplicationStartServerCallStub from ipc.StreamServerCall.
-func (s *ApplicationStartServerCallStub) Init(call ipc.StreamServerCall) {
+// Init initializes ApplicationStartServerCallStub from rpc.StreamServerCall.
+func (s *ApplicationStartServerCallStub) Init(call rpc.StreamServerCall) {
 	s.StreamServerCall = call
 }
 
@@ -1228,20 +1228,20 @@ func (s implApplicationStartServerCallSend) Send(item StartServerMessage) error 
 // The blessings that the device is to be claimed with is provided
 // via the ipc.Granter option in Go.
 type ClaimableClientMethods interface {
-	Claim(ctx *context.T, pairingToken string, opts ...ipc.CallOpt) error
+	Claim(ctx *context.T, pairingToken string, opts ...rpc.CallOpt) error
 }
 
 // ClaimableClientStub adds universal methods to ClaimableClientMethods.
 type ClaimableClientStub interface {
 	ClaimableClientMethods
-	ipc.UniversalServiceMethods
+	rpc.UniversalServiceMethods
 }
 
 // ClaimableClient returns a client stub for Claimable.
-func ClaimableClient(name string, opts ...ipc.BindOpt) ClaimableClientStub {
-	var client ipc.Client
+func ClaimableClient(name string, opts ...rpc.BindOpt) ClaimableClientStub {
+	var client rpc.Client
 	for _, opt := range opts {
-		if clientOpt, ok := opt.(ipc.Client); ok {
+		if clientOpt, ok := opt.(rpc.Client); ok {
 			client = clientOpt
 		}
 	}
@@ -1250,18 +1250,18 @@ func ClaimableClient(name string, opts ...ipc.BindOpt) ClaimableClientStub {
 
 type implClaimableClientStub struct {
 	name   string
-	client ipc.Client
+	client rpc.Client
 }
 
-func (c implClaimableClientStub) c(ctx *context.T) ipc.Client {
+func (c implClaimableClientStub) c(ctx *context.T) rpc.Client {
 	if c.client != nil {
 		return c.client
 	}
 	return v23.GetClient(ctx)
 }
 
-func (c implClaimableClientStub) Claim(ctx *context.T, i0 string, opts ...ipc.CallOpt) (err error) {
-	var call ipc.ClientCall
+func (c implClaimableClientStub) Claim(ctx *context.T, i0 string, opts ...rpc.CallOpt) (err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Claim", []interface{}{i0}, opts...); err != nil {
 		return
 	}
@@ -1286,11 +1286,11 @@ func (c implClaimableClientStub) Claim(ctx *context.T, i0 string, opts ...ipc.Ca
 // The blessings that the device is to be claimed with is provided
 // via the ipc.Granter option in Go.
 type ClaimableServerMethods interface {
-	Claim(call ipc.ServerCall, pairingToken string) error
+	Claim(call rpc.ServerCall, pairingToken string) error
 }
 
 // ClaimableServerStubMethods is the server interface containing
-// Claimable methods, as expected by ipc.Server.
+// Claimable methods, as expected by rpc.Server.
 // There is no difference between this interface and ClaimableServerMethods
 // since there are no streaming methods.
 type ClaimableServerStubMethods ClaimableServerMethods
@@ -1299,21 +1299,21 @@ type ClaimableServerStubMethods ClaimableServerMethods
 type ClaimableServerStub interface {
 	ClaimableServerStubMethods
 	// Describe the Claimable interfaces.
-	Describe__() []ipc.InterfaceDesc
+	Describe__() []rpc.InterfaceDesc
 }
 
 // ClaimableServer returns a server stub for Claimable.
 // It converts an implementation of ClaimableServerMethods into
-// an object that may be used by ipc.Server.
+// an object that may be used by rpc.Server.
 func ClaimableServer(impl ClaimableServerMethods) ClaimableServerStub {
 	stub := implClaimableServerStub{
 		impl: impl,
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
-	if gs := ipc.NewGlobState(stub); gs != nil {
+	if gs := rpc.NewGlobState(stub); gs != nil {
 		stub.gs = gs
-	} else if gs := ipc.NewGlobState(impl); gs != nil {
+	} else if gs := rpc.NewGlobState(impl); gs != nil {
 		stub.gs = gs
 	}
 	return stub
@@ -1321,33 +1321,33 @@ func ClaimableServer(impl ClaimableServerMethods) ClaimableServerStub {
 
 type implClaimableServerStub struct {
 	impl ClaimableServerMethods
-	gs   *ipc.GlobState
+	gs   *rpc.GlobState
 }
 
-func (s implClaimableServerStub) Claim(call ipc.ServerCall, i0 string) error {
+func (s implClaimableServerStub) Claim(call rpc.ServerCall, i0 string) error {
 	return s.impl.Claim(call, i0)
 }
 
-func (s implClaimableServerStub) Globber() *ipc.GlobState {
+func (s implClaimableServerStub) Globber() *rpc.GlobState {
 	return s.gs
 }
 
-func (s implClaimableServerStub) Describe__() []ipc.InterfaceDesc {
-	return []ipc.InterfaceDesc{ClaimableDesc}
+func (s implClaimableServerStub) Describe__() []rpc.InterfaceDesc {
+	return []rpc.InterfaceDesc{ClaimableDesc}
 }
 
 // ClaimableDesc describes the Claimable interface.
-var ClaimableDesc ipc.InterfaceDesc = descClaimable
+var ClaimableDesc rpc.InterfaceDesc = descClaimable
 
 // descClaimable hides the desc to keep godoc clean.
-var descClaimable = ipc.InterfaceDesc{
+var descClaimable = rpc.InterfaceDesc{
 	Name:    "Claimable",
 	PkgPath: "v.io/v23/services/mgmt/device",
 	Doc:     "// Claimable represents an uninitialized device with no owner\n// (i.e., a device that has no blessings).\n//\n// Claim is used to claim ownership by blessing the device's private key.\n// Devices that have provided a pairing token to the claimer through an\n// out-of-band communication channel (eg: display/email) would expect this\n// pairing token to be replayed by the claimer.\n//\n// Once claimed, the device will export the \"Device\" interface and all methods\n// will be restricted to the claimer.\n//\n// The blessings that the device is to be claimed with is provided\n// via the ipc.Granter option in Go.",
-	Methods: []ipc.MethodDesc{
+	Methods: []rpc.MethodDesc{
 		{
 			Name: "Claim",
-			InArgs: []ipc.ArgDesc{
+			InArgs: []rpc.ArgDesc{
 				{"pairingToken", ``}, // string
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
@@ -1451,37 +1451,37 @@ type DeviceClientMethods interface {
 	// installation instance as a receiver is well-defined.
 	ApplicationClientMethods
 	// Describe generates a description of the device.
-	Describe(*context.T, ...ipc.CallOpt) (Description, error)
+	Describe(*context.T, ...rpc.CallOpt) (Description, error)
 	// IsRunnable checks if the device can execute the given binary.
-	IsRunnable(ctx *context.T, description binary.Description, opts ...ipc.CallOpt) (bool, error)
+	IsRunnable(ctx *context.T, description binary.Description, opts ...rpc.CallOpt) (bool, error)
 	// Reset resets the device. If the deadline is non-zero and the device
 	// in question is still running after the given deadline expired,
 	// reset of the device is enforced.
 	//
 	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
 	// are implemented.
-	Reset(ctx *context.T, deadline uint64, opts ...ipc.CallOpt) error
+	Reset(ctx *context.T, deadline uint64, opts ...rpc.CallOpt) error
 	// AssociateAccount associates a local  system account name with the provided
 	// Vanadium identities. It replaces the existing association if one already exists for that
 	// identity. Setting an AccountName to "" removes the association for each
 	// listed identity.
-	AssociateAccount(ctx *context.T, identityNames []string, accountName string, opts ...ipc.CallOpt) error
+	AssociateAccount(ctx *context.T, identityNames []string, accountName string, opts ...rpc.CallOpt) error
 	// ListAssociations returns all of the associations between Vanadium identities
 	// and system names.
-	ListAssociations(*context.T, ...ipc.CallOpt) ([]Association, error)
+	ListAssociations(*context.T, ...rpc.CallOpt) ([]Association, error)
 }
 
 // DeviceClientStub adds universal methods to DeviceClientMethods.
 type DeviceClientStub interface {
 	DeviceClientMethods
-	ipc.UniversalServiceMethods
+	rpc.UniversalServiceMethods
 }
 
 // DeviceClient returns a client stub for Device.
-func DeviceClient(name string, opts ...ipc.BindOpt) DeviceClientStub {
-	var client ipc.Client
+func DeviceClient(name string, opts ...rpc.BindOpt) DeviceClientStub {
+	var client rpc.Client
 	for _, opt := range opts {
-		if clientOpt, ok := opt.(ipc.Client); ok {
+		if clientOpt, ok := opt.(rpc.Client); ok {
 			client = clientOpt
 		}
 	}
@@ -1490,20 +1490,20 @@ func DeviceClient(name string, opts ...ipc.BindOpt) DeviceClientStub {
 
 type implDeviceClientStub struct {
 	name   string
-	client ipc.Client
+	client rpc.Client
 
 	ApplicationClientStub
 }
 
-func (c implDeviceClientStub) c(ctx *context.T) ipc.Client {
+func (c implDeviceClientStub) c(ctx *context.T) rpc.Client {
 	if c.client != nil {
 		return c.client
 	}
 	return v23.GetClient(ctx)
 }
 
-func (c implDeviceClientStub) Describe(ctx *context.T, opts ...ipc.CallOpt) (o0 Description, err error) {
-	var call ipc.ClientCall
+func (c implDeviceClientStub) Describe(ctx *context.T, opts ...rpc.CallOpt) (o0 Description, err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Describe", nil, opts...); err != nil {
 		return
 	}
@@ -1511,8 +1511,8 @@ func (c implDeviceClientStub) Describe(ctx *context.T, opts ...ipc.CallOpt) (o0 
 	return
 }
 
-func (c implDeviceClientStub) IsRunnable(ctx *context.T, i0 binary.Description, opts ...ipc.CallOpt) (o0 bool, err error) {
-	var call ipc.ClientCall
+func (c implDeviceClientStub) IsRunnable(ctx *context.T, i0 binary.Description, opts ...rpc.CallOpt) (o0 bool, err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "IsRunnable", []interface{}{i0}, opts...); err != nil {
 		return
 	}
@@ -1520,8 +1520,8 @@ func (c implDeviceClientStub) IsRunnable(ctx *context.T, i0 binary.Description, 
 	return
 }
 
-func (c implDeviceClientStub) Reset(ctx *context.T, i0 uint64, opts ...ipc.CallOpt) (err error) {
-	var call ipc.ClientCall
+func (c implDeviceClientStub) Reset(ctx *context.T, i0 uint64, opts ...rpc.CallOpt) (err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Reset", []interface{}{i0}, opts...); err != nil {
 		return
 	}
@@ -1529,8 +1529,8 @@ func (c implDeviceClientStub) Reset(ctx *context.T, i0 uint64, opts ...ipc.CallO
 	return
 }
 
-func (c implDeviceClientStub) AssociateAccount(ctx *context.T, i0 []string, i1 string, opts ...ipc.CallOpt) (err error) {
-	var call ipc.ClientCall
+func (c implDeviceClientStub) AssociateAccount(ctx *context.T, i0 []string, i1 string, opts ...rpc.CallOpt) (err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "AssociateAccount", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
@@ -1538,8 +1538,8 @@ func (c implDeviceClientStub) AssociateAccount(ctx *context.T, i0 []string, i1 s
 	return
 }
 
-func (c implDeviceClientStub) ListAssociations(ctx *context.T, opts ...ipc.CallOpt) (o0 []Association, err error) {
-	var call ipc.ClientCall
+func (c implDeviceClientStub) ListAssociations(ctx *context.T, opts ...rpc.CallOpt) (o0 []Association, err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "ListAssociations", nil, opts...); err != nil {
 		return
 	}
@@ -1643,28 +1643,28 @@ type DeviceServerMethods interface {
 	// installation instance as a receiver is well-defined.
 	ApplicationServerMethods
 	// Describe generates a description of the device.
-	Describe(ipc.ServerCall) (Description, error)
+	Describe(rpc.ServerCall) (Description, error)
 	// IsRunnable checks if the device can execute the given binary.
-	IsRunnable(call ipc.ServerCall, description binary.Description) (bool, error)
+	IsRunnable(call rpc.ServerCall, description binary.Description) (bool, error)
 	// Reset resets the device. If the deadline is non-zero and the device
 	// in question is still running after the given deadline expired,
 	// reset of the device is enforced.
 	//
 	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
 	// are implemented.
-	Reset(call ipc.ServerCall, deadline uint64) error
+	Reset(call rpc.ServerCall, deadline uint64) error
 	// AssociateAccount associates a local  system account name with the provided
 	// Vanadium identities. It replaces the existing association if one already exists for that
 	// identity. Setting an AccountName to "" removes the association for each
 	// listed identity.
-	AssociateAccount(call ipc.ServerCall, identityNames []string, accountName string) error
+	AssociateAccount(call rpc.ServerCall, identityNames []string, accountName string) error
 	// ListAssociations returns all of the associations between Vanadium identities
 	// and system names.
-	ListAssociations(ipc.ServerCall) ([]Association, error)
+	ListAssociations(rpc.ServerCall) ([]Association, error)
 }
 
 // DeviceServerStubMethods is the server interface containing
-// Device methods, as expected by ipc.Server.
+// Device methods, as expected by rpc.Server.
 // The only difference between this interface and DeviceServerMethods
 // is the streaming methods.
 type DeviceServerStubMethods interface {
@@ -1758,36 +1758,36 @@ type DeviceServerStubMethods interface {
 	// installation instance as a receiver is well-defined.
 	ApplicationServerStubMethods
 	// Describe generates a description of the device.
-	Describe(ipc.ServerCall) (Description, error)
+	Describe(rpc.ServerCall) (Description, error)
 	// IsRunnable checks if the device can execute the given binary.
-	IsRunnable(call ipc.ServerCall, description binary.Description) (bool, error)
+	IsRunnable(call rpc.ServerCall, description binary.Description) (bool, error)
 	// Reset resets the device. If the deadline is non-zero and the device
 	// in question is still running after the given deadline expired,
 	// reset of the device is enforced.
 	//
 	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
 	// are implemented.
-	Reset(call ipc.ServerCall, deadline uint64) error
+	Reset(call rpc.ServerCall, deadline uint64) error
 	// AssociateAccount associates a local  system account name with the provided
 	// Vanadium identities. It replaces the existing association if one already exists for that
 	// identity. Setting an AccountName to "" removes the association for each
 	// listed identity.
-	AssociateAccount(call ipc.ServerCall, identityNames []string, accountName string) error
+	AssociateAccount(call rpc.ServerCall, identityNames []string, accountName string) error
 	// ListAssociations returns all of the associations between Vanadium identities
 	// and system names.
-	ListAssociations(ipc.ServerCall) ([]Association, error)
+	ListAssociations(rpc.ServerCall) ([]Association, error)
 }
 
 // DeviceServerStub adds universal methods to DeviceServerStubMethods.
 type DeviceServerStub interface {
 	DeviceServerStubMethods
 	// Describe the Device interfaces.
-	Describe__() []ipc.InterfaceDesc
+	Describe__() []rpc.InterfaceDesc
 }
 
 // DeviceServer returns a server stub for Device.
 // It converts an implementation of DeviceServerMethods into
-// an object that may be used by ipc.Server.
+// an object that may be used by rpc.Server.
 func DeviceServer(impl DeviceServerMethods) DeviceServerStub {
 	stub := implDeviceServerStub{
 		impl: impl,
@@ -1795,9 +1795,9 @@ func DeviceServer(impl DeviceServerMethods) DeviceServerStub {
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
-	if gs := ipc.NewGlobState(stub); gs != nil {
+	if gs := rpc.NewGlobState(stub); gs != nil {
 		stub.gs = gs
-	} else if gs := ipc.NewGlobState(impl); gs != nil {
+	} else if gs := rpc.NewGlobState(impl); gs != nil {
 		stub.gs = gs
 	}
 	return stub
@@ -1806,53 +1806,53 @@ func DeviceServer(impl DeviceServerMethods) DeviceServerStub {
 type implDeviceServerStub struct {
 	impl DeviceServerMethods
 	ApplicationServerStub
-	gs *ipc.GlobState
+	gs *rpc.GlobState
 }
 
-func (s implDeviceServerStub) Describe(call ipc.ServerCall) (Description, error) {
+func (s implDeviceServerStub) Describe(call rpc.ServerCall) (Description, error) {
 	return s.impl.Describe(call)
 }
 
-func (s implDeviceServerStub) IsRunnable(call ipc.ServerCall, i0 binary.Description) (bool, error) {
+func (s implDeviceServerStub) IsRunnable(call rpc.ServerCall, i0 binary.Description) (bool, error) {
 	return s.impl.IsRunnable(call, i0)
 }
 
-func (s implDeviceServerStub) Reset(call ipc.ServerCall, i0 uint64) error {
+func (s implDeviceServerStub) Reset(call rpc.ServerCall, i0 uint64) error {
 	return s.impl.Reset(call, i0)
 }
 
-func (s implDeviceServerStub) AssociateAccount(call ipc.ServerCall, i0 []string, i1 string) error {
+func (s implDeviceServerStub) AssociateAccount(call rpc.ServerCall, i0 []string, i1 string) error {
 	return s.impl.AssociateAccount(call, i0, i1)
 }
 
-func (s implDeviceServerStub) ListAssociations(call ipc.ServerCall) ([]Association, error) {
+func (s implDeviceServerStub) ListAssociations(call rpc.ServerCall) ([]Association, error) {
 	return s.impl.ListAssociations(call)
 }
 
-func (s implDeviceServerStub) Globber() *ipc.GlobState {
+func (s implDeviceServerStub) Globber() *rpc.GlobState {
 	return s.gs
 }
 
-func (s implDeviceServerStub) Describe__() []ipc.InterfaceDesc {
-	return []ipc.InterfaceDesc{DeviceDesc, ApplicationDesc, object.ObjectDesc}
+func (s implDeviceServerStub) Describe__() []rpc.InterfaceDesc {
+	return []rpc.InterfaceDesc{DeviceDesc, ApplicationDesc, object.ObjectDesc}
 }
 
 // DeviceDesc describes the Device interface.
-var DeviceDesc ipc.InterfaceDesc = descDevice
+var DeviceDesc rpc.InterfaceDesc = descDevice
 
 // descDevice hides the desc to keep godoc clean.
-var descDevice = ipc.InterfaceDesc{
+var descDevice = rpc.InterfaceDesc{
 	Name:    "Device",
 	PkgPath: "v.io/v23/services/mgmt/device",
 	Doc:     "// Device can be used to manage a device remotely using an object name that\n// identifies it.",
-	Embeds: []ipc.EmbedDesc{
+	Embeds: []rpc.EmbedDesc{
 		{"Application", "v.io/v23/services/mgmt/device", "// Application can be used to manage applications on a device. The\n// idea is that this interace will be invoked using an object name that\n// identifies the application and its installations and instances\n// where applicable.\n//\n// In particular, the interface methods can be divided into three\n// groups based on their intended receiver:\n//\n// 1) Method receiver is an application:\n// -- Install()\n//\n// 2) Method receiver is an application installation:\n// -- Start()\n// -- Uninstall()\n// -- Update()\n//\n// 3) Method receiver is application installation instance:\n// -- Refresh()\n// -- Restart()\n// -- Resume()\n// -- Stop()\n// -- Suspend()\n//\n// For groups 2) and 3), the suffix that specifies the receiver can\n// optionally omit the installation and/or instance, in which case the\n// operation applies to all installations and/or instances in the\n// scope of the suffix.\n//\n// Examples:\n// # Install Google Maps on the device.\n// device/apps.Install(\"/google.com/appstore/maps\", nil, nil) --> \"google maps/0\"\n//\n// # Start an instance of the previously installed maps application installation.\n// device/apps/google maps/0.Start() --> { \"0\" }\n//\n// # Start a second instance of the previously installed maps application installation.\n// device/apps/google maps/0.Start() --> { \"1\" }\n//\n// # Stop the first instance previously started.\n// device/apps/google maps/0/0.Stop()\n//\n// # Install a second Google Maps installation.\n// device/apps.Install(\"/google.com/appstore/maps\", nil, nil) --> \"google maps/1\"\n//\n// # Start an instance for all maps application installations.\n// device/apps/google maps.Start() --> {\"0/2\", \"1/0\"}\n//\n// # Refresh the state of all instances of all maps application installations.\n// device/apps/google maps.Refresh()\n//\n// # Refresh the state of all instances of the maps application installation\n// identified by the given suffix.\n// device/apps/google maps/0.Refresh()\n//\n// # Refresh the state of the maps application installation instance identified by\n// the given suffix.\n// device/apps/google maps/0/2.Refresh()\n//\n// # Update the second maps installation to the latest version available.\n// device/apps/google maps/1.Update()\n//\n// # Update the first maps installation to a specific version.\n// device/apps/google maps/0.UpdateTo(\"/google.com/appstore/beta/maps\")\n//\n// Further, the following methods complement one another:\n// -- Install() and Uninstall()\n// -- Start() and Stop()\n// -- Suspend() and Resume()\n//\n// Finally, an application installation instance can be in one of\n// three abstract states: 1) \"does not exist\", 2) \"running\", or 3)\n// \"suspended\". The interface methods transition between these\n// abstract states using the following state machine:\n//\n// apply(Start(), \"does not exists\") = \"running\"\n// apply(Refresh(), \"running\") = \"running\"\n// apply(Refresh(), \"suspended\") = \"suspended\"\n// apply(Restart(), \"running\") = \"running\"\n// apply(Restart(), \"suspended\") = \"running\"\n// apply(Resume(), \"suspended\") = \"running\"\n// apply(Resume(), \"running\") = \"running\"\n// apply(Stop(), \"running\") = \"does not exist\"\n// apply(Stop(), \"suspended\") = \"does not exist\"\n// apply(Suspend(), \"running\") = \"suspended\"\n// apply(Suspend(), \"suspended\") = \"suspended\"\n//\n// In other words, invoking any method using an existing application\n// installation instance as a receiver is well-defined."},
 	},
-	Methods: []ipc.MethodDesc{
+	Methods: []rpc.MethodDesc{
 		{
 			Name: "Describe",
 			Doc:  "// Describe generates a description of the device.",
-			OutArgs: []ipc.ArgDesc{
+			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // Description
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
@@ -1860,10 +1860,10 @@ var descDevice = ipc.InterfaceDesc{
 		{
 			Name: "IsRunnable",
 			Doc:  "// IsRunnable checks if the device can execute the given binary.",
-			InArgs: []ipc.ArgDesc{
+			InArgs: []rpc.ArgDesc{
 				{"description", ``}, // binary.Description
 			},
-			OutArgs: []ipc.ArgDesc{
+			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // bool
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
@@ -1871,7 +1871,7 @@ var descDevice = ipc.InterfaceDesc{
 		{
 			Name: "Reset",
 			Doc:  "// Reset resets the device. If the deadline is non-zero and the device\n// in question is still running after the given deadline expired,\n// reset of the device is enforced.\n//\n// TODO(jsimsa): Switch deadline to time.Duration when built-in types\n// are implemented.",
-			InArgs: []ipc.ArgDesc{
+			InArgs: []rpc.ArgDesc{
 				{"deadline", ``}, // uint64
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
@@ -1879,7 +1879,7 @@ var descDevice = ipc.InterfaceDesc{
 		{
 			Name: "AssociateAccount",
 			Doc:  "// AssociateAccount associates a local  system account name with the provided\n// Vanadium identities. It replaces the existing association if one already exists for that\n// identity. Setting an AccountName to \"\" removes the association for each\n// listed identity.",
-			InArgs: []ipc.ArgDesc{
+			InArgs: []rpc.ArgDesc{
 				{"identityNames", ``}, // []string
 				{"accountName", ``},   // string
 			},
@@ -1888,7 +1888,7 @@ var descDevice = ipc.InterfaceDesc{
 		{
 			Name: "ListAssociations",
 			Doc:  "// ListAssociations returns all of the associations between Vanadium identities\n// and system names.",
-			OutArgs: []ipc.ArgDesc{
+			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // []Association
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},

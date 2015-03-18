@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"strings"
 
-	"v.io/v23/ipc/version"
+	"v.io/v23/rpc/version"
 )
 
 // EndpointOpt must be implemented by all optional parameters to FormatEndpoint
@@ -14,7 +14,7 @@ type EndpointOpt interface {
 
 // FormatEndpoint creates a string representation of an Endpoint using
 // the supplied parameters. Network and address are always required,
-// RoutingID, IPCVersionRange and ServesMountTableOpt can be specified
+// RoutingID, RPCVersionRange and ServesMountTableOpt can be specified
 // as options.
 func FormatEndpoint(network, address string, opts ...EndpointOpt) string {
 	rid := "@"
@@ -25,7 +25,7 @@ func FormatEndpoint(network, address string, opts ...EndpointOpt) string {
 		switch v := o.(type) {
 		case RoutingID:
 			rid = "@" + v.String()
-		case version.IPCVersionRange:
+		case version.RPCVersionRange:
 			versions = "@" + strconv.FormatUint(uint64(v.Min), 10) +
 				"@" + strconv.FormatUint(uint64(v.Max), 10)
 		case ServesMountTableOpt:

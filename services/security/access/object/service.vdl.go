@@ -7,7 +7,7 @@ import (
 	// VDL system imports
 	"v.io/v23"
 	"v.io/v23/context"
-	"v.io/v23/ipc"
+	"v.io/v23/rpc"
 	"v.io/v23/vdl"
 
 	// VDL user imports
@@ -77,25 +77,25 @@ type ObjectClientMethods interface {
 	// endpoint.  To modify the mount point's AccessList, use ResolveToMountTable
 	// to get an endpoint and call SetPermissions on that.  This means that clients
 	// must know when a name refers to a mount point to change its AccessList.
-	SetPermissions(ctx *context.T, acl access.Permissions, etag string, opts ...ipc.CallOpt) error
+	SetPermissions(ctx *context.T, acl access.Permissions, etag string, opts ...rpc.CallOpt) error
 	// GetPermissions returns the complete, current AccessList for an object.  The returned etag
 	// can be passed to a subsequent call to SetPermissions for optimistic concurrency
 	// control. A successful call to SetPermissions will invalidate etag, and the client
 	// must call GetPermissions again to get the current etag.
-	GetPermissions(*context.T, ...ipc.CallOpt) (acl access.Permissions, etag string, err error)
+	GetPermissions(*context.T, ...rpc.CallOpt) (acl access.Permissions, etag string, err error)
 }
 
 // ObjectClientStub adds universal methods to ObjectClientMethods.
 type ObjectClientStub interface {
 	ObjectClientMethods
-	ipc.UniversalServiceMethods
+	rpc.UniversalServiceMethods
 }
 
 // ObjectClient returns a client stub for Object.
-func ObjectClient(name string, opts ...ipc.BindOpt) ObjectClientStub {
-	var client ipc.Client
+func ObjectClient(name string, opts ...rpc.BindOpt) ObjectClientStub {
+	var client rpc.Client
 	for _, opt := range opts {
-		if clientOpt, ok := opt.(ipc.Client); ok {
+		if clientOpt, ok := opt.(rpc.Client); ok {
 			client = clientOpt
 		}
 	}
@@ -104,18 +104,18 @@ func ObjectClient(name string, opts ...ipc.BindOpt) ObjectClientStub {
 
 type implObjectClientStub struct {
 	name   string
-	client ipc.Client
+	client rpc.Client
 }
 
-func (c implObjectClientStub) c(ctx *context.T) ipc.Client {
+func (c implObjectClientStub) c(ctx *context.T) rpc.Client {
 	if c.client != nil {
 		return c.client
 	}
 	return v23.GetClient(ctx)
 }
 
-func (c implObjectClientStub) SetPermissions(ctx *context.T, i0 access.Permissions, i1 string, opts ...ipc.CallOpt) (err error) {
-	var call ipc.ClientCall
+func (c implObjectClientStub) SetPermissions(ctx *context.T, i0 access.Permissions, i1 string, opts ...rpc.CallOpt) (err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "SetPermissions", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
@@ -123,8 +123,8 @@ func (c implObjectClientStub) SetPermissions(ctx *context.T, i0 access.Permissio
 	return
 }
 
-func (c implObjectClientStub) GetPermissions(ctx *context.T, opts ...ipc.CallOpt) (o0 access.Permissions, o1 string, err error) {
-	var call ipc.ClientCall
+func (c implObjectClientStub) GetPermissions(ctx *context.T, opts ...rpc.CallOpt) (o0 access.Permissions, o1 string, err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "GetPermissions", nil, opts...); err != nil {
 		return
 	}
@@ -195,16 +195,16 @@ type ObjectServerMethods interface {
 	// endpoint.  To modify the mount point's AccessList, use ResolveToMountTable
 	// to get an endpoint and call SetPermissions on that.  This means that clients
 	// must know when a name refers to a mount point to change its AccessList.
-	SetPermissions(call ipc.ServerCall, acl access.Permissions, etag string) error
+	SetPermissions(call rpc.ServerCall, acl access.Permissions, etag string) error
 	// GetPermissions returns the complete, current AccessList for an object.  The returned etag
 	// can be passed to a subsequent call to SetPermissions for optimistic concurrency
 	// control. A successful call to SetPermissions will invalidate etag, and the client
 	// must call GetPermissions again to get the current etag.
-	GetPermissions(ipc.ServerCall) (acl access.Permissions, etag string, err error)
+	GetPermissions(rpc.ServerCall) (acl access.Permissions, etag string, err error)
 }
 
 // ObjectServerStubMethods is the server interface containing
-// Object methods, as expected by ipc.Server.
+// Object methods, as expected by rpc.Server.
 // There is no difference between this interface and ObjectServerMethods
 // since there are no streaming methods.
 type ObjectServerStubMethods ObjectServerMethods
@@ -213,21 +213,21 @@ type ObjectServerStubMethods ObjectServerMethods
 type ObjectServerStub interface {
 	ObjectServerStubMethods
 	// Describe the Object interfaces.
-	Describe__() []ipc.InterfaceDesc
+	Describe__() []rpc.InterfaceDesc
 }
 
 // ObjectServer returns a server stub for Object.
 // It converts an implementation of ObjectServerMethods into
-// an object that may be used by ipc.Server.
+// an object that may be used by rpc.Server.
 func ObjectServer(impl ObjectServerMethods) ObjectServerStub {
 	stub := implObjectServerStub{
 		impl: impl,
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
-	if gs := ipc.NewGlobState(stub); gs != nil {
+	if gs := rpc.NewGlobState(stub); gs != nil {
 		stub.gs = gs
-	} else if gs := ipc.NewGlobState(impl); gs != nil {
+	} else if gs := rpc.NewGlobState(impl); gs != nil {
 		stub.gs = gs
 	}
 	return stub
@@ -235,38 +235,38 @@ func ObjectServer(impl ObjectServerMethods) ObjectServerStub {
 
 type implObjectServerStub struct {
 	impl ObjectServerMethods
-	gs   *ipc.GlobState
+	gs   *rpc.GlobState
 }
 
-func (s implObjectServerStub) SetPermissions(call ipc.ServerCall, i0 access.Permissions, i1 string) error {
+func (s implObjectServerStub) SetPermissions(call rpc.ServerCall, i0 access.Permissions, i1 string) error {
 	return s.impl.SetPermissions(call, i0, i1)
 }
 
-func (s implObjectServerStub) GetPermissions(call ipc.ServerCall) (access.Permissions, string, error) {
+func (s implObjectServerStub) GetPermissions(call rpc.ServerCall) (access.Permissions, string, error) {
 	return s.impl.GetPermissions(call)
 }
 
-func (s implObjectServerStub) Globber() *ipc.GlobState {
+func (s implObjectServerStub) Globber() *rpc.GlobState {
 	return s.gs
 }
 
-func (s implObjectServerStub) Describe__() []ipc.InterfaceDesc {
-	return []ipc.InterfaceDesc{ObjectDesc}
+func (s implObjectServerStub) Describe__() []rpc.InterfaceDesc {
+	return []rpc.InterfaceDesc{ObjectDesc}
 }
 
 // ObjectDesc describes the Object interface.
-var ObjectDesc ipc.InterfaceDesc = descObject
+var ObjectDesc rpc.InterfaceDesc = descObject
 
 // descObject hides the desc to keep godoc clean.
-var descObject = ipc.InterfaceDesc{
+var descObject = rpc.InterfaceDesc{
 	Name:    "Object",
 	PkgPath: "v.io/v23/services/security/access/object",
 	Doc:     "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetPermissions and GetPermissions in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(acl access.Permissions, etag string) error         {Red}\n//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}\n//  }",
-	Methods: []ipc.MethodDesc{
+	Methods: []rpc.MethodDesc{
 		{
 			Name: "SetPermissions",
 			Doc:  "// SetPermissions replaces the current AccessList for an object.  etag allows for optional,\n// optimistic concurrency control.  If non-empty, etag's value must come from\n// GetPermissions.  If any client has successfully called SetPermissions in the meantime, the\n// etag will be stale and SetPermissions will fail.  If empty, SetPermissions performs an\n// unconditional update.\n//\n// AccessList objects are expected to be small.  It is up to the implementation to\n// define the exact limit, though it should probably be around 100KB.  Large\n// lists of principals should use the Group API or blessings.\n//\n// There is some ambiguity when calling SetPermissions on a mount point.  Does it\n// affect the mount itself or does it affect the service endpoint that the\n// mount points to?  The chosen behavior is that it affects the service\n// endpoint.  To modify the mount point's AccessList, use ResolveToMountTable\n// to get an endpoint and call SetPermissions on that.  This means that clients\n// must know when a name refers to a mount point to change its AccessList.",
-			InArgs: []ipc.ArgDesc{
+			InArgs: []rpc.ArgDesc{
 				{"acl", ``},  // access.Permissions
 				{"etag", ``}, // string
 			},
@@ -275,7 +275,7 @@ var descObject = ipc.InterfaceDesc{
 		{
 			Name: "GetPermissions",
 			Doc:  "// GetPermissions returns the complete, current AccessList for an object.  The returned etag\n// can be passed to a subsequent call to SetPermissions for optimistic concurrency\n// control. A successful call to SetPermissions will invalidate etag, and the client\n// must call GetPermissions again to get the current etag.",
-			OutArgs: []ipc.ArgDesc{
+			OutArgs: []rpc.ArgDesc{
 				{"acl", ``},  // access.Permissions
 				{"etag", ``}, // string
 			},

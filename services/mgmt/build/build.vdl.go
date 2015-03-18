@@ -12,7 +12,7 @@ import (
 	"io"
 	"v.io/v23"
 	"v.io/v23/context"
-	"v.io/v23/ipc"
+	"v.io/v23/rpc"
 	"v.io/v23/vdl"
 
 	// VDL user imports
@@ -92,23 +92,23 @@ const UnsupportedOS = OperatingSystem("unsupported")
 type BuilderClientMethods interface {
 	// Build streams sources to the build server, which then attempts to
 	// build the sources and streams back the compiled binaries.
-	Build(ctx *context.T, Arch Architecture, OS OperatingSystem, opts ...ipc.CallOpt) (BuilderBuildClientCall, error)
+	Build(ctx *context.T, Arch Architecture, OS OperatingSystem, opts ...rpc.CallOpt) (BuilderBuildClientCall, error)
 	// Describe generates a description for a binary identified by
 	// the given Object name.
-	Describe(ctx *context.T, name string, opts ...ipc.CallOpt) (binary.Description, error)
+	Describe(ctx *context.T, name string, opts ...rpc.CallOpt) (binary.Description, error)
 }
 
 // BuilderClientStub adds universal methods to BuilderClientMethods.
 type BuilderClientStub interface {
 	BuilderClientMethods
-	ipc.UniversalServiceMethods
+	rpc.UniversalServiceMethods
 }
 
 // BuilderClient returns a client stub for Builder.
-func BuilderClient(name string, opts ...ipc.BindOpt) BuilderClientStub {
-	var client ipc.Client
+func BuilderClient(name string, opts ...rpc.BindOpt) BuilderClientStub {
+	var client rpc.Client
 	for _, opt := range opts {
-		if clientOpt, ok := opt.(ipc.Client); ok {
+		if clientOpt, ok := opt.(rpc.Client); ok {
 			client = clientOpt
 		}
 	}
@@ -117,18 +117,18 @@ func BuilderClient(name string, opts ...ipc.BindOpt) BuilderClientStub {
 
 type implBuilderClientStub struct {
 	name   string
-	client ipc.Client
+	client rpc.Client
 }
 
-func (c implBuilderClientStub) c(ctx *context.T) ipc.Client {
+func (c implBuilderClientStub) c(ctx *context.T) rpc.Client {
 	if c.client != nil {
 		return c.client
 	}
 	return v23.GetClient(ctx)
 }
 
-func (c implBuilderClientStub) Build(ctx *context.T, i0 Architecture, i1 OperatingSystem, opts ...ipc.CallOpt) (ocall BuilderBuildClientCall, err error) {
-	var call ipc.ClientCall
+func (c implBuilderClientStub) Build(ctx *context.T, i0 Architecture, i1 OperatingSystem, opts ...rpc.CallOpt) (ocall BuilderBuildClientCall, err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Build", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
@@ -136,8 +136,8 @@ func (c implBuilderClientStub) Build(ctx *context.T, i0 Architecture, i1 Operati
 	return
 }
 
-func (c implBuilderClientStub) Describe(ctx *context.T, i0 string, opts ...ipc.CallOpt) (o0 binary.Description, err error) {
-	var call ipc.ClientCall
+func (c implBuilderClientStub) Describe(ctx *context.T, i0 string, opts ...rpc.CallOpt) (o0 binary.Description, err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Describe", []interface{}{i0}, opts...); err != nil {
 		return
 	}
@@ -195,7 +195,7 @@ type BuilderBuildClientCall interface {
 }
 
 type implBuilderBuildClientCall struct {
-	ipc.ClientCall
+	rpc.ClientCall
 	valRecv File
 	errRecv error
 }
@@ -258,11 +258,11 @@ type BuilderServerMethods interface {
 	Build(call BuilderBuildServerCall, Arch Architecture, OS OperatingSystem) ([]byte, error)
 	// Describe generates a description for a binary identified by
 	// the given Object name.
-	Describe(call ipc.ServerCall, name string) (binary.Description, error)
+	Describe(call rpc.ServerCall, name string) (binary.Description, error)
 }
 
 // BuilderServerStubMethods is the server interface containing
-// Builder methods, as expected by ipc.Server.
+// Builder methods, as expected by rpc.Server.
 // The only difference between this interface and BuilderServerMethods
 // is the streaming methods.
 type BuilderServerStubMethods interface {
@@ -271,28 +271,28 @@ type BuilderServerStubMethods interface {
 	Build(call *BuilderBuildServerCallStub, Arch Architecture, OS OperatingSystem) ([]byte, error)
 	// Describe generates a description for a binary identified by
 	// the given Object name.
-	Describe(call ipc.ServerCall, name string) (binary.Description, error)
+	Describe(call rpc.ServerCall, name string) (binary.Description, error)
 }
 
 // BuilderServerStub adds universal methods to BuilderServerStubMethods.
 type BuilderServerStub interface {
 	BuilderServerStubMethods
 	// Describe the Builder interfaces.
-	Describe__() []ipc.InterfaceDesc
+	Describe__() []rpc.InterfaceDesc
 }
 
 // BuilderServer returns a server stub for Builder.
 // It converts an implementation of BuilderServerMethods into
-// an object that may be used by ipc.Server.
+// an object that may be used by rpc.Server.
 func BuilderServer(impl BuilderServerMethods) BuilderServerStub {
 	stub := implBuilderServerStub{
 		impl: impl,
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
-	if gs := ipc.NewGlobState(stub); gs != nil {
+	if gs := rpc.NewGlobState(stub); gs != nil {
 		stub.gs = gs
-	} else if gs := ipc.NewGlobState(impl); gs != nil {
+	} else if gs := rpc.NewGlobState(impl); gs != nil {
 		stub.gs = gs
 	}
 	return stub
@@ -300,52 +300,52 @@ func BuilderServer(impl BuilderServerMethods) BuilderServerStub {
 
 type implBuilderServerStub struct {
 	impl BuilderServerMethods
-	gs   *ipc.GlobState
+	gs   *rpc.GlobState
 }
 
 func (s implBuilderServerStub) Build(call *BuilderBuildServerCallStub, i0 Architecture, i1 OperatingSystem) ([]byte, error) {
 	return s.impl.Build(call, i0, i1)
 }
 
-func (s implBuilderServerStub) Describe(call ipc.ServerCall, i0 string) (binary.Description, error) {
+func (s implBuilderServerStub) Describe(call rpc.ServerCall, i0 string) (binary.Description, error) {
 	return s.impl.Describe(call, i0)
 }
 
-func (s implBuilderServerStub) Globber() *ipc.GlobState {
+func (s implBuilderServerStub) Globber() *rpc.GlobState {
 	return s.gs
 }
 
-func (s implBuilderServerStub) Describe__() []ipc.InterfaceDesc {
-	return []ipc.InterfaceDesc{BuilderDesc}
+func (s implBuilderServerStub) Describe__() []rpc.InterfaceDesc {
+	return []rpc.InterfaceDesc{BuilderDesc}
 }
 
 // BuilderDesc describes the Builder interface.
-var BuilderDesc ipc.InterfaceDesc = descBuilder
+var BuilderDesc rpc.InterfaceDesc = descBuilder
 
 // descBuilder hides the desc to keep godoc clean.
-var descBuilder = ipc.InterfaceDesc{
+var descBuilder = rpc.InterfaceDesc{
 	Name:    "Builder",
 	PkgPath: "v.io/v23/services/mgmt/build",
 	Doc:     "// Builder describes an interface for building binaries from source.",
-	Methods: []ipc.MethodDesc{
+	Methods: []rpc.MethodDesc{
 		{
 			Name: "Build",
 			Doc:  "// Build streams sources to the build server, which then attempts to\n// build the sources and streams back the compiled binaries.",
-			InArgs: []ipc.ArgDesc{
+			InArgs: []rpc.ArgDesc{
 				{"Arch", ``}, // Architecture
 				{"OS", ``},   // OperatingSystem
 			},
-			OutArgs: []ipc.ArgDesc{
+			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // []byte
 			},
 		},
 		{
 			Name: "Describe",
 			Doc:  "// Describe generates a description for a binary identified by\n// the given Object name.",
-			InArgs: []ipc.ArgDesc{
+			InArgs: []rpc.ArgDesc{
 				{"name", ``}, // string
 			},
-			OutArgs: []ipc.ArgDesc{
+			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // binary.Description
 			},
 		},
@@ -377,20 +377,20 @@ type BuilderBuildServerStream interface {
 
 // BuilderBuildServerCall represents the context passed to Builder.Build.
 type BuilderBuildServerCall interface {
-	ipc.ServerCall
+	rpc.ServerCall
 	BuilderBuildServerStream
 }
 
-// BuilderBuildServerCallStub is a wrapper that converts ipc.StreamServerCall into
+// BuilderBuildServerCallStub is a wrapper that converts rpc.StreamServerCall into
 // a typesafe stub that implements BuilderBuildServerCall.
 type BuilderBuildServerCallStub struct {
-	ipc.StreamServerCall
+	rpc.StreamServerCall
 	valRecv File
 	errRecv error
 }
 
-// Init initializes BuilderBuildServerCallStub from ipc.StreamServerCall.
-func (s *BuilderBuildServerCallStub) Init(call ipc.StreamServerCall) {
+// Init initializes BuilderBuildServerCallStub from rpc.StreamServerCall.
+func (s *BuilderBuildServerCallStub) Init(call rpc.StreamServerCall) {
 	s.StreamServerCall = call
 }
 

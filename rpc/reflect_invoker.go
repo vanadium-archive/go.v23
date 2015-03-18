@@ -1,4 +1,4 @@
-package ipc
+package rpc
 
 import (
 	"reflect"
@@ -88,19 +88,19 @@ type methodInfo struct {
 // each compatible exported method in obj available.  E.g.:
 //
 //   type impl struct{}
-//   func (impl) NonStreaming(call ipc.ServerCall, ...) (...)
+//   func (impl) NonStreaming(call rpc.ServerCall, ...) (...)
 //   func (impl) Streaming(call *MyCall, ...) (...)
 //
 // The first in-arg must be a call.  For non-streaming methods it must be
-// ipc.ServerCall.  For streaming methods, it must be a pointer to a struct
-// that implements ipc.StreamServerCall, and also adds typesafe streaming wrappers.
+// rpc.ServerCall.  For streaming methods, it must be a pointer to a struct
+// that implements rpc.StreamServerCall, and also adds typesafe streaming wrappers.
 // Here's an example that streams int32 from client to server, and string from
 // server to client:
 //
-//   type MyCall struct { ipc.StreamServerCall }
+//   type MyCall struct { rpc.StreamServerCall }
 //
-//   // Init initializes MyCall via ipc.StreamServerCall.
-//   func (*MyCall) Init(ipc.StreamServerCall) {...}
+//   // Init initializes MyCall via rpc.StreamServerCall.
+//   func (*MyCall) Init(rpc.StreamServerCall) {...}
 //
 //   // RecvStream returns the receiver side of the server stream.
 //   func (*MyCall) RecvStream() interface {
@@ -121,7 +121,7 @@ type methodInfo struct {
 //
 // As a temporary special-case, we also allow generic streaming methods:
 //
-//   func (impl) Generic(call ipc.StreamServerCall, ...) (...)
+//   func (impl) Generic(call rpc.StreamServerCall, ...) (...)
 //
 // The problem with allowing this form is that via reflection we can no longer
 // determine whether the server performs streaming, or what the streaming in and
@@ -129,7 +129,7 @@ type methodInfo struct {
 // TODO(toddw): Remove this special-case.
 //
 // The ReflectInvoker silently ignores unexported methods, and exported methods
-// whose first argument doesn't implement ipc.ServerCall.  All other methods
+// whose first argument doesn't implement rpc.ServerCall.  All other methods
 // must follow the above rules; bad method types cause an error to be returned.
 //
 // If obj implements the Describer interface, we'll use it to describe portions
@@ -243,7 +243,7 @@ func (ri reflectInvoker) MethodSignature(call ServerCall, method string) (signat
 	return signature.Method{}, NewErrUnknownMethod(nil, method)
 }
 
-// Globber implements the ipc.Globber interface.
+// Globber implements the rpc.Globber interface.
 func (ri reflectInvoker) Globber() *GlobState {
 	return determineGlobState(ri.rcvr.Interface())
 }
@@ -371,7 +371,7 @@ func abortedf(embeddedErr verror.IDAction, v ...interface{}) error {
 	return verror.New(verror.ErrAborted, nil, verror.New(embeddedErr, nil, v...))
 }
 
-const pkgPath = "v.io/v23/ipc"
+const pkgPath = "v.io/v23/rpc"
 
 var (
 	rtStreamServerCall     = reflect.TypeOf((*StreamServerCall)(nil)).Elem()
@@ -388,10 +388,10 @@ var (
 	// silently ignore the error.
 
 	// These errors are not embedded in other errors.
-	errReflectInvokerNil   = verror.Register(pkgPath+".errReflectInvokerNil", verror.NoRetry, "{1:}{2:}ipc: ReflectInvoker(nil) is invalid{:_}")
-	errNoCompatibleMethods = verror.Register(pkgPath+".errNoCompatibleMethods", verror.NoRetry, "{1:}{2:}ipc: type {3} has no compatible methods{:_}")
-	errTagError            = verror.Register(pkgPath+".errTagError", verror.NoRetry, "{1:}{2:}ipc: type {3} tag error{:_}")
-	errAbortedDetail       = verror.Register(pkgPath+".errAbortedDetail", verror.NoRetry, "{1:}{2:}ipc: type {3}.{4}{:_}")
+	errReflectInvokerNil   = verror.Register(pkgPath+".errReflectInvokerNil", verror.NoRetry, "{1:}{2:}rpc: ReflectInvoker(nil) is invalid{:_}")
+	errNoCompatibleMethods = verror.Register(pkgPath+".errNoCompatibleMethods", verror.NoRetry, "{1:}{2:}rpc: type {3} has no compatible methods{:_}")
+	errTagError            = verror.Register(pkgPath+".errTagError", verror.NoRetry, "{1:}{2:}rpc: type {3} tag error{:_}")
+	errAbortedDetail       = verror.Register(pkgPath+".errAbortedDetail", verror.NoRetry, "{1:}{2:}rpc: type {3}.{4}{:_}")
 
 	// These errors are embedded in verror.ErrInternal:
 	errReservedMethod = verror.Register(pkgPath+".errReservedMethod", verror.NoRetry, "{1:}{2:}Reserved method{:_}")
@@ -401,16 +401,16 @@ var (
 	errNonRPCMethod      = verror.Register(pkgPath+".errNonRPCMethod", verror.NoRetry, "{1:}{2:}Non-rpc method.  We require at least 1 in-arg."+useCall+"{:_}")
 
 	// These errors are expected to be embedded in verror.Aborted, via abortedf():
-	errInStreamServerCall = verror.Register(pkgPath+".errInStreamServerCall", verror.NoRetry, "{1:}{2:}Call arg ipc.StreamServerCall is invalid; cannot determine streaming types."+forgotWrap+"{:_}")
+	errInStreamServerCall = verror.Register(pkgPath+".errInStreamServerCall", verror.NoRetry, "{1:}{2:}Call arg rpc.StreamServerCall is invalid; cannot determine streaming types."+forgotWrap+"{:_}")
 	errNoFinalErrorOutArg = verror.Register(pkgPath+".errNoFinalErrorOutArg", verror.NoRetry, "{1:}{2:}Invalid out-args (final out-arg must be error){:_}")
-	errBadDescribe        = verror.Register(pkgPath+".errBadDescribe", verror.NoRetry, "{1:}{2:}Describe__ must have signature Describe__() []ipc.InterfaceDesc{:_}")
-	errBadGlobber         = verror.Register(pkgPath+".errBadGlobber", verror.NoRetry, "{1:}{2:}Globber must have signature Globber() *ipc.GlobState{:_}")
-	errBadGlob            = verror.Register(pkgPath+".errBadGlob", verror.NoRetry, "{1:}{2:}Glob__ must have signature Glob__(ipc.ServerCall, pattern string) (<-chan naming.GlobReply, error){:_}")
-	errBadGlobChildren    = verror.Register(pkgPath+".errBadGlobChildren", verror.NoRetry, "{1:}{2:}GlobChildren__ must have signature GlobChildren__(ipc.ServerCall) (<-chan string, error){:_}")
+	errBadDescribe        = verror.Register(pkgPath+".errBadDescribe", verror.NoRetry, "{1:}{2:}Describe__ must have signature Describe__() []rpc.InterfaceDesc{:_}")
+	errBadGlobber         = verror.Register(pkgPath+".errBadGlobber", verror.NoRetry, "{1:}{2:}Globber must have signature Globber() *rpc.GlobState{:_}")
+	errBadGlob            = verror.Register(pkgPath+".errBadGlob", verror.NoRetry, "{1:}{2:}Glob__ must have signature Glob__(rpc.ServerCall, pattern string) (<-chan naming.GlobReply, error){:_}")
+	errBadGlobChildren    = verror.Register(pkgPath+".errBadGlobChildren", verror.NoRetry, "{1:}{2:}GlobChildren__ must have signature GlobChildren__(rpc.ServerCall) (<-chan string, error){:_}")
 
 	errNeedStreamingCall       = verror.Register(pkgPath+".errNeedStreamingCall", verror.NoRetry, "{1:}{2:}Call arg %s is invalid streaming call; must be pointer to a struct representing the typesafe streaming call."+forgotWrap+"{:_}")
 	errNeedInitMethod          = verror.Register(pkgPath+".errNeedInitMethod", verror.NoRetry, "{1:}{2:}Call arg %s is invalid streaming call; must have Init method."+forgotWrap+"{:_}")
-	errNeedSigFunc             = verror.Register(pkgPath+".errNeedNeedSigFunc", verror.NoRetry, "{1:}{2:}Call arg %s is invalid streaming call; Init must have signature func (*) Init(ipc.StreamServerCall)."+forgotWrap+"{:_}")
+	errNeedSigFunc             = verror.Register(pkgPath+".errNeedNeedSigFunc", verror.NoRetry, "{1:}{2:}Call arg %s is invalid streaming call; Init must have signature func (*) Init(rpc.StreamServerCall)."+forgotWrap+"{:_}")
 	errNeedStreamMethod        = verror.Register(pkgPath+".errNeedStreamMethod", verror.NoRetry, "{1:}{2:}Call arg %s is invalid streaming call; must have at least one of RecvStream or SendStream methods."+forgotWrap+"{:_}")
 	errInvalidInStream         = verror.Register(pkgPath+".errInvalidInStream", verror.NoRetry, "{1:}{2:}Invalid in-stream type{:_}")
 	errInvalidOutStream        = verror.Register(pkgPath+".errInvalidOutStream", verror.NoRetry, "{1:}{2:}Invalid out-stream type{:_}")
@@ -438,11 +438,11 @@ func typeCheckMethod(method reflect.Method, sig *signature.Method) error {
 	}
 	switch in1 := mtype.In(1); {
 	case in1 == rtStreamServerCall:
-		// If the first call arg is ipc.StreamServerCall, we do not know whether the
+		// If the first call arg is rpc.StreamServerCall, we do not know whether the
 		// method performs streaming, or what the stream types are.
 		sig.InStream = &signature.Arg{Type: vdl.AnyType}
 		sig.OutStream = &signature.Arg{Type: vdl.AnyType}
-		// We can either disallow ipc.StreamServerCall, at the expense of more boilerplate
+		// We can either disallow rpc.StreamServerCall, at the expense of more boilerplate
 		// for users that don't use the VDL but want to perform streaming.  Or we
 		// can allow it, but won't be able to determine whether the server uses the
 		// stream, or what the streaming types are.
@@ -479,7 +479,7 @@ func typeCheckReservedMethod(method reflect.Method) error {
 		}
 		return verror.New(verror.ErrInternal, nil, verror.New(errReservedMethod, nil))
 	case "Glob__":
-		// Glob__(ipc.ServerCall, string) (<-chan naming.GlobReply, error)
+		// Glob__(rpc.ServerCall, string) (<-chan naming.GlobReply, error)
 		if t := method.Type; t.NumIn() != 3 || t.NumOut() != 2 ||
 			t.In(1) != rtServerCall || t.In(2) != rtString ||
 			t.Out(0) != rtGlobReplyChan || t.Out(1) != rtError {
@@ -487,7 +487,7 @@ func typeCheckReservedMethod(method reflect.Method) error {
 		}
 		return verror.New(verror.ErrInternal, nil, verror.New(errReservedMethod, nil))
 	case "GlobChildren__":
-		// GlobChildren__(ipc.ServerCall) (<-chan string, error)
+		// GlobChildren__(rpc.ServerCall) (<-chan string, error)
 		if t := method.Type; t.NumIn() != 2 || t.NumOut() != 2 ||
 			t.In(1) != rtServerCall ||
 			t.Out(0) != rtStringChan || t.Out(1) != rtError {
@@ -503,7 +503,7 @@ func typeCheckStreamingCall(ctx reflect.Type, sig *signature.Method) error {
 	if ctx.Kind() != reflect.Ptr || ctx.Elem().Kind() != reflect.Struct {
 		return abortedf(errNeedStreamingCall, ctx)
 	}
-	// Must have Init(ipc.StreamServerCall) method.
+	// Must have Init(rpc.StreamServerCall) method.
 	mInit, hasInit := ctx.MethodByName("Init")
 	if !hasInit {
 		return abortedf(errNeedInitMethod, ctx)
@@ -564,7 +564,7 @@ func typeCheckStreamingCall(ctx reflect.Type, sig *signature.Method) error {
 }
 
 const (
-	useCall    = "  Use either ipc.ServerCall for non-streaming methods, or use a non-interface typesafe call for streaming methods."
+	useCall    = "  Use either rpc.ServerCall for non-streaming methods, or use a non-interface typesafe call for streaming methods."
 	forgotWrap = useCall + "  Perhaps you forgot to wrap your server with the VDL-generated server stub."
 )
 

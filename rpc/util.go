@@ -1,4 +1,4 @@
-package ipc
+package rpc
 
 import (
 	"v.io/v23/context"
@@ -36,8 +36,8 @@ func (o obj) GlobChildren__(ServerCall) (<-chan string, error) {
 }
 
 var (
-	unknownMethod = verror.Register("v.io/v23/ipc.unknownMethod", verror.NoRetry, "{1:}{2:} unknown method {3}")
-	unknownSuffix = verror.Register("v.io/v23/ipc.unknownSuffix", verror.NoRetry, "{1:}{2:} unknown object with suffix: {3}")
+	unknownMethod = verror.Register("v.io/v23/rpc.unknownMethod", verror.NoRetry, "{1:}{2:} unknown method {3}")
+	unknownSuffix = verror.Register("v.io/v23/rpc.unknownSuffix", verror.NoRetry, "{1:}{2:} unknown object with suffix: {3}")
 )
 
 // NewErrUnknownMethod returns an unknown method error.

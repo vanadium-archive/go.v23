@@ -1,4 +1,4 @@
-package ipc
+package rpc
 
 import (
 	// Ensure all standard vdl types are registered.

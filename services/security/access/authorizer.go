@@ -55,17 +55,17 @@ var (
 //     GetAndSet([]string) ([]string, error) {ReadAccess, WriteAccess}
 //   }
 //
-// (2) Setup the ipc.Dispatcher to use the PermissionsAuthorizer
+// (2) Setup the rpc.Dispatcher to use the PermissionsAuthorizer
 //   import (
 //     "reflect"
 //     "v.io/x/ref/security/acl"
 //
-//     "v.io/v23/ipc"
+//     "v.io/v23/rpc"
 //     "v.io/v23/security"
 //   )
 //
 //   type dispatcher struct{}
-//   func (d dispatcher) Lookup(suffix, method) (ipc.Invoker, security.Authorizer, error) {
+//   func (d dispatcher) Lookup(suffix, method) (rpc.Invoker, security.Authorizer, error) {
 //      acl := acl.Permissions{
 //        "R": acl.AccessList{In: []security.BlessingPattern{"alice/friends", "alice/family"} },
 //        "W": acl.AccessList{In: []security.BlessingPattern{"alice/family", "alice/colleagues" } },

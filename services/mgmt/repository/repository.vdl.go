@@ -10,7 +10,7 @@ import (
 	"io"
 	"v.io/v23"
 	"v.io/v23/context"
-	"v.io/v23/ipc"
+	"v.io/v23/rpc"
 	"v.io/v23/vdl"
 
 	// VDL user imports
@@ -98,20 +98,20 @@ type ApplicationClientMethods interface {
 	// object name suffix) and if so, returns this envelope. If multiple
 	// profile matches are possible, the method returns the first
 	// matching profile, respecting the order of the input argument.
-	Match(ctx *context.T, profiles []string, opts ...ipc.CallOpt) (application.Envelope, error)
+	Match(ctx *context.T, profiles []string, opts ...rpc.CallOpt) (application.Envelope, error)
 }
 
 // ApplicationClientStub adds universal methods to ApplicationClientMethods.
 type ApplicationClientStub interface {
 	ApplicationClientMethods
-	ipc.UniversalServiceMethods
+	rpc.UniversalServiceMethods
 }
 
 // ApplicationClient returns a client stub for Application.
-func ApplicationClient(name string, opts ...ipc.BindOpt) ApplicationClientStub {
-	var client ipc.Client
+func ApplicationClient(name string, opts ...rpc.BindOpt) ApplicationClientStub {
+	var client rpc.Client
 	for _, opt := range opts {
-		if clientOpt, ok := opt.(ipc.Client); ok {
+		if clientOpt, ok := opt.(rpc.Client); ok {
 			client = clientOpt
 		}
 	}
@@ -120,20 +120,20 @@ func ApplicationClient(name string, opts ...ipc.BindOpt) ApplicationClientStub {
 
 type implApplicationClientStub struct {
 	name   string
-	client ipc.Client
+	client rpc.Client
 
 	object.ObjectClientStub
 }
 
-func (c implApplicationClientStub) c(ctx *context.T) ipc.Client {
+func (c implApplicationClientStub) c(ctx *context.T) rpc.Client {
 	if c.client != nil {
 		return c.client
 	}
 	return v23.GetClient(ctx)
 }
 
-func (c implApplicationClientStub) Match(ctx *context.T, i0 []string, opts ...ipc.CallOpt) (o0 application.Envelope, err error) {
-	var call ipc.ClientCall
+func (c implApplicationClientStub) Match(ctx *context.T, i0 []string, opts ...rpc.CallOpt) (o0 application.Envelope, err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Match", []interface{}{i0}, opts...); err != nil {
 		return
 	}
@@ -204,11 +204,11 @@ type ApplicationServerMethods interface {
 	// object name suffix) and if so, returns this envelope. If multiple
 	// profile matches are possible, the method returns the first
 	// matching profile, respecting the order of the input argument.
-	Match(call ipc.ServerCall, profiles []string) (application.Envelope, error)
+	Match(call rpc.ServerCall, profiles []string) (application.Envelope, error)
 }
 
 // ApplicationServerStubMethods is the server interface containing
-// Application methods, as expected by ipc.Server.
+// Application methods, as expected by rpc.Server.
 // There is no difference between this interface and ApplicationServerMethods
 // since there are no streaming methods.
 type ApplicationServerStubMethods ApplicationServerMethods
@@ -217,12 +217,12 @@ type ApplicationServerStubMethods ApplicationServerMethods
 type ApplicationServerStub interface {
 	ApplicationServerStubMethods
 	// Describe the Application interfaces.
-	Describe__() []ipc.InterfaceDesc
+	Describe__() []rpc.InterfaceDesc
 }
 
 // ApplicationServer returns a server stub for Application.
 // It converts an implementation of ApplicationServerMethods into
-// an object that may be used by ipc.Server.
+// an object that may be used by rpc.Server.
 func ApplicationServer(impl ApplicationServerMethods) ApplicationServerStub {
 	stub := implApplicationServerStub{
 		impl:             impl,
@@ -230,9 +230,9 @@ func ApplicationServer(impl ApplicationServerMethods) ApplicationServerStub {
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
-	if gs := ipc.NewGlobState(stub); gs != nil {
+	if gs := rpc.NewGlobState(stub); gs != nil {
 		stub.gs = gs
-	} else if gs := ipc.NewGlobState(impl); gs != nil {
+	} else if gs := rpc.NewGlobState(impl); gs != nil {
 		stub.gs = gs
 	}
 	return stub
@@ -241,40 +241,40 @@ func ApplicationServer(impl ApplicationServerMethods) ApplicationServerStub {
 type implApplicationServerStub struct {
 	impl ApplicationServerMethods
 	object.ObjectServerStub
-	gs *ipc.GlobState
+	gs *rpc.GlobState
 }
 
-func (s implApplicationServerStub) Match(call ipc.ServerCall, i0 []string) (application.Envelope, error) {
+func (s implApplicationServerStub) Match(call rpc.ServerCall, i0 []string) (application.Envelope, error) {
 	return s.impl.Match(call, i0)
 }
 
-func (s implApplicationServerStub) Globber() *ipc.GlobState {
+func (s implApplicationServerStub) Globber() *rpc.GlobState {
 	return s.gs
 }
 
-func (s implApplicationServerStub) Describe__() []ipc.InterfaceDesc {
-	return []ipc.InterfaceDesc{ApplicationDesc, object.ObjectDesc}
+func (s implApplicationServerStub) Describe__() []rpc.InterfaceDesc {
+	return []rpc.InterfaceDesc{ApplicationDesc, object.ObjectDesc}
 }
 
 // ApplicationDesc describes the Application interface.
-var ApplicationDesc ipc.InterfaceDesc = descApplication
+var ApplicationDesc rpc.InterfaceDesc = descApplication
 
 // descApplication hides the desc to keep godoc clean.
-var descApplication = ipc.InterfaceDesc{
+var descApplication = rpc.InterfaceDesc{
 	Name:    "Application",
 	PkgPath: "v.io/v23/services/mgmt/repository",
 	Doc:     "// Application provides access to application envelopes. An\n// application envelope is identified by an application name and an\n// application version, which are specified through the object name,\n// and a profile name, which is specified using a method argument.\n//\n// Example:\n// /apps/search/v1.Match([]string{\"base\", \"media\"})\n//   returns an application envelope that can be used for downloading\n//   and executing the \"search\" application, version \"v1\", runnable\n//   on either the \"base\" or \"media\" profile.",
-	Embeds: []ipc.EmbedDesc{
+	Embeds: []rpc.EmbedDesc{
 		{"Object", "v.io/v23/services/security/access/object", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetPermissions and GetPermissions in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(acl access.Permissions, etag string) error         {Red}\n//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}\n//  }"},
 	},
-	Methods: []ipc.MethodDesc{
+	Methods: []rpc.MethodDesc{
 		{
 			Name: "Match",
 			Doc:  "// Match checks if any of the given profiles contains an application\n// envelope for the given application version (specified through the\n// object name suffix) and if so, returns this envelope. If multiple\n// profile matches are possible, the method returns the first\n// matching profile, respecting the order of the input argument.",
-			InArgs: []ipc.ArgDesc{
+			InArgs: []rpc.ArgDesc{
 				{"profiles", ``}, // []string
 			},
-			OutArgs: []ipc.ArgDesc{
+			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // application.Envelope
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
@@ -354,47 +354,47 @@ type BinaryClientMethods interface {
 	// mediaInfo argument contains metadata for the binary. If the suffix
 	// identifies a binary that has already been created, the method
 	// returns an error.
-	Create(ctx *context.T, nparts int32, mediaInfo MediaInfo, opts ...ipc.CallOpt) error
+	Create(ctx *context.T, nparts int32, mediaInfo MediaInfo, opts ...rpc.CallOpt) error
 	// Delete deletes the binary identified by the object name
 	// suffix. If the binary that has not been created, the method
 	// returns an error.
-	Delete(*context.T, ...ipc.CallOpt) error
+	Delete(*context.T, ...rpc.CallOpt) error
 	// Download opens a stream that can used for downloading the given
 	// part of the binary identified by the object name suffix. If the
 	// binary part has not been uploaded, the method returns an
 	// error. If the Delete() method is invoked when the Download()
 	// method is in progress, the outcome the Download() method is
 	// undefined.
-	Download(ctx *context.T, part int32, opts ...ipc.CallOpt) (BinaryDownloadClientCall, error)
+	Download(ctx *context.T, part int32, opts ...rpc.CallOpt) (BinaryDownloadClientCall, error)
 	// DownloadUrl returns a transient URL from which the binary
 	// identified by the object name suffix can be downloaded using the
 	// HTTP protocol. If not all parts of the binary have been uploaded,
 	// the method returns an error.
-	DownloadUrl(*context.T, ...ipc.CallOpt) (url string, ttl int64, err error)
+	DownloadUrl(*context.T, ...rpc.CallOpt) (url string, ttl int64, err error)
 	// Stat returns information describing the parts of the binary
 	// identified by the object name suffix, and its RFC 2046 media type.
 	// If the binary has not been created, the method returns an error.
-	Stat(*context.T, ...ipc.CallOpt) (Parts []binary.PartInfo, MediaInfo MediaInfo, err error)
+	Stat(*context.T, ...rpc.CallOpt) (Parts []binary.PartInfo, MediaInfo MediaInfo, err error)
 	// Upload opens a stream that can be used for uploading the given
 	// part of the binary identified by the object name suffix. If the
 	// binary has not been created, the method returns an error. If the
 	// binary part has been uploaded, the method returns an error. If
 	// the same binary part is being uploaded by another caller, the
 	// method returns an error.
-	Upload(ctx *context.T, part int32, opts ...ipc.CallOpt) (BinaryUploadClientCall, error)
+	Upload(ctx *context.T, part int32, opts ...rpc.CallOpt) (BinaryUploadClientCall, error)
 }
 
 // BinaryClientStub adds universal methods to BinaryClientMethods.
 type BinaryClientStub interface {
 	BinaryClientMethods
-	ipc.UniversalServiceMethods
+	rpc.UniversalServiceMethods
 }
 
 // BinaryClient returns a client stub for Binary.
-func BinaryClient(name string, opts ...ipc.BindOpt) BinaryClientStub {
-	var client ipc.Client
+func BinaryClient(name string, opts ...rpc.BindOpt) BinaryClientStub {
+	var client rpc.Client
 	for _, opt := range opts {
-		if clientOpt, ok := opt.(ipc.Client); ok {
+		if clientOpt, ok := opt.(rpc.Client); ok {
 			client = clientOpt
 		}
 	}
@@ -403,20 +403,20 @@ func BinaryClient(name string, opts ...ipc.BindOpt) BinaryClientStub {
 
 type implBinaryClientStub struct {
 	name   string
-	client ipc.Client
+	client rpc.Client
 
 	object.ObjectClientStub
 }
 
-func (c implBinaryClientStub) c(ctx *context.T) ipc.Client {
+func (c implBinaryClientStub) c(ctx *context.T) rpc.Client {
 	if c.client != nil {
 		return c.client
 	}
 	return v23.GetClient(ctx)
 }
 
-func (c implBinaryClientStub) Create(ctx *context.T, i0 int32, i1 MediaInfo, opts ...ipc.CallOpt) (err error) {
-	var call ipc.ClientCall
+func (c implBinaryClientStub) Create(ctx *context.T, i0 int32, i1 MediaInfo, opts ...rpc.CallOpt) (err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Create", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
@@ -424,8 +424,8 @@ func (c implBinaryClientStub) Create(ctx *context.T, i0 int32, i1 MediaInfo, opt
 	return
 }
 
-func (c implBinaryClientStub) Delete(ctx *context.T, opts ...ipc.CallOpt) (err error) {
-	var call ipc.ClientCall
+func (c implBinaryClientStub) Delete(ctx *context.T, opts ...rpc.CallOpt) (err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Delete", nil, opts...); err != nil {
 		return
 	}
@@ -433,8 +433,8 @@ func (c implBinaryClientStub) Delete(ctx *context.T, opts ...ipc.CallOpt) (err e
 	return
 }
 
-func (c implBinaryClientStub) Download(ctx *context.T, i0 int32, opts ...ipc.CallOpt) (ocall BinaryDownloadClientCall, err error) {
-	var call ipc.ClientCall
+func (c implBinaryClientStub) Download(ctx *context.T, i0 int32, opts ...rpc.CallOpt) (ocall BinaryDownloadClientCall, err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Download", []interface{}{i0}, opts...); err != nil {
 		return
 	}
@@ -442,8 +442,8 @@ func (c implBinaryClientStub) Download(ctx *context.T, i0 int32, opts ...ipc.Cal
 	return
 }
 
-func (c implBinaryClientStub) DownloadUrl(ctx *context.T, opts ...ipc.CallOpt) (o0 string, o1 int64, err error) {
-	var call ipc.ClientCall
+func (c implBinaryClientStub) DownloadUrl(ctx *context.T, opts ...rpc.CallOpt) (o0 string, o1 int64, err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "DownloadUrl", nil, opts...); err != nil {
 		return
 	}
@@ -451,8 +451,8 @@ func (c implBinaryClientStub) DownloadUrl(ctx *context.T, opts ...ipc.CallOpt) (
 	return
 }
 
-func (c implBinaryClientStub) Stat(ctx *context.T, opts ...ipc.CallOpt) (o0 []binary.PartInfo, o1 MediaInfo, err error) {
-	var call ipc.ClientCall
+func (c implBinaryClientStub) Stat(ctx *context.T, opts ...rpc.CallOpt) (o0 []binary.PartInfo, o1 MediaInfo, err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Stat", nil, opts...); err != nil {
 		return
 	}
@@ -460,8 +460,8 @@ func (c implBinaryClientStub) Stat(ctx *context.T, opts ...ipc.CallOpt) (o0 []bi
 	return
 }
 
-func (c implBinaryClientStub) Upload(ctx *context.T, i0 int32, opts ...ipc.CallOpt) (ocall BinaryUploadClientCall, err error) {
-	var call ipc.ClientCall
+func (c implBinaryClientStub) Upload(ctx *context.T, i0 int32, opts ...rpc.CallOpt) (ocall BinaryUploadClientCall, err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Upload", []interface{}{i0}, opts...); err != nil {
 		return
 	}
@@ -502,7 +502,7 @@ type BinaryDownloadClientCall interface {
 }
 
 type implBinaryDownloadClientCall struct {
-	ipc.ClientCall
+	rpc.ClientCall
 	valRecv []byte
 	errRecv error
 }
@@ -575,7 +575,7 @@ type BinaryUploadClientCall interface {
 }
 
 type implBinaryUploadClientCall struct {
-	ipc.ClientCall
+	rpc.ClientCall
 }
 
 func (c *implBinaryUploadClientCall) SendStream() interface {
@@ -672,11 +672,11 @@ type BinaryServerMethods interface {
 	// mediaInfo argument contains metadata for the binary. If the suffix
 	// identifies a binary that has already been created, the method
 	// returns an error.
-	Create(call ipc.ServerCall, nparts int32, mediaInfo MediaInfo) error
+	Create(call rpc.ServerCall, nparts int32, mediaInfo MediaInfo) error
 	// Delete deletes the binary identified by the object name
 	// suffix. If the binary that has not been created, the method
 	// returns an error.
-	Delete(ipc.ServerCall) error
+	Delete(rpc.ServerCall) error
 	// Download opens a stream that can used for downloading the given
 	// part of the binary identified by the object name suffix. If the
 	// binary part has not been uploaded, the method returns an
@@ -688,11 +688,11 @@ type BinaryServerMethods interface {
 	// identified by the object name suffix can be downloaded using the
 	// HTTP protocol. If not all parts of the binary have been uploaded,
 	// the method returns an error.
-	DownloadUrl(ipc.ServerCall) (url string, ttl int64, err error)
+	DownloadUrl(rpc.ServerCall) (url string, ttl int64, err error)
 	// Stat returns information describing the parts of the binary
 	// identified by the object name suffix, and its RFC 2046 media type.
 	// If the binary has not been created, the method returns an error.
-	Stat(ipc.ServerCall) (Parts []binary.PartInfo, MediaInfo MediaInfo, err error)
+	Stat(rpc.ServerCall) (Parts []binary.PartInfo, MediaInfo MediaInfo, err error)
 	// Upload opens a stream that can be used for uploading the given
 	// part of the binary identified by the object name suffix. If the
 	// binary has not been created, the method returns an error. If the
@@ -703,7 +703,7 @@ type BinaryServerMethods interface {
 }
 
 // BinaryServerStubMethods is the server interface containing
-// Binary methods, as expected by ipc.Server.
+// Binary methods, as expected by rpc.Server.
 // The only difference between this interface and BinaryServerMethods
 // is the streaming methods.
 type BinaryServerStubMethods interface {
@@ -756,11 +756,11 @@ type BinaryServerStubMethods interface {
 	// mediaInfo argument contains metadata for the binary. If the suffix
 	// identifies a binary that has already been created, the method
 	// returns an error.
-	Create(call ipc.ServerCall, nparts int32, mediaInfo MediaInfo) error
+	Create(call rpc.ServerCall, nparts int32, mediaInfo MediaInfo) error
 	// Delete deletes the binary identified by the object name
 	// suffix. If the binary that has not been created, the method
 	// returns an error.
-	Delete(ipc.ServerCall) error
+	Delete(rpc.ServerCall) error
 	// Download opens a stream that can used for downloading the given
 	// part of the binary identified by the object name suffix. If the
 	// binary part has not been uploaded, the method returns an
@@ -772,11 +772,11 @@ type BinaryServerStubMethods interface {
 	// identified by the object name suffix can be downloaded using the
 	// HTTP protocol. If not all parts of the binary have been uploaded,
 	// the method returns an error.
-	DownloadUrl(ipc.ServerCall) (url string, ttl int64, err error)
+	DownloadUrl(rpc.ServerCall) (url string, ttl int64, err error)
 	// Stat returns information describing the parts of the binary
 	// identified by the object name suffix, and its RFC 2046 media type.
 	// If the binary has not been created, the method returns an error.
-	Stat(ipc.ServerCall) (Parts []binary.PartInfo, MediaInfo MediaInfo, err error)
+	Stat(rpc.ServerCall) (Parts []binary.PartInfo, MediaInfo MediaInfo, err error)
 	// Upload opens a stream that can be used for uploading the given
 	// part of the binary identified by the object name suffix. If the
 	// binary has not been created, the method returns an error. If the
@@ -790,12 +790,12 @@ type BinaryServerStubMethods interface {
 type BinaryServerStub interface {
 	BinaryServerStubMethods
 	// Describe the Binary interfaces.
-	Describe__() []ipc.InterfaceDesc
+	Describe__() []rpc.InterfaceDesc
 }
 
 // BinaryServer returns a server stub for Binary.
 // It converts an implementation of BinaryServerMethods into
-// an object that may be used by ipc.Server.
+// an object that may be used by rpc.Server.
 func BinaryServer(impl BinaryServerMethods) BinaryServerStub {
 	stub := implBinaryServerStub{
 		impl:             impl,
@@ -803,9 +803,9 @@ func BinaryServer(impl BinaryServerMethods) BinaryServerStub {
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
-	if gs := ipc.NewGlobState(stub); gs != nil {
+	if gs := rpc.NewGlobState(stub); gs != nil {
 		stub.gs = gs
-	} else if gs := ipc.NewGlobState(impl); gs != nil {
+	} else if gs := rpc.NewGlobState(impl); gs != nil {
 		stub.gs = gs
 	}
 	return stub
@@ -814,14 +814,14 @@ func BinaryServer(impl BinaryServerMethods) BinaryServerStub {
 type implBinaryServerStub struct {
 	impl BinaryServerMethods
 	object.ObjectServerStub
-	gs *ipc.GlobState
+	gs *rpc.GlobState
 }
 
-func (s implBinaryServerStub) Create(call ipc.ServerCall, i0 int32, i1 MediaInfo) error {
+func (s implBinaryServerStub) Create(call rpc.ServerCall, i0 int32, i1 MediaInfo) error {
 	return s.impl.Create(call, i0, i1)
 }
 
-func (s implBinaryServerStub) Delete(call ipc.ServerCall) error {
+func (s implBinaryServerStub) Delete(call rpc.ServerCall) error {
 	return s.impl.Delete(call)
 }
 
@@ -829,11 +829,11 @@ func (s implBinaryServerStub) Download(call *BinaryDownloadServerCallStub, i0 in
 	return s.impl.Download(call, i0)
 }
 
-func (s implBinaryServerStub) DownloadUrl(call ipc.ServerCall) (string, int64, error) {
+func (s implBinaryServerStub) DownloadUrl(call rpc.ServerCall) (string, int64, error) {
 	return s.impl.DownloadUrl(call)
 }
 
-func (s implBinaryServerStub) Stat(call ipc.ServerCall) ([]binary.PartInfo, MediaInfo, error) {
+func (s implBinaryServerStub) Stat(call rpc.ServerCall) ([]binary.PartInfo, MediaInfo, error) {
 	return s.impl.Stat(call)
 }
 
@@ -841,30 +841,30 @@ func (s implBinaryServerStub) Upload(call *BinaryUploadServerCallStub, i0 int32)
 	return s.impl.Upload(call, i0)
 }
 
-func (s implBinaryServerStub) Globber() *ipc.GlobState {
+func (s implBinaryServerStub) Globber() *rpc.GlobState {
 	return s.gs
 }
 
-func (s implBinaryServerStub) Describe__() []ipc.InterfaceDesc {
-	return []ipc.InterfaceDesc{BinaryDesc, object.ObjectDesc}
+func (s implBinaryServerStub) Describe__() []rpc.InterfaceDesc {
+	return []rpc.InterfaceDesc{BinaryDesc, object.ObjectDesc}
 }
 
 // BinaryDesc describes the Binary interface.
-var BinaryDesc ipc.InterfaceDesc = descBinary
+var BinaryDesc rpc.InterfaceDesc = descBinary
 
 // descBinary hides the desc to keep godoc clean.
-var descBinary = ipc.InterfaceDesc{
+var descBinary = rpc.InterfaceDesc{
 	Name:    "Binary",
 	PkgPath: "v.io/v23/services/mgmt/repository",
 	Doc:     "// Binary can be used to store and retrieve vanadium application\n// binaries.\n//\n// To create a binary, clients first invoke the Create() method that\n// specifies the number of parts the binary consists of. Clients then\n// uploads the individual parts through the Upload() method, which\n// identifies the part being uploaded. To resume an upload after a\n// failure, clients invoke the UploadStatus() method, which returns a\n// slice that identifies which parts are missing.\n//\n// To download a binary, clients first invoke Stat(), which returns\n// information describing the binary, including the number of parts\n// the binary consists of. Clients then download the individual parts\n// through the Download() method, which identifies the part being\n// downloaded. Alternatively, clients can download the binary through\n// HTTP using a transient URL available through the DownloadUrl()\n// method.\n//\n// To delete the binary, clients invoke the Delete() method.",
-	Embeds: []ipc.EmbedDesc{
+	Embeds: []rpc.EmbedDesc{
 		{"Object", "v.io/v23/services/security/access/object", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetPermissions and GetPermissions in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(acl access.Permissions, etag string) error         {Red}\n//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}\n//  }"},
 	},
-	Methods: []ipc.MethodDesc{
+	Methods: []rpc.MethodDesc{
 		{
 			Name: "Create",
 			Doc:  "// Create expresses the intent to create a binary identified by the\n// object name suffix consisting of the given number of parts. The\n// mediaInfo argument contains metadata for the binary. If the suffix\n// identifies a binary that has already been created, the method\n// returns an error.",
-			InArgs: []ipc.ArgDesc{
+			InArgs: []rpc.ArgDesc{
 				{"nparts", ``},    // int32
 				{"mediaInfo", ``}, // MediaInfo
 			},
@@ -878,7 +878,7 @@ var descBinary = ipc.InterfaceDesc{
 		{
 			Name: "Download",
 			Doc:  "// Download opens a stream that can used for downloading the given\n// part of the binary identified by the object name suffix. If the\n// binary part has not been uploaded, the method returns an\n// error. If the Delete() method is invoked when the Download()\n// method is in progress, the outcome the Download() method is\n// undefined.",
-			InArgs: []ipc.ArgDesc{
+			InArgs: []rpc.ArgDesc{
 				{"part", ``}, // int32
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
@@ -886,7 +886,7 @@ var descBinary = ipc.InterfaceDesc{
 		{
 			Name: "DownloadUrl",
 			Doc:  "// DownloadUrl returns a transient URL from which the binary\n// identified by the object name suffix can be downloaded using the\n// HTTP protocol. If not all parts of the binary have been uploaded,\n// the method returns an error.",
-			OutArgs: []ipc.ArgDesc{
+			OutArgs: []rpc.ArgDesc{
 				{"url", ``}, // string
 				{"ttl", ``}, // int64
 			},
@@ -895,7 +895,7 @@ var descBinary = ipc.InterfaceDesc{
 		{
 			Name: "Stat",
 			Doc:  "// Stat returns information describing the parts of the binary\n// identified by the object name suffix, and its RFC 2046 media type.\n// If the binary has not been created, the method returns an error.",
-			OutArgs: []ipc.ArgDesc{
+			OutArgs: []rpc.ArgDesc{
 				{"Parts", ``},     // []binary.PartInfo
 				{"MediaInfo", ``}, // MediaInfo
 			},
@@ -904,7 +904,7 @@ var descBinary = ipc.InterfaceDesc{
 		{
 			Name: "Upload",
 			Doc:  "// Upload opens a stream that can be used for uploading the given\n// part of the binary identified by the object name suffix. If the\n// binary has not been created, the method returns an error. If the\n// binary part has been uploaded, the method returns an error. If\n// the same binary part is being uploaded by another caller, the\n// method returns an error.",
-			InArgs: []ipc.ArgDesc{
+			InArgs: []rpc.ArgDesc{
 				{"part", ``}, // int32
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
@@ -925,18 +925,18 @@ type BinaryDownloadServerStream interface {
 
 // BinaryDownloadServerCall represents the context passed to Binary.Download.
 type BinaryDownloadServerCall interface {
-	ipc.ServerCall
+	rpc.ServerCall
 	BinaryDownloadServerStream
 }
 
-// BinaryDownloadServerCallStub is a wrapper that converts ipc.StreamServerCall into
+// BinaryDownloadServerCallStub is a wrapper that converts rpc.StreamServerCall into
 // a typesafe stub that implements BinaryDownloadServerCall.
 type BinaryDownloadServerCallStub struct {
-	ipc.StreamServerCall
+	rpc.StreamServerCall
 }
 
-// Init initializes BinaryDownloadServerCallStub from ipc.StreamServerCall.
-func (s *BinaryDownloadServerCallStub) Init(call ipc.StreamServerCall) {
+// Init initializes BinaryDownloadServerCallStub from rpc.StreamServerCall.
+func (s *BinaryDownloadServerCallStub) Init(call rpc.StreamServerCall) {
 	s.StreamServerCall = call
 }
 
@@ -973,20 +973,20 @@ type BinaryUploadServerStream interface {
 
 // BinaryUploadServerCall represents the context passed to Binary.Upload.
 type BinaryUploadServerCall interface {
-	ipc.ServerCall
+	rpc.ServerCall
 	BinaryUploadServerStream
 }
 
-// BinaryUploadServerCallStub is a wrapper that converts ipc.StreamServerCall into
+// BinaryUploadServerCallStub is a wrapper that converts rpc.StreamServerCall into
 // a typesafe stub that implements BinaryUploadServerCall.
 type BinaryUploadServerCallStub struct {
-	ipc.StreamServerCall
+	rpc.StreamServerCall
 	valRecv []byte
 	errRecv error
 }
 
-// Init initializes BinaryUploadServerCallStub from ipc.StreamServerCall.
-func (s *BinaryUploadServerCallStub) Init(call ipc.StreamServerCall) {
+// Init initializes BinaryUploadServerCallStub from rpc.StreamServerCall.
+func (s *BinaryUploadServerCallStub) Init(call rpc.StreamServerCall) {
 	s.StreamServerCall = call
 }
 
@@ -1029,23 +1029,23 @@ type ProfileClientMethods interface {
 	// e.g. "linux-media". The label can be used to uniquely identify
 	// the profile (for the purpose of matching application binaries and
 	// devices).
-	Label(*context.T, ...ipc.CallOpt) (string, error)
+	Label(*context.T, ...rpc.CallOpt) (string, error)
 	// Description is a free-text description of the profile, meant for
 	// human consumption.
-	Description(*context.T, ...ipc.CallOpt) (string, error)
+	Description(*context.T, ...rpc.CallOpt) (string, error)
 }
 
 // ProfileClientStub adds universal methods to ProfileClientMethods.
 type ProfileClientStub interface {
 	ProfileClientMethods
-	ipc.UniversalServiceMethods
+	rpc.UniversalServiceMethods
 }
 
 // ProfileClient returns a client stub for Profile.
-func ProfileClient(name string, opts ...ipc.BindOpt) ProfileClientStub {
-	var client ipc.Client
+func ProfileClient(name string, opts ...rpc.BindOpt) ProfileClientStub {
+	var client rpc.Client
 	for _, opt := range opts {
-		if clientOpt, ok := opt.(ipc.Client); ok {
+		if clientOpt, ok := opt.(rpc.Client); ok {
 			client = clientOpt
 		}
 	}
@@ -1054,18 +1054,18 @@ func ProfileClient(name string, opts ...ipc.BindOpt) ProfileClientStub {
 
 type implProfileClientStub struct {
 	name   string
-	client ipc.Client
+	client rpc.Client
 }
 
-func (c implProfileClientStub) c(ctx *context.T) ipc.Client {
+func (c implProfileClientStub) c(ctx *context.T) rpc.Client {
 	if c.client != nil {
 		return c.client
 	}
 	return v23.GetClient(ctx)
 }
 
-func (c implProfileClientStub) Label(ctx *context.T, opts ...ipc.CallOpt) (o0 string, err error) {
-	var call ipc.ClientCall
+func (c implProfileClientStub) Label(ctx *context.T, opts ...rpc.CallOpt) (o0 string, err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Label", nil, opts...); err != nil {
 		return
 	}
@@ -1073,8 +1073,8 @@ func (c implProfileClientStub) Label(ctx *context.T, opts ...ipc.CallOpt) (o0 st
 	return
 }
 
-func (c implProfileClientStub) Description(ctx *context.T, opts ...ipc.CallOpt) (o0 string, err error) {
-	var call ipc.ClientCall
+func (c implProfileClientStub) Description(ctx *context.T, opts ...rpc.CallOpt) (o0 string, err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Description", nil, opts...); err != nil {
 		return
 	}
@@ -1094,14 +1094,14 @@ type ProfileServerMethods interface {
 	// e.g. "linux-media". The label can be used to uniquely identify
 	// the profile (for the purpose of matching application binaries and
 	// devices).
-	Label(ipc.ServerCall) (string, error)
+	Label(rpc.ServerCall) (string, error)
 	// Description is a free-text description of the profile, meant for
 	// human consumption.
-	Description(ipc.ServerCall) (string, error)
+	Description(rpc.ServerCall) (string, error)
 }
 
 // ProfileServerStubMethods is the server interface containing
-// Profile methods, as expected by ipc.Server.
+// Profile methods, as expected by rpc.Server.
 // There is no difference between this interface and ProfileServerMethods
 // since there are no streaming methods.
 type ProfileServerStubMethods ProfileServerMethods
@@ -1110,21 +1110,21 @@ type ProfileServerStubMethods ProfileServerMethods
 type ProfileServerStub interface {
 	ProfileServerStubMethods
 	// Describe the Profile interfaces.
-	Describe__() []ipc.InterfaceDesc
+	Describe__() []rpc.InterfaceDesc
 }
 
 // ProfileServer returns a server stub for Profile.
 // It converts an implementation of ProfileServerMethods into
-// an object that may be used by ipc.Server.
+// an object that may be used by rpc.Server.
 func ProfileServer(impl ProfileServerMethods) ProfileServerStub {
 	stub := implProfileServerStub{
 		impl: impl,
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
-	if gs := ipc.NewGlobState(stub); gs != nil {
+	if gs := rpc.NewGlobState(stub); gs != nil {
 		stub.gs = gs
-	} else if gs := ipc.NewGlobState(impl); gs != nil {
+	} else if gs := rpc.NewGlobState(impl); gs != nil {
 		stub.gs = gs
 	}
 	return stub
@@ -1132,38 +1132,38 @@ func ProfileServer(impl ProfileServerMethods) ProfileServerStub {
 
 type implProfileServerStub struct {
 	impl ProfileServerMethods
-	gs   *ipc.GlobState
+	gs   *rpc.GlobState
 }
 
-func (s implProfileServerStub) Label(call ipc.ServerCall) (string, error) {
+func (s implProfileServerStub) Label(call rpc.ServerCall) (string, error) {
 	return s.impl.Label(call)
 }
 
-func (s implProfileServerStub) Description(call ipc.ServerCall) (string, error) {
+func (s implProfileServerStub) Description(call rpc.ServerCall) (string, error) {
 	return s.impl.Description(call)
 }
 
-func (s implProfileServerStub) Globber() *ipc.GlobState {
+func (s implProfileServerStub) Globber() *rpc.GlobState {
 	return s.gs
 }
 
-func (s implProfileServerStub) Describe__() []ipc.InterfaceDesc {
-	return []ipc.InterfaceDesc{ProfileDesc}
+func (s implProfileServerStub) Describe__() []rpc.InterfaceDesc {
+	return []rpc.InterfaceDesc{ProfileDesc}
 }
 
 // ProfileDesc describes the Profile interface.
-var ProfileDesc ipc.InterfaceDesc = descProfile
+var ProfileDesc rpc.InterfaceDesc = descProfile
 
 // descProfile hides the desc to keep godoc clean.
-var descProfile = ipc.InterfaceDesc{
+var descProfile = rpc.InterfaceDesc{
 	Name:    "Profile",
 	PkgPath: "v.io/v23/services/mgmt/repository",
 	Doc:     "// Profile abstracts a device's ability to run binaries, and hides\n// specifics such as the operating system, hardware architecture, and\n// the set of installed libraries. Profiles describe binaries and\n// devices, and are used to match them.",
-	Methods: []ipc.MethodDesc{
+	Methods: []rpc.MethodDesc{
 		{
 			Name: "Label",
 			Doc:  "// Label is the human-readable profile key for the profile,\n// e.g. \"linux-media\". The label can be used to uniquely identify\n// the profile (for the purpose of matching application binaries and\n// devices).",
-			OutArgs: []ipc.ArgDesc{
+			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // string
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
@@ -1171,7 +1171,7 @@ var descProfile = ipc.InterfaceDesc{
 		{
 			Name: "Description",
 			Doc:  "// Description is a free-text description of the profile, meant for\n// human consumption.",
-			OutArgs: []ipc.ArgDesc{
+			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // string
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},

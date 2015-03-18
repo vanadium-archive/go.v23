@@ -13,7 +13,7 @@ import (
 	"v.io/v23"
 	"v.io/v23/context"
 	"v.io/v23/i18n"
-	"v.io/v23/ipc"
+	"v.io/v23/rpc"
 	"v.io/v23/vdl"
 	"v.io/v23/verror"
 
@@ -151,35 +151,35 @@ type GroupClientMethods interface {
 	// If acl is nil, a default Permissions is used, providing Admin access to
 	// the caller.
 	// Create requires the caller to have Write permission at the GroupServer.
-	Create(ctx *context.T, acl access.Permissions, entries []BlessingPatternChunk, opts ...ipc.CallOpt) error
+	Create(ctx *context.T, acl access.Permissions, entries []BlessingPatternChunk, opts ...rpc.CallOpt) error
 	// Delete deletes the group.
 	// Permissions for all group-related methods except Create() are checked
 	// against the Group object.
-	Delete(ctx *context.T, etag string, opts ...ipc.CallOpt) error
+	Delete(ctx *context.T, etag string, opts ...rpc.CallOpt) error
 	// Add adds an entry to the group.
-	Add(ctx *context.T, entry BlessingPatternChunk, etag string, opts ...ipc.CallOpt) error
+	Add(ctx *context.T, entry BlessingPatternChunk, etag string, opts ...rpc.CallOpt) error
 	// Remove removes an entry from the group.
-	Remove(ctx *context.T, entry BlessingPatternChunk, etag string, opts ...ipc.CallOpt) error
+	Remove(ctx *context.T, entry BlessingPatternChunk, etag string, opts ...rpc.CallOpt) error
 	// Get returns all entries in the group.
 	// TODO(sadovsky): Flesh out this API.
-	Get(ctx *context.T, req GetRequest, reqEtag string, opts ...ipc.CallOpt) (res GetResponse, etag string, err error)
+	Get(ctx *context.T, req GetRequest, reqEtag string, opts ...rpc.CallOpt) (res GetResponse, etag string, err error)
 	// Rest returns information sufficient for the client to perform its AccessList
 	// checks.
 	// TODO(sadovsky): Flesh out this API.
-	Rest(ctx *context.T, req RestRequest, reqEtag string, opts ...ipc.CallOpt) (res RestResponse, etag string, err error)
+	Rest(ctx *context.T, req RestRequest, reqEtag string, opts ...rpc.CallOpt) (res RestResponse, etag string, err error)
 }
 
 // GroupClientStub adds universal methods to GroupClientMethods.
 type GroupClientStub interface {
 	GroupClientMethods
-	ipc.UniversalServiceMethods
+	rpc.UniversalServiceMethods
 }
 
 // GroupClient returns a client stub for Group.
-func GroupClient(name string, opts ...ipc.BindOpt) GroupClientStub {
-	var client ipc.Client
+func GroupClient(name string, opts ...rpc.BindOpt) GroupClientStub {
+	var client rpc.Client
 	for _, opt := range opts {
-		if clientOpt, ok := opt.(ipc.Client); ok {
+		if clientOpt, ok := opt.(rpc.Client); ok {
 			client = clientOpt
 		}
 	}
@@ -188,20 +188,20 @@ func GroupClient(name string, opts ...ipc.BindOpt) GroupClientStub {
 
 type implGroupClientStub struct {
 	name   string
-	client ipc.Client
+	client rpc.Client
 
 	object.ObjectClientStub
 }
 
-func (c implGroupClientStub) c(ctx *context.T) ipc.Client {
+func (c implGroupClientStub) c(ctx *context.T) rpc.Client {
 	if c.client != nil {
 		return c.client
 	}
 	return v23.GetClient(ctx)
 }
 
-func (c implGroupClientStub) Create(ctx *context.T, i0 access.Permissions, i1 []BlessingPatternChunk, opts ...ipc.CallOpt) (err error) {
-	var call ipc.ClientCall
+func (c implGroupClientStub) Create(ctx *context.T, i0 access.Permissions, i1 []BlessingPatternChunk, opts ...rpc.CallOpt) (err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Create", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
@@ -209,8 +209,8 @@ func (c implGroupClientStub) Create(ctx *context.T, i0 access.Permissions, i1 []
 	return
 }
 
-func (c implGroupClientStub) Delete(ctx *context.T, i0 string, opts ...ipc.CallOpt) (err error) {
-	var call ipc.ClientCall
+func (c implGroupClientStub) Delete(ctx *context.T, i0 string, opts ...rpc.CallOpt) (err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Delete", []interface{}{i0}, opts...); err != nil {
 		return
 	}
@@ -218,8 +218,8 @@ func (c implGroupClientStub) Delete(ctx *context.T, i0 string, opts ...ipc.CallO
 	return
 }
 
-func (c implGroupClientStub) Add(ctx *context.T, i0 BlessingPatternChunk, i1 string, opts ...ipc.CallOpt) (err error) {
-	var call ipc.ClientCall
+func (c implGroupClientStub) Add(ctx *context.T, i0 BlessingPatternChunk, i1 string, opts ...rpc.CallOpt) (err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Add", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
@@ -227,8 +227,8 @@ func (c implGroupClientStub) Add(ctx *context.T, i0 BlessingPatternChunk, i1 str
 	return
 }
 
-func (c implGroupClientStub) Remove(ctx *context.T, i0 BlessingPatternChunk, i1 string, opts ...ipc.CallOpt) (err error) {
-	var call ipc.ClientCall
+func (c implGroupClientStub) Remove(ctx *context.T, i0 BlessingPatternChunk, i1 string, opts ...rpc.CallOpt) (err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Remove", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
@@ -236,8 +236,8 @@ func (c implGroupClientStub) Remove(ctx *context.T, i0 BlessingPatternChunk, i1 
 	return
 }
 
-func (c implGroupClientStub) Get(ctx *context.T, i0 GetRequest, i1 string, opts ...ipc.CallOpt) (o0 GetResponse, o1 string, err error) {
-	var call ipc.ClientCall
+func (c implGroupClientStub) Get(ctx *context.T, i0 GetRequest, i1 string, opts ...rpc.CallOpt) (o0 GetResponse, o1 string, err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Get", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
@@ -245,8 +245,8 @@ func (c implGroupClientStub) Get(ctx *context.T, i0 GetRequest, i1 string, opts 
 	return
 }
 
-func (c implGroupClientStub) Rest(ctx *context.T, i0 RestRequest, i1 string, opts ...ipc.CallOpt) (o0 RestResponse, o1 string, err error) {
-	var call ipc.ClientCall
+func (c implGroupClientStub) Rest(ctx *context.T, i0 RestRequest, i1 string, opts ...rpc.CallOpt) (o0 RestResponse, o1 string, err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Rest", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
@@ -310,26 +310,26 @@ type GroupServerMethods interface {
 	// If acl is nil, a default Permissions is used, providing Admin access to
 	// the caller.
 	// Create requires the caller to have Write permission at the GroupServer.
-	Create(call ipc.ServerCall, acl access.Permissions, entries []BlessingPatternChunk) error
+	Create(call rpc.ServerCall, acl access.Permissions, entries []BlessingPatternChunk) error
 	// Delete deletes the group.
 	// Permissions for all group-related methods except Create() are checked
 	// against the Group object.
-	Delete(call ipc.ServerCall, etag string) error
+	Delete(call rpc.ServerCall, etag string) error
 	// Add adds an entry to the group.
-	Add(call ipc.ServerCall, entry BlessingPatternChunk, etag string) error
+	Add(call rpc.ServerCall, entry BlessingPatternChunk, etag string) error
 	// Remove removes an entry from the group.
-	Remove(call ipc.ServerCall, entry BlessingPatternChunk, etag string) error
+	Remove(call rpc.ServerCall, entry BlessingPatternChunk, etag string) error
 	// Get returns all entries in the group.
 	// TODO(sadovsky): Flesh out this API.
-	Get(call ipc.ServerCall, req GetRequest, reqEtag string) (res GetResponse, etag string, err error)
+	Get(call rpc.ServerCall, req GetRequest, reqEtag string) (res GetResponse, etag string, err error)
 	// Rest returns information sufficient for the client to perform its AccessList
 	// checks.
 	// TODO(sadovsky): Flesh out this API.
-	Rest(call ipc.ServerCall, req RestRequest, reqEtag string) (res RestResponse, etag string, err error)
+	Rest(call rpc.ServerCall, req RestRequest, reqEtag string) (res RestResponse, etag string, err error)
 }
 
 // GroupServerStubMethods is the server interface containing
-// Group methods, as expected by ipc.Server.
+// Group methods, as expected by rpc.Server.
 // There is no difference between this interface and GroupServerMethods
 // since there are no streaming methods.
 type GroupServerStubMethods GroupServerMethods
@@ -338,12 +338,12 @@ type GroupServerStubMethods GroupServerMethods
 type GroupServerStub interface {
 	GroupServerStubMethods
 	// Describe the Group interfaces.
-	Describe__() []ipc.InterfaceDesc
+	Describe__() []rpc.InterfaceDesc
 }
 
 // GroupServer returns a server stub for Group.
 // It converts an implementation of GroupServerMethods into
-// an object that may be used by ipc.Server.
+// an object that may be used by rpc.Server.
 func GroupServer(impl GroupServerMethods) GroupServerStub {
 	stub := implGroupServerStub{
 		impl:             impl,
@@ -351,9 +351,9 @@ func GroupServer(impl GroupServerMethods) GroupServerStub {
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
-	if gs := ipc.NewGlobState(stub); gs != nil {
+	if gs := rpc.NewGlobState(stub); gs != nil {
 		stub.gs = gs
-	} else if gs := ipc.NewGlobState(impl); gs != nil {
+	} else if gs := rpc.NewGlobState(impl); gs != nil {
 		stub.gs = gs
 	}
 	return stub
@@ -362,57 +362,57 @@ func GroupServer(impl GroupServerMethods) GroupServerStub {
 type implGroupServerStub struct {
 	impl GroupServerMethods
 	object.ObjectServerStub
-	gs *ipc.GlobState
+	gs *rpc.GlobState
 }
 
-func (s implGroupServerStub) Create(call ipc.ServerCall, i0 access.Permissions, i1 []BlessingPatternChunk) error {
+func (s implGroupServerStub) Create(call rpc.ServerCall, i0 access.Permissions, i1 []BlessingPatternChunk) error {
 	return s.impl.Create(call, i0, i1)
 }
 
-func (s implGroupServerStub) Delete(call ipc.ServerCall, i0 string) error {
+func (s implGroupServerStub) Delete(call rpc.ServerCall, i0 string) error {
 	return s.impl.Delete(call, i0)
 }
 
-func (s implGroupServerStub) Add(call ipc.ServerCall, i0 BlessingPatternChunk, i1 string) error {
+func (s implGroupServerStub) Add(call rpc.ServerCall, i0 BlessingPatternChunk, i1 string) error {
 	return s.impl.Add(call, i0, i1)
 }
 
-func (s implGroupServerStub) Remove(call ipc.ServerCall, i0 BlessingPatternChunk, i1 string) error {
+func (s implGroupServerStub) Remove(call rpc.ServerCall, i0 BlessingPatternChunk, i1 string) error {
 	return s.impl.Remove(call, i0, i1)
 }
 
-func (s implGroupServerStub) Get(call ipc.ServerCall, i0 GetRequest, i1 string) (GetResponse, string, error) {
+func (s implGroupServerStub) Get(call rpc.ServerCall, i0 GetRequest, i1 string) (GetResponse, string, error) {
 	return s.impl.Get(call, i0, i1)
 }
 
-func (s implGroupServerStub) Rest(call ipc.ServerCall, i0 RestRequest, i1 string) (RestResponse, string, error) {
+func (s implGroupServerStub) Rest(call rpc.ServerCall, i0 RestRequest, i1 string) (RestResponse, string, error) {
 	return s.impl.Rest(call, i0, i1)
 }
 
-func (s implGroupServerStub) Globber() *ipc.GlobState {
+func (s implGroupServerStub) Globber() *rpc.GlobState {
 	return s.gs
 }
 
-func (s implGroupServerStub) Describe__() []ipc.InterfaceDesc {
-	return []ipc.InterfaceDesc{GroupDesc, object.ObjectDesc}
+func (s implGroupServerStub) Describe__() []rpc.InterfaceDesc {
+	return []rpc.InterfaceDesc{GroupDesc, object.ObjectDesc}
 }
 
 // GroupDesc describes the Group interface.
-var GroupDesc ipc.InterfaceDesc = descGroup
+var GroupDesc rpc.InterfaceDesc = descGroup
 
 // descGroup hides the desc to keep godoc clean.
-var descGroup = ipc.InterfaceDesc{
+var descGroup = rpc.InterfaceDesc{
 	Name:    "Group",
 	PkgPath: "v.io/v23/services/security/groups",
 	Doc:     "// A group's etag covers its AccessList as well as any other data stored in the group.\n// Clients should treat etags as opaque identifiers. For both Get and Rest, if\n// etag is set and matches the Group's current etag, the response will indicate\n// that fact but will otherwise be empty.",
-	Embeds: []ipc.EmbedDesc{
+	Embeds: []rpc.EmbedDesc{
 		{"Object", "v.io/v23/services/security/access/object", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetPermissions and GetPermissions in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(acl access.Permissions, etag string) error         {Red}\n//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}\n//  }"},
 	},
-	Methods: []ipc.MethodDesc{
+	Methods: []rpc.MethodDesc{
 		{
 			Name: "Create",
 			Doc:  "// Create creates a new group if it doesn't already exist.\n// If acl is nil, a default Permissions is used, providing Admin access to\n// the caller.\n// Create requires the caller to have Write permission at the GroupServer.",
-			InArgs: []ipc.ArgDesc{
+			InArgs: []rpc.ArgDesc{
 				{"acl", ``},     // access.Permissions
 				{"entries", ``}, // []BlessingPatternChunk
 			},
@@ -421,7 +421,7 @@ var descGroup = ipc.InterfaceDesc{
 		{
 			Name: "Delete",
 			Doc:  "// Delete deletes the group.\n// Permissions for all group-related methods except Create() are checked\n// against the Group object.",
-			InArgs: []ipc.ArgDesc{
+			InArgs: []rpc.ArgDesc{
 				{"etag", ``}, // string
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
@@ -429,7 +429,7 @@ var descGroup = ipc.InterfaceDesc{
 		{
 			Name: "Add",
 			Doc:  "// Add adds an entry to the group.",
-			InArgs: []ipc.ArgDesc{
+			InArgs: []rpc.ArgDesc{
 				{"entry", ``}, // BlessingPatternChunk
 				{"etag", ``},  // string
 			},
@@ -438,7 +438,7 @@ var descGroup = ipc.InterfaceDesc{
 		{
 			Name: "Remove",
 			Doc:  "// Remove removes an entry from the group.",
-			InArgs: []ipc.ArgDesc{
+			InArgs: []rpc.ArgDesc{
 				{"entry", ``}, // BlessingPatternChunk
 				{"etag", ``},  // string
 			},
@@ -447,11 +447,11 @@ var descGroup = ipc.InterfaceDesc{
 		{
 			Name: "Get",
 			Doc:  "// Get returns all entries in the group.\n// TODO(sadovsky): Flesh out this API.",
-			InArgs: []ipc.ArgDesc{
+			InArgs: []rpc.ArgDesc{
 				{"req", ``},     // GetRequest
 				{"reqEtag", ``}, // string
 			},
-			OutArgs: []ipc.ArgDesc{
+			OutArgs: []rpc.ArgDesc{
 				{"res", ``},  // GetResponse
 				{"etag", ``}, // string
 			},
@@ -460,11 +460,11 @@ var descGroup = ipc.InterfaceDesc{
 		{
 			Name: "Rest",
 			Doc:  "// Rest returns information sufficient for the client to perform its AccessList\n// checks.\n// TODO(sadovsky): Flesh out this API.",
-			InArgs: []ipc.ArgDesc{
+			InArgs: []rpc.ArgDesc{
 				{"req", ``},     // RestRequest
 				{"reqEtag", ``}, // string
 			},
-			OutArgs: []ipc.ArgDesc{
+			OutArgs: []rpc.ArgDesc{
 				{"res", ``},  // RestResponse
 				{"etag", ``}, // string
 			},

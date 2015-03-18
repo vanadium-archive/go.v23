@@ -9,7 +9,7 @@ import (
 	"io"
 	"v.io/v23"
 	"v.io/v23/context"
-	"v.io/v23/ipc"
+	"v.io/v23/rpc"
 	"v.io/v23/vdl"
 
 	// VDL user imports
@@ -23,7 +23,7 @@ import (
 // LogFile can be used to access log files remotely.
 type LogFileClientMethods interface {
 	// Size returns the number of bytes in the receiving object.
-	Size(*context.T, ...ipc.CallOpt) (int64, error)
+	Size(*context.T, ...rpc.CallOpt) (int64, error)
 	// ReadLog receives up to NumEntries log entries starting at the
 	// StartPos offset (in bytes) in the receiving object. Each stream chunk
 	// contains one log entry.
@@ -37,20 +37,20 @@ type LogFileClientMethods interface {
 	//
 	// The returned error will be EOF if and only if ReadLog reached the
 	// end of the file and no log entries were returned.
-	ReadLog(ctx *context.T, StartPos int64, NumEntries int32, Follow bool, opts ...ipc.CallOpt) (LogFileReadLogClientCall, error)
+	ReadLog(ctx *context.T, StartPos int64, NumEntries int32, Follow bool, opts ...rpc.CallOpt) (LogFileReadLogClientCall, error)
 }
 
 // LogFileClientStub adds universal methods to LogFileClientMethods.
 type LogFileClientStub interface {
 	LogFileClientMethods
-	ipc.UniversalServiceMethods
+	rpc.UniversalServiceMethods
 }
 
 // LogFileClient returns a client stub for LogFile.
-func LogFileClient(name string, opts ...ipc.BindOpt) LogFileClientStub {
-	var client ipc.Client
+func LogFileClient(name string, opts ...rpc.BindOpt) LogFileClientStub {
+	var client rpc.Client
 	for _, opt := range opts {
-		if clientOpt, ok := opt.(ipc.Client); ok {
+		if clientOpt, ok := opt.(rpc.Client); ok {
 			client = clientOpt
 		}
 	}
@@ -59,18 +59,18 @@ func LogFileClient(name string, opts ...ipc.BindOpt) LogFileClientStub {
 
 type implLogFileClientStub struct {
 	name   string
-	client ipc.Client
+	client rpc.Client
 }
 
-func (c implLogFileClientStub) c(ctx *context.T) ipc.Client {
+func (c implLogFileClientStub) c(ctx *context.T) rpc.Client {
 	if c.client != nil {
 		return c.client
 	}
 	return v23.GetClient(ctx)
 }
 
-func (c implLogFileClientStub) Size(ctx *context.T, opts ...ipc.CallOpt) (o0 int64, err error) {
-	var call ipc.ClientCall
+func (c implLogFileClientStub) Size(ctx *context.T, opts ...rpc.CallOpt) (o0 int64, err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Size", nil, opts...); err != nil {
 		return
 	}
@@ -78,8 +78,8 @@ func (c implLogFileClientStub) Size(ctx *context.T, opts ...ipc.CallOpt) (o0 int
 	return
 }
 
-func (c implLogFileClientStub) ReadLog(ctx *context.T, i0 int64, i1 int32, i2 bool, opts ...ipc.CallOpt) (ocall LogFileReadLogClientCall, err error) {
-	var call ipc.ClientCall
+func (c implLogFileClientStub) ReadLog(ctx *context.T, i0 int64, i1 int32, i2 bool, opts ...rpc.CallOpt) (ocall LogFileReadLogClientCall, err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "ReadLog", []interface{}{i0, i1, i2}, opts...); err != nil {
 		return
 	}
@@ -120,7 +120,7 @@ type LogFileReadLogClientCall interface {
 }
 
 type implLogFileReadLogClientCall struct {
-	ipc.ClientCall
+	rpc.ClientCall
 	valRecv types.LogEntry
 	errRecv error
 }
@@ -162,7 +162,7 @@ func (c *implLogFileReadLogClientCall) Finish() (o0 int64, err error) {
 // LogFile can be used to access log files remotely.
 type LogFileServerMethods interface {
 	// Size returns the number of bytes in the receiving object.
-	Size(ipc.ServerCall) (int64, error)
+	Size(rpc.ServerCall) (int64, error)
 	// ReadLog receives up to NumEntries log entries starting at the
 	// StartPos offset (in bytes) in the receiving object. Each stream chunk
 	// contains one log entry.
@@ -180,12 +180,12 @@ type LogFileServerMethods interface {
 }
 
 // LogFileServerStubMethods is the server interface containing
-// LogFile methods, as expected by ipc.Server.
+// LogFile methods, as expected by rpc.Server.
 // The only difference between this interface and LogFileServerMethods
 // is the streaming methods.
 type LogFileServerStubMethods interface {
 	// Size returns the number of bytes in the receiving object.
-	Size(ipc.ServerCall) (int64, error)
+	Size(rpc.ServerCall) (int64, error)
 	// ReadLog receives up to NumEntries log entries starting at the
 	// StartPos offset (in bytes) in the receiving object. Each stream chunk
 	// contains one log entry.
@@ -206,21 +206,21 @@ type LogFileServerStubMethods interface {
 type LogFileServerStub interface {
 	LogFileServerStubMethods
 	// Describe the LogFile interfaces.
-	Describe__() []ipc.InterfaceDesc
+	Describe__() []rpc.InterfaceDesc
 }
 
 // LogFileServer returns a server stub for LogFile.
 // It converts an implementation of LogFileServerMethods into
-// an object that may be used by ipc.Server.
+// an object that may be used by rpc.Server.
 func LogFileServer(impl LogFileServerMethods) LogFileServerStub {
 	stub := implLogFileServerStub{
 		impl: impl,
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
-	if gs := ipc.NewGlobState(stub); gs != nil {
+	if gs := rpc.NewGlobState(stub); gs != nil {
 		stub.gs = gs
-	} else if gs := ipc.NewGlobState(impl); gs != nil {
+	} else if gs := rpc.NewGlobState(impl); gs != nil {
 		stub.gs = gs
 	}
 	return stub
@@ -228,10 +228,10 @@ func LogFileServer(impl LogFileServerMethods) LogFileServerStub {
 
 type implLogFileServerStub struct {
 	impl LogFileServerMethods
-	gs   *ipc.GlobState
+	gs   *rpc.GlobState
 }
 
-func (s implLogFileServerStub) Size(call ipc.ServerCall) (int64, error) {
+func (s implLogFileServerStub) Size(call rpc.ServerCall) (int64, error) {
 	return s.impl.Size(call)
 }
 
@@ -239,27 +239,27 @@ func (s implLogFileServerStub) ReadLog(call *LogFileReadLogServerCallStub, i0 in
 	return s.impl.ReadLog(call, i0, i1, i2)
 }
 
-func (s implLogFileServerStub) Globber() *ipc.GlobState {
+func (s implLogFileServerStub) Globber() *rpc.GlobState {
 	return s.gs
 }
 
-func (s implLogFileServerStub) Describe__() []ipc.InterfaceDesc {
-	return []ipc.InterfaceDesc{LogFileDesc}
+func (s implLogFileServerStub) Describe__() []rpc.InterfaceDesc {
+	return []rpc.InterfaceDesc{LogFileDesc}
 }
 
 // LogFileDesc describes the LogFile interface.
-var LogFileDesc ipc.InterfaceDesc = descLogFile
+var LogFileDesc rpc.InterfaceDesc = descLogFile
 
 // descLogFile hides the desc to keep godoc clean.
-var descLogFile = ipc.InterfaceDesc{
+var descLogFile = rpc.InterfaceDesc{
 	Name:    "LogFile",
 	PkgPath: "v.io/v23/services/mgmt/logreader",
 	Doc:     "// LogFile can be used to access log files remotely.",
-	Methods: []ipc.MethodDesc{
+	Methods: []rpc.MethodDesc{
 		{
 			Name: "Size",
 			Doc:  "// Size returns the number of bytes in the receiving object.",
-			OutArgs: []ipc.ArgDesc{
+			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // int64
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Debug"))},
@@ -267,12 +267,12 @@ var descLogFile = ipc.InterfaceDesc{
 		{
 			Name: "ReadLog",
 			Doc:  "// ReadLog receives up to NumEntries log entries starting at the\n// StartPos offset (in bytes) in the receiving object. Each stream chunk\n// contains one log entry.\n//\n// If Follow is true, ReadLog will block and wait for more entries to\n// arrive when it reaches the end of the file.\n//\n// ReadLog returns the position where it stopped reading, i.e. the\n// position where the next entry starts. This value can be used as\n// StartPos for successive calls to ReadLog.\n//\n// The returned error will be EOF if and only if ReadLog reached the\n// end of the file and no log entries were returned.",
-			InArgs: []ipc.ArgDesc{
+			InArgs: []rpc.ArgDesc{
 				{"StartPos", ``},   // int64
 				{"NumEntries", ``}, // int32
 				{"Follow", ``},     // bool
 			},
-			OutArgs: []ipc.ArgDesc{
+			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // int64
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Debug"))},
@@ -293,18 +293,18 @@ type LogFileReadLogServerStream interface {
 
 // LogFileReadLogServerCall represents the context passed to LogFile.ReadLog.
 type LogFileReadLogServerCall interface {
-	ipc.ServerCall
+	rpc.ServerCall
 	LogFileReadLogServerStream
 }
 
-// LogFileReadLogServerCallStub is a wrapper that converts ipc.StreamServerCall into
+// LogFileReadLogServerCallStub is a wrapper that converts rpc.StreamServerCall into
 // a typesafe stub that implements LogFileReadLogServerCall.
 type LogFileReadLogServerCallStub struct {
-	ipc.StreamServerCall
+	rpc.StreamServerCall
 }
 
-// Init initializes LogFileReadLogServerCallStub from ipc.StreamServerCall.
-func (s *LogFileReadLogServerCallStub) Init(call ipc.StreamServerCall) {
+// Init initializes LogFileReadLogServerCallStub from rpc.StreamServerCall.
+func (s *LogFileReadLogServerCallStub) Init(call rpc.StreamServerCall) {
 	s.StreamServerCall = call
 }
 

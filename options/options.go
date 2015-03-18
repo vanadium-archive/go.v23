@@ -59,17 +59,17 @@ import (
 // from the BlessingStore of the Principal.
 type ServerBlessings struct{ security.Blessings }
 
-func (ServerBlessings) IPCServerOpt()         {}
-func (ServerBlessings) IPCStreamListenerOpt() {}
+func (ServerBlessings) RPCServerOpt()         {}
+func (ServerBlessings) RPCStreamListenerOpt() {}
 
 // VCSecurityLevel represents the level of confidentiality of data transmitted
 // and received over a VC.
 type VCSecurityLevel int
 
-func (VCSecurityLevel) IPCServerOpt()         {}
-func (VCSecurityLevel) IPCCallOpt()           {}
-func (VCSecurityLevel) IPCStreamVCOpt()       {}
-func (VCSecurityLevel) IPCStreamListenerOpt() {}
+func (VCSecurityLevel) RPCServerOpt()         {}
+func (VCSecurityLevel) RPCCallOpt()           {}
+func (VCSecurityLevel) RPCStreamVCOpt()       {}
+func (VCSecurityLevel) RPCStreamListenerOpt() {}
 
 const (
 	// All user data transmitted over the VC is encrypted and can be interpreted only
@@ -92,13 +92,13 @@ const (
 // AllowedServersPolicy{security.AllPrincipals}.
 type AllowedServersPolicy []security.BlessingPattern
 
-func (AllowedServersPolicy) IPCCallOpt() {}
+func (AllowedServersPolicy) RPCCallOpt() {}
 
 // When ServerPublicKey is specified, the client will refuse to connect to
 // servers with a different PublicKey.
 type ServerPublicKey struct{ security.PublicKey }
 
-func (ServerPublicKey) IPCCallOpt() {}
+func (ServerPublicKey) RPCCallOpt() {}
 
 // SkipServerEndpointAuthorization causes clients to ignore the blessings in
 // remote (server) endpoint during authorization. With this option enabled,
@@ -110,7 +110,7 @@ func (ServerPublicKey) IPCCallOpt() {}
 // or ServerPublicKey.
 type SkipServerEndpointAuthorization struct{}
 
-func (SkipServerEndpointAuthorization) IPCCallOpt()   {}
+func (SkipServerEndpointAuthorization) RPCCallOpt()   {}
 func (SkipServerEndpointAuthorization) NSResolveOpt() {}
 
 // TODO(ashankar): Remove: This will be superceeded by
@@ -118,35 +118,35 @@ func (SkipServerEndpointAuthorization) NSResolveOpt() {}
 // option in new code, please check with the security folks.
 type SkipResolveAuthorization struct{}
 
-func (SkipResolveAuthorization) IPCCallOpt()   {}
+func (SkipResolveAuthorization) RPCCallOpt()   {}
 func (SkipResolveAuthorization) NSResolveOpt() {}
 
 // Discharge wraps the security.Discharge interface so that we can
 // add functions representing the option annotations.
 type Discharge struct{ security.Discharge }
 
-func (Discharge) IPCCallOpt() {}
+func (Discharge) RPCCallOpt() {}
 
 // RetryTimeout is the duration during which we will retry starting
 // an RPC call.  Zero means don't retry.
 type RetryTimeout time.Duration
 
-func (RetryTimeout) IPCCallOpt() {}
+func (RetryTimeout) RPCCallOpt() {}
 
 // NoResolve specifies that the RPC call should not further Resolve the name.
 type NoResolve struct{}
 
-func (NoResolve) IPCCallOpt()   {}
+func (NoResolve) RPCCallOpt()   {}
 func (NoResolve) NSResolveOpt() {}
 
 // Create a server that will be used to serve a MountTable. This server
 // cannot be used for any other purpose.
 type ServesMountTable bool
 
-func (ServesMountTable) IPCServerOpt() {}
+func (ServesMountTable) RPCServerOpt() {}
 
 // When NoRetry is specified, the client will not retry calls that fail but would
 // normally be retried.
 type NoRetry struct{}
 
-func (NoRetry) IPCCallOpt() {}
+func (NoRetry) RPCCallOpt() {}

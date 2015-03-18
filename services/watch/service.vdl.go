@@ -108,7 +108,7 @@ import (
 	"io"
 	"v.io/v23"
 	"v.io/v23/context"
-	"v.io/v23/ipc"
+	"v.io/v23/rpc"
 	"v.io/v23/vdl"
 
 	// VDL user imports
@@ -123,20 +123,20 @@ import (
 // that match a pattern.  See the package comments for details.
 type GlobWatcherClientMethods interface {
 	// WatchGlob returns a stream of changes that match a pattern.
-	WatchGlob(ctx *context.T, req types.GlobRequest, opts ...ipc.CallOpt) (GlobWatcherWatchGlobClientCall, error)
+	WatchGlob(ctx *context.T, req types.GlobRequest, opts ...rpc.CallOpt) (GlobWatcherWatchGlobClientCall, error)
 }
 
 // GlobWatcherClientStub adds universal methods to GlobWatcherClientMethods.
 type GlobWatcherClientStub interface {
 	GlobWatcherClientMethods
-	ipc.UniversalServiceMethods
+	rpc.UniversalServiceMethods
 }
 
 // GlobWatcherClient returns a client stub for GlobWatcher.
-func GlobWatcherClient(name string, opts ...ipc.BindOpt) GlobWatcherClientStub {
-	var client ipc.Client
+func GlobWatcherClient(name string, opts ...rpc.BindOpt) GlobWatcherClientStub {
+	var client rpc.Client
 	for _, opt := range opts {
-		if clientOpt, ok := opt.(ipc.Client); ok {
+		if clientOpt, ok := opt.(rpc.Client); ok {
 			client = clientOpt
 		}
 	}
@@ -145,18 +145,18 @@ func GlobWatcherClient(name string, opts ...ipc.BindOpt) GlobWatcherClientStub {
 
 type implGlobWatcherClientStub struct {
 	name   string
-	client ipc.Client
+	client rpc.Client
 }
 
-func (c implGlobWatcherClientStub) c(ctx *context.T) ipc.Client {
+func (c implGlobWatcherClientStub) c(ctx *context.T) rpc.Client {
 	if c.client != nil {
 		return c.client
 	}
 	return v23.GetClient(ctx)
 }
 
-func (c implGlobWatcherClientStub) WatchGlob(ctx *context.T, i0 types.GlobRequest, opts ...ipc.CallOpt) (ocall GlobWatcherWatchGlobClientCall, err error) {
-	var call ipc.ClientCall
+func (c implGlobWatcherClientStub) WatchGlob(ctx *context.T, i0 types.GlobRequest, opts ...rpc.CallOpt) (ocall GlobWatcherWatchGlobClientCall, err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "WatchGlob", []interface{}{i0}, opts...); err != nil {
 		return
 	}
@@ -197,7 +197,7 @@ type GlobWatcherWatchGlobClientCall interface {
 }
 
 type implGlobWatcherWatchGlobClientCall struct {
-	ipc.ClientCall
+	rpc.ClientCall
 	valRecv types.Change
 	errRecv error
 }
@@ -244,7 +244,7 @@ type GlobWatcherServerMethods interface {
 }
 
 // GlobWatcherServerStubMethods is the server interface containing
-// GlobWatcher methods, as expected by ipc.Server.
+// GlobWatcher methods, as expected by rpc.Server.
 // The only difference between this interface and GlobWatcherServerMethods
 // is the streaming methods.
 type GlobWatcherServerStubMethods interface {
@@ -256,21 +256,21 @@ type GlobWatcherServerStubMethods interface {
 type GlobWatcherServerStub interface {
 	GlobWatcherServerStubMethods
 	// Describe the GlobWatcher interfaces.
-	Describe__() []ipc.InterfaceDesc
+	Describe__() []rpc.InterfaceDesc
 }
 
 // GlobWatcherServer returns a server stub for GlobWatcher.
 // It converts an implementation of GlobWatcherServerMethods into
-// an object that may be used by ipc.Server.
+// an object that may be used by rpc.Server.
 func GlobWatcherServer(impl GlobWatcherServerMethods) GlobWatcherServerStub {
 	stub := implGlobWatcherServerStub{
 		impl: impl,
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
-	if gs := ipc.NewGlobState(stub); gs != nil {
+	if gs := rpc.NewGlobState(stub); gs != nil {
 		stub.gs = gs
-	} else if gs := ipc.NewGlobState(impl); gs != nil {
+	} else if gs := rpc.NewGlobState(impl); gs != nil {
 		stub.gs = gs
 	}
 	return stub
@@ -278,34 +278,34 @@ func GlobWatcherServer(impl GlobWatcherServerMethods) GlobWatcherServerStub {
 
 type implGlobWatcherServerStub struct {
 	impl GlobWatcherServerMethods
-	gs   *ipc.GlobState
+	gs   *rpc.GlobState
 }
 
 func (s implGlobWatcherServerStub) WatchGlob(call *GlobWatcherWatchGlobServerCallStub, i0 types.GlobRequest) error {
 	return s.impl.WatchGlob(call, i0)
 }
 
-func (s implGlobWatcherServerStub) Globber() *ipc.GlobState {
+func (s implGlobWatcherServerStub) Globber() *rpc.GlobState {
 	return s.gs
 }
 
-func (s implGlobWatcherServerStub) Describe__() []ipc.InterfaceDesc {
-	return []ipc.InterfaceDesc{GlobWatcherDesc}
+func (s implGlobWatcherServerStub) Describe__() []rpc.InterfaceDesc {
+	return []rpc.InterfaceDesc{GlobWatcherDesc}
 }
 
 // GlobWatcherDesc describes the GlobWatcher interface.
-var GlobWatcherDesc ipc.InterfaceDesc = descGlobWatcher
+var GlobWatcherDesc rpc.InterfaceDesc = descGlobWatcher
 
 // descGlobWatcher hides the desc to keep godoc clean.
-var descGlobWatcher = ipc.InterfaceDesc{
+var descGlobWatcher = rpc.InterfaceDesc{
 	Name:    "GlobWatcher",
 	PkgPath: "v.io/v23/services/watch",
 	Doc:     "// GlobWatcher allows a client to receive updates for changes to objects\n// that match a pattern.  See the package comments for details.",
-	Methods: []ipc.MethodDesc{
+	Methods: []rpc.MethodDesc{
 		{
 			Name: "WatchGlob",
 			Doc:  "// WatchGlob returns a stream of changes that match a pattern.",
-			InArgs: []ipc.ArgDesc{
+			InArgs: []rpc.ArgDesc{
 				{"req", ``}, // types.GlobRequest
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Resolve"))},
@@ -326,18 +326,18 @@ type GlobWatcherWatchGlobServerStream interface {
 
 // GlobWatcherWatchGlobServerCall represents the context passed to GlobWatcher.WatchGlob.
 type GlobWatcherWatchGlobServerCall interface {
-	ipc.ServerCall
+	rpc.ServerCall
 	GlobWatcherWatchGlobServerStream
 }
 
-// GlobWatcherWatchGlobServerCallStub is a wrapper that converts ipc.StreamServerCall into
+// GlobWatcherWatchGlobServerCallStub is a wrapper that converts rpc.StreamServerCall into
 // a typesafe stub that implements GlobWatcherWatchGlobServerCall.
 type GlobWatcherWatchGlobServerCallStub struct {
-	ipc.StreamServerCall
+	rpc.StreamServerCall
 }
 
-// Init initializes GlobWatcherWatchGlobServerCallStub from ipc.StreamServerCall.
-func (s *GlobWatcherWatchGlobServerCallStub) Init(call ipc.StreamServerCall) {
+// Init initializes GlobWatcherWatchGlobServerCallStub from rpc.StreamServerCall.
+func (s *GlobWatcherWatchGlobServerCallStub) Init(call rpc.StreamServerCall) {
 	s.StreamServerCall = call
 }
 

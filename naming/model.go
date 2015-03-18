@@ -3,7 +3,7 @@ package naming
 import (
 	"net"
 
-	"v.io/v23/ipc/version"
+	"v.io/v23/rpc/version"
 	"v.io/v23/verror"
 )
 
@@ -54,7 +54,7 @@ type Endpoint interface {
 	String() string
 
 	// Name returns a string reprsentation of this Endpoint that can
-	// be used as a name with ipc.StartCall.
+	// be used as a name with rpc.StartCall.
 	Name() string
 
 	// VersionedString returns a string in the specified format. If the version
@@ -79,9 +79,9 @@ type Endpoint interface {
 	// this Endpoint will present.
 	BlessingNames() []string
 
-	// IPCVersionRange returns the range of protocol versions supported by
+	// RPCVersionRange returns the range of protocol versions supported by
 	// the process at this endpoint.
-	IPCVersionRange() version.IPCVersionRange
+	RPCVersionRange() version.RPCVersionRange
 }
 
 // Names returns the servers represented by MountEntry as names, including

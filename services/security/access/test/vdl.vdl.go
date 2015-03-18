@@ -8,7 +8,7 @@ import (
 	// VDL system imports
 	"v.io/v23"
 	"v.io/v23/context"
-	"v.io/v23/ipc"
+	"v.io/v23/rpc"
 	"v.io/v23/vdl"
 )
 
@@ -38,24 +38,24 @@ const Execute = MyTag("X")
 //
 // MyObject demonstrates how tags are attached to methods.
 type MyObjectClientMethods interface {
-	Get(*context.T, ...ipc.CallOpt) error
-	Put(*context.T, ...ipc.CallOpt) error
-	Resolve(*context.T, ...ipc.CallOpt) error
-	NoTags(*context.T, ...ipc.CallOpt) error // No tags attached to this.
-	AllTags(*context.T, ...ipc.CallOpt) error
+	Get(*context.T, ...rpc.CallOpt) error
+	Put(*context.T, ...rpc.CallOpt) error
+	Resolve(*context.T, ...rpc.CallOpt) error
+	NoTags(*context.T, ...rpc.CallOpt) error // No tags attached to this.
+	AllTags(*context.T, ...rpc.CallOpt) error
 }
 
 // MyObjectClientStub adds universal methods to MyObjectClientMethods.
 type MyObjectClientStub interface {
 	MyObjectClientMethods
-	ipc.UniversalServiceMethods
+	rpc.UniversalServiceMethods
 }
 
 // MyObjectClient returns a client stub for MyObject.
-func MyObjectClient(name string, opts ...ipc.BindOpt) MyObjectClientStub {
-	var client ipc.Client
+func MyObjectClient(name string, opts ...rpc.BindOpt) MyObjectClientStub {
+	var client rpc.Client
 	for _, opt := range opts {
-		if clientOpt, ok := opt.(ipc.Client); ok {
+		if clientOpt, ok := opt.(rpc.Client); ok {
 			client = clientOpt
 		}
 	}
@@ -64,18 +64,18 @@ func MyObjectClient(name string, opts ...ipc.BindOpt) MyObjectClientStub {
 
 type implMyObjectClientStub struct {
 	name   string
-	client ipc.Client
+	client rpc.Client
 }
 
-func (c implMyObjectClientStub) c(ctx *context.T) ipc.Client {
+func (c implMyObjectClientStub) c(ctx *context.T) rpc.Client {
 	if c.client != nil {
 		return c.client
 	}
 	return v23.GetClient(ctx)
 }
 
-func (c implMyObjectClientStub) Get(ctx *context.T, opts ...ipc.CallOpt) (err error) {
-	var call ipc.ClientCall
+func (c implMyObjectClientStub) Get(ctx *context.T, opts ...rpc.CallOpt) (err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Get", nil, opts...); err != nil {
 		return
 	}
@@ -83,8 +83,8 @@ func (c implMyObjectClientStub) Get(ctx *context.T, opts ...ipc.CallOpt) (err er
 	return
 }
 
-func (c implMyObjectClientStub) Put(ctx *context.T, opts ...ipc.CallOpt) (err error) {
-	var call ipc.ClientCall
+func (c implMyObjectClientStub) Put(ctx *context.T, opts ...rpc.CallOpt) (err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Put", nil, opts...); err != nil {
 		return
 	}
@@ -92,8 +92,8 @@ func (c implMyObjectClientStub) Put(ctx *context.T, opts ...ipc.CallOpt) (err er
 	return
 }
 
-func (c implMyObjectClientStub) Resolve(ctx *context.T, opts ...ipc.CallOpt) (err error) {
-	var call ipc.ClientCall
+func (c implMyObjectClientStub) Resolve(ctx *context.T, opts ...rpc.CallOpt) (err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Resolve", nil, opts...); err != nil {
 		return
 	}
@@ -101,8 +101,8 @@ func (c implMyObjectClientStub) Resolve(ctx *context.T, opts ...ipc.CallOpt) (er
 	return
 }
 
-func (c implMyObjectClientStub) NoTags(ctx *context.T, opts ...ipc.CallOpt) (err error) {
-	var call ipc.ClientCall
+func (c implMyObjectClientStub) NoTags(ctx *context.T, opts ...rpc.CallOpt) (err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "NoTags", nil, opts...); err != nil {
 		return
 	}
@@ -110,8 +110,8 @@ func (c implMyObjectClientStub) NoTags(ctx *context.T, opts ...ipc.CallOpt) (err
 	return
 }
 
-func (c implMyObjectClientStub) AllTags(ctx *context.T, opts ...ipc.CallOpt) (err error) {
-	var call ipc.ClientCall
+func (c implMyObjectClientStub) AllTags(ctx *context.T, opts ...rpc.CallOpt) (err error) {
+	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "AllTags", nil, opts...); err != nil {
 		return
 	}
@@ -124,15 +124,15 @@ func (c implMyObjectClientStub) AllTags(ctx *context.T, opts ...ipc.CallOpt) (er
 //
 // MyObject demonstrates how tags are attached to methods.
 type MyObjectServerMethods interface {
-	Get(ipc.ServerCall) error
-	Put(ipc.ServerCall) error
-	Resolve(ipc.ServerCall) error
-	NoTags(ipc.ServerCall) error // No tags attached to this.
-	AllTags(ipc.ServerCall) error
+	Get(rpc.ServerCall) error
+	Put(rpc.ServerCall) error
+	Resolve(rpc.ServerCall) error
+	NoTags(rpc.ServerCall) error // No tags attached to this.
+	AllTags(rpc.ServerCall) error
 }
 
 // MyObjectServerStubMethods is the server interface containing
-// MyObject methods, as expected by ipc.Server.
+// MyObject methods, as expected by rpc.Server.
 // There is no difference between this interface and MyObjectServerMethods
 // since there are no streaming methods.
 type MyObjectServerStubMethods MyObjectServerMethods
@@ -141,21 +141,21 @@ type MyObjectServerStubMethods MyObjectServerMethods
 type MyObjectServerStub interface {
 	MyObjectServerStubMethods
 	// Describe the MyObject interfaces.
-	Describe__() []ipc.InterfaceDesc
+	Describe__() []rpc.InterfaceDesc
 }
 
 // MyObjectServer returns a server stub for MyObject.
 // It converts an implementation of MyObjectServerMethods into
-// an object that may be used by ipc.Server.
+// an object that may be used by rpc.Server.
 func MyObjectServer(impl MyObjectServerMethods) MyObjectServerStub {
 	stub := implMyObjectServerStub{
 		impl: impl,
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
-	if gs := ipc.NewGlobState(stub); gs != nil {
+	if gs := rpc.NewGlobState(stub); gs != nil {
 		stub.gs = gs
-	} else if gs := ipc.NewGlobState(impl); gs != nil {
+	} else if gs := rpc.NewGlobState(impl); gs != nil {
 		stub.gs = gs
 	}
 	return stub
@@ -163,46 +163,46 @@ func MyObjectServer(impl MyObjectServerMethods) MyObjectServerStub {
 
 type implMyObjectServerStub struct {
 	impl MyObjectServerMethods
-	gs   *ipc.GlobState
+	gs   *rpc.GlobState
 }
 
-func (s implMyObjectServerStub) Get(call ipc.ServerCall) error {
+func (s implMyObjectServerStub) Get(call rpc.ServerCall) error {
 	return s.impl.Get(call)
 }
 
-func (s implMyObjectServerStub) Put(call ipc.ServerCall) error {
+func (s implMyObjectServerStub) Put(call rpc.ServerCall) error {
 	return s.impl.Put(call)
 }
 
-func (s implMyObjectServerStub) Resolve(call ipc.ServerCall) error {
+func (s implMyObjectServerStub) Resolve(call rpc.ServerCall) error {
 	return s.impl.Resolve(call)
 }
 
-func (s implMyObjectServerStub) NoTags(call ipc.ServerCall) error {
+func (s implMyObjectServerStub) NoTags(call rpc.ServerCall) error {
 	return s.impl.NoTags(call)
 }
 
-func (s implMyObjectServerStub) AllTags(call ipc.ServerCall) error {
+func (s implMyObjectServerStub) AllTags(call rpc.ServerCall) error {
 	return s.impl.AllTags(call)
 }
 
-func (s implMyObjectServerStub) Globber() *ipc.GlobState {
+func (s implMyObjectServerStub) Globber() *rpc.GlobState {
 	return s.gs
 }
 
-func (s implMyObjectServerStub) Describe__() []ipc.InterfaceDesc {
-	return []ipc.InterfaceDesc{MyObjectDesc}
+func (s implMyObjectServerStub) Describe__() []rpc.InterfaceDesc {
+	return []rpc.InterfaceDesc{MyObjectDesc}
 }
 
 // MyObjectDesc describes the MyObject interface.
-var MyObjectDesc ipc.InterfaceDesc = descMyObject
+var MyObjectDesc rpc.InterfaceDesc = descMyObject
 
 // descMyObject hides the desc to keep godoc clean.
-var descMyObject = ipc.InterfaceDesc{
+var descMyObject = rpc.InterfaceDesc{
 	Name:    "MyObject",
 	PkgPath: "v.io/v23/services/security/access/test",
 	Doc:     "// MyObject demonstrates how tags are attached to methods.",
-	Methods: []ipc.MethodDesc{
+	Methods: []rpc.MethodDesc{
 		{
 			Name: "Get",
 			Tags: []*vdl.Value{vdl.ValueOf(MyTag("R"))},
