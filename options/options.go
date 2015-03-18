@@ -59,8 +59,7 @@ import (
 // from the BlessingStore of the Principal.
 type ServerBlessings struct{ security.Blessings }
 
-func (ServerBlessings) RPCServerOpt()         {}
-func (ServerBlessings) RPCStreamListenerOpt() {}
+func (ServerBlessings) RPCServerOpt() {}
 
 // VCSecurityLevel represents the level of confidentiality of data transmitted
 // and received over a VC.
