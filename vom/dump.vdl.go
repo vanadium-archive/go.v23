@@ -122,7 +122,7 @@ const (
 )
 
 // DumpKindAll holds all labels for DumpKind.
-var DumpKindAll = []DumpKind{DumpKindMagic, DumpKindControl, DumpKindMsgId, DumpKindTypeMsg, DumpKindValueMsg, DumpKindMsgLen, DumpKindTypeId, DumpKindPrimValue, DumpKindByteLen, DumpKindValueLen, DumpKindIndex, DumpKindWireTypeIndex}
+var DumpKindAll = [...]DumpKind{DumpKindMagic, DumpKindControl, DumpKindMsgId, DumpKindTypeMsg, DumpKindValueMsg, DumpKindMsgLen, DumpKindTypeId, DumpKindPrimValue, DumpKindByteLen, DumpKindValueLen, DumpKindIndex, DumpKindWireTypeIndex}
 
 // DumpKindFromString creates a DumpKind from a string label.
 func DumpKindFromString(label string) (x DumpKind, err error) {
@@ -220,7 +220,7 @@ const (
 )
 
 // ControlKindAll holds all labels for ControlKind.
-var ControlKindAll = []ControlKind{ControlKindNIL, ControlKindEOF}
+var ControlKindAll = [...]ControlKind{ControlKindNIL, ControlKindEOF}
 
 // ControlKindFromString creates a ControlKind from a string label.
 func ControlKindFromString(label string) (x ControlKind, err error) {

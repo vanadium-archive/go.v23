@@ -186,7 +186,7 @@ const (
 )
 
 // NEnumAll holds all labels for NEnum.
-var NEnumAll = []NEnum{NEnumA, NEnumB, NEnumC}
+var NEnumAll = [...]NEnum{NEnumA, NEnumB, NEnumC}
 
 // NEnumFromString creates a NEnum from a string label.
 func NEnumFromString(label string) (x NEnum, err error) {
@@ -581,7 +581,7 @@ const (
 )
 
 // BRIENumAll holds all labels for BRIENum.
-var BRIENumAll = []BRIENum{BRIENumGlee, BRIENumBrie, BRIENumThree}
+var BRIENumAll = [...]BRIENum{BRIENumGlee, BRIENumBrie, BRIENumThree}
 
 // BRIENumFromString creates a BRIENum from a string label.
 func BRIENumFromString(label string) (x BRIENum, err error) {
@@ -632,7 +632,7 @@ const (
 )
 
 // BEANumAll holds all labels for BEANum.
-var BEANumAll = []BEANum{BEANumBean}
+var BEANumAll = [...]BEANum{BEANumBean}
 
 // BEANumFromString creates a BEANum from a string label.
 func BEANumFromString(label string) (x BEANum, err error) {
@@ -675,7 +675,7 @@ const (
 )
 
 // FOODYNumAll holds all labels for FOODYNum.
-var FOODYNumAll = []FOODYNum{FOODYNumBean, FOODYNumBrie, FOODYNumCherry}
+var FOODYNumAll = [...]FOODYNum{FOODYNumBean, FOODYNumBrie, FOODYNumCherry}
 
 // FOODYNumFromString creates a FOODYNum from a string label.
 func FOODYNumFromString(label string) (x FOODYNum, err error) {

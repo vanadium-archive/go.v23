@@ -40,7 +40,7 @@ const (
 )
 
 // GenLanguageAll holds all labels for GenLanguage.
-var GenLanguageAll = []GenLanguage{GenLanguageGo, GenLanguageJava, GenLanguageJavascript}
+var GenLanguageAll = [...]GenLanguage{GenLanguageGo, GenLanguageJava, GenLanguageJavascript}
 
 // GenLanguageFromString creates a GenLanguage from a string label.
 func GenLanguageFromString(label string) (x GenLanguage, err error) {
