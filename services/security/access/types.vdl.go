@@ -79,8 +79,8 @@
 // images and comments, each with a unique name.  When accessing a document,
 // the server would generate a blessing that the client would use to fetch the
 // images and comments; the images and comments would have this blessed
-// identity in their AccessLists.  Changes to the document’s AccessList are therefore
-// “propagated” to the images and comments.
+// identity in their AccessLists.  Changes to the document's AccessList are therefore
+// "propagated" to the images and comments.
 //
 // Some services will want a concept of implicit access control.  They are free
 // to implement this as is best for their service.  However, GetPermissions should
