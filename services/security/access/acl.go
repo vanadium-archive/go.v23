@@ -50,7 +50,7 @@ func (acl *AccessList) Authorize(ctx *context.T) error {
 	if acl.Includes(blessingsForCall...) {
 		return nil
 	}
-	return NewErrAccessListMatch(nil, blessingsForCall, invalid)
+	return NewErrAccessListMatch(ctx, blessingsForCall, invalid)
 }
 
 // WriteTo writes the JSON-encoded representation of a Permissions to w.

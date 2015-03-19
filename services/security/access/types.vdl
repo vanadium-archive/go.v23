@@ -147,5 +147,7 @@ error (
 	// The AccessList is too big.  Use groups to represent large sets of principals.
 	TooBig() {"en": "AccessList is too big"}
 
-	AccessListMatch(validBlessings []string, rejectedBlessings []security.RejectedBlessing){"en":"none of the valid blessings ({validBlessings}) are allowed by the AccessList (rejected blessings: {rejectedBlessings})"}
+	NoPermissions(validBlessings []string, rejectedBlessings []security.RejectedBlessing, tag string){"en":"{validBlessings} does not have {tag} access (rejected blessings: {rejectedBlessings})"}
+
+	AccessListMatch(validBlessings []string, rejectedBlessings []security.RejectedBlessing){"en":"{validBlessings} does not match the access list (rejected blessings: {rejectedBlessings})"}
 )

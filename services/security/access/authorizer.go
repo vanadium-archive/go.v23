@@ -14,7 +14,7 @@ const pkgPath = "v.io/v23/services/security/access"
 
 var (
 	errTagNeedsString             = verror.Register(pkgPath+".errTagNeedsString", verror.NoRetry, "{1:}{2:}tag type({3}) must be backed by a string not {4}{:_}")
-	errNoMethodTags               = verror.Register(pkgPath+".errNoMethodTags", verror.NoRetry, "{1:}{2:}PermissionsAuthorizer.Authorize called with an object ({3}, method {4}) that has no method tags; this is likely unintentional{:_}")
+	errNoMethodTags               = verror.Register(pkgPath+".errNoMethodTags", verror.NoRetry, "{1:}{2:}PermissionsAuthorizer.Authorize called with an object ({3}, method {4}) that has no tags of type {5}; this is likely unintentional{:_}")
 	errCantReadAccessListFromFile = verror.Register(pkgPath+".errCantReadAccessListFromFile", verror.NoRetry, "{1:}{2:}failed to read AccessList from file{:_}")
 )
 
@@ -120,24 +120,19 @@ func (a *authorizer) Authorize(ctx *context.T) error {
 	}
 
 	blessings, invalid := security.RemoteBlessingNames(ctx)
-	grant := false
-	if len(call.MethodTags()) == 0 {
-		// The following error message leaks the fact that the server is likely
-		// misconfigured, but that doesn't seem like a big deal.
-		return verror.New(errNoMethodTags, call.Context(), call.Suffix(), call.Method())
-	}
+	hastag := false
 	for _, tag := range call.MethodTags() {
 		if tag.Type() == a.tagType {
+			hastag = true
 			if acl, exists := a.acls[tag.RawString()]; !exists || !acl.Includes(blessings...) {
-				return NewErrAccessListMatch(nil, blessings, invalid)
+				return NewErrNoPermissions(ctx, blessings, invalid, tag.RawString())
 			}
-			grant = true
 		}
 	}
-	if grant {
-		return nil
+	if !hastag {
+		return verror.New(errNoMethodTags, ctx, call.Suffix(), call.MethodTags(), a.tagType)
 	}
-	return NewErrAccessListMatch(nil, blessings, invalid)
+	return nil
 }
 
 type fileAuthorizer struct {
