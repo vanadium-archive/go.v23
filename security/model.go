@@ -89,8 +89,6 @@
 //  // (in process B)
 //  var p2 Principal
 //  ctx := GetContext() // current *context.T which carries the security state.
-//  call :=  security.GetCall(ctx)  // Call under which p1 is communicating with p2, call.LocalPrincipal() == p2
-//  alice := call.RemoteBlessings()
 //  names, rejected := RemoteBlessingNames(ctx)
 //  fmt.Printf("%v %v", names, rejected) // Will print [] ["alice": "..."]
 //
