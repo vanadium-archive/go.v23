@@ -401,7 +401,7 @@ type NNative int64
 
 func nWireToNative(x NWire, n *NNative) error {
 	*n = 0
-	i, err := strconv.Atoi(x.Str)
+	i, err := strconv.ParseInt(x.Str, 10, 64)
 	if err != nil {
 		return err
 	}
@@ -410,7 +410,7 @@ func nWireToNative(x NWire, n *NNative) error {
 }
 
 func nWireFromNative(x *NWire, n NNative) error {
-	x.Str = strconv.Itoa(int(n))
+	x.Str = strconv.FormatInt(int64(n), 10)
 	return nil
 }
 
