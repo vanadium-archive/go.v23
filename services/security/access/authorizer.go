@@ -119,7 +119,7 @@ func (a *authorizer) Authorize(ctx *context.T) error {
 		return nil
 	}
 
-	blessings, invalid := security.BlessingNames(ctx, security.CallSideRemote)
+	blessings, invalid := security.RemoteBlessingNames(ctx)
 	grant := false
 	if len(call.MethodTags()) == 0 {
 		// The following error message leaks the fact that the server is likely

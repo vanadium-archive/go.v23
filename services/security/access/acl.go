@@ -46,7 +46,7 @@ func (acl AccessList) pruneBlacklisted(blessings []string) []string {
 //
 // TODO(ashankar): Add tests for this
 func (acl *AccessList) Authorize(ctx *context.T) error {
-	blessingsForCall, invalid := security.BlessingNames(ctx, security.CallSideRemote)
+	blessingsForCall, invalid := security.RemoteBlessingNames(ctx)
 	if acl.Includes(blessingsForCall...) {
 		return nil
 	}
