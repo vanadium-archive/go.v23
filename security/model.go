@@ -360,11 +360,9 @@ type ThirdPartyCaveat interface {
 	// thus ensures that it is okay to generate a discharge for this third-party
 	// caveat.
 	//
-	// The 'side' argument specifies the side of the call that this ThirdPartyCaveat
-	// belongs to. For example if 'side' is CallSideRemote then this method assumes that
-	// the  ThirdPartyCaveat was found on a credential shared by the remote end of the
+	// It assumes that the third-party caveat was obtained from the remote end of
 	// call.
-	Dischargeable(call Call, side CallSide) error
+	Dischargeable(call Call) error
 
 	// TODO(andreser, ashankar): require the discharger to have a specific
 	// identity so that the private information below is not exposed to

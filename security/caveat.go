@@ -26,7 +26,6 @@ var (
 	errBadCaveatInputs                = verror.Register(pkgPath+".errBadCaveatInputs", verror.NoRetry, "{1:}{2:}invalid caveat validator: expected {3} inputs, not {4}{:_}")
 	errBadCaveat1stArg                = verror.Register(pkgPath+".errBadCaveat1stArg", verror.NoRetry, "{1:}{2:}invalid caveat validator: first argument must be {3}, not {4}{:_}")
 	errBadCaveat2ndArg                = verror.Register(pkgPath+".errBadCaveat2ndArg", verror.NoRetry, "{1:}{2:}invalid caveat validator: second argument must be {3}, not {4}{:_}")
-	errBadCaveat3rdArg                = verror.Register(pkgPath+".errBadCaveat3rdArg", verror.NoRetry, "{1:}{2:}invalid caveat validator: third argument must be {3}, not {4}{:_}")
 	errBadCaveatRestriction           = verror.Register(pkgPath+".errBadCaveatRestriction", verror.NoRetry, "{1:}{2:}could not validate embedded restriction({3}): {4}{:_}")
 	errCantUnmarshalDischargeKey      = verror.Register(pkgPath+".errCantUnmarshalDischargeKey", verror.NoRetry, "{1:}{2:}invalid {3}: failed to unmarshal discharger's public key: {4}{:_}")
 	errInapproriateDischargeSignature = verror.Register(pkgPath+".errInapproriateDischargeSignature", verror.NoRetry, "{1:}{2:}signature on discharge for caveat {3} was not intended for discharges(purpose={4}){:_}")
@@ -78,9 +77,8 @@ func (r *caveatRegistry) register(d CaveatDescriptor, validator interface{}) err
 		return verror.New(errBadCaveatDescriptorType, nil, d.ParamType)
 	}
 	var (
-		rtErr      = reflect.TypeOf((*error)(nil)).Elem()
-		rtCall     = reflect.TypeOf((*Call)(nil)).Elem()
-		rtCallSide = reflect.TypeOf((*CallSide)(nil)).Elem()
+		rtErr  = reflect.TypeOf((*error)(nil)).Elem()
+		rtCall = reflect.TypeOf((*Call)(nil)).Elem()
 	)
 	if got, want := fn.Kind(), reflect.Func; got != want {
 		return verror.New(errBadCaveatDescriptorKind, nil, want, got)
@@ -91,17 +89,14 @@ func (r *caveatRegistry) register(d CaveatDescriptor, validator interface{}) err
 	if got, want := fn.Type().Out(0), rtErr; got != want {
 		return verror.New(errBadCaveatOutput, nil, want, got)
 	}
-	if got, want := fn.Type().NumIn(), 3; got != want {
+	if got, want := fn.Type().NumIn(), 2; got != want {
 		return verror.New(errBadCaveatInputs, nil, want, got)
 	}
 	if got, want := fn.Type().In(0), rtCall; got != want {
 		return verror.New(errBadCaveat1stArg, nil, want, got)
 	}
-	if got, want := fn.Type().In(1), rtCallSide; got != want {
+	if got, want := fn.Type().In(1), param; got != want {
 		return verror.New(errBadCaveat2ndArg, nil, want, got)
-	}
-	if got, want := fn.Type().In(2), param; got != want {
-		return verror.New(errBadCaveat3rdArg, nil, want, got)
 	}
 	r.byUUID[d.Id] = registryEntry{d, fn, param, registerer}
 	return nil
@@ -114,7 +109,7 @@ func (r *caveatRegistry) lookup(uid uniqueid.Id) (registryEntry, bool) {
 	return entry, exists
 }
 
-func (r *caveatRegistry) validate(uid uniqueid.Id, call Call, side CallSide, paramvom []byte) error {
+func (r *caveatRegistry) validate(uid uniqueid.Id, call Call, paramvom []byte) error {
 	ctx := call.Context()
 	entry, exists := r.lookup(uid)
 	if !exists {
@@ -125,7 +120,7 @@ func (r *caveatRegistry) validate(uid uniqueid.Id, call Call, side CallSide, par
 		t, _ := vdl.TypeFromReflect(entry.paramType)
 		return NewErrCaveatParamCoding(ctx, uid, t, err)
 	}
-	err := entry.validatorFn.Call([]reflect.Value{reflect.ValueOf(call), reflect.ValueOf(side), reflect.ValueOf(param).Elem()})[0].Interface()
+	err := entry.validatorFn.Call([]reflect.Value{reflect.ValueOf(call), reflect.ValueOf(param).Elem()})[0].Interface()
 	if err == nil {
 		return nil
 	}
@@ -135,7 +130,11 @@ func (r *caveatRegistry) validate(uid uniqueid.Id, call Call, side CallSide, par
 // RegisterCaveatValidator associates a CaveatDescriptor with the
 // implementation of the validation function.
 //
-// It may be called at most once per c.ID, and will panic on duplicate
+// The validation function must act as if the caveat was obtained from the
+// remote end of the call. In particular, if the caveat is a third-party
+// caveat then 'call.RemoteDischarges()' must be used to validate it.
+//
+// This function must be called at most once per c.ID, and will panic on duplicate
 // registrations.
 func RegisterCaveatValidator(c CaveatDescriptor, validator interface{}) {
 	if err := registry.register(c, validator); err != nil {
@@ -194,12 +193,11 @@ func (c *Caveat) digest(hash Hash) []byte {
 // Validate tests if 'c' is satisfied under 'call', returning nil if it is or an
 // error otherwise.
 //
-// The 'side' argument specifies the side of the call (local or remote) that this
-// caveat belongs to. For example if 'side' is CallSideRemote then this method
-// assumes that the caveat was found on a credential shared by the remote end of
-// the call.
-func (c *Caveat) Validate(call Call, side CallSide) error {
-	return registry.validate(c.Id, call, side, c.ParamVom)
+// It assumes that 'c' was found on a credential obtained from the remote end of
+// the call. In particular, if 'c' is a third-party caveat then it uses the
+// call.RemoteDischarges() to validate it.
+func (c *Caveat) Validate(call Call) error {
+	return registry.validate(c.Id, call, c.ParamVom)
 }
 
 // ThirdPartyDetails returns nil if c is not a third party caveat, or details about
@@ -280,10 +278,10 @@ func (c *publicKeyThirdPartyCaveat) Requirements() ThirdPartyRequirements {
 	return c.DischargerRequirements
 }
 
-func (c *publicKeyThirdPartyCaveat) Dischargeable(call Call, side CallSide) error {
+func (c *publicKeyThirdPartyCaveat) Dischargeable(call Call) error {
 	// Validate the caveats embedded within this third-party caveat.
 	for _, cav := range c.Caveats {
-		if err := cav.Validate(call, side); err != nil {
+		if err := cav.Validate(call); err != nil {
 			return verror.New(errBadCaveatRestriction, call.Context(), cav, err)
 		}
 	}

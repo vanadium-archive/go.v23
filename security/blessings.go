@@ -134,7 +134,7 @@ func validateCertificateChain(chain []Certificate) (PublicKey, error) {
 }
 
 // Verifies that the chain signatures are correct, without handling caveat validation
-func verifyChainSignature(call Call, side CallSide, chain []Certificate) (string, error) {
+func verifyChainSignature(call Call, chain []Certificate) (string, error) {
 	blessing := chain[0].Extension
 	for i := 1; i < len(chain); i++ {
 		blessing += ChainSeparator
@@ -161,11 +161,11 @@ func verifyChainSignature(call Call, side CallSide, chain []Certificate) (string
 	return blessing, nil
 }
 
-func defaultChainCaveatValidator(call Call, side CallSide, chains [][]Caveat) []error {
+func defaultChainCaveatValidator(call Call, chains [][]Caveat) []error {
 	results := make([]error, len(chains))
 	for i, chain := range chains {
 		for _, cav := range chain {
-			if err := validateCaveat(call, side, cav); err != nil {
+			if err := validateCaveat(call, cav); err != nil {
 				results[i] = err
 				break
 			}
@@ -175,9 +175,9 @@ func defaultChainCaveatValidator(call Call, side CallSide, chains [][]Caveat) []
 	return results
 }
 
-// validateCaveat is pretty much the same as cav.Validate(call, side), but it defers
+// validateCaveat is pretty much the same as cav.Validate(call), but it defers
 // to any validation scheme overrides via SetCaveatValidator.
-func validateCaveat(call Call, side CallSide, cav Caveat) error {
+func validateCaveat(call Call, cav Caveat) error {
 	caveatValidationSetup.mu.RLock()
 	fn := caveatValidationSetup.fn
 	finalized := caveatValidationSetup.finalized
@@ -189,9 +189,9 @@ func validateCaveat(call Call, side CallSide, cav Caveat) error {
 		caveatValidationSetup.mu.Unlock()
 	}
 	if fn != nil {
-		return fn(call, side, cav)
+		return fn(call, cav)
 	}
-	return cav.Validate(call, side)
+	return cav.Validate(call)
 }
 
 // TODO(ashankar): Get rid of this function? It allows users to mess
@@ -276,7 +276,7 @@ func UnionOfBlessings(blessings ...Blessings) (Blessings, error) {
 
 var caveatValidationSetup struct {
 	mu        sync.RWMutex
-	fn        func(Call, CallSide, Caveat) error
+	fn        func(Call, Caveat) error
 	finalized bool
 }
 
@@ -294,7 +294,7 @@ var caveatValidationSetup struct {
 //
 // If never invoked, the default Go API is used to associate validation
 // functions with caveats.
-func SetCaveatValidator(fn func(Call, CallSide, Caveat) error) {
+func SetCaveatValidator(fn func(Call, Caveat) error) {
 	caveatValidationSetup.mu.Lock()
 	defer caveatValidationSetup.mu.Unlock()
 	if caveatValidationSetup.finalized {
@@ -345,18 +345,6 @@ func DefaultBlessingPatterns(p Principal) (patterns []BlessingPattern) {
 	return
 }
 
-// DEPRECATED: Use RemoteBlessingNames and LocalBlessingNames instead.
-// TODO(ataly): Get rid of this function.
-func BlessingNames(ctx *context.T, side CallSide) ([]string, []RejectedBlessing) {
-	switch side {
-	case CallSideLocal:
-		return LocalBlessingNames(ctx), nil
-	case CallSideRemote:
-		return RemoteBlessingNames(ctx)
-	}
-	return nil, nil
-}
-
 // ReturnBlessingNames returns the validated set of human-readable blessing names
 // encapsulated in the blessings object presented by the remote end of a call.
 //
@@ -382,7 +370,7 @@ func RemoteBlessingNames(ctx *context.T) ([]string, []RejectedBlessing) {
 	}
 	validator := defaultChainCaveatValidator
 	if customValidator := call.Context().Value(chainValidatorKey); customValidator != nil {
-		validator = customValidator.(func(call Call, side CallSide, chains [][]Caveat) []error)
+		validator = customValidator.(func(call Call, chains [][]Caveat) []error)
 	}
 
 	var (
@@ -392,7 +380,7 @@ func RemoteBlessingNames(ctx *context.T) ([]string, []RejectedBlessing) {
 		pendingChainCaveats [][]Caveat
 	)
 	for _, chain := range b.chains {
-		name, err := verifyChainSignature(call, CallSideRemote, chain)
+		name, err := verifyChainSignature(call, chain)
 		if err != nil {
 			rejected = append(rejected, RejectedBlessing{name, err})
 			continue
@@ -415,7 +403,7 @@ func RemoteBlessingNames(ctx *context.T) ([]string, []RejectedBlessing) {
 		return validatedNames, rejected
 	}
 
-	validationResults := validator(call, CallSideRemote, pendingChainCaveats)
+	validationResults := validator(call, pendingChainCaveats)
 	if g, w := len(validationResults), len(pendingNames); g != w {
 		panic(fmt.Sprintf("Got wrong number of validation results. Got %d, expected %d.", g, w))
 	}

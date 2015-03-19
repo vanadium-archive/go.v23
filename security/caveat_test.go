@@ -37,15 +37,12 @@ func TestStandardCaveatFactories(t *testing.T) {
 		}
 	)
 	self.AddToRoots(call.LocalBlessings())
-
 	for idx, test := range tests {
-		for _, side := range []CallSide{CallSideLocal, CallSideRemote} {
-			err := test.cav.Validate(call, side)
-			if test.ok && err != nil {
-				t.Errorf("#%d: %v.Validate(...,  %v) failed validation: %v", idx, test.cav, side, err)
-			} else if !test.ok && !verror.Is(err, ErrCaveatValidation.ID) {
-				t.Errorf("#%d: %v.Validate(...) returned error='%v' (errorid=%v), want errorid=%v", idx, test.cav, err, verror.ErrorID(err), ErrCaveatValidation.ID)
-			}
+		err := test.cav.Validate(call)
+		if test.ok && err != nil {
+			t.Errorf("#%d: %v.Validate(...) failed validation: %v", idx, test.cav, err)
+		} else if !test.ok && !verror.Is(err, ErrCaveatValidation.ID) {
+			t.Errorf("#%d: %v.Validate(...) returned error='%v' (errorid=%v), want errorid=%v", idx, test.cav, err, verror.ErrorID(err), ErrCaveatValidation.ID)
 		}
 	}
 }
@@ -57,18 +54,14 @@ func TestPublicKeyThirdPartyCaveat(t *testing.T) {
 		expired      = newCaveat(ExpiryCaveat(now.Add(-1 * time.Second)))
 		discharger   = newPrincipal(t)
 		randomserver = newPrincipal(t)
-		call         = func(method string, local, remote *Discharge) Call {
+		call         = func(method string, discharges ...Discharge) Call {
 			params := &CallParams{
-				Timestamp: now,
-				Method:    method,
+				Timestamp:        now,
+				Method:           method,
+				RemoteDischarges: make(map[string]Discharge),
 			}
-			if local != nil {
-				params.LocalDischarges = make(map[string]Discharge)
-				params.LocalDischarges[local.ID()] = *local
-			}
-			if remote != nil {
-				params.RemoteDischarges = make(map[string]Discharge)
-				params.RemoteDischarges[remote.ID()] = *remote
+			for _, d := range discharges {
+				params.RemoteDischarges[d.ID()] = d
 			}
 			return NewCall(params)
 		}
@@ -78,35 +71,20 @@ func TestPublicKeyThirdPartyCaveat(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	// Caveat should fail validation without a discharge
+	if err := matchesError(tpc.Validate(call("Method1")), "missing discharge"); err != nil {
+		t.Fatal(err)
+	}
+	// Should validate when the discharge is present (and caveats on the discharge are met).
 	d, err := discharger.MintDischarge(tpc, newCaveat(MethodCaveat("Method1")))
 	if err != nil {
 		t.Fatal(err)
 	}
-	// Caveat should fail validation for either ends without a discharge
-	if err := matchesError(tpc.Validate(call("Method1", nil, nil), CallSideLocal), "missing discharge"); err != nil {
-		t.Fatal(err)
-	}
-	if err := matchesError(tpc.Validate(call("Method1", nil, nil), CallSideRemote), "missing discharge"); err != nil {
-		t.Fatal(err)
-	}
-	if err := matchesError(tpc.Validate(call("Method1", nil, &d), CallSideLocal), "missing discharge"); err != nil {
-		t.Fatal(err)
-	}
-	if err := matchesError(tpc.Validate(call("Method1", &d, nil), CallSideRemote), "missing discharge"); err != nil {
-		t.Fatal(err)
-	}
-	// Should validate when the discharge is present (and caveats on the discharge are met).
-	if err := tpc.Validate(call("Method1", &d, nil), CallSideLocal); err != nil {
-		t.Fatal(err)
-	}
-	if err := tpc.Validate(call("Method1", nil, &d), CallSideRemote); err != nil {
+	if err := tpc.Validate(call("Method1", d)); err != nil {
 		t.Fatal(err)
 	}
 	// Should fail validation when caveats on the discharge are not met.
-	if err := matchesError(tpc.Validate(call("Method2", &d, nil), CallSideLocal), "discharge failed to validate"); err != nil {
-		t.Fatal(err)
-	}
-	if err := matchesError(tpc.Validate(call("Method2", nil, &d), CallSideRemote), "discharge failed to validate"); err != nil {
+	if err := matchesError(tpc.Validate(call("Method2", d)), "discharge failed to validate"); err != nil {
 		t.Fatal(err)
 	}
 	// Discharge can be converted to and from wire format:
@@ -116,7 +94,7 @@ func TestPublicKeyThirdPartyCaveat(t *testing.T) {
 	}
 	// A discharge minted by another principal should not be respected.
 	if d, err = randomserver.MintDischarge(tpc, UnconstrainedUse()); err == nil {
-		if err := matchesError(tpc.Validate(call("Method1", nil, &d), CallSideRemote), "signature verification on discharge"); err != nil {
+		if err := matchesError(tpc.Validate(call("Method1", d)), "signature verification on discharge"); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -125,7 +103,7 @@ func TestPublicKeyThirdPartyCaveat(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if merr := matchesError(tpc.ThirdPartyDetails().Dischargeable(NewCall(&CallParams{Timestamp: now}), CallSideRemote), "could not validate embedded restriction"); merr != nil {
+	if merr := matchesError(tpc.ThirdPartyDetails().Dischargeable(NewCall(&CallParams{Timestamp: now})), "could not validate embedded restriction"); merr != nil {
 		t.Fatal(merr)
 	}
 }
@@ -165,31 +143,25 @@ func TestCaveat(t *testing.T) {
 		t.Fatal(err)
 	}
 	// Validation will fail when the validation function isn't registered.
-	if err := c1.Validate(call, CallSideLocal); !verror.Is(err, ErrCaveatNotRegistered.ID) {
-		t.Errorf("Got '%v' (errorid=%v), want errorid=%v", err, verror.ErrorID(err), ErrCaveatNotRegistered.ID)
-	}
-	if err := c1.Validate(call, CallSideRemote); !verror.Is(err, ErrCaveatNotRegistered.ID) {
+	if err := c1.Validate(call); !verror.Is(err, ErrCaveatNotRegistered.ID) {
 		t.Errorf("Got '%v' (errorid=%v), want errorid=%v", err, verror.ErrorID(err), ErrCaveatNotRegistered.ID)
 	}
 	// Once registered, then it should be invoked
-	RegisterCaveatValidator(cd, func(call Call, side CallSide, param string) error {
-		if call.Method() == param && side == CallSideLocal {
+	RegisterCaveatValidator(cd, func(call Call, param string) error {
+		if call.Method() == param {
 			return nil
 		}
 		return fmt.Errorf("na na na")
 	})
-	if err := c1.Validate(call, CallSideLocal); err != nil {
+	if err := c1.Validate(call); err != nil {
 		t.Error(err)
 	}
-	if err := c1.Validate(call, CallSideRemote); !verror.Is(err, ErrCaveatValidation.ID) {
-		t.Errorf("Got '%v' (errorid=%v), want errorid=%v", err, verror.ErrorID(err), ErrCaveatValidation.ID)
-	}
-	if err := c2.Validate(call, CallSideLocal); !verror.Is(err, ErrCaveatValidation.ID) {
+	if err := c2.Validate(call); !verror.Is(err, ErrCaveatValidation.ID) {
 		t.Errorf("Got '%v' (errorid=%v), want errorid=%v", err, verror.ErrorID(err), ErrCaveatValidation.ID)
 	}
 	// If a malformed caveat was received, then validation should fail
 	c3 := Caveat{Id: cd.Id, ParamVom: nil}
-	if err := c3.Validate(call, CallSideLocal); !verror.Is(err, ErrCaveatParamCoding.ID) {
+	if err := c3.Validate(call); !verror.Is(err, ErrCaveatParamCoding.ID) {
 		t.Errorf("Got '%v' (errorid=%v), want errorid=%v", err, verror.ErrorID(err), ErrCaveatParamCoding.ID)
 	}
 }
@@ -218,37 +190,33 @@ func TestRegisterCaveat(t *testing.T) {
 	}()
 	func() {
 		defer expectPanic("wrong #outputs")
-		RegisterCaveatValidator(cd, func(Call, CallSide, string) (error, error) { return nil, nil })
+		RegisterCaveatValidator(cd, func(Call, string) (error, error) { return nil, nil })
 	}()
 	func() {
 		defer expectPanic("bad output type")
-		RegisterCaveatValidator(cd, func(Call, CallSide, string) int { return 0 })
+		RegisterCaveatValidator(cd, func(Call, string) int { return 0 })
 	}()
 	func() {
 		defer expectPanic("wrong #inputs")
-		RegisterCaveatValidator(cd, func(Call, CallSide) error { return nil })
+		RegisterCaveatValidator(cd, func(Call, string, string) error { return nil })
 	}()
 	func() {
 		defer expectPanic("bad input arg 0")
-		RegisterCaveatValidator(cd, func(int, CallSide, string) error { return nil })
+		RegisterCaveatValidator(cd, func(int, string) error { return nil })
 	}()
 	func() {
 		defer expectPanic("bad input arg 1")
-		RegisterCaveatValidator(cd, func(Call, int, string) error { return nil })
-	}()
-	func() {
-		defer expectPanic("bad input arg 2")
-		RegisterCaveatValidator(cd, func(Call, CallSide, int) error { return nil })
+		RegisterCaveatValidator(cd, func(Call, int) error { return nil })
 	}()
 	func() {
 		// Successful registration: No panic:
-		RegisterCaveatValidator(cd, func(Call, CallSide, string) error { return nil })
+		RegisterCaveatValidator(cd, func(Call, string) error { return nil })
 	}()
 	func() {
 		defer expectPanic("Duplication registration")
-		RegisterCaveatValidator(cd, func(Call, CallSide, string) error { return nil })
+		RegisterCaveatValidator(cd, func(Call, string) error { return nil })
 	}()
-	if got, want := npanics, 8; got != want {
+	if got, want := npanics, 7; got != want {
 		t.Errorf("Got %d panics, want %d", got, want)
 	}
 }
@@ -336,6 +304,6 @@ func BenchmarkValidateCaveat(b *testing.B) {
 	call := NewCall(&CallParams{})
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		cav.Validate(call, CallSideRemote) // the CallSide does not matter for ExpiryCaveats.
+		cav.Validate(call)
 	}
 }

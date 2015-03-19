@@ -775,28 +775,22 @@ func TestBlessingsOnWireWithMissingCertificates(t *testing.T) {
 }
 
 func TestCustomChainValidator(t *testing.T) {
-	localSideOnlyCav := Caveat{
-		Id: uniqueid.Id{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
-	}
-	remoteSideOnlyCav := Caveat{
+	falseReturningCav := Caveat{
 		Id: uniqueid.Id{0x99, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
 	}
-	localSideOnlyCavErr := fmt.Errorf("only valid for local end")
-	remoteSideOnlyCavErr := fmt.Errorf("only valid for remote end")
+	trueReturningCav := Caveat{
+		Id: uniqueid.Id{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
+	}
+	falseResultErr := fmt.Errorf("False caveat result")
 
-	validator := func(call Call, side CallSide, cavs [][]Caveat) []error {
+	validator := func(call Call, cavs [][]Caveat) []error {
 		results := make([]error, len(cavs))
 		for i, chain := range cavs {
 			for _, cav := range chain {
 				switch cav.Id {
-				case localSideOnlyCav.Id:
-					if side != CallSideLocal {
-						results[i] = localSideOnlyCavErr
-					}
-				case remoteSideOnlyCav.Id:
-					if side != CallSideRemote {
-						results[i] = remoteSideOnlyCavErr
-					}
+				case falseReturningCav.Id:
+					results[i] = falseResultErr
+				case trueReturningCav.Id:
 				case ConstCaveat.Id:
 					if !reflect.DeepEqual(cav, UnconstrainedUse()) {
 						t.Fatalf("Unexpected const caveat")
@@ -818,23 +812,23 @@ func TestCustomChainValidator(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	bft, err := p.BlessSelf("localremote", localSideOnlyCav, remoteSideOnlyCav)
+	bft, err := p.BlessSelf("falsetrue", falseReturningCav, trueReturningCav)
 	if err != nil {
 		t.Fatal(err)
 	}
-	btt, err := p.BlessSelf("remoteremote", remoteSideOnlyCav, remoteSideOnlyCav)
+	btt, err := p.BlessSelf("truetrue", trueReturningCav, trueReturningCav)
 	if err != nil {
 		t.Fatal(err)
 	}
-	bt, err := p.BlessSelf("remote", remoteSideOnlyCav)
+	bt, err := p.BlessSelf("true", trueReturningCav)
 	if err != nil {
 		t.Fatal(err)
 	}
-	bsepft, err := p.Bless(p.PublicKey(), bt, "local", localSideOnlyCav)
+	bsepft, err := p.Bless(p.PublicKey(), bt, "false", falseReturningCav)
 	if err != nil {
 		t.Fatal(err)
 	}
-	bseptt, err := p.Bless(p.PublicKey(), bt, "remote", remoteSideOnlyCav)
+	bseptt, err := p.Bless(p.PublicKey(), bt, "true", trueReturningCav)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -853,21 +847,21 @@ func TestCustomChainValidator(t *testing.T) {
 	}))
 	results, infos := RemoteBlessingNames(ctx)
 	expectedFailInfos := map[string]error{
-		"localremote":  localSideOnlyCavErr,
-		"remote/local": localSideOnlyCavErr,
+		"falsetrue":  falseResultErr,
+		"true/false": falseResultErr,
 	}
 	failInfos := map[string]error{}
 	for _, info := range infos {
 		failInfos[info.Blessing] = info.Err
 	}
 	if !reflect.DeepEqual(failInfos, expectedFailInfos) {
-		t.Fatalf("Unexpected failinfos from BlessingNames. Got %v, want %v", failInfos, expectedFailInfos)
+		t.Fatalf("Unexpected failinfos from RemoteBlessingNames. Got %v, want %v", failInfos, expectedFailInfos)
 	}
-	expectedResults := []string{"unrestricted", "remoteremote", "remote/remote"}
+	expectedResults := []string{"unrestricted", "truetrue", "true/true"}
 	sort.Strings(results)
 	sort.Strings(expectedResults)
 	if !reflect.DeepEqual(results, expectedResults) {
-		t.Fatalf("Unexpected results from BlessingNames. Got %v, want %v", results, expectedResults)
+		t.Fatalf("Unexpected results from RemoteBlessingNames. Got %v, want %v", results, expectedResults)
 	}
 }
 
@@ -884,7 +878,6 @@ func TestSetCaveatValidator(t *testing.T) {
 
 	type callcav struct {
 		call Call
-		side CallSide
 		cav  Caveat
 	}
 	var (
@@ -897,8 +890,8 @@ func TestSetCaveatValidator(t *testing.T) {
 		t.Fatal(err)
 	}
 	p.AddToRoots(b)
-	SetCaveatValidator(func(call Call, side CallSide, cav Caveat) error {
-		c <- callcav{call, side, cav}
+	SetCaveatValidator(func(call Call, cav Caveat) error {
+		c <- callcav{call, cav}
 		return nil
 	})
 	// The function registered above should be invoked.
@@ -913,9 +906,6 @@ func TestSetCaveatValidator(t *testing.T) {
 	case got := <-c:
 		if !reflect.DeepEqual(call, got.call) {
 			t.Errorf("Caveat validation function invoked with call=%v, want %v", got.call, call)
-		}
-		if !reflect.DeepEqual(call, got.call) {
-			t.Errorf("Caveat validation function invoked with end=%v, want %v", got.side, CallSideRemote)
 		}
 		if !reflect.DeepEqual(cav, got.cav) {
 			t.Errorf("Caveat validation function invoked with cav=%v, want %v", got.cav, cav)
