@@ -145,24 +145,16 @@ func verifyChainSignature(call Call, side CallSide, chain []Certificate) (string
 	// on blessing.
 	root, err := UnmarshalPublicKey(chain[0].PublicKey)
 	if err != nil {
-		// TODO(jsimsa): Decide what (if any) logging mechanism to use.
-		// vlog.VI(2).Infof("could not extract blessing as PublicKey from root certificate with Extension: %v could not be unmarshaled: %v", chain[0].Extension, err)
 		return blessing, err
 	}
 	local := call.LocalPrincipal()
 	if local == nil {
-		// TODO(jsimsa): Decide what (if any) logging mechanism to use.
-		// vlog.VI(2).Infof("could not extract blessing as provided Context %v has LocalPrincipal nil", call)
 		return blessing, NewErrUntrustedRoot(nil, blessing)
 	}
 	if local.Roots() == nil {
-		// TODO(jsimsa): Decide what (if any) logging mechanism to use.
-		// vlog.VI(4).Info("could not extract blessing as no keys are recgonized as valid roots")
 		return blessing, NewErrUntrustedRoot(nil, blessing)
 	}
 	if err := local.Roots().Recognized(root, blessing); err != nil {
-		// TODO(jsimsa): Decide what (if any) logging mechanism to use.
-		// vlog.VI(4).Infof("ignoring blessing %v because %v", blessing, err)
 		return blessing, NewErrUntrustedRoot(nil, blessing)
 	}
 
@@ -174,8 +166,6 @@ func defaultChainCaveatValidator(call Call, side CallSide, chains [][]Caveat) []
 	for i, chain := range chains {
 		for _, cav := range chain {
 			if err := validateCaveat(call, side, cav); err != nil {
-				// TODO(jsimsa): Decide what (if any) logging mechanism to use.
-				// vlog.VI(4).Infof("Ignoring chain %v: %v", chain, err)
 				results[i] = err
 				break
 			}
