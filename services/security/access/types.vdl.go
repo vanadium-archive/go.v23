@@ -177,17 +177,24 @@ const Resolve = Tag("Resolve") // Operations involving namespace navigation.
 var (
 	// The AccessList is too big.  Use groups to represent large sets of principals.
 	ErrTooBig          = verror.Register("v.io/v23/services/security/access.TooBig", verror.NoRetry, "{1:}{2:} AccessList is too big")
-	ErrAccessListMatch = verror.Register("v.io/v23/services/security/access.AccessListMatch", verror.NoRetry, "{1:}{2:} none of the valid blessings ({3}) are allowed by the AccessList (rejected blessings: {4})")
+	ErrNoPermissions   = verror.Register("v.io/v23/services/security/access.NoPermissions", verror.NoRetry, "{1:}{2:} {3} does not have {5} access (rejected blessings: {4})")
+	ErrAccessListMatch = verror.Register("v.io/v23/services/security/access.AccessListMatch", verror.NoRetry, "{1:}{2:} {3} does not match the access list (rejected blessings: {4})")
 )
 
 func init() {
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrTooBig.ID), "{1:}{2:} AccessList is too big")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrAccessListMatch.ID), "{1:}{2:} none of the valid blessings ({3}) are allowed by the AccessList (rejected blessings: {4})")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoPermissions.ID), "{1:}{2:} {3} does not have {5} access (rejected blessings: {4})")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrAccessListMatch.ID), "{1:}{2:} {3} does not match the access list (rejected blessings: {4})")
 }
 
 // NewErrTooBig returns an error with the ErrTooBig ID.
 func NewErrTooBig(ctx *context.T) error {
 	return verror.New(ErrTooBig, ctx)
+}
+
+// NewErrNoPermissions returns an error with the ErrNoPermissions ID.
+func NewErrNoPermissions(ctx *context.T, validBlessings []string, rejectedBlessings []security.RejectedBlessing, tag string) error {
+	return verror.New(ErrNoPermissions, ctx, validBlessings, rejectedBlessings, tag)
 }
 
 // NewErrAccessListMatch returns an error with the ErrAccessListMatch ID.
