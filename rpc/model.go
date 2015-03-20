@@ -149,6 +149,13 @@ func (l ListenSpec) String() string {
 	return strings.TrimSpace(s)
 }
 
+// Clone clones a ListenSpec. The cloned spec has its own copy of the array of
+// addresses to listen on.
+func (l ListenSpec) Copy() ListenSpec {
+	l.Addrs = append(ListenAddrs{}, l.Addrs...)
+	return l
+}
+
 // AddressChooser returns the address it prefers out of the set passed to it
 // for the specified network.
 type AddressChooser func(network string, addrs []Address) ([]Address, error)
