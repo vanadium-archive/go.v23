@@ -19,5 +19,4 @@ type MyObject interface {
   Put() error     {Write}
   Resolve() error {Execute}
   NoTags() error  // No tags attached to this.
-  AllTags() error {Read, Write, Execute}
 }

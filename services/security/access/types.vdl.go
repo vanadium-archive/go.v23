@@ -12,14 +12,15 @@
 //
 // Overview
 //
-// Vanadium objects provide GetPermissions and SetPermissions methods.  An AccessList (Access Control
-// List) contains the set of blessings that grant principals access to the
-// object. All methods on objects can have "tags" on them and the access
-// control list used for the method is selected based on that tag (from a
-// Permissions).
+// Vanadium objects provide GetPermissions and SetPermissions methods.  An
+// AccessList (Access Control List) contains the set of blessings that grant
+// principals access to the object. All methods on objects can have "tags" on
+// them and the access control list used for the method is selected based on
+// that tag (from a Permissions).
 //
-// An object can have multiple names, so GetPermissions and SetPermissions can be invoked on
-// any of these names, but the object itself has a single AccessList.
+// An object can have multiple names, so GetPermissions and SetPermissions can
+// be invoked on any of these names, but the object itself has a single
+// AccessList.
 //
 // SetPermissions completely replaces the Permissions. To perform an atomic
 // read-modify-write of the AccessList, use the etag parameter.
@@ -48,10 +49,10 @@
 // with other parts of Vanadium and with each other.
 //
 // All methods that create an object (e.g. Put, Mount, Link) should take an
-// optional AccessList parameter.  If the AccessList is not specified, the new object, O,
-// copies its AccessList from the parent.  Subsequent changes to the parent AccessList are
-// not automatically propagated to O.  Instead, a client library must make
-// recursive AccessList changes.
+// optional AccessList parameter.  If the AccessList is not specified, the new
+// object, O, copies its AccessList from the parent.  Subsequent changes to the
+// parent AccessList are not automatically propagated to O.  Instead, a client
+// library must make recursive AccessList changes.
 //
 // Resolve access is required on all components of a name, except the last one,
 // in order to access the object referenced by that name.  For example, for

@@ -15,6 +15,7 @@ const pkgPath = "v.io/v23/services/security/access"
 var (
 	errTagNeedsString             = verror.Register(pkgPath+".errTagNeedsString", verror.NoRetry, "{1:}{2:}tag type({3}) must be backed by a string not {4}{:_}")
 	errNoMethodTags               = verror.Register(pkgPath+".errNoMethodTags", verror.NoRetry, "{1:}{2:}PermissionsAuthorizer.Authorize called with an object ({3}, method {4}) that has no tags of type {5}; this is likely unintentional{:_}")
+	errMultipleMethodTags         = verror.Register(pkgPath+".errMultipleMethodTags", verror.NoRetry, "{1:}{2:}PermissionsAuthorizer on {3}.{4} cannot handle multiple tags of type {5} ({6}); this is likely unintentional{:_}")
 	errCantReadAccessListFromFile = verror.Register(pkgPath+".errCantReadAccessListFromFile", verror.NoRetry, "{1:}{2:}failed to read AccessList from file{:_}")
 )
 
@@ -27,10 +28,10 @@ var (
 // Currently, tagType.Kind must be reflect.String, i.e., only tags that are
 // named string types are supported.
 //
-// If multiple tags of tagType are associated with the method, then access is
-// granted if the peer presents blessings that match the AccessLists of each one of
-// those tags. If no tags of tagType are associated with the method, then
-// access is denied.
+// PermissionsAuthorizer expects exactly one tag of tagType to be associated
+// with the method. If there are multiple, it fails authorization and returns
+// an error. However, if multiple tags become a common occurrence, then this
+// behavior may change.
 //
 // If the Permissions provided is nil, then a nil authorizer is returned.
 //
@@ -51,8 +52,6 @@ var (
 //
 //     Set([]string) error           {WriteAccess}
 //     SetIndex(int, string) error   {WriteAccess}
-//
-//     GetAndSet([]string) ([]string, error) {ReadAccess, WriteAccess}
 //   }
 //
 // (2) Setup the rpc.Dispatcher to use the PermissionsAuthorizer
@@ -77,9 +76,7 @@ var (
 // With the above dispatcher, the server will grant access to a peer with the blessing
 // "alice/friend/bob" access only to the "Get" and "GetIndex" methods. A peer presenting
 // the blessing "alice/colleague/carol" will get access only to the "Set" and "SetIndex"
-// methods. A peer presenting "alice/family/mom" will get access to all methods, even
-// GetAndSet - which requires that the blessing appear in the AccessLists for both the
-// ReadAccess and WriteAccess tags.
+// methods. A peer presenting "alice/family/mom" will get access to all methods.
 func PermissionsAuthorizer(acls Permissions, tagType *vdl.Type) (security.Authorizer, error) {
 	if tagType.Kind() != vdl.String {
 		return nil, errTagType(tagType)
@@ -123,6 +120,9 @@ func (a *authorizer) Authorize(ctx *context.T) error {
 	hastag := false
 	for _, tag := range call.MethodTags() {
 		if tag.Type() == a.tagType {
+			if hastag {
+				return verror.New(errMultipleMethodTags, ctx, call.Suffix(), call.Method(), a.tagType, call.MethodTags())
+			}
 			hastag = true
 			if acl, exists := a.acls[tag.RawString()]; !exists || !acl.Includes(blessings...) {
 				return NewErrNoPermissions(ctx, blessings, invalid, tag.RawString())

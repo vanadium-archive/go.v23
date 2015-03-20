@@ -19,10 +19,10 @@ import (
 //
 // Object provides access control for Vanadium objects.
 //
-// Vanadium services implementing dynamic access control would typically
-// embed this interface and tag additional methods defined by the service
-// with one of Admin, Read, Write, Resolve etc. For example,
-// the VDL definition of the object would be:
+// Vanadium services implementing dynamic access control would typically embed
+// this interface and tag additional methods defined by the service with one of
+// Admin, Read, Write, Resolve etc. For example, the VDL definition of the
+// object would be:
 //
 //   package mypackage
 //
@@ -37,10 +37,11 @@ import (
 //
 // If the set of pre-defined tags is insufficient, services may define their
 // own tag type and annotate all methods with this new type.
-// Instead of embedding this Object interface, define SetPermissions and GetPermissions in
-// their own interface. Authorization policies will typically respect
-// annotations of a single type. For example, the VDL definition of an object
-// would be:
+//
+// Instead of embedding this Object interface, define SetPermissions and
+// GetPermissions in their own interface. Authorization policies will typically
+// respect annotations of a single type. For example, the VDL definition of an
+// object would be:
 //
 //  package mypackage
 //
@@ -61,27 +62,30 @@ import (
 //    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}
 //  }
 type ObjectClientMethods interface {
-	// SetPermissions replaces the current AccessList for an object.  etag allows for optional,
-	// optimistic concurrency control.  If non-empty, etag's value must come from
-	// GetPermissions.  If any client has successfully called SetPermissions in the meantime, the
-	// etag will be stale and SetPermissions will fail.  If empty, SetPermissions performs an
-	// unconditional update.
+	// SetPermissions replaces the current AccessList for an object.  etag allows
+	// for optional, optimistic concurrency control.  If non-empty, etag's value
+	// must come from GetPermissions.  If any client has successfully called
+	// SetPermissions in the meantime, the etag will be stale and SetPermissions
+	// will fail.  If empty, SetPermissions performs an unconditional update.
 	//
-	// AccessList objects are expected to be small.  It is up to the implementation to
-	// define the exact limit, though it should probably be around 100KB.  Large
-	// lists of principals should use the Group API or blessings.
+	// AccessList objects are expected to be small.  It is up to the
+	// implementation to define the exact limit, though it should probably be
+	// around 100KB.  Large lists of principals should use the Group API or
+	// blessings.
 	//
-	// There is some ambiguity when calling SetPermissions on a mount point.  Does it
-	// affect the mount itself or does it affect the service endpoint that the
-	// mount points to?  The chosen behavior is that it affects the service
-	// endpoint.  To modify the mount point's AccessList, use ResolveToMountTable
-	// to get an endpoint and call SetPermissions on that.  This means that clients
-	// must know when a name refers to a mount point to change its AccessList.
+	// There is some ambiguity when calling SetPermissions on a mount point.
+	// Does it affect the mount itself or does it affect the service endpoint
+	// that the mount points to?  The chosen behavior is that it affects the
+	// service endpoint.  To modify the mount point's AccessList, use
+	// ResolveToMountTable to get an endpoint and call SetPermissions on that.
+	// This means that clients must know when a name refers to a mount point to
+	// change its AccessList.
 	SetPermissions(ctx *context.T, acl access.Permissions, etag string, opts ...rpc.CallOpt) error
-	// GetPermissions returns the complete, current AccessList for an object.  The returned etag
-	// can be passed to a subsequent call to SetPermissions for optimistic concurrency
-	// control. A successful call to SetPermissions will invalidate etag, and the client
-	// must call GetPermissions again to get the current etag.
+	// GetPermissions returns the complete, current AccessList for an object.
+	// The returned etag can be passed to a subsequent call to SetPermissions for
+	// optimistic concurrency control. A successful call to SetPermissions will
+	// invalidate etag, and the client must call GetPermissions again to get the
+	// current etag.
 	GetPermissions(*context.T, ...rpc.CallOpt) (acl access.Permissions, etag string, err error)
 }
 
@@ -137,10 +141,10 @@ func (c implObjectClientStub) GetPermissions(ctx *context.T, opts ...rpc.CallOpt
 //
 // Object provides access control for Vanadium objects.
 //
-// Vanadium services implementing dynamic access control would typically
-// embed this interface and tag additional methods defined by the service
-// with one of Admin, Read, Write, Resolve etc. For example,
-// the VDL definition of the object would be:
+// Vanadium services implementing dynamic access control would typically embed
+// this interface and tag additional methods defined by the service with one of
+// Admin, Read, Write, Resolve etc. For example, the VDL definition of the
+// object would be:
 //
 //   package mypackage
 //
@@ -155,10 +159,11 @@ func (c implObjectClientStub) GetPermissions(ctx *context.T, opts ...rpc.CallOpt
 //
 // If the set of pre-defined tags is insufficient, services may define their
 // own tag type and annotate all methods with this new type.
-// Instead of embedding this Object interface, define SetPermissions and GetPermissions in
-// their own interface. Authorization policies will typically respect
-// annotations of a single type. For example, the VDL definition of an object
-// would be:
+//
+// Instead of embedding this Object interface, define SetPermissions and
+// GetPermissions in their own interface. Authorization policies will typically
+// respect annotations of a single type. For example, the VDL definition of an
+// object would be:
 //
 //  package mypackage
 //
@@ -179,27 +184,30 @@ func (c implObjectClientStub) GetPermissions(ctx *context.T, opts ...rpc.CallOpt
 //    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}
 //  }
 type ObjectServerMethods interface {
-	// SetPermissions replaces the current AccessList for an object.  etag allows for optional,
-	// optimistic concurrency control.  If non-empty, etag's value must come from
-	// GetPermissions.  If any client has successfully called SetPermissions in the meantime, the
-	// etag will be stale and SetPermissions will fail.  If empty, SetPermissions performs an
-	// unconditional update.
+	// SetPermissions replaces the current AccessList for an object.  etag allows
+	// for optional, optimistic concurrency control.  If non-empty, etag's value
+	// must come from GetPermissions.  If any client has successfully called
+	// SetPermissions in the meantime, the etag will be stale and SetPermissions
+	// will fail.  If empty, SetPermissions performs an unconditional update.
 	//
-	// AccessList objects are expected to be small.  It is up to the implementation to
-	// define the exact limit, though it should probably be around 100KB.  Large
-	// lists of principals should use the Group API or blessings.
+	// AccessList objects are expected to be small.  It is up to the
+	// implementation to define the exact limit, though it should probably be
+	// around 100KB.  Large lists of principals should use the Group API or
+	// blessings.
 	//
-	// There is some ambiguity when calling SetPermissions on a mount point.  Does it
-	// affect the mount itself or does it affect the service endpoint that the
-	// mount points to?  The chosen behavior is that it affects the service
-	// endpoint.  To modify the mount point's AccessList, use ResolveToMountTable
-	// to get an endpoint and call SetPermissions on that.  This means that clients
-	// must know when a name refers to a mount point to change its AccessList.
+	// There is some ambiguity when calling SetPermissions on a mount point.
+	// Does it affect the mount itself or does it affect the service endpoint
+	// that the mount points to?  The chosen behavior is that it affects the
+	// service endpoint.  To modify the mount point's AccessList, use
+	// ResolveToMountTable to get an endpoint and call SetPermissions on that.
+	// This means that clients must know when a name refers to a mount point to
+	// change its AccessList.
 	SetPermissions(call rpc.ServerCall, acl access.Permissions, etag string) error
-	// GetPermissions returns the complete, current AccessList for an object.  The returned etag
-	// can be passed to a subsequent call to SetPermissions for optimistic concurrency
-	// control. A successful call to SetPermissions will invalidate etag, and the client
-	// must call GetPermissions again to get the current etag.
+	// GetPermissions returns the complete, current AccessList for an object.
+	// The returned etag can be passed to a subsequent call to SetPermissions for
+	// optimistic concurrency control. A successful call to SetPermissions will
+	// invalidate etag, and the client must call GetPermissions again to get the
+	// current etag.
 	GetPermissions(rpc.ServerCall) (acl access.Permissions, etag string, err error)
 }
 
@@ -261,11 +269,11 @@ var ObjectDesc rpc.InterfaceDesc = descObject
 var descObject = rpc.InterfaceDesc{
 	Name:    "Object",
 	PkgPath: "v.io/v23/services/security/access/object",
-	Doc:     "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetPermissions and GetPermissions in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(acl access.Permissions, etag string) error         {Red}\n//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}\n//  }",
+	Doc:     "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(acl access.Permissions, etag string) error         {Red}\n//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}\n//  }",
 	Methods: []rpc.MethodDesc{
 		{
 			Name: "SetPermissions",
-			Doc:  "// SetPermissions replaces the current AccessList for an object.  etag allows for optional,\n// optimistic concurrency control.  If non-empty, etag's value must come from\n// GetPermissions.  If any client has successfully called SetPermissions in the meantime, the\n// etag will be stale and SetPermissions will fail.  If empty, SetPermissions performs an\n// unconditional update.\n//\n// AccessList objects are expected to be small.  It is up to the implementation to\n// define the exact limit, though it should probably be around 100KB.  Large\n// lists of principals should use the Group API or blessings.\n//\n// There is some ambiguity when calling SetPermissions on a mount point.  Does it\n// affect the mount itself or does it affect the service endpoint that the\n// mount points to?  The chosen behavior is that it affects the service\n// endpoint.  To modify the mount point's AccessList, use ResolveToMountTable\n// to get an endpoint and call SetPermissions on that.  This means that clients\n// must know when a name refers to a mount point to change its AccessList.",
+			Doc:  "// SetPermissions replaces the current AccessList for an object.  etag allows\n// for optional, optimistic concurrency control.  If non-empty, etag's value\n// must come from GetPermissions.  If any client has successfully called\n// SetPermissions in the meantime, the etag will be stale and SetPermissions\n// will fail.  If empty, SetPermissions performs an unconditional update.\n//\n// AccessList objects are expected to be small.  It is up to the\n// implementation to define the exact limit, though it should probably be\n// around 100KB.  Large lists of principals should use the Group API or\n// blessings.\n//\n// There is some ambiguity when calling SetPermissions on a mount point.\n// Does it affect the mount itself or does it affect the service endpoint\n// that the mount points to?  The chosen behavior is that it affects the\n// service endpoint.  To modify the mount point's AccessList, use\n// ResolveToMountTable to get an endpoint and call SetPermissions on that.\n// This means that clients must know when a name refers to a mount point to\n// change its AccessList.",
 			InArgs: []rpc.ArgDesc{
 				{"acl", ``},  // access.Permissions
 				{"etag", ``}, // string
@@ -274,7 +282,7 @@ var descObject = rpc.InterfaceDesc{
 		},
 		{
 			Name: "GetPermissions",
-			Doc:  "// GetPermissions returns the complete, current AccessList for an object.  The returned etag\n// can be passed to a subsequent call to SetPermissions for optimistic concurrency\n// control. A successful call to SetPermissions will invalidate etag, and the client\n// must call GetPermissions again to get the current etag.",
+			Doc:  "// GetPermissions returns the complete, current AccessList for an object.\n// The returned etag can be passed to a subsequent call to SetPermissions for\n// optimistic concurrency control. A successful call to SetPermissions will\n// invalidate etag, and the client must call GetPermissions again to get the\n// current etag.",
 			OutArgs: []rpc.ArgDesc{
 				{"acl", ``},  // access.Permissions
 				{"etag", ``}, // string

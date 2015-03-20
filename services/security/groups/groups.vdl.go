@@ -105,10 +105,10 @@ func NewErrExcessiveContention(ctx *context.T) error {
 type GroupClientMethods interface {
 	// Object provides access control for Vanadium objects.
 	//
-	// Vanadium services implementing dynamic access control would typically
-	// embed this interface and tag additional methods defined by the service
-	// with one of Admin, Read, Write, Resolve etc. For example,
-	// the VDL definition of the object would be:
+	// Vanadium services implementing dynamic access control would typically embed
+	// this interface and tag additional methods defined by the service with one of
+	// Admin, Read, Write, Resolve etc. For example, the VDL definition of the
+	// object would be:
 	//
 	//   package mypackage
 	//
@@ -123,10 +123,11 @@ type GroupClientMethods interface {
 	//
 	// If the set of pre-defined tags is insufficient, services may define their
 	// own tag type and annotate all methods with this new type.
-	// Instead of embedding this Object interface, define SetPermissions and GetPermissions in
-	// their own interface. Authorization policies will typically respect
-	// annotations of a single type. For example, the VDL definition of an object
-	// would be:
+	//
+	// Instead of embedding this Object interface, define SetPermissions and
+	// GetPermissions in their own interface. Authorization policies will typically
+	// respect annotations of a single type. For example, the VDL definition of an
+	// object would be:
 	//
 	//  package mypackage
 	//
@@ -264,10 +265,10 @@ func (c implGroupClientStub) Rest(ctx *context.T, i0 RestRequest, i1 string, opt
 type GroupServerMethods interface {
 	// Object provides access control for Vanadium objects.
 	//
-	// Vanadium services implementing dynamic access control would typically
-	// embed this interface and tag additional methods defined by the service
-	// with one of Admin, Read, Write, Resolve etc. For example,
-	// the VDL definition of the object would be:
+	// Vanadium services implementing dynamic access control would typically embed
+	// this interface and tag additional methods defined by the service with one of
+	// Admin, Read, Write, Resolve etc. For example, the VDL definition of the
+	// object would be:
 	//
 	//   package mypackage
 	//
@@ -282,10 +283,11 @@ type GroupServerMethods interface {
 	//
 	// If the set of pre-defined tags is insufficient, services may define their
 	// own tag type and annotate all methods with this new type.
-	// Instead of embedding this Object interface, define SetPermissions and GetPermissions in
-	// their own interface. Authorization policies will typically respect
-	// annotations of a single type. For example, the VDL definition of an object
-	// would be:
+	//
+	// Instead of embedding this Object interface, define SetPermissions and
+	// GetPermissions in their own interface. Authorization policies will typically
+	// respect annotations of a single type. For example, the VDL definition of an
+	// object would be:
 	//
 	//  package mypackage
 	//
@@ -406,7 +408,7 @@ var descGroup = rpc.InterfaceDesc{
 	PkgPath: "v.io/v23/services/security/groups",
 	Doc:     "// A group's etag covers its AccessList as well as any other data stored in the group.\n// Clients should treat etags as opaque identifiers. For both Get and Rest, if\n// etag is set and matches the Group's current etag, the response will indicate\n// that fact but will otherwise be empty.",
 	Embeds: []rpc.EmbedDesc{
-		{"Object", "v.io/v23/services/security/access/object", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically\n// embed this interface and tag additional methods defined by the service\n// with one of Admin, Read, Write, Resolve etc. For example,\n// the VDL definition of the object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n// Instead of embedding this Object interface, define SetPermissions and GetPermissions in\n// their own interface. Authorization policies will typically respect\n// annotations of a single type. For example, the VDL definition of an object\n// would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(acl access.Permissions, etag string) error         {Red}\n//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}\n//  }"},
+		{"Object", "v.io/v23/services/security/access/object", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/security/access/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(acl access.Permissions, etag string) error         {Red}\n//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}\n//  }"},
 	},
 	Methods: []rpc.MethodDesc{
 		{

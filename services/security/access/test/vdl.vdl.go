@@ -42,7 +42,6 @@ type MyObjectClientMethods interface {
 	Put(*context.T, ...rpc.CallOpt) error
 	Resolve(*context.T, ...rpc.CallOpt) error
 	NoTags(*context.T, ...rpc.CallOpt) error // No tags attached to this.
-	AllTags(*context.T, ...rpc.CallOpt) error
 }
 
 // MyObjectClientStub adds universal methods to MyObjectClientMethods.
@@ -110,15 +109,6 @@ func (c implMyObjectClientStub) NoTags(ctx *context.T, opts ...rpc.CallOpt) (err
 	return
 }
 
-func (c implMyObjectClientStub) AllTags(ctx *context.T, opts ...rpc.CallOpt) (err error) {
-	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "AllTags", nil, opts...); err != nil {
-		return
-	}
-	err = call.Finish()
-	return
-}
-
 // MyObjectServerMethods is the interface a server writer
 // implements for MyObject.
 //
@@ -128,7 +118,6 @@ type MyObjectServerMethods interface {
 	Put(rpc.ServerCall) error
 	Resolve(rpc.ServerCall) error
 	NoTags(rpc.ServerCall) error // No tags attached to this.
-	AllTags(rpc.ServerCall) error
 }
 
 // MyObjectServerStubMethods is the server interface containing
@@ -182,10 +171,6 @@ func (s implMyObjectServerStub) NoTags(call rpc.ServerCall) error {
 	return s.impl.NoTags(call)
 }
 
-func (s implMyObjectServerStub) AllTags(call rpc.ServerCall) error {
-	return s.impl.AllTags(call)
-}
-
 func (s implMyObjectServerStub) Globber() *rpc.GlobState {
 	return s.gs
 }
@@ -217,10 +202,6 @@ var descMyObject = rpc.InterfaceDesc{
 		},
 		{
 			Name: "NoTags",
-		},
-		{
-			Name: "AllTags",
-			Tags: []*vdl.Value{vdl.ValueOf(MyTag("R")), vdl.ValueOf(MyTag("W")), vdl.ValueOf(MyTag("X"))},
 		},
 	},
 }

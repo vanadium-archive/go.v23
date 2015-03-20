@@ -100,8 +100,6 @@ func TestPermissionsAuthorizer(t *testing.T) {
 
 		{"Resolve", B("superman")},
 		{"Resolve", B("ali/family/boss")},
-
-		{"AllTags", B("ali/family/boss")},
 	} {
 		if err := run(test); err != nil {
 			t.Errorf("Access denied to method %q to %v: %v", test.Method, test.Client, err)
@@ -115,9 +113,6 @@ func TestPermissionsAuthorizer(t *testing.T) {
 		// Since there are no tags on the NoTags method, it has an
 		// empty AccessList.  No client will have access.
 		{"NoTags", B("ali", "ali/family/boss", "bob", "che", "superman")},
-		// On a method with multiple tags on it, all must be satisfied.
-		{"AllTags", B("che")},               // In R and W, but not in X
-		{"AllTags", B("superman", "clark")}, // In R and X, but not W
 	} {
 		if err := run(test); err == nil {
 			t.Errorf("Access to %q granted to %v", test.Method, test.Client)
@@ -137,7 +132,7 @@ func TestPermissionsAuthorizerSelfRPCs(t *testing.T) {
 		typ           test.MyTag
 		authorizer, _ = access.PermissionsAuthorizer(access.Permissions{"R": {In: []security.BlessingPattern{"nobody/$"}}}, vdl.TypeOf(typ))
 	)
-	for _, test := range []string{"Put", "Get", "Resolve", "NoTags", "AllTags"} {
+	for _, test := range []string{"Put", "Get", "Resolve", "NoTags"} {
 		params := &security.CallParams{
 			LocalPrincipal:  p,
 			LocalBlessings:  server,
@@ -159,7 +154,7 @@ func TestPermissionsAuthorizerWithNilAccessList(t *testing.T) {
 		server, _     = pserver.BlessSelf("server")
 		client, _     = pclient.BlessSelf("client")
 	)
-	for _, test := range []string{"Put", "Get", "Resolve", "NoTags", "AllTags"} {
+	for _, test := range []string{"Put", "Get", "Resolve", "NoTags"} {
 		params := &security.CallParams{
 			LocalPrincipal:  pserver,
 			LocalBlessings:  server,
@@ -221,6 +216,46 @@ func TestTagTypeMustBeString(t *testing.T) {
 	}
 	if auth, err := access.PermissionsAuthorizerFromFile("does_not_matter", vdl.TypeOf(I(0))); err == nil || auth != nil {
 		t.Errorf("Got (%v, %v), wanted error since tag type is not a string", auth, err)
+	}
+}
+
+// TestMultipleTags will fail if PermissionsAuthorizer authorizes a request to
+// a method with multiple tags. Alternatives considered were "must be present
+// in access list for *all* tags", "must be present in access list for *any*
+// tag" and "must be present in access list for *first* tag". Cases can be made
+// for any of them and until there is more mileage on the use of multiple tags,
+// take the conservative approach of considering multiple tags an error.
+func TestMultipleTags(t *testing.T) {
+	var (
+		allowAll = access.AccessList{In: []security.BlessingPattern{security.AllPrincipals}}
+		acl      = access.Permissions{
+			"R": allowAll,
+			"W": allowAll,
+		}
+		authorizer, _ = access.PermissionsAuthorizer(acl, vdl.TypeOf(test.Read))
+		pserver       = newPrincipal(t)
+		pclient       = newPrincipal(t)
+		server, _     = pserver.BlessSelf("server")
+		client, _     = pclient.BlessSelf("client")
+		call          = &security.CallParams{
+			LocalPrincipal:  pserver,
+			LocalBlessings:  server,
+			RemoteBlessings: client,
+			Method:          "Get",
+		}
+		tags = []*vdl.Value{vdl.ValueOf(test.Read), vdl.ValueOf(test.Write)}
+	)
+	// Access should be granted if any of the two tags are present.
+	for _, tag := range tags {
+		call.MethodTags = []*vdl.Value{tag}
+		if err := authorize(authorizer, call); err != nil {
+			t.Errorf("%v: %v", tag, err)
+		}
+	}
+	// But not if both the tags are present.
+	call.MethodTags = tags
+	if err := authorize(authorizer, call); err == nil {
+		t.Errorf("Expected error since there are multiple tags on the method")
 	}
 }
 
