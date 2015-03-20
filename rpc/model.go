@@ -149,7 +149,7 @@ func (l ListenSpec) String() string {
 	return strings.TrimSpace(s)
 }
 
-// Clone clones a ListenSpec. The cloned spec has its own copy of the array of
+// Copy clones a ListenSpec. The cloned spec has its own copy of the array of
 // addresses to listen on.
 func (l ListenSpec) Copy() ListenSpec {
 	l.Addrs = append(ListenAddrs{}, l.Addrs...)
