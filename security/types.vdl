@@ -154,6 +154,6 @@ type RejectedBlessing struct {
 }
 
 error (
-	UntrustedRoot(blessing string) {"en":"{blessing}: root not trusted"}
+	UnrecognizedRoot(details error) {"en":"unrecognized root certificate{:details}"}
 )
 

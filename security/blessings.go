@@ -2,16 +2,21 @@ package security
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"sort"
 	"strings"
 	"sync"
 
 	"v.io/v23/context"
+	"v.io/v23/verror"
 )
 
-var errEmptyChain = errors.New("empty certificate chain found")
+var (
+	errEmptyChain         = verror.Register(pkgPath+".errEmptyChain", verror.NoRetry, "empty certificate chain in blessings")
+	errMisconfiguredRoots = verror.Register(pkgPath+".errMisconfiguredRoots", verror.NoRetry, "recognized root certificates not configured")
+	errMultiplePublicKeys = verror.Register(pkgPath+".errMultiplePublicKeys", verror.NoRetry, "invalid blessings: two certificate chains that bind to different public keys")
+	errInvalidUnion       = verror.Register(pkgPath+".errInvalidUnion", verror.NoRetry, "cannot create union of blessings bound to different public keys")
+)
 
 // Blessings encapsulates all the cryptographic operations required to
 // prove that a set of (human-readable) blessing names have been bound
@@ -149,13 +154,13 @@ func verifyChainSignature(call Call, chain []Certificate) (string, error) {
 	}
 	local := call.LocalPrincipal()
 	if local == nil {
-		return blessing, NewErrUntrustedRoot(nil, blessing)
+		return blessing, NewErrUnrecognizedRoot(call.Context(), verror.New(errMisconfiguredRoots, call.Context()))
 	}
 	if local.Roots() == nil {
-		return blessing, NewErrUntrustedRoot(nil, blessing)
+		return blessing, NewErrUnrecognizedRoot(call.Context(), verror.New(errMisconfiguredRoots, call.Context()))
 	}
 	if err := local.Roots().Recognized(root, blessing); err != nil {
-		return blessing, NewErrUntrustedRoot(nil, blessing)
+		return blessing, NewErrUnrecognizedRoot(call.Context(), err)
 	}
 
 	return blessing, nil
@@ -206,7 +211,7 @@ func wireBlessingsToNative(wire WireBlessings, native *Blessings) error {
 	}
 	certchains := wire.CertificateChains
 	if len(certchains) == 0 || len(certchains[0]) == 0 {
-		return errEmptyChain
+		return verror.New(errEmptyChain, nil)
 	}
 	// Public keys should match for all chains.
 	marshaledkey := certchains[0][len(certchains[0])-1].PublicKey
@@ -217,11 +222,11 @@ func wireBlessingsToNative(wire WireBlessings, native *Blessings) error {
 	for i := 1; i < len(certchains); i++ {
 		chain := certchains[i]
 		if len(chain) == 0 {
-			return errEmptyChain
+			return verror.New(errEmptyChain, nil)
 		}
 		cert := chain[len(chain)-1]
 		if !bytes.Equal(marshaledkey, cert.PublicKey) {
-			return errors.New("invalid blessings: two certificate chains that bind to different public keys")
+			return verror.New(errMultiplePublicKeys, nil)
 		}
 		if _, err := validateCertificateChain(chain); err != nil {
 			return err
@@ -260,7 +265,7 @@ func UnionOfBlessings(blessings ...Blessings) (Blessings, error) {
 			continue
 		}
 		if idx > 0 && !bytes.Equal(key0, b.publicKeyDER()) {
-			return Blessings{}, errors.New("mismatched public keys")
+			return Blessings{}, verror.New(errInvalidUnion, nil)
 		}
 		ret.chains = append(ret.chains, b.chains...)
 	}

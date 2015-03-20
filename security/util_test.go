@@ -40,7 +40,7 @@ func (r *roots) Recognized(root PublicKey, blessing string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("root %v not recognized for blessing %q", root, blessing)
+	return fmt.Errorf("public key %v is not authoritative on the blessing %q", root, blessing)
 }
 
 func (*roots) DebugString() string {
