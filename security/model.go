@@ -344,8 +344,7 @@ type Signer interface {
 // Multiple goroutines may invoke methods on a ThirdPartyCaveat simultaneously.
 // TODO(ashankar): This type should become ThirdPartyCaveatDetails?
 type ThirdPartyCaveat interface {
-	// ID returns a cryptographically unique identifier for the third-party
-	// caveat.
+	// ID returns a cryptographically unique identifier for the ThirdPartCaveat.
 	ID() string
 
 	// Location returns the Vanadium object name of the discharging third-party.
@@ -356,12 +355,10 @@ type ThirdPartyCaveat interface {
 	Requirements() ThirdPartyRequirements
 
 	// Dischargeable validates all restrictions encoded within the third-party
-	// caveat under 'call' and returns nil iff they have been satisfied, and
-	// thus ensures that it is okay to generate a discharge for this third-party
-	// caveat.
+	// caveat under 'call' and returns nil iff they have been satisfied, and thus
+	// ensures that it is okay to generate a discharge for this ThirdPartyCaveat.
 	//
-	// It assumes that the third-party caveat was obtained from the remote end of
-	// call.
+	// It assumes that the ThirdPartyCaveat was on the remote end of call.
 	Dischargeable(call Call) error
 
 	// TODO(andreser, ashankar): require the discharger to have a specific
@@ -371,11 +368,12 @@ type ThirdPartyCaveat interface {
 
 // Call defines the state available for authorizing a principal.
 type Call interface {
-	// Timestamp at which the authorization state is to be checked.
+	// Timestamp returns the time at which the authorization state is to be checked.
 	Timestamp() time.Time
 	// Method returns the method being invoked.
 	Method() string
-	// Tags attached to the method, typically through the interface specification in VDL.
+	// MethodTags returns the tags attached to the method, typically through the
+	// interface specification in VDL.
 	MethodTags() []*vdl.Value
 	// Suffix returns the object name suffix for the request.
 	Suffix() string
