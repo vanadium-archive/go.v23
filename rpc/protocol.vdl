@@ -149,7 +149,7 @@ type Response struct {
 // confirmation that the server has received the key, subsequent client requests
 // only send the key.
 //
-// If BlessingRequest.Key is 0 the Client is running in VCSecurityNone and the
+// If BlessingRequest.Key is 0, the Client is running in SecurityNone and the
 // Blessings information should ignored.
 type BlessingsRequest struct {
 	// Key is the required key that the Client has cached Blessings with.

@@ -61,22 +61,20 @@ type ServerBlessings struct{ security.Blessings }
 
 func (ServerBlessings) RPCServerOpt() {}
 
-// VCSecurityLevel represents the level of confidentiality of data transmitted
-// and received over a VC.
-type VCSecurityLevel int
+// SecurityLevel represents the level of confidentiality of data transmitted
+// and received over a connection.
+type SecurityLevel int
 
-func (VCSecurityLevel) RPCServerOpt()         {}
-func (VCSecurityLevel) RPCCallOpt()           {}
-func (VCSecurityLevel) RPCStreamVCOpt()       {}
-func (VCSecurityLevel) RPCStreamListenerOpt() {}
+func (SecurityLevel) RPCServerOpt() {}
+func (SecurityLevel) RPCCallOpt()   {}
 
 const (
-	// All user data transmitted over the VC is encrypted and can be interpreted only
-	// by processes at the two ends of the VC.
+	// All user data transmitted over the connection is encrypted and can be
+	// interpreted only by processes at the two ends of the connection.
 	// This is the default level.
-	VCSecurityConfidential VCSecurityLevel = 0
-	// Data is transmitted over the VC in plain text and there is no authentication.
-	VCSecurityNone VCSecurityLevel = 1
+	SecurityConfidential SecurityLevel = 0
+	// Data is transmitted over the connection in plain text and there is no authentication.
+	SecurityNone SecurityLevel = 1
 )
 
 // AllowedServersPolicy specifies a policy used by clients to authenticate
