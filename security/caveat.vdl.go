@@ -113,9 +113,7 @@ var ExpiryCaveatX = CaveatDescriptor{
 }
 
 // MethodCaveat represents a caveat that validates iff the method being
-// invoked is included in this list. An empty list implies that no method can
-// be invoked (i.e., the holder of a blessing with this caveat could be a
-// server but cannot act as a client).
+// invoked is included in this list. An empty list implies that the caveat is invalid.
 //
 // TODO(ashankar): Rename to MethodCaveat and drop the MethodCaveat helper function?
 var MethodCaveatX = CaveatDescriptor{
@@ -165,15 +163,41 @@ var PublicKeyThirdPartyCaveatX = CaveatDescriptor{
 	ParamType: vdl.TypeOf(publicKeyThirdPartyCaveat{}),
 }
 
+// PeerBlessingsCaveat represents a caveat that validates iff the peer being communicated
+// with (local end of the call) has a blessing name matching at least one of the patterns
+// in the list. An empty list implies that the caveat is invalid.
+var PeerBlessingsCaveat = CaveatDescriptor{
+	Id: uniqueid.Id{
+		5,
+		119,
+		248,
+		86,
+		76,
+		142,
+		95,
+		254,
+		255,
+		142,
+		43,
+		31,
+		77,
+		109,
+		128,
+		0,
+	},
+	ParamType: vdl.TypeOf([]BlessingPattern(nil)),
+}
+
 var (
-	ErrCaveatNotRegistered     = verror.Register("v.io/v23/security.CaveatNotRegistered", verror.NoRetry, "{1:}{2:} no validation function registered for caveat id {3}")
-	ErrCaveatParamAny          = verror.Register("v.io/v23/security.CaveatParamAny", verror.NoRetry, "{1:}{2:} caveat {3} uses illegal param type any")
-	ErrCaveatParamTypeMismatch = verror.Register("v.io/v23/security.CaveatParamTypeMismatch", verror.NoRetry, "{1:}{2:} bad param type: caveat {3} got {4}, want {5}")
-	ErrCaveatParamCoding       = verror.Register("v.io/v23/security.CaveatParamCoding", verror.NoRetry, "{1:}{2:} unable to encode/decode caveat param(type={4}) for caveat {3}: {5}")
-	ErrCaveatValidation        = verror.Register("v.io/v23/security.CaveatValidation", verror.NoRetry, "{1:}{2:} caveat validation failed: {3}")
-	ErrConstCaveatValidation   = verror.Register("v.io/v23/security.ConstCaveatValidation", verror.NoRetry, "{1:}{2:} false const caveat always fails validation")
-	ErrExpiryCaveatValidation  = verror.Register("v.io/v23/security.ExpiryCaveatValidation", verror.NoRetry, "{1:}{2:} now({4}) is after expiry({3})")
-	ErrMethodCaveatValidation  = verror.Register("v.io/v23/security.MethodCaveatValidation", verror.NoRetry, "{1:}{2:} method {3} not in list {4}")
+	ErrCaveatNotRegistered           = verror.Register("v.io/v23/security.CaveatNotRegistered", verror.NoRetry, "{1:}{2:} no validation function registered for caveat id {3}")
+	ErrCaveatParamAny                = verror.Register("v.io/v23/security.CaveatParamAny", verror.NoRetry, "{1:}{2:} caveat {3} uses illegal param type any")
+	ErrCaveatParamTypeMismatch       = verror.Register("v.io/v23/security.CaveatParamTypeMismatch", verror.NoRetry, "{1:}{2:} bad param type: caveat {3} got {4}, want {5}")
+	ErrCaveatParamCoding             = verror.Register("v.io/v23/security.CaveatParamCoding", verror.NoRetry, "{1:}{2:} unable to encode/decode caveat param(type={4}) for caveat {3}: {5}")
+	ErrCaveatValidation              = verror.Register("v.io/v23/security.CaveatValidation", verror.NoRetry, "{1:}{2:} caveat validation failed: {3}")
+	ErrConstCaveatValidation         = verror.Register("v.io/v23/security.ConstCaveatValidation", verror.NoRetry, "{1:}{2:} false const caveat always fails validation")
+	ErrExpiryCaveatValidation        = verror.Register("v.io/v23/security.ExpiryCaveatValidation", verror.NoRetry, "{1:}{2:} now({4}) is after expiry({3})")
+	ErrMethodCaveatValidation        = verror.Register("v.io/v23/security.MethodCaveatValidation", verror.NoRetry, "{1:}{2:} method {3} not in list {4}")
+	ErrPeerBlessingsCaveatValidation = verror.Register("v.io/v23/security.PeerBlessingsCaveatValidation", verror.NoRetry, "{1:}{2:} patterns in peer blessings caveat {4} not matched by the peer {3}")
 )
 
 func init() {
@@ -185,6 +209,7 @@ func init() {
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrConstCaveatValidation.ID), "{1:}{2:} false const caveat always fails validation")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrExpiryCaveatValidation.ID), "{1:}{2:} now({4}) is after expiry({3})")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrMethodCaveatValidation.ID), "{1:}{2:} method {3} not in list {4}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrPeerBlessingsCaveatValidation.ID), "{1:}{2:} patterns in peer blessings caveat {4} not matched by the peer {3}")
 }
 
 // NewErrCaveatNotRegistered returns an error with the ErrCaveatNotRegistered ID.
@@ -225,4 +250,9 @@ func NewErrExpiryCaveatValidation(ctx *context.T, expiryTime time.Time, currentT
 // NewErrMethodCaveatValidation returns an error with the ErrMethodCaveatValidation ID.
 func NewErrMethodCaveatValidation(ctx *context.T, invokedMethod string, permittedMethods []string) error {
 	return verror.New(ErrMethodCaveatValidation, ctx, invokedMethod, permittedMethods)
+}
+
+// NewErrPeerBlessingsCaveatValidation returns an error with the ErrPeerBlessingsCaveatValidation ID.
+func NewErrPeerBlessingsCaveatValidation(ctx *context.T, peerBlessings []string, permittedPatterns []BlessingPattern) error {
+	return verror.New(ErrPeerBlessingsCaveatValidation, ctx, peerBlessings, permittedPatterns)
 }

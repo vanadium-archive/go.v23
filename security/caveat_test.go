@@ -13,13 +13,16 @@ import (
 
 func TestStandardCaveatFactories(t *testing.T) {
 	var (
-		self = newPrincipal(t)
-		now  = time.Now()
-		call = NewCall(&CallParams{
+		self      = newPrincipal(t)
+		balice, _ = UnionOfBlessings(blessSelf(t, self, "alice/phone"), blessSelf(t, self, "alice/tablet"))
+		bother    = blessSelf(t, self, "other")
+		b, _      = UnionOfBlessings(balice, bother)
+		now       = time.Now()
+		call      = NewCall(&CallParams{
 			Timestamp:      now,
 			Method:         "Foo",
 			LocalPrincipal: self,
-			LocalBlessings: blessSelf(t, self, "alice/phone/friend"),
+			LocalBlessings: b,
 		})
 		C     = newCaveat
 		tests = []struct {
@@ -34,9 +37,14 @@ func TestStandardCaveatFactories(t *testing.T) {
 			{C(MethodCaveat("Bar")), false},
 			{C(MethodCaveat("Foo", "Bar")), true},
 			{C(MethodCaveat("Bar", "Baz")), false},
+			// PeerBlesingsCaveat
+			{C(NewCaveat(PeerBlessingsCaveat, []BlessingPattern{"alice/phone"})), true},
+			{C(NewCaveat(PeerBlessingsCaveat, []BlessingPattern{"alice/tablet", "other"})), true},
+			{C(NewCaveat(PeerBlessingsCaveat, []BlessingPattern{"alice/laptop", "other", "alice/$"})), false},
+			{C(NewCaveat(PeerBlessingsCaveat, []BlessingPattern{"alice/laptop", "other", "alice"})), true},
 		}
 	)
-	self.AddToRoots(call.LocalBlessings())
+	self.AddToRoots(balice)
 	for idx, test := range tests {
 		err := test.cav.Validate(call)
 		if test.ok && err != nil {

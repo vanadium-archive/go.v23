@@ -19,9 +19,7 @@ const (
   }
 
   // MethodCaveat represents a caveat that validates iff the method being
-  // invoked is included in this list. An empty list implies that no method can
-  // be invoked (i.e., the holder of a blessing with this caveat could be a
-  // server but cannot act as a client).
+  // invoked is included in this list. An empty list implies that the caveat is invalid.
   //
   // TODO(ashankar): Rename to MethodCaveat and drop the MethodCaveat helper function?
   MethodCaveatX = CaveatDescriptor{
@@ -35,6 +33,14 @@ const (
   PublicKeyThirdPartyCaveatX = CaveatDescriptor{
     Id:        uniqueid.Id{0x79, 0x72, 0xce, 0x17, 0x4a, 0x7b, 0xa9, 0x3f, 0x79, 0x54, 0x7d, 0x76, 0x9c, 0x91, 0x80, 0x0},
     ParamType: typeobject(publicKeyThirdPartyCaveat),
+  }
+
+  // PeerBlessingsCaveat represents a caveat that validates iff the peer being communicated
+  // with (local end of the call) has a blessing name matching at least one of the patterns
+  // in the list. An empty list implies that the caveat is invalid.
+  PeerBlessingsCaveat = CaveatDescriptor {
+    Id:        uniqueid.Id{0x5, 0x77, 0xf8, 0x56, 0x4c, 0x8e, 0x5f, 0xfe, 0xff, 0x8e, 0x2b, 0x1f, 0x4d, 0x6d, 0x80, 0x0},
+    ParamType: typeobject([]BlessingPattern),
   }
 )
 
@@ -63,6 +69,9 @@ error (
   }
   MethodCaveatValidation(invokedMethod string, permittedMethods []string) {
     "en": "method {invokedMethod} not in list {permittedMethods}",
+  }
+  PeerBlessingsCaveatValidation(peerBlessings []string, permittedPatterns []BlessingPattern) {
+    "en": "patterns in peer blessings caveat {permittedPatterns} not matched by the peer {peerBlessings}",
   }
 )
 

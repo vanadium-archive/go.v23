@@ -3,6 +3,8 @@ package security
 import (
 	"fmt"
 	"time"
+
+	"v.io/v23/context"
 	"v.io/v23/verror"
 )
 
@@ -32,15 +34,30 @@ func init() {
 	})
 
 	RegisterCaveatValidator(MethodCaveatX, func(call Call, methods []string) error {
-		if call.Method() == "" && len(methods) == 0 {
-			return nil
-		}
 		for _, m := range methods {
 			if call.Method() == m {
 				return nil
 			}
 		}
 		return NewErrMethodCaveatValidation(call.Context(), call.Method(), methods)
+	})
+
+	RegisterCaveatValidator(PeerBlessingsCaveat, func(call Call, patterns []BlessingPattern) error {
+		// HACK!!
+		// TODO(ataly, mattr): Get rid of the following code once caveat validators
+		// also take in a *context.T
+		ctx, cf := context.RootContext()
+		defer cf()
+		ctx = SetCall(ctx, call)
+
+		lnames := LocalBlessingNames(ctx)
+		for _, p := range patterns {
+			if p.MatchedBy(lnames...) {
+				return nil
+
+			}
+		}
+		return NewErrPeerBlessingsCaveatValidation(call.Context(), lnames, patterns)
 	})
 
 	RegisterCaveatValidator(PublicKeyThirdPartyCaveatX, func(call Call, params publicKeyThirdPartyCaveat) error {
