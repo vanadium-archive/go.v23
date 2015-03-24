@@ -154,6 +154,6 @@ type RejectedBlessing struct {
 }
 
 error (
-	UnrecognizedRoot(details error) {"en":"unrecognized root certificate{:details}"}
+	UnrecognizedRoot(rootKey string, details error) {"en":"unrecognized public key {rootKey} in root certificate{:details}"}
 )
 

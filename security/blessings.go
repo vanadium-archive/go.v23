@@ -154,13 +154,13 @@ func verifyChainSignature(call Call, chain []Certificate) (string, error) {
 	}
 	local := call.LocalPrincipal()
 	if local == nil {
-		return blessing, NewErrUnrecognizedRoot(call.Context(), verror.New(errMisconfiguredRoots, call.Context()))
+		return blessing, NewErrUnrecognizedRoot(call.Context(), root.String(), verror.New(errMisconfiguredRoots, call.Context()))
 	}
 	if local.Roots() == nil {
-		return blessing, NewErrUnrecognizedRoot(call.Context(), verror.New(errMisconfiguredRoots, call.Context()))
+		return blessing, NewErrUnrecognizedRoot(call.Context(), root.String(), verror.New(errMisconfiguredRoots, call.Context()))
 	}
 	if err := local.Roots().Recognized(root, blessing); err != nil {
-		return blessing, NewErrUnrecognizedRoot(call.Context(), err)
+		return blessing, err
 	}
 
 	return blessing, nil
