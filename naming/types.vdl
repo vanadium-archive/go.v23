@@ -8,6 +8,7 @@ type MountFlag uint32
 const (
 	Replace = MountFlag(1 << 0) // Replace means the mount should replace what is currently at the mount point
 	MT      = MountFlag(1 << 1) // MT means that the target server is a mount table.
+	Leaf    = MountFlag(1 << 2) // Leaf means that the target server is a leaf.
 )
 
 // MountedServer represents a server mounted on a specific name.
@@ -33,6 +34,8 @@ type MountEntry struct {
 	Servers []MountedServer
 	// ServesMountTable is true if the servers represent mount tables.
 	ServesMountTable bool
+	// IsLeaf is true if this entry represents a leaf object.
+	IsLeaf bool
 }
 
 // GlobError is returned by namespace.Glob to indicate a subtree of the namespace

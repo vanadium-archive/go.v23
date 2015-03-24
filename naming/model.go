@@ -130,6 +130,11 @@ type ServesMountTableOpt bool
 func (ServesMountTableOpt) NSMountOpt()  {}
 func (ServesMountTableOpt) EndpointOpt() {}
 
+// IsLeafOpt means the target is a leaf
+type IsLeafOpt bool
+
+func (IsLeafOpt) NSMountOpt() {}
+
 // BlessingOpt is used to add a blessing name to the endpoint.
 type BlessingOpt string
 

@@ -47,6 +47,8 @@ type MountEntry struct {
 	Servers []MountedServer
 	// ServesMountTable is true if the servers represent mount tables.
 	ServesMountTable bool
+	// IsLeaf is true if this entry represents a leaf object.
+	IsLeaf bool
 }
 
 func (MountEntry) __VDLReflect(struct {
@@ -118,3 +120,5 @@ func init() {
 const Replace = MountFlag(1) // Replace means the mount should replace what is currently at the mount point
 
 const MT = MountFlag(2) // MT means that the target server is a mount table.
+
+const Leaf = MountFlag(4) // Leaf means that the target server is a leaf.
