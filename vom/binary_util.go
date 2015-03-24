@@ -3,6 +3,7 @@ package vom
 import (
 	"errors"
 	"fmt"
+	"io"
 	"math"
 
 	"v.io/v23/vdl"
@@ -442,4 +443,25 @@ func binaryIgnoreString(buf *decbuf) error {
 		return err
 	}
 	return buf.Skip(len)
+}
+
+func writeMagicByte(w io.Writer) error {
+	// The binary format always starts with a magic byte.
+	if _, err := w.Write([]byte{binaryMagicByte}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func readMagicByte(buf *decbuf) error {
+	// The binary format always starts with a magic byte.
+	magic, err := buf.PeekByte()
+	if err != nil {
+		return fmt.Errorf("error reading magic byte %v", err)
+	}
+	if magic != binaryMagicByte {
+		return fmt.Errorf("bad magic byte, got %x, want %x", magic, binaryMagicByte)
+	}
+	buf.Skip(1)
+	return nil
 }

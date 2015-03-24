@@ -145,6 +145,9 @@ func matchPrefixSeq(target string, seqs []string) bool {
 // binFromHexPat returns a binary string based on the given hex pattern.
 // Allowed hex patterns are the same as for matchHexPat.
 func binFromHexPat(pat string) (string, error) {
+	if len(pat) == 0 {
+		return "", nil
+	}
 	// TODO(toddw): We could also choose to randomly re-order the sequences.
 	hex := strings.NewReplacer("[", "", "]", "", ",", "").Replace(pat)
 	var bin []byte

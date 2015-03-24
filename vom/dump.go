@@ -143,10 +143,10 @@ type dumpWorker struct {
 	closeChan chan<- struct{}
 
 	// We hold regular decoding state, and output dump information to w.
-	w         DumpWriter
-	buf       *decbuf
-	recvTypes *decoderTypes
-	status    DumpStatus
+	w       DumpWriter
+	buf     *decbuf
+	typeDec *TypeDecoder
+	status  DumpStatus
 
 	// Each Write call on the Dumper is passed to us on the cmdChan.  When we get
 	// around to processing the Write data, we buffer any extra data, and hold on
@@ -164,7 +164,7 @@ func startDumpWorker(cmd <-chan dumpCmd, close chan<- struct{}, w DumpWriter) {
 		cmdChan:   cmd,
 		closeChan: close,
 		w:         w,
-		recvTypes: newDecoderTypes(),
+		typeDec:   newTypeDecoder(nil),
 	}
 	worker.buf = newDecbuf(worker)
 	go worker.decodeLoop()
@@ -410,7 +410,7 @@ func (d *dumpWorker) decodeValueType() (*vdl.Type, error) {
 		case id > 0:
 			// This is a value message, the typeID is +id.
 			tid := typeId(+id)
-			tt, err := d.recvTypes.LookupOrBuildType(tid)
+			tt, err := d.typeDec.lookupType(tid)
 			if err != nil {
 				d.writeAtom(DumpKindValueMsg, PrimitivePUint{uint64(tid)}, "%v", err)
 				return nil, err
@@ -421,7 +421,7 @@ func (d *dumpWorker) decodeValueType() (*vdl.Type, error) {
 		// This is a type message, the typeID is -id.
 		tid := typeId(-id)
 		d.writeAtom(DumpKindTypeMsg, PrimitivePUint{uint64(tid)}, "")
-		// Decode the wireType like a regular value, and store it in recvTypes.  The
+		// Decode the wireType like a regular value, and store it in typeDec.  The
 		// type will actually be built when a value message arrives using this tid.
 		var wt wireType
 		target, err := vdl.ReflectTarget(reflect.ValueOf(&wt))
@@ -431,7 +431,7 @@ func (d *dumpWorker) decodeValueType() (*vdl.Type, error) {
 		if err := d.decodeValueMsg(wireTypeType, target); err != nil {
 			return nil, err
 		}
-		if err := d.recvTypes.AddWireType(tid, wt); err != nil {
+		if err := d.typeDec.addWireType(tid, wt); err != nil {
 			return nil, err
 		}
 	}
@@ -584,7 +584,7 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		if err != nil {
 			return err
 		}
-		typeobj, err := d.recvTypes.LookupOrBuildType(typeId(id))
+		typeobj, err := d.typeDec.lookupType(typeId(id))
 		if err != nil {
 			d.writeAtom(DumpKindTypeId, PrimitivePUint{id}, "%v", err)
 			return err
@@ -747,7 +747,7 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		case ctrl != 0:
 			return fmt.Errorf("vom: unexpected control byte 0x%x", ctrl)
 		default:
-			elemType, err := d.recvTypes.LookupOrBuildType(typeId(id))
+			elemType, err := d.typeDec.lookupType(typeId(id))
 			if err != nil {
 				d.writeAtom(DumpKindTypeId, PrimitivePUint{id}, "%v", err)
 				return err

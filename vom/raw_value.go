@@ -7,7 +7,7 @@ import (
 // TODO(toddw): Flesh out the RawValue strategy.
 
 type RawValue struct {
-	recvTypes *decoderTypes
-	valType   *vdl.Type
-	data      []byte
+	typeDec *TypeDecoder
+	valType *vdl.Type
+	data    []byte
 }

@@ -333,6 +333,15 @@ func (RecY) __VDLReflect(struct {
 }) {
 }
 
+type RecStruct struct {
+	A *RecStruct
+}
+
+func (RecStruct) __VDLReflect(struct {
+	Name string "v.io/v23/vom/testdata.RecStruct"
+}) {
+}
+
 // Additional types for compatibility and conversion checks
 type ListString []string
 
@@ -751,6 +760,7 @@ func init() {
 	vdl.Register((*RecA)(nil))
 	vdl.Register((*RecX)(nil))
 	vdl.Register((*RecY)(nil))
+	vdl.Register((*RecStruct)(nil))
 	vdl.Register((*ListString)(nil))
 	vdl.Register((*Array3String)(nil))
 	vdl.Register((*Array4String)(nil))

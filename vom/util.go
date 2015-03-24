@@ -1,6 +1,10 @@
 package vom
 
-import "bytes"
+import (
+	"bytes"
+	"io"
+	"os"
+)
 
 // Encode encodes the provided value using a new instance of a VOM encoder.
 func Encode(value interface{}) ([]byte, error) {
@@ -23,4 +27,11 @@ func Decode(data []byte, valptr interface{}) error {
 		return err
 	}
 	return decoder.Decode(valptr)
+}
+
+// This is only used for debugging; add this as the first line of NewDecoder to
+// dump formatted vom bytes to stdout:
+//   r = teeDump(r)
+func teeDump(r io.Reader) io.Reader {
+	return io.TeeReader(r, NewDumper(NewDumpWriter(os.Stdout)))
 }

@@ -57,6 +57,9 @@ type (
 	RecA []RecA
 	RecX []RecY
 	RecY []RecX
+	RecStruct struct {
+		A ?RecStruct
+	}
 
 	// Additional types for compatibility and conversion checks
 	ListString []string
