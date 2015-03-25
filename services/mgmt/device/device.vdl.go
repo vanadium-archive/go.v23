@@ -7,6 +7,7 @@ package device
 
 import (
 	// VDL system imports
+	"fmt"
 	"io"
 	"v.io/v23"
 	"v.io/v23/context"
@@ -26,6 +27,197 @@ type Config map[string]string
 
 func (Config) __VDLReflect(struct {
 	Name string "v.io/v23/services/mgmt/device.Config"
+}) {
+}
+
+// InstallationState describes the states that an installation can be in at any
+// time.
+type InstallationState int
+
+const (
+	InstallationStateActive InstallationState = iota
+	InstallationStateUninstalled
+)
+
+// InstallationStateAll holds all labels for InstallationState.
+var InstallationStateAll = [...]InstallationState{InstallationStateActive, InstallationStateUninstalled}
+
+// InstallationStateFromString creates a InstallationState from a string label.
+func InstallationStateFromString(label string) (x InstallationState, err error) {
+	err = x.Set(label)
+	return
+}
+
+// Set assigns label to x.
+func (x *InstallationState) Set(label string) error {
+	switch label {
+	case "Active", "active":
+		*x = InstallationStateActive
+		return nil
+	case "Uninstalled", "uninstalled":
+		*x = InstallationStateUninstalled
+		return nil
+	}
+	*x = -1
+	return fmt.Errorf("unknown label %q in device.InstallationState", label)
+}
+
+// String returns the string label of x.
+func (x InstallationState) String() string {
+	switch x {
+	case InstallationStateActive:
+		return "Active"
+	case InstallationStateUninstalled:
+		return "Uninstalled"
+	}
+	return ""
+}
+
+func (InstallationState) __VDLReflect(struct {
+	Name string "v.io/v23/services/mgmt/device.InstallationState"
+	Enum struct{ Active, Uninstalled string }
+}) {
+}
+
+// InstanceState describes the states that an instance can be in at any
+// time.
+type InstanceState int
+
+const (
+	InstanceStateStarting InstanceState = iota
+	InstanceStateStarted
+	InstanceStateSuspending
+	InstanceStateSuspended
+	InstanceStateStopping
+	InstanceStateStopped
+	InstanceStateUpdating
+)
+
+// InstanceStateAll holds all labels for InstanceState.
+var InstanceStateAll = [...]InstanceState{InstanceStateStarting, InstanceStateStarted, InstanceStateSuspending, InstanceStateSuspended, InstanceStateStopping, InstanceStateStopped, InstanceStateUpdating}
+
+// InstanceStateFromString creates a InstanceState from a string label.
+func InstanceStateFromString(label string) (x InstanceState, err error) {
+	err = x.Set(label)
+	return
+}
+
+// Set assigns label to x.
+func (x *InstanceState) Set(label string) error {
+	switch label {
+	case "Starting", "starting":
+		*x = InstanceStateStarting
+		return nil
+	case "Started", "started":
+		*x = InstanceStateStarted
+		return nil
+	case "Suspending", "suspending":
+		*x = InstanceStateSuspending
+		return nil
+	case "Suspended", "suspended":
+		*x = InstanceStateSuspended
+		return nil
+	case "Stopping", "stopping":
+		*x = InstanceStateStopping
+		return nil
+	case "Stopped", "stopped":
+		*x = InstanceStateStopped
+		return nil
+	case "Updating", "updating":
+		*x = InstanceStateUpdating
+		return nil
+	}
+	*x = -1
+	return fmt.Errorf("unknown label %q in device.InstanceState", label)
+}
+
+// String returns the string label of x.
+func (x InstanceState) String() string {
+	switch x {
+	case InstanceStateStarting:
+		return "Starting"
+	case InstanceStateStarted:
+		return "Started"
+	case InstanceStateSuspending:
+		return "Suspending"
+	case InstanceStateSuspended:
+		return "Suspended"
+	case InstanceStateStopping:
+		return "Stopping"
+	case InstanceStateStopped:
+		return "Stopped"
+	case InstanceStateUpdating:
+		return "Updating"
+	}
+	return ""
+}
+
+func (InstanceState) __VDLReflect(struct {
+	Name string "v.io/v23/services/mgmt/device.InstanceState"
+	Enum struct{ Starting, Started, Suspending, Suspended, Stopping, Stopped, Updating string }
+}) {
+}
+
+type (
+	// Status represents any single field of the Status union type.
+	//
+	// Status is returned by the Application Status method.
+	Status interface {
+		// Index returns the field index.
+		Index() int
+		// Interface returns the field value as an interface.
+		Interface() interface{}
+		// Name returns the field name.
+		Name() string
+		// __VDLReflect describes the Status union type.
+		__VDLReflect(__StatusReflect)
+	}
+	// StatusInstance represents field Instance of the Status union type.
+	StatusInstance struct{ Value InstanceStatus }
+	// StatusInstallation represents field Installation of the Status union type.
+	StatusInstallation struct{ Value InstallationStatus }
+	// __StatusReflect describes the Status union type.
+	__StatusReflect struct {
+		Name  string "v.io/v23/services/mgmt/device.Status"
+		Type  Status
+		Union struct {
+			Instance     StatusInstance
+			Installation StatusInstallation
+		}
+	}
+)
+
+func (x StatusInstance) Index() int                   { return 0 }
+func (x StatusInstance) Interface() interface{}       { return x.Value }
+func (x StatusInstance) Name() string                 { return "Instance" }
+func (x StatusInstance) __VDLReflect(__StatusReflect) {}
+
+func (x StatusInstallation) Index() int                   { return 1 }
+func (x StatusInstallation) Interface() interface{}       { return x.Value }
+func (x StatusInstallation) Name() string                 { return "Installation" }
+func (x StatusInstallation) __VDLReflect(__StatusReflect) {}
+
+// InstallationStatus specifies the Status returned by the Application Status
+// method for installation objects.
+type InstallationStatus struct {
+	State   InstallationState
+	Version string
+}
+
+func (InstallationStatus) __VDLReflect(struct {
+	Name string "v.io/v23/services/mgmt/device.InstallationStatus"
+}) {
+}
+
+// InstanceStatus specifies the Status returned by the Application Status method
+// for instance objects.
+type InstanceStatus struct {
+	State   InstanceState
+	Version string
+}
+
+func (InstanceStatus) __VDLReflect(struct {
+	Name string "v.io/v23/services/mgmt/device.InstanceStatus"
 }) {
 }
 
@@ -140,6 +332,11 @@ func (Association) __VDLReflect(struct {
 
 func init() {
 	vdl.Register((*Config)(nil))
+	vdl.Register((*InstallationState)(nil))
+	vdl.Register((*InstanceState)(nil))
+	vdl.Register((*Status)(nil))
+	vdl.Register((*InstallationStatus)(nil))
+	vdl.Register((*InstanceStatus)(nil))
 	vdl.Register((*StartServerMessage)(nil))
 	vdl.Register((*StartClientMessage)(nil))
 	vdl.Register((*Description)(nil))
@@ -361,6 +558,9 @@ type ApplicationClientMethods interface {
 	// stability of the format, and parsing it programmatically is
 	// specifically discouraged.
 	Debug(*context.T, ...rpc.CallOpt) (string, error)
+	// Status return structured information about the application
+	// installation or instance.
+	Status(*context.T, ...rpc.CallOpt) (Status, error)
 }
 
 // ApplicationClientStub adds universal methods to ApplicationClientMethods.
@@ -496,6 +696,15 @@ func (c implApplicationClientStub) UpdateTo(ctx *context.T, i0 string, opts ...r
 func (c implApplicationClientStub) Debug(ctx *context.T, opts ...rpc.CallOpt) (o0 string, err error) {
 	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Debug", nil, opts...); err != nil {
+		return
+	}
+	err = call.Finish(&o0)
+	return
+}
+
+func (c implApplicationClientStub) Status(ctx *context.T, opts ...rpc.CallOpt) (o0 Status, err error) {
+	var call rpc.ClientCall
+	if call, err = c.c(ctx).StartCall(ctx, c.name, "Status", nil, opts...); err != nil {
 		return
 	}
 	err = call.Finish(&o0)
@@ -819,6 +1028,9 @@ type ApplicationServerMethods interface {
 	// stability of the format, and parsing it programmatically is
 	// specifically discouraged.
 	Debug(rpc.ServerCall) (string, error)
+	// Status return structured information about the application
+	// installation or instance.
+	Status(rpc.ServerCall) (Status, error)
 }
 
 // ApplicationServerStubMethods is the server interface containing
@@ -949,6 +1161,9 @@ type ApplicationServerStubMethods interface {
 	// stability of the format, and parsing it programmatically is
 	// specifically discouraged.
 	Debug(rpc.ServerCall) (string, error)
+	// Status return structured information about the application
+	// installation or instance.
+	Status(rpc.ServerCall) (Status, error)
 }
 
 // ApplicationServerStub adds universal methods to ApplicationServerStubMethods.
@@ -1028,6 +1243,10 @@ func (s implApplicationServerStub) UpdateTo(call rpc.ServerCall, i0 string) erro
 
 func (s implApplicationServerStub) Debug(call rpc.ServerCall) (string, error) {
 	return s.impl.Debug(call)
+}
+
+func (s implApplicationServerStub) Status(call rpc.ServerCall) (Status, error) {
+	return s.impl.Status(call)
 }
 
 func (s implApplicationServerStub) Globber() *rpc.GlobState {
@@ -1126,6 +1345,14 @@ var descApplication = rpc.InterfaceDesc{
 				{"", ``}, // string
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Debug"))},
+		},
+		{
+			Name: "Status",
+			Doc:  "// Status return structured information about the application\n// installation or instance.",
+			OutArgs: []rpc.ArgDesc{
+				{"", ``}, // Status
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 	},
 }

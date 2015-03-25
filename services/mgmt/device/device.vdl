@@ -15,6 +15,25 @@ import (
 // Config specifies app configuration that overrides what's in the envelope.
 type Config map[string]string
 
+// InstallationState describes the states that an installation can be in at any
+// time.
+type InstallationState enum {
+	Active
+	Uninstalled
+}
+
+// InstanceState describes the states that an instance can be in at any
+// time.
+type InstanceState enum {
+	Starting
+	Started
+	Suspending
+	Suspended
+	Stopping
+	Stopped
+	Updating
+}
+
 // Application can be used to manage applications on a device. The
 // idea is that this interace will be invoked using an object name that
 // identifies the application and its installations and instances
@@ -193,6 +212,30 @@ type Application interface {
 	// stability of the format, and parsing it programmatically is
 	// specifically discouraged.
 	Debug() (string | error) {access.Debug}
+
+	// Status return structured information about the application
+	// installation or instance.
+	Status() (Status | error) {access.Read}
+}
+
+// Status is returned by the Application Status method.
+type Status union {
+     Instance InstanceStatus
+     Installation InstallationStatus
+}
+
+// InstallationStatus specifies the Status returned by the Application Status
+// method for installation objects.
+type InstallationStatus struct {
+	State InstallationState
+	Version string
+}
+
+// InstanceStatus specifies the Status returned by the Application Status method
+// for instance objects.
+type InstanceStatus struct {
+	State InstanceState
+	Version string
 }
 
 // StartServerMessage is the data type that is streamed from the server to the
