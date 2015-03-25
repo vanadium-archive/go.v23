@@ -152,7 +152,8 @@ func roundTrip(in, out interface{}) error {
 }
 
 func init() {
-	RegisterCaveatValidator(suffixCaveat, func(call Call, suffix string) error {
+	RegisterCaveatValidator(suffixCaveat, func(ctx *context.T, suffix string) error {
+		call := GetCall(ctx)
 		if suffix != call.Suffix() {
 			return fmt.Errorf("suffixCaveat not met")
 		}

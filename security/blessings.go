@@ -139,7 +139,7 @@ func validateCertificateChain(chain []Certificate) (PublicKey, error) {
 }
 
 // Verifies that the chain signatures are correct, without handling caveat validation
-func verifyChainSignature(call Call, chain []Certificate) (string, error) {
+func verifyChainSignature(ctx *context.T, chain []Certificate) (string, error) {
 	blessing := chain[0].Extension
 	for i := 1; i < len(chain); i++ {
 		blessing += ChainSeparator
@@ -152,12 +152,13 @@ func verifyChainSignature(call Call, chain []Certificate) (string, error) {
 	if err != nil {
 		return blessing, err
 	}
+	call := GetCall(ctx)
 	local := call.LocalPrincipal()
 	if local == nil {
-		return blessing, NewErrUnrecognizedRoot(call.Context(), root.String(), verror.New(errMisconfiguredRoots, call.Context()))
+		return blessing, NewErrUnrecognizedRoot(ctx, root.String(), verror.New(errMisconfiguredRoots, ctx))
 	}
 	if local.Roots() == nil {
-		return blessing, NewErrUnrecognizedRoot(call.Context(), root.String(), verror.New(errMisconfiguredRoots, call.Context()))
+		return blessing, NewErrUnrecognizedRoot(ctx, root.String(), verror.New(errMisconfiguredRoots, ctx))
 	}
 	if err := local.Roots().Recognized(root, blessing); err != nil {
 		return blessing, err
@@ -166,11 +167,11 @@ func verifyChainSignature(call Call, chain []Certificate) (string, error) {
 	return blessing, nil
 }
 
-func defaultChainCaveatValidator(call Call, chains [][]Caveat) []error {
+func defaultChainCaveatValidator(ctx *context.T, chains [][]Caveat) []error {
 	results := make([]error, len(chains))
 	for i, chain := range chains {
 		for _, cav := range chain {
-			if err := validateCaveat(call, cav); err != nil {
+			if err := validateCaveat(ctx, cav); err != nil {
 				results[i] = err
 				break
 			}
@@ -182,7 +183,7 @@ func defaultChainCaveatValidator(call Call, chains [][]Caveat) []error {
 
 // validateCaveat is pretty much the same as cav.Validate(call), but it defers
 // to any validation scheme overrides via SetCaveatValidator.
-func validateCaveat(call Call, cav Caveat) error {
+func validateCaveat(ctx *context.T, cav Caveat) error {
 	caveatValidationSetup.mu.RLock()
 	fn := caveatValidationSetup.fn
 	finalized := caveatValidationSetup.finalized
@@ -194,9 +195,9 @@ func validateCaveat(call Call, cav Caveat) error {
 		caveatValidationSetup.mu.Unlock()
 	}
 	if fn != nil {
-		return fn(call, cav)
+		return fn(ctx, cav)
 	}
-	return cav.Validate(call)
+	return cav.Validate(ctx)
 }
 
 // TODO(ashankar): Get rid of this function? It allows users to mess
@@ -281,7 +282,7 @@ func UnionOfBlessings(blessings ...Blessings) (Blessings, error) {
 
 var caveatValidationSetup struct {
 	mu        sync.RWMutex
-	fn        func(Call, Caveat) error
+	fn        func(*context.T, Caveat) error
 	finalized bool
 }
 
@@ -299,7 +300,7 @@ var caveatValidationSetup struct {
 //
 // If never invoked, the default Go API is used to associate validation
 // functions with caveats.
-func SetCaveatValidator(fn func(Call, Caveat) error) {
+func SetCaveatValidator(fn func(*context.T, Caveat) error) {
 	caveatValidationSetup.mu.Lock()
 	defer caveatValidationSetup.mu.Unlock()
 	if caveatValidationSetup.finalized {
@@ -374,8 +375,8 @@ func RemoteBlessingNames(ctx *context.T) ([]string, []RejectedBlessing) {
 		return nil, nil
 	}
 	validator := defaultChainCaveatValidator
-	if customValidator := call.Context().Value(chainValidatorKey); customValidator != nil {
-		validator = customValidator.(func(call Call, chains [][]Caveat) []error)
+	if customValidator := ctx.Value(chainValidatorKey); customValidator != nil {
+		validator = customValidator.(func(ctx *context.T, chains [][]Caveat) []error)
 	}
 
 	var (
@@ -385,7 +386,7 @@ func RemoteBlessingNames(ctx *context.T) ([]string, []RejectedBlessing) {
 		pendingChainCaveats [][]Caveat
 	)
 	for _, chain := range b.chains {
-		name, err := verifyChainSignature(call, chain)
+		name, err := verifyChainSignature(ctx, chain)
 		if err != nil {
 			rejected = append(rejected, RejectedBlessing{name, err})
 			continue
@@ -408,7 +409,7 @@ func RemoteBlessingNames(ctx *context.T) ([]string, []RejectedBlessing) {
 		return validatedNames, rejected
 	}
 
-	validationResults := validator(call, pendingChainCaveats)
+	validationResults := validator(ctx, pendingChainCaveats)
 	if g, w := len(validationResults), len(pendingNames); g != w {
 		panic(fmt.Sprintf("Got wrong number of validation results. Got %d, expected %d.", g, w))
 	}

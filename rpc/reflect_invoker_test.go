@@ -46,9 +46,8 @@ func testContext() *context.T {
 
 func NewFakeStreamServerCall() *FakeStreamServerCall {
 	return &FakeStreamServerCall{
-		security: security.NewCall(&security.CallParams{
-			Context: testContext(),
-		}),
+		context:  testContext(),
+		security: security.NewCall(&security.CallParams{}),
 	}
 }
 
@@ -83,7 +82,7 @@ func (call *FakeStreamServerCall) LocalEndpoint() naming.Endpoint {
 func (call *FakeStreamServerCall) RemoteEndpoint() naming.Endpoint {
 	return call.security.RemoteEndpoint()
 }
-func (call *FakeStreamServerCall) Context() *context.T { return call.security.Context() }
+func (call *FakeStreamServerCall) Context() *context.T { return call.context }
 
 var (
 	call1 = NewFakeStreamServerCall()

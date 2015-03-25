@@ -782,7 +782,7 @@ func TestCustomChainValidator(t *testing.T) {
 	}
 	falseResultErr := fmt.Errorf("False caveat result")
 
-	validator := func(call Call, cavs [][]Caveat) []error {
+	validator := func(ctx *context.T, cavs [][]Caveat) []error {
 		results := make([]error, len(cavs))
 		for i, chain := range cavs {
 			for _, cav := range chain {
@@ -842,7 +842,6 @@ func TestCustomChainValidator(t *testing.T) {
 	ctx = SetCall(ctx, NewCall(&CallParams{
 		LocalPrincipal:  p,
 		RemoteBlessings: bunion,
-		Context:         ctx,
 	}))
 	results, infos := RemoteBlessingNames(ctx)
 	expectedFailInfos := map[string]error{
@@ -889,8 +888,8 @@ func TestSetCaveatValidator(t *testing.T) {
 		t.Fatal(err)
 	}
 	p.AddToRoots(b)
-	SetCaveatValidator(func(call Call, cav Caveat) error {
-		c <- callcav{call, cav}
+	SetCaveatValidator(func(ctx *context.T, cav Caveat) error {
+		c <- callcav{GetCall(ctx), cav}
 		return nil
 	})
 	// The function registered above should be invoked.

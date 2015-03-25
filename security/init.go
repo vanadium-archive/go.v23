@@ -18,38 +18,33 @@ var (
 )
 
 func init() {
-	RegisterCaveatValidator(ConstCaveat, func(call Call, isValid bool) error {
+	RegisterCaveatValidator(ConstCaveat, func(ctx *context.T, isValid bool) error {
 		if isValid {
 			return nil
 		}
-		return NewErrConstCaveatValidation(call.Context())
+		return NewErrConstCaveatValidation(ctx)
 	})
 
-	RegisterCaveatValidator(ExpiryCaveatX, func(call Call, expiry time.Time) error {
+	RegisterCaveatValidator(ExpiryCaveatX, func(ctx *context.T, expiry time.Time) error {
+		call := GetCall(ctx)
 		now := call.Timestamp()
 		if now.After(expiry) {
-			return NewErrExpiryCaveatValidation(call.Context(), now, expiry)
+			return NewErrExpiryCaveatValidation(ctx, now, expiry)
 		}
 		return nil
 	})
 
-	RegisterCaveatValidator(MethodCaveatX, func(call Call, methods []string) error {
+	RegisterCaveatValidator(MethodCaveatX, func(ctx *context.T, methods []string) error {
+		call := GetCall(ctx)
 		for _, m := range methods {
 			if call.Method() == m {
 				return nil
 			}
 		}
-		return NewErrMethodCaveatValidation(call.Context(), call.Method(), methods)
+		return NewErrMethodCaveatValidation(ctx, call.Method(), methods)
 	})
 
-	RegisterCaveatValidator(PeerBlessingsCaveat, func(call Call, patterns []BlessingPattern) error {
-		// HACK!!
-		// TODO(ataly, mattr): Get rid of the following code once caveat validators
-		// also take in a *context.T
-		ctx, cf := context.RootContext()
-		defer cf()
-		ctx = SetCall(ctx, call)
-
+	RegisterCaveatValidator(PeerBlessingsCaveat, func(ctx *context.T, patterns []BlessingPattern) error {
 		lnames := LocalBlessingNames(ctx)
 		for _, p := range patterns {
 			if p.MatchedBy(lnames...) {
@@ -57,13 +52,14 @@ func init() {
 
 			}
 		}
-		return NewErrPeerBlessingsCaveatValidation(call.Context(), lnames, patterns)
+		return NewErrPeerBlessingsCaveatValidation(ctx, lnames, patterns)
 	})
 
-	RegisterCaveatValidator(PublicKeyThirdPartyCaveatX, func(call Call, params publicKeyThirdPartyCaveat) error {
+	RegisterCaveatValidator(PublicKeyThirdPartyCaveatX, func(ctx *context.T, params publicKeyThirdPartyCaveat) error {
+		call := GetCall(ctx)
 		discharge, ok := call.RemoteDischarges()[params.ID()]
 		if !ok {
-			return verror.New(errMissingDischarge, call.Context(), params.ID())
+			return verror.New(errMissingDischarge, ctx, params.ID())
 		}
 		// Must be of the valid type.
 		var d *publicKeyDischarge
@@ -71,20 +67,20 @@ func init() {
 		case WireDischargePublicKey:
 			d = &v.Value
 		default:
-			return verror.New(errInvalidDischarge, call.Context(), fmt.Sprintf("%T", v), fmt.Sprintf("%T", params))
+			return verror.New(errInvalidDischarge, ctx, fmt.Sprintf("%T", v), fmt.Sprintf("%T", params))
 		}
 		// Must be signed by the principal designated by c.DischargerKey
-		key, err := params.discharger(call.Context())
+		key, err := params.discharger(ctx)
 		if err != nil {
 			return err
 		}
-		if err := d.verify(call.Context(), key); err != nil {
+		if err := d.verify(ctx, key); err != nil {
 			return err
 		}
 		// And all caveats on the discharge must be met.
 		for _, cav := range d.Caveats {
-			if err := cav.Validate(call); err != nil {
-				return verror.New(errFailedDischarge, call.Context(), cav, err)
+			if err := cav.Validate(ctx); err != nil {
+				return verror.New(errFailedDischarge, ctx, cav, err)
 			}
 		}
 		return nil

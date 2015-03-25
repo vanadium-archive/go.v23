@@ -564,6 +564,9 @@ type ServerCall interface {
 	GrantedBlessings() security.Blessings
 	// Server returns the Server that this context is associated with.
 	Server() Server
+
+	// Context returns the current context.T.
+	Context() *context.T
 }
 
 // TODO(caprita): Remove this.  It's currently referenced in all VDL-generated

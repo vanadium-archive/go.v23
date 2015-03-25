@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	"v.io/v23/context"
 	"v.io/v23/naming"
 	"v.io/v23/vdl"
 )
@@ -34,8 +33,6 @@ type CallParams struct {
 	RemoteDischarges map[string]Discharge // Map of third-party caveat identifiers to corresponding discharges shared by the remote end.
 	LocalDischarges  map[string]Discharge // Map of third-party caveat identifiers to corresponding discharges shared by the local end.
 	RemoteEndpoint   naming.Endpoint      // Endpoint of the remote end of communication
-
-	Context *context.T // The context.T.
 }
 
 // Copy fills in p with a copy of the values in c.
@@ -60,7 +57,6 @@ func (p *CallParams) Copy(c Call) {
 	p.LocalDischarges = copyDischargeMap(c.LocalDischarges())
 	p.RemoteDischarges = copyDischargeMap(c.RemoteDischarges())
 	p.RemoteEndpoint = c.RemoteEndpoint()
-	p.Context = c.Context()
 }
 
 func copyDischargeMap(discharges map[string]Discharge) map[string]Discharge {
@@ -86,4 +82,3 @@ func (c *ctxImpl) RemoteEndpoint() naming.Endpoint        { return c.params.Remo
 func (c *ctxImpl) LocalDischarges() map[string]Discharge  { return c.params.LocalDischarges }
 func (c *ctxImpl) RemoteDischarges() map[string]Discharge { return c.params.RemoteDischarges }
 func (c *ctxImpl) String() string                         { return fmt.Sprintf("%+v", c.params) }
-func (c *ctxImpl) Context() *context.T                    { return c.params.Context }

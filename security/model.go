@@ -354,12 +354,15 @@ type ThirdPartyCaveat interface {
 	// in order to issue a discharge.
 	Requirements() ThirdPartyRequirements
 
-	// Dischargeable validates all restrictions encoded within the third-party
-	// caveat under 'call' and returns nil iff they have been satisfied, and thus
-	// ensures that it is okay to generate a discharge for this ThirdPartyCaveat.
+	// Dischargeable validates all restrictions encoded within the
+	// third-party caveat under the current call (obtained from the
+	// context) and returns nil iff they have been satisfied, and thus
+	// ensures that it is okay to generate a discharge for this
+	// ThirdPartyCaveat.
 	//
-	// It assumes that the ThirdPartyCaveat was on the remote end of call.
-	Dischargeable(call Call) error
+	// It assumes that the ThirdPartCaveat was obtained from the remote end of
+	// call.
+	Dischargeable(ctx *context.T) error
 
 	// TODO(andreser, ashankar): require the discharger to have a specific
 	// identity so that the private information below is not exposed to
@@ -399,8 +402,6 @@ type Call interface {
 	// RemoteEndpoint() returns the Endpoint of the principal at the remote end
 	// of communication.
 	RemoteEndpoint() naming.Endpoint
-	// Context returns the current context.T.
-	Context() *context.T
 
 	// TODO(ashankar,ataly): Disallow Call interface implementations
 	// in other packages for now?
