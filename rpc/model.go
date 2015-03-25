@@ -552,8 +552,14 @@ type StreamServerCall interface {
 // ServerCall defines the in-flight context for a server method call, not
 // including methods to stream args and results.
 type ServerCall interface {
-	security.Call
-
+	// Suffix returns the object name suffix for the request.
+	Suffix() string
+	// LocalEndpoint returns the Endpoint at the local end of
+	// communication.
+	LocalEndpoint() naming.Endpoint
+	// RemoteEndpoint returns the Endpoint at the remote end of
+	// communication.
+	RemoteEndpoint() naming.Endpoint
 	// GrantedBlessings are blessings granted by the client to the server
 	// (bound to the server).  Typically provided by a client to delegate
 	// to the server, allowed the server to use the client's authority to
