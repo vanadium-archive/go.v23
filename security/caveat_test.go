@@ -59,7 +59,7 @@ func TestStandardCaveatFactories(t *testing.T) {
 		err := test.cav.Validate(ctx)
 		if test.ok && err != nil {
 			t.Errorf("#%d: %v.Validate(...) failed validation: %v", idx, test.cav, err)
-		} else if !test.ok && !verror.Is(err, ErrCaveatValidation.ID) {
+		} else if !test.ok && verror.ErrorID(err) != ErrCaveatValidation.ID {
 			t.Errorf("#%d: %v.Validate(...) returned error='%v' (errorid=%v), want errorid=%v", idx, test.cav, err, verror.ErrorID(err), ErrCaveatValidation.ID)
 		}
 	}
@@ -139,14 +139,14 @@ func TestCaveat(t *testing.T) {
 		Id:        uid,
 		ParamType: vdl.AnyType,
 	}
-	if _, err := NewCaveat(anyCd, 9); !verror.Is(err, ErrCaveatParamAny.ID) {
+	if _, err := NewCaveat(anyCd, 9); verror.ErrorID(err) != ErrCaveatParamAny.ID {
 		t.Errorf("Got '%v' (errorid=%v), want errorid=%v", err, verror.ErrorID(err), ErrCaveatParamAny.ID)
 	}
 	cd := CaveatDescriptor{
 		Id:        uid,
 		ParamType: vdl.TypeOf(string("")),
 	}
-	if _, err := NewCaveat(cd, nil); !verror.Is(err, ErrCaveatParamTypeMismatch.ID) {
+	if _, err := NewCaveat(cd, nil); verror.ErrorID(err) != ErrCaveatParamTypeMismatch.ID {
 		t.Errorf("Got '%v' (errorid=%v), want errorid=%v", err, verror.ErrorID(err), ErrCaveatParamTypeMismatch.ID)
 	}
 	// A param of type *vdl.Value with underlying type string should succeed.
@@ -168,7 +168,7 @@ func TestCaveat(t *testing.T) {
 		t.Fatal(err)
 	}
 	// Validation will fail when the validation function isn't registered.
-	if err := c1.Validate(ctx); !verror.Is(err, ErrCaveatNotRegistered.ID) {
+	if err := c1.Validate(ctx); verror.ErrorID(err) != ErrCaveatNotRegistered.ID {
 		t.Errorf("Got '%v' (errorid=%v), want errorid=%v", err, verror.ErrorID(err), ErrCaveatNotRegistered.ID)
 	}
 	// Once registered, then it should be invoked
@@ -181,12 +181,12 @@ func TestCaveat(t *testing.T) {
 	if err := c1.Validate(ctx); err != nil {
 		t.Error(err)
 	}
-	if err := c2.Validate(ctx); !verror.Is(err, ErrCaveatValidation.ID) {
+	if err := c2.Validate(ctx); verror.ErrorID(err) != ErrCaveatValidation.ID {
 		t.Errorf("Got '%v' (errorid=%v), want errorid=%v", err, verror.ErrorID(err), ErrCaveatValidation.ID)
 	}
 	// If a malformed caveat was received, then validation should fail
 	c3 := Caveat{Id: cd.Id, ParamVom: nil}
-	if err := c3.Validate(ctx); !verror.Is(err, ErrCaveatParamCoding.ID) {
+	if err := c3.Validate(ctx); verror.ErrorID(err) != ErrCaveatParamCoding.ID {
 		t.Errorf("Got '%v' (errorid=%v), want errorid=%v", err, verror.ErrorID(err), ErrCaveatParamCoding.ID)
 	}
 }

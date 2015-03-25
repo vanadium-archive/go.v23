@@ -196,16 +196,6 @@ func Action(err error) ActionCode {
 	return NoRetry
 }
 
-// Is returns true iff the given err has the given ID.
-func Is(err error, id ID) bool {
-	return ErrorID(err) == id
-}
-
-// Equal returns true iff a and b have the same error ID.
-func Equal(a, b error) bool {
-	return ErrorID(a) == ErrorID(b)
-}
-
 // PCs represents a list of PC locations
 type PCs []uintptr
 

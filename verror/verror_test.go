@@ -193,38 +193,12 @@ func TestDefaultValues(t *testing.T) {
 		t.Errorf("got: %d, want: %d", got, want)
 	}
 
-	if !verror.Is(nil, verror.IDAction{}.ID) {
-		t.Errorf("is test failed")
+	unknown := verror.ExplicitNew(verror.ErrUnknown, i18n.NoLangID, "", "")
+	if got, want := verror.ErrorID(unknown), verror.ErrUnknown.ID; got != want {
+		t.Errorf("got: %d, want: %d", got, want)
 	}
-	if verror.Is(nil, verror.ErrBadArg.ID) {
-		t.Errorf("is test succeeded")
-	}
-	if verror.Is(nil, verror.ErrUnknown.ID) {
-		t.Errorf("is test succeeded")
-	}
-
-	if verror.Is(verror.ExplicitNew(verror.ErrUnknown, i18n.NoLangID, "", ""), verror.IDAction{}.ID) {
-		t.Errorf("is test succeeded")
-	}
-
-	if !verror.Equal(nil, nil) {
-		t.Errorf("equality test failed")
-	}
-
-	// nil and default IDAction get mapped to Unknown.
-	if !verror.Equal(nil, verror.ExplicitNew(verror.IDAction{}, i18n.NoLangID, "", "")) {
-		t.Errorf("equality test failed")
-	}
-	if verror.Equal(nil, verror.ExplicitNew(verror.ErrUnknown, i18n.NoLangID, "", "")) {
-		t.Errorf("equality test succeeded")
-	}
-	if verror.Equal(nil, verror.ExplicitNew(verror.ErrBadArg, i18n.NoLangID, "", "")) {
-		t.Errorf("equality test succeeded")
-	}
-
-	unknown := verror.E{}
-	if got, want := unknown.Error(), "v.io/v23/verror.Unknown"; got != want {
-		t.Errorf("got %q, want %q", got, want)
+	if got, want := verror.Action(unknown), verror.NoRetry; got != want {
+		t.Errorf("got: %d, want: %d", got, want)
 	}
 }
 
@@ -266,20 +240,17 @@ func TestBasic(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		if verror.ErrorID(test.err) != test.idAction.ID {
-			t.Errorf("%d: ErrorID(%#v); got %v, want %v", i, test.err, verror.ErrorID(test.err), test.idAction.ID)
+		if got, want := verror.ErrorID(test.err), test.idAction.ID; got != want {
+			t.Errorf("%d: ErrorID(%#v); got %v, want %v", i, test.err, got, want)
 		}
-		if verror.Action(test.err) != test.idAction.Action {
-			t.Errorf("%d: Action(%#v); got %v, want %v", i, test.err, verror.Action(test.err), test.idAction.Action)
+		if got, nowant := verror.ErrorID(test.err), idActionC.ID; got == nowant {
+			t.Errorf("%d: ErrorID(%#v); got %v, nowant %v", i, test.err, got, nowant)
 		}
-		if test.err.Error() != test.msg {
-			t.Errorf("%d: %#v.Error(); got %q, want %q", i, test.err, test.err.Error(), test.msg)
+		if got, want := verror.Action(test.err), test.idAction.Action; got != want {
+			t.Errorf("%d: Action(%#v); got %v, want %v", i, test.err, got, want)
 		}
-		if !verror.Is(test.err, test.idAction.ID) {
-			t.Errorf("%d: Is(%#v, %s); got true, want false", i, test.err, test.idAction.ID)
-		}
-		if verror.Is(test.err, idActionC.ID) {
-			t.Errorf("%d: Is(%#v, %s); got true, want false", i, test.err, idActionC.ID)
+		if got, want := test.err.Error(), test.msg; got != want {
+			t.Errorf("%d: %#v.Error(); got %q, want %q", i, test.err, got, want)
 		}
 
 		stack := verror.Stack(test.err)
@@ -315,27 +286,6 @@ func TestStack(t *testing.T) {
 		}
 		if !strings.Contains(stack, "verror_test.tester") {
 			t.Errorf("got %q, doesn't contain 'verror_test.tester", stack)
-		}
-	}
-}
-
-func TestEqual(t *testing.T) {
-	var equivalanceClasses = [][]error{
-		{aEN0, aEN1, aDE0, aDE1, aDE0, aDE1, v2EN, v2FR0, v2FR1, v2DE},
-		{bEN0, bEN1, bDE0, bDE1, bDE0, bDE1},
-		{nEN0, nEN1, nDE0, nDE1, nDE0, nDE1},
-		{gEN, gFR, gDE},
-	}
-
-	for x, class0 := range equivalanceClasses {
-		for y, class1 := range equivalanceClasses {
-			for _, e0 := range class0 {
-				for _, e1 := range class1 {
-					if verror.Equal(e0, e1) != (x == y) {
-						t.Errorf("Equal(%#v, %#v) == %v", e0, e1, x == y)
-					}
-				}
-			}
 		}
 	}
 }

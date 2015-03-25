@@ -598,12 +598,12 @@ func TestReflectInvokerErrors(t *testing.T) {
 	testInvoker := func(test testcase, invoker rpc.Invoker) {
 		// Call Invoker.Prepare and check error.
 		_, _, err := invoker.Prepare(test.method, len(test.args))
-		if !verror.Is(err, test.prepareErr) {
+		if verror.ErrorID(err) != test.prepareErr {
 			t.Errorf(`%s Prepare got error "%v", want id %v`, name(test), err, test.prepareErr)
 		}
 		// Call Invoker.Invoke and check error.
 		_, err = invoker.Invoke(test.method, call1, test.args)
-		if !verror.Is(err, test.invokeErr) {
+		if verror.ErrorID(err) != test.invokeErr {
 			t.Errorf(`%s Invoke got error "%v", want id %v`, name(test), err, test.invokeErr)
 		}
 	}
