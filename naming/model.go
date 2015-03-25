@@ -115,15 +115,6 @@ type ReplaceMountOpt bool
 
 func (ReplaceMountOpt) NSMountOpt() {}
 
-// MountedServerBlessingsOpt specifies blessing patterns that match the set of
-// blessings presented by the server being mounted.
-//
-// Ideally, the type of this would be []security.BlessingPattern, but it can't
-// be because of a cyclic dependency between the naming and security packages.
-type MountedServerBlessingsOpt []string
-
-func (MountedServerBlessingsOpt) NSMountOpt() {}
-
 // ServesMountTableOpt means the target is a mount table.
 type ServesMountTableOpt bool
 
@@ -144,11 +135,6 @@ func (BlessingOpt) EndpointOpt() {}
 type ResolveOpt interface {
 	NSResolveOpt()
 }
-
-// TODO(ashankar): Remove before release.
-type RootBlessingPatternOpt string
-
-func (RootBlessingPatternOpt) NSResolveOpt() {}
 
 // When this prefix is present at the beginning of an object name suffix, the
 // server may intercept the request and handle it internally. This is used to

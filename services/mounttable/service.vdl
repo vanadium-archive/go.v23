@@ -42,21 +42,11 @@ const (
 //
 // In all methods of MountTable, the receiver is the name bound to.
 type MountTable interface {
-	// DEPRECATED: TODO(ashankar): Rename MountX to Mount and remove
-	// MountX before the release.
-	Mount(server string, ttl uint32, flags naming.MountFlag) error
-
 	// Mount Server (a global name) onto the receiver.
 	//
 	// Subsequent mounts add to the servers mounted there.  The multiple
 	// servers are considered equivalent and are meant solely for
 	// availability, i.e., no load balancing is guaranteed.
-	//
-	// The blessingPatterns is a set of patterns that match the blessings
-	// presented by server to clients that initiate connections with it.  If
-	// empty, the mounttable makes the conservative assumption that the blessings
-	// presented by the client invoking Mount will be the blessings presented by
-	// server.
 	//
 	// The ttl is the number of seconds the mount is to last unless refreshed by
 	// another mount of the same server.  A ttl of 0 represents an infinite
@@ -65,6 +55,9 @@ type MountTable interface {
 	// was never present as far as the interface is concerned.
 	//
 	// The flags represent a bit mask of options.
+	Mount(server string, ttl uint32, flags naming.MountFlag) error
+
+	// DEPRECATED: TODO(ashankar): Remove before release.
 	MountX(server string, blessingPatterns []security.BlessingPattern, ttl uint32, flags naming.MountFlag) error
 
 	// Unmount removes server from the receiver.  If server is empty, remove all

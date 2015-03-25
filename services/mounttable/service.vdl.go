@@ -102,20 +102,11 @@ type MountTableClientMethods interface {
 	//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}
 	//  }
 	object.ObjectClientMethods
-	// DEPRECATED: TODO(ashankar): Rename MountX to Mount and remove
-	// MountX before the release.
-	Mount(ctx *context.T, server string, ttl uint32, flags naming.MountFlag, opts ...rpc.CallOpt) error
 	// Mount Server (a global name) onto the receiver.
 	//
 	// Subsequent mounts add to the servers mounted there.  The multiple
 	// servers are considered equivalent and are meant solely for
 	// availability, i.e., no load balancing is guaranteed.
-	//
-	// The blessingPatterns is a set of patterns that match the blessings
-	// presented by server to clients that initiate connections with it.  If
-	// empty, the mounttable makes the conservative assumption that the blessings
-	// presented by the client invoking Mount will be the blessings presented by
-	// server.
 	//
 	// The ttl is the number of seconds the mount is to last unless refreshed by
 	// another mount of the same server.  A ttl of 0 represents an infinite
@@ -124,6 +115,8 @@ type MountTableClientMethods interface {
 	// was never present as far as the interface is concerned.
 	//
 	// The flags represent a bit mask of options.
+	Mount(ctx *context.T, server string, ttl uint32, flags naming.MountFlag, opts ...rpc.CallOpt) error
+	// DEPRECATED: TODO(ashankar): Remove before release.
 	MountX(ctx *context.T, server string, blessingPatterns []security.BlessingPattern, ttl uint32, flags naming.MountFlag, opts ...rpc.CallOpt) error
 	// Unmount removes server from the receiver.  If server is empty, remove all
 	// servers mounted there.  Returns a non-nil error iff server remains mounted
@@ -277,20 +270,11 @@ type MountTableServerMethods interface {
 	//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}
 	//  }
 	object.ObjectServerMethods
-	// DEPRECATED: TODO(ashankar): Rename MountX to Mount and remove
-	// MountX before the release.
-	Mount(call rpc.ServerCall, server string, ttl uint32, flags naming.MountFlag) error
 	// Mount Server (a global name) onto the receiver.
 	//
 	// Subsequent mounts add to the servers mounted there.  The multiple
 	// servers are considered equivalent and are meant solely for
 	// availability, i.e., no load balancing is guaranteed.
-	//
-	// The blessingPatterns is a set of patterns that match the blessings
-	// presented by server to clients that initiate connections with it.  If
-	// empty, the mounttable makes the conservative assumption that the blessings
-	// presented by the client invoking Mount will be the blessings presented by
-	// server.
 	//
 	// The ttl is the number of seconds the mount is to last unless refreshed by
 	// another mount of the same server.  A ttl of 0 represents an infinite
@@ -299,6 +283,8 @@ type MountTableServerMethods interface {
 	// was never present as far as the interface is concerned.
 	//
 	// The flags represent a bit mask of options.
+	Mount(call rpc.ServerCall, server string, ttl uint32, flags naming.MountFlag) error
+	// DEPRECATED: TODO(ashankar): Remove before release.
 	MountX(call rpc.ServerCall, server string, blessingPatterns []security.BlessingPattern, ttl uint32, flags naming.MountFlag) error
 	// Unmount removes server from the receiver.  If server is empty, remove all
 	// servers mounted there.  Returns a non-nil error iff server remains mounted
@@ -398,7 +384,7 @@ var descMountTable = rpc.InterfaceDesc{
 	Methods: []rpc.MethodDesc{
 		{
 			Name: "Mount",
-			Doc:  "// DEPRECATED: TODO(ashankar): Rename MountX to Mount and remove\n// MountX before the release.",
+			Doc:  "// Mount Server (a global name) onto the receiver.\n//\n// Subsequent mounts add to the servers mounted there.  The multiple\n// servers are considered equivalent and are meant solely for\n// availability, i.e., no load balancing is guaranteed.\n//\n// The ttl is the number of seconds the mount is to last unless refreshed by\n// another mount of the same server.  A ttl of 0 represents an infinite\n// duration.  A server with an expired ttl should never appear in the results\n// nor affect the operation of any MountTable method, and should act as if it\n// was never present as far as the interface is concerned.\n//\n// The flags represent a bit mask of options.",
 			InArgs: []rpc.ArgDesc{
 				{"server", ``}, // string
 				{"ttl", ``},    // uint32
@@ -407,7 +393,7 @@ var descMountTable = rpc.InterfaceDesc{
 		},
 		{
 			Name: "MountX",
-			Doc:  "// Mount Server (a global name) onto the receiver.\n//\n// Subsequent mounts add to the servers mounted there.  The multiple\n// servers are considered equivalent and are meant solely for\n// availability, i.e., no load balancing is guaranteed.\n//\n// The blessingPatterns is a set of patterns that match the blessings\n// presented by server to clients that initiate connections with it.  If\n// empty, the mounttable makes the conservative assumption that the blessings\n// presented by the client invoking Mount will be the blessings presented by\n// server.\n//\n// The ttl is the number of seconds the mount is to last unless refreshed by\n// another mount of the same server.  A ttl of 0 represents an infinite\n// duration.  A server with an expired ttl should never appear in the results\n// nor affect the operation of any MountTable method, and should act as if it\n// was never present as far as the interface is concerned.\n//\n// The flags represent a bit mask of options.",
+			Doc:  "// DEPRECATED: TODO(ashankar): Remove before release.",
 			InArgs: []rpc.ArgDesc{
 				{"server", ``},           // string
 				{"blessingPatterns", ``}, // []security.BlessingPattern
