@@ -1,3 +1,7 @@
+// Copyright 2015 The Vanadium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 // Package naming defines the public interface for naming, including
 // the format of names, the APIs for resolving and managing names as
 // well as all associated types.

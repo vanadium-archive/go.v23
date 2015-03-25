@@ -1,3 +1,7 @@
+// Copyright 2015 The Vanadium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 // reflect_invoker_internal_test uses internals of reflect_invoker (and hence is in the rpc package),
 // whereas reflect_invoker_test is it the rpc_test package.
 

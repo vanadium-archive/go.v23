@@ -1,3 +1,7 @@
+// Copyright 2015 The Vanadium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 // Package vtrace extends the v23/context to allow you to attach
 // various types of debugging information.  This debugging information
 // accumulates along the various parts of the context tree and can be

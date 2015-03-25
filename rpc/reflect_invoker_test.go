@@ -1,3 +1,7 @@
+// Copyright 2015 The Vanadium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 // reflect_invoker_test is the main unit test for relfelct_invoker.go, but see also
 // reflect_invoker_internal_test, which tests some things internal to the module.
 

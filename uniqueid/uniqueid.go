@@ -1,3 +1,7 @@
+// Copyright 2015 The Vanadium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 // Package uniqueid helps generate identifiers that are likely to be
 // globally unique.  We want to be able to generate many Ids quickly,
 // so we make a time/space tradeoff.  We reuse the same random data

@@ -1,3 +1,7 @@
+// Copyright 2015 The Vanadium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 /* Package rpc defines the public interface for all interprocess communication.
 
 There are two actors in the system, clients and servers.  Clients invoke methods

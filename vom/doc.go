@@ -1,3 +1,7 @@
+// Copyright 2015 The Vanadium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 /*
 Package vom implements Vanadium Object Marshaling, a serialization protocol
 similar to the encoding/gob package.  Vom is used in Vanadium to enable

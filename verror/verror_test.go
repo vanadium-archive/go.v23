@@ -1,3 +1,7 @@
+// Copyright 2015 The Vanadium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package verror_test
 
 import (
@@ -84,7 +88,7 @@ func TestSubordinateErrors(t *testing.T) {
 	if !strings.Contains(p2str, r2) {
 		t.Errorf("debug string missing error message: %q, %q", p2str, r2)
 	}
-	if !(strings.Contains(p2str, "verror_test.go:72") && strings.Contains(p2str, "verror_test.go:78")) {
+	if !(strings.Contains(p2str, "verror_test.go:76") && strings.Contains(p2str, "verror_test.go:82")) {
 		t.Errorf("debug string missing correct line #: %s", p2str)
 	}
 	p3 := verror.AddSubErrs(p, nil, verror.SubErr{"go_err=2", fmt.Errorf("Oh"), 0})
