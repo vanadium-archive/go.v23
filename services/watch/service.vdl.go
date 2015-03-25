@@ -112,13 +112,125 @@ import (
 	"io"
 	"v.io/v23"
 	"v.io/v23/context"
+	"v.io/v23/i18n"
 	"v.io/v23/rpc"
 	"v.io/v23/vdl"
+	"v.io/v23/verror"
 
 	// VDL user imports
 	"v.io/v23/services/security/access"
-	"v.io/v23/services/watch/types"
 )
+
+// GlobRequest specifies which entities should be watched and, optionally,
+// how to resume from a previous Watch call.
+type GlobRequest struct {
+	// Pattern specifies the subset of the children of the root entity
+	// for which the client wants updates.
+	Pattern string
+	// ResumeMarker specifies how to resume from a previous Watch call.
+	// See the ResumeMarker type for detailed comments.
+	ResumeMarker ResumeMarker
+}
+
+func (GlobRequest) __VDLReflect(struct {
+	Name string "v.io/v23/services/watch.GlobRequest"
+}) {
+}
+
+// ResumeMarker specifies how much of the existing underlying state
+// is delivered to the client when the watch request is received by
+// the system. The client can set this marker in one of the
+// following ways to get different semantics:
+//
+// (A) Parameter is left empty.
+//     Semantics: Fetch initial state.
+//     The client wants the entities' initial states to be delivered.
+//     See the description in "Initial State".
+//
+// (B) Parameter is set to the string "now" (UTF-8 encoding).
+//     Semantics: Fetch new changes only.
+//     The client just wants to get the changes received by the
+//     system after the watch point. The system may deliver changes
+//     from before the watch point as well.
+//
+// (C) Parameter is set to a value received in an earlier
+//     Change.ResumeMarker field while watching the same entity with
+//     the same query.
+//     Semantics: Resume from a specific point.
+//     The client wants to receive the changes from a specific point
+//     - this value must correspond to a value received in the
+//     Change.ResumeMarker field. The system may deliver changes
+//     from before the ResumeMarker as well.  If the system cannot
+//     resume the stream from this point (e.g., if it is too far
+//     behind in the stream), it can return the
+//     ErrUnknownResumeMarker error.
+//
+// An implementation MUST support the empty string "" marker
+// (initial state fetching) and the "now" marker. It need not
+// support resuming from a specific point.
+type ResumeMarker []byte
+
+func (ResumeMarker) __VDLReflect(struct {
+	Name string "v.io/v23/services/watch.ResumeMarker"
+}) {
+}
+
+// Change is the new value for a watched entity.
+type Change struct {
+	// Name is the Object name of the entity that changed.  This name is relative
+	// to the root entity (i.e. the name of the Watcher service).
+	Name string
+	// State must be one of Exists, DoesNotExist, or InitialStateSkipped.
+	State int32
+	// Value contains the service-specific data for the entity.
+	Value *vdl.Value
+	// If present, provides a compact representation of all the messages
+	// that have been received by the caller for the given Watch call.
+	// For example, it could be a sequence number or a multi-part
+	// timestamp/version vector. This marker can be provided in the
+	// Request message to allow the caller to resume the stream watching
+	// at a specific point without fetching the initial state.
+	ResumeMarker ResumeMarker
+	// If true, this Change is followed by more Changes that are in the
+	// same group as this Change.
+	Continued bool
+}
+
+func (Change) __VDLReflect(struct {
+	Name string "v.io/v23/services/watch.Change"
+}) {
+}
+
+func init() {
+	vdl.Register((*GlobRequest)(nil))
+	vdl.Register((*ResumeMarker)(nil))
+	vdl.Register((*Change)(nil))
+}
+
+// The entity exists and its full value is included in Value.
+const Exists = int32(0)
+
+// The entity does not exist.
+const DoesNotExist = int32(1)
+
+// The root entity and its children may or may not exist. Used only
+// for initial state delivery when the client is not interested in
+// fetching the initial state. See the "Initial State" section
+// above.
+const InitialStateSkipped = int32(2)
+
+var (
+	ErrUnknownResumeMarker = verror.Register("v.io/v23/services/watch.UnknownResumeMarker", verror.NoRetry, "{1:}{2:} unknown resume marker {_}")
+)
+
+func init() {
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnknownResumeMarker.ID), "{1:}{2:} unknown resume marker {_}")
+}
+
+// NewErrUnknownResumeMarker returns an error with the ErrUnknownResumeMarker ID.
+func NewErrUnknownResumeMarker(ctx *context.T) error {
+	return verror.New(ErrUnknownResumeMarker, ctx)
+}
 
 // GlobWatcherClientMethods is the client interface
 // containing GlobWatcher methods.
@@ -127,7 +239,7 @@ import (
 // that match a pattern.  See the package comments for details.
 type GlobWatcherClientMethods interface {
 	// WatchGlob returns a stream of changes that match a pattern.
-	WatchGlob(ctx *context.T, req types.GlobRequest, opts ...rpc.CallOpt) (GlobWatcherWatchGlobClientCall, error)
+	WatchGlob(ctx *context.T, req GlobRequest, opts ...rpc.CallOpt) (GlobWatcherWatchGlobClientCall, error)
 }
 
 // GlobWatcherClientStub adds universal methods to GlobWatcherClientMethods.
@@ -159,7 +271,7 @@ func (c implGlobWatcherClientStub) c(ctx *context.T) rpc.Client {
 	return v23.GetClient(ctx)
 }
 
-func (c implGlobWatcherClientStub) WatchGlob(ctx *context.T, i0 types.GlobRequest, opts ...rpc.CallOpt) (ocall GlobWatcherWatchGlobClientCall, err error) {
+func (c implGlobWatcherClientStub) WatchGlob(ctx *context.T, i0 GlobRequest, opts ...rpc.CallOpt) (ocall GlobWatcherWatchGlobClientCall, err error) {
 	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "WatchGlob", []interface{}{i0}, opts...); err != nil {
 		return
@@ -178,7 +290,7 @@ type GlobWatcherWatchGlobClientStream interface {
 		Advance() bool
 		// Value returns the item that was staged by Advance.  May panic if Advance
 		// returned false or was not called.  Never blocks.
-		Value() types.Change
+		Value() Change
 		// Err returns any error encountered by Advance.  Never blocks.
 		Err() error
 	}
@@ -202,13 +314,13 @@ type GlobWatcherWatchGlobClientCall interface {
 
 type implGlobWatcherWatchGlobClientCall struct {
 	rpc.ClientCall
-	valRecv types.Change
+	valRecv Change
 	errRecv error
 }
 
 func (c *implGlobWatcherWatchGlobClientCall) RecvStream() interface {
 	Advance() bool
-	Value() types.Change
+	Value() Change
 	Err() error
 } {
 	return implGlobWatcherWatchGlobClientCallRecv{c}
@@ -219,11 +331,11 @@ type implGlobWatcherWatchGlobClientCallRecv struct {
 }
 
 func (c implGlobWatcherWatchGlobClientCallRecv) Advance() bool {
-	c.c.valRecv = types.Change{}
+	c.c.valRecv = Change{}
 	c.c.errRecv = c.c.Recv(&c.c.valRecv)
 	return c.c.errRecv == nil
 }
-func (c implGlobWatcherWatchGlobClientCallRecv) Value() types.Change {
+func (c implGlobWatcherWatchGlobClientCallRecv) Value() Change {
 	return c.c.valRecv
 }
 func (c implGlobWatcherWatchGlobClientCallRecv) Err() error {
@@ -244,7 +356,7 @@ func (c *implGlobWatcherWatchGlobClientCall) Finish() (err error) {
 // that match a pattern.  See the package comments for details.
 type GlobWatcherServerMethods interface {
 	// WatchGlob returns a stream of changes that match a pattern.
-	WatchGlob(call GlobWatcherWatchGlobServerCall, req types.GlobRequest) error
+	WatchGlob(call GlobWatcherWatchGlobServerCall, req GlobRequest) error
 }
 
 // GlobWatcherServerStubMethods is the server interface containing
@@ -253,7 +365,7 @@ type GlobWatcherServerMethods interface {
 // is the streaming methods.
 type GlobWatcherServerStubMethods interface {
 	// WatchGlob returns a stream of changes that match a pattern.
-	WatchGlob(call *GlobWatcherWatchGlobServerCallStub, req types.GlobRequest) error
+	WatchGlob(call *GlobWatcherWatchGlobServerCallStub, req GlobRequest) error
 }
 
 // GlobWatcherServerStub adds universal methods to GlobWatcherServerStubMethods.
@@ -285,7 +397,7 @@ type implGlobWatcherServerStub struct {
 	gs   *rpc.GlobState
 }
 
-func (s implGlobWatcherServerStub) WatchGlob(call *GlobWatcherWatchGlobServerCallStub, i0 types.GlobRequest) error {
+func (s implGlobWatcherServerStub) WatchGlob(call *GlobWatcherWatchGlobServerCallStub, i0 GlobRequest) error {
 	return s.impl.WatchGlob(call, i0)
 }
 
@@ -310,7 +422,7 @@ var descGlobWatcher = rpc.InterfaceDesc{
 			Name: "WatchGlob",
 			Doc:  "// WatchGlob returns a stream of changes that match a pattern.",
 			InArgs: []rpc.ArgDesc{
-				{"req", ``}, // types.GlobRequest
+				{"req", ``}, // GlobRequest
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Resolve"))},
 		},
@@ -324,7 +436,7 @@ type GlobWatcherWatchGlobServerStream interface {
 		// Send places the item onto the output stream.  Returns errors encountered
 		// while sending.  Blocks if there is no buffer space; will unblock when
 		// buffer space is available.
-		Send(item types.Change) error
+		Send(item Change) error
 	}
 }
 
@@ -347,7 +459,7 @@ func (s *GlobWatcherWatchGlobServerCallStub) Init(call rpc.StreamServerCall) {
 
 // SendStream returns the send side of the GlobWatcher.WatchGlob server stream.
 func (s *GlobWatcherWatchGlobServerCallStub) SendStream() interface {
-	Send(item types.Change) error
+	Send(item Change) error
 } {
 	return implGlobWatcherWatchGlobServerCallSend{s}
 }
@@ -356,6 +468,6 @@ type implGlobWatcherWatchGlobServerCallSend struct {
 	s *GlobWatcherWatchGlobServerCallStub
 }
 
-func (s implGlobWatcherWatchGlobServerCallSend) Send(item types.Change) error {
+func (s implGlobWatcherWatchGlobServerCallSend) Send(item Change) error {
 	return s.s.Send(item)
 }
