@@ -270,14 +270,14 @@ const SignatureForBlessingCertificates = "B" // Signature.Purpose used by a Prin
 const SignatureForDischarge = "D" // Signature.Purpose used by a Principal when signing discharges for public-key based third-party caveats.
 
 var (
-	ErrUnrecognizedRoot = verror.Register("v.io/v23/security.UnrecognizedRoot", verror.NoRetry, "{1:}{2:} unrecognized root certificate{:3}")
+	ErrUnrecognizedRoot = verror.Register("v.io/v23/security.UnrecognizedRoot", verror.NoRetry, "{1:}{2:} unrecognized public key {3} in root certificate{:4}")
 )
 
 func init() {
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnrecognizedRoot.ID), "{1:}{2:} unrecognized root certificate{:3}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnrecognizedRoot.ID), "{1:}{2:} unrecognized public key {3} in root certificate{:4}")
 }
 
 // NewErrUnrecognizedRoot returns an error with the ErrUnrecognizedRoot ID.
-func NewErrUnrecognizedRoot(ctx *context.T, details error) error {
-	return verror.New(ErrUnrecognizedRoot, ctx, details)
+func NewErrUnrecognizedRoot(ctx *context.T, rootKey string, details error) error {
+	return verror.New(ErrUnrecognizedRoot, ctx, rootKey, details)
 }
