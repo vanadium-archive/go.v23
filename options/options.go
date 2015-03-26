@@ -114,14 +114,6 @@ type SkipServerEndpointAuthorization struct{}
 func (SkipServerEndpointAuthorization) RPCCallOpt()   {}
 func (SkipServerEndpointAuthorization) NSResolveOpt() {}
 
-// TODO(ashankar): Remove: This will be superceeded by
-// SkipServerEndpointAuthorization by March 12, 2015. So if you're using this
-// option in new code, please check with the security folks.
-type SkipResolveAuthorization struct{}
-
-func (SkipResolveAuthorization) RPCCallOpt()   {}
-func (SkipResolveAuthorization) NSResolveOpt() {}
-
 // Discharge wraps the security.Discharge interface so that we can
 // add functions representing the option annotations.
 type Discharge struct{ security.Discharge }
