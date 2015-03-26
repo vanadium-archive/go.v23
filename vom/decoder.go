@@ -5,20 +5,23 @@
 package vom
 
 import (
-	"errors"
-	"fmt"
 	"io"
 	"reflect"
 
 	"v.io/v23/vdl"
+	"v.io/v23/verror"
 )
 
 var (
-	errDecodeNil           = errors.New("vom: invalid decode into nil interface{}")
-	errDecodeNilRawValue   = errors.New("vom: invalid decode into nil *RawValue")
-	errDecodeInvalidTypeID = errors.New("vom: invalid type id")
-	errDecodeZeroTypeID    = errors.New("vom: zero type id")
-	errIndexOutOfRange     = errors.New("vom: index out of range")
+	errDecodeNil                = verror.Register(pkgPath+".errDecodeNil", verror.NoRetry, "{1:}{2:} vom: invalid decode into nil interface{}{:_}")
+	errDecodeNilRawValue        = verror.Register(pkgPath+".errDecodeNilRawValue", verror.NoRetry, "{1:}{2:} vom: invalid decode into nil *RawValue{:_}")
+	errDecodeInvalidTypeID      = verror.Register(pkgPath+".errDecodeInvalidTypeID", verror.NoRetry, "{1:}{2:} vom: invalid type id{:_}")
+	errDecodeZeroTypeID         = verror.Register(pkgPath+".errDecodeZeroTypeID", verror.NoRetry, "{1:}{2:} vom: zero type id{:_}")
+	errIndexOutOfRange          = verror.Register(pkgPath+".errIndexOutOfRange", verror.NoRetry, "{1:}{2:} vom: index out of range{:_}")
+	errLeftOverBytes            = verror.Register(pkgPath+".errLeftOverBytes", verror.NoRetry, "{1:}{2:} vom: {3} leftover bytes{:_}")
+	errUnexpectedControlByte    = verror.Register(pkgPath+".errUnexpectedControlByte", verror.NoRetry, "{1:}{2:} vom: unexpected control byte {3}{:_}")
+	errDecodeValueUnhandledType = verror.Register(pkgPath+".errDecodeValueUnhandledType", verror.NoRetry, "{1:}{2:} vom: decodeValue unhandled type {3}{:_}")
+	errIgnoreValueUnhandledType = verror.Register(pkgPath+".errIgnoreValueUnhandledType", verror.NoRetry, "{1:}{2:} vom: ignoreValue unhandled type {3}{:_}")
 )
 
 // Decoder manages the receipt and unmarshalling of typed values from the other
@@ -70,10 +73,10 @@ func newDecoder(buf *decbuf, typeDec *TypeDecoder) *Decoder {
 func (d *Decoder) Decode(v interface{}) error {
 	switch tv := v.(type) {
 	case nil:
-		return errDecodeNil
+		return verror.New(errDecodeNil, nil)
 	case *RawValue:
 		if tv == nil {
-			return errDecodeNilRawValue
+			return verror.New(errDecodeNilRawValue, nil)
 		}
 		return d.decodeRaw(tv)
 	}
@@ -125,9 +128,9 @@ func (d *Decoder) decodeWireType(wt *wireType) (typeId, error) {
 	}
 	switch {
 	case id == 0:
-		return 0, errDecodeZeroTypeID
+		return 0, verror.New(errDecodeZeroTypeID, nil)
 	case id > 0:
-		return 0, errDecodeInvalidTypeID
+		return 0, verror.New(errDecodeInvalidTypeID, nil)
 	}
 	// This is a type message, the typeId is -id.
 	tid := typeId(-id)
@@ -168,7 +171,7 @@ func (d *Decoder) decodeValueType() (*vdl.Type, error) {
 				return nil, err
 			}
 		case id == 0:
-			return nil, errDecodeZeroTypeID
+			return nil, verror.New(errDecodeZeroTypeID, nil)
 		}
 	}
 }
@@ -198,7 +201,7 @@ func (d *Decoder) decodeValueByteLen(tt *vdl.Type) (int, error) {
 		case err != nil:
 			return 0, err
 		case strlen > maxBinaryMsgLen:
-			return 0, errMsgLen
+			return 0, verror.New(errMsgLen, nil)
 		}
 		return int(strlen) + bytelen, nil
 	default:
@@ -227,7 +230,7 @@ func (d *Decoder) decodeValueMsg(tt *vdl.Type, v interface{}) error {
 	}
 	leftover := d.buf.RemoveLimit()
 	if leftover > 0 {
-		return fmt.Errorf("vom: %d leftover bytes", leftover)
+		return verror.New(errLeftOverBytes, nil, leftover)
 	}
 	return nil
 }
@@ -311,7 +314,7 @@ func (d *Decoder) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		case err != nil:
 			return err
 		case index >= uint64(tt.NumEnumLabel()):
-			return errIndexOutOfRange
+			return verror.New(errIndexOutOfRange, nil)
 		}
 		return target.FromEnumLabel(tt.EnumLabel(int(index)), ttFrom)
 	case vdl.TypeObject:
@@ -440,9 +443,9 @@ func (d *Decoder) decodeValue(tt *vdl.Type, target vdl.Target) error {
 				}
 				return target.FinishFields(fieldsTarget)
 			case ctrl != 0:
-				return fmt.Errorf("vom: unexpected control byte 0x%x", ctrl)
+				return verror.New(errUnexpectedControlByte, nil, ctrl)
 			case index >= uint64(tt.NumField()):
-				return errIndexOutOfRange
+				return verror.New(errIndexOutOfRange, nil)
 			}
 			ttfield := tt.Field(int(index))
 			switch key, field, err := fieldsTarget.StartField(ttfield.Name); {
@@ -472,7 +475,7 @@ func (d *Decoder) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		case err != nil:
 			return err
 		case index >= uint64(tt.NumField()):
-			return errIndexOutOfRange
+			return verror.New(errIndexOutOfRange, nil)
 		}
 		ttfield := tt.Field(int(index))
 		key, field, err := fieldsTarget.StartField(ttfield.Name)
@@ -493,7 +496,7 @@ func (d *Decoder) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		case ctrl == WireCtrlNil:
 			return target.FromNil(vdl.AnyType)
 		case ctrl != 0:
-			return fmt.Errorf("vom: unexpected control byte 0x%x", ctrl)
+			return verror.New(errUnexpectedControlByte, nil, ctrl)
 		default:
 			elemType, err := d.typeDec.lookupType(typeId(id))
 			if err != nil {
@@ -502,7 +505,7 @@ func (d *Decoder) decodeValue(tt *vdl.Type, target vdl.Target) error {
 			return d.decodeValue(elemType, target)
 		}
 	default:
-		panic(fmt.Errorf("vom: decodeValue unhandled type %v", tt))
+		panic(verror.New(errDecodeValueUnhandledType, nil, tt))
 	}
 }
 
@@ -557,9 +560,9 @@ func (d *Decoder) ignoreValue(tt *vdl.Type) error {
 			case ctrl == WireCtrlEnd:
 				return nil
 			case ctrl != 0:
-				return fmt.Errorf("vom: unexpected control byte 0x%x", ctrl)
+				return verror.New(errUnexpectedControlByte, nil, ctrl)
 			case index >= uint64(tt.NumField()):
-				return errIndexOutOfRange
+				return verror.New(errIndexOutOfRange, nil)
 			default:
 				ttfield := tt.Field(int(index))
 				if err := d.ignoreValue(ttfield.Type); err != nil {
@@ -572,7 +575,7 @@ func (d *Decoder) ignoreValue(tt *vdl.Type) error {
 		case err != nil:
 			return err
 		case index >= uint64(tt.NumField()):
-			return errIndexOutOfRange
+			return verror.New(errIndexOutOfRange, nil)
 		default:
 			ttfield := tt.Field(int(index))
 			return d.ignoreValue(ttfield.Type)
@@ -584,7 +587,7 @@ func (d *Decoder) ignoreValue(tt *vdl.Type) error {
 		case ctrl == WireCtrlNil:
 			return nil
 		case ctrl != 0:
-			return fmt.Errorf("vom: unexpected control byte 0x%x", ctrl)
+			return verror.New(errUnexpectedControlByte, nil, ctrl)
 		default:
 			elemType, err := d.typeDec.lookupType(typeId(id))
 			if err != nil {
@@ -593,6 +596,6 @@ func (d *Decoder) ignoreValue(tt *vdl.Type) error {
 			return d.ignoreValue(elemType)
 		}
 	default:
-		panic(fmt.Errorf("vom: ignoreValue unhandled type %v", tt))
+		panic(verror.New(errIgnoreValueUnhandledType, nil, tt))
 	}
 }

@@ -5,19 +5,26 @@
 package vom
 
 import (
-	"errors"
-	"fmt"
 	"io"
 	"reflect"
 
 	"v.io/v23/vdl"
+	"v.io/v23/verror"
+)
+
+const pkgPath = "v.io/v23/vom"
+
+var (
+	errEncodeBadTypeStack   = verror.Register(pkgPath+".errEncodeBadTypeStack", verror.NoRetry, "{1:}{2:} vom: encoder has bad type stack{:_}")
+	errEncodeNilType        = verror.Register(pkgPath+".errEncodeNilType", verror.NoRetry, "{1:}{2:} vom: encoder finished with nil type{:_}")
+	errEncodeZeroTypeId     = verror.Register(pkgPath+".errEncodeZeroTypeId", verror.NoRetry, "{1:}{2:} vom: encoder finished with type Id 0{:_}")
+	errEncoderTypeMismatch  = verror.Register(pkgPath+".errEncoderTypeMismatch", verror.NoRetry, "{1:}{2:} encoder type mismatch, got {3}, want {4}{:_}")
+	errEncoderWantBytesType = verror.Register(pkgPath+".errEncoderWantBytesType", verror.NoRetry, "{1:}{2:} encoder type mismatch, got {3}, want bytes{:_}")
+	errLabelNotInType       = verror.Register(pkgPath+".errLabelNotInType", verror.NoRetry, "{1:}{2:} enum label {3} doesn't exist in type {4}{:_}")
+	errFieldNotInTopType    = verror.Register(pkgPath+".errFieldNotInTopType", verror.NoRetry, "{1:}{2:} field name {3} doesn't exist in top type {4}{:_}")
 )
 
 var (
-	errEncodeBadTypeStack = errors.New("vom: encoder has bad type stack")
-	errEncodeNilType      = errors.New("vom: encoder finished with nil type")
-	errEncodeZeroTypeId   = errors.New("vom: encoder finished with type Id 0")
-
 	// Make sure Encoder implements the vdl *Target interfaces.
 	_ vdl.Target       = (*Encoder)(nil)
 	_ vdl.ListTarget   = (*Encoder)(nil)
@@ -127,14 +134,14 @@ func (e *Encoder) startEncode() error {
 func (e *Encoder) finishEncode(tid typeId) error {
 	switch {
 	case len(e.typeStack) > 1:
-		return errEncodeBadTypeStack
+		return verror.New(errEncodeBadTypeStack, nil)
 	case len(e.typeStack) == 0:
-		return errEncodeNilType
+		return verror.New(errEncodeNilType, nil)
 	}
 	encType := e.typeStack[0].tt
 	if tid == 0 {
 		if tid = e.typeEnc.lookupTypeId(encType); tid == 0 {
-			return errEncodeZeroTypeId
+			return verror.New(errEncodeZeroTypeId, nil)
 		}
 	}
 	// Binary messages always start with a typeId, sometimes followed by the byte
@@ -159,7 +166,7 @@ func (e *Encoder) finishEncode(tid typeId) error {
 }
 
 func errTypeMismatch(t *vdl.Type, kinds ...vdl.Kind) error {
-	return fmt.Errorf("encoder type mismatch, got %q, want %v", t, kinds)
+	return verror.New(errEncoderTypeMismatch, nil, t, kinds)
 }
 
 // prepareType prepares to encode a non-nil value of type tt, checking to make
@@ -209,7 +216,7 @@ func (e *Encoder) pushType(tt *vdl.Type) {
 
 func (e *Encoder) popType() error {
 	if len(e.typeStack) == 0 {
-		return errEncodeBadTypeStack
+		return verror.New(errEncodeBadTypeStack, nil)
 	}
 	e.typeStack = e.typeStack[:len(e.typeStack)-1]
 	return nil
@@ -313,7 +320,7 @@ func (e *Encoder) FromComplex(src complex128, tt *vdl.Type) error {
 
 func (e *Encoder) FromBytes(src []byte, tt *vdl.Type) error {
 	if !tt.IsBytes() {
-		return fmt.Errorf("encoder type mismatch, got %q, want bytes", tt)
+		return verror.New(errEncoderWantBytesType, nil, tt)
 	}
 	if err := e.prepareTypeHelper(tt, false); err != nil {
 		return err
@@ -351,7 +358,7 @@ func (e *Encoder) FromEnumLabel(src string, tt *vdl.Type) error {
 	}
 	index := tt.EnumIndex(src)
 	if index < 0 {
-		return fmt.Errorf("enum label %q doesn't exist in type %q", src, tt)
+		return verror.New(errLabelNotInType, nil, src, tt)
 	}
 	if index == 0 && e.canIgnoreField() {
 		e.ignoreField()
@@ -507,7 +514,7 @@ func (e *Encoder) FinishKeyStartField(key vdl.Target) (vdl.Target, error) {
 func (e *Encoder) StartField(name string) (_, _ vdl.Target, _ error) {
 	top := e.topType()
 	if top == nil {
-		return nil, nil, errEncodeBadTypeStack
+		return nil, nil, verror.New(errEncodeBadTypeStack, nil)
 	}
 	if top.Kind() == vdl.Optional {
 		top = top.Elem()
@@ -523,7 +530,7 @@ func (e *Encoder) StartField(name string) (_, _ vdl.Target, _ error) {
 		binaryEncodeUint(e.buf, uint64(index))
 		return nil, e, nil
 	}
-	return nil, nil, fmt.Errorf("field name %q doesn't exist in top type %q", name, top)
+	return nil, nil, verror.New(errFieldNotInTopType, nil, name, top)
 }
 
 func (e *Encoder) FinishField(key, field vdl.Target) error {

@@ -5,17 +5,17 @@
 package vom
 
 import (
-	"errors"
-	"fmt"
 	"io"
 	"math"
 	"sync"
 
 	"v.io/v23/vdl"
+	"v.io/v23/verror"
 )
 
 var (
-	errEncodeTypeIdOverflow = errors.New("vom: encoder type id overflow")
+	errEncodeTypeIdOverflow = verror.Register(pkgPath+".errEncodeTypeIdOverflow", verror.NoRetry, "{1:}{2:} vom: encoder type id overflow{:_}")
+	errUnhandledType        = verror.Register(pkgPath+".errUnhandledType", verror.NoRetry, "{1:}{2:} vom: encode unhandled type {3}{:_}")
 )
 
 // TypeEncoder manages the transmission and marshaling of types to the other
@@ -126,7 +126,7 @@ func (e *TypeEncoder) encode(tt *vdl.Type) (typeId, error) {
 		}
 		wt = wireTypeOptionalT{wireOptional{tt.Name(), elm}}
 	default:
-		panic(fmt.Errorf("vom: encode unhandled type %v", tt))
+		panic(verror.New(errUnhandledType, nil, tt))
 	}
 
 	// Encode and write the wire type definition.
@@ -173,7 +173,7 @@ func (e *TypeEncoder) lookupOrAssignTypeId(tt *vdl.Type) (typeId, bool, error) {
 	newId := e.nextId
 	if newId > math.MaxInt64 {
 		e.typeMu.Unlock()
-		return 0, false, errEncodeTypeIdOverflow
+		return 0, false, verror.New(errEncodeTypeIdOverflow, nil)
 	}
 	e.nextId++
 	e.typeToId[tt] = newId

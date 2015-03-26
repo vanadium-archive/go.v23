@@ -5,11 +5,19 @@
 package vom
 
 import (
-	"fmt"
 	"io"
 	"sync"
 
 	"v.io/v23/vdl"
+	"v.io/v23/verror"
+)
+
+var (
+	errTypeInvalid        = verror.Register(pkgPath+".errTypeInvalid", verror.NoRetry, "{1:}{2:} vom: type {3} id {4} invalid, the min user type id is {5}{:_}")
+	errAlreadyDefined     = verror.Register(pkgPath+".errAlreadyDefined", verror.NoRetry, "{1:}{2:} vom: type {3} id {4} already defined as {5}{:_}")
+	errUnknownType        = verror.Register(pkgPath+".errUnknownType", verror.NoRetry, "{1:}{2:} vom: unknown type id {3}{:_}")
+	errEmptyName          = verror.Register(pkgPath+".errEmptyName", verror.NoRetry, "{1:}{2:} vom: NamedType has empty name{:_}")
+	errUnknownWireTypeDef = verror.Register(pkgPath+".errUnknownWireTypeDef", verror.NoRetry, "{1:}{2:} vom: unknown wire type definition {3}{:_}")
 )
 
 // TypeDecoder manages the receipt and unmarshalling of types from the other
@@ -94,15 +102,15 @@ func (d *TypeDecoder) addWireType(tid typeId, wt wireType) error {
 
 func (d *TypeDecoder) addWireTypeBuildLocked(tid typeId, wt wireType) error {
 	if tid < WireIdFirstUserType {
-		return fmt.Errorf("vom: type %q id %d invalid, the min user type id is %d", wt, tid, WireIdFirstUserType)
+		return verror.New(errTypeInvalid, nil, wt, tid, WireIdFirstUserType)
 	}
 	// TODO(toddw): Allow duplicates according to some heuristic (e.g. only
 	// identical, or only if the later one is a "superset", etc).
 	if dup := d.lookupKnownType(tid); dup != nil {
-		return fmt.Errorf("vom: type %q id %d already defined as %q", wt, tid, dup)
+		return verror.New(errAlreadyDefined, nil, wt, tid, dup)
 	}
 	if dup := d.idToWire[tid]; dup != nil {
-		return fmt.Errorf("vom: type %q id %d already defined as %q", wt, tid, dup)
+		return verror.New(errAlreadyDefined, nil, wt, tid, dup)
 	}
 	d.idToWire[tid] = wt
 	return nil
@@ -171,7 +179,7 @@ func (d *TypeDecoder) buildType(tid typeId) error {
 func (d *TypeDecoder) makeType(tid typeId, builder *vdl.TypeBuilder, pending map[typeId]vdl.PendingType) (vdl.PendingType, error) {
 	wt := d.idToWire[tid]
 	if wt == nil {
-		return nil, fmt.Errorf("vom: unknown type id %d", tid)
+		return nil, verror.New(errUnknownType, nil, tid)
 	}
 	// Make the type from its wireType representation. First remove it from
 	// dt.idToWire, and add it to pending, so that subsequent lookups will get the
@@ -214,7 +222,7 @@ func (d *TypeDecoder) makeType(tid typeId, builder *vdl.TypeBuilder, pending map
 func (d *TypeDecoder) makeBaseType(wt wireType, builder *vdl.TypeBuilder, pending map[typeId]vdl.PendingType) (vdl.PendingType, error) {
 	switch wt := wt.(type) {
 	case wireTypeNamedT:
-		return nil, fmt.Errorf("vom: NamedType has empty name: %v", wt)
+		return nil, verror.New(errEmptyName, nil, wt)
 	case wireTypeEnumT:
 		enumType := builder.Enum()
 		for _, label := range wt.Value.Labels {
@@ -276,7 +284,7 @@ func (d *TypeDecoder) makeBaseType(wt wireType, builder *vdl.TypeBuilder, pendin
 		}
 		return builder.Optional().AssignElem(elemType), nil
 	default:
-		return nil, fmt.Errorf("vom: unknown wire type definition %v", wt)
+		return nil, verror.New(errUnknownWireTypeDef, nil, wt)
 	}
 }
 

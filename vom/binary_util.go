@@ -5,12 +5,20 @@
 package vom
 
 import (
-	"errors"
-	"fmt"
 	"io"
 	"math"
 
 	"v.io/v23/vdl"
+	"v.io/v23/verror"
+)
+
+var (
+	errInvalid           = verror.Register(pkgPath+".errInvalid", verror.NoRetry, "{1:}{2:} vom: invalid encoding{:_}")
+	errMsgLen            = verror.Register(pkgPath+".errMsgLen", verror.NoRetry, "{1:}{2:} vom: message larger than {3} bytes{:_}")
+	errUintOverflow      = verror.Register(pkgPath+".errUintOverflow", verror.NoRetry, "{1:}{2:} vom: scalar larger than 8 bytes{:_}")
+	errBadControlCode    = verror.Register(pkgPath+".errBadControlCode", verror.NoRetry, "{1:}{2:} invalid control code{:_}")
+	errCantReadMagicByte = verror.Register(pkgPath+".errCantReadMagicByte", verror.NoRetry, "{1:}{2:} error reading magic byte {3}{:_}")
+	errBadMagicByte      = verror.Register(pkgPath+".errBadMagicByte", verror.NoRetry, "{1:}{2:} bad magic byte, got {3}, want {4}{:_}")
 )
 
 // Binary encoding and decoding routines.  The binary format is identical to the
@@ -28,12 +36,6 @@ const (
 	binaryMagicByte byte = 0x80
 )
 
-var (
-	errInvalid      = errors.New("vom: invalid encoding")
-	errMsgLen       = fmt.Errorf("vom: message larger than %d bytes", maxBinaryMsgLen)
-	errUintOverflow = errors.New("vom: scalar larger than 8 bytes")
-)
-
 // hasBinaryMsgLen returns true iff the type t is encoded with a top-level
 // message length.
 func hasBinaryMsgLen(t *vdl.Type) bool {
@@ -49,7 +51,7 @@ func hasBinaryMsgLen(t *vdl.Type) bool {
 
 func binaryEncodeControl(buf *encbuf, v byte) {
 	if v < 0x80 || v > 0xef {
-		panic(fmt.Errorf("invalid control code: %d", v))
+		panic(verror.New(errBadControlCode, nil, v))
 	}
 	buf.WriteByte(v)
 }
@@ -81,7 +83,7 @@ func binaryDecodeBool(buf *decbuf) (bool, error) {
 		return false, err
 	}
 	if v > 0x7f {
-		return false, errInvalid
+		return false, verror.New(errInvalid, nil)
 	}
 	return v != 0, nil
 }
@@ -249,12 +251,12 @@ func binaryPeekUint(buf *decbuf) (uint64, int, error) {
 	}
 	// Verify not a control code.
 	if firstByte <= 0xdf {
-		return 0, 0, errInvalid
+		return 0, 0, verror.New(errInvalid, nil)
 	}
 	// Handle multi-byte encoding.
 	byteLen := int(-int8(firstByte))
 	if byteLen < 1 || byteLen > uint64Size {
-		return 0, 0, errUintOverflow
+		return 0, 0, verror.New(errUintOverflow, nil)
 	}
 	byteLen++ // account for initial len byte
 	bytes, err := buf.PeekAtLeast(byteLen)
@@ -292,7 +294,7 @@ func binaryPeekUintWithControl(buf *decbuf) (uint64, byte, int, error) {
 	// Handle multi-byte encoding.
 	byteLen := int(-int8(firstByte))
 	if byteLen < 1 || byteLen > uint64Size {
-		return 0, 0, 0, errUintOverflow
+		return 0, 0, 0, verror.New(errUintOverflow, nil)
 	}
 	byteLen++ // account for initial len byte
 	bytes, err := buf.PeekAtLeast(byteLen)
@@ -316,7 +318,7 @@ func binaryPeekUintByteLen(buf *decbuf) (int, error) {
 	}
 	byteLen := int(-int8(firstByte))
 	if byteLen > uint64Size {
-		return 0, errUintOverflow
+		return 0, verror.New(errUintOverflow, nil)
 	}
 	return 1 + byteLen, nil
 }
@@ -335,7 +337,7 @@ func binaryDecodeLen(buf *decbuf) (int, error) {
 	case err != nil:
 		return 0, err
 	case ulen > maxBinaryMsgLen:
-		return 0, errMsgLen
+		return 0, verror.New(errMsgLen, nil, maxBinaryMsgLen)
 	}
 	return int(ulen), nil
 }
@@ -347,7 +349,7 @@ func binaryDecodeLenOrArrayLen(buf *decbuf, t *vdl.Type) (int, error) {
 	}
 	if t.Kind() == vdl.Array {
 		if len != 0 {
-			return 0, errInvalid
+			return 0, verror.New(errInvalid, nil)
 		}
 		return t.Len(), nil
 	}
@@ -461,10 +463,10 @@ func readMagicByte(buf *decbuf) error {
 	// The binary format always starts with a magic byte.
 	magic, err := buf.PeekByte()
 	if err != nil {
-		return fmt.Errorf("error reading magic byte %v", err)
+		return verror.New(errCantReadMagicByte, nil, err)
 	}
 	if magic != binaryMagicByte {
-		return fmt.Errorf("bad magic byte, got %x, want %x", magic, binaryMagicByte)
+		return verror.New(errBadMagicByte, nil, magic, binaryMagicByte)
 	}
 	buf.Skip(1)
 	return nil

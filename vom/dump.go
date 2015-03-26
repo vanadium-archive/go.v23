@@ -6,12 +6,17 @@ package vom
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"io"
 	"reflect"
 
 	"v.io/v23/vdl"
+	"v.io/v23/verror"
+)
+
+var (
+	errDumperClosed  = verror.Register(pkgPath+".errDumperClosed", verror.NoRetry, "{1:}{2:} vom: Dumper closed{:_}")
+	errDumperFlushed = verror.Register(pkgPath+".errDumperFlushed", verror.NoRetry, "{1:}{2:} vom: Dumper flushed{:_}")
 )
 
 // Dump returns a human-readable dump of the given vom data, in the default
@@ -196,14 +201,14 @@ func (d *dumpWorker) Read(data []byte) (int, error) {
 		case cmd, ok := <-d.cmdChan:
 			if !ok {
 				// Close called, return our special closed error.
-				return 0, dumperClosed
+				return 0, verror.New(errDumperClosed, nil)
 			}
 			switch {
 			case cmd.data == nil:
 				// Flush called, return our special flushed error.  The Flush is done
 				// when the decoderLoop starts with a new message.
 				d.lastFlush = cmd.done
-				return 0, dumperFlushed
+				return 0, verror.New(errDumperFlushed, nil)
 			case len(cmd.data) == 0:
 				// Status called.
 				d.writeStatus(nil, false)
@@ -223,11 +228,6 @@ func (d *dumpWorker) Read(data []byte) (int, error) {
 	}
 }
 
-var (
-	dumperClosed  = errors.New("vom: Dumper closed")
-	dumperFlushed = errors.New("vom: Dumper flushed")
-)
-
 // decodeLoop runs a loop synchronously decoding messages.  Calls to read from
 // d.buf will eventually result in a call to d.Read, which allows us to handle
 // special commands like Close, Flush and Status synchronously.
@@ -236,7 +236,7 @@ func (d *dumpWorker) decodeLoop() {
 		err := d.decodeNextValue()
 		d.writeStatus(err, true)
 		switch {
-		case err == dumperClosed:
+		case verror.ErrorID(err) == errDumperClosed.ID:
 			d.lastWriteDone()
 			d.lastFlushDone()
 			close(d.closeChan)
@@ -317,7 +317,7 @@ func (a DumpAtom) String() string {
 func (d *dumpWorker) writeStatus(err error, doneDecoding bool) {
 	if doneDecoding {
 		d.status.Err = err
-		if (err == dumperFlushed || err == dumperClosed) && d.status.MsgLen == 0 && d.status.MsgN == 0 {
+		if (verror.ErrorID(err) == errDumperFlushed.ID || verror.ErrorID(err) == errDumperClosed.ID) && d.status.MsgLen == 0 && d.status.MsgN == 0 {
 			// Don't write status for flushed and closed when we've finished decoding
 			// and are waiting for the next message.
 			return
@@ -410,7 +410,7 @@ func (d *dumpWorker) decodeValueType() (*vdl.Type, error) {
 		d.status.MsgId = id
 		switch {
 		case id == 0:
-			return nil, errDecodeZeroTypeID
+			return nil, verror.New(errDecodeZeroTypeID, nil)
 		case id > 0:
 			// This is a value message, the typeID is +id.
 			tid := typeId(+id)
@@ -461,7 +461,7 @@ func (d *dumpWorker) decodeValueMsg(tt *vdl.Type, target vdl.Target) error {
 	case err != nil:
 		return err
 	case leftover > 0:
-		return fmt.Errorf("vom: %d leftover bytes", leftover)
+		return verror.New(errLeftOverBytes, nil, leftover)
 	}
 	return nil
 }
@@ -577,7 +577,7 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 		}
 		if index >= uint64(tt.NumEnumLabel()) {
 			d.writeAtom(DumpKindIndex, PrimitivePUint{index}, "out of range for %v", tt)
-			return errIndexOutOfRange
+			return verror.New(errIndexOutOfRange, nil)
 		}
 		label := tt.EnumLabel(int(index))
 		d.writeAtom(DumpKindIndex, PrimitivePUint{index}, "%v.%v", tt.Name(), label)
@@ -690,10 +690,10 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 				d.writeAtom(DumpKindControl, PrimitivePControl{ControlKindEnd}, "%v END", tt.Name())
 				return target.FinishFields(fieldsTarget)
 			case ctrl != 0:
-				return fmt.Errorf("vom: unexpected control byte 0x%x", ctrl)
+				return verror.New(errUnexpectedControlByte, nil, ctrl)
 			case index >= uint64(tt.NumField()):
 				d.writeAtom(DumpKindIndex, PrimitivePUint{index}, "out of range for %v", tt)
-				return errIndexOutOfRange
+				return verror.New(errIndexOutOfRange, nil)
 			}
 			ttfield := tt.Field(int(index))
 			d.writeAtom(DumpKindIndex, PrimitivePUint{index}, "%v.%v", tt.Name(), ttfield.Name)
@@ -720,7 +720,7 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 			return err
 		case index >= uint64(tt.NumField()):
 			d.writeAtom(DumpKindIndex, PrimitivePUint{index}, "out of range for %v", tt)
-			return errIndexOutOfRange
+			return verror.New(errIndexOutOfRange, nil)
 		}
 		ttfield := tt.Field(int(index))
 		if tt == wireTypeType {
@@ -749,7 +749,7 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 			d.writeAtom(DumpKindControl, PrimitivePControl{ControlKindNil}, "any(nil)")
 			return target.FromNil(vdl.AnyType)
 		case ctrl != 0:
-			return fmt.Errorf("vom: unexpected control byte 0x%x", ctrl)
+			return verror.New(errUnexpectedControlByte, nil, ctrl)
 		default:
 			elemType, err := d.typeDec.lookupType(typeId(id))
 			if err != nil {
@@ -760,6 +760,6 @@ func (d *dumpWorker) decodeValue(tt *vdl.Type, target vdl.Target) error {
 			return d.decodeValue(elemType, target)
 		}
 	default:
-		panic(fmt.Errorf("vom: decodeValue unhandled type %v", tt))
+		panic(verror.New(errDecodeValueUnhandledType, nil, tt))
 	}
 }
