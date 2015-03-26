@@ -9,10 +9,18 @@ package application
 import (
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 
 	"v.io/v23/security"
+	"v.io/v23/verror"
 	"v.io/v23/vom"
+)
+
+const pkgPath = "v.io/v23/services/mgmt/application"
+
+var (
+	errCantVOMEncodePublisher    = verror.Register(pkgPath+".errCantVOMEncodePublisher", verror.NoRetry, "{1:}{2:} failed to vom-encode Publisher{:_}")
+	errCantBase64DecodePublisher = verror.Register(pkgPath+".errCantBase64DecodePublisher", verror.NoRetry, "{1:}{2:} failed to base64-decode Publisher{:_}")
+	errCantVOMDecodePublisher    = verror.Register(pkgPath+".errCantVOMDecodePublisher", verror.NoRetry, "{1:}{2:} failed to vom-decode Publisher{:_}")
 )
 
 type jsonType struct {
@@ -29,7 +37,7 @@ func (env Envelope) MarshalJSON() ([]byte, error) {
 	if !env.Publisher.IsZero() {
 		var err error
 		if bytes, err = vom.Encode(env.Publisher); err != nil {
-			return nil, fmt.Errorf("failed to vom-encode Publisher: %v", err)
+			return nil, verror.New(errCantVOMEncodePublisher, nil, err)
 		}
 	}
 	return json.Marshal(jsonType{
@@ -51,10 +59,10 @@ func (env *Envelope) UnmarshalJSON(input []byte) error {
 	if len(jt.Publisher) > 0 {
 		bytes, err := base64.URLEncoding.DecodeString(jt.Publisher)
 		if err != nil {
-			return fmt.Errorf("failed to base64-decode Publisher: %v", err)
+			return verror.New(errCantBase64DecodePublisher, nil, err)
 		}
 		if err := vom.Decode(bytes, &publisher); err != nil {
-			return fmt.Errorf("failed to vom-decode Publisher: %v", err)
+			return verror.New(errCantVOMDecodePublisher, nil, err)
 		}
 	}
 	env.Title = jt.Title
