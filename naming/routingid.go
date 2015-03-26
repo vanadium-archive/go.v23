@@ -9,12 +9,14 @@ import (
 	"crypto/rand"
 	"encoding/binary"
 	"encoding/hex"
-	"errors"
 	"io"
+
+	"v.io/v23/verror"
 )
 
 var (
-	ErrInvalidString = errors.New("string is of the wrong format and/or size")
+	errInvalidString = verror.Register(pkgPath+".errInvalidString", verror.NoRetry, "{1:}{2:} string is of the wrong format and/or size{:_}")
+	errNotARoutingID = verror.Register(pkgPath+".errNotARoutingID", verror.NoRetry, "{1:}{2:} Not a RoutingID{:_}")
 )
 
 // RoutingIDs have one essential property, namely that they are, to a very
@@ -34,8 +36,6 @@ const (
 var (
 	// NullRoutingID is a special value representing the nil route.
 	NullRoutingID = FixedRoutingID(0)
-
-	errNotARoutingID = errors.New("Not a RoutingID")
 )
 
 // FixedRoutingID returns a routing ID from a constant.
@@ -80,7 +80,7 @@ func (rid *RoutingID) FromString(s string) error {
 		return err
 	}
 	if len(b) != routingIDLength {
-		return ErrInvalidString
+		return verror.New(errInvalidString, nil)
 	}
 	copy(rid.value[:], b)
 	return nil
