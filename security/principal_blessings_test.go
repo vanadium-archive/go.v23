@@ -530,7 +530,7 @@ func TestUnionOfBlessings(t *testing.T) {
 	}
 
 	// However, UnionOfBlessings must not mix up public keys
-	if mixed, err := UnionOfBlessings(alice, bob); !verror.Is(err, errInvalidUnion.ID) || !mixed.IsZero() {
+	if mixed, err := UnionOfBlessings(alice, bob); verror.ErrorID(err) != errInvalidUnion.ID || !mixed.IsZero() {
 		t.Errorf("Got (%v, %v(errorid=%v)), want errorid=%v", mixed, err, verror.ErrorID(err), errInvalidUnion.ID)
 	}
 }
@@ -987,14 +987,14 @@ func TestRemoteBlessingNames(t *testing.T) {
 	if accepted, rejected := bnames(b1, "Blah"); len(accepted) > 0 ||
 		len(rejected) != 1 ||
 		rejected[0].Blessing != "alice" ||
-		!verror.Is(rejected[0].Err, ErrCaveatValidation.ID) {
+		verror.ErrorID(rejected[0].Err) != ErrCaveatValidation.ID {
 		t.Errorf("Got (%v, %v), want ([], [alice: <caveat validation error>])", accepted, rejected)
 	}
 	// b2 is not recognized because the roots aren't recognized.
 	if accepted, rejected := bnames(b2, "Method"); len(accepted) > 0 ||
 		len(rejected) != 1 ||
 		rejected[0].Blessing != "bob" ||
-		!verror.Is(rejected[0].Err, ErrUnrecognizedRoot.ID) {
+		verror.ErrorID(rejected[0].Err) != ErrUnrecognizedRoot.ID {
 		t.Errorf("Got (%v, %v), want ([], [bob: <untrusted root>])", accepted, rejected)
 	}
 }
