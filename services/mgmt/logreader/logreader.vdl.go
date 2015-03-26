@@ -17,9 +17,29 @@ import (
 	"v.io/v23/vdl"
 
 	// VDL user imports
-	"v.io/v23/services/mgmt/logreader/types"
 	"v.io/v23/services/security/access"
 )
+
+// LogEntry is a log entry from a log file.
+type LogEntry struct {
+	// The offset (in bytes) where this entry starts.
+	Position int64
+	// The content of the log entry.
+	Line string
+}
+
+func (LogEntry) __VDLReflect(struct {
+	Name string "v.io/v23/services/mgmt/logreader.LogEntry"
+}) {
+}
+
+func init() {
+	vdl.Register((*LogEntry)(nil))
+}
+
+// A special NumEntries value that indicates that all entries should be
+// returned by ReadLog.
+const AllEntries = int32(-1)
 
 // LogFileClientMethods is the client interface
 // containing LogFile methods.
@@ -101,7 +121,7 @@ type LogFileReadLogClientStream interface {
 		Advance() bool
 		// Value returns the item that was staged by Advance.  May panic if Advance
 		// returned false or was not called.  Never blocks.
-		Value() types.LogEntry
+		Value() LogEntry
 		// Err returns any error encountered by Advance.  Never blocks.
 		Err() error
 	}
@@ -125,13 +145,13 @@ type LogFileReadLogClientCall interface {
 
 type implLogFileReadLogClientCall struct {
 	rpc.ClientCall
-	valRecv types.LogEntry
+	valRecv LogEntry
 	errRecv error
 }
 
 func (c *implLogFileReadLogClientCall) RecvStream() interface {
 	Advance() bool
-	Value() types.LogEntry
+	Value() LogEntry
 	Err() error
 } {
 	return implLogFileReadLogClientCallRecv{c}
@@ -142,11 +162,11 @@ type implLogFileReadLogClientCallRecv struct {
 }
 
 func (c implLogFileReadLogClientCallRecv) Advance() bool {
-	c.c.valRecv = types.LogEntry{}
+	c.c.valRecv = LogEntry{}
 	c.c.errRecv = c.c.Recv(&c.c.valRecv)
 	return c.c.errRecv == nil
 }
-func (c implLogFileReadLogClientCallRecv) Value() types.LogEntry {
+func (c implLogFileReadLogClientCallRecv) Value() LogEntry {
 	return c.c.valRecv
 }
 func (c implLogFileReadLogClientCallRecv) Err() error {
@@ -291,7 +311,7 @@ type LogFileReadLogServerStream interface {
 		// Send places the item onto the output stream.  Returns errors encountered
 		// while sending.  Blocks if there is no buffer space; will unblock when
 		// buffer space is available.
-		Send(item types.LogEntry) error
+		Send(item LogEntry) error
 	}
 }
 
@@ -314,7 +334,7 @@ func (s *LogFileReadLogServerCallStub) Init(call rpc.StreamServerCall) {
 
 // SendStream returns the send side of the LogFile.ReadLog server stream.
 func (s *LogFileReadLogServerCallStub) SendStream() interface {
-	Send(item types.LogEntry) error
+	Send(item LogEntry) error
 } {
 	return implLogFileReadLogServerCallSend{s}
 }
@@ -323,6 +343,6 @@ type implLogFileReadLogServerCallSend struct {
 	s *LogFileReadLogServerCallStub
 }
 
-func (s implLogFileReadLogServerCallSend) Send(item types.LogEntry) error {
+func (s implLogFileReadLogServerCallSend) Send(item LogEntry) error {
 	return s.s.Send(item)
 }
