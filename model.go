@@ -28,10 +28,10 @@ import (
 )
 
 const (
-	// LocalStop is the message received on WaitForStop when the stop was
+	// LocalStop is the message received on AppCycle.WaitForStop when the stop was
 	// initiated by the process itself.
 	LocalStop = "localstop"
-	// RemoteStop is the message received on WaitForStop when the stop was
+	// RemoteStop is the message received on AppCycle.WaitForStop when the stop was
 	// initiated via an RPC call (AppCycle.Stop).
 	RemoteStop            = "remotestop"
 	UnhandledStopExitCode = 1
@@ -97,10 +97,6 @@ type AppCycle interface {
 // implement.  It will not be used directly by application builders.
 // They will instead use the package level functions that mirror these
 // factories.
-// TODO(mattr): Some opts might not make sense now.  For example, the
-// namespace is currently a ServerOpt, but it probably makes more sense
-// to just use the current namespace in the context that is passed
-// to NewServer.  The same for Profile and StreamManager.
 type Runtime interface {
 
 	// Init is a chance to initialize state in the runtime implementation
@@ -135,42 +131,42 @@ type Runtime interface {
 	// ServesMountTable and ServerBlessings.
 	NewServer(ctx *context.T, opts ...rpc.ServerOpt) (rpc.Server, error)
 
-	// SetNewStreamManager creates a new stream manager and context
+	// SetNewStreamManager creates a new StreamManager instance and context
 	// with that StreamManager attached.
 	SetNewStreamManager(ctx *context.T) (*context.T, error)
 
-	// SetPrincipal attaches a principal to the returned context.
+	// SetPrincipal attaches 'principal' to the returned context.
 	SetPrincipal(ctx *context.T, principal security.Principal) (*context.T, error)
 
-	// GetPrincipal returns the current Principal.
+	// GetPrincipal returns the Principal in 'ctx'.
 	GetPrincipal(ctx *context.T) security.Principal
 
 	// SetNewClient creates a new Client instance and attaches it to a
 	// new context.
 	SetNewClient(ctx *context.T, opts ...rpc.ClientOpt) (*context.T, rpc.Client, error)
 
-	// GetClient returns the current Client.
+	// GetClient returns the Client in 'ctx'.
 	GetClient(ctx *context.T) rpc.Client
 
-	// SetNewNamespace creates a new Namespace and attaches it to the
+	// SetNewNamespace creates a new Namespace instance and attaches it to the
 	// returned context.
 	SetNewNamespace(ctx *context.T, roots ...string) (*context.T, ns.Namespace, error)
 
-	// GetNamespace returns the current namespace
+	// GetNamespace returns the Namespace in 'ctx'.
 	GetNamespace(ctx *context.T) ns.Namespace
 
-	// GetAppCycle gets the current AppCycle.
+	// GetAppCycle returns the AppCycle in 'ctx'.
 	GetAppCycle(ctx *context.T) AppCycle
 
-	// GetListenSpec gets the ListenSpec.
+	// GetListenSpec returns the ListenSpec in 'ctx'.
 	GetListenSpec(ctx *context.T) rpc.ListenSpec
 
-	// SetBackgroundContext creates a new context derived from the given context
+	// SetBackgroundContext creates a new context derived from 'ctx'
 	// with the given context set as the background context.
 	SetBackgroundContext(ctx *context.T) *context.T
 
-	// BackgroundContext retrieves a background context.  This context can
-	// be used for general background activities.
+	// GetBackgroundContext returns a background context. This context can be used
+	// for general background activities.
 	GetBackgroundContext(ctx *context.T) *context.T
 }
 
@@ -202,23 +198,23 @@ func NewEndpoint(ep string) (naming.Endpoint, error) {
 // ServesMountTable and ServerBlessings.
 //
 // ServerBlessings defaults to v23.GetPrincipal(ctx).BlessingStore().Default().
-// These Blessings are the server's Blessings for its lifetime.
+// These Blessings are the Server's Blessings for its lifetime.
 func NewServer(ctx *context.T, opts ...rpc.ServerOpt) (rpc.Server, error) {
 	return initState.currentRuntime().NewServer(ctx, opts...)
 }
 
-// SetNewStreamManager creates a new stream manager and context
+// SetNewStreamManager creates a new StreamManager instance and context
 // with that StreamManager attached.
 func SetNewStreamManager(ctx *context.T) (*context.T, error) {
 	return initState.currentRuntime().SetNewStreamManager(ctx)
 }
 
-// SetPrincipal attaches a principal to the returned context.
+// SetPrincipal attaches 'principal' to the returned context.
 func SetPrincipal(ctx *context.T, principal security.Principal) (*context.T, error) {
 	return initState.currentRuntime().SetPrincipal(ctx, principal)
 }
 
-// GetPrincipal returns the current Principal.
+// GetPrincipal returns the Principal in 'ctx'.
 func GetPrincipal(ctx *context.T) security.Principal {
 	return initState.currentRuntime().GetPrincipal(ctx)
 }
@@ -229,40 +225,40 @@ func SetNewClient(ctx *context.T, opts ...rpc.ClientOpt) (*context.T, rpc.Client
 	return initState.currentRuntime().SetNewClient(ctx, opts...)
 }
 
-// GetClient returns the current Client.
+// GetClient returns the Client in 'ctx'.
 func GetClient(ctx *context.T) rpc.Client {
 	return initState.currentRuntime().GetClient(ctx)
 }
 
-// SetNewNamespace creates a new Namespace and attaches it to the
+// SetNewNamespace creates a new Namespace instance and attaches it to the
 // returned context.
 func SetNewNamespace(ctx *context.T, roots ...string) (*context.T, ns.Namespace, error) {
 	return initState.currentRuntime().SetNewNamespace(ctx, roots...)
 }
 
-// GetNamespace returns the current namespace.
+// GetNamespace returns the Namespace in 'ctx'.
 func GetNamespace(ctx *context.T) ns.Namespace {
 	return initState.currentRuntime().GetNamespace(ctx)
 }
 
-// GetAppCycle gets the current AppCycle.
+// GetAppCycle returns the AppCycle in 'ctx'.
 func GetAppCycle(ctx *context.T) AppCycle {
 	return initState.currentRuntime().GetAppCycle(ctx)
 }
 
-// GetListenSpec gets the current ListenSpec.
+// GetListenSpec returns the ListenSpec in 'ctx'.
 func GetListenSpec(ctx *context.T) rpc.ListenSpec {
 	return initState.currentRuntime().GetListenSpec(ctx)
 }
 
-// SetBackgroundContext creates a new context derived from the given context
+// SetBackgroundContext creates a new context derived from 'ctx'
 // with the given context set as the background context.
 func SetBackgroundContext(ctx *context.T) *context.T {
 	return initState.runtime.SetBackgroundContext(ctx)
 }
 
-// BackgroundContext retrieves a background context.  This context can
-// be used for general background activities.
+// GetBackgroundContext returns a background context. This context can be used
+// for general background activities.
 func GetBackgroundContext(ctx *context.T) *context.T {
 	return initState.runtime.GetBackgroundContext(ctx)
 }
