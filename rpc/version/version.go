@@ -29,6 +29,10 @@ const (
 	// RPCVersion7 uses concrete types for security.Discharge during VC
 	// authentication.
 	RPCVersion7
+
+	// RPCVersion8 uses separate VOM type flow to share VOM types across all flows
+	// in a VC.
+	RPCVersion8
 )
 
 // RPCVersionRange allows you to optionally specify a range of versions to
