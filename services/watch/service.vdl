@@ -104,7 +104,7 @@
 //       eventual state of the entity.
 package watch
 
-import "v.io/v23/services/security/access"
+import "v.io/v23/security/access"
 
 // GlobWatcher allows a client to receive updates for changes to objects
 // that match a pattern.  See the package comments for details.

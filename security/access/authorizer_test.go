@@ -15,8 +15,8 @@ import (
 
 	"v.io/v23/context"
 	"v.io/v23/security"
-	"v.io/v23/services/security/access"
-	"v.io/v23/services/security/access/test"
+	"v.io/v23/security/access"
+	"v.io/v23/security/access/internal"
 	"v.io/v23/vdl"
 )
 
@@ -50,7 +50,7 @@ func TestPermissionsAuthorizer(t *testing.T) {
 		Client security.Blessings
 	}
 
-	authorizer, err := access.PermissionsAuthorizer(acl, vdl.TypeOf(test.Read))
+	authorizer, err := access.PermissionsAuthorizer(acl, vdl.TypeOf(internal.Read))
 	if err != nil {
 		t.Fatalf("Could not create authorizer: %v", err)
 	}
@@ -133,7 +133,7 @@ func TestPermissionsAuthorizerSelfRPCs(t *testing.T) {
 		server, _ = p.BlessSelf("server")
 		// Authorizer with a access.Permissions that grants read access to
 		// anyone, write/execute access to noone.
-		typ           test.MyTag
+		typ           internal.MyTag
 		authorizer, _ = access.PermissionsAuthorizer(access.Permissions{"R": {In: []security.BlessingPattern{"nobody/$"}}}, vdl.TypeOf(typ))
 	)
 	for _, test := range []string{"Put", "Get", "Resolve", "NoTags"} {
@@ -152,7 +152,7 @@ func TestPermissionsAuthorizerSelfRPCs(t *testing.T) {
 
 func TestPermissionsAuthorizerWithNilAccessList(t *testing.T) {
 	var (
-		authorizer, _ = access.PermissionsAuthorizer(nil, vdl.TypeOf(test.Read))
+		authorizer, _ = access.PermissionsAuthorizer(nil, vdl.TypeOf(internal.Read))
 		pserver       = newPrincipal(t)
 		pclient       = newPrincipal(t)
 		server, _     = pserver.BlessSelf("server")
@@ -182,7 +182,7 @@ func TestPermissionsAuthorizerFromFile(t *testing.T) {
 	defer os.Remove(filename)
 
 	var (
-		authorizer, _  = access.PermissionsAuthorizerFromFile(filename, vdl.TypeOf(test.Read))
+		authorizer, _  = access.PermissionsAuthorizerFromFile(filename, vdl.TypeOf(internal.Read))
 		pserver        = newPrincipal(t)
 		pclient        = newPrincipal(t)
 		server, _      = pserver.BlessSelf("alice")
@@ -199,7 +199,7 @@ func TestPermissionsAuthorizerFromFile(t *testing.T) {
 	// pserver.AddToRoots(server) to make pserver recognize itself as an
 	// authority on blessings matching "alice".
 
-	// "alice/friend/bob" should not have access to test.Read methods like Get.
+	// "alice/friend/bob" should not have access to internal.Read methods like Get.
 	if err := authorize(authorizer, params); err == nil {
 		t.Fatalf("Expected authorization error as %v is not on the AccessList for Read operations", alicefriend)
 	}
@@ -236,7 +236,7 @@ func TestMultipleTags(t *testing.T) {
 			"R": allowAll,
 			"W": allowAll,
 		}
-		authorizer, _ = access.PermissionsAuthorizer(acl, vdl.TypeOf(test.Read))
+		authorizer, _ = access.PermissionsAuthorizer(acl, vdl.TypeOf(internal.Read))
 		pserver       = newPrincipal(t)
 		pclient       = newPrincipal(t)
 		server, _     = pserver.BlessSelf("server")
@@ -247,7 +247,7 @@ func TestMultipleTags(t *testing.T) {
 			RemoteBlessings: client,
 			Method:          "Get",
 		}
-		tags = []*vdl.Value{vdl.ValueOf(test.Read), vdl.ValueOf(test.Write)}
+		tags = []*vdl.Value{vdl.ValueOf(internal.Read), vdl.ValueOf(internal.Write)}
 	)
 	// Access should be granted if any of the two tags are present.
 	for _, tag := range tags {
@@ -264,7 +264,7 @@ func TestMultipleTags(t *testing.T) {
 }
 
 func methodTags(name string) []*vdl.Value {
-	server := test.MyObjectServer(nil)
+	server := internal.MyObjectServer(nil)
 	for _, iface := range server.Describe__() {
 		for _, method := range iface.Methods {
 			if method.Name == name {

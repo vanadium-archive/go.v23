@@ -9,7 +9,7 @@ import (
 
 	"v.io/v23/context"
 	"v.io/v23/naming"
-	"v.io/v23/services/security/access"
+	"v.io/v23/security/access"
 )
 
 // Namespace provides translation from object names to server object addresses.

@@ -5,7 +5,7 @@
 package object
 
 import (
-	"v.io/v23/services/security/access"
+	"v.io/v23/security/access"
 )
 
 // Object provides access control for Vanadium objects.
@@ -18,7 +18,7 @@ import (
 //   package mypackage
 //
 //   import "v.io/v23/security/access"
-//   import "v.io/v23/security/access/object"
+//   import "v.io/v23/services/security/object"
 //
 //   type MyObject interface {
 //     object.Object

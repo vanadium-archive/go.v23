@@ -14,7 +14,7 @@ import (
 	"v.io/v23/verror"
 )
 
-const pkgPath = "v.io/v23/services/security/access"
+const pkgPath = "v.io/v23/security/access"
 
 var (
 	errTagNeedsString             = verror.Register(pkgPath+".errTagNeedsString", verror.NoRetry, "{1:}{2:}tag type({3}) must be backed by a string not {4}{:_}")

@@ -133,7 +133,7 @@ type AccessList struct {
 }
 
 func (AccessList) __VDLReflect(struct {
-	Name string "v.io/v23/services/security/access.AccessList"
+	Name string "v.io/v23/security/access.AccessList"
 }) {
 }
 
@@ -147,7 +147,7 @@ func (AccessList) __VDLReflect(struct {
 type Permissions map[string]AccessList
 
 func (Permissions) __VDLReflect(struct {
-	Name string "v.io/v23/services/security/access.Permissions"
+	Name string "v.io/v23/security/access.Permissions"
 }) {
 }
 
@@ -159,7 +159,7 @@ func (Permissions) __VDLReflect(struct {
 type Tag string
 
 func (Tag) __VDLReflect(struct {
-	Name string "v.io/v23/services/security/access.Tag"
+	Name string "v.io/v23/security/access.Tag"
 }) {
 }
 
@@ -181,9 +181,9 @@ const Resolve = Tag("Resolve") // Operations involving namespace navigation.
 
 var (
 	// The AccessList is too big.  Use groups to represent large sets of principals.
-	ErrTooBig          = verror.Register("v.io/v23/services/security/access.TooBig", verror.NoRetry, "{1:}{2:} AccessList is too big")
-	ErrNoPermissions   = verror.Register("v.io/v23/services/security/access.NoPermissions", verror.NoRetry, "{1:}{2:} {3} does not have {5} access (rejected blessings: {4})")
-	ErrAccessListMatch = verror.Register("v.io/v23/services/security/access.AccessListMatch", verror.NoRetry, "{1:}{2:} {3} does not match the access list (rejected blessings: {4})")
+	ErrTooBig          = verror.Register("v.io/v23/security/access.TooBig", verror.NoRetry, "{1:}{2:} AccessList is too big")
+	ErrNoPermissions   = verror.Register("v.io/v23/security/access.NoPermissions", verror.NoRetry, "{1:}{2:} {3} does not have {5} access (rejected blessings: {4})")
+	ErrAccessListMatch = verror.Register("v.io/v23/security/access.AccessListMatch", verror.NoRetry, "{1:}{2:} {3} does not match the access list (rejected blessings: {4})")
 )
 
 func init() {

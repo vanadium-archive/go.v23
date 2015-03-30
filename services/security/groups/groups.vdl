@@ -10,8 +10,8 @@
 package groups
 
 import (
-	"v.io/v23/services/security/access"
-	"v.io/v23/services/security/access/object"
+	"v.io/v23/security/access"
+	"v.io/v23/services/security/object"
 )
 
 // BlessingPatternChunk is a substring of a BlessingPattern. As with

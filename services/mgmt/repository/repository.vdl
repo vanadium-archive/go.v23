@@ -7,10 +7,10 @@
 package repository
 
 import (
+	"v.io/v23/security/access"
 	"v.io/v23/services/mgmt/application"
 	"v.io/v23/services/mgmt/binary"
-	"v.io/v23/services/security/access"
-	"v.io/v23/services/security/access/object"
+	"v.io/v23/services/security/object"
 )
 
 // Application provides access to application envelopes. An

@@ -8,10 +8,10 @@ package device
 
 import (
 	"v.io/v23/security"
+	"v.io/v23/security/access"
 	"v.io/v23/services/mgmt/application"
 	"v.io/v23/services/mgmt/binary"
-	"v.io/v23/services/security/access"
-	"v.io/v23/services/security/access/object"
+	"v.io/v23/services/security/object"
 )
 
 // TODO(caprita): Merge with v23/config and v.io/x/ref/lib/exec/config.go.

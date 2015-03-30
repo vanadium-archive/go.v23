@@ -118,7 +118,7 @@ import (
 	"v.io/v23/verror"
 
 	// VDL user imports
-	"v.io/v23/services/security/access"
+	"v.io/v23/security/access"
 )
 
 // GlobRequest specifies which entities should be watched and, optionally,

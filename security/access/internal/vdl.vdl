@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package test provides a VDL specification for a service used in the unittest of the acl package.
-package test
+// Package internal provides a VDL specification for a service used in the
+// unittest of the acl package.
+package internal
 
 // Any package can define tags (of arbitrary types) to be attached to methods.
 // This type can be used to index into a Permissions.

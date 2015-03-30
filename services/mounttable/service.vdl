@@ -7,7 +7,7 @@ package mounttable
 
 import (
 	"v.io/v23/naming"
-	"v.io/v23/services/security/access/object"
+	"v.io/v23/services/security/object"
 )
 
 // A mount table is a tree of names.  Each name may have something mounted on it,
