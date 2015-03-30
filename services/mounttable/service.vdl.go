@@ -17,7 +17,6 @@ import (
 
 	// VDL user imports
 	"v.io/v23/naming"
-	"v.io/v23/security"
 	"v.io/v23/services/security/access/object"
 )
 
@@ -120,8 +119,6 @@ type MountTableClientMethods interface {
 	//
 	// The flags represent a bit mask of options.
 	Mount(ctx *context.T, server string, ttl uint32, flags naming.MountFlag, opts ...rpc.CallOpt) error
-	// DEPRECATED: TODO(ashankar): Remove before release.
-	MountX(ctx *context.T, server string, blessingPatterns []security.BlessingPattern, ttl uint32, flags naming.MountFlag, opts ...rpc.CallOpt) error
 	// Unmount removes server from the receiver.  If server is empty, remove all
 	// servers mounted there.  Returns a non-nil error iff server remains mounted
 	// at the mount point.
@@ -171,15 +168,6 @@ func (c implMountTableClientStub) c(ctx *context.T) rpc.Client {
 func (c implMountTableClientStub) Mount(ctx *context.T, i0 string, i1 uint32, i2 naming.MountFlag, opts ...rpc.CallOpt) (err error) {
 	var call rpc.ClientCall
 	if call, err = c.c(ctx).StartCall(ctx, c.name, "Mount", []interface{}{i0, i1, i2}, opts...); err != nil {
-		return
-	}
-	err = call.Finish()
-	return
-}
-
-func (c implMountTableClientStub) MountX(ctx *context.T, i0 string, i1 []security.BlessingPattern, i2 uint32, i3 naming.MountFlag, opts ...rpc.CallOpt) (err error) {
-	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "MountX", []interface{}{i0, i1, i2, i3}, opts...); err != nil {
 		return
 	}
 	err = call.Finish()
@@ -288,8 +276,6 @@ type MountTableServerMethods interface {
 	//
 	// The flags represent a bit mask of options.
 	Mount(call rpc.ServerCall, server string, ttl uint32, flags naming.MountFlag) error
-	// DEPRECATED: TODO(ashankar): Remove before release.
-	MountX(call rpc.ServerCall, server string, blessingPatterns []security.BlessingPattern, ttl uint32, flags naming.MountFlag) error
 	// Unmount removes server from the receiver.  If server is empty, remove all
 	// servers mounted there.  Returns a non-nil error iff server remains mounted
 	// at the mount point.
@@ -346,10 +332,6 @@ func (s implMountTableServerStub) Mount(call rpc.ServerCall, i0 string, i1 uint3
 	return s.impl.Mount(call, i0, i1, i2)
 }
 
-func (s implMountTableServerStub) MountX(call rpc.ServerCall, i0 string, i1 []security.BlessingPattern, i2 uint32, i3 naming.MountFlag) error {
-	return s.impl.MountX(call, i0, i1, i2, i3)
-}
-
 func (s implMountTableServerStub) Unmount(call rpc.ServerCall, i0 string) error {
 	return s.impl.Unmount(call, i0)
 }
@@ -393,16 +375,6 @@ var descMountTable = rpc.InterfaceDesc{
 				{"server", ``}, // string
 				{"ttl", ``},    // uint32
 				{"flags", ``},  // naming.MountFlag
-			},
-		},
-		{
-			Name: "MountX",
-			Doc:  "// DEPRECATED: TODO(ashankar): Remove before release.",
-			InArgs: []rpc.ArgDesc{
-				{"server", ``},           // string
-				{"blessingPatterns", ``}, // []security.BlessingPattern
-				{"ttl", ``},              // uint32
-				{"flags", ``},            // naming.MountFlag
 			},
 		},
 		{
