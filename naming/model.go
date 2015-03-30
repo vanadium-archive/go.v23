@@ -79,6 +79,9 @@ type Endpoint interface {
 	// ServesMountTable returns true if this endpoint serves a mount table.
 	ServesMountTable() bool
 
+	// ServesLeaf returns true if this endpoint serves a leaf server.
+	ServesLeaf() bool
+
 	// BlessingNames returns the blessings that the process associated with
 	// this Endpoint will present.
 	BlessingNames() []string
