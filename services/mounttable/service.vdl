@@ -7,7 +7,6 @@ package mounttable
 
 import (
 	"v.io/v23/naming"
-	"v.io/v23/security"
 	"v.io/v23/services/security/access/object"
 )
 
@@ -60,9 +59,6 @@ type MountTable interface {
 	//
 	// The flags represent a bit mask of options.
 	Mount(server string, ttl uint32, flags naming.MountFlag) error
-
-	// DEPRECATED: TODO(ashankar): Remove before release.
-	MountX(server string, blessingPatterns []security.BlessingPattern, ttl uint32, flags naming.MountFlag) error
 
 	// Unmount removes server from the receiver.  If server is empty, remove all
 	// servers mounted there.  Returns a non-nil error iff server remains mounted
