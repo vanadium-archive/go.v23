@@ -38,3 +38,19 @@ func TestDischargeToAndFromWire(t *testing.T) {
 		t.Errorf("Got (%#v, %v) want (%#v, nil)", d3, err, discharge)
 	}
 }
+
+func BenchmarkDischargeEquality(b *testing.B) {
+	p, err := CreatePrincipal(newSigner(), nil, nil)
+	if err != nil {
+		b.Fatal(err)
+	}
+	cav := newCaveat(NewPublicKeyCaveat(p.PublicKey(), "moline", ThirdPartyRequirements{}, UnconstrainedUse()))
+	discharge, err := p.MintDischarge(cav, UnconstrainedUse())
+	if err != nil {
+		b.Fatal(err)
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		discharge.Equivalent(discharge)
+	}
+}

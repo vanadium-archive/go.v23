@@ -5,6 +5,7 @@
 package security
 
 import (
+	"reflect"
 	"time"
 
 	"v.io/v23/vom"
@@ -61,6 +62,12 @@ func (d Discharge) Expiry() time.Time {
 		}
 	}
 	return min
+}
+
+// Equivalent returns true if 'd' and 'discharge' can be used interchangeably,
+// i.e., any authorizations that are enabled by 'd' will be enabled by 'discharge' and vice versa.
+func (d Discharge) Equivalent(discharge Discharge) bool {
+	return reflect.DeepEqual(d, discharge)
 }
 
 func wireDischargeToNative(wire WireDischarge, native *Discharge) error {

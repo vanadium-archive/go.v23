@@ -71,6 +71,27 @@ func TestByteSize(t *testing.T) {
 	logCaveatSize(MethodCaveat("m"))
 }
 
+func BenchmarkBlessingsSingleCertificateEquality(b *testing.B) {
+	p, err := CreatePrincipal(newSigner(), nil, nil)
+	if err != nil {
+		b.Fatal(err)
+	}
+	caveat, err := ExpiryCaveat(time.Now().Add(time.Hour))
+	if err != nil {
+		b.Fatal(err)
+	}
+	blessings, err := p.BlessSelf("self", caveat)
+	if err != nil {
+		b.Fatal(err)
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		if equals := blessings.Equivalent(blessings); !equals {
+			b.Fatalf("blessings should be equal")
+		}
+	}
+}
+
 func BenchmarkBless(b *testing.B) {
 	p, err := CreatePrincipal(newSigner(), nil, nil)
 	if err != nil {

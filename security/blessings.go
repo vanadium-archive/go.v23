@@ -7,6 +7,7 @@ package security
 import (
 	"bytes"
 	"fmt"
+	"reflect"
 	"sort"
 	"strings"
 	"sync"
@@ -69,10 +70,17 @@ func (b Blessings) IsZero() bool {
 	return b.publicKey == nil
 }
 
+// Equivalent returns true if 'b' and 'blessings' can be used interchangeably,
+// i.e., 'b' will be authorized wherever 'blessings' is and vice-versa.
+func (b Blessings) Equivalent(blessings Blessings) bool {
+	return reflect.DeepEqual(b, blessings)
+}
+
 func (b Blessings) publicKeyDER() []byte {
 	chain := b.chains[0]
 	return chain[len(chain)-1].PublicKey
 }
+
 func (b Blessings) blessingsByNameForPrincipal(p Principal, pattern BlessingPattern) Blessings {
 	ret := Blessings{publicKey: b.publicKey}
 	for _, chain := range b.chains {
@@ -86,6 +94,7 @@ func (b Blessings) blessingsByNameForPrincipal(p Principal, pattern BlessingPatt
 	}
 	return ret
 }
+
 func (b Blessings) String() string {
 	blessings := make([]string, len(b.chains))
 	for chainidx, chain := range b.chains {
