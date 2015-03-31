@@ -72,14 +72,14 @@ func TestPanicOnInitWithNoProfile(t *testing.T) {
 func TestInitWithRegisteredProfile(t *testing.T) {
 	clear()
 	// Calling v23.Init with a profile should succeed.
-	RegisterProfileInit(MockInit)
+	RegisterProfile(MockInit)
 	Init()
 }
 
 func TestPanicOnSecondProfileRegistration(t *testing.T) {
 	clear()
 	// Registering multiple profiles should fail.
-	RegisterProfileInit(MockInit)
+	RegisterProfile(MockInit)
 	catcher := func() {
 		r := recover()
 		if r == nil {
@@ -91,13 +91,13 @@ func TestPanicOnSecondProfileRegistration(t *testing.T) {
 		}
 	}
 	defer catcher()
-	RegisterProfileInit(MockInit)
+	RegisterProfile(MockInit)
 }
 
 func TestPanicOnSecondInit(t *testing.T) {
 	clear()
 	// Calling Init again before calling shutdown should fail.
-	RegisterProfileInit(MockInit)
+	RegisterProfile(MockInit)
 	Init()
 	catcher := func() {
 		r := recover()
@@ -116,7 +116,7 @@ func TestPanicOnSecondInit(t *testing.T) {
 func TestSecondInitAfterShutdown(t *testing.T) {
 	clear()
 	// Calling Init, shutting down, and then calling Init again should succeed.
-	RegisterProfileInit(MockInit)
+	RegisterProfile(MockInit)
 	_, shutdown := Init()
 	shutdown()
 	Init()

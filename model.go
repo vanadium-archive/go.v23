@@ -309,12 +309,12 @@ runtime implementation.`)
 // "my-sprinkler-controller-v2". Applications should, in general, use
 // as generic a Profile as possbile.
 //
-// Profiles are registered using v23.RegisterProfileInit and
-// subsequent registrations will panic. Packages that implement profiles will
-// typically call RegisterProfileInit in their init functions so importing a
-// profile will be sufficient to register it. Only one profile can be registered
-// in any program, and subsequent registrations will panic.  Typically a
-// program's main package will be the only place to import a profile.
+// Profiles are registered using v23.RegisterProfile and subsequent
+// registrations will panic. Packages that implement profiles will typically
+// call RegisterProfile in their init functions so importing a profile will
+// be sufficient to register it. Only one profile can be registered in any
+// program, and subsequent registrations will panic.  Typically a program's main
+// package will be the only place to import a profile.
 //
 // This scheme allows applications to use a pre-supplied Profile as well
 // as for developers to create their own Profiles (to represent their
@@ -330,11 +330,11 @@ runtime implementation.`)
 // precanned Profiles and how to use them.
 type Profile func(ctx *context.T) (Runtime, *context.T, Shutdown, error)
 
-// RegisterProfileInit register the specified Profile.
+// RegisterProfile register the specified Profile.
 // It must be called before v23.Init; typically it will be called by an init
 // function. It will panic if called more than once.
-func RegisterProfileInit(f Profile) {
-	// Skip 3 frames: runtime.Callers, getStack, RegisterProfileInit.
+func RegisterProfile(f Profile) {
+	// Skip 3 frames: runtime.Callers, getStack, RegisterProfile.
 	stack := getStack(3)
 	initState.mu.Lock()
 	defer initState.mu.Unlock()
