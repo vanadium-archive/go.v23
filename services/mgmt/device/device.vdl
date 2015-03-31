@@ -11,7 +11,7 @@ import (
 	"v.io/v23/security/access"
 	"v.io/v23/services/mgmt/application"
 	"v.io/v23/services/mgmt/binary"
-	"v.io/v23/services/security/object"
+	"v.io/v23/services/permissions"
 )
 
 // TODO(caprita): Merge with v23/config and v.io/x/ref/lib/exec/config.go.
@@ -130,7 +130,7 @@ type Application interface {
 	// Object provides GetPermissions/SetPermissions methods to read/modify AccessLists for the
 	// Application methods. After a device has been claimed, only the
 	// claimant will be able to modify the AccessLists for the device.
-	object.Object
+	permissions.Object
 	// TODO(caprita): Rather than overriding config and package piecemeal,
 	// consider providing an envelope override during install.
 

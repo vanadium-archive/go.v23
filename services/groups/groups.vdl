@@ -11,7 +11,7 @@ package groups
 
 import (
 	"v.io/v23/security/access"
-	"v.io/v23/services/security/object"
+	"v.io/v23/services/permissions"
 )
 
 // BlessingPatternChunk is a substring of a BlessingPattern. As with
@@ -64,7 +64,7 @@ type Group interface {
 	Rest(req RestRequest, reqEtag string) (res RestResponse, etag string | error) {access.Resolve}
 
 	// SetPermissions and GetPermissions are included from the Object interface.
-	object.Object
+	permissions.Object
 }
 
 error (
