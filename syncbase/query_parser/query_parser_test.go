@@ -60,9 +60,7 @@ func TestQueryParser(t *testing.T) {
 					Columns: []query_parser.Field{
 						{[]string{"*"}},
 					},
-					Tables: []query_parser.Table{
-						{Name: "Customer"},
-					},
+					Table: "Customer",
 				},
 			},
 			nil,
@@ -74,9 +72,7 @@ func TestQueryParser(t *testing.T) {
 					Columns: []query_parser.Field{
 						{[]string{"*"}},
 					},
-					Tables: []query_parser.Table{
-						{Name: "Customer"},
-					},
+					Table:  "Customer",
 					Limit:  100,
 					Offset: 200,
 				},
@@ -90,9 +86,7 @@ func TestQueryParser(t *testing.T) {
 					Columns: []query_parser.Field{
 						{[]string{"*"}},
 					},
-					Tables: []query_parser.Table{
-						{Name: "Customer"},
-					},
+					Table:  "Customer",
 					Limit:  10,
 					Offset: 400,
 				},
@@ -106,9 +100,7 @@ func TestQueryParser(t *testing.T) {
 					Columns: []query_parser.Field{
 						{[]string{"*"}},
 					},
-					Tables: []query_parser.Table{
-						{Name: "Customer"},
-					},
+					Table: "Customer",
 					// last limit and offset wins
 					Limit:  1,
 					Offset: 2,
@@ -124,9 +116,7 @@ func TestQueryParser(t *testing.T) {
 						{[]string{"foo", "*"}},
 						{[]string{"bar", "*"}},
 					},
-					Tables: []query_parser.Table{
-						{Name: "Customer"},
-					},
+					Table: "Customer",
 				},
 			},
 			nil,
@@ -138,17 +128,13 @@ func TestQueryParser(t *testing.T) {
 					Columns: []query_parser.Field{
 						{[]string{"*"}},
 					},
-					Tables: []query_parser.Table{
-						{Name: "Customer"},
-					},
+					Table: "Customer",
 				},
 				query_parser.SelectStatement{
 					Columns: []query_parser.Field{
 						{[]string{"*"}},
 					},
-					Tables: []query_parser.Table{
-						{Name: "Invoice"},
-					},
+					Table: "Invoice",
 				},
 			},
 			nil,
@@ -160,17 +146,13 @@ func TestQueryParser(t *testing.T) {
 					Columns: []query_parser.Field{
 						{[]string{"*"}},
 					},
-					Tables: []query_parser.Table{
-						{Name: "Customer"},
-					},
+					Table: "Customer",
 				},
 				query_parser.SelectStatement{
 					Columns: []query_parser.Field{
 						{[]string{"*"}},
 					},
-					Tables: []query_parser.Table{
-						{Name: "Invoice"},
-					},
+					Table: "Invoice",
 				},
 			},
 			nil,
@@ -182,17 +164,13 @@ func TestQueryParser(t *testing.T) {
 					Columns: []query_parser.Field{
 						{[]string{"*"}},
 					},
-					Tables: []query_parser.Table{
-						{Name: "Customer"},
-					},
+					Table: "Customer",
 				},
 				query_parser.SelectStatement{
 					Columns: []query_parser.Field{
 						{[]string{"*"}},
 					},
-					Tables: []query_parser.Table{
-						{Name: "Invoice"},
-					},
+					Table: "Invoice",
 				},
 			},
 			nil,
@@ -204,9 +182,7 @@ func TestQueryParser(t *testing.T) {
 					Columns: []query_parser.Field{
 						{[]string{"select"}},
 					},
-					Tables: []query_parser.Table{
-						{Name: "from"},
-					},
+					Table: "from",
 					Where: &query_parser.Expression{
 						Operand1: &query_parser.Operand{
 							Type:   query_parser.OpField,
@@ -229,9 +205,7 @@ func TestQueryParser(t *testing.T) {
 					Columns: []query_parser.Field{
 						{[]string{"x"}},
 					},
-					Tables: []query_parser.Table{
-						{Name: "y"},
-					},
+					Table: "y",
 					Where: &query_parser.Expression{
 						Operand1: &query_parser.Operand{
 							Type:   query_parser.OpField,
@@ -254,9 +228,7 @@ func TestQueryParser(t *testing.T) {
 					Columns: []query_parser.Field{
 						{[]string{"x"}},
 					},
-					Tables: []query_parser.Table{
-						{Name: "y"},
-					},
+					Table: "y",
 					Where: &query_parser.Expression{
 						Operand1: &query_parser.Operand{
 							Type:   query_parser.OpField,
@@ -281,9 +253,7 @@ func TestQueryParser(t *testing.T) {
 					Columns: []query_parser.Field{
 						{[]string{"x"}},
 					},
-					Tables: []query_parser.Table{
-						{Name: "y"},
-					},
+					Table: "y",
 					Where: &query_parser.Expression{
 						Operand1: &query_parser.Operand{
 							Type:   query_parser.OpField,
@@ -307,9 +277,7 @@ func TestQueryParser(t *testing.T) {
 					Columns: []query_parser.Field{
 						{[]string{"x"}},
 					},
-					Tables: []query_parser.Table{
-						{Name: "y"},
-					},
+					Table: "y",
 					Where: &query_parser.Expression{
 						Operand1: &query_parser.Operand{
 							Type:   query_parser.OpField,
@@ -327,17 +295,14 @@ func TestQueryParser(t *testing.T) {
 			nil,
 		},
 		{
-			"select foo.bar, tom.dick.harry from Customer, Invoice as Inv where a.b.c = \"baz\" and d.e.f like \"%foobarbaz\"",
+			"select foo.bar, tom.dick.harry from Customer where a.b.c = \"baz\" and d.e.f like \"%foobarbaz\"",
 			[]query_parser.SelectStatement{
 				query_parser.SelectStatement{
 					Columns: []query_parser.Field{
 						{[]string{"foo", "bar"}},
 						{[]string{"tom", "dick", "harry"}},
 					},
-					Tables: []query_parser.Table{
-						{Name: "Customer"},
-						{Name: "Invoice", As: "Inv"},
-					},
+					Table: "Customer",
 					Where: &query_parser.Expression{
 						Operand1: &query_parser.Operand{
 							Type: query_parser.OpExpr,
@@ -381,9 +346,7 @@ func TestQueryParser(t *testing.T) {
 						{[]string{"foo"}},
 						{[]string{"bar"}},
 					},
-					Tables: []query_parser.Table{
-						{Name: "Customer"},
-					},
+					Table: "Customer",
 					Where: &query_parser.Expression{
 						Operand1: &query_parser.Operand{
 							Type: query_parser.OpExpr,
@@ -426,9 +389,7 @@ func TestQueryParser(t *testing.T) {
 					Columns: []query_parser.Field{
 						{[]string{"foo"}},
 					},
-					Tables: []query_parser.Table{
-						{Name: "Customer"},
-					},
+					Table: "Customer",
 					Where: &query_parser.Expression{
 						Operand1: &query_parser.Operand{
 							Type: query_parser.OpExpr,
@@ -491,9 +452,7 @@ func TestQueryParser(t *testing.T) {
 					Columns: []query_parser.Field{
 						{[]string{"foo"}},
 					},
-					Tables: []query_parser.Table{
-						{Name: "Customer"},
-					},
+					Table: "Customer",
 					Where: &query_parser.Expression{
 						Operand1: &query_parser.Operand{
 							Type: query_parser.OpExpr,
@@ -556,9 +515,7 @@ func TestQueryParser(t *testing.T) {
 					Columns: []query_parser.Field{
 						{[]string{"foo"}},
 					},
-					Tables: []query_parser.Table{
-						{Name: "Customer"},
-					},
+					Table: "Customer",
 					Where: &query_parser.Expression{
 						Operand1: &query_parser.Operand{
 							Type: query_parser.OpExpr,
@@ -621,9 +578,7 @@ func TestQueryParser(t *testing.T) {
 					Columns: []query_parser.Field{
 						{[]string{"foo"}},
 					},
-					Tables: []query_parser.Table{
-						{Name: "Customer"},
-					},
+					Table: "Customer",
 					Where: &query_parser.Expression{
 						Operand1: &query_parser.Operand{
 							Type: query_parser.OpExpr,
@@ -686,9 +641,7 @@ func TestQueryParser(t *testing.T) {
 					Columns: []query_parser.Field{
 						{[]string{"foo"}},
 					},
-					Tables: []query_parser.Table{
-						{Name: "Customer"},
-					},
+					Table: "Customer",
 					Where: &query_parser.Expression{
 						Operand1: &query_parser.Operand{
 							Type: query_parser.OpExpr,
@@ -776,18 +729,18 @@ func TestQueryParserErrors(t *testing.T) {
 		{"select (foo)", query_parser.Error(7, "Expected identifier or '*', found '('")},
 		{"select from where", query_parser.Error(12, "Expected 'from', found 'where'")},
 		{"create table Customer (CustRecord cust_pkg.Cust, primary key(CustRecord.CustID))", query_parser.Error(0, "Unknown identifier: create")},
-		{"select foo from Customer where (A=123 or B=456) and C=789)", query_parser.Error(57, "Unexpected: ')'")},
+		{"select foo from Customer where (A=123 or B=456) and C=789)", query_parser.Error(57, "Unexpected: ')'.")},
 		{"select foo from Customer where ((A=123 or B=456) and C=789", query_parser.Error(58, "Unexpected end of statement.")},
 		{"select foo from Customer where (((((A=123 or B=456 and C=789))))", query_parser.Error(64, "Unexpected end of statement.")},
-		{"select foo from Customer where (A=123 or B=456) and C=789)))))", query_parser.Error(57, "Unexpected: ')'")},
+		{"select foo from Customer where (A=123 or B=456) and C=789)))))", query_parser.Error(57, "Unexpected: ')'.")},
 		{"select foo from Customer where", query_parser.Error(30, "Unexpected end of statement.")},
 		{"select foo from Customer where ", query_parser.Error(31, "Unexpected end of statement.")},
 		{"select foo from Customer where )", query_parser.Error(31, "Expected operand, found ')'.")},
 		{"select foo from Customer where )A=123 or B=456) and C=789", query_parser.Error(31, "Expected operand, found ')'.")},
 		{"select foo from Customer where ()A=123 or B=456) and C=789", query_parser.Error(32, "Expected operand, found ')'.")},
-		{"select foo from Customer where (A=123 or B=456) and C=789)", query_parser.Error(57, "Unexpected: ')'")},
+		{"select foo from Customer where (A=123 or B=456) and C=789)", query_parser.Error(57, "Unexpected: ')'.")},
 		{"select foo bar from Customer", query_parser.Error(11, "Expected 'from', found 'bar'")},
-		{"select foo from Customer Invoice", query_parser.Error(25, "Unexpected: 'Invoice'")},
+		{"select foo from Customer Invoice", query_parser.Error(25, "Unexpected: 'Invoice'.")},
 		{"select (foo) from (Customer)", query_parser.Error(7, "Expected identifier or '*', found '('")},
 		{"select foo, bar from Customer where a = (b)", query_parser.Error(40, "Expected operand, found '('.")},
 		{"select foo, bar from Customer where a = b and (c) = d", query_parser.Error(48, "Expected operator ('like', 'not like', '=', '<>', 'equal' or 'not equal', found ')'.")},
@@ -807,6 +760,8 @@ func TestQueryParserErrors(t *testing.T) {
 		{"select * from Customer limit 100 offset a", query_parser.Error(40, "Expected integer literal., found 'a'.")},
 		{"select * from Customer limit a offset 200", query_parser.Error(29, "Expected integer literal., found 'a'.")},
 		{"select * from Customer limit", query_parser.Error(28, "Unexpected end of statement, expected integer literal.")},
+		{"select * from Customer, Invoice", query_parser.Error(22, "Unexpected: ','.")},
+		{"select * from Customer As Cust where foo = bar", query_parser.Error(23, "Unexpected: 'As'.")},
 	}
 
 	for _, test := range basic {

@@ -8,7 +8,7 @@
 // The select is of the form:
 //
 // <query_specification> ::=
-//   SELECT <field_clause> FROM <from_clause> [WHERE <where_clause>] [<limit_offset_clause>]
+//   SELECT <field_clause> <from_clause> [<where_clause>] [<limit_offset_clause>]
 //
 // <field_clause> ::= <column_field>[{<comma><column_field>}...]
 //
@@ -18,11 +18,11 @@
 //
 // <segment> ::= <identifier>
 //
-// <from_clause> ::= <table>[{<comma><table>}...]
+// <from_clause> ::= FROM <table>
 //
-// <table> ::= <identifier> [AS <identifier>]
+// <table> ::= <identifier>
 //
-// <where_clause> ::= <expression>
+// <where_clause> ::= WHERE <expression>
 //
 // <limit_offset_clause> ::=
 // <limit_clause> [<offset_clause>]
@@ -62,7 +62,7 @@
 // <literal> ::= <string_literal> | <char_literal> | <int_literal> | <float_literal>
 //
 // Example:
-// select foo.bar, baz from foobarbaz, bazbarfoo where foo = 42 and bar not like "abc%"
+// select foo.bar, baz from foobarbaz where foo = 42 and bar not like "abc%"
 //
 
 package query_parser
@@ -123,11 +123,6 @@ type Field struct {
 	Segments []string
 }
 
-type Table struct {
-	Name string
-	As   string
-}
-
 type BinaryOperator int
 
 const (
@@ -168,7 +163,7 @@ type Expression struct {
 
 type SelectStatement struct {
 	Columns []Field
-	Tables  []Table
+	Table   string
 	Where   *Expression
 	Limit   int64
 	Offset  int64
@@ -288,7 +283,7 @@ func Select(s *scanner.Scanner, token *Token) (Statement, *Token, *SyntaxError) 
 
 	// There can be nothing remaining for the current statement
 	if token.Tok != TokEOF && token.Tok != TokSEMICOLON {
-		return nil, nil, Error(token.Offset, fmt.Sprintf("Unexpected: '%s'", token.Value))
+		return nil, nil, Error(token.Offset, fmt.Sprintf("Unexpected: '%s'.", token.Value))
 	}
 
 	return st, token, nil
@@ -353,59 +348,21 @@ func ParseColumn(s *scanner.Scanner, st *SelectStatement, token *Token) (*Token,
 	return token, nil
 }
 
-// Parse tables and update SelectStatement directly.  Return next Token or SyntaxError.
+// Parse from clause, update SelectStatement directly.  Return next Token or SyntaxError.
 func ParseFrom(s *scanner.Scanner, st *SelectStatement, token *Token) (*Token, *SyntaxError) {
 	if strings.ToLower(token.Value) != "from" {
 		return nil, Error(token.Offset, fmt.Sprintf("Expected 'from', found '%s'", token.Value))
 	}
 	token = ScanToken(s) // eat from
-	// must be at least one table or it is an error
-	// tables may contain an AS clause.
-	// tables are separated by commas
+	// must be a table specified
 	if token.Tok == TokEOF {
 		return nil, Error(token.Offset, "Unexpected end of statement.")
 	}
-	token, err := ParseTable(s, st, token)
-	if err != nil {
-		return nil, err
-	}
-
-	// More tables?
-	for token.Tok == TokCOMMA {
-		token = ScanToken(s)
-		token, err = ParseTable(s, st, token)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return token, nil
-}
-
-// Parse a single table and update SelectStatement directly.  Return next Token or SyntaxError.
-func ParseTable(s *scanner.Scanner, st *SelectStatement, token *Token) (*Token, *SyntaxError) {
 	if token.Tok != TokIDENT {
 		return nil, Error(token.Offset, fmt.Sprintf("Expected identifier, found '%s'", token.Value))
 	}
-	var table Table
-	table.Name = token.Value
-
-	// check for As clause
-	token = ScanToken(s)
-
-	if strings.ToLower(token.Value) == "as" {
-		token = ScanToken(s)
-		if token.Tok == TokEOF {
-			return nil, Error(token.Offset, "Unexpected end of statement.")
-		}
-		if token.Tok != TokIDENT {
-			return nil, Error(token.Offset, fmt.Sprintf("Expected identifier, found '%s'", token.Value))
-		}
-		table.As = token.Value
-		token = ScanToken(s)
-	}
-
-	st.Tables = append(st.Tables, table)
+	st.Table = token.Value
+	token = ScanToken(s) // eat from
 	return token, nil
 }
 
@@ -668,17 +625,7 @@ func (st SelectStatement) String() string {
 			val += st.Columns[i].Segments[j]
 		}
 	}
-	val += ") Tables("
-	for i := range st.Tables {
-		if i != 0 {
-			val += ","
-		}
-		val += st.Tables[i].Name
-		if st.Tables[i].As != "" {
-			val += fmt.Sprintf(" AS %s", st.Tables[i].As)
-		}
-	}
-	val += ") Where"
+	val += ") Table(" + st.Table + ") Where"
 	val += ExpressionToString(st.Where)
 	val += " LIMIT "
 	if st.Limit != 0 {
