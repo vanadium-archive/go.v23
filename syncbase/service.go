@@ -4,7 +4,7 @@ import (
 	wire "v.io/syncbase/v23/services/syncbase"
 	"v.io/v23/context"
 	"v.io/v23/naming"
-	"v.io/v23/services/security/access"
+	"v.io/v23/security/access"
 )
 
 // TODO(sadovsky): Maybe put this elsewhere.

@@ -1,8 +1,8 @@
 package syncbase
 
 import (
-  "v.io/v23/services/security/access"
-  "v.io/v23/services/security/access/object"
+  "v.io/v23/security/access"
+  "v.io/v23/services/security/object"
 )
 
 // NOTE(sadovsky): Various methods below may end up needing additional options.

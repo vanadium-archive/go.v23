@@ -7,7 +7,7 @@ package syncbase
 import (
 	wire "v.io/syncbase/v23/services/syncbase"
 	"v.io/v23/context"
-	"v.io/v23/services/security/access"
+	"v.io/v23/security/access"
 	"v.io/v23/vdl"
 )
 
