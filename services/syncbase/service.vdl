@@ -12,10 +12,10 @@ import (
 // TODO(sadovsky): It turns out the above statement is not true. We should
 // reconsider these interfaces after we've fleshed things out further.
 //
-// TODO(sadovsky): Revisit the ACL-checking semantics. E.g. should we consult
-// the Universe ACL on Item.Get?
+// TODO(sadovsky): Revisit the Permissions-checking semantics. E.g. should we consult
+// the Universe Permissions on Item.Get?
 //
-// TODO(sadovsky): Revisit the ACL model more generally. It's not clear that we
+// TODO(sadovsky): Revisit the Permissions model more generally. It's not clear that we
 // need every layer of the hierarchy to implement SetPermissions and GetPermissions. In fact, we
 // may be able to drop SetPermissions and GetPermissions from all of these interfaces, and also
 // drop the acl argument from Database.Create.
@@ -56,7 +56,7 @@ type Schema set[string]
 
 // Database represents a collection of Tables. Batch operations, queries, sync,
 // watch, etc. all currently operate at the Database level. A Database's etag
-// covers both its ACL and its schema.
+// covers both its Permissions and its schema.
 // Database.Glob operates over Table names.
 //
 // TODO(sadovsky): Add Watch method.
@@ -86,14 +86,14 @@ type Database interface {
 // Table represents a collection of Items (rows). Table implements built-in
 // methods such as Glob but currently does not provide any custom methods.
 // Table.Glob operates over the primary keys of Items in the Table.
-// All ACL checks are performed against the Database ACL.
+// All Permissions checks are performed against the Database Permissions.
 type Table interface {
 }
 
 // Item represents a single row in a Table. The type of data stored in an Item
 // is dictated by the Database schema. The relative name of this Item must be
 // its encoded primary key.
-// All ACL checks are performed against the Database ACL.
+// All Permissions checks are performed against the Database Permissions.
 type Item interface {
 	// Get returns the value for this Item.
 	Get() (any | error) {access.Read}

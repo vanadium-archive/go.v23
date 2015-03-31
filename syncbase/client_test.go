@@ -24,7 +24,7 @@ import (
 	tsecurity "v.io/x/ref/test/security"
 )
 
-func defaultACL() access.Permissions {
+func defaultPermissions() access.Permissions {
 	acl := access.Permissions{}
 	for _, tag := range access.AllTypicalTags() {
 		acl.Add(security.BlessingPattern("server/client"), string(tag))
@@ -44,7 +44,7 @@ func newServer(ctx *context.T, acl access.Permissions) (string, func()) {
 
 	service := server.NewService(memstore.New())
 	if acl == nil {
-		acl = defaultACL()
+		acl = defaultPermissions()
 	}
 	if err := service.Create(acl); err != nil {
 		vlog.Fatal("service.Create() failed: ", err)
@@ -148,7 +148,7 @@ func TestNameAndKey(t *testing.T) {
 }
 
 // Tests that {Universe,Database}.Create work as expected, including default
-// ACLs.
+// Permissions.
 func TestCreate(t *testing.T) {
 	ctx, svName, cleanup := setupOrDie(nil)
 	defer cleanup()
@@ -163,12 +163,12 @@ func TestCreate(t *testing.T) {
 	}
 
 	// Create the Universe.
-	// TODO(sadovsky): Test auth check (against Service ACL).
+	// TODO(sadovsky): Test auth check (against Service Permissions).
 	if err := uv.Create(ctx, nil); err != nil {
 		t.Fatalf("uv.Create() failed: %s", err)
 	}
-	if wantACL, gotACL := defaultACL(), getPermissionsOrDie(uv, ctx, t); !reflect.DeepEqual(wantACL, gotACL) {
-		t.Errorf("ACLs do not match: want %v, got %v", wantACL, gotACL)
+	if wantPermissions, gotPermissions := defaultPermissions(), getPermissionsOrDie(uv, ctx, t); !reflect.DeepEqual(wantPermissions, gotPermissions) {
+		t.Errorf("Permissionss do not match: want %v, got %v", wantPermissions, gotPermissions)
 	}
 
 	// Database GetSchema should fail, since Database does not exist.
@@ -177,12 +177,12 @@ func TestCreate(t *testing.T) {
 	}
 
 	// Create the Database.
-	// TODO(sadovsky): Test auth check (against Universe ACL).
+	// TODO(sadovsky): Test auth check (against Universe Permissions).
 	if err := db.Create(ctx, nil); err != nil {
 		t.Fatalf("db.Create() failed: %s", err)
 	}
-	if wantACL, gotACL := defaultACL(), getPermissionsOrDie(uv, ctx, t); !reflect.DeepEqual(wantACL, gotACL) {
-		t.Errorf("ACLs do not match: want %v, got %v", wantACL, gotACL)
+	if wantPermissions, gotPermissions := defaultPermissions(), getPermissionsOrDie(uv, ctx, t); !reflect.DeepEqual(wantPermissions, gotPermissions) {
+		t.Errorf("Permissionss do not match: want %v, got %v", wantPermissions, gotPermissions)
 	}
 
 	// Database GetSchema should succeed this time, and should return the default
@@ -193,26 +193,26 @@ func TestCreate(t *testing.T) {
 		t.Fatalf("Schema is not empty: %v", schema)
 	}
 
-	// Test Universe.Create with non-default ACL.
+	// Test Universe.Create with non-default Permissions.
 	uv2 := sv.BindUniverse("uv2")
 	acl := access.Permissions{}
 	acl.Add(security.BlessingPattern("server/client"), string(access.Admin))
 	if err := uv2.Create(ctx, acl); err != nil {
 		t.Fatalf("uv2.Create() failed: %s", err)
 	}
-	if wantACL, gotACL := acl, getPermissionsOrDie(uv2, ctx, t); !reflect.DeepEqual(wantACL, gotACL) {
-		t.Errorf("ACLs do not match: want %v, got %v", wantACL, gotACL)
+	if wantPermissions, gotPermissions := acl, getPermissionsOrDie(uv2, ctx, t); !reflect.DeepEqual(wantPermissions, gotPermissions) {
+		t.Errorf("Permissionss do not match: want %v, got %v", wantPermissions, gotPermissions)
 	}
 
-	// Test Database.Create with non-default ACL.
+	// Test Database.Create with non-default Permissions.
 	db2 := uv.BindDatabase("db2")
 	acl = access.Permissions{}
 	acl.Add(security.BlessingPattern("server/client"), string(access.Admin))
 	if err := db2.Create(ctx, acl); err != nil {
 		t.Fatalf("db2.Create() failed: %s", err)
 	}
-	if wantACL, gotACL := acl, getPermissionsOrDie(db2, ctx, t); !reflect.DeepEqual(wantACL, gotACL) {
-		t.Errorf("ACLs do not match: want %v, got %v", wantACL, gotACL)
+	if wantPermissions, gotPermissions := acl, getPermissionsOrDie(db2, ctx, t); !reflect.DeepEqual(wantPermissions, gotPermissions) {
+		t.Errorf("Permissionss do not match: want %v, got %v", wantPermissions, gotPermissions)
 	}
 }
 
@@ -220,8 +220,8 @@ func TestCreate(t *testing.T) {
 func TestDelete(t *testing.T) {
 }
 
-// Tests that the various {Set,Get}ACL methods work as expected.
-func TestACLMethods(t *testing.T) {
+// Tests that the various {Set,Get}Permissions methods work as expected.
+func TestPermissionsMethods(t *testing.T) {
 }
 
 // Tests that the various {Update,Get}Schema methods work as expected.

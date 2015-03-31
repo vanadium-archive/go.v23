@@ -19,11 +19,11 @@ import (
 
 // AccessController provides access control for various syncbase objects.
 type AccessController interface {
-	// SetPermissions replaces the current ACL for an object.
+	// SetPermissions replaces the current Permissions for an object.
 	// For detailed documentation, see Object.SetPermissions.
 	SetPermissions(ctx *context.T, acl access.Permissions, etag string) error
 
-	// GetPermissions returns the current ACL for an object.
+	// GetPermissions returns the current Permissions for an object.
 	// For detailed documentation, see Object.GetPermissions.
 	GetPermissions(ctx *context.T) (acl access.Permissions, etag string, err error)
 }
@@ -73,7 +73,7 @@ type Universe interface {
 
 // Database represents a collection of Tables. Batch operations, queries, sync,
 // watch, etc. all currently operate at the Database level. A Database's etag
-// covers both its ACL and its schema.
+// covers both its Permissions and its schema.
 //
 // TODO(sadovsky): Add Watch method.
 // TODO(sadovsky): Support batch operations.
@@ -107,7 +107,7 @@ type Database interface {
 }
 
 // Table represents a collection of Items (rows).
-// All ACL checks are performed against the Database ACL.
+// All Permissions checks are performed against the Database Permissions.
 //
 // TODO(sadovsky): Add Scan method.
 // TODO(sadovsky): Maybe generate a data access object (DAO) from the schema,
@@ -135,7 +135,7 @@ type Table interface {
 
 // Item represents a single row in a Table. The type of data stored in an Item
 // is dictated by the Database schema.
-// All ACL checks are performed against the Database ACL.
+// All Permissions checks are performed against the Database Permissions.
 type Item interface {
 	// Key returns the primary key for this Item.
 	Key() *vdl.Value
