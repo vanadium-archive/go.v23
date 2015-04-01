@@ -25,7 +25,7 @@ import (
 	"v.io/syncbase/veyron/services/syncbase/server"
 	"v.io/syncbase/veyron/services/syncbase/store/memstore"
 	_ "v.io/x/ref/profiles"
-	tsecurity "v.io/x/ref/test/security"
+	tsecurity "v.io/x/ref/test/testutil"
 )
 
 func defaultPermissions() access.Permissions {
