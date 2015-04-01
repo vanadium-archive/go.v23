@@ -114,12 +114,6 @@ type SkipServerEndpointAuthorization struct{}
 func (SkipServerEndpointAuthorization) RPCCallOpt()   {}
 func (SkipServerEndpointAuthorization) NSResolveOpt() {}
 
-// Discharge wraps the security.Discharge interface so that we can
-// add functions representing the option annotations.
-type Discharge struct{ security.Discharge }
-
-func (Discharge) RPCCallOpt() {}
-
 // RetryTimeout is the duration during which we will retry starting
 // an RPC call.  Zero means don't retry.
 type RetryTimeout time.Duration
