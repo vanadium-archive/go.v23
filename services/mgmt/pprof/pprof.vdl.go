@@ -51,31 +51,17 @@ type PProfClientStub interface {
 }
 
 // PProfClient returns a client stub for PProf.
-func PProfClient(name string, opts ...rpc.BindOpt) PProfClientStub {
-	var client rpc.Client
-	for _, opt := range opts {
-		if clientOpt, ok := opt.(rpc.Client); ok {
-			client = clientOpt
-		}
-	}
-	return implPProfClientStub{name, client}
+func PProfClient(name string) PProfClientStub {
+	return implPProfClientStub{name}
 }
 
 type implPProfClientStub struct {
-	name   string
-	client rpc.Client
-}
-
-func (c implPProfClientStub) c(ctx *context.T) rpc.Client {
-	if c.client != nil {
-		return c.client
-	}
-	return v23.GetClient(ctx)
+	name string
 }
 
 func (c implPProfClientStub) CmdLine(ctx *context.T, opts ...rpc.CallOpt) (o0 []string, err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "CmdLine", nil, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "CmdLine", nil, opts...); err != nil {
 		return
 	}
 	err = call.Finish(&o0)
@@ -84,7 +70,7 @@ func (c implPProfClientStub) CmdLine(ctx *context.T, opts ...rpc.CallOpt) (o0 []
 
 func (c implPProfClientStub) Profiles(ctx *context.T, opts ...rpc.CallOpt) (o0 []string, err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Profiles", nil, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Profiles", nil, opts...); err != nil {
 		return
 	}
 	err = call.Finish(&o0)
@@ -93,7 +79,7 @@ func (c implPProfClientStub) Profiles(ctx *context.T, opts ...rpc.CallOpt) (o0 [
 
 func (c implPProfClientStub) Profile(ctx *context.T, i0 string, i1 int32, opts ...rpc.CallOpt) (ocall PProfProfileClientCall, err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Profile", []interface{}{i0, i1}, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Profile", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
 	ocall = &implPProfProfileClientCall{ClientCall: call}
@@ -102,7 +88,7 @@ func (c implPProfClientStub) Profile(ctx *context.T, i0 string, i1 int32, opts .
 
 func (c implPProfClientStub) CpuProfile(ctx *context.T, i0 int32, opts ...rpc.CallOpt) (ocall PProfCpuProfileClientCall, err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "CpuProfile", []interface{}{i0}, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "CpuProfile", []interface{}{i0}, opts...); err != nil {
 		return
 	}
 	ocall = &implPProfCpuProfileClientCall{ClientCall: call}
@@ -111,7 +97,7 @@ func (c implPProfClientStub) CpuProfile(ctx *context.T, i0 int32, opts ...rpc.Ca
 
 func (c implPProfClientStub) Symbol(ctx *context.T, i0 []uint64, opts ...rpc.CallOpt) (o0 []string, err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Symbol", []interface{}{i0}, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Symbol", []interface{}{i0}, opts...); err != nil {
 		return
 	}
 	err = call.Finish(&o0)

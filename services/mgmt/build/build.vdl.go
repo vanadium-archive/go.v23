@@ -109,31 +109,17 @@ type BuilderClientStub interface {
 }
 
 // BuilderClient returns a client stub for Builder.
-func BuilderClient(name string, opts ...rpc.BindOpt) BuilderClientStub {
-	var client rpc.Client
-	for _, opt := range opts {
-		if clientOpt, ok := opt.(rpc.Client); ok {
-			client = clientOpt
-		}
-	}
-	return implBuilderClientStub{name, client}
+func BuilderClient(name string) BuilderClientStub {
+	return implBuilderClientStub{name}
 }
 
 type implBuilderClientStub struct {
-	name   string
-	client rpc.Client
-}
-
-func (c implBuilderClientStub) c(ctx *context.T) rpc.Client {
-	if c.client != nil {
-		return c.client
-	}
-	return v23.GetClient(ctx)
+	name string
 }
 
 func (c implBuilderClientStub) Build(ctx *context.T, i0 Architecture, i1 OperatingSystem, opts ...rpc.CallOpt) (ocall BuilderBuildClientCall, err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Build", []interface{}{i0, i1}, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Build", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
 	ocall = &implBuilderBuildClientCall{ClientCall: call}
@@ -142,7 +128,7 @@ func (c implBuilderClientStub) Build(ctx *context.T, i0 Architecture, i1 Operati
 
 func (c implBuilderClientStub) Describe(ctx *context.T, i0 string, opts ...rpc.CallOpt) (o0 binary.Description, err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Describe", []interface{}{i0}, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Describe", []interface{}{i0}, opts...); err != nil {
 		return
 	}
 	err = call.Finish(&o0)

@@ -579,11 +579,7 @@ type ServerCall interface {
 	Context() *context.T
 }
 
-// TODO(caprita): Remove this.  It's currently referenced in all VDL-generated
-// files, so do it in a separate CL.
-
-// BindOpt is the interface for options provided to Bind<Service> calls in RPC
-// clients.
+// TODO(ashankar): Remove this once VDL-generated files stop referencing it.
 type BindOpt interface {
 }
 

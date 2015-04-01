@@ -64,33 +64,19 @@ type StatsClientStub interface {
 }
 
 // StatsClient returns a client stub for Stats.
-func StatsClient(name string, opts ...rpc.BindOpt) StatsClientStub {
-	var client rpc.Client
-	for _, opt := range opts {
-		if clientOpt, ok := opt.(rpc.Client); ok {
-			client = clientOpt
-		}
-	}
-	return implStatsClientStub{name, client, watch.GlobWatcherClient(name, client)}
+func StatsClient(name string) StatsClientStub {
+	return implStatsClientStub{name, watch.GlobWatcherClient(name)}
 }
 
 type implStatsClientStub struct {
-	name   string
-	client rpc.Client
+	name string
 
 	watch.GlobWatcherClientStub
 }
 
-func (c implStatsClientStub) c(ctx *context.T) rpc.Client {
-	if c.client != nil {
-		return c.client
-	}
-	return v23.GetClient(ctx)
-}
-
 func (c implStatsClientStub) Value(ctx *context.T, opts ...rpc.CallOpt) (o0 *vdl.Value, err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Value", nil, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Value", nil, opts...); err != nil {
 		return
 	}
 	err = call.Finish(&o0)

@@ -249,31 +249,17 @@ type GlobWatcherClientStub interface {
 }
 
 // GlobWatcherClient returns a client stub for GlobWatcher.
-func GlobWatcherClient(name string, opts ...rpc.BindOpt) GlobWatcherClientStub {
-	var client rpc.Client
-	for _, opt := range opts {
-		if clientOpt, ok := opt.(rpc.Client); ok {
-			client = clientOpt
-		}
-	}
-	return implGlobWatcherClientStub{name, client}
+func GlobWatcherClient(name string) GlobWatcherClientStub {
+	return implGlobWatcherClientStub{name}
 }
 
 type implGlobWatcherClientStub struct {
-	name   string
-	client rpc.Client
-}
-
-func (c implGlobWatcherClientStub) c(ctx *context.T) rpc.Client {
-	if c.client != nil {
-		return c.client
-	}
-	return v23.GetClient(ctx)
+	name string
 }
 
 func (c implGlobWatcherClientStub) WatchGlob(ctx *context.T, i0 GlobRequest, opts ...rpc.CallOpt) (ocall GlobWatcherWatchGlobClientCall, err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "WatchGlob", []interface{}{i0}, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "WatchGlob", []interface{}{i0}, opts...); err != nil {
 		return
 	}
 	ocall = &implGlobWatcherWatchGlobClientCall{ClientCall: call}

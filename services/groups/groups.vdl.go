@@ -181,33 +181,19 @@ type GroupClientStub interface {
 }
 
 // GroupClient returns a client stub for Group.
-func GroupClient(name string, opts ...rpc.BindOpt) GroupClientStub {
-	var client rpc.Client
-	for _, opt := range opts {
-		if clientOpt, ok := opt.(rpc.Client); ok {
-			client = clientOpt
-		}
-	}
-	return implGroupClientStub{name, client, permissions.ObjectClient(name, client)}
+func GroupClient(name string) GroupClientStub {
+	return implGroupClientStub{name, permissions.ObjectClient(name)}
 }
 
 type implGroupClientStub struct {
-	name   string
-	client rpc.Client
+	name string
 
 	permissions.ObjectClientStub
 }
 
-func (c implGroupClientStub) c(ctx *context.T) rpc.Client {
-	if c.client != nil {
-		return c.client
-	}
-	return v23.GetClient(ctx)
-}
-
 func (c implGroupClientStub) Create(ctx *context.T, i0 access.Permissions, i1 []BlessingPatternChunk, opts ...rpc.CallOpt) (err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Create", []interface{}{i0, i1}, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Create", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
 	err = call.Finish()
@@ -216,7 +202,7 @@ func (c implGroupClientStub) Create(ctx *context.T, i0 access.Permissions, i1 []
 
 func (c implGroupClientStub) Delete(ctx *context.T, i0 string, opts ...rpc.CallOpt) (err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Delete", []interface{}{i0}, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Delete", []interface{}{i0}, opts...); err != nil {
 		return
 	}
 	err = call.Finish()
@@ -225,7 +211,7 @@ func (c implGroupClientStub) Delete(ctx *context.T, i0 string, opts ...rpc.CallO
 
 func (c implGroupClientStub) Add(ctx *context.T, i0 BlessingPatternChunk, i1 string, opts ...rpc.CallOpt) (err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Add", []interface{}{i0, i1}, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Add", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
 	err = call.Finish()
@@ -234,7 +220,7 @@ func (c implGroupClientStub) Add(ctx *context.T, i0 BlessingPatternChunk, i1 str
 
 func (c implGroupClientStub) Remove(ctx *context.T, i0 BlessingPatternChunk, i1 string, opts ...rpc.CallOpt) (err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Remove", []interface{}{i0, i1}, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Remove", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
 	err = call.Finish()
@@ -243,7 +229,7 @@ func (c implGroupClientStub) Remove(ctx *context.T, i0 BlessingPatternChunk, i1 
 
 func (c implGroupClientStub) Get(ctx *context.T, i0 GetRequest, i1 string, opts ...rpc.CallOpt) (o0 GetResponse, o1 string, err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Get", []interface{}{i0, i1}, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Get", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
 	err = call.Finish(&o0, &o1)
@@ -252,7 +238,7 @@ func (c implGroupClientStub) Get(ctx *context.T, i0 GetRequest, i1 string, opts 
 
 func (c implGroupClientStub) Rest(ctx *context.T, i0 RestRequest, i1 string, opts ...rpc.CallOpt) (o0 RestResponse, o1 string, err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Rest", []interface{}{i0, i1}, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Rest", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
 	err = call.Finish(&o0, &o1)

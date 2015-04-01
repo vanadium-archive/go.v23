@@ -56,31 +56,17 @@ type MyObjectClientStub interface {
 }
 
 // MyObjectClient returns a client stub for MyObject.
-func MyObjectClient(name string, opts ...rpc.BindOpt) MyObjectClientStub {
-	var client rpc.Client
-	for _, opt := range opts {
-		if clientOpt, ok := opt.(rpc.Client); ok {
-			client = clientOpt
-		}
-	}
-	return implMyObjectClientStub{name, client}
+func MyObjectClient(name string) MyObjectClientStub {
+	return implMyObjectClientStub{name}
 }
 
 type implMyObjectClientStub struct {
-	name   string
-	client rpc.Client
-}
-
-func (c implMyObjectClientStub) c(ctx *context.T) rpc.Client {
-	if c.client != nil {
-		return c.client
-	}
-	return v23.GetClient(ctx)
+	name string
 }
 
 func (c implMyObjectClientStub) Get(ctx *context.T, opts ...rpc.CallOpt) (err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Get", nil, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Get", nil, opts...); err != nil {
 		return
 	}
 	err = call.Finish()
@@ -89,7 +75,7 @@ func (c implMyObjectClientStub) Get(ctx *context.T, opts ...rpc.CallOpt) (err er
 
 func (c implMyObjectClientStub) Put(ctx *context.T, opts ...rpc.CallOpt) (err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Put", nil, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Put", nil, opts...); err != nil {
 		return
 	}
 	err = call.Finish()
@@ -98,7 +84,7 @@ func (c implMyObjectClientStub) Put(ctx *context.T, opts ...rpc.CallOpt) (err er
 
 func (c implMyObjectClientStub) Resolve(ctx *context.T, opts ...rpc.CallOpt) (err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Resolve", nil, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Resolve", nil, opts...); err != nil {
 		return
 	}
 	err = call.Finish()
@@ -107,7 +93,7 @@ func (c implMyObjectClientStub) Resolve(ctx *context.T, opts ...rpc.CallOpt) (er
 
 func (c implMyObjectClientStub) NoTags(ctx *context.T, opts ...rpc.CallOpt) (err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "NoTags", nil, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "NoTags", nil, opts...); err != nil {
 		return
 	}
 	err = call.Finish()

@@ -63,31 +63,17 @@ type AppCycleClientStub interface {
 }
 
 // AppCycleClient returns a client stub for AppCycle.
-func AppCycleClient(name string, opts ...rpc.BindOpt) AppCycleClientStub {
-	var client rpc.Client
-	for _, opt := range opts {
-		if clientOpt, ok := opt.(rpc.Client); ok {
-			client = clientOpt
-		}
-	}
-	return implAppCycleClientStub{name, client}
+func AppCycleClient(name string) AppCycleClientStub {
+	return implAppCycleClientStub{name}
 }
 
 type implAppCycleClientStub struct {
-	name   string
-	client rpc.Client
-}
-
-func (c implAppCycleClientStub) c(ctx *context.T) rpc.Client {
-	if c.client != nil {
-		return c.client
-	}
-	return v23.GetClient(ctx)
+	name string
 }
 
 func (c implAppCycleClientStub) Stop(ctx *context.T, opts ...rpc.CallOpt) (ocall AppCycleStopClientCall, err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Stop", nil, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Stop", nil, opts...); err != nil {
 		return
 	}
 	ocall = &implAppCycleStopClientCall{ClientCall: call}
@@ -96,7 +82,7 @@ func (c implAppCycleClientStub) Stop(ctx *context.T, opts ...rpc.CallOpt) (ocall
 
 func (c implAppCycleClientStub) ForceStop(ctx *context.T, opts ...rpc.CallOpt) (err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "ForceStop", nil, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "ForceStop", nil, opts...); err != nil {
 		return
 	}
 	err = call.Finish()

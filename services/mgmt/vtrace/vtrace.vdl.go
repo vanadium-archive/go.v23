@@ -41,31 +41,17 @@ type StoreClientStub interface {
 }
 
 // StoreClient returns a client stub for Store.
-func StoreClient(name string, opts ...rpc.BindOpt) StoreClientStub {
-	var client rpc.Client
-	for _, opt := range opts {
-		if clientOpt, ok := opt.(rpc.Client); ok {
-			client = clientOpt
-		}
-	}
-	return implStoreClientStub{name, client}
+func StoreClient(name string) StoreClientStub {
+	return implStoreClientStub{name}
 }
 
 type implStoreClientStub struct {
-	name   string
-	client rpc.Client
-}
-
-func (c implStoreClientStub) c(ctx *context.T) rpc.Client {
-	if c.client != nil {
-		return c.client
-	}
-	return v23.GetClient(ctx)
+	name string
 }
 
 func (c implStoreClientStub) Trace(ctx *context.T, i0 uniqueid.Id, opts ...rpc.CallOpt) (o0 vtrace.TraceRecord, err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Trace", []interface{}{i0}, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Trace", []interface{}{i0}, opts...); err != nil {
 		return
 	}
 	err = call.Finish(&o0)
@@ -74,7 +60,7 @@ func (c implStoreClientStub) Trace(ctx *context.T, i0 uniqueid.Id, opts ...rpc.C
 
 func (c implStoreClientStub) AllTraces(ctx *context.T, opts ...rpc.CallOpt) (ocall StoreAllTracesClientCall, err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "AllTraces", nil, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "AllTraces", nil, opts...); err != nil {
 		return
 	}
 	ocall = &implStoreAllTracesClientCall{ClientCall: call}

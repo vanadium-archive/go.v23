@@ -113,33 +113,19 @@ type ApplicationClientStub interface {
 }
 
 // ApplicationClient returns a client stub for Application.
-func ApplicationClient(name string, opts ...rpc.BindOpt) ApplicationClientStub {
-	var client rpc.Client
-	for _, opt := range opts {
-		if clientOpt, ok := opt.(rpc.Client); ok {
-			client = clientOpt
-		}
-	}
-	return implApplicationClientStub{name, client, permissions.ObjectClient(name, client)}
+func ApplicationClient(name string) ApplicationClientStub {
+	return implApplicationClientStub{name, permissions.ObjectClient(name)}
 }
 
 type implApplicationClientStub struct {
-	name   string
-	client rpc.Client
+	name string
 
 	permissions.ObjectClientStub
 }
 
-func (c implApplicationClientStub) c(ctx *context.T) rpc.Client {
-	if c.client != nil {
-		return c.client
-	}
-	return v23.GetClient(ctx)
-}
-
 func (c implApplicationClientStub) Match(ctx *context.T, i0 []string, opts ...rpc.CallOpt) (o0 application.Envelope, err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Match", []interface{}{i0}, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Match", []interface{}{i0}, opts...); err != nil {
 		return
 	}
 	err = call.Finish(&o0)
@@ -398,33 +384,19 @@ type BinaryClientStub interface {
 }
 
 // BinaryClient returns a client stub for Binary.
-func BinaryClient(name string, opts ...rpc.BindOpt) BinaryClientStub {
-	var client rpc.Client
-	for _, opt := range opts {
-		if clientOpt, ok := opt.(rpc.Client); ok {
-			client = clientOpt
-		}
-	}
-	return implBinaryClientStub{name, client, permissions.ObjectClient(name, client)}
+func BinaryClient(name string) BinaryClientStub {
+	return implBinaryClientStub{name, permissions.ObjectClient(name)}
 }
 
 type implBinaryClientStub struct {
-	name   string
-	client rpc.Client
+	name string
 
 	permissions.ObjectClientStub
 }
 
-func (c implBinaryClientStub) c(ctx *context.T) rpc.Client {
-	if c.client != nil {
-		return c.client
-	}
-	return v23.GetClient(ctx)
-}
-
 func (c implBinaryClientStub) Create(ctx *context.T, i0 int32, i1 MediaInfo, opts ...rpc.CallOpt) (err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Create", []interface{}{i0, i1}, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Create", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
 	err = call.Finish()
@@ -433,7 +405,7 @@ func (c implBinaryClientStub) Create(ctx *context.T, i0 int32, i1 MediaInfo, opt
 
 func (c implBinaryClientStub) Delete(ctx *context.T, opts ...rpc.CallOpt) (err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Delete", nil, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Delete", nil, opts...); err != nil {
 		return
 	}
 	err = call.Finish()
@@ -442,7 +414,7 @@ func (c implBinaryClientStub) Delete(ctx *context.T, opts ...rpc.CallOpt) (err e
 
 func (c implBinaryClientStub) Download(ctx *context.T, i0 int32, opts ...rpc.CallOpt) (ocall BinaryDownloadClientCall, err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Download", []interface{}{i0}, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Download", []interface{}{i0}, opts...); err != nil {
 		return
 	}
 	ocall = &implBinaryDownloadClientCall{ClientCall: call}
@@ -451,7 +423,7 @@ func (c implBinaryClientStub) Download(ctx *context.T, i0 int32, opts ...rpc.Cal
 
 func (c implBinaryClientStub) DownloadUrl(ctx *context.T, opts ...rpc.CallOpt) (o0 string, o1 int64, err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "DownloadUrl", nil, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "DownloadUrl", nil, opts...); err != nil {
 		return
 	}
 	err = call.Finish(&o0, &o1)
@@ -460,7 +432,7 @@ func (c implBinaryClientStub) DownloadUrl(ctx *context.T, opts ...rpc.CallOpt) (
 
 func (c implBinaryClientStub) Stat(ctx *context.T, opts ...rpc.CallOpt) (o0 []binary.PartInfo, o1 MediaInfo, err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Stat", nil, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Stat", nil, opts...); err != nil {
 		return
 	}
 	err = call.Finish(&o0, &o1)
@@ -469,7 +441,7 @@ func (c implBinaryClientStub) Stat(ctx *context.T, opts ...rpc.CallOpt) (o0 []bi
 
 func (c implBinaryClientStub) Upload(ctx *context.T, i0 int32, opts ...rpc.CallOpt) (ocall BinaryUploadClientCall, err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Upload", []interface{}{i0}, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Upload", []interface{}{i0}, opts...); err != nil {
 		return
 	}
 	ocall = &implBinaryUploadClientCall{ClientCall: call}
@@ -1051,31 +1023,17 @@ type ProfileClientStub interface {
 }
 
 // ProfileClient returns a client stub for Profile.
-func ProfileClient(name string, opts ...rpc.BindOpt) ProfileClientStub {
-	var client rpc.Client
-	for _, opt := range opts {
-		if clientOpt, ok := opt.(rpc.Client); ok {
-			client = clientOpt
-		}
-	}
-	return implProfileClientStub{name, client}
+func ProfileClient(name string) ProfileClientStub {
+	return implProfileClientStub{name}
 }
 
 type implProfileClientStub struct {
-	name   string
-	client rpc.Client
-}
-
-func (c implProfileClientStub) c(ctx *context.T) rpc.Client {
-	if c.client != nil {
-		return c.client
-	}
-	return v23.GetClient(ctx)
+	name string
 }
 
 func (c implProfileClientStub) Label(ctx *context.T, opts ...rpc.CallOpt) (o0 string, err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Label", nil, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Label", nil, opts...); err != nil {
 		return
 	}
 	err = call.Finish(&o0)
@@ -1084,7 +1042,7 @@ func (c implProfileClientStub) Label(ctx *context.T, opts ...rpc.CallOpt) (o0 st
 
 func (c implProfileClientStub) Description(ctx *context.T, opts ...rpc.CallOpt) (o0 string, err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Description", nil, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Description", nil, opts...); err != nil {
 		return
 	}
 	err = call.Finish(&o0)

@@ -100,31 +100,17 @@ type ObjectClientStub interface {
 }
 
 // ObjectClient returns a client stub for Object.
-func ObjectClient(name string, opts ...rpc.BindOpt) ObjectClientStub {
-	var client rpc.Client
-	for _, opt := range opts {
-		if clientOpt, ok := opt.(rpc.Client); ok {
-			client = clientOpt
-		}
-	}
-	return implObjectClientStub{name, client}
+func ObjectClient(name string) ObjectClientStub {
+	return implObjectClientStub{name}
 }
 
 type implObjectClientStub struct {
-	name   string
-	client rpc.Client
-}
-
-func (c implObjectClientStub) c(ctx *context.T) rpc.Client {
-	if c.client != nil {
-		return c.client
-	}
-	return v23.GetClient(ctx)
+	name string
 }
 
 func (c implObjectClientStub) SetPermissions(ctx *context.T, i0 access.Permissions, i1 string, opts ...rpc.CallOpt) (err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "SetPermissions", []interface{}{i0, i1}, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "SetPermissions", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
 	err = call.Finish()
@@ -133,7 +119,7 @@ func (c implObjectClientStub) SetPermissions(ctx *context.T, i0 access.Permissio
 
 func (c implObjectClientStub) GetPermissions(ctx *context.T, opts ...rpc.CallOpt) (o0 access.Permissions, o1 string, err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "GetPermissions", nil, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "GetPermissions", nil, opts...); err != nil {
 		return
 	}
 	err = call.Finish(&o0, &o1)

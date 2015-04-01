@@ -71,31 +71,17 @@ type LogFileClientStub interface {
 }
 
 // LogFileClient returns a client stub for LogFile.
-func LogFileClient(name string, opts ...rpc.BindOpt) LogFileClientStub {
-	var client rpc.Client
-	for _, opt := range opts {
-		if clientOpt, ok := opt.(rpc.Client); ok {
-			client = clientOpt
-		}
-	}
-	return implLogFileClientStub{name, client}
+func LogFileClient(name string) LogFileClientStub {
+	return implLogFileClientStub{name}
 }
 
 type implLogFileClientStub struct {
-	name   string
-	client rpc.Client
-}
-
-func (c implLogFileClientStub) c(ctx *context.T) rpc.Client {
-	if c.client != nil {
-		return c.client
-	}
-	return v23.GetClient(ctx)
+	name string
 }
 
 func (c implLogFileClientStub) Size(ctx *context.T, opts ...rpc.CallOpt) (o0 int64, err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Size", nil, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Size", nil, opts...); err != nil {
 		return
 	}
 	err = call.Finish(&o0)
@@ -104,7 +90,7 @@ func (c implLogFileClientStub) Size(ctx *context.T, opts ...rpc.CallOpt) (o0 int
 
 func (c implLogFileClientStub) ReadLog(ctx *context.T, i0 int64, i1 int32, i2 bool, opts ...rpc.CallOpt) (ocall LogFileReadLogClientCall, err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "ReadLog", []interface{}{i0, i1, i2}, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "ReadLog", []interface{}{i0, i1, i2}, opts...); err != nil {
 		return
 	}
 	ocall = &implLogFileReadLogClientCall{ClientCall: call}

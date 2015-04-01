@@ -141,33 +141,19 @@ type MountTableClientStub interface {
 }
 
 // MountTableClient returns a client stub for MountTable.
-func MountTableClient(name string, opts ...rpc.BindOpt) MountTableClientStub {
-	var client rpc.Client
-	for _, opt := range opts {
-		if clientOpt, ok := opt.(rpc.Client); ok {
-			client = clientOpt
-		}
-	}
-	return implMountTableClientStub{name, client, permissions.ObjectClient(name, client)}
+func MountTableClient(name string) MountTableClientStub {
+	return implMountTableClientStub{name, permissions.ObjectClient(name)}
 }
 
 type implMountTableClientStub struct {
-	name   string
-	client rpc.Client
+	name string
 
 	permissions.ObjectClientStub
 }
 
-func (c implMountTableClientStub) c(ctx *context.T) rpc.Client {
-	if c.client != nil {
-		return c.client
-	}
-	return v23.GetClient(ctx)
-}
-
 func (c implMountTableClientStub) Mount(ctx *context.T, i0 string, i1 uint32, i2 naming.MountFlag, opts ...rpc.CallOpt) (err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Mount", []interface{}{i0, i1, i2}, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Mount", []interface{}{i0, i1, i2}, opts...); err != nil {
 		return
 	}
 	err = call.Finish()
@@ -176,7 +162,7 @@ func (c implMountTableClientStub) Mount(ctx *context.T, i0 string, i1 uint32, i2
 
 func (c implMountTableClientStub) Unmount(ctx *context.T, i0 string, opts ...rpc.CallOpt) (err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Unmount", []interface{}{i0}, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Unmount", []interface{}{i0}, opts...); err != nil {
 		return
 	}
 	err = call.Finish()
@@ -185,7 +171,7 @@ func (c implMountTableClientStub) Unmount(ctx *context.T, i0 string, opts ...rpc
 
 func (c implMountTableClientStub) Delete(ctx *context.T, i0 bool, opts ...rpc.CallOpt) (err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Delete", []interface{}{i0}, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Delete", []interface{}{i0}, opts...); err != nil {
 		return
 	}
 	err = call.Finish()
@@ -194,7 +180,7 @@ func (c implMountTableClientStub) Delete(ctx *context.T, i0 bool, opts ...rpc.Ca
 
 func (c implMountTableClientStub) ResolveStep(ctx *context.T, opts ...rpc.CallOpt) (o0 naming.MountEntry, err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "ResolveStep", nil, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "ResolveStep", nil, opts...); err != nil {
 		return
 	}
 	err = call.Finish(&o0)
@@ -203,7 +189,7 @@ func (c implMountTableClientStub) ResolveStep(ctx *context.T, opts ...rpc.CallOp
 
 func (c implMountTableClientStub) ResolveStepX(ctx *context.T, opts ...rpc.CallOpt) (o0 naming.MountEntry, err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "ResolveStepX", nil, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "ResolveStepX", nil, opts...); err != nil {
 		return
 	}
 	err = call.Finish(&o0)
