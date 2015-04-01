@@ -579,10 +579,6 @@ type ServerCall interface {
 	Context() *context.T
 }
 
-// TODO(ashankar): Remove this once VDL-generated files stop referencing it.
-type BindOpt interface {
-}
-
 // CallOpt is the interface for all Call options.
 type CallOpt interface {
 	RPCCallOpt()
