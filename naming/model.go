@@ -112,36 +112,31 @@ type DisableCache bool
 
 func (DisableCache) CacheCtl() {}
 
-// MountOpt is the interface for all Mount options.
-type MountOpt interface {
-	NSMountOpt()
+// NamespaceOpt is the interface for all Namespace options.
+type NamespaceOpt interface {
+	NSOpt()
 }
 
-// ReplaceMountOpt requests the mount to replace the previous mount.
-type ReplaceMountOpt bool
+// ReplaceMount requests the mount to replace the previous mount.
+type ReplaceMount bool
 
-func (ReplaceMountOpt) NSMountOpt() {}
+func (ReplaceMount) NSOpt() {}
 
-// ServesMountTableOpt means the target is a mount table.
-type ServesMountTableOpt bool
+// ServesMountTable means the target is a mount table.
+type ServesMountTable bool
 
-func (ServesMountTableOpt) NSMountOpt()  {}
-func (ServesMountTableOpt) EndpointOpt() {}
+func (ServesMountTable) NSOpt()       {}
+func (ServesMountTable) EndpointOpt() {}
 
-// IsLeafOpt means the target is a leaf
-type IsLeafOpt bool
+// IsLeaf means the target is a leaf
+type IsLeaf bool
 
-func (IsLeafOpt) NSMountOpt() {}
+func (IsLeaf) NSOpt() {}
 
 // BlessingOpt is used to add a blessing name to the endpoint.
 type BlessingOpt string
 
 func (BlessingOpt) EndpointOpt() {}
-
-// ResolveOpt is the interface for all Mount options.
-type ResolveOpt interface {
-	NSResolveOpt()
-}
 
 // When this prefix is present at the beginning of an object name suffix, the
 // server may intercept the request and handle it internally. This is used to

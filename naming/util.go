@@ -18,7 +18,7 @@ type EndpointOpt interface {
 
 // FormatEndpoint creates a string representation of an Endpoint using
 // the supplied parameters. Network and address are always required,
-// RoutingID, RPCVersionRange and ServesMountTableOpt can be specified
+// RoutingID, RPCVersionRange and ServesMountTable can be specified
 // as options.
 func FormatEndpoint(network, address string, opts ...EndpointOpt) string {
 	rid := "@"
@@ -32,7 +32,7 @@ func FormatEndpoint(network, address string, opts ...EndpointOpt) string {
 		case version.RPCVersionRange:
 			versions = "@" + strconv.FormatUint(uint64(v.Min), 10) +
 				"@" + strconv.FormatUint(uint64(v.Max), 10)
-		case ServesMountTableOpt:
+		case ServesMountTable:
 			servesMountTable = bool(v)
 		case BlessingOpt:
 			blessings = append(blessings, string(v))
