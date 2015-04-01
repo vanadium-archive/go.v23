@@ -69,8 +69,9 @@ func (ServerBlessings) RPCServerOpt() {}
 // and received over a connection.
 type SecurityLevel int
 
-func (SecurityLevel) RPCServerOpt() {}
-func (SecurityLevel) RPCCallOpt()   {}
+func (SecurityLevel) RPCServerOpt()   {}
+func (SecurityLevel) RPCCallOpt()     {}
+func (SecurityLevel) NSNamespaceOpt() {}
 
 const (
 	// All user data transmitted over the connection is encrypted and can be
@@ -111,8 +112,8 @@ func (ServerPublicKey) RPCCallOpt() {}
 // or ServerPublicKey.
 type SkipServerEndpointAuthorization struct{}
 
-func (SkipServerEndpointAuthorization) RPCCallOpt()   {}
-func (SkipServerEndpointAuthorization) NSResolveOpt() {}
+func (SkipServerEndpointAuthorization) RPCCallOpt() {}
+func (SkipServerEndpointAuthorization) NSOpt()      {}
 
 // RetryTimeout is the duration during which we will retry starting
 // an RPC call.  Zero means don't retry.
@@ -123,8 +124,8 @@ func (RetryTimeout) RPCCallOpt() {}
 // NoResolve specifies that the RPC call should not further Resolve the name.
 type NoResolve struct{}
 
-func (NoResolve) RPCCallOpt()   {}
-func (NoResolve) NSResolveOpt() {}
+func (NoResolve) RPCCallOpt() {}
+func (NoResolve) NSOpt()      {}
 
 // Create a server that will be used to serve a MountTable. This server
 // cannot be used for any other purpose.
@@ -136,4 +137,5 @@ func (ServesMountTable) RPCServerOpt() {}
 // normally be retried.
 type NoRetry struct{}
 
+func (NoRetry) NSOpt()      {}
 func (NoRetry) RPCCallOpt() {}
