@@ -7,7 +7,7 @@ package mounttable
 
 import (
 	"v.io/v23/naming"
-	"v.io/v23/services/security/object"
+	"v.io/v23/services/permissions"
 )
 
 // A mount table is a tree of names.  Each name may have something mounted on it,
@@ -77,5 +77,5 @@ type MountTable interface {
 	// Obsolete, left for backward compatability until all uses are killed.
 	ResolveStepX() (naming.MountEntry | error)
 
-	object.Object
+	permissions.Object
 }

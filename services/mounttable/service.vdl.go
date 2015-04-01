@@ -17,7 +17,7 @@ import (
 
 	// VDL user imports
 	"v.io/v23/naming"
-	"v.io/v23/services/security/object"
+	"v.io/v23/services/permissions"
 )
 
 type Tag string
@@ -70,10 +70,10 @@ type MountTableClientMethods interface {
 	//   package mypackage
 	//
 	//   import "v.io/v23/security/access"
-	//   import "v.io/v23/services/security/object"
+	//   import "v.io/v23/services/permissions"
 	//
 	//   type MyObject interface {
-	//     object.Object
+	//     permissions.Object
 	//     MyRead() (string, error) {access.Read}
 	//     MyWrite(string) error    {access.Write}
 	//   }
@@ -104,7 +104,7 @@ type MountTableClientMethods interface {
 	//    SetPermissions(acl access.Permissions, etag string) error         {Red}
 	//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}
 	//  }
-	object.ObjectClientMethods
+	permissions.ObjectClientMethods
 	// Mount Server (a global name) onto the receiver.
 	//
 	// Subsequent mounts add to the servers mounted there.  The multiple
@@ -148,14 +148,14 @@ func MountTableClient(name string, opts ...rpc.BindOpt) MountTableClientStub {
 			client = clientOpt
 		}
 	}
-	return implMountTableClientStub{name, client, object.ObjectClient(name, client)}
+	return implMountTableClientStub{name, client, permissions.ObjectClient(name, client)}
 }
 
 type implMountTableClientStub struct {
 	name   string
 	client rpc.Client
 
-	object.ObjectClientStub
+	permissions.ObjectClientStub
 }
 
 func (c implMountTableClientStub) c(ctx *context.T) rpc.Client {
@@ -227,10 +227,10 @@ type MountTableServerMethods interface {
 	//   package mypackage
 	//
 	//   import "v.io/v23/security/access"
-	//   import "v.io/v23/services/security/object"
+	//   import "v.io/v23/services/permissions"
 	//
 	//   type MyObject interface {
-	//     object.Object
+	//     permissions.Object
 	//     MyRead() (string, error) {access.Read}
 	//     MyWrite(string) error    {access.Write}
 	//   }
@@ -261,7 +261,7 @@ type MountTableServerMethods interface {
 	//    SetPermissions(acl access.Permissions, etag string) error         {Red}
 	//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}
 	//  }
-	object.ObjectServerMethods
+	permissions.ObjectServerMethods
 	// Mount Server (a global name) onto the receiver.
 	//
 	// Subsequent mounts add to the servers mounted there.  The multiple
@@ -310,7 +310,7 @@ type MountTableServerStub interface {
 func MountTableServer(impl MountTableServerMethods) MountTableServerStub {
 	stub := implMountTableServerStub{
 		impl:             impl,
-		ObjectServerStub: object.ObjectServer(impl),
+		ObjectServerStub: permissions.ObjectServer(impl),
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
@@ -324,7 +324,7 @@ func MountTableServer(impl MountTableServerMethods) MountTableServerStub {
 
 type implMountTableServerStub struct {
 	impl MountTableServerMethods
-	object.ObjectServerStub
+	permissions.ObjectServerStub
 	gs *rpc.GlobState
 }
 
@@ -353,7 +353,7 @@ func (s implMountTableServerStub) Globber() *rpc.GlobState {
 }
 
 func (s implMountTableServerStub) Describe__() []rpc.InterfaceDesc {
-	return []rpc.InterfaceDesc{MountTableDesc, object.ObjectDesc}
+	return []rpc.InterfaceDesc{MountTableDesc, permissions.ObjectDesc}
 }
 
 // MountTableDesc describes the MountTable interface.
@@ -365,7 +365,7 @@ var descMountTable = rpc.InterfaceDesc{
 	PkgPath: "v.io/v23/services/mounttable",
 	Doc:     "// MountTable defines the interface to talk to a mounttable.\n//\n// In all methods of MountTable, the receiver is the name bound to.",
 	Embeds: []rpc.EmbedDesc{
-		{"Object", "v.io/v23/services/security/object", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/security/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(acl access.Permissions, etag string) error         {Red}\n//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}\n//  }"},
+		{"Object", "v.io/v23/services/permissions", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/permissions\"\n//\n//   type MyObject interface {\n//     permissions.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(acl access.Permissions, etag string) error         {Red}\n//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}\n//  }"},
 	},
 	Methods: []rpc.MethodDesc{
 		{

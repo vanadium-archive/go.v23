@@ -21,7 +21,7 @@ import (
 	"v.io/v23/security/access"
 	"v.io/v23/services/mgmt/application"
 	"v.io/v23/services/mgmt/binary"
-	"v.io/v23/services/security/object"
+	"v.io/v23/services/permissions"
 )
 
 // MediaInfo contains the metadata information for a binary.
@@ -63,10 +63,10 @@ type ApplicationClientMethods interface {
 	//   package mypackage
 	//
 	//   import "v.io/v23/security/access"
-	//   import "v.io/v23/services/security/object"
+	//   import "v.io/v23/services/permissions"
 	//
 	//   type MyObject interface {
-	//     object.Object
+	//     permissions.Object
 	//     MyRead() (string, error) {access.Read}
 	//     MyWrite(string) error    {access.Write}
 	//   }
@@ -97,7 +97,7 @@ type ApplicationClientMethods interface {
 	//    SetPermissions(acl access.Permissions, etag string) error         {Red}
 	//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}
 	//  }
-	object.ObjectClientMethods
+	permissions.ObjectClientMethods
 	// Match checks if any of the given profiles contains an application
 	// envelope for the given application version (specified through the
 	// object name suffix) and if so, returns this envelope. If multiple
@@ -120,14 +120,14 @@ func ApplicationClient(name string, opts ...rpc.BindOpt) ApplicationClientStub {
 			client = clientOpt
 		}
 	}
-	return implApplicationClientStub{name, client, object.ObjectClient(name, client)}
+	return implApplicationClientStub{name, client, permissions.ObjectClient(name, client)}
 }
 
 type implApplicationClientStub struct {
 	name   string
 	client rpc.Client
 
-	object.ObjectClientStub
+	permissions.ObjectClientStub
 }
 
 func (c implApplicationClientStub) c(ctx *context.T) rpc.Client {
@@ -170,10 +170,10 @@ type ApplicationServerMethods interface {
 	//   package mypackage
 	//
 	//   import "v.io/v23/security/access"
-	//   import "v.io/v23/services/security/object"
+	//   import "v.io/v23/services/permissions"
 	//
 	//   type MyObject interface {
-	//     object.Object
+	//     permissions.Object
 	//     MyRead() (string, error) {access.Read}
 	//     MyWrite(string) error    {access.Write}
 	//   }
@@ -204,7 +204,7 @@ type ApplicationServerMethods interface {
 	//    SetPermissions(acl access.Permissions, etag string) error         {Red}
 	//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}
 	//  }
-	object.ObjectServerMethods
+	permissions.ObjectServerMethods
 	// Match checks if any of the given profiles contains an application
 	// envelope for the given application version (specified through the
 	// object name suffix) and if so, returns this envelope. If multiple
@@ -232,7 +232,7 @@ type ApplicationServerStub interface {
 func ApplicationServer(impl ApplicationServerMethods) ApplicationServerStub {
 	stub := implApplicationServerStub{
 		impl:             impl,
-		ObjectServerStub: object.ObjectServer(impl),
+		ObjectServerStub: permissions.ObjectServer(impl),
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
@@ -246,7 +246,7 @@ func ApplicationServer(impl ApplicationServerMethods) ApplicationServerStub {
 
 type implApplicationServerStub struct {
 	impl ApplicationServerMethods
-	object.ObjectServerStub
+	permissions.ObjectServerStub
 	gs *rpc.GlobState
 }
 
@@ -259,7 +259,7 @@ func (s implApplicationServerStub) Globber() *rpc.GlobState {
 }
 
 func (s implApplicationServerStub) Describe__() []rpc.InterfaceDesc {
-	return []rpc.InterfaceDesc{ApplicationDesc, object.ObjectDesc}
+	return []rpc.InterfaceDesc{ApplicationDesc, permissions.ObjectDesc}
 }
 
 // ApplicationDesc describes the Application interface.
@@ -271,7 +271,7 @@ var descApplication = rpc.InterfaceDesc{
 	PkgPath: "v.io/v23/services/mgmt/repository",
 	Doc:     "// Application provides access to application envelopes. An\n// application envelope is identified by an application name and an\n// application version, which are specified through the object name,\n// and a profile name, which is specified using a method argument.\n//\n// Example:\n// /apps/search/v1.Match([]string{\"base\", \"media\"})\n//   returns an application envelope that can be used for downloading\n//   and executing the \"search\" application, version \"v1\", runnable\n//   on either the \"base\" or \"media\" profile.",
 	Embeds: []rpc.EmbedDesc{
-		{"Object", "v.io/v23/services/security/object", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/security/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(acl access.Permissions, etag string) error         {Red}\n//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}\n//  }"},
+		{"Object", "v.io/v23/services/permissions", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/permissions\"\n//\n//   type MyObject interface {\n//     permissions.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(acl access.Permissions, etag string) error         {Red}\n//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}\n//  }"},
 	},
 	Methods: []rpc.MethodDesc{
 		{
@@ -321,10 +321,10 @@ type BinaryClientMethods interface {
 	//   package mypackage
 	//
 	//   import "v.io/v23/security/access"
-	//   import "v.io/v23/services/security/object"
+	//   import "v.io/v23/services/permissions"
 	//
 	//   type MyObject interface {
-	//     object.Object
+	//     permissions.Object
 	//     MyRead() (string, error) {access.Read}
 	//     MyWrite(string) error    {access.Write}
 	//   }
@@ -355,7 +355,7 @@ type BinaryClientMethods interface {
 	//    SetPermissions(acl access.Permissions, etag string) error         {Red}
 	//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}
 	//  }
-	object.ObjectClientMethods
+	permissions.ObjectClientMethods
 	// Create expresses the intent to create a binary identified by the
 	// object name suffix consisting of the given number of parts. The
 	// mediaInfo argument contains metadata for the binary. If the suffix
@@ -405,14 +405,14 @@ func BinaryClient(name string, opts ...rpc.BindOpt) BinaryClientStub {
 			client = clientOpt
 		}
 	}
-	return implBinaryClientStub{name, client, object.ObjectClient(name, client)}
+	return implBinaryClientStub{name, client, permissions.ObjectClient(name, client)}
 }
 
 type implBinaryClientStub struct {
 	name   string
 	client rpc.Client
 
-	object.ObjectClientStub
+	permissions.ObjectClientStub
 }
 
 func (c implBinaryClientStub) c(ctx *context.T) rpc.Client {
@@ -640,10 +640,10 @@ type BinaryServerMethods interface {
 	//   package mypackage
 	//
 	//   import "v.io/v23/security/access"
-	//   import "v.io/v23/services/security/object"
+	//   import "v.io/v23/services/permissions"
 	//
 	//   type MyObject interface {
-	//     object.Object
+	//     permissions.Object
 	//     MyRead() (string, error) {access.Read}
 	//     MyWrite(string) error    {access.Write}
 	//   }
@@ -674,7 +674,7 @@ type BinaryServerMethods interface {
 	//    SetPermissions(acl access.Permissions, etag string) error         {Red}
 	//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}
 	//  }
-	object.ObjectServerMethods
+	permissions.ObjectServerMethods
 	// Create expresses the intent to create a binary identified by the
 	// object name suffix consisting of the given number of parts. The
 	// mediaInfo argument contains metadata for the binary. If the suffix
@@ -725,10 +725,10 @@ type BinaryServerStubMethods interface {
 	//   package mypackage
 	//
 	//   import "v.io/v23/security/access"
-	//   import "v.io/v23/services/security/object"
+	//   import "v.io/v23/services/permissions"
 	//
 	//   type MyObject interface {
-	//     object.Object
+	//     permissions.Object
 	//     MyRead() (string, error) {access.Read}
 	//     MyWrite(string) error    {access.Write}
 	//   }
@@ -759,7 +759,7 @@ type BinaryServerStubMethods interface {
 	//    SetPermissions(acl access.Permissions, etag string) error         {Red}
 	//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}
 	//  }
-	object.ObjectServerStubMethods
+	permissions.ObjectServerStubMethods
 	// Create expresses the intent to create a binary identified by the
 	// object name suffix consisting of the given number of parts. The
 	// mediaInfo argument contains metadata for the binary. If the suffix
@@ -808,7 +808,7 @@ type BinaryServerStub interface {
 func BinaryServer(impl BinaryServerMethods) BinaryServerStub {
 	stub := implBinaryServerStub{
 		impl:             impl,
-		ObjectServerStub: object.ObjectServer(impl),
+		ObjectServerStub: permissions.ObjectServer(impl),
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
@@ -822,7 +822,7 @@ func BinaryServer(impl BinaryServerMethods) BinaryServerStub {
 
 type implBinaryServerStub struct {
 	impl BinaryServerMethods
-	object.ObjectServerStub
+	permissions.ObjectServerStub
 	gs *rpc.GlobState
 }
 
@@ -855,7 +855,7 @@ func (s implBinaryServerStub) Globber() *rpc.GlobState {
 }
 
 func (s implBinaryServerStub) Describe__() []rpc.InterfaceDesc {
-	return []rpc.InterfaceDesc{BinaryDesc, object.ObjectDesc}
+	return []rpc.InterfaceDesc{BinaryDesc, permissions.ObjectDesc}
 }
 
 // BinaryDesc describes the Binary interface.
@@ -867,7 +867,7 @@ var descBinary = rpc.InterfaceDesc{
 	PkgPath: "v.io/v23/services/mgmt/repository",
 	Doc:     "// Binary can be used to store and retrieve vanadium application\n// binaries.\n//\n// To create a binary, clients first invoke the Create() method that\n// specifies the number of parts the binary consists of. Clients then\n// uploads the individual parts through the Upload() method, which\n// identifies the part being uploaded. To resume an upload after a\n// failure, clients invoke the UploadStatus() method, which returns a\n// slice that identifies which parts are missing.\n//\n// To download a binary, clients first invoke Stat(), which returns\n// information describing the binary, including the number of parts\n// the binary consists of. Clients then download the individual parts\n// through the Download() method, which identifies the part being\n// downloaded. Alternatively, clients can download the binary through\n// HTTP using a transient URL available through the DownloadUrl()\n// method.\n//\n// To delete the binary, clients invoke the Delete() method.",
 	Embeds: []rpc.EmbedDesc{
-		{"Object", "v.io/v23/services/security/object", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/security/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(acl access.Permissions, etag string) error         {Red}\n//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}\n//  }"},
+		{"Object", "v.io/v23/services/permissions", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/permissions\"\n//\n//   type MyObject interface {\n//     permissions.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(acl access.Permissions, etag string) error         {Red}\n//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}\n//  }"},
 	},
 	Methods: []rpc.MethodDesc{
 		{

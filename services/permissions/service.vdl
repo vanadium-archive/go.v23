@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package object
+package permissions
 
 import (
 	"v.io/v23/security/access"
@@ -18,10 +18,10 @@ import (
 //   package mypackage
 //
 //   import "v.io/v23/security/access"
-//   import "v.io/v23/services/security/object"
+//   import "v.io/v23/services/permissions"
 //
 //   type MyObject interface {
-//     object.Object
+//     permissions.Object
 //     MyRead() (string, error) {access.Read}
 //     MyWrite(string) error    {access.Write}
 //   }

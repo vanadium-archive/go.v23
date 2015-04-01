@@ -23,7 +23,7 @@ import (
 
 	// VDL user imports
 	"v.io/v23/security/access"
-	"v.io/v23/services/security/object"
+	"v.io/v23/services/permissions"
 )
 
 // BlessingPatternChunk is a substring of a BlessingPattern. As with
@@ -34,7 +34,7 @@ import (
 type BlessingPatternChunk string
 
 func (BlessingPatternChunk) __VDLReflect(struct {
-	Name string "v.io/v23/services/security/groups.BlessingPatternChunk"
+	Name string "v.io/v23/services/groups.BlessingPatternChunk"
 }) {
 }
 
@@ -42,7 +42,7 @@ type GetRequest struct {
 }
 
 func (GetRequest) __VDLReflect(struct {
-	Name string "v.io/v23/services/security/groups.GetRequest"
+	Name string "v.io/v23/services/groups.GetRequest"
 }) {
 }
 
@@ -51,7 +51,7 @@ type GetResponse struct {
 }
 
 func (GetResponse) __VDLReflect(struct {
-	Name string "v.io/v23/services/security/groups.GetResponse"
+	Name string "v.io/v23/services/groups.GetResponse"
 }) {
 }
 
@@ -59,7 +59,7 @@ type RestRequest struct {
 }
 
 func (RestRequest) __VDLReflect(struct {
-	Name string "v.io/v23/services/security/groups.RestRequest"
+	Name string "v.io/v23/services/groups.RestRequest"
 }) {
 }
 
@@ -67,7 +67,7 @@ type RestResponse struct {
 }
 
 func (RestResponse) __VDLReflect(struct {
-	Name string "v.io/v23/services/security/groups.RestResponse"
+	Name string "v.io/v23/services/groups.RestResponse"
 }) {
 }
 
@@ -80,8 +80,8 @@ func init() {
 }
 
 var (
-	ErrNoBlessings         = verror.Register("v.io/v23/services/security/groups.NoBlessings", verror.NoRetry, "{1:}{2:} No blessings recognized; cannot create group AccessList")
-	ErrExcessiveContention = verror.Register("v.io/v23/services/security/groups.ExcessiveContention", verror.RetryBackoff, "{1:}{2:} Gave up after encountering excessive contention; try again later")
+	ErrNoBlessings         = verror.Register("v.io/v23/services/groups.NoBlessings", verror.NoRetry, "{1:}{2:} No blessings recognized; cannot create group AccessList")
+	ErrExcessiveContention = verror.Register("v.io/v23/services/groups.ExcessiveContention", verror.RetryBackoff, "{1:}{2:} Gave up after encountering excessive contention; try again later")
 )
 
 func init() {
@@ -117,10 +117,10 @@ type GroupClientMethods interface {
 	//   package mypackage
 	//
 	//   import "v.io/v23/security/access"
-	//   import "v.io/v23/services/security/object"
+	//   import "v.io/v23/services/permissions"
 	//
 	//   type MyObject interface {
-	//     object.Object
+	//     permissions.Object
 	//     MyRead() (string, error) {access.Read}
 	//     MyWrite(string) error    {access.Write}
 	//   }
@@ -151,7 +151,7 @@ type GroupClientMethods interface {
 	//    SetPermissions(acl access.Permissions, etag string) error         {Red}
 	//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}
 	//  }
-	object.ObjectClientMethods
+	permissions.ObjectClientMethods
 	// Create creates a new group if it doesn't already exist.
 	// If acl is nil, a default Permissions is used, providing Admin access to
 	// the caller.
@@ -188,14 +188,14 @@ func GroupClient(name string, opts ...rpc.BindOpt) GroupClientStub {
 			client = clientOpt
 		}
 	}
-	return implGroupClientStub{name, client, object.ObjectClient(name, client)}
+	return implGroupClientStub{name, client, permissions.ObjectClient(name, client)}
 }
 
 type implGroupClientStub struct {
 	name   string
 	client rpc.Client
 
-	object.ObjectClientStub
+	permissions.ObjectClientStub
 }
 
 func (c implGroupClientStub) c(ctx *context.T) rpc.Client {
@@ -277,10 +277,10 @@ type GroupServerMethods interface {
 	//   package mypackage
 	//
 	//   import "v.io/v23/security/access"
-	//   import "v.io/v23/services/security/object"
+	//   import "v.io/v23/services/permissions"
 	//
 	//   type MyObject interface {
-	//     object.Object
+	//     permissions.Object
 	//     MyRead() (string, error) {access.Read}
 	//     MyWrite(string) error    {access.Write}
 	//   }
@@ -311,7 +311,7 @@ type GroupServerMethods interface {
 	//    SetPermissions(acl access.Permissions, etag string) error         {Red}
 	//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}
 	//  }
-	object.ObjectServerMethods
+	permissions.ObjectServerMethods
 	// Create creates a new group if it doesn't already exist.
 	// If acl is nil, a default Permissions is used, providing Admin access to
 	// the caller.
@@ -353,7 +353,7 @@ type GroupServerStub interface {
 func GroupServer(impl GroupServerMethods) GroupServerStub {
 	stub := implGroupServerStub{
 		impl:             impl,
-		ObjectServerStub: object.ObjectServer(impl),
+		ObjectServerStub: permissions.ObjectServer(impl),
 	}
 	// Initialize GlobState; always check the stub itself first, to handle the
 	// case where the user has the Glob method defined in their VDL source.
@@ -367,7 +367,7 @@ func GroupServer(impl GroupServerMethods) GroupServerStub {
 
 type implGroupServerStub struct {
 	impl GroupServerMethods
-	object.ObjectServerStub
+	permissions.ObjectServerStub
 	gs *rpc.GlobState
 }
 
@@ -400,7 +400,7 @@ func (s implGroupServerStub) Globber() *rpc.GlobState {
 }
 
 func (s implGroupServerStub) Describe__() []rpc.InterfaceDesc {
-	return []rpc.InterfaceDesc{GroupDesc, object.ObjectDesc}
+	return []rpc.InterfaceDesc{GroupDesc, permissions.ObjectDesc}
 }
 
 // GroupDesc describes the Group interface.
@@ -409,10 +409,10 @@ var GroupDesc rpc.InterfaceDesc = descGroup
 // descGroup hides the desc to keep godoc clean.
 var descGroup = rpc.InterfaceDesc{
 	Name:    "Group",
-	PkgPath: "v.io/v23/services/security/groups",
+	PkgPath: "v.io/v23/services/groups",
 	Doc:     "// A group's etag covers its AccessList as well as any other data stored in the group.\n// Clients should treat etags as opaque identifiers. For both Get and Rest, if\n// etag is set and matches the Group's current etag, the response will indicate\n// that fact but will otherwise be empty.",
 	Embeds: []rpc.EmbedDesc{
-		{"Object", "v.io/v23/services/security/object", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/security/object\"\n//\n//   type MyObject interface {\n//     object.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(acl access.Permissions, etag string) error         {Red}\n//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}\n//  }"},
+		{"Object", "v.io/v23/services/permissions", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/permissions\"\n//\n//   type MyObject interface {\n//     permissions.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(acl access.Permissions, etag string) error         {Red}\n//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}\n//  }"},
 	},
 	Methods: []rpc.MethodDesc{
 		{

@@ -10,7 +10,7 @@ import (
 	"v.io/v23/security/access"
 	"v.io/v23/services/mgmt/application"
 	"v.io/v23/services/mgmt/binary"
-	"v.io/v23/services/security/object"
+	"v.io/v23/services/permissions"
 )
 
 // Application provides access to application envelopes. An
@@ -26,7 +26,7 @@ import (
 type Application interface {
 	// Object provides GetPermissions/SetPermissions methods to read/modify AccessLists for the
 	// Application methods.
-	object.Object
+	permissions.Object
 	// Match checks if any of the given profiles contains an application
 	// envelope for the given application version (specified through the
 	// object name suffix) and if so, returns this envelope. If multiple
@@ -63,7 +63,7 @@ type MediaInfo struct {
 type Binary interface {
 	// Object provides GetPermissions/SetPermissions methods to read/modify AccessLists for the
 	// Binary methods.
-	object.Object
+	permissions.Object
 	// Create expresses the intent to create a binary identified by the
 	// object name suffix consisting of the given number of parts. The
 	// mediaInfo argument contains metadata for the binary. If the suffix
