@@ -211,7 +211,7 @@ var StoreDesc rpc.InterfaceDesc = descStore
 // descStore hides the desc to keep godoc clean.
 var descStore = rpc.InterfaceDesc{
 	Name:    "Store",
-	PkgPath: "v.io/v23/services/mgmt/vtrace",
+	PkgPath: "v.io/v23/services/vtrace",
 	Methods: []rpc.MethodDesc{
 		{
 			Name: "Trace",

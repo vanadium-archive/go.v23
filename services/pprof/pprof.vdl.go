@@ -349,7 +349,7 @@ var PProfDesc rpc.InterfaceDesc = descPProf
 // descPProf hides the desc to keep godoc clean.
 var descPProf = rpc.InterfaceDesc{
 	Name:    "PProf",
-	PkgPath: "v.io/v23/services/mgmt/pprof",
+	PkgPath: "v.io/v23/services/pprof",
 	Methods: []rpc.MethodDesc{
 		{
 			Name: "CmdLine",

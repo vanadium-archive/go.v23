@@ -33,7 +33,7 @@ type Task struct {
 }
 
 func (Task) __VDLReflect(struct {
-	Name string "v.io/v23/services/mgmt/appcycle.Task"
+	Name string "v.io/v23/services/appcycle.Task"
 }) {
 }
 
@@ -239,7 +239,7 @@ var AppCycleDesc rpc.InterfaceDesc = descAppCycle
 // descAppCycle hides the desc to keep godoc clean.
 var descAppCycle = rpc.InterfaceDesc{
 	Name:    "AppCycle",
-	PkgPath: "v.io/v23/services/mgmt/appcycle",
+	PkgPath: "v.io/v23/services/appcycle",
 	Doc:     "// AppCycle interfaces with the process running a vanadium runtime.",
 	Methods: []rpc.MethodDesc{
 		{

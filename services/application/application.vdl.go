@@ -41,7 +41,7 @@ type Envelope struct {
 }
 
 func (Envelope) __VDLReflect(struct {
-	Name string "v.io/v23/services/mgmt/application.Envelope"
+	Name string "v.io/v23/services/application.Envelope"
 }) {
 }
 
@@ -65,7 +65,7 @@ func (Envelope) __VDLReflect(struct {
 type Packages map[string]SignedFile
 
 func (Packages) __VDLReflect(struct {
-	Name string "v.io/v23/services/mgmt/application.Packages"
+	Name string "v.io/v23/services/application.Packages"
 }) {
 }
 
@@ -79,7 +79,7 @@ type SignedFile struct {
 }
 
 func (SignedFile) __VDLReflect(struct {
-	Name string "v.io/v23/services/mgmt/application.SignedFile"
+	Name string "v.io/v23/services/application.SignedFile"
 }) {
 }
 

@@ -19,8 +19,8 @@ import (
 
 	// VDL user imports
 	"v.io/v23/security/access"
-	"v.io/v23/services/mgmt/application"
-	"v.io/v23/services/mgmt/binary"
+	"v.io/v23/services/application"
+	"v.io/v23/services/binary"
 	"v.io/v23/services/permissions"
 )
 
@@ -31,7 +31,7 @@ type MediaInfo struct {
 }
 
 func (MediaInfo) __VDLReflect(struct {
-	Name string "v.io/v23/services/mgmt/repository.MediaInfo"
+	Name string "v.io/v23/services/repository.MediaInfo"
 }) {
 }
 
@@ -254,7 +254,7 @@ var ApplicationDesc rpc.InterfaceDesc = descApplication
 // descApplication hides the desc to keep godoc clean.
 var descApplication = rpc.InterfaceDesc{
 	Name:    "Application",
-	PkgPath: "v.io/v23/services/mgmt/repository",
+	PkgPath: "v.io/v23/services/repository",
 	Doc:     "// Application provides access to application envelopes. An\n// application envelope is identified by an application name and an\n// application version, which are specified through the object name,\n// and a profile name, which is specified using a method argument.\n//\n// Example:\n// /apps/search/v1.Match([]string{\"base\", \"media\"})\n//   returns an application envelope that can be used for downloading\n//   and executing the \"search\" application, version \"v1\", runnable\n//   on either the \"base\" or \"media\" profile.",
 	Embeds: []rpc.EmbedDesc{
 		{"Object", "v.io/v23/services/permissions", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/permissions\"\n//\n//   type MyObject interface {\n//     permissions.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(acl access.Permissions, etag string) error         {Red}\n//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}\n//  }"},
@@ -836,7 +836,7 @@ var BinaryDesc rpc.InterfaceDesc = descBinary
 // descBinary hides the desc to keep godoc clean.
 var descBinary = rpc.InterfaceDesc{
 	Name:    "Binary",
-	PkgPath: "v.io/v23/services/mgmt/repository",
+	PkgPath: "v.io/v23/services/repository",
 	Doc:     "// Binary can be used to store and retrieve vanadium application\n// binaries.\n//\n// To create a binary, clients first invoke the Create() method that\n// specifies the number of parts the binary consists of. Clients then\n// uploads the individual parts through the Upload() method, which\n// identifies the part being uploaded. To resume an upload after a\n// failure, clients invoke the UploadStatus() method, which returns a\n// slice that identifies which parts are missing.\n//\n// To download a binary, clients first invoke Stat(), which returns\n// information describing the binary, including the number of parts\n// the binary consists of. Clients then download the individual parts\n// through the Download() method, which identifies the part being\n// downloaded. Alternatively, clients can download the binary through\n// HTTP using a transient URL available through the DownloadUrl()\n// method.\n//\n// To delete the binary, clients invoke the Delete() method.",
 	Embeds: []rpc.EmbedDesc{
 		{"Object", "v.io/v23/services/permissions", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/permissions\"\n//\n//   type MyObject interface {\n//     permissions.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(acl access.Permissions, etag string) error         {Red}\n//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}\n//  }"},
@@ -1124,7 +1124,7 @@ var ProfileDesc rpc.InterfaceDesc = descProfile
 // descProfile hides the desc to keep godoc clean.
 var descProfile = rpc.InterfaceDesc{
 	Name:    "Profile",
-	PkgPath: "v.io/v23/services/mgmt/repository",
+	PkgPath: "v.io/v23/services/repository",
 	Doc:     "// Profile abstracts a device's ability to run binaries, and hides\n// specifics such as the operating system, hardware architecture, and\n// the set of installed libraries. Profiles describe binaries and\n// devices, and are used to match them.",
 	Methods: []rpc.MethodDesc{
 		{

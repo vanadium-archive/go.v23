@@ -15,7 +15,7 @@ import (
 	"v.io/v23/vom"
 )
 
-const pkgPath = "v.io/v23/services/mgmt/application"
+const pkgPath = "v.io/v23/services/application"
 
 var (
 	errCantVOMEncodePublisher    = verror.Register(pkgPath+".errCantVOMEncodePublisher", verror.NoRetry, "{1:}{2:} failed to vom-encode Publisher{:_}")

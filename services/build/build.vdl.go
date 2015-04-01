@@ -20,14 +20,14 @@ import (
 	"v.io/v23/vdl"
 
 	// VDL user imports
-	"v.io/v23/services/mgmt/binary"
+	"v.io/v23/services/binary"
 )
 
 // Architecture specifies the hardware architecture of a host.
 type Architecture string
 
 func (Architecture) __VDLReflect(struct {
-	Name string "v.io/v23/services/mgmt/build.Architecture"
+	Name string "v.io/v23/services/build.Architecture"
 }) {
 }
 
@@ -35,7 +35,7 @@ func (Architecture) __VDLReflect(struct {
 type Format string
 
 func (Format) __VDLReflect(struct {
-	Name string "v.io/v23/services/mgmt/build.Format"
+	Name string "v.io/v23/services/build.Format"
 }) {
 }
 
@@ -43,7 +43,7 @@ func (Format) __VDLReflect(struct {
 type OperatingSystem string
 
 func (OperatingSystem) __VDLReflect(struct {
-	Name string "v.io/v23/services/mgmt/build.OperatingSystem"
+	Name string "v.io/v23/services/build.OperatingSystem"
 }) {
 }
 
@@ -54,7 +54,7 @@ type File struct {
 }
 
 func (File) __VDLReflect(struct {
-	Name string "v.io/v23/services/mgmt/build.File"
+	Name string "v.io/v23/services/build.File"
 }) {
 }
 
@@ -315,7 +315,7 @@ var BuilderDesc rpc.InterfaceDesc = descBuilder
 // descBuilder hides the desc to keep godoc clean.
 var descBuilder = rpc.InterfaceDesc{
 	Name:    "Builder",
-	PkgPath: "v.io/v23/services/mgmt/build",
+	PkgPath: "v.io/v23/services/build",
 	Doc:     "// Builder describes an interface for building binaries from source.",
 	Methods: []rpc.MethodDesc{
 		{

@@ -29,7 +29,7 @@ type LogEntry struct {
 }
 
 func (LogEntry) __VDLReflect(struct {
-	Name string "v.io/v23/services/mgmt/logreader.LogEntry"
+	Name string "v.io/v23/services/logreader.LogEntry"
 }) {
 }
 
@@ -263,7 +263,7 @@ var LogFileDesc rpc.InterfaceDesc = descLogFile
 // descLogFile hides the desc to keep godoc clean.
 var descLogFile = rpc.InterfaceDesc{
 	Name:    "LogFile",
-	PkgPath: "v.io/v23/services/mgmt/logreader",
+	PkgPath: "v.io/v23/services/logreader",
 	Doc:     "// LogFile can be used to access log files remotely.",
 	Methods: []rpc.MethodDesc{
 		{

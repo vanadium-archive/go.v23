@@ -40,8 +40,8 @@ const (
 
 // Task is streamed to channels registered using TrackTask to provide a sense of
 // the progress of the application's shutdown sequence.  For a description of
-// the fields, see the Task struct in the v23/services/mgmt/appcycle
-// package, which it mirrors.
+// the fields, see the Task struct in the v23/services/appcycle package, which
+// it mirrors.
 type Task struct {
 	Progress, Goal int32
 }
@@ -89,7 +89,7 @@ type AppCycle interface {
 	TrackTask(chan<- Task)
 
 	// Remote returns an object to serve the remotely accessible AppCycle
-	// interface (as defined in v23/services/mgmt/appcycle)
+	// interface (as defined in v23/services/appcycle)
 	Remote() interface{}
 }
 

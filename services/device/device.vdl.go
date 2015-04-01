@@ -21,8 +21,8 @@ import (
 	// VDL user imports
 	"v.io/v23/security"
 	"v.io/v23/security/access"
-	"v.io/v23/services/mgmt/application"
-	"v.io/v23/services/mgmt/binary"
+	"v.io/v23/services/application"
+	"v.io/v23/services/binary"
 	"v.io/v23/services/permissions"
 )
 
@@ -30,7 +30,7 @@ import (
 type Config map[string]string
 
 func (Config) __VDLReflect(struct {
-	Name string "v.io/v23/services/mgmt/device.Config"
+	Name string "v.io/v23/services/device.Config"
 }) {
 }
 
@@ -78,7 +78,7 @@ func (x InstallationState) String() string {
 }
 
 func (InstallationState) __VDLReflect(struct {
-	Name string "v.io/v23/services/mgmt/device.InstallationState"
+	Name string "v.io/v23/services/device.InstallationState"
 	Enum struct{ Active, Uninstalled string }
 }) {
 }
@@ -157,7 +157,7 @@ func (x InstanceState) String() string {
 }
 
 func (InstanceState) __VDLReflect(struct {
-	Name string "v.io/v23/services/mgmt/device.InstanceState"
+	Name string "v.io/v23/services/device.InstanceState"
 	Enum struct{ Starting, Started, Suspending, Suspended, Stopping, Stopped, Updating string }
 }) {
 }
@@ -182,7 +182,7 @@ type (
 	StatusInstallation struct{ Value InstallationStatus }
 	// __StatusReflect describes the Status union type.
 	__StatusReflect struct {
-		Name  string "v.io/v23/services/mgmt/device.Status"
+		Name  string "v.io/v23/services/device.Status"
 		Type  Status
 		Union struct {
 			Instance     StatusInstance
@@ -209,7 +209,7 @@ type InstallationStatus struct {
 }
 
 func (InstallationStatus) __VDLReflect(struct {
-	Name string "v.io/v23/services/mgmt/device.InstallationStatus"
+	Name string "v.io/v23/services/device.InstallationStatus"
 }) {
 }
 
@@ -221,7 +221,7 @@ type InstanceStatus struct {
 }
 
 func (InstanceStatus) __VDLReflect(struct {
-	Name string "v.io/v23/services/mgmt/device.InstanceStatus"
+	Name string "v.io/v23/services/device.InstanceStatus"
 }) {
 }
 
@@ -251,7 +251,7 @@ type (
 	StartServerMessageInstancePublicKey struct{ Value []byte }
 	// __StartServerMessageReflect describes the StartServerMessage union type.
 	__StartServerMessageReflect struct {
-		Name  string "v.io/v23/services/mgmt/device.StartServerMessage"
+		Name  string "v.io/v23/services/device.StartServerMessage"
 		Type  StartServerMessage
 		Union struct {
 			InstanceName      StartServerMessageInstanceName
@@ -291,7 +291,7 @@ type (
 	StartClientMessageAppBlessings struct{ Value security.Blessings }
 	// __StartClientMessageReflect describes the StartClientMessage union type.
 	__StartClientMessageReflect struct {
-		Name  string "v.io/v23/services/mgmt/device.StartClientMessage"
+		Name  string "v.io/v23/services/device.StartClientMessage"
 		Type  StartClientMessage
 		Union struct {
 			AppBlessings StartClientMessageAppBlessings
@@ -318,7 +318,7 @@ type Description struct {
 }
 
 func (Description) __VDLReflect(struct {
-	Name string "v.io/v23/services/mgmt/device.Description"
+	Name string "v.io/v23/services/device.Description"
 }) {
 }
 
@@ -330,7 +330,7 @@ type Association struct {
 }
 
 func (Association) __VDLReflect(struct {
-	Name string "v.io/v23/services/mgmt/device.Association"
+	Name string "v.io/v23/services/device.Association"
 }) {
 }
 
@@ -1253,7 +1253,7 @@ var ApplicationDesc rpc.InterfaceDesc = descApplication
 // descApplication hides the desc to keep godoc clean.
 var descApplication = rpc.InterfaceDesc{
 	Name:    "Application",
-	PkgPath: "v.io/v23/services/mgmt/device",
+	PkgPath: "v.io/v23/services/device",
 	Doc:     "// Application can be used to manage applications on a device. The\n// idea is that this interace will be invoked using an object name that\n// identifies the application and its installations and instances\n// where applicable.\n//\n// In particular, the interface methods can be divided into three\n// groups based on their intended receiver:\n//\n// 1) Method receiver is an application:\n// -- Install()\n//\n// 2) Method receiver is an application installation:\n// -- Start()\n// -- Uninstall()\n// -- Update()\n//\n// 3) Method receiver is application installation instance:\n// -- Refresh()\n// -- Restart()\n// -- Resume()\n// -- Stop()\n// -- Suspend()\n//\n// For groups 2) and 3), the suffix that specifies the receiver can\n// optionally omit the installation and/or instance, in which case the\n// operation applies to all installations and/or instances in the\n// scope of the suffix.\n//\n// Examples:\n// # Install Google Maps on the device.\n// device/apps.Install(\"/google.com/appstore/maps\", nil, nil) --> \"google maps/0\"\n//\n// # Start an instance of the previously installed maps application installation.\n// device/apps/google maps/0.Start() --> { \"0\" }\n//\n// # Start a second instance of the previously installed maps application installation.\n// device/apps/google maps/0.Start() --> { \"1\" }\n//\n// # Stop the first instance previously started.\n// device/apps/google maps/0/0.Stop()\n//\n// # Install a second Google Maps installation.\n// device/apps.Install(\"/google.com/appstore/maps\", nil, nil) --> \"google maps/1\"\n//\n// # Start an instance for all maps application installations.\n// device/apps/google maps.Start() --> {\"0/2\", \"1/0\"}\n//\n// # Refresh the state of all instances of all maps application installations.\n// device/apps/google maps.Refresh()\n//\n// # Refresh the state of all instances of the maps application installation\n// identified by the given suffix.\n// device/apps/google maps/0.Refresh()\n//\n// # Refresh the state of the maps application installation instance identified by\n// the given suffix.\n// device/apps/google maps/0/2.Refresh()\n//\n// # Update the second maps installation to the latest version available.\n// device/apps/google maps/1.Update()\n//\n// # Update the first maps installation to a specific version.\n// device/apps/google maps/0.UpdateTo(\"/google.com/appstore/beta/maps\")\n//\n// Further, the following methods complement one another:\n// -- Install() and Uninstall()\n// -- Start() and Stop()\n// -- Suspend() and Resume()\n//\n// Finally, an application installation instance can be in one of\n// three abstract states: 1) \"does not exist\", 2) \"running\", or 3)\n// \"suspended\". The interface methods transition between these\n// abstract states using the following state machine:\n//\n// apply(Start(), \"does not exists\") = \"running\"\n// apply(Refresh(), \"running\") = \"running\"\n// apply(Refresh(), \"suspended\") = \"suspended\"\n// apply(Restart(), \"running\") = \"running\"\n// apply(Restart(), \"suspended\") = \"running\"\n// apply(Resume(), \"suspended\") = \"running\"\n// apply(Resume(), \"running\") = \"running\"\n// apply(Stop(), \"running\") = \"does not exist\"\n// apply(Stop(), \"suspended\") = \"does not exist\"\n// apply(Suspend(), \"running\") = \"suspended\"\n// apply(Suspend(), \"suspended\") = \"suspended\"\n//\n// In other words, invoking any method using an existing application\n// installation instance as a receiver is well-defined.",
 	Embeds: []rpc.EmbedDesc{
 		{"Object", "v.io/v23/services/permissions", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/permissions\"\n//\n//   type MyObject interface {\n//     permissions.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(acl access.Permissions, etag string) error         {Red}\n//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}\n//  }"},
@@ -1548,7 +1548,7 @@ var ClaimableDesc rpc.InterfaceDesc = descClaimable
 // descClaimable hides the desc to keep godoc clean.
 var descClaimable = rpc.InterfaceDesc{
 	Name:    "Claimable",
-	PkgPath: "v.io/v23/services/mgmt/device",
+	PkgPath: "v.io/v23/services/device",
 	Doc:     "// Claimable represents an uninitialized device with no owner\n// (i.e., a device that has no blessings).\n//\n// Claim is used to claim ownership by blessing the device's private key.\n// Devices that have provided a pairing token to the claimer through an\n// out-of-band communication channel (eg: display/email) would expect this\n// pairing token to be replayed by the claimer.\n//\n// Once claimed, the device will export the \"Device\" interface and all methods\n// will be restricted to the claimer.\n//\n// The blessings that the device is to be claimed with is provided\n// via the ipc.Granter option in Go.",
 	Methods: []rpc.MethodDesc{
 		{
@@ -2035,10 +2035,10 @@ var DeviceDesc rpc.InterfaceDesc = descDevice
 // descDevice hides the desc to keep godoc clean.
 var descDevice = rpc.InterfaceDesc{
 	Name:    "Device",
-	PkgPath: "v.io/v23/services/mgmt/device",
+	PkgPath: "v.io/v23/services/device",
 	Doc:     "// Device can be used to manage a device remotely using an object name that\n// identifies it.",
 	Embeds: []rpc.EmbedDesc{
-		{"Application", "v.io/v23/services/mgmt/device", "// Application can be used to manage applications on a device. The\n// idea is that this interace will be invoked using an object name that\n// identifies the application and its installations and instances\n// where applicable.\n//\n// In particular, the interface methods can be divided into three\n// groups based on their intended receiver:\n//\n// 1) Method receiver is an application:\n// -- Install()\n//\n// 2) Method receiver is an application installation:\n// -- Start()\n// -- Uninstall()\n// -- Update()\n//\n// 3) Method receiver is application installation instance:\n// -- Refresh()\n// -- Restart()\n// -- Resume()\n// -- Stop()\n// -- Suspend()\n//\n// For groups 2) and 3), the suffix that specifies the receiver can\n// optionally omit the installation and/or instance, in which case the\n// operation applies to all installations and/or instances in the\n// scope of the suffix.\n//\n// Examples:\n// # Install Google Maps on the device.\n// device/apps.Install(\"/google.com/appstore/maps\", nil, nil) --> \"google maps/0\"\n//\n// # Start an instance of the previously installed maps application installation.\n// device/apps/google maps/0.Start() --> { \"0\" }\n//\n// # Start a second instance of the previously installed maps application installation.\n// device/apps/google maps/0.Start() --> { \"1\" }\n//\n// # Stop the first instance previously started.\n// device/apps/google maps/0/0.Stop()\n//\n// # Install a second Google Maps installation.\n// device/apps.Install(\"/google.com/appstore/maps\", nil, nil) --> \"google maps/1\"\n//\n// # Start an instance for all maps application installations.\n// device/apps/google maps.Start() --> {\"0/2\", \"1/0\"}\n//\n// # Refresh the state of all instances of all maps application installations.\n// device/apps/google maps.Refresh()\n//\n// # Refresh the state of all instances of the maps application installation\n// identified by the given suffix.\n// device/apps/google maps/0.Refresh()\n//\n// # Refresh the state of the maps application installation instance identified by\n// the given suffix.\n// device/apps/google maps/0/2.Refresh()\n//\n// # Update the second maps installation to the latest version available.\n// device/apps/google maps/1.Update()\n//\n// # Update the first maps installation to a specific version.\n// device/apps/google maps/0.UpdateTo(\"/google.com/appstore/beta/maps\")\n//\n// Further, the following methods complement one another:\n// -- Install() and Uninstall()\n// -- Start() and Stop()\n// -- Suspend() and Resume()\n//\n// Finally, an application installation instance can be in one of\n// three abstract states: 1) \"does not exist\", 2) \"running\", or 3)\n// \"suspended\". The interface methods transition between these\n// abstract states using the following state machine:\n//\n// apply(Start(), \"does not exists\") = \"running\"\n// apply(Refresh(), \"running\") = \"running\"\n// apply(Refresh(), \"suspended\") = \"suspended\"\n// apply(Restart(), \"running\") = \"running\"\n// apply(Restart(), \"suspended\") = \"running\"\n// apply(Resume(), \"suspended\") = \"running\"\n// apply(Resume(), \"running\") = \"running\"\n// apply(Stop(), \"running\") = \"does not exist\"\n// apply(Stop(), \"suspended\") = \"does not exist\"\n// apply(Suspend(), \"running\") = \"suspended\"\n// apply(Suspend(), \"suspended\") = \"suspended\"\n//\n// In other words, invoking any method using an existing application\n// installation instance as a receiver is well-defined."},
+		{"Application", "v.io/v23/services/device", "// Application can be used to manage applications on a device. The\n// idea is that this interace will be invoked using an object name that\n// identifies the application and its installations and instances\n// where applicable.\n//\n// In particular, the interface methods can be divided into three\n// groups based on their intended receiver:\n//\n// 1) Method receiver is an application:\n// -- Install()\n//\n// 2) Method receiver is an application installation:\n// -- Start()\n// -- Uninstall()\n// -- Update()\n//\n// 3) Method receiver is application installation instance:\n// -- Refresh()\n// -- Restart()\n// -- Resume()\n// -- Stop()\n// -- Suspend()\n//\n// For groups 2) and 3), the suffix that specifies the receiver can\n// optionally omit the installation and/or instance, in which case the\n// operation applies to all installations and/or instances in the\n// scope of the suffix.\n//\n// Examples:\n// # Install Google Maps on the device.\n// device/apps.Install(\"/google.com/appstore/maps\", nil, nil) --> \"google maps/0\"\n//\n// # Start an instance of the previously installed maps application installation.\n// device/apps/google maps/0.Start() --> { \"0\" }\n//\n// # Start a second instance of the previously installed maps application installation.\n// device/apps/google maps/0.Start() --> { \"1\" }\n//\n// # Stop the first instance previously started.\n// device/apps/google maps/0/0.Stop()\n//\n// # Install a second Google Maps installation.\n// device/apps.Install(\"/google.com/appstore/maps\", nil, nil) --> \"google maps/1\"\n//\n// # Start an instance for all maps application installations.\n// device/apps/google maps.Start() --> {\"0/2\", \"1/0\"}\n//\n// # Refresh the state of all instances of all maps application installations.\n// device/apps/google maps.Refresh()\n//\n// # Refresh the state of all instances of the maps application installation\n// identified by the given suffix.\n// device/apps/google maps/0.Refresh()\n//\n// # Refresh the state of the maps application installation instance identified by\n// the given suffix.\n// device/apps/google maps/0/2.Refresh()\n//\n// # Update the second maps installation to the latest version available.\n// device/apps/google maps/1.Update()\n//\n// # Update the first maps installation to a specific version.\n// device/apps/google maps/0.UpdateTo(\"/google.com/appstore/beta/maps\")\n//\n// Further, the following methods complement one another:\n// -- Install() and Uninstall()\n// -- Start() and Stop()\n// -- Suspend() and Resume()\n//\n// Finally, an application installation instance can be in one of\n// three abstract states: 1) \"does not exist\", 2) \"running\", or 3)\n// \"suspended\". The interface methods transition between these\n// abstract states using the following state machine:\n//\n// apply(Start(), \"does not exists\") = \"running\"\n// apply(Refresh(), \"running\") = \"running\"\n// apply(Refresh(), \"suspended\") = \"suspended\"\n// apply(Restart(), \"running\") = \"running\"\n// apply(Restart(), \"suspended\") = \"running\"\n// apply(Resume(), \"suspended\") = \"running\"\n// apply(Resume(), \"running\") = \"running\"\n// apply(Stop(), \"running\") = \"does not exist\"\n// apply(Stop(), \"suspended\") = \"does not exist\"\n// apply(Suspend(), \"running\") = \"suspended\"\n// apply(Suspend(), \"suspended\") = \"suspended\"\n//\n// In other words, invoking any method using an existing application\n// installation instance as a receiver is well-defined."},
 	},
 	Methods: []rpc.MethodDesc{
 		{
