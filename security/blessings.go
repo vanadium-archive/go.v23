@@ -104,7 +104,7 @@ func (b Blessings) String() string {
 		}
 		blessings[chainidx] = fmt.Sprintf("%v", strings.Join(onechain, ChainSeparator))
 	}
-	return strings.Join(blessings, "#")
+	return strings.Join(blessings, ",")
 }
 
 func nameForPrincipal(p Principal, chain []Certificate) string {
