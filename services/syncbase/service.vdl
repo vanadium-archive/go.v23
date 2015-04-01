@@ -6,7 +6,7 @@ package syncbase
 
 import (
   "v.io/v23/security/access"
-  "v.io/v23/services/security/object"
+  "v.io/v23/services/permissions"
 )
 
 // NOTE(sadovsky): Various methods below may end up needing additional options.
@@ -28,7 +28,7 @@ import (
 // Service.Glob operates over Universe names.
 type Service interface {
 	// SetPermissions and GetPermissions are included from the Object interface.
-	object.Object
+	permissions.Object
 }
 
 // TODO(sadovsky): We may want to allow clients to rename their Universes and
@@ -50,7 +50,7 @@ type Universe interface {
 	Delete() error {access.Write}
 
 	// SetPermissions and GetPermissions are included from the Object interface.
-	object.Object
+	permissions.Object
 }
 
 // Schema is a Database schema. Currently it's just a set of Table names, and
@@ -84,7 +84,7 @@ type Database interface {
 	GetSchema() (schema Schema, etag string | error) {access.Read}
 
 	// SetPermissions and GetPermissions are included from the Object interface.
-	object.Object
+	permissions.Object
 }
 
 // Table represents a collection of Items (rows). Table implements built-in
