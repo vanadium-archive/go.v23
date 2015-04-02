@@ -10,8 +10,8 @@ import (
 
 	"v.io/v23/config"
 	"v.io/v23/context"
+	"v.io/v23/namespace"
 	"v.io/v23/naming"
-	"v.io/v23/naming/ns"
 	"v.io/v23/rpc"
 	"v.io/v23/security"
 )
@@ -39,10 +39,10 @@ func (*mockRuntime) SetNewClient(ctx *context.T, opts ...rpc.ClientOpt) (*contex
 	return nil, nil, nil
 }
 func (*mockRuntime) GetClient(ctx *context.T) rpc.Client { return nil }
-func (*mockRuntime) SetNewNamespace(ctx *context.T, roots ...string) (*context.T, ns.Namespace, error) {
+func (*mockRuntime) SetNewNamespace(ctx *context.T, roots ...string) (*context.T, namespace.T, error) {
 	return nil, nil, nil
 }
-func (*mockRuntime) GetNamespace(ctx *context.T) ns.Namespace       { return nil }
+func (*mockRuntime) GetNamespace(ctx *context.T) namespace.T        { return nil }
 func (*mockRuntime) GetAppCycle(ctx *context.T) AppCycle            { return nil }
 func (*mockRuntime) GetListenSpec(ctx *context.T) rpc.ListenSpec    { return rpc.ListenSpec{} }
 func (*mockRuntime) GetPublisher(ctx *context.T) *config.Publisher  { return nil }

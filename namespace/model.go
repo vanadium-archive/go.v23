@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package ns
+// Package namespace supports resolving object names to server object addresses.
+package namespace
 
 import (
 	"time"
@@ -12,10 +13,9 @@ import (
 	"v.io/v23/security/access"
 )
 
-// Namespace provides translation from object names to server object addresses.
-// It represents the interface to a client side library for the MountTable
-// service
-type Namespace interface {
+// T is the interface for namespace operations; it is the client side library
+// for the MountTable service
+type T interface {
 	// Mount the server object address under the object name, expiring after
 	// the ttl. ttl of zero implies an implementation-specific high value
 	// (essentially, forever).
