@@ -274,14 +274,21 @@ const SignatureForBlessingCertificates = "B" // Signature.Purpose used by a Prin
 const SignatureForDischarge = "D" // Signature.Purpose used by a Principal when signing discharges for public-key based third-party caveats.
 
 var (
-	ErrUnrecognizedRoot = verror.Register("v.io/v23/security.UnrecognizedRoot", verror.NoRetry, "{1:}{2:} unrecognized public key {3} in root certificate{:4}")
+	ErrUnrecognizedRoot    = verror.Register("v.io/v23/security.UnrecognizedRoot", verror.NoRetry, "{1:}{2:} unrecognized public key {3} in root certificate{:4}")
+	ErrAuthorizationFailed = verror.Register("v.io/v23/security.AuthorizationFailed", verror.NoRetry, "{1:}{2:} principal with blessings {3} (rejected {4}) is not authorized by principal with blessings {5}")
 )
 
 func init() {
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnrecognizedRoot.ID), "{1:}{2:} unrecognized public key {3} in root certificate{:4}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrAuthorizationFailed.ID), "{1:}{2:} principal with blessings {3} (rejected {4}) is not authorized by principal with blessings {5}")
 }
 
 // NewErrUnrecognizedRoot returns an error with the ErrUnrecognizedRoot ID.
 func NewErrUnrecognizedRoot(ctx *context.T, rootKey string, details error) error {
 	return verror.New(ErrUnrecognizedRoot, ctx, rootKey, details)
+}
+
+// NewErrAuthorizationFailed returns an error with the ErrAuthorizationFailed ID.
+func NewErrAuthorizationFailed(ctx *context.T, remote []string, remoteErr []RejectedBlessing, local []string) error {
+	return verror.New(ErrAuthorizationFailed, ctx, remote, remoteErr, local)
 }

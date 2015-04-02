@@ -159,5 +159,7 @@ type RejectedBlessing struct {
 
 error (
 	UnrecognizedRoot(rootKey string, details error) {"en":"unrecognized public key {rootKey} in root certificate{:details}"}
+
+	AuthorizationFailed(remote []string, remoteErr []RejectedBlessing, local []string) { "en": "principal with blessings {remote} (rejected {remoteErr}) is not authorized by principal with blessings {local}" }
 )
 
