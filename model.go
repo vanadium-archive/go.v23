@@ -168,6 +168,15 @@ type Runtime interface {
 	// GetBackgroundContext returns a background context. This context can be used
 	// for general background activities.
 	GetBackgroundContext(ctx *context.T) *context.T
+
+	// SetReservedNameDispatcher returns a context that uses the
+	// provided dispatcher to control access to the framework managed
+	// portion of the namespace.
+	SetReservedNameDispatcher(ctx *context.T, d rpc.Dispatcher) *context.T
+
+	// GetReservedNameDispatcher returns the dispatcher used for
+	// reserved names.
+	GetReservedNameDispatcher(ctx *context.T) rpc.Dispatcher
 }
 
 // NewEndpoint returns an Endpoint by parsing the supplied endpoint
@@ -261,6 +270,19 @@ func SetBackgroundContext(ctx *context.T) *context.T {
 // for general background activities.
 func GetBackgroundContext(ctx *context.T) *context.T {
 	return initState.runtime.GetBackgroundContext(ctx)
+}
+
+// SetReservedNameDispatcher returns a context that uses the
+// provided dispatcher to handle reserved names in particular
+// __debug.
+func SetReservedNameDispatcher(ctx *context.T, d rpc.Dispatcher) *context.T {
+	return initState.currentRuntime().SetReservedNameDispatcher(ctx, d)
+}
+
+// GetReservedNameDispatcher returns the dispatcher used for
+// reserved names.
+func GetReservedNameDispatcher(ctx *context.T) rpc.Dispatcher {
+	return initState.currentRuntime().GetReservedNameDispatcher(ctx)
 }
 
 var initState = &initStateData{}

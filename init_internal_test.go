@@ -42,15 +42,16 @@ func (*mockRuntime) GetClient(ctx *context.T) rpc.Client { return nil }
 func (*mockRuntime) SetNewNamespace(ctx *context.T, roots ...string) (*context.T, ns.Namespace, error) {
 	return nil, nil, nil
 }
-func (*mockRuntime) GetNamespace(ctx *context.T) ns.Namespace { return nil }
-func (*mockRuntime) SetReservedNameDispatcher(ctx *context.T, server rpc.Dispatcher, opts ...rpc.ServerOpt) *context.T {
-	return nil
-}
+func (*mockRuntime) GetNamespace(ctx *context.T) ns.Namespace       { return nil }
 func (*mockRuntime) GetAppCycle(ctx *context.T) AppCycle            { return nil }
 func (*mockRuntime) GetListenSpec(ctx *context.T) rpc.ListenSpec    { return rpc.ListenSpec{} }
 func (*mockRuntime) GetPublisher(ctx *context.T) *config.Publisher  { return nil }
 func (*mockRuntime) SetBackgroundContext(ctx *context.T) *context.T { return nil }
 func (*mockRuntime) GetBackgroundContext(ctx *context.T) *context.T { return nil }
+
+func (*mockRuntime) SetReservedNameDispatcher(ctx *context.T, d rpc.Dispatcher) *context.T { return nil }
+
+func (*mockRuntime) GetReservedNameDispatcher(ctx *context.T) rpc.Dispatcher { return nil }
 
 func TestPanicOnInitWithNoProfile(t *testing.T) {
 	clear()
