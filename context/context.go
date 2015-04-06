@@ -6,27 +6,30 @@
 // crosses API boundaries.  The context carries deadlines and
 // cancellation as well as other arbitrary values.
 //
-// Server method implmentations receive a context as their first
-// argument, you should generally pass this context (or a derivative)
-// on to dependent operations.  You should allocate new context.T
-// objects only for operations that are semantically unrelated to any
-// ongoing calls.
+// Application code receives contexts in two main ways:
 //
-// New contexts are created via the runtime with
-// veryon2.Runtime.NewContext().  New contexts represent a fresh
-// operation that's unrelated to any other ongoing work.  Further
-// contexts can be derived from the original context to refine the
-// environment.  For example if part of your operation requires a
-// finer deadline you can create a new context to handle that part:
+// 1) A context.T is returned from v23.Init().  This will generally be
+// used to set up servers in main, or for stand-alone client programs.
 //
-//    ctx := runtime.NewContext()
-//    // We'll use cacheCtx to lookup data in memcache
-//    // if it takes more than a second to get data from
-//    // memcache we should just skip the cache and perform
-//    // the slow operation.
-//    cacheCtx, cancel := WithTimeout(ctx, time.Second)
-//    if err := FetchDataFromMemcache(cacheCtx, key); err == DeadlineExceeded {
-//      RecomputeData(ctx, key)
+// 2) The first parameter to every Vanadium server method implementation
+// implements the v23/rpc.ServerCall interface.  ServerCall.Context()
+// returns a context.T.
+//
+// Once you have a context you can derive further contexts to change settings.
+// for example to adjust a deadline you might do:
+//    func main() {
+//      ctx, shutdown := v23.Init()
+//      defer shutdown()
+//      // We'll use cacheCtx to lookup data in memcache
+//      // if it takes more than a second to get data from
+//      // memcache we should just skip the cache and perform
+//      // the slow operation.
+//      cacheCtx, cancel := WithTimeout(ctx, time.Second)
+//      if err := FetchDataFromMemcache(cacheCtx, key); err != nil {
+//        // Here we use the original ctx, not the derived cacheCtx
+//        // so we aren't constrained by the 1 second timeout.
+//        RecomputeData(ctx, key)
+//      }
 //    }
 //
 // Contexts form a tree where derived contexts are children of the
@@ -34,7 +37,7 @@
 // properties of their parent except for the property being replaced
 // (the deadline in the example above).
 //
-// Contexts are extensible.  The Value/WithValue methods allow you to attach
+// Contexts are extensible.  The Value/WithValue functions allow you to attach
 // new information to the context and extend its capabilities.
 // In the same way we derive new contexts via the 'With' family of functions
 // you can create methods to attach new data:
@@ -45,14 +48,15 @@
 //
 //    type Auth struct{...}
 //
-//    type authKey struct{}
+//    type key int
+//    const authKey = key(0)
 //
-//    function WithAuth(parent *context.T, data *Auth) *context.T {
-//        return parent.WithValue(authKey{}, data)
+//    function SetAuth(parent *context.T, data *Auth) *context.T {
+//        return context.WithValue(parent, authKey, data)
 //    }
 //
-//    function FromContext(ctx *context.T) *Auth {
-//        data, _ := ctx.Value(authKey{}).(*Auth)
+//    function GetAuth(ctx *context.T) *Auth {
+//        data, _ := ctx.Value(authKey).(*Auth)
 //        return data
 //    }
 //
@@ -75,7 +79,7 @@ const (
 	deadlineKey
 )
 
-// A CancelFunc is used to cancel a context.  The first call will
+// CancelFunc is used to cancel a context.  The first call will
 // cause the paired context and all decendants to close their Done()
 // channels.  Further calls do nothing.
 type CancelFunc func()
@@ -87,11 +91,10 @@ var Canceled = errors.New("context canceled")
 // deadlines and therefore been canceled automatically.
 var DeadlineExceeded = errors.New("context deadline exceeded")
 
-// A T object carries deadlines, cancellation and data across API
-// boundaries.  It is safe to use a T from multiple goroutines simultaneously.
-// The zero-type of context is uninitialized and should never be used
-// directly by application code.  Only runtime implementors should
-// create them directly.
+// T carries deadlines, cancellation and data across API boundaries.
+// It is safe to use a T from multiple goroutines simultaneously.  The
+// zero-type of context is uninitialized and will panic if used
+// directly by application code.
 type T struct {
 	parent     *T
 	key, value interface{}
@@ -100,7 +103,10 @@ type T struct {
 // RootContext creates a new root context with no data attached.
 // A RootContext is cancelable (see WithCancel).
 // Typically you should not call this function, instead you should derive
-// contexts from other contexts, such as that returned by v23.Init().
+// contexts from other contexts, such as the context returned from v23.Init
+// or the result of the Context() method on a ServerCall.  This function
+// is sometimes useful in tests, where it is undesirable to initialize a
+// runtime to test a function that reads from a T.
 func RootContext() (*T, CancelFunc) {
 	return WithCancel(&T{key: rootKey})
 }
