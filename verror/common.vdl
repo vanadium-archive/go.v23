@@ -33,10 +33,6 @@ error (
 	// BadEtag means the etag presented by the client was out of date or otherwise
 	// invalid, likely because some other request caused the etag at the server to
 	// change. The client should get a fresh etag and try again.
-	// TODO(sadovsky): Rename "etag" to something else. HTTP etags are content
-	// hashes, used to implement client-side response caching. We use etags for
-	// for atomicity in read-modify-write operations, and generally recommend for
-	// them to be implemented as (possibly lightly obfuscated) sequence numbers.
 	BadEtag() {"en":"Etag is out of date"}
 
 	// Exist means that the requested item already exists; typically returned when
@@ -49,23 +45,21 @@ error (
 
 	// NoExistOrNoAccess means that either the requested item does not exist, or
 	// is inaccessible.  Typically returned when the distinction between existence
-	// and inaccessiblity needs to remain hidden, as a privacy feature.
+	// and inaccessiblity should be hidden to preserve privacy.
 	NoExistOrNoAccess() {"en":"Does not exist or access denied{:_}"}
 
-	// The following errors can occur during the process of establishing
-	// an RPC connection.
-	// NoExist (see above) is returned if the name of the server fails to
-	// resolve any addresses.
-	// NoServers is returned when the servers returned for the supplied name
-	// are somehow unusable or unreachable by the client.
-	// NoAccess is returned when a server does not authorize a client.
-	// NotTrusted is returned when a client does not trust a server.
-	//
-	// TODO(toddw): These errors and descriptions were added by Cos; consider
-	// moving the IPC-related ones into the ipc package.
+	// NoServers means a name was resolved to unusable or inaccessible servers.
 	NoServers() {RetryRefetch, "en":"No usable servers found{:_}"}
+
+	// NoAccess means the server does not authorize the client for access.
 	NoAccess() {RetryRefetch, "en":"Access denied{:_}"}
+
+	// NotTrusted means the client does not trust the server.
 	NotTrusted() {RetryRefetch, "en":"Client does not trust server{:_}"}
+
+	// NoServersAndAuth means the client cannot use any servers, because of either
+	// NotTrusted or NoAccess errors.  Typically returned when the distinction
+	// between trust and inaccessibility should be hidden to preserve privacy.
 	NoServersAndAuth() {RetryRefetch, "en":"Has no usable servers and is either not trusted or access was denied{:_}"}
 
 	// Aborted means that an operation was not completed because it was aborted by

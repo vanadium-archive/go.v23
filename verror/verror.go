@@ -2,19 +2,33 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package verror extends the regular error mechanism to work across different
-// address spaces.
+// Package verror defines an error reporting mechanism that works across
+// programming environments, and a set of common errors.
+//
+// Each error has an identifier string, which is used for equality checks.
+// E.g. a Javascript client can check if a Go server returned a NoExist error by
+// checking the string identifier.  Error identifier strings start with the VDL
+// package path to ensure uniqueness, e.g. "v.io/v23/verror.NoExist".
+//
+// Each error contains an action, which is the suggested action for a typical
+// client to perform upon receiving the error.  E.g. some action codes represent
+// whether to retry the operation after receiving the error.
+//
+// Each error also contains a list of typed parameters, and an error message.
+// The error message is created by looking up a format string keyed on the error
+// identifier, and applying the parameters to the format string.  This enables
+// error messages to be generated in different languages.
+//
+// Examples
 //
 // To define a new error identifier, for example "someNewError", client code is
 // expected to declare a variable like this:
 //      var someNewError = verror.Register("my/package/name.someNewError", NoRetry,
 //                                         "{1} {2} English text for new error")
-// Error identifier strings should start with the package path to ensure uniqueness.
 // Text for other languages can be added to the default i18n Catalogue.
 //
 // If the error should cause a client to retry, consider replacing "NoRetry" with
-// one of the other Action codes below.   The purpose of Action is so
-// clients not familiar with an error can retry appropriately.
+// one of the other Action codes below.
 //
 // Errors are given parameters when used.  Conventionally, the first parameter
 // is the name of the component (typically server or binary name), and the

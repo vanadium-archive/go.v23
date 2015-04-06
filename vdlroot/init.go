@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package vdlroot contains the standard VDL packages; the VDLROOT environment
+// Package vdlroot defines the standard VDL packages; the VDLROOT environment
 // variable should point at this directory.
 //
 // This package contains import dependencies on all its sub-packages.  This is

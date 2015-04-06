@@ -36,10 +36,6 @@ var (
 	// BadEtag means the etag presented by the client was out of date or otherwise
 	// invalid, likely because some other request caused the etag at the server to
 	// change. The client should get a fresh etag and try again.
-	// TODO(sadovsky): Rename "etag" to something else. HTTP etags are content
-	// hashes, used to implement client-side response caching. We use etags for
-	// for atomicity in read-modify-write operations, and generally recommend for
-	// them to be implemented as (possibly lightly obfuscated) sequence numbers.
 	ErrBadEtag = Register("v.io/v23/verror.BadEtag", NoRetry, "{1:}{2:} Etag is out of date")
 	// Exist means that the requested item already exists; typically returned when
 	// an attempt to create an item fails because it already exists.
@@ -49,22 +45,17 @@ var (
 	ErrNoExist = Register("v.io/v23/verror.NoExist", NoRetry, "{1:}{2:} Does not exist{:_}")
 	// NoExistOrNoAccess means that either the requested item does not exist, or
 	// is inaccessible.  Typically returned when the distinction between existence
-	// and inaccessiblity needs to remain hidden, as a privacy feature.
+	// and inaccessiblity should be hidden to preserve privacy.
 	ErrNoExistOrNoAccess = Register("v.io/v23/verror.NoExistOrNoAccess", NoRetry, "{1:}{2:} Does not exist or access denied{:_}")
-	// The following errors can occur during the process of establishing
-	// an RPC connection.
-	// NoExist (see above) is returned if the name of the server fails to
-	// resolve any addresses.
-	// NoServers is returned when the servers returned for the supplied name
-	// are somehow unusable or unreachable by the client.
-	// NoAccess is returned when a server does not authorize a client.
-	// NotTrusted is returned when a client does not trust a server.
-	//
-	// TODO(toddw): These errors and descriptions were added by Cos; consider
-	// moving the IPC-related ones into the ipc package.
-	ErrNoServers        = Register("v.io/v23/verror.NoServers", RetryRefetch, "{1:}{2:} No usable servers found{:_}")
-	ErrNoAccess         = Register("v.io/v23/verror.NoAccess", RetryRefetch, "{1:}{2:} Access denied{:_}")
-	ErrNotTrusted       = Register("v.io/v23/verror.NotTrusted", RetryRefetch, "{1:}{2:} Client does not trust server{:_}")
+	// NoServers means a name was resolved to unusable or inaccessible servers.
+	ErrNoServers = Register("v.io/v23/verror.NoServers", RetryRefetch, "{1:}{2:} No usable servers found{:_}")
+	// NoAccess means the server does not authorize the client for access.
+	ErrNoAccess = Register("v.io/v23/verror.NoAccess", RetryRefetch, "{1:}{2:} Access denied{:_}")
+	// NotTrusted means the client does not trust the server.
+	ErrNotTrusted = Register("v.io/v23/verror.NotTrusted", RetryRefetch, "{1:}{2:} Client does not trust server{:_}")
+	// NoServersAndAuth means the client cannot use any servers, because of either
+	// NotTrusted or NoAccess errors.  Typically returned when the distinction
+	// between trust and inaccessibility should be hidden to preserve privacy.
 	ErrNoServersAndAuth = Register("v.io/v23/verror.NoServersAndAuth", RetryRefetch, "{1:}{2:} Has no usable servers and is either not trusted or access was denied{:_}")
 	// Aborted means that an operation was not completed because it was aborted by
 	// the receiver.  A more specific error should be used if it would help the

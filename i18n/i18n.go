@@ -2,36 +2,37 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package i18n provides hooks for internationalization.
+// Package i18n defines support for internationalization of formatted message
+// strings in different languages.
 //
 // Typical usage:
 //   cat := i18n.Cat()   // get default Catalogue
 //   outputString = cat.Format(language, msgID, "1st", "2nd", "3rd", "4th")
 //
-// i18n.Catalogue maps language names and message identifiers to message
-// format strings.  The intent is to provide a primitive form of Sprintf()
-// in a way where the format string can depend upon the language.
+// i18n.Catalogue maps language names and message identifiers to message format
+// strings.  The intent is to provide a primitive form of Sprintf(), where the
+// format string can depend upon the language.
 //
-// i18n.MsgID is a string that identitifies a set of message format strings
-// that have the same meaning, but may be available in multiple languages.
+// i18n.MsgID is a string that identitifies a set of message format strings that
+// have the same meaning, but may be available in multiple languages.
 //
 // i18n.Lang is a string that identifies a language.
 //
-// A message format string is a string containing substrings of the form {<number>}
-// which are replaced by the corresponding position parameter (numbered from 1),
-// or {_}, which is replaced by all otherwise unused parameters.
-// If a substring is of the form {:<number>}, {<number>:}, {:<number>:}, {:_},
-// {_:}, or {:_:}, and the corresponding parameters are not the empty string,
-// the parameter is preceded by ": " or followed by ":"  or both,
-// respectively.  For example, if the format:
-//      {3:} foo {2} bar{:_} ({3})
+// A message format string is a string containing substrings of the form
+// {<number>} which are replaced by the corresponding position parameter
+// (numbered from 1), or {_}, which is replaced by all otherwise unused
+// parameters.  If a substring is of the form {:<number>}, {<number>:},
+// {:<number>:}, {:_}, {_:}, or {:_:}, and the corresponding parameters are not
+// the empty string, the parameter is preceded by ": " or followed by ":" or
+// both, respectively.  For example, if the format:
+//   {3:} foo {2} bar{:_} ({3})
 // is used with the cat.Format example above, it yields:
-//      3rd: foo 2nd bar: 1st 4th (3rd)
+//   3rd: foo 2nd bar: 1st 4th (3rd)
 //
-// The positional parameters may have any type, and are printed in their
-// default formatting.  If particular formatting is desired, the parameter
-// should be converted to a string first.
-// In principle, the default formating for a parameter may depend on LangID.
+// The positional parameters may have any type, and are printed in their default
+// formatting.  If particular formatting is desired, the parameter should be
+// converted to a string first.  In principle, the default formating for a
+// parameter may depend on LangID.
 package i18n
 
 import "bufio"
@@ -43,10 +44,10 @@ import "strings"
 import "sync"
 import "v.io/v23/context"
 
-// A MsgID identifies a message, without specifying its language.
+// MsgID identifies a message, without specifying its language.
 type MsgID string
 
-// A LangID represents the name of a language or locale.
+// LangID represents the name of a language or locale.
 // By convention it should be an IETF language tag:
 //   http://en.wikipedia.org/wiki/IETF_language_tag
 type LangID string
@@ -54,7 +55,7 @@ type LangID string
 // NoLangID is the empty LangID.
 const NoLangID LangID = ""
 
-// A Catalogue maps (LangID, MsgID) pairs to message format strings.
+// Catalogue maps (LangID, MsgID) pairs to message format strings.
 type Catalogue struct {
 	lock    sync.RWMutex // Protects remaining fields.
 	formats map[LangID]map[MsgID]string
@@ -87,7 +88,7 @@ func (cat *Catalogue) Format(langID LangID, msgID MsgID, v ...interface{}) strin
 	return FormatParams(formatStr, v...)
 }
 
-// A langIDKey is used as a key for context.T's Value() map.
+// langIDKey is used as a key for context.T's Value() map.
 type langIDKey struct{}
 
 // LangIDFromContext returns the LangID associated with a context.T,
