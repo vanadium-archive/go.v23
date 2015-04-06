@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package namespace supports resolving object names to server object addresses.
+// Package namespace defines the APIs for resolving, globbing and managing names.
 package namespace
 
 import (

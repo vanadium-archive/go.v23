@@ -3,8 +3,8 @@
 // license that can be found in the LICENSE file.
 
 // Package naming defines the public interface for naming, including
-// the format of names, the APIs for resolving and managing names as
-// well as all associated types.
+// the format of names, the APIs for manipulating the names as
+// well as all associated types for resolving, globbing and managing names.
 //
 // Object names are 'resolved' using a MountTable to obtain a
 // MountedServer that RPC method invocations can be directed
