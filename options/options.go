@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package options implements common options recognized by vanadium implementations.
+// Package options defines common options recognized by vanadium implementations.
 //
 // Below are the common options required of all vanadium implementations.  Let's
 // say we have functions MyFuncA and MyFuncB in package demo:

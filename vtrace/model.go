@@ -2,21 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package vtrace extends the v23/context to allow you to attach
-// various types of debugging information.  This debugging information
-// accumulates along the various parts of the context tree and can be
-// inspected to help you understand the performance and behavior of
-// your system even across servers and processes.
+// Package vtrace defines a system for collecting debugging
+// information about operations that span a distributed system.  We
+// call the debugging information attached to one operation a Trace.
+// A Trace may span many processes on many machines.
 //
-// A new root context, as created by v23.Runtime.NewContext()
-// represents a new operation unconnected to any other.  Vtrace
-// represents all the debugging information collected about this
-// operation, even across servers and processes, as a single Trace.
-// The Trace will be divided into a hierarchy of timespans (Spans).
-// For example, imagine our high level operation is making a new
-// blog post.  We may have to first authentiate with an auth server,
-// then write the new post to a database, and finally notify subscribers
-// of the new content.  The trace might look like this:
+// Traces are composed of a hierarchy of Spans.  A span is a named
+// timespan, that is, it has a name, a start time, and an end time.
+// For example, imagine we are making a new blog post.  We may have to
+// first authentiate with an auth server, then write the new post to a
+// database, and finally notify subscribers of the new content.  The
+// trace might look like this:
 //
 //    Trace:
 //    <---------------- Make a new blog post ----------->
@@ -28,11 +24,12 @@
 //    0s                      1.5s                      3s
 //
 // Here we have a single trace with four Spans.  Note that some Spans
-// are children of other Spans.  This structure falls directly out of
-// our building off of the context.T tree.  When you derive a new
-// context using SetNewSpan(), you create a Span thats a child of
-// the currently active span in the context.  Note that spans that
-// share a parent may overlap in time.
+// are children of other Spans.  Vtrace works by attaching data to a
+// Context, and this hierarchical structure falls directly out of our
+// building off of the tree of Contexts.  When you derive a new
+// context using SetNewSpan(), you create a Span thats a child of the
+// currently active span in the context.  Note that spans that share a
+// parent may overlap in time.
 //
 // In this case the tree would have been created with code like this:
 //
@@ -45,32 +42,32 @@
 //        Notify(notifyCtx)
 //    }
 //
-// Just as we have Spans to represent timesspans we have Annotations
-// to attach debugging information to the current span that is relevant
-// to the current moment.  Currently we only support string annotations.
-// You can add an annotation to the current span by calling the Spans
-// Annotate method:
+// Just as we have Spans to represent time spans we have Annotations
+// to attach debugging information that is relevant to the current
+// moment. You can add an annotation to the current span by calling
+// the Span's Annotate method:
 //
-//    span := vtrace.FromContext(ctx)
+//    span := vtrace.GetSpan(ctx)
 //    span.Annotate("Just got an error")
 //
 // When you make an annotation we record the annotation and the time
 // when it was attached.
-// TODO(mattr): Allow other types of annotations, for example server
-// information, start and stop events.
 //
-// Traces can be composed of large numbers of spans containing
-// data collected from large numbers of different processes.  Because
-// this data is large we don't collect it for every context.  By
-// default we collect trace data on only a small random sample of
-// the contexts that are created.  If a particular operation is of
-// special importants you can force it to be collected by calling the
-// Trace's ForceCollect method.  All the spans and annotations that
-// are added after ForceCollect is called will be collected.
+// Traces can be composed of large numbers of spans containing data
+// collected from large numbers of different processes.  Always
+// collecting this information would have a negative impact on
+// performance.  By default we don't collect any data.  If a
+// particular operation is of special importance you can force it to
+// be collected by calling ForceCollect.  You can also use the
+// --v23.vtrace.collect-regexp flag to set a regular expression which
+// will force us to record any matching trace.
 //
 // If your trace has collected information you can retrieve the data
-// collected so far by calling the Trace.Record() method, which gives
-// you a dump in the form of a TraceRecord.
+// collected so far with the Store's TraceRecord and TraceRecords methods.
+//
+// By default contexts obtained from v23.Init or from ServerCall.Context()
+// already have an initialized Trace.  The functions in this package allow
+// you to add data to existing traces or start new ones.
 package vtrace
 
 import (
