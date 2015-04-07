@@ -57,10 +57,28 @@ func TestQueryParser(t *testing.T) {
 			"select * from Customer",
 			[]query_parser.SelectStatement{
 				query_parser.SelectStatement{
-					Columns: []query_parser.Field{
-						{[]string{"*"}},
+					Select: &query_parser.SelectClause{
+						Columns: []query_parser.Field{
+							query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "*",
+										Node:  query_parser.Node{Off: 7},
+									},
+								},
+								Node: query_parser.Node{Off: 7},
+							},
+						},
+						Node: query_parser.Node{Off: 0},
 					},
-					Table: "Customer",
+					From: &query_parser.FromClause{
+						Table: query_parser.TableEntry{
+							Name: "Customer",
+							Node: query_parser.Node{Off: 14},
+						},
+						Node: query_parser.Node{Off: 9},
+					},
+					Node: query_parser.Node{Off: 0},
 				},
 			},
 			nil,
@@ -69,12 +87,42 @@ func TestQueryParser(t *testing.T) {
 			"select * from Customer limit 100 offset 200",
 			[]query_parser.SelectStatement{
 				query_parser.SelectStatement{
-					Columns: []query_parser.Field{
-						{[]string{"*"}},
+					Select: &query_parser.SelectClause{
+						Columns: []query_parser.Field{
+							query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "*",
+										Node:  query_parser.Node{Off: 7},
+									},
+								},
+								Node: query_parser.Node{Off: 7},
+							},
+						},
+						Node: query_parser.Node{Off: 0},
 					},
-					Table:  "Customer",
-					Limit:  100,
-					Offset: 200,
+					From: &query_parser.FromClause{
+						Table: query_parser.TableEntry{
+							Name: "Customer",
+							Node: query_parser.Node{Off: 14},
+						},
+						Node: query_parser.Node{Off: 9},
+					},
+					Limit: &query_parser.LimitClause{
+						Limit: &query_parser.Int64Value{
+							Value: 100,
+							Node:  query_parser.Node{Off: 29},
+						},
+						Node: query_parser.Node{Off: 23},
+					},
+					ResultsOffset: &query_parser.ResultsOffsetClause{
+						ResultsOffset: &query_parser.Int64Value{
+							Value: 200,
+							Node:  query_parser.Node{Off: 40},
+						},
+						Node: query_parser.Node{Off: 33},
+					},
+					Node: query_parser.Node{Off: 0},
 				},
 			},
 			nil,
@@ -83,12 +131,42 @@ func TestQueryParser(t *testing.T) {
 			"select * from Customer offset 400 limit 10",
 			[]query_parser.SelectStatement{
 				query_parser.SelectStatement{
-					Columns: []query_parser.Field{
-						{[]string{"*"}},
+					Select: &query_parser.SelectClause{
+						Columns: []query_parser.Field{
+							query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "*",
+										Node:  query_parser.Node{Off: 7},
+									},
+								},
+								Node: query_parser.Node{Off: 7},
+							},
+						},
+						Node: query_parser.Node{Off: 0},
 					},
-					Table:  "Customer",
-					Limit:  10,
-					Offset: 400,
+					From: &query_parser.FromClause{
+						Table: query_parser.TableEntry{
+							Name: "Customer",
+							Node: query_parser.Node{Off: 14},
+						},
+						Node: query_parser.Node{Off: 9},
+					},
+					Limit: &query_parser.LimitClause{
+						Limit: &query_parser.Int64Value{
+							Value: 10,
+							Node:  query_parser.Node{Off: 40},
+						},
+						Node: query_parser.Node{Off: 34},
+					},
+					ResultsOffset: &query_parser.ResultsOffsetClause{
+						ResultsOffset: &query_parser.Int64Value{
+							Value: 400,
+							Node:  query_parser.Node{Off: 30},
+						},
+						Node: query_parser.Node{Off: 23},
+					},
+					Node: query_parser.Node{Off: 0},
 				},
 			},
 			nil,
@@ -97,13 +175,42 @@ func TestQueryParser(t *testing.T) {
 			"select * from Customer limit 100 offset 200 limit 1 offset 2",
 			[]query_parser.SelectStatement{
 				query_parser.SelectStatement{
-					Columns: []query_parser.Field{
-						{[]string{"*"}},
+					Select: &query_parser.SelectClause{
+						Columns: []query_parser.Field{
+							query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "*",
+										Node:  query_parser.Node{Off: 7},
+									},
+								},
+								Node: query_parser.Node{Off: 7},
+							},
+						},
+						Node: query_parser.Node{Off: 0},
 					},
-					Table: "Customer",
-					// last limit and offset wins
-					Limit:  1,
-					Offset: 2,
+					From: &query_parser.FromClause{
+						Table: query_parser.TableEntry{
+							Name: "Customer",
+							Node: query_parser.Node{Off: 14},
+						},
+						Node: query_parser.Node{Off: 9},
+					},
+					Limit: &query_parser.LimitClause{
+						Limit: &query_parser.Int64Value{
+							Value: 1,
+							Node:  query_parser.Node{Off: 50},
+						},
+						Node: query_parser.Node{Off: 44},
+					},
+					ResultsOffset: &query_parser.ResultsOffsetClause{
+						ResultsOffset: &query_parser.Int64Value{
+							Value: 2,
+							Node:  query_parser.Node{Off: 59},
+						},
+						Node: query_parser.Node{Off: 52},
+					},
+					Node: query_parser.Node{Off: 0},
 				},
 			},
 			nil,
@@ -112,11 +219,45 @@ func TestQueryParser(t *testing.T) {
 			"select foo.*, bar.* from Customer",
 			[]query_parser.SelectStatement{
 				query_parser.SelectStatement{
-					Columns: []query_parser.Field{
-						{[]string{"foo", "*"}},
-						{[]string{"bar", "*"}},
+					Select: &query_parser.SelectClause{
+						Columns: []query_parser.Field{
+							query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "foo",
+										Node:  query_parser.Node{Off: 7},
+									},
+									query_parser.Segment{
+										Value: "*",
+										Node:  query_parser.Node{Off: 11},
+									},
+								},
+								Node: query_parser.Node{Off: 7},
+							},
+							query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "bar",
+										Node:  query_parser.Node{Off: 14},
+									},
+									query_parser.Segment{
+										Value: "*",
+										Node:  query_parser.Node{Off: 18},
+									},
+								},
+								Node: query_parser.Node{Off: 14},
+							},
+						},
+						Node: query_parser.Node{Off: 0},
 					},
-					Table: "Customer",
+					From: &query_parser.FromClause{
+						Table: query_parser.TableEntry{
+							Name: "Customer",
+							Node: query_parser.Node{Off: 25},
+						},
+						Node: query_parser.Node{Off: 20},
+					},
+					Node: query_parser.Node{Off: 0},
 				},
 			},
 			nil,
@@ -125,16 +266,52 @@ func TestQueryParser(t *testing.T) {
 			"select * from Customer; select * from Invoice",
 			[]query_parser.SelectStatement{
 				query_parser.SelectStatement{
-					Columns: []query_parser.Field{
-						{[]string{"*"}},
+					Select: &query_parser.SelectClause{
+						Columns: []query_parser.Field{
+							query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "*",
+										Node:  query_parser.Node{Off: 7},
+									},
+								},
+								Node: query_parser.Node{Off: 7},
+							},
+						},
+						Node: query_parser.Node{Off: 0},
 					},
-					Table: "Customer",
+					From: &query_parser.FromClause{
+						Table: query_parser.TableEntry{
+							Name: "Customer",
+							Node: query_parser.Node{Off: 14},
+						},
+						Node: query_parser.Node{Off: 9},
+					},
+					Node: query_parser.Node{Off: 0},
 				},
 				query_parser.SelectStatement{
-					Columns: []query_parser.Field{
-						{[]string{"*"}},
+					Select: &query_parser.SelectClause{
+						Columns: []query_parser.Field{
+							query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "*",
+										Node:  query_parser.Node{Off: 31},
+									},
+								},
+								Node: query_parser.Node{Off: 31},
+							},
+						},
+						Node: query_parser.Node{Off: 24},
 					},
-					Table: "Invoice",
+					From: &query_parser.FromClause{
+						Table: query_parser.TableEntry{
+							Name: "Invoice",
+							Node: query_parser.Node{Off: 38},
+						},
+						Node: query_parser.Node{Off: 33},
+					},
+					Node: query_parser.Node{Off: 24},
 				},
 			},
 			nil,
@@ -143,16 +320,52 @@ func TestQueryParser(t *testing.T) {
 			"select * from Customer; select * from Invoice;",
 			[]query_parser.SelectStatement{
 				query_parser.SelectStatement{
-					Columns: []query_parser.Field{
-						{[]string{"*"}},
+					Select: &query_parser.SelectClause{
+						Columns: []query_parser.Field{
+							query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "*",
+										Node:  query_parser.Node{Off: 7},
+									},
+								},
+								Node: query_parser.Node{Off: 7},
+							},
+						},
+						Node: query_parser.Node{Off: 0},
 					},
-					Table: "Customer",
+					From: &query_parser.FromClause{
+						Table: query_parser.TableEntry{
+							Name: "Customer",
+							Node: query_parser.Node{Off: 14},
+						},
+						Node: query_parser.Node{Off: 9},
+					},
+					Node: query_parser.Node{Off: 0},
 				},
 				query_parser.SelectStatement{
-					Columns: []query_parser.Field{
-						{[]string{"*"}},
+					Select: &query_parser.SelectClause{
+						Columns: []query_parser.Field{
+							query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "*",
+										Node:  query_parser.Node{Off: 31},
+									},
+								},
+								Node: query_parser.Node{Off: 31},
+							},
+						},
+						Node: query_parser.Node{Off: 24},
 					},
-					Table: "Invoice",
+					From: &query_parser.FromClause{
+						Table: query_parser.TableEntry{
+							Name: "Invoice",
+							Node: query_parser.Node{Off: 38},
+						},
+						Node: query_parser.Node{Off: 33},
+					},
+					Node: query_parser.Node{Off: 24},
 				},
 			},
 			nil,
@@ -161,16 +374,52 @@ func TestQueryParser(t *testing.T) {
 			";select * from Customer; select * from Invoice;",
 			[]query_parser.SelectStatement{
 				query_parser.SelectStatement{
-					Columns: []query_parser.Field{
-						{[]string{"*"}},
+					Select: &query_parser.SelectClause{
+						Columns: []query_parser.Field{
+							query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "*",
+										Node:  query_parser.Node{Off: 8},
+									},
+								},
+								Node: query_parser.Node{Off: 8},
+							},
+						},
+						Node: query_parser.Node{Off: 1},
 					},
-					Table: "Customer",
+					From: &query_parser.FromClause{
+						Table: query_parser.TableEntry{
+							Name: "Customer",
+							Node: query_parser.Node{Off: 15},
+						},
+						Node: query_parser.Node{Off: 10},
+					},
+					Node: query_parser.Node{Off: 1},
 				},
 				query_parser.SelectStatement{
-					Columns: []query_parser.Field{
-						{[]string{"*"}},
+					Select: &query_parser.SelectClause{
+						Columns: []query_parser.Field{
+							query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "*",
+										Node:  query_parser.Node{Off: 32},
+									},
+								},
+								Node: query_parser.Node{Off: 32},
+							},
+						},
+						Node: query_parser.Node{Off: 25},
 					},
-					Table: "Invoice",
+					From: &query_parser.FromClause{
+						Table: query_parser.TableEntry{
+							Name: "Invoice",
+							Node: query_parser.Node{Off: 39},
+						},
+						Node: query_parser.Node{Off: 34},
+					},
+					Node: query_parser.Node{Off: 25},
 				},
 			},
 			nil,
@@ -179,21 +428,56 @@ func TestQueryParser(t *testing.T) {
 			"select select from from where where equal 42",
 			[]query_parser.SelectStatement{
 				query_parser.SelectStatement{
-					Columns: []query_parser.Field{
-						{[]string{"select"}},
-					},
-					Table: "from",
-					Where: &query_parser.Expression{
-						Operand1: &query_parser.Operand{
-							Type:   query_parser.OpField,
-							Column: &query_parser.Field{[]string{"where"}},
+					Select: &query_parser.SelectClause{
+						Columns: []query_parser.Field{
+							query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "select",
+										Node:  query_parser.Node{Off: 7},
+									},
+								},
+								Node: query_parser.Node{Off: 7},
+							},
 						},
-						Operator: binaryOpPtr(query_parser.Equal),
-						Operand2: &query_parser.Operand{
-							Type: query_parser.OpInt,
-							Int:  42,
-						},
+						Node: query_parser.Node{Off: 0},
 					},
+					From: &query_parser.FromClause{
+						Table: query_parser.TableEntry{
+							Name: "from",
+							Node: query_parser.Node{Off: 19},
+						},
+						Node: query_parser.Node{Off: 14},
+					},
+					Where: &query_parser.WhereClause{
+						Expr: &query_parser.Expression{
+							Operand1: &query_parser.Operand{
+								Type: query_parser.OpField,
+								Column: &query_parser.Field{
+									Segments: []query_parser.Segment{
+										query_parser.Segment{
+											Value: "where",
+											Node:  query_parser.Node{Off: 30},
+										},
+									},
+									Node: query_parser.Node{Off: 30},
+								},
+								Node: query_parser.Node{Off: 30},
+							},
+							Operator: &query_parser.BinaryOperator{
+								Type: query_parser.Equal,
+								Node: query_parser.Node{Off: 36},
+							},
+							Operand2: &query_parser.Operand{
+								Type: query_parser.OpInt,
+								Int:  42,
+								Node: query_parser.Node{Off: 42},
+							},
+							Node: query_parser.Node{Off: 30},
+						},
+						Node: query_parser.Node{Off: 24},
+					},
+					Node: query_parser.Node{Off: 0},
 				},
 			},
 			nil,
@@ -202,21 +486,56 @@ func TestQueryParser(t *testing.T) {
 			"select x from y where b = 'c'",
 			[]query_parser.SelectStatement{
 				query_parser.SelectStatement{
-					Columns: []query_parser.Field{
-						{[]string{"x"}},
-					},
-					Table: "y",
-					Where: &query_parser.Expression{
-						Operand1: &query_parser.Operand{
-							Type:   query_parser.OpField,
-							Column: &query_parser.Field{[]string{"b"}},
+					Select: &query_parser.SelectClause{
+						Columns: []query_parser.Field{
+							query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "x",
+										Node:  query_parser.Node{Off: 7},
+									},
+								},
+								Node: query_parser.Node{Off: 7},
+							},
 						},
-						Operator: binaryOpPtr(query_parser.Equal),
-						Operand2: &query_parser.Operand{
-							Type: query_parser.OpChar,
-							Char: 'c',
-						},
+						Node: query_parser.Node{Off: 0},
 					},
+					From: &query_parser.FromClause{
+						Table: query_parser.TableEntry{
+							Name: "y",
+							Node: query_parser.Node{Off: 14},
+						},
+						Node: query_parser.Node{Off: 9},
+					},
+					Where: &query_parser.WhereClause{
+						Expr: &query_parser.Expression{
+							Operand1: &query_parser.Operand{
+								Type: query_parser.OpField,
+								Column: &query_parser.Field{
+									Segments: []query_parser.Segment{
+										query_parser.Segment{
+											Value: "b",
+											Node:  query_parser.Node{Off: 22},
+										},
+									},
+									Node: query_parser.Node{Off: 22},
+								},
+								Node: query_parser.Node{Off: 22},
+							},
+							Operator: &query_parser.BinaryOperator{
+								Type: query_parser.Equal,
+								Node: query_parser.Node{Off: 24},
+							},
+							Operand2: &query_parser.Operand{
+								Type: query_parser.OpChar,
+								Char: 'c',
+								Node: query_parser.Node{Off: 26},
+							},
+							Node: query_parser.Node{Off: 22},
+						},
+						Node: query_parser.Node{Off: 16},
+					},
+					Node: query_parser.Node{Off: 0},
 				},
 			},
 			nil,
@@ -225,23 +544,70 @@ func TestQueryParser(t *testing.T) {
 			"select x from y where b = 'c' limit 10 offset 20",
 			[]query_parser.SelectStatement{
 				query_parser.SelectStatement{
-					Columns: []query_parser.Field{
-						{[]string{"x"}},
-					},
-					Table: "y",
-					Where: &query_parser.Expression{
-						Operand1: &query_parser.Operand{
-							Type:   query_parser.OpField,
-							Column: &query_parser.Field{[]string{"b"}},
+					Select: &query_parser.SelectClause{
+						Columns: []query_parser.Field{
+							query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "x",
+										Node:  query_parser.Node{Off: 7},
+									},
+								},
+								Node: query_parser.Node{Off: 7},
+							},
 						},
-						Operator: binaryOpPtr(query_parser.Equal),
-						Operand2: &query_parser.Operand{
-							Type: query_parser.OpChar,
-							Char: 'c',
-						},
+						Node: query_parser.Node{Off: 0},
 					},
-					Limit:  10,
-					Offset: 20,
+					From: &query_parser.FromClause{
+						Table: query_parser.TableEntry{
+							Name: "y",
+							Node: query_parser.Node{Off: 14},
+						},
+						Node: query_parser.Node{Off: 9},
+					},
+					Where: &query_parser.WhereClause{
+						Expr: &query_parser.Expression{
+							Operand1: &query_parser.Operand{
+								Type: query_parser.OpField,
+								Column: &query_parser.Field{
+									Segments: []query_parser.Segment{
+										query_parser.Segment{
+											Value: "b",
+											Node:  query_parser.Node{Off: 22},
+										},
+									},
+									Node: query_parser.Node{Off: 22},
+								},
+								Node: query_parser.Node{Off: 22},
+							},
+							Operator: &query_parser.BinaryOperator{
+								Type: query_parser.Equal,
+								Node: query_parser.Node{Off: 24},
+							},
+							Operand2: &query_parser.Operand{
+								Type: query_parser.OpChar,
+								Char: 'c',
+								Node: query_parser.Node{Off: 26},
+							},
+							Node: query_parser.Node{Off: 22},
+						},
+						Node: query_parser.Node{Off: 16},
+					},
+					Limit: &query_parser.LimitClause{
+						Limit: &query_parser.Int64Value{
+							Value: 10,
+							Node:  query_parser.Node{Off: 36},
+						},
+						Node: query_parser.Node{Off: 30},
+					},
+					ResultsOffset: &query_parser.ResultsOffsetClause{
+						ResultsOffset: &query_parser.Int64Value{
+							Value: 20,
+							Node:  query_parser.Node{Off: 46},
+						},
+						Node: query_parser.Node{Off: 39},
+					},
+					Node: query_parser.Node{Off: 0},
 				},
 			},
 			nil,
@@ -250,22 +616,63 @@ func TestQueryParser(t *testing.T) {
 			"select x from y where b = 'c' limit 10",
 			[]query_parser.SelectStatement{
 				query_parser.SelectStatement{
-					Columns: []query_parser.Field{
-						{[]string{"x"}},
-					},
-					Table: "y",
-					Where: &query_parser.Expression{
-						Operand1: &query_parser.Operand{
-							Type:   query_parser.OpField,
-							Column: &query_parser.Field{[]string{"b"}},
+					Select: &query_parser.SelectClause{
+						Columns: []query_parser.Field{
+							query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "x",
+										Node:  query_parser.Node{Off: 7},
+									},
+								},
+								Node: query_parser.Node{Off: 7},
+							},
 						},
-						Operator: binaryOpPtr(query_parser.Equal),
-						Operand2: &query_parser.Operand{
-							Type: query_parser.OpChar,
-							Char: 'c',
-						},
+						Node: query_parser.Node{Off: 0},
 					},
-					Limit: 10,
+					From: &query_parser.FromClause{
+						Table: query_parser.TableEntry{
+							Name: "y",
+							Node: query_parser.Node{Off: 14},
+						},
+						Node: query_parser.Node{Off: 9},
+					},
+					Where: &query_parser.WhereClause{
+						Expr: &query_parser.Expression{
+							Operand1: &query_parser.Operand{
+								Type: query_parser.OpField,
+								Column: &query_parser.Field{
+									Segments: []query_parser.Segment{
+										query_parser.Segment{
+											Value: "b",
+											Node:  query_parser.Node{Off: 22},
+										},
+									},
+									Node: query_parser.Node{Off: 22},
+								},
+								Node: query_parser.Node{Off: 22},
+							},
+							Operator: &query_parser.BinaryOperator{
+								Type: query_parser.Equal,
+								Node: query_parser.Node{Off: 24},
+							},
+							Operand2: &query_parser.Operand{
+								Type: query_parser.OpChar,
+								Char: 'c',
+								Node: query_parser.Node{Off: 26},
+							},
+							Node: query_parser.Node{Off: 22},
+						},
+						Node: query_parser.Node{Off: 16},
+					},
+					Limit: &query_parser.LimitClause{
+						Limit: &query_parser.Int64Value{
+							Value: 10,
+							Node:  query_parser.Node{Off: 36},
+						},
+						Node: query_parser.Node{Off: 30},
+					},
+					Node: query_parser.Node{Off: 0},
 				},
 			},
 			nil,
@@ -274,22 +681,63 @@ func TestQueryParser(t *testing.T) {
 			"select x from y where b = 'c' offset 10",
 			[]query_parser.SelectStatement{
 				query_parser.SelectStatement{
-					Columns: []query_parser.Field{
-						{[]string{"x"}},
-					},
-					Table: "y",
-					Where: &query_parser.Expression{
-						Operand1: &query_parser.Operand{
-							Type:   query_parser.OpField,
-							Column: &query_parser.Field{[]string{"b"}},
+					Select: &query_parser.SelectClause{
+						Columns: []query_parser.Field{
+							query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "x",
+										Node:  query_parser.Node{Off: 7},
+									},
+								},
+								Node: query_parser.Node{Off: 7},
+							},
 						},
-						Operator: binaryOpPtr(query_parser.Equal),
-						Operand2: &query_parser.Operand{
-							Type: query_parser.OpChar,
-							Char: 'c',
-						},
+						Node: query_parser.Node{Off: 0},
 					},
-					Offset: 10,
+					From: &query_parser.FromClause{
+						Table: query_parser.TableEntry{
+							Name: "y",
+							Node: query_parser.Node{Off: 14},
+						},
+						Node: query_parser.Node{Off: 9},
+					},
+					Where: &query_parser.WhereClause{
+						Expr: &query_parser.Expression{
+							Operand1: &query_parser.Operand{
+								Type: query_parser.OpField,
+								Column: &query_parser.Field{
+									Segments: []query_parser.Segment{
+										query_parser.Segment{
+											Value: "b",
+											Node:  query_parser.Node{Off: 22},
+										},
+									},
+									Node: query_parser.Node{Off: 22},
+								},
+								Node: query_parser.Node{Off: 22},
+							},
+							Operator: &query_parser.BinaryOperator{
+								Type: query_parser.Equal,
+								Node: query_parser.Node{Off: 24},
+							},
+							Operand2: &query_parser.Operand{
+								Type: query_parser.OpChar,
+								Char: 'c',
+								Node: query_parser.Node{Off: 26},
+							},
+							Node: query_parser.Node{Off: 22},
+						},
+						Node: query_parser.Node{Off: 16},
+					},
+					ResultsOffset: &query_parser.ResultsOffsetClause{
+						ResultsOffset: &query_parser.Int64Value{
+							Value: 10,
+							Node:  query_parser.Node{Off: 37},
+						},
+						Node: query_parser.Node{Off: 30},
+					},
+					Node: query_parser.Node{Off: 0},
 				},
 			},
 			nil,
@@ -298,42 +746,133 @@ func TestQueryParser(t *testing.T) {
 			"select foo.bar, tom.dick.harry from Customer where a.b.c = \"baz\" and d.e.f like \"%foobarbaz\"",
 			[]query_parser.SelectStatement{
 				query_parser.SelectStatement{
-					Columns: []query_parser.Field{
-						{[]string{"foo", "bar"}},
-						{[]string{"tom", "dick", "harry"}},
-					},
-					Table: "Customer",
-					Where: &query_parser.Expression{
-						Operand1: &query_parser.Operand{
-							Type: query_parser.OpExpr,
-							Expr: &query_parser.Expression{
-								Operand1: &query_parser.Operand{
-									Type:   query_parser.OpField,
-									Column: &query_parser.Field{[]string{"a", "b", "c"}},
+					Select: &query_parser.SelectClause{
+						Columns: []query_parser.Field{
+							query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "foo",
+										Node:  query_parser.Node{Off: 7},
+									},
+									query_parser.Segment{
+										Value: "bar",
+										Node:  query_parser.Node{Off: 11},
+									},
 								},
-								Operator: binaryOpPtr(query_parser.Equal),
-								Operand2: &query_parser.Operand{
-									Type:    query_parser.OpLiteral,
-									Literal: "baz",
+								Node: query_parser.Node{Off: 7},
+							},
+							query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "tom",
+										Node:  query_parser.Node{Off: 16},
+									},
+									query_parser.Segment{
+										Value: "dick",
+										Node:  query_parser.Node{Off: 20},
+									},
+									query_parser.Segment{
+										Value: "harry",
+										Node:  query_parser.Node{Off: 25},
+									},
 								},
+								Node: query_parser.Node{Off: 16},
 							},
 						},
-						Operator: binaryOpPtr(query_parser.And),
-						Operand2: &query_parser.Operand{
-							Type: query_parser.OpExpr,
-							Expr: &query_parser.Expression{
-								Operand1: &query_parser.Operand{
-									Type:   query_parser.OpField,
-									Column: &query_parser.Field{[]string{"d", "e", "f"}},
-								},
-								Operator: binaryOpPtr(query_parser.Like),
-								Operand2: &query_parser.Operand{
-									Type:    query_parser.OpLiteral,
-									Literal: "%foobarbaz",
-								},
-							},
-						},
+						Node: query_parser.Node{Off: 0},
 					},
+					From: &query_parser.FromClause{
+						Table: query_parser.TableEntry{
+							Name: "Customer",
+							Node: query_parser.Node{Off: 36},
+						},
+						Node: query_parser.Node{Off: 31},
+					},
+					Where: &query_parser.WhereClause{
+						Expr: &query_parser.Expression{
+							Operand1: &query_parser.Operand{
+								Type: query_parser.OpExpr,
+								Expr: &query_parser.Expression{
+									Operand1: &query_parser.Operand{
+										Type: query_parser.OpField,
+										Column: &query_parser.Field{
+											Segments: []query_parser.Segment{
+												query_parser.Segment{
+													Value: "a",
+													Node:  query_parser.Node{Off: 51},
+												},
+												query_parser.Segment{
+													Value: "b",
+													Node:  query_parser.Node{Off: 53},
+												},
+												query_parser.Segment{
+													Value: "c",
+													Node:  query_parser.Node{Off: 55},
+												},
+											},
+											Node: query_parser.Node{Off: 51},
+										},
+										Node: query_parser.Node{Off: 51},
+									},
+									Operator: &query_parser.BinaryOperator{
+										Type: query_parser.Equal,
+										Node: query_parser.Node{Off: 57},
+									},
+									Operand2: &query_parser.Operand{
+										Type:    query_parser.OpLiteral,
+										Literal: "baz",
+										Node:    query_parser.Node{Off: 59},
+									},
+									Node: query_parser.Node{Off: 51},
+								},
+								Node: query_parser.Node{Off: 51},
+							},
+							Operator: &query_parser.BinaryOperator{
+								Type: query_parser.And,
+								Node: query_parser.Node{Off: 65},
+							},
+							Operand2: &query_parser.Operand{
+								Type: query_parser.OpExpr,
+								Expr: &query_parser.Expression{
+									Operand1: &query_parser.Operand{
+										Type: query_parser.OpField,
+										Column: &query_parser.Field{
+											Segments: []query_parser.Segment{
+												query_parser.Segment{
+													Value: "d",
+													Node:  query_parser.Node{Off: 69},
+												},
+												query_parser.Segment{
+													Value: "e",
+													Node:  query_parser.Node{Off: 71},
+												},
+												query_parser.Segment{
+													Value: "f",
+													Node:  query_parser.Node{Off: 73},
+												},
+											},
+											Node: query_parser.Node{Off: 69},
+										},
+										Node: query_parser.Node{Off: 69},
+									},
+									Operator: &query_parser.BinaryOperator{
+										Type: query_parser.Like,
+										Node: query_parser.Node{Off: 75},
+									},
+									Operand2: &query_parser.Operand{
+										Type:    query_parser.OpLiteral,
+										Literal: "%foobarbaz",
+										Node:    query_parser.Node{Off: 80},
+									},
+									Node: query_parser.Node{Off: 69},
+								},
+								Node: query_parser.Node{Off: 69},
+							},
+							Node: query_parser.Node{Off: 51},
+						},
+						Node: query_parser.Node{Off: 45},
+					},
+					Node: query_parser.Node{Off: 0},
 				},
 			},
 			nil,
@@ -342,42 +881,113 @@ func TestQueryParser(t *testing.T) {
 			"select foo, bar from Customer where CustRecord.CustID=123 or CustRecord.Name like \"f%\"",
 			[]query_parser.SelectStatement{
 				query_parser.SelectStatement{
-					Columns: []query_parser.Field{
-						{[]string{"foo"}},
-						{[]string{"bar"}},
-					},
-					Table: "Customer",
-					Where: &query_parser.Expression{
-						Operand1: &query_parser.Operand{
-							Type: query_parser.OpExpr,
-							Expr: &query_parser.Expression{
-								Operand1: &query_parser.Operand{
-									Type:   query_parser.OpField,
-									Column: &query_parser.Field{[]string{"CustRecord", "CustID"}},
+					Select: &query_parser.SelectClause{
+						Columns: []query_parser.Field{
+							query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "foo",
+										Node:  query_parser.Node{Off: 7},
+									},
 								},
-								Operator: binaryOpPtr(query_parser.Equal),
-								Operand2: &query_parser.Operand{
-									Type: query_parser.OpInt,
-									Int:  123,
+								Node: query_parser.Node{Off: 7},
+							},
+							query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "bar",
+										Node:  query_parser.Node{Off: 12},
+									},
 								},
+								Node: query_parser.Node{Off: 12},
 							},
 						},
-						Operator: binaryOpPtr(query_parser.Or),
-						Operand2: &query_parser.Operand{
-							Type: query_parser.OpExpr,
-							Expr: &query_parser.Expression{
-								Operand1: &query_parser.Operand{
-									Type:   query_parser.OpField,
-									Column: &query_parser.Field{[]string{"CustRecord", "Name"}},
-								},
-								Operator: binaryOpPtr(query_parser.Like),
-								Operand2: &query_parser.Operand{
-									Type:    query_parser.OpLiteral,
-									Literal: "f%",
-								},
-							},
-						},
+						Node: query_parser.Node{Off: 0},
 					},
+					From: &query_parser.FromClause{
+						Table: query_parser.TableEntry{
+							Name: "Customer",
+							Node: query_parser.Node{Off: 21},
+						},
+						Node: query_parser.Node{Off: 16},
+					},
+					Where: &query_parser.WhereClause{
+						Expr: &query_parser.Expression{
+							Operand1: &query_parser.Operand{
+								Type: query_parser.OpExpr,
+								Expr: &query_parser.Expression{
+									Operand1: &query_parser.Operand{
+										Type: query_parser.OpField,
+										Column: &query_parser.Field{
+											Segments: []query_parser.Segment{
+												query_parser.Segment{
+													Value: "CustRecord",
+													Node:  query_parser.Node{Off: 36},
+												},
+												query_parser.Segment{
+													Value: "CustID",
+													Node:  query_parser.Node{Off: 47},
+												},
+											},
+											Node: query_parser.Node{Off: 36},
+										},
+										Node: query_parser.Node{Off: 36},
+									},
+									Operator: &query_parser.BinaryOperator{
+										Type: query_parser.Equal,
+										Node: query_parser.Node{Off: 53},
+									},
+									Operand2: &query_parser.Operand{
+										Type: query_parser.OpInt,
+										Int:  123,
+										Node: query_parser.Node{Off: 54},
+									},
+									Node: query_parser.Node{Off: 36},
+								},
+								Node: query_parser.Node{Off: 36},
+							},
+							Operator: &query_parser.BinaryOperator{
+								Type: query_parser.Or,
+								Node: query_parser.Node{Off: 58},
+							},
+							Operand2: &query_parser.Operand{
+								Type: query_parser.OpExpr,
+								Expr: &query_parser.Expression{
+									Operand1: &query_parser.Operand{
+										Type: query_parser.OpField,
+										Column: &query_parser.Field{
+											Segments: []query_parser.Segment{
+												query_parser.Segment{
+													Value: "CustRecord",
+													Node:  query_parser.Node{Off: 61},
+												},
+												query_parser.Segment{
+													Value: "Name",
+													Node:  query_parser.Node{Off: 72},
+												},
+											},
+											Node: query_parser.Node{Off: 61},
+										},
+										Node: query_parser.Node{Off: 61},
+									},
+									Operator: &query_parser.BinaryOperator{
+										Type: query_parser.Like,
+										Node: query_parser.Node{Off: 77},
+									},
+									Operand2: &query_parser.Operand{
+										Type:    query_parser.OpLiteral,
+										Literal: "f%",
+										Node:    query_parser.Node{Off: 82},
+									},
+									Node: query_parser.Node{Off: 61},
+								},
+								Node: query_parser.Node{Off: 61},
+							},
+							Node: query_parser.Node{Off: 36},
+						},
+						Node: query_parser.Node{Off: 30},
+					},
+					Node: query_parser.Node{Off: 0},
 				},
 			},
 			nil,
@@ -386,124 +996,136 @@ func TestQueryParser(t *testing.T) {
 			"select foo from Customer where A=123 or B=456 and C=789",
 			[]query_parser.SelectStatement{
 				query_parser.SelectStatement{
-					Columns: []query_parser.Field{
-						{[]string{"foo"}},
-					},
-					Table: "Customer",
-					Where: &query_parser.Expression{
-						Operand1: &query_parser.Operand{
-							Type: query_parser.OpExpr,
-							Expr: &query_parser.Expression{
-								Operand1: &query_parser.Operand{
-									Type: query_parser.OpExpr,
-									Expr: &query_parser.Expression{
-										Operand1: &query_parser.Operand{
-											Type:   query_parser.OpField,
-											Column: &query_parser.Field{[]string{"A"}},
-										},
-										Operator: binaryOpPtr(query_parser.Equal),
-										Operand2: &query_parser.Operand{
-											Type: query_parser.OpInt,
-											Int:  123,
-										},
+					Select: &query_parser.SelectClause{
+						Columns: []query_parser.Field{
+							query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "foo",
+										Node:  query_parser.Node{Off: 7},
 									},
 								},
-								Operator: binaryOpPtr(query_parser.Or),
-								Operand2: &query_parser.Operand{
-									Type: query_parser.OpExpr,
-									Expr: &query_parser.Expression{
-										Operand1: &query_parser.Operand{
-											Type:   query_parser.OpField,
-											Column: &query_parser.Field{[]string{"B"}},
-										},
-										Operator: binaryOpPtr(query_parser.Equal),
-										Operand2: &query_parser.Operand{
-											Type: query_parser.OpInt,
-											Int:  456,
-										},
-									},
-								},
+								Node: query_parser.Node{Off: 7},
 							},
 						},
-						Operator: binaryOpPtr(query_parser.And),
-						Operand2: &query_parser.Operand{
-							Type: query_parser.OpExpr,
-							Expr: &query_parser.Expression{
-								Operand1: &query_parser.Operand{
-									Type:   query_parser.OpField,
-									Column: &query_parser.Field{[]string{"C"}},
-								},
-								Operator: binaryOpPtr(query_parser.Equal),
-								Operand2: &query_parser.Operand{
-									Type: query_parser.OpInt,
-									Int:  789,
-								},
-							},
-						},
+						Node: query_parser.Node{Off: 0},
 					},
-				},
-			},
-			nil,
-		},
-		{
-			"select foo from Customer where A<>123 or B not equal 456 and C not like \"abc%\"",
-			[]query_parser.SelectStatement{
-				query_parser.SelectStatement{
-					Columns: []query_parser.Field{
-						{[]string{"foo"}},
-					},
-					Table: "Customer",
-					Where: &query_parser.Expression{
-						Operand1: &query_parser.Operand{
-							Type: query_parser.OpExpr,
-							Expr: &query_parser.Expression{
-								Operand1: &query_parser.Operand{
-									Type: query_parser.OpExpr,
-									Expr: &query_parser.Expression{
-										Operand1: &query_parser.Operand{
-											Type:   query_parser.OpField,
-											Column: &query_parser.Field{[]string{"A"}},
-										},
-										Operator: binaryOpPtr(query_parser.NotEqual),
-										Operand2: &query_parser.Operand{
-											Type: query_parser.OpInt,
-											Int:  123,
-										},
-									},
-								},
-								Operator: binaryOpPtr(query_parser.Or),
-								Operand2: &query_parser.Operand{
-									Type: query_parser.OpExpr,
-									Expr: &query_parser.Expression{
-										Operand1: &query_parser.Operand{
-											Type:   query_parser.OpField,
-											Column: &query_parser.Field{[]string{"B"}},
-										},
-										Operator: binaryOpPtr(query_parser.NotEqual),
-										Operand2: &query_parser.Operand{
-											Type: query_parser.OpInt,
-											Int:  456,
-										},
-									},
-								},
-							},
+					From: &query_parser.FromClause{
+						Table: query_parser.TableEntry{
+							Name: "Customer",
+							Node: query_parser.Node{Off: 16},
 						},
-						Operator: binaryOpPtr(query_parser.And),
-						Operand2: &query_parser.Operand{
-							Type: query_parser.OpExpr,
-							Expr: &query_parser.Expression{
-								Operand1: &query_parser.Operand{
-									Type:   query_parser.OpField,
-									Column: &query_parser.Field{[]string{"C"}},
-								},
-								Operator: binaryOpPtr(query_parser.NotLike),
-								Operand2: &query_parser.Operand{
-									Type:    query_parser.OpLiteral,
-									Literal: "abc%",
-								},
-							},
-						},
+						Node: query_parser.Node{Off: 11},
 					},
+					Where: &query_parser.WhereClause{
+						Expr: &query_parser.Expression{
+							Operand1: &query_parser.Operand{
+								Type: query_parser.OpExpr,
+								Expr: &query_parser.Expression{
+									Operand1: &query_parser.Operand{
+										Type: query_parser.OpExpr,
+										Expr: &query_parser.Expression{
+											Operand1: &query_parser.Operand{
+												Type: query_parser.OpField,
+												Column: &query_parser.Field{
+													Segments: []query_parser.Segment{
+														query_parser.Segment{
+															Value: "A",
+															Node:  query_parser.Node{Off: 31},
+														},
+													},
+													Node: query_parser.Node{Off: 31},
+												},
+												Node: query_parser.Node{Off: 31},
+											},
+											Operator: &query_parser.BinaryOperator{
+												Type: query_parser.Equal,
+												Node: query_parser.Node{Off: 32},
+											},
+											Operand2: &query_parser.Operand{
+												Type: query_parser.OpInt,
+												Int:  123,
+												Node: query_parser.Node{Off: 33},
+											},
+											Node: query_parser.Node{Off: 31},
+										},
+										Node: query_parser.Node{Off: 31},
+									},
+									Operator: &query_parser.BinaryOperator{
+										Type: query_parser.Or,
+										Node: query_parser.Node{Off: 37},
+									},
+									Operand2: &query_parser.Operand{
+										Type: query_parser.OpExpr,
+										Expr: &query_parser.Expression{
+											Operand1: &query_parser.Operand{
+												Type: query_parser.OpField,
+												Column: &query_parser.Field{
+													Segments: []query_parser.Segment{
+														query_parser.Segment{
+															Value: "B",
+															Node:  query_parser.Node{Off: 40},
+														},
+													},
+													Node: query_parser.Node{Off: 40},
+												},
+												Node: query_parser.Node{Off: 40},
+											},
+											Operator: &query_parser.BinaryOperator{
+												Type: query_parser.Equal,
+												Node: query_parser.Node{Off: 41},
+											},
+											Operand2: &query_parser.Operand{
+												Type: query_parser.OpInt,
+												Int:  456,
+												Node: query_parser.Node{Off: 42},
+											},
+											Node: query_parser.Node{Off: 40},
+										},
+										Node: query_parser.Node{Off: 40},
+									},
+									Node: query_parser.Node{Off: 31},
+								},
+								Node: query_parser.Node{Off: 31},
+							},
+							Operator: &query_parser.BinaryOperator{
+								Type: query_parser.And,
+								Node: query_parser.Node{Off: 46},
+							},
+							Operand2: &query_parser.Operand{
+								Type: query_parser.OpExpr,
+								Expr: &query_parser.Expression{
+									Operand1: &query_parser.Operand{
+										Type: query_parser.OpField,
+										Column: &query_parser.Field{
+											Segments: []query_parser.Segment{
+												query_parser.Segment{
+													Value: "C",
+													Node:  query_parser.Node{Off: 50},
+												},
+											},
+											Node: query_parser.Node{Off: 50},
+										},
+										Node: query_parser.Node{Off: 50},
+									},
+									Operator: &query_parser.BinaryOperator{
+										Type: query_parser.Equal,
+										Node: query_parser.Node{Off: 51},
+									},
+									Operand2: &query_parser.Operand{
+										Type: query_parser.OpInt,
+										Int:  789,
+										Node: query_parser.Node{Off: 52},
+									},
+									Node: query_parser.Node{Off: 50},
+								},
+								Node: query_parser.Node{Off: 50},
+							},
+							Node: query_parser.Node{Off: 31},
+						},
+						Node: query_parser.Node{Off: 25},
+					},
+					Node: query_parser.Node{Off: 0},
 				},
 			},
 			nil,
@@ -512,61 +1134,136 @@ func TestQueryParser(t *testing.T) {
 			"select foo from Customer where (A=123 or B=456) and C=789",
 			[]query_parser.SelectStatement{
 				query_parser.SelectStatement{
-					Columns: []query_parser.Field{
-						{[]string{"foo"}},
-					},
-					Table: "Customer",
-					Where: &query_parser.Expression{
-						Operand1: &query_parser.Operand{
-							Type: query_parser.OpExpr,
-							Expr: &query_parser.Expression{
-								Operand1: &query_parser.Operand{
-									Type: query_parser.OpExpr,
-									Expr: &query_parser.Expression{
-										Operand1: &query_parser.Operand{
-											Type:   query_parser.OpField,
-											Column: &query_parser.Field{[]string{"A"}},
-										},
-										Operator: binaryOpPtr(query_parser.Equal),
-										Operand2: &query_parser.Operand{
-											Type: query_parser.OpInt,
-											Int:  123,
-										},
+					Select: &query_parser.SelectClause{
+						Columns: []query_parser.Field{
+							query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "foo",
+										Node:  query_parser.Node{Off: 7},
 									},
 								},
-								Operator: binaryOpPtr(query_parser.Or),
-								Operand2: &query_parser.Operand{
-									Type: query_parser.OpExpr,
-									Expr: &query_parser.Expression{
-										Operand1: &query_parser.Operand{
-											Type:   query_parser.OpField,
-											Column: &query_parser.Field{[]string{"B"}},
-										},
-										Operator: binaryOpPtr(query_parser.Equal),
-										Operand2: &query_parser.Operand{
-											Type: query_parser.OpInt,
-											Int:  456,
-										},
-									},
-								},
+								Node: query_parser.Node{Off: 7},
 							},
 						},
-						Operator: binaryOpPtr(query_parser.And),
-						Operand2: &query_parser.Operand{
-							Type: query_parser.OpExpr,
-							Expr: &query_parser.Expression{
-								Operand1: &query_parser.Operand{
-									Type:   query_parser.OpField,
-									Column: &query_parser.Field{[]string{"C"}},
-								},
-								Operator: binaryOpPtr(query_parser.Equal),
-								Operand2: &query_parser.Operand{
-									Type: query_parser.OpInt,
-									Int:  789,
-								},
-							},
-						},
+						Node: query_parser.Node{Off: 0},
 					},
+					From: &query_parser.FromClause{
+						Table: query_parser.TableEntry{
+							Name: "Customer",
+							Node: query_parser.Node{Off: 16},
+						},
+						Node: query_parser.Node{Off: 11},
+					},
+					Where: &query_parser.WhereClause{
+						Expr: &query_parser.Expression{
+							Operand1: &query_parser.Operand{
+								Type: query_parser.OpExpr,
+								Expr: &query_parser.Expression{
+									Operand1: &query_parser.Operand{
+										Type: query_parser.OpExpr,
+										Expr: &query_parser.Expression{
+											Operand1: &query_parser.Operand{
+												Type: query_parser.OpField,
+												Column: &query_parser.Field{
+													Segments: []query_parser.Segment{
+														query_parser.Segment{
+															Value: "A",
+															Node:  query_parser.Node{Off: 32},
+														},
+													},
+													Node: query_parser.Node{Off: 32},
+												},
+												Node: query_parser.Node{Off: 32},
+											},
+											Operator: &query_parser.BinaryOperator{
+												Type: query_parser.Equal,
+												Node: query_parser.Node{Off: 33},
+											},
+											Operand2: &query_parser.Operand{
+												Type: query_parser.OpInt,
+												Int:  123,
+												Node: query_parser.Node{Off: 34},
+											},
+											Node: query_parser.Node{Off: 32},
+										},
+										Node: query_parser.Node{Off: 32},
+									},
+									Operator: &query_parser.BinaryOperator{
+										Type: query_parser.Or,
+										Node: query_parser.Node{Off: 38},
+									},
+									Operand2: &query_parser.Operand{
+										Type: query_parser.OpExpr,
+										Expr: &query_parser.Expression{
+											Operand1: &query_parser.Operand{
+												Type: query_parser.OpField,
+												Column: &query_parser.Field{
+													Segments: []query_parser.Segment{
+														query_parser.Segment{
+															Value: "B",
+															Node:  query_parser.Node{Off: 41},
+														},
+													},
+													Node: query_parser.Node{Off: 41},
+												},
+												Node: query_parser.Node{Off: 41},
+											},
+											Operator: &query_parser.BinaryOperator{
+												Type: query_parser.Equal,
+												Node: query_parser.Node{Off: 42},
+											},
+											Operand2: &query_parser.Operand{
+												Type: query_parser.OpInt,
+												Int:  456,
+												Node: query_parser.Node{Off: 43},
+											},
+											Node: query_parser.Node{Off: 41},
+										},
+										Node: query_parser.Node{Off: 41},
+									},
+									Node: query_parser.Node{Off: 32},
+								},
+								Node: query_parser.Node{Off: 32},
+							},
+							Operator: &query_parser.BinaryOperator{
+								Type: query_parser.And,
+								Node: query_parser.Node{Off: 48},
+							},
+							Operand2: &query_parser.Operand{
+								Type: query_parser.OpExpr,
+								Expr: &query_parser.Expression{
+									Operand1: &query_parser.Operand{
+										Type: query_parser.OpField,
+										Column: &query_parser.Field{
+											Segments: []query_parser.Segment{
+												query_parser.Segment{
+													Value: "C",
+													Node:  query_parser.Node{Off: 52},
+												},
+											},
+											Node: query_parser.Node{Off: 52},
+										},
+										Node: query_parser.Node{Off: 52},
+									},
+									Operator: &query_parser.BinaryOperator{
+										Type: query_parser.Equal,
+										Node: query_parser.Node{Off: 53},
+									},
+									Operand2: &query_parser.Operand{
+										Type: query_parser.OpInt,
+										Int:  789,
+										Node: query_parser.Node{Off: 54},
+									},
+									Node: query_parser.Node{Off: 52},
+								},
+								Node: query_parser.Node{Off: 52},
+							},
+							Node: query_parser.Node{Off: 32},
+						},
+						Node: query_parser.Node{Off: 25},
+					},
+					Node: query_parser.Node{Off: 0},
 				},
 			},
 			nil,
@@ -575,61 +1272,136 @@ func TestQueryParser(t *testing.T) {
 			"select foo from Customer where A=123 or (B=456 and C=789)",
 			[]query_parser.SelectStatement{
 				query_parser.SelectStatement{
-					Columns: []query_parser.Field{
-						{[]string{"foo"}},
-					},
-					Table: "Customer",
-					Where: &query_parser.Expression{
-						Operand1: &query_parser.Operand{
-							Type: query_parser.OpExpr,
-							Expr: &query_parser.Expression{
-								Operand1: &query_parser.Operand{
-									Type:   query_parser.OpField,
-									Column: &query_parser.Field{[]string{"A"}},
-								},
-								Operator: binaryOpPtr(query_parser.Equal),
-								Operand2: &query_parser.Operand{
-									Type: query_parser.OpInt,
-									Int:  123,
-								},
-							},
-						},
-						Operator: binaryOpPtr(query_parser.Or),
-						Operand2: &query_parser.Operand{
-							Type: query_parser.OpExpr,
-							Expr: &query_parser.Expression{
-								Operand1: &query_parser.Operand{
-									Type: query_parser.OpExpr,
-									Expr: &query_parser.Expression{
-										Operand1: &query_parser.Operand{
-											Type:   query_parser.OpField,
-											Column: &query_parser.Field{[]string{"B"}},
-										},
-										Operator: binaryOpPtr(query_parser.Equal),
-										Operand2: &query_parser.Operand{
-											Type: query_parser.OpInt,
-											Int:  456,
-										},
+					Select: &query_parser.SelectClause{
+						Columns: []query_parser.Field{
+							query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "foo",
+										Node:  query_parser.Node{Off: 7},
 									},
 								},
-								Operator: binaryOpPtr(query_parser.And),
-								Operand2: &query_parser.Operand{
-									Type: query_parser.OpExpr,
-									Expr: &query_parser.Expression{
-										Operand1: &query_parser.Operand{
-											Type:   query_parser.OpField,
-											Column: &query_parser.Field{[]string{"C"}},
-										},
-										Operator: binaryOpPtr(query_parser.Equal),
-										Operand2: &query_parser.Operand{
-											Type: query_parser.OpInt,
-											Int:  789,
-										},
-									},
-								},
+								Node: query_parser.Node{Off: 7},
 							},
 						},
+						Node: query_parser.Node{Off: 0},
 					},
+					From: &query_parser.FromClause{
+						Table: query_parser.TableEntry{
+							Name: "Customer",
+							Node: query_parser.Node{Off: 16},
+						},
+						Node: query_parser.Node{Off: 11},
+					},
+					Where: &query_parser.WhereClause{
+						Expr: &query_parser.Expression{
+							Operand1: &query_parser.Operand{
+								Type: query_parser.OpExpr,
+								Expr: &query_parser.Expression{
+									Operand1: &query_parser.Operand{
+										Type: query_parser.OpField,
+										Column: &query_parser.Field{
+											Segments: []query_parser.Segment{
+												query_parser.Segment{
+													Value: "A",
+													Node:  query_parser.Node{Off: 31},
+												},
+											},
+											Node: query_parser.Node{Off: 31},
+										},
+										Node: query_parser.Node{Off: 31},
+									},
+									Operator: &query_parser.BinaryOperator{
+										Type: query_parser.Equal,
+										Node: query_parser.Node{Off: 32},
+									},
+									Operand2: &query_parser.Operand{
+										Type: query_parser.OpInt,
+										Int:  123,
+										Node: query_parser.Node{Off: 33},
+									},
+									Node: query_parser.Node{Off: 31},
+								},
+								Node: query_parser.Node{Off: 31},
+							},
+							Operator: &query_parser.BinaryOperator{
+								Type: query_parser.Or,
+								Node: query_parser.Node{Off: 37},
+							},
+							Operand2: &query_parser.Operand{
+								Type: query_parser.OpExpr,
+								Expr: &query_parser.Expression{
+									Operand1: &query_parser.Operand{
+										Type: query_parser.OpExpr,
+										Expr: &query_parser.Expression{
+											Operand1: &query_parser.Operand{
+												Type: query_parser.OpField,
+												Column: &query_parser.Field{
+													Segments: []query_parser.Segment{
+														query_parser.Segment{
+															Value: "B",
+															Node:  query_parser.Node{Off: 41},
+														},
+													},
+													Node: query_parser.Node{Off: 41},
+												},
+												Node: query_parser.Node{Off: 41},
+											},
+											Operator: &query_parser.BinaryOperator{
+												Type: query_parser.Equal,
+												Node: query_parser.Node{Off: 42},
+											},
+											Operand2: &query_parser.Operand{
+												Type: query_parser.OpInt,
+												Int:  456,
+												Node: query_parser.Node{Off: 43},
+											},
+											Node: query_parser.Node{Off: 41},
+										},
+										Node: query_parser.Node{Off: 41},
+									},
+									Operator: &query_parser.BinaryOperator{
+										Type: query_parser.And,
+										Node: query_parser.Node{Off: 47},
+									},
+									Operand2: &query_parser.Operand{
+										Type: query_parser.OpExpr,
+										Expr: &query_parser.Expression{
+											Operand1: &query_parser.Operand{
+												Type: query_parser.OpField,
+												Column: &query_parser.Field{
+													Segments: []query_parser.Segment{
+														query_parser.Segment{
+															Value: "C",
+															Node:  query_parser.Node{Off: 51},
+														},
+													},
+													Node: query_parser.Node{Off: 51},
+												},
+												Node: query_parser.Node{Off: 51},
+											},
+											Operator: &query_parser.BinaryOperator{
+												Type: query_parser.Equal,
+												Node: query_parser.Node{Off: 52},
+											},
+											Operand2: &query_parser.Operand{
+												Type: query_parser.OpInt,
+												Int:  789,
+												Node: query_parser.Node{Off: 53},
+											},
+											Node: query_parser.Node{Off: 51},
+										},
+										Node: query_parser.Node{Off: 51},
+									},
+									Node: query_parser.Node{Off: 41},
+								},
+								Node: query_parser.Node{Off: 41},
+							},
+							Node: query_parser.Node{Off: 31},
+						},
+						Node: query_parser.Node{Off: 25},
+					},
+					Node: query_parser.Node{Off: 0},
 				},
 			},
 			nil,
@@ -638,61 +1410,274 @@ func TestQueryParser(t *testing.T) {
 			"select foo from Customer where (A=123) or ((B=456) and (C=789))",
 			[]query_parser.SelectStatement{
 				query_parser.SelectStatement{
-					Columns: []query_parser.Field{
-						{[]string{"foo"}},
-					},
-					Table: "Customer",
-					Where: &query_parser.Expression{
-						Operand1: &query_parser.Operand{
-							Type: query_parser.OpExpr,
-							Expr: &query_parser.Expression{
-								Operand1: &query_parser.Operand{
-									Type:   query_parser.OpField,
-									Column: &query_parser.Field{[]string{"A"}},
-								},
-								Operator: binaryOpPtr(query_parser.Equal),
-								Operand2: &query_parser.Operand{
-									Type: query_parser.OpInt,
-									Int:  123,
-								},
-							},
-						},
-						Operator: binaryOpPtr(query_parser.Or),
-						Operand2: &query_parser.Operand{
-							Type: query_parser.OpExpr,
-							Expr: &query_parser.Expression{
-								Operand1: &query_parser.Operand{
-									Type: query_parser.OpExpr,
-									Expr: &query_parser.Expression{
-										Operand1: &query_parser.Operand{
-											Type:   query_parser.OpField,
-											Column: &query_parser.Field{[]string{"B"}},
-										},
-										Operator: binaryOpPtr(query_parser.Equal),
-										Operand2: &query_parser.Operand{
-											Type: query_parser.OpInt,
-											Int:  456,
-										},
+					Select: &query_parser.SelectClause{
+						Columns: []query_parser.Field{
+							query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "foo",
+										Node:  query_parser.Node{Off: 7},
 									},
 								},
-								Operator: binaryOpPtr(query_parser.And),
-								Operand2: &query_parser.Operand{
-									Type: query_parser.OpExpr,
-									Expr: &query_parser.Expression{
-										Operand1: &query_parser.Operand{
-											Type:   query_parser.OpField,
-											Column: &query_parser.Field{[]string{"C"}},
-										},
-										Operator: binaryOpPtr(query_parser.Equal),
-										Operand2: &query_parser.Operand{
-											Type: query_parser.OpInt,
-											Int:  789,
-										},
-									},
-								},
+								Node: query_parser.Node{Off: 7},
 							},
 						},
+						Node: query_parser.Node{Off: 0},
 					},
+					From: &query_parser.FromClause{
+						Table: query_parser.TableEntry{
+							Name: "Customer",
+							Node: query_parser.Node{Off: 16},
+						},
+						Node: query_parser.Node{Off: 11},
+					},
+					Where: &query_parser.WhereClause{
+						Expr: &query_parser.Expression{
+							Operand1: &query_parser.Operand{
+								Type: query_parser.OpExpr,
+								Expr: &query_parser.Expression{
+									Operand1: &query_parser.Operand{
+										Type: query_parser.OpField,
+										Column: &query_parser.Field{
+											Segments: []query_parser.Segment{
+												query_parser.Segment{
+													Value: "A",
+													Node:  query_parser.Node{Off: 32},
+												},
+											},
+											Node: query_parser.Node{Off: 32},
+										},
+										Node: query_parser.Node{Off: 32},
+									},
+									Operator: &query_parser.BinaryOperator{
+										Type: query_parser.Equal,
+										Node: query_parser.Node{Off: 33},
+									},
+									Operand2: &query_parser.Operand{
+										Type: query_parser.OpInt,
+										Int:  123,
+										Node: query_parser.Node{Off: 34},
+									},
+									Node: query_parser.Node{Off: 32},
+								},
+								Node: query_parser.Node{Off: 32},
+							},
+							Operator: &query_parser.BinaryOperator{
+								Type: query_parser.Or,
+								Node: query_parser.Node{Off: 39},
+							},
+							Operand2: &query_parser.Operand{
+								Type: query_parser.OpExpr,
+								Expr: &query_parser.Expression{
+									Operand1: &query_parser.Operand{
+										Type: query_parser.OpExpr,
+										Expr: &query_parser.Expression{
+											Operand1: &query_parser.Operand{
+												Type: query_parser.OpField,
+												Column: &query_parser.Field{
+													Segments: []query_parser.Segment{
+														query_parser.Segment{
+															Value: "B",
+															Node:  query_parser.Node{Off: 44},
+														},
+													},
+													Node: query_parser.Node{Off: 44},
+												},
+												Node: query_parser.Node{Off: 44},
+											},
+											Operator: &query_parser.BinaryOperator{
+												Type: query_parser.Equal,
+												Node: query_parser.Node{Off: 45},
+											},
+											Operand2: &query_parser.Operand{
+												Type: query_parser.OpInt,
+												Int:  456,
+												Node: query_parser.Node{Off: 46},
+											},
+											Node: query_parser.Node{Off: 44},
+										},
+										Node: query_parser.Node{Off: 44},
+									},
+									Operator: &query_parser.BinaryOperator{
+										Type: query_parser.And,
+										Node: query_parser.Node{Off: 51},
+									},
+									Operand2: &query_parser.Operand{
+										Type: query_parser.OpExpr,
+										Expr: &query_parser.Expression{
+											Operand1: &query_parser.Operand{
+												Type: query_parser.OpField,
+												Column: &query_parser.Field{
+													Segments: []query_parser.Segment{
+														query_parser.Segment{
+															Value: "C",
+															Node:  query_parser.Node{Off: 56},
+														},
+													},
+													Node: query_parser.Node{Off: 56},
+												},
+												Node: query_parser.Node{Off: 56},
+											},
+											Operator: &query_parser.BinaryOperator{
+												Type: query_parser.Equal,
+												Node: query_parser.Node{Off: 57},
+											},
+											Operand2: &query_parser.Operand{
+												Type: query_parser.OpInt,
+												Int:  789,
+												Node: query_parser.Node{Off: 58},
+											},
+											Node: query_parser.Node{Off: 56},
+										},
+										Node: query_parser.Node{Off: 56},
+									},
+									Node: query_parser.Node{Off: 44},
+								},
+								Node: query_parser.Node{Off: 44},
+							},
+							Node: query_parser.Node{Off: 32},
+						},
+						Node: query_parser.Node{Off: 25},
+					},
+					Node: query_parser.Node{Off: 0},
+				},
+			},
+			nil,
+		},
+		{
+			"select foo from Customer where A<>123 or B not equal 456 and C not like \"abc%\"",
+			[]query_parser.SelectStatement{
+				query_parser.SelectStatement{
+					Select: &query_parser.SelectClause{
+						Columns: []query_parser.Field{
+							query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "foo",
+										Node:  query_parser.Node{Off: 7},
+									},
+								},
+								Node: query_parser.Node{Off: 7},
+							},
+						},
+						Node: query_parser.Node{Off: 0},
+					},
+					From: &query_parser.FromClause{
+						Table: query_parser.TableEntry{
+							Name: "Customer",
+							Node: query_parser.Node{Off: 16},
+						},
+						Node: query_parser.Node{Off: 11},
+					},
+					Where: &query_parser.WhereClause{
+						Expr: &query_parser.Expression{
+							Operand1: &query_parser.Operand{
+								Type: query_parser.OpExpr,
+								Expr: &query_parser.Expression{
+									Operand1: &query_parser.Operand{
+										Type: query_parser.OpExpr,
+										Expr: &query_parser.Expression{
+											Operand1: &query_parser.Operand{
+												Type: query_parser.OpField,
+												Column: &query_parser.Field{
+													Segments: []query_parser.Segment{
+														query_parser.Segment{
+															Value: "A",
+															Node:  query_parser.Node{Off: 31},
+														},
+													},
+													Node: query_parser.Node{Off: 31},
+												},
+												Node: query_parser.Node{Off: 31},
+											},
+											Operator: &query_parser.BinaryOperator{
+												Type: query_parser.NotEqual,
+												Node: query_parser.Node{Off: 32},
+											},
+											Operand2: &query_parser.Operand{
+												Type: query_parser.OpInt,
+												Int:  123,
+												Node: query_parser.Node{Off: 34},
+											},
+											Node: query_parser.Node{Off: 31},
+										},
+										Node: query_parser.Node{Off: 31},
+									},
+									Operator: &query_parser.BinaryOperator{
+										Type: query_parser.Or,
+										Node: query_parser.Node{Off: 38},
+									},
+									Operand2: &query_parser.Operand{
+										Type: query_parser.OpExpr,
+										Expr: &query_parser.Expression{
+											Operand1: &query_parser.Operand{
+												Type: query_parser.OpField,
+												Column: &query_parser.Field{
+													Segments: []query_parser.Segment{
+														query_parser.Segment{
+															Value: "B",
+															Node:  query_parser.Node{Off: 41},
+														},
+													},
+													Node: query_parser.Node{Off: 41},
+												},
+												Node: query_parser.Node{Off: 41},
+											},
+											Operator: &query_parser.BinaryOperator{
+												Type: query_parser.NotEqual,
+												Node: query_parser.Node{Off: 43},
+											},
+											Operand2: &query_parser.Operand{
+												Type: query_parser.OpInt,
+												Int:  456,
+												Node: query_parser.Node{Off: 53},
+											},
+											Node: query_parser.Node{Off: 41},
+										},
+										Node: query_parser.Node{Off: 41},
+									},
+									Node: query_parser.Node{Off: 31},
+								},
+								Node: query_parser.Node{Off: 31},
+							},
+							Operator: &query_parser.BinaryOperator{
+								Type: query_parser.And,
+								Node: query_parser.Node{Off: 57},
+							},
+							Operand2: &query_parser.Operand{
+								Type: query_parser.OpExpr,
+								Expr: &query_parser.Expression{
+									Operand1: &query_parser.Operand{
+										Type: query_parser.OpField,
+										Column: &query_parser.Field{
+											Segments: []query_parser.Segment{
+												query_parser.Segment{
+													Value: "C",
+													Node:  query_parser.Node{Off: 61},
+												},
+											},
+											Node: query_parser.Node{Off: 61},
+										},
+										Node: query_parser.Node{Off: 61},
+									},
+									Operator: &query_parser.BinaryOperator{
+										Type: query_parser.NotLike,
+										Node: query_parser.Node{Off: 63},
+									},
+									Operand2: &query_parser.Operand{
+										Type:    query_parser.OpLiteral,
+										Literal: "abc%",
+										Node:    query_parser.Node{Off: 72},
+									},
+									Node: query_parser.Node{Off: 61},
+								},
+								Node: query_parser.Node{Off: 61},
+							},
+							Node: query_parser.Node{Off: 31},
+						},
+						Node: query_parser.Node{Off: 25},
+					},
+					Node: query_parser.Node{Off: 0},
 				},
 			},
 			nil,
