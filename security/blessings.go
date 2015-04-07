@@ -23,8 +23,8 @@ var (
 	errInvalidUnion       = verror.Register(pkgPath+".errInvalidUnion", verror.NoRetry, "cannot create union of blessings bound to different public keys")
 )
 
-// Blessings encapsulates all the cryptographic operations required to
-// prove that a set of (human-readable) blessing names have been bound
+// Blessings encapsulates all cryptographic operations required to
+// prove that a set of (human-readable) blessing names are bound
 // to a principal in a specific call.
 //
 // Blessings objects are meant to be presented to other principals to authenticate

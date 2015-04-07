@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package uniqueid helps generate identifiers that are likely to be
-// globally unique.  We want to be able to generate many Ids quickly,
-// so we make a time/space tradeoff.  We reuse the same random data
-// many times with a counter appended.  Note: these Ids are NOT useful
-// as a security mechanism as they will be predictable.
+// Package uniqueid defines functions that are likely to generate
+// globally unique identifiers. We want to be able to generate many
+// Ids quickly, so we make a time/space tradeoff.  We reuse the same
+// random data many times with a counter appended.  Note: these Ids are
+// NOT useful as a security mechanism as they will be predictable.
 package uniqueid
 
 import (
