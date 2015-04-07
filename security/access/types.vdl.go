@@ -28,24 +28,6 @@
 //
 // SetPermissions completely replaces the Permissions. To perform an atomic
 // read-modify-write of the AccessList, use the etag parameter.
-//   client := access.ObjectClient(name)
-//   for {
-//     acl, etag, err := client.GetPermissions()
-//     if err != nil {
-//       return err
-//     }
-//     acl[newTag] = AccessList{In: []security.BlessingPattern{newPattern}}
-//     // Use the same etag with the modified acl to ensure that no other client
-//     // has modified the acl since GetPermissions returned.
-//     if err := client.SetPermissions(acl, etag); err != nil {
-//       if verror.ErrorID(err) == verror.ErrBadEtag.Id {
-//         // Another client replaced the AccessList after our GetPermissions returned.
-//         // Try again.
-//         continue
-//       }
-//       return err
-//     }
-//   }
 //
 // Conventions
 //
@@ -96,6 +78,27 @@
 // E should be allowed to modify only "home/E".  The file server doesn't know
 // the list of all employees a priori, so it uses an implementation-specific
 // rule to map employee identities to their home directory.
+//
+// Examples
+//
+//   client := access.ObjectClient(name)
+//   for {
+//     acl, etag, err := client.GetPermissions()
+//     if err != nil {
+//       return err
+//     }
+//     acl[newTag] = AccessList{In: []security.BlessingPattern{newPattern}}
+//     // Use the same etag with the modified acl to ensure that no other client
+//     // has modified the acl since GetPermissions returned.
+//     if err := client.SetPermissions(acl, etag); err != nil {
+//       if verror.ErrorID(err) == verror.ErrBadEtag.Id {
+//         // Another client replaced the AccessList after our GetPermissions returned.
+//         // Try again.
+//         continue
+//       }
+//       return err
+//     }
+//   }
 package access
 
 import (
