@@ -108,28 +108,14 @@ type ServiceClientStub interface {
 }
 
 // ServiceClient returns a client stub for Service.
-func ServiceClient(name string, opts ...rpc.BindOpt) ServiceClientStub {
-	var client rpc.Client
-	for _, opt := range opts {
-		if clientOpt, ok := opt.(rpc.Client); ok {
-			client = clientOpt
-		}
-	}
-	return implServiceClientStub{name, client, permissions.ObjectClient(name, client)}
+func ServiceClient(name string) ServiceClientStub {
+	return implServiceClientStub{name, permissions.ObjectClient(name)}
 }
 
 type implServiceClientStub struct {
-	name   string
-	client rpc.Client
+	name string
 
 	permissions.ObjectClientStub
-}
-
-func (c implServiceClientStub) c(ctx *context.T) rpc.Client {
-	if c.client != nil {
-		return c.client
-	}
-	return v23.GetClient(ctx)
 }
 
 // ServiceServerMethods is the interface a server writer
@@ -311,33 +297,19 @@ type UniverseClientStub interface {
 }
 
 // UniverseClient returns a client stub for Universe.
-func UniverseClient(name string, opts ...rpc.BindOpt) UniverseClientStub {
-	var client rpc.Client
-	for _, opt := range opts {
-		if clientOpt, ok := opt.(rpc.Client); ok {
-			client = clientOpt
-		}
-	}
-	return implUniverseClientStub{name, client, permissions.ObjectClient(name, client)}
+func UniverseClient(name string) UniverseClientStub {
+	return implUniverseClientStub{name, permissions.ObjectClient(name)}
 }
 
 type implUniverseClientStub struct {
-	name   string
-	client rpc.Client
+	name string
 
 	permissions.ObjectClientStub
 }
 
-func (c implUniverseClientStub) c(ctx *context.T) rpc.Client {
-	if c.client != nil {
-		return c.client
-	}
-	return v23.GetClient(ctx)
-}
-
 func (c implUniverseClientStub) Create(ctx *context.T, i0 access.Permissions, opts ...rpc.CallOpt) (err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Create", []interface{}{i0}, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Create", []interface{}{i0}, opts...); err != nil {
 		return
 	}
 	err = call.Finish()
@@ -346,7 +318,7 @@ func (c implUniverseClientStub) Create(ctx *context.T, i0 access.Permissions, op
 
 func (c implUniverseClientStub) Delete(ctx *context.T, opts ...rpc.CallOpt) (err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Delete", nil, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Delete", nil, opts...); err != nil {
 		return
 	}
 	err = call.Finish()
@@ -573,33 +545,19 @@ type DatabaseClientStub interface {
 }
 
 // DatabaseClient returns a client stub for Database.
-func DatabaseClient(name string, opts ...rpc.BindOpt) DatabaseClientStub {
-	var client rpc.Client
-	for _, opt := range opts {
-		if clientOpt, ok := opt.(rpc.Client); ok {
-			client = clientOpt
-		}
-	}
-	return implDatabaseClientStub{name, client, permissions.ObjectClient(name, client)}
+func DatabaseClient(name string) DatabaseClientStub {
+	return implDatabaseClientStub{name, permissions.ObjectClient(name)}
 }
 
 type implDatabaseClientStub struct {
-	name   string
-	client rpc.Client
+	name string
 
 	permissions.ObjectClientStub
 }
 
-func (c implDatabaseClientStub) c(ctx *context.T) rpc.Client {
-	if c.client != nil {
-		return c.client
-	}
-	return v23.GetClient(ctx)
-}
-
 func (c implDatabaseClientStub) Create(ctx *context.T, i0 access.Permissions, opts ...rpc.CallOpt) (err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Create", []interface{}{i0}, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Create", []interface{}{i0}, opts...); err != nil {
 		return
 	}
 	err = call.Finish()
@@ -608,7 +566,7 @@ func (c implDatabaseClientStub) Create(ctx *context.T, i0 access.Permissions, op
 
 func (c implDatabaseClientStub) Delete(ctx *context.T, opts ...rpc.CallOpt) (err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Delete", nil, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Delete", nil, opts...); err != nil {
 		return
 	}
 	err = call.Finish()
@@ -617,7 +575,7 @@ func (c implDatabaseClientStub) Delete(ctx *context.T, opts ...rpc.CallOpt) (err
 
 func (c implDatabaseClientStub) UpdateSchema(ctx *context.T, i0 Schema, i1 string, opts ...rpc.CallOpt) (err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "UpdateSchema", []interface{}{i0, i1}, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "UpdateSchema", []interface{}{i0, i1}, opts...); err != nil {
 		return
 	}
 	err = call.Finish()
@@ -626,7 +584,7 @@ func (c implDatabaseClientStub) UpdateSchema(ctx *context.T, i0 Schema, i1 strin
 
 func (c implDatabaseClientStub) GetSchema(ctx *context.T, opts ...rpc.CallOpt) (o0 Schema, o1 string, err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "GetSchema", nil, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "GetSchema", nil, opts...); err != nil {
 		return
 	}
 	err = call.Finish(&o0, &o1)
@@ -828,26 +786,12 @@ type TableClientStub interface {
 }
 
 // TableClient returns a client stub for Table.
-func TableClient(name string, opts ...rpc.BindOpt) TableClientStub {
-	var client rpc.Client
-	for _, opt := range opts {
-		if clientOpt, ok := opt.(rpc.Client); ok {
-			client = clientOpt
-		}
-	}
-	return implTableClientStub{name, client}
+func TableClient(name string) TableClientStub {
+	return implTableClientStub{name}
 }
 
 type implTableClientStub struct {
-	name   string
-	client rpc.Client
-}
-
-func (c implTableClientStub) c(ctx *context.T) rpc.Client {
-	if c.client != nil {
-		return c.client
-	}
-	return v23.GetClient(ctx)
+	name string
 }
 
 // TableServerMethods is the interface a server writer
@@ -937,31 +881,17 @@ type ItemClientStub interface {
 }
 
 // ItemClient returns a client stub for Item.
-func ItemClient(name string, opts ...rpc.BindOpt) ItemClientStub {
-	var client rpc.Client
-	for _, opt := range opts {
-		if clientOpt, ok := opt.(rpc.Client); ok {
-			client = clientOpt
-		}
-	}
-	return implItemClientStub{name, client}
+func ItemClient(name string) ItemClientStub {
+	return implItemClientStub{name}
 }
 
 type implItemClientStub struct {
-	name   string
-	client rpc.Client
-}
-
-func (c implItemClientStub) c(ctx *context.T) rpc.Client {
-	if c.client != nil {
-		return c.client
-	}
-	return v23.GetClient(ctx)
+	name string
 }
 
 func (c implItemClientStub) Get(ctx *context.T, opts ...rpc.CallOpt) (o0 *vdl.Value, err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Get", nil, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Get", nil, opts...); err != nil {
 		return
 	}
 	err = call.Finish(&o0)
@@ -970,7 +900,7 @@ func (c implItemClientStub) Get(ctx *context.T, opts ...rpc.CallOpt) (o0 *vdl.Va
 
 func (c implItemClientStub) Put(ctx *context.T, i0 *vdl.Value, opts ...rpc.CallOpt) (err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Put", []interface{}{i0}, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Put", []interface{}{i0}, opts...); err != nil {
 		return
 	}
 	err = call.Finish()
@@ -979,7 +909,7 @@ func (c implItemClientStub) Put(ctx *context.T, i0 *vdl.Value, opts ...rpc.CallO
 
 func (c implItemClientStub) Delete(ctx *context.T, opts ...rpc.CallOpt) (err error) {
 	var call rpc.ClientCall
-	if call, err = c.c(ctx).StartCall(ctx, c.name, "Delete", nil, opts...); err != nil {
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Delete", nil, opts...); err != nil {
 		return
 	}
 	err = call.Finish()
