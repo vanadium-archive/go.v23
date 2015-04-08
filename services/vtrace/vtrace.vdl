@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package vtrace defines an interface to access Vtrace traces to
-// anylize and debug distributed systems.
+// Package vtrace defines an interface to access v.io/v23/vtrace traces, to help
+// analyze and debug distributed systems.
 package vtrace
 
 import (

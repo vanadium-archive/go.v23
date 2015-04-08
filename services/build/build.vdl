@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package build supports building and describing Vanadium binaries.
-//
+// Package build defines interfaces for building executable binaries.
+package build
+
 // TODO(jsimsa): Switch Architecture, Format, and OperatingSystem type
 // to enum when supported.
-package build
 
 import (
 	"v.io/v23/services/binary"

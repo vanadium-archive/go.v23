@@ -61,10 +61,10 @@ var (
 // (2) Setup the rpc.Dispatcher to use the PermissionsAuthorizer
 //   import (
 //     "reflect"
-//     "v.io/x/ref/security/acl"
 //
 //     "v.io/v23/rpc"
 //     "v.io/v23/security"
+//     "v.io/x/ref/lib/security/acl"
 //   )
 //
 //   type dispatcher struct{}

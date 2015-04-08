@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package repository can be used for storing and serving various
-// vanadium management objects.
+// Package repository defines interfaces for storing and retrieving device,
+// application and binary management related information.
 package repository
 
 import (

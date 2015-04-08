@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package i18n defines support for internationalization of formatted message
-// strings in different languages.
+// Package i18n implements internationalization of formatted message strings in
+// different languages.
 //
 // Typical usage:
 //   cat := i18n.Cat()   // get default Catalogue

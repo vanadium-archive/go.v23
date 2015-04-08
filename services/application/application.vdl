@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package application defines the type for describing an application.
+// Package application defines types for describing applications.
 package application
 
 import (

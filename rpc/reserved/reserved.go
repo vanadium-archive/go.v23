@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package reserved defines interfaces for interacting with reserved RPC methods
-// such as Signature, MethodSignature and Glob.
+// Package reserved implements client-side support for reserved RPC methods
+// implemented by all servers.
 package reserved
 
 import (

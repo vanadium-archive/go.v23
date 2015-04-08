@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package device supports managing a device and applications running on
-// the device.
+// Package device defines interfaces for managing devices and their
+// applications.
 package device
 
 import (

@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package pprof is used to access runtime profiling data in the format expected
-// by the pprof visualization tool. For more information about pprof, see
-// http://code.google.com/p/google-perftools/.
+// Package pprof defines an interface for accessing runtime profiling data in
+// the format expected by the pprof visualization tool.  For more information
+// about pprof, see http://code.google.com/p/google-perftools/.
 package pprof
 
 import "v.io/v23/security/access"

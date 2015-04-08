@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package version defines a mechanism for versioning the RPC protocol.
 package version
 
 // RPCVersion represents a version of the RPC protocol.

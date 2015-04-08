@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package config defines the API for accessing all configuration information
-// required by any Vanadium process.
+// Package config defines interfaces for accessing process configuration
+// information.
 //
 // Settings represent configuration parameters and their value. Settings
 // are published to named Streams. Streams are forked to add additional

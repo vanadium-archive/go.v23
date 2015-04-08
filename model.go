@@ -2,16 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-/*
-Package v23 defines the Runtime interface of the public Vanadium API and its subdirectories define the entire Vanadium public API.
-
-Once we reach a '1.0' version these public APIs will be stable over
-an extended period and changes to them will be carefully managed to ensure backward compatibility. The same policy as used for go (http://golang.org/doc/go1compat) will be used for them.
-
-The current release is 0.1 and although we will do our best to maintain
-backwards compatibility we can't guarantee that until we reach the 1.0 milestone.
-
-*/
+// Package v23 defines the runtime interface of Vanadium, and its subdirectories
+// define the entire Vanadium public API.
+//
+// Once Vanadium reaches version 1.0 these public APIs will be stable over an
+// extended period.  Changes to APIs will be managed to ensure backwards
+// compatibility, using the same policy as http://golang.org/doc/go1compat.
+//
+// This is version 0.1 - we will do our best to maintain backwards
+// compatibility, but there's no guarantee until version 1.0.
+//
+// For more details about the Vanadium project, please visit https://v.io.
 package v23
 
 import (

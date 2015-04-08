@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package appcycle supports managing the application process.
+// Package appcycle defines interfaces for managing application processes.
 package appcycle
 
 // TODO(caprita): Implement AppCycle server in runtime.

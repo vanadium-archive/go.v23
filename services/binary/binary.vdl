@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package binary contains types and interfaces for managing
-// application binaries.
+// Package binary defines types for describing executable binaries.
 package binary
 
 const MissingChecksum = ""

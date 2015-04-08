@@ -2,22 +2,23 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package mounttable defines a set of mount points and how to traverse them.
+// Package mounttable defines interfaces for managing associations between names
+// and servers.
+//
+// A mount table is a tree of names.  Each name may have something mounted on
+// it, either a terminal server or another mount table server.  If multiple
+// servers are mounted onto the same name, they are considered equivalent, i.e.,
+// it is semantically irrelevant which is chosen to pass an RPC to.
+//
+// Access is determined by AccessLists at each node in the tree.  When resolving
+// a name like a/b/c/d, one must check the client blessings against the
+// AccessLists of each node traversed ("", a, a/b, a/b/c, and a/b/c/d).
 package mounttable
 
 import (
 	"v.io/v23/naming"
 	"v.io/v23/services/permissions"
 )
-
-// A mount table is a tree of names.  Each name may have something mounted on it,
-// either a terminal server or another mount table server.  If multiple servers are
-// mounted onto the same name, they are considered equivalent, i.e., it is semantically
-// irrelevant which is chosen to pass an RPC to.
-//
-// Access is determined by AccessLists at each node in the tree.  When resolving a
-// name like a/b/c/d, one must check the client blessings against the AccessLists of each
-// node traversed ("", a, a/b, a/b/c, and a/b/c/d).
 
 type Tag string
 

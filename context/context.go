@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package context defines context.T, an interface to carry data that
-// crosses API boundaries.  The context carries deadlines and
-// cancellation as well as other arbitrary values.
+// Package context implements a mechanism to carry data across API boundaries.
+// The context.T struct carries deadlines and cancellation as well as other
+// arbitrary values.
 //
 // Application code receives contexts in two main ways:
 //

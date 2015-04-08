@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package access defines types and services for dynamic access control
-// in Vanadium.  Examples: "allow app to read this photo", "prevent user
-// from modifying this file".
+// Package access defines types and interfaces for dynamic access control.
+// Examples: "allow app to read this photo", "prevent user from modifying this
+// file".
 //
 // Target Developers
 //

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package verror defines an error reporting mechanism that works across
+// Package verror implements an error reporting mechanism that works across
 // programming environments, and a set of common errors.
 //
 // Each error has an identifier string, which is used for equality checks.

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package watch defines an API for watching updates that match a query.
+// Package watch defines interfaces for watching a sequence of changes.
 //
 // API Overview
 //

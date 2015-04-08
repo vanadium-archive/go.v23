@@ -2,19 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-/*
-Package vom defines Vanadium Object Marshaling, a serialization protocol.
-Vom is used in Vanadium to enable interchange of user-defined data structures
-across networks, languages and storage systems.
-
-The vom core API is almost identical to encoding/gob.  To marshal objects create
-an Encoder and present it with a series of values.  To unmarshal objects create
-a Decoder and retrieve values.  The implementation creates a possibly stateful
-stream of messages between the Encoder and Decoder.
-
-VOM supports the same types and compatibility rules supported by VDL.
-See v.io/v23/vdl.
-*/
+// Package vom implements the Vanadium Object Marshaling serialization protocol.
+// It is used to enable interchange of user-defined data structures across
+// networks, languages and storage systems.
+//
+// The API is almost identical to encoding/gob.  To marshal objects create an
+// Encoder and present it with a series of values.  To unmarshal objects create
+// a Decoder and retrieve values.  The implementation creates a stream of
+// messages between the Encoder and Decoder.
+//
+// VOM supports the same types and compatibility rules supported by VDL.  See
+// v.io/v23/vdl.
 package vom
 
 /*
