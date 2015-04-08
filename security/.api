@@ -18,6 +18,7 @@ pkg security, func MarshalBlessings(Blessings) WireBlessings
 pkg security, func NewCall(*CallParams) Call
 pkg security, func NewCaveat(CaveatDescriptor, interface{}) (Caveat, error)
 pkg security, func NewECDSAPublicKey(*ecdsa.PublicKey) PublicKey
+pkg security, func NewECDSASigner(*ecdsa.PublicKey, func([]byte) (*big.Int, *big.Int, error)) Signer
 pkg security, func NewErrAuthorizationFailed(*context.T, []string, []RejectedBlessing, []string) error
 pkg security, func NewErrCaveatNotRegistered(*context.T, uniqueid.Id) error
 pkg security, func NewErrCaveatParamAny(*context.T, uniqueid.Id) error

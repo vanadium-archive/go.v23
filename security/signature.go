@@ -36,11 +36,20 @@ func (sig *Signature) Verify(key PublicKey, message []byte) bool {
 // key to sign messages.  This private key is kept in the clear in the memory
 // of the running process.
 func NewInMemoryECDSASigner(key *ecdsa.PrivateKey) Signer {
-	return &ecdsaSigner{key, NewECDSAPublicKey(&key.PublicKey)}
+	sign := func(data []byte) (r, s *big.Int, err error) {
+		return ecdsa.Sign(rand.Reader, key, data)
+	}
+	return NewECDSASigner(&key.PublicKey, sign)
+}
+
+// NewECDSASigner creates a Signer that uses the provided function to sign
+// messages.
+func NewECDSASigner(key *ecdsa.PublicKey, sign func(data []byte) (r, s *big.Int, err error)) Signer {
+	return &ecdsaSigner{sign: sign, pubkey: NewECDSAPublicKey(key)}
 }
 
 type ecdsaSigner struct {
-	key    *ecdsa.PrivateKey
+	sign   func(data []byte) (r, s *big.Int, err error)
 	pubkey PublicKey
 }
 
@@ -49,7 +58,7 @@ func (c *ecdsaSigner) Sign(purpose, message []byte) (Signature, error) {
 	if message = messageDigest(hash, purpose, message); message == nil {
 		return Signature{}, verror.New(errSignCantHash, nil, hash)
 	}
-	r, s, err := ecdsa.Sign(rand.Reader, c.key, message)
+	r, s, err := c.sign(message)
 	if err != nil {
 		return Signature{}, err
 	}
