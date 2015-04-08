@@ -596,11 +596,11 @@ type ServerOpt interface {
 
 // Granter is a ClientCallOpt that is used to provide blessings to
 // the server when making an RPC.
+//
+// It gets passed a context.T with parameters of the RPC call set on
+// it.
 type Granter interface {
-	// Grant grants a blessing to the provided server.
-	Grant(server security.Blessings) (blessing security.Blessings, err error)
+	Grant(ctx *context.T) (blessing security.Blessings, err error)
 
-	// Granter implements the CallOpt interface so that
-	// Granters can be provided as options to an RPC invocation.
 	CallOpt
 }
