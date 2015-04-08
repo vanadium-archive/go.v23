@@ -1,8 +1,8 @@
-// +build ignore
-
 // Copyright 2015 The Vanadium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
+// +build ignore
 
 package syncbase_test
 
@@ -222,7 +222,7 @@ func TestCreate(t *testing.T) {
 	}
 }
 
-// Tests that Universe.Delete and Database.Delete work as expected.
+// Tests that {Universe,Database}.Delete work as expected.
 func TestDelete(t *testing.T) {
 }
 
@@ -230,7 +230,7 @@ func TestDelete(t *testing.T) {
 func TestPermissionsMethods(t *testing.T) {
 }
 
-// Tests that the various {Update,Get}Schema methods work as expected.
+// Tests that Database.{Update,Get}Schema work as expected.
 func TestSchemaMethods(t *testing.T) {
 }
 

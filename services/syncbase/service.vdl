@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// TODO(sadovsky): Update this, and split apart the NoSQL-specific parts from
+// the Syncbase service parts.
+
 package syncbase
 
 import (
@@ -16,13 +19,14 @@ import (
 // TODO(sadovsky): It turns out the above statement is not true. We should
 // reconsider these interfaces after we've fleshed things out further.
 //
-// TODO(sadovsky): Revisit the Permissions-checking semantics. E.g. should we consult
-// the Universe Permissions on Item.Get?
+// TODO(sadovsky): Revisit the Permissions-checking semantics. E.g. should we
+// consult the Universe Permissions on Item.Get?
 //
-// TODO(sadovsky): Revisit the Permissions model more generally. It's not clear that we
-// need every layer of the hierarchy to implement SetPermissions and GetPermissions. In fact, we
-// may be able to drop SetPermissions and GetPermissions from all of these interfaces, and also
-// drop the acl argument from Database.Create.
+// TODO(sadovsky): Revisit the Permissions model more generally. It's not clear
+// that we need every layer of the hierarchy to implement SetPermissions and
+// GetPermissions. In fact, we may be able to drop SetPermissions and
+// GetPermissions from all of these interfaces, and also drop the acl argument
+// from Database.Create.
 
 // Service represents a Vanadium syncbase service.
 // Service.Glob operates over Universe names.

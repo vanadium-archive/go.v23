@@ -17,18 +17,16 @@ import (
 // NOTE(sadovsky): Various methods below may end up needing additional options.
 // One can add options to a Go method in a backwards-compatible way by making
 // the method variadic.
-//
-// TODO(sadovsky): Consider changing *vdl.Value to interface{} everywhere.
 
 // AccessController provides access control for various syncbase objects.
 type AccessController interface {
 	// SetPermissions replaces the current Permissions for an object.
 	// For detailed documentation, see Object.SetPermissions.
-	SetPermissions(ctx *context.T, acl access.Permissions, etag string) error
+	SetPermissions(ctx *context.T, acl access.Permissions, version string) error
 
 	// GetPermissions returns the current Permissions for an object.
 	// For detailed documentation, see Object.GetPermissions.
-	GetPermissions(ctx *context.T) (acl access.Permissions, etag string, err error)
+	GetPermissions(ctx *context.T) (acl access.Permissions, version string, err error)
 }
 
 // TODO(sadovsky): Is the terminology still "bind", or has it changed?
@@ -44,12 +42,15 @@ type Service interface {
 	// ListApps returns a list of all App names.
 	ListApps(ctx *context.T) ([]string, error)
 
-	// SetPermissions and GetPermissions are included from the AccessController interface.
+	// SetPermissions and GetPermissions are included from the AccessController
+	// interface.
 	AccessController
 }
 
-// App represents the data for a specific app instance (i.e. combination of
-// user, device, and app).
+// App represents the data for a specific app instance (possibly a combination
+// of user, device, and app).
+// TODO(sadovsky): Figure out precisely what the App name would be under a
+// normal Vanadium installation.
 type App interface {
 	// Name returns the relative name of this App.
 	Name() string
@@ -63,13 +64,14 @@ type App interface {
 	ListDatabases(ctx *context.T) ([]string, error)
 
 	// Create creates this App.
-	// If acl is nil, the Permissions is inherited (copied) from the Service.
+	// If acl is nil, Permissions is inherited (copied) from the Service.
 	// Create requires the caller to have Write permission at the Service.
 	Create(ctx *context.T, acl access.Permissions) error
 
 	// Delete deletes this Universe.
 	Delete(ctx *context.T) error
 
-	// SetPermissions and GetPermissions are included from the AccessController interface.
+	// SetPermissions and GetPermissions are included from the AccessController
+	// interface.
 	AccessController
 }
