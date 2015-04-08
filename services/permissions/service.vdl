@@ -49,15 +49,16 @@ import (
 //    MyMethod() (string, error) {Blue}
 //
 //    // Allow clients to change access via the access.Object interface:
-//    SetPermissions(acl access.Permissions, etag string) error         {Red}
-//    GetPermissions() (acl access.Permissions, etag string, err error) {Blue}
+//    SetPermissions(acl access.Permissions, version string) error         {Red}
+//    GetPermissions() (acl access.Permissions, version string, err error) {Blue}
 //  }
 type Object interface {
-  // SetPermissions replaces the current AccessList for an object.  etag allows
-  // for optional, optimistic concurrency control.  If non-empty, etag's value
-  // must come from GetPermissions.  If any client has successfully called
-  // SetPermissions in the meantime, the etag will be stale and SetPermissions
-  // will fail.  If empty, SetPermissions performs an unconditional update.
+  // SetPermissions replaces the current AccessList for an object.  version
+  // allows for optional, optimistic concurrency control.  If non-empty,
+  // version's value must come from GetPermissions.  If any client has
+  // successfully called SetPermissions in the meantime, the version will be
+  // stale and SetPermissions will fail.  If empty, SetPermissions performs an
+  // unconditional update.
   //
   // AccessList objects are expected to be small.  It is up to the
   // implementation to define the exact limit, though it should probably be
@@ -71,12 +72,12 @@ type Object interface {
   // ResolveToMountTable to get an endpoint and call SetPermissions on that.
   // This means that clients must know when a name refers to a mount point to
   // change its AccessList.
-  SetPermissions(acl access.Permissions, etag string) error {access.Admin}
+  SetPermissions(acl access.Permissions, version string) error {access.Admin}
 
-  // GetPermissions returns the complete, current AccessList for an object.
-  // The returned etag can be passed to a subsequent call to SetPermissions for
+  // GetPermissions returns the complete, current AccessList for an object. The
+  // returned version can be passed to a subsequent call to SetPermissions for
   // optimistic concurrency control. A successful call to SetPermissions will
-  // invalidate etag, and the client must call GetPermissions again to get the
-  // current etag.
-  GetPermissions() (acl access.Permissions, etag string | error) {access.Admin}
+  // invalidate version, and the client must call GetPermissions again to get
+  // the current version.
+  GetPermissions() (acl access.Permissions, version string | error) {access.Admin}
 }

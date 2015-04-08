@@ -33,10 +33,12 @@ var (
 	// BadState means an operation was attempted on an object while the object was
 	// in an incompatible state.
 	ErrBadState = Register("v.io/v23/verror.BadState", NoRetry, "{1:}{2:} Invalid state{:_}")
-	// BadEtag means the etag presented by the client was out of date or otherwise
-	// invalid, likely because some other request caused the etag at the server to
-	// change. The client should get a fresh etag and try again.
-	ErrBadEtag = Register("v.io/v23/verror.BadEtag", NoRetry, "{1:}{2:} Etag is out of date")
+	// BadVersion means the version presented by the client (e.g. to a service
+	// that supports content-hash-based caching or atomic read-modify-write) was
+	// out of date or otherwise invalid, likely because some other request caused
+	// the version at the server to change. The client should get a fresh version
+	// and try again.
+	ErrBadVersion = Register("v.io/v23/verror.BadVersion", NoRetry, "{1:}{2:} Version is out of date")
 	// Exist means that the requested item already exists; typically returned when
 	// an attempt to create an item fails because it already exists.
 	ErrExist = Register("v.io/v23/verror.Exist", NoRetry, "{1:}{2:} Already exists{:_}")
@@ -79,7 +81,7 @@ func init() {
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrEndOfFile.ID), "{1:}{2:} End of file{:_}")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBadArg.ID), "{1:}{2:} Bad argument{:_}")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBadState.ID), "{1:}{2:} Invalid state{:_}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBadEtag.ID), "{1:}{2:} Etag is out of date")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBadVersion.ID), "{1:}{2:} Version is out of date")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrExist.ID), "{1:}{2:} Already exists{:_}")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoExist.ID), "{1:}{2:} Does not exist{:_}")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoExistOrNoAccess.ID), "{1:}{2:} Does not exist or access denied{:_}")
@@ -123,9 +125,9 @@ func NewErrBadState(ctx *context.T) error {
 	return New(ErrBadState, ctx)
 }
 
-// NewErrBadEtag returns an error with the ErrBadEtag ID.
-func NewErrBadEtag(ctx *context.T) error {
-	return New(ErrBadEtag, ctx)
+// NewErrBadVersion returns an error with the ErrBadVersion ID.
+func NewErrBadVersion(ctx *context.T) error {
+	return New(ErrBadVersion, ctx)
 }
 
 // NewErrExist returns an error with the ErrExist ID.

@@ -78,8 +78,8 @@ type T interface {
 	Roots() []string
 
 	// SetPermissions sets the AccessList in a node in a mount table.
-	SetPermissions(ctx *context.T, name string, acl access.Permissions, etag string, opts ...naming.NamespaceOpt) error
+	SetPermissions(ctx *context.T, name string, acl access.Permissions, version string, opts ...naming.NamespaceOpt) error
 
 	// GetPermissions returns the AccessList in a node in a mount table.
-	GetPermissions(ctx *context.T, name string, opts ...naming.NamespaceOpt) (acl access.Permissions, etag string, err error)
+	GetPermissions(ctx *context.T, name string, opts ...naming.NamespaceOpt) (acl access.Permissions, version string, err error)
 }

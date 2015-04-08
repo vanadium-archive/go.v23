@@ -30,10 +30,12 @@ error (
 	// in an incompatible state.
 	BadState() {"en":"Invalid state{:_}"}
 
-	// BadEtag means the etag presented by the client was out of date or otherwise
-	// invalid, likely because some other request caused the etag at the server to
-	// change. The client should get a fresh etag and try again.
-	BadEtag() {"en":"Etag is out of date"}
+	// BadVersion means the version presented by the client (e.g. to a service
+	// that supports content-hash-based caching or atomic read-modify-write) was
+	// out of date or otherwise invalid, likely because some other request caused
+	// the version at the server to change. The client should get a fresh version
+	// and try again.
+	BadVersion() {"en":"Version is out of date"}
 
 	// Exist means that the requested item already exists; typically returned when
 	// an attempt to create an item fails because it already exists.

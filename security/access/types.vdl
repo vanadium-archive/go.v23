@@ -24,7 +24,7 @@
 // AccessList.
 //
 // SetPermissions completely replaces the Permissions. To perform an atomic
-// read-modify-write of the AccessList, use the etag parameter.
+// read-modify-write of the AccessList, use the version parameter.
 //
 // Conventions
 //
@@ -150,7 +150,7 @@ const (
   Resolve = Tag("Resolve")  // Operations involving namespace navigation.
 )
 
-// Note: For "bad etag" errors, use verror.ErrBadEtag.
+// Note: For "bad version" errors, use verror.ErrBadVersion.
 error (
 	// The AccessList is too big.  Use groups to represent large sets of principals.
 	TooBig() {"en": "AccessList is too big"}

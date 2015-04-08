@@ -27,7 +27,7 @@
 // AccessList.
 //
 // SetPermissions completely replaces the Permissions. To perform an atomic
-// read-modify-write of the AccessList, use the etag parameter.
+// read-modify-write of the AccessList, use the version parameter.
 //
 // Conventions
 //
