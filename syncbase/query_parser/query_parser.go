@@ -53,8 +53,12 @@
 //
 // <binary_op> ::=
 //   =
-//   | EQUAL
 //   | <>
+//   | <
+//   | >
+//   | <=
+//   | >=
+//   | EQUAL
 //   | NOT EQUAL
 //   | LIKE
 //   | NOT LIKE
@@ -140,6 +144,10 @@ type BinaryOperatorType int
 const (
 	And BinaryOperatorType = 1 + iota
 	Equal
+	GreaterThan
+	GreaterThanOrEqual
+	LessThan
+	LessThanOrEqual
 	Like
 	NotEqual
 	NotLike
@@ -548,7 +556,7 @@ func ParseLikeEqualExpression(s *scanner.Scanner, token *Token) (*Expression, *T
 	// operand 2
 	var operand2 *Operand
 	if token.Tok == TokEOF || token.Tok == TokSEMICOLON {
-		return nil, nil, Error(token.Off, "Unexpected end of statement, expected operator.")
+		return nil, nil, Error(token.Off, "Unexpected end of statement, expected operand.")
 	}
 	operand2, token, err = ParseOperand(s, token)
 	if err != nil {
@@ -671,24 +679,42 @@ func ParseBinaryOperator(s *scanner.Scanner, token *Token) (*BinaryOperator, *To
 				operator.Type = NotLike
 			}
 		default:
-			return nil, nil, Error(token.Off, fmt.Sprintf("Expected operator ('like', 'not like', '=', '<>', 'equal' or 'not equal', found '%s'.", token.Value))
+			return nil, nil, Error(token.Off, fmt.Sprintf("Expected operator ('like', 'not like', '=', '<>', '<', '<=', '>', '>=', 'equal' or 'not equal', found '%s'.", token.Value))
 		}
+		token = ScanToken(s)
 	} else {
 		switch token.Tok {
 		case TokEQUAL:
 			operator.Type = Equal
-		case TokLEFTANGLEBRACKET:
 			token = ScanToken(s)
-			if token.Tok == TokEOF || token.Tok != TokRIGHTANGLEBRACKET {
-				return nil, nil, Error(token.Off, "Expected '>'")
+		case TokLEFTANGLEBRACKET:
+			// Can be '<', '<=', '<>'.
+			token = ScanToken(s)
+			switch token.Tok {
+			case TokRIGHTANGLEBRACKET:
+				operator.Type = NotEqual
+				token = ScanToken(s)
+			case TokEQUAL:
+				operator.Type = LessThanOrEqual
+				token = ScanToken(s)
+			default:
+				operator.Type = LessThan
 			}
-			operator.Type = NotEqual
+		case TokRIGHTANGLEBRACKET:
+			// Can be '>', '>='
+			token = ScanToken(s)
+			switch token.Tok {
+			case TokEQUAL:
+				operator.Type = GreaterThanOrEqual
+				token = ScanToken(s)
+			default:
+				operator.Type = GreaterThan
+			}
 		default:
 			return nil, nil, Error(token.Off, fmt.Sprintf("Expected operator ('like', 'not like', '=', '<>', 'equal' or 'not equal', found '%s'.", token.Value))
 		}
 	}
 
-	token = ScanToken(s)
 	return &operator, token, nil
 }
 
@@ -885,6 +911,14 @@ func (o BinaryOperator) String() string {
 		val += "AND"
 	case Equal:
 		val += "="
+	case GreaterThan:
+		val += ">"
+	case GreaterThanOrEqual:
+		val += ">="
+	case LessThan:
+		val += "<"
+	case LessThanOrEqual:
+		val += "<="
 	case Like:
 		val += "LIKE"
 	case NotEqual:
