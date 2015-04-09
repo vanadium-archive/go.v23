@@ -89,6 +89,7 @@ const (
 	TokINT
 	TokLEFTANGLEBRACKET
 	TokLEFTPAREN
+	TokMINUS
 	TokPERIOD
 	TokRIGHTANGLEBRACKET
 	TokRIGHTPAREN
@@ -120,6 +121,7 @@ type Node struct {
 }
 
 type Statement interface {
+	Offset() int64
 	String() string
 }
 
@@ -233,6 +235,8 @@ func ScanToken(s *scanner.Scanner) *Token {
 		token.Tok = TokPERIOD
 	case ',':
 		token.Tok = TokCOMMA
+	case '-':
+		token.Tok = TokMINUS
 	case '*':
 		token.Tok = TokASTERISK
 	case ';':
@@ -382,14 +386,7 @@ func ParseColumn(s *scanner.Scanner, selectClause *SelectClause, token *Token) (
 	segment.Value = token.Value
 	segment.Off = token.Off
 	col.Segments = append(col.Segments, segment)
-
-	saveToken := token
 	token = ScanToken(s)
-	// TODO(jkline): Move following check to semantic analysis
-	if saveToken.Tok == TokASTERISK && token.Tok != TokEOF && token.Tok == TokPERIOD {
-		// If segment is a '*', don't allow more segments.
-		return nil, Error(token.Off, "No segments may follow an asterisk in a field.")
-	}
 
 	for token.Tok != TokEOF && token.Tok == TokPERIOD {
 		token = ScanToken(s)
@@ -400,13 +397,7 @@ func ParseColumn(s *scanner.Scanner, selectClause *SelectClause, token *Token) (
 		segment.Value = token.Value
 		segment.Off = token.Off
 		col.Segments = append(col.Segments, segment)
-		saveToken = token
 		token = ScanToken(s)
-		// TODO(jkline): Move following check to semantic analysis
-		if saveToken.Tok == TokASTERISK && token.Tok != TokEOF && token.Tok == TokPERIOD {
-			// If segment is a '*', don't allow more segments.
-			return nil, Error(token.Off, "No segments may follow an asterisk in a field.")
-		}
 	}
 
 	selectClause.Columns = append(selectClause.Columns, col)
@@ -606,7 +597,7 @@ func ParseOperand(s *scanner.Scanner, token *Token) (*Operand, *Token, *SyntaxEr
 		operand.Type = OpInt
 		i, err := strconv.ParseInt(token.Value, 0, 64)
 		if err != nil {
-			return nil, nil, Error(token.Off, fmt.Sprintf("Logic error, could not convert %s to int64.", token.Value))
+			return nil, nil, Error(token.Off, fmt.Sprintf("Could not convert %s to int64.", token.Value))
 		}
 		operand.Int = i
 		token = ScanToken(s)
@@ -614,7 +605,7 @@ func ParseOperand(s *scanner.Scanner, token *Token) (*Operand, *Token, *SyntaxEr
 		operand.Type = OpFloat
 		f, err := strconv.ParseFloat(token.Value, 64)
 		if err != nil {
-			return nil, nil, Error(token.Off, fmt.Sprintf("Logic error, could not convert %s to float64.", token.Value))
+			return nil, nil, Error(token.Off, fmt.Sprintf("Could not convert %s to float64.", token.Value))
 		}
 		operand.Float = f
 		token = ScanToken(s)
@@ -625,6 +616,29 @@ func ParseOperand(s *scanner.Scanner, token *Token) (*Operand, *Token, *SyntaxEr
 	case TokSTRING:
 		operand.Type = OpLiteral
 		operand.Literal = token.Value
+		token = ScanToken(s)
+	case TokMINUS:
+		// Could be negative int or negative float
+		off := token.Off
+		token = ScanToken(s)
+		switch token.Tok {
+		case TokINT:
+			operand.Type = OpInt
+			i, err := strconv.ParseInt("-"+token.Value, 0, 64)
+			if err != nil {
+				return nil, nil, Error(off, fmt.Sprintf("Could not convert %s to int64.", "-"+token.Value))
+			}
+			operand.Int = i
+		case TokFLOAT:
+			operand.Type = OpFloat
+			f, err := strconv.ParseFloat("-"+token.Value, 64)
+			if err != nil {
+				return nil, nil, Error(off, fmt.Sprintf("Could not convert %s to float64.", "-"+token.Value))
+			}
+			operand.Float = f
+		default:
+			return nil, nil, Error(token.Off, fmt.Sprintf("Expected int or float."))
+		}
 		token = ScanToken(s)
 	default:
 		return nil, nil, Error(token.Off, fmt.Sprintf("Expected operand, found '%s'.", token.Value))
@@ -748,11 +762,12 @@ func ParseResultsOffsetClause(s *scanner.Scanner, token *Token) (*ResultsOffsetC
 // Parse and return an Int64Value and next token (or SyntaxError).
 func ParseInt64(s *scanner.Scanner, token *Token) (*Int64Value, *Token, *SyntaxError) {
 	// We expect an integer literal
+	// Negative integers are not allowed here, so don't bother looking for TokMINUS.
 	if token.Tok == TokEOF || token.Tok == TokSEMICOLON {
 		return nil, nil, Error(token.Off, "Unexpected end of statement, expected integer literal.")
 	}
 	if token.Tok != TokINT {
-		return nil, nil, Error(token.Off, fmt.Sprintf("Expected integer literal., found '%s'.", token.Value))
+		return nil, nil, Error(token.Off, fmt.Sprintf("Expected positive integer literal., found '%s'.", token.Value))
 	}
 	var v Int64Value
 	v.Off = token.Off
@@ -763,6 +778,10 @@ func ParseInt64(s *scanner.Scanner, token *Token) (*Int64Value, *Token, *SyntaxE
 	}
 	token = ScanToken(s)
 	return &v, token, nil
+}
+
+func (st SelectStatement) Offset() int64 {
+	return st.Off
 }
 
 // Pretty string of select statement.

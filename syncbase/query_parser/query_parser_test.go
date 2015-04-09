@@ -22,10 +22,6 @@ type parseSelectErrorTest struct {
 	err   *query_parser.SyntaxError
 }
 
-func binaryOpPtr(o query_parser.BinaryOperator) *query_parser.BinaryOperator {
-	return &o
-}
-
 func TestQueryParser(t *testing.T) {
 	basic := []parseSelectTest{
 		{
@@ -476,6 +472,130 @@ func TestQueryParser(t *testing.T) {
 							Node: query_parser.Node{Off: 30},
 						},
 						Node: query_parser.Node{Off: 24},
+					},
+					Node: query_parser.Node{Off: 0},
+				},
+			},
+			nil,
+		},
+		{
+			"select v from Customer where v.Value equal -42",
+			[]query_parser.SelectStatement{
+				query_parser.SelectStatement{
+					Select: &query_parser.SelectClause{
+						Columns: []query_parser.Field{
+							query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "v",
+										Node:  query_parser.Node{Off: 7},
+									},
+								},
+								Node: query_parser.Node{Off: 7},
+							},
+						},
+						Node: query_parser.Node{Off: 0},
+					},
+					From: &query_parser.FromClause{
+						Table: query_parser.TableEntry{
+							Name: "Customer",
+							Node: query_parser.Node{Off: 14},
+						},
+						Node: query_parser.Node{Off: 9},
+					},
+					Where: &query_parser.WhereClause{
+						Expr: &query_parser.Expression{
+							Operand1: &query_parser.Operand{
+								Type: query_parser.OpField,
+								Column: &query_parser.Field{
+									Segments: []query_parser.Segment{
+										query_parser.Segment{
+											Value: "v",
+											Node:  query_parser.Node{Off: 29},
+										},
+										query_parser.Segment{
+											Value: "Value",
+											Node:  query_parser.Node{Off: 31},
+										},
+									},
+									Node: query_parser.Node{Off: 29},
+								},
+								Node: query_parser.Node{Off: 29},
+							},
+							Operator: &query_parser.BinaryOperator{
+								Type: query_parser.Equal,
+								Node: query_parser.Node{Off: 37},
+							},
+							Operand2: &query_parser.Operand{
+								Type: query_parser.OpInt,
+								Int:  -42,
+								Node: query_parser.Node{Off: 43},
+							},
+							Node: query_parser.Node{Off: 29},
+						},
+						Node: query_parser.Node{Off: 23},
+					},
+					Node: query_parser.Node{Off: 0},
+				},
+			},
+			nil,
+		},
+		{
+			"select v from Customer where v.Value equal -18.888",
+			[]query_parser.SelectStatement{
+				query_parser.SelectStatement{
+					Select: &query_parser.SelectClause{
+						Columns: []query_parser.Field{
+							query_parser.Field{
+								Segments: []query_parser.Segment{
+									query_parser.Segment{
+										Value: "v",
+										Node:  query_parser.Node{Off: 7},
+									},
+								},
+								Node: query_parser.Node{Off: 7},
+							},
+						},
+						Node: query_parser.Node{Off: 0},
+					},
+					From: &query_parser.FromClause{
+						Table: query_parser.TableEntry{
+							Name: "Customer",
+							Node: query_parser.Node{Off: 14},
+						},
+						Node: query_parser.Node{Off: 9},
+					},
+					Where: &query_parser.WhereClause{
+						Expr: &query_parser.Expression{
+							Operand1: &query_parser.Operand{
+								Type: query_parser.OpField,
+								Column: &query_parser.Field{
+									Segments: []query_parser.Segment{
+										query_parser.Segment{
+											Value: "v",
+											Node:  query_parser.Node{Off: 29},
+										},
+										query_parser.Segment{
+											Value: "Value",
+											Node:  query_parser.Node{Off: 31},
+										},
+									},
+									Node: query_parser.Node{Off: 29},
+								},
+								Node: query_parser.Node{Off: 29},
+							},
+							Operator: &query_parser.BinaryOperator{
+								Type: query_parser.Equal,
+								Node: query_parser.Node{Off: 37},
+							},
+							Operand2: &query_parser.Operand{
+								Type:  query_parser.OpFloat,
+								Float: -18.888,
+								Node:  query_parser.Node{Off: 43},
+							},
+							Node: query_parser.Node{Off: 29},
+						},
+						Node: query_parser.Node{Off: 23},
 					},
 					Node: query_parser.Node{Off: 0},
 				},
@@ -1707,8 +1827,6 @@ func TestQueryParserErrors(t *testing.T) {
 	basic := []parseSelectErrorTest{
 		{"foo", query_parser.Error(0, "Unknown identifier: foo")},
 		{"(foo)", query_parser.Error(0, "Expected identifier, found '('")},
-		{"select *.a from b", query_parser.Error(8, "No segments may follow an asterisk in a field.")},
-		{"select a.*.c.", query_parser.Error(10, "No segments may follow an asterisk in a field.")},
 		{"select foo.", query_parser.Error(11, "Expected identifier or '*', found ''")},
 		{"select foo. from a", query_parser.Error(17, "Expected 'from', found 'a'")},
 		{"select (foo)", query_parser.Error(7, "Expected identifier or '*', found '('")},
@@ -1742,8 +1860,8 @@ func TestQueryParserErrors(t *testing.T) {
 		{"select a from b where c not", query_parser.Error(27, "Expected 'equal' or 'like'")},
 		{"select a from b where c not 8", query_parser.Error(28, "Expected 'equal' or 'like'")},
 		{"select x from y where a and b = c", query_parser.Error(24, "Expected operator ('like', 'not like', '=', '<>', 'equal' or 'not equal', found 'and'.")},
-		{"select * from Customer limit 100 offset a", query_parser.Error(40, "Expected integer literal., found 'a'.")},
-		{"select * from Customer limit a offset 200", query_parser.Error(29, "Expected integer literal., found 'a'.")},
+		{"select * from Customer limit 100 offset a", query_parser.Error(40, "Expected positive integer literal., found 'a'.")},
+		{"select * from Customer limit a offset 200", query_parser.Error(29, "Expected positive integer literal., found 'a'.")},
 		{"select * from Customer limit", query_parser.Error(28, "Unexpected end of statement, expected integer literal.")},
 		{"select * from Customer, Invoice", query_parser.Error(22, "Unexpected: ','.")},
 		{"select * from Customer As Cust where foo = bar", query_parser.Error(23, "Unexpected: 'As'.")},
