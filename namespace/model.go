@@ -63,7 +63,7 @@ type T interface {
 	//			fmt.Fprintf(stderr, "%s can't be traversed: %s\n", v.Name, v.Error)
 	//		}
 	//	}
-	Glob(ctx *context.T, pattern string, opts ...naming.NamespaceOpt) (chan interface{}, error)
+	Glob(ctx *context.T, pattern string, opts ...naming.NamespaceOpt) (chan naming.GlobReply, error)
 
 	// SetRoots sets the roots that the local Namespace is
 	// relative to. All relative names passed to the methods above
