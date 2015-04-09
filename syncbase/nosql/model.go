@@ -18,12 +18,27 @@ type DatabaseHandle interface {
 	BindTable(relativeName string) Table
 }
 
-// Database represents a collection of Tables. Batch operations, queries, sync,
-// watch, etc. all currently operate at the Database level. A Database's version
-// covers both its ACL and its schema.
+// BatchOptions configures a batch.
+// TODO(sadovsky): Add more options, e.g. to configure isolation, whether to
+// track the read set, etc.
+type BatchOptions struct {
+	// Arbitrary string, typically used to describe the intent behind a batch.
+	// Hints are surfaced to clients during conflict resolution.
+	Hint string
+
+	// FailEagerly specifies whether individual operations inside a batch should
+	// fail (with error ErrConcurrentBatch) if some other batch has committed rows
+	// that conflict with rows touched by this batch. If false, only Commit() can
+	// fail with ErrConcurrentBatch.
+	// Typically, this option should be set to false for read-only batches and to
+	// true for read-write batches.
+	FailEagerly bool
+}
+
+// Database represents a collection of Tables. Batches, queries, sync, watch,
+// etc. all operate at the Database level.
 //
 // TODO(sadovsky): Add Watch method.
-// TODO(sadovsky): Add SnapshotDatabase (per design doc and discussions).
 type Database interface {
 	DatabaseHandle
 
@@ -33,6 +48,7 @@ type Database interface {
 	// Create creates the specified Table.
 	// If acl is nil, Permissions is inherited (copied) from the Database.
 	// Create requires the caller to have Write permission at the Database.
+	// relativeName must not contain slashes.
 	CreateTable(ctx *context.T, relativeName string, acl access.Permissions) error
 
 	// DeleteTable deletes the specified Table.
@@ -46,9 +62,14 @@ type Database interface {
 	// Delete deletes this Database.
 	Delete(ctx *context.T) error
 
-	// Begin starts a new Batch operation.
+	// BeginBatch creates a new batch. Instead of calling this function directly,
+	// clients are recommended to use the RunInBatch() helper function, which
+	// detects "concurrent batch" errors and handles retries internally.
 	// TODO(kash): Document concurrency semantics.
-	Begin(ctx *context.T) (BatchDatabase, error)
+	// TODO(sadovsky): Maybe use varargs for options.
+	// TODO(sadovsky): Must this method return an error? (Can we defer the RPC
+	// until the first read or write?)
+	BeginBatch(ctx *context.T, opts BatchOptions) (BatchDatabase, error)
 
 	// We can't reuse the AccessController interface from v23/syncbase/model.go
 	// because that would introduce a circular dependency.
@@ -62,8 +83,8 @@ type Database interface {
 	GetPermissions(ctx *context.T) (acl access.Permissions, version string, err error)
 }
 
-// Batch is a handle to a set of reads and writes to the database that should be
-// considered an atomic unit.
+// BatchDatabase is a handle to a set of reads and writes to the database that
+// should be considered an atomic unit.
 // TODO(kash): Document concurrency semantics.
 type BatchDatabase interface {
 	DatabaseHandle

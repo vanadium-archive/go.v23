@@ -35,9 +35,10 @@ func Range(start, limit string) RowRange {
 	return &rowRange{start: start, limit: limit}
 }
 
-// prefixRange implements the RowRange interface.  We do not represent
-// a prefix as a rowRange because we want to be able to distinguish
-// prefixes from ranges (e.g. syncgroups work with prefixes, not ranges).
+// prefixRange implements the PrefixRange interface (and thus also the RowRange
+// interface). We do not represent a prefix as a rowRange because we want to be
+// able to distinguish prefixes from ranges (e.g. syncgroups work with prefixes,
+// not ranges).
 type prefixRange struct {
 	prefix string
 }
@@ -47,8 +48,12 @@ func (r *prefixRange) Start() string {
 }
 
 func (r *prefixRange) Limit() string {
-	// TODO(kash): implement me.
-	return ""
+	p := r.prefix
+	if p == "" {
+		return p
+	}
+	// TODO(sadovsky): Special handling for delimiters or other reserved chars?
+	return p[:len(p)-1] + string(p[len(p)-1]+1)
 }
 
 func (r *prefixRange) Prefix() string {

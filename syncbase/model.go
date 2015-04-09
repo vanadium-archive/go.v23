@@ -30,12 +30,11 @@ type AccessController interface {
 }
 
 // TODO(sadovsky): Is the terminology still "bind", or has it changed?
-// TODO(sadovsky): Maybe move Create/Delete methods from children to parents?
 
 // Service represents a Vanadium syncbase service.
 // Use syncbase.BindService to get a Service.
 type Service interface {
-	// BindUniverse returns an App.
+	// BindApp returns an App.
 	// relativeName must not contain slashes.
 	BindApp(relativeName string) App
 
@@ -55,12 +54,12 @@ type App interface {
 	// Name returns the relative name of this App.
 	Name() string
 
-	// BindDatabase returns a Database.
+	// BindNoSQLDatabase returns a nosql.Database.
 	// relativeName must not contain slashes.
 	BindNoSQLDatabase(relativeName string) nosql.Database
 
 	// ListDatabases returns a list of all Database names.
-	// TODO(kash): Include the type of database (nosql vs sql).
+	// TODO(kash): Include the database type (nosql vs. sql).
 	ListDatabases(ctx *context.T) ([]string, error)
 
 	// Create creates this App.
@@ -68,7 +67,7 @@ type App interface {
 	// Create requires the caller to have Write permission at the Service.
 	Create(ctx *context.T, acl access.Permissions) error
 
-	// Delete deletes this Universe.
+	// Delete deletes this App.
 	Delete(ctx *context.T) error
 
 	// SetPermissions and GetPermissions are included from the AccessController
