@@ -10,6 +10,7 @@ package build
 
 import (
 	// VDL system imports
+	"fmt"
 	"io"
 	"v.io/v23"
 	"v.io/v23/context"
@@ -21,26 +22,164 @@ import (
 )
 
 // Architecture specifies the hardware architecture of a host.
-type Architecture string
+type Architecture int
+
+const (
+	ArchitectureAmd64 Architecture = iota
+	ArchitectureArm
+	ArchitectureX86
+)
+
+// ArchitectureAll holds all labels for Architecture.
+var ArchitectureAll = [...]Architecture{ArchitectureAmd64, ArchitectureArm, ArchitectureX86}
+
+// ArchitectureFromString creates a Architecture from a string label.
+func ArchitectureFromString(label string) (x Architecture, err error) {
+	err = x.Set(label)
+	return
+}
+
+// Set assigns label to x.
+func (x *Architecture) Set(label string) error {
+	switch label {
+	case "Amd64", "amd64":
+		*x = ArchitectureAmd64
+		return nil
+	case "Arm", "arm":
+		*x = ArchitectureArm
+		return nil
+	case "X86", "x86":
+		*x = ArchitectureX86
+		return nil
+	}
+	*x = -1
+	return fmt.Errorf("unknown label %q in build.Architecture", label)
+}
+
+// String returns the string label of x.
+func (x Architecture) String() string {
+	switch x {
+	case ArchitectureAmd64:
+		return "Amd64"
+	case ArchitectureArm:
+		return "Arm"
+	case ArchitectureX86:
+		return "X86"
+	}
+	return ""
+}
 
 func (Architecture) __VDLReflect(struct {
 	Name string "v.io/v23/services/build.Architecture"
+	Enum struct{ Amd64, Arm, X86 string }
 }) {
 }
 
 // Format specifies the file format of a host.
-type Format string
+type Format int
+
+const (
+	FormatElf Format = iota
+	FormatMach
+	FormatPe
+)
+
+// FormatAll holds all labels for Format.
+var FormatAll = [...]Format{FormatElf, FormatMach, FormatPe}
+
+// FormatFromString creates a Format from a string label.
+func FormatFromString(label string) (x Format, err error) {
+	err = x.Set(label)
+	return
+}
+
+// Set assigns label to x.
+func (x *Format) Set(label string) error {
+	switch label {
+	case "Elf", "elf":
+		*x = FormatElf
+		return nil
+	case "Mach", "mach":
+		*x = FormatMach
+		return nil
+	case "Pe", "pe":
+		*x = FormatPe
+		return nil
+	}
+	*x = -1
+	return fmt.Errorf("unknown label %q in build.Format", label)
+}
+
+// String returns the string label of x.
+func (x Format) String() string {
+	switch x {
+	case FormatElf:
+		return "Elf"
+	case FormatMach:
+		return "Mach"
+	case FormatPe:
+		return "Pe"
+	}
+	return ""
+}
 
 func (Format) __VDLReflect(struct {
 	Name string "v.io/v23/services/build.Format"
+	Enum struct{ Elf, Mach, Pe string }
 }) {
 }
 
 // OperatingSystem specifies the operating system of a host.
-type OperatingSystem string
+type OperatingSystem int
+
+const (
+	OperatingSystemDarwin OperatingSystem = iota
+	OperatingSystemLinux
+	OperatingSystemWindows
+)
+
+// OperatingSystemAll holds all labels for OperatingSystem.
+var OperatingSystemAll = [...]OperatingSystem{OperatingSystemDarwin, OperatingSystemLinux, OperatingSystemWindows}
+
+// OperatingSystemFromString creates a OperatingSystem from a string label.
+func OperatingSystemFromString(label string) (x OperatingSystem, err error) {
+	err = x.Set(label)
+	return
+}
+
+// Set assigns label to x.
+func (x *OperatingSystem) Set(label string) error {
+	switch label {
+	case "Darwin", "darwin":
+		*x = OperatingSystemDarwin
+		return nil
+	case "Linux", "linux":
+		*x = OperatingSystemLinux
+		return nil
+	case "Windows", "windows":
+		*x = OperatingSystemWindows
+		return nil
+	}
+	*x = -1
+	return fmt.Errorf("unknown label %q in build.OperatingSystem", label)
+}
+
+// String returns the string label of x.
+func (x OperatingSystem) String() string {
+	switch x {
+	case OperatingSystemDarwin:
+		return "Darwin"
+	case OperatingSystemLinux:
+		return "Linux"
+	case OperatingSystemWindows:
+		return "Windows"
+	}
+	return ""
+}
 
 func (OperatingSystem) __VDLReflect(struct {
 	Name string "v.io/v23/services/build.OperatingSystem"
+	Enum struct{ Darwin, Linux, Windows string }
 }) {
 }
 
@@ -61,30 +200,6 @@ func init() {
 	vdl.Register((*OperatingSystem)(nil))
 	vdl.Register((*File)(nil))
 }
-
-const X86 = Architecture("386")
-
-const AMD64 = Architecture("amd64")
-
-const ARM = Architecture("arm")
-
-const UnsupportedArchitecture = Architecture("unsupported")
-
-const ELF = Format("ELF")
-
-const MACH = Format("MACH")
-
-const PE = Format("PE")
-
-const UnsupportedFormat = Format("unsupported")
-
-const Darwin = OperatingSystem("darwin")
-
-const Linux = OperatingSystem("linux")
-
-const Windows = OperatingSystem("windows")
-
-const UnsupportedOS = OperatingSystem("unsupported")
 
 // BuilderClientMethods is the client interface
 // containing Builder methods.

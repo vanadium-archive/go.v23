@@ -5,42 +5,30 @@
 // Package build defines interfaces for building executable binaries.
 package build
 
-// TODO(jsimsa): Switch Architecture, Format, and OperatingSystem type
-// to enum when supported.
-
 import (
 	"v.io/v23/services/binary"
 )
 
 // Architecture specifies the hardware architecture of a host.
-type Architecture string
-
-const (
-	X86 = Architecture("386")
-	AMD64 = Architecture("amd64")
-	ARM = Architecture("arm")
-	UnsupportedArchitecture = Architecture("unsupported")
-)
+type Architecture enum {
+	Amd64
+	Arm
+	X86
+}
 
 // Format specifies the file format of a host.
-type Format string
-
-const (
-	ELF = Format("ELF")
-	MACH = Format("MACH")
-	PE = Format("PE")
-	UnsupportedFormat = Format("unsupported")
-)
+type Format enum {
+	Elf
+	Mach
+	Pe
+}
 
 // OperatingSystem specifies the operating system of a host.
-type OperatingSystem string
-
-const (
-	Darwin = OperatingSystem("darwin")
-	Linux = OperatingSystem("linux")
-	Windows = OperatingSystem("windows")
-	UnsupportedOS = OperatingSystem("unsupported")
-)
+type OperatingSystem enum {
+	Darwin
+	Linux
+	Windows
+}
 
 // File records the name and contents of a file.
 type File struct {
