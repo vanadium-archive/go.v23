@@ -167,7 +167,7 @@ func ReflectInvokerOrDie(obj interface{}) Invoker {
 func (ri reflectInvoker) Prepare(method string, _ int) ([]interface{}, []*vdl.Value, error) {
 	info, ok := ri.methods[method]
 	if !ok {
-		return nil, nil, NewErrUnknownMethod(nil, method)
+		return nil, nil, verror.New(verror.ErrUnknownMethod, nil, method)
 	}
 	// Return the tags and new in-arg objects.
 	var argptrs []interface{}
@@ -185,7 +185,7 @@ func (ri reflectInvoker) Prepare(method string, _ int) ([]interface{}, []*vdl.Va
 func (ri reflectInvoker) Invoke(method string, call StreamServerCall, argptrs []interface{}) ([]interface{}, error) {
 	info, ok := ri.methods[method]
 	if !ok {
-		return nil, NewErrUnknownMethod(nil, method)
+		return nil, verror.New(verror.ErrUnknownMethod, call.Context(), method)
 	}
 	// Create the reflect.Value args for the invocation.  The receiver of the
 	// method is always first, followed by the required call arg.
@@ -244,7 +244,7 @@ func (ri reflectInvoker) MethodSignature(call ServerCall, method string) (signat
 			return signature.CopyMethod(msig), nil
 		}
 	}
-	return signature.Method{}, NewErrUnknownMethod(nil, method)
+	return signature.Method{}, verror.New(verror.ErrUnknownMethod, call.Context(), method)
 }
 
 // Globber implements the rpc.Globber interface.

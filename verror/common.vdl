@@ -45,6 +45,9 @@ error (
 	// when an attempt to lookup an item fails because it does not exist.
 	NoExist() {"en":"Does not exist{:_}"}
 
+	UnknownMethod() {"en": "Method does not exist{:_}"}
+	UnknownSuffix() {"en": "Suffix does not exist{:_}"}
+
 	// NoExistOrNoAccess means that either the requested item does not exist, or
 	// is inaccessible.  Typically returned when the distinction between existence
 	// and inaccessiblity should be hidden to preserve privacy.

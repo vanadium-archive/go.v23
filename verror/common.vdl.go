@@ -44,7 +44,9 @@ var (
 	ErrExist = Register("v.io/v23/verror.Exist", NoRetry, "{1:}{2:} Already exists{:_}")
 	// NoExist means that the requested item does not exist; typically returned
 	// when an attempt to lookup an item fails because it does not exist.
-	ErrNoExist = Register("v.io/v23/verror.NoExist", NoRetry, "{1:}{2:} Does not exist{:_}")
+	ErrNoExist       = Register("v.io/v23/verror.NoExist", NoRetry, "{1:}{2:} Does not exist{:_}")
+	ErrUnknownMethod = Register("v.io/v23/verror.UnknownMethod", NoRetry, "{1:}{2:} Method does not exist{:_}")
+	ErrUnknownSuffix = Register("v.io/v23/verror.UnknownSuffix", NoRetry, "{1:}{2:} Suffix does not exist{:_}")
 	// NoExistOrNoAccess means that either the requested item does not exist, or
 	// is inaccessible.  Typically returned when the distinction between existence
 	// and inaccessiblity should be hidden to preserve privacy.
@@ -84,6 +86,8 @@ func init() {
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBadVersion.ID), "{1:}{2:} Version is out of date")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrExist.ID), "{1:}{2:} Already exists{:_}")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoExist.ID), "{1:}{2:} Does not exist{:_}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnknownMethod.ID), "{1:}{2:} Method does not exist{:_}")
+	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrUnknownSuffix.ID), "{1:}{2:} Suffix does not exist{:_}")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoExistOrNoAccess.ID), "{1:}{2:} Does not exist or access denied{:_}")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoServers.ID), "{1:}{2:} No usable servers found{:_}")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoAccess.ID), "{1:}{2:} Access denied{:_}")
@@ -138,6 +142,16 @@ func NewErrExist(ctx *context.T) error {
 // NewErrNoExist returns an error with the ErrNoExist ID.
 func NewErrNoExist(ctx *context.T) error {
 	return New(ErrNoExist, ctx)
+}
+
+// NewErrUnknownMethod returns an error with the ErrUnknownMethod ID.
+func NewErrUnknownMethod(ctx *context.T) error {
+	return New(ErrUnknownMethod, ctx)
+}
+
+// NewErrUnknownSuffix returns an error with the ErrUnknownSuffix ID.
+func NewErrUnknownSuffix(ctx *context.T) error {
+	return New(ErrUnknownSuffix, ctx)
 }
 
 // NewErrNoExistOrNoAccess returns an error with the ErrNoExistOrNoAccess ID.

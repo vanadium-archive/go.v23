@@ -4,11 +4,6 @@
 
 package rpc
 
-import (
-	"v.io/v23/context"
-	"v.io/v23/verror"
-)
-
 // NewGlobState returns the GlobState corresponding to obj.  Returns nil if obj
 // doesn't implement AllGlobber or ChildrenGlobber.
 func NewGlobState(obj interface{}) *GlobState {
@@ -37,19 +32,4 @@ func (o obj) GlobChildren__(ServerCall) (<-chan string, error) {
 	}
 	close(ch)
 	return ch, nil
-}
-
-var (
-	unknownMethod = verror.Register("v.io/v23/rpc.unknownMethod", verror.NoRetry, "{1:}{2:} unknown method {3}")
-	unknownSuffix = verror.Register("v.io/v23/rpc.unknownSuffix", verror.NoRetry, "{1:}{2:} unknown object with suffix: {3}")
-)
-
-// NewErrUnknownMethod returns an unknown method error.
-func NewErrUnknownMethod(ctx *context.T, method string) error {
-	return verror.New(verror.ErrNoExist, ctx, verror.New(unknownMethod, ctx, method))
-}
-
-// NewErrUnknownSuffix returns an unknown suffix error.
-func NewErrUnknownSuffix(ctx *context.T, suffix string) error {
-	return verror.New(verror.ErrNoExist, ctx, verror.New(unknownSuffix, ctx, suffix))
 }

@@ -69,9 +69,9 @@ func (ServerBlessings) RPCServerOpt() {}
 // and received over a connection.
 type SecurityLevel int
 
-func (SecurityLevel) RPCServerOpt()   {}
-func (SecurityLevel) RPCCallOpt()     {}
-func (SecurityLevel) NSNamespaceOpt() {}
+func (SecurityLevel) RPCServerOpt() {}
+func (SecurityLevel) RPCCallOpt()   {}
+func (SecurityLevel) NSOpt()        {}
 
 const (
 	// All user data transmitted over the connection is encrypted and can be
