@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-	"strings"
 	"testing"
 	"v.io/syncbase/v23/syncbase/query_checker"
 	"v.io/syncbase/v23/syncbase/query_parser"
@@ -80,15 +79,13 @@ func TestQueryChecker(t *testing.T) {
 	}
 
 	for _, test := range basic {
-		statements, err := query_parser.Parse(strings.NewReader(test.query))
-		if err != nil {
-			t.Errorf("query: %s; unexpected error: got %v, want nil", test.query, err)
+		s, syntaxErr := query_parser.Parse(test.query)
+		if syntaxErr != nil {
+			t.Errorf("query: %s; unexpected error: got %v, want nil", test.query, syntaxErr)
 		}
-		for _, s := range statements {
-			err := query_checker.Check(store, s)
-			if err != nil {
-				t.Errorf("query: %s; got %v, want: nil", test.query, err)
-			}
+		err := query_checker.Check(store, s)
+		if err != nil {
+			t.Errorf("query: %s; got %v, want: nil", test.query, err)
 		}
 	}
 }
@@ -117,21 +114,16 @@ func TestQueryParserErrors(t *testing.T) {
 		{"select v.* from Customer where k > v.y", query_checker.Error(31, "Key (i.e., 'k') expressions must be of form 'k <op> <string-literal>'.")},
 		{"select v.* from Customer where k >= v.y", query_checker.Error(31, "Key (i.e., 'k') expressions must be of form 'k <op> <string-literal>'.")},
 		{"select v.* from Customer where \"abc%\" = k", query_checker.Error(31, "Key (i.e., 'k') expressions must be of form 'k <op> <string-literal>'.")},
-		/*
-			{"", query_checker.Error(1, "")},
-		*/
 	}
 
 	for _, test := range basic {
-		statements, err := query_parser.Parse(strings.NewReader(test.query))
-		if err != nil {
-			t.Errorf("query: %s; unexpected error: got %v, want nil", test.query, err)
+		s, syntaxErr := query_parser.Parse(test.query)
+		if syntaxErr != nil {
+			t.Errorf("query: %s; unexpected error: got %v, want nil", test.query, syntaxErr)
 		}
-		for _, s := range statements {
-			err := query_checker.Check(store, s)
-			if !reflect.DeepEqual(err, test.err) {
-				t.Errorf("query: %s; got %v, want %v", test.query, err, test.err)
-			}
+		err := query_checker.Check(store, s)
+		if !reflect.DeepEqual(err, test.err) {
+			t.Errorf("query: %s; got %v, want %v", test.query, err, test.err)
 		}
 	}
 }

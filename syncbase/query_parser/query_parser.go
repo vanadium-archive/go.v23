@@ -73,7 +73,6 @@ package query_parser
 
 import (
 	"fmt"
-	"io"
 	"strconv"
 	"strings"
 	"text/scanner"
@@ -97,7 +96,6 @@ const (
 	TokPERIOD
 	TokRIGHTANGLEBRACKET
 	TokRIGHTPAREN
-	TokSEMICOLON
 	TokSTRING
 )
 
@@ -247,8 +245,6 @@ func ScanToken(s *scanner.Scanner) *Token {
 		token.Tok = TokMINUS
 	case '*':
 		token.Tok = TokASTERISK
-	case ';':
-		token.Tok = TokSEMICOLON
 	case '(':
 		token.Tok = TokLEFTPAREN
 	case ')':
@@ -277,46 +273,27 @@ func ScanToken(s *scanner.Scanner) *Token {
 	return &token
 }
 
-// Parse statements (which are separated by semicolons).  Return statements or a SyntaxError.
-func Parse(src io.Reader) ([]*Statement, *SyntaxError) {
+// Parse a statement.  Return it or a SyntaxError.
+func Parse(src string) (*Statement, *SyntaxError) {
+	r := strings.NewReader(src)
 	var s scanner.Scanner
-	var statements []*Statement
-	s.Init(src)
+	s.Init(r)
 
-	var st *Statement
-	var err *SyntaxError
-	token := ScanToken(&s)
-	for token.Tok != TokEOF {
-		for token.Tok != TokEOF && token.Tok == TokSEMICOLON {
-			// eat semicolons
-			token = ScanToken(&s)
-		}
-		if token.Tok == TokEOF {
-			break
-		}
-		st, token, err = ParseStatement(&s, token)
-		if err != nil {
-			return statements, err
-		}
-		statements = append(statements, st)
-		token = ScanToken(&s)
+	token := ScanToken(&s) // eat the select
+	if token.Tok == TokEOF {
+		return nil, Error(token.Off, "No statement found.")
 	}
-	return statements, nil
-}
-
-// Parse a single statement.  Return a *Statement and the next token (or SyntaxError)
-func ParseStatement(s *scanner.Scanner, token *Token) (*Statement, *Token, *SyntaxError) {
 	if token.Tok != TokIDENT {
-		return nil, nil, Error(token.Off, fmt.Sprintf("Expected identifier, found '%s'", token.Value))
+		return nil, Error(token.Off, fmt.Sprintf("Expected identifier, found '%s'", token.Value))
 	}
 	switch strings.ToLower(token.Value) {
 	case "select":
 		var st Statement
 		var err *SyntaxError
-		st, token, err = Select(s, token)
-		return &st, token, err
+		st, token, err = Select(&s, token)
+		return &st, err
 	default:
-		return nil, nil, Error(token.Off, fmt.Sprintf("Unknown identifier: %s", token.Value))
+		return nil, Error(token.Off, fmt.Sprintf("Unknown identifier: %s", token.Value))
 	}
 }
 
@@ -348,7 +325,7 @@ func Select(s *scanner.Scanner, token *Token) (Statement, *Token, *SyntaxError) 
 	}
 
 	// There can be nothing remaining for the current statement
-	if token.Tok != TokEOF && token.Tok != TokSEMICOLON {
+	if token.Tok != TokEOF {
 		return nil, nil, Error(token.Off, fmt.Sprintf("Unexpected: '%s'.", token.Value))
 	}
 
@@ -436,7 +413,7 @@ func ParseFromClause(s *scanner.Scanner, token *Token) (*FromClause, *Token, *Sy
 // Parse the where clause (if any).  Return WhereClause (could be nil) and and next Token or SyntaxError.
 func ParseWhereClause(s *scanner.Scanner, token *Token) (*WhereClause, *Token, *SyntaxError) {
 	// parse Optional where clause
-	if token.Tok != TokEOF && token.Tok != TokSEMICOLON {
+	if token.Tok != TokEOF {
 		if strings.ToLower(token.Value) != "where" {
 			return nil, token, nil
 		}
@@ -466,7 +443,7 @@ func ParseParenthesizedExpression(s *scanner.Scanner, token *Token) (*Expression
 		return nil, nil, err
 	}
 	// Expect right paren
-	if token.Tok == TokEOF || token.Tok == TokSEMICOLON {
+	if token.Tok == TokEOF {
 		return nil, nil, Error(token.Off, "Unexpected end of statement.")
 	}
 	if token.Tok != TokRIGHTPAREN {
@@ -478,7 +455,7 @@ func ParseParenthesizedExpression(s *scanner.Scanner, token *Token) (*Expression
 
 // Parse an expression.  Return expression and next token (or SyntaxError)
 func ParseExpression(s *scanner.Scanner, token *Token) (*Expression, *Token, *SyntaxError) {
-	if token.Tok == TokEOF || token.Tok == TokSEMICOLON {
+	if token.Tok == TokEOF {
 		return nil, nil, Error(token.Off, "Unexpected end of statement.")
 	}
 
@@ -495,7 +472,7 @@ func ParseExpression(s *scanner.Scanner, token *Token) (*Expression, *Token, *Sy
 		return nil, nil, err
 	}
 
-	for token.Tok != TokEOF && token.Tok != TokSEMICOLON && token.Tok != TokRIGHTPAREN {
+	for token.Tok != TokEOF && token.Tok != TokRIGHTPAREN {
 		// There is more.  If not 'and', 'or' or ')', the where is over.
 		if strings.ToLower(token.Value) != "and" && strings.ToLower(token.Value) != "or" {
 			return expr, token, nil
@@ -555,7 +532,7 @@ func ParseLikeEqualExpression(s *scanner.Scanner, token *Token) (*Expression, *T
 
 	// operand 2
 	var operand2 *Operand
-	if token.Tok == TokEOF || token.Tok == TokSEMICOLON {
+	if token.Tok == TokEOF {
 		return nil, nil, Error(token.Off, "Unexpected end of statement, expected operand.")
 	}
 	operand2, token, err = ParseOperand(s, token)
@@ -572,7 +549,7 @@ func ParseLikeEqualExpression(s *scanner.Scanner, token *Token) (*Expression, *T
 
 // Parse an operand (field or literal) and return it and the next Token (or SyntaxError)
 func ParseOperand(s *scanner.Scanner, token *Token) (*Operand, *Token, *SyntaxError) {
-	if token.Tok == TokEOF || token.Tok == TokSEMICOLON {
+	if token.Tok == TokEOF {
 		return nil, nil, Error(token.Off, "Unexpected end of statement, expected operand.")
 	}
 	var operand Operand
@@ -589,7 +566,7 @@ func ParseOperand(s *scanner.Scanner, token *Token) (*Operand, *Token, *SyntaxEr
 
 		// Get the next token.  See if it is a '.'.
 		token = ScanToken(s)
-		for token.Tok != TokEOF && token.Tok != TokSEMICOLON && token.Tok == TokPERIOD {
+		for token.Tok != TokEOF && token.Tok == TokPERIOD {
 			token = ScanToken(s)
 			if token.Tok != TokIDENT {
 				return nil, nil, Error(token.Off, fmt.Sprintf("Expected identifier, found '%s'", token.Value))
@@ -656,7 +633,7 @@ func ParseOperand(s *scanner.Scanner, token *Token) (*Operand, *Token, *SyntaxEr
 
 // Parse binary operator and return it and the next Token (or SyntaxError)
 func ParseBinaryOperator(s *scanner.Scanner, token *Token) (*BinaryOperator, *Token, *SyntaxError) {
-	if token.Tok == TokEOF || token.Tok == TokSEMICOLON {
+	if token.Tok == TokEOF {
 		return nil, nil, Error(token.Off, "Unexpected end of statement, expected operator.")
 	}
 	var operator BinaryOperator
@@ -720,7 +697,7 @@ func ParseBinaryOperator(s *scanner.Scanner, token *Token) (*BinaryOperator, *To
 
 // Parse logical operator and return it and the next Token (or SyntaxError)
 func ParseLogicalOperator(s *scanner.Scanner, token *Token) (*BinaryOperator, *Token, *SyntaxError) {
-	if token.Tok == TokEOF || token.Tok == TokSEMICOLON {
+	if token.Tok == TokEOF {
 		return nil, nil, Error(token.Off, "Unexpected end of statement, expected operator.")
 	}
 	var operator BinaryOperator
@@ -743,7 +720,7 @@ func ParseLimitResultsOffsetClauses(s *scanner.Scanner, token *Token) (*LimitCla
 	var err *SyntaxError
 	var lc *LimitClause
 	var oc *ResultsOffsetClause
-	for token.Tok != TokEOF && token.Tok != TokSEMICOLON {
+	for token.Tok != TokEOF {
 		// Note: Can be in any order.  If more than one limit or offset clause, the last one wins
 		if token.Tok == TokIDENT && strings.ToLower(token.Value) == "limit" {
 			lc, token, err = ParseLimitClause(s, token)
@@ -789,7 +766,7 @@ func ParseResultsOffsetClause(s *scanner.Scanner, token *Token) (*ResultsOffsetC
 func ParseInt64(s *scanner.Scanner, token *Token) (*Int64Value, *Token, *SyntaxError) {
 	// We expect an integer literal
 	// Negative integers are not allowed here, so don't bother looking for TokMINUS.
-	if token.Tok == TokEOF || token.Tok == TokSEMICOLON {
+	if token.Tok == TokEOF {
 		return nil, nil, Error(token.Off, "Unexpected end of statement, expected integer literal.")
 	}
 	if token.Tok != TokINT {
