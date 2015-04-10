@@ -124,11 +124,7 @@ type implApplicationClientStub struct {
 }
 
 func (c implApplicationClientStub) Match(ctx *context.T, i0 []string, opts ...rpc.CallOpt) (o0 application.Envelope, err error) {
-	var call rpc.ClientCall
-	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Match", []interface{}{i0}, opts...); err != nil {
-		return
-	}
-	err = call.Finish(&o0)
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Match", []interface{}{i0}, []interface{}{&o0}, opts...)
 	return
 }
 
@@ -395,20 +391,12 @@ type implBinaryClientStub struct {
 }
 
 func (c implBinaryClientStub) Create(ctx *context.T, i0 int32, i1 MediaInfo, opts ...rpc.CallOpt) (err error) {
-	var call rpc.ClientCall
-	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Create", []interface{}{i0, i1}, opts...); err != nil {
-		return
-	}
-	err = call.Finish()
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Create", []interface{}{i0, i1}, nil, opts...)
 	return
 }
 
 func (c implBinaryClientStub) Delete(ctx *context.T, opts ...rpc.CallOpt) (err error) {
-	var call rpc.ClientCall
-	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Delete", nil, opts...); err != nil {
-		return
-	}
-	err = call.Finish()
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Delete", nil, nil, opts...)
 	return
 }
 
@@ -422,20 +410,12 @@ func (c implBinaryClientStub) Download(ctx *context.T, i0 int32, opts ...rpc.Cal
 }
 
 func (c implBinaryClientStub) DownloadUrl(ctx *context.T, opts ...rpc.CallOpt) (o0 string, o1 int64, err error) {
-	var call rpc.ClientCall
-	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "DownloadUrl", nil, opts...); err != nil {
-		return
-	}
-	err = call.Finish(&o0, &o1)
+	err = v23.GetClient(ctx).Call(ctx, c.name, "DownloadUrl", nil, []interface{}{&o0, &o1}, opts...)
 	return
 }
 
 func (c implBinaryClientStub) Stat(ctx *context.T, opts ...rpc.CallOpt) (o0 []binary.PartInfo, o1 MediaInfo, err error) {
-	var call rpc.ClientCall
-	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Stat", nil, opts...); err != nil {
-		return
-	}
-	err = call.Finish(&o0, &o1)
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Stat", nil, []interface{}{&o0, &o1}, opts...)
 	return
 }
 
@@ -1032,20 +1012,12 @@ type implProfileClientStub struct {
 }
 
 func (c implProfileClientStub) Label(ctx *context.T, opts ...rpc.CallOpt) (o0 string, err error) {
-	var call rpc.ClientCall
-	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Label", nil, opts...); err != nil {
-		return
-	}
-	err = call.Finish(&o0)
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Label", nil, []interface{}{&o0}, opts...)
 	return
 }
 
 func (c implProfileClientStub) Description(ctx *context.T, opts ...rpc.CallOpt) (o0 string, err error) {
-	var call rpc.ClientCall
-	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Description", nil, opts...); err != nil {
-		return
-	}
-	err = call.Finish(&o0)
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Description", nil, []interface{}{&o0}, opts...)
 	return
 }
 

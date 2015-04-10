@@ -585,47 +585,27 @@ type implApplicationClientStub struct {
 }
 
 func (c implApplicationClientStub) Install(ctx *context.T, i0 string, i1 Config, i2 application.Packages, opts ...rpc.CallOpt) (o0 string, err error) {
-	var call rpc.ClientCall
-	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Install", []interface{}{i0, i1, i2}, opts...); err != nil {
-		return
-	}
-	err = call.Finish(&o0)
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Install", []interface{}{i0, i1, i2}, []interface{}{&o0}, opts...)
 	return
 }
 
 func (c implApplicationClientStub) Refresh(ctx *context.T, opts ...rpc.CallOpt) (err error) {
-	var call rpc.ClientCall
-	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Refresh", nil, opts...); err != nil {
-		return
-	}
-	err = call.Finish()
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Refresh", nil, nil, opts...)
 	return
 }
 
 func (c implApplicationClientStub) Restart(ctx *context.T, opts ...rpc.CallOpt) (err error) {
-	var call rpc.ClientCall
-	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Restart", nil, opts...); err != nil {
-		return
-	}
-	err = call.Finish()
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Restart", nil, nil, opts...)
 	return
 }
 
 func (c implApplicationClientStub) Resume(ctx *context.T, opts ...rpc.CallOpt) (err error) {
-	var call rpc.ClientCall
-	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Resume", nil, opts...); err != nil {
-		return
-	}
-	err = call.Finish()
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Resume", nil, nil, opts...)
 	return
 }
 
 func (c implApplicationClientStub) Revert(ctx *context.T, opts ...rpc.CallOpt) (err error) {
-	var call rpc.ClientCall
-	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Revert", nil, opts...); err != nil {
-		return
-	}
-	err = call.Finish()
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Revert", nil, nil, opts...)
 	return
 }
 
@@ -639,65 +619,37 @@ func (c implApplicationClientStub) Start(ctx *context.T, opts ...rpc.CallOpt) (o
 }
 
 func (c implApplicationClientStub) Stop(ctx *context.T, i0 uint32, opts ...rpc.CallOpt) (err error) {
-	var call rpc.ClientCall
-	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Stop", []interface{}{i0}, opts...); err != nil {
-		return
-	}
-	err = call.Finish()
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Stop", []interface{}{i0}, nil, opts...)
 	return
 }
 
 func (c implApplicationClientStub) Suspend(ctx *context.T, opts ...rpc.CallOpt) (err error) {
-	var call rpc.ClientCall
-	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Suspend", nil, opts...); err != nil {
-		return
-	}
-	err = call.Finish()
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Suspend", nil, nil, opts...)
 	return
 }
 
 func (c implApplicationClientStub) Uninstall(ctx *context.T, opts ...rpc.CallOpt) (err error) {
-	var call rpc.ClientCall
-	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Uninstall", nil, opts...); err != nil {
-		return
-	}
-	err = call.Finish()
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Uninstall", nil, nil, opts...)
 	return
 }
 
 func (c implApplicationClientStub) Update(ctx *context.T, opts ...rpc.CallOpt) (err error) {
-	var call rpc.ClientCall
-	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Update", nil, opts...); err != nil {
-		return
-	}
-	err = call.Finish()
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Update", nil, nil, opts...)
 	return
 }
 
 func (c implApplicationClientStub) UpdateTo(ctx *context.T, i0 string, opts ...rpc.CallOpt) (err error) {
-	var call rpc.ClientCall
-	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "UpdateTo", []interface{}{i0}, opts...); err != nil {
-		return
-	}
-	err = call.Finish()
+	err = v23.GetClient(ctx).Call(ctx, c.name, "UpdateTo", []interface{}{i0}, nil, opts...)
 	return
 }
 
 func (c implApplicationClientStub) Debug(ctx *context.T, opts ...rpc.CallOpt) (o0 string, err error) {
-	var call rpc.ClientCall
-	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Debug", nil, opts...); err != nil {
-		return
-	}
-	err = call.Finish(&o0)
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Debug", nil, []interface{}{&o0}, opts...)
 	return
 }
 
 func (c implApplicationClientStub) Status(ctx *context.T, opts ...rpc.CallOpt) (o0 Status, err error) {
-	var call rpc.ClientCall
-	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Status", nil, opts...); err != nil {
-		return
-	}
-	err = call.Finish(&o0)
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Status", nil, []interface{}{&o0}, opts...)
 	return
 }
 
@@ -1467,11 +1419,7 @@ type implClaimableClientStub struct {
 }
 
 func (c implClaimableClientStub) Claim(ctx *context.T, i0 string, opts ...rpc.CallOpt) (err error) {
-	var call rpc.ClientCall
-	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Claim", []interface{}{i0}, opts...); err != nil {
-		return
-	}
-	err = call.Finish()
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Claim", []interface{}{i0}, nil, opts...)
 	return
 }
 
@@ -1695,47 +1643,27 @@ type implDeviceClientStub struct {
 }
 
 func (c implDeviceClientStub) Describe(ctx *context.T, opts ...rpc.CallOpt) (o0 Description, err error) {
-	var call rpc.ClientCall
-	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Describe", nil, opts...); err != nil {
-		return
-	}
-	err = call.Finish(&o0)
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Describe", nil, []interface{}{&o0}, opts...)
 	return
 }
 
 func (c implDeviceClientStub) IsRunnable(ctx *context.T, i0 binary.Description, opts ...rpc.CallOpt) (o0 bool, err error) {
-	var call rpc.ClientCall
-	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "IsRunnable", []interface{}{i0}, opts...); err != nil {
-		return
-	}
-	err = call.Finish(&o0)
+	err = v23.GetClient(ctx).Call(ctx, c.name, "IsRunnable", []interface{}{i0}, []interface{}{&o0}, opts...)
 	return
 }
 
 func (c implDeviceClientStub) Reset(ctx *context.T, i0 uint64, opts ...rpc.CallOpt) (err error) {
-	var call rpc.ClientCall
-	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Reset", []interface{}{i0}, opts...); err != nil {
-		return
-	}
-	err = call.Finish()
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Reset", []interface{}{i0}, nil, opts...)
 	return
 }
 
 func (c implDeviceClientStub) AssociateAccount(ctx *context.T, i0 []string, i1 string, opts ...rpc.CallOpt) (err error) {
-	var call rpc.ClientCall
-	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "AssociateAccount", []interface{}{i0, i1}, opts...); err != nil {
-		return
-	}
-	err = call.Finish()
+	err = v23.GetClient(ctx).Call(ctx, c.name, "AssociateAccount", []interface{}{i0, i1}, nil, opts...)
 	return
 }
 
 func (c implDeviceClientStub) ListAssociations(ctx *context.T, opts ...rpc.CallOpt) (o0 []Association, err error) {
-	var call rpc.ClientCall
-	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "ListAssociations", nil, opts...); err != nil {
-		return
-	}
-	err = call.Finish(&o0)
+	err = v23.GetClient(ctx).Call(ctx, c.name, "ListAssociations", nil, []interface{}{&o0}, opts...)
 	return
 }
 

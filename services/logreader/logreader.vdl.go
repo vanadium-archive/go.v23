@@ -80,11 +80,7 @@ type implLogFileClientStub struct {
 }
 
 func (c implLogFileClientStub) Size(ctx *context.T, opts ...rpc.CallOpt) (o0 int64, err error) {
-	var call rpc.ClientCall
-	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Size", nil, opts...); err != nil {
-		return
-	}
-	err = call.Finish(&o0)
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Size", nil, []interface{}{&o0}, opts...)
 	return
 }
 

@@ -81,11 +81,7 @@ func (c implAppCycleClientStub) Stop(ctx *context.T, opts ...rpc.CallOpt) (ocall
 }
 
 func (c implAppCycleClientStub) ForceStop(ctx *context.T, opts ...rpc.CallOpt) (err error) {
-	var call rpc.ClientCall
-	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "ForceStop", nil, opts...); err != nil {
-		return
-	}
-	err = call.Finish()
+	err = v23.GetClient(ctx).Call(ctx, c.name, "ForceStop", nil, nil, opts...)
 	return
 }
 

@@ -60,20 +60,12 @@ type implPProfClientStub struct {
 }
 
 func (c implPProfClientStub) CmdLine(ctx *context.T, opts ...rpc.CallOpt) (o0 []string, err error) {
-	var call rpc.ClientCall
-	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "CmdLine", nil, opts...); err != nil {
-		return
-	}
-	err = call.Finish(&o0)
+	err = v23.GetClient(ctx).Call(ctx, c.name, "CmdLine", nil, []interface{}{&o0}, opts...)
 	return
 }
 
 func (c implPProfClientStub) Profiles(ctx *context.T, opts ...rpc.CallOpt) (o0 []string, err error) {
-	var call rpc.ClientCall
-	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Profiles", nil, opts...); err != nil {
-		return
-	}
-	err = call.Finish(&o0)
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Profiles", nil, []interface{}{&o0}, opts...)
 	return
 }
 
@@ -96,11 +88,7 @@ func (c implPProfClientStub) CpuProfile(ctx *context.T, i0 int32, opts ...rpc.Ca
 }
 
 func (c implPProfClientStub) Symbol(ctx *context.T, i0 []uint64, opts ...rpc.CallOpt) (o0 []string, err error) {
-	var call rpc.ClientCall
-	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Symbol", []interface{}{i0}, opts...); err != nil {
-		return
-	}
-	err = call.Finish(&o0)
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Symbol", []interface{}{i0}, []interface{}{&o0}, opts...)
 	return
 }
 

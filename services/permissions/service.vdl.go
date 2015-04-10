@@ -112,20 +112,12 @@ type implObjectClientStub struct {
 }
 
 func (c implObjectClientStub) SetPermissions(ctx *context.T, i0 access.Permissions, i1 string, opts ...rpc.CallOpt) (err error) {
-	var call rpc.ClientCall
-	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "SetPermissions", []interface{}{i0, i1}, opts...); err != nil {
-		return
-	}
-	err = call.Finish()
+	err = v23.GetClient(ctx).Call(ctx, c.name, "SetPermissions", []interface{}{i0, i1}, nil, opts...)
 	return
 }
 
 func (c implObjectClientStub) GetPermissions(ctx *context.T, opts ...rpc.CallOpt) (o0 access.Permissions, o1 string, err error) {
-	var call rpc.ClientCall
-	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "GetPermissions", nil, opts...); err != nil {
-		return
-	}
-	err = call.Finish(&o0, &o1)
+	err = v23.GetClient(ctx).Call(ctx, c.name, "GetPermissions", nil, []interface{}{&o0, &o1}, opts...)
 	return
 }
 

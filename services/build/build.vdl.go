@@ -239,11 +239,7 @@ func (c implBuilderClientStub) Build(ctx *context.T, i0 Architecture, i1 Operati
 }
 
 func (c implBuilderClientStub) Describe(ctx *context.T, i0 string, opts ...rpc.CallOpt) (o0 binary.Description, err error) {
-	var call rpc.ClientCall
-	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Describe", []interface{}{i0}, opts...); err != nil {
-		return
-	}
-	err = call.Finish(&o0)
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Describe", []interface{}{i0}, []interface{}{&o0}, opts...)
 	return
 }
 

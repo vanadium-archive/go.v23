@@ -162,47 +162,27 @@ type implMountTableClientStub struct {
 }
 
 func (c implMountTableClientStub) Mount(ctx *context.T, i0 string, i1 uint32, i2 naming.MountFlag, opts ...rpc.CallOpt) (err error) {
-	var call rpc.ClientCall
-	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Mount", []interface{}{i0, i1, i2}, opts...); err != nil {
-		return
-	}
-	err = call.Finish()
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Mount", []interface{}{i0, i1, i2}, nil, opts...)
 	return
 }
 
 func (c implMountTableClientStub) Unmount(ctx *context.T, i0 string, opts ...rpc.CallOpt) (err error) {
-	var call rpc.ClientCall
-	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Unmount", []interface{}{i0}, opts...); err != nil {
-		return
-	}
-	err = call.Finish()
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Unmount", []interface{}{i0}, nil, opts...)
 	return
 }
 
 func (c implMountTableClientStub) Delete(ctx *context.T, i0 bool, opts ...rpc.CallOpt) (err error) {
-	var call rpc.ClientCall
-	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Delete", []interface{}{i0}, opts...); err != nil {
-		return
-	}
-	err = call.Finish()
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Delete", []interface{}{i0}, nil, opts...)
 	return
 }
 
 func (c implMountTableClientStub) ResolveStep(ctx *context.T, opts ...rpc.CallOpt) (o0 naming.MountEntry, err error) {
-	var call rpc.ClientCall
-	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "ResolveStep", nil, opts...); err != nil {
-		return
-	}
-	err = call.Finish(&o0)
+	err = v23.GetClient(ctx).Call(ctx, c.name, "ResolveStep", nil, []interface{}{&o0}, opts...)
 	return
 }
 
 func (c implMountTableClientStub) ResolveStepX(ctx *context.T, opts ...rpc.CallOpt) (o0 naming.MountEntry, err error) {
-	var call rpc.ClientCall
-	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "ResolveStepX", nil, opts...); err != nil {
-		return
-	}
-	err = call.Finish(&o0)
+	err = v23.GetClient(ctx).Call(ctx, c.name, "ResolveStepX", nil, []interface{}{&o0}, opts...)
 	return
 }
 
