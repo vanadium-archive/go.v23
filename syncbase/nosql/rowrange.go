@@ -53,6 +53,10 @@ func (r *prefixRange) Limit() string {
 		return p
 	}
 	// TODO(sadovsky): Special handling for delimiters or other reserved chars?
+	// TODO(sadovsky): This implementation is incorrect if we allow prefix strings
+	// to contain bytes with the max possible value (255). In practice we may
+	// disallow such byte values, but in any case it's probably best to make this
+	// implementation defensive.
 	return p[:len(p)-1] + string(p[len(p)-1]+1)
 }
 

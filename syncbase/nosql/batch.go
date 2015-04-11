@@ -9,8 +9,8 @@ import (
 )
 
 // TODO(sadovsky): Add retry loop.
-func RunInBatch(ctx *context.T, db Database, opts BatchOptions, fn func(db BatchDatabase) error) error {
-	b, err := db.BeginBatch(ctx, opts)
+func RunInBatch(ctx *context.T, d Database, opts BatchOptions, fn func(b BatchDatabase) error) error {
+	b, err := d.BeginBatch(ctx, opts)
 	if err != nil {
 		return err
 	}

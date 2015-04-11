@@ -6,7 +6,7 @@
 // reflect the new Syncbase design.
 // +build ignore
 
-package syncbase_test
+package nosql_test
 
 // Note: v.io/x/ref/services/groups/internal/server/server_test.go has some
 // helpful code snippets to model after.
@@ -16,6 +16,7 @@ import (
 	"runtime/debug"
 	"testing"
 
+	wire "v.io/syncbase/v23/services/syncbase"
 	"v.io/syncbase/v23/syncbase"
 	"v.io/syncbase/v23/syncbase/common"
 	"v.io/syncbase/x/ref/services/syncbase/server"
@@ -25,6 +26,7 @@ import (
 	"v.io/v23/naming"
 	"v.io/v23/security"
 	"v.io/v23/security/access"
+	"v.io/v23/vdl"
 	"v.io/x/lib/vlog"
 	_ "v.io/x/ref/profiles"
 	tsecurity "v.io/x/ref/test/testutil"
@@ -112,6 +114,15 @@ func getPermissionsOrDie(ac common.AccessController, ctx *context.T, t *testing.
 	return perms
 }
 
+// Inputs appName and dName are app and database names respectively.
+func createDatabase(ctx *context.T, s syncbase.Service, appName, dName string, perms access.Permissions, schema wire.Schema) error {
+	a := s.App(appName)
+	if err := a.Create(ctx, perms); err != nil {
+		return err
+	}
+	return a.Database(dName).Create(ctx, perms)
+}
+
 ////////////////////////////////////////
 // Test cases
 
@@ -119,56 +130,72 @@ func getPermissionsOrDie(ac common.AccessController, ctx *context.T, t *testing.
 
 func TestNameAndKey(t *testing.T) {
 	a := syncbase.NewService("s").App("a")
+	d := a.Database("d")
+	tb := d.Table("tb")
+	r := tb.Row("r")
 
-	if a.Name() != "a" {
-		t.Errorf("Wrong name: %s", a.Name())
+	if d.Name() != "d" {
+		t.Errorf("Wrong name: %s", d.Name())
+	}
+	if tb.Name() != "tb" {
+		t.Errorf("Wrong name: %s", tb.Name())
+	}
+	if r.Key() != "r" {
+		t.Errorf("Wrong key: %s", r.Key())
 	}
 }
 
-// Tests that App.Create works as expected, including default Permissions.
+// Tests that Database.Create works as expected, including default Permissions.
 func TestCreate(t *testing.T) {
 	ctx, sName, cleanup := setupOrDie(nil)
 	defer cleanup()
 
 	s := syncbase.NewService(sName)
 	a := s.App("a")
-	d := a.NoSQLDatabase("d")
-
-	// Database.Create should fail, since App does not exist.
-	if err := d.Create(ctx, nil); err == nil {
-		t.Fatalf("d.Create() should have failed")
-	}
+	d := a.Database("d")
 
 	// Create the App.
-	// TODO(sadovsky): Test auth check (against Service Permissions).
 	if err := a.Create(ctx, nil); err != nil {
 		t.Fatalf("a.Create() failed: %s", err)
+	}
+
+	// Create the Database.
+	// TODO(sadovsky): Test auth check (against App Permissions).
+	if err := d.Create(ctx, nil); err != nil {
+		t.Fatalf("d.Create() failed: %s", err)
 	}
 	if wantPermissions, gotPermissions := defaultPermissions(), getPermissionsOrDie(a, ctx, t); !reflect.DeepEqual(wantPermissions, gotPermissions) {
 		t.Errorf("Permissions do not match: want %v, got %v", wantPermissions, gotPermissions)
 	}
 
-	// Database.Create should now succeed.
-	if err := d.Create(ctx, nil); err != nil {
-		t.Fatalf("d.Create() failed: %s", err)
-	}
-
-	// Test App.Create with non-default Permissions.
-	a2 := s.App("a2")
-	perms := access.Permissions{}
+	// Test Database.Create with non-default Permissions.
+	d2 := a.Database("d2")
+	perms = access.Permissions{}
 	perms.Add(security.BlessingPattern("server/client"), string(access.Admin))
-	if err := a2.Create(ctx, perms); err != nil {
-		t.Fatalf("a2.Create() failed: %s", err)
+	if err := d2.Create(ctx, perms); err != nil {
+		t.Fatalf("d2.Create() failed: %s", err)
 	}
-	if wantPermissions, gotPermissions := perms, getPermissionsOrDie(a2, ctx, t); !reflect.DeepEqual(wantPermissions, gotPermissions) {
+	if wantPermissions, gotPermissions := perms, getPermissionsOrDie(d2, ctx, t); !reflect.DeepEqual(wantPermissions, gotPermissions) {
 		t.Errorf("Permissions do not match: want %v, got %v", wantPermissions, gotPermissions)
 	}
 }
 
-// Tests that App.Delete works as expected.
+// Tests that Database.Delete works as expected.
+func TestDelete(t *testing.T) {
+}
+
+// Tests that Database.{Create,Delete}Table work as expected.
 func TestDelete(t *testing.T) {
 }
 
 // Tests that the various {Set,Get}Permissions methods work as expected.
 func TestPermissionsMethods(t *testing.T) {
+}
+
+// Tests that Table.{Get,Put,Delete} work as expected.
+func TestTableRowMethods(t *testing.T) {
+}
+
+// Tests that Row.{Get,Put,Delete} work as expected.
+func TestRowMethods(t *testing.T) {
 }

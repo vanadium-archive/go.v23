@@ -1,0 +1,98 @@
+// Copyright 2015 The Vanadium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+// Package nosql defines the wire API for the NoSQL part of Syncbase.
+package nosql
+
+import (
+  "v.io/v23/security/access"
+  "v.io/v23/services/permissions"
+)
+
+// Database represents a collection of Tables. Batches, queries, sync, watch,
+// etc. all operate at the Database level.
+// Database.Glob operates over Table names.
+//
+// TODO(sadovsky): Add Watch method.
+type Database interface {
+	// Create creates the specified Table.
+	// If perms is nil, Permissions is inherited (copied) from the Database.
+	// relativeName must not contain slashes.
+	CreateTable(relativeName string, perms access.Permissions) error {access.Write}
+
+	// DeleteTable deletes the specified Table.
+	DeleteTable(relativeName string) error {access.Write}
+
+	// Create creates this Database.
+	// If perms is nil, Permissions is inherited (copied) from the App.
+	// Create requires the caller to have Write permission at the App.
+	Create(perms access.Permissions) error {access.Write}
+
+	// Delete deletes this Database.
+	Delete() error {access.Write}
+
+	// BeginBatch creates a new batch. It returns an App-relative name for a
+	// Database handle bound to this batch.
+	// TODO(kash): Document concurrency semantics.
+	// FIXME: Move BatchOptions to types.vdl in Go client dir.
+	BeginBatch(bo BatchOptions) (string | error) {access.Read}
+
+	// SetPermissions and GetPermissions are included from the Object interface.
+	permissions.Object
+}
+
+// Table represents a collection of Rows.
+// Table.Glob operates over the primary keys of Rows in the Table.
+type Table interface {
+	// Delete deletes all rows in the given range. See helpers nosql.Prefix(),
+	// nosql.Range(), nosql.SingleRow(). If the last row that is covered by a
+	// prefix from SetPermissions is deleted, that (prefix, permissions) pair is
+	// removed.
+	// TODO(sadovsky): Automatic GC does not interact well with sync, especially
+	// in the presence of fine-grained ACLs. Need to think this through. Perhaps
+	// we should only remove prefix permissions fully covered by the given
+	// RowRange.
+	Delete(start, limit string) error
+
+	// TODO(sadovsky): Add Scan (which accepts a RowRange) and implement Glob in
+	// terms of Scan?
+
+	// SetPermissions sets the permissions for all current and future rows with
+	// the given prefix. If the prefix overlaps with an existing prefix, the
+	// longest prefix that matches a row applies. For example:
+	//     SetPermissions(ctx, Prefix("a/b"), perms1)
+	//     SetPermissions(ctx, Prefix("a/b/c"), perms2)
+	// The permissions for row "a/b/1" are perms1, and the permissions for row
+	// "a/b/c/1" are perms2.
+	//
+	// SetPermissions will fail if called with a prefix that does not match any
+	// rows.
+	SetPermissions(prefix string, perms access.Permissions) error {access.Admin}
+
+	// GetPermissions returns an array of (prefix, permissions) pairs. The array
+	// is sorted from longest prefix to shortest, so element zero is the one that
+	// applies to the row with the given key. The last element is always the
+	// prefix "" which represents the table's permissions -- the array will always
+	// have at least one element.
+	GetPermissions(key string) ([]PrefixPermissions | error) {access.Admin}
+
+	// DeletePermissions deletes the permissions for the specified prefix. Any
+	// rows covered by this prefix will use the next longest prefix's permissions
+	// (see the array returned by GetPermissions).
+	DeletePermissions(prefix string) error {access.Admin}
+}
+
+// Row represents a single row in a Table.
+// All access checks are performed against the most specific matching prefix
+// permissions in the Table.
+type Row interface {
+	// Get returns the value for this Row.
+	Get() (any | error) {access.Read}
+
+	// Put writes the given value for this Row.
+	Put(value any) error {access.Write}
+
+	// Delete deletes this Row.
+	Delete() error {access.Write}
+}

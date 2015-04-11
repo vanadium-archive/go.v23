@@ -9,6 +9,7 @@
 package syncbase
 
 import (
+	"v.io/syncbase/v23/syncbase/common"
 	"v.io/syncbase/v23/syncbase/nosql"
 	"v.io/v23/context"
 	"v.io/v23/security/access"
@@ -18,59 +19,46 @@ import (
 // One can add options to a Go method in a backwards-compatible way by making
 // the method variadic.
 
-// AccessController provides access control for various syncbase objects.
-type AccessController interface {
-	// SetPermissions replaces the current Permissions for an object.
-	// For detailed documentation, see Object.SetPermissions.
-	SetPermissions(ctx *context.T, acl access.Permissions, version string) error
+// TODO(sadovsky): Document the access control policy for every method where
+// it's not obvious.
 
-	// GetPermissions returns the current Permissions for an object.
-	// For detailed documentation, see Object.GetPermissions.
-	GetPermissions(ctx *context.T) (acl access.Permissions, version string, err error)
-}
-
-// TODO(sadovsky): Is the terminology still "bind", or has it changed?
-
-// Service represents a Vanadium syncbase service.
-// Use syncbase.BindService to get a Service.
+// Service represents a Vanadium Syncbase service.
+// Use syncbase.NewService to get a Service.
 type Service interface {
-	// BindApp returns an App.
+	// App returns the App with the given name.
 	// relativeName must not contain slashes.
-	BindApp(relativeName string) App
+	App(relativeName string) App
 
 	// ListApps returns a list of all App names.
 	ListApps(ctx *context.T) ([]string, error)
 
 	// SetPermissions and GetPermissions are included from the AccessController
 	// interface.
-	AccessController
+	common.AccessController
 }
 
 // App represents the data for a specific app instance (possibly a combination
 // of user, device, and app).
-// TODO(sadovsky): Figure out precisely what the App name would be under a
-// normal Vanadium installation.
 type App interface {
 	// Name returns the relative name of this App.
 	Name() string
 
-	// BindNoSQLDatabase returns a nosql.Database.
+	// NoSQLDatabase returns the nosql.Database with the given name.
 	// relativeName must not contain slashes.
-	BindNoSQLDatabase(relativeName string) nosql.Database
+	NoSQLDatabase(relativeName string) nosql.Database
 
 	// ListDatabases returns a list of all Database names.
-	// TODO(kash): Include the database type (nosql vs. sql).
+	// TODO(kash): Include the database type (NoSQL vs. SQL).
 	ListDatabases(ctx *context.T) ([]string, error)
 
 	// Create creates this App.
-	// If acl is nil, Permissions is inherited (copied) from the Service.
-	// Create requires the caller to have Write permission at the Service.
-	Create(ctx *context.T, acl access.Permissions) error
+	// If perms is nil, Permissions is inherited (copied) from the Service.
+	Create(ctx *context.T, perms access.Permissions) error
 
 	// Delete deletes this App.
 	Delete(ctx *context.T) error
 
 	// SetPermissions and GetPermissions are included from the AccessController
 	// interface.
-	AccessController
+	common.AccessController
 }

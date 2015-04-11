@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build ignore
-
 package syncbase
 
 import (
@@ -13,8 +11,7 @@ import (
 	"v.io/v23/security/access"
 )
 
-// TODO(sadovsky): Maybe put this elsewhere.
-func BindService(name string) Service {
+func NewService(name string) Service {
 	return &service{wire.ServiceClient(name), name}
 }
 
@@ -25,24 +22,26 @@ type service struct {
 
 var _ Service = (*service)(nil)
 
-// BindUniverse implements Service.BindUniverse.
-func (s *service) BindUniverse(relativeName string) Universe {
+// TODO(sadovsky): Validate names before sending RPCs.
+
+// App implements Service.App.
+func (s *service) App(relativeName string) App {
 	name := naming.Join(s.name, relativeName)
-	return &universe{wire.UniverseClient(name), name, relativeName}
+	return &app{wire.AppClient(name), name, relativeName}
 }
 
-// ListUniverses implements Service.ListUniverses.
-func (s *service) ListUniverses(ctx *context.T) ([]string, error) {
+// ListApps implements Service.ListApps.
+func (s *service) ListApps(ctx *context.T) ([]string, error) {
 	// TODO(sadovsky): Implement on top of Glob.
 	return nil, nil
 }
 
 // SetPermissions implements Service.SetPermissions.
-func (s *service) SetPermissions(ctx *context.T, acl access.Permissions, etag string) error {
-	return s.c.SetPermissions(ctx, acl, etag)
+func (s *service) SetPermissions(ctx *context.T, perms access.Permissions, version string) error {
+	return s.c.SetPermissions(ctx, perms, version)
 }
 
 // GetPermissions implements Service.GetPermissions.
-func (s *service) GetPermissions(ctx *context.T) (acl access.Permissions, etag string, err error) {
+func (s *service) GetPermissions(ctx *context.T) (perms access.Permissions, version string, err error) {
 	return s.c.GetPermissions(ctx)
 }
