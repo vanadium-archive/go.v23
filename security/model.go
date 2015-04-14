@@ -273,8 +273,7 @@ type BlessingStore interface {
 	// to clients before the client has identified itself.
 	//
 	// Default returns the blessings provided to the last call to
-	// SetDefault, or if no such call was made it is equivalent to ForPeer
-	// with no arguments.
+	// SetDefault.
 	//
 	// Returns the zero value if there is no usable blessings.
 	Default() Blessings
