@@ -57,10 +57,6 @@ var (
 	ErrNoAccess = Register("v.io/v23/verror.NoAccess", RetryRefetch, "{1:}{2:} Access denied{:_}")
 	// NotTrusted means the client does not trust the server.
 	ErrNotTrusted = Register("v.io/v23/verror.NotTrusted", RetryRefetch, "{1:}{2:} Client does not trust server{:_}")
-	// NoServersAndAuth means the client cannot use any servers, because of either
-	// NotTrusted or NoAccess errors.  Typically returned when the distinction
-	// between trust and inaccessibility should be hidden to preserve privacy.
-	ErrNoServersAndAuth = Register("v.io/v23/verror.NoServersAndAuth", RetryRefetch, "{1:}{2:} Has no usable servers and is either not trusted or access was denied{:_}")
 	// Aborted means that an operation was not completed because it was aborted by
 	// the receiver.  A more specific error should be used if it would help the
 	// caller decide how to proceed.
@@ -92,7 +88,6 @@ func init() {
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoServers.ID), "{1:}{2:} No usable servers found{:_}")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoAccess.ID), "{1:}{2:} Access denied{:_}")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNotTrusted.ID), "{1:}{2:} Client does not trust server{:_}")
-	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrNoServersAndAuth.ID), "{1:}{2:} Has no usable servers and is either not trusted or access was denied{:_}")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrAborted.ID), "{1:}{2:} Aborted{:_}")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrBadProtocol.ID), "{1:}{2:} Bad protocol or type{:_}")
 	i18n.Cat().SetWithBase(i18n.LangID("en"), i18n.MsgID(ErrCanceled.ID), "{1:}{2:} Canceled{:_}")
@@ -172,11 +167,6 @@ func NewErrNoAccess(ctx *context.T) error {
 // NewErrNotTrusted returns an error with the ErrNotTrusted ID.
 func NewErrNotTrusted(ctx *context.T) error {
 	return New(ErrNotTrusted, ctx)
-}
-
-// NewErrNoServersAndAuth returns an error with the ErrNoServersAndAuth ID.
-func NewErrNoServersAndAuth(ctx *context.T) error {
-	return New(ErrNoServersAndAuth, ctx)
 }
 
 // NewErrAborted returns an error with the ErrAborted ID.
