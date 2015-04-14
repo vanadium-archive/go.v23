@@ -71,12 +71,11 @@ func ReadPermissions(r io.Reader) (m Permissions, err error) {
 // Add updates m to so that blessings matching pattern will be included in the
 // access control lists for the provided tag (by adding to the "In" list).
 //
-// TODO(ashankar): Add tests for Add, Blacklist and Clear.
 func (m Permissions) Add(pattern security.BlessingPattern, tag string) {
 	list := m[tag]
 	list.In = append(list.In, pattern)
+	list.In = removeDuplicatePatterns(list.In)
 	sort.Sort(byPattern(list.In))
-	// TODO(ashankar): Remove duplicates
 	m[tag] = list
 }
 
@@ -85,8 +84,8 @@ func (m Permissions) Add(pattern security.BlessingPattern, tag string) {
 func (m Permissions) Blacklist(blessing string, tag string) {
 	list := m[tag]
 	list.NotIn = append(list.NotIn, blessing)
+	list.NotIn = removeDuplicateStrings(list.NotIn)
 	sort.Strings(list.NotIn)
-	// TODO(ashankar): Remove duplicates
 	m[tag] = list
 }
 
@@ -117,13 +116,15 @@ func (m Permissions) Clear(blessingOrPattern string, tags ...string) {
 }
 
 // Copy returns a new Permissions that is a copy of m.
-// TODO(ashankar): Unittest for this.
 func (m Permissions) Copy() Permissions {
 	ret := make(Permissions)
 	for tag, list := range m {
-		newlist := AccessList{
-			In:    make([]security.BlessingPattern, len(list.In)),
-			NotIn: make([]string, len(list.NotIn)),
+		var newlist AccessList
+		if len(list.In) > 0 {
+			newlist.In = make([]security.BlessingPattern, len(list.In))
+		}
+		if len(list.NotIn) > 0 {
+			newlist.NotIn = make([]string, len(list.NotIn))
 		}
 		for idx, item := range list.In {
 			newlist.In[idx] = item
@@ -136,25 +137,47 @@ func (m Permissions) Copy() Permissions {
 	return ret
 }
 
-// Normalize re-organizes 'm' so that two equivalent Permissionss are
+// Normalize re-organizes 'm' so that two equivalent Permissions are
 // comparable via reflection. It returns 'm'.
-//
-// TODO(ashankar): Add a unittest for this.
 func (m Permissions) Normalize() Permissions {
 	for tag, list := range m {
+		list.In = removeDuplicatePatterns(list.In)
+		list.NotIn = removeDuplicateStrings(list.NotIn)
 		sort.Sort(byPattern(list.In))
 		sort.Strings(list.NotIn)
-		// TODO(ashankar): Remove duplicate entries.
 		if len(list.In) == 0 && list.In != nil {
 			list.In = nil
-			m[tag] = list
 		}
 		if len(list.NotIn) == 0 && list.NotIn != nil {
 			list.NotIn = nil
-			m[tag] = list
 		}
+		m[tag] = list
 	}
 	return m
+}
+
+func removeDuplicatePatterns(l []security.BlessingPattern) (ret []security.BlessingPattern) {
+	m := make(map[security.BlessingPattern]bool)
+	for _, s := range l {
+		if _, ok := m[s]; ok {
+			continue
+		}
+		ret = append(ret, s)
+		m[s] = true
+	}
+	return ret
+}
+
+func removeDuplicateStrings(l []string) (ret []string) {
+	m := make(map[string]bool)
+	for _, s := range l {
+		if _, ok := m[s]; ok {
+			continue
+		}
+		ret = append(ret, s)
+		m[s] = true
+	}
+	return ret
 }
 
 type byPattern []security.BlessingPattern
