@@ -7,6 +7,8 @@
 package device
 
 import (
+	"time"
+
 	"v.io/v23/security"
 	"v.io/v23/security/access"
 	"v.io/v23/services/application"
@@ -187,10 +189,7 @@ type Application interface {
 	// instance(s). If the deadline (in seconds) is non-zero and the
 	// instance(s) in questions are still running after the given deadline,
 	// shutdown of the instance(s) is enforced.
-	//
-	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
-	// are implemented.
-	Stop(deadline uint32) error {access.Admin}
+	Stop(deadline time.Duration) error {access.Admin}
 	// Suspend suspends execution of application installation(s)
 	// instance(s).
 	Suspend() error {access.Write}
@@ -310,10 +309,7 @@ type Device interface {
 	// Reset resets the device. If the deadline is non-zero and the device
 	// in question is still running after the given deadline expired,
 	// reset of the device is enforced.
-	//
-	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
-	// are implemented.
-	Reset(deadline uint64) error {access.Admin}
+	Reset(deadline time.Duration) error {access.Admin}
 	// AssociateAccount associates a local  system account name with the provided
 	// Vanadium identities. It replaces the existing association if one already exists for that
 	// identity. Setting an AccountName to "" removes the association for each

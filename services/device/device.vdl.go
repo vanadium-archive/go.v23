@@ -19,11 +19,13 @@ import (
 	"v.io/v23/vdl"
 
 	// VDL user imports
+	"time"
 	"v.io/v23/security"
 	"v.io/v23/security/access"
 	"v.io/v23/services/application"
 	"v.io/v23/services/binary"
 	"v.io/v23/services/permissions"
+	_ "v.io/v23/vdlroot/time"
 )
 
 // Config specifies app configuration that overrides what's in the envelope.
@@ -537,10 +539,7 @@ type ApplicationClientMethods interface {
 	// instance(s). If the deadline (in seconds) is non-zero and the
 	// instance(s) in questions are still running after the given deadline,
 	// shutdown of the instance(s) is enforced.
-	//
-	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
-	// are implemented.
-	Stop(ctx *context.T, deadline uint32, opts ...rpc.CallOpt) error
+	Stop(ctx *context.T, deadline time.Duration, opts ...rpc.CallOpt) error
 	// Suspend suspends execution of application installation(s)
 	// instance(s).
 	Suspend(*context.T, ...rpc.CallOpt) error
@@ -618,7 +617,7 @@ func (c implApplicationClientStub) Start(ctx *context.T, opts ...rpc.CallOpt) (o
 	return
 }
 
-func (c implApplicationClientStub) Stop(ctx *context.T, i0 uint32, opts ...rpc.CallOpt) (err error) {
+func (c implApplicationClientStub) Stop(ctx *context.T, i0 time.Duration, opts ...rpc.CallOpt) (err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "Stop", []interface{}{i0}, nil, opts...)
 	return
 }
@@ -945,10 +944,7 @@ type ApplicationServerMethods interface {
 	// instance(s). If the deadline (in seconds) is non-zero and the
 	// instance(s) in questions are still running after the given deadline,
 	// shutdown of the instance(s) is enforced.
-	//
-	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
-	// are implemented.
-	Stop(call rpc.ServerCall, deadline uint32) error
+	Stop(call rpc.ServerCall, deadline time.Duration) error
 	// Suspend suspends execution of application installation(s)
 	// instance(s).
 	Suspend(rpc.ServerCall) error
@@ -1078,10 +1074,7 @@ type ApplicationServerStubMethods interface {
 	// instance(s). If the deadline (in seconds) is non-zero and the
 	// instance(s) in questions are still running after the given deadline,
 	// shutdown of the instance(s) is enforced.
-	//
-	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
-	// are implemented.
-	Stop(call rpc.ServerCall, deadline uint32) error
+	Stop(call rpc.ServerCall, deadline time.Duration) error
 	// Suspend suspends execution of application installation(s)
 	// instance(s).
 	Suspend(rpc.ServerCall) error
@@ -1163,7 +1156,7 @@ func (s implApplicationServerStub) Start(call *ApplicationStartServerCallStub) e
 	return s.impl.Start(call)
 }
 
-func (s implApplicationServerStub) Stop(call rpc.ServerCall, i0 uint32) error {
+func (s implApplicationServerStub) Stop(call rpc.ServerCall, i0 time.Duration) error {
 	return s.impl.Stop(call, i0)
 }
 
@@ -1251,9 +1244,9 @@ var descApplication = rpc.InterfaceDesc{
 		},
 		{
 			Name: "Stop",
-			Doc:  "// Stop attempts a clean shutdown of application installation(s)\n// instance(s). If the deadline (in seconds) is non-zero and the\n// instance(s) in questions are still running after the given deadline,\n// shutdown of the instance(s) is enforced.\n//\n// TODO(jsimsa): Switch deadline to time.Duration when built-in types\n// are implemented.",
+			Doc:  "// Stop attempts a clean shutdown of application installation(s)\n// instance(s). If the deadline (in seconds) is non-zero and the\n// instance(s) in questions are still running after the given deadline,\n// shutdown of the instance(s) is enforced.",
 			InArgs: []rpc.ArgDesc{
-				{"deadline", ``}, // uint32
+				{"deadline", ``}, // time.Duration
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
 		},
@@ -1611,10 +1604,7 @@ type DeviceClientMethods interface {
 	// Reset resets the device. If the deadline is non-zero and the device
 	// in question is still running after the given deadline expired,
 	// reset of the device is enforced.
-	//
-	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
-	// are implemented.
-	Reset(ctx *context.T, deadline uint64, opts ...rpc.CallOpt) error
+	Reset(ctx *context.T, deadline time.Duration, opts ...rpc.CallOpt) error
 	// AssociateAccount associates a local  system account name with the provided
 	// Vanadium identities. It replaces the existing association if one already exists for that
 	// identity. Setting an AccountName to "" removes the association for each
@@ -1652,7 +1642,7 @@ func (c implDeviceClientStub) IsRunnable(ctx *context.T, i0 binary.Description, 
 	return
 }
 
-func (c implDeviceClientStub) Reset(ctx *context.T, i0 uint64, opts ...rpc.CallOpt) (err error) {
+func (c implDeviceClientStub) Reset(ctx *context.T, i0 time.Duration, opts ...rpc.CallOpt) (err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "Reset", []interface{}{i0}, nil, opts...)
 	return
 }
@@ -1769,10 +1759,7 @@ type DeviceServerMethods interface {
 	// Reset resets the device. If the deadline is non-zero and the device
 	// in question is still running after the given deadline expired,
 	// reset of the device is enforced.
-	//
-	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
-	// are implemented.
-	Reset(call rpc.ServerCall, deadline uint64) error
+	Reset(call rpc.ServerCall, deadline time.Duration) error
 	// AssociateAccount associates a local  system account name with the provided
 	// Vanadium identities. It replaces the existing association if one already exists for that
 	// identity. Setting an AccountName to "" removes the association for each
@@ -1884,10 +1871,7 @@ type DeviceServerStubMethods interface {
 	// Reset resets the device. If the deadline is non-zero and the device
 	// in question is still running after the given deadline expired,
 	// reset of the device is enforced.
-	//
-	// TODO(jsimsa): Switch deadline to time.Duration when built-in types
-	// are implemented.
-	Reset(call rpc.ServerCall, deadline uint64) error
+	Reset(call rpc.ServerCall, deadline time.Duration) error
 	// AssociateAccount associates a local  system account name with the provided
 	// Vanadium identities. It replaces the existing association if one already exists for that
 	// identity. Setting an AccountName to "" removes the association for each
@@ -1937,7 +1921,7 @@ func (s implDeviceServerStub) IsRunnable(call rpc.ServerCall, i0 binary.Descript
 	return s.impl.IsRunnable(call, i0)
 }
 
-func (s implDeviceServerStub) Reset(call rpc.ServerCall, i0 uint64) error {
+func (s implDeviceServerStub) Reset(call rpc.ServerCall, i0 time.Duration) error {
 	return s.impl.Reset(call, i0)
 }
 
@@ -1990,9 +1974,9 @@ var descDevice = rpc.InterfaceDesc{
 		},
 		{
 			Name: "Reset",
-			Doc:  "// Reset resets the device. If the deadline is non-zero and the device\n// in question is still running after the given deadline expired,\n// reset of the device is enforced.\n//\n// TODO(jsimsa): Switch deadline to time.Duration when built-in types\n// are implemented.",
+			Doc:  "// Reset resets the device. If the deadline is non-zero and the device\n// in question is still running after the given deadline expired,\n// reset of the device is enforced.",
 			InArgs: []rpc.ArgDesc{
-				{"deadline", ``}, // uint64
+				{"deadline", ``}, // time.Duration
 			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
 		},
