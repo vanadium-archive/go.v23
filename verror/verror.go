@@ -143,11 +143,12 @@ func Register(id ID, action ActionCode, englishText string) IDAction {
 // The wire representation is defined as vdl.WireError; values of E
 // type are automatically converted to/from vdl.WireError by VDL and VOM.
 type E struct {
-	ID        ID            // The identity of the error.
-	Action    ActionCode    // Default action to take on error.
-	Msg       string        // Error message; empty if no language known.
-	ParamList []interface{} // The variadic parameters given to ExplicitNew().
-	stackPCs  []uintptr     // PCs of creators of E
+	ID         ID            // The identity of the error.
+	Action     ActionCode    // Default action to take on error.
+	Msg        string        // Error message; empty if no language known.
+	ParamList  []interface{} // The variadic parameters given to ExplicitNew().
+	stackPCs   []uintptr     // PCs of creators of E
+	chainedPCs []uintptr     // PCs of a chained E
 }
 
 const maxPCs = 40 // Maximum number of PC values we'll include in a stack trace.
@@ -221,6 +222,10 @@ func Stack(err error) PCs {
 		if e, ok := assertIsE(err); ok {
 			stackIntPtr := make([]uintptr, len(e.stackPCs))
 			copy(stackIntPtr, e.stackPCs)
+			if e.chainedPCs != nil {
+				stackIntPtr = append(stackIntPtr, uintptr(0))
+				stackIntPtr = append(stackIntPtr, e.chainedPCs...)
+			}
 			return stackIntPtr
 		}
 	}
@@ -239,9 +244,13 @@ func (st PCs) String() string {
 // indent is added to a prefix of each line printed.
 func stackToTextIndent(w io.Writer, stack []uintptr, indent string) (err error) {
 	for i := 0; i != len(stack) && err == nil; i++ {
-		fnc := runtime.FuncForPC(stack[i])
-		file, line := fnc.FileLine(stack[i])
-		_, err = fmt.Fprintf(w, "%s%s:%d: %s\n", indent, file, line, fnc.Name())
+		if stack[i] == 0 {
+			_, err = fmt.Fprintf(w, "%s----- chained verror -----\n", indent)
+		} else {
+			fnc := runtime.FuncForPC(stack[i])
+			file, line := fnc.FileLine(stack[i])
+			_, err = fmt.Fprintf(w, "%s%s:%d: %s\n", indent, file, line, fnc.Name())
+		}
 	}
 	return err
 }
@@ -270,6 +279,15 @@ func isDefaultIDAction(id ID, action ActionCode) bool {
 // rather than constructing one from the caller's PC.
 func makeInternal(idAction IDAction, langID i18n.LangID, componentName string, opName string, stack []uintptr, v ...interface{}) E {
 	msg := ""
+	var chainedPCs []uintptr
+	for _, par := range v {
+		if err, ok := par.(error); ok {
+			if _, ok := assertIsE(err); ok {
+				chainedPCs = Stack(err)
+				break
+			}
+		}
+	}
 	params := append([]interface{}{componentName, opName}, v...)
 	if langID != i18n.NoLangID {
 		id := idAction.ID
@@ -278,7 +296,7 @@ func makeInternal(idAction IDAction, langID i18n.LangID, componentName string, o
 		}
 		msg = i18n.Cat().Format(langID, i18n.MsgID(id), params...)
 	}
-	return E{idAction.ID, idAction.Action, msg, params, stack}
+	return E{idAction.ID, idAction.Action, msg, params, stack, chainedPCs}
 }
 
 // ExplicitNew returns an error with the given ID, with an error string in the chosen
@@ -286,6 +304,9 @@ func makeInternal(idAction IDAction, langID i18n.LangID, componentName string, o
 // parameters of the error.  Other parameters are taken from v[].  The
 // parameters are formatted into the message according to i18n.Cat().Format.
 // The caller's PC is added to the error's stack.
+// If the parameter list contains an instance of verror.E, then the stack of
+// the first, and only the first, ocurrence of such an instance, will be chained
+// to the stack of this newly created error.
 func ExplicitNew(idAction IDAction, langID i18n.LangID, componentName string, opName string, v ...interface{}) error {
 	stack := make([]uintptr, maxPCs)
 	stack = stack[:runtime.Callers(2, stack)]
@@ -388,7 +409,7 @@ func convertInternal(idAction IDAction, langID i18n.LangID, componentName string
 				msg = i18n.FormatParams(formatStr, newParams...)
 			}
 		}
-		return E{e.ID, e.Action, msg, newParams, e.stackPCs}
+		return E{e.ID, e.Action, msg, newParams, e.stackPCs, nil}
 	}
 	return makeInternal(idAction, langID, componentName, opName, stack, err.Error())
 }

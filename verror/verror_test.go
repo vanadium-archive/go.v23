@@ -98,6 +98,51 @@ func TestSubordinateErrors(t *testing.T) {
 	}
 }
 
+// This function comes first because it has line numbers embedded in it, and putting it first
+// reduces the chances that its line numbers will change.
+func TestChained(t *testing.T) {
+	first := verror.IDAction{"first", verror.NoRetry}
+	second := verror.IDAction{"second", verror.NoRetry}
+	third := verror.IDAction{"third", verror.NoRetry}
+	cat := i18n.Cat()
+	cat.Set(en, i18n.MsgID(first.ID), "first {_}")
+	cat.Set(en, i18n.MsgID(second.ID), "second {3}")
+	cat.Set(en, i18n.MsgID(third.ID), "{3}")
+
+	l1 := verror.ExplicitNew(third, en, "", "", "third")
+	if got, want := len(verror.Stack(l1)), 3; got != want {
+		t.Fatalf("got %v, want %v", got, want)
+	}
+	l2 := verror.ExplicitNew(second, en, "", "", l1)
+	if got, want := len(verror.Stack(l2)), 7; got != want {
+		t.Fatalf("got %v, want %v", got, want)
+	}
+	l3 := verror.ExplicitNew(first, en, "", "", "not first", l2, l1)
+	if got, want := len(verror.Stack(l3)), 11; got != want {
+		t.Fatalf("got %v, want %v", got, want)
+	}
+	lines := strings.Split(verror.Stack(l3).String(), "\n")
+	if got, want := lines[0], "verror_test.go:120"; !strings.Contains(got, want) {
+		t.Fatalf("%q, doesn't contain %q", got, want)
+	}
+	if got, want := lines[4], "verror_test.go:116"; !strings.Contains(got, want) {
+		t.Fatalf("%q, doesn't contain %q", got, want)
+	}
+	if got, want := lines[8], "verror_test.go:112"; !strings.Contains(got, want) {
+		t.Fatalf("%q, doesn't contain %q", got, want)
+	}
+	for _, i := range []int{3, 7} {
+		if got, want := lines[i], "----- chained verror -----"; got != want {
+			t.Fatalf("got %v, want %v", got, want)
+		}
+	}
+	l1s := l1.Error()
+	l2s := l2.Error()
+	if got, want := l3.Error(), "first   not first "+l2s+" "+l1s; got != want {
+		t.Fatalf("got %v, want %v", got, want)
+	}
+}
+
 func init() {
 	rootCtx, shutdown := test.InitForTest()
 	defer shutdown()
