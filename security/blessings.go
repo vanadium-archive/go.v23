@@ -27,12 +27,15 @@ var (
 // prove that a set of (human-readable) blessing names are bound
 // to a principal in a specific call.
 //
-// Blessings objects are meant to be presented to other principals to authenticate
-// and authorize actions. The 'BlessingNames' function in this package can be
-// used to uncover the blessing names encapsulated in these objects.
+// Blessings objects are meant to be presented to other principals to
+// authenticate and authorize actions. The functions 'LocalBlessingNames'
+// and 'RemoteBlessingNames' defined in this package can be used to uncover
+// the blessing names encapsulated in these objects.
 //
 // Blessings objects are immutable and multiple goroutines may invoke methods
 // on them simultaneously.
+//
+// See also: https://v.io/glossary.html#blessing
 type Blessings struct {
 	chains    [][]Certificate
 	publicKey PublicKey

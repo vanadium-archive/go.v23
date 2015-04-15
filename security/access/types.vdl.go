@@ -114,6 +114,8 @@ import (
 
 // AccessList represents an Access Control List - a set of blessings that should be
 // granted access.
+//
+// See also: https://v.io/glossary.html#access-control-list
 type AccessList struct {
 	// In denotes the set of blessings (represented as BlessingPatterns) that
 	// should be granted access, unless blacklisted by an entry in NotIn.
