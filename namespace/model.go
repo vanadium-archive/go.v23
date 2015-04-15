@@ -78,6 +78,8 @@ type T interface {
 	Roots() []string
 
 	// SetPermissions sets the AccessList in a node in a mount table.
+	// If the caller's tries to Set an acl that removes them from Admin, the caller's
+	// original Admin blessings will be retained.
 	SetPermissions(ctx *context.T, name string, acl access.Permissions, version string, opts ...naming.NamespaceOpt) error
 
 	// GetPermissions returns the AccessList in a node in a mount table.
