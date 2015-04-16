@@ -13,11 +13,16 @@ const (
 	// we don't know the relevant version numbers.  In this case the RPC
 	// implementation will have to guess the correct values.
 	UnknownRPCVersion RPCVersion = iota
+
+	// DeprecatedRPCVersion is used to signal that a version number is no longer
+	// relevant and that version information should be obtained elsewhere.
+	DeprecatedRPCVersion
+
 	// Deprecated versions
 	rpcVersion2
 	rpcVersion3
-	rpcDummyVersion3 // So that the numeric value of RPCVersion4 is 4
 	rpcVersion4
+
 	// TODO(ashankar): Unexport all versions except the last before release
 	// RPCVersion5 uses the new security model (Principal and Blessings objects),
 	// and sends discharges for third-party caveats on the server's blessings
@@ -34,6 +39,11 @@ const (
 	// RPCVersion8 uses separate VOM type flow to share VOM types across all flows
 	// in a VC.
 	RPCVersion8
+
+	// RPCVersion9 uses nacl/box encryption for VCs instead of TLS.
+	// In addition versioning information is exchanged during VC setup
+	// instead of in the endpoints.
+	RPCVersion9
 )
 
 // RPCVersionRange allows you to optionally specify a range of versions to

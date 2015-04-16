@@ -48,11 +48,13 @@ type Endpoint interface {
 	// Version 2 is an old version for RPC:
 	//   @2@<protocol>@<address>@<routingid>@<rpc version>@<rpc codec>@@
 	//
-	// Version 3 is the previous version for RPC:
+	// Version 3 is an old version for RPC:
 	//   @3@<protocol>@<address>@<routingid>@<rpc version>@<rpc codec>@m|s@@
 	//
-	// Version 4 is the current version for RPC:
+	// Version 4 is the previous version for RPC:
 	//   @4@<protocol>@<address>@<routingid>@<min RPC version>@<max RPC version>@m|s@[<blessing>[,<blessing>]...]@@
+	// Version 5 is the current version for RPC:
+	//   @5@<protocol>@<address>@<routingid>@m|s@[<blessing>[,<blessing>]...]@@
 	//
 	// Along with Network, this method ensures that Endpoint implements net.Addr.
 	String() string
