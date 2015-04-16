@@ -7,8 +7,10 @@ package vom
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"math/rand"
 	"reflect"
+	"runtime"
 	"strings"
 	"sync"
 	"testing"
@@ -155,13 +157,48 @@ func testDecodeGoWithTypeDecoder(t *testing.T, name, binmagic, bintype, binvalue
 	}
 }
 
+// In concurrent modes, one goroutine may try to read vom types before they are
+// actually sent by other goroutine. We use a simple buffered pipe to provide
+// blocking read since bytes.Buffer will return EOF in this case.
+type pipe struct {
+	b bytes.Buffer
+	m sync.Mutex
+	c sync.Cond
+}
+
+func newPipe() (io.Reader, io.Writer) {
+	p := &pipe{}
+	p.c.L = &p.m
+	return p, p
+}
+
+func (r *pipe) Read(p []byte) (n int, err error) {
+	r.m.Lock()
+	defer r.m.Unlock()
+	for r.b.Len() == 0 {
+		r.c.Wait()
+	}
+	return r.b.Read(p)
+}
+
+func (w *pipe) Write(p []byte) (n int, err error) {
+	w.m.Lock()
+	defer w.m.Unlock()
+	defer w.c.Signal()
+	return w.b.Write(p)
+}
+
 // TestRoundtrip* tests test encoding and then decoding results in various modes.
 func TestRoundtrip(t *testing.T)                   { testRoundtrip(t, false, 1) }
 func TestRoundtripWithTypeDecoder_1(t *testing.T)  { testRoundtrip(t, true, 1) }
-func TestRoundtripWithTypeDecoder_2(t *testing.T)  { testRoundtrip(t, true, 2) }
+func TestRoundtripWithTypeDecoder_5(t *testing.T)  { testRoundtrip(t, true, 5) }
 func TestRoundtripWithTypeDecoder_10(t *testing.T) { testRoundtrip(t, true, 10) }
+func TestRoundtripWithTypeDecoder_20(t *testing.T) { testRoundtrip(t, true, 20) }
 
 func testRoundtrip(t *testing.T, withTypeEncoderDecoder bool, concurrency int) {
+	mp := runtime.GOMAXPROCS(runtime.NumCPU())
+	defer runtime.GOMAXPROCS(mp)
+
 	tests := []struct {
 		In, Want interface{}
 	}{
@@ -207,20 +244,27 @@ func testRoundtrip(t *testing.T, withTypeEncoderDecoder bool, concurrency int) {
 		{testdata.NUnion(testdata.NUnionA{false}), testdata.NUnion(testdata.NUnionA{})},
 		{testdata.RecA{}, testdata.RecA(nil)},
 		{testdata.RecStruct{}, testdata.RecStruct{}},
+		// Test for verifying correctness when encoding/decoding shared types concurrently.
+		{testdata.MStruct{}, testdata.MStruct{E: vdl.AnyType, F: vdl.AnyValue(nil)}},
+		{testdata.NStruct{}, testdata.NStruct{}},
+		{testdata.XyzStruct{}, testdata.XyzStruct{}},
+		{testdata.YzStruct{}, testdata.YzStruct{}},
+		{testdata.MBool(false), testdata.MBool(false)},
+		{testdata.NString(""), testdata.NString("")},
 	}
 
 	var (
 		typeenc *TypeEncoder
 		typedec *TypeDecoder
-		typebuf bytes.Buffer
 	)
 	if withTypeEncoderDecoder {
 		var err error
-		typeenc, err = NewTypeEncoder(&typebuf)
+		r, w := newPipe()
+		typeenc, err = NewTypeEncoder(w)
 		if err != nil {
 			t.Fatal("NewTypeEncoder failed: %v", err)
 		}
-		typedec, err = NewTypeDecoder(&typebuf)
+		typedec, err = NewTypeDecoder(r)
 		if err != nil {
 			t.Fatal("NewTypeDecoder failed: %v", err)
 		}
@@ -232,7 +276,7 @@ func testRoundtrip(t *testing.T, withTypeEncoderDecoder bool, concurrency int) {
 		go func(n int) {
 			defer wg.Done()
 			for _, n := range rand.Perm(len(tests) * 10) {
-				test := tests[n%10]
+				test := tests[n%len(tests)]
 				name := fmt.Sprintf("[%d]:%#v,%#v", n, test.In, test.Want)
 
 				var (
@@ -244,23 +288,23 @@ func testRoundtrip(t *testing.T, withTypeEncoderDecoder bool, concurrency int) {
 				if withTypeEncoderDecoder {
 					encoder, err = NewEncoderWithTypeEncoder(&buf, typeenc)
 					if err != nil {
-						t.Error("%s: NewEncoderWithTypeEncoder failed: %v", name, err)
+						t.Errorf("%s: NewEncoderWithTypeEncoder failed: %v", name, err)
 						return
 					}
 					decoder, err = NewDecoderWithTypeDecoder(&buf, typedec)
 					if err != nil {
-						t.Error("%s: NewDecoderWithTypeDecoder failed: %v", name, err)
+						t.Errorf("%s: NewDecoderWithTypeDecoder failed: %v", name, err)
 						return
 					}
 				} else {
 					encoder, err = NewEncoder(&buf)
 					if err != nil {
-						t.Error("%s: NewEncoder failed: %v", name, err)
+						t.Errorf("%s: NewEncoder failed: %v", name, err)
 						return
 					}
 					decoder, err = NewDecoder(&buf)
 					if err != nil {
-						t.Error("%s: NewDecoder failed: %v", name, err)
+						t.Errorf("%s: NewDecoder failed: %v", name, err)
 						return
 					}
 				}

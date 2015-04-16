@@ -18,6 +18,7 @@ var (
 	errUnknownType        = verror.Register(pkgPath+".errUnknownType", verror.NoRetry, "{1:}{2:} vom: unknown type id {3}{:_}")
 	errEmptyName          = verror.Register(pkgPath+".errEmptyName", verror.NoRetry, "{1:}{2:} vom: NamedType has empty name{:_}")
 	errUnknownWireTypeDef = verror.Register(pkgPath+".errUnknownWireTypeDef", verror.NoRetry, "{1:}{2:} vom: unknown wire type definition {3}{:_}")
+	errNilDecBuf          = verror.Register(pkgPath+".errNilDecBuf", verror.NoRetry, "{1:}{2:} vom: nil decode buffer{:_}")
 )
 
 // TypeDecoder manages the receipt and unmarshalling of types from the other
@@ -129,6 +130,9 @@ func (d *TypeDecoder) lookupKnownType(tid typeId) *vdl.Type {
 // readWireType reads and decode wire types until it meets the corresponding
 // wire type to tid.
 func (d *TypeDecoder) readWireType(tid typeId) error {
+	if d.dec.buf == nil {
+		return verror.New(errNilDecBuf, nil)
+	}
 	for {
 		var wt wireType
 		curTypeId, err := d.dec.decodeWireType(&wt)

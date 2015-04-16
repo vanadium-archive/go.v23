@@ -38,7 +38,11 @@ func NewDecoder(r io.Reader) (*Decoder, error) {
 	if err := readMagicByte(buf); err != nil {
 		return nil, err
 	}
-	return newDecoder(buf, newTypeDecoder(buf)), nil
+	// When the TypeDecoder isn't shared, we always decode type messages in
+	// Decoder.decodeValueType() and feed them to the TypeDecoder. That is,
+	// the TypeDecoder will never read messages from the buffer. So we pass
+	// a nil buffer to newTypeDecoder.
+	return newDecoder(buf, newTypeDecoder(nil)), nil
 }
 
 // NewDecoderWithTypeDecoder returns a new Decoder that reads from the given

@@ -51,6 +51,31 @@ func newTypeEncoder(w io.Writer) *TypeEncoder {
 // the order that we recurse and consequentially may be sent out of sequential
 // order if type information for children is sent (before the parent type).
 func (e *TypeEncoder) encode(tt *vdl.Type) (typeId, error) {
+	if tid := e.lookupTypeId(tt); tid != 0 {
+		return tid, nil
+	}
+
+	// We serialize type encoding to avoid a race that can break our assumption
+	// that all referenced types should be transmitted before the target type.
+	// This can happen when we allow multiple flows encode types concurrently.
+	// E.g.,
+	//   * F1 is encoding T1
+	//   * F2 is encoding T2 which has a T1 type field. F2 skipped T1 encoding,
+	//     since F1 already assigned a type id to T1.
+	//   * A type decoder can see T2 before T1 if F2 finishes encoding before F1.
+	//
+	// TODO(jhahn, toddw): We do not expect this would hurt the performance
+	// practically. Revisit this if it becomes a real issue.
+	//
+	// TODO(jhahn, toddw): There is still a known race condition where multiple
+	// flows send types with a cycle, but the types are referenced in different
+	// orders. Figure out the solution.
+	e.encMu.Lock()
+	defer e.encMu.Unlock()
+	return e.encodeType(tt)
+}
+
+func (e *TypeEncoder) encodeType(tt *vdl.Type) (typeId, error) {
 	// Lookup a type Id for tt or assign a new one.
 	tid, isNew, err := e.lookupOrAssignTypeId(tt)
 	if err != nil {
@@ -72,29 +97,29 @@ func (e *TypeEncoder) encode(tt *vdl.Type) (typeId, error) {
 		}
 		wt = wireTypeEnumT{wireEnum}
 	case vdl.Array:
-		elm, err := e.encode(tt.Elem())
+		elm, err := e.encodeType(tt.Elem())
 		if err != nil {
 			return 0, err
 		}
 		wt = wireTypeArrayT{wireArray{tt.Name(), elm, uint64(tt.Len())}}
 	case vdl.List:
-		elm, err := e.encode(tt.Elem())
+		elm, err := e.encodeType(tt.Elem())
 		if err != nil {
 			return 0, err
 		}
 		wt = wireTypeListT{wireList{tt.Name(), elm}}
 	case vdl.Set:
-		key, err := e.encode(tt.Key())
+		key, err := e.encodeType(tt.Key())
 		if err != nil {
 			return 0, err
 		}
 		wt = wireTypeSetT{wireSet{tt.Name(), key}}
 	case vdl.Map:
-		key, err := e.encode(tt.Key())
+		key, err := e.encodeType(tt.Key())
 		if err != nil {
 			return 0, err
 		}
-		elm, err := e.encode(tt.Elem())
+		elm, err := e.encodeType(tt.Elem())
 		if err != nil {
 			return 0, err
 		}
@@ -102,7 +127,7 @@ func (e *TypeEncoder) encode(tt *vdl.Type) (typeId, error) {
 	case vdl.Struct:
 		wireStruct := wireStruct{tt.Name(), make([]wireField, tt.NumField())}
 		for ix := 0; ix < tt.NumField(); ix++ {
-			field, err := e.encode(tt.Field(ix).Type)
+			field, err := e.encodeType(tt.Field(ix).Type)
 			if err != nil {
 				return 0, err
 			}
@@ -112,7 +137,7 @@ func (e *TypeEncoder) encode(tt *vdl.Type) (typeId, error) {
 	case vdl.Union:
 		wireUnion := wireUnion{tt.Name(), make([]wireField, tt.NumField())}
 		for ix := 0; ix < tt.NumField(); ix++ {
-			field, err := e.encode(tt.Field(ix).Type)
+			field, err := e.encodeType(tt.Field(ix).Type)
 			if err != nil {
 				return 0, err
 			}
@@ -120,7 +145,7 @@ func (e *TypeEncoder) encode(tt *vdl.Type) (typeId, error) {
 		}
 		wt = wireTypeUnionT{wireUnion}
 	case vdl.Optional:
-		elm, err := e.encode(tt.Elem())
+		elm, err := e.encodeType(tt.Elem())
 		if err != nil {
 			return 0, err
 		}
@@ -129,11 +154,8 @@ func (e *TypeEncoder) encode(tt *vdl.Type) (typeId, error) {
 		panic(verror.New(errUnhandledType, nil, tt))
 	}
 
-	// Encode and write the wire type definition.
-	//
-	// We use the same binary encoder as values for wire types.
-	e.encMu.Lock()
-	defer e.encMu.Unlock()
+	// Encode and write the wire type definition using the same
+	// binary encoder as values for wire types.
 	if err := e.enc.encodeWireType(tid, wt); err != nil {
 		return 0, err
 	}
@@ -156,19 +178,13 @@ func (e *TypeEncoder) lookupOrAssignTypeId(tt *vdl.Type) (typeId, bool, error) {
 	if tid := bootstrapTypeToId[tt]; tid != 0 {
 		return tid, false, nil
 	}
-	e.typeMu.RLock()
-	tid := e.typeToId[tt]
-	e.typeMu.RUnlock()
-	if tid > 0 {
-		return tid, false, nil
-	}
-
 	e.typeMu.Lock()
-	// Check it again to avoid a race.
-	if tid := e.typeToId[tt]; tid > 0 {
+	tid := e.typeToId[tt]
+	if tid > 0 {
 		e.typeMu.Unlock()
 		return tid, false, nil
 	}
+
 	// Assign a new id.
 	newId := e.nextId
 	if newId > math.MaxInt64 {
