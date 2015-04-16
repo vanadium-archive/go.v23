@@ -89,10 +89,10 @@ func (c implMyObjectClientStub) NoTags(ctx *context.T, opts ...rpc.CallOpt) (err
 //
 // MyObject demonstrates how tags are attached to methods.
 type MyObjectServerMethods interface {
-	Get(rpc.ServerCall) error
-	Put(rpc.ServerCall) error
-	Resolve(rpc.ServerCall) error
-	NoTags(rpc.ServerCall) error // No tags attached to this.
+	Get(*context.T, rpc.ServerCall) error
+	Put(*context.T, rpc.ServerCall) error
+	Resolve(*context.T, rpc.ServerCall) error
+	NoTags(*context.T, rpc.ServerCall) error // No tags attached to this.
 }
 
 // MyObjectServerStubMethods is the server interface containing
@@ -130,20 +130,20 @@ type implMyObjectServerStub struct {
 	gs   *rpc.GlobState
 }
 
-func (s implMyObjectServerStub) Get(call rpc.ServerCall) error {
-	return s.impl.Get(call)
+func (s implMyObjectServerStub) Get(ctx *context.T, call rpc.ServerCall) error {
+	return s.impl.Get(ctx, call)
 }
 
-func (s implMyObjectServerStub) Put(call rpc.ServerCall) error {
-	return s.impl.Put(call)
+func (s implMyObjectServerStub) Put(ctx *context.T, call rpc.ServerCall) error {
+	return s.impl.Put(ctx, call)
 }
 
-func (s implMyObjectServerStub) Resolve(call rpc.ServerCall) error {
-	return s.impl.Resolve(call)
+func (s implMyObjectServerStub) Resolve(ctx *context.T, call rpc.ServerCall) error {
+	return s.impl.Resolve(ctx, call)
 }
 
-func (s implMyObjectServerStub) NoTags(call rpc.ServerCall) error {
-	return s.impl.NoTags(call)
+func (s implMyObjectServerStub) NoTags(ctx *context.T, call rpc.ServerCall) error {
+	return s.impl.NoTags(ctx, call)
 }
 
 func (s implMyObjectServerStub) Globber() *rpc.GlobState {

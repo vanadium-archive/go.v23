@@ -275,22 +275,22 @@ type GroupServerMethods interface {
 	// If acl is nil, a default Permissions is used, providing Admin access to
 	// the caller.
 	// Create requires the caller to have Write permission at the GroupServer.
-	Create(call rpc.ServerCall, acl access.Permissions, entries []BlessingPatternChunk) error
+	Create(ctx *context.T, call rpc.ServerCall, acl access.Permissions, entries []BlessingPatternChunk) error
 	// Delete deletes the group.
 	// Permissions for all group-related methods except Create() are checked
 	// against the Group object.
-	Delete(call rpc.ServerCall, version string) error
+	Delete(ctx *context.T, call rpc.ServerCall, version string) error
 	// Add adds an entry to the group.
-	Add(call rpc.ServerCall, entry BlessingPatternChunk, version string) error
+	Add(ctx *context.T, call rpc.ServerCall, entry BlessingPatternChunk, version string) error
 	// Remove removes an entry from the group.
-	Remove(call rpc.ServerCall, entry BlessingPatternChunk, version string) error
+	Remove(ctx *context.T, call rpc.ServerCall, entry BlessingPatternChunk, version string) error
 	// Get returns all entries in the group.
 	// TODO(sadovsky): Flesh out this API.
-	Get(call rpc.ServerCall, req GetRequest, reqVersion string) (res GetResponse, version string, err error)
+	Get(ctx *context.T, call rpc.ServerCall, req GetRequest, reqVersion string) (res GetResponse, version string, err error)
 	// Rest returns information sufficient for the client to perform its
 	// AccessList checks.
 	// TODO(sadovsky): Flesh out this API.
-	Rest(call rpc.ServerCall, req RestRequest, reqVersion string) (res RestResponse, version string, err error)
+	Rest(ctx *context.T, call rpc.ServerCall, req RestRequest, reqVersion string) (res RestResponse, version string, err error)
 }
 
 // GroupServerStubMethods is the server interface containing
@@ -330,28 +330,28 @@ type implGroupServerStub struct {
 	gs *rpc.GlobState
 }
 
-func (s implGroupServerStub) Create(call rpc.ServerCall, i0 access.Permissions, i1 []BlessingPatternChunk) error {
-	return s.impl.Create(call, i0, i1)
+func (s implGroupServerStub) Create(ctx *context.T, call rpc.ServerCall, i0 access.Permissions, i1 []BlessingPatternChunk) error {
+	return s.impl.Create(ctx, call, i0, i1)
 }
 
-func (s implGroupServerStub) Delete(call rpc.ServerCall, i0 string) error {
-	return s.impl.Delete(call, i0)
+func (s implGroupServerStub) Delete(ctx *context.T, call rpc.ServerCall, i0 string) error {
+	return s.impl.Delete(ctx, call, i0)
 }
 
-func (s implGroupServerStub) Add(call rpc.ServerCall, i0 BlessingPatternChunk, i1 string) error {
-	return s.impl.Add(call, i0, i1)
+func (s implGroupServerStub) Add(ctx *context.T, call rpc.ServerCall, i0 BlessingPatternChunk, i1 string) error {
+	return s.impl.Add(ctx, call, i0, i1)
 }
 
-func (s implGroupServerStub) Remove(call rpc.ServerCall, i0 BlessingPatternChunk, i1 string) error {
-	return s.impl.Remove(call, i0, i1)
+func (s implGroupServerStub) Remove(ctx *context.T, call rpc.ServerCall, i0 BlessingPatternChunk, i1 string) error {
+	return s.impl.Remove(ctx, call, i0, i1)
 }
 
-func (s implGroupServerStub) Get(call rpc.ServerCall, i0 GetRequest, i1 string) (GetResponse, string, error) {
-	return s.impl.Get(call, i0, i1)
+func (s implGroupServerStub) Get(ctx *context.T, call rpc.ServerCall, i0 GetRequest, i1 string) (GetResponse, string, error) {
+	return s.impl.Get(ctx, call, i0, i1)
 }
 
-func (s implGroupServerStub) Rest(call rpc.ServerCall, i0 RestRequest, i1 string) (RestResponse, string, error) {
-	return s.impl.Rest(call, i0, i1)
+func (s implGroupServerStub) Rest(ctx *context.T, call rpc.ServerCall, i0 RestRequest, i1 string) (RestResponse, string, error) {
+	return s.impl.Rest(ctx, call, i0, i1)
 }
 
 func (s implGroupServerStub) Globber() *rpc.GlobState {

@@ -233,21 +233,21 @@ func (c *implPProfCpuProfileClientCall) Finish() (err error) {
 type PProfServerMethods interface {
 	// CmdLine returns the command-line arguments of the server, including
 	// the name of the executable.
-	CmdLine(rpc.ServerCall) ([]string, error)
+	CmdLine(*context.T, rpc.ServerCall) ([]string, error)
 	// Profiles returns the list of available profiles.
-	Profiles(rpc.ServerCall) ([]string, error)
+	Profiles(*context.T, rpc.ServerCall) ([]string, error)
 	// Profile streams the requested profile. The debug parameter enables
 	// additional output. Passing debug=0 includes only the hexadecimal
 	// addresses that pprof needs. Passing debug=1 adds comments translating
 	// addresses to function names and line numbers, so that a programmer
 	// can read the profile without tools.
-	Profile(call PProfProfileServerCall, name string, debug int32) error
+	Profile(ctx *context.T, call PProfProfileServerCall, name string, debug int32) error
 	// CpuProfile enables CPU profiling for the requested duration and
 	// streams the profile data.
-	CpuProfile(call PProfCpuProfileServerCall, seconds int32) error
+	CpuProfile(ctx *context.T, call PProfCpuProfileServerCall, seconds int32) error
 	// Symbol looks up the program counters and returns their respective
 	// function names.
-	Symbol(call rpc.ServerCall, programCounters []uint64) ([]string, error)
+	Symbol(ctx *context.T, call rpc.ServerCall, programCounters []uint64) ([]string, error)
 }
 
 // PProfServerStubMethods is the server interface containing
@@ -257,21 +257,21 @@ type PProfServerMethods interface {
 type PProfServerStubMethods interface {
 	// CmdLine returns the command-line arguments of the server, including
 	// the name of the executable.
-	CmdLine(rpc.ServerCall) ([]string, error)
+	CmdLine(*context.T, rpc.ServerCall) ([]string, error)
 	// Profiles returns the list of available profiles.
-	Profiles(rpc.ServerCall) ([]string, error)
+	Profiles(*context.T, rpc.ServerCall) ([]string, error)
 	// Profile streams the requested profile. The debug parameter enables
 	// additional output. Passing debug=0 includes only the hexadecimal
 	// addresses that pprof needs. Passing debug=1 adds comments translating
 	// addresses to function names and line numbers, so that a programmer
 	// can read the profile without tools.
-	Profile(call *PProfProfileServerCallStub, name string, debug int32) error
+	Profile(ctx *context.T, call *PProfProfileServerCallStub, name string, debug int32) error
 	// CpuProfile enables CPU profiling for the requested duration and
 	// streams the profile data.
-	CpuProfile(call *PProfCpuProfileServerCallStub, seconds int32) error
+	CpuProfile(ctx *context.T, call *PProfCpuProfileServerCallStub, seconds int32) error
 	// Symbol looks up the program counters and returns their respective
 	// function names.
-	Symbol(call rpc.ServerCall, programCounters []uint64) ([]string, error)
+	Symbol(ctx *context.T, call rpc.ServerCall, programCounters []uint64) ([]string, error)
 }
 
 // PProfServerStub adds universal methods to PProfServerStubMethods.
@@ -303,24 +303,24 @@ type implPProfServerStub struct {
 	gs   *rpc.GlobState
 }
 
-func (s implPProfServerStub) CmdLine(call rpc.ServerCall) ([]string, error) {
-	return s.impl.CmdLine(call)
+func (s implPProfServerStub) CmdLine(ctx *context.T, call rpc.ServerCall) ([]string, error) {
+	return s.impl.CmdLine(ctx, call)
 }
 
-func (s implPProfServerStub) Profiles(call rpc.ServerCall) ([]string, error) {
-	return s.impl.Profiles(call)
+func (s implPProfServerStub) Profiles(ctx *context.T, call rpc.ServerCall) ([]string, error) {
+	return s.impl.Profiles(ctx, call)
 }
 
-func (s implPProfServerStub) Profile(call *PProfProfileServerCallStub, i0 string, i1 int32) error {
-	return s.impl.Profile(call, i0, i1)
+func (s implPProfServerStub) Profile(ctx *context.T, call *PProfProfileServerCallStub, i0 string, i1 int32) error {
+	return s.impl.Profile(ctx, call, i0, i1)
 }
 
-func (s implPProfServerStub) CpuProfile(call *PProfCpuProfileServerCallStub, i0 int32) error {
-	return s.impl.CpuProfile(call, i0)
+func (s implPProfServerStub) CpuProfile(ctx *context.T, call *PProfCpuProfileServerCallStub, i0 int32) error {
+	return s.impl.CpuProfile(ctx, call, i0)
 }
 
-func (s implPProfServerStub) Symbol(call rpc.ServerCall, i0 []uint64) ([]string, error) {
-	return s.impl.Symbol(call, i0)
+func (s implPProfServerStub) Symbol(ctx *context.T, call rpc.ServerCall, i0 []uint64) ([]string, error) {
+	return s.impl.Symbol(ctx, call, i0)
 }
 
 func (s implPProfServerStub) Globber() *rpc.GlobState {

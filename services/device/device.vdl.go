@@ -916,19 +916,19 @@ type ApplicationServerMethods interface {
 	// which can then be used to control all the installations of the given
 	// application.
 	// TODO(rjkroege): Use customized labels.
-	Install(call rpc.ServerCall, name string, config Config, packages application.Packages) (string, error)
+	Install(ctx *context.T, call rpc.ServerCall, name string, config Config, packages application.Packages) (string, error)
 	// Refresh refreshes the state of application installation(s)
 	// instance(s).
-	Refresh(rpc.ServerCall) error
+	Refresh(*context.T, rpc.ServerCall) error
 	// Restart restarts execution of application installation(s)
 	// instance(s).
-	Restart(rpc.ServerCall) error
+	Restart(*context.T, rpc.ServerCall) error
 	// Resume resumes execution of application installation(s)
 	// instance(s).
-	Resume(rpc.ServerCall) error
+	Resume(*context.T, rpc.ServerCall) error
 	// Revert reverts application installation(s) to the most recent
 	// previous installation.
-	Revert(rpc.ServerCall) error
+	Revert(*context.T, rpc.ServerCall) error
 	// Start starts an instance of application installation(s). The
 	// server sends the application instance's Public Key on the stream.
 	// When the client receives the Public Key it must send Blessings back
@@ -939,36 +939,36 @@ type ApplicationServerMethods interface {
 	//                   <--  InstancePublicKey
 	//  AppBlessings     -->
 	//                   <--  InstanceName
-	Start(ApplicationStartServerCall) error
+	Start(*context.T, ApplicationStartServerCall) error
 	// Stop attempts a clean shutdown of application installation(s)
 	// instance(s). If the deadline (in seconds) is non-zero and the
 	// instance(s) in questions are still running after the given deadline,
 	// shutdown of the instance(s) is enforced.
-	Stop(call rpc.ServerCall, deadline time.Duration) error
+	Stop(ctx *context.T, call rpc.ServerCall, deadline time.Duration) error
 	// Suspend suspends execution of application installation(s)
 	// instance(s).
-	Suspend(rpc.ServerCall) error
+	Suspend(*context.T, rpc.ServerCall) error
 	// Uninstall uninstalls application installation(s).
-	Uninstall(rpc.ServerCall) error
+	Uninstall(*context.T, rpc.ServerCall) error
 	// Update updates the application installation(s) from the object name
 	// provided during Install.  If the new application envelope contains a
 	// different application title, the update does not occur, and an error
 	// is returned.
-	Update(rpc.ServerCall) error
+	Update(*context.T, rpc.ServerCall) error
 	// UpdateTo updates the application installation(s) to the application
 	// specified by the object name argument.  If the new application
 	// envelope contains a different application title, the update does not
 	// occur, and an error is returned.
-	UpdateTo(call rpc.ServerCall, name string) error
+	UpdateTo(ctx *context.T, call rpc.ServerCall, name string) error
 	// Debug returns debug information about the application installation or
 	// instance.  This is generally highly implementation-specific, and
 	// presented in an unstructured form.  No guarantees are given about the
 	// stability of the format, and parsing it programmatically is
 	// specifically discouraged.
-	Debug(rpc.ServerCall) (string, error)
+	Debug(*context.T, rpc.ServerCall) (string, error)
 	// Status return structured information about the application
 	// installation or instance.
-	Status(rpc.ServerCall) (Status, error)
+	Status(*context.T, rpc.ServerCall) (Status, error)
 }
 
 // ApplicationServerStubMethods is the server interface containing
@@ -1046,19 +1046,19 @@ type ApplicationServerStubMethods interface {
 	// which can then be used to control all the installations of the given
 	// application.
 	// TODO(rjkroege): Use customized labels.
-	Install(call rpc.ServerCall, name string, config Config, packages application.Packages) (string, error)
+	Install(ctx *context.T, call rpc.ServerCall, name string, config Config, packages application.Packages) (string, error)
 	// Refresh refreshes the state of application installation(s)
 	// instance(s).
-	Refresh(rpc.ServerCall) error
+	Refresh(*context.T, rpc.ServerCall) error
 	// Restart restarts execution of application installation(s)
 	// instance(s).
-	Restart(rpc.ServerCall) error
+	Restart(*context.T, rpc.ServerCall) error
 	// Resume resumes execution of application installation(s)
 	// instance(s).
-	Resume(rpc.ServerCall) error
+	Resume(*context.T, rpc.ServerCall) error
 	// Revert reverts application installation(s) to the most recent
 	// previous installation.
-	Revert(rpc.ServerCall) error
+	Revert(*context.T, rpc.ServerCall) error
 	// Start starts an instance of application installation(s). The
 	// server sends the application instance's Public Key on the stream.
 	// When the client receives the Public Key it must send Blessings back
@@ -1069,36 +1069,36 @@ type ApplicationServerStubMethods interface {
 	//                   <--  InstancePublicKey
 	//  AppBlessings     -->
 	//                   <--  InstanceName
-	Start(*ApplicationStartServerCallStub) error
+	Start(*context.T, *ApplicationStartServerCallStub) error
 	// Stop attempts a clean shutdown of application installation(s)
 	// instance(s). If the deadline (in seconds) is non-zero and the
 	// instance(s) in questions are still running after the given deadline,
 	// shutdown of the instance(s) is enforced.
-	Stop(call rpc.ServerCall, deadline time.Duration) error
+	Stop(ctx *context.T, call rpc.ServerCall, deadline time.Duration) error
 	// Suspend suspends execution of application installation(s)
 	// instance(s).
-	Suspend(rpc.ServerCall) error
+	Suspend(*context.T, rpc.ServerCall) error
 	// Uninstall uninstalls application installation(s).
-	Uninstall(rpc.ServerCall) error
+	Uninstall(*context.T, rpc.ServerCall) error
 	// Update updates the application installation(s) from the object name
 	// provided during Install.  If the new application envelope contains a
 	// different application title, the update does not occur, and an error
 	// is returned.
-	Update(rpc.ServerCall) error
+	Update(*context.T, rpc.ServerCall) error
 	// UpdateTo updates the application installation(s) to the application
 	// specified by the object name argument.  If the new application
 	// envelope contains a different application title, the update does not
 	// occur, and an error is returned.
-	UpdateTo(call rpc.ServerCall, name string) error
+	UpdateTo(ctx *context.T, call rpc.ServerCall, name string) error
 	// Debug returns debug information about the application installation or
 	// instance.  This is generally highly implementation-specific, and
 	// presented in an unstructured form.  No guarantees are given about the
 	// stability of the format, and parsing it programmatically is
 	// specifically discouraged.
-	Debug(rpc.ServerCall) (string, error)
+	Debug(*context.T, rpc.ServerCall) (string, error)
 	// Status return structured information about the application
 	// installation or instance.
-	Status(rpc.ServerCall) (Status, error)
+	Status(*context.T, rpc.ServerCall) (Status, error)
 }
 
 // ApplicationServerStub adds universal methods to ApplicationServerStubMethods.
@@ -1132,56 +1132,56 @@ type implApplicationServerStub struct {
 	gs *rpc.GlobState
 }
 
-func (s implApplicationServerStub) Install(call rpc.ServerCall, i0 string, i1 Config, i2 application.Packages) (string, error) {
-	return s.impl.Install(call, i0, i1, i2)
+func (s implApplicationServerStub) Install(ctx *context.T, call rpc.ServerCall, i0 string, i1 Config, i2 application.Packages) (string, error) {
+	return s.impl.Install(ctx, call, i0, i1, i2)
 }
 
-func (s implApplicationServerStub) Refresh(call rpc.ServerCall) error {
-	return s.impl.Refresh(call)
+func (s implApplicationServerStub) Refresh(ctx *context.T, call rpc.ServerCall) error {
+	return s.impl.Refresh(ctx, call)
 }
 
-func (s implApplicationServerStub) Restart(call rpc.ServerCall) error {
-	return s.impl.Restart(call)
+func (s implApplicationServerStub) Restart(ctx *context.T, call rpc.ServerCall) error {
+	return s.impl.Restart(ctx, call)
 }
 
-func (s implApplicationServerStub) Resume(call rpc.ServerCall) error {
-	return s.impl.Resume(call)
+func (s implApplicationServerStub) Resume(ctx *context.T, call rpc.ServerCall) error {
+	return s.impl.Resume(ctx, call)
 }
 
-func (s implApplicationServerStub) Revert(call rpc.ServerCall) error {
-	return s.impl.Revert(call)
+func (s implApplicationServerStub) Revert(ctx *context.T, call rpc.ServerCall) error {
+	return s.impl.Revert(ctx, call)
 }
 
-func (s implApplicationServerStub) Start(call *ApplicationStartServerCallStub) error {
-	return s.impl.Start(call)
+func (s implApplicationServerStub) Start(ctx *context.T, call *ApplicationStartServerCallStub) error {
+	return s.impl.Start(ctx, call)
 }
 
-func (s implApplicationServerStub) Stop(call rpc.ServerCall, i0 time.Duration) error {
-	return s.impl.Stop(call, i0)
+func (s implApplicationServerStub) Stop(ctx *context.T, call rpc.ServerCall, i0 time.Duration) error {
+	return s.impl.Stop(ctx, call, i0)
 }
 
-func (s implApplicationServerStub) Suspend(call rpc.ServerCall) error {
-	return s.impl.Suspend(call)
+func (s implApplicationServerStub) Suspend(ctx *context.T, call rpc.ServerCall) error {
+	return s.impl.Suspend(ctx, call)
 }
 
-func (s implApplicationServerStub) Uninstall(call rpc.ServerCall) error {
-	return s.impl.Uninstall(call)
+func (s implApplicationServerStub) Uninstall(ctx *context.T, call rpc.ServerCall) error {
+	return s.impl.Uninstall(ctx, call)
 }
 
-func (s implApplicationServerStub) Update(call rpc.ServerCall) error {
-	return s.impl.Update(call)
+func (s implApplicationServerStub) Update(ctx *context.T, call rpc.ServerCall) error {
+	return s.impl.Update(ctx, call)
 }
 
-func (s implApplicationServerStub) UpdateTo(call rpc.ServerCall, i0 string) error {
-	return s.impl.UpdateTo(call, i0)
+func (s implApplicationServerStub) UpdateTo(ctx *context.T, call rpc.ServerCall, i0 string) error {
+	return s.impl.UpdateTo(ctx, call, i0)
 }
 
-func (s implApplicationServerStub) Debug(call rpc.ServerCall) (string, error) {
-	return s.impl.Debug(call)
+func (s implApplicationServerStub) Debug(ctx *context.T, call rpc.ServerCall) (string, error) {
+	return s.impl.Debug(ctx, call)
 }
 
-func (s implApplicationServerStub) Status(call rpc.ServerCall) (Status, error) {
-	return s.impl.Status(call)
+func (s implApplicationServerStub) Status(ctx *context.T, call rpc.ServerCall) (Status, error) {
+	return s.impl.Status(ctx, call)
 }
 
 func (s implApplicationServerStub) Globber() *rpc.GlobState {
@@ -1433,7 +1433,7 @@ func (c implClaimableClientStub) Claim(ctx *context.T, i0 string, opts ...rpc.Ca
 // The blessings that the device is to be claimed with is provided
 // via the ipc.Granter option in Go.
 type ClaimableServerMethods interface {
-	Claim(call rpc.ServerCall, pairingToken string) error
+	Claim(ctx *context.T, call rpc.ServerCall, pairingToken string) error
 }
 
 // ClaimableServerStubMethods is the server interface containing
@@ -1471,8 +1471,8 @@ type implClaimableServerStub struct {
 	gs   *rpc.GlobState
 }
 
-func (s implClaimableServerStub) Claim(call rpc.ServerCall, i0 string) error {
-	return s.impl.Claim(call, i0)
+func (s implClaimableServerStub) Claim(ctx *context.T, call rpc.ServerCall, i0 string) error {
+	return s.impl.Claim(ctx, call, i0)
 }
 
 func (s implClaimableServerStub) Globber() *rpc.GlobState {
@@ -1753,21 +1753,21 @@ type DeviceServerMethods interface {
 	// installation instance as a receiver is well-defined.
 	ApplicationServerMethods
 	// Describe generates a description of the device.
-	Describe(rpc.ServerCall) (Description, error)
+	Describe(*context.T, rpc.ServerCall) (Description, error)
 	// IsRunnable checks if the device can execute the given binary.
-	IsRunnable(call rpc.ServerCall, description binary.Description) (bool, error)
+	IsRunnable(ctx *context.T, call rpc.ServerCall, description binary.Description) (bool, error)
 	// Reset resets the device. If the deadline is non-zero and the device
 	// in question is still running after the given deadline expired,
 	// reset of the device is enforced.
-	Reset(call rpc.ServerCall, deadline time.Duration) error
+	Reset(ctx *context.T, call rpc.ServerCall, deadline time.Duration) error
 	// AssociateAccount associates a local  system account name with the provided
 	// Vanadium identities. It replaces the existing association if one already exists for that
 	// identity. Setting an AccountName to "" removes the association for each
 	// listed identity.
-	AssociateAccount(call rpc.ServerCall, identityNames []string, accountName string) error
+	AssociateAccount(ctx *context.T, call rpc.ServerCall, identityNames []string, accountName string) error
 	// ListAssociations returns all of the associations between Vanadium identities
 	// and system names.
-	ListAssociations(rpc.ServerCall) ([]Association, error)
+	ListAssociations(*context.T, rpc.ServerCall) ([]Association, error)
 }
 
 // DeviceServerStubMethods is the server interface containing
@@ -1865,21 +1865,21 @@ type DeviceServerStubMethods interface {
 	// installation instance as a receiver is well-defined.
 	ApplicationServerStubMethods
 	// Describe generates a description of the device.
-	Describe(rpc.ServerCall) (Description, error)
+	Describe(*context.T, rpc.ServerCall) (Description, error)
 	// IsRunnable checks if the device can execute the given binary.
-	IsRunnable(call rpc.ServerCall, description binary.Description) (bool, error)
+	IsRunnable(ctx *context.T, call rpc.ServerCall, description binary.Description) (bool, error)
 	// Reset resets the device. If the deadline is non-zero and the device
 	// in question is still running after the given deadline expired,
 	// reset of the device is enforced.
-	Reset(call rpc.ServerCall, deadline time.Duration) error
+	Reset(ctx *context.T, call rpc.ServerCall, deadline time.Duration) error
 	// AssociateAccount associates a local  system account name with the provided
 	// Vanadium identities. It replaces the existing association if one already exists for that
 	// identity. Setting an AccountName to "" removes the association for each
 	// listed identity.
-	AssociateAccount(call rpc.ServerCall, identityNames []string, accountName string) error
+	AssociateAccount(ctx *context.T, call rpc.ServerCall, identityNames []string, accountName string) error
 	// ListAssociations returns all of the associations between Vanadium identities
 	// and system names.
-	ListAssociations(rpc.ServerCall) ([]Association, error)
+	ListAssociations(*context.T, rpc.ServerCall) ([]Association, error)
 }
 
 // DeviceServerStub adds universal methods to DeviceServerStubMethods.
@@ -1913,24 +1913,24 @@ type implDeviceServerStub struct {
 	gs *rpc.GlobState
 }
 
-func (s implDeviceServerStub) Describe(call rpc.ServerCall) (Description, error) {
-	return s.impl.Describe(call)
+func (s implDeviceServerStub) Describe(ctx *context.T, call rpc.ServerCall) (Description, error) {
+	return s.impl.Describe(ctx, call)
 }
 
-func (s implDeviceServerStub) IsRunnable(call rpc.ServerCall, i0 binary.Description) (bool, error) {
-	return s.impl.IsRunnable(call, i0)
+func (s implDeviceServerStub) IsRunnable(ctx *context.T, call rpc.ServerCall, i0 binary.Description) (bool, error) {
+	return s.impl.IsRunnable(ctx, call, i0)
 }
 
-func (s implDeviceServerStub) Reset(call rpc.ServerCall, i0 time.Duration) error {
-	return s.impl.Reset(call, i0)
+func (s implDeviceServerStub) Reset(ctx *context.T, call rpc.ServerCall, i0 time.Duration) error {
+	return s.impl.Reset(ctx, call, i0)
 }
 
-func (s implDeviceServerStub) AssociateAccount(call rpc.ServerCall, i0 []string, i1 string) error {
-	return s.impl.AssociateAccount(call, i0, i1)
+func (s implDeviceServerStub) AssociateAccount(ctx *context.T, call rpc.ServerCall, i0 []string, i1 string) error {
+	return s.impl.AssociateAccount(ctx, call, i0, i1)
 }
 
-func (s implDeviceServerStub) ListAssociations(call rpc.ServerCall) ([]Association, error) {
-	return s.impl.ListAssociations(call)
+func (s implDeviceServerStub) ListAssociations(ctx *context.T, call rpc.ServerCall) ([]Association, error) {
+	return s.impl.ListAssociations(ctx, call)
 }
 
 func (s implDeviceServerStub) Globber() *rpc.GlobState {

@@ -251,20 +251,20 @@ type MountTableServerMethods interface {
 	// was never present as far as the interface is concerned.
 	//
 	// The flags represent a bit mask of options.
-	Mount(call rpc.ServerCall, server string, ttl uint32, flags naming.MountFlag) error
+	Mount(ctx *context.T, call rpc.ServerCall, server string, ttl uint32, flags naming.MountFlag) error
 	// Unmount removes server from the receiver.  If server is empty, remove all
 	// servers mounted there.  Returns a non-nil error iff server remains mounted
 	// at the mount point.
-	Unmount(call rpc.ServerCall, server string) error
+	Unmount(ctx *context.T, call rpc.ServerCall, server string) error
 	// Delete removes the receiver.  If the receiver has children, it will not
 	// be removed unless deleteSubtree is true in which case the whole subtree is
 	// removed.
-	Delete(call rpc.ServerCall, deleteSubtree bool) error
+	Delete(ctx *context.T, call rpc.ServerCall, deleteSubtree bool) error
 	// ResolveStep takes the next step in resolving a name.  Returns the next
 	// servers to query and the suffix at those servers.
-	ResolveStep(rpc.ServerCall) (naming.MountEntry, error)
+	ResolveStep(*context.T, rpc.ServerCall) (naming.MountEntry, error)
 	// Obsolete, left for backward compatability until all uses are killed.
-	ResolveStepX(rpc.ServerCall) (naming.MountEntry, error)
+	ResolveStepX(*context.T, rpc.ServerCall) (naming.MountEntry, error)
 }
 
 // MountTableServerStubMethods is the server interface containing
@@ -304,24 +304,24 @@ type implMountTableServerStub struct {
 	gs *rpc.GlobState
 }
 
-func (s implMountTableServerStub) Mount(call rpc.ServerCall, i0 string, i1 uint32, i2 naming.MountFlag) error {
-	return s.impl.Mount(call, i0, i1, i2)
+func (s implMountTableServerStub) Mount(ctx *context.T, call rpc.ServerCall, i0 string, i1 uint32, i2 naming.MountFlag) error {
+	return s.impl.Mount(ctx, call, i0, i1, i2)
 }
 
-func (s implMountTableServerStub) Unmount(call rpc.ServerCall, i0 string) error {
-	return s.impl.Unmount(call, i0)
+func (s implMountTableServerStub) Unmount(ctx *context.T, call rpc.ServerCall, i0 string) error {
+	return s.impl.Unmount(ctx, call, i0)
 }
 
-func (s implMountTableServerStub) Delete(call rpc.ServerCall, i0 bool) error {
-	return s.impl.Delete(call, i0)
+func (s implMountTableServerStub) Delete(ctx *context.T, call rpc.ServerCall, i0 bool) error {
+	return s.impl.Delete(ctx, call, i0)
 }
 
-func (s implMountTableServerStub) ResolveStep(call rpc.ServerCall) (naming.MountEntry, error) {
-	return s.impl.ResolveStep(call)
+func (s implMountTableServerStub) ResolveStep(ctx *context.T, call rpc.ServerCall) (naming.MountEntry, error) {
+	return s.impl.ResolveStep(ctx, call)
 }
 
-func (s implMountTableServerStub) ResolveStepX(call rpc.ServerCall) (naming.MountEntry, error) {
-	return s.impl.ResolveStepX(call)
+func (s implMountTableServerStub) ResolveStepX(ctx *context.T, call rpc.ServerCall) (naming.MountEntry, error) {
+	return s.impl.ResolveStepX(ctx, call)
 }
 
 func (s implMountTableServerStub) Globber() *rpc.GlobState {

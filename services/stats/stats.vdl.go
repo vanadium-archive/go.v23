@@ -97,7 +97,7 @@ type StatsServerMethods interface {
 	// of the value is implementation specific.
 	// Some objects may not have a value, in which case, Value() returns
 	// a NoValue error.
-	Value(rpc.ServerCall) (*vdl.Value, error)
+	Value(*context.T, rpc.ServerCall) (*vdl.Value, error)
 }
 
 // StatsServerStubMethods is the server interface containing
@@ -112,7 +112,7 @@ type StatsServerStubMethods interface {
 	// of the value is implementation specific.
 	// Some objects may not have a value, in which case, Value() returns
 	// a NoValue error.
-	Value(rpc.ServerCall) (*vdl.Value, error)
+	Value(*context.T, rpc.ServerCall) (*vdl.Value, error)
 }
 
 // StatsServerStub adds universal methods to StatsServerStubMethods.
@@ -146,8 +146,8 @@ type implStatsServerStub struct {
 	gs *rpc.GlobState
 }
 
-func (s implStatsServerStub) Value(call rpc.ServerCall) (*vdl.Value, error) {
-	return s.impl.Value(call)
+func (s implStatsServerStub) Value(ctx *context.T, call rpc.ServerCall) (*vdl.Value, error) {
+	return s.impl.Value(ctx, call)
 }
 
 func (s implStatsServerStub) Globber() *rpc.GlobState {

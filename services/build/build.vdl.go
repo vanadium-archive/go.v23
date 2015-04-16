@@ -353,10 +353,10 @@ func (c *implBuilderBuildClientCall) Finish() (o0 []byte, err error) {
 type BuilderServerMethods interface {
 	// Build streams sources to the build server, which then attempts to
 	// build the sources and streams back the compiled binaries.
-	Build(call BuilderBuildServerCall, arch Architecture, os OperatingSystem) ([]byte, error)
+	Build(ctx *context.T, call BuilderBuildServerCall, arch Architecture, os OperatingSystem) ([]byte, error)
 	// Describe generates a description for a binary identified by
 	// the given Object name.
-	Describe(call rpc.ServerCall, name string) (binary.Description, error)
+	Describe(ctx *context.T, call rpc.ServerCall, name string) (binary.Description, error)
 }
 
 // BuilderServerStubMethods is the server interface containing
@@ -366,10 +366,10 @@ type BuilderServerMethods interface {
 type BuilderServerStubMethods interface {
 	// Build streams sources to the build server, which then attempts to
 	// build the sources and streams back the compiled binaries.
-	Build(call *BuilderBuildServerCallStub, arch Architecture, os OperatingSystem) ([]byte, error)
+	Build(ctx *context.T, call *BuilderBuildServerCallStub, arch Architecture, os OperatingSystem) ([]byte, error)
 	// Describe generates a description for a binary identified by
 	// the given Object name.
-	Describe(call rpc.ServerCall, name string) (binary.Description, error)
+	Describe(ctx *context.T, call rpc.ServerCall, name string) (binary.Description, error)
 }
 
 // BuilderServerStub adds universal methods to BuilderServerStubMethods.
@@ -401,12 +401,12 @@ type implBuilderServerStub struct {
 	gs   *rpc.GlobState
 }
 
-func (s implBuilderServerStub) Build(call *BuilderBuildServerCallStub, i0 Architecture, i1 OperatingSystem) ([]byte, error) {
-	return s.impl.Build(call, i0, i1)
+func (s implBuilderServerStub) Build(ctx *context.T, call *BuilderBuildServerCallStub, i0 Architecture, i1 OperatingSystem) ([]byte, error) {
+	return s.impl.Build(ctx, call, i0, i1)
 }
 
-func (s implBuilderServerStub) Describe(call rpc.ServerCall, i0 string) (binary.Description, error) {
-	return s.impl.Describe(call, i0)
+func (s implBuilderServerStub) Describe(ctx *context.T, call rpc.ServerCall, i0 string) (binary.Description, error) {
+	return s.impl.Describe(ctx, call, i0)
 }
 
 func (s implBuilderServerStub) Globber() *rpc.GlobState {

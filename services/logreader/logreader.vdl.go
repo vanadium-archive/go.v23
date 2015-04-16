@@ -168,7 +168,7 @@ func (c *implLogFileReadLogClientCall) Finish() (o0 int64, err error) {
 // LogFile can be used to access log files remotely.
 type LogFileServerMethods interface {
 	// Size returns the number of bytes in the receiving object.
-	Size(rpc.ServerCall) (int64, error)
+	Size(*context.T, rpc.ServerCall) (int64, error)
 	// ReadLog receives up to numEntries log entries starting at the
 	// startPos offset (in bytes) in the receiving object. Each stream chunk
 	// contains one log entry.
@@ -182,7 +182,7 @@ type LogFileServerMethods interface {
 	//
 	// The returned error will be EndOfFile if and only if ReadLog reached the
 	// end of the file and no log entries were returned.
-	ReadLog(call LogFileReadLogServerCall, startPos int64, numEntries int32, follow bool) (int64, error)
+	ReadLog(ctx *context.T, call LogFileReadLogServerCall, startPos int64, numEntries int32, follow bool) (int64, error)
 }
 
 // LogFileServerStubMethods is the server interface containing
@@ -191,7 +191,7 @@ type LogFileServerMethods interface {
 // is the streaming methods.
 type LogFileServerStubMethods interface {
 	// Size returns the number of bytes in the receiving object.
-	Size(rpc.ServerCall) (int64, error)
+	Size(*context.T, rpc.ServerCall) (int64, error)
 	// ReadLog receives up to numEntries log entries starting at the
 	// startPos offset (in bytes) in the receiving object. Each stream chunk
 	// contains one log entry.
@@ -205,7 +205,7 @@ type LogFileServerStubMethods interface {
 	//
 	// The returned error will be EndOfFile if and only if ReadLog reached the
 	// end of the file and no log entries were returned.
-	ReadLog(call *LogFileReadLogServerCallStub, startPos int64, numEntries int32, follow bool) (int64, error)
+	ReadLog(ctx *context.T, call *LogFileReadLogServerCallStub, startPos int64, numEntries int32, follow bool) (int64, error)
 }
 
 // LogFileServerStub adds universal methods to LogFileServerStubMethods.
@@ -237,12 +237,12 @@ type implLogFileServerStub struct {
 	gs   *rpc.GlobState
 }
 
-func (s implLogFileServerStub) Size(call rpc.ServerCall) (int64, error) {
-	return s.impl.Size(call)
+func (s implLogFileServerStub) Size(ctx *context.T, call rpc.ServerCall) (int64, error) {
+	return s.impl.Size(ctx, call)
 }
 
-func (s implLogFileServerStub) ReadLog(call *LogFileReadLogServerCallStub, i0 int64, i1 int32, i2 bool) (int64, error) {
-	return s.impl.ReadLog(call, i0, i1, i2)
+func (s implLogFileServerStub) ReadLog(ctx *context.T, call *LogFileReadLogServerCallStub, i0 int64, i1 int32, i2 bool) (int64, error) {
+	return s.impl.ReadLog(ctx, call, i0, i1, i2)
 }
 
 func (s implLogFileServerStub) Globber() *rpc.GlobState {
