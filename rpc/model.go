@@ -482,22 +482,22 @@ type Invoker interface {
 	// are typically configured in the VDL specification of the method.
 	Prepare(method string, numArgs int) (argptrs []interface{}, tags []*vdl.Value, _ error)
 
-	// Invoke is the second stage of method invocation.  It is passed the method
-	// name, the in-flight call context, and the argptrs returned by Prepare,
-	// filled in with decoded arguments.  It returns the results from the
+	// Invoke is the second stage of method invocation.  It is passed the the
+	// in-flight context and call, the method name, and the argptrs returned by
+	// Prepare, filled in with decoded arguments.  It returns the results from the
 	// invocation, and any errors in invoking the method.
 	//
 	// Note that argptrs is a slice of pointers to the argument objects; each
 	// pointer must be dereferenced to obtain the actual arg value.
-	Invoke(method string, call StreamServerCall, argptrs []interface{}) (results []interface{}, _ error)
+	Invoke(ctx *context.T, call StreamServerCall, method string, argptrs []interface{}) (results []interface{}, _ error)
 
 	// Signature corresponds to the reserved __Signature method; it returns the
 	// signatures of the interfaces the underlying object implements.
-	Signature(call ServerCall) ([]signature.Interface, error)
+	Signature(ctx *context.T, call ServerCall) ([]signature.Interface, error)
 
 	// MethodSignature corresponds to the reserved __MethodSignature method; it
 	// returns the signature of the given method.
-	MethodSignature(call ServerCall, method string) (signature.Method, error)
+	MethodSignature(ctx *context.T, call ServerCall, method string) (signature.Method, error)
 
 	// Globber allows objects to take part in the namespace.
 	Globber
@@ -534,7 +534,7 @@ type AllGlobber interface {
 	// Glob__ returns a MountEntry for the objects that match the given
 	// pattern in the namespace below the receiver object. All the names
 	// returned are relative to the receiver.
-	Glob__(call ServerCall, pattern string) (<-chan naming.GlobReply, error)
+	Glob__(ctx *context.T, call ServerCall, pattern string) (<-chan naming.GlobReply, error)
 }
 
 // ChildrenGlobber is a simple interface to publish the relationship between
@@ -543,7 +543,7 @@ type ChildrenGlobber interface {
 	// GlobChildren__ returns the names of the receiver's immediate children
 	// on a channel.  It should return an error if the receiver doesn't
 	// exist.
-	GlobChildren__(call ServerCall) (<-chan string, error)
+	GlobChildren__(ctx *context.T, call ServerCall) (<-chan string, error)
 }
 
 // StreamServerCall defines the in-flight context for a server method
@@ -556,6 +556,8 @@ type StreamServerCall interface {
 // ServerCall defines the in-flight context for a server method call, not
 // including methods to stream args and results.
 type ServerCall interface {
+	// Security returns the security-related state associated with the call.
+	Security() security.Call
 	// Suffix returns the object name suffix for the request.
 	Suffix() string
 	// LocalEndpoint returns the Endpoint at the local end of
@@ -578,9 +580,6 @@ type ServerCall interface {
 	GrantedBlessings() security.Blessings
 	// Server returns the Server that this context is associated with.
 	Server() Server
-
-	// Context returns the current context.T.
-	Context() *context.T
 }
 
 // CallOpt is the interface for all Call options.

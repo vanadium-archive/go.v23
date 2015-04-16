@@ -13,6 +13,8 @@ import (
 	"strings"
 	"testing"
 
+	"v.io/v23/context"
+	"v.io/v23/naming"
 	"v.io/v23/vdl"
 	"v.io/v23/verror"
 )
@@ -26,35 +28,24 @@ var (
 	tagEpsilon = vdl.StringValue("epsilon")
 )
 
-// All objects used for success testing are based on testObj, which captures the
-// state from each invocation, so that we may test it against our expectations.
-type testObj struct {
-	call ServerCall
-}
-
-func (o testObj) LastCall() ServerCall { return o.call }
-
 var errApp = errors.New("app error")
 
-type notags struct{ testObj }
+type notags struct{}
 
-func (o *notags) Method1(c ServerCall) error               { o.call = c; return nil }
-func (o *notags) Method2(c ServerCall) (int, error)        { o.call = c; return 0, nil }
-func (o *notags) Method3(c ServerCall, _ int) error        { o.call = c; return nil }
-func (o *notags) Method4(c ServerCall, i int) (int, error) { o.call = c; return i, nil }
-func (o *notags) Error(c ServerCall) error                 { o.call = c; return errApp }
+func (o *notags) Method1(*context.T, ServerCall) error             { return nil }
+func (o *notags) Method2(*context.T, ServerCall) (int, error)      { return 0, nil }
+func (o *notags) Method3(*context.T, ServerCall, int) error        { return nil }
+func (o *notags) Method4(*context.T, ServerCall, int) (int, error) { return 0, nil }
+func (o *notags) Error(*context.T, ServerCall) error               { return errApp }
 
-type tags struct{ testObj }
+type tags struct{}
 
-func (o *tags) Alpha(c ServerCall) error               { o.call = c; return nil }
-func (o *tags) Beta(c ServerCall) (int, error)         { o.call = c; return 0, nil }
-func (o *tags) Gamma(c ServerCall, _ int) error        { o.call = c; return nil }
-func (o *tags) Delta(c ServerCall, i int) (int, error) { o.call = c; return i, nil }
-func (o *tags) Epsilon(c ServerCall, i int, s string) (int, string, error) {
-	o.call = c
-	return i, s, nil
-}
-func (o *tags) Error(c ServerCall) error { o.call = c; return errApp }
+func (o *tags) Alpha(*context.T, ServerCall) error                               { return nil }
+func (o *tags) Beta(*context.T, ServerCall) (int, error)                         { return 0, nil }
+func (o *tags) Gamma(*context.T, ServerCall, int) error                          { return nil }
+func (o *tags) Delta(*context.T, ServerCall, int) (int, error)                   { return 0, nil }
+func (o *tags) Epsilon(*context.T, ServerCall, int, string) (int, string, error) { return 0, "", nil }
+func (o *tags) Error(*context.T, ServerCall) error                               { return errApp }
 
 func (o *tags) Describe__() []InterfaceDesc {
 	return []InterfaceDesc{{
@@ -85,27 +76,39 @@ type (
 	badoutargs struct{}
 
 	badGlobber       struct{}
-	badGlob          struct{}
-	badGlobChildren  struct{}
+	badGlob1         struct{}
+	badGlob2         struct{}
+	badGlob3         struct{}
+	badGlob4         struct{}
+	badGlob5         struct{}
+	badGlob6         struct{}
+	badGlob7         struct{}
+	badGlobChildren1 struct{}
 	badGlobChildren2 struct{}
+	badGlobChildren3 struct{}
+	badGlobChildren4 struct{}
+	badGlobChildren5 struct{}
+	badGlobChildren6 struct{}
 )
 
-func (badcall) notExported(ServerCall) error     { return nil }
-func (badcall) NonRPC1() error                   { return nil }
-func (badcall) NonRPC2(int) error                { return nil }
-func (badcall) NonRPC3(int, string) error        { return nil }
-func (badcall) NonRPC4(*badcall) error           { return nil }
-func (badcall) NoInit(*noInitCall) error         { return nil }
-func (badcall) BadInit1(*badInit1Call) error     { return nil }
-func (badcall) BadInit2(*badInit2Call) error     { return nil }
-func (badcall) BadInit3(*badInit3Call) error     { return nil }
-func (badcall) NoSendRecv(*noSendRecvCall) error { return nil }
-func (badcall) BadSend1(*badSend1Call) error     { return nil }
-func (badcall) BadSend2(*badSend2Call) error     { return nil }
-func (badcall) BadSend3(*badSend3Call) error     { return nil }
-func (badcall) BadRecv1(*badRecv1Call) error     { return nil }
-func (badcall) BadRecv2(*badRecv2Call) error     { return nil }
-func (badcall) BadRecv3(*badRecv3Call) error     { return nil }
+func (badcall) notExported(*context.T, ServerCall) error     { return nil }
+func (badcall) NonRPC1() error                               { return nil }
+func (badcall) NonRPC2(int) error                            { return nil }
+func (badcall) NonRPC3(int, string) error                    { return nil }
+func (badcall) NonRPC4(*badcall) error                       { return nil }
+func (badcall) NonRPC5(context.T, *badcall) error            { return nil }
+func (badcall) NonRPC6(*context.T, *badcall) error           { return nil }
+func (badcall) NoInit(*context.T, *noInitCall) error         { return nil }
+func (badcall) BadInit1(*context.T, *badInit1Call) error     { return nil }
+func (badcall) BadInit2(*context.T, *badInit2Call) error     { return nil }
+func (badcall) BadInit3(*context.T, *badInit3Call) error     { return nil }
+func (badcall) NoSendRecv(*context.T, *noSendRecvCall) error { return nil }
+func (badcall) BadSend1(*context.T, *badSend1Call) error     { return nil }
+func (badcall) BadSend2(*context.T, *badSend2Call) error     { return nil }
+func (badcall) BadSend3(*context.T, *badSend3Call) error     { return nil }
+func (badcall) BadRecv1(*context.T, *badRecv1Call) error     { return nil }
+func (badcall) BadRecv2(*context.T, *badRecv2Call) error     { return nil }
+func (badcall) BadRecv3(*context.T, *badRecv3Call) error     { return nil }
 
 func (*badInit1Call) Init()                      {}
 func (*badInit2Call) Init(int)                   {}
@@ -143,15 +146,25 @@ func (*badRecv3Call) RecvStream() interface {
 	return nil
 }
 
-func (badoutargs) NoFinalError1(ServerCall)                 {}
-func (badoutargs) NoFinalError2(ServerCall) string          { return "" }
-func (badoutargs) NoFinalError3(ServerCall) (bool, string)  { return false, "" }
-func (badoutargs) NoFinalError4(ServerCall) (error, string) { return nil, "" }
+func (badoutargs) NoFinalError1(*context.T, ServerCall)                 {}
+func (badoutargs) NoFinalError2(*context.T, ServerCall) string          { return "" }
+func (badoutargs) NoFinalError3(*context.T, ServerCall) (bool, string)  { return false, "" }
+func (badoutargs) NoFinalError4(*context.T, ServerCall) (error, string) { return nil, "" }
 
-func (badGlobber) Globber()                                     {}
-func (badGlob) Glob__()                                         {}
-func (badGlobChildren) GlobChildren__(ServerCall)               {}
-func (badGlobChildren2) GlobChildren__() (<-chan string, error) { return nil, nil }
+func (badGlobber) Globber()                                                    {}
+func (badGlob1) Glob__()                                                       {}
+func (badGlob2) Glob__(*context.T)                                             {}
+func (badGlob3) Glob__(*context.T, ServerCall)                                 {}
+func (badGlob4) Glob__(*context.T, ServerCall, string)                         {}
+func (badGlob5) Glob__(*context.T, ServerCall, string) <-chan naming.GlobReply { return nil }
+func (badGlob6) Glob__(*context.T, ServerCall, string) error                   { return nil }
+func (badGlob7) Glob__() (<-chan naming.GlobReply, error)                      { return nil, nil }
+func (badGlobChildren1) GlobChildren__()                                       {}
+func (badGlobChildren2) GlobChildren__(*context.T)                             {}
+func (badGlobChildren3) GlobChildren__(*context.T, ServerCall)                 {}
+func (badGlobChildren4) GlobChildren__(*context.T, ServerCall) <-chan string   { return nil }
+func (badGlobChildren5) GlobChildren__(*context.T, ServerCall) error           { return nil }
+func (badGlobChildren6) GlobChildren__() (<-chan string, error)                { return nil, nil }
 
 const (
 	badInit = `Init must have signature`
@@ -167,12 +180,11 @@ func TestTypeCheckMethods(t *testing.T) {
 	tests := []testcase{
 		{struct{}{}, nil},
 		{&notags{}, map[string]string{
-			"Method1":  "",
-			"Method2":  "",
-			"Method3":  "",
-			"Method4":  "",
-			"Error":    "",
-			"LastCall": verror.New(verror.ErrBadArg, nil, verror.New(errNonRPCMethod, nil)).Error(),
+			"Method1": "",
+			"Method2": "",
+			"Method3": "",
+			"Method4": "",
+			"Error":   "",
 		}},
 		{&tags{}, map[string]string{
 			"Alpha":      "",
@@ -181,7 +193,6 @@ func TestTypeCheckMethods(t *testing.T) {
 			"Delta":      "",
 			"Epsilon":    "",
 			"Error":      "",
-			"LastCall":   verror.New(verror.ErrBadArg, nil, verror.New(errNonRPCMethod, nil)).Error(),
 			"Describe__": verror.New(verror.ErrInternal, nil, verror.New(errReservedMethod, nil)).Error(),
 		}},
 		{badcall{}, map[string]string{
@@ -190,6 +201,8 @@ func TestTypeCheckMethods(t *testing.T) {
 			"NonRPC2":     verror.New(errNonRPCMethod, nil).Error(),
 			"NonRPC3":     verror.New(errNonRPCMethod, nil).Error(),
 			"NonRPC4":     verror.New(errNonRPCMethod, nil).Error(),
+			"NonRPC5":     verror.New(errNonRPCMethod, nil).Error(),
+			"NonRPC6":     verror.New(errNonRPCMethod, nil).Error(),
 			"NoInit":      "must have Init method",
 			"BadInit1":    badInit,
 			"BadInit2":    badInit,
@@ -208,16 +221,46 @@ func TestTypeCheckMethods(t *testing.T) {
 			"NoFinalError3": verror.New(verror.ErrAborted, nil, verror.New(errNoFinalErrorOutArg, nil)).Error(),
 			"NoFinalError4": verror.New(verror.ErrAborted, nil, verror.New(errNoFinalErrorOutArg, nil)).Error(),
 		}},
-		{&badGlobber{}, map[string]string{
+		{badGlobber{}, map[string]string{
 			"Globber": verror.New(verror.ErrAborted, nil, verror.New(errBadGlobber, nil)).Error(),
 		}},
-		{&badGlob{}, map[string]string{
+		{badGlob1{}, map[string]string{
 			"Glob__": verror.New(verror.ErrAborted, nil, verror.New(errBadGlob, nil)).Error(),
 		}},
-		{&badGlobChildren{}, map[string]string{
+		{badGlob2{}, map[string]string{
+			"Glob__": verror.New(verror.ErrAborted, nil, verror.New(errBadGlob, nil)).Error(),
+		}},
+		{badGlob3{}, map[string]string{
+			"Glob__": verror.New(verror.ErrAborted, nil, verror.New(errBadGlob, nil)).Error(),
+		}},
+		{badGlob4{}, map[string]string{
+			"Glob__": verror.New(verror.ErrAborted, nil, verror.New(errBadGlob, nil)).Error(),
+		}},
+		{badGlob5{}, map[string]string{
+			"Glob__": verror.New(verror.ErrAborted, nil, verror.New(errBadGlob, nil)).Error(),
+		}},
+		{badGlob6{}, map[string]string{
+			"Glob__": verror.New(verror.ErrAborted, nil, verror.New(errBadGlob, nil)).Error(),
+		}},
+		{badGlob7{}, map[string]string{
+			"Glob__": verror.New(verror.ErrAborted, nil, verror.New(errBadGlob, nil)).Error(),
+		}},
+		{badGlobChildren1{}, map[string]string{
 			"GlobChildren__": verror.New(verror.ErrAborted, nil, verror.New(errBadGlobChildren, nil)).Error(),
 		}},
-		{&badGlobChildren2{}, map[string]string{
+		{badGlobChildren2{}, map[string]string{
+			"GlobChildren__": verror.New(verror.ErrAborted, nil, verror.New(errBadGlobChildren, nil)).Error(),
+		}},
+		{badGlobChildren3{}, map[string]string{
+			"GlobChildren__": verror.New(verror.ErrAborted, nil, verror.New(errBadGlobChildren, nil)).Error(),
+		}},
+		{badGlobChildren4{}, map[string]string{
+			"GlobChildren__": verror.New(verror.ErrAborted, nil, verror.New(errBadGlobChildren, nil)).Error(),
+		}},
+		{badGlobChildren5{}, map[string]string{
+			"GlobChildren__": verror.New(verror.ErrAborted, nil, verror.New(errBadGlobChildren, nil)).Error(),
+		}},
+		{badGlobChildren6{}, map[string]string{
 			"GlobChildren__": verror.New(verror.ErrAborted, nil, verror.New(errBadGlobChildren, nil)).Error(),
 		}},
 	}

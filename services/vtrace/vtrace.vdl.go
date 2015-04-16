@@ -137,10 +137,10 @@ func (c *implStoreAllTracesClientCall) Finish() (err error) {
 type StoreServerMethods interface {
 	// Trace returns the trace that matches the given Id.
 	// Will return a NoExists error if no matching trace was found.
-	Trace(rpc.ServerCall, uniqueid.Id) (vtrace.TraceRecord, error)
+	Trace(*context.T, rpc.ServerCall, uniqueid.Id) (vtrace.TraceRecord, error)
 	// AllTraces returns TraceRecords for all traces the server currently
 	// knows about.
-	AllTraces(StoreAllTracesServerCall) error
+	AllTraces(*context.T, StoreAllTracesServerCall) error
 }
 
 // StoreServerStubMethods is the server interface containing
@@ -150,10 +150,10 @@ type StoreServerMethods interface {
 type StoreServerStubMethods interface {
 	// Trace returns the trace that matches the given Id.
 	// Will return a NoExists error if no matching trace was found.
-	Trace(rpc.ServerCall, uniqueid.Id) (vtrace.TraceRecord, error)
+	Trace(*context.T, rpc.ServerCall, uniqueid.Id) (vtrace.TraceRecord, error)
 	// AllTraces returns TraceRecords for all traces the server currently
 	// knows about.
-	AllTraces(*StoreAllTracesServerCallStub) error
+	AllTraces(*context.T, *StoreAllTracesServerCallStub) error
 }
 
 // StoreServerStub adds universal methods to StoreServerStubMethods.
@@ -185,12 +185,12 @@ type implStoreServerStub struct {
 	gs   *rpc.GlobState
 }
 
-func (s implStoreServerStub) Trace(call rpc.ServerCall, i0 uniqueid.Id) (vtrace.TraceRecord, error) {
-	return s.impl.Trace(call, i0)
+func (s implStoreServerStub) Trace(ctx *context.T, call rpc.ServerCall, i0 uniqueid.Id) (vtrace.TraceRecord, error) {
+	return s.impl.Trace(ctx, call, i0)
 }
 
-func (s implStoreServerStub) AllTraces(call *StoreAllTracesServerCallStub) error {
-	return s.impl.AllTraces(call)
+func (s implStoreServerStub) AllTraces(ctx *context.T, call *StoreAllTracesServerCallStub) error {
+	return s.impl.AllTraces(ctx, call)
 }
 
 func (s implStoreServerStub) Globber() *rpc.GlobState {

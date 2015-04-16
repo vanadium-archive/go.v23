@@ -4,6 +4,8 @@
 
 package rpc
 
+import "v.io/v23/context"
+
 // NewGlobState returns the GlobState corresponding to obj.  Returns nil if obj
 // doesn't implement AllGlobber or ChildrenGlobber.
 func NewGlobState(obj interface{}) *GlobState {
@@ -25,7 +27,7 @@ type obj struct {
 	children []string
 }
 
-func (o obj) GlobChildren__(ServerCall) (<-chan string, error) {
+func (o obj) GlobChildren__(*context.T, ServerCall) (<-chan string, error) {
 	ch := make(chan string, len(o.children))
 	for _, v := range o.children {
 		ch <- v

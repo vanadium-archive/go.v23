@@ -162,11 +162,11 @@ type AppCycleServerMethods interface {
 	// Stop initiates shutdown of the server.  It streams back periodic
 	// updates to give the client an idea of how the shutdown is
 	// progressing.
-	Stop(AppCycleStopServerCall) error
+	Stop(*context.T, AppCycleStopServerCall) error
 	// ForceStop tells the server to shut down right away.  It can be issued
 	// while a Stop is outstanding if for example the client does not want
 	// to wait any longer.
-	ForceStop(rpc.ServerCall) error
+	ForceStop(*context.T, rpc.ServerCall) error
 }
 
 // AppCycleServerStubMethods is the server interface containing
@@ -177,11 +177,11 @@ type AppCycleServerStubMethods interface {
 	// Stop initiates shutdown of the server.  It streams back periodic
 	// updates to give the client an idea of how the shutdown is
 	// progressing.
-	Stop(*AppCycleStopServerCallStub) error
+	Stop(*context.T, *AppCycleStopServerCallStub) error
 	// ForceStop tells the server to shut down right away.  It can be issued
 	// while a Stop is outstanding if for example the client does not want
 	// to wait any longer.
-	ForceStop(rpc.ServerCall) error
+	ForceStop(*context.T, rpc.ServerCall) error
 }
 
 // AppCycleServerStub adds universal methods to AppCycleServerStubMethods.
@@ -213,12 +213,12 @@ type implAppCycleServerStub struct {
 	gs   *rpc.GlobState
 }
 
-func (s implAppCycleServerStub) Stop(call *AppCycleStopServerCallStub) error {
-	return s.impl.Stop(call)
+func (s implAppCycleServerStub) Stop(ctx *context.T, call *AppCycleStopServerCallStub) error {
+	return s.impl.Stop(ctx, call)
 }
 
-func (s implAppCycleServerStub) ForceStop(call rpc.ServerCall) error {
-	return s.impl.ForceStop(call)
+func (s implAppCycleServerStub) ForceStop(ctx *context.T, call rpc.ServerCall) error {
+	return s.impl.ForceStop(ctx, call)
 }
 
 func (s implAppCycleServerStub) Globber() *rpc.GlobState {

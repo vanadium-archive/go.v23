@@ -76,7 +76,6 @@ type ctxImpl struct{ params CallParams }
 func (c *ctxImpl) Timestamp() time.Time                   { return c.params.Timestamp }
 func (c *ctxImpl) Method() string                         { return c.params.Method }
 func (c *ctxImpl) MethodTags() []*vdl.Value               { return c.params.MethodTags }
-func (c *ctxImpl) Name() string                           { return c.params.Suffix }
 func (c *ctxImpl) Suffix() string                         { return c.params.Suffix }
 func (c *ctxImpl) LocalPrincipal() Principal              { return c.params.LocalPrincipal }
 func (c *ctxImpl) LocalBlessings() Blessings              { return c.params.LocalBlessings }

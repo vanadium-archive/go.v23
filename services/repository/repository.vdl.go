@@ -192,7 +192,7 @@ type ApplicationServerMethods interface {
 	// object name suffix) and if so, returns this envelope. If multiple
 	// profile matches are possible, the method returns the first
 	// matching profile, respecting the order of the input argument.
-	Match(call rpc.ServerCall, profiles []string) (application.Envelope, error)
+	Match(ctx *context.T, call rpc.ServerCall, profiles []string) (application.Envelope, error)
 }
 
 // ApplicationServerStubMethods is the server interface containing
@@ -232,8 +232,8 @@ type implApplicationServerStub struct {
 	gs *rpc.GlobState
 }
 
-func (s implApplicationServerStub) Match(call rpc.ServerCall, i0 []string) (application.Envelope, error) {
-	return s.impl.Match(call, i0)
+func (s implApplicationServerStub) Match(ctx *context.T, call rpc.ServerCall, i0 []string) (application.Envelope, error) {
+	return s.impl.Match(ctx, call, i0)
 }
 
 func (s implApplicationServerStub) Globber() *rpc.GlobState {
@@ -632,34 +632,34 @@ type BinaryServerMethods interface {
 	// mediaInfo argument contains metadata for the binary. If the suffix
 	// identifies a binary that has already been created, the method
 	// returns an error.
-	Create(call rpc.ServerCall, nparts int32, mediaInfo MediaInfo) error
+	Create(ctx *context.T, call rpc.ServerCall, nparts int32, mediaInfo MediaInfo) error
 	// Delete deletes the binary identified by the object name
 	// suffix. If the binary that has not been created, the method
 	// returns an error.
-	Delete(rpc.ServerCall) error
+	Delete(*context.T, rpc.ServerCall) error
 	// Download opens a stream that can used for downloading the given
 	// part of the binary identified by the object name suffix. If the
 	// binary part has not been uploaded, the method returns an
 	// error. If the Delete() method is invoked when the Download()
 	// method is in progress, the outcome the Download() method is
 	// undefined.
-	Download(call BinaryDownloadServerCall, part int32) error
+	Download(ctx *context.T, call BinaryDownloadServerCall, part int32) error
 	// DownloadUrl returns a transient URL from which the binary
 	// identified by the object name suffix can be downloaded using the
 	// HTTP protocol. If not all parts of the binary have been uploaded,
 	// the method returns an error.
-	DownloadUrl(rpc.ServerCall) (url string, ttl int64, err error)
+	DownloadUrl(*context.T, rpc.ServerCall) (url string, ttl int64, err error)
 	// Stat returns information describing the parts of the binary
 	// identified by the object name suffix, and its RFC 2046 media type.
 	// If the binary has not been created, the method returns an error.
-	Stat(rpc.ServerCall) (Parts []binary.PartInfo, MediaInfo MediaInfo, err error)
+	Stat(*context.T, rpc.ServerCall) (Parts []binary.PartInfo, MediaInfo MediaInfo, err error)
 	// Upload opens a stream that can be used for uploading the given
 	// part of the binary identified by the object name suffix. If the
 	// binary has not been created, the method returns an error. If the
 	// binary part has been uploaded, the method returns an error. If
 	// the same binary part is being uploaded by another caller, the
 	// method returns an error.
-	Upload(call BinaryUploadServerCall, part int32) error
+	Upload(ctx *context.T, call BinaryUploadServerCall, part int32) error
 }
 
 // BinaryServerStubMethods is the server interface containing
@@ -717,34 +717,34 @@ type BinaryServerStubMethods interface {
 	// mediaInfo argument contains metadata for the binary. If the suffix
 	// identifies a binary that has already been created, the method
 	// returns an error.
-	Create(call rpc.ServerCall, nparts int32, mediaInfo MediaInfo) error
+	Create(ctx *context.T, call rpc.ServerCall, nparts int32, mediaInfo MediaInfo) error
 	// Delete deletes the binary identified by the object name
 	// suffix. If the binary that has not been created, the method
 	// returns an error.
-	Delete(rpc.ServerCall) error
+	Delete(*context.T, rpc.ServerCall) error
 	// Download opens a stream that can used for downloading the given
 	// part of the binary identified by the object name suffix. If the
 	// binary part has not been uploaded, the method returns an
 	// error. If the Delete() method is invoked when the Download()
 	// method is in progress, the outcome the Download() method is
 	// undefined.
-	Download(call *BinaryDownloadServerCallStub, part int32) error
+	Download(ctx *context.T, call *BinaryDownloadServerCallStub, part int32) error
 	// DownloadUrl returns a transient URL from which the binary
 	// identified by the object name suffix can be downloaded using the
 	// HTTP protocol. If not all parts of the binary have been uploaded,
 	// the method returns an error.
-	DownloadUrl(rpc.ServerCall) (url string, ttl int64, err error)
+	DownloadUrl(*context.T, rpc.ServerCall) (url string, ttl int64, err error)
 	// Stat returns information describing the parts of the binary
 	// identified by the object name suffix, and its RFC 2046 media type.
 	// If the binary has not been created, the method returns an error.
-	Stat(rpc.ServerCall) (Parts []binary.PartInfo, MediaInfo MediaInfo, err error)
+	Stat(*context.T, rpc.ServerCall) (Parts []binary.PartInfo, MediaInfo MediaInfo, err error)
 	// Upload opens a stream that can be used for uploading the given
 	// part of the binary identified by the object name suffix. If the
 	// binary has not been created, the method returns an error. If the
 	// binary part has been uploaded, the method returns an error. If
 	// the same binary part is being uploaded by another caller, the
 	// method returns an error.
-	Upload(call *BinaryUploadServerCallStub, part int32) error
+	Upload(ctx *context.T, call *BinaryUploadServerCallStub, part int32) error
 }
 
 // BinaryServerStub adds universal methods to BinaryServerStubMethods.
@@ -778,28 +778,28 @@ type implBinaryServerStub struct {
 	gs *rpc.GlobState
 }
 
-func (s implBinaryServerStub) Create(call rpc.ServerCall, i0 int32, i1 MediaInfo) error {
-	return s.impl.Create(call, i0, i1)
+func (s implBinaryServerStub) Create(ctx *context.T, call rpc.ServerCall, i0 int32, i1 MediaInfo) error {
+	return s.impl.Create(ctx, call, i0, i1)
 }
 
-func (s implBinaryServerStub) Delete(call rpc.ServerCall) error {
-	return s.impl.Delete(call)
+func (s implBinaryServerStub) Delete(ctx *context.T, call rpc.ServerCall) error {
+	return s.impl.Delete(ctx, call)
 }
 
-func (s implBinaryServerStub) Download(call *BinaryDownloadServerCallStub, i0 int32) error {
-	return s.impl.Download(call, i0)
+func (s implBinaryServerStub) Download(ctx *context.T, call *BinaryDownloadServerCallStub, i0 int32) error {
+	return s.impl.Download(ctx, call, i0)
 }
 
-func (s implBinaryServerStub) DownloadUrl(call rpc.ServerCall) (string, int64, error) {
-	return s.impl.DownloadUrl(call)
+func (s implBinaryServerStub) DownloadUrl(ctx *context.T, call rpc.ServerCall) (string, int64, error) {
+	return s.impl.DownloadUrl(ctx, call)
 }
 
-func (s implBinaryServerStub) Stat(call rpc.ServerCall) ([]binary.PartInfo, MediaInfo, error) {
-	return s.impl.Stat(call)
+func (s implBinaryServerStub) Stat(ctx *context.T, call rpc.ServerCall) ([]binary.PartInfo, MediaInfo, error) {
+	return s.impl.Stat(ctx, call)
 }
 
-func (s implBinaryServerStub) Upload(call *BinaryUploadServerCallStub, i0 int32) error {
-	return s.impl.Upload(call, i0)
+func (s implBinaryServerStub) Upload(ctx *context.T, call *BinaryUploadServerCallStub, i0 int32) error {
+	return s.impl.Upload(ctx, call, i0)
 }
 
 func (s implBinaryServerStub) Globber() *rpc.GlobState {
@@ -1033,10 +1033,10 @@ type ProfileServerMethods interface {
 	// e.g. "linux-media". The label can be used to uniquely identify
 	// the profile (for the purpose of matching application binaries and
 	// devices).
-	Label(rpc.ServerCall) (string, error)
+	Label(*context.T, rpc.ServerCall) (string, error)
 	// Description is a free-text description of the profile, meant for
 	// human consumption.
-	Description(rpc.ServerCall) (string, error)
+	Description(*context.T, rpc.ServerCall) (string, error)
 }
 
 // ProfileServerStubMethods is the server interface containing
@@ -1074,12 +1074,12 @@ type implProfileServerStub struct {
 	gs   *rpc.GlobState
 }
 
-func (s implProfileServerStub) Label(call rpc.ServerCall) (string, error) {
-	return s.impl.Label(call)
+func (s implProfileServerStub) Label(ctx *context.T, call rpc.ServerCall) (string, error) {
+	return s.impl.Label(ctx, call)
 }
 
-func (s implProfileServerStub) Description(call rpc.ServerCall) (string, error) {
-	return s.impl.Description(call)
+func (s implProfileServerStub) Description(ctx *context.T, call rpc.ServerCall) (string, error) {
+	return s.impl.Description(ctx, call)
 }
 
 func (s implProfileServerStub) Globber() *rpc.GlobState {

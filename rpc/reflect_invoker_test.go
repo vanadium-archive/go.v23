@@ -37,64 +37,47 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-// FakeStreamServerCall implements rpc.ServerCall.
-type FakeStreamServerCall struct {
-	context  *context.T
-	security security.Call
-}
-
 func testContext() *context.T {
 	ctx, _ := context.RootContext()
 	return ctx
 }
 
-func NewFakeStreamServerCall() *FakeStreamServerCall {
-	return &FakeStreamServerCall{
-		context:  testContext(),
-		security: security.NewCall(&security.CallParams{}),
-	}
-}
+type FakeStreamServerCall struct{}
 
-func (*FakeStreamServerCall) Server() rpc.Server                   { return nil }
-func (*FakeStreamServerCall) GrantedBlessings() security.Blessings { return security.Blessings{} }
-func (*FakeStreamServerCall) Closed() <-chan struct{}              { return nil }
-func (*FakeStreamServerCall) IsClosed() bool                       { return false }
-func (*FakeStreamServerCall) Send(item interface{}) error          { return nil }
-func (*FakeStreamServerCall) Recv(itemptr interface{}) error       { return nil }
-func (call *FakeStreamServerCall) Timestamp() time.Time            { return call.security.Timestamp() }
-func (call *FakeStreamServerCall) Method() string                  { return call.security.Method() }
-func (call *FakeStreamServerCall) MethodTags() []*vdl.Value        { return call.security.MethodTags() }
-func (call *FakeStreamServerCall) Suffix() string                  { return call.security.Suffix() }
-func (call *FakeStreamServerCall) LocalDischarges() map[string]security.Discharge {
-	return call.security.LocalDischarges()
-}
-func (call *FakeStreamServerCall) RemoteDischarges() map[string]security.Discharge {
-	return call.security.RemoteDischarges()
-}
-func (call *FakeStreamServerCall) LocalPrincipal() security.Principal {
-	return call.security.LocalPrincipal()
-}
-func (call *FakeStreamServerCall) LocalBlessings() security.Blessings {
-	return call.security.LocalBlessings()
-}
-func (call *FakeStreamServerCall) RemoteBlessings() security.Blessings {
-	return call.security.RemoteBlessings()
-}
-func (call *FakeStreamServerCall) LocalEndpoint() naming.Endpoint {
-	return call.security.LocalEndpoint()
-}
-func (call *FakeStreamServerCall) RemoteEndpoint() naming.Endpoint {
-	return call.security.RemoteEndpoint()
-}
-func (call *FakeStreamServerCall) Context() *context.T { return call.context }
+var _ rpc.StreamServerCall = (*FakeStreamServerCall)(nil)
+
+func (*FakeStreamServerCall) Server() rpc.Server                              { return nil }
+func (*FakeStreamServerCall) GrantedBlessings() security.Blessings            { return security.Blessings{} }
+func (*FakeStreamServerCall) Closed() <-chan struct{}                         { return nil }
+func (*FakeStreamServerCall) IsClosed() bool                                  { return false }
+func (*FakeStreamServerCall) Send(item interface{}) error                     { return nil }
+func (*FakeStreamServerCall) Recv(itemptr interface{}) error                  { return nil }
+func (*FakeStreamServerCall) Timestamp() time.Time                            { return time.Time{} }
+func (*FakeStreamServerCall) Method() string                                  { return "" }
+func (*FakeStreamServerCall) MethodTags() []*vdl.Value                        { return nil }
+func (*FakeStreamServerCall) Suffix() string                                  { return "" }
+func (*FakeStreamServerCall) LocalDischarges() map[string]security.Discharge  { return nil }
+func (*FakeStreamServerCall) RemoteDischarges() map[string]security.Discharge { return nil }
+func (*FakeStreamServerCall) LocalPrincipal() security.Principal              { return nil }
+func (*FakeStreamServerCall) LocalBlessings() security.Blessings              { return security.Blessings{} }
+func (*FakeStreamServerCall) RemoteBlessings() security.Blessings             { return security.Blessings{} }
+func (*FakeStreamServerCall) LocalEndpoint() naming.Endpoint                  { return nil }
+func (*FakeStreamServerCall) RemoteEndpoint() naming.Endpoint                 { return nil }
+func (*FakeStreamServerCall) Security() security.Call                         { return nil }
 
 var (
-	call1 = NewFakeStreamServerCall()
-	call2 = NewFakeStreamServerCall()
-	call3 = NewFakeStreamServerCall()
-	call4 = NewFakeStreamServerCall()
-	call5 = NewFakeStreamServerCall()
-	call6 = NewFakeStreamServerCall()
+	ctx1  = testContext()
+	ctx2  = testContext()
+	ctx3  = testContext()
+	ctx4  = testContext()
+	ctx5  = testContext()
+	ctx6  = testContext()
+	call1 = &FakeStreamServerCall{}
+	call2 = &FakeStreamServerCall{}
+	call3 = &FakeStreamServerCall{}
+	call4 = &FakeStreamServerCall{}
+	call5 = &FakeStreamServerCall{}
+	call6 = &FakeStreamServerCall{}
 )
 
 // test tags.
@@ -109,12 +92,15 @@ var (
 // All objects used for success testing are based on testObj, which captures the
 // state from each invocation, so that we may test it against our expectations.
 type testObj struct {
+	ctx  *context.T
 	call rpc.ServerCall
 }
 
+func (o testObj) LastContext() *context.T  { return o.ctx }
 func (o testObj) LastCall() rpc.ServerCall { return o.call }
 
 type testObjIface interface {
+	LastContext() *context.T
 	LastCall() rpc.ServerCall
 }
 
@@ -122,23 +108,64 @@ var errApp = errors.New("app error")
 
 type notags struct{ testObj }
 
-func (o *notags) Method1(c rpc.ServerCall) error               { o.call = c; return nil }
-func (o *notags) Method2(c rpc.ServerCall) (int, error)        { o.call = c; return 0, nil }
-func (o *notags) Method3(c rpc.ServerCall, _ int) error        { o.call = c; return nil }
-func (o *notags) Method4(c rpc.ServerCall, i int) (int, error) { o.call = c; return i, nil }
-func (o *notags) Error(c rpc.ServerCall) error                 { o.call = c; return errApp }
+func (o *notags) Method1(ctx *context.T, call rpc.ServerCall) error {
+	o.ctx = ctx
+	o.call = call
+	return nil
+}
+func (o *notags) Method2(ctx *context.T, call rpc.ServerCall) (int, error) {
+	o.ctx = ctx
+	o.call = call
+	return 0, nil
+}
+func (o *notags) Method3(ctx *context.T, call rpc.ServerCall, _ int) error {
+	o.ctx = ctx
+	o.call = call
+	return nil
+}
+func (o *notags) Method4(ctx *context.T, call rpc.ServerCall, i int) (int, error) {
+	o.ctx = ctx
+	o.call = call
+	return i, nil
+}
+func (o *notags) Error(ctx *context.T, call rpc.ServerCall) error {
+	o.ctx = ctx
+	o.call = call
+	return errApp
+}
 
 type tags struct{ testObj }
 
-func (o *tags) Alpha(c rpc.ServerCall) error               { o.call = c; return nil }
-func (o *tags) Beta(c rpc.ServerCall) (int, error)         { o.call = c; return 0, nil }
-func (o *tags) Gamma(c rpc.ServerCall, _ int) error        { o.call = c; return nil }
-func (o *tags) Delta(c rpc.ServerCall, i int) (int, error) { o.call = c; return i, nil }
-func (o *tags) Epsilon(c rpc.ServerCall, i int, s string) (int, string, error) {
-	o.call = c
+func (o *tags) Alpha(ctx *context.T, call rpc.ServerCall) error {
+	o.ctx = ctx
+	o.call = call
+	return nil
+}
+func (o *tags) Beta(ctx *context.T, call rpc.ServerCall) (int, error) {
+	o.ctx = ctx
+	o.call = call
+	return 0, nil
+}
+func (o *tags) Gamma(ctx *context.T, call rpc.ServerCall, _ int) error {
+	o.ctx = ctx
+	o.call = call
+	return nil
+}
+func (o *tags) Delta(ctx *context.T, call rpc.ServerCall, i int) (int, error) {
+	o.ctx = ctx
+	o.call = call
+	return i, nil
+}
+func (o *tags) Epsilon(ctx *context.T, call rpc.ServerCall, i int, s string) (int, string, error) {
+	o.ctx = ctx
+	o.call = call
 	return i, s, nil
 }
-func (o *tags) Error(c rpc.ServerCall) error { o.call = c; return errApp }
+func (o *tags) Error(ctx *context.T, call rpc.ServerCall) error {
+	o.ctx = ctx
+	o.call = call
+	return errApp
+}
 
 func (o *tags) Describe__() []rpc.InterfaceDesc {
 	return []rpc.InterfaceDesc{{
@@ -157,6 +184,7 @@ func TestReflectInvoker(t *testing.T) {
 	type testcase struct {
 		obj    testObjIface
 		method string
+		ctx    *context.T
 		call   rpc.StreamServerCall
 		// Expected results:
 		tag     *vdl.Value
@@ -165,17 +193,17 @@ func TestReflectInvoker(t *testing.T) {
 		err     error
 	}
 	tests := []testcase{
-		{&notags{}, "Method1", call1, nil, nil, nil, nil},
-		{&notags{}, "Method2", call2, nil, nil, v{0}, nil},
-		{&notags{}, "Method3", call3, nil, v{0}, nil, nil},
-		{&notags{}, "Method4", call4, nil, v{11}, v{11}, nil},
-		{&notags{}, "Error", call6, nil, nil, nil, errApp},
-		{&tags{}, "Alpha", call1, tagAlpha, nil, nil, nil},
-		{&tags{}, "Beta", call2, tagBeta, nil, v{0}, nil},
-		{&tags{}, "Gamma", call3, tagGamma, v{0}, nil, nil},
-		{&tags{}, "Delta", call4, tagDelta, v{11}, v{11}, nil},
-		{&tags{}, "Epsilon", call5, tagEpsilon, v{11, "b"}, v{11, "b"}, nil},
-		{&tags{}, "Error", call1, nil, nil, nil, errApp},
+		{&notags{}, "Method1", ctx1, call1, nil, nil, nil, nil},
+		{&notags{}, "Method2", ctx2, call2, nil, nil, v{0}, nil},
+		{&notags{}, "Method3", ctx3, call3, nil, v{0}, nil, nil},
+		{&notags{}, "Method4", ctx4, call4, nil, v{11}, v{11}, nil},
+		{&notags{}, "Error", ctx5, call5, nil, nil, nil, errApp},
+		{&tags{}, "Alpha", ctx1, call1, tagAlpha, nil, nil, nil},
+		{&tags{}, "Beta", ctx2, call2, tagBeta, nil, v{0}, nil},
+		{&tags{}, "Gamma", ctx3, call3, tagGamma, v{0}, nil, nil},
+		{&tags{}, "Delta", ctx4, call4, tagDelta, v{11}, v{11}, nil},
+		{&tags{}, "Epsilon", ctx5, call5, tagEpsilon, v{11, "b"}, v{11, "b"}, nil},
+		{&tags{}, "Error", ctx6, call6, nil, nil, nil, errApp},
 	}
 	name := func(test testcase) string {
 		return fmt.Sprintf("%T.%s()", test.obj, test.method)
@@ -197,15 +225,18 @@ func TestReflectInvoker(t *testing.T) {
 			t.Errorf("%s Prepare got tags %v, want %v", name(test), tags, []*vdl.Value{test.tag})
 		}
 		// Call Invoker.Invoke and check results.
-		results, err := invoker.Invoke(test.method, test.call, toPtrs(test.args))
+		results, err := invoker.Invoke(test.ctx, test.call, test.method, toPtrs(test.args))
 		if err != test.err {
 			t.Errorf(`%s Invoke got error "%v", want "%v"`, name(test), err, test.err)
 		}
 		if !reflect.DeepEqual(v(results), test.results) {
 			t.Errorf("%s Invoke got results %v, want %v", name(test), results, test.results)
 		}
-		if call := test.obj.LastCall(); call != test.call {
-			t.Errorf("%s Invoke got call %v, want %v", name(test), call, test.call)
+		if got, want := test.obj.LastContext(), test.ctx; got != want {
+			t.Errorf("%s Invoke got ctx %v, want %v", name(test), got, want)
+		}
+		if got, want := test.obj.LastCall(), test.call; got != want {
+			t.Errorf("%s Invoke got call %v, want %v", name(test), got, want)
 		}
 	}
 	for _, test := range tests {
@@ -278,10 +309,12 @@ func (*stringBoolCall) SendStream() interface {
 	return nil
 }
 
-func (sigTest) Sig1(rpc.ServerCall) error                                       { return nil }
-func (sigTest) Sig2(rpc.ServerCall, int32, string) error                        { return nil }
-func (sigTest) Sig3(*stringBoolCall, float64) ([]uint32, error)                 { return nil, nil }
-func (sigTest) Sig4(rpc.StreamServerCall, int32, string) (int32, string, error) { return 0, "", nil }
+func (sigTest) Sig1(*context.T, rpc.ServerCall) error                       { return nil }
+func (sigTest) Sig2(*context.T, rpc.ServerCall, int32, string) error        { return nil }
+func (sigTest) Sig3(*context.T, *stringBoolCall, float64) ([]uint32, error) { return nil, nil }
+func (sigTest) Sig4(*context.T, rpc.StreamServerCall, int32, string) (int32, string, error) {
+	return 0, "", nil
+}
 func (sigTest) Describe__() []rpc.InterfaceDesc {
 	return []rpc.InterfaceDesc{
 		{
@@ -450,9 +483,9 @@ func TestReflectInvokerSignature(t *testing.T) {
 		var got interface{}
 		var err error
 		if test.Method == "" {
-			got, err = invoker.Signature(nil)
+			got, err = invoker.Signature(nil, nil)
 		} else {
-			got, err = invoker.MethodSignature(nil, test.Method)
+			got, err = invoker.MethodSignature(nil, nil, test.Method)
 		}
 		if err != nil {
 			t.Errorf("%q got error %v", test.Method, err)
@@ -480,27 +513,39 @@ type (
 	badoutargs struct{}
 
 	badGlobber       struct{}
-	badGlob          struct{}
-	badGlobChildren  struct{}
+	badGlob1         struct{}
+	badGlob2         struct{}
+	badGlob3         struct{}
+	badGlob4         struct{}
+	badGlob5         struct{}
+	badGlob6         struct{}
+	badGlob7         struct{}
+	badGlobChildren1 struct{}
 	badGlobChildren2 struct{}
+	badGlobChildren3 struct{}
+	badGlobChildren4 struct{}
+	badGlobChildren5 struct{}
+	badGlobChildren6 struct{}
 )
 
-func (badcall) notExported(rpc.ServerCall) error { return nil }
-func (badcall) NonRPC1() error                   { return nil }
-func (badcall) NonRPC2(int) error                { return nil }
-func (badcall) NonRPC3(int, string) error        { return nil }
-func (badcall) NonRPC4(*badcall) error           { return nil }
-func (badcall) NoInit(*noInitCall) error         { return nil }
-func (badcall) BadInit1(*badInit1Call) error     { return nil }
-func (badcall) BadInit2(*badInit2Call) error     { return nil }
-func (badcall) BadInit3(*badInit3Call) error     { return nil }
-func (badcall) NoSendRecv(*noSendRecvCall) error { return nil }
-func (badcall) BadSend1(*badSend1Call) error     { return nil }
-func (badcall) BadSend2(*badSend2Call) error     { return nil }
-func (badcall) BadSend3(*badSend3Call) error     { return nil }
-func (badcall) BadRecv1(*badRecv1Call) error     { return nil }
-func (badcall) BadRecv2(*badRecv2Call) error     { return nil }
-func (badcall) BadRecv3(*badRecv3Call) error     { return nil }
+func (badcall) notExported(*context.T, rpc.ServerCall) error { return nil }
+func (badcall) NonRPC1() error                               { return nil }
+func (badcall) NonRPC2(int) error                            { return nil }
+func (badcall) NonRPC3(int, string) error                    { return nil }
+func (badcall) NonRPC4(*badcall) error                       { return nil }
+func (badcall) NonRPC5(context.T, *badcall) error            { return nil }
+func (badcall) NonRPC6(*context.T, *badcall) error           { return nil }
+func (badcall) NoInit(*context.T, *noInitCall) error         { return nil }
+func (badcall) BadInit1(*context.T, *badInit1Call) error     { return nil }
+func (badcall) BadInit2(*context.T, *badInit2Call) error     { return nil }
+func (badcall) BadInit3(*context.T, *badInit3Call) error     { return nil }
+func (badcall) NoSendRecv(*context.T, *noSendRecvCall) error { return nil }
+func (badcall) BadSend1(*context.T, *badSend1Call) error     { return nil }
+func (badcall) BadSend2(*context.T, *badSend2Call) error     { return nil }
+func (badcall) BadSend3(*context.T, *badSend3Call) error     { return nil }
+func (badcall) BadRecv1(*context.T, *badRecv1Call) error     { return nil }
+func (badcall) BadRecv2(*context.T, *badRecv2Call) error     { return nil }
+func (badcall) BadRecv3(*context.T, *badRecv3Call) error     { return nil }
 
 func (*badInit1Call) Init()                          {}
 func (*badInit2Call) Init(int)                       {}
@@ -538,15 +583,25 @@ func (*badRecv3Call) RecvStream() interface {
 	return nil
 }
 
-func (badoutargs) NoFinalError1(rpc.ServerCall)                 {}
-func (badoutargs) NoFinalError2(rpc.ServerCall) string          { return "" }
-func (badoutargs) NoFinalError3(rpc.ServerCall) (bool, string)  { return false, "" }
-func (badoutargs) NoFinalError4(rpc.ServerCall) (error, string) { return nil, "" }
+func (badoutargs) NoFinalError1(*context.T, rpc.ServerCall)                 {}
+func (badoutargs) NoFinalError2(*context.T, rpc.ServerCall) string          { return "" }
+func (badoutargs) NoFinalError3(*context.T, rpc.ServerCall) (bool, string)  { return false, "" }
+func (badoutargs) NoFinalError4(*context.T, rpc.ServerCall) (error, string) { return nil, "" }
 
-func (badGlobber) Globber()                                     {}
-func (badGlob) Glob__()                                         {}
-func (badGlobChildren) GlobChildren__(rpc.ServerCall)           {}
-func (badGlobChildren2) GlobChildren__() (<-chan string, error) { return nil, nil }
+func (badGlobber) Globber()                                                        {}
+func (badGlob1) Glob__()                                                           {}
+func (badGlob2) Glob__(*context.T)                                                 {}
+func (badGlob3) Glob__(*context.T, rpc.ServerCall)                                 {}
+func (badGlob4) Glob__(*context.T, rpc.ServerCall, string)                         {}
+func (badGlob5) Glob__(*context.T, rpc.ServerCall, string) <-chan naming.GlobReply { return nil }
+func (badGlob6) Glob__(*context.T, rpc.ServerCall, string) error                   { return nil }
+func (badGlob7) Glob__() (<-chan naming.GlobReply, error)                          { return nil, nil }
+func (badGlobChildren1) GlobChildren__()                                           {}
+func (badGlobChildren2) GlobChildren__(*context.T)                                 {}
+func (badGlobChildren3) GlobChildren__(*context.T, rpc.ServerCall)                 {}
+func (badGlobChildren4) GlobChildren__(*context.T, rpc.ServerCall) <-chan string   { return nil }
+func (badGlobChildren5) GlobChildren__(*context.T, rpc.ServerCall) error           { return nil }
+func (badGlobChildren6) GlobChildren__() (<-chan string, error)                    { return nil, nil }
 
 func TestReflectInvokerPanic(t *testing.T) {
 	type testcase struct {
@@ -559,9 +614,19 @@ func TestReflectInvokerPanic(t *testing.T) {
 		{badcall{}, "invalid streaming call"},
 		{badoutargs{}, "final out-arg must be error"},
 		{badGlobber{}, "Globber must have signature"},
-		{badGlob{}, "Glob__ must have signature"},
-		{badGlobChildren{}, "GlobChildren__ must have signature"},
+		{badGlob1{}, "Glob__ must have signature"},
+		{badGlob2{}, "Glob__ must have signature"},
+		{badGlob3{}, "Glob__ must have signature"},
+		{badGlob4{}, "Glob__ must have signature"},
+		{badGlob5{}, "Glob__ must have signature"},
+		{badGlob6{}, "Glob__ must have signature"},
+		{badGlob7{}, "Glob__ must have signature"},
+		{badGlobChildren1{}, "GlobChildren__ must have signature"},
 		{badGlobChildren2{}, "GlobChildren__ must have signature"},
+		{badGlobChildren3{}, "GlobChildren__ must have signature"},
+		{badGlobChildren4{}, "GlobChildren__ must have signature"},
+		{badGlobChildren5{}, "GlobChildren__ must have signature"},
+		{badGlobChildren6{}, "GlobChildren__ must have signature"},
 	}
 	for _, test := range tests {
 		re := regexp.MustCompile(test.regexp)
@@ -602,7 +667,7 @@ func TestReflectInvokerErrors(t *testing.T) {
 			t.Errorf(`%s Prepare got error "%v", want id %v`, name(test), err, test.prepareErr)
 		}
 		// Call Invoker.Invoke and check error.
-		_, err = invoker.Invoke(test.method, call1, test.args)
+		_, err = invoker.Invoke(ctx1, call1, test.method, test.args)
 		if verror.ErrorID(err) != test.invokeErr {
 			t.Errorf(`%s Invoke got error "%v", want id %v`, name(test), err, test.invokeErr)
 		}
@@ -628,13 +693,13 @@ func (o *vGlobberObject) Globber() *rpc.GlobState {
 
 type allGlobberObject struct{}
 
-func (allGlobberObject) Glob__(call rpc.ServerCall, pattern string) (<-chan naming.GlobReply, error) {
+func (allGlobberObject) Glob__(_ *context.T, _ rpc.ServerCall, pattern string) (<-chan naming.GlobReply, error) {
 	return nil, nil
 }
 
 type childrenGlobberObject struct{}
 
-func (childrenGlobberObject) GlobChildren__(rpc.ServerCall) (<-chan string, error) {
+func (childrenGlobberObject) GlobChildren__(*context.T, rpc.ServerCall) (<-chan string, error) {
 	return nil, nil
 }
 

@@ -188,13 +188,13 @@ type ObjectServerMethods interface {
 	// ResolveToMountTable to get an endpoint and call SetPermissions on that.
 	// This means that clients must know when a name refers to a mount point to
 	// change its AccessList.
-	SetPermissions(call rpc.ServerCall, acl access.Permissions, version string) error
+	SetPermissions(ctx *context.T, call rpc.ServerCall, acl access.Permissions, version string) error
 	// GetPermissions returns the complete, current AccessList for an object. The
 	// returned version can be passed to a subsequent call to SetPermissions for
 	// optimistic concurrency control. A successful call to SetPermissions will
 	// invalidate version, and the client must call GetPermissions again to get
 	// the current version.
-	GetPermissions(rpc.ServerCall) (acl access.Permissions, version string, err error)
+	GetPermissions(*context.T, rpc.ServerCall) (acl access.Permissions, version string, err error)
 }
 
 // ObjectServerStubMethods is the server interface containing
@@ -232,12 +232,12 @@ type implObjectServerStub struct {
 	gs   *rpc.GlobState
 }
 
-func (s implObjectServerStub) SetPermissions(call rpc.ServerCall, i0 access.Permissions, i1 string) error {
-	return s.impl.SetPermissions(call, i0, i1)
+func (s implObjectServerStub) SetPermissions(ctx *context.T, call rpc.ServerCall, i0 access.Permissions, i1 string) error {
+	return s.impl.SetPermissions(ctx, call, i0, i1)
 }
 
-func (s implObjectServerStub) GetPermissions(call rpc.ServerCall) (access.Permissions, string, error) {
-	return s.impl.GetPermissions(call)
+func (s implObjectServerStub) GetPermissions(ctx *context.T, call rpc.ServerCall) (access.Permissions, string, error) {
+	return s.impl.GetPermissions(ctx, call)
 }
 
 func (s implObjectServerStub) Globber() *rpc.GlobState {

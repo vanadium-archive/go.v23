@@ -65,9 +65,9 @@
 // If your trace has collected information you can retrieve the data
 // collected so far with the Store's TraceRecord and TraceRecords methods.
 //
-// By default contexts obtained from v23.Init or from ServerCall.Context()
-// already have an initialized Trace.  The functions in this package allow
-// you to add data to existing traces or start new ones.
+// By default contexts obtained from v23.Init or in rpc server implementations
+// already have an initialized Trace.  The functions in this package allow you
+// to add data to existing traces or start new ones.
 package vtrace
 
 import (

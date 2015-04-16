@@ -342,7 +342,7 @@ func (c *implGlobWatcherWatchGlobClientCall) Finish() (err error) {
 // that match a pattern.  See the package comments for details.
 type GlobWatcherServerMethods interface {
 	// WatchGlob returns a stream of changes that match a pattern.
-	WatchGlob(call GlobWatcherWatchGlobServerCall, req GlobRequest) error
+	WatchGlob(ctx *context.T, call GlobWatcherWatchGlobServerCall, req GlobRequest) error
 }
 
 // GlobWatcherServerStubMethods is the server interface containing
@@ -351,7 +351,7 @@ type GlobWatcherServerMethods interface {
 // is the streaming methods.
 type GlobWatcherServerStubMethods interface {
 	// WatchGlob returns a stream of changes that match a pattern.
-	WatchGlob(call *GlobWatcherWatchGlobServerCallStub, req GlobRequest) error
+	WatchGlob(ctx *context.T, call *GlobWatcherWatchGlobServerCallStub, req GlobRequest) error
 }
 
 // GlobWatcherServerStub adds universal methods to GlobWatcherServerStubMethods.
@@ -383,8 +383,8 @@ type implGlobWatcherServerStub struct {
 	gs   *rpc.GlobState
 }
 
-func (s implGlobWatcherServerStub) WatchGlob(call *GlobWatcherWatchGlobServerCallStub, i0 GlobRequest) error {
-	return s.impl.WatchGlob(call, i0)
+func (s implGlobWatcherServerStub) WatchGlob(ctx *context.T, call *GlobWatcherWatchGlobServerCallStub, i0 GlobRequest) error {
+	return s.impl.WatchGlob(ctx, call, i0)
 }
 
 func (s implGlobWatcherServerStub) Globber() *rpc.GlobState {

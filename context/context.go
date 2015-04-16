@@ -11,9 +11,8 @@
 // 1) A context.T is returned from v23.Init().  This will generally be
 // used to set up servers in main, or for stand-alone client programs.
 //
-// 2) The first parameter to every Vanadium server method implementation
-// implements the v23/rpc.ServerCall interface.  ServerCall.Context()
-// returns a context.T.
+// 2) A context.T is passed to every server method implementation as the first
+// parameter.
 //
 // Once you have a context you can derive further contexts to change settings.
 // for example to adjust a deadline you might do:
