@@ -57,7 +57,18 @@ type Database interface {
 	// BeginBatch creates a new batch. Instead of calling this function directly,
 	// clients are recommended to use the RunInBatch() helper function, which
 	// detects "concurrent batch" errors and handles retries internally.
-	// TODO(kash): Document concurrency semantics.
+	//
+	// Default concurrency semantics:
+	// - Reads inside a batch see a consistent snapshot, taken during
+	//   BeginBatch(), and will not see the effect of writes inside the batch.
+	// - Commit() may fail with ErrConcurrentBatch, indicating that after
+	//   BeginBatch() but before Commit(), some concurrent routine wrote to a key
+	//   that matches a key or row-range read inside this batch. (Writes inside a
+	//   batch cannot cause that batch's Commit() to fail.)
+	// - Other methods (e.g. Get) will never fail with error ErrConcurrentBatch,
+	//   even if it is known that Commit() will fail with this error.
+	//
+	// Concurrency semantics can be configured using BatchOptions.
 	// TODO(sadovsky): Maybe use varargs for options.
 	BeginBatch(ctx *context.T, opts BatchOptions) (BatchDatabase, error)
 
@@ -67,18 +78,20 @@ type Database interface {
 }
 
 // BatchDatabase is a handle to a set of reads and writes to the database that
-// should be considered an atomic unit.
-// TODO(kash): Document concurrency semantics.
+// should be considered an atomic unit. See BeginBatch() for concurrency
+// semantics.
+// TODO(sadovsky): If/when needed, add a CommitWillFail() method so that clients
+// can avoid doing extra work inside a doomed batch.
 type BatchDatabase interface {
 	DatabaseHandle
+
+	// Commit persists the pending changes to the database.
+	Commit(ctx *context.T) error
 
 	// Abort notifies the server that any pending changes can be discarded.
 	// It is not strictly required, but it may allow the server to release locks
 	// or other resources sooner than if it was not called.
 	Abort(ctx *context.T)
-
-	// Commit persists the pending changes to the database.
-	Commit(ctx *context.T) error
 }
 
 // PrefixPermissions represents a pair of (prefix, permissions).

@@ -33,10 +33,33 @@ type Database interface {
 	Delete() error {access.Write}
 
 	// BeginBatch creates a new batch. It returns an App-relative name for a
-	// Database handle bound to this batch.
-	// TODO(kash): Document concurrency semantics.
-	// FIXME: Move BatchOptions to types.vdl in Go client dir.
+	// Database handle bound to this batch. If this Database is already bound to a
+	// batch, BeginBatch() will fail with ErrBoundToBatch.
+	//
+	// Default concurrency semantics:
+	// - Reads inside a batch see a consistent snapshot, taken during
+	//   BeginBatch(), and will not see the effect of writes inside the batch.
+	// - Commit() may fail with ErrConcurrentBatch, indicating that after
+	//   BeginBatch() but before Commit(), some concurrent routine wrote to a key
+	//   that matches a key or row-range read inside this batch. (Writes inside a
+	//   batch cannot cause that batch's Commit() to fail.)
+	// - Other methods (e.g. Get) will never fail with error ErrConcurrentBatch,
+	//   even if it is known that Commit() will fail with this error.
+	//
+	// Concurrency semantics can be configured using BatchOptions.
 	BeginBatch(bo BatchOptions) (string | error) {access.Read}
+
+	// Commit persists the pending changes to the database.
+	// If this Database is not bound to a batch, Commit() will fail with
+	// ErrNotBoundToBatch.
+	Commit() error {access.Read}
+
+	// Abort notifies the server that any pending changes can be discarded.
+	// It is not strictly required, but it may allow the server to release locks
+	// or other resources sooner than if it was not called.
+	// If this Database is not bound to a batch, Abort() will fail with
+	// ErrNotBoundToBatch.
+	Abort() error {access.Read}
 
 	// SetPermissions and GetPermissions are included from the Object interface.
 	permissions.Object

@@ -9,8 +9,8 @@ import (
 )
 
 // BatchOptions configures a batch.
-// TODO(sadovsky): Add more options, e.g. to configure isolation, whether to
-// track the read set, etc.
+// TODO(sadovsky): Add more options, e.g. to configure isolation, timeouts,
+// whether to track the read set and/or write set, etc.
 // TODO(sadovsky): Maybe add a DefaultBatchOptions() function that initializes
 // BatchOptions with our desired defaults. Clients would be encouraged to
 // initialize their BatchOptions object using that function and then modify it
@@ -20,23 +20,11 @@ type BatchOptions struct {
 	// Hints are surfaced to clients during conflict resolution.
 	Hint string
 
-	// TODO(sadovsky): The current design is still suboptimal for read-only
-	// batches in that (1) the client does not explicitly specify that the batch
-	// is read-only, so we must track the read set and prevent concurrent
-	// transactions' write sets from getting GC'ed, and (2) the compiler can't
-	// help enforce read-only semantics. Adding another bool to specify whether
-	// the read set should be tracked addresses (1), though perhaps providing an
-	// explicit "ReadOnly" option would be more user-friendly. It seems we can't
-	// address (2) without having two different Table() functions, one for
-	// read-only and one for read-write.
-
-	// FailEagerly specifies whether individual operations inside a batch should
-	// fail (with error ErrConcurrentBatch) if some other batch has committed rows
-	// that conflict with rows touched by this batch. If false, only Commit() can
-	// fail with ErrConcurrentBatch.
-	// Typically, this option should be set to false for read-only batches and to
-	// true for read-write batches.
-	FailEagerly bool
+	// ReadOnly specifies whether the batch should allow writes.
+	// If ReadOnly is set to true, Abort() should be used to release any resources
+	// associated with this batch (though it is not strictly required), and
+	// Commit() will always fail.
+	ReadOnly bool
 }
 
 // PrefixPermissions represents a pair of (prefix, permissions).

@@ -87,10 +87,31 @@ type DatabaseClientMethods interface {
 	// Delete deletes this Database.
 	Delete(*context.T, ...rpc.CallOpt) error
 	// BeginBatch creates a new batch. It returns an App-relative name for a
-	// Database handle bound to this batch.
-	// TODO(kash): Document concurrency semantics.
-	// FIXME: Move BatchOptions to types.vdl in Go client dir.
+	// Database handle bound to this batch. If this Database is already bound to a
+	// batch, BeginBatch() will fail with ErrBoundToBatch.
+	//
+	// Default concurrency semantics:
+	// - Reads inside a batch see a consistent snapshot, taken during
+	//   BeginBatch(), and will not see the effect of writes inside the batch.
+	// - Commit() may fail with ErrConcurrentBatch, indicating that after
+	//   BeginBatch() but before Commit(), some concurrent routine wrote to a key
+	//   that matches a key or row-range read inside this batch. (Writes inside a
+	//   batch cannot cause that batch's Commit() to fail.)
+	// - Other methods (e.g. Get) will never fail with error ErrConcurrentBatch,
+	//   even if it is known that Commit() will fail with this error.
+	//
+	// Concurrency semantics can be configured using BatchOptions.
 	BeginBatch(ctx *context.T, bo BatchOptions, opts ...rpc.CallOpt) (string, error)
+	// Commit persists the pending changes to the database.
+	// If this Database is not bound to a batch, Commit() will fail with
+	// ErrNotBoundToBatch.
+	Commit(*context.T, ...rpc.CallOpt) error
+	// Abort notifies the server that any pending changes can be discarded.
+	// It is not strictly required, but it may allow the server to release locks
+	// or other resources sooner than if it was not called.
+	// If this Database is not bound to a batch, Abort() will fail with
+	// ErrNotBoundToBatch.
+	Abort(*context.T, ...rpc.CallOpt) error
 }
 
 // DatabaseClientStub adds universal methods to DatabaseClientMethods.
@@ -132,6 +153,16 @@ func (c implDatabaseClientStub) Delete(ctx *context.T, opts ...rpc.CallOpt) (err
 
 func (c implDatabaseClientStub) BeginBatch(ctx *context.T, i0 BatchOptions, opts ...rpc.CallOpt) (o0 string, err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "BeginBatch", []interface{}{i0}, []interface{}{&o0}, opts...)
+	return
+}
+
+func (c implDatabaseClientStub) Commit(ctx *context.T, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Commit", nil, nil, opts...)
+	return
+}
+
+func (c implDatabaseClientStub) Abort(ctx *context.T, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Abort", nil, nil, opts...)
 	return
 }
 
@@ -202,10 +233,31 @@ type DatabaseServerMethods interface {
 	// Delete deletes this Database.
 	Delete(rpc.ServerCall) error
 	// BeginBatch creates a new batch. It returns an App-relative name for a
-	// Database handle bound to this batch.
-	// TODO(kash): Document concurrency semantics.
-	// FIXME: Move BatchOptions to types.vdl in Go client dir.
+	// Database handle bound to this batch. If this Database is already bound to a
+	// batch, BeginBatch() will fail with ErrBoundToBatch.
+	//
+	// Default concurrency semantics:
+	// - Reads inside a batch see a consistent snapshot, taken during
+	//   BeginBatch(), and will not see the effect of writes inside the batch.
+	// - Commit() may fail with ErrConcurrentBatch, indicating that after
+	//   BeginBatch() but before Commit(), some concurrent routine wrote to a key
+	//   that matches a key or row-range read inside this batch. (Writes inside a
+	//   batch cannot cause that batch's Commit() to fail.)
+	// - Other methods (e.g. Get) will never fail with error ErrConcurrentBatch,
+	//   even if it is known that Commit() will fail with this error.
+	//
+	// Concurrency semantics can be configured using BatchOptions.
 	BeginBatch(call rpc.ServerCall, bo BatchOptions) (string, error)
+	// Commit persists the pending changes to the database.
+	// If this Database is not bound to a batch, Commit() will fail with
+	// ErrNotBoundToBatch.
+	Commit(rpc.ServerCall) error
+	// Abort notifies the server that any pending changes can be discarded.
+	// It is not strictly required, but it may allow the server to release locks
+	// or other resources sooner than if it was not called.
+	// If this Database is not bound to a batch, Abort() will fail with
+	// ErrNotBoundToBatch.
+	Abort(rpc.ServerCall) error
 }
 
 // DatabaseServerStubMethods is the server interface containing
@@ -265,6 +317,14 @@ func (s implDatabaseServerStub) BeginBatch(call rpc.ServerCall, i0 BatchOptions)
 	return s.impl.BeginBatch(call, i0)
 }
 
+func (s implDatabaseServerStub) Commit(call rpc.ServerCall) error {
+	return s.impl.Commit(call)
+}
+
+func (s implDatabaseServerStub) Abort(call rpc.ServerCall) error {
+	return s.impl.Abort(call)
+}
+
 func (s implDatabaseServerStub) Globber() *rpc.GlobState {
 	return s.gs
 }
@@ -317,13 +377,23 @@ var descDatabase = rpc.InterfaceDesc{
 		},
 		{
 			Name: "BeginBatch",
-			Doc:  "// BeginBatch creates a new batch. It returns an App-relative name for a\n// Database handle bound to this batch.\n// TODO(kash): Document concurrency semantics.\n// FIXME: Move BatchOptions to types.vdl in Go client dir.",
+			Doc:  "// BeginBatch creates a new batch. It returns an App-relative name for a\n// Database handle bound to this batch. If this Database is already bound to a\n// batch, BeginBatch() will fail with ErrBoundToBatch.\n//\n// Default concurrency semantics:\n// - Reads inside a batch see a consistent snapshot, taken during\n//   BeginBatch(), and will not see the effect of writes inside the batch.\n// - Commit() may fail with ErrConcurrentBatch, indicating that after\n//   BeginBatch() but before Commit(), some concurrent routine wrote to a key\n//   that matches a key or row-range read inside this batch. (Writes inside a\n//   batch cannot cause that batch's Commit() to fail.)\n// - Other methods (e.g. Get) will never fail with error ErrConcurrentBatch,\n//   even if it is known that Commit() will fail with this error.\n//\n// Concurrency semantics can be configured using BatchOptions.",
 			InArgs: []rpc.ArgDesc{
 				{"bo", ``}, // BatchOptions
 			},
 			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // string
 			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
+		},
+		{
+			Name: "Commit",
+			Doc:  "// Commit persists the pending changes to the database.\n// If this Database is not bound to a batch, Commit() will fail with\n// ErrNotBoundToBatch.",
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
+		},
+		{
+			Name: "Abort",
+			Doc:  "// Abort notifies the server that any pending changes can be discarded.\n// It is not strictly required, but it may allow the server to release locks\n// or other resources sooner than if it was not called.\n// If this Database is not bound to a batch, Abort() will fail with\n// ErrNotBoundToBatch.",
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 	},

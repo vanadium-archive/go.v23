@@ -16,8 +16,8 @@ import (
 )
 
 // BatchOptions configures a batch.
-// TODO(sadovsky): Add more options, e.g. to configure isolation, whether to
-// track the read set, etc.
+// TODO(sadovsky): Add more options, e.g. to configure isolation, timeouts,
+// whether to track the read set and/or write set, etc.
 // TODO(sadovsky): Maybe add a DefaultBatchOptions() function that initializes
 // BatchOptions with our desired defaults. Clients would be encouraged to
 // initialize their BatchOptions object using that function and then modify it
@@ -26,13 +26,11 @@ type BatchOptions struct {
 	// Arbitrary string, typically used to describe the intent behind a batch.
 	// Hints are surfaced to clients during conflict resolution.
 	Hint string
-	// FailEagerly specifies whether individual operations inside a batch should
-	// fail (with error ErrConcurrentBatch) if some other batch has committed rows
-	// that conflict with rows touched by this batch. If false, only Commit() can
-	// fail with ErrConcurrentBatch.
-	// Typically, this option should be set to false for read-only batches and to
-	// true for read-write batches.
-	FailEagerly bool
+	// ReadOnly specifies whether the batch should allow writes.
+	// If ReadOnly is set to true, Abort() should be used to release any resources
+	// associated with this batch (though it is not strictly required), and
+	// Commit() will always fail.
+	ReadOnly bool
 }
 
 func (BatchOptions) __VDLReflect(struct {
