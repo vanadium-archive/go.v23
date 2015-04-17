@@ -27,18 +27,18 @@
 // are children of other Spans.  Vtrace works by attaching data to a
 // Context, and this hierarchical structure falls directly out of our
 // building off of the tree of Contexts.  When you derive a new
-// context using SetNewSpan(), you create a Span thats a child of the
+// context using WithNewSpan(), you create a Span thats a child of the
 // currently active span in the context.  Note that spans that share a
 // parent may overlap in time.
 //
 // In this case the tree would have been created with code like this:
 //
 //    function MakeBlogPost(ctx *context.T) {
-//        authCtx, _ := vtrace.SetNewSpan(ctx, "Authenticate")
+//        authCtx, _ := vtrace.WithNewSpan(ctx, "Authenticate")
 //        Authenticate(authCtx)
-//        writeCtx, _ := vtrace.SetNewSpan(ctx, "Write To DB")
+//        writeCtx, _ := vtrace.WithNewSpan(ctx, "Write To DB")
 //        Write(writeCtx)
-//        notifyCtx, _ := vtrace.SetNewSpan(ctx, "Notify")
+//        notifyCtx, _ := vtrace.WithNewSpan(ctx, "Notify")
 //        Notify(notifyCtx)
 //    }
 //
@@ -124,21 +124,21 @@ type Store interface {
 }
 
 type Manager interface {
-	// SetNewTrace creates a new vtrace context that is not the child of any
+	// WithNewTrace creates a new vtrace context that is not the child of any
 	// other span.  This is useful when starting operations that are
 	// disconnected from the activity ctx is performing.  For example
 	// this might be used to start background tasks.
-	SetNewTrace(ctx *context.T) (*context.T, Span)
+	WithNewTrace(ctx *context.T) (*context.T, Span)
 
-	// SetContinuedTrace creates a span that represents a continuation of
+	// WithContinuedTrace creates a span that represents a continuation of
 	// a trace from a remote server.  name is the name of the new span and
 	// req contains the parameters needed to connect this span with it's
 	// trace.
-	SetContinuedTrace(ctx *context.T, name string, req Request) (*context.T, Span)
+	WithContinuedTrace(ctx *context.T, name string, req Request) (*context.T, Span)
 
-	// SetNewSpan derives a context with a new Span that can be used to
+	// WithNewSpan derives a context with a new Span that can be used to
 	// trace and annotate operations across process boundaries.
-	SetNewSpan(ctx *context.T, name string) (*context.T, Span)
+	WithNewSpan(ctx *context.T, name string) (*context.T, Span)
 
 	// Span finds the currently active span.
 	GetSpan(ctx *context.T) Span
@@ -171,26 +171,26 @@ func manager(ctx *context.T) Manager {
 	return manager
 }
 
-// SetNewTrace creates a new vtrace context that is not the child of any
+// WithNewTrace creates a new vtrace context that is not the child of any
 // other span.  This is useful when starting operations that are
 // disconnected from the activity ctx is performing.  For example
 // this might be used to start background tasks.
-func SetNewTrace(ctx *context.T) (*context.T, Span) {
-	return manager(ctx).SetNewTrace(ctx)
+func WithNewTrace(ctx *context.T) (*context.T, Span) {
+	return manager(ctx).WithNewTrace(ctx)
 }
 
-// SetContinuedTrace creates a span that represents a continuation of
+// WithContinuedTrace creates a span that represents a continuation of
 // a trace from a remote server.  name is the name of the new span and
 // req contains the parameters needed to connect this span with it's
 // trace.
-func SetContinuedTrace(ctx *context.T, name string, req Request) (*context.T, Span) {
-	return manager(ctx).SetContinuedTrace(ctx, name, req)
+func WithContinuedTrace(ctx *context.T, name string, req Request) (*context.T, Span) {
+	return manager(ctx).WithContinuedTrace(ctx, name, req)
 }
 
-// SetNewSpan derives a context with a new Span that can be used to
+// WithNewSpan derives a context with a new Span that can be used to
 // trace and annotate operations across process boundaries.
-func SetNewSpan(ctx *context.T, name string) (*context.T, Span) {
-	return manager(ctx).SetNewSpan(ctx, name)
+func WithNewSpan(ctx *context.T, name string) (*context.T, Span) {
+	return manager(ctx).WithNewSpan(ctx, name)
 }
 
 // Span finds the currently active span.
@@ -222,11 +222,11 @@ func GetResponse(ctx *context.T) Response {
 
 type emptyManager struct{}
 
-func (emptyManager) SetNewTrace(ctx *context.T) (*context.T, Span) { return ctx, emptySpan{} }
-func (emptyManager) SetContinuedTrace(ctx *context.T, name string, req Request) (*context.T, Span) {
+func (emptyManager) WithNewTrace(ctx *context.T) (*context.T, Span) { return ctx, emptySpan{} }
+func (emptyManager) WithContinuedTrace(ctx *context.T, name string, req Request) (*context.T, Span) {
 	return ctx, emptySpan{}
 }
-func (emptyManager) SetNewSpan(ctx *context.T, name string) (*context.T, Span) {
+func (emptyManager) WithNewSpan(ctx *context.T, name string) (*context.T, Span) {
 	return ctx, emptySpan{}
 }
 func (emptyManager) GetSpan(ctx *context.T) Span             { return emptySpan{} }

@@ -147,8 +147,8 @@ func init() {
 	rootCtx, shutdown := test.InitForTest()
 	defer shutdown()
 
-	def := i18n.ContextWithLangID(rootCtx, en)
-	def = verror.ContextWithComponentName(def, "verror.test")
+	def := i18n.WithLangID(rootCtx, en)
+	def = verror.WithComponentName(def, "verror.test")
 	verror.SetDefaultContext(def)
 
 	cat := i18n.Cat()
@@ -173,9 +173,9 @@ func init() {
 
 	// Set up a context that advertises French, on a server called FooServer,
 	// running an operation called aFR0.
-	ctx := i18n.ContextWithLangID(rootCtx, fr)
-	ctx = verror.ContextWithComponentName(ctx, "FooServer")
-	ctx, _ = vtrace.SetNewSpan(ctx, "aFR1")
+	ctx := i18n.WithLangID(rootCtx, fr)
+	ctx = verror.WithComponentName(ctx, "FooServer")
+	ctx, _ = vtrace.WithNewSpan(ctx, "aFR1")
 
 	// A first IDAction in various languages.
 	aEN0 = verror.ExplicitNew(idActionA, en, "server", "aEN0", 0)

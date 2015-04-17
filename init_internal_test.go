@@ -28,28 +28,30 @@ func (*mockRuntime) NewEndpoint(ep string) (naming.Endpoint, error) { return nil
 func (*mockRuntime) NewServer(ctx *context.T, opts ...rpc.ServerOpt) (rpc.Server, error) {
 	return nil, nil
 }
-func (*mockRuntime) SetNewStreamManager(ctx *context.T) (*context.T, error) {
+func (*mockRuntime) WithNewStreamManager(ctx *context.T) (*context.T, error) {
 	return nil, nil
 }
-func (*mockRuntime) SetPrincipal(ctx *context.T, principal security.Principal) (*context.T, error) {
+func (*mockRuntime) WithPrincipal(ctx *context.T, principal security.Principal) (*context.T, error) {
 	return nil, nil
 }
 func (*mockRuntime) GetPrincipal(ctx *context.T) security.Principal { return nil }
-func (*mockRuntime) SetNewClient(ctx *context.T, opts ...rpc.ClientOpt) (*context.T, rpc.Client, error) {
+func (*mockRuntime) WithNewClient(ctx *context.T, opts ...rpc.ClientOpt) (*context.T, rpc.Client, error) {
 	return nil, nil, nil
 }
 func (*mockRuntime) GetClient(ctx *context.T) rpc.Client { return nil }
-func (*mockRuntime) SetNewNamespace(ctx *context.T, roots ...string) (*context.T, namespace.T, error) {
+func (*mockRuntime) WithNewNamespace(ctx *context.T, roots ...string) (*context.T, namespace.T, error) {
 	return nil, nil, nil
 }
-func (*mockRuntime) GetNamespace(ctx *context.T) namespace.T        { return nil }
-func (*mockRuntime) GetAppCycle(ctx *context.T) AppCycle            { return nil }
-func (*mockRuntime) GetListenSpec(ctx *context.T) rpc.ListenSpec    { return rpc.ListenSpec{} }
-func (*mockRuntime) GetPublisher(ctx *context.T) *config.Publisher  { return nil }
-func (*mockRuntime) SetBackgroundContext(ctx *context.T) *context.T { return nil }
-func (*mockRuntime) GetBackgroundContext(ctx *context.T) *context.T { return nil }
+func (*mockRuntime) GetNamespace(ctx *context.T) namespace.T         { return nil }
+func (*mockRuntime) GetAppCycle(ctx *context.T) AppCycle             { return nil }
+func (*mockRuntime) GetListenSpec(ctx *context.T) rpc.ListenSpec     { return rpc.ListenSpec{} }
+func (*mockRuntime) GetPublisher(ctx *context.T) *config.Publisher   { return nil }
+func (*mockRuntime) WithBackgroundContext(ctx *context.T) *context.T { return nil }
+func (*mockRuntime) GetBackgroundContext(ctx *context.T) *context.T  { return nil }
 
-func (*mockRuntime) SetReservedNameDispatcher(ctx *context.T, d rpc.Dispatcher) *context.T { return nil }
+func (*mockRuntime) WithReservedNameDispatcher(ctx *context.T, d rpc.Dispatcher) *context.T {
+	return nil
+}
 
 func (*mockRuntime) GetReservedNameDispatcher(ctx *context.T) rpc.Dispatcher { return nil }
 

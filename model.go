@@ -103,7 +103,7 @@ type Runtime interface {
 	// Init is a chance to initialize state in the runtime implementation
 	// after the runtime has been registered in the v23 package.
 	// Code that runs in this routine, unlike the code in the runtimes
-	// constructor, can use the v23.Get/Set methods.
+	// constructor, can use the v23.Get/With methods.
 	Init(ctx *context.T) error
 
 	// NewEndpoint returns an Endpoint by parsing the supplied endpoint
@@ -132,26 +132,26 @@ type Runtime interface {
 	// ServesMountTable and ServerBlessings.
 	NewServer(ctx *context.T, opts ...rpc.ServerOpt) (rpc.Server, error)
 
-	// SetNewStreamManager creates a new StreamManager instance and context
+	// WithNewStreamManager creates a new StreamManager instance and context
 	// with that StreamManager attached.
-	SetNewStreamManager(ctx *context.T) (*context.T, error)
+	WithNewStreamManager(ctx *context.T) (*context.T, error)
 
-	// SetPrincipal attaches 'principal' to the returned context.
-	SetPrincipal(ctx *context.T, principal security.Principal) (*context.T, error)
+	// WithPrincipal attaches 'principal' to the returned context.
+	WithPrincipal(ctx *context.T, principal security.Principal) (*context.T, error)
 
 	// GetPrincipal returns the Principal in 'ctx'.
 	GetPrincipal(ctx *context.T) security.Principal
 
-	// SetNewClient creates a new Client instance and attaches it to a
+	// WithNewClient creates a new Client instance and attaches it to a
 	// new context.
-	SetNewClient(ctx *context.T, opts ...rpc.ClientOpt) (*context.T, rpc.Client, error)
+	WithNewClient(ctx *context.T, opts ...rpc.ClientOpt) (*context.T, rpc.Client, error)
 
 	// GetClient returns the Client in 'ctx'.
 	GetClient(ctx *context.T) rpc.Client
 
-	// SetNewNamespace creates a new Namespace instance and attaches it to the
+	// WithNewNamespace creates a new Namespace instance and attaches it to the
 	// returned context.
-	SetNewNamespace(ctx *context.T, roots ...string) (*context.T, namespace.T, error)
+	WithNewNamespace(ctx *context.T, roots ...string) (*context.T, namespace.T, error)
 
 	// GetNamespace returns the Namespace in 'ctx'.
 	GetNamespace(ctx *context.T) namespace.T
@@ -162,18 +162,18 @@ type Runtime interface {
 	// GetListenSpec returns the ListenSpec in 'ctx'.
 	GetListenSpec(ctx *context.T) rpc.ListenSpec
 
-	// SetBackgroundContext creates a new context derived from 'ctx'
+	// WithBackgroundContext creates a new context derived from 'ctx'
 	// with the given context set as the background context.
-	SetBackgroundContext(ctx *context.T) *context.T
+	WithBackgroundContext(ctx *context.T) *context.T
 
 	// GetBackgroundContext returns a background context. This context can be used
 	// for general background activities.
 	GetBackgroundContext(ctx *context.T) *context.T
 
-	// SetReservedNameDispatcher returns a context that uses the
+	// WithReservedNameDispatcher returns a context that uses the
 	// provided dispatcher to control access to the framework managed
 	// portion of the namespace.
-	SetReservedNameDispatcher(ctx *context.T, d rpc.Dispatcher) *context.T
+	WithReservedNameDispatcher(ctx *context.T, d rpc.Dispatcher) *context.T
 
 	// GetReservedNameDispatcher returns the dispatcher used for
 	// reserved names.
@@ -213,15 +213,15 @@ func NewServer(ctx *context.T, opts ...rpc.ServerOpt) (rpc.Server, error) {
 	return initState.currentRuntime().NewServer(ctx, opts...)
 }
 
-// SetNewStreamManager creates a new StreamManager instance and context
+// WithNewStreamManager creates a new StreamManager instance and context
 // with that StreamManager attached.
-func SetNewStreamManager(ctx *context.T) (*context.T, error) {
-	return initState.currentRuntime().SetNewStreamManager(ctx)
+func WithNewStreamManager(ctx *context.T) (*context.T, error) {
+	return initState.currentRuntime().WithNewStreamManager(ctx)
 }
 
-// SetPrincipal attaches 'principal' to the returned context.
-func SetPrincipal(ctx *context.T, principal security.Principal) (*context.T, error) {
-	return initState.currentRuntime().SetPrincipal(ctx, principal)
+// WithPrincipal attaches 'principal' to the returned context.
+func WithPrincipal(ctx *context.T, principal security.Principal) (*context.T, error) {
+	return initState.currentRuntime().WithPrincipal(ctx, principal)
 }
 
 // GetPrincipal returns the Principal in 'ctx'.
@@ -229,10 +229,10 @@ func GetPrincipal(ctx *context.T) security.Principal {
 	return initState.currentRuntime().GetPrincipal(ctx)
 }
 
-// SetNewClient creates a new Client instance and attaches it to a
+// WithNewClient creates a new Client instance and attaches it to a
 // new context.
-func SetNewClient(ctx *context.T, opts ...rpc.ClientOpt) (*context.T, rpc.Client, error) {
-	return initState.currentRuntime().SetNewClient(ctx, opts...)
+func WithNewClient(ctx *context.T, opts ...rpc.ClientOpt) (*context.T, rpc.Client, error) {
+	return initState.currentRuntime().WithNewClient(ctx, opts...)
 }
 
 // GetClient returns the Client in 'ctx'.
@@ -240,10 +240,10 @@ func GetClient(ctx *context.T) rpc.Client {
 	return initState.currentRuntime().GetClient(ctx)
 }
 
-// SetNewNamespace creates a new Namespace instance and attaches it to the
+// WithNewNamespace creates a new Namespace instance and attaches it to the
 // returned context.
-func SetNewNamespace(ctx *context.T, roots ...string) (*context.T, namespace.T, error) {
-	return initState.currentRuntime().SetNewNamespace(ctx, roots...)
+func WithNewNamespace(ctx *context.T, roots ...string) (*context.T, namespace.T, error) {
+	return initState.currentRuntime().WithNewNamespace(ctx, roots...)
 }
 
 // GetNamespace returns the Namespace in 'ctx'.
@@ -261,10 +261,10 @@ func GetListenSpec(ctx *context.T) rpc.ListenSpec {
 	return initState.currentRuntime().GetListenSpec(ctx)
 }
 
-// SetBackgroundContext creates a new context derived from 'ctx'
+// WithBackgroundContext creates a new context derived from 'ctx'
 // with the given context set as the background context.
-func SetBackgroundContext(ctx *context.T) *context.T {
-	return initState.runtime.SetBackgroundContext(ctx)
+func WithBackgroundContext(ctx *context.T) *context.T {
+	return initState.runtime.WithBackgroundContext(ctx)
 }
 
 // GetBackgroundContext returns a background context. This context can be used
@@ -273,11 +273,11 @@ func GetBackgroundContext(ctx *context.T) *context.T {
 	return initState.runtime.GetBackgroundContext(ctx)
 }
 
-// SetReservedNameDispatcher returns a context that uses the
+// WithReservedNameDispatcher returns a context that uses the
 // provided dispatcher to handle reserved names in particular
 // __debug.
-func SetReservedNameDispatcher(ctx *context.T, d rpc.Dispatcher) *context.T {
-	return initState.currentRuntime().SetReservedNameDispatcher(ctx, d)
+func WithReservedNameDispatcher(ctx *context.T, d rpc.Dispatcher) *context.T {
+	return initState.currentRuntime().WithReservedNameDispatcher(ctx, d)
 }
 
 // GetReservedNameDispatcher returns the dispatcher used for

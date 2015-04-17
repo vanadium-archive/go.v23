@@ -91,9 +91,9 @@ func (cat *Catalogue) Format(langID LangID, msgID MsgID, v ...interface{}) strin
 // langIDKey is used as a key for context.T's Value() map.
 type langIDKey struct{}
 
-// LangIDFromContext returns the LangID associated with a context.T,
+// GetLangID returns the LangID associated with a context.T,
 // or the empty LangID if there is none.
-func LangIDFromContext(ctx *context.T) (langID LangID) {
+func GetLangID(ctx *context.T) (langID LangID) {
 	if ctx != nil {
 		v := ctx.Value(langIDKey{})
 		langID, _ = v.(LangID)
@@ -101,9 +101,9 @@ func LangIDFromContext(ctx *context.T) (langID LangID) {
 	return langID
 }
 
-// ContextWithLangID returns a context based on ctx that has the
+// WithLangID returns a context based on ctx that has the
 // language ID langID.
-func ContextWithLangID(ctx *context.T, langID LangID) *context.T {
+func WithLangID(ctx *context.T, langID LangID) *context.T {
 	return context.WithValue(ctx, langIDKey{}, langID)
 }
 

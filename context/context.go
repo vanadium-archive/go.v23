@@ -50,7 +50,7 @@
 //    type key int
 //    const authKey = key(0)
 //
-//    function SetAuth(parent *context.T, data *Auth) *context.T {
+//    function WithAuth(parent *context.T, data *Auth) *context.T {
 //        return context.WithValue(parent, authKey, data)
 //    }
 //

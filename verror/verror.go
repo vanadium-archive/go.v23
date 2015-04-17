@@ -40,7 +40,7 @@
 //      err = verror.New(someNewError, ctx, "object_on_which_error_occurred")
 //
 // The ExplicitNew() call can be used to specify these things explicitly:
-//      err = verror.ExplicitNew(someNewError, i18n.LangIDFromContext(ctx),
+//      err = verror.ExplicitNew(someNewError, i18n.GetLangID(ctx),
 //              "my_component", "op_name", "procedure_name", "object_name")
 // If the language, component and/or operation name are unknown, use i18n.NoLangID
 // or the empty string, respectively.
@@ -74,8 +74,8 @@
 // might do the following to get the language from the environment, and the
 // programme name from Args[0]:
 //     ctx := runtime.NewContext()
-//     ctx = i18n.ContextWithLangID(ctx, i18n.LangIDFromEnv())
-//     ctx = verror.ContextWithComponentName(ctx, os.Args[0])
+//     ctx = i18n.WithLangID(ctx, i18n.LangIDFromEnv())
+//     ctx = verror.WithComponentName(ctx, os.Args[0])
 //     verror.SetDefaultContext(ctx)
 // A standalone tool might set the operation name to be a subcommand name, if
 // any.  If the default context has not been set, the error generated has no
@@ -316,9 +316,9 @@ func ExplicitNew(idAction IDAction, langID i18n.LangID, componentName string, op
 // A componentKey is used as a key for context.T's Value() map.
 type componentKey struct{}
 
-// ContextWithComponentName returns a context based on ctx that has the
+// WithComponentName returns a context based on ctx that has the
 // componentName that New() and Convert() can use.
-func ContextWithComponentName(ctx *context.T, componentName string) *context.T {
+func WithComponentName(ctx *context.T, componentName string) *context.T {
 	return context.WithValue(ctx, componentKey{}, componentName)
 }
 
@@ -474,7 +474,7 @@ func dataFromContext(ctx *context.T) (langID i18n.LangID, componentName string, 
 		defaultCtxLock.RUnlock()
 	}
 	if ctx != nil {
-		langID = i18n.LangIDFromContext(ctx)
+		langID = i18n.GetLangID(ctx)
 		value := ctx.Value(componentKey{})
 		componentName, _ = value.(string)
 		opName = vtrace.GetSpan(ctx).Name()

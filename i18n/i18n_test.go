@@ -262,25 +262,25 @@ func testContext() *context.T {
 	return ctx
 }
 
-// TestBaseLangID tests LangIDFromContext() and ContextWithLangID.
-func TestLangIDFromContext(t *testing.T) {
+// TestGetWithLangID tests GetLangID() and WithLangID.
+func TestGetWithLangID(t *testing.T) {
 	var dcWithoutLangID *context.T = testContext()
-	dcWithEN := ContextWithLangID(dcWithoutLangID, "en")
-	dcWithFR := ContextWithLangID(dcWithEN, "fr")
+	dcWithEN := WithLangID(dcWithoutLangID, "en")
+	dcWithFR := WithLangID(dcWithEN, "fr")
 	var got LangID
 
-	got = LangIDFromContext(dcWithoutLangID)
+	got = GetLangID(dcWithoutLangID)
 	if got != NoLangID {
-		t.Errorf("LangIDFromContext(dcWithoutLangID); got %v, want \"\"", got)
+		t.Errorf("GetLangID(dcWithoutLangID); got %v, want \"\"", got)
 	}
 
-	got = LangIDFromContext(dcWithEN)
+	got = GetLangID(dcWithEN)
 	if got != LangID("en") {
-		t.Errorf("LangIDFromContext(dcWithEN); got %v, want \"en\"", got)
+		t.Errorf("GetLangID(dcWithEN); got %v, want \"en\"", got)
 	}
 
-	got = LangIDFromContext(dcWithFR)
+	got = GetLangID(dcWithFR)
 	if got != LangID("fr") {
-		t.Errorf("LangIDFromContext(dcWithFR); got %v, want \"fr\"", got)
+		t.Errorf("GetLangID(dcWithFR); got %v, want \"fr\"", got)
 	}
 }
