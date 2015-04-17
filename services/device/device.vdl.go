@@ -90,17 +90,16 @@ func (InstallationState) __VDLReflect(struct {
 type InstanceState int
 
 const (
-	InstanceStateStarting InstanceState = iota
-	InstanceStateStarted
-	InstanceStateSuspending
-	InstanceStateSuspended
-	InstanceStateStopping
-	InstanceStateStopped
+	InstanceStateLaunching InstanceState = iota
+	InstanceStateRunning
+	InstanceStateDying
+	InstanceStateNotRunning
 	InstanceStateUpdating
+	InstanceStateDeleted
 )
 
 // InstanceStateAll holds all labels for InstanceState.
-var InstanceStateAll = [...]InstanceState{InstanceStateStarting, InstanceStateStarted, InstanceStateSuspending, InstanceStateSuspended, InstanceStateStopping, InstanceStateStopped, InstanceStateUpdating}
+var InstanceStateAll = [...]InstanceState{InstanceStateLaunching, InstanceStateRunning, InstanceStateDying, InstanceStateNotRunning, InstanceStateUpdating, InstanceStateDeleted}
 
 // InstanceStateFromString creates a InstanceState from a string label.
 func InstanceStateFromString(label string) (x InstanceState, err error) {
@@ -111,26 +110,23 @@ func InstanceStateFromString(label string) (x InstanceState, err error) {
 // Set assigns label to x.
 func (x *InstanceState) Set(label string) error {
 	switch label {
-	case "Starting", "starting":
-		*x = InstanceStateStarting
+	case "Launching", "launching":
+		*x = InstanceStateLaunching
 		return nil
-	case "Started", "started":
-		*x = InstanceStateStarted
+	case "Running", "running":
+		*x = InstanceStateRunning
 		return nil
-	case "Suspending", "suspending":
-		*x = InstanceStateSuspending
+	case "Dying", "dying":
+		*x = InstanceStateDying
 		return nil
-	case "Suspended", "suspended":
-		*x = InstanceStateSuspended
-		return nil
-	case "Stopping", "stopping":
-		*x = InstanceStateStopping
-		return nil
-	case "Stopped", "stopped":
-		*x = InstanceStateStopped
+	case "NotRunning", "notrunning":
+		*x = InstanceStateNotRunning
 		return nil
 	case "Updating", "updating":
 		*x = InstanceStateUpdating
+		return nil
+	case "Deleted", "deleted":
+		*x = InstanceStateDeleted
 		return nil
 	}
 	*x = -1
@@ -140,27 +136,25 @@ func (x *InstanceState) Set(label string) error {
 // String returns the string label of x.
 func (x InstanceState) String() string {
 	switch x {
-	case InstanceStateStarting:
-		return "Starting"
-	case InstanceStateStarted:
-		return "Started"
-	case InstanceStateSuspending:
-		return "Suspending"
-	case InstanceStateSuspended:
-		return "Suspended"
-	case InstanceStateStopping:
-		return "Stopping"
-	case InstanceStateStopped:
-		return "Stopped"
+	case InstanceStateLaunching:
+		return "Launching"
+	case InstanceStateRunning:
+		return "Running"
+	case InstanceStateDying:
+		return "Dying"
+	case InstanceStateNotRunning:
+		return "NotRunning"
 	case InstanceStateUpdating:
 		return "Updating"
+	case InstanceStateDeleted:
+		return "Deleted"
 	}
 	return ""
 }
 
 func (InstanceState) __VDLReflect(struct {
 	Name string "v.io/v23/services/device.InstanceState"
-	Enum struct{ Starting, Started, Suspending, Suspended, Stopping, Stopped, Updating string }
+	Enum struct{ Launching, Running, Dying, NotRunning, Updating, Deleted string }
 }) {
 }
 
@@ -228,83 +222,75 @@ func (InstanceStatus) __VDLReflect(struct {
 }
 
 type (
-	// StartServerMessage represents any single field of the StartServerMessage union type.
+	// BlessServerMessage represents any single field of the BlessServerMessage union type.
 	//
-	// StartServerMessage is the data type that is streamed from the server to the
-	// client during a Start method call.
-	StartServerMessage interface {
+	// BlessServerMessage is the data type that is streamed from the server to the
+	// client during an Instantiate method call.
+	// This is a union to enable backward compatible changes.
+	BlessServerMessage interface {
 		// Index returns the field index.
 		Index() int
 		// Interface returns the field value as an interface.
 		Interface() interface{}
 		// Name returns the field name.
 		Name() string
-		// __VDLReflect describes the StartServerMessage union type.
-		__VDLReflect(__StartServerMessageReflect)
+		// __VDLReflect describes the BlessServerMessage union type.
+		__VDLReflect(__BlessServerMessageReflect)
 	}
-	// StartServerMessageInstanceName represents field InstanceName of the StartServerMessage union type.
+	// BlessServerMessageInstancePublicKey represents field InstancePublicKey of the BlessServerMessage union type.
 	//
-	// The object name of the instance being started.
-	StartServerMessageInstanceName struct{ Value string }
-	// StartServerMessageInstancePublicKey represents field InstancePublicKey of the StartServerMessage union type.
-	//
-	// The public key of the instance being started. The client must return
+	// The public key of the instance being blessed. The client must return
 	// blessings for this key.
-	StartServerMessageInstancePublicKey struct{ Value []byte }
-	// __StartServerMessageReflect describes the StartServerMessage union type.
-	__StartServerMessageReflect struct {
-		Name  string "v.io/v23/services/device.StartServerMessage"
-		Type  StartServerMessage
+	BlessServerMessageInstancePublicKey struct{ Value []byte }
+	// __BlessServerMessageReflect describes the BlessServerMessage union type.
+	__BlessServerMessageReflect struct {
+		Name  string "v.io/v23/services/device.BlessServerMessage"
+		Type  BlessServerMessage
 		Union struct {
-			InstanceName      StartServerMessageInstanceName
-			InstancePublicKey StartServerMessageInstancePublicKey
+			InstancePublicKey BlessServerMessageInstancePublicKey
 		}
 	}
 )
 
-func (x StartServerMessageInstanceName) Index() int                               { return 0 }
-func (x StartServerMessageInstanceName) Interface() interface{}                   { return x.Value }
-func (x StartServerMessageInstanceName) Name() string                             { return "InstanceName" }
-func (x StartServerMessageInstanceName) __VDLReflect(__StartServerMessageReflect) {}
-
-func (x StartServerMessageInstancePublicKey) Index() int                               { return 1 }
-func (x StartServerMessageInstancePublicKey) Interface() interface{}                   { return x.Value }
-func (x StartServerMessageInstancePublicKey) Name() string                             { return "InstancePublicKey" }
-func (x StartServerMessageInstancePublicKey) __VDLReflect(__StartServerMessageReflect) {}
+func (x BlessServerMessageInstancePublicKey) Index() int                               { return 0 }
+func (x BlessServerMessageInstancePublicKey) Interface() interface{}                   { return x.Value }
+func (x BlessServerMessageInstancePublicKey) Name() string                             { return "InstancePublicKey" }
+func (x BlessServerMessageInstancePublicKey) __VDLReflect(__BlessServerMessageReflect) {}
 
 type (
-	// StartClientMessage represents any single field of the StartClientMessage union type.
+	// BlessClientMessage represents any single field of the BlessClientMessage union type.
 	//
-	// StartClientMessage is the data type that is streamed from the client to the
-	// server during a Start method call.
-	StartClientMessage interface {
+	// BlessClientMessage is the data type that is streamed from the client to the
+	// server during a Instantiate method call.
+	// This is a union to enable backward compatible changes.
+	BlessClientMessage interface {
 		// Index returns the field index.
 		Index() int
 		// Interface returns the field value as an interface.
 		Interface() interface{}
 		// Name returns the field name.
 		Name() string
-		// __VDLReflect describes the StartClientMessage union type.
-		__VDLReflect(__StartClientMessageReflect)
+		// __VDLReflect describes the BlessClientMessage union type.
+		__VDLReflect(__BlessClientMessageReflect)
 	}
-	// StartClientMessageAppBlessings represents field AppBlessings of the StartClientMessage union type.
+	// BlessClientMessageAppBlessings represents field AppBlessings of the BlessClientMessage union type.
 	//
 	// Blessings for the application instance.
-	StartClientMessageAppBlessings struct{ Value security.Blessings }
-	// __StartClientMessageReflect describes the StartClientMessage union type.
-	__StartClientMessageReflect struct {
-		Name  string "v.io/v23/services/device.StartClientMessage"
-		Type  StartClientMessage
+	BlessClientMessageAppBlessings struct{ Value security.Blessings }
+	// __BlessClientMessageReflect describes the BlessClientMessage union type.
+	__BlessClientMessageReflect struct {
+		Name  string "v.io/v23/services/device.BlessClientMessage"
+		Type  BlessClientMessage
 		Union struct {
-			AppBlessings StartClientMessageAppBlessings
+			AppBlessings BlessClientMessageAppBlessings
 		}
 	}
 )
 
-func (x StartClientMessageAppBlessings) Index() int                               { return 0 }
-func (x StartClientMessageAppBlessings) Interface() interface{}                   { return x.Value }
-func (x StartClientMessageAppBlessings) Name() string                             { return "AppBlessings" }
-func (x StartClientMessageAppBlessings) __VDLReflect(__StartClientMessageReflect) {}
+func (x BlessClientMessageAppBlessings) Index() int                               { return 0 }
+func (x BlessClientMessageAppBlessings) Interface() interface{}                   { return x.Value }
+func (x BlessClientMessageAppBlessings) Name() string                             { return "AppBlessings" }
+func (x BlessClientMessageAppBlessings) __VDLReflect(__BlessClientMessageReflect) {}
 
 // Description enumerates the profiles that a Device supports.
 type Description struct {
@@ -343,8 +329,8 @@ func init() {
 	vdl.Register((*Status)(nil))
 	vdl.Register((*InstallationStatus)(nil))
 	vdl.Register((*InstanceStatus)(nil))
-	vdl.Register((*StartServerMessage)(nil))
-	vdl.Register((*StartClientMessage)(nil))
+	vdl.Register((*BlessServerMessage)(nil))
+	vdl.Register((*BlessClientMessage)(nil))
 	vdl.Register((*Description)(nil))
 	vdl.Register((*Association)(nil))
 }
@@ -364,51 +350,40 @@ func init() {
 // -- Install()
 //
 // 2) Method receiver is an application installation:
-// -- Start()
+// -- Instantiate()
 // -- Uninstall()
 // -- Update()
 //
 // 3) Method receiver is application installation instance:
-// -- Refresh()
-// -- Restart()
-// -- Resume()
-// -- Stop()
-// -- Suspend()
+// -- Run()
+// -- Kill()
+// -- Delete()
 //
-// For groups 2) and 3), the suffix that specifies the receiver can
-// optionally omit the installation and/or instance, in which case the
-// operation applies to all installations and/or instances in the
-// scope of the suffix.
+// The following methods complement one another:
+// -- Install() and Uninstall()
+// -- Instantiate() and Delete()
+// -- Run() and Kill()
 //
 // Examples:
 // # Install Google Maps on the device.
 // device/apps.Install("/google.com/appstore/maps", nil, nil) --> "google maps/0"
 //
-// # Start an instance of the previously installed maps application installation.
-// device/apps/google maps/0.Start() --> { "0" }
+// # Create and start an instance of the previously installed maps application
+// installation.
+// device/apps/google maps/0.Instantiate() --> { "0" }
+// device/apps/google maps/0/0.Run()
 //
-// # Start a second instance of the previously installed maps application installation.
-// device/apps/google maps/0.Start() --> { "1" }
+// # Create and start a second instance of the previously installed maps
+// application installation.
+// device/apps/google maps/0.Instantiate() --> { "1" }
+// device/apps/google maps/0/1.Run()
 //
-// # Stop the first instance previously started.
-// device/apps/google maps/0/0.Stop()
+// # Kill and delete the first instance previously started.
+// device/apps/google maps/0/0.Kill()
+// device/apps/google maps/0/0.Delete()
 //
 // # Install a second Google Maps installation.
 // device/apps.Install("/google.com/appstore/maps", nil, nil) --> "google maps/1"
-//
-// # Start an instance for all maps application installations.
-// device/apps/google maps.Start() --> {"0/2", "1/0"}
-//
-// # Refresh the state of all instances of all maps application installations.
-// device/apps/google maps.Refresh()
-//
-// # Refresh the state of all instances of the maps application installation
-// identified by the given suffix.
-// device/apps/google maps/0.Refresh()
-//
-// # Refresh the state of the maps application installation instance identified by
-// the given suffix.
-// device/apps/google maps/0/2.Refresh()
 //
 // # Update the second maps installation to the latest version available.
 // device/apps/google maps/1.Update()
@@ -416,30 +391,15 @@ func init() {
 // # Update the first maps installation to a specific version.
 // device/apps/google maps/0.UpdateTo("/google.com/appstore/beta/maps")
 //
-// Further, the following methods complement one another:
-// -- Install() and Uninstall()
-// -- Start() and Stop()
-// -- Suspend() and Resume()
+// Finally, an application installation instance can be in one of three abstract
+// states: 1) "does not exist/deleted", 2) "running", or 3) "not-running". The
+// interface methods transition between these abstract states using the
+// following state machine:
 //
-// Finally, an application installation instance can be in one of
-// three abstract states: 1) "does not exist", 2) "running", or 3)
-// "suspended". The interface methods transition between these
-// abstract states using the following state machine:
-//
-// apply(Start(), "does not exists") = "running"
-// apply(Refresh(), "running") = "running"
-// apply(Refresh(), "suspended") = "suspended"
-// apply(Restart(), "running") = "running"
-// apply(Restart(), "suspended") = "running"
-// apply(Resume(), "suspended") = "running"
-// apply(Resume(), "running") = "running"
-// apply(Stop(), "running") = "does not exist"
-// apply(Stop(), "suspended") = "does not exist"
-// apply(Suspend(), "running") = "suspended"
-// apply(Suspend(), "suspended") = "suspended"
-//
-// In other words, invoking any method using an existing application
-// installation instance as a receiver is well-defined.
+// apply(Instantiate(), "does not exist") = "not-running"
+// apply(Run(), "not-running") = "running"
+// apply(Kill(), "running") = "not-running"
+// apply(Delete(), "not-running") = "deleted"
 type ApplicationClientMethods interface {
 	// Object provides access control for Vanadium objects.
 	//
@@ -512,56 +472,66 @@ type ApplicationClientMethods interface {
 	// application.
 	// TODO(rjkroege): Use customized labels.
 	Install(ctx *context.T, name string, config Config, packages application.Packages, opts ...rpc.CallOpt) (string, error)
-	// Refresh refreshes the state of application installation(s)
-	// instance(s).
-	Refresh(*context.T, ...rpc.CallOpt) error
-	// Restart restarts execution of application installation(s)
-	// instance(s).
-	Restart(*context.T, ...rpc.CallOpt) error
-	// Resume resumes execution of application installation(s)
-	// instance(s).
-	Resume(*context.T, ...rpc.CallOpt) error
-	// Revert reverts application installation(s) to the most recent
-	// previous installation.
-	Revert(*context.T, ...rpc.CallOpt) error
-	// Start starts an instance of application installation(s). The
-	// server sends the application instance's Public Key on the stream.
-	// When the client receives the Public Key it must send Blessings back
-	// to the server. When the instance is ready to start, the server sends
-	// the instance name to the client.
-	// Client                 Server
-	//  "object".Start() -->
-	//                   <--  InstancePublicKey
-	//  AppBlessings     -->
-	//                   <--  InstanceName
-	Start(*context.T, ...rpc.CallOpt) (ApplicationStartClientCall, error)
-	// Stop attempts a clean shutdown of application installation(s)
-	// instance(s). If the deadline (in seconds) is non-zero and the
-	// instance(s) in questions are still running after the given deadline,
-	// shutdown of the instance(s) is enforced.
-	Stop(ctx *context.T, deadline time.Duration, opts ...rpc.CallOpt) error
-	// Suspend suspends execution of application installation(s)
-	// instance(s).
-	Suspend(*context.T, ...rpc.CallOpt) error
-	// Uninstall uninstalls application installation(s).
+	// Uninstall uninstalls an application installation.
+	// The installation must be in state Active.
 	Uninstall(*context.T, ...rpc.CallOpt) error
-	// Update updates the application installation(s) from the object name
+	// Instantiate creates an instance of an application installation.
+	// The installation must be in state Active.
+	//
+	// The server sends the application instance's Public Key on the stream.
+	// When the client receives the Public Key it must send Blessings back
+	// to the server. When the instance is created, the server returns the
+	// instance name to the client.
+	//
+	// Client                       Server
+	//  "object".Instantiate() -->
+	//                         <--  InstancePublicKey
+	//  AppBlessings           -->
+	//                         <--  return InstanceName
+	Instantiate(*context.T, ...rpc.CallOpt) (ApplicationInstantiateClientCall, error)
+	// Delete deletes an instance.  Once deleted, the instance cannot be
+	// revived.
+	// The instance must be in state NotRunning.
+	//
+	// If called against a Device, causes the Device to shut itself down.
+	Delete(*context.T, ...rpc.CallOpt) error
+	// Run begins execution of an application instance.
+	// The instance must be in state NotRunning.
+	Run(*context.T, ...rpc.CallOpt) error
+	// Kill attempts a clean shutdown an of application instance.
+	// The instance must be in state Running.
+	//
+	// If the deadline is non-zero and the instance in question is still
+	// running after the given deadline, shutdown of the instance is
+	// enforced.
+	//
+	// If called against a Device, causes the Device to stop itself (which
+	// may or may not result in a restart depending on the device manager
+	// setup).
+	Kill(ctx *context.T, deadline time.Duration, opts ...rpc.CallOpt) error
+	// Update updates the application installation from the object name
 	// provided during Install.  If the new application envelope contains a
 	// different application title, the update does not occur, and an error
 	// is returned.
+	// The installation must be in state Active.
 	Update(*context.T, ...rpc.CallOpt) error
 	// UpdateTo updates the application installation(s) to the application
 	// specified by the object name argument.  If the new application
 	// envelope contains a different application title, the update does not
 	// occur, and an error is returned.
+	// The installation must be in state Active.
 	UpdateTo(ctx *context.T, name string, opts ...rpc.CallOpt) error
+	// Revert reverts an application installation to the most recent
+	// previous installation.
+	// The application must be in state Active.
+	Revert(*context.T, ...rpc.CallOpt) error
 	// Debug returns debug information about the application installation or
 	// instance.  This is generally highly implementation-specific, and
 	// presented in an unstructured form.  No guarantees are given about the
 	// stability of the format, and parsing it programmatically is
 	// specifically discouraged.
 	Debug(*context.T, ...rpc.CallOpt) (string, error)
-	// Status return structured information about the application
+	// Status returns structured information about the application
 	// installation or instance.
 	Status(*context.T, ...rpc.CallOpt) (Status, error)
 }
@@ -588,47 +558,32 @@ func (c implApplicationClientStub) Install(ctx *context.T, i0 string, i1 Config,
 	return
 }
 
-func (c implApplicationClientStub) Refresh(ctx *context.T, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "Refresh", nil, nil, opts...)
-	return
-}
-
-func (c implApplicationClientStub) Restart(ctx *context.T, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "Restart", nil, nil, opts...)
-	return
-}
-
-func (c implApplicationClientStub) Resume(ctx *context.T, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "Resume", nil, nil, opts...)
-	return
-}
-
-func (c implApplicationClientStub) Revert(ctx *context.T, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "Revert", nil, nil, opts...)
-	return
-}
-
-func (c implApplicationClientStub) Start(ctx *context.T, opts ...rpc.CallOpt) (ocall ApplicationStartClientCall, err error) {
-	var call rpc.ClientCall
-	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Start", nil, opts...); err != nil {
-		return
-	}
-	ocall = &implApplicationStartClientCall{ClientCall: call}
-	return
-}
-
-func (c implApplicationClientStub) Stop(ctx *context.T, i0 time.Duration, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "Stop", []interface{}{i0}, nil, opts...)
-	return
-}
-
-func (c implApplicationClientStub) Suspend(ctx *context.T, opts ...rpc.CallOpt) (err error) {
-	err = v23.GetClient(ctx).Call(ctx, c.name, "Suspend", nil, nil, opts...)
-	return
-}
-
 func (c implApplicationClientStub) Uninstall(ctx *context.T, opts ...rpc.CallOpt) (err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "Uninstall", nil, nil, opts...)
+	return
+}
+
+func (c implApplicationClientStub) Instantiate(ctx *context.T, opts ...rpc.CallOpt) (ocall ApplicationInstantiateClientCall, err error) {
+	var call rpc.ClientCall
+	if call, err = v23.GetClient(ctx).StartCall(ctx, c.name, "Instantiate", nil, opts...); err != nil {
+		return
+	}
+	ocall = &implApplicationInstantiateClientCall{ClientCall: call}
+	return
+}
+
+func (c implApplicationClientStub) Delete(ctx *context.T, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Delete", nil, nil, opts...)
+	return
+}
+
+func (c implApplicationClientStub) Run(ctx *context.T, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Run", nil, nil, opts...)
+	return
+}
+
+func (c implApplicationClientStub) Kill(ctx *context.T, i0 time.Duration, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Kill", []interface{}{i0}, nil, opts...)
 	return
 }
 
@@ -642,6 +597,11 @@ func (c implApplicationClientStub) UpdateTo(ctx *context.T, i0 string, opts ...r
 	return
 }
 
+func (c implApplicationClientStub) Revert(ctx *context.T, opts ...rpc.CallOpt) (err error) {
+	err = v23.GetClient(ctx).Call(ctx, c.name, "Revert", nil, nil, opts...)
+	return
+}
+
 func (c implApplicationClientStub) Debug(ctx *context.T, opts ...rpc.CallOpt) (o0 string, err error) {
 	err = v23.GetClient(ctx).Call(ctx, c.name, "Debug", nil, []interface{}{&o0}, opts...)
 	return
@@ -652,9 +612,9 @@ func (c implApplicationClientStub) Status(ctx *context.T, opts ...rpc.CallOpt) (
 	return
 }
 
-// ApplicationStartClientStream is the client stream for Application.Start.
-type ApplicationStartClientStream interface {
-	// RecvStream returns the receiver side of the Application.Start client stream.
+// ApplicationInstantiateClientStream is the client stream for Application.Instantiate.
+type ApplicationInstantiateClientStream interface {
+	// RecvStream returns the receiver side of the Application.Instantiate client stream.
 	RecvStream() interface {
 		// Advance stages an item so that it may be retrieved via Value.  Returns
 		// true iff there is an item to retrieve.  Advance must be called before
@@ -662,18 +622,18 @@ type ApplicationStartClientStream interface {
 		Advance() bool
 		// Value returns the item that was staged by Advance.  May panic if Advance
 		// returned false or was not called.  Never blocks.
-		Value() StartServerMessage
+		Value() BlessServerMessage
 		// Err returns any error encountered by Advance.  Never blocks.
 		Err() error
 	}
-	// SendStream returns the send side of the Application.Start client stream.
+	// SendStream returns the send side of the Application.Instantiate client stream.
 	SendStream() interface {
 		// Send places the item onto the output stream.  Returns errors
 		// encountered while sending, or if Send is called after Close or
 		// the stream has been canceled.  Blocks if there is no buffer
 		// space; will unblock when buffer space is available or after
 		// the stream has been canceled.
-		Send(item StartClientMessage) error
+		Send(item BlessClientMessage) error
 		// Close indicates to the server that no more items will be sent;
 		// server Recv calls will receive io.EOF after all sent items.
 		// This is an optional call - e.g. a client might call Close if it
@@ -685,9 +645,9 @@ type ApplicationStartClientStream interface {
 	}
 }
 
-// ApplicationStartClientCall represents the call returned from Application.Start.
-type ApplicationStartClientCall interface {
-	ApplicationStartClientStream
+// ApplicationInstantiateClientCall represents the call returned from Application.Instantiate.
+type ApplicationInstantiateClientCall interface {
+	ApplicationInstantiateClientStream
 	// Finish performs the equivalent of SendStream().Close, then blocks until
 	// the server is done, and returns the positional return values for the call.
 	//
@@ -698,59 +658,59 @@ type ApplicationStartClientCall interface {
 	// Calling Finish is mandatory for releasing stream resources, unless the call
 	// has been canceled or any of the other methods return an error.  Finish should
 	// be called at most once.
-	Finish() error
+	Finish() (string, error)
 }
 
-type implApplicationStartClientCall struct {
+type implApplicationInstantiateClientCall struct {
 	rpc.ClientCall
-	valRecv StartServerMessage
+	valRecv BlessServerMessage
 	errRecv error
 }
 
-func (c *implApplicationStartClientCall) RecvStream() interface {
+func (c *implApplicationInstantiateClientCall) RecvStream() interface {
 	Advance() bool
-	Value() StartServerMessage
+	Value() BlessServerMessage
 	Err() error
 } {
-	return implApplicationStartClientCallRecv{c}
+	return implApplicationInstantiateClientCallRecv{c}
 }
 
-type implApplicationStartClientCallRecv struct {
-	c *implApplicationStartClientCall
+type implApplicationInstantiateClientCallRecv struct {
+	c *implApplicationInstantiateClientCall
 }
 
-func (c implApplicationStartClientCallRecv) Advance() bool {
+func (c implApplicationInstantiateClientCallRecv) Advance() bool {
 	c.c.errRecv = c.c.Recv(&c.c.valRecv)
 	return c.c.errRecv == nil
 }
-func (c implApplicationStartClientCallRecv) Value() StartServerMessage {
+func (c implApplicationInstantiateClientCallRecv) Value() BlessServerMessage {
 	return c.c.valRecv
 }
-func (c implApplicationStartClientCallRecv) Err() error {
+func (c implApplicationInstantiateClientCallRecv) Err() error {
 	if c.c.errRecv == io.EOF {
 		return nil
 	}
 	return c.c.errRecv
 }
-func (c *implApplicationStartClientCall) SendStream() interface {
-	Send(item StartClientMessage) error
+func (c *implApplicationInstantiateClientCall) SendStream() interface {
+	Send(item BlessClientMessage) error
 	Close() error
 } {
-	return implApplicationStartClientCallSend{c}
+	return implApplicationInstantiateClientCallSend{c}
 }
 
-type implApplicationStartClientCallSend struct {
-	c *implApplicationStartClientCall
+type implApplicationInstantiateClientCallSend struct {
+	c *implApplicationInstantiateClientCall
 }
 
-func (c implApplicationStartClientCallSend) Send(item StartClientMessage) error {
+func (c implApplicationInstantiateClientCallSend) Send(item BlessClientMessage) error {
 	return c.c.Send(item)
 }
-func (c implApplicationStartClientCallSend) Close() error {
+func (c implApplicationInstantiateClientCallSend) Close() error {
 	return c.c.CloseSend()
 }
-func (c *implApplicationStartClientCall) Finish() (err error) {
-	err = c.ClientCall.Finish()
+func (c *implApplicationInstantiateClientCall) Finish() (o0 string, err error) {
+	err = c.ClientCall.Finish(&o0)
 	return
 }
 
@@ -769,51 +729,40 @@ func (c *implApplicationStartClientCall) Finish() (err error) {
 // -- Install()
 //
 // 2) Method receiver is an application installation:
-// -- Start()
+// -- Instantiate()
 // -- Uninstall()
 // -- Update()
 //
 // 3) Method receiver is application installation instance:
-// -- Refresh()
-// -- Restart()
-// -- Resume()
-// -- Stop()
-// -- Suspend()
+// -- Run()
+// -- Kill()
+// -- Delete()
 //
-// For groups 2) and 3), the suffix that specifies the receiver can
-// optionally omit the installation and/or instance, in which case the
-// operation applies to all installations and/or instances in the
-// scope of the suffix.
+// The following methods complement one another:
+// -- Install() and Uninstall()
+// -- Instantiate() and Delete()
+// -- Run() and Kill()
 //
 // Examples:
 // # Install Google Maps on the device.
 // device/apps.Install("/google.com/appstore/maps", nil, nil) --> "google maps/0"
 //
-// # Start an instance of the previously installed maps application installation.
-// device/apps/google maps/0.Start() --> { "0" }
+// # Create and start an instance of the previously installed maps application
+// installation.
+// device/apps/google maps/0.Instantiate() --> { "0" }
+// device/apps/google maps/0/0.Run()
 //
-// # Start a second instance of the previously installed maps application installation.
-// device/apps/google maps/0.Start() --> { "1" }
+// # Create and start a second instance of the previously installed maps
+// application installation.
+// device/apps/google maps/0.Instantiate() --> { "1" }
+// device/apps/google maps/0/1.Run()
 //
-// # Stop the first instance previously started.
-// device/apps/google maps/0/0.Stop()
+// # Kill and delete the first instance previously started.
+// device/apps/google maps/0/0.Kill()
+// device/apps/google maps/0/0.Delete()
 //
 // # Install a second Google Maps installation.
 // device/apps.Install("/google.com/appstore/maps", nil, nil) --> "google maps/1"
-//
-// # Start an instance for all maps application installations.
-// device/apps/google maps.Start() --> {"0/2", "1/0"}
-//
-// # Refresh the state of all instances of all maps application installations.
-// device/apps/google maps.Refresh()
-//
-// # Refresh the state of all instances of the maps application installation
-// identified by the given suffix.
-// device/apps/google maps/0.Refresh()
-//
-// # Refresh the state of the maps application installation instance identified by
-// the given suffix.
-// device/apps/google maps/0/2.Refresh()
 //
 // # Update the second maps installation to the latest version available.
 // device/apps/google maps/1.Update()
@@ -821,30 +770,15 @@ func (c *implApplicationStartClientCall) Finish() (err error) {
 // # Update the first maps installation to a specific version.
 // device/apps/google maps/0.UpdateTo("/google.com/appstore/beta/maps")
 //
-// Further, the following methods complement one another:
-// -- Install() and Uninstall()
-// -- Start() and Stop()
-// -- Suspend() and Resume()
+// Finally, an application installation instance can be in one of three abstract
+// states: 1) "does not exist/deleted", 2) "running", or 3) "not-running". The
+// interface methods transition between these abstract states using the
+// following state machine:
 //
-// Finally, an application installation instance can be in one of
-// three abstract states: 1) "does not exist", 2) "running", or 3)
-// "suspended". The interface methods transition between these
-// abstract states using the following state machine:
-//
-// apply(Start(), "does not exists") = "running"
-// apply(Refresh(), "running") = "running"
-// apply(Refresh(), "suspended") = "suspended"
-// apply(Restart(), "running") = "running"
-// apply(Restart(), "suspended") = "running"
-// apply(Resume(), "suspended") = "running"
-// apply(Resume(), "running") = "running"
-// apply(Stop(), "running") = "does not exist"
-// apply(Stop(), "suspended") = "does not exist"
-// apply(Suspend(), "running") = "suspended"
-// apply(Suspend(), "suspended") = "suspended"
-//
-// In other words, invoking any method using an existing application
-// installation instance as a receiver is well-defined.
+// apply(Instantiate(), "does not exist") = "not-running"
+// apply(Run(), "not-running") = "running"
+// apply(Kill(), "running") = "not-running"
+// apply(Delete(), "not-running") = "deleted"
 type ApplicationServerMethods interface {
 	// Object provides access control for Vanadium objects.
 	//
@@ -917,56 +851,66 @@ type ApplicationServerMethods interface {
 	// application.
 	// TODO(rjkroege): Use customized labels.
 	Install(ctx *context.T, call rpc.ServerCall, name string, config Config, packages application.Packages) (string, error)
-	// Refresh refreshes the state of application installation(s)
-	// instance(s).
-	Refresh(*context.T, rpc.ServerCall) error
-	// Restart restarts execution of application installation(s)
-	// instance(s).
-	Restart(*context.T, rpc.ServerCall) error
-	// Resume resumes execution of application installation(s)
-	// instance(s).
-	Resume(*context.T, rpc.ServerCall) error
-	// Revert reverts application installation(s) to the most recent
-	// previous installation.
-	Revert(*context.T, rpc.ServerCall) error
-	// Start starts an instance of application installation(s). The
-	// server sends the application instance's Public Key on the stream.
-	// When the client receives the Public Key it must send Blessings back
-	// to the server. When the instance is ready to start, the server sends
-	// the instance name to the client.
-	// Client                 Server
-	//  "object".Start() -->
-	//                   <--  InstancePublicKey
-	//  AppBlessings     -->
-	//                   <--  InstanceName
-	Start(*context.T, ApplicationStartServerCall) error
-	// Stop attempts a clean shutdown of application installation(s)
-	// instance(s). If the deadline (in seconds) is non-zero and the
-	// instance(s) in questions are still running after the given deadline,
-	// shutdown of the instance(s) is enforced.
-	Stop(ctx *context.T, call rpc.ServerCall, deadline time.Duration) error
-	// Suspend suspends execution of application installation(s)
-	// instance(s).
-	Suspend(*context.T, rpc.ServerCall) error
-	// Uninstall uninstalls application installation(s).
+	// Uninstall uninstalls an application installation.
+	// The installation must be in state Active.
 	Uninstall(*context.T, rpc.ServerCall) error
-	// Update updates the application installation(s) from the object name
+	// Instantiate creates an instance of an application installation.
+	// The installation must be in state Active.
+	//
+	// The server sends the application instance's Public Key on the stream.
+	// When the client receives the Public Key it must send Blessings back
+	// to the server. When the instance is created, the server returns the
+	// instance name to the client.
+	//
+	// Client                       Server
+	//  "object".Instantiate() -->
+	//                         <--  InstancePublicKey
+	//  AppBlessings           -->
+	//                         <--  return InstanceName
+	Instantiate(*context.T, ApplicationInstantiateServerCall) (string, error)
+	// Delete deletes an instance.  Once deleted, the instance cannot be
+	// revived.
+	// The instance must be in state NotRunning.
+	//
+	// If called against a Device, causes the Device to shut itself down.
+	Delete(*context.T, rpc.ServerCall) error
+	// Run begins execution of an application instance.
+	// The instance must be in state NotRunning.
+	Run(*context.T, rpc.ServerCall) error
+	// Kill attempts a clean shutdown an of application instance.
+	// The instance must be in state Running.
+	//
+	// If the deadline is non-zero and the instance in question is still
+	// running after the given deadline, shutdown of the instance is
+	// enforced.
+	//
+	// If called against a Device, causes the Device to stop itself (which
+	// may or may not result in a restart depending on the device manager
+	// setup).
+	Kill(ctx *context.T, call rpc.ServerCall, deadline time.Duration) error
+	// Update updates the application installation from the object name
 	// provided during Install.  If the new application envelope contains a
 	// different application title, the update does not occur, and an error
 	// is returned.
+	// The installation must be in state Active.
 	Update(*context.T, rpc.ServerCall) error
 	// UpdateTo updates the application installation(s) to the application
 	// specified by the object name argument.  If the new application
 	// envelope contains a different application title, the update does not
 	// occur, and an error is returned.
+	// The installation must be in state Active.
 	UpdateTo(ctx *context.T, call rpc.ServerCall, name string) error
+	// Revert reverts an application installation to the most recent
+	// previous installation.
+	// The application must be in state Active.
+	Revert(*context.T, rpc.ServerCall) error
 	// Debug returns debug information about the application installation or
 	// instance.  This is generally highly implementation-specific, and
 	// presented in an unstructured form.  No guarantees are given about the
 	// stability of the format, and parsing it programmatically is
 	// specifically discouraged.
 	Debug(*context.T, rpc.ServerCall) (string, error)
-	// Status return structured information about the application
+	// Status returns structured information about the application
 	// installation or instance.
 	Status(*context.T, rpc.ServerCall) (Status, error)
 }
@@ -1047,56 +991,66 @@ type ApplicationServerStubMethods interface {
 	// application.
 	// TODO(rjkroege): Use customized labels.
 	Install(ctx *context.T, call rpc.ServerCall, name string, config Config, packages application.Packages) (string, error)
-	// Refresh refreshes the state of application installation(s)
-	// instance(s).
-	Refresh(*context.T, rpc.ServerCall) error
-	// Restart restarts execution of application installation(s)
-	// instance(s).
-	Restart(*context.T, rpc.ServerCall) error
-	// Resume resumes execution of application installation(s)
-	// instance(s).
-	Resume(*context.T, rpc.ServerCall) error
-	// Revert reverts application installation(s) to the most recent
-	// previous installation.
-	Revert(*context.T, rpc.ServerCall) error
-	// Start starts an instance of application installation(s). The
-	// server sends the application instance's Public Key on the stream.
-	// When the client receives the Public Key it must send Blessings back
-	// to the server. When the instance is ready to start, the server sends
-	// the instance name to the client.
-	// Client                 Server
-	//  "object".Start() -->
-	//                   <--  InstancePublicKey
-	//  AppBlessings     -->
-	//                   <--  InstanceName
-	Start(*context.T, *ApplicationStartServerCallStub) error
-	// Stop attempts a clean shutdown of application installation(s)
-	// instance(s). If the deadline (in seconds) is non-zero and the
-	// instance(s) in questions are still running after the given deadline,
-	// shutdown of the instance(s) is enforced.
-	Stop(ctx *context.T, call rpc.ServerCall, deadline time.Duration) error
-	// Suspend suspends execution of application installation(s)
-	// instance(s).
-	Suspend(*context.T, rpc.ServerCall) error
-	// Uninstall uninstalls application installation(s).
+	// Uninstall uninstalls an application installation.
+	// The installation must be in state Active.
 	Uninstall(*context.T, rpc.ServerCall) error
-	// Update updates the application installation(s) from the object name
+	// Instantiate creates an instance of an application installation.
+	// The installation must be in state Active.
+	//
+	// The server sends the application instance's Public Key on the stream.
+	// When the client receives the Public Key it must send Blessings back
+	// to the server. When the instance is created, the server returns the
+	// instance name to the client.
+	//
+	// Client                       Server
+	//  "object".Instantiate() -->
+	//                         <--  InstancePublicKey
+	//  AppBlessings           -->
+	//                         <--  return InstanceName
+	Instantiate(*context.T, *ApplicationInstantiateServerCallStub) (string, error)
+	// Delete deletes an instance.  Once deleted, the instance cannot be
+	// revived.
+	// The instance must be in state NotRunning.
+	//
+	// If called against a Device, causes the Device to shut itself down.
+	Delete(*context.T, rpc.ServerCall) error
+	// Run begins execution of an application instance.
+	// The instance must be in state NotRunning.
+	Run(*context.T, rpc.ServerCall) error
+	// Kill attempts a clean shutdown an of application instance.
+	// The instance must be in state Running.
+	//
+	// If the deadline is non-zero and the instance in question is still
+	// running after the given deadline, shutdown of the instance is
+	// enforced.
+	//
+	// If called against a Device, causes the Device to stop itself (which
+	// may or may not result in a restart depending on the device manager
+	// setup).
+	Kill(ctx *context.T, call rpc.ServerCall, deadline time.Duration) error
+	// Update updates the application installation from the object name
 	// provided during Install.  If the new application envelope contains a
 	// different application title, the update does not occur, and an error
 	// is returned.
+	// The installation must be in state Active.
 	Update(*context.T, rpc.ServerCall) error
 	// UpdateTo updates the application installation(s) to the application
 	// specified by the object name argument.  If the new application
 	// envelope contains a different application title, the update does not
 	// occur, and an error is returned.
+	// The installation must be in state Active.
 	UpdateTo(ctx *context.T, call rpc.ServerCall, name string) error
+	// Revert reverts an application installation to the most recent
+	// previous installation.
+	// The application must be in state Active.
+	Revert(*context.T, rpc.ServerCall) error
 	// Debug returns debug information about the application installation or
 	// instance.  This is generally highly implementation-specific, and
 	// presented in an unstructured form.  No guarantees are given about the
 	// stability of the format, and parsing it programmatically is
 	// specifically discouraged.
 	Debug(*context.T, rpc.ServerCall) (string, error)
-	// Status return structured information about the application
+	// Status returns structured information about the application
 	// installation or instance.
 	Status(*context.T, rpc.ServerCall) (Status, error)
 }
@@ -1136,36 +1090,24 @@ func (s implApplicationServerStub) Install(ctx *context.T, call rpc.ServerCall, 
 	return s.impl.Install(ctx, call, i0, i1, i2)
 }
 
-func (s implApplicationServerStub) Refresh(ctx *context.T, call rpc.ServerCall) error {
-	return s.impl.Refresh(ctx, call)
-}
-
-func (s implApplicationServerStub) Restart(ctx *context.T, call rpc.ServerCall) error {
-	return s.impl.Restart(ctx, call)
-}
-
-func (s implApplicationServerStub) Resume(ctx *context.T, call rpc.ServerCall) error {
-	return s.impl.Resume(ctx, call)
-}
-
-func (s implApplicationServerStub) Revert(ctx *context.T, call rpc.ServerCall) error {
-	return s.impl.Revert(ctx, call)
-}
-
-func (s implApplicationServerStub) Start(ctx *context.T, call *ApplicationStartServerCallStub) error {
-	return s.impl.Start(ctx, call)
-}
-
-func (s implApplicationServerStub) Stop(ctx *context.T, call rpc.ServerCall, i0 time.Duration) error {
-	return s.impl.Stop(ctx, call, i0)
-}
-
-func (s implApplicationServerStub) Suspend(ctx *context.T, call rpc.ServerCall) error {
-	return s.impl.Suspend(ctx, call)
-}
-
 func (s implApplicationServerStub) Uninstall(ctx *context.T, call rpc.ServerCall) error {
 	return s.impl.Uninstall(ctx, call)
+}
+
+func (s implApplicationServerStub) Instantiate(ctx *context.T, call *ApplicationInstantiateServerCallStub) (string, error) {
+	return s.impl.Instantiate(ctx, call)
+}
+
+func (s implApplicationServerStub) Delete(ctx *context.T, call rpc.ServerCall) error {
+	return s.impl.Delete(ctx, call)
+}
+
+func (s implApplicationServerStub) Run(ctx *context.T, call rpc.ServerCall) error {
+	return s.impl.Run(ctx, call)
+}
+
+func (s implApplicationServerStub) Kill(ctx *context.T, call rpc.ServerCall, i0 time.Duration) error {
+	return s.impl.Kill(ctx, call, i0)
 }
 
 func (s implApplicationServerStub) Update(ctx *context.T, call rpc.ServerCall) error {
@@ -1174,6 +1116,10 @@ func (s implApplicationServerStub) Update(ctx *context.T, call rpc.ServerCall) e
 
 func (s implApplicationServerStub) UpdateTo(ctx *context.T, call rpc.ServerCall, i0 string) error {
 	return s.impl.UpdateTo(ctx, call, i0)
+}
+
+func (s implApplicationServerStub) Revert(ctx *context.T, call rpc.ServerCall) error {
+	return s.impl.Revert(ctx, call)
 }
 
 func (s implApplicationServerStub) Debug(ctx *context.T, call rpc.ServerCall) (string, error) {
@@ -1199,7 +1145,7 @@ var ApplicationDesc rpc.InterfaceDesc = descApplication
 var descApplication = rpc.InterfaceDesc{
 	Name:    "Application",
 	PkgPath: "v.io/v23/services/device",
-	Doc:     "// Application can be used to manage applications on a device. The\n// idea is that this interace will be invoked using an object name that\n// identifies the application and its installations and instances\n// where applicable.\n//\n// In particular, the interface methods can be divided into three\n// groups based on their intended receiver:\n//\n// 1) Method receiver is an application:\n// -- Install()\n//\n// 2) Method receiver is an application installation:\n// -- Start()\n// -- Uninstall()\n// -- Update()\n//\n// 3) Method receiver is application installation instance:\n// -- Refresh()\n// -- Restart()\n// -- Resume()\n// -- Stop()\n// -- Suspend()\n//\n// For groups 2) and 3), the suffix that specifies the receiver can\n// optionally omit the installation and/or instance, in which case the\n// operation applies to all installations and/or instances in the\n// scope of the suffix.\n//\n// Examples:\n// # Install Google Maps on the device.\n// device/apps.Install(\"/google.com/appstore/maps\", nil, nil) --> \"google maps/0\"\n//\n// # Start an instance of the previously installed maps application installation.\n// device/apps/google maps/0.Start() --> { \"0\" }\n//\n// # Start a second instance of the previously installed maps application installation.\n// device/apps/google maps/0.Start() --> { \"1\" }\n//\n// # Stop the first instance previously started.\n// device/apps/google maps/0/0.Stop()\n//\n// # Install a second Google Maps installation.\n// device/apps.Install(\"/google.com/appstore/maps\", nil, nil) --> \"google maps/1\"\n//\n// # Start an instance for all maps application installations.\n// device/apps/google maps.Start() --> {\"0/2\", \"1/0\"}\n//\n// # Refresh the state of all instances of all maps application installations.\n// device/apps/google maps.Refresh()\n//\n// # Refresh the state of all instances of the maps application installation\n// identified by the given suffix.\n// device/apps/google maps/0.Refresh()\n//\n// # Refresh the state of the maps application installation instance identified by\n// the given suffix.\n// device/apps/google maps/0/2.Refresh()\n//\n// # Update the second maps installation to the latest version available.\n// device/apps/google maps/1.Update()\n//\n// # Update the first maps installation to a specific version.\n// device/apps/google maps/0.UpdateTo(\"/google.com/appstore/beta/maps\")\n//\n// Further, the following methods complement one another:\n// -- Install() and Uninstall()\n// -- Start() and Stop()\n// -- Suspend() and Resume()\n//\n// Finally, an application installation instance can be in one of\n// three abstract states: 1) \"does not exist\", 2) \"running\", or 3)\n// \"suspended\". The interface methods transition between these\n// abstract states using the following state machine:\n//\n// apply(Start(), \"does not exists\") = \"running\"\n// apply(Refresh(), \"running\") = \"running\"\n// apply(Refresh(), \"suspended\") = \"suspended\"\n// apply(Restart(), \"running\") = \"running\"\n// apply(Restart(), \"suspended\") = \"running\"\n// apply(Resume(), \"suspended\") = \"running\"\n// apply(Resume(), \"running\") = \"running\"\n// apply(Stop(), \"running\") = \"does not exist\"\n// apply(Stop(), \"suspended\") = \"does not exist\"\n// apply(Suspend(), \"running\") = \"suspended\"\n// apply(Suspend(), \"suspended\") = \"suspended\"\n//\n// In other words, invoking any method using an existing application\n// installation instance as a receiver is well-defined.",
+	Doc:     "// Application can be used to manage applications on a device. The\n// idea is that this interace will be invoked using an object name that\n// identifies the application and its installations and instances\n// where applicable.\n//\n// In particular, the interface methods can be divided into three\n// groups based on their intended receiver:\n//\n// 1) Method receiver is an application:\n// -- Install()\n//\n// 2) Method receiver is an application installation:\n// -- Instantiate()\n// -- Uninstall()\n// -- Update()\n//\n// 3) Method receiver is application installation instance:\n// -- Run()\n// -- Kill()\n// -- Delete()\n//\n// The following methods complement one another:\n// -- Install() and Uninstall()\n// -- Instantiate() and Delete()\n// -- Run() and Kill()\n//\n// Examples:\n// # Install Google Maps on the device.\n// device/apps.Install(\"/google.com/appstore/maps\", nil, nil) --> \"google maps/0\"\n//\n// # Create and start an instance of the previously installed maps application\n// installation.\n// device/apps/google maps/0.Instantiate() --> { \"0\" }\n// device/apps/google maps/0/0.Run()\n//\n// # Create and start a second instance of the previously installed maps\n// application installation.\n// device/apps/google maps/0.Instantiate() --> { \"1\" }\n// device/apps/google maps/0/1.Run()\n//\n// # Kill and delete the first instance previously started.\n// device/apps/google maps/0/0.Kill()\n// device/apps/google maps/0/0.Delete()\n//\n// # Install a second Google Maps installation.\n// device/apps.Install(\"/google.com/appstore/maps\", nil, nil) --> \"google maps/1\"\n//\n// # Update the second maps installation to the latest version available.\n// device/apps/google maps/1.Update()\n//\n// # Update the first maps installation to a specific version.\n// device/apps/google maps/0.UpdateTo(\"/google.com/appstore/beta/maps\")\n//\n// Finally, an application installation instance can be in one of three abstract\n// states: 1) \"does not exist/deleted\", 2) \"running\", or 3) \"not-running\". The\n// interface methods transition between these abstract states using the\n// following state machine:\n//\n// apply(Instantiate(), \"does not exist\") = \"not-running\"\n// apply(Run(), \"not-running\") = \"running\"\n// apply(Kill(), \"running\") = \"not-running\"\n// apply(Delete(), \"not-running\") = \"deleted\"",
 	Embeds: []rpc.EmbedDesc{
 		{"Object", "v.io/v23/services/permissions", "// Object provides access control for Vanadium objects.\n//\n// Vanadium services implementing dynamic access control would typically embed\n// this interface and tag additional methods defined by the service with one of\n// Admin, Read, Write, Resolve etc. For example, the VDL definition of the\n// object would be:\n//\n//   package mypackage\n//\n//   import \"v.io/v23/security/access\"\n//   import \"v.io/v23/services/permissions\"\n//\n//   type MyObject interface {\n//     permissions.Object\n//     MyRead() (string, error) {access.Read}\n//     MyWrite(string) error    {access.Write}\n//   }\n//\n// If the set of pre-defined tags is insufficient, services may define their\n// own tag type and annotate all methods with this new type.\n//\n// Instead of embedding this Object interface, define SetPermissions and\n// GetPermissions in their own interface. Authorization policies will typically\n// respect annotations of a single type. For example, the VDL definition of an\n// object would be:\n//\n//  package mypackage\n//\n//  import \"v.io/v23/security/access\"\n//\n//  type MyTag string\n//\n//  const (\n//    Blue = MyTag(\"Blue\")\n//    Red  = MyTag(\"Red\")\n//  )\n//\n//  type MyObject interface {\n//    MyMethod() (string, error) {Blue}\n//\n//    // Allow clients to change access via the access.Object interface:\n//    SetPermissions(acl access.Permissions, version string) error         {Red}\n//    GetPermissions() (acl access.Permissions, version string, err error) {Blue}\n//  }"},
 	},
@@ -1218,59 +1164,52 @@ var descApplication = rpc.InterfaceDesc{
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
 		},
 		{
-			Name: "Refresh",
-			Doc:  "// Refresh refreshes the state of application installation(s)\n// instance(s).",
+			Name: "Uninstall",
+			Doc:  "// Uninstall uninstalls an application installation.\n// The installation must be in state Active.",
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
 		},
 		{
-			Name: "Restart",
-			Doc:  "// Restart restarts execution of application installation(s)\n// instance(s).",
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
-		},
-		{
-			Name: "Resume",
-			Doc:  "// Resume resumes execution of application installation(s)\n// instance(s).",
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
-		},
-		{
-			Name: "Revert",
-			Doc:  "// Revert reverts application installation(s) to the most recent\n// previous installation.",
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
-		},
-		{
-			Name: "Start",
-			Doc:  "// Start starts an instance of application installation(s). The\n// server sends the application instance's Public Key on the stream.\n// When the client receives the Public Key it must send Blessings back\n// to the server. When the instance is ready to start, the server sends\n// the instance name to the client.\n// Client                 Server\n//  \"object\".Start() -->\n//                   <--  InstancePublicKey\n//  AppBlessings     -->\n//                   <--  InstanceName",
+			Name: "Instantiate",
+			Doc:  "// Instantiate creates an instance of an application installation.\n// The installation must be in state Active.\n//\n// The server sends the application instance's Public Key on the stream.\n// When the client receives the Public Key it must send Blessings back\n// to the server. When the instance is created, the server returns the\n// instance name to the client.\n//\n// Client                       Server\n//  \"object\".Instantiate() -->\n//                         <--  InstancePublicKey\n//  AppBlessings           -->\n//                         <--  return InstanceName",
+			OutArgs: []rpc.ArgDesc{
+				{"", ``}, // string
+			},
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Read"))},
 		},
 		{
-			Name: "Stop",
-			Doc:  "// Stop attempts a clean shutdown of application installation(s)\n// instance(s). If the deadline (in seconds) is non-zero and the\n// instance(s) in questions are still running after the given deadline,\n// shutdown of the instance(s) is enforced.",
-			InArgs: []rpc.ArgDesc{
-				{"deadline", ``}, // time.Duration
-			},
+			Name: "Delete",
+			Doc:  "// Delete deletes an instance.  Once deleted, the instance cannot be\n// revived.\n// The instance must be in state NotRunning.\n//\n// If called against a Device, causes the Device to shut itself down.",
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
 		},
 		{
-			Name: "Suspend",
-			Doc:  "// Suspend suspends execution of application installation(s)\n// instance(s).",
+			Name: "Run",
+			Doc:  "// Run begins execution of an application instance.\n// The instance must be in state NotRunning.",
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
 		},
 		{
-			Name: "Uninstall",
-			Doc:  "// Uninstall uninstalls application installation(s).",
-			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
+			Name: "Kill",
+			Doc:  "// Kill attempts a clean shutdown an of application instance.\n// The instance must be in state Running.\n//\n// If the deadline is non-zero and the instance in question is still\n// running after the given deadline, shutdown of the instance is\n// enforced.\n//\n// If called against a Device, causes the Device to stop itself (which\n// may or may not result in a restart depending on the device manager\n// setup).",
+			InArgs: []rpc.ArgDesc{
+				{"deadline", ``}, // time.Duration
+			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Write"))},
 		},
 		{
 			Name: "Update",
-			Doc:  "// Update updates the application installation(s) from the object name\n// provided during Install.  If the new application envelope contains a\n// different application title, the update does not occur, and an error\n// is returned.",
+			Doc:  "// Update updates the application installation from the object name\n// provided during Install.  If the new application envelope contains a\n// different application title, the update does not occur, and an error\n// is returned.\n// The installation must be in state Active.",
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
 		},
 		{
 			Name: "UpdateTo",
-			Doc:  "// UpdateTo updates the application installation(s) to the application\n// specified by the object name argument.  If the new application\n// envelope contains a different application title, the update does not\n// occur, and an error is returned.",
+			Doc:  "// UpdateTo updates the application installation(s) to the application\n// specified by the object name argument.  If the new application\n// envelope contains a different application title, the update does not\n// occur, and an error is returned.\n// The installation must be in state Active.",
 			InArgs: []rpc.ArgDesc{
 				{"name", ``}, // string
 			},
+			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
+		},
+		{
+			Name: "Revert",
+			Doc:  "// Revert reverts an application installation to the most recent\n// previous installation.\n// The application must be in state Active.",
 			Tags: []*vdl.Value{vdl.ValueOf(access.Tag("Admin"))},
 		},
 		{
@@ -1283,7 +1222,7 @@ var descApplication = rpc.InterfaceDesc{
 		},
 		{
 			Name: "Status",
-			Doc:  "// Status return structured information about the application\n// installation or instance.",
+			Doc:  "// Status returns structured information about the application\n// installation or instance.",
 			OutArgs: []rpc.ArgDesc{
 				{"", ``}, // Status
 			},
@@ -1292,9 +1231,9 @@ var descApplication = rpc.InterfaceDesc{
 	},
 }
 
-// ApplicationStartServerStream is the server stream for Application.Start.
-type ApplicationStartServerStream interface {
-	// RecvStream returns the receiver side of the Application.Start server stream.
+// ApplicationInstantiateServerStream is the server stream for Application.Instantiate.
+type ApplicationInstantiateServerStream interface {
+	// RecvStream returns the receiver side of the Application.Instantiate server stream.
 	RecvStream() interface {
 		// Advance stages an item so that it may be retrieved via Value.  Returns
 		// true iff there is an item to retrieve.  Advance must be called before
@@ -1302,77 +1241,77 @@ type ApplicationStartServerStream interface {
 		Advance() bool
 		// Value returns the item that was staged by Advance.  May panic if Advance
 		// returned false or was not called.  Never blocks.
-		Value() StartClientMessage
+		Value() BlessClientMessage
 		// Err returns any error encountered by Advance.  Never blocks.
 		Err() error
 	}
-	// SendStream returns the send side of the Application.Start server stream.
+	// SendStream returns the send side of the Application.Instantiate server stream.
 	SendStream() interface {
 		// Send places the item onto the output stream.  Returns errors encountered
 		// while sending.  Blocks if there is no buffer space; will unblock when
 		// buffer space is available.
-		Send(item StartServerMessage) error
+		Send(item BlessServerMessage) error
 	}
 }
 
-// ApplicationStartServerCall represents the context passed to Application.Start.
-type ApplicationStartServerCall interface {
+// ApplicationInstantiateServerCall represents the context passed to Application.Instantiate.
+type ApplicationInstantiateServerCall interface {
 	rpc.ServerCall
-	ApplicationStartServerStream
+	ApplicationInstantiateServerStream
 }
 
-// ApplicationStartServerCallStub is a wrapper that converts rpc.StreamServerCall into
-// a typesafe stub that implements ApplicationStartServerCall.
-type ApplicationStartServerCallStub struct {
+// ApplicationInstantiateServerCallStub is a wrapper that converts rpc.StreamServerCall into
+// a typesafe stub that implements ApplicationInstantiateServerCall.
+type ApplicationInstantiateServerCallStub struct {
 	rpc.StreamServerCall
-	valRecv StartClientMessage
+	valRecv BlessClientMessage
 	errRecv error
 }
 
-// Init initializes ApplicationStartServerCallStub from rpc.StreamServerCall.
-func (s *ApplicationStartServerCallStub) Init(call rpc.StreamServerCall) {
+// Init initializes ApplicationInstantiateServerCallStub from rpc.StreamServerCall.
+func (s *ApplicationInstantiateServerCallStub) Init(call rpc.StreamServerCall) {
 	s.StreamServerCall = call
 }
 
-// RecvStream returns the receiver side of the Application.Start server stream.
-func (s *ApplicationStartServerCallStub) RecvStream() interface {
+// RecvStream returns the receiver side of the Application.Instantiate server stream.
+func (s *ApplicationInstantiateServerCallStub) RecvStream() interface {
 	Advance() bool
-	Value() StartClientMessage
+	Value() BlessClientMessage
 	Err() error
 } {
-	return implApplicationStartServerCallRecv{s}
+	return implApplicationInstantiateServerCallRecv{s}
 }
 
-type implApplicationStartServerCallRecv struct {
-	s *ApplicationStartServerCallStub
+type implApplicationInstantiateServerCallRecv struct {
+	s *ApplicationInstantiateServerCallStub
 }
 
-func (s implApplicationStartServerCallRecv) Advance() bool {
+func (s implApplicationInstantiateServerCallRecv) Advance() bool {
 	s.s.errRecv = s.s.Recv(&s.s.valRecv)
 	return s.s.errRecv == nil
 }
-func (s implApplicationStartServerCallRecv) Value() StartClientMessage {
+func (s implApplicationInstantiateServerCallRecv) Value() BlessClientMessage {
 	return s.s.valRecv
 }
-func (s implApplicationStartServerCallRecv) Err() error {
+func (s implApplicationInstantiateServerCallRecv) Err() error {
 	if s.s.errRecv == io.EOF {
 		return nil
 	}
 	return s.s.errRecv
 }
 
-// SendStream returns the send side of the Application.Start server stream.
-func (s *ApplicationStartServerCallStub) SendStream() interface {
-	Send(item StartServerMessage) error
+// SendStream returns the send side of the Application.Instantiate server stream.
+func (s *ApplicationInstantiateServerCallStub) SendStream() interface {
+	Send(item BlessServerMessage) error
 } {
-	return implApplicationStartServerCallSend{s}
+	return implApplicationInstantiateServerCallSend{s}
 }
 
-type implApplicationStartServerCallSend struct {
-	s *ApplicationStartServerCallStub
+type implApplicationInstantiateServerCallSend struct {
+	s *ApplicationInstantiateServerCallStub
 }
 
-func (s implApplicationStartServerCallSend) Send(item StartServerMessage) error {
+func (s implApplicationInstantiateServerCallSend) Send(item BlessServerMessage) error {
 	return s.s.Send(item)
 }
 
@@ -1520,51 +1459,40 @@ type DeviceClientMethods interface {
 	// -- Install()
 	//
 	// 2) Method receiver is an application installation:
-	// -- Start()
+	// -- Instantiate()
 	// -- Uninstall()
 	// -- Update()
 	//
 	// 3) Method receiver is application installation instance:
-	// -- Refresh()
-	// -- Restart()
-	// -- Resume()
-	// -- Stop()
-	// -- Suspend()
+	// -- Run()
+	// -- Kill()
+	// -- Delete()
 	//
-	// For groups 2) and 3), the suffix that specifies the receiver can
-	// optionally omit the installation and/or instance, in which case the
-	// operation applies to all installations and/or instances in the
-	// scope of the suffix.
+	// The following methods complement one another:
+	// -- Install() and Uninstall()
+	// -- Instantiate() and Delete()
+	// -- Run() and Kill()
 	//
 	// Examples:
 	// # Install Google Maps on the device.
 	// device/apps.Install("/google.com/appstore/maps", nil, nil) --> "google maps/0"
 	//
-	// # Start an instance of the previously installed maps application installation.
-	// device/apps/google maps/0.Start() --> { "0" }
+	// # Create and start an instance of the previously installed maps application
+	// installation.
+	// device/apps/google maps/0.Instantiate() --> { "0" }
+	// device/apps/google maps/0/0.Run()
 	//
-	// # Start a second instance of the previously installed maps application installation.
-	// device/apps/google maps/0.Start() --> { "1" }
+	// # Create and start a second instance of the previously installed maps
+	// application installation.
+	// device/apps/google maps/0.Instantiate() --> { "1" }
+	// device/apps/google maps/0/1.Run()
 	//
-	// # Stop the first instance previously started.
-	// device/apps/google maps/0/0.Stop()
+	// # Kill and delete the first instance previously started.
+	// device/apps/google maps/0/0.Kill()
+	// device/apps/google maps/0/0.Delete()
 	//
 	// # Install a second Google Maps installation.
 	// device/apps.Install("/google.com/appstore/maps", nil, nil) --> "google maps/1"
-	//
-	// # Start an instance for all maps application installations.
-	// device/apps/google maps.Start() --> {"0/2", "1/0"}
-	//
-	// # Refresh the state of all instances of all maps application installations.
-	// device/apps/google maps.Refresh()
-	//
-	// # Refresh the state of all instances of the maps application installation
-	// identified by the given suffix.
-	// device/apps/google maps/0.Refresh()
-	//
-	// # Refresh the state of the maps application installation instance identified by
-	// the given suffix.
-	// device/apps/google maps/0/2.Refresh()
 	//
 	// # Update the second maps installation to the latest version available.
 	// device/apps/google maps/1.Update()
@@ -1572,30 +1500,15 @@ type DeviceClientMethods interface {
 	// # Update the first maps installation to a specific version.
 	// device/apps/google maps/0.UpdateTo("/google.com/appstore/beta/maps")
 	//
-	// Further, the following methods complement one another:
-	// -- Install() and Uninstall()
-	// -- Start() and Stop()
-	// -- Suspend() and Resume()
+	// Finally, an application installation instance can be in one of three abstract
+	// states: 1) "does not exist/deleted", 2) "running", or 3) "not-running". The
+	// interface methods transition between these abstract states using the
+	// following state machine:
 	//
-	// Finally, an application installation instance can be in one of
-	// three abstract states: 1) "does not exist", 2) "running", or 3)
-	// "suspended". The interface methods transition between these
-	// abstract states using the following state machine:
-	//
-	// apply(Start(), "does not exists") = "running"
-	// apply(Refresh(), "running") = "running"
-	// apply(Refresh(), "suspended") = "suspended"
-	// apply(Restart(), "running") = "running"
-	// apply(Restart(), "suspended") = "running"
-	// apply(Resume(), "suspended") = "running"
-	// apply(Resume(), "running") = "running"
-	// apply(Stop(), "running") = "does not exist"
-	// apply(Stop(), "suspended") = "does not exist"
-	// apply(Suspend(), "running") = "suspended"
-	// apply(Suspend(), "suspended") = "suspended"
-	//
-	// In other words, invoking any method using an existing application
-	// installation instance as a receiver is well-defined.
+	// apply(Instantiate(), "does not exist") = "not-running"
+	// apply(Run(), "not-running") = "running"
+	// apply(Kill(), "running") = "not-running"
+	// apply(Delete(), "not-running") = "deleted"
 	ApplicationClientMethods
 	// Describe generates a description of the device.
 	Describe(*context.T, ...rpc.CallOpt) (Description, error)
@@ -1675,51 +1588,40 @@ type DeviceServerMethods interface {
 	// -- Install()
 	//
 	// 2) Method receiver is an application installation:
-	// -- Start()
+	// -- Instantiate()
 	// -- Uninstall()
 	// -- Update()
 	//
 	// 3) Method receiver is application installation instance:
-	// -- Refresh()
-	// -- Restart()
-	// -- Resume()
-	// -- Stop()
-	// -- Suspend()
+	// -- Run()
+	// -- Kill()
+	// -- Delete()
 	//
-	// For groups 2) and 3), the suffix that specifies the receiver can
-	// optionally omit the installation and/or instance, in which case the
-	// operation applies to all installations and/or instances in the
-	// scope of the suffix.
+	// The following methods complement one another:
+	// -- Install() and Uninstall()
+	// -- Instantiate() and Delete()
+	// -- Run() and Kill()
 	//
 	// Examples:
 	// # Install Google Maps on the device.
 	// device/apps.Install("/google.com/appstore/maps", nil, nil) --> "google maps/0"
 	//
-	// # Start an instance of the previously installed maps application installation.
-	// device/apps/google maps/0.Start() --> { "0" }
+	// # Create and start an instance of the previously installed maps application
+	// installation.
+	// device/apps/google maps/0.Instantiate() --> { "0" }
+	// device/apps/google maps/0/0.Run()
 	//
-	// # Start a second instance of the previously installed maps application installation.
-	// device/apps/google maps/0.Start() --> { "1" }
+	// # Create and start a second instance of the previously installed maps
+	// application installation.
+	// device/apps/google maps/0.Instantiate() --> { "1" }
+	// device/apps/google maps/0/1.Run()
 	//
-	// # Stop the first instance previously started.
-	// device/apps/google maps/0/0.Stop()
+	// # Kill and delete the first instance previously started.
+	// device/apps/google maps/0/0.Kill()
+	// device/apps/google maps/0/0.Delete()
 	//
 	// # Install a second Google Maps installation.
 	// device/apps.Install("/google.com/appstore/maps", nil, nil) --> "google maps/1"
-	//
-	// # Start an instance for all maps application installations.
-	// device/apps/google maps.Start() --> {"0/2", "1/0"}
-	//
-	// # Refresh the state of all instances of all maps application installations.
-	// device/apps/google maps.Refresh()
-	//
-	// # Refresh the state of all instances of the maps application installation
-	// identified by the given suffix.
-	// device/apps/google maps/0.Refresh()
-	//
-	// # Refresh the state of the maps application installation instance identified by
-	// the given suffix.
-	// device/apps/google maps/0/2.Refresh()
 	//
 	// # Update the second maps installation to the latest version available.
 	// device/apps/google maps/1.Update()
@@ -1727,30 +1629,15 @@ type DeviceServerMethods interface {
 	// # Update the first maps installation to a specific version.
 	// device/apps/google maps/0.UpdateTo("/google.com/appstore/beta/maps")
 	//
-	// Further, the following methods complement one another:
-	// -- Install() and Uninstall()
-	// -- Start() and Stop()
-	// -- Suspend() and Resume()
+	// Finally, an application installation instance can be in one of three abstract
+	// states: 1) "does not exist/deleted", 2) "running", or 3) "not-running". The
+	// interface methods transition between these abstract states using the
+	// following state machine:
 	//
-	// Finally, an application installation instance can be in one of
-	// three abstract states: 1) "does not exist", 2) "running", or 3)
-	// "suspended". The interface methods transition between these
-	// abstract states using the following state machine:
-	//
-	// apply(Start(), "does not exists") = "running"
-	// apply(Refresh(), "running") = "running"
-	// apply(Refresh(), "suspended") = "suspended"
-	// apply(Restart(), "running") = "running"
-	// apply(Restart(), "suspended") = "running"
-	// apply(Resume(), "suspended") = "running"
-	// apply(Resume(), "running") = "running"
-	// apply(Stop(), "running") = "does not exist"
-	// apply(Stop(), "suspended") = "does not exist"
-	// apply(Suspend(), "running") = "suspended"
-	// apply(Suspend(), "suspended") = "suspended"
-	//
-	// In other words, invoking any method using an existing application
-	// installation instance as a receiver is well-defined.
+	// apply(Instantiate(), "does not exist") = "not-running"
+	// apply(Run(), "not-running") = "running"
+	// apply(Kill(), "running") = "not-running"
+	// apply(Delete(), "not-running") = "deleted"
 	ApplicationServerMethods
 	// Describe generates a description of the device.
 	Describe(*context.T, rpc.ServerCall) (Description, error)
@@ -1787,51 +1674,40 @@ type DeviceServerStubMethods interface {
 	// -- Install()
 	//
 	// 2) Method receiver is an application installation:
-	// -- Start()
+	// -- Instantiate()
 	// -- Uninstall()
 	// -- Update()
 	//
 	// 3) Method receiver is application installation instance:
-	// -- Refresh()
-	// -- Restart()
-	// -- Resume()
-	// -- Stop()
-	// -- Suspend()
+	// -- Run()
+	// -- Kill()
+	// -- Delete()
 	//
-	// For groups 2) and 3), the suffix that specifies the receiver can
-	// optionally omit the installation and/or instance, in which case the
-	// operation applies to all installations and/or instances in the
-	// scope of the suffix.
+	// The following methods complement one another:
+	// -- Install() and Uninstall()
+	// -- Instantiate() and Delete()
+	// -- Run() and Kill()
 	//
 	// Examples:
 	// # Install Google Maps on the device.
 	// device/apps.Install("/google.com/appstore/maps", nil, nil) --> "google maps/0"
 	//
-	// # Start an instance of the previously installed maps application installation.
-	// device/apps/google maps/0.Start() --> { "0" }
+	// # Create and start an instance of the previously installed maps application
+	// installation.
+	// device/apps/google maps/0.Instantiate() --> { "0" }
+	// device/apps/google maps/0/0.Run()
 	//
-	// # Start a second instance of the previously installed maps application installation.
-	// device/apps/google maps/0.Start() --> { "1" }
+	// # Create and start a second instance of the previously installed maps
+	// application installation.
+	// device/apps/google maps/0.Instantiate() --> { "1" }
+	// device/apps/google maps/0/1.Run()
 	//
-	// # Stop the first instance previously started.
-	// device/apps/google maps/0/0.Stop()
+	// # Kill and delete the first instance previously started.
+	// device/apps/google maps/0/0.Kill()
+	// device/apps/google maps/0/0.Delete()
 	//
 	// # Install a second Google Maps installation.
 	// device/apps.Install("/google.com/appstore/maps", nil, nil) --> "google maps/1"
-	//
-	// # Start an instance for all maps application installations.
-	// device/apps/google maps.Start() --> {"0/2", "1/0"}
-	//
-	// # Refresh the state of all instances of all maps application installations.
-	// device/apps/google maps.Refresh()
-	//
-	// # Refresh the state of all instances of the maps application installation
-	// identified by the given suffix.
-	// device/apps/google maps/0.Refresh()
-	//
-	// # Refresh the state of the maps application installation instance identified by
-	// the given suffix.
-	// device/apps/google maps/0/2.Refresh()
 	//
 	// # Update the second maps installation to the latest version available.
 	// device/apps/google maps/1.Update()
@@ -1839,30 +1715,15 @@ type DeviceServerStubMethods interface {
 	// # Update the first maps installation to a specific version.
 	// device/apps/google maps/0.UpdateTo("/google.com/appstore/beta/maps")
 	//
-	// Further, the following methods complement one another:
-	// -- Install() and Uninstall()
-	// -- Start() and Stop()
-	// -- Suspend() and Resume()
+	// Finally, an application installation instance can be in one of three abstract
+	// states: 1) "does not exist/deleted", 2) "running", or 3) "not-running". The
+	// interface methods transition between these abstract states using the
+	// following state machine:
 	//
-	// Finally, an application installation instance can be in one of
-	// three abstract states: 1) "does not exist", 2) "running", or 3)
-	// "suspended". The interface methods transition between these
-	// abstract states using the following state machine:
-	//
-	// apply(Start(), "does not exists") = "running"
-	// apply(Refresh(), "running") = "running"
-	// apply(Refresh(), "suspended") = "suspended"
-	// apply(Restart(), "running") = "running"
-	// apply(Restart(), "suspended") = "running"
-	// apply(Resume(), "suspended") = "running"
-	// apply(Resume(), "running") = "running"
-	// apply(Stop(), "running") = "does not exist"
-	// apply(Stop(), "suspended") = "does not exist"
-	// apply(Suspend(), "running") = "suspended"
-	// apply(Suspend(), "suspended") = "suspended"
-	//
-	// In other words, invoking any method using an existing application
-	// installation instance as a receiver is well-defined.
+	// apply(Instantiate(), "does not exist") = "not-running"
+	// apply(Run(), "not-running") = "running"
+	// apply(Kill(), "running") = "not-running"
+	// apply(Delete(), "not-running") = "deleted"
 	ApplicationServerStubMethods
 	// Describe generates a description of the device.
 	Describe(*context.T, rpc.ServerCall) (Description, error)
@@ -1950,7 +1811,7 @@ var descDevice = rpc.InterfaceDesc{
 	PkgPath: "v.io/v23/services/device",
 	Doc:     "// Device can be used to manage a device remotely using an object name that\n// identifies it.",
 	Embeds: []rpc.EmbedDesc{
-		{"Application", "v.io/v23/services/device", "// Application can be used to manage applications on a device. The\n// idea is that this interace will be invoked using an object name that\n// identifies the application and its installations and instances\n// where applicable.\n//\n// In particular, the interface methods can be divided into three\n// groups based on their intended receiver:\n//\n// 1) Method receiver is an application:\n// -- Install()\n//\n// 2) Method receiver is an application installation:\n// -- Start()\n// -- Uninstall()\n// -- Update()\n//\n// 3) Method receiver is application installation instance:\n// -- Refresh()\n// -- Restart()\n// -- Resume()\n// -- Stop()\n// -- Suspend()\n//\n// For groups 2) and 3), the suffix that specifies the receiver can\n// optionally omit the installation and/or instance, in which case the\n// operation applies to all installations and/or instances in the\n// scope of the suffix.\n//\n// Examples:\n// # Install Google Maps on the device.\n// device/apps.Install(\"/google.com/appstore/maps\", nil, nil) --> \"google maps/0\"\n//\n// # Start an instance of the previously installed maps application installation.\n// device/apps/google maps/0.Start() --> { \"0\" }\n//\n// # Start a second instance of the previously installed maps application installation.\n// device/apps/google maps/0.Start() --> { \"1\" }\n//\n// # Stop the first instance previously started.\n// device/apps/google maps/0/0.Stop()\n//\n// # Install a second Google Maps installation.\n// device/apps.Install(\"/google.com/appstore/maps\", nil, nil) --> \"google maps/1\"\n//\n// # Start an instance for all maps application installations.\n// device/apps/google maps.Start() --> {\"0/2\", \"1/0\"}\n//\n// # Refresh the state of all instances of all maps application installations.\n// device/apps/google maps.Refresh()\n//\n// # Refresh the state of all instances of the maps application installation\n// identified by the given suffix.\n// device/apps/google maps/0.Refresh()\n//\n// # Refresh the state of the maps application installation instance identified by\n// the given suffix.\n// device/apps/google maps/0/2.Refresh()\n//\n// # Update the second maps installation to the latest version available.\n// device/apps/google maps/1.Update()\n//\n// # Update the first maps installation to a specific version.\n// device/apps/google maps/0.UpdateTo(\"/google.com/appstore/beta/maps\")\n//\n// Further, the following methods complement one another:\n// -- Install() and Uninstall()\n// -- Start() and Stop()\n// -- Suspend() and Resume()\n//\n// Finally, an application installation instance can be in one of\n// three abstract states: 1) \"does not exist\", 2) \"running\", or 3)\n// \"suspended\". The interface methods transition between these\n// abstract states using the following state machine:\n//\n// apply(Start(), \"does not exists\") = \"running\"\n// apply(Refresh(), \"running\") = \"running\"\n// apply(Refresh(), \"suspended\") = \"suspended\"\n// apply(Restart(), \"running\") = \"running\"\n// apply(Restart(), \"suspended\") = \"running\"\n// apply(Resume(), \"suspended\") = \"running\"\n// apply(Resume(), \"running\") = \"running\"\n// apply(Stop(), \"running\") = \"does not exist\"\n// apply(Stop(), \"suspended\") = \"does not exist\"\n// apply(Suspend(), \"running\") = \"suspended\"\n// apply(Suspend(), \"suspended\") = \"suspended\"\n//\n// In other words, invoking any method using an existing application\n// installation instance as a receiver is well-defined."},
+		{"Application", "v.io/v23/services/device", "// Application can be used to manage applications on a device. The\n// idea is that this interace will be invoked using an object name that\n// identifies the application and its installations and instances\n// where applicable.\n//\n// In particular, the interface methods can be divided into three\n// groups based on their intended receiver:\n//\n// 1) Method receiver is an application:\n// -- Install()\n//\n// 2) Method receiver is an application installation:\n// -- Instantiate()\n// -- Uninstall()\n// -- Update()\n//\n// 3) Method receiver is application installation instance:\n// -- Run()\n// -- Kill()\n// -- Delete()\n//\n// The following methods complement one another:\n// -- Install() and Uninstall()\n// -- Instantiate() and Delete()\n// -- Run() and Kill()\n//\n// Examples:\n// # Install Google Maps on the device.\n// device/apps.Install(\"/google.com/appstore/maps\", nil, nil) --> \"google maps/0\"\n//\n// # Create and start an instance of the previously installed maps application\n// installation.\n// device/apps/google maps/0.Instantiate() --> { \"0\" }\n// device/apps/google maps/0/0.Run()\n//\n// # Create and start a second instance of the previously installed maps\n// application installation.\n// device/apps/google maps/0.Instantiate() --> { \"1\" }\n// device/apps/google maps/0/1.Run()\n//\n// # Kill and delete the first instance previously started.\n// device/apps/google maps/0/0.Kill()\n// device/apps/google maps/0/0.Delete()\n//\n// # Install a second Google Maps installation.\n// device/apps.Install(\"/google.com/appstore/maps\", nil, nil) --> \"google maps/1\"\n//\n// # Update the second maps installation to the latest version available.\n// device/apps/google maps/1.Update()\n//\n// # Update the first maps installation to a specific version.\n// device/apps/google maps/0.UpdateTo(\"/google.com/appstore/beta/maps\")\n//\n// Finally, an application installation instance can be in one of three abstract\n// states: 1) \"does not exist/deleted\", 2) \"running\", or 3) \"not-running\". The\n// interface methods transition between these abstract states using the\n// following state machine:\n//\n// apply(Instantiate(), \"does not exist\") = \"not-running\"\n// apply(Run(), \"not-running\") = \"running\"\n// apply(Kill(), \"running\") = \"not-running\"\n// apply(Delete(), \"not-running\") = \"deleted\""},
 	},
 	Methods: []rpc.MethodDesc{
 		{

@@ -31,13 +31,12 @@ type InstallationState enum {
 // InstanceState describes the states that an instance can be in at any
 // time.
 type InstanceState enum {
-	Starting
-	Started
-	Suspending
-	Suspended
-	Stopping
-	Stopped
+	Launching
+	Running
+	Dying
+	NotRunning
 	Updating
+	Deleted
 }
 
 // Application can be used to manage applications on a device. The
@@ -52,51 +51,40 @@ type InstanceState enum {
 // -- Install()
 //
 // 2) Method receiver is an application installation:
-// -- Start()
+// -- Instantiate()
 // -- Uninstall()
 // -- Update()
 //
 // 3) Method receiver is application installation instance:
-// -- Refresh()
-// -- Restart()
-// -- Resume()
-// -- Stop()
-// -- Suspend()
+// -- Run()
+// -- Kill()
+// -- Delete()
 //
-// For groups 2) and 3), the suffix that specifies the receiver can
-// optionally omit the installation and/or instance, in which case the
-// operation applies to all installations and/or instances in the
-// scope of the suffix.
+// The following methods complement one another:
+// -- Install() and Uninstall()
+// -- Instantiate() and Delete()
+// -- Run() and Kill()
 //
 // Examples:
 // # Install Google Maps on the device.
 // device/apps.Install("/google.com/appstore/maps", nil, nil) --> "google maps/0"
 //
-// # Start an instance of the previously installed maps application installation.
-// device/apps/google maps/0.Start() --> { "0" }
+// # Create and start an instance of the previously installed maps application
+// installation.
+// device/apps/google maps/0.Instantiate() --> { "0" }
+// device/apps/google maps/0/0.Run()
 //
-// # Start a second instance of the previously installed maps application installation.
-// device/apps/google maps/0.Start() --> { "1" }
+// # Create and start a second instance of the previously installed maps
+// application installation.
+// device/apps/google maps/0.Instantiate() --> { "1" }
+// device/apps/google maps/0/1.Run()
 //
-// # Stop the first instance previously started.
-// device/apps/google maps/0/0.Stop()
+// # Kill and delete the first instance previously started.
+// device/apps/google maps/0/0.Kill()
+// device/apps/google maps/0/0.Delete()
 //
 // # Install a second Google Maps installation.
 // device/apps.Install("/google.com/appstore/maps", nil, nil) --> "google maps/1"
-//
-// # Start an instance for all maps application installations.
-// device/apps/google maps.Start() --> {"0/2", "1/0"}
-//
-// # Refresh the state of all instances of all maps application installations.
-// device/apps/google maps.Refresh()
-//
-// # Refresh the state of all instances of the maps application installation
-// identified by the given suffix.
-// device/apps/google maps/0.Refresh()
-//
-// # Refresh the state of the maps application installation instance identified by
-// the given suffix.
-// device/apps/google maps/0/2.Refresh()
 //
 // # Update the second maps installation to the latest version available.
 // device/apps/google maps/1.Update()
@@ -104,35 +92,22 @@ type InstanceState enum {
 // # Update the first maps installation to a specific version.
 // device/apps/google maps/0.UpdateTo("/google.com/appstore/beta/maps")
 //
-// Further, the following methods complement one another:
-// -- Install() and Uninstall()
-// -- Start() and Stop()
-// -- Suspend() and Resume()
+// Finally, an application installation instance can be in one of three abstract
+// states: 1) "does not exist/deleted", 2) "running", or 3) "not-running". The
+// interface methods transition between these abstract states using the
+// following state machine:
 //
-// Finally, an application installation instance can be in one of
-// three abstract states: 1) "does not exist", 2) "running", or 3)
-// "suspended". The interface methods transition between these
-// abstract states using the following state machine:
-//
-// apply(Start(), "does not exists") = "running"
-// apply(Refresh(), "running") = "running"
-// apply(Refresh(), "suspended") = "suspended"
-// apply(Restart(), "running") = "running"
-// apply(Restart(), "suspended") = "running"
-// apply(Resume(), "suspended") = "running"
-// apply(Resume(), "running") = "running"
-// apply(Stop(), "running") = "does not exist"
-// apply(Stop(), "suspended") = "does not exist"
-// apply(Suspend(), "running") = "suspended"
-// apply(Suspend(), "suspended") = "suspended"
-//
-// In other words, invoking any method using an existing application
-// installation instance as a receiver is well-defined.
+// apply(Instantiate(), "does not exist") = "not-running"
+// apply(Run(), "not-running") = "running"
+// apply(Kill(), "running") = "not-running"
+// apply(Delete(), "not-running") = "deleted"
 type Application interface {
-	// Object provides GetPermissions/SetPermissions methods to read/modify AccessLists for the
-	// Application methods. After a device has been claimed, only the
-	// claimant will be able to modify the AccessLists for the device.
+	// Object provides GetPermissions/SetPermissions methods to read/modify
+	// AccessLists for the Application methods. After a device has been
+	// claimed, only the claimant will be able to modify the AccessLists for
+	// the device.
 	permissions.Object
+
 	// TODO(caprita): Rather than overriding config and package piecemeal,
 	// consider providing an envelope override during install.
 
@@ -162,43 +137,57 @@ type Application interface {
 	// application.
 	// TODO(rjkroege): Use customized labels.
 	Install(name string, config Config, packages application.Packages) (string | error) {access.Write}
-	// Refresh refreshes the state of application installation(s)
-	// instance(s).
-	Refresh() error {access.Admin}
-	// Restart restarts execution of application installation(s)
-	// instance(s).
-	Restart() error {access.Write}
-	// Resume resumes execution of application installation(s)
-	// instance(s).
-	Resume() error {access.Write}
-	// Revert reverts application installation(s) to the most recent
-	// previous installation.
-	Revert() error {access.Admin}
-	// Start starts an instance of application installation(s). The
-	// server sends the application instance's Public Key on the stream.
-	// When the client receives the Public Key it must send Blessings back
-	// to the server. When the instance is ready to start, the server sends
-	// the instance name to the client.
-	// Client                 Server
-	//  "object".Start() -->
-	//                   <--  InstancePublicKey
-	//  AppBlessings     -->
-	//                   <--  InstanceName
-	Start() stream<StartClientMessage, StartServerMessage> error {access.Read}
-	// Stop attempts a clean shutdown of application installation(s)
-	// instance(s). If the deadline (in seconds) is non-zero and the
-	// instance(s) in questions are still running after the given deadline,
-	// shutdown of the instance(s) is enforced.
-	Stop(deadline time.Duration) error {access.Admin}
-	// Suspend suspends execution of application installation(s)
-	// instance(s).
-	Suspend() error {access.Write}
-	// Uninstall uninstalls application installation(s).
+
+	// Uninstall uninstalls an application installation.
+	// The installation must be in state Active.
 	Uninstall() error {access.Admin}
-	// Update updates the application installation(s) from the object name
+
+	// Instantiate creates an instance of an application installation.
+	// The installation must be in state Active.
+	//
+	// The server sends the application instance's Public Key on the stream.
+	// When the client receives the Public Key it must send Blessings back
+	// to the server. When the instance is created, the server returns the
+	// instance name to the client.
+	//
+	// Client                       Server
+	//  "object".Instantiate() -->
+	//                         <--  InstancePublicKey
+	//  AppBlessings           -->
+	//                         <--  return InstanceName
+	Instantiate() stream<BlessClientMessage, BlessServerMessage> (string | error) {access.Read}
+
+	// TODO(caprita): Add a new method Shutdown for Device instead of using
+	// Delete.
+
+	// Delete deletes an instance.  Once deleted, the instance cannot be
+	// revived.
+	// The instance must be in state NotRunning.
+	//
+	// If called against a Device, causes the Device to shut itself down.
+	Delete() error {access.Admin}
+
+	// Run begins execution of an application instance.
+	// The instance must be in state NotRunning.
+	Run() error {access.Write}
+
+	// Kill attempts a clean shutdown an of application instance.
+	// The instance must be in state Running.
+	//
+	// If the deadline is non-zero and the instance in question is still
+	// running after the given deadline, shutdown of the instance is
+	// enforced.
+	//
+	// If called against a Device, causes the Device to stop itself (which
+	// may or may not result in a restart depending on the device manager
+	// setup).
+	Kill(deadline time.Duration) error {access.Write}
+
+	// Update updates the application installation from the object name
 	// provided during Install.  If the new application envelope contains a
 	// different application title, the update does not occur, and an error
 	// is returned.
+	// The installation must be in state Active.
 	Update() error {access.Admin}
 	// TODO(caprita): Decide if we keep this in v0.1.  If we do, we may want
 	// to use it over the origin override mechanism in the config, to
@@ -208,7 +197,14 @@ type Application interface {
 	// specified by the object name argument.  If the new application
 	// envelope contains a different application title, the update does not
 	// occur, and an error is returned.
+	// The installation must be in state Active.
 	UpdateTo(name string) error {access.Admin}
+
+	// Revert reverts an application installation to the most recent
+	// previous installation.
+	// The application must be in state Active.
+	Revert() error {access.Admin}
+
 	// Debug returns debug information about the application installation or
 	// instance.  This is generally highly implementation-specific, and
 	// presented in an unstructured form.  No guarantees are given about the
@@ -216,7 +212,7 @@ type Application interface {
 	// specifically discouraged.
 	Debug() (string | error) {access.Debug}
 
-	// Status return structured information about the application
+	// Status returns structured information about the application
 	// installation or instance.
 	Status() (Status | error) {access.Read}
 }
@@ -241,19 +237,19 @@ type InstanceStatus struct {
 	Version string
 }
 
-// StartServerMessage is the data type that is streamed from the server to the
-// client during a Start method call.
-type StartServerMessage union {
-	// The object name of the instance being started.
-	InstanceName string
-	// The public key of the instance being started. The client must return
+// BlessServerMessage is the data type that is streamed from the server to the
+// client during an Instantiate method call.
+// This is a union to enable backward compatible changes.
+type BlessServerMessage union {
+	// The public key of the instance being blessed. The client must return
 	// blessings for this key.
 	InstancePublicKey []byte
 }
 
-// StartClientMessage is the data type that is streamed from the client to the
-// server during a Start method call.
-type StartClientMessage union {
+// BlessClientMessage is the data type that is streamed from the client to the
+// server during a Instantiate method call.
+// This is a union to enable backward compatible changes.
+type BlessClientMessage union {
 	// Blessings for the application instance.
 	AppBlessings security.WireBlessings
 }
