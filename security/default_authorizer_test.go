@@ -128,7 +128,7 @@ func TestDefaultAuthorizer(t *testing.T) {
 		test.call.LocalBlessings = test.local
 		test.call.RemoteBlessings = test.remote
 		ctx, cancel := context.RootContext()
-		err := authorizer.Authorize(SetCall(ctx, NewCall(&test.call)))
+		err := authorizer.Authorize(ctx, NewCall(&test.call))
 		if (err == nil) != test.authorized {
 			t.Errorf("call: %v. Got %v", test.call, err)
 		}

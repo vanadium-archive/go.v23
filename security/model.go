@@ -51,7 +51,7 @@
 //
 // Examples
 //
-// A principal can decide to call itself anything it wants:
+// A principal can decide to name itself anything it wants:
 //  // (in process A)
 //  var p1 Principal
 //  alice, _ := p1.BlessSelf("alice")
@@ -61,21 +61,20 @@
 // "self-proclaimed" authority:
 //  // (in process B)
 //  var p2 Principal
-//  ctx := GetContext() // current *context.T which carries the security state.
-//  names, rejected := RemoteBlessingNames(ctx)
+//  ctx, call := GetContextAndCall() // current context and security state
+//  names, rejected := RemoteBlessingNames(ctx, call)
 //  fmt.Printf("%v %v", names, rejected) // Will print [] ["alice": "..."]
 //
 // However, p2 can decide to trust the roots of the "alice" blessing and then it
 // will be able to recognize her delegates as well:
 //  // (in process B)
-//  call := security.GetCall(ctx)
 //  p2.AddToRoots(call.RemoteBlessings())
-//  names, rejected := RemoteBlessingNames(ctx)
+//  names, rejected := RemoteBlessingNames(ctx, call)
 //  fmt.Printf("%v %v", names, rejected) // Will print ["alice"] []
 //
 // Furthermore, p2 can seek a blessing from "alice":
 //  // (in process A)
-//  call := GetRPCCall()  // Call under which p2 is seeking a blessing from alice, call.LocalPrincipal = p1
+//  call := GetCall() // Call under which p2 is seeking a blessing from alice, call.LocalPrincipal = p1
 //  key2 := call.RemoteBlessings().PublicKey()
 //  onlyFor10Minutes := ExpiryCaveat(time.Now().Add(10*time.Minute))
 //  aliceFriend, _ := p1.Bless(key2, alice, "friend", onlyFor10Minutes)
@@ -331,15 +330,14 @@ type ThirdPartyCaveat interface {
 	// in order to issue a discharge.
 	Requirements() ThirdPartyRequirements
 
-	// Dischargeable validates all restrictions encoded within the
-	// third-party caveat under the current call (obtained from the
-	// context) and returns nil iff they have been satisfied, and thus
-	// ensures that it is okay to generate a discharge for this
+	// Dischargeable validates all restrictions encoded within the third-party
+	// caveat under the current call and returns nil iff they have been satisfied,
+	// and thus ensures that it is okay to generate a discharge for this
 	// ThirdPartyCaveat.
 	//
 	// It assumes that the ThirdPartCaveat was obtained from the remote end of
 	// call.
-	Dischargeable(ctx *context.T) error
+	Dischargeable(ctx *context.T, call Call) error
 
 	// TODO(andreser, ashankar): require the discharger to have a specific
 	// identity so that the private information below is not exposed to
@@ -390,18 +388,5 @@ type Call interface {
 
 // Authorizer is the interface for performing authorization checks.
 type Authorizer interface {
-	Authorize(ctx *context.T) error
-}
-
-type callKey struct{}
-
-// SetCall returns a new context with the given Call attached.
-func SetCall(ctx *context.T, call Call) *context.T {
-	return context.WithValue(ctx, callKey{}, call)
-}
-
-// GetCall returns the Call attached to the current context.
-func GetCall(ctx *context.T) Call {
-	call, _ := ctx.Value(callKey{}).(Call)
-	return call
+	Authorize(ctx *context.T, call Call) error
 }

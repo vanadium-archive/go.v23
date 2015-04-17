@@ -603,7 +603,7 @@ type ServerOpt interface {
 // It gets passed a context.T with parameters of the RPC call set on
 // it.
 type Granter interface {
-	Grant(ctx *context.T) (blessing security.Blessings, err error)
+	Grant(ctx *context.T, call security.Call) (security.Blessings, error)
 
 	CallOpt
 }

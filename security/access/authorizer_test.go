@@ -23,8 +23,7 @@ import (
 func authorize(authorizer security.Authorizer, params *security.CallParams) error {
 	ctx, cancel := context.RootContext()
 	defer cancel()
-	ctx = security.SetCall(ctx, security.NewCall(params))
-	return authorizer.Authorize(ctx)
+	return authorizer.Authorize(ctx, security.NewCall(params))
 }
 
 // TestPermissionsAuthorizer is both a test and a demonstration of the use of the

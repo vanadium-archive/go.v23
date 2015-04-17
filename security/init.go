@@ -22,15 +22,14 @@ var (
 )
 
 func init() {
-	RegisterCaveatValidator(ConstCaveat, func(ctx *context.T, isValid bool) error {
+	RegisterCaveatValidator(ConstCaveat, func(ctx *context.T, _ Call, isValid bool) error {
 		if isValid {
 			return nil
 		}
 		return NewErrConstCaveatValidation(ctx)
 	})
 
-	RegisterCaveatValidator(ExpiryCaveatX, func(ctx *context.T, expiry time.Time) error {
-		call := GetCall(ctx)
+	RegisterCaveatValidator(ExpiryCaveatX, func(ctx *context.T, call Call, expiry time.Time) error {
 		now := call.Timestamp()
 		if now.After(expiry) {
 			return NewErrExpiryCaveatValidation(ctx, now, expiry)
@@ -38,8 +37,7 @@ func init() {
 		return nil
 	})
 
-	RegisterCaveatValidator(MethodCaveatX, func(ctx *context.T, methods []string) error {
-		call := GetCall(ctx)
+	RegisterCaveatValidator(MethodCaveatX, func(ctx *context.T, call Call, methods []string) error {
 		for _, m := range methods {
 			if call.Method() == m {
 				return nil
@@ -48,8 +46,8 @@ func init() {
 		return NewErrMethodCaveatValidation(ctx, call.Method(), methods)
 	})
 
-	RegisterCaveatValidator(PeerBlessingsCaveat, func(ctx *context.T, patterns []BlessingPattern) error {
-		lnames := LocalBlessingNames(ctx)
+	RegisterCaveatValidator(PeerBlessingsCaveat, func(ctx *context.T, call Call, patterns []BlessingPattern) error {
+		lnames := LocalBlessingNames(ctx, call)
 		for _, p := range patterns {
 			if p.MatchedBy(lnames...) {
 				return nil
@@ -59,8 +57,7 @@ func init() {
 		return NewErrPeerBlessingsCaveatValidation(ctx, lnames, patterns)
 	})
 
-	RegisterCaveatValidator(PublicKeyThirdPartyCaveatX, func(ctx *context.T, params publicKeyThirdPartyCaveat) error {
-		call := GetCall(ctx)
+	RegisterCaveatValidator(PublicKeyThirdPartyCaveatX, func(ctx *context.T, call Call, params publicKeyThirdPartyCaveat) error {
 		discharge, ok := call.RemoteDischarges()[params.ID()]
 		if !ok {
 			return verror.New(errMissingDischarge, ctx, params.ID())
@@ -83,7 +80,7 @@ func init() {
 		}
 		// And all caveats on the discharge must be met.
 		for _, cav := range d.Caveats {
-			if err := cav.Validate(ctx); err != nil {
+			if err := cav.Validate(ctx, call); err != nil {
 				return verror.New(errFailedDischarge, ctx, cav, err)
 			}
 		}

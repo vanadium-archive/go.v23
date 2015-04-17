@@ -113,14 +113,13 @@ type authorizer struct {
 	tagType *vdl.Type
 }
 
-func (a *authorizer) Authorize(ctx *context.T) error {
-	call := security.GetCall(ctx)
+func (a *authorizer) Authorize(ctx *context.T, call security.Call) error {
 	// "Self-RPCs" are always authorized.
 	if l, r := call.LocalBlessings().PublicKey(), call.RemoteBlessings().PublicKey(); l != nil && r != nil && reflect.DeepEqual(l, r) {
 		return nil
 	}
 
-	blessings, invalid := security.RemoteBlessingNames(ctx)
+	blessings, invalid := security.RemoteBlessingNames(ctx, call)
 	hastag := false
 	for _, tag := range call.MethodTags() {
 		if tag.Type() == a.tagType {
@@ -144,13 +143,13 @@ type fileAuthorizer struct {
 	tagType  *vdl.Type
 }
 
-func (a *fileAuthorizer) Authorize(ctx *context.T) error {
+func (a *fileAuthorizer) Authorize(ctx *context.T, call security.Call) error {
 	acl, err := loadPermissionsFromFile(a.filename)
 	if err != nil {
 		// TODO(ashankar): Information leak?
 		return verror.New(errCantReadAccessListFromFile, ctx, err)
 	}
-	return (&authorizer{acl, a.tagType}).Authorize(ctx)
+	return (&authorizer{acl, a.tagType}).Authorize(ctx, call)
 }
 
 func loadPermissionsFromFile(filename string) (Permissions, error) {

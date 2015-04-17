@@ -126,8 +126,7 @@ func checkBlessings(b Blessings, c CallParams, want ...string) error {
 	c.RemoteBlessings = b
 	ctx, cancel := context.RootContext()
 	defer cancel()
-	ctx = SetCall(ctx, NewCall(&c))
-	got, _ := RemoteBlessingNames(ctx)
+	got, _ := RemoteBlessingNames(ctx, NewCall(&c))
 	if !equalBlessings(got, want) {
 		return fmt.Errorf("Got blessings %v, want %v", got, want)
 	}
@@ -156,8 +155,7 @@ func roundTrip(in, out interface{}) error {
 }
 
 func init() {
-	RegisterCaveatValidator(suffixCaveat, func(ctx *context.T, suffix string) error {
-		call := GetCall(ctx)
+	RegisterCaveatValidator(suffixCaveat, func(ctx *context.T, call Call, suffix string) error {
 		if suffix != call.Suffix() {
 			return fmt.Errorf("suffixCaveat not met")
 		}

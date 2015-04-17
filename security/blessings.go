@@ -41,6 +41,11 @@ type Blessings struct {
 	publicKey PublicKey
 }
 
+// chainValidatorKey is the key in the context to lookup the validator for a
+// chain of caveats.  This is a hacky mechanism only used by wspr.
+//
+// TODO(toddw): Combine this mechanism with SetCaveatValidator into a single
+// public API for overriding caveat validation.
 const chainValidatorKey = "customChainValidator"
 
 // PublicKey returns the public key of the principal to which
@@ -155,7 +160,7 @@ func validateCertificateChain(chain []Certificate) (PublicKey, error) {
 }
 
 // Verifies that the chain signatures are correct, without handling caveat validation
-func verifyChainSignature(ctx *context.T, chain []Certificate) (string, error) {
+func verifyChainSignature(ctx *context.T, call Call, chain []Certificate) (string, error) {
 	blessing := chain[0].Extension
 	for i := 1; i < len(chain); i++ {
 		blessing += ChainSeparator
@@ -168,7 +173,6 @@ func verifyChainSignature(ctx *context.T, chain []Certificate) (string, error) {
 	if err != nil {
 		return blessing, err
 	}
-	call := GetCall(ctx)
 	local := call.LocalPrincipal()
 	if local == nil {
 		return blessing, NewErrUnrecognizedRoot(ctx, root.String(), verror.New(errMisconfiguredRoots, ctx))
@@ -183,11 +187,11 @@ func verifyChainSignature(ctx *context.T, chain []Certificate) (string, error) {
 	return blessing, nil
 }
 
-func defaultChainCaveatValidator(ctx *context.T, chains [][]Caveat) []error {
+func defaultChainCaveatValidator(ctx *context.T, call Call, chains [][]Caveat) []error {
 	results := make([]error, len(chains))
 	for i, chain := range chains {
 		for _, cav := range chain {
-			if err := validateCaveat(ctx, cav); err != nil {
+			if err := validateCaveat(ctx, call, cav); err != nil {
 				results[i] = err
 				break
 			}
@@ -199,7 +203,7 @@ func defaultChainCaveatValidator(ctx *context.T, chains [][]Caveat) []error {
 
 // validateCaveat is pretty much the same as cav.Validate(call), but it defers
 // to any validation scheme overrides via SetCaveatValidator.
-func validateCaveat(ctx *context.T, cav Caveat) error {
+func validateCaveat(ctx *context.T, call Call, cav Caveat) error {
 	caveatValidationSetup.mu.RLock()
 	fn := caveatValidationSetup.fn
 	finalized := caveatValidationSetup.finalized
@@ -211,9 +215,9 @@ func validateCaveat(ctx *context.T, cav Caveat) error {
 		caveatValidationSetup.mu.Unlock()
 	}
 	if fn != nil {
-		return fn(ctx, cav)
+		return fn(ctx, call, cav)
 	}
-	return cav.Validate(ctx)
+	return cav.Validate(ctx, call)
 }
 
 // TODO(ashankar): Get rid of this function? It allows users to mess
@@ -298,7 +302,7 @@ func UnionOfBlessings(blessings ...Blessings) (Blessings, error) {
 
 var caveatValidationSetup struct {
 	mu        sync.RWMutex
-	fn        func(*context.T, Caveat) error
+	fn        func(*context.T, Call, Caveat) error
 	finalized bool
 }
 
@@ -316,7 +320,7 @@ var caveatValidationSetup struct {
 //
 // If never invoked, the default Go API is used to associate validation
 // functions with caveats.
-func SetCaveatValidator(fn func(*context.T, Caveat) error) {
+func SetCaveatValidator(fn func(*context.T, Call, Caveat) error) {
 	caveatValidationSetup.mu.Lock()
 	defer caveatValidationSetup.mu.Unlock()
 	if caveatValidationSetup.finalized {
@@ -380,9 +384,8 @@ func DefaultBlessingPatterns(p Principal) (patterns []BlessingPattern) {
 //
 // RemoteBlessingNames also returns the RejectedBlessings for each blessing name that cannot
 // be validated.
-func RemoteBlessingNames(ctx *context.T) ([]string, []RejectedBlessing) {
-	call := GetCall(ctx)
-	if call == nil {
+func RemoteBlessingNames(ctx *context.T, call Call) ([]string, []RejectedBlessing) {
+	if ctx == nil || call == nil {
 		return nil, nil
 	}
 	b := call.RemoteBlessings()
@@ -392,7 +395,7 @@ func RemoteBlessingNames(ctx *context.T) ([]string, []RejectedBlessing) {
 	}
 	validator := defaultChainCaveatValidator
 	if customValidator := ctx.Value(chainValidatorKey); customValidator != nil {
-		validator = customValidator.(func(ctx *context.T, chains [][]Caveat) []error)
+		validator = customValidator.(func(*context.T, Call, [][]Caveat) []error)
 	}
 
 	var (
@@ -402,7 +405,7 @@ func RemoteBlessingNames(ctx *context.T) ([]string, []RejectedBlessing) {
 		pendingChainCaveats [][]Caveat
 	)
 	for _, chain := range b.chains {
-		name, err := verifyChainSignature(ctx, chain)
+		name, err := verifyChainSignature(ctx, call, chain)
 		if err != nil {
 			rejected = append(rejected, RejectedBlessing{name, err})
 			continue
@@ -425,7 +428,7 @@ func RemoteBlessingNames(ctx *context.T) ([]string, []RejectedBlessing) {
 		return validatedNames, rejected
 	}
 
-	validationResults := validator(ctx, pendingChainCaveats)
+	validationResults := validator(ctx, call, pendingChainCaveats)
 	if g, w := len(validationResults), len(pendingNames); g != w {
 		panic(fmt.Sprintf("Got wrong number of validation results. Got %d, expected %d.", g, w))
 	}
@@ -446,9 +449,8 @@ func RemoteBlessingNames(ctx *context.T) ([]string, []RejectedBlessing) {
 // The blessing names are guaranteed to be rooted in call.LocalPrincipal.Roots.
 //
 // LocalBlessingNames does not validate caveats on the blessing names.
-func LocalBlessingNames(ctx *context.T) []string {
-	call := GetCall(ctx)
-	if call == nil {
+func LocalBlessingNames(ctx *context.T, call Call) []string {
+	if ctx == nil || call == nil {
 		return nil
 	}
 	var names []string

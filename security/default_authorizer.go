@@ -16,10 +16,10 @@ func DefaultAuthorizer() Authorizer {
 
 type defaultAuthorizer struct{}
 
-func (defaultAuthorizer) Authorize(ctx *context.T) error {
+func (defaultAuthorizer) Authorize(ctx *context.T, call Call) error {
 	var (
-		localNames             = LocalBlessingNames(ctx)
-		remoteNames, remoteErr = RemoteBlessingNames(ctx)
+		localNames             = LocalBlessingNames(ctx, call)
+		remoteNames, remoteErr = RemoteBlessingNames(ctx, call)
 	)
 	// Authorize if any element in localNames is a "delegate of" (i.e., has been
 	// blessed by) any element in remoteNames, OR vice-versa.
